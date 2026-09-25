@@ -50,16 +50,13 @@ pub const REVOLT_MARGIN: f64 = 10.0;
 /// EQ5: unrest tolerated above [`HIGH_TAX_MAX_UNREST`] while « Haut » taxes
 /// already levied are still needed.
 pub const HIGH_TAX_HYSTERESIS: f64 = 10.0;
-/// EQ5: a treasury below this many seasons of gross income is thin: the
-/// budget keeps a safety margin ([`SAFETY_MARGIN_PERCENT`]).
-pub const THIN_TREASURY_SEASONS: i64 = 2;
 /// EQ5: seasonal surplus kept as a margin against events, in percent of
 /// gross income.
 pub const SAFETY_MARGIN_PERCENT: i64 = 5;
-/// EQ5: buildings may not take more than this share (percent) of the net
+/// EQ5: buildings may not take more than this share (percent) of the gross
 /// income in upkeep: they cannot be dismissed when times turn bad (a
 /// plague, a lost province).
-pub const MAX_BUILDING_UPKEEP_PERCENT: i64 = 35;
+pub const MAX_BUILDING_UPKEEP_PERCENT: i64 = 30;
 /// A debt must be repaid within this many turns, or units are dismissed.
 const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
@@ -417,15 +414,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         PEACE_RUNWAY_TURNS
     };
     let uncovered_deficit = ctx.surplus() < 0 && ctx.treasury < -ctx.surplus() * runway;
-    // EQ5: a thin treasury (below `THIN_TREASURY_SEASONS` of income) with
-    // no margin in the budget is one bad event away from bankruptcy.
-    let thin = ctx.treasury < THIN_TREASURY_SEASONS * ctx.gross_income.max(0)
-        && ctx.surplus() < ctx.safety_margin();
-    let needs_money = in_debt || uncovered_deficit || thin || (ctx.at_war() && low_treasury);
-    // EQ5: heavy taxes already levied stay while the money is needed and
-    // the realm only grumbles (without this margin the rate flipped every
-    // season around the threshold and the debt never closed).
-    let max_unrest = if me.tax_rate == TaxRate::High {
+    let needs_money = in_debt || uncovered_deficit || (ctx.at_war() && low_treasury);
+    // EQ5: in debt, heavy taxes already levied stay while the realm only
+    // grumbles (without this margin the rate flipped every season around
+    // the threshold and the debt never closed).
+    let max_unrest = if in_debt && me.tax_rate == TaxRate::High {
         HIGH_TAX_MAX_UNREST + HIGH_TAX_HYSTERESIS
     } else {
         HIGH_TAX_MAX_UNREST
@@ -622,12 +615,15 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let builds = (1 + (budget / 15_000).max(0) as usize).min(6);
     // F4: a new building's upkeep must fit in the surplus left by the army
     // (or in the hoard being spent).
-    // EQ5: with the safety margin kept, and within a share of the net
-    // income: buildings cannot be dismissed when times turn bad.
-    let mut spare = (ctx.surplus() - (planned_upkeep - ctx.army_upkeep)
+    // EQ5: with the safety margin kept, and within a share of the gross
+    // income (the net one shrinks with a hoard's opulence): buildings
+    // cannot be dismissed when times turn bad.
+    let mut spare = ctx.surplus() - (planned_upkeep - ctx.army_upkeep)
         + hoard / HOARD_SPENDING_TURNS
-        - ctx.safety_margin())
-    .min(ctx.income * MAX_BUILDING_UPKEEP_PERCENT / 100 - ctx.building_upkeep);
+        - ctx.safety_margin();
+    // (Buildings that pay for themselves in taxes or trade escape the cap.)
+    let mut upkeep_room =
+        ctx.gross_income * MAX_BUILDING_UPKEEP_PERCENT / 100 - ctx.building_upkeep;
     let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = Vec::new();
     for (id, settlement) in state
         .settlements
@@ -668,6 +664,13 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         if used.len() >= builds || used.contains(&settlement) || budget < cost || upkeep > spare {
             continue;
         }
+        let pays_for_itself = building_income(ctx, &settlement, &building) >= upkeep as f64;
+        if !pays_for_itself {
+            if upkeep > upkeep_room {
+                continue;
+            }
+            upkeep_room -= upkeep;
+        }
         spare -= upkeep;
         budget -= cost;
         used.insert(settlement.clone());
@@ -704,6 +707,31 @@ fn unit_value(data: &GameData, unit_type: &UnitTypeId, cost: u32) -> f64 {
         let defence = f64::from(t.stats.armor) / 2.0 + f64::from(t.stats.morale) / 4.0;
         f64::from(t.soldiers) * (attack + defence) / f64::from(cost.max(1))
     })
+}
+
+/// EQ5: seasonal taxes and trade `building` adds in `settlement`.
+fn building_income(
+    ctx: &Context,
+    settlement: &SettlementId,
+    building: &data_model::BuildingId,
+) -> f64 {
+    let Some(def) = ctx.data.buildings.get(building) else {
+        return 0.0;
+    };
+    let income = ctx
+        .province_of(settlement)
+        .map_or(0.0, |p| ctx.province_income(p));
+    def.effects
+        .iter()
+        .filter(|e| matches!(e.effect, EffectKind::TaxIncome | EffectKind::TradeIncome))
+        .map(|e| {
+            if matches!(e.mode, data_model::EffectMode::Percent) {
+                income * e.value / 100.0
+            } else {
+                e.value
+            }
+        })
+        .sum()
 }
 
 /// Seasonal value (livres-equivalent) of building `building` in `settlement`.
