@@ -114,3 +114,7 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
   `hydro::chaikin` ne lisse pas ; 40 fps à 15 k à remesurer au calme (30 i/s ce soir, machine chargée).
 - EP9b lancé (retour SG4 : défenseur 10/10 sur plat sans pieux ; duel prolongé si gagné, milice en
   second échelon). EP7 lancé (Crécy d'abord, puis Azincourt, Poitiers).
+- EP9b fusionné (1ffb3926, ADR 0056 § EP9b) : duel prolongé jusqu'à 300 s s'il est gagné
+  (`data/rules/battle_duel.json`), milice 35 m en second échelon. Plat sans pieux : attaquant 0/10 → 7/10 ;
+  Crécy-like 12/12 anglais. Point ouvert (renvoyé à SG4/R4) : crête + pieux en miroir, attaquant 6/10
+  (contagion de déroute des archers du défenseur à travers sa ligne).

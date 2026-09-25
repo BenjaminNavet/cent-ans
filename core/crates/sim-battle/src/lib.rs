@@ -48,6 +48,7 @@ pub mod crest;
 pub mod decision;
 pub mod decor;
 mod decor_gen;
+pub mod duel;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
@@ -81,6 +82,7 @@ pub use decor::{
     Area, AreaKind, Camp, Decor, DecorItem, DecorPlan, DecorProp, DecorPropKind, DecorRules,
     FieldState, Hamlet, HamletLayout, Moat, Mound,
 };
+pub use duel::DuelRules;
 pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,
