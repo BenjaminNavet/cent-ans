@@ -1065,6 +1065,9 @@ func _parse_cmdline() -> void:
 					if _screenshot_stage == "codex_search" and ui.codex_hub != null:
 						ui.codex_hub.search.text = "arc"
 						ui.codex_hub._on_search("arc")
+				"turn_banner":  # U5 : bandeau « Tour des autres factions »
+					_focus_capital()
+					ui.show_turn_banner()
 				"family_tree":  # U10 : arbre familial (héritier mis en évidence)
 					_stage_screenshot_court()
 					ui.court_panel.show_tab(CourtPanel.TAB_TREE)
