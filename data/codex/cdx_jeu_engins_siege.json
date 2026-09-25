@@ -1,0 +1,16 @@
+{
+  "id": "cdx_jeu_engins_siege",
+  "title": "Les engins de siège en action",
+  "category": "mecanique",
+  "aliases": [
+    "engins de siège",
+    "engin de siège",
+    "engins"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Trébuchets et mangonneaux lancent des pierres par-dessus les murs, les bombardes leur succèdent à partir du milieu du XIVe siècle, les beffrois portent l'assaut jusqu'au rempart. Lents, chers et vulnérables, ils décident pourtant des sièges.",
+  "body": "Au début de la guerre de Cent Ans, l'artillerie de siège est mécanique. Le [[cdx_trebuchet|trébuchet]] à contrepoids, apparu à la fin du XIIe siècle, lance des boulets de pierre de plusieurs dizaines de kilos à deux ou trois cents mètres, toujours au même point : répétés pendant des jours, ses coups finissent par ouvrir un mur. Des engins plus légers, que les textes appellent [[cdx_mangonneau|mangonneaux]] ou pierrières, tirent plus vite et plus bas, sur les défenses et dans la ville. Les assiégeants les montent sur place avec des charpentiers, et les assiégés dressent souvent les leurs pour les contrebattre.\n\nLes premières bouches à feu paraissent dans les années 1340 ; les [[cdx_bombarde|bombardes]] ne deviennent décisives qu'au XVe siècle, avec les gros calibres des sièges d'[[cdx_henri_v|Henri V]] puis l'artillerie royale des frères Bureau, qui reprend la Normandie et la Guyenne en quelques campagnes. Le [[cdx_beffroi|beffroi]], tour d'assaut roulante, reste l'engin le plus coûteux : on ne le construit que pour les sièges d'importance.\n\nLes engins et leurs servants sont les premières cibles des sorties : on les incendie, on les brise, on tue leurs maîtres ingénieurs, payés à prix d'or.",
+  "gameplay": "Trébuchet (portée 250 m, attaque de siège 70, 40 pierres), mangonneau (180 m, 40, 40 pierres) et bombarde (300 m, 85, 20 boulets) sont des régiments d'engins, très lents (0,3 à 0,6 m/s), rangés en ligne. Ils tirent toutes les 12 secondes, par-dessus les murs, sans être gênés par la fumée. Sans cible désignée, ils battent le pan de muraille le plus proche à portée (1,6 × attaque de siège par tir, selon les servants restants) ; sur des troupes, chaque servant compte pour trois tireurs. Chaque tir a une chance d'allumer une maison : 18 % pour le trébuchet, 22 % pour le mangonneau, 10 % pour la bombarde (voir [[cdx_jeu_incendies|incendies]]).\n\nLa tour de siège ne tire pas : elle porte l'infanterie sur le rempart (voir [[cdx_jeu_assaut|assaut]]) et, en campagne, sa seule présence rend les murailles franchissables. En campagne encore, les engins ouvrent la brèche à chaque tour de siège (voir [[cdx_jeu_murailles|murailles]]).\n\nAu début d'un siège, les engins sont placés à 240 m de la façade, hors de portée d'arc ; ne les laissez jamais sans escorte. Conseil : concentrez les engins sur un même pan pour ouvrir vite une brèche, puis tournez-les sur les défenseurs ou sur la ville.",
+  "see_also": ["cdx_trebuchet", "cdx_mangonneau", "cdx_bombarde", "cdx_beffroi", "cdx_jeu_murailles", "cdx_jeu_incendies", "cdx_jeu_siege"],
+  "sources": ["Trébuchet", "Mangonneau", "Bombarde", "Poliorcétique"]
+}

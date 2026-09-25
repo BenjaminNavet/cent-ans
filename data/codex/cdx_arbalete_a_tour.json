@@ -1,0 +1,31 @@
+{
+  "id": "cdx_arbalete_a_tour",
+  "title": "L'arbalète à tour et le cranequin",
+  "category": "technique",
+  "aliases": [
+    "Arbalète à tour et à cranequin",
+    "arbalète à tour",
+    "cranequin",
+    "tour anglais",
+    "moufle",
+    "arbalète d'acier"
+  ],
+  "era": {
+    "from": "v. 1340",
+    "to": "1500"
+  },
+  "summary": "Plus l'arc de l'[[cdx_arbalete|arbalète]] est puissant, plus il est dur à bander. Le tour, un treuil à manivelles, puis le cranequin, à crémaillère, permettent d'armer des arcs composites puis d'acier qu'aucun bras ne pourrait tendre.",
+  "body": "Au XIVe siècle, l'arc de l'arbalète, fait de bois, de corne et de tendon, gagne en puissance. Le crochet de ceinture ne suffit plus : on bande l'arme avec un tour, système de poulies et de manivelles fixé à la crosse (le « tour anglais »), puis, à partir de la fin du siècle, avec le cranequin, engrenage à crémaillère plus compact. L'arc d'acier, adopté au XVe siècle, pousse encore plus loin la puissance.\n\nLe tir est plus lent, mais le carreau perce mieux les armures. Ces arbalètes lourdes servent surtout à la défense des places et au siège, où le tireur peut recharger à l'abri d'un [[cdx_pavois|pavois]] ou d'un créneau.",
+  "gameplay": "Recherche : 180 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +3 en tir des tireurs ; +2 en armure des tireurs.",
+  "entity": "tech_crossbow_windlass",
+  "see_also": [
+    "cdx_arbalete",
+    "cdx_pavois",
+    "cdx_arbaletriers_des_villes"
+  ],
+  "sources": [
+    "Arbalète",
+    "Cranequin",
+    "Pavois (bouclier)"
+  ]
+}

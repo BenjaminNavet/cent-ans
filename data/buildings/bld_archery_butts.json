@@ -33,9 +33,9 @@
     "unit_longbowmen",
     "unit_francs_archers"
   ],
-  "description": "Buttes où les paysans s'exercent à l'arc le dimanche, sur ordre royal en Angleterre.",
+  "description": "Buttes de terre où les hommes s'exercent à l'arc les dimanches et jours de fête, sur ordre d'Édouard III (1363). Voir [[cdx_butte_de_tir]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Arc long anglais",
+    "Statut de Winchester"
   ]
 }

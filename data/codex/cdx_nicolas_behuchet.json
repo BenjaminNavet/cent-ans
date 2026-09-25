@@ -1,0 +1,12 @@
+{
+  "id": "cdx_nicolas_behuchet",
+  "title": "Nicolas Béhuchet, trésorier et amiral",
+  "category": "personnage",
+  "aliases": ["Nicolas Béhuchet", "Béhuchet"],
+  "era": { "from": "1288", "to": "1340" },
+  "summary": "Bourgeois du Mans devenu trésorier de France, Nicolas Béhuchet commande la flotte de [[cdx_philippe_vi|Philippe VI]] avec [[cdx_hugues_quieret|Hugues Quiéret]] : raids sur Portsmouth et Southampton, victoire d'[[cdx_arnemuiden|Arnemuiden]]. Pris à l'[[cdx_ecluse|Écluse]], il est pendu au mât de son navire le 24 juin 1340.",
+  "body": "Né au Mans vers 1288, Nicolas Béhuchet n'est pas un grand seigneur mais un homme de l'administration royale. Il sert d'abord Charles de Valois, le père de [[cdx_philippe_vi|Philippe VI]], comme agent financier. Quand son maître monte sur le trône, sa carrière s'accélère : maître des eaux et forêts et membre de la Chambre des comptes en 1328, trésorier de France en 1331.\n\nAu début de la guerre, Philippe VI lui confie, avec l'amiral [[cdx_hugues_quieret|Hugues Quiéret]], la « flotte de la mer » : navires normands et picards réquisitionnés, galères du clos des Galées de Rouen, galères génoises louées avec leurs arbalétriers. Béhuchet se révèle un organisateur énergique. Le 24 mars 1338, la flotte brûle Portsmouth ; à l'automne, elle prend Guernesey, remporte le combat d'[[cdx_arnemuiden|Arnemuiden]] (23 septembre) et saccage Southampton (4-5 octobre). Les côtes anglaises vivent dans la peur d'un débarquement.\n\nEn juin 1340, pour empêcher [[cdx_edouard_iii|Édouard III]] de débarquer en Flandre, les deux amiraux massent la flotte devant l'Écluse et lient leurs navires en lignes serrées, contre l'avis du Génois Barbavera. Le 24 juin, la flotte anglaise les écrase. Béhuchet, capturé, est pendu au mât de son navire : les Anglais se vengent ainsi, dit-on, des prisonniers massacrés à Arnemuiden.\n\nLes chroniqueurs nobles ont fait de ce « bourgeois » le coupable idéal de la défaite. Son destin montre surtout que la guerre navale du XIVe siècle est d'abord une affaire d'argent et de logistique, confiée à des financiers autant qu'à des chevaliers.",
+  "entity": "chr_nicolas_behuchet",
+  "see_also": ["cdx_hugues_quieret", "cdx_ecluse", "cdx_arnemuiden", "cdx_philippe_vi"],
+  "sources": ["Nicolas Béhuchet", "Bataille d'Arnemuiden", "Bataille de L'Écluse", "Jonathan Sumption, The Hundred Years War I: Trial by Battle"]
+}

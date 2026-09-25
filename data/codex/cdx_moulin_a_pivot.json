@@ -1,0 +1,27 @@
+{
+  "id": "cdx_moulin_a_pivot",
+  "title": "Le moulin à pivot",
+  "category": "technique",
+  "aliases": [
+    "moulin à pivot",
+    "moulins à pivot",
+    "moulin sur pivot",
+    "moulin chandelier"
+  ],
+  "era": {
+    "from": "v. 1180",
+    "to": "1500"
+  },
+  "summary": "Apparu en Normandie, en Angleterre et en Flandre à la fin du XIIe siècle, le moulin à vent sur pivot tourne tout entier autour d'un poteau central pour faire face au vent. Il équipe les plaines sans rivière.",
+  "body": "La cage de bois du moulin, avec ses ailes et ses meules, repose sur un gros poteau vertical. Le meunier l'oriente au vent à l'aide d'une longue queue, qu'il pousse comme un levier. Les premières mentions sûres datent des années 1180 en Normandie et en Angleterre.\n\nAu XIVe siècle, les moulins à pivot couvrent les plaines de Flandre, de Picardie, de Beauce et d'Angleterre orientale, là où les cours d'eau manquent. Comme les moulins à eau, ils appartiennent le plus souvent aux seigneurs, qui en tirent une taxe sur chaque mouture.",
+  "gameplay": "Recherche : 160 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_hydraulique_medievale|Moulins à eau]]. Effets, pour toute la faction : +5 % de production (la moitié se retrouve dans l'impôt des paysans et des bourgeois). Débloque : le bâtiment Moulin à vent.",
+  "entity": "tech_windmills",
+  "see_also": [
+    "cdx_hydraulique_medievale",
+    "cdx_assolement_triennal"
+  ],
+  "sources": [
+    "Moulin à vent",
+    "Moulin à pivot"
+  ]
+}

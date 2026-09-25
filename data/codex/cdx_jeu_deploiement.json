@@ -1,0 +1,16 @@
+{
+  "id": "cdx_jeu_deploiement",
+  "title": "Le déploiement et les renforts",
+  "category": "mecanique",
+  "aliases": [
+    "déploiement",
+    "zone de déploiement",
+    "renforts"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Avant le premier trait, chaque chef range ses batailles sur le terrain qu'il a choisi. La plupart des victoires anglaises de la guerre de Cent Ans se sont jouées là, dans le choix de la position et l'ordre des troupes.",
+  "body": "Une bataille rangée se prépare parfois pendant des heures, voire des jours : on reconnaît le terrain, on range les troupes en trois « batailles » (avant-garde, bataille du chef, arrière-garde), on place les archers, on renvoie les chevaux et les chariots à l'arrière. À [[cdx_crecy|Crécy]], [[cdx_edouard_iii|Édouard III]] dispose ses hommes d'armes à pied sur une pente douce, les archers sur les ailes, les bagages enfermés dans un parc de chariots derrière la ligne ; le roi observe depuis un moulin.\n\nÀ [[cdx_poitiers|Poitiers]], le [[cdx_prince_noir|Prince noir]] s'adosse à des haies et à des vignes que l'on ne peut aborder que par un chemin creux ; à [[cdx_azincourt|Azincourt]], [[cdx_henri_v|Henri V]] tient l'étranglement entre les bois d'Azincourt et de Tramecourt, qui empêche les Français de déborder ses ailes et les oblige à s'entasser. Les Français, plus nombreux, se déploient au contraire sur un front trop étroit pour leur nombre : les dernières batailles ne peuvent même pas combattre.\n\nLes troupes qui n'ont pas de place sur la ligne attendent en arrière, prêtes à relever les premières ; celles qui arrivent tard sur le champ, comme les contingents français qui rejoignent Crécy tout au long de la soirée, entrent au combat par petits paquets, dans le désordre.",
+  "gameplay": "Toute bataille du joueur, rangée ou de siège, s'ouvre sur une phase de déploiement : le temps est arrêté, seuls les changements de [[cdx_jeu_formations|formation]] et le [[cdx_jeu_tir|tir à volonté]] sont permis. Clic droit : la sélection se range autour du point ; glisser-droit : elle s'étire le long d'une ligne. « Commencer la bataille » (Entrée) lance le combat.\n\nEn bataille rangée, chaque camp se range dans une bande de 300 m de profondeur le long de son bord d'un champ de 1 200 × 800 m. En siège, l'assaillant a tout le terrain devant l'enceinte, jusqu'à 60 m des murs ; la garnison se place dans l'anneau des murailles, et un défenseur posé près d'un pan monte au [[cdx_jeu_murailles|chemin de ronde]]. L'IA place les tireurs devant, la ligne au centre, les cavaliers aux ailes, les engins derrière et le général derrière le centre ; un camp nettement plus faible recule sur la meilleure hauteur de sa zone.\n\nRenforts : 20 régiments par camp au plus sont sur le champ. Les suivants attendent hors du champ et entrent un à un, par le bord de leur camp (la garnison depuis la place), dès qu'un régiment est détruit, en déroute ou retiré.\n\nConseil : cherchez la [[cdx_jeu_relief_bataille|hauteur]], appuyez un flanc à un bois ou à une rivière et placez les archers derrière des [[cdx_jeu_terrain_bataille|haies]].",
+  "see_also": ["cdx_jeu_formations", "cdx_jeu_relief_bataille", "cdx_jeu_terrain_bataille", "cdx_jeu_general", "cdx_crecy", "cdx_azincourt"],
+  "sources": ["Bataille de Crécy", "Bataille d'Azincourt", "Bataille de Poitiers (1356)"]
+}

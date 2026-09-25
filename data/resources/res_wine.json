@@ -10,8 +10,10 @@
     "clergy",
     "burghers"
   ],
-  "description": "Vins de Gascogne (Bordeaux), de Bourgogne et d'Île-de-France, exportés en Angleterre.",
+  "description": "Vins de Gascogne (Bordeaux) et de La Rochelle, exportés vers l'Angleterre et la Flandre ; vins de Bourgogne et d'Île-de-France pour Paris et la cour d'Avignon. Voir [[cdx_vin]].",
   "sources": [
+    "Vignoble de Bordeaux",
+    "Vignoble de Bourgogne",
     "Économie médiévale (Wikipédia)"
   ]
 }

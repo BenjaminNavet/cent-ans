@@ -24,7 +24,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_cathedral", "bld_stone_walls"],
     "port": false,
-    "description": "Cité archiépiscopale où sont sacrés les rois de France depuis Clovis.",
+    "description": "Cité archiépiscopale où sont sacrés les rois de France, en souvenir du baptême de Clovis.",
     "sources": ["Reims", "Sacre des rois de France"]
   },
   {

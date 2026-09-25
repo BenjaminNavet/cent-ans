@@ -126,7 +126,7 @@ func _make_row(save: Dictionary, index: int) -> PanelContainer:
 	hbox.add_child(text)
 	var lines := [
 		[str(save["label"]), 18, Color(0.22, 0.14, 0.07)],
-		["%s — %s, tour %d" % [faction, save.get("date", "?"), int(save.get("turn", 0)) + 1], 15, Color(0.35, 0.22, 0.10)],
+		["%s — %s, tour %d — %s" % [faction, save.get("date", "?"), int(save.get("turn", 0)) + 1, _difficulty_label(str(save.get("difficulty", "normal")))], 15, Color(0.35, 0.22, 0.10)],
 		["Sauvegardée le %s" % french_timestamp(str(save.get("timestamp", ""))), 13, Color(0.45, 0.36, 0.26)],
 	]
 	var usable := mode != Mode.LOAD or SaveSlots.loadable(save)
@@ -222,3 +222,11 @@ static func french_timestamp(iso: String) -> String:
 		if time.size() >= 2:
 			text += ", %d h %s" % [int(time[0]), time[1]]
 	return text
+
+
+## DF1 : libellé français du niveau de difficulté d'une sauvegarde (Normale par défaut).
+func _difficulty_label(id: String) -> String:
+	var facade := get_node_or_null("/root/SimFacade")
+	if facade != null and facade.has_method("difficulty_label"):
+		return "difficulté %s" % str(facade.call("difficulty_label", id)).to_lower()
+	return "difficulté %s" % id

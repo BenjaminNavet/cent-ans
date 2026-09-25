@@ -85,24 +85,26 @@ func _ready() -> void:
 	_title_label.custom_minimum_size = Vector2(HEADER_WIDTH, 0)
 	header.add_child(_title_label)
 	_count_label = HudStyle.label("", 22, HudStyle.INK)
+	_count_label.set_script(RichLabel)  # B1 : infobulle riche auto-liée (T : bulle du Codex)
 	_count_label.tooltip_text = "Régiments sous contrat d'endenture / capacité du chef"
 	_count_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header.add_child(_count_label)
 	_men_label = HudStyle.label("", HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
 	header.add_child(_men_label)
 	_upkeep_label = HudStyle.label("", HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+	_upkeep_label.set_script(RichLabel)
 	_upkeep_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header.add_child(_upkeep_label)
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	header.add_child(spacer)
-	_split_button = Button.new()
+	_split_button = RichButton.new()
 	_split_button.text = "Séparer"
 	_split_button.add_theme_font_size_override("font_size", 13)
 	_split_button.tooltip_text = "Maj ou Ctrl + clic pour choisir les régiments à détacher"
 	_split_button.pressed.connect(_on_split_pressed)
 	header.add_child(_split_button)
-	_garrison_button = Button.new()
+	_garrison_button = RichButton.new()
 	_garrison_button.text = "Garnison"
 	_garrison_button.add_theme_font_size_override("font_size", 13)
 	_garrison_button.pressed.connect(_on_garrison_pressed)
@@ -441,16 +443,12 @@ class RegimentCard:
 			strip._on_card_clicked(index, click.shift_pressed or click.ctrl_pressed or click.meta_pressed)
 			accept_event()
 
+	## B1 : infobulle riche (parchemin, auto-liens, T : bulle du Codex) ; le nom mène à la
+	## fiche du Codex du type d'unité s'il y en a une.
 	func _make_custom_tooltip(for_text: String) -> Object:
-		var panel := PanelContainer.new()
-		panel.add_theme_stylebox_override("panel", HudStyle.panel_box(8))
-		var box := VBoxContainer.new()
-		panel.add_child(box)
 		var lines := for_text.split("\n")
-		for i in lines.size():
-			var line := HudStyle.label(lines[i], HudStyle.FONT_TITLE if i == 0 else HudStyle.FONT_BODY, HudStyle.RUBRIC if i == 1 else HudStyle.INK)
-			box.add_child(line)
-		return panel
+		lines[0] = "[b]%s[/b]" % RichTooltip.entity_name(str(unit.get("unit_type", "")), lines[0])
+		return RichTooltip.make_panel("\n".join(lines))
 
 	func _draw() -> void:
 		var rect := Rect2(Vector2.ZERO, size)

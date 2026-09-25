@@ -1,0 +1,31 @@
+{
+  "id": "cdx_hydraulique_medievale",
+  "title": "L'énergie hydraulique",
+  "category": "technique",
+  "aliases": [
+    "énergie hydraulique",
+    "roue hydraulique",
+    "roues hydrauliques",
+    "moulin à foulon",
+    "moulins à foulon",
+    "martinet"
+  ],
+  "era": {
+    "from": "v. 1000",
+    "to": "1500"
+  },
+  "summary": "La roue à aubes fait tourner les meules à grain, mais aussi les maillets des moulins à foulon, les martinets des forges et les soufflets des hauts fourneaux : au XIVe siècle, chaque rivière d'Europe est équipée.",
+  "body": "Le moulin à eau, connu des Romains, se multiplie à partir de l'an mil : le Domesday Book (1086) en recense plus de cinq mille en Angleterre. Seigneurs et abbayes les construisent et imposent aux paysans d'y moudre leur grain contre une redevance, comme au [[cdx_four_banal|four banal]].\n\nL'arbre à cames transforme la rotation en mouvement de va-et-vient. Il actionne les maillets qui foulent le drap, les martinets qui battent le fer et, bientôt, les moulins à papier. Cette énergie gratuite fait la richesse des villes drapières de [[cdx_flandre_laine|Flandre]] et d'Angleterre.",
+  "gameplay": "Recherche : 100 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +5 % de production (la moitié se retrouve dans l'impôt des paysans et des bourgeois). Débloque : le bâtiment Moulin à eau.",
+  "entity": "tech_water_mills",
+  "see_also": [
+    "cdx_four_banal",
+    "cdx_papier",
+    "cdx_moulin_a_pivot"
+  ],
+  "sources": [
+    "Moulin à eau",
+    "Moulin à foulon",
+    "Martinet (forge)"
+  ]
+}
