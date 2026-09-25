@@ -340,6 +340,46 @@ pub(crate) fn side_setup(
     }
 }
 
+/// EP5: chronicle line for the standards `army` took from `enemy`, if any.
+fn trophies_event(
+    data: &GameData,
+    result: &SideResult,
+    army: &Army,
+    enemy: &Army,
+    province: &ProvinceId,
+) -> Option<GameEvent> {
+    if result.standards_taken.is_empty() {
+        return None;
+    }
+    let name = |faction: &FactionId| {
+        data.factions.get(faction).map_or_else(
+            || faction.to_string(),
+            |f| f.short_or_display_name().to_owned(),
+        )
+    };
+    let taken = result.standards_taken.len();
+    let what = if taken == 1 {
+        "un étendard".to_owned()
+    } else {
+        format!("{taken} étendards")
+    };
+    let banner = if result.standards_taken.iter().any(|t| t.general) {
+        ", dont la bannière de son chef"
+    } else {
+        ""
+    };
+    let text = format!(
+        "L'ost {} prend {what} à l'ost {}{banner} : trophées portés en triomphe.",
+        sim_battle::sim::of_faction(&name(&army.faction)),
+        sim_battle::sim::of_faction(&name(&enemy.faction)),
+    );
+    Some(
+        GameEvent::new(EventKind::Battle, text)
+            .province(province)
+            .faction(&army.faction),
+    )
+}
+
 fn side_outcome(
     side: &'static str,
     army: &Army,
@@ -599,6 +639,15 @@ impl CampaignState {
             attacker: attacker_outcome,
             defender: defender_outcome,
         };
+        // EP5: standards taken in the battle, told in the chronicle.
+        for (result, army, enemy) in [
+            (&outcome.attacker, attacker, defender),
+            (&outcome.defender, defender, attacker),
+        ] {
+            if let Some(event) = trophies_event(data, result, army, enemy, &request.province) {
+                events.push(event);
+            }
+        }
         if request.siege {
             let walls = crate::siege::walls_stand(self, data, &request.attacker, &request.location);
             crate::siege::apply_assault_result(
