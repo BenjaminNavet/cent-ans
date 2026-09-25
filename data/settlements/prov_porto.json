@@ -17,11 +17,9 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_water_mill",
       "bld_port",
       "bld_vineyard_press",
-      "bld_abbey",
       "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field"
@@ -52,9 +50,8 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
-      "bld_stone_walls",
-      "bld_parish_church"
+      "bld_collegiate_church",
+      "bld_stone_walls"
     ],
     "port": false,
     "description": "Siège archiépiscopal primatial du Portugal, ville romaine christianisée de longue date.",
@@ -106,8 +103,6 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_market",
-      "bld_port",
       "bld_parish_church"
     ],
     "port": true,

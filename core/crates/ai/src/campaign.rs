@@ -354,12 +354,21 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         .iter()
         .filter(|(id, _)| state.controls_province(ctx.faction, id))
         .any(|(_, p)| weighted_unrest(&p.population) > brink);
+    // EQ2: a war is paid from the reserve first; heavy taxes come when the
+    // treasury falls below `RESERVE_SEASONS` of income, or when a deficit
+    // would empty it within the runway (82 % of the « High » samples were
+    // wars, most with a full treasury: 42-45 % of the samples).
+    let low_treasury = ctx.treasury < RESERVE_SEASONS * ctx.gross_income.max(0);
+    let runway = if ctx.at_war() {
+        WAR_RUNWAY_TURNS
+    } else {
+        PEACE_RUNWAY_TURNS
+    };
+    let uncovered_deficit = ctx.surplus() < 0 && ctx.treasury < -ctx.surplus() * runway;
+    let needs_money = in_debt || uncovered_deficit || (ctx.at_war() && low_treasury);
     let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0)
-        && unrest < HIGH_TAX_MAX_UNREST
-        && !revolt_risk
-    {
+    } else if needs_money && unrest < HIGH_TAX_MAX_UNREST && !revolt_risk {
         TaxRate::High
     } else {
         TaxRate::Normal
@@ -371,11 +380,6 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // Debt: dismiss the costliest unit until the surplus repays the debt
     // within `DEBT_REPAYMENT_TURNS`. F4: dismiss ahead of bankruptcy when the
     // treasury no longer covers the deficit for a few seasons.
-    let runway = if ctx.at_war() {
-        WAR_RUNWAY_TURNS
-    } else {
-        PEACE_RUNWAY_TURNS
-    };
     let wanted_surplus = if ctx.treasury < 0 {
         -ctx.treasury / DEBT_REPAYMENT_TURNS
     } else if ctx.surplus() < 0

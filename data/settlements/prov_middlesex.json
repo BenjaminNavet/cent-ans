@@ -16,18 +16,12 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_market",
-      "bld_parish_church",
       "bld_windmill",
       "bld_port",
       "bld_weaving_workshop",
-      "bld_abbey",
       "bld_cathedral",
       "bld_fair",
-      "bld_guild_hall",
-      "bld_stone_walls",
       "bld_castle",
-      "bld_muster_field",
       "bld_archery_butts",
       "bld_counting_house",
       "bld_armoury"
@@ -58,8 +52,7 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_castle",
-      "bld_stone_walls"
+      "bld_castle"
     ],
     "port": true,
     "description": "Plus ancienne ville romaine de Bretagne, dotée d'un donjon normand et d'un commerce drapier actif.",
@@ -135,10 +128,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
+    "buildings": [],
     "port": true,
     "description": "Petit port producteur de sel sur l'estuaire de la Blackwater.",
     "sources": [

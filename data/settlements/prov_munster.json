@@ -50,7 +50,6 @@
     "buildings": [
       "bld_market",
       "bld_castle",
-      "bld_stone_walls",
       "bld_port"
     ],
     "port": true,
@@ -102,10 +101,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
+    "buildings": [],
     "port": true,
     "description": "Petit port de pêche du sud de Munster.",
     "sources": [

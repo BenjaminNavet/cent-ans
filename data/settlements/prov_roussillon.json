@@ -79,8 +79,7 @@
     "fortification_level": 1,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
-      "bld_parish_church"
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Ancienne Illiberis romaine, siège du diocèse du Roussillon (jusqu'au transfert à Perpignan en 1602).",

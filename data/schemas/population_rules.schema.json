@@ -16,7 +16,9 @@
     "disorder_unrest_max": { "type": "number", "minimum": 0, "maximum": 100, "description": "EQ1 : plafond de ce terme (une province prise et reprise sans cesse garde sa jauge à 100)." },
     "revolt_unrest_threshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "EQ1 : mécontentement moyen (pondéré par classe) au-delà duquel la province menace de se révolter." },
     "revolt_seasons": { "type": "integer", "minimum": 1, "maximum": 20, "description": "EQ1 : saisons consécutives au-delà du seuil avant une révolte ; le compte repart de zéro après chaque révolte." },
-    "revolt_control_threshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement au-delà duquel une province en révolte passe aux rebelles." }
+    "revolt_control_threshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement au-delà duquel une province en révolte passe aux rebelles." },
+    "disorder_decay_flat": { "type": "integer", "minimum": 0, "maximum": 100, "description": "EQ2 : baisse fixe par saison de la jauge de troubles de la province (prises, pillages, régence)." },
+    "disorder_decay_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "EQ2 : baisse supplémentaire par saison, en pourcentage de la jauge (une province pacifiée à 100 retombe en quelques saisons)." }
   },
   "required": ["tax_unrest_weight", "garrison_relief_per_100_men", "garrison_relief_max", "goods_relief_max", "occupation_unrest", "foreign_religion_unrest"],
   "additionalProperties": false

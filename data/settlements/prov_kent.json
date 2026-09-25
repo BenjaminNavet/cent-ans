@@ -20,7 +20,6 @@
       "bld_parish_church",
       "bld_water_mill",
       "bld_port",
-      "bld_stone_walls",
       "bld_castle",
       "bld_muster_field",
       "bld_archery_butts"
@@ -52,7 +51,6 @@
     "buildings": [
       "bld_castle",
       "bld_port",
-      "bld_stone_walls",
       "bld_market"
     ],
     "port": true,
@@ -108,7 +106,6 @@
     "fortification_level": 3,
     "buildings": [
       "bld_castle",
-      "bld_stone_walls",
       "bld_market"
     ],
     "port": false,
