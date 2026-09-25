@@ -1,0 +1,210 @@
+{
+  "description": "Largeurs des cours d'eau du réseau fin (lot ZG5a, ADR 0036), en mètres de lit mouillé en eaux moyennes. Chaque point d'ancrage est projeté sur le trait du fleuve nommé le plus proche (≤ search_km) ; la largeur est interpolée entre ancrages en logarithme le long du fleuve, et en amont du premier ancrage elle décroît comme (distance depuis la source)^upstream_exponent sans descendre sous la largeur de l'ordre de Strahler. Les cours d'eau sans ancrage prennent la largeur de leur ordre de Strahler (`strahler_width_m`), bornée par la classe de largeur de la source quand elle existe (BD TOPAGE `ClasseLargeurTH`). Valeurs actuelles ou estimées pour le XIVᵉ siècle (lits non endigués souvent plus larges, bras multiples) ; les estuaires sont des ordres de grandeur. Rendu seulement.",
+  "strahler_width_m": { "1": 1.5, "2": 3.0, "3": 5.0, "4": 9.0, "5": 16.0, "6": 30.0, "7": 60.0, "8": 120.0, "9": 220.0 },
+  "upstream_exponent": 0.7,
+  "search_km": 6.0,
+  "rivers": [
+    {
+      "id": "seine", "names": ["la Seine", "Seine", "Fleuve la Seine"],
+      "anchors": [
+        { "place": "Troyes", "lonlat": [4.08, 48.30], "width_m": 25 },
+        { "place": "Montereau", "lonlat": [2.955, 48.385], "width_m": 70 },
+        { "place": "Melun", "lonlat": [2.66, 48.54], "width_m": 90 },
+        { "place": "Paris (Cité)", "lonlat": [2.348, 48.855], "width_m": 130 },
+        { "place": "Vernon", "lonlat": [1.485, 49.09], "width_m": 160 },
+        { "place": "Rouen", "lonlat": [1.09, 49.437], "width_m": 200 },
+        { "place": "Quillebeuf", "lonlat": [0.53, 49.475], "width_m": 1200 },
+        { "place": "Honfleur (embouchure)", "lonlat": [0.24, 49.44], "width_m": 3000 }
+      ],
+      "source": "Largeurs actuelles d'après les cartes IGN (Seine à Paris 110-150 m selon les bras, à Rouen ~200 m) ; estuaire non endigué en 1340."
+    },
+    {
+      "id": "loire", "names": ["la Loire", "Loire", "Fleuve la Loire"],
+      "anchors": [
+        { "place": "Roanne", "lonlat": [4.08, 46.04], "width_m": 150 },
+        { "place": "Nevers", "lonlat": [3.16, 46.985], "width_m": 300 },
+        { "place": "Gien", "lonlat": [2.63, 47.685], "width_m": 300 },
+        { "place": "Orléans", "lonlat": [1.905, 47.897], "width_m": 350 },
+        { "place": "Blois", "lonlat": [1.335, 47.585], "width_m": 350 },
+        { "place": "Tours", "lonlat": [0.69, 47.40], "width_m": 400 },
+        { "place": "Saumur", "lonlat": [-0.075, 47.26], "width_m": 450 },
+        { "place": "Nantes", "lonlat": [-1.555, 47.21], "width_m": 500 },
+        { "place": "Paimbœuf", "lonlat": [-2.03, 47.29], "width_m": 2500 }
+      ],
+      "source": "Lit de la Loire moyenne à Orléans ~350 m entre levées, bras multiples ; estuaire à partir de Nantes."
+    },
+    {
+      "id": "garonne", "names": ["la Garonne", "Garonne"],
+      "anchors": [
+        { "place": "Toulouse", "lonlat": [1.435, 43.60], "width_m": 200 },
+        { "place": "Agen", "lonlat": [0.615, 44.20], "width_m": 250 },
+        { "place": "Langon", "lonlat": [-0.245, 44.555], "width_m": 300 },
+        { "place": "Bordeaux", "lonlat": [-0.56, 44.845], "width_m": 500 },
+        { "place": "Bec d'Ambès", "lonlat": [-0.535, 45.035], "width_m": 900 }
+      ],
+      "source": "Garonne à Bordeaux ~450-500 m (pont de pierre, 486 m) ; marée jusqu'à Langon."
+    },
+    {
+      "id": "gironde", "names": ["la Gironde", "Gironde"],
+      "anchors": [
+        { "place": "Bec d'Ambès", "lonlat": [-0.535, 45.04], "width_m": 2000 },
+        { "place": "Pauillac", "lonlat": [-0.745, 45.20], "width_m": 4000 },
+        { "place": "Le Verdon", "lonlat": [-1.06, 45.55], "width_m": 5000 }
+      ],
+      "source": "Estuaire de la Gironde, 3 à 11 km de large."
+    },
+    {
+      "id": "dordogne", "names": ["la Dordogne", "Dordogne"],
+      "anchors": [
+        { "place": "Bergerac", "lonlat": [0.485, 44.85], "width_m": 150 },
+        { "place": "Castillon", "lonlat": [-0.04, 44.855], "width_m": 150 },
+        { "place": "Libourne", "lonlat": [-0.245, 44.915], "width_m": 300 },
+        { "place": "Bec d'Ambès", "lonlat": [-0.54, 45.03], "width_m": 700 }
+      ],
+      "source": "Dordogne à Libourne ~300 m (marée), à Bergerac ~150 m."
+    },
+    {
+      "id": "somme", "names": ["la Somme", "Somme", "la Somme Canalisée"],
+      "anchors": [
+        { "place": "Péronne", "lonlat": [2.935, 49.93], "width_m": 20 },
+        { "place": "Amiens", "lonlat": [2.30, 49.895], "width_m": 30 },
+        { "place": "Abbeville", "lonlat": [1.83, 50.105], "width_m": 40 },
+        { "place": "Blanchetaque", "lonlat": [1.73, 50.13], "width_m": 250 },
+        { "place": "Saint-Valery (baie)", "lonlat": [1.62, 50.19], "width_m": 1500 }
+      ],
+      "source": "Somme étroite dans une vallée de marais ; gué de Blanchetaque sur la zone de marée (1346)."
+    },
+    {
+      "id": "rhone", "names": ["le Rhône", "Rhône", "Rhone", "Fleuve le Rhône"],
+      "anchors": [
+        { "place": "Genève", "lonlat": [6.14, 46.205], "width_m": 100 },
+        { "place": "Lyon", "lonlat": [4.835, 45.76], "width_m": 200 },
+        { "place": "Valence", "lonlat": [4.88, 44.93], "width_m": 250 },
+        { "place": "Avignon", "lonlat": [4.805, 43.955], "width_m": 300 },
+        { "place": "Arles", "lonlat": [4.625, 43.68], "width_m": 250 }
+      ],
+      "source": "Rhône non endigué en 1340, bras et îles (Avignon : pont Saint-Bénézet ~900 m sur deux bras)."
+    },
+    {
+      "id": "meuse", "names": ["la Meuse", "Meuse", "Maas", "Fleuve la Meuse", "Grensmaas", "Zandmaas", "Getijdenmaas", "Nieuwe Maas"],
+      "anchors": [
+        { "place": "Verdun", "lonlat": [5.385, 49.16], "width_m": 40 },
+        { "place": "Charleville", "lonlat": [4.72, 49.77], "width_m": 60 },
+        { "place": "Namur", "lonlat": [4.87, 50.46], "width_m": 120 },
+        { "place": "Liège", "lonlat": [5.575, 50.64], "width_m": 120 },
+        { "place": "Maastricht", "lonlat": [5.69, 50.85], "width_m": 150 },
+        { "place": "Venlo", "lonlat": [6.17, 51.37], "width_m": 200 }
+      ],
+      "source": "Largeurs actuelles (Meuse canalisée) ramenées aux lits naturels."
+    },
+    {
+      "id": "escaut", "names": ["l'Escaut", "Escaut", "Schelde", "Scheldt", "Fleuve l'Escaut", "Bovenschelde", "Boven-Schelde", "Zeeschelde", "Westerschelde"],
+      "anchors": [
+        { "place": "Cambrai", "lonlat": [3.235, 50.175], "width_m": 15 },
+        { "place": "Valenciennes", "lonlat": [3.52, 50.36], "width_m": 25 },
+        { "place": "Tournai", "lonlat": [3.39, 50.61], "width_m": 40 },
+        { "place": "Gand", "lonlat": [3.73, 51.05], "width_m": 60 },
+        { "place": "Anvers", "lonlat": [4.395, 51.225], "width_m": 400 }
+      ],
+      "source": "Escaut à Anvers ~400-500 m (marée) ; à Tournai ~40 m."
+    },
+    {
+      "id": "thames", "names": ["River Thames", "Thames"],
+      "anchors": [
+        { "place": "Oxford", "lonlat": [-1.25, 51.745], "width_m": 25 },
+        { "place": "Reading", "lonlat": [-0.97, 51.46], "width_m": 60 },
+        { "place": "Kingston", "lonlat": [-0.31, 51.41], "width_m": 80 },
+        { "place": "Westminster", "lonlat": [-0.12, 51.50], "width_m": 250 },
+        { "place": "London Bridge", "lonlat": [-0.0877, 51.508], "width_m": 280 },
+        { "place": "Gravesend", "lonlat": [0.37, 51.445], "width_m": 800 },
+        { "place": "Southend (estuaire)", "lonlat": [0.72, 51.51], "width_m": 3000 }
+      ],
+      "source": "London Bridge médiéval ~270 m (19 arches) ; Tamise sans quais, plus large qu'aujourd'hui (~250 m à Westminster)."
+    },
+    {
+      "id": "severn", "names": ["River Severn", "Severn"],
+      "anchors": [
+        { "place": "Shrewsbury", "lonlat": [-2.75, 52.71], "width_m": 50 },
+        { "place": "Worcester", "lonlat": [-2.225, 52.19], "width_m": 60 },
+        { "place": "Gloucester", "lonlat": [-2.255, 51.865], "width_m": 70 },
+        { "place": "Aust (estuaire)", "lonlat": [-2.62, 51.60], "width_m": 1500 }
+      ],
+      "source": "Severn à Gloucester ~70 m ; estuaire à marée au sud de Sharpness."
+    },
+    {
+      "id": "trent", "names": ["River Trent", "Trent"],
+      "anchors": [
+        { "place": "Burton", "lonlat": [-1.63, 52.805], "width_m": 40 },
+        { "place": "Nottingham", "lonlat": [-1.15, 52.94], "width_m": 60 },
+        { "place": "Newark", "lonlat": [-0.815, 53.08], "width_m": 60 },
+        { "place": "Gainsborough", "lonlat": [-0.775, 53.40], "width_m": 80 },
+        { "place": "Trent Falls", "lonlat": [-0.69, 53.70], "width_m": 400 }
+      ],
+      "source": "Trent à Nottingham ~60 m ; marée jusqu'à Gainsborough."
+    },
+    {
+      "id": "humber", "names": ["Humber", "River Humber"],
+      "anchors": [
+        { "place": "Trent Falls", "lonlat": [-0.69, 53.705], "width_m": 1500 },
+        { "place": "Hull", "lonlat": [-0.33, 53.735], "width_m": 3000 }
+      ],
+      "source": "Estuaire de la Humber, 2 à 3 km devant Hull."
+    },
+    {
+      "id": "rhin", "names": ["le Rhin", "Rhin", "Rhein", "Rijn", "Nederrijn", "Rhine", "Hochrhein", "Oberrhein", "Niederrhein", "Bovenrijn", "Boven-Rijn", "Waal"],
+      "anchors": [
+        { "place": "Bâle", "lonlat": [7.59, 47.56], "width_m": 200 },
+        { "place": "Strasbourg", "lonlat": [7.80, 48.575], "width_m": 250 },
+        { "place": "Mayence", "lonlat": [8.27, 50.00], "width_m": 400 },
+        { "place": "Coblence", "lonlat": [7.605, 50.36], "width_m": 350 },
+        { "place": "Cologne", "lonlat": [6.97, 50.94], "width_m": 400 },
+        { "place": "Emmerich", "lonlat": [6.25, 51.83], "width_m": 400 }
+      ],
+      "source": "Rhin actuel 200-400 m ; le Rhin supérieur de 1340 est une plaine de tresses (voir historical_hydro_notes.json)."
+    },
+    {
+      "id": "moselle", "names": ["la Moselle", "Moselle", "Mosel"],
+      "anchors": [
+        { "place": "Épinal", "lonlat": [6.45, 48.175], "width_m": 40 },
+        { "place": "Metz", "lonlat": [6.175, 49.12], "width_m": 60 },
+        { "place": "Trèves", "lonlat": [6.63, 49.755], "width_m": 100 },
+        { "place": "Coblence", "lonlat": [7.59, 50.36], "width_m": 150 }
+      ],
+      "source": "Largeurs actuelles (Moselle canalisée à grand gabarit) ramenées aux lits naturels."
+    },
+    {
+      "id": "charente", "names": ["la Charente", "Charente"],
+      "anchors": [
+        { "place": "Angoulême", "lonlat": [0.155, 45.655], "width_m": 30 },
+        { "place": "Saintes", "lonlat": [-0.63, 45.745], "width_m": 50 },
+        { "place": "Rochefort", "lonlat": [-0.96, 45.94], "width_m": 150 }
+      ],
+      "source": "Charente maritime à marée jusqu'à Saintes."
+    },
+    {
+      "id": "vienne", "names": ["la Vienne", "Vienne"],
+      "anchors": [
+        { "place": "Limoges", "lonlat": [1.26, 45.825], "width_m": 50 },
+        { "place": "Chinon", "lonlat": [0.24, 47.165], "width_m": 150 }
+      ],
+      "source": "Vienne à Chinon ~150 m."
+    },
+    {
+      "id": "oise", "names": ["l'Oise", "Oise"],
+      "anchors": [
+        { "place": "Compiègne", "lonlat": [2.83, 49.42], "width_m": 45 },
+        { "place": "Pontoise", "lonlat": [2.10, 49.05], "width_m": 70 }
+      ],
+      "source": "Estimation d'après les largeurs actuelles."
+    },
+    {
+      "id": "marne", "names": ["la Marne", "Marne"],
+      "anchors": [
+        { "place": "Châlons", "lonlat": [4.36, 48.955], "width_m": 40 },
+        { "place": "Meaux", "lonlat": [2.88, 48.96], "width_m": 55 },
+        { "place": "Charenton", "lonlat": [2.415, 48.82], "width_m": 70 }
+      ],
+      "source": "Estimation d'après les largeurs actuelles."
+    }
+  ]
+}

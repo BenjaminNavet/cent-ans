@@ -385,3 +385,163 @@ palier 2), `glo30.py` (téléchargements GLO-30 et WorldCover, mosaïque avant r
   de tuiles de **tout** le cache, étages de ZG3 compris).
 - **Cache de travail** : `tools/geo/raw/pyramid_work/` (`e0.npy`, `base.npy`, `coast.npy`,
   256 Mo chacun ; `reservoirs/*.npz`).
+
+## Hydrographie fine, ancrages et routes drapées (lot ZG5a, ADR 0036)
+
+```sh
+uv run --project tools cent-ans geo hydro-fine                 # réseau fin (sources en cache, recalage parallèle, reprise)
+uv run --project tools cent-ans geo hydro-fine --sources osor  # une seule source (essai)
+uv run --project tools cent-ans geo anchors-fine               # colonies, hameaux, ponts, routes drapées (après hydro-fine)
+```
+
+Données de rendu seulement : `rivers_render.json`, `river_bed.png`, `crossings*.json`,
+`navgrid.png` et les positions de règles ne changent pas (vue stratégique et règles).
+
+### Sources (vérifiées le 25/09/2026, HTTPS anonyme, 0 $)
+
+| Zone | Source | Licence | Accès |
+|---|---|---|---|
+| France | BD TOPAGE® 2025, `TronconHydrographique_FXX` (3,04 M tronçons ; `NumeroOrdreTH` vide → Strahler recalculé) | Licence Ouverte 2.0 | `services.sandre.eaufrance.fr/telechargement/geo/ETH/BDTopage/2025/TronconHydrographique/TronconHydrographique_FXX-gpkg.zip` (857 Mo, 3,0 Go décompressé) |
+| Grande-Bretagne | OS Open Rivers (193 k tronçons, noms gallois/anglais) | OGL v3 | `api.os.uk/downloads/v1/products/OpenRivers/downloads?area=GB&format=GeoPackage&redirect` (52 Mo) |
+| Bénélux, Rhénanie, Suisse romande, Piémont, versant sud des Pyrénées | EU-Hydro River Network Database v1.3 (ordres de Strahler 3 à 9) | Copernicus (libre, attribution) | service REST ArcGIS public de l'AEE `image.discomap.eea.europa.eu/arcgis/rest/services/EUHydro/EUHydro_RiverNetworkDatabase/MapServer/{5..13}/query`, par cellules de 1°, pages de 1 000 (`tools/geo/raw/hydro/euhydro/`) |
+| Hors cœur | Natural Earth 10 m (lignes de `rivers.geojson`) | domaine public | déjà en cache |
+
+EU-Hydro complet (téléchargement par bassin) exige un compte WEkEO/CLMS : le service de
+consultation de l'AEE suffit. Aucune donnée OpenStreetMap. Les fichiers bruts sont dans
+`tools/geo/raw/hydro/`, les tables de tronçons
+projetées dans `tools/geo/raw/hydro/cache/links_<source>.npz` (TOPAGE : ordres ≥ 2 seulement ; le gpkg décompressé est supprimé après lecture et réextrait du zip au besoin ; les lots de recalage et de routes périmés sont purgés : ≈ 2,7 Go au total).
+
+### Méthode (`geo/hydro_sources.py`, `geo/hydro_fine.py`, `geo/valley_snap.py`)
+
+1. **Tronçons orientés** (EPSG:3035) : TOPAGE (nœuds `CdNoeudDebut`/`CdNoeudFin`, sans les
+   conduites, buses et tronçons souterrains), OS (sens `flow_direction`, nom anglais préféré :
+   `Afon Hafren` → `River Severn`), EU-Hydro (`FNODE`/`TNODE`, noms des masses d'eau nettoyés :
+   `MEUSE 6` → `Meuse`), Natural Earth (orienté par l'altitude).
+2. **Ordre de Strahler** calculé sur la topologie (tri topologique ; deux bras d'un même cours
+   d'eau qui se rejoignent n'augmentent pas l'ordre).
+3. **Sélection** : ordre ≥ 3 ; canaux de la source retirés sauf cours artificiels antérieurs à
+   1340 (`kept_artificial` : Fossdyke, biefs de moulins) ; noms de canaux modernes retirés
+   (`modern_canals` de `data/map/historical_hydro_notes.json`). Chaque source n'est gardée que
+   là où elle fait autorité : TOPAGE et OS sur le cœur (tuile E3 présente), EU-Hydro sur le
+   cœur hors des cellules de 2 km touchées par TOPAGE ou OS, Natural Earth hors du cœur.
+4. **Traits** : les tronçons sont chaînés du haut vers le bas en suivant la branche principale à
+   chaque confluence (ordre le plus haut, même cours d'eau, plus long amont) et, à chaque
+   défluence, le bras principal (`BrasTH`, largeur, permanence, bras le plus direct).
+5. **Recalage** sur l'étage le plus fin présent sous chaque point (E7 → E4 sur le cœur, E2 hors
+   cœur ; hauteurs de rendu, rehaussement ADR 0019 compris) : rééchantillonnage à 20 m (60 m pour
+   Natural Earth), puis recherche de Viterbi sur 33 à 61 décalages le long de la normale lissée
+   (rayon 40 / 60 / 100 m selon l'ordre pour TOPAGE et OS, 60 / 90 / 150 m pour EU-Hydro,
+   1 200 m pour Natural Earth) : coût = altitude du fond + attache au tracé source (2 à 4 m au
+   bord du rayon) + changement latéral (0,03 à 0,08 m par mètre), saut latéral ≤ 0,7 × le pas,
+   décalages bornés par le rayon de courbure (pas de raccourci à travers un méandre), lissage
+   gaussien des décalages. Parallèle par lots de ~1 500 km, résultat de chaque lot en cache
+   (`cache/snap/`, clé = version des paramètres + géométrie) : une commande interrompue reprend.
+6. **Niveau d'eau** : régression isotone décroissante (PAVA) des altitudes du fond le long de
+   chaque trait, en traitant chaque fleuve avant ses affluents ; la queue d'un affluent est
+   relevée au niveau du fleuve récepteur au confluent (jamais d'eau qui remonte), et ses six
+   derniers sommets sont fondus sur le point de confluence.
+7. **Largeurs** (m) : ancrages nommés de `data/map/river_widths.json` (Seine, Loire, Garonne,
+   Gironde, Dordogne, Somme, Rhône, Meuse, Escaut, Tamise, Severn, Trent, Humber, Rhin, Moselle,
+   Charente, Vienne, Oise, Marne ; interpolation logarithmique le long du fleuve, décroissance
+   en `(distance depuis la source)^0,7` en amont du premier ancrage), sinon largeur par ordre de
+   Strahler (1,5 m à l'ordre 1 … 220 m à l'ordre 9) bornée par la classe `ClasseLargeurTH` de
+   TOPAGE ; jamais plus étroit vers l'aval.
+8. **Drapeaux** par ligne : zones de `historical_hydro_notes.json` (cours divagant non endigué,
+   tronçon rectifié depuis 1340, marais non drainé, estuaire à marée), salinité TOPAGE / `tidalRiver`
+   OS, écoulement intermittent, source grossière (Natural Earth).
+9. **Tuiles** : simplification de Douglas-Peucker (0,35 × le pixel de l'étage le plus fin, 1,5 à
+   30 m), passage en unités monde, découpe aux bords des tuiles E2.
+
+### Format CAFV (tuiles `data/map/pyramid/hydro_fine/E2/{col}_{row}.bin`, hors git)
+
+Une tuile E2 couvre 64 unités monde (≈ 46 km) : `col = floor(x / 64)`, `row = floor(y / 64)`.
+Petit-boutiste :
+
+| Champ | Type | Contenu |
+|---|---|---|
+| en-tête | `4s H H H H I I I I` (32 o) | `CAFV`, version 1, couche (1 fleuves, 2 routes), étage (2), 0, col, row, nombre de lignes, nombre de sommets |
+| lignes | `u32 × 4` par ligne | entité, premier sommet, nombre de sommets, drapeaux |
+| `x`, `y` | `f32 × n` chacun | unités monde (pixels carte 4096, origine nord-ouest) |
+| `z` | `f32 × n` | niveau d'eau / surface de route en mètres (non exagéré) |
+| `w` | `f32 × n` | largeur en mètres |
+
+Drapeaux : 1 divagant, 2 marée, 4 intermittent, 8 rectifié depuis 1340, 16 source grossière,
+32 marais (fleuve) ou chaussée en zone humide (route), 64 route principale, 128 route
+calculée ; bits 24-27 : ordre de Strahler du trait ; bits 28-31 : source (`source_codes` du
+manifeste : 1 TOPAGE, 2 OS, 3 EU-Hydro, 4 Natural Earth). Une ligne coupée au bord d'une tuile
+partage son sommet de coupe avec la suivante. Lecture en GDScript :
+`FileAccess.get_buffer(4 * n).to_float32_array()` pour chaque tableau.
+
+- `data/map/rivers_fine.json` (versionné, schéma `rivers_fine.schema.json`) : format, drapeaux,
+  sources, statistiques, index des tuiles (lignes, sommets, octets, empreinte SHA-1).
+- `data/map/pyramid/hydro_fine/features.json` (cache) : table des entités (nom, source, ordre,
+  récepteur, longueur).
+
+### Ancrages et routes (`geo/fine_anchors.py`)
+
+- `data/map/fine_anchors.json` (versionné, schéma `fine_anchors.schema.json`) :
+  - `settlements` : `{id: {px, z, moved_m?, reason?}}` ; une colonie ne bouge (≤ 300 m, grille de
+    25 m) que si sa position de règle tombe dans le lit d'un fleuve fin (`lit`) ou sur une pente
+    > 20 % (`pente`) ; coût = pente, proximité du lit, distance parcourue.
+  - `hamlets` : `items[i] = [x, y, z, moved_m]` dans l'ordre de `hamlets.json`, même règle.
+  - `crossings` : dans l'ordre de `crossings_px.json` ; position **sur** le fleuve fin (le plus
+    proche du même nom à ≤ 2 km, sinon le plus proche à ≤ 500 m ; les 114 passages historiques
+    partent de leur lon/lat de `crossings.json`), `river_feature`, `dir` (sens du courant, unités
+    monde), `width_m`, `z_water`, `z_deck` (plus haute des deux berges à ½ largeur + 8 m) ;
+    `snapped: false` et `z_ground` sinon.
+  - `roads` : index des tuiles CAFV couche 2 de `data/map/pyramid/roads_fine/E2/` (entité =
+    index dans `roads.geojson`, largeur 6 / 4 / 3 m pour `main` / `secondary` / `computed`).
+- **Routes** : densifiées à 25 m sur le cœur (90 m ailleurs) ; sur le cœur, décalage latéral de
+  Viterbi (±50 m, 11 décalages) qui minimise dénivelé entre sommets, lit des fleuves fins,
+  fonds humides (`wetlands.png` × position basse dans le profil en travers) et écart au tracé ;
+  altitudes drapées (lissage gaussien 60 m, déblai/remblai ≤ 3 m), tablier horizontal entre les
+  berges d'un fleuve franchi ; simplification 3D (2,5 m, z × 4).
+
+### Contrat pour ZG5b (rendu)
+
+- **Fleuves** : charger `rivers_fine.json`, puis les tuiles E2 sous les nœuds du quadtree à
+  partir du palier 1 (zoom ≤ ~5 unités) ; hors cache (fichier absent), garder
+  `rivers_render.json` + `river_bed.png`. Mailler chaque ligne en ruban : demi-largeur
+  `max(w / 2, 1 pixel écran)` le long de la normale, altitude `z × échelle verticale`, berges en
+  fondu ; creuser le lit dans le shader de terrain (le niveau `z` est ≤ au fond de vallée du
+  relief à la précision de l'étage près). Les rubans de deux tuiles voisines se raccordent au
+  sommet partagé. Drapeaux : `divagating` → bras et grèves (Rhin supérieur, Loire, Rhône),
+  `tidal` → vasières et eau saumâtre, `wetland` → roselières, `intermittent` → lit caillouteux
+  plus étroit. Ordre (bits 24-27) : n'afficher que les ordres ≥ 5 au palier 1, ≥ 3 au palier 2.
+- **Routes** : même chargement ; ruban drapé à `z`, largeur `w` ; drapeau 32 → chaussée
+  surélevée. Au zoom éloigné, garder `roads.geojson`.
+- **Colonies, hameaux, ponts** : décaler les modèles aux `px` de `fine_anchors.json` et les poser
+  à `z` (le sol le plus fin chargé reste la référence en cas d'écart) ; ponts orientés
+  perpendiculairement à `dir`, portée `width_m`, tablier à `z_deck`.
+
+### Relevé du 2026-09-25
+
+- `geo hydro-fine` (8 processus, cache chaud des tables) : 38 636 lignes, 181 800 km TOPAGE,
+  25 600 km OS, 11 700 km EU-Hydro, 45 800 km Natural Earth hors cœur ; 2,41 M sommets,
+  1 306 tuiles E2, **39 Mo** de tuiles (hors git, sous `data/map/pyramid/hydro_fine/`) ;
+  ≈ 2 min (lecture initiale de TOPAGE : ≈ 2 à 10 min selon la charge). Niveau d'eau
+  non croissant vers l'aval sur 100 % des 45 719 lignes de tuiles. `rivers_fine.json` : 0,15 Mo.
+- `geo anchors-fine` : 569 colonies (65 déplacées : 60 pente, 5 lit), 2 999 hameaux (233
+  déplacés), 873 passages dont 815 sur un fleuve fin (historiques : 85 / 102, déplacement
+  médian 140 m depuis leur lon/lat) ; routes : 153 800 km, 0,80 M sommets, 13 Mo de tuiles ;
+  ≈ 1-2 min. `fine_anchors.json` : 0,35 Mo.
+- Aperçus avant/après (rouge : Natural Earth de `rivers.geojson` ; bleu : réseau fin ; brun :
+  routes drapées) sur ombrage E4 et E5/E6 : `docs/img/zg5a/{rouen,orleans,bordeaux,londres}_E*.jpg`.
+
+![Rouen, E4](img/zg5a/rouen_E4.jpg)
+
+### Limites connues
+
+- Réseau moderne : les tracés sont ceux d'aujourd'hui (rectifications, bras comblés) ; les zones
+  de `historical_hydro_notes.json` ne font que **marquer** les lignes (pas de reconstitution des
+  bras de 1340, à faire au rendu ou dans un lot ultérieur).
+- Raccords de frontière : TOPAGE / OS / EU-Hydro ne sont pas cousus topologiquement aux
+  frontières (petits écarts possibles sur la Meuse, l'Escaut, la Moselle, la Sambre).
+- Rhin entre Strasbourg et Mayence, Suisse alémanique, Italie, Espagne : hors du cœur de la
+  pyramide (E3-E4 absents) → Natural Earth recalé sur E1-E2 ; les bacs de Spire, Worms, Mayence
+  et les ponts d'Espagne et d'Italie restent `snapped: false`.
+- Largeurs : ancrages pour 19 fleuves ; ailleurs, estimation par ordre de Strahler (± facteur 2).
+- Passages placés sur un gué de marée (Blanchetaque) ou dans une ville à bras multiples
+  (Amiens, Abbeville) : le plus proche tronçon du même nom peut être un bras secondaire.
+- Londres : les tuiles E5-E7 de la zone `londres` donnent ≈ −12 m au sud de la Tamise (E4 plat à
+  0,5 m) : anomalie de la pyramide (lot ZG3), que le niveau d'eau recopie.
