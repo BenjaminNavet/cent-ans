@@ -3,7 +3,7 @@
   "kind": "dismount",
   "rank": 3,
   "name": "Pied à terre",
-  "description": "Les hommes d'armes renvoient leurs chevaux à l'arrière et combattent à pied, lance raccourcie : plus lents, sans charge, mais bien plus solides. Irréversible pour la bataille. Pratique anglaise (Crécy, 1346), reprise par les Français à Poitiers (1356).",
+  "description": "Les [[cdx_hommes_d_armes|hommes d'armes]] renvoient leurs chevaux à l'arrière et combattent à pied, lance raccourcie : plus lents, sans [[cdx_jeu_charge|charge]], mais bien plus solides. Irréversible pour la bataille. Pratique anglaise ([[cdx_crecy|Crécy]], 1346), reprise par les Français à [[cdx_poitiers|Poitiers]] (1356).",
   "icon": "dismount",
   "scope": "selected",
   "requires_general": false,

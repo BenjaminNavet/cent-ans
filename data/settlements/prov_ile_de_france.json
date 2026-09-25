@@ -38,7 +38,7 @@
     "fortification_level": 3,
     "buildings": ["bld_castle"],
     "port": false,
-    "description": "Résidence et pavillon de chasse fortifié des rois capétiens, aux portes de Paris.",
+    "description": "Manoir royal et pavillon de chasse des Capétiens aux portes de Paris ; Philippe VI y projette en 1337 un donjon dont les travaux ne commenceront vraiment qu'en 1361. (Anachronisme de jeu : la forteresse est présente dès 1337.)",
     "sources": ["Château de Vincennes"]
   },
   {

@@ -1,7 +1,7 @@
 class_name ArmyMarker
 extends Node3D
 
-## Marqueur d'armée (lot V3, façon Total War) : groupe de figurines (chef monté, fantassins,
+## Marqueur d'armée (lot V3) : groupe de figurines (chef monté, fantassins,
 ## arbalétriers selon la composition, teintés aux couleurs de la faction), étendard aux
 ## armoiries (`map_banner.gdshader`), anneau au sol projeté sur le relief (`Decal`, couleur de
 ## la faction, doré et plus vif quand l'armée est sélectionnée). La plaque d'effectif est un

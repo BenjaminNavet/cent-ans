@@ -1,0 +1,29 @@
+{
+  "id": "cdx_hygiene_urbaine",
+  "title": "L'hygiène urbaine",
+  "category": "technique",
+  "aliases": [
+    "Hygiène urbaine",
+    "voirie",
+    "police des rues",
+    "boues et immondices"
+  ],
+  "era": {
+    "from": "v. 1350",
+    "to": "1500"
+  },
+  "summary": "Après la [[cdx_peste_noire|Peste noire]], les villes multiplient les ordonnances : on pave, on cure les égouts, on éloigne les métiers polluants, on interdit les porcs dans les rues et l'on organise l'enlèvement des immondices.",
+  "body": "L'air corrompu passe pour la cause des épidémies. Les autorités urbaines s'attaquent donc aux odeurs : bouchers et tanneurs sont repoussés en aval, les rues pavées et nettoyées, des tombereaux ramassent les ordures. À [[cdx_paris|Paris]], les ordonnances du prévôt obligent chaque habitant à nettoyer le devant de sa maison et à faire emporter ses ordures hors de la ville.\n\nLes villes entretiennent aussi leurs fontaines et leurs aqueducs, et contrôlent les [[cdx_etuves|étuves]]. Les résultats restent modestes, mais ces règlements préparent la police sanitaire des siècles suivants, comme la [[cdx_quarantaine|quarantaine]].",
+  "gameplay": "Recherche : 320 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_hotel_dieu|Réforme hospitalière]]. Effets, pour toute la faction : +8 à la santé visée des bourgeois ; +3 à la santé visée des paysans. Débloque : le bâtiment Adduction d'eau.",
+  "entity": "tech_urban_sanitation",
+  "see_also": [
+    "cdx_peste_noire",
+    "cdx_etuves",
+    "cdx_quarantaine"
+  ],
+  "sources": [
+    "Hygiène au Moyen Âge",
+    "Voirie",
+    "Peste noire"
+  ]
+}

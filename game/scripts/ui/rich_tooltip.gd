@@ -85,7 +85,7 @@ const BRANCH_TEXTS := {
 	"court": "Cour : diplomatie, intrigue, prestige et piété.",
 }
 const GAUGE_TEXTS := {
-	"unrest": ["Mécontentement", "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère et la religion différente ; la garnison et certains bâtiments l'apaisent. Au-delà de 75 pendant deux saisons : révolte ; au-delà de 90 : la province passe aux rebelles."],
+	"unrest": ["Mécontentement", "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère, la religion différente et les troubles récents (prises, pillages, régence) ; la garnison et certains bâtiments l'apaisent. Au-delà de 75 pendant trois saisons : révolte (le compte repart ensuite de zéro) ; au-delà de 90 : la province passe aux rebelles."],
 	"health": ["Santé", "Tend vers 50 + bâtiments sanitaires + satisfaction en biens, moins la surpopulation. Sous 50 la population décline ; sous 30, risque de peste."],
 	"wealth": ["Richesse", "Tend vers la base de la classe + bâtiments de commerce, moins le fardeau fiscal et la dévastation."],
 	"goods_satisfaction": ["Biens", "Satisfaction en biens : 40 + 10 par catégorie de biens accessible à la faction (ressources des provinces contrôlées et alliées) + marchés et foires."],
@@ -129,25 +129,21 @@ static var last_bbcode: String = ""
 
 
 ## Style parchemin commun aux infobulles et aux bulles du Codex.
-static func panel_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.96, 0.91, 0.78, 0.98)
-	style.border_color = Color(0.42, 0.29, 0.16)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(8)
-	style.shadow_color = Color(0, 0, 0, 0.3)
-	style.shadow_size = 4
-	return style
+static func panel_style() -> StyleBox:
+	return HudStyle.note_box(6)
 
 
 ## Contrôle d'infobulle : panneau parchemin + texte BBCode (largeur fixe, hauteur ajustée).
-## Le texte passe par `CodexText.format` (liens `[[…]]` et alias du Codex rubriqués).
+## Le texte passe par `CodexText.format` (liens `[[…]]` et alias du Codex rubriqués). B1 : pied
+## « T : maintenir ouverte » (la touche T verrouille l'infobulle en bulle du Codex).
 static func make_panel(bbcode: String) -> Control:
 	var panel := PanelContainer.new()
 	if ResourceLoader.exists(THEME_PATH):
 		panel.theme = load(THEME_PATH)
 	panel.add_theme_stylebox_override("panel", panel_style())
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	panel.add_child(box)
 	var label := RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
@@ -159,10 +155,40 @@ static func make_panel(bbcode: String) -> Control:
 	label.add_theme_font_size_override("bold_font_size", 15)
 	label.text = CodexText.format(bbcode, true)
 	label.name = "Text"
-	panel.add_child(label)
+	box.add_child(label)
+	var footer := Label.new()
+	footer.name = "Footer"
+	footer.text = footer_text(title_entry(label.text) != "")
+	footer.add_theme_font_size_override("font_size", 11)
+	footer.add_theme_color_override("font_color", Color(MUTED))
+	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	box.add_child(footer)
 	last_panel = weakref(panel)
 	last_bbcode = label.text
 	return panel
+
+
+## Pied des infobulles riches : la fiche liée au titre se lit une fois l'infobulle verrouillée.
+static func footer_text(has_entry: bool) -> String:
+	return "T : maintenir ouverte" + (" · puis clic : lire la fiche" if has_entry else "")
+
+
+## Fiche du Codex liée au titre gras (`[b][url=cdx:…]`, première ligne) d'une infobulle, vide sinon.
+static func title_entry(bbcode: String) -> String:
+	var first_line := bbcode.get_slice("\n", 0)
+	var start := first_line.find("[b][url=" + CodexText.META_PREFIX)
+	if start < 0:
+		return ""
+	start += ("[b][url=" + CodexText.META_PREFIX).length()
+	var end := first_line.find("]", start)
+	return first_line.substr(start, end - start) if end > start else ""
+
+
+## B1 : nom d'une entité de jeu, lié à sa fiche du Codex (`entity` de la fiche) s'il y en a une.
+static func entity_name(id: String, name: String) -> String:
+	var codex := CodexText.store()
+	var entry := str(codex.call("entry_for_entity", id)) if codex != null and id != "" else ""
+	return CodexText.link(entry, name) if entry != "" else name
 
 
 ## Infobulle native actuellement affichée (dans sa fenêtre surgissante), sinon null.
@@ -183,6 +209,7 @@ static func thousands(value: int) -> String:
 
 static func _title(id: String, name: String, subtitle: String = "", category: String = "") -> String:
 	var icon := icon_bbcode(id, 28, category)
+	name = entity_name(id, name)
 	var head := "%s [b]%s[/b]" % [icon, name] if icon != "" else "[b]%s[/b]" % name
 	if subtitle != "":
 		head += "  [color=%s][i]%s[/i][/color]" % [MUTED, subtitle]

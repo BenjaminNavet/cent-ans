@@ -28,7 +28,7 @@
     "charge_lance"
   ],
   "equipment": "Roncin, haubergeon, chapel de fer, lance et épée.",
-  "description": "Cavalerie moyenne non noble : sergents fieffés, gens de métier montés, hommes des communes.",
+  "description": "Cavalerie moyenne non noble : sergents fieffés, gens de métier montés, hommes des [[cdx_milices_urbaines|communes]].",
   "sources": [
     "Sergent (Moyen Âge)"
   ]

@@ -1,0 +1,33 @@
+{
+  "id": "cdx_jeu_victoire",
+  "title": "Victoire et fin de partie",
+  "category": "mecanique",
+  "aliases": [
+    "objectifs de campagne",
+    "objectifs historiques",
+    "fin de la campagne",
+    "score final",
+    "victoire de campagne",
+    "fin de partie"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1477"
+  },
+  "summary": "France, Angleterre et Bourgogne ont chacune des objectifs historiques : les tenir tous assez longtemps avant l'échéance donne la victoire ; perdre toutes ses terres, la défaite. La partie peut continuer ensuite.",
+  "body": "La guerre de Cent Ans ne finit par aucun traité. Après la reconquête de la Normandie en 1449-1450 et la victoire de [[cdx_castillon|Castillon]] le 17 juillet 1453, qui livre Bordeaux à [[cdx_charles_vii|Charles VII]], les Anglais ne gardent sur le continent que [[cdx_calais|Calais]], qu'ils tiendront jusqu'en 1558. Les rois d'Angleterre continueront de porter le titre de roi de France jusqu'en 1801, sans jamais plus menacer sérieusement le royaume.\n\nChaque camp avait ses buts. Pour les Valois, garder la couronne, tenir Paris et Reims, ville du sacre (où [[cdx_jeanne_darc|Jeanne d'Arc]] conduit Charles VII en 1429), et chasser les Anglais. Pour les Plantagenêts, faire valoir les droits d'[[cdx_edouard_iii|Édouard III]], retrouver l'héritage angevin, et, avec [[cdx_henri_v|Henri V]] et le traité de [[cdx_traite_troyes|Troyes]], unir les deux couronnes.\n\nLa [[cdx_bourgogne|Bourgogne]], elle, poursuit un autre rêve : réunir entre France et Empire les Pays-Bas et les deux Bourgognes. [[cdx_philippe_le_bon|Philippe le Bon]] s'affranchit de l'hommage au roi par la [[cdx_paix_arras|paix d'Arras]] (1435) ; son fils Charles le Téméraire veut relier ses terres par la Lorraine, mais meurt devant Nancy en 1477.",
+  "gameplay": "Le panneau « Objectifs (O) » donne les objectifs de la faction jouée. France (avant la fin de 1453, à tenir 20 saisons d'affilée) : aucune des 27 provinces du royaume aux mains de l'Angleterre, Paris et Reims (Île-de-France et Champagne), la Guyenne et la Gascogne, la Bourgogne vassale ou disparue. Angleterre (avant la fin de 1453, 12 saisons) : Paris et Reims, la Guyenne, la Gascogne, la Normandie et l'Anjou, au moins 15 des 27 provinces du royaume, l'Écosse vassale ou disparue. Bourgogne (avant la fin de 1477, 12 saisons) : l'indépendance, les Pays-Bas (Flandre, Artois, Brabant, Hainaut, Hollande, Namur, Luxembourg), la Bourgogne, la Franche-Comté, la Lorraine et la Champagne. Les autres factions n'ont pas d'objectifs.\n\nLa victoire est acquise quand tous les objectifs sont remplis pendant le nombre de saisons consécutives exigé ; la défaite, quand on ne contrôle plus aucune province ; passé l'année d'échéance, la campagne s'achève sur le compte des objectifs remplis. Le résultat n'est prononcé qu'une fois, et l'on peut continuer à jouer.\n\nLe score final vaut 10 points par province contrôlée, 100 par objectif rempli, plus le prestige du souverain et un point par tranche de 2 000 livres au trésor. Conseil : vingt saisons font cinq ans, et la France doit donc avoir rempli tous ses objectifs avant la fin de 1448 pour vaincre à temps ; pour l'Angleterre, Paris et Reims sont la clé de deux objectifs.",
+  "see_also": [
+    "cdx_guerre_de_cent_ans",
+    "cdx_castillon",
+    "cdx_traite_troyes",
+    "cdx_paix_arras",
+    "cdx_jeu_diplomatie",
+    "cdx_bourgogne"
+  ],
+  "sources": [
+    "Guerre de Cent Ans",
+    "Bataille de Castillon",
+    "Charles le Téméraire"
+  ]
+}

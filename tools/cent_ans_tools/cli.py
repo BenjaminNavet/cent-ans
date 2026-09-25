@@ -512,6 +512,17 @@ def assets_menu_art() -> None:
     )
 
 
+@assets_app.command("ui-illumination")
+def assets_ui_illumination() -> None:
+    """Peint le kit d'UI enluminé (textures 9-slice) dans game/assets/ui/illumination/."""
+    from cent_ans_tools import ui_illumination
+
+    paths = ui_illumination.build()
+    console.print(
+        f"[green]OK[/green] : {len(paths)} texture(s) dans {ui_illumination.OUTPUT_DIR}"
+    )
+
+
 @assets_app.command("audio")
 def assets_audio(
     no_music: bool = typer.Option(False, "--no-music", help="Effets seulement"),

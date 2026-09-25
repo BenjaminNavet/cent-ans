@@ -30,9 +30,10 @@
       "value": 30
     }
   ],
-  "description": "Boulevard bas et épais, tours canonnières ; réponse à la bombarde.",
+  "description": "Boulevard de terre et de bois devant les portes, tours basses et épaisses percées de canonnières ; réponse du XVe siècle à la bombarde. Voir [[cdx_boulevard_artillerie]].",
   "sources": [
-    "Économie médiévale",
+    "Boulevard (fortification)",
+    "Canonnière (fortification)",
     "Architecture militaire médiévale"
   ]
 }

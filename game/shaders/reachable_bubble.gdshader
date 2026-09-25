@@ -1,5 +1,5 @@
 shader_type spatial;
-// Lot M4 : bulle des cases atteignables ce tour (façon Total War, teinte parchemin). Le
+// Lot M4 : bulle des cases atteignables ce tour (teinte parchemin). Le
 // maillage épouse le relief ; `mask` porte une case de la grille de navigation par texel
 // (R = atteignable, G = coût / budget). Le masque est adouci par 9 prises bilinéaires puis
 // seuillé à 0,5 : contour arrondi, liseré doré anticrénelé d'au moins ~1,5 pixel à l'écran,
