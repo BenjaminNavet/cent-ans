@@ -44,6 +44,7 @@ pub mod relief;
 pub mod rng;
 pub mod setup;
 pub mod siege;
+pub mod siege_fx;
 pub mod sim;
 pub mod site;
 pub mod unit;
@@ -62,6 +63,7 @@ pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
 };
 pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
+pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use sim::{
     BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD,
     SIEGE_STANDOFF, ZONE_DEPTH,

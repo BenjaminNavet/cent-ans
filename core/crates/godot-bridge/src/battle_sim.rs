@@ -473,7 +473,7 @@ impl BattleSim {
     /// towers[{x, z, radius, height}], houses[{x, z, radius, suburb, fire: {state:
     /// "intact"|"burning"|"burnt", intensity}}], gate_fire: {state, intensity},
     /// wind: Vector2 (direction × strength 0-1), houses_burning, houses_burnt,
-    /// sortie}`. Pieces lose HP and houses burn during the battle (S2): call it
+    /// sortie, ram_period, oil_period}`. Pieces lose HP and houses burn during the battle (S2): call it
     /// again to show the damage.
     #[func]
     fn get_siege(&self) -> VarDictionary {
@@ -547,6 +547,9 @@ impl BattleSim {
             "wind" => v2(works.wind),
             "houses_burning" => works.burning_houses() as i64,
             "houses_burnt" => works.burnt_houses() as i64,
+            // SG1: rhythm of the ram and of the oil pots (seconds).
+            "ram_period" => sim_battle::siege_fx::RAM_PERIOD,
+            "oil_period" => sim_battle::siege_fx::OIL_PERIOD,
         }
     }
 
@@ -633,6 +636,29 @@ impl BattleSim {
             .and_then(|s| s.outcome())
             .map(|o| to_dict(&o))
             .unwrap_or_default()
+    }
+
+    /// SG1: siege assault events for the 3D view, added since the last call:
+    /// `[{time, kind, ...}]` with `kind` among `engine_shot {unit, piece, x, z,
+    /// height (0-1), breached}`, `ram_strike {unit, piece, breached}`,
+    /// `tower_volley {tower, target}`, `ladders_raised {unit, piece}`,
+    /// `tower_docked {unit, piece}`, `tower_undocked {unit, piece}`,
+    /// `on_wall {unit, piece}`, `boiling_oil {piece, x, z, targets: [ids]}`,
+    /// `gate_broken {piece}`, `wall_breached {piece}`, `defenders_fall_back`.
+    /// Rendering only: the rules are already applied.
+    #[func]
+    fn get_siege_events(&mut self) -> VarArray {
+        let Some(sim) = &mut self.sim else {
+            return VarArray::new();
+        };
+        sim.take_new_siege_fx()
+            .iter()
+            .map(|fx| {
+                serde_json::to_value(fx)
+                    .map(|json| json_to_variant(&json))
+                    .unwrap_or_default()
+            })
+            .collect()
     }
 
     /// Journal entries `[{time, text_fr, side}]` added since the last call.
