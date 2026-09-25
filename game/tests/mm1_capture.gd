@@ -42,7 +42,7 @@ func _run() -> void:
 	current_scene = node
 	await process_frame
 	await RenderingServer.frame_post_draw
-	print("mm1_capture: first frame after %d ms" % (Time.get_ticks_msec() - started))
+	print("mm1_capture: first frame after %d ms (%d ms since engine start)" % [Time.get_ticks_msec() - started, Time.get_ticks_msec()])
 	if _fps_seconds > 0.0:
 		var frames := 0
 		var worst := 0.0

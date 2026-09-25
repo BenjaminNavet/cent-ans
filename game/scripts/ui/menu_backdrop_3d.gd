@@ -59,6 +59,7 @@ func _ready() -> void:
 	if config.has("host"):
 		_build_host(config["host"])
 	_build_fade()
+	_build_ambience()
 	camera = Camera3D.new()
 	camera.name = "MenuCamera"
 	camera.near = 0.5
@@ -403,6 +404,24 @@ func _build_banner(at: Vector3, cloth_file: String, livery: Color, phase: float)
 	flag.material_override = material
 	flag.position = Vector3(0.03, BANNER_HEIGHT - 0.05, 0)
 	node.add_child(flag)
+
+
+## Nappes d'ambiance (bus « Ambiance », AU1) : vent et campagne, sous la musique du menu.
+func _build_ambience() -> void:
+	for entry in config.get("ambience", []):
+		var info: Dictionary = entry
+		var path := str(info.get("stream", ""))
+		if not ResourceLoader.exists(path):
+			continue
+		var stream: AudioStream = (load(path) as AudioStream).duplicate()
+		if stream is AudioStreamOggVorbis:
+			(stream as AudioStreamOggVorbis).loop = true
+		var player := AudioStreamPlayer.new()
+		player.stream = stream
+		player.bus = "Ambiance" if AudioServer.get_bus_index("Ambiance") >= 0 else "Master"
+		player.volume_db = float(info.get("volume_db", -12.0))
+		player.autoplay = true
+		add_child(player)
 
 
 ## Voile de fondu entre deux plans (sous l'interface : couche -1).

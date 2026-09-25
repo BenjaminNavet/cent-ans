@@ -257,7 +257,17 @@
         ],
         "count": 36000
       }
-    }
+    },
+    "ambience": [
+      {
+        "stream": "res://assets/audio/ambience/wind.ogg",
+        "volume_db": -16.0
+      },
+      {
+        "stream": "res://assets/audio/ambience/countryside.ogg",
+        "volume_db": -18.0
+      }
+    ]
   },
   "start_dates": [
     {
