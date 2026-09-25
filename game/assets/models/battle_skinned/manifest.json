@@ -531,6 +531,11 @@
      "loop": true,
      "start": 644
     },
+    "climb": {
+     "frames": 24,
+     "loop": true,
+     "start": 871
+    },
     "death": {
      "frames": 26,
      "loop": false,

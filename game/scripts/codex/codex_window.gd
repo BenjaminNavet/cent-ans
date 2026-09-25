@@ -20,6 +20,12 @@ const ART_SIZE := Vector2(0, 220)
 const OWN_ART := "res://assets/illustrations/%s.jpg"
 const ENTITY_ART := ["res://assets/events/%s.jpg", "res://assets/illustrations/%s.jpg", "res://assets/portraits/%s.png"]
 
+## Lot U11 : vue intégrée à `CodexHub` (onglet « Histoire ») : sans cadre, titre, recherche ni
+## bouton de fermeture propres ; la recherche commune passe par `set_query`.
+var embedded := false
+var _header_title: Label
+var _close_button: Button
+
 var current_id: String = ""
 var _history: Array = []
 var _history_index: int = -1
@@ -47,7 +53,10 @@ var _scroll: ScrollContainer
 func _ready() -> void:
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	custom_minimum_size = SIZE
+	custom_minimum_size = SIZE if not embedded else Vector2(SIZE.x, 560)
+	if embedded:
+		add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+		size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 8)
 	add_child(root)
@@ -57,6 +66,9 @@ func _ready() -> void:
 	_search.placeholder_text = "Rechercher un nom, un lieu, un mot…"
 	_search.clear_button_enabled = true
 	_search.text_changed.connect(func(_text: String) -> void: _refresh_list())
+	# D5 : texte d'aide lisible (encre passée sur parchemin).
+	_search.add_theme_color_override("font_placeholder_color", FADED_INK)
+	_search.visible = not embedded
 	root.add_child(_search)
 
 	_tabs = TabBar.new()
@@ -69,6 +81,7 @@ func _ready() -> void:
 		_tabs.add_tab(short_label)
 		_tabs.set_tab_tooltip(_tabs.tab_count - 1, str(family[0]))
 	_tabs.tab_changed.connect(func(_tab: int) -> void: _refresh_list())
+	CodexHub.style_tabs(_tabs, 14, 9)  # D5 : onglets parchemin
 	root.add_child(_tabs)
 
 	var split := HBoxContainer.new()
@@ -98,6 +111,8 @@ func _build_header() -> Control:
 	title.text = "✠ Codex"
 	title.add_theme_font_size_override("font_size", 26)
 	title.add_theme_color_override("font_color", RUBRIC)
+	title.visible = not embedded
+	_header_title = title
 	header.add_child(title)
 	_counter_label = Label.new()
 	_counter_label.add_theme_font_size_override("font_size", 14)
@@ -109,7 +124,9 @@ func _build_header() -> Control:
 	header.add_child(_back_button)
 	_forward_button = _header_button("▶", "Fiche suivante", forward)
 	header.add_child(_forward_button)
-	header.add_child(_header_button("×", "Fermer (Échap)", hide))
+	_close_button = _header_button("×", "Fermer (Échap)", hide)
+	_close_button.visible = not embedded
+	header.add_child(_close_button)
 	return header
 
 
@@ -141,8 +158,8 @@ func _build_page() -> Control:
 	_art.hide()
 	page.add_child(_art)
 	encyclopedia_button = Button.new()
-	encyclopedia_button.text = "Voir dans l'encyclopédie"
-	encyclopedia_button.tooltip_text = "Fiche de jeu (touche L)"
+	encyclopedia_button.text = "Voir la fiche de règles"
+	encyclopedia_button.tooltip_text = "Onglet Règles : la fiche de jeu (touche L)"
 	encyclopedia_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	encyclopedia_button.hide()
 	encyclopedia_button.pressed.connect(open_in_encyclopedia)
@@ -194,9 +211,10 @@ func _rich_text(font_size: int) -> RichTextLabel:
 ## Affiche la fenêtre (centrée) sur la fiche `id`, ou sur la dernière consultée si vide.
 func open(id: String = "") -> void:
 	show()
-	var area := get_viewport_rect().size
-	size = SIZE
-	position = ((area - SIZE) / 2.0).floor()
+	if not embedded:
+		var area := get_viewport_rect().size
+		size = SIZE
+		position = ((area - SIZE) / 2.0).floor()
 	if id != "":
 		navigate(id)
 	elif current_id == "":
@@ -235,6 +253,29 @@ func forward() -> void:
 	if _history_index < _history.size() - 1:
 		_history_index += 1
 		navigate(str(_history[_history_index]), false)
+
+
+## Recherche commune (U11) : même effet que la saisie dans le champ de la fenêtre.
+func set_query(text: String) -> void:
+	if _search.text != text:
+		_search.text = text
+	# Recherche sur toutes les familles, pour ne rien cacher derrière un onglet.
+	if text.strip_edges() != "" and _tabs.current_tab != 0:
+		_tabs.current_tab = 0
+	_refresh_list()
+
+
+## Nombre de fiches (toutes familles) qui répondent à la recherche courante.
+func match_count() -> int:
+	var codex := _store()
+	if codex == null:
+		return 0
+	var query := _search.text.strip_edges().to_lower()
+	var count := 0
+	for id in codex.call("ids_in_family", -1):
+		if query == "" or _matches(codex.call("entry", id), query):
+			count += 1
+	return count
 
 
 func counter_text() -> String:
@@ -313,7 +354,7 @@ func _refresh_list() -> void:
 			continue
 		_visible_ids.append(id)
 		var discovered := bool(codex.call("is_discovered", id))
-		var index := _list.add_item(str(codex.call("title", id)))
+		var index := _list.add_item(("" if discovered else "✧ ") + str(codex.call("title", id)))  # D5 : à découvrir marqué
 		_list.set_item_metadata(index, id)
 		_list.set_item_tooltip(index, "" if discovered else "À découvrir…")
 		_list.set_item_custom_fg_color(index, INK if discovered else UNREAD)

@@ -24,8 +24,26 @@ func setup(campaign_map: Node) -> void:
 	ui.army_garrison_requested.connect(_on_garrison_requested)
 	ui.load_requested.connect(func(_path: String) -> void:
 		last_events = []
+		update_interest()
 		refresh())
+	var settings := map.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.changed.connect(func(key: String) -> void:
+			if key == "interface/news_filter":
+				update_interest())
+	update_interest()
 	refresh()
+
+
+## Lot U5 : instantané des voisins, alliés, ennemis et grandes puissances du joueur (filtre des
+## lettres et du bandeau), à refaire après chaque fin de tour (`CampaignMap._on_end_turn`).
+func update_interest() -> void:
+	var sim := _sim()
+	if sim == null or ui == null:
+		return
+	var settings := map.get_node_or_null("/root/Settings")
+	var mode := str(settings.call("get_value", "interface/news_filter")) if settings != null else NewsInterest.MODE_INTEREST
+	ui.news_interest = NewsInterest.build(sim, map.get("map_data"), str(map.get("player_faction")), mode)
 
 
 func _sim() -> Object:
@@ -56,7 +74,7 @@ func garrison_availability(army: Dictionary, is_player: bool) -> Dictionary:
 		return {"can_garrison": true, "reason": "Colonie assiégée : impossible d'y laisser une garnison."}
 	var free := int(detail.get("garrison_free", -1))
 	if free == 0:
-		return {"can_garrison": true, "reason": "Garnison complète (%d unité(s) au maximum)." % int(detail.get("garrison_cap", 0))}
+		return {"can_garrison": true, "reason": "Garnison complète (%s au maximum)." % FrText.count(int(detail.get("garrison_cap", 0)), "unité")}
 	return {"can_garrison": true, "reason": ""}
 
 
@@ -169,8 +187,46 @@ func _on_general_clicked(character_id: String) -> void:
 	if character_id != "":
 		map.call("_on_character_selected", character_id)
 	elif str(ui.current_army_id) != "" and bool(map.call("_characters_available")):
-		map.set("_court_open", true)
-		map.call("_show_court_panel", CourtPanel.FILTER_GENERAL)
+		open_general_picker(ui.current_army_id)  # U10 : « Sans chef » → choix du général
+
+
+## Lot U10 : choix du général de l'armée `army_id` (armée du joueur).
+func open_general_picker(army_id: String) -> void:
+	var army: Dictionary = _sim().call("get_army", army_id)
+	if str(army.get("faction", "")) != str(map.get("player_faction")):
+		return
+	var place := str(map.call("province_name_of", str(army.get("location_province", army.get("location", "")))))
+	ui.show_general_picker(army_id, "Choisir le chef de l'ost (%s)" % place, general_candidates(army))
+
+
+## Lot U10 : personnages du joueur pour commander `army` : `[{id, name, detail, reason}]`, les
+## disponibles sur place d'abord (`reason` vide), puis les autres avec leur empêchement.
+func general_candidates(army: Dictionary) -> Array:
+	var sim := _sim()
+	var location := str(army.get("location_province", army.get("location", "")))
+	var free: Array = []
+	var busy: Array = []
+	for id in sim.call("get_faction_characters", str(map.get("player_faction"))):
+		var character: Dictionary = sim.call("get_character", id)
+		if character.is_empty() or not bool(character.get("alive", true)):
+			continue
+		var command := int((character.get("skills", {}) as Dictionary).get("command", 0))
+		var entry := {"id": str(id), "name": str(character.get("name", "?")), "detail": "commandement %d" % command, "command": command}
+		var female := str(character.get("sex", "")) == "female"
+		if bool(character.get("captive", false)):
+			entry["reason"] = "retenue captive" if female else "retenu captif"
+		elif str(character.get("army", "")) != "":
+			entry["reason"] = "commande déjà une armée"
+		elif str(character.get("governor_of", "")) != "":
+			entry["reason"] = "gouverne une province"
+		elif str(character.get("location", "")) != location:
+			entry["reason"] = "ailleurs : %s" % str(map.call("province_name_of", str(character.get("location", ""))))
+		if str(entry.get("reason", "")) == "":
+			free.append(entry)
+		else:
+			busy.append(entry)
+	free.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["command"]) > int(b["command"]))
+	return free + busy.slice(0, 6)
 
 
 func _on_split_requested(army_id: String, unit_indices: Array) -> void:
@@ -182,4 +238,4 @@ func _on_split_requested(army_id: String, unit_indices: Array) -> void:
 ## Lot C7d : bouton « Garnison ». Le refus éventuel du cœur (siège survenu entre-temps,
 ## garnison remplie par un autre ordre) revient dans le toast d'erreur de `_submit`.
 func _on_garrison_requested(army_id: String, unit_indices: Array) -> void:
-	map.call("_submit", {"type": "garrison_units", "army": army_id, "unit_indices": unit_indices}, "Régiment(s) laissé(s) en garnison.")
+	map.call("_submit", {"type": "garrison_units", "army": army_id, "unit_indices": unit_indices}, "Régiment laissé en garnison." if unit_indices.size() <= 1 else "Régiments laissés en garnison.")
