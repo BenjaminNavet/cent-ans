@@ -783,9 +783,34 @@ static func _crew(f: Fig, pos: Vector3, yaw: float) -> void:
 		f.st.add_vertex(pos + basis * verts[i])
 
 
+## SG2 : modèle animé de chaque variante d'engin (`SiegeEnginesFx`) et place de ses deux
+## servants autour de lui (x, z, cap).
+const ENGINE_MODELS := ["mangonel", "trebuchet", "bombard"]
+const ENGINE_CREW := [
+	[Vector3(-1.6, 0, -1.3), 0.5, Vector3(1.5, 0, -1.9), -0.3],
+	[Vector3(-2.5, 0, -5.4), 0.9, Vector3(2.5, 0, -6.6), -0.8],
+	[Vector3(-1.4, 0, -1.2), 0.4, Vector3(1.3, 0, -1.8), -0.3],
+]
+
+
+## Vrai quand l'engin de la variante est dessiné par `SiegeEnginesFx` (modèle animé présent et
+## déclaré dans `data/fx/siege_engines.json`) : la figurine ne garde que ses servants.
+static func engine_is_animated(variant: int) -> bool:
+	if variant < 0 or variant >= ENGINE_MODELS.size():
+		return false
+	var model: String = ENGINE_MODELS[variant]
+	var engines: Dictionary = SiegeEnginesFx.settings().get("engines", {})
+	return engines.values().has(model) and SiegeEnginesFx.has_model(model)
+
+
 ## Engins : 0 mangonneau, 1 trébuchet à contrepoids, 2 bombarde sur affût ; deux servants.
 static func _engine(f: Fig, variant: int) -> void:
 	f.set_part(P_STATIC)
+	if engine_is_animated(variant):
+		var crew: Array = ENGINE_CREW[variant]
+		_crew(f, crew[0], crew[1])
+		_crew(f, crew[2], crew[3])
+		return
 	match variant:
 		1:
 			f.set_style(WOOD, C_EXACT)

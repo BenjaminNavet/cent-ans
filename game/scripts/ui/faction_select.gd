@@ -14,6 +14,8 @@ signal start_requested(faction_id: String, seed_value: int, start_date: String)
 
 const CARD_SIZE := Vector2(372, 392)
 const ART_HEIGHT := 194.0
+## Q2 : taille d'écran sous laquelle l'écran est réduit d'un bloc (trois cartes, fiche, boutons).
+const FIT_SIZE := Vector2(1280.0, 860.0)
 
 var selected_faction: String = "fac_france"
 var selected_start: String = ""
@@ -29,16 +31,37 @@ var _detail_weaknesses: VBoxContainer
 var _detail_objectives: Label
 var _detail_title: Label
 var _advanced_box: Control
+var _content: Control = null
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_build()
+	# Q2 : en 1280×720 le bas de l'écran (bouton « Commencer ») sortait de la fenêtre.
+	resized.connect(_fit)
+	_fit.call_deferred()
 	var entries := FrontEndData.start_dates()
 	if not entries.is_empty():
 		selected_start = str((entries[0] as Dictionary).get("id", ""))
 	select(selected_faction if _cards.has(selected_faction) else _first_faction())
+
+
+## Q2 : réduit l'écran d'un bloc quand la fenêtre est plus petite que sa taille minimale
+## (1280×720 : cartes, fiche et boutons restent tous visibles et cliquables).
+func _fit() -> void:
+	if _content == null:
+		return
+	var view := size
+	var factor := clampf(minf(view.x / FIT_SIZE.x, view.y / FIT_SIZE.y), 0.5, 1.0)
+	# Ancres au-delà de 1 : la mise en page donne la taille (vue / facteur), l'échelle la réduit.
+	_content.scale = Vector2.ONE * factor
+	_content.anchor_left = 0.0
+	_content.anchor_top = 0.0
+	_content.anchor_right = 1.0 / factor
+	_content.anchor_bottom = 1.0 / factor
+	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		_content.set_offset(side, 0.0)
 
 
 func _facade() -> Node:
@@ -66,6 +89,7 @@ func _build() -> void:
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_content = margin
 	for side in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side, 48)
 	margin.add_theme_constant_override("margin_top", 26)

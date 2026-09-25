@@ -32,6 +32,9 @@ ENTITY_DIRECTORIES = {
     "fac": "factions",
     "diet": "diets",
     "res": "resources",
+    "edict": "edicts",
+    "order": "battle_orders",
+    "ship": "naval/ships",
 }
 
 
