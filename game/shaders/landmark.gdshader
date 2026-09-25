@@ -31,8 +31,8 @@ uniform int debug_view = 0;
 uniform float material_detail : hint_range(0.0, 1.0) = 1.0;
 uniform float aging : hint_range(0.0, 2.0) = 1.0;
 // Atlas partagé (réglage global du projet, `shader_globals` : aucun script à modifier).
-global uniform sampler2DArray landmark_albedo_array;
-global uniform sampler2DArray landmark_normal_array;
+global uniform sampler2DArray landmark_albedo_array : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+global uniform sampler2DArray landmark_normal_array : filter_linear_mipmap_anisotropic, repeat_enable;
 
 varying vec3 local_pos;
 varying vec2 anchor;
@@ -92,7 +92,7 @@ void fragment() {
 		vec3 w = pow(abs(n_local), vec3(4.0));
 		w /= (w.x + w.y + w.z);
 		float fl = float(layer);
-		vec3 d = pow(tri(landmark_albedo_array, p, w, fl).rgb, vec3(2.2));
+		vec3 d = tri(landmark_albedo_array, p, w, fl).rgb;
 		vec3 nm = tri(landmark_normal_array, p, w, fl).xyz * 2.0 - 1.0;
 		vec3 detail_col = (layer == 12) ? d * 0.1 : base * d * 2.0;
 		// Variation par bâtiment : valeur et chaleur.
@@ -135,8 +135,9 @@ void fragment() {
 		if (layer == 12) {
 			SPECULAR = 0.7;
 		}
-	} else if (!FRONT_FACING) {
-		NORMAL = -NORMAL;
+	} else {
+		// Les GLB n'ont plus de normales (L3, `drop_normals`) : normale plane dérivée.
+		NORMAL = normalize((VIEW_MATRIX * MODEL_MATRIX * vec4(n_local, 0.0)).xyz);
 	}
 	ALBEDO = base;
 	ROUGHNESS = rough;

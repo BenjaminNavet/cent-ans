@@ -118,6 +118,11 @@ func _dress(mesh_instance: MeshInstance3D) -> void:
 		material.set_shader_parameter("roughness", rough)
 		material.set_shader_parameter("water", 1.0 if name == "Water" else 0.0)
 		material.set_shader_parameter("tint_strength", 1.0 if layer == "houses" or layer == "landmarks" else 0.0)
+		# L3 : textures à leur taille réelle (unités de carte → mètres du plan au centre de la
+		# loupe), pied des murs au niveau des plaques de sol du générateur (`Z_ISLAND`).
+		var scale_block: Dictionary = landmark.get("scale", {})
+		material.set_shader_parameter("meters_per_unit", float(scale_block.get("center_meters_per_unit", 200.0)))
+		material.set_shader_parameter("ground_height", 0.010)
 		_apply_height_params(material)
 		mesh_instance.set_surface_override_material(surface, material)
 		_materials.append(material)
