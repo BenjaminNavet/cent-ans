@@ -26,9 +26,15 @@ Branche : `worktree-agent-aeb4f4012dbd33ec4`. ADR : `docs/decisions/0031-droit-d
   (`army_movement_path.gd`, `army_movement_controller.gd`), panneau (raisons pondérées,
   contre-offre, fiche « droit de passage »), smoke.
 - [x] ADR 0031 (dont le point 4 : accord commercial avec un rival, voulu).
-- [ ] build.sh (compilation de godot-ffi très lente : machine chargée), pytest, import, smoke,
-  captures, sonde d'équilibre.
+- [x] Fusion de main (UX1 légende, UI1, ZG3) puis de `feat/map-modes` (MF1, pas encore sur main) :
+  le mode « Diplomatie » est le filtre de `MapModeController` (positions DP2, légende, infobulle,
+  minicarte qui suit le filtre) ; le bouton à part de la minicarte est retiré ; légende UX1 à jour.
+- [x] fmt, clippy, cargo test, build.sh, pytest (418), import, `mf1_map_modes_test` OK.
+- [x] Captures regardées : `docs/img/dp2/diplomacy_map.png` (filtre MF1), `diplomacy_treaty.png`,
+  `diplomacy_counter.png` (un seul point, contre-offre 65 %), `movement_trespass.png` (chemin rouge).
+- [ ] Smoke : tout passe sauf « music playlist too short » (campaign, war, court) : vient de main
+  (listes de lecture UA), sans lien avec DP2.
+- [ ] Sonde `balance_probe campaign 200 1-8`, `passage.enabled` vrai puis faux (en cours).
 
 ## Prochaine étape
-build.sh puis smoke ; captures `--stage=diplomacy_map` et `diplomacy_treaty` ; sonde
-`balance_probe campaign 200 1-8` avec `passage.enabled` faux puis vrai.
+Consigner la sonde ; fusion dans main par l'orchestrateur (la branche contient aussi MF1).

@@ -41,9 +41,10 @@ n'affichait qu'une ligne de « considérations » : le joueur ne savait pas quel
 8. **Carte diplomatique** (`stance.rs`) : allié (vert), accord (bleu : commerce, accès militaire ou
    mariage), neutre (jaune), tension (orange : attitude envers nous ≤ `tension_attitude` −20,
    embargo, intrusion ou casus belli d'intrusion), guerre (rouge), vassal ou suzerain (gris).
-   Même palette (`game/scripts/ui/diplomatic_stances.gd`) pour la carte 3D (touche N), le
-   nouveau bouton « Diplomatie » de la minicarte (qui bascule aussi la carte 3D) et la carte du
-   panneau de diplomatie.
+   Même palette (`game/scripts/ui/diplomatic_stances.gd`) pour le filtre « Diplomatie » de MF1
+   (ADR 0048, `MapModeController` : carte 3D, minicarte qui suit le filtre actif, légende et
+   infobulle de survol), la légende UX1 (`data/ui/map_legend.json`) et la carte du panneau de
+   diplomatie. Pas de bouton à part dans la minicarte.
 9. **Refus expliqués** (`treaty_explain.rs`, `CampaignSim.explain_treaty`) : chaque raison de
    l'évaluation DP1 devient une ligne pondérée (« Ils se méfient de vous −12 », « Accord
    commercial — Routes commerciales communes +8 »), objections d'abord. Quand **un seul point**
