@@ -2047,8 +2047,7 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     let ready = turn >= 4
         && rested
         && !weary
-        && (war_ready(state, faction)
-            || crate::negotiation::pretender_ready(state, data, faction));
+        && (war_ready(state, faction) || crate::negotiation::pretender_ready(state, data, faction));
     let mut declared = false;
     if ready && (turn + slot).is_multiple_of(2) {
         if let Some(target) = war_target(state, data, faction, aggression) {
