@@ -22,6 +22,7 @@ extends Node3D
 ##   --select-settlement=<id>    sélectionne une colonie (surbrillance, lot C6).
 ##   --stage=agents             C6 : espion, héraut et prédicateur recrutés, espion sélectionné ;
 ##   --stage=agents_registry    idem, registre des agents (G) ouvert.
+##   --stage=movement_trespass  DP2 : marche sans droit de passage (chemin rouge, avertissement).
 ##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
 ##                              atteignables et chemin sur le graphe (lot C5).
 ##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
@@ -1259,6 +1260,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_trade()
 				"movement", "movement_near":  # M4 : bulle et chemin (vue d'ensemble, gros plan)
 					movement_ctl.stage_screenshot(_screenshot_stage == "movement_near")
+				"movement_trespass":  # DP2 : chemin rouge sans droit de passage
+					movement_ctl.stage_trespass_screenshot()
 				"agents", "agents_registry":  # C6 agents
 					agents_ctl.stage_screenshot(_screenshot_stage == "agents_registry")
 				_:

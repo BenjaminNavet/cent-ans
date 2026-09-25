@@ -458,6 +458,40 @@ func _update_zoc_ring() -> void:
 
 ## Première armée du joueur sélectionnée, bulle, chemin sur deux tours vers un point au-delà
 ## de la bulle, caméra cadrée sur l'ensemble.
+## Lot DP2 : capture de l'avertissement d'intrusion. Choisit l'armée du joueur et la province
+## en paix la plus proche dont la marche déclenche l'avertissement (chemin rouge, infobulle).
+func stage_trespass_screenshot() -> bool:
+	if not available() or not map.sim.has_method("find_path_trespass"):
+		return false
+	var best := {}
+	var best_distance := INF
+	for army_id in map.player_army_ids():
+		var army: Dictionary = map.sim.call("get_army", army_id)
+		var start: Vector2 = army.get("position", Vector2.ZERO)
+		for index in range(1, map.map_data.province_count + 1):
+			var id := str(map.map_data.get_province(index).get("id", ""))
+			var centroid: Vector2 = map.map_data.centroid_of_id(id)
+			var distance := start.distance_to(centroid)
+			if centroid.x < 0.0 or distance >= best_distance or distance > 900.0:
+				continue
+			var stance: PackedStringArray = map.sim.call("get_province_stances", PackedStringArray([id]))
+			if stance.is_empty() or not (stance[0] in ["neutral", "agreement", "tension"]):
+				continue
+			var passage: Dictionary = map.sim.call("find_path_trespass", army_id, centroid.x, centroid.y)
+			if str(passage.get("warning", "")) == "":
+				continue
+			best = {"army": army_id, "point": centroid, "start": start}
+			best_distance = distance
+	if best.is_empty():
+		return false
+	map.select_army(best["army"])
+	preview_target({"kind": "ground", "id": "", "point": best["point"]})
+	var focus: Vector2 = (best["start"] as Vector2).lerp(best["point"], 0.5)
+	map.camera_rig.look_at_point(Vector3(focus.x, map.map_data.surface_world_at(focus.x, focus.y), focus.y), maxf(best_distance * 1.6, 140.0))
+	map.camera_rig.snap()
+	return true
+
+
 func stage_screenshot(close_up: bool = false) -> void:
 	if not available():
 		return
