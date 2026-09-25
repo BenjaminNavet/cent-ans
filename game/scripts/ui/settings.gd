@@ -200,6 +200,8 @@ func apply_display() -> void:
 
 ## Échelle automatique pour une fenêtre de `height` pixels : 1 à 900 px, 0,9 au moins, 1,6 au plus.
 static func auto_ui_scale(height: float) -> float:
+	if height < 300.0:
+		return 1.0  # fenêtre factice (headless 64 × 64) : pas d'échelle automatique
 	return clampf(height / AUTO_SCALE_REFERENCE_HEIGHT, AUTO_SCALE_MIN, AUTO_SCALE_MAX)
 
 

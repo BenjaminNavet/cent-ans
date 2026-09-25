@@ -726,12 +726,31 @@ func _auto_register(node: Node) -> void:
 ## Échap ferme le panneau du dessus avant que la carte (désélection) ou le menu pause ne la
 ## reçoivent (`_shortcut_input` passe avant `_unhandled_input`).
 func _shortcut_input(event: InputEvent) -> void:
-	if not event.is_action_pressed("ui_cancel") or event.is_echo():
+	if get_tree().paused or not visible or event.is_echo():
 		return
-	if get_tree().paused or not visible:
+	# Lot U7 (partiel) : sauvegarde rapide F5, chargement rapide F9.
+	if event is InputEventKey and event.pressed and not panels.has_modal_open():
+		var key := (event as InputEventKey).physical_keycode
+		if key == KEY_F5:
+			save_requested.emit(QUICK_SAVE_NAME)
+			get_viewport().set_input_as_handled()
+			return
+		if key == KEY_F9:
+			var path := SaveSlots.SAVES_DIR.path_join(QUICK_SAVE_NAME.validate_filename() + ".json")
+			if FileAccess.file_exists(path):
+				load_requested.emit(path)
+			else:
+				show_toast("Aucune sauvegarde rapide (F5 pour en faire une).", true)
+			get_viewport().set_input_as_handled()
+			return
+	if not event.is_action_pressed("ui_cancel"):
 		return
 	if panels.close_top():
 		get_viewport().set_input_as_handled()
+
+
+## Nom de l'emplacement de la sauvegarde rapide (F5 / F9).
+const QUICK_SAVE_NAME := "Sauvegarde rapide"
 
 
 ## Replace le HUD au prochain cycle (plusieurs demandes → un seul placement).
