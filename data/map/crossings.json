@@ -906,6 +906,7 @@
       "name": "Pont d'Abbeville",
       "type": "bridge",
       "river": "Somme",
+      "structure": "stone",
       "lonlat": [1.834, 50.106],
       "source": "Wikipédia (fr), « Abbeville »",
       "note": "Ponts de la ville close, capitale du Ponthieu, sur la basse Somme."
@@ -915,6 +916,7 @@
       "name": "Pont-Remy",
       "type": "bridge",
       "river": "Somme",
+      "structure": "wood",
       "lonlat": [1.912, 50.053],
       "source": "Wikipédia (fr), « Bataille de Crécy »",
       "note": "Pont gardé par les Français contre Édouard III en août 1346."
@@ -924,6 +926,7 @@
       "name": "Pont de Picquigny",
       "type": "bridge",
       "river": "Somme",
+      "structure": "wood",
       "lonlat": [2.144, 49.944],
       "source": "Wikipédia (fr), « Traité de Picquigny »",
       "note": "Pont fortifié ; Louis XI et Édouard IV s'y rencontrent en 1475."
@@ -933,6 +936,7 @@
       "name": "Ponts d'Amiens",
       "type": "bridge",
       "river": "Somme",
+      "structure": "stone",
       "lonlat": [2.296, 49.894],
       "source": "Wikipédia (fr), « Amiens »"
     },
@@ -941,6 +945,7 @@
       "name": "Pont de Corbie",
       "type": "bridge",
       "river": "Somme",
+      "structure": "stone",
       "lonlat": [2.509, 49.908],
       "source": "Wikipédia (fr), « Corbie »"
     },
@@ -949,6 +954,7 @@
       "name": "Pont de Péronne",
       "type": "bridge",
       "river": "Somme",
+      "structure": "stone",
       "lonlat": [2.934, 49.932],
       "source": "Wikipédia (fr), « Péronne »",
       "note": "Place forte gardant le passage de la haute Somme."
