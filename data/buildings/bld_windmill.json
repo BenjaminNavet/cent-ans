@@ -30,9 +30,9 @@
       "value": 2
     }
   ],
-  "description": "Moulin à pivot pour les provinces sans cours d'eau puissant.",
+  "description": "Moulin à pivot pour les provinces sans cours d'eau puissant. Voir [[cdx_moulin_a_vent]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Moulin à vent",
+    "Moulin à pivot"
   ]
 }

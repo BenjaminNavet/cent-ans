@@ -35,9 +35,10 @@
     "unit_english_retinue",
     "unit_culveriners"
   ],
-  "description": "Réserve d'armes et d'armures de la Couronne (Tour de Londres, Louvre).",
+  "description": "Magasin d'armes et d'armures du roi : Privy Wardrobe de la Tour de Londres, artillerie du Louvre, Clos des galées de Rouen. Voir [[cdx_arsenal]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Tour de Londres",
+    "Clos des galées de Rouen",
+    "Arsenal"
   ]
 }
