@@ -13,13 +13,16 @@ Pyramide ZG : lien symbolique `data/map/pyramid` → dépôt principal (ignoré 
 - [x] France 1920×1080 : 12 tours + actions, édits, diplomatie, commerce, agent, panneaux, sauvegarde
 - [x] France 1920×1080 (2e partie) : bataille, siège, zoom, réglages
 - [x] Angleterre 1280×720 (1re partie) : bataille avec ordres d'attaque, siège 3D (assaut), naval
-- [ ] Angleterre 1280×720 (2e partie) : diplomatie, édits, actions, agent, commerce, zoom ZG, 6 tours, réglages
-- [ ] naval seul, 5 min
-- [ ] rapport `docs/audit/q3-recette.md`, merge main, smoke
+- [x] Angleterre 1280×720 (2e partie) : diplomatie, édits, actions, agent, commerce, zoom ZG, 6 tours, réglages
+- [x] naval seul jusqu'à l'écran de fin
+- [x] rapport `docs/audit/q3-recette.md`
+- [x] merge main (dc2360c6, EP inclus) ; [ ] build + smoke
 
 ## Corrigé
 - 544aec3c touche du commerce R → X (R = carte religieuse, jamais atteinte)
 - 85e8efd9 bouton « Donner l'assaut » hors écran (étiquette de siège à largeur 1)
+- 7cd65af0 chronique plus haute que l'écran ; 1b4dc2fe rapport de saison en 720p
+- bb1c54ac bandeau de sortie sur l'écran de fin ; 6e28f35e barre d'agent ; 74d24f03 fin navale
 
 ## Prochaine étape
-Finir les deux parties anglaises, écrire le rapport.
+Smoke après le merge de main, puis rapport final à l'orchestrateur.
