@@ -5,7 +5,7 @@ extends SceneTree
 ## pèse autant sur l'un que sur l'autre). Foule de nobles et de gens du commun en gros plan.
 ## Usage (avec affichage) :
 ##   godot --path game --resolution 1600x900 --disable-vsync --script res://tests/da1_perf.gd -- [--cycles=20]
-## Sortie : `DA1_PERF {"da1_gpu_ms": …, "base_gpu_ms": …, "delta_pct": …}`.
+## Sortie : `DA1_PERF {"da1_ms": …, "base_ms": …, "delta_pct": …}`.
 
 const SIDES := ["attacker", "defender"]
 const FACTIONS := ["fac_france", "fac_england"]
@@ -17,6 +17,7 @@ const WARMUP := 60
 var _sets: Array = [[], []]  # 0 : DA1, 1 : sans DA1
 var _samples: Array = [[], []]
 var _base_shader: Shader = null
+var _density := 1  # `--density=n` : foule n² fois plus dense (scène limitée par le GPU)
 
 
 func _init() -> void:
@@ -24,6 +25,8 @@ func _init() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--cycles="):
 			cycles = int(arg.trim_prefix("--cycles="))
+		elif arg.begins_with("--density="):
+			_density = int(arg.trim_prefix("--density="))
 		elif arg.begins_with("--base-shader="):
 			# Shader d'avant le lot (ex. `git show main:game/shaders/battle_soldier_skinned.gdshader`).
 			_base_shader = Shader.new()
@@ -61,11 +64,18 @@ func _init() -> void:
 	var mode := 0
 	var frame := 0
 	var total := WARMUP + cycles * 2 * SWITCH
+	var last := Time.get_ticks_usec()
 	while frame < total:
 		await process_frame
 		frame += 1
+		var now := Time.get_ticks_usec()
+		# Temps GPU mesuré si le pilote le fournit (0 sous Metal), sinon durée de l'image
+		# (vsync coupée, scène limitée par le GPU).
+		var gpu := RenderingServer.viewport_get_measured_render_time_gpu(root.get_viewport_rid())
+		var sample := gpu if gpu > 0.0 else (now - last) / 1000.0
+		last = now
 		if frame > WARMUP and (frame - WARMUP) % SWITCH > 3:  # 3 images de transition ignorées
-			_samples[mode].append(RenderingServer.viewport_get_measured_render_time_gpu(root.get_viewport_rid()))
+			_samples[mode].append(sample)
 		if frame > WARMUP and (frame - WARMUP) % SWITCH == 0:
 			mode = 1 - mode
 			for m in 2:
@@ -73,7 +83,7 @@ func _init() -> void:
 					(inst as Node3D).visible = m == mode
 	var da1 := _median(_samples[0])
 	var base := _median(_samples[1])
-	print("DA1_PERF %s" % JSON.stringify({"da1_gpu_ms": da1, "base_gpu_ms": base, "delta_pct": (da1 / maxf(base, 0.0001) - 1.0) * 100.0, "samples": _samples[0].size()}))
+	print("DA1_PERF %s" % JSON.stringify({"da1_ms": da1, "base_ms": base, "delta_pct": (da1 / maxf(base, 0.0001) - 1.0) * 100.0, "samples": _samples[0].size()}))
 	quit(0)
 
 
@@ -89,10 +99,10 @@ func _crowd(world: Node3D, soldiers: BattleSoldiers, kind: String, variant: int,
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = BattleSkinned.mesh(kind, variant, 0)
-	var cols := 12
-	var rows := 6
+	var cols := 12 * _density
+	var rows := 6 * _density
 	mm.instance_count = cols * rows
-	var spacing := 1.6 if kind == "cavalry" else 1.0
+	var spacing := (1.6 if kind == "cavalry" else 1.0) / float(_density)
 	var origin := Vector3((index % 3) * 13.0, 0, -(index / 3) * 12.0)
 	for r in rows:
 		for c in cols:
