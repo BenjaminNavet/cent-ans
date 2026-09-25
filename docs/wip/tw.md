@@ -23,7 +23,7 @@ Choix du joueur au lancement :
 ## État courant (25/09, passation à l'orchestrateur de nuit)
 
 Fusionnés par cette session : P1, P2, B1-B7, B8 (IA), B8b (visuels, b420bd6), C1, C3, C6, C7.
-**C4 (édits/chaînes) et C5 (commerce) sont repris par l'orchestrateur de nuit** (`docs/wip/nuit.md`, fusion via `../gp-night-merge`) : ne pas les fusionner ici.
+**C4 et C5 fusionnés par l'orchestrateur de nuit** (92ed8a4c ; accord commercial unifié avec les traités DP1). **Vague 6 TW close** ; pistes d'équilibre transmises à EQ1 (nuit).
 Travail d'intégration transmis : `integration/tw` (6ebe9658) = C5 + C4 par-dessus M2, vérifié (58 suites, smoke 23 OK dont trade et edicts) ; commits utiles 321222ae (clippy c5_trade) et 7d754085 (C5 adapté à `ArmyPosition`). Après M3 : `resolve_trade` dans `resolve_end_of_turn`, `ai_choose_edicts` dans `plan_turn`.
 C2 zone de contrôle : couvert en grande partie par M2 (ZdC 8 km) ; reste éventuel l'affichage (`docs/wip/c2-zone-controle.md`).
 Main a fortement évolué pendant la nuit (M2/M3 mouvement libre, G1, UI2, V2-V4, BV1/BV2, NV1 batailles navales…) : relire `docs/wip/nuit.md` et `docs/wip/mouvement-libre.md` avant toute nouvelle vague TW.
