@@ -637,6 +637,12 @@ pub(crate) fn apply_battle_result(
         .faction(winner_faction),
     );
 
+    // Lot M5b: strength before the battle, to weigh the defeat of the losers.
+    let strength_before: BTreeMap<ArmyId, u32> = attackers
+        .iter()
+        .chain(defenders)
+        .filter_map(|id| Some((id.clone(), state.armies.get(id)?.total_strength())))
+        .collect();
     let attacker_parts = split_outcome(state, attackers, &result.attacker);
     let defender_parts = split_outcome(state, defenders, &result.defender);
     for (id, outcome) in attacker_parts.iter().chain(defender_parts.iter()) {
@@ -703,7 +709,14 @@ pub(crate) fn apply_battle_result(
         Winner::Defender => attackers,
     };
     for loser_id in losers {
-        retreat_beaten_army(state, data, loser_id, battlefield, events);
+        let before = strength_before.get(loser_id).copied().unwrap_or(0);
+        let after = state.armies.get(loser_id).map_or(0, |a| a.total_strength());
+        let losses_percent = if before == 0 {
+            0
+        } else {
+            (u64::from(before.saturating_sub(after)) * 100 / u64::from(before)) as u32
+        };
+        retreat_beaten_army(state, data, loser_id, battlefield, losses_percent, events);
     }
 }
 
@@ -732,17 +745,34 @@ const FALLBACK_ANGLES: [f32; 5] = [0.0, 45.0, -45.0, 90.0, -90.0];
 ///    enemy armies, within `friendly_radius_steps` × `points_per_step`
 ///    kilometres of march on the grid, without crossing an enemy zone of
 ///    control (those around the battlefield excepted) nor an enemy place;
-/// 2. otherwise a point `retreat_fallback_km` away from the victor (or
+/// 2. otherwise, when the army still has a refuge (lot M5b, the C7a
+///    « neutral » rule on the grid: a settlement no enemy holds, free of
+///    enemy armies, within `neutral_radius_steps` of march by the same
+///    rules), a point `retreat_fallback_km` away from the victor (or
 ///    slightly aside), reachable the same way;
 /// 3. otherwise a rout: the survivors rally at the nearest friendly
 ///    settlement of the same land mass, at any distance.
 ///
 /// Ties are broken by cell and settlement id: the result is deterministic.
+/// The battle losses are not weighed here: see [`retreat_target_after`].
 pub fn retreat_target(
     state: &CampaignState,
     data: &GameData,
     army_id: &ArmyId,
     battlefield: [f32; 2],
+) -> Option<Retreat> {
+    retreat_target_after(state, data, army_id, battlefield, 0)
+}
+
+/// [`retreat_target`] for an army that lost `losses_percent` of its men in
+/// the battle: at `heavy_defeat_losses_percent` or more, without a friendly
+/// place within reach, it cannot fall back in order and routs (lot M5b).
+pub fn retreat_target_after(
+    state: &CampaignState,
+    data: &GameData,
+    army_id: &ArmyId,
+    battlefield: [f32; 2],
+    losses_percent: u32,
 ) -> Option<Retreat> {
     let army = state.armies.get(army_id)?;
     let rules = data.retreat_rules();
@@ -801,6 +831,25 @@ pub fn retreat_target(
     {
         return Some(Retreat::Friendly(friendly[&cell].clone()));
     }
+    // Lot M5b: a crushed army, or one with no refuge left in reach (deep in
+    // enemy land, or hemmed in by enemy zones of control), routs.
+    let heavy = losses_percent >= rules.heavy_defeat_losses_percent;
+    let refuges: std::collections::BTreeSet<Cell> = state
+        .settlements
+        .keys()
+        .filter(|id| {
+            !army.is_at(id)
+                && !state.is_hostile_settlement(&army.faction, id)
+                && state.hostile_armies_at(&army.faction, id).is_empty()
+        })
+        .filter_map(|id| data.settlement_point(id).map(|p| Cell::of_point(grid, p)))
+        .collect();
+    let refuge_budget = km_to_grid_points(data, rules.neutral_radius_steps * points_per_step(data));
+    let has_refuge = !heavy
+        && navigation::bounded_dijkstra(grid, start, refuge_budget, blocker, |cell, _| {
+            refuges.contains(&cell)
+        })
+        .is_some();
     // Away from the victor.
     let (dx, dy) = (
         start_point[0] - battlefield[0],
@@ -814,7 +863,7 @@ pub fn retreat_target(
     };
     let reach = free.retreat_fallback_km as f32 * px_per_km(data);
     let fallback_budget = km_to_grid_points(data, 2.0 * free.retreat_fallback_km);
-    for angle in FALLBACK_ANGLES {
+    for angle in FALLBACK_ANGLES.iter().filter(|_| has_refuge) {
         let (sin, cos) = angle.to_radians().sin_cos();
         let (vx, vy) = (ux * cos - uy * sin, ux * sin + uy * cos);
         let target = [start_point[0] + vx * reach, start_point[1] + vy * reach];
@@ -846,9 +895,11 @@ fn retreat_beaten_army(
     data: &GameData,
     army_id: &ArmyId,
     battlefield: [f32; 2],
+    losses_percent: u32,
     events: &mut Vec<GameEvent>,
 ) {
-    let Some(retreat) = retreat_target(state, data, army_id, battlefield) else {
+    let Some(retreat) = retreat_target_after(state, data, army_id, battlefield, losses_percent)
+    else {
         return;
     };
     let rules = data.retreat_rules();
