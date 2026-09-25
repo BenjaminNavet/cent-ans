@@ -15,8 +15,9 @@ Coordination : SG1 (sièges), Q1 (recette) ; HUD de bataille (UB1) intouché sau
 | 6. Discours du général | **fait** |
 
 ## Prochaine étape
-Mesures finales (`--units=50`, Normale et Ultra, A/B `--no-bv3`), fusion de `main`,
-vérifications (fmt, clippy, test, build.sh, import, smoke), rapport.
+Terminé, non fusionné dans `main` (main fusionné dans la branche à la fin : conflits résolus
+dans `battle_scene.gd` avec SG1 / T8 et `v2_figures_shot.gd`). Vérifications repassées : fmt,
+clippy, cargo test, build.sh, import, `bv3_check`, smoke (24 « smoke OK »), pytest des schémas.
 
 ## Lot 1 — herbe couchée, sang en prairie
 - `battle_grass_flatten.gd` (`BattleGrassFlatten`) : carte RG8 à 1 m sur (0, −100)-(1200, 900),
@@ -109,3 +110,13 @@ identiques ; l'écran plafonne souvent à 60 Hz malgré `--disable-vsync`).
 - Normale : −4 % en moyenne, dans le bruit (seuil −10 % tenu) ; les imposteurs retirent 40 %
   des primitives, ce qui compense le coût de l'herbe couchée, des étendards et des duels.
 - Ultra : la baisse de 20-25 % mesurée par BV1 est rattrapée (primitives ÷2,3 à 2,7).
+
+## Points ouverts
+- Duels : clips existants synchronisés, pas de clips appariés cuits dans Blender (contact des
+  lames approximatif) ; pas de mort par duel (cosmétique).
+- Imposteurs : pas de sang ni de variante de casque par soldat, pas d'ombre ; figurines rigides
+  et engins de siège sans imposteurs.
+- Herbe couchée : carte limitée au champ (0..1200 × −100..900) ; hors de ce rectangle, rien.
+- Discours : texte seul (pas de voix) ; pas de discours de l'ennemi.
+- Pièges : `world_vertex_coords` → prendre le coin du quadrilatère dans les UV ; alpha des
+  imposteurs à relever selon le niveau de mipmap ; scripts BV3 dans `scratchpad/bv3/`.
