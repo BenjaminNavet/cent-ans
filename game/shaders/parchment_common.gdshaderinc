@@ -12,10 +12,10 @@ uniform vec3 pm_paper_dark = vec3(0.52, 0.36, 0.17);
 uniform vec3 pm_ink = vec3(0.035, 0.020, 0.010);
 uniform vec3 pm_red_ink = vec3(0.42, 0.045, 0.025);
 uniform vec3 pm_green_ink = vec3(0.07, 0.17, 0.05);
-uniform vec3 pm_sea_wash = vec3(0.50, 0.66, 0.62);
+uniform vec3 pm_sea_wash = vec3(0.40, 0.56, 0.54);
 // Part de la couleur rendue en émission (la carte ne doit pas être ombrée par le soleil).
 uniform float pm_emission = 0.75;
-uniform float pm_emission_gain = 0.55;
+uniform float pm_emission_gain = 0.72;
 
 float pm_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);

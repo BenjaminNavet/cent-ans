@@ -11,8 +11,8 @@ uniform vec2 pm_light_dir = vec2(-0.7, -0.7);
 uniform float pm_mount_cell_px = 26.0;
 uniform float pm_mount_min_m = 750.0;
 // Arbres dessinés : cellule (px carte), part de forêt minimale.
-uniform float pm_tree_cell_px = 11.0;
-uniform float pm_tree_min = 0.42;
+uniform float pm_tree_cell_px = 12.0;
+uniform float pm_tree_min = 0.56;
 uniform float pm_wash_strength = 0.55;
 
 float pm_height(vec2 p, float lod) {
@@ -40,7 +40,7 @@ vec3 pm_mountain(vec2 p, vec2 cell, float footprint) {
 	float aa = footprint / size * 1.2;
 	// Contour : distance approximative au profil (verticale) et au pied.
 	float d_top = abs(q.y - top) * size;
-	float outline = inside > 0.0 || d_top < footprint * 1.5 ? pm_line(d_top, 0.8, footprint) * step(abs(x), 1.0) : 0.0;
+	float outline = inside > 0.0 || d_top < footprint * 1.5 ? pm_line(d_top, 1.0, footprint) * step(abs(x), 1.0) : 0.0;
 	// Versant à l'ombre (est) hachuré de traits verticaux.
 	float shade_side = smoothstep(-0.05, 0.1, x) * inside;
 	float hatch = smoothstep(0.55, 0.8, abs(fract(p.x / max(footprint * 3.0, 1.2)) - 0.5) * 2.0);
@@ -54,7 +54,7 @@ vec3 pm_tree(vec2 p, vec2 cell, float footprint) {
 	vec2 base = (cell + vec2(0.5, 0.8) + jitter * 0.35) * pm_tree_cell_px;
 	vec4 sp = texture(splat, (base + vec2(0.5)) / map_size);
 	float forest = sp.b / max(sp.r + sp.g + sp.b + sp.a, 1e-3);
-	if (forest < pm_tree_min + (pm_hash(cell) - 0.5) * 0.25 || pm_height(base, 0.0) <= 0.0) {
+	if (forest < pm_tree_min + (pm_hash(cell) - 0.5) * 0.25 || pm_hash(cell + 2.7) < 0.35 || pm_height(base, 0.0) <= 0.0) {
 		return vec3(0.0);
 	}
 	float r = pm_tree_cell_px * (0.3 + 0.08 * pm_hash(cell + 5.0));
@@ -118,11 +118,12 @@ vec3 parchment_terrain(vec2 p, vec2 uv, float footprint, float coast, float lake
 
 	// --- Montagnes dessinées (cellule et voisines du sud, qui passent devant) ---
 	vec2 cm = floor(p / pm_mount_cell_px);
-	for (int j = -1; j <= 1; j++) {
+	bool mountains_near = hc > pm_mount_min_m - 500.0;
+	for (int j = -1; j <= (mountains_near ? 1 : -2); j++) {
 		for (int i = -1; i <= 1; i++) {
 			vec3 m = pm_mountain(p, cm + vec2(float(i), float(j)), footprint);
 			if (m.x > 0.0 || m.y > 0.0) {
-				vec3 fill = mix(pm_paper * vec3(1.02, 0.98, 0.9), pm_paper_dark * 0.8, m.z * 0.6);
+				vec3 fill = mix(pm_paper * vec3(1.04, 1.0, 0.92), pm_paper_dark * 0.55, m.z * 0.8);
 				col = mix(col, fill, m.x * land);
 				col = mix(col, pm_ink, m.y * land);
 			}
@@ -133,7 +134,7 @@ vec3 parchment_terrain(vec2 p, vec2 uv, float footprint, float coast, float lake
 	vec4 sp = texture(splat, uv);
 	float forest_here = sp.b / max(sp.r + sp.g + sp.b + sp.a, 1e-3);
 	col = mix(col, col * vec3(0.86, 0.95, 0.78), smoothstep(pm_tree_min - 0.15, pm_tree_min + 0.2, forest_here) * land * 0.6);
-	if (mountain_zone < 0.6) {
+	if (mountain_zone < 0.6 && forest_here > pm_tree_min - 0.3) {
 		vec2 ct = floor(p / pm_tree_cell_px);
 		for (int j = 0; j <= 1; j++) {
 			for (int i = -1; i <= 1; i++) {
@@ -155,8 +156,14 @@ vec3 parchment_terrain(vec2 p, vec2 uv, float footprint, float coast, float lake
 		col = mix(col, realm ? mix(pm_ink, pm_red_ink, 0.35) : pm_ink, max(prov, rl) * land);
 	}
 
+	// --- Fleuves : trait d'encre bleue (distance signée du lit, lot V4) ---
+	if (has_river_bed) {
+		float sd = river_sd_at(p, map_size);
+		col = mix(col, vec3(0.05, 0.13, 0.16), pm_line(max(sd, 0.0), 0.7, footprint) * 0.85 * land);
+	}
+
 	// --- Eaux : lacs au lavis bleu-vert, côtes et rives cernées d'un trait d'encre ---
-	vec3 water = pm_paper_at(p, uv, footprint) * mix(vec3(1.0), pm_sea_wash, 0.8);
+	vec3 water = mix(pm_paper_at(p, uv, footprint), pm_sea_wash, 0.8);
 	col = mix(col, water, clamp(lake + (1.0 - smoothstep(-0.3, 0.3, coast)), 0.0, 1.0));
 	col = mix(col, pm_ink, pm_line(coast, 1.0, footprint) * 0.9);
 	col = mix(col, pm_ink, pm_frame(uv, footprint, map_size) * 0.85);
@@ -177,4 +184,29 @@ void parchment_apply(vec2 p, vec2 uv, float footprint, float coast, float lake, 
 	col = albedo;
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), w));
 	roughness = mix(roughness, 1.0, w);
+}
+
+// Parchemin seul (poids 1) : le terrain saute tout le rendu 3D. Recalcule côte, lacs et
+// province de part et d'autre de la frontière la plus proche (même méthode que le terrain).
+void parchment_only(vec2 p, vec2 uv, float footprint, out vec3 albedo, out vec3 emission) {
+	float hc = height_m_lod(uv, 0.0);
+	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
+	float land_f = smoothstep(-0.4, 0.6, coast);
+	float lake = (1.0 - land_f) * step(0.0, hc);
+	int id = province_at(p);
+	int other_id = id;
+	float d = 1e3;
+	if (has_border_dist) {
+		d = border_d(uv);
+		if (d < 12.0) {
+			vec2 e = vec2(1.0 / map_size.x, 0.0);
+			vec2 f = vec2(0.0, 1.0 / map_size.y);
+			vec2 gd = vec2(border_d(uv + e) - border_d(uv - e), border_d(uv + f) - border_d(uv - f));
+			vec2 away = gd / max(length(gd), 1e-4);
+			id = province_at(p + away * max(0.0, 1.3 - d));
+			other_id = province_at(p - away * (d + 1.3));
+		}
+	}
+	vec3 parch = parchment_terrain(p, uv, footprint, coast, lake, id, other_id, d);
+	pm_output(vec3(0.0), parch, 1.0, albedo, emission);
 }

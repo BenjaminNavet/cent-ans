@@ -35,6 +35,7 @@ var _heraldry_cache: Dictionary = {}
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	_make_glyphs()
 
 
 ## Relit propriétaires, noms et villes (une fois par tour, ou au chargement).
@@ -57,7 +58,7 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 		owner_of[id] = owner
 		var name := str(province.get("name", id))
 		var paren := name.find(" (")
-		_provinces.append({"name": name.substr(0, paren) if paren > 0 else name, "px": province["centroid"], "area": float(province.get("area_px", 0.0))})
+		_provinces.append({"name": name.substr(0, paren) if paren > 0 else name, "px": province["centroid"], "world": _world(province["centroid"]), "area": float(province.get("area_px", 0.0))})
 	_provinces.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["area"] > b["area"])
 	_build_realms(owner_of)
 	if settlement_data != null:
@@ -73,7 +74,8 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 			var province_id := str(entry.get("province", ""))
 			var owner := str(owner_of.get(province_id, ""))
 			var cap: Vector2 = capitals.get(province_id, Vector2(-1, -1))
-			_towns.append({"px": px, "capital": cap.distance_to(px) < 6.0, "color": SimFacade.faction_color(owner) if owner != "" else INK})
+			_towns.append({"px": px, "world": _world(px), "capital": cap.distance_to(px) < 6.0, "color": SimFacade.faction_color(owner) if owner != "" else INK})
+	_towns.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["capital"] and not b["capital"])
 	queue_redraw()
 
 
@@ -140,9 +142,15 @@ func _process(_delta: float) -> void:
 		queue_redraw()
 
 
+func _world(px: Vector2) -> Vector3:
+	return Vector3(px.x, map_data.surface_world_at(px.x, px.y) if map_data != null else 0.0, px.y)
+
+
 func _screen(px: Vector2) -> Vector2:
-	var y := map_data.surface_world_at(px.x, px.y) if map_data != null else 0.0
-	var world := Vector3(px.x, y, px.y)
+	return _screen_w(_world(px))
+
+
+func _screen_w(world: Vector3) -> Vector2:
 	if camera.is_position_behind(world):
 		return Vector2(-99999, -99999)
 	return camera.unproject_position(world)
@@ -154,36 +162,94 @@ func _draw() -> void:
 	var s := clampf(REF_DISTANCE / maxf(camera_distance, 1.0), 0.7, 1.6)
 	var a := weight
 	var view := get_viewport_rect().grow(60.0)
+	var t0 := Time.get_ticks_usec()
 	_draw_sea_decor(s, a, view)
+	var t1 := Time.get_ticks_usec()
+	# Villes trop proches à l'écran : une seule vignette (grille de cellules, capitales d'abord).
+	var cell := 30.0 * s
+	var occupied: Dictionary = {}
 	for town in _towns:
-		var p := _screen(town["px"])
-		if view.has_point(p):
-			_draw_town(p, (15.0 if town["capital"] else 10.0) * s, town, a)
+		var p := _screen_w(town["world"])
+		if not view.has_point(p):
+			continue
+		var key := Vector2i(int(p.x / cell), int(p.y / cell))
+		if occupied.has(key):
+			continue
+		occupied[key] = true
+		_draw_town(p, (11.0 if town["capital"] else 7.5) * s, town, a)
+	var t2 := Time.get_ticks_usec()
+	# Textes et jetons prennent le relais des étiquettes et étendards 3D à mi-fondu.
+	var text_alpha := smoothstep(0.45, 0.85, a)
 	var placed: Array[Rect2] = []
-	for realm in _realms:
-		placed.append_array(_draw_arched(realm, s, a))
-	_draw_province_names(s, a, view, placed)
-	_draw_army_tokens(s, a, view)
+	if text_alpha > 0.01:
+		for realm in _realms:
+			placed.append_array(_draw_arched(realm, s, text_alpha))
+		_draw_province_names(s, text_alpha, view, placed)
+	var t3 := Time.get_ticks_usec()
+	_draw_army_tokens(s, smoothstep(0.4, 0.75, a), view)
+	if Engine.get_process_frames() % 60 == 0:
+		print("CM2 draw us sea=%d towns=%d names=%d armies=%d" % [t1 - t0, t2 - t1, t3 - t2, Time.get_ticks_usec() - t3])
 
 
 # --- Mer ------------------------------------------------------------------------------
 
 
 func _draw_sea_decor(s: float, a: float, view: Rect2) -> void:
-	if decor == null:
+	if decor == null or _sea_glyphs.is_empty():
 		return
 	var t := Time.get_ticks_msec() / 1000.0
 	for ship in decor.ships:
-		var p := _screen(Vector2(ship.x, ship.y))
+		var p := _screen_w(Vector3(ship.x, 0.0, ship.y))
 		if view.has_point(p):
-			_draw_ship(p + Vector2(0.0, sin(t * 1.3 + ship.x) * 1.2), 16.0 * s, ship.z, a)
+			_blit(_sea_glyphs[0], p + Vector2(0.0, sin(t * 1.3 + ship.x) * 1.2), 16.0 * s, a, ship.z < 0.0)
 	for monster in decor.monsters:
-		var p := _screen(Vector2(monster.x, monster.y))
+		var p := _screen_w(Vector3(monster.x, 0.0, monster.y))
 		if view.has_point(p):
-			if monster.z < 0.5:
-				_draw_serpent(p, 20.0 * s, a, t + monster.x)
-			else:
-				_draw_whale(p, 20.0 * s, a, t + monster.y)
+			_blit(_sea_glyphs[1 if monster.z < 0.5 else 2], p + Vector2(0.0, sin(t * 0.8 + monster.y) * 1.5), 20.0 * s, a, false)
+
+
+## Navire, serpent de mer, baleine : dessinés une fois (même méthode que les villes).
+## [texture, taille, ancre, unité]
+var _sea_glyphs: Array = []
+## Cible des fonctions de dessin des ornements (soi-même, ou la toile d'une vignette).
+var _ci: CanvasItem = self
+
+
+func _make_sea_glyphs() -> void:
+	var specs := [
+		[Vector2i(72, 72), Vector2(36.0, 42.0), 24.0, func(ci: CanvasItem) -> void: _paint_with(ci, func() -> void: _draw_ship(Vector2(36.0, 42.0), 24.0, 1.0, 1.0))],
+		[Vector2i(100, 48), Vector2(52.0, 26.0), 20.0, func(ci: CanvasItem) -> void: _paint_with(ci, func() -> void: _draw_serpent(Vector2(52.0, 26.0), 20.0, 1.0, 0.0))],
+		[Vector2i(90, 52), Vector2(40.0, 30.0), 20.0, func(ci: CanvasItem) -> void: _paint_with(ci, func() -> void: _draw_whale(Vector2(40.0, 30.0), 20.0, 1.0, 0.0))],
+	]
+	for spec in specs:
+		_sea_glyphs.append([_make_glyph(spec[0], spec[3]), spec[0], spec[1], spec[2]])
+
+
+## Remplit un polygone (ignoré si la triangulation échoue : contour seul).
+func _fill(points: PackedVector2Array, color: Color) -> void:
+	if Geometry2D.triangulate_polygon(points).is_empty():
+		push_warning("ParchmentOverlay: polygon skipped %s" % [points])
+		return
+	_ci.draw_colored_polygon(points, color)
+
+
+func _paint_with(ci: CanvasItem, body: Callable) -> void:
+	_ci = ci
+	body.call()
+	_ci = self
+
+
+func _blit(glyph: Array, p: Vector2, u: float, a: float, mirrored: bool) -> void:
+	var tex: Texture2D = glyph[0]
+	var k := u / float(glyph[3])
+	var size := Vector2(glyph[1]) * k
+	var anchor: Vector2 = glyph[2] * k
+	if mirrored:
+		draw_set_transform(p, 0.0, Vector2(-1.0, 1.0))
+		draw_texture_rect(tex, Rect2(-anchor, size), false, Color(1, 1, 1, a))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	else:
+		draw_texture_rect(tex, Rect2(p - anchor, size), false, Color(1, 1, 1, a))
 
 
 func _draw_ship(p: Vector2, u: float, facing: float, a: float) -> void:
@@ -195,10 +261,10 @@ func _draw_ship(p: Vector2, u: float, facing: float, a: float) -> void:
 	for i in range(8, -1, -1):
 		var x := lerpf(-0.8, 0.85, i / 8.0)
 		hull.append(p + Vector2(x * f, 0.42 + 0.06 * x * x) * u)
-	draw_colored_polygon(hull, Color(0.52, 0.33, 0.18, a))
-	draw_polyline(_closed(hull), Color(INK, a), 1.2, true)
+	_fill(hull, Color(0.52, 0.33, 0.18, a))
+	_ci.draw_polyline(_closed(hull), Color(INK, a), 1.2, true)
 	# Mât, vergue, voile carrée gonflée à croix rouge, flamme.
-	draw_line(p + Vector2(0.05 * f, 0.0) * u, p + Vector2(0.05 * f, -1.55) * u, Color(INK, a), 1.3, true)
+	_ci.draw_line(p + Vector2(0.05 * f, 0.0) * u, p + Vector2(0.05 * f, -1.55) * u, Color(INK, a), 1.3, true)
 	var sail := PackedVector2Array()
 	for i in 7:
 		var y := lerpf(-1.35, -0.2, i / 6.0)
@@ -206,12 +272,12 @@ func _draw_ship(p: Vector2, u: float, facing: float, a: float) -> void:
 	for i in range(6, -1, -1):
 		var y := lerpf(-1.35, -0.2, i / 6.0)
 		sail.append(p + Vector2((0.65 + 0.22 * sin(i / 6.0 * PI)) * f, y) * u)
-	draw_colored_polygon(sail, Color(PAPER.lightened(0.15), a))
-	draw_polyline(_closed(sail), Color(INK, a), 1.0, true)
-	draw_line(p + Vector2(0.08 * f, -1.2) * u, p + Vector2(0.08 * f, -0.35) * u, Color(RED_INK, a), 1.6)
-	draw_line(p + Vector2(-0.35 * f, -0.8) * u, p + Vector2(0.55 * f, -0.8) * u, Color(RED_INK, a), 1.6)
+	_fill(sail, Color(PAPER.lightened(0.15), a))
+	_ci.draw_polyline(_closed(sail), Color(INK, a), 1.0, true)
+	_ci.draw_line(p + Vector2(0.08 * f, -1.2) * u, p + Vector2(0.08 * f, -0.35) * u, Color(RED_INK, a), 1.6)
+	_ci.draw_line(p + Vector2(-0.35 * f, -0.8) * u, p + Vector2(0.55 * f, -0.8) * u, Color(RED_INK, a), 1.6)
 	var flag := PackedVector2Array([p + Vector2(0.05 * f, -1.55) * u, p + Vector2(0.55 * f, -1.45) * u, p + Vector2(0.05 * f, -1.38) * u])
-	draw_colored_polygon(flag, Color(RED_INK, a))
+	_fill(flag, Color(RED_INK, a))
 	_draw_waves(p + Vector2(0.0, 0.55) * u, u, a)
 
 
@@ -227,18 +293,18 @@ func _draw_serpent(p: Vector2, u: float, a: float, t: float) -> void:
 		for i in range(10, -1, -1):
 			var ang := PI + PI * i / 10.0
 			arc.append(Vector2(cx + cos(ang) * 0.2 * u, p.y + sin(ang) * 0.25 * u))
-		draw_colored_polygon(arc, body)
-		draw_polyline(_closed(arc), Color(INK, a), 1.0, true)
+		_fill(arc, body)
+		_ci.draw_polyline(_closed(arc), Color(INK, a), 1.0, true)
 	var head := PackedVector2Array([
-		p + Vector2(-1.35, 0.0) * u, p + Vector2(-1.45, -0.75) * u, p + Vector2(-1.9, -0.95) * u,
+		p + Vector2(-1.1, 0.0) * u, p + Vector2(-1.3, -0.8) * u, p + Vector2(-1.9, -0.95) * u,
 		p + Vector2(-2.15, -0.8) * u, p + Vector2(-1.75, -0.7) * u, p + Vector2(-1.95, -0.55) * u,
-		p + Vector2(-1.55, -0.5) * u, p + Vector2(-1.15, 0.0) * u])
-	draw_colored_polygon(head, body)
-	draw_polyline(_closed(head), Color(INK, a), 1.0, true)
-	draw_circle(p + Vector2(-1.72, -0.82) * u, maxf(0.06 * u, 1.0), Color(RED_INK, a))
+		p + Vector2(-1.5, -0.45) * u, p + Vector2(-1.4, 0.0) * u])
+	_fill(head, body)
+	_ci.draw_polyline(_closed(head), Color(INK, a), 1.0, true)
+	_ci.draw_circle(p + Vector2(-1.62, -0.8) * u, maxf(0.06 * u, 1.0), Color(RED_INK, a))
 	var tail := PackedVector2Array([p + Vector2(1.25, 0.0) * u, p + Vector2(1.6, -0.55) * u, p + Vector2(1.55, -0.2) * u, p + Vector2(1.95, -0.45) * u, p + Vector2(1.45, 0.0) * u])
-	draw_colored_polygon(tail, body)
-	draw_polyline(_closed(tail), Color(INK, a), 1.0, true)
+	_fill(tail, body)
+	_ci.draw_polyline(_closed(tail), Color(INK, a), 1.0, true)
 	_draw_waves(p + Vector2(0.0, 0.1) * u, u * 1.4, a)
 
 
@@ -247,21 +313,19 @@ func _draw_whale(p: Vector2, u: float, a: float, t: float) -> void:
 	for i in 17:
 		var x := lerpf(-1.4, 1.2, i / 16.0)
 		back.append(p + Vector2(x, -0.55 * sqrt(maxf(1.0 - pow((x + 0.1) / 1.3, 2.0), 0.0))) * u)
-	back.append(p + Vector2(1.2, 0.0) * u)
-	back.append(p + Vector2(-1.4, 0.0) * u)
-	draw_colored_polygon(back, Color(0.36, 0.40, 0.42, a))
-	draw_polyline(_closed(back), Color(INK, a), 1.1, true)
-	draw_circle(p + Vector2(-0.95, -0.25) * u, maxf(0.05 * u, 1.0), Color(INK, a))
+	_fill(back, Color(0.36, 0.40, 0.42, a))
+	_ci.draw_polyline(_closed(back), Color(INK, a), 1.1, true)
+	_ci.draw_circle(p + Vector2(-0.95, -0.25) * u, maxf(0.05 * u, 1.0), Color(INK, a))
 	# Jet d'eau en gerbe.
 	var top := p + Vector2(-0.6, -0.55) * u
 	var puff := 0.8 + 0.2 * sin(t * 2.5)
 	for k in 5:
 		var ang := deg_to_rad(-150.0 + k * 30.0)
-		draw_line(top, top + Vector2(cos(ang), sin(ang) - 0.6) * u * 0.5 * puff, Color(0.30, 0.42, 0.50, a), 1.2, true)
+		_ci.draw_line(top, top + Vector2(cos(ang), sin(ang) - 0.6) * u * 0.5 * puff, Color(0.30, 0.42, 0.50, a), 1.2, true)
 	# Queue relevée.
 	var fluke := PackedVector2Array([p + Vector2(1.1, -0.05) * u, p + Vector2(1.55, -0.65) * u, p + Vector2(1.4, -0.3) * u, p + Vector2(1.85, -0.5) * u, p + Vector2(1.3, 0.0) * u])
-	draw_colored_polygon(fluke, Color(0.36, 0.40, 0.42, a))
-	draw_polyline(_closed(fluke), Color(INK, a), 1.0, true)
+	_fill(fluke, Color(0.36, 0.40, 0.42, a))
+	_ci.draw_polyline(_closed(fluke), Color(INK, a), 1.0, true)
 	_draw_waves(p + Vector2(0.0, 0.1) * u, u * 1.5, a)
 
 
@@ -272,22 +336,68 @@ func _draw_waves(p: Vector2, u: float, a: float) -> void:
 		for i in 9:
 			var x := lerpf(-1.2, 1.2, i / 8.0) * (1.0 - k * 0.2)
 			pts.append(Vector2(p.x + x * u, y + sin(i * 1.6) * 0.06 * u))
-		draw_polyline(pts, Color(INK, a * (0.55 - k * 0.15)), 1.0, true)
+		_ci.draw_polyline(pts, Color(INK, a * (0.55 - k * 0.15)), 1.0, true)
 
 
 # --- Villes ----------------------------------------------------------------------------
 
 
+## Vignette de ville dessinée une fois dans une texture (SubViewport) : le dessin vectoriel
+## par image coûtait ≈ 70 ms pour 130 villes ; une texture partagée se dessine en un lot.
+const GLYPH_SIZE := Vector2i(72, 72)
+const GLYPH_UNIT := 22.0
+const GLYPH_ANCHOR := Vector2(36.0, 58.0)
+
+var _town_glyph: Texture2D
+
+
+func _make_glyphs() -> void:
+	_town_glyph = _make_glyph(GLYPH_SIZE, func(ci: CanvasItem) -> void: paint_town(ci, GLYPH_ANCHOR, GLYPH_UNIT))
+	_make_sea_glyphs()
+
+
+func _make_glyph(size: Vector2i, painter: Callable) -> Texture2D:
+	var viewport := SubViewport.new()
+	viewport.size = size
+	viewport.transparent_bg = true
+	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	var canvas := GlyphCanvas.new()
+	canvas.painter = painter
+	canvas.size = Vector2(size)
+	viewport.add_child(canvas)
+	add_child(viewport)
+	return viewport.get_texture()
+
+
+class GlyphCanvas:
+	extends Control
+	var painter: Callable
+
+	func _draw() -> void:
+		painter.call(self)
+
+
 func _draw_town(p: Vector2, u: float, town: Dictionary, a: float) -> void:
-	var capital: bool = town["capital"]
-	draw_set_transform(p, 0.0, Vector2.ONE)
-	# Tertre au lavis.
+	if _town_glyph == null:
+		return
+	var k := u / GLYPH_UNIT
+	draw_texture_rect(_town_glyph, Rect2(p - GLYPH_ANCHOR * k, Vector2(GLYPH_SIZE) * k), false, Color(1, 1, 1, a))
+	if town["capital"]:
+		var x := p.x + 0.15 * u
+		draw_line(Vector2(x, p.y - 1.8 * u), Vector2(x, p.y - 2.3 * u), Color(INK, a), 1.2)
+		var flag := PackedVector2Array([Vector2(x, p.y - 2.3 * u), Vector2(x + 0.6 * u, p.y - 2.16 * u), Vector2(x, p.y - 2.02 * u)])
+		var c := Color(town["color"], a)
+		draw_primitive(flag, PackedColorArray([c, c, c]), PackedVector2Array())
+
+
+## Vignette : tertre au lavis, clocher, enceinte crénelée, deux tours à toits rouges.
+static func paint_town(ci: CanvasItem, p: Vector2, u: float) -> void:
+	ci.draw_set_transform(p, 0.0, Vector2.ONE)
 	var ground := PackedVector2Array()
 	for i in 16:
 		var ang := TAU * i / 16.0
 		ground.append(Vector2(cos(ang) * 1.05, 0.05 + sin(ang) * 0.28) * u)
-	draw_colored_polygon(ground, Color(0.55, 0.45, 0.28, 0.45 * a))
-	# Enceinte crénelée.
+	ci.draw_colored_polygon(ground, Color(0.55, 0.45, 0.28, 0.45))
 	var wall := PackedVector2Array([Vector2(-0.8, 0.0) * u, Vector2(-0.8, -0.45) * u])
 	var merlons := 6
 	for i in merlons:
@@ -298,33 +408,27 @@ func _draw_town(p: Vector2, u: float, town: Dictionary, a: float) -> void:
 		wall.append(Vector2(x1, -0.45) * u)
 		wall.append(Vector2(lerpf(-0.8, 0.8, float(i + 1) / merlons), -0.45) * u)
 	wall.append(Vector2(0.8, 0.0) * u)
-	# Clocher (derrière l'enceinte), puis enceinte et tours devant.
 	var spire_x := 0.15
-	_draw_box(Rect2(Vector2(spire_x - 0.14, -1.05) * u, Vector2(0.28, 0.7) * u), PAPER.darkened(0.08), a)
-	_draw_roof(Vector2(spire_x, -1.05) * u, 0.2 * u, 0.75 * u, Color(0.35, 0.33, 0.36), a)
-	if capital:
-		draw_line(Vector2(spire_x, -1.8) * u, Vector2(spire_x, -2.25) * u, Color(INK, a), 1.2)
-		var flag := PackedVector2Array([Vector2(spire_x, -2.25) * u, Vector2(spire_x + 0.55, -2.12) * u, Vector2(spire_x, -1.98) * u])
-		draw_colored_polygon(flag, Color(town["color"], a))
-		draw_polyline(_closed(flag), Color(INK, a), 1.0)
-	draw_colored_polygon(wall, Color(PAPER.lightened(0.1), a))
-	draw_polyline(_closed(wall), Color(INK, a), 1.1, true)
-	draw_rect(Rect2(Vector2(-0.12, -0.28) * u, Vector2(0.24, 0.28) * u), Color(INK, 0.8 * a))
+	_paint_box(ci, Rect2(Vector2(spire_x - 0.14, -1.05) * u, Vector2(0.28, 0.7) * u), PAPER.darkened(0.08))
+	_paint_roof(ci, Vector2(spire_x, -1.05) * u, 0.2 * u, 0.75 * u, Color(0.35, 0.33, 0.36))
+	ci.draw_colored_polygon(wall, PAPER.lightened(0.1))
+	ci.draw_polyline(_closed(wall), INK, 1.6, true)
+	ci.draw_rect(Rect2(Vector2(-0.12, -0.28) * u, Vector2(0.24, 0.28) * u), Color(INK, 0.8))
 	for tx in [-0.8, 0.8]:
-		_draw_box(Rect2(Vector2(tx - 0.16, -0.75) * u, Vector2(0.32, 0.75) * u), PAPER, a)
-		_draw_roof(Vector2(tx, -0.75) * u, 0.22 * u, 0.45 * u, ROOF, a)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		_paint_box(ci, Rect2(Vector2(tx - 0.16, -0.75) * u, Vector2(0.32, 0.75) * u), PAPER)
+		_paint_roof(ci, Vector2(tx, -0.75) * u, 0.22 * u, 0.45 * u, ROOF)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-func _draw_box(rect: Rect2, fill: Color, a: float) -> void:
-	draw_rect(rect, Color(fill, a))
-	draw_rect(rect, Color(INK, a), false, 1.0)
+static func _paint_box(ci: CanvasItem, rect: Rect2, fill: Color) -> void:
+	ci.draw_rect(rect, fill)
+	ci.draw_rect(rect, INK, false, 1.4)
 
 
-func _draw_roof(base_center: Vector2, half_width: float, height: float, color: Color, a: float) -> void:
+static func _paint_roof(ci: CanvasItem, base_center: Vector2, half_width: float, height: float, color: Color) -> void:
 	var tri := PackedVector2Array([base_center + Vector2(-half_width, 0.0), base_center + Vector2(0.0, -height), base_center + Vector2(half_width, 0.0)])
-	draw_colored_polygon(tri, Color(color, a))
-	draw_polyline(_closed(tri), Color(INK, a), 1.0, true)
+	ci.draw_colored_polygon(tri, color)
+	ci.draw_polyline(_closed(tri), INK, 1.4, true)
 
 
 # --- Noms -----------------------------------------------------------------------------
@@ -360,8 +464,8 @@ func _draw_arched(realm: Dictionary, s: float, a: float) -> Array[Rect2]:
 	var start := pc - dir * total * 0.5
 	var bend := total * 0.06
 	var x := 0.0
-	var color := Color(RED_INK.darkened(0.1), 0.85 * a)
-	var outline := Color(PAPER, 0.55 * a)
+	var color := Color(RED_INK.darkened(0.25), 0.95 * a)
+	var outline := Color(PAPER.lightened(0.2), 0.8 * a)
 	for i in text.length():
 		var ch := text[i]
 		var t := (x + widths[i] * 0.5) / maxf(total, 1.0) * 2.0 - 1.0
@@ -378,11 +482,11 @@ func _draw_arched(realm: Dictionary, s: float, a: float) -> Array[Rect2]:
 
 
 func _draw_province_names(s: float, a: float, view: Rect2, placed: Array[Rect2]) -> void:
-	var size := int(clampf(13.0 * s, 11.0, 20.0))
+	var size := int(clampf(15.0 * s, 12.0, 22.0))
 	var color := Color(INK, 0.9 * a)
 	var outline := Color(PAPER, 0.6 * a)
 	for province in _provinces:
-		var p := _screen(province["px"])
+		var p := _screen_w(province["world"])
 		if not view.has_point(p):
 			continue
 		var text: String = province["name"]
@@ -429,7 +533,7 @@ func _draw_army_tokens(s: float, a: float, view: Rect2) -> void:
 			var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 250.0)
 			draw_arc(p, r + 5.0 + pulse * 2.0, 0.0, TAU, 40, Color(GOLD, a), 2.0, true)
 		var men := ArmyMarkers.format_men(marker.men)
-		var fs := int(clampf(10.0 * s, 9.0, 14.0))
+		var fs := int(clampf(13.0 * s, 12.0, 17.0))
 		var w := FONT_ROMAN.get_string_size(men, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var origin := p + Vector2(-w * 0.5, r + fs + 3.0)
 		draw_string_outline(FONT_ROMAN, origin, men, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 3, Color(PAPER, a))

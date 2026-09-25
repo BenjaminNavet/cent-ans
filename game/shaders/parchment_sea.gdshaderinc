@@ -6,7 +6,7 @@
 
 uniform vec4 pm_roses[4];  // x, y (px carte), rayon (px carte), 1 = active
 uniform int pm_rose_count = 0;
-uniform float pm_rhumb_alpha = 0.55;
+uniform float pm_rhumb_alpha = 0.4;
 
 // Rose des vents à 16 pointes, pointe nord rouge ; renvoie (couverture, couleur).
 vec4 pm_rose(vec2 p, vec4 rose, float footprint) {
@@ -74,15 +74,16 @@ void parchment_sea(vec2 p, vec2 uv, float footprint, float coast, float lake_f, 
 	vec3 parch = pm_paper_at(p, uv, footprint);
 	float off = max(-coast, 0.0);
 	// Lavis : plus soutenu le long des côtes (pigment au bord), pâle au large.
-	float wash = mix(0.42, 0.85, exp(-off / 10.0)) * (0.9 + 0.2 * pm_noise(p * 0.05));
-	parch *= mix(vec3(1.0), pm_sea_wash, wash);
+	float wash = mix(0.55, 0.9, exp(-off / 10.0)) * (0.9 + 0.2 * pm_noise(p * 0.05));
+	parch = mix(parch, pm_sea_wash * (parch / pm_paper), wash);
 	// Filets d'eau : lignes parallèles à la côte, de plus en plus espacées et pâles.
 	float lines = 0.0;
 	for (int i = 1; i <= 4; i++) {
 		float fi = float(i);
-		lines = max(lines, pm_line(off - fi * fi * 1.6 - 1.2, 0.45, footprint) * (1.0 - fi * 0.2));
+		lines = max(lines, pm_line(off - fi * fi * 1.8 - 1.5, 0.75, footprint) * (1.0 - fi * 0.18));
 	}
-	parch = mix(parch, pm_ink * 4.0 + pm_sea_wash * 0.1, lines * 0.6 * step(0.3, off));
+	parch *= mix(vec3(1.0), vec3(0.78, 0.9, 0.9), exp(-off / 5.0));
+	parch = mix(parch, pm_sea_wash * 0.35, lines * 0.75 * step(0.3, off));
 	// Rhumbs puis roses.
 	for (int i = 0; i < 4; i++) {
 		if (i >= pm_rose_count) {
