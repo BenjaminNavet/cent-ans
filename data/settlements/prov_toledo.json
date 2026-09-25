@@ -17,11 +17,8 @@
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_windmill",
-      "bld_abbey",
       "bld_cathedral",
-      "bld_stone_walls",
       "bld_castle",
       "bld_muster_field",
       "bld_stables",
@@ -80,7 +77,7 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
+      "bld_collegiate_church",
       "bld_stone_walls"
     ],
     "port": false,

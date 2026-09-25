@@ -17,10 +17,8 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_windmill",
       "bld_port",
-      "bld_abbey",
       "bld_cathedral",
       "bld_stone_walls",
       "bld_muster_field",
@@ -53,7 +51,7 @@
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Ville libre d'empire et siège archiépiscopal, grand port hanséatique de la Weser.",
@@ -79,7 +77,7 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
+      "bld_collegiate_church",
       "bld_stone_walls"
     ],
     "port": false,

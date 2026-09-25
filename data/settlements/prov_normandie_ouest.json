@@ -8,7 +8,7 @@
     "weight": 35,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_port", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_port", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": true,
     "description": "Grande ville de Basse-Normandie sur l'Orne, dotée des abbayes de Guillaume le Conquérant.",
     "sources": ["Caen"]

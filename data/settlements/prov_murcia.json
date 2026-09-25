@@ -75,7 +75,6 @@
     "fortification_level": 3,
     "buildings": [
       "bld_castle",
-      "bld_stone_walls",
       "bld_muster_field"
     ],
     "port": false,

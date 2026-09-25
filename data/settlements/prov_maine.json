@@ -8,7 +8,7 @@
     "weight": 34,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_weaving_workshop", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
     "description": "Capitale du comté du Maine, domaine royal, ceinte de son enceinte gallo-romaine.",
     "sources": ["Le Mans", "Comté du Maine"]

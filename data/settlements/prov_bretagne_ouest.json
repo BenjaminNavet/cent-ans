@@ -8,7 +8,7 @@
     "weight": 30,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_abbey", "bld_cathedral", "bld_palisade", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_cathedral", "bld_palisade", "bld_muster_field"],
     "port": true,
     "description": "Cité épiscopale de Cornouaille au confluent de l'Odet et du Steir.",
     "sources": ["Quimper"]

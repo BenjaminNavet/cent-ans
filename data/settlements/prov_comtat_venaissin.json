@@ -8,7 +8,7 @@
     "weight": 40,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_vineyard_press", "bld_weaving_workshop", "bld_abbey", "bld_cathedral", "bld_fair", "bld_guild_hall", "bld_hotel_dieu", "bld_stone_walls", "bld_castle", "bld_muster_field", "bld_university"],
+    "buildings": ["bld_windmill", "bld_vineyard_press", "bld_weaving_workshop", "bld_cathedral", "bld_fair", "bld_hotel_dieu", "bld_castle", "bld_muster_field", "bld_university"],
     "port": false,
     "description": "Résidence de la cour pontificale de Benoît XII, qui y bâtit le Palais des papes, mais la ville relève encore juridiquement du comte de Provence Robert de Naples jusqu'à son rachat en 1348.",
     "sources": ["Avignon", "Papauté d'Avignon"]

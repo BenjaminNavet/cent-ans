@@ -199,7 +199,7 @@ pub fn try_acquire(
                 continue;
             }
             if let Some(building) = &rule.building {
-                if !buildings.contains(building) {
+                if !data.has_building(buildings, building) {
                     continue;
                 }
             }

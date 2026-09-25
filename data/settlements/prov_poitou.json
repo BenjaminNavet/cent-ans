@@ -8,7 +8,7 @@
     "weight": 36,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
     "port": false,
     "description": "Capitale du comté de Poitou, domaine royal depuis 1271, siège de la sénéchaussée.",
     "sources": ["Poitiers", "Comté de Poitou"]
