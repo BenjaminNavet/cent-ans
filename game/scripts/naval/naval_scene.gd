@@ -58,6 +58,10 @@ var _bench_frames: int = 0
 var _bench_time: float = 0.0
 var _bench_frame_ms: PackedFloat64Array = PackedFloat64Array()
 var _bench_at: float = 150.0
+var _bench_gpu_ms: float = 0.0
+var _bench_cpu_ms: float = 0.0
+var _bench_process_ms: float = 0.0
+var _last_process_ms: float = 0.0
 var _last_left_ms: int = -10000
 var _last_left_id: int = -1
 var _audio_director: Node = null
@@ -248,11 +252,13 @@ func _process(delta: float) -> void:
 		return
 	if _benchmark:
 		_bench_frame(delta)
+	var started := Time.get_ticks_usec()
 	var dt := 0.0 if paused or _finished_shown else delta * speed
 	if dt > 0.0:
 		battle.call("tick", dt)
 		anim_time += dt
 	_refresh(delta)
+	_last_process_ms = float(Time.get_ticks_usec() - started) / 1000.0
 
 
 func _refresh(delta: float) -> void:
@@ -744,11 +750,16 @@ func _bench_frame(delta: float) -> void:
 		_fast_forward(_bench_at)
 		_apply_camera_view()
 		speed = 1.0
+		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	_bench_frames += 1
 	if _bench_frames <= 30:
 		return  # préchauffage
 	_bench_time += delta
 	_bench_frame_ms.append(delta * 1000.0)
+	var rid := get_viewport().get_viewport_rid()
+	_bench_gpu_ms += RenderingServer.viewport_get_measured_render_time_gpu(rid)
+	_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(rid)
+	_bench_process_ms += _last_process_ms
 	if _bench_frames >= BENCH_FRAMES + 30:
 		var sorted := _bench_frame_ms.duplicate()
 		sorted.sort()
@@ -761,6 +772,9 @@ func _bench_frame(delta: float) -> void:
 			"scene": "naval", "scenario": scenario_id, "frames": _bench_frame_ms.size(), "fps": snappedf(fps, 0.1),
 			"p95_ms": snappedf(sorted[int(sorted.size() * 0.95)], 0.01), "ships": ships.size(), "afloat": afloat,
 			"arrows": volleys.launched, "time": snappedf(anim_time, 0.1),
+			"gpu_ms": snappedf(_bench_gpu_ms / _bench_frame_ms.size(), 0.01),
+			"render_cpu_ms": snappedf(_bench_cpu_ms / _bench_frame_ms.size(), 0.01),
+			"scene_process_ms": snappedf(_bench_process_ms / _bench_frame_ms.size(), 0.01),
 		}
 		print("NAVAL_BENCH " + JSON.stringify(report))
 		get_tree().quit()
