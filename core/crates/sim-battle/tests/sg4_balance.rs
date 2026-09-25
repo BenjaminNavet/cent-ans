@@ -37,12 +37,15 @@ fn regiments() -> usize {
 }
 
 /// `ground`: 0 flat, 1 crest 45 m in front of the defender, 2 the generated
-/// plains field (as in `ep1_scale`).
+/// plains field without village in clear weather, 3 the `ep1_scale` battle
+/// (generated plains, village and weather drawn).
 fn battle(seed: u64, ground: u8, stakes: bool) -> BattleSim {
     let data = data();
     let army: Vec<&str> = (0..regiments()).map(|i| KINDS[i % KINDS.len()]).collect();
     let mut setup = setup(units(&data, &army), units(&data, &army), None);
-    setup.village = Some(false);
+    if ground != 3 {
+        setup.village = Some(false);
+    }
     for unit in setup
         .attacker
         .units
@@ -56,10 +59,12 @@ fn battle(seed: u64, ground: u8, stakes: bool) -> BattleSim {
         }
     }
     let mut sim = BattleSim::new(setup, seed).unwrap();
-    sim.set_weather(sim_battle::Weather::Clear);
+    if ground != 3 {
+        sim.set_weather(sim_battle::Weather::Clear);
+    }
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
-    if ground == 2 {
+    if ground >= 2 {
         return sim;
     }
     let crest = ground == 1;
@@ -119,6 +124,7 @@ fn survey_epic_attacker_defender() {
         Ok("generated") => vec![(2, true), (2, false)],
         Ok("flat_bare") => vec![(0, false)],
         Ok("crest") => vec![(1, true), (1, false)],
+        Ok("ep1") => vec![(3, true)],
         _ => vec![
             (0, true),
             (0, false),
@@ -126,6 +132,7 @@ fn survey_epic_attacker_defender() {
             (1, false),
             (2, true),
             (2, false),
+            (3, true),
         ],
     };
     for (ground, stakes) in cases {
@@ -142,7 +149,7 @@ fn survey_epic_attacker_defender() {
                 if std::env::var("SG4_HORSE").is_ok()
                     && sim.elapsed() > 180.0
                     && sim.elapsed() < 260.0
-                    && sim.ticks() % 25 == 0
+                    && sim.ticks().is_multiple_of(25)
                 {
                     for u in sim
                         .units()
@@ -259,7 +266,7 @@ fn survey_epic_attacker_defender() {
         let n = f64::from(t.attacker + t.defender + t.draws);
         println!(
             "| {} | {} | {} | {} | {} | {:.0} % | {:.0} % | {:.0} |",
-            ["plat", "crête", "plaine générée"][usize::from(ground)],
+            ["plat", "crête", "plaine générée", "comme ep1_scale"][usize::from(ground)],
             if stakes { "oui" } else { "non" },
             t.attacker,
             t.defender,
