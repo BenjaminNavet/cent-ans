@@ -38,6 +38,9 @@ var _by_chunk: Dictionary = {}
 var _fine_anchors: Array[Dictionary] = []
 var _fine_mode := false
 var _gates_hidden := false
+## Lot ZG4b : ouvrages à remettre en forme après une bascule de mode (index dans `items`),
+## étalés sur plusieurs images (`FrameBudget`) : la bascule d'un bloc coûtait ~35 ms.
+var _reshape_queue: Array[int] = []
 
 
 func build(rivers_renderer: RiversRenderer, settlements: SettlementLayer) -> void:
@@ -200,6 +203,7 @@ func _add(entry: Dictionary) -> void:
 
 
 func _instantiate(item: Dictionary) -> void:
+	item["fine_mode"] = _fine_mode
 	var instance := MeshInstance3D.new()
 	instance.name = str(item["id"])
 	instance.visibility_range_end = VISIBILITY_RANGE
@@ -222,7 +226,11 @@ func _shape(item: Dictionary) -> void:
 		# ZG5b : ouvrage à l'échelle réelle (maillage d'une largeur `width / FINE_SCALE` réduit de
 		# `FINE_SCALE` : la portée reste celle du fleuve fin, culées et tablier rétrécissent).
 		width /= FINE_SCALE
-	instance.mesh = BridgeMeshes.build(str(item["structure"]), width, absi(str(item["id"]).hash()))
+	# ZG4b : un maillage par mode, gardé (un retour au mode précédent ne remaille rien).
+	var mesh_key := "mesh_fine" if not fine.is_empty() else "mesh_v4"
+	if not item.has(mesh_key):
+		item[mesh_key] = BridgeMeshes.build(str(item["structure"]), width, absi(str(item["id"]).hash()))
+	instance.mesh = item[mesh_key]
 	# X local en travers du fleuve (ou selon la route portée), Z = X × Y (repère direct).
 	var across := Vector3(-dir.y, 0.0, dir.x)
 	if item.has("axis") and fine.is_empty():
@@ -256,16 +264,17 @@ func _ground(item: Dictionary) -> void:
 	if not fine.is_empty():
 		# ZG5b : origine au niveau de l'eau du fleuve fin (lit creusé dessous).
 		var q: Vector2 = fine["px"]
-		var vs := MapData.vertical_scale()
 		# Tablier à `z_deck` : hauteur du maillage (sommet du tablier ≈ 0,05 + 0,02 × largeur)
 		# mise à l'échelle de la hauteur réelle au-dessus de l'eau × échelle verticale courante.
 		var basis: Array = item.get("fine_basis", [])
 		if not basis.is_empty():
 			var deck_top := (0.05 + 0.02 * float(basis[2])) * FINE_SCALE
-			var rise := maxf(float(fine["z_deck"]) - float(fine["z_water"]), 3.0) * vs
+			# ZG8 : hauteur affichée du tablier au-dessus de l'eau (relief local exagéré compris).
+			var z_water := float(fine["z_water"])
+			var rise := MapData.display_height(z_water + maxf(float(fine["z_deck"]) - z_water, 3.0), q.x, q.y) - MapData.display_height(z_water, q.x, q.y)
 			var k_h := clampf(rise / maxf(deck_top, 1e-4), 0.3, 12.0)
 			node.transform.basis = Basis(basis[0] * FINE_SCALE, Vector3.UP * FINE_SCALE * k_h, basis[1] * FINE_SCALE)
-		node.position = Vector3(q.x, maxf(float(fine["z_water"]) * vs, 0.0), q.y)
+		node.position = Vector3(q.x, maxf(MapData.display_height(float(fine["z_water"]), q.x, q.y), 0.0), q.y)
 		return
 	var p: Vector2 = item["px"]
 	var y := renderer.map_data.surface_world_at(p.x, p.y)
@@ -293,9 +302,11 @@ func set_fine_anchors(anchors: Array[Dictionary]) -> void:
 	_fine_anchors = anchors
 
 
-## Ancrage fin d'un ouvrage en mode fin : {px, dir, width (unités), z_water} ou {}.
+## Ancrage fin d'un ouvrage en mode fin : {px, dir, width (unités), z_water} ou {}. Mode de
+## l'ouvrage lui-même (`fine_mode`, ZG4b) : pendant une bascule étalée, les ouvrages pas encore
+## remis en forme restent cohérents avec leur maillage.
 func _fine_of(item: Dictionary) -> Dictionary:
-	if not _fine_mode or not item.has("index"):
+	if not bool(item.get("fine_mode", false)) or not item.has("index"):
 		return {}
 	var index: int = item["index"]
 	if index < 0 or index >= _fine_anchors.size():
@@ -316,14 +327,41 @@ func fine_anchor_of(id: String) -> Dictionary:
 	return {}
 
 
-## Bascule tous les ouvrages construits entre le tracé V4 et les ancrages fins.
+## Bascule tous les ouvrages construits entre le tracé V4 et les ancrages fins. ZG4b : remise en
+## forme étalée (au moins un ouvrage par image, puis tant que `FrameBudget.has_time()`) ; hors
+## d'une image ouverte (tests), tout est fait tout de suite.
 func set_fine_mode(on: bool) -> void:
 	if on == _fine_mode:
 		return
 	_fine_mode = on
-	for item in items:
-		if item["node"] != null and item.has("index"):
-			_shape(item)
+	_reshape_queue.clear()
+	for i in items.size():
+		var item: Dictionary = items[i]
+		if item["node"] != null and item.has("index") and bool(item.get("fine_mode", false)) != on:
+			_reshape_queue.append(i)
+	pump_reshape()
+
+
+## Remet en forme les ouvrages en attente (voir `set_fine_mode`) ; `all` : tous (captures).
+func pump_reshape(all: bool = false) -> void:
+	var first := true
+	while not _reshape_queue.is_empty() and (all or first or FrameBudget.has_time()):
+		var item: Dictionary = items[_reshape_queue.pop_back()]
+		first = false
+		if item["node"] == null or bool(item.get("fine_mode", false)) == _fine_mode:
+			continue
+		item["fine_mode"] = _fine_mode
+		_shape(item)
+	set_process(not _reshape_queue.is_empty())
+
+
+func _process(_delta: float) -> void:
+	pump_reshape()
+
+
+## Nombre d'ouvrages en attente de remise en forme (tests, mesures).
+func pending_reshapes() -> int:
+	return _reshape_queue.size()
 
 
 ## Ponts-portes et ponts de zone (tracé V4) cachés quand `FineGeoLayer` pose les siens.

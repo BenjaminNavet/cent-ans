@@ -184,7 +184,8 @@ func _start_bake() -> void:
 func _surface_m(x: float, z: float) -> float:
 	if _terrain == null:
 		return 0.0
-	return _terrain.surface_height_at(x, z) / maxf(MapData.vertical_scale(), 1e-9)
+	# ZG8 : inverse de la hauteur affichée (le shader la repose avec `campaign_display_height`).
+	return MapData.height_from_display(_terrain.surface_height_at(x, z), x, z)
 
 
 ## Hauteurs (m) des coins de texels de la ligne `j` (HEIGHT_RES + 1 valeurs, partagées par les

@@ -255,3 +255,35 @@ Détail dans `docs/godot-map.md` (« Caméra rapprochée et exagération vertica
   leur rendu (lot VH), exclues via `LandmarkLibrary`.
 - Finage : rayon exposé au parcellaire ZG5b par un tableau d'uniformes (`fp_towns`, 16 villes proches),
   pas par le masque des terroirs (1 px = 2,9 km, trop grossier pour un finage de 1-4 km).
+
+## Addendum (lot ZG4b, 2026-09-25) : correctifs de recette de la vue rapprochée
+
+Détail dans `docs/godot-map.md` (« Correctifs de recette (lot ZG4b) »).
+
+- **Plancher provisoire** au-dessus des villes emblématiques : la caméra ne descend pas sous
+  `CloseCameraProfile.landmark_min_distance` (2,6 unités, `close_camera.tres`) dans leurs zones, plancher
+  adouci au-dehors. Leurs maquettes à la loupe restent visibles (au-dessus du palier site) au lieu d'un sol
+  vide. **VH4 le lève** (valeur 0) en passant ces villes au 1:1.
+- Le « sol beige nu » venait surtout du brouillard matinal de la météo peint sur le sol : atténué de près
+  (`weather_mist_near`) ; le parcellaire ZG5b s'applique aussi aux terres relevées au plancher de 0,5 m.
+- Ponts-portes fins à l'échelle réelle ; bascule des ponts en mode fin étalée (`FrameBudget`).
+
+## Addendum (lot ZG8, 2026-09-25) : relief local exagéré
+
+Détail dans `docs/godot-map.md` (« Relief exagéré façon Total War »). L'échelle verticale ZG4 reste le
+propriétaire unique, complétée d'un **gain de relief local** : hauteur affichée
+`y = s·(h + g·max(h − fond, 0))`, fond de vallée lissé (min 3 × 3 puis flou, cellules de 5,75 km,
+≥ 0) calculé au chargement.
+
+- **Source unique** : `campaign_display_height` (`shaders/campaign_relief.gdshaderinc`) et son double
+  `MapData.display_height` (+ inverse `height_from_display`). Tout consommateur de l'ancien
+  `campaign_vertical_scale` × mètres passe par elle ; aucun shader ne redéclare le paramètre (vérifié par
+  `tests/zg8_relief_test.gd`).
+- **Gain fonction de l'échelle quantifiée** (`gain_far` → `gain_near`) : même signal de recalage que ZG4,
+  aucun calque à modifier au-delà de la fonction.
+- **Plancher de près relevé** de ×1,5 à ×2,5 (`relief_exaggeration.tres`), ce qui ramène le nombre de
+  paliers de 27 à ≈ 14.
+- **Fond ≥ 0** : côte, mer, fleuves au fond de leur vallée, ponts inchangés.
+- Écart : les « pentes » des règles d'occupation du sol (`vegetation_mask`, parcellaire) restent les pentes
+  vraies ; seule la roche des falaises suit la pente exagérée.
+- Interrupteur : `enabled = false` ou `--no-relief-exaggeration` rend exactement ZG4.

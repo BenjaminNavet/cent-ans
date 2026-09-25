@@ -12,7 +12,8 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 // selon les drapeaux : grèves et bancs de sable (divagant), vasières découvertes par la marée
 // (marée), roselières (marais), lit de galets (intermittent).
 
-global uniform float campaign_vertical_scale;  // ZG4 : unités monde par mètre
+// ZG4 : unités monde par mètre ; ZG8 : hauteur affichée (relief local exagéré).
+#include "res://shaders/campaign_relief.gdshaderinc"
 #define height_scale campaign_vertical_scale
 // Disque couvert par le rendu fin (centre x, z ; rayon ; poids du palier près).
 uniform vec4 fine_zone = vec4(0.0, 0.0, -1.0, 0.0);
@@ -86,7 +87,7 @@ float zone_mask(vec2 p) {
 }
 
 void vertex() {
-	vec3 world = vec3(VERTEX.x, VERTEX.y * height_scale, VERTEX.z);
+	vec3 world = vec3(VERTEX.x, campaign_display_height(VERTEX.y, VERTEX.xz), VERTEX.z);
 	vec3 to_cam = CAMERA_POSITION_WORLD - world;
 	float dist = max(length(to_cam), 0.01);
 	float world_per_px = dist * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);
