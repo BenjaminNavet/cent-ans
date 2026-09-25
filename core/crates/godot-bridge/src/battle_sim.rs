@@ -372,6 +372,8 @@ impl BattleSim {
                     "present" => unit.present(),
                     "reserve" => unit.reserve,
                     "left_field" => unit.left_field,
+                    // Q2: end-of-battle fate (destroyed, routed, withdrawn, reserve, held).
+                    "fate" => unit.fate().key(),
                     "fire_at_will" => unit.fire_at_will,
                     "can_shoot" => unit.can_shoot(),
                     "running" => unit.running,
