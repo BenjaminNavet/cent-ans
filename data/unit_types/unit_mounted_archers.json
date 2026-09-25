@@ -10,9 +10,9 @@
   "mounted": true,
   "soldiers": 100,
   "cost": {
-    "money": 700
+    "money": 600
   },
-  "upkeep": 60,
+  "upkeep": 55,
   "recruit_time_turns": 2,
   "stats": {
     "melee": 30,

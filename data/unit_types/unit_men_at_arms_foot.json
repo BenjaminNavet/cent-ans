@@ -9,7 +9,7 @@
   "source_class": "nobility",
   "soldiers": 80,
   "cost": {
-    "money": 900
+    "money": 950
   },
   "upkeep": 90,
   "recruit_time_turns": 2,

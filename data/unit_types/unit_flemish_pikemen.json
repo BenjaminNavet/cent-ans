@@ -9,9 +9,9 @@
   "source_class": "burghers",
   "soldiers": 120,
   "cost": {
-    "money": 450
+    "money": 600
   },
-  "upkeep": 40,
+  "upkeep": 55,
   "recruit_time_turns": 1,
   "stats": {
     "melee": 55,
