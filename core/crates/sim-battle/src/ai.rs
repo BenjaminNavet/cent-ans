@@ -123,6 +123,21 @@ pub const ATTACKER_WAIT: f64 = 90.0;
 pub const DEFENDER_PATIENCE: f64 = 480.0;
 /// Besiegers wait for their engines at most this long before escalading.
 pub const ENGINE_PATIENCE: f64 = 420.0;
+/// SG4: a ram whose crew falls below this share of its full crew calls a
+/// foot regiment to take it over.
+pub const RAM_RELIEF_CREW: f64 = 0.6;
+/// SG4: the relieving regiment stands this far behind the ram, away from
+/// the gate (outside the reach of the boiling oil).
+pub const RAM_RELIEF_STAND: f64 = 14.0;
+/// SG4: an assault with no progress (ram blow, ladders, wall walk gained,
+/// tower docked, works down) for this long is abandoned.
+pub const ASSAULT_STALL: f64 = 300.0;
+/// SG4: an assault is abandoned when the besiegers' strength falls below
+/// this share of the garrison's (no opening, nobody on the walls).
+pub const ASSAULT_HOPELESS: f64 = 0.35;
+/// SG4: engines choose the weakest front wall; each metre of distance from
+/// the engines weighs as this many HP (the nearest of equal walls).
+pub const ENGINE_TARGET_HP_PER_M: f64 = 2.0;
 
 /// R2b: a rise steeper than this (metres per metre over 20 m) is not
 /// charged at the run from afar: the regiment walks up and charges close.
@@ -2248,6 +2263,50 @@ fn outer_point(works: &SiegeWorks, piece: usize, offset: f64) -> (f64, f64) {
     (mx + nx * offset, mz + nz * offset)
 }
 
+/// SG4: the attacker's progress in the assault: the last time a ram struck,
+/// ladders went up, a regiment gained the wall walk, a tower docked, or the
+/// works gave way (0 before any).
+fn last_progress(sim: &BattleSim) -> f64 {
+    use crate::siege_fx::SiegeFxKind as K;
+    sim.siege_fx()
+        .iter()
+        .rev()
+        .find(|fx| {
+            matches!(
+                fx.kind,
+                K::RamStrike { .. }
+                    | K::LaddersRaised { .. }
+                    | K::OnWall { .. }
+                    | K::TowerDocked { .. }
+                    | K::GateBroken { .. }
+                    | K::WallBreached { .. }
+            )
+        })
+        .map_or(0.0, |fx| fx.time)
+}
+
+/// SG4: is the assault clearly lost? No way in (no opening, nobody of ours
+/// on the walls, climbing or inside, no tower rolling) and either nothing
+/// has moved for [`ASSAULT_STALL`] seconds since the escalade could start,
+/// or our strength fell below [`ASSAULT_HOPELESS`] of the garrison's.
+fn assault_lost(view: &View, works: &SiegeWorks, towers_rolling: bool) -> bool {
+    let units = view.units;
+    let elapsed = view.sim.elapsed();
+    if elapsed <= ENGINE_PATIENCE || !works.openings().is_empty() || towers_rolling {
+        return false;
+    }
+    let in_the_town = view.own.iter().any(|&i| {
+        let u = &units[i];
+        u.on_wall || u.climbing.is_some() || works.inside(u.x, u.z)
+    });
+    if in_the_town {
+        return false;
+    }
+    let stalled = elapsed > ENGINE_PATIENCE + ASSAULT_STALL
+        && elapsed - last_progress(view.sim) > ASSAULT_STALL;
+    stalled || view.power(true) < view.power(false) * ASSAULT_HOPELESS
+}
+
 fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     let units = view.units;
     let elapsed = view.sim.elapsed();
@@ -2274,11 +2333,23 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         u.destination.is_some() || u.state == UnitState::Marching
     });
     let storm = !openings.is_empty();
-    // Nobody left who can get in: sound the retreat.
-    let climbers_left = own.iter().any(|&i| units[i].can_climb());
-    let ram_left = own.iter().any(|&i| units[i].ram) && works.pieces[works.gate].intact();
+    let gate_intact = works.pieces[works.gate].intact();
+    // SG4: rams of the side, manned or abandoned (their crew all dead).
+    let rams: Vec<usize> = (0..units.len())
+        .filter(|&i| {
+            let u = &units[i];
+            u.ram && u.side == view.side && !u.left_field && !u.withdrawing && !u.reserve
+        })
+        .collect();
+    // Nobody left who can get in, or (SG4) the assault is clearly lost:
+    // sound the retreat.
+    let climbers_left = own
+        .iter()
+        .any(|&i| units[i].can_climb() || (is_shooter(&units[i]) && !units[i].mounted));
+    let ram_left = !rams.is_empty() && gate_intact;
     let engines_left = engines.iter().any(|&i| units[i].ammo > 0);
-    if !storm && !climbers_left && !ram_left && !engines_left {
+    let hopeless = !storm && !climbers_left && !ram_left && !engines_left;
+    if hopeless || assault_lost(view, works, towers_rolling) {
         let all: Vec<u32> = own
             .iter()
             .filter(|&&i| !units[i].withdrawing)
@@ -2294,16 +2365,19 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
             || elapsed > ENGINE_PATIENCE
             || (!engines_working && !towers_rolling && elapsed > 20.0));
 
-    // Engines: concentrate on the weakest front wall, then shoot the wall walk.
+    // Engines: concentrate on the weakest front wall (SG4: the nearest of
+    // equally battered ones), then shoot the wall walk.
+    let engine_center = view.centroid(&engines);
     let target_piece = front
         .iter()
         .copied()
         .filter(|&p| works.pieces[p].intact())
         .min_by(|&a, &b| {
-            works.pieces[a]
-                .hp
-                .total_cmp(&works.pieces[b].hp)
-                .then(a.cmp(&b))
+            let score = |p: usize| {
+                let d = engine_center.map_or(0.0, |(x, z)| works.pieces[p].distance(x, z));
+                works.pieces[p].hp + d * ENGINE_TARGET_HP_PER_M
+            };
+            score(a).total_cmp(&score(b)).then(a.cmp(&b))
         });
     for &i in &engines {
         let unit = &units[i];
@@ -2332,8 +2406,8 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         }
     }
     // Ram: to the gate while it stands.
-    for &i in own.iter().filter(|&&i| units[i].ram) {
-        if works.pieces[works.gate].intact() {
+    for &i in rams.iter().filter(|&&i| units[i].able()) {
+        if gate_intact {
             let (x, z) = outer_point(works, works.gate, band + 1.0);
             view.move_to(i, x, z, false, None);
         } else {
@@ -2341,8 +2415,42 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
             view.move_to(i, x + 25.0, z, false, None);
         }
     }
+    // SG4: a ram short of men (or abandoned): the nearest free foot
+    // regiment comes to take it over (the core passes its men to the ram,
+    // `siege_works.json` `ram.relief_*`), standing behind it, clear of the
+    // boiling oil.
+    let mut relief: Vec<usize> = Vec::new();
+    if gate_intact {
+        for &r in &rams {
+            let ram = &units[r];
+            if ram.hp >= f64::from(ram.initial_soldiers) * RAM_RELIEF_CREW {
+                continue;
+            }
+            let (nx, nz) = works.pieces[works.gate].outward();
+            let spot = (ram.x + nx * RAM_RELIEF_STAND, ram.z + nz * RAM_RELIEF_STAND);
+            let donor = own
+                .iter()
+                .copied()
+                .filter(|&i| {
+                    let u = &units[i];
+                    u.can_climb()
+                        && view.free(i)
+                        && !u.on_wall
+                        && !works.inside(u.x, u.z)
+                        && !relief.contains(&i)
+                })
+                .min_by(|&a, &b| {
+                    dist_to(&units[a], spot.0, spot.1)
+                        .total_cmp(&dist_to(&units[b], spot.0, spot.1))
+                        .then(a.cmp(&b))
+                });
+            if let Some(i) = donor {
+                relief.push(i);
+                view.move_to(i, spot.0, spot.1, true, None);
+            }
+        }
+    }
     // Towers: one per front wall.
-    let mut tower_pieces: Vec<usize> = Vec::new();
     let intact_front: Vec<usize> = front
         .iter()
         .copied()
@@ -2353,18 +2461,37 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
             break;
         }
         let p = intact_front[k % intact_front.len()];
-        tower_pieces.push(p);
         let (x, z) = outer_point(works, p, band + 2.0);
         view.move_to(i, x, z, false, None);
     }
+    // SG4: ladders on several stretches of the front at once (one regiment
+    // per stretch, nearest first), the stretches the garrison holds in
+    // strength (more than twice the average) last: dilute the defence.
+    let held = |p: usize| -> f64 {
+        view.able_enemies()
+            .filter(|&j| {
+                units[j].on_wall && works.pieces[p].distance(units[j].x, units[j].z) < 30.0
+            })
+            .map(|j| units[j].hp)
+            .sum()
+    };
+    let held_by: Vec<f64> = intact_front.iter().map(|&p| held(p)).collect();
+    let average = held_by.iter().sum::<f64>() / held_by.len().max(1) as f64;
+    let strong = |k: usize| average > 0.0 && held_by[k] > 2.0 * average;
+    let ladder_pieces: Vec<usize> = (0..intact_front.len())
+        .filter(|&k| !strong(k))
+        .chain((0..intact_front.len()).filter(|&k| strong(k)))
+        .map(|k| intact_front[k])
+        .collect();
 
     // Foot and horse.
     let waiting_z = front_z(works) - 250.0;
     let square = works.center;
     let mut ladder_slot = 0usize;
+    let mut tower_slot = 0usize;
     for &i in &own {
         let unit = &units[i];
-        if unit.category == UnitCategory::Siege || !view.free(i) {
+        if unit.category == UnitCategory::Siege || !view.free(i) || relief.contains(&i) {
             continue;
         }
         if is_shooter(unit) {
@@ -2391,18 +2518,28 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
                 continue;
             }
         }
-        if storm {
+        // SG4: over the wall or inside the town: take the square (never wait
+        // at the ladders); enemies on the way are fought as they come close.
+        if unit.on_wall || works.inside(unit.x, unit.z) {
             view.move_to(i, square.0, square.1, true, None);
-        } else if escalade && unit.can_climb() {
-            // Climb at a docked tower if any, else ladders along the front.
-            let piece = if !docked.is_empty() {
-                docked[ladder_slot % docked.len()]
-            } else if !intact_front.is_empty() {
-                intact_front[ladder_slot % intact_front.len()]
+            continue;
+        }
+        if storm {
+            // SG4: through the breach or the gate as soon as it opens.
+            view.move_to(i, square.0, square.1, true, None);
+        } else if (escalade || storm) && unit.can_climb() {
+            // Climb at a docked tower if any (one regiment per tower at a
+            // time), else ladders on the least-held stretches of the front.
+            let piece = if let Some(&p) = docked.get(tower_slot) {
+                tower_slot += 1;
+                p
+            } else if !ladder_pieces.is_empty() {
+                let p = ladder_pieces[ladder_slot % ladder_pieces.len()];
+                ladder_slot += 1;
+                p
             } else {
                 works.gate
             };
-            ladder_slot += 1;
             let (x, z) = if let Some(t) = works.pieces[piece].docked_tower {
                 let t = &units[t as usize];
                 let (nx, nz) = works.pieces[piece].outward();
@@ -2411,10 +2548,8 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
                 outer_point(works, piece, -25.0)
             };
             view.move_to(i, x, z, true, None);
-        } else if unit.on_wall || works.inside(unit.x, unit.z) {
-            view.move_to(i, square.0, square.1, true, None);
         } else {
-            // Wait out of bowshot for the engines and towers.
+            // Wait out of bowshot for the engines, towers and ram.
             view.move_to(i, unit.x, waiting_z.min(unit.z), false, Some(0.0));
         }
     }
