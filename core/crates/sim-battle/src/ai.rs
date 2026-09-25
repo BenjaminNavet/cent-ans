@@ -158,10 +158,27 @@ pub const STAKES_GUARD: f64 = 35.0;
 /// of the ride, the horsemen coming from their front)? The ride ends on
 /// the stakes: a routing regiment flees through its archers, a melee drifts.
 fn stakes_in_path(units: &[Unit], from: (f64, f64), target: &Unit) -> bool {
-    let to = (target.x, target.z);
+    stakes_on_ride(
+        units,
+        target.side,
+        from,
+        (target.x, target.z),
+        Some(target.id),
+    )
+}
+
+/// R2b: does a ride from `from` to `to` pass in front of planted stakes of
+/// `foe` (`except` the regiment charged)?
+fn stakes_on_ride(
+    units: &[Unit],
+    foe: SideId,
+    from: (f64, f64),
+    to: (f64, f64),
+    except: Option<u32>,
+) -> bool {
     units.iter().any(|k| {
-        k.id != target.id
-            && k.side == target.side
+        Some(k.id) != except
+            && k.side == foe
             && k.stakes_planted
             && k.able()
             && attack_angle(k, from.0, from.1) == 0
@@ -505,13 +522,24 @@ fn high_ground(view: &View, around: (f64, f64)) -> (f64, f64) {
     }
 }
 
+/// R2b: centre of the deployment line of `side`, from which a defensive
+/// side looks for its ground (a fixed reference: searching from the moving
+/// line would let the reverse slope drag the line back step after step).
+fn deployment_center(side: SideId) -> (f64, f64) {
+    use crate::field::{ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH};
+    match side {
+        SideId::Attacker => (FIELD_WIDTH * 0.5, ATTACKER_LINE_Z),
+        SideId::Defender => (FIELD_WIDTH * 0.5, DEFENDER_LINE_Z),
+    }
+}
+
 /// R2b: depth of the glacis read in front of a defensive position.
 const GLACIS_DEPTH: f64 = 100.0;
 /// R2b: a line stands in order on slopes up to this grade.
 const STAND_SLOPE: f64 = 0.15;
 /// R2b: the line stands at most this far behind the crest its shooters
 /// hold (reverse slope).
-const REVERSE_REACH: f64 = 40.0;
+const REVERSE_REACH: f64 = 30.0;
 
 /// R2b: the line of a defensive side on a crest steps back onto the reverse
 /// slope, out of sight, when the enemy shooters need to see their target
@@ -906,7 +934,7 @@ fn plan_field(view: &mut View) {
         };
         (c.center.0, c.z_at(c.center.0) - view.forward * back)
     } else if defensive {
-        let crest = high_ground(view, line_center);
+        let crest = high_ground(view, deployment_center(view.side));
         reverse_slope_anchor(view, crest, !roles.shooters.is_empty())
     } else if duel && contact < 260.0 {
         line_center
@@ -1405,7 +1433,9 @@ fn plan_horse(
         let e = &units[j];
         if attack_angle(e, unit.x, unit.z) > 0 || d < 25.0 {
             view.attack(i, j, true);
-        } else {
+            return;
+        }
+        {
             // Ride round to its flank first.
             let (rx, rz) = e.right();
             let side = if (unit.x - e.x) * rx + (unit.z - e.z) * rz >= 0.0 {
@@ -1415,11 +1445,24 @@ fn plan_horse(
             };
             let (w, _) = e.extent();
             let (fx, fz) = e.forward();
-            let px = e.x + rx * side * (w * 0.5 + 35.0) - fx * 15.0;
-            let pz = e.z + rz * side * (w * 0.5 + 35.0) - fz * 15.0;
-            view.move_to(i, px, pz, true, None);
+            let flank = |side: f64| {
+                (
+                    e.x + rx * side * (w * 0.5 + 35.0) - fx * 15.0,
+                    e.z + rz * side * (w * 0.5 + 35.0) - fz * 15.0,
+                )
+            };
+            // R2b: not by a flank that passes in front of stakes.
+            let clear = |p: (f64, f64)| {
+                !stakes_on_ride(units, e.side, (unit.x, unit.z), p, None)
+                    && !stakes_on_ride(units, e.side, p, (e.x, e.z), Some(e.id))
+            };
+            let way = [flank(side), flank(-side)].into_iter().find(|&p| clear(p));
+            if let Some((px, pz)) = way {
+                view.move_to(i, px, pz, true, None);
+                return;
+            }
+            // R2b: both flanks pass in front of stakes: next choice.
         }
-        return;
     }
     // 4. Pursuit of routing regiments (B8: leashed — a rout that has
     // already fled too far from the battle line is left to run; chasing it
@@ -1485,6 +1528,24 @@ fn react(view: &mut View, roles: &Roles) {
     for i in own {
         let u = &units[i];
         if u.state != UnitState::Melee || u.climbing.is_some() {
+            continue;
+        }
+        // R2b: horsemen riding down a rout into the front of enemy stakes
+        // break off.
+        let rout_into_stakes = is_horse(u)
+            && u.target
+                .and_then(|t| units.get(t as usize))
+                .is_some_and(|t| {
+                    t.state == UnitState::Routing && stakes_in_path(units, (u.x, u.z), t)
+                });
+        if rout_into_stakes {
+            view.commands.push(Command::Move {
+                units: vec![u.id],
+                x: u.x,
+                z: u.z - view.forward * 60.0,
+                run: true,
+                facing: None,
+            });
             continue;
         }
         // Shaken and bled: pull out before it breaks (if a reserve exists).
