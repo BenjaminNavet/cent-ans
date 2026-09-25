@@ -69,6 +69,7 @@ pub mod table;
 pub mod turn;
 pub mod victory;
 pub mod vision;
+pub mod weather;
 
 pub use agents::{
     AgentActionOption, AgentError, AgentId, AgentRecruitOption, AgentReport, AgentsState,
@@ -113,3 +114,4 @@ pub use state::{
     Stance, Unit, MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
+pub use weather::{MapWeather, ProvinceWeather};
