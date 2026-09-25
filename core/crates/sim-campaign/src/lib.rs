@@ -51,6 +51,7 @@ pub mod march;
 pub mod medicine;
 pub mod movement;
 pub mod navigation;
+pub mod negotiation;
 pub mod orders;
 pub mod path_plan;
 pub mod population;

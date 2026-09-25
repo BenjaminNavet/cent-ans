@@ -68,6 +68,9 @@ pub struct AiDiplomacy {
     pub war: WarPlanningRules,
     pub join_war: JoinWarRules,
     pub peace: PeaceRules,
+    /// Lot DP1: multi-article treaties, war goals and war weariness.
+    #[serde(default)]
+    pub negotiation: NegotiationRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -96,7 +99,92 @@ impl Default for AiDiplomacy {
                 keep_capital: false,
                 cornered_provinces: 0,
             },
+            negotiation: NegotiationRules::default(),
             description: None,
+        }
+    }
+}
+
+/// Lot DP1 (ADR 0025): how treaties are valued, war goals scored and war
+/// weariness accumulated. `enabled: false` (the default without the data
+/// file) keeps the G5 peace of `plan_diplomacy`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct NegotiationRules {
+    /// War goals, war weariness and the AI's treaty peace are active.
+    pub enabled: bool,
+    /// Logistic scale of the acceptance chance: `100 / (1 + e^(-score / scale))`.
+    pub chance_scale: f64,
+    /// Livres worth one point of treaty value (gold, tribute, ransom).
+    pub livres_per_point: i64,
+    /// Cap of the value of one gold or tribute article.
+    pub max_gold_points: i32,
+    /// Provinces an attacker targets as war goals.
+    pub war_goal_count: usize,
+    /// Extra war score per war-goal province the side occupies.
+    pub war_goal_score: i32,
+    /// War score per secondary settlement (castle, town) a side occupies.
+    pub settlement_score: i32,
+    /// Value lost by ceding a province (the capital: `capital_cost`).
+    pub province_cost: i32,
+    pub capital_cost: i32,
+    /// Value lost by ceding a secondary settlement.
+    pub settlement_cost: i32,
+    /// Share of the cost left when the province is already occupied by the
+    /// party receiving it (percent).
+    pub occupied_cost_percent: i32,
+    /// Bonus of receiving one of our war goals.
+    pub war_goal_bonus: i32,
+    /// War weariness gained each season per war (non-rebel enemies).
+    pub weariness_per_war: u32,
+    /// Extra weariness when the war score is below -20.
+    pub weariness_losing: u32,
+    /// Extra weariness per own province occupied by the enemy (capped at 3).
+    pub weariness_occupied: u32,
+    /// Extra weariness with an empty treasury.
+    pub weariness_bankrupt: u32,
+    /// Weariness lost each season of peace.
+    pub weariness_recovery: u32,
+    /// Weariness points per point of unrest in the realm.
+    pub weariness_unrest_divisor: u32,
+    /// Weariness points per point of peace value.
+    pub weariness_peace_divisor: u32,
+    /// The AI declares no new war above this weariness.
+    pub max_weariness_to_declare: u32,
+    /// A pretender whose war goals are unmet resists a white peace.
+    pub unmet_goals_reluctance: i32,
+    /// War score from which the AI winner demands cessions.
+    pub demand_score: i32,
+    /// Minimum acceptance chance (percent) of a treaty the AI sends.
+    pub ai_min_chance: u8,
+}
+
+impl Default for NegotiationRules {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            chance_scale: 6.0,
+            livres_per_point: 250,
+            max_gold_points: 60,
+            war_goal_count: 2,
+            war_goal_score: 12,
+            settlement_score: 3,
+            province_cost: 20,
+            capital_cost: 60,
+            settlement_cost: 6,
+            occupied_cost_percent: 50,
+            war_goal_bonus: 10,
+            weariness_per_war: 1,
+            weariness_losing: 1,
+            weariness_occupied: 1,
+            weariness_bankrupt: 1,
+            weariness_recovery: 3,
+            weariness_unrest_divisor: 5,
+            weariness_peace_divisor: 3,
+            max_weariness_to_declare: 40,
+            unmet_goals_reluctance: 15,
+            demand_score: 20,
+            ai_min_chance: 60,
         }
     }
 }

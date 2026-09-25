@@ -505,6 +505,12 @@ pub struct FactionState {
     /// [`crate::economy_balance::BUDGET_HISTORY_SEASONS`]).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub budget_history: Vec<crate::economy_balance::BudgetRecord>,
+    // ----- Lot DP1: treaties, war goals, war weariness ------------------------
+    #[serde(
+        default,
+        skip_serializing_if = "crate::negotiation::DiplomaticLedger::is_empty"
+    )]
+    pub ledger: crate::negotiation::DiplomaticLedger,
 }
 
 fn default_faction_loyalty() -> u8 {
