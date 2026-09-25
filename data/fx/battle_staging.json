@@ -1,0 +1,75 @@
+{
+  "description": "Mise en scène des batailles (lot EP8, ADR 0052) : lumière selon l'heure (images clés interpolées, facteurs appliqués au préréglage météo de BattleAtmosphere), ombres de nuages, poussière des charges et des colonnes, fumées (feux de camp, bombardes, incendies), oiseaux, plan cinématique au premier choc. Purement visuel : la règle de visibilité est dans data/rules/battle_time_of_day.json (cœur).",
+  "time_of_day": {
+    "update_period_s": 1.5,
+    "keyframes": [
+      { "hour": 0.0, "elevation_mul": 0.55, "sun_yaw_deg": 200, "energy_mul": 0.14, "sun_tint": [0.55, 0.65, 1.0], "zenith_tint": [0.08, 0.1, 0.2], "horizon_tint": [0.14, 0.16, 0.28], "fog_tint": [0.16, 0.18, 0.3], "ambient_mul": 0.3, "exposure": 0.9, "hdri": false, "sun_disc": 0.0, "shadow_opacity": 0.5 },
+      { "hour": 4.6, "elevation_mul": 0.4, "sun_yaw_deg": 250, "energy_mul": 0.16, "sun_tint": [0.6, 0.68, 1.0], "zenith_tint": [0.12, 0.14, 0.28], "horizon_tint": [0.24, 0.24, 0.36], "fog_tint": [0.24, 0.25, 0.36], "ambient_mul": 0.34, "exposure": 0.9, "hdri": false, "sun_disc": 0.0, "shadow_opacity": 0.5 },
+      { "hour": 5.5, "elevation_mul": 0.1, "sun_yaw_deg": 95, "energy_mul": 0.55, "sun_tint": [1.0, 0.58, 0.34], "zenith_tint": [0.46, 0.5, 0.78], "horizon_tint": [1.3, 0.82, 0.62], "fog_tint": [1.1, 0.82, 0.72], "ambient_mul": 0.62, "exposure": 1.0, "hdri": false, "sun_disc": 1.0, "shadow_opacity": 0.85 },
+      { "hour": 7.0, "elevation_mul": 0.36, "sun_yaw_deg": 120, "energy_mul": 0.85, "sun_tint": [1.0, 0.8, 0.6], "zenith_tint": [0.82, 0.88, 1.0], "horizon_tint": [1.12, 0.98, 0.88], "fog_tint": [1.05, 0.96, 0.9], "ambient_mul": 0.85, "exposure": 1.0, "hdri": false, "sun_disc": 1.0, "shadow_opacity": 1.0 },
+      { "hour": 9.0, "elevation_mul": 0.7, "sun_yaw_deg": 170, "energy_mul": 1.0, "sun_tint": [1.0, 0.95, 0.88], "zenith_tint": [1.0, 1.0, 1.0], "horizon_tint": [1.0, 1.0, 1.0], "fog_tint": [1.0, 1.0, 1.0], "ambient_mul": 1.0, "exposure": 1.0, "hdri": true, "sun_disc": 1.0, "shadow_opacity": 1.0 },
+      { "hour": 12.0, "elevation_mul": 1.0, "sun_yaw_deg": 218, "energy_mul": 1.0, "sun_tint": [1.0, 1.0, 1.0], "zenith_tint": [1.0, 1.0, 1.0], "horizon_tint": [1.0, 1.0, 1.0], "fog_tint": [1.0, 1.0, 1.0], "ambient_mul": 1.0, "exposure": 1.0, "hdri": true, "sun_disc": 1.0, "shadow_opacity": 1.0 },
+      { "hour": 15.0, "elevation_mul": 0.78, "sun_yaw_deg": 240, "energy_mul": 1.0, "sun_tint": [1.0, 0.94, 0.84], "zenith_tint": [1.0, 1.0, 1.0], "horizon_tint": [1.02, 1.0, 0.96], "fog_tint": [1.02, 1.0, 0.97], "ambient_mul": 1.0, "exposure": 1.0, "hdri": true, "sun_disc": 1.0, "shadow_opacity": 1.0 },
+      { "hour": 17.0, "elevation_mul": 0.4, "sun_yaw_deg": 255, "energy_mul": 0.9, "sun_tint": [1.0, 0.78, 0.55], "zenith_tint": [0.86, 0.88, 0.98], "horizon_tint": [1.15, 0.95, 0.8], "fog_tint": [1.08, 0.95, 0.85], "ambient_mul": 0.88, "exposure": 1.0, "hdri": false, "sun_disc": 1.0, "shadow_opacity": 1.0 },
+      { "hour": 18.6, "elevation_mul": 0.09, "sun_yaw_deg": 268, "energy_mul": 0.62, "sun_tint": [1.0, 0.5, 0.26], "zenith_tint": [0.42, 0.42, 0.66], "horizon_tint": [1.35, 0.72, 0.5], "fog_tint": [1.1, 0.72, 0.6], "ambient_mul": 0.58, "exposure": 1.0, "hdri": false, "sun_disc": 1.0, "shadow_opacity": 0.85 },
+      { "hour": 20.0, "elevation_mul": 0.05, "sun_yaw_deg": 275, "energy_mul": 0.26, "sun_tint": [0.85, 0.5, 0.5], "zenith_tint": [0.2, 0.2, 0.36], "horizon_tint": [0.62, 0.42, 0.44], "fog_tint": [0.5, 0.4, 0.46], "ambient_mul": 0.4, "exposure": 0.95, "hdri": false, "sun_disc": 0.6, "shadow_opacity": 0.6 },
+      { "hour": 21.2, "elevation_mul": 0.45, "sun_yaw_deg": 170, "energy_mul": 0.14, "sun_tint": [0.55, 0.65, 1.0], "zenith_tint": [0.08, 0.1, 0.2], "horizon_tint": [0.14, 0.16, 0.28], "fog_tint": [0.16, 0.18, 0.3], "ambient_mul": 0.3, "exposure": 0.9, "hdri": false, "sun_disc": 0.0, "shadow_opacity": 0.5 }
+    ]
+  },
+  "cloud_shadows": {
+    "texture_px": 256,
+    "tile_m": 2400,
+    "wind_speed_m_s": 7.0,
+    "update_period_s": 0.25,
+    "by_weather": {
+      "clear": { "strength": 0.42, "coverage": 0.48 },
+      "fog": { "strength": 0.0, "coverage": 0.0 },
+      "rain": { "strength": 0.14, "coverage": 0.7 },
+      "snow": { "strength": 0.1, "coverage": 0.65 }
+    },
+    "night_strength_mul": 0.0,
+    "quality": { "low": false, "medium": true, "high": true, "ultra": true }
+  },
+  "dust": {
+    "reference_soldiers": 240,
+    "max_strength": 1.6,
+    "column_emitters": { "low": 2, "medium": 4, "high": 6, "ultra": 8 },
+    "column_distance_m": 900,
+    "column_min_soldiers": 400,
+    "terrain": { "plains": 1.0, "hills": 0.85, "forest": 0.45, "marsh": 0.15, "mountains": 0.7, "coast": 0.6 },
+    "season": { "spring": 0.7, "summer": 1.2, "autumn": 0.8, "winter": 0.3 }
+  },
+  "smoke": {
+    "max_sources": { "low": 4, "medium": 8, "high": 14, "ultra": 20 },
+    "campfire": { "amount": 14, "lifetime_s": 9.0, "size_m": [3.0, 9.0], "rise_m_s": 1.6, "color": [0.58, 0.57, 0.55, 0.42], "drift_m_s": 1.4, "glow": true },
+    "column": { "amount": 22, "lifetime_s": 16.0, "size_m": [8.0, 26.0], "rise_m_s": 3.2, "color": [0.16, 0.15, 0.14, 0.62], "drift_m_s": 2.6 },
+    "bombard_linger": { "amount": 10, "lifetime_s": 14.0, "size_m": [6.0, 16.0], "rise_m_s": 0.5, "color": [0.84, 0.83, 0.8, 0.4], "drift_m_s": 1.2 },
+    "camp_fires_per_side": { "low": 1, "medium": 2, "high": 3, "ultra": 4 },
+    "camp_depth_m": 170,
+    "no_campfire_weather": ["rain", "snow"]
+  },
+  "birds": {
+    "flocks": { "low": 1, "medium": 2, "high": 4, "ultra": 5 },
+    "birds_per_flock": [14, 28],
+    "trigger_radius_m": 240,
+    "circle_radius_m": [60, 140],
+    "circle_height_m": [35, 80],
+    "flee_speed_m_s": 14.0,
+    "circle_speed_m_s": 9.0,
+    "flight_duration_s": [40.0, 70.0],
+    "crows_after_s": 30.0,
+    "crows": 18,
+    "wing_span_m": 0.8,
+    "color": [0.08, 0.075, 0.07]
+  },
+  "cinematic": {
+    "duration_s": 6.0,
+    "slowmo_scale": 0.35,
+    "distance_m": 30.0,
+    "height_m": 5.5,
+    "orbit_deg": 50.0,
+    "fov_deg": 52.0,
+    "min_soldiers_in_contact": 60,
+    "blend_in_s": 0.6
+  }
+}
