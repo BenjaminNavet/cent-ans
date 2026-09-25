@@ -1084,7 +1084,12 @@ func _process(_delta: float) -> void:
 	if zoom_tiers != null:  # C6 : paliers de zoom
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
-		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
+		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
+		# palier « site » (routes drapées à leur vraie largeur : lot ZG5b).
+		var site_hide := 1.0 - zoom_tiers.site_weight(distance)
+		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
+		if rivers.crossings != null:
+			rivers.crossings.visible = site_hide > 0.5
 		_apply_close_tiers(distance)
 	if life != null:  # CV1
 		life.update_view(distance)
@@ -1103,7 +1108,7 @@ func _process(_delta: float) -> void:
 			return
 		if _screenshot_countdown == 2 and settlement_layer != null:
 			settlement_layer.flush()
-			roads.flush(zoom_tiers.near_weight(distance))
+			roads.flush(zoom_tiers.near_weight(distance) * (1.0 - zoom_tiers.site_weight(distance)))
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:
 			_take_screenshot(_screenshot_path, true)
@@ -1240,6 +1245,8 @@ func _parse_cmdline() -> void:
 			camera_rig.close_min_distance = camera_rig.min_distance
 		elif arg == "--static-exaggeration":  # ZG4 : relief ×4,3 à tous les zooms (comparaisons)
 			dynamic_exaggeration = false
+		elif arg.begins_with("--rescale-settle-ms="):  # ZG4 : mesures (délai avant recalage des calques)
+			terrain.rescale_settle_ms = int(arg.trim_prefix("--rescale-settle-ms="))
 		elif arg.begins_with("--camera-yaw="):  # ZG4 : captures (degrés, 0 = regard vers le nord)
 			camera_rig.target_yaw = deg_to_rad(float(arg.trim_prefix("--camera-yaw=")))
 			camera_rig.snap()
@@ -1524,6 +1531,15 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var err := image.save_png(path)
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
+	if OS.get_cmdline_user_args().has("--dump-near"):  # ZG4 : diagnostic, géométries autour de la caméra
+		var eye := camera.global_position
+		for node in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+			var g := node as GeometryInstance3D
+			if not g.is_visible_in_tree():
+				continue
+			var box: AABB = g.global_transform * g.get_aabb()
+			if box.grow(camera_rig.distance * 2.0).has_point(eye):
+				print("NEAR %s size=%s" % [g.get_path(), box.size])
 	if quit_after:
 		get_tree().quit(0 if err == OK else 1)
 

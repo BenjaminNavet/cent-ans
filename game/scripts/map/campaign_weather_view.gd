@@ -230,7 +230,9 @@ func _update_particles(focus: Vector3, distance: float) -> void:
 			process.initial_velocity_min = (8.0 if is_snow else 60.0) * k
 			process.initial_velocity_max = (12.0 if is_snow else 75.0) * k
 			var quad := particles.draw_pass_1 as QuadMesh
-			quad.size = (Vector2(0.18, 0.18) if is_snow else Vector2(0.035, 1.1)) * maxf(k, 0.3)
+			# ZG4 : plancher 0,3 seulement au-dessus de la vue comté ; en vues vallée / site, taille
+			# proportionnelle (sinon des traits de pluie de 200 m voilent tout l'écran).
+			quad.size = (Vector2(0.18, 0.18) if is_snow else Vector2(0.035, 1.1)) * maxf(k, minf(0.3, k * 1.36))
 
 
 func _update_lightning(delta: float, distance: float) -> void:

@@ -71,10 +71,14 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 @export var surface_settle_ms: int = 700
 ## Lot ZG4 : budget par image des recalages après un changement d'échelle verticale.
 @export var rescale_budget_ms: float = 3.0
+## Délai sans changement d'échelle avant de recaler les calques (zoom continu : un seul recalage).
+@export var rescale_settle_ms: int = 180
+@export var max_far_rescales_per_frame: int = 1
 ## Vrai pendant les `chunk_surface_changed` émis pour un changement d'échelle verticale seul
 ## (la surface en mètres n'a pas changé).
 var rescaling_vertical: bool = false
 var _rescale_queue: Dictionary = {}
+var _rescale_changed_ms: int = 0
 
 var map_data: MapData
 var material: ShaderMaterial
@@ -600,8 +604,9 @@ func _note_emit(t0: int, count: int) -> void:
 
 ## Change l'échelle verticale (`MapData.set_vertical_scale`, paramètre global des shaders) et
 ## recale les calques : `vertical_scale_changed` tout de suite (objets ponctuels, recalage bon
-## marché), puis `chunk_surface_changed` morceau par morceau, étalé sur les images suivantes
-## (`rescale_budget_ms` par image, les morceaux les plus proches du point visé d'abord) avec
+## marché), puis, l'échelle stable depuis `rescale_settle_ms`, `chunk_surface_changed` morceau par
+## morceau, étalé sur les images suivantes (`rescale_budget_ms` par image, les morceaux les plus
+## proches du point visé d'abord) avec
 ## `rescaling_vertical` vrai pendant l'émission (les calques dont la hauteur cuite est en mètres,
 ## comme `LandmarkModel`, l'ignorent). Sans quadtree (repli E0, maillages cuits à
 ## `HEIGHT_SCALE`), l'échelle ne change pas : rend faux.
@@ -615,6 +620,7 @@ func set_vertical_scale(value: float) -> bool:
 	_rescale_queue.clear()
 	for index in CHUNKS * CHUNKS:
 		_rescale_queue[index] = true
+	_rescale_changed_ms = Time.get_ticks_msec()
 	build_stats["vertical_rescales"] = int(build_stats.get("vertical_rescales", 0)) + 1
 	var t0 := Time.get_ticks_usec()
 	vertical_scale_changed.emit(old, value)
@@ -635,10 +641,15 @@ func pending_rescales() -> int:
 	return _rescale_queue.size()
 
 
-## Émet les recalages en attente : morceaux proches (niveau ≥ 1) triés par distance au point visé,
-## dans le budget de l'image (au moins un), puis les lointains ; tout avec `force`.
+## Émet les recalages en attente, une fois l'échelle stable depuis `rescale_settle_ms` (un zoom
+## continu franchit une quinzaine de paliers : un seul recalage à l'arrêt au lieu de quinze) :
+## morceaux proches (niveau ≥ 1) triés par distance au point visé, dans le budget de l'image (au
+## moins un), puis les lointains (niveau 0, objets à peine visibles) au plus
+## `max_far_rescales_per_frame` par image ; tout avec `force`.
 func _flush_rescale(view_center: Vector3, force: bool = false) -> void:
 	if _rescale_queue.is_empty():
+		return
+	if not force and Time.get_ticks_msec() - _rescale_changed_ms < rescale_settle_ms:
 		return
 	var order: Array = []
 	var center := Vector2(view_center.x, view_center.z) if view_center != Vector3.INF else Vector2(2048.0, 2048.0)
@@ -650,11 +661,16 @@ func _flush_rescale(view_center: Vector3, force: bool = false) -> void:
 	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	var t0 := Time.get_ticks_usec()
 	var emitted := 0
+	var far_emitted := 0
 	rescaling_vertical = true
 	for entry in order:
 		if not force and emitted > 0 and (Time.get_ticks_usec() - t0) / 1000.0 >= rescale_budget_ms:
 			break
 		var index: int = entry[1]
+		if not force and _is_near[index] == 0:
+			if far_emitted >= max_far_rescales_per_frame:
+				break
+			far_emitted += 1
 		_rescale_queue.erase(index)
 		chunk_surface_changed.emit(index)
 		emitted += 1
