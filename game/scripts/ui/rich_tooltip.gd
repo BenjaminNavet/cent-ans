@@ -17,7 +17,7 @@ const INK := Color(0.22, 0.14, 0.07)
 const RED := "#8b1a1a"
 const GREEN := "#2a6a2a"
 const MUTED := "#6b5a40"
-const POUND := "℔"
+const POUND := Money.SYMBOL
 
 const EFFECT_LABELS := {
 	"unrest": "Mécontentement", "prestige": "Prestige", "army_morale": "Moral des armées",
@@ -178,12 +178,7 @@ static func visible_panel() -> Control:
 
 
 static func thousands(value: int) -> String:
-	var text := str(absi(value))
-	var out := ""
-	while text.length() > 3:
-		out = " " + text.substr(text.length() - 3) + out
-		text = text.substr(0, text.length() - 3)
-	return ("-" if value < 0 else "") + text + out
+	return Money.digits(value)
 
 
 static func _title(id: String, name: String, subtitle: String = "", category: String = "") -> String:
@@ -225,7 +220,7 @@ static func _effects_block(effects: Array, title: String = "Effets") -> String:
 	return "%s : %s" % [title, " · ".join(parts)] if not parts.is_empty() else ""
 
 
-## Coût `{money, resources{res_id: n}}` → « 800 ℔ + [fer] 2 ».
+## Coût `{money, resources{res_id: n}}` → « 800 ₶ + [fer] 2 ».
 static func cost_text(cost: Variant) -> String:
 	if cost is int or cost is float:
 		return "%s %s" % [thousands(int(cost)), POUND]
