@@ -10,6 +10,17 @@ extends Node3D
 ##
 ## Le tampon Rust concatène les soldats des régiments d'un camp et d'une famille dans l'ordre de
 ## `get_units()` ; chaque régiment présent y occupe exactement `soldiers` transformées.
+##
+## Lot BV2 (bataille vivante) : la mort tirée suit la cause des pertes venue du cœur
+## (`loss_cause`, `loss_by` : flèche, mêlée, charge, boulet, pieux, piques…) ; les cadavres
+## restent toute la bataille, rangés par cellules de terrain (LOD et masquage au loin, plafond
+## global) ; les chocs de cavalerie (`get_impacts`) renversent et projettent des fantassins qui se
+## relèvent (couche « renversés »), ralentissent les chevaux ; sang sur les figurines, gerbes et
+## démembrements (`BattleGore`, réglage « Sang »).
+
+## Émis à chaque cadavre posé (point d'accroche pour les flèches plantées du lot BV1) :
+## position au sol, camp, famille, cause des pertes.
+signal corpse_fallen(position: Vector3, side: String, kind: String, cause: String)
 
 const SOLDIER_SHADER := preload("res://shaders/battle_soldier.gdshader")
 const KINDS := ["infantry", "archer", "cavalry", "siege"]
@@ -47,11 +58,42 @@ var _rng := RandomNumberGenerator.new()
 var _warned: bool = false
 var _anim_track: Dictionary = {}  # unit id -> {ammo, state, since} (lot B4 : volées, chocs)
 var _skinned: Dictionary = {}  # unit id -> true : figurine skinnée (lot V2, `BattleSkinned`)
+## Lot BV2.
+var gore: BattleGore = null
+var knocked_count: int = 0
+var severed_count: int = 0
+var _gore: Dictionary = {}  # data/fx/battle_gore.json
+var _unit_info: Dictionary = {}  # unit id -> {type, kind, variant, side}
+var _unit_pos: Dictionary = {}  # unit id -> Vector3 (centre, dernière image)
+var _unit_scale: Dictionary = {}  # unit id -> figurines par soldat simulé
+var _corpse_materials: Dictionary = {}  # "side/kind/variant" -> ShaderMaterial
+var _corpse_total: int = 0
+var _tumble_layers: Dictionary = {}  # "side/kind/variant" -> {mm, data, next, material}
+var _hidden: Dictionary = {}  # unit id -> {rang: instant de retour}
+var _lag: Dictionary = {}  # unit id -> retard d'horloge d'animation (chevaux ralentis)
+var _slow: Dictionary = {}  # unit id -> {since, kind}
+var _drive: Dictionary = {}  # unit id -> {since, depth, dir} : chevaux qui entrent dans la masse
+var _charge_mass: Dictionary = {}  # unit id -> poids de la dernière charge
+var _melee_time: Dictionary = {}  # unit id -> secondes de mêlée cumulées
+var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
+var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une charge
+var _frame_dt: float = 0.0
+var _audio: Script = null
+## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
+var bv2_enabled: bool = not OS.get_cmdline_user_args().has("--no-bv2")
+var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au début de la bataille)
 
 
 ## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp.
 func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> void:
 	_rng.seed = 4242
+	_gore = BattleGore.settings()
+	_level = BattleGore.level_settings()
+	gore = BattleGore.new()
+	gore.name = "Gore"
+	add_child(gore)
+	if ResourceLoader.exists("res://scripts/audio/battle_audio.gd"):
+		_audio = load("res://scripts/audio/battle_audio.gd")
 	_side_colors = side_colors
 	for side in side_factions:
 		_side_heraldry[side] = PortraitLoader.heraldry_texture(str(side_factions[side]))
@@ -62,6 +104,7 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		var id := int(unit["id"])
 		var variant := BattleMeshes.variant_of(str(unit.get("type", "")))
 		var side := str(unit["side"])
+		_unit_info[id] = {"type": str(unit.get("type", "")), "kind": kind, "variant": variant, "side": side}
 		var skinned := BattleSkinned.has_figure(kind, variant)
 		var mat := _make_skinned_material(side, kind, variant, false) if skinned else _make_material(side, kind, variant, false)
 		var mm := MultiMesh.new()
@@ -165,6 +208,23 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 	var camera := get_viewport().get_camera_3d()
 	if camera != null:
 		_camera_pos = camera.global_position
+	_frame_dt = anim_dt
+	var smooth := 1.0 - exp(-anim_dt / 0.6)
+	for unit in units:
+		var uid := int(unit["id"])
+		var pos := Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"]))
+		if anim_dt > 0.0 and _unit_pos.has(uid):
+			var step := Vector2(pos.x - (_unit_pos[uid] as Vector3).x, pos.z - (_unit_pos[uid] as Vector3).z).length()
+			var v := minf(step / anim_dt, 30.0)
+			_speed[uid] = float(_speed.get(uid, v)) + (v - float(_speed.get(uid, v))) * smooth
+		_unit_pos[uid] = pos
+		if str(unit.get("state", "")) == "melee":
+			_melee_time[uid] = float(_melee_time.get(uid, 0.0)) + anim_dt
+	_advance_lags(anim_dt)
+	if bv2_enabled:
+		_find_braced(units)
+	if gore != null:
+		gore.update(anim_dt, _camera_pos)
 	for side in ["attacker", "defender"]:
 		for kind in KINDS:
 			var buffer: PackedFloat32Array = battle.call("get_soldier_buffer", side, kind)
@@ -184,7 +244,13 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 					n = maxi(total - offset, 0)
 				var slice := buffer.slice(offset * 12, (offset + n) * 12)
 				offset += n
+				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
 				_update_unit(unit, id, kind, slice, n, selected.has(id))
+	# Lot BV2 : chocs de cavalerie résolus par le cœur depuis l'image précédente.
+	if bv2_enabled and battle.has_method("get_impacts"):
+		var impacts: Array = battle.call("get_impacts")
+		if not impacts.is_empty():
+			apply_impacts(impacts)
 
 
 func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32Array, n: int, is_selected: bool) -> void:
@@ -195,8 +261,13 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		var prev: PackedFloat32Array = _previous[id]
 		var prev_n := prev.size() / 12
 		if n < prev_n and n > 0 and bool(unit["present"]):
-			_spawn_corpses(str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), prev, prev_n - n)
+			_spawn_corpses(unit, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), prev, prev_n - n)
 	_previous[id] = slice
+	# Renversés (lot BV2) : leur place dans la formation est vide jusqu'à ce qu'ils se relèvent.
+	if _hidden.has(id):
+		slice = _hide_knocked(id, slice, n)
+	if _drive.has(id):
+		slice = _drive_in(id, slice, n)
 	var lod: MultiMeshInstance3D = _lod_layers[id]
 	var lod_mm := lod.multimesh
 	if n > mm.instance_count:
@@ -230,27 +301,43 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	mm.visible_instance_count = n
 	lod_mm.visible_instance_count = n
 	var mat: ShaderMaterial = _materials[id]
-	mat.set_shader_parameter("anim_time", anim_time)
+	var ammo := int(unit.get("ammo", 0))
+	var state := str(unit.get("state", ""))
+	var config: Dictionary = {}
+	if skinned:
+		var shown_state := "brace" if _braced.has(id) and ["idle", "marching", "rallied"].has(state) else state
+		config = BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), shown_state, bool(unit.get("running", false)))
+		# Lot BV2 : cadence de marche calée sur la vitesse réelle du régiment (pieds qui ne
+		# glissent plus) — l'horloge du régiment avance plus ou moins vite, sans saut de phase.
+		var cadence := _cadence(id, config) if bv2_enabled else 1.0
+		if cadence != 1.0:
+			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt * (1.0 - cadence)
+	# Horloge propre du régiment (retard des chevaux ralentis, cadence) : tous les instants
+	# du matériau (fondus, volées, état) sont pris sur elle.
+	var local := anim_time - float(_lag.get(id, 0.0))
+	mat.set_shader_parameter("anim_time", local)
 	mat.set_shader_parameter("anim_state", anim_state(unit))
 	mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
 	mat.set_shader_parameter("far_blend", smoothstep(READABLE_NEAR, READABLE_FAR, distance))
 	# Lot B4 : décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
-	var ammo := int(unit.get("ammo", 0))
-	var state := str(unit.get("state", ""))
 	var track: Dictionary = _anim_track.get(id, {})
 	if track.is_empty():
-		track = {"ammo": ammo, "state": state, "since": anim_time - 100.0}
+		track = {"ammo": ammo, "state": state, "since": local - 100.0}
 		_anim_track[id] = track
 	if ammo < int(track["ammo"]):
-		mat.set_shader_parameter("volley_time", anim_time)
+		mat.set_shader_parameter("volley_time", local)
 	if state != str(track["state"]):
-		track["since"] = anim_time
+		track["since"] = local
 	track["ammo"] = ammo
 	track["state"] = state
-	mat.set_shader_parameter("state_time", anim_time - float(track["since"]))
+	mat.set_shader_parameter("state_time", local - float(track["since"]))
 	if skinned:
-		var config := BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), state, bool(unit.get("running", false)))
-		BattleSkinned.apply_config(mat, config, anim_time)
+		BattleSkinned.apply_config(mat, config, local)
+		# Sang : uniforme mis à jour seulement quand il change sensiblement.
+		var blood := snappedf(_living_blood(unit, id), 0.02)
+		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
+			mat.set_meta("bv2_blood", blood)
+			mat.set_shader_parameter("blood", blood)
 
 
 ## Positions (au sol) d'au plus `count` soldats du régiment `id`, pris à intervalles réguliers
@@ -273,53 +360,392 @@ func soldier_positions(id: int, count: int) -> PackedVector3Array:
 
 
 ## Ajoute `count` cadavres pris au hasard dans la tranche précédente (plutôt au premier rang).
-func _spawn_corpses(side: String, kind: String, variant: int, prev: PackedFloat32Array, count: int) -> void:
-	var key := "%s/%s/%d" % [side, kind, variant]
+## Lot BV2 : mort tirée selon la cause des pertes (`loss_cause`), projection en arrière loin du
+## tueur (charge, boulet), démembrement sur coup critique (réglage « complet »), sang, gerbe ;
+## cadavres rangés par cellules de terrain (LOD, plafond global `corpses.max_total`).
+func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, prev: PackedFloat32Array, count: int) -> void:
 	var skinned := BattleSkinned.has_figure(kind, variant)
-	var deaths: int = (BattleSkinned.death_config(kind, variant)["set"] as Array).size() if skinned else 1
+	var mounted := kind == "cavalry"
+	var limits: Dictionary = _gore.get("corpses", {})
+	var level := _level
+	var cause := str(unit.get("loss_cause", "other")) if bv2_enabled else "other"
+	var deaths: Dictionary = _gore.get("deaths", {})
+	var death: Dictionary = deaths.get(cause, deaths.get("other", {}))
+	var names: Array = death.get(("mounted" if mounted else "foot"), [])
+	var impulse: Array = death.get("impulse", [0.0, 0.5])
+	var killer := int(unit.get("loss_by", -1))
+	var killer_pos: Variant = _unit_pos.get(killer)
+	var crit_chance := _critical_chance(cause, killer) * float(death.get("critical", 0.0)) if gore != null and gore.dismember_enabled() else 0.0
+	var death_count: int = (BattleSkinned.death_config(kind, variant)["set"] as Array).size() if skinned else 1
+	var prev_n := prev.size() / 12
+	var sprays: Dictionary = _gore.get("sprays", {})
+	for _i in mini(count, int(limits.get("spawn_per_update", 60))):
+		var k := mini(int(pow(_rng.randf(), 1.6) * prev_n), prev_n - 1)
+		var o := k * 12
+		var pos := Vector3(prev[o + 3], prev[o + 7], prev[o + 11])
+		var record := PackedFloat32Array()
+		record.resize(16)
+		for j in 12:
+			record[j] = prev[o + j]
+		# Clip de mort selon la cause ; figurines rigides : clip unique.
+		var clip := str(names[_rng.randi_range(0, names.size() - 1)]) if not names.is_empty() else ""
+		var index := BattleSkinned.death_index(kind, variant, clip) if skinned else 0
+		if index < 0:
+			index = _rng.randi_range(0, death_count - 1)
+		var speed := _rng.randf_range(float(impulse[0]), float(impulse[1]))
+		# Projeté loin du tueur : la figurine lui fait face, le vol part vers -Z du modèle.
+		var away := Vector3(prev[o + 2], 0.0, prev[o + 10]) * -1.0
+		if killer_pos != null and speed > 0.3:
+			var d: Vector3 = pos - (killer_pos as Vector3)
+			d.y = 0.0
+			if d.length() > 0.5:
+				away = d.normalized()
+				var angle := atan2(-away.x, -away.z)
+				var c := cos(angle)
+				var sn := sin(angle)
+				record[0] = c
+				record[2] = sn
+				record[8] = -sn
+				record[10] = c
+		var code := 0
+		if mounted and clip == "c_fall":
+			code = BattleSkinned.CODE_HORSE_FLEES
+		elif crit_chance > 0.0 and _rng.randf() < crit_chance:
+			var part := _pick_part(mounted)
+			if part != "":
+				code = int(BattleSkinned.SEVER_PARTS[part][0])
+				var height := {"head": 1.6, "arm_r": 1.25, "arm_l": 1.25, "leg_r": 0.45, "leg_l": 0.45}[part] as float
+				gore.sever(pos, away, part, height + (1.0 if mounted else 0.0))
+				severed_count += 1
+		var blood := float(level.get("corpse_blood", 0.0)) * _rng.randf_range(0.5, 0.99)
+		record[12] = anim_time
+		record[13] = float(index)
+		record[14] = speed if skinned else 0.0
+		record[15] = float(code) + minf(blood, 0.99)
+		_add_corpse(side, kind, variant, skinned, pos, record, limits)
+		if gore != null:
+			gore.spray(pos, away, int(sprays.get("droplets_per_death", 6)), 2.0 if mounted else 1.2)
+		corpse_fallen.emit(pos, side, kind, cause)
+		corpse_count += 1
+
+
+## Chance de coup critique (démembrement) selon la cause et l'arme du tueur.
+func _critical_chance(cause: String, killer: int) -> float:
+	var chances: Dictionary = _gore.get("critical_chance", {})
+	if cause == "ball" or cause == "stone":
+		return float(chances.get(cause, 0.0))
+	var info: Dictionary = _unit_info.get(killer, {})
+	var weapon := str(_gore.get("weapons", {}).get(str(info.get("type", "")), "sword"))
+	var chance := float(chances.get(weapon, 0.0))
+	if cause == "charge" and float(_charge_mass.get(killer, 0.0)) >= float(_gore.get("heavy_charge_mass", 1.2)):
+		chance = maxf(chance, float(chances.get("heavy_charge", 0.0)))
+	return chance
+
+
+func _pick_part(mounted: bool) -> String:
+	var weights: Dictionary = _gore.get("pieces", {}).get("mounted" if mounted else "foot", {})
+	var total := 0.0
+	for part in weights:
+		total += float(weights[part])
+	var r := _rng.randf() * total
+	for part in weights:
+		r -= float(weights[part])
+		if r <= 0.0:
+			return str(part)
+	return ""
+
+
+## Range un cadavre dans la cellule de terrain de `pos` (tampon circulaire par cellule).
+func _add_corpse(side: String, kind: String, variant: int, skinned: bool, pos: Vector3, record: PackedFloat32Array, limits: Dictionary) -> void:
+	var cell_m := float(limits.get("cell_m", 80.0))
+	var cx := int(floor(pos.x / cell_m))
+	var cz := int(floor(pos.z / cell_m))
+	# Démembrés : couche à part avec la variante `discard` du shader (early-z conservé ailleurs).
+	var severed := int(record[15]) >= 1 and int(record[15]) <= 5
+	var skey := "%s/%s/%d%s" % [side, kind, variant, "/cut" if severed else ""]
+	var key := "%s/%d/%d" % [skey, cx, cz]
 	if not _corpse_layers.has(key):
+		if not _corpse_materials.has(skey):
+			var material := _make_skinned_material(side, kind, variant, true) if skinned else _make_material(side, kind, variant, true)
+			if severed:
+				material.shader = BattleSkinned.corpse_shader()
+			if skinned:
+				material.set_shader_parameter("gravity", 9.8)
+			_corpse_materials[skey] = material
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_custom_data = true
 		mm.mesh = BattleSkinned.mesh(kind, variant, 1) if skinned else BattleMeshes.soldier(kind, variant, true)
 		mm.instance_count = 0
 		var instance := MultiMeshInstance3D.new()
-		instance.name = "Corpses_%s_%s_%d" % [side, kind, variant]
+		instance.name = "Corpses_%s_%s_%d_%d_%d" % [side, kind, variant, cx, cz]
 		instance.multimesh = mm
-		instance.material_override = _make_skinned_material(side, kind, variant, true) if skinned else _make_material(side, kind, variant, true)
+		instance.material_override = _corpse_materials[skey]
 		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(instance)
-		_corpse_layers[key] = {"mm": mm, "data": PackedFloat32Array(), "count": 0, "next": 0, "material": instance.material_override}
+		var center := Vector3((cx + 0.5) * cell_m, pos.y, (cz + 0.5) * cell_m)
+		_corpse_layers[key] = {"mm": mm, "data": PackedFloat32Array(), "count": 0, "next": 0, "instance": instance, "center": center, "kind": kind, "variant": variant, "skinned": skinned, "level": 1}
 	var layer: Dictionary = _corpse_layers[key]
 	var data: PackedFloat32Array = layer["data"]
-	var prev_n := prev.size() / 12
-	for _i in mini(count, 60):
-		var k := mini(int(pow(_rng.randf(), 1.6) * prev_n), prev_n - 1)
-		var o := k * 12
-		var record := PackedFloat32Array()
-		record.resize(16)
-		for j in 12:
-			record[j] = prev[o + j]
-		record[12] = anim_time
-		# Figurines skinnées : clip de mort tiré au sort (INSTANCE_CUSTOM.y) ; w = sang (0).
-		record[13] = float(_rng.randi_range(0, deaths - 1))
-		record[14] = 1.0 if _rng.randf() < 0.5 else -1.0
-		record[15] = 0.0
-		var count_now: int = layer["count"]
-		if count_now < MAX_CORPSES:
-			data.append_array(record)
-			layer["count"] = count_now + 1
-		else:
-			var slot: int = layer["next"]
-			for j in 16:
-				data[slot * 16 + j] = record[j]
-			layer["next"] = (slot + 1) % MAX_CORPSES
-		corpse_count += 1
+	var count_now: int = layer["count"]
+	var full := count_now >= int(limits.get("max_per_layer", 3000)) or _corpse_total >= int(limits.get("max_total", 14000))
+	if not full:
+		data.append_array(record)
+		layer["count"] = count_now + 1
+		_corpse_total += 1
+	elif count_now > 0:
+		# Plafond atteint : le cadavre remplace un plus ancien de la même cellule.
+		var slot: int = int(layer["next"]) % count_now
+		for j in 16:
+			data[slot * 16 + j] = record[j]
+		layer["next"] = (slot + 1) % count_now
+	else:
+		return
 	layer["data"] = data
 	var mm: MultiMesh = layer["mm"]
 	if mm.instance_count != int(layer["count"]):
 		mm.instance_count = int(layer["count"])
 	mm.buffer = data
+
+
+## LOD des cellules de cadavres : maillage moyen en deçà de `near_m`, lointain au-delà,
+## masquées après `far_m` (distance caméra → centre de cellule).
+func _update_corpse_lods() -> void:
+	var limits: Dictionary = _gore.get("corpses", {})
+	var near := float(limits.get("near_m", 60.0))
+	var far := float(limits.get("far_m", 380.0))
+	var half := float(limits.get("cell_m", 80.0)) * 0.7
+	for key in _corpse_layers:
+		var layer: Dictionary = _corpse_layers[key]
+		var dist := maxf(_camera_pos.distance_to(layer["center"]) - half, 0.0)
+		var instance: MultiMeshInstance3D = layer["instance"]
+		instance.visible = dist < far
+		if not layer["skinned"] or not instance.visible:
+			continue
+		var level := 1 if dist < near else 2
+		if level != int(layer["level"]):
+			layer["level"] = level
+			(layer["mm"] as MultiMesh).mesh = BattleSkinned.mesh(str(layer["kind"]), int(layer["variant"]), level)
+
+
+## Lot BV2 : applique les chocs de cavalerie du cœur (renversés projetés qui se relèvent,
+## chevaux ralentis ou arrêtés, gerbes, sons).
+func apply_impacts(impacts: Array) -> void:
+	var knock: Dictionary = _gore.get("knockdown", {})
+	for hit in impacts:
+		var attacker := int(hit["attacker"])
+		var defender := int(hit["defender"])
+		var kind := str(hit["kind"])
+		_charge_mass[attacker] = float(hit.get("mass", 0.0))
+		_slow[attacker] = {"since": anim_time, "kind": kind}
+		if kind == "shock":
+			var horses: Dictionary = _gore.get("horses", {})
+			var h := float(hit.get("heading", 0.0))
+			_drive[attacker] = {"since": anim_time, "depth": float(hit.get("depth", 0.0)) + float(horses.get("drive_extra_m", 2.5)), "dir": Vector2(sin(h), cos(h))}
+		var point: Vector2 = hit["point"]
+		var ground := _unit_pos.get(defender, Vector3(point.x, 0.0, point.y)) as Vector3
+		var at := Vector3(point.x, ground.y, point.y)
+		if kind == "pikes" or kind == "stakes":
+			_play_sound("horse_neigh", at)
+		elif kind == "shock":
+			_play_sound("shield_bash", at)
+		var knocked := int(hit.get("knocked", 0))
+		if knocked > 0:
+			_knock_down(defender, at, float(hit.get("heading", 0.0)), float(hit.get("mass", 1.0)), knocked, knock)
+
+
+## Renverse `knocked` soldats (× taille d'unité) du régiment `id` les plus proches du point
+## d'impact : figurines de la couche « renversés », place vide dans la formation le temps du clip.
+func _knock_down(id: int, at: Vector3, heading: float, mass: float, knocked: int, knock: Dictionary) -> void:
+	if not _previous.has(id) or not _unit_info.has(id):
+		return
+	var info: Dictionary = _unit_info[id]
+	var kind := str(info["kind"])
+	var variant := int(info["variant"])
+	if kind == "cavalry" or not BattleSkinned.has_figure(kind, variant):
+		return
+	var slice: PackedFloat32Array = _previous[id]
+	var n := slice.size() / 12
+	var k := mini(mini(int(round(knocked * float(_unit_scale.get(id, 1.0)))), int(knock.get("max_per_impact", 48))), n)
+	if k <= 0:
+		return
+	# Rangs les plus proches du point d'impact ; tirage parmi un peu plus de candidats.
+	var order: Array = []
+	for i in n:
+		var dx := slice[i * 12 + 3] - at.x
+		var dz := slice[i * 12 + 11] - at.z
+		order.append(Vector2(dx * dx + dz * dz, i))
+	order.sort()
+	var pool := mini(n, int(k * 1.5) + 1)
+	var layer := _tumble_layer(str(info["side"]), kind, variant, int(knock.get("max_active", 600)))
+	var mm: MultiMesh = layer["mm"]
+	var data: PackedFloat32Array = layer["data"]
+	var impulse: Array = knock.get("impulse", [2.0, 4.5])
+	var hidden: Dictionary = _hidden.get(id, {})
+	var clip_len := BattleSkinned.clip_seconds(kind, variant, "knockdown")
+	var level := _level
+	var sprays: Dictionary = _gore.get("sprays", {})
+	var picks: Array = order.slice(0, pool)
+	picks.shuffle()
+	# Face au cavalier : le vol part dans le sens de la charge (-Z du modèle).
+	var angle := heading + PI
+	var c := cos(angle)
+	var sn := sin(angle)
+	var push := Vector3(sin(heading), 0.0, cos(heading))
+	for j in k:
+		var slot := int((picks[j] as Vector2).y)
+		var o := slot * 12
+		var speed := _rng.randf_range(float(impulse[0]), float(impulse[1])) * clampf(0.6 + 0.4 * mass, 0.5, 1.4)
+		var fly := 2.0 * (0.35 * speed + 0.6) / 9.8
+		var r: int = layer["next"]
+		var w := r * 16
+		var values := [c, 0.0, sn, slice[o + 3], 0.0, 1.0, 0.0, slice[o + 7], -sn, 0.0, c, slice[o + 11], anim_time + _rng.randf_range(0.0, 0.15), 0.0, speed, minf(float(level.get("corpse_blood", 0.0)) * 0.3, 0.99)]
+		for q in 16:
+			data[w + q] = values[q]
+		layer["next"] = (r + 1) % mm.instance_count
+		hidden[slot] = anim_time + fly + clip_len + 0.2
+		knocked_count += 1
+		if gore != null:
+			gore.spray(Vector3(slice[o + 3], slice[o + 7], slice[o + 11]), push, int(sprays.get("droplets_per_knock", 3)), 1.3)
+	_hidden[id] = hidden
+	layer["data"] = data
+	mm.buffer = data
+
+
+## Couche « renversés » d'un camp, d'une famille et d'une variante (tampon circulaire).
+func _tumble_layer(side: String, kind: String, variant: int, capacity: int) -> Dictionary:
+	var key := "%s/%s/%d" % [side, kind, variant]
+	if _tumble_layers.has(key):
+		return _tumble_layers[key]
+	var mat := _make_skinned_material(side, kind, variant, true)
+	BattleSkinned.apply_config(mat, BattleSkinned.knockdown_config(kind, variant), anim_time)
+	mat.set_shader_parameter("tumble", true)
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_custom_data = true
+	mm.mesh = BattleSkinned.mesh(kind, variant, 0)
+	mm.instance_count = maxi(capacity / 4, 16)
+	var data := PackedFloat32Array()
+	data.resize(mm.instance_count * 16)
+	data.fill(0.0)
+	for i in mm.instance_count:
+		data[i * 16 + 12] = -1.0e6
+	mm.buffer = data
+	var instance := MultiMeshInstance3D.new()
+	instance.name = "Knocked_%s_%s_%d" % [side, kind, variant]
+	instance.multimesh = mm
+	instance.material_override = mat
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(instance)
+	var layer := {"mm": mm, "data": data, "next": 0, "material": mat}
+	_tumble_layers[key] = layer
+	return layer
+
+
+## Places vides des renversés dans la tranche rendue (base nulle = figurine repliée).
+func _hide_knocked(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
+	var hidden: Dictionary = _hidden[id]
+	var out := slice
+	for slot in hidden.keys():
+		if float(hidden[slot]) <= anim_time:
+			hidden.erase(slot)
+			continue
+		if int(slot) < n:
+			var o := int(slot) * 12
+			for q in [0, 1, 2, 4, 5, 6, 8, 9, 10]:
+				out[o + q] = 0.0
+	if hidden.is_empty():
+		_hidden.erase(id)
+	return out
+
+
+## Piquiers et miliciens qui abaissent leurs armes d'hast devant une charge de cavalerie
+## ennemie à moins de 90 m (rendu seulement, lot BV2).
+func _find_braced(units: Array) -> void:
+	_braced.clear()
+	for unit in units:
+		if str(unit.get("render", "")) != "cavalry" or str(unit.get("state", "")) != "charging" or not bool(unit.get("present", true)):
+			continue
+		var at := Vector2(float(unit["x"]), float(unit["z"]))
+		for other in units:
+			var info: Dictionary = _unit_info.get(int(other["id"]), {})
+			if info.is_empty() or str(other["side"]) == str(unit["side"]) or str(info["kind"]) != "infantry" or int(info["variant"]) == 0:
+				continue
+			if at.distance_to(Vector2(float(other["x"]), float(other["z"]))) < 90.0:
+				_braced[int(other["id"])] = true
+
+
+## Facteur de cadence d'un régiment en marche : vitesse lissée / vitesse nominale du clip de
+## locomotion (`cadence` de battle_gore.json, m/s à la vitesse 1) ; 1 hors locomotion.
+func _cadence(id: int, config: Dictionary) -> float:
+	if int(config.get("mode", 0)) != BattleSkinned.M_LOOP:
+		return 1.0
+	var names: Array = config.get("names", [])
+	var table: Dictionary = _gore.get("cadence", {})
+	if names.is_empty() or not table.has(str(names[0])):
+		return 1.0
+	var nominal := float(table[str(names[0])]) * float(config.get("speed", 1.0))
+	return clampf(float(_speed.get(id, nominal)) / maxf(nominal, 0.1), 0.35, 1.8)
+
+
+## Cavaliers qui entrent dans la masse après un choc (lot BV2) : la formation rendue avance de
+## la pénétration du cœur (`depth`) plus l'écart de contact, s'y tient, puis se replie.
+func _drive_in(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
+	var entry: Dictionary = _drive[id]
+	var horses: Dictionary = _gore.get("horses", {})
+	var t := anim_time - float(entry["since"])
+	var t_in := float(horses.get("drive_in_seconds", 0.7))
+	var hold := float(horses.get("drive_hold_seconds", 2.5))
+	var t_out := float(horses.get("drive_out_seconds", 3.0))
+	if t > t_in + hold + t_out:
+		_drive.erase(id)
+		return slice
+	var f := smoothstep(0.0, t_in, t) * (1.0 - smoothstep(t_in + hold, t_in + hold + t_out, t))
+	var dir: Vector2 = entry["dir"]
+	var d := float(entry["depth"]) * f
+	var out := slice
+	for i in n:
+		out[i * 12 + 3] += dir.x * d
+		out[i * 12 + 11] += dir.y * d
+	return out
+
+
+## Chevaux qui ralentissent dans la masse (choc) ou s'arrêtent (piques, pieux) : l'horloge
+## d'animation du régiment prend du retard (continu, sans saut de phase).
+func _advance_lags(dt: float) -> void:
+	if dt <= 0.0 or _slow.is_empty():
+		return
+	var horses: Dictionary = _gore.get("horses", {})
+	for id in _slow.keys():
+		var entry: Dictionary = _slow[id]
+		var t := anim_time - float(entry["since"])
+		var stop := str(entry["kind"]) != "shock"
+		var span := float(horses.get("stop_seconds", 1.2)) if stop else float(horses.get("slow_seconds", 2.2))
+		if t > span:
+			_slow.erase(id)
+			continue
+		var low := 0.1 if stop else float(horses.get("slow_min", 0.35))
+		var factor := 1.0 - (1.0 - low) * sin(PI * clampf(t / span, 0.0, 1.0))
+		_lag[id] = float(_lag.get(id, 0.0)) + dt * (1.0 - factor)
+
+
+## Taches progressives d'un régiment vivant (pertes subies, durée de mêlée) × réglage « Sang ».
+func _living_blood(unit: Dictionary, id: int) -> float:
+	var stains: Dictionary = _gore.get("living_stains", {})
+	var level := float(_level.get("stains", 0.0))
+	if level <= 0.0:
+		return 0.0
+	var initial := maxf(float(unit.get("initial_soldiers", unit["soldiers"])), 1.0)
+	var lost := clampf(1.0 - float(unit["soldiers"]) / initial, 0.0, 1.0)
+	var melee := float(_melee_time.get(id, 0.0)) / float(stains.get("melee_seconds", 60.0))
+	var amount := lost * float(stains.get("per_loss_share", 1.6)) + minf(melee, 1.0) * 0.4
+	return minf(amount, float(stains.get("max", 0.85))) * level
+
+
+## Son d'AU1 (`BattleAudio.play_at`) s'il est présent dans le projet.
+func _play_sound(event_name: String, at: Vector3) -> void:
+	if _audio != null:
+		_audio.call("play_at", event_name, at)
 
 
 ## Banc d'essai : durées d'image relevées depuis `start_timing` (Metal ne donne pas le
@@ -344,10 +770,13 @@ func timing_report() -> String:
 	return ", median %.1f FPS, %.2f M primitives, %d draw calls" % [1.0 / maxf(median, 0.0001), prims / 1.0e6, int(draws)]
 
 
-## Temps d'animation propagé aux cadavres (chute).
+## Temps d'animation propagé aux cadavres (chute) et aux renversés ; LOD des cellules de
+## cadavres (lot BV2).
 func _process(delta: float) -> void:
 	if _timing:
 		_frame_times.append(delta)
-	for key in _corpse_layers:
-		var mat: ShaderMaterial = _corpse_layers[key]["material"]
-		mat.set_shader_parameter("anim_time", anim_time)
+	for key in _corpse_materials:
+		(_corpse_materials[key] as ShaderMaterial).set_shader_parameter("anim_time", anim_time)
+	for key in _tumble_layers:
+		(_tumble_layers[key]["material"] as ShaderMaterial).set_shader_parameter("anim_time", anim_time)
+	_update_corpse_lods()
