@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/missile_morale_rules.schema.json",
   "title": "Règles du moral sous les traits",
-  "description": "Fichier data/rules/missile_morale.json (ADR 0051) : perte de moral supplémentaire des troupes montées sous les projectiles (chevaux blessés).",
+  "description": "Fichier data/rules/missile_morale.json (ADR 0052) : perte de moral supplémentaire des troupes montées sous les projectiles (chevaux blessés).",
   "type": "object",
   "properties": {
     "description": { "type": "string" },

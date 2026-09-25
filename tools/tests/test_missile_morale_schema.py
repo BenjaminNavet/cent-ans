@@ -1,4 +1,4 @@
-"""Validates data/rules/missile_morale.json against missile_morale_rules.schema.json (ADR 0051)."""
+"""Validates data/rules/missile_morale.json against missile_morale_rules.schema.json (ADR 0052)."""
 
 import json
 from pathlib import Path

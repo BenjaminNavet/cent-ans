@@ -180,4 +180,5 @@ périmètre de R4.
   (`battle_volley.gdshaderinc` et `BattleVolleys.arrow_landing`, bit 32 du code du paquet ; le pas
   des traits confiés à la couche plantée passe au bit 64).
 - Point ouvert : à rapport de forces serré, la position anglaise perd (voir Mesures) ; question
-  d'équilibre des unités.
+  d'équilibre des unités. **Traité par l'ADR 0052** (panique des chevaux sous les traits, haie tenue
+  par les tireurs) : crête + haie 4 → 24/32 (mesure à crête décalée), rase campagne toujours perdue.
