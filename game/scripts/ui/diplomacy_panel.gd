@@ -600,10 +600,15 @@ func _fit_minimap() -> void:
 	if holder == null or view == null or _minimap.crop.size.x <= 0.0:
 		return
 	var aspect := _minimap.crop.size.y / _minimap.crop.size.x
-	var width := maxf(holder.size.x - 16.0, 200.0)
+	# Place prise autour de la vue par la carte elle-même (cadre du thème, marges) : la
+	# soustraire exactement. Une marge fixe plus petite que ce cadre (panneau enluminé UI1)
+	# faisait grandir le support à chaque `resized`, sans fin (file de messages saturée).
+	var chrome := (_minimap.get_combined_minimum_size() - view.get_combined_minimum_size()).max(Vector2.ZERO)
+	var room := holder.size - chrome - Vector2(4.0, 4.0)
+	var width := maxf(room.x, 200.0)
 	var height := width * aspect
-	if height > holder.size.y - 16.0:
-		height = maxf(holder.size.y - 16.0, 150.0)
+	if height > room.y:
+		height = maxf(room.y, 150.0)
 		width = height / aspect
 	view.custom_minimum_size = Vector2(width, height).floor()
 	_minimap.tooltip_text = ""
