@@ -21,6 +21,10 @@ impl GameDataStore {
             dict.set(name, value);
         }
         dict.set("exhausted_fatigue", sim_battle::sim::EXHAUSTED_FATIGUE);
+        dict.set(
+            "breach_open_threshold",
+            f64::from(sim_battle::siege::BREACH_ONE_GAP),
+        );
         dict
     }
 }
