@@ -461,10 +461,7 @@ func declutter() -> void:
 		if alpha < 0.02 or camera.is_position_behind(label.global_position):
 			label.visible = false
 			continue
-		var center := camera.unproject_position(label.global_position) - Vector2(0.0, label.offset.y)
-		var width := label.text.length() * label.font_size * 0.5 + declutter_margin * 2.0
-		var height := label.font_size * 1.05 + declutter_margin * 2.0
-		var rect := Rect2(center - Vector2(width, height) * 0.5, Vector2(width, height))
+		var rect := _label_rect(label, camera, declutter_margin)
 		if not screen.intersects(rect):
 			label.visible = false
 			continue
@@ -482,6 +479,25 @@ func declutter() -> void:
 			var outline := label_outline
 			outline.a = alpha
 			label.outline_modulate = outline
+
+
+## Rectangle écran estimé d'une étiquette (taille de police et longueur du texte).
+static func _label_rect(label: Label3D, camera: Camera3D, margin: float) -> Rect2:
+	var center := camera.unproject_position(label.global_position) - Vector2(0.0, label.offset.y)
+	var width := label.text.length() * label.font_size * 0.5 + margin * 2.0
+	var height := label.font_size * 1.05 + margin * 2.0
+	return Rect2(center - Vector2(width, height) * 0.5, Vector2(width, height))
+
+
+## Lot UX1 : rectangles écran des noms de colonies affichés (obstacles des plaques d'armée).
+func screen_label_rects(camera: Camera3D) -> Array[Rect2]:
+	var rects: Array[Rect2] = []
+	if camera == null:
+		return rects
+	for label in _labels:
+		if label.visible and label.modulate.a > 0.15 and not camera.is_position_behind(label.global_position):
+			rects.append(_label_rect(label, camera, 1.0))
+	return rects
 
 
 func visible_label_count() -> int:
