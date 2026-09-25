@@ -458,6 +458,13 @@ func _run_stage() -> void:
 			pause_menu.open_save()
 		"settings":
 			open_settings()
+			# U7 / U12 : `--flow-tab=Commandes` ouvre directement un onglet.
+			for arg in OS.get_cmdline_user_args():
+				if arg.begins_with("--flow-tab="):
+					for tabs in _settings_menu.find_children("*", "TabContainer", true, false):
+						for index in (tabs as TabContainer).get_tab_count():
+							if (tabs as TabContainer).get_tab_title(index) == arg.trim_prefix("--flow-tab="):
+								(tabs as TabContainer).current_tab = index
 		"confirm":
 			settings.call("set_value", "interface/confirm_end_turn", true, false)
 			map.call("_on_end_turn")
