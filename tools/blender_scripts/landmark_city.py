@@ -463,7 +463,7 @@ def build_bridge(plan, site, bridge, layer, rng):
     mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
     stone = bridge.get("material", "stone") == "stone"
     mat = "WallStone" if stone else "Wood"
-    deck = 0.03
+    deck = 0.045 if "arches" in bridge else 0.03
     layer.add(
         mat,
         *g.box(mid[0], mid[1], deck - 0.012, length + 0.02, half * 2, 0.014, angle),
@@ -498,6 +498,19 @@ def build_bridge(plan, site, bridge, layer, rng):
             ]
             poly = [(px + lx * c - ly * s, py + lx * s + ly * c) for lx, ly in local]
             layer.add(mat, *g.prism(poly, -0.02, deck * 0.35), anchor=mid)
+            # Haunches: the pier widens up to the deck, leaving round-looking arches between.
+            spread = length / piers * 0.42
+            verts = []
+            for lx, z in (
+                (-pier_w / 2, deck * 0.3),
+                (pier_w / 2, deck * 0.3),
+                (spread, deck - 0.01),
+                (-spread, deck - 0.01),
+            ):
+                for ly in (-half, half):
+                    verts.append((px + lx * c - ly * s, py + lx * s + ly * c, z))
+            faces = [(0, 2, 4, 6), (1, 7, 5, 3), (2, 3, 5, 4), (0, 6, 7, 1)]
+            layer.add(mat, verts, faces, anchor=mid)
     # Features on the deck: chapel, gatehouses, drawbridge (fractions from ``from``).
     busy = []
     k_house = plan.a * plan.house_scale * plan.height_scale
