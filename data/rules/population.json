@@ -1,9 +1,14 @@
 {
-  "description": "Ordre public (lot E2) : termes de la cible de mécontentement de chaque classe hors effets de bâtiments et d'événements. L'impôt « Haut » coûte désormais du mécontentement ; la garnison et l'abondance des biens n'effacent plus tout.",
-  "tax_unrest_weight": 100.0,
+  "description": "Ordre public (lots E2, EQ1) : termes de la cible de mécontentement de chaque classe hors effets de bâtiments et d'événements, et seuils de révolte. L'impôt « Haut » coûte du mécontentement ; la garnison et l'abondance des biens n'effacent plus tout ; les troubles récents de la province (prises, pillages, régence) s'y ajoutent ; une révolte exige plusieurs saisons de mécontentement élevé et le compte repart de zéro après chacune.",
+  "tax_unrest_weight": 130.0,
   "garrison_relief_per_100_men": 1.0,
   "garrison_relief_max": 10.0,
   "goods_relief_max": 10.0,
-  "occupation_unrest": 35.0,
-  "foreign_religion_unrest": 10.0
+  "occupation_unrest": 20.0,
+  "foreign_religion_unrest": 10.0,
+  "disorder_unrest_weight": 0.5,
+  "disorder_unrest_max": 20.0,
+  "revolt_unrest_threshold": 75.0,
+  "revolt_seasons": 3,
+  "revolt_control_threshold": 90.0
 }

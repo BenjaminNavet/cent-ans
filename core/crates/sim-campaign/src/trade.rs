@@ -176,7 +176,7 @@ fn resolve_route(
     view.agreement =
         from_faction != to_faction && state.has_trade_agreement(&from_faction, &to_faction);
 
-    let (security, threat_reason) = path_security(state, &path, &from_faction, &to_faction);
+    let (security, threat_reason) = path_security(state, data, &path, &from_faction, &to_faction);
     view.security = security;
     if security <= 0.0 {
         view.cut = true;
@@ -225,9 +225,11 @@ fn coinage_factor(state: &CampaignState, faction: &FactionId) -> f64 {
 
 /// Security of a path (0 cut, 1 fully secure): a siege on any settlement of
 /// it cuts the route; a hostile army camped on it halves the value per
-/// threatened settlement (spec C5).
+/// threatened settlement (spec C5); EQ1: a hostile army in the field within
+/// its zone of control of a settlement threatens it as well.
 fn path_security(
     state: &CampaignState,
+    data: &GameData,
     path: &[SettlementId],
     from_faction: &FactionId,
     to_faction: &FactionId,
@@ -241,11 +243,28 @@ fn path_security(
         if settlement.siege.is_some() {
             return (0.0, Some(format!("siège de {settlement_id}")));
         }
-        let threatened = state.armies.values().any(|army| {
+        let hostile = |faction: &FactionId| {
+            state.is_at_war(faction, from_faction) || state.is_at_war(faction, to_faction)
+        };
+        let mut threatened = state.armies.values().any(|army| {
             matches!(&army.position, ArmyPosition::Settlement(id) if id == settlement_id)
-                && (state.is_at_war(&army.faction, from_faction)
-                    || state.is_at_war(&army.faction, to_faction))
+                && hostile(&army.faction)
         });
+        // EQ1: an enemy army in the open within its zone of control of the
+        // settlement (free movement, `zoc_radius_km`) threatens it too.
+        if !threatened {
+            if let Some(point) = data.settlement_point(settlement_id) {
+                let radius = data.free_movement_rules().zoc_radius_km;
+                threatened = state
+                    .armies_near(data, point, radius)
+                    .iter()
+                    .filter_map(|id| state.armies.get(id))
+                    .any(|army| {
+                        matches!(army.position, ArmyPosition::Field { .. })
+                            && hostile(&army.faction)
+                    });
+            }
+        }
         if threatened {
             security *= THREAT_SECURITY_FACTOR;
             reason.get_or_insert_with(|| format!("armée ennemie près de {settlement_id}"));
