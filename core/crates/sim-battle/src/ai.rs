@@ -25,11 +25,21 @@
 //!   ignore horsemen, whose charge would break. Cavalry never charges
 //!   through a hedge or a ditch, nor into a village: it rides round the end
 //!   of the obstacle, or waits on its wing.
+//! - **Relief (R2b)**, read once per battle ([`crate::relief_ai`]): a
+//!   defensive side takes a true crest with a glacis in front (not a scarp),
+//!   and its line steps back onto the reverse slope, out of sight of enemy
+//!   crossbows, while its shooters hold the crest; a defender clearly above
+//!   the enemy keeps its heights; shooters advance to a spot from which
+//!   they see their target, preferably higher and out of reach of the enemy
+//!   shooters; an advancing line shifts each step aside to go round a steep
+//!   rise, runs under arrows, waits for its laggards, and does not charge
+//!   at the run up a steep rise from afar.
 //! - **Shooters** fall back behind the line as soon as enemy foot or horse
 //!   come close, and disengage from a melee.
 //! - **Cavalry** charges isolated shooters, the flanks or rear of enemy
 //!   regiments already engaged, answers enemy cavalry, pursues routing
-//!   regiments, and never charges pikes or planted stakes head on.
+//!   regiments, and never charges pikes or planted stakes head on (R2b: nor
+//!   rides a rout or a flank in front of planted stakes).
 //! - **Reactions**: the reserve plugs a gap (a line regiment routed or
 //!   wavering) or strikes an enemy attacking a flank; a regiment attacked
 //!   on the flank turns to face its attacker; a shaken regiment in melee is
@@ -104,7 +114,7 @@ pub const ENGINE_PATIENCE: f64 = 420.0;
 
 /// R2b: a rise steeper than this (metres per metre over 20 m) is not
 /// charged at the run from afar: the regiment walks up and charges close.
-pub const STEEP_CLIMB: f64 = 0.12;
+pub const STEEP_CLIMB: f64 = 0.20;
 /// R2b: a regiment hit by missiles within this many seconds is under fire.
 pub const UNDER_FIRE: f64 = 6.0;
 /// R2b: a line regiment this far ahead of the line's centre waits for it.
