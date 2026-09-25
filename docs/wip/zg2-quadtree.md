@@ -14,16 +14,26 @@ Branche `zg2-quadtree` (worktree agent). Liens symboliques non versionnés : `da
 - Shader : `relief_quadtree.gdshaderinc` + 3 crochets d'une ligne dans `terrain.gdshader`.
 
 ## État
-- [ ] ReliefPyramid
-- [ ] ReliefQuadtree (sélection, pages, décodage, LRU)
-- [ ] Shader include + crochets
-- [ ] Intégration TerrainBuilder (surface_height_at, chunk_surface_changed, grilles)
-- [ ] Pyramide synthétique de test + test headless
-- [ ] Banc `--bench-map`, captures `docs/img/zg2/`
+- [x] ReliefPyramid
+- [x] ReliefQuadtree (sélection, pages, décodage, LRU)
+- [x] Shader include + crochets (`qt_vertex`, `qt_relief`, `qt_debug_color`)
+- [x] Intégration TerrainBuilder (surface_height_at, chunk_surface_changed, grilles instantanées)
+- [x] Pyramide synthétique (`game/tests/fixtures/zg2/make_pyramid.py`) + test headless
+  `game/tests/zg2_quadtree_test.gd` (OK)
+- [x] Banc `--bench-map` (`game/scripts/dev/map_bench.gd`), options `--pyramid-dir=`,
+  `--no-pyramid`, `--qt-debug=1|2`, `--camera-min=`
+- [ ] Mesures propres (machine saturée par d'autres agents : charge ~200), captures `docs/img/zg2/`
 - [ ] Docs godot-map.md, addendum ADR
 
+## Décisions en cours de route
+- godot-rust est mono-fil (panique si `GameDataStore` est appelé hors fil principal) : décodage
+  Rust sur le fil principal, ≤ 2 tuiles et ≤ 4 ms par image (≈ 3 ms par tuile) ; repli GDScript
+  `Png16` dans `WorkerThreadPool` (≈ 100 ms à 1 s par tuile : inutilisable pour du streaming).
+- Recalages : les pages qui arrivent ne signalent que les morceaux proches (niveau ≥ 1), au plus
+  2 morceaux toutes les 250 ms.
+
 ## Prochaine étape
-Implémenter ReliefPyramid puis ReliefQuadtree.
+Banc propre, captures, docs ; éventuellement décodeur Rust asynchrone (threads natifs).
 
 ## Mesures
 (à venir)
