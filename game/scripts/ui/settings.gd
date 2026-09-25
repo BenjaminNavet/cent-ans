@@ -21,7 +21,8 @@ const DEFAULTS := {
 	"video/resolution": Vector2i(1440, 900),
 	"video/vsync": true,
 	# V3 (A1-14) : préréglage de qualité du rendu (low, medium, high, ultra), voir `RenderQuality`.
-	"video/quality": "high",
+	# RL1 : "auto" (défaut) suit le GPU détecté ; un choix enregistré par le joueur est gardé.
+	"video/quality": "auto",
 	# Lot U4 (audit A3) : échelle automatique (hauteur de la fenêtre / 900, bornée entre 0,9 et
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
 	"interface/ui_size": 1.0,
