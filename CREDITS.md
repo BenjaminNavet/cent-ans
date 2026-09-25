@@ -39,6 +39,51 @@ n'exigent aucune attribution ; ils sont crédités par courtoisie.
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 - « Village Consort » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Crusade » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Heroic Age » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Celtic Impulse » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Achaidh Cheide » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Crossing the Chasm » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Angevin B » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Procession of the King » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Master of the Feast » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Minstrel Guild » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Moonlight Hall » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Teller of the Tales » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Suonatore di Liuto » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Galway » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Thatched Villagers » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « The Britons » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Folk Round » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Pippin the Hunchback » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Canon in D Major » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Prelude in C - BWV 846 » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+
+### Musique baroque — domaine public / CC0
+
+- Vivaldi, *Les Quatre Saisons* (extraits) — The Modena Chamber Orchestra (Musopen), Public Domain Mark.
+- Vivaldi, Concerto pour mandoline RV 425 — The Milan Baroque Soloists, Public Domain Mark.
+- Bach, Suite n° 2 BWV 1067, Badinerie — European Archive, CC0.
+  Sources : `game/assets/third_party/music/wikimedia/SOURCE.md` (Wikimedia Commons).
 
 ### Polices — SIL Open Font License 1.1
 
