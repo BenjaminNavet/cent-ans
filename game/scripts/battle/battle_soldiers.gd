@@ -43,6 +43,8 @@ const READABLE_FAR := 260.0
 ## image sur 2, au-delà de `BUDGET_FAR` une sur 3 (décalé selon l'id : charge étalée).
 const BUDGET_NEAR := 450.0
 const BUDGET_FAR := 800.0
+## EP1 : au-delà de `THIN_DISTANCE` mètres, imposteurs à demi-densité (`thin_out` du shader).
+const THIN_DISTANCE := 700.0
 
 ## unit id -> MultiMeshInstance3D (exposé à la scène : `_mm` du test de fumée).
 var layers: Dictionary = {}
@@ -356,6 +358,7 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		imp_mat.set_shader_parameter("anim_time", anim_time - float(_lag.get(id, 0.0)))
 		imp_mat.set_shader_parameter("imp_set", BattleImpostors.state_set(str(unit.get("state", "")), bool(unit.get("running", false))))
 		imp_mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
+		imp_mat.set_shader_parameter("thin_out", 1.0 if budget_enabled and distance > THIN_DISTANCE and not is_selected else 0.0)
 	var mat: ShaderMaterial = _materials[id]
 	var ammo := int(unit.get("ammo", 0))
 	var state := str(unit.get("state", ""))
