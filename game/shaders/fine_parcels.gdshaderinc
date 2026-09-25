@@ -24,8 +24,8 @@
 
 uniform int fp_quality = 2;
 // Empreinte (unités monde par pixel écran) où le parcellaire apparaît (début, plein).
-uniform float fp_start = 0.03;
-uniform float fp_full = 0.01;
+uniform float fp_start = 0.05;
+uniform float fp_full = 0.015;
 uniform float fp_meters = 719.0;
 uniform vec3 fp_hedge_color = vec3(0.028, 0.045, 0.016);
 uniform vec3 fp_headland_color = vec3(0.13, 0.17, 0.06);

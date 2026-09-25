@@ -67,7 +67,12 @@ var _update_us_total := 0
 var _update_us_max := 0
 var _updates := 0
 var _build_ms_total := 0.0
+var _install_ms_max := 0.0
 var _builds := 0
+## Préréglage de qualité (PF1) : ordre minimal des cours d'eau, rayon, parcellaire (0-2).
+var _min_order := 3
+var _radius_scale := 1.0
+var _parcels := 2
 
 
 ## Vrai si le rendu fin est actif (pyramide + données ZG5a en cache).
@@ -99,15 +104,37 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	road_material.shader = ROAD_SHADER
 	if OS.get_cmdline_user_args().has("--fine-debug"):
 		river_material.set_shader_parameter("debug_flat", true)
+		road_material.set_shader_parameter("debug_flat", true)
 	if settlements != null:
 		settlements.apply_fine_anchors(store)
 	if rivers.crossings != null:
 		rivers.crossings.set_fine_anchors(store.crossings)
 	if not terrain.surface_rect_changed.is_connected(_on_surface_rect_changed):
 		terrain.surface_rect_changed.connect(_on_surface_rect_changed)
+	add_to_group(RenderQuality.CLIENT_GROUP)
+	apply_render_quality(RenderQuality.preset())
 	stats = store.stats.duplicate()
 	print("FineGeoLayer: %s" % JSON.stringify(stats))
 	return true
+
+
+## PF1 : préréglages de qualité, déduits du budget de nœuds du quadtree (`relief_items`) :
+## Basse (≤ 350) : grands cours d'eau seulement (rang ≥ 5), rayon × 0,6, pas de parcellaire ;
+## Moyenne (< 700) : rang ≥ 4, rayon × 0,8, parcellaire simple (sans enclos du bocage) ;
+## Haute, Ultra : tout.
+func apply_render_quality(p: Dictionary) -> void:
+	var items := int(p.get("relief_items", 700))
+	var level := 0 if items <= 350 else (1 if items < 700 else 2)
+	var min_order: int = [5, 4, 3][level]
+	_radius_scale = [0.6, 0.8, 1.0][level]
+	_parcels = level
+	if terrain != null and terrain.material != null:
+		terrain.material.set_shader_parameter("fp_quality", _parcels)
+	if min_order != _min_order:
+		_min_order = min_order
+		var now := Time.get_ticks_msec() - surface_settle_ms
+		for entry: Dictionary in _built.values():
+			entry["dirty"] = now
 
 
 ## Routes (lot C6) : leurs rubans de près s'effacent dans le disque fin.
@@ -163,7 +190,7 @@ func update_view(camera_distance: float) -> void:
 		_note_update(t0)
 		return
 	var focus := _focus(camera, camera_distance)
-	var radius := clampf(camera_distance * radius_factor, min_radius, max_radius)
+	var radius := clampf(camera_distance * radius_factor, min_radius, max_radius) * _radius_scale
 	_wanted = _wanted_tiles(focus, radius)
 	for key in _wanted:
 		store.request(CafvTile.LAYER_RIVERS, key & 0xFFF, key >> 12)
@@ -280,8 +307,10 @@ func _start_job(key: int) -> void:
 	job.river_tile = store.get_tile(CafvTile.LAYER_RIVERS, col, row)
 	job.road_tile = store.get_tile(CafvTile.LAYER_ROADS, col, row)
 	job.snapshot = terrain.quadtree.surface_snapshot(rect.grow(1.0), rect.position)
+	job.finest = _finest_level(terrain.quadtree.surface_snapshot(rect, rect.position))
 	job.snapshot_scale = MapData.vertical_scale()
 	job.meters_per_unit = map_data.meters_per_px
+	job.min_order = _min_order
 	for c in carver.covers:
 		if rect.grow(c.z + 1.0).has_point(Vector2(c.x, c.y)):
 			job.covers.append(c)
@@ -306,15 +335,19 @@ func _collect_jobs(block: bool = false) -> void:
 		_ready_jobs.append(entry["job"])
 
 
+## Installe les maillages prêts : au moins un par image, puis tant que le budget commun de
+## l'image (PB1, `FrameBudget`) le permet, au plus `max_installs_per_frame`.
 func _install_ready(limit: int = -1) -> void:
 	var count := 0
-	while not _ready_jobs.is_empty() and (limit < 0 and count < max_installs_per_frame or limit >= 0 and count < limit):
+	var cap := max_installs_per_frame if limit < 0 else limit
+	while not _ready_jobs.is_empty() and count < cap and (count == 0 or limit >= 0 or FrameBudget.has_time()):
 		var job: FineRibbonJob = _ready_jobs.pop_front()
 		_install(job)
 		count += 1
 
 
 func _install(job: FineRibbonJob) -> void:
+	var t0 := Time.get_ticks_usec()
 	var entry: Dictionary = _built.get(job.key, {})
 	if entry.is_empty():
 		var node := Node3D.new()
@@ -335,10 +368,12 @@ func _install(job: FineRibbonJob) -> void:
 	(entry["river"] as MeshInstance3D).mesh = _mesh(job.river_arrays, job.river_aabb)
 	(entry["road"] as MeshInstance3D).mesh = _mesh(job.road_arrays, job.road_aabb)
 	entry["version"] = int(entry["version"]) + 1
+	entry["finest"] = job.finest
 	entry["points"] = job.river_points + job.road_points
 	_build_gates(entry, job.gates)
 	_build_ms_total += job.build_ms
 	_builds += 1
+	_install_ms_max = maxf(_install_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
 
 
 static func _mesh(arrays: Array, aabb: AABB) -> ArrayMesh:
@@ -364,11 +399,29 @@ func _evict() -> void:
 		_built.erase(key)
 
 
+## Pages arrivées ou évincées : remaillage d'une tuile seulement si l'étage de page le plus fin
+## qui la touche a changé (pas à chaque page du même étage : le LRU des pages tourne sans cesse
+## pendant un panoramique).
 func _on_surface_rect_changed(rect: Rect2) -> void:
 	var now := Time.get_ticks_msec()
 	for key: int in _built:
-		if FineGeoStore.tile_rect(key & 0xFFF, key >> 12).intersects(rect):
-			(_built[key] as Dictionary)["dirty"] = now
+		var tile_rect := FineGeoStore.tile_rect(key & 0xFFF, key >> 12)
+		if not tile_rect.intersects(rect):
+			continue
+		var entry: Dictionary = _built[key]
+		var finest := _finest_level(terrain.quadtree.surface_snapshot(tile_rect, tile_rect.position))
+		var built_at := int(entry.get("finest", -1))
+		# E5-E7 (zones de détail) : lit déjà creusé dans leurs pages, écart de surface faible ; on
+		# ne remaille que jusqu'à E4.
+		if finest != built_at and mini(finest, 4) != mini(built_at, 4):
+			entry["dirty"] = now
+
+
+static func _finest_level(snapshot: Dictionary) -> int:
+	var finest := -1
+	for page_key: int in snapshot.get("qt_pages", {}):
+		finest = maxi(finest, ReliefPyramid.level_of_key(page_key))
+	return finest
 
 
 # --- Ponts ----------------------------------------------------------------------------
@@ -439,7 +492,7 @@ func flush(camera_distance: float) -> void:
 		_collect_jobs(true)
 		_install_ready(1 << 20)
 	update_view(camera_distance)
-	print("FineGeoLayer: flush %s" % JSON.stringify({"tiles": _built.size(), "wanted": _wanted.size(), "zone": [_zone.x, _zone.y, _zone.z, _zone.w], "river_vertices": river_vertex_count()}.merged(perf_stats())))
+	print("FineGeoLayer: flush %s" % JSON.stringify({"tiles": _built.size(), "wanted": _wanted.size(), "zone": [_zone.x, _zone.y, _zone.z, _zone.w], "river_vertices": river_vertex_count(), "road_vertices": road_vertex_count()}.merged(perf_stats())))
 
 
 func built_tile_count() -> int:
@@ -450,6 +503,15 @@ func river_vertex_count() -> int:
 	var total := 0
 	for entry: Dictionary in _built.values():
 		var mesh: ArrayMesh = (entry["river"] as MeshInstance3D).mesh
+		if mesh != null:
+			total += mesh.surface_get_array_len(0)
+	return total
+
+
+func road_vertex_count() -> int:
+	var total := 0
+	for entry: Dictionary in _built.values():
+		var mesh: ArrayMesh = (entry["road"] as MeshInstance3D).mesh
 		if mesh != null:
 			total += mesh.surface_get_array_len(0)
 	return total
@@ -466,5 +528,6 @@ func perf_stats() -> Dictionary:
 		"fine_tiles_built": _built.size(),
 		"fine_builds": _builds,
 		"fine_build_ms_avg": snappedf(_build_ms_total / maxf(_builds, 1), 0.1),
+		"fine_install_ms_max": snappedf(_install_ms_max, 0.01),
 		"carved_pages": int(carver.stats.get("pages", 0)) if carver != null else 0,
 	}

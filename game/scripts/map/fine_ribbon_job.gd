@@ -20,7 +20,7 @@ extends RefCounted
 const RIVER_LIFT_M := 0.35
 const ROAD_LIFT_M := 0.25
 ## Pas maximal (unités monde) des routes densifiées : elles suivent les facettes du relief.
-const ROAD_STEP := 0.04
+const ROAD_STEP := 0.08
 
 # Entrées (fil principal)
 var key: int = 0
@@ -36,6 +36,8 @@ var zones: PackedVector3Array = PackedVector3Array()
 var towns: PackedVector3Array = PackedVector3Array()
 var meters_per_unit: float = 719.0
 var min_order: int = 3
+## Étage de page le plus fin sous la tuile au moment de l'instantané.
+var finest: int = -1
 
 # Sorties (fil de travail)
 var river_arrays: Array = []

@@ -26,6 +26,10 @@ var _used: Dictionary = {1: {}, 2: {}}
 ## (couche << 24 | clé) → {task, job}
 var _jobs: Dictionary = {}
 var _frame: int = 0
+## Protège `_tiles`, `_used` et `_broken` : les tâches de lit creusé (`FineBedCarver`) lisent et
+## remplissent le cache depuis des fils de travail (`fetch_threadsafe`).
+var _mutex := Mutex.new()
+var _broken: Dictionary = {1: {}, 2: {}}
 
 ## Ancrages : id de colonie → {px: Vector2, z}; hameaux dans l'ordre de `hamlets.json`
 ## (Vector4 x, y, z, déplacement) ; franchissements dans l'ordre de `crossings_px.json`.
@@ -76,6 +80,7 @@ func available(layer: int) -> bool:
 	return not (_index[layer] as Dictionary).is_empty() and DirAccess.dir_exists_absolute(str(_dirs[layer]))
 
 
+## Index immuable après `load_from` : lisible depuis un fil.
 func has_tile(layer: int, col: int, row: int) -> bool:
 	return (_index[layer] as Dictionary).has(key_of(col, row))
 
@@ -87,14 +92,36 @@ func tile_path(layer: int, col: int, row: int) -> String:
 ## Tuile chargée (null sinon) ; marque son utilisation (LRU).
 func get_tile(layer: int, col: int, row: int) -> CafvTile:
 	var key := key_of(col, row)
+	_mutex.lock()
 	var tile: CafvTile = (_tiles[layer] as Dictionary).get(key)
 	if tile != null:
 		(_used[layer] as Dictionary)[key] = _frame
+	_mutex.unlock()
 	return tile
 
 
 func is_loaded(layer: int, col: int, row: int) -> bool:
-	return (_tiles[layer] as Dictionary).has(key_of(col, row))
+	_mutex.lock()
+	var loaded := (_tiles[layer] as Dictionary).has(key_of(col, row)) or (_broken[layer] as Dictionary).has(key_of(col, row))
+	_mutex.unlock()
+	return loaded
+
+
+## Tuile depuis n'importe quel fil : cache, sinon lecture du fichier (hors verrou) puis mise en
+## cache. Null si absente ou illisible.
+func fetch_threadsafe(layer: int, col: int, row: int) -> CafvTile:
+	if not has_tile(layer, col, row):
+		return null
+	var key := key_of(col, row)
+	_mutex.lock()
+	var tile: CafvTile = (_tiles[layer] as Dictionary).get(key)
+	var broken := (_broken[layer] as Dictionary).has(key)
+	_mutex.unlock()
+	if tile != null or broken:
+		return tile
+	tile = CafvTile.load_file(tile_path(layer, col, row))
+	_store(layer, key, tile)
+	return tile
 
 
 ## Charge une tuile tout de suite sur le fil appelant (si elle n'est pas déjà là).
@@ -150,13 +177,15 @@ func poll(block: bool = false) -> int:
 
 
 func _store(layer: int, key: int, tile: CafvTile) -> void:
+	_mutex.lock()
 	if tile == null:
-		# Illisible : retirée de l'index (pas de nouvelle demande).
-		(_index[layer] as Dictionary).erase(key)
-		return
-	(_tiles[layer] as Dictionary)[key] = tile
-	(_used[layer] as Dictionary)[key] = _frame
-	_evict(layer)
+		# Illisible : plus de nouvelle demande.
+		(_broken[layer] as Dictionary)[key] = true
+	else:
+		(_tiles[layer] as Dictionary)[key] = tile
+		(_used[layer] as Dictionary)[key] = _frame
+		_evict(layer)
+	_mutex.unlock()
 
 
 func _evict(layer: int) -> void:
