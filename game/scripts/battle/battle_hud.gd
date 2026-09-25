@@ -209,9 +209,7 @@ func _build_bottom() -> void:
 	panel.offset_right = -8
 	panel.offset_top = -BAND_HEIGHT - 6
 	panel.offset_bottom = -6
-	var band_style := BattleUiKit.parchment_box(6)
-	band_style.shadow_size = 6
-	panel.add_theme_stylebox_override("panel", band_style)
+	panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(6))
 	root.add_child(panel)
 	var outer := HBoxContainer.new()
 	outer.add_theme_constant_override("separation", 8)
@@ -393,7 +391,7 @@ func _build_confirm() -> void:
 	confirm_panel.anchor_bottom = 0.38
 	confirm_panel.offset_left = -260
 	confirm_panel.offset_right = 260
-	confirm_panel.add_theme_stylebox_override("panel", BattleUiKit.parchment_box(18, BattleUiKit.PARCHMENT, BattleUiKit.RUBRIC, 2))
+	confirm_panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(18))
 	confirm_panel.visible = false
 	root.add_child(confirm_panel)
 	var box := VBoxContainer.new()
