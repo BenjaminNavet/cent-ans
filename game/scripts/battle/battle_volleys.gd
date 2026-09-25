@@ -58,6 +58,11 @@ var _rng := RandomNumberGenerator.new()
 var _chunks: MultiMesh
 var _chunk_expiry := PackedFloat32Array()
 var _chunk_high: int = 0
+## Flammes des flèches enflammées : même tampon que les paquets, maillage de flammes seules,
+## dessiné seulement tant qu'une volée enflammée vole ou brûle (les volées ordinaires
+## n'envoient pas leurs sommets de flamme repliés à la carte graphique).
+var _flames: MultiMesh
+var _fire_until: float = -1.0
 var _seed_counter: int = 1
 var _volley_mat: ShaderMaterial
 var _stuck: MultiMesh
@@ -78,12 +83,19 @@ func setup(height_at: Callable) -> void:
 	_chunks = MultiMesh.new()
 	_chunks.transform_format = MultiMesh.TRANSFORM_3D
 	_chunks.use_custom_data = true
-	_chunks.mesh = _chunk_mesh()
+	_chunks.mesh = _chunk_mesh(false)
 	_chunks.instance_count = MAX_CHUNKS
 	_chunks.visible_instance_count = 0
+	_flames = MultiMesh.new()
+	_flames.transform_format = MultiMesh.TRANSFORM_3D
+	_flames.use_custom_data = true
+	_flames.mesh = _chunk_mesh(true)
+	_flames.instance_count = MAX_CHUNKS
+	_flames.visible_instance_count = 0
 	_chunk_expiry.resize(MAX_CHUNKS)
 	_chunk_expiry.fill(-1.0)
 	_add_layer("Volleys", _chunks, _volley_mat)
+	_add_layer("VolleyFlames", _flames, _volley_mat)
 	_stuck_mat = ShaderMaterial.new()
 	_stuck_mat.shader = STUCK_SHADER
 	_stuck = MultiMesh.new()
@@ -108,6 +120,7 @@ func tick_time(now: float) -> void:
 	while _chunk_high > 0 and _chunk_expiry[_chunk_high - 1] < now:
 		_chunk_high -= 1
 	_chunks.visible_instance_count = _chunk_high
+	_flames.visible_instance_count = _chunk_high if now < _fire_until else 0
 
 
 ## Pieux et pavois plantés à l'avant des régiments (état de la simulation).
@@ -262,7 +275,12 @@ func _write_chunk(chunk: Dictionary, expiry: float) -> void:
 	var basis := Basis(src, tgt, Vector3(float(chunk["launch"]), float(chunk["shw"]), float(chunk["shd"])))
 	var xf := Transform3D(basis, Vector3(float(chunk["thw"]), float(chunk["thd"]), slope.y))
 	_chunks.set_instance_transform(slot, xf)
-	_chunks.set_instance_custom_data(slot, Color(float(chunk["seed"]), float(chunk["code"]), float(chunk["count"]), slope.x))
+	var custom := Color(float(chunk["seed"]), float(chunk["code"]), float(chunk["count"]), slope.x)
+	_chunks.set_instance_custom_data(slot, custom)
+	_flames.set_instance_transform(slot, xf)
+	_flames.set_instance_custom_data(slot, custom)
+	if int(chunk["code"]) & 2:
+		_fire_until = maxf(_fire_until, expiry)
 	_chunk_expiry[slot] = expiry
 	_chunk_high = maxi(_chunk_high, slot + 1)
 	_chunks.visible_instance_count = _chunk_high
@@ -395,14 +413,25 @@ const FLETCH := Color(0.22, 0.2, 0.17)
 
 
 ## 256 traits en rubans (le shader les oriente vers la caméra) : pointe, fût, empennage (8
-## sommets), plus un panneau de flamme (4 sommets, replié sauf flèche enflammée). UV.x = partie
-## (0 ruban, 1 flamme), UV2.x = numéro du trait.
-static func _chunk_mesh() -> ArrayMesh:
+## sommets) ; ou, avec `flames`, 256 panneaux de flamme seuls (4 sommets, repliés sauf flèche
+## enflammée). UV.x = partie (0 ruban, 1 flamme), UV2.x = numéro du trait.
+static func _chunk_mesh(flames: bool) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var profile := [[0.0, 0.004, IRON], [-0.06, 0.02, IRON], [-0.62, 0.011, WOOD], [-0.8, 0.034, FLETCH]]
 	for i in ARROWS_PER_CHUNK:
-		var base := i * 12
+		if flames:
+			var base := i * 4
+			for corner in [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(0.5, 0.5), Vector2(-0.5, 0.5)]:
+				st.set_uv(Vector2(1, 0))
+				st.set_uv2(Vector2(i, 0))
+				st.set_color(Color(1, 0.6, 0.2))
+				st.set_normal(Vector3.UP)
+				st.add_vertex(Vector3(corner.x, corner.y, 0.0))
+			for idx in [base, base + 1, base + 2, base, base + 2, base + 3]:
+				st.add_index(idx)
+			continue
+		var first := i * 8
 		for p in profile:
 			for side in [-1.0, 1.0]:
 				st.set_uv(Vector2(0, 0))
@@ -411,17 +440,9 @@ static func _chunk_mesh() -> ArrayMesh:
 				st.set_normal(Vector3.UP)
 				st.add_vertex(Vector3(side * float(p[1]), 0.0, float(p[0])))
 		for seg in 3:
-			var a := base + seg * 2
+			var a := first + seg * 2
 			for idx in [a, a + 1, a + 3, a, a + 3, a + 2]:
 				st.add_index(idx)
-		for corner in [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(0.5, 0.5), Vector2(-0.5, 0.5)]:
-			st.set_uv(Vector2(1, 0))
-			st.set_uv2(Vector2(i, 0))
-			st.set_color(Color(1, 0.6, 0.2))
-			st.set_normal(Vector3.UP)
-			st.add_vertex(Vector3(corner.x, corner.y, 0.0))
-		for idx in [base + 8, base + 9, base + 10, base + 8, base + 10, base + 11]:
-			st.add_index(idx)
 	var mesh := st.commit()
 	mesh.custom_aabb = FIELD_AABB
 	return mesh
