@@ -47,6 +47,19 @@ pub const HIGH_TAX_MAX_UNREST: f64 = 30.0;
 /// EQ1: a province this close to the revolt threshold keeps the realm off
 /// « Haut » taxes.
 pub const REVOLT_MARGIN: f64 = 10.0;
+/// EQ5: unrest tolerated above [`HIGH_TAX_MAX_UNREST`] while « Haut » taxes
+/// already levied are still needed.
+pub const HIGH_TAX_HYSTERESIS: f64 = 10.0;
+/// EQ5: a treasury below this many seasons of gross income is thin: the
+/// budget keeps a safety margin ([`SAFETY_MARGIN_PERCENT`]).
+pub const THIN_TREASURY_SEASONS: i64 = 2;
+/// EQ5: seasonal surplus kept as a margin against events, in percent of
+/// gross income.
+pub const SAFETY_MARGIN_PERCENT: i64 = 5;
+/// EQ5: buildings may not take more than this share (percent) of the net
+/// income in upkeep: they cannot be dismissed when times turn bad (a
+/// plague, a lost province).
+pub const MAX_BUILDING_UPKEEP_PERCENT: i64 = 35;
 /// A debt must be repaid within this many turns, or units are dismissed.
 const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
@@ -143,7 +156,10 @@ impl<'a> Context<'a> {
                 } else {
                     0
                 };
-                gross - state.faction_administration_upkeep(data, faction) - tribute
+                gross
+                    - state.faction_administration_upkeep(data, faction)
+                    - tribute
+                    - commitments(state, faction)
             },
             gross_income: state.faction_income_effective(data, faction),
             army_upkeep: state.faction_army_upkeep(data, faction),
@@ -168,6 +184,11 @@ impl<'a> Context<'a> {
     /// Seasonal surplus (negative: deficit) at the current upkeep.
     fn surplus(&self) -> i64 {
         self.income - self.upkeep()
+    }
+
+    /// EQ5: surplus kept against events (fines, fires, lost harvests).
+    fn safety_margin(&self) -> i64 {
+        self.gross_income.max(0) * SAFETY_MARGIN_PERCENT / 100
     }
 
     /// Treasury above [`RESERVE_SEASONS`] of gross income: idle money the
@@ -260,6 +281,31 @@ impl<'a> Context<'a> {
     }
 }
 
+/// EQ5: seasonal charges the treasury pays besides the army, buildings and
+/// administration: tributes of a lost war (a Granada paying England, Scotland
+/// and Holstein went bankrupt for decades, its budget blind to them), ransom
+/// installments (yearly, spread over the seasons), agents and the diets of
+/// the provinces (« Table », last season's bill).
+fn commitments(state: &CampaignState, faction: &FactionId) -> i64 {
+    let Some(me) = state.factions.get(faction) else {
+        return 0;
+    };
+    let tributes: i64 = me.ledger.tributes.iter().map(|t| t.per_season).sum();
+    let ransoms: i64 = me
+        .ransom_debts
+        .iter()
+        .map(|d| d.installment.min(d.remaining))
+        .sum::<i64>()
+        / i64::from(sim_campaign::state::TURNS_PER_YEAR);
+    let agents = state
+        .agents
+        .upkeep_last_turn
+        .get(faction)
+        .copied()
+        .unwrap_or(0);
+    tributes + ransoms + agents + me.table_upkeep_last_turn
+}
+
 /// Orders of `faction` for this turn.
 pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
@@ -300,7 +346,9 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     orders.extend(sim_campaign::edicts::ai_choose_edicts(state, data, faction));
     // G2: a realm whose buildings eat half its income does not debase: the
     // inflation of their upkeep outweighs the seigniorage (Scots spiral).
-    let upkeep_heavy = 2 * ctx.building_upkeep > ctx.gross_income;
+    // EQ5: a third is enough: the prices stay up after the money is sound
+    // again (Swiss buildings 158 → 201 after two years of debasement).
+    let upkeep_heavy = 3 * ctx.building_upkeep > ctx.gross_income;
     orders.extend(
         sim_campaign::coinage::ai_choose_coinage(state, data, faction)
             .into_iter()
@@ -369,10 +417,22 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         PEACE_RUNWAY_TURNS
     };
     let uncovered_deficit = ctx.surplus() < 0 && ctx.treasury < -ctx.surplus() * runway;
-    let needs_money = in_debt || uncovered_deficit || (ctx.at_war() && low_treasury);
+    // EQ5: a thin treasury (below `THIN_TREASURY_SEASONS` of income) with
+    // no margin in the budget is one bad event away from bankruptcy.
+    let thin = ctx.treasury < THIN_TREASURY_SEASONS * ctx.gross_income.max(0)
+        && ctx.surplus() < ctx.safety_margin();
+    let needs_money = in_debt || uncovered_deficit || thin || (ctx.at_war() && low_treasury);
+    // EQ5: heavy taxes already levied stay while the money is needed and
+    // the realm only grumbles (without this margin the rate flipped every
+    // season around the threshold and the debt never closed).
+    let max_unrest = if me.tax_rate == TaxRate::High {
+        HIGH_TAX_MAX_UNREST + HIGH_TAX_HYSTERESIS
+    } else {
+        HIGH_TAX_MAX_UNREST
+    };
     let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if needs_money && unrest < HIGH_TAX_MAX_UNREST && !revolt_risk {
+    } else if needs_money && unrest < max_unrest && !revolt_risk {
         TaxRate::High
     } else {
         TaxRate::Normal
@@ -562,8 +622,12 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let builds = (1 + (budget / 15_000).max(0) as usize).min(6);
     // F4: a new building's upkeep must fit in the surplus left by the army
     // (or in the hoard being spent).
-    let mut spare =
-        ctx.surplus() - (planned_upkeep - ctx.army_upkeep) + hoard / HOARD_SPENDING_TURNS;
+    // EQ5: with the safety margin kept, and within a share of the net
+    // income: buildings cannot be dismissed when times turn bad.
+    let mut spare = (ctx.surplus() - (planned_upkeep - ctx.army_upkeep)
+        + hoard / HOARD_SPENDING_TURNS
+        - ctx.safety_margin())
+    .min(ctx.income * MAX_BUILDING_UPKEEP_PERCENT / 100 - ctx.building_upkeep);
     let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = Vec::new();
     for (id, settlement) in state
         .settlements

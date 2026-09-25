@@ -400,7 +400,7 @@ fn trace_trespass(state: &CampaignState, data: &GameData) {
         };
         let f = &state.factions[&army.faction];
         println!(
-            "TRESPASS t{} {} {} in {} of {} | wars {} | at {:?} | units {} | stance {:?} | mv {} | supply {} | truce {}",
+            "TRESPASS t{} {} {} in {} of {} | wars {} | at {:?} | units {} | stance {:?} | mv {} | supply {} | truce {} | may {}",
             state.turn,
             id.as_str(),
             army.faction.as_str(),
@@ -417,6 +417,7 @@ fn trace_trespass(state: &CampaignState, data: &GameData) {
             army.movement_left,
             army.supply,
             state.has_truce(&army.faction, &owner),
+            sim_campaign::passage::ai_may_trespass(state, data, &army.faction, &owner),
         );
     }
 }
