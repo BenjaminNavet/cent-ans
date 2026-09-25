@@ -21,7 +21,9 @@
   "haze": {
     "fog_density": {"clear": 0.0002, "fog": 0.0036, "rain": 0.0012, "snow": 0.0015},
     "altitude_scale_m": 900.0,
-    "full_density_m": 6000.0
+    "full_density_m": 6000.0,
+    "ring_scale": 0.5,
+    "ring_tint": 0.9
   },
   "panorama": {
     "radius_m": 14600.0,

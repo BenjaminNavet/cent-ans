@@ -57,7 +57,9 @@
       "properties": {
         "fog_density": { "$ref": "#/$defs/weather_map", "description": "Densité du brouillard exponentiel de la scène quand l'horizon est actif." },
         "altitude_scale_m": { "type": "number", "minimum": 100 },
-        "full_density_m": { "type": "number", "minimum": 0 }
+        "full_density_m": { "type": "number", "minimum": 0 },
+        "ring_scale": { "type": "number", "minimum": 0, "maximum": 2, "description": "Calage de la brume de l'anneau d'horizon sur celle de la scène." },
+        "ring_tint": { "type": "number", "minimum": 0, "maximum": 2 }
       },
       "required": ["fog_density", "altitude_scale_m", "full_density_m"],
       "additionalProperties": false
