@@ -12,6 +12,10 @@ extends Node
 ## tutoriel ») ; ne démarre qu'en début de partie et jamais pendant les captures.
 ##
 ## Encyclopédie : touche L ou Menu → Encyclopédie. Menu → Tutoriel relance le guide.
+##
+## Lot UX2 (U15) : « Plus tard » range le guide (`postpone`, réglage `tutorial/postponed`) ;
+## il reprend à la même étape (`resume`) par le conseil « que faire maintenant », l'aide (F1)
+## ou Menu → Tutoriel. Le sommaire du parchemin mène à n'importe quelle étape (`jump_to`).
 ## Aucune règle de jeu : lecture de l'état seulement.
 
 const TUTORIAL_SCENE := "res://scenes/ui/tutorial.tscn"
@@ -37,6 +41,8 @@ var _check_timer := 0.0
 var _done_timer := -1.0
 ## Faux en capture : la progression du joueur n'est pas modifiée.
 var persist_progress := true
+## UX2 : étape où le guide a été rangé par « Plus tard » (-1 : aucun guide en attente).
+var _postponed_step := -1
 
 
 func setup(campaign_map: Node) -> void:
@@ -53,6 +59,10 @@ func setup(campaign_map: Node) -> void:
 	overlay.continue_pressed.connect(advance)
 	overlay.skip_step_pressed.connect(advance)
 	overlay.skip_all_pressed.connect(skip_all)
+	overlay.later_pressed.connect(postpone)
+	overlay.step_chosen.connect(jump_to)
+	if bool(_setting("tutorial/postponed", false)) and not bool(_setting("tutorial/done", false)):
+		_postponed_step = int(_setting("tutorial/step", 0))
 	var menu_button: MenuButton = ui.get("menu_button")
 	if menu_button != null:
 		var popup := menu_button.get_popup()
@@ -62,7 +72,7 @@ func setup(campaign_map: Node) -> void:
 			if id == MENU_ENCYCLOPEDIA_ID:
 				encyclopedia.open_window()
 			elif id == MENU_TUTORIAL_ID:
-				restart())
+				reopen())
 	if should_autostart():
 		start(int(_setting("tutorial/step", 0)))
 
@@ -88,6 +98,8 @@ static func capture_mode() -> bool:
 func should_autostart() -> bool:
 	var sim: Object = map.get("sim")
 	if sim == null or capture_mode() or not bool(_setting("tutorial/enabled", true)) or bool(_setting("tutorial/done", false)):
+		return false
+	if _postponed_step >= 0:  # UX2 : rangé par « Plus tard », repris à la demande
 		return false
 	return int(sim.call("get_turn")) <= EARLY_TURNS or int(_setting("tutorial/step", 0)) > 0
 
@@ -123,6 +135,11 @@ func start(from_step: int = 0) -> void:
 	steps = TutorialSteps.steps(str(map.get("player_faction")), _context())
 	royal_army = find_royal_army()
 	active = true
+	_clear_postponed()
+	var titles := PackedStringArray()
+	for step in steps:
+		titles.append(str(step.get("title", "")))
+	overlay.set_steps(titles)
 	_enter_step(clampi(from_step, 0, steps.size() - 1))
 
 
@@ -131,6 +148,61 @@ func restart() -> void:
 	_set_setting("tutorial/done", false)
 	_set_setting("tutorial/enabled", true)
 	start(0)
+
+
+## UX2 : « Plus tard » — le guide se range et garde son étape (reprise par `resume`).
+func postpone(notify: bool = true) -> void:
+	if not active:
+		return
+	var index := step_index
+	active = false
+	step_index = -1
+	overlay.hide()
+	overlay.set_target({})
+	_postponed_step = index
+	_set_setting("tutorial/step", index)
+	_set_setting("tutorial/postponed", true)
+	if notify:
+		var ui: Node = map.get("ui")
+		ui.call("show_toast", "Guide mis de côté à l'étape %d : reprenez-le par le conseil en haut à gauche, l'aide (F1) ou Menu → Tutoriel." % (index + 1))
+
+
+## UX2 : reprend le guide à l'étape où « Plus tard » l'avait laissé (sinon au début).
+func resume() -> void:
+	if active:
+		return
+	var index := maxi(_postponed_step, 0)
+	_set_setting("tutorial/done", false)
+	_set_setting("tutorial/enabled", true)
+	start(index)
+
+
+## UX2 : Menu → Tutoriel et bouton de l'aide : reprise du guide rangé, sinon depuis le début.
+func reopen() -> void:
+	if active:
+		return
+	if _postponed_step >= 0:
+		resume()
+	else:
+		restart()
+
+
+## UX2 : étape du guide rangé par « Plus tard », -1 sinon (conseil « Reprendre le guide »).
+func postponed_step() -> int:
+	return -1 if active else _postponed_step
+
+
+## UX2 : sommaire — aller directement à l'étape `index`.
+func jump_to(index: int) -> void:
+	if not active or index < 0 or index >= steps.size():
+		return
+	_enter_step(index)
+
+
+func _clear_postponed() -> void:
+	if _postponed_step >= 0 or bool(_setting("tutorial/postponed", false)):
+		_set_setting("tutorial/postponed", false)
+	_postponed_step = -1
 
 
 func current_step_id() -> String:
@@ -163,13 +235,14 @@ func finish() -> void:
 	overlay.set_target({})
 	_set_setting("tutorial/done", true)
 	_set_setting("tutorial/step", 0)
+	_clear_postponed()
 
 
 ## « Passer le tutoriel » : fermé pour de bon (relançable par Menu → Tutoriel).
 func skip_all() -> void:
 	finish()
 	var ui: Node = map.get("ui")
-	ui.call("show_toast", "Tutoriel passé : Menu → Tutoriel pour le relancer.")
+	ui.call("show_toast", "Tutoriel passé : Menu → Tutoriel ou l'aide (F1) pour le relancer.")
 
 
 ## Vérifie l'objectif tout de suite ; passe à l'étape suivante s'il est rempli. Sert au smoke.
@@ -193,7 +266,11 @@ func _process(delta: float) -> void:
 		return
 	overlay.set_target(resolve_target(str(steps[step_index].get("target", ""))))
 	var avoid: Array = []
-	for panel in [_ui_node("province_panel") as Control, _settlement_panel()]:
+	# UX2 : aussi le bandeau d'ost, la cloche, le sceau et le journal (le parchemin ne les
+	# couvre que faute de place ailleurs).
+	for panel in [_ui_node("province_panel") as Control, _settlement_panel(), _ui_node("army_strip") as Control,
+			_ui_node("end_turn_cluster") as Control, _ui_node("general_seal") as Control, _ui_node("event_log") as Control,
+			_ui_node("tech_panel") as Control, _ui_node("court_panel") as Control, _ui_node("faction_panel") as Control]:
 		if panel != null and panel.is_visible_in_tree():
 			avoid.append(panel.get_global_rect())
 	overlay.set_avoid(avoid)
@@ -617,6 +694,12 @@ func stage_screenshot(stage: String) -> void:
 			map.call("_stage_screenshot")
 			start(TutorialSteps.STEP_IDS.find("move_army"))
 			overlay.set_target(resolve_target("royal_army"))
+		"tutorial_toc":  # UX2 : sommaire ouvert, cible dans la barre du haut
+			map.call("_focus_capital")
+			map.get("ui").call("hide_province")
+			start(TutorialSteps.STEP_IDS.find("research"))
+			overlay.set_toc_open(true)
+			overlay.set_target(resolve_target("research"))
 		"encyclopedia":
 			map.call("_focus_capital")
 			map.get("ui").call("hide_province")
