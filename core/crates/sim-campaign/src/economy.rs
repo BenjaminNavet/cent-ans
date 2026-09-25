@@ -708,6 +708,34 @@ fn supply_modifiers(
     }
 }
 
+/// Seasonal supply change (percentage points) of an army standing in
+/// `location`: positive recovery in friendly territory, negative loss
+/// outside it (heavier in winter). Shared by [`resolve_attrition`] and the
+/// supply map filter (`crate::map_lens`), which passes no general.
+pub fn seasonal_supply_change(
+    state: &CampaignState,
+    data: &GameData,
+    location: &ProvinceId,
+    friendly: bool,
+    general: Option<&data_model::CharacterId>,
+    winter: bool,
+) -> i8 {
+    let (recovery_bonus, loss_relief) = supply_modifiers(state, data, location, friendly, general);
+    if friendly {
+        return (f64::from(SUPPLY_RECOVERY) + recovery_bonus)
+            .round()
+            .clamp(0.0, 100.0) as i8;
+    }
+    let base_loss = if winter {
+        ATTRITION_SUPPLY_LOSS_WINTER
+    } else {
+        ATTRITION_SUPPLY_LOSS
+    };
+    -((f64::from(base_loss) * (1.0 - loss_relief / 100.0))
+        .round()
+        .clamp(0.0, 100.0) as i8)
+}
+
 /// Phase 6: supply and attrition for field armies.
 pub(crate) fn resolve_attrition(
     state: &mut CampaignState,
@@ -734,25 +762,14 @@ pub(crate) fn resolve_attrition(
             || settlement
                 .as_ref()
                 .is_some_and(|s| state.is_friendly_settlement(&faction, s));
-        let (recovery_bonus, loss_relief) =
-            supply_modifiers(state, data, &location, friendly, general.as_ref());
+        let change =
+            seasonal_supply_change(state, data, &location, friendly, general.as_ref(), winter);
         let army = state.armies.get_mut(&army_id).expect("exists");
         if friendly {
-            let recovery = (f64::from(SUPPLY_RECOVERY) + recovery_bonus)
-                .round()
-                .clamp(0.0, 100.0) as u8;
-            army.supply = army.supply.saturating_add(recovery).min(100);
+            army.supply = army.supply.saturating_add(change.unsigned_abs()).min(100);
             continue;
         }
-        let base_loss = if winter {
-            ATTRITION_SUPPLY_LOSS_WINTER
-        } else {
-            ATTRITION_SUPPLY_LOSS
-        };
-        let loss = (f64::from(base_loss) * (1.0 - loss_relief / 100.0))
-            .round()
-            .clamp(0.0, 100.0) as u8;
-        army.supply = army.supply.saturating_sub(loss);
+        army.supply = army.supply.saturating_sub(change.unsigned_abs());
         if army.supply == 0 {
             let mut lost = 0;
             for unit in &mut army.units {

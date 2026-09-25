@@ -5,7 +5,7 @@ extends Control
 ## Les symboles reprennent le vrai rendu : formes du shader `settlement_icon.gdshader`
 ## redessinées en 2D, plaque d'effectif (`ArmyMarkers.build_plate`), jeton d'agent
 ## (`AgentController.Token`), étendard de faction (`ArmyMarker.standard_for`), couleurs de
-## relation (`DiplomacyController.RELATION_COLORS`), anneaux et chemins aux couleurs des couches.
+## relation (`MapModeController.RELATION_COLORS`), anneaux et chemins aux couleurs des couches.
 ## `build(sample, context)` renvoie le contrôle adapté ; `context` : {player_color: Color,
 ## player_faction: String, factions: [[id, Color, nom]]}.
 
@@ -147,7 +147,7 @@ func _draw() -> void:
 		"relation":
 			# DP2 : positions diplomatiques (allié, accord, neutre, tension...) d'abord.
 			var relation := str(sample.get("relation", ""))
-			_draw_swatch(DiplomaticStances.COLORS.get(relation, DiplomacyController.RELATION_COLORS.get(relation, NEUTRAL)))
+			_draw_swatch(DiplomaticStances.COLORS.get(relation, MapModeController.RELATION_COLORS.get(relation, NEUTRAL)))
 		"color":
 			_draw_swatch(Color.html(str(sample.get("color", "#808080"))))
 		"gradient":

@@ -33,9 +33,10 @@ const CAMPAIGN_SECTIONS := [
 		["map_toggle_diplomacy", "Diplomatie et religion"], ["map_toggle_objectives", "Objectifs"],
 		["map_toggle_agents", "Agents"], ["codex_open", "Codex (histoire et règles)"],
 		["encyclopedia_open", "Codex, onglet Règles"], ["help_open", "Aide et raccourcis"]]},
-	{"title": "Modes de carte", "actions": [
+	{"title": "Filtres de carte", "actions": [
+		["map_filters_menu", "Menu des filtres (richesse, population, loyauté, ravitaillement…)"],
 		["map_toggle_unrest", "Mécontentement"], ["map_mode_diplomacy", "Carte diplomatique"],
-		["map_mode_religion", "Carte religieuse"]]},
+		["map_mode_religion", "Carte religieuse"], ["map_toggle_trade", "Routes commerciales"]]},
 	{"title": "Partie", "actions": [
 		["campaign_end_turn", "Finir la saison"], ["campaign_pause", "Fermer la fenêtre du dessus, puis menu pause"],
 		["quick_save", "Sauvegarde rapide"], ["quick_load", "Chargement rapide"],

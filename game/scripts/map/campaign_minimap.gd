@@ -4,8 +4,7 @@ extends PanelContainer
 ## Minicarte de campagne (lot C1), dans un cadre de parchemin : terres et mer,
 ## couleurs de faction par province, frontières, provinces voilées par le brouillard, armées
 ## visibles en points, cadre de la vue caméra. Clic ou glisser = `clicked(map_pos)` (la carte
-## recentre la caméra). Trois modes : politique (aplats de faction), diplomatie (positions
-## diplomatiques du joueur, lot DP2) et relief.
+## recentre la caméra). Deux modes : politique (aplats de faction) et relief.
 ##
 ## Le fond (relief et index de province réduits) est calculé une fois dans `setup` ; les
 ## couleurs de faction et le masque de brouillard sont des textures 1D (une entrée par
@@ -20,9 +19,6 @@ signal legend_toggled(pressed: bool)
 const SHADER := preload("res://shaders/campaign_minimap.gdshader")
 const MODE_POLITICAL := "political"
 const MODE_RELIEF := "relief"
-## Lot DP2 : aplats des positions diplomatiques (`DiplomaticStances`), relié au mode
-## « Diplomatie » de la carte (touche N) par `MinimapController`.
-const MODE_DIPLOMACY := "diplomacy"
 ## Largeur de la carte dans le cadre (le cadre fait la largeur des lettres scellées).
 const MAP_WIDTH := 280.0
 const MAX_MAP_HEIGHT := 230.0
@@ -52,8 +48,6 @@ var legend_button: Button
 var _armies: Array = []  # [{pos: Vector2 carte, color: Color, player: bool}]
 var _frame := PackedVector2Array()  # quadrilatère de la vue caméra (coordonnées carte)
 var _visible_count: int = -1
-var _political_colors := PackedColorArray()
-var _diplomacy_colors := PackedColorArray()
 
 
 func _init() -> void:
@@ -87,7 +81,7 @@ func _init() -> void:
 	modes.alignment = BoxContainer.ALIGNMENT_END
 	box.add_child(modes)
 	_modes_row = modes
-	for entry in [[MODE_POLITICAL, "Politique", "Couleurs des royaumes"], [MODE_DIPLOMACY, "Diplomatie", "Alliés, accords, neutres, tensions, guerres et vassaux (N)"], [MODE_RELIEF, "Relief", "Terres, montagnes et mers"]]:
+	for entry in [[MODE_POLITICAL, "Politique", "Couleurs des royaumes"], [MODE_RELIEF, "Relief", "Terres, montagnes et mers"]]:
 		var button := Button.new()
 		button.name = "Mode_%s" % entry[0]
 		button.text = entry[1]
@@ -207,21 +201,6 @@ static func _relief_color(data: MapData, px: int, py: int, sample_step: int) -> 
 
 ## Couleur de chaque province (`colors[index - 1]`, alpha 0 = neutre), comme le terrain.
 func set_province_colors(colors: PackedColorArray) -> void:
-	_political_colors = colors
-	if mode != MODE_DIPLOMACY:
-		_upload_colors(colors)
-
-
-## Lot DP2 : couleurs du mode « Diplomatie » (mêmes indices que `set_province_colors`).
-func set_diplomacy_colors(colors: PackedColorArray) -> void:
-	_diplomacy_colors = colors
-	if mode == MODE_DIPLOMACY:
-		_upload_colors(colors)
-
-
-func _upload_colors(colors: PackedColorArray) -> void:
-	if _material == null:
-		return
 	var count := map_data.province_count if map_data != null else 0
 	var image := Image.create(maxi(count + 1, 1), 1, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0, 0, 0, 0))
@@ -261,19 +240,18 @@ func set_view_frame(points: PackedVector2Array) -> void:
 
 
 func set_mode(new_mode: String) -> void:
-	if new_mode not in [MODE_POLITICAL, MODE_RELIEF, MODE_DIPLOMACY]:
+	if new_mode != MODE_POLITICAL and new_mode != MODE_RELIEF:
 		return
 	var changed := new_mode != mode
 	mode = new_mode
-	if changed and mode != MODE_RELIEF:
-		_upload_colors(_diplomacy_colors if mode == MODE_DIPLOMACY else _political_colors)
+	_material.set_shader_parameter("political", mode == MODE_POLITICAL)
 	_sync_mode_buttons()
 	if changed:
 		mode_changed.emit(mode)
 
 
 func _sync_mode_buttons() -> void:
-	_material.set_shader_parameter("political", mode != MODE_RELIEF)
+	_material.set_shader_parameter("political", mode == MODE_POLITICAL)
 	for key in _mode_buttons:
 		(_mode_buttons[key] as Button).set_pressed_no_signal(key == mode)
 

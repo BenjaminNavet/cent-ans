@@ -48,6 +48,7 @@ pub mod economy_balance;
 pub mod edicts;
 pub mod events;
 pub mod frontier;
+pub mod map_lens;
 pub mod march;
 pub mod medicine;
 pub mod movement;
