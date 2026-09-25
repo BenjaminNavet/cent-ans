@@ -24,17 +24,40 @@ cède, garnison qui se replie sur la place.
 - Godot : fichier séparé `game/scripts/battle/siege_assault_fx.gd` (ne touche pas aux maisons de
   BR1 dans `battle_siege.gd`).
 
-## État
-- [x] Squelette cœur + pont (compile).
-- [x] Tests `sim-battle/tests/sg1.rs` (7). Sonde escalade `SEEDS=20 probe -- siege 0 ""` : 9/20 → 7/20
-  (huile réglée à 30 s / 3 hommes / −4 moral ; à 20 s / 4 / −8 on tombait à 5/20).
-- [x] Cœur : `BattleSim::ladders`, `climbers_shown`, `soldier_poses` (grimpeurs posés sur les échelles
-  ou le pont du beffroi, part croissante sur le chemin de ronde) ; pont : `get_units().climbers_shown`,
-  `ladder_lines`, tampon des soldats via `soldier_poses`.
-- [x] Clip `climb` (pipeline V2 `battle_skinned_poses.climb`, `human.bones.bin` régénéré) ; shader :
-  mode `M_SPLIT` (les `split_count` premiers soldats escaladent) ; `STYLES.*.climbing`.
-- [ ] Rendu : engins animés, projectiles d'engins vers la muraille, éclats, porte qui éclate, huile.
-- [ ] FPS avant/après, captures `docs/audit/captures/sg1/`.
+## État : terminé (non fusionné)
+- [x] Cœur : `siege_fx.rs` (événements), `sim/siege_assault.rs` (bélier par coups, huile, transitions,
+  échelles, poses des grimpeurs), `ai.rs` (repli sur la place), pont `get_siege_events`,
+  `debug_set_piece_hp`, `get_units().climbers_shown / ladder_lines`. Tests `tests/sg1.rs` (7).
+  Sonde escalade `SEEDS=20 probe -- siege 0 ""` : 9/20 → 7/20 (huile réglée à 30 s / 3 hommes /
+  −4 moral ; à 20 s / 4 / −8 on tombait à 5/20) ; `siege 0` et `siege 60` : 6/6 inchangé.
+- [x] Clip `climb` (pipeline V2, `human.bones.bin` régénéré, seuls ce fichier et le manifeste
+  changent) ; shader `M_SPLIT` + `split_count` ; `STYLES.*.climbing`.
+- [x] Rendu `siege_assault_fx.gd` : échelles dressées (1,4 s) sur `ladder_lines`, laissées au mur
+  jusqu'à la chute du pan ; bélier calé face à la porte, poutre qui recule puis frappe en rythme
+  (`ram_period`), échardes et poussière à chaque coup, vantaux qui tremblent ; beffroi habillé
+  (poteaux, lisses, créneaux) et pont-levis articulé abaissé à l'accostage ; pierres et boulets avec
+  traînée vers le point d'impact, éclats de pierre, poussière, son d'impact à l'arrivée ; carreaux
+  des tours ; huile (coulée + vapeur, cris) ; porte enfoncée (planches projetées, vantail arraché).
+  Tours de la porte écartées au rendu (`gatehouse_tower`) : la porte est enfin visible.
+- [x] Captures `docs/audit/captures/sg1/` (`game/tests/sg1_siege_shot.gd`) et planches de séquences
+  (`*_sequence.png`, 6 images à 0,25 s).
+- [x] ADR 0023, section SG1 de `docs/design/m8-sieges.md`.
 
-## Prochaine étape
-`game/scripts/battle/siege_assault_fx.gd` (échelles contre le mur, bélier, projectiles, porte, huile).
+## Mesures FPS (assaut de la Guyenne, `--siege --units=16 --benchmark --bench-at=130
+--camera=600,395,110,205`, 1600×900, dylib release copiée sous le nom debug dans les deux arbres)
+| Arbre | FPS moyen (plafond écran 60 Hz) | CPU rendu / image |
+|---|---|---|
+| main a8e1cc7a | 58,6 · 58,6 | 0,76 · 0,88 ms |
+| SG1 | 58,6 | 0,84 ms |
+| SG1 + 4 engins (`--siege-engines=`) | 58,5 | 0,92 ms |
+Pas de perte mesurable (l'écran plafonne à 60 Hz même avec `--disable-vsync --max-fps 0`).
+
+## Points ouverts
+- Le trébuchet lui-même n'est pas animé (verge qui bascule) : figurine d'engin B1 inchangée.
+- Le point d'impact est choisi au tir (le cœur applique les dégâts au tir) : l'effondrement S1
+  d'un pan peut précéder de 1-3 s l'arrivée de la dernière pierre.
+- Garnison réduite (démo Guyenne, 3 régiments) : rien à replier sur la place ; visible avec
+  `--units=10`.
+- Pas de son dédié pour l'huile (cri `death_groan` réutilisé) ni pour la porte qui éclate (le son
+  `wall_collapse` d'AU1 joue quand la porte cède).
+- L'IA n'emploie pas encore l'huile comme critère (elle ne garde la porte que par son déploiement).
