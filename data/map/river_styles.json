@@ -9,9 +9,9 @@
     {
       "id": "paris",
       "name": "Paris (lot L1, villes emblématiques)",
-      "lonlat": [2.3488, 48.8534],
-      "radius_px": 4.8,
-      "boundary_bridges": true,
+      "lonlat": [2.3499, 48.853],
+      "radius_px": 6.8,
+      "boundary_bridges": false,
       "note": "Le rendu générique (eau, lit creusé, berges, ponts, ponts aux murs) se retire dans ce cercle : le modèle dédié de Paris (Seine, île de la Cité, ponts habités) y prend le relais."
     }
   ],
