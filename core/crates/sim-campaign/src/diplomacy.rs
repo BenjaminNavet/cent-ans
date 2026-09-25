@@ -367,6 +367,10 @@ impl CampaignState {
         if fa.allies.iter().any(|ally| self.is_at_war(ally, b)) {
             return Some("défense d'un allié".to_owned());
         }
+        // DP2: armies camping on our lands without right of passage.
+        if crate::passage::has_grievance(self, a, b) {
+            return Some("violation de nos frontières".to_owned());
+        }
         if religion::faith_relation(self, data, a, b) == religion::FaithRelation::Different {
             return Some("guerre de religion".to_owned());
         }

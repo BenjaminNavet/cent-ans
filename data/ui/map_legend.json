@@ -39,11 +39,12 @@
       "modes": ["diplomacy"],
       "entries": [
         {"sample": {"type": "relation", "relation": "self"}, "label": "Nous", "text": "Vos terres."},
+        {"sample": {"type": "relation", "relation": "ally"}, "label": "Alliés", "text": "Royaume allié."},
+        {"sample": {"type": "relation", "relation": "agreement"}, "label": "Accords", "text": "En paix, avec un accord : commerce, accès militaire ou mariage."},
+        {"sample": {"type": "relation", "relation": "neutral"}, "label": "Neutres", "text": "En paix (ou en trêve) avec vous, sans accord particulier."},
+        {"sample": {"type": "relation", "relation": "tension"}, "label": "Tensions", "text": "En paix, mais hostiles : mauvaise attitude, embargo, armées campant sans droit de passage ou casus belli."},
         {"sample": {"type": "relation", "relation": "war"}, "label": "Guerre", "text": "Royaume en guerre contre vous."},
-        {"sample": {"type": "relation", "relation": "truce"}, "label": "Trêve", "text": "Trêve en cours : l'attaquer la romprait."},
-        {"sample": {"type": "relation", "relation": "alliance"}, "label": "Alliés", "text": "Royaume allié."},
-        {"sample": {"type": "relation", "relation": "vassal"}, "label": "Vassal ou suzerain", "text": "Lien de vassalité avec vous."},
-        {"sample": {"type": "relation", "relation": "peace"}, "label": "Neutres", "text": "En paix avec vous, sans traité."}
+        {"sample": {"type": "relation", "relation": "vassal"}, "label": "Vassal ou suzerain", "text": "Lien de vassalité avec vous."}
       ]
     },
     {
