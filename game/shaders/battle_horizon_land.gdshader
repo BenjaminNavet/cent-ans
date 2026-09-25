@@ -24,6 +24,9 @@ uniform float fog_density = 0.0002;
 uniform float full_density_m = 6000.0;
 uniform float altitude_scale = 1400.0;
 uniform float ref_y = 0.0;
+// Calage sur le rendu du brouillard de la scène (perspective aérienne comprise) au raccord.
+uniform float haze_scale = 0.6;
+uniform float haze_tint = 0.9;
 
 varying vec3 world_pos;
 varying vec3 world_normal;
@@ -46,11 +49,28 @@ void fragment() {
 	vec3 col = mix(field_color, meadow_color, smoothstep(0.35, 0.65, macro2));
 	col *= mix(0.82, 1.12, macro);
 	col = mix(col, forest_color * mix(0.85, 1.1, macro2), smoothstep(0.35, 0.6, forest + (macro2 - 0.5) * 0.3));
-	float slope = 1.0 - clamp(world_normal.y, 0.0, 1.0);
+	// Détail sous la maille de 400 m : normales tirées du bruit macro (ravines, croupes), plus
+	// marquées en pente, pour que les versants lointains ne paraissent pas découpés dans du papier.
+	float slope0 = 1.0 - clamp(world_normal.y, 0.0, 1.0);
+	vec2 p1 = world_pos.xz * 0.0011;
+	vec2 p2 = world_pos.xz * 0.0043 + 0.61;
+	float eps = 0.02;
+	float b0 = texture(macro_noise, p1).r + 0.5 * texture(macro_noise, p2).r;
+	float bx = texture(macro_noise, p1 + vec2(eps, 0.0)).r + 0.5 * texture(macro_noise, p2 + vec2(eps * 3.9, 0.0)).r;
+	float bz = texture(macro_noise, p1 + vec2(0.0, eps)).r + 0.5 * texture(macro_noise, p2 + vec2(0.0, eps * 3.9)).r;
+	float bump = mix(1.2, 5.0, smoothstep(0.05, 0.4, slope0));
+	vec3 wn = normalize(world_normal + vec3(b0 - bx, 0.0, b0 - bz) * bump);
+	NORMAL = normalize((VIEW_MATRIX * vec4(wn, 0.0)).xyz);
+	float slope = 1.0 - clamp(wn.y, 0.0, 1.0);
+	col *= mix(0.78, 1.08, clamp(b0 / 1.5, 0.0, 1.0));
 	float altitude = world_pos.y - offset_y;
 	col = mix(col, rock_color * mix(0.8, 1.1, macro), smoothstep(0.25, 0.5, slope) * smoothstep(300.0, 1200.0, altitude));
 	float snow_edge = snow_line + (macro - 0.5) * 300.0;
-	float snow = max(smoothstep(snow_edge - 80.0, snow_edge + 80.0, altitude) * (1.0 - smoothstep(0.55, 0.8, slope)), snowy * 0.85);
+	// Neige en plaques : couloirs et replats d'abord, rochers qui percent, pleine au-dessus.
+	float mottle = texture(macro_noise, p2 * 1.7).r;
+	float above = (altitude - snow_edge) / 700.0;
+	float snow = smoothstep(0.45, 0.6, mottle * 0.8 + above + (b0 - 0.75) * 0.5) * (1.0 - smoothstep(0.35, 0.7, slope));
+	snow = max(snow * step(snow_edge - 250.0, altitude), snowy * 0.85);
 	col = mix(col, snow_color, snow);
 	col = mix(col, vec3(0.6, 0.57, 0.48), sea);
 	ALBEDO = col;
@@ -60,5 +80,5 @@ void fragment() {
 	vec3 cam = INV_VIEW_MATRIX[3].xyz;
 	float mid = max((world_pos.y + cam.y) * 0.5 - ref_y, 0.0);
 	float tau = fog_density * (min(d, full_density_m) + max(d - full_density_m, 0.0) * exp(-mid / altitude_scale));
-	FOG = vec4(fog_color, 1.0 - exp(-tau));
+	FOG = vec4(fog_color * haze_tint, 1.0 - exp(-tau * haze_scale));
 }

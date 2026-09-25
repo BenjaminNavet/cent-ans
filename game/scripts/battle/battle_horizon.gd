@@ -711,6 +711,8 @@ func apply_atmosphere(env: Environment, sun: DirectionalLight3D, weather: String
 		_land_material.set_shader_parameter("full_density_m", float(haze.get("full_density_m", 6000.0)))
 		_land_material.set_shader_parameter("altitude_scale", float(haze.get("altitude_scale_m", 1400.0)))
 		_land_material.set_shader_parameter("ref_y", offset_y + maxf(ref_m, 0.0))
+		_land_material.set_shader_parameter("haze_scale", float(haze.get("ring_scale", 0.6)))
+		_land_material.set_shader_parameter("haze_tint", float(haze.get("ring_tint", 0.9)))
 	if _panorama_material != null:
 		_panorama_material.set_shader_parameter("fog_color", fog_color)
 		_panorama_material.set_shader_parameter("fog_density", env.fog_density)

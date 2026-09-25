@@ -724,7 +724,9 @@ func _build_material(weather: String) -> void:
 		if season_key != "winter" and snow_line < 10000.0:
 			snow_line *= 2.2
 		if horizon != null and horizon.active:
-			snow_line = horizon.snow_line_world()  # EP2 : limite des neiges en altitude réelle
+			# EP2 : limite des neiges en altitude réelle ; le sol détaillé (neige uniforme) la prend
+			# un peu plus haut que l'anneau d'horizon (neige en plaques).
+			snow_line = horizon.snow_line_world() + 450.0
 		ground_material.set_shader_parameter("snow_line", snow_line)
 		if ground_key == "snowy" and weather != "snow":
 			ground_material.set_shader_parameter("snow", 0.75)
