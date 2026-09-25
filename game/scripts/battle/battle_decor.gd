@@ -165,6 +165,7 @@ func _build_buildings(buildings: Array, landmarks: BuildingKit.Batch, houses: Bu
 		var xform := Transform3D(basis, Vector3(p.x, minf(span.y, span.x + 1.4) - 0.05, p.y))
 		if kind in ["church", "windmill", "watermill", "manor"]:
 			landmarks.add(model, xform)
+			print("BattleDecor: %s at (%.0f, %.0f)" % [kind, p.x, p.y])  # repères des captures
 		else:
 			houses.add(model, xform)
 		building_count += 1

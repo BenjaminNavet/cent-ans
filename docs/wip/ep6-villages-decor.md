@@ -49,7 +49,28 @@ convoi de bagages derrière chaque armée ; pieux des archers.
 - [x] Fusion de main (EP8, d0be0f2b) ; feux des camps → `BattleScene.add_smoke_source` (au plus
   `camp_fires_per_side` par camp, pas sous la pluie/neige), `staging.auto_campfires = false` dès
   que le décor a des camps ; camp pillé → sources « column » d'EP8. Fumée vérifiée en capture.
-- [ ] Banc EP1 avant/après, captures `docs/img/ep6/`, vérifications finales (smoke Godot, pytest).
+- [x] Banc EP1 A/B (ci-dessous), captures `docs/img/ep6/` (`vue_hameaux_moulin`, `vue_hameau_rue_camp`,
+  `camp_feux_fumee`, `melee_hameau`, `guyenne_moulin_vignes`). `--decor-plan=<fichier>` (Godot) passe
+  un plan JSON à la simulation (essais EP7, captures).
+- [ ] Vérifications finales (smoke Godot, pytest, cargo workspace) après la dernière fusion.
+
+## Mesures (banc `tools/bench_ep1.sh … --units=63 --bench-at=90`, 15 068 soldats, palier epic)
+Mac M4 Pro, machine partagée (charge 5-15) ; A = `--no-ep6-decor` (rendu du décor coupé, règles
+du cœur identiques), B = décor rendu. Guyenne (vignoble, pire cas : 67 bâtiments, 3 255 segments de
+vigne, 42 tentes, 57 chevaux).
+
+| Config | i/s moy. | p95 ms | primitives | appels |
+|---|---|---|---|---|
+| B décor, EP8 actif | 29,9 · 29,8 | 37,5 · 37,9 | 3,61 M | 1 408 |
+| A sans décor, EP8 actif | 30,1 · 30,1 | 37,5 · 37,6 | 3,50 M | 1 321 |
+| B décor, `--no-ep8` | 26,7 | 45,5 | 3,64 M | 1 403 |
+| A sans décor, `--no-ep8` | 27,5 | 42,7 | 3,53 M | 1 317 |
+| B décor, Picardie (openfield) | 30,4 | 36,1 | 2,58 M | 1 312 |
+
+Lecture : le décor coûte ~+3 % de primitives, ~+87 appels, et 0 à 3 % d'i/s (dans le bruit).
+Toutes les mesures plafonnent vers 30 i/s ce soir, décor ou non (EP1 mesurait ~57 le matin, écran à
+60 Hz) : écart d'environnement (charge, affichage), pas du lot ; la cible de 40 i/s n'a pas pu être
+revérifiée dans ces conditions.
 
 ## API de pose explicite (pour EP7)
 
@@ -88,6 +109,5 @@ Deux voies, au choix, toutes deux dans le cœur (`core/crates/sim-battle/src/dec
   z petit). `yaw` en radians : longueur le long de `(cos, sin)`, façade vers `(-sin, cos)`.
 
 ## Prochaine étape
-Banc A/B `tools/bench_ep1.sh ep6 --units=63 --bench-at=90 --scale=epic` avec et sans
-`--no-ep6-decor` ; captures (vue d'ensemble hameau/moulin/camp, gros plan village en mêlée) ;
-smoke Godot, pytest, ruff ; rapport.
+Vérifications finales (cargo fmt/clippy/test workspace, build.sh, pytest, ruff, import, smoke Godot)
+puis rapport.
