@@ -123,7 +123,8 @@ func apply(hour: float) -> void:
 	_env.fog_light_color = (_base["fog_color"] as Color) * fog_tint
 	_env.volumetric_fog_albedo = (_base["volumetric_albedo"] as Color) * fog_tint
 	_env.ambient_light_energy = float(_base["ambient_energy"]) * float(k["ambient_mul"])
-	_env.ambient_light_color = (_base["ambient_color"] as Color) * fog_tint
+	# L'ambiance ne prend qu'une part de la teinte (les faces à l'ombre restent lisibles).
+	_env.ambient_light_color = (_base["ambient_color"] as Color) * fog_tint.lerp(Color.WHITE, 0.5)
 	_env.tonemap_exposure = float(_base["exposure"]) * float(k["exposure"])
 	var want_hdri := _using_hdri and bool(k["hdri"])
 	if want_hdri:

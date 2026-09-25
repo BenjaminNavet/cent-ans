@@ -300,7 +300,7 @@ func dust_factor(unit: Dictionary) -> float:
 		return 1.0
 	var reference := maxf(float(_dust_cfg.get("reference_soldiers", 240)), 1.0)
 	var men := sqrt(maxf(float(unit.get("soldiers", reference)), 0.0) / reference)
-	return clampf(men, 0.35, float(_dust_cfg.get("max_strength", 1.6))) * _dust_scale
+	return clampf(men, 0.7, float(_dust_cfg.get("max_strength", 1.6))) * _dust_scale
 
 
 ## Poussière imposée à un endroit (captures hors simulation).
