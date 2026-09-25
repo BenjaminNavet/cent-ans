@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "illustrations.schema.json",
+  "title": "Habillage illustré (AR1)",
+  "description": "Écrans de chargement (contexte, citation de chroniqueur), vignettes d'événements (liées aux genres d'événements produits par le cœur) et écrans de fin, avec la source de chaque image (enluminure du domaine public sur Wikimedia Commons, ou génération).",
+  "type": "object",
+  "required": ["loading", "vignettes", "endings"],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "image": {"type": "string", "pattern": "^res://assets/art/(loading|vignettes|endings)/[a-z0-9_]+\\.jpg$"},
+    "quote": {
+      "type": "object",
+      "required": ["text", "author", "source", "date"],
+      "additionalProperties": false,
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "author": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "date": {"type": "string", "minLength": 1}
+      }
+    },
+    "crop": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Recadrage : centre (x, y) en fractions de l'image source, scale = part de la plus grande boîte au format cible.",
+      "properties": {
+        "x": {"type": "number", "minimum": 0, "maximum": 1},
+        "y": {"type": "number", "minimum": 0, "maximum": 1},
+        "scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "commons": {
+          "type": "object",
+          "required": ["file", "work", "artist"],
+          "additionalProperties": false,
+          "description": "Enluminure du domaine public sur Wikimedia Commons (licence vérifiée à l'import).",
+          "properties": {
+            "file": {"type": "string", "pattern": "^File:.+"},
+            "work": {"type": "string", "minLength": 1},
+            "artist": {"type": "string", "minLength": 1},
+            "crop": {"$ref": "#/$defs/crop"}
+          }
+        },
+        "generated": {
+          "type": "object",
+          "required": ["prompt"],
+          "additionalProperties": false,
+          "description": "Manque comblé par génération (OpenRouter) ; jamais régénéré si le fichier existe.",
+          "properties": {
+            "prompt": {"type": "string", "minLength": 20}
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "loading": {
+      "type": "object",
+      "required": ["min_seconds", "max_seconds", "screens"],
+      "additionalProperties": false,
+      "properties": {
+        "min_seconds": {"type": "number", "minimum": 0},
+        "max_seconds": {"type": "number", "minimum": 0},
+        "screens": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "contexts", "image", "title", "quote", "source"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"$ref": "#/$defs/id"},
+              "contexts": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {"enum": ["battle", "siege", "naval", "campaign"]}
+              },
+              "image": {"$ref": "#/$defs/image"},
+              "title": {"type": "string", "minLength": 1},
+              "quote": {"$ref": "#/$defs/quote"},
+              "source": {"$ref": "#/$defs/source"}
+            }
+          }
+        }
+      }
+    },
+    "vignettes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordre = priorité : le rapport de saison illustre le genre le plus haut placé parmi ses événements.",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "kinds", "image", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "title": {"type": "string", "minLength": 1},
+          "kinds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^[a-z_]+$"}
+          },
+          "image": {"$ref": "#/$defs/image"},
+          "source": {"$ref": "#/$defs/source"}
+        }
+      }
+    },
+    "endings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "outcome", "title", "caption", "image", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "outcome": {"enum": ["battle_victory", "battle_defeat", "campaign_victory", "campaign_defeat"]},
+          "title": {"type": "string", "minLength": 1},
+          "caption": {"type": "string", "minLength": 1},
+          "image": {"$ref": "#/$defs/image"},
+          "source": {"$ref": "#/$defs/source"}
+        }
+      }
+    }
+  }
+}

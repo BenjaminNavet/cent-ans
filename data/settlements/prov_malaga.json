@@ -21,7 +21,6 @@
       "bld_water_mill",
       "bld_port",
       "bld_vineyard_press",
-      "bld_stone_walls",
       "bld_castle",
       "bld_muster_field"
     ],
@@ -51,7 +50,6 @@
     "fortification_level": 3,
     "buildings": [
       "bld_castle",
-      "bld_stone_walls",
       "bld_muster_field"
     ],
     "port": false,

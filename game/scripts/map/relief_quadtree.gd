@@ -59,6 +59,10 @@ const DIAGONALS: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(
 ## Profondeur des jupes, en espacements de sommets (bornée à `skirt_max`).
 @export var skirt_factor: float = 1.5
 @export var skirt_max: float = 4.0
+## PF1 : les patchs dont le point le plus proche est au-delà de cette distance de la caméra ne
+## portent plus d'ombre (réglée par `TerrainBuilder` selon le préréglage : bord d'une cascade du
+## soleil). Ils en reçoivent toujours. INF : tous portent une ombre.
+var shadow_cast_distance: float = INF
 
 var pyramid: ReliefPyramid
 var material: ShaderMaterial
@@ -295,7 +299,7 @@ func _add_item(n: int, c: int, r: int, quadrant: int, bmin: Vector3, bmax: Vecto
 	_items.append({
 		"key": (n << 40) | (r << 20) | (c << 3) | quadrant,
 		"n": n, "origin": Vector2(bmin.x, bmin.z), "quadrant": quadrant,
-		"fine": fine, "coarse": coarse, "ymin": bmin.y, "ymax": bmax.y, "center": center,
+		"fine": fine, "coarse": coarse, "ymin": bmin.y, "ymax": bmax.y, "center": center, "dist": dist,
 	})
 
 
@@ -357,6 +361,9 @@ func _apply_items() -> void:
 			slot.custom_aabb = AABB(Vector3(0.0, float(item["ymin"]) - skirt, 0.0), Vector3(quads, float(item["ymax"]) - float(item["ymin"]) + skirt, quads))
 			slot.set_instance_shader_parameter("qt_node", Vector4(origin.x, origin.y, s, n))
 			slot.visible = true
+		var cast := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if float(item["dist"]) < shadow_cast_distance else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if slot.cast_shadow != cast:
+			slot.cast_shadow = cast
 		var fine: int = item["fine"]
 		var coarse: int = item["coarse"]
 		var fade := 1.0

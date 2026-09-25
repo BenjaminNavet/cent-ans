@@ -20,7 +20,6 @@
       "bld_parish_church",
       "bld_windmill",
       "bld_port",
-      "bld_stone_walls",
       "bld_castle",
       "bld_muster_field",
       "bld_archery_butts"
@@ -51,8 +50,7 @@
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_castle",
-      "bld_stone_walls"
+      "bld_castle"
     ],
     "port": false,
     "description": "Cité-forteresse frontalière de l'ouest, siège du gardien des Marches occidentales.",

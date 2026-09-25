@@ -60,6 +60,12 @@ const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 ## Recalages (lot C7b) simultanés au plus.
 @export var max_ground_jobs: int = 2
 
+## PF1 : préréglage de qualité (`apply_render_quality`) : part des arbres, portée du détail,
+## zoom maximal des ombres.
+var quality_density: float = 1.0
+var quality_detail: float = 1.0
+var quality_shadow_distance: float = -1.0
+
 var map_data: MapData
 var mask: VegetationMask
 ## Terrain affiché (lot C7b) : null → arbres sur la heightmap 4096 bilinéaire, sans recalage.
@@ -87,7 +93,18 @@ var _warm := false
 var _season: int = -1
 
 
+func apply_render_quality(p: Dictionary) -> void:
+	quality_density = float(p.get("veg_density", 1.0))
+	quality_detail = float(p.get("veg_detail", 1.0))
+	quality_shadow_distance = float(p.get("veg_shadow_distance", shadow_camera_distance))
+	for entry: Dictionary in _tiles.values():
+		for part: Dictionary in entry["parts"]:
+			part.erase("detailed")  # LOD réévalué à la prochaine mise à jour
+
+
 func _ready() -> void:
+	add_to_group(RenderQuality.CLIENT_GROUP)
+	apply_render_quality(RenderQuality.preset())
 	_rig = get_node_or_null(camera_rig_path) as Node3D
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot") or arg == "--vegetation-stats":
@@ -236,6 +253,7 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	_material.set_shader_parameter("fade_start", fade_start)
 	_material.set_shader_parameter("fade_end", maxf(fade_end, fade_start + 1.0))
 	var density := lerpf(1.0, density_min, clampf((camera_distance - density_full_distance) / maxf(max_camera_distance - density_full_distance, 1.0), 0.0, 1.0))
+	density *= quality_density
 	_material.set_shader_parameter("density", density)
 	var wanted: Array = []
 	var camera_xz := Vector2(camera_position.x, camera_position.z)
@@ -290,7 +308,7 @@ static func _rect_distance(rect: Rect2, point: Vector2) -> float:
 ## Maillage selon la distance et nombre d'instances visibles : les graines (triées) inférieures
 ## au seuil d'éclaircissement du point le plus proche de la tuile sont invisibles partout.
 func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float, density: float, camera_distance: float) -> void:
-	var detailed := d < detail_distance
+	var detailed := d < detail_distance * quality_detail
 	var mmis: Array = entry["mmis"]
 	if entry.get("detailed", null) != detailed:
 		entry["detailed"] = detailed
@@ -304,7 +322,8 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 	# d'arbres individuelles ne se distinguent déjà plus mais coûtent toujours plein tarif côté
 	# GPU. Réévalué chaque image (pas seulement au changement de LOD) : ne dépend pas de `detailed`
 	# seul, mais aussi du zoom global qui peut varier sans que `detailed` change.
-	var shadow_on := cast_shadows and detailed and camera_distance < shadow_camera_distance
+	var shadow_limit := shadow_camera_distance if quality_shadow_distance < 0.0 else quality_shadow_distance
+	var shadow_on := cast_shadows and detailed and camera_distance < shadow_limit
 	var shadow_setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow_on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for mmi in mmis:
 		if mmi != null:

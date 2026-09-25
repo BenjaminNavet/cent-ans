@@ -15,7 +15,9 @@ rm -rf "$APP"
 godot --headless --path "$ROOT/game" --import
 # Shader baker left off (export_presets.cfg): tested with the Metal toolchain, it saved only
 # ~0.5 s of the ~11 s first launch (driver pipeline compilation dominates) and made the exported
-# game print a ParticlesShaderRD leak at every exit. The warm-up run below is what helps.
+# game print a ParticlesShaderRD leak at every exit (PF1: that leak came from the campaign
+# weather's ParticleProcessMaterial, now a plain particles shader). The warm-up run below is
+# what helps. The exported game keeps its own user dir (ADR 0031).
 godot --headless --path "$ROOT/game" --export-release "macOS" "$APP"
 mkdir -p "$APP/Contents/Resources"
 rsync -a --delete --exclude "schemas" "$ROOT/data/" "$APP/Contents/Resources/data/"

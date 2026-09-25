@@ -254,11 +254,17 @@ fn fortification_chain_still_upgrades_through_four_tiers() {
 #[test]
 fn pre_c4_stacked_chain_data_still_loads_and_computes_effects() {
     let data = data();
-    let state = france(&data, 406);
-    // Paris's seed data lists both `bld_abbey` and `bld_cathedral` (and
-    // `bld_market`/`bld_guild_hall`/`bld_fair`) together, from before the
-    // chain restructuring.
+    let mut state = france(&data, 406);
+    // A save from before the chain restructuring (and before EQ2 cleaned
+    // the seed data) lists both `bld_abbey` and `bld_cathedral` (and
+    // `bld_market`/`bld_guild_hall`/`bld_fair`) together in Paris.
     let paris = city(&state, "prov_ile_de_france");
+    state
+        .settlements
+        .get_mut(&paris)
+        .unwrap()
+        .buildings
+        .extend([bld("bld_market"), bld("bld_guild_hall"), bld("bld_abbey")]);
     let buildings = &state.settlement_state(&paris).unwrap().buildings;
     assert!(buildings.contains(&bld("bld_abbey")));
     assert!(buildings.contains(&bld("bld_cathedral")));

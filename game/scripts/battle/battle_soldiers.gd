@@ -284,10 +284,12 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		lod_mm.instance_count = n
 	# Distance au régiment : caméra → centre du régiment (x, z de la simulation).
 	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
-	var near := distance < LOD_DISTANCE
-	var shadow := cast_shadows and distance < SHADOW_DISTANCE
+	# PF1 : distances de LOD, d'ombre et d'imposteurs selon le préréglage de qualité.
+	var lod_k := RenderQuality.battle_lod_scale
+	var near := distance < LOD_DISTANCE * lod_k
+	var shadow := cast_shadows and distance < SHADOW_DISTANCE * lod_k
 	var skinned := _skinned.has(id)
-	var level := BattleMeshes.LEVEL_FULL if distance < (SKINNED_DETAIL_DISTANCE if skinned else DETAIL_DISTANCE) else BattleMeshes.LEVEL_MEDIUM
+	var level := BattleMeshes.LEVEL_FULL if distance < (SKINNED_DETAIL_DISTANCE if skinned else DETAIL_DISTANCE) * lod_k else BattleMeshes.LEVEL_MEDIUM
 	if near and int(_near_level.get(id, -1)) != level:
 		_near_level[id] = level
 		var variant := BattleMeshes.variant_of(str(unit.get("type", "")))
@@ -296,7 +298,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	lod.visible = n > 0 and (not near or shadow)
 	# BV3 : imposteurs au-delà de 300 m (atlas cuit au début de la bataille).
 	var imp: MultiMeshInstance3D = null
-	if impostors != null and skinned and distance > BattleImpostors.DISTANCE:
+	# Imposteurs pas avant 80 % de leur distance : plus près, leur teinte pâle se remarque.
+	if impostors != null and skinned and distance > BattleImpostors.DISTANCE * maxf(lod_k, 0.8):
 		imp = _impostor_layer(id, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), mm.instance_count)
 		if imp != null:
 			lod.visible = false

@@ -8,7 +8,7 @@
     "weight": 38,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
     "description": "Capitale du comté d'Anjou, réuni à la couronne avec Philippe VI en 1328 puis donné en apanage à son fils Jean de Normandie (1332) ; réputée pour son ardoise.",
     "sources": ["Angers", "Comté d'Anjou"]

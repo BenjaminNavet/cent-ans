@@ -20,7 +20,6 @@
       "bld_parish_church",
       "bld_windmill",
       "bld_port",
-      "bld_stone_walls",
       "bld_castle",
       "bld_muster_field"
     ],
@@ -77,8 +76,7 @@
     "fortification_level": 4,
     "buildings": [
       "bld_castle",
-      "bld_muster_field",
-      "bld_stone_walls"
+      "bld_muster_field"
     ],
     "port": true,
     "description": "« Clé de l'Écosse » commandant le passage du Forth : forteresse reprise par les Anglais lors de la campagne d'Édouard III de 1336.",
