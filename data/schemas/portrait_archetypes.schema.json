@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "portrait_archetypes.schema.json",
+  "title": "Portraits vivants : banque d'archétypes et variantes âgées (DA2)",
+  "description": "Axes de la banque d'archétypes (rang, sexe, tranche d'âge, aire culturelle d'habit, visages), cases générées, règles d'attribution d'un rang d'affichage, variantes âgées des grandes figures et traits qui déclenchent les marques procédurales. Rendu seulement : aucune règle de jeu.",
+  "type": "object",
+  "required": ["version", "image_size", "archetype_dir", "aged_dir", "age_bands", "cultures", "default_culture", "ranks", "faces", "cells", "fallbacks", "rank_rules", "aged_variants", "marks"],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "sex": {"type": "string", "enum": ["male", "female"]},
+    "band": {"type": "string", "enum": ["child", "young", "adult", "old"]},
+    "text": {"type": "string", "minLength": 1}
+  },
+  "properties": {
+    "version": {"type": "integer", "minimum": 1},
+    "description": {"type": "string"},
+    "image_size": {"type": "integer", "minimum": 128, "maximum": 1024},
+    "archetype_dir": {"type": "string", "description": "Dossier sous game/assets/ des archétypes (<rank>_<sex>_<band>_<culture>_<face>.jpg)."},
+    "aged_dir": {"type": "string", "description": "Dossier sous game/assets/ des variantes âgées (<character>_<band>.jpg)."},
+    "age_bands": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "prompt"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/band"},
+          "label": {"$ref": "#/$defs/text"},
+          "max_age": {"type": "integer", "minimum": 0, "description": "Âge maximal inclus ; absent pour la dernière tranche."},
+          "prompt": {"$ref": "#/$defs/text"}
+        }
+      }
+    },
+    "cultures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "factions", "prompt"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "label": {"$ref": "#/$defs/text"},
+          "factions": {"type": "array", "items": {"type": "string", "pattern": "^fac_[a-z0-9_]+$"}, "uniqueItems": true},
+          "prompt": {"$ref": "#/$defs/text"}
+        }
+      }
+    },
+    "default_culture": {"$ref": "#/$defs/id"},
+    "ranks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "prompt", "headwear"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "label": {"$ref": "#/$defs/text"},
+          "prompt": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {"male": {"$ref": "#/$defs/text"}, "female": {"$ref": "#/$defs/text"}}
+          },
+          "headwear": {"type": "string", "enum": ["none", "crown", "mitre"], "description": "Coiffe déjà peinte dans l'archétype (la marque procédurale ne la redessine pas)."},
+          "frame": {"type": "string", "enum": ["sovereign", "noble", "knight", "prelate", "burgher"]}
+        }
+      }
+    },
+    "faces": {
+      "type": "object",
+      "required": ["male", "female"],
+      "additionalProperties": false,
+      "properties": {
+        "male": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
+        "female": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}}
+      }
+    },
+    "cells": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["rank", "sexes", "bands", "cultures", "faces"],
+        "additionalProperties": false,
+        "properties": {
+          "rank": {"$ref": "#/$defs/id"},
+          "sexes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/sex"}},
+          "bands": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/band"}},
+          "cultures": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "Aires culturelles, ou [\"any\"] pour une image commune."},
+          "faces": {"type": "integer", "minimum": 1, "maximum": 4}
+        }
+      }
+    },
+    "fallbacks": {
+      "type": "object",
+      "required": ["rank", "band"],
+      "additionalProperties": false,
+      "properties": {
+        "rank": {"type": "object", "additionalProperties": {"$ref": "#/$defs/id"}},
+        "band": {"type": "object", "additionalProperties": {"$ref": "#/$defs/band"}}
+      }
+    },
+    "rank_rules": {
+      "type": "object",
+      "required": ["data_roles", "title_keywords", "ruler_house_rank", "army_rank", "default_rank"],
+      "additionalProperties": false,
+      "properties": {
+        "data_roles": {"type": "object", "additionalProperties": {"$ref": "#/$defs/id"}},
+        "title_keywords": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["rank", "words"],
+            "additionalProperties": false,
+            "properties": {
+              "rank": {"$ref": "#/$defs/id"},
+              "words": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 2}}
+            }
+          }
+        },
+        "ruler_house_rank": {"$ref": "#/$defs/id"},
+        "army_rank": {"$ref": "#/$defs/id"},
+        "default_rank": {
+          "type": "object",
+          "required": ["male", "female"],
+          "additionalProperties": false,
+          "properties": {"male": {"$ref": "#/$defs/id"}, "female": {"$ref": "#/$defs/id"}}
+        }
+      }
+    },
+    "aged_variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["character", "band"],
+        "additionalProperties": false,
+        "properties": {
+          "character": {"type": "string", "pattern": "^chr_[a-z0-9_]+$"},
+          "band": {"$ref": "#/$defs/band"}
+        }
+      }
+    },
+    "marks": {
+      "type": "object",
+      "required": ["sick_traits", "wound_traits", "mourning_years"],
+      "additionalProperties": false,
+      "properties": {
+        "sick_traits": {"type": "array", "items": {"type": "string", "pattern": "^trait_[a-z0-9_]+$"}},
+        "wound_traits": {"type": "array", "items": {"type": "string", "pattern": "^trait_[a-z0-9_]+$"}},
+        "mourning_years": {"type": "integer", "minimum": 0, "maximum": 5}
+      }
+    }
+  }
+}
