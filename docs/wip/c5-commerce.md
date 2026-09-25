@@ -36,6 +36,21 @@ dans `GameData::trade` (`core/crates/data-model/src/entities/trade.rs`,
 - Capture : `docs/img/c5-commerce/routes.png` (`--stage=trade`).
 - Smoke : 24 « smoke OK » dont « trade ».
 
+## État (25/09, C5R : reprise C4 + C5, fusion main, unification DP1)
+- Branche `worktree-agent-ae7dec5cc632f4a8c` = `integration/tw` (C4 + C5 déjà réunis, 6ebe9658)
+  + `main` (M2-M4, G1, U1/UI2, DP1, CV1/V4/CM2, Q1). Conflits résolus : `load.rs`, `state.rs`,
+  `setup_1337.rs`, `turn.rs` (édits C4 + commerce C5 dans `resolve_end_of_turn`), `lib.rs`,
+  `economy_balance.rs` (revenu commercial dans les recettes), `diplomacy.rs`, pont
+  (`campaign_sim_diplomacy.rs`, `lib.rs`), `campaign_map.gd` (étapes trade + movement),
+  `season_report.gd` (rubriques de main ; `trade` → Trésor, `edict` → Vos terres ; style « Commerce »),
+  `diplomacy_panel.gd` (écran plein DP1 + routes communes, rupture d'accord).
+- Unification DP1 (ADR 0012 § « Unification avec DP1 ») : l'article de traité `trade_agreement`
+  est l'accord de C5 ; `Proposal::TradeAgreement`, `Order::ProposeTradeAgreement`,
+  `FactionState::trade_agreements`, `plan_trade_agreements` et `trade_income_factor` supprimés.
+  Test `c5_trade::trade_article_counts_common_routes_in_the_evaluation` + accord signé par
+  `apply_treaty` dans les tests C5. Smoke : l'accord passe par `propose_treaty`.
+- `cargo test` : 580 verts.
+
 ## Pistes
 - Icônes de marchandise et navires/charrettes animés sur les routes (seul le
   ruban est fait) ; entrée d'encyclopédie dédiée.
@@ -43,14 +58,15 @@ dans `GameData::trade` (`core/crates/data-model/src/entities/trade.rs`,
   troisième instance ou shader à couleur par sommet.
 - L'infobulle de route ne s'efface pas d'elle-même : le survol de province
   la remplace.
-- `trade.rs::shortest_path` fait un Dijkstra sur `movement_graph` : à adapter
-  si M2 (grille A*, réécriture de `movement.rs`) retire `movement::edges`.
+- `trade.rs::shortest_path` fait un Dijkstra sur `movement_graph` (`movement::edges` existe
+  toujours après M2-M4).
 
 ## Décisions
 - Un seul fichier `data/economy/trade.json` (hubs + routes) plutôt que deux
   dossiers : moins de code de chargement pour un catalogue de taille fixe.
-- Accord commercial = `Proposal::TradeAgreement` réutilisant le flux
-  d'offres existant (comme l'alliance) ; rompu automatiquement (pas d'état à
-  synchroniser) dès que guerre ou embargo entre les deux parties : le calcul
-  du revenu vérifie l'état courant à chaque saison plutôt que d'intercepter
-  les événements qui le rompent.
+- (Remplacé le 25/09) Accord commercial = article de traité DP1, stocké une
+  seule fois dans le registre DP1 ; la guerre l'efface, l'embargo le suspend.
+
+## Prochaine étape
+Sondes d'équilibre (balance_probe 8×200, century_probe 5×464) avant/après, puis build GDExtension,
+import, smoke, captures de la couche commerciale et du panneau d'édits.
