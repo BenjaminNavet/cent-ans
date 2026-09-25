@@ -26,6 +26,10 @@ pub struct PopulationRules {
     /// class's unrest target.
     #[serde(default = "default_disorder_weight")]
     pub disorder_unrest_weight: f64,
+    /// EQ1: ceiling of that term (a province raided or taken again and
+    /// again keeps its gauge at 100).
+    #[serde(default = "default_disorder_max")]
+    pub disorder_unrest_max: f64,
     /// EQ1: weighted unrest above which a province is at risk of revolt.
     #[serde(default = "default_revolt_threshold")]
     pub revolt_unrest_threshold: f64,
@@ -52,6 +56,7 @@ impl Default for PopulationRules {
             occupation_unrest: 20.0,
             foreign_religion_unrest: 10.0,
             disorder_unrest_weight: default_disorder_weight(),
+            disorder_unrest_max: default_disorder_max(),
             revolt_unrest_threshold: default_revolt_threshold(),
             revolt_seasons: default_revolt_seasons(),
             revolt_control_threshold: default_revolt_control_threshold(),
@@ -62,6 +67,10 @@ impl Default for PopulationRules {
 
 fn default_disorder_weight() -> f64 {
     0.5
+}
+
+fn default_disorder_max() -> f64 {
+    20.0
 }
 
 fn default_revolt_threshold() -> f64 {

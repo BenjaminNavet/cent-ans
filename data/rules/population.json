@@ -7,6 +7,7 @@
   "occupation_unrest": 20.0,
   "foreign_religion_unrest": 10.0,
   "disorder_unrest_weight": 0.5,
+  "disorder_unrest_max": 20.0,
   "revolt_unrest_threshold": 75.0,
   "revolt_seasons": 3,
   "revolt_control_threshold": 90.0

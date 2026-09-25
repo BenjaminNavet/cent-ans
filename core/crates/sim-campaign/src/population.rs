@@ -182,7 +182,8 @@ fn update_class(
     }
     // EQ1: recent captures, raids and regencies (the province's own
     // disorder gauge, which fades by itself).
-    unrest_target += f64::from(disorder) * rules.disorder_unrest_weight;
+    unrest_target +=
+        (f64::from(disorder) * rules.disorder_unrest_weight).min(rules.disorder_unrest_max);
     // Building `Unrest` effects: negative values are appeasement.
     unrest_target += effects.unrest.flat + effects.unrest.percent + class_points(class_fx.unrest);
     // F1 `Loyalty` (castles, a loyal governor): the local nobility holds
