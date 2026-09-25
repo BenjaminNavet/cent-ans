@@ -3,6 +3,52 @@
 Reprend l'audit `docs/audit/a5-technique.md` § 5, lots T2 et T8, plus une partie de la dette
 (T11/T12 ciblée : `test_portraits.py`, avertissements RGBFloat).
 
+## Fusion de `main` (conflit V3/AU1/L1 sur `battle_scene.gd`) — vérification bloquée par l'environnement
+
+`git merge main` (commit `f74dc4bb`) apportait V3 (mesure GPU/CPU du banc,
+`viewport_set_measure_render_time`, `--bench-ab=<niveau>,<niveau>`) et AU1 (`_update_audio`,
+`battle_audio`) en conflit avec la restructuration T8 (`_run_benchmark_frame`/`_bench_finish`/
+`_bench_fail`, `BENCH_JSON`). Résolu à la main :
+- `_run_benchmark_frame` garde le budget de temps réel, les répétitions et `BENCH_JSON`, plus
+  active `viewport_set_measure_render_time` et accumule `gpu_ms`/`cpu_ms`/appelle
+  `_bench_ab_step` — sur un nouveau compteur dédié `_bench_measured` qui ne repart pas à zéro
+  entre répétitions (`_bench_frames`, lui, repart à 0 à chaque répétition), pour que le banc A/B
+  continue de cycler correctement même avec `--bench-repeat=`.
+- `BENCH_JSON` gagne `gpu_ms`, `cpu_ms`, `quality` et `ab` (dict niveau → médiane GPU ms, absent
+  si pas de `--bench-ab=`).
+- `_update_audio`, `battle_audio`, `_bench_ab_step`, `--bench-ab=` (parsing CLI) conservés tels
+  quels côté `main`. Toile de fond de ville (L1) et le reste de `main` fusionnés sans conflit.
+- Conflit annexe sur les variables d'instance (deux blocs de `var _bench_*` côte à côte) :
+  fusionné en gardant les deux jeux de champs.
+
+**Vérification demandée non terminée** : après plus de 35 tentatives sur ~30 minutes
+(`godot --headless --path game --import`, `--script res://tests/smoke.gd`, et même
+`--quit` seul), **chaque lancement de Godot sur cette machine se termine en code 137**, quel que
+soit le projet ou l'étape. Rapport de plantage macOS (`~/Library/Logs/DiagnosticReports/
+Godot-*.ips`) : `"termination": {"namespace": "CODESIGNING", "indicator": "Invalid Page"}`,
+`"exception": {"type": "EXC_BAD_ACCESS", "signal": "SIGKILL (Code Signature Invalid)"}` — pas un
+OOM classique (constaté avec 200 Mo à 12 Go de pages libres selon les tentatives, toujours tué).
+Corrélé à une machine très chargée : 23 à 56 processus `godot`/`rustc`/`cargo` simultanés
+observés pendant les tentatives (bien au-delà des « 6 agents en parallèle » de `CLAUDE.md`) —
+signature typique d'un noyau macOS qui invalide des pages de code signé partagées
+(`/Applications/Godot.app`) sous contention mémoire/E-S extrême avec autant de processus
+concurrents. `godot --version` seul fonctionne (code 0) ; c'est bien le chargement d'un projet
+qui échoue systématiquement dans ces conditions, pas le binaire lui-même.
+
+**Décision** : fusion commitée (`f74dc4bb`) — la résolution du conflit a été relue attentivement
+(pas de fonction dupliquée, tous les champs déclarés, mêmes motifs que les fonctionnalités T8
+déjà testées individuellement avant la fusion) ; ne pas commiter aurait laissé une fusion résolue
+mais non validée bloquée indéfiniment dans ce worktree pendant que l'environnement reste chargé.
+**À refaire dès que la machine est moins chargée** :
+```
+godot --headless --path game --import
+godot --headless --path game --script res://tests/smoke.gd
+godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --benchmark --units=20
+godot --path game --disable-vsync res://scenes/battle/battle.tscn -- --benchmark --units=20 --bench-ab=high,ultra
+```
+Les deux derniers doivent produire un `BENCH_JSON` avec `gpu_ms`, `cpu_ms`, `quality`, et le
+second en plus un champ `ab` avec les niveaux `high`/`ultra`.
+
 ## État
 
 - **T2 (relief fin adaptatif)** : fait. `TerrainBuilder` (`game/scripts/map/terrain_builder.gd`)
