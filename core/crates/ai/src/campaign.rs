@@ -40,8 +40,12 @@ pub const DEFENCE_RATIO: f64 = 0.7;
 pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
 /// Weighted unrest above which the AI no longer raises taxes to « Haut »
-/// (lot G1/E2: heavy taxes now bite, 30 before).
-pub const HIGH_TAX_MAX_UNREST: f64 = 18.0;
+/// (lot G1/E2: heavy taxes now bite; 18 after E2, 30 again with EQ1's
+/// higher baseline unrest).
+pub const HIGH_TAX_MAX_UNREST: f64 = 30.0;
+/// EQ1: a province this close to the revolt threshold keeps the realm off
+/// « Haut » taxes.
+pub const REVOLT_MARGIN: f64 = 10.0;
 /// A debt must be repaid within this many turns, or units are dismissed.
 const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
@@ -343,9 +347,19 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // Taxes: heavy in war or deficit if public order allows, light when
     // the realm grumbles (F4: a rich treasury is spent, not untaxed).
     let in_debt = ctx.treasury < 0;
+    // EQ1: no heavy taxes while a province is on the brink of revolt.
+    let brink = data.population_rules.revolt_unrest_threshold - REVOLT_MARGIN;
+    let revolt_risk = state
+        .provinces
+        .iter()
+        .filter(|(id, _)| state.controls_province(ctx.faction, id))
+        .any(|(_, p)| weighted_unrest(&p.population) > brink);
     let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < HIGH_TAX_MAX_UNREST {
+    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0)
+        && unrest < HIGH_TAX_MAX_UNREST
+        && !revolt_risk
+    {
         TaxRate::High
     } else {
         TaxRate::Normal
