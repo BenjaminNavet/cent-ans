@@ -36,10 +36,15 @@ convoi de bagages derrière chaque armée ; pieux des archers.
 - [x] Pose à la main (EP7) + `DecorPlan` + exemple `data/battle_maps/decor_plan_example.json`.
 - [x] Kit Blender (sous-agent) : 27 modèles (watermill, tent, pavilion, haystack, wagon,
   campfire, wall_run, lychgate, graves, vine_row, horse) exportés ; aperçus `docs/img/ep6/kit_*`.
-- [ ] Pont GDExtension (`get_terrain().decor`, `get_camps()`).
-- [ ] Import Godot des nouveaux modèles.
-- [ ] Rendu Godot `battle_decor.gd` (MultiMesh, LOD), vergers, labours, fossé, feux, pieux.
+- [x] Pont GDExtension (`get_terrain().decor`, `get_camps()`).
+- [x] Rendu Godot `battle_decor.gd` (MultiMesh, LOD), vergers (`_plant_orchards`), parcelles
+  peintes (`decor_fields` lu par `battle_ground`/`battle_grass`), fossé, feux
+  (`battle_camp_fire.gdshader`), camp pillé, pieux (`battle_volleys._stake_mesh`) ;
+  `--no-ep6-decor` (A/B), `--province=<id>` (paysage d'une province, captures).
+- [x] ADR 0061 (`docs/decisions/0061-villages-et-decor-du-champ-de-bataille.md`).
+- [ ] Import Godot, premier lancement (erreurs de script), retouches kit (roue du moulin, cheval :
+  sous-agent relancé).
 - [ ] Banc EP1 avant/après, captures `docs/img/ep6/`, fusion de main, vérifications finales.
 
 ## Prochaine étape
-Suite complète `cargo test` (régressions B6/EP3 ?), puis pont GDExtension et rendu Godot.
+`core/build.sh` (en cours), import Godot, lancer une bataille (`--province=prov_guyenne`), corriger, banc A/B `tools/bench_ep1.sh` avec et sans `--no-ep6-decor`, captures.
