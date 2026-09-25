@@ -321,7 +321,7 @@ FIGURES.update(
                 "Green": (eq.C_CLOTH, (0.09, 0.20, 0.07)),
                 "LightGreen": (eq.C_CLOTH, (0.72, 0.72, 0.66)),
                 "Adventurer_Legs:Brown2": (eq.C_SKIN, (0.50, 0.33, 0.21)),
-                "Adventurer_Legs:Brown": (eq.C_LEATHER, (0.10, 0.06, 0.03)),
+                "Adventurer_Legs:Brown": (eq.C_SKIN, (0.50, 0.33, 0.21)),
                 "Gold": (eq.C_LEATHER, (0.12, 0.08, 0.04)),
             },
             "budget": HUMAN_BUDGET,

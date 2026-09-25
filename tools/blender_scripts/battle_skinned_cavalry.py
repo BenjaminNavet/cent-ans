@@ -292,80 +292,87 @@ def _bone_points(mount, bones):
 BARD_STEEL = (0.62, 0.63, 0.66)
 
 
+def _conformal_plate(mount, ctx, name, bones, keep, offset, bind):
+    """Steel bard shaped on the horse: copies of the (decimated) horse faces dominated by
+    `bones` for which `keep(centre, normal)` holds, pushed out by `offset` along the
+    vertex normals and weighted like the horse vertices they come from."""
+    bm = bmesh.new()
+    weights = []
+    for m in mount.hmeshes:
+        names = {g.index: g.name for g in m.vertex_groups}
+        mw = m.matrix_world
+        rot = mw.to_3x3()
+        me = m.data
+        dominant = {}
+        for v in me.vertices:
+            best = max(v.groups, key=lambda g: g.weight, default=None)
+            dominant[v.index] = names.get(best.group) if best is not None else None
+        remap = {}
+        for poly in me.polygons:
+            if not all(dominant[i] in bones for i in poly.vertices):
+                continue
+            centre = mw @ poly.center
+            normal = (rot @ poly.normal).normalized()
+            if not keep(centre, normal):
+                continue
+            verts = []
+            for i in poly.vertices:
+                if i not in remap:
+                    v = me.vertices[i]
+                    n = (rot @ v.normal).normalized()
+                    remap[i] = bm.verts.new(mw @ v.co + n * offset)
+                    weights.append(
+                        [(names[g.group], g.weight) for g in v.groups if g.weight > 0]
+                    )
+                verts.append(remap[i])
+            try:
+                bm.faces.new(verts)
+            except ValueError:
+                pass
+    bm.verts.index_update()
+    obj = eq.to_object(name, bm, [ctx.material(eq.C_PLATE, BARD_STEEL)])
+    if bind is not None:
+        eq.bind_rigid(obj, bind)
+        return [obj]
+    groups = {}
+    for vi, ws in enumerate(weights):
+        for gname, w in ws:
+            if gname not in groups:
+                groups[gname] = obj.vertex_groups.new(name=gname)
+            groups[gname].add([vi], w, "REPLACE")
+    return [obj]
+
+
 def chanfron(mount, ctx):
-    """Chanfron (chanfrein, lot UR1): steel plate over the top and sides of the face."""
+    """Chanfron (chanfrein, lot UR1): steel plate over the brow and the face."""
     pts = _bone_points(mount, {"Head"})
     if not pts:
         return []
-    ys = [p.y for p in pts]
-    y_front, y_back = min(ys), max(ys)
-    stations = ctx.seg(6, 3, 2)
-    around = ctx.seg(8, 4, 3)
-    bm = bmesh.new()
-    rings = []
-    for k in range(stations + 1):
-        # From the nostrils (kept bare) to behind the eyes.
-        y = y_front + 0.06 + (y_back - y_front - 0.1) * k / stations
-        near = [p for p in pts if abs(p.y - y) < 0.05] or pts
-        half = max(abs(p.x) for p in near) + 0.012
-        top = max(p.z for p in near) + 0.012
-        low = top - (top - min(p.z for p in near)) * 0.55
-        ring = []
-        for j in range(around + 1):
-            a = math.pi * j / around
-            ring.append(
-                bm.verts.new(
-                    Vector(
-                        (
-                            half * math.cos(a) * 1.05,
-                            y,
-                            low + (top - low) * math.sin(a),
-                        )
-                    )
-                )
-            )
-        rings.append(ring)
-    for a, b in zip(rings, rings[1:], strict=False):
-        for j in range(around):
-            bm.faces.new((a[j], b[j], b[j + 1], a[j + 1]))
-    for f in bm.faces:
-        c = f.calc_center_median()
-        if f.normal.dot(c - Vector((0.0, c.y, c.z - 0.1))) < 0:
-            f.normal_flip()
-    obj = eq.to_object("chanfron", bm, [ctx.material(eq.C_PLATE, BARD_STEEL)])
-    eq.bind_rigid(obj, "Head")
-    return [obj]
+    top = max(p.z for p in pts)
+    low = min(p.z for p in pts)
+    y_front = min(p.y for p in pts)
+
+    def keep(c, n):
+        # Front and top of the face, not the jaw nor the nostrils.
+        return (
+            n.z > 0.25 or n.y < -0.5
+        ) and c.z > low + (top - low) * 0.35 and c.y > y_front + 0.04
+
+    return _conformal_plate(mount, ctx, "chanfron", {"Head"}, keep, 0.012, "Head")
 
 
 def flanchards(mount, ctx):
-    """Flanchards (flançois, lot UR1): steel plates on both flanks under the saddle."""
-    pts = _bone_points(mount, TORSO_BONES)
+    """Flanchards (flançois, lot UR1): steel plates on both flanks behind the saddle."""
     seat = mount.seat
-    bm = bmesh.new()
-    rows = ctx.seg(3, 2, 1)
-    cols = ctx.seg(4, 2, 2)
-    y0, y1 = seat.y - 0.05, seat.y + 0.4
-    for sx in (1, -1):
-        grid = []
-        for r in range(rows + 1):
-            row = []
-            for c in range(cols + 1):
-                y = y0 + (y1 - y0) * c / cols
-                near = [p for p in pts if abs(p.y - y) < 0.1] or pts
-                half = max(abs(p.x) for p in near) + 0.03
-                z = seat.z - 0.25 - 0.3 * r / rows
-                row.append(bm.verts.new(Vector((sx * half * (1 - 0.06 * r / rows), y, z))))
-            grid.append(row)
-        for a, b in zip(grid, grid[1:], strict=False):
-            for c in range(cols):
-                quad = (a[c], a[c + 1], b[c + 1], b[c])
-                bm.faces.new(quad)
-    for f in bm.faces:
-        if f.normal.x * f.calc_center_median().x < 0:
-            f.normal_flip()
-    obj = eq.to_object("flanchards", bm, [ctx.material(eq.C_PLATE, BARD_STEEL)])
-    eq.bind_rigid(obj, SADDLE_BONE)
-    return [obj]
+
+    def keep(c, n):
+        return (
+            abs(n.x) > 0.45
+            and seat.y - 0.05 < c.y < seat.y + 0.45
+            and seat.z - 0.62 < c.z < seat.z - 0.18
+        )
+
+    return _conformal_plate(mount, ctx, "flanchards", TORSO_BONES, keep, 0.02, None)
 
 
 def saddle(mount, ctx):
