@@ -37,9 +37,10 @@
       "value": 5
     }
   ],
-  "description": "Donjon, enceinte concentrique, citerne et réserves ; tient des mois contre un siège.",
+  "description": "Donjon, enceinte flanquée de tours, parfois concentrique, citerne et réserves ; tient des mois contre un siège. Voir [[cdx_chateau_fort]].",
   "sources": [
-    "Économie médiévale",
+    "Château fort",
+    "Donjon",
     "Architecture militaire médiévale"
   ]
 }
