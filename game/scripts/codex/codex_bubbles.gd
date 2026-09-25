@@ -150,7 +150,7 @@ func pin_hovered_tooltip() -> bool:
 ## Bulle épinglée tirée de l'infobulle de `control` au point `local_pos` (remonte aux parents
 ## comme Godot tant que le contrôle laisse passer la souris). False si aucune infobulle.
 func pin_control_tooltip(control: Control, local_pos: Vector2 = Vector2.ZERO) -> bool:
-	if control == null or _index_of_source(control) >= 0 or bubbles.has(control):
+	if control == null or _index_of_source(control) >= 0 or control is PanelContainer and bubbles.has(control as PanelContainer):
 		return false
 	var text := ""
 	var current := control
@@ -171,7 +171,7 @@ func pin_control_tooltip(control: Control, local_pos: Vector2 = Vector2.ZERO) ->
 
 ## Bulle parente de `bubble` (null pour une racine).
 func parent_of(bubble: PanelContainer) -> PanelContainer:
-	var parent: Variant = bubble.get_meta("parent", null)
+	var parent: Variant = bubble.get_meta("parent") if bubble.has_meta("parent") else null
 	if parent is PanelContainer and is_instance_valid(parent) and bubbles.has(parent):
 		return parent
 	return null
@@ -479,7 +479,7 @@ func _remove(bubble: PanelContainer) -> void:
 	var grandparent := parent_of(bubble)
 	bubbles.erase(bubble)
 	for child in bubbles:
-		if child.get_meta("parent", null) == bubble:
+		if child.has_meta("parent") and child.get_meta("parent") == bubble:
 			if grandparent != null:
 				child.set_meta("parent", grandparent)
 			else:
