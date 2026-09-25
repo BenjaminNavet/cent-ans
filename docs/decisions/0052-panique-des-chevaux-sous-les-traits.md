@@ -42,7 +42,16 @@ de forces serré : 3 arcs longs + 2 hommes d'armes à pied contre 3 chevaliers +
 ## Mesures
 
 `survey_english_position_against_knights`, `R4_FRENCH=heavy`, `R4_JITTER=1`, 32 graines,
-victoires anglaises :
+victoires anglaises, sur le main du 25/09 au moment de la fusion (après EP5 et BR3b) :
+
+| Terrain | main | panique 40 (retenu) |
+|---|---|---|
+| crête + haie | 8 | **20** |
+| crête nue | 16 | **25** |
+| haie en creux + crête | 19 | **25** |
+| rase campagne | 1 | **1** |
+
+Balayage du réglage, fait sur le main antérieur (avant EP5) :
 
 | Terrain | avant | panique 30 | panique 35 | panique 40 (retenu) | panique 45 | panique 60 |
 |---|---|---|---|---|---|---|
@@ -58,17 +67,24 @@ charge.) À 60, les archers gagnent aussi en rase campagne contre une armée qui
 
 Bataille mixte sans site (`b6.rs`, `no_site_sim`, IA des deux côtés : 2 chevaliers + 2 hommes
 d'armes + 2 arbalètes français, 5 800, contre 1 homme d'armes + 2 arcs longs + 1 régiment de chevaliers
-anglais, 3 750), victoires françaises sur les graines 0-63 : avant **58**, panique 30 → 41,
-35 → 39, **40 → 38**, 45 → 32. Toute valeur coûte ici : les chevaliers anglais font écran à
+anglais, 3 750), victoires françaises sur les graines 0-63 : main du 25/09 **51 → 30** avec la
+panique 40 (balayage sur le main antérieur : avant 58, panique 30 → 41, 35 → 39, 40 → 38,
+45 → 32). Toute valeur coûte ici : les chevaliers anglais font écran à
 50 m devant leurs archers, et la cavalerie française, partie devant son infanterie, s'engage contre
-eux sous les flèches. 40 est le compromis : la position défensive gagne environ trois fois sur
-quatre, et l'armée plus riche garde l'avantage (59 %) en rase campagne. Les empreintes de
+eux sous les flèches. 40 est le compromis : la position défensive gagne deux fois sur trois à trois
+fois sur quatre selon la crête, et l'armée plus riche ne garde qu'une courte moitié (47 %) de
+cette bataille mixte : c'est le coût le plus net de ce lot. Les empreintes de
 `battles_without_a_site_are_unchanged` (graines 3 et 11) passent aux Anglais.
 
 Non-régression R2b (`survey_active_against_passive`, IA active contre passive, armées miroir,
-128 batailles) : 100 → **90** (plaine 29 → 26, bocage 22 → 20, collines 25 → 22, montagne 24 → 22).
-Coût attendu : le camp passif garde ses archers en place, et ceux-ci repoussent désormais la
-cavalerie qui les charge de front.
+128 batailles), sur le main du 25/09 : 107 → **109** (plaine 29 → 32, bocage 23 → 25,
+collines 29 → 28, montagne 26 → 24). Sur le main antérieur, la même mesure donnait 100 → 90 : le
+camp passif garde ses archers en place et ceux-ci repoussent la cavalerie qui les charge de front ;
+les réglages suivants de l'IA (EP5) ont compensé.
+
+Test `ep3_water` : un chevalier en déroute peut maintenant se trouver en eau profonde (les fuyards
+se jettent à l'eau et s'y noient, `water_route`, voulu par EP3) ; l'assertion « jamais de cavalier
+en eau profonde » exclut désormais les troupes en déroute.
 
 Suites possibles (IA, hors de ce lot) : la cavalerie d'un assaillant ne devrait pas s'engager à
 portée d'archers pourvus de flèches avant l'arrivée de son infanterie, ou devrait les prendre de
