@@ -21,9 +21,10 @@ use crate::unit::{Formation, Unit};
 
 /// A regiment this close to the near end of a crossing heads for its far end.
 const AT_CROSSING: f64 = 4.0;
-/// A swim is only worth it when the way round is longer than this many
-/// metres more (foot).
-const SWIM_PENALTY: f64 = 350.0;
+/// The danger of a swim, in metres of march (foot).
+const SWIM_PENALTY: f64 = 400.0;
+/// Closer than this to its target, a regiment goes straight at it.
+const CLOSE_QUARTERS: f64 = 40.0;
 
 fn dist(a: (f64, f64), b: (f64, f64)) -> f64 {
     (a.0 - b.0).hypot(a.1 - b.1)
@@ -92,6 +93,10 @@ impl BattleSim {
             return (tx, tz);
         }
         let north_to = river.north_of(tx, tz);
+        // Close combat: straight at the enemy.
+        if dist(from, (tx, tz)) < CLOSE_QUARTERS {
+            return (tx, tz);
+        }
         // A target in the river or on a bridge is met where it stands.
         if river.in_water(tx, tz) || self.field.bridge_at(tx, tz).is_some() {
             return (tx, tz);
@@ -135,7 +140,13 @@ impl BattleSim {
         let Some((near, far, cost)) = best else {
             return (tx, tz);
         };
-        if !Self::stopped_by_deep_water(unit) && dist(from, to) + SWIM_PENALTY < cost {
+        // Swimming: the width of the water at the swimmer's pace, and the
+        // danger.
+        let rules = WaterRules::bundled();
+        let swim = dist(from, to)
+            + river.width_at(meet.0) * (1.0 / rules.movement.deep_foot.max(0.05) - 1.0)
+            + SWIM_PENALTY;
+        if !Self::stopped_by_deep_water(unit) && swim < cost {
             return (tx, tz);
         }
         if dist(from, near) > AT_CROSSING {

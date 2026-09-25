@@ -115,12 +115,16 @@ fn print(label: &str, t: &Tally) {
 #[ignore = "survey: prints AI-against-AI results on river fields"]
 fn survey_river_battles() {
     let data = data();
+    let mirror_only = std::env::var("EP3_MIRROR").is_ok();
     for terrain in [Terrain::Plains, Terrain::Hills, Terrain::Bocage] {
         let key = terrain.key();
         print(
             &format!("{key} mirror AI/AI"),
             &survey(&data, terrain, &ARMY, None),
         );
+        if mirror_only {
+            continue;
+        }
         print(
             &format!("{key} strong attacker AI/AI"),
             &survey(&data, terrain, &STRONG, None),
@@ -133,5 +137,71 @@ fn survey_river_battles() {
             &format!("{key} defender vs passive att"),
             &survey(&data, terrain, &ARMY, Some(SideId::Attacker)),
         );
+    }
+}
+
+#[test]
+#[ignore = "debug trace: EP3_TRACE=terrain,seed"]
+fn trace_river_battle() {
+    let data = data();
+    let spec = std::env::var("EP3_TRACE").unwrap_or_else(|_| "plains,0".into());
+    let parts: Vec<&str> = spec.split(',').collect();
+    let terrain = match parts[0] {
+        "bocage" => Terrain::Bocage,
+        "hills" => Terrain::Hills,
+        _ => Terrain::Plains,
+    };
+    let seed: u64 = parts[1].parse().unwrap();
+    let mut battle = setup(units(&data, &ARMY), units(&data, &ARMY), None);
+    battle.terrain = terrain;
+    battle.river = true;
+    let mut sim = BattleSim::new(battle, seed).unwrap();
+    match parts.get(2).copied() {
+        Some("def") => sim.set_ai(SideId::Defender, false),
+        Some("att") => sim.set_ai(SideId::Attacker, false),
+        _ => {}
+    }
+    let f = sim.field();
+    let r = f.river.as_ref().unwrap();
+    println!(
+        "river width {:.0} fords {:?} bridges {:?}",
+        r.width,
+        r.fords.iter().map(|f| f.x as i32).collect::<Vec<_>>(),
+        f.bridges
+            .iter()
+            .map(|b| (b.x as i32, b.z as i32, b.width as i32))
+            .collect::<Vec<_>>()
+    );
+    let mut t = 0.0;
+    while !sim.is_finished() {
+        if sim.elapsed() >= t {
+            println!("--- t={:.0}", sim.elapsed());
+            for u in sim.units() {
+                if !u.present() {
+                    continue;
+                }
+                println!(
+                    "{:>2} {:<3} {:<22} x{:>5.0} z{:>5.0} rz{:>5.0} hp{:>4.0} m{:>3.0} {:?} {:?} tgt{:?} dst{:?}",
+                    u.id,
+                    &u.side.key()[..3],
+                    u.unit_type,
+                    u.x,
+                    u.z,
+                    sim.field().river.as_ref().unwrap().center_z(u.x),
+                    u.hp,
+                    u.morale,
+                    u.state,
+                    sim.field().water_kind(u.x, u.z),
+                    u.target,
+                    u.destination.map(|(a, b)| (a as i32, b as i32))
+                );
+            }
+            t += 30.0;
+        }
+        sim.step();
+    }
+    println!("winner {:?} at {:.0}", sim.winner(), sim.elapsed());
+    for e in sim.events().iter().take(60) {
+        println!("{:.0} {}", e.time, e.text_fr);
     }
 }
