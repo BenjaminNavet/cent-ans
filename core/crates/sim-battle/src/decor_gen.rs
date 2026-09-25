@@ -18,6 +18,9 @@ use crate::setup::SideId;
 use crate::site::{House, HouseKind, Obstacle, ObstacleKind};
 use crate::town::Footprint;
 
+/// A point on a road, the unit heading of the road there and the road index.
+type RoadSpot = ((f64, f64), (f64, f64), usize);
+
 /// What a footprint must keep clear of.
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Keep {
@@ -377,7 +380,7 @@ impl<'a> Layout<'a> {
 
     /// A point along a road, clear of bridges, fords and the field edges:
     /// (point, heading, road index).
-    fn road_spot(&mut self, main_only: bool) -> Option<((f64, f64), (f64, f64), usize)> {
+    fn road_spot(&mut self, main_only: bool) -> Option<RoadSpot> {
         let roads: Vec<usize> = self
             .field
             .roads
@@ -401,7 +404,7 @@ impl<'a> Layout<'a> {
     }
 
     /// The point of the roads nearest `p`: (point, heading, road index).
-    pub(crate) fn road_near(&self, p: (f64, f64)) -> Option<((f64, f64), (f64, f64), usize)> {
+    pub(crate) fn road_near(&self, p: (f64, f64)) -> Option<RoadSpot> {
         self.field
             .roads
             .iter()
@@ -435,7 +438,7 @@ impl<'a> Layout<'a> {
     pub(crate) fn street_hamlet(
         &mut self,
         profile: &LandscapeProfile,
-        at: Option<((f64, f64), (f64, f64), usize)>,
+        at: Option<RoadSpot>,
         houses: u32,
     ) -> bool {
         let keep = Keep::building(self.rules);
