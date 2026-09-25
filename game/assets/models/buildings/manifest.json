@@ -285,7 +285,7 @@
   "kind": "horse",
   "length": 2.43,
   "ruined": false,
-  "triangles": 2204
+  "triangles": 2182
  },
  "horse_1": {
   "depth": 0.65,
@@ -293,7 +293,7 @@
   "kind": "horse",
   "length": 2.43,
   "ruined": false,
-  "triangles": 2204
+  "triangles": 2182
  },
  "horse_2": {
   "depth": 0.65,
@@ -301,7 +301,7 @@
   "kind": "horse",
   "length": 2.43,
   "ruined": false,
-  "triangles": 2204
+  "triangles": 2182
  },
  "longere_0": {
   "depth": 6.02,
@@ -661,7 +661,7 @@
   "kind": "watermill",
   "length": 10.61,
   "ruined": false,
-  "triangles": 770
+  "triangles": 1158
  },
  "watermill_1": {
   "depth": 6.2,
@@ -669,7 +669,7 @@
   "kind": "watermill",
   "length": 11.27,
   "ruined": false,
-  "triangles": 1640
+  "triangles": 2028
  },
  "well_0": {
   "depth": 2.2,

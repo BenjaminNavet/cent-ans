@@ -15,7 +15,6 @@ GLB files carry named materials, metric UVs and vertex colours only; Godot swaps
 import contextlib
 import json
 import math
-import random
 import sys
 from pathlib import Path
 
@@ -524,45 +523,11 @@ def _horse_recolor(coat: dict) -> None:
         mat.diffuse_color = (*rgb, 1.0)
 
 
-def _horse_tack(rng: random.Random, horse, lo, hi) -> "kit.Geometry":
-    """Saddle blanket and girth strap, draped on the horse's own (already posed) back: the blanket height is sampled from the mesh itself so it hugs the withers instead of floating."""
-    g = kit.Geometry()
-    g.ground_ao = False
-    cloth = kit.pick(rng, kit.CLOTH_TINTS)
-    # The withers-to-loin plateau sits a little towards the tail from the bbox centre (the head,
-    # lowered to graze, skews the centre towards the nose end); sample its height directly.
-    cx = (lo.x + hi.x) / 2.0 + (hi.x - lo.x) * 0.09
-    blanket_l = (hi.x - lo.x) * 0.28
-    half_w = (hi.y - lo.y) * 0.42
-    slice_w = 0.35
-    zs = [
-        v.co.z
-        for v in horse.data.vertices
-        if cx - slice_w <= v.co.x <= cx + slice_w and abs(v.co.y) <= half_w
-    ]
-    back_top = (sum(zs) / len(zs)) if zs else hi.z * 0.9
-    back_z = back_top - 0.03
-    kit.k.box(
-        g, (cx, 0.0, back_z), (blanket_l, half_w * 2, 0.05), "Planks", color=cloth
-    )
-    kit.k.tube(
-        g,
-        (cx, -half_w - 0.01, back_z - 0.05),
-        (cx, half_w + 0.01, back_z - 0.05),
-        0.025,
-        "Iron",
-        6,
-        caps=False,
-    )
-    return g
-
-
 def export_horses(out_dir: Path, seed_start: int = 150) -> None:
-    """Static grazing horse (head-low ``Eating`` pose baked from the Quaternius rig), three coats, a kit-made blanket and girth joined on; writes ``horse_0..2.glb`` and merges them into the existing manifest."""
+    """Static grazing horse (head-low ``Eating`` pose baked from the Quaternius rig), three coats, bare (no tack); writes ``horse_0..2.glb`` and merges them into the existing manifest."""
     out_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = out_dir / "manifest.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
-    rng = random.Random(seed_start)
     for i, (_coat_name, coat) in enumerate(HORSE_COAT_VARIANTS):
         reset_scene()
         arm, meshes, roots = bs.import_glb(str(QUATERNIUS / "horse.glb"))
@@ -588,14 +553,7 @@ def export_horses(out_dir: Path, seed_start: int = 150) -> None:
         lo, _hi = _bbox(horse)
         horse.location.z -= lo.z
         bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
-        lo, hi = _bbox(horse)
         _horse_recolor(coat)
-        tack_obj = to_object(_horse_tack(rng, horse, lo, hi), f"horse_tack_{i}")
-        bpy.ops.object.select_all(action="DESELECT")
-        tack_obj.select_set(True)
-        horse.select_set(True)
-        bpy.context.view_layer.objects.active = horse
-        bpy.ops.object.join()
         for obj in list(bpy.context.scene.objects):
             if obj is not horse:
                 bpy.data.objects.remove(obj, do_unlink=True)

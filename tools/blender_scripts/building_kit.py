@@ -2962,35 +2962,50 @@ def bridge_wood_end(g, rng, detail="high", length=None, depth=None, ruined=False
 
 
 def _mill_wheel(g, rng, x, y, radius, detail):
-    """Undershot mill wheel: felloe, spokes, paddle blades, stub axle through the gable."""
+    """Undershot mill wheel, open construction (see-through): two thin felloe rims (short timber arcs), 8 spokes per rim to a central hub, radial paddle blades between the rims, a stub axle through the gable wall."""
     width = 0.55
-    n = 12 if detail == "high" else 8
-    sides = 16 if detail == "high" else 10
+    n_paddle = 14 if detail == "high" else 9
+    n_rim = 16 if detail == "high" else 10
+    hub_r = 0.14
+    rim_r = 0.045
+    hub_sides = 10 if detail == "high" else 7
+    # Hub.
     k.tube(
         g,
         (x, y - width / 2, radius),
         (x, y + width / 2, radius),
-        radius,
+        hub_r,
         "Timber",
-        sides,
-        color=TIMBER_TINTS[1],
+        hub_sides,
+        color=TIMBER_TINTS[0],
     )
-    for i in range(8):
-        a = 2 * math.pi * i / 8
-        p1 = (x + math.cos(a) * radius * 0.94, y, radius + math.sin(a) * radius * 0.94)
-        k.beam(
-            g,
-            (x, y, radius),
-            p1,
-            0.08,
-            width * 0.45,
-            "Timber",
-            (0.0, 1.0, 0.0),
-            color=TIMBER_TINTS[0],
-        )
-    half_t, out0, out1 = 0.19, -0.03, 0.22
-    for i in range(n):
-        a = 2 * math.pi * i / n
+    for sy in (-width / 2, width / 2):
+        # Rim: a ring of short curved (straight-segment) timber arcs, open in the middle.
+        pts = [
+            (x + math.cos(a) * radius, y + sy, radius + math.sin(a) * radius)
+            for a in (2 * math.pi * i / n_rim for i in range(n_rim))
+        ]
+        for p0, p1 in zip(pts, pts[1:] + pts[:1], strict=False):
+            k.tube(g, p0, p1, rim_r, "Timber", 5, caps=False, color=TIMBER_TINTS[1])
+        # Spokes: hub to rim, one per rim (8 each side).
+        for i in range(8):
+            a = 2 * math.pi * i / 8
+            p1 = (x + math.cos(a) * radius, y + sy, radius + math.sin(a) * radius)
+            k.beam(
+                g,
+                (x, y + sy, radius),
+                p1,
+                0.05,
+                0.05,
+                "Timber",
+                (0.0, 1.0, 0.0),
+                color=TIMBER_TINTS[0],
+            )
+    # Paddle blades between the two rims.
+    half_t = math.pi * radius / n_paddle * 0.4
+    out0, out1 = -0.03, 0.2
+    for i in range(n_paddle):
+        a = 2 * math.pi * i / n_paddle
         tx, tz = -math.sin(a), math.cos(a)
         ox, oz = math.cos(a), math.sin(a)
         cx, cz = x + ox * radius, radius + oz * radius
