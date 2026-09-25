@@ -10,7 +10,7 @@ Branche `worktree-agent-a5b40232e9b8caf20`. ADR : `docs/decisions/0028-batailles
 | 2. Pont GDExtension (`NavalBattleSim`, méthodes navales de `CampaignSim`) | fait |
 | 3. Scène navale Godot (mer, navires, équipages V2, volées BV1, grappins, passerelles, feu, naufrage, HUD, fin) | fait, captures `docs/audit/captures/nv1/` |
 | 4. Déclenchement depuis la carte (`NavalCampaign`, `NavalPreBattleDialog`) + `--naval-scenario=sluys` | fait, test `game/tests/nv1_naval_test.gd` |
-| 5. Finitions : captures feu (La Rochelle), smoke, fusion main | en cours |
+| 5. Finitions : captures feu (La Rochelle), fusion main, vérifications | fait |
 
 ## Fichiers
 - Données : `data/naval/ships/ship_{cog,nef,galley,barge}.json`, `data/naval/rules.json`,
@@ -42,5 +42,6 @@ Branche `worktree-agent-a5b40232e9b8caf20`. ADR : `docs/decisions/0028-batailles
 - Disque presque plein (autres agents) : `core/target/release` supprimé ; éviter `--release`.
 
 ## Prochaine étape
-Capture du feu (scénario `la_rochelle`), capture de l'écran d'avant-bataille, fusion de main,
-vérifications finales (fmt, clippy, tests, build.sh, pytest, import, smoke).
+Lot terminé (main fusionnée, fmt/clippy/tests/build/pytest/import/smoke verts). Suites possibles :
+abordages simultanés plus nombreux à l'Écluse (l'IA aborde un navire à la fois), noms de navires
+de campagne (« Nef n°1 »), GPU non mesurable sous Metal (60 i/s plafonnés par le pilote).
