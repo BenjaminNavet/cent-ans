@@ -298,6 +298,10 @@ func begin() -> bool:
 		var side_setup: Dictionary = setup[side]
 		side_names[side] = str(side_setup.get("faction_name", side))
 		side_colors[side] = _faction_color(str(side_setup.get("faction", "")), side)
+		# DA1 : maison du général (armes du HUD et des figurines nobles), rendu seulement.
+		var general: Variant = side_setup.get("general", null)
+		if general is Dictionary and not (general as Dictionary).has("house"):
+			(general as Dictionary)["house"] = HouseArms.house_of(str((general as Dictionary).get("character", "")), campaign_sim)
 	var weather: Dictionary = battle.call("get_weather")
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
 	_weather_key = weather_key
@@ -498,9 +502,12 @@ func _build_soldier_layers() -> void:
 		soldiers.impostors.name = "Impostors"
 		soldiers.add_child(soldiers.impostors)
 	var factions := {}
+	var houses := {}  # DA1 : maison du général par camp
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
-	soldiers.setup(units, side_colors, factions)
+		var general: Variant = (setup[side] as Dictionary).get("general", null)
+		houses[side] = str((general as Dictionary).get("house", "")) if general is Dictionary else ""
+	soldiers.setup(units, side_colors, factions, houses)
 	_mm = soldiers.layers
 	_setup_standards()
 	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
