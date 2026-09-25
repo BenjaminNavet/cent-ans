@@ -250,7 +250,11 @@ func begin() -> bool:
 	battle = ClassDB.instantiate("BattleSim")
 	if not battle.call("setup", setup, battle_seed):
 		return false
-	player_side = str(setup.get("player_side", "attacker"))
+	var setup_side: Variant = setup.get("player_side", "attacker")
+	player_side = str(setup_side) if setup_side != null else ""
+	if player_side == "" and standalone and siege_landmark != "":
+		# SG2 : démo d'Avignon ou de Bruges, sans le joueur de la campagne : il mène l'assaut.
+		player_side = "attacker"
 	if player_side == "":
 		player_side = "attacker"
 		autoplay = true
