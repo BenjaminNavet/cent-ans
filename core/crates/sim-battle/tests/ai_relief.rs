@@ -57,8 +57,17 @@ fn survey_active_against_passive() {
         Terrain::Hills,
         Terrain::Mountains,
     ] {
-        let (won, lost) = wins(&data, terrain, 0..16);
-        println!("{:<10} {won}/32  lost: {}", terrain.key(), lost.join(" "));
+        // R2B_SEEDS=16..48 checks another sample.
+        let seeds = std::env::var("R2B_SEEDS")
+            .ok()
+            .and_then(|s| {
+                let (a, b) = s.split_once("..")?;
+                Some(a.parse().ok()?..b.parse().ok()?)
+            })
+            .unwrap_or(0..16);
+        let n = 2 * (seeds.end - seeds.start);
+        let (won, lost) = wins(&data, terrain, seeds);
+        println!("{:<10} {won}/{n}  lost: {}", terrain.key(), lost.join(" "));
     }
 }
 
