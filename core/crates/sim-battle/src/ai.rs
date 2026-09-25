@@ -547,11 +547,12 @@ fn high_ground(view: &View, around: (f64, f64)) -> (f64, f64) {
 /// R2b: centre of the deployment line of `side`, from which a defensive
 /// side looks for its ground (a fixed reference: searching from the moving
 /// line would let the reverse slope drag the line back step after step).
-fn deployment_center(side: SideId) -> (f64, f64) {
-    use crate::field::{ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_WIDTH};
+/// EP3: read from the field's dimensions (never a fixed 1200 × 800 m).
+fn deployment_center(field: &crate::field::Battlefield, side: SideId) -> (f64, f64) {
+    let (attacker_line, defender_line) = crate::hydro::battle_lines(field);
     match side {
-        SideId::Attacker => (FIELD_WIDTH * 0.5, ATTACKER_LINE_Z),
-        SideId::Defender => (FIELD_WIDTH * 0.5, DEFENDER_LINE_Z),
+        SideId::Attacker => (field.width * 0.5, attacker_line),
+        SideId::Defender => (field.width * 0.5, defender_line),
     }
 }
 
@@ -639,7 +640,7 @@ pub fn river_hold(
     enemy: (f64, f64),
 ) -> Option<Cover> {
     let river = field.river.as_ref()?;
-    let home = deployment_center(side);
+    let home = deployment_center(field, side);
     if !ReliefMap::river_between(field, home, enemy) {
         return None;
     }
@@ -1038,7 +1039,11 @@ fn plan_field(view: &mut View) {
         view.centroid(&able)
     };
     let river_ahead = enemy_center.is_some_and(|e| {
-        ReliefMap::river_between(view.sim.field(), deployment_center(view.side), e)
+        ReliefMap::river_between(
+            view.sim.field(),
+            deployment_center(view.sim.field(), view.side),
+            e,
+        )
     });
     let holds_river = view.side == SideId::Defender && ratio < HOLD_RATIO && river_ahead;
     let defensive = match view.side {
@@ -1127,7 +1132,7 @@ fn plan_field(view: &mut View) {
         };
         (c.center.0, c.z_at(c.center.0) - view.forward * back)
     } else if defensive {
-        let crest = high_ground(view, deployment_center(view.side));
+        let crest = high_ground(view, deployment_center(view.sim.field(), view.side));
         reverse_slope_anchor(view, crest, !roles.shooters.is_empty())
     } else if let Some(plan) = crossing {
         // Shooters cover the crossing from the own bank.

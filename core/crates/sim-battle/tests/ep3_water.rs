@@ -360,3 +360,160 @@ fn the_side_holding_the_bridgehead_strikes_harder() {
     assert_eq!(run_one(), run_one());
     let _ = SideId::Attacker;
 }
+
+/// The attacker's and defender's deployment centres of a field, read from
+/// its dimensions (never a fixed 1200 × 800 m).
+fn deployment_centres(f: &Battlefield) -> ((f64, f64), (f64, f64)) {
+    let half_gap = (sim_battle::DEFENDER_LINE_Z - sim_battle::ATTACKER_LINE_Z) * 0.5;
+    let (mid_x, mid_z) = (f.width * 0.5, f.depth * 0.5);
+    ((mid_x, mid_z - half_gap), (mid_x, mid_z + half_gap))
+}
+
+#[test]
+fn the_defender_holds_the_bank_at_a_crossing() {
+    let mut held = 0;
+    for seed in 0..24 {
+        let f = field(Terrain::Plains, seed);
+        let r = f.river.as_ref().unwrap();
+        let (attacker, defender) = deployment_centres(&f);
+        let Some(cover) = sim_battle::ai::river_hold(&f, SideId::Defender, attacker) else {
+            continue;
+        };
+        held += 1;
+        assert_eq!(cover.kind, sim_battle::ai::CoverKind::River);
+        assert!(cover.breaks_charge);
+        let own_north = r.north_of(defender.0, defender.1);
+        let (cx, cz) = cover.center;
+        assert_eq!(
+            r.north_of(cx, cz),
+            own_north,
+            "seed {seed}: the bank held is not the defender's"
+        );
+        assert!(
+            f.water_kind(cx, cz).is_none(),
+            "seed {seed}: held in the water"
+        );
+        // Behind the own end of a crossing, a bank setback away.
+        let near_crossing = f.crossings().iter().any(|c| {
+            let end = c.end(own_north);
+            (end.0 - cx).abs() < 1.0
+                && (end.1 - cz).abs() < sim_battle::ai::BANK_SETBACK + r.width_at(cx) + 20.0
+        });
+        assert!(
+            near_crossing,
+            "seed {seed}: the bank held faces no crossing"
+        );
+        // The attacker's side never holds the river from its own bank here.
+        assert!(sim_battle::ai::river_hold(&f, SideId::Attacker, defender)
+            .is_some_and(|c| r.north_of(c.center.0, c.center.1) != own_north));
+    }
+    assert!(held >= 16, "the river is held on {held}/24 fields only");
+}
+
+/// A weaker defender (AI) behind the river and a stronger attacker (AI).
+fn river_battle(seed: u64) -> BattleSim {
+    let data = data();
+    let mut battle = setup(
+        units(
+            &data,
+            &[
+                "unit_men_at_arms_foot",
+                "unit_men_at_arms_foot",
+                "unit_longbowmen",
+                "unit_longbowmen",
+                "unit_knights",
+                "unit_knights",
+            ],
+        ),
+        units(
+            &data,
+            &[
+                "unit_men_at_arms_foot",
+                "unit_longbowmen",
+                "unit_urban_militia",
+            ],
+        ),
+        None,
+    );
+    battle.river = true;
+    BattleSim::new(battle, seed).unwrap()
+}
+
+#[test]
+fn a_weaker_defender_stays_behind_the_river() {
+    for seed in [1, 4, 7] {
+        let mut sim = river_battle(seed);
+        let r = sim.field().river.clone().unwrap();
+        let (_, defender) = deployment_centres(sim.field());
+        let own_north = r.north_of(defender.0, defender.1);
+        // The first minute: the attacker marches, the defender waits.
+        run(&mut sim, 60.0);
+        for u in sim.units().iter().filter(|u| u.side == SideId::Defender) {
+            if !u.present() {
+                continue;
+            }
+            assert_eq!(
+                r.north_of(u.x, u.z),
+                own_north,
+                "seed {seed}: defender {} crossed to ({:.0}, {:.0})",
+                u.unit_type,
+                u.x,
+                u.z
+            );
+        }
+    }
+}
+
+#[test]
+fn the_attacker_crosses_by_the_bridges_and_fords() {
+    let mut crossed = 0;
+    for seed in [1, 4, 7] {
+        let mut sim = river_battle(seed);
+        let r = sim.field().river.clone().unwrap();
+        let (attacker, _) = deployment_centres(sim.field());
+        let own_north = r.north_of(attacker.0, attacker.1);
+        let count = sim.units().len();
+        let mut used_crossing = vec![false; count];
+        for _ in 0..(300.0 / sim_battle::DT) as usize {
+            if sim.is_finished() {
+                break;
+            }
+            sim.step();
+            let f = sim.field();
+            for (k, u) in sim.units().iter().enumerate() {
+                if u.side != SideId::Attacker || !u.present() {
+                    continue;
+                }
+                if f.bridge_at(u.x, u.z).is_some() || f.water_kind(u.x, u.z) == Some(Water::Ford) {
+                    used_crossing[k] = true;
+                }
+                // Horsemen never stand in deep water.
+                if u.category == data_model::UnitCategory::Cavalry {
+                    assert_ne!(f.water_kind(u.x, u.z), Some(Water::Deep), "seed {seed}");
+                }
+                if r.north_of(u.x, u.z) != own_north && !used_crossing[k] {
+                    // Beyond the river without a bridge or ford: only foot
+                    // wading a narrow deep reach may do so, never horsemen.
+                    assert_ne!(
+                        u.category,
+                        data_model::UnitCategory::Cavalry,
+                        "seed {seed}: horsemen crossed without a crossing"
+                    );
+                }
+            }
+        }
+        let beyond = sim
+            .units()
+            .iter()
+            .enumerate()
+            .filter(|(k, u)| {
+                u.side == SideId::Attacker && used_crossing[*k] && r.north_of(u.x, u.z) != own_north
+            })
+            .count();
+        crossed += beyond;
+    }
+    assert!(
+        crossed > 0,
+        "the attacker never crossed by a bridge or ford"
+    );
+}

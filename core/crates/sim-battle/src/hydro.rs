@@ -671,9 +671,20 @@ impl River {
 
 // ----- streams and oxbow -----------------------------------------------------------------
 
-/// Keeps still water off the deployment lines.
-fn clear_of_lines(z: f64, radius: f64) -> bool {
-    (z - ATTACKER_LINE_Z).abs() > radius + 45.0 && (z - DEFENDER_LINE_Z).abs() > radius + 45.0
+/// z of the attacker's and defender's battle lines of `field`, read from its
+/// depth: the standard gap between the lines, centred on the field (the
+/// standard 1200 × 800 m field gives the historical 250 and 550). EP1 sizes
+/// the field by the head count; its `Battlefield::attacker_line_z` /
+/// `defender_line_z` replace this once merged.
+pub(crate) fn battle_lines(field: &Battlefield) -> (f64, f64) {
+    let half_gap = (DEFENDER_LINE_Z - ATTACKER_LINE_Z) * 0.5;
+    let mid = field.depth * 0.5;
+    (mid - half_gap, mid + half_gap)
+}
+
+/// Keeps still water off the deployment lines `lines`.
+fn clear_of_lines(lines: (f64, f64), z: f64, radius: f64) -> bool {
+    (z - lines.0).abs() > radius + 45.0 && (z - lines.1).abs() > radius + 45.0
 }
 
 /// A meandering polyline from `a` to `b` (points every ~20 m).
@@ -716,6 +727,7 @@ pub(crate) fn draw_streams(field: &mut Battlefield, rules: &WaterRules, stream: 
         return;
     };
     let (w, d) = (field.width, field.depth);
+    let lines = battle_lines(field);
     let s = &rules.streams;
     let mut streams = Vec::new();
     if stream.unit() < s.tributary_chance {
@@ -776,7 +788,7 @@ pub(crate) fn draw_streams(field: &mut Battlefield, rules: &WaterRules, stream: 
                         continue;
                     }
                     // A shallow dip only across the deployment lines.
-                    let line = (z - ATTACKER_LINE_Z).abs().min((z - DEFENDER_LINE_Z).abs());
+                    let line = (z - lines.0).abs().min((z - lines.1).abs());
                     let soften = 0.25 + 0.75 * ((line - 20.0) / 50.0).clamp(0.0, 1.0);
                     field.heights[iz * field.nx + ix] -= depth * soften * (1.0 - dist / reach);
                 }
@@ -793,7 +805,7 @@ pub(crate) fn draw_streams(field: &mut Battlefield, rules: &WaterRules, stream: 
             let radius = stream.range(28.0, 55.0);
             let gap = river.width_at(x) * 0.5 + stream.range(18.0, 40.0);
             let c = (x, river.center_z(x) + sign * (gap + radius));
-            if !clear_of_lines(c.1, radius + 8.0)
+            if !clear_of_lines(lines, c.1, radius + 8.0)
                 || field.in_forest(c.0, c.1)
                 || field.village.is_some()
                     && field
@@ -835,7 +847,7 @@ pub(crate) fn draw_streams(field: &mut Battlefield, rules: &WaterRules, stream: 
             if !river.in_ford(x) && !river.near_bridge(x) {
                 let r = stream.range(10.0, 16.0);
                 let z = river.center_z(x) + sign * (river.width_at(x) * 0.5 + r * 0.7);
-                if clear_of_lines(z, r) {
+                if clear_of_lines(lines, z, r) {
                     field.mud_parts.push(Zone { x, z, radius: r });
                 }
             }
