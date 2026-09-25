@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/missile_morale_rules.schema.json",
+  "title": "Règles du moral sous les traits",
+  "description": "Fichier data/rules/missile_morale.json (ADR 0052) : perte de moral supplémentaire des troupes montées sous les projectiles (chevaux blessés).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "mounted_panic_per_loss": { "type": "number", "minimum": 0, "maximum": 200, "description": "Points de moral perdus en plus par une troupe montée pour la totalité de son effectif tuée par des projectiles (proportionnel aux pertes)." }
+  },
+  "required": ["mounted_panic_per_loss"],
+  "additionalProperties": false
+}

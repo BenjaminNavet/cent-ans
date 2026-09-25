@@ -262,6 +262,42 @@ fn regiments_near_a_fire_suffer() {
     );
 }
 
+/// BR3b: on the wall walk, raised above the street behind the parapet, a
+/// regiment gets only `heat.wall_walk_factor` of the heat (the rows of
+/// houses are backed against the rampart).
+#[test]
+fn the_wall_walk_is_sheltered_from_the_heat() {
+    let data = data();
+    let factor = FireRules::bundled().heat.wall_walk_factor;
+    assert!(factor > 0.0 && factor < 1.0, "factor {factor}");
+    let mut sim = quiet_siege(&data, 4, Weather::Clear);
+    let mut rules = FireRules::bundled().clone();
+    rules.spread.chance_per_period = 0.0;
+    sim.set_fire_rules(Some(rules));
+    let house = town_house(&sim);
+    let (hx, hz, radius) = {
+        let h = &sim.siege().unwrap().houses[house];
+        (h.x, h.z, h.radius)
+    };
+    let id = sim
+        .units()
+        .iter()
+        .find(|u| u.side == SideId::Defender && u.unit_type == "unit_crossbowmen")
+        .unwrap()
+        .id as usize;
+    place(&mut sim, id as u32, hx, hz - radius - 8.0, 0.0);
+    assert!(sim.ignite_house(house));
+    run(&mut sim, 20.0);
+    let street = sim.heat_intensity(&sim.units()[id]);
+    assert!(street > 0.0, "within the heat");
+    sim.units_mut()[id].on_wall = true;
+    let wall = sim.heat_intensity(&sim.units()[id]);
+    assert!(
+        (wall - street * factor).abs() < 1e-9,
+        "wall {wall:.3} street {street:.3}"
+    );
+}
+
 #[test]
 fn a_burning_gate_loses_its_hit_points_and_opens() {
     let data = data();
