@@ -15,6 +15,7 @@ const M_LOOP := 0
 const M_CYCLE := 1
 const M_VOLLEY := 2
 const M_CUSTOM := 3
+const M_SPLIT := 4  # SG1 : escalade (premiers soldats sur les échelles, le reste au pied du mur)
 
 static var _manifest: Dictionary = {}
 static var _loaded: bool = false
@@ -221,7 +222,12 @@ static func death_config(kind: String, variant: int) -> Dictionary:
 	return {"key": "%s/%d/dead" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
 
 
+## Style d'animation de la figurine : champ `style` du manifeste (lot UR1), sinon règle
+## historique par famille et variante.
 static func _style(kind: String, variant: int) -> String:
+	var style := str(figure(kind, variant).get("style", ""))
+	if STYLES.has(style):
+		return style
 	match kind:
 		"infantry":
 			return "sword" if variant == 0 else "pike" if variant == 1 else "militia"
@@ -230,6 +236,38 @@ static func _style(kind: String, variant: int) -> String:
 		"cavalry":
 			return "horse_bow" if variant == 2 else "lance"
 	return "sword"
+
+
+## Figurine « noble » (livrée plus présente) : champ `noble` du manifeste (lot UR1), sinon
+## variante 0 des fantassins et des cavaliers.
+static func is_noble(kind: String, variant: int) -> bool:
+	var fig := figure(kind, variant)
+	if fig.has("noble"):
+		return bool(fig["noble"])
+	return variant == 0 and (kind == "infantry" or kind == "cavalry")
+
+
+## Variante des figurines rigides (B1/B4, trois par famille) la plus proche d'une figurine
+## skinnée de variante quelconque (lot UR1), d'après son style d'animation.
+static func rigid_variant(kind: String, variant: int) -> int:
+	if variant <= 2 or kind == "siege":
+		return variant
+	match _style(kind, variant):
+		"sword":
+			return 0
+		"pike":
+			return 1
+		"militia":
+			return 2
+		"bow":
+			return 0
+		"crossbow":
+			return 1
+		"horse_bow":
+			return 2
+		"lance":
+			return 0 if is_noble(kind, variant) else 1
+	return 0
 
 
 const DEATHS_FOOT := ["death", "death_m", "death_back", "death_knees"]
@@ -317,7 +355,7 @@ const STYLES := {
 		"charging": {"set": ["run"], "speed": 1.05},
 		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.3},
 		"routing": {"set": ["run"], "speed": 1.1},
-		"climbing": {"set": ["run"]},
+		"climbing": {"set": ["climb", "guard", "idle"], "mode": M_SPLIT},
 	},
 	# Lot BV2 : lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
 	"militia": {
@@ -328,6 +366,7 @@ const STYLES := {
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3},
 		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["run"], "speed": 1.15},
+		"climbing": {"set": ["climb", "idle", "guard"], "mode": M_SPLIT},
 	},
 	"pike": {
 		"idle": {"set": ["pike_idle"]},
@@ -338,6 +377,7 @@ const STYLES := {
 		# Lot BV2 : piques abaissées face à une charge de cavalerie (rendu seulement).
 		"brace": {"set": ["pike_level"]},
 		"routing": {"set": ["run"], "speed": 1.1},
+		"climbing": {"set": ["climb", "pike_idle"], "mode": M_SPLIT},
 	},
 	"bow": {
 		"idle": {"set": ["bow_idle", "idle"]},

@@ -1,0 +1,41 @@
+{
+  "id": "unit_scottish_spearmen",
+  "name": {
+    "display": "Schiltron écossais",
+    "local": "speirmen",
+    "local_language": "scots"
+  },
+  "category": "infantry",
+  "source_class": "peasants",
+  "soldiers": 120,
+  "cost": {
+    "money": 560
+  },
+  "upkeep": 50,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 44,
+    "ranged": 0,
+    "range": 0,
+    "armor": 32,
+    "morale": 60,
+    "speed": 35,
+    "ammo": 0
+  },
+  "abilities": [
+    "pike_square",
+    "shield_wall"
+  ],
+  "required_culture": [
+    "cul_scottish"
+  ],
+  "figure": "infantry_4",
+  "equipment": "Lance de douze pieds, jaque piqué ou haubergeon, bonnet ou chapel de fer, targe.",
+  "description": "Masses de lances en cercles hérissés (schiltrons) de Bannockburn ; redoutables contre la cavalerie, vulnérables aux archers (Halidon Hill 1333, Neville's Cross 1346).",
+  "sources": [
+    "Schiltron",
+    "Bataille de Bannockburn",
+    "Bataille de Neville's Cross",
+    "C. Rogers, War Cruel and Sharp: English Strategy under Edward III, Boydell, 2000"
+  ]
+}

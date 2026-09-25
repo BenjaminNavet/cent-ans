@@ -82,15 +82,40 @@ const LEVEL_FAR := 2
 
 static var _cache: Dictionary = {}
 static var _figures_meta: Dictionary = {}
+static var _variant_cache: Dictionary = {}  # type d'unité → variante (lot UR1)
 
 
+## Variante de figurine d'un type d'unité : champ `figure` (`<famille>_<variante>`) de
+## `data/unit_types` (lot UR1), sinon table `VARIANTS`, repli 0.
 static func variant_of(unit_type: String) -> int:
-	return int(VARIANTS.get(unit_type, 0))
+	if _variant_cache.has(unit_type):
+		return int(_variant_cache[unit_type])
+	var fig := figure_of(unit_type)
+	var cut := fig.rfind("_")
+	var variant := int(VARIANTS.get(unit_type, 0))
+	if cut > 0 and fig.substr(cut + 1).is_valid_int():
+		variant = int(fig.substr(cut + 1))
+	_variant_cache[unit_type] = variant
+	return variant
+
+
+## Figurine déclarée par le type d'unité (`infantry_3`…), "" si absente.
+static func figure_of(unit_type: String) -> String:
+	return str(GameCatalog.unit_type(unit_type).get("figure", ""))
+
+
+## Famille de figurine déclarée par le type d'unité (`cavalry` pour les jinetes, tireurs
+## montés), "" si le type ne déclare pas de figurine.
+static func figure_kind_of(unit_type: String) -> String:
+	var fig := figure_of(unit_type)
+	var cut := fig.rfind("_")
+	return fig.substr(0, cut) if cut > 0 else ""
 
 
 ## Mode d'arme (uniforme `weapon_mode` du shader) d'une famille/variante :
 ## 0 épée, 1 arme d'hast, 2 arc, 3 arbalète, 4 lance de cavalier, 5 engin.
 static func weapon_mode(kind: String, variant: int) -> int:
+	variant = BattleSkinned.rigid_variant(kind, variant)
 	match kind:
 		"infantry":
 			return 0 if variant == 0 else 1
@@ -293,6 +318,8 @@ static func soldier(kind: String, variant: int = 0, lod: bool = false) -> ArrayM
 
 ## Figurine au niveau de détail `level` (LEVEL_FULL, LEVEL_MEDIUM, LEVEL_FAR).
 static func soldier_level(kind: String, variant: int, level: int) -> ArrayMesh:
+	# Lot UR1 : les figurines rigides n'ont que trois variantes par famille.
+	variant = BattleSkinned.rigid_variant(kind, variant)
 	var key := "%s/%d/%d" % [kind, variant, level]
 	if _cache.has(key):
 		return _cache[key]

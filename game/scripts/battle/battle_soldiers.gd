@@ -159,7 +159,7 @@ func _make_material(side: String, kind: String, variant: int, corpse: bool) -> S
 	mat.set_shader_parameter("torso_y", 0.78 if mounted else 0.0)
 	mat.set_shader_parameter("torso_z", -0.05 if mounted else 0.0)
 	# Nobles (hommes d'armes, chevaliers) presque tous en livrée ; troupe plus mêlée.
-	var noble := variant == 0 and (kind == "infantry" or kind == "cavalry")
+	var noble := BattleSkinned.is_noble(kind, variant)
 	mat.set_shader_parameter("livery_share", 0.7 if noble else 0.4)
 	return mat
 
@@ -177,7 +177,7 @@ func _make_skinned_material(side: String, kind: String, variant: int, corpse: bo
 	mat.set_shader_parameter("has_heraldry", arms != null)
 	BattleSkinned.setup_material(mat, kind, variant)
 	mat.set_shader_parameter("reload_time", 9.0 if kind == "archer" and variant == 2 else 6.0)
-	var noble := variant == 0 and (kind == "infantry" or kind == "cavalry")
+	var noble := BattleSkinned.is_noble(kind, variant)
 	mat.set_shader_parameter("livery_share", 0.92 if noble else 0.6)
 	if corpse:
 		BattleSkinned.apply_config(mat, BattleSkinned.death_config(kind, variant), anim_time)
@@ -335,6 +335,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	mat.set_shader_parameter("state_time", local - float(track["since"]))
 	if skinned:
 		BattleSkinned.apply_config(mat, config, local)
+		# SG1 : soldats de tête sur les échelles ou le pont du beffroi (clip d'escalade).
+		mat.set_shader_parameter("split_count", int(unit.get("climbers_shown", 0)))
 		# Sang : uniforme mis à jour seulement quand il change sensiblement.
 		var blood := snappedf(_living_blood(unit, id), 0.02)
 		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
