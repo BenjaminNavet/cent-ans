@@ -1987,6 +1987,7 @@ impl BattleSim {
         let shooter_id = self.units[i].id;
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
+        self.units[i].kills += kills;
         if kills > 0.0 {
             self.units[t].missile_timer = 0.0;
             self.units[t].loss_cause = cause;
@@ -2173,6 +2174,9 @@ impl BattleSim {
         let mut flanked = vec![0u8; n];
         // BV2: heaviest blow per defender this tick (cause of its deaths).
         let mut heaviest: Vec<Option<(f64, usize)>> = vec![None; n];
+        // UB1: (striker, victim, damage) to credit the kills once capped.
+        let mut credit: Vec<(usize, usize, f64)> = Vec::new();
+        let mut dealt_ratio = vec![0.0; n];
         for i in 0..n {
             let unit = &self.units[i];
             if !unit.present() || contacts[i].is_empty() || unit.state == UnitState::Routing {
@@ -2190,6 +2194,7 @@ impl BattleSim {
             if heaviest[p].is_none_or(|(d, _)| dealt > d) {
                 heaviest[p] = Some((dealt, i));
             }
+            credit.push((i, p, dealt));
             match attack_angle(defender, unit.x, unit.z) {
                 1 => flanked[p] |= 1,
                 2 => flanked[p] |= 2,
@@ -2227,6 +2232,7 @@ impl BattleSim {
             }
             let before = unit.hp;
             let dealt = damage[i].min(unit.hp);
+            dealt_ratio[i] = dealt / damage[i];
             unit.hp -= dealt;
             unit.tick_losses += dealt;
             if let Some((cause, by)) = causes[i] {
@@ -2242,6 +2248,9 @@ impl BattleSim {
             if self.units[i].hp <= 0.0 {
                 self.unit_destroyed(i);
             }
+        }
+        for (striker, victim, blow) in credit {
+            self.units[striker].kills += blow * dealt_ratio[victim];
         }
     }
 

@@ -305,6 +305,7 @@ impl BattleSim {
                     "soldiers" => i64::from(unit.soldiers()),
                     "max_soldiers" => i64::from(unit.max_soldiers),
                     "initial_soldiers" => i64::from(unit.initial_soldiers),
+                    "kills" => unit.kills.round() as i64,
                     "morale" => unit.morale,
                     "fatigue" => unit.fatigue,
                     "ammo" => i64::from(unit.ammo),
@@ -765,6 +766,42 @@ impl CampaignSim {
                 godot_warn!("CampaignSim.get_battle_setup({index}): {error}");
                 VarDictionary::new()
             }
+        }
+    }
+
+    /// UB1: estimated balance of pending battle `index` for the pre-battle
+    /// screen (`battle_forecast.rs`): `{attacker_power, defender_power,
+    /// attacker_share, attacker_win_chance, attacker_soldiers,
+    /// defender_soldiers, attacker_reinforcements, defender_reinforcements,
+    /// modifiers, can_withdraw, siege}`; empty if unknown.
+    #[func]
+    fn get_battle_forecast(&self, index: i64) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        match state.battle_forecast(data, index.max(0) as usize) {
+            Ok(forecast) => to_dict(&forecast),
+            Err(error) => {
+                godot_warn!("CampaignSim.get_battle_forecast({index}): {error}");
+                VarDictionary::new()
+            }
+        }
+    }
+
+    /// UB1: the player calls off pending battle `index` (attacker only; an
+    /// assault is postponed, the siege goes on) → `{ok, error, events}`.
+    #[func]
+    fn withdraw_pending_battle(&mut self, index: i64) -> VarDictionary {
+        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+            return result_dict(Err("aucune campagne en cours".to_owned()));
+        };
+        match state.withdraw_pending_battle(data, index.max(0) as usize) {
+            Ok(events) => {
+                let mut dict = result_dict(Ok(()));
+                dict.set("events", &events_array(&events));
+                dict
+            }
+            Err(error) => result_dict(Err(error.to_string())),
         }
     }
 

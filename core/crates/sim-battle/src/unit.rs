@@ -150,6 +150,10 @@ pub struct Unit {
     /// Casualties taken during the current tick (for morale).
     #[serde(skip)]
     pub tick_losses: f64,
+    /// UB1: enemy soldiers this unit struck down (volleys and melee), for
+    /// the result screen only; no rule reads it.
+    #[serde(default)]
+    pub kills: f64,
     /// Attacked on the flank / rear during the current tick.
     #[serde(skip)]
     pub flanked: u8,
@@ -236,6 +240,7 @@ impl Unit {
             ram: false,
             blocked_by: None,
             tick_losses: 0.0,
+            kills: 0.0,
             flanked: 0,
             order_morale: 0.0,
             order_morale_timer: 0.0,
