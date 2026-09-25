@@ -41,6 +41,10 @@ var exclusions: PackedVector3Array = PackedVector3Array()
 ## au lancement du semis ; les arbres y sont posés (vide : heightmap 4096 bilinéaire). Le tri
 ## terre / mer reste fait sur la heightmap : même semis quel que soit le niveau de relief.
 var ground_grid: Dictionary = {}
+## Lot PB2 : seule la grille grossière est calculée ici (`run`) ; le semis, les haies et
+## l'empaquetage sont faits par `VegetationScatter` (Rust, fils natifs) à partir de
+## `native_params`, puis `apply_native` installe le résultat.
+var coarse_only: bool = false
 
 ## Résultats : un tampon et un nombre d'instances par emplacement `part * KIND_COUNT + kind`.
 var buffers: Array[PackedFloat32Array] = []
@@ -64,6 +68,9 @@ func run() -> void:
 	grove_noise.frequency = 1.0 / 9.0
 	grove_noise.fractal_octaves = 2
 	_sample_coarse(noise, grove_noise)
+	if coarse_only:
+		build_ms = (Time.get_ticks_usec() - t0) / 1000.0
+		return
 	var raw: Array = []
 	for slot in PARTS * KIND_COUNT:
 		raw.append([])
@@ -75,6 +82,26 @@ func run() -> void:
 		counts[slot] = items.size()
 		buffers.append(_pack(items))
 	build_ms = (Time.get_ticks_usec() - t0) / 1000.0
+
+
+## Lot PB2 : paramètres de `VegetationScatter.request` (après `run` en mode `coarse_only`).
+func native_params() -> Dictionary:
+	return {
+		"tile_index": tile_index, "origin_x": float(origin_px.x), "origin_y": float(origin_px.y),
+		"size_px": float(size_px), "spacing": spacing, "coarse_step": float(coarse_step),
+		"tree_scale": tree_scale, "vertical_scale": MapData.vertical_scale(), "side": _side,
+		"coarse": [_forest, _crops, _conifer, _beech, _hedge, _grove, _region],
+		"exclusions": exclusions, "ground_grid": ground_grid,
+	}
+
+
+## Lot PB2 : résultat de `VegetationScatter.poll` (tampons et nombres par emplacement).
+func apply_native(result: Dictionary) -> void:
+	buffers.clear()
+	for buffer: PackedFloat32Array in result["buffers"]:
+		buffers.append(buffer)
+	counts = result["counts"]
+	build_ms += float(result["ms"])
 
 
 func instance_total() -> int:
