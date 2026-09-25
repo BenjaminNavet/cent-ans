@@ -104,8 +104,6 @@ fn english_position(data: &GameData, seed: u64, crest: bool, hedges: &[Obstacle]
     let french = [
         "unit_knights",
         "unit_knights",
-        "unit_knights",
-        "unit_men_at_arms_foot",
         "unit_men_at_arms_foot",
         "unit_crossbowmen",
     ];
