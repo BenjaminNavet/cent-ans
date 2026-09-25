@@ -13,6 +13,7 @@
     "occupation_unrest": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement d'une province tenue par une autre faction que son propriétaire." },
     "foreign_religion_unrest": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement d'une province dont le souverain est d'une autre foi." },
     "disorder_unrest_weight": { "type": "number", "minimum": 0, "maximum": 5, "description": "EQ1 : poids des troubles récents de la province (prises, pillages, régence ; jauge qui décroît d'elle-même) dans la cible de mécontentement." },
+    "disorder_unrest_max": { "type": "number", "minimum": 0, "maximum": 100, "description": "EQ1 : plafond de ce terme (une province prise et reprise sans cesse garde sa jauge à 100)." },
     "revolt_unrest_threshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "EQ1 : mécontentement moyen (pondéré par classe) au-delà duquel la province menace de se révolter." },
     "revolt_seasons": { "type": "integer", "minimum": 1, "maximum": 20, "description": "EQ1 : saisons consécutives au-delà du seuil avant une révolte ; le compte repart de zéro après chaque révolte." },
     "revolt_control_threshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement au-delà duquel une province en révolte passe aux rebelles." }
