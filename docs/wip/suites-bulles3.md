@@ -16,5 +16,6 @@ Fusion : worktree `../gp-suites3-merge` (branche `integration/suites3`), puis ff
 - Montants d'import (300/900 livres) écrits en toutes lettres dans le codex : à resynchroniser si les données changent.
 - `campaign_sim_mock.gd` n'a pas les champs de ressources des recrues (valeurs par défaut).
 
-## Prochaine étape
-Fusionner SV4, smoke + cargo test + pytest sur l'intégration, ff dans main.
+## État final (26/09)
+SV1-SV4 fusionnés dans main (ff `35976b9c`). Sur main : clippy, cargo test, smoke (28 OK, plus d'erreur `scale_particles`), `m5a_vision_ui_test`, `pf1_quality_test`, pytest (579) verts.
+Restes SV4 notés dans `docs/wip/sv4-ui-numbers.md` (malus d'hiver des agents en ligne, échéance 1477 du tutoriel, bornes 0-100 des jauges, autres constantes d'`economy.rs` hors ravitaillement).
