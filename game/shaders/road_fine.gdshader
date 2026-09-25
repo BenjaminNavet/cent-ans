@@ -10,7 +10,8 @@ render_mode blend_mix, cull_disabled, depth_draw_never, specular_disabled, world
 // voies principales plus larges et plus claires, pavé près des villes, chaussée surélevée
 // (talus sombres) dans les marais.
 
-uniform float height_scale = 0.006;
+global uniform float campaign_vertical_scale;  // ZG4 : unités monde par mètre
+#define height_scale campaign_vertical_scale
 uniform vec4 fine_zone = vec4(0.0, 0.0, -1.0, 0.0);
 uniform float fine_weight = 1.0;
 uniform float min_px = 1.6;

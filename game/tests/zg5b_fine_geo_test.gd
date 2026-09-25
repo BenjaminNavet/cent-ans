@@ -229,8 +229,11 @@ func _test_bridge(store: FineGeoStore) -> void:
 	_check(absf(node.position.y - 47.0 * MapData.vertical_scale()) < 1e-4, "bridge not at water level")
 	var across := node.transform.basis.x.normalized()
 	_check(absf(across.dot(Vector3(1.0, 0.0, 0.0))) < 1e-3, "bridge not across the current")
-	var span := node.mesh.get_aabb().size.x
-	_check(span > 100.0 / 719.0 and span < 100.0 / 719.0 + 0.8, "bridge span %.3f" % span)
+	var span := node.mesh.get_aabb().size.x * node.transform.basis.x.length()
+	var river := 100.0 / 719.0
+	_check(span > river and span < river * 1.3 + 0.1, "bridge span %.3f for a river of %.3f" % [span, river])
+	var deck := node.transform.basis.y.length() * (0.05 + 0.02 * river / RiverCrossings.FINE_SCALE)
+	_check(absf(deck - 11.0 * MapData.vertical_scale()) < 1e-4, "deck not at z_deck: %.4f" % deck)
 	crossings.set_fine_mode(false)
 	_check(Vector2(node.position.x, node.position.z).is_equal_approx(Vector2(2080.3, 1890.4)), "bridge did not return to the V4 crossing")
 	crossings.queue_free()

@@ -24,6 +24,8 @@ const HEIGHT_SCALE := 2.0
 const DECK_SCALE := 2.0
 ## Largeur (px carte) sous laquelle un pont-porte n'a pas de tours (simple pont de pierre).
 const GATE_MIN_WIDTH := 0.3
+## Lot ZG5b : réduction des ouvrages en mode fin (culées de 0,5 unité → 50 m, tablier ≈ 10-25 m).
+const FINE_SCALE := 0.14
 
 var renderer: RiversRenderer
 ## Un enregistrement par ouvrage : {id, name, structure, px: Vector2, dir: Vector2, width, node}.
@@ -216,6 +218,10 @@ func _shape(item: Dictionary) -> void:
 	var fine := _fine_of(item)
 	var dir: Vector2 = fine["dir"] if not fine.is_empty() else item["dir"]
 	var width: float = fine["width"] if not fine.is_empty() else float(item["width"])
+	if not fine.is_empty():
+		# ZG5b : ouvrage à l'échelle réelle (maillage d'une largeur `width / FINE_SCALE` réduit de
+		# `FINE_SCALE` : la portée reste celle du fleuve fin, culées et tablier rétrécissent).
+		width /= FINE_SCALE
 	instance.mesh = BridgeMeshes.build(str(item["structure"]), width, absi(str(item["id"]).hash()))
 	# X local en travers du fleuve (ou selon la route portée), Z = X × Y (repère direct).
 	var across := Vector3(-dir.y, 0.0, dir.x)
@@ -225,7 +231,10 @@ func _shape(item: Dictionary) -> void:
 	var along := across.cross(Vector3.UP)
 	# Exagération (comme les maquettes de colonies) : hauteur et largeur du tablier ; la longueur
 	# reste celle du fleuve à franchir.
-	instance.transform = Transform3D(Basis(across, Vector3.UP * HEIGHT_SCALE, along * DECK_SCALE), Vector3.ZERO)
+	if fine.is_empty():
+		instance.transform = Transform3D(Basis(across, Vector3.UP * HEIGHT_SCALE, along * DECK_SCALE), Vector3.ZERO)
+	else:
+		item["fine_basis"] = [across, along, width]
 	_ground(item)
 
 
@@ -247,7 +256,16 @@ func _ground(item: Dictionary) -> void:
 	if not fine.is_empty():
 		# ZG5b : origine au niveau de l'eau du fleuve fin (lit creusé dessous).
 		var q: Vector2 = fine["px"]
-		node.position = Vector3(q.x, maxf(float(fine["z_water"]) * MapData.vertical_scale(), 0.0), q.y)
+		var vs := MapData.vertical_scale()
+		# Tablier à `z_deck` : hauteur du maillage (sommet du tablier ≈ 0,05 + 0,02 × largeur)
+		# mise à l'échelle de la hauteur réelle au-dessus de l'eau × échelle verticale courante.
+		var basis: Array = item.get("fine_basis", [])
+		if not basis.is_empty():
+			var deck_top := (0.05 + 0.02 * float(basis[2])) * FINE_SCALE
+			var rise := maxf(float(fine["z_deck"]) - float(fine["z_water"]), 3.0) * vs
+			var k_h := clampf(rise / maxf(deck_top, 1e-4), 0.3, 12.0)
+			node.transform.basis = Basis(basis[0] * FINE_SCALE, Vector3.UP * FINE_SCALE * k_h, basis[1] * FINE_SCALE)
+		node.position = Vector3(q.x, maxf(float(fine["z_water"]) * vs, 0.0), q.y)
 		return
 	var p: Vector2 = item["px"]
 	var y := renderer.map_data.surface_world_at(p.x, p.y)
@@ -286,7 +304,7 @@ func _fine_of(item: Dictionary) -> Dictionary:
 	if not bool(anchor.get("snapped", false)) or str(anchor.get("id", "")) != str(item["id"]):
 		return {}
 	var width_m := float(anchor.get("width_m", 0.0))
-	return {"px": anchor["px"], "dir": anchor["dir"], "width": maxf(width_m / renderer.map_data.meters_per_px, 0.05), "z_water": anchor["z_water"]}
+	return {"px": anchor["px"], "dir": anchor["dir"], "width": maxf(width_m / renderer.map_data.meters_per_px, 0.01), "z_water": anchor["z_water"], "z_deck": anchor["z_deck"]}
 
 
 ## Ancrage fin (mode fin actif ou non) de l'ouvrage `id`, pour les tests : {} si aucun.
