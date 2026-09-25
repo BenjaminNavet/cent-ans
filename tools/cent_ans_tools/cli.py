@@ -411,6 +411,15 @@ def geo_anchors_fine(
     console.print(result.summary())
 
 
+@geo_app.command("towns")
+def geo_towns() -> None:
+    """Emprise des villes ordinaires vers 1340 (ADR 0036, lot ZG6) : data/map/towns_1340.json."""
+    from cent_ans_tools.geo import towns
+
+    result = towns.build(log=console.print)
+    console.print(result.summary())
+
+
 @geo_app.command("detail-check")
 def geo_detail_check(
     zones: str = typer.Option(

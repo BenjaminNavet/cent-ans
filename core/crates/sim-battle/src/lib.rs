@@ -46,6 +46,7 @@ pub mod formation_ai;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
+pub mod missile_morale;
 pub mod naval;
 pub mod orders;
 pub mod outcome;
@@ -62,6 +63,7 @@ pub mod siege_fx;
 pub mod siege_layout;
 pub mod sim;
 pub mod site;
+pub mod time_of_day;
 pub mod town;
 pub mod unit;
 
@@ -95,5 +97,6 @@ pub use sim::{
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,
 };
+pub use time_of_day::{DayPhase, TimeOfDayRules};
 pub use town::{Footprint, Prop, PropKind, TownRules};
 pub use unit::{Formation, Unit, UnitFate, UnitState};

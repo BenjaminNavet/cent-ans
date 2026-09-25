@@ -89,7 +89,8 @@
       "properties": {
         "radius_m": { "$ref": "#/$defs/distance", "description": "Distance au bord d'un foyer où la chaleur blesse." },
         "loss_per_s": { "type": "number", "minimum": 0, "maximum": 0.1, "description": "Part des soldats perdue par seconde à pleine intensité." },
-        "morale_per_s": { "type": "number", "minimum": 0, "maximum": 10, "description": "Moral perdu par seconde à pleine intensité." }
+        "morale_per_s": { "type": "number", "minimum": 0, "maximum": 10, "description": "Moral perdu par seconde à pleine intensité." },
+        "wall_walk_factor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de la chaleur qui atteint un régiment sur le chemin de ronde (au-dessus de la rue, derrière le parapet ; lot BR3b)." }
       },
       "required": ["radius_m", "loss_per_s", "morale_per_s"],
       "additionalProperties": false

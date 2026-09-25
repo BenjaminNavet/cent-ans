@@ -1,0 +1,4 @@
+{
+  "description": "Effet des traits sur le moral en bataille (lot EQ-arc, ADR 0051). Une flèche ou un carreau qui touche une troupe montée blesse aussi des chevaux : les montures affolées se cabrent, désarçonnent et refluent dans les rangs (Crécy, Poitiers, Azincourt). En plus de la perte de moral ordinaire, une troupe montée perd ce nombre de points de moral par effectif entier tué par des projectiles.",
+  "mounted_panic_per_loss": 40.0
+}
