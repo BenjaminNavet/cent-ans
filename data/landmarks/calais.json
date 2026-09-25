@@ -4,6 +4,8 @@
   "settlement": "set_calais",
   "period": "vers 1340-1400 (anglaise à partir d'août 1347 : tour de Rysbank vers 1350, Étape des laines 1363)",
   "province": "prov_boulonnais",
+  "siege": {"rotate_deg": 0, "radius_m": 1000, "bank_offset_m": 100, "cut_m": 100, "areas": [], "monuments": ["tour_de_rysbank", "cog_havre_1", "cog_havre_2", "cog_manche"], "battle": {"walls": ["enceinte"], "gate": "Porte de Boulogne", "streets": ["rue_royale", "rue_de_boulogne"]}},
+  "materials": {"houses": {"walls": {"Brick": 0.3, "Plaster": 0.4, "Timber": 0.3}, "roofs": {"Tile": 0.4, "TileOld": 0.3, "Thatch": 0.1, "Slate": 0.2}}},
   "sources": [
     {
       "title": "Plan de Calais et de ses fortifications (Pale de Calais)",

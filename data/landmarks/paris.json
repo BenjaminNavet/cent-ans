@@ -5,6 +5,7 @@
   "period": "vers 1340-1380 (enceinte de Charles V et Bastille selon l'année)",
   "province": "prov_ile_de_france",
   "siege": {
+    "battle": {"walls": ["philippe_auguste_gauche"], "gate": "Porte Saint-Jacques", "streets": ["rue_saint_jacques", "rue_de_la_harpe", "rue_saint_germain", "rue_saint_victor"]},
     "rotate_deg": 27,
     "radius_m": 1000,
     "bank_offset_m": 106,
@@ -42,6 +43,7 @@
       "philippe_auguste_droite"
     ]
   },
+  "materials": {"houses": {"walls": {"Plaster": 0.5, "Timber": 0.35, "Stone": 0.15}, "roofs": {"Tile": 0.45, "TileOld": 0.25, "Slate": 0.3}}, "palette": {"Stone": [0.5, 0.45, 0.35]}},
   "sources": [
     {
       "title": "Plan de Paris, dit plan de Bâle",

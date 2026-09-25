@@ -417,8 +417,13 @@ impl Battlefield {
     /// Siege battles: flattens the ground under and around the town and
     /// clears forests and mud from the town and the attacker's approach.
     pub fn prepare_for_siege(&mut self) {
+        self.prepare_for_siege_around(crate::siege::RING_RADIUS);
+    }
+
+    /// [`Self::prepare_for_siege`] around a ring of `radius` metres (L3: the
+    /// town of a landmark plan may be larger than the generic one).
+    pub fn prepare_for_siege_around(&mut self, radius: f64) {
         let (cx, cz) = crate::siege::TOWN_CENTER;
-        let radius = crate::siege::RING_RADIUS;
         let center_height = self.height(cx, cz);
         for iz in 0..self.nz {
             for ix in 0..self.nx {

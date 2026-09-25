@@ -231,16 +231,24 @@ impl BattleSim {
         let weather = Weather::draw(setup.season, &mut rng);
         let is_siege = setup.siege.is_some();
         let mut field = Battlefield::generate_site(&setup.field_site(), weather, &mut rng);
-        let mut siege = setup
-            .siege
-            .as_ref()
-            .map(|s| SiegeWorks::generate(s.fortification, s.breach, &mut rng));
+        let mut siege = setup.siege.as_ref().map(|s| {
+            SiegeWorks::for_battle(
+                s.fortification,
+                s.breach,
+                setup.siege_layout.as_ref(),
+                &mut rng,
+            )
+        });
         let mut fire = fire::FireSystem::new(seed, is_siege);
         if let Some(works) = siege.as_mut() {
             fire.prepare(works);
         }
-        if is_siege {
-            field.prepare_for_siege();
+        if let Some(works) = siege.as_ref() {
+            field.prepare_for_siege_around(if works.landmark.is_some() {
+                works.outer_radius()
+            } else {
+                crate::siege::RING_RADIUS
+            });
         }
         let mut units = Vec::new();
         for side in SideId::BOTH {

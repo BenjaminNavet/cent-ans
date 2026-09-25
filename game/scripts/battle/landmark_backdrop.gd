@@ -1,16 +1,17 @@
 class_name LandmarkBackdrop
 extends Node3D
 
-## Toile de fond d'une bataille de siège dans une ville emblématique (lot L1, Paris) : la ville
-## assiégée reste celle de la simulation (murailles, maisons-obstacles), le plan historique est
-## posé derrière elle à l'échelle réelle — la Seine au pied de la muraille du fond, l'île de la
-## Cité avec Notre-Dame, la Sainte-Chapelle et le palais, la rive droite et le Louvre.
+## Toile de fond d'une bataille de siège dans une ville emblématique (lot L1, Paris ; L3 : les sept
+## villes) : la ville assiégée vient du cœur (depuis L3, tirée du plan : enceinte, portes, rues ;
+## ADR 0026), ce qui est au-delà de sa muraille du fond est posé derrière elle à l'échelle réelle —
+## à Paris la Seine, l'île de la Cité avec Notre-Dame et la rive droite ; à Londres la Tamise, le
+## pont et Southwark ; à Rouen la Seine et Saint-Sever…
 ## Rendu seulement. Modèle : `landmark_city.py --siege` → `assets/models/landmarks/<id>_siege.glb`
 ## (mètres, origine sur `anchor`, plan tourné de `siege.rotate_deg`, nord vers +Z après pose).
 ## Option de capture : `--landmark-backdrop=<id>` force la toile de fond quelle que soit la province.
 
 const SHADER := preload("res://shaders/landmark.gdshader")
-const HEIGHT_RES := 128
+const HEIGHT_RES := 192
 ## Marge entre la muraille du fond et la berge (m).
 const BANK_MARGIN := 40.0
 
@@ -24,12 +25,17 @@ static func create(setup: Dictionary, siege: Dictionary, height_at: Callable) ->
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--landmark-backdrop="):
 			forced = arg.trim_prefix("--landmark-backdrop=")
-	var province := str(setup.get("province", ""))
+	# L3 : la ville assiégée tirée d'un plan (`siege_layout` du cœur) désigne sa toile de fond ; la
+	# province seule ne suffit plus (le Boulonnais a pour ville Boulogne, pas Calais).
+	var layout: Dictionary = setup.get("siege_layout", {}) if setup.get("siege_layout", {}) is Dictionary else {}
+	var wanted := forced if forced != "" else str(layout.get("id", ""))
+	if wanted == "":
+		return null
 	for plan in LandmarkLibrary.all():
 		var plan_dict: Dictionary = plan
 		if not plan_dict.has("siege"):
 			continue
-		if (forced != "" and str(plan_dict.get("id", "")) == forced) or (forced == "" and province != "" and str(plan_dict.get("province", "")) == province):
+		if str(plan_dict.get("id", "")) == wanted:
 			var path := "res://assets/models/landmarks/%s_siege.glb" % str(plan_dict["id"])
 			if not ResourceLoader.exists(path):
 				return null
@@ -49,7 +55,8 @@ func _setup(plan: Dictionary, model: Node3D, siege: Dictionary, height_at: Calla
 	for piece in siege.get("pieces", []):
 		far_z = maxf(far_z, maxf((piece["a"] as Vector2).y, (piece["b"] as Vector2).y))
 	var bank_z := far_z + BANK_MARGIN
-	position = Vector3(center.x, 0.0, bank_z + float(siege_plan.get("bank_offset_m", 100.0)))
+	# L3 : `center_x_m` recentre la toile de fond (le modèle est tourné de π : x du plan → −x).
+	position = Vector3(center.x + float(siege_plan.get("center_x_m", 0.0)), 0.0, bank_z + float(siege_plan.get("bank_offset_m", 100.0)))
 	rotation.y = PI
 	model.name = "Model"
 	add_child(model)
@@ -58,11 +65,19 @@ func _setup(plan: Dictionary, model: Node3D, siege: Dictionary, height_at: Calla
 	var extent := radius * 2.0
 	var origin := Vector2(position.x - radius, position.z - radius)
 	var image := Image.create(HEIGHT_RES, HEIGHT_RES, false, Image.FORMAT_RF)
+	# L3 : maximum du relief sur le texel (centre et coins), comme la carte de campagne (L2), pour
+	# que l'eau et les quais ne passent pas sous le terrain entre deux échantillons.
+	var cell := extent / HEIGHT_RES
 	for j in HEIGHT_RES:
 		for i in HEIGHT_RES:
-			var x := origin.x + (float(i) + 0.5) / HEIGHT_RES * extent
-			var z := origin.y + (float(j) + 0.5) / HEIGHT_RES * extent
-			image.set_pixel(i, j, Color(float(height_at.call(x, z)) if height_at.is_valid() else 0.0, 0.0, 0.0))
+			var x := origin.x + (float(i) + 0.5) * cell
+			var z := origin.y + (float(j) + 0.5) * cell
+			var h := 0.0
+			if height_at.is_valid():
+				h = float(height_at.call(x, z))
+				for corner in [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(-0.5, 0.5), Vector2(0.5, 0.5)]:
+					h = maxf(h, float(height_at.call(x + corner.x * cell, z + corner.y * cell)))
+			image.set_pixel(i, j, Color(h + 0.3, 0.0, 0.0))
 	var texture := ImageTexture.create_from_image(image)
 	var triangles := 0
 	for child in model.find_children("*", "MeshInstance3D", true, false):

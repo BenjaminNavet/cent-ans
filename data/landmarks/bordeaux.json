@@ -4,6 +4,8 @@
   "settlement": "set_bordeaux",
   "period": "vers 1340-1453, capitale de la Guyenne anglaise (tour Pey-Berland dès 1440)",
   "province": "prov_guyenne",
+  "siege": {"rotate_deg": 79, "radius_m": 1600, "bank_offset_m": -786, "cut_m": -780, "areas": ["la_bastide"], "monuments": ["cog_lune_1", "cog_lune_2", "cog_lune_3", "cog_lune_4"], "battle": {"walls": ["enceinte"], "gate": "Porte Dijeaux", "streets": ["rue_sainte_catherine", "rue_du_loup", "rue_des_ayres"]}},
+  "materials": {"houses": {"walls": {"Stone": 0.55, "Plaster": 0.35, "Timber": 0.1}, "roofs": {"Tile": 0.75, "TileOld": 0.25}}, "palette": {"Stone": [0.58, 0.5, 0.38]}},
   "sources": [
     {
       "title": "Burdegala (Bordeaux), plan cavalier",
