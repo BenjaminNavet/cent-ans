@@ -8,9 +8,16 @@ Branche `worktree-agent-adaa478392d02c5a8`. Suite de SG2 (`docs/wip/sg2-engins.m
   enfoncée en moins de 300 s de pilonnage, murs ≥ 3 × plus longs que la porte à tout niveau.
 - [x] Résistance des ouvrages dans `data/rules/siege_works.json` (schéma
   `siege_works_rules.schema.json`, `SiegeWorkRules::bundled()`), plus de constantes dans le code.
-- [ ] Servants animés (clips V2 : treuil, charge, écouvillon, poussée)
-- [ ] Capture de la bombarde au tir (éclair, fumée, recul)
-- [ ] LOD des engins (maillage simplifié / impostor au loin)
+- [x] Servants : clips V2 `crank`, `haul`, `load`, `swab`, `push` (`battle_skinned_poses.py`,
+  `human.bones.bin` régénéré), figurines `crew_0` (sans arme) et `crew_1` (refouloir `rammer`) ;
+  `game/scripts/battle/siege_crew_fx.gd` (MultiMesh par figurine/clip/camp, mode CUSTOM) piloté par
+  `SiegeEnginesFx` d'après `reload` / `reload_period` ; poussée du bélier et du beffroi ; placement
+  et rôles dans `data/fx/siege_engines.json` (`crew`). Servants rigides de B1 retirés si actif.
+- [ ] Capture de la bombarde au tir (éclair, fumée, recul) — script `game/tests/sg3_siege_shot.gd`
+- [x] LOD : `<modèle>_lod.glb` (siege_engines.py, pièces nommées gardées, ~ 45-70 % des triangles)
+  au-delà de `lod.simple_m` (140 m), pose à 6 Hz et servants cachés au-delà de `lod.far_m` (300 m,
+  = `BattleImpostors.DISTANCE`) ; `SiegeEnginesFx.lod_distances()` pour les préréglages (PF1).
+  Bélier et beffroi (nœuds de `BattleSiege`) non concernés.
 
 ## Équilibre de l'assaut
 
@@ -59,4 +66,4 @@ cède 2 à 5 min après le premier coup, les murs sous deux engins en 4 à 6 min
   du mur sans escalader : défaut de l'IA d'assaut (`plan_siege_attack`), pas de l'équilibre.
 
 ## Prochaine étape
-Servants animés (clips V2).
+Build, import, captures (sg3_siege_shot.gd, Avignon et Bruges), vérifier les poses en jeu.
