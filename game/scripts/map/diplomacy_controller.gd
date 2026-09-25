@@ -113,6 +113,7 @@ func _toggle_mode(target: MapMode) -> void:
 	mode = MapMode.NONE if mode == target else target
 	if mode != MapMode.DIPLOMACY:
 		_clear_relation_markers()
+		_sync_minimap(false)
 	# DP1 (audit A3, C11/U14) : teinte franche sur la carte 3D et légende permanente, que le
 	# panneau de province ne recouvre plus (il est refermé en entrant dans le mode).
 	_set_tint_boost(mode != MapMode.NONE)
@@ -135,6 +136,16 @@ func _province_ids() -> PackedStringArray:
 
 func _color_by_relation() -> void:
 	var ids := _province_ids()
+	# DP2 : positions diplomatiques (allié, accord, neutre, tension, guerre, vassal).
+	if DiplomaticStances.available(map.sim):
+		var stances := DiplomaticStances.stances(map.sim, ids)
+		var stance_colors := PackedColorArray()
+		for key in stances:
+			stance_colors.append(DiplomaticStances.color_of(key))
+		map.terrain.set_province_colors(stance_colors)
+		_place_relation_markers(ids, _symbol_keys(stances))
+		_sync_minimap(true)
+		return
 	var relations: PackedStringArray = map.sim.call("get_province_relations", ids)
 	var colors := PackedColorArray()
 	for relation in relations:
@@ -144,6 +155,35 @@ func _color_by_relation() -> void:
 		colors.append(color)
 	map.terrain.set_province_colors(colors)
 	_place_relation_markers(ids, relations)
+
+
+## DP2 : clés de symbole daltonien (relations U12) des positions diplomatiques.
+func _symbol_keys(stances: PackedStringArray) -> PackedStringArray:
+	var keys := PackedStringArray()
+	for key in stances:
+		keys.append(str(DiplomaticStances.SYMBOL_KEYS.get(key, "")))
+	return keys
+
+
+## DP2 : la minicarte suit le mode « Diplomatie » de la carte (et réciproquement, voir
+## `MinimapController`).
+func _sync_minimap(on: bool) -> void:
+	var minimap: CampaignMinimap = map.ui.get("minimap") if map != null and map.ui != null else null
+	if minimap == null:
+		return
+	if on:
+		minimap.set_diplomacy_colors(DiplomaticStances.colors_for(map.sim, _province_ids()))
+		if minimap.mode != CampaignMinimap.MODE_DIPLOMACY:
+			minimap.set_mode(CampaignMinimap.MODE_DIPLOMACY)
+	elif minimap.mode == CampaignMinimap.MODE_DIPLOMACY:
+		minimap.set_mode(CampaignMinimap.MODE_POLITICAL)
+
+
+## DP2 : entre dans le mode « Diplomatie » ou en sort (bouton de la minicarte).
+func set_diplomacy_mode(on: bool) -> void:
+	if (mode == MapMode.DIPLOMACY) == on:
+		return
+	_toggle_mode(MapMode.DIPLOMACY)
 
 
 ## Lot U12 : en mode daltonien, un symbole par province sur la carte diplomatique (⚔ guerre,
@@ -277,6 +317,9 @@ func _show_legend(target: MapMode) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	var entries: Array = [["self", "Nous"], ["war", "Guerre"], ["truce", "Trêve"], ["alliance", "Alliés"], ["vassal", "Vassaux"], ["peace", "Neutres"]]
+	if diplomacy and DiplomaticStances.available(map.sim):
+		entries = []  # DP2 : légende des positions diplomatiques
+		box.add_child(DiplomaticStances.legend(HudStyle.FONT_BODY, 16.0, false))
 	if not diplomacy:
 		entries = [[Color(0.25, 0.35, 0.70), "Obédience d'Avignon"], [Color(0.80, 0.65, 0.20), "Obédience de Rome"], [Color(0.20, 0.65, 0.25), "Hérésie"], [Color(0.45, 0.45, 0.45), "Autre foi"]]
 	for entry in entries:
@@ -290,7 +333,8 @@ func _show_legend(target: MapMode) -> void:
 		var symbol := Accessibility.relation_symbol(entry[0]) if diplomacy and Accessibility.colorblind() else ""
 		chip.add_child(HudStyle.label(("%s %s" % [symbol, entry[1]]).strip_edges(), HudStyle.FONT_BODY, HudStyle.INK))
 		row.add_child(chip)
-	box.add_child(row)
+	if row.get_child_count() > 0:
+		box.add_child(row)
 	box.add_child(HudStyle.label("Les terres voilées sont hors de vue de vos armées, de vos places et de vos agents.", HudStyle.FONT_SMALL, HudStyle.INK_FADED))
 	map.ui.add_child(_legend)
 	_legend.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 18)
