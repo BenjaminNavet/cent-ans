@@ -652,6 +652,67 @@ après changement de niveau).
 - Les rubans et hameaux ne sont construits que sur les tuiles au niveau proche ou fin (≤ 512 unités de
   la caméra), largement au-delà du champ utile en vue comté.
 
+## Vue d'ensemble ZG : carte zoomable jusqu'à 1-5 m (ADR 0036)
+
+Le chantier ZG rend la carte de campagne zoomable du continent jusqu'au terrain à quelques mètres,
+en trois paliers de relief (1 : 180-90 m, 2 : 45-22 m, 3 : 11-2,8 m sur 34 zones historiques).
+Tout est rendu seulement : aucune règle de jeu ne lit la pyramide.
+
+| Lot | Contenu | Où lire |
+|---|---|---|
+| ZG0 | ADR, manifeste `data/map/relief_pyramid.json`, zones `detail_zones.json`, squelettes | ADR 0036 |
+| ZG1 | Pyramide E1-E4 (`geo pyramid`) | `docs/geo.md`, « Pyramide de relief, paliers 1-2 » |
+| ZG2 | Quadtree streamé, pages de hauteurs, surface côté processeur | ci-dessous, « Relief streamé » |
+| ZG3 / ZG3b | Relief E5-E7 des zones (`geo detail-dem`), correctif du rehaussement | `docs/geo.md`, « Relief palier 3 » |
+| ZG4 / ZG4b | Caméra rapprochée par étage, exagération verticale dynamique ; correctifs de recette | « Caméra rapprochée et exagération verticale » |
+| ZG5a / ZG5b | Fleuves et routes fins, ancrages (données) ; rubans, lit creusé, parcellaire (rendu) | `docs/geo.md`, « Hydrographie fine » ; « Hydrographie fine, routes drapées… » |
+| ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | « Villes ordinaires à l'échelle réelle » |
+| ZG7a / ZG7b | Perf et finitions ; cache absent, export, docs, crédits | ce paragraphe ; `docs/wip/zg7*.md` |
+| ZG8 | Relief local exagéré « façon Total War » | « Relief exagéré façon Total War » |
+
+**Cache du relief fin.** Tuiles E1-E7 et fleuves/routes fins sous `data/map/pyramid/` (≈ 2,8 Go,
+hors git). Une seule commande le régénère dans l'ordre, avec reprise :
+`uv run --project tools cent-ans geo relief-all` (`--check` : ce qui manque ; `docs/geo.md`,
+« Cache du relief fin »). Au chargement de la campagne, `ReliefCacheStatus`
+(`scripts/map/relief_cache_status.gd`) lit le manifeste et cherche sur le disque au plus 24 tuiles
+par étage (réparties, bornes comprises) et autant pour les fleuves et routes fins : états
+`DISABLED` (pas de manifeste listant des tuiles : fixtures, essais), `COMPLETE`, `PARTIAL`,
+`MISSING`. Le résultat est journalisé (`ReliefCache: …`, avertissement si incomplet) et, si le cache
+manque en tout ou partie, `ReliefCacheNotice` (`scripts/map/relief_cache_notice.gd`) affiche sous
+la barre supérieure un avis non bloquant « Relief rapproché limité / incomplet » : ce qui manque, la
+commande (champ sélectionnable, bouton « Copier ») ou, dans le jeu exporté, « réinstallez le jeu
+complet… », et « Fermer ». Une fois par session (`ReliefCacheNotice.shown_this_session`). Ignoré avec
+`--no-pyramid` ou `--pyramid-dir=`. Test : `tests/zg7b_cache_test.gd`.
+
+**Où le jeu cherche le relief** (`MapPaths.relief_root_for`, dossier contenant `pyramid/`) :
+variable `CENT_ANS_RELIEF_DIR`, puis `data/map/` (dépôt ; jeu exporté avec le relief dans
+`Cent Ans.app/Contents/Resources/data/map/pyramid`), puis un dossier « Cent Ans relief » à côté de
+l'application (livraison séparée), puis `user://relief`. `TerrainBuilder` (pyramide) et
+`FineGeoLayer` (fleuves, routes) lisent leurs tuiles sous cette racine ; les manifestes restent dans
+`data/map/`. Export : `CENT_ANS_EXPORT_RELIEF=bundle|external|none tools/export_macos.sh`
+(`cent-ans export-data`, voir l'addendum ZG7b de l'ADR 0036).
+
+**Réglages** (ressources, modifiables sans code) :
+- `resources/close_camera.tres` (`CloseCameraProfile`, ZG4/ZG4b) : distance minimale par étage E0-E7,
+  plancher au-dessus des villes emblématiques (`landmark_min_distance`), exagération verticale loin /
+  près et son pas de quantification, inclinaison, plans de découpe ;
+- `resources/relief_exaggeration.tres` (`ReliefExaggerationProfile`, ZG8) : `enabled`, exagération
+  de près (`near_exaggeration`), gains de relief local (`gain_far`, `gain_near`), calcul du fond de
+  vallée (`floor_*`), roche des falaises (`cliff_slope_*`), soleil de l'ombrage.
+
+**Drapeaux de ligne de commande** (après `--`) :
+- désactiver : `--no-pyramid` (relief E0 seul, comportement d'avant ZG), `--no-fine-geo` (ni
+  fleuves ni routes fins), `--no-towns` (villes ZG6), `--no-relief-exaggeration` (ZG8 → rendu ZG4
+  exact), `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
+- essais : `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--camera-min=N`,
+  `--qt-debug=1|2`, `--fine-debug`, `--town-lod=blocks|detail` ;
+- banc : `--stage=map --hide-armies --bench-map` (panoramique + descentes ; `--bench-distance`,
+  `--bench-seconds`, `--bench-descent-only`, `--bench-towns`), voir « Options, test et banc ».
+
+**Tests headless** : `tests/zg2_quadtree_test.gd`, `zg4_camera_test.gd`, `zg5b_fine_geo_test.gd`,
+`zg6_towns_test.gd`, `zg7b_cache_test.gd`, `zg8_relief_test.gd` (captures : `zg8_relief_shots.gd`),
+tous sans le vrai cache (pyramides factices dans `user://`).
+
 ## Relief streamé : pyramide et quadtree (lot ZG2, ADR 0036)
 
 Quand la pyramide de relief est en cache (`data/map/relief_pyramid.json` + tuiles non versionnées
@@ -1308,6 +1369,29 @@ colonie et le bouton « Garnison » restent. Avec le mock, la carte garde le com
 
 ![Bulle et chemin sur deux tours](img/m4/bulle-chemin.png)
 ![Bord de la bulle, fin de l'étape de ce tour](img/m4/bord-de-bulle.png)
+
+## Vision par rayon (lot M5a)
+
+- Règle (cœur, `sim-campaign/src/vision.rs`) : un point est vu à moins de `vision_army_km` (30) d'une
+  armée amie ou de `vision_settlement_km` (20) d'une colonie tenue (`data/movement/rules.json`) ;
+  alliés, vassaux et suzerains partagent leur vue (`data/rules/vision.json`). Toutes les terres des
+  provinces tenues par la faction ou ses alliés sont vues (`own_provinces_visible`). Une province est
+  visible si `province_seen_percent` (25 %) de ses terres sont vues, si elle contient une colonie
+  vue ou une armée amie, ou si un agent la surveille. La vue est recalculée, jamais sauvegardée
+  (≈ 1 ms par faction en release).
+- Pont : `get_vision(faction)` → `{image (R8 512², 255 = vu, bord doux, vu dès 128), size,
+  texel_px, provinces, armies, seen_share}` ; `get_visible_army_ids`, `is_point_visible` ;
+  `get_visible_provinces` inchangé.
+- Rendu : `MinimapController.refresh_fog` pose la texture sur le terrain
+  (`TerrainBuilder.set_fog_cells`, `terrain.gdshader` : prise filtrée, bord effrangé par un bruit
+  lent, liseré sépia) et sur la minicarte (`CampaignMinimap.set_fog_cells`). Les armées étrangères
+  dont le point n'est pas vu n'ont ni marqueur (`ArmyMarkers.visible_armies`) ni point sur la
+  minicarte. Sans `get_vision` (simulation de repli), l'ancien masque par province reste utilisé.
+- Test : `godot --headless --path game --script res://tests/m5a_vision_ui_test.gd`.
+
+![Avant : brouillard par province](img/m5a/avant-brouillard-province.png)
+![Après : brouillard par case](img/m5a/apres-brouillard-case.png)
+![Lisière du brouillard, gros plan](img/m5a/apres-lisiere-proche.png)
 
 ## Performances mesurées (M4 Pro)
 

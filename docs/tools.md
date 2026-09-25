@@ -180,6 +180,13 @@ Produit `export/Cent Ans.app` (Apple Silicon, ≈ 190 Mo) : build release de la 
 modèle universel, bibliothèque Rust arm64 dans `Contents/Frameworks`), copie de `data/` dans
 `Contents/Resources/data` (lu par `MapPaths` quand `OS.has_feature("template")`), signature ad hoc.
 
+Relief fin (lot ZG7b, ADR 0036) : `cent-ans export-data` (appelé par le script) copie aussi le cache
+`data/map/pyramid/` (≈ 2,8 Go, liens symboliques suivis, clones APFS) selon
+`CENT_ANS_EXPORT_RELIEF` : `bundle` (défaut, dans l'application ; ≈ 3 Go au total), `external`
+(dossier `export/Cent Ans relief/` à poser à côté de l'application) ou `none` (export léger, zoom
+rapproché limité, avis affiché en jeu). Vérifier d'abord le cache :
+`uv run --project tools cent-ans geo relief-all --check`.
+
 Prérequis : modèles d'export Godot 4.7.2 installés dans
 `~/Library/Application Support/Godot/export_templates/4.7.2.stable/` (seul `macos.zip` est nécessaire).
 Le jeu exporté ne peut pas recevoir de scène en argument : `-- --autostart[=fac_x]` lance directement une

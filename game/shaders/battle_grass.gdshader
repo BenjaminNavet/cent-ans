@@ -18,6 +18,9 @@ uniform sampler2D splat_a : filter_linear, repeat_disable;
 uniform sampler2D splat_b : filter_linear, repeat_disable;
 uniform vec4 splat_rect = vec4(-400.0, -400.0, 2000.0, 1600.0);
 uniform vec4 calm_rect = vec4(150.0, 60.0, 1050.0, 740.0);
+// EP6 : parcelles du décor (voir `bt_decor_field`).
+uniform sampler2D decor_fields : filter_nearest, repeat_disable;
+uniform float decor_on = 0.0;
 uniform float spacing = 0.9;
 uniform float radius = 80.0;
 uniform float inner_radius = 0.0; // couche lointaine : vide au centre (couvert par la proche)
@@ -82,6 +85,28 @@ void vertex() {
 		v_tint = mix(v_tint, v_tint * vec3(0.7, 0.86, 0.66), lush * 0.8);
 		height_mul *= mix(1.0, 1.25, lush) * mix(1.0, 0.8, dry);
 		float in_field = outside_calm * (1.0 - sb.g) * field.z;
+		if (decor_on > 0.5) {
+			vec4 df = texture(decor_fields, suv);
+			if (df.a > 0.5) {
+				field = bt_decor_field(df, wp);
+				in_field = field.z;
+				if (field.x == 4.0) {
+					// Semis : herbe courte et claire en rangs.
+					density *= 0.55;
+					height_mul *= 0.45;
+					field.x = 0.0;
+				} else if (field.x == 5.0) {
+					// Vigne : herbe rase entre les rangs.
+					density *= 1.0 - in_field * 0.7;
+					field.x = 0.0;
+				} else if (field.x == 6.0) {
+					// Chaume : tiges courtes et blondes.
+					height_mul *= 0.5;
+					v_tint = mix(v_tint, vec3(1.2, 1.02, 0.62), in_field * 0.8);
+					field.x = 0.0;
+				}
+			}
+		}
 		if (field.x == 1.0) {
 			density *= 1.0 - in_field;
 		} else if (field.x == 2.0) {

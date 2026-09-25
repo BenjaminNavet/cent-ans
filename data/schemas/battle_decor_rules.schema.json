@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_decor_rules.schema.json",
+  "title": "Villages et décor du champ de bataille",
+  "description": "Fichier data/rules/battle_decor.json (lot EP6) : paysages régionaux, saisons, effets du décor sur le terrain, camp et convoi de bagages et pillage du camp. Lu par sim-battle (DecorRules).",
+  "type": "object",
+  "$defs": {
+    "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+    "factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 },
+    "metres": { "type": "number", "exclusiveMinimum": 0, "maximum": 400 },
+    "span": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/metres" },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[minimum, maximum] en mètres."
+    },
+    "size": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/metres" },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[longueur, profondeur] en mètres."
+    },
+    "count": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 30 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[minimum, maximum] (tirage uniforme, bornes comprises)."
+    },
+    "profile": {
+      "type": "object",
+      "description": "Paysage d'une région : composition du décor pour le champ standard (1200 × 800 m).",
+      "properties": {
+        "label": { "type": "string" },
+        "provinces": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^prov_[a-z_]+$" },
+          "description": "Provinces de ce paysage (sinon le paysage du terrain de la province)."
+        },
+        "hamlets": { "$ref": "#/$defs/count" },
+        "farmsteads": { "$ref": "#/$defs/count" },
+        "street_share": { "$ref": "#/$defs/chance", "description": "Part des hameaux en rue (le long d'une route) ; les autres sont groupés autour de l'église." },
+        "stone_share": { "$ref": "#/$defs/chance", "description": "Part des maisons de pierre." },
+        "windmill_chance": { "$ref": "#/$defs/chance" },
+        "watermill_chance": { "$ref": "#/$defs/chance", "description": "Chance d'un moulin à eau quand le champ a une rivière ou un ruisseau." },
+        "manor_chance": { "$ref": "#/$defs/chance" },
+        "moat_chance": { "$ref": "#/$defs/chance", "description": "Chance que le manoir soit entouré d'un fossé en eau." },
+        "vineyards": { "$ref": "#/$defs/count" },
+        "orchards": { "$ref": "#/$defs/count" },
+        "ploughland": { "$ref": "#/$defs/count" },
+        "meadows": { "$ref": "#/$defs/count" },
+        "hedgerows": { "type": "boolean", "description": "Haies bocagères sur tout le champ, même hors terrain de bocage." }
+      },
+      "required": ["label", "provinces", "hamlets", "farmsteads", "street_share", "stone_share", "windmill_chance", "watermill_chance", "manor_chance", "moat_chance", "vineyards", "orchards", "ploughland", "meadows", "hedgerows"],
+      "additionalProperties": false
+    },
+    "season": {
+      "type": "object",
+      "properties": {
+        "haystacks_per_meadow": { "$ref": "#/$defs/count" },
+        "carts": { "$ref": "#/$defs/count", "description": "Charrettes laissées dans les champs et au bord des chemins." },
+        "field_states": {
+          "type": "object",
+          "description": "Poids des états des labours : labouré, semé (blé en herbe), blé mûr, chaume.",
+          "properties": {
+            "ploughed": { "$ref": "#/$defs/chance" },
+            "sown": { "$ref": "#/$defs/chance" },
+            "crop": { "$ref": "#/$defs/chance" },
+            "stubble": { "$ref": "#/$defs/chance" }
+          },
+          "required": ["ploughed", "sown", "crop", "stubble"],
+          "additionalProperties": false
+        },
+        "vines_leafy": { "type": "boolean" },
+        "orchard_blossom": { "type": "boolean" }
+      },
+      "required": ["haystacks_per_meadow", "carts", "field_states", "vines_leafy", "orchard_blossom"],
+      "additionalProperties": false
+    },
+    "effect": {
+      "type": "object",
+      "description": "Effet d'une zone du décor sur un régiment dont le centre s'y trouve.",
+      "properties": {
+        "cover": { "$ref": "#/$defs/factor", "description": "Multiplicateur des pertes par les traits." },
+        "foot_speed": { "$ref": "#/$defs/factor" },
+        "horse_speed": { "$ref": "#/$defs/factor" },
+        "defense": { "$ref": "#/$defs/factor", "description": "Diviseur des pertes en mêlée du régiment qui s'y trouve." },
+        "breaks_charge": { "type": "boolean", "description": "Une charge de cavalerie contre un régiment qui s'y trouve se brise." },
+        "wet_speed": { "$ref": "#/$defs/factor", "description": "Multiplicateur de vitesse supplémentaire sous la pluie ou sur sol détrempé (labours boueux)." }
+      },
+      "required": ["cover", "foot_speed", "horse_speed", "defense", "breaks_charge"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "default_profile": { "type": "string" },
+    "terrain_profiles": {
+      "type": "object",
+      "description": "Paysage par défaut selon le terrain de la province.",
+      "properties": {
+        "plains": { "type": "string" },
+        "heath": { "type": "string" },
+        "bocage": { "type": "string" },
+        "forest": { "type": "string" },
+        "hills": { "type": "string" },
+        "mountains": { "type": "string" },
+        "marsh": { "type": "string" }
+      },
+      "required": ["plains", "heath", "bocage", "forest", "hills", "mountains", "marsh"],
+      "additionalProperties": false
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/profile" },
+      "minProperties": 1
+    },
+    "seasons": {
+      "type": "object",
+      "properties": {
+        "spring": { "$ref": "#/$defs/season" },
+        "summer": { "$ref": "#/$defs/season" },
+        "autumn": { "$ref": "#/$defs/season" },
+        "winter": { "$ref": "#/$defs/season" }
+      },
+      "required": ["spring", "summer", "autumn", "winter"],
+      "additionalProperties": false
+    },
+    "effects": {
+      "type": "object",
+      "properties": {
+        "hamlet": { "$ref": "#/$defs/effect" },
+        "church": { "$ref": "#/$defs/effect" },
+        "manor": { "$ref": "#/$defs/effect" },
+        "farmstead": { "$ref": "#/$defs/effect" },
+        "orchard": { "$ref": "#/$defs/effect" },
+        "vineyard": { "$ref": "#/$defs/effect" },
+        "ploughland": { "$ref": "#/$defs/effect" },
+        "meadow": { "$ref": "#/$defs/effect" },
+        "camp": { "$ref": "#/$defs/effect" }
+      },
+      "required": ["hamlet", "church", "manor", "farmstead", "orchard", "vineyard", "ploughland", "meadow", "camp"],
+      "additionalProperties": false
+    },
+    "placement": {
+      "type": "object",
+      "properties": {
+        "road_margin_m": { "$ref": "#/$defs/metres", "description": "Écart minimal entre un bâtiment ou une parcelle et le bord d'une route." },
+        "water_margin_m": { "$ref": "#/$defs/metres" },
+        "bridge_margin_m": { "$ref": "#/$defs/metres", "description": "Rien n'est posé à moins de cette distance d'un pont ou d'un gué." },
+        "house_gap_m": { "$ref": "#/$defs/metres" },
+        "street_spacing_m": { "$ref": "#/$defs/span", "description": "Pas entre deux maisons le long de la rue d'un hameau en rue." },
+        "hamlet_houses": { "$ref": "#/$defs/count" },
+        "farmstead_houses": { "$ref": "#/$defs/count" },
+        "plot_size_m": {
+          "type": "object",
+          "properties": {
+            "vineyard": { "$ref": "#/$defs/span" },
+            "orchard": { "$ref": "#/$defs/span" },
+            "ploughland": { "$ref": "#/$defs/span" },
+            "meadow": { "$ref": "#/$defs/span" }
+          },
+          "required": ["vineyard", "orchard", "ploughland", "meadow"],
+          "additionalProperties": false
+        },
+        "prop_size_m": {
+          "type": "object",
+          "description": "Emprise (longueur, profondeur) des accessoires du décor, celle des modèles du kit.",
+          "properties": {
+            "haystack": { "$ref": "#/$defs/size" },
+            "cart": { "$ref": "#/$defs/size" },
+            "tent": { "$ref": "#/$defs/size" },
+            "pavilion": { "$ref": "#/$defs/size" },
+            "wagon": { "$ref": "#/$defs/size" },
+            "campfire": { "$ref": "#/$defs/size" },
+            "graves": { "$ref": "#/$defs/size" },
+            "well": { "$ref": "#/$defs/size" },
+            "woodpile": { "$ref": "#/$defs/size" }
+          },
+          "required": ["haystack", "cart", "tent", "pavilion", "wagon", "campfire", "graves", "well", "woodpile"],
+          "additionalProperties": false
+        },
+        "mound_radius_m": { "$ref": "#/$defs/metres", "description": "Butte du moulin à vent (quand il n'est pas sur une hauteur)." },
+        "mound_height_m": { "$ref": "#/$defs/metres" },
+        "churchyard_margin_m": { "$ref": "#/$defs/metres" },
+        "moat_width_m": { "$ref": "#/$defs/metres" },
+        "moat_margin_m": { "$ref": "#/$defs/metres" }
+      },
+      "required": ["road_margin_m", "water_margin_m", "bridge_margin_m", "house_gap_m", "street_spacing_m", "hamlet_houses", "farmstead_houses", "plot_size_m", "prop_size_m", "mound_radius_m", "mound_height_m", "churchyard_margin_m", "moat_width_m", "moat_margin_m"],
+      "additionalProperties": false
+    },
+    "camp": {
+      "type": "object",
+      "description": "Camp et convoi de bagages derrière chaque armée ; un ennemi qui tient le camp sans garde le pille.",
+      "properties": {
+        "width_m": { "$ref": "#/$defs/metres" },
+        "depth_m": { "$ref": "#/$defs/metres" },
+        "setback_m": { "$ref": "#/$defs/metres", "description": "Distance du centre du camp au bord arrière du champ." },
+        "tents": { "$ref": "#/$defs/count" },
+        "pavilions": { "$ref": "#/$defs/count" },
+        "wagons": { "$ref": "#/$defs/count" },
+        "fires": { "$ref": "#/$defs/count" },
+        "horse_lines": { "$ref": "#/$defs/count" },
+        "horses_per_line": { "$ref": "#/$defs/count" },
+        "convoy_wagons": { "$ref": "#/$defs/count" },
+        "loot_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 600, "description": "Secondes de présence ennemie sans garde pour piller le camp." },
+        "guard_radius_m": { "$ref": "#/$defs/metres", "description": "Un régiment ami en état de combattre à cette distance du camp le garde." },
+        "decay_per_second": { "type": "number", "minimum": 0, "maximum": 1, "description": "Retour du pillage en cours (fraction par seconde) quand le camp est gardé ou vide." },
+        "looted_morale": { "type": "number", "minimum": 0, "maximum": 100, "description": "Moral perdu par tous les régiments du camp pillé." },
+        "alarm_morale": { "type": "number", "minimum": 0, "maximum": 100, "description": "Moral perdu une fois quand l'ennemi entre dans le camp." },
+        "looter_fatigue": { "type": "number", "minimum": 0, "maximum": 100, "description": "Fatigue gagnée par les pillards (charge du butin)." }
+      },
+      "required": ["width_m", "depth_m", "setback_m", "tents", "pavilions", "wagons", "fires", "horse_lines", "horses_per_line", "convoy_wagons", "loot_seconds", "guard_radius_m", "decay_per_second", "looted_morale", "alarm_morale", "looter_fatigue"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["default_profile", "terrain_profiles", "profiles", "seasons", "effects", "placement", "camp"],
+  "additionalProperties": false
+}

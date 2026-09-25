@@ -373,7 +373,9 @@ func _plant_stakes(unit: Dictionary) -> void:
 			var p := front + right * lateral + fwd * (row * 0.8) + right * _rng.randf_range(-0.15, 0.15)
 			p.y = _h(p.x, p.z)
 			# Pieu pointé vers l'ennemi, planté à ~40° (pointe à hauteur de poitrail).
-			var basis := Basis(right, deg_to_rad(50.0 + _rng.randf_range(-6, 6))) * Basis(Vector3.UP, facing)
+			# EP6 : pieux inégaux, un peu de travers (plantés à la main).
+			var basis := Basis(right, deg_to_rad(50.0 + _rng.randf_range(-6, 6))) * Basis(Vector3.UP, facing + _rng.randf_range(-0.12, 0.12))
+			basis = basis.scaled(Vector3.ONE * _rng.randf_range(0.88, 1.1))
 			_add_fieldwork(_stakes, Transform3D(basis, p), Color(1, 1, 1))
 
 
@@ -504,11 +506,49 @@ static func _stuck_mesh() -> ArrayMesh:
 
 ## Pieu d'archer : perche épointée de 1,8 m, base à l'origine, le long de +Y (inclinée par la
 ## transformée).
+## EP6 : pieu d'archer taillé dans un jeune tronc : fût hexagonal écorcé (brun, nœuds plus
+## sombres), pointe taillée à la hache (bois clair frais), bout enfoncé en terre plus sombre.
 static func _stake_mesh() -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	BattleMeshes.add_box(st, Vector3(0, 0.8, 0), Vector3(0.07, 1.6, 0.07), Color(0.42, 0.32, 0.2))
-	BattleMeshes.add_box(st, Vector3(0, 1.68, 0), Vector3(0.035, 0.16, 0.035), Color(0.62, 0.52, 0.36))
+	var sides := 6
+	var radius := 0.055
+	var rings := [[-0.25, 0.058, Color(0.22, 0.17, 0.11)], [0.05, 0.056, Color(0.3, 0.23, 0.15)], [0.6, 0.054, Color(0.4, 0.3, 0.19)], [1.0, 0.05, Color(0.36, 0.27, 0.17)], [1.42, 0.047, Color(0.42, 0.32, 0.2)], [1.5, 0.045, Color(0.66, 0.55, 0.38)]]
+	for r in rings.size() - 1:
+		var y0: float = rings[r][0]
+		var y1: float = rings[r + 1][0]
+		var r0: float = rings[r][1]
+		var r1: float = rings[r + 1][1]
+		var c0: Color = rings[r][2]
+		var c1: Color = rings[r + 1][2]
+		for k in sides:
+			var a0 := TAU * float(k) / float(sides)
+			var a1 := TAU * float(k + 1) / float(sides)
+			# Écorce irrégulière : une face sur deux un peu plus sombre.
+			var shade := 0.88 if k % 2 == 0 else 1.0
+			var p00 := Vector3(cos(a0) * r0, y0, sin(a0) * r0)
+			var p01 := Vector3(cos(a1) * r0, y0, sin(a1) * r0)
+			var p10 := Vector3(cos(a0) * r1, y1, sin(a0) * r1)
+			var p11 := Vector3(cos(a1) * r1, y1, sin(a1) * r1)
+			var n := Vector3(cos((a0 + a1) * 0.5), 0.0, sin((a0 + a1) * 0.5))
+			for v in [[p00, c0], [p10, c1], [p11, c1], [p00, c0], [p11, c1], [p01, c0]]:
+				st.set_normal(n)
+				st.set_color((v[1] as Color) * shade)
+				st.add_vertex(v[0])
+	# Pointe taillée en quatre facettes décalées (coups de hache), bois frais.
+	var tip := Vector3(0.012, 1.86, -0.008)
+	var base_y := 1.5
+	var fresh := Color(0.74, 0.62, 0.43)
+	for k in sides:
+		var a0 := TAU * float(k) / float(sides)
+		var a1 := TAU * float(k + 1) / float(sides)
+		var p0 := Vector3(cos(a0) * 0.045, base_y, sin(a0) * 0.045)
+		var p1 := Vector3(cos(a1) * 0.045, base_y, sin(a1) * 0.045)
+		var n := (p1 - p0).cross(tip - p0).normalized() * -1.0
+		for v in [p0, tip, p1]:
+			st.set_normal(n)
+			st.set_color(fresh * (0.9 if k % 2 == 0 else 1.05))
+			st.add_vertex(v)
 	return st.commit()
 
 

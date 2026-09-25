@@ -50,6 +50,11 @@ var selected_army: String = ""
 ## Brouillard (lot C1) : provinces hors de vue (id → true) ; les armées étrangères qui s'y
 ## trouvent ne reçoivent pas de marqueur. Rempli par `MinimapController.refresh_fog`.
 var hidden_provinces: Dictionary = {}
+## Lot M5a : armées montrées au joueur (id → true, vue par case de la simulation). Quand
+## `army_filter_active`, ce filtre remplace `hidden_provinces` pour les armées : une armée
+## étrangère n'a de marqueur que si son point est vu.
+var visible_armies: Dictionary = {}
+var army_filter_active: bool = false
 ## Q2 : zones des grandes villes détaillées L1-L3 (`SettlementLayer.landmark_zones()`,
 ## (x, z, rayon) en pixels de carte) ; une armée stationnée dans l'une d'elles se tient devant
 ## ses murs plutôt qu'au milieu de la maquette (lisible et cliquable séparément).
@@ -114,8 +119,12 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		# C4 : l'armée se tient sur une colonie ; sa position est celle de la colonie
 		# (couche C6, sinon `settlements_px.json`), à défaut le centroïde de sa province.
 		var location: String = str(army.get("location_province", army.get("location", "")))
-		if hidden_provinces.has(location) and str(army.get("faction", "")) != player_faction:
-			continue
+		if str(army.get("faction", "")) != player_faction:
+			if army_filter_active:
+				if not visible_armies.has(str(army_id)):
+					continue
+			elif hidden_provinces.has(location):
+				continue
 		# Lot M4 : une armée en campagne se tient à sa position libre ; seules les armées
 		# stationnées dans une colonie s'empilent sur celle-ci.
 		var in_field := army.has("position") and str(army.get("settlement", "")) == ""

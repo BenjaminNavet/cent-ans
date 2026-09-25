@@ -6,6 +6,7 @@ members = [
     "crates/sim-battle",
     "crates/ai",
     "crates/godot-bridge",
+    "crates/vegetation",
 ]
 
 [workspace.package]
@@ -35,6 +36,9 @@ opt-level = 2
 [profile.dev.package."*"]
 opt-level = 3
 [profile.dev.package.data-model]
+opt-level = 3
+# Lot PB2: vegetation tile scattering (millions of scalar operations per tile).
+[profile.dev.package.vegetation]
 opt-level = 3
 [profile.dev.package.png]
 opt-level = 3
