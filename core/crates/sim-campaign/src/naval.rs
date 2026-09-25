@@ -812,7 +812,28 @@ impl CampaignState {
         interceptor: &FactionId,
     ) -> Option<usize> {
         self.naval.ensure(data);
-        let from = self.armies.get(army)?.settlement().cloned()?;
+        let mut from = self.armies.get(army)?.settlement().cloned();
+        if from
+            .as_ref()
+            .and_then(|f| crossing_sea(self, data, f, to_port))
+            .is_none()
+        {
+            // Debug staging: move the army to a friendly port facing `to_port`.
+            let faction = self.armies.get(army)?.faction.clone();
+            let port = data
+                .movement_graph
+                .adjacency
+                .iter()
+                .find(|(f, edges)| {
+                    self.is_friendly_settlement(&faction, f)
+                        && edges.iter().any(|e| e.sea && &e.to == to_port)
+                })
+                .map(|(f, _)| f.clone())?;
+            self.armies.get_mut(army)?.position =
+                crate::state::ArmyPosition::Settlement(port.clone());
+            from = Some(port);
+        }
+        let from = from?;
         let sea = crossing_sea(self, data, &from, to_port)?;
         let squadron = squadron(self, interceptor, &data.naval.rules);
         if squadron.is_empty() {
