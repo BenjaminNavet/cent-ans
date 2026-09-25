@@ -129,7 +129,7 @@ fn ai_handles_sixty_regiments_a_side() {
     let mut melee_seen = 0usize;
     while !sim.is_finished() && sim.elapsed() < 1800.0 {
         sim.step();
-        if sim.ticks() % 100 == 0 {
+        if sim.ticks().is_multiple_of(100) {
             melee_seen = melee_seen.max(
                 sim.units()
                     .iter()
