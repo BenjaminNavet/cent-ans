@@ -21,7 +21,11 @@ Layers, in order (costs from ``data/movement/rules.json``):
 5. **Crossings** that reopen the major rivers: bridges and fords of
    ``crossings.json`` (river cells within :data:`CROSSING_RADIUS` of the
    nearest cell of the named river) and crossings of an Itiner-e road
-   (short overlaps of the road raster with a major river).
+   (short overlaps of the road raster with a major river) that lie within
+   ``road_crossing_radius_km`` of a settlement or of a ``crossings.json``
+   bridge or ford (lot M5b: a Roman road crossing far from any town is not a
+   plausible bridge in 1337). The pieces of one river whose ends are closer
+   than :data:`RIVER_GAP_JOIN_PX` are joined (lower Saône).
 6. **Passes** of ``crossings.json``: the least-cost path along the route
    points ignores the slope limit and is forced passable (mountain cost).
 7. **Water** (sea at or below 0 m, lakes of the land mask): impassable.
@@ -71,11 +75,13 @@ MAJOR_RIVERS: dict[str, tuple[str, ...]] = {
     "meuse": ("Maas",),
     "scheldt": ("Schelde",),
     "dordogne": ("Dordogne",),
-    "saone": ("Saône",),
+    # "Sane": the lower Saône (Chalon to Lyon) in rivers.geojson, name mangled.
+    "saone": ("Saône", "Sane"),
     "po": ("Po",),
     "tagus": ("Tajo", "Tejo"),
     "ebro": ("Ebro",),
     "danube": ("Danube", "Donau"),
+    "somme": ("Somme",),
 }
 # French names used by crossings.json -> major river key.
 RIVER_FR: dict[str, str] = {
@@ -93,6 +99,7 @@ RIVER_FR: dict[str, str] = {
     "Tage": "tagus",
     "Èbre": "ebro",
     "Danube": "danube",
+    "Somme": "somme",
 }
 
 # Terrain classification (cell = 1.44 km; slope = rise / run on that grid).
@@ -110,6 +117,7 @@ MARSH_TERRAIN = "marsh"
 CROSSING_SNAP_CELLS = 8  # search radius for the named river around a bridge
 CROSSING_RADIUS = 1  # river cells reopened around the snapped cell (Chebyshev)
 ROAD_CROSSING_MAX_CELLS = 6  # larger road/river overlaps = road along the river
+RIVER_GAP_JOIN_PX = 20.0  # join the ends of two pieces of one river closer than this
 ROAD_SOURCE = "itiner-e"
 PASS_WINDOW_CELLS = 30
 PASS_SLOPE_PENALTY = 3.0  # cost multiplier of too-steep cells for the pass search
@@ -144,6 +152,7 @@ class NavgridLayers:
     road_crossings: int
     settlement_cells: dict[str, tuple[int, int]]
     ports: set[str]
+    road_crossings_dropped: int = 0
 
 
 @dataclass
@@ -156,6 +165,7 @@ class NavgridResult:
     passable_fraction: float = 0.0
     crossings_used: int = 0
     road_crossings: int = 0
+    road_crossings_dropped: int = 0
     passes: int = 0
     seconds: float = 0.0
     warnings: list[str] = field(default_factory=list)
@@ -286,6 +296,42 @@ def road_river_crossings(road: np.ndarray, major: np.ndarray) -> np.ndarray:
     keep = sizes <= ROAD_CROSSING_MAX_CELLS
     keep[0] = False
     return keep[labels]
+
+
+def near_anchors(
+    candidates: np.ndarray, anchors: np.ndarray, radius_cells: float
+) -> tuple[np.ndarray, int]:
+    """Components of ``candidates`` with a cell within ``radius_cells`` of ``anchors``.
+
+    Returns the kept cells and the number of dropped components.
+    """
+    labels, count = ndimage.label(candidates, structure=EIGHT)
+    if count == 0:
+        return candidates.copy(), 0
+    if not anchors.any():
+        return np.zeros_like(candidates), count
+    distance = ndimage.distance_transform_edt(~anchors)
+    nearest = ndimage.minimum(distance, labels, index=np.arange(1, count + 1))
+    keep = np.concatenate(([False], np.asarray(nearest) <= radius_cells))
+    return keep[labels], int(count - keep.sum())
+
+
+def join_river_gaps(lines: list, max_gap: float = RIVER_GAP_JOIN_PX) -> list:
+    """``lines`` plus a straight segment between close ends of two different pieces."""
+    ends = []
+    for index, line in enumerate(lines):
+        for part in getattr(line, "geoms", [line]):
+            coords = list(part.coords)
+            ends.extend([(index, coords[0]), (index, coords[-1])])
+    joins = []
+    for a, (i, p) in enumerate(ends):
+        for j, q in ends[a + 1 :]:
+            if i == j:
+                continue
+            gap = float(np.hypot(p[0] - q[0], p[1] - q[1]))
+            if 0.0 < gap <= max_gap:
+                joins.append(shapely.geometry.LineString([p, q]))
+    return lines + joins
 
 
 def snap_to_river(
@@ -461,7 +507,9 @@ def compute(
     )
     for index, key in enumerate(keys, start=1):
         mask = four_connected(
-            rasterize_lines(major_lines[key], size, scale, all_touched=True)
+            rasterize_lines(
+                join_river_gaps(major_lines[key]), size, scale, all_touched=True
+            )
         )
         major[mask & (major == 0)] = index
     river = four_connected(major > 0)
@@ -489,11 +537,17 @@ def compute(
     cost = apply_roads(cost, road, rules["road_cost_factor"])
 
     # Reopened river cells keep their terrain (and road) cost.
-    reopened = road_river_crossings(itinere, major)
-    road_crossings = int(ndimage.label(reopened, structure=EIGHT)[1])
+    road_open = road_river_crossings(itinere, major)
+    reopened = np.zeros_like(road_open)
     crossings = []
     grid_scale = scale
     map_grid = settlements.provinces_step.load_grid(map_dir)
+    positions = json.loads(
+        (map_dir / settlements.POSITIONS_FILE).read_text(encoding="utf-8")
+    )
+    settlement_cells = {
+        sid: to_cell(x, y, grid_scale, size) for sid, (x, y) in positions.items()
+    }
     for entry in load_crossings(crossings_path):
         px, py = _lonlat_to_pixel(map_grid, *entry["lonlat"])
         crossing = Crossing(
@@ -518,6 +572,19 @@ def compute(
         crossing.applied = True
         for cell in crossing.cells:
             reopened[cell] = True
+    # Itiner-e crossings near a settlement or a known bridge or ford only.
+    anchors = reopened.copy()
+    for cell in settlement_cells.values():
+        anchors[cell] = True
+    radius_km = rules.get("road_crossing_radius_km")
+    if radius_km is None:
+        road_dropped = 0
+    else:
+        road_open, road_dropped = near_anchors(
+            road_open, anchors, radius_km * 1000.0 / meters_per_cell
+        )
+    road_crossings = int(ndimage.label(road_open & ~reopened, structure=EIGHT)[1])
+    reopened |= road_open
     cost = np.where(river & ~reopened, IMPASSABLE, cost)
 
     # Passes: forced passable along their route (mountain cost at most).
@@ -542,12 +609,6 @@ def compute(
                 cost[cell] = mountains
 
     cost[water] = IMPASSABLE
-    positions = json.loads(
-        (map_dir / settlements.POSITIONS_FILE).read_text(encoding="utf-8")
-    )
-    settlement_cells = {
-        sid: to_cell(x, y, grid_scale, size) for sid, (x, y) in positions.items()
-    }
     plains = float(rules["terrain_costs"]["plains"])
     for cell in settlement_cells.values():
         cost[cell] = plains
@@ -562,6 +623,7 @@ def compute(
         road_crossings=road_crossings,
         settlement_cells=settlement_cells,
         ports=_ports(),
+        road_crossings_dropped=road_dropped,
     )
 
 
@@ -719,6 +781,7 @@ def build(
             1 for c in layers.crossings if c.applied and c.type != "pass"
         ),
         road_crossings=layers.road_crossings,
+        road_crossings_dropped=layers.road_crossings_dropped,
         passes=sum(1 for c in layers.crossings if c.applied and c.type == "pass"),
         seconds=time.perf_counter() - started,
         warnings=warnings,

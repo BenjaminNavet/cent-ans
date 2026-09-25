@@ -17,10 +17,10 @@ const HOTKEYS := [KEY_Z, KEY_X, KEY_V, KEY_B, KEY_N]
 const ICON_DIR := "res://assets/ui/orders/"
 ## Repli quand l'icône PNG n'existe pas : un glyphe par nature d'ordre.
 const GLYPHS := {"war_cry": "✠", "rally": "⚑", "dismount": "♞", "pavise": "▮", "no_quarter": "⚔"}
-## Au-dessus du bandeau des cartes d'unités de `battle_hud.gd` (panneau haut de 182 px) et de sa
+## Au-dessus du bandeau compact des cartes d'unités de `battle_hud.gd` (UB1 : `BAND_HEIGHT`) et de sa
 ## ligne d'aide.
-const BOTTOM_MARGIN := 216.0
-const BUTTON_SIZE := Vector2(108, 62)
+const BOTTOM_MARGIN := BattleHud.BAND_HEIGHT + 16.0
+const BUTTON_SIZE := Vector2(96, 54)
 
 var scene: Node = null  # BattleScene
 var panel: PanelContainer

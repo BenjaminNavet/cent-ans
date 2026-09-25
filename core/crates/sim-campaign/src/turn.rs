@@ -38,6 +38,9 @@ impl CampaignState {
         P: Fn(&CampaignState, &GameData, &FactionId) -> Vec<Order>,
     {
         let mut events = Vec::new();
+        // UI audit A3 (U3): purses before the turn, for the budget history.
+        let purses = self.purses();
+        let resolved_turn = self.turn;
 
         // 1. The player's turn is over. His battles still pending are
         // auto-resolved first (M7).
@@ -58,6 +61,7 @@ impl CampaignState {
         }
 
         self.resolve_end_of_turn(data, &mut events);
+        self.record_budget_history(&purses, resolved_turn);
         (events, timings)
     }
 

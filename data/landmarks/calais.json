@@ -1,0 +1,210 @@
+{
+  "id": "calais",
+  "name": "Calais",
+  "settlement": "set_calais",
+  "period": "vers 1340-1400 (anglaise à partir d'août 1347 : tour de Rysbank vers 1350, Étape des laines 1363)",
+  "province": "prov_boulonnais",
+  "sources": [
+    {
+      "title": "Plan de Calais et de ses fortifications (Pale de Calais)",
+      "author": "Cartographes anglais du XVIe siècle (British Library, Cotton Augustus I)",
+      "date": "vers 1540",
+      "url": "https://commons.wikimedia.org/wiki/Category:Old_maps_of_Calais",
+      "license": "Domaine public",
+      "use": "Enceinte rectangulaire et fossés, château à l'ouest, havre entre la ville et le Rysbank, tour du Guet, Notre-Dame, marais."
+    },
+    {
+      "title": "Chroniques (siège de Calais, 1346-1347)",
+      "author": "Jean Froissart",
+      "date": "XIVe siècle (éd. Kervyn de Lettenhove, 1867-1877)",
+      "url": "https://fr.wikisource.org/wiki/Chroniques_(Froissart)",
+      "license": "Domaine public",
+      "use": "Ville close de doubles fossés, château, havre ; reddition du 3 août 1347."
+    },
+    {
+      "title": "OpenStreetMap (trait de côte, bassins et canaux de Calais-Nord, tour du Guet, Notre-Dame, fort Risban, place d'Armes)",
+      "author": "Contributeurs d'OpenStreetMap",
+      "date": "2026",
+      "url": "https://www.openstreetmap.org/copyright",
+      "license": "ODbL 1.0 (contrôle de position ; une vingtaine de points arrondis à la main)",
+      "use": "Contour de l'île de Calais-Nord (tracé de l'enceinte médiévale), positions des monuments, côte à l'ouest du port (le port moderne gagné sur la mer est ignoré)."
+    }
+  ],
+  "anchor": {
+    "lonlat": [1.851, 50.96257],
+    "px": [2198.078, 1594.409],
+    "north_bearing_deg": 6.35
+  },
+  "scale": {
+    "center_meters_per_unit": 160,
+    "core_radius_m": 1200,
+    "core_radius_px": 4.5,
+    "zone_radius_px": 5.3,
+    "monument_scale": 1.9,
+    "house_scale": 1.5,
+    "height_scale": 1.25
+  },
+  "waters": [
+    {
+      "id": "havre",
+      "name": "Havre de Calais",
+      "kind": "harbour",
+      "polygon": [[-550, -60], [650, -60], [720, 60], [400, 160], [160, 190], [160, 310], [20, 310], [20, 130], [-150, 60], [-450, 30]]
+    }
+  ],
+  "areas": [
+    {
+      "id": "ville",
+      "name": "La ville close",
+      "kind": "built",
+      "density": 0.9,
+      "polygon": [[-480, -95], [-470, -420], [-520, -540], [-391, -818], [-180, -880], [372, -873], [600, -612], [720, -453], [650, -150], [590, -75], [300, -80], [0, -80]]
+    },
+    {
+      "id": "faubourg_sud",
+      "name": "Faubourg (Saint-Pierre)",
+      "kind": "built",
+      "density": 0.2,
+      "polygon": [[-300, -1000], [400, -1000], [700, -1200], [400, -1500], [-200, -1400]]
+    }
+  ],
+  "open_spaces": [
+    {
+      "id": "place_d_armes",
+      "name": "Grand-Place (marché)",
+      "kind": "square",
+      "polygon": [[-146, -407], [67, -379], [60, -275], [-146, -330]]
+    },
+    {
+      "id": "rysbank",
+      "name": "Le Rysbank (banc de sable)",
+      "kind": "meadow",
+      "polygon": [[-700, 40], [-150, 70], [20, 140], [20, 300], [-400, 300], [-700, 230]]
+    },
+    {
+      "id": "dunes_est",
+      "name": "Dunes et grève",
+      "kind": "meadow",
+      "polygon": [[160, 200], [400, 170], [1300, 330], [2500, 600], [2500, 700], [1300, 430], [400, 250], [160, 300]]
+    }
+  ],
+  "walls": [
+    {
+      "id": "enceinte",
+      "name": "Enceinte et doubles fossés",
+      "points": [[-480, -95], [-470, -420], [-520, -540], [-391, -818], [-180, -880], [372, -873], [600, -612], [720, -453], [650, -150], [590, -75], [300, -80], [0, -80]],
+      "closed": true,
+      "height_m": 10,
+      "tower_spacing_m": 75,
+      "tower_shape": "round",
+      "ditch": true,
+      "gates": [
+        { "name": "Porte du Havre (Lanterngate)", "at": [0, -80] },
+        { "name": "Porte de Boulogne", "at": [-470, -420] },
+        { "name": "Porte de Milk", "at": [372, -873] },
+        { "name": "Porte de Gravelines", "at": [720, -453] }
+      ]
+    }
+  ],
+  "streets": [
+    { "id": "rue_royale", "name": "Grand-rue (du havre au marché)", "points": [[-20, -80], [-40, -300], [-50, -600], [-30, -870]], "width_m": 12 },
+    { "id": "rue_de_boulogne", "name": "Rue de Boulogne", "points": [[-470, -420], [-146, -390], [67, -379], [400, -420], [720, -453]], "width_m": 11 },
+    { "id": "route_de_boulogne", "name": "Chaussée vers Guînes et Boulogne", "points": [[-470, -420], [-900, -700], [-1500, -1500], [-2200, -2600]], "width_m": 9 },
+    { "id": "route_de_gravelines", "name": "Chaussée vers Gravelines", "points": [[720, -453], [1300, -700], [2300, -1000], [3500, -1200]], "width_m": 9 }
+  ],
+  "monuments": [
+    {
+      "id": "chateau",
+      "name": "Château de Calais (Philippe Hurepel, 1229)",
+      "model": "castle",
+      "at": [-400, -300],
+      "angle_deg": 0,
+      "scale": 1.5,
+      "clear_radius_m": 70,
+      "params": {
+        "rings": [
+          { "points": [[-40, -38], [40, -38], [42, 36], [-40, 38]], "height": 11, "thick": 3.5, "tower_radius": 6, "tower_height": 18, "tower_shape": "round", "tower_roof": "cone", "extra_towers": 1 }
+        ],
+        "moat": { "points": [[-40, -38], [40, -38], [42, 36], [-40, 38]], "width": 14 },
+        "keep": { "shape": "round", "at": [-12, 8], "size": 10, "height": 30, "roof": "cone" },
+        "halls": [[18, -20, 36, 10, 11, 0]],
+        "gates": [[40, 0, 90]]
+      },
+      "description": "Château à l'ouest de la ville, sur le havre ; remplacé par la citadelle en 1560."
+    },
+    {
+      "id": "tour_du_guet",
+      "name": "Tour du Guet",
+      "model": "belfry",
+      "at": [40, -300],
+      "scale": 1.6,
+      "clear_radius_m": 15,
+      "params": { "stages": [{ "size": 9, "height": 24 }, { "size": 8, "height": 36, "shape": "octagon" }], "top": "lantern", "top_m": 10, "turrets": false, "clock": false },
+      "description": "Tour de guet du XIIIe siècle sur la grand-place, signal pour les navires."
+    },
+    {
+      "id": "notre_dame",
+      "name": "Église Notre-Dame",
+      "model": "gothic_cathedral",
+      "at": [163, -499],
+      "angle_deg": 0,
+      "scale": 1.5,
+      "clear_radius_m": 45,
+      "params": {
+        "length_m": 70, "nave_half": 5, "aisle_half": 11, "vault_m": 16, "ridge_m": 23, "aisle_wall_m": 8,
+        "east": "flat", "transept_m": 34, "transept_x": 8, "bays": 7, "flyers": false,
+        "crossing": { "height": 40, "size": 10 }
+      },
+      "description": "Grande église à tour de croisée, agrandie par les Anglais (gothique perpendiculaire)."
+    },
+    {
+      "id": "etape",
+      "name": "Étape des laines (Staple)",
+      "model": "market_halls",
+      "at": [-60, -240],
+      "angle_deg": 5,
+      "scale": 0.9,
+      "from_year": 1363,
+      "clear_radius_m": 45,
+      "description": "Calais devient l'Étape unique des laines anglaises en 1363 : halles et comptoir des marchands de l'Étape."
+    },
+    {
+      "id": "tour_de_rysbank",
+      "name": "Tour de Rysbank",
+      "model": "keep",
+      "at": [-262, 136],
+      "angle_deg": 20,
+      "size": 0.6,
+      "from_year": 1350,
+      "clear_radius_m": 25,
+      "description": "Tour anglaise gardant l'entrée du havre sur le banc de sable (vers 1350)."
+    },
+    {
+      "id": "cog_havre_1",
+      "name": "Cogue au havre",
+      "model": "cog",
+      "at": [230, -20],
+      "angle_deg": 15,
+      "scale": 1.1,
+      "params": { "length": 24, "sail": false }
+    },
+    {
+      "id": "cog_havre_2",
+      "name": "Cogue au havre",
+      "model": "cog",
+      "at": [420, 40],
+      "angle_deg": -10,
+      "scale": 1.1,
+      "params": { "length": 22, "sail": false }
+    },
+    {
+      "id": "cog_manche",
+      "name": "Cogue dans le pas de Calais",
+      "model": "cog",
+      "at": [120, 600],
+      "angle_deg": 80,
+      "scale": 1.2,
+      "params": { "length": 26 }
+    }
+  ]
+}

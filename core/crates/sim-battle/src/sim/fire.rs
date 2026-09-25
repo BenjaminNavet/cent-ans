@@ -328,6 +328,10 @@ impl BattleSim {
             let loss = (unit.hp * rules.heat.loss_per_s * intensity * DT).min(unit.hp);
             unit.hp -= loss;
             unit.tick_losses += loss;
+            if loss > 0.0 {
+                unit.loss_cause = crate::impact::LossCause::Fire;
+                unit.loss_by = None;
+            }
             unit.morale = (unit.morale - rules.heat.morale_per_s * intensity * DT).max(0.0);
             if unit.hp <= 0.0 {
                 self.unit_destroyed(i);
@@ -364,6 +368,18 @@ impl BattleSim {
 
     /// A besieger's volley aimed at `aim` may set the house (or the gate)
     /// nearest its point of impact on fire (spec § 2.2).
+    /// The regiment looses fire arrows or incendiary stones (BV1, rendering
+    /// only): a siege attacker whose type can set fires (`ignition` rules).
+    pub(super) fn shoots_fire(&self, shooter: usize) -> bool {
+        let Some(rules) = self.fire.rules.as_ref() else {
+            return false;
+        };
+        let unit = &self.units[shooter];
+        self.siege.is_some()
+            && unit.side == SideId::Attacker
+            && rules.ignition_chance(&unit.unit_type, category_key(unit.category)) > 0.0
+    }
+
     pub(super) fn incendiary_volley(&mut self, shooter: usize, aim: (f64, f64)) {
         let Some(rules) = self.fire.rules.clone() else {
             return;

@@ -266,6 +266,10 @@ BATTLE_SET = {
     "hall": [(91, {}, False)],
     "well": [(95, {}, False)],
     "windmill": [(97, {}, False)],
+    "stall": [(s, {}, False) for s in (101, 102, 103, 104, 105)],
+    "cart": [(s, {}, False) for s in (111, 112, 113, 114)],
+    "barrels": [(121, {}, False), (122, {}, False), (123, {}, False)],
+    "woodpile": [(131, {}, False), (132, {}, False)],
 }
 
 
