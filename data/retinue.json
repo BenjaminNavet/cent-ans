@@ -1,6 +1,6 @@
 {
   "max_per_character": 8,
-  "description": "Suite des généraux (lot C7) : compagnons gagnés en campagne, à la manière de Medieval II. Chaque occasion (victoire, siège, chevauchée, saison passée dans une ville bien dotée, rançon touchée) donne au plus un compagnon, tiré de façon déterministe.",
+  "description": "Suite des généraux (lot C7) : compagnons gagnés en campagne. Chaque occasion (victoire, siège, chevauchée, saison passée dans une ville bien dotée, rançon touchée) donne au plus un compagnon, tiré de façon déterministe.",
   "companions": [
     {
       "id": "ret_ecuyer",

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/retinue.schema.json",
   "title": "Suite des généraux",
-  "description": "Compagnons qu'un général peut attacher à sa suite (lot C7, « retinue » à la Medieval II) : effets, conditions et déclencheurs d'obtention, plafond par personnage (data/retinue.json).",
+  "description": "Compagnons qu'un général peut attacher à sa suite (lot C7) : effets, conditions et déclencheurs d'obtention, plafond par personnage (data/retinue.json).",
   "type": "object",
   "properties": {
     "max_per_character": {
