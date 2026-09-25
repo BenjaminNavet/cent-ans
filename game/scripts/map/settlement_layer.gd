@@ -679,6 +679,8 @@ func vegetation_exclusions() -> PackedVector3Array:
 
 ## Support (Node3D posé sur le relief) de la maquette de la colonie `i`, null sans maquette.
 func model_holder(i: int) -> Node3D:
+	if _is_landmark(i):
+		return null  # ville emblématique (L1) : pas de croissance ni de surcouche génériques
 	return _models[i] if i >= 0 and i < _models.size() else null
 
 
@@ -695,7 +697,7 @@ func model_top(i: int) -> float:
 ## monde. Garde position, orientation, portée de visibilité et teinte de bannière ; l'écart
 ## aux voisines (`_fit_models`) est réappliqué.
 func replace_model(i: int, model: Node3D) -> void:
-	var holder: Node3D = _models[i] if i >= 0 and i < _models.size() else null
+	var holder: Node3D = model_holder(i)
 	if holder == null or model == null:
 		return
 	for child in holder.get_children():
