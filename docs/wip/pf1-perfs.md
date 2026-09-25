@@ -11,6 +11,35 @@ Chaque mesure est faite 2 fois ; on donne la médiane des deux (ou l'intervalle)
 3. [x] Fuite « ParticlesShaderRD were never freed » : corrigée, vérifiée sur le jeu exporté
 4. [x] user:// du jeu exporté isolé + copie unique des fichiers du joueur (ADR 0031), vérifié sur l'export
 
+## Suite ZG (fusion de ZG0-ZG3, ADR 0036)
+Avec le cache de pyramide (`data/map/pyramid`, lien symbolique vers le dépôt principal), le
+`ReliefQuadtree` (ZG2) dessine tout le relief ; `FineTerrainJob` n'est plus qu'un repli sans cache.
+- Découpage en blocs + LOD de `FineTerrainJob` / `TerrainBuilder` (PF1) **retiré** : il ne servait
+  plus qu'au repli ; fichiers remis dans l'état de `main`.
+- `RenderQuality` pilote le quadtree par `TerrainBuilder.apply_render_quality` :
+  | | Basse | Moyenne | Haute | Ultra |
+  |---|---|---|---|---|
+  | `max_vertex_px` (espacement des sommets à l'écran) | 12 | 8 | **6** | 4 (valeur ZG2) |
+  | `max_items` (budget de nœuds) | 350 | 500 | 700 | 900 |
+  | `extra_depth` | 2 | 3 | 3 | 3 |
+  | `max_pages` (au chargement de la carte) | 128 | 192 | 256 | 256 |
+  Haute à 6 px au lieu de 4 : captures comparées au zoom comté, aucune différence visible (les
+  normales viennent des pages dans le shader), ≈ 6 ms de GPU et 1,5 M de primitives en moins.
+- `--map-ab` : configurations `qt_px:<px>` et `qt_items:<n>`.
+
+Mesures au zoom comté avec le cache (`--map-ab=150`, Vulkan, GPU ms, 2 passes, charge 19-49) :
+| | Haute | Moyenne | Basse | Ultra |
+|---|---|---|---|---|
+| GPU ms (passe 1 / passe 2 / médiane) | 23,2 / 32,1 / **27,7** | 15,0 / 21,0 / **18,0** | 6,9 / 7,3 / **7,1** | 36,0 / 48,6 / 42,3 |
+| primitives | 7,15 M | 5,35 M | 2,13 M | 12,5 M |
+| appels de dessin | 1 310 | 1 211 | 950 | 1 468 |
+Basse ≈ 3,9 fois plus rapide que Haute. Avant l'ajustement (Haute à 4 px) : 8,68 M primitives,
+28-36 ms. Metal, Haute, non plafonné (2 passes) : d=150 19,5 et 23,1 ms, d=491 18,4 et 27,6 ms
+(GPU disputé) : **le quadtree ne tient pas 16,7 ms au zoom comté en Haute** sur cette machine
+chargée (les blocs PF1 donnaient 16,9-17,8 ms) ; pistes : `max_vertex_px` 8 en Haute (−4 ms
+de plus, différences visibles sur 14 % des pixels d'un recadrage, surtout la pluie), ou patchs
+du quadtree sans ombre portée au-delà de la première cascade.
+
 ## Ce que règle chaque niveau (`RenderQuality.PRESETS`)
 | | Basse | Moyenne | Haute | Ultra |
 |---|---|---|---|---|
@@ -106,7 +135,7 @@ et tests inchangés. Premier lancement de l'export : « 14 fichiers repris » (r
 3 sauvegardes automatiques + sauvegarde rapide avec métadonnées et vignettes ; `smoke.json`
 écarté), marqueur écrit ; lancements suivants : aucune copie.
 
-## État final
+## État final (avant la suite ZG)
 Terminé. `main` fusionné (EP4, UI1, PB1, playlists, UX1/UX2, ZG, MF1 : aucun ne touche
 `render_quality.gd` ni les fichiers PF1, fusion sans conflit). fmt, clippy -D warnings, cargo test,
 build.sh (debug et release), pytest (405), import, `rl1_quality_test`, `pf1_quality_test` : OK.
