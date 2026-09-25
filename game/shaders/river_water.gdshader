@@ -12,6 +12,9 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 // au-dessus du relief (LOD grossier qui ne suit pas le fond de vallée).
 
 #include "res://shaders/river_bed.gdshaderinc"
+// Lot CM2 : fleuves à l'encre bleue en vue parchemin.
+#include "res://shaders/parchment_common.gdshaderinc"
+uniform vec3 pm_river_ink = vec3(0.04, 0.10, 0.12);
 
 uniform vec2 map_size = vec2(4096.0, 4096.0);
 uniform vec3 shallow_color : source_color = vec3(0.30, 0.40, 0.36);
@@ -149,4 +152,8 @@ void fragment() {
 	float carved_alpha = mix(0.7, 0.97, smoothstep(0.0, 0.35, depth_t));
 	float alpha = mix(0.9, carved_alpha, v_carved) * soft * v_alpha;
 	ALPHA = clamp(alpha * (1.0 - ford * 0.35), 0.0, 1.0);
+	float pm_w = pm_weight();  // CM2 : trait d'encre bleue, sans reflet
+	ALBEDO = mix(ALBEDO, pm_river_ink * (1.0 - pm_emission), pm_w);
+	EMISSION = pm_river_ink * pm_emission * pm_emission_gain * pm_w;
+	ALPHA = mix(ALPHA, clamp(v_alpha * 1.2, 0.0, 0.95), pm_w);
 }

@@ -7,13 +7,17 @@
 //! These functions call into the Godot runtime, so they cannot be unit-tested
 //! with `cargo test`; `core/checks/campaign_sim_check.gd` covers them headless.
 
-use godot::builtin::VariantType;
+use godot::builtin::{AnyArray, AnyDictionary, VariantType};
 use godot::prelude::*;
 use serde_json::{Map, Number, Value};
 
 /// Converts a GDScript value into JSON. Unsupported types (objects, vectors,
 /// colours...) give an error naming the type so that a malformed order is
 /// reported instead of silently dropped.
+///
+/// Typed containers (`Array[int]`, typed dictionaries) are accepted: reading
+/// them as `VarArray` panicked, which broke every battle order whose unit list
+/// came from a typed GDScript array (general retreat, halt, fire at will...).
 pub fn variant_to_json(variant: &Variant) -> Result<Value, String> {
     match variant.get_type() {
         VariantType::NIL => Ok(Value::Null),
@@ -25,7 +29,7 @@ pub fn variant_to_json(variant: &Variant) -> Result<Value, String> {
         VariantType::STRING => Ok(Value::String(variant.to::<GString>().to_string())),
         VariantType::STRING_NAME => Ok(Value::String(variant.to::<StringName>().to_string())),
         VariantType::ARRAY => variant
-            .to::<VarArray>()
+            .to::<AnyArray>()
             .iter_shared()
             .map(|item| variant_to_json(&item))
             .collect::<Result<Vec<_>, _>>()
@@ -56,7 +60,7 @@ pub fn variant_to_json(variant: &Variant) -> Result<Value, String> {
         )),
         VariantType::DICTIONARY => {
             let mut map = Map::new();
-            for (key, value) in variant.to::<VarDictionary>().iter_shared() {
+            for (key, value) in variant.to::<AnyDictionary>().iter_shared() {
                 let key = match key.get_type() {
                     VariantType::STRING => key.to::<GString>().to_string(),
                     VariantType::STRING_NAME => key.to::<StringName>().to_string(),
