@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_gore.schema.json",
+  "title": "Morts, chocs, sang et démembrements en bataille",
+  "description": "Fichier data/fx/battle_gore.json (lot BV2) lu par game/scripts/battle/battle_gore.gd et battle_soldiers.gd. Rendu seulement : les règles (qui tombe, qui meurt, cohésion) sont dans core/ (sim-battle, module impact).",
+  "type": "object",
+  "$defs": {
+    "range": {
+      "type": "array",
+      "items": { "type": "number", "minimum": 0 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Intervalle [min, max] (vitesses en m/s)."
+    },
+    "share": { "type": "number", "minimum": 0, "maximum": 1 },
+    "level": {
+      "type": "object",
+      "description": "Intensité d'un niveau du réglage « Sang ».",
+      "properties": {
+        "stains": { "$ref": "#/$defs/share", "description": "Taches sur les figurines vivantes (multiplicateur)." },
+        "sprays": { "$ref": "#/$defs/share", "description": "Gerbes à l'impact (part des gouttes émises)." },
+        "corpse_blood": { "$ref": "#/$defs/share", "description": "Sang sur les cadavres." },
+        "dismember": { "type": "boolean", "description": "Démembrements (réglage « complet » seulement)." }
+      },
+      "required": ["stains", "sprays", "corpse_blood", "dismember"],
+      "additionalProperties": false
+    },
+    "death": {
+      "type": "object",
+      "properties": {
+        "foot": { "type": "array", "items": { "enum": ["death", "death_m", "death_back", "death_knees"] }, "minItems": 1 },
+        "mounted": { "type": "array", "items": { "enum": ["c_death", "c_death_m", "c_fall"] }, "minItems": 1 },
+        "impulse": { "$ref": "#/$defs/range", "description": "Vitesse (m/s) de projection en arrière du corps." },
+        "critical": { "$ref": "#/$defs/share", "description": "1 : les coups critiques de l'arme du tueur s'appliquent ; 0 : jamais de démembrement." }
+      },
+      "required": ["foot", "mounted", "impulse", "critical"],
+      "additionalProperties": false
+    },
+    "pieces": {
+      "type": "object",
+      "propertyNames": { "enum": ["head", "arm_r", "arm_l", "leg_r", "leg_l"] },
+      "additionalProperties": { "$ref": "#/$defs/share" }
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "levels": {
+      "type": "object",
+      "properties": { "off": { "$ref": "#/$defs/level" }, "moderate": { "$ref": "#/$defs/level" }, "full": { "$ref": "#/$defs/level" } },
+      "required": ["off", "moderate", "full"],
+      "additionalProperties": false
+    },
+    "deaths": {
+      "type": "object",
+      "description": "Morts tirées selon la cause des pertes venue du cœur (LossCause).",
+      "propertyNames": { "enum": ["arrow", "bolt", "melee", "charge", "stakes", "pikes", "ball", "stone", "fire", "other"] },
+      "additionalProperties": { "$ref": "#/$defs/death" },
+      "required": ["other"]
+    },
+    "weapons": {
+      "type": "object",
+      "description": "Arme de mêlée (classe) de chaque type d'unité, pour les coups critiques.",
+      "propertyNames": { "pattern": "^unit_[a-z0-9_]+$" },
+      "additionalProperties": { "enum": ["axe", "polearm", "two_hand", "sword", "ball", "stone"] }
+    },
+    "critical_chance": {
+      "type": "object",
+      "propertyNames": { "enum": ["axe", "polearm", "two_hand", "sword", "heavy_charge", "ball", "stone"] },
+      "additionalProperties": { "$ref": "#/$defs/share" }
+    },
+    "heavy_charge_mass": { "type": "number", "minimum": 0, "maximum": 2, "description": "Poids de charge (événement d'impact) au-delà duquel la charge est « lourde »." },
+    "pieces": {
+      "type": "object",
+      "properties": { "foot": { "$ref": "#/$defs/pieces" }, "mounted": { "$ref": "#/$defs/pieces" } },
+      "required": ["foot", "mounted"],
+      "additionalProperties": false
+    },
+    "corpses": {
+      "type": "object",
+      "properties": {
+        "max_per_layer": { "type": "integer", "minimum": 100, "maximum": 20000 },
+        "max_total": { "type": "integer", "minimum": 100, "maximum": 60000, "description": "Plafond de cadavres ; au-delà, les plus anciens sont remplacés." },
+        "spawn_per_update": { "type": "integer", "minimum": 1, "maximum": 500 },
+        "cell_m": { "type": "number", "minimum": 20, "maximum": 400, "description": "Côté des cellules de cadavres (LOD par cellule)." },
+        "near_m": { "type": "number", "minimum": 0, "maximum": 500, "description": "En deçà : maillage moyen ; au-delà : lointain." },
+        "far_m": { "type": "number", "minimum": 50, "maximum": 3000, "description": "Au-delà : cadavres masqués." }
+      },
+      "required": ["max_per_layer", "max_total", "spawn_per_update", "cell_m", "near_m", "far_m"],
+      "additionalProperties": false
+    },
+    "knockdown": {
+      "type": "object",
+      "properties": {
+        "max_per_impact": { "type": "integer", "minimum": 0, "maximum": 500 },
+        "max_active": { "type": "integer", "minimum": 0, "maximum": 5000 },
+        "impulse": { "$ref": "#/$defs/range" },
+        "death_share": { "$ref": "#/$defs/share" },
+        "front_bias": { "type": "number", "minimum": 1, "maximum": 6, "description": "Exposant du tirage des rangs : plus grand = plus près du premier rang." }
+      },
+      "required": ["max_per_impact", "max_active", "impulse", "death_share", "front_bias"],
+      "additionalProperties": false
+    },
+    "horses": {
+      "type": "object",
+      "properties": {
+        "slow_seconds": { "type": "number", "minimum": 0, "maximum": 10 },
+        "slow_min": { "$ref": "#/$defs/share" },
+        "stop_seconds": { "type": "number", "minimum": 0, "maximum": 10 },
+        "drive_extra_m": { "type": "number", "minimum": 0, "maximum": 10, "description": "Mètres ajoutés à la pénétration du cœur (`depth`) : les chevaux comblent l'écart de contact des rectangles simulés." },
+        "drive_in_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "drive_hold_seconds": { "type": "number", "minimum": 0, "maximum": 30 },
+        "drive_out_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 }
+      },
+      "required": ["slow_seconds", "slow_min", "stop_seconds", "drive_extra_m", "drive_in_seconds", "drive_hold_seconds", "drive_out_seconds"],
+      "additionalProperties": false
+    },
+    "cadence": {
+      "type": "object",
+      "description": "Vitesse au sol (m/s) couverte par chaque clip de locomotion joué à la vitesse 1 : la cadence du régiment suit sa vitesse réelle (pieds qui ne glissent pas).",
+      "propertyNames": { "pattern": "^[a-z_]+$" },
+      "additionalProperties": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 }
+    },
+    "sprays": {
+      "type": "object",
+      "properties": {
+        "max_droplets": { "type": "integer", "minimum": 0, "maximum": 65536 },
+        "droplets_per_death": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "droplets_per_knock": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "droplets_per_critical": { "type": "integer", "minimum": 0, "maximum": 200 },
+        "speed": { "$ref": "#/$defs/range" },
+        "lifetime": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "max_distance_m": { "type": "number", "minimum": 10, "maximum": 2000 }
+      },
+      "required": ["max_droplets", "droplets_per_death", "droplets_per_knock", "droplets_per_critical", "speed", "lifetime", "max_distance_m"],
+      "additionalProperties": false
+    },
+    "severed": {
+      "type": "object",
+      "properties": {
+        "max_pieces": { "type": "integer", "minimum": 0, "maximum": 4096 },
+        "speed": { "$ref": "#/$defs/range" },
+        "rest_seconds": { "type": "number", "minimum": 1, "maximum": 600 }
+      },
+      "required": ["max_pieces", "speed", "rest_seconds"],
+      "additionalProperties": false
+    },
+    "living_stains": {
+      "type": "object",
+      "description": "Taches progressives des régiments vivants : part des pertes et durée de mêlée.",
+      "properties": {
+        "per_loss_share": { "type": "number", "minimum": 0, "maximum": 10 },
+        "melee_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 },
+        "max": { "$ref": "#/$defs/share" }
+      },
+      "required": ["per_loss_share", "melee_seconds", "max"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["levels", "deaths", "weapons", "critical_chance", "heavy_charge_mass", "pieces", "corpses", "knockdown", "horses", "cadence", "sprays", "severed", "living_stains"],
+  "additionalProperties": false
+}

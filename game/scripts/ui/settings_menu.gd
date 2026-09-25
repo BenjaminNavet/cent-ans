@@ -154,8 +154,15 @@ func _build_display(grid: GridContainer) -> void:
 	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l'affichage à la fréquence de l'écran.")
 	_options(grid, "video/quality", "Qualité graphique", Array(RenderQuality.LEVELS), Array(RenderQuality.LABELS),
 		"Basse : ombres simples, sans occlusion ni halo. Moyenne : occlusion ambiante. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres plus lointaines.")
-	var scales: Array = _constant("UI_SCALES")
-	_options(grid, "interface/ui_scale", "Échelle de l'interface", scales, scales.map(func(value: float) -> String: return "%d %%" % roundi(value * 100.0)))
+	# Lot U4 : l'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
+	var sizes: Array = _constant("UI_SIZES")
+	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}
+	_options(grid, "interface/ui_size", "Taille de l'interface", sizes, sizes.map(func(value: float) -> String: return str(size_labels.get(value, "%d %%" % roundi(value * 100.0)))),
+		"Échelle automatique selon la hauteur de la fenêtre (actuellement %d %%), multipliée par ce réglage." % roundi(float(settings.call("effective_ui_scale")) * 100.0))
+	var texts: Array = _constant("TEXT_SIZES")
+	var text_labels := {0.9: "Petite", 1.0: "Normale", 1.15: "Grande", 1.3: "Très grande"}
+	_options(grid, "interface/text_size", "Taille du texte", texts, texts.map(func(value: float) -> String: return str(text_labels.get(value, "%d %%" % roundi(value * 100.0)))),
+		"Agrandit les textes seuls, sans changer la taille des panneaux et des icônes.")
 
 
 func _build_map(grid: GridContainer) -> void:
@@ -175,6 +182,7 @@ func _build_game(grid: GridContainer) -> void:
 		return "Chaque tour" if turns == 1 else "Tous les %d tours" % turns)
 	_options(grid, "game/autosave_interval", "Sauvegarde automatique", choices, labels, "Trois emplacements tournants (auto_1 à auto_3).")
 	_check(grid, "game/interactive_battles", "Livrer ses batailles en 3D", "Décoché : toutes les batailles du joueur sont résolues automatiquement.")
+	_options(grid, "battle/blood", "Sang", [0, 1, 2], ["Désactivé", "Modéré", "Complet"], "Taches, gerbes et cadavres ensanglantés en bataille. Complet : démembrements sur les coups critiques.")
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
 
 

@@ -11,7 +11,7 @@ use std::path::PathBuf;
 
 use data_model::{FactionId, GameData, MapRasters, NavGrid, SettlementId, IMPASSABLE, PLAIN_COST};
 use sim_campaign::march::km_to_grid_points;
-use sim_campaign::movement::{retreat_target, Retreat};
+use sim_campaign::movement::{retreat_target, retreat_target_after, Retreat};
 use sim_campaign::navigation::Cell;
 use sim_campaign::{
     ArmyId, ArmyPosition, CampaignState, EventKind, MoveTarget, Order, OrderError, OrderOutcome,
@@ -522,6 +522,37 @@ fn the_loser_falls_back_on_the_grid() {
         retreat_target(&state, &pocket, &english, victor_at),
         Some(Retreat::Rout(None))
     );
+}
+
+/// Lot M5b: without a friendly place in reach, a crushed army or one with
+/// no refuge left routs instead of falling back.
+#[test]
+fn a_crushed_or_cornered_loser_routs() {
+    let spot = empty_spot(&real_data(), 25.0);
+    let victor_at = east(&real_data(), spot, -4.0);
+    let mut data = data_with_grid(|_| {});
+    let rules = &mut data.settlement_rules.as_mut().unwrap().retreat;
+    rules.friendly_radius_steps = 0.0;
+    rules.heavy_defeat_losses_percent = 42;
+    let (state, _, english) = duel(&data, victor_at, spot);
+    assert!(matches!(
+        retreat_target_after(&state, &data, &english, victor_at, 41),
+        Some(Retreat::Fallback(_))
+    ));
+    assert!(matches!(
+        retreat_target_after(&state, &data, &english, victor_at, 42),
+        Some(Retreat::Rout(_))
+    ));
+    // No settlement free of the enemy within the refuge radius: a rout.
+    data.settlement_rules
+        .as_mut()
+        .unwrap()
+        .retreat
+        .neutral_radius_steps = 0.0;
+    assert!(matches!(
+        retreat_target(&state, &data, &english, victor_at),
+        Some(Retreat::Rout(_))
+    ));
 }
 
 #[test]

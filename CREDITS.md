@@ -86,6 +86,10 @@ loopbasedmusic, Lucas_Schacht, modusmogulus, Mythmazter, nekoninja, omerbhatti34
 PixelsphereStudios, PorkMuncher, qubodup, Quickmusik, SamuelGremaud, saturdaysoundguy,
 shadoWisp, Simonus18, spycrah, Twisted_Euphoria, unfa, waxsocks, WelvynZPorterSamples, xkeril.
 
+Les sons d'interface (`game/assets/audio/ui/`, lot UB1) sont découpés hors ligne dans ces mêmes
+fichiers et dans les effets procéduraux du projet par `tools/cent_ans_tools/ui_sounds.py` ;
+détail dans `game/assets/audio/ui/SOURCE.md`.
+
 ## Données géographiques
 
 - **Relief (terre et bathymétrie)** : ETOPO 2022 15 Arc-Second Global Relief Model, NOAA
@@ -94,6 +98,15 @@ shadoWisp, Simonus18, spycrah, Twisted_Euphoria, unfa, waxsocks, WelvynZPorterSa
   2022 15 Arc-Second Global Relief Model. doi:10.25921/fd45-gt74*.
 - **Terres, côtes, rivières, lacs** : [Natural Earth](https://www.naturalearthdata.com/)
   (10 m physical) — domaine public. « Made with Natural Earth. »
+- **Relief fin (terres de l'emprise jouable)** : Copernicus DEM GLO-90, © DLR e.V. 2010-2014 et
+  © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par l'Union
+  européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution. Tuiles lues
+  sur le bucket public AWS Open Data `copernicus-dem-90m` (lot R1, ADR 0019).
+- **Défrichement vers 1340** : KK10 Anthropogenic Land Cover Change — Kaplan, J. O. et
+  Krumhardt, K. M. (2017), PANGAEA, doi:10.1594/PANGAEA.871369, licence CC BY 3.0 ; méthode :
+  Kaplan et al. (2011), *The Holocene* 21(5), doi:10.1177/0959683610386983. Moyenne 1330-1349,
+  combinée aux grandes forêts et zones humides nommées de `data/map/historical_forests.json` et
+  `data/map/wetlands.json` (sources par entrée).
 - Traitement (reprojection EPSG:3035, découpage des provinces) : outils `tools/cent_ans_tools/geo`
   (voir `docs/geo.md`).
 
