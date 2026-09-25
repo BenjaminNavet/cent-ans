@@ -5,8 +5,8 @@ Branche : `worktree-agent-a3c4f4bdfe00c9af3`, depuis main fa7efb3c (M1-M4).
 
 ## État
 
-- [ ] Mesure de référence (`settlements_probe 50 1..8`, release)
-- [ ] Débandades
+- [x] Mesure de référence (`settlements_probe 50 1..8`, release) : identique au M3 de `m3-tour-ia.md`
+- [x] Débandades : refuge (règle « neutre » C7a sur la grille) + défaite lourde (`heavy_defeat_losses_percent` 42) → 1,2 / graine
 - [ ] Passages de fleuves (croisements Itiner-e)
 - [ ] Saône en aval de Chalon
 - [ ] Somme / Blanchetaque
@@ -17,4 +17,4 @@ Branche : `worktree-agent-a3c4f4bdfe00c9af3`, depuis main fa7efb3c (M1-M4).
 
 ## Prochaine étape
 
-Mesure de référence en cours.
+Passages de fleuves : rayon des croisements Itiner-e (`road_crossing_radius_km`), Saône (tronçon « Sane » de rivers.geojson = Saône aval, encodage cassé), Somme.
