@@ -299,6 +299,11 @@ func set_season(weights: Vector4) -> void:
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	near_weight = tiers.near_weight(camera_distance) if tiers != null else 1.0
 	var medium := tiers.medium_weight(camera_distance) if tiers != null else 0.0
+	# ZG4 : au palier « site », fumées, feux et moulins à l'échelle de la carte (des centaines de
+	# mètres) s'effacent avec les maquettes qu'ils accompagnent.
+	var site := tiers.site_weight(camera_distance) if tiers != null else 0.0
+	near_weight *= 1.0 - site
+	medium *= 1.0 - site
 	var chimney_alpha := near_weight * _season_boost * 0.85
 	_chimneys.visible = chimney_alpha > 0.02
 	_chimney_material.set_shader_parameter("fade", chimney_alpha)

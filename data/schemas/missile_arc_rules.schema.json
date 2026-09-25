@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/missile_arc_rules.schema.json",
+  "title": "Règles du tir tendu et du tir en cloche",
+  "description": "Fichier data/rules/missile_arc.json (lot R4, ADR 0046) : quand une troupe de trait peut tirer en volée indirecte sur une cible masquée par une crête, et avec quelle précision.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "indirect_missiles": {
+      "type": "array",
+      "items": { "enum": ["arrow", "bolt", "bullet", "javelin", "ball", "stone"] },
+      "uniqueItems": true,
+      "description": "Projectiles qui peuvent partir en cloche sur une cible masquée (troupes dotées de la capacité « volley »)."
+    },
+    "max_launch_angle_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 80, "description": "Angle de départ maximal d'une volée en cloche, au-dessus de l'horizontale (degrés)." },
+    "clearance_m": { "type": "number", "minimum": 0, "maximum": 20, "description": "Marge que la trajectoire doit garder au-dessus du sol (m)." },
+    "indirect_accuracy": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Facteur de précision d'une volée indirecte sur une cible qu'un allié voit." },
+    "remembered_accuracy": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Facteur de précision d'une volée indirecte sur une cible vue récemment mais que personne ne voit plus." },
+    "spotter_range_m": { "type": "number", "minimum": 0, "maximum": 2000, "description": "Distance à laquelle un allié guide le tir sur une cible qu'il voit (m, réduite par la météo comme la portée)." },
+    "memory_s": { "type": "number", "minimum": 0, "maximum": 120, "description": "Durée pendant laquelle une cible vue reste une cible de tir indirect (s)." }
+  },
+  "required": ["indirect_missiles", "max_launch_angle_deg", "clearance_m", "indirect_accuracy", "remembered_accuracy", "spotter_range_m", "memory_s"],
+  "additionalProperties": false
+}

@@ -12,7 +12,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{LocalizedName, Sources};
-use crate::ids::{FactionId, SeaZoneId, ShipClassId, UnitTypeId};
+use crate::ids::{FactionId, SeaZoneId, SettlementId, ShipClassId, UnitTypeId};
 use crate::load::{load_entities, read_json, DataError};
 
 /// How a ship moves.
@@ -159,6 +159,26 @@ pub struct NavalRules {
     pub castle_defense: f64,
     /// Bonus per free chained neighbour (reinforcements over the chains).
     pub chain_support: f64,
+    // ----- AI: general boarding (lot NV2) -----------------------------------
+    /// The AI shares its targets out: at most this many of its ships board
+    /// one enemy ship.
+    #[serde(default = "default_boarders_per_target")]
+    pub boarders_per_target: u32,
+    /// A fleet calls the general boarding once most of its ships are within
+    /// this distance of an enemy, metres.
+    #[serde(default = "default_assault_range_m")]
+    pub assault_range_m: f64,
+    /// Seconds of volleys at that range before the general boarding.
+    #[serde(default = "default_assault_softening_s")]
+    pub assault_softening_s: f64,
+    /// In the general boarding, a ship boards when its fighting power (after
+    /// the climb) reaches this share of its target's.
+    #[serde(default = "default_assault_odds")]
+    pub assault_odds: f64,
+    /// Chained crews cannot run: their morale losses to volleys and to the
+    /// loss of other ships are multiplied by this.
+    #[serde(default = "default_chain_morale")]
+    pub chain_morale: f64,
     // ----- morale and surrender --------------------------------------------
     pub morale_per_loss_percent: f64,
     /// Crew morale under which a ship strikes (or flees if free).
@@ -227,6 +247,26 @@ pub struct NavalRules {
     pub marine_archer_share: f64,
 }
 
+fn default_boarders_per_target() -> u32 {
+    2
+}
+
+fn default_assault_range_m() -> f64 {
+    250.0
+}
+
+fn default_assault_softening_s() -> f64 {
+    30.0
+}
+
+fn default_assault_odds() -> f64 {
+    0.55
+}
+
+fn default_chain_morale() -> f64 {
+    0.3
+}
+
 impl Default for NavalRules {
     fn default() -> Self {
         NavalRules {
@@ -256,6 +296,11 @@ impl Default for NavalRules {
             climb_cap: 0.45,
             castle_defense: 0.15,
             chain_support: 0.12,
+            boarders_per_target: default_boarders_per_target(),
+            assault_range_m: default_assault_range_m(),
+            assault_softening_s: default_assault_softening_s(),
+            assault_odds: default_assault_odds(),
+            chain_morale: default_chain_morale(),
             morale_per_loss_percent: 1.1,
             surrender_morale: 18.0,
             surrender_crew_share: 0.12,
@@ -327,11 +372,44 @@ pub struct NavalFleets {
     /// French names of the seas (`sea_channel` → « la Manche »).
     #[serde(default)]
     pub sea_names: BTreeMap<SeaZoneId, String>,
+    /// Waters of a crossing from or to a port, instead of the sea's name
+    /// (`set_calais` → « le pas de Calais »), lot NV2.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub port_waters: BTreeMap<SettlementId, String>,
     /// Marines of fleets that give none.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default_marines: Option<Marines>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Sources,
+}
+
+/// Historical ship names of one faction (lot NV2).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FactionShipNames {
+    pub faction: FactionId,
+    /// Names without a home port.
+    pub names: Vec<String>,
+    /// Names of the ships of each port (« la Marguerite de Rye »).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub ports: BTreeMap<SettlementId, Vec<String>>,
+}
+
+/// `data/naval/ship_names.json` (lot NV2).
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct NavalShipNames {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub factions: Vec<FactionShipNames>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sources: Sources,
+}
+
+impl NavalShipNames {
+    pub fn of(&self, faction: &FactionId) -> Option<&FactionShipNames> {
+        self.factions.iter().find(|f| &f.faction == faction)
+    }
 }
 
 /// Everything under `data/naval/`.
@@ -340,6 +418,8 @@ pub struct NavalData {
     pub ship_classes: BTreeMap<ShipClassId, ShipClass>,
     pub rules: NavalRules,
     pub fleets: NavalFleets,
+    /// Ship names per faction and port (absent: « Nef n°1 »).
+    pub ship_names: NavalShipNames,
 }
 
 /// Folder and files of the naval data, relative to `data/`.
@@ -348,6 +428,7 @@ pub mod files {
     pub const SHIPS: &str = "ships";
     pub const RULES: &str = "rules.json";
     pub const FLEETS: &str = "fleets.json";
+    pub const SHIP_NAMES: &str = "ship_names.json";
     pub const SCENARIOS: &str = "scenarios";
 }
 
@@ -371,6 +452,10 @@ impl NavalData {
         let fleets = dir.join(files::FLEETS);
         if fleets.is_file() {
             naval.fleets = read_json(&fleets)?;
+        }
+        let names = dir.join(files::SHIP_NAMES);
+        if names.is_file() {
+            naval.ship_names = read_json(&names)?;
         }
         Ok(naval)
     }

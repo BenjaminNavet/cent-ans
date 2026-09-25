@@ -43,9 +43,11 @@ pub mod field;
 pub mod fire;
 pub mod formation_ai;
 pub mod impact;
+pub mod missile_arc;
 pub mod naval;
 pub mod orders;
 pub mod outcome;
+pub mod position;
 pub mod props;
 pub mod relief;
 pub mod relief_ai;
@@ -75,7 +77,7 @@ pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
 };
 pub use shot::{MissileKind, ShotCover, ShotEvent};
-pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
+pub use siege::{PieceKind, SiegeWorkRules, SiegeWorks, Tower, WallPiece};
 pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
 pub use sim::{

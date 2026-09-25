@@ -357,6 +357,7 @@ func _apply_items() -> void:
 			slot.transform = Transform3D(Basis.from_scale(Vector3(s, 1.0, s)), Vector3(origin.x, 0.0, origin.y))
 			var quads := PATCH_QUADS if quadrant == 4 else PATCH_QUADS / 2
 			var skirt := minf(s * skirt_factor, skirt_max) + 0.02
+			# Boîte en hauteurs monde de l'échelle courante (ZG4 : `on_vertical_scale_changed`).
 			slot.custom_aabb = AABB(Vector3(0.0, float(item["ymin"]) - skirt, 0.0), Vector3(quads, float(item["ymax"]) - float(item["ymin"]) + skirt, quads))
 			slot.set_instance_shader_parameter("qt_node", Vector4(origin.x, origin.y, s, n))
 			slot.visible = true
@@ -444,6 +445,19 @@ func _neighbors(key: int, diagonal: bool) -> Vector4:
 				page["last_used"] = _frame
 		result[i] = layer
 	return result
+
+
+## Lot ZG4 : l'échelle verticale a changé ; les boîtes englobantes des nœuds affichés (hauteurs
+## monde) sont remises à l'échelle (les nouveaux nœuds lisent directement la nouvelle échelle).
+func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
+	var ratio := new_scale / maxf(old_scale, 1e-9)
+	for slot: MeshInstance3D in _slots.values():
+		var box := slot.custom_aabb
+		var lo := box.position.y * ratio
+		var hi := box.end.y * ratio
+		# Jupe (constante, non proportionnelle) : marge de sécurité en plus.
+		var margin := absf(hi - lo) * 0.02 + 0.05
+		slot.custom_aabb = AABB(Vector3(box.position.x, lo - margin, box.position.z), Vector3(box.size.x, hi - lo + 2.0 * margin, box.size.z))
 
 
 func _take_slot() -> MeshInstance3D:

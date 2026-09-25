@@ -40,6 +40,10 @@
     "faction": "fac_france",
     "faction_name": "France",
     "admiral": "Hugues Quiéret et Nicolas Béhuchet",
+    "chains": [
+      { "chain": 1, "origin": [250.0, 0.0], "heading_deg": 180.0, "spacing_m": 12.0 },
+      { "chain": 2, "origin": [335.0, 0.0], "heading_deg": 180.0, "spacing_m": 12.0 }
+    ],
     "units": [
       { "unit_type": "unit_urban_militia", "name": "Mariniers de Normandie et de Picardie", "morale": 60 },
       { "unit_type": "unit_crossbowmen", "name": "Arbalétriers des communes", "morale": 60 },
@@ -47,17 +51,17 @@
       { "unit_type": "unit_genoese_crossbowmen", "name": "Arbalétriers de Barbavera", "morale": 65 }
     ],
     "ships": [
-      { "name": "la Christophe", "class": "ship_nef", "chain": 1, "position": [250.0, -24.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 40 }, { "unit": 0, "men": 60 }, { "unit": 2, "men": 20 } ] },
-      { "name": "l'Édouard", "class": "ship_cog", "chain": 1, "position": [250.0, -12.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 25 }, { "unit": 0, "men": 45 } ] },
-      { "name": "le Saint-Denis", "class": "ship_nef", "chain": 1, "position": [250.0, 0.0], "heading_deg": 180.0, "flagship": true, "crew": [ { "unit": 2, "men": 40 }, { "unit": 1, "men": 30 }, { "unit": 0, "men": 50 } ] },
-      { "name": "la Rose", "class": "ship_cog", "chain": 1, "position": [250.0, 12.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 25 }, { "unit": 0, "men": 45 } ] },
-      { "name": "la Catherine", "class": "ship_cog", "chain": 1, "position": [250.0, 24.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 25 }, { "unit": 0, "men": 45 } ] },
-      { "name": "le Saint-Georges", "class": "ship_cog", "chain": 2, "position": [335.0, -30.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 20 }, { "unit": 0, "men": 50 } ] },
-      { "name": "la Riche de Leure", "class": "ship_cog", "chain": 2, "position": [335.0, -18.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 20 }, { "unit": 0, "men": 50 } ] },
-      { "name": "le Saint-Aubin", "class": "ship_nef", "chain": 2, "position": [335.0, -6.0], "heading_deg": 180.0, "crew": [ { "unit": 2, "men": 30 }, { "unit": 1, "men": 30 }, { "unit": 0, "men": 60 } ] },
-      { "name": "la Marie de Dieppe", "class": "ship_cog", "chain": 2, "position": [335.0, 6.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 20 }, { "unit": 0, "men": 50 } ] },
-      { "name": "le Saint-Nicolas de Harfleur", "class": "ship_cog", "chain": 2, "position": [335.0, 18.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 20 }, { "unit": 0, "men": 50 } ] },
-      { "name": "la Julienne de Boulogne", "class": "ship_barge", "chain": 2, "position": [335.0, 30.0], "heading_deg": 180.0, "crew": [ { "unit": 1, "men": 15 }, { "unit": 0, "men": 25 } ] },
+      { "name": "la Christophe", "class": "ship_nef", "chain": 1, "crew": [ { "unit": 1, "men": 40 }, { "unit": 0, "men": 60 }, { "unit": 2, "men": 20 } ] },
+      { "name": "l'Édouard", "class": "ship_cog", "chain": 1, "crew": [ { "unit": 1, "men": 25 }, { "unit": 0, "men": 45 } ] },
+      { "name": "le Saint-Denis", "class": "ship_nef", "chain": 1, "flagship": true, "crew": [ { "unit": 2, "men": 40 }, { "unit": 1, "men": 30 }, { "unit": 0, "men": 50 } ] },
+      { "name": "la Rose", "class": "ship_cog", "chain": 1, "crew": [ { "unit": 1, "men": 25 }, { "unit": 0, "men": 45 } ] },
+      { "name": "la Catherine", "class": "ship_cog", "chain": 1, "crew": [ { "unit": 1, "men": 25 }, { "unit": 0, "men": 45 } ] },
+      { "name": "le Saint-Georges", "class": "ship_cog", "chain": 2, "crew": [ { "unit": 1, "men": 20 }, { "unit": 0, "men": 50 } ] },
+      { "name": "la Riche de Leure", "class": "ship_cog", "chain": 2, "crew": [ { "unit": 1, "men": 20 }, { "unit": 0, "men": 50 } ] },
+      { "name": "le Saint-Aubin", "class": "ship_nef", "chain": 2, "crew": [ { "unit": 2, "men": 30 }, { "unit": 1, "men": 30 }, { "unit": 0, "men": 60 } ] },
+      { "name": "la Marie de Dieppe", "class": "ship_cog", "chain": 2, "crew": [ { "unit": 1, "men": 20 }, { "unit": 0, "men": 50 } ] },
+      { "name": "le Saint-Nicolas de Harfleur", "class": "ship_cog", "chain": 2, "crew": [ { "unit": 1, "men": 20 }, { "unit": 0, "men": 50 } ] },
+      { "name": "la Julienne de Boulogne", "class": "ship_barge", "chain": 2, "crew": [ { "unit": 1, "men": 15 }, { "unit": 0, "men": 25 } ] },
       { "name": "la galère de Barbavera", "class": "ship_galley", "position": [300.0, -170.0], "heading_deg": 180.0, "crew": [ { "unit": 3, "men": 50 } ] },
       { "name": "la Sainte-Claire de Gênes", "class": "ship_galley", "position": [300.0, 170.0], "heading_deg": 180.0, "crew": [ { "unit": 3, "men": 50 } ] }
     ]
