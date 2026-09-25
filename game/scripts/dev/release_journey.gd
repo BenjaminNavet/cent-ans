@@ -58,7 +58,41 @@ func _ready() -> void:
 			_uncapped = true
 		elif arg.begins_with("--map-ab="):
 			_map_ab = float(arg.trim_prefix("--map-ab="))
+	_isolate()
 	_run.call_deferred()
+
+
+## Réglages, codex et sauvegardes du parcours dans un dossier à part (effacé à la fin) : le
+## joueur ne retrouve ni sauvegarde automatique ni réglage modifié, et le parcours mesure les
+## réglages par défaut.
+var _root_dir := ""
+
+
+func _isolate() -> void:
+	_root_dir = "user://rl1_journey_%d" % OS.get_process_id()
+	DirAccess.make_dir_recursive_absolute(_root_dir.path_join("saves"))
+	var root := get_tree().root
+	var facade := root.get_node_or_null("SimFacade")
+	if facade != null:
+		facade.call("use_test_saves_dir", _root_dir.path_join("saves"))
+	SaveSlots.use_test_dir(_root_dir.path_join("saves"))
+	var settings := root.get_node_or_null("Settings")
+	if settings != null:
+		settings.call("use_test_file", _root_dir.path_join("settings.cfg"))
+	var codex := root.get_node_or_null("CodexStore")
+	if codex != null:
+		codex.call("use_test_file", _root_dir.path_join("codex.json"))
+	RenderQuality.reapply(get_tree())
+
+
+func _cleanup() -> void:
+	if _root_dir == "":
+		return
+	for sub in ["saves", ""]:
+		var dir_path := _root_dir.path_join(sub) if sub != "" else _root_dir
+		for file in DirAccess.get_files_at(dir_path):
+			DirAccess.remove_absolute(dir_path.path_join(file))
+		DirAccess.remove_absolute(dir_path)
 
 
 func _run() -> void:
@@ -104,6 +138,7 @@ func _run() -> void:
 		_result["map_ab"] = await _ab(map)
 		_result["ok"] = true
 		print("JOURNEY_JSON %s" % JSON.stringify(_result))
+		_cleanup()
 		get_tree().quit(0)
 		return
 	var zooms: Dictionary = {}
@@ -136,14 +171,10 @@ func _run() -> void:
 	await _frames_passed(10)
 	# Sauvegarde dans un dossier isolé (les sauvegardes du joueur ne sont pas touchées).
 	if facade != null:
-		var saves_dir := "user://rl1_journey_%d" % OS.get_process_id()
-		facade.call("use_test_saves_dir", saves_dir)
 		var t_save := Time.get_ticks_usec()
 		var saved := bool(facade.call("save_game", "journey"))
 		_result["save_ms"] = (Time.get_ticks_usec() - t_save) / 1000.0
 		_result["save_ok"] = saved and FileAccess.file_exists(str(facade.call("save_path", "journey")))
-		DirAccess.remove_absolute(str(facade.call("save_path", "journey")))
-		DirAccess.remove_absolute(saves_dir)
 		if not _result["save_ok"]:
 			return _fail("save failed")
 	# Bataille lancée depuis la carte (même chemin que le bouton « Combattre »).
@@ -172,6 +203,7 @@ func _run() -> void:
 	_result["ok"] = true
 	_result["wall_ms"] = Time.get_ticks_msec()
 	print("JOURNEY_JSON %s" % JSON.stringify(_result))
+	_cleanup()
 	get_tree().quit(0)
 
 
@@ -179,6 +211,7 @@ func _fail(message: String) -> void:
 	_result["error"] = message
 	_result["wall_ms"] = Time.get_ticks_msec()
 	print("JOURNEY_JSON %s" % JSON.stringify(_result))
+	_cleanup()
 	get_tree().quit(1)
 
 
