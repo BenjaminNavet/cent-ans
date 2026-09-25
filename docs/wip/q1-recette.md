@@ -1,19 +1,24 @@
 # WIP Q1 — recette et intégration (nuit du 25/09)
 
-Branche `worktree-agent-a69d4c733574b0ae3`. Rapport : `docs/audit/q1-recette.md`.
+Branche `worktree-agent-a69d4c733574b0ae3`. Rapport : `docs/audit/q1-recette.md`, captures
+`docs/audit/captures/q1/`.
 
 ## Outil
 - `game/tests/q1_playtest.gd` : pilote une partie en fenêtre (clics et touches poussés dans le
-  viewport, captures numérotées, durées de fin de tour, FPS).
-  `godot --resolution 1920x1080 --path game --script res://tests/q1_playtest.gd -- --out=<dossier> --faction=fac_france --turns=12`
+  viewport, captures numérotées, durées de fin de tour, FPS). Phases : battle, siege, actions,
+  panels, turns, save (`--phase=all` par défaut).
+  `godot --resolution 1920x1080 --path game --script res://tests/q1_playtest.gd -- --out=<dossier> --faction=fac_france --turns=16`
+- Le pilote modifie `user://settings.cfg` (qualité, taille d'interface, tutoriel) : sauvegarder
+  le fichier avant, le restaurer après.
 
 ## État
-- [ ] menu → France → tours
-- [ ] recrutement, construction, déplacement, siège, bataille, auto-résolution
-- [ ] diplomatie, commerce, édits, agents, technologies, personnages, Codex
-- [ ] sauvegarde, chargement, réglages
-- [ ] Angleterre
-- [ ] 1280×720
+- [x] menu → France → 16 tours (1080p), 10 tours (720p)
+- [x] bataille depuis la carte, siège en résolution automatique, recrutement, construction, déplacement libre
+- [x] panneaux (diplomatie, cour, fiche, technologies, agents, Codex, encyclopédie, objectifs, aide, modes de carte)
+- [x] sauvegarde / chargement rapides, réglages, qualité, taille d'interface
+- [x] Angleterre 6 tours
+- [ ] édits, commerce : absents de main (C4/C5 restés dans integration/tw)
+- 8 correctifs commités (voir le rapport), 14 défauts restants priorisés.
 
 ## Prochaine étape
-Premier passage menu → campagne → tours.
+Fusion de main, build, import, smoke, rapport final.
