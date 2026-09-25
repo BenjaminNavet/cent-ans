@@ -106,6 +106,13 @@ func _init() -> void:
 		_cleanup_test_dir()
 		quit(1 if _failures > 0 else 0)
 		return
+	# Batailles seules (bataille rangée avec déploiement, puis siège) : CENT_ANS_SMOKE_ONLY=battle.
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "battle":
+		await _run_battle()
+		await _run_siege_battle()
+		_cleanup_test_dir()
+		quit(1 if _failures > 0 else 0)
+		return
 	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "ui_layout":
 		await _run_ui_layout()
 		quit(1 if _failures > 0 else 0)
