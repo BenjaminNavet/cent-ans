@@ -125,6 +125,45 @@ pour le projet à partir de sources publiques ; chaque fichier liste ses sources
 `sources` (titres d'articles de Wikipédia en français ou références d'ouvrages). Les textes de
 Wikipédia ne sont pas recopiés.
 
+## Enluminures du domaine public (`game/assets/art/`, lot AR1)
+
+Écrans de chargement, vignettes d'événements et écrans de fin : enluminures des XIVe-XVe siècles,
+**domaine public** (œuvres anonymes ou d'artistes morts depuis plus de 500 ans ; numérisations de
+la BnF/Gallica, de la British Library et d'autres fonds, publiées sur Wikimedia Commons sous la
+mention « Public domain » ou CC0). Recadrées et réduites par `tools/cent_ans_tools/art_plates.py`
+(déclarations et recadrages dans `data/ui/illustrations.json`).
+
+- `ld_crecy` : Jean Froissart, Chroniques, BnF, ms. Français 2643, f. 165v — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ABattle_of_crecy_froissart.jpg)).
+- `ld_poitiers` : Jean Froissart, Chroniques, BnF, ms. Français 2643 — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ABattle-poitiers%281356%29.jpg)).
+- `ld_najera` : Jean Froissart, Chroniques, BnF, ms. Français 2643, f. 312v — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ABattle_najera_froissart.jpg)).
+- `ld_auray` : Jean Froissart, Chroniques, BnF, ms. Français 2643 — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ABattle_of_Auray_2.jpg)).
+- `ld_calais` : Jean Froissart, Chroniques, BnF, ms. Français 2643 — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AThe_French_attempt_to_recapture_Calais_from_England_%281350%29.jpg)).
+- `ld_hennebont` : Jean Froissart, Chroniques, BnF, ms. Français 2643, f. 104v — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ASi%C3%A8ge_d%27Hennebont.jpg)).
+- `ld_reims` : Jean Froissart, Chroniques, BnF, ms. Français 2643 — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AEdouard_III_assi%C3%A8geant_Reims.jpg)).
+- `ld_sluys` : Jean Froissart, Chroniques, BnF, ms. Français 2643, f. 72r — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ABattleofSluys.jpeg)).
+- `ld_la_rochelle` : Jean Froissart, Chroniques, BnF, ms. Français 2643 — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ABataille_de_la_Rochelle.jpg)).
+- `ld_paris` : Très Riches Heures du duc de Berry, juin, musée Condé, Chantilly, ms. 65, f. 6v — Frères de Limbourg ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ALes_Tr%C3%A8s_Riches_Heures_du_duc_de_Berry_juin.jpg)).
+- `vg_plague` : Chroniques de Gilles Li Muisis, Bibliothèque royale de Belgique, ms. 13076-77, f. 24v — Pierart dou Tielt (attribué) ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ABurying_Plague_Victims_of_Tournai.jpg)).
+- `vg_revolt` : Jean Froissart, Chroniques, BnF, ms. Français 2643 (la Jacquerie à Meaux, 1358) — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AJacquerie_meaux.jpg)).
+- `vg_succession` : Grandes Chroniques de France, British Library, Royal 20 C VII, f. 216 (sacre de Charles VI) — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ASacre_Charles6_France_01.jpg)).
+- `vg_death` : Martial d'Auvergne, Vigiles de Charles VII, BnF, ms. Français 5054, f. 244v — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AVigiles_du_roi_Charles_VII-12.jpg)).
+- `vg_marriage` : Jean Froissart, Chroniques, BnF, ms. Français 2646, f. 245v — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ARichard_II_et_Isabelle_de_France_en_1396.jpg)).
+- `vg_birth` : Martial d'Auvergne, Vigiles de Charles VII, BnF, ms. Français 5054 (baptême du futur Charles VII) — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AVigiles_du_roi_Charles_VII_00.jpg)).
+- `vg_ransom` : Jean Froissart, Chroniques, bibliothèque municipale de Besançon, ms. 864, f. 172 (capture de Jean II) — Maître de Giac ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ABataille_de_Poitiers_-_BM_Besan%C3%A7on_Ms864_f172.jpg)).
+- `vg_diplomacy` : Grandes Chroniques de France, BnF, ms. Français 2813, f. 357v (hommage d'Amiens, 1329) — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AHomage_d%27Edouard_III.jpg)).
+- `vg_war` : Jean Froissart, Chroniques, British Library, Harley 4380, f. 84 — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AThe_King_of_Hungary_holding_council_in_his_tent_on_the_battlefield_-_Froissart%27s_Chronicles_%28Volume_IV%2C_part_2%29_%281470-1475%29%2C_f.84_-_BL_Harley_MS_4380.jpg)).
+- `vg_battle` : Jean Froissart, Chroniques, vers 1410 (Édouard III fait compter les morts de Crécy) — Maître de Virgile ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AEdward_III_counting_the_dead_on_the_battlefield_of_Cr%C3%A9cy.jpg)).
+- `vg_siege` : Jean Froissart, Chroniques, British Library, Royal 18 E I, f. 345 — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ACapture_of_Wark_Castle_-_Froissart%2C_Chroniques_de_France_et_d%27Angleterre%2C_Book_II_%28c.1460-1480%29%2C_f.345_-_BL_Royal_MS_18_E_I.jpg)).
+- `vg_church` : Couronnement de Clément VII (1378), archives iconographiques du palais du Roure, Avignon — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ACouronnement_Cl%C3%A9ment_VII.jpg)).
+- `vg_intrigue` : Jean Froissart, Chroniques, British Library, Royal 18 E I, f. 172 — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AMurder_of_Simon_Sudbury_-_Froissart%2C_Chroniques_de_France_et_d%27Angleterre%2C_Book_II_%28c.1460-1480%29%2C_f.172_-_BL_Royal_MS_18_E_I.jpg)).
+- `end_battle_victory` : Jean Froissart, Chroniques, BnF, ms. Français 2643 (bataille de Rosebecque) — Loyset Liédet ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3ASlagbijrozebeke.jpg)).
+- `end_battle_defeat` : Martial d'Auvergne, Vigiles de Charles VII, BnF, ms. Français 5054, f. 11 — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AVigiles_du_roi_Charles_VII_06.jpg)).
+- `end_campaign_victory` : Martial d'Auvergne, Vigiles de Charles VII, BnF, ms. Français 5054 (Charles VII devant Tartas) — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AVigiles_du_roi_Charles_VII_14.jpg)).
+- `end_campaign_defeat` : Martial d'Auvergne, Vigiles de Charles VII, BnF, ms. Français 5054 (funérailles du duc François Ier de Bretagne) — Anonyme ([Wikimedia Commons](https://commons.wikimedia.org/wiki/File%3AVigiles_du_roi_Charles_VII_36.jpg)).
+
+Images générées pour combler les manques (`ld_avignon`, `vg_famine`, `vg_treasury`, `vg_trade`) : OpenRouter
+(`openai/gpt-5-image-mini`), dépenses consignées dans `docs/budget.md` (session 7).
+
 ## Assets produits par le projet
 
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons
