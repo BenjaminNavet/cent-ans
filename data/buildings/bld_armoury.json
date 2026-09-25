@@ -32,8 +32,7 @@
   ],
   "enables_units": [
     "unit_men_at_arms_foot",
-    "unit_english_retinue",
-    "unit_culveriners"
+    "unit_english_retinue"
   ],
   "description": "Magasin d'armes et d'armures du roi : Privy Wardrobe de la Tour de Londres, artillerie du Louvre, Clos des galées de Rouen. Voir [[cdx_arsenal]].",
   "sources": [

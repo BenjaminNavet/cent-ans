@@ -38,7 +38,8 @@
     "tech_dismounted_tactics",
     "tech_coat_of_plates",
     "tech_windmills",
-    "tech_universities"
+    "tech_universities",
+    "tech_royal_taxation"
   ],
   "relations": [
     {
