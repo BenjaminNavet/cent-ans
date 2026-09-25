@@ -91,6 +91,42 @@ codex_pin_tooltip={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":84,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
 }
+map_toggle_diplomacy={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":80,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+map_mode_diplomacy={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":78,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+map_mode_religion={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":82,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+map_toggle_objectives={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":79,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+map_toggle_agents={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":71,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+encyclopedia_open={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":76,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+help_open={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":4194332,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+quick_save={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":4194336,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+quick_load={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":4194340,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
 
 [physics]
 

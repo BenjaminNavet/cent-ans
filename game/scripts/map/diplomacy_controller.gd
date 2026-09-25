@@ -93,16 +93,16 @@ func after_end_turn() -> void:
 func handle_input(event: InputEvent) -> bool:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return false
-	match (event as InputEventKey).physical_keycode:
-		KEY_P:
-			toggle_panel()
-			return true
-		KEY_N:
-			_toggle_mode(MapMode.DIPLOMACY)
-			return true
-		KEY_R:
-			_toggle_mode(MapMode.RELIGION)
-			return true
+	# U7 : actions de l'InputMap (fiche des raccourcis générée depuis celle-ci).
+	if event.is_action_pressed("map_toggle_diplomacy"):
+		toggle_panel()
+		return true
+	if event.is_action_pressed("map_mode_diplomacy"):
+		_toggle_mode(MapMode.DIPLOMACY)
+		return true
+	if event.is_action_pressed("map_mode_religion"):
+		_toggle_mode(MapMode.RELIGION)
+		return true
 	return false
 
 

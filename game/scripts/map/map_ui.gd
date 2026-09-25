@@ -173,9 +173,21 @@ func _decorate_top_bar() -> void:
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
 	income_label.tooltip_text = RichTooltip.hud("hud_income")
 	# Boutons à icône seule (le libellé passe dans l'infobulle) : la barre tient en 1440 px.
+	# U7 : chaque bouton porte la lettre de son raccourci (lue dans l'InputMap).
 	_decorate_button(court_button, "hud_court", true)
+	_add_keycap(court_button, "map_toggle_court")
 	_decorate_button(tech_button, "hud_technologies", true)
+	_add_keycap(tech_button, "map_toggle_tech")
 	_add_codex_button()
+	_add_action_button("ObjectivesButton", "⚑", "", "map_toggle_objectives",
+		"[b]Objectifs[/b]\nObjectifs historiques de votre faction et score.", tech_button.get_index() + 2)
+	_add_action_button("AgentsButton", "✦", "Agents", "map_toggle_agents",
+		"[b]Agents[/b]\nRegistre des espions, hérauts et prédicateurs.", tech_button.get_index() + 3)
+	var settings := get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.changed.connect(func(key: String) -> void:
+			if key == "input/layout":
+				refresh_keycaps())
 	# Boutons ajoutés par les contrôleurs (Diplomatie, Chronique) après ce _ready.
 	bar.child_entered_tree.connect(func(node: Node) -> void: _decorate_late_button.call_deferred(node))
 
@@ -203,6 +215,7 @@ func _decorate_late_button(node: Node) -> void:
 	var button := node as Button
 	if button.text.begins_with("Diplomatie"):
 		_decorate_button(button, "hud_diplomacy", true)
+		_add_keycap(button, "map_toggle_diplomacy")
 	elif button.text.begins_with("Chronique"):
 		_decorate_button(button, "hud_chronicle")
 
@@ -827,12 +840,11 @@ func _shortcut_input(event: InputEvent) -> void:
 		return
 	# Lot U7 (partiel) : sauvegarde rapide F5, chargement rapide F9.
 	if event is InputEventKey and event.pressed and not panels.has_modal_open():
-		var key := (event as InputEventKey).physical_keycode
-		if key == KEY_F5:
+		if event.is_action_pressed("quick_save"):
 			save_requested.emit(QUICK_SAVE_NAME)
 			get_viewport().set_input_as_handled()
 			return
-		if key == KEY_F9:
+		if event.is_action_pressed("quick_load"):
 			var path := SaveSlots.SAVES_DIR.path_join(QUICK_SAVE_NAME.validate_filename() + ".json")
 			if FileAccess.file_exists(path):
 				load_requested.emit(path)
@@ -1000,19 +1012,101 @@ func _fit_hover_label() -> void:
 	queue_layout()
 
 
-## Bouton « Codex » (H2) dans la barre du haut, après Technologies ; la touche K reste active.
+## Bouton « Codex » (H2) dans la barre du haut, après Technologies ; lot U7 : icône, libellé
+## « Codex » et lettre de raccourci (K), bien visible.
 func _add_codex_button() -> void:
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles == null or tech_button.get_parent().has_node("CodexButton"):
 		return
 	var button := Button.new()
 	button.name = "CodexButton"
-	button.tooltip_text = "Codex : l'histoire et le savoir du temps (K)"
 	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(func() -> void: bubbles.call("toggle_window"))
 	tech_button.get_parent().add_child(button)
 	tech_button.get_parent().move_child(button, tech_button.get_index() + 1)
 	if IconLibrary.has_icon("hud_codex"):
-		_decorate_button(button, "hud_codex", true)
-	else:
-		button.text = "Codex"
+		_decorate_button(button, "hud_codex")
+	button.text = "Codex"
+	button.add_theme_font_size_override("font_size", 17)
+	button.tooltip_text = "[b]Codex[/b]\nL'histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
+	_add_keycap(button, "codex_open")
+
+
+# --- Raccourcis sur les boutons (lot U7) ------------------------------------------------
+
+## [cartouche, action, bouton] des boutons de la barre.
+var _keycaps: Array = []
+
+
+## Cartouche de la touche d'`action` dans le coin bas droit de `button`, et rappel dans
+## l'infobulle (« Cour (C) »).
+func _add_keycap(button: Button, action: String) -> void:
+	if button == null or button.has_node("Keycap"):
+		return
+	var cap := Label.new()
+	cap.name = "Keycap"
+	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cap.add_theme_font_size_override("font_size", 11)
+	cap.add_theme_color_override("font_color", HudStyle.INK)
+	var box := HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.INK_SOFT)
+	box.content_margin_left = 3
+	box.content_margin_right = 3
+	box.content_margin_top = 0
+	box.content_margin_bottom = 0
+	cap.add_theme_stylebox_override("normal", box)
+	button.add_child(cap)
+	_keycaps.append([cap, action, button, button.tooltip_text])
+	button.resized.connect(func() -> void: _place_keycap(cap, button))
+	_update_keycap(_keycaps.back())
+
+
+func _update_keycap(entry: Array) -> void:
+	var cap: Label = entry[0]
+	var key := ShortcutSheet.first_key(str(entry[1]))
+	cap.text = key
+	cap.visible = key != ""
+	var button: Button = entry[2]
+	var tooltip := str(entry[3])
+	button.tooltip_text = tooltip + ("\nRaccourci : %s" % key if key != "" else "")
+	_place_keycap(cap, button)
+
+
+func _place_keycap(cap: Label, button: Button) -> void:
+	cap.size = cap.get_combined_minimum_size()
+	cap.position = button.size - cap.size + Vector2(2, 2)
+
+
+## Libellés des touches recalculés (réglage « Disposition du clavier »).
+func refresh_keycaps() -> void:
+	for entry in _keycaps:
+		if is_instance_valid(entry[0]):
+			_update_keycap(entry)
+
+
+## Bouton de la barre qui déclenche une action de l'InputMap (même chemin que le clavier).
+func _add_action_button(node_name: String, glyph: String, text: String, action: String, tooltip: String, index: int) -> Button:
+	var bar := tech_button.get_parent()
+	if bar.has_node(node_name):
+		return bar.get_node(node_name)
+	var button := Button.new()
+	button.name = node_name
+	button.focus_mode = Control.FOCUS_NONE
+	button.text = glyph if text == "" else "%s %s" % [glyph, text]
+	button.add_theme_font_size_override("font_size", 17)
+	button.custom_minimum_size = Vector2(TOP_ICON_SIZE + 22.0, 0)
+	button.set_script(RichButton)
+	button.tooltip_text = tooltip
+	button.pressed.connect(func() -> void: press_action(action))
+	bar.add_child(button)
+	bar.move_child(button, mini(index, bar.get_child_count() - 1))
+	_add_keycap(button, action)
+	return button
+
+
+## Simule l'action `action` (appui puis relâche), comme si la touche avait été frappée.
+func press_action(action: String) -> void:
+	for pressed in [true, false]:
+		var event := InputEventAction.new()
+		event.action = action
+		event.pressed = pressed
+		Input.parse_input_event(event)
