@@ -16,7 +16,7 @@ Pyramide ZG : lien symbolique `data/map/pyramid` → dépôt principal (ignoré 
 - [x] Angleterre 1280×720 (2e partie) : diplomatie, édits, actions, agent, commerce, zoom ZG, 6 tours, réglages
 - [x] naval seul jusqu'à l'écran de fin
 - [x] rapport `docs/audit/q3-recette.md`
-- [x] merge main (dc2360c6, EP inclus) ; [ ] build + smoke
+- [x] merge main (EP, ZG5b inclus), build, import, smoke : 28 OK, code 0
 
 ## Corrigé
 - 544aec3c touche du commerce R → X (R = carte religieuse, jamais atteinte)
@@ -25,4 +25,4 @@ Pyramide ZG : lien symbolique `data/map/pyramid` → dépôt principal (ignoré 
 - bb1c54ac bandeau de sortie sur l'écran de fin ; 6e28f35e barre d'agent ; 74d24f03 fin navale
 
 ## Prochaine étape
-Smoke après le merge de main, puis rapport final à l'orchestrateur.
+Terminé ; points ouverts dans `docs/audit/q3-recette.md`.
