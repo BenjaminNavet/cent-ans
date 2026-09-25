@@ -330,7 +330,9 @@ func _build_leader_seal() -> Control:
 func set_leader(general: Variant, faction: String) -> void:
 	_leader = general if general is Dictionary else {}
 	_leader_portrait = PortraitLoader.portrait_texture(str(_leader.get("character", "")))
-	_leader_arms = PortraitLoader.heraldry_texture(faction)
+	# DA1 : armes de la maison du général (`house` posé par la scène), à défaut de la faction.
+	var house := str(_leader.get("house", HouseArms.house_of(str(_leader.get("character", "")))))
+	_leader_arms = PortraitLoader.house_heraldry_texture(house, faction)
 	_refresh_leader_tooltip()
 	leader_seal.queue_redraw()
 
