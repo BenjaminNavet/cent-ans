@@ -60,6 +60,7 @@ var river_bed_image: Image
 ## `VegetationFields.landuse` (lot V2b) ; null tant qu'elle n'a pas été demandée.
 var landuse_image: Image
 var province_ids_image: Image
+var _preloaded_ids: Image = null
 var ids_bytes: PackedByteArray
 var ids_bpp: int = 3
 
@@ -114,11 +115,16 @@ func _load() -> void:
 	if not _load_heightmap():
 		return
 	var t2 := Time.get_ticks_msec()
-	land_mask = _load_image_optional("land_mask.png")
-	splat_image = _load_image_optional("splat.png", Image.FORMAT_RGBA8)
-	border_dist_image = _load_image_optional("province_border_dist.png", Image.FORMAT_RGB8)
-	coast_dist_image = _load_image_optional("coast_dist.png", Image.FORMAT_L8)
-	river_bed_image = _load_image_optional("river_bed.png", Image.FORMAT_L8)
+	# PB1 : les six masques 4096² sont décodés en parallèle (~100 ms chacun en série).
+	var masks := _load_images_parallel([["land_mask.png", -1], ["splat.png", Image.FORMAT_RGBA8],
+		["province_border_dist.png", Image.FORMAT_RGB8], ["coast_dist.png", Image.FORMAT_L8],
+		["river_bed.png", Image.FORMAT_L8], ["province_ids.png", -1]])
+	land_mask = masks[0]
+	splat_image = masks[1]
+	border_dist_image = masks[2]
+	coast_dist_image = masks[3]
+	river_bed_image = masks[4]
+	_preloaded_ids = masks[5]
 	if not _load_province_ids():
 		return
 	var t3 := Time.get_ticks_msec()
@@ -251,8 +257,19 @@ func _load_image_optional(file_name: String, format: int = -1) -> Image:
 	return img
 
 
+## `[[nom de fichier, format ou -1], …]` → images (null si absente), décodées par le pool de fils.
+func _load_images_parallel(specs: Array) -> Array:
+	var images: Array = []
+	images.resize(specs.size())
+	var task := WorkerThreadPool.add_group_task(func(i: int) -> void:
+		images[i] = _load_image_optional(str(specs[i][0]), int(specs[i][1])), specs.size(), -1, true, "map masks")
+	WorkerThreadPool.wait_for_group_task_completion(task)
+	return images
+
+
 func _load_province_ids() -> bool:
-	var img := _load_image_optional("province_ids.png")
+	var img := _preloaded_ids if _preloaded_ids != null else _load_image_optional("province_ids.png")
+	_preloaded_ids = null
 	if img == null:
 		return _fail("province_ids.png missing")
 	if img.get_format() != Image.FORMAT_RGB8:

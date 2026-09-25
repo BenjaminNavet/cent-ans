@@ -47,7 +47,7 @@ const STAGGER := [1.5, 0.8, 0.35, 1.1]
 const STUB := [0.0, 1.0, 1.0, 0.4]
 const KIND_KEYS := ["arrow", "bolt", "bullet", "javelin"]
 const MASK32 := 0xFFFFFFFF
-const FIELD_AABB := AABB(Vector3(-600, -100, -600), Vector3(2800, 700, 2400))
+const FIELD_AABB := AABB(Vector3(-1000, -100, -1000), Vector3(4400, 700, 3600))  # EP1 : jusqu’au champ 2400 × 1600
 const MAX_STAKE_ROWS := 60
 const MAX_PAVISE_ROWS := 60
 

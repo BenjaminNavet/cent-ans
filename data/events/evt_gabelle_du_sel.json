@@ -1,7 +1,7 @@
 {
   "id": "evt_gabelle_du_sel",
   "title": "La gabelle du sel",
-  "text": "La guerre coûte plus que ne rapporte le domaine. Les conseillers de [[cdx_philippe_vi|Philippe VI]] proposent de taxer ce dont nul ne peut se passer : le sel, qui conserve la viande et le poisson de l'hiver (voir la [[cdx_salaison|salaison]]). Tout le sel du royaume passerait par des greniers royaux, où il serait vendu avec un droit, la [[cdx_gabelle|gabelle]]. L'ordonnance est datée du 20 mars 1342 dans les registres, mais c'est mars 1343 pour nous : l'année ne commençait qu'à Pâques (voir le [[cdx_style_de_paques|style de Pâques]]).",
+  "text": "La guerre coûte plus que ne rapporte le domaine. Les conseillers de [[cdx_philippe_vi|Philippe VI]] proposent de taxer ce dont nul ne peut se passer : le sel, qui conserve la viande et le poisson de l'hiver (voir la [[cdx_salaison|salaison]]). Tout le sel du royaume passerait par des greniers royaux, où il serait vendu avec un droit, la [[cdx_gabelle|gabelle]]. L'ordonnance généralisant les greniers est datée de mars 1341 dans les registres, mais c'est mars 1342 pour nous : l'année ne commençait qu'à Pâques (voir le [[cdx_style_de_paques|style de Pâques]]).",
   "kind": "historical",
   "trigger": {
     "date": { "year": 1341, "season": "winter" },
@@ -40,9 +40,9 @@
     }
   ],
   "historical_date": {
-    "value": "1343-03-20",
+    "value": "1342-03-20",
     "uncertain": true,
-    "note": "Premières mesures en 1341 ; ordonnance généralisant les greniers à sel datée du 20 mars 1342 (ancien style, soit 1343 en nouveau style selon la plupart des auteurs)."
+    "note": "Ordonnance généralisant les greniers à sel, datée de mars 1341 dans les registres royaux (année comptée depuis Pâques, non depuis le 1er janvier) ; en style moderne, elle correspond donc à mars 1342, date retenue par la plupart des historiens (Cazelles, Wikipédia)."
   },
   "sources": [
     "Gabelle du sel",

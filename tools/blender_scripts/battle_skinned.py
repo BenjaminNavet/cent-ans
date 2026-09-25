@@ -338,6 +338,18 @@ def human_clip_specs():
         ("xbow_idle", "Idle", True, poses.crossbow_rest, False),
         ("xbow_walk", "Walk", True, poses.crossbow_rest, False),
         ("climb", "Idle", True, poses.climb, False),
+        # Lot EP5: standard bearers and musicians (appended: earlier rows keep their place).
+        ("std_idle", "Idle", True, poses.std_idle, False),
+        ("std_walk", "Walk", True, poses.std_walk, False),
+        ("std_run", "Run", True, poses.std_run, False),
+        ("std_wave", "Idle", True, poses.std_wave, False),
+        ("std_death", "Death", False, poses.std_death, False),
+        ("drum_idle", "Idle", True, poses.drum_idle, False),
+        ("drum_march", "Walk", True, poses.drum_march, False),
+        ("drum_beat", "Idle", True, poses.drum_beat, False),
+        ("horn_idle", "Idle", True, poses.horn_idle, False),
+        ("horn_walk", "Walk", True, poses.horn_walk, False),
+        ("horn_blow", "Idle", True, poses.horn_blow, False),
         # SG3: siege engine crews (windlass, rope, loading, rammer, pushing).
         ("crank", "Idle", True, poses.crank, False),
         ("haul", "Idle", True, poses.haul, False),
@@ -361,6 +373,7 @@ def add_human_virtuals(rig, arm, prefix="", placement=None):
     poses.REST["prop"] = prop_rest
     poses.REST["Wrist.R"] = wrist_r_rest
     poses.REST["Wrist.L"] = wrist_l_rest
+    poses.REST["Hips"] = bone_world(arm, "Hips")
     for side in ("L", "R"):
         forearm = (
             bone_world(arm, f"Wrist.{side}").to_translation()
@@ -740,13 +753,32 @@ def export_figure(fig_name, recipe, rigs):
             )
         )
         files.append(name)
-    return {
+    entry = {
         "rig": recipe["rig"],
         "lods": files,
         "tris": tris,
         "variants": recipe.get("variants", 1),
         "style": recipe.get("style", ""),
         "noble": recipe.get("noble", False),
+    }
+    entry.update(pole_entry(recipe, _arm))
+    return entry
+
+
+def pole_entry(recipe, arm):
+    """Lot EP5: `pole_top` / `pole_axis` (Godot rest space) of a standard bearer's pole.
+
+    The tip of the pole on the virtual bone `Prop` at rest: Godot moves it with the baked
+    `Prop` matrix of the frame to hang the cloth there. Empty without a `pole` recipe key.
+    """
+    if "pole" not in recipe:
+        return {}
+    fr = weapons.prop_frame(equip.Context(arm, 0, material, bone_world))
+    top = TO_GODOT @ (fr[0] + fr[2] * recipe["pole"])
+    axis = (TO_GODOT.to_3x3() @ fr[2]).normalized()
+    return {
+        "pole_top": [round(v, 5) for v in top],
+        "pole_axis": [round(v, 5) for v in axis],
     }
 
 

@@ -86,6 +86,7 @@ fn main() {
                 }),
                 siege_layout: None,
                 orders: Vec::new(),
+                standards: None,
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
             // S2: `FIRE=off` disables the siege fires, `WEATHER=clear|rain|fog|snow`
@@ -189,6 +190,7 @@ fn main() {
                 siege: None,
                 siege_layout: None,
                 orders: Vec::new(),
+                standards: None,
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
             let start = std::time::Instant::now();
@@ -239,6 +241,7 @@ fn main() {
         siege: None,
         siege_layout: None,
         orders: Vec::new(),
+        standards: None,
     };
     let mut sim = BattleSim::new(setup, 7).unwrap();
     sim.set_ai(SideId::Attacker, false);

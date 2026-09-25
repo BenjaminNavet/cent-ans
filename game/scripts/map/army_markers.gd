@@ -93,14 +93,18 @@ func setup(data: MapData, view_camera: Camera3D) -> void:
 
 ## Reconstruit les marqueurs depuis la simulation. `color_of(faction_id) -> Color`.
 func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
-	for marker in _markers.values():
-		marker.queue_free()
-	_markers.clear()
+	# PB1 : `refresh_all` suit chaque ordre du joueur et chaque fin de tour ; reconstruire toutes
+	# les figurines animées coûtait 30 à 60 ms. Un marqueur est gardé tel quel si l'armée n'a pas
+	# changé (signature ci-dessous, position exclue : replacée plus bas à chaque fois).
+	var previous := _markers
+	_markers = {}
 	_homes.clear()
 	for plate in _plates.values():
 		plate.queue_free()
 	_plates.clear()
 	if sim == null or map_data == null:
+		for marker in previous.values():
+			marker.queue_free()
 		return
 	var per_province: Dictionary = {}
 	for army_id in sim.call("get_army_ids"):
@@ -130,10 +134,20 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 				centroid = _clear_of_city(location, centroid)
 			centroid = _clear_of_landmark(centroid)
 			stack_key = "settlement:" + str(army.get("settlement", army.get("location", "")))
-		var marker: ArmyMarker = MARKER_SCENE.instantiate()
-		add_child(marker)
 		var faction: String = str(army.get("faction", ""))
-		marker.setup(army_id, army, color_of.call(faction), faction == player_faction)
+		var color: Color = color_of.call(faction)
+		var signature := _signature(army, color, faction == player_faction)
+		var marker: ArmyMarker = previous.get(army_id)
+		if marker != null and marker.get_meta("pb1_signature", "") == signature:
+			previous.erase(army_id)
+		else:
+			if marker != null:
+				previous.erase(army_id)
+				marker.queue_free()
+			marker = MARKER_SCENE.instantiate()
+			add_child(marker)
+			marker.setup(army_id, army, color, faction == player_faction)
+			marker.set_meta("pb1_signature", signature)
 		marker.base_position = Vector3(centroid.x, _ground(centroid), centroid.y)
 		var stack: int = per_province.get(stack_key, 0)
 		per_province[stack_key] = stack + 1
@@ -149,10 +163,19 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 			var plate := build_plate(marker, marker.army_id == selected_army)
 			_plate_layer.add_child(plate)
 			_plates[army_id] = plate
+	for marker in previous.values():
+		marker.queue_free()
 	if not _markers.has(selected_army):
 		selected_army = ""
 	_placement_dirty = true
 	_update_plates()
+
+
+## Tout ce que `ArmyMarker.setup` lit de l'armée, sauf sa position (replacée à chaque refresh).
+static func _signature(army: Dictionary, color: Color, player: bool) -> String:
+	var copy := army.duplicate()
+	copy.erase("position")
+	return "%s|%s|%s" % [var_to_str(copy), color.to_html(), player]
 
 
 ## Direction d'avance (coordonnées carte) : vers la prochaine étape du chemin, sinon un
