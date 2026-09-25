@@ -31,9 +31,11 @@ mod campaign_sim_victory;
 mod campaign_sim_vision;
 mod campaign_sim_weather;
 mod convert;
+mod naval_sim;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
+pub use naval_sim::NavalBattleSim;
 
 struct CentAnsExtension;
 

@@ -30,6 +30,8 @@ extends Node3D
 
 const SCREENSHOT_DELAY_FRAMES := 40
 const START_MENU_SCENE := "res://scenes/start_menu.tscn"
+## Q2 : un second clic à moins de tant de pixels du précédent alterne armée / ville.
+const REPEAT_CLICK_PX := 12.0
 
 @onready var terrain: TerrainBuilder = $Terrain
 @onready var sea: Sea = $Sea
@@ -52,6 +54,9 @@ var player_faction: String = ""
 var hovered_index: int = 0
 var selected_index: int = 0
 var selected_army: String = ""
+## Q2 : dernier clic gauche résolu (position écran, "army:<id>" ou "settlement:<id>").
+var _last_pick_position := Vector2(-1.0e6, -1.0e6)
+var _last_pick_target := ""
 ## Provinces atteignables ce tour par l'armée sélectionnée : id → coût.
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
@@ -69,6 +74,7 @@ var chronicle: ChronicleController = null  # M10
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
+var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenant »
 ## Lot C6 : paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
 var settlement_data: SettlementData = null
@@ -187,6 +193,10 @@ func _ready() -> void:
 	tutorial = TutorialController.new()  # F8
 	add_child(tutorial)
 	tutorial.setup(self)
+	next_hint = NextHintController.new()  # UX2
+	next_hint.name = "NextHintController"
+	add_child(next_hint)
+	next_hint.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -221,6 +231,7 @@ func _setup_settlements() -> void:
 	settlement_layer.settlement_selected.connect(_on_settlement_selected)
 	armies.settlement_position = settlement_layer.world_position_of  # C4
 	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
+	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
@@ -444,17 +455,40 @@ func player_army_ids() -> PackedStringArray:
 # --- Sélection ---------------------------------------------------------------------
 
 
-## Intercepteur de clic gauche du picker : vrai si une armée a été cliquée.
+## Intercepteur de clic gauche du picker : vrai si une armée ou une colonie a été cliquée.
+## Q2 : quand une armée stationne dans une ville, le clic va à ce qui est sous le curseur
+## (jeton ou figurines : l'armée ; maquette ou icône de la ville : la colonie, dont le panneau
+## ouvre recrutement, chantiers et province) ; un second clic au même endroit alterne.
 func _try_select_army(screen_position: Vector2) -> bool:
-	var army_id := armies.pick_screen(screen_position)
-	if army_id == "":
-		# C6 : clic sur une icône ou une maquette de colonie.
-		var settlement_id := settlement_layer.pick_screen(screen_position) if settlement_layer != null else ""
-		if settlement_id == "":
-			return false
-		settlement_layer.select(settlement_id)
+	var army_hit: Dictionary = armies.pick_screen_scored(screen_position)
+	var settlement_hit: Dictionary = settlement_layer.pick_screen_scored(screen_position) if settlement_layer != null else {}
+	var army_id := str(army_hit.get("id", ""))
+	var settlement_id := str(settlement_hit.get("id", ""))
+	var choose_army := army_id != ""
+	if army_id != "" and settlement_id != "":
+		var repeat := screen_position.distance_to(_last_pick_position) <= REPEAT_CLICK_PX
+		if repeat and _last_pick_target == "army:" + army_id:
+			choose_army = false
+		elif repeat and _last_pick_target == "settlement:" + settlement_id:
+			choose_army = true
+		else:
+			choose_army = float(army_hit["score"]) <= float(settlement_hit["score"])
+	_last_pick_position = screen_position
+	if choose_army:
+		_last_pick_target = "army:" + army_id
+		if settlements_ctl != null and settlements_ctl.panel != null and settlements_ctl.panel.visible:
+			settlements_ctl.panel.hide()  # alternance : un seul des deux à la fois
+			settlement_layer.select("")
+		select_army(army_id)
 		return true
-	select_army(army_id)
+	if settlement_id == "":
+		_last_pick_target = ""
+		return false
+	# C6 : clic sur une icône ou une maquette de colonie.
+	_last_pick_target = "settlement:" + settlement_id
+	if selected_army != "":
+		deselect_army()
+	settlement_layer.select(settlement_id)
 	return true
 
 
@@ -1222,8 +1256,10 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_assault()
 				"tooltips":  # F2
 					_stage_screenshot_tooltips()
-				"tutorial", "encyclopedia":  # F8
+				"tutorial", "encyclopedia", "tutorial_toc":  # F8, UX2 (sommaire)
 					tutorial.stage_screenshot(_screenshot_stage)
+				"next_hint":  # UX2 : conseil « que faire maintenant » au premier tour
+					next_hint.stage_screenshot()
 				"settlement", "settlement_orders":  # C5
 					settlements_ctl.stage_screenshot(_screenshot_stage)
 				"trade":  # C5 : routes commerciales
@@ -1475,6 +1511,9 @@ func _battles_available() -> bool:
 ## Ouvre le dialogue sur la première bataille en attente (s'il y en a une).
 func _offer_pending_battles() -> void:
 	if not _battles_available():
+		return
+	if NavalCampaign.offer(self):  # NV1 : une flotte interceptée passe avant les batailles à terre
+		_close_battle_dialog()
 		return
 	var pending: Array = sim.call("get_pending_battles")
 	if pending.is_empty():

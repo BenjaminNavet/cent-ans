@@ -21,6 +21,10 @@ pub struct SideResult {
     /// took no prisoners. The campaign may use it later (lost ransoms).
     #[serde(default)]
     pub no_quarter: bool,
+    /// The losing side left the field in good order (retreat sounded) rather
+    /// than being broken: none of its regiments routed (Q2).
+    #[serde(default)]
+    pub withdrew: bool,
 }
 
 /// Result of a battle, accepted by `CampaignState::resolve_pending_battle`.

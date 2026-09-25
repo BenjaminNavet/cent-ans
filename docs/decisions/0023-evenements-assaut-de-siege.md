@@ -56,3 +56,19 @@ versée des mâchicoulis.
   dans la fourchette de `f5d` ; brèche et engins inchangés (6/6).
 - Les tours de la porte sont dessinées écartées de ≈ 0,15 rayon au-delà des jambages ; le cœur
   les garde centrées sur les extrémités (elles ne sont pas des obstacles, seul leur tir compte).
+
+## Suite SG2 (2026-09-25) : engins animés d'après le cœur
+
+- Le cœur expose `get_units().reload` / `reload_period` (`Unit::reload_period`,
+  `shot::ENGINE_RELOAD` = 12 s, même valeur qu'avant) : le rendu ramène la verge du trébuchet au
+  treuil au fil du rechargement et commence le basculement `swing_s × release_phase` secondes
+  avant la fin du rechargement quand le régiment tire, pour que la fronde lâche à l'instant du
+  `ShotEvent` ; si le tir n'était pas prévu, le basculement part au tir et la pierre part avec un
+  léger retard, vol raccourci d'autant (l'impact reste proche des dégâts du cœur).
+- Modèles Blender à pièces nommées (`tools/blender_scripts/siege_engines.py`,
+  `game/assets/models/siege/`), animés par nœuds (`SiegeEnginesFx`), aucun clip cuit ; réglages
+  dans `data/fx/siege_engines.json` (schéma `siege_engines.schema.json`). Les figurines d'engin
+  de `BattleMeshes` ne gardent que leurs servants quand le modèle animé existe.
+- Démo : `CampaignState::debug_stage_landmark_siege` assiège la ville d'un plan (Avignon,
+  Bruges) en déclarant la guerre à son détenteur (campagne jetable) ; menu « Batailles de
+  démonstration » (`data/ui/battle_demos.json`).

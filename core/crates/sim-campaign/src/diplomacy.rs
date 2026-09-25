@@ -207,7 +207,7 @@ fn province_name(data: &GameData, id: &ProvinceId) -> String {
         .map_or_else(|| id.to_string(), |p| p.name.display.clone())
 }
 
-fn is_rebels(id: &FactionId) -> bool {
+pub(crate) fn is_rebels(id: &FactionId) -> bool {
     id.as_str() == REBELS_FACTION
 }
 
@@ -953,7 +953,7 @@ impl CampaignState {
         }
     }
 
-    fn start_war(&mut self, a: &FactionId, b: &FactionId) {
+    pub(crate) fn start_war(&mut self, a: &FactionId, b: &FactionId) {
         let turn = self.turn;
         for (x, y) in [(a, b), (b, a)] {
             let f = self.factions.get_mut(x).expect("exists");

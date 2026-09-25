@@ -262,6 +262,17 @@ func _run_start_menu() -> void:
 	await process_frame
 	_check(menu.overlay_open(), "prologue overlay should open")
 	_check(not FrontEndData.random_quote().is_empty() and FrontEndData.random_tip() != "", "loading quotes and tips expected")
+	# SG2 : batailles de démonstration (sièges d'Avignon et de Bruges dans leur plan).
+	menu.open_demos()
+	await process_frame
+	_check(menu.overlay_open() and menu._overlay is BattleDemosMenu, "demo battles overlay should open")
+	var demo_menu := menu._overlay as BattleDemosMenu
+	if demo_menu != null:
+		_check(demo_menu.buttons.has("siege_avignon") and demo_menu.buttons.has("siege_bruges"), "Avignon and Bruges demos expected")
+		for demo in demo_menu.demos:
+			if str(demo["id"]) == "siege_bruges":
+				var args := BattleDemosMenu.args_for(demo)
+				_check(args.has("--siege-landmark=bruges") and args.has("--siege-attacker=fac_france"), "Bruges demo args: %s" % str(args))
 	if _failures == 0:
 		print("smoke OK: start menu, %d cards" % menu.card_count())
 	menu.queue_free()
@@ -2298,6 +2309,11 @@ func _check_siege_f5c(scene: BattleScene) -> void:
 	_check(same, "siege scene: %d houses rendered for %d simulation houses" % [sites.size(), houses.size()])
 	await _check_battle_deployment_f5c(scene)
 	_check(not scene.hud.siege_label.text.contains("sortie"), "siege scene: no sortie at the start")
+	# FB1 : plafond de figurines (taille des unités abaissée au-delà du plafond).
+	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 4000, 15000), 2.5), "figure budget: small battle kept at Ultra")
+	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 10000, 15000), 1.5), "figure budget: large battle not capped")
+	_check(is_equal_approx(BattleScene.capped_figure_scale(1.0, 3000, 0), 1.0), "figure budget: zero budget should mean no cap")
+	_check(SettingsMenu._thousands(15000) == "15\u00a0000", "settings: thousands separator")
 	_check(BattleScene.siege_status({"pieces": [], "sortie": true}).contains("sortie de la garnison"), "siege scene: sortie not shown in the siege status")
 
 
