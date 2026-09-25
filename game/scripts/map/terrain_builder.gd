@@ -63,6 +63,8 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 @export var pyramid_manifest_path: String = ""
 @export var surface_flush_interval_ms: int = 250
 @export var max_surface_emits_per_flush: int = 2
+## Un morceau n'est recalé qu'après ce délai sans nouvelle page (E1 → E2 → E3 → E4 : un seul recalage).
+@export var surface_settle_ms: int = 700
 
 var map_data: MapData
 var material: ShaderMaterial
@@ -526,8 +528,8 @@ func _on_quadtree_surface_changed(rect: Rect2) -> void:
 	for r in range(r0, r1 + 1):
 		for c in range(c0, c1 + 1):
 			var index := r * CHUNKS + c
-			if _is_near[index] >= 1 and quadtree.chunk_top(index) != _emitted_top[index]:
-				_surface_dirty[index] = true
+			if _is_near[index] >= 1 and (quadtree.chunk_top(index) != _emitted_top[index] or _surface_dirty.has(index)):
+				_surface_dirty[index] = Time.get_ticks_msec()
 
 
 ## Signale les morceaux dont la surface a changé (pages), au plus `max_surface_emits_per_flush`
@@ -540,12 +542,22 @@ func _flush_surface_dirty(force: bool) -> void:
 	if not force and now - _surface_flush_ms < surface_flush_interval_ms:
 		return
 	_surface_flush_ms = now
-	var dirty := _surface_dirty.keys()
+	var dirty: Array = []
+	for index: int in _surface_dirty:
+		if force or now - int(_surface_dirty[index]) >= surface_settle_ms:
+			dirty.append(index)
 	if not force and dirty.size() > max_surface_emits_per_flush:
 		dirty = dirty.slice(0, max_surface_emits_per_flush)
-	for index: int in dirty:
+	var settled := dirty
+	dirty = []
+	for index: int in settled:
 		_surface_dirty.erase(index)
-		_emitted_top[index] = quadtree.chunk_top(index)
+		# Étage revenu à celui déjà signalé (page évincée puis rechargée) : rien à recaler.
+		if force or quadtree.chunk_top(index) != _emitted_top[index]:
+			_emitted_top[index] = quadtree.chunk_top(index)
+			dirty.append(index)
+	if dirty.is_empty():
+		return
 	var t0 := Time.get_ticks_usec()
 	for index: int in dirty:
 		chunk_surface_changed.emit(index)
