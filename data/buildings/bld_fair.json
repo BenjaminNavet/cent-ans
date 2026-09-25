@@ -18,17 +18,26 @@
   "effects": [
     {
       "effect": "trade_income",
-      "value": 15,
+      "value": 20,
       "mode": "percent"
     },
     {
-      "effect": "wealth",
-      "class": "burghers",
-      "value": 5
+      "effect": "goods_satisfaction",
+      "value": 10
     },
     {
-      "effect": "goods_satisfaction",
-      "value": 5
+      "effect": "wealth",
+      "value": 10,
+      "class": "burghers"
+    },
+    {
+      "effect": "unrest",
+      "value": -5,
+      "class": "burghers"
+    },
+    {
+      "effect": "research_points",
+      "value": 0.5
     }
   ],
   "description": "Foire à privilèges (foires de Champagne, déjà sur le déclin en 1337, Lendit de Saint-Denis, Chalon, Stourbridge) attirant marchands lombards et hanséates. Voir [[cdx_foire]].",

@@ -15,7 +15,8 @@
     "opulence_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Pourcentage de cet excédent dépensé par la cour chaque saison." },
     "bankruptcy_morale_penalty": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Moral perdu chaque saison par toutes les unités (armées et garnisons) tant que le trésor est négatif." },
     "supply_devastation_loss_percent": { "type": "number", "minimum": 0, "description": "Hors territoire ami : perte de ravitaillement supplémentaire (en % de la perte de saison) dans une province dévastée à 100 ; proportionnelle en dessous." },
-    "supply_devastation_recovery_cut_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "En territoire ami : part de la reprise de ravitaillement (en %) perdue dans une province dévastée à 100 ; proportionnelle en dessous." }
+    "supply_devastation_recovery_cut_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "En territoire ami : part de la reprise de ravitaillement (en %) perdue dans une province dévastée à 100 ; proportionnelle en dessous." },
+    "resource_import_multiplier": { "type": "integer", "minimum": 0, "description": "Lot B7c : prix (livres) d'une unité de ressource de construction manquante = prix de base de la ressource × ce multiplicateur. Les unités disponibles viennent des provinces productrices accessibles à la faction (une par province), réservées pendant le chantier." }
   },
   "required": [
     "event_treasury_reference_income",
@@ -27,7 +28,8 @@
     "opulence_percent",
     "bankruptcy_morale_penalty",
     "supply_devastation_loss_percent",
-    "supply_devastation_recovery_cut_percent"
+    "supply_devastation_recovery_cut_percent",
+    "resource_import_multiplier"
   ],
   "additionalProperties": false
 }

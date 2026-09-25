@@ -863,6 +863,10 @@ impl CampaignState {
                 option.reason.unwrap_or_default(),
             ));
         }
+        // B7c: the resources come from the faction's producing provinces
+        // (reserved for the construction), the rest is imported and paid.
+        let supply = self.free_supply(data, faction);
+        let draw = crate::buildings::resource_draw(data, &supply, &definition.cost.resources);
         self.factions
             .get_mut(faction)
             .expect("checked above")
@@ -873,6 +877,8 @@ impl CampaignState {
             .construction = Some(Construction {
             building: building.clone(),
             turns_left: option.turns,
+            paid: option.cost,
+            drawn: draw.drawn,
         });
         Ok(())
     }
@@ -888,10 +894,16 @@ impl CampaignState {
         let Some(construction) = settlement_state.construction.take() else {
             return Err(OrderError::NoConstruction);
         };
-        let refund = data
-            .buildings
-            .get(&construction.building)
-            .map_or(0, |b| b.cost.money * CANCEL_REFUND_PERCENT / 100);
+        // B7c: half of what was paid (imports included); pre-B7c saves
+        // did not record it and fall back on the money cost.
+        let paid = if construction.paid > 0 {
+            construction.paid
+        } else {
+            data.buildings
+                .get(&construction.building)
+                .map_or(0, |b| b.cost.money)
+        };
+        let refund = paid * CANCEL_REFUND_PERCENT / 100;
         self.factions
             .get_mut(faction)
             .expect("checked above")
@@ -1036,14 +1048,17 @@ impl CampaignState {
         if settlement.recruit_queue.len() >= slots {
             return Some(format!("file de recrutement pleine ({slots} par tour)"));
         }
-        if let Some(building) = &unit_type.required_building {
-            if !data.has_building(&settlement.buildings, building) {
-                let name = data
-                    .buildings
-                    .get(building)
-                    .map_or_else(|| building.to_string(), |b| b.name.display.clone());
-                return Some(format!("bâtiment requis : {name}"));
-            }
+        // B7c: a unit listed in some building's `enables_units` needs one of
+        // those buildings (or an upgrade of it) in the settlement.
+        let enablers: Vec<&data_model::Building> =
+            crate::buildings::enabling_buildings(data, &unit_type.id).collect();
+        if !enablers.is_empty()
+            && !enablers
+                .iter()
+                .any(|b| data.has_building(&settlement.buildings, &b.id))
+        {
+            let names: Vec<&str> = enablers.iter().map(|b| b.name.display.as_str()).collect();
+            return Some(format!("bâtiment requis : {}", names.join(" ou ")));
         }
         if let Some(tech) = &unit_type.required_technology {
             if !faction_state.technologies.contains(tech) {

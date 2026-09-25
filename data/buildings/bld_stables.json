@@ -23,15 +23,6 @@
       "mode": "percent"
     }
   ],
-  "enables_units": [
-    "unit_knights",
-    "unit_mounted_sergeants",
-    "unit_mounted_archers",
-    "unit_hobelars",
-    "unit_breton_knights",
-    "unit_ordonnance_gendarmes",
-    "unit_jinetes"
-  ],
   "description": "Élevage de destriers et de roncins ; réduit le coût de la cavalerie. Voir [[cdx_haras]].",
   "sources": [
     "Haras",

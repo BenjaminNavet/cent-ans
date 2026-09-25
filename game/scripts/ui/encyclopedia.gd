@@ -744,11 +744,13 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	var requires := PackedStringArray()
 	if str(definition.get("required_technology", "")) != "":
 		requires.append("Technologie : " + link(str(definition["required_technology"])))
-	if str(definition.get("required_building", "")) != "":
-		requires.append("Bâtiment : " + link(str(definition["required_building"])))
+	# B7c : `enables_units` des bâtiments est la seule source du bâtiment exigé (lue par le core).
 	var enabling := _referencing("buildings", "enables_units", entry_id)
 	if not enabling.is_empty():
-		requires.append("Levée dans : " + _links(enabling))
+		var enabling_links := PackedStringArray()
+		for building_id in enabling:
+			enabling_links.append(link(str(building_id)))
+		requires.append("Bâtiment exigé : %s (ou supérieur)" % " ou ".join(enabling_links))
 	var unlocking := _tech_unlocking("units", entry_id)
 	if not unlocking.is_empty() and str(definition.get("required_technology", "")) == "":
 		requires.append("Débloquée par : " + _links(unlocking))
@@ -792,10 +794,11 @@ static func _building_fiche(entry_id: String, definition: Dictionary) -> String:
 	costs.append("Entretien : %d %s / saison" % [int(definition.get("upkeep", 0)), RichTooltip.POUND])
 	var requires := PackedStringArray()
 	if str(definition.get("upgrades_from", "")) != "":
-		requires.append("Amélioration de : " + link(str(definition["upgrades_from"])))
+		requires.append("Amélioration de : %s (le remplace et garde ses effets)" % link(str(definition["upgrades_from"])))
 	for key in ["required_building", "required_technology", "required_resource"]:
 		if str(definition.get(key, "")) != "":
-			requires.append(link(str(definition[key])))
+			var note := " ou supérieur" if key == "required_building" and RichTooltip.has_upgrade(str(definition[key])) else ""
+			requires.append(link(str(definition[key])) + note)
 	if bool(definition.get("requires_coastal", false)):
 		requires.append("Province côtière")
 	if bool(definition.get("requires_river", false)):
@@ -809,7 +812,7 @@ static func _building_fiche(entry_id: String, definition: Dictionary) -> String:
 		leads.append("Améliorable en : " + _links(upgrades))
 	var enables: Array = definition.get("enables_units", [])
 	if not enables.is_empty():
-		leads.append("Permet de lever : " + _links(enables))
+		leads.append("Exigé pour lever : " + _links(enables))
 	return _join([
 		_heading(entry_id, name_of(entry_id), subtitle, "building"), _description(definition),
 		" · ".join(costs), _section("Effets", _effects(definition.get("effects", []))),
@@ -856,6 +859,8 @@ static func _resource_fiche(entry_id: String, definition: Dictionary) -> String:
 		classes.append("%s %s" % [icon_bbcode("class_" + str(class_id), 16), str(RichTooltip.CLASS_LABELS.get(class_id, class_id))])
 	if not classes.is_empty():
 		lines.append("Satisfait : " + ", ".join(classes))
+	elif definition.has("satisfies_classes"):
+		lines.append("Satisfait : aucune classe (matériau de construction ou d'armement)")
 	var used_by: Array = _referencing("buildings", "required_resource", entry_id)
 	for id in GameCatalog.definitions("buildings"):
 		var cost: Variant = GameCatalog.definitions("buildings")[id].get("cost", {})

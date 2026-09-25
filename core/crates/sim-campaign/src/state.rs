@@ -315,6 +315,14 @@ fn full_supplies() -> u8 {
 pub struct Construction {
     pub building: BuildingId,
     pub turns_left: u32,
+    /// B7c: livres paid at the start (money cost plus imported resources),
+    /// half of which `cancel_build` refunds; 0 in pre-B7c saves.
+    #[serde(default)]
+    pub paid: u32,
+    /// B7c: resource units drawn from the faction's own producing provinces
+    /// (`goods`), reserved until the construction ends.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub drawn: BTreeMap<data_model::ResourceId, u32>,
 }
 
 /// Dynamic state of a province (static data stays in [`GameData`]).

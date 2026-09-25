@@ -41,6 +41,11 @@ pub struct EconomyRules {
     /// (percent) lost in a province devastated at 100; proportional below.
     #[serde(default = "default_supply_devastation_recovery_cut_percent")]
     pub supply_devastation_recovery_cut_percent: f64,
+    /// B7c: a construction's `cost.resources` come from the provinces
+    /// producing them that the faction can reach (`goods`); each missing
+    /// unit is imported at the resource's `base_price` times this.
+    #[serde(default = "default_resource_import_multiplier")]
+    pub resource_import_multiplier: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -95,7 +100,12 @@ impl Default for EconomyRules {
             supply_devastation_loss_percent: default_supply_devastation_loss_percent(),
             supply_devastation_recovery_cut_percent:
                 default_supply_devastation_recovery_cut_percent(),
+            resource_import_multiplier: default_resource_import_multiplier(),
             description: None,
         }
     }
+}
+
+fn default_resource_import_multiplier() -> u32 {
+    100
 }

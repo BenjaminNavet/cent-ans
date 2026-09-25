@@ -21,13 +21,6 @@
       "value": 1
     }
   ],
-  "enables_units": [
-    "unit_urban_militia",
-    "unit_crossbowmen",
-    "unit_welsh_spearmen",
-    "unit_scottish_spearmen",
-    "unit_coutiliers"
-  ],
   "description": "Terrain où les capitaines présentent leurs troupes à la montre, pour être comptées et payées. Voir [[cdx_ost_feodal]].",
   "sources": [
     "Ost (armée)",

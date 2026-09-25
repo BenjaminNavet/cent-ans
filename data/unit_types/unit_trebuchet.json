@@ -30,7 +30,6 @@
     "wall_breach"
   ],
   "required_technology": "tech_siege_engineering",
-  "required_building": "bld_siege_workshop",
   "equipment": "Trébuchet à contrepoids, boulets de pierre de 50 à 100 kg, équipe de charpentiers et servants.",
   "description": "Le plus puissant engin à contrepoids ; abat les courtines et les tours en quelques jours, avant d'être supplanté par la [[cdx_bombarde|bombarde]].",
   "sources": [
