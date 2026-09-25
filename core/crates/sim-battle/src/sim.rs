@@ -1544,7 +1544,8 @@ impl BattleSim {
             };
             {
                 let crew = unit.hp / f64::from(unit.initial_soldiers.max(1));
-                works.pieces[gate].hp -= siege::RAM_DAMAGE * crew * seconds;
+                works.pieces[gate].hp -=
+                    siege::SiegeWorkRules::bundled().ram.damage_per_s * crew * seconds;
                 blows.push((unit.id, works.pieces[gate].hp <= 0.0));
                 if works.pieces[gate].hp <= 0.0 {
                     works.pieces[gate].hp = 0.0;
@@ -2176,8 +2177,11 @@ impl BattleSim {
     fn fire_at_wall(&mut self, i: usize, piece: usize) {
         let unit = &self.units[i];
         let crew = unit.hp / f64::from(unit.initial_soldiers.max(1));
-        let damage =
-            f64::from(unit.stats.siege_attack.unwrap_or(0)) * siege::ENGINE_WALL_FACTOR * crew;
+        let damage = f64::from(unit.stats.siege_attack.unwrap_or(0))
+            * siege::SiegeWorkRules::bundled()
+                .engine
+                .wall_damage_per_siege_attack
+            * crew;
         let heading = {
             let (mx, mz) = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
             angle_to(mx - unit.x, mz - unit.z)

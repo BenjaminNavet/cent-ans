@@ -97,10 +97,11 @@ fn the_ram_strikes_the_gate_in_rhythm() {
     for pair in strikes.windows(2) {
         assert!(((pair[1] - pair[0]) - RAM_PERIOD).abs() < 0.05, "{pair:?}");
     }
-    // Same wear per second as the continuous ram of M8 (4 HP/s, full crew).
+    // Same wear per second as a continuous ram (`data/rules/siege_works.json`, full crew).
+    let per_s = sim_battle::SiegeWorkRules::bundled().ram.damage_per_s;
     let lost = hp0 - last_hp;
     assert!(
-        (lost - 4.0 * RAM_PERIOD * strikes.len() as f64).abs() < 1.0,
+        (lost - per_s * RAM_PERIOD * strikes.len() as f64).abs() < 1.0,
         "{lost}"
     );
 }
@@ -381,7 +382,7 @@ fn tower_volleys_are_reported_and_the_events_are_deterministic() {
     let data = data();
     let play = || {
         let mut sim = siege(&data, &["unit_trebuchet", "unit_siege_tower"], 2, 47);
-        run(&mut sim, 420.0);
+        run(&mut sim, 600.0);
         sim.siege_fx().to_vec()
     };
     let a = play();
