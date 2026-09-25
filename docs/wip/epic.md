@@ -32,11 +32,11 @@ nuit : NV2, SG3, EQ1, PF1, DP2, AR1).
 
 | Lot | Objet | ADR | Dépend de | État |
 |---|---|---|---|---|
-| EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0031 | — | en cours (vague 1) |
-| EP2 | Horizon : relief réel (DEM) autour du lieu en anneau lointain, panoramas peints par région (mer, Alpes, Pyrénées, collines), silhouettes lointaines (clocher, château), brume de chaleur/fumée de camp | 0032 | — | en cours (vague 1) |
+| EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0031 | — | **dans integration/epic** (87b9d1ee) |
+| EP2 | Horizon : relief réel (DEM) autour du lieu en anneau lointain, panoramas peints par région (mer, Alpes, Pyrénées, collines), silhouettes lointaines (clocher, château), brume de chaleur/fumée de camp | 0032 | — | **dans integration/epic** (7d10edba) |
 | EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | en cours (vague 1) |
 | EP4 | Son de mêlée de proximité : émetteurs par front de mêlée, couches proche/moyen/lointain, grande banque CC0 (chocs, cris, râles, chevaux, ordres), foule qui monte avec l'effectif | — | — | **fusionné** a30b461b (27 clips CC0, 112 générés ; ordres criés sans source CC0 ; volumes à régler à l'oreille) |
-| EP5 | Étendards : figurine porte-étendard dédiée (pose et clips), musiciens (tambours, trompettes), étendard qui tombe, relevé ou pris (moral, écran de fin) | 0034 | — | en cours (vague 1) |
+| EP5 | Étendards : figurine porte-étendard dédiée (pose et clips), musiciens (tambours, trompettes), étendard qui tombe, relevé ou pris (moral, écran de fin) | 0034 | — | **dans integration/epic** (87b9d1ee) |
 | EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | — | EP3 | vague 2 |
 | EP7 | Cartes historiques Crécy (26/08/1346), Poitiers (19/09/1356), Azincourt (25/10/1415) : relief réel, décor d'époque, déploiement historique, entrée depuis la campagne et le menu | 0035 | EP1-EP3, EP6 | vague 2 |
 | EP8 | Mise en scène : heure du jour (aube, crépuscule), ombres de nuages, poussière des charges, fumées, oiseaux qui s'envolent, caméra cinématique au premier choc | — | EP2 | vague 2 |
@@ -54,3 +54,13 @@ CC0 gratuites (Freesound, `tools/cent_ans_tools/freesound_search.py`). Réserve 
 - 25/09 : ADR 0031 à 0035 réservées pour ce chantier (0029-0030 laissées à la nuit : PF1 prévoit un ADR).
 - Taille du champ : EP1 rend les dimensions du champ paramétriques (plus de constantes figées) ; EP3 et
   EP6 ne doivent jamais supposer 1200 × 800 et lisent les dimensions du champ.
+
+## Intégration (25/09, après la coupure de quota)
+- EP1, EP5 puis EP2 fusionnés dans `integration/epic` : conflits `sim.rs` (champs de `BattleSim`,
+  les deux gardés) et `battle_scene.gd` (brume au sol paramétrique EP1 + atmosphère EP2).
+  clippy, cargo test, pytest (436), `ep2_horizon_test`, `ep4_audio_test` : OK.
+- **Bloquant avant ff-only dans main** : le smoke général plante sur la carte de campagne
+  (`Container::_sort_children. Message queue out of memory`, soupçon UI1 + panneau EQ1), bug de main
+  pris en charge par l'orchestrateur de nuit (agent SM1). Attendre son correctif, `git merge main`,
+  smoke vert, puis ff-only.
+- EP3 relancé dans son worktree (`ep3-eau-chemins`) : règles de simulation, ADR 0033.
