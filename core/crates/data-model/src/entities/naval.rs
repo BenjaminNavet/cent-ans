@@ -12,7 +12,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 use crate::common::{LocalizedName, Sources};
-use crate::ids::{FactionId, SeaZoneId, ShipClassId, UnitTypeId};
+use crate::ids::{FactionId, SeaZoneId, SettlementId, ShipClassId, UnitTypeId};
 use crate::load::{load_entities, read_json, DataError};
 
 /// How a ship moves.
@@ -372,11 +372,44 @@ pub struct NavalFleets {
     /// French names of the seas (`sea_channel` → « la Manche »).
     #[serde(default)]
     pub sea_names: BTreeMap<SeaZoneId, String>,
+    /// Waters of a crossing from or to a port, instead of the sea's name
+    /// (`set_calais` → « le pas de Calais »), lot NV2.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub port_waters: BTreeMap<SettlementId, String>,
     /// Marines of fleets that give none.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default_marines: Option<Marines>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Sources,
+}
+
+/// Historical ship names of one faction (lot NV2).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FactionShipNames {
+    pub faction: FactionId,
+    /// Names without a home port.
+    pub names: Vec<String>,
+    /// Names of the ships of each port (« la Marguerite de Rye »).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub ports: BTreeMap<SettlementId, Vec<String>>,
+}
+
+/// `data/naval/ship_names.json` (lot NV2).
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct NavalShipNames {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub factions: Vec<FactionShipNames>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sources: Sources,
+}
+
+impl NavalShipNames {
+    pub fn of(&self, faction: &FactionId) -> Option<&FactionShipNames> {
+        self.factions.iter().find(|f| &f.faction == faction)
+    }
 }
 
 /// Everything under `data/naval/`.
@@ -385,6 +418,8 @@ pub struct NavalData {
     pub ship_classes: BTreeMap<ShipClassId, ShipClass>,
     pub rules: NavalRules,
     pub fleets: NavalFleets,
+    /// Ship names per faction and port (absent: « Nef n°1 »).
+    pub ship_names: NavalShipNames,
 }
 
 /// Folder and files of the naval data, relative to `data/`.
@@ -393,6 +428,7 @@ pub mod files {
     pub const SHIPS: &str = "ships";
     pub const RULES: &str = "rules.json";
     pub const FLEETS: &str = "fleets.json";
+    pub const SHIP_NAMES: &str = "ship_names.json";
     pub const SCENARIOS: &str = "scenarios";
 }
 
@@ -416,6 +452,10 @@ impl NavalData {
         let fleets = dir.join(files::FLEETS);
         if fleets.is_file() {
             naval.fleets = read_json(&fleets)?;
+        }
+        let names = dir.join(files::SHIP_NAMES);
+        if names.is_file() {
+            naval.ship_names = read_json(&names)?;
         }
         Ok(naval)
     }

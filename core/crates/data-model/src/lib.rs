@@ -62,7 +62,8 @@ pub use entities::landmark::{
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
 pub use entities::naval::{
-    FactionFleet, Marines, NavalData, NavalFleets, NavalRules, Propulsion, ShipClass,
+    FactionFleet, FactionShipNames, Marines, NavalData, NavalFleets, NavalRules, NavalShipNames,
+    Propulsion, ShipClass,
 };
 pub use entities::population_rules::PopulationRules;
 pub use entities::province::{

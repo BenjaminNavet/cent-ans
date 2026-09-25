@@ -12,6 +12,8 @@ const MODEL_DIR := "res://assets/models/naval/"
 const SAIL_SHADER := preload("res://shaders/campaign_sail.gdshader")
 const OAR_SHADER := preload("res://shaders/naval_oar.gdshader")
 const BANNER_SHADER := preload("res://shaders/battle_banner.gdshader")
+const HULL_SHADER := preload("res://shaders/naval_hull.gdshader")
+const PAINT_SHADER := preload("res://shaders/naval_paint.gdshader")
 const CANVAS := Color(0.78, 0.72, 0.6)
 const TRIM_GOLD := Color(0.85, 0.7, 0.25)
 const TRIM_SILVER := Color(0.82, 0.82, 0.8)
@@ -48,6 +50,8 @@ var _pivot: Node3D
 var _model: Node3D
 var _sail_mats: Array[ShaderMaterial] = []
 var _oar_mat: ShaderMaterial = null
+var _surface_mats: Array[ShaderMaterial] = []  # bois et peinture (brûlures)
+var _charred: float = 0.0
 var _oar_phase: float = 0.0
 var _flag_pivot: Node3D
 var _flag_mat: ShaderMaterial
@@ -108,11 +112,14 @@ func _build_model() -> void:
 	_dress(_model, color, heraldry)
 
 
-## Voiles (toile teinte, armes au centre), parapets et pavois, avirons.
+## Voiles (toile teinte, armes au centre), parapets et pavois, avirons ; coques en bordé à
+## clin goudronné et châteaux peints patinés (NV2, `naval_hull` et `naval_paint`).
 func _dress(root: Node, p_color: Color, arms: Texture2D) -> void:
 	_sail_mats.clear()
 	var layout: Dictionary = LAYOUT[model_key]
 	var oars: Array = layout["oars"]
+	var wood_mats := _wood_materials()
+	var paint_mats := _paint_materials(p_color)
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := child as MeshInstance3D
 		if mesh_instance.mesh == null:
@@ -134,9 +141,9 @@ func _dress(root: Node, p_color: Color, arms: Texture2D) -> void:
 					dressed.surface_set_material(surface, sail)
 					_sail_mats.append(sail)
 				"Banner", "Shield":
-					var tinted := (material as BaseMaterial3D).duplicate() as BaseMaterial3D
-					tinted.albedo_color = p_color if material.resource_name == "Banner" else p_color.darkened(0.15)
-					dressed.surface_set_material(surface, tinted)
+					dressed.surface_set_material(surface, paint_mats[material.resource_name])
+				"Hull", "Wood", "Deck":
+					dressed.surface_set_material(surface, wood_mats[material.resource_name])
 				"Oar":
 					if _oar_mat == null:
 						_oar_mat = ShaderMaterial.new()
@@ -145,6 +152,44 @@ func _dress(root: Node, p_color: Color, arms: Texture2D) -> void:
 						_oar_mat.set_shader_parameter("half_width", float(oars[1]))
 					dressed.surface_set_material(surface, _oar_mat)
 		mesh_instance.mesh = dressed
+
+
+## Bois du navire : coque (bordé à clin, goudron sous la flottaison, bande mouillée), bordages
+## et châteaux (même chêne, un ton plus clair), pont (planches calfatées). Graine : le navire.
+func _wood_materials() -> Dictionary:
+	var out := {}
+	var variation := float(id % 17) / 17.0
+	for key in ["Hull", "Wood", "Deck"]:
+		var mat := ShaderMaterial.new()
+		mat.shader = HULL_SHADER
+		mat.set_shader_parameter("seed", float(id) + 0.37)
+		mat.set_shader_parameter("deck", key == "Deck")
+		mat.set_shader_parameter("tone", (0.92 if key == "Hull" else 1.05) + 0.12 * variation)
+		mat.set_shader_parameter("wear", 0.35 + 0.4 * variation)
+		# Les galères, basses, ont la flottaison plus près du plat-bord.
+		mat.set_shader_parameter("waterline", 0.2 if model_key == "galley" else 0.3)
+		mat.set_shader_parameter("wet_band", 0.45 if model_key == "galley" else 0.7)
+		out[key] = mat
+		_surface_mats.append(mat)
+	return out
+
+
+## Parapets des châteaux (panneaux alternés, liseré) et pavois, peints aux couleurs du camp.
+func _paint_materials(p_color: Color) -> Dictionary:
+	var out := {}
+	var accent := TRIM_GOLD if p_color.get_luminance() < 0.45 else p_color.darkened(0.45)
+	for key in ["Banner", "Shield"]:
+		var mat := ShaderMaterial.new()
+		mat.shader = PAINT_SHADER
+		mat.set_shader_parameter("paint", p_color if key == "Banner" else p_color.darkened(0.15))
+		mat.set_shader_parameter("accent", accent)
+		mat.set_shader_parameter("panels", key == "Banner")
+		mat.set_shader_parameter("seed", float(id) * 1.3 + (0.0 if key == "Banner" else 7.0))
+		mat.set_shader_parameter("fade", 0.18 + 0.14 * float(id % 5) / 4.0)
+		mat.set_shader_parameter("chipping", 0.35 + 0.25 * float(id % 3) / 2.0)
+		out[key] = mat
+		_surface_mats.append(mat)
+	return out
 
 
 ## Flamme au mât (pointe dans le vent) et grande bannière de poupe aux armes du camp.
@@ -603,6 +648,11 @@ func _apply_transform(dt: float, sea: NavalSea, _wind_to: float, snap: bool) -> 
 
 
 func _update_fire(fire: float, wind_to: float, wind_strength: float) -> void:
+	# Le feu laisse le bois noirci (ne s'efface pas).
+	if fire > _charred + 0.02:
+		_charred = fire
+		for mat in _surface_mats:
+			mat.set_shader_parameter("charred", _charred)
 	if fire <= 0.02 and _fire == null:
 		return
 	if _fire == null:
