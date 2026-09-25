@@ -624,7 +624,7 @@ void fragment() {
 
 	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
 	vec3 wx_emit = vec3(0.0);
-	col = weather_ground(col, p, hc, slope, roughness, wx_emit);  // CM2 : météo
+	col = weather_ground(col, p, hc, slope, footprint, roughness, wx_emit);  // CM2 : météo
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)

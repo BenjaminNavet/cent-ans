@@ -28,6 +28,16 @@ extends Resource
 ## Croissance de la distance minimale par unité d'éloignement d'une zone plus fine.
 @export var min_distance_slope: float = 0.45
 
+## Lot ZG4b : plancher provisoire au-dessus des villes emblématiques (cercles
+## `SettlementLayer.landmark_zones()`, données `data/landmarks/`). Leurs maquettes L1/L2 sont à la
+## loupe (×3,5) et masquées au palier « site » ; rien de fin n'est dessiné dans leurs zones (ZG5b,
+## ZG6 les excluent) : sans plancher, la caméra y descendait à 0,3 unité sur un sol nu. La caméra ne
+## descend donc pas sous `landmark_min_distance` dans une zone (maquette encore crédible, au-dessus
+## du palier site), plancher adouci au-dehors avec `min_distance_slope`. **Le lot VH4** (villes
+## emblématiques à l'échelle réelle, ADR 0036 addendum « villes emblématiques ») **le lève** : 0 =
+## pas de plancher.
+@export var landmark_min_distance: float = 2.6
+
 @export var exaggeration_far: float = 4.31
 @export var exaggeration_near: float = 1.5
 @export var exaggeration_far_distance: float = 45.0
@@ -106,6 +116,20 @@ func soft_min_distance(p: Vector2, relief: Object) -> float:
 				var origin := ReliefPyramid.tile_origin(level, col, row)
 				var nearest := Vector2(clampf(p.x, origin.x, origin.x + t), clampf(p.y, origin.y, origin.y + t))
 				best = minf(best, floor_k + slope * nearest.distance_to(p))
+	return best
+
+
+## Lot ZG4b : plancher de distance au point carte `p` dû aux villes emblématiques (`zones` :
+## cercles x, z, rayon) : `landmark_min_distance` dans un cercle, décroissant de
+## `min_distance_slope` par unité au-dehors ; 0 si aucun (ou plancher désactivé).
+func landmark_floor(p: Vector2, zones: PackedVector3Array) -> float:
+	if landmark_min_distance <= 0.0:
+		return 0.0
+	var slope := maxf(min_distance_slope, 1e-3)
+	var best := 0.0
+	for zone in zones:
+		var outside := maxf(p.distance_to(Vector2(zone.x, zone.y)) - zone.z, 0.0)
+		best = maxf(best, landmark_min_distance - slope * outside)
 	return best
 
 
