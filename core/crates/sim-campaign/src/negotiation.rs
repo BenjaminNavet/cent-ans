@@ -1,4 +1,4 @@
-//! Lot DP1 (ADR 0025): negotiation « à la Total War ».
+//! Lot DP1 (ADR 0025): diplomatic negotiation.
 //!
 //! - **Treaties** with several articles (peace, truce, alliance, military
 //!   access, trade agreement, marriage, tribute, gold, cession of a province
