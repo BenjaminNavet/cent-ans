@@ -72,6 +72,7 @@ pub mod stance;
 pub mod state;
 pub mod table;
 pub mod trade;
+pub mod treaty_explain;
 pub mod turn;
 pub mod victory;
 pub mod vision;
