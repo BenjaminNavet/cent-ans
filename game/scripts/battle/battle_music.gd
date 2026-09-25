@@ -5,7 +5,8 @@ extends Node
 ## engagement (mêlée ou tir nourri) → moment critique (un camp proche de la déroute) →
 ## victoire / défaite. Aucune piste dédiée n'existe pour ces états : on réutilise et transforme
 ## `music/war.ogg` (volume, filtre passe-bas pour l'assourdir à l'approche) plutôt que d'en
-## générer, avec deux couches d'ambiance en boucle réutilisant des effets déjà présents
+## générer — la piste de base est tirée au hasard dans la liste « war » de
+## `data/audio/music.json` (via `AudioDirector.playlist`), `war.ogg` à défaut —, avec deux couches d'ambiance en boucle réutilisant des effets déjà présents
 ## (`sfx/sword_clash.ogg` pour la clameur / le fer, `sfx/march_drum.ogg` pour la percussion du
 ## moment critique) et un stinger de victoire (`fanfare`) ou de défaite (`choir`).
 ##
@@ -104,7 +105,7 @@ func setup(scene: Node) -> void:
 	_scene = scene
 	silent = DisplayServer.get_name() == "headless"
 	_ensure_bus()
-	_base = _make_player("Base", MUSIC_PATH, true)
+	_base = _make_player("Base", _pick_base_track(), true)
 	_ambience = _make_player("Ambience", AMBIENCE_PATH, true)
 	_percussion = _make_player("Percussion", PERCUSSION_PATH, true)
 	_stinger = _make_player("Stinger", "", false)
@@ -229,12 +230,20 @@ func _make_player(player_name: String, path: String, loop: bool) -> AudioStreamP
 	return player
 
 
+## Piste de base : un morceau de guerre au hasard (différent d'une bataille à l'autre).
+func _pick_base_track() -> String:
+	var director: Node = get_node_or_null("/root/AudioDirector")
+	var tracks: Array = director.call("playlist", "war") if director != null and director.has_method("playlist") else []
+	var existing := tracks.filter(func(path: String) -> bool: return ResourceLoader.exists(path))
+	return MUSIC_PATH if existing.is_empty() else str(existing.pick_random())
+
+
 static func _load(path: String, loop: bool) -> AudioStream:
 	if not ResourceLoader.exists(path):
 		return null
-	var stream := load(path) as AudioStream
-	if stream is AudioStreamOggVorbis:
-		(stream as AudioStreamOggVorbis).loop = loop
+	# Copie : `loop` ne doit pas déteindre sur la ressource partagée avec l'AudioDirector.
+	var stream := (load(path) as AudioStream).duplicate() as AudioStream
+	stream.set("loop", loop)
 	return stream
 
 

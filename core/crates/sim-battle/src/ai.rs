@@ -113,7 +113,7 @@ pub const ASSAULT_RANGE: f64 = 250.0;
 pub const ATTACKER_PATIENCE: f64 = 240.0;
 /// A weaker attacker waits this long for the defender to come to it, then
 /// engages anyway (B4: it is the side that sought the battle; armies meet
-/// within one to three minutes, as in Total War).
+/// within one to three minutes).
 pub const ATTACKER_WAIT: f64 = 90.0;
 /// A defensive side gives up waiting after this long.
 pub const DEFENDER_PATIENCE: f64 = 480.0;

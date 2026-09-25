@@ -86,8 +86,11 @@ pub mod folders {
     pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
     /// Public order tuning (lot E2), inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
+    pub const ECONOMY_RULES: &str = "economy.json";
     /// Campaign map weather (lot CM2), inside `rules/`; optional.
     pub const CAMPAIGN_WEATHER_RULES: &str = "campaign_weather.json";
+    /// Campaign difficulty levels (lot DF1), inside `rules/`; optional.
+    pub const DIFFICULTY_RULES: &str = "difficulty.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
@@ -245,9 +248,15 @@ pub struct GameData {
     /// `data/rules/population.json` (lot E2);
     /// [`crate::PopulationRules::default`] when absent.
     pub population_rules: crate::entities::population_rules::PopulationRules,
+    /// `data/rules/economy.json` (lot EQ1); [`crate::EconomyRules::default`]
+    /// when absent.
+    pub economy_rules: crate::entities::economy_rules::EconomyRules,
     /// `data/rules/campaign_weather.json` (lot CM2);
     /// [`crate::CampaignWeatherRules::default`] when absent.
     pub campaign_weather: crate::entities::campaign_weather::CampaignWeatherRules,
+    /// `data/rules/difficulty.json` (lot DF1);
+    /// [`crate::DifficultyRules::default`] when absent.
+    pub difficulty: crate::entities::difficulty::DifficultyRules,
     /// `data/retinue.json` (lot C7), absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
@@ -312,7 +321,9 @@ impl GameData {
             vision_rules: None,
             auto_resolve: Default::default(),
             population_rules: Default::default(),
+            economy_rules: Default::default(),
             campaign_weather: Default::default(),
+            difficulty: Default::default(),
             retinue: None,
             agent_rules: None,
             movement_graph: Default::default(),
@@ -374,11 +385,19 @@ impl GameData {
         if population_path.is_file() {
             data.population_rules = read_json(&population_path)?;
         }
+        let economy_path = root.join(folders::RULES).join(folders::ECONOMY_RULES);
+        if economy_path.is_file() {
+            data.economy_rules = read_json(&economy_path)?;
+        }
         let weather_path = root
             .join(folders::RULES)
             .join(folders::CAMPAIGN_WEATHER_RULES);
         if weather_path.is_file() {
             data.campaign_weather = read_json(&weather_path)?;
+        }
+        let difficulty_path = root.join(folders::RULES).join(folders::DIFFICULTY_RULES);
+        if difficulty_path.is_file() {
+            data.difficulty = read_json(&difficulty_path)?;
         }
         let retinue_path = root.join(folders::RETINUE);
         if retinue_path.is_file() {

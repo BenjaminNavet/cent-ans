@@ -51,6 +51,13 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
     }
 }
 
+/// Game data already loaded by any `CampaignSim` of this process, if any
+/// (lot DF1: the faction screen lists the difficulty levels before a
+/// campaign starts).
+pub(crate) fn loaded_data() -> Option<Arc<GameData>> {
+    shared_data(None)
+}
+
 /// Godot-facing handle on a campaign simulation.
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
@@ -223,7 +230,8 @@ impl CampaignSim {
         dict
     }
 
-    /// `{owner, controller, garrison[], siege?, unrest, devastation,
+    /// `{owner, controller, garrison[], siege?, unrest, disorder,
+    /// revolt_seasons, revolt_threshold, revolt_seasons_needed, devastation,
     /// population_total, city, settlements[]}`. Lot C4: owner, controller,
     /// garrison and siege are those of the province's city (derived).
     #[func]
@@ -243,7 +251,13 @@ impl CampaignSim {
             "garrison" => &units_array(data, &city.garrison),
             "city" => province.city.as_str(),
             "settlements" => &ids(province.settlements.iter()),
-            "unrest" => i64::from(province.unrest),
+            // EQ1: the unrest that drives revolts (class-weighted), not the
+            // province's disorder gauge, which is only one of its causes.
+            "unrest" => sim_campaign::population::weighted_unrest(&province.population).round() as i64,
+            "disorder" => i64::from(province.unrest),
+            "revolt_seasons" => i64::from(province.revolt_seasons),
+            "revolt_threshold" => data.population_rules.revolt_unrest_threshold.round() as i64,
+            "revolt_seasons_needed" => i64::from(data.population_rules.revolt_seasons),
             "devastation" => i64::from(province.devastation),
             "population_total" => province.population.total() as i64,
         };

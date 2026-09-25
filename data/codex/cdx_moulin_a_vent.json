@@ -1,0 +1,30 @@
+{
+  "id": "cdx_moulin_a_vent",
+  "title": "Le moulin à vent",
+  "category": "batiment",
+  "aliases": [
+    "moulin à vent",
+    "moulins à vent",
+    "moulin-tour",
+    "moulin de Crécy"
+  ],
+  "era": {
+    "from": "1180",
+    "to": "1500"
+  },
+  "summary": "Apparu en Europe du Nord-Ouest à la fin du XIIe siècle, le moulin à vent permet de moudre là où les rivières manquent. Sa cabane de bois pivote tout entière sur un pieu pour présenter ses ailes au vent.",
+  "body": "Les premières mentions sûres de moulins à vent en Occident datent des années 1180, en Normandie, en Ponthieu et en Angleterre. Le modèle le plus répandu est le moulin à pivot : toute la cage de bois, avec ses ailes, ses engrenages et ses meules, repose sur un gros poteau vertical, et le meunier la fait tourner à l'aide d'une longue queue pour mettre les ailes face au vent. Le moulin-tour, dont seul le toit tourne sur une tour de pierre, se répand plus tard, surtout dans le Midi. Le moulin à vent s'impose dans les plaines sèches ou plates, sans rivière assez puissante : Artois, Flandre, Beauce, East Anglia.\n\nLa nouveauté pose une question de droit : à qui appartient le vent ? Les seigneurs répondent qu'il leur revient, comme l'eau, et étendent leur banalité aux nouveaux moulins (voir [[cdx_moulin_a_eau|moulin à eau]]). Vers 1191, l'abbé Samson de Bury St Edmunds fait abattre le moulin à vent qu'un doyen avait bâti sans sa permission, parce qu'il faisait concurrence aux moulins de l'abbaye ; vers la même époque, le pape Célestin III décide que les moulins à vent doivent la dîme.\n\nPerché sur une butte, le moulin est aussi un point d'observation. Selon Froissart, [[cdx_edouard_iii|Édouard III]] dirige la bataille de [[cdx_crecy|Crécy]], le 26 août 1346, du haut d'un moulin à vent, d'où il voit toute la plaine sans combattre lui-même, laissant la gloire de la journée à son fils, le [[cdx_prince_noir|Prince noir]].",
+  "gameplay": "Bâtiment de production de niveau 1, constructible dans tous les types de colonie avec la technologie « Moulins à vent », sans condition de rivière. Coût 500 livres (ajusté selon la monnaie), 2 tours, entretien 5 livres par tour.\n\nEffets : production +8 % (la moitié du gain, +4 %, s'ajoute à l'impôt des paysans et des bourgeois ; voir [[cdx_jeu_tresor]]), richesse des paysans +2, et capacité de population de la province +10 % (voir [[cdx_jeu_population]]). Dans une province traversée par une rivière, il s'améliore en [[cdx_moulin_a_eau|moulin à eau]], qui le remplace et fait mieux pour un coût moindre.",
+  "entity": "bld_windmill",
+  "see_also": [
+    "cdx_moulin_a_eau",
+    "cdx_ble",
+    "cdx_crecy",
+    "cdx_seigneurie"
+  ],
+  "sources": [
+    "Moulin à vent",
+    "Moulin à pivot",
+    "Bataille de Crécy"
+  ]
+}

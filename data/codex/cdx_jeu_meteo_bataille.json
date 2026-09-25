@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_meteo_bataille",
+  "title": "La météo en bataille",
+  "category": "mecanique",
+  "aliases": [
+    "météo prévue",
+    "sol détrempé",
+    "sol enneigé",
+    "terre gelée",
+    "cordes d'arc mouillées"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "La pluie détend les cordes des arcs et des arbalètes et change les champs en bourbier, le brouillard raccourcit la vue, la neige fige les marches. Le ciel du jour de la bataille pèse autant qu'un renfort.",
+  "body": "Selon la tradition rapportée par les chroniqueurs, une averse éclate sur [[cdx_crecy|Crécy]] juste avant le combat : les arbalétriers génois auraient eu les cordes détendues par l'eau, tandis que les archers anglais avaient pu abriter les leurs. Le récit est discuté, mais il dit bien ce que craignaient les tireurs : une corde de chanvre mouillée perd sa force, et l'on voit mal viser sous l'averse.\n\nLa pluie fait surtout la boue. À [[cdx_azincourt|Azincourt]], la nuit du 24 au 25 octobre 1415 est pluvieuse ; au matin, le champ labouré est un bourbier où les hommes d'armes français, démontés et chargés de fer, s'enfoncent à chaque pas. Le brouillard, lui, masque les mouvements : à [[cdx_roosebeke|Roosebeke]] (27 novembre 1382), la bataille s'engage dans la brume, qui se lève sur l'armée flamande déjà prise en tenaille.\n\nL'hiver, on combat peu : les armées prennent leurs quartiers, et les rares batailles d'hiver se livrent dans le froid, sur une terre gelée ou enneigée qui épuise hommes et chevaux.",
+  "gameplay": "Le temps de la bataille est tiré selon la saison : printemps 60 % clair, 30 % pluie, 10 % brouillard ; été 80 / 15 / 5 ; automne 45 / 35 / 20 ; hiver 35 % clair, 20 % pluie, 15 % brouillard, 30 % neige. La météo de la carte de campagne n'y entre pas (elle n'a pas encore d'effet de règle). Le sol en découle : détrempé sous la pluie, enneigé sous la neige, avec des bourbiers en plus ; sous un ciel clair ou brumeux, il reste détrempé trois fois sur dix au printemps et à l'automne, et l'hiver il est enneigé (45 %), détrempé (35 %) ou gelé (20 %).\n\nEffets : pluie — justesse des arcs, arbalètes et couleuvrines ×0,6, boue plus lente (×0,45 au lieu de ×0,55) ; neige — justesse ×0,8, marche ×0,8, [[cdx_jeu_fatigue|fatigue]] ×1,3 ; sol enneigé sans chute de neige — marche ×0,9 ; brouillard — portée de tous les tireurs ×0,7. La pluie et la neige étouffent aussi les [[cdx_jeu_incendies|incendies]] de siège.\n\nEn résolution automatique : arcs et arbalètes ×0,6 sous la pluie, ×0,8 sous la neige ; tout tir ×0,7 dans le brouillard ; charges ×0,7 sur sol mouillé (pluie ou neige). Conseil : sous la pluie, misez sur l'infanterie et la cavalerie plutôt que sur le tir ; dans le brouillard, rapprochez vos archers.",
+  "see_also": ["cdx_jeu_tir", "cdx_jeu_terrain_bataille", "cdx_jeu_fatigue", "cdx_jeu_incendies", "cdx_azincourt", "cdx_crecy"],
+  "sources": ["Bataille de Crécy", "Bataille d'Azincourt", "Bataille de Roosebeke"]
+}

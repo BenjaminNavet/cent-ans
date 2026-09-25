@@ -1,0 +1,27 @@
+{
+  "id": "cdx_partie_double",
+  "title": "La comptabilité en partie double",
+  "category": "technique",
+  "aliases": [
+    "Comptabilité en partie double",
+    "partie double",
+    "Luca Pacioli",
+    "massari"
+  ],
+  "era": {
+    "from": "1340",
+    "to": "1500"
+  },
+  "summary": "Chaque somme inscrite deux fois, au débit d'un compte et au crédit d'un autre : cette méthode italienne permet de vérifier que les comptes s'équilibrent. Ses plus anciens registres complets sont ceux des massari de Gênes, en 1340.",
+  "body": "La partie double naît dans les villes marchandes italiennes à la fin du XIIIe siècle. Les registres des massari, trésoriers de la commune de Gênes, tenus selon cette méthode dès 1340, en sont le plus ancien témoin complet ; les marchands toscans comme Francesco Datini l'emploient à la fin du siècle.\n\nElle permet de connaître à tout moment l'état d'une affaire et de repérer les erreurs et les fraudes. Le moine Luca Pacioli la codifie en 1494 dans sa Summa de arithmetica, qui la répand dans toute l'Europe.",
+  "gameplay": "Recherche : 420 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_comptabilite_marchande|Comptabilité marchande]]. Effets, pour toute la faction : +8 % de revenus du commerce (sur l'assiette fiscale des bourgeois) ; +5 % sur toute l'assiette fiscale.",
+  "entity": "tech_double_entry",
+  "see_also": [
+    "cdx_comptabilite_marchande",
+    "cdx_lettre_de_change"
+  ],
+  "sources": [
+    "Comptabilité en partie double",
+    "Luca Pacioli"
+  ]
+}

@@ -3,7 +3,7 @@
   "name": {
     "display": "Franchises marchandes"
   },
-  "description": "Octroi de franchises et privilèges aux marchands et aux villes (à la manière des chartes de commune et des foires franches) : le commerce s'anime, au prix d'un peu plus de désordre parmi les métiers jaloux de leurs droits.",
+  "description": "Octroi de franchises et privilèges aux marchands et aux villes (à la manière des chartes de commune et des foires franches) : le [[cdx_jeu_commerce|commerce]] s'anime, au prix d'un peu plus de désordre parmi les métiers jaloux de leurs droits.",
   "delay_turns": 2,
   "effects": [
     { "effect": "trade_income", "value": 12, "mode": "percent" },

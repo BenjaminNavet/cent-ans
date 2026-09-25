@@ -6,7 +6,7 @@
     "name": {
       "display": "Turin",
       "local": "Turin",
-      "local_language": "lombard"
+      "local_language": "piémontais"
     },
     "lonlat": [
       7.6869,
@@ -26,7 +26,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Turin, ville piémontaise de la maison de Savoie.",
+    "description": "Turin, ville piémontaise tenue par la branche d'Achaïe de la maison de Savoie (Jacques de Savoie-Achaïe, seigneur depuis 1334).",
     "sources": [
       "Savoie-Achaïe",
       "Marquisat de Saluces",
@@ -55,7 +55,7 @@
       "bld_parish_church"
     ],
     "port": false,
-    "description": "Ville disputée entre la maison de Savoie et la branche d'Achaïe.",
+    "description": "Résidence des princes d'Achaïe, branche cadette de la maison de Savoie qui tient le Piémont.",
     "sources": [
       "Pignerol"
     ]

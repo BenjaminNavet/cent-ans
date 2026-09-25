@@ -182,6 +182,7 @@ func _build_map(grid: GridContainer) -> void:
 	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
+	_check(grid, "interface/next_hint", "Conseil : que faire maintenant", "Encart en haut à gauche de la carte qui propose l'action la plus utile du moment (clic : l'exécute). Masqué pendant le tutoriel.")
 	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),
 		"Lettres scellées et bandeau du haut. Le journal garde toutes les nouvelles.")
 
@@ -203,6 +204,19 @@ func _build_battle(grid: GridContainer) -> void:
 		"Gerbes, flaques au sol et cadavres ensanglantés. Modéré : plus discret, sans éclaboussures, traînées ni démembrements. Complet : démembrements sur les coups critiques.")
 	_options(grid, "battle/unit_size", "Taille des unités", _constant("UNIT_SIZES"), ["Petite (× 0,5)", "Normale", "Grande (× 1,5)", "Ultra (× 2,5)"],
 		"Figurines dessinées par soldat simulé : les effectifs et l'équilibre ne changent pas. Ultra est exigeant pour la carte graphique.")
+	var budgets: Array = _constant("MAX_FIGURES_CHOICES")
+	_options(grid, "battle/max_figures", "Figurines maximum", budgets, budgets.map(func(count: int) -> String: return _thousands(count)),
+		"Nombre maximal de figurines dessinées sur tout le champ de bataille. Si les armées sont plus nombreuses, la taille des unités est réduite pour tenir dans ce plafond. Baissez-le si les grandes batailles ralentissent.")
+
+
+## 15000 -> « 15 000 » (espace insécable des milliers).
+static func _thousands(count: int) -> String:
+	var digits := str(count)
+	var grouped := ""
+	while digits.length() > 3:
+		grouped = "\u00a0" + digits.right(3) + grouped
+		digits = digits.left(digits.length() - 3)
+	return digits + grouped
 
 
 ## AU1 : un curseur par bus (Général, Musique, Ambiance, Bataille, Interface, Voix).

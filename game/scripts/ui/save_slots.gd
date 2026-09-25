@@ -2,8 +2,8 @@ class_name SaveSlots
 extends RefCounted
 
 ## F3 — emplacements de sauvegarde au-dessus de `SimFacade.save_game` / `load_game` :
-## - fiche `user://saves/<nom>.meta.json` (faction, date de jeu, tour, date réelle, moteur,
-##   libellé) écrite à côté de chaque sauvegarde : la liste n'a pas à relire l'état complet ;
+## - fiche `user://saves/<nom>.meta.json` (faction, date de jeu, tour, difficulté, date réelle,
+##   moteur, libellé) écrite à côté de chaque sauvegarde : la liste n'a pas à relire l'état complet ;
 ## - vignette `user://saves/<nom>.png` (320 × 180, capture de la carte) ;
 ## - sauvegarde automatique tous les N tours sur 3 emplacements tournants `auto_1..3` ;
 ## - `latest()` pour « Continuer ».
@@ -68,6 +68,7 @@ static func write_meta(save_name: String) -> bool:
 		"faction": str(sim.call("get_player_faction")),
 		"date": str(sim.call("get_date_label")),
 		"turn": int(sim.call("get_turn")),
+		"difficulty": str(facade.call("current_difficulty")) if facade.has_method("current_difficulty") else "normal",
 		"timestamp": Time.get_datetime_string_from_system(),
 		"engine": "real" if facade.get("is_real") else "mock",
 		"path": facade.call("save_path", save_name),
@@ -125,8 +126,8 @@ static func autosave(turn: int, interval: int, thumbnail: Image = null) -> Strin
 	return save_name if save(save_name, thumbnail) else ""
 
 
-## Sauvegardes, plus récentes d'abord : `{path, name, label, faction, date, turn, timestamp,
-## engine, thumbnail}` ; la fiche `.meta.json` évite de relire l'état, sinon repli sur
+## Sauvegardes, plus récentes d'abord : `{path, name, label, faction, date, turn, difficulty,
+## timestamp, engine, thumbnail}` (`difficulty` absente des sauvegardes d'avant DF1 : Normale) ; la fiche `.meta.json` évite de relire l'état, sinon repli sur
 ## `SimFacade.read_save`.
 static func list() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
@@ -153,6 +154,7 @@ static func list() -> Array[Dictionary]:
 				"faction": str(wrapper.get("faction", "")),
 				"date": str(wrapper.get("date", "")),
 				"turn": int(wrapper.get("turn", 0)),
+				"difficulty": str(wrapper.get("difficulty", "normal")),
 				"timestamp": str(wrapper.get("timestamp", "")),
 				"engine": str(wrapper.get("engine", "mock")),
 			}

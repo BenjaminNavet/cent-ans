@@ -24,7 +24,7 @@
     "fortification_level": 3,
     "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
     "port": true,
-    "description": "Port royal fondé par Louis IX, point de départ des septième et huitième croisades, ceint d'une enceinte achevée sous Philippe III.",
+    "description": "Port royal fondé par Louis IX, point de départ des septième et huitième croisades, ceint d'une enceinte commencée sous Philippe III et achevée sous Philippe le Bel.",
     "sources": ["Aigues-Mortes", "Croisades de Louis IX"]
   },
   {
@@ -66,7 +66,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg minier du Vivarais, connu pour ses mines d'argent depuis l'Antiquité.",
+    "description": "Bourg minier du Vivarais, dont les mines d'argent ont fait la richesse aux XIIe et XIIIe siècles.",
     "sources": ["Largentière"]
   }
 ]

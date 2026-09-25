@@ -28,9 +28,10 @@
       "mode": "percent"
     }
   ],
-  "description": "Fontaines publiques, conduites et égouts ; réduit la mortalité épidémique.",
+  "description": "Fontaines publiques, aqueducs, conduites et premiers égouts voûtés (Paris, Londres) ; réduit la mortalité épidémique. Voir [[cdx_adduction_d_eau]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Aqueduc de Belleville",
+    "Great Conduit",
+    "Hugues Aubriot"
   ]
 }
