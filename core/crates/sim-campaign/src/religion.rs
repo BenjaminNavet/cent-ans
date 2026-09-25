@@ -255,6 +255,8 @@ impl CampaignState {
             if is_excommunicated(self, controller) {
                 unrest += 10.0;
             }
+            // DP1: war weariness.
+            unrest += crate::negotiation::weariness_unrest(self, controller);
         }
         let embargoed = self
             .factions

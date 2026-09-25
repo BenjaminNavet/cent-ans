@@ -794,6 +794,7 @@ fn run_3d(data: &GameData, scenario: &Scenario, runs: u32) -> Reference3d {
             defender: battle_side(data, "D", &scenario.defender),
             player_side: None,
             siege: None,
+            siege_layout: None,
             orders: Vec::new(),
         };
         let mut sim = BattleSim::new(setup, seed).expect("battle setup");
