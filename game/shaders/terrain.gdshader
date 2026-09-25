@@ -43,6 +43,13 @@ uniform float fog_cloud_amount = 0.40;
 uniform float fog_cloud_scale = 0.045;    // par pixel carte (≈ 22 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
 uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
+// M5a : brouillard par case (texture de vue R8 de la simulation, filtrage linéaire).
+uniform sampler2D fog_cells : filter_linear, repeat_disable, hint_default_white;
+uniform bool fog_by_cell = false;
+uniform vec2 fog_cells_size = vec2(4096.0, 4096.0);   // pixels carte couverts par la texture
+uniform float fog_edge_jitter_px = 7.0;
+uniform vec3 fog_rim_color = vec3(0.10, 0.065, 0.03);
+uniform float fog_rim_amount = 0.22;
 
 uniform sampler2D splat : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_splat = false;
@@ -602,11 +609,23 @@ void fragment() {
 	}
 
 	if (fog_enabled && id > 0) {
-		float fog = 1.0 - step(0.5, fog_seen(id));
-		if (other_id != id && other_id > 0) {
-			float fog_other = 1.0 - step(0.5, fog_seen(other_id));
-			if (fog_other != fog) {
-				fog = mix(0.5, fog, smoothstep(0.0, fog_feather_px, d));
+		float fog;
+		if (fog_by_cell) {
+			// M5a : vue par case (texture 512² de la simulation, 255 = vu, seuil à 128).
+			// Bord effrangé : la prise est décalée de quelques pixels par un bruit lent.
+			vec2 jitter = vec2(fbm(p * 0.035), fbm(p * 0.035 + vec2(31.7, 5.3))) - 0.5;
+			float seen_r = texture(fog_cells, (p + jitter * fog_edge_jitter_px) / fog_cells_size).r;
+			fog = 1.0 - smoothstep(0.32, 0.68, seen_r);
+			// Liseré d'encre sépia sur la lisière, comme un bord de parchemin.
+			float rim = smoothstep(0.18, 0.5, seen_r) * (1.0 - smoothstep(0.5, 0.82, seen_r));
+			col = mix(col, fog_rim_color, rim * fog_rim_amount);
+		} else {
+			fog = 1.0 - step(0.5, fog_seen(id));
+			if (other_id != id && other_id > 0) {
+				float fog_other = 1.0 - step(0.5, fog_seen(other_id));
+				if (fog_other != fog) {
+					fog = mix(0.5, fog, smoothstep(0.0, fog_feather_px, d));
+				}
 			}
 		}
 		if (fog > 0.0) {
