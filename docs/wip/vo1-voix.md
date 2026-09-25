@@ -33,10 +33,21 @@ Plafond de dépense du lot : **3 $** (estimation avant tout appel, consignée da
 - [x] Réglages (onglet Son) : « Conseiller » (`voice/advisor`), « Répliques des unités »
       (`voice/barks`) ; le curseur « Voix » existait (AU1).
 - [x] Crédits (`CREDITS.md`), budget (ligne VO1, 0,00 $ réel).
-- [x] Test headless `game/tests/vo1_voice_test.gd` OK ; smoke 24 « smoke OK », au1/ub1/bv3 OK, capture du discours fenêtrée OK, pytest 382 OK.
+- [x] Test headless `game/tests/vo1_voice_test.gd` OK ; smoke 24 « smoke OK », au1/ub1/bv3 OK, capture du discours fenêtrée OK, pytest 398 OK (après fusion de main).
 
 ## Prochaine étape
-Faire passer `vo1_voice_test.gd` et le smoke. Quand une clé OpenAI valide est disponible :
+Code terminé, main fusionné. Reste la génération, quand une clé OpenAI valide est disponible :
 `uv run --project tools python -m cent_ans_tools.voice_tts --dry-run` puis sans `--dry-run`
 (≈ 0,37 $), `godot --headless --path game --import`, consigner le coût réel (somme `cost_usd` du
 manifeste) dans `docs/budget.md`, commiter `game/assets/audio/voice/`.
+
+## Points ouverts
+- Clé `OPENAI_API_KEY` invalide (401) : aucune voix produite ; le jeu affiche les sous-titres et
+  reste muet pour les voix. Autre fournisseur (Gemini, OpenRouter) non essayé : exige l'accord de
+  l'utilisateur.
+- Le ducking du discours dure le discours entier même s'il est passé (`duck_music` ne s'annule
+  pas).
+- Les phrases du général contenant son nom (`general_lines`) ne sont pas vocalisées.
+- Factions sans langue propre (Castille, Aragon…) parlent français ; la Bretagne aussi.
+- Niveaux des voix à régler à l'oreille après génération.
+- `ruff check tools` signale 6 erreurs dans `tools/blender_scripts/` (autres lots, pas VO1).
