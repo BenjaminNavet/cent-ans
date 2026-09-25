@@ -32,22 +32,18 @@ fn seeds() -> std::ops::Range<u64> {
         .unwrap_or(1..11)
 }
 
-/// The symmetric case: 60 mirrored regiments a side, flat bare ground, no
-/// stakes, clear weather.
-fn flat_battle(seed: u64) -> BattleSim {
-    flat_battle_with(seed, &KINDS)
-}
-
-/// The same field, the attacker's army cycling through `attacker_kinds`
-/// (the defender keeps [`KINDS`]).
-fn flat_battle_with(seed: u64, attacker_kinds: &[&str]) -> BattleSim {
+/// The symmetric case: 60 regiments of 120 men a side, flat ground, no
+/// stakes, clear weather; the attacker's army cycles through
+/// `attacker_kinds` (the defender keeps [`KINDS`]). `decor`: the countryside of EP6
+/// (hamlets, plots, camps) is kept on the flattened field.
+fn flat_battle_with(seed: u64, attacker_kinds: &[&str], decor: bool) -> BattleSim {
     let data = data();
     let army: Vec<&str> = (0..60).map(|i| KINDS[i % KINDS.len()]).collect();
     let attackers: Vec<&str> = (0..60)
         .map(|i| attacker_kinds[i % attacker_kinds.len()])
         .collect();
     let mut setup = setup(units(&data, &attackers), units(&data, &army), None);
-    setup.village = Some(false);
+    setup.village = if decor { None } else { Some(false) };
     for unit in setup
         .attacker
         .units
@@ -63,12 +59,14 @@ fn flat_battle_with(seed: u64, attacker_kinds: &[&str]) -> BattleSim {
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
     let field = sim.field_mut();
-    field.forests.clear();
-    field.forest_parts.clear();
-    field.mud.clear();
-    field.mud_parts.clear();
-    field.pools.clear();
-    field.obstacles.clear();
+    if !decor {
+        field.forests.clear();
+        field.forest_parts.clear();
+        field.mud.clear();
+        field.mud_parts.clear();
+        field.pools.clear();
+        field.obstacles.clear();
+    }
     field.river = None;
     field.bridges.clear();
     for h in field.heights.iter_mut() {
@@ -88,9 +86,12 @@ fn play(sim: &mut BattleSim) -> Played {
     (sim.winner(), sim.end_kind(), sim.elapsed())
 }
 
-/// Attacker wins, all results, over the seeds.
-fn flat_results() -> (usize, Vec<Played>) {
-    let results: Vec<_> = seeds().map(|seed| play(&mut flat_battle(seed))).collect();
+/// Attacker wins, all results, over the seeds (`decor`: EP6 countryside
+/// kept on the flat field).
+fn flat_results(decor: bool) -> (usize, Vec<Played>) {
+    let results: Vec<_> = seeds()
+        .map(|seed| play(&mut flat_battle_with(seed, &KINDS, decor)))
+        .collect();
     let wins = results
         .iter()
         .filter(|r| r.0 == Some(SideId::Attacker))
@@ -103,7 +104,7 @@ fn flat_results() -> (usize, Vec<Played>) {
 #[test]
 
 fn symmetric_flat_battle_is_open() {
-    let (wins, results) = flat_results();
+    let (wins, results) = flat_results(false);
     for r in &results {
         assert!(r.0.is_some() && r.2 < 1800.0, "undecided: {r:?}");
     }
@@ -117,7 +118,17 @@ fn symmetric_flat_battle_is_open() {
 #[test]
 #[ignore = "survey"]
 fn survey() {
-    let (wins, results) = flat_results();
+    let decor = std::env::var("EP9B_DECOR").is_ok();
+    if decor {
+        let sim = flat_battle_with(1, &KINDS, true);
+        println!(
+            "decor: {} hamlets, {} obstacles, {} forests",
+            sim.field().decor.hamlets.len(),
+            sim.field().obstacles.len(),
+            sim.field().forests.len()
+        );
+    }
+    let (wins, results) = flat_results(decor);
     for (seed, r) in seeds().zip(&results) {
         println!("seed {seed}: {:?} {:?} at {:.0} s", r.0, r.1, r.2);
     }
@@ -290,7 +301,7 @@ const LONGBOW_ATTACKER: [&str; 5] = [
 /// Where the attacker's men-at-arms stand at `at` seconds, and how the
 /// battle ends (`limited`: the duel is never prolonged).
 fn won_duel(limited: bool, at: f64) -> (f64, Option<BattleEnd>, f64) {
-    let mut sim = flat_battle_with(1, &LONGBOW_ATTACKER);
+    let mut sim = flat_battle_with(1, &LONGBOW_ATTACKER, false);
     if limited {
         let mut rules = sim.duel_rules().clone();
         rules.winning_duel_max_seconds = rules.duel_limit_seconds;
@@ -327,7 +338,7 @@ fn a_won_duel_holds_the_line_then_the_battle_ends() {
 #[ignore = "probe"]
 fn probe_epic_duel() {
     for limited in [false, true] {
-        let mut sim = flat_battle_with(1, &LONGBOW_ATTACKER);
+        let mut sim = flat_battle_with(1, &LONGBOW_ATTACKER, false);
         if limited {
             let mut rules = sim.duel_rules().clone();
             rules.winning_duel_max_seconds = rules.duel_limit_seconds;
