@@ -12,6 +12,8 @@ config_version=5
 
 config/name="Cent Ans"
 run/main_scene="res://scenes/start_menu.tscn"
+boot_splash/bg_color=Color(0.16, 0.12, 0.08, 1)
+boot_splash/image="res://assets/ui/boot_splash.png"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
