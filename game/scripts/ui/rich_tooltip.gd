@@ -142,12 +142,16 @@ static func panel_style() -> StyleBoxFlat:
 
 
 ## Contrôle d'infobulle : panneau parchemin + texte BBCode (largeur fixe, hauteur ajustée).
-## Le texte passe par `CodexText.format` (liens `[[…]]` et alias du Codex rubriqués).
+## Le texte passe par `CodexText.format` (liens `[[…]]` et alias du Codex rubriqués). B1 : pied
+## « T : maintenir ouverte » (la touche T verrouille l'infobulle en bulle du Codex).
 static func make_panel(bbcode: String) -> Control:
 	var panel := PanelContainer.new()
 	if ResourceLoader.exists(THEME_PATH):
 		panel.theme = load(THEME_PATH)
 	panel.add_theme_stylebox_override("panel", panel_style())
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	panel.add_child(box)
 	var label := RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
@@ -159,10 +163,40 @@ static func make_panel(bbcode: String) -> Control:
 	label.add_theme_font_size_override("bold_font_size", 15)
 	label.text = CodexText.format(bbcode, true)
 	label.name = "Text"
-	panel.add_child(label)
+	box.add_child(label)
+	var footer := Label.new()
+	footer.name = "Footer"
+	footer.text = footer_text(title_entry(label.text) != "")
+	footer.add_theme_font_size_override("font_size", 11)
+	footer.add_theme_color_override("font_color", Color(MUTED))
+	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	box.add_child(footer)
 	last_panel = weakref(panel)
 	last_bbcode = label.text
 	return panel
+
+
+## Pied des infobulles riches : la fiche liée au titre se lit une fois l'infobulle verrouillée.
+static func footer_text(has_entry: bool) -> String:
+	return "T : maintenir ouverte" + (" · puis clic : lire la fiche" if has_entry else "")
+
+
+## Fiche du Codex liée au titre gras (`[b][url=cdx:…]`, première ligne) d'une infobulle, vide sinon.
+static func title_entry(bbcode: String) -> String:
+	var first_line := bbcode.get_slice("\n", 0)
+	var start := first_line.find("[b][url=" + CodexText.META_PREFIX)
+	if start < 0:
+		return ""
+	start += ("[b][url=" + CodexText.META_PREFIX).length()
+	var end := first_line.find("]", start)
+	return first_line.substr(start, end - start) if end > start else ""
+
+
+## B1 : nom d'une entité de jeu, lié à sa fiche du Codex (`entity` de la fiche) s'il y en a une.
+static func entity_name(id: String, name: String) -> String:
+	var codex := CodexText.store()
+	var entry := str(codex.call("entry_for_entity", id)) if codex != null and id != "" else ""
+	return CodexText.link(entry, name) if entry != "" else name
 
 
 ## Infobulle native actuellement affichée (dans sa fenêtre surgissante), sinon null.
@@ -183,6 +217,7 @@ static func thousands(value: int) -> String:
 
 static func _title(id: String, name: String, subtitle: String = "", category: String = "") -> String:
 	var icon := icon_bbcode(id, 28, category)
+	name = entity_name(id, name)
 	var head := "%s [b]%s[/b]" % [icon, name] if icon != "" else "[b]%s[/b]" % name
 	if subtitle != "":
 		head += "  [color=%s][i]%s[/i][/color]" % [MUTED, subtitle]
