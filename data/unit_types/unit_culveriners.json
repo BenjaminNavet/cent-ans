@@ -7,20 +7,20 @@
   },
   "category": "ranged",
   "source_class": "burghers",
-  "soldiers": 80,
+  "soldiers": 100,
   "cost": {
-    "money": 640
+    "money": 540
   },
-  "upkeep": 58,
+  "upkeep": 48,
   "recruit_time_turns": 2,
   "stats": {
-    "melee": 30,
-    "ranged": 62,
+    "melee": 32,
+    "ranged": 66,
     "range": 120,
     "armor": 32,
     "morale": 48,
     "speed": 40,
-    "ammo": 20
+    "ammo": 24
   },
   "abilities": [
     "pavise",

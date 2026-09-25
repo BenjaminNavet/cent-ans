@@ -10,16 +10,16 @@
   "mounted": true,
   "soldiers": 60,
   "cost": {
-    "money": 1250
+    "money": 1350
   },
-  "upkeep": 118,
+  "upkeep": 125,
   "recruit_time_turns": 3,
   "stats": {
     "melee": 74,
     "ranged": 0,
     "range": 0,
-    "armor": 74,
-    "morale": 86,
+    "armor": 72,
+    "morale": 82,
     "speed": 70,
     "ammo": 0,
     "charge": 86

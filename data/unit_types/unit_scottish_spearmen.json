@@ -9,12 +9,12 @@
   "source_class": "peasants",
   "soldiers": 120,
   "cost": {
-    "money": 480
+    "money": 560
   },
-  "upkeep": 42,
+  "upkeep": 50,
   "recruit_time_turns": 1,
   "stats": {
-    "melee": 46,
+    "melee": 44,
     "ranged": 0,
     "range": 0,
     "armor": 32,
