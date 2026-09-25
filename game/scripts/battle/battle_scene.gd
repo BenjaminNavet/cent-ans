@@ -79,9 +79,14 @@ var _screenshot_path: String = ""
 var _benchmark: bool = false
 var _bench_frames: int = 0
 var _bench_time: float = 0.0
-var _bench_cost := Vector3.ZERO  # BV1 : cumul (script, rendu CPU, rendu GPU) en ms
 var _bench_at: float = -1.0  # `--bench-at=<s>` : avance rapide avant la mesure
 var _bench_start_elapsed: float = 0.0
+var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
+var _bench_cpu_ms: float = 0.0
+## V3 : `--bench-ab=<niveau>,<niveau>` alterne deux niveaux de `RenderQuality` toutes les 30 images
+## pendant la mesure (même charge machine pour les deux), temps GPU médian par niveau.
+var _bench_ab: PackedStringArray = []
+var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
@@ -208,7 +213,12 @@ func begin() -> bool:
 		siege_view.name = "Siege"
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
-	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera)
+		# L1 : ville emblématique (Paris) en toile de fond derrière la ville assiégée.
+		var backdrop := LandmarkBackdrop.create(setup, terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
+		if backdrop != null:
+			add_child(backdrop)
+	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
 	if not _no_bv1:
 		battle.call("set_figure_scale", _unit_size())
@@ -456,19 +466,21 @@ func _process(delta: float) -> void:
 			# d'essai la coupe pour que les FPS départagent enfin les variantes.
 			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 			Engine.max_fps = 0
-			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 			if _bench_at > 0.0:
 				_fast_forward(_bench_at)
 			_bench_start_elapsed = float(battle.call("get_elapsed"))
 			soldiers.start_timing()
 			_apply_camera_override()  # banc d'essai rapproché (lot B1)
+			# V3 : temps GPU/CPU de rendu mesurés (l'écran plafonne souvent les FPS à 60).
+			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 		_bench_frames += 1
 		_bench_time += delta
-		# BV1 : temps processeur du script (ms) et du rendu (CPU / GPU, ms) : départagent les
-		# variantes quand l'écran plafonne les FPS ou que la machine est chargée.
-		var vp := get_viewport().get_viewport_rid()
 		if _bench_frames > 10:
-			_bench_cost += Vector3(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, RenderingServer.viewport_get_measured_render_time_cpu(vp), RenderingServer.viewport_get_measured_render_time_gpu(vp))
+			var viewport_rid := get_viewport().get_viewport_rid()
+			var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
+			_bench_gpu_ms += gpu_ms
+			_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+			_bench_ab_step(gpu_ms)
 		if _bench_frames == 600:
 			var fps := _bench_frames / maxf(_bench_time, 0.001)
 			var soldiers := 0
@@ -476,8 +488,11 @@ func _process(delta: float) -> void:
 				soldiers += int(unit["soldiers"])
 			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
 			print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
-			var cost := _bench_cost / float(_bench_frames - 10)
-			print("BattleScene benchmark: per frame %.2f ms script, %.2f ms render CPU, %.2f ms render GPU" % [cost.x, cost.y, cost.z])
+			print("BattleScene benchmark: render %.2f ms GPU, %.2f ms CPU per frame (quality %s)" % [_bench_gpu_ms / (_bench_frames - 10), _bench_cpu_ms / (_bench_frames - 10), RenderQuality.current()])
+			for level in _bench_ab_ms:
+				var samples: Array = _bench_ab_ms[level]
+				samples.sort()
+				print("BattleScene benchmark A/B: %s median %.2f ms GPU over %d frames" % [level, samples[samples.size() / 2], samples.size()])
 			if effects != null and effects.volleys != null:
 				print("BattleScene benchmark: volleys %d arrows, %d stuck, %d chunks drawn, figure scale %.1f" % [effects.volleys.launched, effects.volleys.stuck_count, effects.volleys.chunks_drawn(), effects.volleys.figure_scale])
 			get_tree().quit(0)
@@ -496,6 +511,24 @@ func _update_audio(delta: float) -> void:
 		if _siege_audio_timer <= 0.0:
 			_siege_audio_timer = 0.25
 			battle_audio.update_siege(battle.call("get_siege"), elapsed)
+
+
+## Banc A/B (V3) : range le temps GPU de l'image dans le niveau actif, change de niveau toutes les
+## 30 images (les 4 premières après un changement sont ignorées : mesure en retard d'une image,
+## ressources réallouées).
+func _bench_ab_step(gpu_ms: float) -> void:
+	if _bench_ab.size() < 2:
+		return
+	var slot := (_bench_frames - 11) / 30
+	var phase := (_bench_frames - 11) % 30
+	var level := _bench_ab[slot % _bench_ab.size()]
+	if phase == 0:
+		RenderQuality.override_level = level
+		RenderQuality.reapply(get_tree())
+	elif phase >= 4:
+		if not _bench_ab_ms.has(level):
+			_bench_ab_ms[level] = []
+		(_bench_ab_ms[level] as Array).append(gpu_ms)
 
 
 ## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris.
@@ -1004,6 +1037,8 @@ func _parse_cmdline() -> void:
 			_pad_units = int(arg.trim_prefix("--units="))
 		elif arg.begins_with("--bench-at="):
 			_bench_at = float(arg.trim_prefix("--bench-at="))
+		elif arg.begins_with("--bench-ab="):
+			_bench_ab = arg.trim_prefix("--bench-ab=").split(",", false)
 		elif arg == "--benchmark":
 			_benchmark = true
 			autoplay = true
