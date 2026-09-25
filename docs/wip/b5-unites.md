@@ -15,7 +15,7 @@ d'après `data/` et `core/crates` ; audit historique des JSON dans
 - [x] Sources génériques des technologies remplacées, notes d'années corrigées
 - [x] Audit écrit (`docs/histoire/audit-2026-09-25-unites.md`) + corrections JSON unités/navires + liens dans les descriptions
 - [x] Validateur Codex vert (288 fiches), pytest vert (418)
-- [ ] cargo test (en cours)
+- [x] cargo test vert (80 suites)
 - [ ] Validateur Codex, pytest, cargo test
 
 ## Prochaine étape
