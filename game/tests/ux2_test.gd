@@ -139,7 +139,9 @@ func _test_postpone_resume() -> void:
 	var overlay: TutorialOverlay = (load("res://scenes/ui/tutorial.tscn") as PackedScene).instantiate()
 	root.add_child(overlay)
 	await process_frame
-	var controller := TutorialController.new()
+	# Chargé à l'exécution : ses dépendances nomment des autoloads, absents à la compilation
+	# d'un script `--script`.
+	var controller: Node = (load("res://scripts/map/tutorial_controller.gd") as GDScript).new()
 	controller.map = fake
 	controller.overlay = overlay
 	controller.persist_progress = false
@@ -163,5 +165,6 @@ func _test_postpone_resume() -> void:
 	_check(rows.size() == TutorialSteps.count() and str((rows[3] as Button).text).begins_with("▸"), "current step marked in the table of contents")
 	(rows[7] as Button).pressed.emit()
 	_check(controller.step_index == 7 and not overlay.toc_open(), "a table-of-contents row jumps to its step and closes the list")
+	controller.free()
 	overlay.queue_free()
 	fake.queue_free()
