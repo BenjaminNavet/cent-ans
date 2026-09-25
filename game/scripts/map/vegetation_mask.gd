@@ -66,6 +66,10 @@ var _cover_high: float = 0.68
 var _essence_bytes: PackedByteArray = PackedByteArray()
 var _essence_size: Vector2i = Vector2i.ZERO
 var _essence_channels: Vector3i = Vector3i(0, 1, 2)
+## Part de résineux (0..1) lue dans un raster (lot R1 : `forest_kind.png`) ; vide : procédural.
+var _conifer_bytes: PackedByteArray = PackedByteArray()
+var _conifer_size: Vector2i = Vector2i.ZERO
+var _conifer_channel: int = 0
 var _beech: Dictionary = {"altitude_low_m": 150.0, "altitude_high_m": 750.0, "patch_px": 22.0, "south_oak": 0.35}
 
 
@@ -136,6 +140,15 @@ func _load_forest_cover() -> void:
 			_essence_size = image.get_size()
 			_essence_channels = Vector3i(int(CHANNELS.get(str(essences.get("oak", "r")), 0)),
 				int(CHANNELS.get(str(essences.get("beech", "g")), 1)), int(CHANNELS.get(str(essences.get("conifer", "b")), 2)))
+	var conifer: Variant = config.get("conifer")
+	if conifer is Dictionary:
+		var image := _rgba8(map_data.map_dir.path_join(str(conifer.get("file", ""))))
+		if image != null:
+			_conifer_bytes = image.get_data()
+			_conifer_size = image.get_size()
+			_conifer_channel = int(CHANNELS.get(str(conifer.get("channel", "r")), 0))
+		else:
+			push_warning("VegetationMask: conifer raster %s unreadable" % str(conifer.get("file", "")))
 	var beech: Variant = config.get("beech")
 	if beech is Dictionary:
 		_beech.merge(beech, true)
@@ -270,6 +283,8 @@ func sample(x: float, y: float, noise: FastNoiseLite) -> Dictionary:
 	var north := 1.0 - clampf(y / maxf(map_data.size.y, 1.0), 0.0, 1.0)
 	var conifer := smoothstep(treeline * 0.35, treeline * 0.7, height_m) + smoothstep(0.62, 0.85, north)
 	result["conifer"] = clampf(conifer + n * 0.25, 0.0, 1.0)
+	if not _conifer_bytes.is_empty():
+		result["conifer"] = _texel(_conifer_bytes, _conifer_size, map_data.size, x, y, _conifer_channel)
 	# Lot V4 : chênaie / hêtraie, par taches (le hêtre monte en altitude, recule dans le Midi).
 	var patch: float = 48.0 / float(_beech["patch_px"])
 	var n2 := noise.get_noise_2d(x * patch + 5171.0, y * patch - 3307.0)

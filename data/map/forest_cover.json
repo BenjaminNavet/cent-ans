@@ -1,10 +1,14 @@
 {
-  "description": "Sources du rendu des forêts de la carte de campagne (lot V4, A1-10). Interchangeables : une carte de couverture forestière (ex. forêts historiques vers 1340, lot R1) remplace la splatmap sans toucher au code. Chemins relatifs à data/map/. Rendu seulement.",
+  "description": "Sources du rendu des forêts de la carte de campagne (lot V4, A1-10). Interchangeables : la couverture vient de la splatmap (canal B, forêts vers 1340 du lot R1, binaire lissé) et la part de résineux de forest_kind.png (R1) ; un autre raster s'y substitue sans toucher au code. Chemins relatifs à data/map/. Rendu seulement.",
   "cover": {
     "file": "splat.png",
     "channel": "b",
-    "low": 0.22,
-    "high": 0.68
+    "low": 0.35,
+    "high": 0.65
+  },
+  "conifer": {
+    "file": "forest_kind.png",
+    "channel": "r"
   },
   "essences": null,
   "beech": {
