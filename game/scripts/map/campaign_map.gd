@@ -1171,6 +1171,15 @@ func _parse_cmdline() -> void:
 			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 			Engine.max_fps = 0
 			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+		elif arg == "--bench-map":  # ZG2 : banc panoramique + zoom (fenêtré)
+			var bench := MapBench.new()
+			bench.camera_rig = camera_rig
+			bench.terrain = terrain
+			bench.map_data = map_data
+			add_child(bench)
+		elif arg.begins_with("--camera-min="):  # ZG2 : essais et captures seulement (ZG4 : caméra)
+			camera_rig.min_distance = float(arg.trim_prefix("--camera-min="))
+			camera_rig.close_min_distance = camera_rig.min_distance
 		elif arg == "--no-fine-terrain":
 			terrain.fine_enabled = false
 		elif arg.begins_with("--fine-step="):
