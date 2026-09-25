@@ -25,8 +25,13 @@ simulation, IA qui tient ponts et gués ; rendu (eau, berges, ponts du kit Blend
   `ai::deployment_center(field, side)`), jamais 1200 × 800. À la fusion d'EP1, remplacer
   `battle_lines` par `field.attacker_line_z()/defender_line_z()` et `FIELD_WIDTH` de
   `generate_base` par `width`.
-- [ ] Fusion de main, build, pytest, smoke, captures `docs/img/ep3/`.
-- [ ] ADR 0033.
+- [x] Fusion de main (1f38c4ef, sans conflit), `core/build.sh`, fmt/clippy/`cargo test` verts,
+  pytest 435 OK, import Godot OK. Captures `docs/img/ep3/ep3_river_deploy.png` (déploiement :
+  rivière, pont, routes, ruisseau, minicarte) et `ep3_river_crossing.png` (2 min 30 : franchissement
+  au pont de pierre, tête de pont).
+- [x] ADR 0033 (`docs/decisions/0033-eau-ponts-routes.md`).
+- Smoke : plante (code 138, « Message queue out of memory ») dans l'étape campagne, avant la
+  bataille — régression connue de main (signalée dans `docs/wip/nuit.md`), sans rapport avec EP3.
 
 Note : le disque était plein (build cassé par des rlib tronquées) ; `cargo clean` fait dans ce
 worktree. Construire avec `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0` pour limiter la place.
@@ -36,4 +41,8 @@ worktree. Construire avec `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0` pour l
 (`EP3_SEEDS=0..32`). Avant EP3 : en cours (worktree détaché dans le scratchpad).
 
 ## Prochaine étape
-Faire passer les tests IA, commit, puis `git merge main`, build, smoke, ADR 0033.
+Lot terminé, prêt à fusionner dans `integration/epic`. Points ouverts : à la fusion d'EP1,
+remplacer `hydro::battle_lines` et le `FIELD_WIDTH` passé à `shape_river` (voir plus haut) ;
+en déploiement, une rivière proche de la ligne peut faire sortir des chevaliers de la zone
+(message « doivent être placés dans votre zone ») — à vérifier avec EP1 (zones paramétriques) ;
+équilibrage par la sonde `ep3_probe`.
