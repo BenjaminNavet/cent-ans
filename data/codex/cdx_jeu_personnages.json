@@ -1,0 +1,42 @@
+{
+  "id": "cdx_jeu_personnages",
+  "title": "Personnages, généraux, traits et compétences",
+  "category": "mecanique",
+  "aliases": [
+    "personnage",
+    "personnages",
+    "général",
+    "généraux",
+    "traits",
+    "compétence",
+    "compétences",
+    "arbre de compétences",
+    "points de compétence",
+    "commandement",
+    "gouvernance",
+    "expérience",
+    "régence",
+    "gouverneur"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Rois, princes et capitaines vieillissent, se marient, meurent et se succèdent. Ils gagnent de l'expérience, apprennent des compétences en trois branches, Commandement, Gouvernance et Cour, et portent des traits qui changent leurs armées et leurs provinces.",
+  "body": "La guerre de Cent Ans est une affaire de personnes autant que de royaumes. La démence de [[cdx_charles_vi|Charles VI]], la captivité de [[cdx_jean_ii|Jean II]], la mort prématurée d'[[cdx_henri_v|Henri V]] en 1422 et la minorité de son fils changent le cours du conflit plus sûrement que bien des batailles. Un roi mineur ou malade ouvre la voie aux régences et aux querelles de princes, comme celle des [[cdx_armagnacs_bourguignons|Armagnacs et des Bourguignons]].\n\nLes capitaines se forment sur le terrain. [[cdx_du_guesclin|Bertrand du Guesclin]], petit noble breton, gagne ses galons dans la [[cdx_guerre_de_succession_de_bretagne|guerre de Bretagne]] avant de devenir connétable ; [[cdx_john_chandos|John Chandos]] et [[cdx_robert_knolles|Robert Knolles]] doivent leur fortune à la guerre. Les contemporains jugent les princes sur leurs vertus, largesse, prouesse, sagesse, piété, que les « miroirs des princes » enseignent aux héritiers.\n\nLa succession obéit à des lois différentes : en France, l'exclusion des femmes, fixée en 1316 et 1328 puis justifiée par la [[cdx_succession_1328|loi salique]] ; en Angleterre et en Bretagne, la transmission possible par les femmes, source des prétentions d'[[cdx_edouard_iii|Édouard III]] et de la guerre de Bretagne.",
+  "gameplay": "La fiche personnage montre trois branches notées de 0 à 10 : Commandement, Gouvernance et Cour. Un général gagne 10 points d'expérience par bataille, 20 s'il la gagne ; un gouverneur 2 par tour. Le point de compétence coûte 100 d'expérience jusqu'à trois compétences apprises, 200 jusqu'à six, puis 300. L'« Arbre de compétences » compte 30 compétences, 10 par branche, sur trois rangs coûtant 1, 2 ou 3 points ; chaque compétence apprise relève sa branche d'un niveau. En bataille, chaque point de Commandement ajoute 3 % à la force de l'armée ; le plus haut Commandement prend la tête d'une coalition. Un gouverneur (« Nommer gouverneur ») applique ses effets à la province qu'il gouverne.\n\nLes 59 traits se répartissent en personnalité, physique, martial, gouvernance et acquis ; deux traits opposés s'excluent. Certains se gagnent : « Vétéran » après 5 batailles, « Maître des sièges » après 3 sièges gagnés, « Cruel » après 3 chevauchées, « Blessé » (150 ‰ après une défaite), et d'autres par la [[cdx_jeu_chronique|chronique]] ; chaque enfant naît avec un trait de personnalité. Compagnons : voir [[cdx_jeu_suite|suite]].\n\nLa mort naturelle menace à partir de 40 ans (5 ‰ par saison, 20 ‰ de 60 à 74 ans, 80 ‰ au-delà ; double pour un maladif ; les personnages historiques ne meurent pas de mort naturelle avant les deux ans qui précèdent leur mort réelle) ; un général vaincu meurt dans 5 % des cas, un souverain dans 1 %. La majorité est à 15 ans, le mariage possible dès 14 ans, et chaque hiver un couple fécond (mère de 16 à 45 ans) a 25 % de chances d'avoir un enfant. La succession suit la loi du royaume (salique, préférence masculine, cognatique ou élective) ; un souverain mineur ou captif impose une régence, qui ajoute 5 de mécontentement à chaque province. Pour les captifs, voir [[cdx_rancon|rançon]].",
+  "see_also": [
+    "cdx_jeu_suite",
+    "cdx_jeu_recrutement",
+    "cdx_succession_1328",
+    "cdx_rancon",
+    "cdx_du_guesclin",
+    "cdx_jeu_diplomatie"
+  ],
+  "sources": [
+    "Connétable de France",
+    "Loi salique",
+    "Miroir des princes",
+    "Régence"
+  ]
+}
