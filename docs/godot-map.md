@@ -652,6 +652,67 @@ après changement de niveau).
 - Les rubans et hameaux ne sont construits que sur les tuiles au niveau proche ou fin (≤ 512 unités de
   la caméra), largement au-delà du champ utile en vue comté.
 
+## Vue d'ensemble ZG : carte zoomable jusqu'à 1-5 m (ADR 0036)
+
+Le chantier ZG rend la carte de campagne zoomable du continent jusqu'au terrain à quelques mètres,
+en trois paliers de relief (1 : 180-90 m, 2 : 45-22 m, 3 : 11-2,8 m sur 34 zones historiques).
+Tout est rendu seulement : aucune règle de jeu ne lit la pyramide.
+
+| Lot | Contenu | Où lire |
+|---|---|---|
+| ZG0 | ADR, manifeste `data/map/relief_pyramid.json`, zones `detail_zones.json`, squelettes | ADR 0036 |
+| ZG1 | Pyramide E1-E4 (`geo pyramid`) | `docs/geo.md`, « Pyramide de relief, paliers 1-2 » |
+| ZG2 | Quadtree streamé, pages de hauteurs, surface côté processeur | ci-dessous, « Relief streamé » |
+| ZG3 / ZG3b | Relief E5-E7 des zones (`geo detail-dem`), correctif du rehaussement | `docs/geo.md`, « Relief palier 3 » |
+| ZG4 / ZG4b | Caméra rapprochée par étage, exagération verticale dynamique ; correctifs de recette | « Caméra rapprochée et exagération verticale » |
+| ZG5a / ZG5b | Fleuves et routes fins, ancrages (données) ; rubans, lit creusé, parcellaire (rendu) | `docs/geo.md`, « Hydrographie fine » ; « Hydrographie fine, routes drapées… » |
+| ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | « Villes ordinaires à l'échelle réelle » |
+| ZG7a / ZG7b | Perf et finitions ; cache absent, export, docs, crédits | ce paragraphe ; `docs/wip/zg7*.md` |
+| ZG8 | Relief local exagéré « façon Total War » | « Relief exagéré façon Total War » |
+
+**Cache du relief fin.** Tuiles E1-E7 et fleuves/routes fins sous `data/map/pyramid/` (≈ 2,8 Go,
+hors git). Une seule commande le régénère dans l'ordre, avec reprise :
+`uv run --project tools cent-ans geo relief-all` (`--check` : ce qui manque ; `docs/geo.md`,
+« Cache du relief fin »). Au chargement de la campagne, `ReliefCacheStatus`
+(`scripts/map/relief_cache_status.gd`) lit le manifeste et cherche sur le disque au plus 24 tuiles
+par étage (réparties, bornes comprises) et autant pour les fleuves et routes fins : états
+`DISABLED` (pas de manifeste listant des tuiles : fixtures, essais), `COMPLETE`, `PARTIAL`,
+`MISSING`. Le résultat est journalisé (`ReliefCache: …`, avertissement si incomplet) et, si le cache
+manque en tout ou partie, `ReliefCacheNotice` (`scripts/map/relief_cache_notice.gd`) affiche sous
+la barre supérieure un avis non bloquant « Relief rapproché limité / incomplet » : ce qui manque, la
+commande (champ sélectionnable, bouton « Copier ») ou, dans le jeu exporté, « réinstallez le jeu
+complet… », et « Fermer ». Une fois par session (`ReliefCacheNotice.shown_this_session`). Ignoré avec
+`--no-pyramid` ou `--pyramid-dir=`. Test : `tests/zg7b_cache_test.gd`.
+
+**Où le jeu cherche le relief** (`MapPaths.relief_root_for`, dossier contenant `pyramid/`) :
+variable `CENT_ANS_RELIEF_DIR`, puis `data/map/` (dépôt ; jeu exporté avec le relief dans
+`Cent Ans.app/Contents/Resources/data/map/pyramid`), puis un dossier « Cent Ans relief » à côté de
+l'application (livraison séparée), puis `user://relief`. `TerrainBuilder` (pyramide) et
+`FineGeoLayer` (fleuves, routes) lisent leurs tuiles sous cette racine ; les manifestes restent dans
+`data/map/`. Export : `CENT_ANS_EXPORT_RELIEF=bundle|external|none tools/export_macos.sh`
+(`cent-ans export-data`, voir l'addendum ZG7b de l'ADR 0036).
+
+**Réglages** (ressources, modifiables sans code) :
+- `resources/close_camera.tres` (`CloseCameraProfile`, ZG4/ZG4b) : distance minimale par étage E0-E7,
+  plancher au-dessus des villes emblématiques (`landmark_min_distance`), exagération verticale loin /
+  près et son pas de quantification, inclinaison, plans de découpe ;
+- `resources/relief_exaggeration.tres` (`ReliefExaggerationProfile`, ZG8) : `enabled`, exagération
+  de près (`near_exaggeration`), gains de relief local (`gain_far`, `gain_near`), calcul du fond de
+  vallée (`floor_*`), roche des falaises (`cliff_slope_*`), soleil de l'ombrage.
+
+**Drapeaux de ligne de commande** (après `--`) :
+- désactiver : `--no-pyramid` (relief E0 seul, comportement d'avant ZG), `--no-fine-geo` (ni
+  fleuves ni routes fins), `--no-towns` (villes ZG6), `--no-relief-exaggeration` (ZG8 → rendu ZG4
+  exact), `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
+- essais : `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--camera-min=N`,
+  `--qt-debug=1|2`, `--fine-debug`, `--town-lod=blocks|detail` ;
+- banc : `--stage=map --hide-armies --bench-map` (panoramique + descentes ; `--bench-distance`,
+  `--bench-seconds`, `--bench-descent-only`, `--bench-towns`), voir « Options, test et banc ».
+
+**Tests headless** : `tests/zg2_quadtree_test.gd`, `zg4_camera_test.gd`, `zg5b_fine_geo_test.gd`,
+`zg6_towns_test.gd`, `zg7b_cache_test.gd`, `zg8_relief_test.gd` (captures : `zg8_relief_shots.gd`),
+tous sans le vrai cache (pyramides factices dans `user://`).
+
 ## Relief streamé : pyramide et quadtree (lot ZG2, ADR 0036)
 
 Quand la pyramide de relief est en cache (`data/map/relief_pyramid.json` + tuiles non versionnées

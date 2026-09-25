@@ -7,6 +7,11 @@ extends Node
 ## (utilisée par le smoke test pour pointer sur `game/tests/fixtures`).
 
 const ENV_VAR := "CENT_ANS_DATA_DIR"
+## Lot ZG7b (ADR 0036) : dossier contenant `pyramid/` (cache du relief fin, ~3 Go, non versionné
+## et hors `.pck`) quand il n'est pas dans `data/map/`.
+const RELIEF_ENV_VAR := "CENT_ANS_RELIEF_DIR"
+## Nom du dossier de relief livré à part, posé à côté de l'application (`Cent Ans.app`).
+const RELIEF_SIBLING_DIR := "Cent Ans relief"
 
 var data_dir: String
 
@@ -39,3 +44,36 @@ static func project_root() -> String:
 
 func map_dir() -> String:
 	return data_dir.path_join("map")
+
+
+## Dossier contenant `pyramid/` (tuiles E1-E7, `hydro_fine/`, `roads_fine/`) pour `map_dir`.
+## Ordre : variable `CENT_ANS_RELIEF_DIR` (même si le dossier manque : l'avis de cache le dira),
+## `map_dir` s'il contient `pyramid/` (dépôt, ou jeu exporté avec le relief dans l'application),
+## dossier « Cent Ans relief » à côté de l'application ou de l'exécutable (livraison séparée),
+## `user://relief`. À défaut, `map_dir` (cache absent).
+static func relief_root_for(map_dir_path: String) -> String:
+	var from_env := OS.get_environment(RELIEF_ENV_VAR)
+	if from_env != "":
+		return from_env.simplify_path()
+	if DirAccess.dir_exists_absolute(map_dir_path.path_join("pyramid")):
+		return map_dir_path
+	for candidate in relief_candidates():
+		if DirAccess.dir_exists_absolute(candidate.path_join("pyramid")):
+			return candidate
+	return map_dir_path
+
+
+## Emplacements du relief livré à part, par ordre de préférence.
+static func relief_candidates() -> PackedStringArray:
+	var out := PackedStringArray()
+	if OS.has_feature("template"):
+		var exe_dir := OS.get_executable_path().get_base_dir()
+		# macOS : `<dossier>/Cent Ans.app/Contents/MacOS/Cent Ans` → `<dossier>/Cent Ans relief`.
+		out.append(exe_dir.path_join("../../..").path_join(RELIEF_SIBLING_DIR).simplify_path())
+		out.append(exe_dir.path_join(RELIEF_SIBLING_DIR))
+	out.append(ProjectSettings.globalize_path("user://relief"))
+	return out
+
+
+func relief_root() -> String:
+	return relief_root_for(map_dir())
