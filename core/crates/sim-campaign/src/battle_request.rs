@@ -734,6 +734,55 @@ impl CampaignState {
         if !self.is_at_war(&faction, &controller) {
             return Err(BattleRequestError::Stale(index));
         }
+        Ok(self.stage_siege_at(data, army, &city, province))
+    }
+
+    /// SG2 demo: puts `army` in siege of the settlement drawn by landmark
+    /// plan `landmark` (`data/landmarks/<id>.json`: Avignon, Bruges...),
+    /// declaring war on its holder first when they are at peace (a demo
+    /// campaign, thrown away after the battle). Returns the battle index.
+    pub fn debug_stage_landmark_siege(
+        &mut self,
+        data: &GameData,
+        army: &ArmyId,
+        landmark: &str,
+    ) -> Result<usize, BattleRequestError> {
+        let index = self.pending_battles.len();
+        let Some(faction) = self.armies.get(army).map(|a| a.faction.clone()) else {
+            return Err(BattleRequestError::Stale(index));
+        };
+        let Some(city) = data
+            .landmarks
+            .values()
+            .find(|l| l.id == landmark)
+            .and_then(|l| data_model::SettlementId::new(l.settlement.as_str()).ok())
+            .filter(|id| self.settlements.contains_key(id))
+        else {
+            return Err(BattleRequestError::Stale(index));
+        };
+        let province = self.settlements[&city].province.clone();
+        let controller = self.settlements[&city].controller.clone();
+        if controller == faction || !self.factions.contains_key(&controller) {
+            return Err(BattleRequestError::Stale(index));
+        }
+        if !self.is_at_war(&faction, &controller) {
+            self.start_war(&faction, &controller);
+        }
+        Ok(self.stage_siege_at(data, army, &city, &province))
+    }
+
+    /// Moves `army` before settlement `city` of `province`, gives the town a
+    /// garrison if it has none, opens the siege and records the battle.
+    fn stage_siege_at(
+        &mut self,
+        data: &GameData,
+        army: &ArmyId,
+        city: &data_model::SettlementId,
+        province: &ProvinceId,
+    ) -> usize {
+        let index = self.pending_battles.len();
+        let city = city.clone();
+        let faction = self.armies[army].faction.clone();
         let army_state = self.armies.get_mut(army).expect("exists");
         army_state.position = crate::state::ArmyPosition::Settlement(city.clone());
         army_state.clear_plan();
@@ -780,7 +829,7 @@ impl CampaignState {
             province: province.clone(),
             siege: true,
         });
-        Ok(index)
+        index
     }
 
     /// Debug helper for headless tests and screenshots: moves `defender` to

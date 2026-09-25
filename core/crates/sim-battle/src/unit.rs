@@ -302,6 +302,19 @@ impl Unit {
         self.present() && self.state != UnitState::Routing && !self.withdrawing
     }
 
+    /// Seconds between two shots of this regiment ([`Self::reload`] restarts
+    /// from it after each volley): engines 12 s, pavise crossbowmen 9 s,
+    /// other shooters 6 s.
+    pub fn reload_period(&self) -> f64 {
+        if self.category == UnitCategory::Siege {
+            crate::shot::ENGINE_RELOAD
+        } else if self.has(Ability::Pavise) {
+            crate::shot::PAVISE_RELOAD
+        } else {
+            crate::shot::VOLLEY_RELOAD
+        }
+    }
+
     /// Engine able to batter walls (`siege_attack`).
     pub fn wall_breaker(&self) -> bool {
         self.stats.siege_attack.unwrap_or(0) > 0 && self.can_shoot()
