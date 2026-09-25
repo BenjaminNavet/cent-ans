@@ -28,6 +28,11 @@ extends Node3D
 ## étendard pris porté par le vainqueur).
 ## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
 ## `--horizon-province=<id>`, `--panorama=<id>` (captures EP2).
+## EP8 (mise en scène, `BattleStaging`) : `--hour=<dawn|morning|midday|afternoon|dusk|night|h>`
+## (heure de début : phase ou heure décimale, règle du cœur), `--no-daytime`,
+## `--no-cloud-shadows`, `--no-staging-dust`, `--no-smoke`, `--no-birds`, `--no-cinematic`,
+## `--no-ep8` (mesures A/B), `--cinematic` (plan cinématique même en capture ou IA contre IA),
+## `--birds-shot` (capture : envol des volées), `--cinematic-shot` (capture au milieu du plan).
 
 signal returned(result: Dictionary)
 
@@ -149,6 +154,15 @@ var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volée
 var voices: BattleVoices = null  # VO1 : répliques des régiments
 var _siege_audio_timer: float = 0.0
 var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
+var staging: BattleStaging = null  # EP8 : heure, nuages, fumées, oiseaux, plan cinématique
+var _hour_override: String = ""  # EP8 : `--hour=`
+var _ep8_disabled: Dictionary = {}  # EP8 : `--no-<effet>`
+var _force_cinematic: bool = false  # EP8 : `--cinematic`
+var _birds_shot: bool = false  # EP8 : `--birds-shot`
+var _cinematic_shot: bool = false  # EP8 : `--cinematic-shot`
+var _title_text: String = ""
+var _weather_text: String = ""
+var _tod_key: String = ""
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -260,6 +274,12 @@ func begin() -> bool:
 		battle.call("set_scale_tier", _scale_tier)  # EP1 : --scale=<skirmish|large|epic>
 	if not battle.call("setup", setup, battle_seed):
 		return false
+	if _hour_override != "" and battle.has_method("set_start_hour"):
+		# EP8 : heure de début imposée (bataille rapide, captures) ; la règle reste au cœur.
+		if _hour_override.is_valid_float():
+			battle.call("set_start_hour", float(_hour_override))
+		elif not battle.call("set_start_phase", _hour_override):
+			push_warning("BattleScene: unknown --hour=%s" % _hour_override)
 	var setup_side: Variant = setup.get("player_side", "attacker")
 	player_side = str(setup_side) if setup_side != null else ""
 	if player_side == "" and standalone and siege_landmark != "":
@@ -319,6 +339,8 @@ func begin() -> bool:
 	if weather_key != str(weather.get("key", "clear")):
 		weather_label += " (rendu forcé : %s)" % weather_key
 		print("BattleScene: --weather=%s overrides rendering only; simulated weather is %s" % [weather_key, weather.get("key", "?")])
+	_title_text = title
+	_weather_text = weather_label
 	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
@@ -328,6 +350,7 @@ func begin() -> bool:
 	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
 	camera_rig.max_distance = 900.0 * (0.5 + 0.5 * maxf(terrain.field_scale_x(), 1.0))
 	_frame_camera()
+	_setup_staging(terrain_data)
 	hud.minimap.flipped = player_side == "attacker"
 	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
@@ -346,6 +369,43 @@ func begin() -> bool:
 	_start_speech()
 	_advise_first_battle()
 	return true
+
+
+## EP8 : mise en scène (heure, nuages, poussière, fumées, oiseaux, plan cinématique).
+func _setup_staging(terrain_data: Dictionary) -> void:
+	staging = BattleStaging.new()
+	add_child(staging)
+	staging.setup(self, battle, world_env.environment, sun, _weather_key, terrain_data, _ep8_disabled)
+	staging.configure_effects(effects, str(terrain_data.get("terrain", "plains")), terrain.season_key)
+	if effects != null:
+		effects.cannon_fired.connect(staging.on_cannon_fired)
+	if staging.cinematic != null and not _force_cinematic and (autoplay or _benchmark or _screenshot_path != ""):
+		# Rien d'imposé : jamais en banc d'essai, en capture ni quand l'IA joue les deux camps.
+		staging.cinematic.enabled = false
+	elif staging.cinematic != null and _force_cinematic:
+		staging.cinematic.enabled = true
+	_update_time_label()
+
+
+## EP8 : pose une source de fumée durable (EP6 : feux des camps) ; -1 si coupée ou hors budget.
+func add_smoke_source(position: Vector3, intensity: float = 1.0, kind: String = "campfire") -> int:
+	return staging.add_smoke_source(position, intensity, kind) if staging != null else -1
+
+
+## EP8 : l'heure au bandeau (« Temps clair · Crépuscule (portée des tireurs −30 %) ») ;
+## rafraîchi à chaque changement de phase.
+func _update_time_label() -> void:
+	if staging == null or staging.tod.is_empty():
+		return
+	var key := str(staging.tod.get("key", ""))
+	if key == _tod_key:
+		return
+	_tod_key = key
+	var label := str(staging.tod.get("label", ""))
+	var visibility := float(staging.tod.get("visibility", 1.0))
+	if visibility < 0.999:
+		label += " (portée des tireurs −%d %%)" % int(round((1.0 - visibility) * 100.0))
+	hud.set_title(_title_text, "%s · %s" % [_weather_text, label] if _weather_text != "" else label, [side_colors[player_side], side_colors[enemy_side]])
 
 
 ## VO1 : le conseiller commente la première bataille (ou le premier assaut), après le discours.
@@ -665,11 +725,17 @@ func _frame_camera() -> void:
 func _process(delta: float) -> void:
 	if battle == null:
 		return
-	if not paused and not battle.call("is_finished"):
-		battle.call("tick", delta * speed)
+	# EP8 : ralenti du plan cinématique (temps de bataille et animations).
+	var slow := staging.time_scale() if staging != null else 1.0
+	var running: bool = not paused and not battle.call("is_finished")
+	if running:
+		battle.call("tick", delta * speed * slow)
 	if music != null:
 		music.update(delta)
-	_refresh_view(false, delta)
+	_refresh_view(false, delta * slow)
+	if staging != null:
+		staging.update(units, delta * speed * slow if running else 0.0, delta, bool(battle.call("is_finished")))
+		_update_time_label()
 	_update_audio(delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
@@ -881,6 +947,8 @@ func _fast_forward(seconds: float) -> void:
 		units = battle.call("get_units")
 		soldiers.update(battle, units, 0.1, [])
 		_update_effects(0.1)
+		if staging != null:
+			staging.update(units, 0.1, 0.0, false)
 
 
 func _refresh_view(force: bool, delta: float = 0.0) -> void:
@@ -1490,6 +1558,16 @@ func _parse_cmdline() -> void:
 			_closeup = true
 		elif arg.begins_with("--weather="):
 			_weather_override = arg.trim_prefix("--weather=")
+		elif arg.begins_with("--hour="):
+			_hour_override = arg.trim_prefix("--hour=")
+		elif arg == "--cinematic":
+			_force_cinematic = true
+		elif arg == "--birds-shot":
+			_birds_shot = true
+		elif arg == "--cinematic-shot":
+			_cinematic_shot = true
+			_force_cinematic = true
+	_ep8_disabled = BattleStaging.disabled_from_args(args)
 	if _screenshot_path != "":
 		call_deferred("_stage_screenshot")
 
