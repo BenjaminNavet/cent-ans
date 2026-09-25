@@ -97,6 +97,8 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	river_material.render_priority = 1
 	road_material = ShaderMaterial.new()
 	road_material.shader = ROAD_SHADER
+	if OS.get_cmdline_user_args().has("--fine-debug"):
+		river_material.set_shader_parameter("debug_flat", true)
 	if settlements != null:
 		settlements.apply_fine_anchors(store)
 	if rivers.crossings != null:
@@ -437,6 +439,7 @@ func flush(camera_distance: float) -> void:
 		_collect_jobs(true)
 		_install_ready(1 << 20)
 	update_view(camera_distance)
+	print("FineGeoLayer: flush %s" % JSON.stringify({"tiles": _built.size(), "wanted": _wanted.size(), "zone": [_zone.x, _zone.y, _zone.z, _zone.w], "river_vertices": river_vertex_count()}.merged(perf_stats())))
 
 
 func built_tile_count() -> int:

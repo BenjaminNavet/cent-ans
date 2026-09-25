@@ -17,12 +17,14 @@ global uniform float campaign_vertical_scale;  // ZG4 : unités monde par mètre
 // Disque couvert par le rendu fin (centre x, z ; rayon ; poids du palier près).
 uniform vec4 fine_zone = vec4(0.0, 0.0, -1.0, 0.0);
 uniform float fine_weight = 1.0;
+// Débogage (`--fine-debug`) : eau en magenta opaque.
+uniform bool debug_flat = false;
 
-uniform vec3 shallow_color : source_color = vec3(0.30, 0.40, 0.36);
-uniform vec3 deep_color : source_color = vec3(0.12, 0.24, 0.29);
+uniform vec3 shallow_color : source_color = vec3(0.22, 0.33, 0.34);
+uniform vec3 deep_color : source_color = vec3(0.07, 0.16, 0.21);
 uniform vec3 brackish_color : source_color = vec3(0.33, 0.37, 0.30);
-uniform vec3 sky_color : source_color = vec3(0.66, 0.72, 0.76);
-uniform float sky_reflect = 0.55;
+uniform vec3 sky_color : source_color = vec3(0.62, 0.72, 0.80);
+uniform float sky_reflect = 0.75;
 uniform vec3 foam_color : source_color = vec3(0.80, 0.82, 0.78);
 uniform vec3 sand_color : source_color = vec3(0.62, 0.55, 0.42);
 uniform vec3 gravel_color : source_color = vec3(0.50, 0.47, 0.42);
@@ -178,4 +180,8 @@ void fragment() {
 	float water_alpha = mix(0.75, 0.97, smoothstep(0.0, 0.35, depth_t));
 	float alpha = max(water * water_alpha, bank_alpha * (1.0 - water));
 	ALPHA = clamp(alpha * v_alpha * zone, 0.0, 1.0);
+	if (debug_flat) {
+		ALBEDO = mix(vec3(1.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), step(0.98, edge));
+		ALPHA = 1.0;
+	}
 }
