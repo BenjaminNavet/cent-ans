@@ -1,0 +1,42 @@
+{
+  "id": "unit_francs_archers",
+  "name": {
+    "display": "Francs-archers",
+    "local": "francs archiers",
+    "local_language": "moyen français"
+  },
+  "category": "ranged",
+  "source_class": "peasants",
+  "soldiers": 100,
+  "cost": {
+    "money": 420
+  },
+  "upkeep": 36,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 34,
+    "ranged": 54,
+    "range": 190,
+    "armor": 32,
+    "morale": 46,
+    "speed": 45,
+    "ammo": 36
+  },
+  "abilities": [
+    "volley",
+    "rain_penalty"
+  ],
+  "required_technology": "tech_francs_archers",
+  "required_faction": [
+    "fac_france"
+  ],
+  "available_from": 1448,
+  "figure": "archer_3",
+  "equipment": "Arc ou arbalète, trousse, salade, jaque de toile ou brigandine, épée ou dague, fournis par la paroisse.",
+  "description": "Un archer équipé pour cinquante feux, exempté de taille, s'exerçant le dimanche (ordonnance de Montils-lès-Tours, 1448) ; présents à Formigny et Castillon.",
+  "sources": [
+    "Francs-archers",
+    "Ordonnance de Montils-lès-Tours (28 avril 1448)",
+    "P. Contamine, Guerre, État et société à la fin du Moyen Âge, 1972"
+  ]
+}

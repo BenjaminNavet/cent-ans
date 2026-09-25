@@ -30,7 +30,8 @@
     }
   ],
   "enables_units": [
-    "unit_longbowmen"
+    "unit_longbowmen",
+    "unit_francs_archers"
   ],
   "description": "Buttes où les paysans s'exercent à l'arc le dimanche, sur ordre royal en Angleterre.",
   "sources": [
