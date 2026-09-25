@@ -28,7 +28,7 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | **dans main** (5caa8def) |
 | ZG3b | Correctif du rehaussement des zones E5-E7 (Londres −12 m) | 2 | **dans main** (2d36ec2a) |
 | ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | **dans main** (c7e9a1c5) |
-| ZG6 | dans main (7f38c532) | 3 | en cours (wip `zg6-villes.md`) |
+| ZG6 | Villes ordinaires à l'échelle réelle vers 1340, finage ↔ parcellaire | 3 | **dans main** (7f38c532) |
 | ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | en cours (wip `zg4b-correctifs.md`) |
 | ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
 
