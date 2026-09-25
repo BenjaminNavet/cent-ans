@@ -14,7 +14,9 @@
 //!   (EP9): the upper bound, not the refusal, ends it.
 //! - Closing in, the foot regiments of low base morale (militia) march in a
 //!   second echelon [`DuelRules::second_echelon_depth_m`] behind the solid
-//!   troops instead of leading the assault through the arrows.
+//!   troops instead of leading the assault through the arrows; it closes up
+//!   for the melee once the enemy is [`DuelRules::second_echelon_closes_m`]
+//!   away.
 
 use std::sync::OnceLock;
 
@@ -42,6 +44,9 @@ pub struct DuelRules {
     pub second_echelon_morale: f64,
     /// Distance of the second echelon behind the first line (metres).
     pub second_echelon_depth_m: f64,
+    /// The second echelon closes up with the first line once the enemy is
+    /// this close (metres): it follows the assault into the melee.
+    pub second_echelon_closes_m: f64,
 }
 
 const BUNDLED: &str = include_str!("../../../../data/rules/battle_duel.json");
