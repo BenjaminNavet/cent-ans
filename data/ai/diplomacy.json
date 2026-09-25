@@ -38,7 +38,7 @@
     "weariness_occupied": 1,
     "weariness_bankrupt": 1,
     "weariness_recovery": 4,
-    "weariness_unrest_divisor": 5,
+    "weariness_unrest_divisor": 4,
     "weariness_peace_divisor": 4,
     "max_weariness_to_declare": 50,
     "unmet_goals_reluctance": 15,
