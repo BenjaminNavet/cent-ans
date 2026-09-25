@@ -12,6 +12,7 @@ pub mod campaign_weather;
 pub mod character;
 pub mod chivalric_order;
 pub mod diet;
+pub mod difficulty;
 pub mod edict;
 pub mod event;
 pub mod faction;
