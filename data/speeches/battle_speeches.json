@@ -1,0 +1,95 @@
+{
+  "line_seconds": 4.6,
+  "cry_seconds": 3.0,
+  "odds_thresholds": { "strong": 1.3, "weak": 0.77 },
+  "default_cry": "À moi ! En avant !",
+  "speaker_without_general": "le capitaine",
+  "openings": {
+    "fac_france": [
+      "Seigneurs et bonnes gens de France, le roi vous regarde, et Dieu avec lui.",
+      "Barons, chevaliers, écuyers : voici l'Anglais sur la terre du royaume.",
+      "Gens de France, souvenez-vous de vos pères et de la bannière des lis."
+    ],
+    "fac_england": [
+      "Hommes d'Angleterre, vous avez passé la mer pour le droit de votre roi.",
+      "Archers, hommes d'armes : nous sommes loin de nos foyers, mais pas de notre bon droit.",
+      "Compagnons, ce royaume revient à notre sire ; allons le lui rendre."
+    ],
+    "fac_burgundy": [
+      "Gens du duc, la maison de Bourgogne ne recule devant personne.",
+      "Flamands, Bourguignons, Picards : montrez ce que vaut la croix de Saint-André."
+    ],
+    "default": [
+      "Compagnons d'armes, l'heure est venue.",
+      "Soldats, voici l'ennemi devant vous, et rien derrière que la honte."
+    ]
+  },
+  "odds": {
+    "strong": [
+      "Ils sont moins nombreux que nous : qu'aucun ne rentre dire ce qu'il a vu.",
+      "Nous les passerons comme le vent passe les blés.",
+      "Le nombre est pour nous ; que le courage le soit aussi."
+    ],
+    "even": [
+      "Les forces se valent : c'est la hardiesse qui fera la différence.",
+      "Ils valent ce que nous valons ; montrons qu'ils valent moins.",
+      "Tenez vos rangs : la ligne qui cède la première perd la journée."
+    ],
+    "weak": [
+      "Ils sont plus nombreux ? Tant mieux : plus d'honneur et plus de rançons.",
+      "Moins nous sommes, plus grande sera la part de gloire de chacun.",
+      "Dieu ne compte pas les lances. Serrez les rangs et tenez ferme."
+    ]
+  },
+  "terrain": {
+    "plains": [
+      "Le champ est ouvert : rien ne les cachera de nos coups.",
+      "Pas une haie, pas un fossé : c'est ici, à découvert, que tout se jouera."
+    ],
+    "hills": [
+      "Tenez la hauteur : qu'ils montent jusqu'à nous, essoufflés.",
+      "La pente est notre alliée ; ne la leur cédez pas."
+    ],
+    "mountains": [
+      "Ces rochers valent une muraille : que chacun y tienne sa place."
+    ],
+    "forest": [
+      "Gardez-vous des bois : qu'aucune troupe n'en sorte sans que nous la voyions."
+    ],
+    "bocage": [
+      "Haies et chemins creux : que chaque compagnie garde son chemin."
+    ],
+    "marsh": [
+      "Le sol est traître : restez sur le ferme, laissez-les s'embourber."
+    ],
+    "heath": [
+      "La lande est rase et le vent y souffle : que vos traits volent avec lui."
+    ],
+    "default": [
+      "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur."
+    ]
+  },
+  "weather": {
+    "rain": ["La pluie mouille leurs cordes comme les nôtres : c'est à la lance que l'on finira."],
+    "fog": ["Le brouillard nous cache ; qu'il nous cache jusqu'au dernier moment."],
+    "snow": ["Le froid mord, mais le combat réchauffe : en avant !"]
+  },
+  "closings": {
+    "fac_france": [
+      "Pour le roi, pour saint Denis et pour la France !",
+      "Que l'oriflamme vous guide : à eux !"
+    ],
+    "fac_england": [
+      "Pour Dieu, pour saint Georges et pour le roi Édouard !",
+      "Bandez vos arcs, et que le ciel s'obscurcisse sur eux !"
+    ],
+    "default": [
+      "Suivez ma bannière, et que Dieu reconnaisse les siens !",
+      "Plus un mot : que vos armes parlent pour vous !"
+    ]
+  },
+  "general_lines": [
+    "Moi, {general}, je serai au premier rang : qui m'aime me suive !",
+    "Je suis {general}, et je ne vous demanderai rien que je ne fasse moi-même."
+  ]
+}

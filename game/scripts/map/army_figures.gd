@@ -111,6 +111,9 @@ static func escort_roster(army: Dictionary) -> Array:
 		men_total += strength
 		var unit_type := str(unit.get("unit_type", ""))
 		var figure_kind: String = {"ranged": "archer", "cavalry": "cavalry", "infantry": "infantry"}.get(ModelLibrary.unit_category(unit_type), "")
+		# Lot UR1 : la figurine déclarée prime (tireurs montés : famille cavalry).
+		if figure_kind != "" and BattleMeshes.figure_kind_of(unit_type) != "":
+			figure_kind = BattleMeshes.figure_kind_of(unit_type)
 		if figure_kind == "":
 			continue  # engins de siège
 		var key := "%s_%d" % [figure_kind, BattleMeshes.variant_of(unit_type)]

@@ -438,6 +438,12 @@
       "source": "delapouite/coins",
       "author": "Delapouite"
     },
+    "hud_agents": {
+      "file": "delapouite-spy.svg",
+      "category": "hud",
+      "source": "delapouite/spy",
+      "author": "Delapouite"
+    },
     "hud_army": {
       "file": "delapouite-knight-banner.svg",
       "category": "hud",
@@ -491,6 +497,12 @@
       "category": "hud",
       "source": "lorc/tied-scroll",
       "author": "Lorc"
+    },
+    "hud_objectives": {
+      "file": "delapouite-flag-objective.svg",
+      "category": "hud",
+      "source": "delapouite/flag-objective",
+      "author": "Delapouite"
     },
     "hud_research": {
       "file": "lorc-open-book.svg",
@@ -592,6 +604,186 @@
       "file": "delapouite-wool.svg",
       "category": "resource",
       "source": "delapouite/wool",
+      "author": "Delapouite"
+    },
+    "skill_agronome": {
+      "file": "lorc-wheat.svg",
+      "category": "skill",
+      "source": "lorc/wheat",
+      "author": "Lorc"
+    },
+    "skill_archerie": {
+      "file": "lorc-high-shot.svg",
+      "category": "skill",
+      "source": "lorc/high-shot",
+      "author": "Lorc"
+    },
+    "skill_batisseur": {
+      "file": "lorc-hammer-nails.svg",
+      "category": "skill",
+      "source": "lorc/hammer-nails",
+      "author": "Lorc"
+    },
+    "skill_beau_parleur": {
+      "file": "delapouite-public-speaker.svg",
+      "category": "skill",
+      "source": "delapouite/public-speaker",
+      "author": "Delapouite"
+    },
+    "skill_bon_justicier": {
+      "file": "lorc-scales.svg",
+      "category": "skill",
+      "source": "lorc/scales",
+      "author": "Lorc"
+    },
+    "skill_capitaine_d_elite": {
+      "file": "lorc-visored-helm.svg",
+      "category": "skill",
+      "source": "lorc/visored-helm",
+      "author": "Lorc"
+    },
+    "skill_chancelier": {
+      "file": "lorc-quill-ink.svg",
+      "category": "skill",
+      "source": "lorc/quill-ink",
+      "author": "Lorc"
+    },
+    "skill_chevauchee": {
+      "file": "lorc-horse-head.svg",
+      "category": "skill",
+      "source": "lorc/horse-head",
+      "author": "Lorc"
+    },
+    "skill_confesseur": {
+      "file": "delapouite-church.svg",
+      "category": "skill",
+      "source": "delapouite/church",
+      "author": "Delapouite"
+    },
+    "skill_courtisan": {
+      "file": "lorc-crown.svg",
+      "category": "skill",
+      "source": "lorc/crown",
+      "author": "Lorc"
+    },
+    "skill_discipline": {
+      "file": "lorc-checked-shield.svg",
+      "category": "skill",
+      "source": "lorc/checked-shield",
+      "author": "Lorc"
+    },
+    "skill_entremetteur": {
+      "file": "lorc-linked-rings.svg",
+      "category": "skill",
+      "source": "lorc/linked-rings",
+      "author": "Lorc"
+    },
+    "skill_espion_a_gages": {
+      "file": "lorc-cloak-dagger.svg",
+      "category": "skill",
+      "source": "lorc/cloak-dagger",
+      "author": "Lorc"
+    },
+    "skill_gardien_de_la_paix": {
+      "file": "lorc-dove.svg",
+      "category": "skill",
+      "source": "lorc/dove",
+      "author": "Lorc"
+    },
+    "skill_grand_intendant": {
+      "file": "delapouite-receive-money.svg",
+      "category": "skill",
+      "source": "delapouite/receive-money",
+      "author": "Delapouite"
+    },
+    "skill_hardiesse": {
+      "file": "lorc-crossed-axes.svg",
+      "category": "skill",
+      "source": "lorc/crossed-axes",
+      "author": "Lorc"
+    },
+    "skill_intendant": {
+      "file": "lorc-cash.svg",
+      "category": "skill",
+      "source": "lorc/cash",
+      "author": "Lorc"
+    },
+    "skill_legende_de_la_cour": {
+      "file": "lorc-wing-cloak.svg",
+      "category": "skill",
+      "source": "lorc/wing-cloak",
+      "author": "Lorc"
+    },
+    "skill_logistique_militaire": {
+      "file": "delapouite-wooden-crate.svg",
+      "category": "skill",
+      "source": "delapouite/wooden-crate",
+      "author": "Delapouite"
+    },
+    "skill_maitre_des_sieges": {
+      "file": "delapouite-trebuchet.svg",
+      "category": "skill",
+      "source": "delapouite/trebuchet",
+      "author": "Delapouite"
+    },
+    "skill_maitre_des_travaux": {
+      "file": "delapouite-trowel.svg",
+      "category": "skill",
+      "source": "delapouite/trowel",
+      "author": "Delapouite"
+    },
+    "skill_mecene": {
+      "file": "lorc-lyre.svg",
+      "category": "skill",
+      "source": "lorc/lyre",
+      "author": "Lorc"
+    },
+    "skill_orateur_des_etats": {
+      "file": "delapouite-scroll-quill.svg",
+      "category": "skill",
+      "source": "delapouite/scroll-quill",
+      "author": "Delapouite"
+    },
+    "skill_ordre_de_bataille": {
+      "file": "lorc-rally-the-troops.svg",
+      "category": "skill",
+      "source": "lorc/rally-the-troops",
+      "author": "Lorc"
+    },
+    "skill_piete": {
+      "file": "lorc-holy-symbol.svg",
+      "category": "skill",
+      "source": "lorc/holy-symbol",
+      "author": "Lorc"
+    },
+    "skill_reformateur_fiscal": {
+      "file": "delapouite-money-stack.svg",
+      "category": "skill",
+      "source": "delapouite/money-stack",
+      "author": "Delapouite"
+    },
+    "skill_saint_protecteur": {
+      "file": "lorc-angel-wings.svg",
+      "category": "skill",
+      "source": "lorc/angel-wings",
+      "author": "Lorc"
+    },
+    "skill_stratege": {
+      "file": "lorc-battle-gear.svg",
+      "category": "skill",
+      "source": "lorc/battle-gear",
+      "author": "Lorc"
+    },
+    "skill_tir_a_volonte": {
+      "file": "lorc-arrow-cluster.svg",
+      "category": "skill",
+      "source": "lorc/arrow-cluster",
+      "author": "Lorc"
+    },
+    "skill_urbaniste": {
+      "file": "delapouite-village.svg",
+      "category": "skill",
+      "source": "delapouite/village",
       "author": "Delapouite"
     },
     "tech_aqua_vitae": {
@@ -918,6 +1110,12 @@
       "source": "lorc/cannon",
       "author": "Lorc"
     },
+    "unit_breton_knights": {
+      "file": "lorc-crested-helmet.svg",
+      "category": "unit",
+      "source": "lorc/crested-helmet",
+      "author": "Lorc"
+    },
     "unit_category_archer": {
       "file": "lorc-bowman.svg",
       "category": "unit",
@@ -960,11 +1158,35 @@
       "source": "delapouite/siege-tower",
       "author": "Delapouite"
     },
+    "unit_coutiliers": {
+      "file": "lorc-plain-dagger.svg",
+      "category": "unit",
+      "source": "lorc/plain-dagger",
+      "author": "Lorc"
+    },
     "unit_crossbowmen": {
       "file": "carl-olsen-crossbow.svg",
       "category": "unit",
       "source": "carl-olsen/crossbow",
       "author": "Carl Olsen"
+    },
+    "unit_culveriners": {
+      "file": "skoll-musket.svg",
+      "category": "unit",
+      "source": "skoll/musket",
+      "author": "Skoll"
+    },
+    "unit_ecorcheurs": {
+      "file": "delapouite-torch.svg",
+      "category": "unit",
+      "source": "delapouite/torch",
+      "author": "Delapouite"
+    },
+    "unit_english_retinue": {
+      "file": "lorc-battle-axe.svg",
+      "category": "unit",
+      "source": "lorc/battle-axe",
+      "author": "Lorc"
     },
     "unit_flemish_pikemen": {
       "file": "delapouite-pikeman.svg",
@@ -972,10 +1194,40 @@
       "source": "delapouite/pikeman",
       "author": "Delapouite"
     },
+    "unit_francs_archers": {
+      "file": "lorc-pocket-bow.svg",
+      "category": "unit",
+      "source": "lorc/pocket-bow",
+      "author": "Lorc"
+    },
+    "unit_gascon_crossbowmen": {
+      "file": "carl-olsen-crossbow.svg",
+      "category": "unit",
+      "source": "carl-olsen/crossbow",
+      "author": "Carl Olsen"
+    },
     "unit_genoese_crossbowmen": {
       "file": "lorc-arrows-shield.svg",
       "category": "unit",
       "source": "lorc/arrows-shield",
+      "author": "Lorc"
+    },
+    "unit_goedendag_militia": {
+      "file": "lorc-spiked-mace.svg",
+      "category": "unit",
+      "source": "lorc/spiked-mace",
+      "author": "Lorc"
+    },
+    "unit_hobelars": {
+      "file": "lorc-horse-head.svg",
+      "category": "unit",
+      "source": "lorc/horse-head",
+      "author": "Lorc"
+    },
+    "unit_jinetes": {
+      "file": "lorc-thrown-spear.svg",
+      "category": "unit",
+      "source": "lorc/thrown-spear",
       "author": "Lorc"
     },
     "unit_knights": {
@@ -1014,6 +1266,24 @@
       "source": "delapouite/horse-head",
       "author": "Delapouite"
     },
+    "unit_ordonnance_gendarmes": {
+      "file": "lorc-visored-helm.svg",
+      "category": "unit",
+      "source": "lorc/visored-helm",
+      "author": "Lorc"
+    },
+    "unit_routiers": {
+      "file": "lorc-broadsword.svg",
+      "category": "unit",
+      "source": "lorc/broadsword",
+      "author": "Lorc"
+    },
+    "unit_scottish_spearmen": {
+      "file": "lorc-spiked-fence.svg",
+      "category": "unit",
+      "source": "lorc/spiked-fence",
+      "author": "Lorc"
+    },
     "unit_siege_tower": {
       "file": "delapouite-siege-tower.svg",
       "category": "unit",
@@ -1030,6 +1300,12 @@
       "file": "lorc-halberd.svg",
       "category": "unit",
       "source": "lorc/halberd",
+      "author": "Lorc"
+    },
+    "unit_welsh_spearmen": {
+      "file": "lorc-stone-spear.svg",
+      "category": "unit",
+      "source": "lorc/stone-spear",
       "author": "Lorc"
     }
   }

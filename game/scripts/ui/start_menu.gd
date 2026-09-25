@@ -250,6 +250,10 @@ func _on_shot_changed(_index: int, label: String) -> void:
 
 
 func _play_intro_fade() -> void:
+	if Accessibility.reduce_motion():  # U12 (UI3) : pas de fondu
+		fade.color.a = 0.0
+		main_column.modulate.a = 1.0
+		return
 	fade.color.a = 1.0
 	main_column.modulate.a = 0.0
 	var tween := create_tween()

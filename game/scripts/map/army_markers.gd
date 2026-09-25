@@ -290,7 +290,7 @@ func _make_plate(marker: ArmyMarker) -> PanelContainer:
 		row.add_child(swatch)
 	var count := Label.new()
 	count.text = format_men(marker.men)
-	count.tooltip_text = "%d unité(s)" % marker.unit_count
+	count.tooltip_text = FrText.count(marker.unit_count, "unité")
 	count.add_theme_font_size_override("font_size", PLATE_FONT_SIZE)
 	count.add_theme_color_override("font_color", INK)
 	count.mouse_filter = Control.MOUSE_FILTER_IGNORE

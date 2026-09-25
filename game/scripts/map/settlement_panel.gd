@@ -239,7 +239,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	if siege.is_empty():
 		siege_value.text = "Aucun"
 	else:
-		siege_value.text = "%s, %d tour(s), brèche %d" % [_faction(str(siege.get("attacker", "")), label_of), int(siege.get("turns_left", 0)), int(siege.get("breach", 0))]
+		siege_value.text = "%s, %s, brèche %d" % [_faction(str(siege.get("attacker", "")), label_of), FrText.count(int(siege.get("turns_left", 0)), "tour"), int(siege.get("breach", 0))]
 	income_value.text = "%s / saison (%d %% de la province)" % [Money.amount(int(detail.get("income", 0))), int(round(float(detail.get("weight_share", 0.0)) * 100.0))]
 	# Garnison et recrutement.
 	var garrison: Array = detail.get("garrison", [])
@@ -257,9 +257,10 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	for unit_type in queue:
 		queue_names.append(GameCatalog.display_name(str(unit_type)))
 	queue_label.visible = player_owner or not queue.is_empty()
-	queue_label.text = "Recrues attendues : %s (%d place(s) libre(s) ce tour sur %d)" % [
+	var free_slots := int(detail.get("recruit_slots_free", 0))
+	queue_label.text = "Recrues attendues : %s (%s libre%s ce tour sur %d)" % [
 		", ".join(queue_names) if not queue_names.is_empty() else "aucune",
-		int(detail.get("recruit_slots_free", 0)), int(detail.get("recruit_slots", 0))]
+		FrText.count(free_slots, "place"), FrText.s(free_slots), int(detail.get("recruit_slots", 0))]
 	PanelWidgets.fill_recruitable(recruit_list, recruitable,
 		func(unit_type: String) -> void: recruit_requested.emit(settlement_id, unit_type))
 	# Bâtiments et construction.
@@ -268,7 +269,7 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	var construction: Dictionary = detail.get("construction", {}) if detail.get("construction") is Dictionary else {}
 	construction_box.visible = not construction.is_empty()
 	if not construction.is_empty():
-		construction_label.text = "%s — %d tour(s) restant(s)" % [str(construction.get("name", "?")), int(construction.get("turns_left", 0))]
+		construction_label.text = "%s — %s restant%s" % [str(construction.get("name", "?")), FrText.count(int(construction.get("turns_left", 0)), "tour"), FrText.s(int(construction.get("turns_left", 0)))]
 	cancel_build_button.visible = player_owner
 	var built_ids: Array = Array(detail.get("buildings", PackedStringArray()))
 	PanelWidgets.fill_buildable(buildable_list, buildable, player_owner, built_ids,

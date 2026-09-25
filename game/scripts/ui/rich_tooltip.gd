@@ -258,6 +258,20 @@ static func _join(lines: Array) -> String:
 
 
 ## Forces et faiblesses : statistiques ≥ 130 % ou ≤ 70 % de la moyenne des types d'unités.
+## Lot UR1 : époque de recrutement d'un type d'unité (`available_from` / `available_until`),
+## « » si l'unité est de tout temps.
+static func unit_period(definition: Dictionary) -> String:
+	var from := int(definition.get("available_from", 0))
+	var until := int(definition.get("available_until", 0))
+	if from > 0 and until > 0:
+		return "%d-%d" % [from, until]
+	if from > 0:
+		return "à partir de %d" % from
+	if until > 0:
+		return "jusqu'en %d" % until
+	return ""
+
+
 static func strengths_weaknesses(definition: Dictionary) -> Array:
 	var strengths := PackedStringArray()
 	var weaknesses := PackedStringArray()
@@ -302,7 +316,7 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 	if upkeep >= 0:
 		cost_line.append("Entretien : %s %s / saison" % [thousands(upkeep), POUND])
 	if definition.has("recruit_time_turns"):
-		cost_line.append("Levée : %d tour(s)" % int(definition["recruit_time_turns"]))
+		cost_line.append("Levée : %s" % FrText.count(int(definition["recruit_time_turns"]), "tour"))
 	lines.append(" · ".join(cost_line))
 	var stats: Dictionary = definition.get("stats", {})
 	var stat_parts := PackedStringArray()
@@ -330,6 +344,9 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 		requires.append("%s %s" % [icon_bbcode(str(definition["required_building"]), 14), GameCatalog.display_name(str(definition["required_building"]))])
 	if not requires.is_empty():
 		lines.append("Requiert : " + ", ".join(requires))
+	var period := unit_period(definition)
+	if period != "":
+		lines.append("Époque : " + period)
 	if str(definition.get("source_class", "")) != "":
 		lines.append("Recrutés parmi : %s" % str(CLASS_LABELS.get(definition["source_class"], definition["source_class"])).to_lower())
 	lines.append(_description(definition))
@@ -359,7 +376,7 @@ static func building(building_id: String, live: Dictionary = {}) -> String:
 		cost_line.append("Coût : " + cost_text(definition["cost"]))
 	var turns := int(live.get("turns", definition.get("build_time_turns", 0)))
 	if turns > 0:
-		cost_line.append("Durée : %d tour(s)" % turns)
+		cost_line.append("Durée : %s" % FrText.count(turns, "tour"))
 	var upkeep := int(live.get("upkeep", definition.get("upkeep", 0)))
 	cost_line.append("Entretien : %s %s / saison" % [thousands(upkeep), POUND])
 	lines.append(" · ".join(cost_line))
@@ -585,7 +602,7 @@ static func skill(node: Dictionary, state: String = "") -> String:
 	var head := "%s [b]%s[/b]  [color=%s][i]%s, rang %d%s[/i][/color]" % [
 		icon_bbcode("branch_" + branch, 28, "branch"), name, MUTED,
 		BRANCH_LABELS.get(branch, branch), int(node.get("tier", 1)), " — " + state if state != "" else ""]
-	var lines: Array = [head, "Coût : %d point(s) de compétence" % int(node.get("cost", 0))]
+	var lines: Array = [head, "Coût : %s de compétence" % FrText.count(int(node.get("cost", 0)), "point")]
 	lines.append(_effects_block(node.get("effects", [])))
 	var prerequisites := PackedStringArray()
 	for prereq in node.get("prerequisites", []):

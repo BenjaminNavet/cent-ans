@@ -159,7 +159,7 @@ func after_end_turn() -> void:
 
 
 func handle_input(event: InputEvent) -> bool:
-	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_O:
+	if event.is_action_pressed("map_toggle_objectives") and not event.is_echo():  # U7
 		toggle_panel()
 		return true
 	return false
