@@ -18,6 +18,7 @@ var _state := "idle"
 var _cols := 5
 var _rows := 2
 var _rigid := false
+var _hide_pavise := false  # BV3 : `--hide-pavise` (pavois du dos masqué, rangée plantée)
 var _split := 0  # SG1 : `--split=N`, N premiers soldats en escalade (état climbing)
 
 
@@ -46,6 +47,8 @@ func _init() -> void:
 			_split = int(arg.trim_prefix("--split="))
 		elif arg == "--rigid":
 			_rigid = true
+		elif arg == "--hide-pavise":
+			_hide_pavise = true
 	if out == "":
 		push_error("v2_figures_shot: --out=<png> required")
 		quit(1)
@@ -151,6 +154,7 @@ func _rank(world: Node3D, kind: String, variant: int, side: int, origin: Vector3
 		mat.set_shader_parameter("blend_since", -100.0)
 		mat.set_shader_parameter("volley_time", _time - _since)
 		mat.set_shader_parameter("livery_share", 0.9)
+		mat.set_shader_parameter("hide_pavise", _hide_pavise)
 	else:
 		mat.shader = RIGID_SHADER
 		mat.set_shader_parameter("weapon_mode", BattleMeshes.weapon_mode(kind, variant))
