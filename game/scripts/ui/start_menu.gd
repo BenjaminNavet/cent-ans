@@ -389,6 +389,7 @@ func _on_start_requested(faction_id: String, seed_value: int, _start_date: Strin
 	if facade != null:
 		facade.set("pending_faction", faction_id)
 		facade.set("pending_seed", seed_value)
+		facade.set("pending_difficulty", faction_select.selected_difficulty)  # DF1
 		facade.set("pending_load_path", "")
 	_leave()
 
@@ -400,6 +401,7 @@ func _autostart() -> void:
 	if facade != null:
 		facade.set("pending_faction", faction_select.selected_faction)
 		facade.set("pending_seed", faction_select.seed_value())
+		facade.set("pending_difficulty", faction_select.selected_difficulty)  # DF1
 		facade.set("pending_load_path", "")
 	get_tree().change_scene_to_file(CAMPAIGN_SCENE)
 

@@ -26,6 +26,8 @@ var _confirm_panel: PanelContainer
 var _confirm_label: Label
 var _pending_exit: String = ""  # "main_menu" ou "quit"
 var _settings_menu: SettingsMenu = null
+## DF1 : rappel du niveau de difficulté de la campagne (figé), sous le titre.
+var difficulty_label: Label
 
 
 func _ready() -> void:
@@ -51,6 +53,14 @@ func _ready() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28)
 	box.add_child(title)
+	difficulty_label = Label.new()
+	difficulty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	difficulty_label.add_theme_font_size_override("font_size", 15)
+	difficulty_label.tooltip_text = "Choisie au lancement de la campagne, elle ne peut plus changer."
+	difficulty_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	box.add_child(difficulty_label)
+	refresh_difficulty()
+	visibility_changed.connect(refresh_difficulty)
 	for spec in [
 		["resume", "Reprendre", func() -> void: resume_requested.emit()],
 		["save", "Sauvegarder…", open_save],
@@ -74,6 +84,17 @@ func _ready() -> void:
 	save_dialog.save_confirmed.connect(func(save_name: String) -> void: save_requested.emit(save_name))
 	save_dialog.load_confirmed.connect(func(path: String) -> void: load_requested.emit(path))
 	save_dialog.dialog_closed.connect(func() -> void: _menu_panel.show())
+
+
+## Relit le niveau de la campagne en cours (`SimFacade`).
+func refresh_difficulty() -> void:
+	if difficulty_label == null:
+		return
+	var facade := get_node_or_null("/root/SimFacade")
+	if facade == null or not facade.has_method("current_difficulty"):
+		difficulty_label.text = ""
+		return
+	difficulty_label.text = "Difficulté : %s" % str(facade.call("difficulty_label", str(facade.call("current_difficulty"))))
 
 
 func _build_confirm(center: CenterContainer) -> void:
