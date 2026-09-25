@@ -41,13 +41,9 @@ n'exigent aucune attribution ; ils sont crédités par courtoisie.
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 - « Crusade » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
-- « Heroic Age » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
-  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 - « Celtic Impulse » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 - « Achaidh Cheide » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
-  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
-- « Crossing the Chasm » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 - « Angevin B » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
@@ -73,16 +69,14 @@ n'exigent aucune attribution ; ils sont crédités par courtoisie.
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 - « Pippin the Hunchback » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
-- « Canon in D Major » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
-  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
-- « Prelude in C - BWV 846 » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
-  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 
-### Musique baroque — domaine public / CC0
+### Musique médiévale et Renaissance — Wikimedia Commons (CC BY-SA)
 
-- Vivaldi, *Les Quatre Saisons* (extraits) — The Modena Chamber Orchestra (Musopen), Public Domain Mark.
-- Vivaldi, Concerto pour mandoline RV 425 — The Milan Baroque Soloists, Public Domain Mark.
-- Bach, Suite n° 2 BWV 1067, Badinerie — European Archive, CC0.
+- Estampie « Retrove », Robertsbridge Codex — Metzner, CC BY-SA 3.0.
+- « Chominciamento di gioia » — Ririkuku, CC BY-SA 4.0.
+- Guillaume Dufay, « Se la face ay pale » — Ensemble Asteria, CC BY-SA 2.5.
+- Folía d'Ahigal — Loreto Galindo, tamborilero (Fundación Joaquín Díaz), CC BY-SA 3.0.
+- Diego Ortiz, Recercadas primera et segunda (*Trattado de Glosas*, 1553) — Phillip W. Serna, CC BY-SA 4.0.
   Sources : `game/assets/third_party/music/wikimedia/SOURCE.md` (Wikimedia Commons).
 
 ### Polices — SIL Open Font License 1.1

@@ -192,6 +192,7 @@ func _decorate_top_bar() -> void:
 	for label in [treasury_label, income_label, date_label]:
 		label.set_script(RichLabel)
 		label.mouse_filter = Control.MOUSE_FILTER_PASS
+	research_box.set_script(RichBox)  # B1 : recherche en infobulle riche (technologie liée au Codex)
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
 	income_label.tooltip_text = RichTooltip.hud("hud_income")
 	# UX2 (C9) : chaque bouton porte un libellé court quand la barre a la place, sinon son
@@ -686,7 +687,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 	var any_free := false
 	for candidate in candidates:
 		var reason := str(candidate.get("reason", ""))
-		var button := Button.new()
+		var button := RichButton.new()  # B1 : infobulle riche auto-liée
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.text = "%s — %s" % [str(candidate.get("name", "?")), str(candidate.get("detail", ""))]
 		if reason != "":
@@ -761,8 +762,9 @@ func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 	research_label.text = str(research.get("name", ""))
 	research_bar.max_value = maxi(1, int(research.get("cost", 1)))
 	research_bar.value = int(research.get("progress", 0))
-	research_box.tooltip_text = "Recherche : %s\n%d / %d points, +%d par tour%s" % [
-		str(research.get("name", "")), int(research.get("progress", 0)), int(research.get("cost", 0)),
+	research_box.tooltip_text = "Recherche : [b]%s[/b]\n%d / %d points, +%d par tour%s" % [
+		RichTooltip.entity_name(str(research.get("technology", "")), str(research.get("name", ""))),
+		int(research.get("progress", 0)), int(research.get("cost", 0)),
 		int(research.get("points_per_turn", points_per_turn)),
 		", %s restant%s" % [FrText.count(turns, "tour"), FrText.s(turns)] if turns >= 0 else ""]
 
@@ -824,9 +826,7 @@ func _setup_turn_banner() -> void:
 	turn_banner.name = "TurnBanner"
 	turn_banner.theme = event_log.theme
 	turn_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var box := HudStyle.panel_box(12)
-	box.border_color = HudStyle.GOLD
-	turn_banner.add_theme_stylebox_override("panel", box)
+	turn_banner.add_theme_stylebox_override("panel", HudStyle.illuminated_box(12))
 	var column := VBoxContainer.new()
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE

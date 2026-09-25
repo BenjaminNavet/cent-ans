@@ -203,6 +203,8 @@ func _show(text: String, data: Dictionary) -> void:
 		_build(data)
 	_text_label.text = "« %s »" % text
 	_panel.visible = true
+	# Réajuste la hauteur à la réplique (sinon la plus longue réplique passée l'impose).
+	_panel.reset_size.call_deferred()
 
 
 func _build(data: Dictionary) -> void:
@@ -211,15 +213,11 @@ func _build(data: Dictionary) -> void:
 	add_child(_layer)
 	_panel = PanelContainer.new()
 	_panel.name = "AdvisorPanel"
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.1, 0.08, 0.05, 0.86)
-	style.border_color = Color(0.72, 0.58, 0.32, 0.9)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(5)
-	style.content_margin_left = 18
-	style.content_margin_right = 18
-	style.content_margin_top = 10
-	style.content_margin_bottom = 12
+	# Note marginale sur vélin (lot UI1) : police et couleurs du thème parchemin.
+	_panel.theme = load("res://scenes/ui/parchment_theme.tres")
+	var style := HudStyle.note_box(10)
+	style.content_margin_left = 20
+	style.content_margin_right = 20
 	_panel.add_theme_stylebox_override("panel", style)
 	# Bottom centre, above the battle unit cards: top-left covered the season
 	# report and other campaign panels (Q2).
@@ -246,12 +244,12 @@ func _build(data: Dictionary) -> void:
 	var name_label := Label.new()
 	name_label.text = "%s — %s" % [str(data.get("name", "Le conseiller")), str(data.get("title", ""))]
 	name_label.add_theme_font_size_override("font_size", 14)
-	name_label.add_theme_color_override("font_color", Color(0.93, 0.8, 0.5))
+	name_label.add_theme_color_override("font_color", HudStyle.RUBRIC)
 	box.add_child(name_label)
 	_text_label = Label.new()
 	_text_label.custom_minimum_size = Vector2(404, 0)
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.add_theme_font_size_override("font_size", 17)
-	_text_label.add_theme_color_override("font_color", Color(0.97, 0.94, 0.88))
+	_text_label.add_theme_color_override("font_color", HudStyle.INK)
 	box.add_child(_text_label)
 	_panel.visible = false

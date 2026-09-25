@@ -1,0 +1,12 @@
+{
+  "id": "cdx_winchelsea",
+  "title": "Winchelsea, « les Espagnols sur mer »",
+  "category": "bataille",
+  "aliases": ["Winchelsea", "bataille de Winchelsea", "les Espagnols sur mer", "Charles de la Cerda"],
+  "era": { "from": "1350", "to": "1350" },
+  "summary": "Le 29 août 1350, au large de Winchelsea, [[cdx_edouard_iii|Édouard III]] et le [[cdx_prince_noir|Prince noir]] attaquent la flotte castillane de Charles de la Cerda. Victoire de prestige, où le roi combat en personne, mais sans grand effet : la Manche reste dangereuse pour les marchands anglais.",
+  "body": "Depuis l'[[cdx_ecluse|Écluse]], la Manche appartient en principe aux Anglais. Mais la [[cdx_castille|Castille]], alliée de la France, arme de grandes nefs marchandes qui commercent avec la Flandre et attaquent au passage les navires anglais. À l'été 1350, une flotte d'une quarantaine de ces hauts navires, commandée par Charles de la Cerda, un prince castillan au service du roi de France, redescend du Zwin chargée de marchandises.\n\n[[cdx_edouard_iii|Édouard III]] rassemble une cinquantaine de navires plus petits à Winchelsea, un des ports des Cinq-Ports, et l'attend. Le 29 août dans l'après-midi, le roi, sur la cogue Thomas, fonce sur une nef castillane : le choc est si violent que la Thomas s'ouvre et coule, et Édouard doit passer à l'abordage du navire ennemi pour ne pas sombrer. Le [[cdx_prince_noir|Prince noir]], dont le navire coule aussi, n'est sauvé que parce qu'il prend à temps celui de l'adversaire. Le jeune Jean de Gaunt, dix ans, est à bord du navire de son frère. De quatorze à vingt-six navires castillans sont pris, les autres s'échappent.\n\n[[cdx_froissart|Froissart]] fait de la journée un récit éclatant : le roi y écoute ses ménestrels et fait chanter une chanson allemande en attendant l'ennemi. Pourtant les survivants castillans continuent de harceler les navires anglais tout l'automne. Charles de la Cerda, fait connétable de France par Jean II, sera assassiné en janvier 1354 par les gens de [[cdx_charles_le_mauvais|Charles le Mauvais]].",
+  "entity": "evt_winchelsea",
+  "see_also": ["cdx_ecluse", "cdx_castille", "cdx_edouard_iii", "cdx_prince_noir"],
+  "sources": ["Bataille de Winchelsea", "Battle of Winchelsea (en)", "Froissart, Chroniques, I"]
+}

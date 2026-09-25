@@ -1,0 +1,34 @@
+{
+  "id": "cdx_jeu_famine",
+  "title": "Famines, disettes et épidémies",
+  "category": "mecanique",
+  "aliases": [
+    "famine",
+    "famines",
+    "disette",
+    "famine hivernale",
+    "résistance à la peste",
+    "nourriture",
+    "épidémie"
+  ],
+  "era": {
+    "from": "1315",
+    "to": "1453"
+  },
+  "summary": "Le jeu ne tient pas de greniers : la faim frappe les provinces dévastées en hiver et les années de mauvaise récolte, et la peste celles dont la santé s'effondre, avant la grande vague de la Peste noire de 1347.",
+  "body": "L'Occident du XIVe siècle vit à la merci de la récolte. Deux ou trois étés pourris suffisent : la grande famine de 1315-1317, née de pluies continuelles en Europe du Nord, tue peut-être un habitant sur dix dans certaines villes flamandes. Plus souvent, la disette est locale : une grêle, une gelée tardive, une armée qui a mangé les semences, et le prix du blé triple sur le marché. Les pauvres mangent alors du pain de fougère ou de glands, les herbes des fossés, et meurent de maladies qui ne tuent pas les gens bien nourris.\n\nLa guerre aggrave tout : les [[cdx_chevauchee|chevauchées]] brûlent les granges, les garnisons réquisitionnent, les paysans fuient vers les villes closes, où s'entassent bouches inutiles et réfugiés. Les princes et les villes répondent comme ils peuvent : greniers municipaux, interdictions d'exporter le grain, taxation du prix du pain, distributions charitables des abbayes.\n\nPuis vient la [[cdx_peste_noire|Peste noire]], qui débarque à Marseille en novembre 1347 et remonte vers le nord en 1348. Elle revient ensuite par vagues, en 1361, en 1374, jusqu'au XVe siècle. Les villes apprennent l'isolement des malades et la [[cdx_quarantaine|quarantaine]] ; les médecins, formés à la théorie des [[cdx_humeurs|humeurs]], prescrivent fumigations et saignées.",
+  "gameplay": "Il n'y a ni stocks de vivres ni production de nourriture dans la simulation : « Nourriture » n'est qu'une catégorie de marchandises (blé, poisson) qui améliore la satisfaction en biens et ouvre certaines [[cdx_jeu_table|tables]]. La faim passe par trois règles. La famine hivernale : chaque hiver, une province dont la [[cdx_jeu_devastation|dévastation]] dépasse 70 perd 5 % de ses paysans. La disette : un événement de [[cdx_jeu_chronique|chronique]] qui ne survient qu'en hiver (délai moyen de 60 tours, soit 17 ‰ de chances par tour) ; ouvrir les greniers coûte 1 500 livres et 5 de santé, laisser faire le marché coûte 12 de santé et 12 de mécontentement.\n\nLa peste locale frappe chaque saison une province dont la santé moyenne des quatre classes tombe sous 30 : elle tue 10 % de la population et ajoute 20 de mécontentement à chaque classe. La résistance à la peste (bâtiments sanitaires et technologies de médecine, 50 % au plus) donne autant de chances d'être épargné et atténue d'autant les pertes. La Peste noire, déclenchée à l'automne 1347, traverse l'Europe du sud au nord en douze tours : chaque province touchée perd de 15 à 30 % de sa population, 30 de santé et gagne 20 de mécontentement, atténués par la résistance, qui donne en outre moitié moins de chances d'y échapper.\n\nConseil : ne laissez pas la santé d'une province glisser sous 30 ; une [[cdx_jeu_table|table]] saine, les hôtels-Dieu et la médecine sont la meilleure défense, et la dévastation d'une province qu'on garde se paie en vies.",
+  "see_also": [
+    "cdx_peste_noire",
+    "cdx_quarantaine",
+    "cdx_jeu_population",
+    "cdx_jeu_devastation",
+    "cdx_hotel_dieu",
+    "cdx_medecine_medievale"
+  ],
+  "sources": [
+    "Grande famine de 1315-1317",
+    "Peste noire",
+    "Famine"
+  ]
+}

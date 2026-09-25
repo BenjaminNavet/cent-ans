@@ -10,7 +10,7 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
-    "description": "Vicomté disputée entre les maisons de Bretagne et de Comminges, réputée pour ses émaux.",
+    "description": "Vicomté tenue par la maison de Bretagne (duc Jean III), enjeu de la future guerre de Succession de Bretagne ; ville réputée pour ses émaux.",
     "sources": ["Limoges", "Vicomté de Limoges"]
   },
   {

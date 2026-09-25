@@ -1,0 +1,12 @@
+{
+  "id": "cdx_arnemuiden",
+  "title": "Arnemuiden, première bataille navale de la guerre",
+  "category": "bataille",
+  "aliases": ["Arnemuiden", "bataille d'Arnemuiden", "la Christophe", "cogue Christophe"],
+  "era": { "from": "1338", "to": "1338" },
+  "summary": "Le 23 septembre 1338, devant Arnemuiden en Zélande, la flotte française de [[cdx_hugues_quieret|Quiéret]] et [[cdx_nicolas_behuchet|Béhuchet]] surprend cinq grandes cogues anglaises chargées de laine et les prend, dont la Christophe. C'est la première bataille navale de la guerre de Cent Ans.",
+  "body": "À l'automne 1338, [[cdx_edouard_iii|Édouard III]] est aux Pays-Bas pour y payer ses alliés. Sa monnaie, c'est la laine anglaise : des navires en apportent sans cesse à Anvers, où elle se vend au profit du roi. Cinq des plus grandes cogues royales, sous le commandement de John Kingston, attendent au mouillage d'Arnemuiden, sur l'île de Walcheren, avec leur cargaison.\n\nLe 23 septembre, la flotte française d'[[cdx_hugues_quieret|Hugues Quiéret]] et de [[cdx_nicolas_behuchet|Nicolas Béhuchet]], forte de dizaines de navires et de galères génoises, tombe sur elles. Les équipages anglais, très inférieurs en nombre, se battent toute une journée ; la Christophe, que [[cdx_froissart|Froissart]] appelle « la belle et grande nef », résisterait longtemps grâce à ses arbalètes et à ses canons, peut-être l'un des premiers usages de la poudre sur mer. Les cinq cogues sont prises, et une partie des prisonniers est massacrée.\n\nLa victoire donne aux Français les meilleurs navires de guerre du Nord : la Christophe, l'Édouard, la Rose et la Catherine passent dans leur flotte. Elle ouvre une année de terreur sur les côtes anglaises (sac de Southampton quelques jours plus tard). Mais ces mêmes navires sont repris à l'[[cdx_ecluse|Écluse]] le 24 juin 1340, où les Anglais font payer aux amiraux français le massacre d'Arnemuiden.",
+  "anachronism": "Dans la bataille de l'Écluse du jeu, la Christophe, l'Édouard, la Rose et la Catherine combattent côté français sous des noms francisés ; leur rôle exact dans la ligne française est reconstitué.",
+  "see_also": ["cdx_ecluse", "cdx_hugues_quieret", "cdx_nicolas_behuchet", "cdx_flandre_laine"],
+  "sources": ["Bataille d'Arnemuiden", "Battle of Arnemuiden (en)", "Jonathan Sumption, The Hundred Years War I: Trial by Battle"]
+}

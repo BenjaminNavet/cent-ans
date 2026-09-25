@@ -28,9 +28,9 @@
     "unit_scottish_spearmen",
     "unit_coutiliers"
   ],
-  "description": "Terrain de revue où l'on passe les montres des troupes levées.",
+  "description": "Terrain où les capitaines présentent leurs troupes à la montre, pour être comptées et payées. Voir [[cdx_ost_feodal]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Ost (armée)",
+    "Ban et arrière-ban"
   ]
 }

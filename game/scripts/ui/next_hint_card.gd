@@ -22,12 +22,8 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	custom_minimum_size = Vector2(WIDTH, 0)
-	var box_style := HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.GOLD, 2)
-	box_style.bg_color.a = 0.94
-	box_style.set_content_margin_all(8)
-	box_style.content_margin_left = 12
-	box_style.shadow_color = HudStyle.SHADOW
-	box_style.shadow_size = 4
+	var box_style := HudStyle.note_box(8)
+	box_style.content_margin_left = 14
 	add_theme_stylebox_override("panel", box_style)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 2)

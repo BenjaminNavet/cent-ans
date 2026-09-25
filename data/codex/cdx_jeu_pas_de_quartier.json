@@ -1,0 +1,19 @@
+{
+  "id": "cdx_jeu_pas_de_quartier",
+  "title": "Ordre : pas de quartier",
+  "category": "mecanique",
+  "aliases": [
+    "pas de quartier",
+    "sans quartier",
+    "oriflamme",
+    "bannière au dragon",
+    "bannière rouge"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Déployer la bannière de guerre à outrance, c'est annoncer qu'on ne fera pas de prisonniers : les hommes y gagnent une rage de vaincre, mais les rançons sont perdues et les vaincus passés au fil de l'épée.",
+  "body": "L'oriflamme de Saint-Denis, étendard de soie rouge que le roi de France lève à l'abbaye avant de partir en guerre, signifie qu'on se bat à outrance : tant qu'elle flotte, on ne fait pas de quartier. Elle est déployée à [[cdx_crecy|Crécy]] (1346), à [[cdx_poitiers|Poitiers]] (1356), où son porteur Geoffroi de Charny meurt en la défendant, à [[cdx_roosebeke|Roosebeke]] (1382) et une dernière fois à [[cdx_azincourt|Azincourt]] (1415). En face, à Crécy, [[cdx_edouard_iii|Édouard III]] fait dresser sa bannière au dragon, avec le même sens.\n\nLa règle heurte les usages de la [[cdx_chevalerie|chevalerie]] : un chevalier qui se rend a droit à la vie, et sa [[cdx_rancon|rançon]] enrichit son vainqueur. Ne pas faire de prisonniers, c'est renoncer à cette fortune, mais c'est aussi garder tous ses hommes au combat au lieu de les voir s'occuper de leurs captifs. À Crécy, le roi anglais interdit de prendre des prisonniers pendant la bataille ; le soir, les morts nobles se comptent par centaines.\n\nLe massacre des prisonniers ordonné par [[cdx_henri_v|Henri V]] à Azincourt, en pleine bataille, reste le cas le plus célèbre et le plus débattu : un geste de nécessité pour les uns, une faute contre l'honneur pour les autres.",
+  "gameplay": "Ordre « Pas de quartier » (libellé selon la faction : « Déployer l'oriflamme » pour la France, « Lever la bannière au dragon » pour l'Angleterre, « Déployer la bannière rouge » ailleurs) : une seule fois par bataille, général vivant et présent requis. Tous les régiments en état de combattre gagnent 20 points de moral et 20 de plafond de moral pour le reste de la bataille.\n\nSi l'armée qui l'a donné l'emporte, elle ne fait aucun prisonnier : le chef ennemi pris est tué, aucune rançon n'est due, et le général vainqueur perd 5 points de piété pour le massacre de chrétiens qui s'étaient rendus. L'IA le donne quand elle affronte un ennemi héréditaire (France et Angleterre, Écosse et Angleterre), plus faible d'un quart au moins, à moins de 150 m.\n\nConseil : gardez-le pour une bataille décisive ou désespérée, quand le moral compte plus que les rançons (voir [[cdx_jeu_moral|moral]] et [[cdx_jeu_pertes_prisonniers|prisonniers]]).",
+  "entity": "order_no_quarter",
+  "see_also": ["cdx_jeu_moral", "cdx_jeu_pertes_prisonniers", "cdx_rancon", "cdx_chevalerie", "cdx_armes_de_france", "cdx_crecy"],
+  "sources": ["Oriflamme", "Bataille de Crécy", "Bataille d'Azincourt"]
+}

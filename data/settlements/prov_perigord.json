@@ -52,8 +52,8 @@
     "fortification_level": 2,
     "buildings": ["bld_market", "bld_stone_walls"],
     "port": false,
-    "description": "Ville close sur la Dordogne, enclave du duché d'Aquitaine anglais en Périgord français, prise par les Français en 1345.",
-    "sources": ["Bergerac (Dordogne)"]
+    "description": "Ville close et pont sur la Dordogne, tenue par le parti français (seigneurie de Bergerac, maison de Pons) ; Henri de Grosmont la prend pour Édouard III le 26 août 1345. (Liberté de jeu : tenue par l'Angleterre dès 1337.)",
+    "sources": ["Bergerac (Dordogne)", "Bataille de Bergerac"]
   },
   {
     "id": "set_brantome",
