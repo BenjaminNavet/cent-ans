@@ -1,0 +1,31 @@
+{
+  "id": "cdx_routiers_des_compagnies",
+  "title": "Les routiers au combat",
+  "category": "unite",
+  "aliases": [
+    "Routiers des Grandes Compagnies",
+    "Seguin de Badefol",
+    "Arnaud de Cervole",
+    "l'Archiprêtre"
+  ],
+  "era": {
+    "from": "1356",
+    "to": "1395"
+  },
+  "summary": "Soldats de métier sans emploi après la trêve de 1357 et le traité de [[cdx_bretigny|Brétigny]], les routiers se regroupent en compagnies qui rançonnent les provinces. Aguerris, bien armés de dépouilles, ils se vendent au plus offrant : à Brignais, en 1362, ils écrasent une armée royale.",
+  "body": "Anglais, Gascons, Bretons, Allemands, Navarrais : les [[cdx_grandes_compagnies|Grandes Compagnies]] mêlent toutes les origines. Leurs capitaines, Seguin de Badefol, Arnaud de Cervole dit l'Archiprêtre, ou [[cdx_robert_knolles|Robert Knolles]], occupent des châteaux d'où ils lèvent des « patis », rançons régulières imposées aux villages alentour.\n\nIls combattent comme les Anglais, à pied, en rangs serrés, et connaissent le métier mieux que les levées qu'on leur oppose. Le 6 avril 1362, à Brignais, près de Lyon, ils taillent en pièces l'armée de Jacques de Bourbon, comte de La Marche, qui meurt de ses blessures.\n\n[[cdx_charles_v|Charles V]] cherche à s'en débarrasser en les envoyant au loin : [[cdx_du_guesclin|Du Guesclin]] les mène en [[cdx_castille|Castille]] en 1365-1367 pour Henri de Trastamare contre [[cdx_pierre_le_cruel|Pierre le Cruel]]. D'autres passent en Italie, comme la Compagnie blanche de John Hawkwood. Le fléau ne disparaît vraiment qu'avec l'armée permanente du siècle suivant.",
+  "gameplay": "Compagnie de 80 hommes (infanterie). Recrutement : 720 livres payées à l'enrôlement ; entretien 80 livres par mois, soit 320 par saison. Caractéristiques : mêlée 64, armure 64 (laisse passer 51 % des coups), moral 62, vitesse 42 (1,68 m/s). Aucun prérequis de technologie ni de bâtiment. Recrutable de 1356 à 1395. La place doit compter assez de paysans (dix fois l'effectif). Pied à terre : ordre irréversible ; vitesse plafonnée à 35, armure +8, plus de charge. À l'assaut d'une place, elle met pied à terre d'elle-même, sans le bonus d'armure. Infanterie lourde aguerrie sans prérequis de technologie, mais chère à entretenir ; disponible seulement de 1356 à 1395.",
+  "entity": "unit_routiers",
+  "see_also": [
+    "cdx_grandes_compagnies",
+    "cdx_ecorcheurs",
+    "cdx_du_guesclin",
+    "cdx_bretigny"
+  ],
+  "sources": [
+    "Grandes Compagnies",
+    "Bataille de Brignais",
+    "Arnaud de Cervole",
+    "John Hawkwood"
+  ]
+}

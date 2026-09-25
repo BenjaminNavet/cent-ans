@@ -1,0 +1,36 @@
+{
+  "id": "cdx_jeu_terrain",
+  "title": "Relief, forêts et marais de la campagne",
+  "category": "mecanique",
+  "aliases": [
+    "terrain de campagne",
+    "collines",
+    "forêt",
+    "forêts",
+    "marais",
+    "montagnes",
+    "hautes terres",
+    "bocage",
+    "col",
+    "cols"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Sur la carte de campagne, collines, forêts, marais et montagnes ralentissent la marche ; les pentes trop raides sont infranchissables et la montagne ne se passe qu'aux cols connus. Le terrain dominant d'une province choisit aussi le champ de bataille.",
+  "body": "La France du XIVe siècle est plus boisée et plus humide qu'aujourd'hui. De grands massifs forestiers, Orléans, Compiègne, la Brière, l'Argonne, les Ardennes, séparent les pays ; ils abritent chasses royales, charbonniers, porchers et brigands, et une armée ne s'y engage qu'en suivant les chemins. Les marais, ceux du Poitou, de la Flandre maritime, de la Somme ou des Landes, ne sont franchissables que par des chaussées et des gués connus des gens du pays.\n\nLes montagnes forment de vraies frontières. On passe les Pyrénées par Roncevaux ou le Somport, les Alpes par le Mont-Cenis ou le Grand-Saint-Bernard, en été seulement, et le passage d'une armée y est un exploit : celle du [[cdx_prince_noir|Prince noir]] franchit Roncevaux en février 1367 dans la neige pour aller combattre à Nájera. Les hautes terres du Massif central, de l'Écosse et du pays de Galles protègent ceux qui les connaissent.\n\nLe relief décide aussi des batailles : colline de [[cdx_crecy|Crécy]] où se retranchent les archers anglais, haies et vignes de [[cdx_poitiers|Poitiers]], étroit champ boueux d'[[cdx_azincourt|Azincourt]] entre deux bois.",
+  "gameplay": "La carte de campagne est découpée en cellules d'environ 1,4 km qui ont chacune un coût de [[cdx_jeu_mouvement|mouvement]], relativement à la plaine : collines (plus de 350 m d'altitude ou pente marquée) ×1,5, forêt ×1,8, marais (plaines basses des provinces marécageuses) ×2,5, montagnes (plus de 1 200 m, pentes fortes ou rocher) ×3. Une pente trop raide est infranchissable ; les cols historiques sont ouverts au coût de la montagne. Une route réduit le coût d'un quart, un petit cours d'eau l'augmente (voir [[cdx_ponts_gues|fleuves]]). Les colonies comptent toujours comme de la plaine.\n\nLe terrain ne change ni la vision, ni le ravitaillement. Pour une bataille de campagne, c'est le terrain dominant de la province (plaines, collines, montagnes, forêt, marais, littoral, hautes terres, bocage) qui fixe le champ de bataille, et la présence d'une rivière dans la province peut y ajouter un cours d'eau et ses gués.\n\nConseil : au marais, une armée ne couvre qu'environ 85 km par saison, en montagne 70 ; suivez les routes et les vallées.",
+  "anachronism": "Les forêts qui gênent la marche viennent d'une couverture du sol simplifiée, et non de la carte des forêts de 1340 dessinée sur la carte ; les marais et le relief fin du rendu n'ont pas d'effet de règle.",
+  "see_also": [
+    "cdx_jeu_mouvement",
+    "cdx_ponts_gues",
+    "cdx_crecy",
+    "cdx_azincourt"
+  ],
+  "sources": [
+    "Forêt en France",
+    "Col de Roncevaux",
+    "Bataille de Nájera"
+  ]
+}

@@ -34,9 +34,10 @@
       "value": 0.25
     }
   ],
-  "description": "Monastère bénédictin ou cistercien : scriptorium, hospitalité, mise en valeur des terres.",
+  "description": "Monastère bénédictin ou cistercien gouverné par un abbé : prière, hospitalité, scriptorium et mise en valeur des terres. Voir [[cdx_abbaye]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Abbaye",
+    "Ordre cistercien",
+    "Ordre de Cluny"
   ]
 }

@@ -8,8 +8,8 @@
   "min_gap_s": 1.5,
   "linger_s": 2.5,
   "lines": [
-    { "id": "adv_start_france", "trigger": "campaign_start", "faction": "fac_france", "text": "Sire, voici votre royaume. Philippe tient la couronne, mais l'Anglais réclame la Guyenne et bien davantage. Veillez sur vos places fortes et sur votre trésor : la guerre sera longue." },
-    { "id": "adv_start_england", "trigger": "campaign_start", "faction": "fac_england", "text": "Monseigneur, le roi Édouard se dit l'héritier de France par sa mère. La Guyenne est à vous, mais la mer vous sépare de vos gens : tenez les ports et ménagez vos alliés de Flandre." },
+    { "id": "adv_start_france", "trigger": "campaign_start", "faction": "fac_france", "text": "Sire, voici votre royaume. Vous avez confisqué la Guyenne au roi d'Angleterre, qui ne la lâchera pas et vise bien davantage. Veillez sur vos places fortes et sur votre trésor : la guerre sera longue." },
+    { "id": "adv_start_england", "trigger": "campaign_start", "faction": "fac_england", "text": "Sire, vous êtes l'héritier de France par votre mère, et le Valois vient de vous confisquer la Guyenne. La mer vous sépare de vos gens : tenez les ports et ménagez vos alliés des Pays-Bas." },
     { "id": "adv_start_burgundy", "trigger": "campaign_start", "faction": "fac_burgundy", "text": "Monseigneur le duc, entre France et Empire, votre maison peut grandir plus qu'aucune autre. Laissez les rois s'épuiser, et gardez l'œil sur les riches villes de Flandre." },
     { "id": "adv_start_default", "trigger": "campaign_start", "text": "Monseigneur, les rois de France et d'Angleterre vont se déchirer. Qu'ils s'épuisent : un prince avisé tire profit de la querelle des autres." },
     { "id": "adv_first_battle", "trigger": "first_battle", "text": "Voici votre première journée. Placez vos archers derrière des pieux, gardez vos chevaliers pour le moment décisif, et n'engagez jamais tout votre monde à la fois." },

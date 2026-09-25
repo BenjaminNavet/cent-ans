@@ -1,0 +1,38 @@
+{
+  "id": "cdx_jeu_edits",
+  "title": "Les édits régionaux",
+  "category": "mecanique",
+  "aliases": [
+    "édit",
+    "édits",
+    "édit régional",
+    "édits régionaux",
+    "changer d'édit",
+    "aide féodale",
+    "franchises marchandes",
+    "levée de la milice",
+    "paix de Dieu",
+    "Carême strict"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Un édit régional oriente une province entière : lever une aide, accorder des franchises aux marchands, armer la milice, proclamer la paix de Dieu ou imposer un Carême strict. Chacun a son prix en mécontentement.",
+  "body": "Le prince médiéval gouverne par ordonnances, mandements et lettres patentes, mais son autorité reste très inégale d'une région à l'autre. Il négocie avec les États provinciaux, confirme ou achète les privilèges des villes, s'appuie sur les évêques et sur les seigneurs locaux. Une mesure prise pour une province tient compte de ses coutumes : la Normandie a sa charte de 1315, le Languedoc ses États, les villes flamandes leurs libertés.\n\nLes outils ne manquent pas. L'aide féodale, due au seigneur pour sa [[cdx_rancon|rançon]], l'adoubement de son fils aîné ou le mariage de sa fille aînée, sert de modèle aux levées exceptionnelles. Les chartes de franchise et les foires franches attirent les marchands. L'arrière-ban convoque tous les hommes capables de porter les armes. L'Église, elle, prêche depuis l'an mil la paix et la trêve de Dieu, qui protègent clercs, paysans et jours saints, et rappelle l'observance du [[cdx_careme|Carême]] et des [[cdx_jours_maigres|jours maigres]].\n\nChacune de ces mesures a ses mécontents : les contribuables pour l'aide, les métiers jaloux de leurs monopoles pour les franchises, les paysans arrachés aux champs pour la milice, la noblesse privée de gibier et de viande pour le Carême rigoureux.",
+  "gameplay": "Un seul édit par province, choisi dans l'onglet Ville du panneau de province (« Édit régional », bouton « Changer d'édit »). Il faut tenir toutes les [[cdx_jeu_colonies|colonies]] de la province ; si l'on en perd une, l'édit cesse. Un édit est gratuit, sans durée limite ni délai de recharge, mais on ne peut changer l'édit d'une province qu'une fois par tour, et le nouvel édit n'entre en vigueur qu'après son délai (l'ancien s'applique en attendant).\n\nLes cinq édits : « Aide féodale » (immédiat) : +20 % d'[[cdx_jeu_impot|impôts]], +10 de mécontentement général et +5 chez les paysans. « Franchises marchandes » (2 tours) : +12 % de « revenus du commerce » (sur la part de l'impôt payée par les bourgeois ; les [[cdx_jeu_commerce|routes commerciales]] n'en profitent pas), +4 de richesse bourgeoise, +3 de mécontentement de la noblesse. « Levée de la milice » (1 tour) : +1 emplacement de [[cdx_jeu_recrutement|recrutement]], −10 % sur le coût des recrues, +1 de garnison, +5 de mécontentement, −2 de richesse paysanne. « Paix de Dieu » (1 tour) : −8 de mécontentement, −1 emplacement de recrutement. « Carême strict » (1 tour) : −6 de mécontentement du clergé, +4 de mécontentement de la noblesse, −3 de satisfaction des biens (voir [[cdx_careme|Carême]]).\n\nConseil : la Paix de Dieu calme une province au bord de la [[cdx_jeu_ordre_public|révolte]] ; l'Aide féodale finance une campagne dans une province tranquille ; la Levée de la milice convient aux marches frontalières.",
+  "see_also": [
+    "cdx_jeu_ordre_public",
+    "cdx_jeu_impot",
+    "cdx_jeu_population",
+    "cdx_careme",
+    "cdx_seigneurie",
+    "cdx_jours_maigres"
+  ],
+  "sources": [
+    "Aide aux quatre cas",
+    "Paix de Dieu",
+    "Charte de franchises",
+    "Arrière-ban"
+  ]
+}

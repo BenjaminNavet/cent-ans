@@ -1,0 +1,17 @@
+{
+  "id": "cdx_jeu_pied_a_terre",
+  "title": "Ordre : pied à terre",
+  "category": "mecanique",
+  "aliases": [
+    "pied à terre",
+    "mettent pied à terre",
+    "démontés"
+  ],
+  "era": { "from": "1332", "to": "1453" },
+  "summary": "Les hommes d'armes renvoient leurs chevaux à l'arrière et combattent à pied, la lance raccourcie : ils perdent la charge mais gagnent une solidité que la cavalerie n'a jamais eue. La grande leçon tactique de la guerre de Cent Ans.",
+  "body": "Les Anglais apprennent à combattre à pied contre les Écossais : à Dupplin Moor (1332) et à Halidon Hill (1333), leurs hommes d'armes démontés, flanqués d'archers, attendent l'ennemi sur place et le brisent. [[cdx_edouard_iii|Édouard III]] applique la même méthode à [[cdx_crecy|Crécy]] (1346) : ses chevaliers combattent à pied au centre, les chevaux gardés à l'arrière dans le parc à chariots. Un homme d'armes à pied, couvert de fer, la lance raccourcie à cinq pieds ou la hache d'armes en main, forme avec ses voisins un mur que les chevaux n'enfoncent pas.\n\nLes Français retiennent la leçon, parfois trop bien. À [[cdx_poitiers|Poitiers]] (1356), [[cdx_jean_ii|Jean II]] fait mettre pied à terre à presque toute son armée, qui marche ensuite à l'assaut de la position anglaise ; seules deux petites troupes de cavaliers menées par les maréchaux chargent les archers. À [[cdx_azincourt|Azincourt]] (1415), les hommes d'armes démontés s'épuisent dans la boue avant d'atteindre la ligne anglaise.\n\nMettre pied à terre engage : les chevaux sont loin, emmenés par les valets. Pour fuir, poursuivre ou manœuvrer, il faut les faire revenir, et c'est souvent impossible au cœur de la bataille (voir [[cdx_hommes_d_armes|hommes d'armes]]).",
+  "gameplay": "Ordre « Pied à terre » de la barre « Ordres du chef » : pour les régiments de cavalerie montés qui savent combattre à pied (chevaliers, gendarmes, écorcheurs, hobelars…), sélectionnés ou, sans sélection, tous. Ils deviennent de l'infanterie : vitesse limitée à 35 (1,4 m/s au pas), armure +8 (120 au plus), plus de charge ; un coin redevient une ligne, mais le schiltron devient possible. Irréversible pour la bataille ; recharge de 5 secondes. N'exige pas la présence du général.\n\nL'IA démonte ses chevaliers quand elle attend l'ennemi sur la défensive. À l'assaut d'une place, les chevaliers et hommes d'armes montés de l'assaillant mettent pied à terre d'eux-mêmes (voir [[cdx_jeu_assaut|assaut]]).\n\nConseil : démontez vos chevaliers quand vous défendez une bonne position contre de la cavalerie ou des piquiers ; gardez-les à cheval pour la [[cdx_jeu_charge|charge]] de flanc et la poursuite.",
+  "entity": "order_dismount",
+  "see_also": ["cdx_hommes_d_armes", "cdx_jeu_charge", "cdx_jeu_formations", "cdx_jeu_assaut", "cdx_crecy", "cdx_poitiers"],
+  "sources": ["Bataille de Crécy", "Bataille de Poitiers (1356)", "Bataille de Dupplin Moor"]
+}

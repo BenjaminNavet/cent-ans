@@ -2,11 +2,31 @@
   "id": "cdx_hotel_dieu",
   "title": "Les hôtels-Dieu",
   "category": "institution",
-  "aliases": ["hôtel-Dieu", "hôtels-Dieu", "Hôtel-Dieu de Paris", "Hospices de Beaune", "maison-Dieu"],
-  "era": { "from": "650", "to": "1500" },
+  "aliases": [
+    "hôtel-Dieu",
+    "hôtels-Dieu",
+    "Hôtel-Dieu de Paris",
+    "Hospices de Beaune",
+    "maison-Dieu"
+  ],
+  "era": {
+    "from": "650",
+    "to": "1500"
+  },
   "summary": "Maisons de Dieu plus qu'hôpitaux au sens moderne, les hôtels-Dieu accueillent pauvres, pèlerins, malades, femmes en couches et enfants abandonnés. On y soigne l'âme d'abord, le corps ensuite. Celui de Beaune est fondé en 1443.",
   "body": "Chaque ville médiévale possède au moins un hôpital, souvent appelé hôtel-Dieu ou maison-Dieu : le pauvre y est accueilli comme le Christ lui-même. Le plus ancien et le plus grand du royaume, l'Hôtel-Dieu de Paris, au pied de Notre-Dame, serait né au VIIe siècle, selon la tradition, de l'initiative de l'évêque saint Landry. Au XIVe siècle, il reçoit des centaines de malades par jour, soignés par des sœurs et des frères augustins.\n\nLa vie y est rythmée par la prière. La grande salle ressemble à une église, avec un autel visible de tous les lits, pour que les malades suivent la messe. On confesse le malade à son entrée, avant tout soin. Les lits, grands et garnis de rideaux, accueillent souvent deux, trois malades ou davantage, tête-bêche, sans distinction de maladie : on mesure mal les risques de contagion. On nourrit, on lave, on réchauffe ; les médecins et les [[cdx_barbiers_chirurgiens|chirurgiens]] ne viennent qu'occasionnellement, et les remèdes viennent de l'[[cdx_apothicaires|apothicaire]] ou du [[cdx_jardin_des_simples|jardin des simples]].\n\nLes hôtels-Dieu vivent de legs, de rentes, de quêtes et de privilèges. Les malades incurables, les lépreux (voir les [[cdx_leproserie|léproseries]]) et, plus tard, les pestiférés sont en principe dirigés ailleurs. Au XVe siècle, des réformes cherchent à mieux gérer ces institutions souvent endettées et à séparer les malades contagieux.\n\nEn 1443, en pleine guerre, Nicolas Rolin, chancelier du duc de Bourgogne [[cdx_philippe_le_bon|Philippe le Bon]], et sa femme Guigone de Salins fondent l'Hôtel-Dieu de Beaune, avec sa grande salle des « Pôvres » et ses toits de tuiles vernissées. Il accueillera des malades jusqu'en 1971 et finance encore aujourd'hui ses œuvres par la célèbre vente des vins des Hospices.",
-  "entity": "tech_hospital_reform",
-  "see_also": ["cdx_leproserie", "cdx_medecine_medievale", "cdx_barbiers_chirurgiens", "cdx_quarantaine", "cdx_philippe_le_bon"],
-  "sources": ["Hôtel-Dieu", "Hôtel-Dieu de Paris", "Hospices de Beaune"]
+  "gameplay": "Bâtiment sanitaire de niveau 1, constructible dans une cité, une ville ou une abbaye qui possède une [[cdx_eglise_paroissiale|église paroissiale]], avec la technologie « Réforme hospitalière ». Coût 800 livres (ajusté selon la monnaie), 3 tours, entretien 20 livres par tour.\n\nEffets : santé +8 pour toutes les classes de la province et mécontentement des paysans −2 (voir [[cdx_jeu_population]] et [[cdx_jeu_ordre_public]]). Il est exigé pour bâtir l'[[cdx_adduction_d_eau|adduction d'eau]]. La santé soutient la croissance et apaise : un bon choix dans les villes surpeuplées ou frappées par les épidémies, avec l'[[cdx_apothicaires|apothicairerie]].\n\nLa technologie « Réforme hospitalière » (180 points de recherche, sans prérequis) donne +5 à la santé visée dans toute la faction et débloque ce bâtiment.",
+  "entity": "bld_hotel_dieu",
+  "see_also": [
+    "cdx_leproserie",
+    "cdx_medecine_medievale",
+    "cdx_barbiers_chirurgiens",
+    "cdx_quarantaine",
+    "cdx_philippe_le_bon"
+  ],
+  "sources": [
+    "Hôtel-Dieu",
+    "Hôtel-Dieu de Paris",
+    "Hospices de Beaune"
+  ]
 }
