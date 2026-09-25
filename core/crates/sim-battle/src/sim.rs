@@ -147,6 +147,9 @@ pub struct BattleSim {
     drown_announced: Vec<u32>,
     /// EP6: looting of each side's camp.
     camp_states: [camp::CampState; 2],
+    /// EP6: solid footprints of the decor by cell (derived data, reset by
+    /// `field_mut`).
+    decor_grid: std::cell::OnceCell<obstacles::DecorGrid>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -408,6 +411,7 @@ impl BattleSim {
             crossings: Default::default(),
             drown_announced: Vec::new(),
             camp_states: Default::default(),
+            decor_grid: Default::default(),
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -693,6 +697,7 @@ impl BattleSim {
         self.relief_map = Default::default();
         self.crossings = Default::default();
         self.village_props = Default::default();
+        self.decor_grid = Default::default();
         &mut self.field
     }
 
