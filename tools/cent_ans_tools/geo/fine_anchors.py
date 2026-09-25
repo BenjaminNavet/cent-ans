@@ -507,6 +507,10 @@ def build_roads(
                     log(
                         f"  routes : {done}/{len(todo)} lots ({time.time() - started:.0f} s)"
                     )
+    current = {Path(job["out"]).name for job in jobs}
+    for stale in ROAD_CACHE.glob("roads_*.npz"):
+        if stale.name not in current:
+            stale.unlink()
     side = fine_tiles.tile_units(fine_tiles.TILE_LEVEL)
     limit = int(round(4096 / side))
     tiles: dict[tuple[int, int], fine_tiles.TileLines] = defaultdict(
