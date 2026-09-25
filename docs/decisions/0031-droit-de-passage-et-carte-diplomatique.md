@@ -69,7 +69,9 @@ contre-offre propose quand le rival est le seul point bloquant. Test :
 ## Conséquences
 
 - Pas de changement de `STATE_VERSION` : `trespassers` est `#[serde(default)]`.
-- L'IA contourne les terres neutres : certaines marches s'allongent (voir la sonde dans
-  `docs/wip/dp2-diplomatie.md`).
+- L'IA contourne les terres neutres. Sonde `balance_probe campaign 200 1-8` (règle coupée → active) :
+  guerre France-Angleterre 52 → 57 % des tours, changements de propriétaire 21,1 → 16,6, batailles
+  299 → 242, banqueroutes 0,51 → 0,29 par faction et décennie ; milice, révoltes et mécontentement
+  inchangés. La carte bouge un peu moins : à surveiller.
 - Limites : une traversée sans halte n'est pas punie ; le graphe de l'IA exclut des places, mais le
   pas de grille entre deux places peut frôler une province neutre.
