@@ -71,6 +71,8 @@ var _update_us_max := 0
 var _updates := 0
 var _build_ms_total := 0.0
 var _install_ms_max := 0.0
+var _install_mesh_ms_max := 0.0
+var _install_gates_ms_max := 0.0
 var _builds := 0
 ## Préréglage de qualité (PF1) : ordre minimal des cours d'eau, rayon, parcellaire (0-2).
 var _min_order := 3
@@ -323,6 +325,11 @@ func _start_job(key: int) -> void:
 	for t in _towns:
 		if rect.grow(t.z).has_point(Vector2(t.x, t.y)):
 			job.towns.append(t)
+	if settlements != null and settlements.data != null:
+		for c in job.covers:
+			var index := int(c.w)
+			if index >= 0 and index < settlements.data.settlements.size():
+				job.cover_kinds[index] = str(settlements.data.settlements[index].get("kind", ""))
 	if _built.has(key):
 		(_built[key] as Dictionary)["dirty"] = -1
 	_jobs[key] = {"task": WorkerThreadPool.add_task(job.run, false, "fine ribbons"), "job": job}
@@ -368,12 +375,16 @@ func _install(job: FineRibbonJob) -> void:
 		node.add_child(road)
 		entry = {"node": node, "river": river, "road": road, "used": _frame, "dirty": -1, "version": 0, "gates": []}
 		_built[job.key] = entry
+	var t_mesh := Time.get_ticks_usec()
 	(entry["river"] as MeshInstance3D).mesh = _mesh(job.river_arrays, job.river_aabb)
 	(entry["road"] as MeshInstance3D).mesh = _mesh(job.road_arrays, job.road_aabb)
+	_install_mesh_ms_max = maxf(_install_mesh_ms_max, (Time.get_ticks_usec() - t_mesh) / 1000.0)
 	entry["version"] = int(entry["version"]) + 1
 	entry["finest"] = job.finest
 	entry["points"] = job.river_points + job.road_points
+	var t_gates := Time.get_ticks_usec()
 	_build_gates(entry, job.gates)
+	_install_gates_ms_max = maxf(_install_gates_ms_max, (Time.get_ticks_usec() - t_gates) / 1000.0)
 	_build_ms_total += job.build_ms
 	_builds += 1
 	_install_ms_max = maxf(_install_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
@@ -437,16 +448,17 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 	var nodes: Array[Node3D] = []
 	for gate in gates:
 		var index: int = gate["cover"]
-		var kind := str(settlements.data.settlements[index].get("kind", "")) if settlements != null and settlements.data != null else "city"
-		var width: float = gate["width"]
-		var structure := ("gate" if width >= GATE_MIN_WIDTH else "stone") if kind in WALLED else "wood"
 		var instance := MeshInstance3D.new()
 		instance.name = "Gate_%d" % index
 		# ZG4b : échelle réelle (ZG5b les laissait à l'échelle exagérée de la carte, ×2 en hauteur et
 		# en largeur de tablier, culées de 50-100 m) : maillage d'une portée `width / FINE_SCALE`
 		# réduit de `FINE_SCALE`, hauteur recalculée à chaque échelle verticale (`_ground_gate`).
-		var mesh_width := maxf(width, 0.01) / RiverCrossings.FINE_SCALE
-		instance.mesh = BridgeMeshes.build(structure, mesh_width, absi(str(index).hash()) + nodes.size())
+		# ZG7a : type, largeur et tableaux préparés dans le fil du maillage (`FineRibbonJob`).
+		var mesh_width: float = gate["mesh_width"]
+		var key: String = gate["mesh_key"]
+		instance.mesh = BridgeMeshes.cached(key)
+		if instance.mesh == null:
+			instance.mesh = BridgeMeshes.build_from(key, gate["surfaces"])
 		var dir: Vector2 = gate["dir"]
 		var across := Vector3(-dir.y, 0.0, dir.x)
 		var along := across.cross(Vector3.UP)
@@ -546,5 +558,8 @@ func perf_stats() -> Dictionary:
 		"fine_builds": _builds,
 		"fine_build_ms_avg": snappedf(_build_ms_total / maxf(_builds, 1), 0.1),
 		"fine_install_ms_max": snappedf(_install_ms_max, 0.01),
+		"fine_install_mesh_ms_max": snappedf(_install_mesh_ms_max, 0.01),
+		"fine_install_gates_ms_max": snappedf(_install_gates_ms_max, 0.01),
 		"carved_pages": int(carver.stats.get("pages", 0)) if carver != null else 0,
+		"bridge_reshape_ms_max": snappedf(rivers.crossings.reshape_ms_max, 0.01) if rivers != null and rivers.crossings != null else 0.0,
 	}

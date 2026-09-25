@@ -41,6 +41,14 @@ var _gates_hidden := false
 ## Lot ZG4b : ouvrages à remettre en forme après une bascule de mode (index dans `items`),
 ## étalés sur plusieurs images (`FrameBudget`) : la bascule d'un bloc coûtait ~35 ms.
 var _reshape_queue: Array[int] = []
+## Lot ZG7a : maillages fins préparés dans un fil dès `set_fine_anchors` (clé du cache
+## `BridgeMeshes` → tableaux) : la bascule n'a plus qu'à créer les `ArrayMesh` (≤ 1 ms par
+## ouvrage au lieu de 5-16 ms de `SurfaceTool` sous charge).
+var _prepared_fine: Dictionary = {}
+var _prepare_task := -1
+var _prepare_mutex := Mutex.new()
+## Remise en forme la plus longue (ms, mesures).
+var reshape_ms_max := 0.0
 
 
 func build(rivers_renderer: RiversRenderer, settlements: SettlementLayer) -> void:
@@ -229,7 +237,15 @@ func _shape(item: Dictionary) -> void:
 	# ZG4b : un maillage par mode, gardé (un retour au mode précédent ne remaille rien).
 	var mesh_key := "mesh_fine" if not fine.is_empty() else "mesh_v4"
 	if not item.has(mesh_key):
-		item[mesh_key] = BridgeMeshes.build(str(item["structure"]), width, absi(str(item["id"]).hash()))
+		var seed_value := absi(str(item["id"]).hash())
+		var key := BridgeMeshes.cache_key(str(item["structure"]), width, seed_value)
+		_prepare_mutex.lock()
+		var surfaces: Array = _prepared_fine.get(key, [])
+		_prepare_mutex.unlock()
+		if not fine.is_empty() and not surfaces.is_empty():
+			item[mesh_key] = BridgeMeshes.build_from(key, surfaces)
+		else:
+			item[mesh_key] = BridgeMeshes.build(str(item["structure"]), width, seed_value)
 	instance.mesh = item[mesh_key]
 	# X local en travers du fleuve (ou selon la route portée), Z = X × Y (repère direct).
 	var across := Vector3(-dir.y, 0.0, dir.x)
@@ -300,6 +316,47 @@ func _on_chunk_surface_changed(index: int) -> void:
 ## Ancrages de `fine_anchors.json` (même ordre que `crossings_px.json`).
 func set_fine_anchors(anchors: Array[Dictionary]) -> void:
 	_fine_anchors = anchors
+	_wait_prepare()
+	var todo: Array = []
+	for item in items:
+		var fine := _fine_anchor_width(item)
+		if fine > 0.0:
+			var width := fine / FINE_SCALE
+			var seed_value := absi(str(item["id"]).hash())
+			todo.append([BridgeMeshes.cache_key(str(item["structure"]), width, seed_value), str(item["structure"]), width, seed_value])
+	if not todo.is_empty():
+		_prepare_task = WorkerThreadPool.add_task(_prepare_fine.bind(todo), false, "fine bridge meshes")
+
+
+## Largeur fine (unités) de l'ouvrage, 0 sans ancrage fin accroché.
+func _fine_anchor_width(item: Dictionary) -> float:
+	if not item.has("index"):
+		return 0.0
+	var index: int = item["index"]
+	if index < 0 or index >= _fine_anchors.size():
+		return 0.0
+	var anchor: Dictionary = _fine_anchors[index]
+	if not bool(anchor.get("snapped", false)) or str(anchor.get("id", "")) != str(item["id"]):
+		return 0.0
+	return maxf(float(anchor.get("width_m", 0.0)) / renderer.map_data.meters_per_px, 0.01)
+
+
+func _prepare_fine(todo: Array) -> void:
+	for entry: Array in todo:
+		var surfaces := BridgeMeshes.build_arrays(entry[1], entry[2], entry[3])
+		_prepare_mutex.lock()
+		_prepared_fine[entry[0]] = surfaces
+		_prepare_mutex.unlock()
+
+
+func _wait_prepare() -> void:
+	if _prepare_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_prepare_task)
+		_prepare_task = -1
+
+
+func _exit_tree() -> void:
+	_wait_prepare()
 
 
 ## Ancrage fin d'un ouvrage en mode fin : {px, dir, width (unités), z_water} ou {}. Mode de
@@ -351,7 +408,9 @@ func pump_reshape(all: bool = false) -> void:
 		if item["node"] == null or bool(item.get("fine_mode", false)) == _fine_mode:
 			continue
 		item["fine_mode"] = _fine_mode
+		var t0 := Time.get_ticks_usec()
 		_shape(item)
+		reshape_ms_max = maxf(reshape_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
 	set_process(not _reshape_queue.is_empty())
 
 
