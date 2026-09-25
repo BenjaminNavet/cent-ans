@@ -10,10 +10,8 @@
 | `lord_of_the_land.mp3` | Lord of the Land | USUAN1400022 | 3:06 |
 | `village_consort.mp3` | Village Consort | USUAN1700007 | 3:35 |
 | `crusade.mp3` | Crusade | USUAN1100884 | 3:19 |
-| `heroic_age.mp3` | Heroic Age | USUAN1100848 | 1:37 |
 | `celtic_impulse.mp3` | Celtic Impulse | USUAN1100297 | 2:38 |
 | `achaidh_cheide.mp3` | Achaidh Cheide | USUAN1100340 | 2:14 |
-| `crossing_the_chasm.mp3` | Crossing the Chasm | USUAN1700026 | 3:17 |
 | `angevin_b.mp3` | Angevin B | USUAN1200111 | 2:09 |
 | `procession_of_the_king.mp3` | Procession of the King | USUAN1100745 | 3:04 |
 | `master_of_the_feast.mp3` | Master of the Feast | USUAN1400019 | 3:48 |
@@ -26,12 +24,13 @@
 | `the_britons.mp3` | The Britons | USUAN2600004 | 5:07 |
 | `folk_round.mp3` | Folk Round | USUAN1100357 | 3:04 |
 | `pippin_the_hunchback.mp3` | Pippin the Hunchback | USUAN1400005 | 3:13 |
-| `canon_in_d_major.mp3` | Canon in D Major (Pachelbel, arr. MacLeod) | USUAN1100301 | 5:55 |
-| `prelude_in_c_bwv_846.mp3` | Prelude in C - BWV 846 (Bach, interpr. MacLeod) | — | ~3:00 |
 
 Téléchargement : `https://incompetech.com/music/royalty-free/mp3-royaltyfree/<Titre>.mp3`.
 Les ajouts du 2026-09-25 sont réencodés en MP3 128 kbit/s (ffmpeg/libmp3lame, métadonnées retirées) ;
 les deux premiers restent en MP3 d'origine 256 kbit/s. Aucune modification musicale.
+
+Retirés le 2026-09-25 (cordes d'orchestre ou piano, anachroniques) : Heroic Age, Crossing the Chasm,
+Canon in D Major, Prelude in C BWV 846.
 
 Attribution à afficher (formule de l'auteur, pour chaque titre) :
 
