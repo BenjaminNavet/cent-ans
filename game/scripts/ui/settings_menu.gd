@@ -203,6 +203,9 @@ func _build_sound(grid: GridContainer) -> void:
 	for spec in AudioBuses.PLAYER_BUSES:
 		var bus_name: String = spec[0]
 		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
+	# VO1 : voix.
+	_check(grid, "voice/advisor", "Conseiller", "Le chroniqueur Jean le Bel commente le premier tour, la première bataille, le premier siège et les alertes importantes (voix et sous-titre).")
+	_check(grid, "voice/barks", "Répliques des unités", "Les régiments répondent à la sélection et aux ordres, crient à la charge et en déroute.")
 
 
 ## Lot U7 : disposition du clavier et fiche des raccourcis, lue dans l'InputMap.

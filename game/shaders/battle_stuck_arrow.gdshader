@@ -1,7 +1,8 @@
-// Flèches et carreaux fichés (lot BV1) : couche statique qui grandit pendant la bataille (au sol,
-// dans les pavois, dans les pieux). Transformée d'instance = position réelle de la flèche (pointe
-// à l'origine, fût le long de -Z) ; INSTANCE_CUSTOM.x = instant où elle se fiche (cachée avant),
-// INSTANCE_CUSTOM.y = 1 pour un carreau (plus court, plus épais).
+// Traits fichés (lot BV1, UR2 : balles, javelots) : couche statique qui grandit pendant la
+// bataille (au sol, dans les pavois, dans les pieux, dans les corps). Transformée d'instance =
+// position réelle du trait (pointe à l'origine, fût le long de -Z) ; INSTANCE_CUSTOM.x = instant
+// où il se fiche (caché avant), INSTANCE_CUSTOM.y = épaisseur relative (0 flèche, 1 carreau ou
+// balle, courts et épais ; entre les deux pour un javelot, plus long).
 shader_type spatial;
 render_mode cull_disabled, specular_disabled;
 

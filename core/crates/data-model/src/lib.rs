@@ -79,7 +79,7 @@ pub use entities::settlement::{
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
 pub use entities::trade::{TradeCatalog, TradeHub, TradeRouteDef};
-pub use entities::unit_type::{Ability, UnitStats, UnitType};
+pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId, EventId,
