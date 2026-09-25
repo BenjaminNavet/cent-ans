@@ -111,4 +111,3 @@ func stage_screenshot() -> void:
 	decisions.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.get("historical", false) and not b.get("historical", false))
 	if not decisions.is_empty():
 		window.show_decision(decisions[0], decisions.size())
-	map.ui.set_date(date)

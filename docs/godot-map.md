@@ -679,6 +679,41 @@ Aucune règle en GDScript : options, disponibilités et refus viennent de `Campa
 
 Avant C7b : `c5-panneau-colonie.png` (panneau sur la minicarte), `c7b-avant-chemin.png`.
 
+## Mouvement libre des armées (lot M4)
+
+Spec : `docs/design/2026-09-24-mouvement-libre.md` § 6. Scripts : `army_movement_controller.gd`
+(contrôleur), `army_movement_bubble.gd` + `shaders/reachable_bubble.gdshader` (bulle),
+`army_movement_path.gd` (chemin). `campaign_map.gd` ne fait que brancher le contrôleur. Avec la
+vraie simulation, la bulle remplace les anneaux C5 et le masque de provinces ; le panneau de
+colonie et le bouton « Garnison » restent. Avec le mock, la carte garde le comportement C5.
+
+- **Bulle** : `get_reachable_area(armée)` renvoie un masque RG8 recadré (une case de la grille par
+  texel, R = atteignable, G = coût / budget) ; les trouées d'une ou deux cases (fleuves franchis plus
+  loin par un pont) sont comblées pour l'affichage. Maillage posé sur le relief, contour doré
+  anticrénelé, ombre d'encre, voile qui se renforce vers le bord de portée ; mipmaps pour un contour
+  stable au dézoom.
+- **Chemin** : `find_path_points(armée, x, y)` (polyligne en pixels carte, `stop_index`,
+  `turn_ends`, coût) ; vert pour ce tour, rouge pour les tours suivants, jalon à chaque fin de tour.
+  Il suit le curseur (recalcul au plus toutes les 40 ms, et seulement si la case visée change) ;
+  l'étiquette de survol donne le nombre de tours et le coût. Une armée déjà en marche montre le reste
+  de son `planned_path`.
+- **Clic droit** : sur le sol → `move_army_to` ; sur une armée ennemie (en guerre) → `attack_army` ;
+  sur une colonie → `move_army_to_settlement` (stationnement, siège ou prise), ou `embark_army` si
+  l'armée est dans un port relié à la colonie par mer. La réponse (`walked`, `stop`, `events`) anime
+  le marqueur le long du trajet, affiche un avis (arrêt en zone de contrôle, siège…) et propose la
+  bataille en attente le cas échéant.
+- **Zone de contrôle** : cercle rouge (décalque) de `zoc_radius_km` au survol d'une armée ennemie.
+- **Marqueurs** : une armée en campagne se tient à sa `position` libre ; seules les armées dans une
+  colonie s'y empilent.
+- Getters du pont : `get_army` gagne `position`, `settlement`, `movement_left`, `movement_max`,
+  `planned_path`, `destination_point` (anciens champs gardés) ; `get_movement_rules`,
+  `submit_order_report` ; `debug_place_army` (tests et captures seulement).
+- Test : `godot --headless --path game --script res://tests/m4_free_movement_ui_test.gd`. Captures :
+  `--stage=movement` et `--stage=movement_near`.
+
+![Bulle et chemin sur deux tours](img/m4/bulle-chemin.png)
+![Bord de la bulle, fin de l'étape de ce tour](img/m4/bord-de-bulle.png)
+
 ## Performances mesurées (M4 Pro)
 
 | Jeu de données | Chargement | Terrain (LOD lointain) | Tuile proche |

@@ -29,6 +29,10 @@ func setup(campaign_map: Node) -> void:
 	var ui: MapUI = map.get("ui")
 	minimap = CampaignMinimap.new()
 	ui.add_child(minimap)
+	# A3 C1 : la minicarte se dessine sous tous les panneaux (technologies, encyclopédie,
+	# diplomatie…), juste après la barre du haut ; elle ne masque plus leur bouton ×.
+	var top_bar := ui.get_node_or_null("TopBar")
+	ui.move_child(minimap, top_bar.get_index() + 1 if top_bar != null else 0)
 	ui.set("minimap", minimap)
 	minimap.setup(map.get("map_data"))
 	minimap.clicked.connect(center_camera_on)

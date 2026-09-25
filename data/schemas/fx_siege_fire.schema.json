@@ -36,7 +36,9 @@
         "velocity_m_s": { "$ref": "#/$defs/range" },
         "spread_m": { "type": "number", "minimum": 0 },
         "color_start": { "$ref": "#/$defs/rgba" },
-        "color_end": { "$ref": "#/$defs/rgba" }
+        "color_end": { "$ref": "#/$defs/rgba" },
+        "anim_loops": { "type": "number", "minimum": 0, "maximum": 8, "description": "V3 : boucles de la planche de flammes pendant la vie d'une particule." },
+        "emission": { "type": "number", "minimum": 0, "maximum": 20, "description": "V3 : intensité lumineuse (HDR) des flammes." }
       },
       "required": ["amount", "lifetime_s", "size_m", "velocity_m_s", "spread_m", "color_start", "color_end"],
       "additionalProperties": false
@@ -53,6 +55,19 @@
         "wind_drift_m_s": { "type": "number", "minimum": 0, "description": "Dérive de la fumée par unité de force du vent." }
       },
       "required": ["amount", "lifetime_s", "size_m", "velocity_m_s", "spread_m", "color", "wind_drift_m_s"],
+      "additionalProperties": false
+    },
+    "embers": {
+      "type": "object",
+      "description": "V3 (A1-13) : braises qui montent des foyers et dérivent au vent.",
+      "properties": {
+        "amount": { "type": "integer", "minimum": 0, "maximum": 512 },
+        "lifetime_s": { "type": "number", "exclusiveMinimum": 0 },
+        "size_m": { "$ref": "#/$defs/range" },
+        "velocity_m_s": { "$ref": "#/$defs/range" },
+        "energy": { "type": "number", "minimum": 0 }
+      },
+      "required": ["amount", "lifetime_s", "size_m", "velocity_m_s", "energy"],
       "additionalProperties": false
     },
     "ruin": {
