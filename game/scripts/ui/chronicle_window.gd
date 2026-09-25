@@ -64,6 +64,9 @@ func _ready() -> void:
 	_title_label.add_theme_color_override("font_color", INK)
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Wrap width fixed: at width 0 the title wraps one letter per line on the first layout and
+	# the window grew taller than the screen (Q3).
+	_title_label.custom_minimum_size = Vector2(580, 0)
 	root.add_child(_title_label)
 
 	_meta_label = Label.new()
@@ -124,6 +127,7 @@ func show_decision(decision: Dictionary, queue_size: int) -> void:
 	_meta_label.text = " — ".join(meta)
 	_text_label.text = "[i]%s[/i]" % CodexText.format(str(decision.get("text", "")), true)
 	for child in _options_box.get_children():
+		_options_box.remove_child(child)  # out of the layout now, not at the end of the frame
 		child.queue_free()
 	var options: Array = decision.get("options", [])
 	for option in options:
