@@ -314,7 +314,9 @@ def _report_navgrid(result) -> None:  # noqa: ANN001
     console.print(
         f"{result.passable_fraction:.1%} des cases de terre franchissables ; "
         f"passages : {result.crossings_used} ponts et gués, "
-        f"{result.road_crossings} croisements route/fleuve, {result.passes} cols "
+        f"{result.road_crossings} croisements route/fleuve "
+        f"({result.road_crossings_dropped} écartés, loin de toute colonie), "
+        f"{result.passes} cols "
         f"({result.seconds:.0f} s)"
     )
     if result.off_river:

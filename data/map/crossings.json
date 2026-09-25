@@ -902,6 +902,58 @@
       "note": "Gué de la basse Somme franchi par Édouard III en 1346."
     },
     {
+      "id": "bridge_pont_d_abbeville",
+      "name": "Pont d'Abbeville",
+      "type": "bridge",
+      "river": "Somme",
+      "lonlat": [1.834, 50.106],
+      "source": "Wikipédia (fr), « Abbeville »",
+      "note": "Ponts de la ville close, capitale du Ponthieu, sur la basse Somme."
+    },
+    {
+      "id": "bridge_pont_remy",
+      "name": "Pont-Remy",
+      "type": "bridge",
+      "river": "Somme",
+      "lonlat": [1.912, 50.053],
+      "source": "Wikipédia (fr), « Bataille de Crécy »",
+      "note": "Pont gardé par les Français contre Édouard III en août 1346."
+    },
+    {
+      "id": "bridge_pont_de_picquigny",
+      "name": "Pont de Picquigny",
+      "type": "bridge",
+      "river": "Somme",
+      "lonlat": [2.144, 49.944],
+      "source": "Wikipédia (fr), « Traité de Picquigny »",
+      "note": "Pont fortifié ; Louis XI et Édouard IV s'y rencontrent en 1475."
+    },
+    {
+      "id": "bridge_ponts_d_amiens",
+      "name": "Ponts d'Amiens",
+      "type": "bridge",
+      "river": "Somme",
+      "lonlat": [2.296, 49.894],
+      "source": "Wikipédia (fr), « Amiens »"
+    },
+    {
+      "id": "bridge_pont_de_corbie",
+      "name": "Pont de Corbie",
+      "type": "bridge",
+      "river": "Somme",
+      "lonlat": [2.509, 49.908],
+      "source": "Wikipédia (fr), « Corbie »"
+    },
+    {
+      "id": "bridge_pont_de_peronne",
+      "name": "Pont de Péronne",
+      "type": "bridge",
+      "river": "Somme",
+      "lonlat": [2.934, 49.932],
+      "source": "Wikipédia (fr), « Péronne »",
+      "note": "Place forte gardant le passage de la haute Somme."
+    },
+    {
       "id": "pass_mont_cenis",
       "name": "Col du Mont-Cenis",
       "type": "pass",
