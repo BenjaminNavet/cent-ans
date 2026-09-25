@@ -16,6 +16,9 @@ pub struct CrestRules {
     /// Share of melee damage gained (downhill) or lost (uphill) per metre
     /// of height over the enemy.
     pub melee_per_m: f64,
+    /// Height differences up to this are mere folds of the ground: no
+    /// advantage (metres); beyond it the advantage grows.
+    pub min_height_m: f64,
     /// Height difference beyond which the advantage stops growing (metres).
     pub max_height_m: f64,
 }
@@ -35,7 +38,8 @@ impl CrestRules {
     /// its enemy (negative: below it).
     pub fn melee_factor(&self, height_over: f64) -> f64 {
         let h = height_over.clamp(-self.max_height_m, self.max_height_m);
-        1.0 + self.melee_per_m * h
+        let beyond = (h.abs() - self.min_height_m).max(0.0);
+        1.0 + self.melee_per_m * beyond * h.signum()
     }
 }
 
@@ -46,9 +50,10 @@ mod tests {
     #[test]
     fn downhill_strikes_harder_within_the_cap() {
         let rules = CrestRules::bundled();
-        assert!(rules.melee_factor(3.0) > 1.0);
-        assert!(rules.melee_factor(-3.0) < 1.0);
+        assert!(rules.melee_factor(4.0) > 1.0);
+        assert!(rules.melee_factor(-4.0) < 1.0);
         assert_eq!(rules.melee_factor(0.0), 1.0);
+        assert_eq!(rules.melee_factor(rules.min_height_m * 0.5), 1.0);
         assert_eq!(
             rules.melee_factor(100.0),
             rules.melee_factor(rules.max_height_m)

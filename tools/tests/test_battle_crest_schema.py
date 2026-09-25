@@ -27,5 +27,5 @@ def test_battle_crest_rules_match_schema() -> None:
 def test_height_advantage_stays_moderate() -> None:
     """The height never more than halves nor doubles the melee damage."""
     rules = _rules()
-    edge = rules["melee_per_m"] * rules["max_height_m"]
+    edge = rules["melee_per_m"] * (rules["max_height_m"] - rules["min_height_m"])
     assert 0.0 <= edge <= 0.5

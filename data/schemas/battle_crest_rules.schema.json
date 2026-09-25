@@ -12,6 +12,12 @@
       "maximum": 0.2,
       "description": "Part de dégâts gagnée (vers le bas) ou perdue (en montée) par mètre d'écart de hauteur avec l'adversaire."
     },
+    "min_height_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20,
+      "description": "Écart de hauteur en deçà duquel il n'y a pas d'avantage (plis du terrain, mètres)."
+    },
     "max_height_m": {
       "type": "number",
       "minimum": 0,
@@ -19,6 +25,6 @@
       "description": "Écart de hauteur au-delà duquel l'avantage ne croît plus (mètres)."
     }
   },
-  "required": ["melee_per_m", "max_height_m"],
+  "required": ["melee_per_m", "min_height_m", "max_height_m"],
   "additionalProperties": false
 }
