@@ -237,5 +237,5 @@ pieux) ; plaine générée 2/8 → 2/8 et 6/4 → 5/5 ; comme `ep1_scale` 3/7 �
 l'issue : l'armée cède avant le duel de cavalerie et la mêlée. Sur le plat sans pieux, la milice de
 l'attaquant (moral 40) traverse 180 m de flèches après `ATTACKER_DUEL_LIMIT` (180 s, EP9) et se
 débande (moral 14 à 300 s) alors que ses tireurs gagnaient le duel ; son armée est brisée. Point
-ouvert pour EP9 (logique hors de SG4). `b6.rs` : empreintes recalculées sur EP9 + SG4 (mêmes
+ouvert pour EP9 (logique hors de SG4), traité par EP9b (ADR 0056 § EP9b : plat sans pieux 0/10 → 7/3, crête avec pieux 0/10 → 6/4). `b6.rs` : empreintes recalculées sur EP9 + SG4 (mêmes
 vainqueurs) ; `ep1_scale` : pic 10-19 en mêlée, 28-59 régiments au contact (seuil 25).

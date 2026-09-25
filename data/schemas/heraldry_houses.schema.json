@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/heraldry_houses.schema.json",
+  "title": "Armoiries des maisons (DA1)",
+  "description": "Fichier data/heraldry/houses.json : armoiries de chaque maison de personnages (champ `house` de data/characters/*.json), dessinées par tools/cent_ans_tools/heraldry.py et lues par game/scripts/ui/house_arms.gd (écus d'interface, figurines nobles de bataille). Rendu seulement : aucune règle de jeu.",
+  "type": "object",
+  "required": ["houses", "badges"],
+  "additionalProperties": false,
+  "$defs": {
+    "tincture": { "enum": ["or", "argent", "gueules", "azur", "sable", "sinople", "pourpre"] },
+    "faction_id": { "type": "string", "pattern": "^fac_[a-z_]+$" }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "badges": {
+      "type": "object",
+      "description": "Croix de livrée des figurines du commun, par faction (sur la poitrine et le dos).",
+      "propertyNames": { "pattern": "^fac_[a-z_]+$" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["cross", "patch"],
+        "additionalProperties": false,
+        "properties": {
+          "cross": { "$ref": "#/$defs/tincture" },
+          "patch": { "anyOf": [{ "$ref": "#/$defs/tincture" }, { "type": "null" }], "description": "Pièce d'étoffe cousue sous la croix (null : croix sur la livrée)." },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "houses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "blazon", "description", "source", "certainty", "factions", "vassal_of"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z_]*$", "description": "Nom du fichier game/assets/heraldry/houses/<id>.png." },
+          "name": { "type": "string", "minLength": 1, "description": "Valeur exacte du champ `house` des personnages." },
+          "blazon": { "type": "string", "minLength": 5, "description": "Blasonnement français, lu par la grammaire de heraldry.py." },
+          "arms_of": { "$ref": "#/$defs/faction_id", "description": "Armes identiques à celles de cette faction (même dessin)." },
+          "description": { "type": "string" },
+          "source": { "type": "string", "minLength": 3 },
+          "certainty": { "enum": ["attesté", "incertain", "substitution"] },
+          "factions": { "type": "array", "items": { "$ref": "#/$defs/faction_id" } },
+          "vassal_of": { "type": "array", "items": { "$ref": "#/$defs/faction_id" }, "description": "Armées dont les figurines nobles peuvent porter ces armes (bannerets)." }
+        }
+      }
+    }
+  }
+}
