@@ -43,6 +43,10 @@ impl BattleSim {
                 take(prop.footprint());
             }
         }
+        // EP6: buildings and solid props of the decor, camp furniture.
+        for f in self.field.decor_footprints_near(x, z, radius) {
+            take(f);
+        }
         if let Some(village) = &self.field.village {
             // Houses stand within the zone (a little slack for their size).
             if (village.zone.x - x).hypot(village.zone.z - z) < village.zone.radius + radius + 30.0
@@ -60,7 +64,9 @@ impl BattleSim {
 
     /// BR3: moves the figures of `unit` out of the footprints near it.
     pub(super) fn push_figures_out(&self, unit: &Unit, positions: &mut [(f64, f64, f64)]) {
-        if positions.is_empty() || (self.siege.is_none() && self.field.village.is_none()) {
+        if positions.is_empty()
+            || (self.siege.is_none() && self.field.village.is_none() && self.field.decor.is_empty())
+        {
             return;
         }
         let reach = positions

@@ -374,7 +374,7 @@ impl Occupied<'_> {
 
 /// `true` when a disc at (x, z) of `radius` sits on the centre of a
 /// deployment line (the armies must be able to form up).
-fn on_line(size: &FieldSize, x: f64, z: f64, radius: f64) -> bool {
+pub(crate) fn on_line(size: &FieldSize, x: f64, z: f64, radius: f64) -> bool {
     [size.attacker_line_z(), size.defender_line_z()]
         .iter()
         .any(|line| {

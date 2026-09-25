@@ -633,7 +633,9 @@ impl Battlefield {
         if self.coast.is_some_and(|c| c.on_beach(x)) {
             factor *= Coast::SAND_FACTOR;
         }
-        factor
+        // EP6: lanes of the hamlets, vines, orchards, muddy furrows, camps.
+        let wet = weather == Weather::Rain || self.ground == Ground::Muddy;
+        factor * self.decor_speed_factor(x, z, mounted, wet)
     }
 
     /// Parts of the one-line description of the site (B6), in French:

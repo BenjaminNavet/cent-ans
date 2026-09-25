@@ -37,15 +37,15 @@ use std::sync::OnceLock;
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
+use crate::decor_gen::Layout;
 use crate::field::Battlefield;
 use crate::hydro::{CountSpan, Span};
 use crate::rng::BattleRng;
 use crate::setup::{BattleSeason, SideId};
-use crate::site::{House, HouseKind};
+use crate::site::{House, HouseKind, Obstacle, ObstacleKind};
 use crate::town::Footprint;
 
 /// Salt of the derived stream of the decor.
-#[allow(dead_code)] // EP6 skeleton
 pub(crate) const DECOR_STREAM: u64 = 0xE6_0D;
 
 // ----- rules -------------------------------------------------------------------
@@ -694,20 +694,347 @@ pub struct DecorPlan {
 }
 
 impl Battlefield {
-    /// Lays the procedural decor of `province` (EP6), from a stream derived
-    /// from `rng` (not advanced).
-    pub fn lay_decor(&mut self, _province: &str, _rng: &BattleRng) {}
+    /// Runs `f` on a layout of this field's decor and writes the result
+    /// back (decor, farm tracks, hedges, windmill mounds).
+    fn with_layout<R>(&mut self, seed: u64, f: impl FnOnce(&mut Layout) -> R) -> R {
+        let mounds_before = self.decor.mounds.len();
+        let (result, decor, tracks, hedges) = {
+            let mut layout = Layout::new(self, BattleRng::from_seed(seed));
+            let result = f(&mut layout);
+            let (decor, tracks, hedges) = layout.finish();
+            (result, decor, tracks, hedges)
+        };
+        self.decor = decor;
+        self.roads.extend(tracks);
+        self.obstacles.extend(hedges);
+        let new_mounds = self.decor.mounds[mounds_before..].to_vec();
+        crate::decor_gen::raise_mounds(self, &new_mounds);
+        result
+    }
 
-    /// Removes the whole decor (camps included).
+    /// Lays the procedural decor of `province` (EP6), from a stream derived
+    /// from `rng` (not advanced): camps, hamlets, farmsteads, manor,
+    /// windmill, water mill, vineyards, orchards, meadows, ploughland,
+    /// carts, bocage hedges.
+    pub fn lay_decor(&mut self, province: &str, rng: &BattleRng) {
+        let rules = DecorRules::bundled();
+        let key = rules.profile_key(province, self.terrain).to_owned();
+        let seed = rng.derive(DECOR_STREAM).next_u64();
+        self.with_layout(seed, |layout| layout.lay(&key));
+    }
+
+    /// Removes the whole decor (camps included). Farm tracks, hedges and
+    /// mounds already laid stay.
     pub fn clear_decor(&mut self) {
         self.decor = Decor::default();
     }
 
-    /// Applies a hand-made decor plan.
-    pub fn apply_decor_plan(&mut self, _plan: &DecorPlan) {}
+    /// Places one building as given (hand placement: no check). A zero
+    /// size takes the usual size of the kind. Its index.
+    pub fn place_building(
+        &mut self,
+        kind: HouseKind,
+        x: f64,
+        z: f64,
+        yaw: f64,
+        length: f64,
+        width: f64,
+    ) -> usize {
+        let (l, w) = match kind {
+            HouseKind::Church => (19.0, 8.0),
+            HouseKind::Barn => (15.0, 7.5),
+            HouseKind::Windmill => (7.0, 7.0),
+            HouseKind::Watermill => (11.0, 7.0),
+            HouseKind::Manor => (20.5, 8.0),
+            _ => (10.0, 6.0),
+        };
+        self.decor.buildings.push(House {
+            x,
+            z,
+            length: if length > 0.0 { length } else { l },
+            width: if width > 0.0 { width } else { w },
+            yaw,
+            kind,
+        });
+        self.decor.buildings.len() - 1
+    }
+
+    /// Places a post mill at (x, z), on a mound when `mound`.
+    pub fn place_windmill(&mut self, x: f64, z: f64, yaw: f64, mound: bool) {
+        self.with_layout(0, |l| l.windmill(Some((x, z, yaw)), Some(mound)));
+    }
+
+    /// Places a water mill whose front (wheel) faces `(-sin yaw, cos yaw)`.
+    pub fn place_watermill(&mut self, x: f64, z: f64, yaw: f64) {
+        self.with_layout(0, |l| l.watermill(Some((x, z, yaw))));
+    }
+
+    /// Places a parish church in its walled churchyard.
+    pub fn place_church(&mut self, x: f64, z: f64, yaw: f64) {
+        self.with_layout(0, |l| l.church(x, z, yaw));
+    }
+
+    /// Places a manor with its yard (and moat).
+    pub fn place_manor(&mut self, x: f64, z: f64, yaw: f64, moat: bool) {
+        self.with_layout(0, |l| l.manor(Some((x, z, yaw)), moat));
+    }
+
+    /// Places a hamlet of `layout` at (x, z) with about `houses` houses
+    /// (0: the usual count), laid round the roads, the water and what is
+    /// already there; a street hamlet follows the road nearest (x, z).
+    /// `false` when nothing fits.
+    pub fn place_hamlet(
+        &mut self,
+        layout: HamletLayout,
+        x: f64,
+        z: f64,
+        yaw: f64,
+        houses: u32,
+        seed: u64,
+    ) -> bool {
+        let rules = DecorRules::bundled();
+        let profile = rules.profile(&self.decor.profile, self.terrain).clone();
+        self.with_layout(seed, |l| {
+            let houses = if houses > 0 {
+                houses
+            } else {
+                match layout {
+                    HamletLayout::Farmstead => rules.placement.farmstead_houses[1],
+                    _ => rules.placement.hamlet_houses[1],
+                }
+            };
+            match layout {
+                HamletLayout::Street => {
+                    let spot = l.road_near((x, z));
+                    spot.is_some() && l.street_hamlet(&profile, spot, houses)
+                }
+                HamletLayout::Green => l.green_hamlet(&profile, Some((x, z, yaw)), houses),
+                HamletLayout::Farmstead => l.farmstead(&profile, Some((x, z, yaw)), houses),
+            }
+        })
+    }
+
+    /// Places a plot (orchard, vineyard, ploughland, meadow — or any area
+    /// kind) as given; meadows get the haystacks of the season.
+    #[allow(clippy::too_many_arguments)]
+    pub fn place_plot(
+        &mut self,
+        kind: AreaKind,
+        x: f64,
+        z: f64,
+        length: f64,
+        width: f64,
+        yaw: f64,
+        state: Option<FieldState>,
+    ) {
+        let fp = Footprint::new(x, z, length, width, yaw);
+        let state = state.or((kind == AreaKind::Ploughland).then_some(FieldState::Ploughed));
+        self.with_layout(0, |l| l.lay_plot(kind, fp, state));
+    }
+
+    /// Places a prop (haystack, cart, tent…) at its usual size.
+    pub fn place_prop(&mut self, kind: DecorPropKind, x: f64, z: f64, yaw: f64) {
+        let s = &DecorRules::bundled().placement.prop_size_m;
+        let size = match kind {
+            DecorPropKind::Haystack => s.haystack,
+            DecorPropKind::Cart => s.cart,
+            DecorPropKind::Tent => s.tent,
+            DecorPropKind::Pavilion => s.pavilion,
+            DecorPropKind::Wagon => s.wagon,
+            DecorPropKind::Campfire => s.campfire,
+            DecorPropKind::Graves => s.graves,
+            DecorPropKind::Well => s.well,
+            DecorPropKind::Woodpile => s.woodpile,
+            DecorPropKind::HorseLine => [12.0, 3.0],
+        };
+        self.decor.props.push(DecorProp {
+            kind,
+            x,
+            z,
+            yaw,
+            length: size[0],
+            depth: size[1],
+            count: if kind == DecorPropKind::HorseLine {
+                6
+            } else {
+                0
+            },
+        });
+    }
+
+    /// Places the camp of `side` centred on (x, z) (front towards
+    /// `(-sin yaw, cos yaw)`, the enemy), replacing its current camp.
+    pub fn place_camp(&mut self, side: SideId, x: f64, z: f64, yaw: f64, seed: u64) -> bool {
+        self.decor.camps.retain(|c| c.side != side);
+        self.with_layout(seed, |l| l.camp(side, Some((x, z, yaw))))
+    }
+
+    /// Applies a hand-made decor plan (EP7). With `clear`, the procedural
+    /// decor goes first; its camps stay unless the plan places its own.
+    pub fn apply_decor_plan(&mut self, plan: &DecorPlan) {
+        if plan.clear {
+            let camps = std::mem::take(&mut self.decor.camps);
+            let profile = std::mem::take(&mut self.decor.profile);
+            let (leafy, blossom) = (self.decor.vines_leafy, self.decor.orchard_blossom);
+            self.decor = Decor {
+                profile,
+                vines_leafy: leafy,
+                orchard_blossom: blossom,
+                ..Decor::default()
+            };
+            if !plan
+                .items
+                .iter()
+                .any(|i| matches!(i, DecorItem::Camp { .. }))
+            {
+                self.decor.camps = camps;
+            }
+        }
+        for item in &plan.items {
+            match *item {
+                DecorItem::Building {
+                    kind,
+                    x,
+                    z,
+                    yaw,
+                    length,
+                    width,
+                } => {
+                    self.place_building(kind, x, z, yaw, length, width);
+                }
+                DecorItem::Windmill { x, z, yaw, mound } => self.place_windmill(x, z, yaw, mound),
+                DecorItem::Watermill { x, z, yaw } => self.place_watermill(x, z, yaw),
+                DecorItem::Church { x, z, yaw } => self.place_church(x, z, yaw),
+                DecorItem::Manor { x, z, yaw, moat } => self.place_manor(x, z, yaw, moat),
+                DecorItem::Hamlet {
+                    layout,
+                    x,
+                    z,
+                    yaw,
+                    houses,
+                    seed,
+                } => {
+                    self.place_hamlet(layout, x, z, yaw, houses, seed);
+                }
+                DecorItem::Plot {
+                    kind,
+                    x,
+                    z,
+                    length,
+                    width,
+                    yaw,
+                    state,
+                } => self.place_plot(kind, x, z, length, width, yaw, state),
+                DecorItem::Prop { kind, x, z, yaw } => self.place_prop(kind, x, z, yaw),
+                DecorItem::Camp {
+                    side,
+                    x,
+                    z,
+                    yaw,
+                    seed,
+                } => {
+                    self.place_camp(side, x, z, yaw, seed);
+                }
+                DecorItem::Hedge { a, b } => self.obstacles.push(Obstacle {
+                    a,
+                    b,
+                    kind: ObstacleKind::Hedge,
+                }),
+            }
+        }
+    }
+
+    // ----- rules of the decor -----------------------------------------------------
 
     /// Decor area that counts at (x, z) (highest rank), camps included.
-    pub fn decor_area_at(&self, _x: f64, _z: f64) -> Option<Area> {
-        None
+    pub fn decor_area_at(&self, x: f64, z: f64) -> Option<Area> {
+        self.decor
+            .areas
+            .iter()
+            .chain(self.decor.camps.iter().map(|c| &c.area))
+            .filter(|a| {
+                let reach = (a.length + a.width) * 0.5;
+                (a.x - x).abs() <= reach && (a.z - z).abs() <= reach && a.contains(x, z)
+            })
+            .max_by_key(|a| a.kind.rank())
+            .copied()
+    }
+
+    /// Effect of the decor at (x, z), if any.
+    pub fn decor_effect_at(&self, x: f64, z: f64) -> Option<&'static AreaEffect> {
+        self.decor_area_at(x, z)
+            .map(|a| DecorRules::bundled().effects.of(a.kind))
+    }
+
+    /// Speed multiplier of the decor at (x, z); `wet`: rain or soaked
+    /// ground (muddy furrows).
+    pub fn decor_speed_factor(&self, x: f64, z: f64, mounted: bool, wet: bool) -> f64 {
+        self.decor_effect_at(x, z).map_or(1.0, |e| {
+            let base = if mounted { e.horse_speed } else { e.foot_speed };
+            if wet {
+                base * e.wet_speed
+            } else {
+                base
+            }
+        })
+    }
+
+    /// Multiplier on missile casualties of a regiment at (x, z).
+    pub fn decor_cover(&self, x: f64, z: f64) -> f64 {
+        self.decor_effect_at(x, z).map_or(1.0, |e| e.cover)
+    }
+
+    /// Divisor of the melee casualties of a regiment at (x, z).
+    pub fn decor_defense(&self, x: f64, z: f64) -> f64 {
+        self.decor_effect_at(x, z).map_or(1.0, |e| e.defense)
+    }
+
+    /// A charge against a regiment at (x, z) breaks: where, in French
+    /// (« dans le hameau », « dans les vignes »…).
+    pub fn decor_breaks_charge(&self, x: f64, z: f64) -> Option<&'static str> {
+        let area = self.decor_area_at(x, z)?;
+        if !DecorRules::bundled().effects.of(area.kind).breaks_charge {
+            return None;
+        }
+        Some(match area.kind {
+            AreaKind::Hamlet => "dans le hameau",
+            AreaKind::Church => "contre le mur du cimetière",
+            AreaKind::Manor => "contre le fossé du manoir",
+            AreaKind::Farmstead => "dans la cour de la ferme",
+            AreaKind::Orchard => "dans le verger",
+            AreaKind::Vineyard => "dans les vignes",
+            AreaKind::Camp => "dans le camp",
+            AreaKind::Ploughland | AreaKind::Meadow => "dans les champs",
+        })
+    }
+
+    /// Solid footprints of the decor within `radius` of (x, z): buildings,
+    /// solid props, camp furniture and the baggage train (figures walk round
+    /// them).
+    pub fn decor_footprints_near(&self, x: f64, z: f64, radius: f64) -> Vec<Footprint> {
+        let mut out = Vec::new();
+        let mut take = |f: Footprint| {
+            if (f.x - x).hypot(f.z - z) < radius + f.bounding_radius() {
+                out.push(f);
+            }
+        };
+        for b in &self.decor.buildings {
+            take(Footprint::new(b.x, b.z, b.length, b.width, b.yaw));
+        }
+        for p in self.decor.props.iter().filter(|p| p.kind.solid()) {
+            take(p.footprint());
+        }
+        for c in &self.decor.camps {
+            let fp = c.area.footprint();
+            if (fp.x - x).hypot(fp.z - z) < radius + fp.bounding_radius() {
+                for p in c.items.iter().filter(|p| p.kind.solid()) {
+                    take(p.footprint());
+                }
+            }
+            for p in &c.convoy {
+                take(p.footprint());
+            }
+        }
+        out
     }
 }
