@@ -114,6 +114,9 @@ pub struct BattleSim {
     deploying: bool,
     /// Siege pathing cache, one slot per regiment (F5a; derived data).
     path_cache: std::cell::RefCell<Vec<Option<pathing::CachedPath>>>,
+    /// Tactical reading of the relief for the AI (R2b; derived data, read
+    /// once per battle, reset by [`BattleSim::field_mut`]).
+    relief_map: std::cell::OnceCell<crate::relief_ai::ReliefMap>,
     /// Siege fires (S2): rules and their own random stream.
     fire: fire::FireSystem,
 }
@@ -322,6 +325,7 @@ impl BattleSim {
             no_quarter: [false; 2],
             deploying: false,
             path_cache: Default::default(),
+            relief_map: Default::default(),
             fire,
         };
         sim.hold_reserves();
@@ -599,7 +603,14 @@ impl BattleSim {
 
     /// Mutable field (tests and laboratory set-ups: hedges, villages).
     pub fn field_mut(&mut self) -> &mut Battlefield {
+        self.relief_map = Default::default();
         &mut self.field
+    }
+
+    /// Tactical reading of the relief (R2b), computed on first use.
+    pub fn relief_map(&self) -> &crate::relief_ai::ReliefMap {
+        self.relief_map
+            .get_or_init(|| crate::relief_ai::ReliefMap::new(&self.field))
     }
 
     pub fn weather(&self) -> Weather {
