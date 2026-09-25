@@ -99,7 +99,6 @@ MATERIAL_LAYER = {
 }
 
 
-
 def material_code(mat, exaggeration=1.0):
     """Alpha byte of the tint: atlas layer × 16 + scale step, as a fraction of 255.
 
@@ -1023,7 +1022,12 @@ def layer_object(bpy, layer, exaggeration=1.0):
     tint_data = []
     for vi in loop_vertices:
         r, gg, b = colors[vi]
-        tint_data += [min(r / 1.2, 1.0), min(gg / 1.2, 1.0), min(b / 1.2, 1.0), atlas[vi]]
+        tint_data += [
+            min(r / 1.2, 1.0),
+            min(gg / 1.2, 1.0),
+            min(b / 1.2, 1.0),
+            atlas[vi],
+        ]
     tint.data.foreach_set("color", tint_data)
     mesh.color_attributes.active_color = tint
     mesh.update()
