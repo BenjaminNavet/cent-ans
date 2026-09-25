@@ -1,0 +1,69 @@
+{
+  "description": "Eau et chemins des champs de bataille (lot EP3, ADR 0033) : largeur de la rivière selon le terrain, gués et ponts selon la largeur, affluent et ruisseaux, berges escarpées ou marécageuses, bras morts, routes ; vitesses dans l'eau et sur route, noyade, combat sur un pont ou dans un gué. Embarqué dans sim-battle à la compilation.",
+  "river": {
+    "width_m": {
+      "plains": [14, 38],
+      "heath": [12, 26],
+      "bocage": [10, 22],
+      "forest": [10, 22],
+      "hills": [10, 20],
+      "mountains": [10, 16],
+      "marsh": [18, 40]
+    },
+    "width_variation": 0.3,
+    "ford_half_width_m": [18, 36],
+    "crossings": [
+      { "max_width_m": 15, "fords": [3, 4], "bridges": [0, 1] },
+      { "max_width_m": 25, "fords": [2, 3], "bridges": [1, 2] },
+      { "max_width_m": 100, "fords": [0, 1], "bridges": [1, 3] }
+    ],
+    "stone_bridge_chance": 0.4,
+    "stone_bridge_from_width_m": 28,
+    "bridge_width_m": { "wood": [4, 6], "stone": [5, 8] },
+    "abutment_m": 5,
+    "steep_bank_chance": 0.35,
+    "marsh_bank_chance": 0.3,
+    "oxbow_chance": 0.45
+  },
+  "streams": {
+    "tributary_chance": 0.45,
+    "tributary_width_m": [5, 9],
+    "brooks": [0, 2],
+    "brook_width_m": [1.5, 3.5],
+    "footbridge_chance": 0.6
+  },
+  "movement": {
+    "ford": 0.5,
+    "deep_foot": 0.15,
+    "deep_mounted": 0.25,
+    "tributary": 0.55,
+    "brook": 0.75,
+    "oxbow": 0.45,
+    "steep_bank": 0.55,
+    "marsh_bank": 0.6,
+    "bank_band_m": 10,
+    "deep_blocks_mounted": true,
+    "deep_blocks_engines": true,
+    "road_column": 1.3,
+    "road_other": 1.0,
+    "bridge_min_squeeze": 0.3
+  },
+  "deep_water": {
+    "fatigue_per_s": 1.5,
+    "morale_per_s": 0.5,
+    "drown_share_per_s": 0.004,
+    "armour_weight": 1.5
+  },
+  "combat": {
+    "bridge_head_reach_m": 25,
+    "bridge_holder_bonus": 1.3,
+    "ford_attacker": 0.8,
+    "deep_attacker": 0.5
+  },
+  "roads": {
+    "main_width_m": 5,
+    "track_width_m": 3.5,
+    "wander_m": 28,
+    "ford_road_chance": 0.7
+  }
+}

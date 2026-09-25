@@ -192,6 +192,121 @@ def test_boost_matches_relief_shade() -> None:
     assert sea[0, 0] == -5.0
 
 
+def test_apply_boost_never_sinks_land_below_sea_level() -> None:
+    """ZG3b regression: a high base never drags land below MIN_LAND_M.
+
+    Mirrors relief_shade.enforce_coast. The London bug baked -11 to -15 m
+    over real land at ~4 m before this floor existed.
+    """
+    height = np.full((1, 1), 4.0, dtype=np.float32)
+    base = np.full((1, 1), 23.0, dtype=np.float32)  # observed Southwark base, E7
+    boosted = detail_dem.apply_boost(height, base)
+    assert boosted[0, 0] == pytest.approx(detail_dem.MIN_LAND_M)
+    assert boosted[0, 0] >= detail_dem.MIN_LAND_M
+
+
+def test_boost_base_ignores_glo90_when_fine_data_exists(monkeypatch) -> None:
+    """ZG3b regression: a small footprint's base comes from its own fine data.
+
+    Not from GLO-90 leaking in through the 5 km blur: the footprint (3-6 km
+    half) is far smaller than 3 sigma (15 km, BASE_MARGIN_M), so the old
+    inner-overlay-then-blur base barely differed from raw GLO-90.
+    """
+
+    def _boom(*args, **kwargs):  # noqa: ANN001, ANN002, ANN003
+        raise AssertionError("GLO-90 must not be read when fine data covers the raster")
+
+    monkeypatch.setattr(detail_dem.copernicus, "resample_to_grid", _boom)
+    z = zone(half=3.0)
+    cluster = detail_dem.clusters(GRID, [z], 7)[0]
+    fine = np.full(cluster.shape, 4.0, dtype=np.float32)
+    base = detail_dem.boost_base(GRID, cluster, fine)
+    assert np.allclose(base, 4.0, atol=0.05)
+
+
+def test_boost_base_falls_back_to_glo90_without_any_fine_data(monkeypatch) -> None:
+    """A cluster with no fine data at all still falls back to blurred GLO-90.
+
+    As before this fix -- only the normal, fine-covered case changed.
+    """
+    calls = []
+
+    def _fake_resample(map_grid, window, names):  # noqa: ANN001
+        calls.append(window)
+        rows, cols = window[3], window[2]
+        return np.full((rows, cols), 42.0, dtype=np.float32)
+
+    monkeypatch.setattr(detail_dem.copernicus, "resample_to_grid", _fake_resample)
+    z = zone(half=3.0)
+    cluster = detail_dem.clusters(GRID, [z], 7)[0]
+    fine = np.full(cluster.shape, np.nan, dtype=np.float32)
+    base = detail_dem.boost_base(GRID, cluster, fine)
+    assert calls  # GLO-90 was consulted
+    assert np.allclose(base, 42.0, atol=0.05)
+
+
+def _write_flat_level(
+    tmp_path: Path,
+    level: int,
+    col0: int,
+    row0: int,
+    col1: int,
+    row1: int,
+    height: float,
+) -> None:
+    """Write flat tiles of ``height`` covering ``[col0, col1] x [row0, row1]`` at ``level``."""
+    for row in range(row0, row1 + 1):
+        for col in range(col0, col1 + 1):
+            path = tmp_path / "pyramid" / f"E{level}" / f"{col}_{row}.png"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            terrain.write_png16(
+                terrain.height_to_uint16(np.full((512, 512), height, np.float32)), path
+            )
+
+
+def test_e5_e4_land_gap_zero_on_flat_matching_land(tmp_path: Path) -> None:
+    """Identical flat E5/E4 land gives a zero gap (a healthy bake)."""
+    z = zone(half=1.0)
+    col0, row0, col1, row1 = GRID.tile_range(5, detail_dem.footprint(z, 5))
+    _write_flat_level(tmp_path, 4, col0 // 2, row0 // 2, col1 // 2, row1 // 2, 50.0)
+    _write_flat_level(tmp_path, 5, col0, row0, col1, row1, 50.0)
+    gap = detail_dem.e5_e4_land_gap(z, GRID, tmp_path)
+    assert gap.n_pixels > 0
+    assert gap.median_m == pytest.approx(0.0, abs=0.01)
+    assert gap.p95_m < 0.5
+
+
+def test_e5_e4_land_gap_excludes_water_below_min_land_m(tmp_path: Path) -> None:
+    """A -11 m E5 (the raw Southwark symptom) reads as water, not land: excluded, not flagged."""
+    z = zone(half=1.0)
+    col0, row0, col1, row1 = GRID.tile_range(5, detail_dem.footprint(z, 5))
+    _write_flat_level(tmp_path, 4, col0 // 2, row0 // 2, col1 // 2, row1 // 2, 4.0)
+    _write_flat_level(
+        tmp_path, 5, col0, row0, col1, row1, -11.0
+    )  # observed at Southwark
+    gap = detail_dem.e5_e4_land_gap(z, GRID, tmp_path)
+    assert gap.n_pixels == 0
+
+
+def test_e5_e4_land_gap_flags_a_boost_leak(tmp_path: Path) -> None:
+    """A large, uniform E5 undershoot that stays above MIN_LAND_M is flagged."""
+    z = zone(half=1.0)
+    col0, row0, col1, row1 = GRID.tile_range(5, detail_dem.footprint(z, 5))
+    _write_flat_level(tmp_path, 4, col0 // 2, row0 // 2, col1 // 2, row1 // 2, 50.0)
+    _write_flat_level(tmp_path, 5, col0, row0, col1, row1, 1.0)  # still land, 49 m off
+    gap = detail_dem.e5_e4_land_gap(z, GRID, tmp_path)
+    assert gap.n_pixels > 0
+    assert gap.p95_m > detail_dem.LAND_GAP_ALERT_M
+
+
+def test_e5_e4_land_gap_no_tiles_returns_none(tmp_path: Path) -> None:
+    """A zone with no E5 tiles baked yet reports ``None`` stats, not a crash."""
+    z = zone(half=1.0)
+    gap = detail_dem.e5_e4_land_gap(z, GRID, tmp_path)
+    assert gap.median_m is None
+    assert gap.n_pixels == 0
+
+
 # ----------------------------------------------------------------------- erasing
 
 

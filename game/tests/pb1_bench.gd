@@ -54,6 +54,9 @@ func _run() -> void:
 	var rig: CampaignCamera = map.camera_rig
 	var data: MapData = map.map_data
 	var settled := func() -> bool: return vegetation.pending_jobs() == 0 and terrain.fine_ready()
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--veg-jobs="):
+			vegetation.max_concurrent_jobs = int(arg.trim_prefix("--veg-jobs="))
 	if "--trace" in OS.get_cmdline_user_args():
 		_wrap_listeners(terrain)
 	_result["first_settle_ms"] = await _settle(settled) + (Time.get_ticks_msec() - t_load)
@@ -123,9 +126,24 @@ func _settle_measured(condition: Callable) -> Dictionary:
 		var frame_ms := (now - last) / 1000.0
 		worst = maxf(worst, frame_ms)
 		last = now
-		if frame_ms > 60.0 and not _trace_frame.is_empty():
-			print("PB1_SPIKE %.1f ms: %s" % [frame_ms, _trace_frame])
+		if frame_ms > 60.0 and root.get_child(-1).get("_PT") != null:
+			var map_times: Dictionary = {}
+			var pt: Dictionary = root.get_child(-1).get("_PT")
+			for key in pt:
+				if int(pt[key]) > 5000:
+					map_times[key] = int(pt[key]) / 1000
+			print("PB1_SPIKE %.1f ms: listeners %s map %s" % [frame_ms, _big(_trace_frame), map_times])
 		_trace_frame.clear()
+		if root.get_child(-1).get("_PT") != null:
+			(root.get_child(-1).get("_PT") as Dictionary).clear()
+	var map_node := root.get_child(-1)
+	if Time.get_ticks_msec() - t0 > 3000 and map_node.get("terrain") != null:
+		var quadtree: Variant = (map_node.get("terrain") as TerrainBuilder).get("quadtree")
+		print("PB1_SLOW %d ms: vegetation pending=%d fine_ready=%s quadtree=%s missing=%s" % [Time.get_ticks_msec() - t0,
+			(map_node.get_node("Vegetation") as Vegetation).pending_jobs(),
+			(map_node.get("terrain") as TerrainBuilder).fine_ready(),
+			(quadtree as Object).call("perf_stats") if quadtree != null else "none",
+			(quadtree as Object).get("_missing_wanted") if quadtree != null else -1])
 	if not condition.call():
 		print("PB1_UNSETTLED vegetation pending=%d fine_ready=%s" % [
 			(root.get_child(-1).get_node("Vegetation") as Vegetation).pending_jobs(),
@@ -172,4 +190,12 @@ func _wrap_listeners(terrain: TerrainBuilder) -> void:
 			var dt := Time.get_ticks_usec() - t
 			var entry: Array = _trace.get(label, [0, 0])
 			_trace[label] = [entry[0] + dt, entry[1] + 1]
-			_trace_frame[label] = int(_trace_frame.get(label, 0)) + dt / 1000)
+			_trace_frame[label] = int(_trace_frame.get(label, 0)) + dt)
+
+
+func _big(times: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for key in times:
+		if int(times[key]) > 3000:
+			out[key] = int(times[key]) / 1000
+	return out
