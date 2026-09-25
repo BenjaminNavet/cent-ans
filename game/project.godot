@@ -138,6 +138,14 @@ campaign_season={
 "type": "vec4",
 "value": Vector4(1, 0, 0, 0)
 }
+landmark_albedo_array={
+"type": "sampler2DArray",
+"value": "res://assets/textures/landmarks/landmark_albedo_array.jpg"
+}
+landmark_normal_array={
+"type": "sampler2DArray",
+"value": "res://assets/textures/landmarks/landmark_normal_array.jpg"
+}
 
 [rendering]
 

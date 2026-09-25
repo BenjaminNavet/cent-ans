@@ -51,6 +51,9 @@ pub use entities::faction::{
     AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
     ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
+pub use entities::landmark::{
+    Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
+};
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
 pub use entities::population_rules::PopulationRules;

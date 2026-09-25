@@ -56,6 +56,8 @@ pub mod folders {
     pub const DIETS: &str = "diets";
     /// Chivalric orders (H6); optional folder.
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
+    /// Landmark cities (lots L1-L3); optional folder.
+    pub const LANDMARKS: &str = "landmarks";
     /// Settlements, one file per province (lot C1); optional folder.
     pub const SETTLEMENTS: &str = "settlements";
     /// Tuning of the settlement rules, inside `settlements/`; optional.
@@ -195,6 +197,9 @@ pub struct GameData {
     pub diets: BTreeMap<DietId, Diet>,
     /// Chivalric orders (H6), empty when `data/chivalric_orders/` is absent.
     pub chivalric_orders: BTreeMap<ChivalricOrderId, ChivalricOrder>,
+    /// Landmark cities (L3: siege battles in the historical plan), empty
+    /// when `data/landmarks/` is absent.
+    pub landmarks: BTreeMap<String, crate::entities::landmark::Landmark>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -272,6 +277,7 @@ impl GameData {
             battle_orders: BTreeMap::new(),
             diets: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
+            landmarks: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
             settlements: BTreeMap::new(),
@@ -307,6 +313,10 @@ impl GameData {
         let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
         if chivalric_dir.is_dir() {
             data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
+        }
+        let landmarks_dir = root.join(folders::LANDMARKS);
+        if landmarks_dir.is_dir() {
+            data.landmarks = load_entities(&landmarks_dir, |l: &crate::Landmark| &l.id)?;
         }
         let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
         if alignment_path.is_file() {
