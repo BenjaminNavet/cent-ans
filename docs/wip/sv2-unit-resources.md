@@ -12,9 +12,9 @@ Branche `sv2-unit-resources`. Réutilise le mécanisme B7c (ADR 0053) des chanti
 
 ## État
 - [x] cœur (orders, state, buildings::free_supply) + tests
-- [ ] pont + UI + bulle
+- [x] pont (`get_recruitable` : resources, import_cost, imported) + UI (liste, bulle)
 - [x] IA (offre locale suivie au fil des recrues du tour, `reprice_recruits`)
-- [ ] tests, docs
+- [x] tests Rust, codex (8 fiches), ADR 0053 complément
 
 ## Prochaine étape
-Pont GDExtension (`recruit_option_dict`), UI de recrutement, bulle.
+Vérifs complètes : cargo test, build.sh, import + smoke Godot, pytest ; puis suites-bulles3.md.

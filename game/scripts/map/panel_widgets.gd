@@ -53,6 +53,9 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		var line := HBoxContainer.new()
 		var button := RichButton.new()
 		button.text = "%s — %s / %s" % [str(row.get("name", row.get("unit_type", "?"))), Money.amount(int(row.get("cost", 0))), Money.amount(int(row.get("upkeep", 0)))]
+		# SV2 : le coût comprend l'importation des matériaux manquants (détail dans la bulle).
+		if int(row.get("import_cost", 0)) > 0:
+			button.text += " (dont import %s)" % Money.amount(int(row["import_cost"]))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var available: bool = bool(row.get("available", false))
