@@ -1,6 +1,6 @@
 # DP2 — Suites de la diplomatie (droit de passage, carte diplomatique, lisibilité des refus)
 
-Branche : `worktree-agent-aeb4f4012dbd33ec4`. ADR : `docs/decisions/0031-droit-de-passage-et-carte-diplomatique.md` (à écrire).
+Branche : `worktree-agent-aeb4f4012dbd33ec4`. ADR : `docs/decisions/0031-droit-de-passage-et-carte-diplomatique.md`.
 
 ## Plan
 1. Droit de passage (`core/crates/sim-campaign/src/passage.rs`) : intrusion détectée en fin de saison
@@ -15,9 +15,20 @@ Branche : `worktree-agent-aeb4f4012dbd33ec4`. ADR : `docs/decisions/0031-droit-d
 
 ## État
 - [x] Données `data/ai/diplomacy.json` § `passage` + schéma + `PassageRules`.
-- [x] `passage.rs` (règles, détection, chemin, IA), `stance.rs`, ledger `trespassers`, branchements.
-- [ ] Tests `sim-campaign/tests/dp2_passage.rs`.
-- [ ] IA (grid.rs), pont, UI, explication, ADR, sondes.
+- [x] `passage.rs`, `stance.rs`, `treaty_explain.rs`, ledger `trespassers`, branchements (turn, casus belli).
+- [x] Tests `sim-campaign/tests/dp2_passage.rs` (10), `dp2_explain.rs` (6 + 1 d'affichage),
+  `ai/tests/dp2_passage_ai.rs` (1).
+- [x] IA : `ai/src/grid.rs` retire de son graphe les places qu'elle ne veut pas violer.
+- [x] Pont `godot-bridge/src/campaign_sim_dp2.rs` (`find_path_trespass`, `get_province_stances`,
+  `get_faction_stance`, `get_trespass`, `explain_treaty`).
+- [x] UI : `diplomatic_stances.gd` (palette), `diplomacy_controller.gd` (mode N), minicarte
+  (bouton « Diplomatie », `campaign_minimap.gd`, `minimap_controller.gd`), chemin rouge
+  (`army_movement_path.gd`, `army_movement_controller.gd`), panneau (raisons pondérées,
+  contre-offre, fiche « droit de passage »), smoke.
+- [x] ADR 0031 (dont le point 4 : accord commercial avec un rival, voulu).
+- [ ] build.sh (compilation de godot-ffi très lente : machine chargée), pytest, import, smoke,
+  captures, sonde d'équilibre.
 
 ## Prochaine étape
-Tests déterministes du droit de passage, puis IA.
+build.sh puis smoke ; captures `--stage=diplomacy_map` et `diplomacy_treaty` ; sonde
+`balance_probe campaign 200 1-8` avec `passage.enabled` faux puis vrai.
