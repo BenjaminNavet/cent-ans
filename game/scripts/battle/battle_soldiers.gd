@@ -87,6 +87,9 @@ var _imp_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (quadrilatèr
 var hide_planted_pavise: bool = false
 var bv2_enabled: bool = not OS.get_cmdline_user_args().has("--no-bv2")
 var _level: Dictionary = {}  # intensités du réglage « Sang » (lues au début de la bataille)
+## EP5 : figurines du tampon remplacées par un porte-étendard ou un musicien dédié
+## (`BattleStandards`) : unit id -> PackedInt32Array des rangs masqués.
+var reserved: Dictionary = {}
 
 
 ## Crée les couches des régiments de `units` ; `side_colors` / `side_factions` par camp.
@@ -277,6 +280,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		slice = _hide_knocked(id, slice, n)
 	if _drive.has(id):
 		slice = _drive_in(id, slice, n)
+	if reserved.has(id):
+		slice = _hide_reserved(reserved[id], slice, n)
 	var lod: MultiMeshInstance3D = _lod_layers[id]
 	var lod_mm := lod.multimesh
 	if n > mm.instance_count:
@@ -387,6 +392,34 @@ func figure_frame(id: int, rank: float) -> Variant:
 	var o := clampi(int(rank * float(n - 1)), 0, n - 1) * 12
 	var basis := Basis(Vector3(slice[o], slice[o + 4], slice[o + 8]), Vector3(slice[o + 1], slice[o + 5], slice[o + 9]), Vector3(slice[o + 2], slice[o + 6], slice[o + 10]))
 	return Transform3D(basis, Vector3(slice[o + 3], slice[o + 7], slice[o + 11]))
+
+
+## EP5 : repère de la figurine d'indice `index` du tampon courant du régiment (null sinon).
+func figure_at(id: int, index: int) -> Variant:
+	if not _previous.has(id):
+		return null
+	var slice: PackedFloat32Array = _previous[id]
+	if index < 0 or index >= slice.size() / 12:
+		return null
+	var o := index * 12
+	var basis := Basis(Vector3(slice[o], slice[o + 4], slice[o + 8]), Vector3(slice[o + 1], slice[o + 5], slice[o + 9]), Vector3(slice[o + 2], slice[o + 6], slice[o + 10]))
+	return Transform3D(basis, Vector3(slice[o + 3], slice[o + 7], slice[o + 11]))
+
+
+## EP5 : figurines dessinées du régiment (tampon courant).
+func figure_count(id: int) -> int:
+	return (_previous[id] as PackedFloat32Array).size() / 12 if _previous.has(id) else 0
+
+
+## EP5 : masque (échelle nulle) les figurines remplacées par un porte-étendard ou un musicien.
+func _hide_reserved(slots: PackedInt32Array, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
+	var out := slice
+	for slot in slots:
+		if slot >= 0 and slot < n:
+			var o := slot * 12
+			for q in [0, 1, 2, 4, 5, 6, 8, 9, 10]:
+				out[o + q] = 0.0
+	return out
 
 
 ## BV3 : rang (indice dans le tampon courant) de la figurine du régiment la plus proche de
