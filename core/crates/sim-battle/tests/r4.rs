@@ -410,3 +410,58 @@ fn an_attacker_above_shooters_waits_then_attacks() {
         foot_z(&sim)
     );
 }
+
+/// On a bare rounded crest, the defending archers stand on its military
+/// crest (down the forward slope), from which they see their glacis, not on
+/// the topographic top with dead ground below them.
+#[test]
+fn archers_leave_no_dead_ground_below_a_rounded_crest() {
+    use sim_battle::position::{dead_ground, military_crest, DEAD_TOLERANCE};
+    let data = data();
+    let mut sim = crest_field(&data, 505.0, &[]);
+    {
+        // Just behind the top (where the height search lands), the ridge
+        // hides the foot of its slope; the military crest does not.
+        let field = sim.field();
+        let top = Front {
+            center: (600.0, 525.0),
+            forward: -1.0,
+            width: 60.0,
+        };
+        assert!(dead_ground(field, top) > DEAD_TOLERANCE);
+        let post = military_crest(field, top);
+        assert!(post.1 < 525.0, "towards the forward slope: z {:.0}", post.1);
+        assert!(
+            dead_ground(
+                field,
+                Front {
+                    center: post,
+                    ..top
+                }
+            ) <= DEAD_TOLERANCE
+        );
+    }
+    sim.set_ai(SideId::Attacker, false);
+    run(&mut sim, 180.0);
+    let field = sim.field();
+    for u in sim
+        .units()
+        .iter()
+        .filter(|u| u.side == SideId::Defender && u.can_shoot())
+    {
+        let front = Front {
+            center: (u.x, u.z),
+            forward: -1.0,
+            width: u.extent().0,
+        };
+        let dead = dead_ground(field, front);
+        assert!(
+            dead <= DEAD_TOLERANCE,
+            "{} at ({:.0}, {:.0}) leaves {:.0} % of its glacis in dead ground",
+            u.name,
+            u.x,
+            u.z,
+            dead * 100.0
+        );
+    }
+}

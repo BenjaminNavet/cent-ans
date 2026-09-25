@@ -14,7 +14,9 @@
 //! - **flanks**: each wing leaning on a wood, a river or a pool, a marsh or
 //!   a scarp (Crécy, Agincourt: woods on the wings);
 //! - **field of fire**: the share of the ground in front the front sees
-//!   (dead ground below a rounded crest hides the enemy from the archers).
+//!   (dead ground below a rounded crest hides the enemy from the archers);
+//!   on a bare crest the shooters stand on its **military crest**
+//!   ([`military_crest`]), down the forward slope where they see the glacis.
 //!
 //! All parts are in metres-equivalent points, the unit of the R2b height
 //! search, so that `total()` compares a bare crest, a hedge in a hollow and a
@@ -118,32 +120,90 @@ pub fn score_position(
     }
 }
 
-/// Points of the field of fire: [`FIRE_POINTS`] x the share of the ground
-/// 60, 120 and 180 m in front (centre and both thirds of the front) seen
-/// from the front. A crest with dead ground below it is a poor post for
-/// archers, who must see what they shoot (ADR 0046).
+/// Points of the field of fire: [`FIRE_POINTS`] x the share of the glacis
+/// (every [`DEAD_STEP`] m from [`DEAD_NEAR`] to [`FIRE_REACH`] m in front,
+/// centre and both thirds of the front) seen from the front. A crest with
+/// dead ground below it is a poor post for archers, who must see what they
+/// shoot (ADR 0046).
 pub fn fire_points(field: &Battlefield, front: Front) -> f64 {
+    FIRE_POINTS * (1.0 - dead_ground(field, front))
+}
+
+/// A front sees the ground from this far in front of it...
+pub const DEAD_NEAR: f64 = 30.0;
+/// ... to this far (the useful range of a longbow volley aimed at sight).
+pub const FIRE_REACH: f64 = 180.0;
+/// Sampling step of the glacis.
+pub const DEAD_STEP: f64 = 15.0;
+/// A military crest leaves at most this share of the glacis in dead ground.
+pub const DEAD_TOLERANCE: f64 = 0.1;
+/// The military crest is looked for this far in front of the crest at most.
+pub const MILITARY_REACH: f64 = 80.0;
+/// Shooters stand in order on slopes up to this grade.
+pub const SHOOTER_SLOPE: f64 = 0.3;
+
+/// Share of the glacis in front of `front` masked from it by the ground
+/// (dead ground: the enemy climbs there unseen and unshot).
+pub fn dead_ground(field: &Battlefield, front: Front) -> f64 {
     let (x, z) = front.center;
     let third = front.width / 3.0;
-    let mut seen = 0;
+    let mut dead = 0;
     let mut total = 0;
-    for d in [60.0, 120.0, 180.0] {
+    let mut d = DEAD_NEAR;
+    while d <= FIRE_REACH {
         for lateral in [-third, 0.0, third] {
             let spot = (x + lateral, z + front.forward * d);
             if !field.inside(spot.0, spot.1) {
                 continue;
             }
             total += 1;
-            if !field.blocks_sight((x + lateral, z), spot) {
-                seen += 1;
+            if field.blocks_sight((x + lateral, z), spot) {
+                dead += 1;
             }
         }
+        d += DEAD_STEP;
     }
     if total == 0 {
         0.0
     } else {
-        FIRE_POINTS * f64::from(seen) / f64::from(total)
+        f64::from(dead) / f64::from(total)
     }
+}
+
+/// The **military crest** of `front` (R4, ADR 0046): the front itself when
+/// it sees its glacis, otherwise the highest standable spot down the
+/// forward slope (every 5 m up to [`MILITARY_REACH`]) from which at most
+/// [`DEAD_TOLERANCE`] of the glacis is dead ground; failing that, the spot
+/// leaving the least dead ground. The topographic crest of a rounded hill
+/// hides the foot of its slope; archers stand lower, where they see it.
+pub fn military_crest(field: &Battlefield, front: Front) -> (f64, f64) {
+    let at = |center: (f64, f64)| dead_ground(field, Front { center, ..front });
+    let crest = front.center;
+    let mut best = (crest, at(crest));
+    if best.1 <= DEAD_TOLERANCE {
+        return crest;
+    }
+    let mut ahead = 5.0;
+    while ahead <= MILITARY_REACH {
+        let spot = (crest.0, crest.1 + front.forward * ahead);
+        ahead += 5.0;
+        if !field.inside(spot.0, spot.1)
+            || field.in_forest(spot.0, spot.1)
+            || field.in_mud(spot.0, spot.1)
+            || field.water_at(spot.0, spot.1).is_some()
+            || ReliefMap::slope(field, spot.0, spot.1) > SHOOTER_SLOPE
+        {
+            continue;
+        }
+        let dead = at(spot);
+        if dead <= DEAD_TOLERANCE {
+            return spot;
+        }
+        if dead < best.1 {
+            best = (spot, dead);
+        }
+    }
+    best.0
 }
 
 /// Spot on the reverse slope behind `front` (standable), if any.
