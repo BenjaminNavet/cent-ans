@@ -83,6 +83,11 @@ func _build() -> void:
 					subtitle += " — %s" % meta.get("date", "")
 	illustration_path = FrontEndData.random_illustration(faction_id)
 	quote = FrontEndData.random_quote()
+	# AR1 : une fois sur deux, une grande enluminure de campagne et sa citation (Paris, Avignon…).
+	var plate := ArtPlates.random_loading_screen("campaign")
+	if not plate.is_empty() and (randf() < 0.5 or _forced_plate()):
+		illustration_path = str(plate.get("image", illustration_path))
+		quote = plate.get("quote", quote)
 	tip = FrontEndData.random_tip()
 	var art_texture := PortraitLoader.load_texture(illustration_path) if illustration_path != "" else null
 
@@ -298,3 +303,8 @@ func _maybe_screenshot() -> void:
 			print("LoadingScreen: screenshot %s (%s)" % [path, error_string(err)])
 			get_tree().quit(0 if err == OK else 1)
 			await get_tree().process_frame
+
+
+## Capture : `-- --loading-plate` impose une enluminure AR1 (écran reproductible).
+func _forced_plate() -> bool:
+	return "--loading-plate" in OS.get_cmdline_user_args()
