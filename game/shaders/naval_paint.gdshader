@@ -62,19 +62,19 @@ void fragment() {
 	float grain = fbm(vec2(q.x * 1.2, q.y * 30.0) + s);
 	// Panneaux alternés et liseré ocre en haut de chaque face.
 	float panel = panels ? mod(floor(q.x / panel_width + 0.5), 2.0) : 0.0;
-	vec3 colour = mix(paint, mix(paint, accent, 0.75), panel);
+	vec3 colour = mix(paint, mix(paint, accent, 0.3) * 0.85, panel);
 	float top = fract(p.y / 1.1);
-	colour = mix(colour, accent * 0.9, smoothstep(0.86, 0.9, top) * 0.8);
+	colour = mix(colour, accent * 0.9, smoothstep(0.88, 0.91, top) * 0.7);
 	// Passée : désaturée et blanchie par le soleil et le sel, par plaques.
 	float weather = fbm(q * 1.7 + s);
 	float grey = dot(colour, vec3(0.3, 0.59, 0.11));
 	colour = mix(colour, vec3(grey) * 1.1 + vec3(0.04, 0.035, 0.02), fade * (0.6 + 0.6 * weather));
 	// Écaillée : le chêne reparaît sur les arêtes des planches et par éclats.
-	float chips = smoothstep(0.62 - chipping * 0.25, 0.7 - chipping * 0.25, fbm(q * 7.0 + s * 3.0));
-	chips = max(chips, (1.0 - seam) * 0.8 * chipping);
+	float chips = smoothstep(0.74 - chipping * 0.1, 0.8 - chipping * 0.1, fbm(q * 5.0 + s * 3.0));
+	chips = max(chips, (1.0 - seam) * 0.3 * chipping);
 	vec3 wood = oak * (0.75 + 0.5 * grain);
 	vec3 albedo = mix(colour * (0.9 + 0.15 * grain), wood, clamp(chips, 0.0, 1.0));
-	albedo *= mix(0.6, 1.0, seam);
+	albedo *= mix(0.8, 1.0, seam);
 	// Coulures de crasse et de sel, bas des faces plus sale.
 	float streak = smoothstep(0.55, 0.85, fbm(vec2(q.x * 5.0, q.y * 0.5) + s));
 	albedo *= 1.0 - streak * 0.25;
