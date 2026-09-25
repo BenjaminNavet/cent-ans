@@ -10,6 +10,14 @@
 
 use serde::Serialize;
 
+/// Seconds between two shots of a siege engine (SG2: the renderer winds the
+/// trebuchet back over this time, `get_units().reload`).
+pub const ENGINE_RELOAD: f64 = 12.0;
+/// Seconds between two volleys of crossbowmen behind pavises.
+pub const PAVISE_RELOAD: f64 = 9.0;
+/// Seconds between two volleys of other shooters.
+pub const VOLLEY_RELOAD: f64 = 6.0;
+
 /// Kind of missile a volley throws.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]

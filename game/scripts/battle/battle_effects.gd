@@ -54,6 +54,9 @@ signal hit_landed(pos: Vector3, time: float)
 signal sound_event(event: StringName, position: Vector3, delay: float)
 
 var enabled_dust: bool = true
+## SG2 : engins animés (point et instant où la pierre ou le boulet part) ; null : ancien départ.
+var engine_fx: SiegeEnginesFx = null
+var _pending_fire: Array = []  # [{time, pos, dir}] : éclairs de bombarde à venir
 ## BV1 : volées massives et traits fichés.
 var volleys: BattleVolleys = null
 var time_now: float = 0.0
@@ -164,6 +167,9 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 	if shots is Array:
 		for shot in shots:
 			_on_core_shot(shot, by_id, soldiers, camera_pos)
+	while not _pending_fire.is_empty() and float(_pending_fire[0]["time"]) <= now:
+		var fire: Dictionary = _pending_fire.pop_front()
+		cannon_fire(fire["pos"], fire["dir"], now)
 	if volleys != null:
 		volleys.update_fieldworks(units)
 	var dusty: Array = []
@@ -349,7 +355,10 @@ func _on_core_shot(shot: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers
 	if target.is_empty():
 		target = {"x": aim.x, "z": aim.y, "y": _height_at.call(aim.x, aim.y) if _height_at.is_valid() else 0.0, "width": 12.0}
 	var aim3 := Vector3(aim.x, float(target.get("y", 0.0)), aim.y)
-	sound_event.emit(&"bombard" if kind == "ball" else &"trebuchet_release", pos, 0.0)
+	# SG2 : le son part avec la pierre (fronde du trébuchet, bouche de la bombarde).
+	var releases: Array = engine_fx.release(int(shooter["id"])) if engine_fx != null else []
+	var release_delay := float(releases[0]["delay"]) if not releases.is_empty() else 0.0
+	sound_event.emit(&"bombard" if kind == "ball" else &"trebuchet_release", pos, release_delay)
 	# SG1 : un engin qui bat la muraille est rendu par `SiegeAssaultFx` (pierre, impact, son).
 	if siege_walls and str(shot.get("cover", "")) == "wall":
 		return
@@ -370,6 +379,19 @@ func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, c
 	if kind == BALL or kind == STONE:
 		# SG1 : sans régiment visé, l'engin bat la muraille (`SiegeAssaultFx`, `engine_shot`).
 		if siege_walls and int(unit.get("target", -1)) < 0:
+			return
+		# SG2 : engins animés, chaque pierre part de la fronde (ou de la bouche) à son lâcher.
+		var releases: Array = engine_fx.release(int(unit["id"])) if engine_fx != null else []
+		if not releases.is_empty():
+			for r in releases:
+				var end := aim + Vector3(_rng.randf_range(-spread, spread), 0.0, _rng.randf_range(-spread, spread))
+				if _height_at.is_valid():
+					end.y = float(_height_at.call(end.x, end.z))
+				var at := time_now + float(r["delay"])
+				if kind == BALL:
+					_pending_fire.append({"time": at, "pos": r["pos"], "dir": r["dir"]})
+				launch(r["pos"], end, kind, at)
+			_pending_fire.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["time"]) < float(b["time"]))
 			return
 		var engines := soldiers.soldier_positions(int(unit["id"]), 4) if soldiers != null else PackedVector3Array()
 		if engines.is_empty():
