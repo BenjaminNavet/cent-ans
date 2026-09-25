@@ -19,12 +19,14 @@ fusionnés : code de la pyramide et manifeste rempli). Cache partagé par liens 
 - Données : `data/map/historical_hydro_notes.json` (canaux modernes, zones divagantes/marais/estuaires).
 
 ## État
-- [x] squelette, sources téléchargées (TOPAGE, OS), EU-Hydro testé
-- [~] pipeline hydro-fine écrit (sélection, recalage parallèle, monotonie réseau, largeurs, tuiles, manifeste), pas encore lancé en entier
-- [ ] `river_widths.json` + schémas + tests
-- [ ] `geo anchors-fine` (colonies, hameaux, ponts, routes drapées)
-- [ ] aperçus `docs/img/zg5a/`, `docs/geo.md`, `CREDITS.md`
+- [x] squelette, sources téléchargées (TOPAGE, OS, EU-Hydro 420 cellules)
+- [x] pipeline `geo hydro-fine` (testé sur OS + EU-Hydro + NE : 25,7 k km GB, 29 k km EU-Hydro, 46 k km NE, 24 s)
+- [x] `geo anchors-fine` (colonies, hameaux, ponts, routes drapées ; testé sans TOPAGE)
+- [x] schémas + tests (`tools/tests/test_hydro_fine.py`), `docs/geo.md`, `CREDITS.md`
+- [ ] préparation TOPAGE (`cache/links_topage.npz`, lecture de 3 Go lente sous charge) puis run complet
+- [ ] aperçus `docs/img/zg5a/` (Rouen, Orléans, Bordeaux, Londres), commit de `rivers_fine.json` et `fine_anchors.json`
 
 ## Prochaine étape
-Écrire la sélection + recalage dans `hydro_fine.py` ; préparation TOPAGE en tâche de fond
-(`cache/links_topage.npz`).
+Attendre `links_topage.npz` (tâche de fond, sinon relancer `hydro_fine.prepare_topage()`),
+puis `cent-ans geo hydro-fine --workers 6` et `cent-ans geo anchors-fine --workers 6`,
+aperçus via `hydro_preview.render_all`.
