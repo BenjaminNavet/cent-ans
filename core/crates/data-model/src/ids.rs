@@ -175,6 +175,11 @@ define_id!(
     SeaZoneId,
     "sea_"
 );
+define_id!(
+    /// Identifier of a ship class (`ship_cog`), lot NV1.
+    ShipClassId,
+    "ship_"
+);
 
 #[cfg(test)]
 mod tests {

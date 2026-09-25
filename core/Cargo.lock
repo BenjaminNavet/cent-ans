@@ -361,6 +361,7 @@ dependencies = [
  "data-model",
  "serde",
  "serde_json",
+ "thiserror",
 ]
 
 [[package]]
