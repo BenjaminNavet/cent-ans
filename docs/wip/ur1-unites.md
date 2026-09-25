@@ -55,7 +55,8 @@ déjà présent sur main).
 | unit_gascon_crossbowmen | Arbalétriers gascons | cultures occitane, basque, navarraise | archer_4 |
 | unit_culveriners | Couleuvriniers | tech. couleuvrines, arsenal ; dès 1380 | archer_5 |
 
-## État : terminé (non fusionné), `main` fusionné (03a42b82), tests, clippy, pytest, smoke verts.
+## État : UR1 terminé (non fusionné). UR2 (5 tâches ci-dessous) terminé, `main` fusionné,
+fmt/clippy/tests (core, 395 pytest), build.sh, import, smoke verts.
 
 ## Points ouverts
 
@@ -77,7 +78,8 @@ déjà présent sur main).
   appliqué pour `cavalry_4`, allègement de la coiffe pour `infantry_8`).
 - Pas de capture en bataille simulée : la démo de `battle_scene.gd` ne choisit pas ses types.
 - Bombardes du XVe siècle / artillerie de campagne non ajoutées (engins : lot SG1).
-- Les types du XVe siècle ne sont atteints qu'au-delà de 400 tours ; `century_probe` non relancé.
+- ~~Les types du XVe siècle ne sont atteints qu'au-delà de 400 tours...~~ **fait (UR2, tâche 5)** :
+  `century_probe 464 1 2 3 4` (release) relancé, voir résultats ci-dessous.
 - ~~`tools/cent_ans_tools/budget.py` ne lit pas un fichier à deux tables...~~ **fait (UR2, tâche
   4)** : lit toutes les tables (sections `## Session N`), cumul et plafond par session courante,
   `session_totals()`, `add_entry` écrit dans la dernière table. Tests dans `tools/tests/
@@ -89,15 +91,37 @@ déjà présent sur main).
 2. Jinetes, clip de lancer de javeline (Blender V2) : **fait**, commit `9668931a`.
 3. Budget de triangles (routiers, écorcheurs) : **fait**, commit `cde0e583`.
 4. `tools/.../budget.py` (tables multi-sessions) : **fait**, commit `4a205183`.
-5. `century_probe` 4 graines × 464 tours, chiffres XVe siècle : **code fait** (commit
-   `b5da244a`, ajoute `CENTURY_15`/`recruited_15th` : scanne chaque tour les armées et
-   garnisons de toutes les factions pour les 4 types tant qu'ils n'ont pas tous été vus).
-   **Run 4 graines × 464 tours lancé, pas encore terminé** (build release,
-   `./target/release/examples/century_probe 464 1 2 3 4`, log `/tmp/century_probe_ur2.log`,
-   PID à vérifier via `ps aux | grep century_probe`) : campagne complète ~2-4 min par graine en
-   parallèle sur 4 threads, ce run a dépassé le budget de tours de cette session. **Prochaine
-   étape pour l'agent de reprise** : relancer si besoin
-   (`cd core && cargo build --release -p ai --example century_probe && ./target/release/
-   examples/century_probe 464 1 2 3 4`), consigner ici la ligne « Types du XVe s. recrutés » et
-   « Survie en 1400 » de la sortie, comparer aux chiffres § Équilibre ci-dessus (majeures 5/5
-   sur `century_probe 464 1..5` avant UR1/UR2).
+5. `century_probe` 4 graines × 464 tours, chiffres XVe siècle : **fait**, commit `b5da244a`
+   (sonde) + résultats ci-dessous.
+
+### `century_probe 464 1 2 3 4` (build release, après UR1+UR2)
+
+Survie en 1400 : england 4/4, france 4/4, burgundy 4/4, scotland 4/4 (**4 majeures 4/4**, comme
+avant UR1/UR2 ; pas de régression).
+
+Types du XVe s. recrutés (au moins une fois, une des 4 graines à 464 tours = jusqu'en 1453) :
+
+| Type | Recruté |
+|---|---|
+| Gendarmes d'ordonnance (`unit_ordonnance_gendarmes`, dès 1445) | 4/4 |
+| Francs-archers (`unit_francs_archers`, dès 1448) | 3/4 |
+| Coutiliers (`unit_coutiliers`, dès 1445) | 3/4 |
+| Couleuvriniers (`unit_culveriners`, dès 1380) | **0/4** |
+
+Les gendarmes d'ordonnance (le remplacement des hommes d'armes) sont systématiquement adoptés.
+Francs-archers et coutiliers, plus tardifs (dès 1448/1445, soit 5-8 ans avant la fin de la sonde
+en 1453), manquent une graine sur quatre — cohérent avec leur fenêtre courte plutôt qu'un signe
+de déséquilibre. **Couleuvriniers jamais recrutés sur les 4 graines** malgré une disponibilité
+dès 1380 (bien avant la fin de la sonde) : à investiguer (lot suivant) — hypothèses : coût/entretien
+peu compétitif face aux archers/arbalétriers dans la matrice à budget égal (30 % de victoires
+contre 57-77 % pour les archers, cf. § Équilibre plus haut), `required_technology: tech_handgonnes`
++ `required_building: bld_armoury` rarement construits par l'IA avant 1453, ou le recruteur IA ne
+considère pas encore ce type. Pas un blocant pour ce lot (le rendu et les données sont corrects,
+cf. tâche 1), mais à noter pour un futur lot d'équilibre (G-suivant).
+
+Guerre FR-EN moy. 38 % [30-56] (1/4 dans la bande cible 55-75 %, déjà hors bande avant G1, cf.
+audit § 6, sans lien avec UR1/UR2). Batailles FR/EN, banqueroutes, appels aux armes : dans les
+ordres de grandeur habituels de ce probe. Détail complet dans le journal d'agent (log non conservé
+au-delà de cette session ; relancer `cd core && cargo build --release -p ai --example
+century_probe && ./target/release/examples/century_probe 464 1 2 3 4` pour le reproduire, environ
+110 s pour les 4 graines en parallèle sur cette machine).
