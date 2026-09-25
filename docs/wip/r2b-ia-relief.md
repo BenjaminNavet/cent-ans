@@ -35,7 +35,7 @@ montée raide » : dans le bruit (± 5 ; le seuil de montée raide est passé de
   des tireurs ennemis ; pas de la ligne décalé pour contourner une montée raide ; pas de charge au pas
   de course en montée raide de loin ; ligne qui court sous les flèches et attend ses retardataires ;
   cavaliers qui ne poursuivent ni ne contournent devant des pieux plantés.
-- [x] Fusion de `main` (2e428a26), `cargo fmt`/`clippy -D warnings`/`cargo test` verts,
+- [x] Fusion de `main` (2e428a26 puis adbaff88, G1 sans effet sur les mesures), `cargo fmt`/`clippy -D warnings`/`cargo test` verts,
   `core/build.sh` puis smoke Godot : 24 « smoke OK », 0 erreur.
 - [x] Tests : `tests/ai.rs` revenu aux graines 0-2 ; `tests/ai_relief.rs` (seuils statistiques par
   terrain, lecture du relief sur une crête synthétique, contre-pente, défenseur qui garde ses
