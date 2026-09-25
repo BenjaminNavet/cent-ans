@@ -717,7 +717,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	if definition.has("upkeep"):
 		costs.append("Entretien : %d %s / saison" % [int(definition["upkeep"]), RichTooltip.POUND])
 	if definition.has("recruit_time_turns"):
-		costs.append("Levée : %d tour(s)" % int(definition["recruit_time_turns"]))
+		costs.append("Levée : %s" % FrText.count(int(definition["recruit_time_turns"]), "tour"))
 	var stats: Dictionary = definition.get("stats", {})
 	var stat_lines := PackedStringArray()
 	for stat in ["melee", "ranged", "range", "armor", "morale", "speed", "charge", "siege_attack", "ammo"]:
@@ -770,7 +770,7 @@ static func _building_fiche(entry_id: String, definition: Dictionary) -> String:
 	if definition.has("cost"):
 		costs.append("Coût : " + RichTooltip.cost_text(definition["cost"]))
 	if definition.has("build_time_turns"):
-		costs.append("Durée : %d tour(s)" % int(definition["build_time_turns"]))
+		costs.append("Durée : %s" % FrText.count(int(definition["build_time_turns"]), "tour"))
 	costs.append("Entretien : %d %s / saison" % [int(definition.get("upkeep", 0)), RichTooltip.POUND])
 	var requires := PackedStringArray()
 	if str(definition.get("upgrades_from", "")) != "":
@@ -863,7 +863,7 @@ static func _trait_fiche(entry_id: String, definition: Dictionary) -> String:
 
 static func _skill_fiche(entry_id: String, definition: Dictionary) -> String:
 	var branch := str(definition.get("branch", ""))
-	var subtitle := "%s, rang %d — %d point(s) de compétence" % [RichTooltip.BRANCH_LABELS.get(branch, branch), int(definition.get("tier", 1)), int(definition.get("cost", 1))]
+	var subtitle := "%s, rang %d — %s de compétence" % [RichTooltip.BRANCH_LABELS.get(branch, branch), int(definition.get("tier", 1)), FrText.count(int(definition.get("cost", 1)), "point")]
 	var prerequisites: Array = definition.get("prerequisites", [])
 	return _join([
 		_heading("branch_" + branch, name_of(entry_id), subtitle, "branch"), _description(definition),

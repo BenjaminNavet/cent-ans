@@ -716,7 +716,7 @@ func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 	research_box.tooltip_text = "Recherche : %s\n%d / %d points, +%d par tour%s" % [
 		str(research.get("name", "")), int(research.get("progress", 0)), int(research.get("cost", 0)),
 		int(research.get("points_per_turn", points_per_turn)),
-		", %d tour(s) restant(s)" % turns if turns >= 0 else ""]
+		", %s restant%s" % [FrText.count(turns, "tour"), FrText.s(turns)] if turns >= 0 else ""]
 
 
 # --- HUD de campagne (F10b) ----------------------------------------------------------
