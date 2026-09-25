@@ -470,6 +470,7 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 		instance.set_meta("across", across)
 		instance.set_meta("along", along)
 		instance.set_meta("mesh_width", mesh_width)
+		instance.set_meta("deck_scale", BridgeMeshes.fine_deck_scale(str(gate["structure"]), mesh_width, map_data.meters_per_px, RiverCrossings.FINE_SCALE))
 		instance.visibility_range_end = RiverCrossings.VISIBILITY_RANGE
 		(entry["node"] as Node3D).add_child(instance)
 		instance.visible = _bridges_fine
@@ -483,7 +484,9 @@ func _ground_gate(instance: MeshInstance3D) -> void:
 	var k := RiverCrossings.FINE_SCALE
 	var deck_top := (0.05 + 0.02 * float(instance.get_meta("mesh_width", 1.0))) * k
 	var k_h := clampf(GATE_DECK_RISE_M * vs / maxf(deck_top, 1e-4), 0.3, 12.0)
-	instance.transform.basis = Basis(instance.get_meta("across", Vector3.RIGHT) * k, Vector3.UP * k * k_h, instance.get_meta("along", Vector3.BACK) * k)
+	# ZG7a : tablier à sa largeur réelle (`BridgeMeshes.fine_deck_scale`), pas × `FINE_SCALE`.
+	var k_along := float(instance.get_meta("deck_scale", k))
+	instance.transform.basis = Basis(instance.get_meta("across", Vector3.RIGHT) * k, Vector3.UP * k * k_h, instance.get_meta("along", Vector3.BACK) * k_along)
 	instance.position.y = maxf(MapData.display_height(float(instance.get_meta("z_m", 0.0)), instance.position.x, instance.position.z), 0.0)
 
 
