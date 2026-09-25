@@ -46,10 +46,10 @@ func _test_quadtree_quality() -> void:
 	var quadtree := ReliefQuadtree.new()
 	terrain.quadtree = quadtree
 	terrain.apply_render_quality(RenderQuality.PRESETS["low"])
-	_check(is_equal_approx(quadtree.max_vertex_px, 10.0) and quadtree.max_items == 350 and quadtree.extra_depth == 2, "low preset reaches the quadtree")
+	_check(is_equal_approx(quadtree.max_vertex_px, 12.0) and quadtree.max_items == 350 and quadtree.extra_depth == 2, "low preset reaches the quadtree")
 	_check(not terrain.quality_fine, "low preset turns the fallback fine relief off")
 	terrain.apply_render_quality(RenderQuality.PRESETS["high"])
-	_check(is_equal_approx(quadtree.max_vertex_px, 4.0) and quadtree.max_items == 700, "high preset keeps the ZG2 defaults")
+	_check(is_equal_approx(quadtree.max_vertex_px, 6.0) and quadtree.max_items == 700, "high preset reaches the quadtree")
 	terrain.quadtree = null
 	quadtree.free()
 	terrain.free()
