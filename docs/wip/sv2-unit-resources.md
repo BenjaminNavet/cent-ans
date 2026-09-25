@@ -17,4 +17,4 @@ Branche `sv2-unit-resources`. Réutilise le mécanisme B7c (ADR 0053) des chanti
 - [x] tests Rust, codex (8 fiches), ADR 0053 complément
 
 ## Prochaine étape
-Vérifs complètes : cargo test, build.sh, import + smoke Godot, pytest ; puis suites-bulles3.md.
+Terminé : cargo test, clippy, build.sh, import + smoke Godot, pytest (561) verts. Reste : fusion par l'orchestrateur.
