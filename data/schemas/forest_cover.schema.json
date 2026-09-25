@@ -21,6 +21,16 @@
       "required": ["file", "channel", "low", "high"],
       "additionalProperties": false
     },
+    "conifer": {
+      "type": "object",
+      "description": "Raster optionnel de la part de résineux dans la forêt (0..1, ex. forest_kind.png du lot R1) ; absent : choix procédural (altitude, latitude). Ignoré si `essences` est fourni.",
+      "properties": {
+        "file": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+\\.png$" },
+        "channel": { "$ref": "#/$defs/channel" }
+      },
+      "required": ["file", "channel"],
+      "additionalProperties": false
+    },
     "essences": {
       "description": "Raster optionnel des essences (parts 0..1 par canal) ; null : choix procédural (altitude, latitude, bruit).",
       "oneOf": [
