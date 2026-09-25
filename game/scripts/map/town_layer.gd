@@ -49,6 +49,9 @@ var _last_distance := INF
 var _plan_usec: Array[int] = []
 var _step_max_usec := 0
 var _task_max_usec := 0
+## Villes dont le finage est envoyé au parcellaire (taille du tableau `fp_towns` du shader).
+const FINAGE_SLOTS := 16
+var _finage_key := ""
 ## Captures et mesures : `--town-lod=blocks` (blocs seuls), `--town-lod=detail` (kit partout),
 ## `--no-towns` (rendu d'avant ZG6).
 var _detail_override := 1.0
@@ -190,6 +193,7 @@ func _stream(rig_distance: float, center: Variant = null) -> int:
 		elif d > radius * profile.unload_factor and _entries.has(id):
 			_unload(id)
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	_push_finage(here)
 	var missing := 0
 	for w in wanted:
 		var id: String = w[1]
@@ -209,6 +213,36 @@ func _stream(rig_distance: float, center: Variant = null) -> int:
 	stats["jobs"] = _jobs.size()
 	stats["radius"] = radius
 	return missing
+
+
+## Finages des `FINAGE_SLOTS` villes les plus proches du point visé → parcellaire du lot ZG5b
+## (`fp_towns` de `fine_parcels.gdshaderinc` : x, y, rayon du finage, rayon bâti en unités).
+func _push_finage(here: Vector2) -> void:
+	if terrain == null or terrain.material == null:
+		return
+	var near: Array = []
+	for id in _ids:
+		near.append([here.distance_squared_to(_anchor[id]), id])
+	near.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var slots: Array[Vector4] = []
+	var key := ""
+	for k in mini(FINAGE_SLOTS, near.size()):
+		var id: String = near[k][1]
+		key += id + ","
+		var town: Dictionary = data.towns[id]
+		var built := 0.0
+		for r in town["radii"]:
+			built += float(r)
+		built /= maxf(float((town["radii"] as Array).size()), 1.0)
+		var a: Vector2 = _anchor[id]
+		slots.append(Vector4(a.x, a.y, float(town["finage_radius_m"]) / data.meters_per_unit, built / data.meters_per_unit))
+	if key == _finage_key:
+		return
+	_finage_key = key
+	while slots.size() < FINAGE_SLOTS:
+		slots.append(Vector4.ZERO)
+	terrain.material.set_shader_parameter("fp_towns", slots)
+	terrain.material.set_shader_parameter("fp_town_count", mini(FINAGE_SLOTS, near.size()))
 
 
 func _heights_for(id: String) -> TownPlan.Heights:
