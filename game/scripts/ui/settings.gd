@@ -47,6 +47,10 @@ const DEFAULTS := {
 	"tutorial/enabled": true,
 	"tutorial/step": 0,
 	"tutorial/done": false,
+	# UX2 : guide rangé par « Plus tard » (repris à `tutorial/step`) ; conseil « que faire
+	# maintenant » de la carte (encart haut gauche).
+	"tutorial/postponed": false,
+	"interface/next_hint": true,
 	# BV1/BV2 : sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements) ; taille des unités (figurines
 	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra).
 	"battle/blood": 1,

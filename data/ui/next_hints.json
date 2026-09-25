@@ -1,0 +1,61 @@
+{
+  "description": "Lot UX2 — conseil « que faire maintenant » de la carte de campagne : un seul conseil à la fois, le premier de la liste dont la condition tient (ordre = priorité). Les conditions sont lues dans l'état exposé par la simulation (alertes de la cloche, armées, trésor, chantiers) ; ce fichier ne porte que les textes, l'action du clic et deux seuils d'affichage. Aucune règle de jeu.",
+  "idle_treasury_min": 2000,
+  "idle_treasury_income_seasons": 2,
+  "hints": [
+    {
+      "id": "chronicle_decision",
+      "title": "Une décision vous attend",
+      "text": "Un événement de la chronique demande votre choix avant la fin de la saison : cliquez pour l'ouvrir.",
+      "action": "alert"
+    },
+    {
+      "id": "siege",
+      "title": "Défendez {province}",
+      "text": "{province} est assiégée : envoyez une armée lever le siège avant que ses vivres s'épuisent.",
+      "action": "alert"
+    },
+    {
+      "id": "enemy_army",
+      "title": "L'ennemi approche",
+      "text": "Une armée ennemie menace {province} : rassemblez vos troupes ou renforcez la garnison.",
+      "action": "alert"
+    },
+    {
+      "id": "debt",
+      "title": "Sortez de la dette",
+      "text": "Votre trésor est négatif : relevez l'impôt ou licenciez des troupes dans le panneau de faction.",
+      "action": "alert"
+    },
+    {
+      "id": "research_idle",
+      "title": "Choisissez une technique (T)",
+      "text": "Aucune recherche n'est en cours : les points de la saison sont perdus. Cliquez pour ouvrir l'arbre.",
+      "action": "alert"
+    },
+    {
+      "id": "army_idle",
+      "title": "Votre armée attend vos ordres",
+      "text": "Sélectionnez {army} et faites un clic droit sur la carte pour la déplacer.",
+      "action": "select_army"
+    },
+    {
+      "id": "idle_treasury",
+      "title": "Construisez dans une ville",
+      "text": "Votre trésor dort ({treasury}) : ouvrez une ville et lancez un bâtiment dans l'onglet « Bâtiments ».",
+      "action": "open_city"
+    },
+    {
+      "id": "tutorial_postponed",
+      "title": "Reprendre le guide",
+      "text": "Le tutoriel vous attend à l'étape {step} : cliquez pour le reprendre là où vous l'aviez laissé.",
+      "action": "resume_tutorial"
+    },
+    {
+      "id": "end_turn",
+      "title": "Terminez la saison",
+      "text": "Vos ordres sont donnés : cliquez ici, sur la cloche ou appuyez sur Entrée pour finir le tour.",
+      "action": "end_turn"
+    }
+  ]
+}

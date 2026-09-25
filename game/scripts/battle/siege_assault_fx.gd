@@ -115,7 +115,7 @@ func setup(p_siege_view: BattleSiege, p_effects: BattleEffects, p_soldiers: Batt
 	if effects != null:
 		effects.siege_walls = true
 	_stone_mesh = SphereMesh.new()
-	# Pierre et boulet grossis (lisibilité à la Total War : ~2× la taille réelle).
+	# Pierre et boulet grossis (lisibilité de loin : ~2× la taille réelle).
 	_stone_mesh.radius = 0.8
 	_stone_mesh.height = 1.4
 	_stone_mesh.radial_segments = 8

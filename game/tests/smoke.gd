@@ -1503,6 +1503,7 @@ func _run_assets() -> void:
 	_check(missing_sfx.is_empty(), "missing sound effects: %s" % [missing_sfx])
 	for context in ["campaign", "war", "court"]:
 		_check(audio.call("has_music", context), "missing music: %s" % context)
+		_check((audio.call("playlist", context) as Array).size() >= 3, "music playlist too short: %s" % context)
 	_check(audio.call("play_sfx", "ui_click"), "play_sfx(ui_click) failed")
 	_check(not audio.call("play_sfx", "does_not_exist"), "unknown sfx should be ignored")
 	audio.call("play_music", "war")

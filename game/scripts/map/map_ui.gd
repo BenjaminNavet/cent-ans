@@ -2,7 +2,7 @@ class_name MapUI
 extends CanvasLayer
 
 ## Couche UI de la carte de campagne : barre supérieure (faction, trésor, solde, date, menu),
-## HUD « à la Total War » (F10b : bandeau d'ost `ArmyStrip` et sceau du chef `GeneralSeal` pour
+## HUD de campagne (F10b : bandeau d'ost `ArmyStrip` et sceau du chef `GeneralSeal` pour
 ## l'armée sélectionnée, cloche de fin de saison `EndTurnCluster`, lettres scellées
 ## `NewsLetters`), journal des événements (bas gauche, replié par défaut), panneau de province,
 ## aperçu de chemin au survol, notifications, dialogue sauver/charger.
@@ -194,17 +194,24 @@ func _decorate_top_bar() -> void:
 		label.mouse_filter = Control.MOUSE_FILTER_PASS
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
 	income_label.tooltip_text = RichTooltip.hud("hud_income")
-	# Boutons à icône seule (le libellé passe dans l'infobulle) : la barre tient en 1440 px.
+	# UX2 (C9) : chaque bouton porte un libellé court quand la barre a la place, sinon son
+	# icône seule (nom et touche dans l'infobulle) ; voir `fit_top_bar`.
 	# U7 : chaque bouton porte la lettre de son raccourci (lue dans l'InputMap).
-	_decorate_button(court_button, "hud_court", true)
+	_decorate_button(court_button, "hud_court")
 	_add_keycap(court_button, "map_toggle_court")
-	_decorate_button(tech_button, "hud_technologies", true)
+	_register_top_label(court_button, "Cour")
+	_decorate_button(tech_button, "hud_technologies")
 	_add_keycap(tech_button, "map_toggle_tech")
+	_register_top_label(tech_button, "Techniques")
 	_add_codex_button()
-	_add_action_button("ObjectivesButton", "⚑", "", "map_toggle_objectives",
+	var objectives := _add_action_button("ObjectivesButton", "⚑", "Objectifs", "map_toggle_objectives",
 		"[b]Objectifs[/b]\nObjectifs historiques de votre faction et score.", tech_button.get_index() + 2)
-	_add_action_button("AgentsButton", "✦", "Agents", "map_toggle_agents",
+	_register_top_label(objectives, "Objectifs", "⚑")
+	var agents := _add_action_button("AgentsButton", "✦", "Agents", "map_toggle_agents",
 		"[b]Agents[/b]\nRegistre des espions, hérauts et prédicateurs.", tech_button.get_index() + 3)
+	_register_top_label(agents, "Agents", "✦")
+	get_viewport().size_changed.connect(queue_fit_top_bar)
+	($TopBar as Control).resized.connect(queue_fit_top_bar)
 	var settings := get_node_or_null("/root/Settings")
 	if settings != null:
 		settings.changed.connect(func(key: String) -> void:
@@ -236,10 +243,12 @@ func _decorate_late_button(node: Node) -> void:
 		return
 	var button := node as Button
 	if button.text.begins_with("Diplomatie"):
-		_decorate_button(button, "hud_diplomacy", true)
+		_decorate_button(button, "hud_diplomacy")
 		_add_keycap(button, "map_toggle_diplomacy")
+		_register_top_label(button, "Diplomatie")
 	elif button.text.begins_with("Chronique"):
 		_decorate_button(button, "hud_chronicle")
+		_register_top_label(button, "Chronique")
 
 
 # --- Barre supérieure ------------------------------------------------------------
@@ -1159,6 +1168,7 @@ func _add_codex_button() -> void:
 	button.add_theme_font_size_override("font_size", 17)
 	button.tooltip_text = "[b]Codex[/b]\nL'histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
 	_add_keycap(button, "codex_open")
+	_register_top_label(button, "Codex")
 
 
 # --- Raccourcis sur les boutons (lot U7) ------------------------------------------------
@@ -1210,6 +1220,7 @@ func refresh_keycaps() -> void:
 	for entry in _keycaps:
 		if is_instance_valid(entry[0]):
 			_update_keycap(entry)
+	queue_fit_top_bar()  # UX2 : marge du cartouche selon la nouvelle lettre
 
 
 ## Bouton de la barre qui déclenche une action de l'InputMap (même chemin que le clavier).
@@ -1239,3 +1250,142 @@ func press_action(action: String) -> void:
 		event.action = action
 		event.pressed = pressed
 		Input.parse_input_event(event)
+
+
+# --- UX2 : libellés de la barre du haut (audit A3, C9) ------------------------------------
+
+## Taille du texte des boutons libellés de la barre.
+const TOP_LABEL_FONT := 15
+## Ordre de repli en icône seule quand la place manque (le premier se replie d'abord).
+const TOP_COLLAPSE_ORDER := ["Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
+## Marge laissée à droite de la barre (bord, respiration).
+const TOP_BAR_SLACK := 4.0
+
+## Boutons libellés : `{button, label, glyph, labelled}`.
+var _top_labels: Array[Dictionary] = []
+var _fit_queued := false
+
+
+## Inscrit `button` dans la barre adaptative : `label` quand la place le permet, sinon l'icône
+## (ou `glyph` pour les boutons sans icône). Nombre en attente : méta `count` (Chronique).
+func _register_top_label(button: Button, label: String, glyph: String = "") -> void:
+	if button == null:
+		return
+	for entry in _top_labels:
+		if entry["button"] == button:
+			return
+	button.add_theme_font_size_override("font_size", TOP_LABEL_FONT)
+	button.set_meta("top_label", label)
+	var entry := {"button": button, "label": label, "glyph": glyph, "labelled": true}
+	_top_labels.append(entry)
+	if glyph == "" and button.icon == null:
+		entry["glyph"] = label.left(1)
+	_apply_top_label(entry, true)
+	queue_fit_top_bar()
+
+
+func _apply_top_label(entry: Dictionary, labelled: bool) -> void:
+	var button: Button = entry["button"]
+	if not is_instance_valid(button):
+		return
+	entry["labelled"] = labelled
+	var count := int(button.get_meta("count", 0))
+	var glyph := str(entry["glyph"])
+	var parts := PackedStringArray()
+	if glyph != "":
+		parts.append(glyph)
+	if labelled:
+		parts.append(str(entry["label"]))
+	var text := " ".join(parts)
+	if count > 0:
+		text = ("%s (%d)" % [text, count]) if labelled else ("%s %d" % [text, count]).strip_edges()
+	button.text = text
+	_pad_for_keycap(button, labelled)
+	if button.has_meta("tooltip"):  # infobulle d'état fournie par le propriétaire (Chronique)
+		button.tooltip_text = str(button.get_meta("tooltip"))
+
+
+## États du bouton dont la marge droite s'élargit pour le cartouche de touche.
+const KEYCAP_PAD_STATES := ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]
+## Écart entre la fin du libellé et le cartouche.
+const KEYCAP_GAP := 4.0
+
+
+## Bouton libellé portant un cartouche (coin bas droit) : marge droite du style élargie de la
+## largeur du cartouche + `KEYCAP_GAP`, pour que le cartouche ne morde plus la dernière lettre.
+## La largeur minimale du bouton l'inclut, donc `fit_top_bar` en tient compte. Icône seule :
+## styles du thème (le cartouche se loge dans le coin, hors de l'icône).
+func _pad_for_keycap(button: Button, labelled: bool) -> void:
+	var cap := button.get_node_or_null("Keycap") as Label
+	for state: String in KEYCAP_PAD_STATES:
+		if button.has_theme_stylebox_override(state):
+			button.remove_theme_stylebox_override(state)
+	if cap == null or not cap.visible or not labelled:
+		return
+	var cap_width := cap.get_combined_minimum_size().x
+	for state: String in KEYCAP_PAD_STATES:
+		var base := button.get_theme_stylebox(state)
+		if base == null:
+			continue
+		var padded := base.duplicate() as StyleBox
+		padded.content_margin_right = maxf(base.get_margin(SIDE_RIGHT), 0.0) + cap_width + KEYCAP_GAP
+		button.add_theme_stylebox_override(state, padded)
+
+
+## Réapplique le libellé de `button` (après un changement de méta `count` ou `tooltip`).
+func refresh_top_button(button: Button) -> void:
+	for entry in _top_labels:
+		if entry["button"] == button:
+			_apply_top_label(entry, bool(entry["labelled"]))
+			queue_fit_top_bar()
+			return
+
+
+## Vrai si le bouton `label` (« Cour », « Techniques »…) porte son libellé en ce moment.
+func top_button_labelled(label: String) -> bool:
+	for entry in _top_labels:
+		if str(entry["label"]) == label:
+			return bool(entry["labelled"])
+	return false
+
+
+func queue_fit_top_bar() -> void:
+	if _fit_queued or not is_inside_tree():
+		return
+	_fit_queued = true
+	fit_top_bar.call_deferred()
+
+
+## Libellés partout si la barre a la place, sinon repli en icône seule dans l'ordre de
+## `TOP_COLLAPSE_ORDER` jusqu'à ce que la barre tienne dans la largeur de l'écran.
+func fit_top_bar() -> void:
+	_fit_queued = false
+	# Largeur de l'écran (la barre, ancrée, s'élargit au-delà quand son contenu déborde).
+	var available := get_viewport().get_visible_rect().size.x
+	for entry in _top_labels:
+		_apply_top_label(entry, true)
+	for label in TOP_COLLAPSE_ORDER:
+		if _top_bar_width() <= available - TOP_BAR_SLACK:
+			break
+		for entry in _top_labels:
+			if str(entry["label"]) == label:
+				_apply_top_label(entry, false)
+
+
+## Largeur minimale de la barre (contenu et marges), calculée sur les enfants visibles.
+func _top_bar_width() -> float:
+	var top_bar := $TopBar as PanelContainer
+	var bar := tech_button.get_parent() as HBoxContainer
+	var width := 0.0
+	var count := 0
+	for child in bar.get_children():
+		var control := child as Control
+		if control == null or not control.visible or control.top_level:
+			continue
+		width += control.get_combined_minimum_size().x
+		count += 1
+	width += float(maxi(count - 1, 0) * bar.get_theme_constant("separation"))
+	var style := top_bar.get_theme_stylebox("panel")
+	if style != null:
+		width += style.get_margin(SIDE_LEFT) + style.get_margin(SIDE_RIGHT)
+	return width
