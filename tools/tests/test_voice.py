@@ -67,7 +67,13 @@ def test_advisor_triggers() -> None:
     starts = [line for line in advisor["lines"] if line["trigger"] == "campaign_start"]
     assert sum(1 for line in starts if "faction" not in line) == 1
     triggers = {line["trigger"] for line in advisor["lines"]}
-    for first in ("first_battle", "first_assault", "first_siege", "first_victory", "first_defeat"):
+    for first in (
+        "first_battle",
+        "first_assault",
+        "first_siege",
+        "first_victory",
+        "first_defeat",
+    ):
         assert first in triggers, first
 
 
