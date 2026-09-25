@@ -127,6 +127,11 @@ struct CampaignRun {
     bankruptcies: BTreeMap<String, u32>,
     /// EQ1: seasons of each faction alive.
     alive_turns: u32,
+    /// EQ1 (C4): provinces under each edict, sampled every 20 turns.
+    edicts: BTreeMap<String, u32>,
+    /// EQ1 (C5): trade income and total income of all factions, summed over
+    /// the samples taken every 20 turns.
+    trade_income: (i64, i64),
 }
 
 /// EQ1: context of one revolt.
@@ -346,6 +351,17 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
             }
         }
         if (turn + 1) % 20 == 0 {
+            for p in state.provinces.values() {
+                let edict = p
+                    .edict
+                    .as_ref()
+                    .map_or("edict_none".to_owned(), |e| e.edict.as_str().to_owned());
+                *run.edicts.entry(edict).or_default() += 1;
+            }
+            for f in state.factions.values().filter(|f| f.alive) {
+                run.trade_income.0 += f.trade_income_last_turn;
+                run.trade_income.1 += f.income_last_turn + f.trade_income_last_turn;
+            }
             for f in state.factions.values().filter(|f| f.alive) {
                 high_tax_samples.1 += 1;
                 if f.tax_rate == TaxRate::High {
@@ -449,6 +465,8 @@ fn run_json(run: &CampaignRun) -> Value {
             "before4": r.before4, "before1": r.before1, "at": r.at, "occupied": r.occupied,
         })).collect::<Vec<_>>(),
         "bankruptcies": run.bankruptcies,
+        "edicts": run.edicts,
+        "trade_income": [run.trade_income.0, run.trade_income.1],
     })
 }
 
@@ -597,6 +615,32 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
         "| Banqueroutes / faction / décennie | {:.2} | < 0,5 (EQ1) |",
         bankrupt / alive.max(1.0) / decades.max(0.1)
     );
+    let (trade, total) = runs.iter().fold((0, 0), |(a, b), r| {
+        (a + r.trade_income.0, b + r.trade_income.1)
+    });
+    let _ = writeln!(
+        md,
+        "| Commerce / revenu total (toutes factions) | {:.1} % | — |",
+        100.0 * trade as f64 / total.max(1) as f64
+    );
+    let mut edicts = BTreeMap::<String, u32>::new();
+    for run in runs {
+        for (edict, count) in &run.edicts {
+            *edicts.entry(edict.clone()).or_default() += count;
+        }
+    }
+    let edict_total: u32 = edicts.values().sum();
+    let edict_text: Vec<String> = edicts
+        .iter()
+        .map(|(e, c)| {
+            format!(
+                "{} {:.0} %",
+                e.trim_start_matches("edict_"),
+                share(*c, edict_total)
+            )
+        })
+        .collect();
+    let _ = writeln!(md, "| Édits (provinces) | {} | — |", edict_text.join(", "));
     let changes: f64 = runs.iter().map(|r| f64::from(r.owner_changes)).sum::<f64>() / n;
     let _ = writeln!(md, "| Changements de propriétaire | {changes:.1} | — |");
     let (att_wins, battles) = runs
