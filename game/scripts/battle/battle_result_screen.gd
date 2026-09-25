@@ -143,6 +143,18 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	margin.add_child(content)
 	content.add_child(_balance_row(sides, player_side, enemy_side, totals))
 	content.add_child(BattleUiKit.rule())
+	# Faits notables, juste sous le bilan (Q2 : en 720p ils tombaient sous le bouton de retour).
+	content.add_child(_label("Faits notables", 17, INK, true))
+	mentions_box = VBoxContainer.new()
+	mentions_box.name = "Mentions"
+	mentions_box.add_theme_constant_override("separation", 1)
+	content.add_child(mentions_box)
+	for line in mentions(player_side, sides, units, outcome):
+		var label := _label("• " + line, 14)
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.custom_minimum_size = Vector2(1000, 0)
+		mentions_box.add_child(label)
+	content.add_child(BattleUiKit.rule())
 	# Un camp par colonne : cartes des régiments puis tableau.
 	var hero := _hero(units, player_side)
 	var columns := HBoxContainer.new()
@@ -159,17 +171,6 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	aftermath_box.add_theme_constant_override("separation", 10)
 	content.add_child(aftermath_box)
 	_fill_aftermath(units, player_side, enemy_side, hero, outcome, aftermath)
-	# Faits notables.
-	content.add_child(_label("Faits notables", 17, INK, true))
-	mentions_box = VBoxContainer.new()
-	mentions_box.name = "Mentions"
-	mentions_box.add_theme_constant_override("separation", 1)
-	content.add_child(mentions_box)
-	for line in mentions(player_side, sides, units, outcome):
-		var label := _label("• " + line, 14)
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.custom_minimum_size = Vector2(1000, 0)
-		mentions_box.add_child(label)
 	var footer := HBoxContainer.new()
 	footer.alignment = BoxContainer.ALIGNMENT_CENTER
 	var footer_margin := MarginContainer.new()
