@@ -300,3 +300,29 @@ def test_fine_relief_prefers_finest_level(tmp_path: Path) -> None:
     assert relief.finest_level(
         np.array([800.0, 20000.0]), np.array([top - 800.0, top - 20000.0])
     ).tolist() == [5, 0]
+
+
+def test_side_arm_rejoining_does_not_raise_order() -> None:
+    """A river splitting around an island (unnamed side arm) keeps its order."""
+    lines = [
+        np.array([[0.0, 0.0], [0.0, 10.0]]),  # 0: river
+        np.array([[0.0, 10.0], [0.0, 20.0]]),  # 1: main arm
+        np.array([[0.0, 10.0], [5.0, 15.0], [0.0, 20.0]]),  # 2: side arm
+        np.array([[0.0, 20.0], [0.0, 30.0]]),  # 3: river below
+    ]
+    n = len(lines)
+    table = hydro_sources.LinkTable(
+        source="test",
+        lines=lines,
+        start=np.array([0, 1, 1, 2]),
+        end=np.array([1, 2, 2, 3]),
+        name=np.array(["r", "r", "", "r"], dtype=object),
+        code=np.array(["r", "r", "", "r"], dtype=object),
+        width_min=np.full(n, np.nan),
+        width_max=np.full(n, np.nan),
+        strahler=np.zeros(n, dtype=np.int16),
+        canal=np.zeros(n, dtype=bool),
+        intermittent=np.zeros(n, dtype=bool),
+        tidal=np.zeros(n, dtype=bool),
+    )
+    assert hydro_sources.compute_strahler(table).tolist() == [1, 1, 1, 1]

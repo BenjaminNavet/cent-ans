@@ -229,9 +229,14 @@ def endpoint_nodes(
 def compute_strahler(table: LinkTable) -> np.ndarray:
     """Strahler order of every link from the directed topology.
 
-    A confluence of two links of the same river (braid rejoining, same ``code``)
-    does not raise the order. Links left in cycles take the order of their
-    processed parents.
+    Braided and anastomosing reaches (splits that rejoin: side arms, mill races,
+    ditches of flood plains) would inflate a plain Strahler count at every
+    rejoining. At each split only the *main* outgoing link (see
+    :func:`_split_key`) continues the tree; the other ones are distributaries:
+    they inherit the order of their parent and never raise the order where they
+    rejoin. A confluence of two links of the same river (same ``code``) does not
+    raise the order either. Links left in cycles take the order of their processed
+    parents.
     """
     n = len(table)
     incoming: dict[int, list[int]] = defaultdict(list)
@@ -240,15 +245,30 @@ def compute_strahler(table: LinkTable) -> np.ndarray:
         incoming[int(table.end[i])].append(i)
         outgoing[int(table.start[i])].append(i)
     parents = [incoming.get(int(table.start[i]), []) for i in range(n)]
+    lengths = table.lengths()
+    main_child = np.full(n, -1, dtype=np.int64)
+    for j in range(n):
+        children = outgoing.get(int(table.end[j]), [])
+        if len(children) == 1:
+            main_child[j] = children[0]
+        elif children:
+            main_child[j] = max(
+                children, key=lambda c: _split_key(table, j, c, lengths, False)
+            )
+    branch = np.zeros(n, dtype=bool)
     pending = np.array([len(p) for p in parents], dtype=np.int64)
     order = np.zeros(n, dtype=np.int16)
     queue = [i for i in range(n) if pending[i] == 0]
     done = np.zeros(n, dtype=bool)
 
     def resolve(i: int) -> int:
-        ups = [j for j in parents[i] if order[j] > 0]
-        if not ups:
+        known = [j for j in parents[i] if order[j] > 0]
+        if not known:
             return 1
+        ups = [j for j in known if main_child[j] == i and not branch[j]]
+        if not ups:  # distributary: inherits, never counts downstream
+            branch[i] = True
+            return int(max(order[j] for j in known))
         best = max(order[j] for j in ups)
         top = [j for j in ups if order[j] == best]
         codes = {table.code[j] for j in top}
@@ -323,12 +343,16 @@ class Stroke:
 
 
 def _split_key(
-    table: LinkTable, parent: int, candidate: int, lengths: np.ndarray
+    table: LinkTable,
+    parent: int,
+    candidate: int,
+    lengths: np.ndarray,
+    use_order: bool = True,
 ) -> tuple:
     """Preference of ``candidate`` as the continuation of ``parent`` at a split."""
     width = table.width_max[candidate]
     return (
-        int(table.strahler[candidate]),
+        int(table.strahler[candidate]) if use_order else 0,
         bool(table.code[parent]) and table.code[candidate] == table.code[parent],
         not bool(table.secondary[candidate]),
         float(width) if np.isfinite(width) else 0.0,
