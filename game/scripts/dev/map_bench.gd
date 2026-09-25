@@ -9,6 +9,11 @@ extends Node
 ##
 ## Options : `--bench-distance=N` (distance du panoramique, 30 par défaut), `--bench-seconds=N`
 ## (durée du panoramique, 20 s), `--camera-min=N` (distance minimale de la caméra, essais seulement).
+## Lot ZG4 : parcours « descente » ensuite (`descent` dans le rapport) : au-dessus de Rouen, de la
+## Grande Chartreuse et de Paris, stratégique (150) → vallée (5) → site (distance minimale du lieu)
+## en `DESCENT_SECONDS` (logarithme de la distance), pause, remontée ; `--bench-descent-only` saute
+## panoramique et zoom. Rapporte aussi les recalages d'échelle verticale et les cuissons des
+## maquettes.
 
 ## Étapes (x, y carte, distance) : Caen → Rouen → Paris → Chartres → Évreux, puis zoom sur Paris.
 const PAN_PATH: Array[Vector2] = [
@@ -16,6 +21,10 @@ const PAN_PATH: Array[Vector2] = [
 	Vector2(2150.0, 2005.0), Vector2(2080.0, 1890.0),
 ]
 const WARMUP_FRAMES := 90
+## ZG4 : lieux de la descente (x, y carte) : Rouen (zone E7), Grande Chartreuse (E4), Paris (E7).
+const DESCENT_SITES: Array[Vector2] = [Vector2(2096.5, 1819.7), Vector2(2537.6, 2492.0), Vector2(2212.9, 1924.5)]
+const DESCENT_SECONDS := 6.0
+const DESCENT_HOLD := 1.5
 
 var camera_rig: CampaignCamera
 var terrain: TerrainBuilder
@@ -32,6 +41,11 @@ var _phase_t := 0.0
 var _cpu_render_ms: PackedFloat32Array = PackedFloat32Array()
 var _primitives: PackedFloat32Array = PackedFloat32Array()
 var _draw_calls: PackedFloat32Array = PackedFloat32Array()
+var _descent_only := false
+var _descent_site := 0
+var _descent_ms: PackedFloat32Array = PackedFloat32Array()
+var _descent_t_start := 0
+var _descent_us := 0
 
 
 func _ready() -> void:
@@ -40,6 +54,8 @@ func _ready() -> void:
 			pan_distance = float(arg.trim_prefix("--bench-distance="))
 		elif arg.begins_with("--bench-seconds="):
 			pan_seconds = float(arg.trim_prefix("--bench-seconds="))
+		elif arg == "--bench-descent-only":
+			_descent_only = true
 	if OS.get_cmdline_user_args().has("--bench-listeners"):
 		_wrap_listeners.call_deferred()
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
@@ -76,9 +92,10 @@ func _process(delta: float) -> void:
 	match _phase:
 		"warmup":
 			if _frame >= WARMUP_FRAMES and (terrain.fine_ready() or _frame > WARMUP_FRAMES * 8):
-				_phase = "pan"
+				_phase = "descent" if _descent_only else "pan"
 				_phase_t = 0.0
 				_t_start = now
+				_descent_t_start = now
 		"pan":
 			_frame_ms.append((now - _last_us) / 1000.0)
 			_sample()
@@ -97,8 +114,30 @@ func _process(delta: float) -> void:
 			var u := 0.5 - 0.5 * cos(_phase_t / 8.0 * TAU)
 			_place(PAN_PATH[2], lerpf(150.0, camera_rig.min_distance_at(Vector3(PAN_PATH[2].x, 0.0, PAN_PATH[2].y)), u))
 			if _phase_t >= 8.0:
-				_report(now)
-				_phase = "done"
+				_phase = "descent"
+				_phase_t = 0.0
+				_descent_t_start = now
+		"descent":
+			_descent_ms.append((now - _last_us) / 1000.0)
+			_frame_ms.append((now - _last_us) / 1000.0)
+			_sample()
+			_phase_t += delta
+			var site := DESCENT_SITES[_descent_site]
+			var lowest := camera_rig.min_distance_at(Vector3(site.x, 0.0, site.y))
+			# Descente en logarithme de la distance (150 → 5 → minimum), pause, remontée.
+			var u := 1.0
+			if _phase_t < DESCENT_SECONDS:
+				u = smoothstep(0.0, 1.0, _phase_t / DESCENT_SECONDS)
+			elif _phase_t >= DESCENT_SECONDS + DESCENT_HOLD:
+				u = 1.0 - smoothstep(0.0, 1.0, (_phase_t - DESCENT_SECONDS - DESCENT_HOLD) / (DESCENT_SECONDS * 0.5))
+			_place(site, exp(lerpf(log(150.0), log(lowest), u)))
+			if _phase_t >= DESCENT_SECONDS * 1.5 + DESCENT_HOLD:
+				_descent_site += 1
+				_phase_t = 0.0
+				if _descent_site >= DESCENT_SITES.size():
+					_descent_us = now - _descent_t_start
+					_report(now)
+					_phase = "done"
 	_last_us = now
 
 
@@ -128,7 +167,32 @@ func _report(now: int) -> void:
 		if ms > 50.0:
 			spikes += 1
 	var seconds := (now - _t_start) / 1000000.0
+	var descent := {}
+	if not _descent_ms.is_empty():
+		var sorted_d := _descent_ms.duplicate()
+		sorted_d.sort()
+		var n := sorted_d.size()
+		var spikes_d := 0
+		for ms in sorted_d:
+			if ms > 50.0:
+				spikes_d += 1
+		descent = {
+			"frames": n, "fps_avg": snappedf(n / maxf(_descent_us / 1000000.0, 0.001), 0.1),
+			"frame_ms_p50": snappedf(sorted_d[n / 2], 0.01), "frame_ms_p99": snappedf(sorted_d[int(n * 0.99)], 0.01),
+			"frame_ms_max": snappedf(sorted_d[n - 1], 0.01), "spikes_over_50ms": spikes_d,
+		}
+	var bakes := 0
+	var bake_frame_max := 0.0
+	var bake_total := 0.0
+	for node in get_tree().root.find_children("Landmark_*", "LandmarkModel", true, false):
+		var landmark := node as LandmarkModel
+		bakes += int(landmark.stats.get("bakes", 0))
+		bake_frame_max = maxf(bake_frame_max, float(landmark.stats.get("bake_frame_ms_max", 0.0)))
+		bake_total += float(landmark.stats.get("bake_ms_total", 0.0))
 	var report := {
+		"descent": descent,
+		"landmark_bakes": bakes, "landmark_bake_frame_ms_max": snappedf(bake_frame_max, 0.01),
+		"landmark_bake_ms_total": snappedf(bake_total, 0.01),
 		"frames": count,
 		"fps_avg": snappedf(count / maxf(seconds, 0.001), 0.1),
 		"frame_ms_p50": snappedf(sorted[count / 2], 0.01) if count > 0 else 0.0,
@@ -144,7 +208,8 @@ func _report(now: int) -> void:
 	}
 	if terrain.quadtree != null:
 		report.merge(terrain.quadtree.perf_stats())
-	for key in ["surface_emits", "surface_page_emits", "surface_emit_ms_max", "surface_emit_ms_total", "qt_update_ms_max"]:
+	for key in ["surface_emits", "surface_page_emits", "surface_emit_ms_max", "surface_emit_ms_total", "qt_update_ms_max",
+			"vertical_rescales", "vertical_signal_ms_max", "rescale_emits", "rescale_ms_total", "rescale_ms_max"]:
 		if terrain.build_stats.has(key):
 			report[key] = snappedf(float(terrain.build_stats[key]), 0.01)
 	if not _listener_ms.is_empty():

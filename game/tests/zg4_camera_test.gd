@@ -242,6 +242,9 @@ func _test_rescale() -> void:
 		_check(is_equal_approx(float(global_value), target), "global shader parameter updated")
 	_check(absf(terrain.surface_height_at(paris.x, paris.y) - before * target / MapData.HEIGHT_SCALE) < 1e-4, "surface follows the scale")
 	_check(terrain.pending_rescales() == 256, "all chunks queued, got %d" % terrain.pending_rescales())
+	terrain.update_lod(camera.global_position, 11.0, focus, 170.0)
+	_check(terrain.pending_rescales() == 256, "rescale waits for the scale to settle")
+	terrain.rescale_settle_ms = 0
 	terrain.rescale_budget_ms = 0.0  # un morceau par image au plus
 	terrain.update_lod(camera.global_position, 11.0, focus, 170.0)
 	_check(terrain.pending_rescales() == 255, "rescale spread over frames (%d left)" % terrain.pending_rescales())

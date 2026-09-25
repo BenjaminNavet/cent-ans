@@ -52,6 +52,7 @@ var _landmarks: Dictionary = {}
 var _landmarks_root: Node3D
 ## ZG4 : maquettes masquées au palier « site ».
 var _site_hidden: bool = false
+var _labels_dirty: bool = false
 var _labels_root: Node3D
 var _hamlets_root: Node3D
 var _selection_ring: MeshInstance3D
@@ -412,6 +413,9 @@ func update_view(camera_distance: float) -> void:
 		_landmarks_root.visible = not site
 		_update_label_heights()
 		_declutter_timer = 0.0
+	if _labels_dirty:
+		_labels_dirty = false
+		_update_label_heights()
 	_update_hamlets()
 	_update_selection_ring()
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
@@ -425,7 +429,8 @@ func _on_chunk_surface_changed(index: int) -> void:
 		_ground_model(i)
 	if _hamlet_nodes.has(index):
 		_hamlet_dirty[index] = true
-	_update_label_heights()
+	# ZG4 : hauteurs des étiquettes une fois par image (et non à chaque morceau recalé).
+	_labels_dirty = true
 
 
 ## Hauteur des étiquettes : au-dessus de la maquette (près) ou de l'icône (moyen).
@@ -553,6 +558,8 @@ func flush() -> void:
 	max_hamlet_builds_per_frame = saved
 	for landmark: LandmarkModel in _landmarks.values():  # ZG4 : cuissons étalées terminées
 		landmark.flush_bake()
+	_labels_dirty = false
+	_update_label_heights()
 
 
 func hamlet_instance_count() -> int:
