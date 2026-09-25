@@ -64,14 +64,15 @@ func _run() -> void:
 	await wait(120)
 	await shot("campaign-start")
 	await fps_probe("campaign-start")
-	if phase in ["all", "actions"]:
-		await phase_actions()
-	if phase in ["all", "panels"]:
-		await phase_panels()
 	if phase in ["all", "battle"]:
 		await phase_battle()
 	if phase in ["all", "siege"]:
 		await phase_siege()
+	if phase in ["all", "actions"]:
+		await phase_actions()
+	if phase in ["all", "panels"]:
+		await phase_panels()
+		await dismiss_dialogs()
 	if phase in ["all", "turns"]:
 		await play_turns(turns)
 	if phase in ["all", "save"]:
@@ -314,20 +315,24 @@ func phase_battle() -> void:
 		await key(KEY_EQUAL)
 	var t_fight := Time.get_ticks_msec()
 	var next_shot := 20000
-	while not battle.get("finished_shown") and Time.get_ticks_msec() - t_fight < 300000:
+	var fight_limit_ms := 90000
+	while not battle.get("finished_shown") and Time.get_ticks_msec() - t_fight < fight_limit_ms:
 		await wait(10)
 		if Time.get_ticks_msec() - t_fight > next_shot:
 			await shot("battle-%ds" % (next_shot / 1000))
 			await fps_probe("battle-%ds" % (next_shot / 1000), 60)
 			next_shot += 40000
 	if not battle.get("finished_shown"):
-		log_q1("battle still running after 5 min; fast-forwarding")
 		var sim_battle: Object = battle.get("battle")
-		for _i in 20000:
-			sim_battle.call("tick", 0.1)
-			if sim_battle.call("is_finished"):
-				break
-		await wait(30)
+		log_q1("battle still running after %d s (clock %.0f s); sounding the general retreat" % [(Time.get_ticks_msec() - t_fight) / 1000, float(sim_battle.call("get_elapsed"))])
+		await click(find_button(battle, "Retraite générale"))
+		await wait(10)
+		await shot("battle-retreat-confirm")
+		await click(find_button(battle, "Sonner la retraite"))
+		var t_retreat := Time.get_ticks_msec()
+		while not battle.get("finished_shown") and Time.get_ticks_msec() - t_retreat < 120000:
+			await wait(10)
+		log_q1("after retreat: finished %s in %d s" % [battle.get("finished_shown"), (Time.get_ticks_msec() - t_retreat) / 1000])
 	await wait(60)
 	await shot("battle-result")
 	var result_screen: Control = battle.get("result_screen")
@@ -437,6 +442,25 @@ func dismiss_dialogs() -> void:
 				await click(auto_button)
 				await wait(5)
 				continue
+		var skip_tutorial := find_button(map.ui, "Passer le tutoriel")
+		if skip_tutorial != null:
+			await shot("tutorial")
+			await click(skip_tutorial)
+			await wait(5)
+			continue
+		var chronicle: Control = map.chronicle.window if map.chronicle != null else null
+		if chronicle != null and chronicle.visible:
+			await shot("chronicle-decision")
+			var choice: BaseButton = null
+			for child in chronicle.find_children("*", "Button", true, false):
+				var text := _text_of(child)
+				if (child as Control).is_visible_in_tree() and not (child as BaseButton).disabled and text not in ["×", "Plus tard", ""]:
+					choice = child
+					break
+			log_q1("chronicle decision: choosing '%s'" % (_text_of(choice) if choice != null else "?"))
+			await click(choice)
+			await wait(10)
+			continue
 		var ok := find_visible_button(map.ui, ["Fermer", "Continuer", "OK", "D'accord"])
 		if ok == null:
 			return
