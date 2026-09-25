@@ -1,0 +1,15 @@
+{
+  "description": "Zones de relief détaillé du palier 3 (ADR 0036). Liste complétée par le lot ZG3.",
+  "zones": [
+    {
+      "id": "paris",
+      "name": "Paris",
+      "kind": "city",
+      "center_lonlat": [2.3470, 48.8540],
+      "half_size_km": 12,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Capitale du royaume de France ; enceintes de Philippe Auguste et de Charles V (1356-1383)."
+    }
+  ]
+}
