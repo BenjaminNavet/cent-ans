@@ -26,7 +26,8 @@ const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/music/"
 const SFX_VOICES := 6
 const FADE_SECONDS := 1.5
-const SOUND_MENU_ID := 900
+## Q1 : 900 était aussi l'id de « Objectifs (O) » (victory_controller) : les deux s'ouvraient ensemble.
+const SOUND_MENU_ID := 930
 
 ## Effet par type d'événement du journal, par priorité décroissante.
 const EVENT_SFX := [

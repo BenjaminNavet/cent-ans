@@ -8,6 +8,7 @@ pub mod ai_grid;
 pub mod auto_resolve;
 pub mod battle_order;
 pub mod building;
+pub mod campaign_weather;
 pub mod character;
 pub mod chivalric_order;
 pub mod diet;
