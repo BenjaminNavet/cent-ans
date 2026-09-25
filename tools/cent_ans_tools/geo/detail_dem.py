@@ -84,7 +84,7 @@ BASE_MARGIN_M = 3.0 * BOOST_SIGMA_M
 MIN_LAND_M = 0.5
 WORKERS = max(1, min(8, (os.cpu_count() or 4) - 2))
 #: Bump when the bake changes, so that ``done`` markers are invalidated.
-BAKE_VERSION = 2
+BAKE_VERSION = 3
 #: Grey-opening width (GLO-30 pixels) turning the surface model into rough ground.
 GLO30_OPENING_PX = 5
 PREVIEW_ZONES = ("calais", "poitiers", "chateau_gaillard")
@@ -652,6 +652,11 @@ def bake_cluster(
         fine = anachronisms.laplace_fill(fine, mask)
     if preview_zone and before is not None:
         write_preview(preview_zone, before, fine, mask, pixel_m)
+    # Sea and foreshore values of the source (below MIN_LAND_M where the ancestor
+    # is sea) give way to the ancestor's bathymetry: no chunk-shaped steps offshore.
+    with np.errstate(invalid="ignore"):
+        offshore = (fine < MIN_LAND_M) & ~(ancestor > 0.0)
+    fine[offshore] = np.nan
     valid = np.isfinite(fine)
     base = boost_base(grid, cluster, fine)
     boosted = apply_boost(np.where(valid, fine, 0.0).astype(np.float32), base)
