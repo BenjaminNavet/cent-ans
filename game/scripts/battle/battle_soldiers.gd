@@ -80,6 +80,9 @@ var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une c
 var _frame_dt: float = 0.0
 var _audio: Script = null
 ## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
+## BV3 : imposteurs lointains (au-delà de `BattleImpostors.DISTANCE`), null si coupés.
+var impostors: BattleImpostors = null
+var _imp_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (quadrilatères)
 ## BV3 : les pavois des génois sont plantés en rangée (`BattleVolleys`) : celui du dos disparaît.
 var hide_planted_pavise: bool = false
 var bv2_enabled: bool = not OS.get_cmdline_user_args().has("--no-bv2")
@@ -138,6 +141,8 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary) -> 
 		_unit_kind[id] = kind
 		if skinned:
 			_skinned[id] = true
+			if impostors != null:
+				impostors.request(BattleImpostors.key_of(side, kind, variant), kind, variant, mat)
 
 
 func _make_material(side: String, kind: String, variant: int, corpse: bool) -> ShaderMaterial:
@@ -289,6 +294,14 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		mm.mesh = BattleSkinned.mesh(kind, variant, level) if skinned else BattleMeshes.soldier_level(kind, variant, level)
 	instance.visible = n > 0 and near
 	lod.visible = n > 0 and (not near or shadow)
+	# BV3 : imposteurs au-delà de 300 m (atlas cuit au début de la bataille).
+	var imp: MultiMeshInstance3D = null
+	if impostors != null and skinned and distance > BattleImpostors.DISTANCE:
+		imp = _impostor_layer(id, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), mm.instance_count)
+		if imp != null:
+			lod.visible = false
+	if _imp_layers.has(id):
+		(_imp_layers[id] as MultiMeshInstance3D).visible = imp != null and n > 0
 	if near:
 		lod.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	else:
@@ -302,8 +315,18 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			mm.buffer = padded
 		if lod.visible:
 			lod_mm.buffer = padded
+		if imp != null:
+			if imp.multimesh.instance_count != mm.instance_count:
+				imp.multimesh.instance_count = mm.instance_count
+			imp.multimesh.buffer = padded
 	mm.visible_instance_count = n
 	lod_mm.visible_instance_count = n
+	if imp != null:
+		imp.multimesh.visible_instance_count = n
+		var imp_mat := imp.material_override as ShaderMaterial
+		imp_mat.set_shader_parameter("anim_time", anim_time - float(_lag.get(id, 0.0)))
+		imp_mat.set_shader_parameter("imp_set", BattleImpostors.state_set(str(unit.get("state", "")), bool(unit.get("running", false))))
+		imp_mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
 	var mat: ShaderMaterial = _materials[id]
 	var ammo := int(unit.get("ammo", 0))
 	var state := str(unit.get("state", ""))
@@ -348,6 +371,37 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
 			mat.set_meta("bv2_blood", blood)
 			mat.set_shader_parameter("blood", blood)
+
+
+## BV3 : nombre de régiments dessinés en imposteurs (bancs d'essai).
+func impostor_regiments() -> int:
+	var n := 0
+	for id in _imp_layers:
+		if (_imp_layers[id] as MultiMeshInstance3D).visible:
+			n += 1
+	return n
+
+
+## BV3 : couche d'imposteurs du régiment (créée quand l'atlas est prêt ; null avant).
+func _impostor_layer(id: int, side: String, kind: String, variant: int, count: int) -> MultiMeshInstance3D:
+	if _imp_layers.has(id):
+		return _imp_layers[id]
+	var key := BattleImpostors.key_of(side, kind, variant)
+	if not impostors.is_ready(key):
+		return null
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = BattleImpostors.quad_mesh()
+	mm.instance_count = count
+	mm.visible_instance_count = 0
+	var imp := MultiMeshInstance3D.new()
+	imp.name = "Unit%d_%s_impostor" % [id, kind]
+	imp.multimesh = mm
+	imp.material_override = impostors.make_material(key)
+	imp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(imp)
+	_imp_layers[id] = imp
+	return imp
 
 
 ## Positions (au sol) d'au plus `count` soldats du régiment `id`, pris à intervalles réguliers

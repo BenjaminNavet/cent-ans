@@ -63,6 +63,7 @@ var _weather_key: String = "clear"
 var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
 var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée de sang
 var _no_bv3: bool = false  # `--no-bv3` : finitions BV3 coupées (mesures A/B)
+var _no_impostors: bool = false  # `--no-impostors` : imposteurs lointains seuls coupés (A/B)
 var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
 var _blood_override: int = -1  # `--blood=<0|1|2>`
 var _no_bv1: bool = false  # `--no-bv1` : volées, sang et mottes du lot BV1 coupés (mesures A/B)
@@ -292,6 +293,11 @@ func _build_soldier_layers() -> void:
 	soldiers = BattleSoldiers.new()
 	soldiers.name = "Soldiers"
 	add_child(soldiers)
+	if not _no_bv3 and not _no_impostors:
+		# BV3 : imposteurs lointains, cuits au début de la bataille (ADR 0024).
+		soldiers.impostors = BattleImpostors.new()
+		soldiers.impostors.name = "Impostors"
+		soldiers.add_child(soldiers.impostors)
 	var factions := {}
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
@@ -524,6 +530,8 @@ func _process(delta: float) -> void:
 				var samples: Array = _bench_ab_ms[level]
 				samples.sort()
 				print("BattleScene benchmark A/B: %s median %.2f ms GPU over %d frames" % [level, samples[samples.size() / 2], samples.size()])
+			if self.soldiers.impostors != null:
+				print("BattleScene benchmark: BV3 %d impostor atlases, %d regiments drawn as impostors" % [self.soldiers.impostors.baked_count, self.soldiers.impostor_regiments()])
 			if effects != null and effects.volleys != null:
 				print("BattleScene benchmark: volleys %d arrows, %d stuck, %d chunks drawn, figure scale %.1f" % [effects.volleys.launched, effects.volleys.stuck_count, effects.volleys.chunks_drawn(), effects.volleys.figure_scale])
 			get_tree().quit(0)
@@ -1125,6 +1133,8 @@ func _parse_cmdline() -> void:
 			_no_bv1 = true
 		elif arg == "--no-bv3":
 			_no_bv3 = true
+		elif arg == "--no-impostors":
+			_no_impostors = true
 		elif arg.begins_with("--unit-size="):
 			_unit_size_override = float(arg.trim_prefix("--unit-size="))
 		elif arg.begins_with("--blood="):

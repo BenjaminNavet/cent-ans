@@ -9,13 +9,13 @@ Coordination : SG1 (sièges), Q1 (recette) ; HUD de bataille (UB1) intouché sau
 |---|---|
 | 1. Herbe couchée (piétinement, corps, mêlée) + sang lisible en prairie | **fait** |
 | 2. Pavois du dos masqué quand la rangée est plantée | **fait** |
-| 3. Imposteurs lointains (Ultra) | à faire |
+| 3. Imposteurs lointains (Ultra) | **fait** (ADR 0024) |
 | 4. Bannières au vent, porte-étendards, étendard du général | à faire |
 | 5. Duels appariés (cosmétique, déterministe) | à faire |
 | 6. Discours du général | à faire |
 
 ## Prochaine étape
-Lot 3 : imposteurs lointains (Ultra).
+Lot 4 : bannières au vent (shader de tissu), porte-étendards, étendard du général.
 
 ## Lot 1 — herbe couchée, sang en prairie
 - `battle_grass_flatten.gd` (`BattleGrassFlatten`) : carte RG8 à 1 m sur (0, −100)-(1200, 900),
@@ -40,3 +40,15 @@ Lot 3 : imposteurs lointains (Ultra).
   charge (la règle de BV1 qui plante la rangée). Les cadavres gardent le pavois au dos.
 - Captures : `avant_pavois_dos` / `apres_pavois_dos` (`tests/v2_figures_shot.gd --fig=archer_2
   --state=shooting [--hide-pavise]`).
+
+## Lot 3 — imposteurs lointains (ADR 0024)
+- `battle_impostors.gd` (`BattleImpostors`, enfant de `BattleSoldiers`) : atlas cuits en jeu
+  depuis les figurines V2 (8 angles × 4 jeux × 4 images), `battle_impostor.gdshader`.
+- `BattleSoldiers` : au-delà de 300 m, couche d'imposteurs à la place du LOD2, même tampon.
+- `--no-impostors` : imposteurs seuls coupés. `tests/bv3_shot.gd --shot=atlas|impostor
+  [--fig=archer_0]` : atlas brut, comparaison maillage / imposteur de près.
+- Premier banc Ultra (`--units=50 --unit-size=2.5`, une passe chacun) : sans imposteurs
+  41,4 FPS, 3,79 M primitives ; avec 54,6 FPS, 1,42 M primitives.
+- Captures `avant_ultra_imposteurs` / `apres_ultra_imposteurs` (`--shot-at=60 --units=20
+  --unit-size=2.5 --camera=600,420,420,200`).
+- Piège : sans relever l'alpha selon le niveau de mipmap, les régiments lointains disparaissent.
