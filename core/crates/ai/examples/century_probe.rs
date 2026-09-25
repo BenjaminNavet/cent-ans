@@ -332,6 +332,25 @@ fn trace_economy(
         .filter(|s| &s.controller == faction)
         .map(|s| s.garrison.len())
         .sum();
+    let unrests: Vec<f64> = state
+        .provinces
+        .iter()
+        .filter(|(id, _)| state.controls_province(faction, id))
+        .map(|(_, p)| sim_campaign::population::weighted_unrest(&p.population))
+        .collect();
+    println!(
+        "{:>16}   unrest max {:.0} mean {:.0} price {} coinage {:?} tributes {:?}",
+        "",
+        unrests.iter().copied().fold(0.0, f64::max),
+        unrests.iter().sum::<f64>() / unrests.len().max(1) as f64,
+        f.price_level,
+        f.coinage,
+        f.ledger
+            .tributes
+            .iter()
+            .map(|t| t.per_season)
+            .collect::<Vec<_>>(),
+    );
     let count = |pred: fn(&Order) -> bool| orders.iter().filter(|o| pred(o)).count();
     println!(
         "{:>16} tr {:>7} inc {:>5} (last {:>5}) adm {:>5} army {:>5} bld {:>5} upk_last {:>5} table {:>4} tax {:?} war {} | armies {} units {} garr {} | disb {} recr {} build {} other {:?}",
@@ -364,6 +383,42 @@ fn trace_economy(
             .map(|o| format!("{o:?}").chars().take(40).collect::<String>())
             .collect::<Vec<_>>(),
     );
+}
+
+/// EQ5: one line per army trespassing at the end of the turn.
+fn trace_trespass(state: &CampaignState, data: &GameData) {
+    for (id, army) in &state.armies {
+        if army.units.is_empty() || army.faction.as_str() == "fac_rebels" {
+            continue;
+        }
+        let Some(province) = state.army_province(data, army) else {
+            continue;
+        };
+        let Some(owner) = sim_campaign::passage::trespassed_owner(state, &army.faction, &province)
+        else {
+            continue;
+        };
+        let f = &state.factions[&army.faction];
+        println!(
+            "TRESPASS t{} {} {} in {} of {} | wars {} | at {:?} | units {} | stance {:?} | mv {} | supply {} | truce {}",
+            state.turn,
+            id.as_str(),
+            army.faction.as_str(),
+            province.as_str(),
+            owner.as_str(),
+            f.at_war_with.len(),
+            army.settlement().map(|s| format!(
+                "{} held by {}",
+                s.as_str(),
+                state.settlements.get(s).map_or("?", |x| x.controller.as_str())
+            )),
+            army.units.len(),
+            army.stance,
+            army.movement_left,
+            army.supply,
+            state.has_truce(&army.faction, &owner),
+        );
+    }
 }
 
 fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
@@ -422,6 +477,10 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     let mut eq4_before = snapshot(&state);
     // EQ5: `ECON_TRACE=fac_swiss` dumps that faction's budget and economic
     // orders every turn.
+    // EQ5: `TRESPASS_TRACE=1` lists every army standing on foreign lands
+    // without right of passage at the end of each turn.
+    let trespass_trace = std::env::var("TRESPASS_TRACE").is_ok();
+    let debug_army = std::env::var("DEBUG_ARMY").ok();
     let econ_trace = std::env::var("ECON_TRACE").ok().map(|f| id(&f));
     for _ in 0..turns {
         // France is the "player": it answers offers as the AI would judge
@@ -445,6 +504,12 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             );
         }
         for order in ai::plan_turn(&state, data, &france) {
+            if let Some(army) = &debug_army {
+                let text = format!("{order:?}");
+                if text.contains(&format!("\"{army}\"")) {
+                    println!("t{} {army} order {text}", state.turn);
+                }
+            }
             report.issued += 1;
             if state.submit_order(data, order).is_err() {
                 report.refused += 1;
@@ -455,15 +520,24 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             .iter()
             .map(|(f, s)| (f.clone(), s.treasury))
             .collect();
-        let events = match &econ_trace {
-            Some(traced) => state.end_turn_with(data, |s, d, f| {
+        let events = if econ_trace.is_some() || debug_army.is_some() {
+            state.end_turn_with(data, |s, d, f| {
                 let orders = ai::plan_turn(s, d, f);
-                if f == traced {
+                if econ_trace.as_ref() == Some(f) {
                     trace_economy(s, d, f, &orders);
                 }
+                if let Some(army) = &debug_army {
+                    let needle = format!("\"{army}\"");
+                    for order in orders.iter().map(|o| format!("{o:?}")) {
+                        if order.contains(&needle) {
+                            println!("t{} {army} order {order}", s.turn);
+                        }
+                    }
+                }
                 orders
-            }),
-            None => state.end_turn_with(data, ai::plan_turn),
+            })
+        } else {
+            state.end_turn_with(data, ai::plan_turn)
         };
         if let Some(traced) = &econ_trace {
             let residual = |f: &FactionId| {
@@ -528,6 +602,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             {
                 println!("  [{seed}] {:>16} {}", state.date_label(), event.text_fr);
             }
+        }
+        if trespass_trace {
+            trace_trespass(&state, data);
         }
         track_eq4(&state, &mut report.eq4, &eq4_before);
         eq4_before = snapshot(&state);

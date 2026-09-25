@@ -34,6 +34,9 @@ struct Enemy {
     settlement: Option<SettlementId>,
     /// Settlements within `avoid_radius_km`.
     near: Vec<SettlementId>,
+    /// EQ5: standing in lands the planning faction will not enter without
+    /// right of passage (it is not pursued there).
+    beyond_passage: bool,
 }
 
 /// Per faction and turn: the enemy armies, the settlements an army may not
@@ -50,13 +53,17 @@ pub struct GridPlanner<'a> {
     stops: BTreeSet<SettlementId>,
     /// Lot DP2: settlements in the lands of a faction at peace that this
     /// faction's AI will not cross without right of passage
-    /// (`passage::ai_may_trespass`): never reached nor passed through.
-    forbidden: BTreeSet<SettlementId>,
+    /// (`passage::ai_may_trespass`), with that faction: never reached nor
+    /// passed through. EQ5: places the faction holds itself are never
+    /// forbidden, and a route starting in forbidden lands may cross those
+    /// lands (the way out, [`GridPlanner::table`]).
+    forbidden: BTreeMap<SettlementId, FactionId>,
     /// Route tables by (start, budget, cap, avoided enemy armies).
     tables: RefCell<BTreeMap<TableKey, Rc<Table>>>,
 }
 
-type TableKey = (SettlementId, u32, u32, Vec<usize>);
+/// (start, budget, cap, avoided enemy armies, homeward).
+type TableKey = (SettlementId, u32, u32, Vec<usize>, bool);
 
 fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
     ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2)).sqrt()
@@ -72,6 +79,23 @@ impl<'a> GridPlanner<'a> {
             .keys()
             .filter_map(|id| Some((id.clone(), data.settlement_point(id)?)))
             .collect();
+        let mut crossing: BTreeMap<FactionId, bool> = BTreeMap::new();
+        let mut may_cross = |owner: &FactionId| {
+            *crossing
+                .entry(owner.clone())
+                .or_insert_with(|| passage::ai_may_trespass(state, data, faction, owner))
+        };
+        let forbidden: BTreeMap<SettlementId, FactionId> = state
+            .settlements
+            .iter()
+            .filter(|(_, s)| &s.controller != faction)
+            .filter_map(|(id, _)| {
+                let owner = state
+                    .settlement_province(id)
+                    .and_then(|p| passage::trespassed_owner(state, faction, p))?;
+                (!may_cross(&owner)).then(|| (id.clone(), owner))
+            })
+            .collect();
         let enemies: Vec<Enemy> = state
             .armies
             .iter()
@@ -84,6 +108,10 @@ impl<'a> GridPlanner<'a> {
                     point,
                     power: state.army_power(data, id),
                     settlement: a.settlement().cloned(),
+                    beyond_passage: state
+                        .army_province(data, a)
+                        .and_then(|p| passage::trespassed_owner(state, faction, &p))
+                        .is_some_and(|owner| !may_cross(&owner)),
                     near: points
                         .iter()
                         .filter(|(_, p)| distance(*p, point) <= avoid_px)
@@ -99,23 +127,6 @@ impl<'a> GridPlanner<'a> {
             .cloned()
             .collect();
         stops.extend(enemies.iter().filter_map(|e| e.settlement.clone()));
-        let mut may_cross: BTreeMap<FactionId, bool> = BTreeMap::new();
-        let forbidden: BTreeSet<SettlementId> = state
-            .settlements
-            .keys()
-            .filter(|id| {
-                let Some(owner) = state
-                    .settlement_province(id)
-                    .and_then(|p| passage::trespassed_owner(state, faction, p))
-                else {
-                    return false;
-                };
-                !*may_cross
-                    .entry(owner.clone())
-                    .or_insert_with(|| passage::ai_may_trespass(state, data, faction, &owner))
-            })
-            .cloned()
-            .collect();
         GridPlanner {
             state,
             data,
@@ -144,9 +155,35 @@ impl<'a> GridPlanner<'a> {
     /// places and places holding an enemy army end a route; so do the
     /// places inside the zone of control of an enemy army stronger than
     /// `power` (lot M3): the army may head for them, never through them.
+    /// EQ5: from a start in forbidden lands (an army caught there by a
+    /// peace), the lands of that same owner are open: the army can leave.
     pub fn table(&self, start: &SettlementId, budget: u32, cap: u32, power: f64) -> Rc<Table> {
+        self.routes(start, budget, cap, power, false)
+    }
+
+    /// EQ5: like [`GridPlanner::table`], but crossing the lands closed
+    /// without right of passage: the way home of an army stranded abroad
+    /// (a short trespass on the way beats camping there for years).
+    pub fn homeward_table(
+        &self,
+        start: &SettlementId,
+        budget: u32,
+        cap: u32,
+        power: f64,
+    ) -> Rc<Table> {
+        self.routes(start, budget, cap, power, true)
+    }
+
+    fn routes(
+        &self,
+        start: &SettlementId,
+        budget: u32,
+        cap: u32,
+        power: f64,
+        homeward: bool,
+    ) -> Rc<Table> {
         let avoided = self.avoided(power);
-        let key = (start.clone(), budget, cap, avoided);
+        let key = (start.clone(), budget, cap, avoided, homeward);
         if let Some(table) = self.tables.borrow().get(&key) {
             return Rc::clone(table);
         }
@@ -155,6 +192,11 @@ impl<'a> GridPlanner<'a> {
             .iter()
             .flat_map(|i| self.enemies[*i].near.iter())
             .collect();
+        let way_out = self
+            .state
+            .settlement_province(start)
+            .and_then(|p| passage::trespassed_owner(self.state, self.faction, p));
+        let way_out = way_out.as_ref();
         let mut best: Table = BTreeMap::new();
         let mut heap = BinaryHeap::new();
         best.insert(
@@ -173,7 +215,12 @@ impl<'a> GridPlanner<'a> {
                 continue;
             }
             for (next, edge) in edges(self.data, &current) {
-                if self.forbidden.contains(&next) {
+                if !homeward
+                    && self
+                        .forbidden
+                        .get(&next)
+                        .is_some_and(|owner| Some(owner) != way_out)
+                {
                     continue;
                 }
                 let total = cost + edge.min(cap.max(1));
@@ -213,6 +260,7 @@ impl<'a> GridPlanner<'a> {
         let here = state.army_point(self.data, army);
         self.enemies
             .iter()
+            .filter(|e| !e.beyond_passage)
             .filter(|e| {
                 e.settlement
                     .as_ref()

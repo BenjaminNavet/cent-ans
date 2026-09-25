@@ -19,6 +19,7 @@ use data_model::{
 };
 use sim_campaign::coinage::CoinageLevel;
 use sim_campaign::movement::{edges, points_per_step};
+use sim_campaign::passage;
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
@@ -56,6 +57,9 @@ pub const INCOME_PER_RECRUIT: i64 = 6000;
 pub const ASSAULT_ODDS: u32 = 65;
 /// Armies below this share of their maximum strength fall back.
 pub const RETREAT_STRENGTH: f64 = 0.4;
+/// EQ5: an army trespassing with no place of its own within the planning
+/// range looks this many times farther for the way home.
+pub const HOMEWARD_RANGE_FACTOR: u32 = 4;
 /// Siege value bonus of a settlement the faction owns de jure but an enemy
 /// holds (lot C7a: win back lost places first, above a throne claim's 30).
 pub const RECLAIM_TARGET_BONUS: f64 = 35.0;
@@ -1046,6 +1050,33 @@ fn garrison_order(ctx: &Context, army_id: &ArmyId) -> Option<Order> {
     })
 }
 
+/// EQ5: at peace, an army standing in a place of its own inside the lands
+/// of another realm (a castle held in a foreign province) joins the
+/// garrison when the walls can hold it all, instead of camping there as a
+/// field army without right of passage.
+fn trespasser_garrison_order(ctx: &Context, army_id: &ArmyId) -> Option<Order> {
+    let state = ctx.state;
+    let army = state.armies.get(army_id)?;
+    let place = state.settlements.get(army.settlement()?)?;
+    if &place.controller != ctx.faction || place.siege.is_some() || army.units.is_empty() {
+        return None;
+    }
+    let cap = ctx
+        .data
+        .settlement_rules
+        .as_ref()
+        .and_then(|r| r.garrison_cap.get(&place.kind))
+        .copied()
+        .unwrap_or(usize::MAX);
+    if place.garrison.len() + army.units.len() > cap {
+        return None;
+    }
+    Some(Order::GarrisonUnits {
+        army: army_id.clone(),
+        unit_indices: (0..army.units.len()).collect(),
+    })
+}
+
 /// True when the planned path to `target` includes a sea crossing.
 fn crosses_sea(
     data: &GameData,
@@ -1154,6 +1185,18 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
 
     for (army_id, _) in armies.iter().filter(|(id, _)| !merged.contains(id)) {
         let army = &state.armies[army_id];
+        // EQ5: standing without right of passage in the lands of a realm at
+        // peace (after a peace, or in a place of its own inside a foreign
+        // province).
+        let trespassing = state
+            .army_province(data, army)
+            .and_then(|p| passage::trespassed_owner(state, ctx.faction, &p));
+        if trespassing.is_some() && !disbanding.contains(army_id) && !ctx.at_war() {
+            if let Some(order) = trespasser_garrison_order(ctx, army_id) {
+                orders.push(order);
+                continue;
+            }
+        }
         if !disbanding.contains(army_id) {
             if let Some(order) = garrison_order(ctx, army_id) {
                 orders.push(order);
@@ -1335,6 +1378,52 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .map(|(id, reach, _)| (id, reach))
                 .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
                 .map(|(id, _)| (Objective::Raid, id.clone()));
+        }
+
+        // EQ5: with nothing to fight for here, an army trespassing on the
+        // lands of a realm at peace goes home (the nearest place of its own
+        // outside those lands, or failing that any place of its own), even
+        // beyond the planning range: it does not camp there for years.
+        if choice.is_none() && !besieging && trespassing.is_some() {
+            let home = |table: &crate::grid::Table| {
+                table
+                    .iter()
+                    .filter(|(id, _)| {
+                        ctx.owns_settlement(id)
+                            && state.hostile_armies_at(ctx.faction, id).is_empty()
+                    })
+                    .map(|(id, reach)| {
+                        let abroad = ctx.province_of(id).is_some_and(|p| {
+                            passage::trespassed_owner(state, ctx.faction, p).is_some()
+                        });
+                        ((abroad, reach.cost), id.clone())
+                    })
+                    .min()
+                    .map(|(_, id)| id)
+            };
+            let far;
+            let mut route = &table;
+            let mut target = home(&table);
+            if target.is_none() {
+                far = ctx
+                    .grid
+                    .homeward_table(&anchor, range * HOMEWARD_RANGE_FACTOR, cap, power);
+                target = home(&far);
+                route = &far;
+            }
+            if let Some(target) = target {
+                if army.stance != Stance::Normal {
+                    orders.push(Order::SetStance {
+                        army: army_id.clone(),
+                        stance: Stance::Normal,
+                    });
+                }
+                orders.extend(
+                    ctx.grid
+                        .march_orders(army_id, army, &anchor, &target, route),
+                );
+                continue;
+            }
         }
 
         // 4. Regroup with the main army when much weaker.
