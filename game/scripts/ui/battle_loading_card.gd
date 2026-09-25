@@ -35,7 +35,7 @@ static func open(tree: SceneTree, p_context: String, forced_id: String = "") -> 
 		for entry in ArtPlates.loading_screens(p_context):
 			if str(entry.get("id", "")) == forced_id:
 				card.screen = entry
-	tree.root.add_child(card)
+	tree.root.add_child.call_deferred(card)  # sûr pendant `_ready` d'une scène
 	return card
 
 
@@ -122,7 +122,7 @@ func _build() -> void:
 	frame_style.shadow_size = 22
 	frame.add_theme_stylebox_override("panel", frame_style)
 	frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	frame.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	column.add_child(frame)
 	var art := AspectRatioContainer.new()
 	art.ratio = 16.0 / 9.0

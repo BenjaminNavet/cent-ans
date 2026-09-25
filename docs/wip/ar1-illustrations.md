@@ -27,10 +27,10 @@ Branche : `worktree-agent-aaa4cf9bc2224eea2`.
 | Recherche domaine public (Froissart BnF fr. 2643, BL Royal 18 E I, Vigiles de Charles VII…) | fait |
 | Données, schéma, outil, 27 planches Commons | fait |
 | Génération des 4 manques (Avignon, famine, trésor, commerce) : 0,19 $ réels | fait |
-| Intégration Godot | fait (à vérifier : import, smoke, captures) |
+| Intégration Godot, import, smoke (hors échec musique préexistant de main) | fait |
 | Tests pytest (`tools/tests/test_art_plates.py`), CREDITS.md | fait |
-| Captures `docs/audit/captures/ar1/` | à faire |
+| Captures `docs/audit/captures/ar1/` (siège, naval, fin, rapport) | fait |
 
 ## Prochaine étape
 
-Import + smoke, captures en fenêtre, merge main, rapport.
+Terminé. Suites : aligner cadres et palette sur UI1 (`ui_illumination.py`, pas encore dans main) ; capture de la fin de bataille en situation.
