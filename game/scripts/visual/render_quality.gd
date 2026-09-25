@@ -12,6 +12,8 @@ extends RefCounted
 const LEVELS: Array[String] = ["low", "medium", "high", "ultra"]
 const LABELS: Array[String] = ["Basse", "Moyenne", "Haute", "Ultra"]
 const DEFAULT_LEVEL := "high"
+## RL1 : valeur du réglage tant que le joueur n'a rien choisi : niveau déduit du GPU détecté.
+const AUTO := "auto"
 const GROUP := "render_quality"
 
 ## Coûts par niveau. `shadow_distance` : facteur sur la portée d'ombre demandée par la scène.
@@ -71,7 +73,37 @@ static func current() -> String:
 			var level := str(settings.call("get_value", "video/quality"))
 			if level in LEVELS:
 				return level
+			if level == AUTO:
+				return detected_level()
 	return DEFAULT_LEVEL
+
+
+## RL1 : niveau conseillé pour le GPU de cette machine (réglage « Automatique », par défaut).
+static func detected_level() -> String:
+	return level_for_adapter(RenderingServer.get_video_adapter_name())
+
+
+## Haute sur Apple Silicon récent (M2 et suivants, ou M1 Pro/Max/Ultra), Moyenne sinon
+## (M1 de base, GPU intégrés Intel, adaptateur inconnu). Purement indicatif : le joueur choisit.
+static func level_for_adapter(adapter: String) -> String:
+	var name := adapter.to_lower().strip_edges()
+	if not name.begins_with("apple m"):
+		return "medium"
+	var digits := ""
+	for character in name.substr(7):
+		if character >= "0" and character <= "9":
+			digits += character
+		else:
+			break
+	if digits == "":
+		return "medium"
+	var generation := int(digits)
+	if generation >= 2:
+		return "high"
+	for tier in ["pro", "max", "ultra"]:
+		if name.contains(tier):
+			return "high"
+	return "medium"
 
 
 static func preset(level: String = "") -> Dictionary:

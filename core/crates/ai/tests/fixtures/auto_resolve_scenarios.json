@@ -1,0 +1,541 @@
+{
+  "comment": "Scénarios de calibration de l'auto-résolution (lot N1). reference_3d : résultats de la bataille 3D (sim-battle, IA contre IA), produits par `RT_WRITE=1 cargo run --release -p ai --example balance_probe -- rt`.",
+  "scenarios": [
+    {
+      "name": "Crécy : 8 chev. + 4 génois + 4 h. d'armes contre 8 arcs longs + 4 h. d'armes, colline",
+      "attacker": [
+        [
+          "unit_knights",
+          8
+        ],
+        [
+          "unit_genoese_crossbowmen",
+          4
+        ],
+        [
+          "unit_men_at_arms_foot",
+          4
+        ]
+      ],
+      "defender": [
+        [
+          "unit_longbowmen",
+          8
+        ],
+        [
+          "unit_men_at_arms_foot",
+          4
+        ]
+      ],
+      "terrain": "hills",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 5,
+        "attacker_losses": 573,
+        "defender_losses": 444
+      }
+    },
+    {
+      "name": "Même armée, plaine",
+      "attacker": [
+        [
+          "unit_knights",
+          8
+        ],
+        [
+          "unit_genoese_crossbowmen",
+          4
+        ],
+        [
+          "unit_men_at_arms_foot",
+          4
+        ]
+      ],
+      "defender": [
+        [
+          "unit_longbowmen",
+          8
+        ],
+        [
+          "unit_men_at_arms_foot",
+          4
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 5,
+        "attacker_losses": 603,
+        "defender_losses": 428
+      }
+    },
+    {
+      "name": "10 chevaliers contre 10 arcs longs",
+      "attacker": [
+        [
+          "unit_knights",
+          10
+        ]
+      ],
+      "defender": [
+        [
+          "unit_longbowmen",
+          10
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 6,
+        "attacker_losses": 117,
+        "defender_losses": 245
+      }
+    },
+    {
+      "name": "4 chevaliers contre 20 milices (6 000 livres)",
+      "attacker": [
+        [
+          "unit_knights",
+          4
+        ]
+      ],
+      "defender": [
+        [
+          "unit_urban_militia",
+          20
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 5,
+        "attacker_losses": 16,
+        "defender_losses": 1503
+      }
+    },
+    {
+      "name": "20 milices contre 4 chevaliers (6 000 livres)",
+      "attacker": [
+        [
+          "unit_urban_militia",
+          20
+        ]
+      ],
+      "defender": [
+        [
+          "unit_knights",
+          4
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 1543,
+        "defender_losses": 12
+      }
+    },
+    {
+      "name": "Courtrai : 10 chevaliers contre 10 piquiers flamands",
+      "attacker": [
+        [
+          "unit_knights",
+          10
+        ]
+      ],
+      "defender": [
+        [
+          "unit_flemish_pikemen",
+          10
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 224,
+        "defender_losses": 54
+      }
+    },
+    {
+      "name": "12 milices contre 12 arcs longs",
+      "attacker": [
+        [
+          "unit_urban_militia",
+          12
+        ]
+      ],
+      "defender": [
+        [
+          "unit_longbowmen",
+          12
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 763,
+        "defender_losses": 0
+      }
+    },
+    {
+      "name": "8 hommes d'armes contre 12 milices",
+      "attacker": [
+        [
+          "unit_men_at_arms_foot",
+          8
+        ]
+      ],
+      "defender": [
+        [
+          "unit_urban_militia",
+          12
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 6,
+        "attacker_losses": 90,
+        "defender_losses": 196
+      }
+    },
+    {
+      "name": "12 milices contre 8 hommes d'armes",
+      "attacker": [
+        [
+          "unit_urban_militia",
+          12
+        ]
+      ],
+      "defender": [
+        [
+          "unit_men_at_arms_foot",
+          8
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 193,
+        "defender_losses": 95
+      }
+    },
+    {
+      "name": "10 arbalétriers contre 10 milices",
+      "attacker": [
+        [
+          "unit_crossbowmen",
+          10
+        ]
+      ],
+      "defender": [
+        [
+          "unit_urban_militia",
+          10
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 6,
+        "attacker_losses": 65,
+        "defender_losses": 680
+      }
+    },
+    {
+      "name": "10 milices contre 10 arbalétriers",
+      "attacker": [
+        [
+          "unit_urban_militia",
+          10
+        ]
+      ],
+      "defender": [
+        [
+          "unit_crossbowmen",
+          10
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 425,
+        "defender_losses": 0
+      }
+    },
+    {
+      "name": "8 sergents à cheval contre 10 arbalétriers",
+      "attacker": [
+        [
+          "unit_mounted_sergeants",
+          8
+        ]
+      ],
+      "defender": [
+        [
+          "unit_crossbowmen",
+          10
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 6,
+        "attacker_losses": 40,
+        "defender_losses": 143
+      }
+    },
+    {
+      "name": "8 chevaliers contre 8 hommes d'armes",
+      "attacker": [
+        [
+          "unit_knights",
+          8
+        ]
+      ],
+      "defender": [
+        [
+          "unit_men_at_arms_foot",
+          8
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 6,
+        "attacker_losses": 44,
+        "defender_losses": 216
+      }
+    },
+    {
+      "name": "10 piquiers contre 8 hommes d'armes",
+      "attacker": [
+        [
+          "unit_flemish_pikemen",
+          10
+        ]
+      ],
+      "defender": [
+        [
+          "unit_men_at_arms_foot",
+          8
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 352,
+        "defender_losses": 283
+      }
+    },
+    {
+      "name": "10 génois contre 10 arcs longs",
+      "attacker": [
+        [
+          "unit_genoese_crossbowmen",
+          10
+        ]
+      ],
+      "defender": [
+        [
+          "unit_longbowmen",
+          10
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 821,
+        "defender_losses": 530
+      }
+    },
+    {
+      "name": "10 archers montés contre 10 milices",
+      "attacker": [
+        [
+          "unit_mounted_archers",
+          10
+        ]
+      ],
+      "defender": [
+        [
+          "unit_urban_militia",
+          10
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 6,
+        "attacker_losses": 0,
+        "defender_losses": 518
+      }
+    },
+    {
+      "name": "France (4 chev. + 4 arbal. + 4 milices) contre Angleterre (6 arcs + 4 h. d'armes)",
+      "attacker": [
+        [
+          "unit_knights",
+          4
+        ],
+        [
+          "unit_crossbowmen",
+          4
+        ],
+        [
+          "unit_urban_militia",
+          4
+        ]
+      ],
+      "defender": [
+        [
+          "unit_longbowmen",
+          6
+        ],
+        [
+          "unit_men_at_arms_foot",
+          4
+        ]
+      ],
+      "terrain": "plains",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 531,
+        "defender_losses": 51
+      }
+    },
+    {
+      "name": "Même affrontement, automne",
+      "attacker": [
+        [
+          "unit_knights",
+          4
+        ],
+        [
+          "unit_crossbowmen",
+          4
+        ],
+        [
+          "unit_urban_militia",
+          4
+        ]
+      ],
+      "defender": [
+        [
+          "unit_longbowmen",
+          6
+        ],
+        [
+          "unit_men_at_arms_foot",
+          4
+        ]
+      ],
+      "terrain": "plains",
+      "season": "autumn",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 505,
+        "defender_losses": 67
+      }
+    },
+    {
+      "name": "6 chev. + 6 sergents contre 12 milices, forêt",
+      "attacker": [
+        [
+          "unit_knights",
+          6
+        ],
+        [
+          "unit_mounted_sergeants",
+          6
+        ]
+      ],
+      "defender": [
+        [
+          "unit_urban_militia",
+          12
+        ]
+      ],
+      "terrain": "forest",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 6,
+        "attacker_losses": 1,
+        "defender_losses": 751
+      }
+    },
+    {
+      "name": "20 milices contre 12 arcs + 4 h. d'armes, colline",
+      "attacker": [
+        [
+          "unit_urban_militia",
+          20
+        ]
+      ],
+      "defender": [
+        [
+          "unit_longbowmen",
+          12
+        ],
+        [
+          "unit_men_at_arms_foot",
+          4
+        ]
+      ],
+      "terrain": "hills",
+      "season": "summer",
+      "river": false,
+      "reference_3d": {
+        "runs": 6,
+        "attacker_wins": 0,
+        "attacker_losses": 1318,
+        "defender_losses": 0
+      }
+    }
+  ]
+}

@@ -325,9 +325,129 @@ def bassinet(ctx, aventail=True, visor=False):
     obj = to_object("bassinet", bm, [ctx.material(C_PLATE, STEEL)])
     bind_rigid(obj, "Head")
     out = [obj]
+    if visor:
+        out.append(_visor(ctx, centre, half, mn, mx))
     if aventail:
         out.append(_aventail(ctx, centre, half, mn, base_z, n))
     return out
+
+
+def _visor(ctx, centre, half, mn, mx):
+    """Pig-faced visor (« bec de passereau ») closing the bassinet's face (lot UR1)."""
+    bm = bmesh.new()
+    n = ctx.seg(10, 6, 4)
+    eye_z = mn.z + (mx.z - mn.z) * 0.55
+    face_y = mn.y + 0.01
+    # Vertical oval over the face (x across, z up), closed by a snout pointing forward.
+    base = [
+        bm.verts.new(
+            Vector(
+                (
+                    centre.x + half.x * 1.08 * math.cos(2 * math.pi * i / n),
+                    face_y + 0.03,
+                    eye_z - 0.02 + (mx.z - mn.z) * 0.36 * math.sin(2 * math.pi * i / n),
+                )
+            )
+        )
+        for i in range(n)
+    ]
+    tip = bm.verts.new(Vector((centre.x, face_y - 0.13, eye_z - 0.05)))
+    for i in range(n):
+        f = bm.faces.new((base[(i + 1) % n], base[i], tip))
+        f.material_index = 0
+    finish(bm)
+    obj = to_object("visor", bm, [ctx.material(C_PLATE, STEEL)])
+    bind_rigid(obj, "Head")
+    return obj
+
+
+def sallet(ctx, bevor=False, colour=STEEL):
+    """Sallet (salade, 15th c.): rounded skull, eye-slit brow, long tail over the nape.
+
+    `bevor` adds the chin and throat guard (bavière) of the men-at-arms.
+    """
+    centre, half, mn, mx = _head_box(ctx)
+    bm = bmesh.new()
+    n = ctx.seg(16, 8, 6)
+    rows = ctx.seg(6, 3, 2)
+    rx, ry = half.x * 1.12, half.y * 1.12
+    base_z = mn.z + (mx.z - mn.z) * 0.5
+
+    def back(a):
+        return max(0.0, math.sin(a))  # +Y is the nape
+
+    rings = []
+    for r in range(rows):
+        ang = r / rows * math.pi / 2
+        z = base_z + math.sin(ang) * (mx.z - base_z + 0.025)
+        rings.append(
+            ring(
+                bm,
+                Vector((centre.x, centre.y + 0.01, z)),
+                rx * math.cos(ang) + 0.004,
+                ry * math.cos(ang) + 0.004,
+                n,
+            )
+        )
+    apex = bm.verts.new(Vector((centre.x, centre.y + 0.01, mx.z + 0.025)))
+    # Rim: drops and flares at the back (the tail), stays at the brow in front.
+    rim = []
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        b = back(a)
+        rim.append(
+            bm.verts.new(
+                Vector(
+                    (
+                        centre.x + (rx + 0.02 + 0.03 * b) * math.cos(a),
+                        centre.y + 0.01 + (ry + 0.02 + 0.07 * b) * math.sin(a),
+                        base_z - 0.02 - 0.09 * b,
+                    )
+                )
+            )
+        )
+    bridge(bm, rim, rings[0], 0)
+    for a, b in zip(rings, rings[1:], strict=False):
+        bridge(bm, a, b, 0)
+    for i in range(n):
+        bm.faces.new((rings[-1][i], rings[-1][(i + 1) % n], apex))
+    if bevor:
+        # Half cone from the chin to the mouth, in front of the face.
+        arc = ctx.seg(8, 5, 3)
+        low, high = [], []
+        for i in range(arc + 1):
+            a = math.pi + math.pi * i / arc  # front half (-Y)
+            low.append(
+                bm.verts.new(
+                    Vector(
+                        (
+                            centre.x + (rx + 0.01) * math.cos(a),
+                            centre.y + (ry * 0.92) * math.sin(a),
+                            mn.z - 0.06,
+                        )
+                    )
+                )
+            )
+            high.append(
+                bm.verts.new(
+                    Vector(
+                        (
+                            centre.x + (rx + 0.02) * math.cos(a),
+                            centre.y + (ry * 0.98) * math.sin(a),
+                            base_z - 0.05,
+                        )
+                    )
+                )
+            )
+        bridge(bm, low, high, 0, closed=False)
+    # Convex around the head: every face looks away from its centre.
+    for f in bm.faces:
+        f.normal_update()
+        if f.normal.dot(f.calc_center_median() - centre) < 0:
+            f.normal_flip()
+    obj = to_object("sallet", bm, [ctx.material(C_PLATE, colour)])
+    bind_rigid(obj, "Head")
+    return [obj]
 
 
 def _aventail(ctx, centre, half, mn, base_z, n):

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/campaign_weather_rules.schema.json",
+  "title": "Météo de la carte de campagne",
+  "description": "Fichier data/rules/campaign_weather.json (lot CM2) : météo tirée à chaque tour pour chaque province (graine, date, position de la capitale). Un champ de bruit régional (fronts) classe les provinces du plus sec au plus humide ; chaque province applique les chances de son climat et de la saison. Purement visuelle pour l'instant (ADR 0027).",
+  "type": "object",
+  "$defs": {
+    "chances": {
+      "type": "object",
+      "description": "Chances en pour cent, du plus sec au plus humide ; leur somme vaut 100.",
+      "properties": {
+        "clear": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "fog": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "rain": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "snow": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "storm": { "type": "integer", "minimum": 0, "maximum": 100 }
+      },
+      "required": ["clear", "fog", "rain", "snow", "storm"],
+      "additionalProperties": false
+    },
+    "seasonal": {
+      "type": "object",
+      "properties": {
+        "spring": { "$ref": "#/$defs/chances" },
+        "summer": { "$ref": "#/$defs/chances" },
+        "autumn": { "$ref": "#/$defs/chances" },
+        "winter": { "$ref": "#/$defs/chances" }
+      },
+      "required": ["spring", "summer", "autumn", "winter"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "front_scale_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 30, "description": "Taille des fronts météo, en degrés de longitude/latitude." },
+    "local_jitter": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du bruit propre à chaque province (0 = fronts entiers, 1 = provinces indépendantes)." },
+    "drift_deg_per_turn": {
+      "type": "array",
+      "items": { "type": "number", "minimum": -20, "maximum": 20 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Déplacement du champ météo d'un tour à l'autre, en degrés (est, nord)."
+    },
+    "climates": {
+      "type": "object",
+      "properties": {
+        "oceanic": { "$ref": "#/$defs/seasonal" },
+        "continental": { "$ref": "#/$defs/seasonal" },
+        "mediterranean": { "$ref": "#/$defs/seasonal" },
+        "mountain": { "$ref": "#/$defs/seasonal" }
+      },
+      "required": ["oceanic", "continental", "mediterranean", "mountain"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["front_scale_deg", "local_jitter", "drift_deg_per_turn", "climates"],
+  "additionalProperties": false
+}

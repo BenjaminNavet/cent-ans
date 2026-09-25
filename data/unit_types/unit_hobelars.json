@@ -1,0 +1,45 @@
+{
+  "id": "unit_hobelars",
+  "name": {
+    "display": "Hobelars",
+    "local": "hobelers",
+    "local_language": "moyen anglais"
+  },
+  "category": "cavalry",
+  "source_class": "peasants",
+  "mounted": true,
+  "soldiers": 80,
+  "cost": {
+    "money": 450
+  },
+  "upkeep": 40,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 46,
+    "ranged": 0,
+    "range": 0,
+    "armor": 32,
+    "morale": 50,
+    "speed": 82,
+    "ammo": 0,
+    "charge": 45
+  },
+  "abilities": [
+    "dismount"
+  ],
+  "required_culture": [
+    "cul_english",
+    "cul_welsh",
+    "cul_irish"
+  ],
+  "available_until": 1400,
+  "figure": "cavalry_6",
+  "equipment": "Petit cheval (hobin), jaque ou haubergeon, chapel de fer, lance légère, épée ou coutelas.",
+  "description": "Cavalerie légère née des guerres d'Irlande et d'Écosse : éclaireurs et fourrageurs des chevauchées, combattant souvent à pied ; remplacés par les archers montés dans la seconde moitié du XIVe siècle.",
+  "sources": [
+    "Hobelar",
+    "J. F. Lydon, « The hobelar: an Irish contribution to medieval warfare », The Irish Sword, 2, 1954",
+    "J. E. Morris, « Mounted infantry in mediaeval warfare », TRHS, 3e série, 8, 1914",
+    "M. Prestwich, Armies and Warfare in the Middle Ages, 1996"
+  ]
+}

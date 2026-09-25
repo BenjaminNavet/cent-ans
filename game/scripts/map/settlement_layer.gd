@@ -46,6 +46,10 @@ var _models: Array = []  # par colonie : Node3D ou null
 var _model_radius: PackedFloat32Array = PackedFloat32Array()
 var _model_top: PackedFloat32Array = PackedFloat32Array()
 var _models_root: Node3D
+## Villes emblématiques (lot L1) : index de colonie → LandmarkModel (toujours visibles, LOD par
+## portées de visibilité), sous `_landmarks_root`.
+var _landmarks: Dictionary = {}
+var _landmarks_root: Node3D
 var _labels_root: Node3D
 var _hamlets_root: Node3D
 var _selection_ring: MeshInstance3D
@@ -81,6 +85,10 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	_models_root = Node3D.new()
 	_models_root.name = "Models"
 	add_child(_models_root)
+	_landmarks.clear()
+	_landmarks_root = Node3D.new()
+	_landmarks_root.name = "Landmarks"
+	add_child(_landmarks_root)
 	_labels_root = Node3D.new()
 	_labels_root.name = "Labels"
 	add_child(_labels_root)
@@ -125,6 +133,8 @@ static func _hash(text: String) -> int:
 
 
 func _build_model(i: int, entry: Dictionary) -> void:
+	if _build_landmark(i, entry):
+		return
 	var model := ModelLibrary.settlement_model(str(entry["kind"]), _hash(str(entry["id"])) / 7)
 	if model == null:
 		_models.append(null)
@@ -149,13 +159,58 @@ func _build_model(i: int, entry: Dictionary) -> void:
 	_ground_model(i)
 
 
+## Ville emblématique (lot L1) : maquette dédiée à la place de la maquette générique.
+func _build_landmark(i: int, entry: Dictionary) -> bool:
+	var plan := LandmarkLibrary.for_settlement(str(entry["id"]))
+	if plan.is_empty():
+		return false
+	var landmark := LandmarkModel.create(plan, terrain)
+	if landmark == null:
+		return false
+	landmark.set_year(1337)
+	_landmarks_root.add_child(landmark)
+	_landmarks[i] = landmark
+	_models.append(landmark)
+	_model_radius[i] = landmark.core_radius
+	_model_top[i] = 1.1
+	return true
+
+
+func _is_landmark(i: int) -> bool:
+	return _landmarks.has(i)
+
+
+## Hauteur de base d'une maquette (les villes emblématiques sont drapées par leur shader).
+func _model_base_y(i: int) -> float:
+	if _landmarks.has(i):
+		return (_landmarks[i] as LandmarkModel).ground_height()
+	return (_models[i] as Node3D).position.y
+
+
+## Cercles (x, z, rayon) des villes emblématiques, pour le zoom rapproché de la caméra.
+func landmark_zones() -> PackedVector3Array:
+	var zones := PackedVector3Array()
+	for landmark in _landmarks.values():
+		var center: Vector3 = (landmark as LandmarkModel).position
+		zones.append(Vector3(center.x, center.z, (landmark as LandmarkModel).zone_radius))
+	return zones
+
+
+## Vrai si un point carte est couvert par une ville emblématique (hameaux, végétation).
+func covered_by_landmark(px: Vector2) -> bool:
+	for landmark in _landmarks.values():
+		if (landmark as LandmarkModel).covers(px):
+			return true
+	return false
+
+
 ## Réduit les maquettes trop proches d'une voisine (Paris / Vincennes / Saint-Denis) : l'écart
 ## entre deux colonies est partagé au prorata du poids du type, sans descendre sous
 ## `MIN_FIT_SCALE`. Étiquettes et picking utilisent le rayon réduit.
 func _fit_models() -> void:
 	for i in data.settlements.size():
 		var holder: Node3D = _models[i]
-		if holder == null:
+		if holder == null or _landmarks.has(i):
 			continue
 		var entry: Dictionary = data.settlements[i]
 		var px: Vector2 = entry["px"]
@@ -210,7 +265,7 @@ static func _relative_transform(root: Node3D, node: Node3D) -> Transform3D:
 ## modèles descendent sous z = 0, rien ne flotte sur une pente).
 func _ground_model(i: int) -> void:
 	var holder: Node3D = _models[i]
-	if holder == null:
+	if holder == null or _landmarks.has(i):
 		return
 	var px: Vector2 = data.settlements[i]["px"]
 	var radius := _model_radius[i] * 0.7
@@ -300,6 +355,11 @@ func refresh(sim: Object, color_of: Callable) -> void:
 	if data == null:
 		return
 	data.apply_live(sim)
+	if not _landmarks.is_empty() and sim != null and sim.has_method("get_date_label"):
+		var year := LandmarkModel.year_of(str(sim.call("get_date_label")))
+		if year > 0:
+			for landmark in _landmarks.values():
+				(landmark as LandmarkModel).set_year(year)
 	var multimesh := _icons.multimesh if _icons != null else null
 	for i in data.settlements.size():
 		var entry: Dictionary = data.settlements[i]
@@ -367,7 +427,7 @@ func _update_label_heights() -> void:
 		var label := _labels[i]
 		var px: Vector2 = data.settlements[i]["px"]
 		if near and _models[i] != null:
-			label.position.y = (_models[i] as Node3D).position.y + _model_top[i] + 0.8
+			label.position.y = _model_base_y(i) + _model_top[i] + 0.8
 			label.offset = Vector2.ZERO
 		else:
 			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
@@ -487,6 +547,8 @@ func _build_hamlets(index: int) -> void:
 	for h in _hamlets_by_chunk[index]:
 		var hamlet: Dictionary = data.hamlets[h]
 		var px: Vector2 = hamlet["px"]
+		if not _landmarks.is_empty() and covered_by_landmark(px):
+			continue
 		var seed_value := _hash(str(hamlet["name"]) + str(px))
 		var variant := seed_value % meshes.size()
 		var devastation: float = _devastation.get(hamlet["province"], 0.0)
@@ -534,7 +596,7 @@ func pick_screen(screen_position: Vector2) -> String:
 		var px: Vector2 = data.settlements[i]["px"]
 		if near and _models[i] != null:
 			var holder: Node3D = _models[i]
-			var center := holder.position + Vector3(0.0, _model_top[i] * 0.4, 0.0)
+			var center := Vector3(holder.position.x, _model_base_y(i) + _model_top[i] * 0.4, holder.position.z)
 			if camera.is_position_behind(center):
 				continue
 			var screen_center := camera.unproject_position(center)
@@ -584,7 +646,7 @@ func _update_selection_ring() -> void:
 	_selection_ring.visible = show
 	if show:
 		var radius := _model_radius[index] * 1.1
-		_selection_ring.position = holder.position + Vector3(0.0, 0.15, 0.0)
+		_selection_ring.position = Vector3(holder.position.x, _model_base_y(index) + 0.15, holder.position.z)
 		_selection_ring.scale = Vector3(radius, 1.0, radius)
 
 
@@ -603,7 +665,70 @@ func vegetation_exclusions() -> PackedVector3Array:
 	for i in data.settlements.size():
 		var px: Vector2 = data.settlements[i]["px"]
 		result.append(Vector3(px.x, px.y, _model_radius[i] * 1.1 + 0.5))
+	for landmark in _landmarks.values():
+		var center: Vector3 = (landmark as LandmarkModel).position
+		result.append(Vector3(center.x, center.z, (landmark as LandmarkModel).zone_radius))
 	for hamlet in data.hamlets:
 		var hpx: Vector2 = hamlet["px"]
 		result.append(Vector3(hpx.x, hpx.y, ModelLibrary.HAMLET_SCALE * 0.6))
 	return result
+
+
+# --- Lot CV1 : accès pour la campagne vivante (croissance, fumées) -------------------------
+
+
+## Support (Node3D posé sur le relief) de la maquette de la colonie `i`, null sans maquette.
+func model_holder(i: int) -> Node3D:
+	if _is_landmark(i):
+		return null  # ville emblématique (L1) : pas de croissance ni de surcouche génériques
+	return _models[i] if i >= 0 and i < _models.size() else null
+
+
+## Rayon au sol et hauteur (unités monde) de la maquette de la colonie `i`.
+func model_radius(i: int) -> float:
+	return _model_radius[i] if i >= 0 and i < _model_radius.size() else 2.0
+
+
+func model_top(i: int) -> float:
+	return _model_top[i] if i >= 0 and i < _model_top.size() else 2.0
+
+
+## Remplace la maquette de la colonie `i` (lot CV1 : croissance) ; `model` est déjà à l'échelle
+## monde. Garde position, orientation, portée de visibilité et teinte de bannière ; l'écart
+## aux voisines (`_fit_models`) est réappliqué.
+func replace_model(i: int, model: Node3D) -> void:
+	var holder: Node3D = model_holder(i)
+	if holder == null or model == null:
+		return
+	for child in holder.get_children():
+		holder.remove_child(child)
+		child.queue_free()
+	holder.add_child(model)
+	var aabb := _model_aabb(model)
+	_model_radius[i] = maxf(aabb.size.x, aabb.size.z) * 0.5
+	_model_top[i] = aabb.end.y
+	for geometry in model.find_children("*", "GeometryInstance3D", true, false):
+		var g := geometry as GeometryInstance3D
+		g.visibility_range_end = tiers.model_range
+		g.visibility_range_end_margin = tiers.model_range * 0.15
+	if i < _colors.size():
+		ModelLibrary.tint_banner(holder, _colors[i])
+	_ground_model(i)
+	_update_label_heights()
+
+
+## Hameau brûlé (même tirage que `_build_hamlets`), pour les fumées d'incendie.
+func hamlet_burned(h: int) -> bool:
+	var hamlet: Dictionary = data.hamlets[h]
+	var px: Vector2 = hamlet["px"]
+	var seed_value := _hash(str(hamlet["name"]) + str(px))
+	var devastation: float = _devastation.get(hamlet["province"], 0.0)
+	return devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
+
+
+## Force une dévastation affichée (captures CV1 `--devastate`) et reconstruit les hameaux.
+func override_devastation(values: Dictionary) -> void:
+	for province_id in values:
+		_devastation[province_id] = float(values[province_id])
+	for index in _hamlet_nodes:
+		_hamlet_dirty[index] = true

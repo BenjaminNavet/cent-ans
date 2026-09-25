@@ -13,6 +13,8 @@ name = "ai"
 version = "0.1.0"
 dependencies = [
  "data-model",
+ "serde",
+ "serde_json",
  "sim-battle",
  "sim-campaign",
 ]
@@ -359,6 +361,7 @@ dependencies = [
  "data-model",
  "serde",
  "serde_json",
+ "thiserror",
 ]
 
 [[package]]

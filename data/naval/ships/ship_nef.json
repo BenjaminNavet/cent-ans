@@ -1,0 +1,22 @@
+{
+  "id": "ship_nef",
+  "name": { "display": "Nef", "local": "nef", "local_language": "ancien français" },
+  "propulsion": "sail",
+  "length_m": 30.0,
+  "beam_m": 9.0,
+  "freeboard_m": 3.4,
+  "forecastle_m": 2.4,
+  "aftcastle_m": 3.0,
+  "castle_capacity": 36,
+  "hull": 360,
+  "soldiers": 120,
+  "sailors": 34,
+  "sail_speed": 3.0,
+  "turn_rate": 4.0,
+  "bulwark": 0.3,
+  "fire_resistance": 0.1,
+  "cost": 1400,
+  "model": "nef",
+  "description": "Grand navire rond à deux mâts, plus haut que la cogue, aux châteaux larges. Navire amiral des flottes du Nord, il porte plus d'hommes d'armes et d'archers que tout autre.",
+  "sources": ["Nef (navire)", "Christophe (cogue royale anglaise)"]
+}

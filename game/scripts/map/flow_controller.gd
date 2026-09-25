@@ -49,6 +49,7 @@ func setup(campaign_map: Node) -> void:
 	season_report.disable_requested.connect(func() -> void:
 		if settings != null:
 			settings.call("set_value", "interface/season_report", false))
+	ui.end_turn_gate = end_turn_would_proceed  # U5 : bandeau des autres factions
 	ui.save_requested.connect(_on_save_requested)
 	ui.load_requested.connect(_on_load_requested)
 	var popup: PopupMenu = ui.menu_button.get_popup()
@@ -243,6 +244,11 @@ func autosave() -> String:
 # --- Fin de tour ------------------------------------------------------------------
 
 
+## Lot U5 : vrai si `before_end_turn` laissera passer la fin de tour (sans effet de bord).
+func end_turn_would_proceed() -> bool:
+	return not is_paused() and (_end_turn_confirmed or not bool(_setting("interface/confirm_end_turn", false)))
+
+
 ## Vrai si la fin de tour peut avoir lieu ; sinon ouvre la confirmation (réglage).
 func before_end_turn() -> bool:
 	if is_paused():
@@ -299,7 +305,7 @@ func confirm_end_turn() -> void:
 	if _confirm_panel != null:
 		_confirm_panel.hide()
 	_end_turn_confirmed = true
-	map.call("_on_end_turn")
+	map.get("ui").call("request_end_turn")  # U5 : avec le bandeau des autres factions
 
 
 ## Après `end_turn` : sauvegarde auto, alertes, rapport de saison.
@@ -311,8 +317,32 @@ func after_end_turn(events: Array) -> void:
 		show_season_report(events)
 
 
+## Lot U5 : rubriques du rapport ; « Le monde » filtré par intérêt (`MapUI.keeps_news`) ; bilan
+## du trésor en tête de la rubrique « Trésor ».
 func report_groups(events: Array) -> Array:
-	return SeasonReport.build_groups(events, _concerns_player)
+	var ui: Node = map.get("ui")
+	var groups := SeasonReport.build_groups(events, _concerns_player, Callable(ui, "keeps_news"), str(map.get("player_faction")))
+	return SeasonReport.with_summary(groups, "treasury", treasury_summary())
+
+
+## Ligne de synthèse du trésor (`get_faction_economy` : solde prévu, variation de la saison).
+func treasury_summary() -> Array:
+	var sim: Object = map.get("sim")
+	if sim == null or not sim.has_method("get_faction_economy"):
+		return []
+	var economy: Dictionary = sim.call("get_faction_economy", str(map.get("player_faction")))
+	var history: Array = economy.get("budget_history", [])
+	if economy.is_empty() or history.is_empty():
+		return []
+	var last: Dictionary = history.back()
+	var change := int(last.get("change", 0))
+	var net := int(economy.get("net_income", 0))
+	var text := "Le trésor %s %s cette saison ; solde prévu %s par saison." % [
+		"gagne" if change >= 0 else "perd", Money.amount(absi(change)), Money.signed(net)]
+	var other := int(last.get("other", 0))
+	if other != 0:
+		text += " Hors budget : %s (rançons, tributs, agents, chronique)." % Money.signed(other)
+	return [{"kind": "summary", "action": "faction", "text_fr": text, "_tone": SeasonReport.TONE_LOSS if net < 0 else ""}]
 
 
 func show_season_report(events: Array) -> bool:
@@ -330,13 +360,21 @@ func report_late_events(events: Array) -> void:
 		return
 	last_events += events
 	if bool(_setting("interface/season_report", true)):
-		season_report.add_events(events, _concerns_player)
+		var sim: Object = map.get("sim")
+		season_report.add_events(events, _concerns_player, Callable(map.get("ui"), "keeps_news"), str(map.get("player_faction")),
+			str(sim.call("get_date_label")) if sim != null else "")
 
 
 func _concerns_player(event: Dictionary) -> bool:
 	var player := str(map.get("player_faction"))
 	if str(event.get("faction", "")) == player:
 		return true
+	# U5 : une place perdue par le joueur (« … (auparavant France) ») le concerne au premier chef.
+	if str(event.get("kind", "")) == "province_captured":
+		var facade := get_node_or_null("/root/SimFacade")
+		var player_name := str(facade.call("faction_short_name", player)) if facade != null else ""
+		if player_name != "" and str(event.get("text_fr", "")).contains("auparavant %s" % player_name):
+			return true
 	var sim: Object = map.get("sim")
 	var province_id := str(event.get("province", ""))
 	if province_id != "":
@@ -357,6 +395,14 @@ func refresh() -> void:
 
 
 func _on_report_entry(event: Dictionary) -> void:
+	var ui: Node = map.get("ui")
+	match str(event.get("kind", "")):
+		"technology_researched":
+			ui.emit_signal("tech_panel_requested")
+			return
+		"summary":
+			ui.emit_signal("faction_panel_requested")
+			return
 	var army_id := str(event.get("army", ""))
 	var armies: ArmyMarkers = map.get("armies")
 	if army_id != "" and armies != null and armies.has_army(army_id):
@@ -414,6 +460,13 @@ func _run_stage() -> void:
 			pause_menu.open_save()
 		"settings":
 			open_settings()
+			# U7 / U12 : `--flow-tab=Commandes` ouvre directement un onglet.
+			for arg in OS.get_cmdline_user_args():
+				if arg.begins_with("--flow-tab="):
+					for tabs in _settings_menu.find_children("*", "TabContainer", true, false):
+						for index in (tabs as TabContainer).get_tab_count():
+							if (tabs as TabContainer).get_tab_title(index) == arg.trim_prefix("--flow-tab="):
+								(tabs as TabContainer).current_tab = index
 		"confirm":
 			settings.call("set_value", "interface/confirm_end_turn", true, false)
 			map.call("_on_end_turn")

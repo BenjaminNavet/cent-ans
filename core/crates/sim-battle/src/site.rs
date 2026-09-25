@@ -322,6 +322,8 @@ pub struct SiteFeatures {
 pub struct Occupied<'a> {
     pub forests: &'a [Zone],
     pub mud: &'a [Zone],
+    /// Lobes and copses of the woods and mud (lot R2): avoided, but no pools.
+    pub parts: &'a [Zone],
     /// z of the river centre line at x, when there is a river.
     pub river_z: Option<&'a dyn Fn(f64) -> f64>,
 }
@@ -332,9 +334,13 @@ impl Occupied<'_> {
     }
 
     fn in_zones(&self, x: f64, z: f64, margin: f64) -> bool {
-        self.forests.iter().chain(self.mud).any(|zone| {
-            (x - zone.x).powi(2) + (z - zone.z).powi(2) < (zone.radius + margin).powi(2)
-        })
+        self.forests
+            .iter()
+            .chain(self.mud)
+            .chain(self.parts)
+            .any(|zone| {
+                (x - zone.x).powi(2) + (z - zone.z).powi(2) < (zone.radius + margin).powi(2)
+            })
     }
 }
 
@@ -786,6 +792,7 @@ fn keep_line(line: &Obstacle, features: &SiteFeatures, occupied: &Occupied) -> b
         !on_line(x, z, 0.0)
             && !occupied.near_river(x, z, 30.0)
             && !occupied.forests.iter().any(|f| f.contains(x, z))
+            && !occupied.parts.iter().any(|f| f.contains(x, z))
             && !features.pools.iter().any(|p| p.contains(x, z))
             && !features
                 .village

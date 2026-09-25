@@ -31,6 +31,10 @@ var _slit_mat: StandardMaterial3D  # matière des archères, partagée entre tou
 var house_sites: Array = []  # F5c : [{p: Vector2, radius}] = obstacles de la simulation
 var _fx: WallCollapseFx  # S1 : effondrement physique (rendu seulement)
 var fire_fx: Node3D = null  # S2 : incendies des maisons (`siege_fire_fx.gd`)
+var _kit_batch: BuildingKit.Batch = null  # BR1 : bâtiments du kit (MultiMesh par modèle)
+var _kit_sites: Dictionary = {}  # BR1 : indice de maison → [[poignée, ruine, Transform3D], …]
+var _kit_ruins: Dictionary = {}  # indice de maison → true (ruine déjà posée)
+var external_ladders := false  # SG1 : échelles posées contre le mur par `SiegeAssaultFx`
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -57,7 +61,7 @@ func build(p_siege: Dictionary, p_height_at: Callable) -> void:
 	towers_root.name = "Towers"
 	add_child(towers_root)
 	for tower in siege.get("towers", []):
-		_build_tower(towers_root, tower)
+		_build_tower(towers_root, SiegeAssaultFx.gatehouse_tower(siege, tower))
 	BattleSiegeBatcher.batch_and_replace(towers_root)
 	_build_square()
 	_build_houses()
@@ -302,6 +306,8 @@ func _build_square() -> void:
 	disc.position = Vector3(center.x, _ground(center.x, center.y) + 0.05, center.y)
 	disc.name = "Square"
 	add_child(disc)
+	if BuildingKit.available():
+		return  # BR2 : puits et marché du kit (`_kit_market`).
 	# Puits au centre.
 	var well := MeshInstance3D.new()
 	var ring := CylinderMesh.new()
@@ -331,6 +337,9 @@ func _build_houses() -> void:
 	var houses_root := Node3D.new()
 	houses_root.name = "Houses"
 	add_child(houses_root)
+	if BuildingKit.available():
+		_build_kit_town(houses_root, church_index, center)
+		return
 	for i in house_sites.size():
 		var r := float(house_sites[i]["radius"])
 		# Emprise inscrite dans le disque (demi-diagonale ≤ rayon).
@@ -355,6 +364,139 @@ func _build_houses() -> void:
 		spire.material_override = _textured("slate", Color(0.62, 0.64, 0.7), 0.7)
 		spire.position = Vector3(church.x - 8.0, _ground(church.x, church.y) + 11.0 + 7.0 + 4.0, church.y)
 		add_child(spire)
+
+
+## BR1 : ville du kit Blender. Chaque disque intra-muros devient un îlot de deux rangées dos à
+## dos de maisons de ville mitoyennes (pignon sur rue, 2-3 étages en encorbellement, boutiques) ;
+## les disques des faubourgs reçoivent une maison rurale ; l'église du fond est la grande église
+## du kit. Emprise des îlots : environ 1,75 rayon × 1,85 rayon (les disques restent les obstacles).
+func _build_kit_town(houses_root: Node3D, church_index: int, center: Vector2) -> void:
+	_kit_batch = BuildingKit.Batch.new("", 2000.0)
+	_kit_sites.clear()
+	_kit_ruins.clear()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1340
+	for i in house_sites.size():
+		var site: Dictionary = house_sites[i]
+		var p: Vector2 = site["p"]
+		var r := float(site["radius"])
+		var handles: Array = []
+		if i == church_index and Geometry2D.is_point_in_polygon(p, _ring()):
+			var yaw := (p - center).angle() + PI * 0.5
+			handles.append(_kit_place("church", p, 34.0, 12.5, yaw, rng))
+		elif bool(site.get("suburb", false)):
+			var kind: String = ["cottage", "timber", "longere", "barn", "cottage"][rng.randi_range(0, 4)]
+			var yaw := rng.randf() * TAU
+			handles.append(_kit_place(kind, p, r * 1.35, r * 0.8, yaw, rng))
+			if rng.randf() < 0.55:
+				handles.append(BuildingKit.add_front_prop(_kit_batch, rng, ["woodpile", "cart", "barrels"], p, -yaw, r * 1.35, r * 0.8, _ground))
+		else:
+			# Îlot de deux rangées dos à dos : façades vers la place et vers la rue extérieure.
+			var inward := (center - p).normalized()
+			var tangent := Vector2(-inward.y, inward.x)
+			var frontage := r * 1.75
+			var depth := r * 0.92
+			for row in 2:
+				var facing := inward if row == 0 else -inward
+				var yaw := atan2(facing.y, facing.x) - PI * 0.5
+				var row_center := p + facing * depth * 0.5
+				var n := 3 if rng.randf() < 0.65 else 2
+				var widths: Array = []
+				var total := 0.0
+				for k in n:
+					var w := rng.randf_range(0.8, 1.25)
+					widths.append(w)
+					total += w
+				var x := -frontage * 0.5
+				for k in n:
+					var w: float = frontage * float(widths[k]) / total
+					var kind := "townhouse"
+					if n == 2 and rng.randf() < 0.35:
+						kind = ["stonehouse", "timber"][rng.randi_range(0, 1)]
+					var d := depth * (rng.randf_range(0.9, 1.05) if kind == "townhouse" else 0.9)
+					var q := row_center + tangent * (x + w * 0.5) - facing * (depth - d) * 0.5
+					handles.append(_kit_place(kind, q, w, d, yaw, rng))
+					# BR2 : étals côté place, tonneaux, charrettes et bûches côté rue.
+					if rng.randf() < 0.3:
+						var kinds := ["stall", "stall", "barrels", "cart"] if row == 0 else ["barrels", "barrels", "woodpile", "cart"]
+						handles.append(BuildingKit.add_front_prop(_kit_batch, rng, kinds, q, -yaw, w, d, _ground))
+					x += w
+		_kit_sites[i] = handles.filter(func(h: Array) -> bool: return not h.is_empty())
+	_kit_market(center, rng)
+	_kit_batch.build(houses_root)
+
+
+## BR2 : place du marché. Puits du kit au centre, étals en couronne au bord de la place (face au
+## centre, par groupes, en laissant des passages vers les rues), quelques charrettes et tonneaux ;
+## le centre reste dégagé pour la mêlée. Tout est posé sur le dessus du dallage.
+func _kit_market(center: Vector2, rng: RandomNumberGenerator) -> void:
+	var radius := float(siege.get("square_radius", 35.0))
+	var top := _ground(center.x, center.y) + 0.2
+	var wells := BuildingKit.models_of("well")
+	if not wells.is_empty():
+		_kit_batch.add(wells[0], Transform3D(Basis(Vector3.UP, rng.randf() * TAU), Vector3(center.x, top - 0.1, center.y)))
+	var stalls := BuildingKit.models_of("stall")
+	var extras := BuildingKit.models_of("cart") + BuildingKit.models_of("barrels")
+	if stalls.is_empty():
+		return
+	var groups := 5
+	for g in groups:
+		var base := TAU * float(g) / groups + rng.randf_range(-0.15, 0.15)
+		var count := rng.randi_range(2, 4)
+		for k in count:
+			var a := base + float(k) * 4.0 / (radius * 0.8)
+			var p := center + Vector2(cos(a), sin(a)) * radius * 0.8
+			# Façade (+Z du modèle) vers le centre de la place.
+			var to_center := (center - p).normalized()
+			var theta := atan2(to_center.x, to_center.y)
+			var model: String = stalls[rng.randi_range(0, stalls.size() - 1)]
+			_kit_batch.add(model, Transform3D(Basis(Vector3.UP, theta), Vector3(p.x, top, p.y)))
+		if not extras.is_empty() and rng.randf() < 0.7:
+			var a := base - 5.0 / (radius * 0.8)
+			var p := center + Vector2(cos(a), sin(a)) * radius * 0.86
+			var model: String = extras[rng.randi_range(0, extras.size() - 1)]
+			_kit_batch.add(model, Transform3D(Basis(Vector3.UP, rng.randf() * TAU), Vector3(p.x, top, p.y)))
+
+
+## Pose un bâtiment du kit (emprise `length` le long de son axe X, façade vers +Z, lacet `yaw`).
+## Renvoie [poignée, modèle de ruine, transformation] ou [] si aucun modèle.
+func _kit_place(kind: String, p: Vector2, length: float, width: float, yaw: float, rng: RandomNumberGenerator) -> Array:
+	var model := BuildingKit.pick(kind, length, width, rng)
+	if model == "":
+		return []
+	var low := INF
+	var high := -INF
+	for corner in [Vector2(-length, -width), Vector2(length, -width), Vector2(length, width), Vector2(-length, width)]:
+		var q: Vector2 = p + (corner * 0.5).rotated(yaw)
+		low = minf(low, _ground(q.x, q.y))
+		high = maxf(high, _ground(q.x, q.y))
+	var basis := Basis(Vector3.UP, -yaw) * Basis.from_scale(BuildingKit.fit_scale(model, length, width))
+	var xform := Transform3D(basis, Vector3(p.x, minf(high, low + 1.4) - 0.05, p.y))
+	var ruin := BuildingKit.pick(kind, length, width, rng, true)
+	return [_kit_batch.add(model, xform), ruin, xform]
+
+
+## S2 + BR1 : la maison `index` a brûlé → ses bâtiments du kit cèdent la place à leurs ruines
+## calcinées (murs éventrés, charpente effondrée). `false` hors kit (repli : affaissement).
+func ruin_site(index: int) -> bool:
+	if _kit_batch == null or not _kit_sites.has(index):
+		return false
+	if _kit_ruins.has(index):
+		return true
+	_kit_ruins[index] = true
+	var houses_root := get_node_or_null("Houses") as Node3D
+	for entry in _kit_sites[index]:
+		_kit_batch.hide(entry[0])
+		var ruin := str(entry[1])
+		var mesh := BuildingKit.mesh(ruin) if ruin != "" else null
+		if mesh == null or houses_root == null:
+			continue
+		var instance := MeshInstance3D.new()
+		instance.name = "Ruin%d" % index
+		instance.mesh = mesh
+		instance.transform = entry[2]
+		houses_root.add_child(instance)
+	return true
 
 
 ## Modèle Blender de M10 (`assets/models/<name>.glb`) mis à l'échelle (plus grande dimension
@@ -543,7 +685,7 @@ func _update_machines(units: Array) -> void:
 				var z := float(unit["z"])
 				machine.position = Vector3(x, _ground(x, z), z)
 				machine.rotation.y = float(unit["facing"])
-		if bool(unit.get("ladders", false)) and present:
+		if bool(unit.get("ladders", false)) and present and not external_ladders:
 			seen[id] = true
 			if not _ladders.has(id):
 				_ladders[id] = _make_ladder_group(float(unit["width"]))
@@ -665,5 +807,5 @@ func _make_ladder_group(width: float) -> Node3D:
 func _house_sites() -> Array:
 	var sites: Array = []
 	for house in siege.get("houses", []):
-		sites.append({"p": Vector2(float(house["x"]), float(house["z"])), "radius": float(house["radius"])})
+		sites.append({"p": Vector2(float(house["x"]), float(house["z"])), "radius": float(house["radius"]), "suburb": bool(house.get("suburb", false))})
 	return sites

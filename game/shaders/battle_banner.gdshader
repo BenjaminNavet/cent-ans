@@ -12,16 +12,25 @@ uniform bool full_texture = false; // bannière peinte (texture entière, alpha 
 uniform bool routing = false;
 uniform float phase = 0.0;
 uniform float flag_length = 2.6;
+// BV3 : vent de la météo (0 calme : drapeau qui pend ; 1 grand vent : tendu, claquant) et
+// rafales (modulation lente de la force, propre à chaque drapeau par `phase`).
+uniform float wind_strength = 0.6;
+uniform float wind_gust = 0.2;
 
 varying float v_fold;
 
 void vertex() {
 	float x = UV.x;
-	float t = TIME * 5.5 + phase;
-	float wave = sin(x * 7.0 - t) * 0.22 + sin(x * 13.0 - t * 1.7 + 1.3) * 0.06;
+	float gust = sin(TIME * 0.7 + phase * 0.37) * 0.5 + sin(TIME * 1.9 + phase) * 0.25;
+	float s = clamp(wind_strength + wind_gust * gust, 0.0, 1.0);
+	float t = TIME * mix(2.5, 7.5, s) + phase;
+	float amp = mix(0.08, 0.3, s);
+	float wave = sin(x * 7.0 - t) * amp + sin(x * 13.0 - t * 1.7 + 1.3) * amp * 0.27;
 	VERTEX.z += wave * x * flag_length * 0.35;
-	VERTEX.y -= x * x * 0.12 * flag_length;
-	float slope = (cos(x * 7.0 - t) * 7.0 * 0.22 + cos(x * 13.0 - t * 1.7 + 1.3) * 13.0 * 0.06) * x * 0.35;
+	// Sans vent, le bord libre retombe le long de la hampe.
+	VERTEX.y -= x * x * mix(0.45, 0.06, s) * flag_length;
+	VERTEX.x *= mix(0.8, 1.0, s);
+	float slope = (cos(x * 7.0 - t) * 7.0 * amp + cos(x * 13.0 - t * 1.7 + 1.3) * 13.0 * amp * 0.27) * x * 0.35;
 	NORMAL = normalize(vec3(-slope, 0.0, 1.0));
 	v_fold = clamp(0.5 + wave * 2.0, 0.0, 1.0);
 }

@@ -1,8 +1,9 @@
 //! Battle regiments: state, formation geometry and soldier positions.
 
-use data_model::{Ability, UnitCategory, UnitStats};
+use data_model::{Ability, Missile, UnitCategory, UnitStats};
 use serde::{Deserialize, Serialize};
 
+use crate::impact::LossCause;
 use crate::rng::jitter;
 use crate::setup::{SideId, UnitSetup};
 
@@ -82,6 +83,10 @@ pub struct Unit {
     pub mounted: bool,
     pub stats: UnitStats,
     pub abilities: Vec<Ability>,
+    /// Missile loosed by a shooting unit (lot UR2: data-driven, see
+    /// `BattleSim::missile_kind`).
+    #[serde(default)]
+    pub missile: Option<Missile>,
     pub experience: u8,
     /// Soldiers at the start of the battle.
     pub initial_soldiers: u32,
@@ -149,6 +154,10 @@ pub struct Unit {
     /// Casualties taken during the current tick (for morale).
     #[serde(skip)]
     pub tick_losses: f64,
+    /// UB1: enemy soldiers this unit struck down (volleys and melee), for
+    /// the result screen only; no rule reads it.
+    #[serde(default)]
+    pub kills: f64,
     /// Attacked on the flank / rear during the current tick.
     #[serde(skip)]
     pub flanked: u8,
@@ -168,6 +177,17 @@ pub struct Unit {
     /// Heavy horse fighting on foot (order or siege assault).
     #[serde(default)]
     pub dismounted: bool,
+    /// BV2: cause of the latest casualties and the regiment that inflicted them.
+    #[serde(default)]
+    pub loss_cause: LossCause,
+    #[serde(default)]
+    pub loss_by: Option<u32>,
+    /// BV2: men knocked down by a charge (not fighting) and the seconds left
+    /// before they are back on their feet.
+    #[serde(default)]
+    pub knocked: f64,
+    #[serde(default)]
+    pub knocked_timer: f64,
 }
 
 /// `missile_timer` of a regiment never shot at.
@@ -188,6 +208,7 @@ impl Unit {
             mounted: setup.mounted,
             stats: setup.stats.clone(),
             abilities: setup.abilities.clone(),
+            missile: setup.missile,
             experience: setup.experience,
             initial_soldiers: setup.soldiers,
             max_soldiers: setup.max_soldiers.max(setup.soldiers).max(1),
@@ -224,12 +245,17 @@ impl Unit {
             ram: false,
             blocked_by: None,
             tick_losses: 0.0,
+            kills: 0.0,
             flanked: 0,
             order_morale: 0.0,
             order_morale_timer: 0.0,
             pavise: None,
             missile_timer: never(),
             dismounted: false,
+            loss_cause: LossCause::Other,
+            loss_by: None,
+            knocked: 0.0,
+            knocked_timer: 0.0,
         }
     }
 
@@ -362,7 +388,13 @@ impl Unit {
             Formation::Wedge => f64::from(files) * 3.0,
             _ => f64::from(files) * 2.0,
         };
-        front.min(self.hp.max(0.0))
+        // BV2: men knocked down by a charge do not fight until they get up.
+        let down = if self.knocked_timer > 0.0 {
+            self.knocked
+        } else {
+            0.0
+        };
+        (front - down).max(0.0).min(self.hp.max(0.0))
     }
 
     /// Support of the formation rectangle along the unit vector `dir`.
@@ -411,6 +443,99 @@ impl Unit {
                 (lx, lz)
             }
         }
+    }
+
+    /// Figures drawn for this regiment at the visual unit-size multiplier
+    /// `scale` (BV1, ADR 0016): `round(soldiers × scale)`, at least one while
+    /// a soldier stands. Rendering only: the rules count [`Self::soldiers`].
+    pub fn figure_count(&self, scale: f64) -> u32 {
+        let n = self.soldiers();
+        if n == 0 || !self.present() {
+            return 0;
+        }
+        if (scale - 1.0).abs() < 1e-9 {
+            return n;
+        }
+        ((f64::from(n) * scale).round() as u32).max(1)
+    }
+
+    /// World (x, z, angle) of the figures drawn at unit-size multiplier
+    /// `scale` (BV1, ADR 0016). The figures fill the regiment's simulated
+    /// rectangle ([`Self::extent`]): more figures stand closer together
+    /// rather than widening the formation, so what the player sees still
+    /// matches the footprint the rules use for contact and collisions. At
+    /// `scale` = 1 this is exactly [`Self::soldier_positions`].
+    pub fn figure_positions(&self, scale: f64) -> Vec<(f64, f64, f64)> {
+        if (scale - 1.0).abs() < 1e-9 {
+            return self.soldier_positions();
+        }
+        let m = self.figure_count(scale);
+        if m == 0 {
+            return Vec::new();
+        }
+        let n = self.soldiers();
+        let (width, depth) = self.extent();
+        let (sx, sz) = self.spacing();
+        // Figure layout: the formation's own shape for m figures, squeezed
+        // back into the simulated rectangle. Lines and columns gain ranks as
+        // well as files (√scale each way) so that a large regiment does not
+        // turn into a single file of shoulder-to-shoulder men; riders keep
+        // at least a horse length between ranks.
+        let (ranks, files) = match self.formation {
+            Formation::Line | Formation::Column => {
+                let (r, _) = self.ranks_files(n);
+                let min_depth = if self.mounted { 2.7 } else { 0.8 };
+                let most = ((depth / min_depth).floor() as u32).max(1);
+                let r = ((f64::from(r) * scale.sqrt()).round() as u32).clamp(1, most.max(r));
+                let r = r.min(m);
+                (r, m.div_ceil(r))
+            }
+            _ => self.ranks_files(m),
+        };
+        let (fw, fd) = match self.formation {
+            Formation::Line | Formation::Column => (f64::from(files) * sx, f64::from(ranks) * sz),
+            _ => {
+                let (r, f) = self.ranks_files(m);
+                (f64::from(f) * sx, f64::from(r) * sz)
+            }
+        };
+        let kx = width / fw.max(1e-6);
+        let kz = depth / fd.max(1e-6);
+        let (fx, fz) = self.forward();
+        let (rx, rz) = self.right();
+        let spread = match self.state {
+            UnitState::Routing => 5.0,
+            UnitState::Melee => 1.2,
+            _ => 0.35,
+        } * kx.min(kz).min(1.0);
+        (0..m)
+            .map(|i| {
+                let (lx, lz) = match self.formation {
+                    Formation::Line | Formation::Column => {
+                        let rank = i / files;
+                        let file = i % files;
+                        (
+                            (f64::from(file) - (f64::from(files) - 1.0) * 0.5) * sx,
+                            ((f64::from(ranks) - 1.0) * 0.5 - f64::from(rank)) * sz,
+                        )
+                    }
+                    _ => self.slot(i, m),
+                };
+                let jx = jitter(u64::from(self.id), u64::from(i) * 2) * spread;
+                let jz = jitter(u64::from(self.id), u64::from(i) * 2 + 1) * spread;
+                let (lx, lz) = (lx * kx + jx, lz * kz + jz);
+                let angle = if self.state == UnitState::Routing {
+                    self.facing + jitter(u64::from(self.id) + 7, u64::from(i)) * 1.5
+                } else {
+                    self.facing
+                };
+                (
+                    self.x + rx * lx + fx * lz,
+                    self.z + rz * lx + fz * lz,
+                    angle,
+                )
+            })
+            .collect()
     }
 
     /// World (x, z, angle) of every living soldier, with a small stable jitter

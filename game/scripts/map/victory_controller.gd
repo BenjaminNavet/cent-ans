@@ -13,6 +13,8 @@ var end_dialog: PanelContainer
 var end_title: Label
 var end_text: Label
 var _announced: String = "ongoing"
+## Q1 : largeur des libellés à retour à la ligne (panneau de 620 px, marges comprises).
+const WRAP_WIDTH := 580.0
 
 
 func setup(campaign_map: Node) -> void:
@@ -121,6 +123,7 @@ func open_panel() -> void:
 		else:
 			score_label.text += "\nLa victoire exige de tenir tous les objectifs %d saisons d'affilée." % hold
 	score_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	score_label.custom_minimum_size.x = WRAP_WIDTH
 	# Audit A3 D2 : le score n'était pas expliqué.
 	score_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	score_label.tooltip_text = "Score de campagne : provinces tenues, objectifs remplis, prestige et trésor. Il mesure votre réussite si la campagne s'achève à l'échéance sans que tous les objectifs soient remplis."
@@ -139,10 +142,21 @@ func open_panel() -> void:
 		var text := Label.new()
 		text.text = str(objective["description"])
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.custom_minimum_size.x = WRAP_WIDTH
 		text.add_theme_font_size_override("font_size", 13)
 		row.add_child(text)
 		list.add_child(row)
 	panel.show()
+	_fit_centered.call_deferred(panel)
+
+
+## Q1 : les libellés à retour à la ligne gonflaient la hauteur minimale au premier calcul (panneau
+## étiré hors de l'écran, vide en bas) ; une fois la largeur connue, on le recentre à sa taille.
+static func _fit_centered(p: Control) -> void:
+	if not is_instance_valid(p):
+		return
+	p.reset_size()
+	p.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 
 
 func after_end_turn() -> void:
@@ -159,7 +173,7 @@ func after_end_turn() -> void:
 
 
 func handle_input(event: InputEvent) -> bool:
-	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_O:
+	if event.is_action_pressed("map_toggle_objectives") and not event.is_echo():  # U7
 		toggle_panel()
 		return true
 	return false

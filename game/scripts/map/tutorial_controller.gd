@@ -204,7 +204,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo or not map.get("visible"):
 		return
 	var key := event as InputEventKey
-	if key.physical_keycode == KEY_L and not key.ctrl_pressed and not key.meta_pressed:
+	if key.is_action_pressed("encyclopedia_open") and not key.ctrl_pressed and not key.meta_pressed:  # U7
 		encyclopedia.toggle()
 		get_viewport().set_input_as_handled()
 

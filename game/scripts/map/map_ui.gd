@@ -42,6 +42,8 @@ signal learn_skill_requested(character_id: String, skill_id: String)
 # M6 : technologies.
 signal tech_panel_requested
 signal research_requested(technology_id: String)
+# C5 : couche des routes commerciales.
+signal trade_layer_toggle_requested
 
 const MENU_SAVE := 0
 const MENU_LOAD := 1
@@ -87,9 +89,15 @@ var docked_right_x: float = 0.0
 @onready var research_label: Label = %ResearchLabel
 @onready var research_bar: ProgressBar = %ResearchBar
 @onready var tech_panel: TechPanel = %TechPanel
+# C5 : commerce.
+@onready var trade_button: Button = %TradeButton
 
 var _log_lines: PackedStringArray = PackedStringArray()
 var _toast_timer: SceneTreeTimer
+## Lot U1 (audit A3) : pile des panneaux (exclusivité, Échap, mise de côté des panneaux ancrés).
+var panels := PanelStack.new()
+## Province affichée par le panneau de province (une autre province = nouvelle sélection).
+var _province_panel_id: String = ""
 
 
 func _ready() -> void:
@@ -133,6 +141,8 @@ func _ready() -> void:
 	tech_panel.closed.connect(func() -> void: tech_panel.hide())
 	# Le panneau recouvre le journal : masqué tant que les technologies sont ouvertes.
 	tech_panel.visibility_changed.connect(func() -> void: event_log.visible = not tech_panel.visible and not court_panel.visible)
+	# --- C5 : routes commerciales ---
+	trade_button.toggled.connect(func(_pressed: bool) -> void: trade_layer_toggle_requested.emit())
 	tech_panel.hide()
 	# --- fin M6 ---
 	save_load_dialog.save_confirmed.connect(func(n: String) -> void: save_requested.emit(n))
@@ -143,6 +153,22 @@ func _ready() -> void:
 	toast.hide()
 	_decorate_top_bar()  # F2
 	_setup_hud()  # F10b : la cloche porte seule le raccourci `campaign_end_turn`
+	_setup_panel_stack()  # U1
+	_apply_access_args()  # U12 : captures
+
+
+## Captures (lot U12) : `--access=colorblind,contrast,motion` active ces réglages sans les
+## enregistrer dans le fichier du joueur.
+func _apply_access_args() -> void:
+	var settings := get_node_or_null("/root/Settings")
+	if settings == null:
+		return
+	var keys := {"colorblind": Accessibility.KEY_COLORBLIND, "contrast": Accessibility.KEY_HIGH_CONTRAST, "motion": Accessibility.KEY_REDUCE_MOTION}
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--access="):
+			for word in arg.trim_prefix("--access=").split(","):
+				if keys.has(word):
+					settings.call("set_value", keys[word], true, false)
 
 
 # --- Icônes et infobulles de la barre (F2) -------------------------------------------
@@ -168,9 +194,21 @@ func _decorate_top_bar() -> void:
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury")
 	income_label.tooltip_text = RichTooltip.hud("hud_income")
 	# Boutons à icône seule (le libellé passe dans l'infobulle) : la barre tient en 1440 px.
+	# U7 : chaque bouton porte la lettre de son raccourci (lue dans l'InputMap).
 	_decorate_button(court_button, "hud_court", true)
+	_add_keycap(court_button, "map_toggle_court")
 	_decorate_button(tech_button, "hud_technologies", true)
+	_add_keycap(tech_button, "map_toggle_tech")
 	_add_codex_button()
+	_add_action_button("ObjectivesButton", "⚑", "", "map_toggle_objectives",
+		"[b]Objectifs[/b]\nObjectifs historiques de votre faction et score.", tech_button.get_index() + 2)
+	_add_action_button("AgentsButton", "✦", "Agents", "map_toggle_agents",
+		"[b]Agents[/b]\nRegistre des espions, hérauts et prédicateurs.", tech_button.get_index() + 3)
+	var settings := get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.changed.connect(func(key: String) -> void:
+			if key == "input/layout":
+				refresh_keycaps())
 	# Boutons ajoutés par les contrôleurs (Diplomatie, Chronique) après ce _ready.
 	bar.child_entered_tree.connect(func(node: Node) -> void: _decorate_late_button.call_deferred(node))
 
@@ -198,6 +236,7 @@ func _decorate_late_button(node: Node) -> void:
 	var button := node as Button
 	if button.text.begins_with("Diplomatie"):
 		_decorate_button(button, "hud_diplomacy", true)
+		_add_keycap(button, "map_toggle_diplomacy")
 	elif button.text.begins_with("Chronique"):
 		_decorate_button(button, "hud_chronicle")
 
@@ -210,48 +249,71 @@ func set_faction(label: String, color: Color) -> void:
 	faction_swatch.color = color
 
 
-## `economy` : `get_faction_economy` (vide si indisponible). Affiche le revenu **net** prévu
-## (recettes - entretien des armées, des bâtiments et de la cour) ; détail en infobulle.
-## Sans économie, repli sur `income` (revenu brut du dernier tour).
+## `economy` : `get_faction_economy` (vide si indisponible). Affiche le solde **net** prévu
+## (calculé par `core/`, `net_income`) ; infobulle : rubriques signées du budget et écart « par
+## rapport à la saison passée » (lot U3). Sans économie, repli sur `income` (revenu brut).
 func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
-	treasury_label.text = "Trésor : %s ℔" % ProvincePanel._thousands(treasury)
+	treasury_label.text = "Trésor : %s" % Money.amount(treasury)
 	if economy.is_empty():
-		income_label.text = "Revenu : %s ℔" % _signed(income)
+		income_label.text = "Revenu : %s" % Money.signed(income)
 		income_label.tooltip_text = "Revenu brut du dernier tour."
 		return
-	var gross := int(economy.get("projected_income", income))
-	var armies := int(economy.get("army_upkeep", 0))
-	var buildings := int(economy.get("building_upkeep", 0))
-	var court := int(economy.get("administration_upkeep", 0))
-	var table := int(economy.get("table_upkeep", 0))  # H3 : la Table (diètes des provinces)
-	# H5 : le seigneuriage est déjà dans les recettes, la refonte dans l'administration.
-	var seigniorage := int(economy.get("seigniorage", 0))
-	var recoinage := int(economy.get("recoinage", 0))
-	# Solde calculé par `core/` (`FactionEconomy::net_income`, audit A3 E1/E4) : l'interface
-	# n'additionne rien, le panneau de faction affiche le même chiffre.
 	var net := int(economy.get("net_income", 0))
-	income_label.text = "Solde : %s ℔ / saison" % _signed(net)
-	income_label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if net < 0 else Color(0.22, 0.14, 0.07))
-	var lines := PackedStringArray(["Prévision pour la prochaine saison"])
-	lines.append("Recettes : %s ℔" % ProvincePanel._thousands(gross))
-	if seigniorage != 0:
-		lines.append("    dont seigneuriage : %s ℔" % _signed(seigniorage))
-	lines.append("Armées : -%s ℔" % ProvincePanel._thousands(armies))
-	lines.append("Bâtiments : -%s ℔" % ProvincePanel._thousands(buildings))
-	lines.append("Cour et administration : -%s ℔" % ProvincePanel._thousands(court))
-	if recoinage != 0:
-		lines.append("    dont refonte des monnaies : -%s ℔" % ProvincePanel._thousands(recoinage))
-	if table != 0:
-		lines.append("La Table : -%s ℔" % ProvincePanel._thousands(table))
-	lines.append("Solde prévu : %s ℔" % _signed(net))
-	if economy.has("net_income_last_turn"):
-		lines.append("Saison passée : %s ℔" % _signed(int(economy["net_income_last_turn"])))
+	income_label.text = "Solde : %s / saison" % Money.signed(net)
+	income_label.add_theme_color_override("font_color", Money.LOSS_COLOR if net < 0 else Money.INK_COLOR)
+	income_label.tooltip_text = budget_tooltip(economy)
+	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury", treasury_tooltip(economy))
+
+
+## Infobulle du solde : rubriques signées (prévu, et saison passée entre parenthèses), solde,
+## puis l'écart par rapport à la saison passée et sa principale cause.
+static func budget_tooltip(economy: Dictionary) -> String:
+	var lines := PackedStringArray(["[b]Solde prévu pour la prochaine saison[/b]"])
+	var has_past := economy.has("net_change")
+	var biggest_key := ""
+	var biggest := 0
+	for line in economy.get("budget_lines", []):
+		var key := str(line.get("key", ""))
+		if key == "other":
+			continue
+		var projected := int(line.get("projected", 0))
+		var text := "%s : [color=#%s]%s[/color]" % [BudgetTable.RUBRICS.get(key, key), Money.color_of(projected).to_html(false), Money.signed(projected)]
+		if has_past and line.has("last"):
+			text += " (saison passée %s)" % Money.signed(int(line["last"]))
+		lines.append(text)
+		var delta := int(line.get("delta", 0))
+		if has_past and absi(delta) > absi(biggest):
+			biggest = delta
+			biggest_key = key
+	var net := int(economy.get("net_income", 0))
+	lines.append("[b]Solde : [color=#%s]%s[/color][/b]" % [Money.color_of(net).to_html(false), Money.signed(net)])
+	if has_past:
+		var change := int(economy.get("net_change", 0))
+		var sentence := "%s par rapport à la saison passée" % Money.signed(change)
+		if change != 0 and biggest_key != "" and biggest != 0:
+			sentence += ", dont %s sur « %s »" % [Money.signed(biggest), str(BudgetTable.RUBRICS.get(biggest_key, biggest_key)).to_lower()]
+		lines.append("[color=#%s]%s.[/color]" % [Money.color_of(change).to_html(false), sentence])
+	else:
+		lines.append("Premier tour : pas encore de saison passée.")
 	lines.append("Détail : panneau de faction (clic sur le blason).")
-	income_label.tooltip_text = "\n".join(lines)
+	return "\n".join(lines)
+
+
+## Infobulle du trésor : variation de la dernière saison, hors budget compris.
+static func treasury_tooltip(economy: Dictionary) -> String:
+	var history: Array = economy.get("budget_history", [])
+	if history.is_empty():
+		return "Aucune saison résolue pour l'instant."
+	var last: Dictionary = history.back()
+	var text := "Saison passée : %s au trésor" % Money.signed(int(last.get("change", 0)))
+	var other := int(last.get("other", 0))
+	if other != 0:
+		text += " (dont %s hors budget : rançons, tributs, agents, chronique)" % Money.signed(other)
+	return text + "."
 
 
 static func _signed(value: int) -> String:
-	return ("+" if value >= 0 else "-") + ProvincePanel._thousands(absi(value))
+	return Money.signed(value)
 
 
 func set_date(text: String) -> void:
@@ -307,9 +369,27 @@ func set_hover_path(province_name: String, steps: int, cost: int, reachable_this
 	_fit_hover_label()
 
 
+## C5 : synchronise le bouton « Commerce » de la barre supérieure avec la couche.
+func set_trade_mode(active: bool) -> void:
+	# Sans signal : `toggled` redemanderait la bascule (boucle infinie).
+	trade_button.set_pressed_no_signal(active)
+
+
+## C5 : infobulle de la route commerciale survolée (texte vide = pas de route sous la souris,
+## le survol de province reprend la main).
+func set_hover_trade(text: String) -> void:
+	if text == "":
+		return
+	hover_label.text = text
+	hover_label.visible = true
+	_fit_hover_label()
+
+
 func show_toast(text: String, is_error: bool = false) -> void:
 	toast.text = text
 	toast.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if is_error else Color(0.22, 0.14, 0.07))
+	# Q1 : le bandeau passait sous les panneaux ancrés et le rapport de saison (message invisible).
+	toast.move_to_front()
 	toast.show()
 	_toast_timer = get_tree().create_timer(TOAST_SECONDS)
 	var timer := _toast_timer
@@ -331,6 +411,16 @@ const FOREIGN_MINOR_KINDS := [
 	"income", "bankruptcy", "attrition", "recruited", "building_completed", "trait_acquired",
 	"skill_learned", "appointment", "technology_researched", "regency", "birth", "raid",
 ]
+
+
+## Lot U5 : filtre d'intérêt des lettres et du bandeau (voisins, alliés, ennemis, grandes
+## puissances), recalculé en fin de tour par `HudController.update_interest` ; nul = tout passe.
+var news_interest: NewsInterest = null
+
+
+## Vrai si la nouvelle mérite une lettre ou le bandeau du haut (le journal garde tout).
+func keeps_news(event: Dictionary) -> bool:
+	return news_interest == null or news_interest.keeps(event)
 
 
 ## Vrai si l'événement doit figurer au journal du joueur.
@@ -360,7 +450,9 @@ func add_events(events: Array, date_text: String) -> void:
 		if not journal_keeps(event):
 			continue
 		var news := NewsLetters.news_from_event(event)  # F10b : lettre scellée (trace persistante)
-		if not news.is_empty():
+		if not news.is_empty() and keeps_news(event):  # U5 : filtre d'intérêt
+			if news_interest != null:
+				news["interest"] = NewsInterest.interest_label(news_interest.event_interest(event))
 			news_letters.push_news(news)
 		var kind: String = str(event.get("kind", ""))
 		var text: String = journal_text(event)
@@ -403,6 +495,8 @@ func add_events(events: Array, date_text: String) -> void:
 			line = "[color=#a1121a][b]⚡ %s[/b][/color]" % text
 		elif kind == "embargo" or kind == "diplomatic_offer" or kind == "diplomacy":
 			line = "[color=#4a3a10]✉ %s[/color]" % text
+		elif kind == "trade":  # C5
+			line = "[color=#4a3a10]⚓ %s[/color]" % text
 		elif kind == "excommunication" or kind == "schism" or kind == "heresy":
 			line = "[color=#5a2a6a][b]✠ %s[/b][/color]" % text
 		elif kind == "chronicle":  # M10
@@ -459,10 +553,18 @@ func log_line_count() -> int:
 
 
 func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Array = [], is_player_owner: bool = false, label_of: Callable = Callable(), city: Dictionary = {}) -> void:
+	# U1 : une autre province choisie sur la carte referme les grands panneaux ; la même
+	# province (rafraîchissement de fin de tour) reste de côté sous le panneau central.
+	var id := str(province.get("id", ""))
+	if id != _province_panel_id:
+		panels.reveal(province_panel)
+	_province_panel_id = id
 	province_panel.show_province(province, state, recruitable, is_player_owner, label_of, city)
 
 
 func hide_province() -> void:
+	_province_panel_id = ""
+	panels.forget_suspended(province_panel)
 	province_panel.hide()
 
 
@@ -528,6 +630,68 @@ func hide_army() -> void:
 	queue_layout()
 
 
+## Lot U10 (audit A3 § 4) : choix du général d'une armée sans chef, ouvert depuis le sceau
+## « Sans chef ». `candidates` : `[{id, name, detail, reason}]` (`reason` non vide = grisé, avec
+## le motif). Choisir émet `general_requested(personnage, armée)` ; « Toute la Cour… » émet
+## `court_panel_requested`.
+var general_picker: PanelContainer
+
+
+func show_general_picker(army_id: String, title: String, candidates: Array) -> void:
+	if general_picker == null:
+		general_picker = PanelContainer.new()
+		general_picker.name = "GeneralPicker"
+		general_picker.theme = event_log.theme
+		general_picker.add_theme_stylebox_override("panel", HudStyle.panel_box(10))
+		add_child(general_picker)
+		register_panel(general_picker, PanelStack.Kind.CENTRAL)
+	for child in general_picker.get_children():
+		general_picker.remove_child(child)
+		child.queue_free()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	general_picker.add_child(box)
+	var header := HBoxContainer.new()
+	box.add_child(header)
+	var heading := HudStyle.label(title, HudStyle.FONT_TITLE + 1, HudStyle.RUBRIC)
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(heading)
+	var close := Button.new()
+	close.text = "×"
+	close.tooltip_text = "Fermer (Échap)"
+	close.pressed.connect(general_picker.hide)
+	header.add_child(close)
+	var any_free := false
+	for candidate in candidates:
+		var reason := str(candidate.get("reason", ""))
+		var button := Button.new()
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.text = "%s — %s" % [str(candidate.get("name", "?")), str(candidate.get("detail", ""))]
+		if reason != "":
+			button.text += " (%s)" % reason
+			button.disabled = true
+			button.tooltip_text = "Impossible : %s." % reason
+		else:
+			any_free = true
+			var character_id := str(candidate.get("id", ""))
+			button.pressed.connect(func() -> void:
+				general_picker.hide()
+				general_requested.emit(character_id, army_id))
+		box.add_child(button)
+	if not any_free:
+		box.add_child(HudStyle.label("Aucun personnage disponible sur place : amenez-en un jusqu'à l'armée.", HudStyle.FONT_BODY, HudStyle.INK_SOFT))
+	var court := Button.new()
+	court.text = "Toute la Cour…"
+	court.pressed.connect(func() -> void:
+		general_picker.hide()
+		court_panel_requested.emit())
+	box.add_child(court)
+	general_picker.show()
+	general_picker.reset_size()
+	var view := get_viewport().get_visible_rect().size
+	general_picker.position = Vector2(HUD_MARGIN, maxf(60.0, view.y - general_seal.size.y - HUD_MARGIN - general_picker.size.y - 8.0))
+
+
 func show_court(rows: Array[Dictionary], faction_label: String, faction_color: Color, preset_filter: int = -1) -> void:
 	court_panel.show_court(rows, faction_label, faction_color, preset_filter)
 
@@ -578,7 +742,7 @@ func set_research_progress(research: Dictionary, points_per_turn: int) -> void:
 	research_box.tooltip_text = "Recherche : %s\n%d / %d points, +%d par tour%s" % [
 		str(research.get("name", "")), int(research.get("progress", 0)), int(research.get("cost", 0)),
 		int(research.get("points_per_turn", points_per_turn)),
-		", %d tour(s) restant(s)" % turns if turns >= 0 else ""]
+		", %s restant%s" % [FrText.count(turns, "tour"), FrText.s(turns)] if turns >= 0 else ""]
 
 
 # --- HUD de campagne (F10b) ----------------------------------------------------------
@@ -610,8 +774,93 @@ func end_turn_control() -> EndTurnCluster:
 	return end_turn_cluster
 
 
+## Lot U5 (audit A3, T5) : bandeau « Tour des autres factions » affiché pendant la résolution de
+## la fin de saison. `end_turn_gate` (posé par `FlowController`) dit si la fin de tour aura lieu
+## tout de suite (pas de confirmation en attente) ; invalide = oui.
+var end_turn_gate: Callable = Callable()
+var turn_banner: PanelContainer
+var _turn_banner_title: Label
+var _turn_banner_detail: Label
+var _turn_banner_tween: Tween
+const TURN_BANNER_HOLD := 1.1
+
+
+## Cloche ou Entrée : bandeau des autres factions, une image pour l'afficher, puis la fin de tour.
+func request_end_turn() -> void:
+	if end_turn_gate.is_valid() and not bool(end_turn_gate.call()):
+		end_turn_pressed.emit()
+		return
+	show_turn_banner()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	end_turn_pressed.emit()
+	finish_turn_banner()
+
+
+func _setup_turn_banner() -> void:
+	turn_banner = PanelContainer.new()
+	turn_banner.name = "TurnBanner"
+	turn_banner.theme = event_log.theme
+	turn_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var box := HudStyle.panel_box(12)
+	box.border_color = HudStyle.GOLD
+	turn_banner.add_theme_stylebox_override("panel", box)
+	var column := VBoxContainer.new()
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	turn_banner.add_child(column)
+	_turn_banner_title = HudStyle.label("Tour des autres factions", 22, HudStyle.RUBRIC)
+	_turn_banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(_turn_banner_title)
+	_turn_banner_detail = HudStyle.label("", HudStyle.FONT_BODY + 2, HudStyle.INK_SOFT)
+	_turn_banner_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(_turn_banner_detail)
+	add_child(turn_banner)
+	turn_banner.hide()
+
+
+func show_turn_banner() -> void:
+	if turn_banner == null:
+		return
+	if _turn_banner_tween != null:
+		_turn_banner_tween.kill()
+	_turn_banner_title.text = "Tour des autres factions"
+	_turn_banner_detail.text = "Les princes d'Europe jouent leur saison…"
+	turn_banner.modulate.a = 1.0
+	move_child(turn_banner, -1)  # au-dessus des panneaux
+	turn_banner.show()
+	_place_turn_banner()
+
+
+## Après la résolution : « à vous de jouer », puis le bandeau s'efface (sans fondu si
+## « Réduire les animations » est coché).
+func finish_turn_banner() -> void:
+	if turn_banner == null or not turn_banner.visible:
+		return
+	_turn_banner_title.text = date_label.text.get_slice(" — ", 0)
+	_turn_banner_detail.text = "Les autres factions ont joué : à vous."
+	_place_turn_banner()
+	if _turn_banner_tween != null:
+		_turn_banner_tween.kill()
+	_turn_banner_tween = create_tween()
+	_turn_banner_tween.tween_interval(TURN_BANNER_HOLD)
+	if Accessibility.reduce_motion():
+		_turn_banner_tween.tween_callback(turn_banner.hide)
+	else:
+		_turn_banner_tween.tween_property(turn_banner, "modulate:a", 0.0, 0.45)
+		_turn_banner_tween.tween_callback(turn_banner.hide)
+
+
+func _place_turn_banner() -> void:
+	var view := get_viewport().get_visible_rect().size
+	turn_banner.reset_size()
+	turn_banner.size.x = maxf(turn_banner.get_combined_minimum_size().x, 380.0)
+	turn_banner.position = Vector2((view.x - turn_banner.size.x) * 0.5, ($TopBar as Control).size.y + 48.0)
+
+
 func _setup_hud() -> void:
-	end_turn_cluster.end_turn_requested.connect(func() -> void: end_turn_pressed.emit())
+	end_turn_cluster.end_turn_requested.connect(request_end_turn)
+	_setup_turn_banner()
 	end_turn_cluster.alert_activated.connect(func(alert: Dictionary) -> void: alert_activated.emit(alert))
 	general_seal.general_requested.connect(func(id: String) -> void: army_general_clicked.emit(id))
 	general_seal.stance_selected.connect(func(stance: String) -> void:
@@ -640,6 +889,7 @@ func _setup_hud() -> void:
 	event_log.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	set_log_expanded(false)
 	army_strip.minimum_size_changed.connect(queue_layout)
+	end_turn_cluster.minimum_size_changed.connect(queue_layout)  # U5 : colonne de pastilles
 	news_letters.resized.connect(queue_layout)
 	event_log.minimum_size_changed.connect(queue_layout)
 	for panel in [province_panel, faction_panel, character_sheet, court_panel]:
@@ -647,6 +897,84 @@ func _setup_hud() -> void:
 	court_panel.resized.connect(queue_layout)  # C7 : onglet arbre (panneau élargi)
 	get_viewport().size_changed.connect(queue_layout)
 	queue_layout()
+
+
+# --- Pile des panneaux (audit A3, lot U1) ------------------------------------------------
+
+
+func _setup_panel_stack() -> void:
+	panels.register(province_panel, PanelStack.Kind.DOCKED)
+	panels.register(faction_panel, PanelStack.Kind.CENTRAL)
+	panels.register(court_panel, PanelStack.Kind.CENTRAL)
+	panels.register(tech_panel, PanelStack.Kind.CENTRAL)
+	panels.register(character_sheet, PanelStack.Kind.COMPANION, [court_panel])
+	panels.register(save_load_dialog, PanelStack.Kind.MODAL)
+	for panel in docked_panels:
+		panels.register(panel, PanelStack.Kind.DOCKED)
+	# U11 : fenêtre commune « Codex » (Histoire / Règles), panneau central.
+	codex_hub = CodexHub.new()
+	add_child(codex_hub)
+	register_panel(codex_hub, PanelStack.Kind.CENTRAL)
+	for child in get_children():
+		_auto_register(child)
+	child_entered_tree.connect(_auto_register)
+	panels.changed.connect(queue_layout)
+
+
+## Enregistre un panneau de la carte : `kind` = `PanelStack.Kind` ; `companion_of` : panneaux
+## centraux qu'il accompagne (fiche à côté de la Cour…).
+func register_panel(panel: Control, kind: PanelStack.Kind, companion_of: Array = []) -> void:
+	panels.register(panel, kind, companion_of)
+	if not panel.resized.is_connected(queue_layout):
+		panel.resized.connect(queue_layout)
+
+
+## Lot U11 : fenêtre commune Codex / encyclopédie.
+var codex_hub: CodexHub
+
+
+## Panneaux ajoutés par les contrôleurs (diplomatie, chronique, agents, rançons, flow).
+func _auto_register(node: Node) -> void:
+	if node is Encyclopedia and codex_hub != null:
+		codex_hub.adopt_encyclopedia.call_deferred(node)  # U11 : onglet « Règles »
+		return
+	if not (node is Control) or panels.is_registered(node):
+		return
+	if node is DiplomacyPanel or node is ChronicleWindow or node.name == &"AgentRegistry":
+		register_panel(node, PanelStack.Kind.CENTRAL)
+	elif node is RansomPanel:
+		register_panel(node, PanelStack.Kind.COMPANION, [faction_panel])
+	elif node is PauseMenu or node is SettingsMenu or node is SeasonReport:
+		register_panel(node, PanelStack.Kind.MODAL)
+
+
+## Échap ferme le panneau du dessus avant que la carte (désélection) ou le menu pause ne la
+## reçoivent (`_shortcut_input` passe avant `_unhandled_input`).
+func _shortcut_input(event: InputEvent) -> void:
+	if get_tree().paused or not visible or event.is_echo():
+		return
+	# Lot U7 (partiel) : sauvegarde rapide F5, chargement rapide F9.
+	if event is InputEventKey and event.pressed and not panels.has_modal_open():
+		if event.is_action_pressed("quick_save"):
+			save_requested.emit(QUICK_SAVE_NAME)
+			get_viewport().set_input_as_handled()
+			return
+		if event.is_action_pressed("quick_load"):
+			var path := SaveSlots.SAVES_DIR.path_join(QUICK_SAVE_NAME.validate_filename() + ".json")
+			if FileAccess.file_exists(path):
+				load_requested.emit(path)
+			else:
+				show_toast("Aucune sauvegarde rapide (F5 pour en faire une).", true)
+			get_viewport().set_input_as_handled()
+			return
+	if not event.is_action_pressed("ui_cancel"):
+		return
+	if panels.close_top():
+		get_viewport().set_input_as_handled()
+
+
+## Nom de l'emplacement de la sauvegarde rapide (F5 / F9).
+const QUICK_SAVE_NAME := "Sauvegarde rapide"
 
 
 ## Replace le HUD au prochain cycle (plusieurs demandes → un seul placement).
@@ -706,24 +1034,62 @@ func layout_hud() -> void:
 	var docked_open := province_panel.visible
 	for panel in docked_panels:
 		docked_open = docked_open or panel.visible
-	var wide_panel_open := faction_panel.visible or character_sheet.visible
+	# U1 : panneaux centraux gardés à l'écran (bouton × visible), puis la minicarte se masque
+	# dès qu'un grand panneau la recouvrirait (elle ne passe plus jamais par-dessus).
+	var wide_panel_open := false
+	for panel in panels.visible_panels():
+		var kind := panels.kind_of(panel)
+		if kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION:
+			_keep_on_screen(panel, top, view)
+			wide_panel_open = true
 	var letters_top := top
 	# Bord droit (distance au bord de l'écran) des panneaux de province et de colonie.
 	var dock_right := HUD_MARGIN
 	if minimap != null:
 		minimap.size = minimap.get_combined_minimum_size()
 		minimap.position = Vector2(view.x - minimap.size.x - HUD_MARGIN, top)
-		minimap.visible = not wide_panel_open
+		minimap.visible = not _covers(minimap.get_global_rect())
 		letters_top = minimap.position.y + minimap.size.y + 10.0
 		if minimap.visible:
 			dock_right = view.x - minimap.position.x + 8.0
 	docked_right_x = view.x - dock_right
 	news_letters.position = Vector2(view.x - NewsLetters.LETTER_WIDTH - HUD_MARGIN, letters_top)
+	# U5 : les lettres s'arrêtent au-dessus des pastilles d'alerte de la cloche.
+	news_letters.fit_height(end_turn_cluster.position.y + end_turn_cluster.stack_top() - 8.0 - letters_top)
 	news_letters.visible = not (docked_open or wide_panel_open)
 	# Panneaux de province et de colonie : de la barre jusqu'au-dessus de la cloche, à gauche de
 	# la minicarte.
 	for panel: Control in [province_panel] + docked_panels:
 		_dock_panel(panel, top, dock_right)
+
+
+## U1 : vrai si un panneau central ou compagnon ouvert recouvre `rect` (coordonnées écran).
+func _covers(rect: Rect2) -> bool:
+	for panel in panels.visible_panels():
+		var kind := panels.kind_of(panel)
+		if (kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION) and panel.get_global_rect().intersects(rect):
+			return true
+	return false
+
+
+## U1 : le coin haut droit (bouton ×) d'un panneau reste sous la barre du haut et dans l'écran.
+func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
+	if panel.get_parent() != self:
+		return
+	# Trop grand pour l'écran : rétréci (dans la limite de sa taille minimale).
+	var room := Vector2(view.x - 8.0, view.y - top - 4.0)
+	if panel.size.x > room.x or panel.size.y > room.y:
+		panel.size = Vector2(minf(panel.size.x, room.x), minf(panel.size.y, room.y))
+	var rect := panel.get_global_rect()
+	var shift := Vector2.ZERO
+	if rect.end.x > view.x - 4.0:
+		shift.x = view.x - 4.0 - rect.end.x
+	if rect.position.x + shift.x < 4.0:
+		shift.x = 4.0 - rect.position.x
+	if rect.position.y < top:
+		shift.y = top - rect.position.y
+	if shift != Vector2.ZERO:
+		panel.position += shift
 
 
 ## Lot C7b : ancre `panel` (panneau de colonie) comme le panneau de province, à gauche de la
@@ -732,6 +1098,7 @@ func dock_right_panel(panel: Control) -> void:
 	if docked_panels.has(panel):
 		return
 	docked_panels.append(panel)
+	panels.register(panel, PanelStack.Kind.DOCKED)
 	panel.visibility_changed.connect(queue_layout)
 	queue_layout()
 
@@ -750,7 +1117,7 @@ func _dock_panel(panel: Control, top: float, right: float) -> void:
 	panel.offset_right = -right
 	panel.offset_left = -right - width
 	panel.offset_top = top
-	panel.offset_bottom = -(end_turn_cluster.size.y + HUD_MARGIN * 0.5)
+	panel.offset_bottom = -(end_turn_cluster.bell_height() + HUD_MARGIN * 0.5)
 
 
 func _fit_hover_label() -> void:
@@ -760,19 +1127,101 @@ func _fit_hover_label() -> void:
 	queue_layout()
 
 
-## Bouton « Codex » (H2) dans la barre du haut, après Technologies ; la touche K reste active.
+## Bouton « Codex » (H2) dans la barre du haut, après Technologies ; lot U7 : icône, libellé
+## « Codex » et lettre de raccourci (K), bien visible.
 func _add_codex_button() -> void:
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles == null or tech_button.get_parent().has_node("CodexButton"):
 		return
 	var button := Button.new()
 	button.name = "CodexButton"
-	button.tooltip_text = "Codex : l'histoire et le savoir du temps (K)"
 	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(func() -> void: bubbles.call("toggle_window"))
 	tech_button.get_parent().add_child(button)
 	tech_button.get_parent().move_child(button, tech_button.get_index() + 1)
 	if IconLibrary.has_icon("hud_codex"):
-		_decorate_button(button, "hud_codex", true)
-	else:
-		button.text = "Codex"
+		_decorate_button(button, "hud_codex")
+	button.text = "Codex"
+	button.add_theme_font_size_override("font_size", 17)
+	button.tooltip_text = "[b]Codex[/b]\nL'histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
+	_add_keycap(button, "codex_open")
+
+
+# --- Raccourcis sur les boutons (lot U7) ------------------------------------------------
+
+## [cartouche, action, bouton] des boutons de la barre.
+var _keycaps: Array = []
+
+
+## Cartouche de la touche d'`action` dans le coin bas droit de `button`, et rappel dans
+## l'infobulle (« Cour (C) »).
+func _add_keycap(button: Button, action: String) -> void:
+	if button == null or button.has_node("Keycap"):
+		return
+	var cap := Label.new()
+	cap.name = "Keycap"
+	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cap.add_theme_font_size_override("font_size", 11)
+	cap.add_theme_color_override("font_color", HudStyle.INK)
+	var box := HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.INK_SOFT)
+	box.content_margin_left = 3
+	box.content_margin_right = 3
+	box.content_margin_top = 0
+	box.content_margin_bottom = 0
+	cap.add_theme_stylebox_override("normal", box)
+	button.add_child(cap)
+	_keycaps.append([cap, action, button, button.tooltip_text])
+	button.resized.connect(func() -> void: _place_keycap(cap, button))
+	_update_keycap(_keycaps.back())
+
+
+func _update_keycap(entry: Array) -> void:
+	var cap: Label = entry[0]
+	var key := ShortcutSheet.first_key(str(entry[1]))
+	cap.text = key
+	cap.visible = key != ""
+	var button: Button = entry[2]
+	var tooltip := str(entry[3])
+	button.tooltip_text = tooltip + ("\nRaccourci : %s" % key if key != "" else "")
+	_place_keycap(cap, button)
+
+
+func _place_keycap(cap: Label, button: Button) -> void:
+	cap.size = cap.get_combined_minimum_size()
+	cap.position = button.size - cap.size + Vector2(2, 2)
+
+
+## Libellés des touches recalculés (réglage « Disposition du clavier »).
+func refresh_keycaps() -> void:
+	for entry in _keycaps:
+		if is_instance_valid(entry[0]):
+			_update_keycap(entry)
+
+
+## Bouton de la barre qui déclenche une action de l'InputMap (même chemin que le clavier).
+func _add_action_button(node_name: String, glyph: String, text: String, action: String, tooltip: String, index: int) -> Button:
+	var bar := tech_button.get_parent()
+	if bar.has_node(node_name):
+		return bar.get_node(node_name)
+	var button := Button.new()
+	button.name = node_name
+	button.focus_mode = Control.FOCUS_NONE
+	button.text = glyph if text == "" else "%s %s" % [glyph, text]
+	button.add_theme_font_size_override("font_size", 17)
+	button.custom_minimum_size = Vector2(TOP_ICON_SIZE + 22.0, 0)
+	button.set_script(RichButton)
+	button.tooltip_text = tooltip
+	button.pressed.connect(func() -> void: press_action(action))
+	bar.add_child(button)
+	bar.move_child(button, mini(index, bar.get_child_count() - 1))
+	_add_keycap(button, action)
+	return button
+
+
+## Simule l'action `action` (appui puis relâche), comme si la touche avait été frappée.
+func press_action(action: String) -> void:
+	for pressed in [true, false]:
+		var event := InputEventAction.new()
+		event.action = action
+		event.pressed = pressed
+		Input.parse_input_event(event)

@@ -38,7 +38,7 @@ const MARCH_FULL := 500.0
 const CAVALRY_FULL := 120.0
 const BED_SMOOTHING := 2.5
 ## Vitesse des traits (m/s) pour caler les impacts à l'arrivée (cf. `BattleEffects.SPEED`).
-const MISSILE_SPEED := {"arrow": 48.0, "bolt": 62.0, "ball": 110.0, "stone": 34.0}
+const MISSILE_SPEED := {"arrow": 48.0, "bolt": 62.0, "ball": 110.0, "stone": 34.0, "bullet": 210.0, "javelin": 24.0}
 const DEATH_GROAN_CHANCE := 0.25
 const BELL_PERIOD := 22.0
 const BELL_UNTIL := 150.0
@@ -62,6 +62,7 @@ var _ambience_targets: Dictionary = {}  # nom → volume_db visé
 var _track: Dictionary = {}  # id → {state, ammo, soldiers, present}
 var _side_cried: Dictionary = {}
 var _siege_track: Dictionary = {}
+var wall_impacts_external := false  # SG1
 var _weather: String = "clear"
 var _time: float = 0.0
 var _battle_time: float = 0.0
@@ -312,7 +313,11 @@ func update_siege(siege: Dictionary, elapsed: float) -> void:
 		if _siege_track.has(key):
 			var prev: Dictionary = _siege_track[key]
 			if hp < float(prev["hp"]) - 0.001:
-				play_event("ram_hit" if str(piece.get("kind", "")) == "gate" else "stone_impact", mid)
+				# SG1 : l'impact d'une pierre sur un pan est joué à son arrivée par `SiegeAssaultFx`.
+				if str(piece.get("kind", "")) == "gate":
+					play_event("ram_hit", mid)
+				elif not wall_impacts_external:
+					play_event("stone_impact", mid)
 			if bool(prev["intact"]) and not intact:
 				play_event("wall_collapse", mid)
 		_siege_track[key] = {"hp": hp, "intact": intact}
@@ -349,10 +354,17 @@ static func _forward(unit: Dictionary) -> Vector3:
 	return Vector3(sin(facing), 0.0, cos(facing))
 
 
+## Lot BV1 sans le cœur (`auto_volley`, `_no_bv1`) : mêmes deux cas particuliers que
+## `sim.rs::missile_kind` (`data/unit_types/*.missile`), reconnus ici par id faute d'accès aux
+## données ; le reste suit l'ancienne heuristique.
 static func missile_kind(unit: Dictionary) -> String:
 	var type := str(unit.get("type", ""))
 	if str(unit.get("render", "")) == "siege":
 		return "ball" if type == "unit_bombard" else "stone"
+	if type == "unit_culveriners":
+		return "bullet"
+	if type == "unit_jinetes":
+		return "javelin"
 	if type.contains("crossbow"):
 		return "bolt"
 	return "arrow"
@@ -418,6 +430,9 @@ func _on_volley(unit: Dictionary, by_id: Dictionary) -> void:
 			play_event("trebuchet_release", pos)
 		"bolt":
 			play_event("crossbow_release", pos)
+		"bullet":
+			# Pas d'échantillon dédié : bombarde adoucie (voir `BattleVolleys.on_shot`).
+			play_event("bombard", pos, -14.0)
 		_:
 			play_event("bow_release", pos)
 	if not by_id.has(target_id):

@@ -56,6 +56,12 @@ impl CampaignSim {
                     "loyalty" => entry.loyalty.map_or(-1, i64::from),
                     "power" => state.faction_power(&entry.faction).round() as i64,
                     "allies" => &allies,
+                    // DP1: ruler, war weariness, standing treaties.
+                    "ruler" => sim_campaign::negotiation::ruler_name(state, data, &entry.faction).as_str(),
+                    "weariness" => i64::from(sim_campaign::negotiation::weariness(state, &entry.faction)),
+                    "trade_agreement" => state.factions[&faction].ledger.trade_agreements.contains(&entry.faction),
+                    "access_given" => state.factions[&faction].ledger.military_access.contains(&entry.faction),
+                    "access_received" => state.factions[&entry.faction].ledger.military_access.contains(&faction),
                 }
                 .to_variant()
             })
@@ -100,6 +106,7 @@ impl CampaignSim {
                 },
             ),
             Order::DeclareWar { target } => return war_verdict(state, data, &player, &target),
+            Order::ProposeTreaty { target, articles } => (target, Proposal::Treaty { articles }),
             _ => return verdict(true, 0, &[]),
         };
         let evaluation = evaluate(state, data, &player, &target, &proposal);

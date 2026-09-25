@@ -63,6 +63,11 @@ pub struct FreeMovementRules {
     pub minor_river_extra: u8,
     /// Slope above which a cell is impassable (pipeline only).
     pub slope_impassable_threshold: f64,
+    /// Lot M5b (pipeline only): an Itiner-e road / major river crossing
+    /// opens a passage only within this distance of a settlement or of a
+    /// known bridge or ford; `None` keeps them all.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub road_crossing_radius_km: Option<f64>,
     pub embark_cost: EmbarkCost,
 }
 
@@ -79,6 +84,7 @@ impl Default for FreeMovementRules {
             road_cost_factor: 0.75,
             minor_river_extra: 10,
             slope_impassable_threshold: 0.3,
+            road_crossing_radius_km: None,
             embark_cost: EmbarkCost::All,
         }
     }

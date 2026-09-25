@@ -15,5 +15,6 @@
   "road_cost_factor": 0.75,
   "minor_river_extra": 10,
   "slope_impassable_threshold": 0.22,
+  "road_crossing_radius_km": 6,
   "embark_cost": "all"
 }

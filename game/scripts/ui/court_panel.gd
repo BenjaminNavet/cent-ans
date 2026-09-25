@@ -225,10 +225,18 @@ func _render() -> void:
 		rows_list.add_child(_make_row(row))
 
 
+## Lot U10 (audit A3, P1) : la ligne entière est cliquable (survol surligné, curseur main) ;
+## plus de bouton « Voir » répété.
 func _make_row(row: Dictionary) -> Control:
+	var character_id: String = str(row.get("id", ""))
+	var frame := CourtRow.new()
+	frame.name = "CourtRow_%s" % character_id.validate_node_name()
+	frame.tooltip_text = "Ouvrir la fiche de %s" % str(row.get("name", "?"))
+	frame.activated.connect(func() -> void: character_selected.emit(character_id))
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override("separation", 10)
-	line.mouse_filter = Control.MOUSE_FILTER_PASS
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_child(line)
 
 	var portrait := PanelContainer.new()
 	portrait.custom_minimum_size = Vector2(36, 36)
@@ -281,12 +289,49 @@ func _make_row(row: Dictionary) -> Control:
 	line.add_child(role_chip)
 	line.move_child(role_chip, 1)
 
-	var open_button := Button.new()
-	open_button.text = "Voir"
-	var character_id: String = str(row.get("id", ""))
-	open_button.pressed.connect(func() -> void: character_selected.emit(character_id))
-	line.add_child(open_button)
-	return line
+	var chevron := Label.new()
+	chevron.text = "›"
+	chevron.add_theme_font_size_override("font_size", 22)
+	chevron.add_theme_color_override("font_color", HudStyle.INK_SOFT)
+	line.add_child(chevron)
+	for child in line.find_children("*", "Control", true, false):
+		if (child as Control).mouse_filter == Control.MOUSE_FILTER_STOP:
+			(child as Control).mouse_filter = Control.MOUSE_FILTER_PASS
+	return frame
+
+
+## Ligne de la Cour cliquable (lot U10).
+class CourtRow:
+	extends PanelContainer
+
+	signal activated
+
+	var _normal: StyleBoxFlat
+	var _hover: StyleBoxFlat
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		focus_mode = Control.FOCUS_ALL
+		_normal = StyleBoxFlat.new()
+		_normal.bg_color = Color(0, 0, 0, 0)
+		_normal.set_content_margin_all(3)
+		_hover = HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.GOLD)
+		_hover.set_content_margin_all(3)
+		add_theme_stylebox_override("panel", _normal)
+		mouse_entered.connect(func() -> void: add_theme_stylebox_override("panel", _hover))
+		mouse_exited.connect(func() -> void: add_theme_stylebox_override("panel", _normal))
+		focus_entered.connect(func() -> void: add_theme_stylebox_override("panel", _hover))
+		focus_exited.connect(func() -> void: add_theme_stylebox_override("panel", _normal))
+
+	func _gui_input(event: InputEvent) -> void:
+		var click := event as InputEventMouseButton
+		if click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
+			activated.emit()
+			accept_event()
+		elif event.is_action_pressed("ui_accept"):
+			activated.emit()
+			accept_event()
 
 
 static func _initials(name: String) -> String:

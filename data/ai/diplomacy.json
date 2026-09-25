@@ -19,5 +19,35 @@
   "peace": {
     "keep_capital": true,
     "cornered_provinces": 1
+  },
+  "negotiation": {
+    "enabled": true,
+    "chance_scale": 8.0,
+    "livres_per_point": 250,
+    "max_gold_points": 60,
+    "war_goal_count": 3,
+    "war_goal_score": 12,
+    "settlement_score": 3,
+    "province_cost": 20,
+    "capital_cost": 60,
+    "settlement_cost": 6,
+    "occupied_cost_percent": 35,
+    "war_goal_bonus": 10,
+    "weariness_per_war": 1,
+    "weariness_losing": 1,
+    "weariness_occupied": 1,
+    "weariness_bankrupt": 1,
+    "weariness_recovery": 4,
+    "weariness_unrest_divisor": 5,
+    "weariness_peace_divisor": 4,
+    "max_weariness_to_declare": 50,
+    "unmet_goals_reluctance": 15,
+    "demand_score": 15,
+    "ai_min_chance": 60,
+    "peace_truce_turns": 8,
+    "pretender_reluctance": 35,
+    "max_weariness_gain": 2,
+    "sue_weariness": 70,
+    "min_war_turns": 20
   }
 }
