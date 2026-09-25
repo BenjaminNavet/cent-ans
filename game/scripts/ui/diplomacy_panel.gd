@@ -608,7 +608,9 @@ func _fit_minimap() -> void:
 	if height > holder.size.y - chrome.y:
 		height = maxf(holder.size.y - chrome.y, 150.0)
 		width = height / aspect
-	view.custom_minimum_size = Vector2(width, height).floor()
+	var fitted := Vector2(width, height).floor()
+	if fitted != view.custom_minimum_size:
+		view.custom_minimum_size = fitted
 	_minimap.tooltip_text = ""
 
 

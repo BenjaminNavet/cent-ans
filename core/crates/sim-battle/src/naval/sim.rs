@@ -977,6 +977,7 @@ impl NavalSim {
                     } else {
                         ShotCover::None
                     },
+                    indirect: false,
                 };
                 if self.shots.len() >= MAX_PENDING_SHOTS {
                     self.shots.remove(0);
