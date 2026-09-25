@@ -105,7 +105,9 @@ fn historical_event_fires_at_its_date_for_the_player() {
     let views = state.decision_views(&data, &fac("fac_france"));
     let view = views.iter().find(|v| v.event == evt("evt_sluys")).unwrap();
     assert_eq!(view.options.len(), 2);
-    assert!(view.options[0].effects_text.contains("Trésor -6000"));
+    assert!(view.options[0]
+        .effects_text
+        .contains("Trésor \u{2212}6\u{a0}000\u{a0}₶"));
     assert!(view.historical);
 }
 
