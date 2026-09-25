@@ -1,7 +1,7 @@
 class_name ArmyFigures
 extends Node3D
 
-## Armée figurée sur la carte de campagne (lot CV2, façon Total War) : général à cheval,
+## Armée figurée sur la carte de campagne (lot CV2) : général à cheval,
 ## porte-étendard à pied et quelques soldats selon l'effectif et la composition, en figurines
 ## skinnées du lot V2 (maillages `battle_skinned`, animations cuites en texture d'os, un
 ## `MultiMesh` par figurine) aux couleurs et armes de la faction. Animées : marche pendant le
