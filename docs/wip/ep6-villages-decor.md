@@ -52,7 +52,18 @@ convoi de bagages derrière chaque armée ; pieux des archers.
 - [x] Banc EP1 A/B (ci-dessous), captures `docs/img/ep6/` (`vue_hameaux_moulin`, `vue_hameau_rue_camp`,
   `camp_feux_fumee`, `melee_hameau`, `guyenne_moulin_vignes`). `--decor-plan=<fichier>` (Godot) passe
   un plan JSON à la simulation (essais EP7, captures).
-- [ ] Vérifications finales (smoke Godot, pytest, cargo workspace) après la dernière fusion.
+- [x] Fusion finale de main (25bf6fbf) ; vérifications vertes : cargo fmt, clippy workspace
+  `-D warnings`, 756 tests cargo, `core/build.sh`, pytest 566, ruff, import Godot, smoke Godot
+  (exit 0) ; fumée des feux de camp revérifiée en capture.
+- Après la fusion d'ADR 0052 (chevaux paniqués), `ai_battles_last_minutes_and_either_side_can_win`
+  passe de 8 à 32 graines (attaquant 21/32 avec décor, 16/32 champ nu ; borne 8..=24).
+
+## Points ouverts
+- L'IA ne vise pas les camps ennemis (le pillage n'arrive que si un régiment y passe).
+- Le décor avantage un peu l'attaquant en duel miroir IA (21/32 contre 16/32) : à surveiller (EQ).
+- `hydro::chaikin` (EP3) rend sa polyligne inchangée (le lissage ne s'applique pas) : bogue EP3.
+- Vignes lointaines en boîtes plates (au-delà de 170 m) : lisibles mais simples.
+- Banc : ~30 i/s plafonné ce soir avec ou sans décor ; revérifier 40 i/s sur machine calme.
 
 ## Mesures (banc `tools/bench_ep1.sh … --units=63 --bench-at=90`, 15 068 soldats, palier epic)
 Mac M4 Pro, machine partagée (charge 5-15) ; A = `--no-ep6-decor` (rendu du décor coupé, règles
@@ -109,5 +120,4 @@ Deux voies, au choix, toutes deux dans le cœur (`core/crates/sim-battle/src/dec
   z petit). `yaw` en radians : longueur le long de `(cos, sin)`, façade vers `(-sin, cos)`.
 
 ## Prochaine étape
-Vérifications finales (cargo fmt/clippy/test workspace, build.sh, pytest, ruff, import, smoke Godot)
-puis rapport.
+Lot terminé ; prêt à fusionner dans main (ff depuis une intégration).
