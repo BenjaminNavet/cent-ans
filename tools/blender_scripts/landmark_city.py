@@ -37,8 +37,8 @@ import landmark_monuments as monuments  # noqa: E402
 
 # name: (base colour (linear RGB), roughness)
 PALETTE = {
-    "NDStone": ((0.47, 0.40, 0.29), 0.85),
-    "Stone": ((0.42, 0.39, 0.33), 0.88),
+    "NDStone": ((0.58, 0.50, 0.37), 0.85),
+    "Stone": ((0.47, 0.43, 0.35), 0.88),
     "DarkStone": ((0.30, 0.28, 0.24), 0.9),
     "WallStone": ((0.40, 0.37, 0.31), 0.9),
     "Lead": ((0.17, 0.19, 0.21), 0.45),
@@ -1008,10 +1008,41 @@ def export(bpy, layers, out_path, house_scale=1.0):
     )
 
 
+def drop_normals(doc, views, data):
+    """Remove the NORMAL attributes (lot L3): `landmark.gdshader` derives flat normals itself.
+
+    Unused accessors and buffer views are removed and the references renumbered. Returns the
+    kept (views, data).
+    """
+    prims = [prim for mesh in doc["meshes"] for prim in mesh["primitives"]]
+    for prim in prims:
+        prim["attributes"].pop("NORMAL", None)
+    used = sorted(
+        {a for prim in prims for a in prim["attributes"].values()}
+        | {prim["indices"] for prim in prims if "indices" in prim}
+    )
+    accessor_map = {old: new for new, old in enumerate(used)}
+    accessors = [doc["accessors"][old] for old in used]
+    kept_views = sorted({a["bufferView"] for a in accessors if "bufferView" in a})
+    view_map = {old: new for new, old in enumerate(kept_views)}
+    for accessor in accessors:
+        if "bufferView" in accessor:
+            accessor["bufferView"] = view_map[accessor["bufferView"]]
+    for prim in prims:
+        prim["attributes"] = {k: accessor_map[v] for k, v in prim["attributes"].items()}
+        if "indices" in prim:
+            prim["indices"] = accessor_map[prim["indices"]]
+    doc["accessors"] = accessors
+    views = [views[old] for old in kept_views]
+    doc["bufferViews"] = views
+    return views, [data[old] for old in kept_views]
+
+
 def compact_glb(path):
     """Store the tint colours as normalised bytes (core glTF) instead of shorts: -9 % of the file.
 
-    Rebuilds the binary chunk (each buffer view repacked, 4-byte aligned). Returns the new size.
+    Also drops the normals (`drop_normals`). Rebuilds the binary chunk (each buffer view
+    repacked, 4-byte aligned). Returns the new size.
     """
     import struct
 
@@ -1043,6 +1074,7 @@ def compact_glb(path):
         data[view] = bytearray(bytes((v * 255 + 32767) // 65535 for v in shorts))
         views[view].pop("byteStride", None)
         accessor["componentType"] = 5121
+    views, data = drop_normals(doc, views, data)
     out = bytearray()
     for view, chunk in zip(views, data, strict=True):
         out += b"\0" * (-len(out) % 4)
