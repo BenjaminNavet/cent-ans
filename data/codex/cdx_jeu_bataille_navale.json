@@ -1,0 +1,19 @@
+{
+  "id": "cdx_jeu_bataille_navale",
+  "title": "La bataille navale : vent, voiles et avirons",
+  "category": "mecanique",
+  "aliases": [
+    "bataille navale",
+    "batailles navales",
+    "avantage du vent",
+    "au vent",
+    "éperon",
+    "éperonne"
+  ],
+  "era": { "from": "1338", "to": "1453" },
+  "summary": "Sur mer comme sur terre, on combat à l'arc et à l'épée, mais c'est le vent qui mène : la flotte qui l'a dans le dos choisit son moment, tire plus loin et aborde quand elle veut. Seules les galères, à la rame, s'en affranchissent.",
+  "body": "Les batailles navales de la guerre de Cent Ans sont des batailles d'infanterie sur des plateformes flottantes. Les navires du Nord, cogues et nefs à voile carrée, portent à l'avant et à l'arrière des châteaux crénelés d'où archers et arbalétriers tirent de haut ; on s'approche, on lance les grappins et l'on se bat de pont à pont (voir [[cdx_jeu_abordage|abordage]]). Les galères méditerranéennes, longues et basses, avancent à l'aviron quel que soit le vent et portent un éperon à la proue.\n\nÀ [[cdx_ecluse|l'Écluse]], le 24 juin 1340, [[cdx_edouard_iii|Édouard III]] attend l'après-midi pour entrer dans le Zwin avec le vent, le soleil et la marée dans le dos. Les amiraux [[cdx_hugues_quieret|Quiéret]] et Béhuchet ont enchaîné leurs navires en lignes serrées : ils ne peuvent plus manœuvrer, et la flotte française est anéantie. À Winchelsea, en 1350, le navire du roi heurte si violemment une nef castillane qu'il fait eau ; Édouard et les siens sautent à bord de l'ennemi et s'en emparent avant que leur propre navire ne sombre.\n\nÀ La Rochelle, en juin 1372, les galères castillanes d'Ambrosio Boccanegra, alliées de Charles V, profitent de la marée basse qui échoue les hautes cogues anglaises du comte de Pembroke : elles tournent autour d'elles et les incendient (voir [[cdx_jeu_brulots|brûlots et incendies en mer]]).",
+  "gameplay": "Quatre classes de navires : cogue, nef, galère, barge (coque, franc-bord, châteaux, équipage ; voir les fiches des navires). Le vent est tiré au début de la bataille. Un navire à voile ne remonte pas à moins de 67° du lit du vent (il louvoie) et va le mieux vent de travers ; sans vent fort, il garde au moins 35 % de sa vitesse. Les galères rament à 3,4 m/s en toutes directions, mais leurs rameurs s'épuisent en 4 minutes d'effort (la galère tombe alors sous la moitié de sa vitesse) et récupèrent deux fois plus lentement.\n\nTir : volées des archers (180 m, toutes les 6 s) et des arbalétriers (160 m, toutes les 12 s). La flotte au vent tire plus loin et plus juste (jusqu'à +20 % par grand vent) ; tirer d'un pont ou d'un château plus haut que la cible ajoute 10 % par mètre (au plus ±50 %) ; la pavesade de la cible et ses châteaux abritent ses hommes ; la pluie gêne arcs et arbalètes (×0,6).\n\nÉperon (galères seulement) : la galère fonce 30 % plus vite ; si elle touche le navire visé à plus de 1,5 m/s, elle lui inflige 6 × sa vitesse en dégâts de coque (40 % seulement contre un navire haut de bord, cogue ou nef) et 8 points de moral, s'abîme elle-même un peu, puis aborde. Fin : une flotte n'a plus de navire en état de combattre, ou après 30 minutes. En résolution automatique : trois volées (deux de plus pour la flotte au vent), brûlots, éperons, quatre reprises d'abordage, feu et redditions. Conseil : prenez le vent, criblez l'ennemi avec les archers des châteaux, puis abordez ses navires un à un.",
+  "see_also": ["cdx_jeu_abordage", "cdx_jeu_brulots", "cdx_jeu_maitrise_mer", "cdx_ecluse", "cdx_hugues_quieret", "cdx_castille"],
+  "sources": ["Bataille de l'Écluse", "Bataille de Winchelsea", "Bataille de La Rochelle (1372)", "Cogue", "Galère"]
+}
