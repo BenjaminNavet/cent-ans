@@ -6,49 +6,257 @@
     "sky": "dawn",
     "sky_luminance": 0.5,
     "sky_saturation": 1.15,
-    "sky_tint": [1.0, 0.86, 0.74],
+    "sky_tint": [
+      1.0,
+      0.86,
+      0.74
+    ],
     "sun_elevation_deg": 7.0,
     "sun_energy": 1.6,
-    "sun_color": [1.0, 0.64, 0.38],
-    "fog_color": [0.62, 0.5, 0.46],
+    "sun_color": [
+      1.0,
+      0.64,
+      0.38
+    ],
+    "fog_color": [
+      0.62,
+      0.5,
+      0.46
+    ],
     "fog_density": 0.00075,
-    "ground_color": [0.24, 0.26, 0.16],
+    "ground_color": [
+      0.24,
+      0.26,
+      0.16
+    ],
     "shot_seconds": 26.0,
     "shots": [
       {
         "id": "host_before_paris",
         "label": "L'ost devant Paris",
-        "from": {"position": [-120.0, 7.0, 1180.0], "target": [80.0, 25.0, 0.0]},
-        "to": {"position": [140.0, 9.0, 1150.0], "target": [-40.0, 30.0, 0.0]},
-        "fov": 36.0,
+        "from": {
+          "position": [
+            -60.0,
+            3.2,
+            1156.0
+          ],
+          "target": [
+            -10.0,
+            24.0,
+            0.0
+          ]
+        },
+        "to": {
+          "position": [
+            45.0,
+            3.8,
+            1150.0
+          ],
+          "target": [
+            20.0,
+            28.0,
+            0.0
+          ]
+        },
+        "fov": 40.0,
         "host": true
       },
       {
         "id": "cite_orbit",
         "label": "L'île de la Cité",
-        "from": {"position": [-620.0, 210.0, 520.0], "target": [0.0, 20.0, 0.0]},
-        "to": {"position": [-120.0, 170.0, 760.0], "target": [40.0, 20.0, -40.0]},
+        "from": {
+          "position": [
+            -620.0,
+            210.0,
+            520.0
+          ],
+          "target": [
+            0.0,
+            20.0,
+            0.0
+          ]
+        },
+        "to": {
+          "position": [
+            -120.0,
+            170.0,
+            760.0
+          ],
+          "target": [
+            40.0,
+            20.0,
+            -40.0
+          ]
+        },
         "fov": 40.0,
         "host": false
       },
       {
         "id": "seine_upstream",
         "label": "La Seine au crépuscule",
-        "from": {"position": [900.0, 60.0, 420.0], "target": [0.0, 30.0, -60.0]},
-        "to": {"position": [760.0, 48.0, 620.0], "target": [-80.0, 30.0, 0.0]},
+        "from": {
+          "position": [
+            900.0,
+            60.0,
+            420.0
+          ],
+          "target": [
+            0.0,
+            30.0,
+            -60.0
+          ]
+        },
+        "to": {
+          "position": [
+            760.0,
+            48.0,
+            620.0
+          ],
+          "target": [
+            -80.0,
+            30.0,
+            0.0
+          ]
+        },
         "fov": 38.0,
         "host": false
       }
     ],
     "host": {
-      "center": [0.0, 0.0, 1110.0],
+      "center": [
+        0.0,
+        0.0,
+        1120.0
+      ],
       "facing_deg": 180.0,
       "regiments": [
-        {"kind": "cavalry", "variant": 0, "faction": "fac_france", "offset": [-44.0, 0.0], "files": 12, "ranks": 3, "spacing": 2.8, "banner": "oriflamme.png"},
-        {"kind": "infantry", "variant": 0, "faction": "fac_france", "offset": [0.0, 4.0], "files": 18, "ranks": 5, "spacing": 1.35, "banner": "fac_france_banner.png"},
-        {"kind": "archer", "variant": 1, "faction": "fac_france", "offset": [36.0, -2.0], "files": 16, "ranks": 4, "spacing": 1.5, "banner": "fac_france_pennon.png"},
-        {"kind": "infantry", "variant": 1, "faction": "fac_burgundy", "offset": [72.0, 6.0], "files": 14, "ranks": 5, "spacing": 1.3, "banner": "fac_burgundy_banner.png"}
+        {
+          "kind": "infantry",
+          "variant": 0,
+          "faction": "fac_france",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "files": 20,
+          "ranks": 5,
+          "spacing": 1.35,
+          "banner": "fac_france_banner.png"
+        },
+        {
+          "kind": "cavalry",
+          "variant": 0,
+          "faction": "fac_france",
+          "offset": [
+            -50.0,
+            6.0
+          ],
+          "files": 12,
+          "ranks": 3,
+          "spacing": 2.8,
+          "banner": "oriflamme.png"
+        },
+        {
+          "kind": "archer",
+          "variant": 1,
+          "faction": "fac_france",
+          "offset": [
+            48.0,
+            2.0
+          ],
+          "files": 16,
+          "ranks": 4,
+          "spacing": 1.5,
+          "banner": "fac_france_pennon.png"
+        },
+        {
+          "kind": "infantry",
+          "variant": 1,
+          "faction": "fac_burgundy",
+          "offset": [
+            95.0,
+            14.0
+          ],
+          "files": 14,
+          "ranks": 5,
+          "spacing": 1.3,
+          "banner": "fac_burgundy_banner.png"
+        },
+        {
+          "kind": "cavalry",
+          "variant": 0,
+          "faction": "fac_france",
+          "offset": [
+            -10.0,
+            45.0
+          ],
+          "files": 16,
+          "ranks": 3,
+          "spacing": 2.8,
+          "banner": "fac_france_banner.png"
+        },
+        {
+          "kind": "infantry",
+          "variant": 2,
+          "faction": "fac_france",
+          "offset": [
+            -100.0,
+            20.0
+          ],
+          "files": 14,
+          "ranks": 4,
+          "spacing": 1.4,
+          "banner": "fac_france_pennon.png"
+        },
+        {
+          "kind": "archer",
+          "variant": 2,
+          "faction": "fac_genoa",
+          "offset": [
+            140.0,
+            40.0
+          ],
+          "files": 12,
+          "ranks": 4,
+          "spacing": 1.6,
+          "banner": "fac_genoa_banner.png"
+        }
       ]
+    },
+    "countryside": {
+      "river_z": 170.0,
+      "river_half_width": 85.0,
+      "seed": 1337,
+      "groves": 70,
+      "keep_out": [
+        [
+          -260.0,
+          950.0,
+          260.0,
+          1400.0
+        ],
+        [
+          -1200.0,
+          320.0,
+          1200.0,
+          1000.0
+        ]
+      ],
+      "meadow_zone": [
+        -600.0,
+        1000.0,
+        600.0,
+        1500.0
+      ],
+      "grass": {
+        "rect": [
+          -140.0,
+          1105.0,
+          160.0,
+          1165.0
+        ],
+        "count": 36000
+      }
     }
   },
   "start_dates": [
@@ -113,7 +321,12 @@
       "illustration": "res://assets/illustrations/fac_burgundy.jpg"
     }
   ],
-  "difficulty_labels": ["Facile", "Normale", "Difficile", "Très difficile"],
+  "difficulty_labels": [
+    "Facile",
+    "Normale",
+    "Difficile",
+    "Très difficile"
+  ],
   "intro": {
     "music": "court",
     "card_seconds": 8.0,
@@ -170,9 +383,18 @@
       "res://assets/illustrations/cdx_paris.jpg"
     ],
     "faction_illustrations": {
-      "fac_france": ["res://assets/events/evt_sacre_de_reims.jpg", "res://assets/illustrations/cdx_paris.jpg"],
-      "fac_england": ["res://assets/events/evt_ordre_de_la_jarretiere.jpg", "res://assets/events/evt_sluys.jpg"],
-      "fac_burgundy": ["res://assets/events/evt_banquet_princier.jpg", "res://assets/illustrations/cdx_toison_or.jpg"]
+      "fac_france": [
+        "res://assets/events/evt_sacre_de_reims.jpg",
+        "res://assets/illustrations/cdx_paris.jpg"
+      ],
+      "fac_england": [
+        "res://assets/events/evt_ordre_de_la_jarretiere.jpg",
+        "res://assets/events/evt_sluys.jpg"
+      ],
+      "fac_burgundy": [
+        "res://assets/events/evt_banquet_princier.jpg",
+        "res://assets/illustrations/cdx_toison_or.jpg"
+      ]
     },
     "quotes": [
       {
