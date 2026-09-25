@@ -470,7 +470,7 @@ func _ground_gate(instance: MeshInstance3D) -> void:
 	var deck_top := (0.05 + 0.02 * float(instance.get_meta("mesh_width", 1.0))) * k
 	var k_h := clampf(GATE_DECK_RISE_M * vs / maxf(deck_top, 1e-4), 0.3, 12.0)
 	instance.transform.basis = Basis(instance.get_meta("across", Vector3.RIGHT) * k, Vector3.UP * k * k_h, instance.get_meta("along", Vector3.BACK) * k)
-	instance.position.y = maxf(float(instance.get_meta("z_m", 0.0)) * vs, 0.0)
+	instance.position.y = maxf(MapData.display_height(float(instance.get_meta("z_m", 0.0)), instance.position.x, instance.position.z), 0.0)
 
 
 func _reground_gates() -> void:

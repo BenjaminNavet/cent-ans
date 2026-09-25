@@ -1156,6 +1156,89 @@ Sully-sur-Loire : 5 maisons) perdent des parcelles aux zones d'eau ; rubans de r
 paliers proches relèvent de ZG5b / VH ; appels de dessin ×3 dans la descente (un MultiMesh par modèle
 et par cellule).
 
+## Relief exagéré « façon Total War » (lot ZG8, ADR 0036)
+
+Purement visuel : rien dans `core/`, déplacement, vision et batailles restent en mètres réels. On
+n'exagère plus seulement l'altitude absolue mais le relief **local**, hauteur au-dessus d'un fond de
+vallée lissé : plaines et fonds de vallée restent plats, versants, escarpements et montagnes se
+dressent, surtout de près (où ZG4 aplatissait à ×1,5).
+
+```
+y = s(d) · (h + g(d) · max(h − fond(x, z), 0))
+```
+
+- `s(d)` : échelle ZG4 (`MapData.vertical_scale()`, ×4,31 au loin), plancher de près relevé à
+  `near_exaggeration` (×2,5) : `CloseCameraProfile.near_exaggeration()`.
+- `g(d)` : gain de relief local, `gain_far` (0,3) en vue stratégique → `gain_near` (0,8) au ras du sol,
+  interpolé en logarithme de l'échelle quantifiée : **fonction de l'échelle**, donc publié en même temps
+  qu'elle (`MapData.set_vertical_scale`) et recalé par les mêmes signaux (`vertical_scale_changed`,
+  `chunk_surface_changed` étalé) ; aucun nouveau recalage.
+- `fond` (`ReliefFloor`, calculé une fois dans `TerrainBuilder.build`, ~90 ms sur 8 cœurs) : cellules de
+  8 px (5,75 km), minimum des altitudes échantillonnées tous les 2 px et bornées à 0, filtre minimum
+  3 × 3 cellules, deux flous de boîte 5 × 5 (grille 512², RF). Toujours ≥ 0 : la côte (h = 0) et la mer
+  (h < 0) ne bougent pas ; une rivière au fond de sa vallée (h ≈ fond) ne monte pas, ponts et berges non
+  plus. Sans fond publié le gain vaut 0 (comportement ZG4).
+
+**Source unique.** `shaders/campaign_relief.gdshaderinc` (`campaign_display_height`,
+`campaign_display_gradient`, globaux `campaign_vertical_scale`, `campaign_relief_gain`,
+`campaign_relief_floor`, `campaign_relief_floor_info`) et son double GDScript `MapData.display_height`
+(+ `height_from_display`, inverse exacte, et `_with` pour une échelle et un gain donnés). Le fond est lu
+au texel près (`texelFetch` + bilinéaire manuel) des deux côtés : pas d'écart de filtrage matériel.
+Consommateurs :
+
+| Consommateur | Passage par la fonction |
+|---|---|
+| `terrain.gdshader` + `relief_quadtree.gdshaderinc` | sommets des patchs (`qt_vertex`), normale d'ombrage (`campaign_display_gradient`) |
+| Morceaux E0 / repli (`_chunk_vertices`, `FineTerrainJob`) | cuits avec `display_height_with(…, HEIGHT_SCALE, gain lointain)` |
+| `ReliefQuadtree.surface_height_at`, `sample_pages`, instantanés | `_bilinear` rend des mètres, `display_height` au point ; `sample_pages_m` pour les rubans |
+| `MapData.height_world_at` / `surface_world_at` | `display_height` : armées, caméra (plancher, visée), sondes de survol, marqueurs, végétation, routes C7b |
+| `river_fine`, `road_fine` (ZG5b) | sommets en mètres → `campaign_display_height` |
+| `river_water` (V4) | cuit en altitude × `HEIGHT_SCALE` sans gain, reposé par le shader |
+| `landmark.gdshader` / `LandmarkModel` | grille en mètres = `height_from_display(surface)`, reposée à l'ancrage |
+| `town_building.gdshader` / `TownBuilder` (ZG6) | base en mètres → hauteur affichée à l'origine de l'instance (maillages drapés : au sommet) ; boîtes × (1 + g) |
+| Ponts et portes (`RiverCrossings`, `FineGeoLayer`) | niveau d'eau et tablier par `display_height` |
+
+Boîtes englobantes conservatrices : `y ≤ s·(1 + g)·h` pour h ≥ 0 (quadtree, villes, rubans avec le gain
+maximal).
+
+**Roche et lumière.** `terrain.gdshader` remplace la couverture du sol par la roche sur les pentes du
+relief exagéré localement (pente vraie × (1 + g), `cliff_slope_start` 0,45 → `cliff_slope_full` 1,0 ;
+la forêt tient un peu plus longtemps) ; soleil de la carte abaissé à 34° (`sun_elevation_deg`, azimut
+conservé ; `TurnLight` part de cette base).
+
+**Réglages et interrupteur.** `game/resources/relief_exaggeration.tres` (`ReliefExaggerationProfile`,
+voisin de `close_camera.tres`) : `enabled`, `near_exaggeration`, `gain_far`, `gain_near`, paramètres du
+fond, falaises, soleil. `enabled = false` ou `-- --no-relief-exaggeration` : exactement ZG4 (gain nul,
+plancher ×1,5, soleil de la scène). Parchemin (morceaux E0 cuits avec le gain lointain) et filtres de
+carte MF1 inchangés.
+
+**Test, captures, banc.**
+- `godot --headless --path game --script res://tests/zg8_relief_test.gd` : formule (plaine inchangée,
+  sommet rehaussé, côte et mer fixes, monotone, inverse), double GPU (texture relue comme le shader =
+  `relief_floor_at`, formule du `.gdshaderinc`, aucun shader ne pose des mètres sans la fonction), carte
+  réelle (fond ≥ 0 ; Paris : h 31 m, fond 7 m, +7 m ; pic pyrénéen 3 125 m, fond 897 m, +668 m au gain
+  lointain), objets posés (sommets E0 et maquettes : sol affiché = hauteur affichée).
+- ZG2 et ZG4 adaptés (surface = `display_height`, nombre de paliers selon le plancher) ; ZG5b, ZG6 OK.
+- Captures : `godot --path game --script res://tests/zg8_relief_shots.gd -- --out=<dossier>
+  --prefix=apres` (et `--prefix=avant --no-relief-exaggeration`) ; la météo et la saison tirées au
+  lancement peuvent différer entre les deux séries.
+- Banc `--bench-map` avec et sans : machine chargée par d'autres sessions (≈ 20 Godot), écarts dans le
+  bruit ; coût GPU ajouté : 4 `texelFetch` par sommet du quadtree et 4 par fragment (gradient du fond).
+
+**Limites.** Gain et plancher choisis à l'œil (captures), à affiner en jeu ; la partie « régionale » du
+relief (plateaux entiers au-dessus de leur fond sur ~10 km) forme une rampe douce au bord des plateaux ;
+les sommets alpins très découpés deviennent plus aigus en vue moyenne (le gain lointain reste modeste) ;
+`vegetation_mask` et le parcellaire lisent encore les pentes vraies (voulu : règles d'occupation du sol).
+
+Captures (`docs/img/zg8/{avant,apres}_<vue>.jpg`) : Pyrénées (d = 40 et 7), Alpes (45), Massif central
+(30), pays de Galles (40), falaises normandes (6), coteaux de Seine aux Andelys (8), Paris (10, plaine :
+inchangée), France entière (900).
+
+![Coteaux de Seine, avant](img/zg8/avant_coteaux_seine.jpg)
+![Coteaux de Seine, après](img/zg8/apres_coteaux_seine.jpg)
+![Pyrénées de près, après](img/zg8/apres_pyrenees_pres.jpg)
+![Paris, après (plaine inchangée)](img/zg8/apres_paris.jpg)
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
