@@ -45,11 +45,11 @@
     },
     {
       "faction": "fac_england",
-      "status": "embargo",
+      "status": "peace",
       "since": {
         "value": "1336-08-12"
       },
-      "note": "Embargo anglais sur la laine : les drapiers de Gand, Bruges et Ypres sont ruinés ; Jacob van Artevelde prend le pouvoir à Gand en janvier 1338."
+      "note": "Sous l'embargo anglais sur la laine (porté par l'Angleterre, voir fac_england) : les drapiers de Gand, Bruges et Ypres sont ruinés ; Jacob van Artevelde prend le pouvoir à Gand en janvier 1338. La Flandre ne rend pas l'embargo (EQ1 : l'embargo était compté deux fois)."
     }
   ],
   "ai_personality": {
