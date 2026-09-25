@@ -1,0 +1,42 @@
+{
+  "id": "unit_jinetes",
+  "name": {
+    "display": "Jinetes",
+    "local": "jinetes",
+    "local_language": "castillan"
+  },
+  "category": "ranged",
+  "source_class": "peasants",
+  "mounted": true,
+  "soldiers": 80,
+  "cost": {
+    "money": 560
+  },
+  "upkeep": 50,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 40,
+    "ranged": 48,
+    "range": 60,
+    "armor": 24,
+    "morale": 52,
+    "speed": 86,
+    "ammo": 8
+  },
+  "abilities": [
+    "skirmish"
+  ],
+  "required_culture": [
+    "cul_castilian",
+    "cul_andalusi",
+    "cul_galician"
+  ],
+  "figure": "cavalry_5",
+  "equipment": "Cheval genet monté à la jineta (étriers courts), adarga de cuir en cœur, deux ou trois javelines (azagayas), lance légère, épée.",
+  "description": "Cavalerie légère de la frontière de Grenade, héritière de la cavalerie nasride : harcèle au javelot et se dérobe ; loués par Pierre le Cruel et Henri de Trastamare (Nájera 1367).",
+  "sources": [
+    "Jinete",
+    "Bataille de Nájera",
+    "F. García Fitz, Castilla y León frente al Islam, Universidad de Sevilla, 1998"
+  ]
+}

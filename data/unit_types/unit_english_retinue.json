@@ -1,0 +1,42 @@
+{
+  "id": "unit_english_retinue",
+  "name": {
+    "display": "Hommes d'armes des retenues",
+    "local": "men of armes of the retenue",
+    "local_language": "moyen anglais"
+  },
+  "category": "infantry",
+  "source_class": "nobility",
+  "soldiers": 80,
+  "cost": {
+    "money": 1050
+  },
+  "upkeep": 100,
+  "recruit_time_turns": 2,
+  "stats": {
+    "melee": 72,
+    "ranged": 0,
+    "range": 0,
+    "armor": 78,
+    "morale": 82,
+    "speed": 35,
+    "ammo": 0
+  },
+  "abilities": [
+    "shield_wall",
+    "dismount"
+  ],
+  "required_technology": "tech_dismounted_tactics",
+  "required_faction": [
+    "fac_england"
+  ],
+  "figure": "infantry_7",
+  "equipment": "Harnois de plates et mailles, bassinet à visière (puis salade), hache d'armes ou bec-de-corbin, épée, jaque armorié aux couleurs du capitaine.",
+  "description": "Gens d'armes sous contrat (indentures) des capitaines anglais, combattant démontés entre les ailes d'archers ; discipline et cohésion des retenues de Crécy à Azincourt.",
+  "sources": [
+    "Indenture of retainer",
+    "A. Curry, Agincourt: A New History, Tempus, 2005",
+    "A. Ayton, Knights and Warhorses, Boydell, 1994",
+    "Bataille d'Azincourt"
+  ]
+}

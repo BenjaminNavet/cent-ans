@@ -1,0 +1,41 @@
+{
+  "id": "unit_goedendag_militia",
+  "name": {
+    "display": "Milice au goedendag",
+    "local": "goedendag",
+    "local_language": "moyen néerlandais"
+  },
+  "category": "infantry",
+  "source_class": "burghers",
+  "soldiers": 120,
+  "cost": {
+    "money": 420
+  },
+  "upkeep": 36,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 50,
+    "ranged": 0,
+    "range": 0,
+    "armor": 32,
+    "morale": 52,
+    "speed": 42,
+    "ammo": 0
+  },
+  "abilities": [
+    "shield_wall"
+  ],
+  "required_culture": [
+    "cul_flemish",
+    "cul_dutch"
+  ],
+  "figure": "infantry_5",
+  "equipment": "Goedendag (bâton ferré à pointe de fer, 1,5 m), chapel de fer, gambison ou haubergeon, écu, livrée de la ville.",
+  "description": "Gens des métiers des villes flamandes armés du goedendag, qui assomme le cheval et perce le cavalier tombé ; sans la cohésion des piquiers des métiers mais levés partout en Flandre (Cassel 1328, Roosebeke 1382).",
+  "sources": [
+    "Goedendag",
+    "Bataille de Mont-Cassel (1328)",
+    "Bataille de Roosebeke",
+    "J. F. Verbruggen, The Battle of the Golden Spurs, Boydell, 2002"
+  ]
+}
