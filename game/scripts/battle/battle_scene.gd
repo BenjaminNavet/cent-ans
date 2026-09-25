@@ -166,6 +166,13 @@ var _dust_shot: bool = false  # EP8 : `--dust-shot` (charge de cavalerie et sa p
 var _dust_unit: int = -1
 var _dust_since: float = -1.0
 var _title_text: String = ""
+## EP7 : bataille historique (`--historical=<id>`, `--historical-side=<attacker|defender>`, vide :
+## IA contre IA) ; `historical` = `BattleSim.get_historical()` (vide hors carte historique).
+var _historical: String = ""
+var _historical_side: String = ""
+var historical: Dictionary = {}
+var _sim_weather: String = ""
+var _weather_poll: float = 0.0
 var _weather_text: String = ""
 var _tod_key: String = ""
 
@@ -196,6 +203,14 @@ func _ready() -> void:
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_drag_rect.visible = false
 	hud.add_child(_drag_rect)
+	if campaign_sim == null and _historical != "":
+		# EP7 : carte historique jouée hors campagne (menu « Batailles historiques »).
+		standalone = true
+		if not begin_historical():
+			push_error("BattleScene: historical battle %s failed" % _historical)
+			if _benchmark:
+				_bench_fail("historical battle setup failed")
+		return
 	if campaign_sim == null:
 		standalone = true
 		if not _stage_standalone():
@@ -285,6 +300,36 @@ func begin() -> bool:
 			battle.call("set_start_hour", float(_hour_override))
 		elif not battle.call("set_start_phase", _hour_override):
 			push_warning("BattleScene: unknown --hour=%s" % _hour_override)
+	return _build_scene()
+
+
+## EP7 : bataille historique `_historical` (site réel, ordres de bataille, météo, heure) ; le
+## résultat n'est pas conservé (hors campagne).
+func begin_historical() -> bool:
+	if not ClassDB.class_exists("BattleSim"):
+		return false
+	_audio_director = get_node_or_null("/root/AudioDirector")
+	if _audio_director != null:
+		_audio_director.call("stop_all")
+	battle = ClassDB.instantiate("BattleSim")
+	if not battle.has_method("setup_historical"):
+		return false
+	var paths := get_node_or_null("/root/MapPaths")
+	var data_dir: String = paths.data_dir if paths != null else ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
+	if not battle.call("setup_historical", data_dir, _historical, _historical_side, battle_seed):
+		return false
+	setup = battle.call("get_setup")
+	padded = true  # hors campagne : pas de résultat à rapporter
+	if _hour_override != "":
+		if _hour_override.is_valid_float():
+			battle.call("set_start_hour", float(_hour_override))
+		else:
+			battle.call("set_start_phase", _hour_override)
+	return _build_scene()
+
+
+## Scène de bataille (terrain, soldats, interface) une fois `battle` et `setup` prêts.
+func _build_scene() -> bool:
 	var setup_side: Variant = setup.get("player_side", "attacker")
 	player_side = str(setup_side) if setup_side != null else ""
 	if player_side == "" and standalone and siege_landmark != "":
@@ -302,9 +347,17 @@ func begin() -> bool:
 		side_colors[side] = _faction_color(str(side_setup.get("faction", "")), side)
 	var weather: Dictionary = battle.call("get_weather")
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
+	# EP7 : une carte historique est rendue sous son ciel final ; l'averse du début tombe de ce
+	# ciel et cesse quand la simulation change de météo (Crécy).
+	historical = battle.call("get_historical") if battle.has_method("get_historical") else {}
+	_sim_weather = str(weather.get("key", "clear"))
+	if not historical.is_empty() and _weather_override == "":
+		weather_key = str(historical.get("weather_end", weather_key))
 	_weather_key = weather_key
 	var terrain_data: Dictionary = battle.call("get_terrain")
 	terrain.province_id = str(setup.get("province", ""))  # EP2 : relief réel et panorama du lieu
+	# EP7 : tuile d'horizon du site historique (campagne sur le site ou carte du menu).
+	terrain.horizon_site = str(historical.get("horizon", setup.get("historical_horizon", "")))
 	terrain.build(terrain_data, weather_key)
 	if terrain.decor_view != null:
 		terrain.decor_view.bind(battle)  # EP6 : pillage des camps
@@ -323,6 +376,8 @@ func begin() -> bool:
 			if landmark_town != null:
 				add_child(landmark_town)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	if _sim_weather == "rain" and weather_key != "rain":
+		BattleAtmosphere.add_shower(camera_rig.camera)  # EP7 : averse qui cessera
 	if terrain.horizon != null:
 		terrain.horizon.apply_atmosphere(world_env.environment, sun, weather_key)  # EP2
 	var field_center := terrain.field_center()  # EP1 : (600, 400) au palier standard
@@ -337,6 +392,12 @@ func begin() -> bool:
 		_make_banner(unit)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
+	if not historical.is_empty():
+		# EP7 : « Bataille de Crécy (26 août 1346) » ; sur le site en campagne : « … , champ de Crécy ».
+		if bool(historical.get("site_only", false)):
+			title += " — champ de bataille de %s" % str(historical.get("place", ""))
+		else:
+			title = "%s (%s)" % [str(historical.get("name", title)), str(historical.get("date_fr", ""))]
 	if landmark_town != null:
 		title = "Assaut %s (%s)" % [BattleScene.de(str(landmark_town.landmark.get("name", ""))), str(landmark_town.landmark.get("gate_name", ""))]
 	# `--weather=` ne force que le rendu (outil de capture) : la simulation, donc les règles
@@ -814,10 +875,31 @@ func _process(delta: float) -> void:
 		staging.update(units, delta * speed * slow if running else 0.0, delta, bool(battle.call("is_finished")))
 		_update_time_label()
 	_update_audio(delta)
+	_poll_weather(delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
 		_run_benchmark_frame(delta)
+
+
+## EP7 : la météo d'une carte historique change pendant la bataille (averse de Crécy) : la pluie
+## cesse de tomber, le journal l'annonce (le ciel est déjà celui de la fin).
+func _poll_weather(delta: float) -> void:
+	if historical.is_empty():
+		return
+	_weather_poll -= delta
+	if _weather_poll > 0.0:
+		return
+	_weather_poll = 1.0
+	var key := str((battle.call("get_weather") as Dictionary).get("key", _sim_weather))
+	if key == _sim_weather:
+		return
+	var camera := camera_rig.camera
+	if _sim_weather == "rain" and camera.get_node_or_null("Precipitation") != null and _weather_key != "rain":
+		camera.get_node("Precipitation").queue_free()
+	elif key == "rain" and _weather_key != "rain":
+		BattleAtmosphere.add_shower(camera)
+	_sim_weather = key
 
 
 ## T8 : une image du banc d'essai (`--benchmark`). Fenêtre de `BENCH_FRAMES` images mesurées,
@@ -1642,6 +1724,10 @@ func _parse_cmdline() -> void:
 			_weather_override = arg.trim_prefix("--weather=")
 		elif arg.begins_with("--hour="):
 			_hour_override = arg.trim_prefix("--hour=")
+		elif arg.begins_with("--historical="):
+			_historical = arg.trim_prefix("--historical=")
+		elif arg.begins_with("--historical-side="):
+			_historical_side = arg.trim_prefix("--historical-side=")
 		elif arg == "--cinematic":
 			_force_cinematic = true
 		elif arg == "--birds-shot":
@@ -1975,6 +2061,9 @@ static func de(name: String) -> String:
 func _open_deployment() -> void:
 	if autoplay and not _deploy_shot:
 		return
+	if not historical.is_empty() and not bool(historical.get("site_only", false)):
+		return  # EP7 : déploiement historique imposé
+
 	deployment = DeploymentController.new()
 	deployment.name = "Deployment"
 	add_child(deployment)
