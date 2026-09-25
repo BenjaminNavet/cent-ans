@@ -163,7 +163,7 @@ impl Default for NegotiationRules {
     fn default() -> Self {
         Self {
             enabled: false,
-            chance_scale: 6.0,
+            chance_scale: 8.0,
             livres_per_point: 250,
             max_gold_points: 60,
             war_goal_count: 2,
