@@ -951,7 +951,7 @@ impl CampaignState {
         }
     }
 
-    fn start_war(&mut self, a: &FactionId, b: &FactionId) {
+    pub(crate) fn start_war(&mut self, a: &FactionId, b: &FactionId) {
         let turn = self.turn;
         for (x, y) in [(a, b), (b, a)] {
             let f = self.factions.get_mut(x).expect("exists");
