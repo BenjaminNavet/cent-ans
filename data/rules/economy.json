@@ -1,5 +1,5 @@
 {
-  "description": "Économie (lots EQ1, B7a, B7c). Les effets de trésor des événements de la chronique sont écrits pour un royaume de taille moyenne : une faction dont le revenu de saison est inférieur à la référence paie (ou reçoit) en proportion de son revenu, sans descendre sous la part minimale. Un incendie à 2 000 ₶ coûte ainsi une saison de revenu à un petit comté au lieu de quatre. La cour et l'administration coûtent une part du revenu qui croît avec le nombre de provinces, plus une part du trésor qui dort au-delà de quelques saisons de revenu (M10/F4). Un trésor négatif coûte du moral à toutes les troupes chaque saison. Les armées se ravitaillent mal en pays dévasté. Les ressources exigées par un bâtiment (pierre) viennent des provinces productrices accessibles à la faction, réservées tant que dure le chantier ; chaque unité manquante est importée au prix de base de la ressource multiplié par resource_import_multiplier.",
+  "description": "Économie (lots EQ1, B7a, B7c, SV4). Les effets de trésor des événements de la chronique sont écrits pour un royaume de taille moyenne : une faction dont le revenu de saison est inférieur à la référence paie (ou reçoit) en proportion de son revenu, sans descendre sous la part minimale. Un incendie à 2 000 ₶ coûte ainsi une saison de revenu à un petit comté au lieu de quatre. La cour et l'administration coûtent une part du revenu qui croît avec le nombre de provinces, plus une part du trésor qui dort au-delà de quelques saisons de revenu (M10/F4). Un trésor négatif coûte du moral à toutes les troupes chaque saison. Ravitaillement (lot SV4) : une armée hors du territoire ami perd supply_loss points de vivres par saison (supply_loss_winter l'hiver) ; en territoire ami elle en regagne supply_recovery ; à zéro, elle perd starvation_loss_percent % de ses hommes par saison. Les armées se ravitaillent mal en pays dévasté. La dévastation d'une province baisse de devastation_decay points par saison. Les ressources exigées par un bâtiment (pierre) viennent des provinces productrices accessibles à la faction, réservées tant que dure le chantier ; chaque unité manquante est importée au prix de base de la ressource multiplié par resource_import_multiplier.",
   "event_treasury_reference_income": 4000,
   "event_treasury_min_scale": 0.25,
   "administration_base": 0.08,
@@ -10,5 +10,10 @@
   "bankruptcy_morale_penalty": 10,
   "supply_devastation_loss_percent": 50.0,
   "supply_devastation_recovery_cut_percent": 50.0,
-  "resource_import_multiplier": 100
+  "resource_import_multiplier": 100,
+  "supply_loss": 20,
+  "supply_loss_winter": 35,
+  "supply_recovery": 40,
+  "starvation_loss_percent": 10,
+  "devastation_decay": 5
 }

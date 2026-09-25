@@ -16,6 +16,8 @@ pub const EXCOMMUNICATION_TURNS: u32 = 40;
 pub const EXCOMMUNICATION_LIFT_FAVOR: u8 = 40;
 /// Heresy share above which a province may rise.
 pub const HERESY_REVOLT_THRESHOLD: u8 = 70;
+/// Livres donated to the Church per point of papal favour.
+pub const DONATION_LIVRES_PER_FAVOR: i64 = 200;
 /// Heresy share above which it spreads to neighbours.
 pub const HERESY_SPREAD_THRESHOLD: u8 = 30;
 
@@ -170,7 +172,8 @@ pub fn religion_display(state: &CampaignState, data: &GameData, religion: &Relig
 }
 
 impl CampaignState {
-    /// `donate_to_church { amount }`: favour +1 per 200 livres.
+    /// `donate_to_church { amount }`: favour +1 per
+    /// [`DONATION_LIVRES_PER_FAVOR`] livres (at least +1).
     pub fn donate_to_church(
         &mut self,
         data: &GameData,
@@ -197,7 +200,11 @@ impl CampaignState {
         {
             papacy.treasury += amount;
         }
-        change_favor(self, faction, ((amount / 200) as i32).max(1));
+        change_favor(
+            self,
+            faction,
+            ((amount / DONATION_LIVRES_PER_FAVOR) as i32).max(1),
+        );
         Ok(())
     }
 

@@ -69,6 +69,9 @@ const ASSAULT_DISMOUNT_SPEED: u8 = 35;
 const MELEE_RATE: f64 = 0.035;
 const RANGED_RATE: f64 = 0.3;
 const LOSS_MORALE_FACTOR: f64 = 60.0;
+/// Fatigue above which a unit loses morale over time (SV4: named so the
+/// battle markers show "exhausted" from the same threshold).
+pub const EXHAUSTED_FATIGUE: f64 = 60.0;
 
 /// Why a setup cannot start a battle.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2574,8 +2577,8 @@ impl BattleSim {
             if unit.flanked & 2 != 0 {
                 morale -= 3.0 * DT;
             }
-            if unit.fatigue > 60.0 {
-                morale -= (unit.fatigue - 60.0) * 0.02 * DT;
+            if unit.fatigue > EXHAUSTED_FATIGUE {
+                morale -= (unit.fatigue - EXHAUSTED_FATIGUE) * 0.02 * DT;
             }
             if unit.state == UnitState::Melee && unit.hp < f64::from(unit.max_soldiers) * 0.5 {
                 morale -= 0.3 * DT;
