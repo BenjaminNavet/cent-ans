@@ -275,20 +275,56 @@ fn mean_z(sim: &BattleSim, kind: &str) -> f64 {
     zs.iter().sum::<f64>() / zs.len().max(1) as f64
 }
 
+/// The attacker's longbows replace its crossbows: it wins the archery duel.
+const LONGBOW_ATTACKER: [&str; 5] = [
+    "unit_men_at_arms_foot",
+    "unit_longbowmen",
+    "unit_knights",
+    "unit_urban_militia",
+    "unit_longbowmen",
+];
+
+/// Where the attacker's men-at-arms stand at `at` seconds, and how the
+/// battle ends (`limited`: the duel is never prolonged).
+fn won_duel(limited: bool, at: f64) -> (f64, Option<BattleEnd>, f64) {
+    let mut sim = flat_battle_with(1, &LONGBOW_ATTACKER);
+    if limited {
+        let mut rules = sim.duel_rules().clone();
+        rules.winning_duel_max_seconds = rules.duel_limit_seconds;
+        sim.set_duel_rules(rules);
+    }
+    let mut z = f64::NAN;
+    while !sim.is_finished() && sim.elapsed() < 1800.0 {
+        sim.step();
+        if z.is_nan() && sim.elapsed() >= at {
+            z = mean_z(&sim, "unit_men_at_arms_foot");
+        }
+    }
+    (z, sim.end_kind(), sim.elapsed())
+}
+
+/// While its shooters win the duel the attacker keeps its line back (it
+/// does not walk into the arrows at 180 s); the battle still ends, and is
+/// not refused (the defender's losses keep the engagement clock going).
+#[test]
+fn a_won_duel_holds_the_line_then_the_battle_ends() {
+    let (held, end, t) = won_duel(false, 270.0);
+    let (walked, _, _) = won_duel(true, 270.0);
+    assert!(
+        walked - held > 20.0,
+        "men-at-arms at {held:.0} (duel prolonged) vs {walked:.0} (limited)"
+    );
+    assert!(t < 1800.0 && end.is_some(), "undecided at {t:.0} s");
+    assert_ne!(end, Some(BattleEnd::Refused));
+}
+
 /// Probe (ignored): the attacker's longbows replace its crossbows (it wins
 /// the duel); where its men-at-arms stand over time.
 #[test]
 #[ignore = "probe"]
 fn probe_epic_duel() {
-    let kinds = [
-        "unit_men_at_arms_foot",
-        "unit_longbowmen",
-        "unit_knights",
-        "unit_urban_militia",
-        "unit_longbowmen",
-    ];
     for limited in [false, true] {
-        let mut sim = flat_battle_with(1, &kinds);
+        let mut sim = flat_battle_with(1, &LONGBOW_ATTACKER);
         if limited {
             let mut rules = sim.duel_rules().clone();
             rules.winning_duel_max_seconds = rules.duel_limit_seconds;
