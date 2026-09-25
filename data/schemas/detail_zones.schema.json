@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/detail_zones.schema.json",
+  "title": "Zones de relief détaillé (palier 3)",
+  "description": "Fichier data/map/detail_zones.json (lot ZG3, ADR 0036) : zones où la pyramide de relief descend à 11-2,8 m depuis un MNT national, après effacement des anachronismes (autoroutes, voies ferrées, carrières, retenues). Lu par `cent-ans geo detail-dem`, par la caméra de campagne (zoom rapproché) et par les batailles historiques (EP2/EP7). Rendu seulement.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "zones": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/zone" }
+    }
+  },
+  "required": ["zones"],
+  "additionalProperties": false,
+  "$defs": {
+    "zone": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "name": { "type": "string" },
+        "kind": { "enum": ["city", "battle", "siege", "fortress", "landscape"] },
+        "center_lonlat": {
+          "type": "array",
+          "prefixItems": [
+            { "type": "number", "minimum": -11, "maximum": 16 },
+            { "type": "number", "minimum": 35, "maximum": 60 }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "half_size_km": { "type": "number", "minimum": 1, "maximum": 40 },
+        "max_level": { "type": "integer", "minimum": 5, "maximum": 7 },
+        "source": { "enum": ["ign_rge_alti", "ea_lidar", "ahn", "dhm_vlaanderen", "wallonie", "glo30"] },
+        "settlement_id": { "type": "string", "description": "Colonie de data/settlements liée, s'il y en a une." },
+        "why": { "type": "string", "description": "Justification historique (événement, date, rôle)." }
+      },
+      "required": ["id", "name", "kind", "center_lonlat", "half_size_km", "max_level", "source", "why"],
+      "additionalProperties": false
+    }
+  }
+}

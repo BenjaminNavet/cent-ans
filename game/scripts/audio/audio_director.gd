@@ -4,8 +4,10 @@ extends Node
 ##
 ## - Bus « Musique » et « Effets » (créés au démarrage s'ils manquent), volumes linéaires
 ##   0..1 persistés dans `user://settings.cfg` (section `audio`).
-## - Musique en boucle selon le contexte (`campaign`, `war` si le joueur est en guerre,
-##   `court` quand la cour est ouverte), fondu enchaîné entre deux lecteurs.
+## - Musique selon le contexte (`campaign`, `war` si le joueur est en guerre, `court` quand la
+##   cour est ouverte), fondu enchaîné entre deux lecteurs. Chaque contexte a une liste de
+##   lecture (`data/audio/music.json`) jouée en ordre aléatoire, sans répéter le morceau
+##   précédent ; à défaut, `music/<contexte>.ogg` en boucle.
 ## - Effets : clic sur tout bouton (via `SceneTree.node_added`), page tournée à l'ouverture
 ##   des panneaux de la carte, cloche de fin de tour puis l'effet de l'événement le plus
 ##   marquant du tour (bataille, naissance, mort, guerre, paix, religion).
@@ -24,6 +26,7 @@ const DUCK_ATTACK := 0.25
 const DUCK_RELEASE := 1.5
 const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/music/"
+const PLAYLISTS_PATH := "audio/music.json"
 const SFX_VOICES := 6
 const FADE_SECONDS := 1.5
 ## Effet par type d'événement du journal, par priorité décroissante.
@@ -65,6 +68,10 @@ var _base_context := "campaign"
 var _court_open := false
 var _duck_tween: Tween = null
 var _duck_until: float = 0.0
+## Listes de lecture par contexte (chemins `res://`) et dernier morceau joué par contexte.
+var _playlists: Dictionary = {}
+var _last_track: Dictionary = {}
+var _music_rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
@@ -75,6 +82,7 @@ func _ready() -> void:
 		var player := AudioStreamPlayer.new()
 		player.name = "Music%d" % index
 		player.bus = MUSIC_BUS
+		player.finished.connect(_on_music_finished.bind(player))
 		add_child(player)
 		_music_players.append(player)
 	for index in SFX_VOICES:
@@ -84,6 +92,7 @@ func _ready() -> void:
 		add_child(voice)
 		_sfx_players.append(voice)
 	load_settings()
+	load_playlists(SoundBank._data_dir().path_join(PLAYLISTS_PATH))
 	get_tree().node_added.connect(_on_node_added)
 
 
@@ -219,7 +228,71 @@ func has_sfx(clip: String) -> bool:
 
 
 func has_music(context: String) -> bool:
-	return _load_stream(MUSIC_DIR, context, true) != null
+	return _pick_track(context, false) != null
+
+
+## Charge les listes de lecture (`{"playlists": {contexte: [chemin relatif à res://]}}`).
+func load_playlists(path: String) -> bool:
+	_playlists.clear()
+	if not FileAccess.file_exists(path):
+		return false
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not parsed is Dictionary:
+		push_warning("AudioDirector: %s is not a JSON object" % path)
+		return false
+	var playlists: Dictionary = (parsed as Dictionary).get("playlists", {})
+	for context in playlists:
+		var tracks: Array[String] = []
+		for track in playlists[context]:
+			tracks.append("res://" + str(track))
+		_playlists[str(context)] = tracks
+	return true
+
+
+## Morceaux du contexte (vide si aucune liste de lecture).
+func playlist(context: String) -> Array:
+	return _playlists.get(context, [])
+
+
+## Choisit un morceau du contexte au hasard, différent du précédent si possible ; repli sur
+## `music/<contexte>.ogg` en boucle. `remember` : note le choix pour éviter la répétition.
+func _pick_track(context: String, remember: bool = true) -> AudioStream:
+	var candidates: Array = playlist(context).duplicate()
+	if candidates.size() > 1:
+		candidates.erase(_last_track.get(context, ""))
+	while not candidates.is_empty():
+		var index := _music_rng.randi_range(0, candidates.size() - 1)
+		var path: String = candidates[index]
+		var stream := _load_music(path)
+		if stream != null:
+			if remember:
+				_last_track[context] = path
+			return stream
+		candidates.remove_at(index)
+	return _load_stream(MUSIC_DIR, context, true)
+
+
+## Morceau d'une liste de lecture, sans boucle (la fin enchaîne sur le suivant).
+func _load_music(path: String) -> AudioStream:
+	if _streams.has(path):
+		return _streams[path]
+	var stream: AudioStream = load(path) as AudioStream if ResourceLoader.exists(path) else null
+	if stream != null:
+		# Copie : la bataille peut boucler la même ressource de son côté.
+		stream = stream.duplicate()
+		stream.set("loop", false)
+	_streams[path] = stream
+	return stream
+
+
+func _on_music_finished(player: AudioStreamPlayer) -> void:
+	if player != _music_players[_active_music] or current_context == "":
+		return
+	var stream := _pick_track(current_context)
+	if stream != null and not silent:
+		player.stream = stream
+		player.volume_db = 0.0
+		player.play()
 
 
 func play_sfx(clip: String) -> bool:
@@ -239,7 +312,7 @@ func play_sfx(clip: String) -> bool:
 func play_music(context: String) -> void:
 	if context == current_context:
 		return
-	var stream := _load_stream(MUSIC_DIR, context, true)
+	var stream := _pick_track(context)
 	current_context = context
 	if stream == null or _music_players.size() < 2 or silent:
 		return

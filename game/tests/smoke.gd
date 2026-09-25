@@ -1503,6 +1503,7 @@ func _run_assets() -> void:
 	_check(missing_sfx.is_empty(), "missing sound effects: %s" % [missing_sfx])
 	for context in ["campaign", "war", "court"]:
 		_check(audio.call("has_music", context), "missing music: %s" % context)
+		_check((audio.call("playlist", context) as Array).size() >= 3, "music playlist too short: %s" % context)
 	_check(audio.call("play_sfx", "ui_click"), "play_sfx(ui_click) failed")
 	_check(not audio.call("play_sfx", "does_not_exist"), "unknown sfx should be ignored")
 	audio.call("play_music", "war")
@@ -2309,6 +2310,11 @@ func _check_siege_f5c(scene: BattleScene) -> void:
 	_check(same, "siege scene: %d houses rendered for %d simulation houses" % [sites.size(), houses.size()])
 	await _check_battle_deployment_f5c(scene)
 	_check(not scene.hud.siege_label.text.contains("sortie"), "siege scene: no sortie at the start")
+	# FB1 : plafond de figurines (taille des unités abaissée au-delà du plafond).
+	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 4000, 15000), 2.5), "figure budget: small battle kept at Ultra")
+	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 10000, 15000), 1.5), "figure budget: large battle not capped")
+	_check(is_equal_approx(BattleScene.capped_figure_scale(1.0, 3000, 0), 1.0), "figure budget: zero budget should mean no cap")
+	_check(SettingsMenu._thousands(15000) == "15\u00a0000", "settings: thousands separator")
 	_check(BattleScene.siege_status({"pieces": [], "sortie": true}).contains("sortie de la garnison"), "siege scene: sortie not shown in the siege status")
 
 

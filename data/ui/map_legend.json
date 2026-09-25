@@ -1,0 +1,128 @@
+{
+  "title": "Légende de la carte",
+  "intro": "Ce que montrent les symboles de la carte de campagne. Survolez un symbole sur la carte pour en savoir plus.",
+  "factions": ["fac_england", "fac_burgundy", "fac_flanders", "fac_scotland"],
+  "mode_titles": {
+    "political": "Carte politique",
+    "unrest": "Carte du mécontentement (M)",
+    "diplomacy": "Carte diplomatique (N)",
+    "religion": "Carte religieuse (R)"
+  },
+  "sections": [
+    {
+      "id": "mode_political",
+      "title": "Couleur des terres",
+      "modes": ["political"],
+      "entries": [
+        {
+          "sample": {"type": "faction_colors"},
+          "label": "Aplats et liserés",
+          "text": "Chaque province prend la couleur du royaume qui la tient ; le liseré épais marque la frontière d'un royaume."
+        }
+      ]
+    },
+    {
+      "id": "mode_unrest",
+      "title": "Couleur des terres",
+      "modes": ["unrest"],
+      "entries": [
+        {
+          "sample": {"type": "gradient", "from": "#338c33", "to": "#bf261a"},
+          "label": "Du vert au rouge",
+          "text": "Mécontentement moyen des places de la province : vert, calme ; rouge, très mécontente. La touche M revient aux couleurs des royaumes."
+        }
+      ]
+    },
+    {
+      "id": "mode_diplomacy",
+      "title": "Couleur des terres",
+      "modes": ["diplomacy"],
+      "entries": [
+        {"sample": {"type": "relation", "relation": "self"}, "label": "Nous", "text": "Vos terres."},
+        {"sample": {"type": "relation", "relation": "war"}, "label": "Guerre", "text": "Royaume en guerre contre vous."},
+        {"sample": {"type": "relation", "relation": "truce"}, "label": "Trêve", "text": "Trêve en cours : l'attaquer la romprait."},
+        {"sample": {"type": "relation", "relation": "alliance"}, "label": "Alliés", "text": "Royaume allié."},
+        {"sample": {"type": "relation", "relation": "vassal"}, "label": "Vassal ou suzerain", "text": "Lien de vassalité avec vous."},
+        {"sample": {"type": "relation", "relation": "peace"}, "label": "Neutres", "text": "En paix avec vous, sans traité."}
+      ]
+    },
+    {
+      "id": "mode_religion",
+      "title": "Couleur des terres",
+      "modes": ["religion"],
+      "entries": [
+        {"sample": {"type": "color", "color": "#4059b3"}, "label": "Obédience d'Avignon", "text": "Provinces fidèles au pape d'Avignon."},
+        {"sample": {"type": "color", "color": "#cca633"}, "label": "Obédience de Rome", "text": "Provinces fidèles au pape de Rome (pendant le Grand Schisme)."},
+        {"sample": {"type": "color", "color": "#33a640"}, "label": "Hérésie", "text": "Plus la teinte verdit, plus l'hérésie y est répandue."},
+        {"sample": {"type": "color", "color": "#737373"}, "label": "Autre foi", "text": "Terres d'une autre religion."}
+      ]
+    },
+    {
+      "id": "fog",
+      "title": "Brouillard de guerre",
+      "entries": [
+        {
+          "sample": {"type": "fog"},
+          "label": "Terres voilées",
+          "text": "Grisées et couvertes de nuages : hors de vue de vos armées, de vos places et de vos agents. Les armées étrangères qui s'y trouvent ne sont pas montrées. Réglage « Brouillard de guerre » dans Réglages, onglet Carte."
+        }
+      ]
+    },
+    {
+      "id": "settlements",
+      "title": "Places (vue moyenne)",
+      "entries": [
+        {"sample": {"type": "settlement", "kind": "city", "owner": "player"}, "label": "Cité", "text": "Écu crénelé à point blanc : grande ville, dont le nom est écrit en plus grand."},
+        {"sample": {"type": "settlement", "kind": "town", "owner": "player"}, "label": "Ville", "text": "Disque crénelé, en forme d'étoile."},
+        {"sample": {"type": "settlement", "kind": "castle", "owner": "player"}, "label": "Château", "text": "Carré à créneaux."},
+        {"sample": {"type": "settlement", "kind": "abbey", "owner": "player"}, "label": "Abbaye", "text": "Disque à croix blanche."},
+        {"sample": {"type": "settlement", "kind": "village", "owner": "player"}, "label": "Village", "text": "Petit point."},
+        {
+          "sample": {"type": "settlement_owners"},
+          "label": "Couleur d'une place",
+          "text": "Celle du royaume qui la tient : les vôtres à gauche, puis d'autres royaumes ; gris, place sans seigneur. En rapprochant la caméra, les symboles cèdent la place aux maquettes."
+        }
+      ]
+    },
+    {
+      "id": "armies",
+      "title": "Armées",
+      "entries": [
+        {"sample": {"type": "army_banner", "owner": "player"}, "label": "Étendard", "text": "Une armée : figurines et étendard aux armes de son royaume. L'anneau au sol est doré quand l'armée est sélectionnée."},
+        {"sample": {"type": "army_plate", "men": 620, "status": "", "owner": "player"}, "label": "Effectif", "text": "Nombre d'hommes. Cadre doré : votre armée ; cadre brun : une armée étrangère."},
+        {"sample": {"type": "army_plate", "men": 429, "status": "siege", "owner": "other"}, "label": "« siège »", "text": "L'armée assiège la place où elle se tient."},
+        {"sample": {"type": "army_plate", "men": 1040, "status": "moving", "owner": "player"}, "label": "Chevron « » »", "text": "L'armée est en marche."},
+        {"sample": {"type": "army_plate", "men": 800, "status": "embarked", "owner": "other"}, "label": "« à bord »", "text": "L'armée est embarquée sur une flotte."}
+      ]
+    },
+    {
+      "id": "agents",
+      "title": "Agents",
+      "entries": [
+        {"sample": {"type": "agent", "kind": "spy"}, "label": "E : espion", "text": "Jeton rond, cerclé à la couleur de son royaume. Les points dorés du bas donnent son niveau."},
+        {"sample": {"type": "agent", "kind": "emissary"}, "label": "H : héraut", "text": "Agent de diplomatie."},
+        {"sample": {"type": "agent", "kind": "preacher"}, "label": "P : prédicateur", "text": "Agent de la foi."}
+      ]
+    },
+    {
+      "id": "orders",
+      "title": "Ordres et chemins",
+      "entries": [
+        {"sample": {"type": "path"}, "label": "Chemin prévu", "text": "Vert : la marche de ce tour ; rouge : les tours suivants ; un jalon clair à la fin de chaque tour."},
+        {"sample": {"type": "ring", "color": "#4df24d"}, "label": "Anneau vert", "text": "Place que l'armée sélectionnée peut atteindre ce tour ; orange : la destination choisie."},
+        {"sample": {"type": "ring", "color": "#f2c740"}, "label": "Anneau doré", "text": "Place sélectionnée, ou place qu'un agent sélectionné peut atteindre."},
+        {"sample": {"type": "construction"}, "label": "Marteaux", "text": "Chantier en cours dans la province."},
+        {"sample": {"type": "trade_route"}, "label": "Route commerciale", "text": "Couche « Commerce » : trait sépia, plus épais pour une route plus riche ; grisé, route coupée."}
+      ]
+    },
+    {
+      "id": "minimap",
+      "title": "Minicarte",
+      "entries": [
+        {"sample": {"type": "minimap_army", "owner": "player"}, "label": "Point cerclé d'or", "text": "Une de vos armées."},
+        {"sample": {"type": "minimap_army", "owner": "other"}, "label": "Losange", "text": "Une armée étrangère en vue."},
+        {"sample": {"type": "minimap_frame"}, "label": "Cadre clair", "text": "Ce que montre la caméra. Cliquer ou glisser sur la minicarte y porte la vue ; « Politique » et « Relief » changent le fond de la minicarte seulement."}
+      ]
+    }
+  ]
+}

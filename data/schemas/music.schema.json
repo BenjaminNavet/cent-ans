@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "music.schema.json",
+  "title": "Listes de lecture musicales",
+  "description": "Morceaux joués en rotation aléatoire (sans répétition immédiate) par contexte : campagne en paix, guerre, cour. La bataille puise sa piste de base dans « war ». Chemins relatifs à res:// (game/), .ogg ou .mp3. Crédits et licences : CREDITS.md et SOURCE.md de chaque dossier third_party.",
+  "type": "object",
+  "required": [
+    "playlists"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "playlists": {
+      "type": "object",
+      "required": [
+        "campaign",
+        "war",
+        "court"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "campaign": {
+          "$ref": "#/$defs/playlist"
+        },
+        "war": {
+          "$ref": "#/$defs/playlist"
+        },
+        "court": {
+          "$ref": "#/$defs/playlist"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "playlist": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^assets/.+\\.(ogg|mp3)$"
+      }
+    }
+  }
+}

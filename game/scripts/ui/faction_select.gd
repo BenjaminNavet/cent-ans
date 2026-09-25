@@ -1,7 +1,7 @@
 class_name FactionSelect
 extends Control
 
-## Lot MM1 — choix de faction à la Total War, posé sur le décor 3D du menu : date de départ,
+## Lot MM1 — choix de faction, posé sur le décor 3D du menu : date de départ,
 ## trois grandes cartes opaques (miniature de la faction, écu, nom, accroche, souverain avec son
 ## portrait, difficulté), fiche détaillée de la faction choisie (introduction, forces,
 ## faiblesses, objectifs historiques), options avancées (graine) et barre d'actions

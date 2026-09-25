@@ -1,4 +1,4 @@
-//! General's retinue (lot C7, « retinue » à la Medieval II).
+//! General's retinue (lot C7).
 //!
 //! Companions are defined in `data/retinue.json` (`GameData::retinue`); a
 //! character keeps the ids of his companions in

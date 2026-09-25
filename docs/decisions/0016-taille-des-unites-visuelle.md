@@ -53,3 +53,12 @@ bataille suivante.
   (backlog) restent la piste si l'Ultra est trop lourd sur les grosses batailles.
 - Si un jour il faut de vrais effectifs, l'option C restera possible : aucun code de règle ne
   dépend du multiplicateur visuel.
+
+## Avenant FB1 (2026-09-25) — plafond de figurines
+
+Demande du joueur : régler la taille des unités en nombre de figurines, jusqu'à 15 000. Nouveau
+réglage `battle/max_figures` (onglet Bataille, « Figurines maximum » : 1 000 à 15 000, défaut
+15 000). Au début de la bataille, `BattleScene.capped_figure_scale` prend
+`min(taille des unités, plafond / hommes simulés)` : les petites batailles gardent le multiplicateur
+choisi ; les grandes sont réduites pour tenir dans le plafond. Le pont borne toujours l'échelle à
+[0,25 ; 4]. Rendu seulement, comme l'option B : effectifs, équilibre et sauvegardes inchangés.
