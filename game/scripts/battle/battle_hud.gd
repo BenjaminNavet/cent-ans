@@ -3,7 +3,7 @@ extends CanvasLayer
 
 ## HUD parchemin de la bataille (construit en code sur `parchment_theme.tres`) : barre du haut
 ## (nom, horloge, météo, rapport de forces), journal repliable et regroupé, en bas un bandeau
-## compact à la Total War (U9, UB1) : sceau du chef à gauche, cartes du joueur (`UnitCard`)
+## compact (U9, UB1) : sceau du chef à gauche, cartes du joueur (`UnitCard`)
 ## rangées par « bataille » (`BattleGroups`), ordres en icônes, « Retraite générale » à part et
 ## confirmée, minicarte (`BattleMinimap`) et boutons de vitesse ; aide F1 (F5b, audit UI § 3.2).
 ## L'écran de fin est `BattleResultScreen` (B2), posé par la scène sur `root`.

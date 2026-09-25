@@ -32,18 +32,44 @@ const FONT_BODY := 14
 const FONT_TITLE := 17
 
 
-## Panneau parchemin opaque avec filet d'encre et filet d'or intérieur (via marge de contenu).
-static func panel_box(margin: int = 10, radius: int = 3) -> StyleBoxFlat:
-	var box := StyleBoxFlat.new()
-	box.bg_color = PARCHMENT
-	box.border_color = INK_SOFT
-	box.set_border_width_all(2)
-	box.set_corner_radius_all(radius)
+## Kit enluminé (lot UI1, `tools/cent_ans_tools/ui_illumination.py`) : textures 9-slice.
+const KIT_DIR := "res://assets/ui/illumination/"
+const PAGE_MARGIN := 20
+const ILLUMINATED_MARGIN := 46
+
+
+## Boîte texturée du kit enluminé : `texture_margin` = bordure peinte, centre et bords
+## répétés (la texture est périodique), `margin` = marge de contenu supplémentaire.
+static func kit_box(texture_name: String, texture_margin: int, margin: int) -> StyleBox:
+	var texture := load(KIT_DIR + texture_name + ".png") as Texture2D
+	if texture == null:
+		return StyleBoxFlat.new()
+	var box := StyleBoxTexture.new()
+	box.texture = texture
+	box.texture_margin_left = texture_margin
+	box.texture_margin_top = texture_margin
+	box.texture_margin_right = texture_margin
+	box.texture_margin_bottom = texture_margin
+	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
 	box.set_content_margin_all(margin)
-	box.shadow_color = SHADOW
-	box.shadow_size = 5
-	box.shadow_offset = Vector2(0, 2)
 	return box
+
+
+## Panneau « page de vélin » : filet d'encre, bande d'or, filet vermillon, bossettes dorées.
+## `margin` : marge de contenu (au moins 10 px, largeur du cadre peint).
+static func panel_box(margin: int = 10, _radius: int = 3) -> StyleBox:
+	return kit_box("panel", PAGE_MARGIN, maxi(margin, 10))
+
+
+## Grande page enluminée : rinceaux de lierre, baguette azur et gueules, coins dorés.
+static func illuminated_box(margin: int = 10) -> StyleBox:
+	return kit_box("panel_illuminated", ILLUMINATED_MARGIN, margin + 44)
+
+
+## Note marginale (bulles, petites fenêtres) : vélin clair, double filet or et vermillon.
+static func note_box(margin: int = 8) -> StyleBox:
+	return kit_box("tooltip", 12, margin + 3)
 
 
 ## Fond plat (cartes d'unité, lettres) : parchemin, bord fin.
