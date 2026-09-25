@@ -45,7 +45,7 @@
       { "unit_type": "unit_longbowmen", "name": "Archers de Pembroke", "morale": 65 }
     ],
     "ships": [
-      { "name": "la Grâce-Dieu", "class": "ship_nef", "flagship": true, "position": [280.0, 0.0], "heading_deg": 180.0, "crew": [ { "unit": 0, "men": 50 }, { "unit": 1, "men": 30 } ] },
+      { "name": "la Sainte-Marie de la Tour", "class": "ship_nef", "flagship": true, "position": [280.0, 0.0], "heading_deg": 180.0, "crew": [ { "unit": 0, "men": 50 }, { "unit": 1, "men": 30 } ] },
       { "name": "la Sainte-Marie de Southampton", "class": "ship_cog", "position": [260.0, -60.0], "heading_deg": 190.0, "crew": [ { "unit": 0, "men": 20 }, { "unit": 1, "men": 25 } ] },
       { "name": "la Trinité de Fowey", "class": "ship_cog", "position": [265.0, 60.0], "heading_deg": 170.0, "crew": [ { "unit": 0, "men": 20 }, { "unit": 1, "men": 25 } ] },
       { "name": "la Christophe de Poole", "class": "ship_cog", "position": [320.0, -110.0], "heading_deg": 185.0, "crew": [ { "unit": 0, "men": 15 }, { "unit": 1, "men": 25 } ] },

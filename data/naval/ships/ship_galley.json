@@ -20,6 +20,6 @@
   "fire_resistance": 0.0,
   "cost": 1600,
   "model": "galley",
-  "description": "Galère de guerre méditerranéenne (Gênes, Castille, clos des Galées de Rouen) : longue, basse, rapide à la rame quel que soit le vent, pavesade d'arbalétriers le long du bord et éperon à la proue. Basse sur l'eau, elle monte mal à l'abordage d'une cogue.",
+  "description": "Galère de guerre méditerranéenne (Gênes, [[cdx_castille|Castille]], clos des Galées de [[cdx_rouen|Rouen]]) : longue, basse, rapide à la rame quel que soit le vent, pavesade d'arbalétriers le long du bord et éperon à la proue. Basse sur l'eau, elle monte mal à l'abordage d'une cogue.",
   "sources": ["Galère", "Clos des Galées", "Bataille de La Rochelle (1372)"]
 }

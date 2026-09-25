@@ -55,6 +55,38 @@
   "ruined": false,
   "triangles": 248
  },
+ "bridge_stone_bay_0": {
+  "depth": 8.8,
+  "height": 8.1,
+  "kind": "bridge_stone_bay",
+  "length": 9.0,
+  "ruined": false,
+  "triangles": 230
+ },
+ "bridge_stone_end_0": {
+  "depth": 6.0,
+  "height": 8.5,
+  "kind": "bridge_stone_end",
+  "length": 5.0,
+  "ruined": false,
+  "triangles": 76
+ },
+ "bridge_wood_bay_0": {
+  "depth": 5.3,
+  "height": 8.0,
+  "kind": "bridge_wood_bay",
+  "length": 4.0,
+  "ruined": false,
+  "triangles": 212
+ },
+ "bridge_wood_end_0": {
+  "depth": 5.0,
+  "height": 8.2,
+  "kind": "bridge_wood_end",
+  "length": 5.0,
+  "ruined": false,
+  "triangles": 132
+ },
  "cart_0": {
   "depth": 1.65,
   "height": 1.9,

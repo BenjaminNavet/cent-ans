@@ -35,7 +35,7 @@ const FONT_TITLE := 17
 ## Kit enluminé (lot UI1, `tools/cent_ans_tools/ui_illumination.py`) : textures 9-slice.
 const KIT_DIR := "res://assets/ui/illumination/"
 const PAGE_MARGIN := 20
-const ILLUMINATED_MARGIN := 46
+const ILLUMINATED_MARGIN := 38
 
 
 ## Boîte texturée du kit enluminé : `texture_margin` = bordure peinte, centre et bords
@@ -64,7 +64,7 @@ static func panel_box(margin: int = 10, _radius: int = 3) -> StyleBox:
 
 ## Grande page enluminée : rinceaux de lierre, baguette azur et gueules, coins dorés.
 static func illuminated_box(margin: int = 10) -> StyleBox:
-	return kit_box("panel_illuminated", ILLUMINATED_MARGIN, margin + 44)
+	return kit_box("panel_illuminated", ILLUMINATED_MARGIN, margin + 34)
 
 
 ## Note marginale (bulles, petites fenêtres) : vélin clair, double filet or et vermillon.

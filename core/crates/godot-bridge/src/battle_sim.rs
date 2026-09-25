@@ -559,6 +559,12 @@ impl BattleSim {
     /// `village?{x, z, radius, farm, houses[{x, z, length, width, yaw, kind}]}`.
     /// R2: `forests` and `mud` are overlapping discs (anchors first, then
     /// lobes and copses).
+    /// EP3: `river` also carries `widths` (water width at each point),
+    /// `flow` (+1 when the water runs towards +x), `banks[{x0, x1, north,
+    /// kind: steep|marsh}]`; `bridges[{x, z, yaw, length, width, span,
+    /// deck, stone, arches, stream}]` (`stream` = -1 on the river),
+    /// `streams[{kind: tributary|brook, points, width}]`, `roads[{kind:
+    /// main|track, points, width}]`; oxbows are appended to `pools`.
     #[func]
     fn get_terrain(&self) -> VarDictionary {
         let Some(sim) = &self.sim else {
@@ -594,7 +600,7 @@ impl BattleSim {
             // B6: the site in one compact line (pre-battle dialog, HUD).
             "site_label" => field.site_label_fr(),
             "woodland" => field.woodland,
-            "pools" => &zones(&field.pools),
+            "pools" => &zones(&[field.pools.as_slice(), &field.oxbows].concat()),
             "obstacles" => &field
                 .obstacles
                 .iter()
@@ -652,11 +658,73 @@ impl BattleSim {
                         .to_variant()
                 })
                 .collect();
+            let widths: PackedFloat32Array = river
+                .polyline(10.0, field.width)
+                .iter()
+                .map(|(x, _)| river.width_at(*x) as f32)
+                .collect();
+            let banks: VarArray = river
+                .banks
+                .iter()
+                .map(|b| {
+                    vdict! { "x0" => b.x0, "x1" => b.x1, "north" => b.north, "kind" => b.kind.key() }
+                        .to_variant()
+                })
+                .collect();
+            // The water runs towards the lower end of the field.
+            let flow = if field.height(0.0, river.center_z(0.0))
+                >= field.height(field.width, river.center_z(field.width))
+            {
+                1
+            } else {
+                -1
+            };
             dict.set(
                 "river",
-                &vdict! { "points" => &points, "width" => river.width, "fords" => &fords },
+                &vdict! {
+                    "points" => &points, "width" => river.width, "fords" => &fords,
+                    "widths" => &widths, "banks" => &banks, "flow" => flow,
+                },
             );
         }
+        let polyline = |points: &[(f64, f64)]| -> PackedVector2Array {
+            points
+                .iter()
+                .map(|(x, z)| Vector2::new(*x as f32, *z as f32))
+                .collect()
+        };
+        let bridges: VarArray = field
+            .bridges
+            .iter()
+            .map(|b| {
+                vdict! {
+                    "x" => b.x, "z" => b.z, "yaw" => b.yaw(), "length" => b.length,
+                    "width" => b.width, "span" => b.span, "deck" => b.deck, "stone" => b.stone,
+                    "arches" => b.arches as i64,
+                    "stream" => b.stream.map_or(-1, |s| s as i64),
+                }
+                .to_variant()
+            })
+            .collect();
+        dict.set("bridges", &bridges);
+        let streams: VarArray = field
+            .streams
+            .iter()
+            .map(|s| {
+                vdict! { "kind" => s.kind.key(), "points" => &polyline(&s.points), "width" => s.width }
+                    .to_variant()
+            })
+            .collect();
+        dict.set("streams", &streams);
+        let roads: VarArray = field
+            .roads
+            .iter()
+            .map(|r| {
+                vdict! { "kind" => r.kind.key(), "points" => &polyline(&r.points), "width" => r.width }
+                    .to_variant()
+            })
+            .collect();
+        dict.set("roads", &roads);
         if sim.siege().is_some() {
             dict.set("siege", &self.get_siege());
         }
@@ -833,6 +901,34 @@ impl BattleSim {
     #[func]
     fn get_height(&self, x: f64, z: f64) -> f64 {
         self.sim.as_ref().map_or(0.0, |s| s.field().height(x, z))
+    }
+
+    /// EP3: height one walks at (x, z): a bridge deck, else the ground.
+    #[func]
+    fn get_walk_height(&self, x: f64, z: f64) -> f64 {
+        self.sim
+            .as_ref()
+            .map_or(0.0, |s| s.field().walk_height(x, z))
+    }
+
+    /// EP3 (for EP6, a water mill): a spot on a bank near (x, z), `setback`
+    /// metres from the water, clear of fords, bridges and roads:
+    /// `{x, z, yaw (facing the water, from +x towards +z), stream (-1: the
+    /// river)}`, or an empty dictionary without water.
+    #[func]
+    fn get_waterside_spot(&self, x: f64, z: f64, setback: f64) -> VarDictionary {
+        let Some(spot) = self
+            .sim
+            .as_ref()
+            .and_then(|s| s.field().waterside_spot((x, z), setback))
+        else {
+            return VarDictionary::new();
+        };
+        vdict! {
+            "x" => spot.x, "z" => spot.z,
+            "yaw" => spot.towards_water.1.atan2(spot.towards_water.0),
+            "stream" => spot.stream.map_or(-1, |s| s as i64),
+        }
     }
 
     /// B6: the battle site in one compact French line, e.g. « Terre gelée ·

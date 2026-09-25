@@ -3,7 +3,7 @@
   "name": {
     "display": "Paix de Dieu"
   },
-  "description": "Reprise du mouvement de paix ecclésiastique (conciles de Charroux puis du Puy, fin Xe s.) : le clergé local fait proclamer trêves et protections pour calmer la province, au prix d'un moindre effort de guerre.",
+  "description": "Reprise du mouvement de paix ecclésiastique (assemblées du Puy en 975 puis de Charroux en 989) : le clergé local fait proclamer trêves et protections pour [[cdx_jeu_ordre_public|calmer la province]], au prix d'un moindre effort de guerre.",
   "delay_turns": 1,
   "effects": [
     { "effect": "unrest", "value": -8 },

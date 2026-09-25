@@ -6,7 +6,7 @@
     "name": {
       "display": "Münster",
       "local": "Münster",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       7.6261,
@@ -40,8 +40,8 @@
     "kind": "town",
     "name": {
       "display": "Dortmund",
-      "local": "Throtmanni",
-      "local_language": "moyen haut-allemand"
+      "local": "Dortmunde",
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       7.4653,
@@ -67,7 +67,7 @@
     "name": {
       "display": "Soest",
       "local": "Susat",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       8.1064,
@@ -92,8 +92,8 @@
     "kind": "abbey",
     "name": {
       "display": "Corvey",
-      "local": "Corbeia Nova",
-      "local_language": "moyen haut-allemand"
+      "local": "Corveye",
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       9.4083,

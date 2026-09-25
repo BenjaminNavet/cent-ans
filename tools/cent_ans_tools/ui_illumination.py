@@ -551,31 +551,31 @@ def panel(rng: np.random.Generator) -> tuple[Canvas, Piece]:
 
 def panel_illuminated(rng: np.random.Generator) -> tuple[Canvas, Piece]:
     """Large window: gold frame, ivy rinceau band, azure/gules bar, big corner bosses."""
-    margin, period = 46, 128
+    margin, period = 38, 128
     size = 2 * margin + period
     canvas = Canvas.vellum(size, size, margin, period, rng)
-    canvas.shade(edge_vignette(size, size, 22.0, 0.16))
+    canvas.shade(edge_vignette(size, size, 18.0, 0.16))
     outer = Mask(size, size)
     outer.frame(1, 1.4)
     inked(canvas, outer)
     band = Mask(size, size)
     band.frame(3.5, 3.0)
     gilded(canvas, band, rng)
-    vine_band(canvas, rng, margin, period, band_center=21.0, amplitude=5.5, leaf=6.4)
+    vine_band(canvas, rng, margin, period, band_center=17.5, amplitude=4.5, leaf=5.6)
     # Inner baguette on the four sides.
-    b0, b1 = 36.0, 41.0
+    b0, b1 = 29.0, 33.5
     bar_segments(canvas, rng, b0, b0, size - b0, b1, 16.0, True, margin)
     bar_segments(canvas, rng, b0, size - b1, size - b0, size - b0, 16.0, True, margin)
     bar_segments(canvas, rng, b0, b0, b1, size - b0, 16.0, False, margin)
     bar_segments(canvas, rng, size - b1, b0, size - b0, size - b0, 16.0, False, margin)
     for cx in (b0 + 2.5, size - b0 - 2.5):
         for cy in (b0 + 2.5, size - b0 - 2.5):
-            corner_boss(canvas, rng, (cx, cy), 13.0, GULES)
-    for cx in (15.0, size - 15.0):
-        for cy in (15.0, size - 15.0):
-            corner_boss(canvas, rng, (cx, cy), 22.0)
+            corner_boss(canvas, rng, (cx, cy), 11.0, GULES)
+    for cx in (13.0, size - 13.0):
+        for cy in (13.0, size - 13.0):
+            corner_boss(canvas, rng, (cx, cy), 19.0)
     return canvas, Piece(
-        "panel_illuminated", (margin, margin, margin, margin), (54, 50, 54, 52)
+        "panel_illuminated", (margin, margin, margin, margin), (44, 40, 44, 40)
     )
 
 

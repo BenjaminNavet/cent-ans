@@ -32,6 +32,8 @@ var _turn: int = -1
 var _seed: int = 0
 var _player: String = ""
 var _rng := RandomNumberGenerator.new()
+## DF1 : niveau de difficulté (le mock ne l'applique pas, il le mémorise seulement).
+var _difficulty: String = "normal"
 
 ## province_id → {name, owner, controller, neighbors: Array[String], garrison: Array, unrest, devastation, population_total}
 var _provinces: Dictionary = {}
@@ -65,6 +67,7 @@ var _skill_tree: Array = []
 
 func new_campaign(data_dir: String, player: String, seed: int) -> bool:
 	_turn = 0
+	_difficulty = "normal"
 	_seed = seed
 	_player = player
 	_rng.seed = seed
@@ -94,6 +97,7 @@ func save_to_string() -> String:
 		"turn": _turn,
 		"seed": _seed,
 		"player": _player,
+		"difficulty": _difficulty,
 		"rng_state": _rng.state,
 		"provinces": _provinces,
 		"factions": _factions,
@@ -113,6 +117,7 @@ func load_from_string(json: String) -> bool:
 	_turn = int(parsed.get("turn", 0))
 	_seed = int(parsed.get("seed", 0))
 	_player = str(parsed.get("player", ""))
+	_difficulty = str(parsed.get("difficulty", "normal"))
 	_rng.seed = _seed
 	_rng.state = int(parsed.get("rng_state", 0))
 	_provinces = parsed.get("provinces", {})
@@ -1767,3 +1772,43 @@ func _handle_succession(faction_id: String, dead_id: String) -> void:
 			"text_fr": "%s est mineur(e) : une régence est instaurée." % str(_characters[successor]["name"]),
 			"character": successor, "faction": faction_id,
 		})
+
+
+# --- Difficulté (DF1) ---------------------------------------------------------------------------
+
+
+## Niveaux lus dans `data/rules/difficulty.json` (sans le résumé chiffré, calculé par le cœur).
+func get_difficulty_levels() -> Array:
+	var path := _map_paths_data_dir().path_join("rules/difficulty.json")
+	if not FileAccess.file_exists(path):
+		return []
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (parsed is Dictionary):
+		return []
+	var default_id := str((parsed as Dictionary).get("default", "normal"))
+	var result: Array = []
+	for entry in (parsed as Dictionary).get("levels", []):
+		var level: Dictionary = entry
+		var id := str(level.get("id", ""))
+		result.append({
+			"id": id,
+			"label": str(level.get("label", id)),
+			"description": str(level.get("description", "")),
+			"effects": PackedStringArray(),
+			"summary": "",
+			"default": id == default_id,
+		})
+	return result
+
+
+func set_difficulty(id: String) -> bool:
+	if not id in ["easy", "normal", "hard", "very_hard"] or _turn < 0:
+		return false
+	if _turn > 0:
+		return id == _difficulty
+	_difficulty = id
+	return true
+
+
+func get_difficulty() -> String:
+	return _difficulty

@@ -30,9 +30,10 @@
       "value": 10
     }
   ],
-  "description": "Courtines crénelées à tours flanquantes et portes fortifiées.",
+  "description": "Courtines crénelées à tours flanquantes et portes fortifiées. Voir [[cdx_enceinte_de_pierre]].",
   "sources": [
-    "Économie médiévale",
+    "Enceinte (fortification)",
+    "Mâchicoulis",
     "Architecture militaire médiévale"
   ]
 }

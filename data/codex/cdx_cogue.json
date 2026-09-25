@@ -1,0 +1,32 @@
+{
+  "id": "cdx_cogue",
+  "title": "La cogue",
+  "category": "unite",
+  "aliases": [
+    "Cogue",
+    "cogues",
+    "kogge",
+    "Christophe",
+    "cogue royale"
+  ],
+  "era": {
+    "from": "1200",
+    "to": "1450"
+  },
+  "summary": "Navire rond à fond plat, bordé à clin, un mât et une grande voile carrée : la cogue, popularisée par la [[cdx_hanse|Hanse]], est le cheval de trait des mers du Nord. Réquisitionnée aux marchands et coiffée de châteaux, elle porte les armées d'[[cdx_edouard_iii|Édouard III]] et combat à l'[[cdx_ecluse|Écluse]].",
+  "body": "La cogue naît sur les côtes de Frise et de la mer du Nord, puis devient le navire type des marchands de la [[cdx_hanse|Hanse]]. L'épave découverte à Brême en 1962, datée de 1380, mesure environ 23 m de long pour 7,6 m de large : fond plat qui lui permet de s'échouer à marée basse, flancs hauts bordés à clin, gouvernail d'étambot à l'arrière, un seul mât portant une voile carrée. Elle transporte vin, laine, sel, harengs et draps entre [[cdx_bordeaux|Bordeaux]], Londres, [[cdx_bruges|Bruges]] et la Baltique.\n\nEn temps de guerre, les rois « arrêtent » les navires marchands de leurs ports, c'est-à-dire les réquisitionnent, et y font bâtir des châteaux de bois crénelés à l'avant, à l'arrière et en haut du mât. Du haut de ces plates-formes, archers et arbalétriers dominent les ponts ennemis. Les batailles navales du temps sont des combats d'infanterie sur des plates-formes flottantes : on s'accroche au grappin et l'on aborde.\n\nÀ l'[[cdx_ecluse|Écluse]], le 24 juin 1340, la flotte d'Édouard III détruit la flotte française de [[cdx_hugues_quieret|Hugues Quiéret]], serrée à l'ancre dans l'estuaire du Zwin, et reprend le Christophe, grande cogue royale perdue en 1338. Dix ans plus tard, devant Winchelsea, Édouard III affronte les grandes nefs castillanes : sa propre cogue coule sous lui, mais il s'empare d'un navire ennemi.",
+  "gameplay": "Navire à voile de 24 m sur 7,5 m, franc-bord 2,8 m. Coque 240 points ; embarque 70 soldats et 24 marins. Vitesse : 3,2 m/s à la voile ; virage 5° par seconde. Châteaux : 24 tireurs y tirent de 5,2 m de haut ; pavesade : traits reçus ×0,75 ; résistance au feu 0,1. Haut de bord : ses tireurs dominent les navires plus bas (jusqu'à +50 % selon l'écart de hauteur) et l'ennemi qui l'aborde d'un pont plus bas perd 12 % d'efficacité par mètre à gravir. Elle dépend du vent : immobile à moins de 67° du lit du vent. En campagne, on ne construit pas de navires : la flotte de chaque faction se reconstitue d'elle-même chaque saison.",
+  "entity": "ship_cog",
+  "see_also": [
+    "cdx_ecluse",
+    "cdx_nef",
+    "cdx_galee",
+    "cdx_hanse"
+  ],
+  "sources": [
+    "Cogue",
+    "Bataille de l'Écluse",
+    "Bataille de Winchelsea (1350)",
+    "Cogue de Brême"
+  ]
+}
