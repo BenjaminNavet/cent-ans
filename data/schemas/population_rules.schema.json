@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/population_rules.schema.json",
+  "title": "Règles de l'ordre public",
+  "description": "Fichier data/rules/population.json (lot E2) : termes de la cible de mécontentement (0-100) de chaque classe sociale, hors effets de bâtiments et d'événements.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "tax_unrest_weight": { "type": "number", "minimum": 0, "maximum": 200, "description": "Mécontentement par unité de charge fiscale (Bas 0,2 ; Normal 0,35 ; Haut 0,5)." },
+    "garrison_relief_per_100_men": { "type": "number", "minimum": 0, "maximum": 10, "description": "Apaisement par tranche de 100 hommes de garnison dans la province." },
+    "garrison_relief_max": { "type": "number", "minimum": 0, "maximum": 100, "description": "Apaisement maximal de la garnison." },
+    "goods_relief_max": { "type": "number", "minimum": 0, "maximum": 100, "description": "Apaisement maximal dû à l'abondance des biens." },
+    "occupation_unrest": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement d'une province tenue par une autre faction que son propriétaire." },
+    "foreign_religion_unrest": { "type": "number", "minimum": 0, "maximum": 100, "description": "Mécontentement d'une province dont le souverain est d'une autre foi." }
+  },
+  "required": ["tax_unrest_weight", "garrison_relief_per_100_men", "garrison_relief_max", "goods_relief_max", "occupation_unrest", "foreign_religion_unrest"],
+  "additionalProperties": false
+}

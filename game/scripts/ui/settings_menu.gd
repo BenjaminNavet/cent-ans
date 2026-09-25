@@ -26,7 +26,7 @@ func _ready() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(640, 440)
+	panel.custom_minimum_size = Vector2(700, 500)
 	center.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
@@ -48,6 +48,8 @@ func _ready() -> void:
 		_build_game(_tab(tabs, "Partie"))
 		_build_battle(_tab(tabs, "Bataille"))
 		_build_sound(_tab(tabs, "Son"))
+		_build_controls(_tab(tabs, "Commandes"))  # U7
+		_build_accessibility(_tab(tabs, "Accessibilité"))  # U12
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_END
 	buttons.add_theme_constant_override("separation", 10)
@@ -173,6 +175,8 @@ func _build_map(grid: GridContainer) -> void:
 	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
+	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),
+		"Lettres scellées et bandeau du haut. Le journal garde toutes les nouvelles.")
 
 
 func _build_game(grid: GridContainer) -> void:
@@ -199,6 +203,60 @@ func _build_sound(grid: GridContainer) -> void:
 	for spec in AudioBuses.PLAYER_BUSES:
 		var bus_name: String = spec[0]
 		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
+
+
+## Lot U7 : disposition du clavier et fiche des raccourcis, lue dans l'InputMap.
+func _build_controls(grid: GridContainer) -> void:
+	_options(grid, "input/layout", "Disposition du clavier", Array(ShortcutSheet.LAYOUTS), Array(ShortcutSheet.LAYOUT_LABELS),
+		"Change les lettres affichées sur les boutons et dans l'aide. Les touches de déplacement suivent leur place sur le clavier (Z Q S D en AZERTY, W A S D en QWERTY).")
+	var sheet := GridContainer.new()
+	sheet.name = "ShortcutGrid"
+	sheet.columns = 2
+	sheet.add_theme_constant_override("h_separation", 18)
+	sheet.add_theme_constant_override("v_separation", 2)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 260)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(sheet)
+	_label(grid, "Raccourcis de la carte")
+	grid.add_child(scroll)
+	_fill_shortcuts(sheet)
+	settings.changed.connect(func(key: String) -> void:
+		if key == "input/layout" and is_instance_valid(sheet):
+			_fill_shortcuts(sheet))
+
+
+func _fill_shortcuts(sheet: GridContainer) -> void:
+	for child in sheet.get_children():
+		sheet.remove_child(child)
+		child.queue_free()
+	for section in ShortcutSheet.sections():
+		var title := Label.new()
+		title.text = str(section["title"])
+		title.add_theme_color_override("font_color", HudStyle.RUBRIC)
+		sheet.add_child(title)
+		sheet.add_child(Control.new())
+		for line in section["lines"]:
+			var keys := Label.new()
+			keys.text = str(line[0])
+			keys.add_theme_font_size_override("font_size", 15)
+			keys.custom_minimum_size = Vector2(90, 0)
+			sheet.add_child(keys)
+			var what := Label.new()
+			what.text = str(line[1])
+			what.add_theme_font_size_override("font_size", 15)
+			sheet.add_child(what)
+
+
+## Lot U12 : mode daltonien, animations réduites, contraste renforcé.
+func _build_accessibility(grid: GridContainer) -> void:
+	_check(grid, Accessibility.KEY_COLORBLIND, "Mode daltonien",
+		"Ajoute motifs et symboles aux couleurs : carte diplomatique hachurée, relations et moral marqués de symboles.")
+	_check(grid, Accessibility.KEY_REDUCE_MOTION, "Réduire les animations",
+		"Supprime les fondus et les travellings de caméra.")
+	_check(grid, Accessibility.KEY_HIGH_CONTRAST, "Contraste renforcé",
+		"Encre plus sombre, parchemin plus clair, bords plus épais.")
 
 
 func _on_reset() -> void:

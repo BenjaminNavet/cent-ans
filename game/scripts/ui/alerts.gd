@@ -35,7 +35,7 @@ static func collect(map: Node, last_events: Array) -> Array:
 				"id": "siege:" + province_id, "kind": "siege", "severity": "danger",
 				"province_id": province_id,
 				"text": "%s assiégée (vivres : %d)" % [map.call("province_name_of", province_id), int(siege.get("supplies", 0))],
-				"tooltip": "Siège mené par %s depuis %d tour(s)." % [_faction_name(str(siege.get("attacker", ""))), int(siege.get("turns_elapsed", 0))],
+				"tooltip": "Siège mené par %s depuis %s." % [_faction_name(str(siege.get("attacker", ""))), FrText.count(int(siege.get("turns_elapsed", 0)), "tour")],
 			})
 	# Armées ennemies dans une province du joueur ou adjacente.
 	for army_id in sim.call("get_army_ids"):

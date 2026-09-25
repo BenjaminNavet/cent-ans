@@ -280,6 +280,23 @@ def _report_landcover() -> None:
     )
 
 
+@geo_app.command("rivers-render")
+def geo_rivers_render() -> None:
+    """Génère rivers_render.json, river_bed.png et crossings_px.json (rendu des fleuves, V4)."""
+    from cent_ans_tools.geo import river_render
+
+    result = river_render.build()
+    _print_sizes("Rendu des fleuves", [result.render, result.bed, result.crossings])
+    console.print(
+        f"{result.rivers} tronçons, {result.points} points ; "
+        f"{result.snapped} passages recalés sur leur fleuve"
+    )
+    if result.unsnapped:
+        console.print(
+            f"[yellow]Hors fleuve affiché : {', '.join(result.unsnapped)}[/yellow]"
+        )
+
+
 @geo_app.command("navgrid")
 def geo_navgrid(
     lenient: bool = typer.Option(

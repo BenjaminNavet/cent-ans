@@ -302,7 +302,7 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 	if upkeep >= 0:
 		cost_line.append("Entretien : %s %s / saison" % [thousands(upkeep), POUND])
 	if definition.has("recruit_time_turns"):
-		cost_line.append("Levée : %d tour(s)" % int(definition["recruit_time_turns"]))
+		cost_line.append("Levée : %s" % FrText.count(int(definition["recruit_time_turns"]), "tour"))
 	lines.append(" · ".join(cost_line))
 	var stats: Dictionary = definition.get("stats", {})
 	var stat_parts := PackedStringArray()
@@ -359,7 +359,7 @@ static func building(building_id: String, live: Dictionary = {}) -> String:
 		cost_line.append("Coût : " + cost_text(definition["cost"]))
 	var turns := int(live.get("turns", definition.get("build_time_turns", 0)))
 	if turns > 0:
-		cost_line.append("Durée : %d tour(s)" % turns)
+		cost_line.append("Durée : %s" % FrText.count(turns, "tour"))
 	var upkeep := int(live.get("upkeep", definition.get("upkeep", 0)))
 	cost_line.append("Entretien : %s %s / saison" % [thousands(upkeep), POUND])
 	lines.append(" · ".join(cost_line))
@@ -585,7 +585,7 @@ static func skill(node: Dictionary, state: String = "") -> String:
 	var head := "%s [b]%s[/b]  [color=%s][i]%s, rang %d%s[/i][/color]" % [
 		icon_bbcode("branch_" + branch, 28, "branch"), name, MUTED,
 		BRANCH_LABELS.get(branch, branch), int(node.get("tier", 1)), " — " + state if state != "" else ""]
-	var lines: Array = [head, "Coût : %d point(s) de compétence" % int(node.get("cost", 0))]
+	var lines: Array = [head, "Coût : %s de compétence" % FrText.count(int(node.get("cost", 0)), "point")]
 	lines.append(_effects_block(node.get("effects", [])))
 	var prerequisites := PackedStringArray()
 	for prereq in node.get("prerequisites", []):
