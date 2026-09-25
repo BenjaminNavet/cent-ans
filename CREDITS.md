@@ -115,6 +115,27 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
   Kaplan et al. (2011), *The Holocene* 21(5), doi:10.1177/0959683610386983. Moyenne 1330-1349,
   combinée aux grandes forêts et zones humides nommées de `data/map/historical_forests.json` et
   `data/map/wetlands.json` (sources par entrée).
+- **Relief détaillé des zones historiques (palier 3, lot ZG3, ADR 0036)** — modèles numériques
+  de terrain sans sursol, rééchantillonnés à 11, 5,6 et 2,8 m :
+  - France : RGE ALTI® 1 m / 5 m, © IGN (Institut national de l'information géographique et
+    forestière), [Licence Ouverte Etalab 2.0](https://www.etalab.gouv.fr/licence-ouverte-open-licence/) ;
+    service WMS-R de la Géoplateforme (`data.geopf.fr`). Mention : « Source : IGN – RGE ALTI® ».
+  - Angleterre : LIDAR Composite Digital Terrain Model (DTM) 1 m, Environment Agency,
+    [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+    Mention : « © Environment Agency copyright and/or database right 2022. All rights reserved. »
+  - Pays-Bas : Actueel Hoogtebestand Nederland (AHN) DTM 0,5 m, Rijkswaterstaat / Het Waterschapshuis,
+    service PDOK, [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (aucune attribution
+    exigée ; citée par courtoisie).
+  - Flandre : Digitaal Hoogtemodel Vlaanderen II (DTM 1 m) et I (DTM 5 m), © Digitaal Vlaanderen,
+    [Modellicentie Gratis Hergebruik v1.0](https://data.vlaanderen.be/doc/licentie/modellicentie-gratis-hergebruik/v1.0)
+    (réutilisation gratuite, y compris commerciale, avec mention de la source).
+  - Repli (Tournai, Wallonie : pas de service à valeurs brutes) : Copernicus DEM GLO-30, © DLR e.V.
+    2010-2014 et © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par
+    l'Union européenne et l'ESA ; licence gratuite avec attribution.
+  - Effacement des aménagements modernes (autoroutes, voies ferrées, carrières, retenues, digues de
+    port) : masques calculés à partir d'OpenStreetMap, © les contributeurs d'OpenStreetMap,
+    [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/) — méthode seulement : aucune donnée
+    OSM n'est redistribuée (masques intermédiaires hors dépôt).
 - Traitement (reprojection EPSG:3035, découpage des provinces) : outils `tools/cent_ans_tools/geo`
   (voir `docs/geo.md`).
 
