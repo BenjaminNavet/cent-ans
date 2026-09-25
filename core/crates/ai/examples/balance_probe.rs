@@ -130,8 +130,12 @@ struct CampaignRun {
 }
 
 /// EQ1: context of one revolt.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 struct RevoltSample {
+    turn: u32,
+    province: String,
+    faction: String,
+    tax: String,
     before4: f64,
     before1: f64,
     at: f64,
@@ -257,7 +261,23 @@ fn run_campaign(data: &GameData, seed: u64, turns: u32) -> CampaignRun {
                         .settlements
                         .get(&province.city)
                         .is_some_and(|c| c.controller != c.owner);
+                    let faction = event
+                        .faction
+                        .as_ref()
+                        .map_or(String::new(), |f| f.as_str().to_owned());
+                    let tax = state
+                        .factions
+                        .get(&fid(if faction.is_empty() {
+                            "fac_rebels"
+                        } else {
+                            &faction
+                        }))
+                        .map_or(String::new(), |f| format!("{:?}", f.tax_rate));
                     run.revolts.push(RevoltSample {
+                        turn,
+                        province: key.to_owned(),
+                        faction,
+                        tax,
                         before4: get(unrest_history.front()),
                         before1: get(unrest_history.back()),
                         at: sim_campaign::population::weighted_unrest(&province.population),
@@ -418,6 +438,7 @@ fn run_json(run: &CampaignRun) -> Value {
         "battles": {"attacker_wins": run.battles.0, "total": run.battles.1},
         "unrest_samples": run.unrest_samples,
         "revolts": run.revolts.iter().map(|r| json!({
+            "turn": r.turn, "province": r.province, "faction": r.faction, "tax": r.tax,
             "before4": r.before4, "before1": r.before1, "at": r.at, "occupied": r.occupied,
         })).collect::<Vec<_>>(),
         "bankruptcies": run.bankruptcies,
@@ -531,7 +552,7 @@ fn campaign_markdown(data: &GameData, runs: &[CampaignRun], turns: u32) -> Strin
     );
     let all_revolts: Vec<RevoltSample> = runs
         .iter()
-        .flat_map(|r| r.revolts.iter().copied())
+        .flat_map(|r| r.revolts.iter().cloned())
         .collect();
     let count = all_revolts.len().max(1) as f64;
     let _ = writeln!(
