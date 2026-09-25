@@ -30,6 +30,8 @@ extends Node3D
 
 const SCREENSHOT_DELAY_FRAMES := 40
 const START_MENU_SCENE := "res://scenes/start_menu.tscn"
+## Q2 : un second clic à moins de tant de pixels du précédent alterne armée / ville.
+const REPEAT_CLICK_PX := 12.0
 
 @onready var terrain: TerrainBuilder = $Terrain
 @onready var sea: Sea = $Sea
@@ -51,6 +53,9 @@ var player_faction: String = ""
 var hovered_index: int = 0
 var selected_index: int = 0
 var selected_army: String = ""
+## Q2 : dernier clic gauche résolu (position écran, "army:<id>" ou "settlement:<id>").
+var _last_pick_position := Vector2(-1.0e6, -1.0e6)
+var _last_pick_target := ""
 ## Provinces atteignables ce tour par l'armée sélectionnée : id → coût.
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
@@ -438,17 +443,40 @@ func player_army_ids() -> PackedStringArray:
 # --- Sélection ---------------------------------------------------------------------
 
 
-## Intercepteur de clic gauche du picker : vrai si une armée a été cliquée.
+## Intercepteur de clic gauche du picker : vrai si une armée ou une colonie a été cliquée.
+## Q2 : quand une armée stationne dans une ville, le clic va à ce qui est sous le curseur
+## (jeton ou figurines : l'armée ; maquette ou icône de la ville : la colonie, dont le panneau
+## ouvre recrutement, chantiers et province) ; un second clic au même endroit alterne.
 func _try_select_army(screen_position: Vector2) -> bool:
-	var army_id := armies.pick_screen(screen_position)
-	if army_id == "":
-		# C6 : clic sur une icône ou une maquette de colonie.
-		var settlement_id := settlement_layer.pick_screen(screen_position) if settlement_layer != null else ""
-		if settlement_id == "":
-			return false
-		settlement_layer.select(settlement_id)
+	var army_hit: Dictionary = armies.pick_screen_scored(screen_position)
+	var settlement_hit: Dictionary = settlement_layer.pick_screen_scored(screen_position) if settlement_layer != null else {}
+	var army_id := str(army_hit.get("id", ""))
+	var settlement_id := str(settlement_hit.get("id", ""))
+	var choose_army := army_id != ""
+	if army_id != "" and settlement_id != "":
+		var repeat := screen_position.distance_to(_last_pick_position) <= REPEAT_CLICK_PX
+		if repeat and _last_pick_target == "army:" + army_id:
+			choose_army = false
+		elif repeat and _last_pick_target == "settlement:" + settlement_id:
+			choose_army = true
+		else:
+			choose_army = float(army_hit["score"]) <= float(settlement_hit["score"])
+	_last_pick_position = screen_position
+	if choose_army:
+		_last_pick_target = "army:" + army_id
+		if settlements_ctl != null and settlements_ctl.panel != null and settlements_ctl.panel.visible:
+			settlements_ctl.panel.hide()  # alternance : un seul des deux à la fois
+			settlement_layer.select("")
+		select_army(army_id)
 		return true
-	select_army(army_id)
+	if settlement_id == "":
+		_last_pick_target = ""
+		return false
+	# C6 : clic sur une icône ou une maquette de colonie.
+	_last_pick_target = "settlement:" + settlement_id
+	if selected_army != "":
+		deselect_army()
+	settlement_layer.select(settlement_id)
 	return true
 
 
