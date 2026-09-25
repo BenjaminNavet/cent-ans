@@ -21,6 +21,8 @@ const STONE_CHIP := Color(0.62, 0.58, 0.52)
 const OIL := Color(0.30, 0.19, 0.07)
 
 var siege_view: BattleSiege
+var engines_fx: SiegeEnginesFx  # SG2 : engins animés (point et instant du lâcher)
+var marks: SiegeMarksFx  # SG2 : cratères des impacts, huile (vapeur, coulures, taches)
 var effects: BattleEffects
 var soldiers: BattleSoldiers
 var height_at: Callable
@@ -139,6 +141,10 @@ func setup(p_siege_view: BattleSiege, p_effects: BattleEffects, p_soldiers: Batt
 		_stone_chips.append(_chips("StoneChips%d" % i, STONE_CHIP, 0.28))
 		_wood_chips.append(_chips("WoodChips%d" % i, WOOD, 0.22))
 	_oil = _oil_emitter()
+	marks = SiegeMarksFx.new()
+	marks.name = "Marks"
+	add_child(marks)
+	marks.setup(SiegeEnginesFx.settings())
 
 
 ## Chaque image (et à chaque pas de l'avance rapide des captures) : `events` = nouveaux
@@ -157,6 +163,7 @@ func update(events: Array, units: Array, now: float, dt: float) -> void:
 	_update_towers(units)
 	_update_flights()
 	_update_debris(dt)
+	marks.update(now)
 	if _door_shake > 0.0:
 		_door_shake = maxf(_door_shake - dt, 0.0)
 		_shake_doors(_door_shake)
@@ -195,6 +202,7 @@ func _on_event(event: Dictionary) -> void:
 			_on_gate_broken(int(event["piece"]))
 		"wall_breached":
 			_drop_ladders(int(event["piece"]))
+			marks.clear_piece(int(event["piece"]))
 
 
 # --- Pans et porte ---------------------------------------------------------------------
@@ -316,12 +324,20 @@ func _update_rams(units: Array) -> void:
 			continue
 		var id := int(unit["id"])
 		var machine: Node3D = siege_view._machines.get(id)
-		if machine == null or machine.get_child_count() < 3:
+		if machine == null or machine.get_child_count() < 1:
 			continue
 		if not _rams.has(id):
-			var beam := machine.get_child(1) as Node3D
-			var head := machine.get_child(2) as Node3D
-			_rams[id] = {"beam": beam, "head": head, "beam_z": beam.position.z, "head_z": head.position.z, "anchor": -1.0}
+			# SG2 : modèle Blender, poutre pendue sous le faîte (`BeamPivot`, balancée) ;
+			# sinon bélier procédural de `BattleSiege` (poutre et tête qui coulissent).
+			var pivot := machine.find_child("BeamPivot", true, false) as Node3D
+			if pivot != null:
+				_rams[id] = {"pivot": pivot, "anchor": -1.0}
+			elif machine.get_child_count() >= 3:
+				var beam := machine.get_child(1) as Node3D
+				var head := machine.get_child(2) as Node3D
+				_rams[id] = {"beam": beam, "head": head, "beam_z": beam.position.z, "head_z": head.position.z, "anchor": -1.0}
+			else:
+				continue
 		var ram: Dictionary = _rams[id]
 		var pos := Vector3(float(unit["x"]), 0.0, float(unit["z"]))
 		var at_gate := bool(unit["present"]) and not _gate_broken and Vector2(pos.x, pos.z).distance_to(Vector2(gate.x, gate.z)) < thickness + 8.0
@@ -341,8 +357,15 @@ func _update_rams(units: Array) -> void:
 			offset = -1.5 * _swing(phase)
 		else:
 			ram["anchor"] = -1.0
-		(ram["beam"] as Node3D).position.z = float(ram["beam_z"]) + offset
-		(ram["head"] as Node3D).position.z = float(ram["head_z"]) + offset
+		if ram.has("pivot"):
+			# Pendule : reculer la tête de `offset` m sous des cordes de `beam_drop` m.
+			var ram_cfg: Dictionary = SiegeEnginesFx.settings().get("ram", {})
+			var drop := float(ram_cfg.get("beam_drop", 1.95))
+			var limit := deg_to_rad(float(ram_cfg.get("max_swing_deg", 48.0)))
+			(ram["pivot"] as Node3D).rotation.x = clampf(asin(clampf(-offset / drop, -0.95, 0.95)), -limit, limit)
+		else:
+			(ram["beam"] as Node3D).position.z = float(ram["beam_z"]) + offset
+			(ram["head"] as Node3D).position.z = float(ram["head_z"]) + offset
 
 
 ## 0 = au contact de la porte, 1 = poutre ramenée en arrière.
@@ -391,9 +414,14 @@ func _update_towers(units: Array) -> void:
 			continue
 		var id := int(unit["id"])
 		var machine: Node3D = siege_view._machines.get(id)
-		if machine == null or machine.get_child_count() < 3:
+		if machine == null or machine.get_child_count() < 1:
 			continue
+		if not _towers.has(id) and machine.find_child("BridgePivot", true, false) != null:
+			# SG2 : beffroi modélisé (pont-levis déjà articulé, caisse à la hauteur du mur).
+			_towers[id] = {"pivot": machine.find_child("BridgePivot", true, false), "docked": false, "since": -1000.0}
 		if not _towers.has(id):
+			if machine.get_child_count() < 3:
+				continue
 			var bridge := machine.get_child(2) as Node3D
 			var pivot := Node3D.new()
 			pivot.name = "BridgePivot"
@@ -463,36 +491,80 @@ func _on_engine_shot(event: Dictionary) -> void:
 	var z := float(event["z"])
 	var end := Vector3(x, _ground(x, z) + wall_height * float(event.get("height", 0.5)), z) + out * (thickness * 0.5)
 	var unit: Dictionary = _by_id.get(int(event["unit"]), {})
-	var start := end + out * 150.0
 	var bombard := str(unit.get("type", "")) == "unit_bombard"
-	if not unit.is_empty():
-		start = Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"]))
-		if soldiers != null:
-			var engines := soldiers.soldier_positions(int(unit["id"]), 1)
-			if not engines.is_empty():
-				start = engines[0]
-	var dir := (end - start)
-	dir.y = 0.0
-	dir = dir.normalized()
-	if bombard:
-		start += Vector3(0, 0.85, 0) + dir * 1.4
-		if effects != null:
-			effects.cannon_fire(start, dir, time_now)
-	else:
-		start += Vector3(0, 9.0, 0) - dir * 2.0
+	var breached := bool(event.get("breached", false))
+	# SG2 : une pierre par engin animé, lâchée par la fronde (ou la bouche) à l'instant du
+	# basculement ; la première frappe le point du cœur, les autres à côté sur le même pan.
+	var releases: Array = engines_fx.release(int(event["unit"])) if engines_fx != null and not unit.is_empty() else []
+	if releases.is_empty():
+		var start := end + out * 150.0
+		if not unit.is_empty():
+			start = Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"]))
+			if soldiers != null:
+				var engines := soldiers.soldier_positions(int(unit["id"]), 1)
+				if not engines.is_empty():
+					start = engines[0]
+		var dir := (end - start)
+		dir.y = 0.0
+		dir = dir.normalized()
+		if bombard:
+			start += Vector3(0, 0.85, 0) + dir * 1.4
+		else:
+			start += Vector3(0, 9.0, 0) - dir * 2.0
+		releases = [{"pos": start, "dir": dir, "delay": 0.0}]
+	var a: Vector2 = piece["a"]
+	var b: Vector2 = piece["b"]
+	var along := Vector3(b.x - a.x, 0.0, b.y - a.y).normalized()
+	var half := a.distance_to(b) * 0.5
+	var mid := (a + b) * 0.5
+	for k in releases.size():
+		var r: Dictionary = releases[k]
+		var target := end
+		if k > 0:
+			# Écart déterministe le long du pan (hachage du tir et du rang), sans quitter le pan.
+			var h := fposmod(sin(float(shots_seen) * 12.9898 + float(k) * 78.233) * 43758.5453, 1.0)
+			var along_2d := Vector2(along.x, along.z)
+			var along_now := Vector2(end.x, end.z).dot(along_2d) - mid.dot(along_2d)
+			var shift := (h - 0.5) * 2.0 * minf(8.0, half * 0.8)
+			shift = clampf(along_now + shift, -half * 0.85, half * 0.85) - along_now
+			target = end + along * shift + Vector3(0, (h - 0.5) * wall_height * 0.3, 0)
+		_launch_stone(r["pos"], target, out, time_now + float(r["delay"]), bombard, breached and k == 0, r.get("dir", Vector3.ZERO), int(event["piece"]))
+
+
+## Pierre ou boulet lancé de `start` à l'instant `t0` (invisible avant), vol raccourci du délai
+## de lâcher pour que l'impact reste proche du tir du cœur (les dégâts sont déjà appliqués).
+func _launch_stone(start: Vector3, end: Vector3, out: Vector3, t0: float, bombard: bool, breached: bool, dir: Vector3, piece: int) -> void:
 	var distance := start.distance_to(end)
+	var delay := maxf(t0 - time_now, 0.0)
 	var flight := clampf(distance / (140.0 if bombard else 60.0), 0.6 if bombard else 1.5, 3.5)
+	flight = maxf(flight - delay, 0.5 if bombard else 1.0)
 	if _flights.size() >= MAX_FLIGHTS:
 		_finish_flight(_flights.pop_front())
 	var node := MeshInstance3D.new()
 	node.mesh = _ball_mesh if bombard else _stone_mesh
 	node.material_override = _stone_mat
 	node.position = start
+	node.visible = false
 	add_child(node)
 	var trail := _trail_emitter(bombard)
+	trail.emitting = false
 	node.add_child(trail)
-	_flights.append({"node": node, "trail": trail, "start": start, "end": end, "t0": time_now, "flight": flight, "arc": 0.0 if bombard else distance * STONE_ARC, "out": out, "breached": bool(event.get("breached", false)), "bombard": bombard})
-	BattleAudio.play_at_delayed("stone_impact", end, flight)
+	if dir == Vector3.ZERO:
+		dir = (end - start).normalized()
+	var entry := {"node": node, "trail": trail, "start": start, "end": end, "t0": t0, "flight": flight, "arc": 0.0 if bombard else distance * STONE_ARC, "out": out, "breached": breached, "bombard": bombard, "dir": dir, "launched": false, "piece": piece}
+	_flights.append(entry)
+	if delay <= 0.0:
+		_on_launch(entry)
+	BattleAudio.play_at_delayed("stone_impact", end, delay + flight)
+
+
+## Départ effectif d'un projectile : éclair et fumée à la bouche d'une bombarde.
+func _on_launch(f: Dictionary) -> void:
+	f["launched"] = true
+	(f["node"] as Node3D).visible = true
+	(f["trail"] as GPUParticles3D).emitting = true
+	if bool(f["bombard"]) and effects != null:
+		effects.cannon_fire(f["start"], f["dir"], time_now)
 
 
 func _update_flights() -> void:
@@ -500,6 +572,10 @@ func _update_flights() -> void:
 	for f in _flights:
 		var t := (time_now - float(f["t0"])) / float(f["flight"])
 		var node: MeshInstance3D = f["node"]
+		if t < 0.0:
+			continue
+		if not bool(f["launched"]):
+			_on_launch(f)
 		if t >= 1.0:
 			landed.append(f)
 			continue
@@ -523,6 +599,8 @@ func _finish_flight(f: Dictionary) -> void:
 	get_tree().create_timer(2.0).timeout.connect(trail.queue_free)
 	node.queue_free()
 	_chips_at("stone", end, out, 1.4 if bool(f["breached"]) else 1.0)
+	if int(f.get("piece", -1)) >= 0 and not bool(f["breached"]):
+		marks.mark_impact(int(f["piece"]), end, out, false)
 	if effects != null:
 		effects.burst(end + out * 1.2, "impact", 2.4 if bool(f["breached"]) else 1.6)
 		effects.burst(end + out * 0.5 + Vector3(0, -2.0, 0), "smoke", 1.4)
@@ -691,6 +769,9 @@ func _on_oil(event: Dictionary) -> void:
 				effects.burst(ground, "smoke", 2.2)
 				effects.burst(ground + out * 2.0, "smoke", 1.6))
 	BattleAudio.play_at_delayed("death_groan", ground, 1.0)
+	var a: Vector2 = gate["a"]
+	var b: Vector2 = gate["b"]
+	marks.pour_oil(top, ground, out, a.distance_to(b), wall_height)
 
 
 # --- Porte enfoncée --------------------------------------------------------------------

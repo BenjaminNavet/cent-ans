@@ -1,0 +1,189 @@
+{
+  "description": "Flottes de guerre au printemps 1337 (lot NV1). Ordres de grandeur : les rois réquisitionnent les navires marchands (cogues) et louent des galères génoises ; les effectifs réels varient d'une campagne à l'autre.",
+  "fleets": [
+    {
+      "faction": "fac_england",
+      "ships": {
+        "ship_cog": 36,
+        "ship_nef": 6,
+        "ship_barge": 12
+      },
+      "seas": [
+        "sea_channel",
+        "sea_north_sea",
+        "sea_irish_sea",
+        "sea_bay_of_biscay"
+      ],
+      "marines": {
+        "archers": "unit_longbowmen",
+        "soldiers": "unit_men_at_arms_foot"
+      },
+      "note": "Cogues réquisitionnées des Cinq-Ports, de Yarmouth et de Bristol ; la Christophe et l'Édouard, cogues royales."
+    },
+    {
+      "faction": "fac_france",
+      "ships": {
+        "ship_cog": 24,
+        "ship_nef": 6,
+        "ship_barge": 14,
+        "ship_galley": 8
+      },
+      "seas": [
+        "sea_channel",
+        "sea_atlantic",
+        "sea_bay_of_biscay"
+      ],
+      "marines": {
+        "archers": "unit_crossbowmen",
+        "soldiers": "unit_men_at_arms_foot"
+      },
+      "note": "Navires normands et picards, galères du clos des Galées de Rouen ; l'amiral Hugues Quiéret et Nicolas Béhuchet."
+    },
+    {
+      "faction": "fac_castile",
+      "ships": {
+        "ship_galley": 12,
+        "ship_nef": 4,
+        "ship_barge": 4
+      },
+      "seas": [
+        "sea_bay_of_biscay",
+        "sea_atlantic",
+        "sea_mediterranean"
+      ],
+      "marines": {
+        "archers": "unit_crossbowmen",
+        "soldiers": "unit_men_at_arms_foot"
+      },
+      "note": "Galères de Séville et nefs de Cantabrie ; alliées de la France après 1369 (La Rochelle, 1372)."
+    },
+    {
+      "faction": "fac_genoa",
+      "ships": {
+        "ship_galley": 16,
+        "ship_nef": 4
+      },
+      "seas": [
+        "sea_mediterranean"
+      ],
+      "marines": {
+        "archers": "unit_genoese_crossbowmen",
+        "soldiers": "unit_men_at_arms_foot"
+      },
+      "note": "Galères génoises, louées au roi de France avec leurs arbalétriers (Barbavera à l'Écluse)."
+    },
+    {
+      "faction": "fac_venice",
+      "ships": {
+        "ship_galley": 16,
+        "ship_nef": 4
+      },
+      "seas": [
+        "sea_mediterranean",
+        "sea_adriatic"
+      ]
+    },
+    {
+      "faction": "fac_aragon",
+      "ships": {
+        "ship_galley": 10,
+        "ship_barge": 4
+      },
+      "seas": [
+        "sea_mediterranean"
+      ]
+    },
+    {
+      "faction": "fac_portugal",
+      "ships": {
+        "ship_galley": 4,
+        "ship_nef": 4,
+        "ship_barge": 4
+      },
+      "seas": [
+        "sea_atlantic",
+        "sea_bay_of_biscay"
+      ]
+    },
+    {
+      "faction": "fac_flanders",
+      "ships": {
+        "ship_cog": 12,
+        "ship_barge": 4
+      },
+      "seas": [
+        "sea_north_sea",
+        "sea_channel"
+      ],
+      "marines": {
+        "archers": "unit_crossbowmen",
+        "soldiers": "unit_goedendag_militia"
+      }
+    },
+    {
+      "faction": "fac_brittany",
+      "ships": {
+        "ship_cog": 6,
+        "ship_barge": 6
+      },
+      "seas": [
+        "sea_channel",
+        "sea_atlantic",
+        "sea_bay_of_biscay"
+      ]
+    },
+    {
+      "faction": "fac_scotland",
+      "ships": {
+        "ship_cog": 4,
+        "ship_barge": 6
+      },
+      "seas": [
+        "sea_north_sea",
+        "sea_irish_sea"
+      ],
+      "marines": {
+        "archers": "unit_crossbowmen",
+        "soldiers": "unit_scottish_spearmen"
+      }
+    },
+    {
+      "faction": "fac_holstein",
+      "ships": {
+        "ship_cog": 10
+      },
+      "seas": [
+        "sea_baltic",
+        "sea_north_sea"
+      ]
+    },
+    {
+      "faction": "fac_naples",
+      "ships": {
+        "ship_galley": 8
+      },
+      "seas": [
+        "sea_mediterranean"
+      ]
+    }
+  ],
+  "sea_names": {
+    "sea_channel": "la Manche",
+    "sea_north_sea": "la mer du Nord",
+    "sea_atlantic": "l'océan",
+    "sea_bay_of_biscay": "le golfe de Gascogne",
+    "sea_irish_sea": "la mer d'Irlande",
+    "sea_mediterranean": "la Méditerranée",
+    "sea_baltic": "la Baltique",
+    "sea_adriatic": "l'Adriatique"
+  },
+  "default_marines": {
+    "archers": "unit_crossbowmen",
+    "soldiers": "unit_men_at_arms_foot"
+  },
+  "sources": [
+    "Bataille de l'Écluse",
+    "Clos des Galées",
+    "Jonathan Sumption, The Hundred Years War I: Trial by Battle"
+  ]
+}

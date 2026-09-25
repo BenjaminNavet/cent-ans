@@ -62,6 +62,9 @@ pub use entities::landmark::{
 };
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
+pub use entities::naval::{
+    FactionFleet, Marines, NavalData, NavalFleets, NavalRules, Propulsion, ShipClass,
+};
 pub use entities::population_rules::PopulationRules;
 pub use entities::province::{
     CapitalCity, Climate, Population, PopulationClass, PopulationClasses, Province, ProvinceGeo,
@@ -84,8 +87,8 @@ pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId, EventId,
-    FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, SkillId,
-    TechnologyId, TraitId, UnitTypeId,
+    FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, ShipClassId,
+    SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 pub use load::{DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};

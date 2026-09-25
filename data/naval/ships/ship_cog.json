@@ -1,0 +1,22 @@
+{
+  "id": "ship_cog",
+  "name": { "display": "Cogue", "local": "cogge", "local_language": "moyen néerlandais" },
+  "propulsion": "sail",
+  "length_m": 24.0,
+  "beam_m": 7.5,
+  "freeboard_m": 2.8,
+  "forecastle_m": 2.0,
+  "aftcastle_m": 2.4,
+  "castle_capacity": 24,
+  "hull": 240,
+  "soldiers": 70,
+  "sailors": 24,
+  "sail_speed": 3.2,
+  "turn_rate": 5.0,
+  "bulwark": 0.25,
+  "fire_resistance": 0.1,
+  "cost": 900,
+  "model": "cog",
+  "description": "Navire rond de la Hanse et de la Manche, bordé à clin, un mât et une voile carrée, châteaux crénelés à l'avant et à l'arrière. Haut de bord : on y tire de haut et on s'y défend bien. Les rois le réquisitionnent aux marchands pour la guerre.",
+  "sources": ["Cogue", "Bataille de l'Écluse", "Richard Unger, The Ship in the Medieval Economy"]
+}

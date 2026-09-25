@@ -1476,6 +1476,9 @@ func _battles_available() -> bool:
 func _offer_pending_battles() -> void:
 	if not _battles_available():
 		return
+	if NavalCampaign.offer(self):  # NV1 : une flotte interceptée passe avant les batailles à terre
+		_close_battle_dialog()
+		return
 	var pending: Array = sim.call("get_pending_battles")
 	if pending.is_empty():
 		_close_battle_dialog()

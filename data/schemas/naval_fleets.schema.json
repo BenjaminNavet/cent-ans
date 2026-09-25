@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/naval_fleets.schema.json",
+  "title": "Flottes de 1337",
+  "description": "Fichier data/naval/fleets.json (lot NV1, ADR 0028) : navires de guerre de chaque faction au début de la campagne et mers où elle les arme (elle peut y intercepter les traversées ennemies).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "fleets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "faction": {
+            "type": "string",
+            "pattern": "^fac_[a-z0-9_]+$"
+          },
+          "ships": {
+            "type": "object",
+            "propertyNames": {
+              "pattern": "^ship_[a-z0-9_]+$"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "seas": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^sea_[a-z0-9_]+$"
+            },
+            "minItems": 1
+          },
+          "note": {
+            "type": "string"
+          },
+          "marines": {
+            "$ref": "#/$defs/marines"
+          }
+        },
+        "required": [
+          "faction",
+          "ships",
+          "seas"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sea_names": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^sea_[a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "default_marines": {
+      "$ref": "#/$defs/marines"
+    }
+  },
+  "required": [
+    "fleets"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "marines": {
+      "type": "object",
+      "description": "Types d'unités embarqués quand la flotte sort sans armée.",
+      "properties": {
+        "archers": {
+          "type": "string",
+          "pattern": "^unit_[a-z0-9_]+$"
+        },
+        "soldiers": {
+          "type": "string",
+          "pattern": "^unit_[a-z0-9_]+$"
+        }
+      },
+      "required": [
+        "archers",
+        "soldiers"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
