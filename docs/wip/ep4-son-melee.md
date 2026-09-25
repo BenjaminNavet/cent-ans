@@ -10,17 +10,30 @@ couches selon la distance caméra. S'appuie sur AU1 (`docs/wip/au1-audio.md`,
 - [x] Sources CC0 repérées et vérifiées page par page (licence CC0 1.0 uniquement) : 27 nouveaux
       sons Freesound (acier/acier, acier/bois, armure/maille, effort/rage, râles, chutes de
       corps/armure, chevaux, foule de mêlée). Détail : `game/assets/audio/SOURCE.md`.
-- [ ] `tools/cent_ans_tools/audio_bank.py` : nouveaux `Clip` (comptes cibles : 12 acier/acier,
-      8 acier/bois, 6 armure/maille, 10 effort/rage, 10 râles, 6 chutes, 6 hennissements,
-      3 nappes de mêlée massives) + génération des fichiers `.ogg`.
-- [ ] `data/audio/sound_bank.json` + schéma : nouveaux événements, section `fronts` (paramètres
-      des émetteurs par front : nombre max, portées, densité).
-- [ ] `battle_audio.gd` : regroupement des régiments en mêlée par front (paires `id`/`target`),
-      émetteurs 3D les plus proches de la caméra, densité/volume selon effectif engagé et pertes
-      récentes, couches proche/moyen/loin, sélection sans répétition, événements charge de
-      cavalerie / déroute qui se déplace / mort du général / volée au-dessus de la caméra.
-- [ ] Test headless `game/tests/ep4_audio_test.gd`.
-- [ ] Smoke, ruff, merge main, rapport.
+- [x] `tools/cent_ans_tools/audio_bank.py` : nouveaux `Clip` (12 acier/acier, 8 acier/bois,
+      6 armure/maille, 10 effort/rage, 10 râles, 6 chutes, 6 hennissements, 1 choc de charge de
+      cavalerie synthétisé, 3e nappe de mêlée massive) ; 112 clips générés, `pytest
+      tools/tests/test_audio_bank.py` OK.
+- [x] `data/audio/sound_bank.json` + schéma : événements `armor_hit`, `effort_cry`, `body_fall`,
+      `cavalry_charge_impact`, `arrow_flyby` ; `sword_clash`/`shield_bash`/`death_groan`/
+      `horse_neigh` étendus ; nappe `melee_bed_3` ; section `fronts` (`max_emitters`, `near_m`,
+      `mid_m`, `engaged_full`, `event_period_s`, `beds`).
+- [x] `battle_audio.gd` (`_update_fronts`, `_front_emitter`, `_play_front_event`,
+      `_pick_near_event`) : régiments en mêlée groupés en fronts (paires `id`/`target`), les
+      `fronts.max_emitters` plus proches de la caméra reçoivent un émetteur 3D dédié dont le
+      volume/densité suit l'effectif engagé et les pertes récentes (`_front_soldiers`). Sous
+      `near_m` : chocs individuels tirés au hasard, pondérés, jamais deux fois de suite le même
+      type (+ `SoundBank.pick_stream` qui évite de répéter le même fichier). Entre `near_m` et
+      `mid_m` : une des 3 nappes massives (`fronts.beds`, une par rang de proximité) remplace les
+      chocs, plus des chocs épars. Au-delà de `mid_m` : pas d'émetteur dédié, la nappe globale
+      (`_update_beds`) et l'ambiance lointaine prennent le relais. Cavalerie : grondement qui
+      enfle puis impact au début de la charge. Volée : sifflement additionnel programmé au-dessus
+      de la caméra si sa trajectoire passe à moins de 55 m (`_maybe_flyby_over_camera`).
+      `play_at(clip, position)` inchangée (API pour EP5).
+- [x] Test headless `game/tests/ep4_audio_test.gd` : comptes de clips, front proche avec émetteur
+      / front loin sans émetteur, pas de répétition immédiate d'un type de choc, budget de voix
+      jamais dépassé (8 fronts denses), charge de cavalerie, sifflement au-dessus de la caméra.
+- [ ] Smoke (`core/build.sh` en cours), merge main, rapport.
 
 ## Décisions
 
