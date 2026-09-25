@@ -36,6 +36,21 @@ pub const OIL_RAM_KILLS: f64 = 0.5;
 /// the garrison's foot regroups on the square.
 pub const BLOCKERS_PER_OPENING: usize = 2;
 
+/// Ladder foot distance from the outer face of the wall (metres).
+pub const LADDER_LEAN: f64 = 2.8;
+/// Soldiers seen on each ladder at once.
+pub const CLIMBERS_PER_LADDER: usize = 4;
+/// Soldiers seen crossing a siege tower's bridge at once.
+pub const BRIDGE_CROSSERS: usize = 6;
+/// How many times a soldier's ascent repeats over one full climb (the
+/// regiment goes up man after man; a ladder takes ~7 s).
+pub const CLIMB_WAVES: f64 = 6.0;
+
+/// Ladders raised by a regiment of this frontage (metres).
+pub fn ladder_count(width: f64) -> usize {
+    ((width / 6.0) as usize).clamp(2, 7)
+}
+
 /// One thing worth showing, at simulated time `time`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SiegeFx {

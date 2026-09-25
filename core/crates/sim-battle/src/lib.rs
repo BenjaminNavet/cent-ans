@@ -65,8 +65,8 @@ pub use setup::{
 pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
 pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use sim::{
-    BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD,
-    SIEGE_STANDOFF, ZONE_DEPTH,
+    BattleSim, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION,
+    MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,
 };
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,

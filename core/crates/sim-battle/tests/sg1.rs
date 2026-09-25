@@ -180,7 +180,32 @@ fn ladders_are_raised_then_the_wall_walk_is_gained() {
         facing: None,
     })
     .unwrap();
-    run(&mut sim, 90.0);
+    // Halfway up: climbers on the ladders, a few men already on top.
+    run(&mut sim, 30.0);
+    let unit = &sim.units()[1];
+    assert!(unit.climb_progress > 0.3 && unit.climb_progress < 0.9);
+    let ladders = sim.ladders(unit);
+    assert!(ladders.len() >= 2);
+    let wall = &works.pieces[piece];
+    for l in &ladders {
+        assert!(wall.outside_offset(l.foot.0, l.foot.1) > wall.outside_offset(l.top.0, l.top.1));
+        assert!(l.top_y > l.foot_y + works.wall_height * 0.8);
+    }
+    let shown = sim.climbers_shown(unit);
+    let poses = sim.soldier_poses(unit);
+    assert_eq!(poses.len(), unit.soldiers() as usize);
+    let ground = sim.field().height(mx, mz);
+    let on_rungs = poses[..shown]
+        .iter()
+        .filter(|p| p[1] > ground + 0.5 && p[1] < ground + works.wall_height + 1.0)
+        .count();
+    assert!(on_rungs * 2 >= shown, "{on_rungs}/{shown} up the ladders");
+    let on_top = poses[shown..]
+        .iter()
+        .filter(|p| p[1] > ground + works.wall_height - 0.5)
+        .count();
+    assert!(on_top > 0 && on_top < poses.len() - shown);
+    run(&mut sim, 60.0);
     let fx = sim.siege_fx();
     let raised = fx
         .iter()

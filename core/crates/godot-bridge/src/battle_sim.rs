@@ -312,6 +312,23 @@ impl BattleSim {
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
                 }
+                // SG1: the first `climbers_shown` soldiers of the buffer are on
+                // the ladders / bridge; `ladder_lines` = [foot, top] per ladder
+                // as Vector3 pairs (ground and crenel heights).
+                if unit.climbing.is_some() {
+                    dict.set("climbers_shown", sim.climbers_shown(unit) as i64);
+                    let lines: PackedVector3Array = sim
+                        .ladders(unit)
+                        .iter()
+                        .flat_map(|l| {
+                            [
+                                Vector3::new(l.foot.0 as f32, l.foot_y as f32, l.foot.1 as f32),
+                                Vector3::new(l.top.0 as f32, l.top_y as f32, l.top.1 as f32),
+                            ]
+                        })
+                        .collect();
+                    dict.set("ladder_lines", &lines);
+                }
                 dict.to_variant()
             })
             .collect()
@@ -344,8 +361,8 @@ impl BattleSim {
             .iter()
             .filter(|u| u.side == side && render_key(u) == render)
         {
-            for (x, z, angle) in unit.soldier_positions() {
-                let y = sim.standing_height(unit, x, z);
+            // SG1: climbers drawn on their ladders / the tower bridge.
+            for [x, y, z, angle] in sim.soldier_poses(unit) {
                 let (s, c) = (angle.sin() as f32, angle.cos() as f32);
                 buffer.extend_from_slice(&[
                     c, 0.0, s, x as f32, 0.0, 1.0, 0.0, y as f32, -s, 0.0, c, z as f32,

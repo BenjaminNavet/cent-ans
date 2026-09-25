@@ -6,10 +6,21 @@ use super::{armor_factor, BattleSim, DT};
 use crate::setup::SideId;
 use crate::siege::PieceKind;
 use crate::siege_fx::{
-    SiegeFx, SiegeFxKind, OIL_GUARD_RANGE, OIL_KILLS, OIL_MORALE, OIL_PERIOD, OIL_RAM_KILLS,
-    OIL_REACH, RAM_PERIOD,
+    ladder_count, SiegeFx, SiegeFxKind, BRIDGE_CROSSERS, CLIMBERS_PER_LADDER, CLIMB_WAVES,
+    LADDER_LEAN, OIL_GUARD_RANGE, OIL_KILLS, OIL_MORALE, OIL_PERIOD, OIL_RAM_KILLS, OIL_REACH,
+    RAM_PERIOD,
 };
-use crate::unit::UnitState;
+use crate::unit::{Unit, UnitState};
+
+/// One ladder of a climbing regiment: foot on the ground and top against
+/// the crenels, both on the (x, z) plane, and their heights.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Ladder {
+    pub foot: (f64, f64),
+    pub top: (f64, f64),
+    pub foot_y: f64,
+    pub top_y: f64,
+}
 
 /// Per-battle state of the assault events (derived from the works, plus the
 /// ram and oil timers).
@@ -29,6 +40,142 @@ pub(crate) struct AssaultState {
 }
 
 impl BattleSim {
+    /// SG1: the ladders a regiment scaling a wall has raised (empty when it
+    /// is not climbing with ladders), evenly spread over its frontage along
+    /// the piece.
+    pub fn ladders(&self, unit: &Unit) -> Vec<Ladder> {
+        let (Some(piece), Some(works)) = (unit.climbing, &self.siege) else {
+            return Vec::new();
+        };
+        let p = &works.pieces[piece];
+        if p.docked_tower.is_some() {
+            return Vec::new();
+        }
+        let (width, _) = unit.extent();
+        let count = ladder_count(width);
+        let (tx, tz) = p.tangent();
+        let (nx, nz) = p.outward();
+        let len = p.length();
+        let (cx, cz) = p.closest_point(unit.x, unit.z);
+        let along0 = (cx - p.a.0) * tx + (cz - p.a.1) * tz;
+        let span = width.min(len - 4.0).max(2.0);
+        let face = works.thickness * 0.5;
+        (0..count)
+            .map(|k| {
+                let u = -span * 0.5 + (k as f64 + 0.5) * span / count as f64;
+                let along = (along0 + u).clamp(2.0, (len - 2.0).max(2.0));
+                let (lx, lz) = (p.a.0 + tx * along, p.a.1 + tz * along);
+                let top = (lx + nx * face, lz + nz * face);
+                let foot = (
+                    lx + nx * (face + LADDER_LEAN),
+                    lz + nz * (face + LADDER_LEAN),
+                );
+                let ground = self.field.height(lx, lz);
+                Ladder {
+                    foot,
+                    top,
+                    foot_y: self.field.height(foot.0, foot.1),
+                    top_y: ground + works.wall_height + 0.3,
+                }
+            })
+            .collect()
+    }
+
+    /// SG1: how many of `unit`'s first soldiers are drawn on its ladders or
+    /// on the bridge of a docked tower (the renderer animates them climbing).
+    pub fn climbers_shown(&self, unit: &Unit) -> usize {
+        let n = unit.soldiers() as usize;
+        match (unit.climbing, &self.siege) {
+            (Some(p), Some(works)) if works.pieces[p].docked_tower.is_some() => {
+                n.min(BRIDGE_CROSSERS)
+            }
+            (Some(_), Some(_)) => {
+                let (width, _) = unit.extent();
+                n.min(ladder_count(width) * CLIMBERS_PER_LADDER)
+            }
+            _ => 0,
+        }
+    }
+
+    /// `(x, y, z, facing)` of every living soldier of `unit` for the
+    /// renderer. SG1: a regiment scaling a wall shows its first soldiers
+    /// going up the ladders (or across the tower bridge) man after man, a
+    /// growing share of the rest already fighting on the wall walk, the
+    /// others pressed at the foot of the wall.
+    pub fn soldier_poses(&self, unit: &Unit) -> Vec<[f64; 4]> {
+        let positions = unit.soldier_positions();
+        let (Some(piece), Some(works)) = (unit.climbing, &self.siege) else {
+            return positions
+                .iter()
+                .map(|&(x, z, a)| [x, self.standing_height(unit, x, z), z, a])
+                .collect();
+        };
+        let p = &works.pieces[piece];
+        let (tx, tz) = p.tangent();
+        let (nx, nz) = p.outward();
+        let facing = (-nx).atan2(-nz);
+        let progress = unit.climb_progress.clamp(0.0, 1.0);
+        let shown = self.climbers_shown(unit);
+        let ladders = self.ladders(unit);
+        // Where a climber comes out on top: the ladder heads, else the bridge.
+        let mut heads: Vec<(f64, f64, f64)> = ladders
+            .iter()
+            .map(|l| (l.top.0, l.top.1, l.top_y - 0.3))
+            .collect();
+        let bridge = p.docked_tower.map(|t| {
+            let tower = &self.units[t as usize];
+            let (cx, cz) = p.closest_point(tower.x, tower.z);
+            let y = self.field.height(cx, cz) + works.wall_height;
+            ((tower.x, tower.z), (cx, cz), y)
+        });
+        if let Some((_, (cx, cz), y)) = bridge {
+            heads.push((cx, cz, y));
+        }
+        let on_top = ((positions.len().saturating_sub(shown)) as f64 * progress * 0.6) as usize;
+        let inset = works.thickness * 0.25;
+        positions
+            .iter()
+            .enumerate()
+            .map(|(i, &(x, z, a))| {
+                if i < shown {
+                    if let Some(((bx, bz), (cx, cz), y)) = bridge {
+                        let h = (progress * CLIMB_WAVES * 0.5 + i as f64 / shown as f64).fract();
+                        let (px, pz) = (bx + (cx - bx) * h, bz + (cz - bz) * h);
+                        return [px, y, pz, facing];
+                    }
+                    let l = &ladders[i % ladders.len()];
+                    let rung = (i / ladders.len()) as f64 / CLIMBERS_PER_LADDER as f64;
+                    let h = (progress * CLIMB_WAVES + rung).fract();
+                    let px = l.foot.0 + (l.top.0 - l.foot.0) * h;
+                    let pz = l.foot.1 + (l.top.1 - l.foot.1) * h;
+                    // Half a metre off the rungs, towards the attacker.
+                    let off = 0.45 * (1.0 - h);
+                    return [
+                        px + nx * off,
+                        l.foot_y + (l.top_y - 0.2 - l.foot_y) * h,
+                        pz + nz * off,
+                        facing,
+                    ];
+                }
+                if i < shown + on_top && !heads.is_empty() {
+                    let k = i - shown;
+                    let (hx, hz, y) = heads[k % heads.len()];
+                    let row = k / heads.len();
+                    let side = if row % 2 == 0 { 1.0 } else { -1.0 };
+                    let spread = 0.9 * (row / 2 + 1) as f64 * side;
+                    let back = inset + 0.6 * (row % 3) as f64;
+                    return [
+                        hx + tx * spread - nx * back,
+                        y,
+                        hz + tz * spread - nz * back,
+                        facing + side * 1.2,
+                    ];
+                }
+                [x, self.field.height(x, z), z, a]
+            })
+            .collect()
+    }
+
     /// SG1: siege events recorded since the last call (for the renderer).
     pub fn take_new_siege_fx(&mut self) -> Vec<SiegeFx> {
         let new = self.assault.fx[self.assault.fx_read..].to_vec();
