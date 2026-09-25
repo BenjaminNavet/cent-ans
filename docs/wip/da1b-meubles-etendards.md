@@ -16,7 +16,12 @@ basée sur main (4c627f4a, DA1 fusionné). ADR : révision de `docs/decisions/00
 6. Planche avant/après `docs/img/da1b/`, captures bataille, ADR 0064 § Révision DA1b.
 
 ## État
-- [ ] 1-6 (squelette seulement)
+- [x] 1. SVG vendus (`data/heraldry/charges/`, SOURCE.md, CREDITS.md, schéma)
+- [x] 2. Rendu par rôles (`heraldic_charges.py`), branché en v1 et v2 ; écartelés de faction (Castille, Hainaut) en v2
+- [x] 3. Tests `test_heraldic_charges.py` (non-régression par blasons), bannières de maisons
+- [ ] 4. Régénérer les assets
+- [ ] 5. EP5
+- [ ] 6. Planche, captures, ADR
 
 ## Prochaine étape
-Télécharger les SVG (limite de débit Commons : script avec attente), écrire le module de rendu.
+Régénérer `cent-ans assets heraldry` et `cent-ans assets banners`, puis EP5 (battle_standards.gd).

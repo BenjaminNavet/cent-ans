@@ -39,6 +39,7 @@ ROLE_ORDER = (
     "argent",
     "outline",
 )
+NAMED_COLORS = {"white": "#ffffff", "black": "#000000"}
 _COLOR_RE = re.compile(r"#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b")
 _ELEMENT_RE = re.compile(r"<(?:path|ellipse|circle|rect|polygon)\b[^>]*?/>", re.S)
 
@@ -72,6 +73,12 @@ def _long_hex(color: str) -> str:
 def _prepared_svg(entry: dict) -> str:
     """SVG text with dropped elements removed and inherited default fill made explicit."""
     text = (CHARGES_DIR / entry["file"]).read_text(encoding="utf-8")
+    # Named colours (a gradient stop in "white") are recoloured like the hex ones.
+    text = re.sub(
+        r"((?:fill|stroke|stop-color)\s*[:=]\s*\"?)(white|black)\b",
+        lambda m: m.group(1) + NAMED_COLORS[m.group(2)],
+        text,
+    )
     drop = {_long_hex(color) for color in entry.get("drop", [])}
     if drop:
 
