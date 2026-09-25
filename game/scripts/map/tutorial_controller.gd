@@ -55,6 +55,7 @@ func setup(campaign_map: Node) -> void:
 	ui.add_child(encyclopedia)
 	overlay = (load(TUTORIAL_SCENE) as PackedScene).instantiate()
 	overlay.hide()
+	PanelStack.set_tier(overlay, PanelStack.Tier.TUTORIAL)  # Q4 : au-dessus de tout le reste
 	ui.add_child(overlay)
 	overlay.continue_pressed.connect(advance)
 	overlay.skip_step_pressed.connect(advance)
