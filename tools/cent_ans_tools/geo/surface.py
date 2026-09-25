@@ -46,6 +46,8 @@ RESERVOIR_DIR = pyramid.WORK_DIR / "reservoirs"
 CANOPY_OFFSET_M = 10.0
 #: Blur (pixels of E4) of the tree fraction before the canopy is removed.
 CANOPY_BLUR_PX = 1.5
+#: Blur (pixels of E4) of the crown texture under full tree cover.
+CANOPY_SMOOTH_PX = 2.0
 #: Width of the grey opening that removes buildings (larger than a city block).
 BUILT_OPENING_M = 340.0
 #: Width of the closing that fills radar pits left between buildings.
@@ -144,9 +146,18 @@ def read_cover(
 def remove_canopy(
     dsm_m: np.ndarray, trees: np.ndarray, offset_m: float = CANOPY_OFFSET_M
 ) -> np.ndarray:
-    """Lower the surface by ``offset_m`` times the blurred tree fraction."""
-    cover = ndimage.gaussian_filter(trees.astype(np.float32), CANOPY_BLUR_PX)
-    return (dsm_m - offset_m * np.clip(cover, 0.0, 1.0)).astype(np.float32)
+    """Lower the surface by ``offset_m`` times the blurred tree fraction.
+
+    Under the trees the crown texture (a few metres of radar noise) is also
+    smoothed away: the result is blended with its blur (σ :data:`CANOPY_SMOOTH_PX`)
+    by the tree cover.
+    """
+    cover = np.clip(
+        ndimage.gaussian_filter(trees.astype(np.float32), CANOPY_BLUR_PX), 0.0, 1.0
+    )
+    lowered = dsm_m - offset_m * cover
+    smooth = ndimage.gaussian_filter(lowered, CANOPY_SMOOTH_PX)
+    return (lowered + (smooth - lowered) * cover).astype(np.float32)
 
 
 def flatten_built(
