@@ -106,7 +106,16 @@ et tests inchangés. Premier lancement de l'export : « 14 fichiers repris » (r
 3 sauvegardes automatiques + sauvegarde rapide avec métadonnées et vignettes ; `smoke.json`
 écarté), marqueur écrit ; lancements suivants : aucune copie.
 
+## État final
+Terminé. `main` fusionné (EP4, UI1, PB1, playlists, UX1/UX2, ZG, MF1 : aucun ne touche
+`render_quality.gd` ni les fichiers PF1, fusion sans conflit). fmt, clippy -D warnings, cargo test,
+build.sh (debug et release), pytest (405), import, `rl1_quality_test`, `pf1_quality_test` : OK.
+Smoke : 3 échecs « music playlist too short » venus de `main` (commit cb1b4416 : les listes de
+`data/audio/music.json` ne sont pas lues quand le smoke pointe `MapPaths` sur les fixtures) ;
+aucun échec lié à PF1 (27 « smoke OK » avant cette fusion).
+
 ## Points ouverts
+- Smoke / playlists (voir ci-dessus) : à corriger par le lot playlists (fixture ou repli).
 - ADR 0036 (ZG, relief streamé) va réécrire le relief de la carte : le découpage en blocs + LOD
   de `FineTerrainJob` / `TerrainBuilder` (PF1) est à reprendre ou à fusionner avec soin.
 - Au parchemin (d=1500), 1 772 appels de dessin pour 378 k primitives, coût 2D indépendant du
