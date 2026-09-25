@@ -16,6 +16,10 @@ uniform vec4 set_len = vec4(1.0);
 uniform int imp_set = 0;
 uniform float anim_time = 0.0;
 uniform float highlight = 0.0;
+// EP1 (ADR 0031) : palier très lointain. À 1, une figurine sur deux est effacée (quadrilatère
+// réduit à un point) et les autres sont élargies d'autant : même masse lue, moitié moins de
+// fragments et de mélange alpha.
+uniform float thin_out = 0.0;
 
 varying vec2 v_uv;
 varying float v_shade;
@@ -52,6 +56,14 @@ void vertex() {
 	vec3 up = vec3(0.0, 1.0, 0.0);
 	float wide = cell_m.x * scale;
 	float tall = cell_m.y * scale;
+	if (thin_out > 0.5) {
+		if (INSTANCE_ID % 2 == 1) {
+			wide = 0.0;
+			tall = 0.0;
+		} else {
+			wide *= 1.6;
+		}
+	}
 	VERTEX = origin + right * local.x * wide + up * (local.y * tall - foot * tall);
 	v_normal_world = normalize(vec3(tc.x, 1.2, tc.y));
 	NORMAL = v_normal_world;

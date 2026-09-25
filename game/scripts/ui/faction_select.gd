@@ -357,11 +357,15 @@ func _build_detail() -> Control:
 	_detail_intro = RichTextLabel.new()
 	_detail_intro.fit_content = true
 	_detail_intro.scroll_active = false
-	_detail_intro.bbcode_enabled = false
+	_detail_intro.bbcode_enabled = true
 	_detail_intro.add_theme_font_override("normal_font", FrontEndStyle.body_font())
 	_detail_intro.add_theme_font_size_override("normal_font_size", 18)
 	_detail_intro.add_theme_color_override("default_color", FrontEndStyle.INK)
 	left.add_child(_detail_intro)
+	# BP1 : mots du Codex cliquables (bulles imbriquées) dans la description de la faction.
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", _detail_intro)
 	_detail_objectives = FrontEndStyle.label("", 16, FrontEndStyle.GULES, FrontEndStyle.body_italic())
 	_detail_objectives.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	left.add_child(_detail_objectives)
@@ -528,7 +532,7 @@ func _fill_detail(faction_id: String) -> void:
 	var facade := _facade()
 	var info: Dictionary = facade.call("faction_info", faction_id) if facade != null else {}
 	_detail_title.text = str(info.get("name", faction_id))
-	_detail_intro.text = str(entry.get("intro", info.get("description", "")))
+	_detail_intro.text = CodexText.format(str(entry.get("intro", info.get("description", ""))), true)
 	var summary := str(info.get("victory_summary", ""))
 	_detail_objectives.text = "Objectifs historiques (avant %d) : %s" % [int(info.get("victory_end_year", 1453)), summary] if summary != "" else ""
 	_detail_objectives.visible = summary != ""

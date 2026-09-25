@@ -223,6 +223,10 @@ func _report(now: int) -> void:
 	}
 	if terrain.quadtree != null:
 		report.merge(terrain.quadtree.perf_stats())
+	# ZG5b : réseau fin (mise à jour par image, maillages, pages creusées).
+	var rivers := terrain.get_parent().get_node_or_null("Rivers") as RiversRenderer if terrain.get_parent() != null else null
+	if rivers != null and rivers.fine != null:
+		report.merge(rivers.fine.perf_stats())
 	for key in ["surface_emits", "surface_page_emits", "surface_emit_ms_max", "surface_emit_ms_total", "qt_update_ms_max",
 			"vertical_rescales", "vertical_signal_ms_max", "rescale_emits", "rescale_ms_total", "rescale_ms_max"]:
 		if terrain.build_stats.has(key):
