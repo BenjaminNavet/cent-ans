@@ -19,3 +19,4 @@ __pycache__/
 tools/geo/raw/
 .claude/
 export/
+tools/.cache/
