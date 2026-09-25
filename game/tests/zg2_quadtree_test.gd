@@ -124,6 +124,15 @@ func _run() -> void:
 	_check(terrain.fine_ready(), "quadtree should settle")
 	_check(terrain.chunk_level(terrain.chunk_index_at(paris.x, paris.y)) == 2, "Paris chunk should be at level 2")
 	_check(_changed > 0, "chunk_surface_changed should fire when pages arrive")
+	# Vue parchemin (caméra nulle) : plus rien de voulu, le quadtree doit se déclarer stable
+	# (régression PB1 : `is_settled()` restait faux à d = 1500).
+	qt.update_view(camera)
+	for _i in 60:
+		qt.update_view(null)
+		await process_frame
+		if qt.is_settled():
+			break
+	_check(qt.is_settled(), "quadtree should settle when the camera is gone (parchment view)")
 
 	# 3. Surface : E1 (17, 15) = contenu de h_8_7 ; son pixel (100, 200) est centré en
 	#    origine + (100,5 ; 200,5) × 0,25.
