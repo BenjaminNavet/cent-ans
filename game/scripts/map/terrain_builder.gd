@@ -32,7 +32,16 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 @export var max_near_builds_per_frame: int = 4
 ## Relief fin : pas en pixels 8192 (1 = un sommet toutes les 0,5 unité), nombre maximal de
 ## tuiles fines affichées, rayon (autour du point visé), tâches simultanées, cache LRU.
+## `fine_step` sert de valeur fixe quand `fine_step_auto` est faux (ex. `--fine-step=N`,
+## bancs de perf) ; sinon le pas est choisi automatiquement selon la distance caméra
+## (T2 : `fine_step_near` en dessous de `fine_step_switch_distance`, `fine_step_far` au-delà,
+## avec hystérésis pour éviter les allers-retours au bord du seuil).
 @export var fine_step: int = 1
+@export var fine_step_auto: bool = true
+@export var fine_step_near: int = 1
+@export var fine_step_far: int = 2
+@export var fine_step_switch_distance: float = 80.0
+@export var fine_step_hysteresis: float = 20.0
 @export var max_fine_chunks: int = 4
 @export var fine_radius: float = 150.0
 @export var max_fine_jobs: int = 2
@@ -54,8 +63,13 @@ var _far_grids: Array[Dictionary] = []
 var _near_grids: Dictionary = {}
 ## Relief fin : index → {"mesh", "grid", "last_used"} ; tâches en cours : index → {"task", "job"}.
 var _fine_cache: Dictionary = {}
+## Pas utilisé pour construire chaque entrée de `_fine_cache` (T2, détecte les tuiles à
+## reconstruire quand le pas adaptatif change).
+var _fine_cache_step: Dictionary = {}
 var _fine_jobs: Dictionary = {}
 var _fine_indices: PackedInt32Array = PackedInt32Array()
+## Pas courant (adaptatif ou fixe, voir `fine_step_auto`) ; initialisé à `fine_step`.
+var _current_fine_step: int = 0
 var _fine_tiles_dir: String = ""
 var _fine_pattern: String = ""
 var _fine_tile_px: int = 0
@@ -293,6 +307,9 @@ func set_highlight(hovered_index: int, selected_index: int) -> void:
 ## rig sous `fine_distance`, les tuiles les plus proches du point visé passent en relief fin.
 func update_lod(camera_position: Vector3, camera_distance: float = INF, view_center: Vector3 = Vector3.INF, fine_distance: float = 0.0) -> void:
 	_lod_frame += 1
+	if _current_fine_step == 0:
+		_current_fine_step = fine_step
+	_current_fine_step = _select_fine_step(camera_distance)
 	_collect_fine_jobs()
 	var wanted_fine := _wanted_fine(camera_distance, view_center, fine_distance)
 	_last_wanted_fine = wanted_fine
@@ -303,7 +320,10 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 		if wanted_fine.has(i) and _fine_cache.has(i):
 			var entry: Dictionary = _fine_cache[i]
 			entry["last_used"] = _lod_frame
-			if _is_near[i] != 2:
+			# Comparaison d'identité (pas `_is_near`) : rejoue l'affectation quand le maillage
+			# en cache a changé (ex. reconstruction après changement de `fine_step` adaptatif),
+			# même si la tuile était déjà au niveau fin.
+			if chunk.mesh != entry["mesh"]:
 				chunk.mesh = entry["mesh"]
 				_is_near[i] = 2
 				chunk_surface_changed.emit(i)
@@ -326,9 +346,27 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 			_is_near[i] = 0
 			chunk_surface_changed.emit(i)
 	for index in wanted_fine:
-		if not _fine_cache.has(index) and not _fine_jobs.has(index) and _fine_jobs.size() < max_fine_jobs:
+		if _fine_jobs.has(index) or _fine_jobs.size() >= max_fine_jobs:
+			continue
+		var stale: bool = _fine_cache.has(index) and int(_fine_cache_step.get(index, -1)) != _current_fine_step
+		if not _fine_cache.has(index) or stale:
 			_start_fine_job(index)
 	_evict_fine()
+
+
+## Pas de relief fin pour la distance caméra donnée (T2). Bande d'hystérésis
+## `fine_step_switch_distance ± fine_step_hysteresis / 2` : le pas ne change pas tant que la
+## distance reste dans la bande, pour éviter les allers-retours de reconstruction au bord du
+## seuil ; en dehors de la bande, le pas correspond simplement à la distance (proche = fin).
+func _select_fine_step(camera_distance: float) -> int:
+	if not fine_step_auto:
+		return fine_step
+	var half := fine_step_hysteresis * 0.5
+	if camera_distance <= fine_step_switch_distance - half:
+		return fine_step_near
+	if camera_distance >= fine_step_switch_distance + half:
+		return fine_step_far
+	return _current_fine_step
 
 
 ## Tuiles voulues en relief fin (les plus proches du point visé), triées par distance.
@@ -405,10 +443,11 @@ func _start_fine_job(index: int) -> void:
 		# Tuile absente ou illisible : la tuile reste au LOD proche (pas de nouvel essai).
 		if _near_meshes.has(index):
 			_fine_cache[index] = {"mesh": _near_meshes[index], "grid": _near_grids.get(index, {}), "last_used": _lod_frame}
+			_fine_cache_step[index] = _current_fine_step
 		return
 	job.origin_px = Vector2i(col * chunk_px, row * chunk_px)
 	job.chunk_px = chunk_px
-	job.step = fine_step
+	job.step = _current_fine_step
 	job.tile_side = _fine_tile_px
 	job.h_min = map_data.height_min_m
 	job.h_range = map_data.height_max_m - map_data.height_min_m
@@ -443,6 +482,7 @@ func _collect_fine_jobs(block: bool = false) -> void:
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		var grid := {"heights": job.heights, "side": job.side, "unit": float(chunk_px) / float(job.side - 1)}
 		_fine_cache[index] = {"mesh": mesh, "grid": grid, "last_used": _lod_frame}
+		_fine_cache_step[index] = job.step
 		build_stats["fine_build_ms_max"] = maxf(float(build_stats.get("fine_build_ms_max", 0.0)), job.build_ms)
 
 
@@ -477,6 +517,7 @@ func _evict_fine() -> void:
 	idle.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	for i in mini(_fine_cache.size() - max_cached_fine, idle.size()):
 		_fine_cache.erase(idle[i][1])
+		_fine_cache_step.erase(idle[i][1])
 
 
 func _build_textures() -> void:
