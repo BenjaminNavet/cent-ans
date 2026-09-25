@@ -1,7 +1,7 @@
 {
   "id": "evt_winchelsea",
   "title": "Les Espagnols sur mer",
-  "text": "Le 29 août 1350, au large de Winchelsea, [[cdx_edouard_iii|Édouard III]] et le [[cdx_prince_noir|Prince noir]] attaquent la flotte castillane de [[cdx_winchelsea|Charles de la Cerda]], qui redescend de Flandre chargée de marchandises. Le roi aborde en personne une grande nef ennemie ; de quatorze à vingt-six navires sont pris selon les chroniques. On l'appellera la bataille « des Espagnols sur mer », mais la Manche reste peu sûre pour les marchands anglais.",
+  "text": "Le 29 août 1350, au large de Winchelsea, [[cdx_edouard_iii|Édouard III]] et le [[cdx_prince_noir|Prince noir]] attaquent la flotte castillane de [[cdx_charles_de_la_cerda|Charles de la Cerda]], qui redescend de Flandre chargée de marchandises. Le roi aborde en personne une grande nef ennemie ; de quatorze à vingt-six navires sont pris selon les chroniques. On l'appellera la bataille « des Espagnols sur mer », mais la Manche reste peu sûre pour les marchands anglais.",
   "kind": "historical",
   "trigger": {
     "date": {
