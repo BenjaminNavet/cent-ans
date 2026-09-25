@@ -261,6 +261,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         return Vec::new();
     };
     let mut orders = sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+    // DP1: trade agreements and military access (ADR 0025).
+    orders.extend(crate::diplomacy_eval::plan_treaties(state, data, faction));
     // G2: historical side changes (Artevelde, Troyes).
     orders.extend(crate::alignment::plan_side_change(state, data, faction));
     orders.extend(crate::alignment::plan_dynastic_alliance(
@@ -287,6 +289,7 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         orders.push(Order::Research { technology });
     }
     orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
+    orders.extend(sim_campaign::edicts::ai_choose_edicts(state, data, faction));
     // G2: a realm whose buildings eat half its income does not debase: the
     // inflation of their upkeep outweighs the seigniorage (Scots spiral).
     let upkeep_heavy = 2 * ctx.building_upkeep > ctx.gross_income;

@@ -441,6 +441,7 @@ pub fn naval_setup(state: &CampaignState, data: &GameData, request: &NavalReques
                 experience: 0,
                 stats: crate::battle_request::fallback_stats(),
                 abilities: Vec::new(),
+                missile: None,
             })
         })
         .collect();

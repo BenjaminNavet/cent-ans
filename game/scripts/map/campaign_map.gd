@@ -38,6 +38,7 @@ const START_MENU_SCENE := "res://scenes/start_menu.tscn"
 @onready var cities: CityMarkers = $Cities
 @onready var armies: ArmyMarkers = $Armies
 @onready var path_preview: PathPreview = $PathPreview
+@onready var trade_layer: TradeRouteLayer = $TradeRouteLayer
 @onready var camera_rig: CampaignCamera = $CameraRig
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var picker: ProvincePicker = $Picker
@@ -55,6 +56,7 @@ var selected_army: String = ""
 var reachable: Dictionary = {}
 var startup_stats: Dictionary = {}
 var unrest_mode: bool = false
+var trade_mode: bool = false  # C5 : couche des routes commerciales
 var _faction_panel_id: String = ""
 var _court_open: bool = false
 var _open_character_id: String = ""
@@ -73,6 +75,8 @@ var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
 var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
+var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
+var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
 var _fps_probe_gpu_ms: float = 0.0
@@ -122,7 +126,22 @@ func _ready() -> void:
 	picker.province_right_clicked.connect(_on_province_right_clicked)
 	picker.click_interceptor = _try_select_army
 	armies.setup(map_data, camera)
+	strategic = StrategicView.new()  # CM2
+	strategic.name = "StrategicView"
+	add_child(strategic)
+	strategic.setup(self)
+	weather_view = CampaignWeatherView.new()  # CM2
+	weather_view.name = "Weather"
+	add_child(weather_view)
+	weather_view.setup(self)
+	if strategic.overlay != null:
+		strategic.overlay.weather_view = weather_view
+	var turn_light := TurnLight.new()  # CM2 : soir doré pendant le tour des autres factions
+	turn_light.name = "TurnLight"
+	add_child(turn_light)
+	turn_light.setup(self)
 	path_preview.setup(map_data)
+	trade_layer.setup(map_data, settlement_layer, settlement_data)  # C5
 	_connect_ui()
 	settlements_ctl = SettlementController.new()  # C5
 	add_child(settlements_ctl)
@@ -171,6 +190,8 @@ func _ready() -> void:
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
+	if sim != null and int(sim.call("get_turn")) == 0 and not TutorialController.capture_mode():  # VO1
+		Advisor.say_trigger("campaign_start", player_faction)
 	load_ok = true
 	startup_stats = {
 		"load_ms": t1 - t0,
@@ -256,6 +277,7 @@ func _connect_ui() -> void:
 	ui.stance_changed.connect(_on_stance_changed)
 	ui.tech_panel_requested.connect(_on_tech_panel_requested)  # M6
 	ui.research_requested.connect(_on_research_requested)  # M6
+	ui.trade_layer_toggle_requested.connect(_toggle_trade_layer)  # C5
 	ui.province_panel_closed.connect(func() -> void:
 		selected_index = 0
 		terrain.set_highlight(hovered_index, 0))
@@ -299,6 +321,10 @@ func refresh_all() -> void:
 		settlement_layer.refresh(sim, SimFacade.faction_color)
 	if life != null:  # CV1
 		life.refresh(sim)
+	if weather_view != null:  # CM2
+		weather_view.refresh(sim)
+	if strategic != null:  # CM2
+		strategic.refresh(sim)
 	if minimap_ctl != null:
 		minimap_ctl.refresh()
 	_refresh_top_bar()
@@ -307,6 +333,7 @@ func refresh_all() -> void:
 		settlements_ctl.refresh()
 	if agents_ctl != null:  # C6 agents
 		agents_ctl.refresh()
+	_refresh_trade_layer()  # C5 : routes commerciales
 	if unrest_mode:
 		_refresh_unrest_colors()
 	if selected_army != "":
@@ -817,6 +844,64 @@ func _toggle_unrest_mode() -> void:
 		_refresh_owner_colors()
 
 
+## Lot C5 : bascule la couche des routes commerciales (touche `map_toggle_trade` ou bouton de
+## la barre de filtres).
+func _toggle_trade_layer() -> void:
+	trade_mode = not trade_mode
+	trade_layer.set_layer_visible(trade_mode)
+	if ui != null:
+		ui.set_trade_mode(trade_mode)
+	if trade_mode:
+		_refresh_trade_layer()
+	else:
+		ui.set_hover_trade("")
+
+
+func _refresh_trade_layer() -> void:
+	if sim == null or trade_layer == null or not sim.has_method("get_trade_routes"):
+		return
+	var routes: Array = sim.call("get_trade_routes")
+	var visible_provinces := PackedStringArray()
+	if sim.has_method("get_visible_provinces"):
+		visible_provinces = sim.call("get_visible_provinces", player_faction)
+	trade_layer.refresh(routes, camera_rig.distance, visible_provinces)
+
+
+## Infobulle de la route commerciale sous la souris (couche visible uniquement).
+func _update_trade_hover() -> void:
+	if not trade_mode or ui == null:
+		return
+	var hit := picker.pick_ray_screen(get_viewport().get_mouse_position())
+	if hit.is_empty():
+		ui.set_hover_trade("")
+		return
+	var threshold := clampf(camera_rig.distance * 0.01, 3.0, 40.0)
+	var route := trade_layer.nearest_route(Vector2(hit["x"], hit["z"]), threshold)
+	if route.is_empty():
+		ui.set_hover_trade("")
+		return
+	ui.set_hover_trade(_trade_route_tooltip(route))
+
+
+func _trade_route_tooltip(route: Dictionary) -> String:
+	var from_name := str(route.get("from_hub_name", ""))
+	var to_name := str(route.get("to_hub_name", ""))
+	if bool(route.get("cut", false)):
+		var reason := str(route.get("cut_reason", ""))
+		return "%s ↔ %s : route coupée (%s)" % [from_name, to_name, reason]
+	var goods: PackedStringArray = route.get("goods", PackedStringArray())
+	var goods_text := ", ".join(goods) if not goods.is_empty() else ""
+	var text := "%s ↔ %s — %d livres/saison" % [from_name, to_name, int(route.get("total_value", 0))]
+	if goods_text != "":
+		text += " (%s)" % goods_text
+	if bool(route.get("agreement", false)):
+		text += " — accord commercial"
+	var security := float(route.get("security", 1.0))
+	if security < 0.99:
+		text += " — menacée"
+	return text
+
+
 ## Couleur par province = vert (0 mécontentement) → rouge (100), moyenne pondérée par classe.
 func _refresh_unrest_colors() -> void:
 	var colors := PackedColorArray()
@@ -888,6 +973,7 @@ func _on_end_turn() -> void:
 	var audio := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio != null:
 		audio.on_turn_events(events)
+	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
 	refresh_all()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
@@ -949,16 +1035,19 @@ func _process(_delta: float) -> void:
 	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
 	if zoom_tiers != null:  # C6 : paliers de zoom
-		cities.set_tier_alpha(zoom_tiers.far_weight(distance))
+		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
 	if life != null:  # CV1
 		life.update_view(distance)
+	strategic.update_view(distance)  # CM2
+	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
 	armies.update_scale(camera_rig.distance)
+	_update_trade_hover()  # C5
 	if _screenshot_countdown > 0:
 		# C6 : la capture attend le relief fin et les rubans / hameaux des tuiles proches.
 		if _screenshot_countdown == 3 and not terrain.fine_ready():
@@ -1024,6 +1113,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera_rig.edge_pan_enabled = not camera_rig.edge_pan_enabled
 	elif event.is_action_pressed("map_toggle_unrest"):
 		_toggle_unrest_mode()
+	elif event.is_action_pressed("map_toggle_trade"):
+		_toggle_trade_layer()
 	elif event.is_action_pressed("map_toggle_court"):
 		if ui.court_panel_visible():
 			_court_open = false
@@ -1110,6 +1201,10 @@ func _parse_cmdline() -> void:
 				"diplomacy":
 					_focus_capital()
 					diplomacy.open_panel("fac_england")
+				"diplomacy_treaty":  # DP1 : négociation à plusieurs clauses
+					_focus_capital()
+					diplomacy.open_panel("fac_england")
+					diplomacy.panel.stage_example()
 				"diplomacy_map":
 					_focus_capital()
 					diplomacy._toggle_mode(DiplomacyController.MapMode.DIPLOMACY)
@@ -1131,6 +1226,8 @@ func _parse_cmdline() -> void:
 					tutorial.stage_screenshot(_screenshot_stage)
 				"settlement", "settlement_orders":  # C5
 					settlements_ctl.stage_screenshot(_screenshot_stage)
+				"trade":  # C5 : routes commerciales
+					_stage_screenshot_trade()
 				"movement", "movement_near":  # M4 : bulle et chemin (vue d'ensemble, gros plan)
 					movement_ctl.stage_screenshot(_screenshot_stage == "movement_near")
 				"agents", "agents_registry":  # C6 agents
@@ -1258,6 +1355,17 @@ func _focus_capital() -> void:
 	camera_rig.look_at_point(Vector3(centroid.x, map_data.surface_world_at(centroid.x, centroid.y), centroid.y), maxf(map_data.size.x, map_data.size.y) * 0.09)
 	camera_rig.snap()
 	picker.select_index(index)
+
+
+## Lot C5 : mise en scène « commerce » — couche des routes activée, caméra sur Bruges (le plus
+## connecté des comptoirs) pour que plusieurs routes soient visibles dans le cadre.
+func _stage_screenshot_trade() -> void:
+	if not trade_mode:
+		_toggle_trade_layer()
+	var world: Vector3 = settlement_layer.world_position_of("set_bruges") if settlement_layer != null else Vector3.ZERO
+	if world != Vector3.ZERO:
+		camera_rig.look_at_point(world, maxf(map_data.size.x, map_data.size.y) * 0.12)
+		camera_rig.snap()
 
 
 ## Mise en scène « ville » : capitale du joueur, panneau de province sur l'onglet Ville.
@@ -1437,6 +1545,17 @@ func _on_battle_returned(result: Dictionary, battle: Node) -> void:
 func _set_campaign_active(active: bool) -> void:
 	visible = active
 	ui.visible = active
+	# Q1 : les calques 2D des contrôleurs (plaques d'effectifs CV2, jetons d'agents C6) ne
+	# suivent pas la visibilité du Node3D parent : ils restaient affichés sur la bataille.
+	for layer: CanvasLayer in find_children("*", "CanvasLayer", true, false):
+		if layer == ui:
+			continue
+		if active:
+			layer.visible = bool(layer.get_meta(&"visible_before_battle", layer.visible))
+			layer.remove_meta(&"visible_before_battle")
+		elif not layer.has_meta(&"visible_before_battle"):
+			layer.set_meta(&"visible_before_battle", layer.visible)
+			layer.visible = false
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 	if active:
 		camera.make_current()

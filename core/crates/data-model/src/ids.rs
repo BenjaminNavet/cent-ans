@@ -180,6 +180,11 @@ define_id!(
     ShipClassId,
     "ship_"
 );
+define_id!(
+    /// Identifier of a regional edict (`edict_peace_of_god`), lot C4.
+    EdictId,
+    "edict_"
+);
 
 #[cfg(test)]
 mod tests {

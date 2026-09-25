@@ -4,6 +4,8 @@
   "settlement": "set_bruges",
   "period": "vers 1340-1450 (hôtel de ville dès 1376 ; lanterne octogonale du beffroi en 1486)",
   "province": "prov_flandre",
+  "siege": {"rotate_deg": 0, "radius_m": 1100, "bank_offset_m": 120, "cut_m": 120, "areas": ["ville"], "monuments": ["belfort", "waterhalle", "stadhuis", "saint_donatien"], "streets": ["vlamingstraat", "langestraat", "ezelstraat"], "battle": {"walls": ["enceinte"], "gate": "Katelijnepoort", "streets": ["steenstraat", "vlamingstraat", "langestraat", "katelijnestraat", "ezelstraat", "gentpoortstraat"]}},
+  "materials": {"houses": {"walls": {"Brick": 0.7, "Timber": 0.2, "Plaster": 0.1}, "roofs": {"Tile": 0.45, "Slate": 0.25, "TileOld": 0.2, "Thatch": 0.1}}, "palette": {"Brick": [0.4, 0.16, 0.09]}},
   "sources": [
     {
       "title": "Brugae Flandrorum urbs (plan de Bruges)",

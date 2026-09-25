@@ -16,6 +16,7 @@ use crate::entities::building::Building;
 use crate::entities::character::Character;
 use crate::entities::chivalric_order::ChivalricOrder;
 use crate::entities::diet::Diet;
+use crate::entities::edict::Edict;
 use crate::entities::event::Event;
 use crate::entities::faction::Faction;
 use crate::entities::names::NameList;
@@ -27,11 +28,12 @@ use crate::entities::retinue::Retinue;
 use crate::entities::settlement::{Settlement, SettlementEdge, SettlementRules};
 use crate::entities::skill::Skill;
 use crate::entities::technology::Technology;
+use crate::entities::trade::TradeCatalog;
 use crate::entities::unit_type::UnitType;
 use crate::entities::vision::VisionRules;
 use crate::ids::{
-    BuildingId, CharacterId, ChivalricOrderId, DietId, EventId, FactionId, NamesId, ProvinceId,
-    ReligionId, ResourceId, SettlementId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, ChivalricOrderId, DietId, EdictId, EventId, FactionId, NamesId,
+    ProvinceId, ReligionId, ResourceId, SettlementId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 use crate::map::{MapMeta, ProvinceFeatureCollection, ProvinceGeometry};
 
@@ -54,8 +56,12 @@ pub mod folders {
     pub const BATTLE_ORDERS: &str = "battle_orders";
     /// Province diets (H3 « La Table »); optional folder.
     pub const DIETS: &str = "diets";
+    /// Regional edicts (lot C4); optional folder.
+    pub const EDICTS: &str = "edicts";
     /// Chivalric orders (H6); optional folder.
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
+    /// Landmark cities (lots L1-L3); optional folder.
+    pub const LANDMARKS: &str = "landmarks";
     /// Settlements, one file per province (lot C1); optional folder.
     pub const SETTLEMENTS: &str = "settlements";
     /// Tuning of the settlement rules, inside `settlements/`; optional.
@@ -80,10 +86,16 @@ pub mod folders {
     pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
     /// Public order tuning (lot E2), inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
+    /// Campaign map weather (lot CM2), inside `rules/`; optional.
+    pub const CAMPAIGN_WEATHER_RULES: &str = "campaign_weather.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
     pub const AGENT_RULES: &str = "agents.json";
+    /// Trade hubs and routes (lot C5); optional folder.
+    pub const ECONOMY: &str = "economy";
+    /// Trade catalogue, inside `economy/`; optional.
+    pub const TRADE: &str = "trade.json";
     pub const MAP: &str = "map";
     /// Free movement rules folder (lot M2); optional.
     pub const MOVEMENT: &str = "movement";
@@ -193,8 +205,13 @@ pub struct GameData {
     pub battle_orders: BTreeMap<String, BattleOrder>,
     /// Province diets (H3), empty when `data/diets/` is absent.
     pub diets: BTreeMap<DietId, Diet>,
+    /// Regional edicts (lot C4), empty when `data/edicts/` is absent.
+    pub edicts: BTreeMap<EdictId, Edict>,
     /// Chivalric orders (H6), empty when `data/chivalric_orders/` is absent.
     pub chivalric_orders: BTreeMap<ChivalricOrderId, ChivalricOrder>,
+    /// Landmark cities (L3: siege battles in the historical plan), empty
+    /// when `data/landmarks/` is absent.
+    pub landmarks: BTreeMap<String, crate::entities::landmark::Landmark>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -228,6 +245,9 @@ pub struct GameData {
     /// `data/rules/population.json` (lot E2);
     /// [`crate::PopulationRules::default`] when absent.
     pub population_rules: crate::entities::population_rules::PopulationRules,
+    /// `data/rules/campaign_weather.json` (lot CM2);
+    /// [`crate::CampaignWeatherRules::default`] when absent.
+    pub campaign_weather: crate::entities::campaign_weather::CampaignWeatherRules,
     /// `data/retinue.json` (lot C7), absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
@@ -237,6 +257,9 @@ pub struct GameData {
     /// Movement graph over the settlements (lot C4): `settlement_graph`, or
     /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
     pub movement_graph: crate::movement_graph::MovementGraph,
+    /// `data/economy/trade.json` (lot C5), absent until written: no trade
+    /// route exists.
+    pub trade: Option<TradeCatalog>,
     /// `data/movement/rules.json` (lot M2, free movement), absent until
     /// written: [`FreeMovementRules::default`] then applies.
     pub free_movement: Option<crate::entities::movement::FreeMovementRules>,
@@ -273,7 +296,9 @@ impl GameData {
             events: BTreeMap::new(),
             battle_orders: BTreeMap::new(),
             diets: BTreeMap::new(),
+            edicts: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
+            landmarks: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
             settlements: BTreeMap::new(),
@@ -287,9 +312,11 @@ impl GameData {
             vision_rules: None,
             auto_resolve: Default::default(),
             population_rules: Default::default(),
+            campaign_weather: Default::default(),
             retinue: None,
             agent_rules: None,
             movement_graph: Default::default(),
+            trade: None,
             free_movement: None,
             settlement_px: BTreeMap::new(),
             rasters: Default::default(),
@@ -307,9 +334,17 @@ impl GameData {
         if diets_dir.is_dir() {
             data.diets = load_entities(&diets_dir, |d: &Diet| &d.id)?;
         }
+        let edicts_dir = root.join(folders::EDICTS);
+        if edicts_dir.is_dir() {
+            data.edicts = load_entities(&edicts_dir, |e: &Edict| &e.id)?;
+        }
         let chivalric_dir = root.join(folders::CHIVALRIC_ORDERS);
         if chivalric_dir.is_dir() {
             data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
+        }
+        let landmarks_dir = root.join(folders::LANDMARKS);
+        if landmarks_dir.is_dir() {
+            data.landmarks = load_entities(&landmarks_dir, |l: &crate::Landmark| &l.id)?;
         }
         let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
         if alignment_path.is_file() {
@@ -339,6 +374,12 @@ impl GameData {
         if population_path.is_file() {
             data.population_rules = read_json(&population_path)?;
         }
+        let weather_path = root
+            .join(folders::RULES)
+            .join(folders::CAMPAIGN_WEATHER_RULES);
+        if weather_path.is_file() {
+            data.campaign_weather = read_json(&weather_path)?;
+        }
         let retinue_path = root.join(folders::RETINUE);
         if retinue_path.is_file() {
             data.retinue = Some(read_json(&retinue_path)?);
@@ -346,6 +387,10 @@ impl GameData {
         let agents_path = root.join(folders::RULES).join(folders::AGENT_RULES);
         if agents_path.is_file() {
             data.agent_rules = Some(read_json(&agents_path)?);
+        }
+        let trade_path = root.join(folders::ECONOMY).join(folders::TRADE);
+        if trade_path.is_file() {
+            data.trade = Some(read_json(&trade_path)?);
         }
         let free_movement_path = root.join(folders::MOVEMENT).join(folders::MOVEMENT_RULES);
         if free_movement_path.is_file() {
@@ -443,6 +488,7 @@ impl GameData {
         checker.check_diets();
         checker.check_chivalric_orders();
         checker.check_retinue();
+        checker.check_trade();
         if checker.errors.is_empty() {
             Ok(())
         } else {
@@ -737,6 +783,50 @@ impl ReferenceChecker<'_> {
             if let Some(faction) = &order.faction {
                 self.require(id, "faction", faction, &data.factions);
             }
+        }
+    }
+
+    fn check_trade(&mut self) {
+        let data = self.data;
+        let Some(trade) = &data.trade else {
+            return;
+        };
+        let mut seen_hubs = std::collections::BTreeSet::new();
+        for hub in &trade.hubs {
+            if !seen_hubs.insert(hub.id.clone()) {
+                self.errors.push(ReferenceError {
+                    entity: hub.id.clone(),
+                    field: "id".to_owned(),
+                    target: format!("duplicate {}", hub.id),
+                });
+            }
+            self.require(&hub.id, "settlement", &hub.settlement, &data.settlements);
+            self.require_all(&hub.id, "goods", &hub.goods, &data.resources);
+        }
+        let mut seen_routes = std::collections::BTreeSet::new();
+        for route in &trade.routes {
+            if !seen_routes.insert(route.id.clone()) {
+                self.errors.push(ReferenceError {
+                    entity: route.id.clone(),
+                    field: "id".to_owned(),
+                    target: format!("duplicate {}", route.id),
+                });
+            }
+            if !seen_hubs.contains(&route.from_hub) {
+                self.errors.push(ReferenceError {
+                    entity: route.id.clone(),
+                    field: "from_hub".to_owned(),
+                    target: route.from_hub.clone(),
+                });
+            }
+            if !seen_hubs.contains(&route.to_hub) {
+                self.errors.push(ReferenceError {
+                    entity: route.id.clone(),
+                    field: "to_hub".to_owned(),
+                    target: route.to_hub.clone(),
+                });
+            }
+            self.require_all(&route.id, "goods", &route.goods, &data.resources);
         }
     }
 
