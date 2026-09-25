@@ -807,6 +807,12 @@ static func engine_is_animated(variant: int) -> bool:
 static func _engine(f: Fig, variant: int) -> void:
 	f.set_part(P_STATIC)
 	if engine_is_animated(variant):
+		if SiegeCrewFx.enabled():
+			# SG3 : servants skinnés et animés par `SiegeCrewFx` ; reste une cale sous l'engin
+			# (la figurine ne peut pas être vide).
+			f.set_style(WOOD, C_EXACT)
+			f.box(Vector3(0, 0.05, 0), Vector3(0.3, 0.1, 0.3))
+			return
 		var crew: Array = ENGINE_CREW[variant]
 		_crew(f, crew[0], crew[1])
 		_crew(f, crew[2], crew[3])
