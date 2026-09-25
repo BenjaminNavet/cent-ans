@@ -1,6 +1,6 @@
 # V4 — Fleuves, ponts et forêts de la carte de campagne (lots A1-11, A1-10)
 
-Branche `worktree-agent-ae5685646cc8b59ac` (fusionne `main` jusqu'à 70c9e2e5 : L1, R1, CV1, CV2…).
+Branche `worktree-agent-ae5685646cc8b59ac` (fusionne `main` jusqu'à 113ce3e2 et la branche L2 : L1, L2, R1, CV1, CV2, M5b…).
 Rendu seulement. Captures : `docs/audit/captures/v4/` (`avant_*` sur main 356a1ad, `apres_*`).
 Banc : `godot --rendering-driver vulkan --disable-vsync --path game --script res://tests/v4_map_bench.gd`
 (Metal plafonne à 145 i/s et ne rend pas le temps GPU ; Vulkan/MoltenVK donne le temps GPU).
@@ -41,11 +41,13 @@ Banc : `godot --rendering-driver vulkan --disable-vsync --path game --script res
   couverture = splat canal B (forêts vers 1340 du lot R1), part de résineux = `forest_kind.png`
   (R1), raster d'essences complet optionnel.
 
-## Point d'accroche L1 (Paris)
-`data/map/river_styles.json` → `custom_zones` : `{"id":"paris","lonlat":[2.3499,48.853],
-"radius_px":6.8,"boundary_bridges":false}` (valeurs L1). Dans le cercle : ni ruban d'eau, ni lit,
-ni berge, ni pont, ni pont-porte ; la maquette L1 dessine sa Seine. Après modification :
-`cent-ans geo rivers-render`. `RiversRenderer.custom_zones()` expose les zones.
+## Zones des villes emblématiques (L1, L2)
+`data/map/river_styles.json` → `custom_zones` (valeurs fournies par L1 et L2) : Paris 6,8 px,
+Londres 8,0, Avignon 6,3, Calais 5,3, Rouen 6,3, Bordeaux 6,4, Bruges 6,3 ; toutes avec
+`boundary_bridges: false`. Dans chaque cercle : ni ruban d'eau, ni lit, ni berge, ni pont, ni
+pont-porte ; la maquette dessine son fleuve. Après modification : `uv run --project tools
+cent-ans geo rivers-render`. `RiversRenderer.custom_zones()` expose les zones. Captures
+`apres_zone_{paris,londres,rouen,bordeaux,avignon}.png`.
 
 ## Performance (Vulkan, temps GPU, meilleur de 3 passes, alternées avec une copie de main a8e1cc7a)
 | Vue | main | V4 | écart | primitives |
@@ -61,7 +63,9 @@ dans le bruit.
 
 ## Points ouverts
 - Structures des ponts historiques (bois / pierre / bateaux) à vérifier par l'historien
-  (`crossings.json`, listes dans l'outil de génération de la branche).
+  (`crossings.json` ; les six ponts de la Somme ajoutés par M5b ont reçu une structure par défaut).
+- Raccords aux bords des zones L1/L2 : le fleuve générique s'arrête sur le cercle, la maquette
+  reprend son propre tracé ; léger décalage visible à Rouen et Avignon.
 - L'eau passe sous les villes au lieu de les traverser à ciel ouvert (sauf Paris, modèle L1).
 - `wetlands.png` (R1) n'est pas lu : des arbres peuvent pousser dans les marais.
 - Machine partagée (≈ 10 agents) : bruit de mesure de ±10 % entre passes.
