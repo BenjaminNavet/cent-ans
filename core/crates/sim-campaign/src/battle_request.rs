@@ -324,6 +324,11 @@ pub(crate) fn side_setup(
             charge_percent: effects.battle_charge.apply(0.0),
             ranged_percent: effects.battle_ranged.apply(0.0),
             defense_percent: effects.battle_defense.apply(0.0),
+            sovereign: state
+                .factions
+                .get(&army.faction)
+                .and_then(|f| f.ruler.as_ref())
+                == Some(character),
         })
     });
     SideSetup {

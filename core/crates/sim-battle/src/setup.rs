@@ -138,6 +138,10 @@ pub struct GeneralSetup {
     /// Armour points added to every unit (`BattleDefense`).
     #[serde(default)]
     pub defense_percent: f64,
+    /// EP5: the general is his faction's ruler in person (royal banner,
+    /// the oriflamme of Saint-Denis for France).
+    #[serde(default)]
+    pub sovereign: bool,
 }
 
 /// One army.
