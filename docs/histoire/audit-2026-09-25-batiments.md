@@ -29,7 +29,7 @@ Les descriptions reçoivent en outre un lien `[[cdx_…]]` vers leur fiche du Co
 | bld_muster_field | description | « où l'on passe les montres des troupes levées » | « où les capitaines présentent leurs troupes à la montre, pour être comptées et payées » | Précision | La montre conditionne la solde (ordonnance de 1351) | Ost (armée) |
 | bld_water_supply | description | « Fontaines publiques, conduites et égouts » | « Fontaines publiques, aqueducs, conduites et premiers égouts voûtés (Paris, Londres) » | Précision | Égout voûté d'Hugues Aubriot (v. 1370), Great Conduit de Londres (1245) | Hugues Aubriot ; Great Conduit |
 | bld_tin_blowing_house | description | « monnayés, c'est-à-dire pesés et taxés » | « essayés, pesés et taxés » | Précision | Le coinage consiste d'abord à couper un coin du lingot pour l'essayer | Stannaries |
-| 27 bâtiments | sources | « Économie médiévale », « Architecture militaire médiévale » pour presque tous | Articles propres à chaque bâtiment | Nettoyage | Sources génériques sans rapport (architecture militaire pour un marché ou un hôpital) | — |
+| 26 bâtiments | sources | « Économie médiévale », « Architecture militaire médiévale » pour presque tous | Articles propres à chaque bâtiment | Nettoyage | Sources génériques sans rapport (architecture militaire pour un marché ou un hôpital) | — |
 
 ### Ressources (`data/resources/`)
 
