@@ -651,6 +651,7 @@ func _build_material() -> void:
 	material.set_shader_parameter("landuse", _landuse_texture)
 	material.set_shader_parameter("has_landuse", true)
 	material.set_shader_parameter("has_textures", _albedo_array != null)
+	ReliefLandcover.apply(material, map_data)  # lot R1 : relief fin, zones humides
 	if _albedo_array != null:
 		material.set_shader_parameter("albedo_array", _albedo_array)
 		material.set_shader_parameter("normal_rough_array", _normal_array)
