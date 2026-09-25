@@ -20,7 +20,7 @@ fusionnés : code de la pyramide et manifeste rempli). Cache partagé par liens 
 
 ## État
 - [x] squelette, sources téléchargées (TOPAGE, OS), EU-Hydro testé
-- [ ] pipeline hydro-fine (sélection, recalage parallèle, monotonie réseau, largeurs, tuiles, manifeste)
+- [~] pipeline hydro-fine écrit (sélection, recalage parallèle, monotonie réseau, largeurs, tuiles, manifeste), pas encore lancé en entier
 - [ ] `river_widths.json` + schémas + tests
 - [ ] `geo anchors-fine` (colonies, hameaux, ponts, routes drapées)
 - [ ] aperçus `docs/img/zg5a/`, `docs/geo.md`, `CREDITS.md`
