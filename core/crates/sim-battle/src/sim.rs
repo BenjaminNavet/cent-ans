@@ -2409,6 +2409,10 @@ impl BattleSim {
         }
         // EP3: fords, streams, deep water, bridges and bridgeheads.
         damage *= self.water_melee_factor(attacker, defender);
+        // SG4: downhill strikes harder, uphill weaker (`battle_crest.json`).
+        damage *= crate::crest::CrestRules::bundled().melee_factor(
+            self.field.height(attacker.x, attacker.z) - self.field.height(defender.x, defender.z),
+        );
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
         damage *= 0.6 + attacker.morale.max(0.0) / 250.0;

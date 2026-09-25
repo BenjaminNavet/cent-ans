@@ -40,6 +40,7 @@
 
 pub mod ai;
 pub mod command;
+pub mod crest;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;

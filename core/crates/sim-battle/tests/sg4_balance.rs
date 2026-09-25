@@ -144,7 +144,12 @@ fn survey_epic_attacker_defender() {
                     && sim.elapsed() < 260.0
                     && sim.ticks() % 25 == 0
                 {
-                    for u in sim.units().iter().filter(|u| u.unit_type == "unit_knights" && u.present()).take(200) {
+                    for u in sim
+                        .units()
+                        .iter()
+                        .filter(|u| u.unit_type == "unit_knights" && u.present())
+                        .take(200)
+                    {
                         let tgt = u.target.map(|t| {
                             let e = &sim.units()[t as usize];
                             format!("{}:{}", t, &e.unit_type[5..9])

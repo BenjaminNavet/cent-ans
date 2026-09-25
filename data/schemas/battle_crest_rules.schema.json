@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_crest_rules.schema.json",
+  "title": "Avantage de la hauteur en mêlée",
+  "description": "Fichier data/rules/battle_crest.json (lot SG4, ADR 0046) : facteur de dégâts de mêlée selon l'écart de hauteur entre deux régiments au contact. Lu par sim-battle (CrestRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "melee_per_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 0.2,
+      "description": "Part de dégâts gagnée (vers le bas) ou perdue (en montée) par mètre d'écart de hauteur avec l'adversaire."
+    },
+    "max_height_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 30,
+      "description": "Écart de hauteur au-delà duquel l'avantage ne croît plus (mètres)."
+    }
+  },
+  "required": ["melee_per_m", "max_height_m"],
+  "additionalProperties": false
+}
