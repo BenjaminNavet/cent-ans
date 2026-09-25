@@ -25,6 +25,7 @@ var _turns := 3
 var _frames := 180
 var _battle := true
 var _uncapped := false
+var _map_ab := 0.0
 
 
 ## Appelé par `StartMenu._ready` : vrai si la ligne de commande demande le parcours (le nœud
@@ -55,6 +56,8 @@ func _ready() -> void:
 			_battle = false
 		elif arg == "--uncapped":
 			_uncapped = true
+		elif arg.begins_with("--map-ab="):
+			_map_ab = float(arg.trim_prefix("--map-ab="))
 	_run.call_deferred()
 
 
@@ -70,6 +73,7 @@ func _run() -> void:
 	_result["quality"] = RenderQuality.current()
 	_result["adapter"] = RenderingServer.get_video_adapter_name()
 	_result["template"] = OS.has_feature("template")
+	_result["window"] = [DisplayServer.window_get_size(), DisplayServer.screen_get_scale(), get_tree().root.size]
 	var facade: Node = root.get_node_or_null("SimFacade")
 	_result["real_sim"] = facade != null and bool(facade.get("is_real"))
 	# Menu
@@ -92,6 +96,16 @@ func _run() -> void:
 	var sim: Object = map.get("sim")
 	var rig: Node = map.get("camera_rig")
 	var map_data: Object = map.get("map_data")
+	if _map_ab > 0.0:
+		var y0: float = map_data.call("surface_world_at", PARIS.x, PARIS.y)
+		rig.call("look_at_point", Vector3(PARIS.x, y0, PARIS.y), _map_ab)
+		rig.call("snap")
+		await _frames_passed(120)
+		_result["map_ab"] = await _ab(map)
+		_result["ok"] = true
+		print("JOURNEY_JSON %s" % JSON.stringify(_result))
+		get_tree().quit(0)
+		return
 	var zooms: Dictionary = {}
 	for d: float in ZOOMS:
 		var y: float = map_data.call("surface_world_at", PARIS.x, PARIS.y)
@@ -101,7 +115,12 @@ func _run() -> void:
 		var terrain: Node = map.get("terrain")
 		if terrain != null and terrain.has_method("fine_ready"):
 			await _wait_for(func() -> bool: return bool(terrain.call("fine_ready")), 20.0)
-		zooms[str(int(d))] = await _measure(_frames)
+		var overlay := map.find_child("ParchmentOverlay", true, false)
+		var draws_before := int(overlay.get("draw_count")) if overlay != null else 0
+		var measured := await _measure(_frames)
+		if overlay != null:
+			measured["parchment_draws"] = int(overlay.get("draw_count")) - draws_before
+		zooms[str(int(d))] = measured
 	_result["map"] = zooms
 	# Fins de tour : temps du cœur seul et de la fin de tour complète de la carte.
 	var core_ms: Array[float] = []
@@ -144,6 +163,12 @@ func _run() -> void:
 		_result["battle_load_ms"] = Time.get_ticks_msec() - t_battle
 		await _frames_passed(120)
 		_result["battle"] = await _measure(_frames)
+		# Sortie propre : la bataille et la carte libérées avant de quitter (pas de fuite au journal).
+		for child in get_tree().root.get_children():
+			if child is BattleScene:
+				child.queue_free()
+		get_tree().current_scene.queue_free()
+		await _frames_passed(5)
 	_result["ok"] = true
 	_result["wall_ms"] = Time.get_ticks_msec()
 	print("JOURNEY_JSON %s" % JSON.stringify(_result))
@@ -197,3 +222,85 @@ func _measure(count: int) -> Dictionary:
 		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 		"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 	}
+
+
+## `--map-ab=<distance>` : coûts isolés à cette distance, configurations alternées dans le même
+## processus (même charge machine pour toutes) ; médianes du temps d'image et du GPU (Vulkan).
+## `--ab-configs=base,medium,hide:Sea,…` : liste des configurations (voir `_apply_config`).
+func _ab(map: Node) -> Dictionary:
+	var configs: Array = ["base", "medium", "low", "no_ssil", "no_ssao", "no_glow", "msaa_off", "no_dof", "no_shadows", "scale75"]
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--ab-configs="):
+			configs = Array(arg.trim_prefix("--ab-configs=").split(","))
+	var samples: Dictionary = {}
+	var gpu: Dictionary = {}
+	for config: String in configs:
+		samples[config] = []
+		gpu[config] = []
+	var vp := get_tree().root.get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
+	for round_index in 4:
+		for config: String in configs:
+			_apply_config(map, config)
+			await _frames_passed(12)
+			var last := Time.get_ticks_usec()
+			for i in 30:
+				if config == "no_shadows":
+					(map.get_node("Sun") as DirectionalLight3D).shadow_enabled = false
+				await get_tree().process_frame
+				var now := Time.get_ticks_usec()
+				samples[config].append((now - last) / 1000.0)
+				gpu[config].append(RenderingServer.viewport_get_measured_render_time_gpu(vp))
+				last = now
+	_apply_config(map, "base")
+	var out: Dictionary = {}
+	for config: String in configs:
+		var frame: Array = samples[config]
+		var g: Array = gpu[config]
+		frame.sort()
+		g.sort()
+		out[config] = {"frame_ms": snappedf(frame[frame.size() / 2], 0.01), "gpu_ms": snappedf(g[g.size() / 2], 0.01)}
+	return out
+
+
+var _hidden: Array[Node] = []
+
+
+func _apply_config(map: Node, config: String) -> void:
+	RenderQuality.override_level = config if config in ["low", "medium", "ultra"] else ""
+	RenderQuality.reapply(get_tree())
+	for node in _hidden:
+		if is_instance_valid(node):
+			node.set("visible", true)
+	_hidden.clear()
+	var env := (map.get_node("WorldEnvironment") as WorldEnvironment).environment
+	var camera := map.get("camera") as Camera3D
+	var attributes := camera.attributes as CameraAttributesPractical
+	if attributes == null:
+		attributes = (map.get_node("WorldEnvironment") as WorldEnvironment).camera_attributes as CameraAttributesPractical
+	if attributes != null:
+		if not attributes.has_meta("rl1_dof"):
+			attributes.set_meta("rl1_dof", attributes.dof_blur_far_enabled)
+		attributes.dof_blur_far_enabled = bool(attributes.get_meta("rl1_dof")) and config != "no_dof"
+	get_tree().root.scaling_3d_scale = 0.75 if config == "scale75" else 1.0
+	var terrain: Node = map.get("terrain")
+	if terrain != null:
+		terrain.set("fine_enabled", config != "no_fine")
+	match config:
+		"no_ssil":
+			env.ssil_enabled = false
+		"no_ssao":
+			env.ssao_enabled = false
+		"no_glow":
+			env.glow_enabled = false
+		"no_fog":
+			env.fog_enabled = false
+		"msaa_off":
+			get_tree().root.msaa_3d = Viewport.MSAA_DISABLED
+		"shadow_4096":
+			RenderingServer.directional_shadow_atlas_set_size(4096, true)
+	if config.begins_with("hide:"):
+		var node := map.find_child(config.trim_prefix("hide:"), true, false)
+		if node != null and node.get("visible") != null:
+			node.set("visible", false)
+			_hidden.append(node)
