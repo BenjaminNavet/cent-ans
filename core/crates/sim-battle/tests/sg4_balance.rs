@@ -144,8 +144,41 @@ fn survey_epic_attacker_defender() {
             let mut contact_at: Option<f64> = None;
             let trace = std::env::var("SG4_TRACE").is_ok();
             let mut next_trace = 120.0;
+            let routs = std::env::var("SG4_ROUTS").is_ok();
+            let mut was_routing: Vec<bool> = vec![false; sim.units().len()];
             while !sim.is_finished() && sim.elapsed() < 1800.0 {
                 sim.step();
+                if routs {
+                    for (k, u) in sim.units().iter().enumerate() {
+                        let now = u.state == sim_battle::UnitState::Routing;
+                        if now && !was_routing[k] && u.side == SideId::Defender {
+                            let friends = sim
+                                .units()
+                                .iter()
+                                .filter(|f| {
+                                    f.side == u.side
+                                        && f.id != u.id
+                                        && f.present()
+                                        && f.state == sim_battle::UnitState::Routing
+                                        && (f.x - u.x).hypot(f.z - u.z) < 120.0
+                                })
+                                .count();
+                            let foe = sim
+                                .units()
+                                .iter()
+                                .filter(|e| e.side != u.side && e.able())
+                                .map(|e| (e.x - u.x).hypot(e.z - u.z))
+                                .fold(f64::INFINITY, f64::min);
+                            eprintln!(
+                                "  rout t {:.0} {:<22} ({:.0},{:.0}) hp {:.0} routing friends {} foe {:.0} m",
+                                sim.elapsed(), u.unit_type, u.x, u.z, u.hp, friends, foe
+                            );
+                        }
+                        if k < was_routing.len() {
+                            was_routing[k] = now;
+                        }
+                    }
+                }
                 if std::env::var("SG4_HORSE").is_ok()
                     && sim.elapsed() > 180.0
                     && sim.elapsed() < 260.0

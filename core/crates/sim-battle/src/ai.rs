@@ -77,6 +77,7 @@
 use data_model::{Ability, BattleOrder, BattleOrderKind, BattleOrderScope, UnitCategory};
 
 use crate::command::Command;
+use crate::crest::CrestDefenceRules;
 use crate::position::{military_crest, score_position, Front};
 use crate::relief_ai::ReliefMap;
 use crate::setup::SideId;
@@ -1508,9 +1509,11 @@ fn plan_field(view: &mut View) {
         plan_reserve(view, r, &roles.line, anchor, facing);
     }
 
-    // Cavalry.
+    // Cavalry. SG5: a defensive side on its heights keeps its horse on
+    // the crest, on the wings behind the line.
+    let hill = defensive && ground.is_some() && height_edge(view) > HOLD_HEIGHT;
     for &i in &roles.horse {
-        plan_horse(view, i, &roles, anchor, facing, defensive, &enemy_melee);
+        plan_horse(view, i, &roles, anchor, facing, defensive, hill, &enemy_melee);
     }
 
     // Engines: stay behind the line, shoot at will.
@@ -2020,6 +2023,7 @@ fn plan_horse(
     anchor: (f64, f64),
     facing: f64,
     defensive: bool,
+    hill: bool,
     enemy_melee: &[usize],
 ) {
     if !view.free(i) {
@@ -2027,6 +2031,15 @@ fn plan_horse(
     }
     let units = view.units;
     let unit = &units[i];
+    let rules = CrestDefenceRules::bundled();
+    // SG5: enemy horse at our foot (line or shooters) on the heights.
+    let at_our_foot = |e: &Unit| {
+        roles
+            .line
+            .iter()
+            .chain(roles.shooters.iter())
+            .any(|&k| units[k].able() && dist(&units[k], e) < rules.horse_guard_m)
+    };
     let general_only = unit.is_general && roles.horse.len() > 1;
     // Mounted shooters skirmish like foot shooters but keep their distance.
     if unit.can_shoot() && unit.ammo > 0 {
@@ -2049,13 +2062,21 @@ fn plan_horse(
         let e = &units[j];
         is_horse(e)
             && matches!(e.state, UnitState::Charging | UnitState::Marching)
-            && (dist(unit, e) < 160.0
+            && if hill && std::env::var("SG5_COUNTER").is_ok() {
+                // SG5: on the heights, wait for the enemy horse to come up
+                // (it then fights uphill) rather than meet it down the
+                // glacis and flee back through the own line.
+                dist(unit, e) < rules.horse_counter_m
+                    || (at_our_foot(e) && dist(unit, e) < CAVALRY_REACH)
+            } else {
+                dist(unit, e) < 160.0
                 || (!defensive
                     && dist(unit, e) < CAVALRY_REACH
                     && roles
                         .shooters
                         .iter()
-                        .any(|&s| units[s].able() && dist(&units[s], e) < SHOOTER_GUARD)))
+                        .any(|&s| units[s].able() && dist(&units[s], e) < SHOOTER_GUARD))
+            }
     });
     if let Some(j) = threatened {
         if !bristling(&units[j]) {
@@ -2095,7 +2116,7 @@ fn plan_horse(
         .filter(|&(_, d)| d < CAVALRY_REACH)
         .collect();
     isolated.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
-    if !general_only {
+    if !general_only && !(hill && std::env::var("SG5_NOISO").is_ok()) {
         // B6: shooters behind a hedge are ridden round, or left alone.
         for (j, _) in isolated {
             if charge_or_detour(view, i, j, true) {
@@ -2198,6 +2219,24 @@ fn plan_horse(
         * 0.5;
     let (x, z) = if general_only || unit.is_general {
         (anchor.0, anchor.1 - view.forward * 50.0)
+    } else if hill {
+        // SG5: beyond the end of the line and of the shooters, and behind
+        // them: a horse that breaks flees past the wing, not through the
+        // foot.
+        let side = if unit.x >= anchor.0 { 1.0 } else { -1.0 };
+        let reach = roles
+            .line
+            .iter()
+            .chain(roles.shooters.iter())
+            .filter(|&&k| (units[k].x - anchor.0) * side > 0.0)
+            .map(|&k| (units[k].x - anchor.0).abs() + units[k].extent().0 * 0.5)
+            .fold(half, f64::max);
+        let gap: f64 = std::env::var("SG5_GAP").ok().and_then(|v| v.parse().ok()).unwrap_or(rules.horse_wing_gap_m);
+        let depth: f64 = std::env::var("SG5_DEPTH").ok().and_then(|v| v.parse().ok()).unwrap_or(rules.horse_wing_depth_m);
+        (
+            anchor.0 + side * (reach + gap),
+            anchor.1 - view.forward * depth,
+        )
     } else {
         let side = if unit.x >= anchor.0 { 1.0 } else { -1.0 };
         (
