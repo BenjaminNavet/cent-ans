@@ -30,7 +30,21 @@
     "unit_bombard": "ball",
     "unit_trebuchet": "stone",
     "unit_mangonel": "stone",
-    "unit_siege_tower": "sword"
+    "unit_siege_tower": "sword",
+    "unit_welsh_spearmen": "polearm",
+    "unit_hobelars": "sword",
+    "unit_english_retinue": "axe",
+    "unit_scottish_spearmen": "polearm",
+    "unit_goedendag_militia": "two_hand",
+    "unit_coutiliers": "polearm",
+    "unit_francs_archers": "sword",
+    "unit_ordonnance_gendarmes": "two_hand",
+    "unit_routiers": "sword",
+    "unit_ecorcheurs": "sword",
+    "unit_jinetes": "sword",
+    "unit_breton_knights": "two_hand",
+    "unit_gascon_crossbowmen": "sword",
+    "unit_culveriners": "sword"
   },
   "critical_chance": {
     "axe": 0.14,
