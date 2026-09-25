@@ -1085,6 +1085,7 @@ func _process(_delta: float) -> void:
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
+		_apply_close_tiers(distance)
 	if life != null:  # CV1
 		life.update_view(distance)
 	strategic.update_view(distance)  # CM2
@@ -1106,6 +1107,45 @@ func _process(_delta: float) -> void:
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:
 			_take_screenshot(_screenshot_path, true)
+
+
+## Lot ZG4 : paliers vallée / site : frontières et voile du brouillard de guerre estompés sur le
+## matériau du terrain (valeurs par défaut du shader × `ZoomTiers.border_alpha` / `fog_alpha`).
+const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_veil_amount", "fog_cloud_amount"]
+var _close_tier_defaults: Dictionary = {}
+var _close_tier_alphas := Vector2(-1.0, -1.0)
+var _prop_scale: float = 1.0
+
+
+## ZG4 : paramètres globaux remis à leurs valeurs par défaut en quittant la carte (les arbres des
+## batailles partagent `foliage.gdshaderinc`).
+func _exit_tree() -> void:
+	RenderingServer.global_shader_parameter_set("campaign_prop_scale", 1.0)
+	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
+
+
+func _apply_close_tiers(distance: float) -> void:
+	var props := zoom_tiers.prop_scale(distance)
+	if absf(props - _prop_scale) > props * 0.01:
+		_prop_scale = props
+		RenderingServer.global_shader_parameter_set("campaign_prop_scale", props)
+	var material := terrain.material
+	if material == null:
+		return
+	var alphas := Vector2(zoom_tiers.border_alpha(distance), zoom_tiers.fog_alpha(distance))
+	if alphas.distance_to(_close_tier_alphas) < 0.01:
+		return
+	_close_tier_alphas = alphas
+	if _close_tier_defaults.is_empty():
+		for param in _CLOSE_TIER_PARAMS:
+			var value: Variant = material.get_shader_parameter(param)
+			if value == null:
+				value = RenderingServer.shader_get_parameter_default(terrain.TERRAIN_SHADER.get_rid(), param)
+			if value != null:  # serveur factice (--headless) : rien à estomper
+				_close_tier_defaults[param] = float(value)
+	for param: String in _close_tier_defaults:
+		var factor := alphas.x if param.ends_with("border_alpha") else alphas.y
+		material.set_shader_parameter(param, float(_close_tier_defaults[param]) * factor)
 
 
 ## `--fps-probe` : FPS moyen sur 240 images une fois le relief fin prêt (mesure de perf C6).
@@ -1200,6 +1240,9 @@ func _parse_cmdline() -> void:
 			camera_rig.close_min_distance = camera_rig.min_distance
 		elif arg == "--static-exaggeration":  # ZG4 : relief ×4,3 à tous les zooms (comparaisons)
 			dynamic_exaggeration = false
+		elif arg.begins_with("--camera-yaw="):  # ZG4 : captures (degrés, 0 = regard vers le nord)
+			camera_rig.target_yaw = deg_to_rad(float(arg.trim_prefix("--camera-yaw=")))
+			camera_rig.snap()
 		elif arg == "--no-fine-terrain":
 			terrain.fine_enabled = false
 		elif arg.begins_with("--fine-step="):

@@ -160,6 +160,10 @@ campaign_vertical_scale={
 "type": "float",
 "value": 0.006
 }
+campaign_prop_scale={
+"type": "float",
+"value": 1.0
+}
 
 [rendering]
 
