@@ -98,7 +98,7 @@ fn flat_results() -> (usize, Vec<(Option<SideId>, Option<BattleEnd>, f64)>) {
 /// Symmetric epic battle on flat ground without stakes: the outcome is
 /// open (the attacker wins 3 to 7 battles out of 10), every battle ends.
 #[test]
-#[ignore = "EP9b: enabled once the attacker's duel is fixed"]
+
 fn symmetric_flat_battle_is_open() {
     let (wins, results) = flat_results();
     for r in &results {
