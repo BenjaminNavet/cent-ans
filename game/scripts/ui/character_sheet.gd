@@ -111,7 +111,7 @@ func _decorate() -> void:
 		_branch_chips[pair[1]] = chip
 	IconLibrary.decorate_button(governor_button, "hud_governor", 20)
 	IconLibrary.decorate_button(general_button, "hud_army", 20)
-	IconLibrary.decorate_button(marry_button, "class_nobility", 20)
+	IconLibrary.decorate_button(marry_button, "act_marry", 20)
 
 # --- H2 : description et fiche du Codex --------------------------------------------------
 
