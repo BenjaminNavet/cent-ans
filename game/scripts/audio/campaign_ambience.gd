@@ -11,9 +11,10 @@ extends Node
 ## (au ras de la carte : les sons du lieu ; en vue haute : le vent d'altitude et la mer au loin),
 ## la saison (oiseaux au printemps, grillons l'été, vent l'hiver) et la météo.
 ##
-## Météo : la carte n'a pas (encore) de simulation météo ; un tirage déterministe par saison et
-## par date (`seasonal_weather`) donne pluie ou neige certains tours. `weather_override` permet
-## de l'imposer (tests, futur système météo).
+## Météo : celle de la province sous la caméra, tirée par le cœur (lot CM2, ADR 0027 :
+## `CampaignWeatherView.weather_at`, `clear`, `fog`, `rain`, `snow`, `storm`). Sans campagne
+## (maquette de simulation), repli sur un tirage déterministe par saison et par date
+## (`seasonal_weather`). `weather_override` permet de l'imposer (tests).
 ##
 ## Enfant d'`AudioDirector` (toujours actif) : les couches s'éteignent en fondu quand la carte est
 ## masquée (bataille) ou détachée (menu), et reprennent au retour.
@@ -129,7 +130,7 @@ func refresh() -> void:
 	environment = sample_environment(map_data, Vector2(focus.x, focus.z), distance, _town_points)
 	var season := current_season()
 	environment["season"] = season
-	environment["weather"] = weather_override if weather_override != "" else seasonal_weather(season, _date_label())
+	environment["weather"] = weather_override if weather_override != "" else map_weather(Vector2(focus.x, focus.z), season)
 	environment["distance"] = distance
 	levels = layer_levels(environment)
 
@@ -152,7 +153,15 @@ func current_season() -> String:
 	return season if season != "" else "spring"
 
 
-## Tirage déterministe (même date → même temps) : `clear`, `rain` ou `snow` (hiver).
+## Météo de la carte au point visé (lot CM2, source : le cœur) ; repli saisonnier sans elle.
+func map_weather(point: Vector2, season: String) -> String:
+	var view: Variant = _campaign.get("weather_view") if _campaign != null else null
+	if view is CampaignWeatherView and not (view as CampaignWeatherView).weather.is_empty():
+		return (view as CampaignWeatherView).weather_at(point)
+	return seasonal_weather(season, _date_label())
+
+
+## Repli (sans météo du cœur) : tirage déterministe (même date → même temps) : `clear`, `rain` ou `snow` (hiver).
 static func seasonal_weather(season: String, date_label: String) -> String:
 	if date_label == "":
 		return "clear"
