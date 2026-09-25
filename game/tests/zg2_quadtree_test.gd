@@ -148,6 +148,10 @@ func _run() -> void:
 		_check(absf(TerrainBuilder.grid_height(grid, local.x, local.y) - qt.surface_height_at(x, y)) < 1e-4, "snapshot grid matches surface")
 	else:
 		_check(false, "E1 page (17, 15) should be resident")
+	var t_probe := Time.get_ticks_usec()
+	for k in 20000:
+		terrain.surface_height_at(paris.x + (k % 141) * 0.07, paris.y + (k / 141) * 0.07)
+	print("zg2_quadtree_test: surface_height_at %.2f us/call" % ((Time.get_ticks_usec() - t_probe) / 20000.0))
 	_check(is_nan(qt.surface_height_at(100.0, 100.0)), "no page far from Paris")
 	_check(absf(terrain.surface_height_at(100.0, 100.0) - map_data.surface_world_at(100.0, 100.0)) < 1e-4, "heightmap fallback outside pages")
 
