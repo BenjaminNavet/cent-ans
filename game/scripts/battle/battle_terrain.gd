@@ -116,6 +116,10 @@ var decor_fields: ImageTexture
 var decor_on := false
 ## EP6 : `--no-ep6-decor` coupe le rendu du décor (banc A/B ; les règles du cœur restent).
 var decor_render := true
+## DA6 (bible DA § 6) : végétation de bataille — lisières douces des cultures, touffes d'herbe en
+## volume, feuillus ramifiés par essence avec imposteurs au loin, détail du sol de près.
+## `--no-da6` rend l'ancienne végétation (banc A/B, captures « avant »).
+var da6 := true
 var _decor_clear: Array = []  # [centre: Vector2, demi-tailles: Vector2, lacet] (arbres écartés)
 var _coast: Dictionary = {}
 var _pools: Array = []
@@ -177,6 +181,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	ground_key = str(terrain.get("ground", "dry"))
 	woodland = float(terrain.get("woodland", 0.5))
 	site_render = not OS.get_cmdline_user_args().has("--no-site")
+	da6 = not OS.get_cmdline_user_args().has("--no-da6")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--ground="):
 			ground_key = arg.trim_prefix("--ground=")  # rendu seulement, comme --weather=
