@@ -51,6 +51,13 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
     }
 }
 
+/// Game data already loaded by any `CampaignSim` of this process, if any
+/// (lot DF1: the faction screen lists the difficulty levels before a
+/// campaign starts).
+pub(crate) fn loaded_data() -> Option<Arc<GameData>> {
+    shared_data(None)
+}
+
 /// Godot-facing handle on a campaign simulation.
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
