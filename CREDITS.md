@@ -110,6 +110,21 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
   © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par l'Union
   européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution. Tuiles lues
   sur le bucket public AWS Open Data `copernicus-dem-90m` (lot R1, ADR 0019).
+- **Relief rapproché (pyramide de relief, palier 2)** : Copernicus DEM GLO-30 Public, © DLR e.V.
+  2010-2014 et © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par
+  l'Union européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution
+  (conditions : https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM).
+  « Copernicus Digital Elevation Model (DEM) was accessed on 2026-09-25 from
+  https://registry.opendata.aws/copernicus-dem. » Les organismes en charge du programme
+  Copernicus n'encourent aucune responsabilité pour l'usage qui en est fait. Modifié : canopée,
+  bâti moderne et retenues de barrages retirés (lot ZG1, ADR 0036). Les tuiles E1-E2 de la
+  pyramide dérivent de GLO-90 (même licence).
+- **Occupation du sol actuelle (correction du relief)** : ESA WorldCover 10 m 2021 v200,
+  © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by
+  ESA WorldCover consortium — licence CC BY 4.0. Citation : *Zanaga, D. et al. (2022). ESA
+  WorldCover 10 m 2021 v200. doi:10.5281/zenodo.7254221* ; accédé le 2026-09-25 depuis
+  https://registry.opendata.aws/esa-worldcover-vito. Sert uniquement à retirer arbres, bâti et
+  plans d'eau modernes du relief GLO-30 (lot ZG1).
 - **Défrichement vers 1340** : KK10 Anthropogenic Land Cover Change — Kaplan, J. O. et
   Krumhardt, K. M. (2017), PANGAEA, doi:10.1594/PANGAEA.871369, licence CC BY 3.0 ; méthode :
   Kaplan et al. (2011), *The Holocene* 21(5), doi:10.1177/0959683610386983. Moyenne 1330-1349,
