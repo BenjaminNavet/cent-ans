@@ -284,7 +284,7 @@
     },
     {
       "id": "saint_donatien",
-      "name": "Cathédrale Saint-Donatien (Burg)",
+      "name": "Collégiale Saint-Donatien (Burg)",
       "model": "gothic_cathedral",
       "at": [150, 95],
       "angle_deg": 0,
@@ -308,7 +308,7 @@
           "spire_m": 20
         }
       },
-      "description": "Collégiale des comtes de Flandre, détruite en 1799."
+      "description": "Collégiale des comtes de Flandre, cathédrale seulement en 1559, détruite en 1799."
     },
     {
       "id": "notre_dame_tour",
