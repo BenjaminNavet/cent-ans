@@ -6,35 +6,34 @@ versionnés : `data/map/pyramid`, `tools/geo/raw` → dépôt principal. Dylib :
 dans `game/bin/libcent_ans.debug.dylib`. Rendu et perf seulement, rien dans `core/`.
 Lot voisin ZG7b (export, message cache absent, `docs/geo.md`, crédits) : ne pas y toucher.
 
-## Périmètre
-1. Perf : MultiMesh par ville (ZG6, appels de dessin ×3), coût du parcellaire ZG5b et du relief ZG8,
-   pic de bascule des ponts, p99 des bancs de descente (cible ≈ 115 ms, aucune tâche > 8 ms).
-2. Lit fin de la Seine trop large (chenal brun) : largeurs réalistes (≈ 150-200 m à Paris).
-3. Ponts-portes encore exagérés : vérifier après ZG4b.
-4. Rives basses de Londres à 2-5 m au-dessus de la Tamise (au lieu du plancher 0,5 m).
-5. `PathPreview` fin aux paliers vallée / site.
-
 ## État
 - [x] Squelette (wip)
 - [x] 1a. villes : un MultiMesh par modèle et par ville, HLOD par instance dans le shader
-  (`lod_mode`, `TownBuilder.set_lod_view`) : appels de dessin de la descente villes 971 → 404
-- [x] 1b. banc GPU A/B `tests/zg7a_gpu_ab.gd` (Vulkan) : parcellaire 1-2,7 ms GPU, relief ZG8 ≈ 0 ;
-  parcellaire allégé (hash22, bruit fin conditionnel, finage) : −20 % de son coût
-- [x] 1c. ponts-portes et ponts fins préparés dans des fils (`BridgeMeshes.build_arrays`) :
-  installation d'une tuile fine 16,8 → 1,4 ms, bascule des ponts 0,3 ms par ouvrage
-- [x] 1d. quadtree : image + mipmaps des pages dans un fil ; `finest_levels` (un parcours) au lieu
-  d'un instantané par tuile ; éviction moins chère ; minuteries par étape (`qt_step_ms_max`)
-- [ ] 1e. comparaison base (main) / ZG7a alternée, plusieurs tours (copie de `game/` à la base)
-- [ ] 2. lit de la Seine
-- [ ] 3. ponts-portes
-- [ ] 4. rives de Londres
-- [ ] 5. PathPreview
-- [ ] captures `docs/img/zg7a/`, docs, addendum ADR, fusion de main, tests
+- [x] 1b. banc GPU A/B `tests/zg7a_gpu_ab.gd` (Vulkan) ; parcellaire allégé (−20 % de son coût)
+- [x] 1c. ponts-portes et ponts fins préparés dans des fils
+- [x] 1d. quadtree : image + mipmaps dans un fil ; `finest_levels` ; éviction ; minuteries
+- [ ] 1e. comparaison base / ZG7a alternée (copie `game/` à 369bc6e7 dans le scratchpad)
+- [x] 2. Seine : diagnostic — le « chenal brun » était le fond de vallée plaqué à 0,5 m (rehaussement
+  de rendu E1-E4 + plancher) sans parcellaire, corrigé par ZG4b (`hc < 0.25`) ; largeurs incohérentes
+  par tronçon (4,5 m en amont de Rouen, 50 m Elbeuf-Rouen, 60 m à Mantes) : `hydro_fine` interpole
+  maintenant le long de la chaîne des ancrages ; ancrages La Bouille, Duclair, Caudebec ;
+  `geo hydro-fine` relancé (dossier temporaire puis copie dans le cache partagé, jeu de tuiles
+  identique, sauvegarde dans le scratchpad) ; pas de lit creusé dans les zones personnalisées.
+- [ ] 2b. `anchors-fine` relancé (largeurs des ponts) : en cours dans `scratchpad/zg7a/hf_map`
+- [x] 3. ponts-portes et ponts fins : tablier à sa largeur réelle (`BridgeMeshes.fine_deck_scale`)
+- [x] 4. Londres : plancher monotone `max(0,5 ; min(0,85 h ; 5 m))` dans `detail_dem.apply_boost`,
+  `BAKE_VERSION` 4, zone `londres` seule recuite (rives 2,6-3,8 m au lieu de 0,5) ; sauvegarde
+  des tuiles d'avant dans le scratchpad. Les autres zones seront recuites au prochain
+  `geo detail-dem` complet (marqueurs invalidés).
+- [x] 5. `PathPreview` fin aux paliers proches (`update_view` chaque image)
+- [ ] captures `docs/img/zg7a/`, docs, addendum ADR, test `zg7a`, fusion de main, tests
 
-## Mesures en cours (machine chargée, charge 35-100)
-- Descente `--bench-towns` : appels de dessin 971 → 404.
-- `fine_update_ms_max` 17,7 → 4,7 ; `fine_install_ms_max` 16,8 → 1,4.
-- Quadtree (pire, sous charge 60) : sélection 9-10 ms, application 6-7 ms (GDScript, ZG2) : non traités.
+## Découvertes hors lot
+- Le relief E1-E4 (ZG1) plaque les fonds de vallée proches de plateaux à 0,5 m (rehaussement de
+  rendu σ 5 km, gain 0,8, puis plancher de côte) : Seine à Vernon, Mantes, Poissy à 0,5 m au lieu de
+  10-25 m, niveau d'eau fin à 0,5 m de Paris à Rouen. Double emploi avec ZG8 (exagération à
+  l'exécution). À traiter par une recuisson E1-E4 (plancher monotone comme ZG7a) : hors lot.
+- Tamise fine : niveau d'eau -7,8 m à Londres (PAVA mêlé à la bathymétrie de l'estuaire).
 
 ## Prochaine étape
-Items 2-5 (visuels), puis comparaison base / ZG7a.
+Fin d'`anchors-fine`, installation ; test `zg7a_test.gd` ; comparaison base / ZG7a ; captures ; docs.
