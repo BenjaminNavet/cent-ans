@@ -287,7 +287,14 @@ fn worker_loop(jobs: &Mutex<Receiver<Job>>, done: &Sender<Done>) {
             return;
         };
         let start = Instant::now();
-        let result = scatter_tile(&job.request, &job.map);
+        // A panicking tile must still answer, or the GDScript side waits forever.
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            scatter_tile(&job.request, &job.map)
+        }))
+        .unwrap_or_else(|_| TileResult {
+            buffers: vec![Vec::new(); 16],
+            counts: vec![0; 16],
+        });
         let item = Done {
             id: job.id,
             result,

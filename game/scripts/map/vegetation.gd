@@ -50,6 +50,9 @@ const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 ## série sans plus de parallélisme réel. Les tuiles restantes arrivent ensuite normalement (même
 ## budget que le chargement en tâche de fond), en général en une poignée de frames.
 @export var warm_start_tiles: int = 5
+## Lot PB2 : semis natif (`VegetationScatter`, Rust) quand l'extension l'expose ; sinon tout le
+## semis tourne en GDScript dans le `WorkerThreadPool`.
+@export var use_native_scatter: bool = true
 @export var max_cached_tiles: int = 64
 @export var cast_shadows: bool = true
 ## Au-delà de cette distance caméra (zoom global, pas la distance d'une tuile), plus aucune
@@ -79,7 +82,11 @@ var stats: Dictionary = {"tiles": 0, "instances": 0, "build_ms_total": 0.0, "bui
 
 var _material: ShaderMaterial
 var _tiles: Dictionary = {}  # index → {"node": Node3D, "mmis": Array[MultiMeshInstance3D], "counts", "last_seen"}
-var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob, "level": int}
+var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob, "level": int[, "native": id]}
+## Lot PB2 : pool natif (`VegetationScatter`) ou null ; requêtes en cours (id → index de tuile).
+var _native: Object = null
+var _native_ids: Dictionary = {}
+var _native_serial: int = 0
 ## Lot C7b : recalages en cours (index → {"task", "job": VegetationGroundJob}) et tuiles à recaler.
 var _ground_jobs: Dictionary = {}
 var _ground_dirty: Dictionary = {}
@@ -109,6 +116,8 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot") or arg == "--vegetation-stats":
 			_log_bursts = true
+		elif arg == "--no-native-vegetation":  # PB2 : comparaisons avec le semis GDScript
+			use_native_scatter = false
 
 
 
@@ -119,6 +128,7 @@ func _exit_tree() -> void:
 func build(data: MapData) -> void:
 	clear()
 	map_data = data
+	_native = _make_native(data) if use_native_scatter else null
 	chunk_px = TerrainBuilder.chunk_px_for(data.size)
 	mask = VegetationMask.new()
 	mask.setup(data)
@@ -133,6 +143,26 @@ func build(data: MapData) -> void:
 		if capital.x >= 0.0:
 			_exclusions.append(Vector3(capital.x, capital.y, 11.0))
 	_exclusions.append_array(extra_exclusions)
+
+
+## Lot PB2 : pool natif de semis, partageant la heightmap et le lit des fleuves de `data`.
+static func _make_native(data: MapData) -> Object:
+	if not ClassDB.class_exists("VegetationScatter") or data.height_bytes.is_empty():
+		return null
+	var native: Object = ClassDB.instantiate("VegetationScatter")
+	var river := PackedByteArray()
+	var river_size := Vector2i.ZERO
+	if data.river_bed_image != null:
+		var image: Image = data.river_bed_image.duplicate()
+		image.clear_mipmaps()
+		if image.get_format() != Image.FORMAT_R8:
+			image.convert(Image.FORMAT_R8)
+		river = image.get_data()
+		river_size = image.get_size()
+	native.call("set_map", data.height_bytes, data.size.x, data.size.y, data.height_bpp, data.height_little_endian,
+		data.height_min_m, data.height_max_m, river, river_size.x, river_size.y)
+	native.call("start", clampi(OS.get_processor_count() / 2, 2, 6))
+	return native
 
 
 func clear() -> void:
@@ -288,8 +318,17 @@ func update_view(camera_position: Vector3, camera_distance: float) -> void:
 	if not _warm and not wanted.is_empty():
 		_warm = true
 		var t0 := Time.get_ticks_msec()
-		for item in _jobs.values():
-			WorkerThreadPool.wait_for_task_completion(item["task"])
+		for item: Dictionary in _jobs.values():
+			if not item.has("native"):
+				WorkerThreadPool.wait_for_task_completion(item["task"])
+		if _native != null:
+			# Grilles prêtes : semis natif en parallèle, attendu ici.
+			for index in _jobs.keys():
+				if not (_jobs[index] as Dictionary).has("native"):
+					_submit_native(index, _jobs[index])
+			while not _native_ids.is_empty():
+				OS.delay_usec(200)
+				_poll_native()
 		var ready_jobs := _jobs.duplicate()
 		_jobs.clear()
 		for index in ready_jobs:
@@ -356,6 +395,7 @@ func _start_job(index: int) -> void:
 	if terrain != null:
 		level = terrain.chunk_level(index)
 		job.ground_grid = terrain.surface_grid(index)
+	job.coarse_only = _native != null
 	var task := WorkerThreadPool.add_task(job.run, false, "vegetation tile %d" % index)
 	_jobs[index] = {"task": task, "job": job, "level": level}
 
@@ -372,19 +412,62 @@ func _exclusions_for(rect: Rect2) -> PackedVector3Array:
 func _collect_jobs() -> void:
 	for index in _jobs.keys():
 		var item: Dictionary = _jobs[index]
-		if not WorkerThreadPool.is_task_completed(item["task"]):
+		if item.has("native") or not WorkerThreadPool.is_task_completed(item["task"]):
 			continue
 		WorkerThreadPool.wait_for_task_completion(item["task"])
+		if (item["job"] as VegetationTileJob).coarse_only:
+			_submit_native(index, item)
+			continue
 		_jobs.erase(index)
 		_install_tile(index, item["job"], item["level"])
+		if _jobs.is_empty() and _log_bursts:
+			print("Vegetation: %s" % JSON.stringify(stats))
+	_poll_native()
+
+
+## Lot PB2 : grille grossière prête → semis natif (conversion des données sur le fil principal).
+func _submit_native(index: int, item: Dictionary) -> void:
+	_native_serial += 1
+	var job: VegetationTileJob = item["job"]
+	if not _native.call("request", _native_serial, job.native_params()):
+		# Requête refusée (données malformées) : semis GDScript complet dans le fil principal.
+		job.coarse_only = false
+		job.run()
+		_jobs.erase(index)
+		_install_tile(index, job, item["level"])
+		return
+	item["native"] = _native_serial
+	_native_ids[_native_serial] = index
+
+
+## Installe les tuiles semées par le pool natif ; les résultats périmés (tuile vidée par
+## `clear` entre-temps) sont ignorés.
+func _poll_native() -> void:
+	if _native == null or _native_ids.is_empty():
+		return
+	for result: Dictionary in _native.call("poll", 64):
+		var id: int = result["id"]
+		if not _native_ids.has(id):
+			continue
+		var index: int = _native_ids[id]
+		_native_ids.erase(id)
+		var item: Dictionary = _jobs.get(index, {})
+		if item.get("native", -1) != id:
+			continue
+		var job: VegetationTileJob = item["job"]
+		job.apply_native(result)
+		_jobs.erase(index)
+		_install_tile(index, job, item["level"])
 		if _jobs.is_empty() and _log_bursts:
 			print("Vegetation: %s" % JSON.stringify(stats))
 
 
 func _wait_all_jobs() -> void:
-	for item in _jobs.values():
-		WorkerThreadPool.wait_for_task_completion(item["task"])
+	for item: Dictionary in _jobs.values():
+		if not item.has("native"):  # tâche déjà attendue avant la requête native
+			WorkerThreadPool.wait_for_task_completion(item["task"])
 	_jobs.clear()
+	_native_ids.clear()
 	for item in _ground_jobs.values():
 		WorkerThreadPool.wait_for_task_completion(item["task"])
 	_ground_jobs.clear()
