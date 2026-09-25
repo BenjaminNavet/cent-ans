@@ -280,6 +280,7 @@ func build_visuals(terrain: BattleTerrain, far_rect: Rect2, weather: String, sea
 	_build_far_sea(terrain, far_rect, sea_rect, weather)
 	_build_panorama(weather)
 	_build_silhouettes(terrain, far_rect, weather)
+	print("BattleHorizon: ring %d tris, %d silhouettes" % [ring_tris, silhouette_count])
 
 
 func _build_ring(terrain: BattleTerrain, far_rect: Rect2, _weather: String) -> void:
