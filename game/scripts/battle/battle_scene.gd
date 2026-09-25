@@ -148,6 +148,8 @@ var _camera_override: String = ""
 var _last_group_ms: int = -10000
 var deployment: DeploymentController = null  # F5c : phase de déploiement du joueur
 var _deploy_shot: bool = false
+## Q4 : `--open-shot` capture la vue d'ouverture (caméra de `_frame_camera`), sans rien jouer.
+var _open_shot: bool = false
 var _sortie_shown: bool = false
 var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
 var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volées, siège, météo)
@@ -755,11 +757,36 @@ func _frame_camera() -> void:
 			sz += float(unit["z"])
 			n += 1
 	var center := Vector3(sx / maxf(n, 1), 0, sz / maxf(n, 1))
+	if siege_view != null and player_side == "attacker" and n > 0 and _frame_siege_camera(center):
+		return
 	var yaw := PI if player_side == "attacker" else 0.0
 	# Regarder un peu devant sa propre ligne, vers l'ennemi.
 	center.z += 70.0 if player_side == "attacker" else -70.0
 	# A1-06 : vue d'ouverture plus basse et plus proche (on voit des hommes, pas des points).
 	camera_rig.look_at_point(center, 170.0, yaw)
+
+
+## Q4 (Q3 : caméra d'assaut cadrant un bélier sur une plaine vide) : l'assaillant ouvre derrière
+## son armée, face à la porte, murailles et régiments dans le même plan.
+func _frame_siege_camera(army: Vector3) -> bool:
+	var siege: Dictionary = battle.call("get_siege") if battle.has_method("get_siege") else {}
+	var pieces: Array = siege.get("pieces", [])
+	var gate_index := int(siege.get("gate", -1))
+	if gate_index < 0 or gate_index >= pieces.size():
+		return false
+	var gate: Dictionary = pieces[gate_index]
+	var mid: Vector2 = ((gate["a"] as Vector2) + (gate["b"] as Vector2)) * 0.5
+	var wall := Vector3(mid.x, 0, mid.y)
+	var to_wall := Vector3(wall.x - army.x, 0, wall.z - army.z)
+	var gap := to_wall.length()
+	if gap < 1.0:
+		return false
+	var dir := to_wall / gap
+	# Point visé un peu au-delà du milieu, recul selon l'écart (murs et armée à l'écran).
+	var focus := army + dir * gap * 0.45
+	var distance := clampf(gap * 0.9 + 140.0, 220.0, 520.0)
+	camera_rig.look_at_point(focus, distance, atan2(-dir.x, -dir.z))
+	return true
 
 
 # --- Boucle ---------------------------------------------------------------------------
@@ -1561,6 +1588,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg == "--deploy-shot":
 			_deploy_shot = true
+		elif arg == "--open-shot":
+			_open_shot = true
 		elif arg == "--siege":
 			siege_demo = true
 		elif arg.begins_with("--siege-province="):
@@ -1627,6 +1656,11 @@ func _stage_screenshot() -> void:
 		get_tree().quit(1)
 		return
 	camera_rig.edge_pan_enabled = false
+	if _open_shot:
+		for _i in 90:
+			await get_tree().process_frame
+		_take_screenshot(_screenshot_path, true)
+		return
 	if _deploy_shot:
 		await _stage_deploy_screenshot()
 		return
