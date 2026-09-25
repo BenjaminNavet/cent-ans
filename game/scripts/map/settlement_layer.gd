@@ -547,7 +547,7 @@ func _update_hamlets() -> void:
 		var node: Node3D = _hamlet_nodes.get(index)
 		if show and level >= 1:
 			if node == null or _hamlet_dirty.has(index):
-				if builds >= max_hamlet_builds_per_frame:
+				if builds >= max_hamlet_builds_per_frame or (builds > 0 and not FrameBudget.has_time()):
 					continue
 				builds += 1
 				_build_hamlets(index)
@@ -562,7 +562,9 @@ func _update_hamlets() -> void:
 func flush() -> void:
 	var saved := max_hamlet_builds_per_frame
 	max_hamlet_builds_per_frame = 1 << 20
+	FrameBudget.unlimited = true
 	_update_hamlets()
+	FrameBudget.unlimited = false
 	max_hamlet_builds_per_frame = saved
 	for landmark: LandmarkModel in _landmarks.values():  # ZG4 : cuissons étalées terminées
 		landmark.flush_bake()
