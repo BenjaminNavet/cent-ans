@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fine_anchors.schema.json",
+  "title": "Ancrages sur le relief fin",
+  "description": "Fichier data/map/fine_anchors.json (lot ZG5a, ADR 0036), écrit par `cent-ans geo anchors-fine` : positions (unités monde) et altitudes (m) affinées des colonies, hameaux et passages, et index des tuiles CAFV des routes drapées. Les positions de règles ne changent pas. Rendu seulement.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "version": { "const": 1 },
+    "generated_at": { "type": "string" },
+    "max_move_m": { "type": "number", "exclusiveMinimum": 0 },
+    "settlements": {
+      "type": "object",
+      "propertyNames": { "pattern": "^set_[a-z0-9_]+$" },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "px": { "$ref": "#/$defs/px" },
+          "z": { "type": "number" },
+          "moved_m": { "type": "number", "exclusiveMinimum": 0, "maximum": 400 },
+          "reason": { "enum": ["lit", "pente"] }
+        },
+        "required": ["px", "z"],
+        "additionalProperties": false
+      }
+    },
+    "hamlets": {
+      "type": "object",
+      "properties": {
+        "fields": { "const": ["x", "y", "z", "moved_m"] },
+        "order": { "const": "hamlets.json" },
+        "items": {
+          "type": "array",
+          "items": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } }
+        }
+      },
+      "required": ["fields", "order", "items"],
+      "additionalProperties": false
+    },
+    "crossings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "px": { "$ref": "#/$defs/px" },
+          "snapped": { "type": "boolean" },
+          "river_feature": { "type": "integer", "minimum": 0 },
+          "dir": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": -1, "maximum": 1 } },
+          "width_m": { "type": "number", "exclusiveMinimum": 0 },
+          "z_water": { "type": "number" },
+          "z_deck": { "type": "number" },
+          "moved_m": { "type": "number", "minimum": 0 },
+          "z_ground": { "type": "number" }
+        },
+        "required": ["id", "px", "snapped"],
+        "additionalProperties": false
+      }
+    },
+    "roads": {
+      "type": "object",
+      "properties": {
+        "format": { "const": "CAFV" },
+        "layer": { "const": 2 },
+        "tile_level": { "type": "integer", "minimum": 0, "maximum": 7 },
+        "dir": { "type": "string" },
+        "pattern": { "type": "string" },
+        "feature": { "type": "string" },
+        "width_m": { "type": "object", "additionalProperties": { "type": "number", "exclusiveMinimum": 0 } },
+        "stats": { "type": "object" },
+        "tiles": { "type": "array", "items": { "$ref": "#/$defs/tile" } }
+      },
+      "required": ["format", "layer", "tile_level", "dir", "pattern", "stats", "tiles"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["version", "settlements", "hamlets", "crossings", "roads"],
+  "additionalProperties": false,
+  "$defs": {
+    "px": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": -64, "maximum": 4160 } },
+    "tile": {
+      "type": "object",
+      "properties": {
+        "col": { "type": "integer", "minimum": 0 },
+        "row": { "type": "integer", "minimum": 0 },
+        "lines": { "type": "integer", "minimum": 0 },
+        "points": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 32 },
+        "sha1": { "type": "string", "pattern": "^[0-9a-f]{12}$" }
+      },
+      "required": ["col", "row", "lines", "points", "bytes", "sha1"],
+      "additionalProperties": false
+    }
+  }
+}
