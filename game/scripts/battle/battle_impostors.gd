@@ -171,6 +171,11 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var image := viewport.get_texture().get_image()
+	if image == null or image.is_empty():
+		# Sans rendu (headless) : pas d'atlas, le LOD2 reste dessiné.
+		_pending.erase(key)
+		viewport.queue_free()
+		return
 	image.generate_mipmaps()
 	_atlases[key] = {"texture": ImageTexture.create_from_image(image), "lengths": lengths, "cell_m": cell_m, "image": image}
 	_pending.erase(key)
