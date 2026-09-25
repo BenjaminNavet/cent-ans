@@ -65,6 +65,13 @@ var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
 ## L3 : province de la démo de siège (`--siege-province=prov_ile_de_france` : Paris).
 var siege_province: String = "prov_guyenne"
+## SG2 : ville assiégée dans son plan (`--siege-landmark=avignon`, guerre déclarée au détenteur si
+## besoin) et faction de l'assiégeant (`--siege-attacker=fac_england`).
+var siege_landmark: String = ""
+var siege_attacker: String = "fac_france"
+## SG2 : options d'une démo lancée depuis le menu (`BattleDemosMenu`), lues comme la ligne de
+## commande puis oubliées.
+static var demo_args: PackedStringArray = []
 var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -196,7 +203,10 @@ func _stage_standalone() -> bool:
 	if armies.is_empty():
 		return false
 	var index: int = -1
-	if siege_demo and sim.has_method("debug_stage_siege"):
+	if siege_demo and siege_landmark != "" and sim.has_method("debug_stage_landmark_siege"):
+		var besieger: String = armies[1] if siege_attacker == "fac_england" else armies[0]
+		index = sim.call("debug_stage_landmark_siege", besieger, siege_landmark)
+	elif siege_demo and sim.has_method("debug_stage_siege"):
 		index = sim.call("debug_stage_siege", armies[0], siege_province)
 		if index < 0:
 			# L3 : une ville française (Paris, Rouen) est assiégée par l'armée anglaise.
@@ -1325,7 +1335,10 @@ func ground_point(screen: Vector2) -> Vector3:
 
 
 func _parse_cmdline() -> void:
-	for arg in OS.get_cmdline_user_args():
+	var args := OS.get_cmdline_user_args()
+	args.append_array(demo_args)
+	demo_args = PackedStringArray()
+	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
 			autoplay = true
@@ -1355,6 +1368,11 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--siege-province="):
 			siege_demo = true
 			siege_province = arg.trim_prefix("--siege-province=")
+		elif arg.begins_with("--siege-landmark="):
+			siege_demo = true
+			siege_landmark = arg.trim_prefix("--siege-landmark=")
+		elif arg.begins_with("--siege-attacker="):
+			siege_attacker = arg.trim_prefix("--siege-attacker=")
 		elif arg.begins_with("--siege-engines="):
 			_siege_engines = arg.trim_prefix("--siege-engines=")
 		elif arg.begins_with("--camera="):
