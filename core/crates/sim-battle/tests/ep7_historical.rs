@@ -25,8 +25,14 @@ fn map(id: &str) -> HistoricalMap {
     HistoricalMap::from_json(&text).expect("map parses")
 }
 
+/// The game data, loaded once for every test of this file.
+fn game_data() -> &'static data_model::GameData {
+    static DATA: std::sync::OnceLock<data_model::GameData> = std::sync::OnceLock::new();
+    DATA.get_or_init(data)
+}
+
 fn start(id: &str, seed: u64) -> (HistoricalMap, BattleSim) {
-    let data = data();
+    let data = game_data();
     let map = map(id);
     let setup = map
         .battle_setup(
@@ -240,6 +246,61 @@ fn posted_regiments_hold_their_ground() {
             }
         }
     }
+}
+
+/// A campaign battle in the province and years of a map is fought on its
+/// site: the campaign armies deploy as usual on the real relief, with the
+/// map's woods, water and decor, out of the woods and the water.
+#[test]
+fn a_campaign_battle_can_be_fought_on_the_site() {
+    let data = game_data();
+    let map = map("crecy");
+    assert!(map.matches_campaign("prov_ponthieu", 1346));
+    assert!(!map.matches_campaign("prov_ponthieu", 1415));
+    assert!(!map.matches_campaign("prov_artois", 1346));
+    let mut setup = common::setup(
+        units(
+            data,
+            &["unit_knights", "unit_crossbowmen", "unit_men_at_arms_foot"],
+        ),
+        units(
+            data,
+            &[
+                "unit_longbowmen",
+                "unit_men_at_arms_foot",
+                "unit_longbowmen",
+            ],
+        ),
+        None,
+    );
+    setup.province = "prov_ponthieu".to_owned();
+    setup.river = true;
+    let mut sim = BattleSim::new_scaled(setup, 11, map.scale()).expect("battle");
+    map.apply_site(sim.field_mut());
+    let field = sim.field();
+    assert!(
+        field.river.is_none(),
+        "the map's own water replaces the drawn river"
+    );
+    assert_eq!(field.streams.len(), map.streams.len());
+    assert!(
+        !field.decor.buildings.is_empty(),
+        "Crécy, Wadicourt and the mill"
+    );
+    assert_eq!(field.decor.camps.len(), 2);
+    assert!(
+        !sim.is_historical(),
+        "no scenario: the campaign armies are free"
+    );
+    for u in sim.units() {
+        assert!(field.inside(u.x, u.z));
+        assert!(
+            field.water_at(u.x, u.z) != Some(true),
+            "{} in deep water",
+            u.name
+        );
+    }
+    run(&mut sim, 60.0);
 }
 
 /// Every map loads, lays its site and deploys every regiment on the field,

@@ -30,7 +30,9 @@ EP9 (fin de bataille).
   `get_historical`, `get_waves` ; site en campagne via `get_battle_setup` → `historical_site`).
 - [x] Menu « Batailles historiques » (`historical_battles_menu.gd`), scène (`begin_historical`,
   ciel final + averse qui cesse, horizon du site, pas de phase de déploiement).
-- [ ] Poitiers (Maupertuis, haies, vignes, chemin creux, Miosson).
+- [x] Poitiers (Maupertuis, haie percée du chemin creux, vignes, Miosson, captal de Buch) ; Anglais 20/30
+  (test : 11 à 18 sur 20).
+- [x] Test Rust du site en campagne (`a_campaign_battle_can_be_fought_on_the_site`).
 - [ ] Essai Godot réel, captures `docs/img/ep7/`, ADR 0035, test Godot, vérifications finales.
 
 ## Décisions
@@ -39,4 +41,4 @@ EP9 (fin de bataille).
   `scenario_filter` (sim.rs::step) ; les Anglais « tiennent » leur poste (laisse).
 
 ## Prochaine étape
-Poitiers, puis essai dans Godot et captures.
+Test Godot (smoke : menu historique + `setup_historical`), captures, ADR 0035, merge main, vérifications finales.
