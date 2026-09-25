@@ -40,6 +40,19 @@ chargée (les blocs PF1 donnaient 16,9-17,8 ms) ; pistes : `max_vertex_px` 8 en 
 de plus, différences visibles sur 14 % des pixels d'un recadrage, surtout la pluie), ou patchs
 du quadtree sans ombre portée au-delà de la première cascade.
 
+### Ombres portées du relief limitées à une cascade (validé par ZG)
+`ReliefQuadtree.shadow_cast_distance` : un patch dont le point le plus proche de la caméra est
+au-delà du bord de la cascade `relief_shadow_cascades` du soleil ne porte plus d'ombre (il en
+reçoit toujours). Réglé à chaque image par `TerrainBuilder._relief_shadow_distance()` ; valeurs :
+1 cascade en Basse, Moyenne, Haute ; 2 en Ultra ; `legacy` 4. `--map-ab` : `relief_cast:<n>`.
+Zoom comté, Haute (même processus, 2 passes) : primitives 7,15 M → 6,09 M ; GPU Vulkan
+24,7 → 23,5 ms ; Metal non plafonné 21,9 → 21,1 ms et 23,4 → 22,7 ms. Captures des ombres du
+relief (vallée de la Seine, Pays de Caux) : pas de différence visible (1,6 % des pixels > 16/255,
+pluie comprise) : l'ombrage du relief vient des normales du shader, les ombres portées lointaines
+ne se voyaient pas. Parcours complet (Metal) : **16,7 ms non tenus** en Haute au zoom comté
+(20-23 ms, et jusqu'à 40 ms quand une autre session rend la carte en 1440×900 en même temps).
+Gain modeste : la cible demande un autre levier (voir points ouverts).
+
 ## Ce que règle chaque niveau (`RenderQuality.PRESETS`)
 | | Basse | Moyenne | Haute | Ultra |
 |---|---|---|---|---|
@@ -144,6 +157,7 @@ Smoke : 3 échecs « music playlist too short » venus de `main` (commit cb1b441
 aucun échec lié à PF1 (27 « smoke OK » avant cette fusion).
 
 ## Points ouverts
+- Zoom comté en Haute avec le quadtree : 21-23 ms en Metal non plafonné sur machine chargée ; leviers restants : filtre d'ombre de carte « bas », portée d'ombre ×0,8, ou `max_vertex_px` 8 (écarté par ZG).
 - Smoke / playlists (voir ci-dessus) : à corriger par le lot playlists (fixture ou repli).
 - ADR 0036 (ZG, relief streamé) va réécrire le relief de la carte : le découpage en blocs + LOD
   de `FineTerrainJob` / `TerrainBuilder` (PF1) est à reprendre ou à fusionner avec soin.
