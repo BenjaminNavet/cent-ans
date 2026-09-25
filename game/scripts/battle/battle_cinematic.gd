@@ -32,6 +32,7 @@ var _saved_fov: float = 70.0
 var _saved_transform: Transform3D
 var _bars: Array[ColorRect] = []
 var _hint: Label = null
+var _hidden: Array = []  # calques d'interface masqués pendant le plan
 
 
 func setup(p_cfg: Dictionary, scene: Node, rig: Node3D, camera: Camera3D) -> void:
@@ -112,6 +113,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## Fige le plan à l'instant `t` (captures).
+func pose_at(t: float) -> void:
+	if active:
+		_t = t
+		_apply(t)
+
+
 ## Orbite lente autour du choc, à hauteur d'homme, avec une entrée en fondu de la focale.
 func _apply(t: float) -> void:
 	var duration := float(cfg.get("duration_s", 6.0))
@@ -160,6 +168,21 @@ func _show_bars(visible: bool) -> void:
 		bar.visible = visible
 	if _hint != null:
 		_hint.visible = visible
-	var hud: Node = _scene.get("hud") if _scene != null else null
-	if hud != null and "visible" in hud:
-		hud.set("visible", not visible)
+	# Interface de bataille (HUD, barre des ordres…) masquée pendant le plan, rendue ensuite.
+	if _scene == null:
+		return
+	if visible:
+		_hidden.clear()
+		for layer in _scene.find_children("*", "CanvasLayer", true, false):
+			if (layer as CanvasLayer).visible and not is_ancestor_of(layer):
+				(layer as CanvasLayer).visible = false
+				# Figé le temps du plan : certaines barres se réaffichent d'elles-mêmes.
+				layer.set_meta("cinematic_mode", layer.process_mode)
+				layer.process_mode = Node.PROCESS_MODE_DISABLED
+				_hidden.append(layer)
+	else:
+		for layer in _hidden:
+			if is_instance_valid(layer):
+				(layer as CanvasLayer).visible = true
+				layer.process_mode = layer.get_meta("cinematic_mode", Node.PROCESS_MODE_INHERIT)
+		_hidden.clear()
