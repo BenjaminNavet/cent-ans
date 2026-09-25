@@ -10,7 +10,14 @@ Branche : `worktree-agent-aa0218e94ad47cabc` (depuis main afd327d4). ADR : `docs
       marais de `wetlands.png` (R ou G ≥ 0,5) ; `navgrid_splat.png` supprimé
 - [x] `navgrid.png` + aperçu régénérés ; tests Python (4 nouveaux tests unitaires) verts
 - [x] Mesures « après » (m3_grid_ai 50 tours × 8 graines vert), ADR 0045, note dans ADR 0019
-- [ ] `cargo test` complet, pytest complet, build.sh + smoke, fusion de main
+- [x] main fusionnée (deux fois) ; `cargo fmt`/`clippy -D warnings`/`cargo test` verts ; pytest vert ;
+      `core/build.sh` OK ; smoke : seul échec « music playlist too short » (campaign/war/court), venu du lot
+      musique cb1b4416 fusionné dans main juste avant, sans lien avec la grille
+
+## Points ouverts
+- Prés humides nommés (Romney Marsh, Chat Moss, Bog of Allen, polders) : non ralentis (canal B mêlé aux prés de fond de vallée).
+- Étangs jamais infranchissables (densité ≤ 0,75, pas d'emprise d'étang par case).
+- Échec smoke musique à signaler au lot audio.
 
 ## Prochaine étape
-Suite de tests complète, puis `git merge main` et revérification.
+Rendu du rapport ; fusion dans main par l'orchestrateur.
