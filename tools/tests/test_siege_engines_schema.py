@@ -20,7 +20,9 @@ def _load(relative: str) -> dict:
 def _check(schema_name: str, document: dict) -> None:
     schema = _load(f"schemas/{schema_name}")
     Draft202012Validator.check_schema(schema)
-    errors = sorted(Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path)
+    errors = sorted(
+        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
+    )
     assert not errors, [error.message for error in errors]
 
 
@@ -55,7 +57,10 @@ def test_trebuchet_timeline_is_ordered() -> None:
     assert trebuchet["cocked_deg"] < trebuchet["rest_deg"] < trebuchet["overswing_deg"]
     assert 0.3 < trebuchet["release_phase"] < 0.9
     assert trebuchet["sling_release_deg"] < trebuchet["sling_end_deg"]
-    assert trebuchet["swing_s"] + trebuchet["settle_s"] + trebuchet["ready_margin_s"] < 12.0
+    assert (
+        trebuchet["swing_s"] + trebuchet["settle_s"] + trebuchet["ready_margin_s"]
+        < 12.0
+    )
 
 
 def test_battle_demos_match_schema() -> None:

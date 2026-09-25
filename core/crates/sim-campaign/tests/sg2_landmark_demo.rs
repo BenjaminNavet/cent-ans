@@ -91,7 +91,9 @@ fn avignon_and_bruges_assault_paths_reach_the_walls() {
             sim.step();
             steps += 1;
         }
-        let count = |pred: fn(&SiegeFxKind) -> bool| sim.siege_fx().iter().filter(|f| pred(&f.kind)).count();
+        let count = |pred: fn(&SiegeFxKind) -> bool| {
+            sim.siege_fx().iter().filter(|f| pred(&f.kind)).count()
+        };
         let strikes = count(|k| matches!(k, SiegeFxKind::RamStrike { .. }));
         let ladders = count(|k| matches!(k, SiegeFxKind::LaddersRaised { .. }));
         let on_wall = count(|k| matches!(k, SiegeFxKind::OnWall { .. }));

@@ -21,7 +21,13 @@ from __future__ import annotations
 import numpy as np
 from scipy import signal
 
-from cent_ans_tools.audio_bank import AUDIO_DIR, PEAK_DB, SAMPLE_RATE, peak_normalize, write_ogg
+from cent_ans_tools.audio_bank import (
+    AUDIO_DIR,
+    PEAK_DB,
+    SAMPLE_RATE,
+    peak_normalize,
+    write_ogg,
+)
 
 CLIP_NAMES = ["battle/boiling_oil_1", "battle/boiling_oil_2"]
 DURATION_S = 3.2
@@ -47,7 +53,9 @@ def boiling_oil(seed: int) -> np.ndarray:
     flutter = 1.0 + 0.35 * np.sin(2 * np.pi * (7.0 + rng.uniform(-1, 1)) * t)
     pour = _filtered(rng, n, "lowpass", 900.0) * flutter
     pour *= np.clip(t / 0.08, 0.0, 1.0) * np.clip((LAND_S + 0.25 - t) / 0.3, 0.0, 1.0)
-    splash = _filtered(rng, n, "bandpass", [300.0, 3200.0]) * _envelope(n, 0.01, 0.18, LAND_S)
+    splash = _filtered(rng, n, "bandpass", [300.0, 3200.0]) * _envelope(
+        n, 0.01, 0.18, LAND_S
+    )
     hiss = _filtered(rng, n, "highpass", 3500.0) * _envelope(n, 0.05, 1.1, LAND_S)
     crackle = np.zeros(n)
     count = int(rng.integers(90, 130))
@@ -57,8 +65,13 @@ def boiling_oil(seed: int) -> np.ndarray:
         if i >= n - 200:
             continue
         width = int(rng.integers(20, 120))
-        crackle[i : i + width] += rng.uniform(0.3, 1.0) * np.hanning(width) * rng.choice([-1.0, 1.0])
-    crackle = signal.sosfilt(signal.butter(2, 1800.0, btype="highpass", fs=SAMPLE_RATE, output="sos"), crackle)
+        crackle[i : i + width] += (
+            rng.uniform(0.3, 1.0) * np.hanning(width) * rng.choice([-1.0, 1.0])
+        )
+    crackle = signal.sosfilt(
+        signal.butter(2, 1800.0, btype="highpass", fs=SAMPLE_RATE, output="sos"),
+        crackle,
+    )
     bubbles = np.zeros(n)
     for _ in range(int(rng.integers(6, 11))):
         at = LAND_S + rng.uniform(0.1, 1.6)
@@ -69,7 +82,9 @@ def boiling_oil(seed: int) -> np.ndarray:
         tt = np.arange(length) / SAMPLE_RATE
         f0 = rng.uniform(350.0, 700.0)
         phase = 2 * np.pi * np.cumsum(f0 * (1.0 + 2.5 * tt / tt[-1])) / SAMPLE_RATE
-        bubbles[i : i + length] += np.sin(phase) * np.exp(-tt / 0.02) * rng.uniform(0.2, 0.5)
+        bubbles[i : i + length] += (
+            np.sin(phase) * np.exp(-tt / 0.02) * rng.uniform(0.2, 0.5)
+        )
     mix = 0.55 * pour + 0.9 * splash + 0.35 * hiss + 0.5 * crackle + 0.4 * bubbles
     fade = np.clip((DURATION_S - t) / 0.4, 0.0, 1.0)
     return peak_normalize((mix * fade).astype(np.float32), PEAK_DB)
