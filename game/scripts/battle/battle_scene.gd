@@ -1629,6 +1629,14 @@ func _apply_camera_override() -> void:
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
+	if OS.get_cmdline_user_args().has("--no-hud"):
+		# EP2 : captures de décor sans interface.
+		for layer in find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
+		for control in find_children("*", "Control", true, false):
+			if not (control.get_parent() is Control):
+				(control as Control).visible = false
+		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())

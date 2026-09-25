@@ -13,6 +13,10 @@ uniform float has_painting = 0.0;
 uniform float repeats = 4.0;
 uniform float paint_offset = 0.0;
 uniform float paint_crest = 0.2;
+// Crête peinte par colonne (0 = haut de la bande) ; `paint_detail` = part du relief peint gardée
+// (0 : la silhouette est la crête réelle, 1 : la peinture garde toutes ses cimes).
+uniform sampler2D paint_skyline : filter_linear, repeat_enable;
+uniform float paint_detail = 0.3;
 uniform float rotation_turns = 0.0;
 uniform float ref_y = 25.0;
 uniform float radius = 14600.0;
@@ -46,10 +50,12 @@ void fragment() {
 	float crest = clamp(max(real.r * exaggeration, min_angle_deg), min_angle_deg, max_angle_deg);
 	float sea = smoothstep(sea_threshold - 0.15, sea_threshold + 0.15, real.b) * (1.0 - smoothstep(0.15, 0.5, real.r));
 	// Terre peinte : bande de `paint_crest` (crête moyenne) à 1 (bas), recalée sur [bottom, crest].
-	float s = (elevation - bottom_deg) / max(crest - bottom_deg, 0.01);
-	float v = 1.0 - s * (1.0 - paint_crest);
 	float u = paint_offset + bearing * repeats;
 	u = abs(fract(u * 0.5) * 2.0 - 1.0);  // aller-retour : bande sans raccord visible
+	float column_crest = texture(paint_skyline, vec2(u, 0.5)).r;
+	float anchor = mix(column_crest, paint_crest, paint_detail);
+	float s = (elevation - bottom_deg) / max(crest - bottom_deg, 0.01);
+	float v = 1.0 - s * (1.0 - anchor);
 	vec4 paint = vec4(land_fallback, step(elevation, crest));
 	if (has_painting > 0.5) {
 		paint = v < 0.0 ? vec4(0.0) : texture(painting, vec2(u, clamp(v, 0.002, 0.998)));

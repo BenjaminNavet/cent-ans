@@ -20,7 +20,7 @@
   },
   "haze": {
     "fog_density": {"clear": 0.0002, "fog": 0.0036, "rain": 0.0012, "snow": 0.0015},
-    "altitude_scale_m": 1400.0,
+    "altitude_scale_m": 900.0,
     "full_density_m": 6000.0
   },
   "panorama": {
@@ -29,63 +29,64 @@
     "min_angle_deg": 0.55,
     "exaggeration": 1.35,
     "max_angle_deg": 7.5,
-    "haze": {"clear": 0.5, "fog": 1.0, "rain": 0.82, "snow": 0.72},
-    "exposure": {"clear": 1.0, "fog": 0.9, "rain": 0.72, "snow": 0.9},
-    "sea_share": 0.55
+    "haze": {"clear": 0.36, "fog": 1.0, "rain": 0.75, "snow": 0.62},
+    "exposure": {"clear": 0.62, "fog": 0.55, "rain": 0.45, "snow": 0.6},
+    "sea_share": 0.55,
+    "paint_detail": 0.3
   },
   "panoramas": {
     "channel_coast": {
       "path": "res://assets/horizon/panoramas/channel_coast.webp",
       "label": "Côte de la Manche",
-      "repeats": 4,
+      "repeats": 6,
       "prompt": "the far distant coastline of the English Channel in northern France: pale chalk cliffs and low grassy downs fading into haze, dunes and salt marsh, a strip of grey-green sea at the foot of the land"
     },
     "pyrenees": {
       "path": "res://assets/horizon/panoramas/pyrenees.webp",
       "label": "Pyrénées",
-      "repeats": 3,
+      "repeats": 8,
       "prompt": "the chain of the Pyrenees mountains seen from the foothills of Bearn, 50 km away: a long wall of jagged grey-blue peaks with snow patches, layered forested ridges in front fading into blue atmospheric haze"
     },
     "alps": {
       "path": "res://assets/horizon/panoramas/alps.webp",
       "label": "Alpes",
-      "repeats": 3,
+      "repeats": 8,
       "prompt": "the high Alps seen from a valley far away: tall snow-capped peaks, glaciers and dark rocky faces, layered pine-covered ridges in front fading into cool blue atmospheric haze"
     },
     "massif_central": {
       "path": "res://assets/horizon/panoramas/massif_central.webp",
       "label": "Massif central",
-      "repeats": 4,
+      "repeats": 6,
       "prompt": "the volcanic uplands of Auvergne in the Massif Central seen from afar: rounded extinct volcano cones and long plateaus, dark pine woods and brown moorland, layered ridges fading into haze"
     },
     "wooded_hills": {
       "path": "res://assets/horizon/panoramas/wooded_hills.webp",
       "label": "Collines boisées",
-      "repeats": 4,
+      "repeats": 6,
       "prompt": "rolling wooded hills in eastern France (Vosges, Morvan, Ardennes) seen from far away: rounded forested summits of oak, beech and fir, several layers of ridges fading into blue haze"
     },
     "picardy_plains": {
       "path": "res://assets/horizon/panoramas/picardy_plains.webp",
       "label": "Plaines de Picardie",
-      "repeats": 5,
+      "repeats": 6,
       "prompt": "the open chalk plain of Picardy seen to the far horizon: very gentle low ridges, wide fields of ripening wheat and fallow, small dark copses and lines of trees, a very low and flat horizon fading into haze"
     },
     "norman_bocage": {
       "path": "res://assets/horizon/panoramas/norman_bocage.webp",
       "label": "Bocage normand",
-      "repeats": 5,
+      "repeats": 6,
       "prompt": "the Norman bocage seen to the far horizon: gently rolling green country, small pastures enclosed by dense hedgerows of oak and ash, small woods, soft layered low hills fading into moist haze"
     },
     "loire_valley": {
       "path": "res://assets/horizon/panoramas/loire_valley.webp",
       "label": "Val de Loire",
-      "repeats": 5,
+      "repeats": 6,
       "prompt": "the wide Loire valley seen from a slope: flat valley floor with meadows, willows and poplars, faint glints of the wide river, low tufa hills and forests on the far side fading into soft haze"
     },
     "gascony_hills": {
       "path": "res://assets/horizon/panoramas/gascony_hills.webp",
       "label": "Coteaux de Gascogne",
-      "repeats": 4,
+      "repeats": 6,
       "prompt": "the rolling hills of Gascony seen to the far horizon: long soft ridges and valleys, vineyards and golden fields, oak woods on the slopes, warm hazy light, layered hills fading into haze"
     },
     "flanders_flat": {
@@ -97,19 +98,19 @@
     "moorland_hills": {
       "path": "res://assets/horizon/panoramas/moorland_hills.webp",
       "label": "Landes et collines des îles Britanniques",
-      "repeats": 4,
+      "repeats": 6,
       "prompt": "the moorland hills of northern England, Wales and Scotland seen from afar: bare rounded fells with heather and bracken, rocky crags, few trees, layered ridges fading into cool grey haze"
     },
     "mediterranean_hills": {
       "path": "res://assets/horizon/panoramas/mediterranean_hills.webp",
       "label": "Collines méditerranéennes",
-      "repeats": 4,
+      "repeats": 6,
       "prompt": "dry Mediterranean hills of Provence and Languedoc seen to the far horizon: limestone ridges with garrigue scrub, olive groves and dark cypresses, pale rocky crests fading into warm haze"
     },
     "winter_lowlands": {
       "path": "res://assets/horizon/panoramas/winter_lowlands.webp",
       "label": "Hiver",
-      "repeats": 5,
+      "repeats": 6,
       "prompt": "a snowy winter countryside of northern France seen to the far horizon: gently rolling hills covered with snow, bare leafless woods drawn in dark grey, frosty hedgerows, a cold pale haze"
     }
   },
