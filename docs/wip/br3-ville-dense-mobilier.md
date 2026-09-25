@@ -57,10 +57,14 @@ Paris à surveiller (5/10 avant) : refaire sur 20 graines après le mobilier.
 - [x] Partie A : ville dense (anneaux d'îlots orientés + rangées le long du rempart ; villes
   emblématiques : rangées le long du rempart et des rues du plan, puis treillis ; église ;
   cheminement sur rectangles ; incendie entre rectangles, réglage 15 m / 0,025).
-- [ ] Partie B : mobilier + collisions + figurines.
+- [x] Partie B cœur : `props.rs` (façades, faubourgs, marché, village), mobilier de la place dans
+  le cheminement (puits exclu : figurines seulement), `sim/obstacles.rs` (repoussement des
+  figurines dans `soldier_poses`), tests `tests/br3.rs`. Pont : `props` + emprises dans
+  `get_siege`, `props` dans le village.
 - [ ] Pont + Godot + captures.
 - [ ] Mesures après, ADR, docs.
 
 ## Prochaine étape
 
-Partie B : `props.rs` (façades, faubourgs, marché, village), `sim/obstacles.rs` (figurines).
+Godot : `battle_siege.gd` (`_build_kit_town` depuis les emprises du cœur, `_kit_market`
+remplacé par les `props`), `battle_village.gd` (props du cœur), smoke, captures ; mesures après.

@@ -108,7 +108,6 @@ fn add_suburbs(works: &mut SiegeWorks, rules: &FireRules) {
         house.rows = 1;
         works.houses.push(house);
     }
-    works.lay_props();
 }
 
 /// Distance from (px, pz) to the segment `a`-`b`.
