@@ -22,9 +22,9 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 |---|---|---|---|
 | ZG0 | Squelette (ADR, manifeste, schémas, stubs, wip) | 0 | fait |
 | ZG1 | Données paliers 1-2 (`geo pyramid`) | 1 | **fusionné** dans `integration/zoom` (3beab01c) ; pyramide E1-E7 complète, 2,6 Go |
-| ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | en cours (wip `zg2-quadtree.md`) |
+| ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | **fusionné** dans `integration/zoom` (650d77a5) |
 | ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | **fusionné** dans `integration/zoom` (26ba32fa) : 34 zones E5-E7, 0,22 Go ; à relancer `geo detail-dem --force` après E3-E4 |
-| ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | — |
+| ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | en cours (branche `zg4-camera` depuis `integration/zoom`, wip `zg4-camera.md`) |
 | ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | en cours (wip `zg5a-hydro-fine.md`) |
 | ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | après ZG2 |
 | ZG6 | Villes à l'échelle réelle vers 1340 | 3 | — |
@@ -41,3 +41,5 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
   et ZG4 et reprend les villes emblématiques en 1:1 ; ajouter à l'ADR 0036 l'addendum « loupe
   en vue stratégique, 1:1 au zoom rapproché (lot VH4) ». ZG6 = villes ordinaires seulement.
 - 25/09 : cuisson E3-E4 terminée par l'orchestrateur, ZG1 fusionné (conflit de manifeste résolu : E1-E4 de ZG1, E5-E7 de ZG3). `geo detail-dem --force` relancé dans `../gp-zoom-merge` pour fondre les zones sur E4. ZG5 scindé : ZG5a (données, lancé) et ZG5b (rendu, après ZG2).
+- 25/09 : ZG2 fusionné dans `integration/zoom` (conflit d'ADR : addenda ZG1 + ZG2 + addendum « villes emblématiques » pour VH). `main` fusionné dans l'intégration (995bf6f4). Le smoke plante comme sur `main` (« Message queue out of memory », cause étrangère, correction par l'orchestrateur de nuit). **`main` pas encore avancé** : le checkout principal contient des modifications non commitées du lot PB1 (autre session) sur `terrain_builder.gd` etc. ; demande de coordination envoyée. Les agents de la vague 2 partent donc de `integration/zoom`. PF1 (nuit) sera adapté par-dessus ZG après l'avance de `main`.
+- Disque presque plein (≈ 25 Go) : compiler avec `CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/core/target` dans les worktrees.
