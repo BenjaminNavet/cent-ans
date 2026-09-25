@@ -52,7 +52,8 @@ Avant = main 9fe0550a ; après = v3. Même machine, build release.
 | balance : milice | 32,0 % | 30,3 % | < 40 % |
 
 Niveau difficile (`DIFFICULTY=hard century_probe`, nouveau réglage de la sonde) : avant 56 %
-[47-63], 3/5 ; v2 60 % [51-66], 3/5 ; Écosse jamais détruite, 5/5 majeures en 1400.
+[47-63], 3/5 ; après (v3) **60 % [40-66], 4/5** (66/65/61/65/40) ; Écosse jamais détruite,
+5/5 majeures en 1400, banqueroutes 0,21.
 
 ## Prochaine étape
 Attendre la référence, puis analyser les phases de guerre FR-EN (VERBOSE=1).
