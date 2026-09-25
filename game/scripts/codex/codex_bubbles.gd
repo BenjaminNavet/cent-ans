@@ -25,7 +25,6 @@ const MOUSE_OFFSET := Vector2(14, 18)
 const MARGIN := 8.0
 const INK := Color(0.22, 0.14, 0.07)
 const MUTED := "#6b5a40"
-const PINNED_BORDER := Color(0.55, 0.12, 0.10)
 
 ## Pile des bulles ouvertes (de la plus ancienne à la plus récente).
 var bubbles: Array[PanelContainer] = []
@@ -122,10 +121,8 @@ func top_id() -> String:
 
 func set_pinned(bubble: PanelContainer, pinned: bool) -> void:
 	bubble.set_meta("pinned", pinned)
-	var style := RichTooltip.panel_style()
-	if pinned:
-		style.border_color = PINNED_BORDER
-		style.set_border_width_all(3)
+	# Épinglée : page à bande d'or (lot UI1) plutôt que simple note marginale.
+	var style: StyleBox = HudStyle.panel_box(10) if pinned else RichTooltip.panel_style()
 	bubble.add_theme_stylebox_override("panel", style)
 	var footer := bubble.find_child("Footer", true, false) as Label
 	if footer != null:
