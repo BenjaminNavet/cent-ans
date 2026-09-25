@@ -45,6 +45,13 @@ Fusion : 17 conflits B5/B6 résolus (textes B6 + liens B2/B5), 21 alias dédoubl
 - B7 correctif code ↔ UI (listes B2/B4/B5 ci-dessus) : session code, pas historien.
 - B8 auto-lien : alias le plus long prioritaire + exceptions (homonymes « Louis de Poitiers »).
 - B9 18 fiches historiques proposées par B6 ; relecture Breteuil/Romorantin 1356 (B3).
-- Décision utilisateur : corriger ou non owner/kind historiquement faux (Bergerac, Aiguillon…), rapport audit-2026-09-25 § 9.
+- ~~Décision owner/kind~~ : tranché le 25/09 — on garde l'équilibre actuel (libertés assumées, audit § 9).
 - Doublon d'entity `prov_flandre` (cdx_gand, cdx_flandre_laine).
 - Unités : l'encyclopédie du smoke en compte 21 au lieu de 27 (les 27 sont chargées ; cause non trouvée).
+
+## Vague 2 (lancée le 25/09)
+| Lot | État | Notes |
+|---|---|---|
+| B8 Auto-lien homonymes | lancé | alias le plus long prioritaire + exceptions |
+| B9a Fiches historiques 1-9 (audit § 10) | lancé | + relecture Breteuil/Romorantin 1356 |
+| B9b Fiches historiques 10-18 (audit § 10) | lancé | |

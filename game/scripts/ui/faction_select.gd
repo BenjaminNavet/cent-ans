@@ -3,9 +3,10 @@ extends Control
 
 ## Lot MM1 — choix de faction, posé sur le décor 3D du menu : date de départ,
 ## trois grandes cartes opaques (miniature de la faction, écu, nom, accroche, souverain avec son
-## portrait, difficulté), fiche détaillée de la faction choisie (introduction, forces,
-## faiblesses, objectifs historiques), options avancées (graine) et barre d'actions
-## (« Retour », « Commencer — <faction> »). Textes : `data/ui/front_end.json` (`factions`,
+## portrait, défi propre à la faction), fiche détaillée de la faction choisie (introduction,
+## forces, faiblesses, objectifs historiques), niveau de difficulté de la campagne (DF1 : quatre
+## niveaux lus dans la sim, `get_difficulty_levels`), options avancées (graine) et barre
+## d'actions (« Retour », « Commencer — <faction> »). Textes : `data/ui/front_end.json` (`factions`,
 ## `start_dates`) ; noms, blasons et objectifs : données des factions via `SimFacade`.
 ## Double-clic sur une carte : commencer.
 
@@ -15,10 +16,12 @@ signal start_requested(faction_id: String, seed_value: int, start_date: String)
 const CARD_SIZE := Vector2(372, 392)
 const ART_HEIGHT := 194.0
 ## Q2 : taille d'écran sous laquelle l'écran est réduit d'un bloc (trois cartes, fiche, boutons).
-const FIT_SIZE := Vector2(1280.0, 860.0)
+const FIT_SIZE := Vector2(1280.0, 920.0)
 
 var selected_faction: String = "fac_france"
 var selected_start: String = ""
+## DF1 : niveau de difficulté de la campagne (`easy`, `normal`, `hard`, `very_hard`).
+var selected_difficulty: String = "normal"
 var start_button: Button
 var back_button: Button
 var seed_edit: LineEdit
@@ -32,6 +35,9 @@ var _detail_objectives: Label
 var _detail_title: Label
 var _advanced_box: Control
 var _content: Control = null
+var _difficulty_buttons: Dictionary = {}  # id → Button
+var _difficulty_levels: Dictionary = {}  # id → {label, description, effects…}
+var _difficulty_description: Label = null
 
 
 func _ready() -> void:
@@ -123,6 +129,7 @@ func _build() -> void:
 			cards.add_child(_build_card({"id": faction_id}))
 
 	column.add_child(_build_detail())
+	column.add_child(_build_difficulty_selector())
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(spacer)
@@ -305,11 +312,14 @@ func _character(character_id: String) -> Dictionary:
 	return {}
 
 
+## Défi propre à la faction (indicatif : situation historique de départ), à ne pas confondre avec
+## le niveau de difficulté de la campagne choisi sous la fiche.
 func _difficulty_row(level: int) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(FrontEndStyle.label("Difficulté :", 15, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
+	row.mouse_filter = Control.MOUSE_FILTER_PASS
+	row.tooltip_text = "Défi de la situation historique de cette couronne en 1337 (indicatif).\nLe niveau de difficulté de la campagne se choisit sous la fiche."
+	row.add_child(FrontEndStyle.label("Défi de la faction :", 15, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
 	var pips := HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 4)
 	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -373,6 +383,82 @@ func _list_column(parent: Control, heading: String, color: Color) -> VBoxContain
 	column.add_child(items)
 	items.set_meta("color", color)
 	return items
+
+
+# --- Difficulté de la campagne (DF1) ---------------------------------------------------------------
+
+
+func _build_difficulty_selector() -> Control:
+	var bar := PanelContainer.new()
+	bar.add_theme_stylebox_override("panel", FrontEndStyle.night_panel(0.72))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	bar.add_child(row)
+	var heading := FrontEndStyle.label("Difficulté de la campagne", 20, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 4)
+	heading.tooltip_text = "Figée pour toute la partie : revenus et entretien de l'IA, vos revenus, l'agitation de vos provinces, l'hostilité de l'IA et le moral de ses armées contre vous."
+	heading.mouse_filter = Control.MOUSE_FILTER_PASS
+	row.add_child(heading)
+	var facade := _facade()
+	var levels: Array = facade.call("difficulty_levels") if facade != null and facade.has_method("difficulty_levels") else []
+	var pending := str(facade.get("pending_difficulty")) if facade != null else ""
+	var default_id := ""
+	var group := ButtonGroup.new()
+	for entry in levels:
+		var level: Dictionary = entry
+		var id := str(level.get("id", ""))
+		if id == "":
+			continue
+		_difficulty_levels[id] = level
+		if bool(level.get("default", false)):
+			default_id = id
+		var button := RichButton.new()
+		button.toggle_mode = true
+		button.button_group = group
+		button.text = str(level.get("label", id))
+		button.tooltip_text = _difficulty_tooltip(level)
+		button.pressed.connect(func() -> void: select_difficulty(id))
+		row.add_child(button)
+		_difficulty_buttons[id] = button
+	_difficulty_description = FrontEndStyle.label("", 15, Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
+	_difficulty_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_difficulty_description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_difficulty_description.custom_minimum_size = Vector2(260, 0)
+	row.add_child(_difficulty_description)
+	bar.visible = not _difficulty_buttons.is_empty()
+	if _difficulty_levels.has(pending):
+		select_difficulty(pending)
+	elif _difficulty_levels.has(default_id):
+		select_difficulty(default_id)
+	elif not _difficulty_levels.is_empty():
+		select_difficulty(str(_difficulty_levels.keys()[0]))
+	return bar
+
+
+## Infobulle parchemin : description et effets chiffrés du niveau.
+func _difficulty_tooltip(level: Dictionary) -> String:
+	var text := "[b]%s[/b]\n%s" % [str(level.get("label", "")), str(level.get("description", ""))]
+	var effects: Array = Array(level.get("effects", PackedStringArray()))
+	if not effects.is_empty():
+		text += "\n"
+		for line in effects:
+			text += "\n• %s" % str(line)
+	return text
+
+
+func select_difficulty(id: String) -> void:
+	if not _difficulty_buttons.has(id):
+		return
+	selected_difficulty = id
+	for key in _difficulty_buttons:
+		var button: Button = _difficulty_buttons[key]
+		button.set_pressed_no_signal(key == id)
+		FrontEndStyle.style_action_button(button, key == id, 18)
+	if _difficulty_description != null:
+		_difficulty_description.text = str((_difficulty_levels[id] as Dictionary).get("description", ""))
+
+
+func difficulty_count() -> int:
+	return _difficulty_buttons.size()
 
 
 func _build_actions() -> Control:

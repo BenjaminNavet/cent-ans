@@ -24,6 +24,8 @@ pub const PERJURY_REASON: &str = "Parjure : trêve rompue";
 pub const AGGRESSION_REASON: &str = "Agression sans motif";
 /// Attitude reason of two factions at war.
 pub const AT_WAR_REASON: &str = "En guerre";
+/// Attitude reason of the campaign difficulty (lot DF1), AI towards the player.
+pub const DIFFICULTY_REASON: &str = "Niveau de difficulté";
 /// Reason of the opinion modifier a gift leaves with its recipient.
 pub const GIFT_REASON: &str = "Présents diplomatiques";
 /// Truce obtained through papal mediation (2 years).
@@ -454,6 +456,8 @@ impl CampaignState {
         if common_enemy {
             add("Ennemi commun", 20);
         }
+        // DF1: the AI's stance towards the player follows the difficulty.
+        add(DIFFICULTY_REASON, self.difficulty_attitude(data, a, b));
         let menace = &data.ai_diplomacy.menacing_neighbour;
         if !self.is_allied(a, b)
             && self.faction_power(b) > menace.power_ratio * self.faction_power(a).max(1.0)
@@ -2263,14 +2267,18 @@ fn war_target(
         })
         .filter_map(|(id, _)| {
             let stakes = claim_stakes(state, faction, id);
+            // DF1: a harder campaign lowers the odds an AI wants before
+            // falling on the player.
+            let demand = state.difficulty_war_ratio_factor(data, id);
             if stakes.any() && aggression >= PRETENDER_AGGRESSION {
                 let ratio = my_power / state.faction_power(id).max(1.0);
                 let supported = has_allies || state.are_neighbors(data, faction, id);
-                let needed = if supported {
-                    rules.pretender_ratio
-                } else {
-                    rules.pretender_ratio_alone
-                };
+                let needed = demand
+                    * if supported {
+                        rules.pretender_ratio
+                    } else {
+                        rules.pretender_ratio_alone
+                    };
                 let weight = if stakes.throne { 3.0 } else { 0.0 } + stakes.provinces as f64;
                 return (ratio >= needed && state.attitude(data, faction, id).0 < 20)
                     // A claim outranks any opportunistic war.
@@ -2281,7 +2289,7 @@ fn war_target(
                 && state.attitude(data, faction, id).0 < 0
             {
                 let ratio = my_power / state.coalition_power(id).max(1.0);
-                return (ratio >= OPPORTUNIST_RATIO).then(|| (id.clone(), ratio));
+                return (ratio >= OPPORTUNIST_RATIO * demand).then(|| (id.clone(), ratio));
             }
             None
         })
