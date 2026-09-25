@@ -1,6 +1,8 @@
 # DA2 — Portraits vivants (état de travail)
 
-Branche : worktree `agent-ade9b18af852c5bfe` (fusion par l'orchestrateur DA, pas par l'agent).
+Branche : `worktree-agent-ade9b18af852c5bfe` (worktree `.claude/worktrees/agent-ade9b18af852c5bfe`, contient la fusion de `feat/da-direction-artistique`) ; fusion par l'orchestrateur DA, pas par l'agent.
+
+**EN PAUSE (demande du joueur, 25/09).** Coût dépensé : **0,00 $** (aucune requête payante envoyée ; seul le `--dry-run` a tourné).
 Plafond : 8 $ (section « Direction artistique (25/09) » de `docs/budget.md`).
 
 ## Conception
@@ -19,10 +21,25 @@ Plafond : 8 $ (section « Direction artistique (25/09) » de `docs/budget.md`).
 
 ## État
 - [x] Données + schéma, outil Python, commande CLI, dry-run (147 images ≈ 6,69 $).
-- [ ] Sonde 3 images, validation visuelle.
+- [x] Captures « avant » : `docs/img/da2/avant-cour.png`, `avant-arbre.png` (script
+  `game/tests/da2_screenshot.gd`, 120 tours = printemps 1367, ~15 s ; avec affichage :
+  `godot --resolution 1600x900 --path game --script res://tests/da2_screenshot.gd -- --tag=avant`).
+  On y voit les personnages nés en jeu réduits à l'écu de France.
+- [ ] Sonde 3 images (`--only <clé>` ×3, p. ex. `noble_male_young_france_0`,
+  `knight_male_adult_england_1`, `chr_edward_iii_old`), validation visuelle.
 - [ ] Génération complète.
 - [ ] GDScript : résolveur, cadre, branchement (cour, arbre, fiche, sceau, rançon…).
 - [ ] Tests (pytest, GDScript), captures avant/après `docs/img/da2/`, ADR.
 
 ## Prochaine étape
-Sonde de 3 images puis GDScript.
+1. Reprendre (après levée de la pause) : `uv run --project tools cent-ans assets portrait-archetypes --dry-run`
+   puis la sonde de 3 images ; lire les JPEG ; si style conforme, génération complète
+   (`--envelope 7.6`) ; vérifier la ligne ajoutée à `docs/budget.md` (section DA).
+2. GDScript : `living_portrait.gd` (rang d'affichage : dirigeant/conjoint via
+   `get_family_tree(id,0,0)` {ruler, heir}, rôle de données via `SimFacade.store.get_character`,
+   mots-clés du titre, armée → chevalier ; tranche par âge ; hachage FNV-1a de l'id → visage ;
+   replis rang/tranche) puis `portrait_frame.gd` (marques) ; brancher dans
+   `PortraitLoader.portrait_texture/overlay_portrait` pour couvrir cour, arbre, fiche, sceau,
+   rançon, bataille.
+3. Tests pytest (schéma, 122 archétypes, prompts), test GDScript, captures « après », ADR
+   (prochain numéro libre après 0055, à revérifier dans main).
