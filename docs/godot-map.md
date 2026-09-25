@@ -730,7 +730,8 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
   `fine_terrain_distance`) : routes en rubans, hameaux, arbres et lit creusé des fleuves
   (`fine_chunk_rects`) suivent comme avant.
 - `chunk_surface_changed(index)` : aux changements de niveau, et quand **l'étage le plus fin chargé**
-  d'un morceau proche change (E1 → E2 → …), au plus 2 morceaux toutes les 250 ms (les recalages des
+  d'un morceau proche change (E1 → E2 → …), **après `surface_settle_ms` (700 ms) sans nouvelle page**
+  dans ce morceau (toute la chaîne E1 → E4 donne un seul recalage), au plus 2 morceaux toutes les 250 ms (les recalages des
   couches sont synchrones et chers : maquettes L1 ≈ 50-300 ms par recalage). Nouveau signal
   `surface_rect_changed(rect)` à chaque page arrivée ou évincée, pour des recalages fins (ZG5).
 - Échelle verticale : `MapData.vertical_scale()` (vaut `HEIGHT_SCALE`) est lu par le shader
@@ -753,6 +754,16 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
   puis aller-retour de zoom 150 ↔ minimum sur Paris ; imprime i/s moyen, médiane et 99ᵉ centile des
   images, pire image, images > 50 ms, statistiques du quadtree et, avec `--bench-listeners`, le temps
   passé dans chaque écouteur de `chunk_surface_changed`.
+  Aussi : coût CPU du rendu, primitives et appels de dessin (médianes), `update_ms_avg` du quadtree.
+- Pyramide réelle d'essai tirée du cache partagé : dossier contenant un lien `pyramid` vers
+  `data/map/pyramid`, puis `python3 game/tests/fixtures/zg2/manifest_from_cache.py
+  <dossier>/relief_pyramid.json` et `--pyramid-dir=<dossier>`.
+
+Mesures (25/09, machine partagée à une charge de 200+ : relatives seulement ; pyramide E1-E7 réelle,
+11 943 tuiles) : quadtree 31,3-31,5 i/s, médiane 24,7-26,5 ms, 54 images > 50 ms, `update_view`
+4,7 ms en moyenne, ≈ 6 ms de décodage par tuile (fils natifs), 9,5 M primitives ; repli E0 31,2-34,1 i/s,
+médiane 24,3-26,3 ms, 57-63 images > 50 ms, 11 M primitives. Captures avant/après (repli E0 / quadtree
+E1-E7) : `docs/img/zg2/` (Grande Chartreuse, Rouen, puy de Dôme).
 
 ## Interface des colonies (lot C5)
 
