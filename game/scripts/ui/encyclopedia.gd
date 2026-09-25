@@ -191,8 +191,14 @@ func _ready() -> void:
 	fiche.add_theme_color_override("default_color", Color(0.22, 0.14, 0.07))
 	fiche.add_theme_font_size_override("normal_font_size", 15)
 	fiche.add_theme_font_size_override("bold_font_size", 16)
-	fiche.meta_underlined = true
 	fiche.meta_clicked.connect(func(meta: Variant) -> void: open_entry(str(meta)))
+	# BP1 : mots du Codex cliquables (bulles imbriquées) dans le corps des fiches.
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", fiche)
+	# Les liens internes de l'encyclopédie restent soulignés (les fiches Codex non lues le sont
+	# déjà explicitement via leur BBCode).
+	fiche.meta_underlined = true
 	split.add_child(fiche)
 	build_entries()
 	select_tab(0)
@@ -579,7 +585,7 @@ static func _section(title: String, body: String) -> String:
 
 static func _description(definition: Dictionary) -> String:
 	var text := str(definition.get("description", ""))
-	return "[i]%s[/i]" % text if text != "" else ""
+	return "[i]%s[/i]" % CodexText.format(text, true) if text != "" else ""
 
 
 static func _sources(definition: Dictionary) -> String:
@@ -986,7 +992,7 @@ static func _religion_fiche(entry_id: String, definition: Dictionary) -> String:
 static func _mechanic_fiche(definition: Dictionary) -> String:
 	return _join([
 		_heading(str(definition.get("icon", "")), str(definition.get("name", "")), "Mécanique de jeu", "hud"),
-		str(definition.get("text", "")), _mechanic_extra(str(definition.get("extra", ""))),
+		CodexText.format(str(definition.get("text", "")), true), _mechanic_extra(str(definition.get("extra", ""))),
 	])
 
 

@@ -538,12 +538,16 @@ func _build_help() -> void:
 	text.add_theme_color_override("default_color", INK)
 	# Touches physiques affichées selon la disposition du clavier (AZERTY : Z Q S D, A / E).
 	var label := func(keycode: Key) -> String: return ORDERS_BAR.physical_label(keycode)
-	text.text = HELP_TEXT.format({
+	text.text = CodexText.format(HELP_TEXT.format({
 		"orders": ORDERS_BAR.hotkey_labels(),
 		"camera": " ".join([label.call(KEY_W), label.call(KEY_A), label.call(KEY_S), label.call(KEY_D)]),
 		"rotate": "%s / %s" % [label.call(KEY_Q), label.call(KEY_E)],
-	})
+	}), true)
 	help_panel.add_child(text)
+	# BP1 : mots du Codex cliquables (bulles imbriquées) dans l'aide de bataille (F1).
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", text)
 
 
 func toggle_help() -> void:
