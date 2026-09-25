@@ -534,7 +534,9 @@ pub(crate) fn resolve_economy(
 ) {
     let factions: Vec<_> = state.factions.keys().cloned().collect();
     for faction_id in factions {
-        if !state.factions[&faction_id].alive {
+        // EQ1: the rebels are not a realm: they levy no taxes, pay no
+        // upkeep and cannot go bankrupt (their garrisons live off the land).
+        if !state.factions[&faction_id].alive || crate::diplomacy::is_rebels(&faction_id) {
             continue;
         }
         // H5: seigniorage is income, the recoinage of strong money upkeep.
