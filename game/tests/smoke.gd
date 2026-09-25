@@ -1518,6 +1518,9 @@ func _run_assets() -> void:
 		if not audio.call("has_sfx", clip):
 			missing_sfx.append(clip)
 	_check(missing_sfx.is_empty(), "missing sound effects: %s" % [missing_sfx])
+	# Les listes de lecture vivent dans les vraies données (`data/audio/music.json`), pas dans
+	# les fixtures pointées par `MapPaths` au démarrage du smoke.
+	_check(audio.call("load_playlists", _project_root().path_join("data/audio/music.json")), "music playlists (data/audio/music.json) not loaded")
 	for context in ["campaign", "war", "court"]:
 		_check(audio.call("has_music", context), "missing music: %s" % context)
 		_check((audio.call("playlist", context) as Array).size() >= 3, "music playlist too short: %s" % context)

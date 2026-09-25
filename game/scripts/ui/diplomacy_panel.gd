@@ -600,12 +600,18 @@ func _fit_minimap() -> void:
 	if holder == null or view == null or _minimap.crop.size.x <= 0.0:
 		return
 	var aspect := _minimap.crop.size.y / _minimap.crop.size.x
-	var width := maxf(holder.size.x - 16.0, 200.0)
+	# Cadre réel de la minicarte (marges du panneau…) : la carte ajustée ne dépasse jamais le
+	# support, sinon le support grandit, se redimensionne et relance l'ajustement sans fin (le
+	# cadre enluminé UI1 fait 20 px, plus que les 16 px supposés : file de messages saturée).
+	var chrome := (_minimap.get_combined_minimum_size() - view.get_combined_minimum_size()).max(Vector2(16.0, 16.0))
+	var width := maxf(holder.size.x - chrome.x, 200.0)
 	var height := width * aspect
-	if height > holder.size.y - 16.0:
-		height = maxf(holder.size.y - 16.0, 150.0)
+	if height > holder.size.y - chrome.y:
+		height = maxf(holder.size.y - chrome.y, 150.0)
 		width = height / aspect
-	view.custom_minimum_size = Vector2(width, height).floor()
+	var fitted := Vector2(width, height).floor()
+	if fitted != view.custom_minimum_size:
+		view.custom_minimum_size = fitted
 	_minimap.tooltip_text = ""
 
 
