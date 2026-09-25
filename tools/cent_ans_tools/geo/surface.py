@@ -43,11 +43,13 @@ RESERVOIRS_FILE = "modern_reservoirs.json"
 RESERVOIR_DIR = pyramid.WORK_DIR / "reservoirs"
 
 #: Metres of DSM removed under full tree cover (measured, see module docstring).
-CANOPY_OFFSET_M = 8.0
+CANOPY_OFFSET_M = 10.0
 #: Blur (pixels of E4) of the tree fraction before the canopy is removed.
-CANOPY_BLUR_PX = 1.0
+CANOPY_BLUR_PX = 1.5
 #: Width of the grey opening that removes buildings (larger than a city block).
 BUILT_OPENING_M = 340.0
+#: Width of the closing that fills radar pits left between buildings.
+BUILT_PIT_M = 180.0
 #: Built-up fraction above which the ground estimate replaces the surface.
 BUILT_THRESHOLD = 0.3
 #: WorldCover read at 1/2 resolution (≈ 20 m, internal overviews): enough for 22 m.
@@ -124,18 +126,16 @@ def read_cover(
             dataset.close()
     classes = classes[0]
     known = classes > 0
-    result = {}
-    for name, value in (
-        ("trees", glo30.WC_TREES),
-        ("built", glo30.WC_BUILT),
-        ("water", glo30.WC_WATER),
-    ):
-        fraction = np.where(known, (classes == value).astype(np.float32), np.nan)
-        result[name] = np.nan_to_num(
-            glo30.warp_to_grid(fraction, transform, grid, window, Resampling.average),
-            nan=0.0,
-        )
-    return result
+    names = ("trees", "built", "water")
+    values = (glo30.WC_TREES, glo30.WC_BUILT, glo30.WC_WATER)
+    fractions = np.stack(
+        [np.where(known, (classes == v).astype(np.float32), np.nan) for v in values]
+    )
+    warped = np.nan_to_num(
+        glo30.warp_to_grid(fractions, transform, grid, window, Resampling.average),
+        nan=0.0,
+    )
+    return dict(zip(names, warped, strict=True))
 
 
 # --------------------------------------------------------------------- correction
@@ -150,15 +150,37 @@ def remove_canopy(
 
 
 def flatten_built(
-    height_m: np.ndarray, built: np.ndarray, meters_per_px: float
+    dsm_m: np.ndarray,
+    terrain_m: np.ndarray,
+    built: np.ndarray,
+    meters_per_px: float,
 ) -> np.ndarray:
-    """Replace built-up areas by a morphological ground estimate (feathered)."""
+    """Replace built-up areas by a morphological ground estimate (feathered).
+
+    The ground is the grey opening of the *raw* surface by a disc of
+    :data:`BUILT_OPENING_M` (streets, squares and yards are ground; blocks and
+    buildings narrower than the disc go), computed at half resolution on the
+    2 x 2 minimum, then smoothed. The raw surface is used because the canopy
+    correction digs pits under street trees that an opening would spread into
+    square terraces.
+    """
     mask = ndimage.gaussian_filter(built.astype(np.float32), 1.0) > BUILT_THRESHOLD
     if not mask.any():
-        return height_m
-    size = max(3, int(round(BUILT_OPENING_M / meters_per_px)) | 1)
-    ground = ndimage.grey_opening(height_m, size=(size, size))
-    ground = np.minimum(ndimage.gaussian_filter(ground, 2.0), height_m)
+        return terrain_m
+    rows, cols = dsm_m.shape
+    padded = np.pad(dsm_m, ((0, rows % 2), (0, cols % 2)), mode="edge")
+    half = padded.reshape(padded.shape[0] // 2, 2, padded.shape[1] // 2, 2).min(
+        axis=(1, 3)
+    )
+    disc = _disc(BUILT_OPENING_M / (4.0 * meters_per_px))
+    opened = ndimage.grey_opening(half, footprint=disc)
+    # Radar shadows between buildings leave pits: a small closing fills them.
+    opened = ndimage.grey_closing(
+        opened, footprint=_disc(BUILT_PIT_M / (4.0 * meters_per_px))
+    )
+    ground = _upsample_to(opened, padded.shape, (2.0, 2.0))[:rows, :cols]
+    ground = ndimage.gaussian_filter(ground.astype(np.float32), 2.0)
+    ground = np.minimum(ground, dsm_m)
     weight = np.clip(
         ndimage.gaussian_filter(
             ndimage.binary_dilation(mask, iterations=1).astype(np.float32), 1.5
@@ -167,7 +189,14 @@ def flatten_built(
         0.0,
         1.0,
     )
-    return (height_m * (1.0 - weight) + ground * weight).astype(np.float32)
+    return (terrain_m * (1.0 - weight) + ground * weight).astype(np.float32)
+
+
+def _disc(radius_px: float) -> np.ndarray:
+    """Boolean disc footprint of the given radius (at least one pixel)."""
+    radius = max(1, int(round(radius_px)))
+    yy, xx = np.ogrid[-radius : radius + 1, -radius : radius + 1]
+    return xx * xx + yy * yy <= radius * radius
 
 
 def correct_surface(
@@ -176,7 +205,7 @@ def correct_surface(
     """Terrain estimate from the surface model (canopy, then built-up)."""
     filled = np.nan_to_num(dsm_m, nan=0.0)
     terrain_m = remove_canopy(filled, cover["trees"])
-    terrain_m = flatten_built(terrain_m, cover["built"], meters_per_px)
+    terrain_m = flatten_built(filled, terrain_m, cover["built"], meters_per_px)
     # Water and sea keep the source value (canopy blur must not dig lakes).
     water = (cover["water"] > 0.5) | (np.abs(filled) <= 0.01)
     return np.where(water, filled, terrain_m).astype(np.float32)
@@ -224,26 +253,33 @@ def _upsample_to(array: np.ndarray, shape: tuple[int, int], zoom: tuple) -> np.n
 def canopy_edge_steps(
     dsm_m: np.ndarray, trees: np.ndarray, meters_per_px: float
 ) -> np.ndarray:
-    """Surface steps (m) across forest edges on flat open ground.
+    """Surface steps (m) between forest interiors and open ground on flat land.
 
-    For pixels on a forest edge (tree fraction between 0.3 and 0.7 within 5 px)
-    with a gentle slope, mean surface of the forested neighbours minus the mean
-    of the open ones: the offset the radar sees above the ground.
+    Forest interior = tree fraction > 0.8 at least 4 pixels (≈ 90 m) from open
+    ground; open ground = tree fraction < 0.05 as far from the forest. Around
+    each pixel where both are present within ≈ 225 m and the open ground is flat
+    (slope < 2 %), the mean surface of the forest interior minus that of the open
+    ground: what the radar sees above the ground under a closed canopy.
     """
-    forest = (trees > 0.8).astype(np.float32)
-    open_ground = (trees < 0.05).astype(np.float32)
-    size = 7
-    forest_w = ndimage.uniform_filter(forest, size)
-    open_w = ndimage.uniform_filter(open_ground, size)
-    forest_h = ndimage.uniform_filter(dsm_m * forest, size) / np.maximum(forest_w, 1e-6)
-    open_h = ndimage.uniform_filter(dsm_m * open_ground, size) / np.maximum(
-        open_w, 1e-6
-    )
-    smooth = ndimage.gaussian_filter(dsm_m, 3.0)
-    gy, gx = np.gradient(smooth, meters_per_px)
+    forest = trees > 0.8
+    open_ground = trees < 0.05
+    interior = ndimage.distance_transform_edt(~open_ground) >= 4
+    interior &= forest
+    far_open = ndimage.distance_transform_edt(~forest) >= 4
+    far_open &= open_ground
+    sigma = 10.0
+    w_in = ndimage.gaussian_filter(interior.astype(np.float32), sigma)
+    w_out = ndimage.gaussian_filter(far_open.astype(np.float32), sigma)
+    h_in = ndimage.gaussian_filter(dsm_m * interior, sigma) / np.maximum(w_in, 1e-6)
+    h_out = ndimage.gaussian_filter(dsm_m * far_open, sigma) / np.maximum(w_out, 1e-6)
+    gy, gx = np.gradient(h_out, meters_per_px)
     flat = np.hypot(gx, gy) < 0.02
-    edge = (forest_w > 0.3) & (open_w > 0.3) & flat
-    return (forest_h - open_h)[edge]
+    sample = (w_in > 0.15) & (w_out > 0.15) & flat
+    # One sample every 8 pixels: neighbouring values are strongly correlated.
+    sample[::8, ::8] &= True
+    thin = np.zeros_like(sample)
+    thin[::8, ::8] = sample[::8, ::8]
+    return (h_in - h_out)[thin]
 
 
 # --------------------------------------------------------------------- reservoirs
@@ -298,21 +334,34 @@ def solve_reservoir(
     report: dict = {"found": False}
     if not water.any():
         return np.zeros_like(water), terrain_m, report
-    # Water component nearest the seed, then its flat surface at the lake level.
+    # Largest water component within reach of the seed (a nearer pond, a river
+    # or a glacier lake must not win).
     labels, _ = ndimage.label(water)
-    distance, (near_r, near_c) = ndimage.distance_transform_edt(
-        labels == 0, return_indices=True
-    )
-    if distance[seed_r, seed_c] * meters_per_px > RESERVOIR_SEED_RADIUS_M:
+    radius = int(RESERVOIR_SEED_RADIUS_M / meters_per_px)
+    yy, xx = np.ogrid[:rows, :cols]
+    reach = (yy - seed_r) ** 2 + (xx - seed_c) ** 2 <= radius**2
+    near = labels[reach & water]
+    if near.size == 0:
         return np.zeros_like(water), terrain_m, report
-    component = labels == labels[near_r[seed_r, seed_c], near_c[seed_r, seed_c]]
-    level = float(np.median(dsm_m[component]))
-    flat = water & (np.abs(dsm_m - level) < RESERVOIR_LEVEL_TOLERANCE_M)
-    labels, _ = ndimage.label(flat | component & flat)
-    candidates = labels[component & flat]
+    seed_label = labels[seed_r, seed_c]
+    component = labels == (seed_label or np.bincount(near).argmax())
+    # Copernicus flattens lakes to one value: the most frequent height of the
+    # component is the lake level (a median would mix in the river below the dam).
+    heights = dsm_m[component]
+    values, counts = np.unique(np.round(heights * 2.0) / 2.0, return_counts=True)
+    level = float(values[np.argmax(counts)])
+    level = float(np.median(heights[np.abs(heights - level) < 0.5]))
+    # WorldCover 2021 and the DSM (2011-2015) saw different lake levels: the lake
+    # is the WorldCover water down to a little below the level (not the river
+    # below the dam) joined to the strictly flat DSM surface at the level.
+    kept = component & (dsm_m >= level - RESERVOIR_LEVEL_TOLERANCE_M)
+    flat = box & (np.abs(dsm_m - level) < 0.3)
+    labels, _ = ndimage.label(flat | kept)
+    candidates = labels[kept]
+    candidates = candidates[candidates > 0]
     if candidates.size == 0:
         return np.zeros_like(water), terrain_m, report
-    lake = labels == np.bincount(candidates[candidates > 0]).argmax()
+    lake = labels == np.bincount(candidates).argmax()
     # The radar shore and the bilinear resampling blur the edge: two pixels more.
     mask = ndimage.binary_dilation(lake, iterations=2) & box
     membrane = push_pull(terrain_m, ~mask)
@@ -414,20 +463,30 @@ def tier2_heights(
     e0: np.ndarray,
     base: np.ndarray,
     coast: np.ndarray,
+    map_dir: Path = pyramid.MAP_DIR,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Boosted E4 heights and water mask of a window (margin included)."""
     dsm = read_dsm(grid, window)
     cover = read_cover(grid, window)
     terrain_m = correct_surface(dsm, cover, grid.meters_per_px)
     terrain_m = apply_reservoirs(terrain_m, window)
-    source_water = np.isnan(dsm) | (np.abs(np.nan_to_num(dsm)) <= 0.01)
-    coast_class = pyramid.sample_e0_grid(coast, 4, window, order=0)
-    water = (coast_class == 0) | ((coast_class == 1) & source_water)
+    missing = np.isnan(dsm)
+    source_sea = ~missing & (np.abs(np.nan_to_num(dsm)) <= 0.01)
     e0_bil = pyramid.sample_e0_grid(e0, 4, window)
-    base_bil = pyramid.sample_e0_grid(base, 4, window)
-    heights = np.where(
-        source_water, e0_bil, pyramid.boost_with_base(terrain_m, base_bil)
+    coast_class = pyramid.sample_e0_grid(coast, 4, window, order=0)
+    # Near E0's shore the source decides; elsewhere (and without source) E0 does.
+    water = (coast_class == 0) | (
+        (coast_class == 1) & (source_sea | (missing & (e0_bil <= 0.0)))
     )
+    base_bil = pyramid.sample_e0_grid(base, 4, window)
+    heights = pyramid.boost_with_base(terrain_m, base_bil)
+    no_source = missing | source_sea
+    if no_source.any():
+        # Land without GLO-30 (edge of the core, source sea inside E0's land):
+        # the E2 tier-1 surface, already boosted, or E0 without it.
+        fallback = pyramid.sample_level_tiles(map_dir, 2, 4, window)
+        fallback = np.where(np.isnan(fallback), e0_bil, fallback)
+        heights = np.where(no_source, fallback, heights)
     heights = pyramid.apply_coast(heights, water, e0_bil, pyramid.COAST_FADE_PX)
     return heights, water
 

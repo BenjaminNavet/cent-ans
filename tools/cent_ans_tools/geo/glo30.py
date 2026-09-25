@@ -203,9 +203,12 @@ def warp_to_grid(
     window: tuple[int, int, int, int],
     resampling: Resampling,
 ) -> np.ndarray:
-    """Reproject a lon/lat ``float32`` array onto a grid window (NaN = no data)."""
+    """Reproject a lon/lat ``float32`` array onto a grid window (NaN = no data).
+
+    ``source`` may hold several bands (``(bands, rows, cols)``): one warp.
+    """
     col0, row0, cols, rows = window
-    destination = np.full((rows, cols), np.nan, dtype=np.float32)
+    destination = np.full(source.shape[:-2] + (rows, cols), np.nan, dtype=np.float32)
     reproject(
         source=source,
         destination=destination,
