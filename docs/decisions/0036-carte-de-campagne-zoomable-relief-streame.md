@@ -157,3 +157,33 @@ Vagues : ZG1 + ZG2 + ZG3 ; puis ZG4 + ZG5 ; puis ZG6 ; puis ZG7.
 - Les paysages proches reflètent le relief réel débarrassé des principales traces modernes, pas
   un relevé de 1340 : haies, chemins creux, forêts et villages restent des reconstructions.
 - `FineTerrainJob` et les tuiles E0 restent le repli sans cache.
+
+## Addendum (lot ZG2, 2026-09-25) : moteur tel que réalisé
+
+Détail dans `docs/godot-map.md` (« Relief streamé : pyramide et quadtree »). Écarts et précisions
+par rapport à la décision :
+
+- **Le quadtree dessine tout le terrain** quand le cache existe (les morceaux E0 restent construits
+  mais masqués : repli, bornes, vue parchemin), au lieu de ne couvrir que le proche. `chunk_level`
+  et `chunk_surface_changed` gardent leur sens pour les couches (routes, colonies, maquettes).
+- **Sélection CDLOD** (distance ↔ espacement des sommets projeté ≤ 4 px, soit ≤ 0,5 px par pixel de
+  page) avec **morphing géomorphe** au vertex shader au lieu d'une hystérésis : pas de saut de
+  géométrie au changement de niveau. Jupes en plus contre les écarts transitoires.
+- **Pages en `FORMAT_R16` avec mipmaps** (entier 16 bits normalisé, même codage que les PNG) :
+  ni flottants 32 bits (deux fois plus de VRAM) ni reconstruction ; 256 couches 512² = 171 Mo.
+  Table de pages en `instance uniform` par nœud (page fine, page du parent, 8 voisines).
+- **Décodage en Rust dans des fils natifs** (`ReliefDecoder`, `request`/`poll`) : godot-rust est
+  mono-fil, `GameDataStore` ne peut pas être appelé depuis `WorkerThreadPool` (panique). Replis :
+  décodage Rust sur le fil principal (≤ 2 tuiles, ≤ 4 ms par image), puis `Png16` GDScript
+  (0,1-1 s par tuile : repli seulement).
+- **Recalages des couches** : les pages qui arrivent ne signalent un morceau proche que lorsque son
+  étage le plus fin chargé change, **après 700 ms sans nouvelle page** (la chaîne E1 → E4 donne un
+  seul recalage), au plus 2 morceaux toutes les 250 ms. Sans ce délai, les recalages des maquettes
+  (50-300 ms chacun) doublaient le coût du panoramique.
+- **Mesures** (banc `--bench-map`, 1 440 × 900, Apple Silicon, machine partagée à une charge de
+  200+ : chiffres relatifs seulement, pyramide réelle E1-E7 de 11 943 tuiles) : deux essais appariés
+  quadtree / repli E0 : 31,3 / 31,2 i/s puis 31,5 / 34,1 i/s ; médiane 24,7-26,5 ms contre
+  24,3-26,3 ms ; images > 50 ms 54 contre 57-63 ; `update_view` 4,7 ms en moyenne ; ≈ 1 100 pages
+  décodées en 28 s (≈ 6 ms par tuile, fils natifs) ; 9,5 M primitives contre 11 M. La cible
+  « 60 i/s au palier 2 » reste à vérifier sur machine au repos ; à parité avec le repli E0, le
+  quadtree n'est pas le goulot (les recalages synchrones des maquettes, ≈ 2,5 s cumulées, le sont).
