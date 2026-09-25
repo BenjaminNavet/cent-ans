@@ -89,4 +89,15 @@ déjà présent sur main).
 2. Jinetes, clip de lancer de javeline (Blender V2) : **fait**, commit `9668931a`.
 3. Budget de triangles (routiers, écorcheurs) : **fait**, commit `cde0e583`.
 4. `tools/.../budget.py` (tables multi-sessions) : **fait**, commit `4a205183`.
-5. `century_probe` 4 graines × 464 tours, chiffres XVe siècle : en cours.
+5. `century_probe` 4 graines × 464 tours, chiffres XVe siècle : **code fait** (commit
+   `b5da244a`, ajoute `CENTURY_15`/`recruited_15th` : scanne chaque tour les armées et
+   garnisons de toutes les factions pour les 4 types tant qu'ils n'ont pas tous été vus).
+   **Run 4 graines × 464 tours lancé, pas encore terminé** (build release,
+   `./target/release/examples/century_probe 464 1 2 3 4`, log `/tmp/century_probe_ur2.log`,
+   PID à vérifier via `ps aux | grep century_probe`) : campagne complète ~2-4 min par graine en
+   parallèle sur 4 threads, ce run a dépassé le budget de tours de cette session. **Prochaine
+   étape pour l'agent de reprise** : relancer si besoin
+   (`cd core && cargo build --release -p ai --example century_probe && ./target/release/
+   examples/century_probe 464 1 2 3 4`), consigner ici la ligne « Types du XVe s. recrutés » et
+   « Survie en 1400 » de la sortie, comparer aux chiffres § Équilibre ci-dessus (majeures 5/5
+   sur `century_probe 464 1..5` avant UR1/UR2).
