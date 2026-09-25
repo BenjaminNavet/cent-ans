@@ -34,7 +34,7 @@ nuit : NV2, SG3, EQ1, PF1, DP2, AR1).
 |---|---|---|---|---|
 | EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0031 | — | **dans integration/epic** (87b9d1ee) |
 | EP2 | Horizon : relief réel (DEM) autour du lieu en anneau lointain, panoramas peints par région (mer, Alpes, Pyrénées, collines), silhouettes lointaines (clocher, château), brume de chaleur/fumée de camp | 0032 | — | **dans integration/epic** (7d10edba) |
-| EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | en cours (vague 1) |
+| EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | **dans integration/epic** (a1465985) |
 | EP4 | Son de mêlée de proximité : émetteurs par front de mêlée, couches proche/moyen/lointain, grande banque CC0 (chocs, cris, râles, chevaux, ordres), foule qui monte avec l'effectif | — | — | **fusionné** a30b461b (27 clips CC0, 112 générés ; ordres criés sans source CC0 ; volumes à régler à l'oreille) |
 | EP5 | Étendards : figurine porte-étendard dédiée (pose et clips), musiciens (tambours, trompettes), étendard qui tombe, relevé ou pris (moral, écran de fin) | 0034 | — | **dans integration/epic** (87b9d1ee) |
 | EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | — | EP3 | vague 2 |
@@ -64,3 +64,12 @@ CC0 gratuites (Freesound, `tools/cent_ans_tools/freesound_search.py`). Réserve 
   pris en charge par l'orchestrateur de nuit (agent SM1). Attendre son correctif, `git merge main`,
   smoke vert, puis ff-only.
 - EP3 relancé dans son worktree (`ep3-eau-chemins`) : règles de simulation, ADR 0033.
+- EP3 fusionné dans `integration/epic` (a1465985) : conflits `field.rs`, `sim.rs`, `site.rs`, `ai.rs`,
+  `battle_request.rs` (EP5 + DF1 venu de main par EP3), `real_data.rs`, `battle_terrain.gd` ; tout
+  gardé. `hydro::battle_lines` supprimé au profit de `field.attacker_line_z()/defender_line_z()`,
+  `shape_river` reçoit la largeur du champ, `generate_sized` pose aussi ponts et routes. Test
+  `automatic_deployment_stays_in_the_zone_on_rivers` (paliers skirmish/large/epic, rivière) : le
+  déploiement automatique reste dans la zone et hors de l'eau profonde. Le message « doivent être
+  placés dans votre zone » vu par EP3 vient de `--deploy-shot`, qui place exprès un régiment hors
+  zone pour montrer le refus. cargo test (658), clippy, pytest (450), `ep2_horizon_test`,
+  `ep4_audio_test`, capture de déploiement palier epic avec rivière : OK. Digests inchangés.
