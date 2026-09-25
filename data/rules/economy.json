@@ -1,0 +1,5 @@
+{
+  "description": "Économie (lot EQ1). Les effets de trésor des événements de la chronique sont écrits pour un royaume de taille moyenne : une faction dont le revenu de saison est inférieur à la référence paie (ou reçoit) en proportion de son revenu, sans descendre sous la part minimale. Un incendie à 2 000 ₶ coûte ainsi une saison de revenu à un petit comté au lieu de quatre.",
+  "event_treasury_reference_income": 4000,
+  "event_treasury_min_scale": 0.25
+}
