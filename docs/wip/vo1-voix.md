@@ -15,8 +15,11 @@ Plafond de dépense du lot : **3 $** (estimation avant tout appel, consignée da
       (estimation), plafond `--cap` (3 $), ffmpeg (silences coupés, réverbération de salle pour le
       conseiller, −16 LUFS, OGG mono), manifeste `game/assets/audio/voice/manifest.json`
       (voix, durée, coût mesuré).
-- [ ] **Génération bloquée** : `OPENAI_API_KEY` refusée par l'API (HTTP 401 « Incorrect API key »)
-      dès le premier clip. Estimation du lot complet : 294 clips, ≈ 0,37 $. Rien facturé.
+- [x] **Génération (reprise)** : OpenAI refusée (401) → backend OpenRouter `openai/gpt-audio-mini`
+      (chat completions, `modalities: [text, audio]`, flux SSE obligatoire, pcm16 24 kHz reconstitué).
+      Consigne « lire mot pour mot » + exemple, contrôle de chaque clip (durée plausible, transcription
+      ≈ texte, sans didascalie), reprises (`--attempts`, `--recheck`). 294 clips (20,6 min), coût
+      réel 0,24 $ (somme `usage.cost`, rejets compris), consigné en session 7.
 - [x] Lecteurs Godot (fonctionnent sans fichiers : sous-titres seuls, silence) :
   - `game/scripts/audio/voice_lines.gd` (`VoiceLines`) : données, langue d'un régiment, repli,
     voix d'un général, nom des fichiers de discours (sha1 du texte).
@@ -36,15 +39,13 @@ Plafond de dépense du lot : **3 $** (estimation avant tout appel, consignée da
 - [x] Test headless `game/tests/vo1_voice_test.gd` OK ; smoke 24 « smoke OK », au1/ub1/bv3 OK, capture du discours fenêtrée OK, pytest 398 OK (après fusion de main).
 
 ## Prochaine étape
-Code terminé, main fusionné. Reste la génération, quand une clé OpenAI valide est disponible :
-`uv run --project tools python -m cent_ans_tools.voice_tts --dry-run` puis sans `--dry-run`
-(≈ 0,37 $), `godot --headless --path game --import`, consigner le coût réel (somme `cost_usd` du
-manifeste) dans `docs/budget.md`, commiter `game/assets/audio/voice/`.
+Terminé. Écoute humaine à faire : quelques lectures un peu théâtrales (allongements, pauses) ;
+pour refaire un clip, supprimer son `.ogg` et son entrée du manifeste (ou `forget()`), puis
+`uv run --project tools --with soundfile python -m cent_ans_tools.voice_tts --cap 3`.
 
 ## Points ouverts
-- Clé `OPENAI_API_KEY` invalide (401) : aucune voix produite ; le jeu affiche les sous-titres et
-  reste muet pour les voix. Autre fournisseur (Gemini, OpenRouter) non essayé : exige l'accord de
-  l'utilisateur.
+- Voix OpenRouter : le modèle, conversationnel, improvise parfois (rejets automatiques) ; accents
+  gascon, gallois, flamand approximatifs ; « plaçaes » dans `adv_start_france` (transcription).
 - Le ducking du discours dure le discours entier même s'il est passé (`duck_music` ne s'annule
   pas).
 - Les phrases du général contenant son nom (`general_lines`) ne sont pas vocalisées.
