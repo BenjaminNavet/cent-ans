@@ -102,7 +102,16 @@ func _ready() -> void:
 	table_section = TableSection.new()  # H9
 	classes_list.add_sibling(table_section)
 	edict_section = EdictSection.new()  # lot C4
-	table_section.add_sibling(edict_section)
+	# Q2 : en tête de l'onglet Ville (en bas, il fallait défiler pour le trouver) ; la liste
+	# des édits reste repliée derrière « Changer d'édit ».
+	var city_box := classes_list.get_parent()
+	city_box.add_child(edict_section)
+	city_box.move_child(edict_section, 0)
+	var edict_rule := HSeparator.new()
+	edict_rule.name = "EdictRule"
+	city_box.add_child(edict_rule)
+	city_box.move_child(edict_rule, 1)
+	edict_section.visibility_changed.connect(func() -> void: edict_rule.visible = edict_section.visible)
 	_build_settlements_tab()  # C5
 
 

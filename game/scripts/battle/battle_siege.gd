@@ -676,7 +676,9 @@ func _update_machines(units: Array) -> void:
 		var present: bool = unit["present"]
 		if render == "tower" or render == "ram":
 			if not _machines.has(id):
-				_machines[id] = _make_tower() if render == "tower" else _make_ram()
+				# SG2 : modèles Blender animés (`SiegeEnginesFx`), repli procédural.
+				var model := _model_machine(render)
+				_machines[id] = model if model != null else (_make_tower() if render == "tower" else _make_ram())
 				add_child(_machines[id])
 			var machine: Node3D = _machines[id]
 			machine.visible = present
@@ -699,6 +701,23 @@ func _update_machines(units: Array) -> void:
 	for id in _ladders:
 		if not seen.has(id):
 			(_ladders[id] as Node3D).visible = false
+
+
+## SG2 : bélier ou beffroi modélisé (`game/assets/models/siege/`) ; null si absent. La caisse du
+## beffroi est mise à la hauteur du mur, son pont-levis juste au-dessus du chemin de ronde.
+func _model_machine(render: String) -> Node3D:
+	var node := SiegeEnginesFx.instantiate("siege_tower" if render == "tower" else "ram")
+	if node == null or render != "tower":
+		return node
+	var c: Dictionary = SiegeEnginesFx.settings().get("siege_tower", {})
+	var body := node.find_child("Body", true, false) as Node3D
+	var pivot := node.find_child("BridgePivot", true, false) as Node3D
+	if body != null:
+		body.scale.y = (wall_height + 4.0) / float(c.get("model_height", 12.8))
+	if pivot != null:
+		pivot.position.y = wall_height + float(c.get("bridge_above_wall", 0.8))
+		pivot.rotation.x = -PI * 0.5
+	return node
 
 
 ## Tour de siège (beffroi) : caisse de bois sur roues, peaux, pont-levis ; face avant vers +Z local.
