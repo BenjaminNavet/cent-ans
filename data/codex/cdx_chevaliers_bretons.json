@@ -1,0 +1,31 @@
+{
+  "id": "cdx_chevaliers_bretons",
+  "title": "Les chevaliers bretons",
+  "category": "unite",
+  "aliases": [
+    "Chevaliers bretons",
+    "chevalier breton",
+    "noblesse bretonne"
+  ],
+  "era": {
+    "from": "1341",
+    "to": "1453"
+  },
+  "summary": "Petite noblesse guerrière d'un duché ravagé par la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession]] (1341-1364), les chevaliers bretons fournissent à [[cdx_charles_v|Charles V]] ses meilleurs capitaines, de [[cdx_du_guesclin|Bertrand du Guesclin]] à [[cdx_olivier_de_clisson|Olivier de Clisson]].",
+  "body": "La Bretagne compte une noblesse nombreuse et souvent pauvre, que la [[cdx_guerre_de_succession_de_bretagne|guerre de Succession]] met sous les armes pendant plus de vingt ans. [[cdx_charles_de_blois|Charles de Blois]], soutenu par le roi de France, y affronte [[cdx_jean_de_montfort|Jean de Montfort]] puis son fils, soutenus par l'Angleterre. C'est une guerre de garnisons, d'embuscades et de sièges, qui forme des hommes rompus au combat à pied comme à cheval. Le [[cdx_combat_des_trente|combat des Trente]], le 26 mars 1351, oppose ainsi trente chevaliers et écuyers de Josselin, menés par [[cdx_jean_de_beaumanoir|Jean de Beaumanoir]], à trente combattants de la garnison anglo-bretonne de Ploërmel.\n\nÀ Auray, le 29 septembre 1364, Charles de Blois est tué et Du Guesclin fait prisonnier par [[cdx_john_chandos|Jean Chandos]]. Le traité de Guérande (1365) règle la succession, et la chevalerie bretonne passe en masse au service du roi de France. Du Guesclin, connétable en 1370, puis Clisson, connétable en 1380, mènent des compagnies bretonnes qui reprennent le Poitou et la Saintonge ; d'autres suivent Du Guesclin en Castille.\n\nLeur équipement est celui de tous les [[cdx_chevalerie|chevaliers]] du temps : destrier, lance, mailles renforcées de plates, bassinet. Ils portent souvent les armes de leur lignage ou l'hermine ducale. Leur réputation de dureté a un revers : licenciées, certaines de leurs bandes se font [[cdx_grandes_compagnies|routiers]].",
+  "gameplay": "Compagnie de 60 hommes (cavalerie). Recrutement : 1350 livres payées à l'enrôlement ; entretien 125 livres par mois, soit 500 par saison. Caractéristiques : mêlée 74, armure 72 (laisse passer 45 % des coups), moral 82, vitesse 70 (2,8 m/s), charge 86. Exige une province de culture bretonne. La place doit compter assez de nobles (dix fois l'effectif). Charge à la lance : bonus de charge ×1,5 et davantage d'hommes renversés au choc. Pied à terre : ordre irréversible ; vitesse plafonnée à 35, armure +8, plus de charge. À l'assaut d'une place, elle met pied à terre d'elle-même, sans le bonus d'armure. Presque aussi redoutables que les [[cdx_chevalerie|Chevaliers]] pour un peu moins cher, avec un moral supérieur ; mêmes faiblesses face aux pieux et aux piques.",
+  "entity": "unit_breton_knights",
+  "see_also": [
+    "cdx_guerre_de_succession_de_bretagne",
+    "cdx_combat_des_trente",
+    "cdx_du_guesclin",
+    "cdx_olivier_de_clisson",
+    "cdx_chevalerie"
+  ],
+  "sources": [
+    "Guerre de Succession de Bretagne",
+    "Combat des Trente",
+    "Bataille d'Auray",
+    "Bertrand du Guesclin"
+  ]
+}

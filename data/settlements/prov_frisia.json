@@ -5,8 +5,8 @@
     "kind": "city",
     "name": {
       "display": "Groningue",
-      "local": "Grunnen",
-      "local_language": "frison"
+      "local": "Groninghe",
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       6.5665,
@@ -37,7 +37,7 @@
     "kind": "town",
     "name": {
       "display": "Stavoren",
-      "local": "Stavria",
+      "local": "Starum",
       "local_language": "frison"
     },
     "lonlat": [
@@ -52,7 +52,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ancien port hanséatique frison sur le Zuiderzee, jadis l'une des « sept villes » frisonnes.",
+    "description": "Vieux port marchand frison du Zuiderzee, jadis le plus actif de Frise, déjà sur le déclin ; il ne rejoindra la Hanse qu'à la fin du siècle.",
     "sources": [
       "Stavoren"
     ]

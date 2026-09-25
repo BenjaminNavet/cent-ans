@@ -1,0 +1,34 @@
+{
+  "id": "cdx_jeu_recrutement",
+  "title": "Recrutement et armées",
+  "category": "mecanique",
+  "aliases": [
+    "recrutement",
+    "recruter",
+    "recrues",
+    "former une armée",
+    "recrues attendues"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "On recrute dans ses colonies, quelques unités par tour selon leurs bâtiments ; les recrues rejoignent la garnison à la fin du tour, puis on forme une armée et on lui donne un général.",
+  "body": "Au XIVe siècle, une armée royale est une mosaïque. Le roi convoque encore l'[[cdx_ost_feodal|ost]] et l'arrière-ban, mais il compte surtout sur des capitaines qu'il engage par lettres de retenue : chacun amène sa compagnie de [[cdx_hommes_d_armes|gens d'armes]], d'écuyers et d'archers, passés en revue et payés à la « montre ». S'y ajoutent les milices des villes, les arbalétriers génois loués par contrat, les contingents des alliés et des vassaux.\n\nEn Angleterre, les « commissions of array » lèvent dans les comtés archers et fantassins, tandis que les grands seigneurs signent avec le roi des contrats d'« indenture » pour une campagne. Le recrutement dépend donc des régions : le pays de Galles fournit lanciers et archers, la Gascogne ses arbalétriers, la Bretagne ses chevaliers, la Flandre ses piquiers des milices urbaines.\n\nLa grande réforme vient en 1445 avec les [[cdx_compagnies_ordonnance|compagnies d'ordonnance]] de [[cdx_charles_vii|Charles VII]], première armée permanente du royaume, complétée en 1448 par les [[cdx_franc_archer|francs-archers]] levés dans chaque paroisse.",
+  "gameplay": "On recrute dans l'onglet de la colonie (« Recruter »), dans une place qu'on possède et qu'on tient, non assiégée. Une colonie offre 2 recrues par tour, une de plus dans la cité capitale du royaume, et une de plus pour chacun de ces bâtiments (Champ de montre, Arsenal, Haras, Atelier d'engins, Draperie) ; l'édit « Levée de la milice » en ajoute une, la « Paix de Dieu » en retire une. Chaque unité exige parfois un bâtiment de la colonie, une technologie, une période (années de disponibilité), une faction ou une culture ; et la classe dont elle est tirée doit compter, pour la part de la colonie, dix hommes par soldat levé.\n\nLe coût, payé à la commande, suit le niveau des prix de la [[cdx_mutations_monetaires|monnaie]] ; les réductions (bâtiments, édit « Levée de la milice » −10 %) ne descendent pas sous le quart du prix. La recrue rejoint la garnison de la colonie à la fin du tour, avec l'expérience de départ que donnent les bâtiments et le gouverneur. Elle coûte ensuite son [[cdx_jeu_entretien|entretien]] chaque saison.\n\n« Former une armée » en tire des unités de la garnison ; la simulation ne limite pas la taille d'une armée (l'interface affiche une capacité indicative de vingt unités). Un général doit être adulte (15 ans), libre, de la même faction, ne pas gouverner de province et se trouver dans la même province. Sans chef, le moral s'effondre plus vite en bataille. Voir [[cdx_jeu_personnages|personnages]] et [[cdx_jeu_suite|suite]].",
+  "see_also": [
+    "cdx_jeu_entretien",
+    "cdx_jeu_colonies",
+    "cdx_jeu_personnages",
+    "cdx_ost_feodal",
+    "cdx_compagnies_ordonnance",
+    "cdx_franc_archer",
+    "cdx_hommes_d_armes"
+  ],
+  "sources": [
+    "Ost",
+    "Compagnie d'ordonnance",
+    "Francs-archers",
+    "Commission of array"
+  ]
+}

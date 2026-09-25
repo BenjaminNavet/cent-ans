@@ -31,7 +31,7 @@
   ],
   "figure": "infantry_5",
   "equipment": "Goedendag (bâton ferré à pointe de fer, 1,5 m), chapel de fer, gambison ou haubergeon, écu, livrée de la ville.",
-  "description": "Gens des métiers des villes flamandes armés du goedendag, qui assomme le cheval et perce le cavalier tombé ; sans la cohésion des piquiers des métiers mais levés partout en Flandre (Cassel 1328, Roosebeke 1382).",
+  "description": "Gens des métiers des villes flamandes armés du goedendag, qui assomme le cheval et perce le cavalier tombé ; sans la cohésion des [[cdx_piquiers_flamands|piquiers des métiers]] mais levés partout en Flandre ([[cdx_cassel|Cassel]] 1328, [[cdx_roosebeke|Roosebeke]] 1382).",
   "sources": [
     "Goedendag",
     "Bataille de Mont-Cassel (1328)",

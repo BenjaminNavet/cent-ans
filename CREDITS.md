@@ -3,6 +3,10 @@
 Ce fichier recense les œuvres de tiers utilisées par le jeu et leurs licences. Les assets
 produits par les outils du projet (`tools/`) sont signalés comme tels.
 
+Licences du projet : code sous GNU GPL v3.0 ([`LICENSE`](LICENSE)), assets et données originaux sous
+CC BY-SA 4.0 ([`LICENSE-ASSETS.md`](LICENSE-ASSETS.md)). Les œuvres de tiers ci-dessous gardent
+leur licence propre.
+
 ## Icônes — game-icons.net (CC BY 3.0)
 
 Icônes de [game-icons.net](https://game-icons.net) (dépôt
@@ -35,6 +39,45 @@ n'exigent aucune attribution ; ils sont crédités par courtoisie.
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 - « Village Consort » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Crusade » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Celtic Impulse » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Achaidh Cheide » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Angevin B » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Procession of the King » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Master of the Feast » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Minstrel Guild » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Moonlight Hall » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Teller of the Tales » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Suonatore di Liuto » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Galway » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Thatched Villagers » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « The Britons » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Folk Round » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+- « Pippin the Hunchback » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+  Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
+
+### Musique médiévale et Renaissance — Wikimedia Commons (CC BY-SA)
+
+- Estampie « Retrove », Robertsbridge Codex — Metzner, CC BY-SA 3.0.
+- « Chominciamento di gioia » — Ririkuku, CC BY-SA 4.0.
+- Guillaume Dufay, « Se la face ay pale » — Ensemble Asteria, CC BY-SA 2.5.
+- Folía d'Ahigal — Loreto Galindo, tamborilero (Fundación Joaquín Díaz), CC BY-SA 3.0.
+- Diego Ortiz, Recercadas primera et segunda (*Trattado de Glosas*, 1553) — Phillip W. Serna, CC BY-SA 4.0.
+  Sources : `game/assets/third_party/music/wikimedia/SOURCE.md` (Wikimedia Commons).
 
 ### Polices — SIL Open Font License 1.1
 
@@ -110,11 +153,59 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
   © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par l'Union
   européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution. Tuiles lues
   sur le bucket public AWS Open Data `copernicus-dem-90m` (lot R1, ADR 0019).
+- **Relief rapproché (pyramide de relief, palier 2)** : Copernicus DEM GLO-30 Public, © DLR e.V.
+  2010-2014 et © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par
+  l'Union européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution
+  (conditions : https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM).
+  « Copernicus Digital Elevation Model (DEM) was accessed on 2026-09-25 from
+  https://registry.opendata.aws/copernicus-dem. » Les organismes en charge du programme
+  Copernicus n'encourent aucune responsabilité pour l'usage qui en est fait. Modifié : canopée,
+  bâti moderne et retenues de barrages retirés (lot ZG1, ADR 0036). Les tuiles E1-E2 de la
+  pyramide dérivent de GLO-90 (même licence).
+- **Occupation du sol actuelle (correction du relief)** : ESA WorldCover 10 m 2021 v200,
+  © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by
+  ESA WorldCover consortium — licence CC BY 4.0. Citation : *Zanaga, D. et al. (2022). ESA
+  WorldCover 10 m 2021 v200. doi:10.5281/zenodo.7254221* ; accédé le 2026-09-25 depuis
+  https://registry.opendata.aws/esa-worldcover-vito. Sert uniquement à retirer arbres, bâti et
+  plans d'eau modernes du relief GLO-30 (lot ZG1).
 - **Défrichement vers 1340** : KK10 Anthropogenic Land Cover Change — Kaplan, J. O. et
   Krumhardt, K. M. (2017), PANGAEA, doi:10.1594/PANGAEA.871369, licence CC BY 3.0 ; méthode :
   Kaplan et al. (2011), *The Holocene* 21(5), doi:10.1177/0959683610386983. Moyenne 1330-1349,
   combinée aux grandes forêts et zones humides nommées de `data/map/historical_forests.json` et
   `data/map/wetlands.json` (sources par entrée).
+- **Relief détaillé des zones historiques (palier 3, lot ZG3, ADR 0036)** — modèles numériques
+  de terrain sans sursol, rééchantillonnés à 11, 5,6 et 2,8 m :
+  - France : RGE ALTI® 1 m / 5 m, © IGN (Institut national de l'information géographique et
+    forestière), [Licence Ouverte Etalab 2.0](https://www.etalab.gouv.fr/licence-ouverte-open-licence/) ;
+    service WMS-R de la Géoplateforme (`data.geopf.fr`). Mention : « Source : IGN – RGE ALTI® ».
+  - Angleterre : LIDAR Composite Digital Terrain Model (DTM) 1 m, Environment Agency,
+    [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+    Mention : « © Environment Agency copyright and/or database right 2022. All rights reserved. »
+  - Pays-Bas : Actueel Hoogtebestand Nederland (AHN) DTM 0,5 m, Rijkswaterstaat / Het Waterschapshuis,
+    service PDOK, [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (aucune attribution
+    exigée ; citée par courtoisie).
+  - Flandre : Digitaal Hoogtemodel Vlaanderen II (DTM 1 m) et I (DTM 5 m), © Digitaal Vlaanderen,
+    [Modellicentie Gratis Hergebruik v1.0](https://data.vlaanderen.be/doc/licentie/modellicentie-gratis-hergebruik/v1.0)
+    (réutilisation gratuite, y compris commerciale, avec mention de la source).
+  - Repli (Tournai, Wallonie : pas de service à valeurs brutes) : Copernicus DEM GLO-30, © DLR e.V.
+    2010-2014 et © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par
+    l'Union européenne et l'ESA ; licence gratuite avec attribution.
+  - Effacement des aménagements modernes (autoroutes, voies ferrées, carrières, retenues, digues de
+    port) : masques calculés à partir d'OpenStreetMap, © les contributeurs d'OpenStreetMap,
+    [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/) — méthode seulement : aucune donnée
+    OSM n'est redistribuée (masques intermédiaires hors dépôt).
+- **Routes** (`data/map/roads.geojson`) : Itiner-e, *A High-Resolution Dataset of Roads of the
+  Roman Empire* (de Soto, Pažout, Brughmans et al.), Zenodo doi:10.5281/zenodo.17122148, licence
+  CC BY 4.0 ; citation : *de Soto P., Pažout A., Brughmans T. et al. (2025). Itiner-e: A
+  high-resolution dataset of roads of the Roman Empire. Scientific Data.
+  doi:10.1038/s41597-025-06140-z*. Complété par des tronçons calculés par le projet.
+- **Hameaux** (`data/map/hamlets.json`) : [GeoNames](https://www.geonames.org/) `cities500`,
+  © GeoNames, licence CC BY 4.0.
+- **Villes emblématiques** (`data/landmarks/`) : quelques dizaines de points de contrôle de position
+  par ville relevés à la main sur © les contributeurs
+  d'[OpenStreetMap](https://www.openstreetmap.org/copyright) (ODbL 1.0), arrondis. Les plans
+  anciens de Wikimedia Commons cités dans ces fichiers ont servi de référence et ne sont pas
+  redistribués.
 - Traitement (reprojection EPSG:3035, découpage des provinces) : outils `tools/cent_ans_tools/geo`
   (voir `docs/geo.md`).
 

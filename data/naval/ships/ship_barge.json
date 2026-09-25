@@ -18,6 +18,6 @@
   "fire_resistance": 0.05,
   "cost": 500,
   "model": "barge",
-  "description": "Petit navire à voile et à avirons (barge, balinier), vif et maniable : éclaireur, transport de chevaux, course et coups de main sur les côtes.",
+  "description": "Petit navire à voile et à avirons (barge, balinier), plus vif et maniable que la [[cdx_cogue|cogue]] : éclaireur, transport de chevaux, course et coups de main sur les côtes.",
   "sources": ["Balinier", "Guerre de course"]
 }

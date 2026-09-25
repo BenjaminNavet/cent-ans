@@ -1,0 +1,17 @@
+{
+  "id": "cdx_jeu_melee",
+  "title": "La mêlée",
+  "category": "mecanique",
+  "aliases": [
+    "mêlée",
+    "mêlées",
+    "corps à corps",
+    "au contact"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Quand deux lignes se touchent, seuls les premiers rangs frappent ; derrière, on pousse, on attend, on relève les blessés. L'armure décide de qui tombe, le nombre et le moral de qui tient.",
+  "body": "La mêlée médiévale n'est pas une foule de duels. Deux lignes serrées se heurtent, et seuls les premiers rangs échangent des coups, à la lance raccourcie, à la hache d'armes, au maillet ou à l'épée ; les rangs suivants poussent, comblent les vides et remplacent les hommes tombés. Contre un homme couvert de plates, il faut chercher les défauts de l'armure, le renverser, puis l'achever à la dague ou le prendre à [[cdx_rancon|rançon]].\n\nÀ [[cdx_poitiers|Poitiers]], le corps à corps entre les hommes d'armes à pied dure des heures, par reprises, jusqu'à la charge de flanc du captal de Buch qui décide de la journée. Le [[cdx_combat_des_trente|combat des Trente]] (1351), mêlée arrangée entre trente Bretons et trente Anglo-Bretons, s'interrompt même pour laisser souffler et boire les combattants.\n\nLe [[cdx_harnois|harnois]] de plates rend un homme d'armes presque invulnérable aux coups d'un milicien mal armé : c'est pourquoi quelques centaines de chevaliers peuvent tenir tête à des milliers de piétons, et pourquoi ceux-ci ont appris à les combattre avec des piques, des goedendags ou des fossés.",
+  "gameplay": "Deux régiments ennemis à moins de 2,5 m sont au contact. Chaque seconde, un régiment tue environ : combattants du front × mêlée/100 × armure de la cible × 0,035. Le front compte deux rangs en ligne, trois en [[cdx_jeu_formations|coin]], les quatre faces d'un schiltron ; les hommes renversés par une [[cdx_jeu_charge|charge]] ne comptent pas. L'armure de la cible (armure du type, plus le bonus de défense de son général) laisse passer 1 − armure/130 des coups : des chevaliers (armure 80) n'encaissent que 38 % des coups, une milice (armure 30) 77 %.\n\nModificateurs : ×1,5 de [[cdx_jeu_flancs|flanc]], ×2 de dos, ×1,5 contre un régiment en déroute, bonus de charge les 4 premières secondes, ×(1 + expérience/20), ×(1 − fatigue/250), ×(0,6 + moral/250). Cavaliers contre piquiers : ×0,7 contre des piquiers en ligne, ×0,25 contre des piquiers en schiltron, ×0,4 contre d'autres fantassins en schiltron ; piquiers contre cavaliers : ×1,8. Sur une échelle, on frappe à 30 % et l'on reçoit le double.\n\nUn régiment au contact se retourne lentement (3° par seconde à pied) : l'avantage d'un flanc pris dure. Le général qui combat risque d'être tué à chaque coup reçu. Conseil : engagez l'infanterie lourde contre les troupes légères, fixez l'ennemi de face et frappez de flanc.",
+  "see_also": ["cdx_jeu_charge", "cdx_jeu_flancs", "cdx_jeu_formations", "cdx_jeu_moral", "cdx_harnois", "cdx_hommes_d_armes"],
+  "sources": ["Bataille de Poitiers (1356)", "Combat des Trente", "Armure de plates"]
+}

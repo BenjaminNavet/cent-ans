@@ -731,6 +731,10 @@ pub struct CampaignState {
     /// from older saves; no change of [`STATE_VERSION`]).
     #[serde(default)]
     pub naval: crate::naval::NavalState,
+    /// Lot DF1: difficulty level, frozen after the first turn (absent from
+    /// older saves, which load as `normal`; no change of [`STATE_VERSION`]).
+    #[serde(default)]
+    pub difficulty: crate::difficulty::Difficulty,
     /// Lot M3: the AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -772,6 +776,7 @@ impl CampaignState {
             victory_streak: 0,
             agents: crate::agents::AgentsState::default(),
             naval: crate::naval::NavalState::default(),
+            difficulty: crate::difficulty::Difficulty::Normal,
             ai_turn: None,
         }
     }

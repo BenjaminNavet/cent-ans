@@ -83,7 +83,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Seigneurie des Montefeltro, vicaires pontificaux depuis 1234.",
+    "description": "Seigneurie des comtes de Montefeltro, maîtres d'Urbino depuis 1234, gibelins souvent en lutte contre le pouvoir pontifical.",
     "sources": [
       "Urbino",
       "Montefeltro"
@@ -110,7 +110,7 @@
       "bld_scriptorium"
     ],
     "port": false,
-    "description": "Ermitage camaldule des Marches, cité par Dante dans le Paradis.",
+    "description": "Ermitage bénédictin des Marches, fondé vers 980 et illustré par saint Pierre Damien, cité par Dante dans le Paradis. Il ne sera rattaché aux Camaldules qu'en 1569.",
     "sources": [
       "Fonte Avellana"
     ]

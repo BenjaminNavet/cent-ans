@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/difficulty_rules.schema.json",
+  "title": "Niveaux de difficulté de la campagne",
+  "description": "Fichier data/rules/difficulty.json (lot DF1, ADR 0037) : quatre niveaux choisis au lancement de la campagne et figés pour la partie. Chaque niveau porte des modificateurs chiffrés ; « normal » est entièrement neutre (100 %, 0).",
+  "type": "object",
+  "$defs": {
+    "level_id": { "enum": ["easy", "normal", "hard", "very_hard"] },
+    "percent": { "type": "integer", "minimum": 25, "maximum": 300 },
+    "level": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/level_id", "description": "Identifiant du niveau." },
+        "label": { "type": "string", "minLength": 1, "description": "Libellé affiché (français)." },
+        "description": { "type": "string", "minLength": 1, "description": "Description courte affichée dans l'info-bulle." },
+        "ai_income_percent": { "$ref": "#/$defs/percent", "description": "Revenus (impôts et commerce) des factions IA, en % du normal." },
+        "player_income_percent": { "$ref": "#/$defs/percent", "description": "Revenus du joueur, en % du normal." },
+        "ai_upkeep_percent": { "$ref": "#/$defs/percent", "description": "Entretien des armées et garnisons IA, en % du normal." },
+        "ai_recruit_cost_percent": { "$ref": "#/$defs/percent", "description": "Coût de recrutement des unités IA, en % du normal." },
+        "player_unrest": { "type": "integer", "minimum": -30, "maximum": 30, "description": "Points ajoutés à l'agitation visée de chaque classe dans les provinces tenues par le joueur (négatif = plus calme)." },
+        "ai_attitude_to_player": { "type": "integer", "minimum": -50, "maximum": 50, "description": "Points ajoutés à l'attitude de chaque faction IA envers le joueur (négatif = plus hostile)." },
+        "ai_war_ratio_percent": { "$ref": "#/$defs/percent", "description": "Rapport de forces qu'une IA exige avant de déclarer la guerre au joueur, en % du normal (moins = plus agressive)." },
+        "ai_morale_vs_player": { "type": "integer", "minimum": -30, "maximum": 30, "description": "Bonus de moral des armées IA qui affrontent le joueur (bataille 3D et auto-résolution)." }
+      },
+      "required": [
+        "id",
+        "label",
+        "description",
+        "ai_income_percent",
+        "player_income_percent",
+        "ai_upkeep_percent",
+        "ai_recruit_cost_percent",
+        "player_unrest",
+        "ai_attitude_to_player",
+        "ai_war_ratio_percent",
+        "ai_morale_vs_player"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "default": { "$ref": "#/$defs/level_id", "description": "Niveau proposé par défaut au lancement." },
+    "levels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/level" },
+      "minItems": 4,
+      "maxItems": 4,
+      "description": "Les quatre niveaux, du plus facile au plus difficile (ordre d'affichage)."
+    }
+  },
+  "required": ["default", "levels"],
+  "additionalProperties": false
+}
