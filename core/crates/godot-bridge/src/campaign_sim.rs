@@ -608,6 +608,7 @@ pub(crate) fn units_array(data: &GameData, units: &[Unit]) -> VarArray {
                 "strength" => i64::from(unit.strength),
                 "max_strength" => i64::from(unit.max_strength),
                 "morale" => i64::from(unit.morale),
+                "experience" => i64::from(unit.experience),
             }
             .to_variant()
         })

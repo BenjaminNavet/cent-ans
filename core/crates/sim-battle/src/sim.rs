@@ -1861,6 +1861,7 @@ impl BattleSim {
         let kills = kills.min(self.units[t].hp);
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
+        self.units[i].kills += kills;
         if kills > 0.0 {
             self.units[t].missile_timer = 0.0;
         }
@@ -2043,6 +2044,9 @@ impl BattleSim {
         let n = self.units.len();
         let mut damage = vec![0.0; n];
         let mut flanked = vec![0u8; n];
+        // UB1: (striker, victim, damage) to credit the kills once capped.
+        let mut credit: Vec<(usize, usize, f64)> = Vec::new();
+        let mut dealt_ratio = vec![0.0; n];
         for i in 0..n {
             let unit = &self.units[i];
             if !unit.present() || contacts[i].is_empty() || unit.state == UnitState::Routing {
@@ -2055,7 +2059,9 @@ impl BattleSim {
                 continue;
             };
             let defender = &self.units[p];
-            damage[p] += self.melee_damage(unit, defender);
+            let blow = self.melee_damage(unit, defender);
+            damage[p] += blow;
+            credit.push((i, p, blow));
             match attack_angle(defender, unit.x, unit.z) {
                 1 => flanked[p] |= 1,
                 2 => flanked[p] |= 2,
@@ -2073,6 +2079,7 @@ impl BattleSim {
             }
             let before = unit.hp;
             let dealt = damage[i].min(unit.hp);
+            dealt_ratio[i] = dealt / damage[i];
             unit.hp -= dealt;
             unit.tick_losses += dealt;
             if unit.is_general && self.general_alive[unit.side.index()] {
@@ -2084,6 +2091,9 @@ impl BattleSim {
             if self.units[i].hp <= 0.0 {
                 self.unit_destroyed(i);
             }
+        }
+        for (striker, victim, blow) in credit {
+            self.units[striker].kills += blow * dealt_ratio[victim];
         }
     }
 
