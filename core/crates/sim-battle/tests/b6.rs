@@ -166,6 +166,9 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// and are taken under heavy losses (same winners; digests recomputed).
 /// R4: seeds 3 and 11 after the military crest, same winner. Digests
 /// recomputed after merging R4 into the EP lots (same winners).
+/// ADR 0052 (horses panic under the arrows): seeds 3 and 11 now go to the
+/// English, whose knights screen their archers; over seeds 0-63 the French
+/// win 38/64 instead of 58/64.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [

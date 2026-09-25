@@ -2194,10 +2194,11 @@ impl BattleSim {
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
         self.units[i].kills += kills;
-        // ADR 0051: the arrows wound the horses too, and they panic.
+        // ADR 0052: the arrows wound the horses too, and they panic, unless
+        // the riders are already locked in a melee.
         let target = &self.units[t];
         self.units[t].morale -= crate::missile_morale::MissileMoraleRules::bundled().panic(
-            target.mounted,
+            target.mounted && target.state != UnitState::Melee,
             kills,
             target.max_soldiers,
         );

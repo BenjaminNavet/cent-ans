@@ -1,4 +1,4 @@
-//! Morale under missiles (ADR 0051).
+//! Morale under missiles (ADR 0052).
 //!
 //! An arrow or a bolt that strikes a mounted regiment wounds horses as well
 //! as riders: the maddened horses rear, throw their riders and turn back into
