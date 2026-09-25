@@ -7,8 +7,12 @@ Branche : `worktree-agent-a2b33defc792e3eab` (main 2452ef13).
 - [x] Étendre `century_probe` (révoltes, sièges et leur issue, boule de neige 1437/1453,
       factions éliminées, droit de passage) : tableau « EQ4 — tableau combiné ».
 - [x] Mesure de référence (main) : 5 graines × 464 tours × 4 niveaux + `balance_probe` 8 × 200.
-- [ ] Correctif révoltes (sous la cible 4-10) par les données : essai A = Paix de Dieu
-      trouble -8 → -6, piété 2 → 1.
+- [x] Essai A (Paix de Dieu trouble -8 → -6, piété 2 → 1) : révoltes 3,1 → 5,4 sur les graines
+      1-8, mais la référence donne 7,1 sur les graines 9-16 (A : 7,2) ; 16 graines : 5,1 sans,
+      6,3 avec. Pas de dérive réelle : **annulé**.
+- [x] Essai B (facile : `ai_upkeep_percent` 100 → 90) contre les banqueroutes chroniques
+      (Suisses, Gueldre) : 10 graines, 0,44 / fac. / déc., boucles toujours là : **annulé**.
+- [ ] main fusionné (SV2 coûts en ressources, SV4) : nouvelle mesure complète en cours.
 - [ ] Addendum ADR.
 
 ## Référence main (2452ef13)
@@ -23,4 +27,5 @@ Facile 56 % (2/5) ; difficile 53 % (1/5) ; très difficile 51 % (2/5), Angleterr
 des provinces.
 
 ## Prochaine étape
-Mesurer l'essai A (`balance_probe` 8 × 200, `century_probe` normal et difficile).
+Tableau final sur main fusionné (`run_final` : normal 10 graines, autres 5, balance 16),
+puis rédaction et addendum ADR 0054.
