@@ -23,7 +23,9 @@ fine, routes drapées, ancrages et parcellaire de près (lot ZG5b) ».
 - [x] lecture, store, lit, rubans, fondu, ancrages, parcellaire, splat, détail, qualité, test
 - [x] fusions de `main` (ZG4, PF1, PB1)
 - [x] doc `docs/godot-map.md`
-- [ ] captures `docs/img/zg5b/` (en cours) et mesures dans la doc
+- [x] captures `docs/img/zg5b/` et mesures dans la doc ; smoke OK, tests zg2/zg5b OK
+
+## État : terminé (à fusionner)
 
 ## Points ouverts (pour la fusion)
 - Fichiers partagés avec ZG4 : `campaign_map.gd` (2 lignes : `attach_roads`, `flush_fine` ; ponts

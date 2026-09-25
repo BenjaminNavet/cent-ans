@@ -1022,6 +1022,26 @@ Trois crochets d'une ligne dans `terrain.gdshader`, logique dans `fine_parcels.g
 - Banc : `--bench-map` imprime aussi `fine_update_ms_avg/max`, `fine_builds`, `fine_build_ms_avg`,
   `fine_install_ms_max`, `carved_pages`.
 
+Mesures (25/09, banc complet `--bench-map`, 1 280 × 720, machine partagée à une charge de 30-45 :
+relatives seulement ; A/B `--no-fine-geo`) : 36,9 contre 41,6 i/s (descente 36,7 / 43,2), médiane
+20,0 / 20,1 ms, 99ᵉ centile 167 / 115 ms ; `FineGeoLayer.update_view` 0,30 ms par image en moyenne
+(35 ms au pire : bascule des ponts) ; installation d'une tuile ≤ 2,4 ms ; 874 pages creusées (≈ 20 ms de
+fil chacune sous charge), 181 maillages de tuile (≈ 200 ms de fil) ; `update_view` du quadtree 4,1 contre
+2,6 ms. Le surcoût vient surtout de la concurrence des fils de travail sur une machine saturée. En vue
+stratégique (au-delà du palier comté), le calque est éteint ; seules les pages ≥ E3 (jamais chargées de
+loin) sont creusées.
+
+Captures avant / après (`docs/img/zg5b/<lieu>_<comte|pres>_<avant|apres>.jpg`, temps clair, été,
+comté d = 22, près d = 1,2-1,5) : Rouen (Seine en aval de la ville), Orléans (Loire, pont de Beaugency),
+Bordeaux (Garonne à marée : vasières), Londres (Tamise à marée en aval de la City), bocage normand
+(Vire), openfield de Beauce. Villes emblématiques (zones personnalisées) : rien de fin dedans, comme V4
+(London Bridge et les ponts de Rouen relèvent de VH4). La bande rouge verticale au-dessus de Rouen des
+captures « comté » existe aussi sans ZG5b (autre calque).
+
+![Loire à Beaugency, pont sur son ancrage fin](img/zg5b/orleans_pres_apres.jpg)
+![Garonne à marée en aval de Bordeaux](img/zg5b/bordeaux_pres_apres.jpg)
+![Bocage normand](img/zg5b/bocage_pres_apres.jpg)
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
