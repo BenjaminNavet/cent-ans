@@ -60,6 +60,9 @@ PALETTE = {
     "Paving": ((0.40, 0.37, 0.31), 0.95),
     "Canvas": ((0.66, 0.61, 0.49), 0.9),
     "Vine": ((0.16, 0.19, 0.07), 0.95),
+    "Whitewash": ((0.78, 0.76, 0.70), 0.85),
+    "Brick": ((0.42, 0.17, 0.09), 0.9),
+    "Ochre": ((0.66, 0.53, 0.36), 0.88),
 }
 
 Z_WATER = 0.004
@@ -216,6 +219,11 @@ def build_ground(plan, layers, rng):
         faces = [(i, n + i, n + i + 1, i + 1) for i in range(n - 1)]
         ground.add("Water", verts, faces)
         waters.append(left + list(reversed(right)))
+    for water in plan.data.get("waters", []):
+        poly = plan.polygon(water["polygon"])
+        kind = water.get("kind", "water")
+        ground.add("Garden" if kind == "marsh" else "Water", *g.flat(poly, Z_WATER))
+        waters.append(poly)
     islands = []
     for island in plan.data.get("islands", []):
         poly = plan.polygon(island["polygon"])
@@ -234,6 +242,7 @@ def build_ground(plan, layers, rng):
             "garden": "Garden",
             "cemetery": "Garden",
             "vineyard": "Vine",
+            "hill": "Grass",
         }.get(kind, "Paving")
         ground.add(mat, *g.flat(poly, Z_ISLAND + 0.002))
     return waters, islands, opens
@@ -466,22 +475,94 @@ def build_bridge(plan, site, bridge, layer, rng):
         anchor=mid,
     )
     c, s = math.cos(angle), math.sin(angle)
-    piers = max(2, int(length / 0.06))
+    piers = bridge.get("arches") or max(2, int(length / 0.06))
+    pier_w = 0.012 if stone else 0.006
     for k in range(1, piers):
         t = k / piers - 0.5
         px, py = mid[0] + c * t * length, mid[1] + s * t * length
         layer.add(
             mat,
-            *g.box(
-                px, py, -0.02, 0.012 if stone else 0.006, half * 2.1, deck + 0.01, angle
-            ),
+            *g.box(px, py, -0.02, pier_w, half * 2.1, deck + 0.01, angle),
             anchor=mid,
         )
+        if stone and "arches" in bridge:
+            # Starlings: pointed cutwaters around the pier, upstream and downstream.
+            ext = half * 1.6
+            local = [
+                (-pier_w, -ext * 0.8),
+                (0.0, -ext),
+                (pier_w, -ext * 0.8),
+                (pier_w, ext * 0.8),
+                (0.0, ext),
+                (-pier_w, ext * 0.8),
+            ]
+            poly = [(px + lx * c - ly * s, py + lx * s + ly * c) for lx, ly in local]
+            layer.add(mat, *g.prism(poly, -0.02, deck * 0.35), anchor=mid)
+    # Features on the deck: chapel, gatehouses, drawbridge (fractions from ``from``).
+    busy = []
+    k_house = plan.a * plan.house_scale * plan.height_scale
+
+    def along(t):
+        return (mid[0] + c * (t - 0.5) * length, mid[1] + s * (t - 0.5) * length)
+
+    if "chapel_at" in bridge:
+        t = bridge["chapel_at"]
+        cx, cy = along(t)
+        # Chapel on an enlarged pier, on the downstream side, choir across the river.
+        ox, oy = -s * half * 1.3, c * half * 1.3
+        layer.add(
+            mat,
+            *g.box(cx + ox, cy + oy, -0.02, 0.05, half * 2.4, deck + 0.01, angle),
+            anchor=mid,
+        )
+        transform = g.Transform(
+            (cx + ox, cy + oy),
+            angle + math.pi / 2,
+            plan.a * plan.house_scale * 0.8,
+            k_house * 0.8,
+            z0=deck,
+        )
+        for part_mat, shape in monuments.church(0.9, tower_spire=False):
+            verts, faces = transform.apply(shape)
+            layer.add(part_mat, verts, faces, anchor=mid)
+        busy.append((t, 0.06 / max(length, 1e-6) * 1.4))
+    for t in bridge.get("gatehouses_at", []):
+        gx, gy = along(t)
+        gw = half * 2.3
+        layer.add(
+            "WallStone",
+            *g.box(gx, gy, deck - 0.01, gw * 0.9, gw, k_house * 18.0, angle),
+            anchor=mid,
+        )
+        for side in (-1, 1):
+            tx, ty = gx - s * side * gw / 2, gy + c * side * gw / 2
+            layer.add(
+                "WallStone",
+                *g.cylinder(tx, ty, -0.02, gw * 0.22, deck + k_house * 22.0, 8),
+                anchor=mid,
+            )
+            layer.add(
+                "Slate",
+                *g.cone(tx, ty, deck + k_house * 22.0, gw * 0.24, gw * 0.4, 8),
+                anchor=mid,
+            )
+        busy.append((t, gw / max(length, 1e-6)))
+    if "drawbridge_at" in bridge:
+        t = bridge["drawbridge_at"]
+        dx, dy = along(t)
+        span = 0.03
+        # Raised leaf (tilted about its landward edge).
+        hinge = (dx - c * span / 2, dy - s * span / 2, deck)
+        tip = (dx - c * span * 0.1, dy - s * span * 0.1, deck + span * 0.8)
+        layer.add("Wood", *g.beam(hinge, tip, half * 1.4, 0.004), anchor=mid)
+        busy.append((t, span * 1.2 / max(length, 1e-6)))
     if bridge.get("inhabited", False):
         step = 0.034
         count = int(length / step)
         for k in range(count):
             t = (k + 0.5) / count - 0.5
+            if any(abs(t + 0.5 - bt) < bw for bt, bw in busy):
+                continue
             for side in (-1, 1):
                 hx = mid[0] + c * t * length - s * side * half * 0.62
                 hy = mid[1] + s * t * length + c * side * half * 0.62
@@ -509,7 +590,7 @@ def build_monument(plan, site, monument, layers, variant=""):
         (x, y), math.radians(monument.get("angle_deg", 0.0)), k, k * plan.height_scale
     )
     builder = monuments.BUILDERS[monument["model"]]
-    parts = builder(monument.get("size", 1.0), variant)
+    parts = builder(monument.get("size", 1.0), variant, monument.get("params", {}))
     layer_name = (
         monument["id"]
         if not active(monument) or monument.get("variant_from_year")
@@ -557,7 +638,16 @@ def house(layer, x, y, z, width, depth, height, angle, rng, anchor=None, roof=No
     roof = roof or pick(rng, ROOFS)
     layer.add(
         wall,
-        *g.box(x, y, z - g.FOUNDATION, width, depth, height + g.FOUNDATION, angle),
+        *g.box(
+            x,
+            y,
+            z - g.FOUNDATION,
+            width,
+            depth,
+            height + g.FOUNDATION,
+            angle,
+            top=False,
+        ),
         anchor=anchor,
         color=color,
     )
@@ -834,6 +924,63 @@ def export(bpy, layers, out_path):
     )
 
 
+def compact_glb(path):
+    """Store the tint colours as normalised bytes (core glTF) instead of shorts: -9 % of the file.
+
+    Rebuilds the binary chunk (each buffer view repacked, 4-byte aligned). Returns the new size.
+    """
+    import struct
+
+    blob = path.read_bytes()
+    json_len = struct.unpack("<I", blob[12:16])[0]
+    doc = json.loads(blob[20 : 20 + json_len])
+    bin_start = 20 + json_len + 8
+    binary = blob[bin_start:]
+    views = doc["bufferViews"]
+    data = [
+        bytearray(
+            binary[v.get("byteOffset", 0) : v.get("byteOffset", 0) + v["byteLength"]]
+        )
+        for v in views
+    ]
+    colors = {
+        prim["attributes"]["COLOR_0"]
+        for mesh in doc["meshes"]
+        for prim in mesh["primitives"]
+        if "COLOR_0" in prim["attributes"]
+    }
+    for index in colors:
+        accessor = doc["accessors"][index]
+        if accessor["componentType"] != 5123 or accessor.get("byteOffset", 0):
+            continue
+        view = accessor["bufferView"]
+        count = accessor["count"] * (4 if accessor["type"] == "VEC4" else 3)
+        shorts = struct.unpack(f"<{count}H", data[view][: count * 2])
+        data[view] = bytearray(bytes((v * 255 + 32767) // 65535 for v in shorts))
+        views[view].pop("byteStride", None)
+        accessor["componentType"] = 5121
+    out = bytearray()
+    for view, chunk in zip(views, data, strict=True):
+        out += b"\0" * (-len(out) % 4)
+        view["byteOffset"] = len(out)
+        view["byteLength"] = len(chunk)
+        out += chunk
+    out += b"\0" * (-len(out) % 4)
+    doc["buffers"][0]["byteLength"] = len(out)
+    text = json.dumps(doc, separators=(",", ":")).encode()
+    text += b" " * (-len(text) % 4)
+    total = 12 + 8 + len(text) + 8 + len(out)
+    header = struct.pack("<4sII", b"glTF", 2, total)
+    path.write_bytes(
+        header
+        + struct.pack("<I4s", len(text), b"JSON")
+        + text
+        + struct.pack("<I4s", len(out), b"BIN\0")
+        + bytes(out)
+    )
+    return total
+
+
 def main() -> None:
     """Parse ``-- <landmark.json> <out.glb>`` and build the model."""
     import bpy
@@ -851,6 +998,7 @@ def main() -> None:
     meters_per_px = json.loads(map_json.read_text(encoding="utf-8"))["meters_per_px"]
     layers = build(landmark, meters_per_px, siege=siege)
     export(bpy, layers, Path(args[1]))
+    print(f"SIZE {compact_glb(Path(args[1])) / 1e6:.2f} MB")
     print("OK")
 
 

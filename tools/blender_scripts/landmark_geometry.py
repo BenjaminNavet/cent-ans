@@ -180,8 +180,11 @@ def polyline_normals(points):
 # --- 3D shapes (local frame) -----------------------------------------------------------
 
 
-def box(cx, cy, z0, sx, sy, h, angle=0.0, bottom=False):
-    """Box of footprint ``sx`` x ``sy`` centred on (cx, cy), from z0 to z0 + h."""
+def box(cx, cy, z0, sx, sy, h, angle=0.0, bottom=False, top=True):
+    """Box of footprint ``sx`` x ``sy`` centred on (cx, cy), from z0 to z0 + h.
+
+    ``top`` False drops the lid (hidden under a roof: fewer vertices in the glTF).
+    """
     c, s = math.cos(angle), math.sin(angle)
     corners = []
     for lx, ly in (
@@ -192,7 +195,9 @@ def box(cx, cy, z0, sx, sy, h, angle=0.0, bottom=False):
     ):
         corners.append((cx + lx * c - ly * s, cy + lx * s + ly * c))
     verts = [(x, y, z0) for x, y in corners] + [(x, y, z0 + h) for x, y in corners]
-    faces = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7), (4, 5, 6, 7)]
+    faces = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+    if top:
+        faces.append((4, 5, 6, 7))
     if bottom:
         faces.append((3, 2, 1, 0))
     return verts, faces
