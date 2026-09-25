@@ -1,7 +1,8 @@
 //! `CampaignSim` trade API (lot C5): routes for the map layer, tooltip and
-//! the faction panel's « Commerce » section. Read only; agreements go
-//! through `submit_order({"type": "propose_trade_agreement", ...})` /
-//! `break_trade_agreement`, already generic (`Order` derives `Deserialize`).
+//! the faction panel's « Commerce » section. Read only; agreements are a
+//! treaty article (`submit_order({"type": "propose_treaty", "articles":
+//! [{"kind": "trade_agreement"}], ...})`, lot DP1, ADR 0012) and end with
+//! `break_trade_agreement` (`Order` derives `Deserialize`).
 
 use godot::prelude::*;
 use sim_campaign::trade::{trade_routes, TradeMode, TradeRouteView};

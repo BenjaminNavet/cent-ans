@@ -224,6 +224,11 @@ pub enum Order {
     ProposeAlliance {
         target: FactionId,
     },
+    /// Lot DP1: a treaty of several articles (`negotiation::Article`).
+    ProposeTreaty {
+        target: FactionId,
+        articles: Vec<crate::negotiation::Article>,
+    },
     BreakAlliance {
         target: FactionId,
     },
@@ -342,12 +347,8 @@ pub enum Order {
         agent: crate::agents::AgentId,
     },
     // ----- C5: trade (`trade.rs`) --------------------------------------------
-    /// Proposes a formal trade agreement to `target` (diplomacy flow, like
-    /// `ProposeAlliance`).
-    ProposeTradeAgreement {
-        target: FactionId,
-    },
-    /// Ends an existing trade agreement with `target`.
+    /// Ends an existing trade agreement with `target` (agreements are
+    /// concluded by a treaty article, `ProposeTreaty`, lot DP1; ADR 0012).
     BreakTradeAgreement {
         target: FactionId,
     },
@@ -705,10 +706,10 @@ impl CampaignState {
             Order::ProposeAlliance { target } => {
                 Ok(self.propose(data, faction, &target, Proposal::Alliance)?)
             }
-            Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
-            Order::ProposeTradeAgreement { target } => {
-                Ok(self.propose(data, faction, &target, Proposal::TradeAgreement)?)
+            Order::ProposeTreaty { target, articles } => {
+                Ok(self.propose(data, faction, &target, Proposal::Treaty { articles })?)
             }
+            Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
             Order::BreakTradeAgreement { target } => {
                 Ok(self.break_trade_agreement(data, faction, &target)?)
             }

@@ -4,6 +4,7 @@
 use std::path::PathBuf;
 
 use data_model::{FactionId, GameData};
+use sim_campaign::negotiation::{self, Article};
 use sim_campaign::{trade, CampaignState, SiegeState};
 
 fn data() -> GameData {
@@ -27,6 +28,13 @@ fn france(data: &GameData, seed: u64) -> CampaignState {
         faction.embargoes.clear();
     }
     state
+}
+
+/// Lot DP1 treaty with the single trade-agreement article: the only way an
+/// agreement is formed (ADR 0012, unification C5/DP1).
+fn sign_trade_treaty(state: &mut CampaignState, data: &GameData, a: &str, b: &str) {
+    negotiation::apply_treaty(state, data, &fac(a), &fac(b), &[Article::TradeAgreement])
+        .expect("trade treaty applies");
 }
 
 fn bruges_londres(routes: &[trade::TradeRouteView]) -> &trade::TradeRouteView {
@@ -130,19 +138,12 @@ fn trade_agreement_raises_the_route_value() {
     let routes_before = trade::trade_routes(&state, &data);
     let base = bruges_londres(&routes_before).total_value();
 
-    state
-        .factions
-        .get_mut(&fac("fac_flanders"))
-        .unwrap()
-        .trade_agreements
-        .insert(fac("fac_england"));
-    state
-        .factions
-        .get_mut(&fac("fac_england"))
-        .unwrap()
-        .trade_agreements
-        .insert(fac("fac_flanders"));
+    sign_trade_treaty(&mut state, &data, "fac_flanders", "fac_england");
 
+    assert!(state.factions[&fac("fac_flanders")]
+        .ledger
+        .trade_agreements
+        .contains(&fac("fac_england")));
     let routes_after = trade::trade_routes(&state, &data);
     let route = bruges_londres(&routes_after);
     assert!(route.agreement);
@@ -181,18 +182,7 @@ fn campaign_with_trade_is_deterministic() {
 fn trade_state_survives_saves_and_old_saves_load() {
     let data = data();
     let mut state = france(&data, 8);
-    state
-        .factions
-        .get_mut(&fac("fac_flanders"))
-        .unwrap()
-        .trade_agreements
-        .insert(fac("fac_england"));
-    state
-        .factions
-        .get_mut(&fac("fac_england"))
-        .unwrap()
-        .trade_agreements
-        .insert(fac("fac_flanders"));
+    sign_trade_treaty(&mut state, &data, "fac_flanders", "fac_england");
     state.end_turn(&data);
     let json = state.save_json();
     let loaded = CampaignState::load_json(&json).unwrap();
@@ -202,12 +192,29 @@ fn trade_state_survives_saves_and_old_saves_load() {
     let mut value: serde_json::Value = serde_json::from_str(&json).unwrap();
     for faction in value["factions"].as_object_mut().unwrap().values_mut() {
         let f = faction.as_object_mut().unwrap();
-        for key in ["trade_agreements", "trade_income_last_turn"] {
-            f.remove(key);
-        }
+        f.remove("trade_income_last_turn");
     }
     let old = CampaignState::load_json(&value.to_string()).expect("old save loads");
     let f = &old.factions[&fac("fac_flanders")];
-    assert!(f.trade_agreements.is_empty());
     assert_eq!(f.trade_income_last_turn, 0);
+    assert!(old.has_trade_agreement(&fac("fac_flanders"), &fac("fac_england")));
+}
+
+#[test]
+fn trade_article_counts_common_routes_in_the_evaluation() {
+    let data = data();
+    let state = france(&data, 9);
+    let (flanders, england) = (fac("fac_flanders"), fac("fac_england"));
+    assert!(trade::common_routes(&state, &data, &flanders, &england) > 0);
+    let verdict = negotiation::evaluate_treaty(
+        &state,
+        &data,
+        &flanders,
+        &england,
+        &[Article::TradeAgreement],
+    );
+    assert!(verdict.articles[0]
+        .reasons
+        .iter()
+        .any(|(text, value)| text == "Routes commerciales communes" && *value > 0));
 }
