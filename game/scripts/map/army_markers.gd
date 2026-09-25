@@ -219,8 +219,14 @@ func plate_text(army_id: String) -> String:
 ## Armée la plus proche du point écran dans `PICK_RADIUS_PX` (étendard, figurines ou plaque),
 ## sinon "".
 func pick_screen(screen_position: Vector2) -> String:
+	return str(pick_screen_scored(screen_position).get("id", ""))
+
+
+## Q2 : comme `pick_screen`, avec `score` (distance / `PICK_RADIUS_PX` ; 0 sur la plaque) pour
+## départager une armée et une colonie sous le même clic ; {} si rien.
+func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	if camera == null:
-		return ""
+		return {}
 	var best := ""
 	var best_distance := PICK_RADIUS_PX
 	for id in _markers:
@@ -234,8 +240,8 @@ func pick_screen(screen_position: Vector2) -> String:
 				best = id
 		var plate: PanelContainer = _plates.get(id)
 		if plate != null and plate.visible and plate.get_global_rect().has_point(screen_position):
-			return id
-	return best
+			return {"id": id, "score": 0.0}
+	return {"id": best, "score": best_distance / PICK_RADIUS_PX} if best != "" else {}
 
 
 ## Lot M4 (animation) : pose le marqueur de `army_id` au point carte `point`, tourné vers
