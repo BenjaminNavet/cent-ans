@@ -11,10 +11,10 @@ Branche `sv2-unit-resources`. Réutilise le mécanisme B7c (ADR 0053) des chanti
 - Pas d'ordre d'annulation de recrutement : rien à rembourser.
 
 ## État
-- [ ] cœur (orders, state, buildings::free_supply)
+- [x] cœur (orders, state, buildings::free_supply) + tests
 - [ ] pont + UI + bulle
-- [ ] IA (offre locale suivie au fil des recrues du tour)
+- [x] IA (offre locale suivie au fil des recrues du tour, `reprice_recruits`)
 - [ ] tests, docs
 
 ## Prochaine étape
-Implémenter le cœur.
+Pont GDExtension (`recruit_option_dict`), UI de recrutement, bulle.
