@@ -15,6 +15,7 @@ const M_LOOP := 0
 const M_CYCLE := 1
 const M_VOLLEY := 2
 const M_CUSTOM := 3
+const M_SPLIT := 4  # SG1 : escalade (premiers soldats sur les échelles, le reste au pied du mur)
 
 static var _manifest: Dictionary = {}
 static var _loaded: bool = false
@@ -227,7 +228,7 @@ const STYLES := {
 		"charging": {"set": ["run"], "speed": 1.05},
 		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.3},
 		"routing": {"set": ["run"], "speed": 1.1},
-		"climbing": {"set": ["run"]},
+		"climbing": {"set": ["climb", "guard", "idle"], "mode": M_SPLIT},
 	},
 	"militia": {
 		"idle": {"set": ["idle", "guard"]},
@@ -236,6 +237,7 @@ const STYLES := {
 		"charging": {"set": ["run"]},
 		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.5},
 		"routing": {"set": ["run"], "speed": 1.15},
+		"climbing": {"set": ["climb", "idle", "guard"], "mode": M_SPLIT},
 	},
 	"pike": {
 		"idle": {"set": ["pike_idle"]},
@@ -244,6 +246,7 @@ const STYLES := {
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
 		"routing": {"set": ["run"], "speed": 1.1},
+		"climbing": {"set": ["climb", "pike_idle"], "mode": M_SPLIT},
 	},
 	"bow": {
 		"idle": {"set": ["bow_idle", "idle"]},

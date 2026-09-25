@@ -161,7 +161,7 @@ impl BattleSim {
                     let k = i - shown;
                     let (hx, hz, y) = heads[k % heads.len()];
                     let row = k / heads.len();
-                    let side = if row % 2 == 0 { 1.0 } else { -1.0 };
+                    let side = if row.is_multiple_of(2) { 1.0 } else { -1.0 };
                     let spread = 0.9 * (row / 2 + 1) as f64 * side;
                     let back = inset + 0.6 * (row % 3) as f64;
                     return [

@@ -26,10 +26,15 @@ cède, garnison qui se replie sur la place.
 
 ## État
 - [x] Squelette cœur + pont (compile).
-- [ ] Tests `sim-battle/tests/sg1.rs`.
+- [x] Tests `sim-battle/tests/sg1.rs` (7). Sonde escalade `SEEDS=20 probe -- siege 0 ""` : 9/20 → 7/20
+  (huile réglée à 30 s / 3 hommes / −4 moral ; à 20 s / 4 / −8 on tombait à 5/20).
+- [x] Cœur : `BattleSim::ladders`, `climbers_shown`, `soldier_poses` (grimpeurs posés sur les échelles
+  ou le pont du beffroi, part croissante sur le chemin de ronde) ; pont : `get_units().climbers_shown`,
+  `ladder_lines`, tampon des soldats via `soldier_poses`.
+- [x] Clip `climb` (pipeline V2 `battle_skinned_poses.climb`, `human.bones.bin` régénéré) ; shader :
+  mode `M_SPLIT` (les `split_count` premiers soldats escaladent) ; `STYLES.*.climbing`.
 - [ ] Rendu : engins animés, projectiles d'engins vers la muraille, éclats, porte qui éclate, huile.
-- [ ] Échelles contre le mur + soldats sur les échelles (clip `climb`).
 - [ ] FPS avant/après, captures `docs/audit/captures/sg1/`.
 
 ## Prochaine étape
-Tests du cœur, puis `siege_assault_fx.gd`.
+`game/scripts/battle/siege_assault_fx.gd` (échelles contre le mur, bélier, projectiles, porte, huile).

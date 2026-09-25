@@ -251,6 +251,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	if skinned:
 		var config := BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), state, bool(unit.get("running", false)))
 		BattleSkinned.apply_config(mat, config, anim_time)
+		# SG1 : soldats de tête sur les échelles ou le pont du beffroi (clip d'escalade).
+		mat.set_shader_parameter("split_count", int(unit.get("climbers_shown", 0)))
 
 
 ## Positions (au sol) d'au plus `count` soldats du régiment `id`, pris à intervalles réguliers
