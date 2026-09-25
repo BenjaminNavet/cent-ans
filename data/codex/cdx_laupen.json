@@ -1,0 +1,12 @@
+{
+  "id": "cdx_laupen",
+  "title": "Laupen (1339), Berne contre la noblesse",
+  "category": "bataille",
+  "aliases": ["Laupen", "bataille de Laupen", "Rodolphe d'Erlach"],
+  "era": { "from": "1339", "to": "1353" },
+  "summary": "Le 21 juin 1339, devant Laupen, les Bernois de Rodolphe d'Erlach, renforcés d'un millier d'hommes des Waldstätten, écrasent Fribourg et la noblesse de Bourgogne transjurane. Berne s'impose dans le plateau suisse et entre en 1353 dans la Confédération.",
+  "body": "Au début du XIVe siècle, Berne, ville impériale fondée par les Zähringen, s'agrandit aux dépens des seigneurs voisins en achetant ou en conquérant leurs terres. Elle inquiète sa voisine et ancienne alliée Fribourg, qui relève des Habsbourg, et toute la noblesse du pays : comtes de Kybourg, de Nidau, de Neuchâtel, de Valangin, de Gruyère, sire de Vaud, évêque de Bâle. En 1339, cette coalition assiège la petite ville bernoise de Laupen, sur la Sarine.\n\nBerne appelle à l'aide les Waldstätten (Uri, Schwytz, Unterwald), qui envoient un millier d'hommes. Le 21 juin 1339, l'armée bernoise, environ six mille hommes commandés par Rodolphe d'Erlach, attaque depuis une hauteur une armée bien plus nombreuse. L'infanterie coalisée cède, puis les fantassins bernois et confédérés se retournent contre la [[cdx_chevalerie|chevalerie]]. Au moins quatre-vingts nobles sont tués, dont les comtes de Nidau et de Valangin.\n\nComme Morgarten (1315) avant elle, et bien avant Sempach (1386), Laupen montre qu'une infanterie de paysans et de bourgeois, soudée et bien menée, peut battre des chevaliers. À la même époque, archers anglais et milices flamandes font la même démonstration. Berne signe une alliance perpétuelle avec les Waldstätten en 1353 et devient l'un des piliers de la Confédération.",
+  "entity": "evt_laupen",
+  "see_also": ["cdx_chevalerie", "cdx_saint_empire"],
+  "sources": ["Bataille de Laupen", "Battle of Laupen (en)", "Rodolphe d'Erlach"]
+}
