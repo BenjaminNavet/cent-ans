@@ -150,6 +150,10 @@ landmark_normal_array={
 "type": "sampler2DArray",
 "value": "res://assets/textures/landmarks/landmark_normal_array.jpg"
 }
+campaign_parchment={
+"type": "float",
+"value": 0.0
+}
 
 [rendering]
 

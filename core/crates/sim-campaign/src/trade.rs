@@ -12,10 +12,11 @@
 //!   outright; a hostile army camped on it halves the value per threatened
 //!   node ([`THREAT_SECURITY_FACTOR`]);
 //! - **war and embargo**: a route whose two hubs are held by factions at war,
-//!   or under an embargo either way, earns nothing — a formal
-//!   [`crate::diplomacy::Proposal::TradeAgreement`] is never actually erased
-//!   by war (see [`CampaignState::has_trade_agreement`]), it just stops
-//!   applying its bonus for the duration;
+//!   or under an embargo either way, earns nothing;
+//! - **agreement**: a formal trade agreement between the two controllers
+//!   (the DP1 treaty article [`crate::negotiation::Article::TradeAgreement`],
+//!   stored once in the ledger, see [`CampaignState::has_trade_agreement`])
+//!   raises the value by [`AGREEMENT_BONUS_PERCENT`]; war erases it;
 //! - **coinage**: a debased currency trades less well (H5).
 //!
 //! Value is split evenly between the controllers of the two hubs (customs at
@@ -321,18 +322,45 @@ fn shortest_path(
     Some((cost, path))
 }
 
-/// `true` when a route of the catalogue links a hub of `a` to a hub of `b`
-/// (used by the AI to weigh a trade agreement offer).
+/// Number of catalogue routes linking a hub held by `a` to a hub held by
+/// `b` (either way), whatever their state this season: what a trade
+/// agreement between them would raise. Cheap (hub controllers only, no
+/// path search): the treaty evaluation calls it for every offer.
+pub fn common_routes(
+    state: &CampaignState,
+    data: &GameData,
+    a: &FactionId,
+    b: &FactionId,
+) -> usize {
+    let Some(catalog) = &data.trade else {
+        return 0;
+    };
+    let controller = |hub: &str| {
+        catalog
+            .hub(hub)
+            .and_then(|h| state.settlements.get(&h.settlement))
+            .map(|s| &s.controller)
+    };
+    catalog
+        .routes
+        .iter()
+        .filter(
+            |route| match (controller(&route.from_hub), controller(&route.to_hub)) {
+                (Some(f), Some(t)) => (f == a && t == b) || (f == b && t == a),
+                _ => false,
+            },
+        )
+        .count()
+}
+
+/// `true` when a route of the catalogue links a hub of `a` to a hub of `b`.
 pub fn have_common_route(
     state: &CampaignState,
     data: &GameData,
     a: &FactionId,
     b: &FactionId,
 ) -> bool {
-    trade_routes(state, data).iter().any(|route| {
-        matches!((&route.from_faction, &route.to_faction),
-            (Some(f), Some(t)) if (f == a && t == b) || (f == b && t == a))
-    })
+    common_routes(state, data, a, b) > 0
 }
 
 /// Income `faction` collects this season from every route touching one of

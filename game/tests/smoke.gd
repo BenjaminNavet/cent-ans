@@ -997,7 +997,18 @@ func _run_diplomacy() -> void:
 	var war: Dictionary = sim.call("submit_order", {"type": "declare_war", "target": "fac_navarre"})
 	_check(war.get("ok", false), "declare_war refused: %s" % war.get("error", "?"))
 
-	# Panneau réel : instanciation et rafraîchissement.
+	# DP1 : traité à plusieurs clauses (chance d'acceptation, contre-proposition, options).
+	var treaty := [{"kind": "peace"}, {"kind": "gold", "giver": "proposer", "amount": 5000}]
+	var treaty_verdict: Dictionary = sim.call("evaluate_treaty", "fac_england", treaty)
+	_check(bool(treaty_verdict.get("ok", false)) and (treaty_verdict.get("articles", []) as Array).size() == 2, "evaluate_treaty should value each article: %s" % treaty_verdict)
+	_check(int(treaty_verdict.get("chance", -1)) >= 0 and int(treaty_verdict.get("chance", -1)) <= 100, "evaluate_treaty chance out of range")
+	var options: Dictionary = sim.call("treaty_options", "fac_england")
+	_check(not ((options.get("theirs", {}) as Dictionary).get("provinces", []) as Array).is_empty(), "treaty_options should list English provinces")
+	_check(sim.call("counter_treaty", "fac_england", treaty) is Dictionary, "counter_treaty should answer")
+	_check((sim.call("get_war_summary", "fac_england") as Dictionary).has("war_score"), "get_war_summary should report the war score")
+	_check(sim.call("get_treaty_history", FACTION_ID) is Array, "get_treaty_history should be an array")
+
+	# Panneau réel : instanciation, rafraîchissement, brouillon de traité.
 	var panel: Node = (load("res://scripts/ui/diplomacy_panel.gd") as GDScript).new()
 	root.add_child(panel)
 	await process_frame
@@ -1005,6 +1016,7 @@ func _run_diplomacy() -> void:
 	panel.player_faction = FACTION_ID
 	panel.refresh()
 	panel.select_faction("fac_england")
+	panel.stage_example()
 	await process_frame
 	panel.queue_free()
 
@@ -1045,19 +1057,28 @@ func _run_trade() -> void:
 	_check(bruges_londres.get("path", PackedStringArray()).size() >= 2, "route path should have >= 2 settlements")
 	_check(bruges_londres.has("total_value") and bruges_londres.has("security") and bruges_londres.has("cut"), "route fields expected")
 
-	# Accord commercial : proposition, présence dans get_diplomacy, rupture.
-	var propose: Dictionary = sim.call("submit_order", {"type": "propose_trade_agreement", "target": "fac_flanders"})
-	_check(propose.get("ok", false), "propose_trade_agreement refused: %s" % propose.get("error", "?"))
-	var diplomacy_entries: Array = sim.call("get_diplomacy", FACTION_ID)
-	var flanders: Dictionary = {}
-	for entry in diplomacy_entries:
-		if str(entry["id"]) == "fac_flanders":
-			flanders = entry
-	_check(bool(flanders.get("trade_agreement", false)), "trade_agreement should be true after propose_trade_agreement")
-	var duplicate: Dictionary = sim.call("submit_order", {"type": "propose_trade_agreement", "target": "fac_flanders"})
-	_check(not duplicate.get("ok", true), "a second trade agreement with the same faction should be refused")
-	var broken: Dictionary = sim.call("submit_order", {"type": "break_trade_agreement", "target": "fac_flanders"})
-	_check(broken.get("ok", false), "break_trade_agreement refused: %s" % broken.get("error", "?"))
+	# Accord commercial (C5 unifié avec DP1, ADR 0012) : article de traité, présence dans
+	# get_diplomacy, doublon refusé, rupture unilatérale. L'IA peut refuser : on essaie
+	# plusieurs partenaires et on garde le premier qui signe.
+	var trade_treaty := [{"kind": "trade_agreement"}]
+	var partner := ""
+	for candidate in ["fac_flanders", "fac_castile", "fac_brittany", "fac_scotland", "fac_aragon", "fac_navarre", "fac_burgundy", "fac_papacy"]:
+		var propose: Dictionary = sim.call("submit_order", {"type": "propose_treaty", "target": candidate, "articles": trade_treaty})
+		if bool(propose.get("ok", false)):
+			partner = candidate
+			break
+	_check(partner != "", "no faction signed a trade agreement treaty")
+	if partner != "":
+		var diplomacy_entries: Array = sim.call("get_diplomacy", FACTION_ID)
+		var partner_entry: Dictionary = {}
+		for entry in diplomacy_entries:
+			if str(entry["id"]) == partner:
+				partner_entry = entry
+		_check(bool(partner_entry.get("trade_agreement", false)), "trade_agreement should be true after the trade treaty")
+		var duplicate: Dictionary = sim.call("submit_order", {"type": "propose_treaty", "target": partner, "articles": trade_treaty})
+		_check(not duplicate.get("ok", true), "a second trade agreement with the same faction should be refused")
+		var broken: Dictionary = sim.call("submit_order", {"type": "break_trade_agreement", "target": partner})
+		_check(broken.get("ok", false), "break_trade_agreement refused: %s" % broken.get("error", "?"))
 
 	# Embargo : coupe la route entre les deux mêmes comptoirs.
 	var embargo: Dictionary = sim.call("submit_order", {"type": "set_embargo", "target": "fac_flanders", "active": true})

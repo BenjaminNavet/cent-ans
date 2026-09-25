@@ -75,6 +75,8 @@ var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
 var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
+var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
+var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
 var _fps_probe_gpu_ms: float = 0.0
@@ -124,6 +126,20 @@ func _ready() -> void:
 	picker.province_right_clicked.connect(_on_province_right_clicked)
 	picker.click_interceptor = _try_select_army
 	armies.setup(map_data, camera)
+	strategic = StrategicView.new()  # CM2
+	strategic.name = "StrategicView"
+	add_child(strategic)
+	strategic.setup(self)
+	weather_view = CampaignWeatherView.new()  # CM2
+	weather_view.name = "Weather"
+	add_child(weather_view)
+	weather_view.setup(self)
+	if strategic.overlay != null:
+		strategic.overlay.weather_view = weather_view
+	var turn_light := TurnLight.new()  # CM2 : soir doré pendant le tour des autres factions
+	turn_light.name = "TurnLight"
+	add_child(turn_light)
+	turn_light.setup(self)
 	path_preview.setup(map_data)
 	trade_layer.setup(map_data, settlement_layer, settlement_data)  # C5
 	_connect_ui()
@@ -303,6 +319,10 @@ func refresh_all() -> void:
 		settlement_layer.refresh(sim, SimFacade.faction_color)
 	if life != null:  # CV1
 		life.refresh(sim)
+	if weather_view != null:  # CM2
+		weather_view.refresh(sim)
+	if strategic != null:  # CM2
+		strategic.refresh(sim)
 	if minimap_ctl != null:
 		minimap_ctl.refresh()
 	_refresh_top_bar()
@@ -1012,11 +1032,13 @@ func _process(_delta: float) -> void:
 	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
 	if zoom_tiers != null:  # C6 : paliers de zoom
-		cities.set_tier_alpha(zoom_tiers.far_weight(distance))
+		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
 	if life != null:  # CV1
 		life.update_view(distance)
+	strategic.update_view(distance)  # CM2
+	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
@@ -1176,6 +1198,10 @@ func _parse_cmdline() -> void:
 				"diplomacy":
 					_focus_capital()
 					diplomacy.open_panel("fac_england")
+				"diplomacy_treaty":  # DP1 : négociation à plusieurs clauses
+					_focus_capital()
+					diplomacy.open_panel("fac_england")
+					diplomacy.panel.stage_example()
 				"diplomacy_map":
 					_focus_capital()
 					diplomacy._toggle_mode(DiplomacyController.MapMode.DIPLOMACY)

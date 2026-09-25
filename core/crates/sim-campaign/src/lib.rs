@@ -52,6 +52,7 @@ pub mod march;
 pub mod medicine;
 pub mod movement;
 pub mod navigation;
+pub mod negotiation;
 pub mod orders;
 pub mod path_plan;
 pub mod population;
@@ -71,6 +72,7 @@ pub mod trade;
 pub mod turn;
 pub mod victory;
 pub mod vision;
+pub mod weather;
 
 pub use agents::{
     AgentActionOption, AgentError, AgentId, AgentRecruitOption, AgentReport, AgentsState,
@@ -116,3 +118,4 @@ pub use state::{
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};
+pub use weather::{MapWeather, ProvinceWeather};
