@@ -2,7 +2,7 @@ class_name BattleCamera
 extends Node3D
 
 ## Caméra RTS de bataille : pivot au sol (`target`), lacet, distance ; inclinaison automatique
-## (rasante de près, plongeante de loin). A1-06, à la Total War : courbe d'inclinaison adoucie
+## (rasante de près, plongeante de loin). A1-06 : courbe d'inclinaison adoucie
 ## (presque à hauteur d'homme au zoom maximal, plongée au loin), visée relevée vers la poitrine
 ## des soldats de près, hauteur minimale au-dessus du relief qui descend avec le zoom. W A S D (positions physiques) et bords d'écran pour
 ## se déplacer, molette pour zoomer, Q / E pour tourner, glisser bouton du milieu pour panoramiquer.
