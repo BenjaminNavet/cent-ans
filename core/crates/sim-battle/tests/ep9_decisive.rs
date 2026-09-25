@@ -139,6 +139,13 @@ pub fn play(sim: &mut BattleSim) -> (f64, Option<SideId>, String) {
 }
 
 fn row(tier: Tier, terrain: Terrain, river: bool, mode: Mode, seeds: u64) -> Vec<f64> {
+    // `EP9_ONLY=large,river,IdleAttacker` keeps the matching rows only.
+    let label = format!("{} {} river={river} {mode:?}", tier.key(), terrain.key());
+    if let Ok(only) = std::env::var("EP9_ONLY") {
+        if !only.split(',').all(|token| label.contains(token)) {
+            return Vec::new();
+        }
+    }
     let mut times = Vec::new();
     let (mut att, mut def, mut open) = (0, 0, 0);
     let mut ends = std::collections::BTreeMap::new();
@@ -216,5 +223,115 @@ fn q3_demo_battle_without_orders_ends() {
         println!("demo seed {seed}: {t:.0} s {w:?} « {last} »");
         assert!(sim.is_finished(), "seed {seed}: still running at {t:.0} s");
         assert!(t <= 720.0, "seed {seed}: {t:.0} s");
+    }
+}
+
+/// The pre-EP9 end: no army break, no refusal (survey baseline).
+pub fn legacy_rules(sim: &mut BattleSim) {
+    let mut rules = sim.decision_rules().clone();
+    rules.break_share = 0.0;
+    rules.break_share_without_general = 0.0;
+    rules.refusal_seconds = f64::INFINITY;
+    sim.set_decision_rules(rules);
+}
+
+/// Crécy-like: English longbows and dismounted men-at-arms on a ridge,
+/// French knights, crossbowmen and foot attacking up the glacis. Both AIs.
+pub fn crecy(seed: u64, legacy: bool) -> BattleSim {
+    let data = data();
+    let french = [
+        "unit_knights",
+        "unit_knights",
+        "unit_knights",
+        "unit_knights",
+        "unit_crossbowmen",
+        "unit_crossbowmen",
+        "unit_men_at_arms_foot",
+        "unit_men_at_arms_foot",
+        "unit_urban_militia",
+    ];
+    let english = [
+        "unit_longbowmen",
+        "unit_longbowmen",
+        "unit_longbowmen",
+        "unit_longbowmen",
+        "unit_men_at_arms_foot",
+        "unit_men_at_arms_foot",
+        "unit_men_at_arms_foot",
+        "unit_knights",
+    ];
+    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    battle.village = Some(false);
+    battle.attacker.general = Some(general("Philippe"));
+    battle.defender.general = Some(general("Edouard"));
+    battle.defender.general.as_mut().unwrap().unit_index = 4;
+    let mut sim = BattleSim::new(battle, seed).unwrap();
+    let crest = sim_battle::DEFENDER_LINE_Z - 20.0;
+    let field = sim.field_mut();
+    field.forests.clear();
+    field.forest_parts.clear();
+    field.mud.clear();
+    field.mud_parts.clear();
+    field.pools.clear();
+    field.obstacles.clear();
+    field.river = None;
+    let (nx, res) = (field.nx, field.resolution);
+    for (k, h) in field.heights.iter_mut().enumerate() {
+        let z = (k / nx) as f64 * res;
+        *h = 20.0 / (1.0 + (-(z - crest + 60.0) / 40.0).exp());
+    }
+    if legacy {
+        legacy_rules(&mut sim);
+    }
+    sim
+}
+
+/// Crécy-like battles over 12 seeds, before (legacy end) and after.
+#[test]
+#[ignore]
+fn survey_crecy() {
+    for legacy in [true, false] {
+        let (mut english, mut times) = (0, Vec::new());
+        for seed in 0..12 {
+            let mut sim = crecy(seed, legacy);
+            let (t, w, _) = play(&mut sim);
+            times.push(t.round() as i64);
+            if w == Some(SideId::Defender) {
+                english += 1;
+            }
+        }
+        println!("crecy legacy={legacy}: English {english}/12, durations {times:?}");
+    }
+}
+
+/// Trace of one demo battle (ignored): `EP9_SEED`.
+#[test]
+#[ignore]
+fn trace_demo() {
+    let setup: BattleSetup =
+        serde_json::from_str(include_str!("fixtures/demo_battle_1337.json")).unwrap();
+    let seed: u64 = std::env::var("EP9_SEED")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(1);
+    let mut sim = BattleSim::new(setup, 1337 + seed).unwrap();
+    let mut next = 0.0;
+    let mut seen = 0;
+    while !sim.is_finished() && sim.elapsed() < CAP {
+        sim.step();
+        for e in &sim.events()[seen..] {
+            println!("{:6.1} {:?} {}", e.time, e.side, e.text_fr);
+        }
+        seen = sim.events().len();
+        if sim.elapsed() >= next {
+            next += 30.0;
+            println!(
+                "t {:4.0} quiet {:4.0} share att {:.2} def {:.2}",
+                sim.elapsed(),
+                sim.quiet_time(),
+                sim.fighting_share(SideId::Attacker),
+                sim.fighting_share(SideId::Defender)
+            );
+        }
     }
 }
