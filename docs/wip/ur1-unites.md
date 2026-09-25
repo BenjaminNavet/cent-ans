@@ -59,12 +59,29 @@ déjà présent sur main).
 
 ## Points ouverts
 
-- Couleuvriniers : la simulation tire encore des flèches (`sim.rs::missile_kind` décide par id) ;
-  il faudrait un type de projectile « balle de plomb » (fumée, son) côté cœur et rendu.
-- Jinetes : pas d'animation de lancer de javeline (repos pendant le tir).
+- ~~Couleuvriniers : la simulation tire encore des flèches...~~ **fait (UR2, tâche 1)** : champ
+  `missile` (`arrow|bolt|bullet|javelin|stone`) dans `unit_type.schema.json`, lu par
+  `UnitType -> UnitSetup -> Unit`, `BattleSim::missile_kind`/`missile_cause` le préfèrent à
+  l'ancienne heuristique id/pavois (repli conservé pour les types qui ne le renseignent pas).
+  `unit_culveriners.json` → `bullet`, `unit_jinetes.json` → `javelin`. Rendu BV1
+  (`battle_volleys.gd`, `battle_volley.gdshader[inc]`, `battle_stuck_arrow.gdshader`) : code de
+  paquet élargi à 2 bits de sorte, vitesse/arc/étalement et ruban dédiés, fumée de mise à feu
+  (panneau flamme réutilisé, gris, fixée à la bouche) pour la balle, traits fichés et décoration
+  des corps mis à jour. Son : pas d'échantillon dédié dans `sound_bank.json`, repli sur
+  `bombard`/`bow_release` à gain réduit (`battle_volleys.gd`, `battle_audio.gd`).
+- Jinetes : pas d'animation de lancer de javeline (repos pendant le tir). Voir tâche 2 (pipeline
+  Blender V2, clip `battle_skinned*`) — en cours.
 - Routiers et écorcheurs : 3,4 k et 3,7 k triangles au LOD0 (au-dessus du budget de 2,4 k).
 - Pas de capture en bataille simulée : la démo de `battle_scene.gd` ne choisit pas ses types.
 - Bombardes du XVe siècle / artillerie de campagne non ajoutées (engins : lot SG1).
 - Les types du XVe siècle ne sont atteints qu'au-delà de 400 tours ; `century_probe` non relancé.
 - `tools/cent_ans_tools/budget.py` ne lit pas un fichier à deux tables (section session 7) :
   la dépense UR1 a été consignée à la main.
+
+## UR2 (suite du lot, agent séparé)
+
+1. Projectile selon les données (voir ci-dessus) : **fait**, commit `5d5edd2d`.
+2. Jinetes, clip de lancer de javeline (Blender V2) : en cours.
+3. Budget de triangles (routiers, écorcheurs) : à faire.
+4. `tools/.../budget.py` (tables multi-sessions) : à faire.
+5. `century_probe` 4 graines × 464 tours, chiffres XVe siècle : à faire.
