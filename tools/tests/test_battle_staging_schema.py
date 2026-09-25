@@ -25,7 +25,9 @@ def _check(schema_file: str, data_file: str) -> None:
 
 def test_time_of_day_rules_match_schema() -> None:
     """data/rules/battle_time_of_day.json matches its schema."""
-    _check("schemas/battle_time_of_day_rules.schema.json", "rules/battle_time_of_day.json")
+    _check(
+        "schemas/battle_time_of_day_rules.schema.json", "rules/battle_time_of_day.json"
+    )
 
 
 def test_staging_fx_match_schema() -> None:
@@ -43,7 +45,10 @@ def test_phases_cover_the_day_and_draw_names_exist() -> None:
             p
             for p in phases
             if (p["from_hour"] <= hour < p["to_hour"])
-            or (p["from_hour"] > p["to_hour"] and (hour >= p["from_hour"] or hour < p["to_hour"]))
+            or (
+                p["from_hour"] > p["to_hour"]
+                and (hour >= p["from_hour"] or hour < p["to_hour"])
+            )
         ]
         assert len(inside) == 1, (hour, [p["key"] for p in inside])
     keys = {p["key"] for p in phases}
@@ -52,5 +57,7 @@ def test_phases_cover_the_day_and_draw_names_exist() -> None:
 
 def test_keyframes_are_sorted() -> None:
     """Time-of-day keyframes are in increasing hour order."""
-    hours = [k["hour"] for k in _load("fx/battle_staging.json")["time_of_day"]["keyframes"]]
+    hours = [
+        k["hour"] for k in _load("fx/battle_staging.json")["time_of_day"]["keyframes"]
+    ]
     assert hours == sorted(hours)
