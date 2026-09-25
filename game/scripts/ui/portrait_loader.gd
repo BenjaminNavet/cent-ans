@@ -35,9 +35,14 @@ static func load_texture(path: String) -> Texture2D:
 	return texture
 
 
+## DA2 : portrait vivant (âge, rang courants via `LivingPortrait`) pendant une campagne ; hors
+## campagne, portrait fixe de 1337.
 static func portrait_texture(character_id: String) -> Texture2D:
 	if character_id == "":
 		return null
+	var character := LivingPortrait.character_for(character_id)
+	if not character.is_empty():
+		return LivingPortrait.texture_for(character)
 	return load_texture(PORTRAITS_DIR + character_id + ".png")
 
 
@@ -75,12 +80,32 @@ static func _overlay(target: Control, texture: Texture2D, min_size: Vector2) -> 
 	return true
 
 
-## Portrait peint du personnage ; à défaut, blason de sa faction (personnages générés).
-static func overlay_portrait(target: Control, character_id: String, faction_id: String, min_size: Vector2 = Vector2.ZERO) -> bool:
-	var texture := portrait_texture(character_id)
-	if texture == null:
-		texture = heraldry_texture(faction_id)
-	var placed := _overlay(target, texture, min_size)
+## DA2 : portrait vivant encadré (`PortraitFrame` : image selon l'âge et le rang, cadre et
+## marques) ; à défaut, blason de la faction, puis initiales du placeholder. `character` : le
+## dictionnaire `get_character` s'il est déjà connu (sinon lu dans la simulation).
+## `show_arms` : faux si l'hôte affiche déjà l'écu de la faction.
+static func overlay_portrait(target: Control, character_id: String, faction_id: String, min_size: Vector2 = Vector2.ZERO,
+		character: Dictionary = {}, show_arms: bool = true) -> bool:
+	if character.is_empty():
+		character = LivingPortrait.character_for(character_id)
+	var placed := false
+	if character.is_empty():
+		# Hors campagne : portrait fixe de 1337, puis blason.
+		var fixed := load_texture(PORTRAITS_DIR + character_id + ".png") if character_id != "" else null
+		placed = _overlay(target, fixed if fixed != null else heraldry_texture(faction_id), min_size)
+	else:
+		_overlay(target, null, Vector2.ZERO)
+		var frame := PortraitFrame.new()
+		frame.name = OVERLAY_NAME
+		frame.show_arms = show_arms
+		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		target.add_child(frame)
+		placed = frame.show_character(character, faction_id, {}, LivingPortrait.character_for)
+		if placed and min_size != Vector2.ZERO:
+			target.custom_minimum_size = min_size
+			var parent := target.get_parent() as Control
+			if parent is PanelContainer:
+				parent.custom_minimum_size = min_size
 	# Les initiales du placeholder sont masquées sous une image.
 	for child in target.get_children():
 		if child is Label:

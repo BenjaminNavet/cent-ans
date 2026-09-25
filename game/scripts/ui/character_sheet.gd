@@ -175,7 +175,7 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	var faction: String = str(character.get("faction", ""))
 	swatch.color = SimFacade.faction_color(faction)
 	# M10 assets : portrait peint (ou blason de faction) à la place du carré de couleur.
-	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE):
+	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE, character, false):
 		swatch.color = Color(0, 0, 0, 0)
 	# C3 : écu de la faction en bas à droite du portrait (s'il y a un portrait peint).
 	_heraldry.texture = PortraitLoader.heraldry_texture(faction) if PortraitLoader.has_portrait(character_id) else null
