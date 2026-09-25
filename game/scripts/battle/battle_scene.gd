@@ -129,6 +129,7 @@ var _bench_gpu_samples: int = 0
 var _bench_ab: PackedStringArray = []
 var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
+var _scale_tier: String = ""  # EP1 : palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
 var _weather_override: String = ""
@@ -249,6 +250,8 @@ func begin() -> bool:
 		SiegeAssaultFx.add_engines(setup, _siege_engines.split(",", false))  # SG1 : captures, banc
 		padded = true  # régiments hors campagne : pas de résultat à rapporter
 	battle = ClassDB.instantiate("BattleSim")
+	if _scale_tier != "" and battle.has_method("set_scale_tier"):
+		battle.call("set_scale_tier", _scale_tier)  # EP1 : --scale=<skirmish|large|epic>
 	if not battle.call("setup", setup, battle_seed):
 		return false
 	var setup_side: Variant = setup.get("player_side", "attacker")
@@ -286,7 +289,8 @@ func begin() -> bool:
 			if landmark_town != null:
 				add_child(landmark_town)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
-	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
+	var field_center := terrain.field_center()  # EP1 : (600, 400) au palier standard
+	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(field_center.x, terrain.height_at(field_center.x, field_center.y), field_center.y), Vector2(terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
 	if not _no_bv1:
 		battle.call("set_figure_scale", _unit_size())
@@ -311,7 +315,9 @@ func begin() -> bool:
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
-	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
+	camera_rig.bounds = Rect2(-150, -150, terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0)  # EP1
+	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
+	camera_rig.max_distance = 900.0 * (0.5 + 0.5 * maxf(terrain.field_scale_x(), 1.0))
 	_frame_camera()
 	hud.minimap.flipped = player_side == "attacker"
 	hud.minimap.setup(terrain_data, side_colors)
@@ -475,7 +481,7 @@ func _setup_grass_flatten() -> void:
 	if terrain.vegetation == null:
 		return
 	grass_flatten = BattleGrassFlatten.new()
-	grass_flatten.setup()
+	grass_flatten.setup(Vector2(terrain.FIELD_W, terrain.FIELD_D))
 	terrain.vegetation.set_flatten(grass_flatten)
 	var blood_amount: float = 0.0 if blood == null else [0.0, 0.6, 1.0][blood.level]
 	if soldiers.bv2_enabled:
@@ -1370,6 +1376,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg.begins_with("--units="):
 			_pad_units = int(arg.trim_prefix("--units="))
+		elif arg.begins_with("--scale="):
+			_scale_tier = arg.trim_prefix("--scale=")
 		elif arg.begins_with("--bench-at="):
 			_bench_at = float(arg.trim_prefix("--bench-at="))
 		elif arg.begins_with("--bench-repeat="):

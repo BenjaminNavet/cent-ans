@@ -22,15 +22,19 @@ extends Node3D
 ## (réécrivent la mise en place avant la simulation, captures) ; `--no-site` coupe le rendu B5
 ## (comparaisons de performance A/B).
 
-const FIELD_W := 1200.0
-const FIELD_D := 800.0
-## Domaine de la splatmap et de la carte de hauteurs de l'herbe (x0, z0, largeur, profondeur).
-const SPLAT_RECT := Rect2(-400, -400, 2000, 1600)
+## EP1 (ADR 0031) : dimensions du champ lues dans `get_terrain()` (`width`, `depth` : 1200 × 800 au
+## palier « escarmouche », jusqu'à 2400 × 1600) ; la splatmap et les anneaux suivent
+## (`_set_field_size`). Variables (et non constantes) aux anciens noms.
+var FIELD_W := 1200.0
+var FIELD_D := 800.0
+## Domaine de la splatmap et de la carte de hauteurs de l'herbe (x0, z0, largeur, profondeur) :
+## le champ plus 400 m de chaque côté.
+var SPLAT_RECT := Rect2(-400, -400, 2000, 1600)
 const SPLAT_TEXEL := 4.0
 const HEIGHT_TEXEL := 10.0
-const NEAR_RECT := Rect2(-900, -900, 3000, 2600)
+var NEAR_RECT := Rect2(-900, -900, 3000, 2600)
 const NEAR_STEP := 20.0
-const FAR_RECT := Rect2(-7000, -7000, 15200, 14800)
+var FAR_RECT := Rect2(-7000, -7000, 15200, 14800)
 const FAR_STEP := 200.0
 const RIVER_CARVE := 1.6
 ## Arbres : taille des tuiles (m), distance de passage au maillage allégé, portée des buissons.
@@ -142,6 +146,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_nx = int(terrain.get("nx", 0))
 	_nz = int(terrain.get("nz", 0))
 	_resolution = float(terrain.get("resolution", 10.0))
+	_set_field_size(float(terrain.get("width", 1200.0)), float(terrain.get("depth", 800.0)))
 	for child in get_children():
 		child.queue_free()
 	roads.clear()
@@ -201,6 +206,26 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 
 
 ## B5 : le sol est-il enneigé (neige tombante ou sol de saison) ?
+## EP1 : dimensions du champ et rectangles qui en dépendent (identiques à l'ancien champ fixe
+## pour 1200 × 800).
+func _set_field_size(width: float, depth: float) -> void:
+	FIELD_W = width
+	FIELD_D = depth
+	SPLAT_RECT = Rect2(-400, -400, width + 800.0, depth + 800.0)
+	NEAR_RECT = Rect2(-900, -900, width + 1800.0, depth + 1800.0)
+	FAR_RECT = Rect2(-7000, -7000, width + 14000.0, depth + 14000.0)
+
+
+## Centre du champ (600, 400 au palier standard).
+func field_center() -> Vector2:
+	return Vector2(FIELD_W * 0.5, FIELD_D * 0.5)
+
+
+## Largeur relative au champ standard (1 pour 1200 m).
+func field_scale_x() -> float:
+	return FIELD_W / 1200.0
+
+
 func snowy() -> bool:
 	return weather_key == "snow" or (site_render and ground_key == "snowy")
 
@@ -434,7 +459,7 @@ func _in_ford(x: float) -> bool:
 	return false
 
 
-## La rivière de la simulation (x de 0 à 1200, un point tous les 10 m) prolongée par symétries
+## La rivière de la simulation (x de 0 à FIELD_W, un point tous les 10 m) prolongée par symétries
 ## successives (onde triangulaire en x) jusqu'aux anneaux lointains.
 func _extend_river() -> void:
 	_river_points = PackedVector2Array()
@@ -466,12 +491,12 @@ func _plan_roads() -> void:
 		for ford in terrain["river"]["fords"]:
 			crossings.append(float(ford["x"]))
 	elif not terrain.has("siege"):
-		crossings.append(rng.randf_range(350.0, 850.0))
+		crossings.append(rng.randf_range(FIELD_W * 0.5 - 250.0 * field_scale_x(), FIELD_W * 0.5 + 250.0 * field_scale_x()))
 	for x0 in crossings:
 		var pts := PackedVector2Array()
 		var x := x0 + rng.randf_range(-120.0, 120.0)
-		for z in range(-1400, 2201, 100):
-			var target := x0 if absf(float(z) - 400.0) < 250.0 else x
+		for z in range(-1400, int(FIELD_D) + 1401, 100):
+			var target := x0 if absf(float(z) - FIELD_D * 0.5) < 250.0 else x
 			x = lerpf(x, target, 0.5) + rng.randf_range(-35.0, 35.0)
 			pts.append(Vector2(x, float(z)))
 		roads.append(_smooth(pts))
@@ -492,9 +517,9 @@ func _plan_roads() -> void:
 				pts.append(p)
 			roads.append(_smooth(pts))
 	# Chemin de traverse (est-ouest) derrière l'une des lignes.
-	var zr := -170.0 if rng.randf() < 0.5 else 980.0
+	var zr := -170.0 if rng.randf() < 0.5 else FIELD_D + 180.0
 	var side := PackedVector2Array()
-	for x in range(-1600, 2801, 120):
+	for x in range(-1600, int(FIELD_W) + 1601, 120):
 		side.append(Vector2(float(x), zr + rng.randf_range(-30.0, 30.0) + sin(float(x) * 0.004) * 60.0))
 	roads.append(_smooth(side))
 
@@ -1074,9 +1099,9 @@ func _build_trees() -> void:
 			tints[kind].append(_tree_tint(rng))
 		z += step
 	# Quelques buissons épars dans le champ, hors du centre.
-	for _i in 140:
+	for _i in int(140.0 * FIELD_W * FIELD_D / 960000.0):
 		var p := Vector2(rng.randf_range(0.0, FIELD_W), rng.randf_range(0.0, FIELD_D))
-		if absf(p.x - 600.0) < 420.0 and p.y > 120.0 and p.y < 680.0:
+		if absf(p.x - FIELD_W * 0.5) < 420.0 * field_scale_x() and absf(p.y - FIELD_D * 0.5) < FIELD_D * 0.5 - 120.0:
 			continue
 		if river_distance(p.x, p.y) < RIVER_SPAN or _near_road(p, 6.0) or p.distance_to(siege_center) < 200.0:
 			continue
@@ -1244,7 +1269,7 @@ func _build_rocks() -> void:
 		var chance := (smoothstep(0.12, 0.35, slope) + (0.0 if in_field else 0.04)) * float(biome["rocks"])
 		if rng.randf() > chance or river_distance(x, z) < RIVER_SPAN or _in_sea(x, z):
 			continue
-		if in_field and absf(x - 600.0) < 380.0 and z > 150.0 and z < 650.0:
+		if in_field and absf(x - FIELD_W * 0.5) < 380.0 * field_scale_x() and absf(z - FIELD_D * 0.5) < FIELD_D * 0.5 - 150.0:
 			continue
 		var s := rng.randf_range(0.5, 2.6)
 		var basis := Basis(Vector3.UP, rng.randf() * TAU).rotated(Vector3.RIGHT, rng.randf_range(-0.3, 0.3)).scaled(Vector3(s * rng.randf_range(0.8, 1.5), s * rng.randf_range(0.5, 0.9), s))
