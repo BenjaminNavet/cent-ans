@@ -47,7 +47,7 @@ lointain + panorama peint par IA pour le très lointain).
   Bande répétée en aller-retour (pas de raccord), décalage tiré de la province.
 - **Bibliothèque de 13 panoramas** (Manche, Pyrénées, Alpes, Massif central, collines boisées,
   Picardie, bocage, Loire, Gascogne, Flandre, landes britanniques, Méditerranée, hiver), générés par
-  OpenRouter (`openai/gpt-5-image-mini`, 0,57 $ au total, sonde comprise) sur un ciel uni demandé
+  OpenRouter (`openai/gpt-5-image-mini`, 0,57 $ au total, sonde et une régénération comprises) sur un ciel uni demandé
   dans l'invite, **détourés hors ligne** (modèle de ciel par rangée, crête par colonne, alpha) :
   `game/assets/horizon/panoramas/*.webp` + profil de crête peint (`panoramas.json`). Originaux
   gardés dans `tools/horizon_raw/` pour retoucher le détourage sans nouvel appel payant.
@@ -68,8 +68,11 @@ lointain + panorama peint par IA pour le très lointain).
 ## Conséquences
 
 - Dépôt : + ≈ 11 Mo de tuiles, ≈ 2 Mo de bandes WebP, ≈ 2 Mo d'originaux JPEG.
-- Coût GPU mesuré (voir `docs/wip/ep2-horizon.md`) : quelques milliers de triangles et un cylindre
-  plein écran au pire (fragment simple).
+- Coût GPU mesuré (`docs/wip/ep2-horizon.md`, Vulkan) : nul en vue plongeante, + 0,6 à 0,9 ms en
+  vue rasante face à l'horizon (5 000 triangles d'anneau, un cylindre, quelques centaines de
+  triangles de silhouettes).
+- La caméra de bataille plonge dès qu'on dézoome : l'horizon se voit surtout de près (vue rasante),
+  derrière les rangées d'arbres de l'anneau proche qui en masquent une partie en plaine.
 - Le relief réel est celui d'un point représentatif de la province, pas du lieu exact de la
   bataille (la campagne n'exporte pas encore de position de bataille) ; les cartes historiques
   (EP7) pourront cuire une tuile sur le site exact avec le même outil.
