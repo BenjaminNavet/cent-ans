@@ -32,14 +32,15 @@ lisible, légende coupée : défauts D1, C11 et U14).
    peut céder (captifs, provinces que l'ennemi occupe déjà, or, tribut) ou on retire ses
    exigences les plus coûteuses, jusqu'à 65 % de chance.
 4. **Buts de guerre, score et fatigue** (N2) : à chaque nouvelle guerre, chaque camp vise jusqu'à
-   deux provinces (revendiquées, puis frontalières) ; les tenir ajoute 12 points au score de
+   trois provinces (revendiquées, puis frontalières) ; les tenir ajoute 12 points au score de
    guerre, les places secondaires occupées 3 points chacune (20 au plus). La **fatigue de guerre**
    (0-100) croît de 1 à 2 points par saison de guerre qui pèse (ennemi frontalier assez fort,
    score négatif ou terres occupées), décroît de 4 en paix, ajoute du mécontentement
    (fatigue ÷ 5 par province) et pousse à la paix (fatigue ÷ 4 dans l'évaluation).
 5. **Paix de l'IA** (`plan_peace`) : pas de traité avant 20 saisons de guerre (sauf royaume
-   acculé) ; le vainqueur (score ≥ 20) exige les provinces qu'il tient, buts de guerre d'abord,
-   tant que la chance reste ≥ 60 % ; un royaume épuisé (fatigue ≥ 70) ou écrasé (score ≤ -50)
+   acculé) ; le vainqueur (score ≥ 15) exige ses buts de guerre (tenus ou non) puis
+   les autres provinces qu'il tient, tant que la chance reste ≥ 60 % ; une province déjà occupée
+   ne coûte au vaincu que 35 % de sa valeur ; un royaume épuisé (fatigue ≥ 70) ou écrasé (score ≤ -50)
    achète la paix par la contre-proposition. Trêve de 2 ans après une paix (Malestroit,
    Bordeaux). Un prétendant au trône part en guerre à crédit (une saison d'entretien en caisse
    au lieu de deux) et tolère un front secondaire deux fois plus lourd (Édouard III et les
@@ -62,15 +63,17 @@ lisible, légende coupée : défauts D1, C11 et U14).
 
 ## Mesures (sonde)
 
-| Mesure | Avant (main + G1) | Après DP1 |
+Même code (main du 2026-09-25 avec G1, UI3 et UR1), `negotiation.enabled` faux puis vrai :
+
+| Mesure | Avant | Après DP1 |
 |---|---|---|
-| `century_probe` 5 × 464 : guerre FR-EN | 36 % (30-42) | **61 % (43-68), 4/5 graines dans 55-75 %** |
+| `century_probe` 5 × 464 : guerre FR-EN | 35 % (56/30/36/30/26), 1/5 graine dans 55-75 % | **59 % (62/67/52/48/65), 3/5 graines** |
 | `century_probe` : 4 majeures vivantes en 1400 | 5/5 | 5/5 |
-| `balance_probe campaign 200 1-8` : guerre FR-EN | 33 % | 54 % |
-| Changements de propriétaire (200 tours) | 6,9 | 13,9 |
-| Mécontentement moyen final | 8,3 | 12,0 |
-| Révoltes par partie | 11,5 | 21,1 |
-| Paix signées / guerres déclarées par partie | 77 / 88 | 104 / 119 |
+| `balance_probe campaign 200 1-8` : guerre FR-EN | 36 % | 56 % |
+| Changements de propriétaire (200 tours) | 8,2 | **19,0** |
+| Mécontentement moyen final | 7,4 | 11,1 |
+| Révoltes par partie | 5,8 | 14,4 |
+| Paix signées / guerres déclarées par partie | 83 / 89 | 147 / 159 |
 
 Traités observés (`dp1_probe`, graine 2) : Calais et le Boulonnais, le Périgord, le Quercy, la
 Normandie cédés à l'Angleterre ; la France rachète la paix contre or et tribut.

@@ -26,21 +26,25 @@ Branche : `worktree-agent-a4e14689f1209a2c9`. ADR : `docs/decisions/0025-negocia
   étendue), captures `docs/audit/captures/dp1/`.
 
 ## Sonde
+Mesures sur main fusionné (G1, UI3, UR1), même binaire, `negotiation.enabled` faux puis vrai.
+
 `century_probe` (5 graines × 464 tours) :
-- Avant (main + G1) : guerre FR-EN moy. 36 % [30-42] (30/38/42/39/32), majeures en 1400 : 5/5.
-- Après : **61 % [43-68]** (43/66/68/61/65), 4/5 graines dans 55-75 %, majeures en 1400 : 5/5.
+- Avant : guerre FR-EN moy. 35 % (56/30/36/30/26), 1/5 graine dans 55-75 %, majeures en 1400 : 5/5.
+- Après : **59 %** (62/67/52/48/65), 3/5 graines dans 55-75 %, majeures en 1400 : 5/5.
 
 `balance_probe campaign 200 1-8` :
-- Avant : guerre FR-EN 33 %, 6,9 changements de propriétaire, mécontentement 8,3, 11,5 révoltes.
-- Après : guerre FR-EN 54 %, **13,9** changements de propriétaire, mécontentement 12,0,
-  21,1 révoltes, 104 paix et 119 déclarations de guerre par partie (avant 77 et 88).
+- Avant : guerre FR-EN 36 %, 8,2 changements de propriétaire, mécontentement 7,4, 5,8 révoltes,
+  83 paix et 89 déclarations de guerre par partie.
+- Après : guerre FR-EN 56 %, **19,0** changements de propriétaire, mécontentement 11,1,
+  14,4 révoltes, 147 paix et 159 déclarations de guerre.
 
 ## Points ouverts
-- Graine 1 du siècle à 43 % : l'Angleterre y manque d'argent (voir `dp1_probe`).
+- Graines 4 (48 %) et 3 (52 %) du siècle sous la cible : cause non analysée (`dp1_probe` affiche
+  pourquoi l'Angleterre ne déclare pas la guerre : trésor, fatigue, fronts, trêve).
 - L'accès militaire ne joue que sur le ravitaillement (pas de règle d'intrusion en paix).
 - Accord commercial autonome : à relier à C5 (`integration/tw`) quand il sera sur main.
 - La minicarte du HUD reste en couleurs politiques dans le mode diplomatique.
 
 ## Prochaine étape
-Fusionné avec main ? voir le rapport final. Suite possible : IA qui propose au joueur des traités
+Lot terminé, main fusionné dans la branche (fmt, clippy, 540 tests, build, import, smoke 24 OK). Suite possible : IA qui propose au joueur des traités
 d'amitié plus riches (mariage + alliance), coalitions (N8) sur la même évaluation.

@@ -1743,6 +1743,14 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
                 })
                 .map(|p| (!goals.contains(p), p.clone()))
                 .collect();
+            // The war goals themselves, even unheld: a clear victory buys
+            // the lands it was fought for (Brétigny).
+            for goal in &goals {
+                if state.province_owner(goal) == Some(enemy) && !held.iter().any(|(_, p)| p == goal)
+                {
+                    held.push((true, goal.clone()));
+                }
+            }
             held.sort();
             let mut treaty = white.clone();
             for (_, province) in held {
