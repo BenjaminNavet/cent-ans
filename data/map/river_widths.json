@@ -86,7 +86,7 @@
       "source": "Rhône non endigué en 1340, bras et îles (Avignon : pont Saint-Bénézet ~900 m sur deux bras)."
     },
     {
-      "id": "meuse", "names": ["la Meuse", "Meuse", "Maas", "Fleuve la Meuse"],
+      "id": "meuse", "names": ["la Meuse", "Meuse", "Maas", "Fleuve la Meuse", "Grensmaas", "Zandmaas", "Getijdenmaas", "Nieuwe Maas"],
       "anchors": [
         { "place": "Verdun", "lonlat": [5.385, 49.16], "width_m": 40 },
         { "place": "Charleville", "lonlat": [4.72, 49.77], "width_m": 60 },
@@ -98,7 +98,7 @@
       "source": "Largeurs actuelles (Meuse canalisée) ramenées aux lits naturels."
     },
     {
-      "id": "escaut", "names": ["l'Escaut", "Escaut", "Schelde", "Scheldt", "Fleuve l'Escaut"],
+      "id": "escaut", "names": ["l'Escaut", "Escaut", "Schelde", "Scheldt", "Fleuve l'Escaut", "Bovenschelde", "Boven-Schelde", "Zeeschelde", "Westerschelde"],
       "anchors": [
         { "place": "Cambrai", "lonlat": [3.235, 50.175], "width_m": 15 },
         { "place": "Valenciennes", "lonlat": [3.52, 50.36], "width_m": 25 },
@@ -151,7 +151,7 @@
       "source": "Estuaire de la Humber, 2 à 3 km devant Hull."
     },
     {
-      "id": "rhin", "names": ["le Rhin", "Rhin", "Rhein", "Rijn", "Nederrijn", "Rhine"],
+      "id": "rhin", "names": ["le Rhin", "Rhin", "Rhein", "Rijn", "Nederrijn", "Rhine", "Hochrhein", "Oberrhein", "Niederrhein", "Bovenrijn", "Boven-Rijn", "Waal"],
       "anchors": [
         { "place": "Bâle", "lonlat": [7.59, 47.56], "width_m": 200 },
         { "place": "Strasbourg", "lonlat": [7.80, 48.575], "width_m": 250 },
