@@ -83,12 +83,7 @@ func _init() -> void:
 		await _engine_throw(engines, "unit_mangonel", 0.22, "mangonneau_tir")
 	if _wants("bombard"):
 		await _engine_throw(engines, "unit_bombard", 0.05, "bombarde_tir")
-	if _wants("marks"):
-		await _wall_marks(fx)
-	if _wants("ram"):
-		await _ram_at_gate(fx)
-	if _wants("oil"):
-		await _oil(fx)
+	await _assault(fx)
 	print("sg2_engines_shot: done at %.0f s, %d swings (%d anticipated), %d shots, %d ram blows, %d oil, %d marks" % [float(battle.call("get_elapsed")), engines.swings_started, engines.predicted_swings, fx.shots_seen, fx.strikes_seen, fx.oils_seen, fx.marks.mark_count()])
 	quit(0)
 
@@ -173,6 +168,72 @@ func _end_figure(entry: Dictionary, unit: Dictionary) -> int:
 			best_d = -node.global_position.dot(right)
 			best = i
 	return best
+
+
+## Une seule avance pour l'assaut : chaque moment est capturé à sa première occurrence
+## (impacts sur le pan, bélier à la porte, huile), avant que la ville ne tombe.
+func _assault(fx: SiegeAssaultFx) -> void:
+	var pending: Array = []
+	for key in ["marks", "ram", "oil"]:
+		if _wants(key):
+			pending.append(key)
+	var strikes := fx.strikes_seen
+	var oils := fx.oils_seen
+	var limit := float(battle.call("get_elapsed")) + 900.0
+	while not pending.is_empty() and float(battle.call("get_elapsed")) < limit and not battle.call("is_finished"):
+		scene._fast_forward(float(battle.call("get_elapsed")) + 0.1)
+		if pending.has("oil") and fx.oils_seen > oils:
+			pending.erase("oil")
+			await _oil_now(fx)
+		elif pending.has("marks") and fx.marks.mark_count() >= 5:
+			pending.erase("marks")
+			await _marks_now(fx)
+		elif pending.has("ram") and fx.strikes_seen > strikes + 1 and not fx._gate_broken:
+			pending.erase("ram")
+			scene._fast_forward(float(battle.call("get_elapsed")) + fx.ram_period * 0.55)
+			await _ram_now(fx)
+		oils = fx.oils_seen
+	if not pending.is_empty():
+		print("sg2_engines_shot: missing ", pending)
+
+
+func _marks_now(fx: SiegeAssaultFx) -> void:
+	var mark: Decal = fx.marks._marks[fx.marks._marks.size() - 1]["node"]
+	var out := mark.global_basis.y
+	scene.paused = true
+	scene.camera_rig.look_at_point(mark.global_position * Vector3(1, 0, 1) + out * 4.0, 34.0, atan2(out.x, out.z) + 0.4)
+	await _frames(6)
+	await _shot("impacts_muraille.png")
+	scene.paused = false
+
+
+func _ram_now(fx: SiegeAssaultFx) -> void:
+	var siege: Dictionary = battle.call("get_siege")
+	var gate: Dictionary = siege["pieces"][int(siege["gate"])]
+	var mid: Vector2 = ((gate["a"] as Vector2) + (gate["b"] as Vector2)) * 0.5
+	var out := fx._outward(gate)
+	scene.paused = true
+	scene.camera_rig.look_at_point(Vector3(mid.x, 0.0, mid.y) + out * 7.0, 24.0, atan2(out.x, out.z) + 1.1)
+	await _frames(6)
+	await _shot("belier_porte.png")
+	scene.paused = false
+
+
+func _oil_now(fx: SiegeAssaultFx) -> void:
+	var siege: Dictionary = battle.call("get_siege")
+	var gate: Dictionary = siege["pieces"][int(siege["gate"])]
+	var mid: Vector2 = ((gate["a"] as Vector2) + (gate["b"] as Vector2)) * 0.5
+	var out := fx._outward(gate)
+	scene.camera_rig.look_at_point(Vector3(mid.x, 0.0, mid.y) + out * 6.0, 30.0, atan2(out.x, out.z) + 0.75)
+	scene.paused = true
+	await _frames(4)
+	await _shot("huile_coulee.png")
+	scene.paused = false
+	await _wait(1.4)
+	scene.paused = true
+	await _frames(3)
+	await _shot("huile_vapeur.png")
+	scene.paused = false
 
 
 func _wall_marks(fx: SiegeAssaultFx) -> void:
