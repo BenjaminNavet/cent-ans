@@ -59,8 +59,8 @@ impl Default for BattleStandardRules {
     fn default() -> Self {
         BattleStandardRules {
             two_bearers_from_soldiers: 120,
-            heavy_losses_below: 0.6,
-            fall_chance_per_loss_percent: 0.03,
+            heavy_losses_below: 0.5,
+            fall_chance_per_loss_percent: 0.015,
             rout_drop_chance: 0.35,
             raise_seconds: 5.0,
             capture_radius_m: 15.0,
