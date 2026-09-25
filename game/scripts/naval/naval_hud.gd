@@ -428,6 +428,7 @@ func show_result(outcome: Dictionary, side_names: Dictionary, button_text: Strin
 		return
 	_result = PanelContainer.new()
 	_result.name = "Result"
+	PanelStack.mark_blocking(_result)  # Q4
 	_result.add_theme_stylebox_override("panel", BattleUiKit.illuminated_box(40))  # clear the 38 px ivy frame (Q3)
 	_result.set_anchors_preset(Control.PRESET_CENTER)
 	_result.custom_minimum_size = Vector2(620, 0)

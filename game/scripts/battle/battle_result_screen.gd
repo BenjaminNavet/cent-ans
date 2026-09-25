@@ -74,6 +74,7 @@ static func banner_title(won: bool, own_ratio: float, enemy_ratio: float) -> Str
 
 func _ready() -> void:
 	name = "BattleResult"
+	PanelStack.mark_blocking(self)  # Q4 : le conseiller s'efface devant l'écran de fin
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var veil := ColorRect.new()

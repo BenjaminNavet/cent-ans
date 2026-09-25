@@ -28,6 +28,7 @@ var _decision_id: int = -1
 
 
 func _ready() -> void:
+	PanelStack.set_tier(self, PanelStack.Tier.MODAL, true)  # Q4 : décision au-dessus des panneaux
 	if theme == null:
 		theme = load("res://scenes/ui/parchment_theme.tres")
 	# Positionnée à la main (centre de l'écran) : la hauteur dépend du texte et des choix.
