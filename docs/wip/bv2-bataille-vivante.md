@@ -6,7 +6,7 @@ Backlog : `docs/audit/backlog-tw.md` § Bataille (idées J). ADR :
 Coordination : BV1 (flèches, sang au sol, taille des unités ; branche
 `worktree-agent-a3fb69eecbaf4f8a1`, non fusionnée), V3 (feu, lumière), AU1 (audio).
 
-## État
+## État : terminé (non fusionné ; `main` fusionné à la fin, vérifications repassées)
 | Lot | État |
 |---|---|
 | 0. Squelette : cœur `impact.rs`, pont, `data/fx/battle_gore.json` + schéma + test | **fait** |
@@ -15,7 +15,7 @@ Coordination : BV1 (flèches, sang au sol, taille des unités ; branche
 | 3. Sang sur les figurines (taches progressives, gerbes, chevaux, réglage « Sang ») | **fait** |
 | 4. Démembrements (réglage « complet ») | **fait** |
 | 5. Corrections V2 : cadence de marche calée sur la vitesse, armes d'hast de la milice à deux mains | **fait** |
-| Mesures FPS `--units=50`, captures `docs/audit/captures/bv2/` | en cours |
+| Mesures FPS `--units=50`, captures `docs/audit/captures/bv2/` | **fait** |
 
 ## Cœur (Rust)
 - `core/crates/sim-battle/src/impact.rs` : `ImpactEvent` (attaquant, défenseur, sorte
@@ -68,5 +68,28 @@ Coordination : BV1 (flèches, sang au sol, taille des unités ; branche
 - Après une fusion de `main` : `godot --headless --path game --import` (nouvelles classes).
 - Répertoire temporaire partagé : scripts de BV2 dans `scratchpad/bv2/`.
 
-## Prochaine étape
-Mesures A/B (`scratchpad/bv2/bench.sh`), captures finales, rapport.
+## Mesures (`--disable-vsync --resolution 1600x900 -- --benchmark --bench-at=90 --units=50`, 11 800 soldats)
+A/B alterné `--no-bv2` / BV2 (sang modéré) / BV2 `--blood=off`, machine partagée avec d'autres agents.
+| Passe | `--no-bv2` | BV2 | BV2 sans sang |
+|---|---|---|---|
+| 1 (machine chargée) | 35,7 | 53,0 | 57,5 |
+| 2 | 58,5 (méd. 60) | 58,5 (méd. 60) | 58,7 (méd. 60) |
+| 3 | 58,6 (méd. 60) | 58,5 (méd. 60) | 56,7 (méd. 60) |
+Primitives 1,90 M et 714 appels dans les trois cas. Écran plafonné à 60 Hz : pas de baisse
+mesurable (seuil −10 % tenu). Une série précédente, avant deux optimisations (taches coupées
+au-delà de 90 m, `discard` réservé aux démembrés), donnait −19 % en moyenne mais avec ±40 %
+de bruit entre passes identiques.
+
+## Captures (`docs/audit/captures/bv2/`)
+`choc_archers_0..3` (0,3 / 0,8 / 1,6 / 3,2 s après l'impact : projetés, au sol, relevés),
+`avant_choc_archers_0` (`--no-bv2`), `piques_0` (piques abaissées à l'impact), `piques_1`
+(chevaux abattus), `pieux_0`, `choc_hommes_armes_0`, `gros_plan_{deaths,sever,knock,horse,spray}_complet`,
+`gros_plan_sever_repos`, `gros_plan_deaths_{modere,sans_sang}`, `milice_deux_mains_melee`.
+
+## Points ouverts
+- Fusion avec BV1 : conflits attendus dans `settings.gd` / `settings_menu.gd` (clé `battle/blood`,
+  garder l'onglet de BV1) et dans `battle_soldiers.gd` (nombre de figurines : `_unit_scale`
+  prend déjà `n / soldiers`) ; brancher `corpse_fallen` sur les traits fichés de BV1.
+- Vitesses nominales de `cadence` estimées à l'oeil (pas mesurées sur les clips).
+- Renversés : retour à la place par un glissement court ; morceaux tranchés = primitives.
+- Pas de GIF : séquences PNG seulement.
