@@ -51,6 +51,10 @@ extends Resource
 ## Garde au sol de la caméra : fraction de la distance, au moins `clearance_min` unités.
 @export var clearance_factor: float = 0.06
 @export var clearance_min: float = 0.004
+## Crêtes entre la caméra et le point visé : échantillons le long de la visée (au-delà de la
+## fraction `occlusion_min_t` de la distance, en partant du point visé).
+@export var occlusion_samples: int = 6
+@export var occlusion_min_t: float = 0.25
 
 
 ## Réglages par défaut (`res://resources/close_camera.tres`), ou une instance neuve si absente.

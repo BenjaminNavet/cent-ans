@@ -1090,6 +1090,7 @@ func _process(_delta: float) -> void:
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
 		if rivers.crossings != null:
 			rivers.crossings.visible = site_hide > 0.5
+		trade_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
 		_apply_close_tiers(distance)
 	if life != null:  # CV1
 		life.update_view(distance)
