@@ -59,9 +59,9 @@
   "text": "Un siège est affaire de patience. Chaque saison, la faim travaille pour l'assiégeant, et la maladie contre lui. Comptez vos vivres avant ceux de l'ennemi.",
   "voice": "cedar",
   "model": "openai/gpt-audio-mini",
-  "transcript": "Un siège est affaire de patience. Chaque saison, la faim travaille pour l'assaillant, et la maladie contre lui. Comptez vos vivres avant ceux de l'ennemi.",
-  "seconds": 10.36,
-  "cost_usd": 0.00076
+  "transcript": "Un siège est affaire de patience. Chaque saison, la faim travaille pour l’assiégeant, et la maladie contre lui. Comptez vos vivres avant ceux de l’ennemi.",
+  "seconds": 9.24,
+  "cost_usd": 0.00075
  },
  "advisor/adv_first_victory.ogg": {
   "text": "Belle journée, et que la chronique retiendra. Mais une victoire ne vaut que par ce qu'on en tire : les rançons, les places, et la terreur de l'ennemi.",
@@ -147,9 +147,9 @@
   "text": "Sire, voici votre royaume. Philippe tient la couronne, mais l'Anglais réclame la Guyenne et bien davantage. Veillez sur vos places fortes et sur votre trésor : la guerre sera longue.",
   "voice": "cedar",
   "model": "openai/gpt-audio-mini",
-  "transcript": "Sire, voici votre royaume. Philippe tient la couronne, mais l'Anglais réclame la Guyenne et bien davantage. Veillez sur vos plaçaes fortes et sur votre trésor : la guerre sera longue.",
-  "seconds": 12.05,
-  "cost_usd": 0.00089
+  "transcript": "Sire, voici votre royaume. Philippe tient la couronne, mais l'Anglais réclame la Guyenne et bien davantage. Veillez sur vos places fortes et sur votre trésor : la guerre sera longue.",
+  "seconds": 11.96,
+  "cost_usd": 0.0009
  },
  "advisor/adv_succession.ogg": {
   "text": "Le trône a changé de mains. Un nouveau règne commence : les grands vont éprouver sa force, et les voisins sa patience.",
