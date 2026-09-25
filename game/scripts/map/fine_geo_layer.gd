@@ -101,6 +101,11 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	for zone in rivers.zones:
 		var c: Vector2 = zone["px"]
 		_zones.append(Vector3(c.x, c.y, float(zone["radius_px"])))
+		# ZG7a : pas de lit creusé dans les zones personnalisées (villes emblématiques) : les
+		# rubans n'y sont pas dessinés, le lit restait une tranchée vide (Tamise à -7,8 m sous
+		# des rives à 2-4 m à Londres). Contrat de `river_styles.json` : le rendu générique
+		# (eau, lit, berges, ponts) se retire dans ces cercles.
+		carver.covers.append(Vector4(c.x, c.y, float(zone["radius_px"]), -1.0))
 	_collect_towns()
 	river_material = ShaderMaterial.new()
 	river_material.shader = RIVER_SHADER
@@ -316,7 +321,7 @@ func _start_job(key: int) -> void:
 	job.snapshot_scale = MapData.vertical_scale()
 	job.meters_per_unit = map_data.meters_per_px
 	job.min_order = _min_order
-	for c in carver.covers:
+	for c in rivers.covers:
 		if rect.grow(c.z + 1.0).has_point(Vector2(c.x, c.y)):
 			job.covers.append(c)
 	for z in _zones:
