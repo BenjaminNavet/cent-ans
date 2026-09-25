@@ -78,6 +78,9 @@ func _init() -> void:
 		if flatten != null:
 			flatten.on_corpse(pos, kind, blood_amount))
 	match shot:
+		"atlas", "impostor":
+			await _impostor_shot(world, soldiers, camera, out, shot)
+			return
 		"grass":
 			# Deux régiments au contact : l'herbe foulée par la mêlée (front + emprise).
 			var a := _unit(1, "attacker", Vector3(_center.x, 0, _center.z - 6), 0.0)
@@ -139,3 +142,65 @@ func _environment(world: Node3D) -> void:
 	sun.light_energy = 1.6
 	sun.shadow_enabled = true
 	world.add_child(sun)
+
+
+## `atlas` : l'atlas d'imposteurs cuit (image brute) ; `impostor` : 8 figurines (caps 0-315°)
+## en maillage (rang du fond) et en imposteurs (rang de devant), vues de près pour comparer.
+## `--fig=archer_0` choisit la figurine.
+func _impostor_shot(world: Node3D, soldiers: BattleSoldiers, camera: Camera3D, out: String, shot: String) -> void:
+	var fig := "infantry_0"
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--fig="):
+			fig = arg.trim_prefix("--fig=")
+	var parts := fig.rsplit("_", true, 1)
+	var kind := parts[0]
+	var variant := int(parts[1])
+	var impostors := BattleImpostors.new()
+	world.add_child(impostors)
+	var mat: ShaderMaterial = soldiers.call("_make_skinned_material", "attacker", kind, variant, false)
+	var key := BattleImpostors.key_of("attacker", kind, variant)
+	impostors.request(key, kind, variant, mat)
+	for i in 30:
+		await process_frame
+		if impostors.is_ready(key):
+			break
+	if not impostors.is_ready(key):
+		push_error("bv3_shot: atlas not baked")
+		quit(1)
+		return
+	if shot == "atlas":
+		var err := impostors.atlas_image(key).save_png(out)
+		print("bv3_shot: atlas %s (%s)" % [out, error_string(err)])
+		quit(0 if err == OK else 1)
+		return
+	var spacing := 3.5 if kind == "cavalry" else 1.6
+	var ground := _center.y
+	var real := MultiMesh.new()
+	real.transform_format = MultiMesh.TRANSFORM_3D
+	real.mesh = BattleSkinned.mesh(kind, variant, 0)
+	real.instance_count = 8
+	var quads := MultiMesh.new()
+	quads.transform_format = MultiMesh.TRANSFORM_3D
+	quads.mesh = BattleImpostors.quad_mesh()
+	quads.instance_count = 8
+	for k in 8:
+		var basis := Basis(Vector3.UP, float(k) * TAU / 8.0)
+		var x := _center.x + (float(k) - 3.5) * spacing
+		real.set_instance_transform(k, Transform3D(basis, Vector3(x, ground, _center.z - spacing * 1.2)))
+		quads.set_instance_transform(k, Transform3D(basis, Vector3(x, ground, _center.z)))
+	var real_inst := MultiMeshInstance3D.new()
+	real_inst.multimesh = real
+	real_inst.material_override = mat
+	world.add_child(real_inst)
+	var imp_inst := MultiMeshInstance3D.new()
+	imp_inst.multimesh = quads
+	imp_inst.material_override = impostors.make_material(key)
+	world.add_child(imp_inst)
+	camera.look_at_from_position(Vector3(_center.x, ground + spacing * 2.2, _center.z + spacing * 5.5), Vector3(_center.x, ground + 0.9, _center.z - spacing * 0.6))
+	for i in 10:
+		await process_frame
+	await RenderingServer.frame_post_draw
+	var image := root.get_texture().get_image()
+	var err := image.save_png(out)
+	print("bv3_shot: impostor %s (%s)" % [out, error_string(err)])
+	quit(0 if err == OK else 1)
