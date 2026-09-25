@@ -45,7 +45,7 @@
     "demand_score": 20,
     "ai_min_chance": 60,
     "peace_truce_turns": 12,
-    "pretender_reluctance": 20,
+    "pretender_reluctance": 35,
     "max_weariness_gain": 3
   }
 }

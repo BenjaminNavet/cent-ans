@@ -1735,8 +1735,11 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
         if we_accept_white && !enemy_is_player && chance(&white) >= min_chance {
             return Some(treaty_order(enemy, white));
         }
-        let beaten =
-            score < diplomacy::SURRENDER_WAR_SCORE || me.ledger.weariness >= 60 || we_accept_white;
+        // Only a beaten or exhausted crown buys its peace (lands, gold,
+        // tribute); otherwise the war goes on until one side prevails.
+        let beaten = score < 2 * diplomacy::SURRENDER_WAR_SCORE
+            || me.ledger.weariness >= 60
+            || diplomacy::is_cornered(state, data, faction);
         if beaten {
             if let Some(treaty) = counter_proposal(state, data, faction, enemy, &white) {
                 if enemy_is_player || chance(&treaty) >= min_chance {

@@ -361,7 +361,14 @@ fn side_dict(
                 && (14..=45).contains(&(state.year() - c.birth_year))
         })
         .take(12)
-        .map(|(id, _)| named(id.as_str(), state.character_name(data, id)))
+        .map(|(id, c)| {
+            vdict! {
+                "id" => id.as_str(),
+                "name" => state.character_name(data, id).as_str(),
+                "female" => c.sex == data_model::Sex::Female,
+            }
+            .to_variant()
+        })
         .collect();
     vdict! {
         "id" => side.as_str(),
