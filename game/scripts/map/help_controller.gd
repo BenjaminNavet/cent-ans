@@ -74,6 +74,10 @@ func setup(campaign_map: Node) -> void:
 	text.add_theme_font_size_override("normal_font_size", 15)
 	text.add_theme_font_size_override("bold_font_size", 17)
 	box.add_child(text)
+	# BP1 : mots du Codex cliquables (bulles imbriquées) dans l'aide.
+	var bubbles := map.get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("attach", text)
 	map.ui.add_child(panel)
 	panel.hide()
 	var popup: PopupMenu = map.ui.menu_button.get_popup()
@@ -91,7 +95,7 @@ func toggle() -> void:
 
 ## Fiche des raccourcis (InputMap) puis principes du jeu.
 static func full_text() -> String:
-	return "[b]Commandes de la carte[/b] (disposition du clavier : Réglages → Commandes)\n\n%s\n\n%s" % [ShortcutSheet.bbcode(), HELP_TEXT]
+	return "[b]Commandes de la carte[/b] (disposition du clavier : Réglages → Commandes)\n\n%s\n\n%s" % [ShortcutSheet.bbcode(), CodexText.format(HELP_TEXT, true)]
 
 
 func handle_input(event: InputEvent) -> bool:

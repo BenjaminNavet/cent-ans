@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_standards_fx.schema.json",
+  "title": "Étendards et musiciens en bataille (rendu)",
+  "description": "Fichier data/fx/battle_standards.json (lot EP5, ADR 0034) : forme et étoffe des étendards selon l'unité, bannière du général, musiciens, distances d'affichage. Rendu seulement.",
+  "type": "object",
+  "$defs": {
+    "kind_id": { "type": "string", "pattern": "^[a-z_]+$" },
+    "instrument": { "enum": ["drum", "horn"] },
+    "faction_map": {
+      "type": "object",
+      "propertyNames": { "pattern": "^fac_[a-z_]+$" },
+      "additionalProperties": { "$ref": "#/$defs/kind_id" }
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "kinds": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "note": { "type": "string" },
+          "cloth": { "enum": ["pennon", "banner", "standard", "oriflamme", "st_george", "dragon"], "description": "Étoffe : pennon, bannière ou étendard de la faction (heraldry/banners/fac_<id>_<cloth>.png), ou étendard royal nommé." },
+          "size_m": { "type": "array", "items": { "type": "number", "minimum": 0.2, "maximum": 6 }, "minItems": 2, "maxItems": 2, "description": "Longueur (depuis la hampe) et hauteur de la texture, en mètres." }
+        },
+        "required": ["label", "cloth", "size_m"],
+        "additionalProperties": false
+      }
+    },
+    "by_unit_type": {
+      "type": "object",
+      "propertyNames": { "pattern": "^unit_[a-z_]+$" },
+      "additionalProperties": { "$ref": "#/$defs/kind_id" }
+    },
+    "default_kind": { "$ref": "#/$defs/kind_id" },
+    "second_bearer_kind": { "$ref": "#/$defs/kind_id" },
+    "general": {
+      "type": "object",
+      "properties": {
+        "kind": { "$ref": "#/$defs/kind_id" },
+        "by_faction": { "$ref": "#/$defs/faction_map" },
+        "sovereign_by_faction": { "$ref": "#/$defs/faction_map" },
+        "no_quarter_by_faction": { "$ref": "#/$defs/faction_map" }
+      },
+      "required": ["kind"],
+      "additionalProperties": false
+    },
+    "musicians": {
+      "type": "object",
+      "properties": {
+        "note": { "type": "string" },
+        "by_unit_type": {
+          "type": "object",
+          "propertyNames": { "pattern": "^unit_[a-z_]+$" },
+          "additionalProperties": { "type": "array", "items": { "$ref": "#/$defs/instrument" }, "maxItems": 2, "uniqueItems": true }
+        },
+        "general": { "type": "array", "items": { "$ref": "#/$defs/instrument" }, "maxItems": 2, "uniqueItems": true },
+        "drum_every_s": { "type": "number", "minimum": 1, "maximum": 60 },
+        "sound_distance_m": { "type": "number", "minimum": 10, "maximum": 2000 }
+      },
+      "required": ["by_unit_type", "drum_every_s", "sound_distance_m"],
+      "additionalProperties": false
+    },
+    "render": {
+      "type": "object",
+      "properties": {
+        "max_distance_m": { "type": "number", "minimum": 50, "maximum": 5000, "description": "Au-delà, ni porte-étendard ni drapeau." },
+        "far_scale": { "type": "number", "minimum": 1, "maximum": 5, "description": "Agrandissement du drapeau au loin (lisibilité)." },
+        "far_scale_from_m": { "type": "number", "minimum": 0 },
+        "far_scale_to_m": { "type": "number", "minimum": 1 },
+        "general_scale": { "type": "number", "minimum": 0.5, "maximum": 3 },
+        "lod0_distance_m": { "type": "number", "minimum": 0 },
+        "lod1_distance_m": { "type": "number", "minimum": 0 },
+        "trophy_slot_offset": { "type": "integer", "minimum": 1, "maximum": 8, "description": "Décalage (rang du tampon) de la figurine qui porte un étendard pris, à côté du porte-étendard du régiment." },
+        "max_fallen_bearers": { "type": "integer", "minimum": 0, "maximum": 1000 }
+      },
+      "required": ["max_distance_m", "far_scale", "far_scale_from_m", "far_scale_to_m", "general_scale", "lod0_distance_m", "lod1_distance_m", "trophy_slot_offset", "max_fallen_bearers"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["kinds", "by_unit_type", "default_kind", "second_bearer_kind", "general", "musicians", "render"],
+  "additionalProperties": false
+}

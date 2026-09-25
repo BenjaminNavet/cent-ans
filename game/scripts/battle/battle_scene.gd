@@ -22,7 +22,12 @@ extends Node3D
 ## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
 ## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
 ## `--no-bv1` (volées, sang, mottes et taille d'unité du lot BV1 coupés : mesures A/B),
-## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
+## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4),
+## `--standard-shot=<foot|mounted|line|fallen|captured>` (capture EP5 : gros plan d'un
+## porte-étendard à pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé,
+## étendard pris porté par le vainqueur).
+## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
+## `--horizon-province=<id>`, `--panorama=<id>` (captures EP2).
 
 signal returned(result: Dictionary)
 
@@ -129,8 +134,10 @@ var _bench_gpu_samples: int = 0
 var _bench_ab: PackedStringArray = []
 var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
+var _scale_tier: String = ""  # EP1 : palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
+var _standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen|captured>`
 var _weather_override: String = ""
 var _camera_override: String = ""
 var _last_group_ms: int = -10000
@@ -249,6 +256,8 @@ func begin() -> bool:
 		SiegeAssaultFx.add_engines(setup, _siege_engines.split(",", false))  # SG1 : captures, banc
 		padded = true  # régiments hors campagne : pas de résultat à rapporter
 	battle = ClassDB.instantiate("BattleSim")
+	if _scale_tier != "" and battle.has_method("set_scale_tier"):
+		battle.call("set_scale_tier", _scale_tier)  # EP1 : --scale=<skirmish|large|epic>
 	if not battle.call("setup", setup, battle_seed):
 		return false
 	var setup_side: Variant = setup.get("player_side", "attacker")
@@ -270,6 +279,7 @@ func begin() -> bool:
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
 	_weather_key = weather_key
 	var terrain_data: Dictionary = battle.call("get_terrain")
+	terrain.province_id = str(setup.get("province", ""))  # EP2 : relief réel et panorama du lieu
 	terrain.build(terrain_data, weather_key)
 	if terrain_data.has("siege"):
 		siege_view = BattleSiege.new()
@@ -286,7 +296,10 @@ func begin() -> bool:
 			if landmark_town != null:
 				add_child(landmark_town)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
-	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
+	if terrain.horizon != null:
+		terrain.horizon.apply_atmosphere(world_env.environment, sun, weather_key)  # EP2
+	var field_center := terrain.field_center()  # EP1 : (600, 400) au palier standard
+	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(field_center.x, terrain.height_at(field_center.x, field_center.y), field_center.y), Vector2(terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
 	if not _no_bv1:
 		battle.call("set_figure_scale", _figure_scale())
@@ -311,7 +324,9 @@ func begin() -> bool:
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
-	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
+	camera_rig.bounds = Rect2(-150, -150, terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0)  # EP1
+	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
+	camera_rig.max_distance = 900.0 * (0.5 + 0.5 * maxf(terrain.field_scale_x(), 1.0))
 	_frame_camera()
 	hud.minimap.flipped = player_side == "attacker"
 	hud.minimap.setup(terrain_data, side_colors)
@@ -391,9 +406,8 @@ func _build_soldier_layers() -> void:
 	effects = BattleEffects.new()
 	effects.name = "Effects"
 	add_child(effects)
-	var river: Dictionary = terrain.terrain.get("river", {})
-	var half_width := float(river.get("width", 0.0)) * 0.5
-	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	# EP3 : l'eau à la largeur locale de la rivière, et les ruisseaux.
+	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if terrain.in_water(x, z) else 0)
 	if not _no_bv1:
 		effects.configure_ground(str(terrain.terrain.get("ground", "dry")), _weather_key)
 	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
@@ -404,7 +418,7 @@ func _build_soldier_layers() -> void:
 	blood.name = "Blood"
 	effects.add_child(blood)
 	blood.figure_scale = effects.volleys.figure_scale
-	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if terrain.in_water(x, z) else 0)
 	effects.hit_landed.connect(func(pos: Vector3, time: float) -> void: blood.add_hit(pos, time, _camera_position()))
 	# Fusion BV1/BV2 : les morts de BV2 portent la flaque au sol (BV1) et les traits fichés dans
 	# les corps ; la gerbe reste à BV2 (`BattleGore`), une seule source par événement.
@@ -436,7 +450,10 @@ func _setup_standards() -> void:
 	standards = BattleStandards.new()
 	standards.name = "Standards"
 	add_child(standards)
-	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind)
+	var factions := {}
+	for side in ["attacker", "defender"]:
+		factions[side] = str((setup.get(side, {}) as Dictionary).get("faction", ""))
+	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle)
 	for id in _banners:
 		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
 	if terrain.vegetation != null:
@@ -475,7 +492,7 @@ func _setup_grass_flatten() -> void:
 	if terrain.vegetation == null:
 		return
 	grass_flatten = BattleGrassFlatten.new()
-	grass_flatten.setup()
+	grass_flatten.setup(Vector2(terrain.FIELD_W, terrain.FIELD_D))
 	terrain.vegetation.set_flatten(grass_flatten)
 	var blood_amount: float = 0.0 if blood == null else [0.0, 0.6, 1.0][blood.level]
 	if soldiers.bv2_enabled:
@@ -753,6 +770,21 @@ func _bench_finish() -> void:
 	}
 	if not ab_result.is_empty():
 		result["ab"] = ab_result
+	# EP1 : palier d'échelle, champ, soldats présents, figurines, primitives, budget d'animation.
+	var on_field := 0
+	var figures := 0
+	for unit in units:
+		if bool(unit.get("present", true)):
+			on_field += int(unit["soldiers"])
+			figures += int(unit.get("figures", unit["soldiers"]))
+	var scale_info: Dictionary = battle.call("get_scale") if battle.has_method("get_scale") else {}
+	result["scale"] = str(scale_info.get("key", ""))
+	result["field_w"] = float(scale_info.get("width", 0.0))
+	result["on_field_soldiers"] = on_field
+	result["figures"] = figures
+	result["primitives_m"] = Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1.0e6
+	result["draw_calls"] = Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+	result["skipped_updates"] = self.soldiers.skipped_updates
 	if effects != null and effects.volleys != null:
 		# BV1 : volées, traits fichés et échelle des figurines.
 		result["volley_arrows"] = effects.volleys.launched
@@ -879,7 +911,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			# BV3 : de près, le drapeau-repère flotte dans le vent, et s'efface devant l'étendard
 			# porté quand celui-ci est affiché.
 			node.rotation.y = lerp_angle(standards.downwind_yaw(), cam_yaw, smoothstep(1.0, 2.5, banner_scale))
-			node.visible = not (banner_scale <= standards.hide_scale() and standards.is_shown(id))
+			node.visible = not (banner_scale <= standards.hide_scale() and standards.handles(id))
 		var routing := str(unit["state"]) == "routing"
 		if routing != bool(banner["routing"]):
 			banner["routing"] = routing
@@ -1394,6 +1426,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg.begins_with("--units="):
 			_pad_units = int(arg.trim_prefix("--units="))
+		elif arg.begins_with("--scale="):
+			_scale_tier = arg.trim_prefix("--scale=")
 		elif arg.begins_with("--bench-at="):
 			_bench_at = float(arg.trim_prefix("--bench-at="))
 		elif arg.begins_with("--bench-repeat="):
@@ -1431,6 +1465,8 @@ func _parse_cmdline() -> void:
 			_result_shot = true
 		elif arg.begins_with("--shot-at="):
 			_shot_at = float(arg.trim_prefix("--shot-at="))
+		elif arg.begins_with("--standard-shot="):
+			_standard_shot = arg.trim_prefix("--standard-shot=")
 		elif arg == "--no-effects":
 			_no_effects = true
 		elif arg == "--no-bv1":
@@ -1481,6 +1517,19 @@ func _stage_screenshot() -> void:
 		units = battle.call("get_units")
 		soldiers.update(battle, units, 0.1, [])
 		_update_effects(0.1)
+		if _standard_shot == "fallen" or _standard_shot == "captured":
+			# EP5 : dès qu'un étendard gît depuis 2 s (le porte-étendard a fini de tomber).
+			if standards != null:
+				standards.update(units, soldiers, _camera_position())
+			var down := false
+			for unit in units:
+				if _standard_shot == "fallen" and str(unit.get("standard", "")) == "fallen" and float(unit.get("standard_timer", 99.0)) < 3.0:
+					down = true
+				elif _standard_shot == "captured" and int(unit.get("standard_by", -1)) >= 0:
+					down = true
+			if down:
+				break
+			continue
 		if _shot_at > 0.0:
 			if float(battle.call("get_elapsed")) >= _shot_at:
 				break
@@ -1530,6 +1579,7 @@ func _stage_screenshot() -> void:
 		markers.world_hover = selected[0]  # B2 : la capture montre aussi le nom au survol
 	_refresh_view(true)
 	_apply_camera_override()
+	_apply_standard_shot()
 	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
 	for _i in 150 if effects != null else 40:
 		await get_tree().process_frame
@@ -1637,6 +1687,61 @@ func _stage_result_screenshot() -> void:
 	_take_screenshot(_screenshot_path, true)
 
 
+## Capture EP5 (`--standard-shot=`) : cadre un porte-étendard (à pied, à cheval), la ligne de
+## bataille et ses étendards au loin, ou un étendard tombé.
+func _apply_standard_shot() -> void:
+	if _standard_shot == "" or standards == null:
+		return
+	selected.clear()
+	var best: Dictionary = {}
+	for unit in units:
+		if not bool(unit["present"]) or not unit.has("bearer_slots"):
+			continue
+		var render := str(unit["render"])
+		var ok := false
+		match _standard_shot:
+			"foot":
+				ok = render == "infantry" and str(unit.get("standard", "")) == "carried"
+			"mounted":
+				ok = render == "cavalry" and str(unit.get("standard", "")) == "carried"
+			"fallen":
+				ok = str(unit.get("standard", "")) in ["fallen", "lost"]
+			"line":
+				ok = str(unit["side"]) == player_side
+			"captured":
+				for other in units:
+					if int(other.get("standard_by", -1)) == int(unit["id"]):
+						ok = true
+		if ok and (best.is_empty() or (str(unit["side"]) == player_side and str(best["side"]) != player_side)):
+			best = unit
+	if best.is_empty():
+		push_warning("BattleScene: no regiment for --standard-shot=%s" % _standard_shot)
+		return
+	var facing := float(best["facing"])
+	var ahead := Vector3(sin(facing), 0, cos(facing))
+	if _standard_shot == "line":
+		# Derrière la ligne du joueur, haut et loin : les étendards ennemis à 300-600 m.
+		camera_rig.look_at_point(Vector3(float(best["x"]), 0, float(best["z"])) + ahead * 25.0, 45.0, atan2(-ahead.x, -ahead.z) + 0.35)
+		print("BattleScene: EP5 line shot, %d standards shown, %d figures" % [standards.shown_count, standards.figure_count])
+		return
+	var point := Vector3(float(best.get("standard_x", best["x"])), 0, float(best.get("standard_z", best["z"])))
+	if _standard_shot != "fallen":
+		var frame: Variant = soldiers.figure_at(int(best["id"]), int((best["bearer_slots"] as PackedInt32Array)[0]))
+		if frame != null:
+			point = (frame as Transform3D).origin
+	# De trois quarts, devant le porte-étendard.
+	var yaw := atan2(ahead.x, ahead.z) + 0.6
+	camera_rig.look_at_point(point, 8.0 if _standard_shot == "foot" else 12.0, yaw)
+	if _standard_shot == "fallen" and camera_rig.camera != null:
+		# Vue plongeante : l'étendard gît dans la mêlée, caché par les hommes debout.
+		camera_rig.set_process(false)
+		var ground := terrain.height_at(point.x, point.z)
+		var at := Vector3(point.x, ground, point.z)
+		camera_rig.camera.global_position = at + Vector3(sin(yaw), 0, cos(yaw)) * 6.0 + Vector3(0, 7.5, 0)
+		camera_rig.camera.look_at(at, Vector3.UP)
+	print("BattleScene: EP5 %s shot on %s (%s) at %s, standard %s, %d standards, %d figures, %d fallen" % [_standard_shot, str(best["name"]), str(best["type"]), point, str(best.get("standard", "")), standards.shown_count, standards.figure_count, standards.fallen_count])
+
+
 ## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).
 func _apply_camera_override() -> void:
 	if _camera_override == "":
@@ -1648,6 +1753,14 @@ func _apply_camera_override() -> void:
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
+	if OS.get_cmdline_user_args().has("--no-hud"):
+		# EP2 : captures de décor sans interface.
+		for layer in find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
+		for control in find_children("*", "Control", true, false):
+			if not (control.get_parent() is Control):
+				(control as Control).visible = false
+		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())

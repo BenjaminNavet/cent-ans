@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_horizon.schema.json",
+  "title": "Horizon des batailles",
+  "description": "Fichier data/fx/horizon.json (lot EP2, ADR 0032) : relief réel lointain, brume, panoramas peints et silhouettes, lus par game/scripts/battle/battle_horizon.gd ; invites des panoramas lues par tools/cent_ans_tools/horizon_panoramas.py. Aucune règle de jeu.",
+  "type": "object",
+  "$defs": {
+    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+    "weather_map": {
+      "type": "object",
+      "properties": {
+        "clear": { "type": "number", "minimum": 0 }, "fog": { "type": "number", "minimum": 0 },
+        "rain": { "type": "number", "minimum": 0 }, "snow": { "type": "number", "minimum": 0 }
+      },
+      "required": ["clear", "fog", "rain", "snow"],
+      "additionalProperties": false
+    },
+    "season_map": {
+      "type": "object",
+      "properties": {
+        "spring": { "type": "number" }, "summer": { "type": "number" },
+        "autumn": { "type": "number" }, "winter": { "type": "number" }
+      },
+      "required": ["spring", "summer", "autumn", "winter"],
+      "additionalProperties": false
+    },
+    "count_range": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 12 }, "minItems": 2, "maxItems": 2 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "relief": {
+      "type": "object",
+      "properties": {
+        "index": { "type": "string", "pattern": "^res://", "description": "Index des tuiles cuites par `cent-ans geo horizon`." },
+        "blend_start_m": { "type": "number", "minimum": 0, "description": "Distance au champ où le relief réel commence à se mêler au relief généré." },
+        "blend_end_m": { "type": "number", "minimum": 0, "description": "Distance au champ au-delà de laquelle seul le relief réel compte." },
+        "river_keep_m": { "type": "number", "minimum": 0, "description": "Le relief généré garde la main à moins de cette distance de la rivière." },
+        "ring_step_m": { "type": "number", "minimum": 100 },
+        "ring_radius_m": { "type": "number", "minimum": 8000, "maximum": 13000, "description": "Rayon de l'anneau d'horizon (la tuile couvre 13 km autour du centre)." },
+        "snow_line_m": { "$ref": "#/$defs/season_map" },
+        "colors": {
+          "type": "object",
+          "properties": {
+            "field": { "$ref": "#/$defs/rgb" }, "meadow": { "$ref": "#/$defs/rgb" }, "forest": { "$ref": "#/$defs/rgb" },
+            "rock": { "$ref": "#/$defs/rgb" }, "snow": { "$ref": "#/$defs/rgb" },
+            "winter_field": { "$ref": "#/$defs/rgb" }, "autumn_forest": { "$ref": "#/$defs/rgb" }
+          },
+          "required": ["field", "meadow", "forest", "rock", "snow"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["index", "blend_start_m", "blend_end_m", "ring_step_m", "ring_radius_m", "snow_line_m", "colors"],
+      "additionalProperties": false
+    },
+    "haze": {
+      "type": "object",
+      "properties": {
+        "fog_density": { "$ref": "#/$defs/weather_map", "description": "Densité du brouillard exponentiel de la scène quand l'horizon est actif." },
+        "altitude_scale_m": { "type": "number", "minimum": 100 },
+        "full_density_m": { "type": "number", "minimum": 0 },
+        "ring_scale": { "type": "number", "minimum": 0, "maximum": 2, "description": "Calage de la brume de l'anneau d'horizon sur celle de la scène." },
+        "ring_tint": { "type": "number", "minimum": 0, "maximum": 2 }
+      },
+      "required": ["fog_density", "altitude_scale_m", "full_density_m"],
+      "additionalProperties": false
+    },
+    "panorama": {
+      "type": "object",
+      "properties": {
+        "radius_m": { "type": "number", "minimum": 13000, "maximum": 15500, "description": "Rayon du cylindre (plan lointain de la caméra : 16 km)." },
+        "bottom_deg": { "type": "number", "maximum": 0 },
+        "min_angle_deg": { "type": "number", "minimum": 0 },
+        "exaggeration": { "type": "number", "minimum": 0.5, "maximum": 4 },
+        "max_angle_deg": { "type": "number", "minimum": 0.5, "maximum": 15 },
+        "haze": { "$ref": "#/$defs/weather_map" },
+        "exposure": { "$ref": "#/$defs/weather_map" },
+        "sea_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de mer d'un azimut au-delà de laquelle l'horizon est marin." },
+        "paint_detail": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du relief peint gardée (0 : silhouette = crête réelle)." }
+      },
+      "required": ["radius_m", "bottom_deg", "min_angle_deg", "exaggeration", "max_angle_deg", "haze", "exposure", "sea_share"],
+      "additionalProperties": false
+    },
+    "panoramas": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "pattern": "^res://assets/horizon/panoramas/[a-z_]+\\.webp$" },
+          "label": { "type": "string" },
+          "repeats": { "type": "integer", "minimum": 1, "maximum": 12, "description": "Répétitions (en aller-retour) de la bande sur 360°." },
+          "prompt": { "type": "string", "minLength": 20 }
+        },
+        "required": ["path", "label", "repeats", "prompt"],
+        "additionalProperties": false
+      }
+    },
+    "prompt_template": { "type": "string", "pattern": "\\{prompt\\}" },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "panorama": { "type": "string" },
+          "provinces": { "type": "array", "items": { "type": "string", "pattern": "^prov_" } },
+          "season": { "type": "array", "items": { "enum": ["spring", "summer", "autumn", "winter"] } },
+          "terrain": { "type": "array", "items": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] } },
+          "coastal": { "type": "boolean" },
+          "skyline_max_deg": { "type": "number" },
+          "skyline_min_deg": { "type": "number" }
+        },
+        "required": ["panorama"],
+        "additionalProperties": false
+      }
+    },
+    "silhouettes": {
+      "type": "object",
+      "properties": {
+        "min_distance_m": { "type": "number", "minimum": 1000 },
+        "max_distance_m": { "type": "number", "minimum": 1000, "maximum": 9000 },
+        "villages": { "$ref": "#/$defs/count_range" },
+        "castles": { "$ref": "#/$defs/count_range" },
+        "smokes": { "$ref": "#/$defs/count_range" },
+        "scale": { "type": "number", "minimum": 0.5, "maximum": 3 },
+        "stone": { "$ref": "#/$defs/rgb" },
+        "roof": { "$ref": "#/$defs/rgb" },
+        "smoke": { "$ref": "#/$defs/rgb" }
+      },
+      "required": ["min_distance_m", "max_distance_m", "villages", "castles", "smokes", "scale"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["relief", "haze", "panorama", "panoramas", "prompt_template", "rules", "silhouettes"],
+  "additionalProperties": false
+}

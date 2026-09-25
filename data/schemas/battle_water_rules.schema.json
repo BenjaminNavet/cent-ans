@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_water_rules.schema.json",
+  "title": "Eau et chemins des champs de bataille",
+  "description": "Fichier data/rules/battle_water.json (lot EP3, ADR 0033) : cours d'eau, gués, ponts, berges, bras morts et routes du champ de bataille, vitesses et combat dans l'eau. Lu par sim-battle (WaterRules).",
+  "type": "object",
+  "$defs": {
+    "factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 },
+    "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+    "metres": { "type": "number", "exclusiveMinimum": 0, "maximum": 200 },
+    "span": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/metres" },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[minimum, maximum] en mètres."
+    },
+    "count": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 6 },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[minimum, maximum] (tirage uniforme, bornes comprises)."
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "river": {
+      "type": "object",
+      "properties": {
+        "width_m": {
+          "type": "object",
+          "description": "Largeur moyenne de la rivière principale par terrain de province.",
+          "properties": {
+            "plains": { "$ref": "#/$defs/span" },
+            "heath": { "$ref": "#/$defs/span" },
+            "bocage": { "$ref": "#/$defs/span" },
+            "forest": { "$ref": "#/$defs/span" },
+            "hills": { "$ref": "#/$defs/span" },
+            "mountains": { "$ref": "#/$defs/span" },
+            "marsh": { "$ref": "#/$defs/span" }
+          },
+          "required": ["plains", "heath", "bocage", "forest", "hills", "mountains", "marsh"],
+          "additionalProperties": false
+        },
+        "width_variation": { "type": "number", "minimum": 0, "maximum": 0.6, "description": "Variation relative de la largeur le long du cours (rétrécissements, élargissements)." },
+        "ford_half_width_m": { "$ref": "#/$defs/span" },
+        "crossings": {
+          "type": "array",
+          "description": "Gués et ponts selon la largeur moyenne (première ligne dont max_width_m couvre la largeur).",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "max_width_m": { "$ref": "#/$defs/metres" },
+              "fords": { "$ref": "#/$defs/count" },
+              "bridges": { "$ref": "#/$defs/count" }
+            },
+            "required": ["max_width_m", "fords", "bridges"],
+            "additionalProperties": false
+          }
+        },
+        "stone_bridge_chance": { "$ref": "#/$defs/chance" },
+        "stone_bridge_from_width_m": { "$ref": "#/$defs/metres", "description": "Au-delà de cette largeur, les ponts sont toujours en pierre." },
+        "bridge_width_m": {
+          "type": "object",
+          "properties": { "wood": { "$ref": "#/$defs/span" }, "stone": { "$ref": "#/$defs/span" } },
+          "required": ["wood", "stone"],
+          "additionalProperties": false
+        },
+        "abutment_m": { "$ref": "#/$defs/metres", "description": "Longueur de pont posée sur chaque berge (culées)." },
+        "steep_bank_chance": { "$ref": "#/$defs/chance" },
+        "marsh_bank_chance": { "$ref": "#/$defs/chance" },
+        "oxbow_chance": { "$ref": "#/$defs/chance" }
+      },
+      "required": ["width_m", "width_variation", "ford_half_width_m", "crossings", "stone_bridge_chance", "stone_bridge_from_width_m", "bridge_width_m", "abutment_m", "steep_bank_chance", "marsh_bank_chance", "oxbow_chance"],
+      "additionalProperties": false
+    },
+    "streams": {
+      "type": "object",
+      "properties": {
+        "tributary_chance": { "$ref": "#/$defs/chance" },
+        "tributary_width_m": { "$ref": "#/$defs/span" },
+        "brooks": { "$ref": "#/$defs/count" },
+        "brook_width_m": { "$ref": "#/$defs/span" },
+        "footbridge_chance": { "$ref": "#/$defs/chance", "description": "Chance d'une passerelle de bois là où une route franchit l'affluent." }
+      },
+      "required": ["tributary_chance", "tributary_width_m", "brooks", "brook_width_m", "footbridge_chance"],
+      "additionalProperties": false
+    },
+    "movement": {
+      "type": "object",
+      "description": "Multiplicateurs de vitesse.",
+      "properties": {
+        "ford": { "$ref": "#/$defs/factor" },
+        "deep_foot": { "$ref": "#/$defs/factor", "description": "Piétons dans l'eau profonde (à la nage, lents et en danger)." },
+        "deep_mounted": { "$ref": "#/$defs/factor", "description": "Cavaliers déjà dans l'eau profonde (déroute)." },
+        "tributary": { "$ref": "#/$defs/factor" },
+        "brook": { "$ref": "#/$defs/factor" },
+        "oxbow": { "$ref": "#/$defs/factor" },
+        "steep_bank": { "$ref": "#/$defs/factor" },
+        "marsh_bank": { "$ref": "#/$defs/factor" },
+        "bank_band_m": { "$ref": "#/$defs/metres" },
+        "deep_blocks_mounted": { "type": "boolean", "description": "L'eau profonde arrête les cavaliers (hors déroute)." },
+        "deep_blocks_engines": { "type": "boolean", "description": "L'eau profonde arrête les engins." },
+        "road_column": { "$ref": "#/$defs/factor", "description": "Marche en colonne sur une route." },
+        "road_other": { "$ref": "#/$defs/factor", "description": "Autres formations sur une route." },
+        "bridge_min_squeeze": { "$ref": "#/$defs/factor", "description": "Vitesse minimale d'un régiment plus large que le pont (il s'étire en file)." }
+      },
+      "required": ["ford", "deep_foot", "deep_mounted", "tributary", "brook", "oxbow", "steep_bank", "marsh_bank", "bank_band_m", "deep_blocks_mounted", "deep_blocks_engines", "road_column", "road_other", "bridge_min_squeeze"],
+      "additionalProperties": false
+    },
+    "deep_water": {
+      "type": "object",
+      "properties": {
+        "fatigue_per_s": { "type": "number", "minimum": 0, "maximum": 20 },
+        "morale_per_s": { "type": "number", "minimum": 0, "maximum": 20 },
+        "drown_share_per_s": { "type": "number", "minimum": 0, "maximum": 0.1, "description": "Part des soldats noyés par seconde (sans armure)." },
+        "armour_weight": { "type": "number", "minimum": 0, "maximum": 5, "description": "Surcroît de noyade des hommes en armure (armure 100 : × (1 + poids))." }
+      },
+      "required": ["fatigue_per_s", "morale_per_s", "drown_share_per_s", "armour_weight"],
+      "additionalProperties": false
+    },
+    "combat": {
+      "type": "object",
+      "properties": {
+        "bridge_head_reach_m": { "$ref": "#/$defs/metres" },
+        "bridge_holder_bonus": { "$ref": "#/$defs/factor", "description": "Coups de qui tient la tête de pont contre un ennemi sur le pont." },
+        "ford_attacker": { "$ref": "#/$defs/factor", "description": "Coups portés depuis un gué ou un ruisseau." },
+        "deep_attacker": { "$ref": "#/$defs/factor", "description": "Coups portés depuis l'eau profonde." }
+      },
+      "required": ["bridge_head_reach_m", "bridge_holder_bonus", "ford_attacker", "deep_attacker"],
+      "additionalProperties": false
+    },
+    "roads": {
+      "type": "object",
+      "properties": {
+        "main_width_m": { "$ref": "#/$defs/metres" },
+        "track_width_m": { "$ref": "#/$defs/metres" },
+        "wander_m": { "$ref": "#/$defs/metres" },
+        "ford_road_chance": { "$ref": "#/$defs/chance" }
+      },
+      "required": ["main_width_m", "track_width_m", "wander_m", "ford_road_chance"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["river", "streams", "movement", "deep_water", "combat", "roads"],
+  "additionalProperties": false
+}

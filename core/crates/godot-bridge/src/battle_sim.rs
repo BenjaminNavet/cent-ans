@@ -132,6 +132,9 @@ pub struct BattleSim {
     /// Visual unit-size multiplier (BV1, ADR 0016): figures drawn per
     /// simulated soldier. Rendering only.
     figure_scale: f64,
+    /// Forced battle scale tier (EP1, `data/rules/battle_scale.json`);
+    /// empty: by head count.
+    scale_key: String,
     base: Base<RefCounted>,
 }
 
@@ -141,6 +144,7 @@ impl IRefCounted for BattleSim {
         BattleSim {
             sim: None,
             figure_scale: 1.0,
+            scale_key: String::new(),
             base,
         }
     }
@@ -151,8 +155,13 @@ impl BattleSim {
     /// Builds the battle from a `CampaignSim.get_battle_setup` dictionary.
     #[func]
     fn setup(&mut self, setup: VarDictionary, seed: i64) -> bool {
+        let forced = sim_battle::BattleScale::named(&self.scale_key);
         let parsed = from_dict::<BattleSetup>(&setup).and_then(|setup| {
-            sim_battle::BattleSim::new(setup, seed as u64).map_err(|e| e.to_string())
+            match forced {
+                Some(scale) => sim_battle::BattleSim::new_scaled(setup, seed as u64, scale),
+                None => sim_battle::BattleSim::new(setup, seed as u64),
+            }
+            .map_err(|e| e.to_string())
         });
         match parsed {
             Ok(sim) => {
@@ -165,6 +174,41 @@ impl BattleSim {
                 false
             }
         }
+    }
+
+    /// Forces the scale tier of the next `setup` (EP1: `skirmish`, `large`,
+    /// `epic`…; empty or unknown: by head count).
+    #[func]
+    fn set_scale_tier(&mut self, key: GString) {
+        self.scale_key = key.to_string();
+    }
+
+    /// Scale of the battle (EP1): `{key, width, depth, attacker_line_z,
+    /// defender_line_z, zone_depth, max_on_field}`.
+    #[func]
+    fn get_scale(&self) -> VarDictionary {
+        let Some(sim) = &self.sim else {
+            return VarDictionary::new();
+        };
+        let scale = sim.scale();
+        let size = sim.field().size;
+        vdict! {
+            "key" => scale.key.as_str(),
+            "width" => size.width,
+            "depth" => size.depth,
+            "attacker_line_z" => size.attacker_line_z(),
+            "defender_line_z" => size.defender_line_z(),
+            "zone_depth" => size.zone_depth,
+            "max_on_field" => scale.max_on_field as i64,
+        }
+    }
+
+    /// Width and depth of the field in metres (EP1), `(0, 0)` before `setup`.
+    #[func]
+    fn get_field_size(&self) -> Vector2 {
+        self.sim.as_ref().map_or(Vector2::ZERO, |sim| {
+            Vector2::new(sim.field().width as f32, sim.field().depth as f32)
+        })
     }
 
     /// Visual unit size (BV1, ADR 0016): figures drawn per simulated soldier
@@ -422,6 +466,42 @@ impl BattleSim {
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
                 }
+                // EP5: the regiment's standard (`carried`, `fallen`, `captured`,
+                // `lost`), where it lies on the ground, the regiment that took it,
+                // and the figures of the buffer that carry it.
+                let bearers = sim.standard_bearers(unit.id as usize);
+                if bearers > 0 {
+                    dict.set("standard", unit.standard.key());
+                    if unit.is_general {
+                        let sovereign = sim
+                            .setup()
+                            .side(unit.side)
+                            .general
+                            .as_ref()
+                            .is_some_and(|g| g.sovereign);
+                        dict.set("sovereign", sovereign);
+                    }
+                    if let Some((x, z)) = unit.standard.ground() {
+                        dict.set("standard_x", x);
+                        dict.set("standard_z", z);
+                        dict.set("standard_y", sim.field().height(x, z));
+                    }
+                    if let sim_battle::unit::StandardState::Fallen { timer, .. } = unit.standard {
+                        dict.set("standard_timer", timer);
+                    }
+                    if let sim_battle::unit::StandardState::Captured { by } = unit.standard {
+                        dict.set(
+                            "standard_by",
+                            if by == u32::MAX { -1 } else { i64::from(by) },
+                        );
+                    }
+                    let slots: PackedInt32Array = unit
+                        .standard_slots(self.figure_scale, bearers)
+                        .iter()
+                        .map(|&s| s as i32)
+                        .collect();
+                    dict.set("bearer_slots", &slots);
+                }
                 // SG1: the first `climbers_shown` soldiers of the buffer are on
                 // the ladders / bridge; `ladder_lines` = [foot, top] per ladder
                 // as Vector3 pairs (ground and crenel heights).
@@ -496,6 +576,12 @@ impl BattleSim {
     /// props[{kind, x, z, yaw, length, depth, house}]}` (BR3).
     /// R2: `forests` and `mud` are overlapping discs (anchors first, then
     /// lobes and copses).
+    /// EP3: `river` also carries `widths` (water width at each point),
+    /// `flow` (+1 when the water runs towards +x), `banks[{x0, x1, north,
+    /// kind: steep|marsh}]`; `bridges[{x, z, yaw, length, width, span,
+    /// deck, stone, arches, stream}]` (`stream` = -1 on the river),
+    /// `streams[{kind: tributary|brook, points, width}]`, `roads[{kind:
+    /// main|track, points, width}]`; oxbows are appended to `pools`.
     #[func]
     fn get_terrain(&self) -> VarDictionary {
         let Some(sim) = &self.sim else {
@@ -512,6 +598,9 @@ impl BattleSim {
         let mut dict = vdict! {
             "width" => field.width,
             "depth" => field.depth,
+            // EP1: battle lines of the field (250 / 550 on the standard one).
+            "attacker_line_z" => field.attacker_line_z(),
+            "defender_line_z" => field.defender_line_z(),
             "resolution" => field.resolution,
             "nx" => field.nx as i64,
             "nz" => field.nz as i64,
@@ -528,7 +617,7 @@ impl BattleSim {
             // B6: the site in one compact line (pre-battle dialog, HUD).
             "site_label" => field.site_label_fr(),
             "woodland" => field.woodland,
-            "pools" => &zones(&field.pools),
+            "pools" => &zones(&[field.pools.as_slice(), &field.oxbows].concat()),
             "obstacles" => &field
                 .obstacles
                 .iter()
@@ -580,7 +669,7 @@ impl BattleSim {
         }
         if let Some(river) = &field.river {
             let points: PackedVector2Array = river
-                .polyline(10.0)
+                .polyline(10.0, field.width)
                 .iter()
                 .map(|(x, z)| Vector2::new(*x as f32, *z as f32))
                 .collect();
@@ -592,11 +681,73 @@ impl BattleSim {
                         .to_variant()
                 })
                 .collect();
+            let widths: PackedFloat32Array = river
+                .polyline(10.0, field.width)
+                .iter()
+                .map(|(x, _)| river.width_at(*x) as f32)
+                .collect();
+            let banks: VarArray = river
+                .banks
+                .iter()
+                .map(|b| {
+                    vdict! { "x0" => b.x0, "x1" => b.x1, "north" => b.north, "kind" => b.kind.key() }
+                        .to_variant()
+                })
+                .collect();
+            // The water runs towards the lower end of the field.
+            let flow = if field.height(0.0, river.center_z(0.0))
+                >= field.height(field.width, river.center_z(field.width))
+            {
+                1
+            } else {
+                -1
+            };
             dict.set(
                 "river",
-                &vdict! { "points" => &points, "width" => river.width, "fords" => &fords },
+                &vdict! {
+                    "points" => &points, "width" => river.width, "fords" => &fords,
+                    "widths" => &widths, "banks" => &banks, "flow" => flow,
+                },
             );
         }
+        let polyline = |points: &[(f64, f64)]| -> PackedVector2Array {
+            points
+                .iter()
+                .map(|(x, z)| Vector2::new(*x as f32, *z as f32))
+                .collect()
+        };
+        let bridges: VarArray = field
+            .bridges
+            .iter()
+            .map(|b| {
+                vdict! {
+                    "x" => b.x, "z" => b.z, "yaw" => b.yaw(), "length" => b.length,
+                    "width" => b.width, "span" => b.span, "deck" => b.deck, "stone" => b.stone,
+                    "arches" => b.arches as i64,
+                    "stream" => b.stream.map_or(-1, |s| s as i64),
+                }
+                .to_variant()
+            })
+            .collect();
+        dict.set("bridges", &bridges);
+        let streams: VarArray = field
+            .streams
+            .iter()
+            .map(|s| {
+                vdict! { "kind" => s.kind.key(), "points" => &polyline(&s.points), "width" => s.width }
+                    .to_variant()
+            })
+            .collect();
+        dict.set("streams", &streams);
+        let roads: VarArray = field
+            .roads
+            .iter()
+            .map(|r| {
+                vdict! { "kind" => r.kind.key(), "points" => &polyline(&r.points), "width" => r.width }
+                    .to_variant()
+            })
+            .collect();
+        dict.set("roads", &roads);
         if sim.siege().is_some() {
             dict.set("siege", &self.get_siege());
         }
@@ -787,6 +938,34 @@ impl BattleSim {
     #[func]
     fn get_height(&self, x: f64, z: f64) -> f64 {
         self.sim.as_ref().map_or(0.0, |s| s.field().height(x, z))
+    }
+
+    /// EP3: height one walks at (x, z): a bridge deck, else the ground.
+    #[func]
+    fn get_walk_height(&self, x: f64, z: f64) -> f64 {
+        self.sim
+            .as_ref()
+            .map_or(0.0, |s| s.field().walk_height(x, z))
+    }
+
+    /// EP3 (for EP6, a water mill): a spot on a bank near (x, z), `setback`
+    /// metres from the water, clear of fords, bridges and roads:
+    /// `{x, z, yaw (facing the water, from +x towards +z), stream (-1: the
+    /// river)}`, or an empty dictionary without water.
+    #[func]
+    fn get_waterside_spot(&self, x: f64, z: f64, setback: f64) -> VarDictionary {
+        let Some(spot) = self
+            .sim
+            .as_ref()
+            .and_then(|s| s.field().waterside_spot((x, z), setback))
+        else {
+            return VarDictionary::new();
+        };
+        vdict! {
+            "x" => spot.x, "z" => spot.z,
+            "yaw" => spot.towards_water.1.atan2(spot.towards_water.0),
+            "stream" => spot.stream.map_or(-1, |s| s as i64),
+        }
     }
 
     /// B6: the battle site in one compact French line, e.g. « Terre gelée ·

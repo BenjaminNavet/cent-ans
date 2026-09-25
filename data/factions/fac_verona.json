@@ -38,14 +38,14 @@
       "faction": "fac_venice",
       "status": "war",
       "since": {
-        "value": "1336-06-01"
+        "value": "1336-06-22"
       }
     },
     {
       "faction": "fac_florence",
       "status": "war",
       "since": {
-        "value": "1336-06-01"
+        "value": "1336-06-22"
       }
     }
   ],

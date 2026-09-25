@@ -1076,6 +1076,7 @@ func _on_load(path: String) -> void:
 func _process(_delta: float) -> void:
 	if not load_ok:
 		return
+	FrameBudget.begin_frame()  # PB1 : budget commun des constructions progressives de l'image
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
 	var t0 := Time.get_ticks_usec()
