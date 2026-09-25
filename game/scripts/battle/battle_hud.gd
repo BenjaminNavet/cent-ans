@@ -251,16 +251,16 @@ func _build_bottom() -> void:
 	buttons.add_theme_constant_override("v_separation", 4)
 	commands.add_child(buttons)
 	for entry in COMMANDS:
-		var button := Button.new()
+		var button := RichButton.new()  # B1 : infobulle riche auto-liée (T : bulle du Codex)
 		button.name = "Command_%s" % entry[0]
 		button.custom_minimum_size = Vector2(52, 38)
 		button.focus_mode = Control.FOCUS_NONE
 		var key_hint := " (%s)" % entry[2] if str(entry[2]) != "" else ""
-		button.tooltip_text = "%s%s\n%s" % [entry[1], key_hint, entry[3]]
+		button.tooltip_text = "[b]%s[/b]%s\n%s" % [entry[1], key_hint, entry[3]]
 		button.draw.connect(_draw_command_icon.bind(button, str(entry[0]), str(entry[2])))
 		button.pressed.connect(func() -> void: command_pressed.emit(str(entry[0])))
 		buttons.add_child(button)
-	withdraw_all_button = Button.new()
+	withdraw_all_button = RichButton.new()
 	withdraw_all_button.name = "WithdrawAll"
 	withdraw_all_button.text = "Retraite générale"
 	withdraw_all_button.focus_mode = Control.FOCUS_NONE
