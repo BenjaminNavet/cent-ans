@@ -28,7 +28,7 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | **dans main** (5caa8def) |
 | ZG3b | Correctif du rehaussement des zones E5-E7 (Londres −12 m) | 2 | **dans main** (2d36ec2a) |
 | ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | **dans main** (c7e9a1c5) |
-| ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | 3 | en cours (wip `zg6-villes.md`) |
+| ZG6 | dans main (7f38c532) | 3 | en cours (wip `zg6-villes.md`) |
 | ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | en cours (wip `zg4b-correctifs.md`) |
 | ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
 
@@ -52,3 +52,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : PB1 dans main. ZG5b fusionné (lit fin creusé dans les pages du quadtree, rubans de fleuves/routes, ponts à l'échelle, parcellaire ; −10 % i/s, p99 115 → 167 ms sous charge) ; smoke 28 OK, tests ZG2/ZG4/ZG5b OK. À reprendre en ZG7 : lit de la Seine trop large (chenal brun), pic de 35 ms au basculement des ponts, ponts-portes encore exagérés, coût GPU du parcellaire non mesuré (pas d'outil Metal).
 - 25/09 : recette Q3 (nuit) : sol beige nu sous 3 unités à Londres (trou entre ZG4/ZG5b/VH), ruban rouge-gris géant sur la Tamise vers 20 unités, arrêt à 7 unités sans cache. → ZG4b lancé ; le cache absent relève de ZG7 (embarquement + message clair).
 - 25/09 21h37 : limite de quota levée, ZG4b (aucun commit encore) et ZG6 (dernier 3b499cf4) relancés avec leur contexte.
+- 25/09 : ZG6 fusionné (villes ordinaires 1:1 vers 1340, finage raccordé au parcellaire ZG5b), **main = 7f38c532**, tests ZG2/4/5b/6 + smoke OK. Coût : 48 vs 57 i/s, appels de dessin ×3 (MultiMesh par cellule → par ville à faire en ZG7). Suites VH3 : populations 1328, Gand vide au sud.
