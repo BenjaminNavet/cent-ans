@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/voice_speech.schema.json",
+  "title": "Voix des discours du général",
+  "description": "Fichier data/voice/speech_voices.json (lot VO1) : distribution des voix synthétiques par faction pour les phrases de data/speeches/battle_speeches.json et les cris de guerre (data/battle_orders/order_war_cry.json). Audio dans game/assets/audio/voice/speech/<voix>/<sha1 du texte, 12 car.>.ogg. Le général d'une bataille reçoit une voix de sa faction, choisie par son identifiant.",
+  "type": "object",
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "line_padding_s": { "type": "number", "minimum": 0, "description": "Silence après chaque phrase parlée avant la suivante (s)." },
+    "cry_padding_s": { "type": "number", "minimum": 0 },
+    "casting": {
+      "type": "object",
+      "required": ["default"],
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "voices": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "instructions": { "type": "string", "minLength": 1 }
+        },
+        "required": ["voices", "instructions"],
+        "additionalProperties": false
+      }
+    },
+    "cry_instructions": { "type": "string", "minLength": 1 }
+  },
+  "required": ["version", "casting", "cry_instructions"],
+  "additionalProperties": false
+}

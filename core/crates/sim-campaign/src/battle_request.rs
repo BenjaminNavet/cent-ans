@@ -64,6 +64,8 @@ pub enum BattleRequestError {
     },
     #[error("résultat invalide : l'unité {unit} de {side} perd plus d'hommes qu'elle n'en a")]
     LossesExceedStrength { side: &'static str, unit: usize },
+    #[error("la bataille n°{0} ne peut être refusée : seul l'assaillant peut se retirer")]
+    CannotWithdraw(usize),
 }
 
 /// Records a player battle instead of fighting it (called by
@@ -178,7 +180,7 @@ pub(crate) fn auto_resolve_all_pending(
 /// Both armies still exist and are at war (they cannot move once the battle
 /// is pending, lot M2); siege: the besiegers still besiege a garrisoned
 /// settlement.
-fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
+pub(crate) fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
     if request.siege {
         let (Some(army), Some(settlement)) = (
             state.armies.get(&request.attacker),
@@ -215,6 +217,19 @@ fn province_name(data: &GameData, id: &ProvinceId) -> String {
         .map_or_else(|| id.to_string(), |p| p.name.display.clone())
 }
 
+/// L3 (ADR 0026): the besieged town of a landmark city is drawn from its plan
+/// (`data/landmarks/<id>.json`, block `siege.battle`); `None` elsewhere or
+/// when the block is missing or broken (the generic town is used).
+fn siege_layout(
+    data: &GameData,
+    settlement: &data_model::SettlementId,
+) -> Option<sim_battle::SiegeLayout> {
+    data.landmarks
+        .values()
+        .find(|l| l.settlement == settlement.as_str())
+        .and_then(|l| sim_battle::SiegeLayout::from_landmark(l).ok())
+}
+
 fn battle_season(season: Season) -> BattleSeason {
     match season {
         Season::Spring => BattleSeason::Spring,
@@ -224,7 +239,7 @@ fn battle_season(season: Season) -> BattleSeason {
     }
 }
 
-fn fallback_stats() -> UnitStats {
+pub(crate) fn fallback_stats() -> UnitStats {
     UnitStats {
         melee: 30,
         ranged: 0,
@@ -238,7 +253,12 @@ fn fallback_stats() -> UnitStats {
     }
 }
 
-fn side_setup(state: &CampaignState, data: &GameData, id: &ArmyId, army: &Army) -> SideSetup {
+pub(crate) fn side_setup(
+    state: &CampaignState,
+    data: &GameData,
+    id: &ArmyId,
+    army: &Army,
+) -> SideSetup {
     let units: Vec<UnitSetup> = army
         .units
         .iter()
@@ -283,6 +303,7 @@ fn side_setup(state: &CampaignState, data: &GameData, id: &ArmyId, army: &Army) 
                 experience: unit.experience,
                 stats: fallback_stats(),
                 abilities: Vec::<Ability>::new(),
+                missile: None,
             },
         })
         .collect();
@@ -344,7 +365,11 @@ fn side_outcome(
 impl CampaignState {
     /// Coalitions `(attackers, defenders)` of a field battle request (F1),
     /// each led by the army of the encounter.
-    fn coalitions(&self, data: &GameData, request: &BattleRequest) -> (Vec<ArmyId>, Vec<ArmyId>) {
+    pub(crate) fn coalitions(
+        &self,
+        data: &GameData,
+        request: &BattleRequest,
+    ) -> (Vec<ArmyId>, Vec<ArmyId>) {
         let faction = |id: &ArmyId| self.armies.get(id).map(|a| a.faction.clone());
         let (Some(attacker), Some(defender)) =
             (faction(&request.attacker), faction(&request.defender))
@@ -456,6 +481,7 @@ impl CampaignState {
             defender: side_setup(self, data, &request.defender, &defender),
             player_side,
             siege: None,
+            siege_layout: None,
             orders: data.battle_orders.values().cloned().collect(),
         })
     }
@@ -687,6 +713,7 @@ impl CampaignState {
                 fortification: self.fortification_level(data, &request.location),
                 breach,
             }),
+            siege_layout: siege_layout(data, &request.location),
             orders: data.battle_orders.values().cloned().collect(),
         }
     }

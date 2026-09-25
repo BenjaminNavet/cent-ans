@@ -544,6 +544,9 @@ fn sea_crossings_go_port_to_port_and_take_the_turn() {
     ));
     state.armies.get_mut(&army).unwrap().movement_left += 1;
     let before = state.army(&army).unwrap().total_strength();
+    // Lot NV1: no French warship to intercept this crossing.
+    state.naval.initialised = true;
+    state.naval.fleets.clear();
     state.submit_order(&data, embark(&army, &to)).unwrap();
     let landed = state.army(&army).unwrap();
     assert!(landed.is_at(&to), "landed in {to}: {:?}", landed.position);
@@ -770,9 +773,12 @@ fn france_income_is_positive_and_in_target_range() {
         .map(|f| f.income_last_turn * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100)
         .sum();
     assert!(tribute > 0, "Burgundy, Brittany and Flanders pay tribute");
+    // C5: trade routes touching a French hub (Troyes, Provins) settle after
+    // the tax income, in their own treasury line.
+    let trade_income = state.factions[&france_id].trade_income_last_turn;
     assert_eq!(
         summary.treasury,
-        treasury_before + effective_income - effective_upkeep + tribute
+        treasury_before + effective_income - effective_upkeep + tribute + trade_income
     );
     assert_eq!(summary.provinces_count, 27);
 }

@@ -57,6 +57,7 @@ func open_panel(faction_id: String = "") -> void:
 	panel.sim = map.sim
 	panel.player_faction = map.player_faction
 	panel.province_name_of = map.province_name_of
+	panel.map_data = map.map_data  # DP1 : carte des relations de l'écran
 	panel.refresh()
 	# Panneau central : ferme les panneaux latéraux qu'il recouvrirait.
 	map.ui.hide_province()
@@ -87,22 +88,22 @@ func after_end_turn() -> void:
 	var offers: Array = map.sim.call("get_offers")
 	if not offers.is_empty():
 		open_panel()
-		map.ui.show_toast("%d proposition(s) diplomatique(s) en attente." % offers.size())
+		map.ui.show_toast("%s en attente." % FrText.count(offers.size(), "proposition diplomatique", "propositions diplomatiques"))
 
 
 func handle_input(event: InputEvent) -> bool:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return false
-	match (event as InputEventKey).physical_keycode:
-		KEY_P:
-			toggle_panel()
-			return true
-		KEY_N:
-			_toggle_mode(MapMode.DIPLOMACY)
-			return true
-		KEY_R:
-			_toggle_mode(MapMode.RELIGION)
-			return true
+	# U7 : actions de l'InputMap (fiche des raccourcis générée depuis celle-ci).
+	if event.is_action_pressed("map_toggle_diplomacy"):
+		toggle_panel()
+		return true
+	if event.is_action_pressed("map_mode_diplomacy"):
+		_toggle_mode(MapMode.DIPLOMACY)
+		return true
+	if event.is_action_pressed("map_mode_religion"):
+		_toggle_mode(MapMode.RELIGION)
+		return true
 	return false
 
 
@@ -110,13 +111,19 @@ func _toggle_mode(target: MapMode) -> void:
 	if not available():
 		return
 	mode = MapMode.NONE if mode == target else target
+	if mode != MapMode.DIPLOMACY:
+		_clear_relation_markers()
+	# DP1 (audit A3, C11/U14) : teinte franche sur la carte 3D et légende permanente, que le
+	# panneau de province ne recouvre plus (il est refermé en entrant dans le mode).
+	_set_tint_boost(mode != MapMode.NONE)
+	_show_legend(mode)
 	if mode == MapMode.NONE:
 		map.refresh_all()
 		map.ui.show_toast("Carte politique.")
 		return
 	map.unrest_mode = false
+	map.ui.hide_province()
 	refresh()
-	map.ui.show_toast("Carte diplomatique : rouge guerre, bleu alliés, violet vassaux, jaune trêve." if mode == MapMode.DIPLOMACY else "Carte religieuse : bleu Avignon, or Rome, vert hérésie.")
 
 
 func _province_ids() -> PackedStringArray:
@@ -127,7 +134,8 @@ func _province_ids() -> PackedStringArray:
 
 
 func _color_by_relation() -> void:
-	var relations: PackedStringArray = map.sim.call("get_province_relations", _province_ids())
+	var ids := _province_ids()
+	var relations: PackedStringArray = map.sim.call("get_province_relations", ids)
 	var colors := PackedColorArray()
 	for relation in relations:
 		var color: Color = RELATION_COLORS.get(relation, Color(0, 0, 0, 0))
@@ -135,6 +143,51 @@ func _color_by_relation() -> void:
 			color.a = 0.0
 		colors.append(color)
 	map.terrain.set_province_colors(colors)
+	_place_relation_markers(ids, relations)
+
+
+## Lot U12 : en mode daltonien, un symbole par province sur la carte diplomatique (⚔ guerre,
+## ⚭ alliance, ⚜ vassal ou suzerain, ⌛ trêve), lisible sans distinguer les couleurs.
+const MARKER_FONT := "res://assets/third_party/fonts/noto/NotoSansSymbols2-Subset.ttf"
+const MARKER_FONT_MAIN := "res://assets/third_party/fonts/noto/NotoSansSymbols-Subset.ttf"
+const MARKED_RELATIONS := ["war", "alliance", "vassal", "suzerain", "truce"]
+var _markers: Node3D
+
+
+func _place_relation_markers(ids: PackedStringArray, relations: PackedStringArray) -> void:
+	_clear_relation_markers()
+	if not Accessibility.colorblind() or not (map is Node3D):
+		return
+	_markers = Node3D.new()
+	_markers.name = "RelationMarkers"
+	map.add_child(_markers)
+	var font := FontVariation.new()
+	font.base_font = load(MARKER_FONT_MAIN)
+	font.fallbacks = [load(MARKER_FONT)]
+	for index in mini(ids.size(), relations.size()):
+		var relation := relations[index]
+		if not MARKED_RELATIONS.has(relation):
+			continue
+		var centroid: Vector2 = map.map_data.centroid_of_id(ids[index])
+		var label := Label3D.new()
+		label.text = Accessibility.relation_symbol(relation)
+		label.font = font
+		label.font_size = 72
+		label.outline_size = 14
+		label.outline_modulate = Color(0.97, 0.93, 0.82)
+		label.modulate = (RELATION_COLORS.get(relation, Color.BLACK) as Color).darkened(0.35)
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.no_depth_test = true
+		label.fixed_size = true
+		label.pixel_size = 0.0009
+		label.position = Vector3(centroid.x, map.map_data.surface_world_at(centroid.x, centroid.y) + 0.5, centroid.y)
+		_markers.add_child(label)
+
+
+func _clear_relation_markers() -> void:
+	if _markers != null and is_instance_valid(_markers):
+		_markers.queue_free()
+	_markers = null
 
 
 func _color_by_religion() -> void:
@@ -174,3 +227,77 @@ func _on_offer_answered(offer_id: int, accept: bool) -> void:
 	else:
 		map.ui.show_toast(str(result.get("error", "Réponse impossible")), true)
 	map.refresh_all()
+
+
+# ----- DP1 : lisibilité des modes de carte (audit A3, C11 et U14) ---------------------------------
+
+## Teinte des provinces à courte distance dans les modes diplomatie et religion (le rendu
+## politique normal la garde discrète pour laisser voir le terrain).
+const MODE_TINT_NEAR := 0.62
+const MODE_TINT_FAR := 0.8
+const MODE_SATURATION := 0.9
+var _tint_saved: Dictionary = {}
+var _legend: PanelContainer
+
+
+func _set_tint_boost(on: bool) -> void:
+	var terrain: Node = map.get("terrain") if map != null else null
+	var material: ShaderMaterial = terrain.get("material") if terrain != null else null
+	if material == null:
+		return
+	var params := {"faction_alpha_near": MODE_TINT_NEAR, "faction_alpha_far": MODE_TINT_FAR, "faction_saturation": MODE_SATURATION}
+	if on:
+		if _tint_saved.is_empty():
+			for key in params:
+				_tint_saved[key] = material.get_shader_parameter(key)
+		for key in params:
+			material.set_shader_parameter(key, params[key])
+	elif not _tint_saved.is_empty():
+		for key in _tint_saved:
+			material.set_shader_parameter(key, _tint_saved[key])
+		_tint_saved.clear()
+
+
+func _show_legend(target: MapMode) -> void:
+	if _legend != null and is_instance_valid(_legend):
+		_legend.queue_free()
+	_legend = null
+	if target == MapMode.NONE or map == null or map.ui == null:
+		return
+	_legend = PanelContainer.new()
+	_legend.name = "MapModeLegend"
+	_legend.theme = load("res://scenes/ui/parchment_theme.tres")
+	_legend.add_theme_stylebox_override("panel", HudStyle.panel_box(8))
+	_legend.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	_legend.add_child(box)
+	var diplomacy := target == MapMode.DIPLOMACY
+	box.add_child(HudStyle.label("Carte diplomatique (N)" if diplomacy else "Carte religieuse (R)", HudStyle.FONT_TITLE, HudStyle.RUBRIC))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	var entries: Array = [["self", "Nous"], ["war", "Guerre"], ["truce", "Trêve"], ["alliance", "Alliés"], ["vassal", "Vassaux"], ["peace", "Neutres"]]
+	if not diplomacy:
+		entries = [[Color(0.25, 0.35, 0.70), "Obédience d'Avignon"], [Color(0.80, 0.65, 0.20), "Obédience de Rome"], [Color(0.20, 0.65, 0.25), "Hérésie"], [Color(0.45, 0.45, 0.45), "Autre foi"]]
+	for entry in entries:
+		var chip := HBoxContainer.new()
+		chip.add_theme_constant_override("separation", 4)
+		var swatch := ColorRect.new()
+		swatch.custom_minimum_size = Vector2(16, 16)
+		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		swatch.color = RELATION_COLORS.get(entry[0], Color.GRAY) if entry[0] is String else entry[0]
+		chip.add_child(swatch)
+		var symbol := Accessibility.relation_symbol(entry[0]) if diplomacy and Accessibility.colorblind() else ""
+		chip.add_child(HudStyle.label(("%s %s" % [symbol, entry[1]]).strip_edges(), HudStyle.FONT_BODY, HudStyle.INK))
+		row.add_child(chip)
+	box.add_child(row)
+	box.add_child(HudStyle.label("Les terres voilées sont hors de vue de vos armées, de vos places et de vos agents.", HudStyle.FONT_SMALL, HudStyle.INK_FADED))
+	map.ui.add_child(_legend)
+	_legend.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 18)
+	_legend.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_legend.grow_vertical = Control.GROW_DIRECTION_BEGIN
+
+
+## Tests et captures : légende affichée du mode de carte courant (null sinon).
+func legend() -> PanelContainer:
+	return _legend if _legend != null and is_instance_valid(_legend) else null

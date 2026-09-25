@@ -72,6 +72,14 @@ func _build_houses(village: Dictionary) -> void:
 	var root := Node3D.new()
 	root.name = "Houses"
 	add_child(root)
+	if BuildingKit.available():
+		# BR1 : bâtiments réalistes du kit Blender, un MultiMesh par modèle.
+		var batch := BuildingKit.Batch.new("snow" if _snowy else "", 1600.0)
+		for house in village.get("houses", []):
+			if _kit_house(batch, house):
+				house_count += 1
+		batch.build(root)
+		return
 	for house in village.get("houses", []):
 		_house(root, house)
 		house_count += 1
@@ -79,6 +87,49 @@ func _build_houses(village: Dictionary) -> void:
 	for child in root.get_children():
 		if child is GeometryInstance3D:
 			(child as GeometryInstance3D).visibility_range_end = 1600.0
+
+
+## Type de modèle du kit pour une maison de la simulation (`kind` et emprise).
+static func kit_kind(kind: String, length: float, rng: RandomNumberGenerator) -> String:
+	match kind:
+		"church":
+			return "church"
+		"barn":
+			return "barn"
+		"timbered":
+			return "stonehouse" if rng.randf() < 0.15 else "timber"
+		_:
+			return "longere" if length > 11.0 else "cottage"
+
+
+## Pose une maison du kit sur son emprise (lacet de la simulation, de +x vers +z) : origine au
+## centre, calée sur le bas de la pente sans descendre de plus de 1,4 m sous le haut (les
+## fondations du modèle comblent le reste). `false` si aucun modèle ne convient.
+func _kit_house(batch: BuildingKit.Batch, house: Dictionary) -> bool:
+	var p := Vector2(float(house["x"]), float(house["z"]))
+	var length := float(house["length"])
+	var width := float(house["width"])
+	var yaw := float(house["yaw"])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(p.x * 31.0 + p.y * 17.0)
+	var model := BuildingKit.pick(kit_kind(str(house["kind"]), length, rng), length, width, rng)
+	if model == "":
+		return false
+	var low := INF
+	var high := -INF
+	for corner in [Vector2(-length, -width), Vector2(length, -width), Vector2(length, width), Vector2(-length, width)]:
+		var q: Vector2 = p + (corner * 0.5).rotated(yaw)
+		var h := _terrain.height_at(q.x, q.y)
+		low = minf(low, h)
+		high = maxf(high, h)
+	# Façade (+Z du modèle) tournée d'un côté ou de l'autre du faîtage.
+	var flip := PI if rng.randf() < 0.5 else 0.0
+	var basis := Basis(Vector3.UP, -yaw + flip) * Basis.from_scale(BuildingKit.fit_scale(model, length, width))
+	batch.add(model, Transform3D(basis, Vector3(p.x, minf(high, low + 1.4) - 0.05, p.y)))
+	# BR2 : bûcher, charrette ou tonneaux devant les maisons (pas l'église).
+	if str(house["kind"]) != "church" and rng.randf() < 0.5:
+		BuildingKit.add_front_prop(batch, rng, ["woodpile", "woodpile", "cart", "barrels"], p, -yaw + flip, length, width, _terrain.height_at)
+	return true
 
 
 func _box(parent: Node3D, size: Vector3, pos: Vector3, mat: StandardMaterial3D, rot: Vector3 = Vector3.ZERO) -> MeshInstance3D:

@@ -12,6 +12,8 @@ config_version=5
 
 config/name="Cent Ans"
 run/main_scene="res://scenes/start_menu.tscn"
+boot_splash/bg_color=Color(0.16, 0.12, 0.08, 1)
+boot_splash/image="res://assets/ui/boot_splash.png"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
@@ -75,6 +77,10 @@ map_toggle_tech={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":84,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
 }
+map_toggle_trade={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":82,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
 campaign_pause={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":4194305,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
@@ -91,10 +97,65 @@ codex_pin_tooltip={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":84,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
 }
+map_toggle_diplomacy={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":80,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+map_mode_diplomacy={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":78,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+map_mode_religion={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":82,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+map_toggle_objectives={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":79,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+map_toggle_agents={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":71,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+encyclopedia_open={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":76,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+help_open={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":4194332,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+quick_save={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":4194336,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
+quick_load={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"physical_keycode":4194340,"keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)]
+}
 
 [physics]
 
 3d/physics_engine="Jolt Physics"
+
+[shader_globals]
+
+campaign_season={
+"type": "vec4",
+"value": Vector4(1, 0, 0, 0)
+}
+landmark_albedo_array={
+"type": "sampler2DArray",
+"value": "res://assets/textures/landmarks/landmark_albedo_array.jpg"
+}
+landmark_normal_array={
+"type": "sampler2DArray",
+"value": "res://assets/textures/landmarks/landmark_normal_array.jpg"
+}
+campaign_parchment={
+"type": "float",
+"value": 0.0
+}
 
 [rendering]
 

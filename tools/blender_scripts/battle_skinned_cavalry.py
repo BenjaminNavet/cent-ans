@@ -136,6 +136,10 @@ def clip_specs():
         ("c_bow_idle", "Idle", "Idle", poses.ride_bow_rest, False, None),
         ("c_bow_walk", "Walk", "Idle", poses.ride_bow_rest, False, None),
         ("c_bow_shoot", "Idle", "Idle", poses.ride_bow_shoot, False, 60),
+        # UR2: jinetes throw javelins rather than shoot a bow (skirmish ability).
+        ("c_javelin_idle", "Idle", "Idle", poses.ride_javelin_rest, False, None),
+        ("c_javelin_walk", "Walk", "Idle", poses.ride_javelin_rest, False, None),
+        ("c_javelin_throw", "Idle", "Idle", poses.ride_javelin_throw, False, 30),
         ("c_death", "Death", "Death", poses.ride_death, False, 30),
         ("c_death_m", "Death", "Death", poses.ride_death, True, 30),
         ("c_fall", "Idle_HitReact_Right", "Death", poses.ride_fall, False, 30),
@@ -184,7 +188,16 @@ def bake_cavalry_rig():
             clip,
             start,
             clip
-            in ("c_idle", "c_walk", "c_gallop", "c_charge", "c_bow_idle", "c_bow_walk"),
+            in (
+                "c_idle",
+                "c_walk",
+                "c_gallop",
+                "c_charge",
+                "c_bow_idle",
+                "c_bow_walk",
+                "c_javelin_idle",
+                "c_javelin_walk",
+            ),
         )
     rig.write()
     return rig
@@ -277,6 +290,104 @@ def caparison(mount, ctx, hem=0.5):
     return [obj]
 
 
+def _bone_points(mount, bones):
+    """World positions of the horse vertices dominated by one of `bones`."""
+    out = []
+    for m in mount.hmeshes:
+        names = {g.index: g.name for g in m.vertex_groups}
+        for v in m.data.vertices:
+            best = max(v.groups, key=lambda g: g.weight, default=None)
+            if best is not None and names[best.group] in bones:
+                out.append(m.matrix_world @ v.co)
+    return out
+
+
+BARD_STEEL = (0.62, 0.63, 0.66)
+
+
+def _conformal_plate(mount, ctx, name, bones, keep, offset, bind):
+    """Steel bard shaped on the horse: copies of the (decimated) horse faces dominated by
+    `bones` for which `keep(centre, normal)` holds, pushed out by `offset` along the
+    vertex normals and weighted like the horse vertices they come from."""
+    bm = bmesh.new()
+    weights = []
+    for m in mount.hmeshes:
+        names = {g.index: g.name for g in m.vertex_groups}
+        mw = m.matrix_world
+        rot = mw.to_3x3()
+        me = m.data
+        dominant = {}
+        for v in me.vertices:
+            best = max(v.groups, key=lambda g: g.weight, default=None)
+            dominant[v.index] = names.get(best.group) if best is not None else None
+        remap = {}
+        for poly in me.polygons:
+            if not all(dominant[i] in bones for i in poly.vertices):
+                continue
+            centre = mw @ poly.center
+            normal = (rot @ poly.normal).normalized()
+            if not keep(centre, normal):
+                continue
+            verts = []
+            for i in poly.vertices:
+                if i not in remap:
+                    v = me.vertices[i]
+                    n = (rot @ v.normal).normalized()
+                    remap[i] = bm.verts.new(mw @ v.co + n * offset)
+                    weights.append(
+                        [(names[g.group], g.weight) for g in v.groups if g.weight > 0]
+                    )
+                verts.append(remap[i])
+            try:
+                bm.faces.new(verts)
+            except ValueError:
+                pass
+    bm.verts.index_update()
+    obj = eq.to_object(name, bm, [ctx.material(eq.C_PLATE, BARD_STEEL)])
+    if bind is not None:
+        eq.bind_rigid(obj, bind)
+        return [obj]
+    groups = {}
+    for vi, ws in enumerate(weights):
+        for gname, w in ws:
+            if gname not in groups:
+                groups[gname] = obj.vertex_groups.new(name=gname)
+            groups[gname].add([vi], w, "REPLACE")
+    return [obj]
+
+
+def chanfron(mount, ctx):
+    """Chanfron (chanfrein, lot UR1): steel plate over the brow and the face."""
+    pts = _bone_points(mount, {"Head"})
+    if not pts:
+        return []
+    top = max(p.z for p in pts)
+    low = min(p.z for p in pts)
+    y_front = min(p.y for p in pts)
+
+    def keep(c, n):
+        # Front and top of the face, not the jaw nor the nostrils.
+        return (
+            n.z > 0.25 or n.y < -0.5
+        ) and c.z > low + (top - low) * 0.35 and c.y > y_front + 0.04
+
+    return _conformal_plate(mount, ctx, "chanfron", {"Head"}, keep, 0.012, "Head")
+
+
+def flanchards(mount, ctx):
+    """Flanchards (flançois, lot UR1): steel plates on both flanks behind the saddle."""
+    seat = mount.seat
+
+    def keep(c, n):
+        return (
+            abs(n.x) > 0.45
+            and seat.y - 0.05 < c.y < seat.y + 0.45
+            and seat.z - 0.62 < c.z < seat.z - 0.18
+        )
+
+    return _conformal_plate(mount, ctx, "flanchards", TORSO_BONES, keep, 0.02, None)
+
+
 def saddle(mount, ctx):
     """Build the saddle and stirrup leathers as boxes anchored on the mount's seat."""
     bm = bmesh.new()
@@ -355,6 +466,8 @@ def build_cavalry(recipe, level):
     for name, mask in recipe.get("horse_equipment", []):
         builder = {
             "caparison": lambda c: caparison(mount, c),
+            "chanfron": lambda c: chanfron(mount, c),
+            "flanchards": lambda c: flanchards(mount, c),
             "saddle": lambda c: saddle(mount, c),
         }[name]
         for obj in builder(ctx_h):
@@ -404,6 +517,8 @@ def export_cavalry(fig_name, recipe, rig):
         "lods": files,
         "tris": tris,
         "variants": recipe.get("variants", 1),
+        "style": recipe.get("style", ""),
+        "noble": recipe.get("noble", False),
     }
 
 

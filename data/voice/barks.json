@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "global_gap_s": 1.1,
+  "situations": {
+    "select": { "label": "Sélection", "priority": 1, "cooldown_s": 2.5, "chance": 0.85, "spatial": false, "tone": "calme et attentif, prêt à obéir, à mi-voix" },
+    "move": { "label": "Ordre de marche", "priority": 2, "cooldown_s": 2.0, "chance": 0.8, "spatial": false, "tone": "bref et obéissant, déjà en mouvement" },
+    "attack": { "label": "Ordre d'attaque", "priority": 3, "cooldown_s": 2.0, "chance": 0.9, "spatial": false, "tone": "résolu et agressif, la mâchoire serrée" },
+    "charge": { "label": "Charge", "priority": 4, "cooldown_s": 4.0, "chance": 0.7, "spatial": true, "tone": "hurlé à pleine gorge, rageur, en courant" },
+    "rout": { "label": "Déroute", "priority": 5, "cooldown_s": 5.0, "chance": 0.8, "spatial": true, "tone": "paniqué, essoufflé, terrifié, en fuyant" },
+    "victory": { "label": "Victoire", "priority": 6, "cooldown_s": 0.0, "chance": 1.0, "spatial": false, "tone": "exultant, triomphant, crié de joie" },
+    "general_down": { "label": "Le général tombe", "priority": 7, "cooldown_s": 0.0, "chance": 1.0, "spatial": true, "tone": "consterné, crié, la voix brisée par l'effroi" }
+  },
+  "languages": {
+    "fr": {
+      "label": "français",
+      "voices": ["ash", "echo", "verse"],
+      "instructions": "Parle en français. Tu es un homme d'armes français du XIVe siècle sur un champ de bataille, en plein air : voix rude, franche, sans affectation, prononciation française naturelle."
+    },
+    "en": {
+      "label": "anglais",
+      "voices": ["ballad", "fable", "onyx"],
+      "instructions": "Speak English with a rough rural English accent. You are a fourteenth-century English archer or soldier on an open battlefield: blunt, earthy voice, no modern intonation."
+    },
+    "an": {
+      "label": "anglo-normand",
+      "voices": ["onyx", "ash"],
+      "instructions": "Parle en français, avec un léger accent anglais. Tu es un chevalier anglais du XIVe siècle dont la langue de cour est le français : voix noble, assurée, un peu hautaine."
+    },
+    "oc": {
+      "label": "gascon",
+      "voices": ["verse"],
+      "instructions": "Parle en gascon (occitan), avec l'accent chantant du sud-ouest de la France. Tu es un arbalétrier gascon du XIVe siècle : voix vive, méridionale."
+    },
+    "nl": {
+      "label": "flamand",
+      "voices": ["echo"],
+      "instructions": "Spreek Vlaams (Nederlands met een West-Vlaams accent). Je bent een Vlaamse stedelijke militieman uit de veertiende eeuw: stoere, ruwe stem."
+    },
+    "cy": {
+      "label": "gallois",
+      "voices": ["ballad"],
+      "instructions": "Speak Welsh (Cymraeg) with a natural North Wales accent. You are a fourteenth-century Welsh spearman: fierce, lilting voice."
+    },
+    "sco": {
+      "label": "écossais",
+      "voices": ["fable"],
+      "instructions": "Speak with a broad Lowland Scots accent. You are a fourteenth-century Scottish spearman in a schiltron: gruff, defiant voice."
+    }
+  },
+  "faction_language": {
+    "fac_france": "fr",
+    "fac_england": "en",
+    "fac_burgundy": "fr",
+    "fac_brittany": "fr",
+    "fac_flanders": "nl",
+    "fac_brabant": "nl",
+    "fac_guelders": "nl",
+    "fac_scotland": "sco",
+    "default": "fr"
+  },
+  "noble_language": {
+    "fac_england": "an"
+  },
+  "noble_units": ["unit_knights", "unit_men_at_arms_foot", "unit_english_retinue", "unit_ordonnance_gendarmes", "unit_breton_knights"],
+  "unit_language": {
+    "unit_gascon_crossbowmen": "oc",
+    "unit_flemish_pikemen": "nl",
+    "unit_goedendag_militia": "nl",
+    "unit_welsh_spearmen": "cy",
+    "unit_scottish_spearmen": "sco"
+  },
+  "fallback_language": {
+    "an": "fr",
+    "oc": "fr",
+    "nl": "fr",
+    "cy": "en",
+    "sco": "en"
+  },
+  "lines": {
+    "fr": {
+      "select": [
+        { "id": "fr_select_01", "text": "Monseigneur ?" },
+        { "id": "fr_select_02", "text": "Nous sommes prêts." },
+        { "id": "fr_select_03", "text": "Que voulez-vous de nous ?" },
+        { "id": "fr_select_04", "text": "Parlez, sire, nous écoutons." },
+        { "id": "fr_select_05", "text": "La compagnie attend vos ordres." },
+        { "id": "fr_select_06", "text": "Ici, monseigneur !" }
+      ],
+      "move": [
+        { "id": "fr_move_01", "text": "Nous y allons." },
+        { "id": "fr_move_02", "text": "Comme il vous plaira." },
+        { "id": "fr_move_03", "text": "En avant, compagnons !" },
+        { "id": "fr_move_04", "text": "Suivez la bannière !" },
+        { "id": "fr_move_05", "text": "Bien, monseigneur, nous marchons." }
+      ],
+      "attack": [
+        { "id": "fr_attack_01", "text": "Sus à eux !" },
+        { "id": "fr_attack_02", "text": "À l'ennemi !" },
+        { "id": "fr_attack_03", "text": "Tirez, et visez bien !", "category": "ranged" },
+        { "id": "fr_attack_04", "text": "Qu'ils sentent nos lances !" },
+        { "id": "fr_attack_05", "text": "Frappez ferme, et gardez le rang !" }
+      ],
+      "charge": [
+        { "id": "fr_charge_01", "text": "Montjoie ! Saint-Denis !" },
+        { "id": "fr_charge_02", "text": "À eux ! À eux !" },
+        { "id": "fr_charge_03", "text": "Piquez des deux !", "category": "cavalry" },
+        { "id": "fr_charge_04", "text": "Pour Dieu et pour le roi !" },
+        { "id": "fr_charge_05", "text": "Baissez les lances, et chargez !", "category": "cavalry" }
+      ],
+      "rout": [
+        { "id": "fr_rout_01", "text": "Sauve qui peut !" },
+        { "id": "fr_rout_02", "text": "Nous sommes trahis !" },
+        { "id": "fr_rout_03", "text": "Fuyez ! Tout est perdu !" },
+        { "id": "fr_rout_04", "text": "Dieu nous garde ! Arrière !" },
+        { "id": "fr_rout_05", "text": "Ils sont trop ! Repliez-vous !" }
+      ],
+      "victory": [
+        { "id": "fr_victory_01", "text": "Victoire ! Dieu est avec nous !" },
+        { "id": "fr_victory_02", "text": "Noël ! Noël !" },
+        { "id": "fr_victory_03", "text": "Le champ est à nous !" },
+        { "id": "fr_victory_04", "text": "Ils fuient ! Montjoie !" },
+        { "id": "fr_victory_05", "text": "Gloire à Dieu et à la bannière des lis !" }
+      ],
+      "general_down": [
+        { "id": "fr_general_01", "text": "Monseigneur est tombé !" },
+        { "id": "fr_general_02", "text": "La bannière est à bas !" },
+        { "id": "fr_general_03", "text": "Notre chef est mort ! Que Dieu ait son âme !" },
+        { "id": "fr_general_04", "text": "Ils ont pris monseigneur !" }
+      ]
+    },
+    "en": {
+      "select": [
+        { "id": "en_select_01", "text": "My lord?", "fr": "Monseigneur ?" },
+        { "id": "en_select_02", "text": "Aye, my lord.", "fr": "Oui, monseigneur." },
+        { "id": "en_select_03", "text": "What would ye have of us?", "fr": "Que voulez-vous de nous ?" },
+        { "id": "en_select_04", "text": "We are ready.", "fr": "Nous sommes prêts." },
+        { "id": "en_select_05", "text": "Speak, my lord, we hear ye.", "fr": "Parlez, monseigneur, nous vous écoutons." },
+        { "id": "en_select_06", "text": "Bows strung, my lord.", "fr": "Les arcs sont bandés, monseigneur.", "category": "ranged" }
+      ],
+      "move": [
+        { "id": "en_move_01", "text": "Aye, we go.", "fr": "Oui, nous y allons." },
+        { "id": "en_move_02", "text": "As ye command.", "fr": "À vos ordres." },
+        { "id": "en_move_03", "text": "Forward, then!", "fr": "En avant, donc !" },
+        { "id": "en_move_04", "text": "Follow the banner, lads!", "fr": "Suivez la bannière, les gars !" },
+        { "id": "en_move_05", "text": "On our way, my lord.", "fr": "Nous sommes en route, monseigneur." }
+      ],
+      "attack": [
+        { "id": "en_attack_01", "text": "Have at them!", "fr": "Sus à eux !" },
+        { "id": "en_attack_02", "text": "Nock! Draw! Loose!", "fr": "Encochez ! Bandez ! Lâchez !", "category": "ranged" },
+        { "id": "en_attack_03", "text": "Let the shafts fly!", "fr": "Que volent les flèches !", "category": "ranged" },
+        { "id": "en_attack_04", "text": "At them, and spare none!", "fr": "À eux, et n'en épargnez aucun !" },
+        { "id": "en_attack_05", "text": "Aye, we'll teach them.", "fr": "Oui, nous allons leur apprendre." }
+      ],
+      "charge": [
+        { "id": "en_charge_01", "text": "Saint George!", "fr": "Saint George !" },
+        { "id": "en_charge_02", "text": "For God and King Edward!", "fr": "Pour Dieu et le roi Édouard !" },
+        { "id": "en_charge_03", "text": "Into them, lads!", "fr": "Sur eux, les gars !" },
+        { "id": "en_charge_04", "text": "Spur on! Spur on!", "fr": "Éperonnez ! Éperonnez !", "category": "cavalry" },
+        { "id": "en_charge_05", "text": "Havoc! Havoc!", "fr": "Pillage ! Pillage ! (cri de curée)" }
+      ],
+      "rout": [
+        { "id": "en_rout_01", "text": "Run! Run for your lives!", "fr": "Fuyez ! Sauvez vos vies !" },
+        { "id": "en_rout_02", "text": "We are undone!", "fr": "Nous sommes perdus !" },
+        { "id": "en_rout_03", "text": "Back! Fall back!", "fr": "Arrière ! Repliez-vous !" },
+        { "id": "en_rout_04", "text": "God save us, they are too many!", "fr": "Dieu nous sauve, ils sont trop !" },
+        { "id": "en_rout_05", "text": "Every man for himself!", "fr": "Chacun pour soi !" }
+      ],
+      "victory": [
+        { "id": "en_victory_01", "text": "The day is ours!", "fr": "La journée est à nous !" },
+        { "id": "en_victory_02", "text": "Saint George and victory!", "fr": "Saint George, et victoire !" },
+        { "id": "en_victory_03", "text": "They flee! God be thanked!", "fr": "Ils fuient ! Dieu soit loué !" },
+        { "id": "en_victory_04", "text": "Ransoms for all, lads!", "fr": "Des rançons pour tous, les gars !" },
+        { "id": "en_victory_05", "text": "England! England!", "fr": "Angleterre ! Angleterre !" }
+      ],
+      "general_down": [
+        { "id": "en_general_01", "text": "Our lord is down!", "fr": "Notre seigneur est tombé !" },
+        { "id": "en_general_02", "text": "The banner has fallen!", "fr": "La bannière est tombée !" },
+        { "id": "en_general_03", "text": "They have slain our captain!", "fr": "Ils ont tué notre capitaine !" },
+        { "id": "en_general_04", "text": "Christ have mercy, the lord is taken!", "fr": "Christ, aie pitié : le seigneur est pris !" }
+      ]
+    },
+    "an": {
+      "select": [
+        { "id": "an_select_01", "text": "Sire ?", "fr": "Sire ?" },
+        { "id": "an_select_02", "text": "Nous sommes à votre commandement.", "fr": "Nous sommes à vos ordres." },
+        { "id": "an_select_03", "text": "Que veut monseigneur le roi ?", "fr": "Que veut monseigneur le roi ?" }
+      ],
+      "move": [
+        { "id": "an_move_01", "text": "Il sera fait ainsi.", "fr": "Il en sera ainsi." },
+        { "id": "an_move_02", "text": "Chevauchons, messires.", "fr": "En selle, messires." }
+      ],
+      "attack": [
+        { "id": "an_attack_01", "text": "Avant, bannières !", "fr": "En avant, les bannières !" },
+        { "id": "an_attack_02", "text": "À eux, pour le droit du roi !", "fr": "À eux, pour le droit du roi !" }
+      ],
+      "charge": [
+        { "id": "an_charge_01", "text": "Saint George ! Guyenne !", "fr": "Saint George ! Guyenne !" },
+        { "id": "an_charge_02", "text": "Pour le roi de France et d'Angleterre !", "fr": "Pour le roi de France et d'Angleterre !" }
+      ],
+      "victory": [
+        { "id": "an_victory_01", "text": "Dieu a montré notre droit !", "fr": "Dieu a montré notre droit !" }
+      ],
+      "general_down": [
+        { "id": "an_general_01", "text": "Hélas ! Monseigneur est abattu !", "fr": "Hélas ! Monseigneur est abattu !" },
+        { "id": "an_general_02", "text": "Relevez la bannière ! Relevez-la !", "fr": "Relevez la bannière !" }
+      ]
+    },
+    "oc": {
+      "select": [
+        { "id": "oc_select_01", "text": "Òc, mossenhor.", "fr": "Oui, monseigneur." },
+        { "id": "oc_select_02", "text": "Qu'èm prèstes !", "fr": "Nous sommes prêts !" }
+      ],
+      "move": [
+        { "id": "oc_move_01", "text": "Anem !", "fr": "Allons !" },
+        { "id": "oc_move_02", "text": "Anem-i, companhs !", "fr": "Allons-y, compagnons !" }
+      ],
+      "attack": [
+        { "id": "oc_attack_01", "text": "Tiratz ! Tiratz !", "fr": "Tirez ! Tirez !", "category": "ranged" },
+        { "id": "oc_attack_02", "text": "Sus a eths !", "fr": "À eux !" }
+      ],
+      "charge": [
+        { "id": "oc_charge_01", "text": "Guiana ! Guiana !", "fr": "Guyenne ! Guyenne !" },
+        { "id": "oc_charge_02", "text": "Sant Jòrdi !", "fr": "Saint Georges !" }
+      ],
+      "rout": [
+        { "id": "oc_rout_01", "text": "Hugitz ! Hugitz !", "fr": "Fuyez ! Fuyez !" },
+        { "id": "oc_rout_02", "text": "Diu nos ajude !", "fr": "Dieu nous aide !" }
+      ]
+    },
+    "nl": {
+      "select": [
+        { "id": "nl_select_01", "text": "Ja, heer?", "fr": "Oui, seigneur ?" },
+        { "id": "nl_select_02", "text": "Wij staan gereed.", "fr": "Nous sommes prêts." }
+      ],
+      "move": [
+        { "id": "nl_move_01", "text": "Voorwaarts!", "fr": "En avant !" },
+        { "id": "nl_move_02", "text": "Blijf bij de banier!", "fr": "Restez près de la bannière !" }
+      ],
+      "attack": [
+        { "id": "nl_attack_01", "text": "Sla ze dood!", "fr": "Assommez-les !" },
+        { "id": "nl_attack_02", "text": "Schild en vriend!", "fr": "Bouclier et ami ! (mot de passe des Mâtines de Bruges)" }
+      ],
+      "charge": [
+        { "id": "nl_charge_01", "text": "Vlaanderen die Leeuw!", "fr": "Flandre au Lion ! (cri de Courtrai)" },
+        { "id": "nl_charge_02", "text": "Houdt de rij! Houdt de rij!", "fr": "Tenez le rang ! Tenez le rang !" }
+      ],
+      "rout": [
+        { "id": "nl_rout_01", "text": "Vlucht! Vlucht!", "fr": "Fuyez ! Fuyez !" },
+        { "id": "nl_rout_02", "text": "Wij zijn verloren!", "fr": "Nous sommes perdus !" }
+      ]
+    },
+    "cy": {
+      "select": [
+        { "id": "cy_select_01", "text": "Ie, arglwydd.", "fr": "Oui, seigneur." },
+        { "id": "cy_select_02", "text": "Barod.", "fr": "Prêts." }
+      ],
+      "move": [
+        { "id": "cy_move_01", "text": "Ymlaen!", "fr": "En avant !" }
+      ],
+      "attack": [
+        { "id": "cy_attack_01", "text": "Arnynt!", "fr": "Sur eux !" }
+      ],
+      "charge": [
+        { "id": "cy_charge_01", "text": "I'r gad!", "fr": "Au combat !" },
+        { "id": "cy_charge_02", "text": "Dewi Sant!", "fr": "Saint David !" }
+      ],
+      "rout": [
+        { "id": "cy_rout_01", "text": "Ffowch!", "fr": "Fuyez !" },
+        { "id": "cy_rout_02", "text": "Duw a'n helpo!", "fr": "Dieu nous aide !" }
+      ]
+    },
+    "sco": {
+      "select": [
+        { "id": "sco_select_01", "text": "Aye, my laird.", "fr": "Oui, mon seigneur." },
+        { "id": "sco_select_02", "text": "We're ready for them.", "fr": "Nous les attendons." }
+      ],
+      "move": [
+        { "id": "sco_move_01", "text": "Forrit, lads!", "fr": "En avant, les gars !" }
+      ],
+      "attack": [
+        { "id": "sco_attack_01", "text": "Spears doun! Hauld fast!", "fr": "Piques basses ! Tenez ferme !" },
+        { "id": "sco_attack_02", "text": "Gie them the point!", "fr": "Donnez-leur de la pointe !" }
+      ],
+      "charge": [
+        { "id": "sco_charge_01", "text": "A Douglas! A Douglas!", "fr": "À Douglas ! À Douglas !" },
+        { "id": "sco_charge_02", "text": "Saint Andrew!", "fr": "Saint André !" }
+      ],
+      "rout": [
+        { "id": "sco_rout_01", "text": "Rin, lads, rin!", "fr": "Courez, les gars, courez !" },
+        { "id": "sco_rout_02", "text": "The schiltron's broken!", "fr": "Le schiltron est rompu !" }
+      ],
+      "victory": [
+        { "id": "sco_victory_01", "text": "Scotland! Scotland!", "fr": "Écosse ! Écosse !" }
+      ]
+    }
+  }
+}

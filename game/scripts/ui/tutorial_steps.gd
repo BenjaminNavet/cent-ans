@@ -33,8 +33,8 @@ const BASE := {
 	},
 	"move_army": {
 		"title": "Donner un ordre de marche",
-		"text": "Armée sélectionnée, survolez une province : le chemin apparaît en orange avec son coût. Les provinces hors d'atteinte ce tour sont assombries. Clic droit pour donner l'ordre : l'armée marchera pendant la fin du tour.",
-		"objective": "Ordonner un déplacement à une de vos armées (clic droit).",
+		"text": "Armée sélectionnée, la bulle dorée au sol montre jusqu'où elle peut aller cette saison. Survolez le sol : le chemin s'affiche en vert pour ce tour, en rouge pour les tours suivants, avec son coût. Clic droit sur le sol : l'armée part aussitôt. Un clic droit sur une colonie y marche (siège d'une place ennemie), sur une armée ennemie l'attaque. Les grands fleuves ne se passent qu'aux ponts et aux gués.",
+		"objective": "Déplacer une de vos armées (clic droit sur le sol).",
 		"target": "royal_army",
 	},
 	"open_province": {
@@ -69,7 +69,7 @@ const BASE := {
 	},
 	"end_turn": {
 		"title": "Finir le tour",
-		"text": "Un tour est une saison. Quand vos ordres sont donnés, cliquez sur « Fin du tour » (ou Entrée) : les armées marchent, les batailles se livrent, les villes produisent et les autres puissances jouent.",
+		"text": "Un tour est une saison. Quand vos armées ont marché, cliquez sur « Fin du tour » (ou Entrée) : les autres puissances jouent l'une après l'autre, les sièges avancent, les villes produisent, et les marches trop longues pour une saison reprennent d'elles-mêmes au tour suivant.",
 		"objective": "Terminer le tour.",
 		"target": "end_turn",
 	},
@@ -127,7 +127,7 @@ const ADVICE := {
 	"fac_england": {
 		"intro": "Édouard III, petit-fils de Philippe le Bel par sa mère Isabelle, revendique la couronne de France. Le royaume est moins peuplé, mais ses archers et sa laine font sa force.",
 		"select_army": "L'armée d'Édouard marie archers à l'arc long et hommes d'armes démontés, la tactique victorieuse d'Halidon Hill (1333).",
-		"move_army": "Traverser la Manche est possible entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte des hommes : visez la Guyenne amie ou un port flamand.",
+		"move_army": "Traverser la Manche est possible entre deux ports : marchez jusqu'au port, puis clic droit sur le port d'arrivée ; la traversée prend la saison, et débarquer en terre ennemie coûte des hommes : visez la Guyenne amie ou un port flamand.",
 		"open_province": "Londres et Westminster : le Parlement y vote les subsides de la guerre.",
 		"city_tab": "La laine anglaise fait vivre les drapiers flamands : c'est votre meilleur levier diplomatique.",
 		"build": "Un port facilite les traversées ; des buttes de tir entretiennent l'adresse des archers.",
@@ -150,7 +150,7 @@ const ADVICE := {
 		"research": "Comptabilité et lettres de change : la cour de Bourgogne sera la plus riche d'Occident.",
 		"diplomacy": "Vassal du roi de France, vous pouvez choisir votre camp : Philippe le Bon s'alliera aux Anglais après Montereau (1419) avant la paix d'Arras (1435).",
 		"end_turn": "Laissez France et Angleterre s'épuiser : chaque saison de paix enrichit le duché.",
-		"season_report": "Les successions des princes voisins sont des occasions : lisez la rubrique « Cour ».",
+		"season_report": "Les successions des princes voisins sont des occasions : lisez la rubrique « Le monde ».",
 		"chronicle": "La querelle des Armagnacs et des Bourguignons (1407) fera de vous l'arbitre du royaume.",
 		"tax": "Les villes flamandes, riches et turbulentes, supportent mal l'impôt : Gand se révoltera en 1453.",
 		"governor": "Un gouverneur habile tient les Pays-Bas pendant que le duc négocie à Paris.",

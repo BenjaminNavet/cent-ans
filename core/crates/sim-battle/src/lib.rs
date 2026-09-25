@@ -20,7 +20,8 @@
 //! - Movement slowed by slope, forest, mud, water and fatigue; shooting with
 //!   range, line of sight, weather and armour; melee on contact with charge,
 //!   flank (+50 %) and rear (+100 %) bonuses, pikes/schiltron against
-//!   cavalry, archers' stakes; morale, rout and rally; a general whose aura
+//!   cavalry, archers' stakes; charge impacts that knock men down
+//!   ([`impact`], lot BV2); morale, rout and rally; a general whose aura
 //!   steadies nearby regiments.
 //! - Siege battles ([`siege`], spec `docs/design/m8-sieges.md` § 2): town
 //!   walls with towers and a gate, ladders, siege towers, ram, engines that
@@ -38,11 +39,18 @@ pub mod command;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
+pub mod impact;
+pub mod naval;
 pub mod orders;
 pub mod outcome;
+pub mod relief;
+pub mod relief_ai;
 pub mod rng;
 pub mod setup;
+pub mod shot;
 pub mod siege;
+pub mod siege_fx;
+pub mod siege_layout;
 pub mod sim;
 pub mod site;
 pub mod unit;
@@ -53,16 +61,21 @@ pub use field::{
     FIELD_WIDTH, GRID_RESOLUTION,
 };
 pub use fire::{Blaze, FireRules, FireState};
+pub use impact::{ImpactEvent, ImpactKind, LossCause};
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult};
+pub use relief::ReliefStyle;
 pub use rng::BattleRng;
 pub use setup::{
     BattleSeason, BattleSetup, GeneralSetup, SideId, SideSetup, SiegeSetup, UnitSetup,
 };
+pub use shot::{MissileKind, ShotCover, ShotEvent};
 pub use siege::{PieceKind, SiegeWorks, Tower, WallPiece};
+pub use siege_fx::{SiegeFx, SiegeFxKind};
+pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
 pub use sim::{
-    BattleSim, DeploymentZone, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD,
-    SIEGE_STANDOFF, ZONE_DEPTH,
+    BattleSim, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION,
+    MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,
 };
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,

@@ -1,10 +1,18 @@
 class_name DiplomacyPanel
 extends PanelContainer
 
-## Panneau « Diplomatie » (bouton de la barre, touche P) : factions vivantes avec statut et
-## attitude envers le joueur, fiche de la faction choisie (raisons de l'attitude, score de guerre,
-## prétentions, religion) et actions diplomatiques. Chaque action affiche avant envoi le verdict
-## de la simulation (`evaluate_proposal`). Aucune règle ici : tout vient de `CampaignSim`.
+## Écran de diplomatie plein écran (lot DP1, ADR 0025), à la manière de Three Kingdoms ou de
+## Warhammer III, en registre de manuscrit enluminé :
+## - à gauche, les factions (blason, souverain, relation, attitude ; raisons en infobulle) ;
+## - au centre, la carte diplomatique (provinces teintées selon la relation et l'attitude envers
+##   nous ; un clic choisit la faction qui tient la province) ;
+## - à droite, la fiche de la faction choisie et trois onglets : « Négociation » (clauses
+##   communes, colonnes « Vous offrez » / « Vous demandez », barre d'acceptation en direct,
+##   « Que faudrait-il ? », actions unilatérales), « Guerre » (score, fatigue, buts de guerre),
+##   « Traités » (historique).
+## Aucune règle ici : tout vient de `CampaignSim` (`get_diplomacy`, `treaty_options`,
+## `evaluate_treaty`, `counter_treaty`, `get_war_summary`, `get_treaty_history`). Le panneau
+## est enregistré comme panneau central de la pile d'UI2 (`map_ui.gd::_auto_register`).
 
 signal order_requested(order: Dictionary, success_text: String)
 signal offer_answered(offer_id: int, accept: bool)
@@ -15,93 +23,374 @@ const STATUS_LABELS := {
 	"vassal": "Notre vassal", "suzerain": "Notre suzerain",
 }
 const STATUS_COLORS := {
-	"war": Color(0.62, 0.12, 0.10), "truce": Color(0.70, 0.55, 0.10), "peace": Color(0.35, 0.33, 0.30),
+	"war": Color(0.62, 0.12, 0.10), "truce": Color(0.66, 0.50, 0.08), "peace": Color(0.35, 0.33, 0.30),
 	"alliance": Color(0.15, 0.32, 0.62), "vassal": Color(0.42, 0.20, 0.55), "suzerain": Color(0.42, 0.20, 0.55),
 }
+## Teintes de la carte diplomatique (plus saturées que la carte 3D : fond clair de la minicarte).
+const MAP_COLORS := {
+	"self": Color(0.86, 0.68, 0.18), "war": Color(0.78, 0.10, 0.08), "truce": Color(0.95, 0.55, 0.15),
+	"alliance": Color(0.18, 0.40, 0.85), "vassal": Color(0.55, 0.25, 0.72), "suzerain": Color(0.55, 0.25, 0.72),
+}
+const FRIENDLY := Color(0.30, 0.62, 0.30)
+const HOSTILE := Color(0.72, 0.36, 0.22)
+const NEUTRAL := Color(0.62, 0.60, 0.55)
 const GIFT_AMOUNT := 1000
 const DONATION_AMOUNT := 1000
+const GOLD_STEPS := [500, 1000, 2500, 5000, 10000, 20000]
+const TRIBUTE_STEPS := [100, 250, 500, 1000]
+const TRIBUTE_SEASONS := 8
+const TRUCE_TURNS := 8
+const TAB_NEGOTIATION := 0
+const TAB_WAR := 1
+const TAB_HISTORY := 2
+const FILTERS := ["Toutes", "En guerre", "Alliés et vassaux", "En paix"]
 
 var sim: Object = null
 var player_faction: String = ""
 var province_name_of: Callable = Callable()
+## Carte (facultative) : sans elle, la colonne centrale affiche une légende seule.
+var map_data: MapData = null
 
 var _entries: Array = []
 var _selected: String = ""
-var _list: VBoxContainer
-var _detail: VBoxContainer
+var _filter := 0
+var _tab := TAB_NEGOTIATION
+## Brouillon du traité en cours (dictionnaires au format de `negotiation::Article`).
+var _articles: Array = []
+var _draft_for: String = ""
+var _options: Dictionary = {}
+var _verdict: Dictionary = {}
+
 var _religion_label: Label
 var _offers_box: VBoxContainer
-var _peace_checks: Dictionary = {}  # province_id -> CheckBox
-var _tribute_spin: SpinBox
-var _verdict_label: RichTextLabel
+var _list: VBoxContainer
+var _minimap: CampaignMinimap
+var _map_hint: Label
+var _head: VBoxContainer
+var _tab_buttons: Array[Button] = []
+var _pages: Array[Control] = []
+var _clauses: HFlowContainer
+var _offer_list: VBoxContainer
+var _demand_list: VBoxContainer
+var _clause_menu: MenuButton
+var _offer_menu: MenuButton
+var _demand_menu: MenuButton
+var _chance_bar: ProgressBar
+var _chance_label: Label
+var _reasons: RichTextLabel
+var _actions: HFlowContainer
+var _war_page: VBoxContainer
+var _history_page: VBoxContainer
+var _unilateral_hint: RichTextLabel
 
 
 func _ready() -> void:
 	theme = load("res://scenes/ui/parchment_theme.tres")
-	set_anchors_preset(Control.PRESET_CENTER)
-	custom_minimum_size = Vector2(980, 640)
-	offset_left = -490
-	offset_right = 490
-	offset_top = -330
-	offset_bottom = 330
+	add_theme_stylebox_override("panel", _page_box())
+	set_anchors_preset(Control.PRESET_TOP_LEFT)
+	visibility_changed.connect(_fit_to_viewport)
+	get_viewport().size_changed.connect(_fit_to_viewport)
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 6)
 	add_child(root)
+	root.add_child(_build_header())
+	_offers_box = VBoxContainer.new()
+	root.add_child(_offers_box)
+	root.add_child(_rule())
+	var body := HBoxContainer.new()
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 14)
+	root.add_child(body)
+	body.add_child(_build_faction_column())
+	body.add_child(_build_map_column())
+	body.add_child(_build_detail_column())
+	_fit_to_viewport()
 
+
+## Plein écran : la pile de panneaux (`map_ui._keep_on_screen`) le cale sous la barre du haut.
+func _fit_to_viewport() -> void:
+	if not is_inside_tree():
+		return
+	var view := get_viewport_rect().size
+	position = Vector2(6, 0)
+	size = Vector2(view.x - 12.0, view.y - 4.0)
+
+
+# ----- construction ------------------------------------------------------------------------
+
+func _page_box() -> StyleBoxFlat:
+	var box := HudStyle.card_box(HudStyle.PARCHMENT, HudStyle.INK, 2)
+	box.content_margin_left = 18
+	box.content_margin_right = 18
+	box.content_margin_top = 12
+	box.content_margin_bottom = 12
+	box.shadow_color = HudStyle.SHADOW
+	box.shadow_size = 8
+	return box
+
+
+func _rule() -> Control:
+	var rule := ColorRect.new()
+	rule.color = HudStyle.GOLD
+	rule.custom_minimum_size = Vector2(0, 2)
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rule
+
+
+func _section(text: String) -> Label:
+	var label := HudStyle.label(text, 17, HudStyle.RUBRIC)
+	label.add_theme_constant_override("outline_size", 0)
+	return label
+
+
+func _build_header() -> Control:
 	var header := HBoxContainer.new()
-	var title := Label.new()
-	title.text = "Diplomatie"
-	title.add_theme_font_size_override("font_size", 22)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(title)
+	header.add_theme_constant_override("separation", 12)
+	header.add_child(DropCap.new())
+	var titles := VBoxContainer.new()
+	titles.add_theme_constant_override("separation", 0)
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var title := HudStyle.label("iplomatie", 30, HudStyle.INK)
+	titles.add_child(title)
+	_religion_label = HudStyle.label("", HudStyle.FONT_BODY, HudStyle.INK_SOFT)
+	titles.add_child(_religion_label)
+	header.add_child(titles)
+	var donate := Button.new()
+	donate.text = "Don à l'Église (%s)" % Money.amount(DONATION_AMOUNT)
+	donate.tooltip_text = "Augmente la faveur pontificale (+1 par 200 livres)."
+	donate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	donate.pressed.connect(func() -> void:
+		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l'Église."))
+	header.add_child(donate)
 	var close := Button.new()
 	close.text = "×"
+	close.tooltip_text = "Fermer (Échap)"
+	close.custom_minimum_size = Vector2(36, 36)
+	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void:
 		hide()
 		closed.emit())
 	header.add_child(close)
-	root.add_child(header)
+	return header
 
-	var religion_row := HBoxContainer.new()
-	_religion_label = Label.new()
-	_religion_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	religion_row.add_child(_religion_label)
-	var donate := Button.new()
-	donate.text = "Don à l'Église (%d)" % DONATION_AMOUNT
-	donate.tooltip_text = "Augmente la faveur pontificale (+1 par 200 livres)."
-	donate.pressed.connect(func() -> void:
-		order_requested.emit({"type": "donate_to_church", "amount": DONATION_AMOUNT}, "Don versé à l'Église."))
-	religion_row.add_child(donate)
-	root.add_child(religion_row)
 
-	_offers_box = VBoxContainer.new()
-	root.add_child(_offers_box)
-	root.add_child(HSeparator.new())
-
-	var body := HBoxContainer.new()
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 12)
-	root.add_child(body)
-
-	var list_scroll := ScrollContainer.new()
-	list_scroll.custom_minimum_size = Vector2(360, 0)
-	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+func _build_faction_column() -> Control:
+	var column := VBoxContainer.new()
+	column.custom_minimum_size = Vector2(290, 0)
+	column.add_theme_constant_override("separation", 6)
+	column.add_child(_section("Les puissances"))
+	var filter := OptionButton.new()
+	for label in FILTERS:
+		filter.add_item(label)
+	filter.selected = _filter
+	filter.item_selected.connect(func(index: int) -> void:
+		_filter = index
+		_render_list())
+	column.add_child(filter)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_list = VBoxContainer.new()
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list_scroll.add_child(_list)
-	body.add_child(list_scroll)
-
-	var detail_scroll := ScrollContainer.new()
-	detail_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_detail = VBoxContainer.new()
-	_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_detail.add_theme_constant_override("separation", 4)
-	detail_scroll.add_child(_detail)
-	body.add_child(detail_scroll)
+	_list.add_theme_constant_override("separation", 3)
+	scroll.add_child(_list)
+	column.add_child(scroll)
+	return column
 
 
-## Recharge tout depuis la simulation (appelé à l'ouverture et après chaque ordre).
+func _build_map_column() -> Control:
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation", 6)
+	column.add_child(_section("Carte des relations"))
+	var holder := CenterContainer.new()
+	holder.name = "MapHolder"
+	holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	holder.resized.connect(_fit_minimap)
+	column.add_child(holder)
+	column.add_child(_legend())
+	_map_hint = HudStyle.label("Cliquez une province pour traiter avec son seigneur. Les terres voilées sont hors de vue de vos agents et de vos armées.", HudStyle.FONT_SMALL, HudStyle.INK_FADED)
+	_map_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(_map_hint)
+	return column
+
+
+func _legend() -> Control:
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 12)
+	for entry in [["self", "Nous"], ["war", "Guerre"], ["truce", "Trêve"], ["alliance", "Alliés"], ["vassal", "Vassaux"], ["friendly", "Bien disposés"], ["hostile", "Hostiles"]]:
+		var key: String = entry[0]
+		var chip := HBoxContainer.new()
+		chip.add_theme_constant_override("separation", 4)
+		var swatch := ColorRect.new()
+		swatch.custom_minimum_size = Vector2(14, 14)
+		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		swatch.color = MAP_COLORS.get(key, FRIENDLY if key == "friendly" else HOSTILE)
+		chip.add_child(swatch)
+		var symbol := Accessibility.relation_symbol(key) if Accessibility.colorblind() else ""
+		chip.add_child(HudStyle.label(("%s %s" % [symbol, entry[1]]).strip_edges(), HudStyle.FONT_SMALL, HudStyle.INK))
+		flow.add_child(chip)
+	return flow
+
+
+func _build_detail_column() -> Control:
+	var column := VBoxContainer.new()
+	column.custom_minimum_size = Vector2(500, 0)
+	column.add_theme_constant_override("separation", 6)
+	_head = VBoxContainer.new()
+	_head.add_theme_constant_override("separation", 2)
+	column.add_child(_head)
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 4)
+	for index in 3:
+		var button := Button.new()
+		button.text = ["Négociation", "Guerre", "Traités"][index]
+		button.toggle_mode = true
+		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(func() -> void: _show_tab(index))
+		tabs.add_child(button)
+		_tab_buttons.append(button)
+	column.add_child(tabs)
+	column.add_child(_rule())
+	var stack := Control.new()
+	stack.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(stack)
+	var negotiation := _scroll_page(_build_negotiation())
+	var war := VBoxContainer.new()
+	war.add_theme_constant_override("separation", 6)
+	_war_page = war
+	var history := VBoxContainer.new()
+	history.add_theme_constant_override("separation", 6)
+	_history_page = history
+	for page in [negotiation, _scroll_page(war), _scroll_page(history)]:
+		page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		stack.add_child(page)
+		_pages.append(page)
+	_show_tab(TAB_NEGOTIATION)
+	return column
+
+
+func _scroll_page(content: Control) -> ScrollContainer:
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(content)
+	return scroll
+
+
+func _build_negotiation() -> Control:
+	var page := VBoxContainer.new()
+	page.add_theme_constant_override("separation", 6)
+	var clause_row := HBoxContainer.new()
+	clause_row.add_child(HudStyle.label("Clauses communes", HudStyle.FONT_TITLE, HudStyle.INK))
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	clause_row.add_child(spacer)
+	_clause_menu = _add_menu("+ Clause")
+	clause_row.add_child(_clause_menu)
+	page.add_child(clause_row)
+	_clauses = HFlowContainer.new()
+	_clauses.add_theme_constant_override("h_separation", 6)
+	page.add_child(_clauses)
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 10)
+	page.add_child(columns)
+	var offer := _article_column("Vous offrez")
+	_offer_menu = offer[1]
+	_offer_list = offer[2]
+	columns.add_child(offer[0])
+	var demand := _article_column("Vous demandez")
+	_demand_menu = demand[1]
+	_demand_list = demand[2]
+	columns.add_child(demand[0])
+	page.add_child(_rule())
+	var chance_row := HBoxContainer.new()
+	chance_row.add_theme_constant_override("separation", 8)
+	_chance_label = HudStyle.label("", HudStyle.FONT_TITLE, HudStyle.INK)
+	_chance_label.custom_minimum_size = Vector2(250, 0)
+	chance_row.add_child(_chance_label)
+	_chance_bar = ProgressBar.new()
+	_chance_bar.min_value = 0
+	_chance_bar.max_value = 100
+	_chance_bar.show_percentage = false
+	_chance_bar.custom_minimum_size = Vector2(0, 18)
+	_chance_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_chance_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	chance_row.add_child(_chance_bar)
+	page.add_child(chance_row)
+	_reasons = RichTextLabel.new()
+	_reasons.bbcode_enabled = true
+	_reasons.fit_content = true
+	_reasons.scroll_active = false
+	page.add_child(_reasons)
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 6)
+	var counter := Button.new()
+	counter.text = "Que faudrait-il ?"
+	counter.tooltip_text = "Demander ce qui les ferait accepter (captifs, terres occupées, or, tribut, exigences retirées)."
+	counter.pressed.connect(_ask_counter)
+	buttons.add_child(counter)
+	var clear := Button.new()
+	clear.text = "Effacer"
+	clear.pressed.connect(func() -> void:
+		_articles = []
+		_render_draft())
+	buttons.add_child(clear)
+	var send := Button.new()
+	send.name = "SendTreaty"
+	send.text = "Proposer le traité"
+	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	send.pressed.connect(_send_treaty)
+	buttons.add_child(send)
+	page.add_child(buttons)
+	page.add_child(_rule())
+	page.add_child(HudStyle.label("Actions unilatérales", HudStyle.FONT_TITLE, HudStyle.INK))
+	_actions = HFlowContainer.new()
+	_actions.add_theme_constant_override("h_separation", 6)
+	_actions.add_theme_constant_override("v_separation", 6)
+	page.add_child(_actions)
+	_unilateral_hint = RichTextLabel.new()
+	_unilateral_hint.bbcode_enabled = true
+	_unilateral_hint.fit_content = true
+	_unilateral_hint.scroll_active = false
+	page.add_child(_unilateral_hint)
+	return page
+
+
+## [colonne, menu d'ajout, liste des articles].
+func _article_column(title: String) -> Array:
+	var box := PanelContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_stylebox_override("panel", HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.GOLD, 1))
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 4)
+	box.add_child(column)
+	var row := HBoxContainer.new()
+	var label := HudStyle.label(title, HudStyle.FONT_TITLE, HudStyle.RUBRIC)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(label)
+	var menu := _add_menu("+ Ajouter")
+	row.add_child(menu)
+	column.add_child(row)
+	var list := VBoxContainer.new()
+	list.custom_minimum_size = Vector2(0, 90)
+	list.add_theme_constant_override("separation", 3)
+	column.add_child(list)
+	return [box, menu, list]
+
+
+func _add_menu(text: String) -> MenuButton:
+	var menu := MenuButton.new()
+	menu.text = text
+	menu.flat = false
+	menu.add_theme_font_size_override("font_size", HudStyle.FONT_BODY)
+	menu.about_to_popup.connect(func() -> void: _fill_menu(menu))
+	return menu
+
+
+# ----- données -----------------------------------------------------------------------------
+
+## Recharge tout depuis la simulation (à l'ouverture et après chaque ordre).
 func refresh() -> void:
 	if sim == null:
 		return
@@ -112,17 +401,19 @@ func refresh() -> void:
 		if rank_a != rank_b:
 			return rank_a < rank_b
 		return str(a["name"]) < str(b["name"]))
-	if _selected == "" and not _entries.is_empty():
+	if (_selected == "" or _entry(_selected).is_empty()) and not _entries.is_empty():
 		_selected = str(_entries[0]["id"])
 	_render_religion()
 	_render_offers()
 	_render_list()
+	_render_map()
 	_render_detail()
 
 
 func select_faction(faction_id: String) -> void:
 	_selected = faction_id
 	_render_list()
+	_render_map()
 	_render_detail()
 
 
@@ -130,11 +421,18 @@ static func _status_rank(status: String) -> int:
 	return ["war", "suzerain", "vassal", "alliance", "truce", "peace"].find(status)
 
 
+func _entry(id: String) -> Dictionary:
+	for entry in _entries:
+		if str(entry["id"]) == id:
+			return entry
+	return {}
+
+
 func _render_religion() -> void:
 	var religion: Dictionary = sim.call("get_religion_state", player_faction)
-	var text := "Religion : %s — faveur pontificale %d/100" % [religion.get("religion_name", "?"), int(religion.get("papal_favor", 0))]
+	var text := "Chancellerie — %s, faveur pontificale %d/100" % [religion.get("religion_name", "?"), int(religion.get("papal_favor", 0))]
 	if bool(religion.get("excommunicated", false)):
-		text += " — EXCOMMUNIÉ (%d tours)" % int(religion.get("turns_left", 0))
+		text += " — EXCOMMUNIÉ (%s)" % FrText.count(int(religion.get("turns_left", 0)), "tour", "tours")
 	if bool(religion.get("schism", false)):
 		text += " — Grand Schisme"
 	_religion_label.text = text
@@ -146,14 +444,17 @@ func _render_offers() -> void:
 	var offers: Array = sim.call("get_offers")
 	if offers.is_empty():
 		return
-	var title := Label.new()
-	title.text = "Propositions reçues"
-	title.add_theme_font_size_override("font_size", 17)
-	_offers_box.add_child(title)
+	_offers_box.add_child(_section("Propositions reçues"))
 	for offer in offers:
 		var row := HBoxContainer.new()
-		var text := Label.new()
-		text.text = "%s (%d tour(s))" % [str(offer["text"]), int(offer["expires_in"])]
+		row.add_theme_constant_override("separation", 6)
+		var heraldry := TextureRect.new()
+		heraldry.texture = PortraitLoader.heraldry_texture(str(offer.get("from", "")))
+		heraldry.custom_minimum_size = Vector2(26, 26)
+		heraldry.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		heraldry.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		row.add_child(heraldry)
+		var text := HudStyle.label("%s (%s)" % [str(offer["text"]), FrText.count(int(offer["expires_in"]), "tour", "tours")], HudStyle.FONT_BODY, HudStyle.INK)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(text)
@@ -169,242 +470,657 @@ func _render_offers() -> void:
 		_offers_box.add_child(row)
 
 
+func _passes_filter(status: String) -> bool:
+	match _filter:
+		1:
+			return status == "war"
+		2:
+			return status in ["alliance", "vassal", "suzerain"]
+		3:
+			return status in ["peace", "truce"]
+	return true
+
+
 func _render_list() -> void:
 	for child in _list.get_children():
 		child.queue_free()
 	for entry in _entries:
-		var id := str(entry["id"])
-		var row := Button.new()
-		row.toggle_mode = true
-		row.button_pressed = id == _selected
-		row.custom_minimum_size = Vector2(0, 40)
-		row.pressed.connect(func() -> void: select_faction(id))
-		var line := HBoxContainer.new()
-		line.set_anchors_preset(Control.PRESET_FULL_RECT)
-		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		line.add_theme_constant_override("separation", 8)
-		var swatch := ColorRect.new()
-		swatch.color = Color.html(str(entry["color"]))
-		swatch.custom_minimum_size = Vector2(14, 0)
-		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		PortraitLoader.overlay_heraldry(swatch, id, Vector2(28, 0))  # M10 assets
-		line.add_child(swatch)
-		var name_label := Label.new()
-		name_label.text = str(entry["name"])
-		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		line.add_child(name_label)
 		var status := str(entry["status"])
-		var status_label := Label.new()
-		status_label.text = STATUS_LABELS.get(status, status)
-		status_label.add_theme_color_override("font_color", STATUS_COLORS.get(status, Color.BLACK))
-		status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		line.add_child(status_label)
-		line.add_child(_attitude_bar(int(entry["attitude"])))
-		row.add_child(line)
-		_list.add_child(row)
+		if not _passes_filter(status):
+			continue
+		_list.add_child(_faction_row(entry))
 
 
-func _attitude_bar(attitude: int) -> Control:
-	var bar := ProgressBar.new()
-	bar.min_value = -100
-	bar.max_value = 100
-	bar.value = attitude
-	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(70, 12)
-	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = Color(0.2, 0.55, 0.2) if attitude >= 0 else Color(0.7, 0.15, 0.1)
-	bar.add_theme_stylebox_override("fill", fill)
-	bar.tooltip_text = "Attitude %+d" % attitude
-	return bar
+func _faction_row(entry: Dictionary) -> Control:
+	var id := str(entry["id"])
+	var status := str(entry["status"])
+	var attitude := int(entry["attitude"])
+	var row := Button.new()
+	row.name = "Faction_%s" % id
+	row.toggle_mode = true
+	row.button_pressed = id == _selected
+	row.custom_minimum_size = Vector2(0, 58)
+	row.focus_mode = Control.FOCUS_NONE
+	row.pressed.connect(func() -> void: select_faction(id))
+	var reasons := PackedStringArray(["Attitude envers nous : %+d" % attitude])
+	for reason in entry.get("attitude_reasons", []):
+		reasons.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
+	row.tooltip_text = "\n".join(reasons)
+	var line := HBoxContainer.new()
+	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	line.offset_left = 6
+	line.offset_right = -6
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_theme_constant_override("separation", 8)
+	line.add_child(_heraldry(id, 36, str(entry.get("color", "#888888"))))
+	var names := VBoxContainer.new()
+	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	names.alignment = BoxContainer.ALIGNMENT_CENTER
+	names.add_theme_constant_override("separation", -2)
+	names.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var name_label := HudStyle.label(str(entry["name"]), 16, HudStyle.INK)
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	names.add_child(name_label)
+	var ruler := str(entry.get("ruler", ""))
+	if ruler != "":
+		var ruler_label := HudStyle.label(ruler, HudStyle.FONT_SMALL, HudStyle.INK_FADED)
+		ruler_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ruler_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		names.add_child(ruler_label)
+	line.add_child(names)
+	var right := VBoxContainer.new()
+	right.alignment = BoxContainer.ALIGNMENT_CENTER
+	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	right.add_theme_constant_override("separation", 0)
+	var symbol := Accessibility.relation_symbol(status) if Accessibility.colorblind() else ""
+	var status_label := HudStyle.label(("%s %s" % [symbol, STATUS_LABELS.get(status, status)]).strip_edges(), HudStyle.FONT_SMALL, STATUS_COLORS.get(status, HudStyle.INK))
+	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	right.add_child(status_label)
+	var attitude_label := HudStyle.label("%+d" % attitude, HudStyle.FONT_BODY, HudStyle.GOOD if attitude >= 0 else HudStyle.POOR)
+	attitude_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	attitude_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	right.add_child(attitude_label)
+	line.add_child(right)
+	line.add_child(_attitude_gauge(attitude))
+	row.add_child(line)
+	return row
 
 
-func _entry(id: String) -> Dictionary:
+func _heraldry(faction_id: String, side: int, fallback: String) -> Control:
+	var texture := PortraitLoader.heraldry_texture(faction_id)
+	if texture == null:
+		var swatch := ColorRect.new()
+		swatch.color = Color.html(fallback)
+		swatch.custom_minimum_size = Vector2(side * 0.8, side)
+		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		return swatch
+	var rect := TextureRect.new()
+	rect.texture = texture
+	rect.custom_minimum_size = Vector2(side, side)
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rect
+
+
+## Jauge verticale d'attitude (-100..100) : moitié haute verte, moitié basse rouge.
+func _attitude_gauge(attitude: int) -> Control:
+	var gauge := AttitudeGauge.new()
+	gauge.attitude = attitude
+	return gauge
+
+
+# ----- carte ---------------------------------------------------------------------------------
+
+func _ensure_minimap() -> void:
+	if _minimap != null or map_data == null:
+		return
+	var holder: Control = find_child("MapHolder", true, false)
+	if holder == null:
+		return
+	_minimap = CampaignMinimap.new()
+	_minimap.name = "DiplomacyMap"
+	_minimap.setup(map_data)
+	# Pas de boutons de mode : la carte des relations n'a qu'un rendu.
+	for child in _minimap.get_child(0).get_children():
+		if child is HBoxContainer:
+			child.hide()
+	_minimap.clicked.connect(_on_map_clicked)
+	holder.add_child(_minimap)
+	_fit_minimap()
+
+
+func _fit_minimap() -> void:
+	if _minimap == null:
+		return
+	var holder := _minimap.get_parent() as Control
+	var view := _minimap.find_child("MapView", true, false) as Control
+	if holder == null or view == null or _minimap.crop.size.x <= 0.0:
+		return
+	var aspect := _minimap.crop.size.y / _minimap.crop.size.x
+	var width := maxf(holder.size.x - 16.0, 200.0)
+	var height := width * aspect
+	if height > holder.size.y - 16.0:
+		height = maxf(holder.size.y - 16.0, 150.0)
+		width = height / aspect
+	view.custom_minimum_size = Vector2(width, height).floor()
+	_minimap.tooltip_text = ""
+
+
+func _render_map() -> void:
+	_ensure_minimap()
+	if _minimap == null or sim == null:
+		return
+	var ids := PackedStringArray()
+	for index in range(1, map_data.province_count + 1):
+		ids.append(str(map_data.get_province(index).get("id", "")))
+	var relations: PackedStringArray = sim.call("get_province_relations", ids)
+	var attitude_of := {}
 	for entry in _entries:
-		if str(entry["id"]) == id:
-			return entry
-	return {}
+		attitude_of[str(entry["id"])] = int(entry["attitude"])
+	var colors := PackedColorArray()
+	for index in ids.size():
+		var relation := relations[index] if index < relations.size() else ""
+		var color := Color(0, 0, 0, 0)
+		if MAP_COLORS.has(relation):
+			color = MAP_COLORS[relation]
+		elif relation == "peace":
+			var state: Dictionary = sim.call("get_province_state", ids[index])
+			var attitude := int(attitude_of.get(str(state.get("controller", "")), 0))
+			color = NEUTRAL.lerp(FRIENDLY if attitude >= 0 else HOSTILE, clampf(absf(attitude) / 60.0, 0.0, 1.0))
+		if relation != "" and relation != "self":
+			var state: Dictionary = sim.call("get_province_state", ids[index])
+			if str(state.get("controller", "")) == _selected:
+				color = color.lightened(0.22)
+		colors.append(color)
+	_minimap.set_province_colors(colors)
+
+
+func _on_map_clicked(map_pos: Vector2) -> void:
+	if map_data == null or sim == null:
+		return
+	var index := map_data.province_index_at(map_pos.x, map_pos.y)
+	if index <= 0:
+		return
+	var id := str(map_data.get_province(index).get("id", ""))
+	var state: Dictionary = sim.call("get_province_state", id)
+	var owner := str(state.get("controller", state.get("owner", "")))
+	if owner != "" and owner != player_faction and not _entry(owner).is_empty():
+		select_faction(owner)
+
+
+# ----- fiche et onglets ------------------------------------------------------------------------
+
+func _show_tab(index: int) -> void:
+	_tab = index
+	for i in _pages.size():
+		_pages[i].visible = i == index
+	for i in _tab_buttons.size():
+		_tab_buttons[i].set_pressed_no_signal(i == index)
 
 
 func _render_detail() -> void:
-	for child in _detail.get_children():
+	for child in _head.get_children():
 		child.queue_free()
-	_peace_checks.clear()
 	var entry := _entry(_selected)
 	if entry.is_empty():
 		return
 	var status := str(entry["status"])
-	var title := Label.new()
-	title.text = "%s — %s" % [entry["name"], STATUS_LABELS.get(status, status)]
-	title.add_theme_font_size_override("font_size", 19)
-	title.add_theme_color_override("font_color", STATUS_COLORS.get(status, Color.BLACK))
-	_detail.add_child(title)
-
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	top.add_child(_heraldry(_selected, 64, str(entry.get("color", "#888888"))))
+	var names := VBoxContainer.new()
+	names.add_theme_constant_override("separation", 0)
+	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	names.add_child(HudStyle.label(str(entry["name"]), 24, HudStyle.INK))
+	var ruler := str(entry.get("ruler", ""))
+	names.add_child(HudStyle.label(ruler if ruler != "" else "Souverain inconnu", HudStyle.FONT_BODY, HudStyle.INK_SOFT))
+	var line := "%s — attitude %+d" % [STATUS_LABELS.get(status, status), int(entry["attitude"])]
+	names.add_child(HudStyle.label(line, HudStyle.FONT_BODY, STATUS_COLORS.get(status, HudStyle.INK)))
+	top.add_child(names)
+	_head.add_child(top)
 	var facts := PackedStringArray()
-	facts.append("Religion : %s" % entry["religion_name"])
-	facts.append("Puissance militaire : %d" % int(entry["power"]))
-	if int(entry["truce_turns_left"]) > 0:
-		facts.append("Trêve : encore %d tour(s)" % int(entry["truce_turns_left"]))
-	if status == "war":
-		facts.append("Score de guerre : %+d" % int(entry["war_score"]))
-	if int(entry["loyalty"]) >= 0:
-		facts.append("Loyauté du vassal : %d/100" % int(entry["loyalty"]))
-	if bool(entry["embargo_by_us"]):
-		facts.append("Nous lui imposons un embargo")
-	if bool(entry["embargo_on_us"]):
-		facts.append("Elle nous impose un embargo")
-	if str(entry["casus_belli"]) != "":
-		facts.append("Casus belli : %s" % entry["casus_belli"])
-	for claim in entry["claims"]:
-		facts.append("Prétention : %s" % claim)
-	var facts_label := Label.new()
-	facts_label.text = "\n".join(facts)
+	facts.append("Religion : %s" % entry.get("religion_name", "?"))
+	facts.append("Puissance : %s" % HudStyle.thousands(int(entry.get("power", 0))))
+	if int(entry.get("truce_turns_left", 0)) > 0:
+		facts.append("Trêve : encore %s" % FrText.count(int(entry["truce_turns_left"]), "tour", "tours"))
+	if bool(entry.get("trade_agreement", false)):
+		# C5 : un embargo suspend les routes sans rompre l'accord (la guerre le rompt).
+		var suspended := bool(entry.get("embargo_by_us", false)) or bool(entry.get("embargo_on_us", false))
+		facts.append("Accord commercial" + (" (suspendu)" if suspended else ""))
+	if bool(entry.get("access_received", false)):
+		facts.append("Accès militaire accordé")
+	if int(entry.get("loyalty", -1)) >= 0:
+		facts.append("Loyauté %d/100" % int(entry["loyalty"]))
+	if bool(entry.get("embargo_by_us", false)):
+		facts.append("Sous notre embargo")
+	if bool(entry.get("embargo_on_us", false)):
+		facts.append("Nous impose un embargo")
+	var facts_label := HudStyle.label(" · ".join(facts), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
 	facts_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_detail.add_child(facts_label)
-
-	var reasons := RichTextLabel.new()
-	reasons.bbcode_enabled = true
-	reasons.fit_content = true
-	reasons.scroll_active = false
-	var text := "[b]Attitude envers nous : %+d[/b]\n" % int(entry["attitude"])
-	for reason in entry["attitude_reasons"]:
-		var value := int(reason["value"])
-		var color := "#2a6a2a" if value >= 0 else "#8b1a1a"
-		text += "[color=%s]%+d[/color] %s\n" % [color, value, reason["text"]]
-	reasons.text = text
-	_detail.add_child(reasons)
-	_detail.add_child(HSeparator.new())
+	_head.add_child(facts_label)
+	_render_trade_routes(_head, _selected)
+	if _draft_for != _selected:
+		_draft_for = _selected
+		_articles = [{"kind": "peace"}] if status == "war" else []
+	_options = sim.call("treaty_options", _selected) if sim.has_method("treaty_options") else {}
+	_render_draft()
 	_render_actions(entry)
+	_render_war(entry)
+	_render_history()
 
 
+# ----- négociation ---------------------------------------------------------------------------
+
+func _render_draft() -> void:
+	for box in [_clauses, _offer_list, _demand_list]:
+		for child in box.get_children():
+			child.queue_free()
+	_verdict = {}
+	if sim != null and sim.has_method("evaluate_treaty") and not _articles.is_empty():
+		_verdict = sim.call("evaluate_treaty", _selected, _articles)
+	var values: Array = _verdict.get("articles", [])
+	for index in _articles.size():
+		var article: Dictionary = _articles[index]
+		var value: Dictionary = values[index] if index < values.size() else {}
+		var giver := str(article.get("giver", ""))
+		var target: Container = _clauses if giver == "" else (_offer_list if giver == "proposer" else _demand_list)
+		target.add_child(_article_row(index, article, value))
+	for list in [_offer_list, _demand_list]:
+		if list.get_child_count() == 0:
+			list.add_child(HudStyle.label("—", HudStyle.FONT_BODY, HudStyle.INK_FADED))
+	if _clauses.get_child_count() == 0:
+		_clauses.add_child(HudStyle.label("Aucune clause commune.", HudStyle.FONT_SMALL, HudStyle.INK_FADED))
+	_render_chance()
+
+
+func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	var label_text := str(value.get("label", _fallback_label(article)))
+	var label := HudStyle.label(label_text, HudStyle.FONT_BODY, HudStyle.INK)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.custom_minimum_size = Vector2(120, 0)
+	var tips := PackedStringArray()
+	for reason in value.get("reasons", []):
+		tips.append("%+d  %s" % [int(reason["value"]), str(reason["text"])])
+	if str(value.get("blocked", "")) != "":
+		tips.append("Impossible : %s" % value["blocked"])
+	label.tooltip_text = "\n".join(tips)
+	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	row.add_child(label)
+	if not value.is_empty():
+		var points := int(value.get("value", 0))
+		var points_label := HudStyle.label("%+d" % points, HudStyle.FONT_BODY, HudStyle.GOOD if points >= 0 else HudStyle.POOR)
+		points_label.tooltip_text = "Valeur pour eux"
+		points_label.mouse_filter = Control.MOUSE_FILTER_STOP
+		row.add_child(points_label)
+	var remove := Button.new()
+	remove.text = "×"
+	remove.tooltip_text = "Retirer cette clause"
+	remove.focus_mode = Control.FOCUS_NONE
+	remove.pressed.connect(func() -> void:
+		_articles.remove_at(index)
+		_render_draft())
+	row.add_child(remove)
+	return row
+
+
+func _fallback_label(article: Dictionary) -> String:
+	return str(article.get("kind", "?")).replace("_", " ")
+
+
+func _render_chance() -> void:
+	var fill := StyleBoxFlat.new()
+	if _articles.is_empty():
+		_chance_label.text = "Ajoutez des clauses"
+		_chance_bar.value = 0
+		_reasons.text = ""
+		return
+	var chance := int(_verdict.get("chance", 0))
+	var blocked := str(_verdict.get("blocked", ""))
+	_chance_bar.value = chance
+	fill.bg_color = HudStyle.gauge_color(chance / 100.0)
+	_chance_bar.add_theme_stylebox_override("fill", fill)
+	var word := "accepterait" if chance >= 66 else ("hésite" if chance >= 34 else "refuserait")
+	_chance_label.text = "Chance d'acceptation : %d %% (%s)" % [chance, word]
+	var text := ""
+	if blocked != "":
+		text += "[color=#8b1a1a][b]Impossible :[/b] %s[/color]\n" % blocked
+	var context: Array = _verdict.get("context", [])
+	var parts := PackedStringArray()
+	for reason in context:
+		var v := int(reason["value"])
+		parts.append("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, reason["text"]])
+	if not parts.is_empty():
+		text += "[b]Considérations :[/b] " + " · ".join(parts)
+	_reasons.text = text
+
+
+func _fill_menu(menu: MenuButton) -> void:
+	var popup := menu.get_popup()
+	popup.clear()
+	for child in popup.get_children():
+		if child is PopupMenu:
+			child.queue_free()
+	if popup.id_pressed.is_connected(_on_menu_id):
+		popup.id_pressed.disconnect(_on_menu_id)
+	var items: Array = []  # [label, article | null, children[]]
+	var ours: Dictionary = _options.get("ours", {})
+	var theirs: Dictionary = _options.get("theirs", {})
+	var at_war := bool(_options.get("at_war", false))
+	if menu == _clause_menu:
+		if at_war:
+			items.append(["Paix", {"kind": "peace"}])
+			items.append(["Trêve de deux ans", {"kind": "truce", "turns": TRUCE_TURNS}])
+		if not bool(_options.get("allied", false)):
+			items.append(["Alliance", {"kind": "alliance"}])
+		if not bool(_options.get("trade", false)):
+			items.append(["Accord commercial", {"kind": "trade_agreement"}])
+		var pairs: Array = []
+		for a in ours.get("marriageable", []):
+			for b in theirs.get("marriageable", []):
+				if bool(a.get("female", false)) != bool(b.get("female", false)) and pairs.size() < 10:
+					pairs.append(["%s et %s" % [a["name"], b["name"]], {"kind": "marriage", "character": a["id"], "spouse": b["id"]}])
+		if not pairs.is_empty():
+			items.append(["Mariage", null, pairs])
+	else:
+		var giver := "proposer" if menu == _offer_menu else "recipient"
+		var side: Dictionary = ours if giver == "proposer" else theirs
+		var other_occupies := "occupée par eux" if giver == "proposer" else "occupée par nous"
+		var gold: Array = []
+		for amount in GOLD_STEPS:
+			if amount <= int(side.get("treasury", 0)):
+				gold.append([Money.amount(amount), {"kind": "gold", "giver": giver, "amount": amount}])
+		if not gold.is_empty():
+			items.append(["Or", null, gold])
+		var tribute: Array = []
+		for amount in TRIBUTE_STEPS:
+			tribute.append(["%s par saison, %d saisons" % [Money.amount(amount), TRIBUTE_SEASONS], {"kind": "tribute", "giver": giver, "per_season": amount, "seasons": TRIBUTE_SEASONS}])
+		items.append(["Tribut", null, tribute])
+		var access_key := "access_given" if giver == "proposer" else "access_received"
+		if not bool(_options.get(access_key, false)):
+			items.append(["Accès militaire", {"kind": "military_access", "giver": giver}])
+		var provinces: Array = []
+		for province in side.get("provinces", []):
+			var label := str(province["name"])
+			if bool(province.get("capital", false)):
+				label += " (capitale)"
+			if bool(province.get("occupied", false)):
+				label += " — %s" % other_occupies
+			if bool(province.get("war_goal", false)):
+				label = "★ " + label
+			provinces.append([label, {"kind": "cede_province", "giver": giver, "province": province["id"]}])
+		if not provinces.is_empty():
+			items.append(["Province", null, provinces])
+		var places: Array = []
+		for place in side.get("settlements", []):
+			if places.size() >= 24:
+				break
+			places.append(["%s (%s)" % [place["name"], place["province"]], {"kind": "cede_settlement", "giver": giver, "settlement": place["id"]}])
+		if not places.is_empty():
+			items.append(["Place forte ou colonie", null, places])
+		var captives: Array = []
+		for captive in side.get("captives", []):
+			captives.append([str(captive["name"]), {"kind": "release_captive", "giver": giver, "character": captive["id"]}])
+		if not captives.is_empty():
+			items.append(["Libérer un captif", null, captives])
+		var hostages: Array = []
+		for hostage in side.get("hostages", []):
+			hostages.append([str(hostage["name"]), {"kind": "hostage", "giver": giver, "character": hostage["id"]}])
+		if not hostages.is_empty():
+			items.append(["Otage", null, hostages])
+		items.append(["Devenir vassal" if giver == "proposer" else "Vassalité", {"kind": "vassalage", "giver": giver}])
+	var id := 0
+	var lookup := {}
+	for item in items:
+		if item.size() > 2:
+			var sub := PopupMenu.new()
+			for child in item[2]:
+				sub.add_item(str(child[0]), id)
+				lookup[id] = child[1]
+				id += 1
+			sub.id_pressed.connect(func(pressed: int) -> void: _add_article(lookup.get(pressed, {})))
+			popup.add_submenu_node_item(str(item[0]), sub)
+		else:
+			popup.add_item(str(item[0]), id)
+			lookup[id] = item[1]
+			id += 1
+	popup.set_meta("lookup", lookup)
+	popup.id_pressed.connect(_on_menu_id.bind(popup))
+
+
+func _on_menu_id(pressed: int, popup: PopupMenu) -> void:
+	var lookup: Dictionary = popup.get_meta("lookup", {})
+	_add_article(lookup.get(pressed, {}))
+
+
+func _add_article(article: Dictionary) -> void:
+	if article.is_empty():
+		return
+	for existing in _articles:
+		if JSON.stringify(existing) == JSON.stringify(article):
+			return
+	# Un seul versement d'or et un seul tribut par camp : le nouveau remplace l'ancien.
+	if str(article["kind"]) in ["gold", "tribute"]:
+		for index in range(_articles.size() - 1, -1, -1):
+			var old: Dictionary = _articles[index]
+			if old.get("kind") == article["kind"] and old.get("giver") == article.get("giver"):
+				_articles.remove_at(index)
+	_articles.append(article)
+	_render_draft()
+
+
+func _ask_counter() -> void:
+	if sim == null or not sim.has_method("counter_treaty"):
+		return
+	var answer: Dictionary = sim.call("counter_treaty", _selected, _articles)
+	if bool(answer.get("ok", false)):
+		_articles = answer.get("articles", [])
+		_render_draft()
+	else:
+		_chance_label.text = str(answer.get("error", "Aucune contre-proposition."))
+
+
+func _send_treaty() -> void:
+	if _articles.is_empty():
+		return
+	order_requested.emit({"type": "propose_treaty", "target": _selected, "articles": _articles}, "Le traité est signé.")
+
+
+## Actions sans négociation (guerre, embargo, présents, ruptures, médiation). Survol = conséquences.
 func _render_actions(entry: Dictionary) -> void:
+	for child in _actions.get_children():
+		child.queue_free()
+	_unilateral_hint.text = ""
 	var id := str(entry["id"])
 	var status := str(entry["status"])
-	var actions := VBoxContainer.new()
-	_detail.add_child(actions)
-	_verdict_label = RichTextLabel.new()
-	_verdict_label.bbcode_enabled = true
-	_verdict_label.fit_content = true
-	_verdict_label.scroll_active = false
-
 	if status == "war":
-		_render_peace_form(actions, id)
-		_add_action(actions, "Médiation pontificale (1 000)", {"type": "request_papal_mediation", "target": id}, "Le pape obtient une trêve.")
-	else:
-		if status != "alliance" and status != "vassal" and status != "suzerain":
-			_add_action(actions, "Déclarer la guerre", {"type": "declare_war", "target": id}, "La guerre est déclarée.", true)
-			_add_action(actions, "Proposer une alliance", {"type": "propose_alliance", "target": id}, "Alliance conclue.")
-			_add_action(actions, "Exiger la vassalité", {"type": "demand_vassalage", "target": id}, "Nouveau vassal.")
-		if status == "alliance":
-			_add_action(actions, "Rompre l'alliance", {"type": "break_alliance", "target": id}, "Alliance rompue.", true)
-		if status == "vassal":
-			_add_action(actions, "Libérer le vassal", {"type": "release_vassal", "target": id}, "Vassal libéré.", true)
-	var embargo := bool(entry["embargo_by_us"])
-	_add_action(actions, "Lever l'embargo" if embargo else "Imposer un embargo",
+		_add_action("Médiation pontificale (%s)" % Money.amount(1000), {"type": "request_papal_mediation", "target": id}, "Le pape obtient une trêve.", false)
+	elif status != "alliance" and status != "vassal" and status != "suzerain":
+		_add_action("Déclarer la guerre", {"type": "declare_war", "target": id}, "La guerre est déclarée.", true)
+	if status == "alliance":
+		_add_action("Rompre l'alliance", {"type": "break_alliance", "target": id}, "Alliance rompue.", true)
+	if status == "vassal":
+		_add_action("Libérer le vassal", {"type": "release_vassal", "target": id}, "Vassal libéré.", true)
+	var embargo := bool(entry.get("embargo_by_us", false))
+	_add_action("Lever l'embargo" if embargo else "Imposer un embargo",
 		{"type": "set_embargo", "target": id, "active": not embargo},
 		"Embargo levé." if embargo else "Embargo imposé.", true)
-	_add_action(actions, "Envoyer des présents (%d)" % GIFT_AMOUNT, {"type": "send_gift", "target": id, "amount": GIFT_AMOUNT}, "Présents envoyés.", true)
-	actions.add_child(_verdict_label)
+	_add_action("Présents (%s)" % Money.amount(GIFT_AMOUNT), {"type": "send_gift", "target": id, "amount": GIFT_AMOUNT}, "Présents envoyés.", true)
+	# C5 : l'accord commercial se conclut par un article de traité ; la rupture est unilatérale.
+	if bool(entry.get("trade_agreement", false)):
+		_add_action("Rompre l'accord commercial", {"type": "break_trade_agreement", "target": id}, "Accord commercial rompu.", true)
 
 
-## Un bouton d'action : survol = verdict de la simulation, clic = envoi. `unilateral` : pas de
-## verdict d'acceptation (seulement les conséquences, pour la guerre).
-func _add_action(parent: Control, label: String, order: Dictionary, success_text: String, unilateral: bool = false) -> void:
+## Lot C5 : routes commerciales entre nous et cette faction (revenu par saison, biens, coupure).
+func _render_trade_routes(parent: Control, id: String) -> void:
+	if sim == null or not sim.has_method("get_trade_routes"):
+		return
+	var lines := PackedStringArray()
+	for route_variant in sim.call("get_trade_routes"):
+		var route: Dictionary = route_variant
+		var from_f := str(route.get("from_faction", ""))
+		var to_f := str(route.get("to_faction", ""))
+		if not ((from_f == player_faction and to_f == id) or (from_f == id and to_f == player_faction)):
+			continue
+		if bool(route.get("cut", false)):
+			lines.append("%s ↔ %s : coupée (%s)" % [route["from_hub_name"], route["to_hub_name"], route["cut_reason"]])
+		else:
+			var goods: PackedStringArray = route.get("goods", PackedStringArray())
+			lines.append("%s ↔ %s : %s/saison (%s)" % [route["from_hub_name"], route["to_hub_name"],
+				Money.amount(int(route["total_value"])), ", ".join(goods)])
+	if lines.is_empty():
+		return
+	var label := HudStyle.label("Commerce — " + " · ".join(lines), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+	label.name = "TradeRoutes"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	parent.add_child(label)
+
+
+func _add_action(label: String, order: Dictionary, success_text: String, unilateral: bool) -> void:
 	var button := Button.new()
 	button.text = label
-	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.mouse_entered.connect(func() -> void: _show_verdict(order, unilateral))
-	button.focus_entered.connect(func() -> void: _show_verdict(order, unilateral))
+	button.focus_mode = Control.FOCUS_NONE
+	button.mouse_entered.connect(func() -> void: _show_consequences(order, unilateral))
 	button.pressed.connect(func() -> void: order_requested.emit(order, success_text))
-	parent.add_child(button)
+	_actions.add_child(button)
 
 
-func _show_verdict(order: Dictionary, unilateral: bool) -> void:
-	if sim == null or _verdict_label == null:
+func _show_consequences(order: Dictionary, unilateral: bool) -> void:
+	if sim == null:
+		return
+	var type := str(order.get("type", ""))
+	if unilateral and type != "declare_war":
+		_unilateral_hint.text = ""
 		return
 	var verdict: Dictionary = sim.call("evaluate_proposal", order)
-	var text := ""
-	var type := str(order.get("type", ""))
-	if type == "declare_war":
-		text = "[b]Conséquences :[/b]\n"
-	elif unilateral:
-		_verdict_label.text = ""
-		return
-	elif bool(verdict.get("accept", false)):
-		text = "[b][color=#2a6a2a]Accepterait[/color][/b] (score %+d)\n" % int(verdict.get("score", 0))
-	else:
-		text = "[b][color=#8b1a1a]Refuserait[/color][/b] (score %+d)\n" % int(verdict.get("score", 0))
+	var text := "[b]Conséquences :[/b] " if type == "declare_war" else ("[b][color=#2a6a2a]Accepterait[/color][/b] : " if bool(verdict.get("accept", false)) else "[b][color=#8b1a1a]Refuserait[/color][/b] : ")
+	var parts := PackedStringArray()
 	for reason in verdict.get("reasons", []):
-		var value := int(reason["value"])
-		var color := "#2a6a2a" if value >= 0 else "#8b1a1a"
-		text += "[color=%s]%+d[/color] %s\n" % [color, value, reason["text"]] if value != 0 else "• %s\n" % reason["text"]
-	_verdict_label.text = text
+		var v := int(reason["value"])
+		parts.append(("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, reason["text"]]) if v != 0 else str(reason["text"]))
+	_unilateral_hint.text = text + " · ".join(parts)
 
 
-## Formulaire de paix : provinces occupées de part et d'autre (cases à cocher), tribut.
-func _render_peace_form(parent: Control, enemy: String) -> void:
-	var title := Label.new()
-	title.text = "Conditions de paix"
-	title.add_theme_font_size_override("font_size", 16)
-	parent.add_child(title)
-	var provinces: Array = _occupied_between(enemy)
-	if provinces.is_empty():
-		var none := Label.new()
-		none.text = "Aucune province occupée : paix blanche possible."
-		parent.add_child(none)
-	for item in provinces:
-		var check := CheckBox.new()
-		var ours: bool = bool(item["ours"])
-		check.text = ("Céder %s" if ours else "Exiger %s") % item["name"]
-		check.button_pressed = not ours
-		check.toggled.connect(func(_on: bool) -> void: _show_verdict(_peace_order(enemy), false))
-		_peace_checks[str(item["id"])] = check
-		parent.add_child(check)
-	var tribute_row := HBoxContainer.new()
-	var tribute_label := Label.new()
-	tribute_label.text = "Tribut (positif = exigé, négatif = offert) :"
-	tribute_row.add_child(tribute_label)
-	_tribute_spin = SpinBox.new()
-	_tribute_spin.min_value = -20000
-	_tribute_spin.max_value = 20000
-	_tribute_spin.step = 500
-	_tribute_spin.value_changed.connect(func(_v: float) -> void: _show_verdict(_peace_order(enemy), false))
-	tribute_row.add_child(_tribute_spin)
-	parent.add_child(tribute_row)
-	var send := Button.new()
-	send.text = "Proposer la paix"
-	send.mouse_entered.connect(func() -> void: _show_verdict(_peace_order(enemy), false))
-	send.pressed.connect(func() -> void: order_requested.emit(_peace_order(enemy), "La paix est signée."))
-	parent.add_child(send)
+# ----- guerre et traités --------------------------------------------------------------------------
+
+func _render_war(entry: Dictionary) -> void:
+	for child in _war_page.get_children():
+		child.queue_free()
+	var status := str(entry["status"])
+	if str(entry.get("casus_belli", "")) != "":
+		_war_page.add_child(HudStyle.label("Casus belli : %s" % entry["casus_belli"], HudStyle.FONT_BODY, HudStyle.INK))
+	for claim in entry.get("claims", []):
+		var claim_label := HudStyle.label("Prétention : %s" % claim, HudStyle.FONT_BODY, HudStyle.INK_SOFT)
+		claim_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_war_page.add_child(claim_label)
+	if status != "war" or not sim.has_method("get_war_summary"):
+		_war_page.add_child(HudStyle.label("Pas de guerre en cours avec cette faction.", HudStyle.FONT_BODY, HudStyle.INK_FADED))
+		return
+	var summary: Dictionary = sim.call("get_war_summary", _selected)
+	var score := int(summary.get("war_score", 0))
+	_war_page.add_child(_section("Score de guerre : %+d" % score))
+	var bar := ProgressBar.new()
+	bar.min_value = -100
+	bar.max_value = 100
+	bar.value = score
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 16)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = HudStyle.GOOD if score >= 0 else HudStyle.POOR
+	bar.add_theme_stylebox_override("fill", fill)
+	_war_page.add_child(bar)
+	_war_page.add_child(HudStyle.label("Batailles, sièges et provinces occupées remplissent le score ; les buts de guerre tenus comptent double. Plus il est haut, plus l'ennemi cédera de terres.", HudStyle.FONT_SMALL, HudStyle.INK_FADED))
+	(_war_page.get_child(_war_page.get_child_count() - 1) as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_war_page.add_child(HudStyle.label("Fatigue de guerre : nous %d/100, eux %d/100" % [int(summary.get("weariness_ours", 0)), int(summary.get("weariness_theirs", 0))], HudStyle.FONT_BODY, HudStyle.INK))
+	for pair in [["Nos buts de guerre", "goals_ours"], ["Leurs buts de guerre", "goals_theirs"]]:
+		_war_page.add_child(HudStyle.label(str(pair[0]), HudStyle.FONT_TITLE, HudStyle.RUBRIC))
+		var goals: Array = summary.get(pair[1], [])
+		if goals.is_empty():
+			_war_page.add_child(HudStyle.label("—", HudStyle.FONT_BODY, HudStyle.INK_FADED))
+		for goal in goals:
+			var held := bool(goal.get("held", false))
+			_war_page.add_child(HudStyle.label("%s %s%s" % ["★" if held else "☆", goal["name"], " (tenue)" if held else ""], HudStyle.FONT_BODY, HudStyle.INK))
 
 
-func _peace_order(enemy: String) -> Dictionary:
-	var provinces: Array = []
-	for id in _peace_checks:
-		if (_peace_checks[id] as CheckBox).button_pressed:
-			provinces.append(id)
-	var tribute := int(_tribute_spin.value) if _tribute_spin != null else 0
-	return {"type": "propose_peace", "target": enemy, "provinces": provinces, "tribute": tribute}
-
-
-## Provinces de l'ennemi que nous occupons (à exiger) et les nôtres qu'il occupe (à céder).
-func _occupied_between(enemy: String) -> Array:
-	var result: Array = []
-	# Autoload lu à l'exécution : ce script est aussi compilé par le smoke test (--script).
-	var facade: Node = get_node_or_null("/root/SimFacade")
-	if facade == null or not facade.call("store_loaded"):
-		return result
-	for id in facade.get("store").call("get_province_ids"):
-		var state: Dictionary = sim.call("get_province_state", id)
-		if state.is_empty():
+func _render_history() -> void:
+	for child in _history_page.get_children():
+		child.queue_free()
+	if sim == null or not sim.has_method("get_treaty_history"):
+		return
+	var shown := 0
+	for record in sim.call("get_treaty_history", player_faction):
+		if str(record.get("with", "")) != _selected and shown >= 0 and _filter_history_to_selected():
 			continue
-		var owner := str(state.get("owner", ""))
-		var controller := str(state.get("controller", ""))
-		var name: String = province_name_of.call(str(id)) if province_name_of.is_valid() else str(id)
-		if owner == enemy and controller == player_faction:
-			result.append({"id": str(id), "name": name, "ours": false})
-		elif owner == player_faction and controller == enemy:
-			result.append({"id": str(id), "name": name, "ours": true})
-	return result
+		var accepted := bool(record.get("accepted", false))
+		var head := "%s — %s, %s" % [record.get("date", ""), record.get("with_name", ""), "signé" if accepted else "refusé"]
+		_history_page.add_child(HudStyle.label(head, HudStyle.FONT_BODY, HudStyle.INK if accepted else HudStyle.RUBRIC))
+		var body := HudStyle.label(str(record.get("text", "")), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_history_page.add_child(body)
+		shown += 1
+	if shown == 0:
+		_history_page.add_child(HudStyle.label("Aucun traité avec cette faction.", HudStyle.FONT_BODY, HudStyle.INK_FADED))
+
+
+## Captures et smoke : un brouillon de paix type (province exigée, or offert).
+func stage_example() -> void:
+	var theirs: Array = (_options.get("theirs", {}) as Dictionary).get("provinces", [])
+	_articles = [{"kind": "peace"}, {"kind": "gold", "giver": "proposer", "amount": 5000}]
+	for province in theirs:
+		if not bool(province.get("capital", false)):
+			_articles.append({"kind": "cede_province", "giver": "recipient", "province": province["id"]})
+			break
+	_articles.append({"kind": "trade_agreement"})
+	_render_draft()
+
+
+func _filter_history_to_selected() -> bool:
+	return true
+
+
+## Lettrine enluminée « D » : champ d'azur, filets et lettre d'or (dessinée, sans image).
+class DropCap:
+	extends Control
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(52, 52)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var box := Rect2(Vector2.ZERO, size)
+		draw_rect(Rect2(box.position + Vector2(3, 3), box.size), HudStyle.SHADOW)
+		draw_rect(box, Color(0.16, 0.24, 0.52))
+		draw_rect(box, HudStyle.GOLD, false, 2.0)
+		draw_rect(box.grow(-4.0), Color(HudStyle.GOLD, 0.7), false, 1.0)
+		var font := get_theme_default_font()
+		var text_size := font.get_string_size("D", HORIZONTAL_ALIGNMENT_LEFT, -1, 40)
+		draw_string(font, Vector2((size.x - text_size.x) * 0.5, size.y * 0.5 + text_size.y * 0.32), "D", HORIZONTAL_ALIGNMENT_LEFT, -1, 40, HudStyle.GOLD_PALE)
+
+
+## Jauge verticale d'attitude : trait médian, remplissage vert vers le haut, rouge vers le bas.
+class AttitudeGauge:
+	extends Control
+
+	var attitude := 0
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(8, 36)
+		size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var mid := size.y * 0.5
+		draw_rect(Rect2(Vector2.ZERO, size), HudStyle.PARCHMENT_DARK)
+		var h := mid * clampf(absf(attitude) / 100.0, 0.0, 1.0)
+		if attitude >= 0:
+			draw_rect(Rect2(0, mid - h, size.x, h), HudStyle.GOOD)
+		else:
+			draw_rect(Rect2(0, mid, size.x, h), HudStyle.POOR)
+		draw_line(Vector2(0, mid), Vector2(size.x, mid), HudStyle.INK, 1.0)
+		draw_rect(Rect2(Vector2.ZERO, size), HudStyle.INK_SOFT, false, 1.0)

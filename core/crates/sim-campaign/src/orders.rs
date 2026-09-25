@@ -224,6 +224,11 @@ pub enum Order {
     ProposeAlliance {
         target: FactionId,
     },
+    /// Lot DP1: a treaty of several articles (`negotiation::Article`).
+    ProposeTreaty {
+        target: FactionId,
+        articles: Vec<crate::negotiation::Article>,
+    },
     BreakAlliance {
         target: FactionId,
     },
@@ -278,6 +283,12 @@ pub enum Order {
     SetDiet {
         province: ProvinceId,
         diet: data_model::DietId,
+    },
+    /// Lot C4: adopts `edict` in `province` (regional edict, one active at a
+    /// time, delayed effect); one change per province and per turn.
+    SetEdict {
+        province: ProvinceId,
+        edict: data_model::EdictId,
     },
     /// H5: strikes the faction's money at `level`; one change per year.
     SetCoinage {
@@ -334,6 +345,12 @@ pub enum Order {
     },
     DismissAgent {
         agent: crate::agents::AgentId,
+    },
+    // ----- C5: trade (`trade.rs`) --------------------------------------------
+    /// Ends an existing trade agreement with `target` (agreements are
+    /// concluded by a treaty article, `ProposeTreaty`, lot DP1; ADR 0012).
+    BreakTradeAgreement {
+        target: FactionId,
     },
 }
 
@@ -468,6 +485,8 @@ pub enum OrderError {
     Assault(#[from] crate::siege::AssaultError),
     #[error(transparent)]
     Diet(#[from] crate::table::DietError),
+    #[error(transparent)]
+    Edict(#[from] crate::edicts::EdictError),
     #[error(transparent)]
     Coinage(#[from] crate::coinage::CoinageError),
     #[error(transparent)]
@@ -687,7 +706,13 @@ impl CampaignState {
             Order::ProposeAlliance { target } => {
                 Ok(self.propose(data, faction, &target, Proposal::Alliance)?)
             }
+            Order::ProposeTreaty { target, articles } => {
+                Ok(self.propose(data, faction, &target, Proposal::Treaty { articles })?)
+            }
             Order::BreakAlliance { target } => Ok(self.break_alliance(data, faction, &target)?),
+            Order::BreakTradeAgreement { target } => {
+                Ok(self.break_trade_agreement(data, faction, &target)?)
+            }
             Order::SetEmbargo { target, active } => {
                 Ok(self.set_embargo(data, faction, &target, active)?)
             }
@@ -734,6 +759,10 @@ impl CampaignState {
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
+                Ok(())
+            }
+            Order::SetEdict { province, edict } => {
+                crate::edicts::set_edict(self, data, faction, &province, &edict)?;
                 Ok(())
             }
             Order::SetCoinage { level } => {
@@ -1023,6 +1052,18 @@ impl CampaignState {
                     .get(tech)
                     .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
                 return Some(format!("technologie requise : {name}"));
+            }
+        }
+        // Lot UR1: period units (compagnies d'ordonnance from 1445, routiers
+        // until the bands are hired away to Castile...).
+        if let Some(from) = unit_type.available_from {
+            if self.year < from {
+                return Some(format!("disponible à partir de {from}"));
+            }
+        }
+        if let Some(until) = unit_type.available_until {
+            if self.year > until {
+                return Some(format!("plus levée après {until}"));
             }
         }
         if !unit_type.required_faction.is_empty() && !unit_type.required_faction.contains(faction) {

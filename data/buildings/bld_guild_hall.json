@@ -5,12 +5,12 @@
   },
   "category": "commerce",
   "tier": 2,
+  "upgrades_from": "bld_market",
   "cost": {
     "money": 900
   },
   "build_time_turns": 2,
   "upkeep": 10,
-  "required_building": "bld_market",
   "settlement_kinds": [
     "city",
     "town"
@@ -32,7 +32,8 @@
     }
   ],
   "enables_units": [
-    "unit_flemish_pikemen"
+    "unit_flemish_pikemen",
+    "unit_goedendag_militia"
   ],
   "description": "Siège des corporations ; organise les milices de métiers (Flandre) et finance la recherche civile.",
   "sources": [

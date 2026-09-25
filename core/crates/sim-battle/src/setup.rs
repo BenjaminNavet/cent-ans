@@ -3,7 +3,7 @@
 //! The setup is plain serde data so that it crosses the GDExtension boundary
 //! as a `Dictionary` (via JSON) and can be stored in tests as fixtures.
 
-use data_model::{Ability, BattleOrder, Terrain, UnitCategory, UnitStats, UnitType};
+use data_model::{Ability, BattleOrder, Missile, Terrain, UnitCategory, UnitStats, UnitType};
 use serde::{Deserialize, Serialize};
 
 /// One of the two sides of a battle.
@@ -91,6 +91,10 @@ pub struct UnitSetup {
     pub stats: UnitStats,
     #[serde(default)]
     pub abilities: Vec<Ability>,
+    /// Missile loosed by a shooting unit (lot UR2: data-driven; `None` falls
+    /// back to the id/ability heuristic in `sim.rs::missile_kind`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub missile: Option<Missile>,
 }
 
 impl UnitSetup {
@@ -107,6 +111,7 @@ impl UnitSetup {
             experience,
             stats: unit_type.stats.clone(),
             abilities: unit_type.abilities.clone(),
+            missile: unit_type.missile,
         }
     }
 }
@@ -188,6 +193,10 @@ pub struct BattleSetup {
     /// Siege battle: the defender holds the town walls (M8 § 2).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub siege: Option<SiegeSetup>,
+    /// Siege in a landmark city (L3, ADR 0026): the besieged town is drawn
+    /// from the plan instead of the generic octagon. Ignored without `siege`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub siege_layout: Option<crate::siege_layout::SiegeLayout>,
     /// Catalogue of the leader's orders (`data/battle_orders/`, F10b); no
     /// order can be given when empty.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

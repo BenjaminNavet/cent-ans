@@ -2,30 +2,43 @@ class_name SeasonReport
 extends PanelContainer
 
 ## F3 — rapport de saison : fenêtre parchemin ouverte en fin de tour, qui liste les
-## événements majeurs du journal de la simulation (`end_turn`) groupés par rubrique. Chaque
-## ligne liée à une province ou une armée est cliquable (`entry_selected` : la carte y porte
-## la caméra). « Ne plus afficher » désactive le rapport (réglage `interface/season_report`).
+## événements majeurs du journal de la simulation (`end_turn`). Lot U5 (audit A3, T1) : cinq
+## rubriques dans l'ordre d'urgence — « Vos terres » (pertes et prises en rouge, en premier),
+## « Trésor », « Armées », « Constructions et recherches », « Le monde » (nouvelles étrangères
+## filtrées par intérêt : voisins, alliés, ennemis, grandes puissances). Chaque ligne liée à un
+## lieu, une armée, une technologie ou au trésor porte un bouton d'action (`entry_selected`).
+## « Ne plus afficher » désactive le rapport (réglage `interface/season_report`).
 ## Aucun calcul de jeu : tri et mise en forme des événements déjà produits par `core/`.
 
 signal entry_selected(entry: Dictionary)
 signal closed
 signal disable_requested
 
-## Rubriques du rapport : titre, glyphe, genres d'événements (`EventKind` en snake_case).
-const GROUPS := [
-	{"title": "Batailles et sièges", "glyph": "⚔", "kinds": ["battle", "siege_started", "siege_lifted", "province_captured", "raid", "army_destroyed", "general_captured"]},
-	{"title": "Diplomatie et Église", "glyph": "✉", "kinds": ["war_declared", "peace_signed", "alliance_formed", "alliance_broken", "vassalage", "vassal_rebellion", "embargo", "diplomatic_offer", "diplomacy", "excommunication", "schism", "heresy"]},
-	{"title": "Cour et dynasties", "glyph": "♔", "kinds": ["death", "succession", "no_heir", "birth", "marriage", "regency", "faction_destroyed"]},
-	{"title": "Royaume", "glyph": "⚒", "kinds": ["building_completed", "technology_researched", "revolt", "plague", "famine", "bankruptcy"]},
-	# H9 : régimes revenus au défaut, Carême ; blessés soignés, épidémies contenues.
-	{"title": "Table et santé", "glyph": "✚", "kinds": ["table", "medicine"]},
-	# H11 : mutations monétaires, rançons et échéances, ordres de chevalerie.
-	{"title": "Monnaie, rançons et chevalerie", "glyph": "¤", "kinds": ["coinage", "ransom", "chivalry"]},
-	# C6 : espions, hérauts et prédicateurs.
-	{"title": "Agents", "glyph": "✦", "kinds": ["agent"]},
-	{"title": "Chronique", "glyph": "§", "kinds": ["chronicle", "victory", "defeat", "campaign_ended"]},
+## Rubriques du rapport, dans l'ordre d'affichage.
+const SECTIONS := [
+	{"id": "lands", "title": "Vos terres", "glyph": "⚑"},
+	{"id": "treasury", "title": "Trésor", "glyph": "₶"},
+	{"id": "armies", "title": "Armées", "glyph": "⚔"},
+	{"id": "works", "title": "Constructions et recherches", "glyph": "⚒"},
+	{"id": "world", "title": "Le monde", "glyph": "✉"},
 ]
-## Genres rapportés même quand ils ne concernent pas le joueur (nouvelles du monde).
+## Genres rangés par rubrique quand ils concernent le joueur (le reste va à « Le monde »).
+const SECTION_KINDS := {
+	"lands": ["province_captured", "siege_started", "siege_lifted", "raid", "revolt", "plague", "famine",
+		"death", "succession", "no_heir", "birth", "marriage", "regency", "table", "medicine", "chivalry",
+		"agent", "excommunication", "heresy", "vassal_rebellion", "victory", "defeat", "campaign_ended",
+		"edict"],  # C4 : édits régionaux
+	# « income » (revenus bruts) : redondant avec la ligne de synthèse du trésor, laissé au journal.
+	"treasury": ["bankruptcy", "coinage", "ransom", "trade"],  # C5 : accords et routes coupées
+	"armies": ["battle", "army_destroyed", "general_captured", "recruited", "attrition"],
+	"works": ["building_completed", "technology_researched"],
+}
+## Genres d'une autre faction qui peuvent figurer dans « Le monde » (après filtre d'intérêt).
+const WORLD_NEWS_KINDS := [
+	"war_declared", "peace_signed", "alliance_formed", "alliance_broken", "vassalage", "vassal_rebellion",
+	"faction_destroyed", "schism", "excommunication", "succession", "death", "province_captured",
+	"battle", "revolt", "plague", "chronicle", "victory", "defeat", "campaign_ended", "general_captured"]
+## Genres rapportés même quand ils ne concernent pas le joueur et sans filtre fourni.
 const WORLD_KINDS := ["war_declared", "peace_signed", "faction_destroyed", "schism", "chronicle", "victory", "defeat", "campaign_ended", "succession", "excommunication"]
 ## H9 / H11 : glyphe, libellé et encre par genre, pour le journal et les alertes.
 const KIND_STYLES := {
@@ -37,14 +50,19 @@ const KIND_STYLES := {
 	"chivalry": {"glyph": "⚜", "label": "Chevalerie", "color": "#2a3a7a"},
 	# C6
 	"agent": {"glyph": "✦", "label": "Agents", "color": "#4a2a6a"},
+	# C5 : accords commerciaux, routes coupées par la guerre, un siège ou un blocus.
+	"trade": {"glyph": "⚓", "label": "Commerce", "color": "#1a5a6a"},
 }
+## Ton d'une ligne (`_tone`) : perte (rouge, en tête), prise (vert, juste après), neutre.
+const TONE_LOSS := "loss"
+const TONE_GAIN := "gain"
 const MAX_ENTRIES_PER_GROUP := 12
-const MAX_LIST_HEIGHT := 440.0
+const MAX_LIST_HEIGHT := 460.0
 
 var title_label: Label
 var scroll: ScrollContainer
 var list_box: VBoxContainer
-var groups: Array = []  # [{title, glyph, entries: [event]}]
+var groups: Array = []  # [{id, title, glyph, entries: [event + _tone]}]
 var _title: String = ""
 
 
@@ -53,7 +71,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	position = Vector2(20, 60)
-	custom_minimum_size = Vector2(520, 0)
+	custom_minimum_size = Vector2(560, 0)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	add_child(box)
@@ -75,7 +93,7 @@ func _ready() -> void:
 	box.add_child(scroll)
 	list_box = VBoxContainer.new()
 	list_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list_box.add_theme_constant_override("separation", 2)
+	list_box.add_theme_constant_override("separation", 3)
 	scroll.add_child(list_box)
 	var footer := HBoxContainer.new()
 	footer.alignment = BoxContainer.ALIGNMENT_END
@@ -100,23 +118,109 @@ func close() -> void:
 	closed.emit()
 
 
-## Regroupe les événements pertinents : `is_relevant(event) -> bool` décide si un événement
-## concerne le joueur ; les nouvelles du monde (`WORLD_KINDS`) passent toujours.
-static func build_groups(events: Array, is_relevant: Callable) -> Array:
+## Rubrique d'un événement qui concerne le joueur (« lands », « treasury »…), « world » sinon.
+static func section_of(kind: String) -> String:
+	for section in SECTION_KINDS:
+		if kind in SECTION_KINDS[section]:
+			return section
+	return "world"
+
+
+## Ton d'un événement pour le joueur `player` : perte d'une place, prise, ou neutre.
+## `province_owner(province_id) -> String` (facultatif) désigne le propriétaire actuel.
+static func tone_of(event: Dictionary, player: String, province_owner: Callable = Callable()) -> String:
+	if player == "":
+		return ""
+	var kind := str(event.get("kind", ""))
+	var faction := str(event.get("faction", ""))
+	match kind:
+		"province_captured":
+			if faction == player:
+				return TONE_GAIN
+			return TONE_LOSS
+		"siege_started", "raid":
+			return TONE_LOSS if faction != player else ""
+		"revolt", "army_destroyed", "bankruptcy", "defeat", "vassal_rebellion", "famine", "plague":
+			return TONE_LOSS
+		"siege_lifted", "victory":
+			return TONE_GAIN if faction == player or kind == "victory" else ""
+	return ""
+
+
+## Regroupe les événements en rubriques. `is_relevant(event) -> bool` décide si un événement
+## concerne le joueur (rubriques du royaume) ; les autres vont à « Le monde » s'ils passent
+## `keeps_world(event) -> bool` (filtre d'intérêt ; par défaut les nouvelles de `WORLD_KINDS`).
+## `player` : faction du joueur, pour le ton des lignes (pertes et prises).
+static func build_groups(events: Array, is_relevant: Callable, keeps_world: Callable = Callable(), player: String = "") -> Array:
+	var by_section := {}
+	for event in events:
+		if not (event is Dictionary) or str(event.get("text_fr", "")) == "":
+			continue
+		var kind := str(event.get("kind", ""))
+		var section := ""
+		if kind == "income":
+			continue
+		if is_relevant.call(event):
+			section = section_of(kind)
+			if section == "world" and not (kind in WORLD_NEWS_KINDS or kind in WORLD_KINDS or kind.begins_with("diplom") or kind == "embargo"):
+				continue
+		elif keeps_world.is_valid():
+			if kind in WORLD_NEWS_KINDS and keeps_world.call(event):
+				section = "world"
+		elif kind in WORLD_KINDS:
+			section = "world"
+		if section == "":
+			continue
+		var entry: Dictionary = (event as Dictionary).duplicate()
+		entry["_tone"] = tone_of(event, player) if is_relevant.call(event) else ""
+		if not by_section.has(section):
+			by_section[section] = []
+		(by_section[section] as Array).append(entry)
 	var result: Array = []
-	for spec in GROUPS:
-		var entries: Array = []
-		for event in events:
-			if not (event is Dictionary):
-				continue
-			var kind := str(event.get("kind", ""))
-			if not (kind in spec["kinds"]) or str(event.get("text_fr", "")) == "":
-				continue
-			if kind in WORLD_KINDS or is_relevant.call(event):
-				entries.append(event)
-		if not entries.is_empty():
-			result.append({"title": spec["title"], "glyph": spec["glyph"], "entries": entries})
+	for spec in SECTIONS:
+		if not by_section.has(spec["id"]):
+			continue
+		result.append({"id": spec["id"], "title": spec["title"], "glyph": spec["glyph"], "entries": sort_entries(by_section[spec["id"]])})
 	return result
+
+
+## Pertes d'abord, puis prises, puis le reste (ordre du journal conservé à ton égal).
+static func sort_entries(entries: Array) -> Array:
+	var losses: Array = []
+	var gains: Array = []
+	var rest: Array = []
+	for entry in entries:
+		match str(entry.get("_tone", "")):
+			TONE_LOSS:
+				losses.append(entry)
+			TONE_GAIN:
+				gains.append(entry)
+			_:
+				rest.append(entry)
+	return losses + gains + rest
+
+
+## Ajoute des lignes de synthèse (`{text_fr, kind, _tone}`) en tête de la rubrique `section_id`
+## (créée à sa place si absente) : par ex. le bilan du trésor.
+static func with_summary(report_groups: Array, section_id: String, lines: Array) -> Array:
+	if lines.is_empty():
+		return report_groups
+	var result: Array = []
+	var inserted := false
+	for spec in SECTIONS:
+		var existing: Dictionary = {}
+		for group in report_groups:
+			if str(group.get("id", "")) == spec["id"]:
+				existing = group
+		if spec["id"] == section_id:
+			var entries: Array = lines.duplicate()
+			if not existing.is_empty():
+				entries.append_array(existing["entries"])
+			result.append({"id": spec["id"], "title": spec["title"], "glyph": spec["glyph"], "entries": entries})
+			inserted = true
+		elif not existing.is_empty():
+			result.append(existing)
+	return result if inserted else report_groups
 
 
 static func entry_count(report_groups: Array) -> int:
@@ -126,12 +230,21 @@ static func entry_count(report_groups: Array) -> int:
 	return total
 
 
+## Vrai si le rapport contient autre chose que des lignes de synthèse.
+static func has_news(report_groups: Array) -> bool:
+	for group in report_groups:
+		for entry in group["entries"]:
+			if str(entry.get("kind", "")) != "summary":
+				return true
+	return false
+
+
 ## Affiche le rapport ; renvoie faux (et reste fermé) s'il n'y a rien de notable.
 func show_report(date_label: String, report_groups: Array) -> bool:
 	groups = report_groups
 	_title = date_label
 	_render()
-	if report_groups.is_empty():
+	if not has_news(report_groups):
 		hide()
 		return false
 	show()
@@ -142,33 +255,38 @@ func show_report(date_label: String, report_groups: Array) -> bool:
 ## Fusionne des événements survenus après l'affichage initiale (batailles résolues via le
 ## dialogue d'avant-bataille, dont le résultat n'est connu qu'après la fermeture de ce
 ## dialogue) dans les rubriques déjà construites, et rouvre le rapport s'il avait été fermé.
-## `is_relevant` : voir `build_groups`.
-func add_events(new_events: Array, is_relevant: Callable) -> bool:
-	var new_groups := build_groups(new_events, is_relevant)
+## Mêmes paramètres que `build_groups`. `date_label` : titre du rapport s'il n'en a pas encore.
+func add_events(new_events: Array, is_relevant: Callable, keeps_world: Callable = Callable(), player: String = "", date_label: String = "") -> bool:
+	var new_groups := build_groups(new_events, is_relevant, keeps_world, player)
 	if new_groups.is_empty():
 		return false
 	groups = merge_groups(groups, new_groups)
+	if _title == "":  # Q1 : bataille livrée avant la première fin de tour (titre vide)
+		_title = date_label
 	_render()
 	show()
 	_fit_height.call_deferred()
 	return true
 
 
-## Fusionne deux listes de rubriques (même format que `build_groups`) par titre, en
-## conservant l'ordre de `GROUPS` et en ajoutant les nouvelles entrées à la suite.
+## Fusionne deux listes de rubriques (même format que `build_groups`) dans l'ordre de
+## `SECTIONS`, les nouvelles entrées à la suite (pertes et prises remises en tête).
 static func merge_groups(existing: Array, additional: Array) -> Array:
 	var by_title: Dictionary = {}
 	var order: Array = []
-	for group in existing:
-		by_title[group["title"]] = {"title": group["title"], "glyph": group["glyph"], "entries": (group["entries"] as Array).duplicate()}
-		order.append(group["title"])
-	for group in additional:
-		if by_title.has(group["title"]):
-			(by_title[group["title"]]["entries"] as Array).append_array(group["entries"])
-		else:
-			by_title[group["title"]] = {"title": group["title"], "glyph": group["glyph"], "entries": (group["entries"] as Array).duplicate()}
-			order.append(group["title"])
+	for group in existing + additional:
+		var title := str(group["title"])
+		if not by_title.has(title):
+			by_title[title] = {"id": group.get("id", ""), "title": title, "glyph": group["glyph"], "entries": []}
+			order.append(title)
+		(by_title[title]["entries"] as Array).append_array(group["entries"])
 	var result: Array = []
+	for spec in SECTIONS:
+		if by_title.has(spec["title"]):
+			var group: Dictionary = by_title[spec["title"]]
+			group["entries"] = sort_entries(group["entries"])
+			result.append(group)
+			order.erase(spec["title"])
 	for title in order:
 		result.append(by_title[title])
 	return result
@@ -184,16 +302,17 @@ func _render() -> void:
 	for group in groups:
 		var heading := Label.new()
 		heading.text = "%s  %s" % [group["glyph"], group["title"]]
-		heading.add_theme_font_size_override("font_size", 18)
-		heading.add_theme_color_override("font_color", Color(0.45, 0.12, 0.08))
+		heading.add_theme_font_size_override("font_size", 19)
+		heading.add_theme_color_override("font_color", HudStyle.RUBRIC)
 		list_box.add_child(heading)
 		var entries: Array = group["entries"]
 		for index in mini(entries.size(), MAX_ENTRIES_PER_GROUP):
 			list_box.add_child(_entry_row(entries[index]))
 		if entries.size() > MAX_ENTRIES_PER_GROUP:
 			var more := Label.new()
-			more.text = "… et %d autres (voir le journal)" % (entries.size() - MAX_ENTRIES_PER_GROUP)
-			more.add_theme_font_size_override("font_size", 13)
+			var hidden := entries.size() - MAX_ENTRIES_PER_GROUP
+			more.text = "… et %d autre%s (voir le journal)" % [hidden, "s" if hidden > 1 else ""]
+			more.add_theme_font_size_override("font_size", 14)
 			list_box.add_child(more)
 
 
@@ -203,25 +322,49 @@ func _fit_height() -> void:
 	reset_size()
 
 
+## Libellé du bouton d'action d'une ligne, vide si aucune action.
+static func action_label(event: Dictionary) -> String:
+	var kind := str(event.get("kind", ""))
+	if kind == "technology_researched":
+		return "Technologies"
+	if kind == "summary":
+		return "Finances" if str(event.get("action", "")) == "faction" else ""
+	if kind == "building_completed" and str(event.get("province", "")) != "":
+		return "Ville"
+	if str(event.get("army", "")) != "" or str(event.get("province", "")) != "":
+		return "Voir ⌖"
+	return ""
+
+
 func _entry_row(event: Dictionary) -> Control:
-	var text := str(event.get("text_fr", ""))
-	var target := str(event.get("province", "")) != "" or str(event.get("army", "")) != ""
-	if not target:
-		var label := Label.new()
-		label.text = "•  " + text
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.add_theme_font_size_override("font_size", 15)
-		return label
-	var button := Button.new()
-	button.flat = true
-	button.text = "•  %s  ⌖" % text
-	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	button.tooltip_text = "Voir sur la carte"
-	button.add_theme_font_size_override("font_size", 15)
-	button.custom_minimum_size = Vector2(460, 0)
-	button.pressed.connect(func() -> void: entry_selected.emit(event))
-	return button
+	var tone := str(event.get("_tone", ""))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	var mark := Label.new()
+	mark.text = "▼" if tone == TONE_LOSS else ("▲" if tone == TONE_GAIN else "•")
+	mark.add_theme_font_size_override("font_size", 14)
+	mark.custom_minimum_size = Vector2(16, 0)
+	row.add_child(mark)
+	var label := Label.new()
+	label.text = str(event.get("text_fr", ""))
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.custom_minimum_size = Vector2(380, 0)
+	label.add_theme_font_size_override("font_size", 16 if tone == TONE_LOSS else 15)
+	var ink := HudStyle.RUBRIC if tone == TONE_LOSS else (Money.GAIN_COLOR if tone == TONE_GAIN else HudStyle.INK)
+	label.add_theme_color_override("font_color", ink)
+	mark.add_theme_color_override("font_color", ink)
+	row.add_child(label)
+	var action := action_label(event)
+	if action != "":
+		var button := Button.new()
+		button.text = action
+		button.tooltip_text = "Aller voir" if action.begins_with("Voir") else "Ouvrir : %s" % action.to_lower()
+		button.add_theme_font_size_override("font_size", 13)
+		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		button.pressed.connect(func() -> void: entry_selected.emit(event))
+		row.add_child(button)
+	return row
 
 
 func line_count() -> int:

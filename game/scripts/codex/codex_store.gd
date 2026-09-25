@@ -198,8 +198,9 @@ func total_count() -> int:
 
 
 ## Tests : découvertes dans un fichier dédié, vidé (le fichier du joueur n'est pas touché).
-func use_test_file() -> void:
-	_save_path = TEST_SAVE_PATH
+## T2 : `test_path` isole ce fichier par exécution (smoke test en parallèle).
+func use_test_file(test_path: String = TEST_SAVE_PATH) -> void:
+	_save_path = test_path
 	_discovered.clear()
 	_save_discoveries()
 

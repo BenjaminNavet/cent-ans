@@ -52,7 +52,7 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 	for row in recruitable:
 		var line := HBoxContainer.new()
 		var button := RichButton.new()
-		button.text = "%s — %s ℔ / %s ℔" % [str(row.get("name", row.get("unit_type", "?"))), thousands(int(row.get("cost", 0))), thousands(int(row.get("upkeep", 0)))]
+		button.text = "%s — %s / %s" % [str(row.get("name", row.get("unit_type", "?"))), Money.amount(int(row.get("cost", 0))), Money.amount(int(row.get("upkeep", 0)))]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var available: bool = bool(row.get("available", false))
@@ -75,12 +75,19 @@ static func fill_buildings(list: Container, buildings: Array) -> void:
 		return
 	for entry in buildings:
 		var building_id: String = str(entry.get("id", ""))
-		var text := "%s (entretien %s ℔)" % [str(entry.get("name", building_id)), thousands(int(entry.get("upkeep", 0)))]
+		var text := "%s (entretien %s)" % [str(entry.get("name", building_id)), Money.amount(int(entry.get("upkeep", 0)))]
 		list.add_child(IconChip.create(building_id, text, RichTooltip.building(building_id, entry), ROW_ICON, 14, "building"))
 
 
 ## Constructions possibles (`buildable`), sans celles déjà construites (`built_ids`) ;
 ## `on_build(building_id)` au clic. Rien si `is_player_owner` est faux.
+## Lot C4 : rang de chaîne de `building_id` (`Building.tier`, 1 = palier de
+## base), pour lire les options de construction comme un arbre trié plutôt
+## qu'un ordre alphabétique.
+static func _building_tier(building_id: String) -> int:
+	return int(GameCatalog.building(building_id).get("tier", 1))
+
+
 static func fill_buildable(list: Container, buildable: Array, is_player_owner: bool, built_ids: Array, on_build: Callable) -> void:
 	clear(list)
 	if not is_player_owner:
@@ -92,11 +99,23 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 	if rows.is_empty():
 		placeholder(list, "—")
 		return
+	# Lot C4 : catégorie puis rang, pour que chaque chaîne (marché → maison des
+	# métiers → foire, etc.) s'affiche dans l'ordre de ses paliers.
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var cat_a: String = str(GameCatalog.building(str(a.get("building", ""))).get("category", ""))
+		var cat_b: String = str(GameCatalog.building(str(b.get("building", ""))).get("category", ""))
+		if cat_a != cat_b:
+			return cat_a < cat_b
+		var tier_a := _building_tier(str(a.get("building", "")))
+		var tier_b := _building_tier(str(b.get("building", "")))
+		if tier_a != tier_b:
+			return tier_a < tier_b
+		return str(a.get("name", "")) < str(b.get("name", "")))
 	for row in rows:
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 8)
 		var button := RichButton.new()
-		button.text = "%s — %s ℔ / %d tour(s)" % [str(row.get("name", row.get("building", "?"))), thousands(int(row.get("cost", 0))), int(row.get("turns", 1))]
+		button.text = "%s — %s / %s" % [str(row.get("name", row.get("building", "?"))), Money.amount(int(row.get("cost", 0))), FrText.count(int(row.get("turns", 1)), "tour")]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var available: bool = bool(row.get("available", false))

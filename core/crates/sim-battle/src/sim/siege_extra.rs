@@ -36,7 +36,7 @@ impl BattleSim {
             return;
         }
         let period = (TOWER_RELOAD / DT).round() as u64;
-        let mut volleys: Vec<(usize, f64)> = Vec::new();
+        let mut volleys: Vec<(usize, usize, f64)> = Vec::new();
         for (k, tower) in works.towers.iter().enumerate() {
             if !(self.ticks + k as u64 * 7).is_multiple_of(period) {
                 continue;
@@ -70,10 +70,15 @@ impl BattleSim {
                 .filter(|&(_, d)| d <= TOWER_RANGE)
                 .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
             if let Some((j, d)) = target {
-                volleys.push((j, d));
+                volleys.push((k, j, d));
             }
         }
-        for (j, d) in volleys {
+        for (tower, j, d) in volleys {
+            let target_id = self.units[j].id;
+            self.push_fx(crate::siege_fx::SiegeFxKind::TowerVolley {
+                tower,
+                target: target_id,
+            });
             let target = &self.units[j];
             let accuracy = 0.3 * (1.0 - 0.5 * d / TOWER_RANGE) * self.weather.range_factor();
             let kills = TOWER_SHOTS
@@ -85,6 +90,10 @@ impl BattleSim {
             self.units[j].hp -= kills;
             self.units[j].tick_losses += kills;
             self.units[j].missile_timer = 0.0;
+            if kills > 0.0 {
+                self.units[j].loss_cause = crate::impact::LossCause::Arrow;
+                self.units[j].loss_by = None;
+            }
             if self.units[j].hp <= 0.0 {
                 self.unit_destroyed(j);
             }

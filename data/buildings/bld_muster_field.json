@@ -23,7 +23,10 @@
   ],
   "enables_units": [
     "unit_urban_militia",
-    "unit_crossbowmen"
+    "unit_crossbowmen",
+    "unit_welsh_spearmen",
+    "unit_scottish_spearmen",
+    "unit_coutiliers"
   ],
   "description": "Terrain de revue où l'on passe les montres des troupes levées.",
   "sources": [

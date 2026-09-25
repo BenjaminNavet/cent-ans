@@ -15,6 +15,7 @@ mod battle_sim;
 mod campaign_sim;
 mod campaign_sim_agents;
 mod campaign_sim_diplomacy;
+mod campaign_sim_edicts;
 mod campaign_sim_events;
 mod campaign_sim_family;
 mod campaign_sim_h5h6;
@@ -24,12 +25,17 @@ mod campaign_sim_settlements;
 mod campaign_sim_siege;
 mod campaign_sim_table;
 mod campaign_sim_tech;
+mod campaign_sim_trade;
+mod campaign_sim_treaty;
 mod campaign_sim_victory;
 mod campaign_sim_vision;
+mod campaign_sim_weather;
 mod convert;
+mod naval_sim;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
+pub use naval_sim::NavalBattleSim;
 
 struct CentAnsExtension;
 

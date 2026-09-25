@@ -348,6 +348,10 @@ pub struct ProvinceState {
     /// `diet_bread_pottage`); see [`CampaignState::province_diet`].
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub diet: Option<crate::table::DietChoice>,
+    /// Lot C4: regional edict chosen by the controller (`None`: the default
+    /// `edict_none`); see [`CampaignState::province_edict`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub edict: Option<crate::edicts::EdictChoice>,
 }
 
 /// Dynamic state of a settlement (spec § 4.2).
@@ -500,6 +504,21 @@ pub struct FactionState {
     /// The chivalric order founded by the faction (at most one).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chivalric_order: Option<crate::chivalry::OrderState>,
+    // ----- C5: trade (`trade.rs`) --------------------------------------------
+    /// Trade income collected during the last resolved turn.
+    #[serde(default)]
+    pub trade_income_last_turn: i64,
+    // ----- UI audit A3, lot U3: budget history ------------------------------
+    /// Last resolved seasons of the purse, oldest first (at most
+    /// [`crate::economy_balance::BUDGET_HISTORY_SEASONS`]).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub budget_history: Vec<crate::economy_balance::BudgetRecord>,
+    // ----- Lot DP1: treaties, war goals, war weariness ------------------------
+    #[serde(
+        default,
+        skip_serializing_if = "crate::negotiation::DiplomaticLedger::is_empty"
+    )]
+    pub ledger: crate::negotiation::DiplomaticLedger,
 }
 
 fn default_faction_loyalty() -> u8 {
@@ -708,6 +727,10 @@ pub struct CampaignState {
     /// change of [`STATE_VERSION`]).
     #[serde(default)]
     pub agents: crate::agents::AgentsState,
+    /// Lot NV1: warship pools, sea control, intercepted crossings (absent
+    /// from older saves; no change of [`STATE_VERSION`]).
+    #[serde(default)]
+    pub naval: crate::naval::NavalState,
     /// Lot M3: the AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -748,6 +771,7 @@ impl CampaignState {
             outcome: None,
             victory_streak: 0,
             agents: crate::agents::AgentsState::default(),
+            naval: crate::naval::NavalState::default(),
             ai_turn: None,
         }
     }
@@ -894,10 +918,30 @@ impl CampaignState {
         a == b || self.factions.get(a).is_some_and(|f| f.allies.contains(b))
     }
 
+    /// Lot C5: a formal trade agreement is in force between `a` and `b` (also
+    /// `true` for a faction and itself, its own trade always flows). Single
+    /// representation: the DP1 ledger (`FactionState::ledger`), filled by
+    /// the treaty article [`crate::negotiation::Article::TradeAgreement`]
+    /// and erased by war; an embargo only suspends the routes
+    /// ([`crate::trade::trade_routes`]). ADR 0012.
+    pub fn has_trade_agreement(&self, a: &FactionId, b: &FactionId) -> bool {
+        a == b
+            || self
+                .factions
+                .get(a)
+                .is_some_and(|f| f.ledger.trade_agreements.contains(b))
+    }
+
     /// `true` when `province` is controlled by `faction` or one of its allies.
     pub fn is_friendly_territory(&self, faction: &FactionId, province: &ProvinceId) -> bool {
-        self.province_controller(province)
-            .is_some_and(|c| self.is_allied(faction, c))
+        self.province_controller(province).is_some_and(|c| {
+            self.is_allied(faction, c)
+                // DP1: military access by treaty supplies our armies.
+                || self
+                    .factions
+                    .get(c)
+                    .is_some_and(|f| f.ledger.military_access.contains(faction))
+        })
     }
 
     /// `true` when `province` is controlled by a faction `faction` is at war with.

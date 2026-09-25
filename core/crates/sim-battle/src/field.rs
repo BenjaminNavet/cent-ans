@@ -6,6 +6,7 @@
 use data_model::Terrain;
 use serde::{Deserialize, Serialize};
 
+use crate::relief;
 use crate::rng::BattleRng;
 use crate::setup::BattleSeason;
 use crate::site::{
@@ -163,8 +164,16 @@ pub struct Battlefield {
     pub nz: usize,
     /// Row-major heights (z rows of `nx` values), in metres.
     pub heights: Vec<f64>,
+    /// Anchor disc of each wood (R2: shrunk and moved along the relief).
     pub forests: Vec<Zone>,
+    /// Anchor disc of each patch of mud.
     pub mud: Vec<Zone>,
+    /// Lobes and copses of the woods (R2): a wood is its anchor plus its parts.
+    #[serde(default)]
+    pub forest_parts: Vec<Zone>,
+    /// Lobes and puddles of the mud (R2).
+    #[serde(default)]
+    pub mud_parts: Vec<Zone>,
     pub river: Option<River>,
     /// Province terrain the field was drawn from (B5).
     #[serde(default = "default_terrain")]
@@ -224,12 +233,19 @@ impl Battlefield {
         let mut field = Self::generate_base(site.terrain, site.river, weather, rng);
         field.season = site.season;
         let mut stream = rng.derive(SITE_STREAM);
+        let parts: Vec<Zone> = field
+            .forest_parts
+            .iter()
+            .chain(&field.mud_parts)
+            .copied()
+            .collect();
         let river = field.river.clone();
         let river_z = move |x: f64| river.as_ref().map_or(f64::NAN, |r| r.center_z(x));
         let river_fn: &dyn Fn(f64) -> f64 = &river_z;
         let occupied = Occupied {
             forests: &field.forests,
             mud: &field.mud,
+            parts: &parts,
             river_z: field.river.is_some().then_some(river_fn),
         };
         let features = SiteFeatures::draw(site, weather, &occupied, &mut stream);
@@ -272,6 +288,9 @@ impl Battlefield {
     }
 
     fn generate_base(terrain: Terrain, river: bool, weather: Weather, rng: &mut BattleRng) -> Self {
+        // R2: the relief detail and the shapes of woods and mud come from a
+        // derived stream; the draws below are the pre-R2 ones, unchanged.
+        let mut relief_stream = rng.derive(relief::RELIEF_STREAM);
         let (hill_count, hill_height, forest_count, mud_count) = match terrain {
             Terrain::Plains => (4, 5.0, 2, 1),
             Terrain::Heath => (5, 7.0, 1, 1),
@@ -339,6 +358,12 @@ impl Battlefield {
                 heights.push(h);
             }
         }
+        relief::shape_relief(
+            &mut heights,
+            terrain,
+            river_def.as_ref(),
+            &mut relief_stream,
+        );
         // Forests and mud stay off the centre of the deployment lines.
         let zone = |radius_low: f64, radius_high: f64, rng: &mut BattleRng| loop {
             let candidate = Zone {
@@ -354,11 +379,18 @@ impl Battlefield {
                 break candidate;
             }
         };
-        let forests = (0..forest_count).map(|_| zone(35.0, 90.0, rng)).collect();
+        let mut forests: Vec<Zone> = (0..forest_count).map(|_| zone(35.0, 90.0, rng)).collect();
         let wet = matches!(weather, Weather::Rain | Weather::Snow);
-        let mud = (0..mud_count + if wet { 2 } else { 0 })
+        let mut mud: Vec<Zone> = (0..mud_count + if wet { 2 } else { 0 })
             .map(|_| zone(30.0, 70.0, rng))
             .collect();
+        let (forest_parts, mud_parts) = relief::shape_cover(
+            &mut forests,
+            &mut mud,
+            &heights,
+            river_def.as_ref(),
+            &mut relief_stream,
+        );
         Battlefield {
             width: FIELD_WIDTH,
             depth: FIELD_DEPTH,
@@ -368,6 +400,8 @@ impl Battlefield {
             heights,
             forests,
             mud,
+            forest_parts,
+            mud_parts,
             river: river_def,
             terrain,
             season: BattleSeason::Spring,
@@ -383,8 +417,13 @@ impl Battlefield {
     /// Siege battles: flattens the ground under and around the town and
     /// clears forests and mud from the town and the attacker's approach.
     pub fn prepare_for_siege(&mut self) {
+        self.prepare_for_siege_around(crate::siege::RING_RADIUS);
+    }
+
+    /// [`Self::prepare_for_siege`] around a ring of `radius` metres (L3: the
+    /// town of a landmark plan may be larger than the generic one).
+    pub fn prepare_for_siege_around(&mut self, radius: f64) {
         let (cx, cz) = crate::siege::TOWN_CENTER;
-        let radius = crate::siege::RING_RADIUS;
         let center_height = self.height(cx, cz);
         for iz in 0..self.nz {
             for ix in 0..self.nx {
@@ -411,6 +450,8 @@ impl Battlefield {
         };
         self.forests.retain(keep);
         self.mud.retain(keep);
+        self.forest_parts.retain(keep);
+        self.mud_parts.retain(keep);
         self.pools.retain(keep);
         if self.village.as_ref().is_some_and(|v| !keep(&v.zone)) {
             self.village = None;
@@ -535,11 +576,17 @@ impl Battlefield {
     }
 
     pub fn in_forest(&self, x: f64, z: f64) -> bool {
-        self.forests.iter().any(|f| f.contains(x, z))
+        self.forests
+            .iter()
+            .chain(&self.forest_parts)
+            .any(|f| f.contains(x, z))
     }
 
     pub fn in_mud(&self, x: f64, z: f64) -> bool {
-        self.mud.iter().any(|m| m.contains(x, z))
+        self.mud
+            .iter()
+            .chain(&self.mud_parts)
+            .any(|m| m.contains(x, z))
     }
 
     /// `Some(true)` in a ford, `Some(false)` in deep water, `None` on land.

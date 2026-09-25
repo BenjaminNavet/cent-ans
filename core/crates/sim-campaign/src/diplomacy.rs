@@ -110,6 +110,10 @@ pub enum Proposal {
     Obedience {
         religion: data_model::ReligionId,
     },
+    /// Lot DP1: a treaty of several articles.
+    Treaty {
+        articles: Vec<crate::negotiation::Article>,
+    },
 }
 
 /// A proposal waiting for the player's answer.
@@ -181,6 +185,8 @@ pub enum DiplomacyError {
     NoSchism,
     #[error("obédience invalide")]
     InvalidObedience,
+    #[error("pas d'accord commercial à rompre")]
+    NoTradeAgreement,
     #[error("la faction virtuelle des rebelles ne négocie pas")]
     Rebels,
 }
@@ -327,8 +333,8 @@ impl CampaignState {
                 .map(|id| if Some(id) == capital.as_ref() { 28 } else { 8 })
                 .sum()
         };
-        let _ = data;
-        (battles + occupation(a, b) - occupation(b, a)).clamp(-100, 100)
+        let goals = crate::negotiation::goal_war_score(self, data, a, b);
+        (battles + occupation(a, b) - occupation(b, a) + goals).clamp(-100, 100)
     }
 
     /// The casus belli `a` holds against `b`, if any (French label).
@@ -764,6 +770,15 @@ pub fn evaluate(
         Proposal::Obedience { .. } => {
             reasons.push(("Choix d'obédience".to_owned(), 0));
         }
+        Proposal::Treaty { articles } => {
+            let verdict =
+                crate::negotiation::evaluate_treaty(state, data, proposer, recipient, articles);
+            return Evaluation {
+                accept: verdict.accept,
+                score: verdict.score,
+                reasons: verdict.reasons(),
+            };
+        }
     }
     reasons.retain(|(_, v)| *v != 0 || hard_no);
     let score: i32 = reasons.iter().map(|(_, v)| v).sum();
@@ -1165,7 +1180,7 @@ impl CampaignState {
     }
 
     /// Applies an accepted proposal of `proposer` to `recipient`.
-    fn apply_proposal(
+    pub(crate) fn apply_proposal(
         &mut self,
         data: &GameData,
         proposer: &FactionId,
@@ -1196,6 +1211,9 @@ impl CampaignState {
             Proposal::Obedience { religion: target } => {
                 religion::set_obedience(self, data, recipient, target)?;
             }
+            Proposal::Treaty { articles } => {
+                crate::negotiation::apply_treaty(self, data, proposer, recipient, articles)?;
+            }
         }
         Ok(())
     }
@@ -1203,6 +1221,7 @@ impl CampaignState {
     /// Validates a proposal before evaluation (war targets, provinces...).
     fn check_proposal(
         &self,
+        data: &GameData,
         proposer: &FactionId,
         recipient: &FactionId,
         proposal: &Proposal,
@@ -1237,6 +1256,9 @@ impl CampaignState {
                 }
             }
             Proposal::Vassalage | Proposal::Marriage { .. } | Proposal::Obedience { .. } => {}
+            Proposal::Treaty { articles } => {
+                crate::negotiation::check_treaty(self, data, proposer, recipient, articles)?;
+            }
         }
         Ok(())
     }
@@ -1250,9 +1272,13 @@ impl CampaignState {
         recipient: &FactionId,
         proposal: Proposal,
     ) -> Result<(), DiplomacyError> {
-        self.check_proposal(proposer, recipient, &proposal)?;
+        self.check_proposal(data, proposer, recipient, &proposal)?;
         if recipient == &self.player_faction && proposer != &self.player_faction {
             self.create_offer(data, proposer, proposal);
+            return Ok(());
+        }
+        if let Proposal::Treaty { articles } = proposal {
+            crate::negotiation::propose_treaty(self, data, proposer, recipient, articles)?;
             return Ok(());
         }
         let evaluation = evaluate(self, data, proposer, recipient, &proposal);
@@ -1320,7 +1346,7 @@ impl CampaignState {
         let offer = self.factions[faction].offers[index].clone();
         if accept {
             if !matches!(offer.proposal, Proposal::Obedience { .. }) {
-                self.check_proposal(&offer.from, faction, &offer.proposal)?;
+                self.check_proposal(data, &offer.from, faction, &offer.proposal)?;
             }
             self.factions
                 .get_mut(faction)
@@ -1401,6 +1427,40 @@ impl CampaignState {
             faction_name(data, target)
         );
         self.push_order_event(GameEvent::new(EventKind::AllianceBroken, text).faction(faction));
+        Ok(())
+    }
+
+    /// Lot C5: ends a trade agreement concluded by a DP1 treaty article
+    /// ([`crate::negotiation::Article::TradeAgreement`]); the player's call,
+    /// the AI never breaks one on its own.
+    pub fn break_trade_agreement(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        target: &FactionId,
+    ) -> Result<(), DiplomacyError> {
+        self.check_pair(faction, target)?;
+        if !self.has_trade_agreement(faction, target) {
+            return Err(DiplomacyError::NoTradeAgreement);
+        }
+        self.factions
+            .get_mut(faction)
+            .expect("checked")
+            .ledger
+            .trade_agreements
+            .remove(target);
+        self.factions
+            .get_mut(target)
+            .expect("checked")
+            .ledger
+            .trade_agreements
+            .remove(faction);
+        let text = format!(
+            "{} rompt son accord commercial avec {}.",
+            faction_name(data, faction),
+            faction_name(data, target)
+        );
+        self.push_order_event(GameEvent::new(EventKind::Trade, text).faction(faction));
         Ok(())
     }
 
@@ -1506,6 +1566,7 @@ impl CampaignState {
                     } else {
                         None
                     },
+                    trade_agreement: self.has_trade_agreement(faction, id),
                 }
             })
             .collect()
@@ -1526,6 +1587,10 @@ pub struct DiplomacyEntry {
     pub casus_belli: Option<String>,
     pub claims: Vec<String>,
     pub loyalty: Option<u8>,
+    /// Lot C5: a formal trade agreement is in force (erased by war, its
+    /// routes suspended by an embargo — see [`CampaignState::has_trade_agreement`]).
+    #[serde(default)]
+    pub trade_agreement: bool,
 }
 
 fn offer_text(
@@ -1563,6 +1628,13 @@ fn offer_text(
             state.character_name(data, character),
             state.character_name(data, spouse)
         ),
+        Proposal::Treaty { articles } => {
+            let player = state.player_faction.clone();
+            format!(
+                "{name} propose un traité. {}",
+                crate::negotiation::treaty_text(state, data, from, &player, articles)
+            )
+        }
         Proposal::Obedience { religion } => format!(
             "Grand Schisme : rejoindre {} ?",
             data.religions
@@ -1582,6 +1654,7 @@ pub(crate) fn resolve_diplomacy(
     data: &GameData,
     events: &mut Vec<GameEvent>,
 ) {
+    crate::negotiation::resolve_negotiation(state, data, events);
     let turn = state.turn;
     for f in state.factions.values_mut() {
         f.modifiers.retain(|m| m.expires_turn > turn);
@@ -1983,7 +2056,11 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     // Peace: offer a white peace when we would accept one ourselves; when
     // clearly winning, ask for the occupied provinces; when losing,
     // cede what the enemy holds rather than lose everything (F4).
-    if (turn + slot).is_multiple_of(2) || cornered(state, data, faction) {
+    let treaties = data.ai_diplomacy.negotiation.enabled;
+    if treaties && ((turn + slot).is_multiple_of(2) || cornered(state, data, faction)) {
+        orders.extend(crate::negotiation::plan_peace(state, data, faction));
+    }
+    if !treaties && ((turn + slot).is_multiple_of(2) || cornered(state, data, faction)) {
         for enemy in me.at_war_with.iter().filter(|e| !is_rebels(e)) {
             if let Some(provinces) = peace_terms(state, data, faction, enemy) {
                 orders.push(Order::ProposePeace {
@@ -2001,7 +2078,16 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     let rested = me
         .last_war_declared
         .is_none_or(|t| t + WAR_REST_TURNS <= turn);
-    let ready = turn >= 4 && rested && war_ready(state, faction);
+    // DP1: a weary realm opens no new front; a pretender waits less.
+    let weary = treaties && {
+        let most = data.ai_diplomacy.negotiation.max_weariness_to_declare;
+        let pretender = me.claims.iter().any(|c| c.kind == ClaimKind::Throne);
+        me.ledger.weariness > if pretender { most + 20 } else { most }
+    };
+    let ready = turn >= 4
+        && rested
+        && !weary
+        && (war_ready(state, faction) || crate::negotiation::pretender_ready(state, data, faction));
     let mut declared = false;
     if ready && (turn + slot).is_multiple_of(2) {
         if let Some(target) = war_target(state, data, faction, aggression) {
@@ -2049,6 +2135,10 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
 /// A crown down to `peace.cornered_provinces` provinces of its own (or
 /// fewer) sues for peace every season, whatever the war score (G5: the
 /// Scots after Halidon Hill treat rather than vanish).
+pub fn is_cornered(state: &CampaignState, data: &GameData, faction: &FactionId) -> bool {
+    cornered(state, data, faction)
+}
+
 fn cornered(state: &CampaignState, data: &GameData, faction: &FactionId) -> bool {
     let most = data.ai_diplomacy.peace.cornered_provinces;
     most > 0
@@ -2137,8 +2227,22 @@ fn war_target(
 ) -> Option<FactionId> {
     let my_power = state.coalition_power(faction);
     let rules = &data.ai_diplomacy.war;
-    // Never a new front while the current wars weigh.
-    if enemy_power(state, data, faction) > rules.front_share * state.faction_power(faction) {
+    // Never a new front while the current wars weigh (DP1: a pretender
+    // to a throne tolerates a heavier border war, as Edward III kept
+    // fighting the Scots while claiming France).
+    let pressing = enemy_power(state, data, faction);
+    let own = state.faction_power(faction);
+    let pretender = data.ai_diplomacy.negotiation.enabled
+        && state.factions[faction]
+            .claims
+            .iter()
+            .any(|c| c.kind == ClaimKind::Throne);
+    let share = if pretender {
+        rules.front_share * 2.0
+    } else {
+        rules.front_share
+    };
+    if pressing > share * own {
         return None;
     }
     let has_allies = state.factions[faction]

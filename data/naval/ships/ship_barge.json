@@ -1,0 +1,23 @@
+{
+  "id": "ship_barge",
+  "name": { "display": "Barge", "local": "barge", "local_language": "ancien français" },
+  "propulsion": "mixed",
+  "length_m": 20.0,
+  "beam_m": 5.0,
+  "freeboard_m": 1.6,
+  "aftcastle_m": 1.2,
+  "castle_capacity": 8,
+  "hull": 140,
+  "soldiers": 40,
+  "sailors": 14,
+  "rowers": 30,
+  "sail_speed": 2.8,
+  "oar_speed": 2.4,
+  "turn_rate": 8.0,
+  "bulwark": 0.15,
+  "fire_resistance": 0.05,
+  "cost": 500,
+  "model": "barge",
+  "description": "Petit navire à voile et à avirons (barge, balinier), vif et maniable : éclaireur, transport de chevaux, course et coups de main sur les côtes.",
+  "sources": ["Balinier", "Guerre de course"]
+}
