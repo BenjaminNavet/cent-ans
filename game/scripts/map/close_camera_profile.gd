@@ -146,7 +146,7 @@ func close_pitch_deg(distance: float, reference_deg: float) -> float:
 	var lo := log(maxf(pitch_closest_distance, 1e-4))
 	var hi := log(maxf(pitch_reference_distance, pitch_closest_distance * 1.01))
 	var t := clampf((log(maxf(distance, 1e-4)) - lo) / (hi - lo), 0.0, 1.0)
-	# Linéaire en logarithme de la distance : 21° à 5 unités (vallée), 17° à 1,5, 11° à 0,3.
+	# Linéaire en logarithme de la distance : 23,5° à 5 unités (vallée), 18° à 1,5, 11° à 0,3.
 	return lerpf(pitch_closest_deg, reference_deg, t)
 
 
