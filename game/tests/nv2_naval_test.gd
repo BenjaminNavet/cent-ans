@@ -67,7 +67,8 @@ func _run_hud() -> void:
 			_check(bool(layout["scroll"]), "%s : le bandeau défile (flèches)" % label)
 		# Le bas du bandeau reste dans l'écran.
 		var strip := hud.get_node("Root/Bottom") as Control
-		_check(strip.get_global_rect().end.y <= screen.y + 0.5, "%s : bandeau dans l'écran en hauteur" % label)
+		var visible := hud.get_viewport().get_visible_rect()
+		_check(strip.get_global_rect().end.y <= visible.end.y + 0.5 and strip.get_global_rect().end.x <= visible.end.x + 0.5, "%s : bandeau dans l'écran (%s dans %s)" % [label, strip.get_global_rect().end, visible.end])
 		hud.queue_free()
 		await process_frame
 	root.size = Vector2i(1280, 720)
