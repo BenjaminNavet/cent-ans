@@ -3,7 +3,7 @@ extends CanvasLayer
 
 ## HUD parchemin de la bataille (construit en code sur `parchment_theme.tres`) : barre du haut
 ## (nom, horloge, météo, rapport de forces), journal repliable et regroupé, en bas un bandeau
-## compact à la Total War (U9, UB1) : sceau du chef à gauche, cartes du joueur (`UnitCard`)
+## compact (U9, UB1) : sceau du chef à gauche, cartes du joueur (`UnitCard`)
 ## rangées par « bataille » (`BattleGroups`), ordres en icônes, « Retraite générale » à part et
 ## confirmée, minicarte (`BattleMinimap`) et boutons de vitesse ; aide F1 (F5b, audit UI § 3.2).
 ## L'écran de fin est `BattleResultScreen` (B2), posé par la scène sur `root`.
@@ -251,16 +251,16 @@ func _build_bottom() -> void:
 	buttons.add_theme_constant_override("v_separation", 4)
 	commands.add_child(buttons)
 	for entry in COMMANDS:
-		var button := Button.new()
+		var button := RichButton.new()  # B1 : infobulle riche auto-liée (T : bulle du Codex)
 		button.name = "Command_%s" % entry[0]
 		button.custom_minimum_size = Vector2(52, 38)
 		button.focus_mode = Control.FOCUS_NONE
 		var key_hint := " (%s)" % entry[2] if str(entry[2]) != "" else ""
-		button.tooltip_text = "%s%s\n%s" % [entry[1], key_hint, entry[3]]
+		button.tooltip_text = "[b]%s[/b]%s\n%s" % [entry[1], key_hint, entry[3]]
 		button.draw.connect(_draw_command_icon.bind(button, str(entry[0]), str(entry[2])))
 		button.pressed.connect(func() -> void: command_pressed.emit(str(entry[0])))
 		buttons.add_child(button)
-	withdraw_all_button = Button.new()
+	withdraw_all_button = RichButton.new()
 	withdraw_all_button.name = "WithdrawAll"
 	withdraw_all_button.text = "Retraite générale"
 	withdraw_all_button.focus_mode = Control.FOCUS_NONE

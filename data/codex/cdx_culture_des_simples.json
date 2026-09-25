@@ -1,0 +1,30 @@
+{
+  "id": "cdx_culture_des_simples",
+  "title": "La culture des simples",
+  "category": "technique",
+  "aliases": [
+    "simples",
+    "plantes médicinales",
+    "herbes médicinales",
+    "Circa instans"
+  ],
+  "era": {
+    "from": "v. 800",
+    "to": "1500"
+  },
+  "summary": "On appelle « simples » les plantes médicinales employées seules. Moines, puis apothicaires et particuliers les cultivent en carrés : sauge, rue, menthe, fenouil forment la première pharmacie de l'Occident médiéval.",
+  "body": "Le capitulaire De Villis, vers 800, dresse la liste de près de cent plantes à cultiver dans les domaines royaux, et le plan de l'abbaye de Saint-Gall dessine un herbularius de seize plates-bandes. Les monastères transmettent ce savoir, que les herbiers de l'école de [[cdx_salerne|Salerne]], comme le Circa instans (v. 1150), mettent en ordre.\n\nAu XIVe siècle, chaque maison aisée a son carré de simples. On y trouve la [[cdx_sauge|sauge]], la [[cdx_rue|rue]], la [[cdx_menthe|menthe]] et le [[cdx_fenouil|fenouil]], que l'on prépare en tisanes, onguents ou vins aromatisés, selon les prescriptions de la [[cdx_humeurs|théorie des humeurs]].",
+  "gameplay": "Recherche : 120 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +2 à la santé visée. Débloque : le bâtiment Jardin des simples.",
+  "entity": "tech_herb_garden",
+  "see_also": [
+    "cdx_jardin_des_simples",
+    "cdx_sauge",
+    "cdx_rue",
+    "cdx_apothicaires"
+  ],
+  "sources": [
+    "Capitulaire De Villis",
+    "Plan de Saint-Gall",
+    "Jardin médiéval"
+  ]
+}

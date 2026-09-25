@@ -1,0 +1,31 @@
+{
+  "id": "cdx_universites",
+  "title": "Les universités et la scolastique",
+  "category": "technique",
+  "aliases": [
+    "Universités et scolastique",
+    "universités",
+    "scolastique",
+    "studium generale",
+    "faculté des arts"
+  ],
+  "era": {
+    "from": "v. 1150",
+    "to": "1500"
+  },
+  "summary": "Nées à Bologne, [[cdx_universite_paris|Paris]] et [[cdx_oxford|Oxford]] autour de 1200, les universités forment les théologiens, les juristes et les médecins. Leurs légistes peuplent les conseils des rois et plaident la cause de chaque camp dans la guerre de succession de France.",
+  "body": "L'université est une corporation de maîtres et d'étudiants, protégée par le pape et le roi. On y entre vers quatorze ans à la faculté des arts, avant de poursuivre en théologie, en droit ou en médecine, comme à [[cdx_montpellier|Montpellier]]. La méthode scolastique, fondée sur la lecture commentée des autorités et la dispute, vise à concilier la foi et la raison d'Aristote.\n\nPendant la guerre, les universités se multiplient, fondées par les princes pour former leurs administrateurs : Angers, Orléans, Toulouse, Poitiers (1431) ou Caen (1432). Elles prennent parti dans les grands débats, du [[cdx_grand_schisme|Grand Schisme]] au procès de [[cdx_jeanne_darc|Jeanne d'Arc]].",
+  "gameplay": "Recherche : 220 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +2 points de recherche par saison. Débloque : le bâtiment Université.",
+  "entity": "tech_universities",
+  "see_also": [
+    "cdx_universite_paris",
+    "cdx_oxford",
+    "cdx_montpellier",
+    "cdx_nicole_oresme"
+  ],
+  "sources": [
+    "Université médiévale",
+    "Scolastique",
+    "Université de Paris"
+  ]
+}
