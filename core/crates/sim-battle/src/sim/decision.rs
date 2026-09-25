@@ -56,6 +56,21 @@ impl BattleSim {
         }
     }
 
+    /// EP9b: share of its initial soldiers `side` lost over the last
+    /// `seconds` (at most the duel window of `data/rules/battle_duel.json`,
+    /// sampled every AI period).
+    pub fn recent_losses(&self, side: SideId, seconds: f64) -> f64 {
+        let log = &self.clock.loss_log;
+        let Some(&(now, latest)) = log.back() else {
+            return 0.0;
+        };
+        let start = log
+            .iter()
+            .find(|&&(t, _)| now - t <= seconds)
+            .map_or(latest, |&(_, l)| l);
+        (latest[side.index()] - start[side.index()]).max(0.0)
+    }
+
     /// Share of its initial soldiers `side` has lost.
     fn loss_share(&self, side: SideId) -> f64 {
         let (left, initial) = self
@@ -137,6 +152,17 @@ impl BattleSim {
         let period = (AI_PERIOD / DT).round() as u64;
         if !self.ticks.is_multiple_of(period) {
             return;
+        }
+        // EP9b: the sliding window of the attacker's archery duel.
+        let keep = crate::duel::DuelRules::bundled().window_seconds + AI_PERIOD;
+        self.clock.loss_log.push_back((self.elapsed, losses));
+        while self
+            .clock
+            .loss_log
+            .front()
+            .is_some_and(|&(t, _)| self.elapsed - t > keep)
+        {
+            self.clock.loss_log.pop_front();
         }
         let Some(gap) = self.army_gap() else {
             return;

@@ -1,7 +1,7 @@
 //! EP9b (ADR 0056, § EP9b): the attacker's archery duel. Mirrored epic
 //! armies (60 regiments of 120 men a side, both AIs) on bare flat ground
 //! without stakes: before EP9b the attacker's line walked into the arrows
-//! after `ATTACKER_DUEL_LIMIT` even while its shooters were winning the
+//! after ``ATTACKER_DUEL_LIMIT` (180 s) even while its shooters were winning the
 //! duel, its militia in front broke and the defender won 10 battles out
 //! of 10.
 //!
