@@ -83,6 +83,9 @@ pub const CHARGE_DISTANCE: f64 = 60.0;
 pub const COUNTER_CHARGE_DISTANCE: f64 = 45.0;
 /// Shooters fall back when enemy melee troops come this close.
 pub const SHOOTER_SAFETY: f64 = 70.0;
+/// R4: shooters behind a hedge, a ditch or in a village fall back when enemy
+/// foot comes this close.
+pub const COVER_SAFETY: f64 = 40.0;
 /// Enemy shooters farther than this from their own melee troops are
 /// "isolated" (a cavalry target).
 pub const ISOLATION_DISTANCE: f64 = 80.0;
@@ -566,9 +569,10 @@ const RACE_MARGIN: f64 = 0.6;
 
 /// R4: can the regiments that hold the front (the shooters, else the line;
 /// at the pace of the slowest, uphill slowed as in the simulation) reach a
-/// spot well before the enemy's battle line (the enemy foot, at the pace of
-/// its slowest, from the nearest enemy regiment; the AI's horse waits for
-/// its line)?
+/// spot from their deployment line well before the enemy's battle line (its
+/// foot, at the pace of the slowest; the AI's horse waits for its line)
+/// from its own? Both measured from the deployment lines, so that the
+/// choice holds all battle long instead of flipping as the enemy nears.
 fn race<'v>(view: &'v View, roles: &Roles) -> impl Fn((f64, f64)) -> bool + 'v {
     let field = view.sim.field();
     let walkers: &[usize] = if roles.shooters.is_empty() {
@@ -576,7 +580,8 @@ fn race<'v>(view: &'v View, roles: &Roles) -> impl Fn((f64, f64)) -> bool + 'v {
     } else {
         &roles.shooters
     };
-    let from = view.centroid(walkers).or_else(|| view.centroid(&view.own));
+    let from = deployment_center(view.side);
+    let enemy_from = deployment_center(view.side.other());
     let own_speed = walkers
         .iter()
         .map(|&i| f64::from(view.units[i].stats.speed))
@@ -594,25 +599,12 @@ fn race<'v>(view: &'v View, roles: &Roles) -> impl Fn((f64, f64)) -> bool + 'v {
             .fold(1.0, f64::max)
     }
     .max(1.0);
-    let enemies: Vec<(f64, f64, f64)> = view
-        .able_enemies()
-        .map(|j| {
-            let e = &view.units[j];
-            (e.x, e.z, enemy_speed)
-        })
-        .collect();
     move |spot: (f64, f64)| {
-        let Some(from) = from else {
-            return true;
-        };
         if !own_speed.is_finite() || own_speed <= 0.0 {
             return true;
         }
         let ours = ReliefMap::march_cost(field, from, spot) / own_speed;
-        let theirs = enemies
-            .iter()
-            .map(|&(x, z, v)| (x - spot.0).hypot(z - spot.1) / v)
-            .fold(f64::INFINITY, f64::min);
+        let theirs = (enemy_from.0 - spot.0).hypot(enemy_from.1 - spot.1) / enemy_speed;
         ours < RACE_MARGIN * theirs
     }
 }
@@ -675,6 +667,9 @@ pub const COVER_BEHIND: f64 = 90.0;
 /// Shooters stand this far behind a hedge, a fence or a ditch (well within
 /// [`crate::site::HEDGE_COVER_REACH`]).
 pub const COVER_SETBACK: f64 = 7.0;
+/// R4: setbacks tried in turn behind a hedge on a crest (the last one still
+/// clear of the obstacle's [`OBSTACLE_REACH`]).
+const COVER_SETBACKS: [f64; 3] = [COVER_SETBACK, 5.5, 4.5];
 /// Shooters stand this far inside the edge of a village.
 pub const VILLAGE_SETBACK: f64 = 16.0;
 /// Shooters stand this far in front of the line (the usual defensive order).
@@ -773,7 +768,19 @@ fn cover_candidates(field: &crate::field::Battlefield, side: SideId) -> Vec<(Cov
             (obstacle.a.0 + obstacle.b.0) * 0.5,
             (obstacle.a.1 + obstacle.b.1) * 0.5,
         );
-        let center = (mid.0, mid.1 - forward * COVER_SETBACK);
+        // R4: on a crest, the shooters stand closer to the hedge when the
+        // ground just behind it would hide the glacis from them.
+        let sees_glacis = |back: f64| {
+            let spot = (mid.0, mid.1 - forward * back);
+            [100.0, 150.0].iter().all(|&d| {
+                crate::relief_ai::ReliefMap::sees(field, spot, (mid.0, mid.1 + forward * d))
+            })
+        };
+        let setback = COVER_SETBACKS
+            .into_iter()
+            .find(|&b| sees_glacis(b))
+            .unwrap_or(COVER_SETBACK);
+        let center = (mid.0, mid.1 - forward * setback);
         if !within(mid.0, mid.1) || !standable(center.0, center.1) {
             continue;
         }
@@ -979,8 +986,30 @@ fn plan_field(view: &mut View) {
         && side_losses(view.units, view.side)
             <= side_losses(view.units, view.side.other()) + DUEL_LOSS_MARGIN
         && height_edge(view) > HOLD_HEIGHT;
+    // R4: an evenly matched defender whose enemy is marching on it waits
+    // for it on its ground (behind its hedge, on its crest) rather than
+    // leaving it as soon as its archers have thinned the enemy ranks.
+    // An army made mostly of shooters needs the enemy to come to it
+    // (Crécy, Agincourt): its strength counts only while it holds.
+    let receives = view.side == SideId::Defender
+        && (ratio < HOLD_RATIO
+            || roles
+                .shooters
+                .iter()
+                .map(|&i| unit_power(&view.units[i]))
+                .sum::<f64>()
+                > SHOOTER_ARMY * own_power)
+        && enemy_melee.iter().any(|&j| {
+            let e = &view.units[j];
+            matches!(e.state, UnitState::Marching | UnitState::Charging)
+                && front_ref
+                    .iter()
+                    .any(|&i| dist(&view.units[i], e) < RECEIVE_DISTANCE)
+        });
     let defensive = match view.side {
-        SideId::Defender => (ratio < 0.85 || holds_heights) && elapsed < DEFENDER_PATIENCE,
+        SideId::Defender => {
+            (ratio < 0.85 || holds_heights || receives) && elapsed < DEFENDER_PATIENCE
+        }
         SideId::Attacker => (ratio < 0.8 && elapsed < ATTACKER_WAIT) || attacker_holds,
     };
     let shooters_have_ammo = roles
@@ -1147,6 +1176,8 @@ pub const HOLD_HEIGHT: f64 = 6.0;
 /// ... unless it is this much stronger.
 pub const HOLD_RATIO: f64 = 1.25;
 
+/// R4: a defender receives an enemy marching on it from this close.
+pub const RECEIVE_DISTANCE: f64 = 250.0;
 /// R4: an attacker above an enemy of shooters waits at most this long.
 pub const ATTACKER_HOLD_TIME: f64 = 150.0;
 /// R4: ... when shooters make more than this share of the enemy's power.
@@ -1325,7 +1356,13 @@ fn plan_shooter(
     };
     // Engaged or about to be: fall back behind the line.
     if let Some((_, d)) = threat {
-        if d < SHOOTER_SAFETY || view.engaged(i) {
+        // R4: behind a hedge, a ditch or houses, the foot must cross them
+        // too: the shooters keep shooting until it is close.
+        let safety = match cover {
+            Some((_, c)) if c.breaks_charge => COVER_SAFETY,
+            _ => SHOOTER_SAFETY,
+        };
+        if d < safety || view.engaged(i) {
             let rear = (line_z * view.forward).min(anchor.1 * view.forward) * view.forward;
             let behind = (unit.x, rear - view.forward * 45.0);
             if (unit.z - behind.1) * view.forward > 8.0 || view.engaged(i) {
@@ -1350,7 +1387,9 @@ fn plan_shooter(
         if let Some(((x, z), _)) = cover {
             // B6: reach the cover first (the threat above sends them back
             // when the enemy closes in).
-            if dist_to(unit, x, z) > 6.0 {
+            // R4: right up to the slot (6 m short, behind a hedge on a
+            // crest, would leave the glacis in dead ground).
+            if dist_to(unit, x, z) > 2.0 {
                 view.move_to(i, x, z, false, Some(facing));
             } else {
                 view.halt(i);

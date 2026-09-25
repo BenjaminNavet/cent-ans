@@ -12,7 +12,9 @@
 //! - **cover**: a hedge, a ditch or a fence just in front of the front (the
 //!   shooters stand behind it), or the houses of a village;
 //! - **flanks**: each wing leaning on a wood, a river or a pool, a marsh or
-//!   a scarp (Crécy, Agincourt: woods on the wings).
+//!   a scarp (Crécy, Agincourt: woods on the wings);
+//! - **field of fire**: the share of the ground in front the front sees
+//!   (dead ground below a rounded crest hides the enemy from the archers).
 //!
 //! All parts are in metres-equivalent points, the unit of the R2b height
 //! search, so that `total()` compares a bare crest, a hedge in a hollow and a
@@ -25,6 +27,8 @@ use crate::site::{Obstacle, ObstacleKind, HEDGE_COVER_REACH};
 /// A full front of hedge (or the houses of a village) is worth this many
 /// metres of height.
 pub const COVER_POINTS: f64 = 14.0;
+/// A front that sees all the ground in front of it (field of fire).
+pub const FIRE_POINTS: f64 = 6.0;
 /// Each wing leaning on impassable or slow ground.
 pub const FLANK_POINTS: f64 = 4.0;
 /// A reverse slope behind the front.
@@ -53,11 +57,13 @@ pub struct PositionScore {
     pub reverse: f64,
     pub cover: f64,
     pub flanks: f64,
+    /// Share of the ground in front the front sees (shooters' field of fire).
+    pub fire: f64,
 }
 
 impl PositionScore {
     pub fn total(&self) -> f64 {
-        self.height + self.glacis + self.reverse + self.cover + self.flanks
+        self.height + self.glacis + self.reverse + self.cover + self.flanks + self.fire
     }
 
     /// The score without the cover (a spot chosen for its ground only).
@@ -108,6 +114,35 @@ pub fn score_position(
         },
         cover: cover_points(field, front),
         flanks: flank_points(field, front),
+        fire: fire_points(field, front),
+    }
+}
+
+/// Points of the field of fire: [`FIRE_POINTS`] x the share of the ground
+/// 60, 120 and 180 m in front (centre and both thirds of the front) seen
+/// from the front. A crest with dead ground below it is a poor post for
+/// archers, who must see what they shoot (ADR 0046).
+pub fn fire_points(field: &Battlefield, front: Front) -> f64 {
+    let (x, z) = front.center;
+    let third = front.width / 3.0;
+    let mut seen = 0;
+    let mut total = 0;
+    for d in [60.0, 120.0, 180.0] {
+        for lateral in [-third, 0.0, third] {
+            let spot = (x + lateral, z + front.forward * d);
+            if !field.inside(spot.0, spot.1) {
+                continue;
+            }
+            total += 1;
+            if !field.blocks_sight((x + lateral, z), spot) {
+                seen += 1;
+            }
+        }
+    }
+    if total == 0 {
+        0.0
+    } else {
+        FIRE_POINTS * f64::from(seen) / f64::from(total)
     }
 }
 
