@@ -47,6 +47,8 @@ pub enum StopReason {
     EnemySettlement { settlement: SettlementId },
     /// The path is no longer passable.
     Blocked,
+    /// The army closed in on an enemy army and fought it (order `Attack`, lot M4).
+    Engaged { army: ArmyId },
 }
 
 /// What a move order did (lot M2): the points walked (map pixels, for the
@@ -610,7 +612,7 @@ impl CampaignState {
         army: &ArmyId,
         target: &ArmyId,
         events: &mut Vec<GameEvent>,
-    ) -> Result<(), OrderError> {
+    ) -> Result<MoveReport, OrderError> {
         let entry = self.own_army_checked(faction, army)?;
         let enemy = self
             .armies
@@ -658,7 +660,15 @@ impl CampaignState {
             a.clear_plan();
         }
         crate::movement::fight(self, data, army, target, events);
-        Ok(())
+        Ok(MoveReport {
+            army: army.clone(),
+            walked: walk.cells.iter().map(|c| c.center(grid)).collect(),
+            cost: walk.cost,
+            stop: StopReason::Engaged {
+                army: target.clone(),
+            },
+            planned_path: Vec::new(),
+        })
     }
 
     /// Order `Embark` (lot M2): a port-to-port crossing along a `sea` edge

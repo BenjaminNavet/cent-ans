@@ -90,6 +90,16 @@ var _bench_frame_ms: PackedFloat64Array = PackedFloat64Array()
 var _bench_wall_start_ms: int = -1
 var _bench_timeout_s: float = 120.0
 var _bench_failed: bool = false
+var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
+var _bench_cpu_ms: float = 0.0
+## Compteur d'images mesurées (GPU/CPU/A-B) qui ne repart pas à zéro entre répétitions
+## (`--bench-repeat=`), contrairement à `_bench_frames` (fenêtre de mesure courante).
+var _bench_measured: int = 0
+var _bench_gpu_samples: int = 0
+## V3 : `--bench-ab=<niveau>,<niveau>` alterne deux niveaux de `RenderQuality` toutes les 30 images
+## pendant la mesure (même charge machine pour les deux), temps GPU médian par niveau.
+var _bench_ab: PackedStringArray = []
+var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
@@ -100,6 +110,8 @@ var deployment: DeploymentController = null  # F5c : phase de déploiement du jo
 var _deploy_shot: bool = false
 var _sortie_shown: bool = false
 var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
+var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volées, siège, météo)
+var _siege_audio_timer: float = 0.0
 var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
 
 @onready var terrain: BattleTerrain = $Terrain
@@ -221,7 +233,12 @@ func begin() -> bool:
 		siege_view.name = "Siege"
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
-	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera)
+		# L1 : ville emblématique (Paris) en toile de fond derrière la ville assiégée.
+		var backdrop := LandmarkBackdrop.create(setup, terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
+		if backdrop != null:
+			add_child(backdrop)
+	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -250,6 +267,9 @@ func begin() -> bool:
 	music.name = "Music"
 	add_child(music)
 	music.setup(self)
+	battle_audio = BattleAudio.new()
+	add_child(battle_audio)
+	battle_audio.setup(_weather_key, camera_rig.camera)
 	_refresh_view(true)
 	return true
 
@@ -406,6 +426,7 @@ func _process(delta: float) -> void:
 	if music != null:
 		music.update(delta)
 	_refresh_view(false, delta)
+	_update_audio(delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
@@ -417,13 +438,17 @@ func _process(delta: float) -> void:
 ## répétitions sont regroupés pour la médiane / p95 finales. Un budget de temps réel
 ## (`--bench-timeout=`, `_bench_wall_start_ms`) fait échouer proprement le banc (JSON + code de
 ## sortie ≠ 0) au lieu de bloquer indéfiniment si la simulation n'avance pas (120 régiments, cf.
-## `docs/wip/t2-perf.md`).
+## `docs/wip/t2-perf.md`). V3 : temps GPU/CPU mesurés et banc A/B (`--bench-ab=`, `_bench_ab_step`)
+## sur un compteur dédié `_bench_measured` qui ne repart pas à zéro entre répétitions.
 func _run_benchmark_frame(delta: float) -> void:
 	if _bench_failed:
 		return
 	if _bench_wall_start_ms < 0:
 		_bench_wall_start_ms = Time.get_ticks_msec()
 	if _bench_frames == 0:
+		if _bench_repeat_done == 0:
+			# V3 : temps GPU/CPU de rendu mesurés (l'écran plafonne souvent les FPS à 60).
+			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 		if _bench_at > 0.0:
 			_fast_forward(_bench_at)
 			if _bench_failed:
@@ -437,6 +462,14 @@ func _run_benchmark_frame(delta: float) -> void:
 	_bench_frames += 1
 	_bench_time += delta
 	_bench_frame_ms.append(delta * 1000.0)
+	_bench_measured += 1
+	if _bench_measured > 10:
+		var viewport_rid := get_viewport().get_viewport_rid()
+		var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
+		_bench_gpu_ms += gpu_ms
+		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+		_bench_gpu_samples += 1
+		_bench_ab_step(gpu_ms)
 	if _bench_timed_out():
 		_bench_fail("timeout after %d frames of repeat %d/%d (%.0f s wall budget)" % [_bench_frames, _bench_repeat_done + 1, _bench_repeat, _bench_timeout_s])
 		return
@@ -450,7 +483,8 @@ func _run_benchmark_frame(delta: float) -> void:
 
 
 ## Résultat JSON systématique (T8) : imprimé sur une seule ligne préfixée `BENCH_JSON `
-## (facile à extraire d'une sortie bruyante), avec code de sortie 0.
+## (facile à extraire d'une sortie bruyante), avec code de sortie 0. V3 : `gpu_ms`/`cpu_ms`
+## (moyenne par image mesurée) et `ab` (médiane GPU par niveau, si `--bench-ab=`).
 func _bench_finish() -> void:
 	var sorted_ms := _bench_frame_ms.duplicate()
 	sorted_ms.sort()
@@ -461,6 +495,11 @@ func _bench_finish() -> void:
 	var total_s := 0.0
 	for ms in sorted_ms:
 		total_s += ms / 1000.0
+	var ab_result := {}
+	for level in _bench_ab_ms:
+		var samples: Array = _bench_ab_ms[level]
+		samples.sort()
+		ab_result[level] = samples[samples.size() / 2] if not samples.is_empty() else 0.0
 	var result := {
 		"ok": true,
 		"units": units.size(),
@@ -472,11 +511,20 @@ func _bench_finish() -> void:
 		"frame_ms_median": _percentile(sorted_ms, 0.5),
 		"frame_ms_p95": _percentile(sorted_ms, 0.95),
 		"engine_fps": Engine.get_frames_per_second(),
+		"gpu_ms": _bench_gpu_ms / maxf(_bench_gpu_samples, 1),
+		"cpu_ms": _bench_cpu_ms / maxf(_bench_gpu_samples, 1),
+		"quality": RenderQuality.current(),
 		"missiles_launched": effects.launched if effects != null else 0,
 		"wall_s": _bench_wall_elapsed_s(),
 	}
+	if not ab_result.is_empty():
+		result["ab"] = ab_result
 	print("BENCH_JSON " + JSON.stringify(result))
 	print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (%d repeats)%s" % [units.size(), soldier_count, result["fps_avg"], total_frames, _bench_repeat, self.soldiers.timing_report()])
+	print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
+	print("BattleScene benchmark: render %.2f ms GPU, %.2f ms CPU per frame (quality %s)" % [result["gpu_ms"], result["cpu_ms"], result["quality"]])
+	for level in ab_result:
+		print("BattleScene benchmark A/B: %s median %.2f ms GPU" % [level, ab_result[level]])
 	get_tree().quit(0)
 
 
@@ -507,6 +555,40 @@ static func _percentile(sorted_values: PackedFloat64Array, ratio: float) -> floa
 		return 0.0
 	var idx := int(clampf(ratio * float(sorted_values.size() - 1), 0.0, float(sorted_values.size() - 1)))
 	return float(sorted_values[idx])
+
+
+## AU1 : sons spatialisés d'après les régiments (et le siège, 4 fois par seconde).
+func _update_audio(delta: float) -> void:
+	if battle_audio == null:
+		return
+	var running: bool = not paused and not battle.call("is_finished")
+	var elapsed := float(battle.call("get_elapsed"))
+	var height := camera_rig.camera.global_position.y - camera_rig.target.y
+	battle_audio.update(units, camera_rig.target, height, delta * speed if running else 0.0, delta, elapsed)
+	if siege_view != null and running:
+		_siege_audio_timer -= delta
+		if _siege_audio_timer <= 0.0:
+			_siege_audio_timer = 0.25
+			battle_audio.update_siege(battle.call("get_siege"), elapsed)
+
+
+## Banc A/B (V3) : range le temps GPU de l'image dans le niveau actif, change de niveau toutes les
+## 30 images sur `_bench_measured` (les 4 premières après un changement sont ignorées : mesure en
+## retard d'une image, ressources réallouées) — indépendant de `_bench_frames` pour continuer à
+## cycler correctement à travers plusieurs répétitions (`--bench-repeat=`).
+func _bench_ab_step(gpu_ms: float) -> void:
+	if _bench_ab.size() < 2:
+		return
+	var slot := (_bench_measured - 11) / 30
+	var phase := (_bench_measured - 11) % 30
+	var level := _bench_ab[slot % _bench_ab.size()]
+	if phase == 0:
+		RenderQuality.override_level = level
+		RenderQuality.reapply(get_tree())
+	elif phase >= 4:
+		if not _bench_ab_ms.has(level):
+			_bench_ab_ms[level] = []
+		(_bench_ab_ms[level] as Array).append(gpu_ms)
 
 
 ## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris. Abandonne
@@ -1025,6 +1107,8 @@ func _parse_cmdline() -> void:
 			_bench_repeat = maxi(1, int(arg.trim_prefix("--bench-repeat=")))
 		elif arg.begins_with("--bench-timeout="):
 			_bench_timeout_s = float(arg.trim_prefix("--bench-timeout="))
+		elif arg.begins_with("--bench-ab="):
+			_bench_ab = arg.trim_prefix("--bench-ab=").split(",", false)
 		elif arg == "--benchmark":
 			_benchmark = true
 			autoplay = true
