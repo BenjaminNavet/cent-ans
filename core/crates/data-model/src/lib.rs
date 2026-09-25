@@ -40,6 +40,9 @@ pub use entities::battle_order::{
     BattleOrderScope,
 };
 pub use entities::building::{Building, BuildingCategory};
+pub use entities::campaign_weather::{
+    CampaignWeatherChances, CampaignWeatherRules, ClimateWeather, SeasonalWeather,
+};
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
