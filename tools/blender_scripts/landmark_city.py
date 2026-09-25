@@ -220,7 +220,16 @@ def build_ground(plan, layers, rng):
         ground.add("Water", verts, faces)
         waters.append(left + list(reversed(right)))
     for water in plan.data.get("waters", []):
-        poly = plan.polygon(water["polygon"])
+        # Clip to the reserved zone (a sea polygon may reach far beyond it).
+        clipped = [tuple(p) for p in water["polygon"]]
+        for k in range(72):
+            angle = 2 * math.pi * k / 72
+            clipped = g.clip_polygon_halfplane(
+                clipped, math.cos(angle), math.sin(angle), plan.zone_m * 1.01
+            )
+        if len(clipped) < 3:
+            continue
+        poly = plan.polygon(clipped)
         kind = water.get("kind", "water")
         ground.add("Garden" if kind == "marsh" else "Water", *g.flat(poly, Z_WATER))
         waters.append(poly)
