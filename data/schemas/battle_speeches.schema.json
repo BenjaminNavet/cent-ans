@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_speeches.schema.json",
+  "title": "Discours du général avant la bataille",
+  "description": "Fichier data/speeches/battle_speeches.json (lot BV3) lu par game/scripts/battle/battle_speech.gd. Le discours est composé d'une ouverture (faction), d'une phrase du général (s'il y en a un), d'une phrase selon le rapport de forces, d'une selon le terrain, d'une selon la météo (facultative) et d'une conclusion (faction), puis du cri de guerre (data/battle_orders/order_war_cry.json). Rendu seulement : aucun effet de règle.",
+  "type": "object",
+  "$defs": {
+    "lines": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "by_key": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/lines" }
+    }
+  },
+  "properties": {
+    "line_seconds": { "type": "number", "exclusiveMinimum": 0, "description": "Durée d'affichage d'une phrase (s)." },
+    "cry_seconds": { "type": "number", "exclusiveMinimum": 0, "description": "Durée du cri de guerre final (s)." },
+    "odds_thresholds": {
+      "type": "object",
+      "properties": {
+        "strong": { "type": "number", "exclusiveMinimum": 1, "description": "Rapport (nos hommes / les leurs) au-delà duquel nous sommes les plus forts." },
+        "weak": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1, "description": "Rapport en deçà duquel nous sommes les plus faibles." }
+      },
+      "required": ["strong", "weak"],
+      "additionalProperties": false
+    },
+    "default_cry": { "type": "string", "minLength": 1 },
+    "speaker_without_general": { "type": "string", "minLength": 1 },
+    "openings": { "allOf": [{ "$ref": "#/$defs/by_key" }, { "required": ["default"] }], "description": "Par faction (fac_*), plus « default »." },
+    "odds": {
+      "type": "object",
+      "properties": {
+        "strong": { "$ref": "#/$defs/lines" },
+        "even": { "$ref": "#/$defs/lines" },
+        "weak": { "$ref": "#/$defs/lines" }
+      },
+      "required": ["strong", "even", "weak"],
+      "additionalProperties": false
+    },
+    "terrain": { "allOf": [{ "$ref": "#/$defs/by_key" }, { "required": ["default"] }], "description": "Par terrain de bataille (plains, hills…), plus « default »." },
+    "weather": {
+      "type": "object",
+      "propertyNames": { "enum": ["clear", "rain", "fog", "snow"] },
+      "additionalProperties": { "$ref": "#/$defs/lines" }
+    },
+    "closings": { "allOf": [{ "$ref": "#/$defs/by_key" }, { "required": ["default"] }], "description": "Par faction, plus « default »." },
+    "general_lines": { "$ref": "#/$defs/lines", "description": "Phrases du général ; {general} = son nom." }
+  },
+  "required": ["line_seconds", "cry_seconds", "odds_thresholds", "default_cry", "speaker_without_general", "openings", "odds", "terrain", "weather", "closings", "general_lines"],
+  "additionalProperties": false
+}
