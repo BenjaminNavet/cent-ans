@@ -1319,6 +1319,24 @@ func _run_assets() -> void:
 	_check(not (marker.get_node("Banner") as Node3D).visible, "placeholder banner should be hidden")
 	_check(marker.get_node_or_null("%s/SiegeCamp" % ModelLibrary.MODEL_NODE) != null, "siege camp expected")
 	marker.queue_free()
+	# Lot CV2 : figurines skinnées d'une armée (général, porte-étendard, escorte), flotte, bivouac.
+	if ArmyFigures.enabled():
+		var cv2_army := {"faction": "fac_france", "stance": "normal", "position": Vector2(100, 100),
+			"units": [{"unit_type": "unit_knights", "strength": 600}, {"unit_type": "unit_longbowmen", "strength": 900}]}
+		var cv2_figures := ArmyFigures.build(cv2_army, Color(0.2, 0.3, 0.8), null, "cv2")
+		root.add_child(cv2_figures)
+		_check(cv2_figures.figure_count() == 2 + 4, "CV2: 1 500 men → leader + bearer + 4 escort, got %d" % cv2_figures.figure_count())
+		_check(cv2_figures.get_node_or_null("Bivouac") != null, "CV2: idle army in the field should camp")
+		cv2_figures.set_walking(true)
+		cv2_figures.set_view(100.0, 1.0)
+		cv2_army["embarked"] = true
+		var cv2_fleet := ArmyFigures.build(cv2_army, Color(0.2, 0.3, 0.8), null, "cv2f")
+		root.add_child(cv2_fleet)
+		_check(cv2_fleet.ship_count() == 2, "CV2: 1 500 men at sea → 2 ships, got %d" % cv2_fleet.ship_count())
+		await process_frame
+		cv2_figures.queue_free()
+		cv2_fleet.queue_free()
+		ArmyFigures.clear_cache()
 	await process_frame
 	ModelLibrary.clear_cache()
 	PortraitLoader.clear_cache()
