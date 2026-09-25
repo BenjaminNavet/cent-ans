@@ -63,7 +63,7 @@ pub use field::{
 pub use fire::{Blaze, FireRules, FireState};
 pub use impact::{ImpactEvent, ImpactKind, LossCause};
 pub use orders::{OrderUse, OrderView};
-pub use outcome::{BattleEvent, BattleOutcome, SideResult};
+pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
 pub use relief::ReliefStyle;
 pub use rng::BattleRng;
 pub use setup::{

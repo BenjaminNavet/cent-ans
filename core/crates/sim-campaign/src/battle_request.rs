@@ -483,6 +483,7 @@ impl CampaignState {
             siege: None,
             siege_layout: None,
             orders: data.battle_orders.values().cloned().collect(),
+            standards: Some(data.battle_standard_rules.clone()),
         })
     }
 
@@ -715,6 +716,7 @@ impl CampaignState {
             }),
             siege_layout: siege_layout(data, &request.location),
             orders: data.battle_orders.values().cloned().collect(),
+            standards: Some(data.battle_standard_rules.clone()),
         }
     }
 

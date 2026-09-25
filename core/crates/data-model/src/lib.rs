@@ -40,6 +40,7 @@ pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
     BattleOrderScope,
 };
+pub use entities::battle_standards::BattleStandardRules;
 pub use entities::building::{Building, BuildingCategory};
 pub use entities::campaign_weather::{
     CampaignWeatherChances, CampaignWeatherRules, ClimateWeather, SeasonalWeather,

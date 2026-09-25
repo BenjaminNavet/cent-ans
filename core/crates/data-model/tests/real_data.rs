@@ -63,6 +63,19 @@ fn population_rules_match_their_default() {
     assert_eq!(from_file, data_model::PopulationRules::default());
 }
 
+/// Lot EP5: `data/rules/battle_standards.json` is read and mirrored by the default.
+#[test]
+fn battle_standard_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.battle_standard_rules.clone();
+    assert!(
+        from_file.description.is_some(),
+        "battle_standards.json not read"
+    );
+    from_file.description = None;
+    assert_eq!(from_file, data_model::BattleStandardRules::default());
+}
+
 #[test]
 fn real_data_loads_without_errors() {
     let (data, warnings) = GameData::load(&data_root()).expect("data/ must load");

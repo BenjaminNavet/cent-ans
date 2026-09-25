@@ -406,6 +406,33 @@ impl BattleSim {
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
                 }
+                // EP5: the regiment's standard (`carried`, `fallen`, `captured`,
+                // `lost`), where it lies on the ground, the regiment that took it,
+                // and the figures of the buffer that carry it.
+                let bearers = sim.standard_bearers(unit.id as usize);
+                if bearers > 0 {
+                    dict.set("standard", unit.standard.key());
+                    if let Some((x, z)) = unit.standard.ground() {
+                        dict.set("standard_x", x);
+                        dict.set("standard_z", z);
+                        dict.set("standard_y", sim.field().height(x, z));
+                    }
+                    if let sim_battle::unit::StandardState::Fallen { timer, .. } = unit.standard {
+                        dict.set("standard_timer", timer);
+                    }
+                    if let sim_battle::unit::StandardState::Captured { by } = unit.standard {
+                        dict.set(
+                            "standard_by",
+                            if by == u32::MAX { -1 } else { i64::from(by) },
+                        );
+                    }
+                    let slots: PackedInt32Array = unit
+                        .standard_slots(self.figure_scale, bearers)
+                        .iter()
+                        .map(|&s| s as i32)
+                        .collect();
+                    dict.set("bearer_slots", &slots);
+                }
                 // SG1: the first `climbers_shown` soldiers of the buffer are on
                 // the ladders / bridge; `ladder_lines` = [foot, top] per ladder
                 // as Vector3 pairs (ground and crenel heights).
