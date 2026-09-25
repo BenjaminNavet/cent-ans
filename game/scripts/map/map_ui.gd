@@ -366,6 +366,8 @@ func set_hover_path(province_name: String, steps: int, cost: int, reachable_this
 func show_toast(text: String, is_error: bool = false) -> void:
 	toast.text = text
 	toast.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if is_error else Color(0.22, 0.14, 0.07))
+	# Q1 : le bandeau passait sous les panneaux ancrés et le rapport de saison (message invisible).
+	toast.move_to_front()
 	toast.show()
 	_toast_timer = get_tree().create_timer(TOAST_SECONDS)
 	var timer := _toast_timer
