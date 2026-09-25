@@ -889,10 +889,22 @@ pub(crate) fn build_bridges(field: &mut Battlefield, rules: &WaterRules, stream:
     }
 }
 
+/// Height of a stone bridge's road above the higher bank (arches clear of
+/// the water); the abutment ramps down by as much (the kit pieces of
+/// `tools/blender_scripts/building_kit.py` share these numbers).
+pub const STONE_DECK_RISE: f64 = 2.4;
+/// Same for a wooden bridge.
+pub const WOOD_DECK_RISE: f64 = 1.0;
+
 /// Deck height: above both banks (at the ends of the deck).
 fn deck_height(field: &Battlefield, bridge: &Bridge) -> f64 {
     let [a, b] = bridge.ends();
-    field.height(a.0, a.1).max(field.height(b.0, b.1)) + if bridge.stone { 0.9 } else { 0.6 }
+    field.height(a.0, a.1).max(field.height(b.0, b.1))
+        + if bridge.stone {
+            STONE_DECK_RISE
+        } else {
+            WOOD_DECK_RISE
+        }
 }
 
 // ----- roads ------------------------------------------------------------------------------
@@ -1087,12 +1099,23 @@ impl Battlefield {
         self.bridges.iter().find(|b| b.on_deck(x, z))
     }
 
-    /// Height at which one walks at (x, z): the deck on a bridge (with a
-    /// ramp over the abutments), else the ground.
+    /// Height at which one walks at (x, z): the deck on a bridge (ramping
+    /// down over the abutments), else the ground.
     pub fn walk_height(&self, x: f64, z: f64) -> f64 {
         let ground = self.height(x, z);
         match self.bridge_at(x, z) {
-            Some(b) => ground.max(b.deck),
+            Some(b) => {
+                let (along, _) = b.local(x, z);
+                let span = b.span * 0.5;
+                let ramp = (b.length * 0.5 - span).max(1e-6);
+                let rise = if b.stone {
+                    STONE_DECK_RISE
+                } else {
+                    WOOD_DECK_RISE
+                };
+                let t = ((along.abs() - span) / ramp).clamp(0.0, 1.0);
+                ground.max(b.deck - rise * t)
+            }
             None => ground,
         }
     }

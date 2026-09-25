@@ -21,6 +21,11 @@ extends Node3D
 ## `--ground=<dry|muddy|snowy>` (rendu seulement, comme `--weather=`)
 ## (réécrivent la mise en place avant la simulation, captures) ; `--no-site` coupe le rendu B5
 ## (comparaisons de performance A/B).
+##
+## Lot EP3 (eau et chemins) : rivière de largeur variable (`river.widths`), berges escarpées ou
+## marécageuses, affluent et ruisseaux (rubans d'eau étroits), gués caillouteux (galets et pierres
+## affleurantes), ponts du kit Blender (`BattleBridges`), routes de la simulation (`roads`)
+## prolongées hors du champ (ornières et bas-côtés dans la splatmap).
 
 const FIELD_W := 1200.0
 const FIELD_D := 800.0
@@ -77,6 +82,14 @@ var _nz: int = 0
 var _resolution: float = 10.0
 var _mean_height: float = 0.0
 var _river_points: PackedVector2Array = PackedVector2Array()  # prolongée hors du champ
+## EP3 : largeur de l'eau à chaque point de `_river_points`, niveau de l'eau (ruban), sens du courant.
+var _river_widths: PackedFloat32Array = PackedFloat32Array()
+var _river_levels: PackedFloat32Array = PackedFloat32Array()
+var river_flow: float = 1.0
+## EP3 : largeur de chaque route de `roads` (même ordre), ruisseaux rééchantillonnés.
+var road_widths: Array[float] = []
+var _streams: Array = []  # [{points: PackedVector2Array, width, kind}]
+var bridges_view: BattleBridges
 var _hills := FastNoiseLite.new()
 var _woods := FastNoiseLite.new()
 ## R2 : crêtes et ondulations de l'horizon, carte de relief du sol (pente, creux, crêtes).
@@ -145,6 +158,8 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	for child in get_children():
 		child.queue_free()
 	roads.clear()
+	road_widths.clear()
+	_streams.clear()
 	if _nx < 2 or _nz < 2:
 		return
 	_mean_height = 0.0
@@ -178,6 +193,12 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_add_mesh("FarRing", _ring_mesh(FAR_RECT, FAR_STEP, NEAR_RECT.grow(-2.0 * FAR_STEP), 1.5), false)
 	if terrain.has("river"):
 		_build_river(terrain["river"])
+		_build_ford_stones(terrain["river"])
+	_build_streams()
+	bridges_view = BattleBridges.new()
+	bridges_view.name = "Bridges"
+	add_child(bridges_view)
+	bridges_view.build(self, terrain.get("bridges", []), river_flow, snowy())
 	_build_trees()
 	_build_rocks()
 	vegetation = BattleVegetation.new()
@@ -370,9 +391,10 @@ func world_height(x: float, z: float) -> float:
 	if rd < INF:
 		hills *= smoothstep(25.0, 320.0, rd)
 	var h := lerpf(base, _mean_height + hills, t)
-	if rd < RIVER_SPAN:
+	var span := river_span_at(x)
+	if rd < span:
 		# Le lit : même profil que la simulation, raccordé au bord du champ.
-		h -= RIVER_CARVE * (1.0 - rd / RIVER_SPAN) * t
+		h -= RIVER_CARVE * (1.0 - rd / span) * t
 	if not _coast.is_empty():
 		# B5 : au-delà du bord côtier, le sol plonge sous la mer (plage puis estran).
 		var west := str(_coast["flank"]) == "west"
@@ -434,13 +456,76 @@ func _in_ford(x: float) -> bool:
 	return false
 
 
+## EP3 : indice (réel) de `_river_points` au droit de x (un point tous les 10 m).
+func _river_index(x: float) -> float:
+	if _river_points.size() < 2:
+		return -1.0
+	return clampf((x - _river_points[0].x) / 10.0, 0.0, float(_river_points.size() - 1))
+
+
+## EP3 : largeur de l'eau au droit de x (prolongée hors du champ comme le cours).
+func river_width_at(x: float) -> float:
+	var f := _river_index(x)
+	if f < 0.0 or _river_widths.is_empty():
+		return float(terrain.get("river", {}).get("width", 0.0))
+	var i := mini(int(f), _river_widths.size() - 2)
+	return lerpf(_river_widths[i], _river_widths[i + 1], f - i)
+
+
+## EP3 : demi-largeur creusée du lit (1,5 × la largeur, comme la simulation).
+func river_span_at(x: float) -> float:
+	var w := river_width_at(x)
+	return w * 1.5 if w > 0.0 else RIVER_SPAN
+
+
+## EP3 : z du milieu de la rivière au droit de x.
+func river_center_z(x: float) -> float:
+	var f := _river_index(x)
+	if f < 0.0:
+		return INF
+	var i := mini(int(f), _river_points.size() - 2)
+	return lerpf(_river_points[i].y, _river_points[i + 1].y, f - i)
+
+
+## EP3 : (x, z) dans l'eau de la rivière (largeur locale) ou d'un ruisseau.
+func in_water(x: float, z: float) -> bool:
+	if _river_points.size() >= 2 and river_distance(x, z) < river_width_at(x) * 0.5:
+		return true
+	for stream in _streams:
+		if _polyline_distance(stream["points"], Vector2(x, z)) < float(stream["width"]) * 0.5:
+			return true
+	return false
+
+
+## EP3 : niveau de l'eau de la rivière au droit de x (-INF sans rivière).
+func water_level_at(x: float) -> float:
+	var f := _river_index(x)
+	if f < 0.0 or _river_levels.is_empty():
+		return -INF
+	return _river_levels[mini(int(round(f)), _river_levels.size() - 1)]
+
+
+static func _polyline_distance(points: PackedVector2Array, p: Vector2) -> float:
+	var best := INF
+	for i in range(points.size() - 1):
+		var a := points[i]
+		var b := points[i + 1]
+		if absf(a.x - p.x) > 60.0 and absf(b.x - p.x) > 60.0 and absf(a.y - p.y) > 60.0 and absf(b.y - p.y) > 60.0:
+			continue
+		best = minf(best, Geometry2D.get_closest_point_to_segment(p, a, b).distance_to(p))
+	return best
+
+
 ## La rivière de la simulation (x de 0 à 1200, un point tous les 10 m) prolongée par symétries
 ## successives (onde triangulaire en x) jusqu'aux anneaux lointains.
 func _extend_river() -> void:
 	_river_points = PackedVector2Array()
+	_river_widths = PackedFloat32Array()
 	if not terrain.has("river"):
 		return
 	var points: PackedVector2Array = terrain["river"]["points"]
+	var widths: PackedFloat32Array = terrain["river"].get("widths", PackedFloat32Array())
+	river_flow = float(terrain["river"].get("flow", 1))
 	if points.size() < 2:
 		return
 	var span := points[points.size() - 1].x - points[0].x
@@ -453,20 +538,33 @@ func _extend_river() -> void:
 		var f := m / span * float(points.size() - 1)
 		var i := mini(int(f), points.size() - 2)
 		_river_points.append(Vector2(x, lerpf(points[i].y, points[i + 1].y, f - i)))
+		if widths.size() == points.size():
+			_river_widths.append(lerpf(widths[i], widths[i + 1], f - i))
+		else:
+			_river_widths.append(float(terrain["river"]["width"]))
 		x += 10.0
 
 
-## Chemins décoratifs : un par gué (du sud au nord à travers le gué), sinon une route qui
-## traverse le champ, plus un chemin de traverse à l'arrière ; en siège, la route de la porte.
+## EP3 : routes de la simulation (ponts, gués, village, bords du champ), prolongées hors du
+## champ par une marche aléatoire ; plus un chemin de traverse à l'arrière (décor) ; en siège, la
+## route de la porte. Sans routes de la simulation (anciens terrains) : un chemin par gué.
 func _plan_roads() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 90210 + _nx * 7 + int(_mean_height * 10.0)
+	var sim_roads: Array = terrain.get("roads", [])
+	for road in sim_roads:
+		var pts: PackedVector2Array = road["points"]
+		if pts.size() < 2:
+			continue
+		roads.append(_extend_road(pts, rng))
+		road_widths.append(float(road.get("width", 4.0)))
 	var crossings: Array[float] = []
-	if terrain.has("river"):
-		for ford in terrain["river"]["fords"]:
-			crossings.append(float(ford["x"]))
-	elif not terrain.has("siege"):
-		crossings.append(rng.randf_range(350.0, 850.0))
+	if not terrain.has("roads"):
+		if terrain.has("river"):
+			for ford in terrain["river"]["fords"]:
+				crossings.append(float(ford["x"]))
+		elif not terrain.has("siege"):
+			crossings.append(rng.randf_range(350.0, 850.0))
 	for x0 in crossings:
 		var pts := PackedVector2Array()
 		var x := x0 + rng.randf_range(-120.0, 120.0)
@@ -475,6 +573,7 @@ func _plan_roads() -> void:
 			x = lerpf(x, target, 0.5) + rng.randf_range(-35.0, 35.0)
 			pts.append(Vector2(x, float(z)))
 		roads.append(_smooth(pts))
+		road_widths.append(4.0)
 	if terrain.has("siege"):
 		var siege: Dictionary = terrain["siege"]
 		var center: Vector2 = siege.get("center", Vector2(600, 560))
@@ -491,12 +590,46 @@ func _plan_roads() -> void:
 				p += out * 90.0
 				pts.append(p)
 			roads.append(_smooth(pts))
+			road_widths.append(5.0)
 	# Chemin de traverse (est-ouest) derrière l'une des lignes.
 	var zr := -170.0 if rng.randf() < 0.5 else 980.0
 	var side := PackedVector2Array()
 	for x in range(-1600, 2801, 120):
 		side.append(Vector2(float(x), zr + rng.randf_range(-30.0, 30.0) + sin(float(x) * 0.004) * 60.0))
 	roads.append(_smooth(side))
+	road_widths.append(3.5)
+
+
+## EP3 : une route de la simulation prolongée à ses deux bouts hors du champ (1,4 km environ),
+## dans la direction de son dernier tronçon, en serpentant ; les bouts dans le champ restent tels.
+func _extend_road(pts: PackedVector2Array, rng: RandomNumberGenerator) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	var field := Rect2(0, 0, FIELD_W, FIELD_D).grow(-2.0)
+	var ends := [[pts[0], pts[0] - pts[mini(3, pts.size() - 1)]], [pts[pts.size() - 1], pts[pts.size() - 1] - pts[maxi(pts.size() - 4, 0)]]]
+	var tails: Array[PackedVector2Array] = []
+	for e in ends:
+		var p: Vector2 = e[0]
+		var dir: Vector2 = (e[1] as Vector2).normalized()
+		var tail := PackedVector2Array()
+		if field.has_point(p) or dir == Vector2.ZERO:
+			tails.append(tail)  # la route finit dans le champ (village) : pas de prolongement
+			continue
+		var base := dir
+		for _i in 14:
+			dir = dir.rotated(rng.randf_range(-0.18, 0.18))
+			if dir.angle_to(base) > 0.5 or dir.angle_to(base) < -0.5:
+				dir = base.rotated(clampf(dir.angle_to(base), -0.5, 0.5) * -1.0)
+			p += dir * 100.0
+			tail.append(p)
+		tails.append(tail)
+	var head := _smooth(PackedVector2Array([pts[0]]) + tails[0]) if tails[0].size() > 0 else PackedVector2Array()
+	head.reverse()
+	result.append_array(head)
+	result.append_array(pts)
+	if tails[1].size() > 0:
+		var tail2 := _smooth(PackedVector2Array([pts[pts.size() - 1]]) + tails[1])
+		result.append_array(tail2.slice(1))
+	return result
 
 
 ## Lissage de Chaikin (deux passes).
@@ -531,15 +664,40 @@ func _build_textures() -> void:
 		_stamp_site(a, b)
 	# Rivière : galets dans le lit et sur les gués, berges humides.
 	if _river_points.size() >= 2:
-		var width := float(terrain["river"]["width"])
+		var banks: Array = terrain["river"].get("banks", [])
 		for i in range(_river_points.size() - 1):
 			var p := _river_points[i]
 			if not SPLAT_RECT.grow(40.0).has_point(p):
 				continue
+			var width := _river_widths[i] if i < _river_widths.size() else float(terrain["river"]["width"])
 			var ford := _in_ford(p.x)
-			_stamp_disc(a, p, width * (1.05 if ford else 0.98), 3, 5.0)
+			# EP3 : gués larges et caillouteux, galets plus serrés.
+			_stamp_disc(a, p, width * (1.25 if ford else 0.98), 3, 5.0)
 			_stamp_disc(b, p, width * 1.25, 0, 8.0)
-	for road in roads:
+			# EP3 : berges marécageuses (boue, herbe humide) ou escarpées (terre nue au bord).
+			for bank in banks:
+				if p.x < float(bank["x0"]) or p.x > float(bank["x1"]) or ford:
+					continue
+				var side := 1.0 if bool(bank["north"]) else -1.0
+				var edge := p + Vector2(0.0, side * (width * 0.5 + 6.0))
+				if str(bank["kind"]) == "marsh":
+					_stamp_disc(a, edge, 12.0, 2, 8.0, 0.8)
+					_stamp_disc(b, edge, 20.0, 0, 10.0)
+				else:
+					_stamp_disc(a, p + Vector2(0.0, side * (width * 0.5 + 2.0)), 3.5, 3, 2.0, 0.7)
+	# EP3 : ruisseaux (galets du lit, berges humides).
+	for stream in terrain.get("streams", []):
+		var pts: PackedVector2Array = stream["points"]
+		var w := float(stream["width"])
+		for i in range(pts.size() - 1):
+			var steps := maxi(int(pts[i].distance_to(pts[i + 1]) / 2.0), 1)
+			for s in steps:
+				var p := pts[i].lerp(pts[i + 1], float(s) / float(steps))
+				_stamp_disc(a, p, w * 0.55 + 0.5, 3, 1.5, 0.8)
+				_stamp_disc(b, p, w * 1.3 + 3.0, 0, 4.0)
+	for r in roads.size():
+		var road := roads[r]
+		var half := (road_widths[r] if r < road_widths.size() else 4.0) * 0.5
 		for i in range(road.size() - 1):
 			var p0 := road[i]
 			var p1 := road[i + 1]
@@ -547,8 +705,11 @@ func _build_textures() -> void:
 			for s in steps:
 				var p := p0.lerp(p1, float(s) / float(steps))
 				if SPLAT_RECT.grow(10.0).has_point(p):
-					_stamp_disc(a, p, 3.2, 1, 2.0)
-					_stamp_disc(b, p, 9.0, 1, 6.0)
+					_stamp_disc(a, p, half + 0.7, 1, 2.0)
+					_stamp_disc(b, p, half + 6.5, 1, 6.0)
+					# EP3 : ornières boueuses sur les routes de terre détrempées.
+					if muddy():
+						_stamp_disc(a, p, half * 0.5, 2, 1.5, 0.45)
 	if terrain.has("siege"):
 		var siege: Dictionary = terrain["siege"]
 		var center: Vector2 = siege.get("center", Vector2(600, 560))
@@ -894,10 +1055,11 @@ func _build_river(river: Dictionary) -> void:
 		var p := points[i]
 		var n := dirs[i]
 		var extent := [0.0, 0.0]
+		var reach := (_river_widths[i] if i < _river_widths.size() else 18.0) * 0.5 + 8.0
 		for s in 2:
 			var sign := 1.0 if s == 0 else -1.0
 			var d := 1.0
-			while d < 16.0:
+			while d < reach:
 				var q := p + n * sign * d
 				if world_height(q.x, q.y) > levels[i] + 0.08:
 					break
@@ -918,6 +1080,7 @@ func _build_river(river: Dictionary) -> void:
 			var k := i * 2
 			indices.append_array([k - 2, k - 1, k, k - 1, k + 1, k])
 	var half := width * 0.5
+	_river_levels = levels
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
@@ -929,6 +1092,8 @@ func _build_river(river: Dictionary) -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = WATER_SHADER
 	mat.set_shader_parameter("river_width", half * 2.0)
+	# EP3 : l'eau coule vers le bas du champ (UV.y croît avec x).
+	mat.set_shader_parameter("flow_speed", 0.55 * river_flow)
 	var waves := NoiseTexture2D.new()
 	waves.seamless = true
 	waves.as_normal_map = true
@@ -954,6 +1119,115 @@ func _build_river(river: Dictionary) -> void:
 	instance.mesh = mesh
 	instance.material_override = mat
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(instance)
+
+
+## EP3 : affluent et ruisseaux, rubans d'eau étroits (même shader que la rivière) ; le niveau suit
+## le lit creusé par la simulation, lissé, sous les berges.
+func _build_streams() -> void:
+	for stream in terrain.get("streams", []):
+		var raw: PackedVector2Array = stream["points"]
+		if raw.size() < 2:
+			continue
+		var width := float(stream["width"])
+		# Rééchantillonnage tous les 4 m.
+		var pts := PackedVector2Array([raw[0]])
+		for i in range(raw.size() - 1):
+			var steps := maxi(int(raw[i].distance_to(raw[i + 1]) / 4.0), 1)
+			for s in range(1, steps + 1):
+				pts.append(raw[i].lerp(raw[i + 1], float(s) / float(steps)))
+		_streams.append({"points": pts, "width": width, "kind": str(stream["kind"])})
+		var levels := PackedFloat32Array()
+		levels.resize(pts.size())
+		for i in pts.size():
+			levels[i] = height_at(pts[i].x, pts[i].y) + (0.22 if str(stream["kind"]) == "tributary" else 0.14)
+		for _pass in 6:
+			var smoothed := levels.duplicate()
+			for i in range(1, pts.size() - 1):
+				smoothed[i] = minf(levels[i], (levels[i - 1] + levels[i] * 2.0 + levels[i + 1]) * 0.25)
+			levels = smoothed
+		var vertices := PackedVector3Array()
+		var uvs := PackedVector2Array()
+		var normals := PackedVector3Array()
+		var indices := PackedInt32Array()
+		var along := 0.0
+		for i in pts.size():
+			var a := pts[maxi(i - 1, 0)]
+			var b := pts[mini(i + 1, pts.size() - 1)]
+			var dir := (b - a).normalized()
+			var n := Vector2(-dir.y, dir.x)
+			var half := width * 0.5 + 0.8
+			if i > 0:
+				along += pts[i].distance_to(pts[i - 1])
+			var left := pts[i] + n * half
+			var right := pts[i] - n * half
+			vertices.append(Vector3(left.x, levels[i], left.y))
+			vertices.append(Vector3(right.x, levels[i], right.y))
+			uvs.append(Vector2(0.0, along))
+			uvs.append(Vector2(1.0, along))
+			normals.append(Vector3.UP)
+			normals.append(Vector3.UP)
+			if i > 0:
+				var k := i * 2
+				indices.append_array([k - 2, k - 1, k, k - 1, k + 1, k])
+		var arrays := []
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX] = vertices
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		arrays[Mesh.ARRAY_TEX_UV] = uvs
+		arrays[Mesh.ARRAY_INDEX] = indices
+		var mesh := ArrayMesh.new()
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		var mat := ShaderMaterial.new()
+		mat.shader = WATER_SHADER
+		mat.set_shader_parameter("river_width", width + 1.6)
+		mat.set_shader_parameter("flow_speed", 0.8)
+		mat.set_shader_parameter("clarity", 1.6)
+		mat.set_shader_parameter("turbidity", 0.15)
+		mat.set_shader_parameter("macro_noise", macro_noise)
+		mat.set_shader_parameter("wave_normal", water_waves())
+		mat.set_shader_parameter("sky_color", sky_reflection())
+		var instance := MeshInstance3D.new()
+		instance.name = "Stream"
+		instance.mesh = mesh
+		instance.material_override = mat
+		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		instance.visibility_range_end = 1400.0
+		add_child(instance)
+
+
+## EP3 : gués visibles : pierres et galets qui affleurent en travers du courant.
+func _build_ford_stones(river: Dictionary) -> void:
+	var fords: Array = river.get("fords", [])
+	if fords.is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4711
+	var transforms: Array[Transform3D] = []
+	for ford in fords:
+		var fx := float(ford["x"])
+		var half := float(ford["half_width"])
+		for _i in int(half * 5.0):
+			var x := fx + rng.randf_range(-half, half)
+			var w := river_width_at(x)
+			var z := river_center_z(x) + rng.randf_range(-0.55, 0.55) * w
+			var s := rng.randf_range(0.18, 0.55)
+			var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s * rng.randf_range(1.0, 1.6), s * rng.randf_range(0.4, 0.7), s))
+			var level := water_level_at(x)
+			var y := height_at(x, z) + s * 0.1
+			if level != -INF:
+				y = minf(y, level + s * 0.15)
+			transforms.append(Transform3D(basis, Vector3(x, y, z)))
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = BattleMeshes.rock()
+	mm.instance_count = transforms.size()
+	for i in transforms.size():
+		mm.set_instance_transform(i, transforms[i])
+	var instance := MultiMeshInstance3D.new()
+	instance.name = "FordStones"
+	instance.multimesh = mm
+	instance.visibility_range_end = 700.0
 	add_child(instance)
 
 
@@ -1031,6 +1305,9 @@ func _build_trees() -> void:
 			var z := float(zone["z"]) + sin(angle) * dist
 			if _in_zones_before(forests, k, x, z):
 				continue
+			# EP3 : routes et ruisseaux restent dégagés dans les bois.
+			if _near_road(Vector2(x, z), 4.0) or in_water(x, z):
+				continue
 			var edge := _zones_edge_distance(forests, x, z)
 			if edge < 6.0 and rng.randf() < 0.35:
 				continue
@@ -1063,7 +1340,7 @@ func _build_trees() -> void:
 			var isolated := rng.randf() < 0.004
 			if n < near_woods and not isolated:
 				continue
-			if _in_sea(px, pz) or river_distance(px, pz) < RIVER_SPAN + 6.0 or _near_road(p, 9.0):
+			if _in_sea(px, pz) or river_distance(px, pz) < river_span_at(px) + 6.0 or _near_road(p, 9.0):
 				continue
 			if n >= near_woods and n < near_woods + 0.06 and rng.randf() < 0.6:
 				sets["bush"].append(_tree_transform(rng, px, pz, 0.7, 1.5))
@@ -1078,7 +1355,7 @@ func _build_trees() -> void:
 		var p := Vector2(rng.randf_range(0.0, FIELD_W), rng.randf_range(0.0, FIELD_D))
 		if absf(p.x - 600.0) < 420.0 and p.y > 120.0 and p.y < 680.0:
 			continue
-		if river_distance(p.x, p.y) < RIVER_SPAN or _near_road(p, 6.0) or p.distance_to(siege_center) < 200.0:
+		if river_distance(p.x, p.y) < river_span_at(p.x) or _near_road(p, 6.0) or p.distance_to(siege_center) < 200.0 or in_water(p.x, p.y):
 			continue
 		if _in_site_clearing(p):
 			continue
@@ -1242,7 +1519,7 @@ func _build_rocks() -> void:
 		var slope := Vector2(world_height(x + 4.0, z) - world_height(x - 4.0, z), world_height(x, z + 4.0) - world_height(x, z - 4.0)).length() / 8.0
 		var in_field := x >= 0.0 and x <= FIELD_W and z >= 0.0 and z <= FIELD_D
 		var chance := (smoothstep(0.12, 0.35, slope) + (0.0 if in_field else 0.04)) * float(biome["rocks"])
-		if rng.randf() > chance or river_distance(x, z) < RIVER_SPAN or _in_sea(x, z):
+		if rng.randf() > chance or river_distance(x, z) < river_span_at(x) or _in_sea(x, z) or in_water(x, z):
 			continue
 		if in_field and absf(x - 600.0) < 380.0 and z > 150.0 and z < 650.0:
 			continue
