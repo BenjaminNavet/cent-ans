@@ -1,6 +1,6 @@
 //! Battle regiments: state, formation geometry and soldier positions.
 
-use data_model::{Ability, UnitCategory, UnitStats};
+use data_model::{Ability, Missile, UnitCategory, UnitStats};
 use serde::{Deserialize, Serialize};
 
 use crate::impact::LossCause;
@@ -83,6 +83,10 @@ pub struct Unit {
     pub mounted: bool,
     pub stats: UnitStats,
     pub abilities: Vec<Ability>,
+    /// Missile loosed by a shooting unit (lot UR2: data-driven, see
+    /// `BattleSim::missile_kind`).
+    #[serde(default)]
+    pub missile: Option<Missile>,
     pub experience: u8,
     /// Soldiers at the start of the battle.
     pub initial_soldiers: u32,
@@ -204,6 +208,7 @@ impl Unit {
             mounted: setup.mounted,
             stats: setup.stats.clone(),
             abilities: setup.abilities.clone(),
+            missile: setup.missile,
             experience: setup.experience,
             initial_soldiers: setup.soldiers,
             max_soldiers: setup.max_soldiers.max(setup.soldiers).max(1),
