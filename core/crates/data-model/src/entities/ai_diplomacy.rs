@@ -170,6 +170,9 @@ pub struct NegotiationRules {
     /// Seasons of war before the AI proposes any treaty peace (unless
     /// cornered).
     pub min_war_turns: u32,
+    /// EQ3: a peace also ends the wars of the allies and vassals who joined
+    /// it (they sign the same truce).
+    pub truce_binds_allies: bool,
 }
 
 impl Default for NegotiationRules {
@@ -203,6 +206,7 @@ impl Default for NegotiationRules {
             max_weariness_gain: 3,
             sue_weariness: 60,
             min_war_turns: 0,
+            truce_binds_allies: false,
         }
     }
 }

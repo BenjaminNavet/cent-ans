@@ -81,7 +81,8 @@
         "pretender_reluctance": {"type": "integer", "minimum": 0, "description": "Un prétendant au trône de l'autre refuse toute paix qui ne lui donne aucune terre, sauf s'il est nettement battu."},
         "max_weariness_gain": {"type": "integer", "minimum": 0, "description": "Fatigue de guerre gagnée au plus en une saison."},
         "sue_weariness": {"type": "integer", "minimum": 0, "maximum": 100, "description": "Fatigue à partir de laquelle l'IA achète la paix (terres, or, tribut)."},
-        "min_war_turns": {"type": "integer", "minimum": 0, "description": "Saisons de guerre avant que l'IA ne propose un traité de paix (sauf si elle est acculée)."}
+        "min_war_turns": {"type": "integer", "minimum": 0, "description": "Saisons de guerre avant que l'IA ne propose un traité de paix (sauf si elle est acculée)."},
+        "truce_binds_allies": {"type": "boolean", "description": "Une paix met aussi fin aux guerres des alliés et vassaux entrés dans ce conflit : ils signent la même trêve (trêve de Leulinghem, 1389, qui liait l'Écosse)."}
       },
       "additionalProperties": false
     }
