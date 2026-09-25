@@ -297,6 +297,36 @@ def geo_rivers_render() -> None:
         )
 
 
+@geo_app.command("detail-dem")
+def geo_detail_dem(
+    zones: str = typer.Option(
+        "",
+        "--zones",
+        help="Identifiants de zones séparés par des virgules (toutes sinon)",
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Recuit les zones même si elles sont à jour"
+    ),
+) -> None:
+    """Relief palier 3 (E5-E7, 11 → 2,8 m) sur les zones de détail (ADR 0036, lot ZG3)."""
+    from cent_ans_tools.geo import detail_dem
+
+    zone_ids = tuple(z.strip() for z in zones.split(",") if z.strip())
+    result = detail_dem.build(zone_ids, force=force, log=console.print)
+    for level in sorted(result.tiles):
+        console.print(
+            f"E{level} : {result.tiles[level]} tuiles, "
+            f"{result.bytes_by_level[level] / 1e6:.1f} Mo"
+        )
+    total = sum(result.bytes_by_level.values())
+    console.print(
+        f"Palier 3 : {total / 1e9:.2f} Go de tuiles, bruts {result.raw_bytes / 1e9:.2f} Go, "
+        f"{result.seconds:.0f} s"
+    )
+    for note in result.notes:
+        console.print(f"[yellow]{note}[/yellow]")
+
+
 @geo_app.command("navgrid")
 def geo_navgrid(
     lenient: bool = typer.Option(
