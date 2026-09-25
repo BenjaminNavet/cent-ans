@@ -35,6 +35,8 @@ var close_zones: PackedVector3Array = PackedVector3Array()
 var profile: CloseCameraProfile = CloseCameraProfile.load_default()
 var relief: Object = null
 var ground_height: Callable = Callable()
+var _occlusion_lift: float = 0.0
+var _snapping: bool = false
 var _soft_min_key := Vector3(INF, INF, INF)
 var _soft_min_value: float = 0.0
 
@@ -65,7 +67,9 @@ func snap() -> void:
 	focus = target_focus
 	distance = target_distance
 	yaw = target_yaw
+	_snapping = true
 	_apply_transform()
+	_snapping = false
 
 
 func look_at_point(point: Vector3, new_distance: float = -1.0) -> void:
@@ -197,10 +201,22 @@ func _apply_transform() -> void:
 	var horizontal := cos(pitch) * distance
 	var offset := Vector3(sin(yaw) * horizontal, sin(pitch) * distance, cos(yaw) * horizontal)
 	var eye := focus + offset
-	# ZG4 : jamais sous le relief (garde au sol proportionnelle à la distance).
+	# ZG4 : jamais sous le relief (garde au sol proportionnelle à la distance) et point visé jamais
+	# caché par une crête entre lui et la caméra (vue rasante) : la caméra monte d'autant, vite à la
+	# montée, lentement à la descente (pas de tremblement en panoramique).
 	if ground_height.is_valid() and profile != null:
-		var floor_y := float(ground_height.call(eye.x, eye.z)) + profile.clearance(distance)
-		eye.y = maxf(eye.y, floor_y)
+		var clear := profile.clearance(distance)
+		var needed := float(ground_height.call(eye.x, eye.z)) + clear
+		for k in range(1, profile.occlusion_samples + 1):
+			var t := lerpf(profile.occlusion_min_t, 1.0, float(k) / profile.occlusion_samples)
+			var p := focus.lerp(eye, t)
+			var ground := float(ground_height.call(p.x, p.z)) + clear
+			needed = maxf(needed, focus.y + (ground - focus.y) / t)
+		var lift := maxf(needed - eye.y, 0.0)
+		var rate := 1.0 if _snapping else (0.5 if lift > _occlusion_lift else 0.06)
+		_occlusion_lift = lerpf(_occlusion_lift, lift, rate)
+		eye.y += _occlusion_lift
+		eye.y = maxf(eye.y, float(ground_height.call(eye.x, eye.z)) + clear)
 	camera.global_position = eye
 	camera.look_at(focus, Vector3.UP)
 	if profile != null:

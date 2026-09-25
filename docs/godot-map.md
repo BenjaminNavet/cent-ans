@@ -165,9 +165,9 @@ itérations, arrêt sous 0,02 unité). Lecture ensuite de `province_ids` au pixe
 | Action | Entrée |
 |---|---|
 | Déplacement | W A S D (positions physiques : Z Q S D en AZERTY), flèches, bords d'écran (F2 pour désactiver), glisser bouton du milieu |
-| Zoom | molette, borné 30..1500 unités |
+| Zoom | molette (±15 % par cran), borné 22..1500 unités ; avec la pyramide de relief (ZG4), jusqu'à 5 (E2), 1,5 (E4), 0,3 (zones E5-E7) |
 | Rotation | Q / E (positions physiques : A / E en AZERTY) |
-| Inclinaison | automatique : 35° en vue rapprochée → 70° à `pitch_far_distance` |
+| Inclinaison | automatique : 30° à 22 unités → 70° à `pitch_far_distance` ; ZG4 : de plus en plus rasante sous 22 (11° à 0,3) |
 | Sélection | clic gauche : armée (prioritaire) ou province ; survol = surbrillance + nom ; Échap désélectionne l'armée |
 | Ordre de déplacement | clic droit sur une province avec une armée sélectionnée |
 | Fin de saison | cloche en bas à droite ou Entrée (action `campaign_end_turn`, désactivée pendant un dialogue ; bloquée par une décision de chronique) |
@@ -186,7 +186,11 @@ Options de ligne de commande (après `--`) :
   panneau de faction ouvert. `--stage=city`/`faction` basculent sur `CampaignSimMock` si la simulation
   active n'expose pas encore `get_province_city` (`_ensure_city_capable_sim`). Sur `start_menu.tscn`,
   capture l'écran de démarrage.
-- `--focus=<x>,<y>,<distance>` : placement initial de la caméra.
+- `--focus=<x>,<y>,<distance>` : placement initial de la caméra ; `--camera-yaw=<degrés>` (ZG4 : 0 = regard
+  vers le nord, 90 = vers l'ouest, -90 = vers l'est).
+- ZG4 : `--static-exaggeration` (relief ×4,3 à tous les zooms, captures « avant »),
+  `--rescale-settle-ms=N` (délai avant recalage des calques, mesures), `--dump-near` (après une capture,
+  liste les géométries visibles autour de la caméra : diagnostic des objets démesurés en vue rasante).
 
 ```sh
 godot --path game                                   # menu de démarrage
@@ -523,11 +527,15 @@ Spec : `docs/design/2026-09-24-echelle-colonies.md` § 6. Rendu seulement : posi
 |---|---|---|
 | **Loin** | > 620 (fondu 550-690) | provinces colorées, noms de provinces en capitales (`CityMarkers.labels_only`, parenthèses retirées) |
 | **Moyen** | 150-620 | icônes de colonies (forme par type, couleur du contrôleur, cité plus grande), noms des cités, puis des villes sous 380, routes principales en traits deux tons, secondaires en traits pâles sous 420 (lot C7b) |
-| **Près** (vue comté) | < 150 (fondu 130-170) ; min 22 | maquettes 3D, hameaux, toutes les routes en rubans drapés, noms de toutes les colonies, relief fin sous 170 |
+| **Près** (vue comté) | < 150 (fondu 130-170) ; min 22 sans pyramide | maquettes 3D, hameaux, toutes les routes en rubans drapés, noms de toutes les colonies, relief fin sous 170 |
+| **Vallée** (ZG4, pyramide en cache) | < 8 (fondu 6,5-9,5) | comme « près » ; frontières et voile du brouillard de guerre à 50-70 %, étiquettes de colonies et plaques d'armées limitées à 40 × la distance, routes commerciales masquées, marqueurs d'armée à taille écran bornée, arbres rétrécis (`campaign_prop_scale`) |
+| **Site** (ZG4) | < 1,8 (fondu 1,4-2,2) ; min 1,5 sur E4, 0,3 en zone E5-E7 | relief seul : maquettes, hameaux, villes emblématiques, rubans de routes, ponts, moulins, fumées, navires et oiseaux (à l'échelle de la carte, des centaines de mètres) masqués en attendant ZG5b / ZG6 / VH4 ; frontières à 20 %, voile à 35 % |
 
 Réglages : `game/resources/zoom_tiers.tres` (`ZoomTiers` : seuils, largeurs de fondu, distance des noms
-de villes, relief fin, portées des maquettes et hameaux). Caméra : `min_distance` 22 (≈ 40 km visibles,
-un comté), tangage 30° de près → 70° de loin.
+de villes, relief fin, portées des maquettes et hameaux ; ZG4 : seuils vallée / site, opacités résiduelles,
+portée des étiquettes, échelle des arbres). Caméra : `min_distance` 22 (≈ 40 km visibles, un comté),
+tangage 30° de près → 70° de loin ; avec la pyramide de relief, caméra rapprochée du lot ZG4 (ci-dessous,
+« Caméra rapprochée et exagération verticale »).
 
 ![Île-de-France, palier près (Paris sélectionnée)](img/colonies/ile-de-france-pres.png)
 
@@ -734,10 +742,9 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
   dans ce morceau (toute la chaîne E1 → E4 donne un seul recalage), au plus 2 morceaux toutes les 250 ms (les recalages des
   couches sont synchrones et chers : maquettes L1 ≈ 50-300 ms par recalage). Nouveau signal
   `surface_rect_changed(rect)` à chaque page arrivée ou évincée, pour des recalages fins (ZG5).
-- Échelle verticale : `MapData.vertical_scale()` (vaut `HEIGHT_SCALE`) est lu par le shader
-  (`height_scale`), le quadtree (boîtes, surface) et `surface_height_at` ;
-  `TerrainBuilder.refresh_vertical_scale()` le repousse au shader et signale toutes les surfaces (à
-  brancher par ZG4).
+- Échelle verticale : `MapData.vertical_scale()` est lu par le shader (paramètre global
+  `campaign_vertical_scale`), le quadtree (boîtes, surface) et `surface_height_at` ; dynamique depuis ZG4
+  (`TerrainBuilder.set_vertical_scale`, section « Caméra rapprochée et exagération verticale »).
 
 ### Options, test et banc
 
@@ -755,6 +762,10 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
   images, pire image, images > 50 ms, statistiques du quadtree et, avec `--bench-listeners`, le temps
   passé dans chaque écouteur de `chunk_surface_changed`.
   Aussi : coût CPU du rendu, primitives et appels de dessin (médianes), `update_ms_avg` du quadtree.
+  ZG4 : puis parcours « descente » (`descent` dans le rapport) au-dessus de Rouen, de la Grande Chartreuse
+  et de Paris (150 → 5 → distance minimale, pause, remontée ; `--bench-descent-only` pour lui seul),
+  recalages d'échelle verticale (`vertical_rescales`, `rescale_*`) et cuissons des maquettes
+  (`landmark_bake_*`).
 - Pyramide réelle d'essai tirée du cache partagé : dossier contenant un lien `pyramid` vers
   `data/map/pyramid`, puis `python3 game/tests/fixtures/zg2/manifest_from_cache.py
   <dossier>/relief_pyramid.json` et `--pyramid-dir=<dossier>`.
@@ -764,6 +775,111 @@ Mesures (25/09, machine partagée à une charge de 200+ : relatives seulement ; 
 4,7 ms en moyenne, ≈ 6 ms de décodage par tuile (fils natifs), 9,5 M primitives ; repli E0 31,2-34,1 i/s,
 médiane 24,3-26,3 ms, 57-63 images > 50 ms, 11 M primitives. Captures avant/après (repli E0 / quadtree
 E1-E7) : `docs/img/zg2/` (Grande Chartreuse, Rouen, puy de Dôme).
+
+## Caméra rapprochée et exagération verticale (lot ZG4, ADR 0036)
+
+Quand la pyramide de relief est en cache (`TerrainBuilder.pyramid`), la caméra descend jusqu'au relief le
+plus fin disponible et l'exagération verticale s'atténue de près. Sans cache (ou `--no-pyramid`) : rien
+ne change (distance minimale 22, relief ×4,3, maillages E0 cuits à `HEIGHT_SCALE`). Rendu seulement.
+
+Réglages : `game/resources/close_camera.tres` (`CloseCameraProfile`, `scripts/map/close_camera_profile.gd`)
+et `game/resources/zoom_tiers.tres` (paliers vallée / site).
+
+### Distance minimale par étage
+
+| Étage le plus fin sous le point visé | E0 (mer) | E1 | E2 (180 → 90 m, toutes les terres) | E3 | E4 (22 m, cœur) | E5 | E6 | E7 (2,8 m, zones de détail) |
+|---|---|---|---|---|---|---|---|---|
+| Distance minimale (unités ; 1 = 719 m) | 22 | 9 | 5 | 2,6 | 1,5 (~1 km) | 0,8 | 0,5 | 0,3 (~200 m) |
+
+- **Champ adouci** (`soft_min_distance`) : min sur les étages k de `level_min_distance[k] + 0,45 ×
+  distance à la tuile d'étage k la plus proche` (rectangles exacts des tuiles du manifeste) : champ
+  continu, qui croît d'au plus 0,45 unité par unité parcourue. En sortant d'une zone E7, la caméra
+  remonte donc progressivement (0,5 à 1 unité du bord, 1,5 à 8 unités), jamais d'un coup ; le rig
+  mémorise la valeur tant que le point visé bouge de moins de 2 % de la distance.
+- `CampaignCamera.min_distance_at(point)` = min(`min_distance` (22, plafond ; `--camera-min` le baisse),
+  zones L1 `close_zones` (7), champ par étage). `close_zones` reste valable sans pyramide.
+- **Point visé au sol** (`ground_height` = `TerrainBuilder.surface_height_at`) ; **garde au sol** : la
+  caméra reste à au moins `max(0,06 × distance, 0,004)` au-dessus de la surface sous elle.
+- **Tangage** : courbe historique au-dessus de 22 unités ; en deçà, `lerp(11°, 30°, sqrt(t))` avec t le
+  logarithme normalisé de la distance entre 0,3 et 22 (24° à 2,6 ; 17° à 0,8 ; 11° à 0,3).
+- **Plans** : `near = clamp(0,02 × distance, 0,002, 1)`, `far = min(4 × distance + 700, 6000)` (tampon
+  de profondeur inversé de Godot 4 : aucune perte de précision à 0,006 / 700).
+- Zoom multiplicatif (15 % par cran) et panoramique proportionnel à la distance (inchangés) : ~26 crans de
+  22 à 0,3.
+
+### Exagération verticale dynamique
+
+- **Propriétaire unique** : `MapData.vertical_scale()` (unités monde par mètre), changé seulement par
+  `TerrainBuilder.set_vertical_scale(v)` (qui appelle `MapData.set_vertical_scale`) ; paramètre global de
+  shader `campaign_vertical_scale` (`project.godot`, défaut 0,006) lu par `terrain.gdshader` (via
+  `#define height_scale`), le quadtree (`relief_quadtree.gdshaderinc`), `river_water.gdshader` (rubans cuits à
+  `baked_vertical_scale` = 0,006, remis à l'échelle dans le vertex shader) et `landmark.gdshader`
+  (`height_in_meters`). `MapData.vertical_exaggeration()` = échelle × 719.
+- **Courbe** (`CloseCameraProfile.exaggeration_at`) : ×4,31 au-dessus de 45 unités (vue stratégique
+  intacte), ×1,5 sous 0,45, smoothstep en logarithme de la distance entre les deux, interpolation
+  géométrique : ×1,52 à 0,6 ; ×1,9 à 1,9 ; ×2,8 à 5,7 ; ×3,8 à 17,5.
+- **Paliers** (`quantized_scale`) : pas géométrique de 4 % (27 paliers de ×4,31 à ×1,5), hystérésis de
+  15 % de pas : l'échelle ne change qu'au franchissement d'un palier.
+- **Recalage des calques** (`TerrainBuilder`) :
+  1. `vertical_scale_changed(old, new)` tout de suite : objets ponctuels bon marché (`ArmyMarkers.reground`) ;
+  2. `chunk_surface_changed(index)` pour les 256 morceaux, **une fois l'échelle stable depuis
+     `rescale_settle_ms` (180 ms)** (un zoom continu franchit une quinzaine de paliers : un seul recalage à
+     l'arrêt), morceaux proches du point visé d'abord dans `rescale_budget_ms` (3 ms) par image, morceaux
+     lointains (niveau 0) un par image ; `rescaling_vertical` est vrai pendant ces émissions ;
+  3. AABB des nœuds du quadtree remises à l'échelle (`ReliefQuadtree.on_vertical_scale_changed`).
+- Calques invariants (rien à recalculer) : terrain et quadtree (shader), fleuves (shader), maquettes des
+  villes emblématiques (`LandmarkModel` : hauteurs cuites **en mètres**, ignorent `rescaling_vertical`).
+- `LandmarkModel` : la cuisson des hauteurs (96² texels, max centre + coins partagés : 2,5 fois moins
+  d'appels à `surface_height_at`) est **étalée** sur plusieurs images (`bake_budget_ms` = 1,5 ms), l'ancienne
+  texture restant affichée ; `flush_bake()` pour les captures (`SettlementLayer.flush`).
+- `SettlementLayer` : hauteurs des étiquettes recalculées une fois par image (plus à chaque morceau).
+
+### Paliers vallée et site
+
+Voir le tableau des paliers (lot C6). `ZoomTiers.valley_weight` / `site_weight` sont cumulatifs (1 à ce palier
+et en deçà), `border_alpha` / `fog_alpha` pilotent `province_border_alpha`, `realm_border_alpha`,
+`fog_veil_amount` et `fog_cloud_amount` du matériau de terrain (valeurs par défaut du shader × facteur),
+`prop_scale` le paramètre global `campaign_prop_scale` (arbres de `foliage.gdshaderinc` : 1 au-dessus de
+22 unités, `(d / 22)^0,8` en deçà, au moins 0,04 ; remis à 1 en quittant la carte car les batailles
+partagent ce shader). Marqueurs d'armée : échelle proportionnelle à la distance sous 12 unités
+(`ArmyMarkers.CLOSE_KNEE_DISTANCE`), plaques au-delà de 40 × la distance masquées sous 12. Pluie et neige
+(`CampaignWeatherView`) : taille des gouttes proportionnelle à la distance sous 22. Atmosphère
+(`CampaignAtmosphere`) sous 30 unités (pleinement sous 6) : brouillard de profondeur au moins de 18 à 240
+unités (crêtes et horizon visibles en vue rasante), flou de profondeur coupé, ombres sur au moins 12 unités,
+rayons SSAO / SSIL proportionnels à la distance.
+
+### API pour ZG5b, ZG6 et VH
+
+- `MapData.vertical_scale()` : échelle courante ; ne jamais cuire de hauteur monde sans réagir à
+  `TerrainBuilder.vertical_scale_changed` / `chunk_surface_changed` ; préférer des hauteurs **en mètres**
+  multipliées dans le shader par `global uniform float campaign_vertical_scale;` (comme `landmark.gdshader`)
+  ou une remise à l'échelle `VERTEX.y *= campaign_vertical_scale / baked_vertical_scale` (comme
+  `river_water.gdshader`) : aucun recalage à faire.
+- Un écouteur de `chunk_surface_changed` qui ne dépend que des hauteurs en mètres ignore les émissions
+  pendant lesquelles `terrain.rescaling_vertical` est vrai.
+- `CampaignCamera.min_distance_at(point)` : distance minimale au-dessus d'un point ; `camera_rig.relief`
+  (pyramide) et `camera_rig.ground_height` ; `CloseCameraProfile.min_distance_for_level(k)`.
+- `ZoomTiers.valley_weight(d)` / `site_weight(d)` / `tier_at(d)` (`Tier.VALLEY`, `Tier.SITE`) : ce qui est
+  masqué au palier site (maquettes à la loupe, rubans de routes, ponts, moulins, navires) doit être remplacé
+  par sa version à l'échelle réelle (ZG5b : routes et fleuves drapés ; ZG6 / VH4 : villes).
+
+### Test et mesures
+
+`godot --headless --path game --script res://tests/zg4_camera_test.gd` : courbe d'exagération (bornes,
+monotonie, paliers de 4 %, hystérésis), distances minimales par étage et continuité du champ adouci (pyramide
+factice), caméra (point visé au sol, pas sous le relief, tangage rasant, `near`), paliers vallée / site,
+`set_vertical_scale` sur une pyramide factice (paramètre global, surface proportionnelle, recalages étalés
+puis vidés, repli sans pyramide).
+
+MESURES_ZG4
+
+Captures (`docs/img/zg4/`, été, temps clair, 1 440 × 900) : Rouen (zone E7, regard vers l'est), Grande
+Chartreuse (E4, vers le nord), Paris (E7, vers le nord), puy de Dôme (E4, vers l'ouest), Douvres (E7, vers le
+nord-ouest) ; pour chacun `-1_strategique` (60), `-2_vallee` (5), `-3_site_apres` (distance minimale,
+exagération dynamique) et `-4_site_avant` (même vue, `--static-exaggeration`).
+
+![Rouen, site (exagération dynamique)](img/zg4/rouen-3_site_apres.jpg)
+![Puy de Dôme, site](img/zg4/puy-de-dome-3_site_apres.jpg)
 
 ## Interface des colonies (lot C5)
 

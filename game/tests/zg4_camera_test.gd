@@ -151,6 +151,17 @@ func _test_camera() -> void:
 	rig.snap()
 	var eye := camera.global_position
 	_check(eye.y >= float(rig.ground_height.call(eye.x, eye.z)) + 0.003, "camera above ground: %f vs %f" % [eye.y, float(rig.ground_height.call(eye.x, eye.z))])
+	# Crête entre la caméra (au sud) et le point visé : la visée passe au-dessus.
+	rig.ground_height = func(_x: float, z: float) -> float:
+		return 1.2 if z > 1000.12 and z < 1000.2 else 1.0
+	rig.target_yaw = 0.0
+	rig.snap()
+	eye = camera.global_position
+	var ridge_t := (1000.16 - rig.focus.z) / (eye.z - rig.focus.z)
+	var sight_y := rig.focus.y + ridge_t * (eye.y - rig.focus.y)
+	_check(ridge_t > 0.0 and ridge_t < 1.0 and sight_y > 1.2, "line of sight should clear the ridge (t %f, y %f)" % [ridge_t, sight_y])
+	rig.ground_height = func(x: float, _y: float) -> float:
+		return 1.0 + maxf(x - 1000.0, 0.0) * 0.5
 	# En sortant de la zone, la distance remonte sans saut brutal.
 	var previous := rig.target_distance
 	var worst := 0.0
