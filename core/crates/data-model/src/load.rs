@@ -68,12 +68,18 @@ pub mod folders {
     pub const AI_ALIGNMENT: &str = "alignment.json";
     /// Inside `AI`: wars, alliances and peaces around borders (G5).
     pub const AI_DIPLOMACY: &str = "diplomacy.json";
+    /// Inside `AI`: recruitment doctrines (lot E1); optional.
+    pub const AI_DOCTRINES: &str = "doctrines.json";
     /// Inside `AI`: the AI armies on the navigation grid (lot M3).
     pub const AI_GRID: &str = "grid.json";
     /// Global rule tuning (lot C1: `vision.json`); optional folder.
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
     pub const VISION_RULES: &str = "vision.json";
+    /// Phased auto-resolve coefficients (lot N1), inside `rules/`; optional.
+    pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
+    /// Public order tuning (lot E2), inside `rules/`; optional.
+    pub const POPULATION_RULES: &str = "population.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
@@ -209,10 +215,19 @@ pub struct GameData {
     /// `data/ai/diplomacy.json` (G5); the F4 constants
     /// ([`AiDiplomacy::default`]) when absent.
     pub ai_diplomacy: AiDiplomacy,
+    /// `data/ai/doctrines.json` (lot E1), absent until written: the AI then
+    /// ranks units by value alone.
+    pub ai_doctrines: Option<crate::entities::ai_doctrine::AiDoctrines>,
     /// `data/ai/grid.json` (lot M3); [`AiGrid::default`] when absent.
     pub ai_grid: AiGrid,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
+    /// `data/rules/auto_resolve.json` (lot N1); [`crate::AutoResolveRules::default`]
+    /// when absent.
+    pub auto_resolve: crate::entities::auto_resolve::AutoResolveRules,
+    /// `data/rules/population.json` (lot E2);
+    /// [`crate::PopulationRules::default`] when absent.
+    pub population_rules: crate::entities::population_rules::PopulationRules,
     /// `data/retinue.json` (lot C7), absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
@@ -265,8 +280,11 @@ impl GameData {
             settlement_graph: Vec::new(),
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
+            ai_doctrines: None,
             ai_grid: AiGrid::default(),
             vision_rules: None,
+            auto_resolve: Default::default(),
+            population_rules: Default::default(),
             retinue: None,
             agent_rules: None,
             movement_graph: Default::default(),
@@ -298,6 +316,10 @@ impl GameData {
         if diplomacy_path.is_file() {
             data.ai_diplomacy = read_json(&diplomacy_path)?;
         }
+        let doctrines_path = root.join(folders::AI).join(folders::AI_DOCTRINES);
+        if doctrines_path.is_file() {
+            data.ai_doctrines = Some(read_json(&doctrines_path)?);
+        }
         let grid_path = root.join(folders::AI).join(folders::AI_GRID);
         if grid_path.is_file() {
             data.ai_grid = read_json(&grid_path)?;
@@ -305,6 +327,14 @@ impl GameData {
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {
             data.vision_rules = Some(read_json(&vision_path)?);
+        }
+        let auto_resolve_path = root.join(folders::RULES).join(folders::AUTO_RESOLVE_RULES);
+        if auto_resolve_path.is_file() {
+            data.auto_resolve = read_json(&auto_resolve_path)?;
+        }
+        let population_path = root.join(folders::RULES).join(folders::POPULATION_RULES);
+        if population_path.is_file() {
+            data.population_rules = read_json(&population_path)?;
         }
         let retinue_path = root.join(folders::RETINUE);
         if retinue_path.is_file() {
