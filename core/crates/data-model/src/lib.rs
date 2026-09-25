@@ -30,7 +30,11 @@ pub use entities::ai_alignment::{
 pub use entities::ai_diplomacy::{
     AiDiplomacy, JoinWarRules, MenacingNeighbourRules, PeaceRules, WarPlanningRules,
 };
+pub use entities::ai_doctrine::{AiDoctrines, Doctrine};
 pub use entities::ai_grid::AiGrid;
+pub use entities::auto_resolve::{
+    AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
+};
 pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
     BattleOrderScope,
@@ -49,6 +53,7 @@ pub use entities::faction::{
 };
 pub use entities::movement::{EmbarkCost, FreeMovementRules, TerrainCosts};
 pub use entities::names::NameList;
+pub use entities::population_rules::PopulationRules;
 pub use entities::province::{
     CapitalCity, Climate, Population, PopulationClass, PopulationClasses, Province, ProvinceGeo,
     Terrain,
