@@ -1547,16 +1547,18 @@ func _tree_layer(kind: String, transforms: Array, tints: Array) -> void:
 		if not tiles.has(key):
 			tiles[key] = []
 		(tiles[key] as Array).append(i)
+	# PF1 : distances de LOD des arbres et buissons selon le préréglage de qualité.
+	var lod_k := RenderQuality.battle_lod_scale
 	for key in tiles:
 		var members: Array = tiles[key]
 		match kind:
 			"oak", "poplar":
-				_tree_tile(kind, members, transforms, tints, key, 0.0, TREE_LOD_DISTANCE, true)
-				_tree_tile(kind + "_lod", members, transforms, tints, key, TREE_LOD_DISTANCE, 0.0, false)
+				_tree_tile(kind, members, transforms, tints, key, 0.0, TREE_LOD_DISTANCE * lod_k, true)
+				_tree_tile(kind + "_lod", members, transforms, tints, key, TREE_LOD_DISTANCE * lod_k, 0.0, false)
 			"bush":
-				_tree_tile(kind, members, transforms, tints, key, 0.0, BUSH_DISTANCE, false)
+				_tree_tile(kind, members, transforms, tints, key, 0.0, BUSH_DISTANCE * lod_k, false)
 			"hedge":
-				_tree_tile(kind, members, transforms, tints, key, 0.0, HEDGE_DISTANCE, false)
+				_tree_tile(kind, members, transforms, tints, key, 0.0, HEDGE_DISTANCE * lod_k, false)
 			_:
 				_tree_tile(kind, members, transforms, tints, key, 0.0, 0.0, false)
 

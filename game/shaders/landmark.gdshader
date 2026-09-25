@@ -19,6 +19,10 @@ uniform float tint_strength : hint_range(0.0, 1.0) = 1.0;
 uniform sampler2D height_map : filter_linear, repeat_disable;
 uniform vec2 map_origin = vec2(0.0);
 uniform float map_extent = 1.0;
+// ZG4 : hauteurs cuites en mètres, mises à l'échelle verticale courante de la carte (pas de
+// nouvelle cuisson quand l'exagération change) ; faux : hauteurs déjà en unités monde.
+uniform bool height_in_meters = false;
+global uniform float campaign_vertical_scale;
 // Eau : léger reflet spéculaire et teinte.
 uniform float water = 0.0;
 // Échelle de la maquette : mètres par unité locale (1 : toiles de fond de siège, menu).
@@ -57,7 +61,7 @@ void vertex() {
 	vec3 anchor_world = (MODEL_MATRIX * vec4(UV.x, 0.0, UV.y, 1.0)).xyz;
 	vec2 uvh = (anchor_world.xz - map_origin) / map_extent;
 	float h = textureLod(height_map, clamp(uvh, vec2(0.0), vec2(1.0)), 0.0).r;
-	VERTEX.y += h;
+	VERTEX.y += height_in_meters ? h * campaign_vertical_scale : h;
 }
 
 // Échantillon triplanaire d'une couche ; `n` normale locale, `w` poids des trois plans.

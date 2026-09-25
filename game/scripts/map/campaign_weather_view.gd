@@ -10,6 +10,9 @@ extends Node3D
 ## `--no-map-weather` (A/B).
 
 const CLOUD_SHADER := preload("res://shaders/campaign_clouds.gdshader")
+## PF1 : shader de particules maison (voir l'en-tête du shader : fuite à la fermeture avec
+## `ParticleProcessMaterial`).
+const PRECIPITATION_SHADER := preload("res://shaders/campaign_precipitation.gdshader")
 const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 
 ## Altitude du plan de nuées (unités monde ; le relief culmine vers 29).
@@ -176,18 +179,14 @@ func _make_particles(snow: bool) -> GPUParticles3D:
 	particles.visible = false
 	particles.local_coords = false
 	particles.visibility_aabb = AABB(Vector3(-400, -200, -400), Vector3(800, 400, 800))
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	process.emission_box_extents = Vector3(60, 10, 60)
-	process.direction = Vector3(0.12, -1.0, 0.05)
-	process.spread = 4.0 if not snow else 18.0
-	process.gravity = Vector3.ZERO
-	process.initial_velocity_min = 60.0 if not snow else 8.0
-	process.initial_velocity_max = 75.0 if not snow else 12.0
-	if snow:
-		process.turbulence_enabled = true
-		process.turbulence_noise_strength = 0.6
-		process.turbulence_noise_scale = 4.0
+	var process := ShaderMaterial.new()
+	process.shader = PRECIPITATION_SHADER
+	process.set_shader_parameter("emission_box_extents", Vector3(60, 10, 60))
+	process.set_shader_parameter("direction", Vector3(0.12, -1.0, 0.05))
+	process.set_shader_parameter("spread_deg", 4.0 if not snow else 18.0)
+	process.set_shader_parameter("velocity_min", 60.0 if not snow else 8.0)
+	process.set_shader_parameter("velocity_max", 75.0 if not snow else 12.0)
+	process.set_shader_parameter("sway", 3.0 if snow else 0.0)
 	particles.process_material = process
 	var quad := QuadMesh.new()
 	quad.size = Vector2(0.18, 0.18) if snow else Vector2(0.035, 1.1)
@@ -224,13 +223,16 @@ func _update_particles(focus: Vector3, distance: float) -> void:
 	if absf(k - _particle_scale) / maxf(_particle_scale, 0.01) > 0.08:
 		_particle_scale = k
 		for particles: GPUParticles3D in [_rain, _snow]:
-			var process := particles.process_material as ParticleProcessMaterial
-			process.emission_box_extents = Vector3(80.0 * k, 8.0 * k, 80.0 * k)
+			var process := particles.process_material as ShaderMaterial
+			process.set_shader_parameter("emission_box_extents", Vector3(80.0 * k, 8.0 * k, 80.0 * k))
 			var is_snow := particles == _snow
-			process.initial_velocity_min = (8.0 if is_snow else 60.0) * k
-			process.initial_velocity_max = (12.0 if is_snow else 75.0) * k
+			process.set_shader_parameter("velocity_min", (8.0 if is_snow else 60.0) * k)
+			process.set_shader_parameter("velocity_max", (12.0 if is_snow else 75.0) * k)
+			process.set_shader_parameter("sway", 3.0 * k if is_snow else 0.0)
 			var quad := particles.draw_pass_1 as QuadMesh
-			quad.size = (Vector2(0.18, 0.18) if is_snow else Vector2(0.035, 1.1)) * maxf(k, 0.3)
+			# ZG4 : plancher 0,3 seulement au-dessus de la vue comté ; en vues vallée / site, taille
+			# proportionnelle (sinon des traits de pluie de 200 m voilent tout l'écran).
+			quad.size = (Vector2(0.18, 0.18) if is_snow else Vector2(0.035, 1.1)) * maxf(k, minf(0.3, k * 1.36))
 
 
 func _update_lightning(delta: float, distance: float) -> void:

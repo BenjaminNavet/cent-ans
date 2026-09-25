@@ -40,6 +40,15 @@ pub struct PopulationRules {
     /// Weighted unrest above which a revolting province falls to the rebels.
     #[serde(default = "default_revolt_control_threshold")]
     pub revolt_control_threshold: f64,
+    /// EQ2: the province disorder gauge (`ProvinceState::unrest`) loses
+    /// this much each season...
+    #[serde(default = "default_disorder_decay_flat")]
+    pub disorder_decay_flat: u8,
+    /// ... plus this percentage of its value (a gauge at 100 falls by
+    /// 12 a season, not 2: a pacified province calms down in a few
+    /// seasons instead of a decade).
+    #[serde(default = "default_disorder_decay_percent")]
+    pub disorder_decay_percent: u8,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -60,6 +69,8 @@ impl Default for PopulationRules {
             revolt_unrest_threshold: default_revolt_threshold(),
             revolt_seasons: default_revolt_seasons(),
             revolt_control_threshold: default_revolt_control_threshold(),
+            disorder_decay_flat: default_disorder_decay_flat(),
+            disorder_decay_percent: default_disorder_decay_percent(),
             description: None,
         }
     }
@@ -83,4 +94,12 @@ fn default_revolt_seasons() -> u32 {
 
 fn default_revolt_control_threshold() -> f64 {
     90.0
+}
+
+fn default_disorder_decay_flat() -> u8 {
+    2
+}
+
+fn default_disorder_decay_percent() -> u8 {
+    10
 }

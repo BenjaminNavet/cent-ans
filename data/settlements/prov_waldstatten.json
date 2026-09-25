@@ -71,9 +71,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Chef-lieu du canton d'Uri, associé par la légende à Guillaume Tell.",
     "sources": [

@@ -17,7 +17,8 @@ uniform int height_bpp = 1;               // 1 = canal R normalisé (R16/L8), 2 
 uniform bool height_little_endian = false; // LA8 seulement
 uniform float height_min_m = -200.0;
 uniform float height_max_m = 4800.0;
-uniform float height_scale = 0.006;       // unités monde par mètre (MapData.HEIGHT_SCALE)
+global uniform float campaign_vertical_scale; // ZG4 : unités monde par mètre (MapData.vertical_scale())
+#define height_scale campaign_vertical_scale
 uniform vec2 map_size = vec2(4096.0, 4096.0);
 uniform float meters_per_px = 719.0;
 

@@ -233,4 +233,6 @@ func update_view(camera_distance: float) -> void:
 	elif ambient != null and _tiers != null:
 		var rig := _map.get("camera_rig") as Node3D if _map != null else null
 		var focus: Vector3 = rig.get("focus") if rig != null else Vector3.ZERO
-		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance), _tiers.medium_weight(_camera_distance))
+		# ZG4 : navires, bateaux et oiseaux à l'échelle de la carte masqués au palier « site ».
+		var keep := 1.0 - _tiers.site_weight(_camera_distance)
+		ambient.update_view(Vector2(focus.x, focus.z), _tiers.near_weight(_camera_distance) * keep, _tiers.medium_weight(_camera_distance) * keep)

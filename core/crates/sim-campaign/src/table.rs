@@ -161,7 +161,7 @@ pub fn diet_blockers(
             requirements
                 .any_building
                 .iter()
-                .any(|b| buildings.contains(b))
+                .any(|b| data.has_building(&buildings, b))
         })
     {
         let names: Vec<String> = requirements

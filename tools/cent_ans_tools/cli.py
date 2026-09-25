@@ -781,6 +781,47 @@ def assets_horizon_panoramas(
         console.print(f"{len(meta['panoramas'])} panoramas traités")
 
 
+@assets_app.command("art-plates")
+def assets_art_plates(
+    generate: bool = typer.Option(
+        False, "--generate", help="Génère aussi les manques (appel payant OpenRouter)"
+    ),
+    limit: int | None = typer.Option(
+        None, "--limit", help="Nombre maximal d'images générées"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    recrop: bool = typer.Option(
+        False, "--recrop", help="Recadre les planches Commons existantes (cache local)"
+    ),
+    envelope: float = typer.Option(
+        8.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """AR1 : planches illustrées (chargements, vignettes, fins) dans game/assets/art/."""
+    from cent_ans_tools import art_plates, portraits
+
+    written = art_plates.build_commons(force=recrop)
+    console.print(f"Commons : {len(written)} planche(s) écrite(s)")
+    if not (generate or dry_run):
+        return
+    jobs = art_plates.generation_jobs()[:limit]
+    for family in art_plates.FORMATS:
+        family_jobs = [job for job in jobs if art_plates.family_of(job) == family]
+        if not family_jobs:
+            continue
+        _run_art_batch(
+            family_jobs,
+            portraits.DEFAULT_MODEL,
+            envelope,
+            dry_run,
+            "planche(s)",
+            f"AR1 : planches illustrées ({family})",
+            lambda image, family=family: art_plates.convert_generated(image, family),
+        )
+
+
 @assets_app.command("codex-art")
 def assets_codex_art(
     category: str | None = typer.Option(

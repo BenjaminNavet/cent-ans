@@ -8,7 +8,7 @@
     "weight": 40,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
     "port": false,
     "description": "Capitale du duché de Bourgogne tenu par Eudes IV, pairie de France.",
     "sources": ["Dijon", "Duché de Bourgogne"]
