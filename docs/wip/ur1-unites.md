@@ -69,9 +69,12 @@ déjà présent sur main).
   (panneau flamme réutilisé, gris, fixée à la bouche) pour la balle, traits fichés et décoration
   des corps mis à jour. Son : pas d'échantillon dédié dans `sound_bank.json`, repli sur
   `bombard`/`bow_release` à gain réduit (`battle_volleys.gd`, `battle_audio.gd`).
-- Jinetes : pas d'animation de lancer de javeline (repos pendant le tir). Voir tâche 2 (pipeline
-  Blender V2, clip `battle_skinned*`) — en cours.
-- Routiers et écorcheurs : 3,4 k et 3,7 k triangles au LOD0 (au-dessus du budget de 2,4 k).
+- ~~Jinetes : pas d'animation de lancer de javeline...~~ **fait (UR2, tâche 2)** : clips
+  `c_javelin_idle/walk/throw` (`battle_skinned_poses.py`, `battle_skinned_cavalry.py`), style
+  `horse_javelin` (`battle_skinned.gd`), `cavalry_5` reconstruit.
+- ~~Routiers et écorcheurs : 3,4 k et 3,7 k triangles...~~ **fait (UR2, tâche 3)** : sous 3 000
+  triangles au LOD0 (`infantry_8` 2 980, `cavalry_4` 2 952 ; correction d'un budget mounted mal
+  appliqué pour `cavalry_4`, allègement de la coiffe pour `infantry_8`).
 - Pas de capture en bataille simulée : la démo de `battle_scene.gd` ne choisit pas ses types.
 - Bombardes du XVe siècle / artillerie de campagne non ajoutées (engins : lot SG1).
 - Les types du XVe siècle ne sont atteints qu'au-delà de 400 tours ; `century_probe` non relancé.
@@ -81,7 +84,7 @@ déjà présent sur main).
 ## UR2 (suite du lot, agent séparé)
 
 1. Projectile selon les données (voir ci-dessus) : **fait**, commit `5d5edd2d`.
-2. Jinetes, clip de lancer de javeline (Blender V2) : en cours.
-3. Budget de triangles (routiers, écorcheurs) : à faire.
+2. Jinetes, clip de lancer de javeline (Blender V2) : **fait**, commit `9668931a`.
+3. Budget de triangles (routiers, écorcheurs) : **fait**, commit `cde0e583`.
 4. `tools/.../budget.py` (tables multi-sessions) : à faire.
 5. `century_probe` 4 graines × 464 tours, chiffres XVe siècle : à faire.
