@@ -1117,6 +1117,9 @@ var _prop_scale: float = 1.0
 func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("campaign_prop_scale", 1.0)
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
+	if _parked_environment != null and not _parked_environment.is_inside_tree():
+		_parked_environment.queue_free()  # Q4 : carte quittée pendant une bataille
+		_parked_environment = null
 
 
 func _apply_close_tiers(distance: float) -> void:
@@ -1694,8 +1697,28 @@ func _set_campaign_active(active: bool) -> void:
 			layer.set_meta(&"visible_before_battle", layer.visible)
 			layer.visible = false
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	_set_world_environment_active(active)
 	if active:
 		camera.make_current()
+
+
+var _parked_environment: WorldEnvironment = null
+
+
+## Q4 : un `WorldEnvironment` ne suit pas la visibilité du Node3D parent, et le monde 3D prend
+## le premier du groupe (celui de la carte, avant la scène de bataille ajoutée à la racine) :
+## batailles et sièges lancés depuis la campagne étaient rendus avec le brouillard et le ciel de
+## la carte (brouillard épais par « Temps clair »). La carte retire le sien pendant la bataille.
+func _set_world_environment_active(active: bool) -> void:
+	if not active:
+		var env := get_node_or_null("WorldEnvironment") as WorldEnvironment
+		if env != null:
+			_parked_environment = env
+			remove_child(env)
+	elif _parked_environment != null:
+		add_child(_parked_environment)
+		move_child(_parked_environment, 0)
+		_parked_environment = null
 
 
 ## `--stage=assault` (UB1) : assaut français de la Guyenne mis en scène, écran ouvert.
