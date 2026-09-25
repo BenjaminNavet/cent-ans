@@ -52,6 +52,7 @@ var finished_shown: bool = false
 var resolved: bool = false
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
+var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
 var siege_demo: bool = false
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -292,6 +293,11 @@ func _build_soldier_layers() -> void:
 	var river: Dictionary = terrain.terrain.get("river", {})
 	var half_width := float(river.get("width", 0.0)) * 0.5
 	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	if siege_view != null:
+		assault_fx = SiegeAssaultFx.new()
+		assault_fx.name = "AssaultFx"
+		add_child(assault_fx)
+		assault_fx.setup(siege_view, effects, soldiers, func(x: float, z: float) -> float: return terrain.height_at(x, z))
 
 
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
@@ -302,6 +308,8 @@ func _update_effects(dt: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
 	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos)
+	if assault_fx != null:
+		assault_fx.update(battle.call("get_siege_events"), units, soldiers.anim_time, dt)
 
 
 func _make_banner(unit: Dictionary) -> void:
