@@ -191,8 +191,10 @@ func update(units: Array, shots: Variant, now: float, dt: float) -> void:
 				_on_shot(id)
 	for id in _engines.keys():
 		if not seen.has(id):
-			for node in _engines[id]["figures"]:
-				(node as Node3D).visible = false
+			_engines[id]["shown"] = 0
+			for node in _engines[id]["figures"] + _engines[id].get("lods", []):
+				if node != null:
+					(node as Node3D).visible = false
 	for id in _engines:
 		_pose_engine(id, _engines[id])
 	if crew != null:
@@ -260,10 +262,11 @@ func _add_servant(key: String, frame: Transform3D, s: Dictionary, clip: String, 
 
 func _update_engine(unit: Dictionary, id: int, model: String) -> void:
 	if not _engines.has(id):
-		_engines[id] = {"model": model, "figures": [], "swing": -1000.0, "fired": false, "unit": unit, "mantlet": 0.0}
+		_engines[id] = {"model": model, "figures": [], "lods": [], "shown": 0, "swing": -1000.0, "fired": false, "unit": unit, "mantlet": 0.0}
 	var entry: Dictionary = _engines[id]
 	entry["unit"] = unit
 	var figures: Array = entry["figures"]
+	var lods: Array = entry["lods"]
 	var present := bool(unit.get("present", false))
 	var count := int(unit.get("figures", 0)) if present else 0
 	var frames := _frames(unit, id, count)
@@ -273,11 +276,25 @@ func _update_engine(unit: Dictionary, id: int, model: String) -> void:
 			return
 		add_child(node)
 		figures.append(node)
+		# SG3 : maillage simplifié (`<modèle>_lod.glb`, mêmes pièces nommées) pour le lointain.
+		var lod := instantiate(model + "_lod") if has_model(model + "_lod") else null
+		if lod != null:
+			add_child(lod)
+		lods.append(lod)
+	entry["shown"] = frames.size()
+	var simple := float(lod_distances()["simple_m"])
 	for i in figures.size():
 		var node: Node3D = figures[i]
-		node.visible = i < frames.size()
-		if node.visible:
+		var lod: Node3D = lods[i]
+		var shown := i < frames.size()
+		var far := lod != null and shown and _distance(frames[i].origin) > simple
+		node.visible = shown and not far
+		if lod != null:
+			lod.visible = far
+		if shown:
 			node.transform = frames[i]
+			if lod != null:
+				lod.transform = frames[i]
 	_maybe_predict(unit, entry)
 
 
@@ -363,7 +380,7 @@ func release(id: int) -> Array:
 	var figures: Array = entry["figures"]
 	for i in figures.size():
 		var node: Node3D = figures[i]
-		if not node.visible:
+		if i >= int(entry.get("shown", 0)):
 			continue
 		var start := float(entry["swing"]) + stagger * i
 		var delay := maxf(start + lead - time_now, 0.0)
@@ -433,13 +450,24 @@ func _pose_engine(id: int, entry: Dictionary) -> void:
 	var unit: Dictionary = entry["unit"]
 	var figures: Array = entry["figures"]
 	var stagger := float(c.get("stagger_s", 0.3))
+	var lods: Array = entry.get("lods", [])
+	var lod_cfg := lod_distances()
 	for i in figures.size():
-		var node: Node3D = figures[i]
-		if not node.visible:
+		if i >= int(entry.get("shown", 0)):
 			continue
+		var node: Node3D = figures[i]
 		var tau := time_now - (float(entry["swing"]) + stagger * i)
 		if crew != null:
 			_crew_engine(id, i, node, model, c, unit, entry, tau)
+		if i < lods.size() and lods[i] != null and (lods[i] as Node3D).visible:
+			# SG3 : au loin, le maillage simplifié ; au-delà de `far_m`, pose rafraîchie
+			# `far_pose_hz` fois par seconde seulement.
+			node = lods[i]
+			if _distance(node.global_position) > float(lod_cfg["far_m"]):
+				var tick := int(floor(time_now * float(lod_cfg["far_pose_hz"])))
+				if int(node.get_meta("pose_tick", -1)) == tick:
+					continue
+				node.set_meta("pose_tick", tick)
 		match model:
 			"trebuchet":
 				_pose_trebuchet(node, c, unit, tau, bool(entry["fired"]))

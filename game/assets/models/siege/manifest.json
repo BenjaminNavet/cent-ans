@@ -8,7 +8,8 @@
     "long_arm": 8.5,
     "short_arm": 2.2,
     "sling": 4.4,
-    "triangles": 808
+    "triangles": 808,
+    "lod_triangles": 560
   },
   "mangonel": {
     "pivot": [
@@ -17,7 +18,8 @@
       -0.6
     ],
     "arm": 2.3,
-    "triangles": 360
+    "triangles": 360,
+    "lod_triangles": 236
   },
   "bombard": {
     "barrel": [
@@ -26,7 +28,8 @@
       0.0
     ],
     "muzzle_z": 1.5,
-    "triangles": 528
+    "triangles": 528,
+    "lod_triangles": 268
   },
   "ram": {
     "beam_pivot": [
@@ -36,7 +39,8 @@
     ],
     "beam_drop": 1.95,
     "wheel_radius": 0.55,
-    "triangles": 712
+    "triangles": 712,
+    "lod_triangles": 372
   },
   "siege_tower": {
     "height": 12.0,
@@ -47,6 +51,7 @@
       2.5
     ],
     "wheel_radius": 0.8,
-    "triangles": 932
+    "triangles": 932,
+    "lod_triangles": 720
   }
 }
