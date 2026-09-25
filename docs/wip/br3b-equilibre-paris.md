@@ -180,7 +180,7 @@ en ne gardant que le correctif d'IA ; (d) un levier propre à Paris ou à Bordea
 - [x] Correctif : chaleur sur le chemin de ronde (données) + IA d'assaut (défaut révélé).
 - [x] Mesures après, addendum ADR 0047, codex.
 - [x] Fusion de main (e885d011), mesures finales main seul / main + BR3b.
-- [ ] Vérifications après fusion (fmt, clippy, test, pytest, build.sh, smoke siège).
+- [x] Vérifications après fusion : fmt, clippy -D warnings, cargo test (694 verts), pytest (545 verts, 2 ignorés), core/build.sh, smoke Godot `CENT_ANS_SMOKE_ONLY=battle` (bataille rangée et siège OK).
 
 ## Prochaine étape
-Vérifications après fusion, rapport.
+Terminé ; à fusionner par l'orchestrateur. Décision ouverte : Bordeaux (options a-d ci-dessus).
