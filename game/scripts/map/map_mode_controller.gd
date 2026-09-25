@@ -85,6 +85,7 @@ func setup(campaign_map: Node) -> void:
 	button.tooltip_text = "Filtres de la carte : diplomatie, religion, ordre public, richesse… (F)"
 	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(toggle_menu)
+	_decorate_ink(button, "map_filters", 14)  # DA5
 	_build_menu()
 	var minimap: Node = map.ui.get("minimap") if map.ui != null else null
 	if minimap != null and minimap.has_method("add_layer_button"):
@@ -97,6 +98,14 @@ func setup(campaign_map: Node) -> void:
 		trade_button.hide()
 	if map.ui != null and map.ui.has_method("add_keycap"):
 		map.ui.add_keycap(button, "map_filters_menu")
+
+
+## DA5 : icône d'action à l'encre sur un bouton (or au survol) ; rien si l'icône manque.
+static func _decorate_ink(target: Button, icon_id: String, size: int) -> void:
+	var library := HudStyle.icon_library()
+	if library == null or not bool(library.call("has_icon", icon_id)):
+		return
+	library.call("decorate_button", target, icon_id, size)
 
 
 func _build_menu() -> void:
@@ -123,6 +132,7 @@ func _build_menu() -> void:
 		var key := ShortcutSheet.first_key(str(entry[2])) if str(entry[2]) != "" else ""
 		item.text = "%s   (%s)" % [entry[1], key] if key != "" else str(entry[1])
 		item.tooltip_text = entry[3]
+		_decorate_ink(item, "lens_" + id, 18)  # DA5
 		item.pressed.connect(func() -> void:
 			set_mode(id)
 			menu.hide())
