@@ -1,7 +1,7 @@
 class_name PreBattleDialog
 extends Control
 
-## Écran d'avant-bataille à la Total War (lot UB1, reprend M7 § 4 et M8 § 2) : bannière
+## Écran d'avant-bataille (lot UB1, reprend M7 § 4 et M8 § 2) : bannière
 ## illustrée, rapport de forces (barre d'équilibre et chances **estimées par le cœur**,
 ## `CampaignSim.get_battle_forecast`), sceaux et portraits des généraux, régiments des deux
 ## camps en cartes (`RosterCard`), renforts alliés, terrain, saison, météo prévue et site, puis
