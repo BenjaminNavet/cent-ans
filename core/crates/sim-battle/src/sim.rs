@@ -4,6 +4,7 @@
 // while reading the others.
 #![allow(clippy::needless_range_loop)]
 
+mod camp;
 mod deployment;
 mod fire;
 mod indirect;
@@ -16,6 +17,7 @@ mod siege_extra;
 mod standards;
 mod water;
 
+pub use camp::CampState;
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
@@ -143,6 +145,8 @@ pub struct BattleSim {
     crossings: std::cell::OnceCell<Vec<crate::hydro::Crossing>>,
     /// EP3: regiments whose drowning was announced.
     drown_announced: Vec<u32>,
+    /// EP6: looting of each side's camp.
+    camp_states: [camp::CampState; 2],
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -389,6 +393,7 @@ impl BattleSim {
             trophies: Vec::new(),
             crossings: Default::default(),
             drown_announced: Vec::new(),
+            camp_states: Default::default(),
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -1215,6 +1220,7 @@ impl BattleSim {
         self.resolve_fire();
         self.resolve_melee(&contacts);
         self.resolve_standards(&contacts);
+        self.resolve_camps();
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
         self.elapsed += DT;
@@ -2754,6 +2760,7 @@ impl BattleSim {
                 withdrew,
                 standards_taken: self.trophies_of(side),
                 standards_lost: self.trophies.iter().filter(|t| t.taken_by != side).count() as u32,
+                baggage_lost: self.camp_states[side.index()].looted,
             }
         };
         Some(BattleOutcome {

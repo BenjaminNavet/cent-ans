@@ -31,6 +31,9 @@ pub struct SideResult {
     /// EP5: standards of this side taken by the enemy.
     #[serde(default)]
     pub standards_lost: u32,
+    /// EP6: the enemy looted this side's camp and baggage.
+    #[serde(default)]
+    pub baggage_lost: bool,
 }
 
 /// A standard taken in battle (lot EP5, ADR 0034).

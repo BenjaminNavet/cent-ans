@@ -209,6 +209,10 @@ pub struct BattleSetup {
     /// EP5); [`data_model::BattleStandardRules::default`] when `None`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub standards: Option<data_model::BattleStandardRules>,
+    /// EP6: hand-made decor (EP7 historical maps), applied over the
+    /// procedural one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub decor_plan: Option<crate::decor::DecorPlan>,
 }
 
 impl BattleSetup {
