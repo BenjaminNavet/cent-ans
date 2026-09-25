@@ -39,6 +39,12 @@ Mesure R2b, graines 0-63 : plaine 113/128, bocage 89/128, collines 98/128, monta
   avant contact (88,1 avant R4) ; R2b 399/512. Cas serré (`R4_FRENCH=heavy`) : 0/32 partout, analyse
   dans l'ADR 0046 (tir à l'aveugle d'avant R4 ; équilibre hors périmètre).
 
+- [x] Fusion de main (366a9a7e, conflits d'une ligne `mod` dans lib.rs et sim.rs), puis fmt,
+  clippy --all-targets, cargo test --release, build.sh verts ; mesures inchangées après fusion.
+- Smoke complet : plante toujours sur main (file de messages, code 138, étape campagne). Étapes de
+  bataille vérifiées par `CENT_ANS_SMOKE_ONLY=battle` (ajouté à smoke.gd) : bataille, déploiement,
+  siège OK (exit 0).
+
 ## État : terminé (non fusionné dans main)
 
 ## Mesures
