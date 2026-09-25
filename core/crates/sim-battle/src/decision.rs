@@ -41,6 +41,9 @@ pub struct DecisionRules {
     pub break_share: f64,
     /// The same once its general is killed or taken.
     pub break_share_without_general: f64,
+    /// The army breaks once it has stayed below its share this long
+    /// (regiments that rally at once do not break it).
+    pub break_hold_seconds: f64,
     /// Seconds without engagement before the battle ends.
     pub refusal_seconds: f64,
     /// The same once a melee has taken place (the fight died down).
@@ -117,4 +120,6 @@ pub(crate) struct EngagementClock {
     pub melee_seen: bool,
     /// Loss share of each side when the clock last restarted.
     pub losses_mark: [f64; 2],
+    /// Since when each side has been below its break share.
+    pub below_since: [Option<f64>; 2],
 }

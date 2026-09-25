@@ -228,6 +228,8 @@ func _build_banner(big_title: String, battle_title: String, outcome: Dictionary,
 	center.add_child(title_label)
 	var duration := int(float(outcome.get("duration", 0.0)))
 	var nuance := verdict(won, own_ratio, enemy_ratio)
+	if str(outcome.get("end", "")) == "refused":  # EP9 : personne n'a engagé le combat
+		nuance = "Bataille refusée"
 	nuance = "" if nuance == big_title else nuance + " · "
 	subtitle_label = BattleUiKit.label("%s%s · %d min %02d s · vainqueur : %s" % [nuance, battle_title, duration / 60, duration % 60, str(sides[winner]["name"])], 17, Color(0.97, 0.9, 0.74))
 	subtitle_label.add_theme_font_override("font", BattleUiKit.title_italic_font())
@@ -489,6 +491,9 @@ static func unit_fate(unit: Dictionary) -> String:
 static func mentions(player_side: String, sides: Dictionary, units: Array, outcome: Dictionary) -> Array[String]:
 	var lines: Array[String] = []
 	var enemy_side := "defender" if player_side == "attacker" else "attacker"
+	var ending := end_mention(sides, outcome)
+	if ending != "":
+		lines.append(ending)
 	for side in [player_side, enemy_side]:
 		var result: Dictionary = outcome.get(side, {})
 		var side_name := str(sides[side]["name"])
@@ -517,6 +522,25 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 	if lines.is_empty():
 		lines.append("Aucun fait d'armes notable : les deux osts se sont séparés en bon ordre.")
 	return lines
+
+
+## EP9 (ADR 0056) : comment la bataille s'est terminée (`BattleOutcome.end` du cœur) ; vide pour
+## une fin ordinaire (tous les régiments du vaincu en fuite).
+static func end_mention(sides: Dictionary, outcome: Dictionary) -> String:
+	var winner := str(outcome.get("winner", "defender"))
+	var loser := "attacker" if winner == "defender" else "defender"
+	if not sides.has(winner) or not sides.has(loser):
+		return ""
+	var winner_name := str(sides[winner]["name"])
+	var loser_name := str(sides[loser]["name"])
+	match str(outcome.get("end", "")):
+		"refused":
+			return "Bataille refusée : personne n'a engagé le combat. L'ost %s renonce et se retire, l'ost %s garde le champ." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
+		"broken":
+			return "L'armée %s, trop entamée, s'est brisée : déroute générale." % BattleScene.de(loser_name)
+		"lull":
+			return "Le combat est retombé : l'ost %s a cédé le terrain à l'ost %s." % [BattleScene.de(loser_name), BattleScene.de(winner_name)]
+	return ""
 
 
 ## EP5 : libellés des étendards pris (`SideResult.standards_taken` du cœur).
