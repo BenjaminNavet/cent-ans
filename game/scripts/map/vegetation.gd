@@ -159,8 +159,10 @@ func _process(_delta: float) -> void:
 func _update_season() -> void:
 	if _material == null:
 		return
-	var weights: Variant = RenderingServer.global_shader_parameter_get(&"campaign_season")
-	var value := 3 if weights is Vector4 and (weights as Vector4).w > 0.5 else 1
+	# Poids tenus par CampaignLife.seasons (la lecture du paramètre global est réservée à l'éditeur).
+	var life: Variant = get_parent().get("life") if get_parent() != null else null
+	var seasons: Variant = (life as Object).get("seasons") if life is Object else null
+	var value := 3 if seasons is SeasonVisuals and (seasons as SeasonVisuals).weights.w > 0.5 else 1
 	if value != _season:
 		_season = value
 		_material.shader = FOLIAGE_WINTER_SHADER if value == 3 else FOLIAGE_SHADER
