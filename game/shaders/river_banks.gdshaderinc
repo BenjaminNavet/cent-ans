@@ -47,6 +47,7 @@ void river_banks(vec2 p, vec2 size, float footprint, inout vec3 col, inout float
 		return;
 	}
 	float vis = 1.0 - smoothstep(river_bank_px * 0.6, river_bank_px * 2.5, footprint);
+	vis *= 1.0 - fine_zone_mask(p);  // ZG5b : berges du réseau fin (lit creusé dans les pages)
 	float reeds = rb_noise(p * 5.3) * 0.6 + rb_noise(p * 13.1) * 0.4;
 	float in_bed = 1.0 - smoothstep(-0.15, 0.05, rsd);
 	float mud = (1.0 - smoothstep(0.0, 0.18 + 0.25 * reeds, rsd)) * (1.0 - in_bed);

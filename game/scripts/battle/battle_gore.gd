@@ -126,7 +126,7 @@ func _make_layer(layer_name: String, mesh: Mesh, mat: ShaderMaterial, count: int
 	inst.material_override = mat
 	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# Trajectoires calculées dans le shader : boîte englobante de tout le champ.
-	inst.custom_aabb = AABB(Vector3(-2000, -200, -2000), Vector3(4000, 600, 4000))
+	inst.custom_aabb = AABB(Vector3(-2000, -200, -2000), Vector3(6400, 600, 5600))  # EP1 : jusqu’au champ 2400 × 1600
 	add_child(inst)
 	# Instances inactives : instant très ancien (repliées par le shader).
 	var stride := 20 if colors else 16

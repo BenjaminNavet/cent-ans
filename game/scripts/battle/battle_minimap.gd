@@ -117,12 +117,34 @@ func _draw() -> void:
 		var top := to_map(Vector2(shore_x, 0.0))
 		var bottom := to_map(Vector2(shore_x, field_size.y))
 		draw_line(top, bottom, Color(0.3, 0.45, 0.65), 2.0)
+	# EP3 : routes (sous l'eau et les ponts), ruisseaux, rivière, gués, ponts.
+	for road in _terrain.get("roads", []):
+		var road_line := PackedVector2Array()
+		for point in road["points"]:
+			road_line.append(to_map(point))
+		if road_line.size() >= 2:
+			draw_polyline(road_line, Color(0.62, 0.5, 0.34, 0.85), 1.5 if str(road.get("kind", "")) == "main" else 1.0)
+	for stream in _terrain.get("streams", []):
+		var stream_line := PackedVector2Array()
+		for point in stream["points"]:
+			stream_line.append(to_map(point))
+		if stream_line.size() >= 2:
+			draw_polyline(stream_line, Color(0.36, 0.52, 0.7), 1.0)
 	var river: Dictionary = _terrain.get("river", {})
 	if river.has("points"):
 		var line := PackedVector2Array()
 		for point in river["points"]:
 			line.append(to_map(point))
 		draw_polyline(line, Color(0.3, 0.45, 0.65), maxf(float(river.get("width", 10.0)) * scale_x, 2.0))
+		for ford in river.get("fords", []):
+			var fx := float(ford["x"])
+			var half := float(ford["half_width"])
+			var fz := float(ford["z"])
+			draw_line(to_map(Vector2(fx - half, fz)), to_map(Vector2(fx + half, fz)), Color(0.72, 0.8, 0.86), maxf(float(river.get("width", 10.0)) * scale_x * 0.6, 2.0))
+	for bridge in _terrain.get("bridges", []):
+		var centre := Vector2(float(bridge["x"]), float(bridge["z"]))
+		var along := Vector2(cos(float(bridge["yaw"])), sin(float(bridge["yaw"]))) * float(bridge["length"]) * 0.5
+		draw_line(to_map(centre - along), to_map(centre + along), Color(0.35, 0.26, 0.18), 3.0)
 	for dot in _dots:
 		draw_rect(Rect2(to_map(dot[0]) - Vector2(2, 2), Vector2(4, 4)), dot[1])
 	if _frame.size() >= 3:

@@ -36,6 +36,18 @@
 | cavalry_4 | écorcheurs | lance |
 | cavalry_5 | jinetes | lance |
 | cavalry_6 | hobelars | lance |
+| standard_0 | porte-étendard à pied (lot EP5, noble) | standard |
+| standard_1 | porte-étendard à cheval (lot EP5, noble) | standard_mounted |
+| musician_0 | tambour (tabor en bandoulière, deux baguettes) | drum |
+| musician_1 | busine (trompette droite, pennonceau aux armes) | horn |
+
+Lot EP5 : les porte-étendards n'ont ni arme ni écu ; la hampe (3,8 m à pied, 4 m à cheval)
+suit l'os virtuel `Prop`. Leur entrée de manifeste porte `pole_top` (pointe de la hampe en
+espace de repos Godot) et `pole_axis` (axe de la hampe vers le haut, en repos) : Godot
+accroche l'étoffe à `Prop(image) × pole_top`. Clips `human` ajoutés : `std_idle`, `std_walk`,
+`std_run`, `std_wave`, `std_death`, `drum_idle`, `drum_march`, `drum_beat`, `horn_idle`,
+`horn_walk`, `horn_blow` ; `cavalry` : `c_std_idle`, `c_std_walk`, `c_std_gallop`,
+`c_std_wave`, `c_std_death`.
 
 Le type d'unité choisit sa figurine par le champ `figure` de `data/unit_types` ; les figurines
 rigides de repli (B1/B4) n'ont que trois variantes par famille (`BattleSkinned.rigid_variant`).
