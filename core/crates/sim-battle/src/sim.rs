@@ -153,6 +153,8 @@ pub struct BattleSim {
     /// EP9: rules of the end of a field battle, the engagement clock and
     /// how the battle ended.
     decision: crate::decision::DecisionRules,
+    /// EP9b: the attacker's archery duel and the second echelon.
+    duel: crate::duel::DuelRules,
     clock: crate::decision::EngagementClock,
     end: Option<crate::decision::BattleEnd>,
 }
@@ -404,6 +406,7 @@ impl BattleSim {
             start_hour: crate::time_of_day::TimeOfDayRules::bundled().default_hour,
             day_phase: None,
             decision: crate::decision::DecisionRules::bundled().clone(),
+            duel: crate::duel::DuelRules::bundled().clone(),
             clock: Default::default(),
             end: None,
         };
@@ -2206,6 +2209,9 @@ impl BattleSim {
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
         self.units[i].kills += kills;
+        if !self.units[t].synthetic {
+            self.clock.missile_losses[self.units[t].side.index()] += kills;
+        }
         // ADR 0052: the arrows wound the horses too, and they panic, unless
         // the riders are already locked in a melee.
         let target = &self.units[t];
