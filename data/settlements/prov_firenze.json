@@ -16,18 +16,13 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_market",
-      "bld_parish_church",
       "bld_water_mill",
       "bld_port",
       "bld_vineyard_press",
       "bld_weaving_workshop",
-      "bld_abbey",
       "bld_cathedral",
       "bld_fair",
-      "bld_guild_hall",
       "bld_hotel_dieu",
-      "bld_stone_walls",
       "bld_castle",
       "bld_muster_field",
       "bld_counting_house",
@@ -58,9 +53,8 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_market",
       "bld_port",
-      "bld_cathedral",
+      "bld_collegiate_church",
       "bld_stone_walls",
       "bld_guild_hall"
     ],
@@ -88,9 +82,9 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_market",
-      "bld_cathedral",
+      "bld_collegiate_church",
       "bld_stone_walls",
+      "bld_fair",
       "bld_counting_house"
     ],
     "port": false,
@@ -171,7 +165,6 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_market",
       "bld_parish_church"
     ],
     "port": false,

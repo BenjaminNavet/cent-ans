@@ -19,5 +19,6 @@ __pycache__/
 tools/geo/raw/
 .claude/
 export/
+tools/.cache/
 # Relief pyramid cache (ADR 0036, rebuilt by cent-ans geo pyramid / detail-dem)
 data/map/pyramid/

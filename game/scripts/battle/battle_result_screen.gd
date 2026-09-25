@@ -40,6 +40,7 @@ var aftermath_box: HBoxContainer
 var hero_label: Label
 var panel: PanelContainer
 var banner: Control
+var backdrop: TextureRect
 var _banner_texture: Texture2D
 var _banner_color := GREEN
 var _tables: Dictionary = {}  # side -> GridContainer
@@ -80,6 +81,16 @@ func _ready() -> void:
 	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(veil)
+	# AR1 : enluminure plein écran de l'issue (victoire / défaite) derrière le parchemin.
+	backdrop = TextureRect.new()
+	backdrop.name = "Backdrop"
+	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.modulate = Color(0.55, 0.5, 0.45)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backdrop.hide()
+	add_child(backdrop)
 	get_viewport().size_changed.connect(_layout)
 
 
@@ -118,7 +129,12 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	var enemy_ratio := float(totals[enemy_side]["ratio"])
 	var big_title := banner_title(won, own_ratio, enemy_ratio)
 	var banner_key := "defeat" if not won else ("pyrrhic" if big_title != "Victoire" else "victory")
-	_banner_texture = PortraitLoader.load_texture(BANNERS[banner_key])
+	var ending := ArtPlates.ending("battle_defeat" if banner_key == "defeat" else "battle_victory")
+	_banner_texture = ArtPlates.texture(ending)
+	if _banner_texture == null:
+		_banner_texture = PortraitLoader.load_texture(BANNERS[banner_key])
+	backdrop.texture = _banner_texture
+	backdrop.visible = _banner_texture != null
 	_banner_color = {"victory": Color(0.98, 0.86, 0.45), "pyrrhic": Color(0.95, 0.78, 0.55), "defeat": Color(0.95, 0.55, 0.45)}[banner_key]
 	panel = PanelContainer.new()
 	panel.name = "Scroll"

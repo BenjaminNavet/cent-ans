@@ -59,6 +59,10 @@ const DIAGONALS: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(
 ## Profondeur des jupes, en espacements de sommets (bornée à `skirt_max`).
 @export var skirt_factor: float = 1.5
 @export var skirt_max: float = 4.0
+## PF1 : les patchs dont le point le plus proche est au-delà de cette distance de la caméra ne
+## portent plus d'ombre (réglée par `TerrainBuilder` selon le préréglage : bord d'une cascade du
+## soleil). Ils en reçoivent toujours. INF : tous portent une ombre.
+var shadow_cast_distance: float = INF
 
 var pyramid: ReliefPyramid
 var material: ShaderMaterial
@@ -295,7 +299,7 @@ func _add_item(n: int, c: int, r: int, quadrant: int, bmin: Vector3, bmax: Vecto
 	_items.append({
 		"key": (n << 40) | (r << 20) | (c << 3) | quadrant,
 		"n": n, "origin": Vector2(bmin.x, bmin.z), "quadrant": quadrant,
-		"fine": fine, "coarse": coarse, "ymin": bmin.y, "ymax": bmax.y, "center": center,
+		"fine": fine, "coarse": coarse, "ymin": bmin.y, "ymax": bmax.y, "center": center, "dist": dist,
 	})
 
 
@@ -353,9 +357,13 @@ func _apply_items() -> void:
 			slot.transform = Transform3D(Basis.from_scale(Vector3(s, 1.0, s)), Vector3(origin.x, 0.0, origin.y))
 			var quads := PATCH_QUADS if quadrant == 4 else PATCH_QUADS / 2
 			var skirt := minf(s * skirt_factor, skirt_max) + 0.02
+			# Boîte en hauteurs monde de l'échelle courante (ZG4 : `on_vertical_scale_changed`).
 			slot.custom_aabb = AABB(Vector3(0.0, float(item["ymin"]) - skirt, 0.0), Vector3(quads, float(item["ymax"]) - float(item["ymin"]) + skirt, quads))
 			slot.set_instance_shader_parameter("qt_node", Vector4(origin.x, origin.y, s, n))
 			slot.visible = true
+		var cast := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if float(item["dist"]) < shadow_cast_distance else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if slot.cast_shadow != cast:
+			slot.cast_shadow = cast
 		var fine: int = item["fine"]
 		var coarse: int = item["coarse"]
 		var fade := 1.0
@@ -440,6 +448,19 @@ func _neighbors(key: int, diagonal: bool) -> Vector4:
 				page["last_used"] = _frame
 		result[i] = layer
 	return result
+
+
+## Lot ZG4 : l'échelle verticale a changé ; les boîtes englobantes des nœuds affichés (hauteurs
+## monde) sont remises à l'échelle (les nouveaux nœuds lisent directement la nouvelle échelle).
+func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
+	var ratio := new_scale / maxf(old_scale, 1e-9)
+	for slot: MeshInstance3D in _slots.values():
+		var box := slot.custom_aabb
+		var lo := box.position.y * ratio
+		var hi := box.end.y * ratio
+		# Jupe (constante, non proportionnelle) : marge de sécurité en plus.
+		var margin := absf(hi - lo) * 0.02 + 0.05
+		slot.custom_aabb = AABB(Vector3(box.position.x, lo - margin, box.position.z), Vector3(box.size.x, hi - lo + 2.0 * margin, box.size.z))
 
 
 func _take_slot() -> MeshInstance3D:

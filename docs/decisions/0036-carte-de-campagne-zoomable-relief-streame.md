@@ -213,3 +213,31 @@ vue stratégique mais passent en **1:1 géoréférencé au zoom rapproché** : s
 Seine d'une maquette agrandie ne tomberait plus dans la vraie vallée. Ce passage est le lot VH4
 du chantier « villes historiques » (ADR 0037, `docs/wip/vh-villes-historiques.md`), qui démarre
 après la fusion de ZG2 et ZG4. ZG6 ne traite que les villes ordinaires.
+
+## Addendum (lot ZG4, 2026-09-25) : caméra rapprochée et exagération dynamique telles que réalisées
+
+Détail dans `docs/godot-map.md` (« Caméra rapprochée et exagération verticale »). Précisions et écarts :
+
+- **Distance minimale** par étage (E0 22, E1 9, E2 5, E3 2,6, E4 1,5, E5 0,8, E6 0,5, E7 0,3 unités),
+  sous forme d'un **champ adouci** : min sur k de `d_k + 0,45 × distance à la tuile d'étage k la plus
+  proche` (tuiles du manifeste). La caméra ne « saute » jamais au bord d'une zone de détail ; `close_zones`
+  (L1) reste une source parmi d'autres. Réglages dans `game/resources/close_camera.tres`.
+- **Exagération** : ×4,31 au-dessus de 45 unités, ×1,5 sous 0,45, smoothstep en logarithme de la distance ;
+  **quantifiée par paliers de 4 %** (hystérésis 15 %). Paramètre global de shader
+  `campaign_vertical_scale` (et non un uniforme par matériau).
+- **Recalage des calques** : les objets ponctuels suivent aussitôt (`vertical_scale_changed`) ; les calques
+  par morceau (`chunk_surface_changed`) ne sont recalés qu'**une fois l'échelle stable depuis 180 ms** (un
+  zoom continu franchit une quinzaine de paliers), proches d'abord, 3 ms par image. Pendant le zoom, routes,
+  hameaux et arbres peuvent donc flotter ou s'enfoncer de quelques pour cent de la hauteur du relief
+  pendant ≤ 0,2 s. Maquettes des villes emblématiques et fleuves : hauteurs en mètres / remise à l'échelle
+  dans le shader, rien à recalculer ; cuisson des maquettes étalée (≤ 4 ms par image au lieu de 50-300 ms
+  d'un bloc).
+- Sans pyramide, l'échelle reste `HEIGHT_SCALE` (maillages E0 cuits) et la caméra s'arrête à 22.
+- **Palier « site »** : tout ce qui est dessiné à l'échelle de la carte (maquettes à la loupe, villes
+  emblématiques, hameaux, rubans de routes, ponts, moulins, fumées, navires, oiseaux) est **masqué** en
+  attendant les versions à l'échelle réelle (ZG5b routes et fleuves, ZG6 villes, VH4 villes emblématiques) ;
+  les arbres rétrécissent (`campaign_prop_scale`, jusqu'à ×0,04). Le lit creusé des fleuves (`river_bed.png`,
+  719 m/px) reste visible de près comme une large dépression sombre : ZG5b.
+- Quadtree : pas de réglage nécessaire pour la vue rasante (≈ 165 nœuds dans la descente, budget 700 jamais
+  atteint, `px_scale` 1) ; si PF1 abaisse le budget, appliquer un multiplicateur en vue rasante plutôt que
+  d'écraser ses préréglages.

@@ -16,6 +16,9 @@ extends Node3D
 ##   --stage=tech               panneau des technologies (une recherche lancée, M6) ;
 ##   --stage=tech_civil         idem sur l'onglet Civil.
 ##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
+##   --stage=loading_battle|loading_siege|loading_naval  AR1 : écran de chargement illustré.
+##   --stage=ending_victory|ending_defeat  AR1 : fin de campagne illustrée.
+##   --stage=report_vignette    AR1 : rapport de saison avec sa vignette (peste).
 ##   --stage=tooltips           recrutement de la capitale + infobulles riches figées (F2).
 ##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
@@ -84,6 +87,8 @@ var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
 var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
+## ZG4 : exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
+var dynamic_exaggeration: bool = true
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
 var _fps_probe_gpu_ms: float = 0.0
@@ -126,6 +131,9 @@ func _ready() -> void:
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
+	if terrain.pyramid != null:  # ZG4 : caméra rapprochée selon l'étage de relief sous elle
+		camera_rig.relief = terrain.pyramid
+		camera_rig.ground_height = terrain.surface_height_at
 	camera_rig.setup(bounds, maxf(map_data.size.x, map_data.size.y) * 0.55)
 	picker.setup(camera, map_data)
 	picker.province_hovered.connect(_on_province_hovered)
@@ -133,6 +141,9 @@ func _ready() -> void:
 	picker.province_right_clicked.connect(_on_province_right_clicked)
 	picker.click_interceptor = _try_select_army
 	armies.setup(map_data, camera)
+	if terrain.quadtree != null:  # ZG4 : marqueurs posés sur la surface fine, recalés à l'échelle
+		armies.ground_height = terrain.surface_height_at
+		terrain.vertical_scale_changed.connect(func(_old: float, _new: float) -> void: armies.reground())
 	strategic = StrategicView.new()  # CM2
 	strategic.name = "StrategicView"
 	add_child(strategic)
@@ -1068,13 +1079,22 @@ func _process(_delta: float) -> void:
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
 	var t0 := Time.get_ticks_usec()
+	if dynamic_exaggeration and terrain.quadtree != null and camera_rig.profile != null:  # ZG4
+		terrain.set_vertical_scale(camera_rig.profile.quantized_scale(distance, MapData.vertical_scale()))
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
 	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
 	if zoom_tiers != null:  # C6 : paliers de zoom
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
-		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
+		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
+		# palier « site » (routes drapées à leur vraie largeur : lot ZG5b).
+		var site_hide := 1.0 - zoom_tiers.site_weight(distance)
+		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
+		if rivers.crossings != null:
+			rivers.crossings.visible = site_hide > 0.5
+		trade_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
+		_apply_close_tiers(distance)
 	if life != null:  # CV1
 		life.update_view(distance)
 	strategic.update_view(distance)  # CM2
@@ -1092,10 +1112,49 @@ func _process(_delta: float) -> void:
 			return
 		if _screenshot_countdown == 2 and settlement_layer != null:
 			settlement_layer.flush()
-			roads.flush(zoom_tiers.near_weight(distance))
+			roads.flush(zoom_tiers.near_weight(distance) * (1.0 - zoom_tiers.site_weight(distance)))
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:
 			_take_screenshot(_screenshot_path, true)
+
+
+## Lot ZG4 : paliers vallée / site : frontières et voile du brouillard de guerre estompés sur le
+## matériau du terrain (valeurs par défaut du shader × `ZoomTiers.border_alpha` / `fog_alpha`).
+const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_veil_amount", "fog_cloud_amount"]
+var _close_tier_defaults: Dictionary = {}
+var _close_tier_alphas := Vector2(-1.0, -1.0)
+var _prop_scale: float = 1.0
+
+
+## ZG4 : paramètres globaux remis à leurs valeurs par défaut en quittant la carte (les arbres des
+## batailles partagent `foliage.gdshaderinc`).
+func _exit_tree() -> void:
+	RenderingServer.global_shader_parameter_set("campaign_prop_scale", 1.0)
+	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
+
+
+func _apply_close_tiers(distance: float) -> void:
+	var props := zoom_tiers.prop_scale(distance)
+	if absf(props - _prop_scale) > props * 0.01:
+		_prop_scale = props
+		RenderingServer.global_shader_parameter_set("campaign_prop_scale", props)
+	var material := terrain.material
+	if material == null:
+		return
+	var alphas := Vector2(zoom_tiers.border_alpha(distance), zoom_tiers.fog_alpha(distance))
+	if alphas.distance_to(_close_tier_alphas) < 0.01:
+		return
+	_close_tier_alphas = alphas
+	if _close_tier_defaults.is_empty():
+		for param in _CLOSE_TIER_PARAMS:
+			var value: Variant = material.get_shader_parameter(param)
+			if value == null:
+				value = RenderingServer.shader_get_parameter_default(terrain.TERRAIN_SHADER.get_rid(), param)
+			if value != null:  # serveur factice (--headless) : rien à estomper
+				_close_tier_defaults[param] = float(value)
+	for param: String in _close_tier_defaults:
+		var factor := alphas.x if param.ends_with("border_alpha") else alphas.y
+		material.set_shader_parameter(param, float(_close_tier_defaults[param]) * factor)
 
 
 ## `--fps-probe` : FPS moyen sur 240 images une fois le relief fin prêt (mesure de perf C6).
@@ -1188,6 +1247,13 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--camera-min="):  # ZG2 : essais et captures seulement (ZG4 : caméra)
 			camera_rig.min_distance = float(arg.trim_prefix("--camera-min="))
 			camera_rig.close_min_distance = camera_rig.min_distance
+		elif arg == "--static-exaggeration":  # ZG4 : relief ×4,3 à tous les zooms (comparaisons)
+			dynamic_exaggeration = false
+		elif arg.begins_with("--rescale-settle-ms="):  # ZG4 : mesures (délai avant recalage des calques)
+			terrain.rescale_settle_ms = int(arg.trim_prefix("--rescale-settle-ms="))
+		elif arg.begins_with("--camera-yaw="):  # ZG4 : captures (degrés, 0 = regard vers le nord)
+			camera_rig.target_yaw = deg_to_rad(float(arg.trim_prefix("--camera-yaw=")))
+			camera_rig.snap()
 		elif arg == "--no-fine-terrain":
 			terrain.fine_enabled = false
 		elif arg.begins_with("--fine-step="):
@@ -1268,6 +1334,16 @@ func _parse_cmdline() -> void:
 					ui.tech_panel.select_branch("civil")
 				"battle":
 					_stage_screenshot_battle()
+				"loading_battle", "loading_siege", "loading_naval":  # AR1 : écran de chargement illustré
+					BattleLoadingCard.open(get_tree(), _screenshot_stage.trim_prefix("loading_"))
+				"ending_victory", "ending_defeat":  # AR1 : fin de campagne illustrée
+					victory.show_ending(_screenshot_stage.trim_prefix("ending_"), "La guerre de Cent Ans s'achève.", 1234)
+				"report_vignette":  # AR1 : vignette du rapport de saison
+					var province := ""
+					flow.season_report.show_report(str(sim.call("get_date_label")), SeasonReport.build_groups([
+						{"kind": "plague", "text_fr": "La peste frappe la province.", "province": province, "faction": player_faction},
+						{"kind": "revolt", "text_fr": "Les vilains se soulèvent.", "province": province, "faction": player_faction}],
+						func(_e: Dictionary) -> bool: return true, Callable(), player_faction))
 				"assault":  # UB1 : écran d'avant-bataille d'un assaut
 					_stage_screenshot_assault()
 				"tooltips":  # F2
@@ -1469,6 +1545,15 @@ func _take_screenshot(path: String, quit_after: bool) -> void:
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var err := image.save_png(path)
 	print("CampaignMap: screenshot %s (%s)" % [path, error_string(err)])
+	if OS.get_cmdline_user_args().has("--dump-near"):  # ZG4 : diagnostic, géométries autour de la caméra
+		var eye := camera.global_position
+		for node in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+			var g := node as GeometryInstance3D
+			if not g.is_visible_in_tree():
+				continue
+			var box: AABB = g.global_transform * g.get_aabb()
+			if box.grow(camera_rig.distance * 2.0).has_point(eye):
+				print("NEAR %s size=%s" % [g.get_path(), box.size])
 	if quit_after:
 		get_tree().quit(0 if err == OK else 1)
 
@@ -1573,11 +1658,19 @@ func _on_battle_withdraw(index: int) -> void:
 
 
 func _on_battle_fight(index: int, seed: int) -> void:
+	# AR1 : écran de chargement illustré (siège ou bataille rangée) pendant la construction.
+	var context := "battle"
+	for pending in sim.call("get_pending_battles"):
+		if int((pending as Dictionary).get("index", -1)) == index and bool(pending.get("siege", false)):
+			context = "siege"
+	var card := BattleLoadingCard.open(get_tree(), context)
+	await card.drawn
 	var battle: Node = load(BATTLE_SCENE).instantiate()
 	battle.configure(sim, index, seed)
 	battle.returned.connect(_on_battle_returned.bind(battle))
 	_set_campaign_active(false)
 	get_tree().root.add_child(battle)
+	card.close()
 
 
 func _on_battle_returned(result: Dictionary, battle: Node) -> void:

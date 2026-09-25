@@ -58,12 +58,18 @@ const TONE_LOSS := "loss"
 const TONE_GAIN := "gain"
 const MAX_ENTRIES_PER_GROUP := 12
 const MAX_LIST_HEIGHT := 460.0
+## AR1 : taille de la vignette enluminée en tête du rapport.
+const VIGNETTE_SIZE := Vector2(536, 170)
 
 var title_label: Label
 var scroll: ScrollContainer
 var list_box: VBoxContainer
 var groups: Array = []  # [{id, title, glyph, entries: [event + _tone]}]
 var _title: String = ""
+var vignette: TextureRect
+var vignette_caption: Label
+## Identifiant de la vignette affichée (tests, captures).
+var vignette_id: String = ""
 
 
 func _ready() -> void:
@@ -87,6 +93,21 @@ func _ready() -> void:
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
 	box.add_child(HSeparator.new())
+	# AR1 : vignette enluminée du fait le plus marquant de la saison (genre prioritaire).
+	vignette = TextureRect.new()
+	vignette.name = "Vignette"
+	vignette.custom_minimum_size = VIGNETTE_SIZE
+	vignette.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	vignette.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	vignette.clip_contents = true
+	vignette.hide()
+	box.add_child(vignette)
+	vignette_caption = Label.new()
+	vignette_caption.add_theme_font_size_override("font_size", 15)
+	vignette_caption.add_theme_color_override("font_color", HudStyle.RUBRIC)
+	vignette_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vignette_caption.hide()
+	box.add_child(vignette_caption)
 	scroll = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -299,6 +320,7 @@ func _render() -> void:
 	if groups.is_empty():
 		return
 	title_label.text = "Rapport de saison — %s" % _title
+	_update_vignette()
 	for group in groups:
 		var heading := Label.new()
 		heading.text = "%s  %s" % [group["glyph"], group["title"]]
@@ -314,6 +336,20 @@ func _render() -> void:
 			more.text = "… et %d autre%s (voir le journal)" % [hidden, "s" if hidden > 1 else ""]
 			more.add_theme_font_size_override("font_size", 14)
 			list_box.add_child(more)
+
+
+## AR1 : vignette du genre d'événement le plus prioritaire (`data/ui/illustrations.json`).
+func _update_vignette() -> void:
+	var entries: Array = []
+	for group in groups:
+		entries.append_array(group["entries"])
+	var chosen := ArtPlates.vignette_for_events(entries)
+	vignette_id = str(chosen.get("id", ""))
+	var texture := ArtPlates.texture(chosen) if not chosen.is_empty() else null
+	vignette.texture = texture
+	vignette.visible = texture != null
+	vignette_caption.text = str(chosen.get("title", ""))
+	vignette_caption.visible = texture != null
 
 
 ## Hauteur ajustée au contenu (au plus `MAX_LIST_HEIGHT`, défilement au-delà).

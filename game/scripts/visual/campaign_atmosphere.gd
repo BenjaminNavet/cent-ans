@@ -31,6 +31,18 @@ extends Node
 @export var dof_transition_factor: float = 2.5
 @export var dof_amount_near: float = 0.08
 @export var dof_max_distance: float = 700.0
+## Lot ZG4 : vue rapprochée (sous `close_begin_distance`, pleinement sous `close_full_distance`) :
+## le brouillard ne se règle plus sur la distance caméra (il noierait l'horizon à 2 km en vue
+## rasante) mais laisse voir crêtes et vallées lointaines (`close_fog_begin` / `close_fog_end`
+## unités) ; flou de profondeur coupé ; ombres plus serrées ; rayon de l'occlusion ambiante
+## (unités monde) proportionnel à la distance.
+@export var close_begin_distance: float = 30.0
+@export var close_full_distance: float = 6.0
+@export var close_fog_begin: float = 18.0
+@export var close_fog_end: float = 240.0
+@export var close_shadow_min: float = 12.0
+@export var ssao_radius_factor: float = 0.14
+@export var ssao_radius_min: float = 0.03
 
 var _environment: Environment
 var _attributes: CameraAttributesPractical
@@ -40,6 +52,10 @@ var _last_distance: float = -1.0
 var _world_env: WorldEnvironment
 var _season: String = ""
 var _season_check_s: float = 0.0
+## PF1 : facteur de portée et cascades des ombres selon le préréglage (`RenderQuality`).
+var _quality_range: float = 1.0
+var _quality_splits: int = 4
+var _base_ssao_radius: float = -1.0
 
 
 func _ready() -> void:
@@ -51,6 +67,8 @@ func _ready() -> void:
 	_sun = get_node_or_null(sun_path) as DirectionalLight3D
 	_rig = get_node_or_null(camera_rig_path) as CampaignCamera
 	_orient_sun()
+	add_to_group(RenderQuality.CLIENT_GROUP)
+	apply_render_quality(RenderQuality.preset())
 	if _world_env != null:
 		RenderQuality.register(_world_env, _sun, "campaign")
 	_update_season()
@@ -112,15 +130,30 @@ func sun_direction() -> Vector3:
 	return -toward_sun.normalized()
 
 
+func apply_render_quality(p: Dictionary) -> void:
+	_quality_range = float(p.get("map_shadow_range", 1.0))
+	_quality_splits = int(p.get("map_shadow_splits", 4))
+	if _sun != null:
+		_sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if _quality_splits >= 4 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	if _last_distance > 0.0:
+		apply_distance(_last_distance)
+
+
 func apply_distance(distance: float) -> void:
+	var close := 1.0 - smoothstep(close_full_distance, close_begin_distance, distance)
 	if _environment != null:
-		_environment.fog_depth_begin = distance * fog_begin_factor
-		_environment.fog_depth_end = distance * fog_end_factor
+		_environment.fog_depth_begin = lerpf(distance * fog_begin_factor, maxf(close_fog_begin, distance * fog_begin_factor), close)
+		_environment.fog_depth_end = lerpf(distance * fog_end_factor, maxf(close_fog_end, distance * fog_end_factor), close)
+		if _base_ssao_radius < 0.0:
+			_base_ssao_radius = _environment.ssao_radius
+		_environment.ssao_radius = clampf(distance * ssao_radius_factor, ssao_radius_min, _base_ssao_radius)
+		if _environment.ssil_enabled:  # rayon posé par RenderQuality (12 en campagne), idem
+			_environment.ssil_radius = clampf(distance * 0.55, 0.1, 12.0)
 	if _sun != null:
 		_sun.shadow_enabled = distance < shadow_max_camera_distance
-		_sun.directional_shadow_max_distance = maxf(distance * shadow_range_factor, 50.0)
+		_sun.directional_shadow_max_distance = maxf(distance * shadow_range_factor * _quality_range, lerpf(50.0, close_shadow_min, close))
 	if _attributes != null:
-		var closeness := 1.0 - clampf(distance / dof_max_distance, 0.0, 1.0)
+		var closeness := (1.0 - clampf(distance / dof_max_distance, 0.0, 1.0)) * (1.0 - close)
 		_attributes.dof_blur_far_enabled = closeness > 0.0
 		_attributes.dof_blur_far_distance = distance * dof_begin_factor
 		_attributes.dof_blur_far_transition = distance * dof_transition_factor

@@ -24,7 +24,8 @@ func build(terrain: BattleTerrain, weather: String) -> void:
 	var mesh := _clump_mesh()
 	for layer in LAYERS:
 		var spacing: float = layer[0]
-		var radius: float = layer[1]
+		# PF1 : rayon (donc nombre de touffes, au carré) selon le préréglage de qualité.
+		var radius: float = float(layer[1]) * float(RenderQuality.preset().get("grass", 1.0))
 		var mat := ShaderMaterial.new()
 		mat.shader = GRASS_SHADER
 		mat.set_shader_parameter("grass_texture", GRASS_TEXTURE)
@@ -42,7 +43,7 @@ func build(terrain: BattleTerrain, weather: String) -> void:
 		mat.set_shader_parameter("spacing", spacing)
 		mat.set_shader_parameter("radius", radius)
 		mat.set_shader_parameter("blade_scale", float(layer[2]))
-		mat.set_shader_parameter("inner_radius", float(layer[3]))
+		mat.set_shader_parameter("inner_radius", float(layer[3]) * float(RenderQuality.preset().get("grass", 1.0)))
 		# B5 : sol de saison (neige au sol sans chute de neige), herbe d'hiver et d'automne
 		# plus sèche, joncs plus sombres du marais.
 		var ground_weather := "snow" if terrain.snowy() else weather
