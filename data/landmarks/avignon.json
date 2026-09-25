@@ -4,6 +4,8 @@
   "settlement": "set_avignon",
   "period": "vers 1337-1400 (palais Neuf de Clément VI dès 1342, remparts d'Innocent VI et d'Urbain V à partir de 1358, fort Saint-André 1362)",
   "province": "prov_comtat_venaissin",
+  "siege": {"rotate_deg": -22, "radius_m": 1600, "bank_offset_m": -309, "cut_m": -300, "areas": ["villeneuve"], "monuments": ["tour_philippe_le_bel", "fort_saint_andre", "chartreuse"], "bridges": ["pont_saint_benezet"], "battle": {"walls": ["remparts"], "gate": "Porte Limbert", "streets": ["rue_carreterie", "rue_des_teinturiers", "rue_saint_michel", "rue_de_l_oulle"]}},
+  "materials": {"houses": {"walls": {"Stone": 0.55, "Plaster": 0.45}, "roofs": {"Tile": 0.7, "TileOld": 0.3}}, "palette": {"Ochre": [0.6, 0.49, 0.33], "Stone": [0.55, 0.47, 0.35], "Plaster": [0.62, 0.5, 0.36]}},
   "sources": [
     {
       "title": "Avenio, plan cavalier d'Avignon",

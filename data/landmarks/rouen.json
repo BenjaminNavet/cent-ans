@@ -4,6 +4,8 @@
   "settlement": "set_rouen",
   "period": "vers 1340-1400 (beffroi du Gros-Horloge 1389 ; tour de Beurre seulement en 1506)",
   "province": "prov_normandie",
+  "siege": {"rotate_deg": 180, "radius_m": 1200, "bank_offset_m": -249, "cut_m": -240, "areas": ["saint_sever"], "monuments": ["cog_quai"], "bridges": ["pont_mathilde"], "streets": ["route_saint_sever"], "battle": {"walls": ["enceinte"], "gate": "Porte Beauvoisine", "streets": ["rue_du_gros_horloge", "rue_grand_pont", "rue_beauvoisine", "rue_cauchoise", "rue_martainville"]}},
+  "materials": {"houses": {"walls": {"Timber": 0.6, "Plaster": 0.25, "Stone": 0.15}, "roofs": {"Slate": 0.55, "Tile": 0.3, "TileOld": 0.15}}, "palette": {"Stone": [0.6, 0.55, 0.44], "NDStone": [0.62, 0.56, 0.44]}},
   "sources": [
     {
       "title": "Le Livre des Fontaines de Rouen",

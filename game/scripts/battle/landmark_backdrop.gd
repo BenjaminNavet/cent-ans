@@ -49,7 +49,8 @@ func _setup(plan: Dictionary, model: Node3D, siege: Dictionary, height_at: Calla
 	for piece in siege.get("pieces", []):
 		far_z = maxf(far_z, maxf((piece["a"] as Vector2).y, (piece["b"] as Vector2).y))
 	var bank_z := far_z + BANK_MARGIN
-	position = Vector3(center.x, 0.0, bank_z + float(siege_plan.get("bank_offset_m", 100.0)))
+	# L3 : `center_x_m` recentre la toile de fond (le modèle est tourné de π : x du plan → −x).
+	position = Vector3(center.x + float(siege_plan.get("center_x_m", 0.0)), 0.0, bank_z + float(siege_plan.get("bank_offset_m", 100.0)))
 	rotation.y = PI
 	model.name = "Model"
 	add_child(model)
