@@ -131,11 +131,16 @@ func _run() -> void:
 	var rig: Node = map.get("camera_rig")
 	var map_data: Object = map.get("map_data")
 	if _map_ab > 0.0:
-		var y0: float = map_data.call("surface_world_at", PARIS.x, PARIS.y)
-		rig.call("look_at_point", Vector3(PARIS.x, y0, PARIS.y), _map_ab)
-		rig.call("snap")
-		await _frames_passed(120)
+		# L'arrivée sur la carte peut lancer un travelling vers la capitale : on attend qu'il
+		# soit posé avant de viser, et chaque configuration revise le point (voir `_ab`).
+		await _frames_passed(90)
+		_aim(map, _map_ab)
+		await _frames_passed(60)
+		await _wait_map_settled(map)
+		_aim(map, _map_ab)
+		await _wait_map_settled(map)
 		_result["map_ab"] = await _ab(map)
+		_result["map_ab_distance"] = float(rig.get("distance"))
 		_result["ok"] = true
 		print("JOURNEY_JSON %s" % JSON.stringify(_result))
 		_cleanup()
@@ -207,6 +212,25 @@ func _run() -> void:
 	get_tree().quit(0)
 
 
+func _aim(map: Node, distance: float) -> void:
+	var map_data: Object = map.get("map_data")
+	var rig: Node = map.get("camera_rig")
+	var y: float = map_data.call("surface_world_at", PARIS.x, PARIS.y)
+	rig.call("look_at_point", Vector3(PARIS.x, y, PARIS.y), distance)
+	rig.call("snap")
+
+
+## Relief fin construit et végétation semée (plus aucune tâche en cours), puis 60 images.
+func _wait_map_settled(map: Node, settle_frames: int = 60) -> void:
+	var terrain: Node = map.get("terrain")
+	var vegetation := map.get_node_or_null("Vegetation")
+	await _wait_for(func() -> bool:
+		var fine_ok := terrain == null or not terrain.has_method("fine_ready") or bool(terrain.call("fine_ready"))
+		var veg_ok := vegetation == null or int(vegetation.call("pending_jobs")) == 0
+		return fine_ok and veg_ok, 30.0)
+	await _frames_passed(settle_frames)
+
+
 func _fail(message: String) -> void:
 	_result["error"] = message
 	_result["wall_ms"] = Time.get_ticks_msec()
@@ -267,15 +291,21 @@ func _ab(map: Node) -> Dictionary:
 			configs = Array(arg.trim_prefix("--ab-configs=").split(","))
 	var samples: Dictionary = {}
 	var gpu: Dictionary = {}
+	var prims: Dictionary = {}
+	var draws: Dictionary = {}
 	for config: String in configs:
 		samples[config] = []
 		gpu[config] = []
+		prims[config] = []
+		draws[config] = []
 	var vp := get_tree().root.get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	for round_index in 4:
 		for config: String in configs:
 			_apply_config(map, config)
-			await _frames_passed(12)
+			_aim(map, _map_ab)
+			await _frames_passed(4)
+			await _wait_map_settled(map, 8)
 			var last := Time.get_ticks_usec()
 			for i in 30:
 				if config == "no_shadows":
@@ -284,15 +314,34 @@ func _ab(map: Node) -> Dictionary:
 				var now := Time.get_ticks_usec()
 				samples[config].append((now - last) / 1000.0)
 				gpu[config].append(RenderingServer.viewport_get_measured_render_time_gpu(vp))
+				prims[config].append(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME))
+				draws[config].append(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
 				last = now
+	# `--ab-shots=<dossier absolu>` : une capture par configuration (comparaisons visuelles).
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--ab-shots="):
+			var shot_dir := arg.trim_prefix("--ab-shots=")
+			DirAccess.make_dir_recursive_absolute(shot_dir)
+			for config: String in configs:
+				_apply_config(map, config)
+				_aim(map, _map_ab)
+				await _frames_passed(4)
+				await _wait_map_settled(map, 30)
+				var image := get_tree().root.get_texture().get_image()
+				image.save_png(shot_dir.path_join("d%d_%s.png" % [int(_map_ab), config.replace(":", "_")]))
 	_apply_config(map, "base")
 	var out: Dictionary = {}
 	for config: String in configs:
 		var frame: Array = samples[config]
 		var g: Array = gpu[config]
+		var pr: Array = prims[config]
+		var dr: Array = draws[config]
 		frame.sort()
 		g.sort()
-		out[config] = {"frame_ms": snappedf(frame[frame.size() / 2], 0.01), "gpu_ms": snappedf(g[g.size() / 2], 0.01)}
+		pr.sort()
+		dr.sort()
+		out[config] = {"frame_ms": snappedf(frame[frame.size() / 2], 0.01), "gpu_ms": snappedf(g[g.size() / 2], 0.01),
+			"prims_k": int(pr[pr.size() / 2]) / 1000, "draws": int(dr[dr.size() / 2])}
 	return out
 
 
@@ -319,6 +368,30 @@ func _apply_config(map: Node, config: String) -> void:
 	var terrain: Node = map.get("terrain")
 	if terrain != null:
 		terrain.set("fine_enabled", config != "no_fine")
+		var step := int(config.trim_prefix("fine_step:")) if config.begins_with("fine_step:") else 2
+		terrain.set("fine_step_far", step)
+		terrain.set("fine_lod_bias", float(config.trim_prefix("fine_bias:")) if config.begins_with("fine_bias:") else 1.0)
+		for chunk in (terrain as Node).get_children():
+			if chunk is GeometryInstance3D:
+				(chunk as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if config == "terrain_noshadow" else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+			elif chunk.name.begins_with("Fine_"):
+				if config == "fine_hidden" and chunk.visible:
+					chunk.visible = false
+					_hidden.append(chunk)
+				for block in chunk.get_children():
+					var off := config in ["terrain_noshadow", "fine_noshadow"]
+					(block as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if off else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	var vegetation := map.get_node_or_null("Vegetation")
+	if vegetation != null:
+		vegetation.set("enabled", config != "no_veg")
+		vegetation.set("cast_shadows", config != "veg_noshadow")
+	var sun := map.get_node("Sun") as DirectionalLight3D
+	sun.shadow_enabled = _map_ab < 650.0
+	if not sun.has_meta("pf1_shadow"):
+		sun.set_meta("pf1_shadow", [sun.directional_shadow_mode, sun.directional_shadow_max_distance])
+	var shadow_base: Array = sun.get_meta("pf1_shadow")
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if config == "splits2" else shadow_base[0]
+	sun.directional_shadow_max_distance = float(shadow_base[1]) * (float(config.trim_prefix("shadow_range:")) if config.begins_with("shadow_range:") else 1.0)
 	match config:
 		"no_ssil":
 			env.ssil_enabled = false
@@ -332,6 +405,10 @@ func _apply_config(map: Node, config: String) -> void:
 			get_tree().root.msaa_3d = Viewport.MSAA_DISABLED
 		"shadow_4096":
 			RenderingServer.directional_shadow_atlas_set_size(4096, true)
+		"soft_low":
+			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_LOW)
+		"soft_hard":
+			RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_HARD)
 	if config.begins_with("hide:"):
 		var node := map.find_child(config.trim_prefix("hide:"), true, false)
 		if node != null and node.get("visible") != null:

@@ -67,7 +67,20 @@ var _fine_cache: Dictionary = {}
 ## reconstruire quand le pas adaptatif change).
 var _fine_cache_step: Dictionary = {}
 var _fine_jobs: Dictionary = {}
-var _fine_indices: PackedInt32Array = PackedInt32Array()
+## PF1 : index des blocs de relief fin par « quads:pas » (partagés par tous les blocs).
+var _block_indices: Dictionary = {}
+## Tuile → numéro (`serial`) de l'entrée de `_fine_cache` affichée.
+var _fine_shown: Dictionary = {}
+var _fine_serial: int = 0
+## PF1 (préréglage de qualité) : multiplicateur des clés de LOD des blocs fins. 1 = un niveau
+## n'est pris que si son erreur de hauteur fait moins de ≈ 1 pixel ; 4 = moins de ≈ 4 pixels.
+var fine_lod_bias: float = 1.0:
+	set(value):
+		fine_lod_bias = maxf(value, 0.01)
+		for entry: Dictionary in _fine_cache.values():
+			if entry.has("node"):
+				for block: GeometryInstance3D in (entry["node"] as Node).get_children():
+					block.lod_bias = 1.0 / fine_lod_bias
 ## Pas courant (adaptatif ou fixe, voir `fine_step_auto`) ; initialisé à `fine_step`.
 var _current_fine_step: int = 0
 var _fine_tiles_dir: String = ""
@@ -150,7 +163,10 @@ func clear_terrain() -> void:
 	_near_meshes.clear()
 	_far_grids.clear()
 	_near_grids.clear()
+	for index in _fine_cache.keys():
+		_free_fine_entry(index)
 	_fine_cache.clear()
+	_fine_shown.clear()
 
 
 func _exit_tree() -> void:
@@ -321,14 +337,18 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 		if wanted_fine.has(i) and _fine_cache.has(i):
 			var entry: Dictionary = _fine_cache[i]
 			entry["last_used"] = _lod_frame
-			# Comparaison d'identité (pas `_is_near`) : rejoue l'affectation quand le maillage
+			# Comparaison du numéro d'entrée (pas `_is_near`) : rejoue l'affichage quand l'entrée
 			# en cache a changé (ex. reconstruction après changement de `fine_step` adaptatif),
 			# même si la tuile était déjà au niveau fin.
-			if chunk.mesh != entry["mesh"]:
-				chunk.mesh = entry["mesh"]
+			if int(_fine_shown.get(i, -1)) != int(entry["serial"]):
+				_show_fine(i, entry)
 				_is_near[i] = 2
 				chunk_surface_changed.emit(i)
 			continue
+		if _fine_shown.has(i):
+			_hide_fine(i)
+			_is_near[i] = 1 if chunk.mesh == _near_meshes.get(i) else 0
+			chunk_surface_changed.emit(i)
 		var center := chunk.position + Vector3(half, 0.0, half)
 		var is_near := camera_position.distance_to(center) < near_distance or wanted_fine.has(i)
 		if is_near and _is_near[i] != 1:
@@ -416,7 +436,6 @@ func _setup_fine_tiles() -> void:
 	_fine_tile_px = tile_px
 	if ClassDB.class_exists("GameDataStore"):
 		_fine_store = ClassDB.instantiate("GameDataStore")
-	_fine_indices = FineTerrainJob.build_indices(tile_px / fine_step + 1)
 
 
 ## Décodage de la tuile (fil principal : décodeur Rust, sinon `Png16`) puis tâche de maillage.
@@ -443,7 +462,8 @@ func _start_fine_job(index: int) -> void:
 	if job.tile_bytes.is_empty():
 		# Tuile absente ou illisible : la tuile reste au LOD proche (pas de nouvel essai).
 		if _near_meshes.has(index):
-			_fine_cache[index] = {"mesh": _near_meshes[index], "grid": _near_grids.get(index, {}), "last_used": _lod_frame}
+			_fine_serial += 1
+			_fine_cache[index] = {"mesh": _near_meshes[index], "grid": _near_grids.get(index, {}), "last_used": _lod_frame, "serial": _fine_serial}
 			_fine_cache_step[index] = _current_fine_step
 		return
 	job.origin_px = Vector2i(col * chunk_px, row * chunk_px)
@@ -473,16 +493,13 @@ func _collect_fine_jobs(block: bool = false) -> void:
 		var job: FineTerrainJob = item["job"]
 		if not job.ok:
 			continue
-		if _fine_indices.size() != (job.side - 1) * (job.side - 1) * 6 + 4 * (job.side - 1) * 12:
-			_fine_indices = FineTerrainJob.build_indices(job.side)
-		var arrays := []
-		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX] = job.vertices
-		arrays[Mesh.ARRAY_INDEX] = _fine_indices
-		var mesh := ArrayMesh.new()
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		var blocks: Array[ArrayMesh] = []
+		for b in job.block_vertices.size():
+			blocks.append(_block_mesh(job.block_vertices[b], job.block_errors[b], job.block_quads))
 		var grid := {"heights": job.heights, "side": job.side, "unit": float(chunk_px) / float(job.side - 1)}
-		_fine_cache[index] = {"mesh": mesh, "grid": grid, "last_used": _lod_frame}
+		_free_fine_entry(index)
+		_fine_serial += 1
+		_fine_cache[index] = {"blocks": blocks, "grid": grid, "last_used": _lod_frame, "serial": _fine_serial}
 		_fine_cache_step[index] = job.step
 		build_stats["fine_build_ms_max"] = maxf(float(build_stats.get("fine_build_ms_max", 0.0)), job.build_ms)
 
@@ -508,6 +525,79 @@ func _wait_fine_jobs() -> void:
 
 
 ## Cache LRU : libère les maillages fins non affichés les plus anciens.
+## Maillage d'un bloc fin : pas 1 plus les niveaux `FineTerrainJob.LOD_STRIDES` (clés = erreur).
+func _block_mesh(vertices: PackedVector3Array, errors: PackedFloat32Array, quads: int) -> ArrayMesh:
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_INDEX] = _indices_for(quads, 1)
+	var lods := {}
+	for level in errors.size():
+		var stride: int = FineTerrainJob.LOD_STRIDES[level]
+		if stride <= quads and is_finite(errors[level]):
+			lods[errors[level]] = _indices_for(quads, stride)
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], lods)
+	return mesh
+
+
+func _indices_for(quads: int, stride: int) -> PackedInt32Array:
+	var key := "%d:%d" % [quads, stride]
+	if not _block_indices.has(key):
+		_block_indices[key] = FineTerrainJob.block_indices(quads, stride)
+	return _block_indices[key]
+
+
+## Affiche une tuile fine : ses blocs (nœud créé une fois par entrée) à la place de la tuile.
+func _show_fine(i: int, entry: Dictionary) -> void:
+	var chunk := _chunks[i]
+	if _fine_shown.has(i):
+		_hide_fine(i)
+	_fine_shown[i] = int(entry["serial"])
+	if not entry.has("blocks"):
+		chunk.mesh = entry["mesh"]  # tuile de relief absente : LOD proche
+		return
+	if not entry.has("node"):
+		var node := Node3D.new()
+		node.name = "Fine_%d" % i
+		node.position = chunk.position
+		for mesh: ArrayMesh in entry["blocks"]:
+			var block := MeshInstance3D.new()
+			block.mesh = mesh
+			block.material_override = material
+			block.cast_shadow = chunk.cast_shadow
+			block.lod_bias = 1.0 / fine_lod_bias
+			node.add_child(block)
+		add_child(node)
+		entry["node"] = node
+	(entry["node"] as Node3D).visible = true
+	chunk.visible = false
+
+
+func _hide_fine(i: int) -> void:
+	_fine_shown.erase(i)
+	_chunks[i].visible = true
+	var entry: Dictionary = _fine_cache.get(i, {})
+	if entry.has("node"):
+		(entry["node"] as Node3D).visible = false
+
+
+func _free_fine_entry(index: int) -> void:
+	var entry: Dictionary = _fine_cache.get(index, {})
+	if entry.has("node"):
+		(entry["node"] as Node).queue_free()
+		entry.erase("node")
+
+
+## Nombre de blocs fins affichés (mesures).
+func fine_block_count() -> int:
+	var count := 0
+	for i in _fine_shown:
+		var entry: Dictionary = _fine_cache.get(i, {})
+		count += (entry.get("blocks", []) as Array).size()
+	return count
+
+
 func _evict_fine() -> void:
 	if _fine_cache.size() <= max_cached_fine:
 		return
@@ -517,6 +607,7 @@ func _evict_fine() -> void:
 			idle.append([int(_fine_cache[index]["last_used"]), index])
 	idle.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	for i in mini(_fine_cache.size() - max_cached_fine, idle.size()):
+		_free_fine_entry(idle[i][1])
 		_fine_cache.erase(idle[i][1])
 		_fine_cache_step.erase(idle[i][1])
 
