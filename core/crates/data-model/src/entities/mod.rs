@@ -13,6 +13,7 @@ pub mod chivalric_order;
 pub mod diet;
 pub mod event;
 pub mod faction;
+pub mod landmark;
 pub mod movement;
 pub mod names;
 pub mod population_rules;
