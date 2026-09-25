@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/auto_resolve_rules.schema.json",
+  "title": "Règles de l'auto-résolution",
+  "description": "Fichier data/rules/auto_resolve.json (lot N1, ADR 0013) : une bataille auto-résolue se joue en phases (salves, charge, manches de mêlée) entre familles d'unités. Les pertes infligées valent hommes / 100 × statistique × létalité, réduites par l'armure de la cible.",
+  "type": "object",
+  "$defs": {
+    "factor": { "type": "number", "minimum": 0, "maximum": 5 },
+    "share": { "type": "number", "minimum": 0, "maximum": 1 },
+    "chances": {
+      "type": "object",
+      "description": "Chances (en %) de chaque temps dans la saison.",
+      "properties": {
+        "clear": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "rain": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "fog": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "snow": { "type": "integer", "minimum": 0, "maximum": 100 }
+      },
+      "required": ["clear", "rain", "fog", "snow"],
+      "additionalProperties": false
+    },
+    "terrain": {
+      "type": "object",
+      "properties": {
+        "charge": { "$ref": "#/$defs/factor", "description": "Multiplicateur des charges." },
+        "ranged": { "$ref": "#/$defs/factor", "description": "Multiplicateur du tir." },
+        "defender": { "$ref": "#/$defs/factor", "description": "Multiplicateur de tout ce que le défenseur inflige." }
+      },
+      "required": ["charge", "ranged", "defender"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "volleys": { "type": "integer", "minimum": 0, "maximum": 10, "description": "Salves tirées avant le contact." },
+    "melee_rounds": { "type": "integer", "minimum": 1, "maximum": 20, "description": "Manches de mêlée après la charge." },
+    "ranged_lethality": { "$ref": "#/$defs/factor", "description": "Pertes par 100 hommes et point de tir, par salve." },
+    "melee_lethality": { "$ref": "#/$defs/factor", "description": "Pertes par 100 hommes et point de mêlée, par manche." },
+    "charge_lethality": { "$ref": "#/$defs/factor", "description": "Pertes par 100 hommes et point de charge." },
+    "armor_vs_ranged": { "$ref": "#/$defs/share", "description": "Part des traits arrêtée par 100 points d'armure." },
+    "armor_vs_melee": { "$ref": "#/$defs/share", "description": "Part des coups arrêtée par 100 points d'armure." },
+    "armor_vs_charge": { "$ref": "#/$defs/share", "description": "Part de la charge arrêtée par 100 points d'armure." },
+    "ranged_in_melee": { "$ref": "#/$defs/share", "description": "Part de leur salve que les tireurs gardent pendant la mêlée." },
+    "screened_exposure": { "$ref": "#/$defs/factor", "description": "Exposition des tireurs à l'infanterie ennemie tant que leur front tient." },
+    "screen_share": { "$ref": "#/$defs/share", "description": "Part des hommes que le front doit garder pour couvrir les tireurs." },
+    "cavalry_flank_exposure": { "$ref": "#/$defs/factor", "description": "Exposition des tireurs à la cavalerie (flancs)." },
+    "skirmish_exposure": { "$ref": "#/$defs/factor", "description": "Exposition des tirailleurs montés aux traits et aux coups." },
+    "pike_charge_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur d'une charge reçue par des piques." },
+    "pike_reflect": { "$ref": "#/$defs/factor", "description": "Pertes rendues aux cavaliers par point de charge reçu par des piques." },
+    "stakes_charge_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur d'une charge reçue par des archers en défense derrière leurs pieux." },
+    "pike_vs_cavalry": { "$ref": "#/$defs/factor", "description": "En mêlée, les piques frappent les cavaliers plus fort de ce facteur, et les cavaliers frappent les piques moins fort d'autant." },
+    "mounted_target_ranged_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur des traits reçus par les unités montées (elles abordent vite)." },
+    "pavise_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur des traits reçus par une unité à pavois." },
+    "cavalry_melee_factor": { "$ref": "#/$defs/factor", "description": "Multiplicateur de la mêlée de la cavalerie." },
+    "morale_per_loss_percent": { "$ref": "#/$defs/factor", "description": "Points de moral perdus par % des hommes perdus dans une phase." },
+    "break_morale": { "type": "number", "minimum": 0, "maximum": 100, "description": "Seuil de moral sous lequel un camp rompt." },
+    "pursuit_base": { "$ref": "#/$defs/share", "description": "Part des hommes restants perdue par le vaincu dans la déroute." },
+    "pursuit_per_cavalry": { "$ref": "#/$defs/factor", "description": "Part supplémentaire par cavalier vainqueur et par homme vaincu." },
+    "winner_max_losses": { "$ref": "#/$defs/share", "description": "Pertes maximales du vainqueur (part des hommes)." },
+    "loser_max_losses": { "$ref": "#/$defs/share", "description": "Pertes maximales du vaincu." },
+    "loser_min_losses": { "$ref": "#/$defs/share", "description": "Pertes minimales du vaincu." },
+    "jitter": { "$ref": "#/$defs/share", "description": "Fortune des armes : chaque phase est multipliée par 1 ± jitter." },
+    "river_attacker": { "$ref": "#/$defs/factor", "description": "Multiplicateur de l'attaquant qui franchit une rivière." },
+    "walls_attacker": { "$ref": "#/$defs/factor", "description": "Multiplicateur de l'attaquant qui donne l'assaut à des murailles." },
+    "walls_defender_ranged": { "$ref": "#/$defs/factor", "description": "Multiplicateur du tir du défenseur depuis ses murailles." },
+    "legacy_defender_bonus": { "$ref": "#/$defs/factor", "description": "Bonus du défenseur quand seul l'indicateur de relief est connu (terrain inconnu)." },
+    "weather": {
+      "type": "object",
+      "properties": {
+        "spring": { "$ref": "#/$defs/chances" },
+        "summer": { "$ref": "#/$defs/chances" },
+        "autumn": { "$ref": "#/$defs/chances" },
+        "winter": { "$ref": "#/$defs/chances" },
+        "rain_bow_factor": { "$ref": "#/$defs/factor", "description": "Tir des unités sensibles à la pluie, sous la pluie." },
+        "snow_bow_factor": { "$ref": "#/$defs/factor", "description": "Même chose sous la neige." },
+        "fog_ranged_factor": { "$ref": "#/$defs/factor", "description": "Tout tir dans le brouillard." },
+        "wet_charge_factor": { "$ref": "#/$defs/factor", "description": "Charges sous la pluie ou la neige (boue)." }
+      },
+      "required": ["spring", "summer", "autumn", "winter", "rain_bow_factor", "snow_bow_factor", "fog_ranged_factor", "wet_charge_factor"],
+      "additionalProperties": false
+    },
+    "terrain": {
+      "type": "object",
+      "description": "Effets par terrain ; un terrain absent est neutre.",
+      "propertyNames": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] },
+      "additionalProperties": { "$ref": "#/$defs/terrain" }
+    }
+  },
+  "required": [
+    "volleys", "melee_rounds", "ranged_lethality", "melee_lethality", "charge_lethality",
+    "armor_vs_ranged", "armor_vs_melee", "armor_vs_charge", "ranged_in_melee", "screened_exposure",
+    "screen_share", "cavalry_flank_exposure", "skirmish_exposure", "pike_charge_factor", "pike_reflect",
+    "stakes_charge_factor", "pike_vs_cavalry", "mounted_target_ranged_factor", "pavise_factor", "cavalry_melee_factor", "morale_per_loss_percent",
+    "break_morale", "pursuit_base", "pursuit_per_cavalry", "winner_max_losses", "loser_max_losses",
+    "loser_min_losses", "jitter", "river_attacker", "walls_attacker", "walls_defender_ranged",
+    "legacy_defender_bonus", "weather"
+  ],
+  "additionalProperties": false
+}

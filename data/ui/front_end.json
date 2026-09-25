@@ -1,0 +1,497 @@
+{
+  "description": "Écrans d'accueil (lot MM1) : décor 3D du menu, présentation des factions jouables, dates de départ, introduction, citations et conseils des écrans de chargement. Rendu et textes seulement, aucune règle.",
+  "backdrop": {
+    "landmark": "paris",
+    "model": "res://assets/models/landmarks/paris_siege.glb",
+    "sky": "dawn",
+    "sky_luminance": 0.5,
+    "sky_saturation": 1.15,
+    "sky_tint": [
+      1.0,
+      0.86,
+      0.74
+    ],
+    "sun_elevation_deg": 7.0,
+    "sun_energy": 1.6,
+    "sun_color": [
+      1.0,
+      0.64,
+      0.38
+    ],
+    "fog_color": [
+      0.62,
+      0.5,
+      0.46
+    ],
+    "fog_density": 0.00075,
+    "ground_color": [
+      0.24,
+      0.26,
+      0.16
+    ],
+    "shot_seconds": 26.0,
+    "shots": [
+      {
+        "id": "host_before_paris",
+        "label": "L'ost devant Paris",
+        "from": {
+          "position": [
+            -60.0,
+            3.2,
+            1156.0
+          ],
+          "target": [
+            -10.0,
+            24.0,
+            0.0
+          ]
+        },
+        "to": {
+          "position": [
+            45.0,
+            3.8,
+            1150.0
+          ],
+          "target": [
+            20.0,
+            28.0,
+            0.0
+          ]
+        },
+        "fov": 40.0,
+        "host": true
+      },
+      {
+        "id": "cite_orbit",
+        "label": "L'île de la Cité",
+        "from": {
+          "position": [
+            -620.0,
+            210.0,
+            520.0
+          ],
+          "target": [
+            -300.0,
+            10.0,
+            -60.0
+          ]
+        },
+        "to": {
+          "position": [
+            -120.0,
+            170.0,
+            760.0
+          ],
+          "target": [
+            -230.0,
+            10.0,
+            -120.0
+          ]
+        },
+        "fov": 40.0,
+        "host": false
+      },
+      {
+        "id": "seine_upstream",
+        "label": "La Seine au crépuscule",
+        "from": {
+          "position": [
+            900.0,
+            60.0,
+            420.0
+          ],
+          "target": [
+            -160.0,
+            30.0,
+            -60.0
+          ]
+        },
+        "to": {
+          "position": [
+            760.0,
+            48.0,
+            620.0
+          ],
+          "target": [
+            -240.0,
+            30.0,
+            0.0
+          ]
+        },
+        "fov": 38.0,
+        "host": false
+      }
+    ],
+    "host": {
+      "center": [
+        0.0,
+        0.0,
+        1120.0
+      ],
+      "facing_deg": 180.0,
+      "regiments": [
+        {
+          "kind": "infantry",
+          "variant": 0,
+          "faction": "fac_france",
+          "offset": [
+            0.0,
+            0.0
+          ],
+          "files": 20,
+          "ranks": 5,
+          "spacing": 1.35,
+          "banner": "fac_france_banner.png"
+        },
+        {
+          "kind": "cavalry",
+          "variant": 0,
+          "faction": "fac_france",
+          "offset": [
+            -50.0,
+            6.0
+          ],
+          "files": 12,
+          "ranks": 3,
+          "spacing": 2.8,
+          "banner": "oriflamme.png"
+        },
+        {
+          "kind": "archer",
+          "variant": 1,
+          "faction": "fac_france",
+          "offset": [
+            48.0,
+            2.0
+          ],
+          "files": 16,
+          "ranks": 4,
+          "spacing": 1.5,
+          "banner": "fac_france_pennon.png"
+        },
+        {
+          "kind": "infantry",
+          "variant": 1,
+          "faction": "fac_burgundy",
+          "offset": [
+            95.0,
+            14.0
+          ],
+          "files": 14,
+          "ranks": 5,
+          "spacing": 1.3,
+          "banner": "fac_burgundy_banner.png"
+        },
+        {
+          "kind": "cavalry",
+          "variant": 0,
+          "faction": "fac_france",
+          "offset": [
+            -10.0,
+            45.0
+          ],
+          "files": 16,
+          "ranks": 3,
+          "spacing": 2.8,
+          "banner": "fac_france_banner.png"
+        },
+        {
+          "kind": "infantry",
+          "variant": 2,
+          "faction": "fac_france",
+          "offset": [
+            -100.0,
+            20.0
+          ],
+          "files": 14,
+          "ranks": 4,
+          "spacing": 1.4,
+          "banner": "fac_france_pennon.png"
+        },
+        {
+          "kind": "archer",
+          "variant": 2,
+          "faction": "fac_genoa",
+          "offset": [
+            140.0,
+            40.0
+          ],
+          "files": 12,
+          "ranks": 4,
+          "spacing": 1.6,
+          "banner": "fac_genoa_banner.png"
+        }
+      ]
+    },
+    "countryside": {
+      "river_z": 170.0,
+      "river_half_width": 85.0,
+      "seed": 1337,
+      "groves": 70,
+      "keep_out": [
+        [
+          -260.0,
+          950.0,
+          260.0,
+          1400.0
+        ],
+        [
+          -1200.0,
+          320.0,
+          1200.0,
+          1000.0
+        ]
+      ],
+      "meadow_zone": [
+        -600.0,
+        1000.0,
+        600.0,
+        1500.0
+      ],
+      "grass": {
+        "rect": [
+          -140.0,
+          1105.0,
+          160.0,
+          1165.0
+        ],
+        "count": 36000
+      }
+    },
+    "ambience": [
+      {
+        "stream": "res://assets/audio/ambience/wind.ogg",
+        "volume_db": -16.0
+      },
+      {
+        "stream": "res://assets/audio/ambience/countryside.ogg",
+        "volume_db": -18.0
+      }
+    ]
+  },
+  "start_dates": [
+    {
+      "id": "grand_campaign_1337",
+      "year": 1337,
+      "season": "printemps",
+      "title": "La querelle de Guyenne",
+      "text": "Printemps 1337. Philippe VI s'apprête à confisquer la Guyenne ; Édouard III rassemble ses alliés aux Pays-Bas et prépare son défi. La grande campagne s'étend jusqu'en 1453."
+    }
+  ],
+  "factions": [
+    {
+      "id": "fac_france",
+      "tagline": "Le plus riche royaume d'Occident",
+      "intro": "Philippe VI de Valois règne depuis neuf ans sur quinze à vingt millions de sujets. Mais sa couronne est contestée : Édouard d'Angleterre, petit-fils de Philippe le Bel, se dit plus proche héritier. Tenez la Guyenne et la Flandre, ramenez les grands vassaux dans l'obéissance et boutez l'Anglais hors du royaume.",
+      "strengths": [
+        "Le trésor le plus riche et le royaume le plus peuplé",
+        "Chevalerie lourde nombreuse, arbalétriers génois à la solde",
+        "Paris, Reims et les pairs du royaume sous votre main"
+      ],
+      "weaknesses": [
+        "Grands vassaux turbulents : Bretagne, Flandre, Navarre",
+        "Pas d'infanterie de trait nationale",
+        "Fronts multiples : Guyenne, Flandre, Manche"
+      ],
+      "difficulty": 1,
+      "illustration": "res://assets/illustrations/fac_france.jpg"
+    },
+    {
+      "id": "fac_england",
+      "tagline": "Des archers redoutés, une couronne à conquérir",
+      "intro": "Édouard III a vingt-quatre ans et vient de soumettre l'Écosse. Duc d'Aquitaine, il refuse de voir la Guyenne confisquée et revendique la couronne de France par sa mère Isabelle. Un royaume de quatre à cinq millions d'âmes, riche de sa laine, face au géant capétien : il faudra des alliés, des chevauchées et des victoires éclatantes.",
+      "strengths": [
+        "Archers à l'arc long et tactiques à pied éprouvées",
+        "Fiscalité efficace, laine vendue aux villes de Flandre",
+        "La mer : Bordeaux, Ponthieu et les ports de la Manche"
+      ],
+      "weaknesses": [
+        "Royaume moins peuplé, trésor vite épuisé",
+        "L'Écosse, alliée de la France, menace au nord",
+        "Des têtes de pont lointaines à défendre outre-Manche"
+      ],
+      "difficulty": 2,
+      "illustration": "res://assets/illustrations/fac_england.jpg"
+    },
+    {
+      "id": "fac_burgundy",
+      "tagline": "Grandir entre deux couronnes",
+      "intro": "Eudes IV, pair de France et beau-frère du roi, tient le duché, le comté de Bourgogne et l'Artois. Vassal fidèle ou prince ambitieux ? Entre la France et l'Empire, jouez des alliances et des mariages pour bâtir l'État bourguignon des Pays-Bas à la Saône, sans vous faire dévorer.",
+      "strengths": [
+        "Duché riche : vignes, sel de Salins, draps d'Artois",
+        "Position charnière entre la France et l'Empire",
+        "Diplomatie et alliances matrimoniales"
+      ],
+      "weaknesses": [
+        "Vassal du roi de France, entraîné dans ses guerres",
+        "Petite armée, peu de places fortes",
+        "Terres éclatées de l'Artois à la Franche-Comté"
+      ],
+      "difficulty": 3,
+      "illustration": "res://assets/illustrations/fac_burgundy.jpg"
+    }
+  ],
+  "difficulty_labels": [
+    "Facile",
+    "Normale",
+    "Difficile",
+    "Très difficile"
+  ],
+  "intro": {
+    "music": "court",
+    "card_seconds": 8.0,
+    "cards": [
+      {
+        "date": "1er février 1328",
+        "title": "La fin des Capétiens directs",
+        "text": "Charles IV le Bel meurt à Vincennes sans fils. Trois frères se sont succédé sur le trône en quatorze ans ; avec le dernier s'éteint la lignée directe d'Hugues Capet.",
+        "illustration": "res://assets/illustrations/cdx_capetiens_directs.jpg"
+      },
+      {
+        "date": "Printemps 1328",
+        "title": "Un Valois sur le trône",
+        "text": "Les barons écartent Édouard III d'Angleterre, petit-fils de Philippe le Bel par sa mère Isabelle : une femme, disent-ils, ne peut transmettre la couronne. Ils sacrent Philippe de Valois, neveu de Philippe le Bel : Philippe VI.",
+        "illustration": "res://assets/illustrations/cdx_succession_1328.jpg"
+      },
+      {
+        "date": "1329-1334",
+        "title": "L'hommage et la Guyenne",
+        "text": "À Amiens, le jeune Édouard prête hommage au Valois pour la Guyenne, dernier lambeau de l'héritage Plantagenêt. Mais les procès s'y multiplient, Philippe VI accueille le roi d'Écosse David II, et Édouard donne asile à Robert d'Artois, ennemi mortel du roi de France.",
+        "illustration": "res://assets/illustrations/cdx_guyenne.jpg"
+      },
+      {
+        "date": "24 mai 1337",
+        "title": "La confiscation",
+        "text": "Philippe VI prononce la saisie du duché de Guyenne pour la félonie de son vassal. À la Toussaint, l'évêque de Lincoln porte à Paris le défi d'Édouard III, qui se dit roi de France.",
+        "illustration": "res://assets/events/evt_appel_gascon.jpg"
+      },
+      {
+        "date": "1337",
+        "title": "Cent ans de guerre",
+        "text": "Ainsi commence la plus longue guerre de l'Occident médiéval. Elle verra Crécy et Azincourt, la Peste noire et les Grandes Compagnies, Du Guesclin et Jeanne d'Arc. Son issue est désormais entre vos mains.",
+        "illustration": "res://assets/illustrations/cdx_guerre_de_cent_ans.jpg"
+      }
+    ]
+  },
+  "loading": {
+    "illustrations": [
+      "res://assets/events/evt_crecy.jpg",
+      "res://assets/events/evt_sluys.jpg",
+      "res://assets/events/evt_poitiers.jpg",
+      "res://assets/events/evt_siege_calais.jpg",
+      "res://assets/events/evt_combat_des_trente.jpg",
+      "res://assets/events/evt_du_guesclin.jpg",
+      "res://assets/events/evt_sacre_de_reims.jpg",
+      "res://assets/events/evt_tournoi.jpg",
+      "res://assets/events/evt_ordre_de_la_jarretiere.jpg",
+      "res://assets/events/evt_roi_de_france_a_gand.jpg",
+      "res://assets/events/evt_banquet_princier.jpg",
+      "res://assets/events/evt_chroniqueur.jpg",
+      "res://assets/illustrations/cdx_tres_riches_heures.jpg",
+      "res://assets/illustrations/cdx_travaux_des_mois.jpg",
+      "res://assets/illustrations/cdx_chevauchee.jpg",
+      "res://assets/illustrations/cdx_paris.jpg"
+    ],
+    "faction_illustrations": {
+      "fac_france": [
+        "res://assets/events/evt_sacre_de_reims.jpg",
+        "res://assets/illustrations/cdx_paris.jpg"
+      ],
+      "fac_england": [
+        "res://assets/events/evt_ordre_de_la_jarretiere.jpg",
+        "res://assets/events/evt_sluys.jpg"
+      ],
+      "fac_burgundy": [
+        "res://assets/events/evt_banquet_princier.jpg",
+        "res://assets/illustrations/cdx_toison_or.jpg"
+      ]
+    },
+    "quotes": [
+      {
+        "text": "Afin que les honorables entreprises, nobles aventures et faits d'armes advenus par les guerres de France et d'Angleterre soient notablement enregistrés et mis en mémoire perpétuelle…",
+        "author": "Jean Froissart",
+        "source": "Chroniques, prologue",
+        "date": "vers 1370"
+      },
+      {
+        "text": "Laissez à l'enfant gagner ses éperons, car je veux que la journée soit sienne.",
+        "author": "Édouard III, du Prince noir",
+        "source": "Froissart, Chroniques",
+        "date": "Crécy, 26 août 1346"
+      },
+      {
+        "text": "Ouvrez, ouvrez, châtelain : c'est l'infortuné roi de France.",
+        "author": "Philippe VI au château de La Broye",
+        "source": "Froissart, Chroniques",
+        "date": "nuit du 26 août 1346"
+      },
+      {
+        "text": "Père, gardez-vous à droite ! Père, gardez-vous à gauche !",
+        "author": "Philippe, fils de Jean II",
+        "source": "selon la tradition",
+        "date": "Poitiers, 19 septembre 1356"
+      },
+      {
+        "text": "Honni soit qui mal y pense.",
+        "author": "Devise de l'ordre de la Jarretière",
+        "source": "fondé par Édouard III",
+        "date": "vers 1348"
+      },
+      {
+        "text": "Édouard, par la grâce de Dieu, roi de France et d'Angleterre et seigneur d'Irlande.",
+        "author": "Titre pris par Édouard III",
+        "source": "place du Vendredi, à Gand",
+        "date": "26 janvier 1340"
+      },
+      {
+        "text": "Quand Adam bêchait et qu'Ève filait, qui donc était gentilhomme ?",
+        "author": "John Ball",
+        "source": "sermon de Blackheath",
+        "date": "juin 1381"
+      },
+      {
+        "text": "Il n'est fileuse en France qui ne filerait pour payer ma rançon.",
+        "author": "Bertrand du Guesclin",
+        "source": "selon la tradition",
+        "date": "1367"
+      },
+      {
+        "text": "Roi d'Angleterre, faites raison au Roi du Ciel de son sang royal.",
+        "author": "Jeanne d'Arc",
+        "source": "lettre aux Anglais",
+        "date": "22 mars 1429"
+      },
+      {
+        "text": "L'an mil quatre cent vingt-neuf reprit à luire le soleil.",
+        "author": "Christine de Pizan",
+        "source": "Ditié de Jehanne d'Arc",
+        "date": "31 juillet 1429"
+      },
+      {
+        "text": "Le royaume de France ne tombe point en quenouille.",
+        "author": "Adage des légistes",
+        "source": "sur la succession au trône",
+        "date": "XIVe-XVe siècle"
+      },
+      {
+        "text": "Si la bonne foi était bannie du monde, elle devrait se retrouver dans le cœur des rois.",
+        "author": "Jean II le Bon",
+        "source": "selon la tradition",
+        "date": "1364"
+      }
+    ],
+    "tips": [
+      "Un tour est une saison : l'hiver ralentit les armées et affame celles qui sont en terre ennemie.",
+      "Échap ouvre le menu pause : sauvegarde, réglages, aide et retour au menu.",
+      "Le rapport de saison résume chaque fin de tour ; cliquez une ligne pour y porter la caméra.",
+      "Les alertes à droite signalent sièges, armées ennemies aux frontières et dettes.",
+      "Un général expérimenté vaut plusieurs compagnies : confiez vos armées à vos meilleurs vassaux.",
+      "La chronique propose des décisions historiques : vous avez deux tours pour choisir.",
+      "Les archers anglais redoutent la pluie ; les chevaliers, la boue et les pieux.",
+      "La touche K ouvre le Codex : chaque mot souligné d'une bulle y renvoie.",
+      "Un siège affame la place : tenez le blocus plutôt que de donner l'assaut trop tôt.",
+      "Une rançon bien négociée peut remplir le trésor mieux qu'une province conquise.",
+      "Les pentes, la boue et les bois ralentissent la marche : attendez l'ennemi sur les hauteurs et laissez-le s'épuiser à monter."
+    ]
+  }
+}

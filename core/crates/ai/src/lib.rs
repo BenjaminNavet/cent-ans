@@ -8,6 +8,7 @@
 
 pub mod alignment;
 pub mod campaign;
+pub mod doctrine;
 pub mod grid;
 pub mod support;
 

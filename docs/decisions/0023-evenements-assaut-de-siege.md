@@ -1,0 +1,58 @@
+# ADR 0023 — Assaut de siège : événements de rendu du cœur et grimpeurs posés par le cœur
+
+Date : 2026-09-25. Statut : accepté. Lot SG1 (backlog `docs/audit/backlog-tw.md`, « Sièges »).
+
+## Contexte
+
+Les batailles de siège (M8, F5, S1, S2) avaient leurs règles dans `sim-battle`, mais le rendu les
+devinait en comparant l'état d'une image à l'autre : PV d'un pan qui baissent (son d'impact),
+munitions qui baissent (volée tirée… vers le régiment ennemi le plus proche, même quand l'engin
+battait la muraille), un régiment `climbing` entier élevé d'un bloc à `climb_progress × hauteur`.
+Impossible ainsi de montrer la pierre qui frappe tel endroit du pan, le coup de bélier, les
+échelles dressées là où la simulation les pose, le pont-levis d'un beffroi qui accoste ou l'huile
+versée des mâchicoulis.
+
+## Décision
+
+1. **Flux d'événements de rendu** distinct du journal : `SiegeFx { time, kind }`
+   (`sim-battle/src/siege_fx.rs`), lu par `BattleSim.get_siege_events()` (comme `get_events()`,
+   « depuis le dernier appel »). Le cœur applique d'abord ses règles puis enregistre ce qui s'est
+   passé ; un rendu qui ignore ces événements ne perd que le spectacle. Aucun tirage aléatoire :
+   le point d'impact d'une pierre vient d'un hachage entier (tick, unité), le déterminisme et les
+   tests existants sont intacts. Les transitions (porte enfoncée, brèche, beffroi accosté ou
+   décroché) sont détectées une fois par pas, quelle qu'en soit la cause (bélier, engin, feu).
+2. **Grimpeurs posés par le cœur** : `BattleSim::soldier_poses(unit)` remplace
+   `soldier_positions + standing_height` pour le tampon des soldats. Un régiment qui escalade
+   montre ses premiers soldats sur les échelles (`BattleSim::ladders`, pied et haut sur le pan,
+   à l'écart des tours) ou sur le pont du beffroi, montant homme après homme, une part croissante
+   des autres déjà sur le chemin de ronde, le reste au pied du mur. Le rendu pose ses échelles sur
+   les mêmes segments (`get_units().ladder_lines`) : pas de géométrie dupliquée.
+3. **Animation d'escalade** : clip `climb` cuit par le pipeline V2 (surcouche de pose, ADR 0014)
+   et mode de shader `M_SPLIT` : les `split_count` premiers soldats d'un régiment
+   (`climbers_shown`) jouent le clip d'escalade, les autres les clips du pied du mur. Le tampon
+   de la simulation reste copié tel quel dans le `MultiMesh` (aucun reconditionnement GDScript).
+4. **Règles ajoutées avec** (dans le cœur, testées) : bélier par coups toutes les 3 s (même usure
+   moyenne), huile bouillante (un pot toutes les 30 s si un défenseur garde la porte, 3 hommes
+   avant armure à moitié efficace, −4 de moral ; bélier protégé par ses peaux), repli de la
+   garnison IA sur la place quand la porte tombe (2 régiments au plus par ouverture la bouchent).
+5. **Rendu** dans un fichier séparé (`game/scripts/battle/siege_assault_fx.gd`) : `battle_siege.gd`
+   (maisons BR1, pans S1, feu S2) ne gagne qu'un drapeau (`external_ladders`) et le décalage
+   visuel des tours de la porte (`SiegeAssaultFx.gatehouse_tower`).
+
+## Options écartées
+
+- Tout déduire des différences d'état côté GDScript : ni point d'impact, ni instant du coup, ni
+  pan visé par un engin (la cible d'unité est vide quand il bat la muraille).
+- Mettre ces événements dans le journal (`BattleEvent`) : il parle au joueur, en français ; le
+  mélanger au rendu l'aurait pollué (une ligne par pierre).
+- Un `MultiMesh` séparé pour les grimpeurs : exclusion côté cœur, second tampon, second matériau ;
+  le mode `M_SPLIT` suffit avec un seul entier par régiment.
+
+## Conséquences
+
+- Nouveau spectacle de siège = un variant de `SiegeFxKind` + son traitement dans
+  `siege_assault_fx.gd`.
+- Sonde d'escalade (`SEEDS=20 probe -- siege 0 ""`) : 9/20 → 7/20 victoires de l'assaillant (huile),
+  dans la fourchette de `f5d` ; brèche et engins inchangés (6/6).
+- Les tours de la porte sont dessinées écartées de ≈ 0,15 rayon au-delà des jambages ; le cœur
+  les garde centrées sur les extrémités (elles ne sont pas des obstacles, seul leur tir compte).
