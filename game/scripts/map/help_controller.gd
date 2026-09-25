@@ -5,12 +5,12 @@ extends Node
 ## `campaign_map.gd` ; celui-ci n'appelle que `setup` et `handle_input`.
 
 const HELP_TEXT := """[b]Commandes de la carte[/b]
-• Déplacer la caméra : W A S D (Z Q S D en AZERTY), flèches ou bords d'écran (F2 pour désactiver) ; molette : zoom ; Q / E : rotation.
+• Déplacer la caméra : W A S D (Z Q S D en AZERTY), flèches ou bords d'écran (F2 pour désactiver) ; molette : zoom ; Q / E (A / E en AZERTY) : rotation.
 • Clic gauche : sélectionner une armée ou une province. Clic droit (armée sélectionnée) : ordre de déplacement.
 • Entrée : fin du tour. Échap : désélectionner.
-• C : cour et personnages. T : technologies. P : diplomatie. O : objectifs. F1 : cette aide.
+• C : cour et personnages. T : technologies. P : diplomatie. O : objectifs. G : agents. K : Codex. L : tutoriel. F1 : cette aide.
 • Modes de carte : M mécontentement, N diplomatie, R religion. F12 : capture d'écran.
-• Volumes de la musique et des effets : menu de départ ou Menu → Son….
+• Volumes de la musique et des effets : menu de départ ou Menu → Son…
 
 [b]La campagne[/b]
 • Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi.
@@ -18,13 +18,13 @@ const HELP_TEXT := """[b]Commandes de la carte[/b]
 • Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort (3 % de l'excédent au-delà de huit saisons de revenu). En dette, les troupes perdent du moral : licenciez.
 • Recrutez dans le panneau de province, formez des armées, donnez-leur un général (fiche personnage).
 • Chronique : les grands événements historiques (Crécy, la Peste noire, Jeanne d'Arc…) et des événements aléatoires demandent une décision ; bouton « Chronique (n) » de la barre, deux tours pour choisir.
-• Posture « Siège » : l'armée assiège la place ennemie ; vivres, brèche et bouton « Donner l'assaut » apparaissent dans le panneau d'armée. Posture « Chevauchée » : pillage et butin.
+• Posture « Siège » : l'armée assiège la place ennemie ; quand elle est sélectionnée, l'état du siège (vivres, brèche) et le bouton « Donner l'assaut » apparaissent au-dessus du bandeau d'ost, en bas de l'écran. Posture « Chevauchée » : pillage et butin.
 • Quand vos armées rencontrent l'ennemi, choisissez « Livrer bataille » (bataille 3D) ou la résolution automatique.
 
 [b]Batailles[/b]
 • Espace : pause (ordres possibles en pause). + / − ou boutons en bas à droite : vitesse ×1 / ×2 / ×4. Ctrl+1…9 : enregistrer un groupe, 1…9 : le rappeler (deux fois : centrer).
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter). Clic droit : déplacer ou attaquer ; double clic droit : au pas de course ; glisser-droit : orienter la ligne.
-• F : formation, G : tir à volonté, H : halte. La pluie gêne les archers, les flancs et les arrières sont vulnérables, le moral s'effondre sans général.
+• F : formation, G : tir à volonté, H : halte. Ordres du chef : Z X V B N (W X V B N en AZERTY). C : suivre la sélection. U : bannières. F1 : aide de bataille. La pluie gêne les archers, les flancs et les arrières sont vulnérables, le moral s'effondre sans général.
 
 [b]Personnages, diplomatie, religion[/b]
 • Les personnages gagnent de l'expérience et des points de compétence (arbre à trois branches), se marient, ont des enfants, meurent : la succession suit la loi du royaume.

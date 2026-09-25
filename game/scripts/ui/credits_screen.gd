@@ -86,7 +86,9 @@ func _ready() -> void:
 	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back.pressed.connect(close)
 	box.add_child(back)
-	text_label.text = markdown_to_bbcode(load_credits())
+	var parts := split_title(load_credits())
+	title.text = parts[0]
+	text_label.text = markdown_to_bbcode(parts[1])
 
 
 func _process(delta: float) -> void:
@@ -122,15 +124,51 @@ func load_credits() -> String:
 	return FALLBACK_TEXT
 
 
-## Markdown simple → BBCode centré.
+## Markdown simple → BBCode centré (audit A3 M4) : paragraphes recollés, tableaux en lignes
+## « [b]Auteur[/b] — colonnes », parenthèses purement techniques (« (`tools/`) », « (outil `…`) »)
+## retirées, code restant en italique.
 static func markdown_to_bbcode(markdown: String) -> String:
 	var bold := RegEx.create_from_string("\\*\\*(.+?)\\*\\*")
 	var italic := RegEx.create_from_string("(?<![*\\w])[*_](.+?)[*_](?![*\\w])")
 	var link := RegEx.create_from_string("\\[([^\\]]+)\\]\\([^)]+\\)")
 	var code := RegEx.create_from_string("`([^`]+)`")
+	var technical := RegEx.create_from_string("\\s*\\((?:outils?\\s+)?`[^`]*`\\)")
+	var blocks := PackedStringArray()
+	var paragraph := PackedStringArray()
+	var table_rows: Array[PackedStringArray] = []
+	for raw_line in (markdown + "\n").split("\n"):
+		var stripped := raw_line.strip_edges()
+		if stripped.begins_with("|"):
+			var cells := PackedStringArray()
+			for cell in stripped.trim_prefix("|").trim_suffix("|").split("|"):
+				cells.append(cell.strip_edges())
+			if not cells.is_empty() and not cells[0].begins_with("---"):
+				table_rows.append(cells)
+			continue
+		if not table_rows.is_empty():
+			# La première ligne est l'en-tête : les autres deviennent « Auteur — valeurs ».
+			for index in range(1, table_rows.size()):
+				var row: PackedStringArray = table_rows[index]
+				var rest := row.slice(1)
+				blocks.append("[b]%s[/b] — [font_size=14]%s[/font_size]" % [row[0], " — ".join(rest)])
+			table_rows.clear()
+		var is_item := stripped.begins_with("- ") or stripped.begins_with("* ")
+		if stripped == "" or stripped.begins_with("#") or is_item:
+			if not paragraph.is_empty():
+				blocks.append(" ".join(paragraph))
+				paragraph.clear()
+		if stripped == "":
+			continue
+		if stripped.begins_with("#"):
+			blocks.append(stripped)
+		else:
+			paragraph.append(stripped.substr(2) if is_item else stripped)
 	var lines := PackedStringArray()
-	for raw_line in markdown.split("\n"):
-		var line := link.sub(raw_line.strip_edges(), "$1", true).replace("[", "[lb]")
+	for block in blocks:
+		var line := technical.sub(block, "", true)
+		line = link.sub(line, "$1", true)
+		if not line.begins_with("[b]"):
+			line = line.replace("[", "[lb]")
 		line = bold.sub(line, "[b]$1[/b]", true)
 		line = italic.sub(line, "[i]$1[/i]", true)
 		line = code.sub(line, "[i]$1[/i]", true)
@@ -140,7 +178,19 @@ static func markdown_to_bbcode(markdown: String) -> String:
 			line = "\n[font_size=22][b]%s[/b][/font_size]" % line.trim_prefix("## ")
 		elif line.begins_with("### "):
 			line = "[font_size=19][b]%s[/b][/font_size]" % line.trim_prefix("### ")
-		elif line.begins_with("- ") or line.begins_with("* "):
-			line = line.substr(2)
 		lines.append(line)
 	return "[center]%s[/center]" % "\n".join(lines)
+
+
+## Sépare le titre de premier niveau (« # Crédits — Cent Ans ») du reste : il remplace le titre
+## fixe de l'écran au lieu d'être répété dessous (audit A3 M4).
+static func split_title(markdown: String) -> PackedStringArray:
+	var lines := markdown.split("\n")
+	for index in lines.size():
+		var line := lines[index].strip_edges()
+		if line == "":
+			continue
+		if line.begins_with("# "):
+			return PackedStringArray([line.trim_prefix("# "), "\n".join(lines.slice(index + 1))])
+		break
+	return PackedStringArray(["Crédits", markdown])

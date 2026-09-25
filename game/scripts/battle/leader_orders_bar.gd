@@ -11,7 +11,8 @@ const INK := Color(0.22, 0.14, 0.07)
 const INK_MUTED := Color(0.42, 0.34, 0.26)
 const REFRESH := 0.2
 ## Raccourcis, dans l'ordre de la barre (touches libres : 1-3 vitesse, F/G/H ordres, Q/E/WASD caméra,
-## C/M/T carte de campagne).
+## C/M/T carte de campagne). Touches **physiques** (position QWERTY), comme la caméra : en AZERTY
+## la rangée du bas donne W X V B N et ne recoupe jamais Z Q S D (audit A3 B1).
 const HOTKEYS := [KEY_Z, KEY_X, KEY_V, KEY_B, KEY_N]
 const ICON_DIR := "res://assets/ui/orders/"
 ## Repli quand l'icône PNG n'existe pas : un glyphe par nature d'ordre.
@@ -130,7 +131,7 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 	inner.add_child(name_label)
 	# Raccourci en haut à gauche, recharge en surimpression.
 	var key := Label.new()
-	key.text = OS.get_keycode_string(HOTKEYS[index]) if index < HOTKEYS.size() else ""
+	key.text = physical_label(HOTKEYS[index]) if index < HOTKEYS.size() else ""
 	key.position = Vector2(5, 1)
 	key.add_theme_font_size_override("font_size", 11)
 	key.add_theme_color_override("font_color", INK_MUTED)
@@ -141,17 +142,38 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	button.add_child(shade)
+	# Recharge en haut à droite (face au raccourci) : ne recouvre plus le nom (audit A3 B5).
 	var timer := Label.new()
-	timer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	timer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	timer.add_theme_font_size_override("font_size", 20)
+	timer.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	timer.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	timer.offset_right = -5
+	timer.offset_top = 0
+	timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	timer.add_theme_font_size_override("font_size", 14)
 	timer.add_theme_color_override("font_color", Color(1, 0.95, 0.85))
 	timer.add_theme_color_override("font_outline_color", Color(0.1, 0.06, 0.03))
 	timer.add_theme_constant_override("outline_size", 5)
 	timer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	button.add_child(timer)
 	return {"button": button, "name": name_label, "shade": shade, "timer": timer, "key": key.text}
+
+
+## Libellé de la touche physique `keycode` sur la disposition active (Z physique → « W » en AZERTY).
+static func physical_label(keycode: Key) -> String:
+	var label := keycode
+	if DisplayServer.get_name() != "headless":
+		label = DisplayServer.keyboard_get_label_from_physical(keycode)
+	if label == KEY_NONE:
+		label = keycode
+	return OS.get_keycode_string(label)
+
+
+## Raccourcis des ordres, séparés par des espaces (« W X V B N » en AZERTY).
+static func hotkey_labels() -> String:
+	var labels: PackedStringArray = []
+	for keycode: Key in HOTKEYS:
+		labels.append(physical_label(keycode))
+	return " ".join(labels)
 
 
 func _update_button(entry: Dictionary, order: Dictionary) -> void:
@@ -206,7 +228,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible or _battle() == null:
 		return
 	if event is InputEventKey and event.pressed and not event.echo and not event.ctrl_pressed:
-		var index := HOTKEYS.find((event as InputEventKey).keycode)
+		var index := HOTKEYS.find((event as InputEventKey).physical_keycode)
 		if index >= 0 and index < _orders.size():
 			give(str(_orders[index]["id"]))
 			get_viewport().set_input_as_handled()

@@ -128,13 +128,17 @@ func _refresh_saves() -> void:
 	continue_button.visible = not latest_save.is_empty()
 	if not latest_save.is_empty():
 		continue_button.tooltip_text = "%s — %s, %s" % [latest_save.get("label", ""), SimFacade.faction_short_name(str(latest_save.get("faction", ""))), latest_save.get("date", "")]
-	var store_text := "données chargées" if SimFacade.store_loaded() else "données de jeu indisponibles (core/build.sh ?)"
-	status_label.text = "Simulation %s — %s — %d sauvegarde(s)" % [SimFacade.engine_label(), store_text, SaveSlots.list().size()]
+	# Audit A3 M3 : plus de ligne de débogage ; un message seulement si le jeu est incomplet.
+	status_label.text = "" if SimFacade.store_loaded() else "Données de jeu introuvables : le jeu est incomplet, réinstallez-le."
+	status_label.visible = status_label.text != ""
 
 
 ## Capture de l'écran de démarrage (`-- --screenshot=<chemin.png>`) puis sortie.
 func _screenshot_then_quit(path: String) -> void:
 	for _i in 60:
+		await get_tree().process_frame
+	# Audit A3 M1 : la capture tombait au milieu du fondu d'ouverture (cartes à demi transparentes).
+	while fade.color.a > 0.01 or cards.modulate.a < 0.99:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
