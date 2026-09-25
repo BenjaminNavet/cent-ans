@@ -387,6 +387,47 @@ func figure_frame(id: int, rank: float) -> Variant:
 	return Transform3D(basis, Vector3(slice[o + 3], slice[o + 7], slice[o + 11]))
 
 
+## BV3 : rang (indice dans le tampon courant) de la figurine du régiment la plus proche de
+## `point` (-1 : aucune figurine dessinée).
+func figure_slot_near(id: int, point: Vector3) -> int:
+	if not _previous.has(id):
+		return -1
+	var slice: PackedFloat32Array = _previous[id]
+	var best := -1
+	var best_d := INF
+	for i in slice.size() / 12:
+		var dx := slice[i * 12 + 3] - point.x
+		var dz := slice[i * 12 + 11] - point.z
+		var d := dx * dx + dz * dz
+		if d < best_d:
+			best_d = d
+			best = i
+	return best
+
+
+## BV3 : repère de la figurine au rang `slot` du tampon courant.
+func slot_frame(id: int, slot: int) -> Transform3D:
+	var slice: PackedFloat32Array = _previous[id]
+	var o := slot * 12
+	return Transform3D(Basis.IDENTITY, Vector3(slice[o + 3], slice[o + 7], slice[o + 11]))
+
+
+## BV3 : retire la figurine `slot` de la formation jusqu'à l'instant `until` (horloge
+## d'animation), comme les renversés de BV2 (duels).
+func hide_figure(id: int, slot: int, until: float) -> void:
+	var hidden: Dictionary = _hidden.get(id, {})
+	hidden[slot] = maxf(float(hidden.get(slot, 0.0)), until)
+	_hidden[id] = hidden
+
+
+## BV3 : figurine skinnée du régiment (famille, variante, matériau) ; vide sinon.
+func skinned_info(id: int) -> Dictionary:
+	if not _skinned.has(id) or not _unit_info.has(id):
+		return {}
+	var info: Dictionary = _unit_info[id]
+	return {"kind": info["kind"], "variant": info["variant"], "side": info["side"], "material": _materials[id]}
+
+
 ## BV3 : nombre de régiments dessinés en imposteurs (bancs d'essai).
 func impostor_regiments() -> int:
 	var n := 0

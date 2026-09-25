@@ -11,12 +11,11 @@ Coordination : SG1 (sièges), Q1 (recette) ; HUD de bataille (UB1) intouché sau
 | 2. Pavois du dos masqué quand la rangée est plantée | **fait** |
 | 3. Imposteurs lointains (Ultra) | **fait** (ADR 0024) |
 | 4. Bannières au vent, porte-étendards, étendard du général | **fait** |
-| 5. Duels appariés (cosmétique, déterministe) | à faire |
+| 5. Duels appariés (cosmétique, déterministe) | **fait** |
 | 6. Discours du général | à faire |
 
 ## Prochaine étape
-Lot 5 : duels appariés cosmétiques (`battle_duels.gd`, section `duels` de
-`data/fx/battle_finish.json`, déjà écrite et validée).
+Lot 6 : discours du général (données `data/`, sous-titre, travelling, cri de guerre).
 
 ## Lot 1 — herbe couchée, sang en prairie
 - `battle_grass_flatten.gd` (`BattleGrassFlatten`) : carte RG8 à 1 m sur (0, −100)-(1200, 900),
@@ -69,3 +68,17 @@ Lot 5 : duels appariés cosmétiques (`battle_duels.gd`, section `duels` de
   herbe dans le même vent (`BattleVegetation.set_wind`).
 - Capture `apres_etendards_vent` (`tests/bv3_shot.gd --shot=standards`, décor factice
   `FakeBattle` qui rend les figurines rangées sans simulation).
+
+## Lot 5 — duels appariés (cosmétiques)
+- Le cœur ne modélise pas de duel : `battle_duels.gd` (`BattleDuels`) crée un événement
+  purement visuel et déterministe (aucun tirage : figurines, moment et perdant sont des
+  fonctions des ids et du temps), sans effet sur les règles, les pertes ou le moral.
+- Déclenchement : régiment du général, de chevaliers ou d'hommes d'armes (`enabled_for`) en
+  mêlée contre sa cible depuis 1,5 s, caméra à moins de 160 m, 4 duels au plus, 25 s entre deux
+  duels d'un même régiment. Les deux figurines au contact quittent la formation
+  (`BattleSoldiers.hide_figure`, mécanisme des renversés de BV2) et combattent au milieu.
+- Passes synchronisées (0,9 s) de clips existants, en mode CUSTOM : attaque / parade, parade /
+  estoc, taille / coup reçu, estoc / renversé (le perdant se relève, clip `knockdown`) ; à cheval :
+  estocs de lance alternés. Pas de nouveaux clips appariés cuits dans Blender (écart à la
+  demande : les clips existants synchronisés suffisent à la lecture ; piste ouverte).
+- Captures `duel_passe_1` / `duel_passe_4` (`tests/bv3_shot.gd --shot=duel`).

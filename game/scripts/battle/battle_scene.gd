@@ -63,6 +63,7 @@ var _weather_key: String = "clear"
 var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
 var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée de sang
 var standards: BattleStandards = null  # BV3 : vent, porte-étendards
+var duels: BattleDuels = null  # BV3 : duels appariés cosmétiques
 var _no_bv3: bool = false  # `--no-bv3` : finitions BV3 coupées (mesures A/B)
 var _no_impostors: bool = false  # `--no-impostors` : imposteurs lointains seuls coupés (A/B)
 var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
@@ -349,6 +350,11 @@ func _setup_standards() -> void:
 		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
 	if terrain.vegetation != null:
 		terrain.vegetation.set_wind(wind["dir"], float(wind["strength"]) * float(wind["grass_scale"]))
+	if soldiers.bv2_enabled:
+		duels = BattleDuels.new()
+		duels.name = "Duels"
+		add_child(duels)
+		duels.setup()
 
 
 ## BV3 : herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
@@ -401,6 +407,8 @@ func _on_sound_event(event: StringName, position: Vector3, delay: float) -> void
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
 func _update_effects(dt: float) -> void:
 	terrain.update_trample(units, dt)  # B7 : neige piétinée (sans effet hors neige au sol)
+	if duels != null:
+		duels.update(units, soldiers, soldiers.anim_time, _camera_position())
 	if grass_flatten != null:
 		grass_flatten.update(units, dt)
 	if effects == null:
