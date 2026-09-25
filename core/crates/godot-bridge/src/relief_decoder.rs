@@ -106,20 +106,20 @@ impl ReliefDecoder {
             };
             self.pending -= 1;
             let mut dict = VarDictionary::new();
-            dict.set("id", item.id);
-            dict.set("ms", item.micros as f64 / 1000.0);
+            dict.set("id", &item.id.to_variant());
+            dict.set("ms", &(item.micros as f64 / 1000.0).to_variant());
             match item.result {
                 Ok((bytes, width, height)) => {
-                    dict.set("bytes", PackedByteArray::from(bytes));
-                    dict.set("width", width as i64);
-                    dict.set("height", height as i64);
-                    dict.set("error", "");
+                    dict.set("bytes", &PackedByteArray::from(bytes).to_variant());
+                    dict.set("width", &(width as i64).to_variant());
+                    dict.set("height", &(height as i64).to_variant());
+                    dict.set("error", &"".to_variant());
                 }
                 Err(error) => {
-                    dict.set("bytes", PackedByteArray::new());
-                    dict.set("width", 0i64);
-                    dict.set("height", 0i64);
-                    dict.set("error", error);
+                    dict.set("bytes", &PackedByteArray::new().to_variant());
+                    dict.set("width", &0i64.to_variant());
+                    dict.set("height", &0i64.to_variant());
+                    dict.set("error", &error.to_variant());
                 }
             }
             out.push(&dict.to_variant());
@@ -154,11 +154,7 @@ fn worker_loop(jobs: &Mutex<Receiver<Job>>, done: &Sender<Done>) {
             return;
         };
         let start = Instant::now();
-        let result = decode_png_file(
-            &job.path,
-            png::ColorType::Grayscale,
-            png::BitDepth::Sixteen,
-        );
+        let result = decode_png_file(&job.path, png::ColorType::Grayscale, png::BitDepth::Sixteen);
         let item = Done {
             id: job.id,
             result,
@@ -176,8 +172,8 @@ mod tests {
 
     #[test]
     fn worker_decodes_a_real_tile_off_thread() {
-        let path =
-            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data/map/height/h_8_7.png");
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../data/map/height/h_8_7.png");
         if !path.exists() {
             return;
         }

@@ -644,6 +644,116 @@ après changement de niveau).
 - Les rubans et hameaux ne sont construits que sur les tuiles au niveau proche ou fin (≤ 512 unités de
   la caméra), largement au-delà du champ utile en vue comté.
 
+## Relief streamé : pyramide et quadtree (lot ZG2, ADR 0036)
+
+Quand la pyramide de relief est en cache (`data/map/relief_pyramid.json` + tuiles non versionnées
+`data/map/pyramid/E{k}/{col}_{row}.png`, cuites par ZG1/ZG3), `TerrainBuilder` crée un
+`ReliefQuadtree` qui dessine **tout** le terrain ; les 16 × 16 morceaux E0 sont masqués (ils restent
+construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, rien ne change
+(morceaux E0 + relief fin `FineTerrainJob`) : le test de fumée tourne sans cache.
+
+| Fichier | Rôle |
+|---|---|
+| `scripts/map/relief_pyramid.gd` | Manifeste (RLE → ensembles de tuiles par étage), E0 = `data/map/height/`, `has_tile`, `finest_level_at`, `max_level_under`, `finest_ancestor`, chemins. |
+| `scripts/map/relief_quadtree.gd` | Sélection, pages, décodage, instances, surface côté processeur. |
+| `shaders/relief_quadtree.gdshaderinc` | `qt_vertex` (déplacement + morphing), `qt_relief` (altitude et normale depuis la page), `qt_debug_color`. |
+| `core/crates/godot-bridge/src/relief_decoder.rs` | `ReliefDecoder` : décodage PNG 16 bits dans des fils natifs Rust. |
+| `scripts/dev/map_bench.gd` | Banc `--bench-map`. |
+| `tests/zg2_quadtree_test.gd`, `tests/fixtures/zg2/make_pyramid.py` | Test headless (pyramide factice), pyramide synthétique pour les essais visuels. |
+
+### Arbre et sélection
+
+- Racine = toute la carte (4 096 unités), nœud (n, col, row) de côté `4096 / 2^n`, **aligné sur la
+  grille des tuiles** (décalage −0,5 unité du pixel centré) : profondeur n ↔ étage L = n − 4 (un nœud de
+  profondeur 4 est une tuile E0 de 256 unités). Profondeur maximale d'un nœud : étage de données le plus
+  fin de son sous-arbre (`max_level_under`, sinon l'ancêtre existant) + `extra_depth` (3), plafond 14.
+- **CDLOD** : un nœud est accepté quand l'espacement de ses sommets (côté / 64) projeté à l'écran
+  `s × K / d ≤ max_vertex_px` (4 px ; K = demi-hauteur de la vue / tan(fov / 2)). En distance : le
+  niveau n sert jusqu'à `R_n = 2 × s_n × K / seuil` (≥ 3 côtés) et le parent se divise quand la boîte
+  d'un enfant coupe la sphère `R_{n+1}` ; un enfant hors portée est dessiné comme quadrant du parent
+  (demi-patch). Une page de l'étage du nœud a 8 pixels par sommet : ses pixels font ≤ 0,5 px à l'écran.
+- Budget `max_items` (700) : au-delà, le seuil s'élargit (×1,2 par image, retour ÷1,1 sous 60 %).
+- Boîtes englobantes : bornes par morceau E0 (maillages lointains, en mètres, marges larges) × facteur
+  vertical ; élagage par le tronc de vue (6 plans) avant toute demande de page.
+
+### Géométrie : patch partagé, morphing, jupes
+
+- Deux maillages partagés : patch 64 × 64 quads (65² sommets) et demi-patch 32 × 32, en coordonnées de
+  grille entières, plus une jupe (sommets y = −1, même disposition que `FineTerrainJob`). Chaque nœud est
+  un `MeshInstance3D` (réutilisé) avec le **matériau partagé du terrain** (splat, forêts, frontières,
+  brouillard, surbrillance, météo : tout reste), transformation = origine + échelle s.
+- Paramètres du nœud en `instance uniform` : origine et espacement, pages fine (étage du nœud) et
+  grossière (celle du parent) avec couche du `Texture2DArray`, emprise et **couches des 8 voisines de
+  même étage** (table des pages), début et longueur du morphing, fondu, profondeur de jupe. Seuls les
+  paramètres qui changent sont renvoyés au serveur de rendu.
+- **Morphing géomorphe** (vertex shader) : k = f(distance caméra–sommet) sur `[0,7 R_n, R_n]` ; les
+  sommets impairs glissent sur les pairs (grille du parent) et la hauteur passe de la page fine à la
+  page du parent. À k = 1 le bord coïncide exactement avec le voisin plus grossier : ni fissure ni saut.
+  La distance vient de l'uniforme `qt_camera` (caméra principale) : même géométrie dans la passe d'ombre.
+- Bilinéaire **inter-pages** : un échantillon au bord d'une tuile lit les texels de la voisine
+  (`texelFetch` dans sa couche) ; pas de marche aux bords de tuiles de même étage.
+- Jupes (1,5 espacement, ≤ 4 unités) contre les écarts restants (voisine non chargée, fondu en cours).
+- Profondeur < 4 (nœuds plus grands qu'une tuile E0) : hauteurs de la heightmap 4096 (mipmap assorti à
+  l'espacement, cohérent entre parent et enfant) ; au fragment, chemin actuel (heightmap + `relief_shade`).
+
+### Pages de hauteurs
+
+- `Texture2DArray` de `max_pages` (256) couches 512², **`FORMAT_R16`** (entier 16 bits normalisé,
+  même codage que les PNG : aucune conversion, pas de 7,6 cm sur 5 000 m ; pas de demi-flottant)
+  **avec mipmaps** (0,67 Mo par couche : 171 Mo de VRAM pour 256 couches, plafond ADR 256 Mo).
+- Le vertex shader lit le niveau 0 (bilinéaire manuel, `texelFetch`) ; le fragment dérive la normale
+  de la page par différences finies au pas de l'empreinte du pixel écran (mipmap assorti, différences
+  décentrées au bord de la tuile) : vallées et crêtes à la résolution de l'étage. Altitude du fragment
+  (`hc` : neige, roche, eau) tirée de la même page.
+- Choix de page : la tuile de l'étage du nœud (ou de l'ancêtre le plus fin qui existe : pyramide
+  creuse) ; en attendant qu'elle arrive, l'ancêtre chargé le plus fin (= la page du parent : continuité).
+  Demandes triées par étage puis distance (le grossier d'abord). Fondu d'arrivée `fade_seconds` (0,35 s)
+  de la page du parent vers la nouvelle page (hauteur et normale) : pas de saut à l'arrivée.
+- LRU : une couche n'est reprise qu'à une page inutilisée depuis au moins une image.
+- **Décodage** (godot-rust est mono-fil : aucun appel à l'extension hors fil principal) :
+  1. `ReliefDecoder` (Rust, `max_jobs` fils natifs qui ne touchent pas à Godot) : `request` / `poll` ;
+     le fil principal ne fait que la copie en `PackedByteArray`, l'`Image` R16 et ses mipmaps (≈ 0,1 ms) ;
+  2. extension plus ancienne sans `ReliefDecoder` : `GameDataStore.load_heightmap_u16` sur le fil
+     principal, ≤ 2 tuiles et ≤ 4 ms par image (≈ 3 ms par tuile) ;
+  3. sans extension : `Png16` dans `WorkerThreadPool` (0,1 à 1 s par tuile : repli seulement).
+  Téléversement `update_layer` ≤ `max_uploads_per_frame` (2) par image.
+
+### Surface côté processeur et signaux
+
+- Les octets des pages chargées sont gardés (0,5 Mo par page, ≤ 128 Mo). `surface_height_at(x, y)` rend
+  la **surface bilinéaire de la page chargée la plus fine** (indépendante de la vue : la position d'un
+  objet ne dépend pas du niveau du nœud qui le porte), repli heightmap 4096 hors pages ; ≈ 1,7 µs par
+  appel (index par morceau de l'étage le plus fin chargé, cache de la dernière page).
+- `surface_grid(index)` rend un **instantané** (dictionnaire `qt_pages` + repli `MapData`) lisible depuis
+  un fil de travail ; `TerrainBuilder.grid_height` l'accepte (végétation, lot C7b, inchangée).
+- `chunk_level` garde son sens (0 lointain, 1 proche, 2 « fin » = morceaux voisins du point visé sous
+  `fine_terrain_distance`) : routes en rubans, hameaux, arbres et lit creusé des fleuves
+  (`fine_chunk_rects`) suivent comme avant.
+- `chunk_surface_changed(index)` : aux changements de niveau, et quand **l'étage le plus fin chargé**
+  d'un morceau proche change (E1 → E2 → …), au plus 2 morceaux toutes les 250 ms (les recalages des
+  couches sont synchrones et chers : maquettes L1 ≈ 50-300 ms par recalage). Nouveau signal
+  `surface_rect_changed(rect)` à chaque page arrivée ou évincée, pour des recalages fins (ZG5).
+- Échelle verticale : `MapData.vertical_scale()` (vaut `HEIGHT_SCALE`) est lu par le shader
+  (`height_scale`), le quadtree (boîtes, surface) et `surface_height_at` ;
+  `TerrainBuilder.refresh_vertical_scale()` le repousse au shader et signale toutes les surfaces (à
+  brancher par ZG4).
+
+### Options, test et banc
+
+- `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--no-pyramid`, `--qt-debug=1` (teinte par
+  profondeur de nœud) / `2` (par étage de page), `--camera-min=N` (distance minimale, essais et captures
+  seulement : la caméra rapprochée est le lot ZG4).
+- Pyramide synthétique (E1-E4 sur Paris et la basse Seine, relief de bruit ajouté : **pas des données
+  réelles**) : `uv run --project tools python game/tests/fixtures/zg2/make_pyramid.py <dossier>`.
+- `godot --headless --path game --script res://tests/zg2_quadtree_test.gd` : pyramide factice écrite dans
+  `user://zg2_test/` (tuiles E0 recopiées), manifeste, sélection, pages, `surface_height_at` comparée à un
+  décodage direct, instantané, LRU borné, repli sans tuile.
+- `godot --path game res://scenes/campaign_map.tscn -- --stage=map --hide-armies --bench-map` (fenêtré) :
+  panoramique Caen → Rouen → Paris → Chartres → Évreux à d = 30 (`--bench-distance`, `--bench-seconds`)
+  puis aller-retour de zoom 150 ↔ minimum sur Paris ; imprime i/s moyen, médiane et 99ᵉ centile des
+  images, pire image, images > 50 ms, statistiques du quadtree et, avec `--bench-listeners`, le temps
+  passé dans chaque écouteur de `chunk_surface_changed`.
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
