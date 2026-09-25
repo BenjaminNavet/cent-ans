@@ -92,7 +92,8 @@ func refresh(routes: Array, camera_distance: float, visible_provinces: PackedStr
 		_cut_mesh.mesh = PolylineMesh.build(cut_lines, cut_widths, map_data, 0.5)
 		_cut_mesh.material_override = PolylineMesh.flat_material(COLOR_CUT)
 		_cut_mesh.material_override.render_priority = 1
-	_wanted_visible = true
+	# Visibilité décidée par le mode Commerce seulement (`set_layer_visible`) : forcer ici
+	# affichait les rubans à chaque `refresh_all` (recette Q3, ruban géant sur la Tamise).
 	_apply_visible()
 
 
