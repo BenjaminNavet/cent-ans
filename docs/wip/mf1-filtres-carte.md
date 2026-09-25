@@ -1,20 +1,19 @@
 # MF1 — Filtres de la carte de campagne
 
-Branche `feat/map-modes`, worktree `../game_project-mapmodes`.
+Terminé le 25/09/2026 (ADR 0048). Branche `feat/map-modes`.
 
-## Objectif
-- Un bouton « Filtres » (touche F) sur la minicarte ouvre un menu de filtres façon Total War.
-- Un seul mode actif à la fois (`MapModeController`) : Politique, Diplomatie (N), Religion (R),
-  Mécontentement (M), Richesse, Population, Loyauté des vassaux, Ravitaillement, Revendications.
-- Routes commerciales = calque indépendant, combinable (touche V, plus de conflit avec R).
-- Valeurs calculées dans le cœur : `sim_campaign::map_lens` → `CampaignSim.get_map_lens(ids)`.
+## Fait
+- Cœur : `sim_campaign::map_lens` (revenu, population, mécontentement, loyauté du vassal,
+  ravitaillement, revendications), `economy::seasonal_supply_change` partagé avec
+  `resolve_attrition`, tests `core/crates/sim-campaign/tests/mf1_map_lens.rs`.
+- Pont : `CampaignSim.get_map_lens(ids)` (`campaign_sim_map_lens.rs`).
+- Godot : `MapModeController` (mode unique, menu, légende, valeur au survol, marqueurs daltoniens
+  de la diplomatie), bouton « Filtres » (F) sur la minicarte, routes commerciales en case du menu
+  et sur V (fin du conflit avec R = religion).
+- Correction : le mode mécontentement saturait au rouge dès 1 % (0-100 non divisé par 100).
+- Tests : `game/tests/mf1_map_modes_test.gd` (headless), captures `game/tests/mf1_shot.gd`.
 
-## État
-- [x] Cœur : `map_lens.rs`, `economy::seasonal_supply_change` (partagé avec `resolve_attrition`), tests `mf1_map_lens.rs`.
-- [x] Pont : `campaign_sim_map_lens.rs`.
-- [ ] Godot : `map_mode_controller.gd` (modes, teintes, légendes), menu de filtres, touches.
-- [ ] Correction : l'ancien mode mécontentement saturait au rouge (unrest 0-100 non divisé par 100).
-- [ ] Test Godot, fiche des raccourcis, fusion dans main.
-
-## Prochaine étape
-Écrire `game/scripts/map/map_mode_controller.gd` et y migrer les modes de `diplomacy_controller.gd`.
+## Limites / suites possibles
+- Richesse = impôt de base, sans taux d'imposition ni bâtiments.
+- Ravitaillement sans l'effet du général (compétence Supply) ni des colonies amies isolées.
+- Pas de raccourci pour richesse, population, loyauté, ravitaillement, revendications (menu F).

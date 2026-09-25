@@ -41,6 +41,7 @@ const WEALTH_HIGH := Color(0.62, 0.42, 0.05)
 const POPULATION_LOW := Color(0.90, 0.88, 0.80)
 const POPULATION_HIGH := Color(0.30, 0.18, 0.45)
 const LOYALTY_LOW := Color(0.75, 0.15, 0.10)
+const LOYALTY_MID := Color(0.88, 0.62, 0.15)
 const LOYALTY_HIGH := Color(0.20, 0.40, 0.78)
 const NEUTRAL := Color(0.62, 0.60, 0.56)
 const SUPPLY_GAIN := Color(0.22, 0.55, 0.25)
@@ -117,6 +118,8 @@ func _build_menu() -> void:
 		item.toggle_mode = true
 		item.button_group = group
 		item.flat = true
+		item.add_theme_color_override("font_pressed_color", HudStyle.RUBRIC)
+		item.add_theme_color_override("font_hover_pressed_color", HudStyle.RUBRIC)
 		item.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		item.focus_mode = Control.FOCUS_NONE
 		var key := ShortcutSheet.first_key(str(entry[2])) if str(entry[2]) != "" else ""
@@ -147,9 +150,9 @@ func toggle_menu() -> void:
 		map.ui.add_child(menu)
 	_sync_menu()
 	menu.reset_size()
-	var anchor := button.get_global_rect()
+	var anchor: Rect2 = button.get_global_rect()
 	var menu_size := Vector2i(menu.get_contents_minimum_size())
-	var viewport := map.ui.get_viewport_rect().size
+	var viewport: Vector2 = button.get_viewport_rect().size
 	# Sous le bouton, ou au-dessus s'il n'y a pas la place.
 	var pos := Vector2(anchor.end.x - menu_size.x, anchor.end.y + 4)
 	if pos.y + menu_size.y > viewport.y:
@@ -160,7 +163,9 @@ func toggle_menu() -> void:
 
 func _sync_menu() -> void:
 	for id in _menu_buttons:
-		(_menu_buttons[id] as Button).set_pressed_no_signal(id == mode)
+		var item: Button = _menu_buttons[id]
+		item.set_pressed_no_signal(id == mode)
+		item.text = ("▸ " if id == mode else "   ") + item.text.trim_prefix("▸ ").trim_prefix("   ")
 	if _trade_check != null and map != null:
 		_trade_check.set_pressed_no_signal(bool(map.get("trade_mode")))
 
@@ -331,37 +336,49 @@ func _clear_relation_markers() -> void:
 func _lens_colors(ids: PackedStringArray) -> PackedColorArray:
 	var rows: Array = map.sim.call("get_map_lens", ids)
 	_lens.clear()
-	var max_income := 1.0
-	var max_population := 1.0
 	for index in mini(ids.size(), rows.size()):
-		var row: Dictionary = rows[index]
-		_lens[ids[index]] = row
-		max_income = maxf(max_income, float(row.get("income", 0.0)))
-		max_population = maxf(max_population, float(row.get("population", 0)))
+		if not (rows[index] as Dictionary).is_empty():
+			_lens[ids[index]] = rows[index]
+	var ranks := {}
+	if mode == "wealth" or mode == "population":
+		ranks = _percentiles("income" if mode == "wealth" else "population")
 	var colors := PackedColorArray()
 	for id in ids:
 		var row: Dictionary = _lens.get(id, {})
 		if row.is_empty():
 			colors.append(Color(0, 0, 0, 0))
 			continue
-		colors.append(_lens_color(row, max_income, max_population))
+		colors.append(_lens_color(row, float(ranks.get(id, 0.0))))
 	return colors
 
 
-## Richesse et population en racine carrée : Paris ne doit pas écraser toutes les autres teintes.
-func _lens_color(row: Dictionary, max_income: float, max_population: float) -> Color:
+## Rang de chaque province (0 = la plus faible, 1 = la plus forte) pour `key` : une échelle par
+## rang, et non par valeur, sans quoi Paris écrase toutes les autres teintes.
+func _percentiles(key: String) -> Dictionary:
+	var ids := _lens.keys()
+	ids.sort_custom(func(a: String, b: String) -> bool: return float(_lens[a].get(key, 0)) < float(_lens[b].get(key, 0)))
+	var ranks := {}
+	var last := maxf(1.0, ids.size() - 1.0)
+	for index in ids.size():
+		ranks[ids[index]] = index / last
+	return ranks
+
+
+## `rank` : rang de la province (richesse, population), ignoré pour les autres modes.
+func _lens_color(row: Dictionary, rank: float) -> Color:
 	match mode:
 		"unrest":
 			return GOOD.lerp(BAD, clampf(float(row.get("unrest", 0.0)) / 100.0, 0.0, 1.0))
 		"wealth":
-			return WEALTH_LOW.lerp(WEALTH_HIGH, sqrt(clampf(float(row.get("income", 0.0)) / max_income, 0.0, 1.0)))
+			return WEALTH_LOW.lerp(WEALTH_HIGH, rank)
 		"population":
-			return POPULATION_LOW.lerp(POPULATION_HIGH, sqrt(clampf(float(row.get("population", 0)) / max_population, 0.0, 1.0)))
+			return POPULATION_LOW.lerp(POPULATION_HIGH, rank)
 		"loyalty":
 			var loyalty := int(row.get("vassal_loyalty", -1))
 			if loyalty < 0:
 				return NEUTRAL
-			return LOYALTY_LOW.lerp(LOYALTY_HIGH, clampf(loyalty / 100.0, 0.0, 1.0))
+			var ratio := clampf(loyalty / 100.0, 0.0, 1.0)
+			return LOYALTY_LOW.lerp(LOYALTY_MID, ratio * 2.0) if ratio < 0.5 else LOYALTY_MID.lerp(LOYALTY_HIGH, ratio * 2.0 - 1.0)
 		"supply":
 			var change := int(row.get("supply_change", 0))
 			if change >= 0:
@@ -441,11 +458,11 @@ func _legend_entries() -> Variant:
 		"unrest":
 			return {"from": GOOD, "to": BAD, "low": "Calme", "high": "Révolte proche"}
 		"wealth":
-			return {"from": WEALTH_LOW, "to": WEALTH_HIGH, "low": "Pauvre", "high": "Riche"}
+			return {"from": WEALTH_LOW, "to": WEALTH_HIGH, "low": "Les plus pauvres", "high": "Les plus riches"}
 		"population":
-			return {"from": POPULATION_LOW, "to": POPULATION_HIGH, "low": "Peu peuplée", "high": "Très peuplée"}
+			return {"from": POPULATION_LOW, "to": POPULATION_HIGH, "low": "Les moins peuplées", "high": "Les plus peuplées"}
 		"loyalty":
-			return [[LOYALTY_HIGH, "Vassal fidèle"], [LOYALTY_LOW, "Vassal rebelle"], [NEUTRAL, "Pas un vassal"]]
+			return [[LOYALTY_HIGH, "Vassal fidèle"], [LOYALTY_MID, "Hésitant"], [LOYALTY_LOW, "Prêt à se révolter"], [NEUTRAL, "Pas un vassal"]]
 		"supply":
 			return [[SUPPLY_GAIN, "Ravitaillée (terres amies)"], [SUPPLY_LOSS, "Attrition"], [SUPPLY_STARVE, "Attrition d'hiver"]]
 		"claims":
@@ -463,6 +480,8 @@ func _mode_title() -> String:
 
 func _show_legend() -> void:
 	if _legend != null and is_instance_valid(_legend):
+		# Détachée tout de suite : la nouvelle légende garde le nom « MapModeLegend ».
+		_legend.get_parent().remove_child(_legend)
 		_legend.queue_free()
 	_legend = null
 	if mode == POLITICAL or map == null or map.ui == null:
