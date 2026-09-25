@@ -126,9 +126,9 @@ static func block_mesh() -> Mesh:
 		return _meshes["__block"]
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var wall := layer_color("Plaster", Color(0.92, 0.88, 0.8))
-	var roof := layer_color("RoofTile", Color(0.9, 0.8, 0.75))
-	var eave := 0.62
+	var wall := layer_color("Plaster", Color(0.55, 0.49, 0.41))
+	var roof := layer_color("RoofTile", Color(1.0, 0.72, 0.6))
+	var eave := 0.52
 	var y0 := -0.15
 	var corners := [Vector3(-0.5, 0, -0.5), Vector3(0.5, 0, -0.5), Vector3(0.5, 0, 0.5), Vector3(-0.5, 0, 0.5)]
 	for i in 4:
@@ -140,13 +140,7 @@ static func block_mesh() -> Mesh:
 		var p0 := Vector3(sx, eave, -0.5)
 		var p1 := Vector3(sx, eave, 0.5)
 		var p2 := Vector3(sx, 1.0, 0.0)
-		var n := Vector3(signf(sx), 0, 0)
-		st.set_color(wall)
-		st.set_normal(n)
-		if sx > 0:
-			st.add_vertex(p0); st.add_vertex(p2); st.add_vertex(p1)
-		else:
-			st.add_vertex(p0); st.add_vertex(p1); st.add_vertex(p2)
+		_tri(st, p0, p1, p2, wall)
 	# Pans de toit avec débord.
 	var o := 0.08
 	_quad(st, Vector3(-0.5 - o, eave - 0.05, 0.5 + o), Vector3(0.5 + o, eave - 0.05, 0.5 + o), Vector3(0.5 + o, 1.0, 0.0), Vector3(-0.5 - o, 1.0, 0.0), roof)
@@ -190,24 +184,33 @@ static func tower_mesh() -> Mesh:
 		var p0 := Vector3(cos(a0), 0, sin(a0))
 		var p1 := Vector3(cos(a1), 0, sin(a1))
 		_quad(st, p1 + Vector3(0, -0.1, 0), p0 + Vector3(0, -0.1, 0), p0 + Vector3(0, 1, 0), p1 + Vector3(0, 1, 0), wall)
-		st.set_color(roof)
-		var e0 := p0 * 1.12 + Vector3(0, 0.98, 0)
-		var e1 := p1 * 1.12 + Vector3(0, 0.98, 0)
-		var apex := Vector3(0, 1.45, 0)
-		st.set_normal((((e0 + e1) * 0.5).normalized() + Vector3(0, 0.6, 0)).normalized())
-		st.add_vertex(e1)
-		st.add_vertex(e0)
-		st.add_vertex(apex)
+		_tri(st, p0 * 1.12 + Vector3(0, 0.98, 0), p1 * 1.12 + Vector3(0, 0.98, 0), Vector3(0, 1.45, 0), roof)
 	var mesh := st.commit()
 	_meshes["__tower"] = mesh
 	return mesh
 
 
+## Quadrilatère plan (a, b, c, d dans l'ordre du pourtour) d'un maillage unitaire centré sur l'axe
+## Y : face avant (normale géométrique (p1 - p0) × (p2 - p0), convention de Godot) tournée vers
+## l'extérieur, c'est-à-dire à l'opposé du point (0 ; 0,4 ; 0).
 static func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, color: Color) -> void:
-	var n := (b - a).cross(d - a).normalized()
-	for p in [a, c, b, a, d, c]:
+	_tri(st, a, b, c, color, (a + b + c + d) * 0.25)
+	_tri(st, a, c, d, color, (a + b + c + d) * 0.25)
+
+
+static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, color: Color, center: Variant = null) -> void:
+	var mid: Vector3 = center if center is Vector3 else (a + b + c) / 3.0
+	var outward := mid - Vector3(0, 0.4, 0)
+	var n := (b - a).cross(c - a)
+	if n.dot(outward) < 0.0:
+		var t := b
+		b = c
+		c = t
+		n = -n
+	n = n.normalized()
+	for p in [a, b, c]:
 		st.set_color(color)
-		st.set_normal(-n)
+		st.set_normal(n)
 		st.add_vertex(p)
 
 
@@ -238,6 +241,7 @@ func _init(p_plan: Dictionary, anchor: Vector2, p_meters_per_unit: float, parent
 			_cells[key] = PackedInt32Array()
 			_cell_keys.append(key)
 		_cells[key].append(i)
+	_tasks.append(_build_ground)
 	_tasks.append(_build_streets)
 	_tasks.append(_build_walls)
 	_tasks.append(_build_monuments)
@@ -397,7 +401,11 @@ func _build_cell(key: Vector2i) -> void:
 			groups[model][2].append(houses["tint"][i])
 			groups[model][3].append(i)
 		var h: float = BLOCK_HEIGHT.get(kind, 10.0)
-		block_x.append(Transform3D(basis_x(d, Vector3(front, h, depth)), pos))
+		# Faîtage du bloc le long du grand côté (maison de ville : pignon sur rue).
+		if depth > front:
+			block_x.append(Transform3D(basis_x(Vector2(-d.y, d.x), Vector3(depth, h, front)), pos))
+		else:
+			block_x.append(Transform3D(basis_x(d, Vector3(front, h, depth)), pos))
 		block_b.append(houses["base"][i])
 		block_t.append(houses["tint"][i])
 	for model in groups:
@@ -410,6 +418,52 @@ func _build_cell(key: Vector2i) -> void:
 	if not block_x.is_empty():
 		var bmi := _multimesh(block_mesh(), block_x, block_b, block_t, block_mat, "block", 20.0)
 		bmi.name = "Blocks_%d_%d" % [key.x, key.y]
+
+
+## Sol de terre battue, cours et jardins sous la ville (grille drapée, teinte fondue au bord).
+func _build_ground() -> void:
+	var ground: Dictionary = plan.get("ground", {})
+	if ground.is_empty():
+		return
+	var n: int = ground["n"]
+	var step: float = ground["step"]
+	var origin: Vector2 = ground["origin"]
+	var mask: PackedByteArray = ground["inside"]
+	var h: PackedFloat32Array = ground["heights"]
+	var radii: PackedFloat32Array = ground["radii"]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var lo := INF
+	var hi := -INF
+	for j in n - 1:
+		for i in n - 1:
+			var ks := [j * n + i, j * n + i + 1, (j + 1) * n + i + 1, (j + 1) * n + i]
+			var ok := true
+			for k in ks:
+				if mask[k] == 0:
+					ok = false
+			if not ok:
+				continue
+			for idx in [0, 1, 2, 0, 2, 3]:
+				var k: int = ks[idx]
+				var p: Vector2 = origin + Vector2(k % n, k / n) * step
+				var edge := clampf((TownPlan.radius_at(radii, atan2(p.y, p.x)) - p.length()) / 40.0, 0.0, 1.0)
+				st.set_color(layer_color("Rubble", Color(0.24, 0.26, 0.18).lerp(Color(0.25, 0.23, 0.18), edge)))
+				st.set_normal(Vector3.UP)
+				st.set_uv(p)
+				st.set_uv2(Vector2(h[k], 0.0))
+				st.add_vertex(Vector3(p.x, 0.0, p.y))
+				lo = minf(lo, h[k])
+				hi = maxf(hi, h[k])
+	if lo == INF:
+		return
+	var mi := MeshInstance3D.new()
+	mi.name = "Ground"
+	mi.mesh = st.commit()
+	mi.material_override = material(1, false, 0.5, meters_per_unit)
+	var half := (n - 1) * 0.5 * step
+	_register(mi, "all", lo, hi, 2.0, Rect2(-half, -half, half * 2.0, half * 2.0))
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 func _build_streets() -> void:
@@ -459,7 +513,7 @@ func _build_streets() -> void:
 	var mi := MeshInstance3D.new()
 	mi.name = "Streets"
 	mi.mesh = st.commit()
-	mi.material_override = material(1, false, 0.3, meters_per_unit)
+	mi.material_override = material(1, false, 0.9, meters_per_unit)
 	_register(mi, "all", lo, hi, 2.0, rect.grow(10.0))
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
