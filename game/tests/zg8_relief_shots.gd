@@ -11,11 +11,11 @@ const VIEWS := [
 	["pyrenees", Vector2(1855, 2826), 40.0],
 	["alpes", Vector2(2652, 2404), 45.0],
 	["massif_central", Vector2(2233, 2405), 30.0],
-	["galles", Vector2(1694, 1188), 22.0],
+	["galles", Vector2(1694, 1188), 40.0],
 	["falaises_normandes", Vector2(2018, 1772), 6.0],
 	["coteaux_seine", Vector2(2127, 1853), 8.0],
 	["paris", Vector2(2214, 1924), 10.0],
-	["pyrenees_pres", Vector2(1855, 2826), 3.0],
+	["pyrenees_pres", Vector2(1862, 2818), 7.0],
 	["france", Vector2(2100, 2100), 900.0],
 ]
 
