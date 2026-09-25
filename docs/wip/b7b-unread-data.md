@@ -9,11 +9,11 @@ Branche : `b7b-unread-data` (partie de main 04657c09). Contexte : `docs/wip/bull
 4. `vision_army_km` / `vision_settlement_km` : déjà branchés par le lot M5a (branche `merge-m5a`, en attente de fusion) ; rien à faire ici pour éviter un conflit.
 
 ## État
-- [ ] 1 piété des édits
-- [ ] 2 vitesse de construction
-- [ ] 3 délai de recrutement
-- [ ] codex / infobulles
-- [ ] contrôles
+- [x] 1 piété des édits (`edicts::yearly_edict_piety`, test `edict_piety_reaches_the_ruler_each_winter`)
+- [x] 2 vitesse de construction (`CampaignState::construction_speed_percent`, `build_time`, plafond `MAX_CONSTRUCTION_SPEED_PERCENT` 100 %)
+- [x] 3 délai de recrutement (`QueuedRecruit`, sauvegardes anciennes lues ; IA : l'entretien des recrues en formation compte dans son budget ; pont `recruit_queue_turns`, panneau de colonie « (n tours) »)
+- [x] codex : `cdx_jeu_edits`, `cdx_jeu_construction`, `cdx_jeu_recrutement`
+- [ ] contrôles complets (cargo test, build.sh, smoke, pytest)
 
 ## Prochaine étape
-Implémenter 1.
+Contrôles complets, puis rapport.
