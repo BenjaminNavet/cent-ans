@@ -50,7 +50,18 @@ Sources : `docs/audit/a3-ui.md` (U9, U13, défauts B1-B7), `docs/audit/backlog-t
   retraite, écran d'avant-bataille, HUD, écran de fin). Test Python de la banque adapté aux WAV.
 
 ## Prochaine étape
-Fusion de main, vérifications complètes (cargo, build, import, smoke).
+Terminé. `main` fusionné (506550a2, sans conflit) ; cargo fmt / clippy / test verts, build,
+import, `ub1_ui_test` et `au1_audio_test` OK, smoke 23 « smoke OK », sortie 0.
+
+## Points ouverts
+- Prévision d'équilibre = estimation simple (mêmes pièces que l'auto-résolution actuelle, sans
+  hasard) ; quand N1 (auto-résolution par phases) arrivera, `battle_forecast.rs` restera une
+  approximation lisible (seules `side_power` et `effective_armor` sont appelées).
+- Retraite avant bataille : seul l'assaillant peut refuser (−10 moral) ; un assaut remis garde le
+  siège. Le défenseur ne peut se dérober (pas de règle de repli sous pression).
+- Butin : aucune règle de butin en bataille rangée ; l'encart montre les rançons à percevoir.
+- B7 (échelle à 2560×1440) laissé à l'échelle globale d'UI2 ; zone de déploiement au sol inchangée.
+- Sons réglés sans écoute (session headless) : niveaux à affiner à l'oreille.
 
 ## Reprise
 `core/build.sh`, `godot --headless --path game --import`. Captures :
