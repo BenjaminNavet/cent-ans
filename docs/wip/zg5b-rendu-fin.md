@@ -1,34 +1,35 @@
 # ZG5b — rendu de l'hydrographie fine, des routes drapées, des ancrages et du parcellaire de près
 
-Branche `worktree-agent-a1d8f6f50c1e29cce` (depuis `main` 5a33ec1f, ZG0-ZG5a). Cache partagé par
-liens symboliques non versionnés `data/map/pyramid`, `tools/geo/raw`. ADR 0036, contrat
-`docs/geo.md` § « Hydrographie fine ».
+Branche `worktree-agent-a1d8f6f50c1e29cce` (depuis `main` 5a33ec1f ; `main` refusionné après ZG4,
+PF1, PB1). Cache partagé par liens symboliques non versionnés `data/map/pyramid`, `tools/geo/raw`.
+ADR 0036, contrat `docs/geo.md` § « Hydrographie fine ». Doc : `docs/godot-map.md` § « Hydrographie
+fine, routes drapées, ancrages et parcellaire de près (lot ZG5b) ».
 
 ## Architecture (choix)
-- `cafv_tile.gd` : lecture CAFV v1 (en-tête de **28 octets**, pas 32 comme l'écrit `docs/geo.md`).
-- `fine_geo_store.gd` : index `rivers_fine.json` + `fine_anchors.json` (routes, ancrages), tuiles
-  chargées dans `WorkerThreadPool`, LRU 64 tuiles par couche, `load_sync` pour le lit.
-- **Lit creusé = abaissement des pages** (`fine_bed_carver.gd`) : crochet `page_filter` dans
-  `relief_quadtree.gd` ; chaque page ≥ E2 est creusée dans un fil avant téléversement (profil
-  parabolique sous `z`, berges fondues, sillon ≥ 0,75 px de page). Un seul état pour le vertex
-  shader, les normales, le morphing et `surface_height_at`.
-- `fine_ribbon_job.gd` (fil) + `fine_geo_layer.gd` (enfant `Rivers/FineGeo`) : tuiles E2 autour du
-  point visé, rubans fleuves + routes par tuile, hauteurs en **mètres** (× `height_scale` dans le
-  shader), remaillage 600 ms après les pages, disque `fine_zone` pour le fondu avec l'ancien rendu.
-- Shaders : `river_fine.gdshader` (eau, bancs, vasières à marée, roselières, galets),
-  `road_fine.gdshader` (terre, principale, pavé, chaussée) ; `fine_zone_mask` dans
-  `river_bed.gdshaderinc` (anciens rubans et berges effacés dans le disque), `road.gdshader`.
-- Ancrages : `SettlementLayer.apply_fine_anchors` (maquettes, hameaux, étiquettes de près),
-  `RiverCrossings.set_fine_anchors` / `set_fine_mode` (ponts sur le fleuve fin au palier près),
-  ponts-portes recalculés sur le fleuve fin (`FineGeoLayer._build_gates`).
+- `cafv_tile.gd` : lecture CAFV v1 (en-tête de **28 octets** ; `docs/geo.md` corrigé) ; **rang** =
+  max(ordre, ordre équivalent à la largeur) car ZG5a sous-estime l'ordre des grands fleuves.
+- `fine_geo_store.gd` : index + ancrages, tuiles dans des fils, LRU verrouillé (`fetch_threadsafe`).
+- **Lit creusé = abaissement des pages ≥ E3** (`fine_bed_carver.gd`, crochet `page_filter` de
+  `relief_quadtree.gd`, tâche de fil par page, E/S comprises). Ancien lit `river_bed.png` non creusé.
+- `fine_ribbon_job.gd` (fil) + `fine_geo_layer.gd` (`Rivers/FineGeo`) : rubans fleuves + routes par
+  tuile E2, hauteurs en mètres × `campaign_vertical_scale`, fondu `fine_zone`, ponts-portes fins,
+  qualité PF1, `FrameBudget` PB1.
+- `river_fine.gdshader`, `road_fine.gdshader`, `fine_parcels.gdshaderinc` (3 crochets d'une ligne dans
+  `terrain.gdshader` : `fp_splat`, `fp_tile_level`, `fp_parcels`).
+- Ancrages : `SettlementLayer.apply_fine_anchors`, `RiverCrossings.set_fine_anchors/set_fine_mode`
+  (ponts à l'échelle réelle, tablier à `z_deck`).
 
 ## État
-- [x] squelette + lecture CAFV, store, lit creusé, rubans, fondu, ancrages (non testés)
-- [ ] fusion de `main` (ZG4 dans main : a3389a92) — demandée par l'orchestrateur
-- [ ] test headless `tests/zg5b_fine_geo_test.gd`
-- [ ] parcellaire (`fine_parcels.gdshaderinc`) + casse des carrés de la splat + détail HF
-- [ ] fondu du lit `river_bed.png` aux paliers vallée/site
-- [ ] banc, captures `docs/img/zg5b/`, `docs/godot-map.md`
+- [x] lecture, store, lit, rubans, fondu, ancrages, parcellaire, splat, détail, qualité, test
+- [x] fusions de `main` (ZG4, PF1, PB1)
+- [x] doc `docs/godot-map.md`
+- [ ] captures `docs/img/zg5b/` (en cours) et mesures dans la doc
 
-## Prochaine étape
-Fusionner `main`, brancher `vertical_scale_changed` de ZG4, lancer le jeu sur Rouen.
+## Points ouverts (pour la fusion)
+- Fichiers partagés avec ZG4 : `campaign_map.gd` (2 lignes : `attach_roads`, `flush_fine` ; ponts
+  visibles au palier site si rendu fin), `settlement_layer.gd` (ancrages), `relief_quadtree.gd`
+  (crochet `page_filter`), `river_crossings.gd`.
+- Villes emblématiques (zones personnalisées : Paris, Londres, Rouen, Bordeaux…) : rien de fin dedans
+  (comme V4) ; London Bridge / ponts de Rouen relèvent de VH4.
+- Coût : ≈ 10 % d'i/s sur le banc complet (machine chargée), surtout la concurrence des fils
+  (≈ 200 ms de maillage par tuile, 8-30 ms de creusement par page).
