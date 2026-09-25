@@ -28,6 +28,14 @@ const DEFAULTS := {
 	"interface/text_size": 1.0,
 	"interface/season_report": true,
 	"interface/confirm_end_turn": false,
+	# Lot U5 (audit A3, T2) : portée des lettres et du bandeau (`NewsInterest.MODES`).
+	"interface/news_filter": "interest",
+	# Lot U7 : disposition du clavier (« azerty » / « qwerty ») pour les libellés des touches.
+	"input/layout": "auto",
+	# Lot U12 : accessibilité.
+	"access/colorblind": false,
+	"access/reduce_motion": false,
+	"access/high_contrast": false,
 	"camera/edge_pan": true,
 	"camera/speed": 1.0,
 	# C1 : brouillard de guerre (provinces hors de vue voilées, armées ennemies masquées).

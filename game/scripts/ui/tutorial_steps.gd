@@ -150,7 +150,7 @@ const ADVICE := {
 		"research": "Comptabilité et lettres de change : la cour de Bourgogne sera la plus riche d'Occident.",
 		"diplomacy": "Vassal du roi de France, vous pouvez choisir votre camp : Philippe le Bon s'alliera aux Anglais après Montereau (1419) avant la paix d'Arras (1435).",
 		"end_turn": "Laissez France et Angleterre s'épuiser : chaque saison de paix enrichit le duché.",
-		"season_report": "Les successions des princes voisins sont des occasions : lisez la rubrique « Cour ».",
+		"season_report": "Les successions des princes voisins sont des occasions : lisez la rubrique « Le monde ».",
 		"chronicle": "La querelle des Armagnacs et des Bourguignons (1407) fera de vous l'arbitre du royaume.",
 		"tax": "Les villes flamandes, riches et turbulentes, supportent mal l'impôt : Gand se révoltera en 1453.",
 		"governor": "Un gouverneur habile tient les Pays-Bas pendant que le duc négocie à Paris.",

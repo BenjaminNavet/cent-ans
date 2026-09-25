@@ -361,6 +361,16 @@ const FOREIGN_MINOR_KINDS := [
 ]
 
 
+## Lot U5 : filtre d'intérêt des lettres et du bandeau (voisins, alliés, ennemis, grandes
+## puissances), recalculé en fin de tour par `HudController.update_interest` ; nul = tout passe.
+var news_interest: NewsInterest = null
+
+
+## Vrai si la nouvelle mérite une lettre ou le bandeau du haut (le journal garde tout).
+func keeps_news(event: Dictionary) -> bool:
+	return news_interest == null or news_interest.keeps(event)
+
+
 ## Vrai si l'événement doit figurer au journal du joueur.
 func journal_keeps(event: Dictionary) -> bool:
 	var faction := str(event.get("faction", ""))
@@ -388,7 +398,9 @@ func add_events(events: Array, date_text: String) -> void:
 		if not journal_keeps(event):
 			continue
 		var news := NewsLetters.news_from_event(event)  # F10b : lettre scellée (trace persistante)
-		if not news.is_empty():
+		if not news.is_empty() and keeps_news(event):  # U5 : filtre d'intérêt
+			if news_interest != null:
+				news["interest"] = NewsInterest.interest_label(news_interest.event_interest(event))
 			news_letters.push_news(news)
 		var kind: String = str(event.get("kind", ""))
 		var text: String = journal_text(event)
@@ -646,8 +658,92 @@ func end_turn_control() -> EndTurnCluster:
 	return end_turn_cluster
 
 
+## Lot U5 (audit A3, T5) : bandeau « Tour des autres factions » affiché pendant la résolution de
+## la fin de saison. `end_turn_gate` (posé par `FlowController`) dit si la fin de tour aura lieu
+## tout de suite (pas de confirmation en attente) ; invalide = oui.
+var end_turn_gate: Callable = Callable()
+var turn_banner: PanelContainer
+var _turn_banner_title: Label
+var _turn_banner_detail: Label
+var _turn_banner_tween: Tween
+const TURN_BANNER_HOLD := 1.1
+
+
+## Cloche ou Entrée : bandeau des autres factions, une image pour l'afficher, puis la fin de tour.
+func request_end_turn() -> void:
+	if end_turn_gate.is_valid() and not bool(end_turn_gate.call()):
+		end_turn_pressed.emit()
+		return
+	show_turn_banner()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	end_turn_pressed.emit()
+	finish_turn_banner()
+
+
+func _setup_turn_banner() -> void:
+	turn_banner = PanelContainer.new()
+	turn_banner.name = "TurnBanner"
+	turn_banner.theme = event_log.theme
+	turn_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var box := HudStyle.panel_box(12)
+	box.border_color = HudStyle.GOLD
+	turn_banner.add_theme_stylebox_override("panel", box)
+	var column := VBoxContainer.new()
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	turn_banner.add_child(column)
+	_turn_banner_title = HudStyle.label("Tour des autres factions", 22, HudStyle.RUBRIC)
+	_turn_banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(_turn_banner_title)
+	_turn_banner_detail = HudStyle.label("", HudStyle.FONT_BODY + 2, HudStyle.INK_SOFT)
+	_turn_banner_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(_turn_banner_detail)
+	add_child(turn_banner)
+	turn_banner.hide()
+
+
+func show_turn_banner() -> void:
+	if turn_banner == null:
+		return
+	if _turn_banner_tween != null:
+		_turn_banner_tween.kill()
+	_turn_banner_title.text = "Tour des autres factions"
+	_turn_banner_detail.text = "Les princes d'Europe jouent leur saison…"
+	turn_banner.modulate.a = 1.0
+	turn_banner.show()
+	_place_turn_banner()
+
+
+## Après la résolution : « à vous de jouer », puis le bandeau s'efface (sans fondu si
+## « Réduire les animations » est coché).
+func finish_turn_banner() -> void:
+	if turn_banner == null or not turn_banner.visible:
+		return
+	_turn_banner_title.text = date_label.text.get_slice(" — ", 0)
+	_turn_banner_detail.text = "Les autres factions ont joué : à vous."
+	_place_turn_banner()
+	if _turn_banner_tween != null:
+		_turn_banner_tween.kill()
+	_turn_banner_tween = create_tween()
+	_turn_banner_tween.tween_interval(TURN_BANNER_HOLD)
+	if Accessibility.reduce_motion():
+		_turn_banner_tween.tween_callback(turn_banner.hide)
+	else:
+		_turn_banner_tween.tween_property(turn_banner, "modulate:a", 0.0, 0.45)
+		_turn_banner_tween.tween_callback(turn_banner.hide)
+
+
+func _place_turn_banner() -> void:
+	var view := get_viewport().get_visible_rect().size
+	turn_banner.reset_size()
+	turn_banner.size.x = maxf(turn_banner.get_combined_minimum_size().x, 380.0)
+	turn_banner.position = Vector2((view.x - turn_banner.size.x) * 0.5, ($TopBar as Control).size.y + 48.0)
+
+
 func _setup_hud() -> void:
-	end_turn_cluster.end_turn_requested.connect(func() -> void: end_turn_pressed.emit())
+	end_turn_cluster.end_turn_requested.connect(request_end_turn)
+	_setup_turn_banner()
 	end_turn_cluster.alert_activated.connect(func(alert: Dictionary) -> void: alert_activated.emit(alert))
 	general_seal.general_requested.connect(func(id: String) -> void: army_general_clicked.emit(id))
 	general_seal.stance_selected.connect(func(stance: String) -> void:
@@ -676,6 +772,7 @@ func _setup_hud() -> void:
 	event_log.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	set_log_expanded(false)
 	army_strip.minimum_size_changed.connect(queue_layout)
+	end_turn_cluster.minimum_size_changed.connect(queue_layout)  # U5 : colonne de pastilles
 	news_letters.resized.connect(queue_layout)
 	event_log.minimum_size_changed.connect(queue_layout)
 	for panel in [province_panel, faction_panel, character_sheet, court_panel]:
@@ -830,6 +927,8 @@ func layout_hud() -> void:
 			dock_right = view.x - minimap.position.x + 8.0
 	docked_right_x = view.x - dock_right
 	news_letters.position = Vector2(view.x - NewsLetters.LETTER_WIDTH - HUD_MARGIN, letters_top)
+	# U5 : les lettres s'arrêtent au-dessus des pastilles d'alerte de la cloche.
+	news_letters.fit_height(end_turn_cluster.position.y + end_turn_cluster.stack_top() - 8.0 - letters_top)
 	news_letters.visible = not (docked_open or wide_panel_open)
 	# Panneaux de province et de colonie : de la barre jusqu'au-dessus de la cloche, à gauche de
 	# la minicarte.
@@ -891,7 +990,7 @@ func _dock_panel(panel: Control, top: float, right: float) -> void:
 	panel.offset_right = -right
 	panel.offset_left = -right - width
 	panel.offset_top = top
-	panel.offset_bottom = -(end_turn_cluster.size.y + HUD_MARGIN * 0.5)
+	panel.offset_bottom = -(end_turn_cluster.bell_height() + HUD_MARGIN * 0.5)
 
 
 func _fit_hover_label() -> void:

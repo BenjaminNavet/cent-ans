@@ -24,8 +24,26 @@ func setup(campaign_map: Node) -> void:
 	ui.army_garrison_requested.connect(_on_garrison_requested)
 	ui.load_requested.connect(func(_path: String) -> void:
 		last_events = []
+		update_interest()
 		refresh())
+	var settings := map.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.changed.connect(func(key: String) -> void:
+			if key == "interface/news_filter":
+				update_interest())
+	update_interest()
 	refresh()
+
+
+## Lot U5 : instantané des voisins, alliés, ennemis et grandes puissances du joueur (filtre des
+## lettres et du bandeau), à refaire après chaque fin de tour (`CampaignMap._on_end_turn`).
+func update_interest() -> void:
+	var sim := _sim()
+	if sim == null or ui == null:
+		return
+	var settings := map.get_node_or_null("/root/Settings")
+	var mode := str(settings.call("get_value", "interface/news_filter")) if settings != null else NewsInterest.MODE_INTEREST
+	ui.news_interest = NewsInterest.build(sim, map.get("map_data"), str(map.get("player_faction")), mode)
 
 
 func _sim() -> Object:
