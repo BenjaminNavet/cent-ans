@@ -13,6 +13,8 @@ mod reinforcements;
 mod separation;
 mod siege_assault;
 mod siege_extra;
+mod standards;
+mod water;
 
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
@@ -23,11 +25,12 @@ use data_model::{Ability, UnitCategory, UnitStats};
 
 use crate::ai;
 use crate::command::{Command, CommandError};
-use crate::field::{Battlefield, Weather, ATTACKER_LINE_Z, DEFENDER_LINE_Z};
+use crate::field::{Battlefield, Weather};
 use crate::impact::{self, ImpactEvent, ImpactKind, LossCause, MAX_PENDING_IMPACTS};
 use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
 use crate::rng::BattleRng;
+use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
 use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
@@ -128,6 +131,18 @@ pub struct BattleSim {
     fire: fire::FireSystem,
     /// SG1: renderer events of the assault, ram and oil timers.
     assault: siege_assault::AssaultState,
+    /// Scale of the battle (EP1): field size and regiments per side.
+    scale: BattleScale,
+    /// EP5: rules of the standards, their own random stream, the routs
+    /// already seen and the standards taken so far.
+    standard_rules: data_model::BattleStandardRules,
+    standard_rng: BattleRng,
+    standard_rout_seen: Vec<bool>,
+    trophies: Vec<crate::outcome::StandardTrophy>,
+    /// EP3: crossings of the river (derived data, reset by `field_mut`).
+    crossings: std::cell::OnceCell<Vec<crate::hydro::Crossing>>,
+    /// EP3: regiments whose drowning was announced.
+    drown_announced: Vec<u32>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -226,8 +241,23 @@ pub(crate) fn attack_angle(defender: &Unit, attacker_x: f64, attacker_z: f64) ->
 }
 
 impl BattleSim {
-    /// Deploys both armies and draws the weather and the field from `seed`.
+    /// Deploys both armies and draws the weather and the field from `seed`,
+    /// at the scale of the setup's head count ([`BattleScale::for_setup`]).
     pub fn new(setup: BattleSetup, seed: u64) -> Result<Self, SetupError> {
+        let scale = BattleScale::for_setup(&setup);
+        Self::new_scaled(setup, seed, scale)
+    }
+
+    /// [`Self::new`] at a given scale (EP1: forced tier; sieges always use
+    /// the standard field, whatever `scale` says about the field).
+    pub fn new_scaled(
+        setup: BattleSetup,
+        seed: u64,
+        mut scale: BattleScale,
+    ) -> Result<Self, SetupError> {
+        if setup.siege.is_some() {
+            scale.field = crate::scale::FieldSize::STANDARD;
+        }
         for side in SideId::BOTH {
             if setup.side(side).units.iter().all(|u| u.soldiers == 0) {
                 return Err(SetupError::EmptySide(side));
@@ -236,7 +266,8 @@ impl BattleSim {
         let mut rng = BattleRng::from_seed(seed);
         let weather = Weather::draw(setup.season, &mut rng);
         let is_siege = setup.siege.is_some();
-        let mut field = Battlefield::generate_site(&setup.field_site(), weather, &mut rng);
+        let mut field =
+            Battlefield::generate_site_sized(&setup.field_site(), scale.field, weather, &mut rng);
         let mut siege = setup.siege.as_ref().map(|s| {
             SiegeWorks::for_battle(
                 s.fortification,
@@ -318,6 +349,8 @@ impl BattleSim {
                 .any(|u| u.side == SideId::Defender && u.is_general),
         ];
         let count = units.len();
+        let standard_rng = rng.derive(standards::STANDARD_SALT);
+        let standard_rules = setup.standards.clone().unwrap_or_default();
         let mut sim = BattleSim {
             setup,
             field,
@@ -349,6 +382,13 @@ impl BattleSim {
             village_props: Default::default(),
             fire,
             assault: Default::default(),
+            scale,
+            standard_rules,
+            standard_rng,
+            standard_rout_seen: vec![false; count],
+            trophies: Vec::new(),
+            crossings: Default::default(),
+            drown_announced: Vec::new(),
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -391,8 +431,8 @@ impl BattleSim {
     fn deploy(&mut self) {
         for side in SideId::BOTH {
             let (line_z, facing, back) = match side {
-                SideId::Attacker => (ATTACKER_LINE_Z, 0.0, -1.0),
-                SideId::Defender => (DEFENDER_LINE_Z, std::f64::consts::PI, 1.0),
+                SideId::Attacker => (self.field.attacker_line_z(), 0.0, -1.0),
+                SideId::Defender => (self.field.defender_line_z(), std::f64::consts::PI, 1.0),
             };
             let ids: Vec<usize> = (0..self.units.len())
                 .filter(|&i| self.units[i].side == side && !self.units[i].reserve)
@@ -430,8 +470,9 @@ impl BattleSim {
     /// Cavalry on the wings of a front `front_width` wide, alternating right
     /// and left.
     fn place_wings(&mut self, cavalry: &[usize], front_width: f64, z: f64) {
-        let mut left = 600.0 - front_width * 0.5 - 20.0;
-        let mut right = 600.0 + front_width * 0.5 + 20.0;
+        let center = self.field.size.center_x();
+        let mut left = center - front_width * 0.5 - 20.0;
+        let mut right = center + front_width * 0.5 + 20.0;
         for (k, &i) in cavalry.iter().enumerate() {
             let (w, _) = self.units[i].extent();
             let x = if k % 2 == 0 {
@@ -575,7 +616,7 @@ impl BattleSim {
         self.place_row(&others, cz + 30.0, 1.0);
     }
 
-    /// Places `row` side by side, centred on x = 600, wrapping into extra rows
+    /// Places `row` side by side, centred on the field, wrapping into extra rows
     /// behind when wider than the field. Returns the width of the first row.
     fn place_row(&mut self, row: &[usize], z: f64, back: f64) -> f64 {
         let gap = 12.0;
@@ -601,7 +642,7 @@ impl BattleSim {
             if line_index == 0 {
                 first_width = total.max(0.0);
             }
-            let mut x = 600.0 - total * 0.5;
+            let mut x = self.field.size.center_x() - total * 0.5;
             for &i in line {
                 let (w, _) = self.units[i].extent();
                 let unit = &mut self.units[i];
@@ -623,9 +664,15 @@ impl BattleSim {
         &self.field
     }
 
+    /// Scale of the battle (EP1).
+    pub fn scale(&self) -> &BattleScale {
+        &self.scale
+    }
+
     /// Mutable field (tests and laboratory set-ups: hedges, villages).
     pub fn field_mut(&mut self) -> &mut Battlefield {
         self.relief_map = Default::default();
+        self.crossings = Default::default();
         self.village_props = Default::default();
         &mut self.field
     }
@@ -653,7 +700,7 @@ impl BattleSim {
     /// Height at which `unit`'s soldiers stand at (x, z): the ground, raised
     /// to the wall walk on the walls and part-way up while climbing.
     pub fn standing_height(&self, unit: &Unit, x: f64, z: f64) -> f64 {
-        let ground = self.field.height(x, z);
+        let ground = self.field.walk_height(x, z);
         let Some(works) = &self.siege else {
             return ground;
         };
@@ -1159,6 +1206,7 @@ impl BattleSim {
         let contacts = self.contacts();
         self.resolve_movement(&contacts);
         self.separate_friends();
+        self.resolve_water();
         self.resolve_siege_works();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
@@ -1166,6 +1214,7 @@ impl BattleSim {
         self.boiling_oil();
         self.resolve_fire();
         self.resolve_melee(&contacts);
+        self.resolve_standards(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
         self.elapsed += DT;
@@ -1264,11 +1313,8 @@ impl BattleSim {
                 0.55
             };
         }
-        match self.field.water_at(unit.x, unit.z) {
-            Some(true) => speed *= 0.5,
-            Some(false) => speed *= 0.25,
-            None => {}
-        }
+        // EP3: fords, deep water, streams, banks, bridges, roads.
+        speed *= self.water_speed(unit);
         if self.weather == Weather::Snow {
             speed *= 0.8;
         }
@@ -1308,7 +1354,9 @@ impl BattleSim {
         let from = (unit.x, unit.z);
         let to = (unit.x + dir.0 * step, unit.z + dir.1 * step);
         let blocked = self.wall_block(index, from, to);
-        let in_house = blocked.is_none() && self.house_block(index, from, to);
+        let in_house = blocked.is_none()
+            && (self.house_block(index, from, to)
+                || (!may_leave && self.water_blocks(index, from, to)));
         let unit = &mut self.units[index];
         unit.blocked_by = blocked;
         if blocked.is_some() || in_house {
@@ -1385,7 +1433,8 @@ impl BattleSim {
     /// keep going straight unless the detour is short).
     fn route(&self, index: usize, tx: f64, tz: f64) -> (f64, f64) {
         let Some(works) = &self.siege else {
-            return (tx, tz);
+            // EP3: across the river by a bridge or a ford.
+            return self.water_route(index, tx, tz);
         };
         let unit = &self.units[index];
         let sallying = works.sortie && unit.side == SideId::Defender;
@@ -1850,10 +1899,21 @@ impl BattleSim {
             (self.units[i].x, self.units[i].z),
             (self.units[p].x, self.units[p].z),
         );
-        if cavalry && (self.field.breaks_charge(from, to) || self.field.in_village(to.0, to.1)) {
+        let water = if cavalry {
+            self.water_breaks_charge(from, to)
+        } else {
+            None
+        };
+        if cavalry
+            && (self.field.breaks_charge(from, to)
+                || self.field.in_village(to.0, to.1)
+                || water.is_some())
+        {
             self.units[i].charge_timer = 0.0;
             self.units[i].morale -= 5.0;
-            let text = if self.field.in_village(to.0, to.1) {
+            let text = if let Some(how) = water {
+                format!("La charge des {} {how}.", self.unit_label(i))
+            } else if self.field.in_village(to.0, to.1) {
                 format!(
                     "La charge des {} se brise dans le village.",
                     self.unit_label(i)
@@ -2329,9 +2389,15 @@ impl BattleSim {
         if self.on_ladders(defender) {
             damage *= 2.0;
         }
+        // EP3: fords, streams, deep water, bridges and bridgeheads.
+        damage *= self.water_melee_factor(attacker, defender);
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
         damage *= 0.6 + attacker.morale.max(0.0) / 250.0;
+        // EP5: without its standard the regiment loses its rallying point.
+        if matches!(attacker.standard, crate::unit::StandardState::Fallen { .. }) {
+            damage *= self.standard_rules.fallen_melee_factor;
+        }
         damage
     }
 
@@ -2612,6 +2678,7 @@ impl BattleSim {
         };
         self.finished = true;
         self.winner = Some(winner);
+        self.collect_field_standards(winner);
         let loser = winner.other();
         if self.general_alive[loser.index()] {
             if let Some(unit) = self.units.iter().find(|u| u.side == loser && u.is_general) {
@@ -2685,6 +2752,8 @@ impl BattleSim {
                 general_captured: self.general_captured[side.index()],
                 no_quarter: self.no_quarter[side.index()],
                 withdrew,
+                standards_taken: self.trophies_of(side),
+                standards_lost: self.trophies.iter().filter(|t| t.taken_by != side).count() as u32,
             }
         };
         Some(BattleOutcome {

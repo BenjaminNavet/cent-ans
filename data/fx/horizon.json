@@ -1,0 +1,148 @@
+{
+  "description": "Horizon des batailles (lot EP2, ADR 0032). Purement visuel, aucune règle. relief : tuiles de relief réel cuites par `cent-ans geo horizon` (game/assets/horizon/relief), raccord au champ et anneau d'horizon ; haze : brume de distance (densité du brouillard par météo quand l'horizon est actif, allègement en altitude) ; panorama : bande peinte cylindrique recalée sur la ligne d'horizon réelle ; panoramas : bibliothèque d'images peintes (générées par `cent-ans horizon-panoramas`, invites ci-dessous) ; rules : choix du panorama (première règle qui s'applique) ; silhouettes : clochers, châteaux et fumées lointains posés sur l'anneau.",
+  "relief": {
+    "index": "res://assets/horizon/relief/index.json",
+    "blend_start_m": 700.0,
+    "blend_end_m": 3000.0,
+    "river_keep_m": 450.0,
+    "ring_step_m": 400.0,
+    "ring_radius_m": 13000.0,
+    "snow_line_m": {"spring": 1900.0, "summer": 2900.0, "autumn": 2300.0, "winter": 700.0},
+    "colors": {
+      "field": [0.34, 0.37, 0.21],
+      "meadow": [0.27, 0.34, 0.17],
+      "forest": [0.1, 0.16, 0.08],
+      "rock": [0.42, 0.4, 0.37],
+      "snow": [0.92, 0.94, 0.97],
+      "winter_field": [0.46, 0.44, 0.36],
+      "autumn_forest": [0.26, 0.19, 0.08]
+    }
+  },
+  "haze": {
+    "fog_density": {"clear": 0.0002, "fog": 0.0036, "rain": 0.0012, "snow": 0.0015},
+    "altitude_scale_m": 900.0,
+    "full_density_m": 6000.0,
+    "ring_scale": 0.5,
+    "ring_tint": 0.9
+  },
+  "panorama": {
+    "radius_m": 14600.0,
+    "bottom_deg": -1.2,
+    "min_angle_deg": 0.55,
+    "exaggeration": 1.35,
+    "max_angle_deg": 7.5,
+    "haze": {"clear": 0.36, "fog": 1.0, "rain": 0.75, "snow": 0.62},
+    "exposure": {"clear": 0.62, "fog": 0.55, "rain": 0.45, "snow": 0.6},
+    "sea_share": 0.55,
+    "paint_detail": 0.3
+  },
+  "panoramas": {
+    "channel_coast": {
+      "path": "res://assets/horizon/panoramas/channel_coast.webp",
+      "label": "Côte de la Manche",
+      "repeats": 6,
+      "prompt": "the far distant coastline of the English Channel in northern France: pale chalk cliffs and low grassy downs fading into haze, dunes and salt marsh, a strip of grey-green sea at the foot of the land"
+    },
+    "pyrenees": {
+      "path": "res://assets/horizon/panoramas/pyrenees.webp",
+      "label": "Pyrénées",
+      "repeats": 8,
+      "prompt": "the chain of the Pyrenees mountains seen from the foothills of Bearn, 50 km away: a long wall of jagged grey-blue peaks with snow patches, layered forested ridges in front fading into blue atmospheric haze"
+    },
+    "alps": {
+      "path": "res://assets/horizon/panoramas/alps.webp",
+      "label": "Alpes",
+      "repeats": 8,
+      "prompt": "the high Alps seen from a valley far away: tall snow-capped peaks, glaciers and dark rocky faces, layered pine-covered ridges in front fading into cool blue atmospheric haze"
+    },
+    "massif_central": {
+      "path": "res://assets/horizon/panoramas/massif_central.webp",
+      "label": "Massif central",
+      "repeats": 6,
+      "prompt": "the volcanic uplands of Auvergne in the Massif Central seen from afar: rounded extinct volcano cones and long plateaus, dark pine woods and brown moorland, layered ridges fading into haze"
+    },
+    "wooded_hills": {
+      "path": "res://assets/horizon/panoramas/wooded_hills.webp",
+      "label": "Collines boisées",
+      "repeats": 6,
+      "prompt": "rolling wooded hills in eastern France (Vosges, Morvan, Ardennes) seen from far away: rounded forested summits of oak, beech and fir, several layers of ridges fading into blue haze"
+    },
+    "picardy_plains": {
+      "path": "res://assets/horizon/panoramas/picardy_plains.webp",
+      "label": "Plaines de Picardie",
+      "repeats": 6,
+      "prompt": "the open chalk plain of Picardy seen to the far horizon: very gentle low ridges, wide fields of ripening wheat and fallow, small dark copses and lines of trees, a very low and flat horizon fading into haze"
+    },
+    "norman_bocage": {
+      "path": "res://assets/horizon/panoramas/norman_bocage.webp",
+      "label": "Bocage normand",
+      "repeats": 6,
+      "prompt": "the Norman bocage seen to the far horizon: gently rolling green country, small pastures enclosed by dense hedgerows of oak and ash, small woods, soft layered low hills fading into moist haze"
+    },
+    "loire_valley": {
+      "path": "res://assets/horizon/panoramas/loire_valley.webp",
+      "label": "Val de Loire",
+      "repeats": 6,
+      "prompt": "the wide Loire valley seen from a slope: flat valley floor with meadows, willows and poplars, faint glints of the wide river, low tufa hills and forests on the far side fading into soft haze"
+    },
+    "gascony_hills": {
+      "path": "res://assets/horizon/panoramas/gascony_hills.webp",
+      "label": "Coteaux de Gascogne",
+      "repeats": 6,
+      "prompt": "the rolling hills of Gascony seen to the far horizon: long soft ridges and valleys, vineyards and golden fields, oak woods on the slopes, warm hazy light, layered hills fading into haze"
+    },
+    "flanders_flat": {
+      "path": "res://assets/horizon/panoramas/flanders_flat.webp",
+      "label": "Plat pays de Flandre",
+      "repeats": 6,
+      "prompt": "the flat country of Flanders seen from a church tower, only the far distance several kilometres away: perfectly flat wet meadows and fields, small distant rows of willows and poplars, a very low flat horizon at mid-height of the picture, fading into grey haze; no road, no near trees"
+    },
+    "moorland_hills": {
+      "path": "res://assets/horizon/panoramas/moorland_hills.webp",
+      "label": "Landes et collines des îles Britanniques",
+      "repeats": 6,
+      "prompt": "the moorland hills of northern England, Wales and Scotland seen from afar: bare rounded fells with heather and bracken, rocky crags, few trees, layered ridges fading into cool grey haze"
+    },
+    "mediterranean_hills": {
+      "path": "res://assets/horizon/panoramas/mediterranean_hills.webp",
+      "label": "Collines méditerranéennes",
+      "repeats": 6,
+      "prompt": "dry Mediterranean hills of Provence and Languedoc seen to the far horizon: limestone ridges with garrigue scrub, olive groves and dark cypresses, pale rocky crests fading into warm haze"
+    },
+    "winter_lowlands": {
+      "path": "res://assets/horizon/panoramas/winter_lowlands.webp",
+      "label": "Hiver",
+      "repeats": 6,
+      "prompt": "a snowy winter countryside of northern France seen to the far horizon: gently rolling hills covered with snow, bare leafless woods drawn in dark grey, frosty hedgerows, a cold pale haze"
+    }
+  },
+  "prompt_template": "Distant landscape backdrop for a historical strategy game, realistic oil painting in the style of 19th-century landscape painters, wide horizontal format. {prompt}. The upper half of the picture is an empty, perfectly plain and uniform pale sky with no clouds, no sun and no birds. Only the far distance is shown: no foreground, no people, no animals, no buildings, no roads, no text, no signature, no frame.",
+  "rules": [
+    {"panorama": "winter_lowlands", "season": ["winter"], "skyline_max_deg": 2.5},
+    {"panorama": "pyrenees", "provinces": ["prov_bearn", "prov_navarra", "prov_roussillon", "prov_aragon", "prov_biscay", "prov_carcassonne", "prov_toulousain", "prov_barcelona"]},
+    {"panorama": "alps", "provinces": ["prov_savoie", "prov_dauphine", "prov_bern", "prov_waldstatten", "prov_tirol", "prov_piemont", "prov_oberbayern", "prov_austria", "prov_swabia", "prov_milano", "prov_verona", "prov_montferrat"]},
+    {"panorama": "massif_central", "provinces": ["prov_auvergne", "prov_limousin", "prov_rouergue", "prov_lyonnais", "prov_bourbonnais", "prov_quercy"]},
+    {"panorama": "moorland_hills", "provinces": ["prov_highlands", "prov_lothian", "prov_fife", "prov_renfrew", "prov_galloway", "prov_northumberland", "prov_lancashire", "prov_yorkshire", "prov_gwynedd", "prov_deheubarth", "prov_devon", "prov_cornwall", "prov_ulster", "prov_munster", "prov_dublin"]},
+    {"panorama": "mediterranean_hills", "provinces": ["prov_provence", "prov_montpellier", "prov_beaucaire", "prov_comtat_venaissin", "prov_corsica", "prov_sardegna", "prov_sicilia", "prov_napoli", "prov_lazio", "prov_firenze", "prov_genova", "prov_valencia", "prov_murcia", "prov_granada", "prov_malaga", "prov_sevilla", "prov_cordoba", "prov_mallorca", "prov_toledo", "prov_ancona"]},
+    {"panorama": "gascony_hills", "provinces": ["prov_gascogne", "prov_guyenne", "prov_agenais", "prov_perigord", "prov_angoumois", "prov_saintonge"]},
+    {"panorama": "flanders_flat", "provinces": ["prov_flandre", "prov_flandre_wallonne", "prov_holland", "prov_utrecht", "prov_frisia", "prov_gueldre", "prov_brabant", "prov_jutland", "prov_holstein", "prov_lower_saxony", "prov_norfolk"]},
+    {"panorama": "norman_bocage", "provinces": ["prov_normandie", "prov_normandie_ouest", "prov_maine", "prov_bretagne", "prov_bretagne_ouest", "prov_anjou", "prov_poitou", "prov_wessex", "prov_gloucester"]},
+    {"panorama": "loire_valley", "provinces": ["prov_touraine", "prov_orleanais", "prov_berry", "prov_nivernais"]},
+    {"panorama": "channel_coast", "coastal": true, "skyline_max_deg": 1.5},
+    {"panorama": "alps", "skyline_min_deg": 3.0},
+    {"panorama": "wooded_hills", "terrain": ["hills", "forest", "mountains"]},
+    {"panorama": "wooded_hills", "skyline_min_deg": 1.2},
+    {"panorama": "picardy_plains"}
+  ],
+  "silhouettes": {
+    "min_distance_m": 2600.0,
+    "max_distance_m": 8500.0,
+    "villages": [2, 5],
+    "castles": [0, 1],
+    "smokes": [1, 4],
+    "scale": 1.3,
+    "stone": [0.36, 0.34, 0.31],
+    "roof": [0.3, 0.22, 0.18],
+    "smoke": [0.62, 0.62, 0.64]
+  }
+}
