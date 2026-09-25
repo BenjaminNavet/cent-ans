@@ -17,7 +17,14 @@ Voisin : ZG7a (perf, lit de la Seine, rives de Londres, PathPreview) — ne pas 
    `CREDITS.md` (sources MNT et licences).
 
 ## État
-- Squelette (ce fichier).
+- 1 fait : `relief_cache_status.gd`, `relief_cache_notice.gd`, crochet d'une ligne dans
+  `campaign_map.gd`, `zg7b_cache_test.gd` OK.
+- 2 fait : `geo/relief_cache.py`, `cent-ans geo relief-all [--check] [--force] [--workers]`,
+  `tests/test_relief_cache.py` (8 tests).
+- 3 fait : `cent_ans_tools/export_data.py` + `cent-ans export-data --app … --relief
+  bundle|external|none`, appelé par `export_macos.sh` (`CENT_ANS_EXPORT_RELIEF`) ;
+  `MapPaths.relief_root_for` ; export debug réel essayé avec une fausse pyramide (E1 partiel) en
+  modes bundle et external : relief trouvé, avis PARTIAL journalisé. Tests `test_export_data.py`.
 
 ## Prochaine étape
-- Implémenter 1 et 2.
+- Addendum ADR 0036, docs/geo.md, docs/godot-map.md, CREDITS.md ; puis smoke + tests ZG.
