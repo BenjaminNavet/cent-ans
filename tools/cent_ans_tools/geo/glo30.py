@@ -22,7 +22,14 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+import numpy as np
+import rasterio
+from rasterio.enums import Resampling
+from rasterio.merge import merge
+from rasterio.warp import reproject
+
 from cent_ans_tools.geo import download
+from cent_ans_tools.geo.project import CRS_GEO, CRS_MAP, MapGrid
 
 GLO30_BUCKET_URL = "https://copernicus-dem-30m.s3.amazonaws.com"
 GLO30_TILE_LIST_URL = f"{GLO30_BUCKET_URL}/tileList.txt"
@@ -170,3 +177,86 @@ def raw_bytes() -> dict[str, int]:
         for directory in (GLO30_DIR, WORLDCOVER_DIR)
         if directory.exists()
     }
+
+
+def window_lonlat(
+    grid: MapGrid, window: tuple[int, int, int, int], pad_deg: float = 0.01
+) -> tuple[float, float, float, float]:
+    """``(lon_min, lat_min, lon_max, lat_max)`` of a grid window, padded."""
+    col0, row0, cols, rows = window
+    xs = np.linspace(col0, col0 + cols, 17)
+    ys = np.linspace(row0, row0 + rows, 17)
+    gx, gy = np.meshgrid(xs, ys)
+    lon, lat = grid.pixel_to_lonlat(gx.ravel(), gy.ravel())
+    return (
+        float(np.min(lon)) - pad_deg,
+        float(np.min(lat)) - pad_deg,
+        float(np.max(lon)) + pad_deg,
+        float(np.max(lat)) + pad_deg,
+    )
+
+
+def warp_to_grid(
+    source: np.ndarray,
+    src_transform: object,
+    grid: MapGrid,
+    window: tuple[int, int, int, int],
+    resampling: Resampling,
+) -> np.ndarray:
+    """Reproject a lon/lat ``float32`` array onto a grid window (NaN = no data)."""
+    col0, row0, cols, rows = window
+    destination = np.full((rows, cols), np.nan, dtype=np.float32)
+    reproject(
+        source=source,
+        destination=destination,
+        src_transform=src_transform,
+        src_crs=CRS_GEO,
+        src_nodata=np.nan,
+        dst_transform=grid.transform * rasterio.Affine.translation(col0, row0),
+        dst_crs=CRS_MAP,
+        dst_nodata=np.nan,
+        resampling=resampling,
+    )
+    return destination
+
+
+def mosaic_to_grid(
+    paths: list[Path],
+    grid: MapGrid,
+    window: tuple[int, int, int, int],
+    res_deg: float,
+    resampling: Resampling,
+) -> np.ndarray:
+    """Heights of 1° DEM tiles on a grid window, mosaicked *before* the warp.
+
+    Warping each tile on its own leaves the target pixels that straddle a tile
+    boundary with the average of a sliver only (errors of 100-250 m in the Alps
+    along every integer meridian and parallel): the tiles are first merged on a
+    common ``res_deg`` lon/lat grid (bilinear, the tiles above 50°N are coarser in
+    longitude), then warped with ``resampling``. NaN where no tile covers.
+    """
+    if not paths:
+        return np.full((window[3], window[2]), np.nan, dtype=np.float32)
+    lon_min, lat_min, lon_max, lat_max = window_lonlat(grid, window)
+    # Snap on the source pixel centres (integer multiples of the resolution):
+    # tiles at the mosaic resolution are then copied without resampling.
+    bbox = (
+        (math.floor(lon_min / res_deg) - 0.5) * res_deg,
+        (math.floor(lat_min / res_deg) - 0.5) * res_deg,
+        (math.ceil(lon_max / res_deg) + 0.5) * res_deg,
+        (math.ceil(lat_max / res_deg) + 0.5) * res_deg,
+    )
+    datasets = [rasterio.open(path) for path in paths]
+    try:
+        mosaic, transform = merge(
+            datasets,
+            bounds=bbox,
+            res=(res_deg, res_deg),
+            nodata=np.nan,
+            resampling=Resampling.bilinear,
+            dtype="float32",
+        )
+    finally:
+        for dataset in datasets:
+            dataset.close()
+    return warp_to_grid(mosaic[0], transform, grid, window, resampling)

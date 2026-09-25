@@ -39,6 +39,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from rasterio.enums import Resampling
 from scipy import ndimage
 
 from cent_ans_tools.geo import copernicus, download, relief, relief_shade, terrain
@@ -61,6 +62,7 @@ CORE_BBOX = (-6.0, 42.0, 9.0, 56.0)
 #: E4 pixels of margin around each tier-2 block (surface correction filters).
 TIER2_MARGIN_PX = 128
 COAST_FADE_PX = 2
+GLO90_RES_DEG = 1.0 / 1200.0
 
 
 @dataclass(frozen=True)
@@ -542,10 +544,7 @@ def tier1_unit(
     bounds = _SHARED["bounds"]
     grid2 = level_grid(bounds, 2)  # type: ignore[arg-type]
     window2 = (key.col * 2 * TILE_PX, key.row * 2 * TILE_PX, 2 * TILE_PX, 2 * TILE_PX)
-    names = _SHARED.setdefault(
-        "glo90_names", copernicus.tiles_in_bbox(copernicus.tile_list())
-    )
-    raw = copernicus.resample_to_grid(grid2, window2, names)  # type: ignore[arg-type]
+    raw = glo90_on_grid(grid2, window2)
     h2 = tier1_heights(raw, window2)
     written: list[tuple[int, int]] = []
     if 2 in write_levels:
@@ -562,6 +561,20 @@ def tier1_unit(
         h1 = apply_coast(h1, e0_bil <= 0.0, e0_bil)
         written.append((1, _write_tile(map_dir, key, h1)))
     return written
+
+
+def glo90_on_grid(grid: MapGrid, window: tuple[int, int, int, int]) -> np.ndarray:
+    """Area average of the cached GLO-90 tiles on a grid window (NaN = no tile)."""
+    from cent_ans_tools.geo import glo30
+
+    lon_min, lat_min, lon_max, lat_max = glo30.window_lonlat(grid, window)
+    paths = []
+    for lat in range(int(np.floor(lat_min)), int(np.ceil(lat_max))):
+        for lon in range(int(np.floor(lon_min)), int(np.ceil(lon_max))):
+            path = copernicus.tile_path(copernicus.tile_name(lon, lat))
+            if path.exists():
+                paths.append(path)
+    return glo30.mosaic_to_grid(paths, grid, window, GLO90_RES_DEG, Resampling.average)
 
 
 def tier1_heights(
