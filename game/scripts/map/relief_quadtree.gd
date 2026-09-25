@@ -266,19 +266,25 @@ func _depth_cap(n: int, c: int, r: int) -> int:
 ## Bornes (min, max) des hauteurs monde du nœud, depuis les morceaux E0 (mètres, marges
 ## comprises) et le facteur vertical courant.
 func _y_bounds(n: int, c: int, r: int) -> Vector2:
-	var vs := MapData.vertical_scale()
 	if _bounds.size() < 256:
-		return Vector2(-400.0, 5000.0) * vs
+		return _to_world_bounds(Vector2(-400.0, 5000.0))
 	if n >= DEPTH_E0:
 		var shift := n - DEPTH_E0
-		return _bounds[clampi(r >> shift, 0, 15) * 16 + clampi(c >> shift, 0, 15)] * vs
+		return _to_world_bounds(_bounds[clampi(r >> shift, 0, 15) * 16 + clampi(c >> shift, 0, 15)])
 	var span := 1 << (DEPTH_E0 - n)
 	var result := Vector2(INF, -INF)
 	for j in span:
 		for i in span:
 			var b := _bounds[(r * span + j) * 16 + c * span + i]
 			result = Vector2(minf(result.x, b.x), maxf(result.y, b.y))
-	return result * vs
+	return _to_world_bounds(result)
+
+
+## Bornes en mètres → hauteurs affichées (ZG8 : s·h ≤ y ≤ s·(1 + g)·h pour h ≥ 0).
+static func _to_world_bounds(bounds_m: Vector2) -> Vector2:
+	var vs := MapData.vertical_scale()
+	var up := 1.0 + MapData.relief_gain()
+	return Vector2(bounds_m.x * vs, bounds_m.y * vs * (up if bounds_m.y > 0.0 else 1.0))
 
 
 func _box_in_sphere(bmin: Vector3, bmax: Vector3, radius: float) -> bool:
@@ -458,10 +464,12 @@ func _neighbors(key: int, diagonal: bool) -> Vector4:
 ## monde) sont remises à l'échelle (les nouveaux nœuds lisent directement la nouvelle échelle).
 func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
 	var ratio := new_scale / maxf(old_scale, 1e-9)
+	# ZG8 : le gain local suit l'échelle ; le haut positif de la boîte suit s·(1 + g).
+	var ratio_up := ratio * (1.0 + MapData.relief_gain_for_scale(new_scale)) / (1.0 + MapData.relief_gain_for_scale(old_scale))
 	for slot: MeshInstance3D in _slots.values():
 		var box := slot.custom_aabb
 		var lo := box.position.y * ratio
-		var hi := box.end.y * ratio
+		var hi := box.end.y * (ratio_up if box.end.y > 0.0 else ratio)
 		# Jupe (constante, non proportionnelle) : marge de sécurité en plus.
 		var margin := absf(hi - lo) * 0.02 + 0.05
 		slot.custom_aabb = AABB(Vector3(box.position.x, lo - margin, box.position.z), Vector3(box.size.x, hi - lo + 2.0 * margin, box.size.z))
@@ -764,7 +772,7 @@ func surface_height_at(x: float, y: float) -> float:
 		var lx := x - _hit_origin.x
 		var ly := y - _hit_origin.y
 		if lx >= 0.0 and ly >= 0.0 and lx < _hit_units and ly < _hit_units:
-			return _bilinear(_hit_bytes, lx / _hit_px - 0.5, ly / _hit_px - 0.5, pyramid.height_min_m, pyramid.height_range_m)
+			return MapData.display_height(_bilinear(_hit_bytes, lx / _hit_px - 0.5, ly / _hit_px - 0.5, pyramid.height_min_m, pyramid.height_range_m), x, y)
 	var side := 1 << top
 	for level in range(top, -1, -1):
 		var units := ROOT_TILE_UNITS / side
@@ -781,11 +789,12 @@ func surface_height_at(x: float, y: float) -> float:
 		_hit_units = units
 		_hit_px = units / PAGE_PX
 		_hit_bytes = bytes
-		return _bilinear(bytes, (x - _hit_origin.x) / _hit_px - 0.5, (y - _hit_origin.y) / _hit_px - 0.5, pyramid.height_min_m, pyramid.height_range_m)
+		return MapData.display_height(_bilinear(bytes, (x - _hit_origin.x) / _hit_px - 0.5, (y - _hit_origin.y) / _hit_px - 0.5, pyramid.height_min_m, pyramid.height_range_m), x, y)
 	return NAN
 
 
-## Bilinéaire aux coordonnées pixel (fx, fy) d'une page (bornées au bord), hauteur monde.
+## Bilinéaire aux coordonnées pixel (fx, fy) d'une page (bornées au bord), altitude en MÈTRES
+## (ZG8 : la hauteur affichée passe par `MapData.display_height`, qui dépend du point).
 static func _bilinear(bytes: PackedByteArray, fx: float, fy: float, h_min: float, h_range: float) -> float:
 	fx = clampf(fx, 0.0, PAGE_PX - 1.0)
 	fy = clampf(fy, 0.0, PAGE_PX - 1.0)
@@ -800,7 +809,7 @@ static func _bilinear(bytes: PackedByteArray, fx: float, fy: float, h_min: float
 	var d := bytes.decode_u16(o + PAGE_PX * 2 + 2)
 	var top := a + (b - a) * tx
 	var v := (top + (c + (d - c) * tx - top) * ty) / 65535.0
-	return (h_min + v * h_range) * MapData.vertical_scale()
+	return h_min + v * h_range
 
 
 ## Instantané des pages chargées qui touchent `rect`, lisible depuis un fil de travail sans
@@ -832,6 +841,12 @@ static func sample_snapshot(grid: Dictionary, lx: float, ly: float) -> float:
 ## Échantillonnage bilinéaire (octets little-endian 16 bits) dans la page la plus fine de `pages`
 ## (clé de tuile → octets) couvrant (x, y) ; NAN si aucune.
 static func sample_pages(pages: Dictionary, top_level: int, h_min: float, h_range: float, x: float, y: float) -> float:
+	var h := sample_pages_m(pages, top_level, h_min, h_range, x, y)
+	return MapData.display_height(h, x, y) if not is_nan(h) else NAN
+
+
+## Altitude (m) bilinéaire dans la page la plus fine de `pages` couvrant (x, y) ; NAN si aucune.
+static func sample_pages_m(pages: Dictionary, top_level: int, h_min: float, h_range: float, x: float, y: float) -> float:
 	if pages.is_empty():
 		return NAN
 	for level in range(top_level, -1, -1):

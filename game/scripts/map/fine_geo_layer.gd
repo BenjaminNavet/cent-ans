@@ -455,7 +455,7 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 
 
 func _ground_gate(instance: MeshInstance3D) -> void:
-	instance.position.y = maxf(float(instance.get_meta("z_m", 0.0)) * MapData.vertical_scale(), 0.0)
+	instance.position.y = maxf(MapData.display_height(float(instance.get_meta("z_m", 0.0)), instance.position.x, instance.position.z), 0.0)
 
 
 func _reground_gates() -> void:

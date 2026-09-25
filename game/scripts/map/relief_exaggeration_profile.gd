@@ -32,9 +32,10 @@ extends Resource
 @export var floor_blur_radius: int = 2
 @export var floor_blur_passes: int = 2
 
-## Pentes AFFICHÉES (unités par unité) où la roche remplace la couverture du sol (falaises).
-@export var cliff_slope_start: float = 0.55
-@export var cliff_slope_full: float = 1.3
+## Falaises : pentes du relief exagéré localement (pente vraie × (1 + gain), m/m) où la roche
+## remplace progressivement la couverture du sol (terrain.gdshader).
+@export var cliff_slope_start: float = 0.45
+@export var cliff_slope_full: float = 1.0
 ## Lumière plus rasante : hauteur du soleil (degrés) de la carte de campagne, azimut conservé ;
 ## ≤ 0 : soleil de la scène inchangé.
 @export var sun_elevation_deg: float = 34.0

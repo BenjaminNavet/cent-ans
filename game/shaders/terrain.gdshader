@@ -17,7 +17,9 @@ uniform int height_bpp = 1;               // 1 = canal R normalisé (R16/L8), 2 
 uniform bool height_little_endian = false; // LA8 seulement
 uniform float height_min_m = -200.0;
 uniform float height_max_m = 4800.0;
-global uniform float campaign_vertical_scale; // ZG4 : unités monde par mètre (MapData.vertical_scale())
+// ZG4 : échelle verticale (MapData.vertical_scale()) ; ZG8 : relief local exagéré, hauteur affichée
+// `campaign_display_height` (source unique, double GDScript MapData.display_height).
+#include "res://shaders/campaign_relief.gdshaderinc"
 #define height_scale campaign_vertical_scale
 uniform vec2 map_size = vec2(4096.0, 4096.0);
 uniform float meters_per_px = 719.0;
@@ -109,6 +111,10 @@ uniform float snow_line_m = 2750.0;
 uniform float rock_line_m = 1700.0;
 // Exagération de l'ombrage par rapport à la géométrie (lisibilité du relief).
 uniform float shading_relief = 1.8;
+// ZG8 : roche sur les pentes raides du relief EXAGÉRÉ localement (pente affichée ramenée à l'échelle
+// ×1 : pente vraie × (1 + gain local)), m/m ; 0 / 0 : désactivé (posés par TerrainBuilder).
+uniform float cliff_slope_start = 0.0;
+uniform float cliff_slope_full = 0.0;
 
 // Politique : empreinte (pixels carte par pixel écran) où la couleur de faction prend le dessus.
 uniform float political_start = 0.9;
@@ -310,7 +316,9 @@ void fragment() {
 	rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
 	qt_relief(p, footprint, hc, grad_m);  // ZG2 : relief de la page du quadtree
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
-	vec2 g = grad_m * height_scale * shading_relief;
+	vec2 grad_disp = campaign_display_gradient(hc, grad_m, p);  // ZG8 : pente de la surface affichée
+	float cliff = cliff_slope_full > cliff_slope_start ? smoothstep(cliff_slope_start, cliff_slope_full, length(grad_disp) / (height_scale * meters_per_px)) : 0.0;
+	vec2 g = grad_disp * shading_relief;
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
 
 	float coast = has_coast_dist ? (texture(coast_dist, uv).r * 255.0 - 128.0) / coast_dist_scale : (hc > 0.0 ? 8.0 : -8.0);
@@ -346,6 +354,13 @@ void fragment() {
 	float w_forest = s.b;
 	float w_rock = s.a * rock_frac;
 	float w_heath = s.a * (1.0 - rock_frac);
+	// ZG8 : falaises (pente affichée) en roche, la forêt s'accroche un peu plus longtemps.
+	float before_cliff = w_grass + w_farm + w_forest + w_heath;
+	w_grass *= 1.0 - cliff;
+	w_farm *= 1.0 - cliff;
+	w_heath *= 1.0 - cliff;
+	w_forest *= 1.0 - 0.6 * cliff;
+	w_rock += before_cliff - (w_grass + w_farm + w_forest + w_heath);
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
 	snow = season_snow(snow, hc, uv, p, slope, macro, footprint);  // CV1

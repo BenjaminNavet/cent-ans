@@ -256,16 +256,17 @@ func _ground(item: Dictionary) -> void:
 	if not fine.is_empty():
 		# ZG5b : origine au niveau de l'eau du fleuve fin (lit creusé dessous).
 		var q: Vector2 = fine["px"]
-		var vs := MapData.vertical_scale()
 		# Tablier à `z_deck` : hauteur du maillage (sommet du tablier ≈ 0,05 + 0,02 × largeur)
 		# mise à l'échelle de la hauteur réelle au-dessus de l'eau × échelle verticale courante.
 		var basis: Array = item.get("fine_basis", [])
 		if not basis.is_empty():
 			var deck_top := (0.05 + 0.02 * float(basis[2])) * FINE_SCALE
-			var rise := maxf(float(fine["z_deck"]) - float(fine["z_water"]), 3.0) * vs
+			# ZG8 : hauteur affichée du tablier au-dessus de l'eau (relief local exagéré compris).
+			var z_water := float(fine["z_water"])
+			var rise := MapData.display_height(z_water + maxf(float(fine["z_deck"]) - z_water, 3.0), q.x, q.y) - MapData.display_height(z_water, q.x, q.y)
 			var k_h := clampf(rise / maxf(deck_top, 1e-4), 0.3, 12.0)
 			node.transform.basis = Basis(basis[0] * FINE_SCALE, Vector3.UP * FINE_SCALE * k_h, basis[1] * FINE_SCALE)
-		node.position = Vector3(q.x, maxf(float(fine["z_water"]) * vs, 0.0), q.y)
+		node.position = Vector3(q.x, maxf(MapData.display_height(float(fine["z_water"]), q.x, q.y), 0.0), q.y)
 		return
 	var p: Vector2 = item["px"]
 	var y := renderer.map_data.surface_world_at(p.x, p.y)

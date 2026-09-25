@@ -25,7 +25,8 @@ uniform bool box_uv = false;
 uniform float meters_per_unit = 719.0;
 // Décalage vertical (m) ajouté à la base (rues au-dessus du sol).
 uniform float lift_m = 0.0;
-global uniform float campaign_vertical_scale;
+// ZG8 : base posée à la hauteur affichée (relief local exagéré), source unique.
+#include "res://shaders/campaign_relief.gdshaderinc"
 
 varying flat int layer;
 varying float tint_shift;
@@ -36,7 +37,9 @@ void vertex() {
 	layer = clamp(int(COLOR.a * 16.0), 0, 15);
 	float base = base_source == 0 ? INSTANCE_CUSTOM.r : UV2.x;
 	tint_shift = base_source == 0 ? INSTANCE_CUSTOM.g - 0.5 : 0.0;
-	VERTEX.y += (base + lift_m) * campaign_vertical_scale;
+	// Ancrage : origine de l'instance (bâtiments rigides) ou le sommet (maillages drapés).
+	vec2 anchor_xz = base_source == 0 ? MODEL_MATRIX[3].xz : VERTEX.xz;
+	VERTEX.y += campaign_display_height(base, anchor_xz) + lift_m * campaign_vertical_scale;
 	world_m = VERTEX * meters_per_unit;
 	world_n = NORMAL;
 }
