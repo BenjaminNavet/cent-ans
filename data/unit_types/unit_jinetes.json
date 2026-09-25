@@ -10,18 +10,18 @@
   "mounted": true,
   "soldiers": 80,
   "cost": {
-    "money": 560
+    "money": 480
   },
-  "upkeep": 50,
+  "upkeep": 42,
   "recruit_time_turns": 2,
   "stats": {
-    "melee": 40,
-    "ranged": 48,
-    "range": 60,
+    "melee": 42,
+    "ranged": 55,
+    "range": 80,
     "armor": 24,
     "morale": 52,
     "speed": 86,
-    "ammo": 8
+    "ammo": 12
   },
   "abilities": [
     "skirmish"

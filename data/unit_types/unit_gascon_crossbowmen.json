@@ -9,13 +9,13 @@
   "source_class": "burghers",
   "soldiers": 100,
   "cost": {
-    "money": 520
+    "money": 540
   },
-  "upkeep": 46,
+  "upkeep": 48,
   "recruit_time_turns": 1,
   "stats": {
-    "melee": 42,
-    "ranged": 58,
+    "melee": 40,
+    "ranged": 55,
     "range": 190,
     "armor": 38,
     "morale": 52,

@@ -22,7 +22,7 @@
     "morale": 80,
     "speed": 70,
     "ammo": 0,
-    "charge": 90
+    "charge": 86
   },
   "abilities": [
     "charge_lance",

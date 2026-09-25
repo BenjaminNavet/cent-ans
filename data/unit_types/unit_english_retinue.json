@@ -9,16 +9,16 @@
   "source_class": "nobility",
   "soldiers": 80,
   "cost": {
-    "money": 1050
+    "money": 1150
   },
-  "upkeep": 100,
+  "upkeep": 110,
   "recruit_time_turns": 2,
   "stats": {
     "melee": 72,
     "ranged": 0,
     "range": 0,
     "armor": 78,
-    "morale": 82,
+    "morale": 80,
     "speed": 35,
     "ammo": 0
   },
