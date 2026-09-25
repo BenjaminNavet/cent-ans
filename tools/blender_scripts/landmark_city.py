@@ -37,7 +37,7 @@ import landmark_monuments as monuments  # noqa: E402
 
 # name: (base colour (linear RGB), roughness)
 PALETTE = {
-    "NDStone": ((0.64, 0.59, 0.48), 0.85),
+    "NDStone": ((0.47, 0.40, 0.29), 0.85),
     "Stone": ((0.42, 0.39, 0.33), 0.88),
     "DarkStone": ((0.30, 0.28, 0.24), 0.9),
     "WallStone": ((0.40, 0.37, 0.31), 0.9),
@@ -66,7 +66,8 @@ PALETTE = {
 }
 
 # Layer of the shared material atlas (lot L3, `game/assets/textures/landmarks/build_textures.py`),
-# stored in the alpha of the tint colour: (layer + 0.5) / MATERIAL_LAYERS.
+# stored with the exaggeration of the shape in the alpha byte of the tint colour
+# (see `material_code`).
 MATERIAL_LAYERS = 16
 MATERIAL_LAYER = {
     "NDStone": 0,
@@ -96,6 +97,21 @@ MATERIAL_LAYER = {
     "Gold": 14,
     "Dark": 14,
 }
+
+
+
+def material_code(mat, exaggeration=1.0):
+    """Alpha byte of the tint: atlas layer × 16 + scale step, as a fraction of 255.
+
+    The step ``s`` (0-15) stores the exaggeration ``k`` of the shape (monument or house drawn
+    ``k`` times larger than life): ``k = 2 ** ((s - 4) / 4)``, from 0.5 to 6.7, so that the shader
+    gives stones, bricks and tiles their real size on an enlarged monument.
+    """
+    layer = MATERIAL_LAYER.get(mat, 14)
+    step = round(4.0 * math.log2(max(exaggeration, 1e-3))) + 4
+    step = min(max(step, 0), 15)
+    return (layer * 16 + step) / 255.0
+
 
 Z_WATER = 0.004
 Z_GROUND = 0.008
@@ -658,9 +674,10 @@ def build_monument(plan, site, monument, layers, variant=""):
     if variant:
         layer_name = f"{monument['id']}__{variant}"
     layer = layers.setdefault(layer_name, g.Layer(layer_name))
+    exaggeration = monument.get("scale", plan.monument_scale)
     for mat, shape in parts:
         verts, faces = transform.apply(shape)
-        layer.add(mat, verts, faces, anchor=(x, y))
+        layer.add(mat, verts, faces, anchor=(x, y), color=(1.0, 1.0, 1.0, exaggeration))
     radius = monument.get("clear_radius_m", 0.0) * k
     if radius > 0 and not variant:
         site.clearings.append((x, y, radius))
@@ -924,8 +941,12 @@ def material(bpy, name):
     return mat
 
 
-def layer_object(bpy, layer):
-    """One mesh object per layer: material slots, anchor UV map, tint colour attribute."""
+def layer_object(bpy, layer, exaggeration=1.0):
+    """One mesh object per layer: material slots, anchor UV map, tint colour attribute.
+
+    A colour may carry a 4th value, the exaggeration of its shape (monuments); the others use
+    ``exaggeration`` (the houses' scale).
+    """
     verts, faces, anchors, colors, mat_index, atlas = [], [], [], [], [], []
     materials = sorted(layer.parts)
     for slot, mat in enumerate(materials):
@@ -934,9 +955,11 @@ def layer_object(bpy, layer):
         verts.extend(v)
         faces.extend(tuple(i + base for i in face) for face in f)
         anchors.extend(a)
-        colors.extend(c)
+        colors.extend(col[:3] for col in c)
         mat_index.extend([slot] * len(f))
-        atlas.extend([(MATERIAL_LAYER.get(mat, 14) + 0.5) / MATERIAL_LAYERS] * len(v))
+        atlas.extend(
+            material_code(mat, col[3] if len(col) > 3 else exaggeration) for col in c
+        )
     mesh = bpy.data.meshes.new(layer.name)
     mesh.from_pydata(verts, [], faces)
     for mat in materials:
@@ -964,13 +987,14 @@ def layer_object(bpy, layer):
     return obj
 
 
-def export(bpy, layers, out_path):
+def export(bpy, layers, out_path, house_scale=1.0):
     """Create the objects and export the glTF binary."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     for layer in layers.values():
         if not layer.parts:
             continue
-        obj = layer_object(bpy, layer)
+        houses = layer.name in ("houses", "blocks")
+        obj = layer_object(bpy, layer, house_scale if houses else 1.0)
         obj.select_set(True)
         print(f"LAYER {layer.name} {layer.triangles()}")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1057,7 +1081,8 @@ def main() -> None:
     map_json = landmark_path.resolve().parents[1] / "map" / "map.json"
     meters_per_px = json.loads(map_json.read_text(encoding="utf-8"))["meters_per_px"]
     layers = build(landmark, meters_per_px, siege=siege)
-    export(bpy, layers, Path(args[1]))
+    house_scale = 1.0 if siege else landmark["scale"].get("house_scale", 1.0)
+    export(bpy, layers, Path(args[1]), house_scale)
     print(f"SIZE {compact_glb(Path(args[1])) / 1e6:.2f} MB")
     print("OK")
 
