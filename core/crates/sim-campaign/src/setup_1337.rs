@@ -244,6 +244,7 @@ impl CampaignState {
                 chivalric_order: None,
                 trade_agreements: BTreeSet::new(),
                 trade_income_last_turn: 0,
+                budget_history: Vec::new(),
                 regency: false,
                 embargoes: BTreeSet::new(),
                 suzerain: faction.suzerain.clone(),

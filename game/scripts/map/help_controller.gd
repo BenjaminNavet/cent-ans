@@ -4,27 +4,21 @@ extends Node
 ## Aide en jeu (F1 ou Menu → Aide) : commandes et principes du jeu, en français. Séparé de
 ## `campaign_map.gd` ; celui-ci n'appelle que `setup` et `handle_input`.
 
-const HELP_TEXT := """[b]Commandes de la carte[/b]
-• Déplacer la caméra : W A S D (Z Q S D en AZERTY), flèches ou bords d'écran (F2 pour désactiver) ; molette : zoom ; Q / E : rotation.
-• Clic gauche : sélectionner une armée ou une province. Clic droit (armée sélectionnée) : ordre de déplacement.
-• Entrée : fin du tour. Échap : désélectionner.
-• C : cour et personnages. T : technologies. P : diplomatie. O : objectifs. F1 : cette aide.
-• Modes de carte : M mécontentement, N diplomatie, R religion. F12 : capture d'écran.
-• Volumes de la musique et des effets : menu de départ ou Menu → Son….
-
-[b]La campagne[/b]
+## Principes du jeu ; la fiche des commandes de la carte, en tête, est générée depuis
+## l'InputMap (`ShortcutSheet`, lot U7) à chaque ouverture (disposition du clavier à jour).
+const HELP_TEXT := """[b]La campagne[/b]
 • Un tour est une saison. L'hiver réduit les déplacements et affame les armées en pays ennemi.
 • Les armées traversent la mer entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte 5 % des hommes (10 % l'hiver).
 • Les provinces rapportent selon leur population, leurs bâtiments et l'impôt (panneau de faction, clic sur le blason). La cour et l'administration coûtent d'autant plus que le royaume est vaste et que le trésor dort (3 % de l'excédent au-delà de huit saisons de revenu). En dette, les troupes perdent du moral : licenciez.
 • Recrutez dans le panneau de province, formez des armées, donnez-leur un général (fiche personnage).
 • Chronique : les grands événements historiques (Crécy, la Peste noire, Jeanne d'Arc…) et des événements aléatoires demandent une décision ; bouton « Chronique (n) » de la barre, deux tours pour choisir.
-• Posture « Siège » : l'armée assiège la place ennemie ; vivres, brèche et bouton « Donner l'assaut » apparaissent dans le panneau d'armée. Posture « Chevauchée » : pillage et butin.
+• Posture « Siège » : l'armée assiège la place ennemie ; quand elle est sélectionnée, l'état du siège (vivres, brèche) et le bouton « Donner l'assaut » apparaissent au-dessus du bandeau d'ost, en bas de l'écran. Posture « Chevauchée » : pillage et butin.
 • Quand vos armées rencontrent l'ennemi, choisissez « Livrer bataille » (bataille 3D) ou la résolution automatique.
 
 [b]Batailles[/b]
 • Espace : pause (ordres possibles en pause). + / − ou boutons en bas à droite : vitesse ×1 / ×2 / ×4. Ctrl+1…9 : enregistrer un groupe, 1…9 : le rappeler (deux fois : centrer).
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter). Clic droit : déplacer ou attaquer ; double clic droit : au pas de course ; glisser-droit : orienter la ligne.
-• F : formation, G : tir à volonté, H : halte. La pluie gêne les archers, les flancs et les arrières sont vulnérables, le moral s'effondre sans général.
+• F : formation, G : tir à volonté, H : halte. Ordres du chef : Z X V B N (W X V B N en AZERTY). C : suivre la sélection. U : bannières. F1 : aide de bataille. La pluie gêne les archers, les flancs et les arrières sont vulnérables, le moral s'effondre sans général.
 
 [b]Personnages, diplomatie, religion[/b]
 • Les personnages gagnent de l'expérience et des points de compétence (arbre à trois branches), se marient, ont des enfants, meurent : la succession suit la loi du royaume.
@@ -36,6 +30,7 @@ const HELP_TEXT := """[b]Commandes de la carte[/b]
 
 var map: Node = null  # CampaignMap
 var panel: PanelContainer
+var text: RichTextLabel
 
 
 func setup(campaign_map: Node) -> void:
@@ -61,9 +56,9 @@ func setup(campaign_map: Node) -> void:
 	close.pressed.connect(func() -> void: panel.hide())
 	header.add_child(close)
 	box.add_child(header)
-	var text := RichTextLabel.new()
+	text = RichTextLabel.new()
 	text.bbcode_enabled = true
-	text.text = HELP_TEXT
+	text.text = full_text()
 	text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	text.add_theme_font_size_override("normal_font_size", 15)
 	text.add_theme_font_size_override("bold_font_size", 17)
@@ -78,11 +73,18 @@ func setup(campaign_map: Node) -> void:
 
 
 func toggle() -> void:
+	if not panel.visible:
+		text.text = full_text()
 	panel.visible = not panel.visible
 
 
+## Fiche des raccourcis (InputMap) puis principes du jeu.
+static func full_text() -> String:
+	return "[b]Commandes de la carte[/b] (disposition du clavier : Réglages → Commandes)\n\n%s\n\n%s" % [ShortcutSheet.bbcode(), HELP_TEXT]
+
+
 func handle_input(event: InputEvent) -> bool:
-	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_F1:
+	if event.is_action_pressed("help_open") and not event.is_echo():  # U7 : action de l'InputMap
 		toggle()
 		return true
 	return false

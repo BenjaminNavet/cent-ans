@@ -153,7 +153,7 @@ func _render_offers() -> void:
 	for offer in offers:
 		var row := HBoxContainer.new()
 		var text := Label.new()
-		text.text = "%s (%d tour(s))" % [str(offer["text"]), int(offer["expires_in"])]
+		text.text = "%s (%s)" % [str(offer["text"]), FrText.count(int(offer["expires_in"]), "tour")]
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(text)
@@ -197,10 +197,20 @@ func _render_list() -> void:
 		var status := str(entry["status"])
 		var status_label := Label.new()
 		status_label.text = STATUS_LABELS.get(status, status)
+		if Accessibility.colorblind() and Accessibility.relation_symbol(status) != "":  # U12
+			status_label.text = "%s %s" % [Accessibility.relation_symbol(status), status_label.text]
 		status_label.add_theme_color_override("font_color", STATUS_COLORS.get(status, Color.BLACK))
 		status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		line.add_child(status_label)
 		line.add_child(_attitude_bar(int(entry["attitude"])))
+		# Audit A3 D1 / U12 : la valeur de l'attitude écrite à côté de la barre (symbole en mode daltonien).
+		var attitude_label := Label.new()
+		attitude_label.text = Accessibility.signed_with_symbol(int(entry["attitude"]))
+		attitude_label.custom_minimum_size = Vector2(46, 0)
+		attitude_label.add_theme_font_size_override("font_size", 15)
+		attitude_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		attitude_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		line.add_child(attitude_label)
 		row.add_child(line)
 		_list.add_child(row)
 
@@ -211,7 +221,7 @@ func _attitude_bar(attitude: int) -> Control:
 	bar.max_value = 100
 	bar.value = attitude
 	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(70, 12)
+	bar.custom_minimum_size = Vector2(56, 12)
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var fill := StyleBoxFlat.new()
@@ -244,9 +254,9 @@ func _render_detail() -> void:
 
 	var facts := PackedStringArray()
 	facts.append("Religion : %s" % entry["religion_name"])
-	facts.append("Puissance militaire : %d" % int(entry["power"]))
+	facts.append("Puissance militaire : %s" % HudStyle.thousands(int(entry["power"])))  # D1
 	if int(entry["truce_turns_left"]) > 0:
-		facts.append("Trêve : encore %d tour(s)" % int(entry["truce_turns_left"]))
+		facts.append("Trêve : encore %s" % FrText.count(int(entry["truce_turns_left"]), "tour"))
 	if status == "war":
 		facts.append("Score de guerre : %+d" % int(entry["war_score"]))
 	if int(entry["loyalty"]) >= 0:

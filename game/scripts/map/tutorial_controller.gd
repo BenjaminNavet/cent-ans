@@ -204,7 +204,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo or not map.get("visible"):
 		return
 	var key := event as InputEventKey
-	if key.physical_keycode == KEY_L and not key.ctrl_pressed and not key.meta_pressed:
+	if key.is_action_pressed("encyclopedia_open") and not key.ctrl_pressed and not key.meta_pressed:  # U7
 		encyclopedia.toggle()
 		get_viewport().set_input_as_handled()
 
@@ -294,8 +294,14 @@ func _army_orders() -> Dictionary:
 	var result := {}
 	for army_id in map.call("player_army_ids"):
 		var army: Dictionary = sim.call("get_army", army_id)
-		result[str(army_id)] = str(army.get("location", ""))
+		result[str(army_id)] = _army_place(army)
 	return result
+
+
+## Lieu d'une armée pour le tutoriel : colonie, et position libre (lot M4 : une marche courte
+## peut laisser l'armée près de la même colonie).
+static func _army_place(army: Dictionary) -> String:
+	return "%s@%s" % [army.get("location", ""), army.get("position", "")]
 
 
 func _tax_rate() -> String:
@@ -346,7 +352,7 @@ func objective_met(step_id: String) -> bool:
 				var army: Dictionary = sim.call("get_army", army_id)
 				if not (army.get("path", []) as Array).is_empty():
 					return true
-				if before.has(army_id) and str(before[army_id]) != str(army.get("location", "")):
+				if before.has(army_id) and str(before[army_id]) != _army_place(army):
 					return true
 			return false
 		"open_province":

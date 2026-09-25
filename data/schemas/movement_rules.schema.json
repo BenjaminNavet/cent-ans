@@ -27,6 +27,7 @@
     "road_cost_factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Multiplicateur du coût d'une case de route." },
     "minor_river_extra": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Surcoût d'une case traversée par un cours d'eau secondaire." },
     "slope_impassable_threshold": { "type": "number", "exclusiveMinimum": 0, "description": "Pente (dénivelé / distance, moyenne sur une case de 1,44 km) au-delà de laquelle une case est infranchissable, sauf le long d'un col." },
+    "road_crossing_radius_km": { "type": "number", "minimum": 0, "description": "Lot M5b (pipeline seulement) : un croisement voie romaine (Itiner-e) / grand fleuve n'ouvre un passage qu'à moins de cette distance d'une colonie ou d'un pont ou gué de crossings.json. Absent : tous les croisements sont ouverts." },
     "embark_cost": { "const": "all", "description": "Coût d'un embarquement de port à port : tout le mouvement du tour." }
   },
   "required": [

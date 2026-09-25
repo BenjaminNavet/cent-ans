@@ -1,0 +1,40 @@
+{
+  "id": "unit_coutiliers",
+  "name": {
+    "display": "Coutiliers",
+    "local": "coustilliers",
+    "local_language": "moyen français"
+  },
+  "category": "infantry",
+  "source_class": "peasants",
+  "soldiers": 100,
+  "cost": {
+    "money": 460
+  },
+  "upkeep": 42,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 52,
+    "ranged": 0,
+    "range": 0,
+    "armor": 42,
+    "morale": 52,
+    "speed": 52,
+    "ammo": 0
+  },
+  "required_technology": "tech_compagnies_d_ordonnance",
+  "required_faction": [
+    "fac_france",
+    "fac_brittany",
+    "fac_burgundy"
+  ],
+  "available_from": 1445,
+  "figure": "infantry_6",
+  "equipment": "Coustille (longue dague ou glaive à lame étroite), brigandine, salade, gantelets, épée courte.",
+  "description": "Valets armés de la « lance fournie » des compagnies d'ordonnance (un homme d'armes, un coutilier, un page, deux archers) ; achèvent les hommes renversés et tiennent les chevaux.",
+  "sources": [
+    "Coutilier",
+    "Compagnie d'ordonnance",
+    "P. Contamine, Guerre, État et société à la fin du Moyen Âge, Mouton, 1972"
+  ]
+}

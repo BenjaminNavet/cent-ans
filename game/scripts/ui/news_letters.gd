@@ -58,6 +58,9 @@ const MAX_KEPT := 40
 
 ## Lettres visibles ; au-delà, une ligne « + n lettres plus anciennes ».
 @export var max_visible: int = 5
+## Lot U5 : plafond de `max_visible` et hauteur estimée d'une lettre repliée (`fit_height`).
+const MAX_VISIBLE_DEFAULT := 5
+const LETTER_HEIGHT_ESTIMATE := 98.0
 
 var _items: Array = []  # plus récente en premier
 var _expanded: Dictionary = {}  # instance id de l'item → vrai
@@ -95,9 +98,19 @@ func _notification(what: int) -> void:
 		_more_pill.free()
 
 
+## Lot U5 : nombre de lettres visibles ajusté à la hauteur disponible (au-dessus des pastilles
+## d'alerte de la cloche) ; 0 = seule l'étiquette « + n lettres » reste.
+func fit_height(max_height: float) -> void:
+	var fitting := clampi(int((max_height - 26.0 + 6.0) / (LETTER_HEIGHT_ESTIMATE + 6.0)), 0, MAX_VISIBLE_DEFAULT)
+	if fitting != max_visible:
+		max_visible = fitting
+		_rebuild()
+
+
 ## Ajoute une nouvelle en tête de pile.
 func push_news(item: Dictionary) -> void:
 	_items.push_front(item.duplicate(true))
+	UiSounds.play("letter")  # UB1 / U13 : lettre reçue
 	if _items.size() > MAX_KEPT:
 		_items.resize(MAX_KEPT)
 	_rebuild(true)
@@ -176,7 +189,7 @@ func _rebuild(animate_first := false) -> void:
 		_box.remove_child(child)
 		if child != _more_pill:
 			child.queue_free()
-	var shown := mini(_items.size(), maxi(max_visible, 1))
+	var shown := mini(_items.size(), maxi(max_visible, 0))
 	for i in shown:
 		var letter := Letter.new()
 		letter.owner_list = self
@@ -184,7 +197,7 @@ func _rebuild(animate_first := false) -> void:
 		letter.item = _items[i]
 		letter.expanded = bool(_expanded.get(_key(_items[i]), false))
 		_box.add_child(letter)
-		if i == 0 and animate_first and is_inside_tree():
+		if i == 0 and animate_first and is_inside_tree() and not Accessibility.reduce_motion():
 			letter.modulate.a = 0.0
 			create_tween().tween_property(letter, "modulate:a", 1.0, 0.35)
 	var hidden := _items.size() - shown
@@ -247,6 +260,8 @@ class Letter:
 			body.custom_minimum_size = title.custom_minimum_size
 			column.add_child(body)
 		tooltip_text = "Clic : lire · clic droit : écarter" if not expanded else "Clic : replier · clic droit : écarter"
+		if str(item.get("interest", "")) != "":  # U5 : pourquoi cette nouvelle est retenue
+			tooltip_text = "%s\n%s" % [str(item["interest"]), tooltip_text]
 		mouse_entered.connect(func() -> void:
 			_hover = true
 			queue_redraw())

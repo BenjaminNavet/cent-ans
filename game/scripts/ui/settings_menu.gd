@@ -26,7 +26,7 @@ func _ready() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(640, 440)
+	panel.custom_minimum_size = Vector2(700, 500)
 	center.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
@@ -46,7 +46,10 @@ func _ready() -> void:
 		_build_display(_tab(tabs, "Affichage"))
 		_build_map(_tab(tabs, "Carte"))
 		_build_game(_tab(tabs, "Partie"))
+		_build_battle(_tab(tabs, "Bataille"))
 		_build_sound(_tab(tabs, "Son"))
+		_build_controls(_tab(tabs, "Commandes"))  # U7
+		_build_accessibility(_tab(tabs, "Accessibilité"))  # U12
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_END
 	buttons.add_theme_constant_override("separation", 10)
@@ -152,17 +155,28 @@ func _build_display(grid: GridContainer) -> void:
 	var labels: Array = resolutions.map(func(size: Vector2i) -> String: return "%d × %d" % [size.x, size.y])
 	_options(grid, "video/resolution", "Résolution (fenêtré)", resolutions, labels)
 	_check(grid, "video/vsync", "Synchronisation verticale", "Limite l'affichage à la fréquence de l'écran.")
-	var scales: Array = _constant("UI_SCALES")
-	_options(grid, "interface/ui_scale", "Échelle de l'interface", scales, scales.map(func(value: float) -> String: return "%d %%" % roundi(value * 100.0)))
+	_options(grid, "video/quality", "Qualité graphique", Array(RenderQuality.LEVELS), Array(RenderQuality.LABELS),
+		"Basse : ombres simples, sans occlusion ni halo. Moyenne : occlusion ambiante. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres plus lointaines.")
+	# Lot U4 : l'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
+	var sizes: Array = _constant("UI_SIZES")
+	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}
+	_options(grid, "interface/ui_size", "Taille de l'interface", sizes, sizes.map(func(value: float) -> String: return str(size_labels.get(value, "%d %%" % roundi(value * 100.0)))),
+		"Échelle automatique selon la hauteur de la fenêtre (actuellement %d %%), multipliée par ce réglage." % roundi(float(settings.call("effective_ui_scale")) * 100.0))
+	var texts: Array = _constant("TEXT_SIZES")
+	var text_labels := {0.9: "Petite", 1.0: "Normale", 1.15: "Grande", 1.3: "Très grande"}
+	_options(grid, "interface/text_size", "Taille du texte", texts, texts.map(func(value: float) -> String: return str(text_labels.get(value, "%d %%" % roundi(value * 100.0)))),
+		"Agrandit les textes seuls, sans changer la taille des panneaux et des icônes.")
 
 
 func _build_map(grid: GridContainer) -> void:
 	_check(grid, "camera/edge_pan", "Défilement par les bords de l'écran", "Aussi basculé par F2 sur la carte.")
 	_slider(grid, "Vitesse de la caméra", float(settings.call("get_value", "camera/speed")), 0.4, 2.5, 0.1,
 		func(value: float) -> void: settings.call("set_value", "camera/speed", value), "camera/speed")
-	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées. Portée : data/rules/vision.json.")
+	_check(grid, "map/fog_of_war", "Brouillard de guerre", "Provinces hors de vue voilées, armées étrangères masquées.")
 	_check(grid, "interface/season_report", "Rapport de saison en fin de tour")
 	_check(grid, "interface/confirm_end_turn", "Confirmer la fin du tour")
+	_options(grid, "interface/news_filter", "Nouvelles reçues", Array(NewsInterest.MODES), Array(NewsInterest.MODE_LABELS),
+		"Lettres scellées et bandeau du haut. Le journal garde toutes les nouvelles.")
 
 
 func _build_game(grid: GridContainer) -> void:
@@ -176,9 +190,73 @@ func _build_game(grid: GridContainer) -> void:
 	_check(grid, "tutorial/enabled", "Tutoriel des premiers tours", "Guide pas à pas au début d'une nouvelle partie. Décoché : jamais affiché.")
 
 
+## BV1 : sang et taille des unités (appliqués à la bataille suivante).
+func _build_battle(grid: GridContainer) -> void:
+	_options(grid, "battle/blood", "Sang", _constant("BLOOD_CHOICES"), ["Désactivé", "Modéré", "Complet"],
+		"Gerbes, flaques au sol et cadavres ensanglantés. Modéré : plus discret, sans éclaboussures, traînées ni démembrements. Complet : démembrements sur les coups critiques.")
+	_options(grid, "battle/unit_size", "Taille des unités", _constant("UNIT_SIZES"), ["Petite (× 0,5)", "Normale", "Grande (× 1,5)", "Ultra (× 2,5)"],
+		"Figurines dessinées par soldat simulé : les effectifs et l'équilibre ne changent pas. Ultra est exigeant pour la carte graphique.")
+
+
+## AU1 : un curseur par bus (Général, Musique, Ambiance, Bataille, Interface, Voix).
 func _build_sound(grid: GridContainer) -> void:
-	_slider(grid, "Musique", float(settings.call("music_volume")), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_music_volume", value))
-	_slider(grid, "Effets", float(settings.call("sfx_volume")), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_sfx_volume", value))
+	for spec in AudioBuses.PLAYER_BUSES:
+		var bus_name: String = spec[0]
+		_slider(grid, str(spec[1]), float(settings.call("bus_volume", bus_name)), 0.0, 1.0, 0.05, func(value: float) -> void: settings.call("set_bus_volume", bus_name, value))
+
+
+## Lot U7 : disposition du clavier et fiche des raccourcis, lue dans l'InputMap.
+func _build_controls(grid: GridContainer) -> void:
+	_options(grid, "input/layout", "Disposition du clavier", Array(ShortcutSheet.LAYOUTS), Array(ShortcutSheet.LAYOUT_LABELS),
+		"Change les lettres affichées sur les boutons et dans l'aide. Les touches de déplacement suivent leur place sur le clavier (Z Q S D en AZERTY, W A S D en QWERTY).")
+	var sheet := GridContainer.new()
+	sheet.name = "ShortcutGrid"
+	sheet.columns = 2
+	sheet.add_theme_constant_override("h_separation", 18)
+	sheet.add_theme_constant_override("v_separation", 2)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 260)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(sheet)
+	_label(grid, "Raccourcis de la carte")
+	grid.add_child(scroll)
+	_fill_shortcuts(sheet)
+	settings.changed.connect(func(key: String) -> void:
+		if key == "input/layout" and is_instance_valid(sheet):
+			_fill_shortcuts(sheet))
+
+
+func _fill_shortcuts(sheet: GridContainer) -> void:
+	for child in sheet.get_children():
+		sheet.remove_child(child)
+		child.queue_free()
+	for section in ShortcutSheet.sections():
+		var title := Label.new()
+		title.text = str(section["title"])
+		title.add_theme_color_override("font_color", HudStyle.RUBRIC)
+		sheet.add_child(title)
+		sheet.add_child(Control.new())
+		for line in section["lines"]:
+			var keys := Label.new()
+			keys.text = str(line[0])
+			keys.add_theme_font_size_override("font_size", 15)
+			keys.custom_minimum_size = Vector2(90, 0)
+			sheet.add_child(keys)
+			var what := Label.new()
+			what.text = str(line[1])
+			what.add_theme_font_size_override("font_size", 15)
+			sheet.add_child(what)
+
+
+## Lot U12 : mode daltonien, animations réduites, contraste renforcé.
+func _build_accessibility(grid: GridContainer) -> void:
+	_check(grid, Accessibility.KEY_COLORBLIND, "Mode daltonien",
+		"Ajoute motifs et symboles aux couleurs : carte diplomatique hachurée, relations et moral marqués de symboles.")
+	_check(grid, Accessibility.KEY_REDUCE_MOTION, "Réduire les animations",
+		"Supprime les fondus et les travellings de caméra.")
+	_check(grid, Accessibility.KEY_HIGH_CONTRAST, "Contraste renforcé",
+		"Encre plus sombre, parchemin plus clair, bords plus épais.")
 
 
 func _on_reset() -> void:

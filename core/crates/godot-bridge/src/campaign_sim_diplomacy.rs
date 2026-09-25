@@ -75,7 +75,10 @@ impl CampaignSim {
             .and_then(|json| serde_json::from_value::<Order>(json).map_err(|e| e.to_string()));
         let order = match parsed {
             Ok(order) => order,
-            Err(error) => return verdict(false, 0, &[(format!("ordre invalide : {error}"), 0)]),
+            Err(error) => {
+                let message = crate::campaign_sim::invalid_order_message(&error);
+                return verdict(false, 0, &[(message, 0)]);
+            }
         };
         let player = state.player_faction().clone();
         let (target, proposal) = match order {

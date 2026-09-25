@@ -10,10 +10,12 @@
 //! Lives here rather than in the `ai` crate because `ai` depends on this crate;
 //! `ai::plan_turn` re-exports [`plan_turn`].
 //!
-//! Lot M2 (mechanical adaptation, the real grid AI is lot M3): the plans
+//! Lot M2: the plans
 //! are still made on the settlement graph from each army's anchor (its
 //! settlement, or the nearest one in the field); the orders are `MoveArmy`
-//! towards the chosen settlement, walked on the navigation grid.
+//! towards the chosen settlement, walked on the navigation grid. It neither
+//! attacks armies in the field nor crosses the sea: the grid AI of lot M3
+//! (`ai::grid`, used by the game) does.
 
 use std::collections::BTreeMap;
 

@@ -253,7 +253,7 @@ func _refresh() -> void:
 	_men_label.text = "%s hommes" % HudStyle.thousands(men)
 	var upkeep := total_upkeep()
 	_upkeep_label.text = "Entretien %s ₶" % HudStyle.thousands(upkeep)
-	_upkeep_label.tooltip_text = "Entretien de l'armée par saison : %s livres tournois" % HudStyle.thousands(upkeep)
+	_upkeep_label.tooltip_text = "Entretien de l'armée par saison : %s (livres tournois)" % Money.amount(upkeep)
 
 	var layout := card_layout(units.size())
 	_grid.columns = int(layout["columns"])
@@ -460,6 +460,8 @@ class RegimentCard:
 		var ratio := strip.morale_ratio(unit)
 		draw_rect(Rect2(0, 0, 4, size.y), HudStyle.PARCHMENT_DARK)
 		draw_rect(Rect2(0, size.y * (1.0 - ratio), 4, size.y * ratio), HudStyle.gauge_color(ratio))
+		if Accessibility.colorblind():  # U12 : moral lisible sans les couleurs (▲ bon, ■ moyen, ▼ bas)
+			draw_string(get_theme_default_font(), Vector2(7, 14), Accessibility.level_symbol(ratio), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, HudStyle.INK)
 		# Icône de classe.
 		var icon_center := Vector2(size.x * 0.5 + 2, 25)
 		var texture := HudStyle.icon(str(unit.get("unit_type", "")), "unit")

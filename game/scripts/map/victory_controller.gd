@@ -116,10 +116,14 @@ func open_panel() -> void:
 	if hold > 1:
 		var streak := int(outcome.get("victory_streak", 0))
 		if streak > 0:
-			score_label.text += "\nTous les objectifs sont remplis : encore %d saison(s) à les tenir pour l'emporter." % (hold - streak)
+			var left := hold - streak
+			score_label.text += "\nTous les objectifs sont remplis : encore %d %s à les tenir pour l'emporter." % [left, "saison" if left <= 1 else "saisons"]
 		else:
 			score_label.text += "\nLa victoire exige de tenir tous les objectifs %d saisons d'affilée." % hold
 	score_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Audit A3 D2 : le score n'était pas expliqué.
+	score_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	score_label.tooltip_text = "Score de campagne : provinces tenues, objectifs remplis, prestige et trésor. Il mesure votre réussite si la campagne s'achève à l'échéance sans que tous les objectifs soient remplis."
 	if objectives.is_empty():
 		var none := Label.new()
 		none.text = "Cette faction n'a pas d'objectifs historiques : survivre et prospérer."
@@ -155,7 +159,7 @@ func after_end_turn() -> void:
 
 
 func handle_input(event: InputEvent) -> bool:
-	if event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_O:
+	if event.is_action_pressed("map_toggle_objectives") and not event.is_echo():  # U7
 		toggle_panel()
 		return true
 	return false

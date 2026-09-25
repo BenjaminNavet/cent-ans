@@ -33,6 +33,11 @@ var height_bpp: int = 1
 var height_little_endian: bool = false
 ## "rust" (GameDataStore), "png16" (GDScript) ou "8bit" (repli Image.load_from_file).
 var height_decoder: String = ""
+## Fichier d'altitude chargé : `heightmap_render.png` (lot R1 : Copernicus 90 m moyenné, relief
+## local rehaussé pour le rendu, même trait de côte) s'il existe (`map.json.render_heightmap`),
+## sinon `heightmap.png` (source des règles : grille de navigation). Surface unique du rendu :
+## terrain, armées, villes, fleuves et sélection passent tous par `MapData`.
+var height_file: String = "heightmap.png"
 
 var land_mask: Image
 ## Rasters optionnels du shader de terrain (`cent-ans geo splat`), null si absents :
@@ -41,6 +46,9 @@ var land_mask: Image
 var splat_image: Image
 var border_dist_image: Image
 var coast_dist_image: Image
+## Lot V4 : lit des fleuves (`cent-ans geo rivers-render`), L8, distance signée à la berge
+## ((valeur − 128) / 16 px, négative dans le lit) ; null si absent.
+var river_bed_image: Image
 ## Occupation du sol par province (vigne, sécheresse, bocage), calculée à la demande par
 ## `VegetationFields.landuse` (lot V2b) ; null tant qu'elle n'a pas été demandée.
 var landuse_image: Image
@@ -81,6 +89,7 @@ func _load() -> void:
 	splat_image = _load_image_optional("splat.png", Image.FORMAT_RGBA8)
 	border_dist_image = _load_image_optional("province_border_dist.png", Image.FORMAT_RGB8)
 	coast_dist_image = _load_image_optional("coast_dist.png", Image.FORMAT_L8)
+	river_bed_image = _load_image_optional("river_bed.png", Image.FORMAT_L8)
 	if not _load_province_ids():
 		return
 	var t3 := Time.get_ticks_msec()
@@ -128,22 +137,25 @@ func _load_map_json() -> bool:
 	meters_per_px = float(meta.get("meters_per_px", 800.0))
 	height_min_m = float(meta.get("height_min_m", -200.0))
 	height_max_m = float(meta.get("height_max_m", 4800.0))
+	var render: Variant = meta.get("render_heightmap")
+	if render is Dictionary and FileAccess.file_exists(map_dir.path_join(str(render.get("file", "")))):
+		height_file = str(render["file"])
 	if size.x <= 0 or size.y <= 0:
 		return _fail("map.json: invalid size_px")
 	return true
 
 
 func _load_heightmap() -> bool:
-	var path := map_dir.path_join("heightmap.png")
+	var path := map_dir.path_join(height_file)
 	if not FileAccess.file_exists(path):
-		return _fail("heightmap.png missing")
+		return _fail("%s missing" % height_file)
 	var raw16 := _load_heightmap_rust(path)
 	if raw16.is_empty():
 		raw16 = _load_heightmap_16(path)
 	if raw16.is_empty():
 		var img := Image.load_from_file(path)
 		if img == null:
-			return _fail("heightmap.png unreadable")
+			return _fail("%s unreadable" % height_file)
 		if img.get_format() != Image.FORMAT_L8:
 			img.convert(Image.FORMAT_L8)
 		height_image = img
@@ -156,7 +168,7 @@ func _load_heightmap() -> bool:
 		height_little_endian = raw16.get("little_endian", false)
 		height_decoder = raw16.get("decoder", "png16")
 	if height_image.get_size() != size:
-		return _fail("heightmap.png size %s != map.json size_px %s" % [height_image.get_size(), size])
+		return _fail("%s size %s != map.json size_px %s" % [height_file, height_image.get_size(), size])
 	height_bytes = height_image.get_data()
 	return true
 
@@ -385,6 +397,16 @@ func centroid_of_id(id: String) -> Vector2:
 	if province.is_empty():
 		return Vector2(-1, -1)
 	return province["centroid"]
+
+
+## Lot V4 : distance signée (px carte) à la berge du fleuve le plus proche, négative dans le lit ;
+## 8 (loin de tout fleuve) sans `river_bed.png`. Plus proche voisin (semis de la végétation).
+func river_sd_at(x: float, y: float) -> float:
+	if river_bed_image == null:
+		return 8.0
+	var px := clampi(int(x), 0, river_bed_image.get_width() - 1)
+	var py := clampi(int(y), 0, river_bed_image.get_height() - 1)
+	return (river_bed_image.get_pixel(px, py).r * 255.0 - 128.0) / 16.0
 
 
 func is_land_px(px: int, py: int) -> bool:

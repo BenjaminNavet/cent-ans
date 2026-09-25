@@ -211,6 +211,15 @@ pub struct RetreatRules {
     /// maximum strength; otherwise the survivors rally at the nearest
     /// reachable friendly settlement (or disperse if there is none).
     pub rout_dissolve_below_percent: u32,
+    /// Lot M5b: a beaten army that lost at least this share (per cent) of
+    /// its men in the battle and has no friendly place within reach cannot
+    /// fall back in order: it routs. 100 disables the rule.
+    #[serde(default = "default_heavy_defeat_losses_percent")]
+    pub heavy_defeat_losses_percent: u32,
+}
+
+fn default_heavy_defeat_losses_percent() -> u32 {
+    100
 }
 
 impl Default for RetreatRules {
@@ -221,6 +230,7 @@ impl Default for RetreatRules {
             neutral_loss_percent: 10,
             rout_loss_percent: 50,
             rout_dissolve_below_percent: 30,
+            heavy_defeat_losses_percent: default_heavy_defeat_losses_percent(),
         }
     }
 }

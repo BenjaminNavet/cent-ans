@@ -1,9 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://cent_ans_start_menu"]
+[gd_scene load_steps=4 format=3 uid="uid://cent_ans_start_menu"]
 
 [ext_resource type="Script" path="res://scripts/ui/start_menu.gd" id="1_menu"]
 [ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" path="res://scenes/ui/save_load_dialog.tscn" id="3_dialog"]
-[ext_resource type="Script" path="res://scripts/ui/menu_background.gd" id="4_background"]
 
 [node name="StartMenu" type="Control"]
 layout_mode = 3
@@ -14,122 +13,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_menu")
-
-[node name="Background" type="Control" parent="."]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("4_background")
-
-[node name="Center" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="VBox" type="VBoxContainer" parent="Center"]
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="Title" type="Label" parent="Center/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.88, 0.70, 1)
-theme_override_font_sizes/font_size = 72
-text = "Cent Ans"
-horizontal_alignment = 1
-
-[node name="Subtitle" type="Label" parent="Center/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.22, 0.14, 0.07, 1)
-theme_override_colors/font_outline_color = Color(0.93, 0.87, 0.72, 0.9)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 22
-text = "La guerre de Cent Ans — printemps 1337. Choisissez votre couronne."
-horizontal_alignment = 1
-
-[node name="Cards" type="HBoxContainer" parent="Center/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/separation = 20
-alignment = 1
-
-[node name="SeedRow" type="HBoxContainer" parent="Center/VBox"]
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 10
-
-[node name="SeedKey" type="Label" parent="Center/VBox/SeedRow"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.22, 0.14, 0.07, 1)
-theme_override_colors/font_outline_color = Color(0.93, 0.87, 0.72, 0.9)
-theme_override_constants/outline_size = 6
-text = "Graine"
-
-[node name="SeedEdit" type="LineEdit" parent="Center/VBox/SeedRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 0)
-layout_mode = 2
-text = "1337"
-
-[node name="Buttons" type="HBoxContainer" parent="Center/VBox"]
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 16
-
-[node name="ContinueButton" type="Button" parent="Center/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Continuer"
-
-[node name="StartButton" type="Button" parent="Center/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Commencer"
-
-[node name="LoadButton" type="Button" parent="Center/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Charger une partie"
-
-[node name="SettingsButton" type="Button" parent="Center/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Réglages"
-
-[node name="CreditsButton" type="Button" parent="Center/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Crédits"
-
-[node name="QuitButton" type="Button" parent="Center/VBox/Buttons"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Quitter"
-
-[node name="StatusLabel" type="Label" parent="Center/VBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.30, 0.20, 0.10, 1)
-theme_override_colors/font_outline_color = Color(0.93, 0.87, 0.72, 0.9)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 14
-text = ""
-horizontal_alignment = 1
 
 [node name="SaveLoadDialog" parent="." instance=ExtResource("3_dialog")]
 unique_name_in_owner = true
