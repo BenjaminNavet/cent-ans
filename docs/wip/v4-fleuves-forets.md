@@ -1,6 +1,6 @@
 # V4 — Fleuves, ponts et forêts de la carte de campagne (lots A1-11, A1-10)
 
-Branche `worktree-agent-ae5685646cc8b59ac` (fusionne `main` jusqu'à a8e1cc7a : L1, R1, CV2…).
+Branche `worktree-agent-ae5685646cc8b59ac` (fusionne `main` jusqu'à 70c9e2e5 : L1, R1, CV1, CV2…).
 Rendu seulement. Captures : `docs/audit/captures/v4/` (`avant_*` sur main 356a1ad, `apres_*`).
 Banc : `godot --rendering-driver vulkan --disable-vsync --path game --script res://tests/v4_map_bench.gd`
 (Metal plafonne à 145 i/s et ne rend pas le temps GPU ; Vulkan/MoltenVK donne le temps GPU).
@@ -33,9 +33,10 @@ Banc : `godot --rendering-driver vulkan --disable-vsync --path game --script res
   Aucun asset tiers (les conifères Poly Haven, 30 000 triangles, sont écartés pour la carte).
 - Quatre essences (`VegetationTileJob.Kind` : chêne, hêtre, conifère, haie) ; houppiers élargis au
   cœur des massifs (canopée continue) ; hêtraie par taches selon l'altitude, recul dans le Midi.
-- Saisons (`foliage.gdshaderinc`, saison lue dans la date de la simulation, `--season=0..3` pour
-  les captures) : printemps tendre, automne roux / cuivré, hiver dénudé ajouré. La variante
-  `foliage_winter.gdshader` (discard) n'est employée qu'en hiver.
+- Saisons (`foliage.gdshaderinc`) : teintes par essence pondérées par le paramètre global
+  `campaign_season` du lot CV1 (`--season=winter` pour les captures) : printemps tendre, automne
+  roux / cuivré, hiver dénudé ajouré. La variante `foliage_winter.gdshader` (discard) n'est
+  employée qu'en hiver (poids hiver > 0,5, lu dans `CampaignLife.seasons`).
 - Sources interchangeables : `data/map/forest_cover.json` (schéma `forest_cover.schema.json`) :
   couverture = splat canal B (forêts vers 1340 du lot R1), part de résineux = `forest_kind.png`
   (R1), raster d'essences complet optionnel.
