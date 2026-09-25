@@ -260,6 +260,12 @@ func blend(x: float, z: float, generated: float, river_distance: float = INF) ->
 	return lerpf(generated, real_height(x, z), w)
 
 
+## Limite des neiges de la saison en hauteur du monde de bataille.
+func snow_line_world() -> float:
+	var snow: Dictionary = (_cfg.get("relief", {}) as Dictionary).get("snow_line_m", {})
+	return float(snow.get(_season, 2500.0)) + offset_y
+
+
 # --- Rendu --------------------------------------------------------------------------------
 
 
@@ -301,6 +307,11 @@ func _build_ring(terrain: BattleTerrain, far_rect: Rect2, _weather: String) -> v
 			var h := terrain.world_height(x, z)
 			if inner.has_point(Vector2(x, z)):
 				h -= 4.0  # sous l'anneau lointain, qui recouvre le raccord
+			# Bord extérieur : le relief plonge (pas de falaise au bord de la tuile) ; le panorama,
+			# recalé sur la crête réelle au-delà de 12 km, prend le relais.
+			var edge := smoothstep(radius - 2.5 * step, radius + step, Vector2(x, z).distance_to(centre))
+			if edge > 0.0:
+				h = lerpf(h, minf(h, offset_y + ref_m) - 400.0, edge)
 			heights[iz * nx + ix] = h
 			vertices[iz * nx + ix] = Vector3(x, h, z)
 	for iz in nz:
@@ -459,6 +470,8 @@ func _build_panorama(weather: String) -> void:
 		_panorama_material.set_shader_parameter("has_painting", 1.0)
 		_panorama_material.set_shader_parameter("repeats", float(entry.get("repeats", 4)))
 		_panorama_material.set_shader_parameter("paint_crest", _mean(meta.get("skyline", [0.2])))
+		_panorama_material.set_shader_parameter("paint_skyline", _row_texture(meta.get("skyline", [0.2])))
+		_panorama_material.set_shader_parameter("paint_detail", float(pano_cfg.get("paint_detail", 0.3)))
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash(province)
 		_panorama_material.set_shader_parameter("paint_offset", rng.randf())
@@ -479,6 +492,13 @@ static func _panorama_meta(id: String) -> Dictionary:
 	if not (parsed is Dictionary):
 		return {}
 	return ((parsed as Dictionary).get("panoramas", {}) as Dictionary).get(id, {})
+
+
+static func _row_texture(values: Array) -> ImageTexture:
+	var image := Image.create(maxi(values.size(), 1), 1, false, Image.FORMAT_RF)
+	for k in values.size():
+		image.set_pixel(k, 0, Color(float(values[k]), 0.0, 0.0))
+	return ImageTexture.create_from_image(image)
 
 
 static func _mean(values: Array) -> float:

@@ -72,7 +72,8 @@
         "max_angle_deg": { "type": "number", "minimum": 0.5, "maximum": 15 },
         "haze": { "$ref": "#/$defs/weather_map" },
         "exposure": { "$ref": "#/$defs/weather_map" },
-        "sea_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de mer d'un azimut au-delà de laquelle l'horizon est marin." }
+        "sea_share": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de mer d'un azimut au-delà de laquelle l'horizon est marin." },
+        "paint_detail": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part du relief peint gardée (0 : silhouette = crête réelle)." }
       },
       "required": ["radius_m", "bottom_deg", "min_angle_deg", "exaggeration", "max_angle_deg", "haze", "exposure", "sea_share"],
       "additionalProperties": false
