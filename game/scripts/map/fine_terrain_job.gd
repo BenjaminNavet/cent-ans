@@ -11,7 +11,7 @@ extends RefCounted
 ## - Bords : les sommets du pourtour reprennent le profil du LOD proche 4096 (pas `edge_step`,
 ##   interpolation linéaire le long du bord) : aucune fissure avec une tuile voisine proche ou
 ##   fine. Une jupe (`skirt_depth`) masque en plus les écarts avec une voisine lointaine.
-## - Résultats : `block_vertices` (blocs avec jupe), `block_errors`, `heights` (grille `side` × `side` des hauteurs monde de
+## - Résultats : `vertices` (dont jupe), `heights` (grille `side` × `side` des hauteurs monde de
 ##   la surface affichée, pour poser les objets), sans accès à l'arbre de scène.
 
 var tile_index: int = 0
@@ -34,23 +34,7 @@ var map_size: Vector2i = Vector2i(4096, 4096)
 var edge_step: int = 4
 var skirt_depth: float = 1.5
 
-## PF1 : la tuile est découpée en blocs de `block_quads` × `block_quads` quads (un
-## `MeshInstance3D` chacun : les blocs hors champ ou hors cascade d'ombre sont écartés), chacun
-## avec ses niveaux de détail (pas × 2, × 4, × 8 : `LOD_STRIDES`). Clé de LOD de Godot (unités
-## monde ; un niveau est pris quand sa clé fait moins de `mesh_lod_threshold` ≈ 1 pixel à
-## l'écran) : le plus petit de (a) l'erreur de hauteur maximale du niveau et (b) l'arête du
-## niveau plus fin divisée par `lod_triangle_px`. Un niveau plus grossier est donc pris dès que
-## son erreur passe sous le pixel, ou dès que les triangles du niveau plus fin font moins de
-## `lod_triangle_px` pixels : des triangles de 1 à 3 pixels ne montrent pas plus de relief (les
-## normales viennent de la heightmap, dans le shader) mais font ombrer chaque pixel plusieurs
-## fois (quads 2 × 2, MSAA) : c'est l'essentiel du coût du relief fin au zoom comté.
-const LOD_STRIDES: Array[int] = [2, 4, 8]
-var lod_triangle_px: float = 6.0
-var block_quads: int = 64
-var blocks_per_side: int = 0
-## Par bloc (ligne par ligne) : sommets (grille `block_quads + 1` au carré puis jupe) et erreurs.
-var block_vertices: Array[PackedVector3Array] = []
-var block_errors: Array[PackedFloat32Array] = []
+var vertices: PackedVector3Array = PackedVector3Array()
 var heights: PackedFloat32Array = PackedFloat32Array()
 var side: int = 0
 var build_ms: float = 0.0
@@ -80,112 +64,21 @@ func run() -> void:
 		heights[(side - 1) * side + i] = _edge_height(float(origin_px.x) + t, float(origin_px.y + chunk_px))
 		heights[i * side] = _edge_height(float(origin_px.x), float(origin_px.y) + t)
 		heights[i * side + side - 1] = _edge_height(float(origin_px.x + chunk_px), float(origin_px.y) + t)
-	_build_blocks(unit)
+	vertices.resize(side * side + 4 * side)
+	k = 0
+	for j in side:
+		for i in side:
+			vertices[k] = Vector3(i * unit, heights[k], j * unit)
+			k += 1
+	# Jupe : copie de chaque bord abaissée de `skirt_depth` (nord, sud, ouest, est).
+	var base := side * side
+	for i in side:
+		vertices[base + i] = vertices[i] - Vector3(0.0, skirt_depth, 0.0)
+		vertices[base + side + i] = vertices[(side - 1) * side + i] - Vector3(0.0, skirt_depth, 0.0)
+		vertices[base + 2 * side + i] = vertices[i * side] - Vector3(0.0, skirt_depth, 0.0)
+		vertices[base + 3 * side + i] = vertices[i * side + side - 1] - Vector3(0.0, skirt_depth, 0.0)
 	build_ms = (Time.get_ticks_usec() - t0) / 1000.0
 	ok = true
-
-
-func _build_blocks(unit: float) -> void:
-	var quads := side - 1
-	var n := mini(block_quads, quads)
-	block_quads = n
-	blocks_per_side = quads / n
-	var bside := n + 1
-	var down := Vector3(0.0, skirt_depth, 0.0)
-	block_vertices.clear()
-	block_errors.clear()
-	for by in blocks_per_side:
-		for bx in blocks_per_side:
-			var i0 := bx * n
-			var j0 := by * n
-			var verts := PackedVector3Array()
-			verts.resize(bside * bside + 4 * bside)
-			var local := PackedFloat32Array()
-			local.resize(bside * bside)
-			var k := 0
-			for j in bside:
-				var row := (j0 + j) * side + i0
-				for i in bside:
-					var h := heights[row + i]
-					local[k] = h
-					verts[k] = Vector3((i0 + i) * unit, h, (j0 + j) * unit)
-					k += 1
-			var base := bside * bside
-			for i in bside:
-				verts[base + i] = verts[i] - down
-				verts[base + bside + i] = verts[(bside - 1) * bside + i] - down
-				verts[base + 2 * bside + i] = verts[i * bside] - down
-				verts[base + 3 * bside + i] = verts[i * bside + bside - 1] - down
-			block_vertices.append(verts)
-			var errors := PackedFloat32Array()
-			var previous := 0.0
-			var finer_edge := unit
-			for stride in LOD_STRIDES:
-				var key := minf(lod_error(local, bside, stride), finer_edge / lod_triangle_px)
-				finer_edge = stride * unit
-				# Clés strictement croissantes (exigence de Godot), jamais nulles.
-				var e := maxf(key, previous * 1.05 + 0.0005)
-				errors.append(e)
-				previous = e
-			block_errors.append(errors)
-
-
-## Écart de hauteur maximal entre la grille `bside` × `bside` et sa version au pas `stride`
-## (mêmes triangles que `block_indices` : diagonale a-d).
-static func lod_error(h: PackedFloat32Array, bside: int, stride: int) -> float:
-	var worst := 0.0
-	var n := bside - 1
-	if stride > n:
-		return INF
-	for j in bside:
-		var j0 := mini((j / stride) * stride, n - stride)
-		var ty := float(j - j0) / stride
-		for i in bside:
-			var i0 := mini((i / stride) * stride, n - stride)
-			var tx := float(i - i0) / stride
-			var ha := h[j0 * bside + i0]
-			var hb := h[j0 * bside + i0 + stride]
-			var hc := h[(j0 + stride) * bside + i0]
-			var hd := h[(j0 + stride) * bside + i0 + stride]
-			var v: float
-			if tx >= ty:
-				v = ha + tx * (hb - ha) + ty * (hd - hb)
-			else:
-				v = ha + ty * (hc - ha) + tx * (hd - hc)
-			worst = maxf(worst, absf(v - h[j * bside + i]))
-	return worst
-
-
-## Index d'un bloc de `n` quads au pas `stride` (grille + jupe), partagés par tous les blocs.
-static func block_indices(n: int, stride: int) -> PackedInt32Array:
-	var bside := n + 1
-	var cells := n / stride
-	var indices := PackedInt32Array()
-	indices.resize(cells * cells * 6 + 4 * cells * 12)
-	var k := 0
-	for cj in cells:
-		for ci in cells:
-			var a := cj * stride * bside + ci * stride
-			var b := a + stride
-			var c := a + stride * bside
-			var d := c + stride
-			indices[k] = a
-			indices[k + 1] = b
-			indices[k + 2] = d
-			indices[k + 3] = a
-			indices[k + 4] = d
-			indices[k + 5] = c
-			k += 6
-	var base := bside * bside
-	for ci in cells:
-		var i := ci * stride
-		var i1 := i + stride
-		k = _skirt_quad(indices, k, i1, i, base + i1, base + i)
-		var s0 := (bside - 1) * bside
-		k = _skirt_quad(indices, k, s0 + i, s0 + i1, base + bside + i, base + bside + i1)
-		k = _skirt_quad(indices, k, i * bside, i1 * bside, base + 2 * bside + i, base + 2 * bside + i1)
-		k = _skirt_quad(indices, k, i1 * bside + bside - 1, i * bside + bside - 1, base + 3 * bside + i1, base + 3 * bside + i)
-	return indices
 
 
 func _sample(x: int, y: int) -> float:
@@ -225,6 +118,41 @@ func _edge_height(x: float, y: float) -> float:
 	if ty > 0.0001:
 		return lerpf(a, _map_height(x0 * edge_step, (y0 + 1) * edge_step), ty)
 	return a
+
+
+## Index partagés par toutes les tuiles fines de même `side` (grille + jupe).
+static func build_indices(grid_side: int) -> PackedInt32Array:
+	var quads := grid_side - 1
+	var indices := PackedInt32Array()
+	indices.resize(quads * quads * 6 + 4 * quads * 12)
+	var k := 0
+	for j in quads:
+		for i in quads:
+			var a := j * grid_side + i
+			var b := a + 1
+			var c := a + grid_side
+			var d := c + 1
+			indices[k] = a
+			indices[k + 1] = b
+			indices[k + 2] = d
+			indices[k + 3] = a
+			indices[k + 4] = d
+			indices[k + 5] = c
+			k += 6
+	var base := grid_side * grid_side
+	# Faces de jupe dans les deux sens (visibles de part et d'autre de la couture).
+	for i in quads:
+		# Nord (vue depuis -Z) : bord j = 0.
+		k = _skirt_quad(indices, k, i + 1, i, base + i + 1, base + i)
+		# Sud (vue depuis +Z).
+		var s0 := (grid_side - 1) * grid_side + i
+		k = _skirt_quad(indices, k, s0, s0 + 1, base + grid_side + i, base + grid_side + i + 1)
+		# Ouest (vue depuis -X).
+		k = _skirt_quad(indices, k, i * grid_side, (i + 1) * grid_side, base + 2 * grid_side + i, base + 2 * grid_side + i + 1)
+		# Est (vue depuis +X).
+		var e0 := i * grid_side + grid_side - 1
+		k = _skirt_quad(indices, k, e0 + grid_side, e0, base + 3 * grid_side + i + 1, base + 3 * grid_side + i)
+	return indices
 
 
 ## Quad de jupe : (top_a, top_b) en haut, (low_a, low_b) en dessous, deux faces.

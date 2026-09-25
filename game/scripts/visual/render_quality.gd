@@ -25,8 +25,10 @@ const GROUP := "render_quality"
 ## PF1 : nœuds qui implémentent `apply_render_quality(preset: Dictionary)`.
 const CLIENT_GROUP := "render_quality_client"
 ## Clés « scène » (PF1), communes à tous les niveaux :
-## - `fine_relief` : relief fin de la carte au zoom comté ; `fine_lod_bias` : > 1 = blocs de
-##   relief fin plus tôt en LOD grossier (`TerrainBuilder.fine_lod_bias`) ;
+## - quadtree de relief (ZG2, pyramide en cache) : `relief_vertex_px` espacement maximal des
+##   sommets à l'écran, `relief_items` budget de nœuds, `relief_extra_depth` profondeur au-delà
+##   de l'étage de données, `relief_pages` couches de pages (VRAM, au chargement de la carte) ;
+## - `fine_relief` : sans pyramide, relief fin `FineTerrainJob` au zoom comté (repli) ;
 ## - `terrain_near` : facteur sur la distance du LOD proche du relief de la carte ;
 ## - `veg_density` : part des arbres affichés ; `veg_detail` : facteur sur la portée des arbres
 ##   détaillés ; `veg_shadow_distance` : zoom au-delà duquel les arbres ne portent plus d'ombre
@@ -34,7 +36,7 @@ const CLIENT_GROUP := "render_quality_client"
 ## - `map_shadow_range`, `map_shadow_splits`, `map_soft_shadows` : ombres de la carte ;
 ## - `battle_lod` : facteur sur les distances de LOD, d'ombre et d'imposteurs des soldats ;
 ## - `grass` : facteur sur le rayon de l'herbe de bataille ; `particles` : part des particules.
-const SCENE_KEYS := ["fine_relief", "fine_lod_bias", "terrain_near", "veg_density", "veg_detail",
+const SCENE_KEYS := ["relief_vertex_px", "relief_items", "relief_extra_depth", "relief_pages", "fine_relief", "terrain_near", "veg_density", "veg_detail",
 	"veg_shadow_distance", "map_shadow_range", "map_shadow_splits", "map_soft_shadows", "battle_lod",
 	"grass", "particles"]
 
@@ -47,7 +49,8 @@ const PRESETS := {
 		"shadow_splits": 4, "shadow_distance": 1.0, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
 		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
 		"glow": true, "fog_grid": [64, 32],
-		"fine_relief": true, "fine_lod_bias": 0.01, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
+		"relief_vertex_px": 4.0, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256,
+		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
 		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
 	},
@@ -56,7 +59,8 @@ const PRESETS := {
 		"shadow_splits": 2, "shadow_distance": 0.6, "ssao": false, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_LOW,
 		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
 		"glow": false, "fog_grid": [64, 32],
-		"fine_relief": false, "fine_lod_bias": 4.0, "terrain_near": 0.6, "veg_density": 0.5, "veg_detail": 0.6,
+		"relief_vertex_px": 10.0, "relief_items": 350, "relief_extra_depth": 2, "relief_pages": 128,
+		"fine_relief": false, "terrain_near": 0.6, "veg_density": 0.5, "veg_detail": 0.6,
 		"veg_shadow_distance": 0.0, "map_shadow_range": 0.6, "map_shadow_splits": 2,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.55, "grass": 0.55, "particles": 0.35,
 	},
@@ -65,7 +69,8 @@ const PRESETS := {
 		"shadow_splits": 4, "shadow_distance": 0.8, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_MEDIUM,
 		"ssil": false, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_LOW, "volumetric": "off", "sdfgi": false,
 		"glow": true, "fog_grid": [64, 32],
-		"fine_relief": true, "fine_lod_bias": 2.0, "terrain_near": 0.8, "veg_density": 0.75, "veg_detail": 0.8,
+		"relief_vertex_px": 6.0, "relief_items": 500, "relief_extra_depth": 3, "relief_pages": 192,
+		"fine_relief": true, "terrain_near": 0.8, "veg_density": 0.75, "veg_detail": 0.8,
 		"veg_shadow_distance": 200.0, "map_shadow_range": 0.8, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.75, "grass": 0.75, "particles": 0.6,
 	},
@@ -76,7 +81,8 @@ const PRESETS := {
 		"glow": true, "fog_grid": [64, 48],
 		# PF1 : filtre moyen sur la carte (ombres douces à contact durci, PCSS) : invisible au
 		# zoom comté, ≈ 4 ms de GPU de moins qu'en « haut ».
-		"fine_relief": true, "fine_lod_bias": 1.0, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
+		"relief_vertex_px": 4.0, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256,
+		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
 		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
 	},
@@ -85,7 +91,8 @@ const PRESETS := {
 		"shadow_splits": 4, "shadow_distance": 1.35, "ssao": true, "ssao_quality": RenderingServer.ENV_SSAO_QUALITY_ULTRA,
 		"ssil": true, "ssil_quality": RenderingServer.ENV_SSIL_QUALITY_HIGH, "volumetric": "always", "sdfgi": true,
 		"glow": true, "fog_grid": [128, 64],
-		"fine_relief": true, "fine_lod_bias": 0.5, "terrain_near": 1.2, "veg_density": 1.0, "veg_detail": 1.3,
+		"relief_vertex_px": 3.0, "relief_items": 900, "relief_extra_depth": 3, "relief_pages": 256,
+		"fine_relief": true, "terrain_near": 1.2, "veg_density": 1.0, "veg_detail": 1.3,
 		"veg_shadow_distance": 400.0, "map_shadow_range": 1.2, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "battle_lod": 1.3, "grass": 1.2, "particles": 1.0,
 	},
