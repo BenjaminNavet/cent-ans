@@ -154,6 +154,19 @@ static func apply_site_overrides(setup: Dictionary) -> void:
 		elif arg.begins_with("--province="):
 			# EP6 : paysage d'une autre province (vignoble, bocage…), captures et essais.
 			setup["province"] = arg.trim_prefix("--province=")
+		elif arg.begins_with("--decor-plan="):
+			# EP6 : plan de décor posé à la main (schéma `battle_decor_plan`), essais et captures.
+			var text := FileAccess.get_file_as_string(arg.trim_prefix("--decor-plan="))
+			var plan: Variant = JSON.parse_string(text)
+			if plan is Dictionary:
+				# Le JSON de Godot lit tous les nombres en flottants : entiers attendus par le cœur.
+				for item in (plan as Dictionary).get("items", []):
+					for key in ["houses", "seed"]:
+						if (item as Dictionary).has(key):
+							item[key] = int(item[key])
+				setup["decor_plan"] = plan
+			else:
+				push_warning("--decor-plan : plan illisible (%s)" % arg)
 
 
 func build(p_terrain: Dictionary, weather: String) -> void:
