@@ -143,6 +143,18 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	margin.add_child(content)
 	content.add_child(_balance_row(sides, player_side, enemy_side, totals))
 	content.add_child(BattleUiKit.rule())
+	# Faits notables, juste sous le bilan (Q2 : en 720p ils tombaient sous le bouton de retour).
+	content.add_child(_label("Faits notables", 17, INK, true))
+	mentions_box = VBoxContainer.new()
+	mentions_box.name = "Mentions"
+	mentions_box.add_theme_constant_override("separation", 1)
+	content.add_child(mentions_box)
+	for line in mentions(player_side, sides, units, outcome):
+		var label := _label("• " + line, 14)
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.custom_minimum_size = Vector2(1000, 0)
+		mentions_box.add_child(label)
+	content.add_child(BattleUiKit.rule())
 	# Un camp par colonne : cartes des régiments puis tableau.
 	var hero := _hero(units, player_side)
 	var columns := HBoxContainer.new()
@@ -159,17 +171,6 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	aftermath_box.add_theme_constant_override("separation", 10)
 	content.add_child(aftermath_box)
 	_fill_aftermath(units, player_side, enemy_side, hero, outcome, aftermath)
-	# Faits notables.
-	content.add_child(_label("Faits notables", 17, INK, true))
-	mentions_box = VBoxContainer.new()
-	mentions_box.name = "Mentions"
-	mentions_box.add_theme_constant_override("separation", 1)
-	content.add_child(mentions_box)
-	for line in mentions(player_side, sides, units, outcome):
-		var label := _label("• " + line, 14)
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.custom_minimum_size = Vector2(1000, 0)
-		mentions_box.add_child(label)
 	var footer := HBoxContainer.new()
 	footer.alignment = BoxContainer.ALIGNMENT_CENTER
 	var footer_margin := MarginContainer.new()
@@ -435,8 +436,21 @@ func _fill_aftermath(units: Array, player_side: String, enemy_side: String, hero
 	aftermath_box.add_child(_aftermath_card("Butin", loot_lines, BattleUiKit.GOLD.darkened(0.35)))
 
 
-## Sort d'un régiment en fin de bataille (libellé court).
+## Q2 : libellés du sort d'un régiment calculé par le cœur (`Unit::fate`, clé `fate`).
+const FATE_LABELS := {
+	"destroyed": "anéanti",
+	"routed": "en déroute",
+	"withdrawn": "s'est retiré",
+	"reserve": "en réserve",
+	"held": "tient le champ",
+}
+
+
+## Sort d'un régiment en fin de bataille (libellé court) : celui du cœur (`fate`), sinon
+## déduit de l'état (anciens dictionnaires, doubles de test).
 static func unit_fate(unit: Dictionary) -> String:
+	if FATE_LABELS.has(str(unit.get("fate", ""))):
+		return str(FATE_LABELS[str(unit["fate"])])
 	if int(unit["soldiers"]) <= 0:
 		return "anéanti"
 	if bool(unit.get("left_field", false)):
@@ -470,7 +484,9 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 			lines.append("Le chef de l'ost %s est aux mains de l'ost %s : rançon à attendre." % [BattleScene.de(side_name), BattleScene.de(other_name)])
 		if bool(result.get("no_quarter", false)):
 			lines.append("%s a déployé l'étendard du « pas de quartier » : aucun prisonnier, aucune rançon." % side_name)
-		if bool(result.get("routed", false)):
+		if bool(result.get("withdrew", false)):  # Q2 : retraite en bon ordre, pas une déroute
+			lines.append("L'ost %s a sonné la retraite et quitté le champ en bon ordre." % BattleScene.de(side_name))
+		elif bool(result.get("routed", false)):
 			lines.append("L'ost %s a été mis en déroute." % BattleScene.de(side_name))
 	if lines.is_empty():
 		lines.append("Aucun fait d'armes notable : les deux osts se sont séparés en bon ordre.")

@@ -34,6 +34,11 @@ func _init() -> void:
 
 func _run() -> void:
 	await wait(5)
+	if phase == "q2tutorial":
+		var settings: Node = root.get_node_or_null("/root/Settings")
+		settings.call("set_value", "tutorial/enabled", true)
+		settings.call("set_value", "tutorial/done", false)
+		settings.call("set_value", "tutorial/step", 0)
 	change_scene_to_file("res://scenes/start_menu.tscn")
 	await wait(90)
 	await shot("menu")
@@ -77,6 +82,16 @@ func _run() -> void:
 	await wait(120)
 	await shot("campaign-start")
 	await fps_probe("campaign-start")
+	if phase == "q2zoom":
+		await phase_q2_zoom()
+	if phase == "q2click":
+		await phase_q2_click()
+	if phase == "q2tutorial":
+		await phase_q2_tutorial()
+	if phase == "q2misc":
+		await phase_q2_misc()
+	if phase == "q2edicts":
+		await phase_q2_edicts()
 	if phase in ["all", "battle"]:
 		await phase_battle()
 	if phase in ["all", "siege"]:
@@ -92,6 +107,201 @@ func _run() -> void:
 		await phase_save_settings()
 	log_q1("done")
 	quit(0)
+
+
+# --- Q2 : vérifications ciblées ------------------------------------------------------
+
+
+## Q2 : échelle des figurines d'armée autour de la capitale, du plus près au palier moyen.
+func phase_q2_zoom() -> void:
+	var capital := capital_world()
+	var army_ids: PackedStringArray = map.player_army_ids()
+	for distance in [8.0, 15.0, 25.0, 40.0, 60.0, 150.0]:
+		await look_at_world(capital, distance)
+		await wait(40)
+		for army_id in army_ids:
+			var marker: Node3D = map.armies._markers.get(army_id)
+			if marker != null and marker.global_position.distance_to(capital) < 60.0:
+				var box := world_aabb(marker)
+				log_q1("q2 zoom %d: army %s scale %.2f size %.1f x %.1f x %.1f at %.1f from capital" % [int(distance), army_id, marker.scale.x, box.size.x, box.size.y, box.size.z, marker.global_position.distance_to(capital)])
+		await shot("q2-zoom-%d" % int(distance))
+
+
+## Q2 : clic sur la ville où stationne l'armée royale : ville, armée, alternance.
+func phase_q2_click() -> void:
+	var capital := capital_world()
+	var army_ids: PackedStringArray = map.player_army_ids()
+	var army_id := ""
+	for id in army_ids:
+		if map.armies.world_position_of(id).distance_to(capital) < 30.0:
+			army_id = id
+	log_q1("q2 click: army at capital '%s'" % army_id)
+	for distance in [25.0, 60.0, 150.0]:
+		await look_at_world(capital, distance)
+		await wait(30)
+		# Clic au centre de la ville.
+		await click_at(world_to_window(capital))
+		await wait(15)
+		log_q1("q2 click %d city centre: army '%s', settlement '%s', panel %s" % [int(distance), map.selected_army, map.settlement_layer.selected_id, _settlement_panel_visible()])
+		await shot("q2-click-%d-city" % int(distance))
+		await key(KEY_ESCAPE)
+		await wait(5)
+		# Clic sur l'armée.
+		var army_point := world_to_window(map.armies._markers[army_id].pick_position()) if army_id != "" else Vector2.ZERO
+		await click_at(army_point)
+		await wait(15)
+		log_q1("q2 click %d army: army '%s', panel %s" % [int(distance), map.selected_army, _settlement_panel_visible()])
+		await shot("q2-click-%d-army" % int(distance))
+		# Point où l'armée et la ville sont toutes deux sous le curseur : alternance.
+		var scale := root.get_final_transform().get_scale().x
+		var both := Vector2(-1, -1)
+		var from: Vector2 = map.camera.unproject_position(map.armies._markers[army_id].pick_position()) if army_id != "" else Vector2.ZERO
+		var to: Vector2 = map.camera.unproject_position(capital)
+		for step in 21:
+			var candidate: Vector2 = from.lerp(to, step / 20.0)
+			if map.armies.pick_screen(candidate) != "" and map.settlement_layer.pick_screen(candidate) != "":
+				both = candidate
+				break
+		if both.x < 0.0:
+			log_q1("q2 click %d: no overlap between army and city" % int(distance))
+			await key(KEY_ESCAPE)
+			continue
+		var window := both * scale
+		for attempt in 3:
+			await click_at(window)
+			await wait(15)
+			log_q1("q2 click %d overlap #%d: army '%s', settlement '%s', panel %s" % [int(distance), attempt + 1, map.selected_army, map.settlement_layer.selected_id, _settlement_panel_visible()])
+			await wait(20)
+		await key(KEY_ESCAPE)
+		await wait(5)
+
+
+## Q2 : le tutoriel suivi comme un joueur (Continuer, sélection de l'ost, marche, province…).
+func phase_q2_tutorial() -> void:
+	var tutorial: Node = map.tutorial
+	log_q1("q2 tutorial: active %s step '%s'" % [tutorial.active, tutorial.current_step_id()])
+	await shot("q2-tuto-intro")
+	await click(find_button(map.ui, "Continuer"))
+	await wait(20)
+	log_q1("q2 tutorial after Continuer: step '%s'" % tutorial.current_step_id())
+	var army_id: String = tutorial.royal_army
+	var army_world: Vector3 = map.armies.world_position_of(army_id)
+	await look_at_world(army_world, 80.0)
+	await click_at(world_to_window(map.armies._markers[army_id].pick_position()))
+	await wait(90)
+	log_q1("q2 tutorial after selecting %s (selected '%s'): step '%s'" % [army_id, map.selected_army, tutorial.current_step_id()])
+	await shot("q2-tuto-selected")
+	var target := world_to_window(army_world) + Vector2(260, 120)
+	await move_to(target)
+	await wait(10)
+	await click_at(target, MOUSE_BUTTON_RIGHT)
+	await wait(120)
+	log_q1("q2 tutorial after moving: step '%s'" % tutorial.current_step_id())
+	await shot("q2-tuto-moved")
+	await key(KEY_ESCAPE)
+	await wait(10)
+	await look_at_world(capital_world(), 60.0)
+	await click_at(world_to_window(capital_world()))
+	await wait(90)
+	log_q1("q2 tutorial after clicking the capital: step '%s'" % tutorial.current_step_id())
+	await shot("q2-tuto-capital")
+	var panel: Control = map.settlements_ctl.panel
+	if panel.visible:
+		var bar: TabBar = panel.tabs.get_tab_bar()
+		var tab_rect := bar.get_tab_rect(1)
+		await click_at(root.get_final_transform() * (bar.get_global_transform_with_canvas() * tab_rect.get_center()))
+		await wait(90)
+		log_q1("q2 tutorial after the Bâtiments tab: step '%s'" % tutorial.current_step_id())
+		await shot("q2-tuto-buildings")
+		var building := first_enabled(panel.buildable_list, 0)
+		if building != null:
+			await click(building)
+			await wait(90)
+		log_q1("q2 tutorial after building: step '%s'" % tutorial.current_step_id())
+		await shot("q2-tuto-built")
+	await key(KEY_ESCAPE)
+	await wait(10)
+	await key(KEY_ESCAPE)
+	await wait(30)
+	log_q1("q2 tutorial pause menu open: overlay visible %s" % tutorial.overlay.visible)
+	await shot("q2-tuto-pause")
+	await key(KEY_ESCAPE)
+	await wait(10)
+	for turn in 3:
+		await key(KEY_ENTER)
+		await wait(240)
+		log_q1("q2 tutorial turn %d: step '%s', visible %s" % [turn + 2, tutorial.current_step_id(), tutorial.overlay.visible])
+		await shot("q2-tuto-turn-%d" % (turn + 2))
+
+
+## Q2 : bandeau puis panneau (plus de chevauchement), menu Son…, fins de tour (rapport de
+## saison puis chronique, jamais ensemble).
+func phase_q2_misc() -> void:
+	map.ui.show_toast("cette armée n'a plus de points de mouvement ce tour", true)
+	await wait(40)
+	await key(KEY_P)
+	await wait(20)
+	log_q1("q2 toast visible after opening diplomacy: %s" % map.ui.toast.visible)
+	await shot("q2-toast-diplomacy")
+	await key(KEY_ESCAPE)
+	await wait(10)
+	var popup: PopupMenu = map.ui.menu_button.get_popup()
+	popup.id_pressed.emit(930)
+	await wait(20)
+	await shot("q2-sound-menu")
+	var settings_menu: Node = map.flow.get("_settings_menu")
+	log_q1("q2 Menu > Son opens settings: %s" % (settings_menu != null and is_instance_valid(settings_menu)))
+	if settings_menu != null:
+		settings_menu.call("close")
+		await wait(5)
+	for turn in turns:
+		await key(KEY_ENTER)
+		await wait(200)
+		var report: Control = map.flow.get("season_report")
+		var chronicle: Control = map.chronicle.window
+		log_q1("q2 turn %d: report %s, chronicle %s" % [turn + 2, report != null and report.visible, chronicle.visible])
+		if report != null and report.visible and chronicle.visible:
+			await shot("q2-report-and-chronicle")
+		await dismiss_dialogs()
+		await wait(20)
+		log_q1("q2 turn %d after dismiss: report %s, chronicle %s" % [turn + 2, report != null and report.visible, chronicle.visible])
+
+
+## Q2 : section des édits en tête de l'onglet Ville, visible sans défiler.
+func phase_q2_edicts() -> void:
+	var capital := str(GameCatalog.definitions("factions").get(map.player_faction, {}).get("capital", ""))
+	map.picker.select_index(map.map_data.index_of_id(capital))
+	await wait(20)
+	var panel: Control = map.ui.province_panel
+	panel.tabs.current_tab = 1
+	await wait(20)
+	var section: Control = panel.edict_section
+	var scroll: Control = panel.tabs.get_current_tab_control()
+	var inside := scroll.get_global_rect().encloses(section.get_global_rect()) if section.visible else false
+	log_q1("q2 edicts: section visible %s, fully in view %s" % [section.visible, inside])
+	await shot("q2-edicts")
+
+
+func _settlement_panel_visible() -> bool:
+	var controller: Node = map.get("settlements_ctl")
+	var panel: Control = controller.get("panel") if controller != null else null
+	return panel != null and panel.is_visible_in_tree()
+
+
+func world_aabb(node: Node3D) -> AABB:
+	var box := AABB()
+	var first := true
+	for child in node.find_children("*", "VisualInstance3D", true, false):
+		var visual := child as VisualInstance3D
+		if not visual.is_visible_in_tree() or visual is GPUParticles3D:
+			continue
+		var local := visual.get_aabb()
+		if local.size.length() < 0.001:
+			continue
+		var global := visual.global_transform * local
+		box = global if first else box.merge(global)
+		first = false
+	return box
 
 
 # --- Actions de campagne -----------------------------------------------------------
@@ -329,8 +539,15 @@ func phase_battle() -> void:
 	log_q1("battle scene loaded in %d ms" % (Time.get_ticks_msec() - t))
 	await shot("battle-deploy")
 	await fps_probe("battle-deploy")
-	await key(KEY_ENTER)
-	await wait(60)
+	# BV3 : le discours du chef se joue d'abord ; le premier clic (ou Entrée) l'écourte.
+	var deployment: Object = battle.get("deployment")
+	for attempt in 3:
+		var start_button := find_button(battle, "Commencer la bataille")
+		if start_button == null or deployment == null or not deployment.get("active"):
+			break
+		await click(start_button)
+		await wait(30)
+	log_q1("deployment active after start: %s" % [deployment.get("active") if deployment != null else "?"])
 	await shot("battle-start")
 	for _i in 3:
 		await key(KEY_EQUAL)
