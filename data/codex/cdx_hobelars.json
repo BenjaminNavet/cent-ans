@@ -1,0 +1,28 @@
+{
+  "id": "cdx_hobelars",
+  "title": "Les hobelars",
+  "category": "unite",
+  "aliases": [
+    "Hobelars",
+    "hobelar",
+    "hobin",
+    "hobins"
+  ],
+  "era": {
+    "from": "v. 1296",
+    "to": "1400"
+  },
+  "summary": "Cavaliers légers montés sur de petits chevaux irlandais (hobins), les hobelars apparaissent dans les guerres d'Édouard Ier en Irlande et en [[cdx_ecosse|Écosse]]. Éclaireurs, fourrageurs et combattants à pied, ils annoncent les [[cdx_archers_montes|archers montés]].",
+  "body": "Le mot vient du hobin, petit cheval irlandais robuste et sobre. Les premiers hobelars sont des Irlandais amenés en Écosse par Édouard Ier à la fin des années 1290. Légèrement armés d'un jaque ou d'un haubergeon, d'une lance légère et d'une épée, ils fouillent le pays, poursuivent les fuyards et protègent les fourrageurs.\n\nÉdouard II et [[cdx_edouard_iii|Édouard III]] en lèvent dans les comtés anglais pour les guerres d'Écosse, et les comtés côtiers en entretiennent pour la garde des rivages contre les descentes françaises. Payés à peu près comme un archer monté, ils combattent souvent à pied une fois arrivés sur le champ de bataille.\n\nÀ partir des années 1340, les [[cdx_archers_montes|archers montés]], aussi rapides mais bien plus utiles au combat, les remplacent peu à peu dans les armées d'Édouard III. Les hobelars ne survivent guère au-delà de la fin du XIVe siècle, sauf en Irlande.",
+  "gameplay": "Compagnie de 80 hommes (cavalerie montée). Recrutement : 450 livres payées à l'enrôlement ; entretien 40 livres par mois, soit 160 par saison. Caractéristiques : mêlée 46, armure 32 (laisse passer 75 % des coups), moral 50, vitesse 82 (3,28 m/s), charge 45. Exige une province de culture anglaise, galloise ou irlandaise. Recrutable jusqu'en 1400. La place doit compter assez de paysans (dix fois l'effectif). Pied à terre : ordre irréversible ; vitesse plafonnée à 35, armure +8, plus de charge. À l'assaut d'une place, elle met pied à terre d'elle-même, sans le bonus d'armure. Éclaireurs très rapides (82) pour poursuivre les fuyards et couvrir les flancs ; trop légers pour tenir une ligne. Plus recrutables après 1400.",
+  "entity": "unit_hobelars",
+  "see_also": [
+    "cdx_archers_montes",
+    "cdx_chevauchee",
+    "cdx_zone_controle"
+  ],
+  "sources": [
+    "Hobelar",
+    "Cavalerie légère"
+  ]
+}

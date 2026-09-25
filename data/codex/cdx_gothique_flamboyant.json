@@ -1,0 +1,29 @@
+{
+  "id": "cdx_gothique_flamboyant",
+  "title": "Le gothique flamboyant",
+  "category": "technique",
+  "aliases": [
+    "Gothique flamboyant",
+    "style flamboyant",
+    "flamboyant",
+    "voûte à liernes",
+    "remplage"
+  ],
+  "era": {
+    "from": "v. 1375",
+    "to": "1530"
+  },
+  "summary": "Des remplages en forme de flammes, des voûtes à nervures multiples, des façades couvertes de dentelle de pierre : né vers 1375-1380, le gothique flamboyant devient au XVe siècle le style des églises, des hôtels de ville et des palais.",
+  "body": "On en situe souvent le premier jalon français dans les fenêtres de la chapelle de la Grange, à la cathédrale d'Amiens (v. 1373-1375). Venu en partie d'Angleterre, où le style « décoré » avait multiplié les courbes et contre-courbes, il se répand malgré la guerre et culmine au XVe et au début du XVIe siècle : façade de la Trinité de Vendôme, tour de Beurre de [[cdx_rouen|Rouen]], hôtel de Jacques Cœur à Bourges, palais de justice de Rouen.\n\nCes chantiers coûteux sont une affaire de prestige pour les villes, les chapitres et les princes, qui y affichent leurs armoiries. Ils se poursuivent jusqu'aux premières décennies du XVIe siècle, quand la Renaissance impose d'autres formes.",
+  "gameplay": "Recherche : 300 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_maconnerie_militaire|Maçonnerie militaire]]. Année historique 1380 : avant 1360, elle coûte 25 % de plus (anachronisme). Effets, pour toute la faction : −3 d'agitation ; +3 de prestige (le souverain en reçoit chaque année le cinquième).",
+  "entity": "tech_gothic_flamboyant",
+  "see_also": [
+    "cdx_tour_de_beurre",
+    "cdx_rouen",
+    "cdx_paris"
+  ],
+  "sources": [
+    "Gothique flamboyant",
+    "Architecture gothique"
+  ]
+}

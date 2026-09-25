@@ -1,0 +1,32 @@
+{
+  "id": "cdx_mangonneau",
+  "title": "Le mangonneau",
+  "category": "unite",
+  "aliases": [
+    "Mangonneau",
+    "mangonneaux",
+    "pierrière",
+    "pierrières",
+    "perrière"
+  ],
+  "era": {
+    "from": "1100",
+    "to": "1420"
+  },
+  "summary": "Nom donné aux engins de jet à balancier plus légers que le [[cdx_trebuchet|trébuchet]], le mangonneau lance des pierres de quelques dizaines de kilos. Vite monté, il bat les créneaux, les hourds, les portes et les défenseurs plutôt que les murs épais.",
+  "body": "Le mot vient du grec manganon, « machine ». Les chroniqueurs l'emploient de façon assez lâche : aux XIIe et XIIIe siècles, il désigne souvent la pierrière à traction, dont le bras est abaissé à la force des bras par une équipe de tireurs ; au XIVe siècle, plutôt un petit engin à contrepoids. On lui oppose le trébuchet, plus grand et plus lent.\n\nPendant la guerre de Cent Ans, ces engins servent à tous les sièges. En 1342, à Hennebont, [[cdx_gautier_de_mauny|Gautier de Mauny]] fait une sortie pour détruire le grand engin qui bat la ville défendue par [[cdx_jeanne_de_flandre|Jeanne de Flandre]]. Selon Froissart, les assiégeants d'Auberoche, en 1345, renvoient même dans le château, par la fronde d'un engin, un messager anglais qu'ils ont capturé.\n\nOn lance aussi des pots à feu, des carcasses d'animaux ou des immondices. Les engins à balancier disparaissent au XVe siècle devant les [[cdx_bombarde|bombardes]].",
+  "gameplay": "Engin servi par 4 hommes. Recrutement : 700 livres payées à l'enrôlement ; entretien 40 livres par mois, soit 160 par saison. Caractéristiques : mêlée 5, tir 45 à 180 m (40 volées), armure 10 (laisse passer 92 % des coups), moral 40, vitesse 15 (0,6 m/s), attaque de siège 40. Exige le bâtiment Atelier d'engins dans la place. La place doit compter assez de bourgeois (dix fois l'effectif). Contre les murs : 64 points de dégâts par tir toutes les 12 s en bataille ; en campagne, une pièce complète ouvre la brèche de 10 points par saison contre une enceinte de niveau 1 (attaque ÷ (2 × (1 + niveau))). Engin léger sans technologie requise : un peu plus de la moitié de l'effet d'un [[cdx_trebuchet|trébuchet]] contre les murs, pour un peu plus de la moitié du prix.",
+  "entity": "unit_mangonel",
+  "see_also": [
+    "cdx_trebuchet",
+    "cdx_beffroi",
+    "cdx_ingenieurs_de_siege",
+    "cdx_places_fortes"
+  ],
+  "sources": [
+    "Mangonneau",
+    "Pierrière",
+    "Siège d'Hennebont",
+    "Bataille d'Auberoche"
+  ]
+}
