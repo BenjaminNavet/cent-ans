@@ -75,6 +75,17 @@ static func parchment_box(margin: int = 16, bg: Color = PARCHMENT, border: Color
 	return box
 
 
+## Page de vélin enluminée (kit UI1, bande d'or et bossettes) aux mêmes marges de contenu
+## que `parchment_box` : seul le dessin change, pas la mise en page.
+static func page_box(margin: int = 16) -> StyleBox:
+	return HudStyle.kit_box("panel", HudStyle.PAGE_MARGIN, margin)
+
+
+## Grande page à rinceaux (écrans de bilan, dialogue d'avant-bataille).
+static func illuminated_box(margin: int = 16) -> StyleBox:
+	return HudStyle.kit_box("panel_illuminated", HudStyle.ILLUMINATED_MARGIN, margin)
+
+
 static func button_font(button: Button, size: int = 18) -> void:
 	var font := body_font(600)
 	if font != null:

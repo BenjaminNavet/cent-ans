@@ -61,7 +61,7 @@ func _ready() -> void:
 	add_child(dim)
 	panel = PanelContainer.new()
 	panel.name = "PreBattlePanel"
-	panel.add_theme_stylebox_override("panel", BattleUiKit.parchment_box(0))
+	panel.add_theme_stylebox_override("panel", BattleUiKit.illuminated_box(34))
 	add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
