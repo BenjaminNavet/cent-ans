@@ -520,6 +520,46 @@ def _lines_3035(
     return lines, keep
 
 
+def orient_two_way(
+    start: np.ndarray, end: np.ndarray, two_way: np.ndarray, passes: int = 200
+) -> np.ndarray:
+    """Links of undefined direction (tidal reaches, marshes) to reverse.
+
+    A two-way link is oriented from the node that already receives water
+    (a one-way or resolved link ends there) towards the node that already gives
+    water; the resolution spreads along chains of two-way links pass after pass.
+    Links still ambiguous keep their digitised direction.
+
+    Returns:
+        Boolean mask of the links to reverse.
+    """
+    n = len(start)
+    size = int(max(start.max(initial=0), end.max(initial=0))) + 1
+    resolved = ~np.asarray(two_way, dtype=bool)
+    flip = np.zeros(n, dtype=bool)
+    for _ in range(passes):
+        s = np.where(flip, end, start)
+        e = np.where(flip, start, end)
+        inflow = np.bincount(e[resolved], minlength=size)
+        outflow = np.bincount(s[resolved], minlength=size)
+        todo = np.flatnonzero(~resolved)
+        if len(todo) == 0:
+            break
+        a, b = start[todo], end[todo]
+        forward = ((inflow[a] > 0) & (inflow[b] == 0)) | (
+            (outflow[b] > 0) & (outflow[a] == 0) & (inflow[b] == 0)
+        )
+        backward = ((inflow[b] > 0) & (inflow[a] == 0)) | (
+            (outflow[a] > 0) & (outflow[b] == 0) & (inflow[a] == 0)
+        )
+        decided = forward ^ backward
+        if not decided.any():
+            break
+        flip[todo[decided & backward]] = True
+        resolved[todo[decided]] = True
+    return flip
+
+
 def read_topage(
     gpkg: Path, bbox_3035: tuple[float, float, float, float] | None = None
 ) -> LinkTable:
@@ -553,6 +593,11 @@ def read_topage(
     end = np.where(end == "", np.char.add("c", coord_end.astype(str)), end)
     ids = node_ids(np.concatenate([start, end]))
     s, e = ids[: len(start)], ids[len(start) :]
+    two_way = frame["SensEcoulementTH"].to_numpy() == "dans les deux directions"
+    flipped = orient_two_way(s, e, two_way)
+    for i in np.flatnonzero(flipped):
+        lines[i] = lines[i][::-1].copy()
+    s, e = np.where(flipped, e, s), np.where(flipped, s, e)
     width_class = frame["ClasseLargeurTH"].fillna("").astype(str).to_numpy()
     names = frame["TopoOH"].fillna("").astype(str).to_numpy()
     codes = frame["CdCoursEau_1"].fillna("").astype(str).to_numpy()
