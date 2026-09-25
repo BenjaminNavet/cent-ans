@@ -801,6 +801,7 @@ func show_turn_banner() -> void:
 	_turn_banner_title.text = "Tour des autres factions"
 	_turn_banner_detail.text = "Les princes d'Europe jouent leur saison…"
 	turn_banner.modulate.a = 1.0
+	move_child(turn_banner, -1)  # au-dessus des panneaux
 	turn_banner.show()
 	_place_turn_banner()
 
