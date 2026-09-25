@@ -9,8 +9,12 @@ Branche `worktree-agent-a7241565332549af6` (partie de `main` `ad08ea16`).
 3. Lumière dorée pendant le tour de l'IA (si le temps le permet).
 
 ## État
-- [ ] 0. Squelette
-- [ ] 1. Parchemin
+- [x] 0. Squelette
+- [x] 1. Parchemin : `strategic_view.gd` (poids 1080 → 1440, global `campaign_parchment`),
+  `parchment_common/map/sea.gdshaderinc` (crochets `// CM2` dans terrain, water, river_water),
+  `terrain_parchment.gdshader` (substitué au poids 1 : le rendu 3D n'est plus payé),
+  `parchment_overlay.gd` (noms, vignettes pré-rendues, jetons, navires et monstres),
+  `parchment_decor.gd` (roses, navires, monstres placés par la distance à la côte)
 - [ ] 2. Météo
 - [ ] 3. Lumière de fin de tour
 - [ ] Mesures FPS (3 zooms), captures `docs/audit/captures/cm2/`, fusion de main, smoke
@@ -23,4 +27,4 @@ Branche `worktree-agent-a7241565332549af6` (partie de `main` `ad08ea16`).
 | 1500 | 65,4 | 10,28 |
 
 ## Prochaine étape
-Squelette.
+Lot 2 : météo dans `core/` (module `weather.rs`), pont, rendu, AU1.

@@ -956,7 +956,7 @@ func _process(_delta: float) -> void:
 	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
 	if zoom_tiers != null:  # C6 : paliers de zoom
-		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - strategic.weight_at(distance)))  # CM2
+		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
 	if life != null:  # CV1

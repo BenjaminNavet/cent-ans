@@ -21,7 +21,13 @@ var forced: float = -1.0
 var decor: ParchmentDecor
 var overlay: ParchmentOverlay
 
+const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
+const PARCHMENT_SHADER := preload("res://shaders/terrain_parchment.gdshader")
+## Poids à partir duquel le terrain ne calcule plus que le parchemin (shader substitué).
+const FULL_WEIGHT := 0.999
+
 var _map: Node
+var _parchment_only: bool = false
 var _layer: CanvasLayer
 var _markers_hidden: bool = false
 
@@ -83,8 +89,21 @@ func update_view(distance: float) -> void:
 	if not is_equal_approx(w, weight):
 		weight = w
 		RenderingServer.global_shader_parameter_set("campaign_parchment", w)
+		_swap_terrain_shader(w >= FULL_WEIGHT)
 	overlay.set_weight(w, distance)
 	_fade_armies(w)
+
+
+## Au poids 1, le matériau partagé du terrain passe au shader « parchemin seul » (mêmes
+## uniformes, valeurs conservées) : le rendu 3D n'est plus payé.
+func _swap_terrain_shader(parchment_only: bool) -> void:
+	if parchment_only == _parchment_only:
+		return
+	var terrain := _map.get("terrain") as TerrainBuilder
+	if terrain == null or terrain.material == null:
+		return
+	_parchment_only = parchment_only
+	terrain.material.shader = PARCHMENT_SHADER if parchment_only else TERRAIN_SHADER
 
 
 ## Étendards 3D et plaques d'effectif s'effacent devant les jetons à blason.
@@ -102,4 +121,4 @@ func _fade_armies(w: float) -> void:
 			if marker.visible:
 				marker.visible = false
 	for plate in armies._plates.values():
-		(plate as Control).modulate.a = 1.0 - w
+		(plate as Control).modulate.a = 1.0 - smoothstep(0.2, marker_cutoff, w)
