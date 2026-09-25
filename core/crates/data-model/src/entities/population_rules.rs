@@ -45,11 +45,11 @@ impl Default for PopulationRules {
     /// that file (checked by `tests/real_data.rs`).
     fn default() -> Self {
         PopulationRules {
-            tax_unrest_weight: 100.0,
+            tax_unrest_weight: 130.0,
             garrison_relief_per_100_men: 1.0,
             garrison_relief_max: 10.0,
             goods_relief_max: 10.0,
-            occupation_unrest: 35.0,
+            occupation_unrest: 20.0,
             foreign_religion_unrest: 10.0,
             disorder_unrest_weight: default_disorder_weight(),
             revolt_unrest_threshold: default_revolt_threshold(),
@@ -61,7 +61,7 @@ impl Default for PopulationRules {
 }
 
 fn default_disorder_weight() -> f64 {
-    1.0
+    0.5
 }
 
 fn default_revolt_threshold() -> f64 {
