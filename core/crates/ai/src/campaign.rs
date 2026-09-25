@@ -18,7 +18,7 @@ use data_model::{
     SkillBranch, SkillId, UnitTypeId,
 };
 use sim_campaign::coinage::CoinageLevel;
-use sim_campaign::movement::{dijkstra, edges, points_per_step};
+use sim_campaign::movement::{edges, points_per_step};
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
@@ -101,6 +101,8 @@ struct Context<'a> {
     /// Lot M2: the settlement standing for every army on the settlement
     /// graph (its own, or the nearest one in the field).
     anchors: BTreeMap<ArmyId, SettlementId>,
+    /// Lot M3: routes on the settlement graph and orders on the grid.
+    grid: crate::grid::GridPlanner<'a>,
 }
 
 impl<'a> Context<'a> {
@@ -118,6 +120,7 @@ impl<'a> Context<'a> {
                 .iter()
                 .filter_map(|(id, a)| Some((id.clone(), state.army_anchor(data, a)?)))
                 .collect(),
+            grid: crate::grid::GridPlanner::new(state, data, faction),
             state,
             data,
             faction,
@@ -1125,7 +1128,8 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         let strength: u32 = army.units.iter().map(|u| u.strength).sum();
         let max_strength: u32 = army.units.iter().map(|u| u.max_strength).sum();
         let cap = state.army_movement_allowance(data, army);
-        let table = dijkstra(state, data, ctx.faction, &anchor, Some(range), Some(cap));
+        // Lot M3: cached for the turn; stronger enemy armies are avoided.
+        let table = ctx.grid.table(&anchor, range, cap, power);
         let steps = |cost: u32| f64::from(cost) / step;
         let besieging = army
             .settlement()
@@ -1168,6 +1172,16 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .is_some_and(|(odds, _)| odds >= ASSAULT_ODDS);
         if hopeless {
             targeted.insert(anchor.clone());
+        }
+
+        // Lot M3: engage an enemy army within the bubble when the odds are
+        // good. The strategic orders below still follow: they fail harmlessly
+        // once the battle has spent the army's movement, and apply when the
+        // attack was refused (target out of reach).
+        if !broken && !besieging {
+            if let Some(order) = ctx.grid.attack_order(army_id, power) {
+                orders.push(order);
+            }
         }
 
         // Keep a siege that is going our way.
@@ -1349,8 +1363,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 stance,
             });
         }
-        if !army.is_at(&target) && table.contains_key(&target) {
-            orders.push(Order::move_to(army_id.clone(), target));
-        }
+        orders.extend(
+            ctx.grid
+                .march_orders(army_id, army, &anchor, &target, &table),
+        );
     }
 }

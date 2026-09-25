@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 from jsonschema import Draft202012Validator
 
-from cent_ans_tools import audio_bank
+from cent_ans_tools import audio_bank, ui_sounds
 
 REPO = Path(__file__).resolve().parents[2]
 DATA = REPO / "data"
@@ -34,7 +34,12 @@ def test_every_bank_file_exists_and_is_generated() -> None:
     files += [entry["file"] for entry in bank["beds"].values()]
     files += [entry["file"] for entry in bank["ambience"].values()]
     clip_names = {clip.name for clip in audio_bank.CLIPS}
+    # UB1: interface clips (WAV) are cut by ui_sounds from files already in the bank.
+    ui_names = {f"ui/{clip.name}" for clip in ui_sounds.CLIPS}
     for name in files:
+        if name in ui_names:
+            assert (AUDIO / f"{name}.wav").exists(), name
+            continue
         assert (AUDIO / f"{name}.ogg").exists(), name
         assert name in clip_names, name
 

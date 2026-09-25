@@ -85,6 +85,10 @@ impl BattleSim {
             self.units[j].hp -= kills;
             self.units[j].tick_losses += kills;
             self.units[j].missile_timer = 0.0;
+            if kills > 0.0 {
+                self.units[j].loss_cause = crate::impact::LossCause::Arrow;
+                self.units[j].loss_by = None;
+            }
             if self.units[j].hp <= 0.0 {
                 self.unit_destroyed(j);
             }

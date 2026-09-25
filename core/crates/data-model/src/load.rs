@@ -10,6 +10,7 @@ use serde::de::DeserializeOwned;
 use crate::entities::agent::AgentRules;
 use crate::entities::ai_alignment::AiAlignment;
 use crate::entities::ai_diplomacy::AiDiplomacy;
+use crate::entities::ai_grid::AiGrid;
 use crate::entities::battle_order::BattleOrder;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
@@ -69,6 +70,8 @@ pub mod folders {
     pub const AI_DIPLOMACY: &str = "diplomacy.json";
     /// Inside `AI`: recruitment doctrines (lot E1); optional.
     pub const AI_DOCTRINES: &str = "doctrines.json";
+    /// Inside `AI`: the AI armies on the navigation grid (lot M3).
+    pub const AI_GRID: &str = "grid.json";
     /// Global rule tuning (lot C1: `vision.json`); optional folder.
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
@@ -215,6 +218,8 @@ pub struct GameData {
     /// `data/ai/doctrines.json` (lot E1), absent until written: the AI then
     /// ranks units by value alone.
     pub ai_doctrines: Option<crate::entities::ai_doctrine::AiDoctrines>,
+    /// `data/ai/grid.json` (lot M3); [`AiGrid::default`] when absent.
+    pub ai_grid: AiGrid,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
     /// `data/rules/auto_resolve.json` (lot N1); [`crate::AutoResolveRules::default`]
@@ -276,6 +281,7 @@ impl GameData {
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
             ai_doctrines: None,
+            ai_grid: AiGrid::default(),
             vision_rules: None,
             auto_resolve: Default::default(),
             population_rules: Default::default(),
@@ -313,6 +319,10 @@ impl GameData {
         let doctrines_path = root.join(folders::AI).join(folders::AI_DOCTRINES);
         if doctrines_path.is_file() {
             data.ai_doctrines = Some(read_json(&doctrines_path)?);
+        }
+        let grid_path = root.join(folders::AI).join(folders::AI_GRID);
+        if grid_path.is_file() {
+            data.ai_grid = read_json(&grid_path)?;
         }
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {

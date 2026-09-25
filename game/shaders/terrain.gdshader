@@ -270,6 +270,10 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 	rows = ts;
 }
 
+#include "res://shaders/relief_landcover.gdshaderinc"
+// Lot CV1 : saisons, terroirs, dévastation, ombres de nuages (fonctions séparées).
+#include "res://shaders/campaign_life.gdshaderinc"
+
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
@@ -291,6 +295,7 @@ void fragment() {
 	float h_u = height_m_lod(uv - dv, lod);
 	float h_d = height_m_lod(uv + dv, lod);
 	vec2 grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
+	rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
 	vec2 g = grad_m * height_scale * shading_relief;
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
@@ -317,6 +322,9 @@ void fragment() {
 	// --- Poids des matériaux ---
 	vec4 s = has_splat ? texture(splat, uv) : vec4(0.5, 0.3, 0.2, 0.0);
 	s /= max(s.r + s.g + s.b + s.a, 1e-3);
+	s = rl_landcover(s, p, footprint);  // lot R1 : lisières
+	vec4 terroir = terroir_at(uv);  // CV1 : finage des colonies, vigne, brûlis, pâtures
+	s = terroir_splat(s, terroir);
 	float macro = fbm(p * 0.035);
 	float rock_frac = max(smoothstep(rock_line_m - 700.0, rock_line_m, hc), smoothstep(0.35, 0.6, slope));
 	float w_grass = s.r;
@@ -326,6 +334,7 @@ void fragment() {
 	float w_heath = s.a * (1.0 - rock_frac);
 	float snow = smoothstep(snow_line_m - 150.0, snow_line_m + 250.0, hc + (macro - 0.5) * 500.0)
 		* (1.0 - smoothstep(0.55, 0.9, slope));
+	snow = season_snow(snow, hc, uv, p, slope, macro, footprint);  // CV1
 	float sand = (1.0 - smoothstep(0.3, 1.6, coast)) * (1.0 - smoothstep(4.0, 30.0, hc)) * land_f * (1.0 - lake_shore);
 	float keep = (1.0 - snow) * (1.0 - sand);
 	w_grass *= keep; w_farm *= keep; w_forest *= keep; w_rock *= keep; w_heath *= keep;
@@ -335,12 +344,15 @@ void fragment() {
 
 	// --- Parcellaire (lot V2b) : enclos, lanières de cultures, prés, vignes, haies, chemins ---
 	vec3 lu = has_landuse ? texture(landuse, uv).rgb : vec3(0.0);
+	lu = terroir_landuse(lu, terroir);  // CV1
 	float dry = lu.g;
 	float open_land = clamp(s.g + 0.6 * s.r, 0.0, 1.0);
 	float grass_share = s.r / max(s.r + s.g, 1e-3);
 	// Teintes de base (lointain) : même moyenne que les parcelles, sèches au sud.
 	vec3 grass_base = mix(tint_grass, dry_grass, dry * 0.75);
 	vec3 farm_base = mix(tint_farmland, mix(tint_farmland, crop_wheat, 0.35) * vec3(1.05, 0.98, 0.9), dry * 0.6);
+	grass_base = season_grass(grass_base);  // CV1
+	farm_base = season_farm(farm_base);
 	vec3 grass_tint = grass_base;
 	vec3 farm_tint = farm_base;
 	float hedge = 0.0;
@@ -364,14 +376,16 @@ void fragment() {
 		vec3 crop;
 		bool vine = h_b < lu.r * 0.32 && grass_share < 0.8;
 		if (vine) {
-			crop = vine_soil;
+			crop = season_field(vine_soil, 6, h_b);  // CV1
 		} else if (h < p_meadow) {
 			float m = h / max(p_meadow, 1e-3);
 			crop = m < 0.6 ? meadow_color * (0.85 + 0.35 * h_b) : (m < 0.85 ? mix(meadow_color, hay_color, 0.55) : hay_color);
+			crop = season_field(crop, m < 0.6 ? 4 : 5, h_b);  // CV1
 			crop = mix(crop, dry_grass, dry * 0.7);
 		} else {
 			float c = (h - p_meadow) / max(1.0 - p_meadow, 1e-3);
 			crop = c < 0.36 ? crop_wheat : (c < 0.6 ? crop_green : (c < 0.76 ? crop_ploughed : crop_fallow));
+			crop = season_field(crop, c < 0.36 ? 0 : (c < 0.6 ? 1 : (c < 0.76 ? 2 : 3)), h_b);  // CV1
 			crop *= 0.9 + 0.2 * h_b;
 			crop = mix(crop, crop * vec3(1.08, 0.96, 0.82), dry);
 		}
@@ -410,6 +424,7 @@ void fragment() {
 	}
 
 	// --- Textures ---
+	vec3 forest_tint = season_forest(tint_forest, value_noise(p * 0.45));  // CV1
 	float detail_fade = 1.0 - smoothstep(0.7, 1.8, footprint);
 	vec3 albedo = vec3(0.0);
 	vec3 dn = vec3(0.0, 0.0, 0.0);
@@ -440,7 +455,7 @@ void fragment() {
 			vec2 nxy = transpose(rot) * (nf.rg * 2.0 - 1.0);
 			dn += w_farm * vec3(nxy, nf.b);
 		}
-		if (w_forest > 0.01) { sample_layer(2, uv_a, uv_b, mix_b, tint_forest, det, albedo, dn, w_forest); }
+		if (w_forest > 0.01) { sample_layer(2, uv_a, uv_b, mix_b, forest_tint, det, albedo, dn, w_forest); }
 		if (w_rock > 0.01) { sample_layer(3, uv_a, uv_b, mix_b, tint_rock, det, albedo, dn, w_rock); }
 		if (w_heath > 0.01) { sample_layer(4, uv_a, uv_b, mix_b, tint_heath, det, albedo, dn, w_heath); }
 		if (snow > 0.01) { sample_layer(5, uv_a, uv_b, mix_b, tint_snow, det, albedo, dn, snow); }
@@ -448,7 +463,7 @@ void fragment() {
 		albedo /= max(wsum, 1e-3);
 		dn /= max(wsum, 1e-3);
 	} else {
-		albedo = (w_grass * grass_tint + w_farm * farm_tint + w_forest * tint_forest + w_rock * tint_rock
+		albedo = (w_grass * grass_tint + w_farm * farm_tint + w_forest * forest_tint + w_rock * tint_rock
 			+ w_heath * tint_heath + snow * tint_snow + sand * tint_sand) / max(wsum, 1e-3);
 		dn = vec3(0.0, 0.0, 0.85);
 	}
@@ -457,9 +472,11 @@ void fragment() {
 	col *= 1.0 - 0.25 * w_forest / max(wsum, 1e-3) * (1.0 - value_noise(p * 1.7)) * detail_fade;
 	float open_w = (w_grass + w_farm) / max(wsum, 1e-3);
 	col = mix(col, col * vec3(0.93, 0.95, 0.9), balk * open_w);
-	col = mix(col, vine_leaf, vine_rows * open_w * 0.8);
+	col = mix(col, season_vine_leaf(vine_leaf), vine_rows * open_w * 0.8);  // CV1
 	col = mix(col, track_color * (0.9 + 0.2 * macro), track * open_w * 0.85);
 	col = mix(col, hedge_color, hedge * open_w * 0.55);
+
+	col = terroir_burn(col, terroir.b * (1.0 - snow * 0.7), p, footprint);  // CV1
 
 	// Normales de détail combinées au relief (blend « whiteout » dans le repère carte).
 	float dstrength = detail_normal_strength * detail_fade;
@@ -489,6 +506,7 @@ void fragment() {
 		lake = 1.0 - smoothstep(-0.7, 0.3 + 0.3 * (reeds - 0.5), coast);
 		water_col = mix(lake_color, lake_shallow_color, 1.0 - smoothstep(-1.6, 0.0, coast));
 	}
+	rl_surface(p, uv, footprint, land_f, col, lake, water_col, roughness);  // lot R1
 	col = mix(col, water_col, lake);
 	roughness = mix(roughness, 0.3, lake);
 	n = normalize(mix(n, vec3(0.0, 1.0, 0.0), lake));
@@ -585,6 +603,7 @@ void fragment() {
 		}
 	}
 
+	col *= mix(cloud_shadow(p), 1.0, political);  // CV1
 	ALBEDO = col;
 	ROUGHNESS = roughness;
 	SPECULAR = mix(0.3, 0.1, lake);
