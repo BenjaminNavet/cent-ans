@@ -10,7 +10,8 @@
     "attack_reach_share": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Une armée ennemie est une cible possible quand sa distance à vol d'oiseau ne dépasse pas cette part des kilomètres que l'armée peut encore parcourir." },
     "avoid_ratio": { "type": "number", "exclusiveMinimum": 0, "description": "Une armée ennemie plus puissante que ce multiple de la puissance de l'armée est évitée : sa zone de contrôle sort de l'itinéraire." },
     "avoid_radius_km": { "type": "number", "minimum": 0, "description": "Les colonies à moins de cette distance (km) d'une armée évitée sont écartées de l'itinéraire (zone de contrôle et marge)." },
-    "max_legs_per_turn": { "type": "integer", "minimum": 1, "description": "Nombre maximal d'étapes du graphe des colonies qu'une armée reçoit l'ordre de parcourir en un tour (un ordre MoveArmy par étape)." }
+    "max_legs_per_turn": { "type": "integer", "minimum": 1, "description": "Nombre maximal d'étapes du graphe des colonies qu'une armée reçoit l'ordre de parcourir en un tour (un ordre MoveArmy par étape)." },
+    "trespass_route_factor": { "type": "number", "minimum": 1, "description": "Lot EQ5 : multiplicateur du coût des routes qui entrent dans les terres qu'une IA peut traverser sans droit de passage (en guerre, selon son tempérament) : les armées les contournent quand une route à elles ou chez l'ennemi n'est guère plus longue. 1 : sans effet (défaut)." }
   },
   "required": ["attack_ratio", "attack_reach_share", "avoid_ratio", "avoid_radius_km", "max_legs_per_turn"],
   "additionalProperties": false

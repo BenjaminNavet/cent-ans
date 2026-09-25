@@ -4,5 +4,6 @@
   "attack_reach_share": 0.8,
   "avoid_ratio": 1.0,
   "avoid_radius_km": 12,
-  "max_legs_per_turn": 6
+  "max_legs_per_turn": 6,
+  "trespass_route_factor": 2.0
 }

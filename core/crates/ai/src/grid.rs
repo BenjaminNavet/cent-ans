@@ -58,6 +58,10 @@ pub struct GridPlanner<'a> {
     /// forbidden, and a route starting in forbidden lands may cross those
     /// lands (the way out, [`GridPlanner::table`]).
     forbidden: BTreeMap<SettlementId, FactionId>,
+    /// EQ5: settlements in lands of a faction at peace that this faction's
+    /// AI may cross without right of passage: reached at a higher route
+    /// cost (`AiGrid::trespass_route_factor`).
+    crossable: BTreeSet<SettlementId>,
     /// Route tables by (start, budget, cap, avoided enemy armies).
     tables: RefCell<BTreeMap<TableKey, Rc<Table>>>,
 }
@@ -85,17 +89,25 @@ impl<'a> GridPlanner<'a> {
                 .entry(owner.clone())
                 .or_insert_with(|| passage::ai_may_trespass(state, data, faction, owner))
         };
-        let forbidden: BTreeMap<SettlementId, FactionId> = state
+        let mut forbidden: BTreeMap<SettlementId, FactionId> = BTreeMap::new();
+        let mut crossable: BTreeSet<SettlementId> = BTreeSet::new();
+        for (id, _) in state
             .settlements
             .iter()
             .filter(|(_, s)| &s.controller != faction)
-            .filter_map(|(id, _)| {
-                let owner = state
-                    .settlement_province(id)
-                    .and_then(|p| passage::trespassed_owner(state, faction, p))?;
-                (!may_cross(&owner)).then(|| (id.clone(), owner))
-            })
-            .collect();
+        {
+            let Some(owner) = state
+                .settlement_province(id)
+                .and_then(|p| passage::trespassed_owner(state, faction, p))
+            else {
+                continue;
+            };
+            if may_cross(&owner) {
+                crossable.insert(id.clone());
+            } else {
+                forbidden.insert(id.clone(), owner);
+            }
+        }
         let enemies: Vec<Enemy> = state
             .armies
             .iter()
@@ -136,6 +148,7 @@ impl<'a> GridPlanner<'a> {
             enemies,
             stops,
             forbidden,
+            crossable,
             tables: RefCell::new(BTreeMap::new()),
         }
     }
@@ -223,7 +236,11 @@ impl<'a> GridPlanner<'a> {
                 {
                     continue;
                 }
-                let total = cost + edge.min(cap.max(1));
+                let mut step = edge.min(cap.max(1));
+                if self.crossable.contains(&next) {
+                    step = (f64::from(step) * self.rules.trespass_route_factor).round() as u32;
+                }
+                let total = cost + step;
                 if total > budget {
                     continue;
                 }

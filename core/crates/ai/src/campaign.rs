@@ -70,6 +70,8 @@ pub const RETREAT_STRENGTH: f64 = 0.4;
 /// EQ5: an army trespassing with no place of its own within the planning
 /// range looks this many times farther for the way home.
 pub const HOMEWARD_RANGE_FACTOR: u32 = 4;
+/// EQ5: places of its own tried (nearest first) before giving up a way home.
+const HOMEWARD_CANDIDATES: usize = 3;
 /// Siege value bonus of a settlement the faction owns de jure but an enemy
 /// holds (lot C7a: win back lost places first, above a throne claim's 30).
 pub const RECLAIM_TARGET_BONUS: f64 = 35.0;
@@ -1473,37 +1475,44 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         }
 
         // EQ5: with nothing to fight for here, an army trespassing on the
-        // lands of a realm at peace goes home (the nearest place of its own
-        // outside those lands, or failing that any place of its own), even
-        // beyond the planning range: it does not camp there for years.
+        // lands of a realm at peace goes home: a place of its own outside
+        // closed lands first (within the planning range, then farther
+        // across those lands), else any place of its own, and only a place
+        // the grid can actually reach (a road over water is no way home).
         if choice.is_none() && !besieging && trespassing.is_some() {
-            let home = |table: &crate::grid::Table| {
-                table
+            let far = ctx
+                .grid
+                .homeward_table(&anchor, range * HOMEWARD_RANGE_FACTOR, cap, power);
+            let homes = |table: &crate::grid::Table, abroad_ok: bool| -> Vec<SettlementId> {
+                let mut homes: Vec<(u32, SettlementId)> = table
                     .iter()
                     .filter(|(id, _)| {
                         ctx.owns_settlement(id)
                             && state.hostile_armies_at(ctx.faction, id).is_empty()
+                            && (abroad_ok
+                                || ctx.province_of(id).is_none_or(|p| {
+                                    passage::trespassed_owner(state, ctx.faction, p).is_none()
+                                }))
                     })
-                    .map(|(id, reach)| {
-                        let abroad = ctx.province_of(id).is_some_and(|p| {
-                            passage::trespassed_owner(state, ctx.faction, p).is_some()
-                        });
-                        ((abroad, reach.cost), id.clone())
-                    })
-                    .min()
-                    .map(|(_, id)| id)
+                    .map(|(id, reach)| (reach.cost, id.clone()))
+                    .collect();
+                homes.sort();
+                homes.into_iter().map(|(_, id)| id).collect()
             };
-            let far;
-            let mut route = &table;
-            let mut target = home(&table);
-            if target.is_none() {
-                far = ctx
-                    .grid
-                    .homeward_table(&anchor, range * HOMEWARD_RANGE_FACTOR, cap, power);
-                target = home(&far);
-                route = &far;
-            }
-            if let Some(target) = target {
+            let reachable = |target: &SettlementId| {
+                data.settlement_point(target)
+                    .is_some_and(|p| state.find_path(data, army_id, p).is_some())
+            };
+            let found = [(&table, false), (&far, false), (&table, true), (&far, true)]
+                .into_iter()
+                .find_map(|(route, abroad_ok)| {
+                    homes(route, abroad_ok)
+                        .into_iter()
+                        .take(HOMEWARD_CANDIDATES)
+                        .find(|id| reachable(id))
+                        .map(|id| (route, id))
+                });
+            if let Some((route, target)) = found {
                 if army.stance != Stance::Normal {
                     orders.push(Order::SetStance {
                         army: army_id.clone(),

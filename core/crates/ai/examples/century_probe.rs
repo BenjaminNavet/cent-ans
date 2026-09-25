@@ -505,14 +505,16 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             );
         }
         for order in ai::plan_turn(&state, data, &france) {
-            if let Some(army) = &debug_army {
-                let text = format!("{order:?}");
-                if text.contains(&format!("\"{army}\"")) {
-                    println!("t{} {army} order {text}", state.turn);
-                }
-            }
+            let text = debug_army
+                .as_ref()
+                .map(|army| (army.clone(), format!("{order:?}")))
+                .filter(|(army, text)| text.contains(&format!("\"{army}\"")));
             report.issued += 1;
-            if state.submit_order(data, order).is_err() {
+            let result = state.submit_order(data, order);
+            if let Some((army, text)) = text {
+                println!("t{} {army} order {text} -> {result:?}", state.turn);
+            }
+            if result.is_err() {
                 report.refused += 1;
             }
         }
