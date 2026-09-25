@@ -199,7 +199,7 @@ fn a_crest_close_in_front_of_the_target_leaves_dead_ground() {
 
 /// A ridge crest at z 470 in front of the defender's deployment line (z
 /// 550), hedges optional.
-fn crest_field(data: &GameData, hedges: &[Obstacle]) -> BattleSim {
+fn crest_field(data: &GameData, crest_z: f64, hedges: &[Obstacle]) -> BattleSim {
     let french = [
         "unit_knights",
         "unit_knights",
@@ -218,7 +218,7 @@ fn crest_field(data: &GameData, hedges: &[Obstacle]) -> BattleSim {
     battle.village = Some(false);
     let mut sim = BattleSim::new(battle, 5).unwrap();
     sim.set_weather(sim_battle::Weather::Clear);
-    shape(&mut sim, ridge(470.0));
+    shape(&mut sim, ridge(crest_z));
     sim.field_mut().obstacles.extend_from_slice(hedges);
     sim
 }
@@ -237,6 +237,7 @@ fn the_score_prefers_a_hedge_on_a_crest() {
     // Hedge on the crest (x 470-730) and in the hollow behind (x 470-730).
     let sim = crest_field(
         &data,
+        470.0,
         &[hedge_at(465.0, 470.0, 730.0), hedge_at(600.0, 470.0, 730.0)],
     );
     let (field, map) = (sim.field(), sim.relief_map());
@@ -268,7 +269,7 @@ fn the_score_prefers_a_hedge_on_a_crest() {
 #[test]
 fn a_wing_on_a_wood_or_a_river_scores_its_flank() {
     let data = data();
-    let mut sim = crest_field(&data, &[]);
+    let mut sim = crest_field(&data, 470.0, &[]);
     let front = Front {
         center: (600.0, 470.0),
         forward: -1.0,
@@ -290,11 +291,13 @@ fn a_wing_on_a_wood_or_a_river_scores_its_flank() {
 #[test]
 fn english_archers_take_the_hedge_on_the_crest() {
     let data = data();
-    let crest_hedge = hedge_at(465.0, 470.0, 730.0);
-    let hollow_hedge = hedge_at(545.0, 480.0, 720.0);
-    let mut sim = crest_field(&data, &[crest_hedge, hollow_hedge]);
+    // The crest 45 m ahead of the deployment line (reachable before the
+    // French foot), the hollow 30 m behind it.
+    let crest_hedge = hedge_at(500.0, 470.0, 730.0);
+    let hollow_hedge = hedge_at(580.0, 480.0, 720.0);
+    let mut sim = crest_field(&data, 505.0, &[crest_hedge, hollow_hedge]);
     let b6 = sim_battle::ai::defensive_cover(sim.field(), SideId::Defender).unwrap();
-    assert!(b6.center.1 > 540.0, "B6 alone takes the hollow hedge");
+    assert!(b6.center.1 > 570.0, "B6 alone takes the hollow hedge");
     sim.set_ai(SideId::Attacker, false);
     // Uphill to the crest: a slow march.
     run(&mut sim, 180.0);
@@ -304,7 +307,7 @@ fn english_archers_take_the_hedge_on_the_crest() {
         .filter(|u| u.side == SideId::Defender && u.can_shoot())
     {
         assert!(
-            u.z > 465.0 && u.z < 465.0 + sim_battle::site::HEDGE_COVER_REACH,
+            u.z > 500.0 && u.z < 500.0 + sim_battle::site::HEDGE_COVER_REACH,
             "{} at ({:.0}, {:.0}), not behind the crest hedge",
             u.name,
             u.x,

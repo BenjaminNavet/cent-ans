@@ -523,6 +523,9 @@ fn defensive_ground(view: &View, roles: &Roles) -> ((f64, f64), Option<Cover>) {
         };
         score_position(field, map, front, base, reverse)
     };
+    // R4: a position the enemy would reach first (or hardly later) is no
+    // position: the line would be caught marching up to it.
+    let first = race(view, roles);
     let mut best = (around, None, score(around).ground() + GROUND_MARGIN);
     for ix in -8..=8 {
         for iz in -4..=4 {
@@ -536,7 +539,11 @@ fn defensive_ground(view: &View, roles: &Roles) -> ((f64, f64), Option<Cover>) {
                 continue;
             }
             let value = score((x, z)).ground() - (x - around.0).abs() * 0.01;
-            if value > best.2 + 0.5 && !field.in_forest(x, z) && !field.in_mud(x, z) {
+            if value > best.2 + 0.5
+                && !field.in_forest(x, z)
+                && !field.in_mud(x, z)
+                && first((x, z))
+            {
                 best = ((x, z), None, value);
             }
         }
@@ -546,11 +553,68 @@ fn defensive_ground(view: &View, roles: &Roles) -> ((f64, f64), Option<Cover>) {
         let value = score(cover.center).total()
             - COVER_LATERAL_COST * (x - around.0).abs()
             - COVER_DEPTH_COST * (z - around.1).abs();
-        if value > best.2 {
+        if value > best.2 && first(cover.center) {
             best = (cover.center, Some(cover), value);
         }
     }
     (best.0, best.1)
+}
+
+/// R4: the own line must reach a position in less than this share of the
+/// time the nearest enemy needs to get there.
+const RACE_MARGIN: f64 = 0.6;
+
+/// R4: can the regiments that hold the front (the shooters, else the line;
+/// at the pace of the slowest, uphill slowed as in the simulation) reach a
+/// spot well before the enemy's battle line (the enemy foot, at the pace of
+/// its slowest, from the nearest enemy regiment; the AI's horse waits for
+/// its line)?
+fn race<'v>(view: &'v View, roles: &Roles) -> impl Fn((f64, f64)) -> bool + 'v {
+    let field = view.sim.field();
+    let walkers: &[usize] = if roles.shooters.is_empty() {
+        &roles.line
+    } else {
+        &roles.shooters
+    };
+    let from = view.centroid(walkers).or_else(|| view.centroid(&view.own));
+    let own_speed = walkers
+        .iter()
+        .map(|&i| f64::from(view.units[i].stats.speed))
+        .fold(f64::INFINITY, f64::min);
+    let enemy_foot = view
+        .able_enemies()
+        .filter(|&j| !view.units[j].mounted)
+        .map(|j| f64::from(view.units[j].stats.speed))
+        .fold(f64::INFINITY, f64::min);
+    let enemy_speed = if enemy_foot.is_finite() {
+        enemy_foot
+    } else {
+        view.able_enemies()
+            .map(|j| f64::from(view.units[j].stats.speed))
+            .fold(1.0, f64::max)
+    }
+    .max(1.0);
+    let enemies: Vec<(f64, f64, f64)> = view
+        .able_enemies()
+        .map(|j| {
+            let e = &view.units[j];
+            (e.x, e.z, enemy_speed)
+        })
+        .collect();
+    move |spot: (f64, f64)| {
+        let Some(from) = from else {
+            return true;
+        };
+        if !own_speed.is_finite() || own_speed <= 0.0 {
+            return true;
+        }
+        let ours = ReliefMap::march_cost(field, from, spot) / own_speed;
+        let theirs = enemies
+            .iter()
+            .map(|&(x, z, v)| (x - spot.0).hypot(z - spot.1) / v)
+            .fold(f64::INFINITY, f64::min);
+        ours < RACE_MARGIN * theirs
+    }
 }
 
 /// R4: a spot of the heights must beat the deployment spot by this much.

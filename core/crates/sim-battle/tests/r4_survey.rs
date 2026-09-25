@@ -48,8 +48,6 @@ struct Tally {
     defender_wins: u32,
     /// Men of the watched side killed by missiles.
     arrow_losses: f64,
-    /// Men of the attacker killed by missiles.
-    attacker_arrow_losses: f64,
     duration: f64,
 }
 
@@ -57,11 +55,10 @@ impl Tally {
     fn line(&self, label: &str) -> String {
         let n = f64::from(self.battles.max(1));
         format!(
-            "{label:<28} défenseur {:>2}/{:<2}  pertes au trait (camp observé) {:>6.1}/bataille  pertes au trait de l'attaquant {:>6.1}/bataille  durée {:>4.0} s",
+            "{label:<28} défenseur {:>2}/{:<2}  pertes au trait (camp observé) {:>6.1}/bataille  durée {:>4.0} s",
             self.defender_wins,
             self.battles,
             self.arrow_losses / n,
-            self.attacker_arrow_losses / n,
             self.duration / n
         )
     }
@@ -79,19 +76,11 @@ fn run_and_count(
         .filter(|u| watched(u))
         .map(|u| u.id)
         .collect();
-    let attackers: Vec<u32> = sim
-        .units()
-        .iter()
-        .filter(|u| u.side == SideId::Attacker)
-        .map(|u| u.id)
-        .collect();
     while !sim.is_finished() && sim.elapsed() < 1800.0 {
         sim.step();
         for shot in sim.take_shots() {
-            match shot.target {
-                Some(t) if ids.contains(&t) => tally.arrow_losses += shot.kills,
-                Some(t) if attackers.contains(&t) => tally.attacker_arrow_losses += shot.kills,
-                _ => {}
+            if shot.target.is_some_and(|t| ids.contains(&t)) {
+                tally.arrow_losses += shot.kills;
             }
         }
     }
@@ -108,8 +97,9 @@ fn hedge(z: f64) -> Obstacle {
     }
 }
 
-/// English (defender) against French knights, on a crest at z 470 in front
-/// of the English deployment line.
+/// English (defender) against French knights, on a crest at z 505 (45 m in
+/// front of the English deployment line: the English get there before the
+/// French foot).
 fn english_position(data: &GameData, seed: u64, crest: bool, hedges: &[Obstacle]) -> BattleSim {
     let french = [
         "unit_knights",
@@ -131,7 +121,7 @@ fn english_position(data: &GameData, seed: u64, crest: bool, hedges: &[Obstacle]
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_weather(sim_battle::Weather::Clear);
     if crest {
-        shape(&mut sim, ridge(470.0));
+        shape(&mut sim, ridge(505.0));
     } else {
         shape(&mut sim, |_| 0.0);
     }
@@ -144,9 +134,9 @@ fn english_position(data: &GameData, seed: u64, crest: bool, hedges: &[Obstacle]
 fn survey_english_position_against_knights() {
     let data = data();
     let cases: [(&str, bool, Vec<Obstacle>); 4] = [
-        ("crête + haie", true, vec![hedge(465.0)]),
+        ("crête + haie", true, vec![hedge(500.0)]),
         ("crête nue", true, vec![]),
-        ("haie en creux + crête", true, vec![hedge(545.0)]),
+        ("haie en creux + crête", true, vec![hedge(580.0)]),
         ("rase campagne", false, vec![]),
     ];
     for (label, crest, hedges) in cases {
@@ -162,7 +152,7 @@ fn survey_english_position_against_knights() {
 
 /// A weaker defender holding a crest (z 470) with one regiment of shooters
 /// against an attacker with three regiments of longbows.
-fn reverse_slope_battle(data: &GameData, seed: u64) -> BattleSim {
+fn reverse_slope_battle(data: &GameData, seed: u64, ridged: bool) -> BattleSim {
     let attacker = [
         "unit_men_at_arms_foot",
         "unit_men_at_arms_foot",
@@ -180,7 +170,11 @@ fn reverse_slope_battle(data: &GameData, seed: u64) -> BattleSim {
     battle.village = Some(false);
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_weather(sim_battle::Weather::Clear);
-    shape(&mut sim, ridge(470.0));
+    if ridged {
+        shape(&mut sim, ridge(470.0));
+    } else {
+        shape(&mut sim, |_| 0.0);
+    }
     sim
 }
 
@@ -188,33 +182,80 @@ fn reverse_slope_battle(data: &GameData, seed: u64) -> BattleSim {
 #[ignore = "survey: run in release with --nocapture"]
 fn survey_reverse_slope_against_longbows() {
     let data = data();
-    let mut tally = Tally::default();
-    let mut before_contact = 0.0;
-    for seed in seeds() {
-        let mut sim = reverse_slope_battle(&data, seed);
-        let line: Vec<u32> = sim
-            .units()
-            .iter()
-            .filter(|u| u.side == SideId::Defender && !u.can_shoot())
-            .map(|u| u.id)
-            .collect();
-        // Arrow losses of the defender's foot before the first melee.
-        while !sim.is_finished() && !sim.units().iter().any(|u| u.state == UnitState::Melee) {
-            sim.step();
-            for shot in sim.take_shots() {
-                if shot.target.is_some_and(|t| line.contains(&t)) {
-                    before_contact += shot.kills;
+    for (label, ridged) in [("crête (contre-pente)", true), ("rase campagne", false)] {
+        let mut tally = Tally::default();
+        let mut before_contact = 0.0;
+        for seed in seeds() {
+            let mut sim = reverse_slope_battle(&data, seed, ridged);
+            let line: Vec<u32> = sim
+                .units()
+                .iter()
+                .filter(|u| u.side == SideId::Defender && !u.can_shoot())
+                .map(|u| u.id)
+                .collect();
+            // Arrow losses of the defender's foot before the first melee.
+            while !sim.is_finished() && !sim.units().iter().any(|u| u.state == UnitState::Melee) {
+                sim.step();
+                for shot in sim.take_shots() {
+                    if shot.target.is_some_and(|t| line.contains(&t)) {
+                        before_contact += shot.kills;
+                    }
                 }
             }
+            run_and_count(sim, &mut tally, |u| {
+                u.side == SideId::Defender && !u.can_shoot()
+            });
         }
-        run_and_count(sim, &mut tally, |u| {
-            u.side == SideId::Defender && !u.can_shoot()
-        });
+        let n = f64::from(tally.battles.max(1));
+        println!("{}", tally.line(&format!("{label}, après le contact")));
+        println!(
+            "{label} : pertes au trait de la ligne avant le contact {:.1}/bataille",
+            before_contact / n
+        );
     }
-    let n = f64::from(tally.battles.max(1));
-    println!("{}", tally.line("contre-pente (après le contact)"));
-    println!(
-        "contre-pente : pertes au trait de la ligne avant le contact {:.1}/bataille",
-        before_contact / n
-    );
+}
+
+#[test]
+#[ignore = "debug trace: R4_TRACE=case,seed (case: crest_hedge, bare, hollow, open)"]
+fn trace_english_position() {
+    let data = data();
+    let spec = std::env::var("R4_TRACE").unwrap_or_else(|_| "crest_hedge,0".into());
+    let (case, seed) = spec.split_once(',').unwrap();
+    let seed: u64 = seed.parse().unwrap();
+    let (crest, hedges) = match case {
+        "bare" => (true, vec![]),
+        "hollow" => (true, vec![hedge(580.0)]),
+        "open" => (false, vec![]),
+        _ => (true, vec![hedge(500.0)]),
+    };
+    let mut sim = english_position(&data, seed, crest, &hedges);
+    let mut t = 0.0;
+    while !sim.is_finished() && sim.elapsed() < 1800.0 {
+        if sim.elapsed() >= t {
+            println!("--- t={:.0}", sim.elapsed());
+            for u in sim.units().iter().filter(|u| u.present()) {
+                println!(
+                    "{:>2} {:<3} {:<22} x{:>5.0} z{:>5.0} h{:>5.1} hp{:>4.0} m{:>3.0} {:?} amm{} stk{} tgt{:?}",
+                    u.id,
+                    &u.side.key()[..3],
+                    u.unit_type,
+                    u.x,
+                    u.z,
+                    sim.field().height(u.x, u.z),
+                    u.hp,
+                    u.morale,
+                    u.state,
+                    u.ammo,
+                    u8::from(u.stakes_planted),
+                    u.target
+                );
+            }
+            t += 20.0;
+        }
+        sim.step();
+    }
+    println!("winner {:?} at {:.0}", sim.winner(), sim.elapsed());
+    for e in sim.events() {
+        println!("{:>5.0} {}", e.time, e.text_fr);
+    }
 }
