@@ -8,7 +8,7 @@
     "weight": 35,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
     "description": "Vicomté disputée entre les maisons de Bretagne et de Comminges, réputée pour ses émaux.",
     "sources": ["Limoges", "Vicomté de Limoges"]

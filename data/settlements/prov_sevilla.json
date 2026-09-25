@@ -17,13 +17,10 @@
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_windmill",
       "bld_port",
       "bld_vineyard_press",
-      "bld_abbey",
       "bld_cathedral",
-      "bld_stone_walls",
       "bld_castle",
       "bld_muster_field",
       "bld_stables"
@@ -81,7 +78,6 @@
     "fortification_level": 3,
     "buildings": [
       "bld_castle",
-      "bld_stone_walls",
       "bld_muster_field"
     ],
     "port": false,
@@ -107,8 +103,7 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_castle",
-      "bld_stone_walls"
+      "bld_castle"
     ],
     "port": false,
     "description": "Alcazar almohade sur un éperon dominant la campagne sévillane.",

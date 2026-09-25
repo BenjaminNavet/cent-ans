@@ -8,7 +8,7 @@
     "weight": 38,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": ["bld_market", "bld_windmill", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
     "port": false,
     "description": "Vicomté royale depuis 1101, siège de la cathédrale Saint-Étienne, au cœur du Berry.",
     "sources": ["Bourges"]

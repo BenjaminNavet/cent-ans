@@ -8,7 +8,7 @@
     "weight": 32,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
     "description": "Capitale du comté de Savoie, résidence d'Aymon le Pacifique, en guerre contre le Dauphin.",
     "sources": ["Chambéry", "Comté de Savoie"]

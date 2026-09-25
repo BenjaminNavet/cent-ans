@@ -17,14 +17,11 @@
     "fortification_level": 3,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_water_mill",
       "bld_port",
       "bld_vineyard_press",
-      "bld_abbey",
       "bld_cathedral",
       "bld_hotel_dieu",
-      "bld_stone_walls",
       "bld_castle",
       "bld_muster_field",
       "bld_university"
@@ -56,7 +53,7 @@
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_cathedral",
+      "bld_collegiate_church",
       "bld_stone_walls"
     ],
     "port": true,
@@ -84,7 +81,7 @@
     "buildings": [
       "bld_market",
       "bld_port",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Ancienne république maritime déclinée mais toujours active sur la côte tyrrhénienne.",
@@ -110,7 +107,6 @@
     "fortification_level": 2,
     "buildings": [
       "bld_castle",
-      "bld_stone_walls",
       "bld_muster_field"
     ],
     "port": false,

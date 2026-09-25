@@ -17,11 +17,9 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_parish_church",
       "bld_windmill",
       "bld_port",
       "bld_weaving_workshop",
-      "bld_abbey",
       "bld_cathedral",
       "bld_hotel_dieu",
       "bld_stone_walls",
@@ -80,8 +78,8 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
       "bld_port",
+      "bld_fair",
       "bld_counting_house"
     ],
     "port": true,

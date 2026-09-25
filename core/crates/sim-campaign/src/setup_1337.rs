@@ -136,6 +136,8 @@ fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), Ca
                 buildings.push(building.clone());
             }
         }
+        // EQ2: one step per upgrade chain (the data once stacked tiers).
+        let buildings = data.normalize_building_tiers(&buildings);
         state.settlements.insert(
             id.clone(),
             SettlementState {
