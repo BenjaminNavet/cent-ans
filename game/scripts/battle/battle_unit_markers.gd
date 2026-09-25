@@ -1,7 +1,7 @@
 class_name BattleUnitMarkers
 extends Control
 
-## Bannières flottantes d'unité à la Total War (lot B2) : au-dessus de chaque régiment présent,
+## Bannières flottantes d'unité (lot B2) : au-dessus de chaque régiment présent,
 ## un repère à taille écran constante (plaque aux couleurs du camp, icône de classe, barres
 ## d'effectif et de moral, pastilles d'état, étoile du général). Un seul Control plein écran
 ## dessine tous les repères ; `_has_point` ne le rend cliquable que sur eux, le reste du champ

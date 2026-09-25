@@ -8,7 +8,7 @@ render_mode skip_vertex_transform, diffuse_burley, specular_disabled;
 
 void vertex() {
 	Flight f = projectile(MODEL_MATRIX);
-	// Lisibilité de loin (comme dans Total War) : le trait s'épaissit avec la distance pour
+	// Lisibilité de loin : le trait s'épaissit avec la distance pour
 	// rester visible (environ un pixel), sans s'allonger.
 	float widen = clamp(distance(CAMERA_POSITION_WORLD, f.pos) / 30.0, 1.0, 7.0);
 	vec3 local = VERTEX * f.scale * vec3(widen, widen, 1.0);

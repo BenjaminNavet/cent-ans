@@ -1,4 +1,4 @@
-//! Campaign agents (lot C6): spies, heralds and preachers à la Medieval II.
+//! Campaign agents (lot C6): spies, heralds and preachers.
 //!
 //! See `docs/design/2026-09-24-agents.md` and ADR 0009. Agents are light
 //! entities (not dynasty characters) kept in [`CampaignState::agents`]; they
