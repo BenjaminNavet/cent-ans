@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/town_footprint_rules.schema.json",
+  "title": "Entrées de l'emprise des villes ordinaires vers 1340",
+  "description": "Fichier data/rules/town_footprint.json (lot ZG6, ADR 0036) : densités, populations de référence sourcées, enceintes, adaptation au relief, faubourgs, finage et plan procédural. Lu par l'outil `cent-ans geo towns` (et recopié en partie dans data/map/towns_1340.json pour le rendu). Rendu seulement.",
+  "type": "object",
+  "$defs": {
+    "positive": {"type": "number", "exclusiveMinimum": 0},
+    "range": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 2, "maxItems": 2},
+    "kinds": {
+      "type": "object",
+      "properties": {
+        "city": {"type": "number", "minimum": 0},
+        "town": {"type": "number", "minimum": 0},
+        "castle": {"type": "number", "minimum": 0},
+        "abbey": {"type": "number", "minimum": 0},
+        "village": {"type": "number", "minimum": 0}
+      },
+      "required": ["city", "town", "castle", "abbey", "village"],
+      "additionalProperties": false
+    },
+    "kind_model": {
+      "type": "object",
+      "properties": {
+        "base": {"$ref": "#/$defs/positive"},
+        "at_weight": {"type": "number"},
+        "slope": {"type": "number"},
+        "min": {"$ref": "#/$defs/positive"},
+        "max": {"$ref": "#/$defs/positive"}
+      },
+      "required": ["base", "at_weight", "slope", "min", "max"],
+      "additionalProperties": false
+    },
+    "wall": {
+      "type": "object",
+      "properties": {
+        "height_m": {"type": "number", "minimum": 0},
+        "thickness_m": {"type": "number", "minimum": 0},
+        "tower_spacing_m": {"type": "number", "minimum": 0},
+        "tower_radius_m": {"type": "number", "minimum": 0},
+        "tower_height_m": {"type": "number", "minimum": 0}
+      },
+      "required": ["height_m", "thickness_m", "tower_spacing_m", "tower_radius_m", "tower_height_m"],
+      "additionalProperties": false
+    },
+    "mix": {"type": "object", "additionalProperties": {"type": "number", "exclusiveMinimum": 0}, "minProperties": 1}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "year": {"type": "integer", "minimum": 1300, "maximum": 1500},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {"id": {"type": "string"}, "text": {"type": "string"}},
+        "required": ["id", "text"],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "persons_per_household": {"$ref": "#/$defs/positive"},
+    "density_by_population": {
+      "description": "Densité intra-muros (hab./ha) selon la population, interpolée en logarithme de la population.",
+      "type": "array",
+      "items": {"type": "array", "items": {"$ref": "#/$defs/positive"}, "minItems": 2, "maxItems": 2},
+      "minItems": 2
+    },
+    "population_model": {
+      "type": "object",
+      "properties": {
+        "description": {"type": "string"},
+        "kinds": {
+          "type": "object",
+          "properties": {
+            "city": {"$ref": "#/$defs/kind_model"},
+            "town": {"$ref": "#/$defs/kind_model"},
+            "castle": {"$ref": "#/$defs/kind_model"},
+            "abbey": {"$ref": "#/$defs/kind_model"},
+            "village": {"$ref": "#/$defs/kind_model"}
+          },
+          "required": ["city", "town", "castle", "abbey", "village"],
+          "additionalProperties": false
+        },
+        "building_factors": {"type": "object", "additionalProperties": {"$ref": "#/$defs/positive"}},
+        "poll_tax_1377_factor": {"$ref": "#/$defs/positive"}
+      },
+      "required": ["kinds", "building_factors", "poll_tax_1377_factor"],
+      "additionalProperties": false
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "settlement": {"type": "string", "pattern": "^set_"},
+          "population": {"$ref": "#/$defs/positive"},
+          "poll_tax_1377": {"$ref": "#/$defs/positive"},
+          "walled_area_ha": {"$ref": "#/$defs/positive"},
+          "wall_perimeter_km": {"$ref": "#/$defs/positive"},
+          "source": {"type": "string"},
+          "confidence": {"type": "string"}
+        },
+        "required": ["settlement", "source", "confidence"],
+        "oneOf": [{"required": ["population"]}, {"required": ["poll_tax_1377"]}],
+        "additionalProperties": false
+      }
+    },
+    "walls": {
+      "type": "object",
+      "properties": {
+        "description": {"type": "string"},
+        "intra_muros_share": {"$ref": "#/$defs/kinds"},
+        "stone_from_fortification": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}, "description": "Niveau de fortification (type → niveau) à partir duquel une colonie sans bld_stone_walls est quand même close de pierre."},
+        "open_core_share": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Bourg ouvert : part de la population dans le noyau, le reste en faubourgs le long des routes."},
+        "garden_margin": {"$ref": "#/$defs/kinds"},
+        "stone": {"$ref": "#/$defs/wall"},
+        "palisade": {"$ref": "#/$defs/wall"},
+        "gate_depth_m": {"$ref": "#/$defs/positive"},
+        "max_gates": {"type": "integer", "minimum": 1},
+        "min_gates": {"type": "integer", "minimum": 0}
+      },
+      "required": ["intra_muros_share", "stone_from_fortification", "open_core_share", "garden_margin", "stone", "palisade", "gate_depth_m", "max_gates", "min_gates"],
+      "additionalProperties": false
+    },
+    "site": {
+      "type": "object",
+      "properties": {
+        "description": {"type": "string"},
+        "bearings": {"type": "integer", "minimum": 8, "maximum": 128},
+        "edge_slope": {"$ref": "#/$defs/positive"},
+        "edge_drop_m": {"$ref": "#/$defs/positive"},
+        "min_radius_factor": {"$ref": "#/$defs/positive"},
+        "max_radius_factor": {"$ref": "#/$defs/positive"},
+        "irregularity": {"type": "number", "minimum": 0, "maximum": 0.5},
+        "spur_share": {"type": "number", "minimum": 0, "maximum": 1},
+        "both_banks_population": {"$ref": "#/$defs/positive"},
+        "river_search_factor": {"$ref": "#/$defs/positive"}
+      },
+      "required": ["bearings", "edge_slope", "edge_drop_m", "min_radius_factor", "max_radius_factor", "irregularity", "spur_share", "both_banks_population", "river_search_factor"],
+      "additionalProperties": false
+    },
+    "faubourgs": {
+      "type": "object",
+      "properties": {
+        "description": {"type": "string"},
+        "length_per_sqrt_pop_m": {"$ref": "#/$defs/positive"},
+        "min_length_m": {"$ref": "#/$defs/positive"},
+        "max_length_m": {"$ref": "#/$defs/positive"},
+        "main_road_weight": {"$ref": "#/$defs/positive"}
+      },
+      "required": ["length_per_sqrt_pop_m", "min_length_m", "max_length_m", "main_road_weight"],
+      "additionalProperties": false
+    },
+    "finage": {
+      "type": "object",
+      "properties": {
+        "description": {"type": "string"},
+        "radius_per_sqrt_pop_m": {"$ref": "#/$defs/positive"},
+        "min_radius_m": {"$ref": "#/$defs/positive"},
+        "max_radius_m": {"$ref": "#/$defs/positive"}
+      },
+      "required": ["radius_per_sqrt_pop_m", "min_radius_m", "max_radius_m"],
+      "additionalProperties": false
+    },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "description": {"type": "string"},
+        "frontage_m": {"$ref": "#/$defs/range"},
+        "depth_m": {"$ref": "#/$defs/range"},
+        "faubourg_frontage_m": {"$ref": "#/$defs/range"},
+        "faubourg_depth_m": {"$ref": "#/$defs/range"},
+        "village_frontage_m": {"$ref": "#/$defs/range"},
+        "street_width_m": {
+          "type": "object",
+          "properties": {
+            "main": {"$ref": "#/$defs/positive"},
+            "secondary": {"$ref": "#/$defs/positive"},
+            "ring": {"$ref": "#/$defs/positive"},
+            "lane": {"$ref": "#/$defs/positive"}
+          },
+          "required": ["main", "secondary", "ring", "lane"],
+          "additionalProperties": false
+        },
+        "secondary_spacing_m": {"$ref": "#/$defs/range"},
+        "market_area_m2_per_inhabitant": {"$ref": "#/$defs/positive"},
+        "market_min_m": {"$ref": "#/$defs/range"},
+        "parish_inhabitants": {"$ref": "#/$defs/positive"},
+        "max_parishes": {"type": "integer", "minimum": 1},
+        "house_kinds": {
+          "type": "object",
+          "properties": {
+            "intra": {"$ref": "#/$defs/mix"},
+            "faubourg": {"$ref": "#/$defs/mix"},
+            "village": {"$ref": "#/$defs/mix"}
+          },
+          "required": ["intra", "faubourg", "village"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["frontage_m", "depth_m", "faubourg_frontage_m", "faubourg_depth_m", "village_frontage_m", "street_width_m", "secondary_spacing_m", "market_area_m2_per_inhabitant", "market_min_m", "parish_inhabitants", "max_parishes", "house_kinds"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["description", "year", "sources", "persons_per_household", "density_by_population", "population_model", "references", "walls", "site", "faubourgs", "finage", "plan"],
+  "additionalProperties": false
+}
