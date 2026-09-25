@@ -26,6 +26,8 @@ extends Node3D
 ## `--standard-shot=<foot|mounted|line|fallen|captured>` (capture EP5 : gros plan d'un
 ## porte-étendard à pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé,
 ## étendard pris porté par le vainqueur).
+## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
+## `--horizon-province=<id>`, `--panorama=<id>` (captures EP2).
 
 signal returned(result: Dictionary)
 
@@ -277,6 +279,7 @@ func begin() -> bool:
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
 	_weather_key = weather_key
 	var terrain_data: Dictionary = battle.call("get_terrain")
+	terrain.province_id = str(setup.get("province", ""))  # EP2 : relief réel et panorama du lieu
 	terrain.build(terrain_data, weather_key)
 	if terrain_data.has("siege"):
 		siege_view = BattleSiege.new()
@@ -293,6 +296,8 @@ func begin() -> bool:
 			if landmark_town != null:
 				add_child(landmark_town)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	if terrain.horizon != null:
+		terrain.horizon.apply_atmosphere(world_env.environment, sun, weather_key)  # EP2
 	var field_center := terrain.field_center()  # EP1 : (600, 400) au palier standard
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(field_center.x, terrain.height_at(field_center.x, field_center.y), field_center.y), Vector2(terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
@@ -1746,6 +1751,14 @@ func _apply_camera_override() -> void:
 
 
 func _take_screenshot(path: String, quit_after: bool) -> void:
+	if OS.get_cmdline_user_args().has("--no-hud"):
+		# EP2 : captures de décor sans interface.
+		for layer in find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
+		for control in find_children("*", "Control", true, false):
+			if not (control.get_parent() is Control):
+				(control as Control).visible = false
+		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
