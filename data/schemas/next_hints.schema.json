@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "next_hints.schema.json",
+  "title": "Conseil « que faire maintenant » (UX2)",
+  "description": "Textes du conseil de la carte de campagne, par ordre de priorité, avec l'action d'un clic et les seuils du « trésor qui dort ». Les conditions sont codées dans game/scripts/ui/next_hint.gd (lecture de l'état exposé par la simulation) ; ce fichier ne porte aucune règle de jeu.",
+  "type": "object",
+  "required": ["hints", "idle_treasury_min", "idle_treasury_income_seasons"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "idle_treasury_min": {
+      "description": "Trésor (livres) en deçà duquel le conseil « Construisez » ne s'affiche jamais.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "idle_treasury_income_seasons": {
+      "description": "Le trésor « dort » quand il dépasse aussi ce nombre de saisons de solde.",
+      "type": "number",
+      "minimum": 0
+    },
+    "hints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "text", "action"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Condition évaluée par NextHint (ordre du tableau = priorité).",
+            "enum": [
+              "chronicle_decision",
+              "siege",
+              "enemy_army",
+              "debt",
+              "research_idle",
+              "army_idle",
+              "idle_treasury",
+              "tutorial_postponed",
+              "end_turn"
+            ]
+          },
+          "title": {"type": "string", "minLength": 1, "maxLength": 48},
+          "text": {"type": "string", "minLength": 1, "maxLength": 160},
+          "action": {
+            "description": "alert : même chemin qu'un clic sur la pastille de la cloche ; les autres ouvrent ou exécutent l'action.",
+            "enum": ["alert", "select_army", "open_city", "resume_tutorial", "end_turn"]
+          }
+        }
+      }
+    }
+  }
+}

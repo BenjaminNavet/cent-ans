@@ -85,7 +85,7 @@ const BRANCH_TEXTS := {
 	"court": "Cour : diplomatie, intrigue, prestige et piété.",
 }
 const GAUGE_TEXTS := {
-	"unrest": ["Mécontentement", "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère et la religion différente ; la garnison et certains bâtiments l'apaisent. Au-delà de 75 pendant deux saisons : révolte ; au-delà de 90 : la province passe aux rebelles."],
+	"unrest": ["Mécontentement", "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère, la religion différente et les troubles récents (prises, pillages, régence) ; la garnison et certains bâtiments l'apaisent. Au-delà de 75 pendant trois saisons : révolte (le compte repart ensuite de zéro) ; au-delà de 90 : la province passe aux rebelles."],
 	"health": ["Santé", "Tend vers 50 + bâtiments sanitaires + satisfaction en biens, moins la surpopulation. Sous 50 la population décline ; sous 30, risque de peste."],
 	"wealth": ["Richesse", "Tend vers la base de la classe + bâtiments de commerce, moins le fardeau fiscal et la dévastation."],
 	"goods_satisfaction": ["Biens", "Satisfaction en biens : 40 + 10 par catégorie de biens accessible à la faction (ressources des provinces contrôlées et alliées) + marchés et foires."],

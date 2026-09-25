@@ -36,6 +36,9 @@ const PARCHMENT := Color(0.94, 0.89, 0.76, 0.94)
 const PLAYER_BORDER := Color(0.85, 0.66, 0.2)
 const OTHER_BORDER := Color(0.30, 0.20, 0.12)
 const STATUS_TEXT := {"moving": "»", "siege": "siège", "embarked": "à bord"}
+## Lot UX1 : période de recalcul du placement des plaques quand la caméra est immobile (les
+## armées animées et les noms de ville qui apparaissent sont repris à ce rythme).
+const PLACEMENT_INTERVAL := 0.25
 
 var map_data: MapData
 var camera: Camera3D
@@ -50,6 +53,9 @@ var landmark_zones: PackedVector3Array = PackedVector3Array()
 ## C4/C6 : position monde d'une colonie (`SettlementLayer.world_position_of`), posée par
 ## la carte ; à défaut, `MapData.settlement_px`.
 var settlement_position: Callable = Callable()
+## Lot UX1 (A3 C8) : noms de ville à éviter, `func(camera: Camera3D) -> Array[Rect2]` (rectangles
+## écran), posé par la carte ; les plaques s'en écartent (`LabelPlacer`).
+var label_obstacles: Callable = Callable()
 
 var _markers: Dictionary = {}  # army_id → ArmyMarker
 var _homes: Dictionary = {}  # army_id → position de base issue de la simulation (M4)
@@ -59,6 +65,13 @@ var _current_scale: float = 1.0
 ## Lot CV2 : paliers de zoom (fondu des figurines au palier « loin ») et dernière distance.
 var _zoom_tiers: ZoomTiers
 var _camera_distance: float = -1.0
+## Lot UX1 : placement des plaques hors des noms de ville et des autres plaques.
+var _placer := LabelPlacer.new()
+var _plate_offsets: Dictionary = {}  # army_id → décalage écran
+var _placement_camera := Transform3D()
+var _placement_view := Vector2.ZERO
+var _placement_timer := 0.0
+var _placement_dirty := true
 
 
 func setup(data: MapData, view_camera: Camera3D) -> void:
@@ -126,11 +139,12 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		_markers[army_id] = marker
 		_homes[army_id] = marker.base_position
 		if _plate_layer != null:
-			var plate := _make_plate(marker)
+			var plate := build_plate(marker, marker.army_id == selected_army)
 			_plate_layer.add_child(plate)
 			_plates[army_id] = plate
 	if not _markers.has(selected_army):
 		selected_army = ""
+	_placement_dirty = true
 	_update_plates()
 
 
@@ -191,6 +205,7 @@ func set_selected(army_id: String) -> void:
 		_markers[id].set_selected(id == army_id)
 	for id in _plates:
 		_style_plate(_plates[id], _markers[id], id == army_id)
+	_placement_dirty = true
 
 
 func has_army(army_id: String) -> bool:
@@ -294,14 +309,15 @@ func figure_weight(camera_distance: float) -> float:
 	return 1.0 - _zoom_tiers.far_weight(camera_distance)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_placement_timer -= delta
 	_update_plates()
 
 
 # --- Plaques d'effectif ------------------------------------------------------------
 
 
-func _make_plate(marker: ArmyMarker) -> PanelContainer:
+static func build_plate(marker: ArmyMarker, selected: bool = false) -> PanelContainer:
 	var plate := PanelContainer.new()
 	plate.name = "Plate_" + marker.army_id
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -339,11 +355,11 @@ func _make_plate(marker: ArmyMarker) -> PanelContainer:
 		status.add_theme_color_override("font_color", Color(0.45, 0.12, 0.08) if marker.status == "siege" else INK.lightened(0.25))
 		status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(status)
-	_style_plate(plate, marker, marker.army_id == selected_army)
+	_style_plate(plate, marker, selected)
 	return plate
 
 
-func _style_plate(plate: PanelContainer, marker: ArmyMarker, selected: bool) -> void:
+static func _style_plate(plate: PanelContainer, marker: ArmyMarker, selected: bool) -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = PARCHMENT if not selected else PARCHMENT.lightened(0.35)
 	var border := PLAYER_BORDER if marker.is_player else OTHER_BORDER
@@ -374,6 +390,7 @@ func _update_plates() -> void:
 	if camera == null or _plates.is_empty():
 		return
 	var viewport_rect := get_viewport().get_visible_rect()
+	var bases: Array = []  # [{id, rect, marker}] des plaques visibles
 	for id in _plates:
 		var plate: PanelContainer = _plates[id]
 		var marker: ArmyMarker = _markers.get(id)
@@ -388,5 +405,52 @@ func _update_plates() -> void:
 		var size := plate.get_combined_minimum_size()
 		plate.size = size
 		var lift := -2.0 if marker.plate_below() else size.y + 2.0
-		plate.position = (screen - Vector2(size.x * 0.5, lift)).round()
+		var base := (screen - Vector2(size.x * 0.5, lift)).round()
 		plate.visible = viewport_rect.grow(40.0).has_point(screen)
+		if plate.visible:
+			bases.append({"id": id, "rect": Rect2(base, size), "marker": marker})
+		plate.position = base + _plate_offsets.get(id, Vector2.ZERO)
+	if _placement_due(viewport_rect.size):
+		_place_plates(bases)
+
+
+## Lot UX1 : recalcul quand la caméra ou la vue change, quand les armées changent, sinon à
+## `PLACEMENT_INTERVAL` ; entre deux, les plaques gardent leur décalage (pas de clignotement).
+func _placement_due(view: Vector2) -> bool:
+	var moved := not camera.global_transform.is_equal_approx(_placement_camera) or view != _placement_view
+	if not (moved or _placement_dirty or _placement_timer <= 0.0):
+		return false
+	_placement_camera = camera.global_transform
+	_placement_view = view
+	_placement_dirty = false
+	_placement_timer = PLACEMENT_INTERVAL
+	return true
+
+
+func _place_plates(bases: Array) -> void:
+	# Priorité : armée sélectionnée, armées du joueur, gros effectifs (gardent leur place).
+	bases.sort_custom(_plate_before)
+	var obstacles: Array = label_obstacles.call(camera) if label_obstacles.is_valid() else []
+	_plate_offsets = _placer.place(bases, obstacles)
+	for entry in bases:
+		var plate: PanelContainer = _plates[entry["id"]]
+		plate.position = (entry["rect"] as Rect2).position + _plate_offsets.get(entry["id"], Vector2.ZERO)
+
+
+func _plate_before(a: Dictionary, b: Dictionary) -> bool:
+	var ma: ArmyMarker = a["marker"]
+	var mb: ArmyMarker = b["marker"]
+	var sa: bool = a["id"] == selected_army
+	var sb: bool = b["id"] == selected_army
+	if sa != sb:
+		return sa
+	if ma.is_player != mb.is_player:
+		return ma.is_player
+	if ma.men != mb.men:
+		return ma.men > mb.men
+	return str(a["id"]) < str(b["id"])
+
+
+## Lot UX1 : décalage écran appliqué à la plaque d'une armée (Vector2.ZERO = à sa place).
+func plate_offset(army_id: String) -> Vector2:
+	return _plate_offsets.get(army_id, Vector2.ZERO)
