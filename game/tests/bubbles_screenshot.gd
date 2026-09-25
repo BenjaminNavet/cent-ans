@@ -1,11 +1,11 @@
 extends SceneTree
 
-## Capture B1 (bulles partout) : une chaîne de 3 bulles façon Baldur's Gate 3 — une infobulle
+## Capture B1 (bulles partout) : une chaîne de 3 bulles — une infobulle
 ## riche d'unité verrouillée par T, une bulle fille ouverte par survol d'un mot-clé et verrouillée,
 ## puis une petite-fille non épinglée (pied « T : maintenir ouverte »).
 ## Usage (avec affichage, pas en headless) :
 ##   godot --path game --script res://tests/bubbles_screenshot.gd
-## Écrit `docs/img/bulles-bg3.png`.
+## Écrit `docs/img/bulles-imbriquees.png`.
 
 
 func _init() -> void:
@@ -34,7 +34,7 @@ func _init() -> void:
 		await _hover_link(bubbles, second, Vector2(780, 340))
 	for _i in 6:
 		await process_frame
-	_save(out_dir.path_join("bulles-bg3.png"))
+	_save(out_dir.path_join("bulles-imbriquees.png"))
 	store.call("reset_discoveries")
 	quit(0)
 

@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-## Autoload `CodexBubbles` (H2) : bulles imbriquées façon Baldur's Gate 3 au-dessus de toute
+## Autoload `CodexBubbles` (H2) : bulles imbriquées au-dessus de toute
 ## l'interface. Une UI branche ses textes par `attach(label)` (un `RichTextLabel` dont le BBCode
 ## vient de `CodexText.format`) :
 ##  - survol d'un mot-lien ≥ 0,35 s → bulle fille près de la souris (titre, catégorie, résumé) ;

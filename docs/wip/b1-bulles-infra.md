@@ -10,7 +10,7 @@ Branche : `feat/b1-bulles-infra` (worktree agent). Spec : `docs/design/2026-09-2
 - [x] Titres d'infobulles riches liés via `entity` (`RichTooltip.entity_name`, `title_entry`), édits compris
 - [x] Conversions : army_strip (cartes de régiment, en-tête), battle_hud (ordres, retraite), pre_battle_dialog (boutons, renforts, composition, commandement), map_ui (recherche via `RichBox`, choix du général). province_panel et faction_panel étaient déjà riches.
 - [x] Smoke complet vert (étape seule : `CENT_ANS_SMOKE_ONLY=codex_bubbles`), pytest vert (418)
-- [x] Capture `docs/img/bulles-bg3.png` (`godot --path game --script res://tests/bubbles_screenshot.gd`)
+- [x] Capture `docs/img/bulles-imbriquees.png` (`godot --path game --script res://tests/bubbles_screenshot.gd`)
 
 ## Prochaine étape
 Terminé ; reste à fusionner (voir limites dans le rapport : T sur un contrôle survolé exige le délai d'infobulle, sceau du chef et boutons de vitesse restés simples mais verrouillables).

@@ -2,7 +2,7 @@ class_name MapUI
 extends CanvasLayer
 
 ## Couche UI de la carte de campagne : barre supérieure (faction, trésor, solde, date, menu),
-## HUD « à la Total War » (F10b : bandeau d'ost `ArmyStrip` et sceau du chef `GeneralSeal` pour
+## HUD de campagne (F10b : bandeau d'ost `ArmyStrip` et sceau du chef `GeneralSeal` pour
 ## l'armée sélectionnée, cloche de fin de saison `EndTurnCluster`, lettres scellées
 ## `NewsLetters`), journal des événements (bas gauche, replié par défaut), panneau de province,
 ## aperçu de chemin au survol, notifications, dialogue sauver/charger.
