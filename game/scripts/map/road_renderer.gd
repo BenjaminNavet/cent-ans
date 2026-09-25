@@ -162,7 +162,7 @@ func update_view(medium: float, near: float) -> void:
 		var ribbon: MeshInstance3D = _ribbons.get(index)
 		if wanted:
 			if ribbon == null or _dirty.has(index):
-				if builds >= max_ribbon_builds_per_frame:
+				if builds >= max_ribbon_builds_per_frame or (builds > 0 and not FrameBudget.has_time()):
 					continue
 				builds += 1
 				_build_ribbon(index)
@@ -181,8 +181,10 @@ func update_view(medium: float, near: float) -> void:
 func flush(near: float) -> void:
 	var saved := max_ribbon_builds_per_frame
 	max_ribbon_builds_per_frame = 1 << 20
+	FrameBudget.unlimited = true
 	_near_alpha = -1.0
 	update_view(maxf(_medium_alpha, 0.0), near)
+	FrameBudget.unlimited = false
 	max_ribbon_builds_per_frame = saved
 
 
@@ -201,7 +203,9 @@ func _build_ribbon(index: int) -> void:
 		var half: float = run["width"] * 0.5
 		var base := vertices.size()
 		var count := dense.size()
-		var along := 0.0
+		# Bords gauche et droit alternés, hauteurs en un seul lot (PB1).
+		var edges := PackedVector2Array()
+		edges.resize(count * 2)
 		for i in count:
 			var p := dense[i]
 			var prev := dense[maxi(i - 1, 0)]
@@ -210,19 +214,35 @@ func _build_ribbon(index: int) -> void:
 			if dir == Vector2.ZERO:
 				dir = Vector2.RIGHT
 			var perp := Vector2(-dir.y, dir.x) * half
+			edges[i * 2] = p + perp
+			edges[i * 2 + 1] = p - perp
+		var edge_heights := terrain.surface_heights_at(edges)
+		vertices.resize(base + count * 2)
+		normals.resize(base + count * 2)
+		uvs.resize(base + count * 2)
+		var along := 0.0
+		for i in count:
 			if i > 0:
-				along += p.distance_to(dense[i - 1])
-			var left := p + perp
-			var right := p - perp
-			vertices.append(Vector3(left.x, terrain.surface_height_at(left.x, left.y) + lift, left.y))
-			vertices.append(Vector3(right.x, terrain.surface_height_at(right.x, right.y) + lift, right.y))
-			normals.append(Vector3.UP)
-			normals.append(Vector3.UP)
-			uvs.append(Vector2(along, 1.0))
-			uvs.append(Vector2(along, -1.0))
+				along += dense[i].distance_to(dense[i - 1])
+			var left := edges[i * 2]
+			var right := edges[i * 2 + 1]
+			vertices[base + i * 2] = Vector3(left.x, edge_heights[i * 2] + lift, left.y)
+			vertices[base + i * 2 + 1] = Vector3(right.x, edge_heights[i * 2 + 1] + lift, right.y)
+			normals[base + i * 2] = Vector3.UP
+			normals[base + i * 2 + 1] = Vector3.UP
+			uvs[base + i * 2] = Vector2(along, 1.0)
+			uvs[base + i * 2 + 1] = Vector2(along, -1.0)
+		var first := indices.size()
+		indices.resize(first + (count - 1) * 6)
 		for i in count - 1:
 			var a := base + i * 2
-			indices.append_array([a, a + 1, a + 3, a, a + 3, a + 2])
+			var k := first + i * 6
+			indices[k] = a
+			indices[k + 1] = a + 1
+			indices[k + 2] = a + 3
+			indices[k + 3] = a
+			indices[k + 4] = a + 3
+			indices[k + 5] = a + 2
 	var ribbon: MeshInstance3D = _ribbons.get(index)
 	if ribbon == null:
 		ribbon = MeshInstance3D.new()

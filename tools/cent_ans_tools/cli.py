@@ -401,6 +401,36 @@ def geo_towns() -> None:
     console.print(result.summary())
 
 
+@geo_app.command("detail-check")
+def geo_detail_check(
+    zones: str = typer.Option(
+        "",
+        "--zones",
+        help="Identifiants de zones séparés par des virgules (toutes sinon)",
+    ),
+) -> None:
+    """E5 comparé à l'ancêtre E4 sur terre, par zone (lot ZG3b) : écart médian et p95.
+
+    Signale (rouge) les zones dont l'écart p95 dépasse
+    ``detail_dem.LAND_GAP_ALERT_M`` (5 m) : trait de côte ou relief mal
+    raccordé (ex. fuite du rehaussement de rendu, ADR 0036).
+    """
+    from cent_ans_tools.geo import detail_dem
+
+    zone_ids = tuple(z.strip() for z in zones.split(",") if z.strip())
+    for gap in detail_dem.land_gap_report(zone_ids):
+        if gap.median_m is None:
+            console.print(f"{gap.zone_id:20s} pas de tuiles E5")
+            continue
+        flag = gap.p95_m > detail_dem.LAND_GAP_ALERT_M
+        colour = "red" if flag else "green"
+        console.print(
+            f"[{colour}]{gap.zone_id:20s} n={gap.n_pixels:8d}  "
+            f"médiane={gap.median_m:6.2f} m  p95={gap.p95_m:6.2f} m  "
+            f"max={gap.max_m:6.2f} m{'  ALERTE' if flag else ''}[/{colour}]"
+        )
+
+
 @geo_app.command("navgrid")
 def geo_navgrid(
     lenient: bool = typer.Option(
