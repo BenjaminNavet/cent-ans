@@ -32,6 +32,16 @@ func _init() -> void:
 		quit(1)
 		return
 	var vegetation: Vegetation = map.get_node("Vegetation")
+	# --hide=Rivers,Vegetation,... : masque des nœuds de la carte pour attribuer le coût GPU.
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--hide="):
+			for node_name in arg.substr(7).split(","):
+				var node := map.get_node_or_null(NodePath(node_name))
+				if node is Vegetation:
+					(node as Vegetation).enabled = false
+				elif node is Node3D:
+					(node as Node3D).visible = false
+					print("V4BENCH hidden: ", node_name)
 	var terrain: TerrainBuilder = map.get("terrain")
 	var rig: CampaignCamera = map.camera_rig
 	var data: MapData = map.map_data

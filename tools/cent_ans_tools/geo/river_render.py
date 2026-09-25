@@ -146,7 +146,9 @@ def in_zones(points: np.ndarray, zones: list[dict]) -> np.ndarray:
     return inside
 
 
-def _boundary_point(outside: np.ndarray, inside: np.ndarray, zones: list[dict]) -> np.ndarray:
+def _boundary_point(
+    outside: np.ndarray, inside: np.ndarray, zones: list[dict]
+) -> np.ndarray:
     """Point of segment ``outside → inside`` on the zone boundary (bisection)."""
     lo, hi = outside, inside
     for _ in range(16):
@@ -175,7 +177,9 @@ def split_outside(
             run_points = [points[k] for k in range(start, i)]
             run_widths = [widths[k] for k in range(start, i)]
             if start > 0:
-                run_points.insert(0, _boundary_point(points[start], points[start - 1], zones))
+                run_points.insert(
+                    0, _boundary_point(points[start], points[start - 1], zones)
+                )
                 run_widths.insert(0, widths[start])
             if i < n:
                 run_points.append(_boundary_point(points[i - 1], points[i], zones))
