@@ -287,3 +287,32 @@ propriétaire unique, complétée d'un **gain de relief local** : hauteur affich
 - Écart : les « pentes » des règles d'occupation du sol (`vegetation_mask`, parcellaire) restent les pentes
   vraies ; seule la roche des falaises suit la pente exagérée.
 - Interrupteur : `enabled = false` ou `--no-relief-exaggeration` rend exactement ZG4.
+
+## Addendum (lot ZG7b, 2026-09-25) : cache absent, livraison du relief fin
+
+**Cache absent ou partiel.** Sans `data/map/pyramid/`, le jeu retombait en silence sur E0 et la
+caméra s'arrêtait vers 7 unités (recette Q3). Désormais `ReliefCacheStatus` contrôle au chargement
+de la campagne un échantillon borné de tuiles par étage (24, réparties) et des tuiles fines des
+fleuves et routes ; si le cache manque en tout ou partie, l'état est journalisé et `ReliefCacheNotice`
+affiche un avis non bloquant, une fois par session, fermable, avec la commande unique
+`uv run --project tools cent-ans geo relief-all` (ordre pyramid 1-2 → 3-4 → detail-dem → hydro-fine →
+anchors-fine, reprise, `--check`). Un manifeste sans tuiles listées (fixtures) ne déclenche rien.
+
+**Livraison.** Le cache n'entre pas dans le `.pck` Godot : `data/` n'est pas une ressource `res://`
+(lu par chemins absolus via `MapPaths`), les tuiles sont des PNG 16 bits lus par `FileAccess` dans
+des fils, et un paquet de 2,9 Go serait à réécrire en entier à chaque mise à jour du jeu, sans gain
+(Godot n'importe pas ces fichiers). Choix :
+- **par défaut, dans l'application** : `Cent Ans.app/Contents/Resources/data/map/pyramid/`, copié par
+  `tools/export_macos.sh` (`cent-ans export-data --relief bundle`). Un seul téléchargement, et le jeu
+  reste complet même quand macOS « translocalise » une application non signée (lancée depuis un
+  dossier en quarantaine, elle ne voit plus ses voisins) ;
+- **à part si besoin** (`--relief external`) : dossier « Cent Ans relief/pyramid » à côté de
+  l'application, pour une distribution en deux archives ou une mise à jour du jeu sans les 2,9 Go ;
+- **sans** (`--relief none`) : export léger, avis affiché.
+
+`MapPaths.relief_root_for(map_dir)` résout la racine du relief : `CENT_ANS_RELIEF_DIR`, `data/map`
+s'il contient `pyramid/`, « Cent Ans relief » à côté de l'application ou de l'exécutable,
+`user://relief`. Les manifestes restent dans `data/map/` (versionnés, petits). Les liens symboliques
+des worktrees sont suivis à la copie, qui utilise les clones APFS (`cp -c`) : instantanée et sans
+place disque supplémentaire sur le même volume. Rien n'est téléversé : l'hébergement d'une archive
+publique reste à décider (hors budget v1).
