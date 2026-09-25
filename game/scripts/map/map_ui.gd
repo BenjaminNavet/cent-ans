@@ -98,10 +98,7 @@ var _province_panel_id: String = ""
 
 func _ready() -> void:
 	menu_button.get_popup().id_pressed.connect(_on_menu_item)
-	# M10 assets : entrée « Son… » (volumes Musique / Effets) dans le menu.
-	var audio := get_node_or_null("/root/AudioDirector")
-	if audio != null:
-		audio.add_sound_menu(menu_button.get_popup(), self)
+	# « Son… » (Q2) : ajouté par `FlowController`, ouvre l'onglet Son des réglages.
 	log_toggle.pressed.connect(_toggle_log)
 	province_panel.hide()
 	province_panel.recruit_requested.connect(func(p: String, u: String) -> void: recruit_requested.emit(p, u))
