@@ -15,6 +15,7 @@ mod siege_extra;
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
+pub use siege_assault::Ladder;
 
 use data_model::{Ability, UnitCategory, UnitStats};
 
@@ -2413,9 +2414,7 @@ impl BattleSim {
             .iter()
             .filter(|u| u.side == side && category.is_none_or(|c| c == u.category))
         {
-            for (x, z, angle) in unit.soldier_positions() {
-                result.push([x, self.standing_height(unit, x, z), z, angle]);
-            }
+            result.extend(self.soldier_poses(unit));
         }
         result
     }
