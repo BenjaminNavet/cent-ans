@@ -1,0 +1,33 @@
+{
+  "id": "cdx_jeu_mouvement",
+  "title": "Points de mouvement et marche des armées",
+  "category": "mecanique",
+  "aliases": [
+    "points de mouvement",
+    "mouvement",
+    "mouvement restant",
+    "marche des armées",
+    "train de siège"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Les armées marchent librement sur la carte, sans cases ni provinces à franchir une à une : environ 210 km de plaine par saison, 140 en hiver, moins en forêt, au marais ou en montagne, davantage sur les routes.",
+  "body": "Une armée médiévale avance lentement. Avec ses charrois, ses valets, ses troupeaux et ses traînards, elle couvre ordinairement quinze à vingt-cinq kilomètres par jour ; une troupe montée et légère peut doubler l'étape, comme les [[cdx_chevauchee|chevauchées]] anglaises, qui parcourent parfois trente kilomètres par jour. Les engins de siège et plus tard l'artillerie, tirés par des bœufs, ralentissent tout.\n\nLes routes sont celles que l'Antiquité a laissées, les chemins royaux et les voies de pèlerinage, entretenues de façon inégale. La marche suit les vallées, cherche les [[cdx_ponts_gues|ponts et gués]], évite forêts profondes et marais. Le choix de l'itinéraire est une affaire de renseignement : guides du pays, [[cdx_zone_controle|coureurs]] envoyés en avant, prisonniers interrogés.\n\nUne campagne entière dure rarement plus de quelques mois. En 1346, [[cdx_edouard_iii|Édouard III]] met environ six semaines pour aller de Saint-Vaast-la-Hougue à Crécy, en pillant tout le long du chemin ; en 1373, la grande chevauchée de Jean de Gand traverse la France de Calais à Bordeaux en cinq mois, au prix de la moitié de ses chevaux.",
+  "gameplay": "Une armée dispose de 3 pas par saison, 2 en hiver ; un pas vaut 70 km de plaine, soit 210 km par tour (140 en hiver). Le reste des points ne se reporte pas : tout est rendu au début de la saison suivante. Le « Mouvement restant » s'affiche sur le sceau du général. Les ordres s'exécutent aussitôt, sur un chemin calculé à travers la carte ; une marche trop longue s'interrompt (« Plus de mouvement : la marche reprendra au prochain tour ») et reprend seule au tour suivant.\n\nLe coût dépend du [[cdx_jeu_terrain|terrain]] : collines ×1,5, forêt ×1,8, marais ×2,5, montagnes ×3 ; une route réduit le coût d'un quart. Les grands fleuves ne se passent qu'aux [[cdx_jeu_fleuves|ponts et gués]]. L'armée la plus lente fixe l'allure : un train de siège (trébuchets, bombardes) retire 20 % des pas, ce qui en été ramène l'armée à 2 pas et en hiver à 1. La compétence « Chevauchée » et le trait « Amiral » donnent un pas de plus ; la technologie de l'artillerie de campagne annule la pénalité du train de siège. Il n'existe pas de marche forcée.\n\nLa marche s'arrête en entrant dans la [[cdx_zone_controle|zone de contrôle]] d'une armée ennemie (8 km), devant une place ennemie qui n'est pas la destination, ou quand le chemin est bloqué. Entrer dans une colonie ennemie sans garnison la prend ; une garnison impose un siège, sauf dans un village, enlevé d'assaut aussitôt (voir [[cdx_jeu_colonies|colonies]]). L'ordre d'attaque mène l'armée à 5 km de sa cible : les deux armées perdent alors le reste de leur mouvement, et les alliés à moins de 5 km se joignent à la bataille. Pour la mer, voir [[cdx_jeu_traversee|traversée]].",
+  "see_also": [
+    "cdx_zone_controle",
+    "cdx_jeu_terrain",
+    "cdx_jeu_fleuves",
+    "cdx_jeu_traversee",
+    "cdx_jeu_ravitaillement",
+    "cdx_chevauchee",
+    "cdx_ponts_gues"
+  ],
+  "sources": [
+    "Chevauchée (guerre de Cent Ans)",
+    "Bataille de Crécy",
+    "Voie romaine"
+  ]
+}
