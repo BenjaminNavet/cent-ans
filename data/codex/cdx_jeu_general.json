@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_general",
+  "title": "Le chef de l'ost et sa garde",
+  "category": "mecanique",
+  "aliases": [
+    "garde du chef",
+    "chef de l'ost",
+    "sans chef",
+    "présence du chef",
+    "tombé au combat"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Le chef combat au milieu de ses hommes, sous sa bannière, entouré de sa garde : sa présence tient les rangs, sa mort ou sa capture peut défaire une armée entière.",
+  "body": "Au XIVe siècle, le roi ou le prince qui commande combat en personne, reconnaissable à ses armoiries, entouré de chevaliers de sa maison chargés de le protéger. Sa bannière est le point de ralliement de l'ost ; tant qu'elle flotte, l'armée sait que le chef tient. À [[cdx_crecy|Crécy]], le vieux roi aveugle Jean de Luxembourg se fait mener au combat, son cheval lié à ceux de ses compagnons, et y meurt ; [[cdx_philippe_vi|Philippe VI]], blessé, doit quitter le champ à la nuit.\n\nLa présence du chef est une force et un risque. À [[cdx_poitiers|Poitiers]], [[cdx_jean_ii|Jean II]] combat à pied à la hache, son jeune fils Philippe à ses côtés ; sa capture achève la défaite et plonge le royaume dans la crise. [[cdx_du_guesclin|Du Guesclin]] est pris deux fois, à Auray (1364) et à Nájera (1367), et chaque fois racheté. À [[cdx_castillon|Castillon]] (1453), la mort de Talbot, en tête de l'assaut, entraîne la déroute anglaise.\n\nUn bon capitaine se voit à sa façon de tenir ses hommes : reformer une troupe qui plie, lancer la réserve au bon moment, retenir les impatients. C'est tout le sens des ordres que le jeu lui confie (voir [[cdx_jeu_cri_de_guerre|cri de guerre]], [[cdx_jeu_ralliement|ralliement]], [[cdx_jeu_pas_de_quartier|pas de quartier]]).",
+  "gameplay": "Le général de l'armée combat avec un régiment, sa garde (le premier régiment de cavalerie, sinon le premier régiment) ; un clic sur le sceau du chef, dans le bandeau de bataille, la sélectionne (double clic : la caméra y va). Son commandement (0 à 10) fait remonter le [[cdx_jeu_moral|moral]] des régiments à moins de 150 m (+0,1 par seconde, plus 0,05 par point). Ses traits et compétences ajoutent un bonus de moral à toute l'armée, et des bonus de charge, de tir et d'armure ; il est nécessaire au cri de guerre, au pas de quartier et au ralliement.\n\nChaque coup reçu par sa garde en mêlée peut le tuer ; si la garde est anéantie, il meurt. Sa mort coûte 25 points de moral à toute l'armée, et l'ost combat alors « sans chef ». Si la bataille s'achève alors que sa garde fuit, il est pris avec 35 % de chance (20 % si elle a déjà quitté le champ) — et tué si le vainqueur ne faisait [[cdx_jeu_pas_de_quartier|pas de quartier]]. En résolution automatique, chaque point de commandement ajoute 3 % aux coups portés, et le chef vaincu est pris avec 10 % de chance, plus 2 points par point d'intrigue d'écart avec le vainqueur (50 % au plus).\n\nAprès la bataille, le général gagne de l'expérience (et 5 de prestige s'il a vaincu) ; vaincu, il a 15 % de risque d'être blessé et 5 % de mourir de ses blessures (1 % pour un souverain). Conseil : gardez-le près du centre, hors de la mêlée, tant que le moral tient.",
+  "see_also": ["cdx_jeu_moral", "cdx_jeu_ralliement", "cdx_jeu_cri_de_guerre", "cdx_jeu_pertes_prisonniers", "cdx_rancon", "cdx_jean_ii"],
+  "sources": ["Bataille de Poitiers (1356)", "Jean Ier de Bohême", "Bataille de Castillon"]
+}

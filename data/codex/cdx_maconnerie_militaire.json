@@ -1,0 +1,30 @@
+{
+  "id": "cdx_maconnerie_militaire",
+  "title": "La maçonnerie militaire",
+  "category": "technique",
+  "aliases": [
+    "Maçonnerie militaire",
+    "château philippien",
+    "châteaux philippiens",
+    "tour flanquante",
+    "tours flanquantes"
+  ],
+  "era": {
+    "from": "v. 1190",
+    "to": "1400"
+  },
+  "summary": "Depuis Philippe Auguste, les ingénieurs bâtissent des enceintes de pierre à tours rondes régulièrement espacées, qui flanquent les courtines et ne laissent aucun angle mort. Au XIVe siècle, les villes s'entourent à leur tour de murailles pour se protéger des chevauchées.",
+  "body": "Le château « philippien » de la fin du XIIe et du XIIIe siècle rompt avec le donjon isolé : plan régulier, tours rondes plus résistantes à la sape, archères permettant de tirer le long des murs, porte encadrée de deux tours, fossé profond. Le Louvre de Philippe Auguste en est le modèle.\n\nPendant la guerre de Cent Ans, les villes jusque-là ouvertes se hâtent de construire ou de relever leurs enceintes, souvent financées par des taxes spéciales, et [[cdx_charles_v|Charles V]] ordonne l'inspection des forteresses du royaume. Ces murs, faits contre l'escalade et les engins, devront plus tard être adaptés au [[cdx_fortification_artillerie|canon]].",
+  "gameplay": "Recherche : 140 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +1 niveau de fortification pour les places déjà murées. Débloque : le bâtiment Enceinte de pierre.",
+  "entity": "tech_masonry",
+  "see_also": [
+    "cdx_places_fortes",
+    "cdx_fortification_artillerie",
+    "cdx_charles_v"
+  ],
+  "sources": [
+    "Château fort",
+    "Architecture philippienne",
+    "Enceinte urbaine"
+  ]
+}

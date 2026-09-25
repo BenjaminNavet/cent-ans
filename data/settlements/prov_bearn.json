@@ -52,7 +52,7 @@
     "fortification_level": 0,
     "buildings": ["bld_parish_church", "bld_windmill"],
     "port": false,
-    "description": "Ancienne capitale du Béarn, conservant son atelier monétaire (le morlaàs) et son marché.",
+    "description": "Ancienne capitale du Béarn, qui conserve son atelier monétaire (les deniers morlans) et son marché.",
     "sources": ["Morlaàs"]
   }
 ]

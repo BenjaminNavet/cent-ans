@@ -29,9 +29,9 @@
       "value": 3
     }
   ],
-  "description": "Pressoir seigneurial et celliers pour le commerce du vin.",
+  "description": "Pressoir seigneurial et celliers pour le commerce du vin. Voir [[cdx_pressoir_banal]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Pressoir",
+    "Banalité (droit féodal)"
   ]
 }

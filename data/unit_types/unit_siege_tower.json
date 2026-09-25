@@ -31,7 +31,7 @@
   "required_technology": "tech_siege_engineering",
   "required_building": "bld_siege_workshop",
   "equipment": "Beffroi roulant à plusieurs étages, couvert de peaux mouillées, pont-levis d'assaut.",
-  "description": "Tour roulante permettant de prendre pied sur la courtine sans brèche.",
+  "description": "Tour roulante permettant de prendre pied sur la courtine sans brèche ; l'arme des assauts avant l'âge des [[cdx_bombarde|bombardes]].",
   "sources": [
     "Tour de siège"
   ]

@@ -22,11 +22,9 @@
       "value": 5
     }
   ],
-  "description": "Statuts des hôtels-Dieu, confréries soignantes, séparation des malades contagieux.",
+  "description": "Statuts des hôtels-Dieu, confréries soignantes, séparation des malades contagieux dans les [[cdx_leproserie|maladreries]].",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Hôtel-Dieu",
+    "Hôpital au Moyen Âge"
   ]
 }

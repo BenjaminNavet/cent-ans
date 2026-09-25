@@ -1,0 +1,28 @@
+{
+  "id": "cdx_pavois",
+  "title": "Le pavois",
+  "category": "technique",
+  "aliases": [
+    "Pavois",
+    "pavescheur",
+    "pavesade"
+  ],
+  "era": {
+    "from": "1300",
+    "to": "1500"
+  },
+  "summary": "Grand bouclier rectangulaire, haut comme un homme, que l'on plante devant soi pour recharger l'[[cdx_arbalete|arbalète]] à l'abri. À [[cdx_crecy|Crécy]], les arbalétriers génois l'avaient laissé dans les bagages.",
+  "body": "Le pavois, dont le nom viendrait de la ville de Pavie, est fait de planches couvertes de cuir ou de toile, peintes aux armes de la ville ou du capitaine. Une nervure centrale et une béquille permettent de le tenir debout ; un valet, le pavescheur, le porte souvent pour l'arbalétrier.\n\nLe 26 août 1346, les arbalétriers génois engagés par Philippe VI doivent attaquer à [[cdx_crecy|Crécy]] sans leurs pavois, restés en arrière avec les bagages, et sous une averse qui a détendu leurs cordes : les archers anglais les déciment. Sur mer, on dresse aussi des pavois le long du bord des navires, la pavesade.",
+  "gameplay": "Recherche : 130 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +5 en armure des tireurs.",
+  "entity": "tech_pavise",
+  "see_also": [
+    "cdx_arbalete",
+    "cdx_crecy",
+    "cdx_arbalete_a_tour"
+  ],
+  "sources": [
+    "Pavois (bouclier)",
+    "Bataille de Crécy",
+    "Arbalétriers génois"
+  ]
+}

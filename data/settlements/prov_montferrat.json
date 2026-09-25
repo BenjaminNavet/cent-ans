@@ -6,7 +6,7 @@
     "name": {
       "display": "Casal",
       "local": "Casal",
-      "local_language": "lombard"
+      "local_language": "piémontais"
     },
     "lonlat": [
       8.4548,
@@ -24,7 +24,7 @@
       "bld_muster_field"
     ],
     "port": false,
-    "description": "Casal (Casale Monferrato), capitale du marquisat des Paléologues de Montferrat.",
+    "description": "Casal (Casale Monferrato), l'une des principales villes du marquisat des Paléologues de Montferrat, qui n'en fera sa capitale qu'au XVe siècle.",
     "sources": [
       "Marquisat de Montferrat",
       "Jean II de Montferrat"

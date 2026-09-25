@@ -1,0 +1,32 @@
+{
+  "id": "cdx_jeu_entretien",
+  "title": "L'entretien des armées et des bâtiments",
+  "category": "mecanique",
+  "aliases": [
+    "entretien",
+    "entretien des armées",
+    "entretien des bâtiments",
+    "gages",
+    "entretien des garnisons"
+  ],
+  "era": {
+    "from": "1337",
+    "to": "1453"
+  },
+  "summary": "Chaque unité et chaque bâtiment coûtent chaque saison. Les gens d'armes à cheval sont les plus chers ; une garnison coûte moins qu'une armée en campagne.",
+  "body": "L'armée de la guerre de Cent Ans est une armée soldée. L'[[cdx_ost_feodal|ost féodal]], service gratuit de quarante jours, ne suffit plus : le roi engage des capitaines par contrat (en Angleterre, l'« indenture »), qui amènent leur « retenue » de [[cdx_hommes_d_armes|gens d'armes]] et d'archers contre des gages fixés par jour. Les gages croissent avec le rang : en Angleterre, sous Édouard III, un archer à pied touche trois pence par jour, un archer à cheval six, un homme d'armes douze, un chevalier deux shillings ; en France, écuyers, chevaliers et bannerets sont payés de même selon un barème journalier.\n\nCes gages sont versés par « montres », revues où l'on compte les hommes et vérifie chevaux et harnois. Quand le paiement tarde, la troupe se paie sur le pays : pillage, rançonnement des villages, « appatis » imposés aux paroisses. Les [[cdx_grandes_compagnies|Grandes Compagnies]] naissent de ces soldats sans gages après [[cdx_bretigny|Brétigny]].\n\nLes places fortes coûtent aussi : un capitaine de château, quelques sergents et arbalétriers à l'année, les réparations des murailles, que les villes financent souvent par des taxes locales. [[cdx_charles_vii|Charles VII]] règle durablement le problème en 1445 avec les [[cdx_compagnies_ordonnance|compagnies d'ordonnance]], soldées en permanence par la [[cdx_taille|taille]].",
+  "gameplay": "Chaque type d'unité a un entretien mensuel ; une [[cdx_jeu_saisons|saison]] en facture quatre mois. Par mois : gendarmes des compagnies d'ordonnance 150, chevaliers 130, hommes d'armes à pied 100, routiers 80, archers à l'arc long 60, arbalétriers génois 55, arbalétriers 40, milice urbaine 25, par exemple. La technologie « Compagnies d'ordonnance » retire 10 % ; le « Banquier lombard » de la [[cdx_jeu_suite|suite]] d'un général réduit de 10 % l'entretien de son armée (les compétences du général peuvent réduire jusqu'à 50 % au plus).\n\nLes garnisons, levées locales à temps partiel, ne paient qu'une part de l'entretien de campagne selon la colonie : cité 50 %, ville 15 %, château 25 %, abbaye 10 %, village 0 %. Les effets « garnison » des bâtiments et de l'édit « Levée de la milice » allègent encore ce coût (10 % par point, jusqu'à 50 %). Une colonie abrite au plus 8 unités de garnison pour une cité, 4 pour un château, 3 pour une ville, 2 pour une abbaye, 1 pour un village. Voir [[cdx_jeu_colonies|colonies]].\n\nL'entretien des bâtiments dépend aussi de la colonie (cité 100 %, château et village 50 %, ville 40 %, abbaye 25 %) et diminue de moitié du taux de [[cdx_jeu_devastation|dévastation]] ; une colonie assiégée ne paie rien. Tous ces coûts suivent le niveau des prix de la [[cdx_mutations_monetaires|monnaie]]. L'hiver ne change pas l'entretien. Si le [[cdx_jeu_tresor|trésor]] passe sous zéro, toutes les troupes perdent 10 de moral par saison : licenciez les unités les plus chères ou relevez l'[[cdx_jeu_impot|impôt]].",
+  "see_also": [
+    "cdx_jeu_tresor",
+    "cdx_jeu_recrutement",
+    "cdx_compagnies_ordonnance",
+    "cdx_grandes_compagnies",
+    "cdx_hommes_d_armes",
+    "cdx_ost_feodal"
+  ],
+  "sources": [
+    "Compagnie d'ordonnance",
+    "Grandes compagnies",
+    "Ost"
+  ]
+}

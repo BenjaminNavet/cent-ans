@@ -1,0 +1,28 @@
+{
+  "id": "cdx_poudre_noire",
+  "title": "La poudre noire",
+  "category": "technique",
+  "aliases": [
+    "Poudre noire",
+    "salpêtre",
+    "salpêtriers",
+    "poudre à feu"
+  ],
+  "era": {
+    "from": "v. 1260",
+    "to": "1500"
+  },
+  "summary": "Salpêtre, soufre et charbon de bois : la poudre, venue de Chine par le monde islamique, est décrite en Europe vers 1260. Au XIVe siècle, rois et villes apprennent à la fabriquer en grandes quantités pour leurs canons.",
+  "body": "Inventée en Chine, la poudre passe par le monde mongol et islamique. Roger Bacon y fait allusion vers 1267, et des recettes circulent en latin à la fin du XIIIe siècle. Le salpêtre est l'ingrédient le plus rare : on le récolte en grattant les murs des caves, des écuries et des bergeries, où il se forme à partir des déjections.\n\nAu XIVe siècle, la poudre devient une affaire d'État. Les maîtres de l'artillerie achètent salpêtre et soufre, les font broyer et mélanger ; au XVe siècle, on apprend à « grener » la poudre, c'est-à-dire à l'agglomérer en grains, plus stables et plus puissants. Sans elle, ni [[cdx_premieres_bouches_a_feu|bouches à feu]] ni [[cdx_bombarde|bombardes]].",
+  "gameplay": "Recherche : 250 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Aucun prérequis. Effets, pour toute la faction : +1 point de recherche par saison.",
+  "entity": "tech_gunpowder",
+  "see_also": [
+    "cdx_premieres_bouches_a_feu",
+    "cdx_bombarde",
+    "cdx_batons_a_feu"
+  ],
+  "sources": [
+    "Poudre noire",
+    "Histoire de la poudre à canon"
+  ]
+}

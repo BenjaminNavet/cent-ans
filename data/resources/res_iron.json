@@ -6,8 +6,9 @@
   "category": "raw_material",
   "base_price": 9,
   "satisfies_classes": [],
-  "description": "Minerai et forges (Weald du Kent, Berry, Lorraine) ; nécessaire aux armures et engins.",
+  "description": "Minerai et forges (Weald du Sussex et du Kent, forêt de Dean, Berry, Lorraine, Biscaye, Pays de Liège) ; nécessaire aux armures et engins. Voir [[cdx_fer]].",
   "sources": [
+    "Bas fourneau",
     "Économie médiévale (Wikipédia)"
   ]
 }

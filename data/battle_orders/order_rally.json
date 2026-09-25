@@ -3,7 +3,7 @@
   "kind": "rally",
   "rank": 2,
   "name": "Rallier",
-  "description": "Le chef galope vers les fuyards, bannière haute, et tente de les ramener au combat ; la réussite dépend de son commandement. Ainsi Du Guesclin reformant ses hommes à Cocherel (1364).",
+  "description": "Le chef galope vers les [[cdx_deroute_debandade|fuyards]], bannière haute, et tente de les ramener au combat ; la réussite dépend de son [[cdx_jeu_general|commandement]]. Ainsi [[cdx_du_guesclin|Du Guesclin]] reformant ses hommes à Cocherel (1364).",
   "icon": "rally",
   "scope": "radius",
   "requires_general": true,
