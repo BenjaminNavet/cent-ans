@@ -5,7 +5,9 @@
   "description": "Fichier data/rules/battle_duel.json (lot EP9b, ADR 0056) : combien de temps l'attaquant IA échange des traits avant de marcher à l'ennemi, selon qu'il gagne le duel ou non, et quelles troupes avancent en second échelon. Lu par sim-battle (DuelRules).",
   "type": "object",
   "properties": {
-    "description": { "type": "string" },
+    "description": {
+      "type": "string"
+    },
     "duel_limit_seconds": {
       "type": "number",
       "minimum": 0,
@@ -47,6 +49,12 @@
       "minimum": 0,
       "maximum": 150,
       "description": "Distance du second échelon derrière la première ligne (mètres)."
+    },
+    "second_echelon_closes_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 320,
+      "description": "Le second échelon serre sur la première ligne quand l'ennemi est à moins de cette distance (mètres) : il suit l'assaut dans la mêlée."
     }
   },
   "required": [
@@ -56,7 +64,8 @@
     "winning_ratio",
     "winning_min_share",
     "second_echelon_morale",
-    "second_echelon_depth_m"
+    "second_echelon_depth_m",
+    "second_echelon_closes_m"
   ],
   "additionalProperties": false
 }

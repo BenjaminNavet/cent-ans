@@ -1299,7 +1299,7 @@ fn plan_field(view: &mut View) {
         .iter()
         .partition(|&&i| view.units[i].morale_cap >= duel_rules.second_echelon_morale);
     let echelons =
-        !defensive && !duel && contact < DUEL_RANGE && !first.is_empty() && !second.is_empty();
+        !defensive && !duel && contact < DUEL_RANGE && contact >= duel_rules.second_echelon_closes_m && !first.is_empty() && !second.is_empty();
     let line_center = view
         .centroid(if echelons { &first } else { &roles.line })
         .or_else(|| view.centroid(&view.own))
