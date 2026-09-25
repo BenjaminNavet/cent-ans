@@ -37,8 +37,8 @@ nuit : NV2, SG3, EQ1, PF1, DP2, AR1).
 | EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | **fusionné** 13506bf1 |
 | EP4 | Son de mêlée de proximité : émetteurs par front de mêlée, couches proche/moyen/lointain, grande banque CC0 (chocs, cris, râles, chevaux, ordres), foule qui monte avec l'effectif | — | — | **fusionné** a30b461b (27 clips CC0, 112 générés ; ordres criés sans source CC0 ; volumes à régler à l'oreille) |
 | EP5 | Étendards : figurine porte-étendard dédiée (pose et clips), musiciens (tambours, trompettes), étendard qui tombe, relevé ou pris (moral, écran de fin) | 0034 | — | **fusionné** 13506bf1 |
-| EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | — | EP3 | en cours (repris 25/09 soir) |
-| EP7 | Cartes historiques Crécy (26/08/1346), Poitiers (19/09/1356), Azincourt (25/10/1415) : relief réel, décor d'époque, déploiement historique, entrée depuis la campagne et le menu | 0035 | EP1-EP3, EP6 | vague 2 |
+| EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | 0061 | EP3 | **fusionné** ade1b9a7 |
+| EP7 | Cartes historiques Crécy (26/08/1346), Poitiers (19/09/1356), Azincourt (25/10/1415) : relief réel, décor d'époque, déploiement historique, entrée depuis la campagne et le menu | 0035 | EP1-EP3, EP6 | en cours (26/09) |
 | EP8 | Mise en scène : heure du jour (aube, crépuscule), ombres de nuages, poussière des charges, fumées, oiseaux qui s'envolent, caméra cinématique au premier choc | 0055 | EP2 | **fusionné** 3805ef66 |
 
 ## Budget (plafond 20 $)
@@ -109,3 +109,8 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
 - EP7 attend EP6 (API de placement explicite) et utilise `set_start_hour` d'EP8.
 - Points ouverts EP9 : passage de rivière profonde par l'IA attaquante (jusqu'à 22 min) ; l'IA
   attaquante perd face à un défenseur immobile (10-12/12) ; seuil `ep1_scale` à 10 régiments en mêlée.
+- EP6 fusionné (ade1b9a7, ADR 0061) : décor procédural, camps et pillage, API `DecorPlan`.
+  Suites : l'IA ne vise pas les camps ; léger avantage attaquant avec décor (21/32) ;
+  `hydro::chaikin` ne lisse pas ; 40 fps à 15 k à remesurer au calme (30 i/s ce soir, machine chargée).
+- EP9b lancé (retour SG4 : défenseur 10/10 sur plat sans pieux ; duel prolongé si gagné, milice en
+  second échelon). EP7 lancé (Crécy d'abord, puis Azincourt, Poitiers).
