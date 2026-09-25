@@ -3,6 +3,7 @@
 pub mod agent;
 pub mod ai_alignment;
 pub mod ai_diplomacy;
+pub mod ai_grid;
 pub mod battle_order;
 pub mod building;
 pub mod character;
