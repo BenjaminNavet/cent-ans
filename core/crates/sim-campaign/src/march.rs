@@ -696,7 +696,33 @@ impl CampaignState {
         if entry.movement_left < full {
             return Err(OrderError::NoMovementLeft);
         }
-        let army_faction = entry.faction.clone();
+        if let Some(a) = self.armies.get_mut(army) {
+            a.movement_left = 0;
+            a.clear_plan();
+        }
+        // Lot NV1: an enemy squadron may bar the way.
+        match crate::naval::intercept(self, data, army, &from, to_port, events) {
+            crate::naval::Crossing::Clear | crate::naval::Crossing::Fought(true) => {}
+            crate::naval::Crossing::Pending | crate::naval::Crossing::Fought(false) => {
+                return Ok(());
+            }
+        }
+        self.land_crossing(data, army, to_port, events);
+        Ok(())
+    }
+
+    /// End of a crossing: the army lands at `to_port` (and fights whoever
+    /// holds it).
+    pub(crate) fn land_crossing(
+        &mut self,
+        data: &GameData,
+        army: &ArmyId,
+        to_port: &SettlementId,
+        events: &mut Vec<GameEvent>,
+    ) {
+        let Some(army_faction) = self.armies.get(army).map(|a| a.faction.clone()) else {
+            return;
+        };
         if let Some(a) = self.armies.get_mut(army) {
             a.movement_left = 0;
             a.clear_plan();
@@ -723,7 +749,6 @@ impl CampaignState {
         } else if self.is_hostile_settlement(&army_faction, to_port) {
             enter_settlement(self, data, army, to_port, events);
         }
-        Ok(())
     }
 }
 

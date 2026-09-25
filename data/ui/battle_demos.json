@@ -1,0 +1,45 @@
+{
+  "description": "Batailles de démonstration du menu principal (lot SG2) : chacune part de la campagne de 1337 (armées principales de France et d'Angleterre) et met en scène une bataille rangée ou l'assaut d'une ville. Un siège « landmark » assiège la ville dessinée d'après son plan (data/landmarks, ADR 0026), en déclarant la guerre à son détenteur si besoin ; « engines » ajoute des engins à l'assiégeant (bataille hors campagne, sans résultat rapporté).",
+  "demos": [
+    {
+      "id": "field_1337",
+      "label": "Bataille rangée",
+      "detail": "L'ost de France contre l'armée anglaise, en rase campagne (1337).",
+      "kind": "field"
+    },
+    {
+      "id": "siege_guyenne",
+      "label": "Assaut en Guyenne",
+      "detail": "Les Français donnent l'assaut à une ville anglaise de Guyenne : échelles, beffroi, bélier.",
+      "kind": "siege",
+      "province": "prov_guyenne",
+      "engines": ["unit_trebuchet", "unit_bombard"]
+    },
+    {
+      "id": "siege_paris",
+      "label": "Siège de Paris",
+      "detail": "L'armée anglaise devant la porte Saint-Jacques, comme en 1360.",
+      "kind": "siege",
+      "province": "prov_ile_de_france",
+      "engines": ["unit_trebuchet"]
+    },
+    {
+      "id": "siege_avignon",
+      "label": "Siège d'Avignon",
+      "detail": "Les Grandes Compagnies menacent la cité des papes (1361) : trébuchets et mangonneaux contre les remparts neufs.",
+      "kind": "siege",
+      "landmark": "avignon",
+      "attacker": "fac_england",
+      "engines": ["unit_trebuchet", "unit_mangonel"]
+    },
+    {
+      "id": "siege_bruges",
+      "label": "Siège de Bruges",
+      "detail": "L'ost du roi de France devant la ville drapière révoltée : trébuchet et bombarde contre la porte.",
+      "kind": "siege",
+      "landmark": "bruges",
+      "attacker": "fac_france",
+      "engines": ["unit_trebuchet", "unit_bombard"]
+    }
+  ]
+}

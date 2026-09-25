@@ -45,6 +45,7 @@ impl CampaignState {
         // 1. The player's turn is over. His battles still pending are
         // auto-resolved first (M7).
         battle_request::auto_resolve_all_pending(self, data, &mut events);
+        crate::naval::auto_resolve_all_pending(self, data, &mut events);
 
         // 2. Each AI faction plays in id order (spec § 3.4).
         let ai_factions: Vec<FactionId> = self
@@ -123,6 +124,8 @@ impl CampaignState {
         research::resolve_research(self, data, events);
         economy::resolve_attrition(self, data, events);
         economy::resolve_decay(self, data);
+        // NV1: blockades, sea control, shipyards.
+        crate::naval::resolve_season(self, data, events);
 
         // 8b. Diplomacy (vassal tribute after the economy, expiries,
         // rebellions) and religion (favour, Schism, heresy) before the

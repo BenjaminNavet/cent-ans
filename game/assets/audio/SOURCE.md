@@ -82,3 +82,14 @@ Les effets `sfx/` et musiques `music/` d'origine restent de la synthèse procéd
 | `ambience/crickets.ogg` | [522299](https://freesound.org/people/Defelozedd94/sounds/522299/) Defelozedd94 — Crickets At Night - Raw sound | boucle, stéréo |
 | `ambience/forest.ogg` | [474342](https://freesound.org/people/pborel/sounds/474342/) pborel — forest-birds3a.WAV | boucle, stéréo |
 | `ambience/town.ogg` | [424790](https://freesound.org/people/bolkmar/sounds/424790/) bolkmar — Crowded street at medieval market<br>[444900](https://freesound.org/people/DigestContent/sounds/444900/) DigestContent — Crowd Murmuring | boucle, stéréo ; market street layered over a crowd murmur |
+
+## Sons de siège SG2 (synthèse procédurale)
+
+Générés par `tools/cent_ans_tools/sg2_sounds.py` (numpy/scipy, graines fixes, aucun échantillon
+externe : `uv run --project tools --with soundfile python -m cent_ans_tools.sg2_sounds`). Si
+`audio_bank.py` réécrit ce fichier, recopier cette section.
+
+| Fichier | Recette |
+|---|---|
+| `battle/boiling_oil_1.ogg` | huile bouillante : coulée (bruit passe-bas modulé), éclaboussure à 0,85 s, grésillement et crépitements, bulles ; mono |
+| `battle/boiling_oil_2.ogg` | même recette, autre graine |

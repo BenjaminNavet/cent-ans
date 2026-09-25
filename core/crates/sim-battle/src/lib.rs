@@ -40,6 +40,7 @@ pub mod field;
 pub mod fire;
 pub mod formation_ai;
 pub mod impact;
+pub mod naval;
 pub mod orders;
 pub mod outcome;
 pub mod relief;

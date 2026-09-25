@@ -19,6 +19,7 @@ pub mod faction;
 pub mod landmark;
 pub mod movement;
 pub mod names;
+pub mod naval;
 pub mod population_rules;
 pub mod province;
 pub mod religion;
