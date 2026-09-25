@@ -5,8 +5,8 @@
     "kind": "city",
     "name": {
       "display": "Lübeck",
-      "local": "Lübeck",
-      "local_language": "moyen haut-allemand"
+      "local": "Lübeke",
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       10.6866,
@@ -37,8 +37,8 @@
     "kind": "town",
     "name": {
       "display": "Hambourg",
-      "local": "Hammaburg",
-      "local_language": "moyen haut-allemand"
+      "local": "Hamborch",
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       9.9937,
@@ -65,7 +65,7 @@
     "name": {
       "display": "Kiel",
       "local": "Kiel",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       10.1228,
@@ -79,7 +79,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Ville portuaire ducale du Holstein sur la Baltique.",
+    "description": "Ville portuaire comtale du Holstein sur la Baltique (le Holstein ne sera duché qu'en 1474).",
     "sources": [
       "Kiel"
     ]
@@ -91,7 +91,7 @@
     "name": {
       "display": "Segeberg",
       "local": "Segeberch",
-      "local_language": "moyen haut-allemand"
+      "local_language": "moyen bas-allemand"
     },
     "lonlat": [
       10.3167,

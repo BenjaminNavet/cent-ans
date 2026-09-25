@@ -14,3 +14,8 @@ Sous-ensembles faits avec `pyftsubset` (fontTools) :
   U+25A0–25FF (✉ ✦ ✧ ⌖ ⌛ ♔ ♛ ☠ ⚠ ★ ♨ ▲ ■ ▼ absents des deux autres).
 
 Déclarées en polices de repli (`fallbacks`) d'EB Garamond dans `scenes/ui/parchment_theme.tres`.
+
+Métriques verticales (lot UI1, 2026-09-25) : `hhea` et `OS/2` (ascender/descender, win et typo)
+ramenées à celles d'EB Garamond (1007 / -298 pour 1000 unités) avec fontTools. Sans cela, Godot
+prenait la hauteur maximale de la chaîne de repli : chaque ligne du thème faisait 36 px au lieu
+de 24 px (corps 17). Les glyphes ne sont pas modifiés.

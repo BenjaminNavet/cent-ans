@@ -84,7 +84,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Ville-refuge des papes bâtie sur un piton de tuf, cathédrale achevée en grande partie en 1330.",
+    "description": "Ville-refuge des papes bâtie sur un piton de tuf, cathédrale en chantier depuis 1290, dont Lorenzo Maitani élève la façade.",
     "sources": [
       "Orvieto"
     ]
@@ -110,7 +110,7 @@
       "bld_port"
     ],
     "port": true,
-    "description": "Petit bourg fortifié near l'embouchure du Tibre, sur le site de l'antique port de Rome, poste de douane pontifical.",
+    "description": "Petit bourg fortifié près de l'embouchure du Tibre, sur le site de l'antique port de Rome, poste de douane pontifical.",
     "sources": [
       "Ostie antique"
     ]

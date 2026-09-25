@@ -17,6 +17,6 @@
   "fire_resistance": 0.1,
   "cost": 900,
   "model": "cog",
-  "description": "Navire rond de la Hanse et de la Manche, bordé à clin, un mât et une voile carrée, châteaux crénelés à l'avant et à l'arrière. Haut de bord : on y tire de haut et on s'y défend bien. Les rois le réquisitionnent aux marchands pour la guerre.",
+  "description": "Navire rond de la [[cdx_hanse|Hanse]] et de la Manche, bordé à clin, un mât et une voile carrée, châteaux crénelés à l'avant et à l'arrière. Haut de bord : on y tire de haut et on s'y défend bien. Les rois le réquisitionnent aux marchands pour la guerre.",
   "sources": ["Cogue", "Bataille de l'Écluse", "Richard Unger, The Ship in the Medieval Economy"]
 }

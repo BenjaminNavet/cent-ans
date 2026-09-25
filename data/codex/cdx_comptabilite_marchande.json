@@ -1,0 +1,31 @@
+{
+  "id": "cdx_comptabilite_marchande",
+  "title": "La comptabilité marchande",
+  "category": "technique",
+  "aliases": [
+    "Comptabilité marchande",
+    "livre de raison",
+    "livres de raison",
+    "livres de comptes",
+    "Chambre des comptes"
+  ],
+  "era": {
+    "from": "1300",
+    "to": "1500"
+  },
+  "summary": "Les grandes compagnies toscanes tiennent des livres de comptes rigoureux, et les rois les imitent : en France, la Chambre des comptes vérifie depuis 1320 la gestion des officiers royaux.",
+  "body": "Les compagnies marchandes et bancaires de Florence, comme celles des Bardi et des Peruzzi, gèrent des succursales de Londres à Chypre. Elles tiennent des livres de raison, des inventaires et des correspondances régulières, et forment leurs commis au calcul en chiffres arabes dans les écoles d'abaque. Ces méthodes se diffusent dans les villes marchandes, de [[cdx_bruges|Bruges]] à Avignon.\n\nLes princes suivent. L'ordonnance de Vivier-en-Brie (1320) organise la Chambre des comptes de Paris, qui contrôle receveurs et trésoriers ; l'Échiquier anglais fait de même avec ses rouleaux. La guerre coûte cher : sans ces comptes, ni la [[cdx_taille|taille]] ni les [[cdx_aides|aides]] ne pourraient être levées et dépensées.",
+  "gameplay": "Recherche : 300 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_taille|Fiscalité royale]]. Effets, pour toute la faction : +10 % de revenus du commerce (sur l'assiette fiscale des bourgeois). Débloque : le bâtiment Comptoir marchand.",
+  "entity": "tech_bookkeeping",
+  "see_also": [
+    "cdx_partie_double",
+    "cdx_lettre_de_change",
+    "cdx_taille",
+    "cdx_livre_tournois"
+  ],
+  "sources": [
+    "Comptabilité",
+    "Compagnie des Bardi",
+    "Chambre des comptes"
+  ]
+}

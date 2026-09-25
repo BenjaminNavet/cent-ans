@@ -18,11 +18,10 @@
       "value": 1
     }
   ],
-  "description": "Fabrication de poudre (salpêtre, soufre, charbon) par les artilleurs royaux.",
+  "description": "Fabrication de poudre (salpêtre, soufre, charbon) pour les [[cdx_premieres_bouches_a_feu|premières bouches à feu]] des artilleurs royaux.",
   "sources": [
-    "Guerre de Cent Ans",
-    "Armure de plates",
-    "Artillerie médiévale",
-    "Économie médiévale"
+    "Poudre noire",
+    "Histoire de la poudre à canon",
+    "Pot-de-fer"
   ]
 }

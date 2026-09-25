@@ -251,7 +251,7 @@ class OrderButton extends Button:
 		lines.append("[b]%s[/b]   [color=#6b5a45][%s][/color]" % [order.get("name", ""), hotkey])
 		if str(order.get("label", "")) != str(order.get("name", "")):
 			lines.append("[i]%s[/i]" % order.get("label", ""))
-		lines.append(str(order.get("description", "")))
+		lines.append(CodexText.format(str(order.get("description", "")), true))
 		var facts: Array[String] = []
 		var cooldown := float(order.get("cooldown", 0.0))
 		if cooldown > 0.0:

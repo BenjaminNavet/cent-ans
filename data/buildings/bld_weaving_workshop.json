@@ -32,9 +32,9 @@
       "value": 1
     }
   ],
-  "description": "Ateliers de tisserands, foulons et teinturiers ; transforme la laine en drap.",
+  "description": "Ateliers de tisserands, foulons et teinturiers ; transforme la laine en drap. Voir [[cdx_draperie]].",
   "sources": [
-    "Économie médiévale",
-    "Architecture militaire médiévale"
+    "Draperie",
+    "Foulage (textile)"
   ]
 }

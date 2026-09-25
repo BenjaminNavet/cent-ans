@@ -8,7 +8,7 @@
     "fac_france": "Déployer l'oriflamme",
     "fac_england": "Lever la bannière au dragon"
   },
-  "description": "Le chef fait déployer la bannière de guerre à outrance : on ne fera pas de prisonniers. Toute l'armée gagne un grand courage pour la bataille, mais les rançons sont perdues. L'oriflamme de Saint-Denis, déployée à Crécy et à Poitiers, et la bannière au dragon d'Édouard III à Crécy (1346) annonçaient qu'il ne serait fait aucun quartier. Une seule fois par bataille.",
+  "description": "Le chef fait déployer la bannière de guerre à outrance : on ne fera pas de prisonniers. Toute l'armée gagne un grand [[cdx_jeu_moral|courage]] pour la bataille, mais les [[cdx_rancon|rançons]] sont perdues. L'oriflamme de Saint-Denis, déployée à [[cdx_crecy|Crécy]] et à [[cdx_poitiers|Poitiers]], et la bannière au dragon d'[[cdx_edouard_iii|Édouard III]] à Crécy (1346) annonçaient qu'il ne serait fait aucun quartier. Une seule fois par bataille.",
   "icon": "no_quarter",
   "scope": "army",
   "requires_general": true,

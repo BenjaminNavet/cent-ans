@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_relief_bataille",
+  "title": "Le relief du champ de bataille",
+  "category": "mecanique",
+  "aliases": [
+    "pente",
+    "pentes",
+    "crête",
+    "avantage de la hauteur",
+    "hauteurs"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Tenir la hauteur, c'est voir venir l'ennemi, tirer plus loin et le forcer à monter sous les traits. Les armées anglaises de la guerre de Cent Ans attendent presque toujours sur une pente.",
+  "body": "À [[cdx_crecy|Crécy]], la ligne anglaise occupe le haut d'une pente douce, entre la vallée des Clercs et le moulin d'où [[cdx_edouard_iii|Édouard III]] observe le combat : les chevaliers français doivent la gravir, déjà désunis, sous une pluie de flèches, et leurs charges meurent au pied de la ligne. Treize ans plus tôt, à Halidon Hill (1333), les Écossais avaient dû franchir un marais puis monter à l'assaut d'une colline tenue par les archers d'Édouard III, avec le même résultat.\n\nLa hauteur donne aussi la vue : un chef posté sur une butte embrasse le champ, voit les mouvements de l'ennemi et règle les siens. À Cocherel (1364), les Anglo-Navarrais du captal de Buch refusent de quitter leur colline ; [[cdx_du_guesclin|Du Guesclin]] doit feindre la retraite pour les en faire descendre.\n\nMais une crête cache aussi ce qui se passe derrière elle : réserves, cavalerie en embuscade. Et descendre une pente au pas de charge disloque les rangs aussi sûrement que la monter épuise.",
+  "gameplay": "Le champ a un vrai relief (collines, croupes, vallons, talus, plaine alluviale le long de la rivière), plus marqué en collines et en montagne ; dans ces terrains, la ligne du défenseur est au moins 8 m (collines) ou 16 m (montagne) plus haut que celle de l'assaillant.\n\nMarche : en montée, la vitesse est divisée par 1 + 6 × pente (une pente de 10 % la ramène à 62 %) ; en descente, elle gagne jusqu'à 10 %. Tir : la portée gagne 1 % par mètre de hauteur au-dessus de la cible. Vue : une crête masque la cible aux tireurs, sauf aux archers qui tirent en cloche (voir [[cdx_jeu_tir|tir]]).\n\nL'IA cherche la hauteur quand elle attend, et un camp nettement plus faible se replie au déploiement sur la meilleure hauteur de sa zone. En résolution automatique, collines et montagnes réduisent la [[cdx_jeu_charge|charge]] et renforcent le défenseur (voir [[cdx_jeu_resolution_auto|résolution automatique]]). Conseil : attendez sur la pente et laissez l'ennemi monter vers vos archers ; n'attaquez une hauteur qu'après l'avoir fait tirer ou en la tournant.",
+  "see_also": ["cdx_jeu_terrain_bataille", "cdx_jeu_deploiement", "cdx_jeu_tir", "cdx_jeu_fatigue", "cdx_crecy"],
+  "sources": ["Bataille de Crécy", "Bataille de Halidon Hill", "Bataille de Cocherel"]
+}

@@ -1,7 +1,7 @@
 {
   "id": "evt_disette",
   "title": "La disette",
-  "text": "Pluies d'automne, semailles pourries : le pain manque et son prix triple. On voit des enfants manger l'herbe des fossés, et les boulangers sont menacés sur les marchés.",
+  "text": "Pluies d'automne, semailles pourries : le pain manque et son prix triple, la [[cdx_jeu_famine|disette]] menace. On voit des enfants manger l'herbe des fossés, et les boulangers sont menacés sur les marchés.",
   "kind": "random",
   "trigger": {
     "mean_time_to_happen": 60,

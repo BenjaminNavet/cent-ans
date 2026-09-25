@@ -1,0 +1,31 @@
+{
+  "id": "cdx_imprimerie",
+  "title": "L'imprimerie",
+  "category": "technique",
+  "aliases": [
+    "Imprimerie",
+    "Gutenberg",
+    "Johannes Gutenberg",
+    "caractères mobiles",
+    "incunable",
+    "incunables"
+  ],
+  "era": {
+    "from": "v. 1450",
+    "to": "1500"
+  },
+  "summary": "Vers 1450, à Mayence, Gutenberg combine caractères mobiles en métal, encre grasse et presse à vis. En 1470, les premiers livres imprimés à Paris sortent d'un atelier installé à la Sorbonne.",
+  "body": "Johannes Gutenberg met au point un moule qui permet de fondre en série des lettres de métal identiques, qu'on assemble en lignes et en pages avant de les imprimer sur du [[cdx_papier|papier]] au moyen d'une presse. La Bible dite à quarante-deux lignes est achevée vers 1455. La technique se répand en quelques décennies dans toute l'Europe.\n\nEn 1470, trois imprimeurs allemands, appelés par des maîtres de l'[[cdx_universite_paris|université de Paris]], installent la première presse parisienne au collège de Sorbonne. Les livres imprimés avant 1501, les incunables, sont déjà plusieurs millions à la fin du siècle.",
+  "gameplay": "Recherche : 900 points (5 par saison de base, plus les bonus de bâtiments, de technologies et du souverain). Prérequis : [[cdx_papier|Moulins à papier]], [[cdx_comptabilite_marchande|Comptabilité marchande]]. Année historique 1450 : avant 1430, elle coûte 25 % de plus (anachronisme). Effets, pour toute la faction : +5 de prestige (le souverain en reçoit chaque année le cinquième) ; +5 points de recherche par saison.",
+  "entity": "tech_printing_press",
+  "see_also": [
+    "cdx_papier",
+    "cdx_universite_paris",
+    "cdx_enluminure"
+  ],
+  "sources": [
+    "Imprimerie",
+    "Johannes Gutenberg",
+    "Première imprimerie parisienne"
+  ]
+}
