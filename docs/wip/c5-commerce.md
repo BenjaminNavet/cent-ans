@@ -49,7 +49,48 @@ dans `GameData::trade` (`core/crates/data-model/src/entities/trade.rs`,
   `FactionState::trade_agreements`, `plan_trade_agreements` et `trade_income_factor` supprimés.
   Test `c5_trade::trade_article_counts_common_routes_in_the_evaluation` + accord signé par
   `apply_treaty` dans les tests C5. Smoke : l'accord passe par `propose_treaty`.
-- `cargo test` : 580 verts.
+- `cargo test` : 580 verts ; clippy propre ; pytest 392 ; import OK ; smoke 26 « smoke OK »,
+  code 0.
+- Barre du haut : le bouton « Commerce » ne tenait plus en 1280 px (1496 px > 1422) ; il est
+  déplacé dans la rangée des modes de la minicarte (`CampaignMinimap.add_layer_button`), touche R
+  inchangée.
+- Diplomatie : ligne « Commerce — routes communes » sous la fiche de la faction (coupées : raison),
+  « Accord commercial (suspendu) » sous embargo, action « Rompre l'accord commercial ».
+- Captures regardées : `docs/img/c5-commerce/routes.png` (couche commerciale, Flandres),
+  `docs/img/c5-commerce/diplomacy.png` (écran DP1, routes Calais/La Rochelle ↔ Londres coupées par
+  la guerre), `docs/img/c4-edits/edicts.png` et `chains.png` (script `c4_screenshot.gd`).
+
+## Sondes (25/09, même machine, main 58733bb2 contre C5R)
+`balance_probe campaign 200 1-8` :
+
+| Mesure | main | C5R (C4 + C5 + unification) |
+|---|---|---|
+| Guerre FR-EN (part des tours) | 56 % | 60 % |
+| Milice / recrutements | 30,6 % | 32,0 % |
+| Archers longs / recr. anglais | 61,1 % | 60,1 % |
+| Mécontentement final | 11,1 | 9,2 |
+| Impôt « Haut » | 44 % | 48 % |
+| Révoltes / partie | 14,4 | 14,6 |
+| Changements de propriétaire | 19,0 | 23,0 |
+| Graines FR-EN (1-8) | 54/68/42/50/78/57/47/50 | 66/66/62/64/52/52/60/64 |
+
+`century_probe 464 1-5` :
+
+| Mesure | main | C5R |
+|---|---|---|
+| Guerre FR-EN moy. | 59 % [48-67], 3/5 dans 55-75 % | 57 % [53-61], 3/5 dans 55-75 % |
+| 4 majeures vivantes en 1400 | 5/5 | 5/5 |
+| Banqueroutes / fac. / déc. | 0,66 | 0,98 (graine 1 : 2,27) |
+| Trésors > 8 saisons | 0 | 0 |
+
+Pas de régression sur les cibles G1/DP1 : la guerre FR-EN est plus régulière (écart entre graines
+réduit), la milice reste sous 40 %. À surveiller : banqueroutes un peu plus fréquentes (graine 1),
+mécontentement final toujours sous la cible E2 (15-35), comme sur main. Temps : +8 % par partie
+(graine 3, 22,8 s → 24,6 s, parties différentes).
+
+## Prochaine étape
+Fusion dans main par l'orchestrateur (branche prête, main fusionné).
+
 
 ## Pistes
 - Icônes de marchandise et navires/charrettes animés sur les routes (seul le
@@ -67,6 +108,3 @@ dans `GameData::trade` (`core/crates/data-model/src/entities/trade.rs`,
 - (Remplacé le 25/09) Accord commercial = article de traité DP1, stocké une
   seule fois dans le registre DP1 ; la guerre l'efface, l'embargo le suspend.
 
-## Prochaine étape
-Sondes d'équilibre (balance_probe 8×200, century_probe 5×464) avant/après, puis build GDExtension,
-import, smoke, captures de la couche commerciale et du panneau d'édits.
