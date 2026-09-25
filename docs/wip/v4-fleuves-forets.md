@@ -1,57 +1,66 @@
 # V4 — Fleuves, ponts et forêts de la carte de campagne (lots A1-11, A1-10)
 
-Branche `worktree-agent-ae5685646cc8b59ac` (depuis `main` 356a1ad). Rendu seulement.
-Captures : `docs/audit/captures/v4/` (avant `avant_*`, après `apres_*`).
+Branche `worktree-agent-ae5685646cc8b59ac` (fusionne `main` jusqu'à a8e1cc7a : L1, R1, CV2…).
+Rendu seulement. Captures : `docs/audit/captures/v4/` (`avant_*` sur main 356a1ad, `apres_*`).
 Banc : `godot --rendering-driver vulkan --disable-vsync --path game --script res://tests/v4_map_bench.gd`
 (Metal plafonne à 145 i/s et ne rend pas le temps GPU ; Vulkan/MoltenVK donne le temps GPU).
+`-- --hide=Rivers,Vegetation,Rivers/Crossings` masque des nœuds pour attribuer le coût.
 
-## Point d'accroche pour L1 (villes emblématiques : Paris)
+## État : terminé (les deux lots)
 
-Une **zone personnalisée** retire le rendu générique des fleuves pour qu'un modèle dédié prenne
-le relais. Tout est piloté par `data/map/river_styles.json` → `custom_zones` (schéma
-`data/schemas/river_styles.schema.json`) :
-
-```json
-{ "id": "paris", "name": "…", "lonlat": [2.3488, 48.8534], "radius_px": 4.8, "boundary_bridges": true }
-```
-
-- `lonlat` : centre (Notre-Dame) ; `radius_px` : rayon en pixels carte (1 px = 719 m) ; 4,8 = cercle des murs de la maquette générique actuelle (rayon 6 × 0,8).
-- Après modification : `uv run --project tools cent-ans geo rivers-render` régénère
-  `data/map/rivers_render.json` (tronçons d'eau **coupés** dans le cercle, zone recopiée avec son
-  centre en px), `data/map/river_bed.png` (pas de lit creusé ni de berges dans le cercle) et
-  `data/map/crossings_px.json` (`"in_custom_zone": true` pour les ponts dont la position source est
-  dans le cercle : le Grand-Pont et le Petit-Pont de Paris ne sont pas dessinés par V4).
-- En jeu (`RiversRenderer`, `game/scripts/map/rivers_renderer.gd`) : aucun ruban d'eau, lit, berge,
-  pont de `crossings.json` ni pont-porte de muraille de colonie dans la zone.
-  `boundary_bridges: true` pose un pont-porte générique (pierre crénelée, `BridgeMeshes` « gate »)
-  là où un fleuve entre dans la zone ou en sort ; L1 le passe à `false` s'il dessine ses propres
-  entrées d'eau. `RiversRenderer.custom_zones()` rend les zones (id, centre px, rayon) pour L1.
-- La maquette générique de Paris (`SettlementLayer`) n'est pas touchée par V4 : c'est à L1 de la
-  remplacer.
-
-## Plan
 ### A1-11 fleuves et ponts
-1. Outil `tools/cent_ans_tools/geo/river_render.py` (`cent-ans geo rivers-render`) — fait.
-2. `terrain.gdshader` + `river_bed.gdshaderinc` : lit creusé (sommets abaissés dans les tuiles de
-   relief fin), berges (vase, roseaux, herbe grasse), pente des berges dans l'ombrage.
-3. `rivers_renderer.gd` + `river_water.gdshader` : ruban d'eau avec test de profondeur (plus de
-   fleuve dessiné par-dessus les murs), écoulement, reflets, eau peu profonde en bord, gués.
-4. `river_crossings.gd` + `bridge_meshes.gd` : ponts 3D procéduraux (pierre à arches, bois sur
-   pilotis, bateaux), bacs, gués ; ponts-portes aux murs des colonies traversées par un fleuve
-   (l'eau passe sous la ville).
+- Outil `tools/cent_ans_tools/geo/river_render.py` (`uv run --project tools cent-ans geo rivers-render`,
+  tests `tools/tests/test_river_render.py`) → `data/map/rivers_render.json` (tronçons lissés,
+  orientés vers l'aval, largeur par point selon l'importance et l'altitude, `river_styles.json`),
+  `data/map/river_bed.png` (distance signée à la berge, L8) et `data/map/crossings_px.json`
+  (871 passages : 79 ponts historiques et 17 gués de `crossings.json` recalés sur leur fleuve,
+  775 ponts de route aux croisements route/fleuve ; structures : 634 bois, 216 pierre, 16 bacs,
+  4 ponts de bateaux).
+- `crossings.json` : champ `structure` (stone, wood, boats, ferry, ford) ; schéma mis à jour.
+- Terrain : `game/shaders/river_bed.gdshaderinc` + `river_banks.gdshaderinc` (3 lignes dans
+  `terrain.gdshader`) : lit creusé dans les tuiles de relief fin, berges (vase, roseaux).
+- `game/scripts/map/rivers_renderer.gd` + `game/shaders/river_water.gdshader` : ruban d'eau avec
+  test de profondeur (les murs le cachent), épaisseur d'eau lue dans la profondeur, écoulement,
+  reflets du ciel (fresnel), gués ; l'eau passe **sous** les villes (coupée dans leur emprise).
+- `game/scripts/map/river_crossings.gd` + `bridge_meshes.gd` : ponts 3D procéduraux (pierre à
+  arches brisées et avant-becs, bois sur pilotis, bateaux, bac, gué), instanciés par tuile
+  proche ; ponts-portes crénelés où un fleuve entre dans une ville fortifiée.
+
 ### A1-10 forêts
-5. Essences : chênaie, hêtraie, conifères de montagne, bocage/haies ; maillages procéduraux
-   distincts ; canopée continue (masse par tuile + arbres de lisière) ; teinte saisonnière.
+- `tools/blender_scripts/campaign_trees.py` → `game/assets/models/vegetation/campaign_trees.glb`
+  (chêne 90 triangles, hêtre 90, sapin 82 ; variantes lointaines 20/20/12), procédural
+  reproductible : `blender --background --python tools/blender_scripts/campaign_trees.py -- game/assets/models/vegetation/campaign_trees.glb`.
+  Aucun asset tiers (les conifères Poly Haven, 30 000 triangles, sont écartés pour la carte).
+- Quatre essences (`VegetationTileJob.Kind` : chêne, hêtre, conifère, haie) ; houppiers élargis au
+  cœur des massifs (canopée continue) ; hêtraie par taches selon l'altitude, recul dans le Midi.
+- Saisons (`foliage.gdshaderinc`, saison lue dans la date de la simulation, `--season=0..3` pour
+  les captures) : printemps tendre, automne roux / cuivré, hiver dénudé ajouré. La variante
+  `foliage_winter.gdshader` (discard) n'est employée qu'en hiver.
+- Sources interchangeables : `data/map/forest_cover.json` (schéma `forest_cover.schema.json`) :
+  couverture = splat canal B (forêts vers 1340 du lot R1), part de résineux = `forest_kind.png`
+  (R1), raster d'essences complet optionnel.
 
-## Performance (avant, Vulkan, meilleur de 3 × 150 images, machine partagée)
-| Vue | GPU ms | primitives | appels |
-|---|---|---|---|
-| large (France, d=1500) | 6,06 | 0,29 M | 526 |
-| très proche (Paris, d=22) | 16,46 | 7,6 M | 699 |
-| forêt (Orléanais, d=90) | 24,87 | 8,7 M | 1405 |
-| Loire (Orléans, d=40) | 17,96 | 9,0 M | 842 |
+## Point d'accroche L1 (Paris)
+`data/map/river_styles.json` → `custom_zones` : `{"id":"paris","lonlat":[2.3499,48.853],
+"radius_px":6.8,"boundary_bridges":false}` (valeurs L1). Dans le cercle : ni ruban d'eau, ni lit,
+ni berge, ni pont, ni pont-porte ; la maquette L1 dessine sa Seine. Après modification :
+`cent-ans geo rivers-render`. `RiversRenderer.custom_zones()` expose les zones.
 
-## État
-- [x] squelette, données (`river_styles.json`, `structure` dans `crossings.json`), outil + tests
-- [ ] shaders, rendu de l'eau, ponts (en cours)
-- [ ] forêts
+## Performance (Vulkan, temps GPU, meilleur de 3 passes, alternées avec une copie de main a8e1cc7a)
+| Vue | main | V4 | écart | primitives |
+|---|---|---|---|---|
+| large (France, d=1500) | 8,76 ms | 8,18 ms | −6,6 % | 0,29 → 0,36 M |
+| très proche (Paris, d=22) | 17,39 ms | 18,79 ms | +8,1 % | 10,2 → 10,8 M |
+| forêt (Orléanais, d=90) | 26,14 ms | 27,94 ms | +6,9 % | 10,8 → 11,6 M |
+| Loire (Orléans, d=40) | 21,05 ms | 22,30 ms | +5,9 % | 10,9 → 11,6 M |
+
+Attribution (masquage) : eau + ponts ≈ 0,6 à 1,2 ms selon la vue, végétation ≈ +1 ms (arbres
+Blender ramenés de ≈ 150 à ≈ 90 triangles, discard réservé à l'hiver) ; terrain (lit, berges)
+dans le bruit.
+
+## Points ouverts
+- Structures des ponts historiques (bois / pierre / bateaux) à vérifier par l'historien
+  (`crossings.json`, listes dans l'outil de génération de la branche).
+- L'eau passe sous les villes au lieu de les traverser à ciel ouvert (sauf Paris, modèle L1).
+- `wetlands.png` (R1) n'est pas lu : des arbres peuvent pousser dans les marais.
+- Machine partagée (≈ 10 agents) : bruit de mesure de ±10 % entre passes.
