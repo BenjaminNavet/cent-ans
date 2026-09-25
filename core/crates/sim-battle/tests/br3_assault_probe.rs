@@ -485,3 +485,139 @@ fn probe_figure_cost() {
         sim.units().len()
     );
 }
+
+/// BR3b: an ASCII map of one assault at `SNAP_T` seconds (`TOWN`, `SEED`):
+/// walls (`#`, `O` open), blocks (`H`, `F` burning, `,` burnt), heat
+/// around the fires (`~`), the square (`*`), regiments (`A`/`D`, `r`
+/// routing) and the A* way of the first attacker foot regiment inside the
+/// walls to the square (`+`). 8 m per character.
+#[test]
+#[ignore = "probe: prints an ASCII map of an assault"]
+fn probe_assault_map() {
+    let data = data();
+    let town = std::env::var("TOWN").ok().filter(|t| t != "generic");
+    let seed: u64 = std::env::var("SEED")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(2);
+    let times: Vec<f64> = std::env::var("SNAP_T")
+        .unwrap_or_else(|_| "480".to_owned())
+        .split(',')
+        .filter_map(|s| s.parse().ok())
+        .collect();
+    let mut setup = setup(
+        units(&data, &BESIEGERS),
+        units(&data, &GARRISON),
+        Some(SiegeSetup {
+            fortification: 2,
+            breach: 40,
+        }),
+    );
+    setup.siege_layout = town
+        .as_deref()
+        .map(|id| SiegeLayout::from_landmark(&data.landmarks[id]).expect("siege.battle"));
+    let mut sim = BattleSim::new(setup, seed).unwrap();
+    tune_fire(&mut sim);
+    sim.set_ai(SideId::Attacker, true);
+    sim.set_ai(SideId::Defender, true);
+    if sim.is_deploying() {
+        sim.start_battle().expect("start");
+    }
+    for t in times {
+        while !sim.is_finished() && sim.elapsed() < t {
+            sim.step();
+        }
+        let works = sim.siege().unwrap();
+        let heat = sim.fire_rules().unwrap().heat.radius_m;
+        let cell = 8.0;
+        let (mut x0, mut z0, mut x1, mut z1) = (f64::MAX, f64::MAX, f64::MIN, f64::MIN);
+        for v in &works.vertices {
+            x0 = x0.min(v.0);
+            z0 = z0.min(v.1);
+            x1 = x1.max(v.0);
+            z1 = z1.max(v.1);
+        }
+        let (x0, z0, x1, z1) = (x0 - 60.0, z0 - 120.0, x1 + 20.0, z1 + 20.0);
+        let (nx, nz) = (((x1 - x0) / cell) as usize, ((z1 - z0) / cell) as usize);
+        let mut grid = vec![vec![' '; nx]; nz];
+        for (iz, row) in grid.iter_mut().enumerate() {
+            for (ix, ch) in row.iter_mut().enumerate() {
+                let (x, z) = (x0 + (ix as f64 + 0.5) * cell, z0 + (iz as f64 + 0.5) * cell);
+                if let Some(p) = works.pieces.iter().find(|p| p.distance(x, z) < cell * 0.5) {
+                    *ch = if p.intact() { '#' } else { 'O' };
+                } else if let Some(h) = works.houses.iter().find(|h| h.edge_distance(x, z) < 0.0) {
+                    *ch = if h.fire.burning() {
+                        'F'
+                    } else if h.fire.burnt() {
+                        ','
+                    } else {
+                        'H'
+                    };
+                } else if works
+                    .houses
+                    .iter()
+                    .any(|h| h.fire.burning() && h.edge_distance(x, z) < heat)
+                {
+                    *ch = '~';
+                } else if works.in_square(x, z) {
+                    *ch = '*';
+                } else if works.inside(x, z) {
+                    *ch = '.';
+                }
+            }
+        }
+        let mut put = |x: f64, z: f64, c: char| {
+            let (ix, iz) = (((x - x0) / cell) as isize, ((z - z0) / cell) as isize);
+            if ix >= 0 && iz >= 0 && (ix as usize) < nx && (iz as usize) < nz {
+                grid[iz as usize][ix as usize] = c;
+            }
+        };
+        let walker = sim.units().iter().find(|u| {
+            u.side == SideId::Attacker
+                && u.able()
+                && u.category != data_model::UnitCategory::Siege
+                && works.inside(u.x, u.z)
+        });
+        if let Some(u) = walker {
+            if let Some(route) = sim.siege_route(SideId::Attacker, (u.x, u.z), works.center) {
+                for (x, z) in route {
+                    put(x, z, '+');
+                }
+            } else {
+                println!("no route for {} at ({:.0}, {:.0})", u.unit_type, u.x, u.z);
+            }
+        }
+        for u in sim.units().iter().filter(|u| u.present() && !u.synthetic) {
+            let c = match (u.side, u.state == UnitState::Routing) {
+                (_, true) => 'r',
+                (SideId::Attacker, _) => 'A',
+                (SideId::Defender, _) => 'D',
+            };
+            put(u.x, u.z, c);
+        }
+        println!(
+            "T {town:?} seed {seed} at {:.0} s: burning {}, burnt {}, hold {:.0}",
+            sim.elapsed(),
+            works.burning_houses(),
+            works.burnt_houses(),
+            works.hold_time
+        );
+        for row in grid.iter().rev() {
+            println!("T {}", row.iter().collect::<String>());
+        }
+        for u in sim.units().iter().filter(|u| u.present() && !u.synthetic) {
+            println!(
+                "T {:?} {:<22} ({:>4.0}, {:>4.0}) {:?} hp {:>4.0} morale {:>3.0} heat {:.2} dest {:?}",
+                u.side,
+                u.unit_type,
+                u.x,
+                u.z,
+                u.state,
+                u.hp,
+                u.morale,
+                heat_intensity(&sim, u),
+                u.destination.map(|d| (d.0.round(), d.1.round()))
+            );
+        }
+    }
+}
