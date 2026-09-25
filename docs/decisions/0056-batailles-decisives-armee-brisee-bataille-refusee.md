@@ -95,6 +95,12 @@ d'armes anglais sur une crête contre chevaliers, arbalétriers et piétons fran
 avant et après, 5 min 30 au lieu de 5 min 40 - 8 min. Démo 1337 sans ordre (le cas Q3) : 529 à
 665 s, victoire anglaise (armée française brisée ou accalmie) au lieu de 607 à 911 s.
 
+Après fusion de main (ADR 0052, panique des chevaux sous les traits), mêmes ordres de grandeur :
+IA-IA 107 à 669 s selon les paliers ; seules des graines avec rivière dépassent 12 minutes (jusqu'à
+870 s, et une graine épique « défenseur immobile » à 1302 s). Crécy-like : Anglais 11/12. En jeu
+(`q3_playtest.gd` de la recette, partie France, bataille sans aucun ordre) : bataille refusée à
+326 s, écran de résultat « Défaite · Bataille refusée ».
+
 ## Conséquences
 
 - Toutes les batailles rangées mesurées se terminent ; hors rivière, en 5 à 11 minutes. Avec une

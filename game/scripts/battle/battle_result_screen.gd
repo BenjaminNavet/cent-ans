@@ -515,7 +515,9 @@ static func mentions(player_side: String, sides: Dictionary, units: Array, outco
 		var taken: Array = result.get("standards_taken", [])
 		if not taken.is_empty():
 			lines.append("%s a pris %s : %s." % [side_name, "un étendard" if taken.size() == 1 else "%d étendards" % taken.size(), ", ".join(trophy_labels(taken))])
-		if bool(result.get("withdrew", false)):  # Q2 : retraite en bon ordre, pas une déroute
+		if ending != "" and str(outcome.get("end", "")) in ["refused", "lull"]:
+			pass  # EP9 : la mention de fin dit déjà qui s'est retiré
+		elif bool(result.get("withdrew", false)):  # Q2 : retraite en bon ordre, pas une déroute
 			lines.append("L'ost %s a sonné la retraite et quitté le champ en bon ordre." % BattleScene.de(side_name))
 		elif bool(result.get("routed", false)):
 			lines.append("L'ost %s a été mis en déroute." % BattleScene.de(side_name))
