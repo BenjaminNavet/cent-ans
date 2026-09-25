@@ -24,8 +24,9 @@ Branche `zg2-quadtree` (worktree agent). Liens symboliques non versionnés : `da
   `--no-pyramid`, `--qt-debug=1|2`, `--camera-min=`
 - [x] Décodeur Rust asynchrone `ReliefDecoder` (fils natifs, `request`/`poll`)
 - [x] Docs godot-map.md (section « Relief streamé »)
-- [~] Captures `docs/img/zg2/` (Chartreuse, Rouen, puy de Dôme avant/après faites)
-- [ ] Mesures du banc (charge machine encore ~170 le 25/09 11 h), addendum ADR 0036
+- [x] Captures `docs/img/zg2/` (Chartreuse, Rouen, puy de Dôme avant/après)
+- [x] Mesures du banc (relatives, charge 200+), délai de repos 700 ms des recalages par pages
+- [x] Addendum ADR 0036, test de fumée OK, test ZG2 OK
 
 ## Décisions en cours de route
 - godot-rust est mono-fil (panique si `GameDataStore` est appelé hors fil principal) : décodage
@@ -35,9 +36,11 @@ Branche `zg2-quadtree` (worktree agent). Liens symboliques non versionnés : `da
   2 morceaux toutes les 250 ms.
 
 ## Prochaine étape
-Pyramide réelle d'essai : `python3 <scratchpad>/mk_manifest.py <dossier>/relief_pyramid.json` (manifeste tiré
-du cache partagé, lien `pyramid/` vers `data/map/pyramid`), puis `--pyramid-dir=<dossier>`.
-Reste : banc `--bench-map` avec et sans pyramide, addendum ADR 0036, fumée, rapport.
+Lot terminé (en attente de fusion). Pyramide réelle d'essai :
+`python3 game/tests/fixtures/zg2/manifest_from_cache.py <dossier>/relief_pyramid.json` (lien
+`<dossier>/pyramid` → `data/map/pyramid`), puis `--pyramid-dir=<dossier>`.
+Suites : banc sur machine au repos (cible 60 i/s), recalages des maquettes (`landmark_model`,
+50-300 ms synchrones) à rendre incrémentaux, caméra rapprochée (ZG4).
 
 ## Mesures
-(à venir)
+Voir `docs/godot-map.md` (fin de la section « Relief streamé ») et l'addendum de l'ADR 0036.
