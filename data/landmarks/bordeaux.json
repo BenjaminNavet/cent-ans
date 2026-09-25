@@ -1,0 +1,254 @@
+{
+  "id": "bordeaux",
+  "name": "Bordeaux",
+  "settlement": "set_bordeaux",
+  "period": "vers 1340-1453, capitale de la Guyenne anglaise (tour Pey-Berland dès 1440)",
+  "province": "prov_guyenne",
+  "sources": [
+    {
+      "title": "Burdegala (Bordeaux), plan cavalier",
+      "author": "Georg Braun et Frans Hogenberg, Civitates orbis terrarum",
+      "date": "1575",
+      "url": "https://commons.wikimedia.org/wiki/Category:Old_maps_of_Bordeaux",
+      "license": "Domaine public",
+      "use": "Troisième enceinte et portes sur le fleuve, port de la Lune, cathédrale et ses flèches, Grosse Cloche, palais de l'Ombrière."
+    },
+    {
+      "title": "Plan de Bordeaux au XIVe siècle (restitution)",
+      "author": "Léo Drouyn, La Guienne militaire",
+      "date": "1865",
+      "url": "https://commons.wikimedia.org/wiki/Category:L%C3%A9o_Drouyn",
+      "license": "Domaine public",
+      "use": "Tracé de l'enceinte de 1302-1327, palais de l'Ombrière, portes."
+    },
+    {
+      "title": "OpenStreetMap (Garonne, cathédrale Saint-André, tour Pey-Berland, Grosse Cloche, porte Cailhau, place du Palais, Saint-Michel, Sainte-Croix, Saint-Seurin)",
+      "author": "Contributeurs d'OpenStreetMap",
+      "date": "2026",
+      "url": "https://www.openstreetmap.org/copyright",
+      "license": "ODbL 1.0 (contrôle de position ; une vingtaine de points arrondis à la main)",
+      "use": "Axe de la Garonne et courbe du port de la Lune, positions des monuments."
+    }
+  ],
+  "anchor": {
+    "lonlat": [-0.5776, 44.8378],
+    "px": [1831.52, 2502.874],
+    "north_bearing_deg": 7.71
+  },
+  "scale": {
+    "center_meters_per_unit": 180,
+    "core_radius_m": 1700,
+    "core_radius_px": 5.6,
+    "zone_radius_px": 6.4,
+    "monument_scale": 1.9,
+    "house_scale": 1.6,
+    "height_scale": 1.25
+  },
+  "rivers": [
+    {
+      "id": "garonne",
+      "name": "Garonne",
+      "points": [[4907, -6541, 500], [4179, -4661, 500], [3756, -2800, 520], [3561, -2371, 520], [3157, -1656, 540], [2556, -1057, 550], [1596, -362, 560], [1312, -76, 560], [1167, 70, 560], [1039, 212, 560], [906, 367, 560], [839, 616, 560], [775, 958, 560], [805, 1100, 560], [963, 1468, 560], [1280, 1770, 560], [2171, 2396, 560], [2726, 2894, 560], [2859, 3368, 560], [2902, 3774, 560], [3257, 4700, 560]]
+    },
+    {
+      "id": "peugue",
+      "name": "Peugue",
+      "points": [[-1600, -700, 16], [-900, -450, 16], [-350, -250, 16], [200, -120, 18], [560, -10, 20], [790, 30, 24]]
+    }
+  ],
+  "areas": [
+    {
+      "id": "ville",
+      "name": "La ville close (troisième enceinte, 1302-1327)",
+      "kind": "built",
+      "density": 0.9,
+      "polygon": [[-350, 420], [250, 450], [560, 430], [720, 320], [880, 60], [1080, -190], [1300, -420], [1500, -650], [1520, -950], [900, -980], [300, -920], [-350, -720]]
+    },
+    {
+      "id": "saint_seurin",
+      "name": "Bourg Saint-Seurin",
+      "kind": "built",
+      "density": 0.3,
+      "polygon": [[-350, 420], [-400, 800], [-900, 900], [-1000, 400], [-700, 100], [-350, 0]]
+    },
+    {
+      "id": "chartrons",
+      "name": "Faubourg des Chartreux",
+      "kind": "built",
+      "density": 0.2,
+      "polygon": [[250, 450], [-300, 700], [100, 1300], [450, 1500], [520, 900], [560, 430]]
+    },
+    {
+      "id": "faubourg_sud",
+      "name": "Faubourgs Sainte-Croix et Saint-Julien",
+      "kind": "built",
+      "density": 0.2,
+      "polygon": [[-350, -720], [300, -920], [900, -980], [1520, -950], [1300, -1500], [300, -1500], [-400, -1200]]
+    },
+    {
+      "id": "la_bastide",
+      "name": "La Bastide (rive droite)",
+      "kind": "built",
+      "density": 0.12,
+      "polygon": [[1500, 500], [2000, 300], [2400, 800], [1900, 1300], [1350, 1100]]
+    }
+  ],
+  "open_spaces": [
+    {
+      "id": "place_du_palais",
+      "name": "Place du Palais",
+      "kind": "square",
+      "polygon": [[610, 0], [690, 10], [700, 95], [630, 85]]
+    },
+    {
+      "id": "parvis_saint_andre",
+      "name": "Place Saint-André",
+      "kind": "parvis",
+      "polygon": [[-200, -90], [20, -90], [20, 60], [-200, 60]]
+    }
+  ],
+  "walls": [
+    {
+      "id": "enceinte",
+      "name": "Troisième enceinte (1302-1327) et mur des quais",
+      "points": [[-350, 420], [250, 450], [560, 430], [720, 320], [880, 60], [1080, -190], [1300, -420], [1500, -650], [1520, -950], [900, -980], [300, -920], [-350, -720]],
+      "closed": true,
+      "height_m": 10,
+      "tower_spacing_m": 85,
+      "tower_shape": "round",
+      "ditch": true,
+      "gates": [
+        { "name": "Porte Dijeaux", "at": [-350, 150] },
+        { "name": "Porte du Caillau", "at": [800, 190] },
+        { "name": "Porte de la Rousselle", "at": [1000, -90] },
+        { "name": "Porte des Salinières", "at": [1200, -310] },
+        { "name": "Porte Saint-Julien", "at": [300, -920] },
+        { "name": "Porte Médoque", "at": [250, 450] }
+      ]
+    }
+  ],
+  "streets": [
+    { "id": "rue_sainte_catherine", "name": "Rue Sainte-Catherine (cardo)", "points": [[300, 450], [330, 0], [350, -500], [300, -920]], "width_m": 11 },
+    { "id": "rue_du_loup", "name": "Grand-rue vers le palais", "points": [[-50, 40], [300, 60], [640, 50]], "width_m": 10 },
+    { "id": "rue_des_ayres", "name": "Rue vers la Grosse Cloche et Saint-Michel", "points": [[0, -120], [495, -257], [954, -394], [1300, -420]], "width_m": 10 },
+    { "id": "route_du_medoc", "name": "Chemin du Médoc", "points": [[250, 450], [150, 1000], [0, 1800]], "width_m": 9 },
+    { "id": "route_de_toulouse", "name": "Chemin de Toulouse", "points": [[300, -920], [400, -1500], [600, -2400]], "width_m": 9 },
+    { "id": "route_de_saint_seurin", "name": "Chemin de Saint-Seurin", "points": [[-350, 150], [-598, 560], [-1000, 900]], "width_m": 9 }
+  ],
+  "monuments": [
+    {
+      "id": "saint_andre",
+      "name": "Cathédrale Saint-André",
+      "model": "gothic_cathedral",
+      "at": [-73, -34],
+      "angle_deg": 0,
+      "clear_radius_m": 100,
+      "params": {
+        "length_m": 124, "nave_half": 9, "aisle_half": 12, "vault_m": 26, "ridge_m": 35, "aisle_wall_m": 14,
+        "east": "round", "transept_m": 58, "transept_x": 18, "bays": 10,
+        "transept_spires": { "side": 1, "height": 46, "size": 8, "spire_m": 35 }
+      },
+      "description": "Nef unique élargie au XIIIe s., chœur rayonnant (1280-1350) payé en partie par les rois d'Angleterre ; deux flèches sur le portail nord."
+    },
+    {
+      "id": "pey_berland",
+      "name": "Tour Pey-Berland",
+      "model": "belfry",
+      "at": [74, -29],
+      "scale": 1.5,
+      "from_year": 1440,
+      "clear_radius_m": 15,
+      "params": { "stages": [{ "size": 10, "height": 30 }, { "size": 9, "height": 46 }], "top": "spire", "top_m": 20, "turrets": true, "clock": false },
+      "description": "Clocher isolé de la cathédrale, élevé par l'archevêque Pey Berland à partir de 1440."
+    },
+    {
+      "id": "ombriere",
+      "name": "Palais de l'Ombrière (siège du sénéchal de Guyenne)",
+      "model": "castle",
+      "at": [640, 60],
+      "scale": 1.3,
+      "clear_radius_m": 60,
+      "params": {
+        "rings": [
+          { "points": [[-40, -30], [35, -30], [40, 30], [-40, 30]], "height": 12, "thick": 3, "tower_radius": 5, "tower_height": 18, "tower_shape": "square", "tower_roof": "pyramid" }
+        ],
+        "keep": { "shape": "square", "at": [-20, 12], "size": [16, 16], "height": 34, "roof": "pyramid" },
+        "halls": [[10, -12, 40, 12, 13, 0]],
+        "ward": "Paving"
+      },
+      "description": "Ancien palais des ducs d'Aquitaine, résidence du sénéchal anglais ; tour de l'Arbalesteyre."
+    },
+    {
+      "id": "grosse_cloche",
+      "name": "Grosse Cloche (porte Saint-Éloi)",
+      "model": "gate_tower",
+      "at": [495, -257],
+      "angle_deg": 0,
+      "scale": 1.6,
+      "clear_radius_m": 20,
+      "params": { "width": 16, "height": 22, "tower_radius": 5, "tower_height": 30, "cones": true, "bell": true, "clock": true },
+      "description": "Beffroi de l'hôtel de ville (jurade) sur l'ancienne porte Saint-Éloi, deux tours rondes à toits en poivrière."
+    },
+    {
+      "id": "saint_michel",
+      "name": "Église Saint-Michel",
+      "model": "church",
+      "at": [954, -394],
+      "angle_deg": 0,
+      "size": 1.0,
+      "clear_radius_m": 35
+    },
+    {
+      "id": "sainte_croix",
+      "name": "Abbaye Sainte-Croix",
+      "model": "abbey",
+      "at": [1325, -771],
+      "size": 0.8,
+      "clear_radius_m": 50
+    },
+    {
+      "id": "saint_seurin",
+      "name": "Collégiale Saint-Seurin",
+      "model": "church",
+      "at": [-598, 614],
+      "size": 0.85,
+      "clear_radius_m": 30
+    },
+    {
+      "id": "cog_lune_1",
+      "name": "Nef du vin (port de la Lune)",
+      "model": "cog",
+      "at": [1000, 330],
+      "angle_deg": 120,
+      "scale": 1.2,
+      "params": { "length": 26, "sail": false }
+    },
+    {
+      "id": "cog_lune_2",
+      "name": "Nef du vin (port de la Lune)",
+      "model": "cog",
+      "at": [1130, 90],
+      "angle_deg": 130,
+      "scale": 1.2,
+      "params": { "length": 24, "sail": false }
+    },
+    {
+      "id": "cog_lune_3",
+      "name": "Nef du vin (port de la Lune)",
+      "model": "cog",
+      "at": [1300, -150],
+      "angle_deg": 135,
+      "scale": 1.2,
+      "params": { "length": 25, "sail": false }
+    },
+    {
+      "id": "cog_lune_4",
+      "name": "Nef du vin sous voile",
+      "model": "cog",
+      "at": [980, 800],
+      "angle_deg": 95,
+      "scale": 1.2,
+      "params": { "length": 27 }
+    }
+  ]
+}
