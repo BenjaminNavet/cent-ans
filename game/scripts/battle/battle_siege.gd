@@ -305,6 +305,8 @@ func _build_square() -> void:
 	disc.position = Vector3(center.x, _ground(center.x, center.y) + 0.05, center.y)
 	disc.name = "Square"
 	add_child(disc)
+	if BuildingKit.available():
+		return  # BR2 : puits et marché du kit (`_kit_market`).
 	# Puits au centre.
 	var well := MeshInstance3D.new()
 	var ring := CylinderMesh.new()
@@ -383,7 +385,10 @@ func _build_kit_town(houses_root: Node3D, church_index: int, center: Vector2) ->
 			handles.append(_kit_place("church", p, 34.0, 12.5, yaw, rng))
 		elif bool(site.get("suburb", false)):
 			var kind: String = ["cottage", "timber", "longere", "barn", "cottage"][rng.randi_range(0, 4)]
-			handles.append(_kit_place(kind, p, r * 1.35, r * 0.8, rng.randf() * TAU, rng))
+			var yaw := rng.randf() * TAU
+			handles.append(_kit_place(kind, p, r * 1.35, r * 0.8, yaw, rng))
+			if rng.randf() < 0.55:
+				handles.append(BuildingKit.add_front_prop(_kit_batch, rng, ["woodpile", "cart", "barrels"], p, -yaw, r * 1.35, r * 0.8, _ground))
 		else:
 			# Îlot de deux rangées dos à dos : façades vers la place et vers la rue extérieure.
 			var inward := (center - p).normalized()
@@ -410,9 +415,46 @@ func _build_kit_town(houses_root: Node3D, church_index: int, center: Vector2) ->
 					var d := depth * (rng.randf_range(0.9, 1.05) if kind == "townhouse" else 0.9)
 					var q := row_center + tangent * (x + w * 0.5) - facing * (depth - d) * 0.5
 					handles.append(_kit_place(kind, q, w, d, yaw, rng))
+					# BR2 : étals côté place, tonneaux, charrettes et bûches côté rue.
+					if rng.randf() < 0.3:
+						var kinds := ["stall", "stall", "barrels", "cart"] if row == 0 else ["barrels", "barrels", "woodpile", "cart"]
+						handles.append(BuildingKit.add_front_prop(_kit_batch, rng, kinds, q, -yaw, w, d, _ground))
 					x += w
 		_kit_sites[i] = handles.filter(func(h: Array) -> bool: return not h.is_empty())
+	_kit_market(center, rng)
 	_kit_batch.build(houses_root)
+
+
+## BR2 : place du marché. Puits du kit au centre, étals en couronne au bord de la place (face au
+## centre, par groupes, en laissant des passages vers les rues), quelques charrettes et tonneaux ;
+## le centre reste dégagé pour la mêlée. Tout est posé sur le dessus du dallage.
+func _kit_market(center: Vector2, rng: RandomNumberGenerator) -> void:
+	var radius := float(siege.get("square_radius", 35.0))
+	var top := _ground(center.x, center.y) + 0.2
+	var wells := BuildingKit.models_of("well")
+	if not wells.is_empty():
+		_kit_batch.add(wells[0], Transform3D(Basis(Vector3.UP, rng.randf() * TAU), Vector3(center.x, top - 0.1, center.y)))
+	var stalls := BuildingKit.models_of("stall")
+	var extras := BuildingKit.models_of("cart") + BuildingKit.models_of("barrels")
+	if stalls.is_empty():
+		return
+	var groups := 5
+	for g in groups:
+		var base := TAU * float(g) / groups + rng.randf_range(-0.15, 0.15)
+		var count := rng.randi_range(2, 4)
+		for k in count:
+			var a := base + float(k) * 4.0 / (radius * 0.8)
+			var p := center + Vector2(cos(a), sin(a)) * radius * 0.8
+			# Façade (+Z du modèle) vers le centre de la place.
+			var to_center := (center - p).normalized()
+			var theta := atan2(to_center.x, to_center.y)
+			var model: String = stalls[rng.randi_range(0, stalls.size() - 1)]
+			_kit_batch.add(model, Transform3D(Basis(Vector3.UP, theta), Vector3(p.x, top, p.y)))
+		if not extras.is_empty() and rng.randf() < 0.7:
+			var a := base - 5.0 / (radius * 0.8)
+			var p := center + Vector2(cos(a), sin(a)) * radius * 0.86
+			var model: String = extras[rng.randi_range(0, extras.size() - 1)]
+			_kit_batch.add(model, Transform3D(Basis(Vector3.UP, rng.randf() * TAU), Vector3(p.x, top, p.y)))
 
 
 ## Pose un bâtiment du kit (emprise `length` le long de son axe X, façade vers +Z, lacet `yaw`).
