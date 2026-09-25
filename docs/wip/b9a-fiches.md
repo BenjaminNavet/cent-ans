@@ -15,11 +15,11 @@ Branche : `b9a-fiches` (partie de `integration/historien`).
 | 6 | `cdx_taddeo_pepoli` | écrite (entité prov_bologna) |
 | 7 | `cdx_savoie_achaie` | écrite (entité prov_piemont ; description corrigée : Suse au comte) |
 | 8 | `cdx_conquete_de_la_sardaigne` | écrite (entité prov_sardegna) |
-| — | Vérification Breteuil / Romorantin (fiches jeu) | à faire |
-| — | Rapport audit § 10 | à faire |
+| — | Vérification Breteuil / Romorantin (fiches jeu) | faite : exacts ; cdx_beffroi et cdx_jeu_incendies précisés |
+| — | Rapport audit § 10 | fait (section « Rédigées par le lot B9a ») |
 
 ## Prochaine étape
 
-Vérifier Breteuil et Romorantin ; mettre à jour l'audit ; validateur + `pytest tools/tests/test_codex.py`.
+Lot terminé : validateur vert (397 fiches), `pytest tools/tests/test_codex.py` vert. Reste : fusion dans `integration/historien` (conflit probable avec B9b dans l'audit § 10, à résoudre à la main).
 
 Pas de build (disque plein) : seul le validateur Python.
