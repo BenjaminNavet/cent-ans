@@ -33,6 +33,11 @@ var height_bpp: int = 1
 var height_little_endian: bool = false
 ## "rust" (GameDataStore), "png16" (GDScript) ou "8bit" (repli Image.load_from_file).
 var height_decoder: String = ""
+## Fichier d'altitude chargé : `heightmap_render.png` (lot R1 : Copernicus 90 m moyenné, relief
+## local rehaussé pour le rendu, même trait de côte) s'il existe (`map.json.render_heightmap`),
+## sinon `heightmap.png` (source des règles : grille de navigation). Surface unique du rendu :
+## terrain, armées, villes, fleuves et sélection passent tous par `MapData`.
+var height_file: String = "heightmap.png"
 
 var land_mask: Image
 ## Rasters optionnels du shader de terrain (`cent-ans geo splat`), null si absents :
@@ -128,22 +133,25 @@ func _load_map_json() -> bool:
 	meters_per_px = float(meta.get("meters_per_px", 800.0))
 	height_min_m = float(meta.get("height_min_m", -200.0))
 	height_max_m = float(meta.get("height_max_m", 4800.0))
+	var render: Variant = meta.get("render_heightmap")
+	if render is Dictionary and FileAccess.file_exists(map_dir.path_join(str(render.get("file", "")))):
+		height_file = str(render["file"])
 	if size.x <= 0 or size.y <= 0:
 		return _fail("map.json: invalid size_px")
 	return true
 
 
 func _load_heightmap() -> bool:
-	var path := map_dir.path_join("heightmap.png")
+	var path := map_dir.path_join(height_file)
 	if not FileAccess.file_exists(path):
-		return _fail("heightmap.png missing")
+		return _fail("%s missing" % height_file)
 	var raw16 := _load_heightmap_rust(path)
 	if raw16.is_empty():
 		raw16 = _load_heightmap_16(path)
 	if raw16.is_empty():
 		var img := Image.load_from_file(path)
 		if img == null:
-			return _fail("heightmap.png unreadable")
+			return _fail("%s unreadable" % height_file)
 		if img.get_format() != Image.FORMAT_L8:
 			img.convert(Image.FORMAT_L8)
 		height_image = img
@@ -156,7 +164,7 @@ func _load_heightmap() -> bool:
 		height_little_endian = raw16.get("little_endian", false)
 		height_decoder = raw16.get("decoder", "png16")
 	if height_image.get_size() != size:
-		return _fail("heightmap.png size %s != map.json size_px %s" % [height_image.get_size(), size])
+		return _fail("%s size %s != map.json size_px %s" % [height_file, height_image.get_size(), size])
 	height_bytes = height_image.get_data()
 	return true
 
