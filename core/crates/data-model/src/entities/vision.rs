@@ -29,8 +29,16 @@ pub struct VisionRules {
     /// for the province to count as visible (lot M5a).
     #[serde(default = "default_province_seen_percent")]
     pub province_seen_percent: u32,
+    /// Whether every land cell of a province controlled by the faction (or
+    /// a lending ally) is seen, as in Total War (lot M5a).
+    #[serde(default = "default_own_provinces_visible")]
+    pub own_provinces_visible: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+fn default_own_provinces_visible() -> bool {
+    true
 }
 
 fn default_province_seen_percent() -> u32 {
@@ -47,6 +55,7 @@ impl Default for VisionRules {
             general_bonus: 0,
             share_allied_vision: true,
             province_seen_percent: default_province_seen_percent(),
+            own_provinces_visible: default_own_provinces_visible(),
             description: None,
         }
     }
