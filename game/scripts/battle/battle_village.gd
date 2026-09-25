@@ -75,9 +75,18 @@ func _build_houses(village: Dictionary) -> void:
 	if BuildingKit.available():
 		# BR1 : bâtiments réalistes du kit Blender, un MultiMesh par modèle.
 		var batch := BuildingKit.Batch.new("snow" if _snowy else "", 1600.0)
-		for house in village.get("houses", []):
-			if _kit_house(batch, house):
+		var props: Array = village.get("props", [])
+		var houses: Array = village.get("houses", [])
+		for i in houses.size():
+			if _kit_house(batch, houses[i], _prop_side(houses[i], i, props)):
 				house_count += 1
+		# BR3 : mobilier du cœur (solide pour les figurines), taille réelle, dos au mur.
+		for k in props.size():
+			var prop: Dictionary = props[k]
+			var model := BuildingKit.prop_model(str(prop["kind"]), k)
+			if model != "":
+				var y := _terrain.height_at(float(prop["x"]), float(prop["z"])) - 0.03
+				batch.add(model, BuildingKit.prop_transform(prop, y))
 		batch.build(root)
 		return
 	for house in village.get("houses", []):
@@ -102,10 +111,23 @@ static func kit_kind(kind: String, length: float, rng: RandomNumberGenerator) ->
 			return "longere" if length > 11.0 else "cottage"
 
 
+## BR3 : côté de la façade d'une maison qui a du mobilier du cœur devant elle (+1 : face avant
+## (-sin, cos) du lacet, -1 : l'autre) ; 0 sans mobilier (côté tiré au hasard).
+static func _prop_side(house: Dictionary, index: int, props: Array) -> int:
+	var yaw := float(house["yaw"])
+	var front := Vector2(-sin(yaw), cos(yaw))
+	for prop in props:
+		if int(prop["house"]) == index:
+			var d := Vector2(float(prop["x"]) - float(house["x"]), float(prop["z"]) - float(house["z"]))
+			return 1 if d.dot(front) >= 0.0 else -1
+	return 0
+
+
 ## Pose une maison du kit sur son emprise (lacet de la simulation, de +x vers +z) : origine au
 ## centre, calée sur le bas de la pente sans descendre de plus de 1,4 m sous le haut (les
-## fondations du modèle comblent le reste). `false` si aucun modèle ne convient.
-func _kit_house(batch: BuildingKit.Batch, house: Dictionary) -> bool:
+## fondations du modèle comblent le reste). `side` : façade tournée vers le mobilier (BR3).
+## `false` si aucun modèle ne convient.
+func _kit_house(batch: BuildingKit.Batch, house: Dictionary, side: int = 0) -> bool:
 	var p := Vector2(float(house["x"]), float(house["z"]))
 	var length := float(house["length"])
 	var width := float(house["width"])
@@ -122,13 +144,12 @@ func _kit_house(batch: BuildingKit.Batch, house: Dictionary) -> bool:
 		var h := _terrain.height_at(q.x, q.y)
 		low = minf(low, h)
 		high = maxf(high, h)
-	# Façade (+Z du modèle) tournée d'un côté ou de l'autre du faîtage.
+	# Façade (+Z du modèle) tournée d'un côté ou de l'autre du faîtage (vers le mobilier s'il y en a).
 	var flip := PI if rng.randf() < 0.5 else 0.0
+	if side != 0:
+		flip = 0.0 if side > 0 else PI
 	var basis := Basis(Vector3.UP, -yaw + flip) * Basis.from_scale(BuildingKit.fit_scale(model, length, width))
 	batch.add(model, Transform3D(basis, Vector3(p.x, minf(high, low + 1.4) - 0.05, p.y)))
-	# BR2 : bûcher, charrette ou tonneaux devant les maisons (pas l'église).
-	if str(house["kind"]) != "church" and rng.randf() < 0.5:
-		BuildingKit.add_front_prop(batch, rng, ["woodpile", "woodpile", "cart", "barrels"], p, -yaw + flip, length, width, _terrain.height_at)
 	return true
 
 

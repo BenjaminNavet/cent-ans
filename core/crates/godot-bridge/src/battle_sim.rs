@@ -71,6 +71,21 @@ fn parse_side(raw: &GString) -> Option<SideId> {
 
 /// Rendering family of a regiment: `infantry`, `archer`, `cavalry`, `siege`,
 /// or `ram` / `tower` (siege battles: drawn as one machine, not soldiers).
+/// BR3: a piece of street furniture for the renderer, `{kind, x, z, yaw,
+/// length, depth, house}` (`house` = -1 on the market square; yaw of the
+/// core: length along (cos, sin), front along (-sin, cos)).
+fn prop_dict(prop: &sim_battle::Prop) -> VarDictionary {
+    vdict! {
+        "kind" => prop.kind.key(),
+        "x" => prop.x,
+        "z" => prop.z,
+        "yaw" => prop.yaw,
+        "length" => prop.length,
+        "depth" => prop.depth,
+        "house" => prop.house.map_or(-1, |h| h as i64),
+    }
+}
+
 fn render_key(unit: &Unit) -> &'static str {
     if unit.ram {
         return "ram";
@@ -556,7 +571,8 @@ impl BattleSim {
     /// `ground_label`, `site_label` (B6), `woodland` (0-1), `pools[{x, z, radius}]`,
     /// `obstacles[{a: Vector2, b: Vector2, kind: hedge|fence|ditch}]`,
     /// `coast?{flank: west|east, shore_x, beach}`,
-    /// `village?{x, z, radius, farm, houses[{x, z, length, width, yaw, kind}]}`.
+    /// `village?{x, z, radius, farm, houses[{x, z, length, width, yaw, kind}],
+    /// props[{kind, x, z, yaw, length, depth, house}]}` (BR3).
     /// R2: `forests` and `mud` are overlapping discs (anchors first, then
     /// lobes and copses).
     /// EP3: `river` also carries `widths` (water width at each point),
@@ -636,11 +652,17 @@ impl BattleSim {
                     .to_variant()
                 })
                 .collect();
+            // BR3: props laid by the core (solid for the figures).
+            let props: VarArray = sim
+                .village_props()
+                .iter()
+                .map(|p| prop_dict(p).to_variant())
+                .collect();
             dict.set(
                 "village",
                 &vdict! {
                     "x" => village.zone.x, "z" => village.zone.z, "radius" => village.zone.radius,
-                    "farm" => village.farm, "houses" => &houses,
+                    "farm" => village.farm, "houses" => &houses, "props" => &props,
                 },
             );
         }
@@ -736,7 +758,8 @@ impl BattleSim {
     /// gate, hold_time, hold_to_win, integrity, pieces[{index, kind: "wall"|"gate",
     /// a: Vector2, b: Vector2, hp, max_hp, intact, docked_tower}],
     /// towers[{x, z, radius, height}], houses[{x, z, radius, suburb, fire: {state:
-    /// "intact"|"burning"|"burnt", intensity}}], gate_fire: {state, intensity},
+    /// "intact"|"burning"|"burnt", intensity}, length, depth, yaw, rows, church}],
+    /// props[{kind, x, z, yaw, length, depth, house}] (BR3), gate_fire: {state, intensity},
     /// wind: Vector2 (direction × strength 0-1), houses_burning, houses_burnt,
     /// sortie, ram_period, oil_period}`. Pieces lose HP and houses burn during the battle (S2): call it
     /// again to show the damage.
@@ -790,9 +813,21 @@ impl BattleSim {
                     "radius" => h.radius,
                     "suburb" => h.suburb,
                     "fire" => &blaze(&h.fire),
+                    // BR3: the block's rectangle (length along (cos, sin)
+                    // of yaw, row 0 facing (-sin, cos)), rows, church.
+                    "length" => h.length,
+                    "depth" => h.depth,
+                    "yaw" => h.yaw,
+                    "rows" => i64::from(h.rows),
+                    "church" => h.church,
                 }
                 .to_variant()
             })
+            .collect();
+        let props: VarArray = works
+            .props
+            .iter()
+            .map(|p| prop_dict(p).to_variant())
             .collect();
         vdict! {
             "fortification" => i64::from(works.fortification),
@@ -807,6 +842,7 @@ impl BattleSim {
             "pieces" => &pieces,
             "towers" => &towers,
             "houses" => &houses,
+            "props" => &props,
             "sortie" => works.sortie,
             "gate_fire" => &blaze(&works.gate_fire),
             "wind" => v2(works.wind),

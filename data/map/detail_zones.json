@@ -1,5 +1,5 @@
 {
-  "description": "Zones de relief détaillé du palier 3 (ADR 0036). Liste complétée par le lot ZG3.",
+  "description": "Zones de relief détaillé du palier 3 (ADR 0036, lot ZG3) : villes emblématiques, batailles, sièges et forteresses de la guerre de Cent Ans. E5 sur half_size_km, E6 sur min(half, 6 km), E7 sur min(half, 3 km).",
   "zones": [
     {
       "id": "paris",
@@ -9,7 +9,363 @@
       "half_size_km": 12,
       "max_level": 7,
       "source": "ign_rge_alti",
-      "why": "Capitale du royaume de France ; enceintes de Philippe Auguste et de Charles V (1356-1383)."
+      "settlement_id": "set_paris",
+      "why": "Capitale du royaume de France ; enceintes de Philippe Auguste et de Charles V (1356-1383), Louvre, Cité ; ville emblématique du jeu."
+    },
+    {
+      "id": "londres",
+      "name": "Londres",
+      "kind": "city",
+      "center_lonlat": [-0.1050, 51.5080],
+      "half_size_km": 10,
+      "max_level": 7,
+      "source": "ea_lidar",
+      "settlement_id": "set_londres",
+      "why": "Capitale du royaume d'Angleterre : Cité, Tour de Londres, Westminster, Southwark ; ville emblématique du jeu."
+    },
+    {
+      "id": "avignon",
+      "name": "Avignon",
+      "kind": "city",
+      "center_lonlat": [4.8075, 43.9508],
+      "half_size_km": 8,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_avignon",
+      "why": "Siège de la papauté (1309-1377) : palais des Papes, pont Saint-Bénézet, remparts (1355-1370), Villeneuve et le fort Saint-André ; ville emblématique du jeu."
+    },
+    {
+      "id": "calais",
+      "name": "Calais",
+      "kind": "siege",
+      "center_lonlat": [1.8530, 50.9560],
+      "half_size_km": 10,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_calais",
+      "why": "Siège de Calais par Édouard III (sept. 1346 - août 1347), camp de Villeneuve-la-Hardie, marais ; place anglaise jusqu'en 1558 ; ville emblématique du jeu."
+    },
+    {
+      "id": "rouen",
+      "name": "Rouen",
+      "kind": "siege",
+      "center_lonlat": [1.0940, 49.4410],
+      "half_size_km": 10,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_rouen",
+      "why": "Capitale normande, siège par Henri V (juillet 1418 - janvier 1419), procès de Jeanne d'Arc (1431), reprise en 1449 ; ville emblématique du jeu."
+    },
+    {
+      "id": "bordeaux",
+      "name": "Bordeaux",
+      "kind": "city",
+      "center_lonlat": [-0.5720, 44.8400],
+      "half_size_km": 10,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_bordeaux",
+      "why": "Capitale de la Guyenne anglaise, cour du Prince Noir, port du vin ; reddition le 19 octobre 1453 ; ville emblématique du jeu."
+    },
+    {
+      "id": "bruges",
+      "name": "Bruges",
+      "kind": "city",
+      "center_lonlat": [3.2247, 51.2093],
+      "half_size_km": 10,
+      "max_level": 7,
+      "source": "dhm_vlaanderen",
+      "extra_sources": ["ahn"],
+      "settlement_id": "set_bruges",
+      "why": "Métropole drapière et marchande de Flandre, alliée anglaise sous Artevelde (1338-1345), avant-port de Damme sur le Zwin ; ville emblématique du jeu."
+    },
+    {
+      "id": "crecy",
+      "name": "Crécy",
+      "kind": "battle",
+      "center_lonlat": [1.8790, 50.2560],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_crecy_en_ponthieu",
+      "why": "Bataille de Crécy (26 août 1346) : coteau du moulin, vallée des Clercs, forêt de Crécy ; carte historique EP7."
+    },
+    {
+      "id": "poitiers",
+      "name": "Poitiers (Nouaillé-Maupertuis)",
+      "kind": "battle",
+      "center_lonlat": [0.4050, 46.5200],
+      "half_size_km": 9,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Bataille de Poitiers (19 septembre 1356), capture de Jean le Bon : haies, vignes et gué du Miosson à Nouaillé-Maupertuis, la ville au nord ; carte historique EP7."
+    },
+    {
+      "id": "azincourt",
+      "name": "Azincourt",
+      "kind": "battle",
+      "center_lonlat": [2.1400, 50.4640],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_azincourt",
+      "why": "Bataille d'Azincourt (25 octobre 1415) : plateau labouré entre les bois d'Azincourt et de Tramecourt ; carte historique EP7."
+    },
+    {
+      "id": "l_ecluse",
+      "name": "L'Écluse (Sluis)",
+      "kind": "battle",
+      "center_lonlat": [3.3600, 51.3300],
+      "half_size_km": 8,
+      "max_level": 7,
+      "source": "ahn",
+      "extra_sources": ["dhm_vlaanderen"],
+      "settlement_id": "set_sluis",
+      "why": "Bataille navale de L'Écluse (24 juin 1340) dans l'estuaire du Zwin, destruction de la flotte française ; relief actuel des polders (le Zwin est comblé)."
+    },
+    {
+      "id": "auray",
+      "name": "Auray",
+      "kind": "battle",
+      "center_lonlat": [-2.9900, 47.6850],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Bataille d'Auray (29 septembre 1364), fin de la guerre de Succession de Bretagne ; chartreuse fondée sur le champ de bataille."
+    },
+    {
+      "id": "cocherel",
+      "name": "Cocherel",
+      "kind": "battle",
+      "center_lonlat": [1.3720, 49.0750],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Bataille de Cocherel (16 mai 1364) : Du Guesclin bat le captal de Buch dans la vallée de l'Eure."
+    },
+    {
+      "id": "formigny",
+      "name": "Formigny",
+      "kind": "battle",
+      "center_lonlat": [-0.9010, 49.3380],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Bataille de Formigny (15 avril 1450), l'artillerie française brise l'armée anglaise de Normandie."
+    },
+    {
+      "id": "castillon",
+      "name": "Castillon",
+      "kind": "battle",
+      "center_lonlat": [0.0000, 44.8520],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Bataille de Castillon (17 juillet 1453), mort de Talbot devant le parc d'artillerie des Bureau sur la Lidoire : dernière bataille de la guerre."
+    },
+    {
+      "id": "orleans",
+      "name": "Orléans",
+      "kind": "siege",
+      "center_lonlat": [1.9080, 47.9020],
+      "half_size_km": 8,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_orleans",
+      "why": "Siège d'Orléans (octobre 1428 - 8 mai 1429) : Tourelles, bastides anglaises, pont sur la Loire, délivrance par Jeanne d'Arc."
+    },
+    {
+      "id": "harfleur",
+      "name": "Harfleur",
+      "kind": "siege",
+      "center_lonlat": [0.1980, 49.5070],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Siège d'Harfleur par Henri V (août - septembre 1415), prélude à Azincourt ; port de l'estuaire de la Seine."
+    },
+    {
+      "id": "nevilles_cross",
+      "name": "Neville's Cross (Durham)",
+      "kind": "battle",
+      "center_lonlat": [-1.5900, 54.7760],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ea_lidar",
+      "why": "Bataille de Neville's Cross (17 octobre 1346), capture de David II d'Écosse sous Durham ; pendant écossais de Crécy."
+    },
+    {
+      "id": "tournai",
+      "name": "Tournai",
+      "kind": "siege",
+      "center_lonlat": [3.3890, 50.6060],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "glo30",
+      "why": "Siège de Tournai par Édouard III (juillet - septembre 1340). Wallonie : MNT publié en images seulement (pas de valeurs brutes), repli GLO-30."
+    },
+    {
+      "id": "verneuil",
+      "name": "Verneuil",
+      "kind": "battle",
+      "center_lonlat": [0.9280, 48.7390],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Bataille de Verneuil (17 août 1424), « second Azincourt » : défaite franco-écossaise face à Bedford."
+    },
+    {
+      "id": "patay",
+      "name": "Patay",
+      "kind": "battle",
+      "center_lonlat": [1.6960, 48.0490],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "why": "Bataille de Patay (18 juin 1429) : la cavalerie française surprend les archers de Talbot dans la plaine de Beauce."
+    },
+    {
+      "id": "bauge",
+      "name": "Baugé",
+      "kind": "battle",
+      "center_lonlat": [-0.1069, 47.5439],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_bauge",
+      "why": "Bataille de Baugé (22 mars 1421), mort de Thomas de Clarence face aux Écossais de Buchan."
+    },
+    {
+      "id": "la_rochelle",
+      "name": "La Rochelle",
+      "kind": "battle",
+      "center_lonlat": [-1.1520, 46.1591],
+      "half_size_km": 8,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_la_rochelle",
+      "why": "Bataille navale de La Rochelle (22-23 juin 1372), la flotte castillane détruit l'escadre de Pembroke ; tours du port."
+    },
+    {
+      "id": "winchelsea",
+      "name": "Winchelsea",
+      "kind": "battle",
+      "center_lonlat": [0.7061, 50.9250],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ea_lidar",
+      "settlement_id": "set_winchelsea",
+      "why": "Bataille des Espagnols sur mer (29 août 1350) au large de Winchelsea ; ville neuve des Cinq-Ports pillée en 1360."
+    },
+    {
+      "id": "southampton",
+      "name": "Southampton",
+      "kind": "siege",
+      "center_lonlat": [-1.4048, 50.9000],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ea_lidar",
+      "settlement_id": "set_southampton",
+      "why": "Raid franco-génois sur Southampton (octobre 1338), murs reconstruits ensuite ; port d'embarquement d'Henri V en 1415."
+    },
+    {
+      "id": "chateau_gaillard",
+      "name": "Château-Gaillard",
+      "kind": "fortress",
+      "center_lonlat": [1.4031, 49.2380],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_chateau_gaillard",
+      "why": "Château-Gaillard sur son éperon dominant la Seine aux Andelys ; siège anglais (1418-1419) et reprise française (1429, 1449)."
+    },
+    {
+      "id": "vincennes",
+      "name": "Vincennes",
+      "kind": "fortress",
+      "center_lonlat": [2.4350, 48.8425],
+      "half_size_km": 4,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_vincennes",
+      "why": "Donjon (1361-1369) et enceinte de Vincennes, résidence royale de Charles V ; Henri V y meurt en 1422."
+    },
+    {
+      "id": "carcassonne",
+      "name": "Carcassonne",
+      "kind": "fortress",
+      "center_lonlat": [2.3635, 43.2064],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_carcassonne",
+      "why": "Cité de Carcassonne, double enceinte ; le Prince Noir brûle la ville basse en novembre 1355 sans prendre la Cité."
+    },
+    {
+      "id": "mont_saint_michel",
+      "name": "Mont-Saint-Michel",
+      "kind": "fortress",
+      "center_lonlat": [-1.5115, 48.6361],
+      "half_size_km": 8,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_mont_saint_michel",
+      "why": "Abbaye fortifiée jamais prise, siège anglais (1423-1434) et forteresse de Tombelaine ; relief actuel de la baie (herbus et polders)."
+    },
+    {
+      "id": "douvres",
+      "name": "Douvres",
+      "kind": "fortress",
+      "center_lonlat": [1.3215, 51.1290],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ea_lidar",
+      "settlement_id": "set_dover",
+      "why": "Château de Douvres, « clef de l'Angleterre », sur les falaises face à Calais ; port des Cinq-Ports."
+    },
+    {
+      "id": "chinon",
+      "name": "Chinon",
+      "kind": "fortress",
+      "center_lonlat": [0.2425, 47.1667],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_chinon",
+      "why": "Forteresse royale sur la Vienne : Jeanne d'Arc y reconnaît Charles VII (mars 1429)."
+    },
+    {
+      "id": "caen",
+      "name": "Caen",
+      "kind": "siege",
+      "center_lonlat": [-0.3630, 49.1860],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_caen",
+      "why": "Sac de Caen par Édouard III (26 juillet 1346), siège par Henri V (1417), reprise française (1450) ; château de Guillaume."
+    },
+    {
+      "id": "meaux",
+      "name": "Meaux",
+      "kind": "siege",
+      "center_lonlat": [2.8783, 48.9603],
+      "half_size_km": 5,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_meaux",
+      "why": "Marché de Meaux et Jacquerie (juin 1358) ; siège par Henri V (octobre 1421 - mai 1422) dans la boucle de la Marne."
+    },
+    {
+      "id": "reims",
+      "name": "Reims",
+      "kind": "siege",
+      "center_lonlat": [4.0317, 49.2583],
+      "half_size_km": 6,
+      "max_level": 7,
+      "source": "ign_rge_alti",
+      "settlement_id": "set_reims",
+      "why": "Siège de Reims par Édouard III (décembre 1359 - janvier 1360) ; sacre de Charles VII (17 juillet 1429)."
     }
   ]
 }
