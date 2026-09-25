@@ -47,11 +47,11 @@ const TERRAIN_LABELS := {
 }
 ## H9 : règles de Carême et d'hiver d'un régime (`lent_rule`, `winter_rule`), texte d'affichage.
 const LENT_RULE_TEXTS := {
-	"meat": "Carême : table grasse, −3 piété du souverain et +10 de mécontentement du clergé",
-	"dairy": "Carême : laitages interdits, −3 piété du souverain et +10 de mécontentement du clergé",
-	"fish": "Carême : table maigre, +2 piété du souverain",
+	"meat": "Carême : table grasse, −{rule.lent_piety_penalty} piété du souverain et +{rule.lent_clergy_unrest} de mécontentement du clergé",
+	"dairy": "Carême : laitages interdits, −{rule.lent_piety_penalty} piété du souverain et +{rule.lent_clergy_unrest} de mécontentement du clergé",
+	"fish": "Carême : table maigre, +{rule.lent_fish_piety} piété du souverain",
 }
-const WINTER_RULE_TEXTS := {"fresh": "Denrées fraîches : coût ×1,5 en hiver"}
+const WINTER_RULE_TEXTS := {"fresh": "Denrées fraîches : coût ×{rule.winter_fresh_cost_factor} en hiver"}
 const STAT_LABELS := {
 	"melee": "Mêlée", "ranged": "Tir", "range": "Portée", "armor": "Armure", "morale": "Moral",
 	"speed": "Vitesse", "ammo": "Munitions", "charge": "Charge", "siege_attack": "Attaque de siège",
@@ -85,11 +85,11 @@ const BRANCH_TEXTS := {
 	"court": "Cour : diplomatie, intrigue, prestige et piété.",
 }
 const GAUGE_TEXTS := {
-	"unrest": ["Mécontentement", "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère, la religion différente et les troubles récents (prises, pillages, régence) ; la garnison et certains bâtiments l'apaisent. Au-delà de 75 pendant trois saisons : révolte (le compte repart ensuite de zéro) ; au-delà de 90 : la province passe aux rebelles."],
-	"health": ["Santé", "Tend vers 50 + bâtiments sanitaires + satisfaction en biens, moins la surpopulation. Sous 50 la population décline ; sous 30, risque de peste."],
+	"unrest": ["Mécontentement", "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère, la religion différente et les troubles récents (prises, pillages, régence) ; la garnison et certains bâtiments l'apaisent. Au-delà de {rule.revolt_unrest_threshold} pendant {rule.revolt_seasons} saisons : révolte (le compte repart ensuite de zéro) ; au-delà de {rule.revolt_control_threshold} : la province passe aux rebelles."],
+	"health": ["Santé", "Tend vers {rule.health_neutral} + bâtiments sanitaires + satisfaction en biens, moins la surpopulation. Sous {rule.health_neutral} la population décline ; sous {rule.plague_health_threshold}, risque de peste."],
 	"wealth": ["Richesse", "Tend vers la base de la classe + bâtiments de commerce, moins le fardeau fiscal et la dévastation."],
-	"goods_satisfaction": ["Biens", "Satisfaction en biens : 40 + 10 par catégorie de biens accessible à la faction (ressources des provinces contrôlées et alliées) + marchés et foires."],
-	"devastation": ["Dévastation", "Pillages et combats : freine la croissance (nulle au-delà de 50), la richesse et nourrit le mécontentement."],
+	"goods_satisfaction": ["Biens", "Satisfaction en biens : {rule.goods_target_base} + {rule.goods_target_per_category} par catégorie de biens accessible à la faction (ressources des provinces contrôlées et alliées) + marchés et foires."],
+	"devastation": ["Dévastation", "Pillages et combats : freine la croissance (nulle au-delà de {rule.growth_devastation_cap}), la richesse et nourrit le mécontentement."],
 	"population": ["Population", "Habitants de la province, toutes classes confondues ; croît avec la santé."],
 	"morale": ["Moral", "Au plus bas, l'unité rompt et fuit le combat."],
 	"supply": ["Ravitaillement", "Vivres de l'armée : baisse hors du territoire ami (plus vite l'hiver), remonte en territoire ami ; un pays dévasté aggrave la perte et ralentit la reprise."],
@@ -97,7 +97,7 @@ const GAUGE_TEXTS := {
 	"strength": ["Effectif", "Hommes présents / effectif complet de l'unité."],
 }
 const HUD_TEXTS := {
-	"hud_treasury": ["Trésor", "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent 10 de moral chaque saison."],
+	"hud_treasury": ["Trésor", "Livres disponibles pour recruter, construire et entretenir armées et bâtiments. En dette, toutes les troupes perdent {rule.bankruptcy_morale_penalty} de moral chaque saison."],
 	"hud_income": ["Solde", "Recettes de la saison (impôts, commerce, seigneuriage) moins l'entretien des armées, des bâtiments, de la Table et de l'administration : ce qui sera ajouté au trésor en fin de tour."],
 	"hud_research": ["Recherche", "Technologie en cours ; clic : arbre des technologies."],
 	"hud_court": ["Cour", "Personnages de la faction (touche C)."],
@@ -448,7 +448,7 @@ static func building(building_id: String, live: Dictionary = {}) -> String:
 	if int(live.get("import_cost", 0)) > 0:
 		lines.append("[color=%s]Dont importation : %s %s (%s manquant)[/color]" % [RED, thousands(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
 	elif definition.has("cost") and (definition["cost"] as Dictionary).has("resources"):
-		lines.append("Matériaux tirés de vos provinces productrices, sinon importés (prix de base × 100).")
+		lines.append(RuleValues.format("Matériaux tirés de vos provinces productrices, sinon importés (prix de base × {rule.resource_import_multiplier})."))
 	lines.append(_effects_block(definition.get("effects", [])))
 	var units := PackedStringArray()
 	for unit_id in definition.get("enables_units", []):
@@ -493,7 +493,7 @@ static func technology(node: Dictionary) -> String:
 	var effective := int(node.get("effective_cost", cost))
 	var cost_line := "Coût : %d points" % effective
 	if effective > cost:
-		cost_line += " [color=%s](%d + 25 %% : en avance sur son temps)[/color]" % [RED, cost]
+		cost_line += " [color=%s](%d + %s %% : en avance sur son temps)[/color]" % [RED, cost, RuleValues.text("anachronism_surcharge_percent")]
 	if int(node.get("progress", 0)) > 0 and state != "known":
 		cost_line += " · %d / %d" % [int(node.get("progress", 0)), effective]
 	lines.append(cost_line)
@@ -557,8 +557,8 @@ static func diet(option: Dictionary) -> String:
 		cost_line += " [color=%s](%s %s pour 1 000 habitants)[/color]" % [MUTED, str(snappedf(per_thousand, 0.01)).replace(".", ","), POUND]
 	lines.append(cost_line)
 	lines.append(_effects_block(option.get("effects", [])))
-	lines.append(str(LENT_RULE_TEXTS.get(str(option.get("lent_rule", "none")), "")))
-	lines.append(str(WINTER_RULE_TEXTS.get(str(option.get("winter_rule", "none")), "")))
+	lines.append(RuleValues.format(str(LENT_RULE_TEXTS.get(str(option.get("lent_rule", "none")), ""))))
+	lines.append(RuleValues.format(str(WINTER_RULE_TEXTS.get(str(option.get("winter_rule", "none")), ""))))
 	lines.append(_diet_requirements(option.get("requirements", {})))
 	var reasons := PackedStringArray()
 	for reason in option.get("reasons", []):
@@ -631,12 +631,12 @@ static func population_class(class_id: String, data: Dictionary = {}) -> String:
 static func gauge(key: String, value: float = -1.0) -> String:
 	var spec: Array = GAUGE_TEXTS.get(key, [key.capitalize(), ""])
 	var head := _title("gauge_" + key, str(spec[0]), "%d / 100" % int(round(value)) if value >= 0.0 else "", "gauge")
-	return _join([head, str(spec[1])])
+	return _join([head, RuleValues.format(str(spec[1]))])
 
 
 static func hud(id: String, extra: String = "") -> String:
 	var spec: Array = HUD_TEXTS.get(id, [id.trim_prefix("hud_").capitalize(), ""])
-	return _join([_title(id, str(spec[0]), "", "hud"), str(spec[1]), extra])
+	return _join([_title(id, str(spec[0]), "", "hud"), RuleValues.format(str(spec[1])), extra])
 
 
 ## Saison (`spring`…) d'un libellé de date « Automne 1339 », "" si inconnue.

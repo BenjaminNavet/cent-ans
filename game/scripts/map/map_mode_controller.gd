@@ -47,8 +47,6 @@ const NEUTRAL := Color(0.62, 0.60, 0.56)
 const SUPPLY_GAIN := Color(0.22, 0.55, 0.25)
 const SUPPLY_LOSS := Color(0.85, 0.55, 0.15)
 const SUPPLY_STARVE := Color(0.60, 0.08, 0.06)
-## Perte de ravitaillement (points par saison) rendue en rouge sombre (hiver hors de nos terres).
-const SUPPLY_LOSS_MAX := 35.0
 const CLAIM_COLORS := {
 	"ours": Color(0.85, 0.68, 0.20), "against_us": Color(0.72, 0.12, 0.10), "contested": Color(0.50, 0.25, 0.65),
 }
@@ -396,7 +394,9 @@ func _lens_color(row: Dictionary, rank: float) -> Color:
 			var change := int(row.get("supply_change", 0))
 			if change >= 0:
 				return SUPPLY_GAIN
-			return SUPPLY_LOSS.lerp(SUPPLY_STARVE, clampf(-change / SUPPLY_LOSS_MAX, 0.0, 1.0))
+			# SV4 : rouge sombre à la perte d'hiver hors de nos terres (`supply_loss_winter`, cœur).
+			var worst := RuleValues.value("supply_loss_winter", 0.0)
+			return SUPPLY_LOSS.lerp(SUPPLY_STARVE, clampf(-change / worst, 0.0, 1.0) if worst > 0.0 else 1.0)
 		"claims":
 			return CLAIM_COLORS.get(str(row.get("claim", "")), NEUTRAL)
 	return Color(0, 0, 0, 0)
