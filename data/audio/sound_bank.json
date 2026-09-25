@@ -22,7 +22,15 @@
     "bombard": {"description": "Tir de bombarde", "files": ["battle/bombard_1", "battle/bombard_2"], "priority": 7, "volume_db": 0, "pitch": [0.92, 1.05], "max_instances": 2, "cooldown_s": 1.0, "unit_size_m": 60, "max_distance_m": 1500, "duck_music_db": -4, "duck_seconds": 2},
     "wall_collapse": {"description": "Effondrement d'un pan de muraille", "files": ["battle/wall_collapse_1", "battle/wall_collapse_2"], "priority": 9, "volume_db": 2, "pitch": [0.92, 1.02], "max_instances": 2, "cooldown_s": 2.0, "unit_size_m": 80, "max_distance_m": 1500, "duck_music_db": -8, "duck_seconds": 4},
     "thunder": {"description": "Tonnerre (pluie)", "files": ["battle/thunder_1", "battle/thunder_2"], "bus": "Ambiance", "priority": 6, "volume_db": -2, "pitch": [0.9, 1.05], "max_instances": 1, "cooldown_s": 10.0, "unit_size_m": 400, "max_distance_m": 3000},
-    "general_death": {"description": "Mort d'un général : cor et clameur, musique atténuée", "layers": ["horn", "rout_cry"], "duck_music_db": -10, "duck_seconds": 5}
+    "general_death": {"description": "Mort d'un général : cor et clameur, musique atténuée", "layers": ["horn", "rout_cry"], "duck_music_db": -10, "duck_seconds": 5},
+    "ui_order": {"description": "Interface (UB1) : ordre donné", "files": ["ui/order"], "bus": "Interface", "priority": 6, "volume_db": -6, "pitch": [0.96, 1.06], "max_instances": 2, "cooldown_s": 0.12},
+    "ui_order_refused": {"description": "Interface (UB1) : ordre refusé", "files": ["ui/order_refused"], "bus": "Interface", "priority": 7, "volume_db": -4, "pitch": [0.97, 1.02], "max_instances": 1, "cooldown_s": 0.25},
+    "ui_alert": {"description": "Interface (UB1) : alerte (bataille en vue, confirmation grave)", "files": ["ui/alert"], "bus": "Interface", "priority": 8, "volume_db": -5, "pitch": [0.98, 1.02], "max_instances": 1, "cooldown_s": 1.0},
+    "ui_letter": {"description": "Interface (UB1) : lettre reçue", "files": ["ui/letter"], "bus": "Interface", "priority": 5, "volume_db": -4, "pitch": [0.95, 1.05], "max_instances": 1, "cooldown_s": 0.6},
+    "ui_recruit": {"description": "Interface (UB1) : recrutement lancé", "files": ["ui/recruit"], "bus": "Interface", "priority": 6, "volume_db": -5, "pitch": [0.98, 1.03], "max_instances": 1, "cooldown_s": 0.3},
+    "ui_build": {"description": "Interface (UB1) : construction lancée", "files": ["ui/build"], "bus": "Interface", "priority": 6, "volume_db": -5, "pitch": [0.96, 1.04], "max_instances": 1, "cooldown_s": 0.3},
+    "ui_army_select": {"description": "Interface (UB1) : sélection d'une armée (piétinement)", "files": ["ui/army_select"], "bus": "Interface", "priority": 4, "volume_db": -8, "pitch": [0.95, 1.05], "max_instances": 1, "cooldown_s": 0.4},
+    "ui_card": {"description": "Interface (UB1) : clic sur une carte d'unité", "files": ["ui/card"], "bus": "Interface", "priority": 3, "volume_db": -8, "pitch": [0.92, 1.1], "max_instances": 2, "cooldown_s": 0.05}
   },
   "beds": {
     "melee_bed_1": {"description": "Nappe de mêlée (fer, boucliers, cris)", "file": "battle/melee_bed_1", "volume_db": 0, "unit_size_m": 45, "max_distance_m": 700},

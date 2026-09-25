@@ -86,6 +86,10 @@ loopbasedmusic, Lucas_Schacht, modusmogulus, Mythmazter, nekoninja, omerbhatti34
 PixelsphereStudios, PorkMuncher, qubodup, Quickmusik, SamuelGremaud, saturdaysoundguy,
 shadoWisp, Simonus18, spycrah, Twisted_Euphoria, unfa, waxsocks, WelvynZPorterSamples, xkeril.
 
+Les sons d'interface (`game/assets/audio/ui/`, lot UB1) sont découpés hors ligne dans ces mêmes
+fichiers et dans les effets procéduraux du projet par `tools/cent_ans_tools/ui_sounds.py` ;
+détail dans `game/assets/audio/ui/SOURCE.md`.
+
 ## Données géographiques
 
 - **Relief (terre et bathymétrie)** : ETOPO 2022 15 Arc-Second Global Relief Model, NOAA
