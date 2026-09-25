@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/fx_battle_staging.schema.json",
+  "title": "Mise en scène des batailles",
+  "description": "Fichier data/fx/battle_staging.json (lot EP8) : lumière selon l'heure, ombres de nuages, poussière, fumées, oiseaux, plan cinématique. Rendu seulement (game/scripts/battle/battle_staging.gd).",
+  "type": "object",
+  "$defs": {
+    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 2 }, "minItems": 3, "maxItems": 3 },
+    "rgba": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4 },
+    "range": { "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2 },
+    "by_quality_int": {
+      "type": "object",
+      "properties": {
+        "low": { "type": "integer", "minimum": 0 }, "medium": { "type": "integer", "minimum": 0 },
+        "high": { "type": "integer", "minimum": 0 }, "ultra": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["low", "medium", "high"],
+      "additionalProperties": false
+    },
+    "smoke_kind": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "lifetime_s": { "type": "number", "exclusiveMinimum": 0 },
+        "size_m": { "$ref": "#/$defs/range" },
+        "rise_m_s": { "type": "number", "minimum": 0 },
+        "color": { "$ref": "#/$defs/rgba" },
+        "drift_m_s": { "type": "number", "minimum": 0 },
+        "glow": { "type": "boolean" }
+      },
+      "required": ["amount", "lifetime_s", "size_m", "rise_m_s", "color", "drift_m_s"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "time_of_day": {
+      "type": "object",
+      "properties": {
+        "update_period_s": { "type": "number", "exclusiveMinimum": 0 },
+        "keyframes": {
+          "type": "array",
+          "minItems": 2,
+          "description": "Images clés par heure croissante ; interpolées, la dernière rejoint la première après minuit.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hour": { "type": "number", "minimum": 0, "exclusiveMaximum": 24 },
+              "elevation_mul": { "type": "number", "minimum": 0, "maximum": 1.5, "description": "Facteur sur l'élévation du soleil du préréglage météo." },
+              "sun_yaw_deg": { "type": "number", "minimum": -360, "maximum": 720, "description": "Lacet du soleil (degrés Godot, continu d'une image à l'autre)." },
+              "energy_mul": { "type": "number", "minimum": 0, "maximum": 2 },
+              "sun_tint": { "$ref": "#/$defs/rgb" },
+              "zenith_tint": { "$ref": "#/$defs/rgb" },
+              "horizon_tint": { "$ref": "#/$defs/rgb" },
+              "fog_tint": { "$ref": "#/$defs/rgb" },
+              "ambient_mul": { "type": "number", "minimum": 0, "maximum": 2 },
+              "exposure": { "type": "number", "minimum": 0.2, "maximum": 2 },
+              "hdri": { "type": "boolean", "description": "Garder le ciel HDRI (sinon ciel procédural teinté)." },
+              "sun_disc": { "type": "number", "minimum": 0, "maximum": 1 },
+              "shadow_opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": ["hour", "elevation_mul", "sun_yaw_deg", "energy_mul", "sun_tint", "zenith_tint", "horizon_tint", "fog_tint", "ambient_mul", "exposure", "hdri", "sun_disc", "shadow_opacity"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["update_period_s", "keyframes"],
+      "additionalProperties": false
+    },
+    "cloud_shadows": {
+      "type": "object",
+      "properties": {
+        "texture_px": { "type": "integer", "minimum": 64, "maximum": 1024, "description": "Deux fois la résolution d'une tuile de bruit (px)." },
+        "tile_m": { "type": "number", "minimum": 200, "description": "Côté d'une tuile du bruit périodique (m) : le décal glisse d'au plus une tuile." },
+        "wind_speed_m_s": { "type": "number", "minimum": 0, "description": "Vitesse des ombres pour un vent de force 1." },
+        "by_weather": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": { "strength": { "type": "number", "minimum": 0, "maximum": 1 }, "coverage": { "type": "number", "minimum": 0, "maximum": 1 } },
+            "required": ["strength", "coverage"],
+            "additionalProperties": false
+          }
+        },
+        "night_strength_mul": { "type": "number", "minimum": 0, "maximum": 1 },
+        "quality": {
+          "type": "object",
+          "properties": { "low": { "type": "boolean" }, "medium": { "type": "boolean" }, "high": { "type": "boolean" }, "ultra": { "type": "boolean" } },
+          "required": ["low", "medium", "high"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["texture_px", "tile_m", "wind_speed_m_s", "by_weather", "quality"],
+      "additionalProperties": false
+    },
+    "dust": {
+      "type": "object",
+      "properties": {
+        "reference_soldiers": { "type": "integer", "minimum": 1 },
+        "max_strength": { "type": "number", "minimum": 0.1, "maximum": 4 },
+        "column_emitters": { "$ref": "#/$defs/by_quality_int" },
+        "column_distance_m": { "type": "number", "minimum": 0 },
+        "column_min_soldiers": { "type": "integer", "minimum": 0 },
+        "terrain": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0, "maximum": 2 } },
+        "season": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0, "maximum": 2 } }
+      },
+      "required": ["reference_soldiers", "max_strength", "column_emitters", "column_distance_m", "column_min_soldiers", "terrain", "season"],
+      "additionalProperties": false
+    },
+    "smoke": {
+      "type": "object",
+      "properties": {
+        "max_sources": { "$ref": "#/$defs/by_quality_int" },
+        "campfire": { "$ref": "#/$defs/smoke_kind" },
+        "column": { "$ref": "#/$defs/smoke_kind" },
+        "bombard_linger": { "$ref": "#/$defs/smoke_kind" },
+        "camp_fires_per_side": { "$ref": "#/$defs/by_quality_int" },
+        "camp_depth_m": { "type": "number", "minimum": 0 },
+        "no_campfire_weather": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["max_sources", "campfire", "column", "bombard_linger", "camp_fires_per_side", "camp_depth_m"],
+      "additionalProperties": false
+    },
+    "birds": {
+      "type": "object",
+      "properties": {
+        "flocks": { "$ref": "#/$defs/by_quality_int" },
+        "birds_per_flock": { "$ref": "#/$defs/range" },
+        "trigger_radius_m": { "type": "number", "minimum": 0 },
+        "circle_radius_m": { "$ref": "#/$defs/range" },
+        "circle_height_m": { "$ref": "#/$defs/range" },
+        "flee_speed_m_s": { "type": "number", "minimum": 0 },
+        "circle_speed_m_s": { "type": "number", "minimum": 0 },
+        "flight_duration_s": { "$ref": "#/$defs/range" },
+        "crows_after_s": { "type": "number", "minimum": 0 },
+        "crows": { "type": "integer", "minimum": 0 },
+        "wing_span_m": { "type": "number", "exclusiveMinimum": 0 },
+        "color": { "$ref": "#/$defs/rgb" }
+      },
+      "required": ["flocks", "birds_per_flock", "trigger_radius_m", "circle_radius_m", "circle_height_m", "flee_speed_m_s", "circle_speed_m_s", "flight_duration_s", "crows_after_s", "crows", "wing_span_m", "color"],
+      "additionalProperties": false
+    },
+    "cinematic": {
+      "type": "object",
+      "properties": {
+        "duration_s": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 },
+        "slowmo_scale": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "distance_m": { "type": "number", "minimum": 5 },
+        "height_m": { "type": "number", "minimum": 1 },
+        "orbit_deg": { "type": "number" },
+        "fov_deg": { "type": "number", "minimum": 20, "maximum": 100 },
+        "min_soldiers_in_contact": { "type": "integer", "minimum": 0 },
+        "blend_in_s": { "type": "number", "minimum": 0 }
+      },
+      "required": ["duration_s", "slowmo_scale", "distance_m", "height_m", "orbit_deg", "fov_deg", "min_soldiers_in_contact", "blend_in_s"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["time_of_day", "cloud_shadows", "dust", "smoke", "birds", "cinematic"],
+  "additionalProperties": false
+}

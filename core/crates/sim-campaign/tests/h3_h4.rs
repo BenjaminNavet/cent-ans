@@ -537,6 +537,7 @@ fn fight(state: &mut CampaignState, data: &GameData) -> (ArmyId, ArmyId) {
         withdrew: false,
         standards_taken: Vec::new(),
         standards_lost: 0,
+        baggage_lost: false,
     };
     let outcome = BattleOutcome {
         winner: SideId::Attacker,

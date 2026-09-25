@@ -276,3 +276,10 @@ func _densify(points: PackedVector2Array) -> PackedVector2Array:
 		for k in range(1, n + 1):
 			result.append(a.lerp(b, float(k) / n))
 	return result
+
+
+## Lot ZG5b : disque (centre x, z ; rayon ; poids) où les routes drapées fines remplacent les
+## rubans de chemin de terre (`FineGeoLayer`).
+func set_fine_zone(zone: Vector4) -> void:
+	if _ribbon_material != null:
+		_ribbon_material.set_shader_parameter("fine_zone", zone)

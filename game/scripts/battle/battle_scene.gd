@@ -28,6 +28,11 @@ extends Node3D
 ## étendard pris porté par le vainqueur).
 ## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
 ## `--horizon-province=<id>`, `--panorama=<id>` (captures EP2).
+## EP8 (mise en scène, `BattleStaging`) : `--hour=<dawn|morning|midday|afternoon|dusk|night|h>`
+## (heure de début : phase ou heure décimale, règle du cœur), `--no-daytime`,
+## `--no-cloud-shadows`, `--no-staging-dust`, `--no-smoke`, `--no-birds`, `--no-cinematic`,
+## `--no-ep8` (mesures A/B), `--cinematic` (plan cinématique même en capture ou IA contre IA),
+## `--birds-shot` (capture : envol des volées), `--cinematic-shot` (capture au milieu du plan).
 
 signal returned(result: Dictionary)
 
@@ -149,6 +154,18 @@ var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volée
 var voices: BattleVoices = null  # VO1 : répliques des régiments
 var _siege_audio_timer: float = 0.0
 var _audio_director: Node = null  # B3 : mis en veille pendant la bataille, réveillé au retour
+var staging: BattleStaging = null  # EP8 : heure, nuages, fumées, oiseaux, plan cinématique
+var _hour_override: String = ""  # EP8 : `--hour=`
+var _ep8_disabled: Dictionary = {}  # EP8 : `--no-<effet>`
+var _force_cinematic: bool = false  # EP8 : `--cinematic`
+var _birds_shot: bool = false  # EP8 : `--birds-shot`
+var _cinematic_shot: bool = false  # EP8 : `--cinematic-shot`
+var _dust_shot: bool = false  # EP8 : `--dust-shot` (charge de cavalerie et sa poussière)
+var _dust_unit: int = -1
+var _dust_since: float = -1.0
+var _title_text: String = ""
+var _weather_text: String = ""
+var _tod_key: String = ""
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -260,6 +277,12 @@ func begin() -> bool:
 		battle.call("set_scale_tier", _scale_tier)  # EP1 : --scale=<skirmish|large|epic>
 	if not battle.call("setup", setup, battle_seed):
 		return false
+	if _hour_override != "" and battle.has_method("set_start_hour"):
+		# EP8 : heure de début imposée (bataille rapide, captures) ; la règle reste au cœur.
+		if _hour_override.is_valid_float():
+			battle.call("set_start_hour", float(_hour_override))
+		elif not battle.call("set_start_phase", _hour_override):
+			push_warning("BattleScene: unknown --hour=%s" % _hour_override)
 	var setup_side: Variant = setup.get("player_side", "attacker")
 	player_side = str(setup_side) if setup_side != null else ""
 	if player_side == "" and standalone and siege_landmark != "":
@@ -321,6 +344,8 @@ func begin() -> bool:
 	if weather_key != str(weather.get("key", "clear")):
 		weather_label += " (rendu forcé : %s)" % weather_key
 		print("BattleScene: --weather=%s overrides rendering only; simulated weather is %s" % [weather_key, weather.get("key", "?")])
+	_title_text = title
+	_weather_text = weather_label
 	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
@@ -330,6 +355,7 @@ func begin() -> bool:
 	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).
 	camera_rig.max_distance = 900.0 * (0.5 + 0.5 * maxf(terrain.field_scale_x(), 1.0))
 	_frame_camera()
+	_setup_staging(terrain_data)
 	hud.minimap.flipped = player_side == "attacker"
 	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
@@ -348,6 +374,83 @@ func begin() -> bool:
 	_start_speech()
 	_advise_first_battle()
 	return true
+
+
+## EP8 : mise en scène (heure, nuages, poussière, fumées, oiseaux, plan cinématique).
+func _setup_staging(terrain_data: Dictionary) -> void:
+	staging = BattleStaging.new()
+	add_child(staging)
+	staging.setup(self, battle, world_env.environment, sun, _weather_key, terrain_data, _ep8_disabled)
+	staging.configure_effects(effects, str(terrain_data.get("terrain", "plains")), terrain.season_key)
+	if effects != null:
+		effects.cannon_fired.connect(staging.on_cannon_fired)
+	if staging.cinematic != null and not _force_cinematic and (autoplay or _benchmark or _screenshot_path != ""):
+		# Rien d'imposé : jamais en banc d'essai, en capture ni quand l'IA joue les deux camps.
+		staging.cinematic.enabled = false
+	elif staging.cinematic != null and _force_cinematic:
+		staging.cinematic.enabled = true
+	_update_time_label()
+
+
+## EP8 : captures `--birds-shot` (caméra basse tournée vers les volées) et `--cinematic-shot`
+## (plan cinématique figé à mi-course, bandes noires comprises).
+func _apply_staging_shot() -> void:
+	if staging == null:
+		return
+	if _dust_shot and _dust_unit >= 0:
+		for unit in units:
+			if int(unit["id"]) == _dust_unit:
+				var facing := float(unit["facing"])
+				# De trois quarts avant, un peu à l'écart de la trajectoire.
+				camera_rig.look_at_point(Vector3(float(unit["x"]), 0.0, float(unit["z"])), 55.0, facing + 0.9)
+	if _birds_shot and staging.birds != null:
+		var sky := staging.birds.flying_center()
+		if sky != Vector3.ZERO:
+			camera_rig.set_process(false)
+			var ground := Vector3(sky.x, 0.0, sky.z)
+			var back := Vector3(float(units[0]["x"]), 0.0, float(units[0]["z"])) - ground if not units.is_empty() else Vector3(0, 0, -1)
+			back.y = 0.0
+			var eye := ground + back.normalized() * 50.0
+			eye.y = terrain.world_height(eye.x, eye.z) + 3.0
+			camera_rig.camera.global_position = eye
+			camera_rig.camera.look_at(Vector3(sky.x, terrain.world_height(sky.x, sky.z) + 14.0, sky.z), Vector3.UP)
+	if _cinematic_shot and staging.cinematic != null:
+		selected.clear()
+		_refresh_view(true)
+		var shot := _closeup_shot(units)
+		staging.cinematic.start(shot["focus"], float(shot["yaw"]))
+		staging.cinematic.pose_at(float(staging.cinematic.cfg.get("duration_s", 6.0)) * 0.5)
+
+
+## EP8 : aucun point d'eau (rivière, gué, ruisseau) à moins de `radius` m (capture de poussière).
+func _dry_around(x: float, z: float, radius: float) -> bool:
+	for k in 9:
+		var a := TAU * k / 8.0
+		var r := 0.0 if k == 8 else radius
+		if terrain.in_water(x + cos(a) * r, z + sin(a) * r):
+			return false
+	return true
+
+
+## EP8 : pose une source de fumée durable (EP6 : feux des camps) ; -1 si coupée ou hors budget.
+func add_smoke_source(position: Vector3, intensity: float = 1.0, kind: String = "campfire") -> int:
+	return staging.add_smoke_source(position, intensity, kind) if staging != null else -1
+
+
+## EP8 : l'heure au bandeau (« Temps clair · Crépuscule (portée des tireurs −30 %) ») ;
+## rafraîchi à chaque changement de phase.
+func _update_time_label() -> void:
+	if staging == null or staging.tod.is_empty():
+		return
+	var key := str(staging.tod.get("key", ""))
+	if key == _tod_key:
+		return
+	_tod_key = key
+	var label := str(staging.tod.get("label", ""))
+	var visibility := float(staging.tod.get("visibility", 1.0))
+	if visibility < 0.999:
+		label += " (portée des tireurs −%d %%)" % int(round((1.0 - visibility) * 100.0))
+	hud.set_title(_title_text, "%s · %s" % [_weather_text, label] if _weather_text != "" else label, [side_colors[player_side], side_colors[enemy_side]])
 
 
 ## VO1 : le conseiller commente la première bataille (ou le premier assaut), après le discours.
@@ -667,11 +770,17 @@ func _frame_camera() -> void:
 func _process(delta: float) -> void:
 	if battle == null:
 		return
-	if not paused and not battle.call("is_finished"):
-		battle.call("tick", delta * speed)
+	# EP8 : ralenti du plan cinématique (temps de bataille et animations).
+	var slow := staging.time_scale() if staging != null else 1.0
+	var running: bool = not paused and not battle.call("is_finished")
+	if running:
+		battle.call("tick", delta * speed * slow)
 	if music != null:
 		music.update(delta)
-	_refresh_view(false, delta)
+	_refresh_view(false, delta * slow)
+	if staging != null:
+		staging.update(units, delta * speed * slow if running else 0.0, delta, bool(battle.call("is_finished")))
+		_update_time_label()
 	_update_audio(delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
@@ -883,6 +992,8 @@ func _fast_forward(seconds: float) -> void:
 		units = battle.call("get_units")
 		soldiers.update(battle, units, 0.1, [])
 		_update_effects(0.1)
+		if staging != null:
+			staging.update(units, 0.1, 0.0, false)
 
 
 func _refresh_view(force: bool, delta: float = 0.0) -> void:
@@ -1492,6 +1603,18 @@ func _parse_cmdline() -> void:
 			_closeup = true
 		elif arg.begins_with("--weather="):
 			_weather_override = arg.trim_prefix("--weather=")
+		elif arg.begins_with("--hour="):
+			_hour_override = arg.trim_prefix("--hour=")
+		elif arg == "--cinematic":
+			_force_cinematic = true
+		elif arg == "--birds-shot":
+			_birds_shot = true
+		elif arg == "--dust-shot":
+			_dust_shot = true
+		elif arg == "--cinematic-shot":
+			_cinematic_shot = true
+			_force_cinematic = true
+	_ep8_disabled = BattleStaging.disabled_from_args(args)
 	if _screenshot_path != "":
 		call_deferred("_stage_screenshot")
 
@@ -1519,6 +1642,27 @@ func _stage_screenshot() -> void:
 		units = battle.call("get_units")
 		soldiers.update(battle, units, 0.1, [])
 		_update_effects(0.1)
+		if staging != null:
+			staging.update(units, 0.1, 0.1, bool(battle.call("is_finished")))
+		if _dust_shot:
+			# EP8 : une charge de cavalerie lancée depuis 2,5 s (la poussière s'est levée).
+			var charging := -1
+			for unit in units:
+				if bool(unit["present"]) and str(unit["state"]) == "charging" and str(unit["render"]) == "cavalry" and _dry_around(float(unit["x"]), float(unit["z"]), 40.0):
+					charging = int(unit["id"])
+					break
+			if charging < 0:
+				_dust_since = -1.0  # au sec seulement (au gué, ce sont des gerbes d'eau)
+			elif _dust_since < 0.0:
+				_dust_since = float(battle.call("get_elapsed"))
+				_dust_unit = charging
+			if _dust_since >= 0.0 and float(battle.call("get_elapsed")) - _dust_since >= 2.5:
+				break
+			continue
+		if (_birds_shot or _cinematic_shot) and contact_time >= 0.0:
+			# EP8 : envol des oiseaux (6 s après le choc) ou plan cinématique (dès le choc).
+			if float(battle.call("get_elapsed")) - contact_time >= (6.0 if _birds_shot else 0.5):
+				break
 		if _standard_shot == "fallen" or _standard_shot == "captured":
 			# EP5 : dès qu'un étendard gît depuis 2 s (le porte-étendard a fini de tomber).
 			if standards != null:
@@ -1582,6 +1726,7 @@ func _stage_screenshot() -> void:
 	_refresh_view(true)
 	_apply_camera_override()
 	_apply_standard_shot()
+	_apply_staging_shot()
 	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
 	for _i in 150 if effects != null else 40:
 		await get_tree().process_frame
