@@ -271,3 +271,295 @@ FIGURES = {
 }
 
 FIGURES["cavalry_0"]["colors"] = FIGURES["infantry_0"]["colors"]
+
+# --- Lot UR1: regional, faction and period figures ---------------------------------------
+
+WHITE_HARNESS = (0.70, 0.71, 0.74)  # polished 15th-century « harnois blanc »
+HOODED_PARTS = [
+    (
+        "hooded_adventurer.glb",
+        ["Medieval_Body", "Medieval_Legs", "Medieval_Feet", "Medieval_Head"],
+    ),
+    ("adventurer.glb", ["Adventurer_Head"]),
+]
+HOODED_COLORS = {
+    "Medieval_Body:Black": (eq.C_CLOTH, (0.10, 0.08, 0.06)),
+    "Medieval_Body:LightBrown": (eq.C_LEATHER, (0.16, 0.09, 0.04)),
+    "Medieval_Body:DarkBrown": (eq.C_CLOTH, (0.12, 0.07, 0.03)),
+    "Medieval_Body:Metal": (eq.C_MAIL, eq.MAIL),
+    "Medieval_Legs:Black": (eq.C_CLOTH, (0.09, 0.07, 0.05)),
+    "Medieval_Head:Black": (eq.C_CLOTH, (0.14, 0.10, 0.06)),
+    "Medieval_Head:DarkBrown": (eq.C_CLOTH, (0.18, 0.11, 0.05)),
+}
+PLATE_COLORS = {
+    **FIGURES["infantry_0"]["colors"],
+}
+WHITE_PLATE_COLORS = {
+    "King_Body:Metal": (eq.C_PLATE, WHITE_HARNESS),
+    "King_Body:Blue": (eq.C_PLATE, WHITE_HARNESS),
+    "King_Body:Beige": (eq.C_LEATHER, (0.12, 0.07, 0.035)),
+    "King_Body:Metal_Dark": (eq.C_PLATE, (0.55, 0.56, 0.58)),
+    "King_Legs:Metal": (eq.C_PLATE, WHITE_HARNESS),
+    "King_Legs:DarkBrown": (eq.C_PLATE, (0.55, 0.56, 0.58)),
+    "King_Legs:Metal_Dark": (eq.C_PLATE, (0.55, 0.56, 0.58)),
+    "King_Feet:Metal": (eq.C_PLATE, WHITE_HARNESS),
+}
+KING_PARTS = [
+    ("king.glb", ["King_Body", "King_Legs", "King_Feet"]),
+    ("adventurer.glb", ["Adventurer_Head"]),
+]
+
+FIGURES.update(
+    {
+        # Welsh spearmen: green-and-white levy tunic, bare legs, spear and small buckler;
+        # bare head, felt cap or kettle hat.
+        "infantry_3": {
+            "rig": "human",
+            "style": "militia",
+            "parts": COMMONER_PARTS,
+            "colors": {
+                "Green": (eq.C_CLOTH, (0.09, 0.20, 0.07)),
+                "LightGreen": (eq.C_CLOTH, (0.72, 0.72, 0.66)),
+                "Adventurer_Legs:Brown2": (eq.C_SKIN, (0.50, 0.33, 0.21)),
+                "Adventurer_Legs:Brown": (eq.C_LEATHER, (0.10, 0.06, 0.03)),
+                "Gold": (eq.C_LEATHER, (0.12, 0.08, 0.04)),
+            },
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("cloth_cap", 2, {"colour": (0.10, 0.18, 0.07)}),
+                ("kettle_hat", 4),
+                ("spear", 0, {"length": 2.4}),
+                ("round_shield", 0, {"radius": 0.16, "arms": False}),
+            ],
+            "variants": 3,
+        },
+        # Scottish schiltron: quilted jack, blue bonnet, kettle hat or bassinet, long
+        # spear in both hands, targe slung on the back.
+        "infantry_4": {
+            "rig": "human",
+            "style": "pike",
+            "parts": COMMONER_PARTS,
+            "colors": {**COMMONER_COLORS, "Green": (eq.C_QUILT, (0.40, 0.35, 0.25))},
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("jack", 0, {"colour": (0.40, 0.34, 0.24), "skirt": 0.26}),
+                ("cloth_cap", 1, {"colour": (0.06, 0.08, 0.20)}),
+                ("kettle_hat", 2),
+                ("bassinet", 4, {"aventail": True}),
+                ("pike", 0, {"length": 3.9, "below": 1.1}),
+                ("round_shield", 0, {"radius": 0.22, "back": True, "arms": False}),
+            ],
+            "variants": 3,
+        },
+        # Flemish goedendag militia: gambeson, livery tabard, kettle hat or bassinet.
+        "infantry_5": {
+            "rig": "human",
+            "style": "militia",
+            "parts": COMMONER_PARTS,
+            "colors": COMMONER_COLORS,
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("tabard", 0, {"length": 0.3}),
+                ("kettle_hat", 1),
+                ("bassinet", 2, {"aventail": False}),
+                ("goedendag", 0),
+            ],
+            "variants": 2,
+        },
+        # Coutiliers: riveted brigandine, sallet (with bevor for one in two), coustille.
+        "infantry_6": {
+            "rig": "human",
+            "style": "militia",
+            "parts": COMMONER_PARTS,
+            "colors": {**COMMONER_COLORS, "Green": (eq.C_CLOTH, (0.25, 0.20, 0.14))},
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("brigandine", 1, {"colour": (0.30, 0.04, 0.03)}),
+                ("brigandine", 2, {"colour": (0.05, 0.08, 0.20)}),
+                ("sallet", 1, {"bevor": True}),
+                ("sallet", 2),
+                ("coustille", 0),
+            ],
+            "variants": 2,
+        },
+        # English retinue men-at-arms: plate harness under an armorial jupon, visored
+        # bassinet or sallet, pollaxe in both hands.
+        "infantry_7": {
+            "rig": "human",
+            "style": "militia",
+            "noble": True,
+            "parts": KING_PARTS,
+            "colors": PLATE_COLORS,
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("bassinet", 1, {"visor": True}),
+                ("sallet", 2, {"bevor": True}),
+                ("pollaxe", 0),
+            ],
+            "variants": 2,
+        },
+        # Routiers: mismatched gear, hood or bassinet, brigandine or mail, sword and
+        # rondache painted with the company's arms.
+        "infantry_8": {
+            "rig": "human",
+            "style": "sword",
+            "parts": HOODED_PARTS,
+            "colors": HOODED_COLORS,
+            "masks": {"Medieval_Head": 1, "Adventurer_Head": 6},
+            "budget": budget(Adventurer_Head=0.75),
+            "equipment": [
+                ("brigandine", 2, {"colour": (0.20, 0.12, 0.05)}),
+                ("bassinet", 2),
+                ("kettle_hat", 4),
+                ("sword", 0),
+                ("round_shield", 0, {"radius": 0.21}),
+            ],
+            "variants": 3,
+        },
+        # Francs-archers: livery hoqueton (jack), sallet or felt cap, longbow.
+        "archer_3": {
+            "rig": "human",
+            "style": "bow",
+            "parts": COMMONER_PARTS,
+            "colors": COMMONER_COLORS,
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("jack", 0, {"colour": (1.0, 1.0, 1.0), "livery": True, "skirt": 0.28}),
+                ("sallet", 1),
+                ("cloth_cap", 2),
+                ("longbow", 0),
+                ("quiver", 0),
+            ],
+            "variants": 2,
+        },
+        # Gascon crossbowmen: mail shirt, livery tabard, bassinet or kettle hat, pavise.
+        "archer_4": {
+            "rig": "human",
+            "style": "crossbow",
+            "parts": COMMONER_PARTS,
+            "colors": {**COMMONER_COLORS, "Green": (eq.C_MAIL, eq.MAIL)},
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("tabard", 0, {"length": 0.26}),
+                ("bassinet", 1),
+                ("kettle_hat", 2),
+                ("crossbow", 0),
+                ("quiver", 0, {"arrows": False}),
+                ("pavise", 0),
+            ],
+            "variants": 2,
+        },
+        # Culveriners: jack, sallet or felt cap, hand culverin, powder horn.
+        "archer_5": {
+            "rig": "human",
+            "style": "crossbow",
+            "parts": COMMONER_PARTS,
+            "colors": COMMONER_COLORS,
+            "budget": HUMAN_BUDGET,
+            "equipment": [
+                ("jack", 0, {"colour": (0.35, 0.30, 0.22), "skirt": 0.22}),
+                ("sallet", 1),
+                ("cloth_cap", 2, {"colour": (0.30, 0.05, 0.04)}),
+                ("hand_culverin", 0),
+                ("powder_flask", 0),
+            ],
+            "variants": 2,
+        },
+        # Ordonnance gendarmes: white harness, sallet and bevor or visored bassinet,
+        # lance with the company pennon; barded horse (chanfron, flanchards), a
+        # livery caparison for one in two.
+        "cavalry_3": {
+            "rig": "cavalry",
+            "style": "lance",
+            "noble": True,
+            "parts": KING_PARTS,
+            "colors": WHITE_PLATE_COLORS,
+            "budget": RIDER_BUDGET,
+            "horse_budget": HORSE_BUDGET,
+            "horse_equipment": [
+                ("saddle", 0),
+                ("chanfron", 0),
+                ("flanchards", 1),
+                ("caparison", 2),
+            ],
+            "equipment": [
+                ("sallet", 1, {"bevor": True, "colour": WHITE_HARNESS}),
+                ("bassinet", 2, {"visor": True, "aventail": False}),
+                ("lance", 0),
+            ],
+            "variants": 2,
+        },
+        # Écorcheurs: hood or sallet, brigandine, light lance, unarmoured horse.
+        "cavalry_4": {
+            "rig": "cavalry",
+            "style": "lance",
+            "parts": HOODED_PARTS,
+            "colors": HOODED_COLORS,
+            "masks": {"Medieval_Head": 1, "Adventurer_Head": 2},
+            "budget": RIDER_BUDGET,
+            "horse_budget": HORSE_BUDGET,
+            "horse_equipment": [("saddle", 0)],
+            "equipment": [
+                ("brigandine", 2, {"colour": (0.22, 0.05, 0.04), "studs": False}),
+                ("sallet", 2),
+                ("lance", 0, {"pennon": False}),
+            ],
+            "variants": 2,
+        },
+        # Jinetes: light tunic, cap or kettle hat, adarga, javelin; light horse.
+        "cavalry_5": {
+            "rig": "cavalry",
+            "style": "lance",
+            "parts": COMMONER_PARTS,
+            "colors": {
+                **COMMONER_COLORS,
+                "Green": (eq.C_CLOTH, (0.62, 0.58, 0.50)),
+                "LightGreen": (eq.C_LIVERY, (0.9, 0.9, 0.9)),
+            },
+            "budget": RIDER_BUDGET,
+            "horse_budget": HORSE_BUDGET,
+            "horse_equipment": [("saddle", 0)],
+            "equipment": [
+                ("cloth_cap", 1, {"colour": (0.60, 0.56, 0.48)}),
+                ("kettle_hat", 2),
+                ("adarga", 0),
+                ("javelin", 0),
+            ],
+            "variants": 2,
+        },
+        # Hobelars: jack, kettle hat or felt cap, light lance, small unarmoured horse.
+        "cavalry_6": {
+            "rig": "cavalry",
+            "style": "lance",
+            "parts": COMMONER_PARTS,
+            "colors": COMMONER_COLORS,
+            "budget": RIDER_BUDGET,
+            "horse_budget": HORSE_BUDGET,
+            "horse_equipment": [("saddle", 0)],
+            "equipment": [
+                ("jack", 0, {"colour": (0.45, 0.38, 0.26), "skirt": 0.15}),
+                ("kettle_hat", 1),
+                ("cloth_cap", 2, {"colour": (0.18, 0.12, 0.06)}),
+                ("lance", 0, {"pennon": False}),
+            ],
+            "variants": 2,
+        },
+    }
+)
+
+# Animation style of each figure (read by `BattleSkinned._style`) and noble livery share.
+_STYLES = {
+    "infantry_0": "sword",
+    "infantry_1": "pike",
+    "infantry_2": "militia",
+    "archer_0": "bow",
+    "archer_1": "crossbow",
+    "archer_2": "crossbow",
+    "cavalry_0": "lance",
+    "cavalry_1": "lance",
+    "cavalry_2": "horse_bow",
+}
+for _name, _style in _STYLES.items():
+    FIGURES[_name]["style"] = _style
+FIGURES["infantry_0"]["noble"] = True
+FIGURES["cavalry_0"]["noble"] = True

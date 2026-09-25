@@ -277,6 +277,97 @@ def caparison(mount, ctx, hem=0.5):
     return [obj]
 
 
+def _bone_points(mount, bones):
+    """World positions of the horse vertices dominated by one of `bones`."""
+    out = []
+    for m in mount.hmeshes:
+        names = {g.index: g.name for g in m.vertex_groups}
+        for v in m.data.vertices:
+            best = max(v.groups, key=lambda g: g.weight, default=None)
+            if best is not None and names[best.group] in bones:
+                out.append(m.matrix_world @ v.co)
+    return out
+
+
+BARD_STEEL = (0.62, 0.63, 0.66)
+
+
+def chanfron(mount, ctx):
+    """Chanfron (chanfrein, lot UR1): steel plate over the top and sides of the face."""
+    pts = _bone_points(mount, {"Head"})
+    if not pts:
+        return []
+    ys = [p.y for p in pts]
+    y_front, y_back = min(ys), max(ys)
+    stations = ctx.seg(6, 3, 2)
+    around = ctx.seg(8, 4, 3)
+    bm = bmesh.new()
+    rings = []
+    for k in range(stations + 1):
+        # From the nostrils (kept bare) to behind the eyes.
+        y = y_front + 0.06 + (y_back - y_front - 0.1) * k / stations
+        near = [p for p in pts if abs(p.y - y) < 0.05] or pts
+        half = max(abs(p.x) for p in near) + 0.012
+        top = max(p.z for p in near) + 0.012
+        low = top - (top - min(p.z for p in near)) * 0.55
+        ring = []
+        for j in range(around + 1):
+            a = math.pi * j / around
+            ring.append(
+                bm.verts.new(
+                    Vector(
+                        (
+                            half * math.cos(a) * 1.05,
+                            y,
+                            low + (top - low) * math.sin(a),
+                        )
+                    )
+                )
+            )
+        rings.append(ring)
+    for a, b in zip(rings, rings[1:], strict=False):
+        for j in range(around):
+            bm.faces.new((a[j], b[j], b[j + 1], a[j + 1]))
+    for f in bm.faces:
+        c = f.calc_center_median()
+        if f.normal.dot(c - Vector((0.0, c.y, c.z - 0.1))) < 0:
+            f.normal_flip()
+    obj = eq.to_object("chanfron", bm, [ctx.material(eq.C_PLATE, BARD_STEEL)])
+    eq.bind_rigid(obj, "Head")
+    return [obj]
+
+
+def flanchards(mount, ctx):
+    """Flanchards (flançois, lot UR1): steel plates on both flanks under the saddle."""
+    pts = _bone_points(mount, TORSO_BONES)
+    seat = mount.seat
+    bm = bmesh.new()
+    rows = ctx.seg(3, 2, 1)
+    cols = ctx.seg(4, 2, 2)
+    y0, y1 = seat.y - 0.05, seat.y + 0.4
+    for sx in (1, -1):
+        grid = []
+        for r in range(rows + 1):
+            row = []
+            for c in range(cols + 1):
+                y = y0 + (y1 - y0) * c / cols
+                near = [p for p in pts if abs(p.y - y) < 0.1] or pts
+                half = max(abs(p.x) for p in near) + 0.03
+                z = seat.z - 0.25 - 0.3 * r / rows
+                row.append(bm.verts.new(Vector((sx * half * (1 - 0.06 * r / rows), y, z))))
+            grid.append(row)
+        for a, b in zip(grid, grid[1:], strict=False):
+            for c in range(cols):
+                quad = (a[c], a[c + 1], b[c + 1], b[c])
+                bm.faces.new(quad)
+    for f in bm.faces:
+        if f.normal.x * f.calc_center_median().x < 0:
+            f.normal_flip()
+    obj = eq.to_object("flanchards", bm, [ctx.material(eq.C_PLATE, BARD_STEEL)])
+    eq.bind_rigid(obj, SADDLE_BONE)
+    return [obj]
+
+
 def saddle(mount, ctx):
     """Build the saddle and stirrup leathers as boxes anchored on the mount's seat."""
     bm = bmesh.new()
@@ -355,6 +446,8 @@ def build_cavalry(recipe, level):
     for name, mask in recipe.get("horse_equipment", []):
         builder = {
             "caparison": lambda c: caparison(mount, c),
+            "chanfron": lambda c: chanfron(mount, c),
+            "flanchards": lambda c: flanchards(mount, c),
             "saddle": lambda c: saddle(mount, c),
         }[name]
         for obj in builder(ctx_h):
@@ -404,6 +497,8 @@ def export_cavalry(fig_name, recipe, rig):
         "lods": files,
         "tris": tris,
         "variants": recipe.get("variants", 1),
+        "style": recipe.get("style", ""),
+        "noble": recipe.get("noble", False),
     }
 
 
