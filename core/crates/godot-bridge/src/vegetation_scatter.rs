@@ -13,11 +13,13 @@ use std::time::Instant;
 
 use godot::classes::RefCounted;
 use godot::prelude::*;
-use vegetation::{scatter_tile, Ground, MapRasters, TileRequest, TileResult, PAGE_PX};
+use vegetation::{reground, scatter_tile, Ground, MapRasters, TileRequest, TileResult, PAGE_PX};
 
 struct Job {
     id: i64,
     request: TileRequest,
+    /// Buffers to re-seat (`request_reground`); `None` for a scatter.
+    reground: Option<Vec<Vec<f32>>>,
     map: Arc<MapRasters>,
 }
 
@@ -165,9 +167,9 @@ impl VegetationScatter {
     /// malformed.
     #[func]
     fn request(&mut self, id: i64, params: VarDictionary) -> bool {
-        let Some(jobs) = &self.jobs else {
+        if self.jobs.is_none() {
             return false;
-        };
+        }
         let side = int_of(&params, "side", 0).max(0) as usize;
         let Some(coarse) = params
             .get("coarse")
@@ -219,16 +221,53 @@ impl VegetationScatter {
             exclusions,
             ground,
         };
-        let job = Job {
+        self.send(Job {
             id,
             request,
+            reground: None,
             map: Arc::clone(&self.map),
+        })
+    }
+
+    /// Queues the re-seating of a tile's packed buffers on `ground_grid`
+    /// (`TerrainBuilder.surface_grid`, local to `origin`); the result comes back from `poll`
+    /// like a scatter (`counts` unchanged).
+    #[func]
+    fn request_reground(
+        &mut self,
+        id: i64,
+        buffers: VarArray,
+        ground_grid: VarDictionary,
+        origin: Vector2,
+        vertical_scale: f64,
+    ) -> bool {
+        let buffers: Vec<Vec<f32>> = buffers
+            .iter_shared()
+            .map(|v| {
+                v.try_to::<PackedFloat32Array>()
+                    .map(|b| b.to_vec())
+                    .unwrap_or_default()
+            })
+            .collect();
+        let request = TileRequest {
+            tile_index: 0,
+            origin: (origin.x as f64, origin.y as f64),
+            size_px: 0.0,
+            spacing: 1.0,
+            coarse_step: 1.0,
+            tree_scale: 1.0,
+            vertical_scale,
+            coarse: Default::default(),
+            side: 0,
+            exclusions: Vec::new(),
+            ground: ground_of(&ground_grid),
         };
-        if jobs.send(job).is_err() {
-            return false;
-        }
-        self.pending += 1;
-        true
+        self.send(Job {
+            id,
+            request,
+            reground: Some(buffers),
+            map: Arc::clone(&self.map),
+        })
     }
 
     /// Up to `max` finished tiles, each `{id, buffers (Array of PackedFloat32Array), counts
@@ -268,6 +307,19 @@ impl VegetationScatter {
     }
 }
 
+impl VegetationScatter {
+    fn send(&mut self, job: Job) -> bool {
+        let Some(jobs) = &self.jobs else {
+            return false;
+        };
+        if jobs.send(job).is_err() {
+            return false;
+        }
+        self.pending += 1;
+        true
+    }
+}
+
 impl Drop for VegetationScatter {
     fn drop(&mut self) {
         self.jobs = None;
@@ -288,13 +340,19 @@ fn worker_loop(jobs: &Mutex<Receiver<Job>>, done: &Sender<Done>) {
         };
         let start = Instant::now();
         // A panicking tile must still answer, or the GDScript side waits forever.
-        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            scatter_tile(&job.request, &job.map)
-        }))
-        .unwrap_or_else(|_| TileResult {
-            buffers: vec![Vec::new(); 16],
-            counts: vec![0; 16],
-        });
+        let result =
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| match job.reground {
+                Some(mut buffers) => {
+                    reground(&mut buffers, &job.request, &job.map);
+                    let counts = buffers.iter().map(|b| (b.len() / 16) as i32).collect();
+                    TileResult { buffers, counts }
+                }
+                None => scatter_tile(&job.request, &job.map),
+            }))
+            .unwrap_or_else(|_| TileResult {
+                buffers: vec![Vec::new(); 16],
+                counts: vec![0; 16],
+            });
         let item = Done {
             id: job.id,
             result,

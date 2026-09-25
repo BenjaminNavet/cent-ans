@@ -706,6 +706,24 @@ fn pack(mut items: Vec<Instance>) -> Vec<f32> {
     buffer
 }
 
+/// `VegetationTileJob.reground`: re-seats packed instances on `req.ground` (same sink as
+/// `push`, height = length of the basis Y column). Buffers are returned unchanged without a
+/// ground grid.
+pub fn reground(buffers: &mut [Vec<f32>], req: &TileRequest, map: &MapRasters) {
+    if matches!(req.ground, Ground::None) {
+        return;
+    }
+    for buffer in buffers.iter_mut() {
+        for item in buffer.as_chunks_mut::<FLOATS_PER_INSTANCE>().0 {
+            let height =
+                ((item[1] as f64).powi(2) + (item[5] as f64).powi(2) + (item[9] as f64).powi(2))
+                    .sqrt();
+            let ground = req.display_ground(map, item[3] as f64, item[11] as f64, 0.0);
+            item[7] = (ground - GROUND_SINK * height) as f32;
+        }
+    }
+}
+
 /// Scatters one tile (scatter, hedges, pack).
 pub fn scatter_tile(req: &TileRequest, map: &MapRasters) -> TileResult {
     let seed = (req.tile_index as u64)
@@ -862,6 +880,29 @@ mod tests {
         assert!((0.29..0.47).contains(&height));
         let ground = map.height_m_at(buffer[3] as f64, buffer[11] as f64) * 0.01;
         assert!((buffer[7] as f64 - (ground - GROUND_SINK * height as f64)).abs() < 1e-4);
+    }
+
+    #[test]
+    fn reground_moves_only_the_origin_height() {
+        let map = flat_map(40000);
+        let req = request(1.0, 0.0, 0.0, 1.0);
+        let mut buffers = scatter_tile(&req, &map).buffers;
+        let before = buffers.clone();
+        let mut lifted = request(1.0, 0.0, 0.0, 1.0);
+        lifted.ground = Ground::Grid {
+            heights: vec![2.0; 4 * 4],
+            side: 4,
+            unit: 32.0,
+        };
+        reground(&mut buffers, &lifted, &map);
+        for (a, b) in before.iter().zip(&buffers) {
+            for (x, y) in a.chunks(16).zip(b.chunks(16)) {
+                let height = (x[1].powi(2) + x[5].powi(2) + x[9].powi(2)).sqrt();
+                assert!((y[7] - (2.0 - 0.08 * height)).abs() < 1e-4);
+                assert_eq!(x[..7], y[..7]);
+                assert_eq!(x[8..], y[8..]);
+            }
+        }
     }
 
     #[test]

@@ -86,6 +86,7 @@ var _jobs: Dictionary = {}  # index → {"task": int, "job": VegetationTileJob, 
 ## Lot PB2 : pool natif (`VegetationScatter`) ou null ; requêtes en cours (id → index de tuile).
 var _native: Object = null
 var _native_ids: Dictionary = {}
+var _native_ground_ids: Dictionary = {}  # recalages : id → index de tuile
 var _native_serial: int = 0
 ## Lot C7b : recalages en cours (index → {"task", "job": VegetationGroundJob}) et tuiles à recaler.
 var _ground_jobs: Dictionary = {}
@@ -443,10 +444,23 @@ func _submit_native(index: int, item: Dictionary) -> void:
 ## Installe les tuiles semées par le pool natif ; les résultats périmés (tuile vidée par
 ## `clear` entre-temps) sont ignorés.
 func _poll_native() -> void:
-	if _native == null or _native_ids.is_empty():
+	if _native == null or (_native_ids.is_empty() and _native_ground_ids.is_empty()):
 		return
 	for result: Dictionary in _native.call("poll", 64):
 		var id: int = result["id"]
+		if _native_ground_ids.has(id):
+			var ground_index: int = _native_ground_ids[id]
+			_native_ground_ids.erase(id)
+			var ground_item: Dictionary = _ground_jobs.get(ground_index, {})
+			if ground_item.get("native", -1) == id:
+				_ground_jobs.erase(ground_index)
+				var ground_job: VegetationGroundJob = ground_item["job"]
+				ground_job.results.clear()
+				for buffer: PackedFloat32Array in result["buffers"]:
+					ground_job.results.append(buffer)
+				ground_job.build_ms = float(result["ms"])
+				_apply_ground(ground_index, ground_job)
+			continue
 		if not _native_ids.has(id):
 			continue
 		var index: int = _native_ids[id]
@@ -468,9 +482,11 @@ func _wait_all_jobs() -> void:
 			WorkerThreadPool.wait_for_task_completion(item["task"])
 	_jobs.clear()
 	_native_ids.clear()
-	for item in _ground_jobs.values():
-		WorkerThreadPool.wait_for_task_completion(item["task"])
+	for item: Dictionary in _ground_jobs.values():
+		if not item.has("native"):
+			WorkerThreadPool.wait_for_task_completion(item["task"])
 	_ground_jobs.clear()
+	_native_ground_ids.clear()
 	_ground_dirty.clear()
 
 
@@ -497,6 +513,14 @@ func _start_ground_jobs() -> void:
 		job.grid = terrain.surface_grid(index)
 		job.origin = Vector2((index % TerrainBuilder.CHUNKS) * chunk_px, (index / TerrainBuilder.CHUNKS) * chunk_px)
 		job.buffers = entry["buffers"]
+		if _native != null:
+			_native_serial += 1
+			var untyped: Array = []  # le pont Rust attend un Array non typé
+			untyped.assign(job.buffers)
+			if _native.call("request_reground", _native_serial, untyped, job.grid, job.origin, MapData.vertical_scale()):
+				_native_ground_ids[_native_serial] = index
+				_ground_jobs[index] = {"native": _native_serial, "job": job}
+				continue
 		var task := WorkerThreadPool.add_task(job.run, false, "vegetation ground %d" % index)
 		_ground_jobs[index] = {"task": task, "job": job}
 
@@ -504,26 +528,35 @@ func _start_ground_jobs() -> void:
 func _collect_ground_jobs(block: bool = false) -> void:
 	for index in _ground_jobs.keys():
 		var item: Dictionary = _ground_jobs[index]
+		if item.has("native"):
+			continue  # relevé par `_poll_native`
 		if not block and not WorkerThreadPool.is_task_completed(item["task"]):
 			continue
 		WorkerThreadPool.wait_for_task_completion(item["task"])
 		_ground_jobs.erase(index)
-		var job: VegetationGroundJob = item["job"]
-		var entry: Dictionary = _tiles.get(index, {})
-		if entry.is_empty() or int(entry["generation"]) != job.generation:
-			continue
-		var slots: Array = entry["slots"]
-		for slot in slots.size():
-			var mmi: MultiMeshInstance3D = slots[slot]
-			if mmi != null:
-				mmi.multimesh.buffer = job.results[slot]
-		entry["buffers"] = job.results
-		entry["level"] = job.level
-		# Le niveau a encore changé pendant le calcul : un nouveau recalage suivra.
-		if terrain.chunk_level(index) != job.level:
-			_ground_dirty[index] = true
-		stats["regrounds"] = int(stats["regrounds"]) + 1
-		stats["reground_ms_max"] = maxf(float(stats["reground_ms_max"]), job.build_ms)
+		_apply_ground(index, item["job"])
+	while block and not _native_ground_ids.is_empty():
+		OS.delay_usec(200)
+		_poll_native()
+
+
+## Installe les tampons recalés d'une tuile (ignorés si la tuile a été resemée entre-temps).
+func _apply_ground(index: int, job: VegetationGroundJob) -> void:
+	var entry: Dictionary = _tiles.get(index, {})
+	if entry.is_empty() or int(entry["generation"]) != job.generation:
+		return
+	var slots: Array = entry["slots"]
+	for slot in slots.size():
+		var mmi: MultiMeshInstance3D = slots[slot]
+		if mmi != null:
+			mmi.multimesh.buffer = job.results[slot]
+	entry["buffers"] = job.results
+	entry["level"] = job.level
+	# Le niveau a encore changé pendant le calcul : un nouveau recalage suivra.
+	if terrain.chunk_level(index) != job.level:
+		_ground_dirty[index] = true
+	stats["regrounds"] = int(stats["regrounds"]) + 1
+	stats["reground_ms_max"] = maxf(float(stats["reground_ms_max"]), job.build_ms)
 
 
 ## Recale tout de suite les tuiles en attente, visibles ou non (tests, captures).
