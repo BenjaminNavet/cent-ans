@@ -21,9 +21,9 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | Lot | Contenu | Vague | État |
 |---|---|---|---|
 | ZG0 | Squelette (ADR, manifeste, schémas, stubs, wip) | 0 | fait |
-| ZG1 | Données paliers 1-2 (`geo pyramid`) | 1 | à lancer |
-| ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | à lancer |
-| ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | à lancer |
+| ZG1 | Données paliers 1-2 (`geo pyramid`) | 1 | en cours (wip `zg1-pyramide.md`) |
+| ZG2 | Moteur : quadtree streamé, patchs GPU | 1 | en cours (wip `zg2-quadtree.md`) |
+| ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | en cours (wip `zg3-palier3.md`) |
 | ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | — |
 | ZG5 | Hydrographie, côtes, routes, colonies recollées, parcellaire | 2 | — |
 | ZG6 | Villes à l'échelle réelle vers 1340 | 3 | — |
@@ -32,3 +32,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 ## Journal
 - 25/09 : ZG0 commité (ADR 0036, `data/map/relief_pyramid.json`, `detail_zones.json`, schémas,
   `geo/pyramid.py`, `geo/detail_dem.py`, `relief_pyramid.gd`, `relief_quadtree.gd`).
+- 25/09 : vague 1 lancée (ZG1, ZG2, ZG3 en worktrees d'agents ; cache partagé par liens symboliques). Suite : fusion dans `integration/zoom`, puis vague 2 (ZG4 caméra + échelle verticale, ZG5 hydro/routes/parcellaire), vague 3 (ZG6 villes), vague 4 (ZG7 perf/recette/export/docs).
