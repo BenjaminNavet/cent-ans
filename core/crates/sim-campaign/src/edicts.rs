@@ -280,7 +280,7 @@ const AI_EDICT_RESERVE_SEASONS: i64 = 3;
 /// Vassals counted in the weight of tax edicts (EQ2: the feudal aid is
 /// levied on the vassals), and their weight each.
 const AI_EDICT_MAX_VASSALS: usize = 3;
-const AI_EDICT_VASSAL_WEIGHT: f64 = 0.5;
+const AI_EDICT_VASSAL_WEIGHT: f64 = 0.25;
 
 /// Weight of a tax edict's income for the AI (EQ2): 1 at peace with a
 /// balanced budget, 2 at war or in deficit, 4 when the treasury is also
