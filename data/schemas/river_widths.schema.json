@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/river_widths.schema.json",
+  "title": "Largeurs des cours d'eau du réseau fin",
+  "description": "Fichier data/map/river_widths.json (lot ZG5a, ADR 0036) : largeur par ordre de Strahler et ancrages nommés (lieu, lon/lat, largeur en mètres) interpolés le long des grands fleuves. Rendu seulement.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "strahler_width_m": {
+      "type": "object",
+      "patternProperties": { "^[1-9]$": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 } },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "upstream_exponent": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 },
+    "search_km": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+    "rivers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "names": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 2 } },
+          "anchors": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "place": { "type": "string" },
+                "lonlat": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "prefixItems": [
+                    { "type": "number", "minimum": -11, "maximum": 16 },
+                    { "type": "number", "minimum": 35, "maximum": 60 }
+                  ]
+                },
+                "width_m": { "type": "number", "exclusiveMinimum": 0, "maximum": 20000 }
+              },
+              "required": ["place", "lonlat", "width_m"],
+              "additionalProperties": false
+            }
+          },
+          "source": { "type": "string", "minLength": 5 }
+        },
+        "required": ["id", "names", "anchors", "source"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["strahler_width_m", "upstream_exponent", "search_km", "rivers"],
+  "additionalProperties": false
+}

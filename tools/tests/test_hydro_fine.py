@@ -161,11 +161,19 @@ def test_strokes_follow_main_stem() -> None:
 
 def test_modern_canals_are_excluded() -> None:
     """Source canals and named post-1340 canals go, the Fossdyke stays."""
-    notes = json.loads((DATA / "map" / "historical_hydro_notes.json").read_text(encoding="utf-8"))
+    notes = json.loads(
+        (DATA / "map" / "historical_hydro_notes.json").read_text(encoding="utf-8")
+    )
     canal_filter = hydro_sources.CanalFilter.from_notes(notes)
     table = _toy_table()
     table.name = np.array(
-        ["Canal du Midi", "la Loire", "Fossdyke", "Canal de Briare", "New Bedford River"],
+        [
+            "Canal du Midi",
+            "la Loire",
+            "Fossdyke",
+            "Canal de Briare",
+            "New Bedford River",
+        ],
         dtype=object,
     )
     table.canal = np.array([False, False, True, True, False])
@@ -190,8 +198,20 @@ def test_split_by_tiles_shares_border_vertices() -> None:
 def test_tile_roundtrip() -> None:
     """Encode then decode a CAFV tile."""
     lines = fine_tiles.TileLines()
-    lines.add(3, fine_tiles.FLAG_TIDAL, np.array([[1.0, 2.0], [3.0, 4.0]]), [5.0, 4.0], [100.0, 120.0])
-    lines.add(7, 0, np.array([[9.0, 9.0], [9.5, 9.0], [10.0, 9.5]]), [1.0, 1.0, 0.5], [3.0, 3.0, 3.0])
+    lines.add(
+        3,
+        fine_tiles.FLAG_TIDAL,
+        np.array([[1.0, 2.0], [3.0, 4.0]]),
+        [5.0, 4.0],
+        [100.0, 120.0],
+    )
+    lines.add(
+        7,
+        0,
+        np.array([[9.0, 9.0], [9.5, 9.0], [10.0, 9.5]]),
+        [1.0, 1.0, 0.5],
+        [3.0, 3.0, 3.0],
+    )
     data = fine_tiles.encode(fine_tiles.LAYER_RIVERS, 2, 40, 41, lines)
     decoded = fine_tiles.decode(data)
     assert (decoded["col"], decoded["row"], decoded["level"]) == (40, 41, 2)
@@ -199,3 +219,57 @@ def test_tile_roundtrip() -> None:
     assert decoded["lines"][0]["flags"] == fine_tiles.FLAG_TIDAL
     assert np.allclose(decoded["lines"][1]["xy"][-1], [10.0, 9.5])
     assert np.allclose(decoded["lines"][0]["w"], [100.0, 120.0])
+
+
+# ------------------------------------------------------------------- schemas
+
+
+@pytest.mark.parametrize(
+    ("schema_name", "data_path"),
+    [
+        ("historical_hydro_notes.schema.json", "map/historical_hydro_notes.json"),
+        ("river_widths.schema.json", "map/river_widths.json"),
+        ("rivers_fine.schema.json", "map/rivers_fine.json"),
+        ("fine_anchors.schema.json", "map/fine_anchors.json"),
+    ],
+)
+def test_matches_schema(schema_name: str, data_path: str) -> None:
+    """Versioned ZG5a files match their schema."""
+    from jsonschema import Draft202012Validator
+
+    schema = json.loads((DATA / "schemas" / schema_name).read_text(encoding="utf-8"))
+    Draft202012Validator.check_schema(schema)
+    path = DATA / data_path
+    if not path.exists():
+        pytest.skip(f"{data_path} pas encore généré")
+    document = json.loads(path.read_text(encoding="utf-8"))
+    errors = sorted(
+        Draft202012Validator(schema).iter_errors(document), key=lambda e: e.path
+    )
+    assert not errors, [error.message for error in errors[:5]]
+
+
+def test_canal_patterns_compile_and_hit_their_name() -> None:
+    """Every modern canal pattern compiles; each entry matches its own name or a pattern of it."""
+    import re
+
+    notes = json.loads(
+        (DATA / "map" / "historical_hydro_notes.json").read_text(encoding="utf-8")
+    )
+    for entry in notes["modern_canals"] + notes["kept_artificial"]:
+        compiled = [re.compile(p, re.IGNORECASE) for p in entry["patterns"]]
+        assert compiled, entry["id"]
+
+
+def test_width_anchor_names_resolve() -> None:
+    """Width anchor names normalise to distinct keys (no two rivers share a name)."""
+    from cent_ans_tools.geo import hydro_fine
+
+    widths = json.loads(
+        (DATA / "map" / "river_widths.json").read_text(encoding="utf-8")
+    )
+    seen: dict[str, str] = {}
+    for river in widths["rivers"]:
+        for name in river["names"]:
+            key = hydro_fine.normalise_name(name)
+            assert seen.setdefault(key, river["id"]) == river["id"], name

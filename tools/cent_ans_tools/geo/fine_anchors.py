@@ -54,7 +54,7 @@ ROAD_VERSION = 2
 
 MAX_MOVE_M = 300.0
 SITE_STEP_M = 25.0
-SITE_SLOPE_OK = 0.08  # a site flatter than 8 % outside the river bed stays put
+SITE_SLOPE_OK = 0.2  # a site flatter than 20 % outside the river bed stays put
 BRIDGE_NAMED_M = 2000.0  # search radius for the named river around a crossing
 BRIDGE_ANY_M = 500.0
 DENSIFY_M = 8.0
