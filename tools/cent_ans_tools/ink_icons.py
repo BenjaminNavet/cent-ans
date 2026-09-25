@@ -329,6 +329,8 @@ def build(catalog: dict | None = None) -> dict[str, list[str]]:
         report[f"{entry.kind}s"].append(entry.id)
         for target in entry.targets:
             indexes[entry.kind][target] = entry.out_path.name
+        if entry.kind == "medallion":  # medallions are looked up by their own id
+            indexes["medallion"][entry.id] = entry.out_path.name
     _write_index(
         ICONS_OUT_DIR,
         indexes["icon"],
