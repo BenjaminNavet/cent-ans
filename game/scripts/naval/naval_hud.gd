@@ -6,6 +6,8 @@ extends CanvasLayer
 ## navires du joueur (coque, feu, équipage), ordres (Aborder, Tirer, Éperonner, Flèches
 ## enflammées, Tenir, Se désengager), vitesse, chronique des événements, écran de fin.
 ## Aucune règle : les ordres partent en signaux vers la scène, qui les donne au cœur.
+## Bandeau des navires (NV2) : cartes pleines tant qu'elles tiennent sur une ligne, sinon
+## cartes compactes sur deux lignes, et défilement horizontal (molette, flèches) au-delà.
 
 signal card_clicked(ship_id: int, additive: bool)
 signal card_double_clicked(ship_id: int)
@@ -22,6 +24,13 @@ const ORDERS := [
 	["disengage", "Se désengager", "Couper les grappins et fuir vent arrière"],
 ]
 const SPEEDS := [["❚❚", 0.0], ["×1", 1.0], ["×2", 2.0], ["×4", 4.0]]
+## Cartes des navires : pleines (une ligne) ou compactes (deux lignes au plus).
+const CARD_FULL := Vector2(170, 96)
+const CARD_COMPACT_MIN_WIDTH := 150.0
+const CARD_COMPACT_MAX_WIDTH := 210.0
+const CARD_COMPACT_HEIGHT := 50.0
+const CARD_GAP := 5
+const CARD_ROWS_MAX := 2
 
 var player_side: String = "attacker"
 var colors: Dictionary = {}
@@ -31,7 +40,11 @@ var _wind: Label
 var _balance: Control
 var _share: float = 0.5
 var _clock: Label
-var _cards: HBoxContainer
+var _cards: GridContainer
+var _card_scroll: ScrollContainer
+var _scroll_left: Button
+var _scroll_right: Button
+var _compact := false
 var _card_nodes: Dictionary = {}  # id -> {panel, name, hull, crew, status}
 var _orders: HBoxContainer
 var _order_buttons: Dictionary = {}
@@ -136,13 +149,117 @@ func _ready() -> void:
 	_hint = BattleUiKit.label("", 13, BattleUiKit.RUBRIC)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	order_column.add_child(_hint)
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(0, 104)
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	bottom.add_child(scroll)
-	_cards = HBoxContainer.new()
-	_cards.add_theme_constant_override("separation", 5)
-	scroll.add_child(_cards)
+	# Bandeau des cartes : flèches de défilement de part et d'autre.
+	var strip := HBoxContainer.new()
+	strip.name = "CardStrip"
+	strip.add_theme_constant_override("separation", 4)
+	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bottom.add_child(strip)
+	_scroll_left = _scroll_button("‹", -1)
+	strip.add_child(_scroll_left)
+	_card_scroll = ScrollContainer.new()
+	_card_scroll.name = "CardScroll"
+	_card_scroll.custom_minimum_size = Vector2(0, CARD_FULL.y + 8)
+	_card_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_card_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_card_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	_card_scroll.gui_input.connect(_on_cards_wheel)
+	strip.add_child(_card_scroll)
+	_scroll_right = _scroll_button("›", 1)
+	strip.add_child(_scroll_right)
+	_cards = GridContainer.new()
+	_cards.name = "Cards"
+	_cards.add_theme_constant_override("h_separation", CARD_GAP)
+	_cards.add_theme_constant_override("v_separation", CARD_GAP - 1)
+	_card_scroll.add_child(_cards)
+	get_viewport().size_changed.connect(_layout_cards)
+	_layout_cards()
+
+
+func _scroll_button(text: String, direction: int) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.tooltip_text = "Faire défiler les navires"
+	BattleUiKit.button_font(button, 22)
+	button.custom_minimum_size = Vector2(26, 0)
+	button.visible = false
+	button.pressed.connect(func() -> void: _scroll_cards(direction))
+	return button
+
+
+func _scroll_cards(direction: int) -> void:
+	var step := int(_card_width() + CARD_GAP) * 3
+	_card_scroll.scroll_horizontal = maxi(0, _card_scroll.scroll_horizontal + direction * step)
+
+
+## Molette sur le bandeau : défilement horizontal.
+func _on_cards_wheel(event: InputEvent) -> void:
+	var button := event as InputEventMouseButton
+	if button == null or not button.pressed:
+		return
+	if button.button_index in [MOUSE_BUTTON_WHEEL_DOWN, MOUSE_BUTTON_WHEEL_RIGHT]:
+		_card_scroll.scroll_horizontal += int(_card_width() + CARD_GAP)
+		_card_scroll.accept_event()
+	elif button.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_LEFT]:
+		_card_scroll.scroll_horizontal = maxi(0, _card_scroll.scroll_horizontal - int(_card_width() + CARD_GAP))
+		_card_scroll.accept_event()
+
+
+## Largeur disponible pour les cartes (écran moins les marges et les flèches).
+func _strip_width() -> float:
+	var arrows := 60.0 if _scroll_right != null and _scroll_right.visible else 0.0
+	return get_viewport().get_visible_rect().size.x - 20.0 - arrows
+
+
+func _card_width() -> float:
+	if not _compact:
+		return CARD_FULL.x
+	var count := maxi(_card_nodes.size(), 1)
+	var columns := ceili(float(count) / CARD_ROWS_MAX)
+	var fit := (_strip_width() - CARD_GAP * (columns - 1)) / columns
+	return clampf(fit, CARD_COMPACT_MIN_WIDTH, CARD_COMPACT_MAX_WIDTH)
+
+
+## Cartes pleines sur une ligne si elles tiennent, sinon compactes sur deux lignes ;
+## flèches et molette quand même cela déborde.
+func _layout_cards() -> void:
+	if _cards == null:
+		return
+	var count := maxi(_card_nodes.size(), 1)
+	var width := _strip_width()
+	_compact = count * (CARD_FULL.x + CARD_GAP) - CARD_GAP > width
+	var card_size := CARD_FULL
+	var rows := 1
+	if _compact:
+		rows = CARD_ROWS_MAX if count > 1 else 1
+		card_size = Vector2(_card_width(), CARD_COMPACT_HEIGHT)
+	var columns := ceili(float(count) / rows)
+	_cards.columns = maxi(columns, 1)
+	var content := columns * (card_size.x + CARD_GAP) - CARD_GAP
+	var overflow := content > width + 0.5
+	_scroll_left.visible = overflow
+	_scroll_right.visible = overflow
+	_card_scroll.custom_minimum_size = Vector2(0, rows * (card_size.y + CARD_GAP) + 4)
+	for id in _card_nodes:
+		_style_card(_card_nodes[id], card_size)
+
+
+func _style_card(card: Dictionary, card_size: Vector2) -> void:
+	(card["panel"] as PanelContainer).custom_minimum_size = card_size
+	(card["kind"] as Label).visible = not _compact
+	(card["crew"] as Label).visible = not _compact
+	(card["hull"] as ProgressBar).custom_minimum_size = Vector2(card_size.x - 20.0, 6 if _compact else 8)
+
+
+## Mode du bandeau (tests) : `compact`, nombre de colonnes, défilement.
+func card_layout() -> Dictionary:
+	return {
+		"compact": _compact,
+		"columns": _cards.columns,
+		"scroll": _scroll_right.visible,
+		"card_width": _card_width(),
+		"strip_width": _strip_width(),
+	}
 
 
 func _enemy() -> String:
@@ -184,14 +301,19 @@ func update_cards(ships: Array, selected: Array) -> void:
 		var id := int(ship["id"])
 		if not _card_nodes.has(id):
 			_card_nodes[id] = _make_card(ship)
+			_layout_cards()
 		var card: Dictionary = _card_nodes[id]
 		var status := str(ship["status"])
 		var men := int(round(float(ship["soldiers"])))
-		(card["crew"] as Label).text = "%d hommes · %d marins" % [men, int(round(float(ship["sailors"])))]
+		var sailors := int(round(float(ship["sailors"])))
+		(card["crew"] as Label).text = "%d hommes · %d marins" % [men, sailors]
 		var hull := float(ship["hull"]) / maxf(float(ship["hull_max"]), 1.0)
 		(card["hull"] as ProgressBar).value = hull * 100.0
 		var text := _status_text(ship)
+		if _compact and status == "afloat":
+			text = "%d h · %s" % [men + sailors, text]
 		(card["status"] as Label).text = text
+		(card["panel"] as PanelContainer).tooltip_text = "%s (%s) — %d hommes, %d marins" % [ship["name"], ship["class_name"], men, sailors]
 		(card["status"] as Label).add_theme_color_override("font_color", BattleUiKit.RUBRIC if float(ship["fire"]) > 0.05 or status != "afloat" else BattleUiKit.INK_SOFT)
 		var panel: PanelContainer = card["panel"]
 		var chosen := selected.has(id)
@@ -263,6 +385,7 @@ func _make_card(ship: Dictionary) -> Dictionary:
 	status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(status)
 	panel.gui_input.connect(func(event: InputEvent) -> void:
+		_on_cards_wheel(event)
 		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 			var now := Time.get_ticks_msec()
 			if int(_last_click["id"]) == id and now - int(_last_click["ms"]) < 350:
@@ -271,7 +394,7 @@ func _make_card(ship: Dictionary) -> Dictionary:
 				card_clicked.emit(id, (event as InputEventMouseButton).shift_pressed or (event as InputEventMouseButton).ctrl_pressed)
 			_last_click = {"id": id, "ms": now})
 	_cards.add_child(panel)
-	return {"panel": panel, "hull": hull, "crew": crew, "status": status}
+	return {"panel": panel, "hull": hull, "crew": crew, "status": status, "kind": kind}
 
 
 ## Ordres possibles pour la sélection (Éperonner : galères seulement).
