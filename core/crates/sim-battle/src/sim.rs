@@ -2194,6 +2194,13 @@ impl BattleSim {
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
         self.units[i].kills += kills;
+        // ADR 0051: the arrows wound the horses too, and they panic.
+        let target = &self.units[t];
+        self.units[t].morale -= crate::missile_morale::MissileMoraleRules::bundled().panic(
+            target.mounted,
+            kills,
+            target.max_soldiers,
+        );
         if kills > 0.0 {
             self.units[t].missile_timer = 0.0;
             self.units[t].loss_cause = cause;
