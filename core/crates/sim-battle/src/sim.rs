@@ -1208,6 +1208,7 @@ impl BattleSim {
         self.separate_friends();
         self.resolve_water();
         self.resolve_siege_works();
+        self.relieve_rams();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
         self.tower_fire();
@@ -2678,6 +2679,7 @@ impl BattleSim {
         };
         self.finished = true;
         self.winner = Some(winner);
+        self.return_ram_crews();
         self.collect_field_standards(winner);
         let loser = winner.other();
         if self.general_alive[loser.index()] {
