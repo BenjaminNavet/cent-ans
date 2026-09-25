@@ -142,6 +142,48 @@ def test_terrain_cost_classes() -> None:
     ]
 
 
+def test_wetland_cells_are_marsh_whatever_their_height() -> None:
+    """Lot R3: a curated wetland (``wetlands.png``) is a marsh even above 15 m."""
+    rules = navgrid.load_rules()
+    height = np.array([[40.0, 40.0]])
+    slope = np.array([[0.02, 0.02]])
+    no_marsh = np.zeros((1, 2), dtype=bool)
+    wetland = np.array([[True, False]])
+    result = navgrid.terrain_cost(
+        height, slope, np.zeros((1, 2, 4)), no_marsh, rules, wetland
+    )
+    assert result.tolist() == [
+        [rules["terrain_costs"]["marsh"], rules["terrain_costs"]["plains"]]
+    ]
+
+
+def test_splat_is_block_averaged_to_the_grid() -> None:
+    """Lot R3: a cell is a forest when half of its splat pixels are wooded."""
+    forest = np.zeros((4, 4), dtype=np.float32)
+    forest[0, 0] = forest[0, 1] = 1.0  # half of the top-left cell
+    forest[2, 2] = 1.0  # a quarter of the bottom-right cell
+    cells = navgrid._block_mean(forest, 2)
+    assert cells.tolist() == [[0.5, 0.0], [0.0, 0.25]]
+    weights = np.zeros((1, 2, 4))
+    weights[0, :, 2] = [cells[0, 0], cells[1, 1]]
+    cost = navgrid.terrain_cost(
+        np.full((1, 2), 50.0),
+        np.full((1, 2), 0.01),
+        weights,
+        np.zeros((1, 2), dtype=bool),
+        navgrid.load_rules(),
+    )
+    costs = navgrid.load_rules()["terrain_costs"]
+    assert cost.tolist() == [[costs["forest"], costs["plains"]]]
+
+
+def test_forest_and_marsh_are_never_walls() -> None:
+    """Forests and marshes are slower than plains but always passable."""
+    costs = navgrid.load_rules()["terrain_costs"]
+    for name in ("forest", "marsh"):
+        assert costs["plains"] < costs[name] < navgrid.IMPASSABLE
+
+
 # ----------------------------------------------------------------------------
 # Data files
 # ----------------------------------------------------------------------------
