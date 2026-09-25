@@ -48,6 +48,7 @@
     "pretender_reluctance": 45,
     "max_weariness_gain": 2,
     "sue_weariness": 70,
-    "min_war_turns": 20
+    "min_war_turns": 20,
+    "truce_binds_allies": true
   }
 }
