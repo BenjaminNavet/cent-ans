@@ -431,7 +431,7 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
 	var stars_label := BattleUiKit.label(stars, 14, BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
 	stars_label.set_script(RichLabel)
-	stars_label.tooltip_text = "Commandement %d / 10" % command
+	stars_label.tooltip_text = "Commandement %d / %s" % [command, RuleValues.text("max_skill_level")]
 	stars_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	texts.add_child(stars_label)
 	if slot == 0:

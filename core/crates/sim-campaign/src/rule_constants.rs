@@ -15,7 +15,8 @@ use data_model::GameData;
 
 use crate::state::Season;
 use crate::{
-    agents, chronicle, diplomacy, economy, population, ransom, religion, research, retinue, table,
+    agents, chronicle, diplomacy, economy, movement, population, ransom, religion, research,
+    retinue, skills, table,
 };
 
 /// Every rule value the interface may quote, by name.
@@ -140,12 +141,21 @@ pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
     values.insert("march_km_season", season_km(Season::Summer));
     values.insert("march_km_winter", season_km(Season::Winter));
     values.insert("zoc_radius_km", data.free_movement_rules().zoc_radius_km);
+    values.insert(
+        "landing_loss_percent",
+        f64::from(movement::LANDING_LOSS_PERCENT),
+    );
+    values.insert(
+        "landing_loss_winter_percent",
+        f64::from(movement::LANDING_WINTER_FACTOR * movement::LANDING_LOSS_PERCENT),
+    );
 
     // Characters and agents.
     values.insert(
         "retinue_max_per_character",
         retinue::max_per_character(data) as f64,
     );
+    values.insert("max_skill_level", f64::from(skills::MAX_SKILL_LEVEL));
     let agent_rules = agents::rules(data);
     values.insert("agent_xp_success", f64::from(agent_rules.xp_success));
     values.insert("agent_xp_failure", f64::from(agent_rules.xp_failure));
