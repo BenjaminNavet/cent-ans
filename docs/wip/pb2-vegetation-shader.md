@@ -19,6 +19,22 @@ Worktree `/Users/jean_hubert/dev/gp-pb2`, branche `pb2-veg-shader`. Coût cloud 
   - Recalage d'une tuile : 438 → 6 ms au pire ; `settlements_render_test` tree_error 0,0.
   - Captures A/B (Orléans d=40, Angers d=25) : même aspect (densité, essences, haies, pose).
 
-## 2. Shader du terrain — à faire
-- Le shader est modifié en parallèle par la session ZG (ZG8, zg4b, `integration/zoom`) :
-  partir de main à jour, changements localisés, captures comparées pixel à pixel.
+## 2. Shader du terrain — fait (gains exacts seulement)
+- Mesure par bloc (Vulkan, sonde temporaire `pb_skip` : uniforme global qui coupe un bloc, jamais
+  commitée), d=40, base ~22,5 ms GPU : météo au sol `weather_ground` 1,3-1,5 ms, parcellaire
+  ZG5b 1,3, textures de détail 1,2, parcellaire V2b 1,0, fleuves + zones humides 0,7, `fp_splat`
+  0,7, frontières 0,3, terroirs 0,3, ombres de nuages ~0 ; tous les blocs coupés : −6,6 ms.
+  Le reste (~16 ms) : géométrie (7,4 M primitives, surtout la végétation), ombres, MSAA.
+- Fait (résultat identique, moins de lectures de texture) :
+  - fragment : sur une page du quadtree (`qt_has_page`), plus de relief heightmap ni de
+    `rl_relief` (9 lectures par pixel), remplacés de toute façon par `qt_relief` ;
+  - vertex `qt_vertex` : hauteur grossière et fond de vallée ZG8 lus une fois quand le sommet
+    ne glisse pas (`gm == g`) — 8 lectures de moins par sommet, dans les 6 passes (prépasse,
+    couleur, 4 cascades d'ombre). `campaign_display_height_at_floor` (même expression).
+  - Gain mesuré −0,3 à −0,6 ms (machine très chargée : 24 autres Godot, écarts de ±5 ms entre
+    passes ; seul le signe est sûr). Captures A/B : écarts au niveau du bruit des animations.
+- Écarté : espacement des sommets du quadtree (`qt_px` 6/8) — le relief ne fait qu'une petite
+  part des primitives, aucun gain net.
+- Au-delà, il faudrait accepter un changement (même faible) : parcellaire V2b coupé de près
+  (encore mélangé à 8 % sous ZG5b), déformation météo précalculée en texture, Voronoï 2×2.
+  Non fait (consigne : sans changement visible).
