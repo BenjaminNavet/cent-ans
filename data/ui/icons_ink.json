@@ -9,7 +9,7 @@
   },
   "medallion_style": {
     "size": 256,
-    "reference": "docs/img/da/planche/bouton_cloche.png",
+    "reference": "docs/img/da5/reference_medaillon.png",
     "prompt": "Paint a round illuminated medallion button in exactly the same style, palette and frame as the reference picture (Gothic French manuscript illumination, egg tempera, fine brown ink outlines): burnished gold outer ring with a dark outline, azure blue band decorated with thin white scrollwork, thin vermilion inner fillet, gold field inside, four small gold fleurons at the top, bottom, left and right. Keep the frame identical to the reference; only replace the bell in the centre by the new emblem, painted in the same way (gold, brown and a touch of azure or vermilion), large and simple, readable at 40 pixels. Plain flat parchment background around the medallion. No text, no letters, no numbers. Emblem:"
   },
   "icons": [
