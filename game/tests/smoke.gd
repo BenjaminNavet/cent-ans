@@ -171,6 +171,14 @@ func _run_campaign_sim() -> void:
 			return
 	else:
 		campaign.new_campaign(1337)
+	if campaign.has_method("set_difficulty"):
+		# DF1 : niveau de difficulté choisi au lancement, figé ensuite.
+		var levels: Array = campaign.get_difficulty_levels()
+		_check(levels.size() == 4, "expected 4 difficulty levels, got %d" % levels.size())
+		_check(campaign.get_difficulty() == "normal", "default difficulty should be 'normal', got '%s'" % campaign.get_difficulty())
+		_check(campaign.set_difficulty("hard"), "set_difficulty('hard') refused")
+		_check(campaign.get_difficulty() == "hard", "get_difficulty() should be 'hard', got '%s'" % campaign.get_difficulty())
+		_check(campaign.set_difficulty("normal"), "set_difficulty('normal') refused at turn 0")
 	_check(campaign.get_turn() == 0, "initial turn should be 0, got %d" % campaign.get_turn())
 	_check(campaign.get_date_label() == "Printemps 1337", "initial date should be 'Printemps 1337', got '%s'" % campaign.get_date_label())
 
@@ -264,6 +272,9 @@ func _run_start_menu() -> void:
 	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
 	menu.show_faction_select(true)
 	_check(menu.faction_select.visible and not menu.main_column.visible, "faction select should replace the main column")
+	# DF1 : sélecteur de difficulté de campagne, Normale par défaut.
+	_check(menu.faction_select.difficulty_count() == 4, "faction select should offer 4 difficulty levels, got %d" % menu.faction_select.difficulty_count())
+	_check(menu.faction_select.selected_difficulty == "normal", "default campaign difficulty should be normal, got %s" % menu.faction_select.selected_difficulty)
 	menu.open_intro()
 	await process_frame
 	_check(menu.overlay_open(), "prologue overlay should open")
