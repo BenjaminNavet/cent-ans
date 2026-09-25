@@ -23,13 +23,15 @@ Aucun changement Rust.
   (« Message queue out of memory », étape campagne, cause étrangère), aucune nouvelle erreur.
 - [x] Banc : parcours « descente » (`--bench-descent-only`), mesures ci-dessous.
 - [x] Docs `godot-map.md`, addendum ADR 0036.
-- [ ] Captures `docs/img/zg4/` (en cours), mesures finales du banc complet.
+- [x] Captures `docs/img/zg4/` (20 JPEG), mesures du banc complet (`docs/godot-map.md`).
 - [ ] Fusion de `integration/zoom` (correctif 3a3c8a95 du quadtree) : `git merge` refusé par le
   classificateur de permissions dans ce worktree → à faire par l'orchestrateur (pas de conflit attendu :
   `relief_quadtree.gd` modifié à des endroits différents).
 
 ## Prochaine étape
-Terminer captures + banc complet, remplir « MESURES_ZG4 » dans `docs/godot-map.md`, commit final.
+Lot terminé, en attente de fusion (fusionner d'abord `integration/zoom` dans `zg4-camera`).
+Suites : ZG5b (routes/fleuves à l'échelle réelle ; lit creusé 719 m/px visible de près), ZG6/VH4
+(villes à l'échelle réelle, masquées au palier site), recalages des colonies/ponts encore ~250 ms par banc.
 
 ## Mesures (descente seule, `--bench-descent-only`, 1 440 × 900, charge notée)
 | Essai | charge (1 min) | i/s | médiane ms | p99 ms | > 50 ms | recalages |

@@ -874,7 +874,23 @@ factice), caméra (point visé au sol, pas sous le relief, tangage rasant, `near
 `set_vertical_scale` sur une pyramide factice (paramètre global, surface proportionnelle, recalages étalés
 puis vidés, repli sans pyramide).
 
-MESURES_ZG4
+Mesures (25/09, banc complet `--bench-map` = panoramique d = 30 + zoom Paris + descente, 1 440 × 900,
+Apple Silicon partagé ; comparaisons appariées à charge égale seulement) :
+
+| Essai | charge (1 min) | i/s global | i/s descente | médiane descente | > 50 ms (global / descente) |
+|---|---|---|---|---|---|
+| statique (`--static-exaggeration`) | 22 → 20 | 27,4 | 32,2 | 22,6 ms | 197 / 67 |
+| dynamique | 25 → 24 | 26,5 | 29,6 | 27,1 ms | 236 / 103 |
+| dynamique (machine plus calme) | 6 → 15 | 39,1 | 37,0 | 18,8 ms | 124 / 82 |
+
+Recalages d'échelle : ≈ 180 changements de palier par banc, 740-920 émissions de morceaux, 150-190 ms au
+total, ≤ 4,2 ms par image ; écouteurs : colonies 135 ms, ponts 115 ms, maquettes 7 ms (au lieu de
+1,23 s pour les colonies quand chaque palier recalait tout). Cuissons des maquettes : ≈ 45 par banc,
+≈ 60 ms de calcul chacune, ≤ 3-5,6 ms par image. Quadtree : ≈ 165 nœuds en vue rasante (budget 700
+jamais atteint, `px_scale` 1), `update_view` 3,8-5,7 ms en moyenne. Coût net de l'exagération dynamique :
+de l'ordre de 3 % d'i/s sur le banc complet et 8 % sur la descente (plus d'images > 50 ms pendant les
+recalages), dans le bruit de la machine partagée pour la vue stratégique (échelle constante au-dessus de
+45 unités).
 
 Captures (`docs/img/zg4/`, été, temps clair, 1 440 × 900) : Rouen (zone E7, regard vers l'est), Grande
 Chartreuse (E4, vers le nord), Paris (E7, vers le nord), puy de Dôme (E4, vers l'ouest), Douvres (E7, vers le
