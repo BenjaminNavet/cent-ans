@@ -3,7 +3,7 @@
   "name": {
     "display": "Aide féodale"
   },
-  "description": "Levée de l'aide féodale exceptionnelle (rançon du seigneur, adoubement de l'aîné, mariage de la fille aînée, ou simple nécessité de guerre) : le trésor s'en trouve renfloué, mais les sujets grognent.",
+  "description": "Levée de l'aide féodale exceptionnelle ([[cdx_rancon|rançon]] du seigneur, adoubement de l'aîné, mariage de la fille aînée, ou simple nécessité de guerre) : le [[cdx_jeu_tresor|trésor]] s'en trouve renfloué, mais les sujets [[cdx_jeu_ordre_public|grognent]].",
   "delay_turns": 0,
   "effects": [
     { "effect": "tax_income", "value": 20, "mode": "percent" },
