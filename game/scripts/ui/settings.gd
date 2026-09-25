@@ -35,6 +35,8 @@ const DEFAULTS := {
 	"tutorial/enabled": true,
 	"tutorial/step": 0,
 	"tutorial/done": false,
+	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
+	"interface/intro_seen": false,
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).
