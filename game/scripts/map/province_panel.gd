@@ -132,7 +132,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	if siege.is_empty():
 		siege_value.text = "Aucun"
 	else:
-		siege_value.text = "%s, %d tour(s)" % [_faction_label(str(siege.get("attacker", "")), "", label_of), int(siege.get("turns_left", 0))]
+		siege_value.text = "%s, %s" % [_faction_label(str(siege.get("attacker", "")), "", label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
 	id_value.text = "%s (index %d)" % [province_id, int(province.get("index", 0))]
 	var governor_name: String = str(state.get("governor_name", ""))
 	governor_label.text = "Gouverneur : %s" % (governor_name if governor_name != "" else "—")
@@ -265,7 +265,7 @@ func _fill_construction(construction: Dictionary, is_player_owner: bool) -> void
 	construction_box.visible = not construction.is_empty()
 	if construction.is_empty():
 		return
-	construction_label.text = "%s — %d tour(s) restant(s)" % [str(construction.get("name", "?")), int(construction.get("turns_left", 0))]
+	construction_label.text = "%s — %s restant%s" % [str(construction.get("name", "?")), FrText.count(int(construction.get("turns_left", 0)), "tour"), FrText.s(int(construction.get("turns_left", 0)))]
 	cancel_build_button.visible = is_player_owner
 
 
@@ -342,10 +342,10 @@ func _make_settlement_row(row: Dictionary) -> Control:
 	var kind := str(row.get("kind", ""))
 	var controller := _faction_label(str(row.get("controller", "")), "", _label_of)
 	var text := "%s — %s, %s" % [str(row.get("name", settlement_id)), str(SettlementPanel.KIND_LABELS.get(kind, kind)), controller]
-	text += "\n    garnison : %d unité(s), %s hommes" % [int(row.get("garrison_units", 0)), _thousands(int(row.get("garrison_strength", 0)))]
+	text += "\n    garnison : %s, %s hommes" % [FrText.count(int(row.get("garrison_units", 0)), "unité"), _thousands(int(row.get("garrison_strength", 0)))]
 	var siege: Dictionary = row.get("siege", {}) if row.get("siege") is Dictionary else {}
 	if not siege.is_empty():
-		text += " — assiégée par %s (%d tour(s))" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), int(siege.get("turns_left", 0))]
+		text += " — assiégée par %s (%s)" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
 	button.text = text
 	button.tooltip_text = "Ouvrir le panneau de la colonie et centrer la carte"
 	button.pressed.connect(func() -> void: settlement_requested.emit(settlement_id))
