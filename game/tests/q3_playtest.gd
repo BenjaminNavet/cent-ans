@@ -388,11 +388,11 @@ func phase_trade() -> void:
 		await wait(10)
 	else:
 		log_q("trade: no visible trade button")
-	await key(KEY_R)
+	await key(KEY_X)
 	await wait(20)
-	log_q("trade: after R, trade_mode %s, diplomacy mode %s" % [map.trade_mode, map.diplomacy.get("mode") if map.diplomacy != null else "?"])
-	await shot("trade-key-r")
-	await key(KEY_R)
+	log_q("trade: after X, trade_mode %s, diplomacy mode %s" % [map.trade_mode, map.diplomacy.get("mode") if map.diplomacy != null else "?"])
+	await shot("trade-key-x")
+	await key(KEY_X)
 	await wait(10)
 
 
@@ -609,6 +609,7 @@ func fight(button: Button, label: String) -> void:
 	await shot("%s-start" % label)
 	for _i in 2:
 		await key(KEY_EQUAL)
+	await attack_order(battle, label)
 	var t_fight := Time.get_ticks_msec()
 	var next_shot := 15000
 	var fight_limit_ms := 110000
@@ -618,6 +619,7 @@ func fight(button: Button, label: String) -> void:
 			await shot("%s-%ds" % [label, next_shot / 1000])
 			await fps_probe("%s-%ds" % [label, next_shot / 1000], 60)
 			next_shot += 30000
+			await attack_order(battle, label)
 	if not battle.get("finished_shown"):
 		var sim_battle: Object = battle.get("battle")
 		log_q("%s still running after %d s (clock %.0f s); sounding the general retreat" % [label, (Time.get_ticks_msec() - t_fight) / 1000, float(sim_battle.call("get_elapsed"))])
@@ -638,6 +640,51 @@ func fight(button: Button, label: String) -> void:
 	log_q("%s scene still valid after return: %s" % [label, is_instance_valid(battle)])
 	await shot("after-%s" % label)
 	await dismiss_dialogs()
+
+
+## Comme un joueur : sélectionne tous ses régiments (clic + Maj-clic sur les cartes d'unité) et
+## clic droit sur le régiment ennemi le plus proche.
+func attack_order(battle: Node, label: String) -> void:
+	var cards: Array = battle.find_children("*", "UnitCard", true, false).filter(func(n: Node) -> bool: return (n as Control).is_visible_in_tree())
+	if cards.is_empty():
+		log_q("%s: no unit cards" % label)
+		return
+	for index in cards.size():
+		await click_at(window_point(cards[index]), MOUSE_BUTTON_LEFT, index > 0)
+	var player_side := str(battle.get("player_side"))
+	var mine := Vector3.ZERO
+	var count := 0
+	for unit in battle.get("units"):
+		if str(unit.get("side", "")) == player_side:
+			mine += Vector3(float(unit["x"]), float(unit["y"]), float(unit["z"]))
+			count += 1
+	if count == 0:
+		return
+	mine /= count
+	var target: Dictionary = {}
+	var best := INF
+	for unit in battle.get("units"):
+		if str(unit.get("side", "")) != player_side and bool(unit.get("present", true)) and int(unit.get("soldiers", 1)) > 0 and str(unit.get("state", "")) != "routing":
+			var d := Vector3(float(unit["x"]), 0, float(unit["z"])).distance_to(Vector3(mine.x, 0, mine.z))
+			if d < best:
+				best = d
+				target = unit
+	if target.is_empty():
+		log_q("%s: no enemy target" % label)
+		return
+	var world := Vector3(float(target["x"]), float(target["y"]), float(target["z"]))
+	var camera := battle.get_viewport().get_camera_3d()
+	var screen := camera.unproject_position(world)
+	var view := battle.get_viewport().get_visible_rect()
+	if camera.is_position_behind(world) or not view.grow(-60).has_point(screen):
+		var rig: Node = battle.get("camera_rig")
+		rig.call("look_at_point", world, rig.get("distance"), rig.get("yaw"))
+		await wait(40)
+		screen = camera.unproject_position(world)
+	var point := root.get_final_transform() * screen
+	await click_at(point, MOUSE_BUTTON_RIGHT)
+	await wait(10)
+	log_q("%s: %d regiments selected (%d), attack on %s at %.0f m" % [label, cards.size(), (battle.get("selected") as Array).size(), target.get("type", target.get("id", "?")), best])
 
 
 func phase_siege() -> void:
@@ -963,12 +1010,13 @@ func move_to(point: Vector2) -> void:
 	await wait(3)
 
 
-func click_at(point: Vector2, button := MOUSE_BUTTON_LEFT) -> void:
+func click_at(point: Vector2, button := MOUSE_BUTTON_LEFT, shift := false) -> void:
 	await move_to(point)
 	for pressed in [true, false]:
 		var event := InputEventMouseButton.new()
 		event.button_index = button
 		event.pressed = pressed
+		event.shift_pressed = shift
 		event.position = point
 		event.global_position = point
 		Input.parse_input_event(event)
