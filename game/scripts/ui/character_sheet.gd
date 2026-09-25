@@ -76,6 +76,7 @@ const SCREEN_MARGIN := 16.0
 
 
 func _ready() -> void:
+	Lettrine.attach(name_label)  # UI1 : titre à lettrine enluminée
 	close_button.pressed.connect(func() -> void:
 		hide()
 		closed.emit())

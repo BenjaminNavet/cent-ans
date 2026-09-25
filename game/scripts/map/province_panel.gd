@@ -78,6 +78,7 @@ var _label_of: Callable = Callable()
 
 
 func _ready() -> void:
+	Lettrine.attach(name_label)  # UI1 : titre à lettrine enluminée
 	recruit_button.pressed.connect(func() -> void: recruit_panel.visible = not recruit_panel.visible)
 	create_army_button.pressed.connect(_on_create_army)
 	cancel_build_button.pressed.connect(func() -> void: cancel_build_requested.emit(province_id))
