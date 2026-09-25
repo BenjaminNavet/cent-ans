@@ -138,10 +138,16 @@ fn fire_spread(data: &GameData, town: Option<&str>, seed: u64) -> (usize, usize)
     lab(&mut sim);
     // Tuning sweeps: `FIRE_CHANCE`, `FIRE_REACH` override the spread.
     let mut rules = sim.fire_rules().unwrap().clone();
-    if let Some(v) = std::env::var("FIRE_CHANCE").ok().and_then(|s| s.parse().ok()) {
+    if let Some(v) = std::env::var("FIRE_CHANCE")
+        .ok()
+        .and_then(|s| s.parse().ok())
+    {
         rules.spread.chance_per_period = v;
     }
-    if let Some(v) = std::env::var("FIRE_REACH").ok().and_then(|s| s.parse().ok()) {
+    if let Some(v) = std::env::var("FIRE_REACH")
+        .ok()
+        .and_then(|s| s.parse().ok())
+    {
         rules.spread.edge_distance_m = v;
     }
     sim.set_fire_rules(Some(rules));
