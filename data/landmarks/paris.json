@@ -1,0 +1,709 @@
+{
+  "id": "paris",
+  "name": "Paris",
+  "settlement": "set_paris",
+  "period": "vers 1340-1380 (enceinte de Charles V et Bastille selon l'année)",
+  "province": "prov_ile_de_france",
+  "siege": {
+    "rotate_deg": 27,
+    "radius_m": 1000,
+    "bank_offset_m": 106,
+    "areas": [
+      "cite",
+      "ville",
+      "outre_enceinte_droite"
+    ],
+    "monuments": [
+      "notre_dame",
+      "sainte_chapelle",
+      "palais_cite",
+      "grand_chatelet",
+      "louvre",
+      "halles",
+      "saint_germain_auxerrois",
+      "saint_jacques_boucherie",
+      "saint_gervais"
+    ],
+    "bridges": [
+      "grand_pont",
+      "planche_mibray"
+    ],
+    "streets": [
+      "rue_saint_denis",
+      "rue_saint_martin",
+      "rue_juiverie",
+      "rue_barillerie",
+      "rue_saint_antoine",
+      "rue_saint_honore",
+      "rue_du_temple",
+      "rue_montmartre"
+    ],
+    "walls": [
+      "philippe_auguste_droite"
+    ]
+  },
+  "sources": [
+    {
+      "title": "Plan de Paris, dit plan de Bâle",
+      "author": "Olivier Truschet et Germain Hoyau",
+      "date": "vers 1550",
+      "url": "https://commons.wikimedia.org/wiki/File:Map_of_Paris_by_Truschet_and_Hoyau_-_Basel_University_Library.jpg",
+      "license": "Domaine public (Basel University Library, Kartenslg AA 124)",
+      "use": "Tissu urbain, ponts habités, silhouettes des monuments, enceintes encore debout en 1550."
+    },
+    {
+      "title": "Paris en 1380",
+      "author": "Henri Legrand, Atlas des anciens plans de Paris (Imprimerie nationale)",
+      "date": "1868 (atlas 1880, tirage 1900)",
+      "url": "https://commons.wikimedia.org/wiki/File:Atlas_des_anciens_plans_de_Paris_-_Paris_en_1380_-_David_Rumsey.jpg",
+      "license": "Domaine public (Public Domain Mark 1.0, David Rumsey Map Collection)",
+      "use": "Tracé des enceintes de Philippe Auguste et de Charles V, portes, grandes rues, îles."
+    },
+    {
+      "title": "Plan de Paris vers 1300-1330",
+      "author": "Caroline Bourlet, Nicolas Thomas, Cédric Roms (ALPAGE)",
+      "date": "2011",
+      "url": "https://commons.wikimedia.org/wiki/File:Plan_de_Paris_vers_1300-1330_-_ALPAGE.svg",
+      "license": "CC BY 2.0 FR (consulté pour vérification, non reproduit)",
+      "use": "Contrôle des positions des portes et des quartiers bâtis."
+    },
+    {
+      "title": "Dictionnaire raisonné de l'architecture française du XIe au XVIe siècle",
+      "author": "Eugène Viollet-le-Duc",
+      "date": "1854-1868",
+      "url": "https://commons.wikimedia.org/wiki/Category:Dictionnaire_raisonn%C3%A9_de_l%27architecture_fran%C3%A7aise_du_XIe_au_XVIe_si%C3%A8cle",
+      "license": "Domaine public",
+      "use": "Proportions de Notre-Dame (façade, flèche du XIIIe siècle, arcs-boutants), du Louvre et de la Bastille."
+    },
+    {
+      "title": "OpenStreetMap (berges de la Seine, îles, vestiges des enceintes, monuments)",
+      "author": "Contributeurs d'OpenStreetMap",
+      "date": "2026",
+      "url": "https://www.openstreetmap.org/copyright",
+      "license": "ODbL 1.0 (contrôle de position ; une vingtaine de points arrondis à la main)",
+      "use": "Recalage des berges modernes, de l'île de la Cité et de l'île Saint-Louis, des vestiges des enceintes et des monuments."
+    }
+  ],
+  "anchor": {
+    "lonlat": [2.3499, 48.853],
+    "px": [2212.975, 1924.516],
+    "north_bearing_deg": 5.83
+  },
+  "scale": {
+    "center_meters_per_unit": 205,
+    "core_radius_m": 2000,
+    "core_radius_px": 6.0,
+    "zone_radius_px": 6.8,
+    "monument_scale": 1.9,
+    "house_scale": 1.5,
+    "height_scale": 1.25
+  },
+  "rivers": [
+    {
+      "id": "seine",
+      "name": "Seine",
+      "points": [[4577, -5014, 170], [3605, -3262, 170], [2896, -2979, 180], [2278, -2236, 170], [1600, -1330, 170], [1195, -916, 175], [900, -500, 250], [500, -165, 360], [250, -26, 380], [0, 114, 415], [-250, 240, 400], [-500, 372, 340], [-800, 554, 180], [-1100, 658, 145], [-1400, 762, 135], [-1900, 1012, 135], [-2300, 1190, 140], [-2905, 1179, 135], [-3600, 1150, 135], [-4160, 850, 140], [-4760, 793, 150], [-6977, -1568, 170]]
+    }
+  ],
+  "islands": [
+    {
+      "id": "cite",
+      "name": "Île de la Cité",
+      "kind": "island",
+      "polygon": [[200, -155], [190, -118], [178, -44], [170, 28], [101, 180], [65, 213], [27, 240], [-42, 276], [-118, 306], [-176, 333], [-242, 360], [-363, 416], [-486, 446], [-600, 468], [-600, 362], [-445, 186], [-335, 120], [-221, 51], [-105, -25], [-12, -78], [130, -132], [171, -147]]
+    },
+    {
+      "id": "ile_notre_dame",
+      "name": "Île Notre-Dame",
+      "kind": "island",
+      "polygon": [[229, 85], [224, 76], [242, -37], [267, -86], [264, -100], [292, -154], [321, -169], [399, -196], [455, -223], [474, -234], [488, -33], [401, 11], [246, 86]]
+    },
+    {
+      "id": "ile_aux_vaches",
+      "name": "Île aux Vaches",
+      "kind": "island",
+      "polygon": [[508, -40], [496, -242], [675, -335], [723, -365], [761, -397], [767, -396], [750, -321], [750, -256], [754, -217], [746, -198], [689, -138]]
+    },
+    {
+      "id": "ile_louviers",
+      "name": "Île Louviers",
+      "kind": "island",
+      "polygon": [[800, -300], [1000, -470], [1200, -760], [1170, -780], [965, -510], [775, -330]]
+    }
+  ],
+  "areas": [
+    {
+      "id": "cite",
+      "name": "La Cité",
+      "kind": "built",
+      "density": 0.95,
+      "polygon": [[200, -155], [190, -118], [178, -44], [170, 28], [101, 180], [65, 213], [27, 240], [-42, 276], [-118, 306], [-176, 333], [-242, 360], [-363, 416], [-486, 446], [-600, 468], [-600, 362], [-445, 186], [-335, 120], [-221, 51], [-105, -25], [-12, -78], [130, -132], [171, -147]]
+    },
+    {
+      "id": "ville",
+      "name": "La Ville (rive droite, dans l'enceinte de Philippe Auguste)",
+      "kind": "built",
+      "density": 0.95,
+      "polygon": [[-800, 660], [-730, 900], [-700, 1100], [-560, 1190], [-300, 1200], [-20, 1150], [200, 1070], [480, 990], [680, 820], [740, 560], [760, 452], [770, 300], [795, 119], [720, -10], [420, 60], [166, 220], [-271, 450], [-683, 600]]
+    },
+    {
+      "id": "universite",
+      "name": "L'Université (rive gauche, dans l'enceinte de Philippe Auguste)",
+      "kind": "built",
+      "density": 0.8,
+      "polygon": [[-990, 480], [-900, 200], [-760, -150], [-600, -560], [-380, -680], [-150, -820], [0, -800], [130, -700], [250, -520], [410, -305], [125, -190], [-124, -60], [-415, 90], [-753, 420]]
+    },
+    {
+      "id": "outre_enceinte_droite",
+      "name": "Rive droite entre les deux enceintes",
+      "kind": "built",
+      "density": 0.55,
+      "polygon": [[-1260, 790], [-1175, 980], [-1000, 1150], [-700, 1520], [-300, 1860], [204, 1867], [421, 1795], [900, 1550], [1150, 1100], [1300, 600], [1345, 40], [1330, -108], [1250, -370], [1170, -640], [900, -420], [760, -100], [-271, 450], [-837, 640]]
+    },
+    {
+      "id": "faubourg_saint_germain",
+      "name": "Bourg Saint-Germain",
+      "kind": "built",
+      "density": 0.35,
+      "polygon": [[-1450, 500], [-1400, -150], [-1000, -400], [-760, -150], [-900, 200], [-990, 480], [-1250, 640]]
+    },
+    {
+      "id": "faubourg_saint_marcel",
+      "name": "Bourg Saint-Marcel et Saint-Victor",
+      "kind": "built",
+      "density": 0.3,
+      "polygon": [[-150, -850], [0, -800], [130, -700], [250, -520], [410, -305], [695, -480], [1100, -930], [900, -1300], [300, -1800], [-100, -1300]]
+    },
+    {
+      "id": "faubourg_saint_jacques",
+      "name": "Faubourg Saint-Jacques",
+      "kind": "built",
+      "density": 0.25,
+      "polygon": [[-600, -560], [-700, -1400], [-300, -1450], [-150, -850], [-380, -680]]
+    },
+    {
+      "id": "faubourgs_nord",
+      "name": "Faubourgs Saint-Denis et Saint-Martin",
+      "kind": "built",
+      "density": 0.3,
+      "polygon": [[-300, 1860], [-350, 2500], [250, 2600], [700, 2200], [421, 1795], [204, 1867]],
+      "from_year": 1300
+    },
+    {
+      "id": "faubourg_saint_antoine",
+      "name": "Faubourg Saint-Antoine",
+      "kind": "built",
+      "density": 0.25,
+      "polygon": [[1345, 40], [2100, 150], [2100, -150], [1330, -108]]
+    }
+  ],
+  "open_spaces": [
+    {
+      "id": "parvis",
+      "name": "Parvis Notre-Dame",
+      "kind": "parvis",
+      "polygon": [[-142, 112], [-178, 30], [-224, 51], [-188, 133]]
+    },
+    {
+      "id": "greve",
+      "name": "Place de Grève",
+      "kind": "square",
+      "polygon": [[120, 280], [230, 250], [260, 330], [150, 370]]
+    },
+    {
+      "id": "innocents",
+      "name": "Cimetière des Innocents",
+      "kind": "cemetery",
+      "polygon": [[-210, 830], [-70, 880], [-50, 815], [-190, 770]]
+    },
+    {
+      "id": "jardin_palais",
+      "name": "Jardin du roi (palais de la Cité)",
+      "kind": "garden",
+      "polygon": [[-600, 468], [-600, 362], [-520, 290], [-500, 452]]
+    },
+    {
+      "id": "terrain_notre_dame",
+      "name": "Terrain (motte aux Papelards)",
+      "kind": "garden",
+      "polygon": [[140, -40], [185, -110], [171, -147], [120, -120]]
+    },
+    {
+      "id": "ile_notre_dame_pres",
+      "name": "Prés de l'île Notre-Dame",
+      "kind": "meadow",
+      "polygon": [[229, 85], [224, 76], [242, -37], [267, -86], [264, -100], [292, -154], [321, -169], [399, -196], [455, -223], [474, -234], [488, -33], [401, 11], [246, 86]]
+    },
+    {
+      "id": "ile_aux_vaches_pres",
+      "name": "Pâtures de l'île aux Vaches",
+      "kind": "meadow",
+      "polygon": [[508, -40], [496, -242], [675, -335], [723, -365], [761, -397], [767, -396], [750, -321], [750, -256], [754, -217], [746, -198], [689, -138]]
+    },
+    {
+      "id": "louviers_bois",
+      "name": "Chantiers de bois de l'île Louviers",
+      "kind": "meadow",
+      "polygon": [[800, -300], [1000, -470], [1200, -760], [1170, -780], [965, -510], [775, -330]]
+    },
+    {
+      "id": "pre_aux_clercs",
+      "name": "Pré-aux-Clercs",
+      "kind": "meadow",
+      "polygon": [[-2000, 900], [-1400, 700], [-1350, 350], [-2000, 450]]
+    },
+    {
+      "id": "clos_saint_victor",
+      "name": "Clos de l'abbaye Saint-Victor",
+      "kind": "garden",
+      "polygon": [[650, -700], [900, -850], [850, -1050], [600, -900]]
+    },
+    {
+      "id": "clos_sainte_genevieve",
+      "name": "Vignes et clos de Sainte-Geneviève",
+      "kind": "vineyard",
+      "polygon": [[-100, -870], [150, -780], [220, -1000], [-80, -1100]]
+    },
+    {
+      "id": "saint_pol",
+      "name": "Jardins de l'hôtel Saint-Pol",
+      "kind": "garden",
+      "polygon": [[850, -40], [1150, 60], [1200, -250], [950, -300]],
+      "from_year": 1361
+    },
+    {
+      "id": "temple_enclos",
+      "name": "Enclos du Temple",
+      "kind": "garden",
+      "polygon": [[640, 1250], [880, 1230], [900, 1450], [660, 1470]]
+    }
+  ],
+  "walls": [
+    {
+      "id": "philippe_auguste_droite",
+      "name": "Enceinte de Philippe Auguste (rive droite)",
+      "points": [[-800, 660], [-730, 900], [-700, 1100], [-560, 1190], [-300, 1200], [-20, 1150], [200, 1070], [480, 990], [680, 820], [740, 560], [760, 452], [770, 300], [795, 119], [720, -10]],
+      "closed": false,
+      "height_m": 9,
+      "tower_spacing_m": 70,
+      "tower_shape": "round",
+      "ditch": false,
+      "gates": [
+        {
+          "name": "Porte Saint-Honoré",
+          "at": [-730, 900]
+        },
+        {
+          "name": "Porte Montmartre",
+          "at": [-420, 1195]
+        },
+        {
+          "name": "Porte Saint-Denis",
+          "at": [-20, 1150]
+        },
+        {
+          "name": "Porte Saint-Martin",
+          "at": [200, 1070]
+        },
+        {
+          "name": "Porte Barbette",
+          "at": [740, 560]
+        },
+        {
+          "name": "Porte Baudoyer",
+          "at": [770, 300]
+        }
+      ]
+    },
+    {
+      "id": "philippe_auguste_gauche",
+      "name": "Enceinte de Philippe Auguste (rive gauche)",
+      "points": [[-990, 480], [-900, 200], [-760, -150], [-600, -560], [-380, -680], [-150, -820], [0, -800], [130, -700], [250, -520], [410, -305]],
+      "closed": false,
+      "height_m": 9,
+      "tower_spacing_m": 70,
+      "tower_shape": "round",
+      "ditch": true,
+      "gates": [
+        {
+          "name": "Porte de Buci",
+          "at": [-900, 200]
+        },
+        {
+          "name": "Porte Saint-Germain",
+          "at": [-760, -150]
+        },
+        {
+          "name": "Porte Saint-Michel",
+          "at": [-600, -560]
+        },
+        {
+          "name": "Porte Saint-Jacques",
+          "at": [-380, -680]
+        },
+        {
+          "name": "Porte Bordelles",
+          "at": [-60, -812]
+        },
+        {
+          "name": "Porte Saint-Victor",
+          "at": [250, -520]
+        }
+      ]
+    },
+    {
+      "id": "charles_v",
+      "name": "Enceinte de Charles V (rive droite)",
+      "points": [[1170, -640], [1250, -370], [1330, -108], [1345, 40], [1300, 600], [1150, 1100], [900, 1550], [421, 1795], [204, 1867], [-300, 1860], [-700, 1520], [-1000, 1150], [-1175, 980], [-1260, 790]],
+      "closed": false,
+      "height_m": 10,
+      "tower_spacing_m": 110,
+      "tower_shape": "square",
+      "ditch": true,
+      "gates": [
+        {
+          "name": "Porte du Temple",
+          "at": [900, 1550]
+        },
+        {
+          "name": "Porte Saint-Martin",
+          "at": [421, 1795]
+        },
+        {
+          "name": "Porte Saint-Denis",
+          "at": [204, 1867]
+        },
+        {
+          "name": "Porte Montmartre",
+          "at": [-300, 1860]
+        },
+        {
+          "name": "Porte Saint-Honoré",
+          "at": [-1000, 1150]
+        }
+      ],
+      "from_year": 1358
+    }
+  ],
+  "bridges": [
+    {
+      "id": "grand_pont",
+      "name": "Grand-Pont",
+      "from": [-225, 352],
+      "to": [-215, 465],
+      "width_m": 26,
+      "inhabited": true,
+      "material": "stone"
+    },
+    {
+      "id": "petit_pont",
+      "name": "Petit-Pont",
+      "from": [-222, 58],
+      "to": [-222, -8],
+      "width_m": 22,
+      "inhabited": true,
+      "material": "stone"
+    },
+    {
+      "id": "planche_mibray",
+      "name": "Planches de Mibray",
+      "from": [-70, 285],
+      "to": [-50, 388],
+      "width_m": 8,
+      "inhabited": false,
+      "material": "wood"
+    },
+    {
+      "id": "pont_saint_michel",
+      "name": "Pont Saint-Michel",
+      "from": [-386, 155],
+      "to": [-393, 85],
+      "width_m": 20,
+      "inhabited": true,
+      "material": "stone",
+      "from_year": 1378
+    }
+  ],
+  "streets": [
+    {
+      "id": "rue_saint_denis",
+      "name": "Rue Saint-Denis",
+      "points": [[-190, 540], [-100, 850], [0, 1150], [204, 1867], [260, 2600]],
+      "width_m": 12
+    },
+    {
+      "id": "rue_saint_martin",
+      "name": "Rue Saint-Martin",
+      "points": [[-40, 400], [60, 800], [200, 1070], [330, 1500], [421, 1795], [600, 2300]],
+      "width_m": 11
+    },
+    {
+      "id": "rue_saint_antoine",
+      "name": "Rue Saint-Antoine",
+      "points": [[160, 330], [420, 300], [770, 290], [1100, 150], [1345, 40], [2100, 60]],
+      "width_m": 14
+    },
+    {
+      "id": "rue_saint_honore",
+      "name": "Rue Saint-Honoré",
+      "points": [[-170, 830], [-500, 880], [-730, 920], [-1000, 1150]],
+      "width_m": 11
+    },
+    {
+      "id": "rue_montmartre",
+      "name": "Rue Montmartre",
+      "points": [[-380, 1080], [-420, 1200], [-330, 1860], [-450, 2600]],
+      "width_m": 9
+    },
+    {
+      "id": "rue_du_temple",
+      "name": "Rue du Temple",
+      "points": [[200, 330], [420, 900], [700, 1300], [900, 1550]],
+      "width_m": 9
+    },
+    {
+      "id": "rue_juiverie",
+      "name": "Rue de la Juiverie",
+      "points": [[-60, 285], [-140, 170], [-222, 58]],
+      "width_m": 10
+    },
+    {
+      "id": "rue_barillerie",
+      "name": "Rue de la Barillerie",
+      "points": [[-235, 352], [-290, 250], [-386, 155]],
+      "width_m": 10
+    },
+    {
+      "id": "rue_saint_jacques",
+      "name": "Rue Saint-Jacques",
+      "points": [[-222, -10], [-300, -300], [-380, -680], [-460, -1450]],
+      "width_m": 12
+    },
+    {
+      "id": "rue_de_la_harpe",
+      "name": "Rue de la Harpe",
+      "points": [[-393, 85], [-480, -250], [-600, -560]],
+      "width_m": 9
+    },
+    {
+      "id": "rue_saint_germain",
+      "name": "Chemin de Saint-Germain",
+      "points": [[-760, -150], [-1000, 20], [-1150, 80]],
+      "width_m": 9
+    },
+    {
+      "id": "rue_saint_victor",
+      "name": "Rue Saint-Victor",
+      "points": [[-100, -60], [100, -300], [250, -520], [550, -700]],
+      "width_m": 9
+    },
+    {
+      "id": "rue_mouffetard",
+      "name": "Rue Mouffetard",
+      "points": [[-60, -810], [100, -1300], [250, -1750]],
+      "width_m": 9
+    }
+  ],
+  "monuments": [
+    {
+      "id": "notre_dame",
+      "name": "Notre-Dame de Paris",
+      "model": "notre_dame",
+      "at": [0, 0],
+      "angle_deg": -24,
+      "clear_radius_m": 70,
+      "description": "Cathédrale gothique (1163-1345) : façade à deux tours, flèche du XIIIe siècle à la croisée, arcs-boutants.",
+      "scale": 2.6
+    },
+    {
+      "id": "sainte_chapelle",
+      "name": "Sainte-Chapelle",
+      "model": "sainte_chapelle",
+      "at": [-358, 267],
+      "angle_deg": -22,
+      "clear_radius_m": 30,
+      "description": "Chapelle palatine de Saint Louis (1248).",
+      "scale": 2.3
+    },
+    {
+      "id": "palais_cite",
+      "name": "Palais de la Cité",
+      "model": "palais_cite",
+      "at": [-410, 360],
+      "angle_deg": -20,
+      "clear_radius_m": 75,
+      "description": "Palais royal : grand-salle, tours de la Conciergerie, tour de l'Horloge (1350-1370).",
+      "scale": 1.7
+    },
+    {
+      "id": "louvre",
+      "name": "Château du Louvre",
+      "model": "louvre",
+      "at": [-860, 790],
+      "angle_deg": -13,
+      "clear_radius_m": 70,
+      "variant_from_year": {
+        "charles_v": 1364
+      },
+      "description": "Forteresse de Philippe Auguste et sa grosse tour ; résidence de Charles V après 1364."
+    },
+    {
+      "id": "grand_chatelet",
+      "name": "Grand Châtelet",
+      "model": "chatelet",
+      "at": [-200, 505],
+      "angle_deg": -10,
+      "clear_radius_m": 30,
+      "description": "Forteresse de la tête du Grand-Pont, siège de la prévôté."
+    },
+    {
+      "id": "petit_chatelet",
+      "name": "Petit Châtelet",
+      "model": "chatelet",
+      "at": [-222, -32],
+      "angle_deg": -10,
+      "size": 0.7,
+      "clear_radius_m": 22,
+      "description": "Porte fortifiée de la tête du Petit-Pont."
+    },
+    {
+      "id": "bastille",
+      "name": "Bastille Saint-Antoine",
+      "model": "bastille",
+      "at": [1330, 40],
+      "angle_deg": 80,
+      "clear_radius_m": 55,
+      "from_year": 1370,
+      "description": "Forteresse de la porte Saint-Antoine, commencée en 1370."
+    },
+    {
+      "id": "halles",
+      "name": "Halles de Champeaux",
+      "model": "market_halls",
+      "at": [-327, 1024],
+      "angle_deg": 18,
+      "clear_radius_m": 45,
+      "description": "Halles couvertes du marché de Paris."
+    },
+    {
+      "id": "tour_de_nesle",
+      "name": "Tour de Nesle",
+      "model": "tower",
+      "at": [-990, 480],
+      "angle_deg": 0,
+      "size": 1.1,
+      "clear_radius_m": 15
+    },
+    {
+      "id": "saint_germain_des_pres",
+      "name": "Abbaye de Saint-Germain-des-Prés",
+      "model": "abbey",
+      "at": [-1172, 92],
+      "angle_deg": 0,
+      "size": 1.1,
+      "clear_radius_m": 90
+    },
+    {
+      "id": "sainte_genevieve",
+      "name": "Abbaye Sainte-Geneviève",
+      "model": "abbey",
+      "at": [-145, -760],
+      "angle_deg": 5,
+      "size": 1.0,
+      "clear_radius_m": 70
+    },
+    {
+      "id": "saint_victor",
+      "name": "Abbaye Saint-Victor",
+      "model": "abbey",
+      "at": [600, -620],
+      "angle_deg": 0,
+      "size": 0.95,
+      "clear_radius_m": 80
+    },
+    {
+      "id": "temple",
+      "name": "Enclos du Temple",
+      "model": "keep",
+      "at": [760, 1330],
+      "angle_deg": 0,
+      "size": 1.1,
+      "clear_radius_m": 60
+    },
+    {
+      "id": "saint_martin_des_champs",
+      "name": "Prieuré Saint-Martin-des-Champs",
+      "model": "abbey",
+      "at": [404, 1456],
+      "angle_deg": 0,
+      "size": 0.9,
+      "clear_radius_m": 70
+    },
+    {
+      "id": "saint_germain_auxerrois",
+      "name": "Saint-Germain-l'Auxerrois",
+      "model": "church",
+      "at": [-680, 770],
+      "angle_deg": 0,
+      "size": 0.9,
+      "clear_radius_m": 30
+    },
+    {
+      "id": "saint_jacques_boucherie",
+      "name": "Saint-Jacques-de-la-Boucherie",
+      "model": "church",
+      "at": [-80, 560],
+      "angle_deg": 0,
+      "size": 0.8,
+      "clear_radius_m": 25
+    },
+    {
+      "id": "saint_gervais",
+      "name": "Saint-Gervais",
+      "model": "church",
+      "at": [355, 279],
+      "angle_deg": 0,
+      "size": 0.8,
+      "clear_radius_m": 25
+    },
+    {
+      "id": "saint_severin",
+      "name": "Saint-Séverin",
+      "model": "church",
+      "at": [-306, -101],
+      "angle_deg": 0,
+      "size": 0.75,
+      "clear_radius_m": 22
+    },
+    {
+      "id": "montmartre",
+      "name": "Abbaye de Montmartre",
+      "model": "abbey",
+      "at": [-574, 3750],
+      "angle_deg": 0,
+      "size": 0.9,
+      "clear_radius_m": 80
+    },
+    {
+      "id": "moulin_montmartre_1",
+      "name": "Moulin de Montmartre",
+      "model": "windmill",
+      "at": [-700, 3700],
+      "angle_deg": 20
+    },
+    {
+      "id": "moulin_montmartre_2",
+      "name": "Moulin de Montmartre",
+      "model": "windmill",
+      "at": [-300, 3900],
+      "angle_deg": 70
+    },
+    {
+      "id": "moulin_montmartre_3",
+      "name": "Moulin de Montmartre",
+      "model": "windmill",
+      "at": [-800, 3950],
+      "angle_deg": 45
+    }
+  ]
+}

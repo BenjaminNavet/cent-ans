@@ -5,6 +5,9 @@ extends RefCounted
 ## tonemapping AgX, SSAO, halo, brouillard de distance avec perspective aérienne (l'horizon se
 ## fond dans le ciel), étalonnage léger, soleil et ombres réglés ; pluie et neige en particules
 ## GPU accrochées à la caméra. Un préréglage par temps de la simulation (clear, fog, rain, snow).
+## Lot V3 (A1-05, A1-14) : ciel HDRI Poly Haven et LUT d'étalonnage par météo et par saison
+## (`AtmosphereLibrary`, `data/fx/atmosphere.json`) — le ciel procédural reste le repli ; brouillard
+## volumétrique (nappes basses par temps de brouillard) et effets réglés par `RenderQuality`.
 
 const SKY_SHADER := preload("res://shaders/battle_sky.gdshader")
 
@@ -41,9 +44,18 @@ const PRESETS := {
 }
 
 
-## Applique le préréglage `key` ; `camera` reçoit les précipitations éventuelles.
-static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: String, camera: Camera3D) -> void:
-	var p: Dictionary = PRESETS.get(key, PRESETS["clear"])
+## Soleil plafonné (ombres longues lisibles, faces éclairées vues depuis la caméra par défaut).
+const MAX_SUN_ELEVATION := 36.0
+const HDRI_AMBIENT_BOOST := 1.35
+
+## Densité du brouillard volumétrique par temps (actif selon le niveau de `RenderQuality`).
+const VOLUMETRIC_DENSITY := {"clear": 0.0012, "fog": 0.004, "rain": 0.0035, "snow": 0.004}
+
+
+## Applique le préréglage `key` ; `camera` reçoit les précipitations éventuelles ; `season`
+## (spring, summer, autumn, winter) choisit le ciel HDRI et l'étalonnage de saison.
+static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: String, camera: Camera3D, season: String = "summer") -> void:
+	var p: Dictionary = (PRESETS.get(key, PRESETS["clear"]) as Dictionary).duplicate()
 	# La ressource de la scène est partagée entre instances : on travaille sur une copie.
 	var env: Environment = world_env.environment.duplicate() as Environment
 	world_env.environment = env
@@ -93,12 +105,62 @@ static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: Str
 	env.adjustment_brightness = 1.0
 	env.adjustment_contrast = p["contrast"]
 	env.adjustment_saturation = p["saturation"]
+	# V3 : ciel HDRI et étalonnage (LUT) ; contraste et saturation passent dans la LUT.
+	var look := AtmosphereLibrary.battle_look(key, season)
+	if not look.is_empty():
+		AtmosphereLibrary.apply_to_environment(env, look, p["fog_color"], (p["horizon"] as Color).darkened(0.45))
+		if (env.sky.sky_material as ShaderMaterial).shader != SKY_SHADER:
+			env.adjustment_contrast = 1.0
+			env.adjustment_saturation = 1.0
+			p["elevation"] = minf(AtmosphereLibrary.sun_elevation(look, float(p["elevation"])), MAX_SUN_ELEVATION)
+			# Le ciel HDRI est plus sombre et plus bleu côté opposé au soleil que le ciel
+			# procédural : une part d'ambiance neutre (couleur du brouillard) éclaire les faces à
+			# l'ombre sans les bleuir.
+			env.ambient_light_sky_contribution = 0.7
+			env.ambient_light_color = (p["fog_color"] as Color).lightened(0.15)
+			env.ambient_light_energy = float(p["ambient"]) * HDRI_AMBIENT_BOOST
+	_setup_volumetric_fog(env, key, p)
 	_setup_sun(sun, p)
+	RenderQuality.register(world_env, sun, "battle", key)
 	match key:
 		"rain":
 			_add_precipitation(camera, true)
 		"snow":
 			_add_precipitation(camera, false)
+
+
+## Brouillard volumétrique (V3, A1-14) : voile léger qui accroche la lumière (rayons), plus dense
+## par mauvais temps ; par temps de brouillard, nappe basse (`FogVolume`) sur tout le champ.
+## Activé ou non par `RenderQuality` (coût GPU) ; réglé ici quel que soit le niveau.
+static func _setup_volumetric_fog(env: Environment, key: String, p: Dictionary) -> void:
+	env.volumetric_fog_density = float(VOLUMETRIC_DENSITY.get(key, 0.0015))
+	env.volumetric_fog_albedo = p["fog_color"]
+	env.volumetric_fog_emission = Color.BLACK
+	env.volumetric_fog_anisotropy = 0.6 if key == "clear" else 0.25
+	env.volumetric_fog_length = 320.0
+	env.volumetric_fog_detail_spread = 2.0
+	env.volumetric_fog_gi_inject = 0.0
+	env.volumetric_fog_ambient_inject = 0.35
+	env.volumetric_fog_sky_affect = 0.0
+	env.volumetric_fog_temporal_reprojection_enabled = true
+
+
+## Nappe de brouillard au ras du sol (temps « fog ») : `FogVolume` couvrant le champ.
+static func add_ground_mist(parent: Node3D, key: String, center: Vector3, size: Vector2) -> void:
+	if key != "fog" or parent == null:
+		return
+	var volume := FogVolume.new()
+	volume.name = "GroundMist"
+	volume.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
+	volume.size = Vector3(size.x, 12.0, size.y)
+	volume.position = center + Vector3(0, 1.0, 0)
+	var material := FogMaterial.new()
+	material.density = 0.01
+	material.albedo = (PRESETS["fog"]["fog_color"] as Color).lightened(0.1)
+	material.height_falloff = 0.35
+	material.edge_fade = 0.3
+	volume.material = material
+	parent.add_child(volume)
 
 
 ## Soleil : élévation du préréglage, venant du sud-ouest ; ombres en 4 cascades.
