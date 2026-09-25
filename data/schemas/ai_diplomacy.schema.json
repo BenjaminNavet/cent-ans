@@ -76,7 +76,10 @@
         "max_weariness_to_declare": {"type": "integer", "minimum": 0, "description": "Au-delà de cette fatigue, l'IA ne déclare plus de guerre."},
         "unmet_goals_reluctance": {"type": "integer", "minimum": 0, "description": "Réticence d'un belligérant dont les buts de guerre ne sont pas atteints à signer une paix sans cession."},
         "demand_score": {"type": "integer", "description": "Score de guerre à partir duquel l'IA victorieuse exige des cessions."},
-        "ai_min_chance": {"type": "integer", "minimum": 0, "maximum": 100, "description": "Chance d'acceptation minimale (en %) d'un traité envoyé par l'IA."}
+        "ai_min_chance": {"type": "integer", "minimum": 0, "maximum": 100, "description": "Chance d'acceptation minimale (en %) d'un traité envoyé par l'IA."},
+        "peace_truce_turns": {"type": "integer", "minimum": 1, "description": "Trêve (en saisons) après une paix par traité (la guerre de Cent Ans est une suite de trêves courtes : Malestroit 1343, Bordeaux 1357)."},
+        "pretender_reluctance": {"type": "integer", "minimum": 0, "description": "Un prétendant au trône de l'autre refuse toute paix qui ne lui donne aucune terre, sauf s'il est nettement battu."},
+        "max_weariness_gain": {"type": "integer", "minimum": 0, "description": "Fatigue de guerre gagnée au plus en une saison."}
       },
       "additionalProperties": false
     }

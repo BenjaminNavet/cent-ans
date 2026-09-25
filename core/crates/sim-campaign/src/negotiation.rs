@@ -682,6 +682,25 @@ fn context_reasons(
                 "Fatigue de guerre".to_owned(),
                 (rec.ledger.weariness / rules.weariness_peace_divisor.max(1)) as i32,
             ));
+            // A pretender does not give up a crown for nothing.
+            let gains_land = articles.iter().any(|a| {
+                matches!(
+                    a,
+                    Article::CedeProvince {
+                        giver: Party::Proposer,
+                        ..
+                    }
+                )
+            });
+            if diplomacy::claim_stakes(state, recipient, proposer).throne
+                && !gains_land
+                && state.war_score(data, recipient, proposer) > -40
+            {
+                reasons.push((
+                    "Prétention à la couronne".to_owned(),
+                    -rules.pretender_reluctance,
+                ));
+            }
             // War goals: a belligerent not beaten keeps fighting for them.
             if let Some(goals) = rec.ledger.war_goals.get(proposer) {
                 let obtained = articles.iter().any(|a| match a {
@@ -975,7 +994,15 @@ pub fn article_label(
     let who = |p: &Party| faction_name(data, party_id(*p, proposer, recipient));
     let to = |p: &Party| faction_name(data, party_id(p.other(), proposer, recipient));
     match article {
-        Article::Peace => "Paix (trêve de 5 ans)".to_owned(),
+        Article::Peace => format!(
+            "Paix (trêve de {} ans)",
+            (if rules(data).enabled {
+                rules(data).peace_truce_turns
+            } else {
+                diplomacy::TRUCE_TURNS
+            } / 4)
+                .max(1)
+        ),
         Article::Truce { turns } => format!("Trêve de {} an(s)", (turns / 4).max(1)),
         Article::Alliance => "Alliance défensive et offensive".to_owned(),
         Article::MilitaryAccess { giver } => {
@@ -1274,7 +1301,12 @@ pub fn apply_treaty(
             .map(|g| party_id(g.other(), proposer, recipient).clone());
         match article {
             Article::Peace => {
-                state.make_peace(data, proposer, recipient, &[], 0, diplomacy::TRUCE_TURNS);
+                let truce = if rules(data).enabled {
+                    rules(data).peace_truce_turns
+                } else {
+                    diplomacy::TRUCE_TURNS
+                };
+                state.make_peace(data, proposer, recipient, &[], 0, truce.max(1));
             }
             Article::Truce { turns } => {
                 state.make_peace(data, proposer, recipient, &[], 0, (*turns).max(1));
@@ -1566,10 +1598,19 @@ pub(crate) fn resolve_negotiation(
         if !state.factions[id].alive || is_rebels(id) {
             continue;
         }
+        // Only wars that press on us tire the realm: a bordering enemy, or
+        // one holding our lands or beating us.
         let enemies: Vec<FactionId> = state.factions[id]
             .at_war_with
             .iter()
             .filter(|e| !is_rebels(e))
+            .filter(|e| {
+                state.are_neighbors(data, id, e)
+                    || state.war_score(data, id, e) < 0
+                    || state.provinces.keys().any(|p| {
+                        state.province_owner(p) == Some(id) && state.controls_province(e, p)
+                    })
+            })
             .cloned()
             .collect();
         let current = state.factions[id].ledger.weariness;
@@ -1595,7 +1636,7 @@ pub(crate) fn resolve_negotiation(
             if state.factions[id].treasury < 0 {
                 gain += rules.weariness_bankrupt;
             }
-            (current + gain).min(100)
+            (current + gain.min(rules.max_weariness_gain)).min(100)
         };
         let ledger = &mut state.factions.get_mut(id).expect("listed").ledger;
         ledger.weariness = next;

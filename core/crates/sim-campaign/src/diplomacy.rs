@@ -2038,8 +2038,12 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
     let rested = me
         .last_war_declared
         .is_none_or(|t| t + WAR_REST_TURNS <= turn);
-    let weary =
-        treaties && me.ledger.weariness > data.ai_diplomacy.negotiation.max_weariness_to_declare;
+    // DP1: a weary realm opens no new front; a pretender waits less.
+    let weary = treaties && {
+        let most = data.ai_diplomacy.negotiation.max_weariness_to_declare;
+        let pretender = me.claims.iter().any(|c| c.kind == ClaimKind::Throne);
+        me.ledger.weariness > if pretender { most + 20 } else { most }
+    };
     let ready = turn >= 4 && rested && !weary && war_ready(state, faction);
     let mut declared = false;
     if ready && (turn + slot).is_multiple_of(2) {

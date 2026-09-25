@@ -261,6 +261,8 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
         return Vec::new();
     };
     let mut orders = sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+    // DP1: trade agreements and military access (ADR 0025).
+    orders.extend(crate::diplomacy_eval::plan_treaties(state, data, faction));
     // G2: historical side changes (Artevelde, Troyes).
     orders.extend(crate::alignment::plan_side_change(state, data, faction));
     orders.extend(crate::alignment::plan_dynastic_alliance(

@@ -907,8 +907,14 @@ impl CampaignState {
 
     /// `true` when `province` is controlled by `faction` or one of its allies.
     pub fn is_friendly_territory(&self, faction: &FactionId, province: &ProvinceId) -> bool {
-        self.province_controller(province)
-            .is_some_and(|c| self.is_allied(faction, c))
+        self.province_controller(province).is_some_and(|c| {
+            self.is_allied(faction, c)
+                // DP1: military access by treaty supplies our armies.
+                || self
+                    .factions
+                    .get(c)
+                    .is_some_and(|f| f.ledger.military_access.contains(faction))
+        })
     }
 
     /// `true` when `province` is controlled by a faction `faction` is at war with.
