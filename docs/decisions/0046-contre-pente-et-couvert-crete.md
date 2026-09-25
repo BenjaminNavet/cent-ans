@@ -182,3 +182,60 @@ périmètre de R4.
 - Point ouvert : à rapport de forces serré, la position anglaise perd (voir Mesures) ; question
   d'équilibre des unités. **Traité par l'ADR 0052** (panique des chevaux sous les traits, haie tenue
   par les tireurs) : crête + haie 8 → 20/32 (mesure à crête décalée), rase campagne toujours perdue.
+
+## Suite SG4 (2026-09-25) : avantage de la hauteur en mêlée, cavalerie qui couvre ses tireurs
+
+Mesure (`sim-battle/tests/sg4_balance.rs`, ignoré : 60 régiments × 120 hommes par camp, armées
+miroir, IA des deux côtés, graines 1-10 ; crête gaussienne de 20 m à 45 m devant le défenseur ;
+« sans pieux » retire la capacité `stakes`) — victoires attaquant / défenseur / nuls :
+
+| Terrain | Pieux | main (après ADR 0052) | SG4 |
+|---|---|---|---|
+| plat | oui | 7 / 3 / 0 | 3 / 7 / 0 |
+| plat | non | **2 / 8** / 0 | 9 / 1 / 0 |
+| crête | oui | 0 / 10 / 0 | 0 / 10 / 0 |
+| crête | non | 0 / 10 / 0 | 0 / 10 / 0 |
+| plaine générée, sans village | oui | 4 / 5 / 1 | 5 / 5 / 0 |
+| plaine générée, sans village | non | 3 / 6 / 1 | 4 / 4 / 2 |
+| comme `ep1_scale` (village, météo tirés) | oui | 4 / 5 / 1 | 4 / 6 / 0 |
+
+(Avant la fusion de l'ADR 0052, main donnait plat 5/5, 0/10 ; crête 0/8 + 2 nuls, 0/10 ; plaine
+générée 3/7, 4/4 + 2 nuls.) Hors crête, l'attaquant gagne 25 batailles sur 50 avec SG4 (20/50 sur
+main) ; sur la crête, le défenseur gagne toujours.
+
+Diagnostic : l'issue se joue dans le duel de cavalerie. Les tireurs de l'attaquant, qui avancent
+pour tirer, se retrouvent « isolés » devant leur ligne ; la cavalerie du défenseur les charge et la
+cavalerie de l'attaquant ne réagissait qu'à des cavaliers à moins de 160 m d'elle-même (le
+commentaire annonçait « ou de nos tireurs »). Sur un terrain plat sans pieux, l'attaquant perdait
+ainsi 8 fois sur 10 à forces égales. Par ailleurs, rien dans la mêlée ne tenait compte de la pente.
+
+Décision :
+1. **Avantage de la hauteur en mêlée**, en données (`data/rules/battle_crest.json`, schéma
+   `battle_crest_rules.schema.json`, `crest::CrestRules`) : un régiment plus haut que son adversaire
+   de plus de `min_height_m` (1,5 m) frappe `melee_per_m` (5 %) plus fort par mètre au-delà, jusqu'à
+   `max_height_m` (6 m, soit ± 22,5 %) ; en montée, autant de moins. Les plis du terrain (sous 1,5 m)
+   ne comptent pas : une bataille de plaine n'en dépend pas. Un facteur de plus dans
+   `melee_damage` (hauteur du sol au centre des deux régiments), sans toucher au moral ni à
+   l'engagement, ni à la signature des modificateurs de terrain.
+2. **La cavalerie couvre ses tireurs** (`plan_horse`, règle 1) : hors posture défensive, elle
+   contre-charge aussi les cavaliers ennemis qui arrivent à moins de `SHOOTER_GUARD` (160 m) d'un de
+   ses tireurs, à portée de cavalerie (450 m). Une armée en défense garde sa cavalerie sur sa
+   position (sinon la crête perd son avantage : 7/3 pour l'attaquant sur crête sans pieux).
+3. Les pieux et la crête militaire de R4 sont inchangés : la mesure montre que les tireurs derrière
+   leurs pieux sur la crête ne décident pas de l'issue (seuil de repli 20 → 45 m, portée de la crête
+   militaire 80 → 40 m : résultats identiques).
+
+Conséquences : empreintes `b6.rs` (graines 3 et 11) recalculées, mêmes vainqueurs. `ep1_scale`
+(graine 11) : pic de 10 régiments en mêlée (16 et 26 aux graines 3 et 5, 41-47 aux graines 1, 2, 4) ;
+le test compte aussi les régiments qui ont combattu au corps à corps au moins une fois (55 à 95 sur
+120) et exige au moins 10 au pic et 40 en tout.
+
+Après fusion d'EP9 (ADR 0056, armée brisée à 40 % d'effectif en état de combattre ; batailles de
+5-6 min) — victoires attaquant / défenseur, 10 graines, main EP9 seul → EP9 + SG4 :
+plat avec pieux 3/7 → 3/7 ; plat sans pieux **0/10 → 0/10** ; crête 0/10 → 0/10 (avec et sans
+pieux) ; plaine générée 2/8 → 2/8 et 6/4 → 5/5 ; comme `ep1_scale` 3/7 → 2/8. SG4 ne change plus
+l'issue : l'armée cède avant le duel de cavalerie et la mêlée. Sur le plat sans pieux, la milice de
+l'attaquant (moral 40) traverse 180 m de flèches après `ATTACKER_DUEL_LIMIT` (180 s, EP9) et se
+débande (moral 14 à 300 s) alors que ses tireurs gagnaient le duel ; son armée est brisée. Point
+ouvert pour EP9 (logique hors de SG4). `b6.rs` : empreintes recalculées sur EP9 + SG4 (mêmes
+vainqueurs) ; `ep1_scale` : pic 10-19 en mêlée, 28-59 régiments au contact (seuil 25).
