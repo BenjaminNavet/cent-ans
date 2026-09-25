@@ -620,9 +620,19 @@ pub(crate) fn resolve_economy(
             continue;
         };
         reinforce_garrison(settlement, effects);
+        // B7b: every recruit trains one more turn; those done join the
+        // garrison, the others stay in the queue.
         let queue = std::mem::take(&mut settlement.recruit_queue);
+        let (ready, training): (Vec<_>, Vec<_>) = queue
+            .into_iter()
+            .map(|mut r| {
+                r.turns_left = r.turns_left.saturating_sub(1);
+                r
+            })
+            .partition(|r| r.turns_left == 0);
+        settlement.recruit_queue = training;
         let bonus = morale_bonus.get(settlement_id).copied().unwrap_or(0.0);
-        for unit_type_id in queue {
+        for unit_type_id in ready.into_iter().map(|r| r.unit_type) {
             let Some(unit_type) = data.unit_types.get(&unit_type_id) else {
                 continue;
             };

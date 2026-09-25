@@ -918,8 +918,8 @@ pub fn yearly_building_piety(state: &CampaignState, data: &GameData, faction: &F
     ((buildings / PIETY_EFFECT_DIVISOR).round() as i32).clamp(0, MAX_YEARLY_BUILDING_PIETY)
 }
 
-/// Phase (winter): every ruler gains its [`yearly_court_prestige`] and its
-/// [`yearly_building_piety`].
+/// Phase (winter): every ruler gains its [`yearly_court_prestige`], its
+/// [`yearly_building_piety`] and its `edicts::yearly_edict_piety` (B7b).
 pub(crate) fn resolve_court_prestige(state: &mut CampaignState, data: &GameData) {
     if state.season != crate::state::Season::Winter {
         return;
@@ -932,7 +932,10 @@ pub(crate) fn resolve_court_prestige(state: &mut CampaignState, data: &GameData)
         .collect();
     for faction in factions {
         let gain = yearly_court_prestige(state, data, &faction);
-        let piety = yearly_building_piety(state, data, &faction);
+        // B7b: the edicts' piety (Peace of God, strict Lent) comes on top
+        // of the buildings' capped share.
+        let piety = yearly_building_piety(state, data, &faction)
+            + crate::edicts::yearly_edict_piety(state, data, &faction);
         if gain == 0 && piety == 0 {
             continue;
         }

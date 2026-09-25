@@ -426,7 +426,18 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let target_upkeep = garrisons
         + ((ctx.income - ctx.building_upkeep - garrisons).max(0) as f64 * share) as i64
         + hoard / HOARD_SPENDING_TURNS;
-    let mut planned_upkeep = ctx.army_upkeep;
+    // B7b: recruits still training (`recruit_time_turns` > 1) are already
+    // paid for and will soon cost their upkeep; count them like this turn's
+    // recruits (same measure: the unit type's `upkeep`).
+    let training_upkeep: i64 = state
+        .settlements
+        .iter()
+        .filter(|(id, _)| ctx.owns_settlement(id))
+        .flat_map(|(_, s)| s.recruit_queue.iter())
+        .filter_map(|r| data.unit_types.get(&r.unit_type))
+        .map(|t| i64::from(t.upkeep))
+        .sum();
+    let mut planned_upkeep = ctx.army_upkeep + training_upkeep;
 
     // Recruitment: the capital's city first, then the cities (and castles)
     // of threatened border provinces.
