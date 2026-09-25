@@ -6,8 +6,9 @@ Run: ``uv run --with pillow python build_textures.py`` in this folder.
   albedo is orange-stained; lime wash is whiter, so the colour is pulled 70 % towards its own
   luminance and lifted slightly; the relief and the normal map are kept);
 * ``building_albedo_array.jpg``: the albedo layers of the campaign atlas material stacked
-  vertically (512 px each, order = ``LAYERS``, same as ``kit_campaign.LAYERS`` and
-  ``building_materials.gd``); solid layers are white (their colour is the shader tint).
+  vertically (512 px each, order = ``LAYERS``, same as ``kit_export.ATLAS_LAYERS`` and
+  ``building_materials.gd``); solid layers are white (their colour is the shader tint);
+* ``building_normal_array.jpg``: the matching OpenGL normal maps (solid layers flat).
 """
 
 from pathlib import Path
@@ -44,10 +45,27 @@ def main() -> None:
     for index, layer in enumerate(LAYERS):
         if layer is None:
             continue
-        path = Path("..") / f"{layer}_diff.jpg" if layer.startswith("battle/") else Path(f"{layer}_diff.jpg")
+        path = (
+            Path("..") / f"{layer}_diff.jpg"
+            if layer.startswith("battle/")
+            else Path(f"{layer}_diff.jpg")
+        )
         image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.LANCZOS)
         sheet.paste(image, (0, index * SLICE))
     sheet.save("building_albedo_array.jpg", quality=88, optimize=True)
+    normals = Image.new("RGB", (SLICE, SLICE * len(LAYERS)), (128, 128, 255))
+    for index, layer in enumerate(LAYERS):
+        if layer is None:
+            continue
+        name = "medieval_wall_01" if layer == "lime_plaster" else layer
+        path = (
+            Path("..") / f"{name}_nor.jpg"
+            if name.startswith("battle/")
+            else Path(f"{name}_nor.jpg")
+        )
+        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.LANCZOS)
+        normals.paste(image, (0, index * SLICE))
+    normals.save("building_normal_array.jpg", quality=90, optimize=True)
 
 
 if __name__ == "__main__":

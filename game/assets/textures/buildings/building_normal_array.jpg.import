@@ -1,0 +1,30 @@
+[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+uid="uid://c0b8d77qie2k3"
+path.s3tc="res://.godot/imported/building_normal_array.jpg-95f8b333bfa9be8afcf8a4f6a60a888f.s3tc.ctexarray"
+path.etc2="res://.godot/imported/building_normal_array.jpg-95f8b333bfa9be8afcf8a4f6a60a888f.etc2.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://assets/textures/buildings/building_normal_array.jpg"
+dest_files=["res://.godot/imported/building_normal_array.jpg-95f8b333bfa9be8afcf8a4f6a60a888f.s3tc.ctexarray", "res://.godot/imported/building_normal_array.jpg-95f8b333bfa9be8afcf8a4f6a60a888f.etc2.ctexarray"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+slices/horizontal=1
+slices/vertical=14

@@ -1,13 +1,17 @@
 shader_type spatial;
 
-// Lot BR1 (ADR 0021) : matériau unique des maquettes de campagne du kit de bâtiments.
+// Lot BR1 (ADR 0021) : matériau unique des bâtiments du kit (maquettes de campagne, batailles).
 // Toutes les matières (enduit, moellons, pierre, bois, tuiles, ardoise, chaume, vitres…) sont
 // les couches d'un Texture2DArray ; la couche d'une face est codée dans l'alpha de la couleur
 // de sommet ((indice + 0,5) / 16), le RVB portant teinte du bâtiment × occlusion × patine.
-// Un seul appel de dessin par maquette (ou par MultiMesh de hameaux) au lieu d'un par matière.
-// Table des couches : `BuildingMaterials.ATLAS_LAYERS` (même ordre que `kit_campaign.LAYERS`).
+// Un seul appel de dessin par maquette (ou par MultiMesh de hameaux, ou par modèle de bataille)
+// au lieu d'un par matière.
+// Table des couches : `BuildingMaterials.ATLAS_LAYERS` (même ordre que `kit_export.ATLAS_LAYERS`).
 
 uniform sampler2DArray albedo_array : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+// Cartes normales (batailles) ; la campagne s'en passe (`use_normals` faux, lecture en moins).
+uniform sampler2DArray normal_array : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform bool use_normals = false;
 // rgb = teinte de la matière, a = rugosité.
 uniform vec4 layer_tint[16];
 // Répétitions par mètre (1 / taille de tuile de la texture).
@@ -29,7 +33,11 @@ void fragment() {
 	vec4 tint = layer_tint[layer];
 	vec3 base = vec3(1.0);
 	if (layer < first_plain) {
-		base = texture(albedo_array, vec3(UV * layer_tile[layer], float(layer))).rgb;
+		vec3 uvw = vec3(UV * layer_tile[layer], float(layer));
+		base = texture(albedo_array, uvw).rgb;
+		if (use_normals) {
+			NORMAL_MAP = texture(normal_array, uvw).rgb;
+		}
 	}
 	vec3 albedo = base * tint.rgb * COLOR.rgb;
 	if (snow > 0.0 && layer >= roof_first && layer <= roof_last) {

@@ -14,7 +14,7 @@ const TEX := "res://assets/textures/"
 const SPECS := {
 	"Plaster": ["buildings/lime_plaster_diff", "buildings/medieval_wall_01_nor", "buildings/medieval_wall_01_rough", 2.2, Color(1.05, 1.02, 0.97), 0.95],
 	"Rubble": ["buildings/stone_wall_diff", "buildings/stone_wall_nor", "buildings/stone_wall_rough", 2.4, Color(1.0, 1.0, 1.0), 0.95],
-	"Ashlar": ["buildings/rustic_stone_wall_diff", "buildings/rustic_stone_wall_nor", "buildings/rustic_stone_wall_rough", 2.1, Color(1.0, 1.0, 1.0), 0.9],
+	"Ashlar": ["buildings/rustic_stone_wall_diff", "buildings/rustic_stone_wall_nor", "buildings/rustic_stone_wall_rough", 2.1, Color(1.15, 1.12, 1.06), 0.9],
 	"Masonry": ["battle/castle_wall_varriation_diff", "battle/castle_wall_varriation_nor", "", 3.0, Color(1.05, 1.03, 0.98), 0.9],
 	"Timber": ["buildings/rough_wood_diff", "buildings/rough_wood_nor", "buildings/rough_wood_rough", 1.6, Color(1.0, 1.0, 1.0), 0.9],
 	"Planks": ["buildings/weathered_brown_planks_diff", "buildings/weathered_brown_planks_nor", "buildings/weathered_brown_planks_rough", 2.2, Color(1.0, 1.0, 1.0), 0.92],
@@ -31,9 +31,10 @@ const PLAIN := {
 	"Canvas": [Color(0.78, 0.74, 0.66), 0.95],
 }
 const ROOFS := ["RoofTile", "RoofFlat", "RoofSlate", "Thatch"]
-## Maquettes de campagne : toutes les matières du kit fusionnées en un matériau `Building`
-## (`building_atlas.gdshader`), couche = alpha de la couleur de sommet. Même ordre que
-## `kit_campaign.LAYERS` et que les tranches de `building_albedo_array.jpg`.
+## Toutes les matières du kit fusionnées en un matériau `Building` (`building_atlas.gdshader`),
+## couche = alpha de la couleur de sommet : maquettes de campagne (variante `far`, sans normales)
+## et bâtiments de bataille. Même ordre que `kit_export.ATLAS_LAYERS` et que les tranches de
+## `building_albedo_array.jpg` / `building_normal_array.jpg`.
 const ATLAS_LAYERS := ["Plaster", "Rubble", "Ashlar", "Masonry", "Timber", "Planks", "Door", "RoofTile", "RoofFlat", "RoofSlate", "Thatch", "Window", "Iron", "Canvas"]
 const ATLAS_SHADER := preload("res://shaders/building_atlas.gdshader")
 
@@ -98,6 +99,9 @@ static func _atlas(variant: String) -> ShaderMaterial:
 	mat.set_shader_parameter("roof_first", ATLAS_LAYERS.find("RoofTile"))
 	mat.set_shader_parameter("roof_last", ATLAS_LAYERS.find("Thatch"))
 	mat.set_shader_parameter("snow", 1.0 if variant == "snow" else 0.0)
+	if variant != "far":
+		mat.set_shader_parameter("normal_array", load(TEX + "buildings/building_normal_array.jpg"))
+		mat.set_shader_parameter("use_normals", true)
 	return mat
 
 
