@@ -2426,6 +2426,14 @@ func _run_tutorial() -> void:
 	tutorial._unhandled_input(key)
 	_check(not encyclopedia.visible, "K should close the encyclopedia")
 
+	# BP1 : le journal et l'aide F1 sont branchés sur les bulles du Codex.
+	_check(bool(map.ui.log_text.has_meta("codex_attached")), "BP1: campaign log should be attached to CodexBubbles")
+	map.ui.add_events([{"kind": "chronicle", "text": "La victoire de Crécy marque l'Europe."}], "Test BP1")
+	_check(map.ui.log_text.text.contains("[url=cdx:"), "BP1: a known alias in a log event should be auto-linked: %s" % map.ui.log_text.text)
+	map.help.toggle()
+	_check(bool(map.help.text.has_meta("codex_attached")) and map.help.text.text.contains("[url=cdx:"), "BP1: F1 help should be attached to CodexBubbles and auto-link known aliases (Crécy, Peste noire…)")
+	map.help.toggle()
+
 	if settings != null:
 		settings.call("set_value", "tutorial/enabled", false, false)
 		settings.call("set_value", "game/interactive_battles", true, false)

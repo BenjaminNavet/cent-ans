@@ -261,6 +261,25 @@ def geo_relief_shade(
     _print_sizes("Relief de rendu", [result.render_heightmap, result.relief_shade])
 
 
+@geo_app.command("horizon")
+def geo_horizon(
+    province: str = typer.Option(
+        "",
+        "--province",
+        help="Ne cuire que ces provinces (liste séparée par des virgules)",
+    ),
+) -> None:
+    """Relief réel autour de chaque province pour l'horizon des batailles (EP2)."""
+    from cent_ans_tools.geo import horizon as geo_horizon_step
+
+    only = [p.strip() for p in province.split(",") if p.strip()]
+    result = geo_horizon_step.build(only=only or None)
+    console.print(
+        f"{result.tiles} tuiles d'horizon ({result.total_bytes / 1e6:.1f} Mo, "
+        f"{result.seconds:.0f} s) dans game/assets/horizon/relief/"
+    )
+
+
 @geo_app.command("pyramid")
 def geo_pyramid(
     levels: str = typer.Option(
@@ -538,7 +557,7 @@ def assets_heraldry() -> None:
 
 @assets_app.command("banners")
 def assets_banners() -> None:
-    """Dessine bannières (256×512) et pennons (512×128) de chaque faction (F10c)."""
+    """Dessine bannières (256×512), pennons (512×128) et étendards (1024×256) de chaque faction."""
     from cent_ans_tools import banners
 
     paths = banners.build()
@@ -768,6 +787,28 @@ def assets_illustrations(
         "Illustrations de l'encyclopédie",
         entry_art.convert,
     )
+
+
+@assets_app.command("horizon-panoramas")
+def assets_horizon_panoramas(
+    ids: str = typer.Option(
+        "", "--ids", help="Panoramas à générer (virgules ; défaut : tous)"
+    ),
+    generate: bool = typer.Option(
+        False, "--generate", help="Appels payants OpenRouter (sinon traitement seul)"
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Affiche les invites"),
+) -> None:
+    """Panoramas d'horizon peints des batailles (EP2) : génération puis détourage."""
+    from cent_ans_tools import horizon_panoramas
+
+    data = horizon_panoramas.load_data()
+    wanted = [i.strip() for i in ids.split(",") if i.strip()] or list(data["panoramas"])
+    if generate or dry_run:
+        horizon_panoramas.generate(wanted, dry_run=dry_run, data=data)
+    if not dry_run:
+        meta = horizon_panoramas.process_all(data)
+        console.print(f"{len(meta['panoramas'])} panoramas traités")
 
 
 @assets_app.command("art-plates")

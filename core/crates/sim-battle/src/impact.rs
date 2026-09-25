@@ -77,6 +77,8 @@ pub enum LossCause {
     Stakes,
     Pikes,
     Fire,
+    /// EP3: swept away in deep water.
+    Drowned,
 }
 
 impl LossCause {
@@ -94,6 +96,7 @@ impl LossCause {
             LossCause::Stakes => "stakes",
             LossCause::Pikes => "pikes",
             LossCause::Fire => "fire",
+            LossCause::Drowned => "drowned",
         }
     }
 }
