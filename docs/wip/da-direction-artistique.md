@@ -27,3 +27,7 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
 - 25/09 ~22 h : inventaire, captures à jour depuis `../gp-da` (l'arbre principal avait un cache
   de classes Godot périmé : `FineGeoLayer` introuvable ; import refait dans le worktree), bible
   écrite. Prochaine étape : lancer DA1 et DA2 (agents en worktree).
+- 25/09 ~22 h 30 : vague 1 lancée — DA1 (héraldique, wip `da1-heraldique.md`) et DA2 (portraits
+  vivants, ≤ 8 $, wip `da2-portraits-vivants.md`), agents en worktrees, chacun fusionne d'abord
+  `feat/da-direction-artistique` pour la bible. L'orchestrateur fusionne (jamais les agents).
+  Vague 2 (DA3 marqueurs après ZG4b, DA4 musique, DA5 icônes) après retour de la vague 1.
