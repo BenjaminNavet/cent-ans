@@ -931,6 +931,7 @@ func _build_material(weather: String) -> void:
 	ground_material.set_shader_parameter("splat_rect", Vector4(SPLAT_RECT.position.x, SPLAT_RECT.position.y, SPLAT_RECT.size.x, SPLAT_RECT.size.y))
 	var calm := Vector4(150.0, 60.0, 1050.0, 740.0)
 	ground_material.set_shader_parameter("calm_rect", calm)
+	ground_material.set_shader_parameter("da6_on", 1.0 if da6 else 0.0)
 	if decor_on:
 		ground_material.set_shader_parameter("decor_fields", decor_fields)
 		ground_material.set_shader_parameter("decor_on", 1.0)
@@ -1403,7 +1404,8 @@ func _stamp_decor(a: Image, b: Image) -> void:
 					ca.g = maxf(ca.g, 0.25 if kind in ["hamlet", "church"] else 0.35)
 					a.set_pixel(ix, iz, ca)
 					continue
-				fields.set_pixel(ix, iz, Color(float(code) / 8.0, yaw01, clampf(edge / 3.0, 0.0, 1.0), 1.0))
+				# DA6 : rampe de lisière sur 8 m (fondu, bord bruité dans les shaders), 3 m sinon.
+				fields.set_pixel(ix, iz, Color(float(code) / 8.0, yaw01, clampf(edge / (8.0 if da6 else 3.0), 0.0, 1.0), 1.0))
 	# Cours de ferme, abords des maisons et des moulins : terre battue.
 	for bld in decor.get("buildings", []):
 		var p := Vector2(float(bld["x"]), float(bld["z"]))
