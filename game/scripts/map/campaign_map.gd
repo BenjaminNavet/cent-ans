@@ -1460,6 +1460,17 @@ func _on_battle_returned(result: Dictionary, battle: Node) -> void:
 func _set_campaign_active(active: bool) -> void:
 	visible = active
 	ui.visible = active
+	# Q1 : les calques 2D des contrôleurs (plaques d'effectifs CV2, jetons d'agents C6) ne
+	# suivent pas la visibilité du Node3D parent : ils restaient affichés sur la bataille.
+	for layer: CanvasLayer in find_children("*", "CanvasLayer", true, false):
+		if layer == ui:
+			continue
+		if active:
+			layer.visible = bool(layer.get_meta(&"visible_before_battle", layer.visible))
+			layer.remove_meta(&"visible_before_battle")
+		elif not layer.has_meta(&"visible_before_battle"):
+			layer.set_meta(&"visible_before_battle", layer.visible)
+			layer.visible = false
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 	if active:
 		camera.make_current()
