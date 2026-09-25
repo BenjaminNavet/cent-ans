@@ -77,8 +77,11 @@ fn flat_battle_with(seed: u64, attacker_kinds: &[&str]) -> BattleSim {
     sim
 }
 
+/// Winner, end and duration of a battle.
+type Played = (Option<SideId>, Option<BattleEnd>, f64);
+
 /// Plays a battle to its end (30 min cap); returns winner, end and time.
-fn play(sim: &mut BattleSim) -> (Option<SideId>, Option<BattleEnd>, f64) {
+fn play(sim: &mut BattleSim) -> Played {
     while !sim.is_finished() && sim.elapsed() < 1800.0 {
         sim.step();
     }
@@ -86,7 +89,7 @@ fn play(sim: &mut BattleSim) -> (Option<SideId>, Option<BattleEnd>, f64) {
 }
 
 /// Attacker wins, all results, over the seeds.
-fn flat_results() -> (usize, Vec<(Option<SideId>, Option<BattleEnd>, f64)>) {
+fn flat_results() -> (usize, Vec<Played>) {
     let results: Vec<_> = seeds().map(|seed| play(&mut flat_battle(seed))).collect();
     let wins = results
         .iter()
