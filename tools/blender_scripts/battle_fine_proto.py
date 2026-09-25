@@ -56,6 +56,27 @@ CHAIN = {
     "calf_r": ("LowerLeg.R", "ankle.R"),
 }
 
+# Closed fists at bind pose (degrees about each finger bone's X axis): the figures hold
+# a weapon or a shield's enarmes in every clip.
+FIST_CURL = {
+    "index_01": 50,
+    "index_02": 80,
+    "index_03": 55,
+    "middle_01": 55,
+    "middle_02": 80,
+    "middle_03": 55,
+    "ring_01": 60,
+    "ring_02": 80,
+    "ring_03": 55,
+    "pinky_01": 65,
+    "pinky_02": 80,
+    "pinky_03": 55,
+    "thumb_02": 25,
+    "thumb_03": 35,
+}
+CURL_SIGN = 1.0
+FIST = {}  # side -> (fist centre, grip axis from the little finger to the index), world
+
 # Bones whose head is pinned on the Quaternius joint; the others hang from their parent.
 ANCHORED = {"thigh_l", "thigh_r"}
 
@@ -198,6 +219,9 @@ def fit_pose(rig, joints, scale, head_scale=1.0):
             loc = m.to_translation()
             prot = posed[p.name].to_3x3().normalized() @ p.matrix_local.to_3x3().normalized().inverted()
             rot = prot @ rest_rot
+            curl = FIST_CURL.get(b.name[:-2] if b.name[-2:] in ("_l", "_r") else "", 0.0)
+            if curl:
+                rot = rot @ Matrix.Rotation(math.radians(curl * CURL_SIGN), 3, "X")
             s = head_scale * scale if b.name == "head" else scale
             sy = sxz = s
         else:
@@ -206,6 +230,13 @@ def fit_pose(rig, joints, scale, head_scale=1.0):
             sy = sxz = scale
         m = Matrix.LocRotScale(loc, rot.to_quaternion(), Vector((sxz, sy, sxz)))
         posed[b.name] = m
+    mw = rig.matrix_world
+    for s in "lr":
+        idx = mw @ posed[f"index_01_{s}"].to_translation()
+        pinky = mw @ posed[f"pinky_01_{s}"].to_translation()
+        tip_b = rig.data.bones[f"middle_02_{s}"]
+        tip = mw @ (posed[tip_b.name] @ Vector((0, tip_b.length, 0)))
+        FIST[s.upper()] = ((idx + pinky) / 2 * 0.5 + tip * 0.5, (idx - pinky).normalized())
     return posed
 
 
@@ -435,6 +466,260 @@ def step_fit(out):
         print("CLIP", label, clip)
 
 
+# --- Prototype man-at-arms ---------------------------------------------------------------
+
+# LOD0 triangle budget per piece (0 = as modelled). The body keeps its head, neck and hands.
+FOOT_BUDGET = {
+    "MH_Body": 2600,
+    "hauberk": 2600,
+    "chausses": 1300,
+    "shoes": 360,
+    "surcoat": 1100,
+}
+
+
+def _tris(obj):
+    obj.data.calc_loop_triangles()
+    return len(obj.data.loop_triangles)
+
+
+def build_infantry():
+    """Fitted body dressed as a man-at-arms c. 1340; returns (armature, objects)."""
+    from mathutils.bvhtree import BVHTree
+
+    import battle_fine_equipment as fe
+    import battle_skinned_equipment as eq
+
+    arm, body = fitted_body()
+    lm = fe.Landmarks(body, arm)
+    hauberk = fe.hauberk(body, lm)[0]
+    objs = [hauberk]
+    objs += fe.chausses(body, lm)
+    bvh = BVHTree.FromObject(hauberk, bpy.context.evaluated_depsgraph_get())
+    surcoat = fe.surcoat(body, lm, hauberk, bvh)
+    objs += surcoat
+    bvh_coat = BVHTree.FromObject(surcoat[0], bpy.context.evaluated_depsgraph_get())
+    objs += fe.belt(lm, bvh)
+    objs += fe.scabbard(lm)
+    helm, frame = fe.bassinet(lm)
+    objs += helm
+    objs += fe.aventail(lm, frame, bvh, extra=(bvh_coat,))
+    ctx = eq.Context(arm, 0, bs.material, bs.bone_world)
+    objs += fe.sword(ctx, fist=FIST.get("R"))
+    objs += fe.heater_shield(ctx)
+    fe.trim_body(body)
+    fe.assign_body_materials(body)
+    objs.insert(0, body)
+    for o in objs:
+        target = FOOT_BUDGET.get(o.name.split(".")[0], 0)
+        tris = bs.weld_and_decimate(o, target) if target else _tris(o)
+        print(f"PIECE {o.name} tris={tris}")
+        if o.parent is None:
+            attach(o, arm)
+        o.data.shade_smooth()
+        o.data.set_sharp_from_angle(angle=math.radians(60))
+    print(f"FIGURE infantry_fine LOD0 tris={sum(_tris(o) for o in objs)}")
+    return arm, objs
+
+
+# --- Eevee look -------------------------------------------------------------------------
+
+LIVERY = (0.431, 0.0097, 0.0242)  # gueules #B0182B, linear
+OR = (0.888, 0.539, 0.0296)  # or #F2C230, linear
+
+# Shader codes of the current pipeline -> (roughness, metallic) for the Blender renders.
+CODE_LOOK = {
+    0: (0.85, 0.0),
+    1: (0.4, 1.0),
+    2: (0.3, 1.0),
+    3: (0.45, 1.0),
+    4: (0.9, 0.0),
+    7: (0.55, 0.0),
+    8: (0.6, 0.0),
+    9: (0.7, 0.0),
+    11: (0.7, 0.0),
+    12: (0.9, 0.0),
+}
+
+
+def _principled(m):
+    m.use_nodes = True
+    nt = m.node_tree
+    bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+    return nt, bsdf
+
+
+def _math(nt, op, a, b=None):
+    n = nt.nodes.new("ShaderNodeMath")
+    n.operation = op
+    for i, x in enumerate((a, b)):
+        if x is None:
+            continue
+        if isinstance(x, (int, float)):
+            n.inputs[i].default_value = x
+        else:
+            nt.links.new(x, n.inputs[i])
+    return n.outputs[0]
+
+
+def heraldry_factor(nt, uv_name):
+    """Chevron mask (1 on the charge) from a shield UV layer."""
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    uv.uv_map = uv_name
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(uv.outputs[0], sep.inputs[0])
+    dist = _math(nt, "ABSOLUTE", _math(nt, "SUBTRACT", sep.outputs[0], 0.5))
+    h = _math(nt, "MULTIPLY_ADD", dist, -1.3)
+    nt.links.new(sep.outputs[1], h.node.inputs[2])
+    return _math(nt, "MULTIPLY", _math(nt, "GREATER_THAN", h, 0.08), _math(nt, "LESS_THAN", h, 0.25))
+
+
+def _heraldry(nt, bsdf, field, charge, uv_name="heraldry"):
+    band = heraldry_factor(nt, uv_name)
+    mix = nt.nodes.new("ShaderNodeMix")
+    mix.data_type = "RGBA"
+    nt.links.new(band, mix.inputs[0])
+    mix.inputs[6].default_value = (*field, 1)
+    mix.inputs[7].default_value = (*charge, 1)
+    nt.links.new(mix.outputs[2], bsdf.inputs["Base Color"])
+
+
+def look_fine(m, maps=None):
+    """Eevee material of a prototype piece (optionally with the baked maps)."""
+    name = m.get("fg", "")
+    nt, bsdf = _principled(m)
+    rgb = LIVERY if name == "livery" else tuple(m["rgb"])
+    bsdf.inputs["Base Color"].default_value = (*rgb, 1)
+    bsdf.inputs["Roughness"].default_value = m["rough"]
+    bsdf.inputs["Metallic"].default_value = m["metal"]
+    if name == "skin":
+        bsdf.inputs["Subsurface Weight"].default_value = 0.15
+        bsdf.inputs["Subsurface Radius"].default_value = (0.04, 0.015, 0.008)
+    if name == "arms":
+        _heraldry(nt, bsdf, LIVERY, OR)
+    if maps:
+        maps(nt, bsdf, name)
+
+
+def look_current(m, uv_name="UVMap"):
+    """Eevee material of a current figure's coded material (flat colour per code)."""
+    if "code" not in m:
+        return
+    code = int(m["code"])
+    nt, bsdf = _principled(m)
+    rgb = LIVERY if code == 0 else tuple(m["rgb"])
+    rough, metal = CODE_LOOK.get(code, (0.6, 0.0))
+    bsdf.inputs["Base Color"].default_value = (*rgb, 1)
+    bsdf.inputs["Roughness"].default_value = rough
+    bsdf.inputs["Metallic"].default_value = metal
+    if code == 6:
+        _heraldry(nt, bsdf, LIVERY, OR, uv_name)
+
+
+def setup_eevee(res=(800, 1000)):
+    """Soft daylight studio: one warm sun, sky-coloured world, neutral floor."""
+    scene = bpy.context.scene
+    try:
+        scene.render.engine = "BLENDER_EEVEE"
+    except TypeError:
+        scene.render.engine = "BLENDER_EEVEE_NEXT"
+    scene.render.resolution_x, scene.render.resolution_y = res
+    scene.render.resolution_percentage = 100
+    scene.render.film_transparent = False
+    if hasattr(scene.eevee, "taa_render_samples"):
+        scene.eevee.taa_render_samples = 64
+    world = scene.world or bpy.data.worlds.new("fg_world")
+    scene.world = world
+    world.use_nodes = True
+    bg = next(n for n in world.node_tree.nodes if n.type == "BACKGROUND")
+    bg.inputs[0].default_value = (0.42, 0.45, 0.50, 1)
+    bg.inputs[1].default_value = 0.9
+    if bpy.data.objects.get("fg_sun") is None:
+        light = bpy.data.lights.new("fg_sun", "SUN")
+        light.energy = 3.2
+        light.angle = math.radians(12)
+        light.color = (1.0, 0.95, 0.86)
+        sun = bpy.data.objects.new("fg_sun", light)
+        scene.collection.objects.link(sun)
+        sun.rotation_euler = (math.radians(52), 0, math.radians(-35))
+    if bpy.data.objects.get("fg_floor") is None:
+        me = bpy.data.meshes.new("fg_floor")
+        s_ = 60.0
+        me.from_pydata(
+            [(-s_, -s_, 0), (s_, -s_, 0), (s_, s_, 0), (-s_, s_, 0)], [], [(0, 1, 2, 3)]
+        )
+        floor = bpy.data.objects.new("fg_floor", me)
+        scene.collection.objects.link(floor)
+        fm = bpy.data.materials.new("fg_floor")
+        _nt, b = _principled(fm)
+        b.inputs["Base Color"].default_value = (0.20, 0.19, 0.16, 1)
+        b.inputs["Roughness"].default_value = 0.95
+        me.materials.append(fm)
+    scene.view_settings.view_transform = "AgX"
+    return scene
+
+
+VIEWS = {
+    # name: (eye, target, lens, resolution)
+    "face": ((0.0, -3.6, 1.05), (0.0, 0.0, 0.92), 50, (700, 1000)),
+    "trois_quarts": ((-2.2, -2.8, 1.3), (0.0, 0.0, 0.9), 50, (700, 1000)),
+    "tete": ((-0.35, -1.05, 1.62), (0.0, -0.05, 1.5), 85, (700, 700)),
+}
+
+
+def render_views(prefix, out, views=("face", "trois_quarts", "tete"), shift=Vector()):
+    """Render the named views of the current scene to `out/<prefix>_<view>.png`."""
+    cam = camera()
+    paths = []
+    for v in views:
+        eye, target, lens, res = VIEWS[v]
+        setup_eevee(res)
+        look_at(cam, Vector(eye) + shift, Vector(target) + shift, lens)
+        path = os.path.join(out, f"{prefix}_{v}.png")
+        render(path)
+        paths.append(path)
+    return paths
+
+
+def render_far(prefix, out, distance=30.0, target=(0, 0, 0.9)):
+    """Game-like view at `distance` (70 degree FOV, 1920x1080), full frame."""
+    cam = camera()
+    setup_eevee((1920, 1080))
+    target = Vector(target)
+    eye = target + Vector((-0.45, -0.85, 0.35)).normalized() * distance
+    look_at(cam, eye, target, 25.2)  # 25.2 mm on a 36 mm sensor = 70 degrees horizontal
+    path = os.path.join(out, f"{prefix}_30m_full.png")
+    render(path)
+    return path
+
+
+def step_infantry(out):
+    """Prototype man-at-arms: build, count, render (no baked maps)."""
+    build_infantry()
+    for m in bpy.data.materials:
+        if m.get("fg"):
+            look_fine(m)
+    render_views("proto_infantry", out)
+
+
+def step_current_infantry(out):
+    """Current ``infantry_0`` (LOD0) rendered with the same light."""
+    import battle_skinned_figures as figures
+
+    _arm, objs = bs.build_human(figures.FIGURES["infantry_0"], 0)
+    for m in bpy.data.materials:
+        look_current(m)
+    print(f"FIGURE infantry_0 LOD0 tris={sum(_tris(o) for o in objs)}")
+    render_views("current_infantry", out)
+
+
+STEPS = {
+    "fit": step_fit,
+    "infantry": step_infantry,
+    "current_infantry": step_current_infantry,
+}
+
+
 def main():
     """Parse the step and run it."""
     args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
@@ -443,7 +728,7 @@ def main():
         out = args[args.index("--out") + 1]
     os.makedirs(out, exist_ok=True)
     step = args[0] if args else "fit"
-    {"fit": step_fit}[step](out)
+    STEPS[step](out)
     print("OK")
 
 
