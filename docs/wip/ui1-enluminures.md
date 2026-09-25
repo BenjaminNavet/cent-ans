@@ -14,8 +14,13 @@ belle, avec des assets « moines », enluminures. Décision : ADR 0050.
 - [x] Captures `docs/img/ui1/` ; smoke : pas de régression (échecs restants préexistants :
       niveaux de difficulté, playlists musicales)
 
+- [x] Lettrines des titres de fenêtres : `Lettrine.attach(label)` sur province, cour, faction,
+      techniques, fiche de personnage ; test `tests/ui1_lettrine_test.gd`
+- [x] `core/build.sh` : supprime la dylib avant de la copier (sinon signature macOS invalidée →
+      Godot tué, code 137)
+
 ## Pistes (non faites)
-- Lettrines enluminées pour les titres de fenêtres (IM Fell, première lettre sur champ d'azur).
+- Lettrine pour la chronique (titre centré et à retour à la ligne : non géré par `Lettrine`).
 - Encore ~25 `StyleBoxFlat` locaux (lignes de sauvegarde, pastilles, cartes d'unité) : volontairement
   plats (couleurs porteuses de sens) ou à reprendre au cas par cas.
 - Captures : `godot --path game --script res://tests/ui1_capture.gd -- --out=<dossier>`.

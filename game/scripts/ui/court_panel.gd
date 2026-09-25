@@ -50,6 +50,7 @@ var max_right: float = INF
 
 
 func _ready() -> void:
+	Lettrine.attach(title_label)  # UI1 : titre à lettrine enluminée
 	sort_option.add_item("Rang", SORT_RANK)
 	sort_option.add_item("Âge", SORT_AGE)
 	sort_option.add_item("Nom", SORT_NAME)
