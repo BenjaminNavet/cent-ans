@@ -74,6 +74,9 @@ var _fine_shown: Dictionary = {}
 var _fine_serial: int = 0
 ## PF1 (préréglage de qualité) : multiplicateur des clés de LOD des blocs fins. 1 = un niveau
 ## n'est pris que si son erreur de hauteur fait moins de ≈ 1 pixel ; 4 = moins de ≈ 4 pixels.
+## PF1 : relief fin permis par le préréglage (en plus de `fine_enabled`, réglé par les options).
+var quality_fine: bool = true
+var _base_near_distance: float = -1.0
 var fine_lod_bias: float = 1.0:
 	set(value):
 		fine_lod_bias = maxf(value, 0.01)
@@ -119,8 +122,19 @@ const FALLBACK_PALETTE: Array[Color] = [
 ]
 
 
+## PF1 : préréglage de qualité (`RenderQuality`, groupe `CLIENT_GROUP`).
+func apply_render_quality(p: Dictionary) -> void:
+	if _base_near_distance < 0.0:
+		_base_near_distance = near_distance
+	quality_fine = bool(p.get("fine_relief", true))
+	fine_lod_bias = float(p.get("fine_lod_bias", 1.0))
+	near_distance = _base_near_distance * float(p.get("terrain_near", 1.0))
+
+
 func build(data: MapData) -> void:
 	var t0 := Time.get_ticks_msec()
+	add_to_group(RenderQuality.CLIENT_GROUP)
+	apply_render_quality(RenderQuality.preset())
 	clear_terrain()
 	map_data = data
 	chunk_px = ceili(float(maxi(data.size.x, data.size.y)) / CHUNKS)
@@ -393,7 +407,7 @@ func _select_fine_step(camera_distance: float) -> int:
 ## Tuiles voulues en relief fin (les plus proches du point visé), triées par distance.
 func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: float) -> Array:
 	var result: Array = []
-	if not fine_enabled or _fine_tiles_dir == "" or view_center == Vector3.INF or camera_distance >= fine_distance:
+	if not fine_enabled or not quality_fine or _fine_tiles_dir == "" or view_center == Vector3.INF or camera_distance >= fine_distance:
 		return result
 	var center := Vector2(view_center.x, view_center.z)
 	var radius := maxf(fine_radius, camera_distance * 1.2)
