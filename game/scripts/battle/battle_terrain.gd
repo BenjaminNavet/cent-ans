@@ -103,6 +103,9 @@ var _trample_bytes := PackedByteArray()
 var _trample_timer: float = 0.0
 var _trample_last: Dictionary = {}  # id -> dernière position (x, z) imprimée
 var _trample_snow: bool = true  # B8 : false = carte de boue (sol détrempé)
+## EP2 : horizon (relief réel lointain, panorama peint) ; province du lieu, posée par la scène.
+var province_id: String = ""
+var horizon: BattleHorizon = null
 
 
 ## B5 : options de ligne de commande qui réécrivent la mise en place de la bataille (terrain,
@@ -169,6 +172,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_rolls.frequency = 1.0 / 520.0
 	_rolls.fractal_octaves = 3
 	_extend_river()
+	_setup_horizon()
 	_plan_roads()
 	_build_textures()
 	_build_material(weather)
@@ -176,6 +180,8 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	_add_mesh("Ground", _field_mesh(), true)
 	_add_mesh("NearRing", _ring_mesh(NEAR_RECT, NEAR_STEP, Rect2(0, 0, FIELD_W, FIELD_D), 0.0), true)
 	_add_mesh("FarRing", _ring_mesh(FAR_RECT, FAR_STEP, NEAR_RECT.grow(-2.0 * FAR_STEP), 1.5), false)
+	if horizon.active:
+		horizon.build_visuals(self, FAR_RECT, weather, _sea_rect())
 	if terrain.has("river"):
 		_build_river(terrain["river"])
 	_build_trees()
@@ -373,6 +379,9 @@ func world_height(x: float, z: float) -> float:
 	if rd < RIVER_SPAN:
 		# Le lit : même profil que la simulation, raccordé au bord du champ.
 		h -= RIVER_CARVE * (1.0 - rd / RIVER_SPAN) * t
+	if horizon != null and horizon.active:
+		# EP2 : relief réel au loin, raccordé au relief généré (rivière et côte gardent la main).
+		h = horizon.blend(x, z, h, rd)
 	if not _coast.is_empty():
 		# B5 : au-delà du bord côtier, le sol plonge sous la mer (plage puis estran).
 		var west := str(_coast["flank"]) == "west"
@@ -1097,7 +1106,7 @@ func _build_trees() -> void:
 			x += step
 			if NEAR_RECT.grow(-60.0).has_point(Vector2(px, pz)):
 				continue
-			if _woods.get_noise_2d(px * 0.6, pz * 0.6) < far_woods or _in_sea(px, pz):
+			if _woods.get_noise_2d(px * 0.6, pz * 0.6) < _far_woods_at(px, pz, far_woods) or _in_sea(px, pz):
 				continue
 			sets["far"].append(_tree_transform(rng, px, pz, 1.3, 2.0))
 			tints["far"].append(_tree_tint(rng))
@@ -1108,10 +1117,45 @@ func _build_trees() -> void:
 		_tree_layer(kind, sets[kind], tints[kind])
 
 
+## EP2 : seuil des bois lointains ; au loin, les forêts réelles de la tuile d'horizon.
+func _far_woods_at(x: float, z: float, biome_threshold: float) -> float:
+	if horizon == null or not horizon.active:
+		return biome_threshold
+	var w := horizon.weight(x, z)
+	if w <= 0.0:
+		return biome_threshold
+	return lerpf(biome_threshold, lerpf(0.55, -0.9, horizon.forest_at(x, z)), w)
+
+
+## EP2 : dimensions du champ lues dans la grille de la simulation (EP1 les rend paramétriques).
+func field_size() -> Vector2:
+	return Vector2(float(_nx - 1) * _resolution, float(_nz - 1) * _resolution)
+
+
+## EP2 : prépare le relief réel du lieu (avant tout appel à `world_height`).
+func _setup_horizon() -> void:
+	horizon = BattleHorizon.new()
+	horizon.name = "Horizon"
+	add_child(horizon)
+	var flank := str(_coast.get("flank", "")) if not _coast.is_empty() else ""
+	horizon.setup(province_id, field_size(), _mean_height, flank, terrain_key, season_key)
+
+
+## EP2 : emprise de la mer du champ (B5, `BattleVillage._build_sea`), vide sans côte.
+func _sea_rect() -> Rect2:
+	if _coast.is_empty():
+		return Rect2()
+	var west := str(_coast.get("flank", "west")) == "west"
+	var shore := float(_coast.get("shore_x", 0.0))
+	var inland := shore + (40.0 if west else -40.0)
+	var x_far := shore - 9000.0 if west else shore + 9000.0
+	return Rect2(minf(inland, x_far), 400.0 - 8500.0, absf(x_far - inland), 17000.0)
+
+
 ## B5 : au large (sous le niveau de la mer, flanc côtier seulement).
 func _in_sea(x: float, z: float) -> bool:
 	if _coast.is_empty():
-		return false
+		return horizon != null and horizon.is_sea(x, z)  # EP2 : mer réelle au loin
 	var west := str(_coast["flank"]) == "west"
 	if (west and x > 0.0) or (not west and x < FIELD_W):
 		return false
