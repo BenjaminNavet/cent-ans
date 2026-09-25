@@ -326,3 +326,12 @@ def test_side_arm_rejoining_does_not_raise_order() -> None:
         tidal=np.zeros(n, dtype=bool),
     )
     assert hydro_sources.compute_strahler(table).tolist() == [1, 1, 1, 1]
+
+
+def test_two_way_reach_is_oriented_downstream() -> None:
+    """A chain of two-way links digitised upstream is reversed after a one-way link."""
+    # one-way 0 -> 1, then two-way links digitised 3 -> 2 and 2 -> 1 (backwards).
+    start = np.array([0, 2, 3])
+    end = np.array([1, 1, 2])
+    flip = hydro_sources.orient_two_way(start, end, np.array([False, True, True]))
+    assert flip.tolist() == [False, True, True]
