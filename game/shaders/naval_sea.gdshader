@@ -83,7 +83,7 @@ void fragment() {
 	vec3 albedo = mix(water, sky_color * 0.75, clamp(fresnel * 0.8 + calm * 0.3, 0.0, 0.85));
 
 	// Écume : crêtes des grosses vagues, étraves et sillages.
-	float foam = smoothstep(0.55, 1.0, crest * 1.2 + (macro - 0.5) * 0.6) * far_fade * 0.5;
+	float foam = smoothstep(0.75, 1.25, crest * 1.1 + (macro - 0.5) * 0.5) * far_fade * 0.3;
 	float foam_noise = texture(macro_noise, p * 0.09 + vec2(t * 0.03, t * 0.01)).r;
 	for (int i = 0; i < MAX_SHIPS; i++) {
 		if (i >= ship_count) {
@@ -104,14 +104,14 @@ void fragment() {
 		float ey = across / (half_beam + 1.2);
 		float r = sqrt(ex * ex + ey * ey);
 		float hull_ring = (1.0 - smoothstep(0.85, 1.25, r)) * smoothstep(0.7, 0.95, r);
-		foam = max(foam, hull_ring * (0.35 + 0.4 * clamp(speed / 3.0, 0.0, 1.0)));
+		foam = max(foam, hull_ring * (0.2 + 0.45 * clamp(speed / 3.0, 0.0, 1.0)));
 		// Moustache d'étrave et sillage en V derrière.
 		if (speed > 0.2) {
 			float behind = -along - half_len;
 			if (behind > -2.0 && behind < 140.0) {
 				float spread = 0.5 * half_beam + behind * 0.18;
 				float edge = abs(abs(across) - spread);
-				float trail = (1.0 - smoothstep(0.0, 1.5 + behind * 0.05, edge)) * (1.0 - behind / 140.0);
+				float trail = (1.0 - smoothstep(0.0, 0.8 + behind * 0.03, edge)) * (1.0 - behind / 110.0);
 				float centre = (1.0 - smoothstep(0.0, half_beam * 0.8 + behind * 0.04, abs(across))) * (1.0 - behind / 60.0);
 				foam = max(foam, (trail * 0.8 + max(centre, 0.0) * 0.45) * clamp(speed / 3.0, 0.0, 1.0));
 			}
