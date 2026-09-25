@@ -35,6 +35,27 @@ func _init() -> void:
 	for _i in 4:
 		await process_frame
 	await _save(out_dir.path_join("23-journal-replie.png"))
+	# Écran de fin vu du vaincu (bannière « Défaite »), sans suites de campagne.
+	for _i in 36000:
+		battle.call("tick", 0.1)
+		if battle.call("is_finished"):
+			break
+	for _i in 4:
+		await process_frame
+	var own_screen: Control = scene.get("result_screen")
+	if own_screen != null:
+		own_screen.visible = false  # l'écran du vainqueur, posé par la scène
+	var outcome: Dictionary = battle.call("get_outcome")
+	var loser := "defender" if str(outcome.get("winner", "")) == "attacker" else "attacker"
+	var sides := {}
+	for side in ["attacker", "defender"]:
+		sides[side] = {"name": scene.get("side_names")[side], "faction": str((scene.get("setup")[side] as Dictionary).get("faction", "")), "color": scene.get("side_colors")[side]}
+	var screen := BattleResultScreen.new()
+	hud.root.add_child(screen)
+	screen.show_result(hud.title_label.text, loser, sides, battle.call("get_units"), outcome)
+	for _i in 6:
+		await process_frame
+	await _save(out_dir.path_join("31-fin-defaite.png"))
 	quit(0)
 
 
