@@ -99,6 +99,22 @@ RIDER_BUDGET = budget(
         )
     }
 )
+# UR2: `budget()` only scales named parts, and the `HOODED_PARTS` rider (écorcheurs) uses the
+# "Medieval_*" names (`hooded_adventurer.glb`), not "Adventurer_*" ; without this, RIDER_BUDGET
+# left them at the full HUMAN_BUDGET (walking figure) size instead of the mounted 0.6 factor,
+# which was most of why écorcheurs (cavalry_4) ran well over the LOD0 triangle budget.
+RIDER_BUDGET_HOODED = budget(
+    **{
+        k: 0.57
+        for k in (
+            "Adventurer_Head",
+            "Medieval_Body",
+            "Medieval_Legs",
+            "Medieval_Feet",
+            "Medieval_Head",
+        )
+    }
+)
 HORSE_BUDGET = [1100, 280, 110]
 
 COMMONER_PARTS = [
@@ -411,13 +427,16 @@ FIGURES.update(
             "parts": HOODED_PARTS,
             "colors": HOODED_COLORS,
             "masks": {"Medieval_Head": 1, "Adventurer_Head": 6},
-            "budget": budget(Adventurer_Head=0.75),
+            # UR2: three variants each bake in their own headgear (bassinet, kettle hat, hood)
+            # on top of the body ; scaled down a bit more than usual to stay under the 3,000
+            # triangle LOD0 budget once every piece of kit is added together.
+            "budget": budget(Adventurer_Head=0.7, Medieval_Body=0.76, Medieval_Legs=0.78),
             "equipment": [
                 ("brigandine", 2, {"colour": (0.20, 0.12, 0.05)}),
-                ("bassinet", 2),
+                ("bassinet", 2, {"aventail": False}),
                 ("kettle_hat", 4),
                 ("sword", 0),
-                ("round_shield", 0, {"radius": 0.21}),
+                ("round_shield", 0, {"radius": 0.21, "boss": False}),
             ],
             "variants": 3,
         },
@@ -501,7 +520,7 @@ FIGURES.update(
             "parts": HOODED_PARTS,
             "colors": HOODED_COLORS,
             "masks": {"Medieval_Head": 1, "Adventurer_Head": 2},
-            "budget": RIDER_BUDGET,
+            "budget": RIDER_BUDGET_HOODED,
             "horse_budget": HORSE_BUDGET,
             "horse_equipment": [("saddle", 0)],
             "equipment": [
@@ -514,7 +533,7 @@ FIGURES.update(
         # Jinetes: light tunic, cap or kettle hat, adarga, javelin; light horse.
         "cavalry_5": {
             "rig": "cavalry",
-            "style": "lance",
+            "style": "horse_javelin",  # UR2: throws javelins rather than fighting with a lance.
             "parts": COMMONER_PARTS,
             "colors": {
                 **COMMONER_COLORS,

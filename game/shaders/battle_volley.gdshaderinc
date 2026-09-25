@@ -1,10 +1,14 @@
-// Trajectoire d'une flèche d'une volée (lot BV1). Reproduit à l'identique par
-// `BattleVolleys.arrow_landing()` (GDScript) : mêmes hachages entiers, mêmes constantes.
+// Trajectoire d'un projectile d'une volée (lot BV1, UR2 : balle, javelot). Reproduit à l'identique
+// par `BattleVolleys.arrow_landing()` (GDScript) : mêmes hachages entiers, mêmes constantes.
 
-// Vitesse (m/s), flèche relative de l'arc, étalement du tir (s) : flèche, carreau.
-const float VOLLEY_SPEED[2] = float[](48.0, 62.0);
-const float VOLLEY_ARC[2] = float[](0.16, 0.06);
-const float VOLLEY_STAGGER[2] = float[](1.5, 0.8);
+// Vitesse (m/s), flèche relative de l'arc, étalement du tir (s) : flèche, carreau, balle
+// (couleuvrine, quasi tendue), javelot (jinetes, plus arqué, plus lent).
+const float VOLLEY_SPEED[4] = float[](48.0, 62.0, 210.0, 24.0);
+const float VOLLEY_ARC[4] = float[](0.16, 0.06, 0.015, 0.22);
+const float VOLLEY_STAGGER[4] = float[](1.5, 0.8, 0.35, 1.1);
+// Épaisseur et longueur du ruban : flèche, carreau, balle (court, fin), javelot (long, épais).
+const float VOLLEY_WIDEN[4] = float[](1.0, 1.6, 1.2, 1.3);
+const float VOLLEY_STRETCH[4] = float[](1.0, 0.5, 0.3, 0.85);
 
 struct VolleyArrow {
 	vec3 start;
@@ -13,7 +17,7 @@ struct VolleyArrow {
 	float flight;
 	float arc;
 	int count;
-	bool bolt;
+	int kind;
 	bool fire;
 	bool handed_off;
 	float seed_f;
@@ -34,10 +38,12 @@ VolleyArrow volley_arrow(mat4 m, vec4 c, int i) {
 	VolleyArrow a;
 	uint sh = volley_pcg(uint(c.x + 0.5));
 	int code = int(c.y + 0.5);
-	int kind = code & 1;
-	a.bolt = kind == 1;
-	int cover = (code >> 2) & 3;
-	int stride = code >> 4;
+	// code = kind (2 bits: 0 flèche, 1 carreau, 2 balle, 3 javelot) + 4 × feu
+	// + 8 × couvert (0, 1 pavois, 2 pieux) + 32 × pas des traits confiés à la couche plantée.
+	int kind = code & 3;
+	a.kind = kind;
+	int cover = (code >> 3) & 3;
+	int stride = code >> 5;
 	a.count = int(c.z + 0.5);
 	a.seed_f = c.x;
 	vec3 src = m[0].xyz;
@@ -67,7 +73,7 @@ VolleyArrow volley_arrow(mat4 m, vec4 c, int i) {
 	float dist = distance(a.start, a.end_p);
 	a.flight = max(dist / VOLLEY_SPEED[kind] * (1.0 + VOLLEY_ARC[kind]), 0.05);
 	a.arc = dist * VOLLEY_ARC[kind] * (0.85 + 0.3 * volley_rand(sh, i, 7));
-	a.fire = (code & 2) != 0 && volley_rand(sh, i, 9) < 0.5;
+	a.fire = (code & 4) != 0 && volley_rand(sh, i, 9) < 0.5;
 	a.handed_off = stride > 0 && (i % max(stride, 1)) == 0;
 	return a;
 }

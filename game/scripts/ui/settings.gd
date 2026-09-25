@@ -52,6 +52,11 @@ const DEFAULTS := {
 	"battle/unit_size": 1.0,
 	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
 	"interface/intro_seen": false,
+	# VO1 : conseiller parlé (chroniqueur), répliques des unités, interventions déjà faites
+	# (« premières fois », liste séparée par des virgules).
+	"voice/advisor": true,
+	"voice/barks": true,
+	"voice/advisor_seen": "",
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).

@@ -37,10 +37,13 @@ const MAX_STUCK := 30000
 ## au moins.
 const STUCK_PER_VOLLEY := 96
 const STUCK_STRIDE := 5
-## Doit rester identique à `battle_volley.gdshaderinc` (flèche, carreau).
-const SPEED := [48.0, 62.0]
-const ARC := [0.16, 0.06]
-const STAGGER := [1.5, 0.8]
+## Doit rester identique à `battle_volley.gdshaderinc` (flèche, carreau, balle, javelot).
+const SPEED := [48.0, 62.0, 210.0, 24.0]
+const ARC := [0.16, 0.06, 0.015, 0.22]
+const STAGGER := [1.5, 0.8, 0.35, 1.1]
+## Épaisseur des traits fichés par sorte (voir `battle_stuck_arrow.gdshader`).
+const STUB := [0.0, 1.0, 1.0, 0.4]
+const KIND_KEYS := ["arrow", "bolt", "bullet", "javelin"]
 const MASK32 := 0xFFFFFFFF
 const FIELD_AABB := AABB(Vector3(-600, -100, -600), Vector3(2800, 700, 2400))
 const MAX_STAKE_ROWS := 60
@@ -148,9 +151,9 @@ func update_fieldworks(units: Array) -> void:
 ## d'impact des touches `[{pos, time}]` (sang).
 func on_shot(shot: Dictionary, by_id: Dictionary, camera_pos: Vector3) -> Array:
 	var kind_key := str(shot.get("kind", "arrow"))
-	if kind_key != "arrow" and kind_key != "bolt":
-		return []
-	var kind := 1 if kind_key == "bolt" else 0
+	var kind := KIND_KEYS.find(kind_key)
+	if kind < 0:
+		return []  # engins (boulet, pierre) : dessinés ailleurs (SG1).
 	var shooter: Dictionary = by_id.get(int(shot["shooter"]), {})
 	if shooter.is_empty():
 		return []
@@ -175,7 +178,9 @@ func on_shot(shot: Dictionary, by_id: Dictionary, camera_pos: Vector3) -> Array:
 			cover = 2
 	var fire := bool(shot.get("incendiary", false))
 	var stride := maxi(STUCK_STRIDE, ceili(float(total) / STUCK_PER_VOLLEY))
-	var code := kind + (2 if fire else 0) + 4 * cover + 16 * stride
+	# kind (2 bits) + 4 × feu + 8 × couvert (0, 1 pavois, 2 pieux) + 32 × pas des flèches
+	# confiées à la couche plantée (voir `battle_volley.gdshaderinc`).
+	var code := kind + (4 if fire else 0) + 8 * cover + 32 * stride
 	var slope := Vector2((_h(aim.x + 3.0, aim.z) - _h(aim.x - 3.0, aim.z)) / 6.0, (_h(aim.x, aim.z + 3.0) - _h(aim.x, aim.z - 3.0)) / 6.0)
 	var chunk := {
 		"src": from, "tgt": aim, "launch": time_now,
@@ -199,7 +204,7 @@ func on_shot(shot: Dictionary, by_id: Dictionary, camera_pos: Vector3) -> Array:
 		while i < count:
 			var arrow := arrow_landing(chunk, sh, i)
 			flight_max = maxf(flight_max, float(arrow["time"]) - time_now)
-			_add_stuck(arrow["pos"], arrow["dir"], float(arrow["time"]), kind, bool(arrow["cover"]))
+			_add_stuck(arrow["pos"], arrow["dir"], float(arrow["time"]), STUB[kind], bool(arrow["cover"]))
 			i += stride
 		var tries := 0
 		while hits.size() < hit_count and tries < hit_count * 4:
@@ -210,8 +215,14 @@ func on_shot(shot: Dictionary, by_id: Dictionary, camera_pos: Vector3) -> Array:
 		_write_chunk(chunk, time_now + flight_max + STAGGER[kind] + STICK_HOLD + 1.0)
 		launched += count
 	var flight := from.distance_to(aim) / float(SPEED[kind]) * (1.0 + float(ARC[kind]))
-	sound_event.emit(&"crossbow_release" if kind == 1 else &"bow_release", from + Vector3(0, 1.5, 0), 0.0)
-	sound_event.emit(&"arrow_whistle", from.lerp(aim, 0.55) + Vector3(0, 12, 0), minf(flight * 0.35, 1.5))
+	# Balle et javelot : pas d'échantillon dédié dans la banque (`data/audio/sound_bank.json`) ;
+	# repli sur le tir le plus proche de la banque plutôt qu'un silence (bombarde adoucie pour la
+	# couleuvrine à main, arc pour le lancer de javeline).
+	var release_gain: float = [0.0, 0.0, -14.0, -2.0][kind]
+	var release: StringName = [&"bow_release", &"crossbow_release", &"bombard", &"bow_release"][kind]
+	sound_event.emit(release, from + Vector3(0, 1.5, 0), release_gain)
+	if kind < 2:  # flèche, carreau : sifflement au tiers du vol (balle et javelot : pas de vol audible).
+		sound_event.emit(&"arrow_whistle", from.lerp(aim, 0.55) + Vector3(0, 12, 0), minf(flight * 0.35, 1.5))
 	sound_event.emit(&"arrow_impact", aim, flight + STAGGER[kind] * 0.5)
 	return hits
 
@@ -220,8 +231,8 @@ func on_shot(shot: Dictionary, by_id: Dictionary, camera_pos: Vector3) -> Array:
 ## `{pos, dir, time, cover}` au moment où elle se fiche (pointe à la surface).
 func arrow_landing(chunk: Dictionary, sh: int, i: int) -> Dictionary:
 	var code := int(chunk["code"])
-	var kind := code & 1
-	var cover := (code >> 2) & 3
+	var kind := code & 3
+	var cover := (code >> 3) & 3
 	var src: Vector3 = chunk["src"]
 	var tgt: Vector3 = chunk["tgt"]
 	var d2 := Vector2(tgt.x - src.x, tgt.z - src.z)
@@ -253,17 +264,18 @@ func arrow_landing(chunk: Dictionary, sh: int, i: int) -> Dictionary:
 	return {"pos": end, "dir": fly_dir, "time": launch + flight, "cover": in_cover}
 
 
-## Fusion BV2 : un homme tué par un trait (`corpse_fallen`, cause « arrow » ou « bolt ») garde
-## un à trois traits fichés dans le corps, dans la même couche statique que ceux du sol.
+## Fusion BV2 : un homme tué par un trait (`corpse_fallen`, cause « arrow », « bolt », « bullet »
+## ou « javelin ») garde un à trois traits fichés dans le corps, dans la même couche statique que
+## ceux du sol.
 func on_corpse(pos: Vector3, _side: String, kind: String, cause: String) -> void:
-	if cause != "arrow" and cause != "bolt":
+	var missile_kind := KIND_KEYS.find(cause)
+	if missile_kind < 0:
 		return
-	var bolt := 1 if cause == "bolt" else 0
 	var height := 0.9 if kind == "cavalry" else 0.22  # corps couché ; cheval : flanc
 	for _i in _rng.randi_range(1, 3):
 		var tip := pos + Vector3(_rng.randf_range(-0.45, 0.45), height + _rng.randf_range(-0.05, 0.1), _rng.randf_range(-0.45, 0.45))
 		var dir := Vector3(_rng.randf_range(-0.6, 0.6), -1.0, _rng.randf_range(-0.6, 0.6)).normalized()
-		_add_stuck(tip, dir, time_now, bolt, true)
+		_add_stuck(tip, dir, time_now, STUB[missile_kind], true)
 
 
 # --- Paquets -----------------------------------------------------------------------------
@@ -292,7 +304,9 @@ func _write_chunk(chunk: Dictionary, expiry: float) -> void:
 	_chunks.set_instance_custom_data(slot, custom)
 	_flames.set_instance_transform(slot, xf)
 	_flames.set_instance_custom_data(slot, custom)
-	if int(chunk["code"]) & 2:
+	# Feu (flèche enflammée) ou balle (fumée de mise à feu) : les deux gardent la couche
+	# « flammes » visible tant qu'un paquet en vol ou fiché peut en montrer une.
+	if (int(chunk["code"]) & 4) or (int(chunk["code"]) & 3) == 2:
 		_fire_until = maxf(_fire_until, expiry)
 	_chunk_expiry[slot] = expiry
 	_chunk_high = maxi(_chunk_high, slot + 1)
@@ -316,7 +330,9 @@ func _h(x: float, z: float) -> float:
 # --- Traits fichés ---------------------------------------------------------------------------
 
 
-func _add_stuck(tip: Vector3, dir: Vector3, appear: float, kind: int, in_cover: bool) -> void:
+## `stub` : épaisseur relative du trait fiché (0 flèche, 1 carreau ou balle, entre les deux pour
+## un javelot ; voir `STUB` et `battle_stuck_arrow.gdshader`).
+func _add_stuck(tip: Vector3, dir: Vector3, appear: float, stub: float, in_cover: bool) -> void:
 	var idx := stuck_count
 	if stuck_count < MAX_STUCK:
 		stuck_count += 1
@@ -330,7 +346,7 @@ func _add_stuck(tip: Vector3, dir: Vector3, appear: float, kind: int, in_cover: 
 	# Pointe enfoncée : 25 cm dans la terre, 8 cm dans le bois d'un pavois ou d'un pieu.
 	var origin := tip + z * (0.08 if in_cover else 0.25)
 	_stuck.set_instance_transform(idx, Transform3D(Basis(x, y, z), origin))
-	_stuck.set_instance_custom_data(idx, Color(appear, float(kind), 0.0, 0.0))
+	_stuck.set_instance_custom_data(idx, Color(appear, stub, 0.0, 0.0))
 
 
 # --- Pieux et pavois -------------------------------------------------------------------------
