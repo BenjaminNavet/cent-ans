@@ -1,0 +1,19 @@
+{
+  "id": "cdx_jeu_pavois",
+  "title": "Ordre : dresser les pavois",
+  "category": "mecanique",
+  "aliases": [
+    "dresser les pavois",
+    "dressent leurs pavois",
+    "pavois dressés",
+    "pavescheur",
+    "pavescheurs"
+  ],
+  "era": { "from": "1340", "to": "1453" },
+  "summary": "Le pavois est un grand bouclier que l'on plante devant soi : derrière lui, l'arbalétrier retend son arme à l'abri des flèches. Encore faut-il l'avoir sous la main — à Crécy, les pavois des Génois étaient restés aux bagages.",
+  "body": "Recharger une arbalète prend du temps : il faut la poser à terre, tendre la corde au crochet de ceinture ou au cranequin, placer le carreau. Pendant ce temps, l'arbalétrier est à découvert. D'où le pavois, bouclier rectangulaire haut comme un homme, souvent peint aux armes de la ville, qu'un servant, le pavescheur, porte et plante devant le tireur ; plusieurs pavois côte à côte forment un véritable mur (voir [[cdx_arbalete|arbalète]]).\n\nÀ [[cdx_crecy|Crécy]], le 26 août 1346, les arbalétriers génois au service de [[cdx_philippe_vi|Philippe VI]] sont envoyés au combat au soir d'une longue marche, sans leurs pavois restés dans les chariots à l'arrière : exposés aux flèches des archers anglais, ils sont décimés et refluent. Les milices flamandes, les Génois et plus tard les Hussites de Bohême, qui en font des murailles mobiles derrière leurs chariots, montrent au contraire ce que vaut une ligne de pavois bien tenue.",
+  "gameplay": "Ordre « Dresser les pavois » de la barre « Ordres du chef » : pour les régiments à pavois (arbalétriers, arbalétriers génois et gascons, couleuvriniers), sélectionnés ou, sans sélection, tous ceux qui ne les ont pas déjà dressés. Le régiment s'arrête et plante ses pavois : il ne reçoit plus que 35 % des pertes par les traits. Il peut tirer sur tout ce qui entre à portée, mais ne bouge plus ; le prochain ordre de mouvement, une cible hors de portée, la retraite ou la déroute font lever les pavois. Recharge de 10 secondes, sans besoin du général. L'IA les dresse dès qu'un régiment est sous le tir.\n\nMême sans l'ordre, un régiment à pavois à l'arrêt ne reçoit que 60 % des pertes par les traits ; ces arbalétriers rechargent en 9 secondes au lieu de 6. En résolution automatique, leurs pavois arrêtent 30 % des traits. Conseil : dressez les pavois avant le duel de tir contre des archers anglais, et couvrez les flancs de vos arbalétriers, que les pavois ne protègent pas de la [[cdx_jeu_charge|charge]].",
+  "entity": "order_pavise",
+  "see_also": ["cdx_arbalete", "cdx_jeu_tir", "cdx_crecy", "cdx_hussites", "cdx_arc_long"],
+  "sources": ["Pavois (bouclier)", "Arbalétriers génois", "Bataille de Crécy"]
+}
