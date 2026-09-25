@@ -20,6 +20,8 @@ const DEFAULTS := {
 	"video/fullscreen": false,
 	"video/resolution": Vector2i(1440, 900),
 	"video/vsync": true,
+	# V3 (A1-14) : préréglage de qualité du rendu (low, medium, high, ultra), voir `RenderQuality`.
+	"video/quality": "high",
 	# Lot U4 (audit A3) : échelle automatique (hauteur de la fenêtre / 900, bornée entre 0,9 et
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
 	"interface/ui_size": 1.0,
@@ -77,6 +79,7 @@ func _ready() -> void:
 	apply_display()
 	get_tree().root.size_changed.connect(_apply_ui_scale)
 	get_tree().node_added.connect(_on_node_added)
+	RenderQuality.apply_global(get_tree().root)
 
 
 ## Smoke test : valeurs par défaut, fichier dédié (le fichier du joueur n'est pas touché).
@@ -116,7 +119,10 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 	values[key] = _coerce(key, value)
 	if key == "video/resolution" or key == "video/fullscreen":
 		window_overridden_by_cmdline = false
-	if key.begins_with("video/") or key == "interface/ui_size" or key == "interface/text_size":
+	if key == "video/quality":
+		if is_inside_tree():
+			RenderQuality.reapply(get_tree())
+	elif key.begins_with("video/") or key == "interface/ui_size" or key == "interface/text_size":
 		apply_display()
 	if persist:
 		save_settings()
@@ -134,6 +140,8 @@ func _coerce(key: String, value: Variant) -> Variant:
 			return float(value)
 		TYPE_VECTOR2I:
 			return value if value is Vector2i else default
+		TYPE_STRING:
+			return str(value)
 	return value
 
 
@@ -163,6 +171,7 @@ func save_settings(to_path: String = "") -> Error:
 func reset_to_defaults() -> void:
 	values = DEFAULTS.duplicate()
 	apply_display()
+	RenderQuality.reapply(get_tree())
 	save_settings()
 	for key in DEFAULTS:
 		changed.emit(key)
@@ -298,3 +307,15 @@ func set_sfx_volume(linear: float) -> void:
 	var audio := _audio()
 	if audio != null:
 		audio.call("set_sfx_volume", linear, path == SETTINGS_PATH)
+
+
+## AU1 : volume d'un bus réglable (`AudioBuses.PLAYER_BUSES`).
+func bus_volume(bus_name: String) -> float:
+	var audio := _audio()
+	return float(audio.call("bus_volume", bus_name)) if audio != null else 0.0
+
+
+func set_bus_volume(bus_name: String, linear: float) -> void:
+	var audio := _audio()
+	if audio != null:
+		audio.call("set_bus_volume", bus_name, linear, path == SETTINGS_PATH)

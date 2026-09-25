@@ -31,9 +31,10 @@ fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
         .expect("faction has an army")
 }
 
-/// Destination of the move order of `army`, if any.
+/// Destination of the last move order of `army` (lot M3: one order per
+/// leg of the route), if any.
 fn destination(orders: &[Order], army: &ArmyId) -> Option<SettlementId> {
-    orders.iter().find_map(|o| match o {
+    orders.iter().rev().find_map(|o| match o {
         Order::MoveArmy { army: a, target } if a == army => match target {
             sim_campaign::MoveOrderTarget::Place(Place::Settlement(s)) => Some(s.clone()),
             sim_campaign::MoveOrderTarget::Path(path) => match path.last() {
