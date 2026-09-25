@@ -4,7 +4,7 @@ extends Node
 ## (même fichier que les volumes d'`AudioDirector`, section `audio`, conservée telle quelle).
 ##
 ## Clés « section/nom » ; `get_value` / `set_value` (persisté, signal `changed`). Les réglages
-## d'affichage sont appliqués ici (fenêtre, vsync, échelle d'interface) ; ceux de la carte
+## d'affichage sont appliqués ici (fenêtre, vsync, échelle d'interface, taille du texte) ; ceux de la carte
 ## (caméra, sauvegarde auto, batailles, rapport de saison) sont lus par `FlowController`.
 ## Volumes : délégués à `AudioDirector` (`music_volume` / `sfx_volume`).
 ##
@@ -22,7 +22,10 @@ const DEFAULTS := {
 	"video/vsync": true,
 	# V3 (A1-14) : préréglage de qualité du rendu (low, medium, high, ultra), voir `RenderQuality`.
 	"video/quality": "high",
-	"interface/ui_scale": 1.0,
+	# Lot U4 (audit A3) : échelle automatique (hauteur de la fenêtre / 900, bornée entre 0,9 et
+	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
+	"interface/ui_size": 1.0,
+	"interface/text_size": 1.0,
 	"interface/season_report": true,
 	"interface/confirm_end_turn": false,
 	"camera/edge_pan": true,
@@ -35,6 +38,12 @@ const DEFAULTS := {
 	"tutorial/enabled": true,
 	"tutorial/step": 0,
 	"tutorial/done": false,
+	# BV1/BV2 : sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements) ; taille des unités (figurines
+	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra).
+	"battle/blood": 1,
+	"battle/unit_size": 1.0,
+	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
+	"interface/intro_seen": false,
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).
@@ -42,8 +51,21 @@ const RESOLUTIONS: Array[Vector2i] = [
 	Vector2i(1280, 720), Vector2i(1440, 900), Vector2i(1600, 900), Vector2i(1920, 1080),
 	Vector2i(2560, 1440),
 ]
-const UI_SCALES: Array[float] = [0.8, 0.9, 1.0, 1.1, 1.25, 1.5]
+const UI_SIZES: Array[float] = [0.8, 0.9, 1.0, 1.1, 1.25]
+const TEXT_SIZES: Array[float] = [0.9, 1.0, 1.15, 1.3]
+## Échelle automatique : hauteur de la fenêtre / 900, bornée (lot U4).
+const AUTO_SCALE_REFERENCE_HEIGHT := 900.0
+const AUTO_SCALE_MIN := 0.9
+const AUTO_SCALE_MAX := 1.6
+## Bornes de l'échelle finale (automatique × taille choisie).
+const UI_SCALE_MIN := 0.7
+const UI_SCALE_MAX := 2.0
+## Propriétés de thème de taille de police mises à l'échelle par « Taille du texte ».
+const FONT_SIZE_KEYS := ["font_size", "normal_font_size", "bold_font_size", "italics_font_size", "bold_italics_font_size", "mono_font_size"]
+const PARCHMENT_THEME := "res://scenes/ui/parchment_theme.tres"
 const AUTOSAVE_CHOICES: Array[int] = [0, 1, 2, 4, 8]
+const BLOOD_CHOICES: Array[int] = [0, 1, 2]
+const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5]
 
 var path: String = SETTINGS_PATH
 var values: Dictionary = {}
@@ -63,6 +85,8 @@ func _ready() -> void:
 		)
 	load_settings()
 	apply_display()
+	get_tree().root.size_changed.connect(_apply_ui_scale)
+	get_tree().node_added.connect(_on_node_added)
 	RenderQuality.apply_global(get_tree().root)
 
 
@@ -106,7 +130,7 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 	if key == "video/quality":
 		if is_inside_tree():
 			RenderQuality.reapply(get_tree())
-	elif key.begins_with("video/") or key == "interface/ui_scale":
+	elif key.begins_with("video/") or key == "interface/ui_size" or key == "interface/text_size":
 		apply_display()
 	if persist:
 		save_settings()
@@ -167,7 +191,8 @@ func reset_to_defaults() -> void:
 func apply_display() -> void:
 	if not is_inside_tree():
 		return
-	get_tree().root.content_scale_factor = float(get_value("interface/ui_scale"))
+	_apply_ui_scale()
+	apply_text_size()
 	if not apply_display_enabled:
 		return
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if get_value("video/vsync") else DisplayServer.VSYNC_DISABLED)
@@ -185,6 +210,82 @@ func apply_display() -> void:
 		if DisplayServer.window_get_size() != size:
 			DisplayServer.window_set_size(size)
 			DisplayServer.window_set_position(usable.position + (usable.size - size) / 2)
+
+
+# --- Échelle de l'interface et taille du texte (lot U4) ------------------------------
+
+
+## Échelle automatique pour une fenêtre de `height` pixels : 1 à 900 px, 0,9 au moins, 1,6 au plus.
+static func auto_ui_scale(height: float) -> float:
+	if height < 300.0:
+		return 1.0  # fenêtre factice (headless 64 × 64) : pas d'échelle automatique
+	return clampf(height / AUTO_SCALE_REFERENCE_HEIGHT, AUTO_SCALE_MIN, AUTO_SCALE_MAX)
+
+
+## Échelle appliquée à la fenêtre : automatique × « Taille de l'interface ».
+func effective_ui_scale() -> float:
+	var height := float(get_tree().root.size.y) if is_inside_tree() else AUTO_SCALE_REFERENCE_HEIGHT
+	return clampf(auto_ui_scale(height) * float(get_value("interface/ui_size")), UI_SCALE_MIN, UI_SCALE_MAX)
+
+
+func _apply_ui_scale() -> void:
+	if not is_inside_tree():
+		return
+	var scale := effective_ui_scale()
+	if not is_equal_approx(get_tree().root.content_scale_factor, scale):
+		get_tree().root.content_scale_factor = scale
+
+
+## « Taille du texte » : thème parchemin, thème par défaut et tailles de police posées en code
+## (surcharges `font_size`…) de chaque contrôle, recalculées depuis leur valeur d'origine.
+func apply_text_size() -> void:
+	if not is_inside_tree():
+		return
+	var factor := float(get_value("interface/text_size"))
+	_scale_theme(load(PARCHMENT_THEME) as Theme, factor)
+	_scale_theme(ThemeDB.get_default_theme(), factor)
+	for node in get_tree().root.find_children("*", "Control", true, false):
+		_scale_control_text(node as Control, factor)
+
+
+func _scale_theme(theme: Theme, factor: float) -> void:
+	if theme == null:
+		return
+	if not theme.has_meta("text_base_size"):
+		theme.set_meta("text_base_size", theme.default_font_size if theme.default_font_size > 0 else ThemeDB.fallback_font_size)
+	var size := roundi(int(theme.get_meta("text_base_size")) * factor)
+	if theme.default_font_size != size:
+		theme.default_font_size = size
+
+
+func _on_node_added(node: Node) -> void:
+	if node is Control and not is_equal_approx(float(get_value("interface/text_size")), 1.0):
+		# Les surcharges sont souvent posées juste après l'ajout (dans `_ready`).
+		_scale_control_text.call_deferred(node, float(get_value("interface/text_size")))
+
+
+## Met à l'échelle les surcharges de taille de police de `control` ; la taille d'origine est
+## gardée en méta (`text_base_sizes` : clé → [base, appliquée]) et reprise si le code l'a changée.
+func _scale_control_text(control: Control, factor: float) -> void:
+	if not is_instance_valid(control):
+		return
+	var bases: Dictionary = control.get_meta("text_base_sizes", {})
+	var changed_any := false
+	for key: String in FONT_SIZE_KEYS:
+		if not control.has_theme_font_size_override(key):
+			continue
+		var current := control.get_theme_font_size(key)
+		var entry: Array = bases.get(key, [])
+		if entry.is_empty() or int(entry[1]) != current:
+			entry = [current, current]  # nouvelle valeur posée par le code : c'est la base
+		var target := maxi(6, roundi(int(entry[0]) * factor))
+		if target != current:
+			control.add_theme_font_size_override(key, target)
+		entry[1] = target
+		bases[key] = entry
+		changed_any = true
+	if changed_any:
+		control.set_meta("text_base_sizes", bases)
 
 
 # --- Volumes (AudioDirector) --------------------------------------------------------

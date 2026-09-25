@@ -96,8 +96,9 @@ impl BattleSim {
 
     /// SG1: how many of `unit`'s first soldiers are drawn on its ladders or
     /// on the bridge of a docked tower (the renderer animates them climbing).
-    pub fn climbers_shown(&self, unit: &Unit) -> usize {
-        let n = unit.soldiers() as usize;
+    /// `scale` = figures per soldier (BV1, [`Unit::figure_count`]).
+    pub fn climbers_shown(&self, unit: &Unit, scale: f64) -> usize {
+        let n = unit.figure_count(scale) as usize;
         match (unit.climbing, &self.siege) {
             (Some(p), Some(works)) if works.pieces[p].docked_tower.is_some() => {
                 n.min(BRIDGE_CROSSERS)
@@ -115,8 +116,10 @@ impl BattleSim {
     /// going up the ladders (or across the tower bridge) man after man, a
     /// growing share of the rest already fighting on the wall walk, the
     /// others pressed at the foot of the wall.
-    pub fn soldier_poses(&self, unit: &Unit) -> Vec<[f64; 4]> {
-        let positions = unit.soldier_positions();
+    /// `scale` = figures per soldier (BV1): one pose per figure of
+    /// [`Unit::figure_positions`].
+    pub fn soldier_poses(&self, unit: &Unit, scale: f64) -> Vec<[f64; 4]> {
+        let positions = unit.figure_positions(scale);
         let (Some(piece), Some(works)) = (unit.climbing, &self.siege) else {
             return positions
                 .iter()
@@ -128,7 +131,7 @@ impl BattleSim {
         let (nx, nz) = p.outward();
         let facing = (-nx).atan2(-nz);
         let progress = unit.climb_progress.clamp(0.0, 1.0);
-        let shown = self.climbers_shown(unit);
+        let shown = self.climbers_shown(unit, scale).min(positions.len());
         let ladders = self.ladders(unit);
         // Where a climber comes out on top: the ladder heads, else the bridge.
         let mut heads: Vec<(f64, f64, f64)> = ladders

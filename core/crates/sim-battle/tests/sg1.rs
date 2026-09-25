@@ -199,8 +199,8 @@ fn ladders_are_raised_then_the_wall_walk_is_gained() {
         ladders.windows(2).all(|w| w[0].foot != w[1].foot),
         "ladders side by side"
     );
-    let shown = sim.climbers_shown(unit);
-    let poses = sim.soldier_poses(unit);
+    let shown = sim.climbers_shown(unit, 1.0);
+    let poses = sim.soldier_poses(unit, 1.0);
     assert_eq!(poses.len(), unit.soldiers() as usize);
     let ground = sim.field().height(mx, mz);
     let on_rungs = poses[..shown]
@@ -213,6 +213,10 @@ fn ladders_are_raised_then_the_wall_walk_is_gained() {
         .filter(|p| p[1] > ground + works.wall_height - 0.5)
         .count();
     assert!(on_top > 0 && on_top < poses.len() - shown);
+    // BV1: with fewer figures than soldiers, one pose per figure.
+    let half = sim.soldier_poses(unit, 0.5);
+    assert_eq!(half.len(), unit.figure_count(0.5) as usize);
+    assert!(sim.climbers_shown(unit, 0.5) <= half.len());
     run(&mut sim, 60.0);
     let fx = sim.siege_fx();
     let raised = fx
