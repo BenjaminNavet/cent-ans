@@ -21,4 +21,4 @@ Branche `worktree-agent-a69d4c733574b0ae3`. Rapport : `docs/audit/q1-recette.md`
 - 8 correctifs commités (voir le rapport), 14 défauts restants priorisés.
 
 ## Prochaine étape
-Fusion de main, build, import, smoke, rapport final.
+Fait : main fusionné (0c082a82, conflits UI3 résolus), cargo fmt/clippy/test (518), build, import, smoke (24 OK), partie rejouée après fusion (menu MM1 pris en charge par le pilote). Reste : les défauts P1-P3 du rapport, à répartir.

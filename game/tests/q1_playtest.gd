@@ -39,9 +39,22 @@ func _run() -> void:
 	await shot("menu")
 	var menu: Node = current_scene
 	# Carte de faction : clic sur le bouton « Choisir » de la faction voulue.
-	var card_button: Button = menu.get("_card_buttons").get(faction)
-	await click(card_button)
-	await wait(10)
+	var select: Node = menu.get("faction_select")
+	if select != null:
+		# MM1 : « Nouvelle partie » → cartes de faction (clic sur la carte) → « Commencer ».
+		await click(menu.get("new_game_button"))
+		await wait(40)
+		await shot("menu-factions")
+		var cards: Dictionary = select.get("_cards")
+		if cards.has(faction):
+			await click(cards[faction])
+		else:
+			select.call("select", faction)
+		await wait(20)
+	else:
+		await click(menu.get("_card_buttons").get(faction))
+		await wait(10)
+	log_q1("selected faction: %s" % menu.get("selected_faction"))
 	await shot("menu-faction")
 	await click(menu.get("start_button"))
 	var t0 := Time.get_ticks_msec()
@@ -219,7 +232,15 @@ func phase_panels() -> void:
 	await key(KEY_C)
 	await wait(15)
 	var court: Control = map.ui.court_panel
-	await click(find_button(court, "Voir"))
+	var voir := find_button(court, "Voir")
+	if voir != null:
+		await click(voir)
+	else:
+		# UI3 : la ligne entière est cliquable (chevron « › »).
+		for label in court.find_children("*", "Label", true, false):
+			if (label as Control).is_visible_in_tree() and (label as Label).text.contains(" ans — "):
+				await click(label)
+				break
 	await wait(20)
 	await shot("character-sheet")
 	await key(KEY_ESCAPE)
