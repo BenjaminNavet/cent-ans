@@ -559,7 +559,7 @@ def _write_tile(map_dir: Path, key: TileKey, heights_m: np.ndarray) -> int:
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_name(f".{path.stem}.part")
     encoded = np.ascontiguousarray(terrain.height_to_uint16(heights_m))
-    Image.fromarray(encoded, mode="I;16").save(partial, format="PNG", compress_level=9)
+    Image.fromarray(encoded).save(partial, format="PNG", compress_level=9)
     os.replace(partial, path)
     return path.stat().st_size
 
