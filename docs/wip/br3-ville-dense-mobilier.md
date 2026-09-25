@@ -89,6 +89,10 @@ Guyenne, `--no-speech`).
   `BuildingKit.prop_model/prop_transform`, `add_front_prop` supprimé), captures.
 - [x] ADR 0047, codex (`cdx_jeu_incendies`, `cdx_jeu_assaut`), `br1-batiments.md`, fusion de main.
 
+## Vérifications
+
+cargo fmt/clippy -D warnings/test (634 tests, espace de travail, après fusion de main) ; pytest 478 ; smoke Godot : parties bataille/siège vertes ; le smoke complet échoue comme sur main (« Message queue out of memory » pendant la campagne, contourné localement par un override.cfg non commité ; puis « music playlist too short », musiques absentes du dépôt).
+
 ## Limites
 
 - Paris : taux de victoire de l'assaillant divisé par deux (voir plus haut).
