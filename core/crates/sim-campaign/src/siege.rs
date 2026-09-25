@@ -416,7 +416,8 @@ fn storm(state: &mut CampaignState, data: &GameData, army: &ArmyId, events: &mut
             .is_some_and(|a| a.faction == state.player_faction)
     });
     let player_involved = player_ally || controller == state.player_faction;
-    if state.interactive_battles && player_involved {
+    // Lot M3: an assault during an AI faction's turn is auto-resolved.
+    if state.interactive_battles && player_involved && state.ai_turn.is_none() {
         let already = state
             .pending_battles
             .iter()
