@@ -24,6 +24,9 @@ extends Node3D
 ## `--no-pyramid`), comportement inchangé.
 
 signal chunk_surface_changed(index: int)
+## Lot ZG2 : rectangle carte dont la surface a changé (page de la pyramide arrivée ou évincée),
+## émis à chaque page, sans regroupement : pour les recalages fins (lot ZG5).
+signal surface_rect_changed(rect: Rect2)
 
 const CHUNKS := 16
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
@@ -111,6 +114,8 @@ var pyramid: ReliefPyramid
 var quadtree: ReliefQuadtree
 ## Morceaux dont la surface a changé (page arrivée ou évincée), signalés par paquets.
 var _surface_dirty: Dictionary = {}
+## Étage de page le plus fin au dernier signal de chaque morceau (recalage seulement s'il change).
+var _emitted_top: PackedInt32Array = PackedInt32Array()
 var _surface_flush_ms: int = 0
 
 
@@ -363,7 +368,7 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 			if chunk.mesh != entry["mesh"]:
 				chunk.mesh = entry["mesh"]
 				_is_near[i] = 2
-				chunk_surface_changed.emit(i)
+				_emit_level_change(i)
 			continue
 		var center := chunk.position + Vector3(half, 0.0, half)
 		var is_near := camera_position.distance_to(center) < near_distance or wanted_fine.has(i)
@@ -377,11 +382,11 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 				builds += 1
 			chunk.mesh = _near_meshes[i]
 			_is_near[i] = 1
-			chunk_surface_changed.emit(i)
+			_emit_level_change(i)
 		elif not is_near and _is_near[i] != 0:
 			chunk.mesh = _far_meshes[i]
 			_is_near[i] = 0
-			chunk_surface_changed.emit(i)
+			_emit_level_change(i)
 	for index in wanted_fine:
 		if _fine_jobs.has(index) or _fine_jobs.size() >= max_fine_jobs:
 			continue
@@ -496,6 +501,8 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 		if _is_near[i] != level:
 			_is_near[i] = level
 			_surface_dirty.erase(i)
+			if _emitted_top.size() == CHUNKS * CHUNKS:
+				_emitted_top[i] = quadtree.chunk_top(i)
 			var t_emit := Time.get_ticks_usec()
 			chunk_surface_changed.emit(i)
 			_note_emit(t_emit, 1)
@@ -510,11 +517,17 @@ func _on_quadtree_surface_changed(rect: Rect2) -> void:
 	var c1 := clampi(int(floor(rect.end.x / chunk_px)), 0, CHUNKS - 1)
 	var r1 := clampi(int(floor(rect.end.y / chunk_px)), 0, CHUNKS - 1)
 	# Morceaux lointains ignorés : leurs objets sont recalés quand ils passent au niveau proche
-	# (signal de changement de niveau), pas à chaque page qui arrive.
+	# (signal de changement de niveau). Ailleurs, un recalage seulement quand l'étage le plus fin
+	# chargé du morceau change (E1 → E2 → …), pas à chaque tuile du même étage.
+	surface_rect_changed.emit(rect)
+	if _emitted_top.size() != CHUNKS * CHUNKS:
+		_emitted_top.resize(CHUNKS * CHUNKS)
+		_emitted_top.fill(-1)
 	for r in range(r0, r1 + 1):
 		for c in range(c0, c1 + 1):
-			if _is_near[r * CHUNKS + c] >= 1:
-				_surface_dirty[r * CHUNKS + c] = true
+			var index := r * CHUNKS + c
+			if _is_near[index] >= 1 and quadtree.chunk_top(index) != _emitted_top[index]:
+				_surface_dirty[index] = true
 
 
 ## Signale les morceaux dont la surface a changé (pages), au plus `max_surface_emits_per_flush`
@@ -532,10 +545,19 @@ func _flush_surface_dirty(force: bool) -> void:
 		dirty = dirty.slice(0, max_surface_emits_per_flush)
 	for index: int in dirty:
 		_surface_dirty.erase(index)
+		_emitted_top[index] = quadtree.chunk_top(index)
 	var t0 := Time.get_ticks_usec()
 	for index: int in dirty:
 		chunk_surface_changed.emit(index)
 	_note_emit(t0, dirty.size())
+	build_stats["surface_page_emits"] = int(build_stats.get("surface_page_emits", 0)) + dirty.size()
+
+
+## Changement de niveau d'un morceau (repli sans cache), mesuré comme les autres signaux.
+func _emit_level_change(index: int) -> void:
+	var t0 := Time.get_ticks_usec()
+	chunk_surface_changed.emit(index)
+	_note_emit(t0, 1)
 
 
 ## Mesure du coût des recalages déclenchés par `chunk_surface_changed` (écouteurs synchrones).

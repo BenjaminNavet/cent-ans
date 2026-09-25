@@ -32,10 +32,12 @@ mod campaign_sim_vision;
 mod campaign_sim_weather;
 mod convert;
 mod naval_sim;
+mod relief_decoder;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
 pub use naval_sim::NavalBattleSim;
+pub use relief_decoder::ReliefDecoder;
 
 struct CentAnsExtension;
 
