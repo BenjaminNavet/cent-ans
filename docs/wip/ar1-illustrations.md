@@ -19,7 +19,7 @@ Branche : `worktree-agent-aaa4cf9bc2224eea2`.
 |---|---|
 | Recherche domaine public (Commons : Froissart BnF fr. 2643, BL Royal 18 E I, Vigiles de Charles VII…) | fait |
 | Données, schéma, outil, 27 planches Commons | fait |
-| Génération des 4 manques (Avignon, famine, trésor, commerce) | à faire |
+| Génération des 4 manques (Avignon, famine, trésor, commerce) : 0,19 $ réels | fait |
 | Intégration Godot (chargement bataille/siège/naval, vignettes, fins) | à faire |
 | Tests pytest, CREDITS.md, captures | à faire |
 
