@@ -160,7 +160,7 @@ func _stamp_disc(center: Vector2, radius: float, r_value: int, g_value: int) -> 
 	for iz in range(maxi(int(c.y - rr), 0), mini(int(c.y + rr) + 1, _h)):
 		for ix in range(maxi(int(c.x - rr), 0), mini(int(c.x + rr) + 1, _w)):
 			var d := (Vector2(ix, iz) + Vector2(0.5, 0.5) - c).length() * TEXEL
-			var k := 1.0 - smoothstep(radius * 0.5, radius + TEXEL * 0.5, d)
+			var k := 1.0 - smoothstep(radius * 0.8, radius + TEXEL * 0.5, d)
 			if k <= 0.0:
 				continue
 			var i := (iz * _w + ix) * 2
