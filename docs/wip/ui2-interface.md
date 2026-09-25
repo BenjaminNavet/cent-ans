@@ -25,8 +25,10 @@ Propriétaire exclusif de `game/scripts/map/map_ui.gd` pendant le lot. Ne pas to
   les thèmes et les surcharges de police), `settings_menu.gd`, thème parchemin en EB Garamond
   (Georgia / Palatino retirées). Smoke : étape `_run_ui_layout` (4 résolutions, seule avec
   `CENT_ANS_SMOKE_ONLY=ui_layout`) ; captures : `game/tests/ui_resolutions.sh`.
-- [ ] U5 fin de tour utile (optionnel)
-- [ ] U7 barre du haut et raccourcis (optionnel)
+- [ ] U5 fin de tour utile (non traité, faute de temps)
+- [~] U7 partiel : F5 sauvegarde rapide, F9 chargement rapide (`map_ui.gd::_shortcut_input`), aide F1 à jour. Reste : libellés des boutons, bouton Agents, onglet Commandes.
 
 ## Prochaine étape
-Vérifications finales (cargo, build, import, smoke) puis U5 / U7 si le temps le permet.
+Terminé et fusionné avec main (0138e56e) : cargo fmt / clippy / test verts, build, import, smoke
+24 « smoke OK » (sortie 0), `tests/ui_panel_stack_test.gd` OK. Suite possible : U5, reste de U7,
+Codex et encyclopédie (calques à part) dans la pile des panneaux.
