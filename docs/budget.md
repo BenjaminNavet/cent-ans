@@ -31,6 +31,7 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 |---|---|---|---|---|---|
 | 2026-09-25 | OpenRouter | UR1 : illustrations des 14 nouveaux types d'unités (14 × openai/gpt-5-image-mini, script hors registre automatique car le parseur de `budget.py` ne lit pas la table de session 7) | 0,64 $ | 0,64 $ | 0,64 $ |
 | 2026-09-25 | OpenAI | VO1 : voix (294 clips gpt-4o-mini-tts : 120 répliques, 21 interventions du conseiller, 153 phrases et cris de discours ; `--dry-run` de `tools/cent_ans_tools/voice_tts.py`, plafond du lot 3 $). Sonde d'un clip refusée : HTTP 401, clé `OPENAI_API_KEY` invalide ; rien généré, rien facturé | 0,37 $ | 0,00 $ | 0,64 $ |
+| 2026-09-25 | OpenRouter | VO1 : voix synthétiques, 294 clips openai/gpt-audio-mini (120 répliques, 21 interventions du conseiller, 153 phrases et cris de discours), contrôle mot pour mot (transcription et durée) avec reprises ; coût réel = somme de usage.cost des passes (0,194 + 0,027 + 0,006 + 0,007 + sondes 0,004) | 0,36 $ | 0,24 $ | 0,88 $ |
 
 ## Batailles épiques (25/09) — plafond propre de 20 $
 

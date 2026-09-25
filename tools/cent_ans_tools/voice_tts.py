@@ -278,12 +278,28 @@ def _words(text: str) -> list[str]:
 
 
 def transcript_matches(text: str, transcript: str) -> bool:
-    """The model's transcript says the text (most words, nothing much added)."""
+    """The model's transcript says the text (most words, nothing much added).
+
+    Stage directions or tags in the transcript (``(pause)``, ``*roar*``, ``</texte>``)
+    may have been spoken aloud: rejected too.
+    """
+    if any(mark in transcript for mark in "<>*[]()"):
+        return False
     expected, said = _words(text), _words(transcript)
     if not expected:
         return True
     common = sum(1 for word in expected if word in said)
-    return common >= 0.6 * len(expected) and len(said) <= 1.6 * len(expected) + 3
+    return common >= 0.6 * len(expected) and len(said) <= 1.3 * len(expected) + 2
+
+
+def forget(job: Job) -> None:
+    """Drop a clip (output, cached OpenRouter answer, manifest entry) to redo it."""
+    key = job.cache_key(OPENROUTER_MODEL)
+    for path in (job.output, CACHE_DIR / f"{key}.wav", CACHE_DIR / f"{key}.json"):
+        path.unlink(missing_ok=True)
+    manifest = load_manifest()
+    if manifest.pop(f"{job.path}.ogg", None) is not None:
+        save_manifest(manifest)
 
 
 def _write_wav(path: Path, pcm: bytes) -> None:
@@ -497,6 +513,9 @@ def main(argv: list[str] | None = None) -> int:
         "--backend", choices=["openrouter", "openai"], default="openrouter"
     )
     parser.add_argument(
+        "--recheck", action="store_true", help="redo clips failing the transcript check"
+    )
+    parser.add_argument(
         "--attempts", type=int, default=2, help="tries per clip (OpenRouter checks)"
     )
     parser.add_argument(
@@ -504,6 +523,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    if args.recheck:
+        # Redo generated clips whose recorded transcript fails today's checks.
+        manifest = load_manifest()
+        for job in all_jobs():
+            entry = manifest.get(f"{job.path}.ogg")
+            if entry and not transcript_matches(job.text, entry.get("transcript", "")):
+                print(f"recheck: redo {job.path} (said {entry.get('transcript')!r})")
+                if not args.dry_run:
+                    forget(job)
     jobs = pending(all_jobs())
     if args.only:
         jobs = [job for job in jobs if job.kind in args.only]
