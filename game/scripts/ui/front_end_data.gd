@@ -14,6 +14,9 @@ static var _data: Dictionary = {}
 static func data() -> Dictionary:
 	if _data.is_empty():
 		var path := _data_dir().path_join(DATA_PATH)
+		# Jeux de données réduits (fixtures des tests) : textes d'accueil du jeu complet.
+		if not FileAccess.file_exists(path):
+			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(DATA_PATH)
 		if FileAccess.file_exists(path):
 			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 			if parsed is Dictionary:
