@@ -56,6 +56,7 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
     setup.siege_layout =
         town.map(|id| SiegeLayout::from_landmark(&data.landmarks[id]).expect("siege.battle"));
     let mut sim = BattleSim::new(setup, seed).unwrap();
+    tune_fire(&mut sim);
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
     if sim.is_deploying() {
@@ -72,6 +73,15 @@ fn assault(data: &GameData, town: Option<&str>, seed: u64, limit_s: f64) -> Outc
             .sum::<f64>()
     };
     let works = sim.siege().unwrap();
+    if std::env::var("BR3_VERBOSE").is_ok() {
+        println!(
+            "{town:?} seed {seed}: winner {:?} at {:.0} s, openings {}, hold {:.0}",
+            sim.winner(),
+            sim.elapsed(),
+            works.openings().len(),
+            works.hold_time
+        );
+    }
     Outcome {
         attacker_won: sim.winner() == Some(SideId::Attacker),
         ended: sim.elapsed(),
@@ -119,6 +129,24 @@ fn probe_town_assaults() {
             runs.iter().map(|r| r.burnt as f64).sum::<f64>() / n,
         );
     }
+}
+
+/// Tuning sweeps: `FIRE_CHANCE`, `FIRE_REACH` override the spread.
+fn tune_fire(sim: &mut BattleSim) {
+    let mut rules = sim.fire_rules().unwrap().clone();
+    if let Some(v) = std::env::var("FIRE_CHANCE")
+        .ok()
+        .and_then(|s| s.parse().ok())
+    {
+        rules.spread.chance_per_period = v;
+    }
+    if let Some(v) = std::env::var("FIRE_REACH")
+        .ok()
+        .and_then(|s| s.parse().ok())
+    {
+        rules.spread.edge_distance_m = v;
+    }
+    sim.set_fire_rules(Some(rules));
 }
 
 /// Houses caught by the fire 10 minutes after the house nearest the square

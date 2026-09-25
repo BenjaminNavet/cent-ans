@@ -90,9 +90,24 @@ func _siege_shots(scene: Node, battle: Object) -> void:
 	scene.camera_rig.look_at_point(focus, 45.0, 1.0)
 	await _wait(2.0)
 	await _shot(_prefix + "-marche.png")
-	scene.camera_rig.look_at_point(focus + Vector3(-70, 0, 40), 35.0, 0.6)
+	scene.camera_rig.look_at_point(focus + Vector3(-60, 0, 30), 80.0, 0.9)
 	await _wait(2.0)
 	await _shot(_prefix + "-ilots.png")
+	# BR3 : l'assaut en cours (deux IA), figurines dans les rues étroites, hors des maisons.
+	if bool(battle.call("is_deploying")):
+		battle.call("start_battle")
+	battle.call("set_ai", "attacker", true)
+	battle.call("set_ai", "defender", true)
+	for _i in 150:
+		battle.call("tick", 0.5)
+		await process_frame
+	var gate: Dictionary = (battle.call("get_siege") as Dictionary)["pieces"][int(siege.get("gate", 0))]
+	var g: Vector2 = ((gate["a"] as Vector2) + (gate["b"] as Vector2)) * 0.5
+	var inward := (center - g).normalized()
+	var spot := g + inward * 60.0
+	scene.camera_rig.look_at_point(Vector3(spot.x, 0, spot.y), 70.0, 0.8)
+	await _wait(2.5)
+	await _shot(_prefix + "-assaut.png")
 
 
 func _wait(seconds: float) -> void:
