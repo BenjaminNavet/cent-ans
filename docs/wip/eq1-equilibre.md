@@ -3,7 +3,7 @@
 Branche : `worktree-agent-a6c791c0cae04ee1a` (C4 + C5 + DP1 + main fusionnés). ADR :
 `docs/decisions/0029-revoltes-et-couts-d-evenements.md`.
 
-## État : terminé (checks verts, main fusionné). Prochaine étape : fusion par l'orchestrateur.
+## État : terminé, main fusionné (cb553f64) ; fmt, clippy, 611 tests, build.sh, import, smoke (26 OK), pytest 419 verts. Prochaine étape : fusion par l’orchestrateur.
 
 ## Avant / après
 
