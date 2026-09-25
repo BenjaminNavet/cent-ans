@@ -4,6 +4,7 @@
 [ext_resource type="Theme" path="res://scenes/ui/parchment_theme.tres" id="2_theme"]
 
 [node name="CourtPanel" type="PanelContainer"]
+theme_type_variation = &"IlluminatedPanel"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 0)
 anchors_preset = 9

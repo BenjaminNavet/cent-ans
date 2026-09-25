@@ -129,16 +129,8 @@ static var last_bbcode: String = ""
 
 
 ## Style parchemin commun aux infobulles et aux bulles du Codex.
-static func panel_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.96, 0.91, 0.78, 0.98)
-	style.border_color = Color(0.42, 0.29, 0.16)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(8)
-	style.shadow_color = Color(0, 0, 0, 0.3)
-	style.shadow_size = 4
-	return style
+static func panel_style() -> StyleBox:
+	return HudStyle.note_box(6)
 
 
 ## Contrôle d'infobulle : panneau parchemin + texte BBCode (largeur fixe, hauteur ajustée).
