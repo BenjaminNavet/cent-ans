@@ -68,6 +68,13 @@ var _declutter_timer := 0.0
 var _weights := Vector3(-1, -1, -1)  # près, moyen, loin
 var _camera_distance := 0.0
 var _regrounded: Dictionary = {}
+## ZG6 : villes ordinaires à l'échelle réelle (paliers vallée et site), voir `TownLayer`.
+var towns: TownLayer
+var _towns_version := -1
+## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
+## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
+var _anchor_px: Dictionary = {}
+var _hamlet_anchors: PackedVector4Array = PackedVector4Array()
 
 
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
@@ -115,6 +122,7 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 		_register(_hamlets_by_chunk, terrain.chunk_index_at(hpx.x, hpx.y), i)
 	_build_icons()
 	_build_selection_ring()
+	_setup_towns()
 	if not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 	stats = {"settlements": count, "hamlets": data.hamlets.size(), "models": _models.filter(func(m: Variant) -> bool: return m != null).size()}
@@ -270,7 +278,7 @@ func _ground_model(i: int) -> void:
 	var holder: Node3D = _models[i]
 	if holder == null or _landmarks.has(i):
 		return
-	var px: Vector2 = data.settlements[i]["px"]
+	var px := model_px(i)
 	var radius := _model_radius[i] * 0.7
 	var low := terrain.surface_height_at(px.x, px.y)
 	for k in 8:
@@ -408,7 +416,7 @@ func update_view(camera_distance: float) -> void:
 		_site_hidden = site
 		_icon_material.set_shader_parameter("alpha", weights.y)
 		_icons.visible = weights.y > 0.01
-		_models_root.visible = weights.x > 0.35 and not site
+		_models_root.visible = weights.x > 0.35 and not site and not _towns_active()
 		_hamlets_root.visible = weights.x > 0.35 and not site
 		_landmarks_root.visible = not site
 		_update_label_heights()
@@ -416,6 +424,7 @@ func update_view(camera_distance: float) -> void:
 	if _labels_dirty:
 		_labels_dirty = false
 		_update_label_heights()
+	_update_towns(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
@@ -440,11 +449,18 @@ func _update_label_heights() -> void:
 		var label := _labels[i]
 		var px: Vector2 = data.settlements[i]["px"]
 		if near and _models[i] != null:
-			label.position.y = _model_base_y(i) + _model_top[i] + 0.8
+			if not _landmarks.has(i):
+				var model_at := model_px(i)  # ZG5b : au-dessus de la maquette ancrée
+				label.position.x = model_at.x
+				label.position.z = model_at.y
+			if _towns_active() and not _landmarks.has(i):
+				label.position.y = _model_base_y(i) + 0.12  # ZG6 : ville 1:1, pas de maquette
+			else:
+				label.position.y = _model_base_y(i) + _model_top[i] + 0.8
 			label.offset = Vector2.ZERO
 		else:
 			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
-			label.position.y = map_data.surface_world_at(px.x, px.y) + 0.5
+			label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
 			label.offset = Vector2(0.0, icon_size_px * 0.9 + label.font_size * 0.5)
 
 
@@ -560,6 +576,9 @@ func flush() -> void:
 	max_hamlet_builds_per_frame = saved
 	for landmark: LandmarkModel in _landmarks.values():  # ZG4 : cuissons étalées terminées
 		landmark.flush_bake()
+	if towns != null:  # ZG6 : villes 1:1 autour de la caméra
+		towns.flush()
+		_update_towns(_camera_distance)
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -592,6 +611,7 @@ func _build_hamlets(index: int) -> void:
 		if not _landmarks.is_empty() and covered_by_landmark(px):
 			continue
 		var seed_value := _hash(str(hamlet["name"]) + str(px))
+		px = hamlet_px(h)  # ZG5b : ancrage fin (tirages inchangés)
 		var variant := seed_value % meshes.size()
 		var devastation: float = _devastation.get(hamlet["province"], 0.0)
 		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
@@ -707,6 +727,41 @@ func world_position_of(id: String) -> Vector3:
 	return Vector3(px.x, terrain.surface_height_at(px.x, px.y), px.y)
 
 
+## Lot ZG5b : position de rendu de la maquette `i` (ancrage fin, sinon position de règle).
+func model_px(i: int) -> Vector2:
+	return _anchor_px.get(i, data.settlements[i]["px"])
+
+
+## Lot ZG5b : position de rendu du hameau `h` (ancrage fin, sinon `hamlets.json`).
+func hamlet_px(h: int) -> Vector2:
+	if h < _hamlet_anchors.size():
+		var a := _hamlet_anchors[h]
+		return Vector2(a.x, a.y)
+	return data.hamlets[h]["px"]
+
+
+## Lot ZG5b : maquettes (hors villes emblématiques) et hameaux posés aux ancrages fins de
+## `fine_anchors.json` (déplacés de ≤ 300 m hors des lits et des pentes fortes), puis recalés
+## sur la surface affichée. Icônes, étiquettes du palier moyen, picking et règles gardent les
+## positions de `data`.
+func apply_fine_anchors(store: FineGeoStore) -> void:
+	_anchor_px.clear()
+	for i in data.settlements.size():
+		var id := str(data.settlements[i]["id"])
+		if _landmarks.has(i) or not store.settlements.has(id) or _models[i] == null:
+			continue
+		var p: Vector2 = store.settlements[id]["px"]
+		_anchor_px[i] = p
+		var holder := _models[i] as Node3D
+		holder.position.x = p.x
+		holder.position.z = p.y
+		_ground_model(i)
+	_hamlet_anchors = store.hamlets if store.hamlets.size() == data.hamlets.size() else PackedVector4Array()
+	for index in _hamlet_nodes:
+		_hamlet_dirty[index] = true
+	_update_label_heights()
+
+
 ## Cercles d'exclusion de la végétation (x, y, rayon en px carte) : colonies et hameaux.
 func vegetation_exclusions() -> PackedVector3Array:
 	var result := PackedVector3Array()
@@ -780,3 +835,35 @@ func override_devastation(values: Dictionary) -> void:
 		_devastation[province_id] = float(values[province_id])
 	for index in _hamlet_nodes:
 		_hamlet_dirty[index] = true
+
+
+# --- Lot ZG6 : villes ordinaires à l'échelle réelle ------------------------------------------
+
+
+func _setup_towns() -> void:
+	towns = TownLayer.new()
+	add_child(towns)
+	var ids: Array = []
+	for entry in data.settlements:
+		ids.append(entry["id"])
+	towns.setup(map_data, terrain, tiers, ids)
+
+
+## Rendu 1:1 aux paliers vallée / site. Tant qu'il est actif, les maquettes à la loupe des
+## colonies ordinaires sont masquées (au loin, une ville vraie de 1340 n'est qu'une tache : les
+## maquettes géantes à l'horizon disparaissent) ; les villes emblématiques restent au lot VH.
+func _update_towns(camera_distance: float) -> void:
+	if towns == null:
+		return
+	var was_active := towns.active
+	towns.update_view(camera_distance)
+	if towns.version == _towns_version:
+		return
+	_towns_version = towns.version
+	if was_active != towns.active:
+		_models_root.visible = _weights.x > 0.35 and not _site_hidden and not towns.active
+		_update_label_heights()
+
+
+func _towns_active() -> bool:
+	return towns != null and towns.active

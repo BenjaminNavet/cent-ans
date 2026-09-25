@@ -9,6 +9,14 @@ uniform vec3 dirt_color : source_color = vec3(0.47, 0.38, 0.25);
 uniform vec3 rut_color : source_color = vec3(0.34, 0.26, 0.16);
 uniform vec3 grass_edge : source_color = vec3(0.30, 0.31, 0.16);
 uniform float alpha = 1.0;
+// Lot ZG5b : disque où les routes drapées fines prennent le relais (centre x, z ; rayon ; poids).
+uniform vec4 fine_zone = vec4(0.0, 0.0, -1.0, 0.0);
+
+varying vec2 v_xz;
+
+void vertex() {
+	v_xz = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
+}
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -31,5 +39,6 @@ void fragment() {
 	ALBEDO = col;
 	ROUGHNESS = 1.0;
 	float edge = 1.0 - smoothstep(0.7, 1.0, side + (n - 0.5) * 0.25);
-	ALPHA = edge * alpha;
+	float fine = fine_zone.z > 0.0 ? fine_zone.w * (1.0 - smoothstep(fine_zone.z * 0.85, fine_zone.z, distance(v_xz, fine_zone.xy))) : 0.0;
+	ALPHA = edge * alpha * (1.0 - fine);
 }

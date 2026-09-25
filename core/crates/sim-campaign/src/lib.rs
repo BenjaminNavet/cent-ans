@@ -49,6 +49,7 @@ pub mod economy_balance;
 pub mod edicts;
 pub mod events;
 pub mod frontier;
+pub mod map_lens;
 pub mod march;
 pub mod medicine;
 pub mod movement;
@@ -56,6 +57,7 @@ pub mod naval;
 pub mod navigation;
 pub mod negotiation;
 pub mod orders;
+pub mod passage;
 pub mod path_plan;
 pub mod population;
 pub mod ransom;
@@ -68,9 +70,11 @@ pub mod settlements;
 pub mod setup_1337;
 pub mod siege;
 pub mod skills;
+pub mod stance;
 pub mod state;
 pub mod table;
 pub mod trade;
+pub mod treaty_explain;
 pub mod turn;
 pub mod victory;
 pub mod vision;
@@ -115,8 +119,9 @@ pub use save::{CampaignError, FREE_MOVEMENT_STATE_VERSION, SETTLEMENTS_STATE_VER
 pub use skills::LearnSkillError;
 pub use state::{
     Army, ArmyId, ArmyPosition, BattleRequest, CampaignState, CharacterState, Construction,
-    FactionState, FactionSummary, MoveTarget, ProvinceState, Season, SettlementState, SiegeState,
-    Stance, Unit, MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION, TURNS_PER_YEAR,
+    FactionState, FactionSummary, MoveTarget, ProvinceState, QueuedRecruit, Season,
+    SettlementState, SiegeState, Stance, Unit, MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION,
+    TURNS_PER_YEAR,
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};

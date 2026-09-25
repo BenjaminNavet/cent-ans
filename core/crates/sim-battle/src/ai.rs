@@ -827,7 +827,7 @@ fn crossing_plan(view: &View, from: (f64, f64), line: &[usize]) -> Option<Crossi
         .iter()
         .map(|&i| view.units[i].extent().0)
         .fold(20.0, f64::max);
-    let weather = view.sim.weather().range_factor();
+    let weather = view.sim.range_factor();
     let foes: Vec<(f64, f64, f64)> = able
         .iter()
         .filter(|&&k| is_shooter(&view.units[k]))
@@ -1357,7 +1357,13 @@ fn plan_field(view: &mut View) {
         if !view.free(i) {
             continue;
         }
-        let target = view.nearest_enemy(i, |e| e.state != UnitState::Routing);
+        // ADR 0052: archers out of arrows fall only on horsemen already held
+        // in a melee (Agincourt); they do not walk alone into fresh knights.
+        let spent_archers = view.units[i].category == UnitCategory::Ranged;
+        let target = view.nearest_enemy(i, |e| {
+            e.state != UnitState::Routing
+                && !(spent_archers && is_horse(e) && e.state != UnitState::Melee)
+        });
         // R2b: a regiment well ahead of the line waits for it rather than
         // arriving alone under the enemy arrows (fast archers out of
         // arrows outpace the men-at-arms).
@@ -1781,7 +1787,7 @@ const EXPOSURE_COST: f64 = 60.0;
 fn firing_spot(view: &View, i: usize, j: usize, limit: f64) -> Option<(f64, f64)> {
     let field = view.sim.field();
     let (u, t) = (&view.units[i], &view.units[j]);
-    let weather = view.sim.weather().range_factor();
+    let weather = view.sim.range_factor();
     let reach = f64::from(u.stats.range) * weather;
     let ht = field.height(t.x, t.z);
     let foes: Vec<(f64, f64, f64, f64)> = view
@@ -2396,7 +2402,7 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         });
     for &i in &engines {
         let unit = &units[i];
-        let range = f64::from(unit.stats.range) * view.sim.weather().range_factor();
+        let range = f64::from(unit.stats.range) * view.sim.range_factor();
         match target_piece {
             Some(p) if openings.len() < 2 => {
                 let d = works.pieces[p].distance(unit.x, unit.z);
@@ -2533,8 +2539,9 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
                 continue;
             }
         }
-        // SG4: over the wall or inside the town: take the square (never wait
-        // at the ladders); enemies on the way are fought as they come close.
+        // SG4 (BR3b too): over the wall or inside the town: take the square
+        // (never wait at the ladders); enemies on the way are fought as they
+        // come close.
         if unit.on_wall || works.inside(unit.x, unit.z) {
             view.move_to(i, square.0, square.1, true, None);
             continue;
