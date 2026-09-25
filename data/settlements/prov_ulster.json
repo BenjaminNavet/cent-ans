@@ -74,10 +74,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
+    "buildings": [],
     "port": true,
     "description": "Bourg de la frontière anglo-gaélique, disputé entre colons normands et chefs irlandais.",
     "sources": [

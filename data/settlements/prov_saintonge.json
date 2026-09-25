@@ -8,7 +8,7 @@
     "weight": 32,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": true,
     "description": "Ancienne capitale romaine de l'Aquitaine, siège épiscopal sur la Charente, aval jusqu'à l'océan.",
     "sources": ["Saintes"]
@@ -22,7 +22,7 @@
     "weight": 30,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_market", "bld_port", "bld_stone_walls", "bld_guild_hall"],
+    "buildings": ["bld_port", "bld_stone_walls", "bld_guild_hall"],
     "port": true,
     "description": "Grand port atlantique du sel et du vin, commune privilégiée passée sous domination royale française en 1224.",
     "sources": ["La Rochelle"]
