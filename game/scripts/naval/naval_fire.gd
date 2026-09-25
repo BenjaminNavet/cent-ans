@@ -27,8 +27,8 @@ static func make(ship_length: float, ship_beam: float) -> Node3D:
 	flame_process.anim_offset_max = 1.0
 	flames.position.y = 2.0
 	root.add_child(flames)
-	var smoke_color := Color(0.12, 0.11, 0.1, 0.75)
-	var smoke := _emitter(56, 12.0, Vector2(6.0, 16.0), Vector2(2.0, 4.5), spread, _smoke_material(smoke_color), smoke_color, Color(smoke_color, 0.35))
+	var smoke_color := Color(0.2, 0.18, 0.16, 0.8)
+	var smoke := _emitter(110, 12.0, Vector2(9.0, 22.0), Vector2(1.2, 2.6), spread, _smoke_material(smoke_color), smoke_color, Color(smoke_color, 0.25))
 	smoke.name = "Smoke"
 	var smoke_process := smoke.process_material as ParticleProcessMaterial
 	smoke_process.angle_min = -180.0
@@ -42,8 +42,8 @@ static func make(ship_length: float, ship_beam: float) -> Node3D:
 	var growth_texture := CurveTexture.new()
 	growth_texture.curve = growth
 	smoke_process.scale_curve = growth_texture
-	smoke_process.damping_min = 0.1
-	smoke_process.damping_max = 0.25
+	smoke_process.damping_min = 0.3
+	smoke_process.damping_max = 0.6
 	smoke.position.y = 7.0
 	smoke.sorting_offset = -1.0
 	root.add_child(smoke)
@@ -69,7 +69,7 @@ static func set_intensity(root: Node3D, fire: float, wind: Vector2) -> void:
 	var ratio := clampf(0.2 + fire, 0.0, 1.0)
 	flames.amount_ratio = ratio
 	smoke.amount_ratio = ratio
-	(smoke.process_material as ParticleProcessMaterial).gravity = Vector3(wind.x, 0.8, wind.y)
+	(smoke.process_material as ParticleProcessMaterial).gravity = Vector3(wind.x * 0.6, 0.15, wind.y * 0.6)
 	(flames.process_material as ParticleProcessMaterial).gravity = Vector3(wind.x * 0.3, 1.0, wind.y * 0.3)
 	light.visible = on
 	light.light_energy = (2.0 + 6.0 * fire) * (0.85 + 0.15 * sin(Time.get_ticks_msec() * 0.013))
@@ -80,6 +80,8 @@ static func _emitter(amount: int, lifetime: float, size: Vector2, velocity: Vect
 	particles.amount = amount
 	particles.lifetime = lifetime
 	particles.local_coords = false
+	# Un feu qui vient de prendre montre déjà sa colonne de fumée.
+	particles.preprocess = minf(lifetime * 0.5, 5.0)
 	particles.visibility_aabb = AABB(Vector3(-80, -10, -80), Vector3(160, 90, 160))
 	var process := ParticleProcessMaterial.new()
 	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
