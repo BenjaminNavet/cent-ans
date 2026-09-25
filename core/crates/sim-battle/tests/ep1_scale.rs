@@ -127,10 +127,14 @@ fn reinforcements_beyond_the_epic_cap() {
 /// fewer regiments are locked in melee at once (15-22 over seeds 3, 5, 11
 /// instead of 20+); the melee is counted at every step.
 ///
-/// SG4 (horse guarding its shooters, melee height advantage): the peak
-/// varies more with the seed (seed 11: 10, 3: 16, 5: 26, 1, 2, 4: 41-47);
-/// the test also counts the regiments that fought hand to hand at least
-/// once (55-95 of 120 over seeds 1-5 and 11).
+/// EP9 (ADR 0056): the army that gives way breaks as a whole once it has
+/// lost most of its fighting strength, so the battle ends in 5-6 minutes
+/// instead of 14-18, before the whole line is locked in melee (11-12
+/// regiments at most over seeds 3, 5, 11): the threshold of 20 cannot come
+/// back; the battle must end within 12 minutes.
+///
+/// SG4 (horse guarding its shooters, melee height advantage): the test
+/// also counts the regiments that fought hand to hand at least once.
 #[test]
 fn ai_handles_sixty_regiments_a_side() {
     // `EP1_SEED=<n>`: another seed (probe).
@@ -159,8 +163,9 @@ fn ai_handles_sixty_regiments_a_side() {
         sim.elapsed()
     );
     assert!(melee_seen >= 10, "at most {melee_seen} regiments in melee");
-    assert!(fought >= 40, "only {fought} regiments fought hand to hand");
+    assert!(fought >= 25, "only {fought} regiments fought hand to hand");
     assert!(sim.is_finished(), "still running at {:.0} s", sim.elapsed());
+    assert!(sim.elapsed() <= 720.0, "over at {:.0} s", sim.elapsed());
     println!(
         "60/side: {melee_seen} regiments in melee at most, over at {:.0} s, winner {:?}",
         sim.elapsed(),
