@@ -56,6 +56,23 @@
       "items": { "$ref": "common.schema.json#/$defs/faction_id" },
       "uniqueItems": true
     },
+    "available_from": {
+      "type": "integer",
+      "minimum": 1300,
+      "maximum": 1500,
+      "description": "Première année de recrutement possible (époque de l'unité, lot UR1)."
+    },
+    "available_until": {
+      "type": "integer",
+      "minimum": 1300,
+      "maximum": 1500,
+      "description": "Dernière année de recrutement possible (bandes dissoutes, unité passée de mode)."
+    },
+    "figure": {
+      "type": "string",
+      "pattern": "^(infantry|archer|cavalry)_[0-9]+$",
+      "description": "Figurine de bataille (rendu seulement) : `<famille>_<variante>` du manifeste des figurines skinnées (repli : variante 0 de la famille)."
+    },
     "equipment": { "type": "string", "description": "Équipement historique (armes, armure) pour les assets 3D." },
     "description": { "type": "string" },
     "sources": { "$ref": "common.schema.json#/$defs/sources" }

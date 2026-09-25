@@ -192,7 +192,7 @@ def geo_hamlets(
 def geo_relief(
     force: bool = typer.Option(False, "--force", help="Retélécharge ETOPO"),
 ) -> None:
-    """Génère le relief 8192² en 16 × 16 tuiles (data/map/height/) et height_tiles de map.json."""
+    """Relief 8192² ETOPO seul (16 × 16 tuiles, data/map/height/) : repli ; voir geo relief-shade."""
     from cent_ans_tools.geo import relief as geo_relief_step
 
     result = geo_relief_step.build(force=force)
@@ -227,6 +227,74 @@ def geo_splat() -> None:
         "Rasters du shader de terrain",
         [result.splat, result.border_dist, result.coast_dist],
     )
+    # Lot R1 : splat.png est ensuite refait avec l'occupation du sol historique.
+    _report_landcover()
+
+
+@geo_app.command("kk10")
+def geo_kk10() -> None:
+    """Extrait KK10 (usage anthropique du sol, 1330-1349) par requêtes HTTP partielles.
+
+    Demande h5py et fsspec : uv run --project tools --with h5py --with fsspec
+    --with aiohttp --with requests cent-ans geo kk10
+    """
+    from cent_ans_tools.geo import kk10 as geo_kk10_step
+
+    path = geo_kk10_step.extract()
+    _print_sizes("KK10 (cache)", [path])
+
+
+@geo_app.command("relief-shade")
+def geo_relief_shade(
+    force: bool = typer.Option(
+        False, "--force", help="Recalcule la mosaïque Copernicus (sinon cache .npy)"
+    ),
+) -> None:
+    """Relief fin Copernicus GLO-90 : tuiles 8192², heightmap_render.png, relief_shade.png."""
+    from cent_ans_tools.geo import relief_shade as geo_relief_shade_step
+
+    result = geo_relief_shade_step.build(force=force)
+    console.print(
+        f"{result.tiles} tuiles ({result.tiles_bytes / 1e6:.1f} Mo), "
+        f"relief_shade {result.shade_bytes / 1e6:.1f} Mo ({result.seconds:.0f} s)"
+    )
+    _print_sizes("Relief de rendu", [result.render_heightmap, result.relief_shade])
+
+
+@geo_app.command("landcover")
+def geo_landcover() -> None:
+    """Occupation du sol vers 1340 : splat.png (forêts KK10 + massifs nommés), wetlands.png, forest_kind.png."""
+    _report_landcover()
+
+
+def _report_landcover() -> None:
+    from cent_ans_tools.geo import landcover as geo_landcover_step
+
+    result = geo_landcover_step.build()
+    _print_sizes(
+        "Occupation du sol (1340)",
+        [result.splat, result.wetlands, result.forest_kind],
+    )
+    console.print(
+        f"forêt {result.forest_share:.1%} des terres, défriché (KK10) {result.cleared_share:.1%}"
+    )
+
+
+@geo_app.command("rivers-render")
+def geo_rivers_render() -> None:
+    """Génère rivers_render.json, river_bed.png et crossings_px.json (rendu des fleuves, V4)."""
+    from cent_ans_tools.geo import river_render
+
+    result = river_render.build()
+    _print_sizes("Rendu des fleuves", [result.render, result.bed, result.crossings])
+    console.print(
+        f"{result.rivers} tronçons, {result.points} points ; "
+        f"{result.snapped} passages recalés sur leur fleuve"
+    )
+    if result.unsnapped:
+        console.print(
+            f"[yellow]Hors fleuve affiché : {', '.join(result.unsnapped)}[/yellow]"
+        )
 
 
 @geo_app.command("navgrid")
@@ -246,7 +314,9 @@ def _report_navgrid(result) -> None:  # noqa: ANN001
     console.print(
         f"{result.passable_fraction:.1%} des cases de terre franchissables ; "
         f"passages : {result.crossings_used} ponts et gués, "
-        f"{result.road_crossings} croisements route/fleuve, {result.passes} cols "
+        f"{result.road_crossings} croisements route/fleuve "
+        f"({result.road_crossings_dropped} écartés, loin de toute colonie), "
+        f"{result.passes} cols "
         f"({result.seconds:.0f} s)"
     )
     if result.off_river:

@@ -3,7 +3,8 @@ extends Control
 
 ## Cloche de fin de saison (HUD de campagne, bas à droite ; lot F10a) : gros bouton rond
 ## (cloche + saison/année) qui termine le tour — raccourci `campaign_end_turn` (Entrée) —,
-## entouré d'un éventail de pastilles d'alerte regroupées par type.
+## surmonté d'une colonne de pastilles d'alerte regroupées par type. Lot U5 (audit A3, C10) :
+## chaque pastille porte un libellé court et un compteur lisibles sans survol.
 ##
 ## Aucune règle de jeu : les alertes sont fournies par l'appelant (`set_alerts`, lot F3) sous
 ## la forme `{kind, text, province_id?, army_id?, character_id?, blocking?}`. Types connus :
@@ -23,6 +24,24 @@ signal alert_activated(alert: Dictionary)
 ## Ordre d'affichage des types dans l'éventail (du bas-gauche vers le haut).
 const KIND_ORDER := [
 	"chronicle_decision", "enemy_army", "siege", "debt", "idle_character", "construction_done", "research_done"]
+## Libellés courts des pastilles (lot U5), écrits sur la pastille.
+const SHORT_LABELS := {
+	"chronicle_decision": "Décision",
+	"enemy_army": "Armée ennemie",
+	"siege": "Siège",
+	"debt": "Dette",
+	"idle_character": "Sans charge",
+	"construction_done": "Chantier fini",
+	"research_done": "Recherche finie",
+	"research_idle": "Aucune recherche",
+	"ransom": "Rançon",
+	"table": "Vivres",
+	"medicine": "Médecine",
+	"herbarium": "Herbier",
+	"coinage": "Monnaie",
+	"chivalry": "Chevalerie",
+	"agent": "Agents",
+}
 const KIND_LABELS := {
 	"chronicle_decision": "Décision de chronique",
 	"enemy_army": "Armée ennemie",
@@ -34,14 +53,19 @@ const KIND_LABELS := {
 	"table": "Table et vivres",
 	"medicine": "Médecine",
 	"herbarium": "Herbier",
+	"research_idle": "Aucune recherche en cours",
+	"ransom": "Captifs et rançons",
 }
+## Icône d'un type sans icône propre (`hud_<alias>`).
+const ICON_ALIASES := {"research_idle": "research", "ransom": "treasury", "coinage": "treasury", "other": "chronicle"}
 ## Types dessinés sur cire rouge (danger) ; les autres sur parchemin.
 const DANGER_KINDS := ["chronicle_decision", "enemy_army", "siege", "debt"]
 const BUTTON_RADIUS := 62.0
 const BADGE_RADIUS := 17.0
-const FAN_RADIUS := 120.0
-const FAN_START := PI * 0.92
-const FAN_END := PI * 1.58
+## Colonne des pastilles au-dessus de la cloche (lot U5).
+const PILL_WIDTH := 190.0
+const PILL_HEIGHT := 30.0
+const PILL_GAP := 4.0
 const MAX_BADGES := 7
 
 ## Relie le bouton à l'action `campaign_end_turn` (désactiver si un autre bouton la porte).
@@ -60,7 +84,7 @@ var _enabled := true
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(FAN_RADIUS + BUTTON_RADIUS + BADGE_RADIUS + 16.0, FAN_RADIUS + BUTTON_RADIUS + BADGE_RADIUS + 16.0)
+	_update_minimum_size()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_button = Button.new()
 	_button.flat = true
@@ -142,9 +166,25 @@ func activate_group(group_index: int) -> void:
 	alert_activated.emit(list[cursor])
 
 
-## Abscisse locale du bord gauche de l'éventail (pour borner le bandeau d'ost à sa gauche).
+## Abscisse locale du bord gauche de la cloche (pour borner le bandeau d'ost à sa gauche ; les
+## pastilles sont au-dessus de la cloche, hors de la bande du bandeau).
 func fan_left_edge() -> float:
-	return _button_center().x - FAN_RADIUS - BADGE_RADIUS - 4.0
+	return _button_center().x - BUTTON_RADIUS - 8.0
+
+
+## Hauteur de la cloche seule (les panneaux ancrés à droite s'arrêtent au-dessus).
+func bell_height() -> float:
+	return BUTTON_RADIUS * 2.0 + 12.0
+
+
+## Ordonnée locale du haut de la colonne des pastilles (ou de la cloche s'il n'y en a pas).
+func stack_top() -> float:
+	return size.y - bell_height() - _groups.size() * (PILL_HEIGHT + PILL_GAP)
+
+
+func _update_minimum_size() -> void:
+	var count := _groups.size()
+	custom_minimum_size = Vector2(maxf(PILL_WIDTH + 4.0, bell_height()), bell_height() + count * (PILL_HEIGHT + PILL_GAP))
 
 
 func _button_center() -> Vector2:
@@ -181,6 +221,12 @@ func _rebuild() -> void:
 	_groups.clear()
 	for kind in order.slice(0, MAX_BADGES):
 		_groups.append({"kind": kind, "alerts": by_kind[kind]})
+	# Au-delà de `MAX_BADGES` types : la dernière pastille regroupe le reste (« Autres avis »).
+	if order.size() > MAX_BADGES:
+		var rest: Array = []
+		for kind in order.slice(MAX_BADGES - 1):
+			rest.append_array(by_kind[kind])
+		_groups[MAX_BADGES - 1] = {"kind": "other", "alerts": rest}
 	for badge in _badges:
 		badge.queue_free()
 	_badges.clear()
@@ -190,33 +236,41 @@ func _rebuild() -> void:
 		badge.group_index = i
 		badge.kind = str(_groups[i]["kind"])
 		badge.count = (_groups[i]["alerts"] as Array).size()
+		badge.label = short_label(badge.kind)
+		badge.glyph = str(((_groups[i]["alerts"] as Array)[0] as Dictionary).get("glyph", ""))
 		badge.tooltip_text = _group_tooltip(_groups[i])
-		badge.size = Vector2(BADGE_RADIUS, BADGE_RADIUS) * 2.0 + Vector2(6, 6)
+		badge.size = Vector2(PILL_WIDTH, PILL_HEIGHT)
 		add_child(badge)
 		_badges.append(badge)
+	_update_minimum_size()
 	_place_badges()
 	_update_tooltip()
 	queue_redraw()
 
 
+## Pastilles empilées au-dessus de la cloche, la plus urgente juste au-dessus d'elle.
 func _place_badges() -> void:
-	var center := _button_center()
-	var count := _badges.size()
-	for i in count:
-		var t := 0.5 if count == 1 else float(i) / float(MAX_BADGES - 1)
-		var angle := lerpf(FAN_START, FAN_END, t)
-		var at := center + Vector2(cos(angle), sin(angle)) * FAN_RADIUS
-		_badges[i].position = at - _badges[i].size * 0.5
+	var bottom := size.y - bell_height()
+	for i in _badges.size():
+		_badges[i].position = Vector2(size.x - PILL_WIDTH - 2.0, bottom - (i + 1) * (PILL_HEIGHT + PILL_GAP) + PILL_GAP)
+
+
+## Libellé court d'un type d'alerte (pastille).
+static func short_label(kind: String) -> String:
+	if kind == "other":
+		return "Autres avis"
+	return str(SHORT_LABELS.get(kind, KIND_LABELS.get(kind, "Avis")))
 
 
 func _group_tooltip(group: Dictionary) -> String:
 	var kind := str(group["kind"])
 	var list: Array = group["alerts"]
-	var lines := PackedStringArray([str(KIND_LABELS.get(kind, "Avis"))])
+	var lines := PackedStringArray([str(KIND_LABELS.get(kind, short_label(kind)))])
 	for alert in list.slice(0, 6):
 		lines.append("• " + str((alert as Dictionary).get("text", "")))
 	if list.size() > 6:
-		lines.append("… et %d autre(s)" % (list.size() - 6))
+		var more := list.size() - 6
+		lines.append("… et %d autre%s" % [more, "s" if more > 1 else ""])
 	lines.append("Clic : aller à la suivante")
 	return "\n".join(lines)
 
@@ -244,9 +298,9 @@ func _on_button_pressed() -> void:
 func _draw() -> void:
 	var center := _button_center()
 	var blocked := not blocking_alert().is_empty()
-	# Filet d'or de l'éventail, derrière les pastilles.
+	# Filet d'or reliant la colonne des pastilles à la cloche.
 	if not _badges.is_empty():
-		draw_arc(center, FAN_RADIUS, FAN_START - 0.08, FAN_END + 0.08, 32, HudStyle.GOLD, 1.5, true)
+		draw_line(Vector2(center.x, stack_top() + 4.0), Vector2(center.x, center.y - BUTTON_RADIUS), HudStyle.GOLD, 1.5, true)
 	# Disque : ombre, parchemin, double filet (encre + or ; rubrique si bloqué).
 	draw_circle(center + Vector2(2, 3), BUTTON_RADIUS, HudStyle.SHADOW)
 	var face := HudStyle.PARCHMENT
@@ -302,6 +356,10 @@ class AlertBadge:
 	var group_index: int = 0
 	var kind: String = ""
 	var count: int = 1
+	## Libellé court écrit sur la pastille (lot U5).
+	var label: String = ""
+	## Glyphe fourni par l'alerte (`glyph`), à défaut d'icône.
+	var glyph: String = ""
 	var _hover := false
 
 	func _ready() -> void:
@@ -313,9 +371,6 @@ class AlertBadge:
 		mouse_exited.connect(func() -> void:
 			_hover = false
 			queue_redraw())
-
-	func _has_point(point: Vector2) -> bool:
-		return point.distance_to(size * 0.5) <= EndTurnCluster.BADGE_RADIUS + 2.0
 
 	func _gui_input(event: InputEvent) -> void:
 		var click := event as InputEventMouseButton
@@ -335,29 +390,37 @@ class AlertBadge:
 		return panel
 
 	func _draw() -> void:
-		var center := size * 0.5
-		var r := EndTurnCluster.BADGE_RADIUS
+		var r := EndTurnCluster.BADGE_RADIUS * 0.8
 		var danger := EndTurnCluster.DANGER_KINDS.has(kind)
-		draw_circle(center + Vector2(1, 2), r, HudStyle.SHADOW)
+		var rect := Rect2(Vector2.ZERO, size)
+		# Bandeau parchemin (cire pour un danger), filet d'encre ; disque à gauche pour l'icône.
+		var face := HudStyle.PARCHMENT_LIGHT if _hover else HudStyle.PARCHMENT
 		if danger:
-			var wax := HudStyle.WAX_LIGHT if _hover else HudStyle.WAX
-			draw_colored_polygon(HudStyle.wax_points(center, r, hash(kind) % 13, 28), wax)
-			draw_arc(center, r * 0.78, 0.0, TAU, 28, wax.lightened(0.2), 1.0, true)
-		else:
-			draw_circle(center, r, HudStyle.PARCHMENT_LIGHT if _hover else HudStyle.PARCHMENT)
-			draw_arc(center, r - 1.0, 0.0, TAU, 28, HudStyle.INK_SOFT, 1.5, true)
-			draw_arc(center, r - 4.0, 0.0, TAU, 28, HudStyle.GOLD, 1.0, true)
-		var glyph_color := HudStyle.PARCHMENT_LIGHT if danger else HudStyle.INK
-		var texture := HudStyle.icon("hud_" + kind, "hud")
+			face = HudStyle.WAX_LIGHT if _hover else HudStyle.WAX
+		draw_rect(Rect2(rect.position + Vector2(1, 2), rect.size), HudStyle.SHADOW)
+		draw_rect(rect, face)
+		draw_rect(rect.grow(-0.5), HudStyle.WAX_DARK if danger else HudStyle.INK_SOFT, false, 1.0)
+		draw_rect(Rect2(0, 0, 3, size.y), HudStyle.GOLD if danger else HudStyle.RUBRIC)
+		var center := Vector2(r + 8.0, size.y * 0.5)
+		draw_circle(center, r, HudStyle.PARCHMENT_LIGHT)
+		draw_arc(center, r, 0.0, TAU, 24, HudStyle.GOLD, 1.0, true)
+		var texture := HudStyle.icon("hud_" + str(EndTurnCluster.ICON_ALIASES.get(kind, kind)), "hud")
+		var font := get_theme_default_font()
 		if texture != null:
-			HudStyle.draw_texture_fit(self, texture, center, r * 1.25)
+			HudStyle.draw_texture_fit(self, texture, center, r * 1.5)
+		elif glyph != "":
+			var glyph_width := font.get_string_size(glyph, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+			draw_string(font, center + Vector2(-glyph_width * 0.5, 5.0), glyph, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, HudStyle.INK)
 		else:
-			var glyph := "siege_alert" if kind == "siege" else kind
-			HudStyle.draw_glyph(self, glyph, center, r * 1.15, glyph_color, HudStyle.WAX if danger else HudStyle.PARCHMENT)
-		if count > 1:
-			var badge := center + Vector2(r * 0.72, -r * 0.72)
-			draw_circle(badge, 8.0, HudStyle.INK)
-			var font := get_theme_default_font()
-			var text := str(count) if count < 10 else "9+"
-			var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-			draw_string(font, badge + Vector2(-width * 0.5, 4.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, HudStyle.PARCHMENT_LIGHT)
+			var glyph_id := "siege_alert" if kind == "siege" else kind
+			HudStyle.draw_glyph(self, glyph_id, center, r * 1.4, HudStyle.INK, HudStyle.PARCHMENT_LIGHT)
+		var ink := HudStyle.PARCHMENT_LIGHT if danger else HudStyle.INK
+		var count_text := str(count)
+		var count_width := font.get_string_size(count_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+		var text_left := center.x + r + 7.0
+		var text_room := size.x - text_left - count_width - 18.0
+		draw_string(font, Vector2(text_left, size.y * 0.5 + 5.0), label, HORIZONTAL_ALIGNMENT_LEFT, text_room, 15, ink)
+		# Compteur dans un cartouche à droite.
+		var box := Rect2(size.x - count_width - 13.0, 5.0, count_width + 8.0, size.y - 10.0)
+		draw_rect(box, HudStyle.PARCHMENT_LIGHT if danger else HudStyle.INK)
+		draw_string(font, Vector2(box.position.x + 4.0, size.y * 0.5 + 5.0), count_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, HudStyle.WAX_DARK if danger else HudStyle.PARCHMENT_LIGHT)

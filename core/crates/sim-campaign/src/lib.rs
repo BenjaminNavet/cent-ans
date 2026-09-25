@@ -34,6 +34,7 @@
 pub mod agents;
 pub mod ai_minimal;
 pub mod battle_auto;
+pub mod battle_forecast;
 pub mod battle_request;
 pub mod buildings;
 pub mod characters;
@@ -43,6 +44,7 @@ pub mod coinage;
 pub mod diplomacy;
 pub mod dynasty;
 pub mod economy;
+pub mod economy_balance;
 pub mod edicts;
 pub mod events;
 pub mod frontier;
@@ -51,6 +53,7 @@ pub mod medicine;
 pub mod movement;
 pub mod navigation;
 pub mod orders;
+pub mod path_plan;
 pub mod population;
 pub mod ransom;
 pub mod religion;
@@ -73,7 +76,8 @@ pub use agents::{
     AgentActionOption, AgentError, AgentId, AgentRecruitOption, AgentReport, AgentsState,
 };
 pub use battle_auto::{
-    resolve_auto, BattleContext, BattleResult, BattleUnit, Side, SideOutcome, Winner,
+    resolve_auto, resolve_field, resolve_with, BattleContext, BattleResult, BattleUnit,
+    FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
@@ -99,6 +103,7 @@ pub use navigation::{Cell, GridPath};
 pub use orders::{
     MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, BASE_RECRUIT_SLOTS,
 };
+pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;

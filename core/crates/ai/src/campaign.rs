@@ -18,7 +18,7 @@ use data_model::{
     SkillBranch, SkillId, UnitTypeId,
 };
 use sim_campaign::coinage::CoinageLevel;
-use sim_campaign::movement::{dijkstra, edges, points_per_step};
+use sim_campaign::movement::{edges, points_per_step};
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
@@ -39,6 +39,9 @@ pub const DEFENCE_RATIO: f64 = 0.7;
 /// Share of income spent on armies at war / at peace.
 pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
+/// Weighted unrest above which the AI no longer raises taxes to « Haut »
+/// (lot G1/E2: heavy taxes now bite, 30 before).
+pub const HIGH_TAX_MAX_UNREST: f64 = 18.0;
 /// A debt must be repaid within this many turns, or units are dismissed.
 const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
@@ -98,6 +101,8 @@ struct Context<'a> {
     /// Lot M2: the settlement standing for every army on the settlement
     /// graph (its own, or the nearest one in the field).
     anchors: BTreeMap<ArmyId, SettlementId>,
+    /// Lot M3: routes on the settlement graph and orders on the grid.
+    grid: crate::grid::GridPlanner<'a>,
 }
 
 impl<'a> Context<'a> {
@@ -115,6 +120,7 @@ impl<'a> Context<'a> {
                 .iter()
                 .filter_map(|(id, a)| Some((id.clone(), state.army_anchor(data, a)?)))
                 .collect(),
+            grid: crate::grid::GridPlanner::new(state, data, faction),
             state,
             data,
             faction,
@@ -337,7 +343,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let in_debt = ctx.treasury < 0;
     let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < 30.0 {
+    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < HIGH_TAX_MAX_UNREST {
         TaxRate::High
     } else {
         TaxRate::Normal
@@ -433,38 +439,49 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let max_recruits = (ctx.income / INCOME_PER_RECRUIT
         + hoard / HOARD_SPENDING_TURNS / HOARD_LIVRES_PER_RECRUIT)
         .clamp(1, MAX_RECRUITS_PER_TURN) as usize;
+    let mut composition = crate::doctrine::field_composition(state, ctx.faction);
     'sites: for site in &sites {
         if !ctx.owns_settlement(site) {
             continue;
         }
-        let best = state
+        // E1: the doctrine's mix decides, among what fits the budget.
+        let options: Vec<sim_campaign::RecruitOption> = state
             .recruitable(data, site)
             .into_iter()
             .filter(|o| o.available)
-            .max_by(|a, b| {
-                unit_value(data, &a.unit_type, a.cost)
-                    .total_cmp(&unit_value(data, &b.unit_type, b.cost))
-                    .then_with(|| b.unit_type.cmp(&a.unit_type))
-            });
-        let Some(option) = best else {
+            .collect();
+        if options.is_empty() {
             continue;
-        };
+        }
         // G1: no more than the settlement's free recruitment slots.
         let mut free_slots = state.recruit_slots_free(data, site);
-        while recruits < max_recruits
-            && free_slots > 0
-            && planned_upkeep + i64::from(option.upkeep)
-                <= if planned_upkeep == 0 && ctx.surplus() >= i64::from(option.upkeep) {
-                    target_upkeep.max(i64::from(option.upkeep))
+        while recruits < max_recruits && free_slots > 0 {
+            let upkeep_cap = |upkeep: i64| {
+                if planned_upkeep == 0 && ctx.surplus() >= upkeep {
+                    target_upkeep.max(upkeep)
                 } else {
                     target_upkeep
                 }
-            && budget >= i64::from(option.cost)
-        {
+            };
+            let fitting: Vec<&sim_campaign::RecruitOption> = options
+                .iter()
+                .filter(|o| {
+                    planned_upkeep + i64::from(o.upkeep) <= upkeep_cap(i64::from(o.upkeep))
+                        && budget >= i64::from(o.cost)
+                })
+                .collect();
+            let Some(option) =
+                crate::doctrine::pick_recruit(data, ctx.faction, &fitting, &composition, |o| {
+                    unit_value(data, &o.unit_type, o.cost)
+                })
+            else {
+                break;
+            };
             orders.push(Order::Recruit {
                 settlement: site.into(),
                 unit_type: option.unit_type.clone(),
             });
+            *composition.entry(option.unit_type.clone()).or_default() += 1;
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);
             recruits += 1;
@@ -1112,7 +1129,8 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         let strength: u32 = army.units.iter().map(|u| u.strength).sum();
         let max_strength: u32 = army.units.iter().map(|u| u.max_strength).sum();
         let cap = state.army_movement_allowance(data, army);
-        let table = dijkstra(state, data, ctx.faction, &anchor, Some(range), Some(cap));
+        // Lot M3: cached for the turn; stronger enemy armies are avoided.
+        let table = ctx.grid.table(&anchor, range, cap, power);
         let steps = |cost: u32| f64::from(cost) / step;
         let besieging = army
             .settlement()
@@ -1155,6 +1173,16 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .is_some_and(|(odds, _)| odds >= ASSAULT_ODDS);
         if hopeless {
             targeted.insert(anchor.clone());
+        }
+
+        // Lot M3: engage an enemy army within the bubble when the odds are
+        // good. The strategic orders below still follow: they fail harmlessly
+        // once the battle has spent the army's movement, and apply when the
+        // attack was refused (target out of reach).
+        if !broken && !besieging {
+            if let Some(order) = ctx.grid.attack_order(army_id, power) {
+                orders.push(order);
+            }
         }
 
         // Keep a siege that is going our way.
@@ -1336,8 +1364,9 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 stance,
             });
         }
-        if !army.is_at(&target) && table.contains_key(&target) {
-            orders.push(Order::move_to(army_id.clone(), target));
-        }
+        orders.extend(
+            ctx.grid
+                .march_orders(army_id, army, &anchor, &target, &table),
+        );
     }
 }

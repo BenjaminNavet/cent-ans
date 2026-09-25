@@ -8,7 +8,9 @@ extends Node3D
 ##   cloche ou des carreaux plus tendus, avec une traînée légère, qui restent fichés au sol ;
 ## - bombardes : éclair, fumée, boulet et gerbe de terre à l'impact ; pierres des engins ;
 ## - choc des charges : gerbe de poussière au contact.
-## Sang : aucun (public large, cf. `docs/wip/b4-effets-animations.md`).
+## BV1 : les volées de traits et de carreaux viennent des événements de tir du cœur
+## (`BattleSim.get_shots()`) et sont dessinées en masse par `BattleVolleys` (traits fichés, pieux,
+## pavois, flèches enflammées) ; les touches alimentent `BattleBlood` (réglage « Sang »).
 ##
 ## Budget : émetteurs de particules GPU en nombre fixe (réaffectés chaque image aux régiments
 ## les plus proches de la caméra), traits dans deux MultiMesh à tampon circulaire dont la
@@ -39,9 +41,21 @@ const SPEED := [48.0, 62.0, 110.0, 34.0]
 const ARC := [0.16, 0.06, 0.02, 0.3]
 const STICK := [30.0, 30.0, 0.0, 0.0]
 const DUST_COLOR := Color(0.74, 0.66, 0.52)
+## BV1 : mottes projetées par les sabots (émetteurs réaffectés comme la poussière).
+const CLOD_EMITTERS := 6
+const CLOD_DISTANCE := 260.0
+## Couleur de la poussière et des mottes selon le sol (`get_terrain().ground`).
+const GROUND_DUST := {"dry": Color(0.74, 0.66, 0.52), "muddy": Color(0.52, 0.45, 0.36), "snowy": Color(0.9, 0.92, 0.96)}
+const GROUND_CLODS := {"dry": Color(0.34, 0.26, 0.17), "muddy": Color(0.2, 0.15, 0.1), "snowy": Color(0.88, 0.9, 0.95)}
 const SPLASH_COLOR := Color(0.93, 0.96, 0.98)
 
+signal hit_landed(pos: Vector3, time: float)
+## BV1 : sons des engins (bombarde, trébuchet) tirés par le cœur ; `delay` en temps de bataille.
+signal sound_event(event: StringName, position: Vector3, delay: float)
+
 var enabled_dust: bool = true
+## BV1 : volées massives et traits fichés.
+var volleys: BattleVolleys = null
 var time_now: float = 0.0
 ## Traits lancés depuis le début (banc d'essai, captures).
 var launched: int = 0
@@ -60,6 +74,8 @@ var _materials: Array[ShaderMaterial] = []
 var _dust: Array[GPUParticles3D] = []
 var _splash: Array[GPUParticles3D] = []
 var _wake: Array[GPUParticles3D] = []  # B8 : sillage d'écume (chevaux au gué)
+var _clods: Array[GPUParticles3D] = []  # BV1 : mottes sous les sabots
+var _ground: String = "dry"
 var _bursts: Dictionary = {}  # sorte -> Array[GPUParticles3D]
 var _burst_next: Dictionary = {}
 var _flash: OmniLight3D
@@ -72,6 +88,9 @@ var _dirty: bool = false  # tampon des flèches à renvoyer à la carte graphiqu
 
 ## `weather` : clé météo du rendu ; `height_at(x, z)` : hauteur du sol ; `water_at(x, z)` :
 ## 0 terre ferme, 1 eau (gué ou rivière).
+var siege_walls := false  # SG1 : les tirs d'engins sur les murs sont rendus ailleurs
+
+
 func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 	_rng.seed = 7351
 	_height_at = height_at
@@ -90,6 +109,8 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 		_splash.append(_emitter("Splash%d" % i, _splash_material(), 160, 0.8, false))
 	for i in WAKE_EMITTERS:
 		_wake.append(_emitter("Wake%d" % i, _splash_material(), 90, 1.6, false))
+	for i in CLOD_EMITTERS:
+		_clods.append(_emitter("Clods%d" % i, _clod_material(), 320, 1.0, false))
 	_bursts = {
 		"impact": _burst_pool("Impact", _dust_material(true), 48, 2.2),
 		"smoke": _burst_pool("Smoke", _smoke_material(), 40, 5.5),
@@ -99,6 +120,10 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 	}
 	for key in _bursts:
 		_burst_next[key] = 0
+	volleys = BattleVolleys.new()
+	volleys.name = "Volleys"
+	add_child(volleys)
+	volleys.setup(height_at)
 	_flash = OmniLight3D.new()
 	_flash.light_color = Color(1.0, 0.75, 0.4)
 	_flash.omni_range = 18.0
@@ -111,6 +136,8 @@ func setup(weather: String, height_at: Callable, water_at: Callable) -> void:
 ## Avance le temps des effets (`anim_time` de la bataille, figé en pause).
 func tick_time(now: float, dt: float) -> void:
 	time_now = now
+	if volleys != null:
+		volleys.tick_time(now)
 	for mat in _materials:
 		mat.set_shader_parameter("time_now", now)
 	while not _pending.is_empty() and float(_pending[0]["time"]) <= now:
@@ -127,14 +154,22 @@ func tick_time(now: float, dt: float) -> void:
 
 
 ## Suit les régiments (`BattleSim.get_units()`) : volées, charges, poussière, gués.
-func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camera_pos: Vector3) -> void:
+## `shots` (BV1) : événements de tir du cœur (`get_shots()`) ; `null` = ancien déclencheur (baisse
+## des munitions), gardé pour les bancs d'essai hors simulation.
+func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camera_pos: Vector3, shots: Variant = null) -> void:
 	tick_time(now, dt)
 	var by_id := {}
 	for unit in units:
 		by_id[int(unit["id"])] = unit
+	if shots is Array:
+		for shot in shots:
+			_on_core_shot(shot, by_id, soldiers, camera_pos)
+	if volleys != null:
+		volleys.update_fieldworks(units)
 	var dusty: Array = []
 	var wet: Array = []
 	var wakes: Array = []  # B8 : sillage d'écume (sous-ensemble de `wet` : cavalerie seulement)
+	var clodsy: Array = []  # BV1 : cavalerie lancée hors de l'eau (mottes)
 	for unit in units:
 		var id := int(unit["id"])
 		var present := bool(unit["present"])
@@ -144,7 +179,7 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 		var near := camera_pos.distance_to(pos) < EFFECT_DISTANCE
 		var prev: Dictionary = _track.get(id, {})
 		if not prev.is_empty() and present and near:
-			if ammo < int(prev["ammo"]):
+			if not (shots is Array) and ammo < int(prev["ammo"]):
 				_on_volley(unit, by_id, soldiers, camera_pos)
 			if str(prev["state"]) == "charging" and state == "melee":
 				var fwd := _forward(unit)
@@ -181,12 +216,36 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 					var fwd := _forward(unit)
 					var mid := (wet_span.x + wet_span.y) * 0.5
 					burst(pos + fwd * mid + Vector3(0, 0.45, 0), "ford", 2.2 if state == "charging" else 1.4)
-		elif enabled_dust and d < DUST_DISTANCE:
-			dusty.append(entry)
+		else:
+			if enabled_dust and d < DUST_DISTANCE:
+				dusty.append(entry)
+			# BV1 : mottes projetées par les sabots à la charge (terre, boue ou neige), sur tout sol.
+			if mounted and fast and d < CLOD_DISTANCE and not _clods.is_empty():
+				clodsy.append(entry)
 	if _dust_spots.is_empty():
 		_assign(_dust, dusty)
+		_assign(_clods, clodsy)
 	_assign(_splash, wet)
 	_assign_wake(_wake, wakes)
+
+
+## BV1 : sol du champ (`dry`, `muddy`, `snowy`) et météo du rendu. Pas de poussière sous la
+## pluie ou la neige, ni sur un sol boueux ou enneigé ; teinte de la poussière (sèche, pâle) et
+## des mottes (terre, boue, neige) selon le sol.
+func configure_ground(ground: String, weather: String) -> void:
+	_ground = ground if GROUND_CLODS.has(ground) else "dry"
+	enabled_dust = weather != "rain" and weather != "snow" and _ground == "dry"
+	var dust_color: Color = GROUND_DUST[_ground]
+	for emitter in _dust:
+		var mat := (emitter.draw_pass_1 as QuadMesh).material as StandardMaterial3D
+		mat.albedo_color = dust_color * Color(0.9, 0.9, 0.9)
+	for emitter in _clods:
+		var mat := (emitter.draw_pass_1 as QuadMesh).material as StandardMaterial3D
+		mat.albedo_color = GROUND_CLODS[_ground]
+		# Neige : des gerbes plus fines et plus nombreuses ; boue : des paquets lourds.
+		var process := emitter.process_material as ParticleProcessMaterial
+		process.scale_min = 0.08 if _ground == "snowy" else 0.12
+		process.scale_max = 0.18 if _ground == "snowy" else (0.32 if _ground == "muddy" else 0.24)
 
 
 ## Poussière imposée à un endroit (captures hors simulation).
@@ -268,8 +327,38 @@ func burst(pos: Vector3, kind: String, scale: float = 1.0) -> void:
 # --- Volées -----------------------------------------------------------------------------
 
 
-func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, camera_pos: Vector3) -> void:
-	var target := _volley_target(unit, by_id)
+## BV1 : un tir résolu par le cœur. Traits et carreaux : volée massive (`BattleVolleys`) ;
+## boulets et pierres : ancien chemin (engins, éclair, fumée).
+func _on_core_shot(shot: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, camera_pos: Vector3) -> void:
+	var shooter: Dictionary = by_id.get(int(shot.get("shooter", -1)), {})
+	if shooter.is_empty() or not bool(shooter.get("present", false)):
+		return
+	var kind := str(shot.get("kind", "arrow"))
+	if kind == "arrow" or kind == "bolt":
+		if volleys == null:
+			return
+		var hits: Array = volleys.on_shot(shot, by_id, camera_pos)
+		for hit in hits:
+			hit_landed.emit(hit["pos"], float(hit["time"]))
+		return
+	var pos := Vector3(float(shooter["x"]), 0.0, float(shooter["z"]))
+	if camera_pos.distance_to(pos) >= EFFECT_DISTANCE:
+		return
+	var aim: Vector2 = shot.get("aim", Vector2(pos.x, pos.z))
+	var target: Dictionary = by_id.get(int(shot.get("target", -1)), {})
+	if target.is_empty():
+		target = {"x": aim.x, "z": aim.y, "y": _height_at.call(aim.x, aim.y) if _height_at.is_valid() else 0.0, "width": 12.0}
+	var aim3 := Vector3(aim.x, float(target.get("y", 0.0)), aim.y)
+	sound_event.emit(&"bombard" if kind == "ball" else &"trebuchet_release", pos, 0.0)
+	# SG1 : un engin qui bat la muraille est rendu par `SiegeAssaultFx` (pierre, impact, son).
+	if siege_walls and str(shot.get("cover", "")) == "wall":
+		return
+	sound_event.emit(&"stone_impact", aim3, pos.distance_to(aim3) / float(SPEED[BALL if kind == "ball" else STONE]))
+	_on_volley(shooter, {-999: target}, soldiers, camera_pos, target)
+
+
+func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, camera_pos: Vector3, forced: Dictionary = {}) -> void:
+	var target := forced if not forced.is_empty() else _volley_target(unit, by_id)
 	if target.is_empty():
 		return
 	var pos := Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"]))
@@ -279,6 +368,9 @@ func _on_volley(unit: Dictionary, by_id: Dictionary, soldiers: BattleSoldiers, c
 	var mid := (pos + aim) * 0.5
 	var lod := 1.0 if camera_pos.distance_to(mid) < 350.0 else 0.4
 	if kind == BALL or kind == STONE:
+		# SG1 : sans régiment visé, l'engin bat la muraille (`SiegeAssaultFx`, `engine_shot`).
+		if siege_walls and int(unit.get("target", -1)) < 0:
+			return
 		var engines := soldiers.soldier_positions(int(unit["id"]), 4) if soldiers != null else PackedVector3Array()
 		if engines.is_empty():
 			engines.append(pos)
@@ -477,6 +569,22 @@ func _process_for(node_name: String) -> ParticleProcessMaterial:
 		grow.add_point(Vector2(0, 0.5))
 		grow.add_point(Vector2(1, 1.4))
 		mat.color_ramp = _ramp([0.0, 0.08, 0.6, 1.0], [0.0, 0.9, 0.5, 0.0])
+	elif node_name.begins_with("Clods"):
+		# BV1 : mottes arrachées par les sabots, lancées vers l'arrière et vers le haut, qui
+		# retombent vite (pas de nuage : de petits paquets opaques).
+		mat.emission_shape_offset = Vector3(0, 0.45, 0)  # à hauteur de sabot, pas sous le sol
+		mat.direction = Vector3(0, 0.8, -0.6)
+		mat.spread = 28.0
+		mat.initial_velocity_min = 2.5
+		mat.initial_velocity_max = 6.5
+		mat.gravity = Vector3(0, -9.8, 0)
+		mat.scale_min = 0.12
+		mat.scale_max = 0.24
+		mat.angular_velocity_min = -360.0
+		mat.angular_velocity_max = 360.0
+		grow.add_point(Vector2(0, 1.0))
+		grow.add_point(Vector2(1, 0.8))
+		mat.color_ramp = _ramp([0.0, 0.05, 0.85, 1.0], [0.0, 1.0, 1.0, 0.0])
 	elif node_name.begins_with("Wake"):
 		# B8 : sillage d'écume, entraîné vers l'arrière (pas projeté vers le haut comme une gerbe)
 		# et étalé sur les côtés, plus longue durée de vie pour laisser une traîne visible.
@@ -605,8 +713,45 @@ func _splash_material() -> StandardMaterial3D:
 	return _billboard(SPLASH_COLOR, true, false)
 
 
-func _smoke_material() -> StandardMaterial3D:
-	return _billboard(Color(0.86, 0.85, 0.82), false, false)
+## Motte : petit éclat opaque, éclairé (terre ou boue), non flou.
+func _clod_material() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = GROUND_CLODS["dry"]
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.55, 0.7])
+	gradient.colors = PackedColorArray([Color(1, 1, 1, 1), Color(0.8, 0.8, 0.8, 1), Color(1, 1, 1, 0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_SQUARE
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 16
+	texture.height = 16
+	mat.albedo_texture = texture
+	mat.vertex_color_use_as_albedo = true
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.5
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.billboard_keep_scale = true
+	mat.roughness = 1.0
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return mat
+
+
+## Fumée de bombarde : planche de fumée animée du lot V3 (A1-13, `fire_smoke.gdshader`), blanche
+## (poudre noire), sans lueur de feu ; disque flou (B4) si la planche n'est pas importée.
+func _smoke_material() -> Material:
+	var flipbook := "res://assets/textures/fx/smoke_flipbook.png"
+	if not ResourceLoader.exists(flipbook):
+		return _billboard(Color(0.86, 0.85, 0.82), false, false)
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/fire_smoke.gdshader")
+	mat.set_shader_parameter("flipbook", load(flipbook))
+	mat.set_shader_parameter("smoke_color", Color(0.8, 0.79, 0.76))
+	mat.set_shader_parameter("ember_glow_energy", 0.0)
+	mat.set_shader_parameter("density", 1.4)
+	mat.set_shader_parameter("soft_distance", 1.5)
+	return mat
 
 
 func _flash_material() -> StandardMaterial3D:

@@ -1,0 +1,25 @@
+{
+  "id": "cdx_ponts_gues",
+  "title": "Ponts et gués",
+  "category": "guerre",
+  "aliases": [
+    "ponts et gués",
+    "pont fortifié",
+    "gué de Blanchetaque",
+    "Blanchetaque",
+    "frères pontifes"
+  ],
+  "era": { "from": "1177", "to": "1453" },
+  "summary": "Au XIVe siècle, les grands fleuves ne se franchissent qu'en quelques points : des ponts, souvent fortifiés et gardés par une ville, et des gués connus des gens du pays. Tenir ou couper ces passages décide souvent du sort d'une campagne.",
+  "body": "Un pont de pierre est un ouvrage rare et coûteux. Sur le Rhône, le pont d'[[cdx_avignon|Avignon]], dit pont Saint-Bénézet, est bâti de 1177 à 1185 ; celui de Pont-Saint-Esprit, de 1265 à 1309, grâce aux quêtes d'une confrérie de « frères pontifes ». Sur la Loire, chaque ville d'importance a le sien, de Nevers à Nantes, en passant par [[cdx_orleans|Orléans]], Blois et Tours. Un pont est presque toujours défendu : une tour ou un châtelet en garde l'entrée, comme les Tourelles d'Orléans, prises par [[cdx_jeanne_darc|Jeanne d'Arc]] en mai 1429, ou le pont Valentré de Cahors, élevé à partir de 1308 et hérissé de trois tours. On y perçoit aussi un péage, le pontonage.\n\nEntre deux ponts, le fleuve est un obstacle sérieux. On passe à gué aux basses eaux, là où le lit s'élargit sur un fond dur, ou en bac, sous la menace d'être surpris à mi-chemin. Aussi, pour arrêter un envahisseur, on coupe les ponts et on garde les gués.\n\nLa campagne de 1346 le montre bien. Après avoir ravagé la Normandie, [[cdx_edouard_iii|Édouard III]] trouve rompus tous les ponts de la Seine. Il remonte le fleuve jusqu'à Poissy, où ses charpentiers réparent le pont sous le nez des Français. Plus au nord, [[cdx_philippe_vi|Philippe VI]] fait garder les ponts de la Somme : Pont-Remy, Picquigny, Amiens, Abbeville. L'armée anglaise, prise au piège contre la mer, franchit enfin la Somme le 24 août, à marée basse, au gué de Blanchetaque, en forçant le passage contre les troupes de Godemar du Fay. Deux jours plus tard, elle livre bataille à [[cdx_crecy|Crécy]].",
+  "anachronism": "Dans le jeu, les grands fleuves (Loire, Seine, Somme, Rhône, Saône, Garonne, Dordogne, Meuse, Escaut, Rhin, Tamise…) ne se franchissent qu'aux ponts et gués de 1337 répertoriés, aux villes bâties sur leur rive et là où une ancienne voie romaine les croise près d'une ville. Les ponts ne peuvent être ni coupés ni gardés, les gués ne dépendent pas des marées, et les autres rivières ne font que ralentir la marche.",
+  "see_also": ["cdx_crecy", "cdx_edouard_iii", "cdx_philippe_vi", "cdx_chevauchee", "cdx_orleans"],
+  "sources": [
+    "Bataille de Blanchetaque",
+    "Pont Saint-Bénézet",
+    "Pont de Pont-Saint-Esprit",
+    "Frères pontifes",
+    "Pont Valentré",
+    "Bataille de Crécy"
+  ]
+}

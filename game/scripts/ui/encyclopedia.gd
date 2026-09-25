@@ -58,8 +58,9 @@ const MECHANICS := [
 	{"id": "mech_economy", "name": "Économie", "icon": "hud_treasury", "text": "Chaque saison, les provinces rapportent l'impôt (selon la population de chaque classe, sa richesse et le taux d'imposition choisi dans le panneau de faction) et le commerce (bâtiments de commerce, ressources). Cet impôt est réparti entre les colonies de la province au prorata de leur poids, une colonie assiégée n'en touchant rien ; tenir toutes les colonies d'une province ajoute un bonus de province complète. On en retire l'entretien des armées, des garnisons et des bâtiments (payé en partie par la couronne selon le type de colonie) et les frais de cour et d'administration, qui croissent avec la taille du royaume et quand le trésor dort. En dette, les troupes perdent du moral et se débandent : licenciez ou baissez les dépenses.\n\nLes quatre classes (paysans, bourgeois, clergé, noblesse) ont chacune un mécontentement, une santé, une richesse et une satisfaction en biens. Un fardeau fiscal trop lourd, la dévastation, l'occupation étrangère ou une religion différente attisent le mécontentement ; au-delà du seuil de révolte, la province se soulève.", "extra": "classes"},
 	{"id": "mech_morale", "name": "Moral", "icon": "gauge_morale", "text": "Le moral d'une unité baisse sous le tir, en mêlée, quand elle est prise de flanc ou de dos, quand ses voisines fuient ou que le général tombe. Au plus bas, elle rompt et fuit ; elle peut se rallier loin de l'ennemi. En campagne, la dette, la famine et les défaites entament le moral des armées ; le repos en territoire ami le rétablit. Certains traits (chevaleresque…) et compétences du général le relèvent."},
 	{"id": "mech_supply", "name": "Ravitaillement", "icon": "gauge_supply", "text": "Chaque armée a des vivres. Ils baissent en territoire hostile ou dévasté, surtout l'hiver, et remontent en territoire ami. Sans vivres, l'armée perd des hommes (attrition). Les bâtiments et les compétences de logistique améliorent le ravitaillement ; la posture « Chevauchée » pille le pays pour vivre sur l'ennemi, au prix de la dévastation.\n\nTraverser la mer se fait entre deux ports ; débarquer en terre ennemie épuise le mouvement et coûte des hommes."},
-	{"id": "mech_sieges", "name": "Sièges", "icon": "bld_stone_walls", "text": "Chaque province contient plusieurs colonies prenables séparément (cité, villes, châteaux, abbayes, villages) : une armée en posture « Siège » sur une colonie ennemie fortifiée l'assiège. La place a des vivres : quand ils s'épuisent, elle capitule. Les engins de siège ouvrent une brèche. Le panneau d'armée affiche vivres, brèche et chances d'assaut ; « Donner l'assaut » lance une bataille de siège (3D ou automatique). Les fortifications (palissade, murailles de pierre, château fort, bastion) allongent le siège et renforcent la garnison ; un village sans garnison est pris dès qu'une armée ennemie y entre, sans siège.\n\nEn bataille de siège : échelles, tours de siège et bélier contre la porte ; la victoire revient à qui met la garnison en déroute ou tient la place centrale.\n\nUne armée battue se replie vers la colonie amie la plus proche, sinon une colonie neutre en perdant des traînards, sinon c'est la débandade (lourdes pertes, dispersion possible)."},
-	{"id": "mech_battles", "name": "Batailles", "icon": "hud_army", "text": "Quand deux armées ennemies se rencontrent, choisissez « Livrer bataille » (bataille 3D en temps réel) ou la résolution automatique. En 3D : régiments en ligne, colonne, schiltron ou coin ; flancs et arrières vulnérables ; piques contre cavalerie ; pieux des archers ; la pluie gêne arcs et arbalètes, le brouillard réduit la portée. La mort du général fait chuter le moral. Les armées alliées présentes dans la province se joignent à la bataille."},
+	{"id": "mech_sieges", "name": "Sièges", "icon": "bld_stone_walls", "text": "Chaque province contient plusieurs colonies prenables séparément (cité, villes, châteaux, abbayes, villages) : une armée en posture « Siège » sur une colonie ennemie fortifiée l'assiège. La place a des vivres : quand ils s'épuisent, elle capitule. Les engins de siège ouvrent une brèche. Quand l'armée assiégeante est sélectionnée, un encart au-dessus du bandeau d'ost affiche vivres, brèche et chances d'assaut ; « Donner l'assaut » lance une bataille de siège (3D ou automatique). Les fortifications (palissade, murailles de pierre, château fort, bastion) allongent le siège et renforcent la garnison ; un village sans garnison est pris dès qu'une armée ennemie y entre, sans siège.\n\nEn bataille de siège : échelles, tours de siège et bélier contre la porte ; la victoire revient à qui met la garnison en déroute ou tient la place centrale.\n\nUne armée battue se replie vers la colonie amie la plus proche ; sinon elle recule de quelques lieues en perdant des traînards, si un refuge reste à portée et qu'elle n'a pas été écrasée ; sinon c'est la débandade (lourdes pertes, dispersion possible)."},
+	{"id": "mech_movement", "name": "Mouvement des armées", "icon": "hud_army", "text": "Les armées se déplacent librement sur la terre. Armée sélectionnée, la bulle dorée au sol montre sa portée pour la saison (environ 210 km de plaine, 140 l'hiver ; les routes accélèrent, collines, forêts, marais et montagnes ralentissent). En survolant le sol, le chemin s'affiche en vert pour ce tour et en rouge pour les suivants. Clic droit sur le sol : l'armée marche aussitôt ; une cible hors de portée est gardée, et la marche reprend d'elle-même au début des tours suivants. Clic droit sur une colonie ennemie : siège (un village sans garnison est pris aussitôt) ; sur une colonie amie : stationnement ; sur une armée ennemie : attaque.\n\nChaque armée tient une zone de contrôle de 8 km : une armée ennemie qui y entre s'arrête. Les grands fleuves ne se passent qu'aux ponts et gués, et les montagnes qu'aux cols connus. Pour traverser la mer, marchez jusqu'à un port puis visez le port d'arrivée : la traversée prend la saison.\n\nLe tour est séquentiel : vous jouez d'abord, chaque ordre s'exécute tout de suite ; puis chaque puissance IA joue à son tour. Ses batailles contre vous sont résolues automatiquement et figurent au rapport de saison."},
+	{"id": "mech_battles", "name": "Batailles", "icon": "hud_army", "text": "Quand deux armées ennemies se rencontrent, choisissez « Livrer bataille » (bataille 3D en temps réel) ou la résolution automatique. En 3D : régiments en ligne, colonne, schiltron ou coin ; flancs et arrières vulnérables ; piques contre cavalerie ; pieux des archers ; la pluie gêne arcs et arbalètes, le brouillard réduit la portée. La mort du général fait chuter le moral. Les armées alliées présentes à proximité se joignent à la bataille."},
 	{"id": "mech_diplomacy", "name": "Diplomatie", "icon": "hud_diplomacy", "text": "L'attitude de chaque puissance envers vous est calculée (liens, guerres, religion, prétentions, réputation) et le panneau en donne les raisons. Déclarer une guerre sans casus belli ou rompre une trêve coûte en réputation. La paix se négocie selon le score de guerre (cessions, tribut, trêve). Alliances, appels aux armes, embargos, vassalité, mariages entre dynasties et unions personnelles complètent le jeu.\n\nReligion : la faveur pontificale se gagne par la piété et les dons ; l'excommunication isole. Le Grand Schisme (1378-1417) oblige à choisir une obédience.", "extra": "relations"},
 	{"id": "mech_succession", "name": "Succession", "icon": "hud_court", "text": "Les personnages vieillissent, se marient, ont des enfants et meurent. À la mort du souverain, l'héritier est désigné par la loi de succession du royaume ; un héritier mineur règne sous régence. Une faction sans héritier voit une nouvelle maison (ou un élu) prendre le pouvoir. Les prétentions dynastiques issues des mariages peuvent donner un casus belli, voire une union personnelle.", "extra": "succession"},
 	{"id": "mech_characters", "name": "Personnages", "icon": "hud_governor", "text": "Les personnages gagnent de l'expérience (batailles, gouvernance) et des points de compétence à dépenser dans trois branches : Commandement, Gouvernance, Cour. Leurs traits (personnalité, physique, martial, gouvernance, acquis) modifient batailles, provinces et diplomatie. Nommez des généraux à la tête des armées et des gouverneurs dans les provinces (fiche personnage).\n\nSuite : au fil des victoires, des sièges, des chevauchées, des saisons passées dans une ville bien dotée ou des rançons touchées, des compagnons (écuyer, héraut, confesseur, barbier-chirurgien…) rejoignent un personnage, huit au plus. Leurs effets s'ajoutent à ceux de ses traits ; certains passent à l'héritier à sa mort, et deux généraux réunis peuvent s'en confier."},
@@ -98,6 +99,7 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	var panel := PanelContainer.new()
+	_window_panel = panel
 	panel.name = "Window"
 	panel.custom_minimum_size = Vector2(1060, 680)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -143,6 +145,7 @@ func _ready() -> void:
 	close.tooltip_text = "Fermer (Échap ou K)"
 	close.pressed.connect(close_window)
 	header.add_child(close)
+	_close_button = close
 	tab_bar = TabBar.new()
 	tab_bar.name = "Tabs"
 	tab_bar.clip_tabs = false
@@ -212,7 +215,8 @@ func open_window(entry_id: String = "") -> void:
 	show()
 	if entry_id != "":
 		open_entry(entry_id)
-	search_field.grab_focus.call_deferred()
+	if not embedded:
+		search_field.grab_focus.call_deferred()
 
 
 func close_window() -> void:
@@ -371,6 +375,39 @@ func build_entries() -> void:
 		_entries[tab_id] = rows
 
 
+## Lot U11 : vue intégrée à la fenêtre `CodexHub` (onglet « Règles ») : sans cadre, titre,
+## recherche ni bouton de fermeture propres (ceux de la fenêtre commune les remplacent).
+var embedded := false
+var _window_panel: PanelContainer
+var _close_button: Button
+
+
+func set_embedded(on: bool) -> void:
+	embedded = on
+	if _window_panel == null:
+		return
+	_window_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new() if on else _window_panel.get_theme_stylebox("panel"))
+	_window_panel.custom_minimum_size = Vector2(1060, 600) if on else Vector2(1060, 680)
+	custom_minimum_size = Vector2(1180, 600) if on else Vector2.ZERO
+	size_flags_vertical = Control.SIZE_EXPAND_FILL if on else Control.SIZE_FILL
+	title_label.visible = not on
+	search_field.visible = not on
+	_close_button.visible = not on
+	if on:
+		CodexHub.style_tabs(tab_bar, 14, 7)
+
+
+## Nombre d'entrées de tous les onglets qui répondent à la recherche courante.
+func match_count() -> int:
+	var needle := fold(query.strip_edges())
+	var count := 0
+	for tab_id in _entries:
+		for row in _entries[tab_id]:
+			if needle == "" or str(row["search"]).contains(needle):
+				count += 1
+	return count
+
+
 func tab_ids() -> PackedStringArray:
 	var ids := PackedStringArray()
 	for tab in TABS:
@@ -410,6 +447,14 @@ func set_query(text: String) -> void:
 	if search_field.text != text:
 		search_field.text = text
 	_fill_list()
+	# U11 : recherche commune — l'onglet courant sans résultat cède la place au premier qui en a.
+	if embedded and _visible_ids.is_empty() and fold(query.strip_edges()) != "":
+		for index in TABS.size():
+			var tab_id := str(TABS[index]["id"])
+			for row in _entries.get(tab_id, []):
+				if str(row["search"]).contains(fold(query.strip_edges())):
+					select_tab(index)
+					return
 
 
 func _fill_list() -> void:
@@ -673,7 +718,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	if definition.has("upkeep"):
 		costs.append("Entretien : %d %s / saison" % [int(definition["upkeep"]), RichTooltip.POUND])
 	if definition.has("recruit_time_turns"):
-		costs.append("Levée : %d tour(s)" % int(definition["recruit_time_turns"]))
+		costs.append("Levée : %s" % FrText.count(int(definition["recruit_time_turns"]), "tour"))
 	var stats: Dictionary = definition.get("stats", {})
 	var stat_lines := PackedStringArray()
 	for stat in ["melee", "ranged", "range", "armor", "morale", "speed", "charge", "siege_attack", "ammo"]:
@@ -709,6 +754,17 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 		for culture in cultures:
 			names.append(str(culture).trim_prefix("cul_").replace("_", " "))
 		requires.append("Cultures : " + ", ".join(names))
+	var factions: Array = definition.get("required_faction", [])
+	if not factions.is_empty():
+		var faction_links := PackedStringArray()
+		for faction in factions:
+			faction_links.append(link(str(faction)))
+		requires.append("Factions : " + ", ".join(faction_links))
+	var period := RichTooltip.unit_period(definition)
+	if period != "":
+		requires.append("Époque : " + period)
+	if bool(definition.get("mercenary", false)):
+		requires.append("Mercenaires")
 	return _join([
 		_heading(entry_id, name_of(entry_id), subtitle, "unit"), _description(definition),
 		" · ".join(costs), _section("Caractéristiques", " · ".join(stat_lines)), "\n".join(traits),
@@ -726,7 +782,7 @@ static func _building_fiche(entry_id: String, definition: Dictionary) -> String:
 	if definition.has("cost"):
 		costs.append("Coût : " + RichTooltip.cost_text(definition["cost"]))
 	if definition.has("build_time_turns"):
-		costs.append("Durée : %d tour(s)" % int(definition["build_time_turns"]))
+		costs.append("Durée : %s" % FrText.count(int(definition["build_time_turns"]), "tour"))
 	costs.append("Entretien : %d %s / saison" % [int(definition.get("upkeep", 0)), RichTooltip.POUND])
 	var requires := PackedStringArray()
 	if str(definition.get("upgrades_from", "")) != "":
@@ -819,7 +875,7 @@ static func _trait_fiche(entry_id: String, definition: Dictionary) -> String:
 
 static func _skill_fiche(entry_id: String, definition: Dictionary) -> String:
 	var branch := str(definition.get("branch", ""))
-	var subtitle := "%s, rang %d — %d point(s) de compétence" % [RichTooltip.BRANCH_LABELS.get(branch, branch), int(definition.get("tier", 1)), int(definition.get("cost", 1))]
+	var subtitle := "%s, rang %d — %s de compétence" % [RichTooltip.BRANCH_LABELS.get(branch, branch), int(definition.get("tier", 1)), FrText.count(int(definition.get("cost", 1)), "point")]
 	var prerequisites: Array = definition.get("prerequisites", [])
 	return _join([
 		_heading("branch_" + branch, name_of(entry_id), subtitle, "branch"), _description(definition),
@@ -1027,8 +1083,8 @@ static func _agent_fiche(definition: Dictionary) -> String:
 	var kind_labels := {"city": "cité", "town": "ville", "castle": "château", "abbey": "abbaye", "village": "village"}
 	for kind in kinds:
 		places.append(str(kind_labels.get(str(kind), kind)))
-	var recruit := "Coût %d livres, entretien %d par saison, %d au plus par faction. Recrutement : %s%s." % [
-		int(definition.get("cost", 0)), int(definition.get("upkeep", 0)), int(definition.get("max_per_faction", 0)),
+	var recruit := "Coût %s, entretien %s par saison, %d au plus par faction. Recrutement : %s%s." % [
+		Money.amount(int(definition.get("cost", 0))), Money.amount(int(definition.get("upkeep", 0))), int(definition.get("max_per_faction", 0)),
 		", ".join(places),
 		" (avec un bâtiment religieux, ou une abbaye)" if bool(definition.get("requires_religious_building", false)) else "",
 	]

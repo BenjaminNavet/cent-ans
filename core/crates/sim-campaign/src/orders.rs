@@ -573,7 +573,7 @@ impl CampaignState {
             }
             Order::Attack { army, target_army } => self
                 .order_attack(data, faction, &army, &target_army, &mut events)
-                .map(|()| OrderOutcome::Done),
+                .map(OrderOutcome::Moved),
             Order::Embark { army, to_port } => self
                 .order_embark(data, faction, &army, &to_port, &mut events)
                 .map(|()| OrderOutcome::Done),
@@ -1051,6 +1051,18 @@ impl CampaignState {
                     .get(tech)
                     .map_or_else(|| tech.to_string(), |t| t.name.display.clone());
                 return Some(format!("technologie requise : {name}"));
+            }
+        }
+        // Lot UR1: period units (compagnies d'ordonnance from 1445, routiers
+        // until the bands are hired away to Castile...).
+        if let Some(from) = unit_type.available_from {
+            if self.year < from {
+                return Some(format!("disponible à partir de {from}"));
+            }
+        }
+        if let Some(until) = unit_type.available_until {
+            if self.year > until {
+                return Some(format!("plus levée après {until}"));
             }
         }
         if !unit_type.required_faction.is_empty() && !unit_type.required_faction.contains(faction) {

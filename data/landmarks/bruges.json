@@ -1,0 +1,414 @@
+{
+  "id": "bruges",
+  "name": "Bruges",
+  "settlement": "set_bruges",
+  "period": "vers 1340-1450 (hôtel de ville dès 1376 ; lanterne octogonale du beffroi en 1486)",
+  "province": "prov_flandre",
+  "siege": {"rotate_deg": 0, "radius_m": 1100, "bank_offset_m": 120, "cut_m": 120, "areas": ["ville"], "monuments": ["belfort", "waterhalle", "stadhuis", "saint_donatien"], "streets": ["vlamingstraat", "langestraat", "ezelstraat"], "battle": {"walls": ["enceinte"], "gate": "Katelijnepoort", "streets": ["steenstraat", "vlamingstraat", "langestraat", "katelijnestraat", "ezelstraat", "gentpoortstraat"]}},
+  "materials": {"houses": {"walls": {"Brick": 0.7, "Timber": 0.2, "Plaster": 0.1}, "roofs": {"Tile": 0.45, "Slate": 0.25, "TileOld": 0.2, "Thatch": 0.1}}, "palette": {"Brick": [0.4, 0.16, 0.09]}},
+  "sources": [
+    {
+      "title": "Brugae Flandrorum urbs (plan de Bruges)",
+      "author": "Marcus Gerards",
+      "date": "1562",
+      "url": "https://commons.wikimedia.org/wiki/File:Brugge_Marcus_Gerards_1562.jpg",
+      "license": "Domaine public",
+      "use": "Enceinte de 1297 et ses portes, canaux (reien), halles et beffroi, Waterhalle, Burg, Notre-Dame, Saint-Sauveur."
+    },
+    {
+      "title": "Beffroi et halles de Bruges (élévations anciennes)",
+      "author": "Gravures des XVIe-XVIIIe siècles (Sanderus, Flandria illustrata, 1641)",
+      "date": "1641",
+      "url": "https://commons.wikimedia.org/wiki/Category:Belfry_of_Bruges",
+      "license": "Domaine public",
+      "use": "Étages carrés du XIIIe siècle, lanterne octogonale de 1482-1486, cour des halles."
+    },
+    {
+      "title": "OpenStreetMap (reien et vesten, portes, Notre-Dame, Saint-Sauveur, hôtel de ville, Markt)",
+      "author": "Contributeurs d'OpenStreetMap",
+      "date": "2026",
+      "url": "https://www.openstreetmap.org/copyright",
+      "license": "ODbL 1.0 (contrôle de position ; une quarantaine de points arrondis à la main)",
+      "use": "Tracé des canaux intérieurs et du fossé de l'enceinte, portes, positions des monuments."
+    }
+  ],
+  "anchor": {
+    "lonlat": [3.2247, 51.2089],
+    "px": [2335.015, 1570.107],
+    "north_bearing_deg": 5.29
+  },
+  "scale": {
+    "center_meters_per_unit": 190,
+    "core_radius_m": 1500,
+    "core_radius_px": 5.5,
+    "zone_radius_px": 6.3,
+    "monument_scale": 1.9,
+    "house_scale": 1.8,
+    "height_scale": 1.25
+  },
+  "rivers": [
+    {
+      "id": "reie_sud",
+      "name": "Reie (Minnewater, Bakkersrei, Dijver)",
+      "points": [[-25, -1383, 30], [-54, -1191, 30], [-65, -934, 30], [-55, -823, 30], [-81, -620, 30], [66, -505, 30], [27, -393, 30], [45, -315, 30], [194, -169, 30], [174, -124, 30]]
+    },
+    {
+      "id": "groenerei",
+      "name": "Groenerei et Sint-Annarei",
+      "points": [[174, -124, 30], [453, 71, 30], [463, 188, 30], [284, 524, 30], [317, 725, 30], [274, 920, 30], [389, 1207, 30], [534, 1311, 30]]
+    },
+    {
+      "id": "reie_damme",
+      "name": "Reie vers Damme et le Zwin",
+      "points": [[534, 1311, 30], [800, 1500, 34], [1050, 1713, 36], [2399, 2816, 40], [3400, 4100, 40]]
+    },
+    {
+      "id": "kraanrei",
+      "name": "Kraanrei (sous la Waterhalle)",
+      "points": [[174, -124, 30], [105, -92, 30], [60, 0, 30], [80, 150, 30], [110, 307, 30], [317, 431, 30], [463, 188, 30]]
+    },
+    {
+      "id": "speelmansrei",
+      "name": "Speelmansrei et Augustijnenrei",
+      "points": [[-379, -531, 30], [-484, -308, 30], [-516, -199, 30], [-285, 284, 30], [89, 485, 30], [288, 508, 30]]
+    },
+    {
+      "id": "kapucijnenrei",
+      "name": "Kapucijnenrei",
+      "points": [[-342, -1047, 30], [-379, -531, 30]]
+    },
+    {
+      "id": "coupure",
+      "name": "Rei de l'est",
+      "points": [[453, 71, 30], [654, -132, 30], [855, -488, 30]]
+    }
+  ],
+  "areas": [
+    {
+      "id": "ville",
+      "name": "La ville (dans l'enceinte de 1297)",
+      "kind": "built",
+      "density": 0.62,
+      "polygon": [[-54, -1191], [-351, -1081], [-598, -998], [-786, -750], [-849, -479], [-886, -339], [-808, 93], [-753, 381], [-627, 728], [-400, 1100], [-81, 1470], [514, 1516], [663, 1337], [900, 900], [1064, 407], [1000, 0], [855, -488], [681, -652], [450, -950], [297, -1117]]
+    }
+  ],
+  "open_spaces": [
+    {
+      "id": "markt",
+      "name": "Markt (Grand-Place)",
+      "kind": "square",
+      "polygon": [[-100, -20], [70, -20], [70, 110], [-100, 110]]
+    },
+    {
+      "id": "burg",
+      "name": "Burg",
+      "kind": "square",
+      "polygon": [[120, -30], [240, -30], [240, 40], [120, 40]]
+    },
+    {
+      "id": "beguinage",
+      "name": "Béguinage de la Vigne",
+      "kind": "garden",
+      "polygon": [[-160, -1100], [-60, -1050], [-80, -960], [-170, -990]]
+    },
+    {
+      "id": "pres_nord",
+      "name": "Prés et blanchisseries du nord",
+      "kind": "meadow",
+      "polygon": [[-500, 1000], [-150, 1000], [0, 1300], [-81, 1400], [-400, 1100]]
+    }
+  ],
+  "walls": [
+    {
+      "id": "enceinte",
+      "name": "Seconde enceinte (1297-1300) et vesten",
+      "points": [[-54, -1191], [-351, -1081], [-598, -998], [-786, -750], [-849, -479], [-886, -339], [-808, 93], [-753, 381], [-627, 728], [-400, 1100], [-81, 1470], [514, 1516], [663, 1337], [900, 900], [1064, 407], [1000, 0], [855, -488], [681, -652], [450, -950], [297, -1117]],
+      "closed": true,
+      "height_m": 8,
+      "tower_spacing_m": 130,
+      "tower_shape": "round",
+      "ditch": true,
+      "gates": [
+        {
+          "name": "Smedenpoort",
+          "at": [-849, -479]
+        },
+        {
+          "name": "Boeveriepoort",
+          "at": [-786, -750]
+        },
+        {
+          "name": "Ezelpoort",
+          "at": [-627, 728]
+        },
+        {
+          "name": "Dampoort",
+          "at": [663, 1337]
+        },
+        {
+          "name": "Kruispoort",
+          "at": [1064, 407]
+        },
+        {
+          "name": "Gentpoort",
+          "at": [681, -652]
+        },
+        {
+          "name": "Katelijnepoort",
+          "at": [297, -1117]
+        }
+      ]
+    }
+  ],
+  "streets": [
+    {
+      "id": "steenstraat",
+      "name": "Steenstraat et Smedenstraat",
+      "points": [[-100, 20], [-300, -180], [-600, -380], [-849, -479]],
+      "width_m": 12
+    },
+    {
+      "id": "vlamingstraat",
+      "name": "Vlamingstraat",
+      "points": [[-20, 110], [0, 400], [30, 800]],
+      "width_m": 10
+    },
+    {
+      "id": "langestraat",
+      "name": "Hoogstraat et Langestraat",
+      "points": [[240, 0], [500, 150], [800, 300], [1064, 407]],
+      "width_m": 11
+    },
+    {
+      "id": "katelijnestraat",
+      "name": "Katelijnestraat",
+      "points": [[0, -120], [60, -600], [200, -900], [297, -1117]],
+      "width_m": 10
+    },
+    {
+      "id": "ezelstraat",
+      "name": "Ezelstraat",
+      "points": [[-100, 110], [-400, 450], [-627, 728]],
+      "width_m": 10
+    },
+    {
+      "id": "gentpoortstraat",
+      "name": "Gentpoortstraat",
+      "points": [[200, -150], [450, -400], [681, -652]],
+      "width_m": 10
+    }
+  ],
+  "monuments": [
+    {
+      "id": "belfort",
+      "name": "Beffroi et halles",
+      "model": "belfry",
+      "at": [7, -45],
+      "angle_deg": -90,
+      "scale": 2.6,
+      "clear_radius_m": 70,
+      "variant_from_year": {
+        "octogone": 1486
+      },
+      "params": {
+        "stone": "Ochre",
+        "stages": [
+          {
+            "size": 17,
+            "height": 33
+          },
+          {
+            "size": 15,
+            "height": 50
+          }
+        ],
+        "top": "spire",
+        "top_m": 22,
+        "turrets": true,
+        "clock": false,
+        "halls": {
+          "length": 84,
+          "width": 44,
+          "height": 13
+        },
+        "variants": {
+          "octogone": {
+            "stages": [
+              {
+                "size": 17,
+                "height": 33
+              },
+              {
+                "size": 15,
+                "height": 50
+              },
+              {
+                "size": 12,
+                "height": 72,
+                "shape": "octagon"
+              }
+            ],
+            "top": "spire",
+            "top_m": 12
+          }
+        }
+      },
+      "description": "Beffroi de brique et pierre (étages carrés vers 1240, lanterne octogonale 1482-1486) sur la cour des halles aux draps."
+    },
+    {
+      "id": "waterhalle",
+      "name": "Waterhalle (halle d'eau sur la Kraanrei)",
+      "model": "market_halls",
+      "at": [95, 40],
+      "angle_deg": 90,
+      "scale": 0.9,
+      "clear_radius_m": 30,
+      "description": "Halle bâtie sur le canal (1284-1294) : les bateaux y déchargeaient à couvert."
+    },
+    {
+      "id": "stadhuis",
+      "name": "Hôtel de ville (Stadhuis)",
+      "model": "royal_palace",
+      "at": [175, -56],
+      "angle_deg": 0,
+      "scale": 1.8,
+      "from_year": 1376,
+      "clear_radius_m": 25,
+      "params": {
+        "stone": "Stone",
+        "hall": [36, 14, 14, 13],
+        "hall_towers": true,
+        "towers": [[-17, 7, 4, 32], [0, 7, 4, 32]]
+      },
+      "description": "Hôtel de ville gothique commencé en 1376 sur le Burg."
+    },
+    {
+      "id": "saint_donatien",
+      "name": "Cathédrale Saint-Donatien (Burg)",
+      "model": "gothic_cathedral",
+      "at": [150, 95],
+      "angle_deg": 0,
+      "scale": 1.6,
+      "clear_radius_m": 45,
+      "params": {
+        "length_m": 75,
+        "nave_half": 5,
+        "aisle_half": 11,
+        "vault_m": 18,
+        "ridge_m": 25,
+        "aisle_wall_m": 9,
+        "east": "round",
+        "transept_m": 34,
+        "transept_x": 5,
+        "bays": 7,
+        "flyers": false,
+        "crossing": {
+          "height": 48,
+          "size": 10,
+          "spire_m": 20
+        }
+      },
+      "description": "Collégiale des comtes de Flandre, détruite en 1799."
+    },
+    {
+      "id": "notre_dame_tour",
+      "name": "Tour de Notre-Dame (115 m)",
+      "model": "belfry",
+      "at": [-60, -470],
+      "scale": 2.3,
+      "clear_radius_m": 15,
+      "params": {
+        "stone": "Brick",
+        "stages": [
+          {
+            "size": 14,
+            "height": 55
+          },
+          {
+            "size": 12,
+            "height": 82
+          }
+        ],
+        "top": "spire",
+        "top_m": 33,
+        "turrets": true,
+        "clock": false
+      },
+      "description": "Clocher de brique du XIIIe siècle, le plus haut ouvrage en brique des Pays-Bas."
+    },
+    {
+      "id": "notre_dame",
+      "name": "Église Notre-Dame",
+      "model": "gothic_cathedral",
+      "at": [-10, -510],
+      "angle_deg": 0,
+      "scale": 1.4,
+      "clear_radius_m": 50,
+      "params": {
+        "stone": "Brick",
+        "roof": "Slate",
+        "length_m": 90,
+        "nave_half": 5.5,
+        "aisle_half": 13,
+        "vault_m": 20,
+        "ridge_m": 28,
+        "aisle_wall_m": 9,
+        "east": "round",
+        "transept_m": 36,
+        "transept_x": 10,
+        "bays": 8,
+        "flyers": false
+      }
+    },
+    {
+      "id": "saint_sauveur",
+      "name": "Saint-Sauveur",
+      "model": "gothic_cathedral",
+      "at": [-224, -400],
+      "angle_deg": 0,
+      "scale": 1.4,
+      "clear_radius_m": 50,
+      "params": {
+        "stone": "Brick",
+        "roof": "Slate",
+        "length_m": 95,
+        "nave_half": 5.5,
+        "aisle_half": 13,
+        "vault_m": 20,
+        "ridge_m": 28,
+        "aisle_wall_m": 9,
+        "east": "round",
+        "transept_m": 38,
+        "transept_x": 12,
+        "bays": 8,
+        "flyers": false,
+        "west_towers": {
+          "size": 13,
+          "heights": [0, 0]
+        },
+        "crossing": null
+      }
+    },
+    {
+      "id": "saint_sauveur_tour",
+      "name": "Tour de Saint-Sauveur",
+      "model": "belfry",
+      "at": [-275, -400],
+      "scale": 2.2,
+      "clear_radius_m": 10,
+      "params": {
+        "stone": "Brick",
+        "stages": [
+          {
+            "size": 14,
+            "height": 50
+          }
+        ],
+        "top": "pyramid",
+        "top_m": 12,
+        "turrets": false,
+        "clock": false
+      }
+    }
+  ]
+}

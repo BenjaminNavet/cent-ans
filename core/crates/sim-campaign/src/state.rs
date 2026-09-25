@@ -512,6 +512,11 @@ pub struct FactionState {
     /// Trade income collected during the last resolved turn.
     #[serde(default)]
     pub trade_income_last_turn: i64,
+    // ----- UI audit A3, lot U3: budget history ------------------------------
+    /// Last resolved seasons of the purse, oldest first (at most
+    /// [`crate::economy_balance::BUDGET_HISTORY_SEASONS`]).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub budget_history: Vec<crate::economy_balance::BudgetRecord>,
 }
 
 fn default_faction_loyalty() -> u8 {
@@ -720,6 +725,10 @@ pub struct CampaignState {
     /// change of [`STATE_VERSION`]).
     #[serde(default)]
     pub agents: crate::agents::AgentsState,
+    /// Lot M3: the AI faction whose turn is being played inside `end_turn`
+    /// (its battles against the player are auto-resolved); never saved.
+    #[serde(skip)]
+    pub(crate) ai_turn: Option<FactionId>,
 }
 
 impl CampaignState {
@@ -756,6 +765,7 @@ impl CampaignState {
             outcome: None,
             victory_streak: 0,
             agents: crate::agents::AgentsState::default(),
+            ai_turn: None,
         }
     }
 

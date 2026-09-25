@@ -64,32 +64,52 @@ var _fixtures_dir: String
 ## singletons, donc `SimFacade.x` / `MapPaths.x` (membres d'instance) y sont interdits.
 var facade: Node
 var paths: Node
+## T2 : dossier `user://` dédié à cette exécution (PID + horodatage), pour que plusieurs smoke
+## tests lancés en parallèle (plusieurs worktrees d'agents partagent le même `user://` Godot,
+## dérivé du nom du projet et non du chemin sur disque) ne se marchent pas dessus sur les
+## sauvegardes / réglages / découvertes du Codex. Nettoyé en fin d'exécution (`_cleanup_test_dir`).
+var _test_root: String
+var _test_settings_path: String
+var _test_codex_path: String
+var _test_saves_dir: String
 
 
 func _init() -> void:
 	# Doit précéder l'instanciation de l'autoload MapPaths (après _init).
 	_fixtures_dir = ProjectSettings.globalize_path("res://tests/fixtures")
 	OS.set_environment(MapPaths.ENV_VAR, _fixtures_dir)
+	_test_root = "user://smoke_%d_%d" % [OS.get_process_id(), Time.get_ticks_usec()]
+	_test_settings_path = _test_root.path_join("settings.cfg")
+	_test_codex_path = _test_root.path_join("codex.json")
+	_test_saves_dir = _test_root.path_join("saves")
 	_run_campaign_sim()
 	await process_frame
 	facade = root.get_node("/root/SimFacade")
 	paths = root.get_node("/root/MapPaths")
-	# F3 : réglages par défaut sur un fichier dédié (le fichier du joueur n'est pas touché),
-	# sans sauvegarde automatique hors de l'étape « flow ».
+	facade.call("use_test_saves_dir", _test_saves_dir)
+	SaveSlots.use_test_dir(_test_saves_dir)
+	# F3 : réglages par défaut sur un fichier dédié à cette exécution (le fichier du joueur
+	# n'est pas touché), sans sauvegarde automatique hors de l'étape « flow ».
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	if settings != null:
-		settings.call("use_test_file")
+		settings.call("use_test_file", _test_settings_path)
 		settings.call("set_value", "game/autosave_interval", 0, false)
 		settings.call("set_value", "tutorial/enabled", false, false)  # F8 : seulement à l'étape 13
 	# Exécution ciblée d'une étape : CENT_ANS_SMOKE_ONLY=coinage_ransom.
 	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "coinage_ransom":
 		await _run_coinage_ransom()
+		_cleanup_test_dir()
+		quit(1 if _failures > 0 else 0)
+		return
+	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "ui_layout":
+		await _run_ui_layout()
 		quit(1 if _failures > 0 else 0)
 		return
 	await _run_campaign_map()
 	await _run_start_menu()
 	await _run_campaign_loop()
 	await _run_minimap_fog()  # C1
+	await _run_ui_layout()  # UI2 : pile des panneaux (U1), échelle et 4 résolutions (U4)
 	await _run_agents()  # C6 agents
 	_run_city_economy()
 	await _run_characters()
@@ -107,7 +127,27 @@ func _init() -> void:
 	await _run_siege_battle()
 	await _run_flow()  # F3
 	await _run_tutorial()  # F8
+	_cleanup_test_dir()
 	quit(1 if _failures > 0 else 0)
+
+
+## T2 : supprime le dossier `user://smoke_<pid>_<horodatage>` créé pour cette exécution
+## (réglages, découvertes du Codex, sauvegardes). Best effort : une erreur ne fait pas
+## échouer le smoke test.
+func _cleanup_test_dir() -> void:
+	_remove_dir_recursive(_test_root)
+
+
+func _remove_dir_recursive(path: String) -> void:
+	var dir := DirAccess.open(path)
+	if dir == null:
+		return
+	dir.include_hidden = true
+	for file_name in dir.get_files():
+		dir.remove(file_name)
+	for sub_dir in dir.get_directories():
+		_remove_dir_recursive(path.path_join(sub_dir))
+	DirAccess.remove_absolute(path)
 
 
 func _run_campaign_sim() -> void:
@@ -215,6 +255,13 @@ func _run_start_menu() -> void:
 	_check(menu.card_count() == 3, "start menu should show 3 faction cards, got %d" % menu.card_count())
 	_check(menu.selected_faction == "fac_france", "default faction should be fac_france")
 	_check(menu.start_button.text.begins_with("Commencer"), "start button label")
+	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
+	menu.show_faction_select(true)
+	_check(menu.faction_select.visible and not menu.main_column.visible, "faction select should replace the main column")
+	menu.open_intro()
+	await process_frame
+	_check(menu.overlay_open(), "prologue overlay should open")
+	_check(not FrontEndData.random_quote().is_empty() and FrontEndData.random_tip() != "", "loading quotes and tips expected")
 	if _failures == 0:
 		print("smoke OK: start menu, %d cards" % menu.card_count())
 	menu.queue_free()
@@ -259,7 +306,13 @@ func _run_campaign_loop() -> void:
 	# Aperçu de chemin au survol de la cible.
 	var target_index: int = map.map_data.index_of_id(target)
 	map._on_province_hovered(target_index)
-	_check(map.path_preview.visible, "path preview should be visible when hovering a reachable province")
+	if map.movement_ctl != null and map.movement_ctl.active():
+		# Lot M4 : l'aperçu du mouvement libre suit le curseur jusqu'au point visé.
+		var city_world: Vector3 = map.settlement_layer.world_position_of(str(map.sim.call("get_province_state", target).get("city", "")))
+		map.movement_ctl.preview_target({"kind": "ground", "id": "", "point": Vector2(city_world.x, city_world.z)})
+		_check(map.movement_ctl.path_line.visible, "free movement path preview should be visible towards a reachable province")
+	else:
+		_check(map.path_preview.visible, "path preview should be visible when hovering a reachable province")
 	var army_before: Dictionary = map.sim.call("get_army", army_ids[0])
 	var result: Dictionary = map.order_move(army_ids[0], target)
 	_check(result.get("ok", false), "move order refused: %s" % result.get("error", "?"))
@@ -391,6 +444,84 @@ func _run_agents() -> void:
 ## C1 : minicarte présente dans le HUD (haut droite, lettres dessous, sans chevaucher la cloche),
 ## clic = caméra recentrée ; brouillard (vraie simulation) : au moins une province voilée, aucune
 ## armée étrangère marquée hors de vue, réglage désactivable.
+## UI2 (audit A3, lots U1 et U4) : aux quatre résolutions de référence, l'échelle automatique
+## vaut hauteur / 900 bornée entre 0,9 et 1,6 ; la barre du haut tient dans la largeur ; faction,
+## Cour et technologies s'ouvrent une à une (exclusivité), leur bouton × reste à l'écran et la
+## minicarte ne les recouvre jamais ; Échap (pile) ferme le panneau du dessus et la province
+## mise de côté revient.
+const UI_RESOLUTIONS: Array[Vector2i] = [Vector2i(1280, 720), Vector2i(1440, 900), Vector2i(1920, 1080), Vector2i(2560, 1440)]
+
+
+func _run_ui_layout() -> void:
+	var real_data := _project_root().path_join("data")
+	if ClassDB.class_exists("CampaignSim") and FileAccess.file_exists(real_data.path_join("map/map.json")):
+		facade.set_data_dir(real_data)
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var scene: PackedScene = load("res://scenes/campaign_map.tscn")
+	var map: Node3D = scene.instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.load_ok and map.sim != null, "ui layout: campaign scene failed to start"):
+		map.queue_free()
+		return
+	var ui: Node = map.ui
+	var initial_size := root.size
+	var checked := 0
+	for resolution in UI_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		if root.size != resolution:
+			print("smoke ui layout: window cannot be resized here (%s), resolution %s skipped" % [root.size, resolution])
+			continue
+		var expected := clampf(resolution.y / 900.0, 0.9, 1.6)
+		_check(is_equal_approx(root.content_scale_factor, expected), "ui scale at %s should be %.3f, got %.3f" % [resolution, expected, root.content_scale_factor])
+		var view: Vector2 = ui.get_viewport().get_visible_rect().size
+		var bar: Control = ui.get_node("TopBar")
+		_check(bar.get_combined_minimum_size().x <= view.x + 1.0, "top bar (%.0f px) wider than the screen (%.0f) at %s" % [bar.get_combined_minimum_size().x, view.x, resolution])
+		# Province choisie, puis les grands panneaux un à un.
+		map.picker.select_index(1)
+		await process_frame
+		var openers := [
+			["faction", func() -> void: map._show_faction_panel(map.player_faction), ui.faction_panel, ui.faction_panel.close_button],
+			["court", func() -> void: map._on_court_panel_requested(), ui.court_panel, ui.court_panel.close_button],
+			["tech", func() -> void: map._on_tech_panel_requested(), ui.tech_panel, ui.tech_panel.close_button],
+		]
+		for entry in openers:
+			(entry[1] as Callable).call()
+			await process_frame
+			ui.layout_hud()
+			await process_frame
+			ui.layout_hud()
+			var panel: Control = entry[2]
+			var close_button: Control = entry[3]
+			if not panel.visible:
+				continue  # simulation sans cette fonction (mock)
+			var open_centrals := 0
+			for other in ui.panels.visible_panels():
+				if ui.panels.kind_of(other) == PanelStack.Kind.CENTRAL:
+					open_centrals += 1
+			_check(open_centrals == 1, "%s at %s: %d central panels open (exclusive expected)" % [entry[0], resolution, open_centrals])
+			_check(not ui.province_panel.visible, "%s at %s: the province panel should be set aside" % [entry[0], resolution])
+			var close_rect := close_button.get_global_rect()
+			_check(Rect2(Vector2.ZERO, view).encloses(close_rect), "%s at %s: close button %s off screen %s" % [entry[0], resolution, close_rect, view])
+			if ui.minimap != null and ui.minimap.visible:
+				_check(not ui.minimap.get_global_rect().intersects(panel.get_global_rect()), "%s at %s: minimap drawn over the panel" % [entry[0], resolution])
+			checked += 1
+		# Échap : ferme le panneau du dessus ; la province revient.
+		_check(ui.panels.close_top(), "escape should close the top panel at %s" % resolution)
+		_check(not ui.tech_panel.visible and ui.province_panel.visible, "province should come back after the last central panel at %s" % resolution)
+		_check(ui.panels.close_top() and not ui.province_panel.visible and map.selected_index == 0, "escape should then close and deselect the province at %s" % resolution)
+	root.size = initial_size
+	await process_frame
+	map.queue_free()
+	await process_frame
+	if _failures == 0:
+		print("smoke OK: ui layout (%d panel checks at %d resolutions, auto scale, exclusive panels, escape)" % [checked, UI_RESOLUTIONS.size()])
+
+
 func _run_minimap_fog() -> void:
 	var scene: PackedScene = load("res://scenes/campaign_map.tscn")
 	var map: Node3D = scene.instantiate()
@@ -1388,6 +1519,24 @@ func _run_assets() -> void:
 	_check(not (marker.get_node("Banner") as Node3D).visible, "placeholder banner should be hidden")
 	_check(marker.get_node_or_null("%s/SiegeCamp" % ModelLibrary.MODEL_NODE) != null, "siege camp expected")
 	marker.queue_free()
+	# Lot CV2 : figurines skinnées d'une armée (général, porte-étendard, escorte), flotte, bivouac.
+	if ArmyFigures.enabled():
+		var cv2_army := {"faction": "fac_france", "stance": "normal", "position": Vector2(100, 100),
+			"units": [{"unit_type": "unit_knights", "strength": 600}, {"unit_type": "unit_longbowmen", "strength": 900}]}
+		var cv2_figures := ArmyFigures.build(cv2_army, Color(0.2, 0.3, 0.8), null, "cv2")
+		root.add_child(cv2_figures)
+		_check(cv2_figures.figure_count() == 2 + 4, "CV2: 1 500 men → leader + bearer + 4 escort, got %d" % cv2_figures.figure_count())
+		_check(cv2_figures.get_node_or_null("Bivouac") != null, "CV2: idle army in the field should camp")
+		cv2_figures.set_walking(true)
+		cv2_figures.set_view(100.0, 1.0)
+		cv2_army["embarked"] = true
+		var cv2_fleet := ArmyFigures.build(cv2_army, Color(0.2, 0.3, 0.8), null, "cv2f")
+		root.add_child(cv2_fleet)
+		_check(cv2_fleet.ship_count() == 2, "CV2: 1 500 men at sea → 2 ships, got %d" % cv2_fleet.ship_count())
+		await process_frame
+		cv2_figures.queue_free()
+		cv2_fleet.queue_free()
+		ArmyFigures.clear_cache()
 	await process_frame
 	ModelLibrary.clear_cache()
 	PortraitLoader.clear_cache()
@@ -1459,7 +1608,7 @@ func _run_codex() -> void:
 	var bubbles: Node = root.get_node_or_null("/root/CodexBubbles")
 	if not _check(store != null and bubbles != null, "CodexStore / CodexBubbles autoloads missing"):
 		return
-	store.call("use_test_file")
+	store.call("use_test_file", _test_codex_path)
 	store.call("reload", _project_root().path_join("data/codex"))
 	var total: int = store.call("total_count")
 	_check(total >= 20, "codex should have at least 20 entries, got %d" % total)
@@ -1647,7 +1796,7 @@ func _run_table_medicine() -> void:
 	_check(alerts.size() == 2 and str(alerts[0]["kind"]) == "table", "alerts for table/medicine: %s" % [alerts])
 	var store: Node = root.get_node_or_null("/root/CodexStore")
 	if store != null:
-		store.call("use_test_file")
+		store.call("use_test_file", _test_codex_path)
 		var herbs := Herbarium.sync(sim, FACTION_ID)
 		_check(herbs.size() >= 0, "herbarium sync should ignore missing entries")
 		store.call("reset_discoveries")
@@ -2144,7 +2293,7 @@ func _run_coinage_ransom() -> void:
 		return
 	var store: Node = root.get_node_or_null("/root/CodexStore")
 	if store != null:
-		store.call("use_test_file")
+		store.call("use_test_file", _test_codex_path)
 		store.call("reload", _project_root().path_join("data/codex"))
 
 	# Vraies données (noms de provinces, encyclopédie) ; dossier précédent restauré à la fin.
@@ -2206,7 +2355,8 @@ func _run_coinage_ransom() -> void:
 		{"kind": "chivalry", "text_fr": "Ordre fondé.", "faction": FACTION_ID},
 	]
 	var groups := SeasonReport.build_groups(events, func(_event: Dictionary) -> bool: return true)
-	_check(groups.size() == 1 and (groups[0]["entries"] as Array).size() == 3, "season report group for coinage/ransom/chivalry: %s" % [groups])
+	# U5 : monnaie et rançon au « Trésor », chevalerie dans « Vos terres ».
+	_check(SeasonReport.entry_count(groups) == 3 and str(groups[0]["id"]) == "lands" and str(groups[1]["id"]) == "treasury", "season report sections for coinage/ransom/chivalry: %s" % [groups])
 	_check(SeasonReport.KIND_STYLES.has("ransom") and NewsLetters.KIND_LABELS.has("chivalry") and not NewsLetters.news_from_event(events[0]).is_empty(), "styles and letters for H11 kinds")
 
 	# Encyclopédie → Codex et Codex → Encyclopédie.

@@ -361,6 +361,9 @@ func get_faction_economy(id: String) -> Dictionary:
 		"treasury": int(faction.get("treasury", 0)),
 		"income": int(faction.get("income", 0)),
 		"projected_income": _projected_income(id, building_upkeep, army_upkeep),
+		# Le mock ajoute ce montant tel quel au trésor : c'est déjà un solde net.
+		"net_income": _projected_income(id, building_upkeep, army_upkeep),
+		"net_income_last_turn": int(faction.get("income", 0)),
 		"army_upkeep": army_upkeep,
 		"building_upkeep": building_upkeep,
 		"tax_rate": str(faction.get("tax_rate", "normal")),

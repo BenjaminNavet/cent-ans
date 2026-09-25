@@ -42,6 +42,7 @@ fn setup(attacker: Vec<UnitSetup>, defender: Vec<UnitSetup>) -> BattleSetup {
         defender: side("fac_england", "Angleterre", defender),
         player_side: None,
         siege: None,
+        siege_layout: None,
         orders: Vec::new(),
     }
 }

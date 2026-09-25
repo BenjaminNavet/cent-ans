@@ -278,10 +278,10 @@ func _debt_row(debt: Dictionary) -> Control:
 	var character_id := str(debt.get("character", ""))
 	var due := int(debt.get("next_due_turn", 0))
 	var turn := int(_sim.call("get_turn")) if _sim != null and _sim.has_method("get_turn") else -1
-	var when := "prochaine échéance au tour %d" % due
+	var when := "prochaine échéance au tour %d" % (due + 1)
 	if turn >= 0:
 		var seasons := due - turn
-		when = "prochaine échéance cette saison" if seasons <= 0 else "prochaine échéance dans %d saison(s)" % seasons
+		when = "prochaine échéance cette saison" if seasons <= 0 else "prochaine échéance dans %s" % FrText.count(seasons, "saison")
 	var subtitle := "Due à %s : reste %s, échéance %s · %s" % [
 		_faction_name(str(debt.get("creditor", ""))), _pounds(int(debt.get("remaining", 0))),
 		_pounds(int(debt.get("installment", 0))), when]

@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/battle/pre_battle_dialog.gd" id="1_dialog"]
 
-[node name="PreBattleDialog" type="PanelContainer"]
+[node name="PreBattleDialog" type="Control"]
 script = ExtResource("1_dialog")

@@ -10,6 +10,7 @@ use serde::de::DeserializeOwned;
 use crate::entities::agent::AgentRules;
 use crate::entities::ai_alignment::AiAlignment;
 use crate::entities::ai_diplomacy::AiDiplomacy;
+use crate::entities::ai_grid::AiGrid;
 use crate::entities::battle_order::BattleOrder;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
@@ -59,6 +60,8 @@ pub mod folders {
     pub const EDICTS: &str = "edicts";
     /// Chivalric orders (H6); optional folder.
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
+    /// Landmark cities (lots L1-L3); optional folder.
+    pub const LANDMARKS: &str = "landmarks";
     /// Settlements, one file per province (lot C1); optional folder.
     pub const SETTLEMENTS: &str = "settlements";
     /// Tuning of the settlement rules, inside `settlements/`; optional.
@@ -71,10 +74,18 @@ pub mod folders {
     pub const AI_ALIGNMENT: &str = "alignment.json";
     /// Inside `AI`: wars, alliances and peaces around borders (G5).
     pub const AI_DIPLOMACY: &str = "diplomacy.json";
+    /// Inside `AI`: recruitment doctrines (lot E1); optional.
+    pub const AI_DOCTRINES: &str = "doctrines.json";
+    /// Inside `AI`: the AI armies on the navigation grid (lot M3).
+    pub const AI_GRID: &str = "grid.json";
     /// Global rule tuning (lot C1: `vision.json`); optional folder.
     pub const RULES: &str = "rules";
     /// Line of sight of the campaign map, inside `rules/`; optional.
     pub const VISION_RULES: &str = "vision.json";
+    /// Phased auto-resolve coefficients (lot N1), inside `rules/`; optional.
+    pub const AUTO_RESOLVE_RULES: &str = "auto_resolve.json";
+    /// Public order tuning (lot E2), inside `rules/`; optional.
+    pub const POPULATION_RULES: &str = "population.json";
     /// General's retinue catalogue (lot C7), at the root of `data/`; optional.
     pub const RETINUE: &str = "retinue.json";
     /// Campaign agents (lot C6), inside `rules/`; optional.
@@ -196,6 +207,9 @@ pub struct GameData {
     pub edicts: BTreeMap<EdictId, Edict>,
     /// Chivalric orders (H6), empty when `data/chivalric_orders/` is absent.
     pub chivalric_orders: BTreeMap<ChivalricOrderId, ChivalricOrder>,
+    /// Landmark cities (L3: siege battles in the historical plan), empty
+    /// when `data/landmarks/` is absent.
+    pub landmarks: BTreeMap<String, crate::entities::landmark::Landmark>,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -216,8 +230,19 @@ pub struct GameData {
     /// `data/ai/diplomacy.json` (G5); the F4 constants
     /// ([`AiDiplomacy::default`]) when absent.
     pub ai_diplomacy: AiDiplomacy,
+    /// `data/ai/doctrines.json` (lot E1), absent until written: the AI then
+    /// ranks units by value alone.
+    pub ai_doctrines: Option<crate::entities::ai_doctrine::AiDoctrines>,
+    /// `data/ai/grid.json` (lot M3); [`AiGrid::default`] when absent.
+    pub ai_grid: AiGrid,
     /// `data/rules/vision.json` (lot C1, fog of war), absent until written.
     pub vision_rules: Option<VisionRules>,
+    /// `data/rules/auto_resolve.json` (lot N1); [`crate::AutoResolveRules::default`]
+    /// when absent.
+    pub auto_resolve: crate::entities::auto_resolve::AutoResolveRules,
+    /// `data/rules/population.json` (lot E2);
+    /// [`crate::PopulationRules::default`] when absent.
+    pub population_rules: crate::entities::population_rules::PopulationRules,
     /// `data/retinue.json` (lot C7), absent until written: no companion
     /// ever joins a general.
     pub retinue: Option<Retinue>,
@@ -266,6 +291,7 @@ impl GameData {
             diets: BTreeMap::new(),
             edicts: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
+            landmarks: BTreeMap::new(),
             map: None,
             province_geometry: BTreeMap::new(),
             settlements: BTreeMap::new(),
@@ -274,7 +300,11 @@ impl GameData {
             settlement_graph: Vec::new(),
             ai_alignment: None,
             ai_diplomacy: AiDiplomacy::default(),
+            ai_doctrines: None,
+            ai_grid: AiGrid::default(),
             vision_rules: None,
+            auto_resolve: Default::default(),
+            population_rules: Default::default(),
             retinue: None,
             agent_rules: None,
             movement_graph: Default::default(),
@@ -303,6 +333,10 @@ impl GameData {
         if chivalric_dir.is_dir() {
             data.chivalric_orders = load_entities(&chivalric_dir, |o: &ChivalricOrder| &o.id)?;
         }
+        let landmarks_dir = root.join(folders::LANDMARKS);
+        if landmarks_dir.is_dir() {
+            data.landmarks = load_entities(&landmarks_dir, |l: &crate::Landmark| &l.id)?;
+        }
         let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
         if alignment_path.is_file() {
             data.ai_alignment = Some(read_json(&alignment_path)?);
@@ -311,9 +345,25 @@ impl GameData {
         if diplomacy_path.is_file() {
             data.ai_diplomacy = read_json(&diplomacy_path)?;
         }
+        let doctrines_path = root.join(folders::AI).join(folders::AI_DOCTRINES);
+        if doctrines_path.is_file() {
+            data.ai_doctrines = Some(read_json(&doctrines_path)?);
+        }
+        let grid_path = root.join(folders::AI).join(folders::AI_GRID);
+        if grid_path.is_file() {
+            data.ai_grid = read_json(&grid_path)?;
+        }
         let vision_path = root.join(folders::RULES).join(folders::VISION_RULES);
         if vision_path.is_file() {
             data.vision_rules = Some(read_json(&vision_path)?);
+        }
+        let auto_resolve_path = root.join(folders::RULES).join(folders::AUTO_RESOLVE_RULES);
+        if auto_resolve_path.is_file() {
+            data.auto_resolve = read_json(&auto_resolve_path)?;
+        }
+        let population_path = root.join(folders::RULES).join(folders::POPULATION_RULES);
+        if population_path.is_file() {
+            data.population_rules = read_json(&population_path)?;
         }
         let retinue_path = root.join(folders::RETINUE);
         if retinue_path.is_file() {
