@@ -71,6 +71,9 @@ pub struct AiDiplomacy {
     /// Lot DP1: multi-article treaties, war goals and war weariness.
     #[serde(default)]
     pub negotiation: NegotiationRules,
+    /// Lot DP2: right of passage, trespass incidents, diplomatic map.
+    #[serde(default)]
+    pub passage: PassageRules,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -100,6 +103,7 @@ impl Default for AiDiplomacy {
                 cornered_provinces: 0,
             },
             negotiation: NegotiationRules::default(),
+            passage: PassageRules::default(),
             description: None,
         }
     }
@@ -170,6 +174,9 @@ pub struct NegotiationRules {
     /// Seasons of war before the AI proposes any treaty peace (unless
     /// cornered).
     pub min_war_turns: u32,
+    /// EQ3: a peace also ends the wars of the allies and vassals who joined
+    /// it (they sign the same truce).
+    pub truce_binds_allies: bool,
 }
 
 impl Default for NegotiationRules {
@@ -203,6 +210,56 @@ impl Default for NegotiationRules {
             max_weariness_gain: 3,
             sue_weariness: 60,
             min_war_turns: 0,
+            truce_binds_allies: false,
+        }
+    }
+}
+
+/// Lot DP2 (ADR 0029): an army ending its season in the lands of a faction
+/// at peace, without military access, creates a diplomatic incident whose
+/// malus grows with its duration and gives the victim a casus belli.
+/// `enabled: false` (the default without the data file) ignores trespass.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct PassageRules {
+    /// Trespass incidents are recorded.
+    pub enabled: bool,
+    /// Attitude malus of the first season of trespass.
+    pub base_penalty: i32,
+    /// Extra malus per further consecutive season.
+    pub per_season_penalty: i32,
+    /// Largest malus of one incident.
+    pub max_penalty: i32,
+    /// Seasons the victim remembers the incident after the last trespass.
+    pub memory_turns: u32,
+    /// Consecutive seasons of trespass that give the victim a casus belli.
+    pub casus_belli_seasons: u32,
+    /// Seasons tolerated while a truce holds (armies leaving after a peace).
+    pub truce_grace_seasons: u32,
+    /// AI at war: aggression (0-100) from which it crosses neutral lands.
+    pub ai_violate_aggression: i32,
+    /// AI at war: attitude towards the owner at or below which it crosses.
+    pub ai_violate_attitude: i32,
+    /// AI at war: power ratio over the owner from which it crosses.
+    pub ai_violate_power_ratio: f64,
+    /// Diplomatic map: attitude at or below which a neutral is « tension ».
+    pub tension_attitude: i32,
+}
+
+impl Default for PassageRules {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            base_penalty: 10,
+            per_season_penalty: 5,
+            max_penalty: 40,
+            memory_turns: 12,
+            casus_belli_seasons: 2,
+            truce_grace_seasons: 2,
+            ai_violate_aggression: 70,
+            ai_violate_attitude: -40,
+            ai_violate_power_ratio: 2.0,
+            tension_attitude: -20,
         }
     }
 }

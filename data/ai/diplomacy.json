@@ -38,7 +38,7 @@
     "weariness_occupied": 1,
     "weariness_bankrupt": 1,
     "weariness_recovery": 4,
-    "weariness_unrest_divisor": 5,
+    "weariness_unrest_divisor": 4,
     "weariness_peace_divisor": 4,
     "max_weariness_to_declare": 50,
     "unmet_goals_reluctance": 15,
@@ -48,6 +48,20 @@
     "pretender_reluctance": 45,
     "max_weariness_gain": 2,
     "sue_weariness": 70,
-    "min_war_turns": 20
+    "min_war_turns": 20,
+    "truce_binds_allies": true
+  },
+  "passage": {
+    "enabled": true,
+    "base_penalty": 10,
+    "per_season_penalty": 5,
+    "max_penalty": 40,
+    "memory_turns": 12,
+    "casus_belli_seasons": 2,
+    "truce_grace_seasons": 2,
+    "ai_violate_aggression": 70,
+    "ai_violate_attitude": -40,
+    "ai_violate_power_ratio": 2.0,
+    "tension_attitude": -20
   }
 }
