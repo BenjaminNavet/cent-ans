@@ -247,7 +247,8 @@ func set_walking(value: bool) -> void:
 ## troupe tourne) ; pour une flotte, pied de la hampe de poupe du navire amiral.
 func bearer_anchor() -> Vector3:
 	if kind == "fleet":
-		return Basis(Vector3.UP, rotation.y) * (STERN_STAFF * SHIP_SCALE)
+		# Hampe enfoncée dans le château de poupe (étendard au-dessus du mât, lisible).
+		return Basis(Vector3.UP, rotation.y) * (STERN_STAFF * SHIP_SCALE) - Vector3(0.0, 3.0, 0.0)
 	var local := Vector3(BEARER_SLOT.x + POLE_IN_HAND.x, 0.0, BEARER_SLOT.y + POLE_IN_HAND.y)
 	return Basis(Vector3.UP, rotation.y) * local
 
