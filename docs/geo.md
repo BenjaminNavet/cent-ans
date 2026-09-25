@@ -35,6 +35,7 @@ uv run --project tools cent-ans geo roads --computed # routes entièrement calcu
 uv run --project tools cent-ans geo settlements      # graphe des colonies seul et tracé routier des arêtes (≈ 7 s), après modification de data/settlements
 uv run --project tools cent-ans geo hamlets          # hameaux GeoNames (≈ 5 s)
 uv run --project tools cent-ans geo info             # métadonnées, plage d'altitudes, fraction de terre, tailles
+uv run --project tools cent-ans geo relief-all       # cache du relief fin E1-E7 + fleuves et routes fins, hors git (≈ 2,8 Go, heures ; --check pour l'état), voir « Cache du relief fin »
 uv run --project tools pytest tests/test_geo.py      # tests sans réseau (grille, encodage des altitudes)
 ```
 
@@ -291,6 +292,61 @@ Ordre de régénération : `geo relief-shade` (après `geo build`) puis `geo lan
   bruit + terrain, essarts autour des villes et hameaux), `wetlands.png` (RGB : marais, étangs,
   prés humides, depuis `wetlands.json` et les fonds de vallée), `forest_kind.png` (L8 2048², part
   de résineux, pour le rendu des forêts). ≈ 70 s.
+
+## Cache du relief fin : pipeline complet des paliers 1-3 (lot ZG7b, ADR 0036)
+
+La carte zoomable (chantier ZG) lit un cache **non versionné** sous `data/map/pyramid/` :
+tuiles de relief E1-E7 et tuiles fines des fleuves et des routes. Sans lui, le jeu garde le relief
+E0 (360 m), la caméra s'arrête vers 7 unités et la carte de campagne affiche l'avis « Relief
+rapproché limité » (une fois par session, fermable) avec la commande ci-dessous. Les manifestes,
+eux, sont versionnés (`relief_pyramid.json`, `rivers_fine.json`, `fine_anchors.json`) : ils
+disent quelles tuiles doivent exister.
+
+```sh
+uv run --project tools cent-ans geo relief-all --check   # état : tuiles présentes / attendues par étage, bruts ; code 1 si incomplet
+uv run --project tools cent-ans geo relief-all           # régénère ce qui manque, dans l'ordre, avec reprise
+uv run --project tools cent-ans geo relief-all --force   # recuit tout depuis zéro
+```
+
+`geo relief-all` (`geo/relief_cache.py`) contrôle chaque tuile listée (≈ 15 000 `stat`, moins
+d'une seconde), puis enchaîne seulement les étapes utiles :
+
+| # | Étape | Produit | Bruts téléchargés (`tools/geo/raw/`) | Durée mesurée (M4 Pro, 14 cœurs) |
+|---|---|---|---|---|
+| 1 | `geo pyramid --levels 1,2` | E1-E2 (palier 1, 180 → 90 m), 1 382 tuiles, 0,41 Go | Copernicus GLO-90 `copernicus/` 0,96 Go, ETOPO `etopo2022/` 0,28 Go (et le cache `copernicus_cache/` de `geo relief-shade`) | ≈ 1 min |
+| 2 | `geo pyramid --levels 3,4` | E3-E4 (palier 2, 45 → 22 m), 8 451 tuiles, 2,1 Go | GLO-30 `copernicus30/` 4,8 Go (172 tuiles), ESA WorldCover `worldcover/` 1,4 Go ; travail `pyramid_work/` 0,6 Go | téléchargement ≈ 6,5 min, cuisson plusieurs heures (non mesurée d'un trait : reprise après coupure) |
+| 3 | `geo detail-dem` (`--force` si l'étape 2 a écrit des tuiles : les zones sont refondues dans E4) | E5-E7 (palier 3, 11 → 2,8 m) sur les 34 zones, 2 110 tuiles, 0,2 Go | MNT nationaux + OSM `detail/` 1,3 Go | ≈ 30 min téléchargements compris, 12 min de cuisson |
+| 4 | `geo hydro-fine` | fleuves fins `pyramid/hydro_fine/`, 1 306 tuiles, 39 Mo | BD TOPAGE, OS Open Rivers, EU-Hydro `hydro/` 2,7 Go | ≈ 2 à 10 min |
+| 5 | `geo anchors-fine` | routes drapées `pyramid/roads_fine/`, 1 261 tuiles, 13 Mo (+ `fine_anchors.json`) | — | ≈ 1-2 min |
+
+Règles d'enchaînement : une étape manquante est lancée, et toute étape en aval d'une étape lancée
+l'est aussi (4 et 5 relisent le relief le plus fin, 3 se fond dans E4). Chaque commande reprend
+ce qui est déjà sur le disque (tuiles présentes sautées, marqueurs `done_E<k>.json` de ZG3,
+lots de recalage en cache de ZG5a) : après une interruption, relancer `geo relief-all`. Les
+bruts déjà téléchargés ne le sont jamais une seconde fois.
+
+- **Disque** : cache ≈ 2,8 Go (relevé du 25/09/2026 : E1 94 Mo, E2 311 Mo, E3 491 Mo, E4 1,6 Go,
+  E5 51 Mo, E6 83 Mo, E7 71 Mo, fleuves 39 Mo, routes 13 Mo) ; bruts ≈ 11 Go en plus
+  (`tools/geo/raw/`, supprimables une fois le cache cuit, sauf à vouloir recuire). Plafonds de
+  l'ADR 0036 : bruts ≤ 20 Go, pyramide ≤ 4 Go.
+- **Coût** : 0 $ (services publics HTTPS anonymes, sans clé).
+- **Prérequis** : `geo build`, `geo relief-shade` et `geo landcover` déjà faits (fichiers
+  versionnés de `data/map/`), réseau pour les téléchargements.
+- **Worktrees d'agents** : ne jamais recuire ; lier `data/map/pyramid` et `tools/geo/raw` au
+  dépôt principal (liens symboliques).
+- **Jeu exporté** : `tools/export_macos.sh` copie le cache avec les données (voir l'addendum ZG7b
+  de l'ADR 0036 et `docs/godot-map.md`, « Vue d'ensemble ZG »).
+
+Sources et licences des paliers :
+
+| Palier | Source | Licence / attribution exigée |
+|---|---|---|
+| 1 (E1-E2) | Copernicus DEM GLO-90 (ESA, programme Copernicus), bucket public `copernicus-dem-90m` | licence Copernicus DEM (usage libre, attribution) : « © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved » |
+| 2 (E3-E4) | Copernicus DEM GLO-30, bucket public `copernicus-dem-30m` ; ESA WorldCover 10 m 2021 v200 (correction canopée et bâti) | GLO-30 : même mention ; WorldCover : CC BY 4.0, « © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium » |
+| 3 (E5-E7) | IGN RGE ALTI® 1 m / 5 m (France, WMS-R Géoplateforme), Environment Agency LIDAR Composite DTM 1 m (Angleterre), AHN DTM 0,5 m (Pays-Bas, PDOK), DHM Vlaanderen II / I (Flandre) ; repli GLO-30 (Wallonie) ; anachronismes d'OpenStreetMap (Overpass, méthode seulement) | IGN : Licence Ouverte Etalab 2.0, « Source : IGN – RGE ALTI® » ; EA : Open Government Licence v3.0, « © Environment Agency copyright and/or database right 2022. All rights reserved. » ; AHN : CC0 1.0 ; DHM Vlaanderen : Modellicentie Gratis Hergebruik v1.0, mention « © Digitaal Vlaanderen » ; OSM : ODbL 1.0, « © les contributeurs d'OpenStreetMap » |
+| Fleuves fins | BD TOPAGE® 2025 (IGN, OFB ; SANDRE), OS Open Rivers, EU-Hydro v1.3 (AEE, Copernicus), Natural Earth | Licence Ouverte Etalab 2.0, « Source : BD TOPAGE® – IGN, OFB » ; OGL v3, « Contains OS data © Crown copyright and database right 2026. » ; politique de données Copernicus, « © European Union, Copernicus Land Monitoring Service 2020, European Environment Agency (EEA). » ; domaine public |
+
+Mentions complètes et textes d'attribution : `CREDITS.md` (section « Données géographiques »).
 
 ## Relief palier 3 : zones de détail E5-E7 (lot ZG3, ADR 0036)
 
