@@ -1,0 +1,258 @@
+{
+ "barn_0": {
+  "depth": 9.15,
+  "height": 11.83,
+  "kind": "barn",
+  "length": 12.22,
+  "ruined": false,
+  "triangles": 50
+ },
+ "barn_1": {
+  "depth": 8.17,
+  "height": 11.53,
+  "kind": "barn",
+  "length": 14.17,
+  "ruined": false,
+  "triangles": 68
+ },
+ "cathedral_0": {
+  "depth": 39.77,
+  "height": 85.22,
+  "kind": "cathedral",
+  "length": 102.43,
+  "ruined": false,
+  "triangles": 905
+ },
+ "church_0": {
+  "depth": 8.0,
+  "height": 25.2,
+  "kind": "church",
+  "length": 19.0,
+  "ruined": false,
+  "triangles": 217
+ },
+ "church_1": {
+  "depth": 9.0,
+  "height": 29.1,
+  "kind": "church",
+  "length": 24.0,
+  "ruined": false,
+  "triangles": 217
+ },
+ "church_2": {
+  "depth": 13.0,
+  "height": 40.63,
+  "kind": "church",
+  "length": 36.0,
+  "ruined": false,
+  "triangles": 225
+ },
+ "cottage_0": {
+  "depth": 5.76,
+  "height": 6.53,
+  "kind": "cottage",
+  "length": 10.15,
+  "ruined": false,
+  "triangles": 224
+ },
+ "cottage_1": {
+  "depth": 5.67,
+  "height": 7.78,
+  "kind": "cottage",
+  "length": 7.68,
+  "ruined": false,
+  "triangles": 72
+ },
+ "cottage_2": {
+  "depth": 5.61,
+  "height": 7.66,
+  "kind": "cottage",
+  "length": 8.75,
+  "ruined": false,
+  "triangles": 88
+ },
+ "cottage_3": {
+  "depth": 5.53,
+  "height": 7.45,
+  "kind": "cottage",
+  "length": 9.12,
+  "ruined": false,
+  "triangles": 74
+ },
+ "hall_0": {
+  "depth": 12.17,
+  "height": 10.27,
+  "kind": "hall",
+  "length": 22.97,
+  "ruined": false,
+  "triangles": 550
+ },
+ "longere_0": {
+  "depth": 6.03,
+  "height": 7.24,
+  "kind": "longere",
+  "length": 18.11,
+  "ruined": false,
+  "triangles": 94
+ },
+ "longere_1": {
+  "depth": 6.02,
+  "height": 6.85,
+  "kind": "longere",
+  "length": 14.15,
+  "ruined": false,
+  "triangles": 111
+ },
+ "longere_2": {
+  "depth": 6.3,
+  "height": 7.87,
+  "kind": "longere",
+  "length": 16.66,
+  "ruined": false,
+  "triangles": 96
+ },
+ "manor_0": {
+  "depth": 8.03,
+  "height": 22.21,
+  "kind": "manor",
+  "length": 22.27,
+  "ruined": false,
+  "triangles": 227
+ },
+ "manor_1": {
+  "depth": 7.71,
+  "height": 23.79,
+  "kind": "manor",
+  "length": 20.37,
+  "ruined": false,
+  "triangles": 231
+ },
+ "stonehouse_0": {
+  "depth": 7.62,
+  "height": 10.88,
+  "kind": "stonehouse",
+  "length": 11.83,
+  "ruined": false,
+  "triangles": 170
+ },
+ "stonehouse_1": {
+  "depth": 8.22,
+  "height": 11.66,
+  "kind": "stonehouse",
+  "length": 12.16,
+  "ruined": false,
+  "triangles": 149
+ },
+ "stonehouse_2": {
+  "depth": 8.47,
+  "height": 11.11,
+  "kind": "stonehouse",
+  "length": 12.61,
+  "ruined": false,
+  "triangles": 182
+ },
+ "timber_0": {
+  "depth": 8.37,
+  "height": 12.95,
+  "kind": "timber",
+  "length": 11.44,
+  "ruined": false,
+  "triangles": 430
+ },
+ "timber_1": {
+  "depth": 7.02,
+  "height": 10.85,
+  "kind": "timber",
+  "length": 11.42,
+  "ruined": false,
+  "triangles": 285
+ },
+ "timber_2": {
+  "depth": 7.56,
+  "height": 10.94,
+  "kind": "timber",
+  "length": 11.2,
+  "ruined": false,
+  "triangles": 459
+ },
+ "timber_3": {
+  "depth": 7.52,
+  "height": 10.93,
+  "kind": "timber",
+  "length": 11.69,
+  "ruined": false,
+  "triangles": 434
+ },
+ "timber_4": {
+  "depth": 6.78,
+  "height": 11.33,
+  "kind": "timber",
+  "length": 8.3,
+  "ruined": false,
+  "triangles": 416
+ },
+ "townhouse_0": {
+  "depth": 12.17,
+  "height": 14.31,
+  "kind": "townhouse",
+  "length": 6.6,
+  "ruined": false,
+  "triangles": 612
+ },
+ "townhouse_1": {
+  "depth": 11.32,
+  "height": 13.52,
+  "kind": "townhouse",
+  "length": 6.45,
+  "ruined": false,
+  "triangles": 600
+ },
+ "townhouse_2": {
+  "depth": 10.94,
+  "height": 12.91,
+  "kind": "townhouse",
+  "length": 6.1,
+  "ruined": false,
+  "triangles": 594
+ },
+ "townhouse_3": {
+  "depth": 11.5,
+  "height": 12.96,
+  "kind": "townhouse",
+  "length": 5.97,
+  "ruined": false,
+  "triangles": 438
+ },
+ "townhouse_4": {
+  "depth": 13.03,
+  "height": 14.55,
+  "kind": "townhouse",
+  "length": 6.82,
+  "ruined": false,
+  "triangles": 622
+ },
+ "townhouse_5": {
+  "depth": 11.34,
+  "height": 13.62,
+  "kind": "townhouse",
+  "length": 5.33,
+  "ruined": false,
+  "triangles": 596
+ },
+ "well_0": {
+  "depth": 2.2,
+  "height": 3.4,
+  "kind": "well",
+  "length": 2.2,
+  "ruined": false,
+  "triangles": 100
+ },
+ "windmill_0": {
+  "depth": 7.0,
+  "height": 14.53,
+  "kind": "windmill",
+  "length": 7.0,
+  "ruined": false,
+  "triangles": 200
+ }
+}
