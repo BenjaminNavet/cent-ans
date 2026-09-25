@@ -90,6 +90,8 @@ func _run() -> void:
 		await phase_q2_tutorial()
 	if phase == "q2misc":
 		await phase_q2_misc()
+	if phase == "q2edicts":
+		await phase_q2_edicts()
 	if phase in ["all", "battle"]:
 		await phase_battle()
 	if phase in ["all", "siege"]:
@@ -263,6 +265,21 @@ func phase_q2_misc() -> void:
 		await dismiss_dialogs()
 		await wait(20)
 		log_q1("q2 turn %d after dismiss: report %s, chronicle %s" % [turn + 2, report != null and report.visible, chronicle.visible])
+
+
+## Q2 : section des édits en tête de l'onglet Ville, visible sans défiler.
+func phase_q2_edicts() -> void:
+	var capital := str(GameCatalog.definitions("factions").get(map.player_faction, {}).get("capital", ""))
+	map.picker.select_index(map.map_data.index_of_id(capital))
+	await wait(20)
+	var panel: Control = map.ui.province_panel
+	panel.tabs.current_tab = 1
+	await wait(20)
+	var section: Control = panel.edict_section
+	var scroll: Control = panel.tabs.get_current_tab_control()
+	var inside := scroll.get_global_rect().encloses(section.get_global_rect()) if section.visible else false
+	log_q1("q2 edicts: section visible %s, fully in view %s" % [section.visible, inside])
+	await shot("q2-edicts")
 
 
 func _settlement_panel_visible() -> bool:
