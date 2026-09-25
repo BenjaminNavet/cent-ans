@@ -44,10 +44,10 @@
     "unmet_goals_reluctance": 15,
     "demand_score": 20,
     "ai_min_chance": 60,
-    "peace_truce_turns": 10,
+    "peace_truce_turns": 8,
     "pretender_reluctance": 35,
     "max_weariness_gain": 2,
     "sue_weariness": 70,
-    "min_war_turns": 16
+    "min_war_turns": 20
   }
 }

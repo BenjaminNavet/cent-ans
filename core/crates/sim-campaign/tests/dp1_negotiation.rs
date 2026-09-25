@@ -362,6 +362,7 @@ fn counter_proposal_finds_what_it_would_take() {
     let mut state = start(&data, "fac_france", 12);
     let (fr, en) = (fac("fac_france"), fac("fac_england"));
     state.factions.get_mut(&fr).unwrap().treasury = 50_000;
+    state.factions.get_mut(&en).unwrap().ledger.weariness = 80;
     let greedy = vec![Article::Peace, cede(Party::Recipient, "prov_guyenne")];
     let before = evaluate_treaty(&state, &data, &fr, &en, &greedy).chance;
     let counter = counter_proposal(&state, &data, &fr, &en, &greedy).expect("a counter-offer");
@@ -469,6 +470,8 @@ fn the_ai_winner_demands_what_it_holds() {
     }
     set_battle_score(&mut state, "fac_france", "fac_england", 60);
     state.factions.get_mut(&en).unwrap().ledger.weariness = 80;
+    // Past the minimum length of a war.
+    state.turn = 40;
     let order = negotiation::plan_peace(&state, &data, &fr).expect("France treats");
     let Order::ProposeTreaty { target, articles } = order else {
         panic!("a treaty");
