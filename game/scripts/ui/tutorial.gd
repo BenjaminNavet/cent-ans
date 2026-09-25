@@ -14,6 +14,8 @@ signal skip_all_pressed
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const PANEL_WIDTH := 500.0
 const BOTTOM_MARGIN := 18.0
+## Q2 : hauteur laissée au journal replié (bas gauche) quand le parchemin se range à gauche.
+const JOURNAL_CLEARANCE := 110.0
 const HALO_COLOR := Color(0.85, 0.55, 0.10)
 const ARROW_COLOR := Color(0.55, 0.12, 0.08)
 const MUTED := "#6b5a40"
@@ -30,6 +32,9 @@ var skip_all_button: Button
 ## Cible courante : `{rect: Rect2}` (contrôle) ou `{point: Vector2}` (carte), vide sinon.
 var target: Dictionary = {}
 var _time := 0.0
+
+
+var avoid_rects: Array = []
 
 
 func _ready() -> void:
@@ -135,11 +140,28 @@ func set_target(new_target: Dictionary) -> void:
 	target = new_target
 
 
+## Q2 : panneaux ouverts (coordonnées globales) que le parchemin ne doit pas couvrir ; il se
+## range alors dans l'espace libre à leur gauche.
+func set_avoid(rects: Array) -> void:
+	avoid_rects = rects
+
+
 func _process(delta: float) -> void:
 	_time += delta
 	if visible:
-		# Calé en bas au centre, quelle que soit la hauteur du texte de l'étape.
-		panel.position = Vector2(roundf((size.x - panel.size.x) * 0.5), size.y - panel.size.y - BOTTOM_MARGIN)
+		# Calé en bas au centre, quelle que soit la hauteur du texte de l'étape ; Q2 : à gauche
+		# d'un panneau ouvert qu'il couvrirait (liste des bâtiments, onglets…).
+		var spot := Vector2(roundf((size.x - panel.size.x) * 0.5), size.y - panel.size.y - BOTTOM_MARGIN)
+		var origin := get_global_rect().position
+		var left_edge := size.x
+		for rect in avoid_rects:
+			var local := Rect2((rect as Rect2).position - origin, (rect as Rect2).size)
+			if local.intersects(Rect2(spot, panel.size)):
+				left_edge = minf(left_edge, local.position.x)
+		if left_edge < size.x:
+			spot.x = maxf(16.0, roundf((left_edge - panel.size.x) * 0.5))
+			spot.y = maxf(16.0, spot.y - JOURNAL_CLEARANCE)
+		panel.position = spot
 		queue_redraw()
 
 

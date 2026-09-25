@@ -9,6 +9,8 @@ extends Control
 signal closed
 
 var settings: Node = null
+## Onglet ouvert d'emblée (nom d'onglet, ex. « Son » pour Menu → Son…) ; "" = le premier.
+var initial_tab: String = ""
 var _controls: Dictionary = {}  # clé → contrôle
 
 
@@ -50,6 +52,9 @@ func _ready() -> void:
 		_build_sound(_tab(tabs, "Son"))
 		_build_controls(_tab(tabs, "Commandes"))  # U7
 		_build_accessibility(_tab(tabs, "Accessibilité"))  # U12
+		var start_tab := tabs.get_node_or_null(initial_tab) if initial_tab != "" else null
+		if start_tab != null:
+			tabs.current_tab = start_tab.get_index()
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_END
 	buttons.add_theme_constant_override("separation", 10)

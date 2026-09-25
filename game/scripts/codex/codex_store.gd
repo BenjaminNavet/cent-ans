@@ -24,13 +24,16 @@ const FAMILIES := [
 	["Table", ["cuisine", "ingredient", "recette"], "Table"],
 	["Médecine et herbier", ["medecine", "plante"], "Médecine"],
 	["Savoirs", ["savoir"], "Savoirs"],
+	["Armées, navires et bâtiments", ["unite", "batiment", "technique"], "Armées"],
+	["Mécaniques du jeu", ["mecanique"], "Le jeu"],
 ]
 const CATEGORY_LABELS := {
 	"personnage": "Personnage", "dynastie": "Dynastie", "lieu": "Lieu", "bataille": "Bataille",
 	"evenement": "Événement", "institution": "Institution", "societe": "Société",
 	"guerre": "Guerre", "religion": "Religion", "economie": "Économie", "cuisine": "Cuisine",
 	"ingredient": "Ingrédient", "recette": "Recette", "medecine": "Médecine", "plante": "Plante",
-	"savoir": "Savoir", "vie_quotidienne": "Vie quotidienne",
+	"savoir": "Savoir", "vie_quotidienne": "Vie quotidienne", "mecanique": "Mécanique du jeu",
+	"batiment": "Bâtiment", "unite": "Unité", "technique": "Technique",
 }
 
 var entries: Dictionary = {}  # id → fiche

@@ -26,9 +26,6 @@ const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/music/"
 const SFX_VOICES := 6
 const FADE_SECONDS := 1.5
-## Q1 : 900 était aussi l'id de « Objectifs (O) » (victory_controller) : les deux s'ouvraient ensemble.
-const SOUND_MENU_ID := 930
-
 ## Effet par type d'événement du journal, par priorité décroissante.
 const EVENT_SFX := [
 	["battle", "sword_clash"],
@@ -381,23 +378,3 @@ func make_volume_controls() -> Control:
 		slider.value_changed.connect(func(value: float) -> void: set_bus_volume(bus_name, value))
 		grid.add_child(slider)
 	return grid
-
-
-## Ajoute « Son… » au menu de la carte ; ouvre une fenêtre avec les curseurs.
-func add_sound_menu(popup: PopupMenu, host: Node) -> void:
-	popup.add_separator()
-	popup.add_item("Son…", SOUND_MENU_ID)
-	popup.id_pressed.connect(func(id: int) -> void:
-		if id == SOUND_MENU_ID:
-			_open_sound_dialog(host))
-
-
-func _open_sound_dialog(host: Node) -> void:
-	var dialog := AcceptDialog.new()
-	dialog.title = "Son"
-	dialog.ok_button_text = "Fermer"
-	dialog.add_child(make_volume_controls())
-	dialog.confirmed.connect(dialog.queue_free)
-	dialog.canceled.connect(dialog.queue_free)
-	host.add_child(dialog)
-	dialog.popup_centered(Vector2i(420, 260))

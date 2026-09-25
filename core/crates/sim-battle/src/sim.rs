@@ -29,7 +29,7 @@ use crate::rng::BattleRng;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
 use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
-use crate::unit::{Formation, Unit, UnitState};
+use crate::unit::{Formation, Unit, UnitFate, UnitState};
 
 /// Fixed simulation step, in seconds.
 pub const DT: f64 = 0.1;
@@ -2075,13 +2075,7 @@ impl BattleSim {
         }
         kills *= self.smoke_factor(shooter, target);
         let aim = (target.x, target.z);
-        let reload = if shooter.category == UnitCategory::Siege {
-            12.0
-        } else if shooter.has(Ability::Pavise) {
-            9.0
-        } else {
-            6.0
-        };
+        let reload = shooter.reload_period();
         let heading = angle_to(target.x - shooter.x, target.z - shooter.z);
         let kills = kills.min(self.units[t].hp);
         let cover = if target.on_wall {
@@ -2203,7 +2197,7 @@ impl BattleSim {
         };
         self.record_shot(shot);
         let shooter = &mut self.units[i];
-        shooter.reload = 12.0;
+        shooter.reload = crate::shot::ENGINE_RELOAD;
         shooter.ammo = shooter.ammo.saturating_sub(1);
         shooter.facing = turn_towards(shooter.facing, heading, 0.5);
         if shooter.state != UnitState::Marching {
@@ -2652,6 +2646,14 @@ impl BattleSim {
                 losses[unit.setup_index] = unit.initial_soldiers.saturating_sub(unit.soldiers());
             }
             let won = side == winner;
+            let fates: Vec<UnitFate> = self
+                .units
+                .iter()
+                .filter(|u| u.side == side && !u.synthetic)
+                .map(Unit::fate)
+                .collect();
+            let withdrew =
+                !won && fates.contains(&UnitFate::Withdrawn) && !fates.contains(&UnitFate::Routed);
             SideResult {
                 total_losses: losses.iter().sum(),
                 losses,
@@ -2660,6 +2662,7 @@ impl BattleSim {
                 general_killed: self.general_killed[side.index()],
                 general_captured: self.general_captured[side.index()],
                 no_quarter: self.no_quarter[side.index()],
+                withdrew,
             }
         };
         Some(BattleOutcome {

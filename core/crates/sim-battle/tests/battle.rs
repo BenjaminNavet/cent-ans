@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use data_model::{GameData, Terrain, UnitTypeId};
 use sim_battle::{
     BattleSeason, BattleSetup, BattleSim, Command, CommandError, Formation, GeneralSetup, SideId,
-    SideSetup, UnitSetup, UnitState, Weather, DT,
+    SideSetup, UnitFate, UnitSetup, UnitState, Weather, DT,
 };
 
 fn data() -> GameData {
@@ -596,4 +596,41 @@ fn full_ai_battle_on_a_river_field_finishes() {
         .map(|u| u.soldiers())
         .sum();
     assert_eq!(transforms.len() as u32, living);
+}
+
+#[test]
+fn general_retreat_reports_withdrawn_regiments() {
+    let data = data();
+    let mut sim = lab(
+        vec![unit(&data, "unit_knights"), unit(&data, "unit_longbowmen")],
+        vec![unit(&data, "unit_urban_militia")],
+    );
+    sim.set_end_conditions(true);
+    run(&mut sim, 1.0);
+    // Q2: the whole attacker army sounds the retreat; the battle ends at once.
+    sim.issue_command(Command::Withdraw { units: vec![0, 1] })
+        .unwrap();
+    run(&mut sim, 1.0);
+    assert!(sim.is_finished());
+    assert_eq!(sim.units()[0].fate(), UnitFate::Withdrawn);
+    assert_eq!(sim.units()[1].fate(), UnitFate::Withdrawn);
+    assert_eq!(sim.units()[2].fate(), UnitFate::Held);
+    let outcome = sim.outcome().unwrap();
+    assert_eq!(outcome.winner, SideId::Defender);
+    assert!(outcome.attacker.withdrew);
+    assert!(!outcome.defender.withdrew);
+}
+
+#[test]
+fn unit_fate_follows_losses_and_rout() {
+    let data = data();
+    let mut sim = lab(
+        vec![unit(&data, "unit_knights")],
+        vec![unit(&data, "unit_urban_militia")],
+    );
+    assert_eq!(sim.units()[0].fate(), UnitFate::Held);
+    sim.units_mut()[0].state = UnitState::Routing;
+    assert_eq!(sim.units()[0].fate(), UnitFate::Routed);
+    sim.units_mut()[1].hp = 0.0;
+    assert_eq!(sim.units()[1].fate(), UnitFate::Destroyed);
 }
