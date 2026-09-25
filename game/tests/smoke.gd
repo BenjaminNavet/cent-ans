@@ -2312,6 +2312,11 @@ func _check_siege_f5c(scene: BattleScene) -> void:
 	_check(same, "siege scene: %d houses rendered for %d simulation houses" % [sites.size(), houses.size()])
 	await _check_battle_deployment_f5c(scene)
 	_check(not scene.hud.siege_label.text.contains("sortie"), "siege scene: no sortie at the start")
+	# FB1 : plafond de figurines (taille des unités abaissée au-delà du plafond).
+	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 4000, 15000), 2.5), "figure budget: small battle kept at Ultra")
+	_check(is_equal_approx(BattleScene.capped_figure_scale(2.5, 10000, 15000), 1.5), "figure budget: large battle not capped")
+	_check(is_equal_approx(BattleScene.capped_figure_scale(1.0, 3000, 0), 1.0), "figure budget: zero budget should mean no cap")
+	_check(SettingsMenu._thousands(15000) == "15\u00a0000", "settings: thousands separator")
 	_check(BattleScene.siege_status({"pieces": [], "sortie": true}).contains("sortie de la garnison"), "siege scene: sortie not shown in the siege status")
 
 

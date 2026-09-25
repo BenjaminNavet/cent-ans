@@ -289,7 +289,7 @@ func begin() -> bool:
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
 	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
 	if not _no_bv1:
-		battle.call("set_figure_scale", _unit_size())
+		battle.call("set_figure_scale", _figure_scale())
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -489,6 +489,27 @@ func _unit_size() -> float:
 		return _unit_size_override
 	var settings := get_node_or_null("/root/Settings")
 	return float(settings.call("get_value", "battle/unit_size")) if settings != null else 1.0
+
+
+## FB1 : taille des unités effective. Le multiplicateur choisi est abaissé pour que le total de
+## figurines tienne dans « Figurines maximum » (`battle/max_figures`) ; `--unit-size=` l'emporte.
+func _figure_scale() -> float:
+	if _unit_size_override > 0.0:
+		return _unit_size_override
+	var settings := get_node_or_null("/root/Settings")
+	var budget: int = int(settings.call("get_value", "battle/max_figures")) if settings != null else 0
+	var men := 0
+	for unit in battle.call("get_units"):
+		men += int(unit.get("soldiers", 0))
+	return BattleScene.capped_figure_scale(_unit_size(), men, budget)
+
+
+## Multiplicateur de figurines borné par le plafond `budget` pour `men` hommes simulés
+## (0 = pas de plafond).
+static func capped_figure_scale(unit_size: float, men: int, budget: int) -> float:
+	if men <= 0 or budget <= 0:
+		return unit_size
+	return minf(unit_size, float(budget) / float(men))
 
 
 func _blood_level() -> int:
