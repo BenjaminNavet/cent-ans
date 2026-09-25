@@ -273,3 +273,30 @@ def test_width_anchor_names_resolve() -> None:
         for name in river["names"]:
             key = hydro_fine.normalise_name(name)
             assert seen.setdefault(key, river["id"]) == river["id"], name
+
+
+def test_fine_relief_prefers_finest_level(tmp_path: Path) -> None:
+    """The sampler reads E5 where a tile exists, E0 elsewhere."""
+    from cent_ans_tools.geo import fine_relief, terrain
+
+    bounds = (0.0, 0.0, 8192.0 * 100.0, 8192.0 * 100.0)  # E0 pixel = 100 m
+    (tmp_path / "height").mkdir()
+    terrain.write_png16(
+        terrain.height_to_uint16(np.full((512, 512), 10.0)),
+        tmp_path / "height" / "h_0_0.png",
+    )
+    (tmp_path / "pyramid" / "E5").mkdir(parents=True)
+    terrain.write_png16(
+        terrain.height_to_uint16(np.full((512, 512), 42.0)),
+        tmp_path / "pyramid" / "E5" / "0_0.png",
+    )
+    relief = fine_relief.FineRelief(tmp_path, bounds)
+    top = bounds[3]
+    # E5 tile (0, 0) covers 512 * 100 / 32 = 1600 m from the north-west corner.
+    inside = relief.sample(np.array([800.0]), np.array([top - 800.0]))
+    outside = relief.sample(np.array([20000.0]), np.array([top - 20000.0]))
+    assert inside[0] == pytest.approx(42.0, abs=0.1)
+    assert outside[0] == pytest.approx(10.0, abs=0.1)
+    assert relief.finest_level(
+        np.array([800.0, 20000.0]), np.array([top - 800.0, top - 20000.0])
+    ).tolist() == [5, 0]
