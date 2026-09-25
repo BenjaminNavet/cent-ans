@@ -68,8 +68,8 @@ jusqu'à 28 800 soldats. Il reste de la marge.
 - Correction du banc : `first_settle_ms` comptait deux fois l'attente.
 
 ## Pistes non traitées (par ordre de gain estimé)
-- Végétation : `VegetationMask.sample` (~35-110 ms par tuile, un dictionnaire par point) ; le
-  bocage garde des haies chères (`p_max` haut) → portage natif possible si besoin.
+- ~~Végétation : portage natif~~ → fait en PB2 (ADR 0062, `docs/wip/pb2-vegetation-shader.md`) ;
+  reste `VegetationMask.sample` (25-35 ms par tuile, hors fil).
 - Shader du terrain (~12 ms GPU de près) : partagé avec ZG/R1/CM2, en évolution. Profiler par
   bloc (parcellaire `field_at`, couches, côtes) avant de toucher.
 - Premier `refresh_all` au chargement (~800 ms : croissance des colonies 384 ms, figurines).

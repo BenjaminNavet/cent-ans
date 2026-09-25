@@ -89,7 +89,8 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	if terrain == null or terrain.quadtree == null or OS.get_cmdline_user_args().has("--no-fine-geo"):
 		return false
 	store = FineGeoStore.new()
-	if not store.load_from(map_data.map_dir) or not store.available(CafvTile.LAYER_RIVERS):
+	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)  # ZG7b
+	if not store.load_from(map_data.map_dir, relief_root) or not store.available(CafvTile.LAYER_RIVERS):
 		store = null
 		return false
 	enabled = true

@@ -581,7 +581,10 @@ func _setup_quadtree() -> void:
 	if not pyramid_enabled:
 		return
 	var relief := ReliefPyramid.new()
-	if not relief.load_manifest(map_data.map_dir, manifest):
+	# ZG7b : pyramide livrée à part (`MapPaths.relief_root_for`), sauf manifeste d'essai.
+	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)
+	var tiles_override := relief_root.path_join("pyramid") if manifest == "" and relief_root != map_data.map_dir else ""
+	if not relief.load_manifest(map_data.map_dir, manifest, tiles_override):
 		return
 	pyramid = relief
 	quadtree = ReliefQuadtree.new()
