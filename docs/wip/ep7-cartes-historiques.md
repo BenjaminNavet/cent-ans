@@ -19,14 +19,25 @@ EP9 (fin de bataille).
   campagne (province + années du `campaign` de la carte).
 
 ## État
-- [x] Squelette : schéma, test pytest, `historical.rs`, `sim/scenario.rs`, test Rust, Crécy stub.
-- [ ] Outil `cent-ans geo battle-site` (relief GLO-30 + tuile d'horizon du site).
-- [ ] Crécy complet (site, décor, ordre de bataille, équilibre ≥ 7/10).
-- [ ] Pont GDExtension + menu « Batailles historiques » + scène.
-- [ ] Entrée depuis la campagne.
-- [ ] Azincourt, puis Poitiers.
-- [ ] Captures `docs/img/ep7/`, ADR 0035, vérifications finales.
+- [x] Squelette : schéma, test pytest, `historical.rs`, `sim/scenario.rs`, test Rust.
+- [x] Outil `cent-ans geo battle-site` (`tools/cent_ans_tools/geo/battle_site.py`) : relief GLO-30
+  (canopée WorldCover retirée, ouverture 90 m) écrit sur une ligne dans la carte, tuile d'horizon
+  `hist_<id>` tournée dans le repère du champ, aperçu `docs/img/ep7/<id>_site.png`.
+- [x] Crécy : site (crête Crécy-Wadicourt, vallée des Clercs, Maye, moulin, fosses), ordre de
+  bataille, 4 vagues françaises en assaut ; Anglais 23/30 (test : 14 à 19 sur 20 graines).
+- [x] Azincourt : entonnoir entre les bois d'Azincourt et de Tramecourt, labours détrempés, ailes
+  de cavalerie ; Anglais 24/30.
+- [x] Pont GDExtension (`historical_battles.rs` : `list_historical`, `setup_historical`,
+  `get_historical`, `get_waves` ; site en campagne via `get_battle_setup` → `historical_site`).
+- [x] Menu « Batailles historiques » (`historical_battles_menu.gd`), scène (`begin_historical`,
+  ciel final + averse qui cesse, horizon du site, pas de phase de déploiement).
+- [ ] Poitiers (Maupertuis, haies, vignes, chemin creux, Miosson).
+- [ ] Essai Godot réel, captures `docs/img/ep7/`, ADR 0035, test Godot, vérifications finales.
+
+## Décisions
+- ai.rs n'est pas modifié (demande de coordination : SG5 y travaille). Les vagues françaises sont
+  scriptées (`assault`) : les ordres de l'IA pour une vague retenue ou en assaut sont filtrés par
+  `scenario_filter` (sim.rs::step) ; les Anglais « tiennent » leur poste (laisse).
 
 ## Prochaine étape
-Outil de cuisson du relief du site (GLO-30 dans `tools/geo/raw/copernicus30`, lien symbolique vers
-le dépôt principal dans ce worktree).
+Poitiers, puis essai dans Godot et captures.

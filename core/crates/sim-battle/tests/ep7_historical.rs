@@ -15,7 +15,7 @@ use common::*;
 use sim_battle::{BattleSim, HistoricalMap, SideId};
 
 /// The historical maps shipped.
-const MAPS: &[&str] = &["crecy"];
+const MAPS: &[&str] = &["crecy", "azincourt"];
 
 fn map(id: &str) -> HistoricalMap {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -155,12 +155,55 @@ fn survey_all() {
     }
 }
 
+/// English victories over seeds 1-20 of map `id`.
+fn english_wins(id: &str) -> usize {
+    (1..21)
+        .filter(|&seed| play(id, seed, 2400.0).winner == Some(SideId::Defender))
+        .count()
+}
+
 /// Crécy: with the AI on both sides the English win most of the time
 /// (>= 70 % of the seeds), never always.
 #[test]
 fn crecy_is_most_often_an_english_victory() {
-    let wins = (1..21)
-        .filter(|&seed| play("crecy", seed, 2400.0).winner == Some(SideId::Defender))
-        .count();
+    let wins = english_wins("crecy");
     assert!((14..20).contains(&wins), "English won {wins}/20");
+}
+
+/// Agincourt: the English win most of the time (>= 70 %), never always.
+#[test]
+fn azincourt_is_most_often_an_english_victory() {
+    let wins = english_wins("azincourt");
+    assert!((14..20).contains(&wins), "English won {wins}/20");
+}
+
+/// Every map loads, lays its site and deploys every regiment on the field,
+/// out of deep water and woods for the formed regiments.
+#[test]
+fn every_map_deploys_on_its_site() {
+    for &id in MAPS {
+        let (map, sim) = start(id, 7);
+        assert!(sim.is_historical(), "{id}");
+        assert_eq!(sim.field().width, map.field.width_m, "{id}");
+        assert!(
+            sim.field().heights.iter().any(|&h| h > 1.0),
+            "{id}: real relief laid"
+        );
+        for u in sim.units() {
+            assert!(u.present(), "{id}: {} deployed", u.name);
+            assert!(
+                sim.field().inside(u.x, u.z),
+                "{id}: {} on the field",
+                u.name
+            );
+            assert!(
+                !sim.field().in_forest(u.x, u.z),
+                "{id}: {} not in a wood at {:.0},{:.0}",
+                u.name,
+                u.x,
+                u.z
+            );
+        }
+        assert_eq!(sim.field().decor.camps.len(), 2, "{id}: both camps");
+    }
 }

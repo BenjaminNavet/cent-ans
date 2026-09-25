@@ -1,5 +1,18 @@
 {
  "provinces": {
+  "hist_azincourt": {
+   "file": "hist_azincourt.bin",
+   "lon": 2.1395,
+   "lat": 50.4595,
+   "ref_m": 123.2,
+   "terrain": "plains",
+   "coastal": false,
+   "coast_bearing_deg": null,
+   "skyline_max_deg": 0.4,
+   "relief_max_m": 200.0,
+   "sea_share": 0.0,
+   "site": "azincourt"
+  },
   "hist_crecy": {
    "file": "hist_crecy.bin",
    "lon": 1.9032,
