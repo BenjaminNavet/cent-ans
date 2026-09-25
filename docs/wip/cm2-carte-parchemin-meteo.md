@@ -23,8 +23,11 @@ Branche `worktree-agent-a7241565332549af6` (partie de `main` `ad08ea16`).
   `campaign_weather.gdshaderinc` (mouillé, neige fraîche, brouillard matinal qui se lève,
   ombres des nuées), nuées dessinées sur le parchemin. AU1 : `CampaignAmbience.map_weather`.
   Test `game/tests/cm2_parchment_weather_test.gd`, `cargo test --test cm2_weather`.
-- [ ] 3. Lumière de fin de tour
-- [ ] Mesures FPS (3 zooms), captures `docs/audit/captures/cm2/`, fusion de main, smoke
+- [x] 3. Lumière de fin de tour : `turn_light.gd` (soleil bas à l'ouest, doré, −18 % d'énergie au
+  plus, tant que le bandeau « Tour des autres factions » est affiché ; aube rosée au retour).
+  `--dusk` fige le soir (capture `apres_soir_ia_400.png`).
+- [x] Mesures FPS (3 zooms), captures `docs/audit/captures/cm2/`
+- [ ] Fusion de main, smoke
 
 ## Mesures de référence (avant CM2, Vulkan, 1600×900, `--fps-probe`, charge ≈ 30)
 | Distance | i/s | GPU ms |
@@ -32,6 +35,19 @@ Branche `worktree-agent-a7241565332549af6` (partie de `main` `ad08ea16`).
 | 400 | 50,1 | 19,94 |
 | 1000 | 98,5 | 6,38 |
 | 1500 | 65,4 | 10,28 |
+
+## Mesures après CM2 (Vulkan, 1600×900, `--fps-probe`, A/B dans la même session, charge 11-26)
+« avant » = `--no-parchment --no-map-weather` ; météo réelle du tour 1 (nuées à 1000).
+| Distance | GPU ms après (2 passes) | GPU ms avant (2 passes) | écart |
+|---|---|---|---|
+| 400 | 24,10 · 25,62 | 25,59 · 25,46 | −3 % (bruit) |
+| 1000 | 12,31 · 11,85 | 12,30 · 11,20 | +3 % |
+| 1500 (parchemin) | 11,96 · 12,08 | 12,24 · 12,40 | −3 % |
+| 1250 (fondu, avant réglage) | 13,64 · 14,25 | 11,81 · 9,40 | +15 à +50 % |
+À 1500, le terrain passe au shader « parchemin seul » (`terrain_parchment.gdshader`) : moins
+cher que le rendu 3D. Dans la bande de fondu, les deux rendus sont calculés : bande resserrée à
+1180 → 1440 (transitoire pendant le zoom). Couche 2D : ≈ 3 ms CPU (vignettes pré-rendues ;
+`draw_colored_polygon` par image coûtait 70 ms pour 130 villes).
 
 ## Prochaine étape
 Lot 3 : lumière dorée pendant le tour de l'IA ; puis mesures FPS, fusion de main, smoke.
