@@ -93,7 +93,7 @@ fn trace_one_battle() {
                     continue;
                 }
                 println!(
-                    "{:>2} {:<3} {:<22} x{:>5.0} z{:>5.0} h{:>5.1} hp{:>4.0} m{:>3.0} {:?} amm{} stk{}",
+                    "{:>2} {:<3} {:<22} x{:>5.0} z{:>5.0} h{:>5.1} hp{:>4.0} m{:>3.0} {:?} amm{} stk{} tgt{:?} dst{:?}",
                     u.id,
                     &u.side.key()[..3],
                     u.unit_type,
@@ -104,10 +104,10 @@ fn trace_one_battle() {
                     u.morale,
                     u.state,
                     u.ammo,
-                    u.stakes_planted as u8
+                    u.stakes_planted as u8, u.target, u.destination.map(|(a, b)| (a as i32, b as i32))
                 );
             }
-            t += 30.0;
+            t += if sim.elapsed() > 380.0 { 5.0 } else { 30.0 };
         }
         sim.step();
     }
