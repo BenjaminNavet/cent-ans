@@ -320,7 +320,8 @@ static func strengths_weaknesses(definition: Dictionary) -> Array:
 	return [strengths, weaknesses]
 
 
-## `live` : ligne de `get_recruitable` (`cost`, `upkeep`, `available`, `reason`) ou unité
+## `live` : ligne de `get_recruitable` (`cost`, `upkeep`, `available`, `reason`, SV2 `resources`,
+## `import_cost`, `imported`) ou unité
 ## d'armée (`strength`, `max_strength`, `morale`) ; vide pour la seule définition.
 static func unit(unit_type: String, live: Dictionary = {}) -> String:
 	var definition := GameCatalog.unit_type(unit_type)
@@ -345,6 +346,15 @@ static func unit(unit_type: String, live: Dictionary = {}) -> String:
 	if definition.has("recruit_time_turns"):
 		cost_line.append("Levée : %s" % FrText.count(int(definition["recruit_time_turns"]), "tour"))
 	lines.append(" · ".join(cost_line))
+	# SV2 : matériaux des engins, tirés des provinces productrices à la commande ; le manque est
+	# importé et compté dans le coût (même règle que les chantiers, ADR 0053).
+	var materials: Dictionary = live.get("resources", (definition.get("cost", {}) as Dictionary).get("resources", {}))
+	if live.has("cost") and not materials.is_empty():
+		lines.append("Matériaux : " + cost_text({"resources": materials}))
+	if int(live.get("import_cost", 0)) > 0:
+		lines.append("[color=%s]Dont importation : %s %s (%s manquant)[/color]" % [RED, thousands(int(live["import_cost"])), POUND, cost_text({"resources": live.get("imported", {})})])
+	elif not materials.is_empty():
+		lines.append("Matériaux tirés de vos provinces productrices, sinon importés et payés.")
 	var stats: Dictionary = definition.get("stats", {})
 	var stat_parts := PackedStringArray()
 	for stat in ["melee", "ranged", "range", "armor", "morale", "speed", "charge", "siege_attack", "ammo"]:

@@ -254,6 +254,7 @@ fn legacy_queue_entries_load_as_one_turn_recruits() {
         unit_type: UnitTypeId::new("unit_knights").unwrap(),
         turns_left: 2,
         ordered_turn: 5,
+        drawn: Default::default(),
     })
     .unwrap();
     let back: QueuedRecruit = serde_json::from_str(&full).unwrap();
