@@ -245,6 +245,68 @@ def test_boost_base_falls_back_to_glo90_without_any_fine_data(monkeypatch) -> No
     assert np.allclose(base, 42.0, atol=0.05)
 
 
+def _write_flat_level(
+    tmp_path: Path,
+    level: int,
+    col0: int,
+    row0: int,
+    col1: int,
+    row1: int,
+    height: float,
+) -> None:
+    """Write flat tiles of ``height`` covering ``[col0, col1] x [row0, row1]`` at ``level``."""
+    for row in range(row0, row1 + 1):
+        for col in range(col0, col1 + 1):
+            path = tmp_path / "pyramid" / f"E{level}" / f"{col}_{row}.png"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            terrain.write_png16(
+                terrain.height_to_uint16(np.full((512, 512), height, np.float32)), path
+            )
+
+
+def test_e5_e4_land_gap_zero_on_flat_matching_land(tmp_path: Path) -> None:
+    """Identical flat E5/E4 land gives a zero gap (a healthy bake)."""
+    z = zone(half=1.0)
+    col0, row0, col1, row1 = GRID.tile_range(5, detail_dem.footprint(z, 5))
+    _write_flat_level(tmp_path, 4, col0 // 2, row0 // 2, col1 // 2, row1 // 2, 50.0)
+    _write_flat_level(tmp_path, 5, col0, row0, col1, row1, 50.0)
+    gap = detail_dem.e5_e4_land_gap(z, GRID, tmp_path)
+    assert gap.n_pixels > 0
+    assert gap.median_m == pytest.approx(0.0, abs=0.01)
+    assert gap.p95_m < 0.5
+
+
+def test_e5_e4_land_gap_excludes_water_below_min_land_m(tmp_path: Path) -> None:
+    """A -11 m E5 (the raw Southwark symptom) reads as water, not land: excluded, not flagged."""
+    z = zone(half=1.0)
+    col0, row0, col1, row1 = GRID.tile_range(5, detail_dem.footprint(z, 5))
+    _write_flat_level(tmp_path, 4, col0 // 2, row0 // 2, col1 // 2, row1 // 2, 4.0)
+    _write_flat_level(
+        tmp_path, 5, col0, row0, col1, row1, -11.0
+    )  # observed at Southwark
+    gap = detail_dem.e5_e4_land_gap(z, GRID, tmp_path)
+    assert gap.n_pixels == 0
+
+
+def test_e5_e4_land_gap_flags_a_boost_leak(tmp_path: Path) -> None:
+    """A large, uniform E5 undershoot that stays above MIN_LAND_M is flagged."""
+    z = zone(half=1.0)
+    col0, row0, col1, row1 = GRID.tile_range(5, detail_dem.footprint(z, 5))
+    _write_flat_level(tmp_path, 4, col0 // 2, row0 // 2, col1 // 2, row1 // 2, 50.0)
+    _write_flat_level(tmp_path, 5, col0, row0, col1, row1, 1.0)  # still land, 49 m off
+    gap = detail_dem.e5_e4_land_gap(z, GRID, tmp_path)
+    assert gap.n_pixels > 0
+    assert gap.p95_m > detail_dem.LAND_GAP_ALERT_M
+
+
+def test_e5_e4_land_gap_no_tiles_returns_none(tmp_path: Path) -> None:
+    """A zone with no E5 tiles baked yet reports ``None`` stats, not a crash."""
+    z = zone(half=1.0)
+    gap = detail_dem.e5_e4_land_gap(z, GRID, tmp_path)
+    assert gap.median_m is None
+    assert gap.n_pixels == 0
+
+
 # ----------------------------------------------------------------------- erasing
 
 

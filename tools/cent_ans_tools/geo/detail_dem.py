@@ -1144,3 +1144,85 @@ def _zones_bbox(zones: list[Zone], level: int) -> list[float] | None:
         max(b[2] for b in boxes),
         max(b[3] for b in boxes),
     ]
+
+
+# ---------------------------------------------------------------------- coast check
+
+
+@dataclass
+class LandGap:
+    """E5-vs-E4 land gap of one zone (lot ZG3b): :func:`e5_e4_land_gap`."""
+
+    zone_id: str
+    n_pixels: int
+    median_m: float | None
+    p95_m: float | None
+    max_m: float | None
+
+
+#: Above this p95 gap (m), a zone is flagged (docstring of :func:`e5_e4_land_gap`).
+LAND_GAP_ALERT_M = 5.0
+#: Interior margin (of a footprint's half-size) excluded from the check: the
+#: footprint edge blends into the E4 ancestor by construction (blend()), so a
+#: gap there is expected and not a bake defect.
+LAND_GAP_EDGE_WEIGHT = 0.98
+
+
+def e5_e4_land_gap(zone: Zone, grid: PyramidGrid, map_dir: Path = MAP_DIR) -> LandGap:
+    """Compare baked E5 land to the E4 ancestor over one zone's footprint.
+
+    ``E5`` should read close to ``E4`` on land away from the footprint edge
+    (E4 is itself only a coarser, boosted average of the same relief): a
+    systematic gap flags a bake defect such as the ZG3b render-boost leak
+    (real land baked far below the coarser levels, or below sea level). Water
+    pixels (baked below :data:`MIN_LAND_M`) are excluded: E5-E7 legitimately
+    show real river channels/foreshore the E4 ancestor cannot resolve.
+
+    Returns ``LandGap`` with ``median_m/p95_m/max_m`` as ``None`` when the
+    zone has no E5 tiles on disk (not yet baked).
+    """
+    level = 5
+    box = footprint(zone, level)
+    if box is None:
+        return LandGap(zone.id, 0, None, None, None)
+    col0, row0, col1, row1 = grid.tile_range(level, box)
+    shape = ((row1 - row0 + 1) * TILE_PX, (col1 - col0 + 1) * TILE_PX)
+    e5 = np.full(shape, np.nan, dtype=np.float32)
+    any_tile = False
+    for row in range(row0, row1 + 1):
+        for col in range(col0, col1 + 1):
+            tile = read_tile_m(tile_path(map_dir, level, col, row))
+            if tile is None:
+                continue
+            any_tile = True
+            r, c = (row - row0) * TILE_PX, (col - col0) * TILE_PX
+            e5[r : r + TILE_PX, c : c + TILE_PX] = tile
+    if not any_tile:
+        return LandGap(zone.id, 0, None, None, None)
+    ancestor = ancestor_heights(grid, level, col0, row0, shape, map_dir)
+    single = Cluster(level, [zone], col0, row0, col1, row1, set())
+    weight = footprint_weight(grid, single)
+    land = np.isfinite(e5) & (e5 > MIN_LAND_M) & (weight >= LAND_GAP_EDGE_WEIGHT)
+    land &= np.isfinite(ancestor)
+    if not land.any():
+        return LandGap(zone.id, 0, None, None, None)
+    gap = np.abs(e5[land] - ancestor[land])
+    return LandGap(
+        zone.id,
+        int(land.sum()),
+        float(np.median(gap)),
+        float(np.percentile(gap, 95)),
+        float(np.max(gap)),
+    )
+
+
+def land_gap_report(
+    zone_ids: tuple[str, ...] = (), map_dir: Path = MAP_DIR
+) -> list[LandGap]:
+    """:func:`e5_e4_land_gap` of every zone (or ``zone_ids``), sorted by p95 gap."""
+    grid = PyramidGrid.from_map(map_dir)
+    zones = load_zones()
+    wanted = set(zone_ids) or {z.id for z in zones}
+    results = [e5_e4_land_gap(z, grid, map_dir) for z in zones if z.id in wanted]
+    results.sort(key=lambda r: (r.p95_m is None, -(r.p95_m or 0.0)))
+    return results
