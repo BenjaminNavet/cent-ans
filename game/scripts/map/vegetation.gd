@@ -16,9 +16,14 @@ extends Node3D
 ##   (`TerrainBuilder.surface_grid`) et recalés quand une tuile change de niveau (relief fin
 ##   8192², LOD proche ou lointain, signal `chunk_surface_changed`) : nouveaux tampons calculés
 ##   dans une tâche `VegetationGroundJob`, installés en une fois (pas d'à-coup).
+## - Lot V4 (A1-10) : quatre essences (chêne, hêtre, conifère de montagne, haie ; maillages Blender
+##   `campaign_trees.glb`), houppiers élargis au cœur des massifs (canopée continue), teinte
+##   saisonnière par essence (`foliage.gdshaderinc`, poids globaux `campaign_season` du lot CV1 ;
+##   `--season=winter` les force pour les captures). Couverture forestière : `data/map/forest_cover.json`.
 ## Purement visuel : aucune règle de jeu.
 
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
+const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Pas (px de carte) de la grille de candidats ; plus petit = forêts plus denses.
@@ -78,6 +83,8 @@ var _rig: Node3D
 var _frame: int = 0
 var _log_bursts := false
 var _warm := false
+## Saison du feuillage : 3 en hiver (variante ajourée), 1 sinon ; -1 : pas encore lue.
+var _season: int = -1
 
 
 func _ready() -> void:
@@ -85,6 +92,7 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot") or arg == "--vegetation-stats":
 			_log_bursts = true
+
 
 
 func _exit_tree() -> void:
@@ -100,6 +108,7 @@ func build(data: MapData) -> void:
 	stats["source"] = mask.source
 	_material = ShaderMaterial.new()
 	_material.shader = FOLIAGE_SHADER
+	_season = -1
 	_exclusions.clear()
 	# Sans colonies (C6), clairière autour de chaque capitale de province.
 	for index in data.provinces if extra_exclusions.is_empty() else {}:
@@ -141,6 +150,22 @@ func _process(_delta: float) -> void:
 		return
 	var distance: float = _rig.get("distance") if _rig != null else camera.global_position.y
 	update_view(camera.global_position, distance)
+	if _frame % 30 == 1:
+		_update_season()
+
+
+## Hiver (poids `campaign_season.w` du lot CV1 > 0,5) → variante ajourée du feuillage ; le reste
+## de l'année, le shader sans discard garde le test de profondeur anticipé (moins de surdessin).
+func _update_season() -> void:
+	if _material == null:
+		return
+	# Poids tenus par CampaignLife.seasons (la lecture du paramètre global est réservée à l'éditeur).
+	var life: Variant = get_parent().get("life") if get_parent() != null else null
+	var seasons: Variant = (life as Object).get("seasons") if life is Object else null
+	var value := 3 if seasons is SeasonVisuals and (seasons as SeasonVisuals).weights.w > 0.5 else 1
+	if value != _season:
+		_season = value
+		_material.shader = FOLIAGE_WINTER_SHADER if value == 3 else FOLIAGE_SHADER
 
 
 func _try_autobind() -> void:
@@ -292,10 +317,11 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 			multimesh.visible_instance_count = ceili(multimesh.instance_count * fraction)
 
 
+## Un maillage par essence (ordre de `VegetationTileJob.Kind`) ; lot V4 : chêne, hêtre et
+## conifère modélisés sous Blender (`VegetationMeshes.essence`).
 func _meshes(detailed: bool) -> Array:
-	if detailed:
-		return [VegetationMeshes.deciduous(), VegetationMeshes.conifer(), VegetationMeshes.hedge()]
-	return [VegetationMeshes.deciduous_low(), VegetationMeshes.conifer_low(), VegetationMeshes.hedge_low()]
+	return [VegetationMeshes.essence("oak", detailed), VegetationMeshes.essence("beech", detailed),
+		VegetationMeshes.essence("fir", detailed), VegetationMeshes.hedge() if detailed else VegetationMeshes.hedge_low()]
 
 
 func _start_job(index: int) -> void:
@@ -439,7 +465,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 			multimesh.instance_count = count
 			multimesh.buffer = job.buffers[slot]
 			var mmi := MultiMeshInstance3D.new()
-			mmi.name = ["Deciduous", "Conifer", "Hedge"][kind]
+			mmi.name = ["Oak", "Beech", "Conifer", "Hedge"][kind]
 			mmi.multimesh = multimesh
 			mmi.material_override = _material
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

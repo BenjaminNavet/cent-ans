@@ -64,26 +64,41 @@ var _fixtures_dir: String
 ## singletons, donc `SimFacade.x` / `MapPaths.x` (membres d'instance) y sont interdits.
 var facade: Node
 var paths: Node
+## T2 : dossier `user://` dédié à cette exécution (PID + horodatage), pour que plusieurs smoke
+## tests lancés en parallèle (plusieurs worktrees d'agents partagent le même `user://` Godot,
+## dérivé du nom du projet et non du chemin sur disque) ne se marchent pas dessus sur les
+## sauvegardes / réglages / découvertes du Codex. Nettoyé en fin d'exécution (`_cleanup_test_dir`).
+var _test_root: String
+var _test_settings_path: String
+var _test_codex_path: String
+var _test_saves_dir: String
 
 
 func _init() -> void:
 	# Doit précéder l'instanciation de l'autoload MapPaths (après _init).
 	_fixtures_dir = ProjectSettings.globalize_path("res://tests/fixtures")
 	OS.set_environment(MapPaths.ENV_VAR, _fixtures_dir)
+	_test_root = "user://smoke_%d_%d" % [OS.get_process_id(), Time.get_ticks_usec()]
+	_test_settings_path = _test_root.path_join("settings.cfg")
+	_test_codex_path = _test_root.path_join("codex.json")
+	_test_saves_dir = _test_root.path_join("saves")
 	_run_campaign_sim()
 	await process_frame
 	facade = root.get_node("/root/SimFacade")
 	paths = root.get_node("/root/MapPaths")
-	# F3 : réglages par défaut sur un fichier dédié (le fichier du joueur n'est pas touché),
-	# sans sauvegarde automatique hors de l'étape « flow ».
+	facade.call("use_test_saves_dir", _test_saves_dir)
+	SaveSlots.use_test_dir(_test_saves_dir)
+	# F3 : réglages par défaut sur un fichier dédié à cette exécution (le fichier du joueur
+	# n'est pas touché), sans sauvegarde automatique hors de l'étape « flow ».
 	var settings: Node = root.get_node_or_null("/root/Settings")
 	if settings != null:
-		settings.call("use_test_file")
+		settings.call("use_test_file", _test_settings_path)
 		settings.call("set_value", "game/autosave_interval", 0, false)
 		settings.call("set_value", "tutorial/enabled", false, false)  # F8 : seulement à l'étape 13
 	# Exécution ciblée d'une étape : CENT_ANS_SMOKE_ONLY=coinage_ransom.
 	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "coinage_ransom":
 		await _run_coinage_ransom()
+		_cleanup_test_dir()
 		quit(1 if _failures > 0 else 0)
 		return
 	if OS.get_environment("CENT_ANS_SMOKE_ONLY") == "ui_layout":
@@ -110,7 +125,27 @@ func _init() -> void:
 	await _run_siege_battle()
 	await _run_flow()  # F3
 	await _run_tutorial()  # F8
+	_cleanup_test_dir()
 	quit(1 if _failures > 0 else 0)
+
+
+## T2 : supprime le dossier `user://smoke_<pid>_<horodatage>` créé pour cette exécution
+## (réglages, découvertes du Codex, sauvegardes). Best effort : une erreur ne fait pas
+## échouer le smoke test.
+func _cleanup_test_dir() -> void:
+	_remove_dir_recursive(_test_root)
+
+
+func _remove_dir_recursive(path: String) -> void:
+	var dir := DirAccess.open(path)
+	if dir == null:
+		return
+	dir.include_hidden = true
+	for file_name in dir.get_files():
+		dir.remove(file_name)
+	for sub_dir in dir.get_directories():
+		_remove_dir_recursive(path.path_join(sub_dir))
+	DirAccess.remove_absolute(path)
 
 
 func _run_campaign_sim() -> void:
@@ -218,6 +253,13 @@ func _run_start_menu() -> void:
 	_check(menu.card_count() == 3, "start menu should show 3 faction cards, got %d" % menu.card_count())
 	_check(menu.selected_faction == "fac_france", "default faction should be fac_france")
 	_check(menu.start_button.text.begins_with("Commencer"), "start button label")
+	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
+	menu.show_faction_select(true)
+	_check(menu.faction_select.visible and not menu.main_column.visible, "faction select should replace the main column")
+	menu.open_intro()
+	await process_frame
+	_check(menu.overlay_open(), "prologue overlay should open")
+	_check(not FrontEndData.random_quote().is_empty() and FrontEndData.random_tip() != "", "loading quotes and tips expected")
 	if _failures == 0:
 		print("smoke OK: start menu, %d cards" % menu.card_count())
 	menu.queue_free()
@@ -1491,7 +1533,7 @@ func _run_codex() -> void:
 	var bubbles: Node = root.get_node_or_null("/root/CodexBubbles")
 	if not _check(store != null and bubbles != null, "CodexStore / CodexBubbles autoloads missing"):
 		return
-	store.call("use_test_file")
+	store.call("use_test_file", _test_codex_path)
 	store.call("reload", _project_root().path_join("data/codex"))
 	var total: int = store.call("total_count")
 	_check(total >= 20, "codex should have at least 20 entries, got %d" % total)
@@ -1648,7 +1690,7 @@ func _run_table_medicine() -> void:
 	_check(alerts.size() == 2 and str(alerts[0]["kind"]) == "table", "alerts for table/medicine: %s" % [alerts])
 	var store: Node = root.get_node_or_null("/root/CodexStore")
 	if store != null:
-		store.call("use_test_file")
+		store.call("use_test_file", _test_codex_path)
 		var herbs := Herbarium.sync(sim, FACTION_ID)
 		_check(herbs.size() >= 0, "herbarium sync should ignore missing entries")
 		store.call("reset_discoveries")
@@ -2145,7 +2187,7 @@ func _run_coinage_ransom() -> void:
 		return
 	var store: Node = root.get_node_or_null("/root/CodexStore")
 	if store != null:
-		store.call("use_test_file")
+		store.call("use_test_file", _test_codex_path)
 		store.call("reload", _project_root().path_join("data/codex"))
 
 	# Vraies données (noms de provinces, encyclopédie) ; dossier précédent restauré à la fin.
