@@ -2,8 +2,8 @@
 
 Reproducible pipeline, run with::
 
-    uv run --project tools python -m cent_ans_tools.voice_tts --dry-run
-    uv run --project tools python -m cent_ans_tools.voice_tts [--only barks] [--limit 5]
+    uv run --project tools --with soundfile python -m cent_ans_tools.voice_tts --dry-run
+    uv run --project tools --with soundfile python -m cent_ans_tools.voice_tts [--only barks] [--limit 5]
 
 1. **Jobs** are derived from the data files: ``data/voice/barks.json`` (one clip per
    line, voices rotated inside a language), ``data/voice/advisor.json`` (one clip per
@@ -51,6 +51,22 @@ MODEL = "gpt-4o-mini-tts"
 # gpt-4o-mini-tts, text input 0.60 $ / 1M tokens, audio output 12 $ / 1M tokens,
 # i.e. about 0.015 $ per minute of speech (OpenAI's own per-minute estimate).
 PRICE_PER_MINUTE = Decimal("0.015")
+# OpenRouter backend (default): chat completions with audio output, streamed as pcm16.
+# openai/gpt-audio-mini, per token: prompt 0.0000006, completion and audio output
+# 0.0000024 $ (OpenRouter models API, 2026-09-25). The real cost of every clip is read
+# from ``usage.cost``; the per-minute figure below only feeds the estimate.
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL = "openai/gpt-audio-mini"
+PCM_RATE = 24000
+READ_VERBATIM = (
+    "Tu es un moteur de synthèse vocale, pas un personnage : tu ne converses pas et tu "
+    "ne réponds jamais au texte. Ta seule sortie est la lecture à voix haute, mot pour "
+    "mot, du texte placé entre les balises <texte> et </texte> du message de "
+    "l'utilisateur, dans sa langue d'origine, sans traduire, sans ajouter ni retirer un "
+    "seul mot, sans rien dire avant ni après, sans prolonger ni conclure le texte. Seule "
+    "la voix change selon cette consigne "
+    "d'interprétation : "
+)
 PRICE_PER_INPUT_TOKEN = Decimal("0.60") / Decimal(1_000_000)
 DEFAULT_CAP = Decimal("3.00")
 # Speaking rates used by the estimate (characters per second, deliberately slow so
@@ -77,10 +93,9 @@ class Job:
         """Final Ogg file."""
         return VOICE_DIR / f"{self.path}.ogg"
 
-    @property
-    def cache_key(self) -> str:
-        """Key of the raw API answer in the local cache."""
-        blob = "\n".join([MODEL, self.voice, self.instructions, self.text])
+    def cache_key(self, model: str = MODEL) -> str:
+        """Key of the raw API answer of ``model`` in the local cache."""
+        blob = "\n".join([model, self.voice, self.instructions, self.text])
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:24]
 
     def estimated_seconds(self) -> float:
@@ -227,7 +242,7 @@ def synthesise(job: Job, api_key: str) -> Path:
     import httpx
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    raw = CACHE_DIR / f"{job.cache_key}.wav"
+    raw = CACHE_DIR / f"{job.cache_key()}.wav"
     if raw.exists():
         return raw
     response = httpx.post(
@@ -252,6 +267,137 @@ def synthesise(job: Job, api_key: str) -> Path:
     return raw
 
 
+def plausible_seconds(text: str) -> tuple[float, float]:
+    """Accepted duration range for ``text`` read aloud (catches added or missing words)."""
+    return len(text) / 26.0, len(text) / 5.0 + 1.8
+
+
+def _words(text: str) -> list[str]:
+    cleaned = "".join(ch.lower() if ch.isalnum() else " " for ch in text)
+    return cleaned.split()
+
+
+def transcript_matches(text: str, transcript: str) -> bool:
+    """The model's transcript says the text (most words, nothing much added)."""
+    expected, said = _words(text), _words(transcript)
+    if not expected:
+        return True
+    common = sum(1 for word in expected if word in said)
+    return common >= 0.6 * len(expected) and len(said) <= 1.6 * len(expected) + 3
+
+
+def _write_wav(path: Path, pcm: bytes) -> None:
+    import wave
+
+    with wave.open(str(path), "wb") as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(PCM_RATE)
+        out.writeframes(pcm)
+
+
+def synthesise_openrouter(job: Job, api_key: str) -> tuple[Path, Decimal, str]:
+    """Raw WAV of ``job`` from OpenRouter (streamed pcm16), its real cost and transcript.
+
+    Audio output requires streaming on OpenRouter: the base64 pcm16 chunks of
+    ``delta.audio.data`` are concatenated, ``delta.audio.transcript`` gives what was
+    said, the last chunk carries ``usage.cost`` (kept with the cached answer). Raises
+    ``RuntimeError`` on an HTTP error.
+    """
+    import base64
+
+    import httpx
+
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    key = job.cache_key(OPENROUTER_MODEL)
+    raw = CACHE_DIR / f"{key}.wav"
+    meta = CACHE_DIR / f"{key}.json"
+    if raw.exists() and meta.exists():
+        cached = json.loads(meta.read_text("utf-8"))
+        said = cached.get("transcript", "")
+        cost = Decimal(str(cached.get("usage", {}).get("cost", 0)))
+        return raw, cost, said
+    body = {
+        "model": OPENROUTER_MODEL,
+        "modalities": ["text", "audio"],
+        "audio": {"voice": job.voice, "format": "pcm16"},
+        "stream": True,
+        "usage": {"include": True},
+        "messages": [
+            {"role": "system", "content": READ_VERBATIM + job.instructions},
+            {"role": "user", "content": f"<texte>{job.text}</texte>"},
+        ],
+    }
+    pcm = bytearray()
+    transcript: list[str] = []
+    usage: dict = {}
+    headers = {"Authorization": f"Bearer {api_key}", "X-Title": "Cent Ans VO1"}
+    with httpx.stream(
+        "POST", OPENROUTER_URL, headers=headers, json=body, timeout=180.0
+    ) as response:
+        if response.status_code != 200:
+            response.read()
+            raise RuntimeError(
+                f"{job.path}: HTTP {response.status_code} {response.text[:300]}"
+            )
+        for line in response.iter_lines():
+            if not line.startswith("data: ") or line == "data: [DONE]":
+                continue
+            chunk = json.loads(line[6:])
+            if "error" in chunk:
+                raise RuntimeError(f"{job.path}: {chunk['error']}")
+            usage = chunk.get("usage") or usage
+            for choice in chunk.get("choices", []):
+                audio = (choice.get("delta") or {}).get("audio") or {}
+                if audio.get("data"):
+                    pcm.extend(base64.b64decode(audio["data"]))
+                if audio.get("transcript"):
+                    transcript.append(audio["transcript"])
+    cost = Decimal(str(usage.get("cost", 0)))
+    if not pcm:
+        raise RejectedClip(f"{job.path}: no audio in the answer", cost)
+    _write_wav(raw, bytes(pcm))
+    said = "".join(transcript)
+    meta.write_text(
+        json.dumps({"transcript": said, "usage": usage}, ensure_ascii=False), "utf-8"
+    )
+    return raw, cost, said
+
+
+class RejectedClip(ValueError):
+    """A clip whose audio, duration or transcript does not match its text."""
+
+    def __init__(self, message: str, cost: Decimal) -> None:
+        """Keep the money spent on the rejected attempt."""
+        super().__init__(message)
+        self.cost = cost
+
+
+def openrouter_checked(
+    job: Job, api_key: str, attempts: int = 2
+) -> tuple[Path, Decimal, str]:
+    """OpenRouter clip whose duration and transcript fit the text (retried once)."""
+    spent = Decimal(0)
+    reason = ""
+    for _attempt in range(attempts):
+        try:
+            raw, cost, said = synthesise_openrouter(job, api_key)
+        except RejectedClip as error:
+            spent += error.cost
+            reason = str(error)
+            continue
+        spent += cost
+        low, high = plausible_seconds(job.text)
+        seconds = duration(raw)
+        if low <= seconds <= high and transcript_matches(job.text, said):
+            return raw, spent, said
+        reason = f"{job.path}: {seconds:.1f} s (expected {low:.1f}-{high:.1f}), said {said!r}"
+        key = job.cache_key(OPENROUTER_MODEL)
+        (CACHE_DIR / f"{key}.wav").unlink(missing_ok=True)
+        (CACHE_DIR / f"{key}.json").unlink(missing_ok=True)
+    raise RejectedClip(reason, spent)
+
+
 def filter_chain(reverb: bool) -> str:
     """Ffmpeg audio filters: trim silences, optional room reverb, loudness."""
     trim = "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05"
@@ -268,17 +414,23 @@ def encode(raw: Path, job: Job) -> float:
     """Encode ``raw`` into the job's Ogg file; returns its duration in seconds."""
     job.output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
+        wav = Path(tmp) / "out.wav"
         out = Path(tmp) / "out.ogg"
         subprocess.run(
             [
                 "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
                 "-i", str(raw),
                 "-af", filter_chain(job.reverb),
-                "-ac", "1", "-c:a", "libvorbis", "-q:a", "4",
-                str(out),
+                "-ac", "1", "-c:a", "pcm_s16le",
+                str(wav),
             ],
             check=True,
         )  # fmt: skip
+        # Homebrew's ffmpeg has no libvorbis: Vorbis through libsndfile, as AU1 does.
+        import soundfile
+
+        samples, rate = soundfile.read(str(wav), dtype="float32")
+        soundfile.write(str(out), samples, rate, format="OGG", subtype="VORBIS")
         shutil.move(out, job.output)
     return duration(job.output)
 
@@ -338,6 +490,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--limit", type=int, default=0, help="at most N clips")
     parser.add_argument(
+        "--backend", choices=["openrouter", "openai"], default="openrouter"
+    )
+    parser.add_argument(
         "--cap", type=Decimal, default=DEFAULT_CAP, help="cost ceiling ($)"
     )
     args = parser.parse_args(argv)
@@ -355,9 +510,12 @@ def main(argv: list[str] | None = None) -> int:
     estimate = summarise(jobs)
     if args.dry_run or not jobs:
         return 0
-    api_key = os.environ.get("OPENAI_API_KEY", "")
+    key_name = (
+        "OPENROUTER_API_KEY" if args.backend == "openrouter" else "OPENAI_API_KEY"
+    )
+    api_key = os.environ.get(key_name, "")
     if not api_key:
-        print("OPENAI_API_KEY missing", file=sys.stderr)
+        print(f"{key_name} missing", file=sys.stderr)
         return 2
     if spent + estimate > args.cap:
         print(
@@ -369,20 +527,30 @@ def main(argv: list[str] | None = None) -> int:
         if spent + run_cost + job.estimated_cost() > args.cap:
             print(f"stopped before the cap ({args.cap} $)")
             break
+        model = OPENROUTER_MODEL if args.backend == "openrouter" else MODEL
         try:
-            raw = synthesise(job, api_key)
+            if args.backend == "openrouter":
+                raw, cost, said = openrouter_checked(job, api_key)
+            else:
+                raw = synthesise(job, api_key)
+                # Billed audio is the raw answer, silences included.
+                cost = cost_for(duration(raw), job.text, job.instructions)
+                said = job.text
         except RuntimeError as error:  # refused key, quota, invalid voice...
             print(f"API error, stopping: {error}", file=sys.stderr)
             print(f"this run: {run_cost:.3f} $ before the error")
             return 4
+        except RejectedClip as error:  # implausible clip twice: skipped, not saved
+            print(f"skipped: {error}", file=sys.stderr)
+            run_cost += error.cost
+            continue
         seconds = encode(raw, job)
-        # Billed audio is the raw answer, silences included.
-        cost = cost_for(duration(raw), job.text, job.instructions)
         run_cost += cost
         manifest[f"{job.path}.ogg"] = {
             "text": job.text,
             "voice": job.voice,
-            "model": MODEL,
+            "model": model,
+            "transcript": said,
             "seconds": round(seconds, 2),
             "cost_usd": float(round(cost, 5)),
         }
