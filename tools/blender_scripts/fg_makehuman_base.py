@@ -24,7 +24,9 @@ import bpy
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-OUT_DIR = os.path.join(ROOT, "game", "assets", "third_party", "characters", "makehuman_base")
+OUT_DIR = os.path.join(
+    ROOT, "game", "assets", "third_party", "characters", "makehuman_base"
+)
 OUT = os.path.join(OUT_DIR, "fg_base_male.blend")
 
 # A weathered young adult man-at-arms: male, ~25 years, muscular, slightly heavy, tall.
