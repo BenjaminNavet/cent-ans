@@ -3,6 +3,14 @@
  "icons": {
   "act_form_army": "form_army.png",
   "act_recruit": "recruit.png",
+  "agents": "agents.png",
+  "chronicle": "chronicle.png",
+  "codex": "codex.png",
+  "court": "court.png",
+  "diplomacy": "diplomacy.png",
+  "end_turn": "end_turn.png",
+  "filters": "filters.png",
+  "form_army": "form_army.png",
   "hud_agents": "agents.png",
   "hud_chronicle": "chronicle.png",
   "hud_codex": "codex.png",
@@ -14,7 +22,14 @@
   "hud_objectives": "objectives.png",
   "hud_research": "research.png",
   "hud_technologies": "technologies.png",
+  "journal": "journal.png",
+  "legend": "legend.png",
   "map_filters": "filters.png",
-  "map_legend": "legend.png"
+  "map_legend": "legend.png",
+  "menu": "menu.png",
+  "objectives": "objectives.png",
+  "recruit": "recruit.png",
+  "research": "research.png",
+  "technologies": "technologies.png"
  }
 }
