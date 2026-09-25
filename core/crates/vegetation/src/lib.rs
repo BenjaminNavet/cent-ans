@@ -101,6 +101,36 @@ impl MapRasters {
     }
 }
 
+/// Valley floor of the local relief exaggeration (lot ZG8, `MapData.relief_floor_at`): metres,
+/// bilinear between cell centres, edges replicated.
+#[derive(Default)]
+pub struct ReliefFloor {
+    pub data: Vec<f32>,
+    pub side: (usize, usize),
+    pub cell: f64,
+}
+
+impl ReliefFloor {
+    fn at(&self, x: f64, z: f64) -> f64 {
+        let (sx, sz) = self.side;
+        if self.data.is_empty() || sx < 2 || sz < 2 {
+            return 0.0;
+        }
+        let half = 0.5 * (self.cell - 1.0);
+        let fx = ((x - half) / self.cell).clamp(0.0, sx as f64 - 1.0);
+        let fz = ((z - half) / self.cell).clamp(0.0, sz as f64 - 1.0);
+        let i = (fx as usize).min(sx - 2);
+        let j = (fz as usize).min(sz - 2);
+        let tx = fx - i as f64;
+        let tz = fz - j as f64;
+        let o = j * sx + i;
+        let d = &self.data;
+        let top = lerp(d[o] as f64, d[o + 1] as f64, tx);
+        let bottom = lerp(d[o + sx] as f64, d[o + sx + 1] as f64, tx);
+        lerp(top, bottom, tz)
+    }
+}
+
 /// Displayed ground under the trees (`TerrainBuilder.surface_grid`).
 pub enum Ground {
     /// Heightmap only.
@@ -129,6 +159,9 @@ pub struct TileRequest {
     pub coarse_step: f64,
     pub tree_scale: f64,
     pub vertical_scale: f64,
+    /// Local relief gain (`MapData.relief_gain`, lot ZG8) and its valley floor.
+    pub relief_gain: f64,
+    pub floor: std::sync::Arc<ReliefFloor>,
     /// Coarse grids, `side × side`: forest, crops, conifer, beech, hedge, grove, region.
     pub coarse: [Vec<f32>; 7],
     pub side: usize,
@@ -255,7 +288,8 @@ fn clip_linear(coeff: f64, offset: f64, lo: f64, hi: f64, cur: (f64, f64)) -> (f
 
 // --- Ground sampling ---
 
-fn page_bilinear(bytes: &[u8], fx: f64, fy: f64, h_min: f64, h_range: f64, vscale: f64) -> f64 {
+/// Bilinear altitude (m) in a relief page (`ReliefQuadtree._bilinear`).
+fn page_bilinear(bytes: &[u8], fx: f64, fy: f64, h_min: f64, h_range: f64) -> f64 {
     let last = (PAGE_PX - 1) as f64;
     let fx = fx.clamp(0.0, last);
     let fy = fy.clamp(0.0, last);
@@ -271,12 +305,21 @@ fn page_bilinear(bytes: &[u8], fx: f64, fy: f64, h_min: f64, h_range: f64, vscal
     let d = sample(o + PAGE_PX * 2 + 2);
     let top = a + (b - a) * tx;
     let v = (top + (c + (d - c) * tx - top) * ty) / 65535.0;
-    (h_min + v * h_range) * vscale
+    h_min + v * h_range
 }
 
 impl TileRequest {
+    /// `MapData.display_height` (lot ZG8): s·(h + g·max(h − floor, 0)).
+    fn display_height(&self, h_m: f64, x: f64, z: f64) -> f64 {
+        if self.relief_gain == 0.0 {
+            return h_m * self.vertical_scale;
+        }
+        self.vertical_scale * (h_m + self.relief_gain * (h_m - self.floor.at(x, z)).max(0.0))
+    }
+
+    /// `MapData.height_world_at` (displayed height of the 4096 heightmap).
     fn height_world_at(&self, map: &MapRasters, x: f64, y: f64) -> f64 {
-        map.height_m_at(x, y) * self.vertical_scale
+        self.display_height(map.height_m_at(x, y), x, y)
     }
 
     /// `VegetationTileJob._display_ground` (`TerrainBuilder.grid_height`, never below sea level).
@@ -347,14 +390,14 @@ impl TileRequest {
             let px_units = units / PAGE_PX as f64;
             let ox = col as f64 * units + GRID_OFFSET;
             let oy = row as f64 * units + GRID_OFFSET;
-            return Some(page_bilinear(
+            let h_m = page_bilinear(
                 bytes,
                 (x - ox) / px_units - 0.5,
                 (y - oy) / px_units - 0.5,
                 h_min,
                 h_range,
-                self.vertical_scale,
-            ));
+            );
+            return Some(self.display_height(h_m, x, y));
         }
         None
     }
@@ -782,6 +825,8 @@ mod tests {
             coarse_step: 4.0,
             tree_scale: 1.0,
             vertical_scale: 0.01,
+            relief_gain: 0.0,
+            floor: Default::default(),
             coarse: [
                 vec![forest; n],
                 vec![crops; n],
@@ -880,6 +925,25 @@ mod tests {
         assert!((0.29..0.47).contains(&height));
         let ground = map.height_m_at(buffer[3] as f64, buffer[11] as f64) * 0.01;
         assert!((buffer[7] as f64 - (ground - GROUND_SINK * height as f64)).abs() < 1e-4);
+    }
+
+    #[test]
+    fn relief_gain_lifts_ground_above_the_valley_floor() {
+        let map = flat_map(40000);
+        let h_m = map.height_m_at(10.0, 10.0);
+        let mut req = request(1.0, 0.0, 0.0, 1.0);
+        req.relief_gain = 2.0;
+        req.floor = std::sync::Arc::new(ReliefFloor {
+            data: vec![(h_m - 100.0) as f32; 4],
+            side: (2, 2),
+            cell: 64.0,
+        });
+        let lifted = 0.01 * (h_m + 2.0 * 100.0);
+        assert!((req.height_world_at(&map, 10.0, 10.0) - lifted).abs() < 1e-6);
+        let result = scatter_tile(&req, &map);
+        let buffer = result.buffers.iter().find(|b| !b.is_empty()).unwrap();
+        let height = (buffer[1].powi(2) + buffer[5].powi(2) + buffer[9].powi(2)).sqrt() as f64;
+        assert!((buffer[7] as f64 - (lifted - 0.08 * height)).abs() < 1e-4);
     }
 
     #[test]

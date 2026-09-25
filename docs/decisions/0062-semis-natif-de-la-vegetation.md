@@ -15,6 +15,8 @@ tuile. Ce sont des millions d'opérations scalaires, où l'interpréteur GDScrip
   `VegetationFields`), empaquetage et recalage, avec lecture de la heightmap, du lit des fleuves,
   des grilles de maillage et des pages du quadtree de relief (`ReliefQuadtree.sample_pages`).
   Optimisée même en profil `dev` (`[profile.dev.package.vegetation] opt-level = 3`).
+  Hauteur affichée du lot ZG8 portée aussi (`MapData.display_height` : échelle, gain local,
+  fond de vallée recopié par `set_floor` à chaque publication, `MapData.relief_floor_grid`).
 - Classe `VegetationScatter` (godot-bridge) : pool de fils natifs, même schéma que
   `ReliefDecoder` (ADR 0036) — le fil principal convertit les champs en données Rust
   (`request`, `request_reground`), les fils ne touchent jamais l'API Godot, le fil principal

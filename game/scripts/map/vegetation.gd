@@ -88,6 +88,7 @@ var _native: Object = null
 var _native_ids: Dictionary = {}
 var _native_ground_ids: Dictionary = {}  # recalages : id → index de tuile
 var _native_serial: int = 0
+var _native_floor_version: int = -1
 ## Lot C7b : recalages en cours (index → {"task", "job": VegetationGroundJob}) et tuiles à recaler.
 var _ground_jobs: Dictionary = {}
 var _ground_dirty: Dictionary = {}
@@ -130,6 +131,7 @@ func build(data: MapData) -> void:
 	clear()
 	map_data = data
 	_native = _make_native(data) if use_native_scatter else null
+	_native_floor_version = -1
 	chunk_px = TerrainBuilder.chunk_px_for(data.size)
 	mask = VegetationMask.new()
 	mask.setup(data)
@@ -426,8 +428,19 @@ func _collect_jobs() -> void:
 	_poll_native()
 
 
+## Lot PB2 : recopie le fond de vallée (ZG8) dans le pool natif quand il a été republié.
+func _sync_native_floor() -> void:
+	var grid := MapData.relief_floor_grid()
+	if int(grid["version"]) == _native_floor_version:
+		return
+	_native_floor_version = grid["version"]
+	var side: Vector2i = grid["side"]
+	_native.call("set_floor", grid["data"], side.x, side.y, grid["cell"])
+
+
 ## Lot PB2 : grille grossière prête → semis natif (conversion des données sur le fil principal).
 func _submit_native(index: int, item: Dictionary) -> void:
+	_sync_native_floor()
 	_native_serial += 1
 	var job: VegetationTileJob = item["job"]
 	if not _native.call("request", _native_serial, job.native_params()):
@@ -514,10 +527,11 @@ func _start_ground_jobs() -> void:
 		job.origin = Vector2((index % TerrainBuilder.CHUNKS) * chunk_px, (index / TerrainBuilder.CHUNKS) * chunk_px)
 		job.buffers = entry["buffers"]
 		if _native != null:
+			_sync_native_floor()
 			_native_serial += 1
 			var untyped: Array = []  # le pont Rust attend un Array non typé
 			untyped.assign(job.buffers)
-			if _native.call("request_reground", _native_serial, untyped, job.grid, job.origin, MapData.vertical_scale()):
+			if _native.call("request_reground", _native_serial, untyped, job.grid, job.origin, MapData.vertical_scale(), MapData.relief_gain()):
 				_native_ground_ids[_native_serial] = index
 				_ground_jobs[index] = {"native": _native_serial, "job": job}
 				continue

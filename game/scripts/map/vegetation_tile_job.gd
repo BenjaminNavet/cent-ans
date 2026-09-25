@@ -89,7 +89,8 @@ func native_params() -> Dictionary:
 	return {
 		"tile_index": tile_index, "origin_x": float(origin_px.x), "origin_y": float(origin_px.y),
 		"size_px": float(size_px), "spacing": spacing, "coarse_step": float(coarse_step),
-		"tree_scale": tree_scale, "vertical_scale": MapData.vertical_scale(), "side": _side,
+		"tree_scale": tree_scale, "vertical_scale": MapData.vertical_scale(), "relief_gain": MapData.relief_gain(),
+		"side": _side,
 		"coarse": [_forest, _crops, _conifer, _beech, _hedge, _grove, _region],
 		"exclusions": exclusions, "ground_grid": ground_grid,
 	}
