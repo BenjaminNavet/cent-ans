@@ -53,6 +53,7 @@ fn longest_build(state: &CampaignState, data: &GameData, city: &SettlementId) ->
     state
         .buildable(data, city)
         .into_iter()
+        .filter(|o| o.available)
         .map(|o| {
             (
                 o.building.to_string(),
@@ -77,6 +78,7 @@ fn builder_ruler_shortens_constructions() {
     let data = data();
     let mut state = start(&data);
     clear_builders(&mut state, &data);
+    state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
     let city = capital_city(&state);
     let (building, base) = longest_build(&state, &data, &city);
     assert!(base >= 4, "a long build exists ({building}: {base})");
@@ -104,7 +106,6 @@ fn builder_ruler_shortens_constructions() {
 
     // The construction started takes the shortened time.
     let building_id = data_model::BuildingId::new(&building).unwrap();
-    state.factions.get_mut(&france()).unwrap().treasury = 1_000_000;
     state
         .submit_order(
             &data,
@@ -161,7 +162,10 @@ fn governor_and_ruler_do_not_stack_but_skills_do() {
     let g = state.characters.get_mut(&governor).unwrap();
     g.governor_of = Some(province.clone());
     g.traits.insert(TraitId::new("trait_builder").unwrap());
-    assert_eq!(state.construction_speed_percent(&data, &city), ruler_percent);
+    assert_eq!(
+        state.construction_speed_percent(&data, &city),
+        ruler_percent
+    );
 }
 
 #[test]
