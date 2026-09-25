@@ -325,6 +325,10 @@ def synthesise_openrouter(job: Job, api_key: str) -> tuple[Path, Decimal, str]:
         "usage": {"include": True},
         "messages": [
             {"role": "system", "content": READ_VERBATIM + job.instructions},
+            # One text-only example of a verbatim reading: short, emotional lines
+            # (charges, routs, war cries) otherwise tempt the model to improvise.
+            {"role": "user", "content": "<texte>À moi ! Tenez ferme !</texte>"},
+            {"role": "assistant", "content": "À moi ! Tenez ferme !"},
             {"role": "user", "content": f"<texte>{job.text}</texte>"},
         ],
     }
@@ -493,6 +497,9 @@ def main(argv: list[str] | None = None) -> int:
         "--backend", choices=["openrouter", "openai"], default="openrouter"
     )
     parser.add_argument(
+        "--attempts", type=int, default=2, help="tries per clip (OpenRouter checks)"
+    )
+    parser.add_argument(
         "--cap", type=Decimal, default=DEFAULT_CAP, help="cost ceiling ($)"
     )
     args = parser.parse_args(argv)
@@ -530,7 +537,7 @@ def main(argv: list[str] | None = None) -> int:
         model = OPENROUTER_MODEL if args.backend == "openrouter" else MODEL
         try:
             if args.backend == "openrouter":
-                raw, cost, said = openrouter_checked(job, api_key)
+                raw, cost, said = openrouter_checked(job, api_key, args.attempts)
             else:
                 raw = synthesise(job, api_key)
                 # Billed audio is the raw answer, silences included.
