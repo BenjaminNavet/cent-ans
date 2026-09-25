@@ -92,6 +92,8 @@ func min_distance_at(point: Vector3) -> float:
 			break
 	if relief != null and profile != null:
 		result = minf(result, _soft_min(point))
+		# ZG4b : plancher provisoire au-dessus des villes emblématiques (levé par VH4).
+		result = maxf(result, minf(profile.landmark_floor(Vector2(point.x, point.z), close_zones), min_distance))
 	return result
 
 

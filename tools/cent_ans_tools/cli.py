@@ -280,6 +280,42 @@ def geo_horizon(
     )
 
 
+@app.command("export-data")
+def export_data_command(
+    app_path: str = typer.Option(
+        ..., "--app", help="Application exportée (…/Cent Ans.app)"
+    ),
+    relief: str = typer.Option(
+        "bundle",
+        "--relief",
+        help="Cache du relief fin : bundle (dans l'app), external (dossier « Cent Ans relief » à côté), none",
+    ),
+) -> None:
+    """Copie data/ et le cache de relief dans un export (tools/export_macos.sh, lot ZG7b)."""
+    from pathlib import Path
+
+    from cent_ans_tools import export_data
+
+    result = export_data.stage(Path(app_path) / "Contents" / "Resources", relief)
+    console.print(f"data/ : {result.data_bytes / 1e6:.0f} Mo → {result.data_dir}")
+    if result.relief_dir is not None:
+        console.print(
+            f"Relief fin : {result.relief_bytes / 1e9:.2f} Go → {result.relief_dir}"
+        )
+    else:
+        console.print(
+            "[yellow]Relief fin non embarqué (zoom rapproché limité).[/yellow]"
+        )
+    if relief != "none" and not result.report.complete:
+        for line in result.report.lines():
+            console.print(line)
+        console.print(
+            "[yellow]Cache de relief incomplet : le jeu exporté affichera l'avis "
+            "« relief rapproché limité ». Compléter avec : "
+            "uv run --project tools cent-ans geo relief-all[/yellow]"
+        )
+
+
 @geo_app.command("pyramid")
 def geo_pyramid(
     levels: str = typer.Option(
@@ -418,6 +454,57 @@ def geo_towns() -> None:
 
     result = towns.build(log=console.print)
     console.print(result.summary())
+
+
+@geo_app.command("relief-all")
+def geo_relief_all(
+    check: bool = typer.Option(
+        False, "--check", help="Liste seulement ce qui manque (code 1 si incomplet)"
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Recuit toutes les étapes depuis zéro"
+    ),
+    workers: int = typer.Option(
+        0, "--workers", help="Processus (0 = défaut de l'étape)"
+    ),
+) -> None:
+    """Cache complet du relief fin (ADR 0036, lot ZG7b) : pyramid 1-4, detail-dem, hydro-fine, anchors-fine.
+
+    Dans l'ordre, chaque étape reprenant ce qui est déjà sur le disque ;
+    relançable après une interruption. Voir docs/geo.md.
+    """
+    from cent_ans_tools.geo import relief_cache
+
+    report = relief_cache.check()
+    for line in report.lines():
+        console.print(line)
+    plan = report.plan(force)
+    commands = {step: command for step, command, _ in relief_cache.STEPS}
+    if check:
+        if plan:
+            console.print(
+                "[yellow]Incomplet. Étapes à lancer : "
+                + " → ".join(commands[s] for s in plan)
+                + "\nCommande unique : uv run --project tools cent-ans geo relief-all[/yellow]"
+            )
+            raise typer.Exit(1)
+        console.print("[green]Cache de relief complet.[/green]")
+        return
+    if not plan:
+        console.print("[green]Cache de relief complet : rien à faire.[/green]")
+        return
+    result = relief_cache.rebuild(
+        force=force, workers=workers or None, log=console.print
+    )
+    for line in result.report.lines():
+        console.print(line)
+    if not result.report.complete:
+        console.print(
+            "[red]Cache encore incomplet (voir ci-dessus) : relancer la commande, "
+            "elle reprend où elle s'est arrêtée.[/red]"
+        )
+        raise typer.Exit(1)
+    console.print("[green]Cache de relief complet.[/green]")
 
 
 @geo_app.command("detail-check")

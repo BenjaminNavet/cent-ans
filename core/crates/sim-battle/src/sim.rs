@@ -4,6 +4,7 @@
 // while reading the others.
 #![allow(clippy::needless_range_loop)]
 
+mod decision;
 mod deployment;
 mod fire;
 mod indirect;
@@ -26,6 +27,7 @@ use data_model::{Ability, UnitCategory, UnitStats};
 
 use crate::ai;
 use crate::command::{Command, CommandError};
+use crate::decision::BattleEnd;
 use crate::field::{Battlefield, Weather};
 use crate::impact::{self, ImpactEvent, ImpactKind, LossCause, MAX_PENDING_IMPACTS};
 use crate::orders::OrderUses;
@@ -69,6 +71,9 @@ const ASSAULT_DISMOUNT_SPEED: u8 = 35;
 const MELEE_RATE: f64 = 0.035;
 const RANGED_RATE: f64 = 0.3;
 const LOSS_MORALE_FACTOR: f64 = 60.0;
+/// Fatigue above which a unit loses morale over time (SV4: named so the
+/// battle markers show "exhausted" from the same threshold).
+pub const EXHAUSTED_FATIGUE: f64 = 60.0;
 
 /// Why a setup cannot start a battle.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -148,6 +153,11 @@ pub struct BattleSim {
     /// `elapsed`) and the phase last announced in the journal.
     start_hour: f64,
     day_phase: Option<String>,
+    /// EP9: rules of the end of a field battle, the engagement clock and
+    /// how the battle ended.
+    decision: crate::decision::DecisionRules,
+    clock: crate::decision::EngagementClock,
+    end: Option<crate::decision::BattleEnd>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -396,6 +406,9 @@ impl BattleSim {
             drown_announced: Vec::new(),
             start_hour: crate::time_of_day::TimeOfDayRules::bundled().default_hour,
             day_phase: None,
+            decision: crate::decision::DecisionRules::bundled().clone(),
+            clock: Default::default(),
+            end: None,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -1217,6 +1230,7 @@ impl BattleSim {
         self.separate_friends();
         self.resolve_water();
         self.resolve_siege_works();
+        self.relieve_rams();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
         self.tower_fire();
@@ -1230,6 +1244,7 @@ impl BattleSim {
         self.ticks += 1;
         self.release_reserves();
         self.record_siege_transitions();
+        self.track_engagement();
         self.check_end();
     }
 
@@ -2408,6 +2423,10 @@ impl BattleSim {
         }
         // EP3: fords, streams, deep water, bridges and bridgeheads.
         damage *= self.water_melee_factor(attacker, defender);
+        // SG4: downhill strikes harder, uphill weaker (`battle_crest.json`).
+        damage *= crate::crest::CrestRules::bundled().melee_factor(
+            self.field.height(attacker.x, attacker.z) - self.field.height(defender.x, defender.z),
+        );
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
         damage *= 0.6 + attacker.morale.max(0.0) / 250.0;
@@ -2574,8 +2593,8 @@ impl BattleSim {
             if unit.flanked & 2 != 0 {
                 morale -= 3.0 * DT;
             }
-            if unit.fatigue > 60.0 {
-                morale -= (unit.fatigue - 60.0) * 0.02 * DT;
+            if unit.fatigue > EXHAUSTED_FATIGUE {
+                morale -= (unit.fatigue - EXHAUSTED_FATIGUE) * 0.02 * DT;
             }
             if unit.state == UnitState::Melee && unit.hp < f64::from(unit.max_soldiers) * 0.5 {
                 morale -= 0.3 * DT;
@@ -2685,16 +2704,32 @@ impl BattleSim {
             .siege
             .as_ref()
             .is_some_and(|w| w.hold_time >= siege::HOLD_TO_WIN);
-        if able[0] > 0 && able[1] > 0 && !timeout && !square_held {
-            return;
-        }
-        let winner = if (able[1] == 0 && able[0] > 0) || (square_held && able[0] > 0) {
-            SideId::Attacker
+        let (winner, end) = if able[0] > 0 && able[1] > 0 && !timeout && !square_held {
+            // EP9: a broken army, a refused battle or a lull.
+            match self.field_decision() {
+                Some(decision) => decision,
+                None => return,
+            }
         } else {
-            SideId::Defender
+            let winner = if (able[1] == 0 && able[0] > 0) || (square_held && able[0] > 0) {
+                SideId::Attacker
+            } else {
+                SideId::Defender
+            };
+            let end = if square_held && winner == SideId::Attacker && able[1] > 0 {
+                BattleEnd::SquareHeld
+            } else if timeout && able[0] > 0 && able[1] > 0 {
+                BattleEnd::Nightfall
+            } else {
+                BattleEnd::Rout
+            };
+            (winner, end)
         };
+        self.apply_decision(winner.other(), end);
+        self.end = Some(end);
         self.finished = true;
         self.winner = Some(winner);
+        self.return_ram_crews();
         self.collect_field_standards(winner);
         let loser = winner.other();
         if self.general_alive[loser.index()] {
@@ -2721,21 +2756,26 @@ impl BattleSim {
                 }
             }
         }
-        let text = if square_held && winner == SideId::Attacker && able[1] > 0 {
-            format!(
-                "{} tient la place centrale : la ville est prise !",
-                self.setup.side(winner).faction_name
-            )
-        } else if timeout && able[0] > 0 && able[1] > 0 {
-            format!(
-                "La nuit tombe : {} tient le terrain.",
-                self.setup.side(winner).faction_name
-            )
-        } else {
-            format!(
-                "Victoire {} !",
-                of_faction(&self.setup.side(winner).faction_name)
-            )
+        let winner_name = self.setup.side(winner).faction_name.clone();
+        let loser_name = self.setup.side(loser).faction_name.clone();
+        let text = match end {
+            BattleEnd::SquareHeld => {
+                format!("{winner_name} tient la place centrale : la ville est prise !")
+            }
+            BattleEnd::Nightfall => format!("La nuit tombe : {winner_name} tient le terrain."),
+            BattleEnd::Refused => format!(
+                "Personne n'engage le combat : {loser_name} renonce et se retire, \
+                 {winner_name} garde le champ. Bataille refusée."
+            ),
+            BattleEnd::Lull => {
+                format!("Le combat cesse : {loser_name} se retire, {winner_name} garde le champ.")
+            }
+            BattleEnd::Broken => format!(
+                "L'armée {} est brisée : déroute générale ! Victoire {} !",
+                of_faction(&loser_name),
+                of_faction(&winner_name)
+            ),
+            BattleEnd::Rout => format!("Victoire {} !", of_faction(&winner_name)),
         };
         self.log(text, Some(winner));
     }
@@ -2745,6 +2785,8 @@ impl BattleSim {
     /// The result, once the battle is finished.
     pub fn outcome(&self) -> Option<BattleOutcome> {
         let winner = self.winner?;
+        let end = self.end.unwrap_or_default();
+        let refused = end == BattleEnd::Refused;
         let side_result = |side: SideId| -> SideResult {
             let setup = self.setup.side(side);
             let mut losses = vec![0u32; setup.units.len()];
@@ -2763,8 +2805,14 @@ impl BattleSim {
             SideResult {
                 total_losses: losses.iter().sum(),
                 losses,
-                morale_delta: if won { 5 } else { -20 },
-                routed: !won,
+                morale_delta: match (refused, won) {
+                    (true, true) => self.decision.refused_morale.defender,
+                    (true, false) => self.decision.refused_morale.attacker,
+                    (false, true) => 5,
+                    (false, false) => -20,
+                },
+                // EP9: an army that gave up the field unbroken was not routed.
+                routed: !won && !matches!(end, BattleEnd::Refused | BattleEnd::Lull),
                 general_killed: self.general_killed[side.index()],
                 general_captured: self.general_captured[side.index()],
                 no_quarter: self.no_quarter[side.index()],
@@ -2778,6 +2826,7 @@ impl BattleSim {
             attacker: side_result(SideId::Attacker),
             defender: side_result(SideId::Defender),
             duration: self.elapsed,
+            end,
         })
     }
 

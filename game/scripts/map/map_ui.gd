@@ -828,6 +828,7 @@ func request_end_turn() -> void:
 
 func _setup_turn_banner() -> void:
 	turn_banner = PanelContainer.new()
+	PanelStack.set_tier(turn_banner, PanelStack.Tier.BANNER)  # Q4 : au-dessus des panneaux, sous les modales
 	turn_banner.name = "TurnBanner"
 	turn_banner.theme = event_log.theme
 	turn_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -854,7 +855,7 @@ func show_turn_banner() -> void:
 	_turn_banner_title.text = "Tour des autres factions"
 	_turn_banner_detail.text = "Les princes d'Europe jouent leur saison…"
 	turn_banner.modulate.a = 1.0
-	move_child(turn_banner, -1)  # au-dessus des panneaux
+	queue_restack()  # Q4 : étage BANNER, au-dessus des panneaux
 	turn_banner.show()
 	_place_turn_banner()
 
@@ -945,14 +946,33 @@ func _setup_panel_stack() -> void:
 	for child in get_children():
 		_auto_register(child)
 	child_entered_tree.connect(_auto_register)
+	# Q4 : ordre des enfants HUD < panneaux < bandeaux < modales < tutoriel (voir PanelStack).
+	child_entered_tree.connect(func(_node: Node) -> void: queue_restack())
+	panels.changed.connect(queue_restack)
 	panels.changed.connect(queue_layout)
 	panels.changed.connect(func() -> void: _hide_toast_under_panels.call_deferred())
+	queue_restack()
+
+
+var _restack_queued := false
+
+
+## Q4 : trie les enfants de l'interface par étage (fin d'image, une fois).
+func queue_restack() -> void:
+	if _restack_queued:
+		return
+	_restack_queued = true
+	(func() -> void:
+		_restack_queued = false
+		if is_inside_tree():
+			panels.restack(self)).call_deferred()
 
 
 ## Enregistre un panneau de la carte : `kind` = `PanelStack.Kind` ; `companion_of` : panneaux
 ## centraux qu'il accompagne (fiche à côté de la Cour…).
 func register_panel(panel: Control, kind: PanelStack.Kind, companion_of: Array = []) -> void:
 	panels.register(panel, kind, companion_of)
+	queue_restack()
 	if not panel.resized.is_connected(queue_layout):
 		panel.resized.connect(queue_layout)
 

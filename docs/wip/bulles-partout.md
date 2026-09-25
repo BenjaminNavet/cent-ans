@@ -78,7 +78,7 @@ encyclopédie, aide F1, tutoriel, diplomatie, HUD de bataille, barre d'ordres du
 Fusion : worktree d'intégration `../gp-bulles3-merge` (branche `integration/bulles3`), puis ff-only dans main.
 
 **État vague 3** : BP1, B7a, B7b, B7c, B10 tous fusionnés. cargo clippy/test verts, pytest 545 verts.
-Suites ouvertes (hors bulles) :
+Suites ouvertes (hors bulles) — **toutes traitées le 26/09 par SV1-SV4**, voir `docs/wip/suites-bulles3.md` (prestige des bâtiments sans plafond : toujours ouvert) :
 - chiffres d'UI encore codés en dur dans certains GDScript ; constantes de ravitaillement encore dans `economy.rs` ;
 - panneau de province : n'affiche pas encore le surcoût d'import de pierre (`BuildOption.import_cost`) ;
 - coûts en ressources des unités non prélevés ; prestige des bâtiments sans plafond ;

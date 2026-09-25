@@ -255,3 +255,64 @@ Détail dans `docs/godot-map.md` (« Caméra rapprochée et exagération vertica
   leur rendu (lot VH), exclues via `LandmarkLibrary`.
 - Finage : rayon exposé au parcellaire ZG5b par un tableau d'uniformes (`fp_towns`, 16 villes proches),
   pas par le masque des terroirs (1 px = 2,9 km, trop grossier pour un finage de 1-4 km).
+
+## Addendum (lot ZG4b, 2026-09-25) : correctifs de recette de la vue rapprochée
+
+Détail dans `docs/godot-map.md` (« Correctifs de recette (lot ZG4b) »).
+
+- **Plancher provisoire** au-dessus des villes emblématiques : la caméra ne descend pas sous
+  `CloseCameraProfile.landmark_min_distance` (2,6 unités, `close_camera.tres`) dans leurs zones, plancher
+  adouci au-dehors. Leurs maquettes à la loupe restent visibles (au-dessus du palier site) au lieu d'un sol
+  vide. **VH4 le lève** (valeur 0) en passant ces villes au 1:1.
+- Le « sol beige nu » venait surtout du brouillard matinal de la météo peint sur le sol : atténué de près
+  (`weather_mist_near`) ; le parcellaire ZG5b s'applique aussi aux terres relevées au plancher de 0,5 m.
+- Ponts-portes fins à l'échelle réelle ; bascule des ponts en mode fin étalée (`FrameBudget`).
+
+## Addendum (lot ZG8, 2026-09-25) : relief local exagéré
+
+Détail dans `docs/godot-map.md` (« Relief exagéré façon Total War »). L'échelle verticale ZG4 reste le
+propriétaire unique, complétée d'un **gain de relief local** : hauteur affichée
+`y = s·(h + g·max(h − fond, 0))`, fond de vallée lissé (min 3 × 3 puis flou, cellules de 5,75 km,
+≥ 0) calculé au chargement.
+
+- **Source unique** : `campaign_display_height` (`shaders/campaign_relief.gdshaderinc`) et son double
+  `MapData.display_height` (+ inverse `height_from_display`). Tout consommateur de l'ancien
+  `campaign_vertical_scale` × mètres passe par elle ; aucun shader ne redéclare le paramètre (vérifié par
+  `tests/zg8_relief_test.gd`).
+- **Gain fonction de l'échelle quantifiée** (`gain_far` → `gain_near`) : même signal de recalage que ZG4,
+  aucun calque à modifier au-delà de la fonction.
+- **Plancher de près relevé** de ×1,5 à ×2,5 (`relief_exaggeration.tres`), ce qui ramène le nombre de
+  paliers de 27 à ≈ 14.
+- **Fond ≥ 0** : côte, mer, fleuves au fond de leur vallée, ponts inchangés.
+- Écart : les « pentes » des règles d'occupation du sol (`vegetation_mask`, parcellaire) restent les pentes
+  vraies ; seule la roche des falaises suit la pente exagérée.
+- Interrupteur : `enabled = false` ou `--no-relief-exaggeration` rend exactement ZG4.
+
+## Addendum (lot ZG7b, 2026-09-25) : cache absent, livraison du relief fin
+
+**Cache absent ou partiel.** Sans `data/map/pyramid/`, le jeu retombait en silence sur E0 et la
+caméra s'arrêtait vers 7 unités (recette Q3). Désormais `ReliefCacheStatus` contrôle au chargement
+de la campagne un échantillon borné de tuiles par étage (24, réparties) et des tuiles fines des
+fleuves et routes ; si le cache manque en tout ou partie, l'état est journalisé et `ReliefCacheNotice`
+affiche un avis non bloquant, une fois par session, fermable, avec la commande unique
+`uv run --project tools cent-ans geo relief-all` (ordre pyramid 1-2 → 3-4 → detail-dem → hydro-fine →
+anchors-fine, reprise, `--check`). Un manifeste sans tuiles listées (fixtures) ne déclenche rien.
+
+**Livraison.** Le cache n'entre pas dans le `.pck` Godot : `data/` n'est pas une ressource `res://`
+(lu par chemins absolus via `MapPaths`), les tuiles sont des PNG 16 bits lus par `FileAccess` dans
+des fils, et un paquet de 2,9 Go serait à réécrire en entier à chaque mise à jour du jeu, sans gain
+(Godot n'importe pas ces fichiers). Choix :
+- **par défaut, dans l'application** : `Cent Ans.app/Contents/Resources/data/map/pyramid/`, copié par
+  `tools/export_macos.sh` (`cent-ans export-data --relief bundle`). Un seul téléchargement, et le jeu
+  reste complet même quand macOS « translocalise » une application non signée (lancée depuis un
+  dossier en quarantaine, elle ne voit plus ses voisins) ;
+- **à part si besoin** (`--relief external`) : dossier « Cent Ans relief/pyramid » à côté de
+  l'application, pour une distribution en deux archives ou une mise à jour du jeu sans les 2,9 Go ;
+- **sans** (`--relief none`) : export léger, avis affiché.
+
+`MapPaths.relief_root_for(map_dir)` résout la racine du relief : `CENT_ANS_RELIEF_DIR`, `data/map`
+s'il contient `pyramid/`, « Cent Ans relief » à côté de l'application ou de l'exécutable,
+`user://relief`. Les manifestes restent dans `data/map/` (versionnés, petits). Les liens symboliques
+des worktrees sont suivis à la copie, qui utilise les clones APFS (`cp -c`) : instantanée et sans
+place disque supplémentaire sur le même volume. Rien n'est téléversé : l'hébergement d'une archive
+publique reste à décider (hors budget v1).

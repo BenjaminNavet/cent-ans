@@ -136,6 +136,9 @@ var _owner_colors: Dictionary = {}
 var _province_colors: PackedColorArray = PackedColorArray()
 var pyramid: ReliefPyramid
 var quadtree: ReliefQuadtree
+## ZG8 : gain de relief local des maillages cuits (E0, repli), durée du calcul du fond.
+var _baked_gain: float = 0.0
+var _relief_floor_ms: float = 0.0
 ## Morceaux dont la surface a changé (page arrivée ou évincée), signalés par paquets.
 var _surface_dirty: Dictionary = {}
 ## Étage de page le plus fin au dernier signal de chaque morceau (recalage seulement s'il change).
@@ -196,8 +199,10 @@ func build(data: MapData) -> void:
 	RenderingServer.global_shader_parameter_set("campaign_vertical_scale", MapData.HEIGHT_SCALE)
 	map_data = data
 	chunk_px = ceili(float(maxi(data.size.x, data.size.y)) / CHUNKS)
+	_build_relief_floor()
 	_build_textures()
 	_build_material()
+	_apply_sun_elevation()
 	_is_near.resize(CHUNKS * CHUNKS)
 	_is_near.fill(0)
 	var vertex_count := 0
@@ -237,6 +242,7 @@ func build(data: MapData) -> void:
 		"far_step": far_step,
 		"near_step": near_step,
 		"build_ms": Time.get_ticks_msec() - t0,
+		"relief_floor_ms": _relief_floor_ms,
 	}
 
 
@@ -460,6 +466,18 @@ func set_fog(enabled: bool, visible: PackedInt32Array) -> void:
 			image.set_pixel(index, 0, Color(1.0, 0, 0))
 	material.set_shader_parameter("fog_mask", ImageTexture.create_from_image(image))
 	material.set_shader_parameter("fog_enabled", enabled)
+	material.set_shader_parameter("fog_by_cell", false)
+
+
+## Brouillard par case (lot M5a) : `cells` = texture de vue R8 de la simulation (255 = vu,
+## bords doux), couvrant `size_px` pixels carte depuis l'origine. Remplace le masque par province.
+func set_fog_cells(enabled: bool, cells: Texture2D, size_px: Vector2) -> void:
+	if material == null:
+		return
+	material.set_shader_parameter("fog_cells", cells)
+	material.set_shader_parameter("fog_cells_size", size_px)
+	material.set_shader_parameter("fog_by_cell", enabled and cells != null)
+	material.set_shader_parameter("fog_enabled", enabled)
 
 
 func set_highlight(hovered_index: int, selected_index: int) -> void:
@@ -575,7 +593,10 @@ func _setup_quadtree() -> void:
 	if not pyramid_enabled:
 		return
 	var relief := ReliefPyramid.new()
-	if not relief.load_manifest(map_data.map_dir, manifest):
+	# ZG7b : pyramide livrée à part (`MapPaths.relief_root_for`), sauf manifeste d'essai.
+	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)
+	var tiles_override := relief_root.path_join("pyramid") if manifest == "" and relief_root != map_data.map_dir else ""
+	if not relief.load_manifest(map_data.map_dir, manifest, tiles_override):
 		return
 	pyramid = relief
 	quadtree = ReliefQuadtree.new()
@@ -604,7 +625,8 @@ func _chunk_bounds_m() -> PackedVector2Array:
 			for h in heights:
 				lo = minf(lo, h)
 				hi = maxf(hi, h)
-		lo /= MapData.HEIGHT_SCALE
+		# ZG8 : hauteurs cuites exagérées (y = s·(h + g·local), local ≤ h) : h ≥ y / (s·(1 + g)).
+		lo = lo / MapData.HEIGHT_SCALE if lo < 0.0 else lo / (MapData.HEIGHT_SCALE * (1.0 + _baked_gain))
 		hi /= MapData.HEIGHT_SCALE
 		bounds[i] = Vector2(minf(lo, 0.0) - 150.0, hi + maxf(0.5 * (hi - lo), 200.0))
 	return bounds
@@ -855,6 +877,7 @@ func _start_fine_job(index: int) -> void:
 	job.h_min = map_data.height_min_m
 	job.h_range = map_data.height_max_m - map_data.height_min_m
 	job.height_scale = MapData.HEIGHT_SCALE
+	job.relief_gain = _baked_gain
 	job.map_bytes = map_data.height_bytes
 	job.map_bpp = map_data.height_bpp
 	job.map_little_endian = map_data.height_little_endian
@@ -928,6 +951,40 @@ func _evict_fine() -> void:
 	for i in mini(_fine_cache.size() - max_cached_fine, idle.size()):
 		_fine_cache.erase(idle[i][1])
 		_fine_cache_step.erase(idle[i][1])
+
+
+# --- Relief exagéré (lot ZG8) -------------------------------------------------------------
+
+
+## Fond de vallée lissé (`ReliefFloor`), publié aux shaders et à `MapData.display_height` ; profil
+## désactivé : aucun fond, gain nul (comportement ZG4). Gain des maillages cuits (E0, repli) : celui
+## de l'échelle stratégique.
+func _build_relief_floor() -> void:
+	var relief := ReliefExaggerationProfile.load_default()
+	_relief_floor_ms = 0.0
+	if relief.enabled:
+		var grid := ReliefFloor.compute(map_data, relief)
+		_relief_floor_ms = float(grid["ms"])
+		MapData.set_relief_floor(grid)
+	else:
+		MapData.set_relief_floor({})
+	_baked_gain = MapData.relief_gain_for_scale(MapData.HEIGHT_SCALE)
+
+
+## Soleil plus rasant (ZG8, `sun_elevation_deg`) : même azimut, hauteur imposée.
+func _apply_sun_elevation() -> void:
+	var relief := ReliefExaggerationProfile.load_default()
+	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D if get_parent() != null else null
+	if sun == null or not relief.enabled or relief.sun_elevation_deg <= 0.0:
+		return
+	var toward_sun := sun.global_basis.z.normalized() if sun.is_inside_tree() else sun.basis.z.normalized()
+	var flat := Vector2(toward_sun.x, toward_sun.z)
+	if flat.length() < 1e-4:
+		return
+	flat = flat.normalized()
+	var elevation := deg_to_rad(relief.sun_elevation_deg)
+	var target := Vector3(flat.x * cos(elevation), sin(elevation), flat.y * cos(elevation))
+	sun.basis = Basis.looking_at(-target, Vector3.UP)
 
 
 func _build_textures() -> void:
@@ -1101,6 +1158,10 @@ func _build_material() -> void:
 	material.set_shader_parameter("has_landuse", true)
 	material.set_shader_parameter("has_textures", _albedo_array != null)
 	ReliefLandcover.apply(material, map_data)  # lot R1 : relief fin, zones humides
+	# ZG8 : roche sur les falaises du relief exagéré (désactivée avec le profil).
+	var relief := ReliefExaggerationProfile.load_default()
+	material.set_shader_parameter("cliff_slope_start", relief.cliff_slope_start if relief.enabled else 0.0)
+	material.set_shader_parameter("cliff_slope_full", relief.cliff_slope_full if relief.enabled else 0.0)
 	if _albedo_array != null:
 		material.set_shader_parameter("albedo_array", _albedo_array)
 		material.set_shader_parameter("normal_rough_array", _normal_array)
@@ -1168,6 +1229,8 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 	var h_min := map_data.height_min_m
 	var h_range := map_data.height_max_m - map_data.height_min_m
 	var scale := MapData.HEIGHT_SCALE
+	# ZG8 : maillages cuits à l'échelle stratégique, relief local exagéré compris (gain lointain).
+	var gain := _baked_gain
 	var vertices := PackedVector3Array()
 	vertices.resize(side * side)
 	heights.resize(side * side)
@@ -1201,7 +1264,7 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 					v01 = float((bytes[o] << 8) | bytes[o + 1]) / 65535.0
 			else:
 				v01 = float(bytes[row + px]) / 255.0
-			var y := (h_min + v01 * h_range) * scale
+			var y := MapData.display_height_with(h_min + v01 * h_range, px, py, scale, gain)
 			vertices[k] = Vector3(px - x0, y, py - y0)
 			heights[k] = y
 			k += 1

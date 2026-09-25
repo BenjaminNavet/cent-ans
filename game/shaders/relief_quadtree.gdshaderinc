@@ -89,15 +89,21 @@ vec3 qt_vertex(vec3 v) {
 	float lod_fine = max(log2(s) - 1.0, 0.0);
 	float lod_coarse = max(log2(2.0 * s) - 1.0, 0.0);
 	vec2 p = qt_node.xy + g * s;
-	float h0 = qt_height_m(p, qt_coarse, qt_coarse_nbr, qt_coarse_diag, lod_coarse) * height_scale;
+	float hc0 = qt_height_m(p, qt_coarse, qt_coarse_nbr, qt_coarse_diag, lod_coarse);
+	// PB2 : fond de vallée (ZG8) lu une fois ; réutilisé avec `hc0` quand le sommet ne glisse pas
+	// (hors morphing ou sommet pair : pm == p), soit la plupart des sommets, dans toutes les passes.
+	float floor_p = campaign_relief_gain != 0.0 ? campaign_floor_m(p) : 0.0;
+	float h0 = campaign_display_height_at_floor(hc0, floor_p);
 	float dist = distance(qt_camera, vec3(p.x, h0, p.y));
 	float k = clamp((dist - qt_morph.x) * qt_morph.y, 0.0, 1.0);
 	vec2 gm = g - fract(g * 0.5) * 2.0 * k;
+	bool still = gm == g;
 	vec2 pm = qt_node.xy + gm * s;
-	float hc = qt_height_m(pm, qt_coarse, qt_coarse_nbr, qt_coarse_diag, lod_coarse);
+	float hc = still ? hc0 : qt_height_m(pm, qt_coarse, qt_coarse_nbr, qt_coarse_diag, lod_coarse);
 	float hf = qt_fine.x >= 0.0 && qt_fine.x == qt_coarse.x ? hc
 		: qt_height_m(pm, qt_fine, qt_fine_nbr, qt_fine_diag, lod_fine);
-	float h = mix(hc, hf, qt_morph.z * (1.0 - k)) * height_scale;
+	float hm = mix(hc, hf, qt_morph.z * (1.0 - k));
+	float h = still ? campaign_display_height_at_floor(hm, floor_p) : campaign_display_height(hm, pm);  // ZG8 : relief exagéré
 	if (v.y < -0.5) {
 		h -= qt_morph.w;
 	}
@@ -128,11 +134,16 @@ void qt_page_relief(vec4 page, vec2 p, float footprint, out float h, out vec2 gr
 	h = qt_page_h_min + textureLod(qt_pages, vec3(vx, vy, page.x), max(lod - 1.0, 0.0)).r * qt_page_h_range;
 }
 
+// Vrai si `qt_relief` remplace l'altitude et le gradient du fragment (nœud du quadtree avec page).
+bool qt_has_page() {
+	return qt_node.w >= 0.0 && qt_fine.x >= 0.0;
+}
+
 // Crochet fragment : normale d'ombrage et altitude depuis la page du nœud (vallées et crêtes au
 // pixel de l'étage), au lieu de la heightmap 4096 + détail 8192 ; sans effet hors quadtree ou
 // quand le nœud n'a pas de page (niveaux grossiers).
 void qt_relief(vec2 p, float footprint, inout float hc, inout vec2 grad_m) {
-	if (qt_node.w < 0.0 || qt_fine.x < 0.0) {
+	if (!qt_has_page()) {
 		return;
 	}
 	float h;

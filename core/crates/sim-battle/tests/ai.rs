@@ -182,9 +182,11 @@ fn ai_battles_last_minutes_and_either_side_can_win() {
         }
     }
     let mean = total / f64::from(runs as u32);
+    // EP9 (ADR 0056): a beaten army breaks before its last regiment flees;
+    // the mean fell from about 6 to 5 minutes (rivers make it shorter).
     assert!(
-        (300.0..=900.0).contains(&mean),
-        "AI battles should last 5-15 minutes, mean {mean:.0} s"
+        (240.0..=720.0).contains(&mean),
+        "AI battles should last 4-12 minutes, mean {mean:.0} s"
     );
     assert!(
         (2..=6).contains(&wins),

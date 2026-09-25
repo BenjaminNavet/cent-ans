@@ -17,9 +17,9 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 uniform vec3 pm_river_ink = vec3(0.04, 0.10, 0.12);
 
 uniform vec2 map_size = vec2(4096.0, 4096.0);
-// ZG4 : rubans cuits à l'échelle verticale `baked_vertical_scale` (MapData.HEIGHT_SCALE), remis à
-// l'échelle courante de la carte (exagération dynamique) sans reconstruction.
-global uniform float campaign_vertical_scale;
+// ZG4 : rubans cuits en altitude × `baked_vertical_scale` (MapData.HEIGHT_SCALE, SANS relief exagéré),
+// posés à la hauteur affichée courante (ZG8 : `campaign_display_height`) sans reconstruction.
+#include "res://shaders/campaign_relief.gdshaderinc"
 uniform float baked_vertical_scale = 0.006;
 uniform vec3 shallow_color : source_color = vec3(0.30, 0.40, 0.36);
 uniform vec3 deep_color : source_color = vec3(0.13, 0.26, 0.31);
@@ -67,7 +67,8 @@ float vnoise(vec2 p) {
 }
 
 void vertex() {
-	VERTEX.y *= campaign_vertical_scale / baked_vertical_scale;
+	vec2 axis_xz = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
+	VERTEX.y = campaign_display_height(VERTEX.y / baked_vertical_scale, axis_xz);
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 view_pos = (VIEW_MATRIX * vec4(world, 1.0)).xyz;
 	float dist = max(length(view_pos), 0.01);

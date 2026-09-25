@@ -12,6 +12,12 @@ uniform vec2 weather_wind = vec2(3.0, 0.6);
 uniform float weather_fog_morning = 1.0;
 // Frange irrégulière des zones météo (px carte) : pas de bord de province net.
 uniform float weather_edge_px = 30.0;
+// Lot ZG4b : de près (paliers vallée / site, empreinte d'un pixel < `weather_mist_near_footprint`
+// unité), la nappe de brouillard matinal peinte sur le sol ne garde que `weather_mist_near` : sinon
+// elle recouvre le sol d'un gris-beige uniforme qui efface textures et parcellaire (Londres, recette
+// Q3) ; l'atmosphère de près (ZG4) donne déjà le voile en profondeur.
+uniform float weather_mist_near = 0.2;
+uniform float weather_mist_near_footprint = 0.06;
 
 float wx_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -80,7 +86,7 @@ float wx_lightning(vec2 p, vec4 w) {
 
 // Sol : mouillé sous la pluie, neige fraîche, brouillard matinal (vallées), ombre des nuées,
 // lueur des éclairs. `hc` : altitude (m), `emission` reçoit la lueur des éclairs.
-vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, inout float roughness, inout vec3 emission) {
+vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, float footprint, inout float roughness, inout vec3 emission) {
 	if (!weather_enabled) {
 		return col;
 	}
@@ -103,6 +109,7 @@ vec3 weather_ground(vec3 col, vec2 p, float hc, float slope, inout float roughne
 		float low = 1.0 - smoothstep(150.0, 700.0, hc);
 		float patches = smoothstep(0.3, 0.75, wx_fbm(p * 0.02 - TIME * weather_wind * 0.004));
 		float mist = w.b * mix(0.3, 0.75, low) * mix(0.35, 1.0, weather_fog_morning) * (0.35 + 0.65 * patches);
+		mist *= mix(weather_mist_near, 1.0, smoothstep(weather_mist_near_footprint * 0.5, weather_mist_near_footprint * 2.0, footprint));
 		col = mix(col, vec3(0.62, 0.64, 0.66), clamp(mist, 0.0, 0.8));
 	}
 	// Ombre des nuées qui passent.

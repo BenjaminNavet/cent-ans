@@ -142,6 +142,13 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   assemblées en atlas avec des couches procédurales (pans de bois, plomb, vitrail, vieillissement) :
   `game/assets/textures/landmarks/` (lot L3, détail dans son `SOURCE.md`).
 
+### Textures du terrain de campagne — CC0 1.0
+
+- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Aerial Grass Rock, Aerial Mud 1,
+  Forrest Ground 01, Aerial Rocks 01, Sparse Grass, Snow Field Aerial, Aerial Beach 01 (1k),
+  téléchargées par `tools/cent_ans_tools/geo/textures.py` et réduites en albédo + normale/rugosité
+  (`game/assets/textures/terrain/`).
+
 ### Ciels HDRI — CC0 1.0
 
 - **Belfast Open Field** — Dimitrios Savva, Jarod Guest (Poly Haven).
@@ -176,6 +183,12 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
 
 ## Données géographiques
 
+Le relief et l'hydrographie de la carte de campagne sont des produits dérivés, calculés par les
+outils du projet (`tools/cent_ans_tools/geo`, `docs/geo.md`) à partir des sources ci-dessous ; le
+cache du relief fin (`data/map/pyramid/`, livré dans l'application ou dans le dossier « Cent Ans
+relief », ADR 0036) en fait partie. Les mentions d'attribution exigées par chaque licence sont
+reproduites telles quelles (entre guillemets).
+
 - **Relief (terre et bathymétrie)** : ETOPO 2022 15 Arc-Second Global Relief Model, NOAA
   National Centers for Environmental Information — domaine public (données du gouvernement des
   États-Unis). Citation : *NOAA National Centers for Environmental Information. 2022: ETOPO
@@ -185,7 +198,10 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
 - **Relief fin (terres de l'emprise jouable)** : Copernicus DEM GLO-90, © DLR e.V. 2010-2014 et
   © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par l'Union
   européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution. Tuiles lues
-  sur le bucket public AWS Open Data `copernicus-dem-90m` (lot R1, ADR 0019).
+  sur le bucket public AWS Open Data `copernicus-dem-90m` (lot R1, ADR 0019). Mention : « © DLR
+  e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the
+  European Union and ESA; all rights reserved. » Sert aussi aux étages E1-E2 de la pyramide de
+  relief (palier 1, lot ZG1) et aux horizons des batailles (`game/assets/horizon/relief/`, EP2).
 - **Relief rapproché (pyramide de relief, palier 2)** : Copernicus DEM GLO-30 Public, © DLR e.V.
   2010-2014 et © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par
   l'Union européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution
@@ -207,7 +223,8 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
   combinée aux grandes forêts et zones humides nommées de `data/map/historical_forests.json` et
   `data/map/wetlands.json` (sources par entrée).
 - **Relief détaillé des zones historiques (palier 3, lot ZG3, ADR 0036)** — modèles numériques
-  de terrain sans sursol, rééchantillonnés à 11, 5,6 et 2,8 m :
+  de terrain sans sursol, rééchantillonnés à 11, 5,6 et 2,8 m (34 zones de
+  `data/map/detail_zones.json`, étages E5-E7) :
   - France : RGE ALTI® 1 m / 5 m, © IGN (Institut national de l'information géographique et
     forestière), [Licence Ouverte Etalab 2.0](https://www.etalab.gouv.fr/licence-ouverte-open-licence/) ;
     service WMS-R de la Géoplateforme (`data.geopf.fr`). Mention : « Source : IGN – RGE ALTI® ».
