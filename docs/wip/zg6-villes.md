@@ -25,12 +25,16 @@ puis copie dans `game/bin/libcent_ans.debug.dylib`. Aucun changement Rust prévu
 - [x] Plan procédural (`town_plan.gd`) + test headless `game/tests/zg6_towns_test.gd` (OK)
 - [x] Rendu 1:1 (`town_builder.gd`, `town_layer.gd`, `town_building.gdshader`, `town_render.tres`),
       accroche dans `settlement_layer.gd` (`_setup_towns`, `_update_towns`)
-- [ ] Essai en jeu (captures), réglages visuels
-- [ ] Banc, captures avant/après, docs (`godot-map.md`, addendum ADR)
-- [ ] Fusion de main avant le rapport (main a régénéré fine_anchors.json : relancer `cent-ans geo towns`)
+- [x] Essai en jeu (captures), réglages visuels
+- [x] Construction hors fil principal (`TownBuilder.prepare`), banc `--bench-towns`
+- [x] Finage raccordé au parcellaire ZG5b (`fp_towns` dans `fine_parcels.gdshaderinc`)
+- [x] Captures avant/après `docs/img/zg6/` (JPEG 960 px), docs (`godot-map.md`, addendum ADR 0036)
+- [x] Fusion de main (ZG5b, EP8), `cent-ans geo towns` relancé
 
 ## Prochaine étape
-Lancer le jeu sur Amiens / Troyes / Poitiers au palier site (`--stage=map --focus=x,y,d`), régler.
+Lot terminé, en attente d'intégration par l'orchestrateur. Suites pour VH3 : caler les populations
+sur l'état des feux de 1328, affiner villages (plans en village-tas, village-rue), réduire les appels
+de dessin (un MultiMesh par modèle et par ville au lieu de par cellule, ou fusion des blocs).
 
 ## 2026-09-25 — construction hors fil principal
 - `TownBuilder.prepare(plan)` (fil de travail, après `TownPlan.generate`/`reground`) : tampons MultiMesh par cellule/modèle, tableaux de sol (bandes de 24 rangées), rues (paquets de 40), murailles via `SurfaceTool.commit_to_arrays`.

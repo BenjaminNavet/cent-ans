@@ -1042,6 +1042,82 @@ captures « comté » existe aussi sans ZG5b (autre calque).
 ![Garonne à marée en aval de Bordeaux](img/zg5b/bordeaux_pres_apres.jpg)
 ![Bocage normand](img/zg5b/bocage_pres_apres.jpg)
 
+## Villes ordinaires à l'échelle réelle vers 1340 (lot ZG6, ADR 0036)
+
+Les 562 colonies ordinaires (villes, bourgs, villages, châteaux, abbayes ; les villes emblématiques de
+`data/landmarks/` restent au lot VH) sont rendues à l'échelle 1:1 aux paliers vallée et site.
+
+**Données.** `data/rules/town_footprint.json` (schéma `town_footprint_rules.schema.json`) porte les
+entrées sourcées : densités 80-230 hab./ha selon la population (Russell 1972, Bairoch 1988, Hohenberg &
+Lees ; contrôles : Gand 64 000 hab. / 644 ha d'après Nicholas 1987, périmètre de Poitiers 6,5 km,
+Chartres ~60 ha), 4,5 personnes par feu, modèle de population par type et bâtiments, poll tax anglaise
+de 1377 × 1,6, règles d'enceinte, de site, de faubourgs, de finage (30 × √pop, 900-4 500 m) et de
+parcellaire (façades 5-8 m, profondeurs 20-40 m, largeurs de rues). `uv run --project tools cent-ans geo
+towns` (`tools/cent_ans_tools/geo/towns.py`, après `geo anchors-fine`) écrit `data/map/towns_1340.json`
+(schéma `towns_1340.schema.json`) : population estimée, surfaces, enceinte (pierre, palissade, aucune)
+et son polygone de rayons par gisement adapté au relief (éperon, méandre, mer), portes sur les routes
+d'accès, faubourgs, monuments, paroisses, fleuve et pont (ancrages ZG5a), rayon de finage.
+
+**Plan** (`town_plan.gd`, statique, sans état, fil de travail, déterministe par `seed`) : place du
+marché, monuments réservés, grandes rues drapées (décalage latéral par Viterbi sur la pente) du marché
+aux portes puis en faubourgs, rue des lices, rues secondaires qui suivent les courbes de niveau,
+ruelles ; parcelles en lanières des deux côtés des rues (maison sur rue, annexe et arbre de jardin à
+l'arrière), budget de maisons tiré des feux ; muraille (anneau tous les ~8 m, tours, portes), pont,
+grille de sol. Hauteurs en mètres lues dans un instantané des pages du quadtree (`TownPlan.Heights`).
+
+**Rendu** (`town_builder.gd`, `town_layer.gd`, `shaders/town_building.gdshader`,
+`resources/town_render.tres`) : nœud racine à l'échelle 1/`meters_per_unit` (tout en mètres dessous),
+hauteur de base en mètres dans `INSTANCE_CUSTOM.r` (MultiMesh) ou `UV2.x` (maillages drapés), ajoutée
+dans le shader × `campaign_vertical_scale` : l'exagération dynamique ZG4 ne demande aucune
+reconstruction (AABB recalées sur `vertical_scale_changed`). HLOD par cellule de 250 m : kit bas détail
+(`game/assets/models/town_kit/`, `kit_export.py export-town`) jusqu'à `detail_range`, blocs (un cube à
+toit par maison) jusqu'à `block_range`, fondu ; distances et ombres selon le préréglage de qualité (PF1).
+Tant que la couche est active (poids vallée ≥ 0,5), les maquettes « à la loupe » des colonies
+ordinaires sont masquées et leurs étiquettes posées au sol (accroche `_setup_towns` / `_update_towns`
+dans `settlement_layer.gd`).
+
+**Streaming et budget.** Villes dans un rayon `distance × stream_factor` (4-18 unités) : plan
+(`TownPlan.generate`) puis préparation de la géométrie (`TownBuilder.prepare` : tampons MultiMesh,
+tableaux via `SurfaceTool.commit_to_arrays`, sol en bandes de 24 rangées, rues par 40) dans le
+`WorkerThreadPool` ; le fil principal ne crée que les nœuds, par tâches indivisibles de ≤ 1-2 ms,
+sous `FrameBudget.has_time()` (PB1) et `build_budget_ms`. Recalage (`TownPlan.reground` + préparation,
+fil) quand des pages plus fines arrivent (`chunk_surface_changed`, hors `rescaling_vertical`), puis
+échange de constructeur sans trou. Cache LRU des plans (24). `flush` (captures) fait tout de façon
+synchrone.
+
+**Finage ↔ parcellaire ZG5b.** `TownLayer._push_finage` envoie au shader du terrain les 16 villes les
+plus proches du point visé (`fp_towns[16]` : x, y, rayon de finage, rayon bâti en unités ;
+`fp_town_count`) ; `fine_parcels.gdshaderinc` (`fp_finage`) remplace les friches par des terres
+cultivées dans le finage et peint une couronne de jardins et vergers (carrés de 12 m) entre 0,9 et
+1,4 × le rayon bâti. `TownLayer.finage_zones()` / `TownData.finage_zones()` exposent les cercles de toutes
+les villes. Dans l'enceinte, le sol de la ville est vert (jardins, prés intra-muros) sauf autour des
+maisons et des rues.
+
+**Drapeaux.** `--no-towns` (désactive la couche : captures « avant »), `--town-lod=blocks|detail`
+(force un niveau), `--bench-towns` (avec `--bench-map --bench-descent-only` : descente sur Amiens,
+Troyes, Poitiers, Gand, pause 4 s).
+
+**Mesures** (25/09, M4 Pro, 1 440 × 900, machine chargée par d'autres agents, charge ~25-60) :
+descente `--bench-towns` avec villes : 48,2 i/s, p50 15,0 ms, p99 120 ms, 160 pics > 50 ms, 809 appels de
+dessin ; sans (`--no-towns`) : 56,6 i/s, p50 11,7 ms, p99 117 ms, 158 pics, 241 appels. Les pics sont
+ceux du relief (identiques avec et sans). Plan : 0,5-2 s par ville dans un fil (build debug, Gand 64 000
+hab. ≈ 8 100 maisons) ; plus longue tâche du fil principal 1-10 ms (création d'un maillage de sol ou de
+monuments sous forte charge). Aucun coût en vue stratégique (couche inactive au-delà du palier vallée).
+
+Captures avant/après (`docs/img/zg6/`, `<ville>_{vallee,site}_{avant,apres}.jpg`) : Gand (grande ville
+de plaine), Amiens (ville de plaine avec pont), Poitiers (ville close sur éperon), Carcassonne (ville
+close de fleuve), Blois (petite ville de Loire avec pont).
+
+![Poitiers, éperon, palier site](img/zg6/poitiers_site_apres.jpg)
+![Gand, palier vallée](img/zg6/gand_vallee_apres.jpg)
+![Blois, palier site](img/zg6/blois_site_apres.jpg)
+
+**Limites.** Populations estimées par type et bâtiments (pas encore calées sur l'état des feux de
+1328) ; les villages restent des rues-villages simples ; certaines villes près de l'eau (Gand au sud,
+Sully-sur-Loire : 5 maisons) perdent des parcelles aux zones d'eau ; rubans de routes et moulins aux
+paliers proches relèvent de ZG5b / VH ; appels de dessin ×3 dans la descente (un MultiMesh par modèle
+et par cellule).
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
