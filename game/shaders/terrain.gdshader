@@ -278,8 +278,10 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 // Lot CM2 : vue stratégique parchemin (fondu au zoom maximal) et météo de campagne.
 #include "res://shaders/parchment_map.gdshaderinc"
 #include "res://shaders/campaign_weather.gdshaderinc"
+#include "res://shaders/relief_quadtree.gdshaderinc"  // ZG2 : relief streamé en quadtree
 
 void vertex() {
+	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float carve = river_carve(world_pos.xz, map_size);  // lot V4
 	VERTEX.y -= carve;
@@ -304,6 +306,7 @@ void fragment() {
 	float h_d = height_m_lod(uv + dv, lod);
 	vec2 grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
 	rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
+	qt_relief(p, footprint, hc, grad_m);  // ZG2 : relief de la page du quadtree
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
 	vec2 g = grad_m * height_scale * shading_relief;
 	vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
