@@ -78,7 +78,9 @@ def detail(srgb: np.ndarray, hue: float = 0.25) -> np.ndarray:
     return linear_to_srgb(lin * 0.5)
 
 
-def periodic_noise(rng: np.random.Generator, scale: float, aspect=(1.0, 1.0)) -> np.ndarray:
+def periodic_noise(
+    rng: np.random.Generator, scale: float, aspect=(1.0, 1.0)
+) -> np.ndarray:
     """Tileable noise in [0, 1]: white noise low-passed in the Fourier domain."""
     white = rng.standard_normal((SLICE, SLICE))
     fy = np.fft.fftfreq(SLICE)[:, None] * aspect[1]
@@ -213,7 +215,10 @@ def build(src: Path) -> None:
         elif source == "@soil":
             albedo, normal = soil(rng)
         elif source == "@flat":
-            albedo, normal = np.full((SLICE, SLICE, 3), linear_to_srgb(np.array(0.5))), FLAT_NORMAL
+            albedo, normal = (
+                np.full((SLICE, SLICE, 3), linear_to_srgb(np.array(0.5))),
+                FLAT_NORMAL,
+            )
         elif source == "@aging":
             albedo, normal = aging(rng)
         else:
@@ -222,7 +227,10 @@ def build(src: Path) -> None:
         albedos.append(albedo)
         normals.append(normal)
         print(f"layer {len(albedos) - 1:2d} {name}")
-    for out, stack in (("landmark_albedo_array.jpg", albedos), ("landmark_normal_array.jpg", normals)):
+    for out, stack in (
+        ("landmark_albedo_array.jpg", albedos),
+        ("landmark_normal_array.jpg", normals),
+    ):
         sheet = np.concatenate(stack, axis=0)
         Image.fromarray((np.clip(sheet, 0, 1) * 255 + 0.5).astype(np.uint8)).save(
             HERE / out, quality=90

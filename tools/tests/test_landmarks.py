@@ -182,3 +182,16 @@ def test_landmark_siege_backdrop_references(path: Path) -> None:
         missing = set(siege.get(key, [])) - known
         assert not missing, (key, missing)
     assert (DATA / "provinces" / f"{landmark['province']}.json").exists()
+
+
+@pytest.mark.parametrize("path", LANDMARKS, ids=lambda p: p.stem)
+def test_landmark_siege_battle_references(path: Path) -> None:
+    """L3: every city describes its besieged town; walls, attacked gate and streets exist."""
+    landmark = _load(path)
+    battle = landmark["siege"]["battle"]
+    walls = {wall["id"]: wall for wall in landmark["walls"]}
+    assert set(battle["walls"]) <= set(walls), battle["walls"]
+    gates = {g["name"] for w in battle["walls"] for g in walls[w].get("gates", [])}
+    assert battle["gate"] in gates, (battle["gate"], gates)
+    streets = {street["id"] for street in landmark["streets"]}
+    assert set(battle.get("streets", [])) <= streets
