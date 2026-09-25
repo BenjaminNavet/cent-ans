@@ -31,6 +31,62 @@
   "ruined": true,
   "triangles": 583
  },
+ "barrels_0": {
+  "depth": 1.3,
+  "height": 1.7,
+  "kind": "barrels",
+  "length": 2.53,
+  "ruined": false,
+  "triangles": 440
+ },
+ "barrels_1": {
+  "depth": 1.3,
+  "height": 1.7,
+  "kind": "barrels",
+  "length": 2.54,
+  "ruined": false,
+  "triangles": 172
+ },
+ "barrels_2": {
+  "depth": 1.3,
+  "height": 1.7,
+  "kind": "barrels",
+  "length": 1.89,
+  "ruined": false,
+  "triangles": 248
+ },
+ "cart_0": {
+  "depth": 1.65,
+  "height": 1.9,
+  "kind": "cart",
+  "length": 4.6,
+  "ruined": false,
+  "triangles": 610
+ },
+ "cart_1": {
+  "depth": 1.65,
+  "height": 1.9,
+  "kind": "cart",
+  "length": 4.6,
+  "ruined": false,
+  "triangles": 322
+ },
+ "cart_2": {
+  "depth": 1.65,
+  "height": 1.9,
+  "kind": "cart",
+  "length": 4.6,
+  "ruined": false,
+  "triangles": 322
+ },
+ "cart_3": {
+  "depth": 1.65,
+  "height": 1.9,
+  "kind": "cart",
+  "length": 4.6,
+  "ruined": false,
+  "triangles": 338
+ },
  "church_0": {
   "depth": 8.0,
   "height": 21.61,
@@ -166,6 +222,46 @@
   "length": 20.48,
   "ruined": false,
   "triangles": 2647
+ },
+ "stall_0": {
+  "depth": 1.79,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 3.34,
+  "ruined": false,
+  "triangles": 524
+ },
+ "stall_1": {
+  "depth": 1.84,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 3.17,
+  "ruined": false,
+  "triangles": 342
+ },
+ "stall_2": {
+  "depth": 1.69,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 3.19,
+  "ruined": false,
+  "triangles": 288
+ },
+ "stall_3": {
+  "depth": 1.73,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 2.78,
+  "ruined": false,
+  "triangles": 440
+ },
+ "stall_4": {
+  "depth": 1.72,
+  "height": 2.5,
+  "kind": "stall",
+  "length": 3.36,
+  "ruined": false,
+  "triangles": 524
  },
  "stonehouse_0": {
   "depth": 7.35,
@@ -342,5 +438,21 @@
   "length": 7.0,
   "ruined": false,
   "triangles": 506
+ },
+ "woodpile_0": {
+  "depth": 1.5,
+  "height": 0.9,
+  "kind": "woodpile",
+  "length": 2.93,
+  "ruined": false,
+  "triangles": 497
+ },
+ "woodpile_1": {
+  "depth": 1.5,
+  "height": 0.9,
+  "kind": "woodpile",
+  "length": 3.42,
+  "ruined": false,
+  "triangles": 497
  }
 }
