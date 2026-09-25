@@ -27,6 +27,14 @@ fn active_wins(data: &GameData, terrain: Terrain, seed: u64, passive: SideId) ->
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(passive, false);
     run_to_end(&mut sim);
+    if std::env::var("R2B_TIMES").is_ok() {
+        println!(
+            "{} {seed} {} {:.0}",
+            terrain.key(),
+            passive.other().key(),
+            sim.elapsed()
+        );
+    }
     sim.winner() == Some(passive.other())
 }
 
