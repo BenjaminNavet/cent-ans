@@ -100,11 +100,12 @@ pub fn diplomatic_stance(
         return Stance::Tension;
     }
     let ledger = |a: &FactionId| state.factions.get(a).map(|f| &f.ledger);
-    let agreement = ledger(viewer).is_some_and(|l| {
-        l.trade_agreements.contains(other) || l.military_access.contains(other)
-    }) || ledger(other).is_some_and(|l| {
-        l.trade_agreements.contains(viewer) || l.military_access.contains(viewer)
-    }) || state.marriage_tie(viewer, other);
+    let agreement = ledger(viewer)
+        .is_some_and(|l| l.trade_agreements.contains(other) || l.military_access.contains(other))
+        || ledger(other).is_some_and(|l| {
+            l.trade_agreements.contains(viewer) || l.military_access.contains(viewer)
+        })
+        || state.marriage_tie(viewer, other);
     if agreement {
         Stance::Agreement
     } else {
