@@ -15,7 +15,7 @@ Branche : `worktree-agent-a3c4f4bdfe00c9af3`, depuis main fa7efb3c (M1-M4).
 - [x] Manuel (§ 4, § 5 « Mouvement libre des armées », « Repli »), encyclopédie (`mech_movement`, sièges), codex
   (`cdx_ponts_gues`, `cdx_zone_controle`, `cdx_deroute_debandade` mis à jour), tutoriel (étapes « marche »,
   « fin du tour », conseil anglais).
-- [ ] Fusion de main, vérifications finales.
+- [x] Fusion de main (a4508f81), fmt/clippy/test, ruff, pytest (échec connu test_portraits seul), build.sh, smoke, m4 et c5 verts.
 
 ## Mesures (`settlements_probe 50 1..8`, release)
 
@@ -89,4 +89,4 @@ levées et des pertes, pas une règle de mouvement. Hors périmètre (équilibra
 
 ## Prochaine étape
 
-Fusion de main dans la branche, puis vérifications finales (cargo, pytest, build.sh, Godot).
+Terminé ; en attente de fusion par l’orchestrateur.
