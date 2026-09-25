@@ -97,13 +97,65 @@ les arbalétriers près de la porte, rompus ou non par la chaleur de la rangée 
 Les réglages en tout ou rien donnent 3/20 ou 15-17/20. Levier progressif à l'essai : une part
 seulement de la chaleur atteint le rempart (hauteur et parapet).
 
+### Autres leviers écartés
+
+Rayon de l'anneau de Paris (`siege.battle.radius_m`, 150 m par défaut) : 135 m → 20/20, 175 m →
+20/20 (la géométrie change tout, pas de pente exploitable).
+
+## Correctif
+
+1. **Chaleur sur le chemin de ronde** (`data/rules/siege_fire.json`, `heat.wall_walk_factor` =
+   0,3 ; schéma ; `sim/fire.rs` `heat_on`, exposé en `BattleSim::heat_intensity`) : un régiment sur
+   le rempart, au-dessus de la rue et derrière le parapet, ne reçoit que 30 % de la chaleur des
+   maisons en feu (pertes et moral). Balayage du facteur (Paris / Bordeaux / Londres) : 1 → 17/18/18,
+   0,6 → 15/15/15, 0,45 → 14/12/16, 0,3 → 12/12/16, 0,2 → Paris 12.
+2. **IA d'assaut** (`ai.rs`, `plan_siege_attack`) : défaut révélé par (1). Un régiment de
+   l'assaillant déjà passé par-dessus le mur (dedans ou sur le rempart), sans porte ni brèche
+   ouverte, recevait encore l'ordre de gagner son point d'échelle — 25 m derrière le mur, donc là
+   où il était : il restait planté jusqu'à la nuit (Rouen de la sonde SG3 : 6 nuls à 1800 s sur 10
+   avec (1) ; c'était aussi le point ouvert d'Avignon dans SG3). Il marche maintenant vers la place.
+   Sans effet sur la sonde BR3 (chiffres identiques avec et sans).
+3. Tests : `fire.rs::the_wall_walk_is_sheltered_from_the_heat`,
+   `sg1.rs::an_attacker_over_the_wall_makes_for_the_square` (échoue sans le correctif : 124 → 123 m).
+4. Codex `cdx_jeu_incendies` : la part de chaleur sur le chemin de ronde.
+
+## Mesures après (sonde BR3, 20 graines, brèche 40 %, fort. 2, deux IA)
+
+| Ville | Îlots | Victoires assaillant avant → après | Durée médiane (s) | Pertes assaillant | Pertes garnison | Maisons brûlées (moy.) |
+|---|---|---|---|---|---|---|
+| générique | 59 | 17 → 18/20 | 438 → 441 | 55 → 56 | 197 → 197 | 10.9 → 10.4 |
+| paris | 61 | 17 → **12/20** | 501 → 560 | 85 → 78 | 194 → 166 | 6.7 → 8.9 |
+| rouen | 78 | 2 → 0/20 | 307 → 305 | 91 → 70 | 148 → 157 | 5.6 → 4.0 |
+| avignon | 80 | 18 → 18/20 | 452 → 452 | 154 → 154 | 175 → 175 | 5.0 → 5.0 |
+| bordeaux | 85 | 18 → **12/20** | 463 → 470 | 70 → 85 | 196 → 212 | 17.4 → 19.9 |
+| bruges | 82 | 19 → 19/20 | 413 → 406 | 71 → 69 | 159 → 167 | 5.0 → 4.7 |
+| calais | 84 | 6 → 6/20 | 329 → 334 | 78 → 90 | 152 → 167 | 3.4 → 2.9 |
+| london | 70 | 18 → 16/20 | 501 → 501 | 81 → 77 | 208 → 169 | 4.3 → 5.3 |
+
+Paris sur 40 graines : 26/40 (13/20). Défaites de Paris : l'équipage du bélier tué par les
+arbalétriers du rempart, escalade tardive (515 s) qui se débande ; victoires : porte tombée ou
+place tenue.
+
+Sonde SG3 (armées de la démo, 10 graines), victoires de l'assaillant main → chaleur seule → après :
+Paris 10 → 9 → 10, Avignon 8 → 8 → 10, Bruges 10 → 10 → 10, Calais 10 → 10 → 10, Rouen 8 → 4 → 10 ;
+durées médianes après : 240, 294, 285, 262, 329 s (main : 233, 421, 243, 262, 546).
+
+## Écart à l'objectif
+
+Bordeaux perd 6 victoires (18 → 12/20), au-delà de ±3 : la même garnison sur le rempart y est
+elle aussi soulagée de la chaleur. Aucun réglage global ne sépare Paris de Bordeaux (0,6 : Paris
+15, Bordeaux 15 ; 0,3 : 12 et 12). Options : (a) garder 0,3 (Paris dans la cible, Bordeaux 12/20) ;
+(b) 0,6 (toutes les villes à ±3, Paris 15/20) ; (c) 1,0 = main (Paris 17/20), en ne gardant que le
+correctif d'IA ; (d) un levier propre à Paris, à inventer (le bloc `siege.battle` n'offre que
+murs, porte, rues, place, rayon, et le rayon est chaotique).
+
 ## État
 - [x] Référence sur main (sondes BR3 et SG3), toutes villes emblématiques.
 - [x] Diagnostic instrumenté (traces, carte ASCII).
-- [ ] Contre-épreuve : SG3 sans BR3 (pointe de la branche SG3 d29e5684).
-- [ ] Décision / correctif minimal.
-- [ ] Mesures après, addendum ADR 0047, codex si chiffres visibles changent.
+- [x] Contre-épreuve : SG3 sans BR3 (pointe de la branche SG3 d29e5684).
+- [x] Correctif : chaleur sur le chemin de ronde (données) + IA d'assaut (défaut révélé).
+- [x] Mesures après, addendum ADR 0047, codex.
 - [ ] Vérifications (fmt, clippy, test, pytest, build.sh, smoke siège), fusion de main.
 
 ## Prochaine étape
-Contre-épreuve SG3 sans BR3, puis décider (Paris est déjà au-dessus de la cible).
+Vérifications complètes, fusion de main, rapport.
