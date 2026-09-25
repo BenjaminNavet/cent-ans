@@ -1132,6 +1132,10 @@ func _parse_cmdline() -> void:
 				"diplomacy":
 					_focus_capital()
 					diplomacy.open_panel("fac_england")
+				"diplomacy_treaty":  # DP1 : négociation à plusieurs clauses
+					_focus_capital()
+					diplomacy.open_panel("fac_england")
+					diplomacy.panel.stage_example()
 				"diplomacy_map":
 					_focus_capital()
 					diplomacy._toggle_mode(DiplomacyController.MapMode.DIPLOMACY)

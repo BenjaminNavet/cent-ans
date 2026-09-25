@@ -28,7 +28,8 @@ pub use entities::ai_alignment::{
     AiAlignment, DefectionRules, DynasticRules, GrievanceRules, MoneyFiefRules, WoolRevoltRules,
 };
 pub use entities::ai_diplomacy::{
-    AiDiplomacy, JoinWarRules, MenacingNeighbourRules, PeaceRules, WarPlanningRules,
+    AiDiplomacy, JoinWarRules, MenacingNeighbourRules, NegotiationRules, PeaceRules,
+    WarPlanningRules,
 };
 pub use entities::ai_doctrine::{AiDoctrines, Doctrine};
 pub use entities::ai_grid::AiGrid;
