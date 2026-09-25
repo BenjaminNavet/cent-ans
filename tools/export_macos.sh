@@ -13,7 +13,9 @@ APP="$ROOT/export/Cent Ans.app"
 mkdir -p "$ROOT/export"
 rm -rf "$APP"
 godot --headless --path "$ROOT/game" --import
-godot --headless --path "$ROOT/game" --export-release "macOS" "$APP"
+# Not headless: the shader baker (export_presets.cfg, shader_baker/enabled) needs the Forward+
+# renderer to precompile the shaders, otherwise the first launch compiles them (~10 s).
+godot --path "$ROOT/game" --export-release "macOS" "$APP"
 mkdir -p "$APP/Contents/Resources"
 rsync -a --delete --exclude "schemas" "$ROOT/data/" "$APP/Contents/Resources/data/"
 cp "$ROOT/CREDITS.md" "$APP/Contents/Resources/CREDITS.md"
