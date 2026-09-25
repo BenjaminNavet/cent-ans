@@ -129,7 +129,6 @@ var _bench_gpu_samples: int = 0
 var _bench_ab: PackedStringArray = []
 var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
-var _bench_process_ms: float = 0.0  # EP1 : cumul du temps de script par image
 var _scale_tier: String = ""  # EP1 : palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
@@ -685,8 +684,6 @@ func _run_benchmark_frame(delta: float) -> void:
 		var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
 		_bench_gpu_ms += gpu_ms
 		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
-		# EP1 : temps de script par image (hors attente de l'écran, qui plafonne souvent à 60 Hz).
-		_bench_process_ms += Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
 		_bench_gpu_samples += 1
 		_bench_ab_step(gpu_ms)
 	if _bench_timed_out():
@@ -753,7 +750,6 @@ func _bench_finish() -> void:
 	result["primitives_m"] = Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1.0e6
 	result["draw_calls"] = Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 	result["skipped_updates"] = self.soldiers.skipped_updates
-	result["process_ms"] = _bench_process_ms / maxf(_bench_gpu_samples, 1)
 	if effects != null and effects.volleys != null:
 		# BV1 : volées, traits fichés et échelle des figurines.
 		result["volley_arrows"] = effects.volleys.launched

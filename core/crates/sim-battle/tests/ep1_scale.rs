@@ -140,4 +140,31 @@ fn ai_handles_sixty_regiments_a_side() {
     }
     assert!(melee_seen >= 20, "at most {melee_seen} regiments in melee");
     assert!(sim.is_finished(), "still running at {:.0} s", sim.elapsed());
+    println!(
+        "60/side: {melee_seen} regiments in melee at most, over at {:.0} s, winner {:?}",
+        sim.elapsed(),
+        sim.winner()
+    );
+}
+
+/// Probe (ignored): simulation cost per tick at 63 and 105 regiments a side.
+#[test]
+#[ignore]
+fn probe_tick_cost() {
+    for regiments in [20, 63, 105] {
+        let mut sim = BattleSim::new(big_setup(regiments), 11).unwrap();
+        sim.set_ai(SideId::Attacker, true);
+        sim.set_ai(SideId::Defender, true);
+        while sim.elapsed() < 90.0 {
+            sim.step();
+        }
+        let start = std::time::Instant::now();
+        let ticks = 300;
+        for _ in 0..ticks {
+            sim.step();
+        }
+        let per_tick = start.elapsed().as_secs_f64() * 1000.0 / f64::from(ticks);
+        let present = sim.units().iter().filter(|u| u.present()).count();
+        println!("{regiments}/side: {present} present, {per_tick:.2} ms per tick");
+    }
 }

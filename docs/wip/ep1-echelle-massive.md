@@ -45,7 +45,7 @@ Batailles de 15 000 soldats et plus, fluides (≥ 40 i/s à 15 000 en Haut, ≥ 
   du shader : une figurine sur deux effacée, les autres élargies ×1,6).
 - `--no-ep1-budget` coupe les trois (A/B). Banc : `tools/bench_ep1.sh <étiquette> --units=63 …`.
 - JSON du banc : `scale`, `field_w`, `on_field_soldiers`, `figures`, `primitives_m`,
-  `draw_calls`, `skipped_updates`, `process_ms`.
+  `draw_calls`, `skipped_updates`.
 
 ## Mesures (Mac M4 Pro, machine très chargée : charge 200+, 50+ rustc/godot d'autres agents)
 `--disable-vsync --resolution 1600x900 -- --benchmark --quality=high --bench-at=90` ; l'écran
@@ -55,6 +55,20 @@ plafonne à 60 Hz malgré `--disable-vsync` (comme BV3) : les i/s moyennes satur
 |---|---|---|---|---|---|---|
 | `--units=63` (15 120 soldats, palier epic 2400 × 1600) | A sans budget | 57,1 · 56,4 | 23,9 · 25,1 | 2,70 M | 14 644 | 1 370 |
 | idem | B budget EP1 | 57,6 · 57,4 · 57,4 | 23,0 · 25,0 · 24,2 | 2,70 M | 14 644 | 1 364 |
+| `--units=63 --unit-size=1.75` (≈ 25 600 figurines) | A | 55,2 · 48,4 | 24,3 · 33,3 | 3,1-3,5 M | 25 600 | 1 364-1 400 |
+| idem | B | 52,4 · 50,3 | 26,4 · 29,6 | 3,1-3,5 M | 25 600 | 1 365-1 413 |
+| `--units=105` (19 000 soldats présents, 80 régiments/camp + 25 en renfort) | A | 30,1 | 54,5 | 3,03 M | 19 079 | 1 630 |
+| idem | B | 36,2 | 44,9 | 2,95 M | 19 052 | 1 630 |
+| `--units=105 --unit-size=1.5` (≈ 28 600 figurines) | B | 34,4 | 42,9 | 3,18 M | 28 562 | 1 624 |
+| `--units=20 --unit-size=4` (Épique, 4 700 soldats, palier large) | B | 65,0 | 20,9 | 3,16 M | 18 648 | 1 196 |
+
+Lecture : cibles tenues (15 000 soldats ≥ 40 i/s : ~57, plafonné par l'écran ; 25 000 figurines
+≥ 30 i/s : ~50). Le budget ne se voit pas tant que l'écran plafonne ; il rend +20 % à 172
+régiments présents (`--units=105`), où le coût est côté script par régiment. Simulation (sonde
+`probe_tick_cost`, release) : 0,77 ms par pas à 20 régiments/camp, 0,89 ms à 63, 1,81 ms à 105
+(10 pas par seconde de bataille) : ce n'est pas le goulot. Sonde IA contre IA 60 contre 60
+(`ai_handles_sixty_regiments_a_side`) : jusqu'à 39 régiments en mêlée, fin à 1 160 s, pas
+d'effondrement.
 
 ## Prochaine étape
 Mesures à 25 000 figurines (`--unit-size=1.75`) et au-delà ; ADR ; fusion de main.
