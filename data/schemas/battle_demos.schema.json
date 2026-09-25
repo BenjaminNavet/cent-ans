@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "battle_demos.schema.json",
+  "title": "Batailles de démonstration du menu (SG2)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["description", "demos"],
+  "properties": {
+    "description": {"type": "string"},
+    "demos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "detail", "kind"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "label": {"type": "string", "minLength": 1},
+          "detail": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["field", "siege"]},
+          "province": {"type": "string", "pattern": "^prov_[a-z0-9_]+$"},
+          "landmark": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "attacker": {"enum": ["fac_france", "fac_england"]},
+          "engines": {"type": "array", "items": {"type": "string", "pattern": "^unit_[a-z0-9_]+$"}}
+        },
+        "allOf": [
+          {"if": {"properties": {"kind": {"const": "field"}}}, "then": {"not": {"anyOf": [{"required": ["province"]}, {"required": ["landmark"]}]}}},
+          {"if": {"required": ["landmark"]}, "then": {"required": ["attacker"]}}
+        ]
+      }
+    }
+  }
+}

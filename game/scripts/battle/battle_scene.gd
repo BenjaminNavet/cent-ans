@@ -59,11 +59,19 @@ var resolved: bool = false
 var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
+var engines_fx: SiegeEnginesFx = null  # SG2 : engins de siège animés
 var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
 var _siege_engines := ""  # SG1 : `--siege-engines=` (captures, banc d'essai)
 var siege_demo: bool = false
 ## L3 : province de la démo de siège (`--siege-province=prov_ile_de_france` : Paris).
 var siege_province: String = "prov_guyenne"
+## SG2 : ville assiégée dans son plan (`--siege-landmark=avignon`, guerre déclarée au détenteur si
+## besoin) et faction de l'assiégeant (`--siege-attacker=fac_england`).
+var siege_landmark: String = ""
+var siege_attacker: String = "fac_france"
+## SG2 : options d'une démo lancée depuis le menu (`BattleDemosMenu`), lues comme la ligne de
+## commande puis oubliées.
+static var demo_args: PackedStringArray = []
 var landmark_town: LandmarkSiegeTown = null
 
 var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layers)
@@ -196,7 +204,10 @@ func _stage_standalone() -> bool:
 	if armies.is_empty():
 		return false
 	var index: int = -1
-	if siege_demo and sim.has_method("debug_stage_siege"):
+	if siege_demo and siege_landmark != "" and sim.has_method("debug_stage_landmark_siege"):
+		var besieger: String = armies[1] if siege_attacker == "fac_england" else armies[0]
+		index = sim.call("debug_stage_landmark_siege", besieger, siege_landmark)
+	elif siege_demo and sim.has_method("debug_stage_siege"):
 		index = sim.call("debug_stage_siege", armies[0], siege_province)
 		if index < 0:
 			# L3 : une ville française (Paris, Rouen) est assiégée par l'armée anglaise.
@@ -240,7 +251,11 @@ func begin() -> bool:
 	battle = ClassDB.instantiate("BattleSim")
 	if not battle.call("setup", setup, battle_seed):
 		return false
-	player_side = str(setup.get("player_side", "attacker"))
+	var setup_side: Variant = setup.get("player_side", "attacker")
+	player_side = str(setup_side) if setup_side != null else ""
+	if player_side == "" and standalone and siege_landmark != "":
+		# SG2 : démo d'Avignon ou de Bruges, sans le joueur de la campagne : il mène l'assaut.
+		player_side = "attacker"
 	if player_side == "":
 		player_side = "attacker"
 		autoplay = true
@@ -398,10 +413,17 @@ func _build_soldier_layers() -> void:
 		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
 			blood.on_corpse(pos, side, kind, cause, _camera_position())
 			effects.volleys.on_corpse(pos, side, kind, cause))
+	# SG2 : engins animés (trébuchet, mangonneau, bombarde, roues du bélier et du beffroi).
+	engines_fx = SiegeEnginesFx.new()
+	engines_fx.name = "EnginesFx"
+	add_child(engines_fx)
+	engines_fx.setup(soldiers, effects, siege_view)
+	effects.engine_fx = engines_fx
 	if siege_view != null:
 		assault_fx = SiegeAssaultFx.new()
 		assault_fx.name = "AssaultFx"
 		add_child(assault_fx)
+		assault_fx.engines_fx = engines_fx
 		assault_fx.setup(siege_view, effects, soldiers, func(x: float, z: float) -> float: return terrain.height_at(x, z))
 	_setup_grass_flatten()
 
@@ -503,6 +525,8 @@ func _update_effects(dt: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
 	var shots: Variant = battle.call("get_shots")
+	if engines_fx != null:
+		engines_fx.update(units, shots, soldiers.anim_time, dt)
 	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, null if _no_bv1 else shots)
 	if blood != null:
 		blood.tick_time(soldiers.anim_time)
@@ -1337,7 +1361,10 @@ func ground_point(screen: Vector2) -> Vector3:
 
 
 func _parse_cmdline() -> void:
-	for arg in OS.get_cmdline_user_args():
+	var args := OS.get_cmdline_user_args()
+	args.append_array(demo_args)
+	demo_args = PackedStringArray()
+	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
 			autoplay = true
@@ -1367,6 +1394,11 @@ func _parse_cmdline() -> void:
 		elif arg.begins_with("--siege-province="):
 			siege_demo = true
 			siege_province = arg.trim_prefix("--siege-province=")
+		elif arg.begins_with("--siege-landmark="):
+			siege_demo = true
+			siege_landmark = arg.trim_prefix("--siege-landmark=")
+		elif arg.begins_with("--siege-attacker="):
+			siege_attacker = arg.trim_prefix("--siege-attacker=")
 		elif arg.begins_with("--siege-engines="):
 			_siege_engines = arg.trim_prefix("--siege-engines=")
 		elif arg.begins_with("--camera="):
