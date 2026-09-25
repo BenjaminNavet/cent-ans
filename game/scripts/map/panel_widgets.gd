@@ -96,7 +96,7 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 8)
 		var button := RichButton.new()
-		button.text = "%s — %s / %d tour(s)" % [str(row.get("name", row.get("building", "?"))), Money.amount(int(row.get("cost", 0))), int(row.get("turns", 1))]
+		button.text = "%s — %s / %s" % [str(row.get("name", row.get("building", "?"))), Money.amount(int(row.get("cost", 0))), FrText.count(int(row.get("turns", 1)), "tour")]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var available: bool = bool(row.get("available", false))

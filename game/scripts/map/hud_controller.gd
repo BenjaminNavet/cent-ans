@@ -74,7 +74,7 @@ func garrison_availability(army: Dictionary, is_player: bool) -> Dictionary:
 		return {"can_garrison": true, "reason": "Colonie assiégée : impossible d'y laisser une garnison."}
 	var free := int(detail.get("garrison_free", -1))
 	if free == 0:
-		return {"can_garrison": true, "reason": "Garnison complète (%d unité(s) au maximum)." % int(detail.get("garrison_cap", 0))}
+		return {"can_garrison": true, "reason": "Garnison complète (%s au maximum)." % FrText.count(int(detail.get("garrison_cap", 0)), "unité")}
 	return {"can_garrison": true, "reason": ""}
 
 
@@ -238,4 +238,4 @@ func _on_split_requested(army_id: String, unit_indices: Array) -> void:
 ## Lot C7d : bouton « Garnison ». Le refus éventuel du cœur (siège survenu entre-temps,
 ## garnison remplie par un autre ordre) revient dans le toast d'erreur de `_submit`.
 func _on_garrison_requested(army_id: String, unit_indices: Array) -> void:
-	map.call("_submit", {"type": "garrison_units", "army": army_id, "unit_indices": unit_indices}, "Régiment(s) laissé(s) en garnison.")
+	map.call("_submit", {"type": "garrison_units", "army": army_id, "unit_indices": unit_indices}, "Régiment laissé en garnison." if unit_indices.size() <= 1 else "Régiments laissés en garnison.")

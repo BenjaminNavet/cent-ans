@@ -87,7 +87,7 @@ func after_end_turn() -> void:
 	var offers: Array = map.sim.call("get_offers")
 	if not offers.is_empty():
 		open_panel()
-		map.ui.show_toast("%d proposition(s) diplomatique(s) en attente." % offers.size())
+		map.ui.show_toast("%s en attente." % FrText.count(offers.size(), "proposition diplomatique", "propositions diplomatiques"))
 
 
 func handle_input(event: InputEvent) -> bool:

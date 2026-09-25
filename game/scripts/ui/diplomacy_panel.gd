@@ -153,7 +153,7 @@ func _render_offers() -> void:
 	for offer in offers:
 		var row := HBoxContainer.new()
 		var text := Label.new()
-		text.text = "%s (%d tour(s))" % [str(offer["text"]), int(offer["expires_in"])]
+		text.text = "%s (%s)" % [str(offer["text"]), FrText.count(int(offer["expires_in"]), "tour")]
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(text)
@@ -256,7 +256,7 @@ func _render_detail() -> void:
 	facts.append("Religion : %s" % entry["religion_name"])
 	facts.append("Puissance militaire : %s" % HudStyle.thousands(int(entry["power"])))  # D1
 	if int(entry["truce_turns_left"]) > 0:
-		facts.append("Trêve : encore %d tour(s)" % int(entry["truce_turns_left"]))
+		facts.append("Trêve : encore %s" % FrText.count(int(entry["truce_turns_left"]), "tour"))
 	if status == "war":
 		facts.append("Score de guerre : %+d" % int(entry["war_score"]))
 	if int(entry["loyalty"]) >= 0:
