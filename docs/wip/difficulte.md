@@ -9,8 +9,8 @@ Branche : `feature/df1-difficulty` (worktree agent). Ne pas merger soi-même.
 - [x] Pont : `set_difficulty`, `get_difficulty`, `get_difficulty_levels` (`campaign_sim_difficulty.rs`).
 - [x] Brancher les leviers : revenus, entretien, recrutement, agitation, attitude, guerre, moral (3D + auto + prévision).
 - [x] Tests Rust (`tests/df1_difficulty.rs`).
-- [ ] UI : sélecteur sur l'écran de faction, « Défi de la faction », SimFacade.pending_difficulty, sauvegardes, menu pause, smoke.
-- [ ] ADR 0037, codex mécaniques si présent.
+- [x] UI (à valider par le smoke) : sélecteur sur l'écran de faction, « Défi de la faction », SimFacade.pending_difficulty, sauvegardes, menu pause, smoke.
+- [x] ADR 0037 (pas de codex mécaniques sur main : rien créé).
 
 ## Prochaine étape
-UI Godot (faction_select.gd, sim_facade.gd, mock, save_slots.gd, pause), smoke, puis ADR 0037. Vérifier cargo test complet + clippy.
+Construire la dylib (core/build.sh), lancer le smoke Godot, vérifier cargo test complet + clippy, pytest.

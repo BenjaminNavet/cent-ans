@@ -17,6 +17,7 @@ var SAVES_DIR := "user://saves"
 const SAVE_VERSION := 1
 const DEFAULT_FACTION := "fac_france"
 const DEFAULT_SEED := 1337
+const DEFAULT_DIFFICULTY := "normal"
 
 var store: Object = null
 var sim: Object = null
@@ -24,6 +25,9 @@ var is_real: bool = false
 
 var pending_faction: String = DEFAULT_FACTION
 var pending_seed: int = DEFAULT_SEED
+## DF1 : niveau de difficulté choisi sur l'écran de faction, appliqué juste après
+## `new_campaign` (`easy`, `normal`, `hard`, `very_hard`).
+var pending_difficulty: String = DEFAULT_DIFFICULTY
 var pending_load_path: String = ""
 
 
@@ -93,13 +97,49 @@ func new_campaign(faction: String, seed: int) -> bool:
 		sim = CampaignSimMock.new()
 		is_real = false
 	if sim.call("new_campaign", MapPaths.data_dir, faction, seed):
+		_apply_pending_difficulty()
 		return true
 	if is_real:
 		push_warning("SimFacade: real CampaignSim refused %s; falling back to mock" % MapPaths.data_dir)
 		sim = CampaignSimMock.new()
 		is_real = false
-		return sim.new_campaign(MapPaths.data_dir, faction, seed)
+		if sim.new_campaign(MapPaths.data_dir, faction, seed):
+			_apply_pending_difficulty()
+			return true
 	return false
+
+
+# --- Difficulté (DF1) -----------------------------------------------------------
+
+
+## Fixe le niveau choisi sur la campagne qui vient d'être créée (figé ensuite par la sim).
+func _apply_pending_difficulty() -> void:
+	if sim != null and sim.has_method("set_difficulty"):
+		if not sim.call("set_difficulty", pending_difficulty):
+			push_warning("SimFacade: difficulty '%s' refused" % pending_difficulty)
+
+
+## Les quatre niveaux, du plus facile au plus difficile : `[{id, label, description,
+## effects, summary, default}]` (vide si la sim ne les expose pas).
+func difficulty_levels() -> Array:
+	if sim != null and sim.has_method("get_difficulty_levels"):
+		return sim.call("get_difficulty_levels")
+	return []
+
+
+## Niveau de la campagne en cours (`normal` si la sim ne le connaît pas).
+func current_difficulty() -> String:
+	if sim != null and sim.has_method("get_difficulty"):
+		return str(sim.call("get_difficulty"))
+	return DEFAULT_DIFFICULTY
+
+
+## Libellé français du niveau `id` (« Difficile »), l'id lui-même à défaut.
+func difficulty_label(id: String) -> String:
+	for level in difficulty_levels():
+		if str((level as Dictionary).get("id", "")) == id:
+			return str((level as Dictionary).get("label", id))
+	return id
 
 
 # --- Données de faction ----------------------------------------------------------
@@ -137,6 +177,7 @@ func save_game(save_name: String) -> bool:
 		"faction": str(sim.call("get_player_faction")),
 		"date": str(sim.call("get_date_label")),
 		"turn": int(sim.call("get_turn")),
+		"difficulty": current_difficulty(),
 		"timestamp": Time.get_datetime_string_from_system(),
 		"state": str(sim.call("save_to_string")),
 	}
