@@ -919,8 +919,8 @@ def gothic_cathedral(params):
     ``aisle_half`` 15, ``vault_m`` 28, ``ridge_m`` 38, ``aisle_wall_m`` 11, ``east`` "round" |
     "flat" (flat: great east window), ``transept_m`` 55 (north-south span), ``transept_x`` -5
     (crossing, from the centre), ``west_towers`` null | {``height``, ``size``, ``tops``: ["flat",
-    "spire", ...] (south, north), ``spire_m``, ``heights``: [south, north]} ; ``crossing``
-    null | {``height``, ``size``, ``spire_m``, ``lantern``}; ``transept_spires`` null |
+    "spire", ...] (south, north), ``spire_m``, ``spires_m``, ``heights``: [south, north], 0 = not built} ; ``crossing``
+    null | {``height``, ``size``, ``spire_m``, ``spire_mat``}; ``transept_spires`` null |
     {``side``: 1 (north), ``height``, ``spire_m``}; ``flyers`` true; ``stone`` "NDStone";
     ``roof`` "Lead"; ``bays`` 10.
     """
@@ -1179,7 +1179,16 @@ def gothic_cathedral(params):
         )
         for k, side in enumerate((-1, 1)):
             ty = side * (outer_r - size / 2)
-            square_tower(parts, wx, ty, size, -2.0, heights[k], stone, tops[k], spire_m)
+            if heights[k] <= 0:
+                # Tower not built yet (Rouen's Tour de Beurre before 1485): aisle-high block.
+                parts.append(
+                    (stone, g.box(wx, ty, -2.0, facade_depth, size, aisle_wall + 4.0))
+                )
+            else:
+                top_m = _p(towers, "spires_m", [spire_m, spire_m])[k]
+                square_tower(
+                    parts, wx, ty, size, -2.0, heights[k], stone, tops[k], top_m
+                )
             parts.append(
                 (
                     "Dark",
