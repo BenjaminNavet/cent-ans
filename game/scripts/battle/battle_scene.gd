@@ -64,6 +64,10 @@ var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
 var grass_flatten: BattleGrassFlatten = null  # BV3 : herbe couchée et tachée de sang
 var standards: BattleStandards = null  # BV3 : vent, porte-étendards
 var duels: BattleDuels = null  # BV3 : duels appariés cosmétiques
+var speech: BattleSpeech = null  # BV3 : discours du général avant la bataille
+var _no_speech: bool = false  # `--no-speech`
+var _speech_shot: String = ""  # `--speech-shot=<png>` (avec `--speech-at=<s>`)
+var _speech_at: float = 6.0
 var _no_bv3: bool = false  # `--no-bv3` : finitions BV3 coupées (mesures A/B)
 var _no_impostors: bool = false  # `--no-impostors` : imposteurs lointains seuls coupés (A/B)
 var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
@@ -262,6 +266,7 @@ func begin() -> bool:
 	add_child(battle_audio)
 	battle_audio.setup(_weather_key, camera_rig.camera)
 	_refresh_view(true)
+	_start_speech()
 	return true
 
 
@@ -355,6 +360,24 @@ func _setup_standards() -> void:
 		duels.name = "Duels"
 		add_child(duels)
 		duels.setup()
+
+
+## BV3 : discours du général du joueur, au début du déploiement (ou de la bataille), en jeu
+## seulement (pas en `--autoplay`, captures ni bancs), sauf `--speech-shot`.
+func _start_speech() -> void:
+	if _no_bv3 or _no_speech or (autoplay and _speech_shot == ""):
+		return
+	var ours := float(battle.call("get_strength", player_side))
+	var theirs := maxf(float(battle.call("get_strength", enemy_side)), 1.0)
+	var text := BattleSpeech.compose(setup, player_side, ours / theirs, terrain.terrain_key, _weather_key, battle_seed)
+	speech = BattleSpeech.new()
+	speech.name = "Speech"
+	speech.shot_path = _speech_shot
+	speech.shot_at = _speech_at
+	add_child(speech)
+	if not speech.start(self, text, units, player_side):
+		speech.queue_free()
+		speech = null
 
 
 ## BV3 : herbe couchée par les troupes et sous les corps, sang lisible en prairie ; pavois du
@@ -1167,6 +1190,12 @@ func _parse_cmdline() -> void:
 			_no_bv3 = true
 		elif arg == "--no-impostors":
 			_no_impostors = true
+		elif arg == "--no-speech":
+			_no_speech = true
+		elif arg.begins_with("--speech-shot="):
+			_speech_shot = arg.trim_prefix("--speech-shot=")
+		elif arg.begins_with("--speech-at="):
+			_speech_at = float(arg.trim_prefix("--speech-at="))
 		elif arg.begins_with("--unit-size="):
 			_unit_size_override = float(arg.trim_prefix("--unit-size="))
 		elif arg.begins_with("--blood="):
