@@ -5,6 +5,8 @@ extends SceneTree
 ##   godot --path game --resolution 1600x900 --script res://tests/bv3_shot.gd -- \
 ##     --out=<png> --shot=grass [--blood=0|1|2] [--no-bv3] [--cam=x,y,z,tx,ty,tz]
 ## `grass` : un champ de mêlée (herbe foulée), des morts sur l'herbe et leur sang.
+## `standards` : étendards portés dans le vent ; `duel` : duel apparié (4 captures) ;
+## `atlas` / `impostor` : imposteurs lointains (`--fig=infantry_0`).
 ## `--no-bv3` : même scène sans herbe couchée (captures « avant »).
 
 const SKY_SHADER := preload("res://shaders/battle_sky.gdshader")
@@ -106,6 +108,9 @@ func _init() -> void:
 	match shot:
 		"standards":
 			await _standards_shot(world, terrain, soldiers, camera, out)
+			return
+		"duel":
+			await _duel_shot(world, terrain, soldiers, camera, out)
 			return
 		"atlas", "impostor":
 			await _impostor_shot(world, soldiers, camera, out, shot)
@@ -300,3 +305,46 @@ func _cloth(unit: Dictionary, faction: String) -> Dictionary:
 		if texture != null:
 			return {"texture": texture, "size": candidate[1], "full": true}
 	return {"texture": PortraitLoader.heraldry_texture(faction), "size": Vector2(2.6, 1.7), "full": false}
+
+
+## `duel` : deux régiments d'hommes d'armes au contact ; un duel s'engage entre deux figurines ;
+## captures `<out>_0..3.png` à 0,4 / 1,3 / 2,2 / 3,1 s du début (une par passe).
+func _duel_shot(world: Node3D, terrain: BattleTerrain, soldiers: BattleSoldiers, camera: Camera3D, out: String) -> void:
+	var fake := FakeBattle.new()
+	var c := _center
+	fake.units = [
+		_stage_unit(1, "attacker", "unit_men_at_arms_foot", "infantry", Vector3(c.x, 0, c.z - 3.4), 0.0, 48, true),
+		_stage_unit(3, "defender", "unit_men_at_arms_foot", "infantry", Vector3(c.x, 0, c.z + 3.4), PI, 48, false),
+	]
+	for unit in fake.units:
+		unit["y"] = terrain.world_height(float(unit["x"]), float(unit["z"]))
+		unit["state"] = "melee"
+		unit["depth"] = 4.4
+	fake.units[0]["target"] = 3
+	fake.units[1]["target"] = 1
+	soldiers.setup(fake.units, _colors(), _factions())
+	var duels := BattleDuels.new()
+	world.add_child(duels)
+	duels.setup()
+	var dt := 1.0 / 30.0
+	var started_at := -1.0
+	var shots := [0.4, 1.3, 2.2, 3.1]
+	var shot_index := 0
+	for i in 400:
+		soldiers.update(fake, fake.units, dt, [])
+		duels.update(fake.units, soldiers, soldiers.anim_time, camera.position)
+		if started_at < 0.0 and duels.started_count > 0:
+			started_at = soldiers.anim_time
+			var m := duels.last_center
+			camera.look_at_from_position(m + Vector3(5.5, 2.4, -1.5), m + Vector3(0, 1.0, 0))
+		await process_frame
+		if started_at >= 0.0 and soldiers.anim_time - started_at >= float(shots[shot_index]):
+			await RenderingServer.frame_post_draw
+			var path := "%s_%d.png" % [out.trim_suffix(".png"), shot_index]
+			root.get_texture().get_image().save_png(path)
+			print("bv3_shot: duel %s at %.1f s" % [path, soldiers.anim_time - started_at])
+			shot_index += 1
+			if shot_index >= shots.size():
+				break
+	print("bv3_shot: %d duels started" % duels.started_count)
+	quit(0 if duels.started_count > 0 else 1)
