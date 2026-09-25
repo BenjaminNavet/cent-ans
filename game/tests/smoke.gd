@@ -253,6 +253,13 @@ func _run_start_menu() -> void:
 	_check(menu.card_count() == 3, "start menu should show 3 faction cards, got %d" % menu.card_count())
 	_check(menu.selected_faction == "fac_france", "default faction should be fac_france")
 	_check(menu.start_button.text.begins_with("Commencer"), "start button label")
+	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
+	menu.show_faction_select(true)
+	_check(menu.faction_select.visible and not menu.main_column.visible, "faction select should replace the main column")
+	menu.open_intro()
+	await process_frame
+	_check(menu.overlay_open(), "prologue overlay should open")
+	_check(not FrontEndData.random_quote().is_empty() and FrontEndData.random_tip() != "", "loading quotes and tips expected")
 	if _failures == 0:
 		print("smoke OK: start menu, %d cards" % menu.card_count())
 	menu.queue_free()
