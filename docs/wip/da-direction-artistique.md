@@ -58,3 +58,8 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   DA1 et DA2 repris (mêmes worktrees), DA5 boutons + icônes (≤ 5 $), DA3 marqueurs (≤ 1,5 $,
   ZG4b fusionné), DA4 musique libre (Sonnet, 0 $). DA6 attend la fin d'EP6. Fusions : par
   l'orchestrateur dans `feat/da-direction-artistique` (../gp-da), puis ff dans main.
+- 26/09 : DA2 code terminé (branche agent, `fc968b5f`, ADR 0063, pytest 569 + smoke OK). La
+  génération des 141 portraits a été **refusée par le garde-fou de permissions de l'agent** :
+  à lancer par le joueur (`uv run --project tools cent-ans assets portrait-archetypes --envelope 7.6`
+  dans le worktree de DA2, ≈ 6,42 $), puis import Godot, commit des images, captures `apres`,
+  fusion. DA3/DA5 risquent le même blocage pour leurs images.
