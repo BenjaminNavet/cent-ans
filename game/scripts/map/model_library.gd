@@ -69,7 +69,7 @@ static func instantiate(model_name: String, model_scale: float = 1.0) -> Node3D:
 		return null
 	if is_building_model(model_name):
 		# BR1 : matériaux PBR partagés du kit de bâtiments (textures, patine des couleurs de sommet).
-		BuildingMaterials.remap_node(node)
+		BuildingMaterials.remap_node(node, "far")
 	node.name = MODEL_NODE
 	node.scale = Vector3.ONE * model_scale
 	return node
@@ -218,7 +218,7 @@ static func hamlet_meshes() -> Array:
 		var root := scene.instantiate()
 		var meshes := root.find_children("*", "MeshInstance3D", true, false)
 		if not meshes.is_empty():
-			_hamlet_meshes.append(BuildingMaterials.remap_mesh((meshes[0] as MeshInstance3D).mesh))
+			_hamlet_meshes.append(BuildingMaterials.remap_mesh((meshes[0] as MeshInstance3D).mesh, "far"))
 		root.free()
 	return _hamlet_meshes
 

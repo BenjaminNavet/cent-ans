@@ -55,6 +55,67 @@ MATERIAL_TINT = {
 }
 
 
+# Atlas: every kit material becomes a layer of one ``Building`` material (same order as
+# ``building_materials.gd`` ATLAS_LAYERS and ``build_textures.py`` LAYERS); the layer index is
+# stored in the vertex colour alpha as (index + 0.5) / 16.
+ATLAS_LAYERS = [
+    "Plaster",
+    "Rubble",
+    "Ashlar",
+    "Masonry",
+    "Timber",
+    "Planks",
+    "Door",
+    "RoofTile",
+    "RoofFlat",
+    "RoofSlate",
+    "Thatch",
+    "Window",
+    "Iron",
+    "Canvas",
+]
+
+
+def atlas(obj) -> None:
+    """Merge the kit materials of an object into one ``Building`` material (layer in alpha)."""
+    mesh = obj.data
+    colors = mesh.color_attributes.get("Color")
+    names = [
+        slot.material.name.split(".")[0] if slot.material else ""
+        for slot in obj.material_slots
+    ]
+    keep = [n for n in dict.fromkeys(names) if n not in ATLAS_LAYERS]
+    order = keep + ["Building"]
+    targets = []
+    for poly in mesh.polygons:
+        name = names[poly.material_index] if poly.material_index < len(names) else ""
+        if name in ATLAS_LAYERS:
+            alpha = (ATLAS_LAYERS.index(name) + 0.5) / 16.0
+            targets.append(order.index("Building"))
+            if colors is not None:
+                for li in poly.loop_indices:
+                    c = colors.data[li].color
+                    colors.data[li].color = (c[0], c[1], c[2], alpha)
+        else:
+            targets.append(order.index(name))
+    old = {
+        n: next(
+            slot.material
+            for slot in obj.material_slots
+            if slot.material and slot.material.name.split(".")[0] == n
+        )
+        for n in keep
+    }
+    building = bpy.data.materials.get("Building") or bpy.data.materials.new("Building")
+    # Clearing the slots resets the polygon material indices: assign them afterwards.
+    mesh.materials.clear()
+    for n in keep:
+        mesh.materials.append(old[n])
+    mesh.materials.append(building)
+    mesh.polygons.foreach_set("material_index", targets)
+    mesh.update()
+
+
 def _tex_path(tex: str, suffix: str) -> Path:
     """Texture file: ``battle/<id>`` lives in the battle folder, else in the building folder."""
     if tex.startswith("battle/"):
@@ -221,6 +282,7 @@ def export_battle(out_dir: Path) -> None:
             name = f"{kind}_{'ruin_' if ruined else ''}{index[tag]}"
             index[tag] += 1
             obj = to_object(g, name)
+            atlas(obj)
             export_glb(obj, out_dir / f"{name}.glb")
             manifest[name] = {
                 "kind": kind,

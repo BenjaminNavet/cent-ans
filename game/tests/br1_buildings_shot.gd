@@ -6,9 +6,12 @@ extends SceneTree
 ## Usage (avec affichage, pas en headless) :
 ##   godot --path game --resolution 1600x900 --script res://tests/br1_buildings_shot.gd -- \
 ##       --out=<dossier> --village --terrain=plains [--season=winter] [--prefix=village]
+## `--siege` : assaut de la Guyenne (`debug_stage_siege`), vues de la ville assiégée. Chaque vue
+## imprime appels de dessin et primitives (comparaison avant/après).
 
 var _out := ""
 var _prefix := "village"
+var _siege := false
 
 
 func _init() -> void:
@@ -17,6 +20,8 @@ func _init() -> void:
 			_out = arg.trim_prefix("--out=")
 		elif arg.begins_with("--prefix="):
 			_prefix = arg.trim_prefix("--prefix=")
+		elif arg == "--siege":
+			_siege = true
 	if _out == "":
 		push_error("br1_buildings_shot: --out=<dossier> required")
 		quit(1)
@@ -28,7 +33,7 @@ func _init() -> void:
 		quit(1)
 		return
 	var armies: Array = BattleScene.main_armies(sim, "fac_france", "fac_england")
-	var index: int = sim.call("debug_stage_battle", armies[0], armies[1])
+	var index: int = sim.call("debug_stage_siege", armies[0], "prov_guyenne") if _siege else sim.call("debug_stage_battle", armies[0], armies[1])
 	var scene: Node = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
 	scene.configure(sim, index, 11)
 	root.add_child(scene)
@@ -36,6 +41,10 @@ func _init() -> void:
 		await process_frame
 	scene.paused = true
 	var battle: Object = scene.battle
+	if _siege:
+		await _siege_shots(scene, battle)
+		quit(0)
+		return
 	var terrain: Dictionary = battle.call("get_terrain")
 	var houses: Array = terrain.get("village", {}).get("houses", [])
 	if houses.is_empty():
@@ -66,6 +75,19 @@ func _init() -> void:
 	quit(0)
 
 
+func _siege_shots(scene: Node, battle: Object) -> void:
+	var siege: Dictionary = battle.call("get_siege")
+	var center: Vector2 = siege.get("center", Vector2(600, 560))
+	var focus := Vector3(center.x, 0, center.y)
+	scene.camera_rig.edge_pan_enabled = false
+	scene.camera_rig.look_at_point(focus + Vector3(0, 0, 60), 230.0, 0.4)
+	await _wait(2.5)
+	await _shot(_prefix + "-large.png")
+	scene.camera_rig.look_at_point(focus + Vector3(60, 0, 20), 55.0, 2.2)
+	await _wait(2.0)
+	await _shot(_prefix + "-rue.png")
+
+
 func _wait(seconds: float) -> void:
 	var end := Time.get_ticks_msec() + int(seconds * 1000.0)
 	while Time.get_ticks_msec() < end:
@@ -78,4 +100,6 @@ func _shot(file: String) -> void:
 	var path := _out.path_join(file)
 	DirAccess.make_dir_recursive_absolute(_out)
 	var err := image.save_png(path)
-	print("br1_buildings_shot: %s (%s)" % [path, error_string(err)])
+	var calls := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
+	var prims := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
+	print("br1_buildings_shot: %s (%s) %d draw calls, %.2f M primitives" % [path, error_string(err), calls, prims / 1.0e6])

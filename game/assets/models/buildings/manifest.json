@@ -37,7 +37,7 @@
   "kind": "church",
   "length": 19.0,
   "ruined": false,
-  "triangles": 1130
+  "triangles": 1140
  },
  "church_1": {
   "depth": 8.5,
@@ -45,7 +45,7 @@
   "kind": "church",
   "length": 21.0,
   "ruined": false,
-  "triangles": 1150
+  "triangles": 1160
  },
  "church_2": {
   "depth": 13.0,
@@ -53,7 +53,7 @@
   "kind": "church",
   "length": 36.0,
   "ruined": false,
-  "triangles": 1618
+  "triangles": 1628
  },
  "cottage_0": {
   "depth": 5.61,
