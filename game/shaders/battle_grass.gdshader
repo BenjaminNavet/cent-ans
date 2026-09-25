@@ -27,6 +27,11 @@ uniform vec3 base_tint : source_color = vec3(1.0);
 uniform vec2 wind_dir = vec2(0.8, 0.6);
 uniform float wind_strength = 1.0;
 uniform vec3 focus = vec3(0.0);
+// BV3 : herbe couchée (R) et tachée de sang (G), carte `BattleGrassFlatten`.
+uniform sampler2D flatten_map : filter_linear, repeat_disable;
+uniform vec4 flatten_rect = vec4(0.0, -100.0, 1200.0, 1000.0);
+uniform float flatten_on = 0.0;
+uniform vec3 grass_blood_color : source_color = vec3(0.2, 0.02, 0.02);
 
 varying float v_shade;
 varying vec3 v_tint;
@@ -87,6 +92,21 @@ void vertex() {
 			v_tint = mix(v_tint, vec3(1.25, 1.1, 0.7), in_field * 0.7);
 		}
 		height_mul *= 1.0 - snow * 0.5;
+		// BV3 : herbe couchée par les troupes et sous les corps, sang sur les brins.
+		float flat_k = 0.0;
+		float blood_k = 0.0;
+		if (flatten_on > 0.0) {
+			vec2 fuv = (wp - flatten_rect.xy) / flatten_rect.zw;
+			vec2 fl = texture(flatten_map, fuv).rg;
+			// Bords irréguliers (bruit à ~1,5 m) et touffes plus ou moins couchées.
+			float ragged = bt_value_noise(wp * 0.7) - 0.5;
+			flat_k = smoothstep(0.08, 0.9, fl.r * (1.0 + ragged * 0.6) + (rnd.x - 0.5) * 0.25 * fl.r);
+			blood_k = smoothstep(0.05, 0.6, fl.g) * smoothstep(-0.45, 0.1, ragged + fl.g * 0.5);
+			density *= 1.0 - flat_k * 0.3;
+			height_mul *= mix(1.0, 0.22, flat_k);
+			v_tint = mix(v_tint, v_tint * vec3(1.08, 1.0, 0.62), flat_k * 0.6);
+			v_tint = mix(v_tint, grass_blood_color, blood_k * mix(0.55, 0.9, r3));
+		}
 		float keep = step(r3, density);
 		float s = (0.6 + 0.8 * rnd.x) * blade_scale * fade * keep;
 
@@ -99,7 +119,9 @@ void vertex() {
 		float top = 1.0 - UV.y;
 		float gust = sin(dot(wp, wind_dir) * 0.08 - TIME * 1.7) * 0.5 + 0.5;
 		float sway = sin(TIME * 2.3 + rnd.x * 6.2832 + wp.x * 0.3) * 0.12 + gust * 0.28;
-		v.xz += wind_dir * sway * top * top * wind_strength * s * height_mul;
+		v.xz += wind_dir * sway * top * top * wind_strength * s * height_mul * (1.0 - flat_k * 0.8);
+		// Brins couchés : le haut de la touffe s'étale au ras du sol (sens propre à la touffe).
+		v.xz += vec2(cos(angle * 1.7), sin(angle * 1.7)) * top * 0.42 * s * flat_k;
 		vec3 world = vec3(wp.x, terrain_h(wp) - 0.05, wp.y) + v;
 		VERTEX = world - origin;
 		NORMAL = normalize(vec3(0.0, 1.0, 0.0) + vec3(wind_dir.x, 0.0, wind_dir.y) * sway * 0.3);
