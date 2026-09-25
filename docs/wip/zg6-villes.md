@@ -19,12 +19,15 @@ puis copie dans `game/bin/libcent_ans.debug.dylib`. Aucun changement Rust prévu
   ordinaires masquées aux paliers vallée/site.
 
 ## État
-- [ ] Squelette (wip, stubs)
-- [ ] Données sourcées + outil + tests pytest
-- [ ] Kit bas détail pour la campagne (`game/assets/models/town_kit/`)
-- [ ] Plan procédural (GDScript) + test headless
-- [ ] Rendu 1:1, HLOD, streaming
-- [ ] Banc, captures, docs
+- [x] Squelette (wip)
+- [x] Données sourcées + outil `cent-ans geo towns` + tests pytest (`tools/tests/test_towns.py`)
+- [x] Kit bas détail pour la campagne (`game/assets/models/town_kit/`, `kit_export.py export-town`)
+- [x] Plan procédural (`town_plan.gd`) + test headless `game/tests/zg6_towns_test.gd` (OK)
+- [x] Rendu 1:1 (`town_builder.gd`, `town_layer.gd`, `town_building.gdshader`, `town_render.tres`),
+      accroche dans `settlement_layer.gd` (`_setup_towns`, `_update_towns`)
+- [ ] Essai en jeu (captures), réglages visuels
+- [ ] Banc, captures avant/après, docs (`godot-map.md`, addendum ADR)
+- [ ] Fusion de main avant le rapport (main a régénéré fine_anchors.json : relancer `cent-ans geo towns`)
 
 ## Prochaine étape
-Squelette puis données.
+Lancer le jeu sur Amiens / Troyes / Poitiers au palier site (`--stage=map --focus=x,y,d`), régler.

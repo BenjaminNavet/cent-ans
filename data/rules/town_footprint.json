@@ -143,14 +143,16 @@
     "max_radius_m": 4500.0
   },
   "plan": {
-    "description": "Plan procédural (Godot, `town_plan.gd`) : parcelles en lanières, rues, marché, églises.",
+    "description": "Plan procédural (Godot, `town_plan.gd`) : parcelles en lanières, rues, venelles, marché, églises. Maisons de ville à plusieurs étages : `households_per_house` feux par maison intra-muros (ordre de grandeur, à recaler par VH3).",
     "frontage_m": [5.0, 8.0],
     "depth_m": [20.0, 40.0],
     "faubourg_frontage_m": [8.0, 16.0],
     "faubourg_depth_m": [30.0, 60.0],
     "village_frontage_m": [14.0, 26.0],
     "street_width_m": {"main": 8.0, "secondary": 5.0, "ring": 5.0, "lane": 3.0},
-    "secondary_spacing_m": [70.0, 110.0],
+    "secondary_spacing_m": [55.0, 85.0],
+    "lane_spacing_m": [60.0, 95.0],
+    "households_per_house": {"intra": 1.5, "faubourg": 1.0, "village": 1.0},
     "market_area_m2_per_inhabitant": 0.4,
     "market_min_m": [30.0, 40.0],
     "parish_inhabitants": 1500,

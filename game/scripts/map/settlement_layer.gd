@@ -68,6 +68,9 @@ var _declutter_timer := 0.0
 var _weights := Vector3(-1, -1, -1)  # près, moyen, loin
 var _camera_distance := 0.0
 var _regrounded: Dictionary = {}
+## ZG6 : villes ordinaires à l'échelle réelle (paliers vallée et site), voir `TownLayer`.
+var towns: TownLayer
+var _towns_version := -1
 
 
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
@@ -115,6 +118,7 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 		_register(_hamlets_by_chunk, terrain.chunk_index_at(hpx.x, hpx.y), i)
 	_build_icons()
 	_build_selection_ring()
+	_setup_towns()
 	if not terrain.chunk_surface_changed.is_connected(_on_chunk_surface_changed):
 		terrain.chunk_surface_changed.connect(_on_chunk_surface_changed)
 	stats = {"settlements": count, "hamlets": data.hamlets.size(), "models": _models.filter(func(m: Variant) -> bool: return m != null).size()}
@@ -416,6 +420,7 @@ func update_view(camera_distance: float) -> void:
 	if _labels_dirty:
 		_labels_dirty = false
 		_update_label_heights()
+	_update_towns(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
@@ -560,6 +565,9 @@ func flush() -> void:
 	max_hamlet_builds_per_frame = saved
 	for landmark: LandmarkModel in _landmarks.values():  # ZG4 : cuissons étalées terminées
 		landmark.flush_bake()
+	if towns != null:  # ZG6 : villes 1:1 autour de la caméra
+		towns.flush()
+		_update_towns(_camera_distance)
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -780,3 +788,30 @@ func override_devastation(values: Dictionary) -> void:
 		_devastation[province_id] = float(values[province_id])
 	for index in _hamlet_nodes:
 		_hamlet_dirty[index] = true
+
+
+# --- Lot ZG6 : villes ordinaires à l'échelle réelle ------------------------------------------
+
+
+func _setup_towns() -> void:
+	towns = TownLayer.new()
+	add_child(towns)
+	var ids: Array = []
+	for entry in data.settlements:
+		ids.append(entry["id"])
+	towns.setup(map_data, terrain, tiers, ids)
+
+
+## Rendu 1:1 aux paliers vallée / site ; la maquette d'une colonie dont la ville 1:1 est affichée
+## est masquée (au palier site, toutes les maquettes le sont déjà, ZG4).
+func _update_towns(camera_distance: float) -> void:
+	if towns == null:
+		return
+	towns.update_view(camera_distance)
+	if towns.version == _towns_version:
+		return
+	_towns_version = towns.version
+	for i in _models.size():
+		if _models[i] == null or _landmarks.has(i):
+			continue
+		(_models[i] as Node3D).visible = not towns.is_shown(str(data.settlements[i]["id"]))

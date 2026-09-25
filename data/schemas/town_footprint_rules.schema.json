@@ -183,6 +183,13 @@
           "additionalProperties": false
         },
         "secondary_spacing_m": {"$ref": "#/$defs/range"},
+        "lane_spacing_m": {"$ref": "#/$defs/range"},
+        "households_per_house": {
+          "type": "object",
+          "properties": {"intra": {"$ref": "#/$defs/positive"}, "faubourg": {"$ref": "#/$defs/positive"}, "village": {"$ref": "#/$defs/positive"}},
+          "required": ["intra", "faubourg", "village"],
+          "additionalProperties": false
+        },
         "market_area_m2_per_inhabitant": {"$ref": "#/$defs/positive"},
         "market_min_m": {"$ref": "#/$defs/range"},
         "parish_inhabitants": {"$ref": "#/$defs/positive"},
@@ -198,7 +205,7 @@
           "additionalProperties": false
         }
       },
-      "required": ["frontage_m", "depth_m", "faubourg_frontage_m", "faubourg_depth_m", "village_frontage_m", "street_width_m", "secondary_spacing_m", "market_area_m2_per_inhabitant", "market_min_m", "parish_inhabitants", "max_parishes", "house_kinds"],
+      "required": ["frontage_m", "depth_m", "faubourg_frontage_m", "faubourg_depth_m", "village_frontage_m", "street_width_m", "secondary_spacing_m", "lane_spacing_m", "households_per_house", "market_area_m2_per_inhabitant", "market_min_m", "parish_inhabitants", "max_parishes", "house_kinds"],
       "additionalProperties": false
     }
   },
