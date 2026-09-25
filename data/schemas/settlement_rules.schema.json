@@ -132,6 +132,12 @@
           "minimum": 0,
           "maximum": 100,
           "description": "Après la débandade, l'armée se disperse si ses effectifs tombent sous ce pourcentage de son maximum ; sinon les survivants rejoignent la place amie la plus proche à toute distance (ou se dispersent s'il n'y en a aucune)."
+        },
+        "heavy_defeat_losses_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Lot M5b : une armée qui a perdu au moins ce pourcentage de ses hommes dans la bataille et n'a aucune place amie à portée ne peut pas reculer en ordre : elle se débande. 100 désactive la règle."
         }
       },
       "required": [

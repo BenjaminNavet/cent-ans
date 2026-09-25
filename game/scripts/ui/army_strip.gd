@@ -253,7 +253,7 @@ func _refresh() -> void:
 	_men_label.text = "%s hommes" % HudStyle.thousands(men)
 	var upkeep := total_upkeep()
 	_upkeep_label.text = "Entretien %s ₶" % HudStyle.thousands(upkeep)
-	_upkeep_label.tooltip_text = "Entretien de l'armée par saison : %s livres tournois" % HudStyle.thousands(upkeep)
+	_upkeep_label.tooltip_text = "Entretien de l'armée par saison : %s (livres tournois)" % Money.amount(upkeep)
 
 	var layout := card_layout(units.size())
 	_grid.columns = int(layout["columns"])

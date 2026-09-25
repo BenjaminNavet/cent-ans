@@ -25,6 +25,7 @@ extends Node3D
 ##   --stage=settlement|settlement_orders  panneau d'une ville du joueur / armée, colonies
 ##                              atteignables et chemin sur le graphe (lot C5).
 ##   --fps-probe                 imprime les FPS moyens après la mise en place (lot C6).
+##   --hide-armies               masque les marqueurs d'armée (captures des villes emblématiques, L2).
 ## Touches de debug : F12 = capture dans docs/img/, F2 = bascule du pan par bords.
 
 const SCREENSHOT_DELAY_FRAMES := 40
@@ -71,6 +72,7 @@ var zoom_tiers: ZoomTiers = null
 var settlement_data: SettlementData = null
 var settlement_layer: SettlementLayer = null
 var roads: RoadRenderer = null
+var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var _fps_probe_frames: int = -1
 var _fps_probe_start: int = 0
 var _fps_probe_gpu_ms: float = 0.0
@@ -102,13 +104,14 @@ func _ready() -> void:
 	sea.setup(map_data.size)
 	var map_extent := maxf(map_data.size.x, map_data.size.y)
 	rivers.minor_max_distance = map_extent * 0.35
-	rivers.build(map_data)
 	coast.build(map_data)
 	# Étiquettes visibles quand peu de provinces sont à l'écran : seuil ∝ 1/√(nombre de provinces).
 	cities.label_max_distance = map_extent * 0.35 * sqrt(20.0 / maxf(map_data.province_count, 1.0))
 	cities.labels_only = true  # C6 : noms de provinces (palier loin), colonies à part
 	cities.build(map_data)
 	_setup_settlements()
+	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
+	rivers.build(map_data, terrain, settlement_layer)
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
@@ -151,6 +154,10 @@ func _ready() -> void:
 	help = HelpController.new()
 	add_child(help)
 	help.setup(self)
+	# U1 : objectifs et aide dans la pile des panneaux (exclusifs, Échap).
+	ui.register_panel(victory.panel, PanelStack.Kind.CENTRAL)
+	ui.register_panel(victory.end_dialog, PanelStack.Kind.MODAL)
+	ui.register_panel(help.panel, PanelStack.Kind.CENTRAL)
 	flow = FlowController.new()  # F3
 	add_child(flow)
 	flow.setup(self)
@@ -196,6 +203,10 @@ func _setup_settlements() -> void:
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())
+	life = CampaignLife.new()  # CV1
+	life.name = "CampaignLife"
+	add_child(life)
+	life.setup(self)
 
 
 ## Lot C6 : sélection d'une colonie (le panneau viendra au lot C5).
@@ -286,6 +297,8 @@ func refresh_all() -> void:
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
 	if settlement_layer != null:  # C6
 		settlement_layer.refresh(sim, SimFacade.faction_color)
+	if life != null:  # CV1
+		life.refresh(sim)
 	if minimap_ctl != null:
 		minimap_ctl.refresh()
 	_refresh_top_bar()
@@ -305,15 +318,20 @@ func refresh_all() -> void:
 		_show_province_panel(selected_index)
 	if ui.faction_panel_visible() and _faction_panel_id != "":
 		_show_faction_panel(_faction_panel_id)
+	# U1 : un panneau fermé (×, Échap, exclusivité) ne se rouvre pas au rafraîchissement.
+	_court_open = _court_open and ui.court_panel_visible()
 	if _court_open:
 		_show_court_panel()
-	if _open_character_id != "":
+	if _open_character_id != "" and ui.character_sheet.visible:
 		_show_character_sheet(_open_character_id)
+	else:
+		_open_character_id = ""
 	if diplomacy != null:
 		diplomacy.refresh()
 	if chronicle != null:  # M10
 		chronicle.refresh()
 	_refresh_research()  # M6
+	_tech_open = _tech_open and ui.tech_panel_visible()
 	if _tech_open:
 		_show_tech_panel()
 	if flow != null:  # F3
@@ -420,6 +438,8 @@ func select_army(army_id: String) -> void:
 	if army.is_empty():
 		deselect_army()
 		return
+	if selected_army != army_id:
+		UiSounds.play("army")  # UB1 / U13 : piétinement de la troupe
 	selected_army = army_id
 	armies.set_selected(army_id)
 	if agents_ctl != null:  # C6 agents : une seule sélection à la fois
@@ -574,6 +594,7 @@ func _on_province_right_clicked(index: int) -> void:
 		return
 	var target_id: String = str(map_data.get_province(index).get("id", ""))
 	var result := order_move(selected_army, target_id)
+	UiSounds.play_order_result(result)  # UB1 / U13
 	if not result["ok"]:
 		ui.show_toast(str(result.get("error", "Ordre refusé")), true)
 
@@ -844,9 +865,12 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 		return {"ok": false, "error": "Simulation absente"}
 	var result: Dictionary = sim.call("submit_order", order)
 	if result.get("ok", false):
+		# UB1 / U13 : recrutement, construction ou ordre ordinaire.
+		UiSounds.play({"recruit": "recruit", "build": "build"}.get(str(order.get("type", "")), "order"))
 		ui.show_toast(success_text)
 		refresh_all()
 	else:
+		UiSounds.play("refused")
 		ui.show_toast(str(result.get("error", "Ordre refusé")), true)
 	return result
 
@@ -904,6 +928,8 @@ func _on_load(path: String) -> void:
 	ui.hide_province()
 	ui.clear_log()
 	ui.add_events(sim.call("get_events"), "%s (partie chargée)" % sim.call("get_date_label"))
+	if life != null:  # CV1 : relire saison, dévastation et croissance de la partie chargée
+		life.invalidate()
 	refresh_all()
 	ui.show_toast("Partie chargée.")
 
@@ -924,6 +950,8 @@ func _process(_delta: float) -> void:
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance))
 		settlement_layer.update_view(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance))
+	if life != null:  # CV1
+		life.update_view(distance)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
@@ -1024,10 +1052,14 @@ func _parse_cmdline() -> void:
 		elif arg == "--no-fine-terrain":
 			terrain.fine_enabled = false
 		elif arg.begins_with("--fine-step="):
+			# Force un pas fixe (mesure, comparaison) : désactive le choix adaptatif (T2).
 			terrain.fine_step = int(arg.trim_prefix("--fine-step="))
+			terrain.fine_step_auto = false
 			terrain.fine_enabled = terrain.fine_step > 0
 		elif arg.begins_with("--select-settlement=") and settlement_layer != null:
 			settlement_layer.select(arg.trim_prefix("--select-settlement="))
+		elif arg == "--hide-armies":  # L2 : captures des villes emblématiques
+			armies.visible = false
 	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_path = arg.trim_prefix("--screenshot=")
@@ -1040,6 +1072,8 @@ func _parse_cmdline() -> void:
 					_stage_screenshot_city()
 				"faction":
 					_stage_screenshot_faction()
+				"budget":  # U3 : budget et courbe du trésor après quelques saisons
+					_stage_screenshot_budget()
 				"court":
 					_stage_screenshot_court()
 				"skills":
@@ -1069,6 +1103,8 @@ func _parse_cmdline() -> void:
 					ui.tech_panel.select_branch("civil")
 				"battle":
 					_stage_screenshot_battle()
+				"assault":  # UB1 : écran d'avant-bataille d'un assaut
+					_stage_screenshot_assault()
 				"tooltips":  # F2
 					_stage_screenshot_tooltips()
 				"tutorial", "encyclopedia":  # F8
@@ -1234,6 +1270,19 @@ func _stage_screenshot_faction() -> void:
 	_show_faction_panel(player_faction)
 
 
+## Mise en scène « budget » (lot U3) : six saisons jouées, puis le panneau de faction (tableau
+## du budget avec la saison passée et l'écart, courbe du trésor).
+func _stage_screenshot_budget() -> void:
+	_ensure_city_capable_sim()
+	_focus_capital()
+	ui.hide_province()
+	selected_index = 0
+	for _i in 6:
+		sim.call("end_turn")
+	refresh_all()
+	_show_faction_panel(player_faction)
+
+
 func _take_screenshot(path: String, quit_after: bool) -> void:
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
@@ -1308,6 +1357,7 @@ func _offer_pending_battles() -> void:
 		ui.add_child(_battle_dialog)
 		_battle_dialog.fight_requested.connect(_on_battle_fight)
 		_battle_dialog.auto_requested.connect(_on_battle_auto)
+		_battle_dialog.withdraw_requested.connect(_on_battle_withdraw)
 	_battle_dialog.show_battle(sim, pending[0])
 
 
@@ -1321,6 +1371,20 @@ func _on_battle_auto(index: int) -> void:
 	ui.add_events(events, "%s (résolution automatique)" % sim.call("get_date_label"))
 	if flow != null:  # P2 : le résultat rejoint le rapport de saison déjà affiché
 		flow.report_late_events(events)
+	refresh_all()
+	_offer_pending_battles()
+
+
+## UB1 : « Retraite » ou « Maintenir le siège » (règle et journal dans le cœur).
+func _on_battle_withdraw(index: int) -> void:
+	var result: Dictionary = sim.call("withdraw_pending_battle", index)
+	if result.get("ok", false):
+		var events: Array = result.get("events", [])
+		ui.add_events(events, str(sim.call("get_date_label")))
+		if flow != null:
+			flow.report_late_events(events)
+	else:
+		ui.show_toast(str(result.get("error", "?")), true)
 	refresh_all()
 	_offer_pending_battles()
 
@@ -1353,6 +1417,18 @@ func _set_campaign_active(active: bool) -> void:
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 	if active:
 		camera.make_current()
+
+
+## `--stage=assault` (UB1) : assaut français de la Guyenne mis en scène, écran ouvert.
+func _stage_screenshot_assault() -> void:
+	if not _battles_available() or not sim.has_method("debug_stage_siege"):
+		return
+	var armies := BattleScene.main_armies(sim, player_faction, "fac_england")
+	if armies.is_empty():
+		return
+	sim.call("debug_stage_siege", armies[0], "prov_guyenne")
+	refresh_all()
+	_offer_pending_battles()
 
 
 ## `--stage=battle` : bataille France–Angleterre mise en scène, dialogue ouvert.

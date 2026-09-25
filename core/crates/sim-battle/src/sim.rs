@@ -22,10 +22,12 @@ use data_model::{Ability, UnitCategory, UnitStats};
 use crate::ai;
 use crate::command::{Command, CommandError};
 use crate::field::{Battlefield, Weather, ATTACKER_LINE_Z, DEFENDER_LINE_Z};
+use crate::impact::{self, ImpactEvent, ImpactKind, LossCause, MAX_PENDING_IMPACTS};
 use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
 use crate::rng::BattleRng;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
+use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
 use crate::unit::{Formation, Unit, UnitState};
 
@@ -98,7 +100,11 @@ pub struct BattleSim {
     general_captured: [bool; 2],
     events: Vec<BattleEvent>,
     events_read: usize,
+    /// Volleys resolved since the renderer last read them (BV1).
+    shots: std::collections::VecDeque<ShotEvent>,
     charge_announced: Vec<bool>,
+    /// Charge impacts since the renderer last read them (BV2).
+    impacts: std::collections::VecDeque<ImpactEvent>,
     /// Siege battles: the town walls (M8 § 2).
     siege: Option<SiegeWorks>,
     square_announced: bool,
@@ -311,7 +317,9 @@ impl BattleSim {
             general_captured: [false; 2],
             events: Vec::new(),
             events_read: 0,
+            shots: std::collections::VecDeque::new(),
             charge_announced: vec![false; count],
+            impacts: std::collections::VecDeque::new(),
             siege,
             square_announced: false,
             order_uses: Default::default(),
@@ -689,6 +697,71 @@ impl BattleSim {
     /// Every journal entry since the start.
     pub fn events(&self) -> &[BattleEvent] {
         &self.events
+    }
+
+    /// Volleys resolved since the previous call (BV1: arrows, stuck arrows
+    /// and blood are drawn from them; at most [`MAX_PENDING_SHOTS`] kept).
+    pub fn take_shots(&mut self) -> Vec<ShotEvent> {
+        self.shots.drain(..).collect()
+    }
+
+    fn record_shot(&mut self, shot: ShotEvent) {
+        if self.shots.len() >= MAX_PENDING_SHOTS {
+            self.shots.pop_front();
+        }
+        self.shots.push_back(shot);
+    }
+
+    /// Missile kind of a shooting regiment (engines: bombard ball or stone).
+    pub fn missile_kind(unit: &Unit) -> MissileKind {
+        if unit.category == UnitCategory::Siege {
+            if unit.unit_type == "unit_bombard" {
+                MissileKind::Ball
+            } else {
+                MissileKind::Stone
+            }
+        } else if unit.unit_type.contains("crossbow") || unit.has(Ability::Pavise) {
+            MissileKind::Bolt
+        } else {
+            MissileKind::Arrow
+        }
+    }
+
+    /// Missiles one volley of `unit` looses (one per man, one per engine).
+    fn missiles(unit: &Unit) -> u32 {
+        if unit.category == UnitCategory::Siege {
+            unit.soldiers().clamp(1, 4)
+        } else {
+            unit.soldiers()
+        }
+    }
+
+    /// Charge impacts resolved since the previous call (BV2: men knocked
+    /// down, horses slowed, riders unhorsed; at most [`MAX_PENDING_IMPACTS`]).
+    pub fn take_impacts(&mut self) -> Vec<ImpactEvent> {
+        self.impacts.drain(..).collect()
+    }
+
+    fn record_impact(&mut self, event: ImpactEvent) {
+        if self.impacts.len() >= MAX_PENDING_IMPACTS {
+            self.impacts.pop_front();
+        }
+        self.impacts.push_back(event);
+    }
+
+    /// Cause of the casualties a volley of `unit` inflicts (BV2).
+    fn missile_cause(unit: &Unit) -> LossCause {
+        if unit.category == UnitCategory::Siege {
+            if unit.unit_type == "unit_bombard" {
+                LossCause::Ball
+            } else {
+                LossCause::Stone
+            }
+        } else if unit.unit_type.contains("crossbow") || unit.has(Ability::Pavise) {
+            LossCause::Bolt
+        } else {
+            LossCause::Arrow
+        }
     }
 
     /// Journal entries added since the previous call.
@@ -1665,16 +1738,68 @@ impl BattleSim {
     fn charge_impact(&mut self, i: usize, p: usize) {
         let angle = attack_angle(&self.units[p], self.units[i].x, self.units[i].z);
         let cavalry = self.units[i].is_cavalry();
+        let mass = impact::charge_mass(&self.units[i]);
+        let heading = angle_to(
+            self.units[p].x - self.units[i].x,
+            self.units[p].z - self.units[i].z,
+        );
+        let point = self.contact_point(i, p);
+        let base = ImpactEvent {
+            time: self.elapsed,
+            attacker: self.units[i].id,
+            defender: self.units[p].id,
+            kind: ImpactKind::Shock,
+            point,
+            heading,
+            mass,
+            knocked: 0,
+            unhorsed: 0,
+            depth: 0.0,
+            cohesion: 0.0,
+        };
         if cavalry && angle == 0 && self.units[p].stakes_planted {
+            let defender_id = self.units[p].id;
             let unit = &mut self.units[i];
             let loss = unit.hp * 0.12;
             unit.hp -= loss;
             unit.tick_losses += loss;
             unit.morale -= 15.0;
             unit.charge_timer = 0.0;
+            unit.loss_cause = LossCause::Stakes;
+            unit.loss_by = Some(defender_id);
             let text = format!("Les {} s'empalent sur les pieux !", self.unit_label(i));
             let side = self.units[i].side;
             self.log(text, Some(side));
+            self.record_impact(ImpactEvent {
+                kind: ImpactKind::Stakes,
+                unhorsed: loss.round() as u32,
+                ..base
+            });
+            return;
+        }
+        // BV2: levelled pikes stop the horses and unhorse the first riders.
+        if impact::pikes_stop(&self.units[i], &self.units[p], angle) {
+            let defender_id = self.units[p].id;
+            let unit = &mut self.units[i];
+            let loss = unit.hp * impact::PIKE_STOP_LOSS;
+            unit.hp -= loss;
+            unit.tick_losses += loss;
+            unit.morale -= 10.0;
+            unit.charge_timer = 0.0;
+            unit.loss_cause = LossCause::Pikes;
+            unit.loss_by = Some(defender_id);
+            let text = format!(
+                "La charge des {} se brise sur les piques des {} !",
+                self.unit_label(i),
+                self.unit_label(p)
+            );
+            let side = self.units[i].side;
+            self.log(text, Some(side));
+            self.record_impact(ImpactEvent {
+                kind: ImpactKind::Pikes,
+                unhorsed: loss.round() as u32,
+                ..base
+            });
             return;
         }
         // B5: a hedge or a ditch in front of the target, or the lanes of a
@@ -1696,13 +1821,53 @@ impl BattleSim {
             };
             let side = self.units[i].side;
             self.log(text, Some(side));
+            self.record_impact(ImpactEvent {
+                kind: ImpactKind::Broken,
+                ..base
+            });
             return;
         }
         self.units[i].charge_timer = CHARGE_IMPACT;
-        if cavalry && self.units[p].formation != Formation::Square {
-            let shock = if angle == 0 { 8.0 } else { 15.0 };
-            self.units[p].morale -= shock;
+        // Loss of cohesion: the shock of the horses (B-rules, unchanged).
+        let cohesion = if cavalry && self.units[p].formation != Formation::Square {
+            impact::shock_morale(angle)
+        } else {
+            0.0
+        };
+        self.units[p].morale -= cohesion;
+        // BV2: the horses knock men down; they stop fighting until they are
+        // back on their feet.
+        let knocked = if cavalry && self.units[i].mounted {
+            impact::knocked_count(&self.units[i], &self.units[p], angle)
+        } else {
+            0
+        };
+        let depth = impact::drive_depth(mass, knocked, &self.units[p]);
+        if knocked > 0 {
+            let target = &mut self.units[p];
+            target.knocked = f64::from(knocked);
+            target.knocked_timer = impact::KNOCKDOWN_TIME;
         }
+        self.record_impact(ImpactEvent {
+            knocked,
+            depth,
+            cohesion,
+            ..base
+        });
+    }
+
+    /// Point where regiment `i` strikes regiment `p`: on `p`'s face, along
+    /// the line between the two centres.
+    fn contact_point(&self, i: usize, p: usize) -> (f64, f64) {
+        let (a, b) = (&self.units[i], &self.units[p]);
+        let (dx, dz) = (a.x - b.x, a.z - b.z);
+        let len = (dx * dx + dz * dz).sqrt();
+        if len < 1e-6 {
+            return (b.x, b.z);
+        }
+        let dir = (dx / len, dz / len);
+        let reach = b.support(dir).min(len);
+        (b.x + dir.0 * reach, b.z + dir.1 * reach)
     }
 
     fn primary_opponent(&self, i: usize, contacts: &[usize]) -> Option<usize> {
@@ -1887,10 +2052,39 @@ impl BattleSim {
         };
         let heading = angle_to(target.x - shooter.x, target.z - shooter.z);
         let kills = kills.min(self.units[t].hp);
+        let cover = if target.on_wall {
+            ShotCover::Wall
+        } else if target.pavise.is_some()
+            || (target.has(Ability::Pavise) && target.state != UnitState::Marching)
+        {
+            ShotCover::Pavise
+        } else if target.stakes_planted {
+            ShotCover::Stakes
+        } else {
+            ShotCover::None
+        };
+        let shot = ShotEvent {
+            time: self.elapsed,
+            shooter: shooter.id,
+            target: Some(target.id),
+            from: (shooter.x, shooter.z),
+            aim: (target.x, target.z),
+            missiles: Self::missiles(shooter),
+            kills,
+            kind: Self::missile_kind(shooter),
+            incendiary: self.shoots_fire(i),
+            cover,
+        };
+        self.record_shot(shot);
+        let cause = Self::missile_cause(&self.units[i]);
+        let shooter_id = self.units[i].id;
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
+        self.units[i].kills += kills;
         if kills > 0.0 {
             self.units[t].missile_timer = 0.0;
+            self.units[t].loss_cause = cause;
+            self.units[t].loss_by = Some(shooter_id);
         }
         let shooter = &mut self.units[i];
         shooter.reload = reload;
@@ -1962,6 +2156,20 @@ impl BattleSim {
             let (mx, mz) = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
             angle_to(mx - unit.x, mz - unit.z)
         };
+        let aim = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
+        let shot = ShotEvent {
+            time: self.elapsed,
+            shooter: unit.id,
+            target: None,
+            from: (unit.x, unit.z),
+            aim,
+            missiles: Self::missiles(unit),
+            kills: 0.0,
+            kind: Self::missile_kind(unit),
+            incendiary: self.shoots_fire(i),
+            cover: ShotCover::Wall,
+        };
+        self.record_shot(shot);
         let shooter = &mut self.units[i];
         shooter.reload = 12.0;
         shooter.ammo = shooter.ammo.saturating_sub(1);
@@ -2083,6 +2291,11 @@ impl BattleSim {
         let n = self.units.len();
         let mut damage = vec![0.0; n];
         let mut flanked = vec![0u8; n];
+        // BV2: heaviest blow per defender this tick (cause of its deaths).
+        let mut heaviest: Vec<Option<(f64, usize)>> = vec![None; n];
+        // UB1: (striker, victim, damage) to credit the kills once capped.
+        let mut credit: Vec<(usize, usize, f64)> = Vec::new();
+        let mut dealt_ratio = vec![0.0; n];
         for i in 0..n {
             let unit = &self.units[i];
             if !unit.present() || contacts[i].is_empty() || unit.state == UnitState::Routing {
@@ -2095,17 +2308,42 @@ impl BattleSim {
                 continue;
             };
             let defender = &self.units[p];
-            damage[p] += self.melee_damage(unit, defender);
+            let dealt = self.melee_damage(unit, defender);
+            damage[p] += dealt;
+            if heaviest[p].is_none_or(|(d, _)| dealt > d) {
+                heaviest[p] = Some((dealt, i));
+            }
+            credit.push((i, p, dealt));
             match attack_angle(defender, unit.x, unit.z) {
                 1 => flanked[p] |= 1,
                 2 => flanked[p] |= 2,
                 _ => {}
             }
         }
+        let causes: Vec<Option<(LossCause, u32)>> = heaviest
+            .iter()
+            .map(|h| {
+                h.map(|(_, a)| {
+                    let attacker = &self.units[a];
+                    let cause = if attacker.charge_timer > 0.0 {
+                        LossCause::Charge
+                    } else {
+                        LossCause::Melee
+                    };
+                    (cause, attacker.id)
+                })
+            })
+            .collect();
         for i in 0..n {
             let unit = &mut self.units[i];
             if unit.charge_timer > 0.0 {
                 unit.charge_timer -= DT;
+            }
+            if unit.knocked_timer > 0.0 {
+                unit.knocked_timer -= DT;
+                if unit.knocked_timer <= 0.0 {
+                    unit.knocked = 0.0;
+                }
             }
             unit.flanked = flanked[i];
             if damage[i] <= 0.0 || !unit.present() {
@@ -2113,8 +2351,13 @@ impl BattleSim {
             }
             let before = unit.hp;
             let dealt = damage[i].min(unit.hp);
+            dealt_ratio[i] = dealt / damage[i];
             unit.hp -= dealt;
             unit.tick_losses += dealt;
+            if let Some((cause, by)) = causes[i] {
+                unit.loss_cause = cause;
+                unit.loss_by = Some(by);
+            }
             if unit.is_general && self.general_alive[unit.side.index()] {
                 let chance = dealt / before.max(1.0) * 0.4;
                 if self.rng.unit() < chance || self.units[i].hp <= 0.0 {
@@ -2124,6 +2367,9 @@ impl BattleSim {
             if self.units[i].hp <= 0.0 {
                 self.unit_destroyed(i);
             }
+        }
+        for (striker, victim, blow) in credit {
+            self.units[striker].kills += blow * dealt_ratio[victim];
         }
     }
 
@@ -2414,7 +2660,7 @@ impl BattleSim {
             .iter()
             .filter(|u| u.side == side && category.is_none_or(|c| c == u.category))
         {
-            result.extend(self.soldier_poses(unit));
+            result.extend(self.soldier_poses(unit, 1.0));
         }
         result
     }

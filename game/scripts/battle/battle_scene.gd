@@ -10,7 +10,10 @@ extends Node3D
 ## bataille France–Angleterre mise en scène (`debug_stage_battle`).
 ## Options (après `--`) : `--screenshot=<png>` (joue la bataille jusqu'au contact, capture, quitte),
 ## `--units=<n>` (complète chaque camp à n régiments, banc d'essai sans retour campagne),
-## `--benchmark` (mesure les FPS sur 600 images puis quitte ; `--bench-at=<s>` avance d'abord la bataille), `--autoplay` (IA des deux camps),
+## `--benchmark` (mesure les FPS sur `BENCH_FRAMES` images puis quitte, vsync désactivé, sortie
+## `BENCH_JSON {...}` systématique, code de sortie ≠ 0 en cas d'échec ou de dépassement du budget
+## `--bench-timeout=<s>` (défaut 120) ; `--bench-at=<s>` avance d'abord la bataille,
+## `--bench-repeat=<n>` répète la fenêtre de mesure, T8), `--autoplay` (IA des deux camps),
 ## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8),
 ## `--closeup` (capture : caméra rapprochée sur la mêlée), `--weather=<clear|fog|rain|snow>`
 ## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
@@ -18,10 +21,13 @@ extends Node3D
 ## `--screenshot=` : capture de la phase de déploiement, F5c), `--result-shot` (avec
 ## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
 ## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
+## `--no-bv1` (volées, sang, mottes et taille d'unité du lot BV1 coupés : mesures A/B),
 ## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
 
 signal returned(result: Dictionary)
 
+## T8 : images mesurées par répétition du banc d'essai (`--benchmark`).
+const BENCH_FRAMES := 600
 const KINDS := ["infantry", "archer", "cavalry", "siege"]
 const SPEEDS := [1.0, 2.0, 4.0]
 const DOUBLE_CLICK_MS := 350
@@ -50,6 +56,7 @@ var autoplay: bool = false
 var padded: bool = false
 var finished_shown: bool = false
 var resolved: bool = false
+var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
 var siege_view: BattleSiege = null  # batailles de siège (M8)
 var assault_fx: SiegeAssaultFx = null  # SG1 : engins, échelles, porte, huile (événements du cœur)
@@ -60,6 +67,10 @@ var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layer
 var soldiers: BattleSoldiers = null
 var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
 var _weather_key: String = "clear"
+var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
+var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
+var _blood_override: int = -1  # `--blood=<0|1|2>`
+var _no_bv1: bool = false  # `--no-bv1` : volées, sang et mottes du lot BV1 coupés (mesures A/B)
 var _no_effects: bool = false  # `--no-effects` : captures « avant » et mesures A/B
 var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
 var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
@@ -78,8 +89,21 @@ var _bench_frames: int = 0
 var _bench_time: float = 0.0
 var _bench_at: float = -1.0  # `--bench-at=<s>` : avance rapide avant la mesure
 var _bench_start_elapsed: float = 0.0
+## T8 : répétitions (`--bench-repeat=`), temps d'image collectés (ms, toutes répétitions
+## confondues, pour médiane/p95), budget de temps réel (`--bench-timeout=`, défaut 120 s) et
+## drapeau d'échec (pour ne conclure qu'une fois).
+var _bench_repeat: int = 1
+var _bench_repeat_done: int = 0
+var _bench_frame_ms: PackedFloat64Array = PackedFloat64Array()
+var _bench_wall_start_ms: int = -1
+var _bench_timeout_s: float = 120.0
+var _bench_failed: bool = false
 var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
 var _bench_cpu_ms: float = 0.0
+## Compteur d'images mesurées (GPU/CPU/A-B) qui ne repart pas à zéro entre répétitions
+## (`--bench-repeat=`), contrairement à `_bench_frames` (fenêtre de mesure courante).
+var _bench_measured: int = 0
+var _bench_gpu_samples: int = 0
 ## V3 : `--bench-ab=<niveau>,<niveau>` alterne deux niveaux de `RenderQuality` toutes les 30 images
 ## pendant la mesure (même charge machine pour les deux), temps GPU médian par niveau.
 var _bench_ab: PackedStringArray = []
@@ -119,6 +143,7 @@ func _ready() -> void:
 	hud.command_pressed.connect(_on_command)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
+	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -128,9 +153,16 @@ func _ready() -> void:
 		standalone = true
 		if not _stage_standalone():
 			push_error("BattleScene: cannot stage a demo battle")
+			# T8 : un banc d'essai qui ne peut pas se lancer doit échouer bruyamment (JSON +
+			# code de sortie ≠ 0) plutôt que laisser une fenêtre ouverte sans jamais quitter
+			# (l'une des causes des exécutions « sans résultat », cf. docs/wip/t2-perf.md).
+			if _benchmark:
+				_bench_fail("cannot stage a demo battle")
 			return
 	if not begin():
 		push_error("BattleScene: battle setup failed")
+		if _benchmark:
+			_bench_fail("battle setup failed")
 
 
 ## Démo autonome : campagne France 1337, principale armée française contre anglaise.
@@ -218,6 +250,9 @@ func begin() -> bool:
 			add_child(backdrop)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
+	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
+	if not _no_bv1:
+		battle.call("set_figure_scale", _unit_size())
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -235,6 +270,7 @@ func begin() -> bool:
 	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
+	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, 1500, 1100)
 	_frame_camera()
@@ -288,6 +324,7 @@ func _build_soldier_layers() -> void:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 	soldiers.setup(units, side_colors, factions)
 	_mm = soldiers.layers
+	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
 	if _no_effects:
 		return
 	effects = BattleEffects.new()
@@ -296,11 +333,60 @@ func _build_soldier_layers() -> void:
 	var river: Dictionary = terrain.terrain.get("river", {})
 	var half_width := float(river.get("width", 0.0)) * 0.5
 	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	if not _no_bv1:
+		effects.configure_ground(str(terrain.terrain.get("ground", "dry")), _weather_key)
+	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
+	effects.volleys.sound_event.connect(_on_sound_event)
+	effects.sound_event.connect(_on_sound_event)
+	BattleAudio.auto_volley = _no_bv1
+	blood = BattleBlood.new()
+	blood.name = "Blood"
+	effects.add_child(blood)
+	blood.figure_scale = effects.volleys.figure_scale
+	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	effects.hit_landed.connect(func(pos: Vector3, time: float) -> void: blood.add_hit(pos, time, _camera_position()))
+	# Fusion BV1/BV2 : les morts de BV2 portent la flaque au sol (BV1) et les traits fichés dans
+	# les corps ; la gerbe reste à BV2 (`BattleGore`), une seule source par événement.
+	if soldiers.bv2_enabled and not _no_bv1:
+		blood.corpse_driven = true
+		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
+			blood.on_corpse(pos, side, kind, cause, _camera_position())
+			effects.volleys.on_corpse(pos, side, kind, cause))
 	if siege_view != null:
 		assault_fx = SiegeAssaultFx.new()
 		assault_fx.name = "AssaultFx"
 		add_child(assault_fx)
 		assault_fx.setup(siege_view, effects, soldiers, func(x: float, z: float) -> float: return terrain.height_at(x, z))
+
+
+## Réglages du joueur lus par la bataille (BV1) : `--unit-size=` / `--blood=` les forcent.
+func _unit_size() -> float:
+	if _unit_size_override > 0.0:
+		return _unit_size_override
+	var settings := get_node_or_null("/root/Settings")
+	return float(settings.call("get_value", "battle/unit_size")) if settings != null else 1.0
+
+
+func _blood_level() -> int:
+	if _blood_override >= 0:
+		return _blood_override
+	return BattleGore.blood_level()  # même lecture que BV2 (`--blood=off|moderate|full|0|1|2`)
+
+
+func _camera_position() -> Vector3:
+	var camera := get_viewport().get_camera_3d()
+	return camera.global_position if camera != null else Vector3.ZERO
+
+
+## BV1 : sons des tirs du cœur (lâcher, sifflement, impact) joués par l'API du lot AU1
+## (`BattleAudio.play_at` / `play_at_delayed`, bus et banque sonore d'AU1). `delay` en temps de
+## bataille ; `BattleAudio.auto_volley` est coupé pour ne pas doubler ses volées déduites des
+## munitions.
+func _on_sound_event(event: StringName, position: Vector3, delay: float) -> void:
+	if delay > 0.0:
+		BattleAudio.play_at_delayed(str(event), position, delay)
+	else:
+		BattleAudio.play_at(str(event), position)
 
 
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
@@ -310,7 +396,11 @@ func _update_effects(dt: float) -> void:
 		return
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
-	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos)
+	var shots: Variant = battle.call("get_shots")
+	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, null if _no_bv1 else shots)
+	if blood != null:
+		blood.tick_time(soldiers.anim_time)
+		blood.update(units, camera_pos)
 	if assault_fx != null:
 		assault_fx.update(battle.call("get_siege_events"), units, soldiers.anim_time, dt)
 
@@ -416,35 +506,140 @@ func _process(delta: float) -> void:
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
-		if _bench_frames == 0:
-			if _bench_at > 0.0:
-				_fast_forward(_bench_at)
-			_bench_start_elapsed = float(battle.call("get_elapsed"))
-			soldiers.start_timing()
-			_apply_camera_override()  # banc d'essai rapproché (lot B1)
+		_run_benchmark_frame(delta)
+
+
+## T8 : une image du banc d'essai (`--benchmark`). Fenêtre de `BENCH_FRAMES` images mesurées,
+## répétée `_bench_repeat` fois (`--bench-repeat=`) ; les temps d'image de toutes les
+## répétitions sont regroupés pour la médiane / p95 finales. Un budget de temps réel
+## (`--bench-timeout=`, `_bench_wall_start_ms`) fait échouer proprement le banc (JSON + code de
+## sortie ≠ 0) au lieu de bloquer indéfiniment si la simulation n'avance pas (120 régiments, cf.
+## `docs/wip/t2-perf.md`). V3 : temps GPU/CPU mesurés et banc A/B (`--bench-ab=`, `_bench_ab_step`)
+## sur un compteur dédié `_bench_measured` qui ne repart pas à zéro entre répétitions.
+func _run_benchmark_frame(delta: float) -> void:
+	if _bench_failed:
+		return
+	if _bench_wall_start_ms < 0:
+		_bench_wall_start_ms = Time.get_ticks_msec()
+	if _bench_frames == 0:
+		if _bench_repeat_done == 0:
+			# BV1 : l'autoload `Settings` réimpose la synchro verticale du joueur (60 Hz) ; le banc
+			# d'essai la coupe pour que les FPS départagent enfin les variantes.
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			Engine.max_fps = 0
 			# V3 : temps GPU/CPU de rendu mesurés (l'écran plafonne souvent les FPS à 60).
 			RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
-		_bench_frames += 1
-		_bench_time += delta
-		if _bench_frames > 10:
-			var viewport_rid := get_viewport().get_viewport_rid()
-			var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
-			_bench_gpu_ms += gpu_ms
-			_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
-			_bench_ab_step(gpu_ms)
-		if _bench_frames == 600:
-			var fps := _bench_frames / maxf(_bench_time, 0.001)
-			var soldiers := 0
-			for unit in units:
-				soldiers += int(unit["soldiers"])
-			print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (engine %d FPS)%s" % [units.size(), soldiers, fps, _bench_frames, Engine.get_frames_per_second(), self.soldiers.timing_report()])
-			print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
-			print("BattleScene benchmark: render %.2f ms GPU, %.2f ms CPU per frame (quality %s)" % [_bench_gpu_ms / (_bench_frames - 10), _bench_cpu_ms / (_bench_frames - 10), RenderQuality.current()])
-			for level in _bench_ab_ms:
-				var samples: Array = _bench_ab_ms[level]
-				samples.sort()
-				print("BattleScene benchmark A/B: %s median %.2f ms GPU over %d frames" % [level, samples[samples.size() / 2], samples.size()])
-			get_tree().quit(0)
+		if _bench_at > 0.0:
+			_fast_forward(_bench_at)
+			if _bench_failed:
+				return  # `_bench_fail` a déjà conclu (timeout pendant l'avance rapide)
+			if _bench_timed_out():
+				_bench_fail("timeout advancing to --bench-at=%.0f (%.0f s elapsed of %.0f s wall budget)" % [_bench_at, _bench_wall_elapsed_s(), _bench_timeout_s])
+				return
+		_bench_start_elapsed = float(battle.call("get_elapsed"))
+		soldiers.start_timing()
+		_apply_camera_override()  # banc d'essai rapproché (lot B1)
+	_bench_frames += 1
+	_bench_time += delta
+	_bench_frame_ms.append(delta * 1000.0)
+	_bench_measured += 1
+	if _bench_measured > 10:
+		var viewport_rid := get_viewport().get_viewport_rid()
+		var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
+		_bench_gpu_ms += gpu_ms
+		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+		_bench_gpu_samples += 1
+		_bench_ab_step(gpu_ms)
+	if _bench_timed_out():
+		_bench_fail("timeout after %d frames of repeat %d/%d (%.0f s wall budget)" % [_bench_frames, _bench_repeat_done + 1, _bench_repeat, _bench_timeout_s])
+		return
+	if _bench_frames >= BENCH_FRAMES:
+		_bench_repeat_done += 1
+		if _bench_repeat_done < _bench_repeat:
+			_bench_frames = 0
+			_bench_time = 0.0
+			return
+		_bench_finish()
+
+
+## Résultat JSON systématique (T8) : imprimé sur une seule ligne préfixée `BENCH_JSON `
+## (facile à extraire d'une sortie bruyante), avec code de sortie 0. V3 : `gpu_ms`/`cpu_ms`
+## (moyenne par image mesurée) et `ab` (médiane GPU par niveau, si `--bench-ab=`).
+func _bench_finish() -> void:
+	var sorted_ms := _bench_frame_ms.duplicate()
+	sorted_ms.sort()
+	var soldier_count := 0
+	for unit in units:
+		soldier_count += int(unit["soldiers"])
+	var total_frames := sorted_ms.size()
+	var total_s := 0.0
+	for ms in sorted_ms:
+		total_s += ms / 1000.0
+	var ab_result := {}
+	for level in _bench_ab_ms:
+		var samples: Array = _bench_ab_ms[level]
+		samples.sort()
+		ab_result[level] = samples[samples.size() / 2] if not samples.is_empty() else 0.0
+	var result := {
+		"ok": true,
+		"units": units.size(),
+		"soldiers": soldier_count,
+		"frames": total_frames,
+		"repeats": _bench_repeat,
+		"bench_at_s": _bench_start_elapsed,
+		"fps_avg": total_frames / maxf(total_s, 0.001),
+		"frame_ms_median": _percentile(sorted_ms, 0.5),
+		"frame_ms_p95": _percentile(sorted_ms, 0.95),
+		"engine_fps": Engine.get_frames_per_second(),
+		"gpu_ms": _bench_gpu_ms / maxf(_bench_gpu_samples, 1),
+		"cpu_ms": _bench_cpu_ms / maxf(_bench_gpu_samples, 1),
+		"quality": RenderQuality.current(),
+		"missiles_launched": effects.launched if effects != null else 0,
+		"wall_s": _bench_wall_elapsed_s(),
+	}
+	if not ab_result.is_empty():
+		result["ab"] = ab_result
+	if effects != null and effects.volleys != null:
+		# BV1 : volées, traits fichés et échelle des figurines.
+		result["volley_arrows"] = effects.volleys.launched
+		result["arrows_stuck"] = effects.volleys.stuck_count
+		result["figure_scale"] = effects.volleys.figure_scale
+	print("BENCH_JSON " + JSON.stringify(result))
+	print("BattleScene benchmark: %d units, %d soldiers, %.1f FPS average over %d frames (%d repeats)%s" % [units.size(), soldier_count, result["fps_avg"], total_frames, _bench_repeat, self.soldiers.timing_report()])
+	print("BattleScene benchmark: measured from %.0f s, %d missiles launched" % [_bench_start_elapsed, effects.launched if effects != null else 0])
+	print("BattleScene benchmark: render %.2f ms GPU, %.2f ms CPU per frame (quality %s)" % [result["gpu_ms"], result["cpu_ms"], result["quality"]])
+	for level in ab_result:
+		print("BattleScene benchmark A/B: %s median %.2f ms GPU" % [level, ab_result[level]])
+	get_tree().quit(0)
+
+
+## Échec du banc (setup impossible, ou budget de temps réel dépassé) : sortie JSON aussi,
+## `"ok": false`, code de sortie 1 (T8 : plus jamais de code 0 sans résultat).
+func _bench_fail(reason: String) -> void:
+	if _bench_failed:
+		return
+	_bench_failed = true
+	var result := {"ok": false, "error": reason, "wall_s": _bench_wall_elapsed_s()}
+	push_error("BattleScene benchmark failed: %s" % reason)
+	print("BENCH_JSON " + JSON.stringify(result))
+	get_tree().quit(1)
+
+
+func _bench_wall_elapsed_s() -> float:
+	if _bench_wall_start_ms < 0:
+		return 0.0
+	return float(Time.get_ticks_msec() - _bench_wall_start_ms) / 1000.0
+
+
+func _bench_timed_out() -> bool:
+	return _bench_timeout_s > 0.0 and _bench_wall_elapsed_s() > _bench_timeout_s
+
+
+static func _percentile(sorted_values: PackedFloat64Array, ratio: float) -> float:
+	if sorted_values.is_empty():
+		return 0.0
+	var idx := int(clampf(ratio * float(sorted_values.size() - 1), 0.0, float(sorted_values.size() - 1)))
+	return float(sorted_values[idx])
 
 
 ## AU1 : sons spatialisés d'après les régiments (et le siège, 4 fois par seconde).
@@ -463,13 +658,14 @@ func _update_audio(delta: float) -> void:
 
 
 ## Banc A/B (V3) : range le temps GPU de l'image dans le niveau actif, change de niveau toutes les
-## 30 images (les 4 premières après un changement sont ignorées : mesure en retard d'une image,
-## ressources réallouées).
+## 30 images sur `_bench_measured` (les 4 premières après un changement sont ignorées : mesure en
+## retard d'une image, ressources réallouées) — indépendant de `_bench_frames` pour continuer à
+## cycler correctement à travers plusieurs répétitions (`--bench-repeat=`).
 func _bench_ab_step(gpu_ms: float) -> void:
 	if _bench_ab.size() < 2:
 		return
-	var slot := (_bench_frames - 11) / 30
-	var phase := (_bench_frames - 11) % 30
+	var slot := (_bench_measured - 11) / 30
+	var phase := (_bench_measured - 11) % 30
 	var level := _bench_ab[slot % _bench_ab.size()]
 	if phase == 0:
 		RenderQuality.override_level = level
@@ -480,9 +676,15 @@ func _bench_ab_step(gpu_ms: float) -> void:
 		(_bench_ab_ms[level] as Array).append(gpu_ms)
 
 
-## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris.
+## Avance la simulation (pas de 0,1 s) jusqu'à `seconds`, cadavres et effets compris. Abandonne
+## (T8 : `_bench_fail`) si le budget de temps réel du banc est dépassé pendant l'avance rapide,
+## pour ne jamais bloquer indéfiniment (120 régiments en lib debug : jadis sans résultat après
+## 98-220 s, cf. `docs/wip/t2-perf.md`).
 func _fast_forward(seconds: float) -> void:
 	while float(battle.call("get_elapsed")) < seconds and not battle.call("is_finished"):
+		if _benchmark and _bench_timed_out():
+			_bench_fail("timeout advancing to --bench-at=%.0f (stopped at %.1f s simulated)" % [seconds, battle.call("get_elapsed")])
+			return
 		battle.call("tick", 0.1)
 		units = battle.call("get_units")
 		soldiers.update(battle, units, 0.1, [])
@@ -617,22 +819,44 @@ func _show_end() -> void:
 	var sides := {}
 	for side in ["attacker", "defender"]:
 		sides[side] = {"name": side_names[side], "faction": str((setup[side] as Dictionary).get("faction", "")), "color": side_colors[side]}
+	# UB1 : le résultat est appliqué dès la fin, pour montrer ses suites (captifs, rançons,
+	# expérience) sur l'écran de fin ; « Retour à la campagne » ne fait plus que rendre la main.
+	var side_setup: Dictionary = setup[player_side]
+	var general: Variant = side_setup.get("general", null)
+	var general_id := str(general.get("character", "")) if general is Dictionary else ""
+	var before := BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id)
+	_resolve_now()
+	var aftermath := {}
+	if bool(_resolution.get("ok", false)):
+		aftermath = BattleAftermath.diff(before, BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id))
 	result_screen = BattleResultScreen.new()
 	hud.root.add_child(result_screen)
 	result_screen.return_pressed.connect(_on_return)
-	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome)
+	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome, aftermath)
 
 
-## « Retour à la campagne » : applique le résultat (`resolve_battle`) puis rend la main.
-func _on_return() -> void:
+var _resolution: Dictionary = {}
+
+
+## Applique le résultat (`resolve_battle`) une seule fois.
+func _resolve_now() -> void:
 	if resolved:
 		return
 	resolved = true
-	var result := {"ok": false, "error": "bataille non terminée", "events": []}
+	_resolution = {"ok": false, "error": "bataille non terminée", "events": []}
 	if battle != null and battle.call("is_finished") and campaign_sim != null and not padded:
-		result = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
-		if not result.get("ok", false):
-			push_error("BattleScene: resolve_battle refused: %s" % result.get("error", "?"))
+		_resolution = campaign_sim.call("resolve_battle", battle_index, battle.call("get_outcome"))
+		if not _resolution.get("ok", false):
+			push_error("BattleScene: resolve_battle refused: %s" % _resolution.get("error", "?"))
+
+
+## « Retour à la campagne » : applique le résultat s'il ne l'est pas encore, puis rend la main.
+func _on_return() -> void:
+	if _returned:
+		return
+	_returned = true
+	_resolve_now()
+	var result := _resolution
 	if _audio_director != null:  # B3 : la carte retrouve sa musique de contexte
 		_audio_director.call("refresh_context")
 	returned.emit(result)
@@ -811,6 +1035,7 @@ func _finish_right(position: Vector2) -> void:
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
 func issue(command: Dictionary) -> Dictionary:
 	var result: Dictionary = battle.call("issue_command", command)
+	UiSounds.play_order_result(result)  # UB1 / U13 : ordre donné ou refusé
 	if not result.get("ok", false):
 		hud.add_events([{"time": battle.call("get_elapsed"), "text_fr": "Ordre refusé : %s" % result.get("error", "?")}])
 	return result
@@ -821,6 +1046,17 @@ func _on_card_clicked(unit_id: int, additive: bool) -> void:
 		selected.clear()
 	if not selected.has(unit_id):
 		selected.append(unit_id)
+
+
+## UB1 : clic sur le sceau du chef = sélectionner sa garde ; double clic = y centrer la caméra.
+func _on_leader_clicked(double: bool) -> void:
+	var id := hud.leader_unit_id()
+	if id < 0:
+		return
+	if double:
+		_on_card_double_clicked(id)
+	else:
+		_on_card_clicked(id, false)
 
 
 ## B3 / T6 : double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
@@ -986,11 +1222,19 @@ func _parse_cmdline() -> void:
 			_pad_units = int(arg.trim_prefix("--units="))
 		elif arg.begins_with("--bench-at="):
 			_bench_at = float(arg.trim_prefix("--bench-at="))
+		elif arg.begins_with("--bench-repeat="):
+			_bench_repeat = maxi(1, int(arg.trim_prefix("--bench-repeat=")))
+		elif arg.begins_with("--bench-timeout="):
+			_bench_timeout_s = float(arg.trim_prefix("--bench-timeout="))
 		elif arg.begins_with("--bench-ab="):
 			_bench_ab = arg.trim_prefix("--bench-ab=").split(",", false)
 		elif arg == "--benchmark":
 			_benchmark = true
 			autoplay = true
+			# T8 : vsync fausse les i/s (plafond à 60) et rend le banc peu comparable d'une
+			# machine à l'autre ; le désactiver systématiquement pendant le banc.
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			Engine.max_fps = 0
 		elif arg == "--autoplay":
 			autoplay = true
 		elif arg == "--deploy-shot":
@@ -1007,6 +1251,13 @@ func _parse_cmdline() -> void:
 			_shot_at = float(arg.trim_prefix("--shot-at="))
 		elif arg == "--no-effects":
 			_no_effects = true
+		elif arg == "--no-bv1":
+			_no_bv1 = true
+		elif arg.begins_with("--unit-size="):
+			_unit_size_override = float(arg.trim_prefix("--unit-size="))
+		elif arg.begins_with("--blood="):
+			var value := arg.trim_prefix("--blood=")
+			_blood_override = ["off", "moderate", "full"].find(value) if not value.is_valid_int() else clampi(int(value), 0, 2)
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
@@ -1059,6 +1310,8 @@ func _stage_screenshot() -> void:
 			break
 	paused = true
 	print("BattleScene: capture at %.0f s, %d corpses, %d missiles" % [float(battle.call("get_elapsed")), soldiers.corpse_count, effects.launched if effects != null else 0])
+	if effects != null and blood != null:
+		print("BattleScene: BV1 %d volley arrows, %d stuck, %d blood decals (level %d), last at %s" % [effects.volleys.launched, effects.volleys.stuck_count, blood.decal_count, blood.level, blood.last_pos])
 	units = battle.call("get_units")
 	var focus := Vector3.ZERO
 	var n := 0

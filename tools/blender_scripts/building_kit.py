@@ -2186,6 +2186,357 @@ def cathedral(g, rng, detail="high", length=None, depth=None, ruined=False):
     return {"height": zr + spire_h, "length": L, "depth": W + 10.0}
 
 
+# --- street furniture ------------------------------------------------------------------------
+# Small props of lived-in streets (market stalls, carts, barrels, woodpiles). Same frame as the
+# buildings: footprint centred on the origin, length along +x, front towards -y, ground at z = 0.
+
+CLOTH_TINTS = [
+    (1.0, 0.95, 0.85),  # undyed linen
+    (0.95, 0.42, 0.32),  # madder red
+    (0.5, 0.6, 0.85),  # woad blue
+    (1.0, 0.8, 0.45),  # weld yellow
+    (0.62, 0.75, 0.5),  # green
+]
+PRODUCE_TINTS = [
+    (0.9, 0.35, 0.2),
+    (0.55, 0.72, 0.3),
+    (0.95, 0.7, 0.3),
+    (0.6, 0.3, 0.35),
+]
+POTTERY = (0.95, 0.62, 0.45)
+
+
+def _barrel(g, x, y, z=0.0, radius=0.3, height=0.85, detail="high", tint=None):
+    """Standing oak barrel with two iron hoops."""
+    sides = 10 if detail == "high" else 7
+    wood = tint or TIMBER_TINTS[0]
+    k.tube(
+        g,
+        (x, y, z),
+        (x, y, z + height),
+        radius,
+        "Planks",
+        sides,
+        bulge=0.12,
+        color=wood,
+        grain=True,
+    )
+    if detail == "high":
+        for t in (0.14, 0.86):
+            r = radius * (1.0 + 0.12 * (1.0 - abs(t - 0.5) * 2.0)) + 0.012
+            zt = z + height * t
+            k.tube(
+                g, (x, y, zt - 0.03), (x, y, zt + 0.03), r, "Iron", sides, caps=False
+            )
+
+
+def _lying_barrel(g, p0, p1, radius, detail):
+    k.tube(
+        g,
+        p0,
+        p1,
+        radius,
+        "Planks",
+        10 if detail == "high" else 7,
+        bulge=0.12,
+        color=TIMBER_TINTS[1],
+    )
+
+
+def _crate(g, center, size, yaw=0.0, tint=None):
+    k.box(g, center, size, "Planks", yaw, color=tint or TIMBER_TINTS[0])
+
+
+def _sack(g, rng, x, y, z):
+    k.box(
+        g,
+        (x, y, z + 0.2),
+        (0.45, 0.32, 0.4),
+        "Canvas",
+        rng.uniform(-0.5, 0.5),
+        color=(0.95, 0.9, 0.78),
+    )
+
+
+def _wheel(g, x, y, radius, width, detail):
+    """Cart wheel (felloe as a thick disc, iron tyre, projecting hub)."""
+    sides = 16 if detail == "high" else 10
+    k.tube(
+        g,
+        (x, y - width / 2, radius),
+        (x, y + width / 2, radius),
+        radius,
+        "Timber",
+        sides,
+        color=TIMBER_TINTS[3],
+    )
+    if detail == "high":
+        k.tube(
+            g,
+            (x, y - width / 2 - 0.005, radius),
+            (x, y + width / 2 + 0.005, radius),
+            radius + 0.015,
+            "Iron",
+            sides,
+            caps=False,
+        )
+    k.tube(
+        g,
+        (x, y - width, radius),
+        (x, y + width, radius),
+        0.1,
+        "Timber",
+        8,
+        color=TIMBER_TINTS[1],
+    )
+
+
+def market_stall(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Market stall: four posts, a counter with its apron, a sloping dyed awning and goods."""
+    L = length or rng.uniform(2.6, 3.4)
+    D = depth or rng.uniform(1.6, 2.0)
+    wood = pick(rng, TIMBER_TINTS)
+    for sx in (-1, 1):
+        for sy, h in ((-1, 2.05), (1, 2.45)):
+            k.box(
+                g,
+                (sx * (L / 2 - 0.08), sy * (D / 2 - 0.08), h / 2),
+                (0.1, 0.1, h),
+                "Timber",
+                grain=True,
+                color=wood,
+            )
+    # Counter at the front, a plank apron down to the ground.
+    k.box(g, (0.0, -D / 2 + 0.45, 0.86), (L - 0.1, 0.9, 0.06), "Planks", color=wood)
+    k.box(
+        g,
+        (0.0, -D / 2 + 0.03, 0.43),
+        (L - 0.2, 0.04, 0.8),
+        "Planks",
+        grain=True,
+        color=wood,
+    )
+    # Awning: linen or dyed cloth, overhanging the customers.
+    cloth = pick(rng, CLOTH_TINTS)
+    k.slab(
+        g,
+        [
+            (-L / 2 - 0.1, -D / 2 - 0.55, 1.95),
+            (L / 2 + 0.1, -D / 2 - 0.55, 1.95),
+            (L / 2 + 0.1, D / 2 + 0.1, 2.5),
+            (-L / 2 - 0.1, D / 2 + 0.1, 2.5),
+        ],
+        0.03,
+        "Canvas",
+        color=cloth,
+    )
+    if detail == "high":
+        # Scalloped valance along the front edge.
+        k.box(
+            g,
+            (0.0, -D / 2 - 0.56, 1.8),
+            (L + 0.2, 0.02, 0.28),
+            "Canvas",
+            color=cloth,
+            back=True,
+        )
+    # Goods on the counter: crates of produce, bolts of cloth, baskets, pottery.
+    trade = rng.randrange(4)
+    x = -L / 2 + 0.35
+    while x < L / 2 - 0.3:
+        y = -D / 2 + 0.45 + rng.uniform(-0.12, 0.12)
+        if trade == 0:
+            _crate(g, (x, y, 1.0), (0.5, 0.38, 0.22), rng.uniform(-0.1, 0.1))
+            k.box(
+                g,
+                (x, y, 1.1),
+                (0.44, 0.32, 0.04),
+                "Canvas",
+                color=pick(rng, PRODUCE_TINTS),
+            )
+            x += 0.6
+        elif trade == 1:
+            k.tube(
+                g,
+                (x, y - 0.3, 0.97),
+                (x, y + 0.3, 0.97),
+                0.1,
+                "Canvas",
+                8,
+                color=pick(rng, CLOTH_TINTS),
+            )
+            x += 0.24
+        elif trade == 2:
+            k.cylinder(
+                g,
+                (x, y, 0.89),
+                0.2,
+                0.2,
+                "Thatch",
+                sides=8,
+                radius_top=0.24,
+                color=(0.9, 0.8, 0.6),
+            )
+            k.cylinder(
+                g,
+                (x, y, 1.05),
+                0.2,
+                0.03,
+                "Canvas",
+                sides=8,
+                color=pick(rng, PRODUCE_TINTS),
+            )
+            x += 0.5
+        else:
+            r = rng.uniform(0.1, 0.16)
+            k.cylinder(
+                g,
+                (x, y, 0.89),
+                r,
+                rng.uniform(0.2, 0.34),
+                "Plaster",
+                sides=8,
+                radius_top=r * 0.7,
+                color=POTTERY,
+            )
+            x += 0.38
+    # Stock behind the counter.
+    _barrel(g, -L / 2 + 0.45, D / 2 - 0.4, detail=detail)
+    _crate(
+        g, (L / 2 - 0.45, D / 2 - 0.4, 0.2), (0.55, 0.45, 0.4), rng.uniform(-0.2, 0.2)
+    )
+    return {"height": 2.5, "length": L, "depth": D}
+
+
+def cart(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Two-wheeled cart, unhitched, shafts resting on the ground; hay, barrels or sacks."""
+    bed_l, bed_w, bed_z = 2.3, 1.15, 0.85
+    x0 = 0.55  # bed centre (shafts run towards -x)
+    wood = pick(rng, TIMBER_TINTS)
+    k.box(g, (x0, 0.0, bed_z), (bed_l, bed_w, 0.08), "Planks", color=wood, bottom=True)
+    for sy in (-1, 1):
+        k.box(
+            g,
+            (x0, sy * (bed_w / 2 - 0.03), bed_z + 0.2),
+            (bed_l, 0.05, 0.34),
+            "Planks",
+            color=wood,
+        )
+        # Shafts from under the bed to the ground in front.
+        k.beam(
+            g,
+            (x0 + bed_l / 2 - 0.2, sy * 0.42, bed_z - 0.08),
+            (x0 - bed_l / 2 - 1.9, sy * 0.36, 0.06),
+            0.09,
+            0.09,
+            "Timber",
+            (0.0, 0.0, 1.0),
+            color=TIMBER_TINTS[1],
+        )
+        _wheel(g, x0 + 0.1, sy * (bed_w / 2 + 0.12), 0.62, 0.09, detail)
+    k.box(
+        g,
+        (x0 + bed_l / 2 - 0.03, 0.0, bed_z + 0.2),
+        (0.05, bed_w, 0.34),
+        "Planks",
+        color=wood,
+    )
+    k.tube(
+        g,
+        (x0 + 0.1, -bed_w / 2 - 0.2, 0.62),
+        (x0 + 0.1, bed_w / 2 + 0.2, 0.62),
+        0.05,
+        "Timber",
+        6,
+    )
+    load = rng.randrange(4)
+    top = bed_z + 0.04
+    if load == 0:
+        hay = (0.95, 0.85, 0.6)
+        k.box(
+            g,
+            (x0, 0.0, top + 0.25),
+            (bed_l - 0.1, bed_w + 0.1, 0.5),
+            "Thatch",
+            color=hay,
+        )
+        k.prism_x(
+            g,
+            x0 - bed_l / 2 + 0.1,
+            x0 + bed_l / 2 - 0.2,
+            0.0,
+            top + 0.5,
+            bed_w / 2 + 0.05,
+            0.45,
+            "Thatch",
+            color=hay,
+        )
+    elif load == 1:
+        for bx in (-0.6, 0.1, 0.8):
+            _barrel(g, x0 + bx, rng.uniform(-0.2, 0.2), top, 0.27, 0.75, detail)
+    elif load == 2:
+        for i in range(6):
+            _sack(g, rng, x0 - 0.8 + (i % 3) * 0.75, -0.25 + (i // 3) * 0.5, top)
+    return {"height": 1.9, "length": bed_l + 2.3, "depth": bed_w + 0.5}
+
+
+def barrels(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Heap of barrels and crates against a wall (cellar delivery, cooper's yard)."""
+    L = length or rng.uniform(1.8, 2.6)
+    D = depth or 1.3
+    x = -L / 2 + 0.35
+    while x < L / 2 - 0.3:
+        y = rng.uniform(-0.15, 0.2)
+        if rng.random() < 0.7:
+            _barrel(g, x, y, detail=detail, tint=pick(rng, TIMBER_TINTS[:2]))
+            if rng.random() < 0.3:
+                _barrel(g, x, y, 0.85, detail=detail)
+            x += 0.68
+        else:
+            _crate(g, (x, y, 0.25), (0.6, 0.5, 0.5), rng.uniform(-0.3, 0.3))
+            x += 0.7
+    _lying_barrel(
+        g, (-L / 2 + 0.3, -0.5, 0.3), (-L / 2 + 1.1, -0.45, 0.3), 0.28, detail
+    )
+    return {"height": 1.7, "length": L, "depth": D}
+
+
+def woodpile(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Stacked firewood logs between stakes, with a chopping block."""
+    L = length or rng.uniform(1.8, 2.6)
+    r = 0.11
+    rows = 4 if detail == "high" else 3
+    for row in range(rows):
+        n = 6 - row
+        for i in range(n):
+            y = (i - (n - 1) / 2) * r * 2.0
+            z = r + row * r * 1.75
+            jitter = rng.uniform(-0.08, 0.08)
+            k.tube(
+                g,
+                (-L / 2 + jitter, y, z),
+                (L / 2 + jitter, y, z),
+                r * rng.uniform(0.85, 1.1),
+                "Timber",
+                7,
+                color=pick(rng, TIMBER_TINTS),
+            )
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            k.box(
+                g,
+                (sx * (L / 2 - 0.1), sy * 0.72, 0.45),
+                (0.07, 0.07, 0.9),
+                "Timber",
+                grain=True,
+                color=TIMBER_TINTS[3],
+            )
+    k.cylinder(
+        g, (L / 2 + 0.6, -0.4, 0.0), 0.25, 0.5, "Timber", sides=9, color=TIMBER_TINTS[0]
+    )
+    return {"height": 0.9, "length": L + 0.9, "depth": 1.5}
+
+
 RECIPES = {
     "cottage": cottage,
     "longere": longere,
@@ -2199,6 +2550,10 @@ RECIPES = {
     "hall": market_hall,
     "well": well,
     "windmill": windmill,
+    "stall": market_stall,
+    "cart": cart,
+    "barrels": barrels,
+    "woodpile": woodpile,
 }
 
 

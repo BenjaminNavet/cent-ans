@@ -1,144 +1,286 @@
 class_name StartMenu
 extends Control
 
-## Écran de démarrage (F3) : carte ancienne illustrée en fond (`MenuBackground`, cartouche
-## « Cent Ans »), trois cartes de faction (écu, nom, blason, accroche, objectifs historiques),
-## graine, « Continuer » (sauvegarde la plus récente), « Commencer », « Charger une partie »,
-## « Réglages », « Crédits », « Quitter ». Fondu à l'ouverture, fondu vers l'écran de
-## chargement (`LoadingScreen`) qui construit la carte.
+## Écran titre et menu principal (F3, refait par MM1) : décor 3D vivant (`MenuBackdrop3D` : Paris
+## au crépuscule, l'ost et ses bannières, plans de caméra lents enchaînés en fondu), titre enluminé
+## (`IlluminatedTitle`), colonne de boutons à gauche (Nouvelle partie, Continuer, Charger une
+## partie, Prologue, Codex, Réglages, Crédits, Quitter), légende du plan en bas à droite.
+## « Nouvelle partie » ouvre le choix de faction (`FactionSelect`) en fondu ; « Commencer »
+## passe par l'écran de chargement (`LoadingScreen`). Le prologue (`IntroCards`) est joué une fois
+## au premier lancement, puis depuis le menu. Sans rendu (headless) ou avec `--no-menu-3d` : fond
+## illustré 2D (`MenuBackground`).
 ##
-## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=settings`
-## ou `credits` ouvre la fenêtre correspondante avant la capture ; `--autostart[=fac_x]`
-## démarre directement une campagne (jeu exporté).
+## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=settings`,
+## `credits`, `faction`, `intro` ou `loading` ouvre l'écran correspondant avant la capture ;
+## `--autostart[=fac_x]` démarre directement une campagne (jeu exporté).
 
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
 const FADE_SECONDS := 0.6
+const SWITCH_SECONDS := 0.45
 
-## Textes d'interface (pas des données de jeu) : deux lignes d'accroche par faction jouable.
-const PLAYABLE_FACTIONS := [
-	{
-		"id": "fac_france",
-		"fallback_name": "Royaume de France",
-		"description": "Le plus riche royaume d'Occident, mais un roi contesté et des vassaux turbulents. Défendez la Guyenne, tenez la Flandre et repoussez l'Anglais.",
-	},
-	{
-		"id": "fac_england",
-		"fallback_name": "Royaume d'Angleterre",
-		"description": "Un royaume insulaire aux finances tendues, mais aux archers redoutés. Revendiquez la couronne de France depuis la Guyenne et la Flandre.",
-	},
-	{
-		"id": "fac_burgundy",
-		"fallback_name": "Duché de Bourgogne",
-		"description": "Un duché prospère, vassal du roi de France et son beau-frère. Grandissez dans l'ombre des deux couronnes sans vous faire dévorer.",
-	},
-]
-
-@onready var background: MenuBackground = %Background
-@onready var title_label: Label = %Title
-@onready var subtitle_label: Label = %Subtitle
-@onready var cards: HBoxContainer = %Cards
-@onready var seed_edit: LineEdit = %SeedEdit
-@onready var continue_button: Button = %ContinueButton
-@onready var start_button: Button = %StartButton
-@onready var load_button: Button = %LoadButton
-@onready var settings_button: Button = %SettingsButton
-@onready var credits_button: Button = %CreditsButton
-@onready var quit_button: Button = %QuitButton
-@onready var status_label: Label = %StatusLabel
 @onready var save_load_dialog: SaveLoadDialog = %SaveLoadDialog
 @onready var fade: ColorRect = %Fade
 
-var selected_faction: String = "fac_france"
+var backdrop: Node = null  # MenuBackdrop3D ou MenuBackground
+var faction_select: FactionSelect
+var main_column: Control
+var continue_button: Button
+var new_game_button: Button
+var load_button: Button
+var intro_button: Button
+var codex_button: Button
+var settings_button: Button
+var credits_button: Button
+var quit_button: Button
+var status_label: Label
 var latest_save: Dictionary = {}
-var _card_buttons: Dictionary = {}  # faction_id → Button (toggle)
-var _card_panels: Dictionary = {}  # faction_id → PanelContainer
+## Bouton « Commencer » du choix de faction (les tests et captures y accèdent ici).
+var start_button: Button:
+	get:
+		return faction_select.start_button if faction_select != null else null
+var selected_faction: String:
+	get:
+		return faction_select.selected_faction if faction_select != null else "fac_france"
+
+var _continue_detail: Label
+var _caption: Label
 var _leaving := false
-var _overlay: Control = null  # réglages ou crédits ouverts
+var _overlay: Control = null  # réglages, crédits ou prologue ouverts
 
 
 func _ready() -> void:
-	_build_cards()
-	# Le cartouche de l'illustration porte le titre : le libellé ne sert que sans image.
-	title_label.visible = not background.has_art()
-	# Bandeau parchemin sous les textes posés sur l'illustration (les noms de villes de la carte
-	# ne doivent pas se lire à travers).
-	for label: Label in [subtitle_label, status_label]:
-		_give_backing(label)
-	background.layout_changed.connect(_layout)
-	_layout.call_deferred()
-	start_button.pressed.connect(_on_start)
-	continue_button.pressed.connect(_on_continue)
-	load_button.pressed.connect(func() -> void: save_load_dialog.open_load())
-	settings_button.pressed.connect(open_settings)
-	credits_button.pressed.connect(open_credits)
-	quit_button.pressed.connect(func() -> void: get_tree().quit())
+	_build_backdrop()
+	_build_shading()
+	_build_main_column()
+	_build_caption()
+	if backdrop is MenuBackdrop3D:
+		var scene := backdrop as MenuBackdrop3D
+		if scene.shot_count() > 0:
+			_on_shot_changed(scene.shot_index, str((scene.config.get("shots", [])[scene.shot_index] as Dictionary).get("label", "")))
+	faction_select = FactionSelect.new()
+	faction_select.name = "FactionSelect"
+	faction_select.visible = false
+	add_child(faction_select)
+	faction_select.back_requested.connect(show_main)
+	faction_select.start_requested.connect(_on_start_requested)
+	var facade := get_node_or_null("/root/SimFacade")
+	if facade != null:
+		var pending := str(facade.get("pending_faction"))
+		faction_select.select(pending if pending != "" else "fac_france")
+	move_child(save_load_dialog, -1)
+	move_child(fade, -1)
 	save_load_dialog.load_confirmed.connect(_on_load)
 	save_load_dialog.dialog_closed.connect(_refresh_saves)
-	seed_edit.text = str(SimFacade.pending_seed)
-	_select_faction(SimFacade.pending_faction if _card_buttons.has(SimFacade.pending_faction) else "fac_france")
 	_refresh_saves()
 	var audio := get_node_or_null("/root/AudioDirector")
 	if audio != null:
 		audio.enter_menu()
-	_play_intro()
+	_play_intro_fade()
 	var args := OS.get_cmdline_user_args()
 	# `-- --autostart[=fac_x]` : démarre directement une campagne (tests du jeu exporté, où la
 	# scène ne peut pas être passée en argument) ; les autres options vont à la carte.
 	for arg in args:
 		if arg.begins_with("--autostart"):
 			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
-			if faction != "" and _card_buttons.has(faction):
-				_select_faction(faction)
+			if faction != "":
+				faction_select.select(faction)
 			_autostart.call_deferred()
 			return
+	var staged := false
 	for arg in args:
 		if arg == "--menu-stage=settings":
 			open_settings()
+			staged = true
 		elif arg == "--menu-stage=credits":
 			open_credits()
+			staged = true
+		elif arg == "--menu-stage=faction":
+			show_faction_select(true)
+			staged = true
+		elif arg == "--menu-stage=intro":
+			open_intro()
+			staged = true
 		elif arg == "--menu-stage=loading":
-			_on_start.call_deferred()
+			_on_start_requested.call_deferred(faction_select.selected_faction, 1337, "")
 			return
 	for arg in args:
 		if arg.begins_with("--screenshot="):
 			_screenshot_then_quit(arg.trim_prefix("--screenshot="))
+			staged = true
+	# Premier lancement (sans option de ligne de commande) : le prologue.
+	var settings := get_node_or_null("/root/Settings")
+	if not staged and args.is_empty() and not _headless() and settings != null and not bool(settings.call("get_value", "interface/intro_seen")):
+		settings.call("set_value", "interface/intro_seen", true)
+		open_intro()
+	else:
+		new_game_button.grab_focus.call_deferred()
 
 
-## Le contenu est centré sous le cartouche de l'illustration (s'il y a la place).
-func _layout() -> void:
-	var center: Control = $Center
-	var cartouche := background.cartouche_rect()
-	var content_height: float = ($Center/VBox as Control).get_combined_minimum_size().y
-	var top := 0.0
-	if cartouche.size != Vector2.ZERO and size.y - cartouche.end.y >= content_height + 16.0:
-		top = cartouche.end.y
-	center.offset_top = top
+static func _headless() -> bool:
+	return DisplayServer.get_name() == "headless"
 
 
-func _play_intro() -> void:
-	fade.color.a = 1.0
-	cards.modulate.a = 0.0
+# --- Construction ------------------------------------------------------------------------------
+
+
+func _build_backdrop() -> void:
+	var use_3d := not _headless() and not OS.get_cmdline_user_args().has("--no-menu-3d")
+	if use_3d:
+		var scene := MenuBackdrop3D.new()
+		scene.name = "Backdrop3D"
+		add_child(scene)
+		move_child(scene, 0)
+		scene.shot_changed.connect(_on_shot_changed)
+		backdrop = scene
+	else:
+		var flat := MenuBackground.new()
+		flat.name = "Background"
+		flat.dim = 0.25
+		add_child(flat)
+		move_child(flat, 0)
+		backdrop = flat
+
+
+## Dégradé sombre à gauche (lisibilité de la colonne), vignette en bas.
+func _build_shading() -> void:
+	var left := TextureRect.new()
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(0.02, 0.015, 0.01, 0.82))
+	gradient.set_color(1, Color(0.02, 0.015, 0.01, 0.0))
+	gradient.add_point(0.55, Color(0.02, 0.015, 0.01, 0.45))
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill_from = Vector2(0, 0)
+	texture.fill_to = Vector2(1, 0)
+	texture.width = 256
+	texture.height = 4
+	left.texture = texture
+	left.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	left.stretch_mode = TextureRect.STRETCH_SCALE
+	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	left.anchor_right = 0.55
+	left.anchor_bottom = 1.0
+	add_child(left)
+	var bottom := TextureRect.new()
+	var bottom_gradient := Gradient.new()
+	bottom_gradient.set_color(0, Color(0, 0, 0, 0.0))
+	bottom_gradient.set_color(1, Color(0.02, 0.015, 0.01, 0.6))
+	var bottom_texture := GradientTexture2D.new()
+	bottom_texture.gradient = bottom_gradient
+	bottom_texture.fill_from = Vector2(0, 0)
+	bottom_texture.fill_to = Vector2(0, 1)
+	bottom_texture.width = 4
+	bottom_texture.height = 128
+	bottom.texture = bottom_texture
+	bottom.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bottom.stretch_mode = TextureRect.STRETCH_SCALE
+	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bottom.anchor_top = 0.78
+	bottom.anchor_right = 1.0
+	bottom.anchor_bottom = 1.0
+	add_child(bottom)
+
+
+func _build_main_column() -> void:
+	main_column = MarginContainer.new()
+	main_column.name = "MainColumn"
+	main_column.anchor_bottom = 1.0
+	main_column.offset_right = 640
+	main_column.add_theme_constant_override("margin_left", 84)
+	main_column.add_theme_constant_override("margin_top", 64)
+	main_column.add_theme_constant_override("margin_bottom", 40)
+	add_child(main_column)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6)
+	main_column.add_child(column)
+	column.add_child(IlluminatedTitle.new())
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 44)
+	column.add_child(gap)
+
+	new_game_button = _menu_button(column, "Nouvelle partie", func() -> void: show_faction_select())
+	continue_button = _menu_button(column, "Continuer", _on_continue)
+	_continue_detail = FrontEndStyle.label("", 16, Color(0.85, 0.78, 0.62), FrontEndStyle.body_italic(), 4)
+	var detail_margin := MarginContainer.new()
+	detail_margin.add_theme_constant_override("margin_left", 25)
+	detail_margin.add_theme_constant_override("margin_top", -8)
+	detail_margin.add_child(_continue_detail)
+	column.add_child(detail_margin)
+	load_button = _menu_button(column, "Charger une partie", func() -> void: save_load_dialog.open_load())
+	intro_button = _menu_button(column, "Prologue : 1328-1337", open_intro)
+	codex_button = _menu_button(column, "Codex", open_codex)
+	settings_button = _menu_button(column, "Réglages", open_settings)
+	credits_button = _menu_button(column, "Crédits", open_credits)
+	quit_button = _menu_button(column, "Quitter", func() -> void: get_tree().quit())
+
+	status_label = FrontEndStyle.label("", 15, Color(1.0, 0.75, 0.6), FrontEndStyle.body_italic(), 4)
+	column.add_child(status_label)
+
+
+func _menu_button(parent: Control, text: String, action: Callable) -> Button:
+	var button := Button.new()
+	button.text = text
+	FrontEndStyle.style_menu_button(button)
+	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	button.custom_minimum_size = Vector2(360, 0)
+	button.pressed.connect(action)
+	parent.add_child(button)
+	return button
+
+
+func _build_caption() -> void:
+	_caption = FrontEndStyle.label("", 18, Color(0.92, 0.86, 0.72), FrontEndStyle.title_italic(), 5)
+	_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_caption.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	_caption.offset_left = -620
+	_caption.offset_top = -52
+	_caption.offset_right = -36
+	_caption.offset_bottom = -22
+	_caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_caption)
+
+
+func _on_shot_changed(_index: int, label: String) -> void:
+	if _caption == null:
+		return
 	var tween := create_tween()
-	tween.tween_property(fade, "color:a", 0.0, FADE_SECONDS)
-	tween.tween_property(cards, "modulate:a", 1.0, FADE_SECONDS * 0.8)
+	tween.tween_property(_caption, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(func() -> void: _caption.text = "%s — printemps 1337" % label if label != "" else "")
+	tween.tween_property(_caption, "modulate:a", 1.0, 1.2)
+
+
+func _play_intro_fade() -> void:
+	fade.color.a = 1.0
+	main_column.modulate.a = 0.0
+	var tween := create_tween()
+	tween.tween_property(fade, "color:a", 0.0, FADE_SECONDS * 1.5)
+	tween.tween_property(main_column, "modulate:a", 1.0, FADE_SECONDS)
 
 
 func _refresh_saves() -> void:
 	latest_save = SaveSlots.latest()
 	continue_button.visible = not latest_save.is_empty()
+	_continue_detail.get_parent().visible = not latest_save.is_empty()
 	if not latest_save.is_empty():
-		continue_button.tooltip_text = "%s — %s, %s" % [latest_save.get("label", ""), SimFacade.faction_short_name(str(latest_save.get("faction", ""))), latest_save.get("date", "")]
+		var facade := get_node_or_null("/root/SimFacade")
+		var faction := str(facade.call("faction_short_name", str(latest_save.get("faction", "")))) if facade != null else ""
+		_continue_detail.text = "%s — %s" % [faction, latest_save.get("date", "")]
+		continue_button.tooltip_text = str(latest_save.get("label", ""))
 	# Audit A3 M3 : plus de ligne de débogage ; un message seulement si le jeu est incomplet.
-	status_label.text = "" if SimFacade.store_loaded() else "Données de jeu introuvables : le jeu est incomplet, réinstallez-le."
+	var facade_node := get_node_or_null("/root/SimFacade")
+	var loaded: bool = facade_node != null and bool(facade_node.call("store_loaded"))
+	status_label.text = "" if loaded else "Données de jeu introuvables : le jeu est incomplet, réinstallez-le."
 	status_label.visible = status_label.text != ""
 
 
-## Capture de l'écran de démarrage (`-- --screenshot=<chemin.png>`) puis sortie.
+## Capture de l'écran (`-- --screenshot=<chemin.png>`) puis sortie.
 func _screenshot_then_quit(path: String) -> void:
-	for _i in 60:
+	for _i in 90:
 		await get_tree().process_frame
-	# Audit A3 M1 : la capture tombait au milieu du fondu d'ouverture (cartes à demi transparentes).
-	while fade.color.a > 0.01 or cards.modulate.a < 0.99:
+	# Audit A3 M1 : la capture ne doit pas tomber au milieu d'un fondu.
+	while fade.color.a > 0.01 or (main_column.visible and main_column.modulate.a < 0.99) or (faction_select.visible and faction_select.modulate.a < 0.99):
+		await get_tree().process_frame
+	for _i in 30:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var image := get_viewport().get_texture().get_image()
@@ -148,106 +290,38 @@ func _screenshot_then_quit(path: String) -> void:
 	get_tree().quit(0 if err == OK else 1)
 
 
-func _build_cards() -> void:
-	for child in cards.get_children():
-		child.queue_free()
-	_card_buttons.clear()
-	_card_panels.clear()
-	var group := ButtonGroup.new()
-	for entry in PLAYABLE_FACTIONS:
-		var faction_id: String = entry["id"]
-		var info := SimFacade.faction_info(faction_id)
-		var panel := PanelContainer.new()
-		panel.custom_minimum_size = Vector2(320, 330)
-		var vbox := VBoxContainer.new()
-		vbox.add_theme_constant_override("separation", 6)
-		panel.add_child(vbox)
-
-		var swatch := ColorRect.new()
-		swatch.custom_minimum_size = Vector2(0, 8)
-		swatch.color = info.get("color", Color(0.5, 0.5, 0.5))
-		vbox.add_child(swatch)
-
-		var header := HBoxContainer.new()
-		header.add_theme_constant_override("separation", 10)
-		vbox.add_child(header)
-		# Écu procédural de la faction (M10 assets), à gauche du nom.
-		var shield_texture := PortraitLoader.heraldry_texture(faction_id)
-		if shield_texture != null:
-			var shield := TextureRect.new()
-			shield.texture = shield_texture
-			shield.custom_minimum_size = Vector2(80, 92)
-			shield.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			shield.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			header.add_child(shield)
-		var names := VBoxContainer.new()
-		names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		names.alignment = BoxContainer.ALIGNMENT_CENTER
-		header.add_child(names)
-		var name_label := Label.new()
-		name_label.text = str(info.get("name", entry["fallback_name"])) if SimFacade.store_loaded() else entry["fallback_name"]
-		name_label.add_theme_font_size_override("font_size", 22)
-		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		names.add_child(name_label)
-		var blazon := Label.new()
-		var blazon_text := str(info.get("blazon", ""))
-		blazon.text = blazon_text if blazon_text != "" else "Blason inconnu"
-		blazon.add_theme_font_size_override("font_size", 13)
-		blazon.add_theme_color_override("font_color", Color(0.40, 0.28, 0.14))
-		blazon.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		names.add_child(blazon)
-
-		var description := Label.new()
-		description.text = entry["description"]
-		description.add_theme_font_size_override("font_size", 15)
-		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		vbox.add_child(description)
-
-		# M10 : objectifs historiques de la faction (résumé des données).
-		var summary := str(info.get("victory_summary", ""))
-		if summary != "":
-			var objectives := Label.new()
-			objectives.text = "Objectifs (avant %d) : %s" % [int(info.get("victory_end_year", 0)), summary]
-			objectives.add_theme_font_size_override("font_size", 14)
-			objectives.add_theme_color_override("font_color", Color(0.45, 0.12, 0.08))
-			objectives.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			objectives.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			vbox.add_child(objectives)
-		else:
-			description.size_flags_vertical = Control.SIZE_EXPAND_FILL
-
-		var choose := Button.new()
-		choose.text = "Choisir"
-		choose.toggle_mode = true
-		choose.button_group = group
-		choose.pressed.connect(func() -> void: _select_faction(faction_id))
-		vbox.add_child(choose)
-		panel.gui_input.connect(func(event: InputEvent) -> void:
-			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-				_select_faction(faction_id)
-				if event.double_click:
-					_on_start())
-
-		cards.add_child(panel)
-		_card_buttons[faction_id] = choose
-		_card_panels[faction_id] = panel
-
-
-func _select_faction(faction_id: String) -> void:
-	selected_faction = faction_id
-	for id in _card_buttons:
-		_card_buttons[id].button_pressed = id == faction_id
-		_card_buttons[id].text = "Choisie" if id == faction_id else "Choisir"
-		_card_panels[id].modulate = Color(1, 1, 1, 1) if id == faction_id else Color(0.84, 0.82, 0.78, 1)
-		_card_panels[id].scale = Vector2.ONE
-	start_button.text = "Commencer — %s" % SimFacade.faction_short_name(faction_id)
-
-
 func card_count() -> int:
-	return _card_panels.size()
+	return faction_select.card_count() if faction_select != null else 0
 
 
-# --- Fenêtres ---------------------------------------------------------------------
+# --- Écrans ------------------------------------------------------------------------------------
+
+
+func show_faction_select(immediate: bool = false) -> void:
+	_switch(main_column, faction_select, immediate)
+	_caption.visible = false
+	faction_select.start_button.grab_focus.call_deferred()
+
+
+func show_main() -> void:
+	_switch(faction_select, main_column, false)
+	_caption.visible = true
+	new_game_button.grab_focus.call_deferred()
+
+
+func _switch(from: Control, to: Control, immediate: bool) -> void:
+	if immediate:
+		from.visible = false
+		to.visible = true
+		to.modulate.a = 1.0
+		return
+	var tween := create_tween()
+	tween.tween_property(from, "modulate:a", 0.0, SWITCH_SECONDS * 0.6)
+	tween.tween_callback(func() -> void:
+		from.visible = false
+		to.modulate.a = 0.0
+		to.visible = true)
+	tween.tween_property(to, "modulate:a", 1.0, SWITCH_SECONDS)
 
 
 func open_settings() -> void:
@@ -258,34 +332,54 @@ func open_credits() -> void:
 	_open_overlay((load("res://scenes/ui/credits_screen.tscn") as PackedScene).instantiate())
 
 
-func _open_overlay(overlay: Control) -> void:
+func open_intro() -> void:
+	var intro := IntroCards.new()
+	intro.finished.connect(func() -> void:
+		_overlay = null
+		new_game_button.grab_focus.call_deferred())
+	_open_overlay(intro, false)
+
+
+func open_codex() -> void:
+	var bubbles := get_node_or_null("/root/CodexBubbles")
+	if bubbles != null:
+		bubbles.call("open_entry", "")
+
+
+func _open_overlay(overlay: Control, closable: bool = true) -> void:
 	if _overlay != null and is_instance_valid(_overlay):
 		_overlay.queue_free()
 	_overlay = overlay
-	overlay.connect("closed", func() -> void: _overlay = null)
+	if closable:
+		overlay.connect("closed", func() -> void: _overlay = null)
 	add_child(overlay)
+	move_child(fade, -1)
 
 
 func overlay_open() -> bool:
 	return _overlay != null and is_instance_valid(_overlay)
 
 
-# --- Départ -----------------------------------------------------------------------
+# --- Départ ------------------------------------------------------------------------------------
 
 
-func _on_start() -> void:
-	SimFacade.pending_faction = selected_faction
-	SimFacade.pending_seed = int(seed_edit.text) if seed_edit.text.is_valid_int() else seed_edit.text.hash()
-	SimFacade.pending_load_path = ""
+func _on_start_requested(faction_id: String, seed_value: int, _start_date: String) -> void:
+	var facade := get_node_or_null("/root/SimFacade")
+	if facade != null:
+		facade.set("pending_faction", faction_id)
+		facade.set("pending_seed", seed_value)
+		facade.set("pending_load_path", "")
 	_leave()
 
 
 ## Démarrage direct (jeu exporté, tests) : pas de fondu ni d'écran de chargement, pour que les
 ## captures `--screenshot` de la carte gardent leur délai habituel.
 func _autostart() -> void:
-	SimFacade.pending_faction = selected_faction
-	SimFacade.pending_seed = int(seed_edit.text) if seed_edit.text.is_valid_int() else seed_edit.text.hash()
-	SimFacade.pending_load_path = ""
+	var facade := get_node_or_null("/root/SimFacade")
+	if facade != null:
+		facade.set("pending_faction", faction_select.selected_faction)
+		facade.set("pending_seed", faction_select.seed_value())
+		facade.set("pending_load_path", "")
 	get_tree().change_scene_to_file(CAMPAIGN_SCENE)
 
 
@@ -296,7 +390,9 @@ func _on_continue() -> void:
 
 
 func _on_load(path: String) -> void:
-	SimFacade.pending_load_path = path
+	var facade := get_node_or_null("/root/SimFacade")
+	if facade != null:
+		facade.set("pending_load_path", path)
 	_leave()
 
 
@@ -306,18 +402,9 @@ func _leave() -> void:
 		return
 	_leaving = true
 	var tween := create_tween()
-	tween.tween_property(fade, "color:a", 1.0, FADE_SECONDS * 0.6)
+	tween.tween_property(fade, "color:a", 1.0, FADE_SECONDS * 0.8)
+	var audio := get_node_or_null("/root/AudioDirector")
+	if audio != null and audio.has_method("duck_music"):
+		audio.call("duck_music", -8.0, FADE_SECONDS)
 	await tween.finished
 	LoadingScreen.start(get_tree(), CAMPAIGN_SCENE)
-
-
-func _give_backing(label: Label) -> void:
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.93, 0.87, 0.74, 0.88)
-	box.set_corner_radius_all(4)
-	box.content_margin_left = 14
-	box.content_margin_right = 14
-	box.content_margin_top = 3
-	box.content_margin_bottom = 3
-	label.add_theme_stylebox_override("normal", box)
-	label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
