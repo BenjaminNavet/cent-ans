@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_charge",
+  "title": "La charge et le choc",
+  "category": "mecanique",
+  "aliases": [
+    "charge",
+    "charges",
+    "charge de cavalerie",
+    "chargent",
+    "choc"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "La charge de la chevalerie, lance couchée, est l'arme reine de l'ost féodal : lancée au bon moment sur un ennemi désuni, elle renverse tout. Mais des piques, des pieux, une haie ou un fossé la brisent net, et les chevaux s'y empalent.",
+  "body": "Au XIVe siècle, le chevalier charge la lance couchée sous le bras, calée contre l'arrêt de cuirasse, et c'est toute la masse du cheval lancé au galop qui frappe. Contre des piétons désunis ou des cavaliers mal rangés, l'effet est dévastateur : à Cassel (1328) comme à [[cdx_roosebeke|Roosebeke]] (1382), la chevalerie française écrase les milices flamandes une fois leur front entamé.\n\nMais la charge ne vaut que sur un terrain ferme et contre un adversaire qui s'ouvre. À Courtrai (1302), les chevaliers s'enlisent dans les fossés et se font tuer par les piétons flamands. À [[cdx_crecy|Crécy]], les charges françaises successives, montant une pente sous les flèches, se brisent avant d'atteindre la ligne anglaise ; à [[cdx_azincourt|Azincourt]], les cavaliers des ailes, criblés de traits, se heurtent aux pieux des archers et refluent en désordre dans leur propre infanterie.\n\nD'où l'habitude, dès le milieu du XIVe siècle, de faire combattre à pied la plupart des [[cdx_hommes_d_armes|hommes d'armes]] (voir [[cdx_jeu_pied_a_terre|pied à terre]]) et de réserver la charge montée aux ailes, à la poursuite ou au coup de grâce.",
+  "gameplay": "Un régiment lancé au pas de course sur une cible entre en charge à moins de 120 m s'il est monté (40 m à pied, jamais pour les tireurs) ; les cavaliers qui chargent vont 2,5 fois plus vite qu'au pas. Au contact, pendant 4 secondes, ses coups sont multipliés par 1 + charge/100 (statistique de charge), ×1,5 avec la lance de chevalerie, ×1,2 en [[cdx_jeu_formations|coin]], plus le bonus de charge du [[cdx_jeu_general|général]] : des chevaliers (charge 90) frappent 2,35 fois plus fort en ligne, 2,62 fois en coin.\n\nLe choc des chevaux renverse des hommes, qui ne combattent plus pendant 3 secondes (jusqu'à 60 % du régiment chargé, 1,5 homme par cavalier au plus ; davantage sur des tireurs, sur des hommes peu armés et de flanc ou de dos), et coûte à la cible 8 points de [[cdx_jeu_moral|moral]] de face, 15 de flanc ou de dos. Un schiltron ne se laisse ni renverser ni ébranler.\n\nLa charge se brise : sur les [[cdx_jeu_pieux|pieux]] plantés par des archers (charge de face : 12 % des cavaliers tués, −15 de moral), sur les piques de piquiers pris de face ou en schiltron (8 % tués, −10 de moral), à travers une haie, un fossé ou dans un village (−5 de moral) ; elle n'a alors aucun effet de choc. Conseil : chargez de flanc ou de dos, des tireurs à découvert ou un régiment déjà engagé, jamais un front de piques.",
+  "see_also": ["cdx_jeu_formations", "cdx_jeu_pieux", "cdx_jeu_flancs", "cdx_jeu_melee", "cdx_jeu_pied_a_terre", "cdx_chevalerie", "cdx_roosebeke"],
+  "sources": ["Charge de cavalerie", "Bataille de Courtrai", "Bataille de Crécy", "Bataille de Cassel (1328)"]
+}

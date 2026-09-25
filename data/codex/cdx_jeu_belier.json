@@ -1,0 +1,18 @@
+{
+  "id": "cdx_jeu_belier",
+  "title": "Le bélier et la porte",
+  "category": "mecanique",
+  "aliases": [
+    "bélier",
+    "béliers",
+    "coups du bélier",
+    "porte enfoncée",
+    "la porte cède"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "La porte est le point faible de l'enceinte, et le mieux gardé. Sous un toit couvert de peaux mouillées, une poutre ferrée suspendue à des chaînes la bat coup après coup, pendant que les défenseurs l'accablent d'en haut.",
+  "body": "Le bélier est la plus ancienne des machines de siège : une lourde poutre à tête de fer, suspendue dans un abri roulant (le « chat » ou la « truie »), que les servants balancent contre la porte ou contre le pied d'un mur. Le toit, couvert de cuirs frais ou de peaux mouillées, protège les hommes des pierres et du feu.\n\nAu XIVe siècle, les portes des villes et des châteaux sont devenues de petites forteresses : barbacane en avant, pont-levis sur le fossé, herse de fer, vantaux doublés, assommoirs et mâchicoulis au-dessus du passage. Amener un bélier jusqu'aux vantaux demande de combler le fossé sous le tir. Les assiégeants préfèrent souvent mettre le feu à la porte, la faire sauter à la mine ou entrer par surprise : en février 1437, les Anglais s'emparent de Pontoise en traversant les fossés gelés, vêtus de blanc pour se confondre avec la neige.\n\nUne porte enfoncée n'ouvre pas toujours la ville : derrière, les défenseurs barricadent le passage, et la bataille continue dans les rues jusqu'à la place.",
+  "gameplay": "Chaque armée assiégeante reçoit en bataille de siège un bélier, régiment de 12 servants qui n'existe que pour la bataille (armure 75). Au contact de la porte, il frappe un coup toutes les 3 secondes, pour 4 points de solidité par seconde à plein effectif (moins s'il a perdu des servants) : une porte de fortification 1 (500 points) cède en un peu plus de 2 minutes, de fortification 2 (750) en un peu plus de 3 (« La porte cède sous les coups du bélier ! »). Sous son toit, il ne reçoit que 10 % des traits, jamais ceux des tours, et ne ressent ses pertes qu'à 30 %.\n\nTant qu'un défenseur garde la porte de l'intérieur, l'[[cdx_jeu_huile_bouillante|huile]] tombe des mâchicoulis toutes les 30 secondes (un demi-servant ébouillanté par coup). La porte peut aussi brûler (voir [[cdx_jeu_incendies|incendies]]) ou voler en éclats sous les [[cdx_jeu_engins_siege|engins]]. Une fois enfoncée, elle est une ouverture que l'infanterie emprunte, et la garnison la bouche avec deux régiments (voir [[cdx_jeu_assaut|assaut]]). Conseil : couvrez le bélier par vos archers, qui tiennent les défenseurs de la porte sous leur tir.",
+  "see_also": ["cdx_jeu_assaut", "cdx_jeu_huile_bouillante", "cdx_jeu_murailles", "cdx_jeu_incendies", "cdx_jeu_engins_siege"],
+  "sources": ["Bélier (arme)", "Herse (fortification)", "Pontoise"]
+}
