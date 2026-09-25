@@ -637,6 +637,54 @@ impl BattleSim {
         }
     }
 
+    /// L3 (ADR 0026): the besieged town drawn from a landmark plan, `{id,
+    /// name, gate_name, gatehouses: [{name, at: Vector2}], streets:
+    /// [PackedVector2Array], quay: [piece index], plan_scale}`; empty for the
+    /// generic town or a field battle.
+    #[func]
+    fn get_siege_landmark(&self) -> VarDictionary {
+        let Some(landmark) = self
+            .sim
+            .as_ref()
+            .and_then(|s| s.siege())
+            .and_then(|w| w.landmark.as_ref())
+        else {
+            return VarDictionary::new();
+        };
+        let v2 = |p: (f64, f64)| Vector2::new(p.0 as f32, p.1 as f32);
+        let gatehouses: VarArray = landmark
+            .gatehouses
+            .iter()
+            .map(|(name, x, z)| {
+                vdict! { "name" => name.as_str(), "at" => v2((*x, *z)) }.to_variant()
+            })
+            .collect();
+        let streets: VarArray = landmark
+            .streets
+            .iter()
+            .map(|s| {
+                s.iter()
+                    .map(|&p| v2(p))
+                    .collect::<PackedVector2Array>()
+                    .to_variant()
+            })
+            .collect();
+        let quay: VarArray = landmark
+            .quay
+            .iter()
+            .map(|&i| (i as i64).to_variant())
+            .collect();
+        vdict! {
+            "id" => landmark.id.as_str(),
+            "name" => landmark.name.as_str(),
+            "gate_name" => landmark.gate_name.as_str(),
+            "gatehouses" => &gatehouses,
+            "streets" => &streets,
+            "quay" => &quay,
+            "plan_scale" => landmark.plan_scale,
+        }
+    }
+
     /// Debug (tests, captures, S2): sets house `house` on fire, or the gate
     /// when `house` < 0; `false` when it already burns or is not a siege.
     #[func]
