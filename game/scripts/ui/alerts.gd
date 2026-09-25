@@ -129,7 +129,7 @@ static func ransom_alerts(sim: Object) -> Array:
 			"id": "ransom_due:%s" % str(debt.get("character", "")), "kind": "ransom", "glyph": style["glyph"],
 			"severity": "danger" if int(debt.get("missed", 0)) > 0 else "warning",
 			"text": "Échéance de rançon : %s dus à %s" % [Money.amount(int(debt.get("installment", 0))), _faction_name(str(debt.get("creditor", "")))],
-			"tooltip": "Rançon de %s, reste %s. Sans trésor suffisant, la dette grossit de 10 %%." % [str(debt.get("name", "")), Money.amount(int(debt.get("remaining", 0)))],
+			"tooltip": "Rançon de %s, reste %s. Sans trésor suffisant, la dette grossit de %s %%." % [str(debt.get("name", "")), Money.amount(int(debt.get("remaining", 0))), RuleValues.text("ransom_default_surcharge_percent")],
 		})
 	return result
 
