@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/voice_barks.schema.json",
+  "title": "Répliques d'unités en bataille",
+  "description": "Fichier data/voice/barks.json (lot VO1) lu par game/scripts/audio/battle_voices.gd et par tools/cent_ans_tools/voice_tts.py (synthèse). Chaque réplique est jouée depuis game/assets/audio/voice/barks/<id>.ogg. Rendu seulement : aucun effet de règle.",
+  "type": "object",
+  "$defs": {
+    "language_key": { "type": "string", "enum": ["fr", "en", "an", "oc", "nl", "cy", "sco"] },
+    "situation_key": { "type": "string", "enum": ["select", "move", "attack", "charge", "rout", "victory", "general_down"] },
+    "line": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z]+_[a-z]+_[0-9]{2}$" },
+        "text": { "type": "string", "minLength": 1, "maxLength": 80, "description": "Texte prononcé (langue de la réplique)." },
+        "fr": { "type": "string", "minLength": 1, "description": "Traduction française (répliques en langue étrangère)." },
+        "category": { "type": "string", "enum": ["infantry", "ranged", "cavalry"], "description": "Réservée à cette catégorie d'unité." }
+      },
+      "required": ["id", "text"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "global_gap_s": { "type": "number", "minimum": 0, "description": "Écart minimal entre deux répliques, toutes situations confondues (s)." },
+    "situations": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/situation_key" },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "priority": { "type": "integer", "minimum": 0, "maximum": 10 },
+          "cooldown_s": { "type": "number", "minimum": 0 },
+          "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+          "spatial": { "type": "boolean", "description": "Jouée en 3D à la position du régiment (BattleAudio) plutôt qu'en 2D." },
+          "tone": { "type": "string", "description": "Consigne de ton ajoutée aux instructions de synthèse." }
+        },
+        "required": ["priority", "cooldown_s", "chance", "spatial", "tone"],
+        "additionalProperties": false
+      }
+    },
+    "languages": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/language_key" },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "voices": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "instructions": { "type": "string", "minLength": 1 }
+        },
+        "required": ["voices", "instructions"],
+        "additionalProperties": false
+      }
+    },
+    "faction_language": { "type": "object", "additionalProperties": { "$ref": "#/$defs/language_key" }, "required": ["default"] },
+    "noble_language": { "type": "object", "additionalProperties": { "$ref": "#/$defs/language_key" } },
+    "noble_units": { "type": "array", "items": { "type": "string", "pattern": "^unit_" } },
+    "unit_language": { "type": "object", "additionalProperties": { "$ref": "#/$defs/language_key" } },
+    "fallback_language": { "type": "object", "additionalProperties": { "$ref": "#/$defs/language_key" } },
+    "lines": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/language_key" },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": { "$ref": "#/$defs/situation_key" },
+        "additionalProperties": { "type": "array", "items": { "$ref": "#/$defs/line" }, "minItems": 1 }
+      }
+    }
+  },
+  "required": ["version", "global_gap_s", "situations", "languages", "faction_language", "lines"],
+  "additionalProperties": false
+}

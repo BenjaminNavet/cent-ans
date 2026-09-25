@@ -76,6 +76,9 @@ func _ready() -> void:
 	if audio != null:
 		audio.enter_menu()
 	_play_intro_fade()
+	# RL1 : `-- --journey` (parcours de vérification du jeu exporté, `scripts/dev/release_journey.gd`).
+	if ReleaseJourney.maybe_start(get_tree()):
+		return
 	var args := OS.get_cmdline_user_args()
 	# `-- --autostart[=fac_x]` : démarre directement une campagne (tests du jeu exporté, où la
 	# scène ne peut pas être passée en argument) ; les autres options vont à la carte.

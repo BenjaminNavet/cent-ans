@@ -822,6 +822,14 @@ fn article_value(
         }
         Article::TradeAgreement => {
             reasons.push(("Commerce".to_owned(), 6));
+            // C5: the agreement raises the routes linking our marketplaces.
+            let routes = crate::trade::common_routes(state, data, proposer, recipient) as i32;
+            if routes > 0 {
+                reasons.push((
+                    "Routes commerciales communes".to_owned(),
+                    (4 * routes).min(12),
+                ));
+            }
             let partner = state.factions[proposer].income_last_turn.max(0);
             reasons.push((
                 "Richesse du partenaire".to_owned(),
@@ -1667,19 +1675,6 @@ pub fn pretender_ready(state: &CampaignState, data: &GameData, faction: &Faction
         && ruler_free
         && me.treasury > 0
         && me.treasury >= me.upkeep_last_turn.max(0)
-}
-
-/// Income factor of the trade agreements of `faction` (+2 % each, +8 %
-/// at most).
-pub fn trade_income_factor(state: &CampaignState, faction: &FactionId) -> f64 {
-    let count = state.factions.get(faction).map_or(0, |f| {
-        f.ledger
-            .trade_agreements
-            .iter()
-            .filter(|o| state.factions.get(*o).is_some_and(|x| x.alive))
-            .count()
-    });
-    1.0 + (0.02 * count as f64).min(0.08)
 }
 
 /// Does `owner` let `army_faction`'s armies cross its lands?

@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/province_panel.tscn" id="10_panel"]
 [ext_resource type="Script" path="res://scripts/map/army_markers.gd" id="11_armies"]
 [ext_resource type="Script" path="res://scripts/map/path_preview.gd" id="12_path"]
+[ext_resource type="Script" path="res://scripts/map/trade_route_layer.gd" id="12b_trade"]
 [ext_resource type="PackedScene" path="res://scenes/ui/army_strip.tscn" id="21_army_strip"]
 [ext_resource type="PackedScene" path="res://scenes/ui/general_seal.tscn" id="22_general_seal"]
 [ext_resource type="PackedScene" path="res://scenes/ui/end_turn_cluster.tscn" id="23_end_turn_cluster"]
@@ -140,6 +141,9 @@ script = ExtResource("6_cities")
 [node name="PathPreview" type="MeshInstance3D" parent="."]
 script = ExtResource("12_path")
 
+[node name="TradeRouteLayer" type="MeshInstance3D" parent="."]
+script = ExtResource("12b_trade")
+
 [node name="Armies" type="Node3D" parent="."]
 script = ExtResource("11_armies")
 
@@ -226,6 +230,14 @@ layout_mode = 2
 tooltip_text = "Technologies (T)"
 theme_override_font_sizes/font_size = 15
 text = "Technologies"
+
+[node name="TradeButton" type="Button" parent="UI/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+tooltip_text = "Routes commerciales (R)"
+theme_override_font_sizes/font_size = 15
+text = "Commerce"
 
 [node name="ResearchBox" type="VBoxContainer" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true

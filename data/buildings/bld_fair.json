@@ -4,8 +4,8 @@
     "display": "Foire"
   },
   "category": "commerce",
-  "tier": 2,
-  "upgrades_from": "bld_market",
+  "tier": 3,
+  "upgrades_from": "bld_guild_hall",
   "cost": {
     "money": 1200
   },

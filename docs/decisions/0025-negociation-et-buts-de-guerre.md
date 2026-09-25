@@ -45,7 +45,7 @@ lisible, légende coupée : défauts D1, C11 et U14).
    Bordeaux). Un prétendant au trône part en guerre à crédit (une saison d'entretien en caisse
    au lieu de deux) et tolère un front secondaire deux fois plus lourd (Édouard III et les
    Écossais).
-6. **Accords** : un accord commercial vaut +2 % de revenu (+8 % au plus), l'accès militaire
+6. **Accords** : un accord commercial relève de 30 % les routes de C5 entre les signataires (ADR 0012 ; +2 % de revenu à l'origine), l'accès militaire
    ravitaille nos armées sur les terres de l'autre (`is_friendly_territory`), le tribut est
    versé chaque saison, l'otage est tenu captif 40 saisons ; une guerre rompt tout, et l'otage
    trahi laisse un malus de confiance.
@@ -86,4 +86,6 @@ Normandie cédés à l'Angleterre ; la France rachète la paix contre or et trib
   les mêmes traités.
 - Le commerce de C5 (`Proposal::TradeAgreement`, `integration/tw`) n'est pas sur main : l'accord
   commercial de DP1 est autonome (`DiplomaticLedger::trade_agreements`). À la fusion de C5, il
-  faudra faire de la clause `trade_agreement` l'accord de C5.
+  faudra faire de la clause `trade_agreement` l'accord de C5. **Fait (C5R, 25/09)** : la clause est
+  l'accord de C5 et le +2 % forfaitaire est remplacé par le revenu des routes, voir ADR 0012 §
+  « Unification avec DP1 ».

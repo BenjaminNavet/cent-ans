@@ -136,6 +136,10 @@ def clip_specs():
         ("c_bow_idle", "Idle", "Idle", poses.ride_bow_rest, False, None),
         ("c_bow_walk", "Walk", "Idle", poses.ride_bow_rest, False, None),
         ("c_bow_shoot", "Idle", "Idle", poses.ride_bow_shoot, False, 60),
+        # UR2: jinetes throw javelins rather than shoot a bow (skirmish ability).
+        ("c_javelin_idle", "Idle", "Idle", poses.ride_javelin_rest, False, None),
+        ("c_javelin_walk", "Walk", "Idle", poses.ride_javelin_rest, False, None),
+        ("c_javelin_throw", "Idle", "Idle", poses.ride_javelin_throw, False, 30),
         ("c_death", "Death", "Death", poses.ride_death, False, 30),
         ("c_death_m", "Death", "Death", poses.ride_death, True, 30),
         ("c_fall", "Idle_HitReact_Right", "Death", poses.ride_fall, False, 30),
@@ -184,7 +188,16 @@ def bake_cavalry_rig():
             clip,
             start,
             clip
-            in ("c_idle", "c_walk", "c_gallop", "c_charge", "c_bow_idle", "c_bow_walk"),
+            in (
+                "c_idle",
+                "c_walk",
+                "c_gallop",
+                "c_charge",
+                "c_bow_idle",
+                "c_bow_walk",
+                "c_javelin_idle",
+                "c_javelin_walk",
+            ),
         )
     rig.write()
     return rig

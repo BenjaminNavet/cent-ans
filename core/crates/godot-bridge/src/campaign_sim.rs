@@ -896,6 +896,8 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "tax_rate" => tax_rate_key(economy.tax_rate),
         "goods" => &goods,
         "goods_categories" => &goods_categories,
+        "trade_income" => economy.trade_income,
+        "trade_income_last_turn" => economy.trade_income_last_turn,
     }
 }
 
