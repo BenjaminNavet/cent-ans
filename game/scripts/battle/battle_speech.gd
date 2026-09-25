@@ -311,6 +311,7 @@ func _build_subtitle() -> void:
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(band)
 	_band = band
+	PanelStack.mark_blocking(band)  # Q4 : pas de bulle du conseiller sur le discours
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
 	band.add_child(box)

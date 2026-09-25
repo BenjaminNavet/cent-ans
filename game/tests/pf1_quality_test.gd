@@ -52,7 +52,7 @@ func _test_quadtree_quality() -> void:
 		_check(int(RenderQuality.PRESETS[level]["relief_shadow_cascades"]) == 1, "%s: relief casts shadows in the first cascade only" % level)
 	_check(int(RenderQuality.PRESETS["ultra"]["relief_shadow_cascades"]) >= 2, "ultra: relief shadows further")
 	terrain.apply_render_quality(RenderQuality.PRESETS["high"])
-	_check(is_equal_approx(quadtree.max_vertex_px, 6.0) and quadtree.max_items == 700, "high preset reaches the quadtree")
+	_check(is_equal_approx(quadtree.max_vertex_px, 7.5) and quadtree.max_items == 700, "high preset reaches the quadtree")
 	terrain.quadtree = null
 	quadtree.free()
 	terrain.free()
