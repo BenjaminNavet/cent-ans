@@ -1,24 +1,25 @@
 {
   "description": "Ville assiégée dense et mobilier de rue solide (lot BR3, ADR 0047) : îlots de maisons de la ville générique (anneaux) et des villes emblématiques (treillis), rues, chemin de ronde, emprises des îlots et du mobilier (valeurs du manifeste game/assets/models/buildings/manifest.json), marché de la place, et repoussement des figurines hors des bâtiments. Embarqué dans sim-battle à la compilation.",
   "block": {
-    "radius_m": 8.5,
-    "frontage_factor": 1.75,
-    "depth_factor": 1.85,
+    "depth_m": 17.0,
+    "min_frontage_m": 12.0,
+    "max_frontage_m": 30.0,
     "clearance_m": 3.0
   },
   "generic": {
-    "rings_m": [50.0, 74.0, 102.0, 126.0],
+    "rings_m": [50.0, 75.0, 104.5, 129.0],
     "main_street_m": 11.0,
     "alley_m": 3.5,
     "square_street_m": 6.0,
-    "wall_walk_m": 12.0
+    "wall_walk_m": 8.0
   },
   "landmark": {
-    "spacing_m": 21.0,
+    "frontage_m": 15.0,
+    "pitch_x_m": 19.0,
+    "pitch_z_m": 24.0,
     "lane_m": 11.0,
     "square_street_m": 6.0,
-    "wall_walk_m": 12.0,
-    "street_align_m": 40.0
+    "wall_walk_m": 8.0
   },
   "church": {
     "length_m": 34.0,

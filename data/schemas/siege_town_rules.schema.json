@@ -25,14 +25,14 @@
     "description": { "type": "string" },
     "block": {
       "type": "object",
-      "description": "Îlot de maisons intra-muros : disque d'incendie et rectangle orienté (obstacle du cheminement et des figurines).",
+      "description": "Îlot de maisons intra-muros : rectangle orienté de deux rangées de maisons dos à dos (obstacle du cheminement, des figurines, source et cible du feu).",
       "properties": {
-        "radius_m": { "$ref": "#/$defs/positive", "description": "Rayon du disque de l'îlot (incendie, allumage)." },
-        "frontage_factor": { "$ref": "#/$defs/factor", "description": "Façade de l'îlot = facteur × rayon." },
-        "depth_factor": { "$ref": "#/$defs/factor", "description": "Profondeur de l'îlot (deux rangées dos à dos) = facteur × rayon." },
+        "depth_m": { "$ref": "#/$defs/positive", "description": "Profondeur d'un îlot de deux rangées." },
+        "min_frontage_m": { "$ref": "#/$defs/positive", "description": "Façade minimale d'un îlot (ville générique)." },
+        "max_frontage_m": { "$ref": "#/$defs/positive", "description": "Façade maximale : au-delà, l'anneau est coupé par une ruelle de plus." },
         "clearance_m": { "$ref": "#/$defs/distance", "description": "Marge gardée par le centre d'un régiment autour d'un îlot (grille A*)." }
       },
-      "required": ["radius_m", "frontage_factor", "depth_factor", "clearance_m"],
+      "required": ["depth_m", "min_frontage_m", "max_frontage_m", "clearance_m"],
       "additionalProperties": false
     },
     "generic": {
@@ -50,15 +50,16 @@
     },
     "landmark": {
       "type": "object",
-      "description": "Villes emblématiques : treillis hexagonal d'îlots hors des rues du plan, de la voie de la porte, de la place et du chemin de ronde.",
+      "description": "Villes emblématiques : rangées de maisons le long du chemin de ronde et des rues du plan (et de la voie porte-place), puis treillis d'îlots dans le reste.",
       "properties": {
-        "spacing_m": { "$ref": "#/$defs/positive", "description": "Pas du treillis." },
+        "frontage_m": { "$ref": "#/$defs/positive", "description": "Façade d'un îlot du treillis." },
+        "pitch_x_m": { "$ref": "#/$defs/positive", "description": "Pas du treillis le long de x (façade + ruelle)." },
+        "pitch_z_m": { "$ref": "#/$defs/positive", "description": "Pas du treillis le long de z (profondeur + rue)." },
         "lane_m": { "$ref": "#/$defs/positive", "description": "Largeur libre des rues du plan et de la voie porte-place." },
         "square_street_m": { "$ref": "#/$defs/distance" },
-        "wall_walk_m": { "$ref": "#/$defs/distance" },
-        "street_align_m": { "$ref": "#/$defs/distance", "description": "Un îlot plus proche qu'autant d'une rue du plan s'aligne sur elle." }
+        "wall_walk_m": { "$ref": "#/$defs/distance" }
       },
-      "required": ["spacing_m", "lane_m", "square_street_m", "wall_walk_m", "street_align_m"],
+      "required": ["frontage_m", "pitch_x_m", "pitch_z_m", "lane_m", "square_street_m", "wall_walk_m"],
       "additionalProperties": false
     },
     "church": {
@@ -74,7 +75,7 @@
     },
     "suburb": {
       "type": "object",
-      "description": "Maison de faubourg (hors les murs) : emprise en facteurs du rayon.",
+      "description": "Maison de faubourg (hors les murs) : emprise en facteurs du rayon des faubourgs de data/rules/siege_fire.json.",
       "properties": {
         "frontage_factor": { "$ref": "#/$defs/factor" },
         "depth_factor": { "$ref": "#/$defs/factor" }

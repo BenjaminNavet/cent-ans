@@ -146,6 +146,37 @@ impl Footprint {
             .min(corner(-l, d))
     }
 
+    /// The two rectangles intersect (separating-axis test).
+    pub fn intersects(&self, other: &Footprint) -> bool {
+        let axes = [self.axis(), self.front(), other.axis(), other.front()];
+        axes.iter().all(|&(ax, az)| {
+            let project = |f: &Footprint| {
+                let c = f.x * ax + f.z * az;
+                let (u, v) = (f.axis(), f.front());
+                let r = f.half_length * (u.0 * ax + u.1 * az).abs()
+                    + f.half_depth * (v.0 * ax + v.1 * az).abs();
+                (c - r, c + r)
+            };
+            let (a0, a1) = project(self);
+            let (b0, b1) = project(other);
+            a0 < b1 && b0 < a1
+        })
+    }
+
+    /// Distance between two rectangles (0 when they meet).
+    pub fn distance_to(&self, other: &Footprint) -> f64 {
+        if self.intersects(other) {
+            return 0.0;
+        }
+        let edges = |f: &Footprint, g: &Footprint| {
+            let c = f.corners();
+            (0..4)
+                .map(|i| g.distance_to_segment(c[i], c[(i + 1) % 4]))
+                .fold(f64::INFINITY, f64::min)
+        };
+        edges(self, other).min(edges(other, self))
+    }
+
     /// The four ways out of the rectangle grown by `margin` for a point
     /// inside it, nearest first: straight out through each side.
     pub fn exits(&self, x: f64, z: f64, margin: f64) -> [(f64, (f64, f64)); 4] {
@@ -223,9 +254,9 @@ pub struct PropSize {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BlockRules {
-    pub radius_m: f64,
-    pub frontage_factor: f64,
-    pub depth_factor: f64,
+    pub depth_m: f64,
+    pub min_frontage_m: f64,
+    pub max_frontage_m: f64,
     pub clearance_m: f64,
 }
 
@@ -242,11 +273,12 @@ pub struct GenericRules {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LandmarkRules {
-    pub spacing_m: f64,
+    pub frontage_m: f64,
+    pub pitch_x_m: f64,
+    pub pitch_z_m: f64,
     pub lane_m: f64,
     pub square_street_m: f64,
     pub wall_walk_m: f64,
-    pub street_align_m: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
