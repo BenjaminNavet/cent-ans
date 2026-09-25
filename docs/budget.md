@@ -36,3 +36,4 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 
 | Date | Service | Objet | Coût estimé | Coût réel | Cumul batailles épiques |
 |---|---|---|---|---|---|
+| 2026-09-25 | Freesound (CC0) | EP4 : 27 sons libres supplémentaires (chocs acier/acier et acier/bois, impacts d'armure, cris d'effort, râles, chutes, chevaux, 3e nappe de mêlée), licence vérifiée page par page, aucun appel payant | 0,00 $ | 0,00 $ | 0,00 $ |
