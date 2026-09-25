@@ -396,7 +396,7 @@ pub fn dry_z(field: &crate::field::Battlefield, x: f64, z: f64, from_z: f64, for
         return z;
     };
     let center = river.center_z(x);
-    let reach = river.width * 0.5 + RIVER_MARGIN;
+    let reach = river.width_at(x) * 0.5 + RIVER_MARGIN;
     if river.in_ford(x) || (z - center).abs() > reach {
         return z;
     }

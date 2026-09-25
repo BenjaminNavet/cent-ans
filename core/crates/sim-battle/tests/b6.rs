@@ -109,14 +109,17 @@ fn bocage_battles_still_engage() {
 #[test]
 fn the_site_reads_in_one_line() {
     let mut sim = demo_sim();
-    // The demo: dry spring plains, a farm with hedges and fences, a river.
+    // The demo: dry spring plains, a farm with hedges and fences, a river
+    // (EP3: bridged, with brooks).
     assert_eq!(
         sim.field().site_label_fr(),
-        "Sol sec · printemps · ferme · haies · clôtures · rivière et gués"
+        "Sol sec · printemps · ferme · haies · clôtures · rivière et ponts · ruisseaux"
     );
     let field = sim.field_mut();
     field.season = sim_battle::BattleSeason::Winter;
     field.river = None;
+    field.streams.clear();
+    field.bridges.clear();
     field.obstacles.retain(|o| o.kind == ObstacleKind::Hedge);
     field.village.as_mut().unwrap().farm = false;
     field.coast = Some(sim_battle::Coast {

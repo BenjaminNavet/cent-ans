@@ -11,6 +11,7 @@ mod reinforcements;
 mod separation;
 mod siege_assault;
 mod siege_extra;
+mod water;
 
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
@@ -123,6 +124,10 @@ pub struct BattleSim {
     fire: fire::FireSystem,
     /// SG1: renderer events of the assault, ram and oil timers.
     assault: siege_assault::AssaultState,
+    /// EP3: crossings of the river (derived data, reset by `field_mut`).
+    crossings: std::cell::OnceCell<Vec<crate::hydro::Crossing>>,
+    /// EP3: regiments whose drowning was announced.
+    drown_announced: Vec<u32>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -341,6 +346,8 @@ impl BattleSim {
             relief_map: Default::default(),
             fire,
             assault: Default::default(),
+            crossings: Default::default(),
+            drown_announced: Vec::new(),
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -618,6 +625,7 @@ impl BattleSim {
     /// Mutable field (tests and laboratory set-ups: hedges, villages).
     pub fn field_mut(&mut self) -> &mut Battlefield {
         self.relief_map = Default::default();
+        self.crossings = Default::default();
         &mut self.field
     }
 
@@ -644,7 +652,7 @@ impl BattleSim {
     /// Height at which `unit`'s soldiers stand at (x, z): the ground, raised
     /// to the wall walk on the walls and part-way up while climbing.
     pub fn standing_height(&self, unit: &Unit, x: f64, z: f64) -> f64 {
-        let ground = self.field.height(x, z);
+        let ground = self.field.walk_height(x, z);
         let Some(works) = &self.siege else {
             return ground;
         };
@@ -1150,6 +1158,7 @@ impl BattleSim {
         let contacts = self.contacts();
         self.resolve_movement(&contacts);
         self.separate_friends();
+        self.resolve_water();
         self.resolve_siege_works();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
@@ -1255,11 +1264,8 @@ impl BattleSim {
                 0.55
             };
         }
-        match self.field.water_at(unit.x, unit.z) {
-            Some(true) => speed *= 0.5,
-            Some(false) => speed *= 0.25,
-            None => {}
-        }
+        // EP3: fords, deep water, streams, banks, bridges, roads.
+        speed *= self.water_speed(unit);
         if self.weather == Weather::Snow {
             speed *= 0.8;
         }
@@ -1299,7 +1305,9 @@ impl BattleSim {
         let from = (unit.x, unit.z);
         let to = (unit.x + dir.0 * step, unit.z + dir.1 * step);
         let blocked = self.wall_block(index, from, to);
-        let in_house = blocked.is_none() && self.house_block(index, from, to);
+        let in_house = blocked.is_none()
+            && (self.house_block(index, from, to)
+                || (!may_leave && self.water_blocks(index, from, to)));
         let unit = &mut self.units[index];
         unit.blocked_by = blocked;
         if blocked.is_some() || in_house {
@@ -1376,7 +1384,8 @@ impl BattleSim {
     /// keep going straight unless the detour is short).
     fn route(&self, index: usize, tx: f64, tz: f64) -> (f64, f64) {
         let Some(works) = &self.siege else {
-            return (tx, tz);
+            // EP3: across the river by a bridge or a ford.
+            return self.water_route(index, tx, tz);
         };
         let unit = &self.units[index];
         let sallying = works.sortie && unit.side == SideId::Defender;
@@ -1840,10 +1849,21 @@ impl BattleSim {
             (self.units[i].x, self.units[i].z),
             (self.units[p].x, self.units[p].z),
         );
-        if cavalry && (self.field.breaks_charge(from, to) || self.field.in_village(to.0, to.1)) {
+        let water = if cavalry {
+            self.water_breaks_charge(from, to)
+        } else {
+            None
+        };
+        if cavalry
+            && (self.field.breaks_charge(from, to)
+                || self.field.in_village(to.0, to.1)
+                || water.is_some())
+        {
             self.units[i].charge_timer = 0.0;
             self.units[i].morale -= 5.0;
-            let text = if self.field.in_village(to.0, to.1) {
+            let text = if let Some(how) = water {
+                format!("La charge des {} {how}.", self.unit_label(i))
+            } else if self.field.in_village(to.0, to.1) {
                 format!(
                     "La charge des {} se brise dans le village.",
                     self.unit_label(i)
@@ -2307,6 +2327,8 @@ impl BattleSim {
         if self.on_ladders(defender) {
             damage *= 2.0;
         }
+        // EP3: fords, streams, deep water, bridges and bridgeheads.
+        damage *= self.water_melee_factor(attacker, defender);
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
         damage *= 0.6 + attacker.morale.max(0.0) / 250.0;

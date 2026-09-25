@@ -45,7 +45,7 @@
     "deep_blocks_mounted": true,
     "deep_blocks_engines": true,
     "road_column": 1.3,
-    "road_other": 1.05,
+    "road_other": 1.0,
     "bridge_min_squeeze": 0.3
   },
   "deep_water": {

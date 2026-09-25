@@ -775,7 +775,10 @@ pub(crate) fn draw_streams(field: &mut Battlefield, rules: &WaterRules, stream: 
                     if river.in_water(x, z) {
                         continue;
                     }
-                    field.heights[iz * field.nx + ix] -= depth * (1.0 - dist / reach);
+                    // A shallow dip only across the deployment lines.
+                    let line = (z - ATTACKER_LINE_Z).abs().min((z - DEFENDER_LINE_Z).abs());
+                    let soften = 0.25 + 0.75 * ((line - 20.0) / 50.0).clamp(0.0, 1.0);
+                    field.heights[iz * field.nx + ix] -= depth * soften * (1.0 - dist / reach);
                 }
             }
         }

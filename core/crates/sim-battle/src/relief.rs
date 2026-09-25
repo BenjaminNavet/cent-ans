@@ -678,7 +678,7 @@ fn near_line(x: f64, z: f64, radius: f64) -> bool {
 }
 
 fn in_river(river: Option<&River>, x: f64, z: f64, radius: f64) -> bool {
-    river.is_some_and(|r| (z - r.center_z(x)).abs() < radius + r.width * 0.5 + 4.0)
+    river.is_some_and(|r| (z - r.center_z(x)).abs() < radius + r.width_at(x) * 0.5 + 4.0)
 }
 
 fn fits(zone: &Zone, river: Option<&River>) -> bool {
