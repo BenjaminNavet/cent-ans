@@ -34,7 +34,11 @@ Branche : `worktree-agent-aeb4f4012dbd33ec4`. ADR : `docs/decisions/0031-droit-d
   `diplomacy_counter.png` (un seul point, contre-offre 65 %), `movement_trespass.png` (chemin rouge).
 - [ ] Smoke : tout passe sauf « music playlist too short » (campaign, war, court) : vient de main
   (listes de lecture UA), sans lien avec DP2.
-- [ ] Sonde `balance_probe campaign 200 1-8`, `passage.enabled` vrai puis faux (en cours).
+- [x] Sonde `balance_probe campaign 200 1-8`, même binaire, `passage.enabled` faux → vrai :
+  guerre FR-EN 52 → 57 %, changements de propriétaire 21,1 → 16,6, batailles 299 → 242,
+  banqueroutes/faction/décennie 0,51 → 0,29, révoltes 4,6 → 4,5, milice 30 → 29 %,
+  mécontentement final 18,8 → 17,3. L'IA contourne les terres neutres : moins de batailles et de
+  prises (à surveiller : carte un peu plus figée qu'avec le passage libre).
 
 ## Prochaine étape
-Consigner la sonde ; fusion dans main par l'orchestrateur (la branche contient aussi MF1).
+Fusion dans main par l'orchestrateur (la branche contient aussi MF1).
