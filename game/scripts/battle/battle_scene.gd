@@ -18,6 +18,7 @@ extends Node3D
 ## `--screenshot=` : capture de la phase de déploiement, F5c), `--result-shot` (avec
 ## `--screenshot=` : bataille jouée jusqu'au bout, capture de l'écran de fin, B2),
 ## `--no-effects` (sans poussière ni traits, B4 : captures « avant », mesures A/B),
+## `--no-bv1` (volées, sang, mottes et taille d'unité du lot BV1 coupés : mesures A/B),
 ## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4).
 
 signal returned(result: Dictionary)
@@ -59,6 +60,10 @@ var _mm: Dictionary = {}  # unit id -> MultiMeshInstance3D (BattleSoldiers.layer
 var soldiers: BattleSoldiers = null
 var effects: BattleEffects = null  # B4 : poussière, traits, fumée des bombardes, gués
 var _weather_key: String = "clear"
+var blood: BattleBlood = null  # BV1 : sang au sol (réglage « Sang »)
+var _unit_size_override: float = -1.0  # `--unit-size=<k>` (banc d'essai BV1)
+var _blood_override: int = -1  # `--blood=<0|1|2>`
+var _no_bv1: bool = false  # `--no-bv1` : volées, sang et mottes du lot BV1 coupés (mesures A/B)
 var _no_effects: bool = false  # `--no-effects` : captures « avant » et mesures A/B
 var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
 var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
@@ -216,6 +221,9 @@ func begin() -> bool:
 			add_child(backdrop)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
 	BattleAtmosphere.add_ground_mist(self, weather_key, Vector3(600.0, terrain.height_at(600.0, 400.0), 400.0), Vector2(1500.0, 1100.0))
+	# BV1 (ADR 0016) : taille des unités = figurines par homme simulé (rendu seulement).
+	if not _no_bv1:
+		battle.call("set_figure_scale", _unit_size())
 	_open_deployment()
 	units = battle.call("get_units")
 	_build_soldier_layers()
@@ -287,6 +295,7 @@ func _build_soldier_layers() -> void:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 	soldiers.setup(units, side_colors, factions)
 	_mm = soldiers.layers
+	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
 	if _no_effects:
 		return
 	effects = BattleEffects.new()
@@ -295,6 +304,55 @@ func _build_soldier_layers() -> void:
 	var river: Dictionary = terrain.terrain.get("river", {})
 	var half_width := float(river.get("width", 0.0)) * 0.5
 	effects.setup(_weather_key, func(x: float, z: float) -> float: return terrain.world_height(x, z), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	if not _no_bv1:
+		effects.configure_ground(str(terrain.terrain.get("ground", "dry")), _weather_key)
+	effects.volleys.figure_scale = float(battle.call("get_figure_scale"))
+	effects.volleys.sound_event.connect(_on_sound_event)
+	effects.sound_event.connect(_on_sound_event)
+	BattleAudio.auto_volley = _no_bv1
+	blood = BattleBlood.new()
+	blood.name = "Blood"
+	effects.add_child(blood)
+	blood.figure_scale = effects.volleys.figure_scale
+	blood.setup(func(x: float, z: float) -> float: return terrain.world_height(x, z), BattleBlood.OFF if _no_bv1 else _blood_level(), func(x: float, z: float) -> int: return 1 if half_width > 0.0 and terrain.river_distance(x, z) < half_width else 0)
+	effects.hit_landed.connect(func(pos: Vector3, time: float) -> void: blood.add_hit(pos, time, _camera_position()))
+	# Fusion BV1/BV2 : les morts de BV2 portent la flaque au sol (BV1) et les traits fichés dans
+	# les corps ; la gerbe reste à BV2 (`BattleGore`), une seule source par événement.
+	if soldiers.bv2_enabled and not _no_bv1:
+		blood.corpse_driven = true
+		soldiers.corpse_fallen.connect(func(pos: Vector3, side: String, kind: String, cause: String) -> void:
+			blood.on_corpse(pos, side, kind, cause, _camera_position())
+			effects.volleys.on_corpse(pos, side, kind, cause))
+
+
+## Réglages du joueur lus par la bataille (BV1) : `--unit-size=` / `--blood=` les forcent.
+func _unit_size() -> float:
+	if _unit_size_override > 0.0:
+		return _unit_size_override
+	var settings := get_node_or_null("/root/Settings")
+	return float(settings.call("get_value", "battle/unit_size")) if settings != null else 1.0
+
+
+func _blood_level() -> int:
+	if _blood_override >= 0:
+		return _blood_override
+	return BattleGore.blood_level()  # même lecture que BV2 (`--blood=off|moderate|full|0|1|2`)
+
+
+func _camera_position() -> Vector3:
+	var camera := get_viewport().get_camera_3d()
+	return camera.global_position if camera != null else Vector3.ZERO
+
+
+## BV1 : sons des tirs du cœur (lâcher, sifflement, impact) joués par l'API du lot AU1
+## (`BattleAudio.play_at` / `play_at_delayed`, bus et banque sonore d'AU1). `delay` en temps de
+## bataille ; `BattleAudio.auto_volley` est coupé pour ne pas doubler ses volées déduites des
+## munitions.
+func _on_sound_event(event: StringName, position: Vector3, delay: float) -> void:
+	if delay > 0.0:
+		BattleAudio.play_at_delayed(str(event), position, delay)
+	else:
+		BattleAudio.play_at(str(event), position)
 
 
 ## B4 : effets (poussière, traits…) d'après l'état des régiments ; `dt` = temps simulé écoulé.
@@ -304,7 +362,11 @@ func _update_effects(dt: float) -> void:
 		return
 	var camera := get_viewport().get_camera_3d()
 	var camera_pos := camera.global_position if camera != null else Vector3.ZERO
-	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos)
+	var shots: Variant = battle.call("get_shots")
+	effects.update(units, soldiers, soldiers.anim_time, dt, camera_pos, null if _no_bv1 else shots)
+	if blood != null:
+		blood.tick_time(soldiers.anim_time)
+		blood.update(units, camera_pos)
 
 
 func _make_banner(unit: Dictionary) -> void:
@@ -409,6 +471,10 @@ func _process(delta: float) -> void:
 		_show_end()
 	if _benchmark:
 		if _bench_frames == 0:
+			# BV1 : l'autoload `Settings` réimpose la synchro verticale du joueur (60 Hz) ; le banc
+			# d'essai la coupe pour que les FPS départagent enfin les variantes.
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			Engine.max_fps = 0
 			if _bench_at > 0.0:
 				_fast_forward(_bench_at)
 			_bench_start_elapsed = float(battle.call("get_elapsed"))
@@ -436,6 +502,8 @@ func _process(delta: float) -> void:
 				var samples: Array = _bench_ab_ms[level]
 				samples.sort()
 				print("BattleScene benchmark A/B: %s median %.2f ms GPU over %d frames" % [level, samples[samples.size() / 2], samples.size()])
+			if effects != null and effects.volleys != null:
+				print("BattleScene benchmark: volleys %d arrows, %d stuck, %d chunks drawn, figure scale %.1f" % [effects.volleys.launched, effects.volleys.stuck_count, effects.volleys.chunks_drawn(), effects.volleys.figure_scale])
 			get_tree().quit(0)
 
 
@@ -1031,6 +1099,13 @@ func _parse_cmdline() -> void:
 			_shot_at = float(arg.trim_prefix("--shot-at="))
 		elif arg == "--no-effects":
 			_no_effects = true
+		elif arg == "--no-bv1":
+			_no_bv1 = true
+		elif arg.begins_with("--unit-size="):
+			_unit_size_override = float(arg.trim_prefix("--unit-size="))
+		elif arg.begins_with("--blood="):
+			var value := arg.trim_prefix("--blood=")
+			_blood_override = ["off", "moderate", "full"].find(value) if not value.is_valid_int() else clampi(int(value), 0, 2)
 		elif arg == "--closeup":
 			_closeup = true
 		elif arg.begins_with("--weather="):
@@ -1083,6 +1158,8 @@ func _stage_screenshot() -> void:
 			break
 	paused = true
 	print("BattleScene: capture at %.0f s, %d corpses, %d missiles" % [float(battle.call("get_elapsed")), soldiers.corpse_count, effects.launched if effects != null else 0])
+	if effects != null and blood != null:
+		print("BattleScene: BV1 %d volley arrows, %d stuck, %d blood decals (level %d), last at %s" % [effects.volleys.launched, effects.volleys.stuck_count, blood.decal_count, blood.level, blood.last_pos])
 	units = battle.call("get_units")
 	var focus := Vector3.ZERO
 	var n := 0
