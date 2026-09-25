@@ -13,7 +13,10 @@ Branche `worktree-agent-adaa478392d02c5a8`. Suite de SG2 (`docs/wip/sg2-engins.m
   `game/scripts/battle/siege_crew_fx.gd` (MultiMesh par figurine/clip/camp, mode CUSTOM) piloté par
   `SiegeEnginesFx` d'après `reload` / `reload_period` ; poussée du bélier et du beffroi ; placement
   et rôles dans `data/fx/siege_engines.json` (`crew`). Servants rigides de B1 retirés si actif.
-- [ ] Capture de la bombarde au tir (éclair, fumée, recul) — script `game/tests/sg3_siege_shot.gd`
+- [x] Captures `docs/audit/captures/sg3/` (`game/tests/sg3_siege_shot.gd`, Bruges et Avignon) : bombarde
+  au tir (éclair, recul, fumée), écouvillon et charge, treuil et chargeur du trébuchet, poussée du
+  bélier et du beffroi, engins au loin. Le servant au refouloir se tient de côté (`rest`) hors du
+  souffle quand il ne travaille pas.
 - [x] LOD : `<modèle>_lod.glb` (siege_engines.py, pièces nommées gardées, ~ 45-70 % des triangles)
   au-delà de `lod.simple_m` (140 m), pose à 6 Hz et servants cachés au-delà de `lod.far_m` (300 m,
   = `BattleImpostors.DISTANCE`) ; `SiegeEnginesFx.lod_distances()` pour les préréglages (PF1).
@@ -66,4 +69,10 @@ cède 2 à 5 min après le premier coup, les murs sous deux engins en 4 à 6 min
   du mur sans escalader : défaut de l'IA d'assaut (`plan_siege_attack`), pas de l'équilibre.
 
 ## Prochaine étape
-Build, import, captures (sg3_siege_shot.gd, Avignon et Bruges), vérifier les poses en jeu.
+Terminé ; à fusionner par l’orchestrateur.
+
+## Points ouverts (servants, LOD)
+- Le recul du fût (0,8 m) se lit mal sur une image fixe ; éclair et fumée bien visibles.
+- Les servants ne marchent pas (places fixes autour de l’engin), pas de pierre portée à la main ;
+  gestes calés sur le rechargement, non sur le tour exact du treuil.
+- LOD : réduction modeste (modèles déjà légers) ; bélier et beffroi sans LOD.
