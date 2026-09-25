@@ -16,7 +16,7 @@ Branche `b7a-economy-order` (depuis main 04657c09). Liste d'origine : `docs/wip/
 - [x] 3 ravitaillement × dévastation + tests + textes
 - [x] 4 mock + fiche ordre public
 - [x] 5 carte
-- [ ] validations (cargo, build, smoke, pytest, codex)
+- [x] validations : cargo fmt/clippy/test verts, build.sh OK, smoke vert, pytest 515 verts (2 ignorés), validateur Codex 406 fiches, 0 erreur
 
 ## Prochaine étape
-Validations : cargo test complet, build.sh, import + smoke Godot, pytest.
+Lot terminé, non fusionné. Conflit attendu avec `feat/map-modes` dans `campaign_map.gd` (`_refresh_unrest_colors` y est supprimée : garder leur version). Points ouverts : chiffres des textes d'aide et des infobulles recopiés en dur (à lire un jour depuis `economy.json` via le pont) ; constantes de ravitaillement (`ATTRITION_*`, `SUPPLY_RECOVERY`) encore dans `economy.rs`.
