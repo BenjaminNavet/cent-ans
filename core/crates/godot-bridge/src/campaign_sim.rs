@@ -219,6 +219,7 @@ impl CampaignSim {
             "net_income_last_turn",
             state.faction_net_last_turn(&faction).unwrap_or(0),
         );
+        budget_into_dict(&mut dict, &economy, state.budget_history(&faction));
         dict
     }
 
@@ -608,6 +609,7 @@ pub(crate) fn units_array(data: &GameData, units: &[Unit]) -> VarArray {
                 "strength" => i64::from(unit.strength),
                 "max_strength" => i64::from(unit.max_strength),
                 "morale" => i64::from(unit.morale),
+                "experience" => i64::from(unit.experience),
             }
             .to_variant()
         })
@@ -895,6 +897,55 @@ fn faction_economy_dict(economy: &FactionEconomy) -> VarDictionary {
         "goods" => &goods,
         "goods_categories" => &goods_categories,
     }
+}
+
+/// UI audit A3, lot U3: signed budget lines (`budget_lines`: `{key,
+/// projected, last?, delta?, charge}`), the change of the projected balance
+/// against the season just resolved (`net_change`, absent before the first
+/// turn) and the purse history (`budget_history`: `{turn, treasury, net,
+/// change, other}`, oldest first, at most 12 seasons).
+fn budget_into_dict(
+    dict: &mut VarDictionary,
+    economy: &FactionEconomy,
+    history: &[sim_campaign::economy_balance::BudgetRecord],
+) {
+    let last = history.last();
+    let lines: VarArray = economy
+        .budget_lines(last)
+        .iter()
+        .map(|line| {
+            let mut row = vdict! {
+                "key" => line.kind.key(),
+                "projected" => line.projected,
+                "charge" => line.kind.is_charge(),
+            };
+            if let Some(booked) = line.last {
+                row.set("last", booked);
+            }
+            if let Some(delta) = line.delta() {
+                row.set("delta", delta);
+            }
+            row.to_variant()
+        })
+        .collect();
+    dict.set("budget_lines", &lines);
+    if let Some(record) = last {
+        dict.set("net_change", economy.net_income() - record.net());
+    }
+    let records: VarArray = history
+        .iter()
+        .map(|record| {
+            vdict! {
+                "turn" => i64::from(record.turn),
+                "treasury" => record.treasury,
+                "net" => record.net(),
+                "change" => record.change(),
+                "other" => record.other,
+            }
+            .to_variant()
+        })
+        .collect();
+    dict.set("budget_history", &records);
 }
 
 pub(crate) fn events_array(events: &[GameEvent]) -> VarArray {

@@ -18,13 +18,12 @@ extends Node3D
 ##   dans une tâche `VegetationGroundJob`, installés en une fois (pas d'à-coup).
 ## - Lot V4 (A1-10) : quatre essences (chêne, hêtre, conifère de montagne, haie ; maillages Blender
 ##   `campaign_trees.glb`), houppiers élargis au cœur des massifs (canopée continue), teinte
-##   saisonnière (`foliage.gdshader`, saison lue dans la date de la simulation ; `--season=<0-3>`
-##   la force pour les captures). Couverture forestière : `data/map/forest_cover.json`.
+##   saisonnière par essence (`foliage.gdshaderinc`, poids globaux `campaign_season` du lot CV1 ;
+##   `--season=winter` les force pour les captures). Couverture forestière : `data/map/forest_cover.json`.
 ## Purement visuel : aucune règle de jeu.
 
 const FOLIAGE_SHADER := preload("res://shaders/foliage.gdshader")
 const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
-const SEASON_INDEX := {"spring": 0, "summer": 1, "autumn": 2, "winter": 3}
 
 @export var camera_rig_path: NodePath = ^"../CameraRig"
 ## Pas (px de carte) de la grille de candidats ; plus petit = forêts plus denses.
@@ -84,8 +83,7 @@ var _rig: Node3D
 var _frame: int = 0
 var _log_bursts := false
 var _warm := false
-## Saison affichée (0 printemps … 3 hiver) ; -1 : lue dans la simulation.
-var season_override: int = -1
+## Saison du feuillage : 3 en hiver (variante ajourée), 1 sinon ; -1 : pas encore lue.
 var _season: int = -1
 
 
@@ -94,8 +92,7 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--screenshot") or arg == "--vegetation-stats":
 			_log_bursts = true
-		elif arg.begins_with("--season="):
-			season_override = clampi(int(arg.substr(9)), 0, 3)
+
 
 
 func _exit_tree() -> void:
@@ -157,21 +154,16 @@ func _process(_delta: float) -> void:
 		_update_season()
 
 
-## Saison de la carte → teinte du feuillage (printemps tendre, automne roux, hiver dénudé).
+## Hiver (poids `campaign_season.w` du lot CV1 > 0,5) → variante ajourée du feuillage ; le reste
+## de l'année, le shader sans discard garde le test de profondeur anticipé (moins de surdessin).
 func _update_season() -> void:
-	var value := season_override
-	if value < 0:
-		var sim: Variant = get_parent().get("sim") if get_parent() != null else null
-		if sim is Object and (sim as Object).has_method("get_date_label"):
-			value = int(SEASON_INDEX.get(RichTooltip.season_of(str((sim as Object).call("get_date_label"))), 1))
-		else:
-			value = 1
-	if value != _season and _material != null:
+	if _material == null:
+		return
+	var weights: Variant = RenderingServer.global_shader_parameter_get(&"campaign_season")
+	var value := 3 if weights is Vector4 and (weights as Vector4).w > 0.5 else 1
+	if value != _season:
 		_season = value
-		# Hiver seulement : variante à discard (houppiers ajourés) ; le reste de l'année, le shader
-		# sans discard garde le test de profondeur anticipé (moins de surdessin dans les forêts).
 		_material.shader = FOLIAGE_WINTER_SHADER if value == 3 else FOLIAGE_SHADER
-		_material.set_shader_parameter("season", value)
 
 
 func _try_autobind() -> void:

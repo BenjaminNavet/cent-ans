@@ -447,6 +447,53 @@ def cylinder(
         g.poly(ring1, mat, occlude=False, **kw)
 
 
+def tube(
+    g: Geometry,
+    p0: Vec,
+    p1: Vec,
+    radius: float,
+    mat: str,
+    sides: int = 10,
+    caps: bool = True,
+    bulge: float = 0.0,
+    **kw,
+) -> None:
+    """Cylinder along any axis from ``p0`` to ``p1`` (logs, lying barrels, wheels, axles).
+
+    ``bulge`` > 0 swells the middle ring (barrel belly) by that fraction of the radius.
+    """
+    axis = sub(p1, p0)
+    d = norm(axis)
+    ref = UP if abs(d[2]) < 0.9 else (1.0, 0.0, 0.0)
+    u = norm(cross(ref, d))
+    v = cross(d, u)
+    stations = [(0.0, 1.0), (1.0, 1.0)]
+    if bulge:
+        stations = [(0.0, 1.0), (0.5, 1.0 + bulge), (1.0, 1.0)]
+    rings = []
+    for t, rs in stations:
+        c = add(p0, mul(axis, t))
+        rings.append(
+            [
+                add(
+                    c,
+                    add(
+                        mul(u, radius * rs * math.cos(a)),
+                        mul(v, radius * rs * math.sin(a)),
+                    ),
+                )
+                for a in _angles(sides)
+            ]
+        )
+    for r0, r1 in zip(rings, rings[1:], strict=False):
+        for i in range(sides):
+            j = (i + 1) % sides
+            g.quad(r0[i], r0[j], r1[j], r1[i], mat, **kw)
+    if caps:
+        g.poly(rings[-1], mat, occlude=False, **kw)
+        g.poly(list(reversed(rings[0])), mat, occlude=False, **kw)
+
+
 def cone(
     g: Geometry,
     center: Vec,

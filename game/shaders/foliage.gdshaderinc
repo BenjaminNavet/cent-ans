@@ -11,8 +11,9 @@ uniform float density : hint_range(0.05, 1.0) = 1.0;
 uniform float wind_strength = 0.035;
 uniform float wind_speed = 1.1;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
-// Lot V4 (A1-10) : saison de la carte (réglée par vegetation.gd depuis la date de la simulation).
-uniform int season : hint_range(0, 3) = 0;
+// Lot CV1 : saison (poids printemps, été, automne, hiver, somme 1), publiée par season_visuals.gd.
+// Lot V4 : teintes par essence (UV.x) pondérées par ces poids.
+global uniform vec4 campaign_season;
 uniform vec3 spring_tint = vec3(1.03, 1.10, 0.9);
 uniform vec3 autumn_oak = vec3(0.19, 0.13, 0.035);
 uniform vec3 autumn_beech = vec3(0.30, 0.10, 0.018);
@@ -63,8 +64,8 @@ void vertex() {
 	v_seed = seed;
 	v_world_y = origin.y;
 	// Hiver : houppiers des feuillus dénudés, plus légers (on devine la ramure).
-	if (season == 3 && UV.y > 0.5 && UV.x < 1.5) {
-		VERTEX.xz *= 0.82;
+	if (UV.y > 0.5 && UV.x < 1.5) {
+		VERTEX.xz *= mix(1.0, 0.82, campaign_season.w);
 	}
 	v_local = VERTEX * 9.0 + vec3(seed * 17.0);
 	VERTEX.x += sway * weight;
@@ -79,37 +80,36 @@ void fragment() {
 	float leaves = value_noise(v_local) * 0.6 + value_noise(v_local * 2.3) * 0.4;
 	vec3 albedo = COLOR.rgb * tint * mix(0.72, 1.18, leaves);
 	if (v_crown > 0.5) {
+		vec4 w = campaign_season;
 		float lum = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
 		bool broadleaf = v_essence < 1.5;
+		bool conifer = v_essence > 1.5 && v_essence < 2.5;
 		bool hedge = v_essence > 2.5;
-		if (season == 0 && (broadleaf || hedge)) {
-			albedo *= spring_tint;
-		} else if (season == 2) {
-			// Automne : chênes roux-olive, hêtres cuivrés, haies rousses ; quelques retardataires verts.
-			float turn = smoothstep(0.15, 0.45, fract(v_seed * 7.13)) * mix(0.7, 1.0, leaves);
-			vec3 target = v_essence < 0.5 ? autumn_oak : (v_essence < 1.5 ? autumn_beech : autumn_hedge);
-			if (v_essence > 1.5 && v_essence < 2.5) {
-				turn = 0.0;
-			}
-			albedo = mix(albedo, target * (lum / 0.09) * mix(0.8, 1.2, leaves), turn * 0.85);
-		} else if (season == 3) {
-			if (broadleaf) {
-				// Ramure nue : houppier ajouré (on voit le sol à travers), gris-brun violacé.
+		// Printemps : feuillus et haies plus tendres.
+		vec3 spring = conifer ? albedo : albedo * spring_tint;
+		// Automne : chênes roux-olive, hêtres cuivrés, haies rousses ; quelques retardataires verts.
+		float turn = conifer ? 0.0 : smoothstep(0.15, 0.45, fract(v_seed * 7.13)) * mix(0.7, 1.0, leaves);
+		vec3 target = v_essence < 0.5 ? autumn_oak : (v_essence < 1.5 ? autumn_beech : autumn_hedge);
+		vec3 autumn = mix(albedo, target * (lum / 0.09) * mix(0.8, 1.2, leaves), turn * 0.85);
+		// Hiver : ramure nue gris-brun ; conifères plus sombres, poudrés de neige en altitude et
+		// sur les faces tournées vers le ciel.
+		vec3 winter;
+		if (broadleaf) {
 #ifdef FOLIAGE_WINTER_CUTOUT
-				if (value_noise(v_local * 2.4) < 0.5) {
-					discard;
-				}
-#endif
-				albedo = winter_bare * mix(0.8, 1.25, leaves);
-			} else if (hedge) {
-				albedo = mix(albedo, winter_bare, 0.7);
-			} else {
-				// Conifères : plus sombres, neige sur les branches exposées en altitude.
-				albedo *= 0.8;
-				float snow = smoothstep(winter_snow_y - 1.0, winter_snow_y + 1.0, v_world_y) * smoothstep(0.35, 0.8, leaves);
-				albedo = mix(albedo, vec3(0.75, 0.78, 0.82), snow * 0.7);
+			// Houppier ajouré (on voit le sol à travers).
+			if (w.w > 0.5 && value_noise(v_local * 2.4) < 0.5) {
+				discard;
 			}
+#endif
+			winter = winter_bare * mix(0.8, 1.25, leaves);
+		} else if (hedge) {
+			winter = mix(albedo, winter_bare, 0.7);
+		} else {
+			float up = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).y;
+			float snow = max(smoothstep(winter_snow_y - 1.0, winter_snow_y + 1.0, v_world_y), 0.5 * smoothstep(0.45, 0.9, up));
+			winter = mix(albedo * 0.8, vec3(0.75, 0.78, 0.82), snow * smoothstep(0.35, 0.8, leaves) * 0.7);
 		}
+		albedo = spring * w.x + albedo * w.y + autumn * w.z + winter * w.w;
 	}
 	ALBEDO = albedo;
 	ROUGHNESS = roughness_value;
@@ -117,5 +117,5 @@ void fragment() {
 	AO = v_ao;
 	AO_LIGHT_AFFECT = 0.4;
 	// Lumière transmise à travers le feuillage, vue à contre-jour.
-	BACKLIGHT = albedo * (season == 3 && v_essence < 1.5 ? 0.1 : 0.35);
+	BACKLIGHT = albedo * (v_essence < 1.5 ? mix(0.35, 0.1, campaign_season.w) : 0.35);
 }

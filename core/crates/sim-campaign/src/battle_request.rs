@@ -64,6 +64,8 @@ pub enum BattleRequestError {
     },
     #[error("résultat invalide : l'unité {unit} de {side} perd plus d'hommes qu'elle n'en a")]
     LossesExceedStrength { side: &'static str, unit: usize },
+    #[error("la bataille n°{0} ne peut être refusée : seul l'assaillant peut se retirer")]
+    CannotWithdraw(usize),
 }
 
 /// Records a player battle instead of fighting it (called by
@@ -178,7 +180,7 @@ pub(crate) fn auto_resolve_all_pending(
 /// Both armies still exist and are at war (they cannot move once the battle
 /// is pending, lot M2); siege: the besiegers still besiege a garrisoned
 /// settlement.
-fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
+pub(crate) fn is_live(state: &CampaignState, request: &BattleRequest) -> bool {
     if request.siege {
         let (Some(army), Some(settlement)) = (
             state.armies.get(&request.attacker),
@@ -344,7 +346,11 @@ fn side_outcome(
 impl CampaignState {
     /// Coalitions `(attackers, defenders)` of a field battle request (F1),
     /// each led by the army of the encounter.
-    fn coalitions(&self, data: &GameData, request: &BattleRequest) -> (Vec<ArmyId>, Vec<ArmyId>) {
+    pub(crate) fn coalitions(
+        &self,
+        data: &GameData,
+        request: &BattleRequest,
+    ) -> (Vec<ArmyId>, Vec<ArmyId>) {
         let faction = |id: &ArmyId| self.armies.get(id).map(|a| a.faction.clone());
         let (Some(attacker), Some(defender)) =
             (faction(&request.attacker), faction(&request.defender))
