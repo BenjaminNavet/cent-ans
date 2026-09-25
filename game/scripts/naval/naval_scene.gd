@@ -384,7 +384,7 @@ func _on_events(events: Array) -> void:
 				lines.append(["%s lance ses grappins sur %s." % [name_cap, other.get("name", "?")], BattleUiKit.INK])
 				_play("shield_bash", pos)
 			"board":
-				lines.append(["Abordage ! %s monte à l'assaut de %s." % [name_cap, other.get("name", "?")], good if ours else bad])
+				lines.append(["Abordage ! %s monte à l'assaut %s." % [name_cap, _de(str(other.get("name", "?")))], good if ours else bad])
 				_play("war_cry", pos)
 				_play("contact", pos)
 			"capture":
