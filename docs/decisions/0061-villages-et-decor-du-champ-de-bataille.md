@@ -76,8 +76,13 @@ pour les cartes historiques d'EP7.
 ## Conséquences
 
 - Les batailles de campagne ont désormais un décor qui compte : couverts et défenses à prendre,
-  vignes et haies qui brisent les charges, camps à garder. L'IA ne cherche pas encore ces couverts ni
-  ne vise les camps (point ouvert).
+  vignes et haies qui brisent les charges, camps à garder. L'IA prend les zones couvrantes du décor
+  comme couverts (comme le village de B5) mais ne vise pas encore les camps ennemis (point ouvert).
+- Les feux des camps alimentent les fumées d'EP8 (`BattleScene.add_smoke_source`) ; EP8 ne pose pas
+  ses feux par défaut (`auto_campfires = false`) quand le décor a des camps. Le camp pillé fume en
+  colonnes noires.
+- Coût de rendu mesuré : ~+3 % de primitives, ~+90 appels, 0 à 3 % d'images par seconde à 15 000
+  soldats (banc A/B `--no-ep6-decor`, `docs/wip/ep6-villages-decor.md`).
 - Les batailles déjà jouées changent un peu (effets des zones, camps) ; les digests de B6 sont
   recalculés (même vainqueur).
 - EP7 pose ses décors historiques par `DecorPlan` sans toucher au rendu.
