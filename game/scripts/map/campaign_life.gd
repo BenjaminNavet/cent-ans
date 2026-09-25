@@ -195,17 +195,26 @@ func _refresh_terroir() -> void:
 	if key == _terroir_key:
 		return
 	_terroir_key = key
-	if terroir == null:
-		terroir = TerroirMask.new()
 	var landuse := VegetationFields.landuse(_map_data) if _map_data != null else null
-	terroir.build(_settlements.data.settlements, _settlements.data.hamlets, province_states, landuse, Vector2(_map_data.size))
-	_terrain.material.set_shader_parameter("terroir_mask", terroir.texture)
-	_terrain.material.set_shader_parameter("has_terroir", true)
+	if terroir == null:
+		# Premier affichage : masque tout de suite (pas de terroir « nu » au lancement).
+		terroir = TerroirMask.new()
+		terroir.build(_settlements.data.settlements, _settlements.data.hamlets, province_states, landuse, Vector2(_map_data.size))
+		_terrain.material.set_shader_parameter("terroir_mask", terroir.texture)
+		_terrain.material.set_shader_parameter("has_terroir", true)
+	else:
+		# PB1 : fins de tour suivantes, calcul dans un fil (installé par `update_view`).
+		terroir.build_async(_settlements.data.settlements, _settlements.data.hamlets, province_states, landuse, Vector2(_map_data.size))
 	stats["terroir_ms"] = terroir.build_ms
 	if effects != null:
 		effects.rebuild(province_states)
 		stats.merge(effects.stats, true)
 	print("CampaignLife: %s" % JSON.stringify(stats))
+
+
+func _exit_tree() -> void:
+	if terroir != null:
+		terroir.wait()
 
 
 ## Force une relecture complète au prochain `refresh` (chargement d'une partie).
@@ -217,6 +226,8 @@ func update_view(camera_distance: float) -> void:
 	_camera_distance = camera_distance
 	if not enabled:
 		return
+	if terroir != null and terroir.poll():
+		_terrain.material.set_shader_parameter("terroir_mask", terroir.texture)
 	seasons.update(get_process_delta_time())
 	if effects != null:
 		effects.set_season(seasons.weights)
