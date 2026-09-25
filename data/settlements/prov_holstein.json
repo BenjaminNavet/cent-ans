@@ -48,8 +48,8 @@
     "owner": null,
     "fortification_level": 2,
     "buildings": [
-      "bld_market",
       "bld_port",
+      "bld_fair",
       "bld_counting_house"
     ],
     "port": true,

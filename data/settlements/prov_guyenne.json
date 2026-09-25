@@ -8,7 +8,7 @@
     "weight": 45,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": true,
     "description": "Capitale du duché d'Aquitaine anglais sur la Garonne, premier port d'exportation du vin de Guyenne vers l'Angleterre.",
     "sources": ["Bordeaux", "Duché d'Aquitaine"]

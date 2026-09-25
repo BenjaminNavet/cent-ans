@@ -261,6 +261,25 @@ def geo_relief_shade(
     _print_sizes("Relief de rendu", [result.render_heightmap, result.relief_shade])
 
 
+@geo_app.command("horizon")
+def geo_horizon(
+    province: str = typer.Option(
+        "",
+        "--province",
+        help="Ne cuire que ces provinces (liste séparée par des virgules)",
+    ),
+) -> None:
+    """Relief réel autour de chaque province pour l'horizon des batailles (EP2)."""
+    from cent_ans_tools.geo import horizon as geo_horizon_step
+
+    only = [p.strip() for p in province.split(",") if p.strip()]
+    result = geo_horizon_step.build(only=only or None)
+    console.print(
+        f"{result.tiles} tuiles d'horizon ({result.total_bytes / 1e6:.1f} Mo, "
+        f"{result.seconds:.0f} s) dans game/assets/horizon/relief/"
+    )
+
+
 @geo_app.command("pyramid")
 def geo_pyramid(
     levels: str = typer.Option(
@@ -392,6 +411,36 @@ def geo_anchors_fine(
     console.print(result.summary())
 
 
+@geo_app.command("detail-check")
+def geo_detail_check(
+    zones: str = typer.Option(
+        "",
+        "--zones",
+        help="Identifiants de zones séparés par des virgules (toutes sinon)",
+    ),
+) -> None:
+    """E5 comparé à l'ancêtre E4 sur terre, par zone (lot ZG3b) : écart médian et p95.
+
+    Signale (rouge) les zones dont l'écart p95 dépasse
+    ``detail_dem.LAND_GAP_ALERT_M`` (5 m) : trait de côte ou relief mal
+    raccordé (ex. fuite du rehaussement de rendu, ADR 0036).
+    """
+    from cent_ans_tools.geo import detail_dem
+
+    zone_ids = tuple(z.strip() for z in zones.split(",") if z.strip())
+    for gap in detail_dem.land_gap_report(zone_ids):
+        if gap.median_m is None:
+            console.print(f"{gap.zone_id:20s} pas de tuiles E5")
+            continue
+        flag = gap.p95_m > detail_dem.LAND_GAP_ALERT_M
+        colour = "red" if flag else "green"
+        console.print(
+            f"[{colour}]{gap.zone_id:20s} n={gap.n_pixels:8d}  "
+            f"médiane={gap.median_m:6.2f} m  p95={gap.p95_m:6.2f} m  "
+            f"max={gap.max_m:6.2f} m{'  ALERTE' if flag else ''}[/{colour}]"
+        )
+
+
 @geo_app.command("navgrid")
 def geo_navgrid(
     lenient: bool = typer.Option(
@@ -508,7 +557,7 @@ def assets_heraldry() -> None:
 
 @assets_app.command("banners")
 def assets_banners() -> None:
-    """Dessine bannières (256×512) et pennons (512×128) de chaque faction (F10c)."""
+    """Dessine bannières (256×512), pennons (512×128) et étendards (1024×256) de chaque faction."""
     from cent_ans_tools import banners
 
     paths = banners.build()
@@ -738,6 +787,69 @@ def assets_illustrations(
         "Illustrations de l'encyclopédie",
         entry_art.convert,
     )
+
+
+@assets_app.command("horizon-panoramas")
+def assets_horizon_panoramas(
+    ids: str = typer.Option(
+        "", "--ids", help="Panoramas à générer (virgules ; défaut : tous)"
+    ),
+    generate: bool = typer.Option(
+        False, "--generate", help="Appels payants OpenRouter (sinon traitement seul)"
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Affiche les invites"),
+) -> None:
+    """Panoramas d'horizon peints des batailles (EP2) : génération puis détourage."""
+    from cent_ans_tools import horizon_panoramas
+
+    data = horizon_panoramas.load_data()
+    wanted = [i.strip() for i in ids.split(",") if i.strip()] or list(data["panoramas"])
+    if generate or dry_run:
+        horizon_panoramas.generate(wanted, dry_run=dry_run, data=data)
+    if not dry_run:
+        meta = horizon_panoramas.process_all(data)
+        console.print(f"{len(meta['panoramas'])} panoramas traités")
+
+
+@assets_app.command("art-plates")
+def assets_art_plates(
+    generate: bool = typer.Option(
+        False, "--generate", help="Génère aussi les manques (appel payant OpenRouter)"
+    ),
+    limit: int | None = typer.Option(
+        None, "--limit", help="Nombre maximal d'images générées"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    recrop: bool = typer.Option(
+        False, "--recrop", help="Recadre les planches Commons existantes (cache local)"
+    ),
+    envelope: float = typer.Option(
+        8.0, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """AR1 : planches illustrées (chargements, vignettes, fins) dans game/assets/art/."""
+    from cent_ans_tools import art_plates, portraits
+
+    written = art_plates.build_commons(force=recrop)
+    console.print(f"Commons : {len(written)} planche(s) écrite(s)")
+    if not (generate or dry_run):
+        return
+    jobs = art_plates.generation_jobs()[:limit]
+    for family in art_plates.FORMATS:
+        family_jobs = [job for job in jobs if art_plates.family_of(job) == family]
+        if not family_jobs:
+            continue
+        _run_art_batch(
+            family_jobs,
+            portraits.DEFAULT_MODEL,
+            envelope,
+            dry_run,
+            "planche(s)",
+            f"AR1 : planches illustrées ({family})",
+            lambda image, family=family: art_plates.convert_generated(image, family),
+        )
 
 
 @assets_app.command("codex-art")

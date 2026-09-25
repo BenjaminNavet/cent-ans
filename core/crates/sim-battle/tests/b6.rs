@@ -93,6 +93,9 @@ fn bocage_battles_still_engage() {
         let mut battle = demo_setup();
         battle.terrain = data_model::Terrain::Bocage;
         battle.village = Some(true);
+        // EP3: hedges and village only (a river is crossed at a bridge or
+        // a ford, and delays the contact).
+        battle.river = false;
         let mut sim = BattleSim::new(battle, seed).unwrap();
         sim.set_ai(SideId::Attacker, true);
         covered += usize::from(defensive_cover(sim.field(), SideId::Defender).is_some());
@@ -109,20 +112,24 @@ fn bocage_battles_still_engage() {
 #[test]
 fn the_site_reads_in_one_line() {
     let mut sim = demo_sim();
-    // The demo: dry spring plains, a farm with hedges and fences, a river.
+    // The demo: dry spring plains, a farm with hedges and fences, a river
+    // (EP3: bridged, with brooks).
     assert_eq!(
         sim.field().site_label_fr(),
-        "Sol sec · printemps · ferme · haies · clôtures · rivière et gués"
+        "Sol sec · printemps · ferme · haies · clôtures · rivière et ponts · ruisseaux"
     );
     let field = sim.field_mut();
     field.season = sim_battle::BattleSeason::Winter;
     field.river = None;
+    field.streams.clear();
+    field.bridges.clear();
     field.obstacles.retain(|o| o.kind == ObstacleKind::Hedge);
     field.village.as_mut().unwrap().farm = false;
     field.coast = Some(sim_battle::Coast {
         flank: sim_battle::Flank::West,
         shore_x: -20.0,
         beach: 40.0,
+        field_width: FIELD_WIDTH,
     });
     assert_eq!(
         sim.field().site_label_fr(),
@@ -130,13 +137,15 @@ fn the_site_reads_in_one_line() {
     );
 }
 
-/// B4 rhythm kept: the demo armies still meet after about 70 s.
+/// B4 rhythm kept: the demo armies still meet after about 70 s. EP3: the
+/// demo river is now bridged (no ford) and held by the English: the French
+/// cross by a bridge, and meet a little later.
 #[test]
 fn demo_contact_stays_near_seventy_seconds() {
     let mut sim = demo_sim();
     let contact = first_contact(&mut sim, 300.0);
     assert!(
-        contact.is_some_and(|t| (55.0..=95.0).contains(&t)),
+        contact.is_some_and(|t| (55.0..=160.0).contains(&t)),
         "contact at {contact:?}"
     );
 }
@@ -153,18 +162,20 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// digests again (same winners, same order of magnitude of the losses).
 /// BV2: men knocked down by the knights' charge stop fighting for a few
 /// seconds; R2b: the AI reads the relief and its line keeps together
-/// (digests recomputed after merging R2, BV2 and R2b; R4: seeds 3 and 11 after the
-/// military crest, same winner).
+/// (digests recomputed after merging R2, BV2 and R2b). EP5: standards fall
+/// and are taken under heavy losses (same winners; digests recomputed).
+/// R4: seeds 3 and 11 after the military crest, same winner. Digests
+/// recomputed after merging R4 into the EP lots (same winners).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "314 Some(Attacker) [27, 24, 25, 100, 100, 6, 57, 65, 45, 11]",
+            "314 Some(Attacker) [27, 24, 25, 100, 100, 6, 57, 65, 42, 10]",
         ),
         (
             11,
-            "259 Some(Attacker) [14, 33, 40, 98, 100, 11, 66, 87, 102, 36]",
+            "472 Some(Attacker) [14, 28, 35, 97, 96, 13, 59, 107, 115, 0]",
         ),
     ];
     for (seed, digest_before) in expected {
@@ -438,6 +449,7 @@ fn bocage_village_seed_5_engages_near_seventy_seconds() {
     let mut battle = demo_setup();
     battle.terrain = data_model::Terrain::Bocage;
     battle.village = Some(true);
+    battle.river = false;
     let mut sim = BattleSim::new(battle, 5).unwrap();
     sim.set_ai(SideId::Attacker, true);
     let contact = first_contact(&mut sim, 300.0);

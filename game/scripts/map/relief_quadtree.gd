@@ -59,8 +59,16 @@ const DIAGONALS: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(
 ## Profondeur des jupes, en espacements de sommets (bornée à `skirt_max`).
 @export var skirt_factor: float = 1.5
 @export var skirt_max: float = 4.0
+## PF1 : les patchs dont le point le plus proche est au-delà de cette distance de la caméra ne
+## portent plus d'ombre (réglée par `TerrainBuilder` selon le préréglage : bord d'une cascade du
+## soleil). Ils en reçoivent toujours. INF : tous portent une ombre.
+var shadow_cast_distance: float = INF
 
 var pyramid: ReliefPyramid
+## Lot ZG5b : objet optionnel dont `carve_job(key) -> Object` (sur le fil principal) rend une
+## tâche `apply(bytes) -> PackedByteArray` exécutée dans un fil avant le téléversement de la page
+## (lit des fleuves fins, `FineBedCarver`), ou null.
+var page_filter: Object = null
 var material: ShaderMaterial
 var map_data: MapData
 var stats: Dictionary = {}
@@ -295,7 +303,7 @@ func _add_item(n: int, c: int, r: int, quadrant: int, bmin: Vector3, bmax: Vecto
 	_items.append({
 		"key": (n << 40) | (r << 20) | (c << 3) | quadrant,
 		"n": n, "origin": Vector2(bmin.x, bmin.z), "quadrant": quadrant,
-		"fine": fine, "coarse": coarse, "ymin": bmin.y, "ymax": bmax.y, "center": center,
+		"fine": fine, "coarse": coarse, "ymin": bmin.y, "ymax": bmax.y, "center": center, "dist": dist,
 	})
 
 
@@ -357,6 +365,9 @@ func _apply_items() -> void:
 			slot.custom_aabb = AABB(Vector3(0.0, float(item["ymin"]) - skirt, 0.0), Vector3(quads, float(item["ymax"]) - float(item["ymin"]) + skirt, quads))
 			slot.set_instance_shader_parameter("qt_node", Vector4(origin.x, origin.y, s, n))
 			slot.visible = true
+		var cast := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if float(item["dist"]) < shadow_cast_distance else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if slot.cast_shadow != cast:
+			slot.cast_shadow = cast
 		var fine: int = item["fine"]
 		var coarse: int = item["coarse"]
 		var fade := 1.0
@@ -576,6 +587,8 @@ func _collect_jobs(block: bool = false) -> void:
 		_jobs.erase(key)
 		if _finish_job(key, entry["job"]):
 			uploads += 1
+	if block and not _jobs.is_empty():
+		_collect_jobs(true)  # ZG5b : pages parties au creusement pendant cette passe
 
 
 func _finish_job(key: int, job: PageJob) -> bool:
@@ -583,6 +596,12 @@ func _finish_job(key: int, job: PageJob) -> bool:
 		pyramid.mark_broken(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
 		push_warning("ReliefQuadtree: unreadable tile %s" % job.path)
 		return false
+	if page_filter != null and job.filter == null:
+		var task: Object = page_filter.call("carve_job", key)
+		if task != null:
+			job.filter = task
+			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
+			return false
 	_decode_ms.append(job.decode_ms)
 	return _upload(key, job)
 
@@ -840,6 +859,15 @@ class PageJob:
 	var image: Image
 	var decode_ms: float = 0.0
 	var ok: bool = false
+	## Lot ZG5b : retouche des octets (lit creusé) dans un fil, puis image refaite.
+	var filter: Object = null
+
+	func run_filter() -> void:
+		var t0 := Time.get_ticks_usec()
+		bytes = filter.call("apply", bytes)
+		var decoded := decode_ms
+		_finish(t0)
+		decode_ms += decoded
 
 	func run() -> void:
 		var t0 := Time.get_ticks_usec()

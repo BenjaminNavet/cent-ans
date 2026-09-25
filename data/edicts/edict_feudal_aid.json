@@ -7,8 +7,8 @@
   "delay_turns": 0,
   "effects": [
     { "effect": "tax_income", "value": 20, "mode": "percent" },
-    { "effect": "unrest", "value": 10 },
-    { "effect": "unrest", "class": "peasants", "value": 5 }
+    { "effect": "unrest", "value": 6 },
+    { "effect": "unrest", "class": "peasants", "value": 4 }
   ],
   "sources": ["Économie médiévale"]
 }

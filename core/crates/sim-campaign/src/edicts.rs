@@ -275,6 +275,44 @@ pub fn edict_effects(
 /// (EQ1): less in a calm province, more near revolt.
 const AI_EDICT_UNREST_REFERENCE: f64 = 30.0;
 
+/// Seasons of income under which the AI deems its treasury low (EQ2).
+const AI_EDICT_RESERVE_SEASONS: i64 = 3;
+/// Vassals counted in the weight of tax edicts (EQ2: the feudal aid is
+/// levied on the vassals), and their weight each.
+const AI_EDICT_MAX_VASSALS: usize = 3;
+const AI_EDICT_VASSAL_WEIGHT: f64 = 0.25;
+
+/// Weight of a tax edict's income for the AI (EQ2): 1 at peace with a
+/// balanced budget, 2 at war or in deficit, 4 when the treasury is also
+/// below [`AI_EDICT_RESERVE_SEASONS`] of income, 6 in debt; each vassal
+/// adds [`AI_EDICT_VASSAL_WEIGHT`] (up to [`AI_EDICT_MAX_VASSALS`]). The
+/// feudal aid, the only such edict, is thus chosen by a realm at war and
+/// short of money, in its calm provinces, and dropped once the need ends.
+fn ai_money_weight(state: &CampaignState, faction: &FactionId) -> f64 {
+    let Some(f) = state.factions.get(faction) else {
+        return 1.0;
+    };
+    let at_war = f.at_war_with.iter().any(|e| e.as_str() != "fac_rebels");
+    let deficit = f.income_last_turn < f.upkeep_last_turn;
+    let low = f.treasury < AI_EDICT_RESERVE_SEASONS * f.income_last_turn.max(0);
+    let base = if f.treasury < 0 {
+        6.0
+    } else if (at_war || deficit) && low {
+        4.0
+    } else if at_war || deficit {
+        2.0
+    } else {
+        1.0
+    };
+    let vassals = state
+        .factions
+        .values()
+        .filter(|v| v.alive && v.suzerain.as_ref() == Some(faction))
+        .count()
+        .min(AI_EDICT_MAX_VASSALS);
+    base + vassals as f64 * AI_EDICT_VASSAL_WEIGHT
+}
+
 /// Simple deterministic AI, one pass per faction (mirrors
 /// `table::ai_choose_diets`'s scoring, without the budget check since
 /// edicts cost nothing): in each wholly-held province, switch to the
@@ -310,8 +348,8 @@ pub fn ai_choose_edicts(state: &CampaignState, data: &GameData, faction: &Factio
             .get(&id)
             .map_or(0.0, |p| crate::population::weighted_unrest(&p.population));
         let unrest_weight = (unrest / AI_EDICT_UNREST_REFERENCE).clamp(0.25, 3.0);
-        let needs_money = !f.at_war_with.is_empty() || f.income_last_turn < f.upkeep_last_turn;
         let needs_men = !f.at_war_with.is_empty();
+        let money_weight = ai_money_weight(state, faction);
         let score = |edict: &Edict| -> f64 {
             edict
                 .effects
@@ -324,7 +362,7 @@ pub fn ai_choose_edicts(state: &CampaignState, data: &GameData, faction: &Factio
                     };
                     match e.effect {
                         EffectKind::Unrest => -value * unrest_weight,
-                        EffectKind::TaxIncome if needs_money => value * 2.0,
+                        EffectKind::TaxIncome => value * money_weight,
                         EffectKind::RecruitSlots
                         | EffectKind::RecruitCost
                         | EffectKind::Garrison
@@ -470,7 +508,7 @@ mod tests {
         let after = edict_effects(&state, &data, &province);
         assert_eq!(before.tax_income.percent, 0.0);
         assert_eq!(after.tax_income.percent, 20.0);
-        assert_eq!(after.unrest.flat, 10.0);
+        assert_eq!(after.unrest.flat, 6.0);
         // Merged into the province's full effect totals too, on top of
         // whatever the buildings/governor already contribute.
         let merged_after = state.province_effects(&data, &province);
@@ -595,5 +633,47 @@ mod tests {
                 probe.apply_order(&data, &faction, order).unwrap();
             }
         }
+    }
+
+    /// EQ2: the feudal aid is chosen by a realm at war and short of money
+    /// in its calm provinces, never by a rich realm at peace.
+    #[test]
+    fn ai_levies_the_feudal_aid_only_when_short_of_money() {
+        let (mut state, data) = setup();
+        let faction = state.player_faction.clone();
+        let aid = EdictId::new("edict_feudal_aid").expect("well-formed id");
+        let calm: Vec<ProvinceId> = state
+            .controlled_provinces(&faction)
+            .into_iter()
+            .filter(|p| state.holds_whole_province(&faction, p))
+            .collect();
+        for id in &calm {
+            let p = state.provinces.get_mut(id).expect("province");
+            for class in [
+                &mut p.population.peasants,
+                &mut p.population.burghers,
+                &mut p.population.clergy,
+                &mut p.population.nobility,
+            ] {
+                class.unrest = 5;
+            }
+        }
+        let chooses_aid = |state: &CampaignState| {
+            ai_choose_edicts(state, &data, &faction)
+                .iter()
+                .any(|o| matches!(o, Order::SetEdict { edict, .. } if *edict == aid))
+        };
+        let f = state.factions.get_mut(&faction).expect("faction");
+        f.at_war_with.clear();
+        f.treasury = 100_000;
+        f.income_last_turn = 5_000;
+        f.upkeep_last_turn = 3_000;
+        assert!(!chooses_aid(&state), "rich realm at peace");
+        let f = state.factions.get_mut(&faction).expect("faction");
+        f.at_war_with
+            .insert(FactionId::new("fac_england").expect("well-formed id"));
+        assert!(!chooses_aid(&state), "rich realm at war");
+        state.factions.get_mut(&faction).expect("faction").treasury = 2_000;
+        assert!(chooses_aid(&state), "realm at war with a low treasury");
     }
 }

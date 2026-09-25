@@ -76,7 +76,7 @@
     "fortification_level": 2,
     "buildings": [
       "bld_market",
-      "bld_cathedral",
+      "bld_collegiate_church",
       "bld_port"
     ],
     "port": true,

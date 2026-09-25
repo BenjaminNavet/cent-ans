@@ -1037,7 +1037,7 @@ impl CampaignState {
             return Some(format!("file de recrutement pleine ({slots} par tour)"));
         }
         if let Some(building) = &unit_type.required_building {
-            if !settlement.buildings.contains(building) {
+            if !data.has_building(&settlement.buildings, building) {
                 let name = data
                     .buildings
                     .get(building)

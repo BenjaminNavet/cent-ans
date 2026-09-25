@@ -11,9 +11,10 @@ extends RefCounted
 ## Complète la carte de neige / boue piétinée de B7/B8 (`BattleTerrain.update_trample`), qui ne
 ## vit que sur sol enneigé ou détrempé et reste propriété du terrain.
 
-const TEXEL := 1.0
+## EP1 : 1 m sur le champ standard, 2 m sur les grands champs (mémoire, envoi GPU).
+var TEXEL := 1.0
 ## Rectangle couvert (le champ de bataille et ses abords, en mètres).
-const RECT := Rect2(0.0, -100.0, 1200.0, 1000.0)
+var RECT := Rect2(0.0, -100.0, 1200.0, 1000.0)
 ## Envoi de la texture au plus toutes les `STEP` secondes de bataille.
 const STEP := 0.5
 ## Plafonds (0-255) : une troupe qui marche foule l'herbe sans la raser.
@@ -35,7 +36,10 @@ var _dirty: bool = false
 var _last: Dictionary = {}  # id -> position (x, z) au dernier passage
 
 
-func setup() -> void:
+## `field` : largeur et profondeur du champ (EP1), 1200 × 800 par défaut.
+func setup(field: Vector2 = Vector2(1200.0, 800.0)) -> void:
+	RECT = Rect2(0.0, -100.0, field.x, field.y + 200.0)
+	TEXEL = 1.0 if field.x * field.y <= 1200.0 * 800.0 * 1.5 else 2.0
 	_w = int(RECT.size.x / TEXEL)
 	_h = int(RECT.size.y / TEXEL)
 	_bytes.resize(_w * _h * 2)

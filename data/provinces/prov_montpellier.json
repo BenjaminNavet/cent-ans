@@ -84,16 +84,12 @@
     }
   },
   "buildings": [
-    "bld_market",
-    "bld_parish_church",
     "bld_windmill",
     "bld_port",
     "bld_vineyard_press",
     "bld_weaving_workshop",
-    "bld_abbey",
     "bld_cathedral",
     "bld_fair",
-    "bld_guild_hall",
     "bld_hotel_dieu",
     "bld_stone_walls",
     "bld_muster_field",

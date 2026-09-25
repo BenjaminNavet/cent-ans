@@ -81,6 +81,13 @@ var _rescale_queue: Dictionary = {}
 var _rescale_changed_ms: int = 0
 
 var map_data: MapData
+## PF1 : préréglage de qualité (`RenderQuality`, groupe `CLIENT_GROUP`) : densité du quadtree de
+## relief (ZG2) et, sans pyramide en cache, relief fin `FineTerrainJob` et LOD proche.
+var quality_fine: bool = true
+var _quality: Dictionary = {}
+var _base_near_distance: float = -1.0
+## Bancs (`--map-ab`, `relief_cast:<n>`) : impose le nombre de cascades (0 = préréglage).
+var relief_shadow_override: int = 0
 var material: ShaderMaterial
 var chunk_px: int = 0
 var build_stats: Dictionary = {}
@@ -93,6 +100,7 @@ var _is_near: PackedByteArray = PackedByteArray()
 ## Grilles de hauteurs des maillages (pour `surface_height_at`) : {"heights", "side", "unit"}.
 var _far_grids: Array[Dictionary] = []
 var _near_grids: Dictionary = {}
+var _grid_indices_cache: Dictionary = {}  # quads → PackedInt32Array
 ## Relief fin : index → {"mesh", "grid", "last_used"} ; tâches en cours : index → {"task", "job"}.
 var _fine_cache: Dictionary = {}
 ## Pas utilisé pour construire chaque entrée de `_fine_cache` (T2, détecte les tuiles à
@@ -145,8 +153,42 @@ const FALLBACK_PALETTE: Array[Color] = [
 ]
 
 
+func apply_render_quality(p: Dictionary) -> void:
+	_quality = p
+	if _base_near_distance < 0.0:
+		_base_near_distance = near_distance
+	quality_fine = bool(p.get("fine_relief", true))
+	near_distance = _base_near_distance * float(p.get("terrain_near", 1.0))
+	if quadtree != null:
+		_apply_quadtree_quality()
+
+
+## Quadtree : espacement des sommets à l'écran, budget de nœuds et profondeur au-delà des données
+## (immédiats) ; couches de pages (au prochain chargement de la carte : tableau alloué au `setup`).
+func _apply_quadtree_quality() -> void:
+	quadtree.max_vertex_px = float(_quality.get("relief_vertex_px", quadtree.max_vertex_px))
+	quadtree.max_items = int(_quality.get("relief_items", quadtree.max_items))
+	quadtree.extra_depth = int(_quality.get("relief_extra_depth", quadtree.extra_depth))
+
+
+## PF1 : portée des ombres portées par le relief du quadtree : bord de la cascade
+## `relief_shadow_cascades` du soleil (1 = première cascade ; 4 ou plus = toutes).
+func _relief_shadow_distance() -> float:
+	var cascades := relief_shadow_override if relief_shadow_override > 0 else int(_quality.get("relief_shadow_cascades", 4))
+	var sun := get_parent().get_node_or_null("Sun") as DirectionalLight3D if get_parent() != null else null
+	if sun == null or not sun.shadow_enabled:
+		return INF
+	var splits := 4 if sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS else 2
+	if cascades >= splits:
+		return INF
+	var edges := [sun.directional_shadow_split_1, sun.directional_shadow_split_2, sun.directional_shadow_split_3]
+	return sun.directional_shadow_max_distance * float(edges[cascades - 1])
+
+
 func build(data: MapData) -> void:
 	var t0 := Time.get_ticks_msec()
+	add_to_group(RenderQuality.CLIENT_GROUP)
+	apply_render_quality(RenderQuality.preset())
 	clear_terrain()
 	# ZG4 : nouvelle carte à l'échelle stratégique (les maillages E0 sont cuits à HEIGHT_SCALE).
 	_rescale_queue.clear()
@@ -159,9 +201,21 @@ func build(data: MapData) -> void:
 	_is_near.resize(CHUNKS * CHUNKS)
 	_is_near.fill(0)
 	var vertex_count := 0
+	# PB1 : sommets des 256 tuiles lointaines calculés en parallèle (fonction pure des hauteurs) ;
+	# maillages et nœuds créés ensuite sur le fil principal, dans le même ordre.
+	var far_vertices: Array = []
+	var far_heights: Array = []
+	far_vertices.resize(CHUNKS * CHUNKS)
+	far_heights.resize(CHUNKS * CHUNKS)
+	var task := WorkerThreadPool.add_group_task(func(i: int) -> void:
+		var heights := PackedFloat32Array()
+		far_vertices[i] = _chunk_vertices(i % CHUNKS, i / CHUNKS, far_step, heights)
+		far_heights[i] = heights, CHUNKS * CHUNKS, -1, true, "terrain far chunks")
+	WorkerThreadPool.wait_for_group_task_completion(task)
 	for cy in CHUNKS:
 		for cx in CHUNKS:
-			var built := _build_chunk(cx, cy, far_step)
+			var i := cy * CHUNKS + cx
+			var built := _chunk_from(far_vertices[i], far_heights[i], far_step)
 			var mesh: ArrayMesh = built["mesh"]
 			_far_grids.append(built["grid"])
 			vertex_count += mesh.surface_get_array_len(0)
@@ -253,6 +307,60 @@ func surface_height_at(x: float, y: float) -> float:
 	if grid.is_empty():
 		return map_data.surface_world_at(x, y)
 	return maxf(grid_height(grid, x - (index % CHUNKS) * chunk_px, y - (index / CHUNKS) * chunk_px), 0.0)
+
+
+## `surface_height_at` pour une série de points (PB1 : rubans de route, recalages) : même
+## résultat, la grille de la tuile courante reste en cache tant que les points y restent.
+func surface_heights_at(points: PackedVector2Array) -> PackedFloat32Array:
+	var result := PackedFloat32Array()
+	result.resize(points.size())
+	if quadtree != null or map_data == null:
+		for n in points.size():
+			result[n] = surface_height_at(points[n].x, points[n].y)
+		return result
+	var current := -2
+	var heights := PackedFloat32Array()
+	var side := 0
+	var unit := 1.0
+	var ox := 0.0
+	var oy := 0.0
+	var has_grid := false
+	for n in points.size():
+		var p := points[n]
+		var index := chunk_index_at(p.x, p.y)
+		if index != current:
+			current = index
+			has_grid = false
+			if index >= 0 and map_data != null:
+				var grid: Dictionary = _grid_for(index)
+				if not grid.is_empty():
+					has_grid = true
+					heights = grid["heights"]
+					side = grid["side"]
+					unit = grid["unit"]
+					ox = (index % CHUNKS) * chunk_px
+					oy = (index / CHUNKS) * chunk_px
+		if not has_grid:
+			result[n] = map_data.surface_world_at(p.x, p.y) if map_data != null else 0.0
+			continue
+		var gx := clampf((p.x - ox) / unit, 0.0, side - 1.001)
+		var gy := clampf((p.y - oy) / unit, 0.0, side - 1.001)
+		var i := int(gx)
+		var j := int(gy)
+		var tx := gx - i
+		var ty := gy - j
+		var a := j * side + i
+		var ha := heights[a]
+		var hd := heights[a + side + 1]
+		var h: float
+		if tx >= ty:
+			var hb := heights[a + 1]
+			h = ha + (hb - ha) * tx + (hd - hb) * ty
+		else:
+			var hc := heights[a + side]
+			h = ha + (hd - hc) * tx + (hc - ha) * ty
+		result[n] = maxf(h, 0.0)
+	return result
 
 
 ## Grille de hauteurs du maillage affiché pour la tuile `index` ({"heights", "side", "unit"},
@@ -394,7 +502,7 @@ func update_lod(camera_position: Vector3, camera_distance: float = INF, view_cen
 		var is_near := camera_position.distance_to(center) < near_distance or wanted_fine.has(i)
 		if is_near and _is_near[i] != 1:
 			if not _near_meshes.has(i):
-				if builds >= max_near_builds_per_frame:
+				if builds >= max_near_builds_per_frame or (builds > 0 and not FrameBudget.has_time()):
 					continue
 				var built := _build_chunk(i % CHUNKS, i / CHUNKS, near_step)
 				_near_meshes[i] = built["mesh"]
@@ -434,7 +542,7 @@ func _select_fine_step(camera_distance: float) -> int:
 ## Tuiles voulues en relief fin (les plus proches du point visé), triées par distance.
 func _wanted_fine(camera_distance: float, view_center: Vector3, fine_distance: float) -> Array:
 	var result: Array = []
-	if not fine_enabled or (_fine_tiles_dir == "" and quadtree == null) or view_center == Vector3.INF or camera_distance >= fine_distance:
+	if not fine_enabled or not quality_fine or (_fine_tiles_dir == "" and quadtree == null) or view_center == Vector3.INF or camera_distance >= fine_distance:
 		return result
 	var center := Vector2(view_center.x, view_center.z)
 	var radius := maxf(fine_radius, camera_distance * 1.2)
@@ -472,6 +580,8 @@ func _setup_quadtree() -> void:
 	pyramid = relief
 	quadtree = ReliefQuadtree.new()
 	quadtree.name = "ReliefQuadtree"
+	quadtree.max_pages = int(_quality.get("relief_pages", quadtree.max_pages))
+	_apply_quadtree_quality()
 	add_child(quadtree)
 	quadtree.setup(pyramid, material, map_data, _chunk_bounds_m())
 	quadtree.surface_changed.connect(_on_quadtree_surface_changed)
@@ -509,6 +619,7 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 		for chunk in _chunks:
 			chunk.visible = parchment
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() and not parchment else null
+	quadtree.shadow_cast_distance = _relief_shadow_distance()
 	var t0 := Time.get_ticks_usec()
 	quadtree.update_view(camera)
 	build_stats["qt_update_ms_max"] = maxf(float(build_stats.get("qt_update_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
@@ -997,20 +1108,54 @@ func _build_material() -> void:
 
 
 ## Maillage d'une tuile et grille de ses hauteurs : {"mesh": ArrayMesh, "grid": Dictionary}.
+## PB1 : hauteurs prises dans les sommets calculés (plus de relecture `surface_get_arrays` du
+## maillage) et indices partagés par toutes les tuiles de même pas.
 func _build_chunk(cx: int, cy: int, step: int) -> Dictionary:
-	var mesh := _build_chunk_mesh(cx, cy, step)
-	var vertices: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 	var heights := PackedFloat32Array()
-	heights.resize(vertices.size())
-	for k in vertices.size():
-		heights[k] = vertices[k].y
-	var side := ceili(float(chunk_px) / step) + 1
-	return {"mesh": mesh, "grid": {"heights": heights, "side": side, "unit": float(step)}}
+	var vertices := _chunk_vertices(cx, cy, step, heights)
+	return _chunk_from(vertices, heights, step)
 
 
-## Maillage d'une tuile en coordonnées locales (origine = coin nord-ouest de la tuile).
-## Face avant = sens horaire vu du dessus (convention Godot).
-func _build_chunk_mesh(cx: int, cy: int, step: int) -> ArrayMesh:
+func _chunk_from(vertices: PackedVector3Array, heights: PackedFloat32Array, step: int) -> Dictionary:
+	var quads := ceili(float(chunk_px) / step)
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_INDEX] = _grid_indices(quads)
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return {"mesh": mesh, "grid": {"heights": heights, "side": quads + 1, "unit": float(step)}}
+
+
+## Indices d'une grille `quads` × `quads` (face avant = sens horaire vu du dessus, convention
+## Godot), mis en cache par taille.
+func _grid_indices(quads: int) -> PackedInt32Array:
+	if _grid_indices_cache.has(quads):
+		return _grid_indices_cache[quads]
+	var side := quads + 1
+	var indices := PackedInt32Array()
+	indices.resize(quads * quads * 6)
+	var k := 0
+	for j in quads:
+		for i in quads:
+			var a := j * side + i
+			var b := a + 1
+			var c := a + side
+			var d := c + 1
+			indices[k] = a
+			indices[k + 1] = b
+			indices[k + 2] = d
+			indices[k + 3] = a
+			indices[k + 4] = d
+			indices[k + 5] = c
+			k += 6
+	_grid_indices_cache[quads] = indices
+	return indices
+
+
+## Sommets d'une tuile en coordonnées locales (origine = coin nord-ouest de la tuile) ; remplit
+## `heights` avec leurs hauteurs (grille de `surface_height_at`).
+func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -> PackedVector3Array:
 	var x0 := cx * chunk_px
 	var y0 := cy * chunk_px
 	var quads := ceili(float(chunk_px) / step)
@@ -1025,6 +1170,7 @@ func _build_chunk_mesh(cx: int, cy: int, step: int) -> ArrayMesh:
 	var scale := MapData.HEIGHT_SCALE
 	var vertices := PackedVector3Array()
 	vertices.resize(side * side)
+	heights.resize(side * side)
 	# LOD lointain : bilinéaire dans le mipmap 4×4 (filtre ≈ 8 px), si le pas est multiple de 4.
 	var smooth := step >= far_step and step % 4 == 0 and not _smooth_bytes.is_empty()
 	var sw := _smooth_size.x
@@ -1055,31 +1201,11 @@ func _build_chunk_mesh(cx: int, cy: int, step: int) -> ArrayMesh:
 					v01 = float((bytes[o] << 8) | bytes[o + 1]) / 65535.0
 			else:
 				v01 = float(bytes[row + px]) / 255.0
-			vertices[k] = Vector3(px - x0, (h_min + v01 * h_range) * scale, py - y0)
+			var y := (h_min + v01 * h_range) * scale
+			vertices[k] = Vector3(px - x0, y, py - y0)
+			heights[k] = y
 			k += 1
-	var indices := PackedInt32Array()
-	indices.resize(quads * quads * 6)
-	k = 0
-	for j in quads:
-		for i in quads:
-			var a := j * side + i
-			var b := a + 1
-			var c := a + side
-			var d := c + 1
-			indices[k] = a
-			indices[k + 1] = b
-			indices[k + 2] = d
-			indices[k + 3] = a
-			indices[k + 4] = d
-			indices[k + 5] = c
-			k += 6
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_INDEX] = indices
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return mesh
+	return vertices
 
 
 static func chunk_px_for(map_size: Vector2i) -> int:

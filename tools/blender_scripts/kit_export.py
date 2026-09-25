@@ -1,7 +1,7 @@
 """Blender side of the building kit (lot BR1, ADR 0021): meshes, glTF export and previews.
 
 Run headless:
-    blender --background --python kit_export.py -- export <out_dir>
+    blender --background --python kit_export.py -- export <out_dir> [kind ...]
     blender --background --python kit_export.py -- preview <prefix> [kind[:seed][!] ...] [--low]
 
 ``export`` writes the battle set (``high`` detail, a few seeds per kind, burned ruins) to
@@ -270,14 +270,28 @@ BATTLE_SET = {
     "cart": [(s, {}, False) for s in (111, 112, 113, 114)],
     "barrels": [(121, {}, False), (122, {}, False), (123, {}, False)],
     "woodpile": [(131, {}, False), (132, {}, False)],
+    # EP3: bridge pieces (assembled by game/scripts/battle/battle_bridges.gd).
+    "bridge_stone_bay": [(141, {}, False)],
+    "bridge_stone_end": [(142, {}, False)],
+    "bridge_wood_bay": [(143, {}, False)],
+    "bridge_wood_end": [(144, {}, False)],
 }
 
 
-def export_battle(out_dir: Path) -> None:
-    """Write the battle building set and its manifest."""
+def export_battle(out_dir: Path, kinds: list[str] | None = None) -> None:
+    """Write the battle building set and its manifest.
+
+    With ``kinds``, only those kinds are written and merged into the existing manifest (EP3:
+    adding the bridge pieces without rewriting every building).
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     manifest = {}
+    manifest_path = out_dir / "manifest.json"
+    if kinds and manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text())
     for kind, entries in BATTLE_SET.items():
+        if kinds and kind not in kinds:
+            continue
         index = {"intact": 0, "ruin": 0}
         for seed, dims, ruined in entries:
             reset_scene()
@@ -435,7 +449,7 @@ def main() -> None:
         raise SystemExit("usage: -- export <dir> | preview <png> [kind ...]")
     command = argv[0]
     if command == "export":
-        export_battle(Path(argv[1]))
+        export_battle(Path(argv[1]), argv[2:] or None)
     elif command == "preview":
         args = argv[2:]
         detail = "low" if "--low" in args else "high"

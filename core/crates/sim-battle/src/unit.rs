@@ -98,6 +98,41 @@ impl UnitFate {
     }
 }
 
+/// The regiment's standard (lot EP5, ADR 0034).
+#[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
+#[serde(tag = "state", rename_all = "snake_case")]
+pub enum StandardState {
+    /// Flying above the regiment, held by its bearer.
+    #[default]
+    Carried,
+    /// On the ground at `(x, z)`; raised or taken when `timer` runs out.
+    Fallen { x: f64, z: f64, timer: f64 },
+    /// Taken by the enemy regiment `by` (a trophy).
+    Captured { by: u32 },
+    /// Left on the ground at `(x, z)` when the regiment fled or perished and
+    /// no enemy was there to take it (the victor collects it at the end).
+    Lost { x: f64, z: f64 },
+}
+
+impl StandardState {
+    pub fn key(self) -> &'static str {
+        match self {
+            StandardState::Carried => "carried",
+            StandardState::Fallen { .. } => "fallen",
+            StandardState::Captured { .. } => "captured",
+            StandardState::Lost { .. } => "lost",
+        }
+    }
+
+    /// Ground position of a fallen or lost standard.
+    pub fn ground(self) -> Option<(f64, f64)> {
+        match self {
+            StandardState::Fallen { x, z, .. } | StandardState::Lost { x, z } => Some((x, z)),
+            _ => None,
+        }
+    }
+}
+
 /// A regiment on the field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Unit {
@@ -216,6 +251,9 @@ pub struct Unit {
     pub knocked: f64,
     #[serde(default)]
     pub knocked_timer: f64,
+    /// EP5: the regiment's standard.
+    #[serde(default)]
+    pub standard: StandardState,
     /// R4: simulated time at which enemy shooters last saw the regiment
     /// (a target of indirect volleys for a few seconds after).
     #[serde(default = "unseen")]
@@ -293,6 +331,7 @@ impl Unit {
             loss_by: None,
             knocked: 0.0,
             knocked_timer: 0.0,
+            standard: StandardState::Carried,
             seen_at: unseen(),
         }
     }
@@ -540,25 +579,9 @@ impl Unit {
         if m == 0 {
             return Vec::new();
         }
-        let n = self.soldiers();
         let (width, depth) = self.extent();
         let (sx, sz) = self.spacing();
-        // Figure layout: the formation's own shape for m figures, squeezed
-        // back into the simulated rectangle. Lines and columns gain ranks as
-        // well as files (√scale each way) so that a large regiment does not
-        // turn into a single file of shoulder-to-shoulder men; riders keep
-        // at least a horse length between ranks.
-        let (ranks, files) = match self.formation {
-            Formation::Line | Formation::Column => {
-                let (r, _) = self.ranks_files(n);
-                let min_depth = if self.mounted { 2.7 } else { 0.8 };
-                let most = ((depth / min_depth).floor() as u32).max(1);
-                let r = ((f64::from(r) * scale.sqrt()).round() as u32).clamp(1, most.max(r));
-                let r = r.min(m);
-                (r, m.div_ceil(r))
-            }
-            _ => self.ranks_files(m),
-        };
+        let (ranks, files) = self.figure_ranks_files(scale, m);
         let (fw, fd) = match self.formation {
             Formation::Line | Formation::Column => (f64::from(files) * sx, f64::from(ranks) * sz),
             _ => {
@@ -603,6 +626,84 @@ impl Unit {
                 )
             })
             .collect()
+    }
+
+    /// `(ranks, files)` of the figure grid for `m` figures drawn at `scale`.
+    /// Figure layout: the formation's own shape for m figures, squeezed back
+    /// into the simulated rectangle. Lines and columns gain ranks as well as
+    /// files (√scale each way) so that a large regiment does not turn into a
+    /// single file of shoulder-to-shoulder men; riders keep at least a horse
+    /// length between ranks.
+    fn figure_ranks_files(&self, scale: f64, m: u32) -> (u32, u32) {
+        if (scale - 1.0).abs() < 1e-9 {
+            return self.ranks_files(m);
+        }
+        match self.formation {
+            Formation::Line | Formation::Column => {
+                let (r, _) = self.ranks_files(self.soldiers());
+                let (_, depth) = self.extent();
+                let min_depth = if self.mounted { 2.7 } else { 0.8 };
+                let most = ((depth / min_depth).floor() as u32).max(1);
+                let r = ((f64::from(r) * scale.sqrt()).round() as u32).clamp(1, most.max(r));
+                let r = r.min(m);
+                (r, m.div_ceil(r))
+            }
+            _ => self.ranks_files(m),
+        }
+    }
+
+    /// EP5: indices, in the figure buffer drawn at `scale`, of the figures
+    /// that carry the regiment's standards (`bearers`, 1 or 2): the centre
+    /// of the front rank (of the middle rank for shooters in line, whose
+    /// front rank must see; the tip of a wedge). Rendering only.
+    pub fn standard_slots(&self, scale: f64, bearers: u32) -> Vec<u32> {
+        let m = self.figure_count(scale);
+        if m == 0 || bearers == 0 {
+            return Vec::new();
+        }
+        let bearers = bearers.min(m);
+        if self.formation == Formation::Wedge {
+            // Row k holds 2k + 1 riders from index k²: the tip, then the
+            // second row's ends.
+            return match bearers {
+                1 => vec![0],
+                _ => vec![1.min(m - 1), 3.min(m - 1)],
+            };
+        }
+        let (ranks, files) = self.figure_ranks_files(scale, m);
+        let rank = if self.category == UnitCategory::Ranged
+            && self.formation == Formation::Line
+            && ranks > 2
+        {
+            ranks / 2
+        } else {
+            0
+        };
+        (0..bearers)
+            .map(|b| {
+                let file = files * (2 * b + 1) / (2 * bearers);
+                (rank * files + file.min(files.saturating_sub(1))).min(m - 1)
+            })
+            .collect()
+    }
+
+    /// EP5: world `(x, z)` where the bearer of the regiment's standard
+    /// stands (front centre, the middle for shooters in line).
+    pub fn standard_point(&self) -> (f64, f64) {
+        let (_, depth) = self.extent();
+        let (fx, fz) = self.forward();
+        let ahead = if self.category == UnitCategory::Ranged && self.formation == Formation::Line {
+            0.0
+        } else {
+            depth * 0.5
+        };
+        (self.x + fx * ahead, self.z + fz * ahead)
+    }
+
+    /// EP5: the regiment carries a standard (not siege engines nor the
+    /// battle-only ram).
+    pub fn has_standard(&self) -> bool {
+        !self.synthetic && self.category != UnitCategory::Siege
     }
 
     /// World (x, z, angle) of every living soldier, with a small stable jitter

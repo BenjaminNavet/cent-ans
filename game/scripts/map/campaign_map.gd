@@ -16,6 +16,9 @@ extends Node3D
 ##   --stage=tech               panneau des technologies (une recherche lancée, M6) ;
 ##   --stage=tech_civil         idem sur l'onglet Civil.
 ##   --stage=battle             bataille France–Angleterre mise en scène, dialogue d'avant-bataille (M7).
+##   --stage=loading_battle|loading_siege|loading_naval  AR1 : écran de chargement illustré.
+##   --stage=ending_victory|ending_defeat  AR1 : fin de campagne illustrée.
+##   --stage=report_vignette    AR1 : rapport de saison avec sa vignette (peste).
 ##   --stage=tooltips           recrutement de la capitale + infobulles riches figées (F2).
 ##   --stage=tutorial|encyclopedia  étape du tutoriel / fiche d'encyclopédie (F8).
 ##   --focus=<x>,<y>,<distance>  place la caméra (coordonnées carte) au démarrage.
@@ -125,6 +128,7 @@ func _ready() -> void:
 	_setup_settlements()
 	# Lot V4 : après les colonies (l'eau passe sous les villes, ponts-portes aux murs).
 	rivers.build(map_data, terrain, settlement_layer)
+	rivers.attach_roads(roads)  # ZG5b : routes drapées fines
 	var t3 := Time.get_ticks_msec()
 
 	var bounds := Rect2(Vector2.ZERO, Vector2(map_data.size))
@@ -1073,6 +1077,7 @@ func _on_load(path: String) -> void:
 func _process(_delta: float) -> void:
 	if not load_ok:
 		return
+	FrameBudget.begin_frame()  # PB1 : budget commun des constructions progressives de l'image
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
 	var t0 := Time.get_ticks_usec()
@@ -1089,7 +1094,8 @@ func _process(_delta: float) -> void:
 		var site_hide := 1.0 - zoom_tiers.site_weight(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
 		if rivers.crossings != null:
-			rivers.crossings.visible = site_hide > 0.5
+			# ZG5b : avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.
+			rivers.crossings.visible = site_hide > 0.5 or rivers.fine != null
 		trade_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
 		_apply_close_tiers(distance)
 	if life != null:  # CV1
@@ -1110,6 +1116,7 @@ func _process(_delta: float) -> void:
 		if _screenshot_countdown == 2 and settlement_layer != null:
 			settlement_layer.flush()
 			roads.flush(zoom_tiers.near_weight(distance) * (1.0 - zoom_tiers.site_weight(distance)))
+			rivers.flush_fine(distance)  # ZG5b
 		_screenshot_countdown -= 1
 		if _screenshot_countdown == 0:
 			_take_screenshot(_screenshot_path, true)
@@ -1331,6 +1338,16 @@ func _parse_cmdline() -> void:
 					ui.tech_panel.select_branch("civil")
 				"battle":
 					_stage_screenshot_battle()
+				"loading_battle", "loading_siege", "loading_naval":  # AR1 : écran de chargement illustré
+					BattleLoadingCard.open(get_tree(), _screenshot_stage.trim_prefix("loading_"))
+				"ending_victory", "ending_defeat":  # AR1 : fin de campagne illustrée
+					victory.show_ending(_screenshot_stage.trim_prefix("ending_"), "La guerre de Cent Ans s'achève.", 1234)
+				"report_vignette":  # AR1 : vignette du rapport de saison
+					var province := ""
+					flow.season_report.show_report(str(sim.call("get_date_label")), SeasonReport.build_groups([
+						{"kind": "plague", "text_fr": "La peste frappe la province.", "province": province, "faction": player_faction},
+						{"kind": "revolt", "text_fr": "Les vilains se soulèvent.", "province": province, "faction": player_faction}],
+						func(_e: Dictionary) -> bool: return true, Callable(), player_faction))
 				"assault":  # UB1 : écran d'avant-bataille d'un assaut
 					_stage_screenshot_assault()
 				"tooltips":  # F2
@@ -1645,11 +1662,19 @@ func _on_battle_withdraw(index: int) -> void:
 
 
 func _on_battle_fight(index: int, seed: int) -> void:
+	# AR1 : écran de chargement illustré (siège ou bataille rangée) pendant la construction.
+	var context := "battle"
+	for pending in sim.call("get_pending_battles"):
+		if int((pending as Dictionary).get("index", -1)) == index and bool(pending.get("siege", false)):
+			context = "siege"
+	var card := BattleLoadingCard.open(get_tree(), context)
+	await card.drawn
 	var battle: Node = load(BATTLE_SCENE).instantiate()
 	battle.configure(sim, index, seed)
 	battle.returned.connect(_on_battle_returned.bind(battle))
 	_set_campaign_active(false)
 	get_tree().root.add_child(battle)
+	card.close()
 
 
 func _on_battle_returned(result: Dictionary, battle: Node) -> void:

@@ -8,7 +8,7 @@
     "weight": 35,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_vineyard_press", "bld_abbey", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
     "port": false,
     "description": "Capitale du Dauphiné de Viennois tenu par Humbert II, sur l'Isère.",
     "sources": ["Grenoble", "Dauphiné de Viennois"]
@@ -22,7 +22,7 @@
     "weight": 18,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_cathedral", "bld_stone_walls"],
+    "buildings": ["bld_market", "bld_collegiate_church", "bld_stone_walls"],
     "port": false,
     "description": "Grande cité archiépiscopale sur le Rhône, ancienne capitale du royaume de Bourgogne-Provence.",
     "sources": ["Vienne (Isère)"]

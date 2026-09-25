@@ -334,12 +334,17 @@ par `geo pyramid`, restent identiques octet pour octet).
   fossés anciens restent. Petits trous sans donnée (rivières, étangs < 25 ha) comblés de même.
   Aperçus avant/après (ombrage, masque en rouge) : `docs/img/zg3/`.
 - **Raccord** : rehaussement de rendu identique à `heightmap_render.png` (σ 5 km, gain 0,8,
-  ±120 m, effacé au-dessus de 600-1 600 m), base σ 5 km calculée à 90 m sur GLO-90 autour de
-  la zone avec la source fine à l'intérieur ; fondu vers l'ancêtre (tuile existante la plus
-  fine, interpolée bilinéairement comme le moteur) sur 20 % du demi-côté au bord de l'emprise et
+  ±120 m, effacé au-dessus de 600-1 600 m), base σ 5 km calculée à 90 m sur la source fine
+  elle-même (étendue vers l'extérieur par plus-proche-voisin ; GLO-90 seulement si une grappe
+  n'a aucune donnée fine du tout) ; fondu vers l'ancêtre (tuile existante la plus fine,
+  interpolée bilinéairement comme le moteur) sur 20 % du demi-côté au bord de l'emprise et
   sur 2 pixels là où la source n'a pas de donnée (mer : côte de la source). Après chaque étage,
   les tuiles parentes E5/E6 reprennent la moyenne 2 × 2 de leurs enfants (pondérée par le
-  fondu) : la pyramide reste cohérente d'un étage à l'autre.
+  fondu) : la pyramide reste cohérente d'un étage à l'autre. La terre boostée ne descend jamais
+  sous `MIN_LAND_M` (0,5 m), comme `relief_shade.enforce_coast` pour E0-E4 (correctif ZG3b,
+  `docs/wip/zg3-palier3.md`) : sans ce plancher, une base régionale plus haute que la source
+  fine (collines à quelques km, ancienne fuite GLO-90 dans les petites emprises E6-E7) pouvait
+  faire passer de la terre réelle sous le niveau de la mer.
 
 ## Pyramide de relief, paliers 1-2 (lot ZG1, ADR 0036)
 
@@ -459,7 +464,7 @@ Petit-boutiste :
 
 | Champ | Type | Contenu |
 |---|---|---|
-| en-tête | `4s H H H H I I I I` (32 o) | `CAFV`, version 1, couche (1 fleuves, 2 routes), étage (2), 0, col, row, nombre de lignes, nombre de sommets |
+| en-tête | `4s H H H H I I I I` (28 o) | `CAFV`, version 1, couche (1 fleuves, 2 routes), étage (2), 0, col, row, nombre de lignes, nombre de sommets |
 | lignes | `u32 × 4` par ligne | entité, premier sommet, nombre de sommets, drapeaux |
 | `x`, `y` | `f32 × n` chacun | unités monde (pixels carte 4096, origine nord-ouest) |
 | `z` | `f32 × n` | niveau d'eau / surface de route en mètres (non exagéré) |

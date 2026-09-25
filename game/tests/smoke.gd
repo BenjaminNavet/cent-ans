@@ -1230,11 +1230,20 @@ func _run_battle() -> void:
 	_check(str(dialog.body_label.text).contains("Météo prévue"), "battle: dialog should show the weather forecast")
 	_check(str(dialog.body_label.text).contains("Site : ") and dialog.site_label_text != "", "battle: dialog should show the battle site (B6)")
 	dialog.fight_button.emit_signal("pressed")
-	await process_frame
+	# AR1 : la bataille se construit derrière l'écran de chargement illustré (quelques images).
 	var scene: Node = null
+	for _frame in 120:
+		await process_frame
+		for child in root.get_children():
+			if child is BattleScene:
+				scene = child
+		if scene != null:
+			break
+	var loading_card_shown := false
 	for child in root.get_children():
-		if child is BattleScene:
-			scene = child
+		if child is BattleLoadingCard:
+			loading_card_shown = true
+	_check(loading_card_shown, "battle: illustrated loading card (AR1) should cover the battle build")
 	if not _check(scene != null, "battle: battle.tscn not opened by « Livrer bataille »"):
 		map.queue_free()
 		return
@@ -2416,6 +2425,14 @@ func _run_tutorial() -> void:
 	_check(france.contains("Philippe VI") and france.contains("Objectifs"), "faction fiche: ruler and objectives expected")
 	tutorial._unhandled_input(key)
 	_check(not encyclopedia.visible, "K should close the encyclopedia")
+
+	# BP1 : le journal et l'aide F1 sont branchés sur les bulles du Codex.
+	_check(bool(map.ui.log_text.has_meta("codex_attached")), "BP1: campaign log should be attached to CodexBubbles")
+	map.ui.add_events([{"kind": "chronicle", "text": "La victoire de Crécy marque l'Europe."}], "Test BP1")
+	_check(map.ui.log_text.text.contains("[url=cdx:"), "BP1: a known alias in a log event should be auto-linked: %s" % map.ui.log_text.text)
+	map.help.toggle()
+	_check(bool(map.help.text.has_meta("codex_attached")) and map.help.text.text.contains("[url=cdx:"), "BP1: F1 help should be attached to CodexBubbles and auto-link known aliases (Crécy, Peste noire…)")
+	map.help.toggle()
 
 	if settings != null:
 		settings.call("set_value", "tutorial/enabled", false, false)

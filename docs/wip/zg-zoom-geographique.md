@@ -26,8 +26,8 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG3 | Données palier 3 (`geo detail-dem`, zones, anachronismes) | 1 | **fusionné** dans `integration/zoom` (26ba32fa) : 34 zones E5-E7, 0,22 Go ; à relancer `geo detail-dem --force` après E3-E4 |
 | ZG4 | Caméra rapprochée, exagération verticale dynamique | 2 | **dans main** (a3389a92) |
 | ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | **dans main** (5caa8def) |
-| ZG3b | Correctif côte/estuaires des zones E5-E7 (Londres −12 m) | 2 | en cours (Sonnet, wip `zg3-palier3.md`) |
-| ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | en cours (wip `zg5b-rendu-fin.md`) |
+| ZG3b | Correctif du rehaussement des zones E5-E7 (Londres −12 m) | 2 | **dans main** (2d36ec2a) |
+| ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | **dans main** (c7e9a1c5) |
 | ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | 3 | en cours (wip `zg6-villes.md`) |
 | ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
 
@@ -47,3 +47,5 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : **ZG0-ZG3 dans main** (a8e0f3d3, ff-only) après libération du checkout par PB1 (game-project-b3, qui rebase sur ZG). Prévenus : PB1 et l'orchestrateur de nuit (PF1 branchera les préréglages de qualité sur le quadtree ; recalages incrémentaux de landmark_model = ZG4).
 - 25/09 : correctif 3a3c8a95 (quadtree jamais « stable » en vue parchemin, signalé par PB1) ; ZG5a fusionné, **main = 5caa8def**. Anomalie Londres (E5-E7 10-15 m trop bas, côte grossière) → ZG3b. ZG5b lancé en parallèle de ZG4 (ne touche ni caméra ni paliers).
 - 25/09 : ZG4 fusionné, **main = a3389a92**, smoke complet OK (28 étapes, après SM1 de la nuit). Défauts visibles de près (captures ZG4) transmis à ZG5b : tranchée de `river_bed.png`, damier de la splat 719 m, texture floue. ZG6 lancé. Prévenus : nuit (PF1, VH peut démarrer), PB1.
+- 25/09 : PF1 (nuit) dans main par-dessus ZG4. ZG3b fusionné : cause = base du rehaussement calculée sur GLO-90 (surface, bâti) au lieu de la source fine + pas de plancher de terre ; corrigé, 34 zones recuites, `geo detail-check` ajouté. `hydro-fine` et `anchors-fine` relancés sur le relief corrigé. **main = 2d36ec2a**. Limite : rives basses de Londres plaquées à 0,5 m (plancher) au lieu de 2-5 m.
+- 25/09 : PB1 dans main. ZG5b fusionné (lit fin creusé dans les pages du quadtree, rubans de fleuves/routes, ponts à l'échelle, parcellaire ; −10 % i/s, p99 115 → 167 ms sous charge) ; smoke 28 OK, tests ZG2/ZG4/ZG5b OK. À reprendre en ZG7 : lit de la Seine trop large (chenal brun), pic de 35 ms au basculement des ponts, ponts-portes encore exagérés, coût GPU du parcellaire non mesuré (pas d'outil Metal).
