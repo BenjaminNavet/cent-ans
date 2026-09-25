@@ -109,6 +109,12 @@ class LinkTable:
     canal: np.ndarray = field(default_factory=lambda: np.zeros(0, bool))
     intermittent: np.ndarray = field(default_factory=lambda: np.zeros(0, bool))
     tidal: np.ndarray = field(default_factory=lambda: np.zeros(0, bool))
+    secondary: np.ndarray | None = None
+
+    def __post_init__(self) -> None:
+        """Default ``secondary`` (side arm of a braid) to false."""
+        if self.secondary is None:
+            self.secondary = np.zeros(len(self.lines), dtype=bool)
 
     def __len__(self) -> int:
         """Number of links."""
@@ -141,6 +147,7 @@ class LinkTable:
             canal=self.canal[index],
             intermittent=self.intermittent[index],
             tidal=self.tidal[index],
+            secondary=self.secondary[index],
         )
 
     # ------------------------------------------------------------ persistence
@@ -170,6 +177,7 @@ class LinkTable:
             canal=self.canal,
             intermittent=self.intermittent,
             tidal=self.tidal,
+            secondary=self.secondary,
         )
         tmp.replace(path)
 
@@ -193,6 +201,7 @@ class LinkTable:
             canal=data["canal"],
             intermittent=data["intermittent"],
             tidal=data["tidal"],
+            secondary=data.get("secondary", None),
         )
 
 
@@ -312,6 +321,21 @@ class Stroke:
     link_of_point: np.ndarray
 
 
+def _split_key(
+    table: LinkTable, parent: int, candidate: int, lengths: np.ndarray
+) -> tuple:
+    """Preference of ``candidate`` as the continuation of ``parent`` at a split."""
+    width = table.width_max[candidate]
+    return (
+        int(table.strahler[candidate]),
+        bool(table.code[parent]) and table.code[candidate] == table.code[parent],
+        not bool(table.secondary[candidate]),
+        float(width) if np.isfinite(width) else 0.0,
+        not bool(table.intermittent[candidate]),
+        -float(lengths[candidate]),
+    )
+
+
 def build_strokes(table: LinkTable, lengths: np.ndarray | None = None) -> list[Stroke]:
     """Chain links into strokes following the main stem at each confluence.
 
@@ -339,12 +363,12 @@ def build_strokes(table: LinkTable, lengths: np.ndarray | None = None) -> list[S
                 upstream[j],
             ),
         )
-        # A link that splits (braids) continues into its best child only.
+        # A link that splits (braids) continues into its best child only: the
+        # same river, main arm, widest, permanent, then the most direct arm.
         current = child[main]
-        if current < 0 or (
-            int(table.strahler[b]),
-            upstream[b],
-        ) > (int(table.strahler[current]), upstream[current]):
+        if current < 0 or _split_key(table, main, b, lengths) > _split_key(
+            table, main, int(current), lengths
+        ):
             child[main] = b
     has_parent = np.zeros(n, dtype=bool)
     has_parent[child[child >= 0]] = True
@@ -488,6 +512,7 @@ def read_topage(
         "CdCoursEau_1",
         "CdNoeudDebut",
         "CdNoeudFin",
+        "BrasTH",
     ]
     frame = pyogrio.read_dataframe(gpkg, columns=columns)
     frame = frame[~frame["NatureTH"].isin(TOPAGE_DROP_NATURE)]
@@ -519,6 +544,7 @@ def read_topage(
         strahler=np.zeros(len(lines), dtype=np.int16),
         canal=(frame["NatureTH"].to_numpy() == "Canal"),
         intermittent=(frame["PersistanceTH"].to_numpy() == "intermittent"),
+        secondary=(frame["BrasTH"].to_numpy() == "secondaire"),
         tidal=(frame["SaliniteTH"].fillna(False).to_numpy().astype(bool))
         | (frame["NatureTH"].to_numpy() == "Plan d'eau - estuaire"),
     )
@@ -543,7 +569,13 @@ def read_osor(gpkg: Path) -> LinkTable:
     s0 = np.where(reverse, end, start)
     e0 = np.where(reverse, start, end)
     ids = node_ids(np.concatenate([s0, e0]))
-    names = frame["watercourse_name"].fillna("").astype(str).to_numpy()
+    primary = frame["watercourse_name"].fillna("").astype(str).to_numpy()
+    alternative = (
+        frame["watercourse_name_alternative"].fillna("").astype(str).to_numpy()
+    )
+    # Welsh first names (``Afon Hafren``) carry the English one as alternative.
+    english = np.char.startswith(alternative.astype(str), "River ")
+    names = np.where(english, alternative, primary)
     form = frame["form"].astype(str).to_numpy()
     return LinkTable(
         source="osor",
@@ -655,6 +687,59 @@ def fetch_euhydro(
     return target
 
 
+_EUHYDRO_CUTS = (
+    " DU CONFLUENT",
+    " DE SA SOURCE",
+    " DE LA SOURCE",
+    " DEPUIS",
+    " DESDE",
+    " HASTA",
+    " DU ",
+    " À ",
+    " AU ",
+    " ET ",
+    " (",
+    ",",
+)
+_EUHYDRO_PREFIXES = (
+    "UNTERE ",
+    "OBERE ",
+    "MITTLERE ",
+    "UNTERER ",
+    "OBERER ",
+    "MITTLERER ",
+)
+_ROMAN = re.compile(r"^(?:[IVX]+|\d+[A-Z]?)$")
+
+
+def clean_euhydro_name(raw: str) -> str:
+    """River name from an EU-Hydro water-body name (``MEUSE 6`` -> ``Meuse``).
+
+    EU-Hydro carries the names of the Water Framework Directive water bodies:
+    upper case, reach numbers, "from ... to ..." descriptions.
+    """
+    text = raw.replace("\xa0", " ").strip()
+    if text.upper() in ("", "UNK", "N_A", "NONE"):
+        return ""
+    upper = text.upper()
+    for cut in _EUHYDRO_CUTS:
+        index = upper.find(cut, 1)
+        if index > 0:
+            text, upper = text[:index], upper[:index]
+    for prefix in _EUHYDRO_PREFIXES:
+        if upper.startswith(prefix):
+            text, upper = text[len(prefix) :], upper[len(prefix) :]
+    words = [w for w in text.split() if not _ROMAN.match(w.upper())]
+    text = " ".join(words).strip(" .-")
+    if len(text) <= 2:
+        return ""
+    if text.isupper():
+        text = " ".join(part.capitalize() for part in text.lower().split())
+        text = re.sub(r"\bL'(\w)", lambda m: "l'" + m.group(1).upper(), text)
+        text = re.sub(r"^(Le|La|Les|R[ií]o) ", lambda m: m.group(1).lower() + " ", text)
+    return text
+
+
 def read_euhydro(directory: Path) -> LinkTable:
     """EU-Hydro links from the cell files of :func:`fetch_euhydro` (deduplicated)."""
     seen: set[str] = set()
@@ -681,7 +766,7 @@ def read_euhydro(directory: Path) -> LinkTable:
             starts.append(str(props.get("FNODE") or f"s{key}"))
             ends.append(str(props.get("TNODE") or f"e{key}"))
             name = props.get("nameText") or props.get("nameTxtInt") or ""
-            names.append("" if name in ("UNK", "N_A") else str(name))
+            names.append(clean_euhydro_name(str(name)))
             codes.append(names[-1])
             orders.append(int(props.get("STRAHLER") or 0))
             canal.append(str(props.get("DFDD") or "") in EUHYDRO_CANAL_DFDD)

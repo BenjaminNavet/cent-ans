@@ -660,6 +660,7 @@ def tile_lines(
     """Simplify, convert to world units and cut every line along the E2 tiles."""
     mpp = (bounds[2] - bounds[0]) / 4096.0
     side = fine_tiles.tile_units(fine_tiles.TILE_LEVEL)
+    limit = int(round(4096 / side))
     tiles: dict[tuple[int, int], fine_tiles.TileLines] = defaultdict(
         fine_tiles.TileLines
     )
@@ -681,6 +682,8 @@ def tile_lines(
             ]
         )
         for col, row, xy, att in fine_tiles.split_by_tiles(units, attrs, side):
+            if not (0 <= col < limit and 0 <= row < limit):
+                continue  # off the map (Natural Earth near the edges)
             piece_bits = att[:, 2].astype(np.int64)
             tiles[(col, row)].add(
                 feature,
