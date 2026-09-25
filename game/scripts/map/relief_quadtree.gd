@@ -114,6 +114,7 @@ var _missing_wanted: int = 0
 var _decode_ms: PackedFloat32Array = PackedFloat32Array()
 var _upload_ms_max: float = 0.0
 var _select_ms: float = 0.0
+var _update_ms_total: float = 0.0
 
 
 ## `pyramid` doit être disponible ; `terrain_material` est le matériau partagé des morceaux E0
@@ -183,6 +184,7 @@ func update_view(camera: Camera3D) -> void:
 	_apply_items()
 	_start_jobs()
 	_select_ms = (Time.get_ticks_usec() - t0) / 1000.0
+	_update_ms_total += _select_ms
 	material.set_shader_parameter("qt_camera", _cam)
 
 
@@ -699,6 +701,7 @@ func perf_stats() -> Dictionary:
 		"decode_ms_max": snappedf(worst, 0.01),
 		"upload_ms_max": snappedf(_upload_ms_max, 0.01),
 		"select_ms": snappedf(_select_ms, 0.01),
+		"update_ms_avg": snappedf(_update_ms_total / maxf(_frame, 1.0), 0.01),
 		"px_scale": snappedf(_px_scale, 0.01),
 	}
 

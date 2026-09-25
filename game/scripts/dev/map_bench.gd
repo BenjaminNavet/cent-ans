@@ -29,6 +29,9 @@ var _last_us := 0
 var _frame_ms: PackedFloat32Array = PackedFloat32Array()
 var _phase := "warmup"
 var _phase_t := 0.0
+var _cpu_render_ms: PackedFloat32Array = PackedFloat32Array()
+var _primitives: PackedFloat32Array = PackedFloat32Array()
+var _draw_calls: PackedFloat32Array = PackedFloat32Array()
 
 
 func _ready() -> void:
@@ -42,6 +45,7 @@ func _ready() -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
 	camera_rig.edge_pan_enabled = false
+	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	_place(PAN_PATH[0], pan_distance)
 
 
@@ -77,6 +81,7 @@ func _process(delta: float) -> void:
 				_t_start = now
 		"pan":
 			_frame_ms.append((now - _last_us) / 1000.0)
+			_sample()
 			_phase_t += delta
 			var t := clampf(_phase_t / pan_seconds, 0.0, 1.0) * (PAN_PATH.size() - 1)
 			var i := mini(int(t), PAN_PATH.size() - 2)
@@ -86,6 +91,7 @@ func _process(delta: float) -> void:
 				_phase_t = 0.0
 		"zoom":
 			_frame_ms.append((now - _last_us) / 1000.0)
+			_sample()
 			_phase_t += delta
 			# Aller-retour de 150 à la distance minimale au-dessus de Paris en 8 s.
 			var u := 0.5 - 0.5 * cos(_phase_t / 8.0 * TAU)
@@ -94,6 +100,23 @@ func _process(delta: float) -> void:
 				_report(now)
 				_phase = "done"
 	_last_us = now
+
+
+## Coût CPU du rendu (mesuré par le serveur de rendu, image précédente ; la mesure GPU vaut 0 sous
+## Metal), primitives et appels de dessin.
+func _sample() -> void:
+	var rid := get_viewport().get_viewport_rid()
+	_cpu_render_ms.append(RenderingServer.viewport_get_measured_render_time_cpu(rid))
+	_primitives.append(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
+	_draw_calls.append(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+
+
+static func _median(values: PackedFloat32Array) -> float:
+	if values.is_empty():
+		return 0.0
+	var sorted := values.duplicate()
+	sorted.sort()
+	return snappedf(sorted[sorted.size() / 2], 0.01)
 
 
 func _report(now: int) -> void:
@@ -115,6 +138,9 @@ func _report(now: int) -> void:
 		"pan_distance": pan_distance,
 		"viewport": get_viewport().get_visible_rect().size,
 		"quadtree": terrain.quadtree != null,
+		"render_cpu_ms_p50": _median(_cpu_render_ms),
+		"primitives_p50": _median(_primitives),
+		"draw_calls_p50": _median(_draw_calls),
 	}
 	if terrain.quadtree != null:
 		report.merge(terrain.quadtree.perf_stats())
