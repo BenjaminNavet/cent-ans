@@ -43,22 +43,16 @@ impl CrestRules {
     }
 }
 
-/// SG5: contents of `data/rules/battle_crest_defence.json`: how a
-/// defensive side on its heights keeps its shooters and horse from
-/// breaking its own line (ADR 0046 § Suite SG5).
+/// SG5: contents of `data/rules/battle_crest_defence.json`: where a
+/// defensive side holding its heights keeps its line (ADR 0046 § Suite SG5).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CrestDefenceRules {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    /// The horse counter-charges enemy horse this close to itself (metres).
-    pub horse_counter_m: f64,
-    /// ... or enemy horse this close to one of its foot regiments (metres).
-    pub horse_guard_m: f64,
-    /// The horse holds the wing this far beyond the end of the line (metres).
-    pub horse_wing_gap_m: f64,
-    /// ... and this far behind it (metres).
-    pub horse_wing_depth_m: f64,
+    /// With its shooters holding the crest in front, the line stands this
+    /// far behind its post on the reverse slope (metres).
+    pub line_setback_m: f64,
 }
 
 const BUNDLED_DEFENCE: &str = include_str!("../../../../data/rules/battle_crest_defence.json");
@@ -89,5 +83,11 @@ mod tests {
             rules.melee_factor(100.0),
             rules.melee_factor(rules.max_height_m)
         );
+    }
+
+    #[test]
+    fn crest_defence_rules_load() {
+        let rules = CrestDefenceRules::bundled();
+        assert!(rules.line_setback_m >= 0.0);
     }
 }

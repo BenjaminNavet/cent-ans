@@ -1,7 +1,4 @@
 {
-  "description": "Défense d'une crête (lot SG5, ADR 0046 § Suite SG5) : une armée en défense sur ses hauteurs garde sa cavalerie sur la crête, aux ailes et en retrait de la ligne, et ne contre-charge la cavalerie ennemie que lorsqu'elle est montée jusqu'à elle ou jusqu'à ses gens de pied. Une cavalerie battue au bas du glacis refluait à travers sa propre ligne et la faisait céder par contagion avant la mêlée.",
-  "horse_counter_m": 70,
-  "horse_guard_m": 60,
-  "horse_wing_gap_m": 60,
-  "horse_wing_depth_m": 40
+  "description": "Défense d'une crête (lot SG5, ADR 0046 § Suite SG5). Une armée en défense sur ses hauteurs, dont les tireurs tiennent la crête militaire devant elle, garde sa ligne en retrait sur la contre-pente, à line_setback_m derrière son poste habituel : hors de portée de la contagion de déroute (120 m) des tireurs et de la cavalerie qui combattent devant, qui refluaient à travers elle et la faisaient céder avant la mêlée.",
+  "line_setback_m": 120
 }

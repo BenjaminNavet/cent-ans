@@ -1397,12 +1397,16 @@ fn plan_field(view: &mut View) {
         };
         (c.center.0, c.z_at(c.center.0) - view.forward * back)
     } else if let Some((crest, _)) = ground {
-        let a = reverse_slope_anchor(view, crest, !roles.shooters.is_empty());
-        let back: f64 = std::env::var("SG5_LINEBACK").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0);
-        if back > 0.0 && height_edge(view) > HOLD_HEIGHT && !roles.shooters.is_empty() {
-            (a.0, a.1 - view.forward * back)
+        let post = reverse_slope_anchor(view, crest, !roles.shooters.is_empty());
+        // SG5: on its heights, with its shooters holding the crest in front,
+        // the line stands back out of reach of their rout (and of the horse
+        // fighting in front of them): a broken regiment there no longer
+        // carries the line with it before the melee (ADR 0046 § Suite SG5).
+        if !roles.shooters.is_empty() && height_edge(view) > HOLD_HEIGHT {
+            let back = CrestDefenceRules::bundled().line_setback_m;
+            (post.0, post.1 - view.forward * back)
         } else {
-            a
+            post
         }
     } else if attacker_holds {
         // R4: an attacker above an enemy of shooters waits on its heights.
@@ -1494,21 +1498,12 @@ fn plan_field(view: &mut View) {
     let slots = cover
         .map(|c| cover_slots(view, &roles.shooters, &c))
         .unwrap_or_default();
-    // SG5: on the heights, the shooters spread along the front of the line
-    // (not beyond its ends, where horsemen take them in the flank).
-    let hill = defensive && ground.is_some() && height_edge(view) > HOLD_HEIGHT && std::env::var("SG5_OFF").is_err();
-    let crest_slots = if hill && cover.is_none() && std::env::var("SG5_SLOTS").is_ok() {
-        view.line_slots(&roles.shooters, anchor, facing)
-    } else {
-        Vec::new()
-    };
     for &i in &roles.shooters {
         let slot = slots
             .iter()
             .find(|s| s.0 == i)
             .map(|&(_, x, z)| (x, z))
             .zip(cover);
-        let post_x = crest_slots.iter().find(|s| s.0 == i).map(|s| s.1);
         let at = shooter_anchor.unwrap_or(anchor);
         let line_z = if shooter_anchor.is_some() {
             at.1
@@ -1516,7 +1511,7 @@ fn plan_field(view: &mut View) {
             line_center.1
         };
         let crest = ground.filter(|(_, c)| c.is_none()).map(|(p, _)| p);
-        plan_shooter(view, i, at, line_z, facing, defensive, slot, crest, post_x);
+        plan_shooter(view, i, at, line_z, facing, defensive, slot, crest);
     }
 
     // Reserve.
@@ -1524,10 +1519,9 @@ fn plan_field(view: &mut View) {
         plan_reserve(view, r, &roles.line, anchor, facing);
     }
 
-    // Cavalry. SG5: a defensive side on its heights keeps its horse on
-    // the crest, on the wings beyond and behind the line.
+    // Cavalry.
     for &i in &roles.horse {
-        plan_horse(view, i, &roles, anchor, facing, defensive, hill, &enemy_melee);
+        plan_horse(view, i, &roles, anchor, facing, defensive, &enemy_melee);
     }
 
     // Engines: stay behind the line, shoot at will.
@@ -1752,7 +1746,6 @@ fn plan_shooter(
     defensive: bool,
     cover: Option<((f64, f64), Cover)>,
     crest: Option<(f64, f64)>,
-    post_x: Option<f64>,
 ) {
     let unit = &view.units[i];
     // B6: behind a hedge, a ditch or in a village, horsemen are no threat
@@ -1826,10 +1819,9 @@ fn plan_shooter(
         // the glacis, rather than halting wherever a target first comes in
         // range.
         // A crest that sees its glacis needs none of this.
-        let x = post_x.unwrap_or(unit.x);
         let post = crest.filter(|_| defensive).and_then(|(_, cz)| {
             let front = Front {
-                center: (x, cz),
+                center: (unit.x, cz),
                 forward: view.forward,
                 width: unit.extent().0,
             };
@@ -1842,13 +1834,11 @@ fn plan_shooter(
             } else {
                 front_z
             };
-            if (unit.z - z).abs() > 6.0 || (unit.x - x).abs() > 6.0 {
+            if (unit.z - z).abs() > 6.0 {
                 // At the run when the enemy comes on: the crest must be
                 // held before it arrives.
                 let run = d < POST_RUN;
-                view.move_to(i, x, z, run, Some(facing));
-            } else if let Some(j) = counter_battery(view, i) {
-                view.attack(i, j, false);
+                view.move_to(i, unit.x, z, run, Some(facing));
             } else {
                 view.halt(i);
             }
@@ -1878,33 +1868,6 @@ fn plan_shooter(
             view.move_to(i, unit.x, wanted, false, None);
         }
     }
-}
-
-/// SG5: on its post on the crest, shooter `i` shoots the nearest enemy
-/// shooter it can hit that has no pavise up (the archers that shoot at it)
-/// rather than whatever comes nearest (crossbowmen behind their pavises,
-/// who soak the volleys). Only once its stakes are planted (a regiment given
-/// a target does not stand still to plant them).
-fn counter_battery(view: &View, i: usize) -> Option<usize> {
-    if std::env::var("SG5_TARGET").is_err() {
-        return None;
-    }
-    let unit = &view.units[i];
-    if unit.has(Ability::Stakes) && !unit.stakes_planted {
-        return None;
-    }
-    view.able_enemies()
-        .filter(|&j| {
-            let e = &view.units[j];
-            is_shooter(e)
-                && e.pavise.is_none()
-                && e.state != UnitState::Melee
-                && dist(unit, e) <= view.sim.effective_range(unit, e.x, e.z) * 0.9
-                && view.sim.fire_mode(unit, e).is_some()
-        })
-        .map(|j| (j, dist(unit, &view.units[j])))
-        .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)))
-        .map(|(j, _)| j)
 }
 
 /// R2b: lateral offsets of the firing spots tried by a shooter.
@@ -2068,7 +2031,6 @@ fn plan_horse(
     anchor: (f64, f64),
     facing: f64,
     defensive: bool,
-    hill: bool,
     enemy_melee: &[usize],
 ) {
     if !view.free(i) {
@@ -2076,15 +2038,6 @@ fn plan_horse(
     }
     let units = view.units;
     let unit = &units[i];
-    let rules = CrestDefenceRules::bundled();
-    // SG5: enemy horse at our foot (line or shooters) on the heights.
-    let at_our_foot = |e: &Unit| {
-        roles
-            .line
-            .iter()
-            .chain(roles.shooters.iter())
-            .any(|&k| units[k].able() && dist(&units[k], e) < rules.horse_guard_m)
-    };
     let general_only = unit.is_general && roles.horse.len() > 1;
     // Mounted shooters skirmish like foot shooters but keep their distance.
     if unit.can_shoot() && unit.ammo > 0 {
@@ -2107,21 +2060,13 @@ fn plan_horse(
         let e = &units[j];
         is_horse(e)
             && matches!(e.state, UnitState::Charging | UnitState::Marching)
-            && if hill && std::env::var("SG5_COUNTER").is_ok() {
-                // SG5: on the heights, wait for the enemy horse to come up
-                // (it then fights uphill) rather than meet it down the
-                // glacis and flee back through the own line.
-                dist(unit, e) < rules.horse_counter_m
-                    || (at_our_foot(e) && dist(unit, e) < CAVALRY_REACH)
-            } else {
-                dist(unit, e) < 160.0
+            && (dist(unit, e) < 160.0
                 || (!defensive
                     && dist(unit, e) < CAVALRY_REACH
                     && roles
                         .shooters
                         .iter()
-                        .any(|&s| units[s].able() && dist(&units[s], e) < SHOOTER_GUARD))
-            }
+                        .any(|&s| units[s].able() && dist(&units[s], e) < SHOOTER_GUARD)))
     });
     if let Some(j) = threatened {
         if !bristling(&units[j]) {
@@ -2159,19 +2104,6 @@ fn plan_horse(
         })
         .map(|j| (j, dist(unit, &units[j])))
         .filter(|&(_, d)| d < CAVALRY_REACH)
-        // SG5: on the heights, only shooters that came up close to our foot.
-        .filter(|&(j, _)| {
-            let leash: f64 = std::env::var("SG5_LEASH")
-                .ok()
-                .and_then(|v| v.parse().ok())
-                .unwrap_or(1e9);
-            !hill
-                || roles
-                    .line
-                    .iter()
-                    .chain(roles.shooters.iter())
-                    .any(|&k| units[k].able() && dist(&units[k], &units[j]) < leash)
-        })
         .collect();
     isolated.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
     if !general_only {
@@ -2277,38 +2209,6 @@ fn plan_horse(
         * 0.5;
     let (x, z) = if general_only || unit.is_general {
         (anchor.0, anchor.1 - view.forward * 50.0)
-    } else if hill {
-        // SG5: beyond the end of the line and of the shooters, and behind
-        // them: a horse that breaks flees past the wing, not through the
-        // foot.
-        let side = if unit.x >= anchor.0 { 1.0 } else { -1.0 };
-        let reach = roles
-            .line
-            .iter()
-            .chain(roles.shooters.iter())
-            .filter(|&&k| (units[k].x - anchor.0) * side > 0.0)
-            .map(|&k| (units[k].x - anchor.0).abs() + units[k].extent().0 * 0.5)
-            .fold(half, f64::max);
-        let reach = if std::env::var("SG5_ORIGWING").is_ok() { half } else { reach };
-        let gap: f64 = std::env::var("SG5_GAP").ok().and_then(|v| v.parse().ok()).unwrap_or(rules.horse_wing_gap_m);
-        let depth: f64 = std::env::var("SG5_DEPTH").ok().and_then(|v| v.parse().ok()).unwrap_or(rules.horse_wing_depth_m);
-        // Side by side outwards, not all on one spot (a broken regiment
-        // would carry the whole wing with it).
-        let rank = roles
-            .horse
-            .iter()
-            .filter(|&&k| k != i && !units[k].is_general)
-            .filter(|&&k| (units[k].x - anchor.0) * side > 0.0)
-            .filter(|&&k| {
-                let (a, b) = ((units[k].x - anchor.0).abs(), (unit.x - anchor.0).abs());
-                a < b || (a == b && k < i)
-            })
-            .count() as f64;
-        let spread: f64 = std::env::var("SG5_SPREAD").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0);
-        (
-            anchor.0 + side * (reach + gap + rank * spread),
-            anchor.1 - view.forward * depth,
-        )
     } else {
         let side = if unit.x >= anchor.0 { 1.0 } else { -1.0 };
         (
