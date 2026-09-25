@@ -37,6 +37,29 @@ uniform vec3 fp_terrace_color = vec3(0.16, 0.14, 0.11);
 // cellules alignées sur le bloc (pas de couture) ; `per` cellules par bloc.
 const float FP_BLOCK = 8.0;
 
+// Lot ZG6 : finages des villes 1:1 proches (`TownLayer._push_finage`) : x, y (unités monde),
+// rayon du finage, rayon bâti (unités). Terres cultivées jusqu'au rayon du finage (plus de
+// friches), jardins et vergers entre le bâti et 1,3 × le bâti.
+const int FP_MAX_TOWNS = 16;
+uniform vec4 fp_towns[16];
+uniform int fp_town_count = 0;
+
+// 1 dans le finage d'une ville proche, fondu au bord ; `garden` : couronne des jardins.
+float fp_finage(vec2 p, out float garden) {
+	float f = 0.0;
+	garden = 0.0;
+	for (int i = 0; i < FP_MAX_TOWNS; i++) {
+		if (i >= fp_town_count) {
+			break;
+		}
+		vec4 t = fp_towns[i];
+		float d = distance(p, t.xy);
+		f = max(f, 1.0 - smoothstep(t.z * 0.75, t.z, d));
+		garden = max(garden, smoothstep(t.w * 0.9, t.w, d) * (1.0 - smoothstep(t.w * 1.2, t.w * 1.4, d)));
+	}
+	return f;
+}
+
 float fp_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
 	p3 += dot(p3, p3.yzx + 33.33);
@@ -111,7 +134,9 @@ float fp_tile_level(float lvl) {
 void fp_parcels(vec2 p, vec2 uv, float footprint, vec2 grad_m, float slope, float hc, vec4 s, vec3 lu,
 		vec4 terroir, float open_w, float forest_w, inout vec3 col, inout float roughness, inout vec3 n) {
 	float vis = fp_near(footprint);
-	if (vis <= 0.0 || open_w + forest_w < 0.05 || hc <= 0.5) {
+	// ZG4b : les terres basses sont relevées au plancher `MIN_LAND_M` = 0,5 m (ZG3b, rives de la
+	// Tamise, polders) ; le test `hc <= 0.5` les privait de parcellaire (sol nu de près).
+	if (vis <= 0.0 || open_w + forest_w < 0.05 || hc < 0.25) {
 		return;
 	}
 	vec2 blk = floor(p / FP_BLOCK);
@@ -122,6 +147,8 @@ void fp_parcels(vec2 p, vec2 uv, float footprint, vec2 grad_m, float slope, floa
 	// --- Tendances : bocage / openfield, village, fond de vallée, coteau sud, lisière ---
 	float bocage = smoothstep(0.25, 0.6, lu.b + (value_noise(p * 0.25) - 0.5) * 0.25);
 	float village = clamp(terroir.r * 1.3 + terroir.a * 0.6, 0.0, 1.0);
+	float town_garden = 0.0;
+	village = max(village, fp_finage(p, town_garden));  // ZG6 : finage des villes 1:1
 	float grass_share = s.r / max(s.r + s.g, 1e-3);
 	float occ = has_relief_shade ? rl_occ_at(uv) : 0.0;
 	float wet_meadow = has_wetlands ? texture(wetlands, uv).b : 0.0;
@@ -237,6 +264,19 @@ void fp_parcels(vec2 p, vec2 uv, float footprint, vec2 grad_m, float slope, floa
 		float bush = smoothstep(0.7, 0.76, value_noise(q * 0.12) * 0.7 + value_noise(q * 0.5) * 0.3);
 		vec3 rough = mix(season_field(fp_waste_color, 4, fh), fp_hedge_color * 1.3, bush * 0.8);
 		pc = mix(pc, rough, waste * 0.75);
+	}
+
+	// ZG6 : jardins et vergers en couronne autour du bâti (petits carrés de 12 m, arbres ronds).
+	if (town_garden > 0.01) {
+		vec2 plot = floor(q / 12.0);
+		float kind = fp_hash(plot + blk * 131.0);
+		vec3 garden_col = mix(vec3(0.10, 0.15, 0.05), vec3(0.17, 0.18, 0.08), kind);
+		vec2 f = fract(q / 12.0) - 0.5;
+		float tree = (1.0 - smoothstep(0.18, 0.26, length(f))) * step(0.55, kind);
+		float border = smoothstep(0.44, 0.48, max(abs(f.x), abs(f.y)));
+		garden_col = mix(garden_col, fp_hedge_color * 1.2, max(tree, border * 0.6));
+		pc = mix(pc, garden_col, town_garden * 0.85);
+		furrow_on *= 1.0 - town_garden;
 	}
 
 	// Détail haute fréquence (touffes, mottes) : visible de près seulement.

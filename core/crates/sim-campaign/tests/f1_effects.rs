@@ -530,11 +530,14 @@ fn scholar_ruler_speeds_up_civil_research_only() {
     give_trait(&mut state, &ruler, "trait_scholar");
     assert_eq!(points(&mut state, &military), military_plain);
     let civil_scholar = points(&mut state, &civil);
-    assert_eq!(
-        civil_scholar,
-        (f64::from(civil_plain) * 1.1).round() as u32,
-        "scholar: +10 % civil research"
+    // Both totals are rounded from fractional building points: allow one
+    // point of rounding either way.
+    let expected = f64::from(civil_plain) * 1.1;
+    assert!(
+        (f64::from(civil_scholar) - expected).abs() <= 1.0,
+        "scholar: +10 % civil research ({civil_plain} -> {civil_scholar})"
     );
+    assert!(civil_scholar > civil_plain);
 }
 
 #[test]
@@ -761,6 +764,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         attacker: side(units - 1, 1),
         defender: side(setup.defender.units.len(), 1),
         duration: 60.0,
+        end: Default::default(),
     };
     assert!(state.resolve_pending_battle(&data, index, &short).is_err());
     let index = state.debug_stage_battle(&lead, &enemy).unwrap();
@@ -770,6 +774,7 @@ fn a_3d_battle_result_spreads_losses_over_the_coalition() {
         attacker: side(units, 7),
         defender: side(setup.defender.units.len(), 1),
         duration: 60.0,
+        end: Default::default(),
     };
     state
         .resolve_pending_battle(&data, index, &outcome)

@@ -28,9 +28,12 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG5a | Hydrographie fine, ancrages et routes drapées (données) | 2 | **dans main** (5caa8def) |
 | ZG3b | Correctif du rehaussement des zones E5-E7 (Londres −12 m) | 2 | **dans main** (2d36ec2a) |
 | ZG5b | Rendu : rubans de fleuves, routes drapées, parcellaire de près | 2 | **dans main** (c7e9a1c5) |
-| ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | 3 | en cours (wip `zg6-villes.md`) |
-| ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | en cours (wip `zg4b-correctifs.md`) |
-| ZG7 | Perf, recette aux 3 paliers, export, docs, crédits | 4 | — |
+| ZG6 | Villes ordinaires à l'échelle réelle vers 1340, finage ↔ parcellaire | 3 | **dans main** (7f38c532) |
+| ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | **dans main** |
+| ZG8 | Relief local exagéré façon Total War (visuel seulement), roche selon la pente, ombrage (wip `zg8-relief-exagere.md`) | 3 | **dans main** |
+| ZG7a | Perf (MultiMesh par ville, parcellaire, p99, ponts), lit de la Seine, ponts-portes, rives de Londres, PathPreview (wip `zg7a-perf-finitions.md`) | 4 | en cours |
+| ZG7b | Cache absent (message + commande unique), embarquement de la pyramide, docs geo/godot-map, crédits (wip `zg7b-export-cache.md`) | 4 | en cours |
+| ZG7c | Recette visuelle aux 3 paliers après ZG7a/b | 4 | — |
 
 ## Journal
 - 25/09 : ZG0 commité (ADR 0036, `data/map/relief_pyramid.json`, `detail_zones.json`, schémas,
@@ -52,3 +55,7 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : PB1 dans main. ZG5b fusionné (lit fin creusé dans les pages du quadtree, rubans de fleuves/routes, ponts à l'échelle, parcellaire ; −10 % i/s, p99 115 → 167 ms sous charge) ; smoke 28 OK, tests ZG2/ZG4/ZG5b OK. À reprendre en ZG7 : lit de la Seine trop large (chenal brun), pic de 35 ms au basculement des ponts, ponts-portes encore exagérés, coût GPU du parcellaire non mesuré (pas d'outil Metal).
 - 25/09 : recette Q3 (nuit) : sol beige nu sous 3 unités à Londres (trou entre ZG4/ZG5b/VH), ruban rouge-gris géant sur la Tamise vers 20 unités, arrêt à 7 unités sans cache. → ZG4b lancé ; le cache absent relève de ZG7 (embarquement + message clair).
 - 25/09 21h37 : limite de quota levée, ZG4b (aucun commit encore) et ZG6 (dernier 3b499cf4) relancés avec leur contexte.
+- 25/09 : ZG6 fusionné (villes ordinaires 1:1 vers 1340, finage raccordé au parcellaire ZG5b), **main = 7f38c532**, tests ZG2/4/5b/6 + smoke OK. Coût : 48 vs 57 i/s, appels de dessin ×3 (MultiMesh par cellule → par ville à faire en ZG7). Suites VH3 : populations 1328, Gand vide au sud.
+- 25/09 : ajout de ZG8 à la demande du joueur (capture Total War) : exagérer le relief local, pas l'altitude ; purement visuel, une seule fonction de hauteur affichée. Passe avant la recette ZG7.
+- 25/09 : ZG4b et ZG8 fusionnés, plus le correctif C5 (le « ruban géant » de la Tamise était la couche des routes commerciales, affichée hors mode Commerce). Tests ZG2/4/5b/6/8 + smoke OK. ZG4b : brume météo trop couvrante de près (vraie cause du sol beige), parcellaire absent des rives à 0,5 m, plancher caméra 2,6 au-dessus des villes emblématiques (à lever par VH4), portes et bascule des ponts étalée. ZG8 : hauteur affichée = s·(h + g·max(h − fond, 0)), près ×2,5, gains 0,3/0,8 réglés à l'œil (à affiner en jeu), `--no-relief-exaggeration`. Reste à signaler à d'autres lots : `PathPreview` à l'échelle de la carte de près. Prochain : ZG7.
+- 25/09 : ZG7 découpé en ZG7a (perf + finitions visuelles) et ZG7b (export, cache, docs, crédits), lancés en parallèle ; recette finale ZG7c ensuite.

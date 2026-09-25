@@ -900,6 +900,44 @@ exagération dynamique) et `-4_site_avant` (même vue, `--static-exaggeration`).
 ![Rouen, site (exagération dynamique)](img/zg4/rouen-3_site_apres.jpg)
 ![Puy de Dôme, site](img/zg4/puy-de-dome-3_site_apres.jpg)
 
+### Correctifs de recette (lot ZG4b)
+
+Relevés par la recette Q3 (`docs/audit/q3-recette.md`, P1 n° 2) ; rendu seulement.
+
+- **Plancher provisoire au-dessus des villes emblématiques** : `CloseCameraProfile.landmark_min_distance`
+  (`game/resources/close_camera.tres`, **2,6 unités**, au-dessus du palier site qui masque les maquettes à
+  la loupe) dans les cercles `SettlementLayer.landmark_zones()` (`camera_rig.close_zones`), adouci au-dehors
+  avec `min_distance_slope` (`landmark_floor`). Avant, la caméra descendait à 0,3 unité au-dessus de Londres
+  sur un sol vide (maquette masquée, rien de fin dans la zone). **Le lot VH4 le lève** (`landmark_min_distance
+  = 0`) quand les villes emblématiques passent à l'échelle réelle.
+- **Brouillard matinal de la météo (CM2) de près** : la nappe peinte sur le sol (`weather_ground`, jusqu'à
+  80 % de gris) recouvrait tout le sol d'un beige uniforme de près (textures et parcellaire effacés : c'était
+  le « sol beige nu » de Londres, région souvent dans la brume). Elle ne garde que `weather_mist_near` (20 %)
+  quand l'empreinte d'un pixel passe sous `weather_mist_near_footprint` (0,06 unité, palier vallée) ;
+  l'atmosphère de près (ZG4) donne le voile en profondeur. Joueur français : le voile beige sur Londres est
+  le brouillard de guerre, normal.
+- **Parcellaire des terres basses** : `fp_parcels` sautait `hc <= 0,5`, or ZG3b relève les terres sous le
+  niveau de la mer au plancher `MIN_LAND_M` = 0,5 m (rives de la Tamise, polders) : test `hc < 0,25`.
+- **Ponts-portes fins à l'échelle réelle** : `FineGeoLayer._build_gates` posait les ponts-portes (bords des
+  emprises des colonies, fleuve fin) à l'échelle exagérée de la carte (×2 en hauteur et en tablier) ; ils
+  suivent maintenant la règle des ponts ancrés (portée du fleuve fin, maillage `width / FINE_SCALE` réduit de
+  `FINE_SCALE`, tablier à `GATE_DECK_RISE_M` = 7 m au-dessus de l'eau × échelle verticale, recalculé à chaque
+  palier d'exagération).
+- **Bascule des ponts étalée** : `RiverCrossings.set_fine_mode` remaillait tous les ponts construits d'un bloc
+  (~35 ms) ; file d'attente vidée au moins d'un ouvrage par image puis tant que `FrameBudget.has_time()`
+  (`pump_reshape`, vidée d'un coup par `FineGeoLayer.flush`), un maillage gardé par mode (le retour ne remaille
+  rien), mode porté par chaque ouvrage (cohérent pendant la bascule).
+- **Hors lot** : le ruban rouge et gris géant de Londres vers 20 unités (`en3-011`) n'est pas un pont mais la
+  couche des routes commerciales C5 (`TradeRouteLayer`) : `refresh()` force `_wanted_visible = true`, la couche
+  apparaît donc sans le mode Commerce (route active sépia + route coupée Calais-Londres grise par-dessus).
+  L'aperçu de chemin d'armée (`PathPreview`, orange) reste lui aussi à l'échelle de la carte aux paliers
+  vallée / site.
+
+Captures (`docs/img/zg4b/`, 1 280 × 720) : `avant-londres-20` / `-8` / `-plus-pres` (recette Q3) ;
+`apres-londres-20`, `-8`, `-0.3` (plancher : 2,6), `apres-paris-0.3`, `apres-pont-porte-orleans`.
+
+![Londres au plus près (plancher ZG4b)](img/zg4b/apres-londres-0.3.jpg)
+
 ## Hydrographie fine, routes drapées, ancrages et parcellaire de près (lot ZG5b, ADR 0036)
 
 Rendu seulement : les données viennent du lot ZG5a (`docs/geo.md`, « Hydrographie fine »), les règles
@@ -1041,6 +1079,165 @@ captures « comté » existe aussi sans ZG5b (autre calque).
 ![Loire à Beaugency, pont sur son ancrage fin](img/zg5b/orleans_pres_apres.jpg)
 ![Garonne à marée en aval de Bordeaux](img/zg5b/bordeaux_pres_apres.jpg)
 ![Bocage normand](img/zg5b/bocage_pres_apres.jpg)
+
+## Villes ordinaires à l'échelle réelle vers 1340 (lot ZG6, ADR 0036)
+
+Les 562 colonies ordinaires (villes, bourgs, villages, châteaux, abbayes ; les villes emblématiques de
+`data/landmarks/` restent au lot VH) sont rendues à l'échelle 1:1 aux paliers vallée et site.
+
+**Données.** `data/rules/town_footprint.json` (schéma `town_footprint_rules.schema.json`) porte les
+entrées sourcées : densités 80-230 hab./ha selon la population (Russell 1972, Bairoch 1988, Hohenberg &
+Lees ; contrôles : Gand 64 000 hab. / 644 ha d'après Nicholas 1987, périmètre de Poitiers 6,5 km,
+Chartres ~60 ha), 4,5 personnes par feu, modèle de population par type et bâtiments, poll tax anglaise
+de 1377 × 1,6, règles d'enceinte, de site, de faubourgs, de finage (30 × √pop, 900-4 500 m) et de
+parcellaire (façades 5-8 m, profondeurs 20-40 m, largeurs de rues). `uv run --project tools cent-ans geo
+towns` (`tools/cent_ans_tools/geo/towns.py`, après `geo anchors-fine`) écrit `data/map/towns_1340.json`
+(schéma `towns_1340.schema.json`) : population estimée, surfaces, enceinte (pierre, palissade, aucune)
+et son polygone de rayons par gisement adapté au relief (éperon, méandre, mer), portes sur les routes
+d'accès, faubourgs, monuments, paroisses, fleuve et pont (ancrages ZG5a), rayon de finage.
+
+**Plan** (`town_plan.gd`, statique, sans état, fil de travail, déterministe par `seed`) : place du
+marché, monuments réservés, grandes rues drapées (décalage latéral par Viterbi sur la pente) du marché
+aux portes puis en faubourgs, rue des lices, rues secondaires qui suivent les courbes de niveau,
+ruelles ; parcelles en lanières des deux côtés des rues (maison sur rue, annexe et arbre de jardin à
+l'arrière), budget de maisons tiré des feux ; muraille (anneau tous les ~8 m, tours, portes), pont,
+grille de sol. Hauteurs en mètres lues dans un instantané des pages du quadtree (`TownPlan.Heights`).
+
+**Rendu** (`town_builder.gd`, `town_layer.gd`, `shaders/town_building.gdshader`,
+`resources/town_render.tres`) : nœud racine à l'échelle 1/`meters_per_unit` (tout en mètres dessous),
+hauteur de base en mètres dans `INSTANCE_CUSTOM.r` (MultiMesh) ou `UV2.x` (maillages drapés), ajoutée
+dans le shader × `campaign_vertical_scale` : l'exagération dynamique ZG4 ne demande aucune
+reconstruction (AABB recalées sur `vertical_scale_changed`). HLOD par cellule de 250 m : kit bas détail
+(`game/assets/models/town_kit/`, `kit_export.py export-town`) jusqu'à `detail_range`, blocs (un cube à
+toit par maison) jusqu'à `block_range`, fondu ; distances et ombres selon le préréglage de qualité (PF1).
+Tant que la couche est active (poids vallée ≥ 0,5), les maquettes « à la loupe » des colonies
+ordinaires sont masquées et leurs étiquettes posées au sol (accroche `_setup_towns` / `_update_towns`
+dans `settlement_layer.gd`).
+
+**Streaming et budget.** Villes dans un rayon `distance × stream_factor` (4-18 unités) : plan
+(`TownPlan.generate`) puis préparation de la géométrie (`TownBuilder.prepare` : tampons MultiMesh,
+tableaux via `SurfaceTool.commit_to_arrays`, sol en bandes de 24 rangées, rues par 40) dans le
+`WorkerThreadPool` ; le fil principal ne crée que les nœuds, par tâches indivisibles de ≤ 1-2 ms,
+sous `FrameBudget.has_time()` (PB1) et `build_budget_ms`. Recalage (`TownPlan.reground` + préparation,
+fil) quand des pages plus fines arrivent (`chunk_surface_changed`, hors `rescaling_vertical`), puis
+échange de constructeur sans trou. Cache LRU des plans (24). `flush` (captures) fait tout de façon
+synchrone.
+
+**Finage ↔ parcellaire ZG5b.** `TownLayer._push_finage` envoie au shader du terrain les 16 villes les
+plus proches du point visé (`fp_towns[16]` : x, y, rayon de finage, rayon bâti en unités ;
+`fp_town_count`) ; `fine_parcels.gdshaderinc` (`fp_finage`) remplace les friches par des terres
+cultivées dans le finage et peint une couronne de jardins et vergers (carrés de 12 m) entre 0,9 et
+1,4 × le rayon bâti. `TownLayer.finage_zones()` / `TownData.finage_zones()` exposent les cercles de toutes
+les villes. Dans l'enceinte, le sol de la ville est vert (jardins, prés intra-muros) sauf autour des
+maisons et des rues.
+
+**Drapeaux.** `--no-towns` (désactive la couche : captures « avant »), `--town-lod=blocks|detail`
+(force un niveau), `--bench-towns` (avec `--bench-map --bench-descent-only` : descente sur Amiens,
+Troyes, Poitiers, Gand, pause 4 s).
+
+**Mesures** (25/09, M4 Pro, 1 440 × 900, machine chargée par d'autres agents, charge ~25-60) :
+descente `--bench-towns` avec villes : 48,2 i/s, p50 15,0 ms, p99 120 ms, 160 pics > 50 ms, 809 appels de
+dessin ; sans (`--no-towns`) : 56,6 i/s, p50 11,7 ms, p99 117 ms, 158 pics, 241 appels. Les pics sont
+ceux du relief (identiques avec et sans). Plan : 0,5-2 s par ville dans un fil (build debug, Gand 64 000
+hab. ≈ 8 100 maisons) ; plus longue tâche du fil principal 1-10 ms (création d'un maillage de sol ou de
+monuments sous forte charge). Aucun coût en vue stratégique (couche inactive au-delà du palier vallée).
+
+Captures avant/après (`docs/img/zg6/`, `<ville>_{vallee,site}_{avant,apres}.jpg`) : Gand (grande ville
+de plaine), Amiens (ville de plaine avec pont), Poitiers (ville close sur éperon), Carcassonne (ville
+close de fleuve), Blois (petite ville de Loire avec pont).
+
+![Poitiers, éperon, palier site](img/zg6/poitiers_site_apres.jpg)
+![Gand, palier vallée](img/zg6/gand_vallee_apres.jpg)
+![Blois, palier site](img/zg6/blois_site_apres.jpg)
+
+**Limites.** Populations estimées par type et bâtiments (pas encore calées sur l'état des feux de
+1328) ; les villages restent des rues-villages simples ; certaines villes près de l'eau (Gand au sud,
+Sully-sur-Loire : 5 maisons) perdent des parcelles aux zones d'eau ; rubans de routes et moulins aux
+paliers proches relèvent de ZG5b / VH ; appels de dessin ×3 dans la descente (un MultiMesh par modèle
+et par cellule).
+
+## Relief exagéré « façon Total War » (lot ZG8, ADR 0036)
+
+Purement visuel : rien dans `core/`, déplacement, vision et batailles restent en mètres réels. On
+n'exagère plus seulement l'altitude absolue mais le relief **local**, hauteur au-dessus d'un fond de
+vallée lissé : plaines et fonds de vallée restent plats, versants, escarpements et montagnes se
+dressent, surtout de près (où ZG4 aplatissait à ×1,5).
+
+```
+y = s(d) · (h + g(d) · max(h − fond(x, z), 0))
+```
+
+- `s(d)` : échelle ZG4 (`MapData.vertical_scale()`, ×4,31 au loin), plancher de près relevé à
+  `near_exaggeration` (×2,5) : `CloseCameraProfile.near_exaggeration()`.
+- `g(d)` : gain de relief local, `gain_far` (0,3) en vue stratégique → `gain_near` (0,8) au ras du sol,
+  interpolé en logarithme de l'échelle quantifiée : **fonction de l'échelle**, donc publié en même temps
+  qu'elle (`MapData.set_vertical_scale`) et recalé par les mêmes signaux (`vertical_scale_changed`,
+  `chunk_surface_changed` étalé) ; aucun nouveau recalage.
+- `fond` (`ReliefFloor`, calculé une fois dans `TerrainBuilder.build`, ~90 ms sur 8 cœurs) : cellules de
+  8 px (5,75 km), minimum des altitudes échantillonnées tous les 2 px et bornées à 0, filtre minimum
+  3 × 3 cellules, deux flous de boîte 5 × 5 (grille 512², RF). Toujours ≥ 0 : la côte (h = 0) et la mer
+  (h < 0) ne bougent pas ; une rivière au fond de sa vallée (h ≈ fond) ne monte pas, ponts et berges non
+  plus. Sans fond publié le gain vaut 0 (comportement ZG4).
+
+**Source unique.** `shaders/campaign_relief.gdshaderinc` (`campaign_display_height`,
+`campaign_display_gradient`, globaux `campaign_vertical_scale`, `campaign_relief_gain`,
+`campaign_relief_floor`, `campaign_relief_floor_info`) et son double GDScript `MapData.display_height`
+(+ `height_from_display`, inverse exacte, et `_with` pour une échelle et un gain donnés). Le fond est lu
+au texel près (`texelFetch` + bilinéaire manuel) des deux côtés : pas d'écart de filtrage matériel.
+Consommateurs :
+
+| Consommateur | Passage par la fonction |
+|---|---|
+| `terrain.gdshader` + `relief_quadtree.gdshaderinc` | sommets des patchs (`qt_vertex`), normale d'ombrage (`campaign_display_gradient`) |
+| Morceaux E0 / repli (`_chunk_vertices`, `FineTerrainJob`) | cuits avec `display_height_with(…, HEIGHT_SCALE, gain lointain)` |
+| `ReliefQuadtree.surface_height_at`, `sample_pages`, instantanés | `_bilinear` rend des mètres, `display_height` au point ; `sample_pages_m` pour les rubans |
+| `MapData.height_world_at` / `surface_world_at` | `display_height` : armées, caméra (plancher, visée), sondes de survol, marqueurs, végétation, routes C7b |
+| `river_fine`, `road_fine` (ZG5b) | sommets en mètres → `campaign_display_height` |
+| `river_water` (V4) | cuit en altitude × `HEIGHT_SCALE` sans gain, reposé par le shader |
+| `landmark.gdshader` / `LandmarkModel` | grille en mètres = `height_from_display(surface)`, reposée à l'ancrage |
+| `town_building.gdshader` / `TownBuilder` (ZG6) | base en mètres → hauteur affichée à l'origine de l'instance (maillages drapés : au sommet) ; boîtes × (1 + g) |
+| Ponts et portes (`RiverCrossings`, `FineGeoLayer`) | niveau d'eau et tablier par `display_height` |
+
+Boîtes englobantes conservatrices : `y ≤ s·(1 + g)·h` pour h ≥ 0 (quadtree, villes, rubans avec le gain
+maximal).
+
+**Roche et lumière.** `terrain.gdshader` remplace la couverture du sol par la roche sur les pentes du
+relief exagéré localement (pente vraie × (1 + g), `cliff_slope_start` 0,45 → `cliff_slope_full` 1,0 ;
+la forêt tient un peu plus longtemps) ; soleil de la carte abaissé à 34° (`sun_elevation_deg`, azimut
+conservé ; `TurnLight` part de cette base).
+
+**Réglages et interrupteur.** `game/resources/relief_exaggeration.tres` (`ReliefExaggerationProfile`,
+voisin de `close_camera.tres`) : `enabled`, `near_exaggeration`, `gain_far`, `gain_near`, paramètres du
+fond, falaises, soleil. `enabled = false` ou `-- --no-relief-exaggeration` : exactement ZG4 (gain nul,
+plancher ×1,5, soleil de la scène). Parchemin (morceaux E0 cuits avec le gain lointain) et filtres de
+carte MF1 inchangés.
+
+**Test, captures, banc.**
+- `godot --headless --path game --script res://tests/zg8_relief_test.gd` : formule (plaine inchangée,
+  sommet rehaussé, côte et mer fixes, monotone, inverse), double GPU (texture relue comme le shader =
+  `relief_floor_at`, formule du `.gdshaderinc`, aucun shader ne pose des mètres sans la fonction), carte
+  réelle (fond ≥ 0 ; Paris : h 31 m, fond 7 m, +7 m ; pic pyrénéen 3 125 m, fond 897 m, +668 m au gain
+  lointain), objets posés (sommets E0 et maquettes : sol affiché = hauteur affichée).
+- ZG2 et ZG4 adaptés (surface = `display_height`, nombre de paliers selon le plancher) ; ZG5b, ZG6 OK.
+- Captures : `godot --path game --script res://tests/zg8_relief_shots.gd -- --out=<dossier>
+  --prefix=apres` (et `--prefix=avant --no-relief-exaggeration`) ; la météo et la saison tirées au
+  lancement peuvent différer entre les deux séries.
+- Banc `--bench-map` avec et sans : machine chargée par d'autres sessions (≈ 20 Godot), écarts dans le
+  bruit ; coût GPU ajouté : 4 `texelFetch` par sommet du quadtree et 4 par fragment (gradient du fond).
+
+**Limites.** Gain et plancher choisis à l'œil (captures), à affiner en jeu ; la partie « régionale » du
+relief (plateaux entiers au-dessus de leur fond sur ~10 km) forme une rampe douce au bord des plateaux ;
+les sommets alpins très découpés deviennent plus aigus en vue moyenne (le gain lointain reste modeste) ;
+`vegetation_mask` et le parcellaire lisent encore les pentes vraies (voulu : règles d'occupation du sol).
+
+Captures (`docs/img/zg8/{avant,apres}_<vue>.jpg`) : Pyrénées (d = 40 et 7), Alpes (45), Massif central
+(30), pays de Galles (40), falaises normandes (6), coteaux de Seine aux Andelys (8), Paris (10, plaine :
+inchangée), France entière (900).
+
+![Coteaux de Seine, avant](img/zg8/avant_coteaux_seine.jpg)
+![Coteaux de Seine, après](img/zg8/apres_coteaux_seine.jpg)
+![Pyrénées de près, après](img/zg8/apres_pyrenees_pres.jpg)
+![Paris, après (plaine inchangée)](img/zg8/apres_paris.jpg)
 
 ## Interface des colonies (lot C5)
 

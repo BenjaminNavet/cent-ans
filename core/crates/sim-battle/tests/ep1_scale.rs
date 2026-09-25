@@ -126,6 +126,12 @@ fn reinforcements_beyond_the_epic_cap() {
 /// enemy on its ground and its archers thin the attack before contact, so
 /// fewer regiments are locked in melee at once (15-22 over seeds 3, 5, 11
 /// instead of 20+); the melee is counted at every step.
+///
+/// EP9 (ADR 0056): the army that gives way breaks as a whole once it has
+/// lost most of its fighting strength, so the battle ends in 5-6 minutes
+/// instead of 14-18, before the whole line is locked in melee (11-12
+/// regiments at most over seeds 3, 5, 11): the threshold of 20 cannot come
+/// back; the battle must end within 12 minutes.
 #[test]
 fn ai_handles_sixty_regiments_a_side() {
     let mut sim = BattleSim::new(big_setup(60), 11).unwrap();
@@ -141,8 +147,9 @@ fn ai_handles_sixty_regiments_a_side() {
                 .count(),
         );
     }
-    assert!(melee_seen >= 12, "at most {melee_seen} regiments in melee");
+    assert!(melee_seen >= 10, "at most {melee_seen} regiments in melee");
     assert!(sim.is_finished(), "still running at {:.0} s", sim.elapsed());
+    assert!(sim.elapsed() <= 720.0, "over at {:.0} s", sim.elapsed());
     println!(
         "60/side: {melee_seen} regiments in melee at most, over at {:.0} s, winner {:?}",
         sim.elapsed(),

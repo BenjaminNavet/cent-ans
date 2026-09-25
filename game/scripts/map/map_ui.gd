@@ -1204,6 +1204,11 @@ var _keycaps: Array = []
 
 ## Cartouche de la touche d'`action` dans le coin bas droit de `button`, et rappel dans
 ## l'infobulle (« Cour (C) »).
+## Lot MF1 : pose la touche d'une action sur un bouton ajouté par un contrôleur.
+func add_keycap(button: Button, action: String) -> void:
+	_add_keycap(button, action)
+
+
 func _add_keycap(button: Button, action: String) -> void:
 	if button == null or button.has_node("Keycap"):
 		return

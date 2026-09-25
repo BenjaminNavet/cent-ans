@@ -86,6 +86,7 @@ fn trophies_are_told_in_the_chronicle() {
         attacker: won,
         defender: lost,
         duration: 300.0,
+        end: Default::default(),
     };
     let events = state
         .resolve_pending_battle(&data, index, &outcome)
@@ -109,6 +110,7 @@ fn no_trophy_no_line() {
         attacker: side(&state, &attacker, true),
         defender: side(&state, &defender, false),
         duration: 300.0,
+        end: Default::default(),
     };
     let events = state
         .resolve_pending_battle(&data, index, &outcome)

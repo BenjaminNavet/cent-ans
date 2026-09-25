@@ -176,11 +176,11 @@ impl CampaignSim {
     }
 }
 
-fn error_dict(message: &str) -> VarDictionary {
+pub(crate) fn error_dict(message: &str) -> VarDictionary {
     vdict! { "ok" => false, "error" => message, "chance" => 0 }
 }
 
-fn parse(
+pub(crate) fn parse(
     state: &CampaignState,
     target: &GString,
     articles: &VarArray,
@@ -256,20 +256,20 @@ fn json_to_variant(value: &Value) -> Variant {
     }
 }
 
-fn articles_array(articles: &[Article]) -> VarArray {
+pub(crate) fn articles_array(articles: &[Article]) -> VarArray {
     articles
         .iter()
         .map(|a| json_to_variant(&serde_json::to_value(a).unwrap_or(Value::Null)))
         .collect()
 }
 
-fn faction_label(data: &GameData, id: &FactionId) -> String {
+pub(crate) fn faction_label(data: &GameData, id: &FactionId) -> String {
     data.factions
         .get(id)
         .map_or_else(|| id.to_string(), |f| f.short_or_display_name().to_owned())
 }
 
-fn province_label(data: &GameData, id: &data_model::ProvinceId) -> String {
+pub(crate) fn province_label(data: &GameData, id: &data_model::ProvinceId) -> String {
     data.provinces
         .get(id)
         .map_or_else(|| id.to_string(), |p| p.name.display.clone())

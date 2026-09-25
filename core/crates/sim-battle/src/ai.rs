@@ -105,6 +105,9 @@ pub const DUEL_TIME: f64 = 480.0;
 /// the archery duel after this long and closes in (F5d: two AI armies
 /// always end up engaging).
 pub const ATTACKER_DUEL_TIME: f64 = 60.0;
+/// EP9 (ADR 0056): the side that sought the battle trades volleys at most
+/// this long, then closes in (it must attack; the defender may wait).
+pub const ATTACKER_DUEL_LIMIT: f64 = 180.0;
 /// A side whose losses exceed the enemy's by more than this share is
 /// losing the archery duel and closes in (B4).
 pub const DUEL_LOSS_MARGIN: f64 = 0.04;
@@ -119,8 +122,12 @@ pub const ATTACKER_PATIENCE: f64 = 240.0;
 /// engages anyway (B4: it is the side that sought the battle; armies meet
 /// within one to three minutes).
 pub const ATTACKER_WAIT: f64 = 90.0;
-/// A defensive side gives up waiting after this long.
+/// A defensive side gives up waiting after this long ...
 pub const DEFENDER_PATIENCE: f64 = 480.0;
+/// ... unless nobody has fought for this long: the attacker does not come,
+/// the defender keeps its ground and lets the battle be refused (EP9,
+/// ADR 0056).
+pub const DEFENDER_QUIET: f64 = 60.0;
 /// Besiegers wait for their engines at most this long before escalading.
 pub const ENGINE_PATIENCE: f64 = 420.0;
 
@@ -1207,7 +1214,7 @@ fn plan_field(view: &mut View) {
     let defensive = match view.side {
         SideId::Defender => {
             (ratio < 0.85 || holds_heights || holds_river || receives)
-                && elapsed < DEFENDER_PATIENCE
+                && (elapsed < DEFENDER_PATIENCE || view.sim.quiet_for(DEFENDER_QUIET))
         }
         SideId::Attacker => (ratio < 0.8 && elapsed < ATTACKER_WAIT) || attacker_holds,
     };
@@ -1240,7 +1247,14 @@ fn plan_field(view: &mut View) {
     let duel = !roles.shooters.is_empty()
         && shooters_have_ammo
         && contact < 320.0
-        && elapsed < if press { ATTACKER_DUEL_TIME } else { DUEL_TIME }
+        && elapsed
+            < if press {
+                ATTACKER_DUEL_TIME
+            } else if view.side == SideId::Attacker {
+                ATTACKER_DUEL_LIMIT
+            } else {
+                DUEL_TIME
+            }
         && !losing
         && (enemy_shooters == 0 || own_ranged >= enemy_ranged * 0.8);
 
@@ -1335,7 +1349,13 @@ fn plan_field(view: &mut View) {
         if !view.free(i) {
             continue;
         }
-        let target = view.nearest_enemy(i, |e| e.state != UnitState::Routing);
+        // ADR 0052: archers out of arrows fall only on horsemen already held
+        // in a melee (Agincourt); they do not walk alone into fresh knights.
+        let spent_archers = view.units[i].category == UnitCategory::Ranged;
+        let target = view.nearest_enemy(i, |e| {
+            e.state != UnitState::Routing
+                && !(spent_archers && is_horse(e) && e.state != UnitState::Melee)
+        });
         // R2b: a regiment well ahead of the line waits for it rather than
         // arriving alone under the enemy arrows (fast archers out of
         // arrows outpace the men-at-arms).
@@ -2391,9 +2411,12 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
                 continue;
             }
         }
+        // BR3b: a regiment already over the wall (or on it) makes for the
+        // square instead of its ladder point, which it has passed.
+        let over = unit.on_wall || works.inside(unit.x, unit.z);
         if storm {
             view.move_to(i, square.0, square.1, true, None);
-        } else if escalade && unit.can_climb() {
+        } else if escalade && unit.can_climb() && !over {
             // Climb at a docked tower if any, else ladders along the front.
             let piece = if !docked.is_empty() {
                 docked[ladder_slot % docked.len()]
@@ -2411,7 +2434,7 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
                 outer_point(works, piece, -25.0)
             };
             view.move_to(i, x, z, true, None);
-        } else if unit.on_wall || works.inside(unit.x, unit.z) {
+        } else if over {
             view.move_to(i, square.0, square.1, true, None);
         } else {
             // Wait out of bowshot for the engines and towers.
