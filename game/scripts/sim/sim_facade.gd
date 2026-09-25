@@ -122,9 +122,15 @@ func _apply_pending_difficulty() -> void:
 ## Les quatre niveaux, du plus facile au plus difficile : `[{id, label, description,
 ## effects, summary, default}]` (vide si la sim ne les expose pas).
 func difficulty_levels() -> Array:
+	var levels: Array = []
 	if sim != null and sim.has_method("get_difficulty_levels"):
-		return sim.call("get_difficulty_levels")
-	return []
+		levels = sim.call("get_difficulty_levels")
+	# Mock sur un jeu de données partiel (tests) : le cœur connaît les niveaux par défaut.
+	if levels.is_empty() and ClassDB.class_exists("CampaignSim"):
+		var core: Object = ClassDB.instantiate("CampaignSim")
+		if core.has_method("get_difficulty_levels"):
+			levels = core.call("get_difficulty_levels")
+	return levels
 
 
 ## Niveau de la campagne en cours (`normal` si la sim ne le connaît pas).
