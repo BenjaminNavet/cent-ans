@@ -149,13 +149,28 @@ def test_generate_refuses_beyond_global_cap(
     assert "/api/v1/chat/completions" not in calls
 
 
-def test_dry_run_makes_no_network_call(monkeypatch: pytest.MonkeyPatch) -> None:
-    """--dry-run prints prompts and an offline estimate without touching httpx."""
+def test_dry_run_makes_no_network_call(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """--dry-run prints prompts and an offline estimate without touching httpx.
+
+    Hermetic (T11): the CLI command's ``portraits.plan(limit=limit)`` call defaults to
+    ``game/assets/portraits`` for ``out_dir``, so this used to depend on which portraits
+    already exist there (empty jobs list -> no "Style" printed once every portrait had been
+    generated). Redirect ``plan`` to an empty temp directory instead, so the test always sees
+    ``limit`` jobs regardless of repository state.
+    """
 
     def forbidden(*_args, **_kwargs):
         raise AssertionError("network call during dry-run")
 
     monkeypatch.setattr(httpx.Client, "send", forbidden)
+    real_plan = portraits.plan
+    monkeypatch.setattr(
+        portraits,
+        "plan",
+        lambda limit=None, **_: real_plan(out_dir=tmp_path, limit=limit),
+    )
     result = CliRunner().invoke(
         cli.app, ["assets", "portraits", "--dry-run", "--limit", "2"]
     )

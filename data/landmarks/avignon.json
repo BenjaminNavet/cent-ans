@@ -1,0 +1,302 @@
+{
+  "id": "avignon",
+  "name": "Avignon",
+  "settlement": "set_avignon",
+  "period": "vers 1337-1400 (palais Neuf de Clément VI dès 1342, remparts d'Innocent VI et d'Urbain V à partir de 1358, fort Saint-André 1362)",
+  "province": "prov_comtat_venaissin",
+  "sources": [
+    {
+      "title": "Avenio, plan cavalier d'Avignon",
+      "author": "Georg Braun et Frans Hogenberg, Civitates orbis terrarum",
+      "date": "1575",
+      "url": "https://commons.wikimedia.org/wiki/Category:Old_maps_of_Avignon",
+      "license": "Domaine public",
+      "use": "Enceinte et portes, pont Saint-Bénézet entier avec sa chapelle, palais, rocher des Doms, Villeneuve."
+    },
+    {
+      "title": "Palais des Papes (plans et élévations)",
+      "author": "Eugène Viollet-le-Duc, Dictionnaire raisonné de l'architecture française",
+      "date": "1854-1868",
+      "url": "https://commons.wikimedia.org/wiki/Category:Palais_des_Papes_(Avignon)",
+      "license": "Domaine public",
+      "use": "Palais Vieux de Benoît XII autour du cloître, palais Neuf de Clément VI, tours (Trouillas, Anges, Campane, Saint-Laurent, Garde-Robe, Gâche), grandes arcades à mâchicoulis."
+    },
+    {
+      "title": "OpenStreetMap (bras du Rhône, tours des remparts, pont Saint-Bénézet, tour Philippe-le-Bel, fort Saint-André, rocher des Doms)",
+      "author": "Contributeurs d'OpenStreetMap",
+      "date": "2026",
+      "url": "https://www.openstreetmap.org/copyright",
+      "license": "ODbL 1.0 (contrôle de position ; une trentaine de points arrondis à la main)",
+      "use": "Tracé des remparts par leurs tours conservées, axes des deux bras du Rhône et de la Durance, positions des monuments."
+    }
+  ],
+  "anchor": {
+    "lonlat": [4.8075, 43.9508],
+    "px": [2411.919, 2701.954],
+    "north_bearing_deg": 3.75
+  },
+  "scale": {
+    "center_meters_per_unit": 170,
+    "core_radius_m": 1500,
+    "core_radius_px": 5.5,
+    "zone_radius_px": 6.3,
+    "monument_scale": 1.9,
+    "house_scale": 1.6,
+    "height_scale": 1.25
+  },
+  "rivers": [
+    {
+      "id": "rhone_avignon",
+      "name": "Rhône (bras d'Avignon)",
+      "points": [[2864, 6573, 230], [2984, 5261, 230], [3132, 4901, 230], [3617, 4073, 230], [3763, 3652, 230], [3766, 3136, 230], [3683, 2723, 230], [3710, 2173, 230], [3645, 1851, 230], [3423, 1458, 230], [3180, 1166, 230], [2999, 1032, 230], [2563, 972, 230], [1712, 1000, 230], [1488, 843, 230], [1101, 437, 230], [974, 368, 230], [698, 324, 230], [300, 380, 230], [-98, 417, 230], [-360, 313, 230], [-542, 140, 230], [-1003, -703, 230], [-1404, -987, 230], [-2209, -1250, 230], [-2522, -1434, 230], [-3015, -1617, 230], [-4077, -1778, 230], [-4459, -1963, 230], [-5042, -2414, 230]]
+    },
+    {
+      "id": "rhone_villeneuve",
+      "name": "Rhône (bras de Villeneuve)",
+      "points": [[564, 4622, 260], [326, 4009, 260], [205, 3377, 260], [198, 3086, 260], [249, 2781, 260], [562, 2101, 260], [606, 1907, 260], [521, 1441, 260], [327, 1206, 260], [79, 1035, 260], [-777, 672, 260], [-1129, 357, 260], [-1495, -385, 260], [-2209, -1250, 260]]
+    },
+    {
+      "id": "durance",
+      "name": "Durance",
+      "points": [[977, -4190, 150], [876, -4241, 150], [310, -4088, 150], [-300, -3775, 150], [-620, -3732, 150], [-967, -3770, 150], [-1345, -3564, 150], [-1960, -3444, 150], [-2486, -3509, 150], [-4410, -3109, 150]]
+    }
+  ],
+  "areas": [
+    {
+      "id": "vieille_ville",
+      "name": "La ville (dans l'enceinte du XIIIe siècle)",
+      "kind": "built",
+      "density": 0.92,
+      "polygon": [[-150, 150], [-330, 60], [-380, -150], [-330, -380], [-100, -450], [150, -430], [380, -300], [420, -50], [380, 150], [200, 250]]
+    },
+    {
+      "id": "bourgs",
+      "name": "Bourgs entre les deux enceintes",
+      "kind": "built",
+      "density": 0.6,
+      "polygon": [[-157, 250], [-82, 282], [92, 282], [292, 288], [509, 255], [729, 122], [946, -92], [879, -232], [710, -552], [473, -785], [345, -815], [217, -855], [-14, -903], [-253, -873], [-498, -849], [-575, -835], [-742, -728], [-744, -615], [-648, -452], [-548, -323], [-488, -225], [-379, 3], [-323, 83], [-240, 176]]
+    },
+    {
+      "id": "villeneuve",
+      "name": "Villeneuve (rive du royaume)",
+      "kind": "built",
+      "density": 0.3,
+      "polygon": [[-1000, 800], [-780, 900], [-600, 1300], [-450, 1450], [-700, 1700], [-1100, 1500], [-1250, 1000]]
+    },
+    {
+      "id": "faubourgs",
+      "name": "Faubourgs hors les murs",
+      "kind": "built",
+      "density": 0.15,
+      "polygon": [[946, -92], [1300, -100], [1300, -700], [800, -1200], [0, -1300], [-900, -1100], [-742, -728], [-575, -835], [-14, -903], [473, -785], [879, -232]]
+    }
+  ],
+  "open_spaces": [
+    {
+      "id": "rocher_des_doms",
+      "name": "Rocher des Doms",
+      "kind": "hill",
+      "polygon": [[-150, 150], [-60, 110], [60, 120], [150, 150], [170, 260], [60, 280], [-80, 275], [-150, 245]]
+    },
+    {
+      "id": "place_du_palais",
+      "name": "Place du Palais",
+      "kind": "square",
+      "polygon": [[-190, -60], [-120, -60], [-120, 70], [-190, 70]]
+    },
+    {
+      "id": "barthelasse",
+      "name": "Île de la Barthelasse (prés et vergers)",
+      "kind": "meadow",
+      "polygon": [[-100, 600], [300, 700], [700, 1100], [500, 1600], [100, 1300], [-500, 700]]
+    }
+  ],
+  "walls": [
+    {
+      "id": "enceinte_xiii",
+      "name": "Enceinte du XIIIe siècle",
+      "points": [[-150, 150], [-330, 60], [-380, -150], [-330, -380], [-100, -450], [150, -430], [380, -300], [420, -50], [380, 150], [200, 250]],
+      "closed": true,
+      "height_m": 7,
+      "tower_spacing_m": 90,
+      "tower_shape": "square",
+      "until_year": 1370
+    },
+    {
+      "id": "remparts",
+      "name": "Remparts d'Innocent VI et d'Urbain V (1355-1370)",
+      "points": [[-157, 250], [-82, 282], [92, 282], [292, 288], [509, 255], [729, 122], [946, -92], [879, -232], [710, -552], [473, -785], [345, -815], [217, -855], [-14, -903], [-253, -873], [-498, -849], [-575, -835], [-742, -728], [-744, -615], [-648, -452], [-548, -323], [-488, -225], [-379, 3], [-323, 83], [-240, 176]],
+      "closed": true,
+      "height_m": 10,
+      "tower_spacing_m": 70,
+      "tower_shape": "square",
+      "ditch": true,
+      "from_year": 1358,
+      "gates": [
+        {
+          "name": "Porte Saint-Lazare",
+          "at": [729, 122]
+        },
+        {
+          "name": "Porte Limbert",
+          "at": [946, -92]
+        },
+        {
+          "name": "Porte Saint-Michel",
+          "at": [217, -855]
+        },
+        {
+          "name": "Porte de l'Oulle",
+          "at": [-548, -323]
+        },
+        {
+          "name": "Porte du Rhône",
+          "at": [-157, 250]
+        }
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "pont_saint_benezet",
+      "name": "Pont Saint-Bénézet (22 arches, 920 m)",
+      "from": [-125, 225],
+      "to": [-790, 840],
+      "width_m": 9,
+      "material": "stone",
+      "arches": 22,
+      "chapel_at": 0.1,
+      "gatehouses_at": [0.02]
+    }
+  ],
+  "streets": [
+    {
+      "id": "rue_carreterie",
+      "name": "Rue Carreterie",
+      "points": [[200, -20], [450, 60], [729, 122]],
+      "width_m": 10
+    },
+    {
+      "id": "rue_des_teinturiers",
+      "name": "Grand-rue vers la porte Limbert",
+      "points": [[150, -150], [500, -120], [946, -92]],
+      "width_m": 10
+    },
+    {
+      "id": "rue_saint_michel",
+      "name": "Rue vers la porte Saint-Michel",
+      "points": [[0, -250], [100, -550], [217, -855]],
+      "width_m": 10
+    },
+    {
+      "id": "rue_de_l_oulle",
+      "name": "Rue vers la porte de l'Oulle",
+      "points": [[-150, -100], [-350, -220], [-548, -323]],
+      "width_m": 10
+    },
+    {
+      "id": "route_d_aix",
+      "name": "Route d'Aix et de Marseille",
+      "points": [[217, -855], [300, -1400], [500, -2200]],
+      "width_m": 10
+    },
+    {
+      "id": "route_de_villeneuve",
+      "name": "Route de Villeneuve",
+      "points": [[-790, 840], [-800, 1150], [-560, 1500]],
+      "width_m": 9
+    }
+  ],
+  "monuments": [
+    {
+      "id": "palais_des_papes",
+      "name": "Palais des Papes",
+      "model": "papal_palace",
+      "at": [0, -10],
+      "angle_deg": 0,
+      "clear_radius_m": 80,
+      "variant_from_year": {
+        "clement_vi": 1342
+      },
+      "description": "Palais Vieux de Benoît XII (1335-1342) autour du cloître ; palais Neuf de Clément VI (1342-1352) : Grande Audience, chapelle Clémentine, façade et porte des Champeaux."
+    },
+    {
+      "id": "notre_dame_des_doms",
+      "name": "Notre-Dame des Doms",
+      "model": "church",
+      "at": [10, 100],
+      "angle_deg": 0,
+      "size": 0.85,
+      "clear_radius_m": 25
+    },
+    {
+      "id": "tour_philippe_le_bel",
+      "name": "Tour Philippe-le-Bel (tête du pont, rive du royaume)",
+      "model": "keep",
+      "at": [-801, 852],
+      "angle_deg": -45,
+      "size": 0.75,
+      "clear_radius_m": 25
+    },
+    {
+      "id": "fort_saint_andre",
+      "name": "Fort Saint-André",
+      "model": "castle",
+      "at": [-529, 1620],
+      "scale": 1.3,
+      "from_year": 1362,
+      "clear_radius_m": 120,
+      "params": {
+        "rings": [
+          {
+            "points": [[-110, -60], [60, -80], [120, 20], [70, 90], [-60, 100], [-130, 30]],
+            "height": 10,
+            "thick": 3,
+            "tower_radius": 5,
+            "tower_height": 13,
+            "tower_shape": "square",
+            "tower_roof": "flat"
+          }
+        ],
+        "halls": [[20, 40, 40, 12, 10, 10]],
+        "gates": [[-118, -20, 90]],
+        "ward": "Dirt"
+      },
+      "description": "Fort de Jean le Bon et Charles V sur le mont Andaon, porte à tours jumelles (vers 1362-1368)."
+    },
+    {
+      "id": "chartreuse",
+      "name": "Chartreuse du Val de Bénédiction",
+      "model": "abbey",
+      "at": [-930, 1450],
+      "angle_deg": 0,
+      "size": 0.8,
+      "from_year": 1356,
+      "clear_radius_m": 50
+    },
+    {
+      "id": "saint_pierre",
+      "name": "Collégiale Saint-Pierre",
+      "model": "church",
+      "at": [120, -188],
+      "size": 0.7,
+      "clear_radius_m": 20
+    },
+    {
+      "id": "saint_agricol",
+      "name": "Collégiale Saint-Agricol",
+      "model": "church",
+      "at": [-176, -243],
+      "size": 0.7,
+      "clear_radius_m": 20
+    },
+    {
+      "id": "saint_didier",
+      "name": "Église Saint-Didier",
+      "model": "church",
+      "at": [-48, -431],
+      "size": 0.7,
+      "clear_radius_m": 20
+    }
+  ]
+}

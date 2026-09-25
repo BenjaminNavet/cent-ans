@@ -464,10 +464,11 @@ class FamilyTreeNode:
 		lines.append("Maison %s — %s" % [str(entry.get("house", "")), dates_text()])
 		if is_ruler:
 			lines.append("[color=#8b6a1a]Chef de la maison régnante[/color]")
+		var female := str(entry.get("sex", "")) == "female"
 		if is_heir:
-			lines.append("[color=#8b6a1a]♛ Héritier désigné[/color]")
+			lines.append("[color=#8b6a1a]♛ %s[/color]" % ("Héritière désignée" if female else "Héritier désigné"))
 		if not bool(entry.get("alive", true)):
-			lines.append("[color=#6b5a40]Défunt(e)[/color]")
+			lines.append("[color=#6b5a40]%s[/color]" % ("Défunte" if female else "Défunt"))
 		lines.append("[color=#6b5a40]Clic : fiche — clic droit : recentrer l'arbre[/color]")
 		return "\n".join(lines)
 
@@ -493,8 +494,11 @@ class FamilyTreeNode:
 		# Cartouche de parchemin sous le nom.
 		var card := Rect2(Vector2(2, center.y + radius * 0.55), Vector2(width - 4, size.y - center.y - radius * 0.55 - 2))
 		var card_fill := HudStyle.PARCHMENT_LIGHT if not is_root else HudStyle.PARCHMENT.lerp(HudStyle.GOLD_PALE, 0.35)
+		if is_heir:  # U10 (audit A3, P5) : l'héritier se voit de loin
+			card_fill = HudStyle.PARCHMENT_LIGHT.lerp(HudStyle.GOLD_PALE, 0.6)
 		draw_rect(card, card_fill)
-		draw_rect(card, HudStyle.INK_SOFT if not _hover else HudStyle.RUBRIC, false, maxf(1.0, (2.0 if _hover else 1.0) * z))
+		var card_border := HudStyle.RUBRIC if _hover else (HudStyle.GOLD if is_heir else HudStyle.INK_SOFT)
+		draw_rect(card, card_border, false, maxf(1.0, (2.5 if (_hover or is_heir) else 1.0) * z))
 		# Nom (deux lignes au plus) et dates.
 		var font := get_theme_default_font()
 		var name_size := int(round(13.0 * z))
@@ -504,6 +508,15 @@ class FamilyTreeNode:
 		draw_multiline_string(font, Vector2(4, name_y), text, HORIZONTAL_ALIGNMENT_CENTER, width - 8, name_size, 2, ink)
 		var date_size := int(round(11.0 * z))
 		draw_string(font, Vector2(4, size.y - 8.0 * z), dates_text(), HORIZONTAL_ALIGNMENT_CENTER, width - 8, date_size, HudStyle.RUBRIC if alive else HudStyle.INK_SOFT)
+		if is_heir:
+			# Cartouche « HÉRITIER » sous le cartouche du nom (le médaillon couvre le haut).
+			var tag := "HÉRITIÈRE" if str(entry.get("sex", "")) == "female" else "HÉRITIER"
+			var tag_size := int(round(10.0 * z))
+			var tag_width := font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, tag_size).x + 10.0 * z
+			var tag_rect := Rect2(Vector2((width - tag_width) * 0.5, card.end.y + 1.0 * z), Vector2(tag_width, 13.0 * z))
+			draw_rect(tag_rect, HudStyle.RUBRIC)
+			draw_rect(tag_rect, HudStyle.GOLD, false, maxf(1.0, z))
+			draw_string(font, Vector2(tag_rect.position.x + 5.0 * z, tag_rect.end.y - 3.0 * z), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, tag_size, HudStyle.PARCHMENT_LIGHT)
 
 	## Médaillon : fond, portrait (ou écu), filet d'encre, anneau d'or, couronnes.
 	func _draw_disc(canvas: Control) -> void:
@@ -522,6 +535,7 @@ class FamilyTreeNode:
 		if is_root:
 			canvas.draw_arc(center, radius + 6.0 * z, 0.0, TAU, 64, HudStyle.RUBRIC, maxf(1.0, 1.5 * z), true)
 		if is_heir:
+			canvas.draw_arc(center, radius + 6.0 * z, 0.0, TAU, 64, Color(HudStyle.GOLD, 0.7), maxf(1.5, 3.0 * z), true)
 			_draw_crown(canvas, center + Vector2(0, -radius - 2.0 * z), 15.0 * z)
 		if is_ruler:
 			_draw_crown(canvas, center + Vector2(0, -radius - 2.0 * z), 18.0 * z)

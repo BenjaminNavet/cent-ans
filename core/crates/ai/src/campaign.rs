@@ -39,6 +39,9 @@ pub const DEFENCE_RATIO: f64 = 0.7;
 /// Share of income spent on armies at war / at peace.
 pub const WAR_MILITARY_SHARE: f64 = 0.7;
 pub const PEACE_MILITARY_SHARE: f64 = 0.4;
+/// Weighted unrest above which the AI no longer raises taxes to « Haut »
+/// (lot G1/E2: heavy taxes now bite, 30 before).
+pub const HIGH_TAX_MAX_UNREST: f64 = 18.0;
 /// A debt must be repaid within this many turns, or units are dismissed.
 const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
@@ -339,7 +342,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let in_debt = ctx.treasury < 0;
     let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < 30.0 {
+    } else if (ctx.at_war() || in_debt || ctx.surplus() < 0) && unrest < HIGH_TAX_MAX_UNREST {
         TaxRate::High
     } else {
         TaxRate::Normal
@@ -435,38 +438,49 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let max_recruits = (ctx.income / INCOME_PER_RECRUIT
         + hoard / HOARD_SPENDING_TURNS / HOARD_LIVRES_PER_RECRUIT)
         .clamp(1, MAX_RECRUITS_PER_TURN) as usize;
+    let mut composition = crate::doctrine::field_composition(state, ctx.faction);
     'sites: for site in &sites {
         if !ctx.owns_settlement(site) {
             continue;
         }
-        let best = state
+        // E1: the doctrine's mix decides, among what fits the budget.
+        let options: Vec<sim_campaign::RecruitOption> = state
             .recruitable(data, site)
             .into_iter()
             .filter(|o| o.available)
-            .max_by(|a, b| {
-                unit_value(data, &a.unit_type, a.cost)
-                    .total_cmp(&unit_value(data, &b.unit_type, b.cost))
-                    .then_with(|| b.unit_type.cmp(&a.unit_type))
-            });
-        let Some(option) = best else {
+            .collect();
+        if options.is_empty() {
             continue;
-        };
+        }
         // G1: no more than the settlement's free recruitment slots.
         let mut free_slots = state.recruit_slots_free(data, site);
-        while recruits < max_recruits
-            && free_slots > 0
-            && planned_upkeep + i64::from(option.upkeep)
-                <= if planned_upkeep == 0 && ctx.surplus() >= i64::from(option.upkeep) {
-                    target_upkeep.max(i64::from(option.upkeep))
+        while recruits < max_recruits && free_slots > 0 {
+            let upkeep_cap = |upkeep: i64| {
+                if planned_upkeep == 0 && ctx.surplus() >= upkeep {
+                    target_upkeep.max(upkeep)
                 } else {
                     target_upkeep
                 }
-            && budget >= i64::from(option.cost)
-        {
+            };
+            let fitting: Vec<&sim_campaign::RecruitOption> = options
+                .iter()
+                .filter(|o| {
+                    planned_upkeep + i64::from(o.upkeep) <= upkeep_cap(i64::from(o.upkeep))
+                        && budget >= i64::from(o.cost)
+                })
+                .collect();
+            let Some(option) =
+                crate::doctrine::pick_recruit(data, ctx.faction, &fitting, &composition, |o| {
+                    unit_value(data, &o.unit_type, o.cost)
+                })
+            else {
+                break;
+            };
             orders.push(Order::Recruit {
                 settlement: site.into(),
                 unit_type: option.unit_type.clone(),
             });
+            *composition.entry(option.unit_type.clone()).or_default() += 1;
             budget -= i64::from(option.cost);
             planned_upkeep += i64::from(option.upkeep);
             recruits += 1;

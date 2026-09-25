@@ -9,11 +9,13 @@ mod fire;
 mod pathing;
 mod reinforcements;
 mod separation;
+mod siege_assault;
 mod siege_extra;
 
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
+pub use siege_assault::Ladder;
 
 use data_model::{Ability, UnitCategory, UnitStats};
 
@@ -25,6 +27,7 @@ use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
 use crate::rng::BattleRng;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
+use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
 use crate::unit::{Formation, Unit, UnitState};
 
@@ -97,6 +100,8 @@ pub struct BattleSim {
     general_captured: [bool; 2],
     events: Vec<BattleEvent>,
     events_read: usize,
+    /// Volleys resolved since the renderer last read them (BV1).
+    shots: std::collections::VecDeque<ShotEvent>,
     charge_announced: Vec<bool>,
     /// Charge impacts since the renderer last read them (BV2).
     impacts: std::collections::VecDeque<ImpactEvent>,
@@ -111,8 +116,13 @@ pub struct BattleSim {
     deploying: bool,
     /// Siege pathing cache, one slot per regiment (F5a; derived data).
     path_cache: std::cell::RefCell<Vec<Option<pathing::CachedPath>>>,
+    /// Tactical reading of the relief for the AI (R2b; derived data, read
+    /// once per battle, reset by [`BattleSim::field_mut`]).
+    relief_map: std::cell::OnceCell<crate::relief_ai::ReliefMap>,
     /// Siege fires (S2): rules and their own random stream.
     fire: fire::FireSystem,
+    /// SG1: renderer events of the assault, ram and oil timers.
+    assault: siege_assault::AssaultState,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -310,6 +320,7 @@ impl BattleSim {
             general_captured: [false; 2],
             events: Vec::new(),
             events_read: 0,
+            shots: std::collections::VecDeque::new(),
             charge_announced: vec![false; count],
             impacts: std::collections::VecDeque::new(),
             siege,
@@ -318,7 +329,9 @@ impl BattleSim {
             no_quarter: [false; 2],
             deploying: false,
             path_cache: Default::default(),
+            relief_map: Default::default(),
             fire,
+            assault: Default::default(),
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -595,7 +608,14 @@ impl BattleSim {
 
     /// Mutable field (tests and laboratory set-ups: hedges, villages).
     pub fn field_mut(&mut self) -> &mut Battlefield {
+        self.relief_map = Default::default();
         &mut self.field
+    }
+
+    /// Tactical reading of the relief (R2b), computed on first use.
+    pub fn relief_map(&self) -> &crate::relief_ai::ReliefMap {
+        self.relief_map
+            .get_or_init(|| crate::relief_ai::ReliefMap::new(&self.field))
     }
 
     pub fn weather(&self) -> Weather {
@@ -688,6 +708,43 @@ impl BattleSim {
     /// Every journal entry since the start.
     pub fn events(&self) -> &[BattleEvent] {
         &self.events
+    }
+
+    /// Volleys resolved since the previous call (BV1: arrows, stuck arrows
+    /// and blood are drawn from them; at most [`MAX_PENDING_SHOTS`] kept).
+    pub fn take_shots(&mut self) -> Vec<ShotEvent> {
+        self.shots.drain(..).collect()
+    }
+
+    fn record_shot(&mut self, shot: ShotEvent) {
+        if self.shots.len() >= MAX_PENDING_SHOTS {
+            self.shots.pop_front();
+        }
+        self.shots.push_back(shot);
+    }
+
+    /// Missile kind of a shooting regiment (engines: bombard ball or stone).
+    pub fn missile_kind(unit: &Unit) -> MissileKind {
+        if unit.category == UnitCategory::Siege {
+            if unit.unit_type == "unit_bombard" {
+                MissileKind::Ball
+            } else {
+                MissileKind::Stone
+            }
+        } else if unit.unit_type.contains("crossbow") || unit.has(Ability::Pavise) {
+            MissileKind::Bolt
+        } else {
+            MissileKind::Arrow
+        }
+    }
+
+    /// Missiles one volley of `unit` looses (one per man, one per engine).
+    fn missiles(unit: &Unit) -> u32 {
+        if unit.category == UnitCategory::Siege {
+            unit.soldiers().clamp(1, 4)
+        } else {
+            unit.soldiers()
+        }
     }
 
     /// Charge impacts resolved since the previous call (BV2: men knocked
@@ -1076,6 +1133,7 @@ impl BattleSim {
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
         self.tower_fire();
+        self.boiling_oil();
         self.resolve_fire();
         self.resolve_melee(&contacts);
         self.resolve_morale_and_fatigue(&contacts);
@@ -1083,6 +1141,7 @@ impl BattleSim {
         self.elapsed += DT;
         self.ticks += 1;
         self.release_reserves();
+        self.record_siege_transitions();
         self.check_end();
     }
 
@@ -1355,6 +1414,10 @@ impl BattleSim {
         };
         let side = self.units[i].side;
         self.log(text, Some(side));
+        if !tower {
+            let unit = self.units[i].id;
+            self.push_fx(crate::siege_fx::SiegeFxKind::LaddersRaised { unit, piece });
+        }
     }
 
     /// One step of climbing; on the top the regiment stands on the wall walk
@@ -1401,6 +1464,8 @@ impl BattleSim {
             let text = format!("Les {} prennent pied sur le rempart !", self.unit_label(i));
             let side = self.units[i].side;
             self.log(text, Some(side));
+            let unit = self.units[i].id;
+            self.push_fx(crate::siege_fx::SiegeFxKind::OnWall { unit, piece });
         }
     }
 
@@ -1443,15 +1508,23 @@ impl BattleSim {
                 }
             }
         }
-        // The ram batters the gate.
+        // The ram batters the gate, one blow every `RAM_PERIOD` seconds (SG1).
         let gate = works.gate;
-        for unit in self.units.iter_mut() {
-            if !unit.ram || !unit.able() || !works.pieces[gate].intact() {
+        let mut blows: Vec<(u32, bool)> = Vec::new();
+        for (index, unit) in self.units.iter_mut().enumerate() {
+            if !unit.ram {
                 continue;
             }
-            if works.pieces[gate].distance(unit.x, unit.z) < band + 4.0 {
+            let at_gate = unit.able()
+                && works.pieces[gate].intact()
+                && works.pieces[gate].distance(unit.x, unit.z) < band + 4.0;
+            let Some(seconds) = Self::ram_blow(&mut self.assault.ram_timers, index, at_gate) else {
+                continue;
+            };
+            {
                 let crew = unit.hp / f64::from(unit.initial_soldiers.max(1));
-                works.pieces[gate].hp -= siege::RAM_DAMAGE * crew * DT;
+                works.pieces[gate].hp -= siege::RAM_DAMAGE * crew * seconds;
+                blows.push((unit.id, works.pieces[gate].hp <= 0.0));
                 if works.pieces[gate].hp <= 0.0 {
                     works.pieces[gate].hp = 0.0;
                     logs.push((
@@ -1483,6 +1556,13 @@ impl BattleSim {
         }
         for (text, side) in logs {
             self.log(text, side);
+        }
+        for (unit, breached) in blows {
+            self.push_fx(crate::siege_fx::SiegeFxKind::RamStrike {
+                unit,
+                piece: gate,
+                breached,
+            });
         }
     }
 
@@ -1983,6 +2063,30 @@ impl BattleSim {
         };
         let heading = angle_to(target.x - shooter.x, target.z - shooter.z);
         let kills = kills.min(self.units[t].hp);
+        let cover = if target.on_wall {
+            ShotCover::Wall
+        } else if target.pavise.is_some()
+            || (target.has(Ability::Pavise) && target.state != UnitState::Marching)
+        {
+            ShotCover::Pavise
+        } else if target.stakes_planted {
+            ShotCover::Stakes
+        } else {
+            ShotCover::None
+        };
+        let shot = ShotEvent {
+            time: self.elapsed,
+            shooter: shooter.id,
+            target: Some(target.id),
+            from: (shooter.x, shooter.z),
+            aim: (target.x, target.z),
+            missiles: Self::missiles(shooter),
+            kills,
+            kind: Self::missile_kind(shooter),
+            incendiary: self.shoots_fire(i),
+            cover,
+        };
+        self.record_shot(shot);
         let cause = Self::missile_cause(&self.units[i]);
         let shooter_id = self.units[i].id;
         self.units[t].hp -= kills;
@@ -2063,6 +2167,20 @@ impl BattleSim {
             let (mx, mz) = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
             angle_to(mx - unit.x, mz - unit.z)
         };
+        let aim = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
+        let shot = ShotEvent {
+            time: self.elapsed,
+            shooter: unit.id,
+            target: None,
+            from: (unit.x, unit.z),
+            aim,
+            missiles: Self::missiles(unit),
+            kills: 0.0,
+            kind: Self::missile_kind(unit),
+            incendiary: self.shoots_fire(i),
+            cover: ShotCover::Wall,
+        };
+        self.record_shot(shot);
         let shooter = &mut self.units[i];
         shooter.reload = 12.0;
         shooter.ammo = shooter.ammo.saturating_sub(1);
@@ -2106,6 +2224,18 @@ impl BattleSim {
                 self.unit_destroyed(j);
             }
         }
+        // SG1: where the stone struck (deterministic hash, no random draw).
+        let id = self.units[i].id;
+        let along = 0.15 + 0.7 * crate::siege_fx::hash01(self.ticks, u64::from(id));
+        let height = 0.25 + 0.6 * crate::siege_fx::hash01(self.ticks ^ 0x5eed, u64::from(id));
+        self.push_fx(crate::siege_fx::SiegeFxKind::EngineShot {
+            unit: id,
+            piece,
+            x: p.a.0 + (p.b.0 - p.a.0) * along,
+            z: p.a.1 + (p.b.1 - p.a.1) * along,
+            height,
+            breached,
+        });
         self.incendiary_volley(i, p.midpoint());
     }
 
@@ -2541,9 +2671,7 @@ impl BattleSim {
             .iter()
             .filter(|u| u.side == side && category.is_none_or(|c| c == u.category))
         {
-            for (x, z, angle) in unit.soldier_positions() {
-                result.push([x, self.standing_height(unit, x, z), z, angle]);
-            }
+            result.extend(self.soldier_poses(unit, 1.0));
         }
         result
     }
