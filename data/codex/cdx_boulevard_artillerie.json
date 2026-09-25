@@ -2,12 +2,33 @@
   "id": "cdx_boulevard_artillerie",
   "title": "Le boulevard d'artillerie",
   "category": "batiment",
-  "aliases": ["boulevard d'artillerie", "boulevards d'artillerie", "boulevard", "boulevards", "canonnière", "canonnières", "tour d'artillerie", "tours d'artillerie"],
-  "era": { "from": "1380", "to": "1530" },
+  "aliases": [
+    "boulevard d'artillerie",
+    "boulevards d'artillerie",
+    "boulevard",
+    "boulevards",
+    "tour d'artillerie",
+    "tours d'artillerie"
+  ],
+  "era": {
+    "from": "1380",
+    "to": "1530"
+  },
   "summary": "Face aux bombardes, les bâtisseurs abaissent et épaississent les défenses : boulevards de terre et de bois devant les portes, tours basses percées de canonnières. C'est la réponse du XVe siècle au canon, avant le bastion à l'italienne.",
   "body": "Le mur haut et mince du château fort est fait pour arrêter l'escalade et résister au trébuchet. Contre le boulet de pierre ou de fer d'une [[cdx_bombarde|bombarde]], il devient une faiblesse : plus il est haut, plus il offre de cible, et ses éclats tuent les défenseurs. À partir de la fin du XIVe siècle, les ingénieurs cherchent des parades. On perce d'abord les murs de canonnières, ces petites ouvertures en trou de serrure puis à la française, pour tirer de l'intérieur ; on bâtit des tours plus basses et plus épaisses, pleines ou remplies de terre, capables de porter des pièces.\n\nLe boulevard, mot tiré du néerlandais bolwerk, « ouvrage de madriers », est d'abord un ouvrage avancé de terre et de bois devant une porte ou un pont, qui tient l'assaillant à distance et accueille l'artillerie du défenseur. Au siège d'[[cdx_orleans|Orléans]], en 1428-1429, Anglais et Orléanais s'affrontent ainsi de boulevard en boulevard, dont celui des Tourelles, au bout du pont. Les villes en garnissent leurs portes : l'enceinte de [[cdx_bordeaux|Bordeaux]], celle de Paris ou de Rouen se hérissent de boulevards maçonnés au XVe siècle.\n\nLa leçon devient urgente quand l'artillerie royale des frères Bureau reprend la Normandie en 1449-1450 : les châteaux anglais tombent en quelques jours. Après la guerre, Louis XI et les grands seigneurs font élever de grosses tours d'artillerie, comme à Ham (tour du connétable de Saint-Pol, 1470) ou à Fougères, et des châteaux entièrement pensés pour le canon, comme Bonaguil. Le vrai bastion polygonal, inventé en Italie à la fin du XVe siècle, ne s'imposera en France qu'au XVIe.",
   "gameplay": "Fortification de niveau 4, élevée à la place du [[cdx_chateau_fort|château fort]] dans une cité, une ville ou un château. Il faut la technologie « Fortification adaptée à l'artillerie ». Coût 6 000 livres (ajusté selon la monnaie) et 4 pierre (affichées, non prélevées), 8 tours, entretien 60 livres par tour.\n\nEffets : fortifications +1 et résistance aux sièges +30 % (part des dégâts infligés aux murs à chaque tour de siège qui est absorbée ; total plafonné à 80 % avec les technologies de la faction et les techniques de siège de l'assaillant).\n\nAttention : il remplace le château fort, et les effets ne se cumulent pas. Avec les valeurs actuelles, on gagne 10 points de résistance aux sièges mais on perd 2 niveaux de fortification, les 3 points de garnison et la loyauté +5 du château. À réserver aux places qui doivent tenir contre des bombardes.",
   "entity": "bld_artillery_bastion",
-  "see_also": ["cdx_chateau_fort", "cdx_enceinte_de_pierre", "cdx_bombarde", "cdx_orleans", "cdx_places_fortes"],
-  "sources": ["Boulevard (fortification)", "Canonnière (fortification)", "Architecture militaire médiévale", "Fortification bastionnée"]
+  "see_also": [
+    "cdx_chateau_fort",
+    "cdx_enceinte_de_pierre",
+    "cdx_bombarde",
+    "cdx_orleans",
+    "cdx_places_fortes"
+  ],
+  "sources": [
+    "Boulevard (fortification)",
+    "Canonnière (fortification)",
+    "Architecture militaire médiévale",
+    "Fortification bastionnée"
+  ]
 }
