@@ -107,6 +107,8 @@ pub const ENGINE_PATIENCE: f64 = 420.0;
 pub const STEEP_CLIMB: f64 = 0.12;
 /// R2b: a regiment hit by missiles within this many seconds is under fire.
 pub const UNDER_FIRE: f64 = 6.0;
+/// R2b: a line regiment this far ahead of the line's centre waits for it.
+pub const LINE_SLACK: f64 = 30.0;
 /// R2b: below this distance a regiment charges whatever the slope.
 pub const CLOSE_CHARGE: f64 = 25.0;
 
@@ -862,8 +864,12 @@ fn plan_field(view: &mut View) {
         .iter()
         .filter_map(|&i| view.nearest_enemy(i, |_| true).map(|(_, d)| d))
         .fold(f64::INFINITY, f64::min);
+    // R2b: a defender standing clearly above the enemy does not give up its
+    // ground to meet it (unless much stronger).
+    let holds_heights =
+        view.side == SideId::Defender && ratio < HOLD_RATIO && height_edge(view) > HOLD_HEIGHT;
     let defensive = match view.side {
-        SideId::Defender => ratio < 0.85 && elapsed < DEFENDER_PATIENCE,
+        SideId::Defender => (ratio < 0.85 || holds_heights) && elapsed < DEFENDER_PATIENCE,
         SideId::Attacker => ratio < 0.8 && elapsed < ATTACKER_WAIT,
     };
     let shooters_have_ammo = roles
@@ -951,7 +957,12 @@ fn plan_field(view: &mut View) {
             continue;
         }
         let target = view.nearest_enemy(i, |e| e.state != UnitState::Routing);
+        // R2b: a regiment well ahead of the line waits for it rather than
+        // arriving alone under the enemy arrows (fast archers out of
+        // arrows outpace the men-at-arms).
+        let ahead = (view.units[i].z - line_center.1) * view.forward > LINE_SLACK;
         match target {
+            Some((_, d)) if ahead && !defensive && d >= CHARGE_DISTANCE => view.halt(i),
             Some((j, d)) if !defensive && !duel && d < CHARGE_DISTANCE * 2.0 => {
                 let j = opposite(view, i).unwrap_or(j);
                 let run = d < CHARGE_DISTANCE && !steep_charge(view, i, j);
@@ -1014,6 +1025,31 @@ fn plan_field(view: &mut View) {
 
     react(view, &roles);
     plan_orders(view, defensive);
+}
+
+/// R2b: a defender this much higher than the enemy (mean ground under the
+/// regiments, metres) holds its heights ...
+pub const HOLD_HEIGHT: f64 = 6.0;
+/// ... unless it is this much stronger.
+pub const HOLD_RATIO: f64 = 1.25;
+
+/// R2b: mean ground under the own regiments minus that under the enemy's.
+fn height_edge(view: &View) -> f64 {
+    let field = view.sim.field();
+    let mean = |list: &mut dyn Iterator<Item = usize>| {
+        let (sum, n) = list
+            .filter(|&i| !view.units[i].synthetic)
+            .fold((0.0, 0.0), |(s, n), i| {
+                let u = &view.units[i];
+                (s + field.height(u.x, u.z), n + 1.0)
+            });
+        if n > 0.0 {
+            sum / n
+        } else {
+            0.0
+        }
+    };
+    mean(&mut view.own.iter().copied()) - mean(&mut view.able_enemies())
 }
 
 /// Share of its initial soldiers a side has lost (B4, archery duel).
