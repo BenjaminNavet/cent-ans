@@ -24,7 +24,12 @@ entrés sur appel (Bretagne, Bourgogne, Naples, Écosse…) : sa fatigue continu
 ## Itérations
 - v1 (trêve liant tous les alliés entrés après le début) : guerre FR-EN **32 %** [20-39], 15-23
   paix par siècle : la paix d'un petit allié (Écosse) entraînait la France. Rejeté.
-- v2 : seul le partenaire le plus faible suit la paix du plus fort (mesure en cours).
+- v2 : seul le partenaire le plus faible suit la paix du plus fort. century : guerre **65 %**
+  [53-73], 4/5 dans la bande, 10-14 paix par siècle, plus longue guerre 8-12 ans, 5/5 majeures,
+  Écosse jamais détruite, banqueroutes 0,11. Difficile : 60 % [51-66], 3/5. balance 8 × 200 :
+  milice 30 %, trouble 17,4 / 20,4, Haut 24 %, banqueroutes 0,11, **révoltes 3,9** (cible 4-10).
+- v3 : `weariness_unrest_divisor` 5 → 4 (la fatigue de guerre pèse plus sur l'ordre public)
+  pour remonter les révoltes (mesure en cours).
 
 ## Prochaine étape
 Attendre la référence, puis analyser les phases de guerre FR-EN (VERBOSE=1).
