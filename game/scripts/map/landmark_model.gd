@@ -152,11 +152,18 @@ func _apply_height_params(material: ShaderMaterial) -> void:
 func _bake_heights() -> void:
 	var t0 := Time.get_ticks_usec()
 	var image := Image.create(HEIGHT_RES, HEIGHT_RES, false, Image.FORMAT_RF)
+	var half := 0.5 * _extent / HEIGHT_RES
 	for j in HEIGHT_RES:
 		for i in HEIGHT_RES:
 			var x := _origin.x + (float(i) + 0.5) / HEIGHT_RES * _extent
 			var z := _origin.y + (float(j) + 0.5) / HEIGHT_RES * _extent
-			var h := _terrain.surface_height_at(x, z) if _terrain != null else 0.0
+			var h := 0.0
+			if _terrain != null:
+				# L2 : maximum sur le texel (centre et coins) : le lit creusé d'une rivière de la carte
+				# ne fait plus plonger les rives, l'eau et les quais de la maquette sous le relief.
+				h = _terrain.surface_height_at(x, z)
+				for offset in [Vector2(-half, -half), Vector2(half, -half), Vector2(-half, half), Vector2(half, half)]:
+					h = maxf(h, _terrain.surface_height_at(x + offset.x, z + offset.y))
 			image.set_pixel(i, j, Color(h, 0.0, 0.0))
 	if _height_texture == null:
 		_height_texture = ImageTexture.create_from_image(image)

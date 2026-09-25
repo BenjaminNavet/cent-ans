@@ -8,3 +8,7 @@ license.workspace = true
 sim-campaign = { path = "../sim-campaign" }
 sim-battle = { path = "../sim-battle" }
 data-model = { path = "../data-model" }
+
+[dev-dependencies]
+serde.workspace = true
+serde_json.workspace = true

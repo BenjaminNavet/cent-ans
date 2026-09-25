@@ -46,6 +46,12 @@ const DEFAULTS := {
 	"tutorial/enabled": true,
 	"tutorial/step": 0,
 	"tutorial/done": false,
+	# BV1/BV2 : sang en bataille (0 désactivé, 1 modéré, 2 complet : démembrements) ; taille des unités (figurines
+	# par homme simulé, ADR 0016 : 0,5 petite, 1 normale, 1,5 grande, 2,5 ultra).
+	"battle/blood": 1,
+	"battle/unit_size": 1.0,
+	# MM1 : prologue (cartons 1328-1337) joué une fois au premier lancement.
+	"interface/intro_seen": false,
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).
@@ -66,6 +72,8 @@ const UI_SCALE_MAX := 2.0
 const FONT_SIZE_KEYS := ["font_size", "normal_font_size", "bold_font_size", "italics_font_size", "bold_italics_font_size", "mono_font_size"]
 const PARCHMENT_THEME := "res://scenes/ui/parchment_theme.tres"
 const AUTOSAVE_CHOICES: Array[int] = [0, 1, 2, 4, 8]
+const BLOOD_CHOICES: Array[int] = [0, 1, 2]
+const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5]
 
 var path: String = SETTINGS_PATH
 var values: Dictionary = {}

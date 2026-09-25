@@ -75,6 +75,29 @@ def test_road_crossings_keep_short_overlaps_only() -> None:
     assert not opened[12:28, 15].any()
 
 
+def test_road_crossings_far_from_anchors_are_dropped() -> None:
+    """Lot M5b: only crossings near a settlement or a known bridge stay open."""
+    candidates = np.zeros((40, 40), dtype=bool)
+    candidates[5, 10] = candidates[5, 11] = True  # near the anchor
+    candidates[30, 30] = True  # far away
+    anchors = np.zeros_like(candidates)
+    anchors[8, 10] = True
+    kept, dropped = navgrid.near_anchors(candidates, anchors, radius_cells=4.0)
+    assert kept[5, 10] and kept[5, 11]
+    assert not kept[30, 30]
+    assert dropped == 1
+
+
+def test_river_gaps_are_joined() -> None:
+    """Two pieces of one river a few pixels apart are joined; far pieces are not."""
+    upper = LineString([(0, 0), (0, 50)])
+    lower = LineString([(3, 60), (3, 100)])
+    far = LineString([(80, 0), (80, 40)])
+    joined = navgrid.join_river_gaps([upper, lower, far], max_gap=20.0)
+    assert len(joined) == 4
+    assert joined[-1].length == pytest.approx(np.hypot(3, 10))
+
+
 def test_pass_opens_a_steep_ridge() -> None:
     """The pass path crosses a steep ridge; water is never used."""
     size = 60

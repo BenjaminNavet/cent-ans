@@ -109,6 +109,7 @@ func fit_height(max_height: float) -> void:
 ## Ajoute une nouvelle en tête de pile.
 func push_news(item: Dictionary) -> void:
 	_items.push_front(item.duplicate(true))
+	UiSounds.play("letter")  # UB1 / U13 : lettre reçue
 	if _items.size() > MAX_KEPT:
 		_items.resize(MAX_KEPT)
 	_rebuild(true)

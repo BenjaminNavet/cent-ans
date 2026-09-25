@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/ai_doctrine.schema.json",
+  "title": "Doctrines de recrutement de l'IA",
+  "description": "Fichier data/ai/doctrines.json (lot E1) : pour chaque faction, poids relatif de chaque type d'unité parmi ses régiments de campagne. L'IA recrute ce qui manque le plus à ce mélange parmi les unités levables sur place.",
+  "type": "object",
+  "$defs": {
+    "doctrine": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "mix": {
+          "type": "object",
+          "description": "Poids relatif (entier positif) par identifiant de type d'unité.",
+          "propertyNames": { "pattern": "^unit_[a-z0-9_]+$" },
+          "additionalProperties": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "minProperties": 1
+        }
+      },
+      "required": ["mix"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "default": { "$ref": "#/$defs/doctrine", "description": "Doctrine des factions sans doctrine propre." },
+    "factions": {
+      "type": "object",
+      "propertyNames": { "pattern": "^fac_[a-z0-9_]+$" },
+      "additionalProperties": { "$ref": "#/$defs/doctrine" }
+    }
+  },
+  "required": ["default"],
+  "additionalProperties": false
+}

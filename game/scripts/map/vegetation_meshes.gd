@@ -15,6 +15,95 @@ const NEEDLE_LIGHT := Color(0.10, 0.17, 0.08)
 
 static var _cache: Dictionary = {}
 
+## Lot V4 (A1-10) : essences modélisées sous Blender (`tools/blender_scripts/campaign_trees.py`).
+const TREES_GLB := "res://assets/models/vegetation/campaign_trees.glb"
+## Identifiant d'essence (UV.x des sommets, lu par `foliage.gdshader` pour la teinte saisonnière).
+const ESSENCE_ID := {"oak": 0.0, "beech": 1.0, "fir": 2.0, "hedge": 3.0}
+## Palettes (albédo linéaire) : feuillage sombre / clair, écorce.
+const PALETTES := {
+	"oak": [Color(0.040, 0.068, 0.026), Color(0.118, 0.155, 0.056), Color(0.20, 0.15, 0.10)],
+	"beech": [Color(0.052, 0.090, 0.030), Color(0.150, 0.200, 0.064), Color(0.30, 0.29, 0.26)],
+	"fir": [Color(0.022, 0.058, 0.046), Color(0.065, 0.120, 0.075), Color(0.22, 0.14, 0.09)],
+}
+
+
+## Maillage d'une essence (`oak`, `beech`, `fir`) : détaillé (houppier + tronc) ou lointain
+## (houppier seul, ≈ 20 triangles). Repli sur les maillages procéduraux si le GLB manque.
+static func essence(name: String, detailed: bool) -> ArrayMesh:
+	var key := "%s_%d" % [name, int(detailed)]
+	if _cache.has(key):
+		return _cache[key]
+	var mesh := _load_essence(name, detailed)
+	if mesh == null:
+		if name == "fir":
+			mesh = conifer() if detailed else conifer_low()
+		else:
+			mesh = deciduous() if detailed else deciduous_low()
+	_cache[key] = mesh
+	return mesh
+
+
+static func _load_essence(name: String, detailed: bool) -> ArrayMesh:
+	if not ResourceLoader.exists(TREES_GLB):
+		return null
+	var scene := load(TREES_GLB) as PackedScene
+	if scene == null:
+		return null
+	var root := scene.instantiate()
+	var crown := root.find_child("%s%s_crown" % [name, "" if detailed else "_low"], true, false) as MeshInstance3D
+	var trunk: MeshInstance3D = root.find_child("%s_trunk" % name, true, false) as MeshInstance3D if detailed else null
+	if crown == null:
+		root.free()
+		return null
+	var palette: Array = PALETTES.get(name, PALETTES["oak"])
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_append_part(st, crown, root, palette, true, float(ESSENCE_ID.get(name, 0.0)))
+	if trunk != null:
+		_append_part(st, trunk, root, palette, false, float(ESSENCE_ID.get(name, 0.0)))
+	root.free()
+	return st.commit()
+
+
+## Ajoute une partie importée : couleurs de sommet (feuillage selon l'exposition, écorce), normales
+## « gonflées » depuis le centre du houppier (ombrage doux), UV = (essence, 1 houppier / 0 tronc).
+static func _append_part(st: SurfaceTool, part: MeshInstance3D, root: Node, palette: Array, is_crown: bool, essence_id: float) -> void:
+	var xform := Transform3D.IDENTITY
+	var node: Node = part
+	while node != null and node != root:
+		if node is Node3D:
+			xform = (node as Node3D).transform * xform
+		node = node.get_parent()
+	var box := xform * part.mesh.get_aabb()
+	var center := box.get_center() - Vector3(0.0, box.size.y * 0.15, 0.0)
+	for s in part.mesh.get_surface_count():
+		var arrays := part.mesh.surface_get_arrays(s)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL] if arrays[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
+		var order: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+		if order.is_empty():
+			order.resize(vertices.size())
+			for i in vertices.size():
+				order[i] = i
+		for i in order:
+			var v := xform * vertices[i]
+			var n := (xform.basis * normals[i]).normalized() if i < normals.size() else Vector3.UP
+			if is_crown:
+				var dir := (v - center).normalized()
+				var light := clampf(0.5 + 0.5 * dir.y, 0.0, 1.0)
+				var color: Color = (palette[0] as Color).lerp(palette[1], light * 0.8 + 0.2 * _hash01(v * 13.0))
+				color.a = clampf(v.y, 0.0, 1.0)
+				st.set_color(color)
+				st.set_normal((dir * 0.88 + n * 0.12 + Vector3.UP * 0.12).normalized())
+				st.set_uv(Vector2(essence_id, 1.0))
+			else:
+				var bark: Color = palette[2]
+				bark.a = clampf(v.y * 0.3, 0.0, 0.15)
+				st.set_color(bark)
+				st.set_normal(n)
+				st.set_uv(Vector2(essence_id, 0.0))
+			st.add_vertex(v)
+
 
 static func clear_cache() -> void:
 	_cache.clear()
@@ -63,6 +152,7 @@ static func hedge_low() -> ArrayMesh:
 	if not _cache.has("hedge_low"):
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		st.set_uv(Vector2(ESSENCE_ID["hedge"], 1.0))
 		var top := Vector3(0, 0.56, 0)
 		var ring := [Vector3(0.55, 0.28, 0), Vector3(0, 0.28, 0.2), Vector3(-0.55, 0.28, 0), Vector3(0, 0.28, -0.2)]
 		var bottom := Vector3(0, 0.0, 0)
@@ -105,6 +195,7 @@ static func _build_conifer() -> ArrayMesh:
 static func _build_hedge() -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_uv(Vector2(ESSENCE_ID["hedge"], 1.0))
 	_add_blob(st, Vector3(0.0, 0.28, 0.0), Vector3(0.55, 0.28, 0.2), 51, false)
 	return st.commit()
 
