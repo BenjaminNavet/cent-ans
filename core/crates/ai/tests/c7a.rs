@@ -31,11 +31,16 @@ fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
         .expect("faction has an army")
 }
 
-/// Destination of the move order of `army`, if any.
+/// Destination of the last move order of `army` (lot M3: one order per
+/// leg of the route), if any.
 fn destination(orders: &[Order], army: &ArmyId) -> Option<SettlementId> {
-    orders.iter().find_map(|o| match o {
-        Order::MoveArmy { army: a, path } if a == army => match path.last() {
-            Some(Place::Settlement(s)) => Some(s.clone()),
+    orders.iter().rev().find_map(|o| match o {
+        Order::MoveArmy { army: a, target } if a == army => match target {
+            sim_campaign::MoveOrderTarget::Place(Place::Settlement(s)) => Some(s.clone()),
+            sim_campaign::MoveOrderTarget::Path(path) => match path.last() {
+                Some(Place::Settlement(s)) => Some(s.clone()),
+                _ => None,
+            },
             _ => None,
         },
         _ => None,
@@ -48,7 +53,8 @@ fn garrison_order_moves_units_within_the_cap() {
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
     let army = main_army(&state, "fac_france");
     let meaux = set("set_meaux");
-    state.armies.get_mut(&army).unwrap().location = meaux.clone();
+    state.armies.get_mut(&army).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(meaux.clone());
     state.settlements.get_mut(&meaux).unwrap().garrison.clear();
     let units = state.armies[&army].units.len();
     assert!(units >= 3);
@@ -79,6 +85,7 @@ fn garrison_order_moves_units_within_the_cap() {
         turns_elapsed: 1,
         supplies: 100,
         breach: 0,
+        started_turn: 0,
     });
     assert!(matches!(
         state.submit_order(
@@ -99,7 +106,7 @@ fn giving_every_unit_dissolves_the_army() {
     let army = main_army(&state, "fac_france");
     let vincennes = set("set_vincennes");
     let a = state.armies.get_mut(&army).unwrap();
-    a.location = vincennes.clone();
+    a.position = sim_campaign::ArmyPosition::Settlement(vincennes.clone());
     a.units.truncate(2);
     state
         .settlements
@@ -152,7 +159,8 @@ fn the_ai_leaves_a_garrison_in_a_conquered_place() {
     let s = state.settlements.get_mut(&place).unwrap();
     s.controller = fac("fac_england");
     s.garrison.clear();
-    state.armies.get_mut(&army).unwrap().location = place.clone();
+    state.armies.get_mut(&army).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(place.clone());
     assert!(state.armies[&army].units.len() >= 3);
     let orders = ai::plan_turn(&state, &data, &fac("fac_england"));
     assert!(
@@ -186,7 +194,7 @@ fn an_idle_army_abroad_goes_home() {
         })
         .cloned()
         .expect("a neutral place on the French border");
-    state.armies.get_mut(&army).unwrap().location = neutral;
+    state.armies.get_mut(&army).unwrap().position = sim_campaign::ArmyPosition::Settlement(neutral);
     let orders = ai::plan_turn(&state, &data, &fac("fac_france"));
     let home = destination(&orders, &army).expect("the army marches home");
     assert!(state.is_friendly_settlement(&fac("fac_france"), &home));

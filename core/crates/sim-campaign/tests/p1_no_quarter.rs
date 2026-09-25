@@ -31,10 +31,6 @@ fn main_army(state: &CampaignState, faction: &str) -> ArmyId {
         .expect("faction has a led army")
 }
 
-fn idle(_: &CampaignState, _: &GameData, _: &FactionId) -> Vec<Order> {
-    Vec::new()
-}
-
 /// France attacks an English army in Normandy; the battle waits for the 3D
 /// result. Returns the state, both armies and a finished outcome where the
 /// French won and the English general was caught.
@@ -45,17 +41,23 @@ fn french_victory(data: &GameData) -> (CampaignState, ArmyId, ArmyId, BattleOutc
     // Lot C4: armies stand on settlements; the province path heads for
     // the city of Normandy.
     let rouen = state.provinces[&prov("prov_normandie")].city.clone();
-    state.armies.get_mut(&english).unwrap().location = rouen;
+    state.armies.get_mut(&english).unwrap().position =
+        sim_campaign::ArmyPosition::Settlement(rouen);
+    // Lot M2: the French stand next to Rouen and attack at once.
+    let point = data
+        .settlement_point(&state.provinces[&prov("prov_normandie")].city)
+        .unwrap();
+    state.armies.get_mut(&french).unwrap().position =
+        sim_campaign::ArmyPosition::field([point[0] + 4.0, point[1]]);
     state
         .submit_order(
             data,
-            Order::MoveArmy {
+            Order::Attack {
                 army: french.clone(),
-                path: vec![prov("prov_normandie").into()],
+                target_army: english.clone(),
             },
         )
         .unwrap();
-    state.end_turn_with(data, idle);
     assert_eq!(state.pending_battles.len(), 1);
     let setup = state.battle_setup(data, 0).unwrap();
     let mut battle = BattleSim::new(setup, 4).unwrap();

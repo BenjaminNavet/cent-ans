@@ -41,9 +41,10 @@ impl CampaignState {
                 } else {
                     0
                 };
-                // C4: armies stand on a settlement; sight starts from its province.
-                if let Some(province) = self.settlement_province(&army.location) {
-                    seed(province, rules.army_range + bonus);
+                // Sight starts from the army's province (lot M2: the one
+                // under it in the field).
+                if let Some(province) = self.army_province(data, army) {
+                    seed(&province, rules.army_range + bonus);
                 }
             }
         }

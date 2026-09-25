@@ -165,6 +165,10 @@ func _apply_state(state: String, instant: bool = false) -> void:
 	if silent:
 		return
 	_start_if_needed(_base)
+	# AU1 : quand l'audio spatialisé de bataille est actif, ses nappes de mêlée remplacent cette
+	# couche 2D (sinon le fer serait entendu deux fois).
+	if BattleAudio.active != null:
+		ambience_db = -80.0
 	if ambience_db > -79.0:
 		_start_if_needed(_ambience)
 	if percussion_db > -79.0:
