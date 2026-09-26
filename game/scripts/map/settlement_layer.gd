@@ -81,6 +81,8 @@ var _camera_distance := 0.0
 var _regrounded: Dictionary = {}
 ## ZG6 : villes ordinaires à l'échelle réelle (paliers vallée et site), voir `TownLayer`.
 var towns: TownLayer
+## VH4 (ADR 0078) : villes emblématiques à l'échelle 1:1 (format v2), voir `LandmarkCityLayer`.
+var landmark_cities: LandmarkCityLayer
 var _towns_version := -1
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
@@ -207,6 +209,18 @@ func _model_base_y(i: int) -> float:
 	if _landmarks.has(i):
 		return (_landmarks[i] as LandmarkModel).ground_height()
 	return (_models[i] as Node3D).position.y
+
+
+## VH4 : cercles des villes emblématiques encore sans ville 1:1 (format v2) : le plancher de
+## caméra provisoire de ZG4b (`landmark_min_distance`) ne s'applique plus qu'à elles.
+func landmark_floor_zones() -> PackedVector3Array:
+	var zones := PackedVector3Array()
+	for i in _landmarks:
+		if landmark_cities != null and landmark_cities.has_city(str(data.settlements[i]["id"])):
+			continue
+		var landmark := _landmarks[i] as LandmarkModel
+		zones.append(Vector3(landmark.position.x, landmark.position.z, landmark.zone_radius))
+	return zones
 
 
 ## Cercles (x, z, rayon) des villes emblématiques, pour le zoom rapproché de la caméra.
@@ -448,6 +462,8 @@ func refresh(sim: Object, color_of: Callable) -> void:
 		if year > 0:
 			for landmark in _landmarks.values():
 				(landmark as LandmarkModel).set_year(year)
+			if landmark_cities != null:
+				landmark_cities.set_year(year)
 	_refresh_shields()
 	for i in data.settlements.size():
 		var entry: Dictionary = data.settlements[i]
@@ -506,6 +522,7 @@ func update_view(camera_distance: float) -> void:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
 	_update_towns(camera_distance)
+	_update_landmark_cities(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
@@ -660,6 +677,9 @@ func flush() -> void:
 	if towns != null:  # ZG6 : villes 1:1 autour de la caméra
 		towns.flush()
 		_update_towns(_camera_distance)
+	if landmark_cities != null:  # VH4 : villes emblématiques 1:1
+		landmark_cities.flush()
+		_update_landmark_cities(_camera_distance)
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -930,6 +950,20 @@ func _setup_towns() -> void:
 	for entry in data.settlements:
 		ids.append(entry["id"])
 	towns.setup(map_data, terrain, tiers, ids)
+	landmark_cities = LandmarkCityLayer.new()
+	add_child(landmark_cities)
+	landmark_cities.setup(map_data, terrain, tiers, ids)
+
+
+## VH4 : villes emblématiques 1:1 et fondu de leur maquette L1/L2 (tramage).
+func _update_landmark_cities(camera_distance: float) -> void:
+	if landmark_cities == null:
+		return
+	landmark_cities.update_view(camera_distance)
+	for i in _landmarks:
+		var id := str(data.settlements[i]["id"])
+		if landmark_cities.has_city(id):
+			(_landmarks[i] as LandmarkModel).set_fade(landmark_cities.fade(id))
 
 
 ## Rendu 1:1 aux paliers vallée / site. Tant qu'il est actif, les maquettes à la loupe des

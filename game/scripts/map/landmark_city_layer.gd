@@ -91,6 +91,30 @@ func _register_chunks(sid: String) -> void:
 			(_ids_by_chunk[index] as Array).append(sid)
 
 
+## Année de la partie : si un élément daté apparaît ou disparaît (beffroi de 1389, aître de
+## 1348…), les villes chargées sont replanifiées.
+func set_year(p_year: int) -> void:
+	if p_year == year:
+		return
+	var changed := false
+	for city in _cities.values():
+		if _dated_signature(city, year) != _dated_signature(city, p_year):
+			changed = true
+	year = p_year
+	if changed:
+		for id in _entries.keys():
+			_unload(id)
+
+
+static func _dated_signature(city: Dictionary, p_year: int) -> String:
+	var sig := ""
+	for key in ["walls", "streets", "bridges", "monuments", "districts", "open_spaces"]:
+		for item in city.get(key, []):
+			if (item.has("from_year") or item.has("until_year")) and LandmarkV2Library.present(item, p_year):
+				sig += str(item.get("id", "")) + ","
+	return sig
+
+
 func has_city(id: String) -> bool:
 	return _cities.has(id)
 

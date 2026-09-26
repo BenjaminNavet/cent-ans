@@ -159,7 +159,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 	# 8. Parcelles en lanières le long des rues.
 	for s in ranked:
 		_line_parcels(s["points"], float(s["width"]), s["rank"] == "main", districts, occ, heights, rng, plan, out)
-	out["ground"] = _ground_grid(districts, waters, heights)
+	out["ground"] = _ground_grid(districts, waters, heights, out["houses"])
 	out["stats"] = {"houses": (out["houses"]["x"] as PackedFloat32Array).size(), "streets": (out["streets"] as Array).size(), "monuments": (out["v2_monuments"] as Array).size(), "towers": (out["towers"] as Array).size(), "usec": Time.get_ticks_usec() - t0}
 	return out
 
@@ -417,7 +417,10 @@ static func _line_parcels(pts: PackedVector2Array, width: float, main: bool, dis
 					var parcel_center := center_along + n * (width * 0.5 + 0.8 + d * 0.5)
 					if districts.at(parcel_center) != di:
 						continue
-					if occ.rect(parcel_center, u, maxf(front * 0.5 - 1.5, 0.5), maxf(d * 0.5 - 1.5, 0.5), true):
+					# Test sans la bande de 2,5 m sur rue : les cases de la rue (arrondies à 2,5 m)
+					# débordent sur le front des parcelles, qui toucheraient sinon toujours la rue.
+					var test_center := center_along + n * (width * 0.5 + 0.8 + 2.5 + (d - 2.5) * 0.5)
+					if occ.rect(test_center, u, maxf(front * 0.5 - 1.5, 0.5), maxf((d - 2.5) * 0.5 - 1.5, 0.5), true):
 						occ.rect(parcel_center, u, maxf(front * 0.5 - 1.3, 0.5), d * 0.5, false)
 						var zone := TownPlan.ZONE_FAUBOURG if faubourg else TownPlan.ZONE_INTRA
 						var mix: Dictionary = dist["houses"] if not (dist["houses"] as Dictionary).is_empty() else mixes.get("faubourg" if faubourg else "intra", {"townhouse": 1.0})
@@ -434,7 +437,14 @@ static func _line_parcels(pts: PackedVector2Array, width: float, main: bool, dis
 ## Sol des quartiers (cours, jardins, terre battue) : grille drapée carrée couvrant les
 ## quartiers, sommets dans un quartier et hors de l'eau ; `edge` : 1 en ville close, 0,4 aux
 ## faubourgs (teinte des cours plus verte).
-static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.Heights) -> Dictionary:
+static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.Heights, houses: Dictionary) -> Dictionary:
+	# Faubourgs : sol de la ville seulement autour des maisons (cases de 30 m), les champs du
+	# parcellaire ZG5b restent visibles entre les rues.
+	var near := {}
+	var xs: PackedFloat32Array = houses["x"]
+	var ys: PackedFloat32Array = houses["y"]
+	for i in xs.size():
+		near[Vector2i(floori(xs[i] / 30.0), floori(ys[i] / 30.0))] = true
 	var box := districts.bounds().grow(GROUND_STEP_M)
 	var side := maxf(box.size.x, box.size.y)
 	var step := GROUND_STEP_M
@@ -451,6 +461,8 @@ static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.
 			var p := origin + Vector2(i, j) * step
 			var di := districts.at(p)
 			if di < 0 or _in_water(p, waters):
+				continue
+			if str(districts.polys[di]["zone"]) == "faubourg" and not near.has(Vector2i(floori(p.x / 30.0), floori(p.y / 30.0))):
 				continue
 			var k := j * n + i
 			mask[k] = 1

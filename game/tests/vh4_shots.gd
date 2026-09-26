@@ -1,0 +1,118 @@
+extends SceneTree
+
+## Captures et mesure du lot VH4 (villes emblématiques 1:1, ADR 0078) : Rouen vers 1340 en vue
+## stratégique (maquette sous loupe), pendant le fondu, aux paliers vallée et site, puis au ras
+## des toits ; mesure d'images par seconde au-dessus de Rouen et d'une ville ordinaire ZG6
+## (Amiens) à la même distance.
+## Fenêtre réelle (pas headless) :
+##   godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> [--only=a,b] [--no-fps]
+##   [--no-landmarks-1to1] (rendu d'avant VH4 : maquette et plancher ZG4b)
+## JPEG ≤ 1280 px, `rouen_<vue>.jpg`.
+
+const ROUEN := Vector2(2096.54, 1819.88)
+const AMIENS := Vector2(2224.0, 1763.6)
+## [nom, point, distance (unités), décalage de cap (degrés)]
+const SHOTS := [
+	["strategique", ROUEN, 60.0, 0.0],
+	["transition", ROUEN, 8.0, 0.0],
+	["vallee", ROUEN, 4.0, 0.0],
+	["site", ROUEN + Vector2(0.1, -0.1), 1.6, 0.0],
+	["site_ouest", ROUEN + Vector2(-0.35, 0.05), 1.1, 60.0],
+	["toits", ROUEN + Vector2(0.05, -0.05), 0.45, 20.0],
+	["pont", ROUEN + Vector2(-0.36, 0.45), 0.55, -30.0],
+	["chateau", ROUEN + Vector2(-0.05, -0.85), 0.5, 150.0],
+]
+
+
+func _init() -> void:
+	var out_dir := "user://vh4"
+	var only := ""
+	var fps := true
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--out="):
+			out_dir = arg.substr(6)
+		elif arg.begins_with("--only="):
+			only = arg.substr(7)
+		elif arg == "--no-fps":
+			fps = false
+	DirAccess.make_dir_recursive_absolute(out_dir)
+	await process_frame
+	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
+	root.add_child(map)
+	for i in 5:
+		await process_frame
+	if not map.get("load_ok"):
+		push_error("vh4 shots: campaign map failed to load")
+		quit(1)
+		return
+	var rig: CampaignCamera = map.camera_rig
+	var data: MapData = map.map_data
+	var terrain: TerrainBuilder = map.get("terrain")
+	var settlements: SettlementLayer = map.get("settlement_layer")
+	for shot: Array in SHOTS:
+		if only != "" and not (shot[0] as String) in only.split(","):
+			continue
+		var point: Vector2 = shot[1]
+		var focus := Vector3(point.x, data.surface_world_at(point.x, point.y), point.y)
+		var distance: float = shot[2]
+		rig.look_at_point(focus, maxf(distance, rig.min_distance_at(focus)))
+		rig.target_yaw = deg_to_rad(float(shot[3]))
+		rig.snap()
+		await _settle(terrain, settlements)
+		for layer in root.find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false
+		if terrain != null and terrain.material != null:
+			terrain.material.set_shader_parameter("fog_enabled", false)
+		for i in 4:
+			await process_frame
+		var image := root.get_viewport().get_texture().get_image()
+		if image.get_width() > 1280:
+			image.resize(1280, roundi(image.get_height() * 1280.0 / image.get_width()), Image.INTERPOLATE_LANCZOS)
+		var path := out_dir.path_join("rouen_%s.jpg" % shot[0])
+		image.save_jpg(path, 0.85)
+		var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
+		print("VH4 shot %s d=%.2f (min %.2f) fade %.2f city %s" % [path, rig.target_distance, rig.min_distance_at(focus),
+			lc.fade("set_rouen") if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
+	if fps:
+		for place: Array in [["rouen", ROUEN], ["amiens", AMIENS]]:
+			for d: float in [1.6, 0.6]:
+				var p: Vector2 = place[1]
+				rig.look_at_point(Vector3(p.x, data.surface_world_at(p.x, p.y), p.y), d)
+				rig.target_yaw = 0.0
+				rig.snap()
+				await _settle(terrain, settlements)
+				var frames := 0
+				var t0 := Time.get_ticks_usec()
+				var worst := 0
+				var last := t0
+				while Time.get_ticks_usec() - t0 < 4_000_000:
+					await process_frame
+					var now := Time.get_ticks_usec()
+					worst = maxi(worst, now - last)
+					last = now
+					frames += 1
+				var seconds := (Time.get_ticks_usec() - t0) / 1e6
+				print("VH4 fps %s d=%.1f : %.1f i/s (pire image %.1f ms)" % [place[0], d, frames / seconds, worst / 1000.0])
+	map.queue_free()
+	await process_frame
+	quit(0)
+
+
+func _settle(terrain: TerrainBuilder, settlements: SettlementLayer) -> void:
+	for i in 30:
+		await process_frame
+	var guard := 0
+	while guard < 1500:
+		guard += 1
+		var busy := false
+		if terrain != null and (not terrain.fine_ready() or terrain.pending_rescales() > 0):
+			busy = true
+		if ReliefLandcover.pending():
+			busy = true
+		if not busy:
+			break
+		await process_frame
+	if settlements != null:
+		settlements.flush()
+	for i in 40:
+		await process_frame
