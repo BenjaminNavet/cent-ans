@@ -3,84 +3,367 @@
     "id": "set_paris",
     "province": "prov_ile_de_france",
     "kind": "city",
-    "name": { "display": "Paris", "local": "Paris", "local_language": "ancien français" },
-    "lonlat": [2.3522, 48.8566],
+    "name": {
+      "display": "Paris",
+      "local": "Paris",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3522,
+      48.8566
+    ],
     "weight": 50,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_windmill", "bld_vineyard_press", "bld_cathedral", "bld_fair", "bld_hotel_dieu", "bld_castle", "bld_muster_field", "bld_stables"],
+    "buildings": [
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_fair",
+      "bld_hotel_dieu",
+      "bld_castle",
+      "bld_muster_field",
+      "bld_stables"
+    ],
     "port": false,
     "description": "Capitale du royaume, cœur politique, fiscal et intellectuel avec son université, autour du Louvre et de Notre-Dame.",
-    "sources": ["Paris au Moyen Âge"]
+    "sources": [
+      "Paris au Moyen Âge"
+    ]
   },
   {
     "id": "set_saint_denis",
     "province": "prov_ile_de_france",
     "kind": "abbey",
-    "name": { "display": "Saint-Denis", "local": "Saint Denis", "local_language": "ancien français" },
-    "lonlat": [2.3597, 48.9356],
+    "name": {
+      "display": "Saint-Denis",
+      "local": "Saint Denis",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3597,
+      48.9356
+    ],
     "weight": 18,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Abbaye royale, nécropole des rois de France, hôte de la grande foire du Lendit.",
-    "sources": ["Basilique Saint-Denis", "Foire du Lendit"]
+    "sources": [
+      "Basilique Saint-Denis",
+      "Foire du Lendit"
+    ]
   },
   {
     "id": "set_vincennes",
     "province": "prov_ile_de_france",
     "kind": "castle",
-    "name": { "display": "Vincennes", "local": "Vincennes", "local_language": "ancien français" },
-    "lonlat": [2.4372, 48.8422],
+    "name": {
+      "display": "Vincennes",
+      "local": "Vincennes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.4372,
+      48.8422
+    ],
     "weight": 13,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Manoir royal et pavillon de chasse des Capétiens aux portes de Paris ; Philippe VI y projette en 1337 un donjon dont les travaux ne commenceront vraiment qu'en 1361. (Anachronisme de jeu : la forteresse est présente dès 1337.)",
-    "sources": ["Château de Vincennes"]
+    "sources": [
+      "Château de Vincennes"
+    ]
   },
   {
     "id": "set_meaux",
     "province": "prov_ile_de_france",
     "kind": "town",
-    "name": { "display": "Meaux", "local": "Miaux", "local_language": "ancien français" },
-    "lonlat": [2.8783, 48.9603],
+    "name": {
+      "display": "Meaux",
+      "local": "Miaux",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.8783,
+      48.9603
+    ],
     "weight": 11,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Cité épiscopale sur la Marne, marché du blé de la Brie.",
-    "sources": ["Meaux"]
+    "sources": [
+      "Meaux"
+    ]
   },
   {
     "id": "set_etampes",
     "province": "prov_ile_de_france",
     "kind": "town",
-    "name": { "display": "Étampes", "local": "Estampes", "local_language": "ancien français" },
-    "lonlat": [2.1614, 48.4347],
+    "name": {
+      "display": "Étampes",
+      "local": "Estampes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.1614,
+      48.4347
+    ],
     "weight": 9,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Ville et prévôté royale au sud de Paris, étape sur la route d'Orléans.",
-    "sources": ["Étampes"]
+    "sources": [
+      "Étampes"
+    ]
   },
   {
     "id": "set_gonesse",
     "province": "prov_ile_de_france",
     "kind": "village",
-    "name": { "display": "Gonesse", "local": "Gonesse", "local_language": "ancien français" },
-    "lonlat": [2.4514, 48.9856],
+    "name": {
+      "display": "Gonesse",
+      "local": "Gonesse",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.4514,
+      48.9856
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_windmill"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_windmill"
+    ],
     "port": false,
     "description": "Bourg céréalier au nord de Paris, réputé pour son pain.",
-    "sources": ["Gonesse"]
+    "sources": [
+      "Gonesse"
+    ]
+  },
+  {
+    "id": "set_pontoise",
+    "province": "prov_ile_de_france",
+    "kind": "town",
+    "name": {
+      "display": "Pontoise",
+      "local": "Pontoise",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.0975,
+      49.0503
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville et prévôté royale sur l'Oise, chef-lieu du Vexin français.",
+    "sources": [
+      "Pontoise"
+    ]
+  },
+  {
+    "id": "set_melun",
+    "province": "prov_ile_de_france",
+    "kind": "town",
+    "name": {
+      "display": "Melun",
+      "local": "Melun",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.6598,
+      48.5396
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville royale sur la Seine, ancienne résidence capétienne.",
+    "sources": [
+      "Melun"
+    ]
+  },
+  {
+    "id": "set_montlhery",
+    "province": "prov_ile_de_france",
+    "kind": "castle",
+    "name": {
+      "display": "Montlhéry",
+      "local": "Montlhéry",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.2725,
+      48.6494
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Puissant donjon royal dominant la route d'Orléans, symbole de l'autorité capétienne.",
+    "sources": [
+      "Château de Montlhéry"
+    ]
+  },
+  {
+    "id": "set_saint_germain_en_laye",
+    "province": "prov_ile_de_france",
+    "kind": "castle",
+    "name": {
+      "display": "Saint-Germain-en-Laye",
+      "local": "Saint Germain en Laye",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.0947,
+      48.8981
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château royal forestier sur la terrasse dominant la Seine, résidence favorite des Capétiens.",
+    "sources": [
+      "Château-Vieux de Saint-Germain-en-Laye"
+    ]
+  },
+  {
+    "id": "set_royaumont",
+    "province": "prov_ile_de_france",
+    "kind": "abbey",
+    "name": {
+      "display": "Royaumont",
+      "local": "Royaumont",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3697,
+      49.1372
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée par Saint Louis, nécropole de la famille royale.",
+    "sources": [
+      "Abbaye de Royaumont"
+    ]
+  },
+  {
+    "id": "set_poissy",
+    "province": "prov_ile_de_france",
+    "kind": "village",
+    "name": {
+      "display": "Poissy",
+      "local": "Poissy",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.0389,
+      48.9289
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg royal sur la Seine, lieu de baptême de Saint Louis et halle aux draps réputée.",
+    "sources": [
+      "Poissy"
+    ]
+  },
+  {
+    "id": "set_montmorency",
+    "province": "prov_ile_de_france",
+    "kind": "village",
+    "name": {
+      "display": "Montmorency",
+      "local": "Montmorency",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3283,
+      48.9897
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg siège de la puissante maison de Montmorency, premiers barons chrétiens de France.",
+    "sources": [
+      "Montmorency (Val-d'Oise)"
+    ]
+  },
+  {
+    "id": "set_corbeil",
+    "province": "prov_ile_de_france",
+    "kind": "village",
+    "name": {
+      "display": "Corbeil",
+      "local": "Corbeil",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.4867,
+      48.6167
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg et ancienne vicomté au confluent de la Seine et de l'Essonne, moulins à blé.",
+    "sources": [
+      "Corbeil-Essonnes"
+    ]
   }
 ]
