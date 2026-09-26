@@ -11,6 +11,7 @@ mod fire;
 mod indirect;
 mod obstacles;
 mod pathing;
+mod pipeline;
 mod push;
 mod reinforcements;
 mod scenario;
@@ -1233,19 +1234,7 @@ impl BattleSim {
     /// Advances the battle by `dt` seconds, running as many fixed steps as
     /// needed (at most a few hundred per call).
     pub fn tick(&mut self, dt: f64) {
-        if self.finished || self.deploying || !dt.is_finite() || dt <= 0.0 {
-            return;
-        }
-        self.accumulator += dt;
-        let mut steps = 0;
-        while self.accumulator >= DT - 1e-9 && steps < MAX_STEPS_PER_CALL && !self.finished {
-            self.accumulator -= DT;
-            self.step();
-            steps += 1;
-        }
-        if steps == MAX_STEPS_PER_CALL {
-            self.accumulator = 0.0;
-        }
+        self.tick_with(dt, BattleSim::step);
     }
 
     /// Runs one fixed step of [`DT`] seconds.

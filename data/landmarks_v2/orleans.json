@@ -35,16 +35,16 @@
    "url": "https://multimedia.inrap.fr/atlas/orleans",
    "license": "Faits seulement (droits réservés)",
    "extracted": false,
-   "use": "Faits : castrum de 2 032 m et 25 ha, tours de 8 m, fossé de 10 m ; accrue du XIVe s. (+17 ha) ; boulevards à partir de 1404."
+   "use": "Faits : castrum de 2 032 m et 25 ha, tours de 8 m, fossé de 10 m ; porte Renart sous la place De Gaulle, porte Bannier sous le Martroi."
   },
   {
    "title": "Le pont des Tourelles à Orléans (1120-1760)",
    "author": "A. Collin",
-   "date": "s. d.",
+   "date": "1895",
    "url": "https://gallica.bnf.fr/ark:/12148/bpt6k376667h",
    "license": "Gallica (réutilisation non commerciale) : faits seulement",
    "extracted": false,
-   "use": "Faits : 331 m, 10 m de large, 21 puis 18 arches, motte Saint-Antoine, Tourelles et Châtelet."
+   "use": "Faits (via Wikipédia et l'Inrap ; Gallica protégé) : 331 m, 10 m de large, 21 arches jusqu'en 1434-1435 puis 19 et 18, motte Saint-Antoine, Tourelles et Châtelet."
   },
   {
    "title": "Plans anciens d'Orléans (siège de 1428, enceintes, plan de 1778)",
@@ -62,7 +62,52 @@
    "url": "https://fr.wikipedia.org/wiki/Si%C3%A8ge_d%27Orl%C3%A9ans",
    "license": "CC BY-SA 4.0 (faits seulement)",
    "extracted": false,
-   "use": "Dates : chevet seul en 1340 et 1429, faubourgs rasés du 8 novembre au 29 décembre 1428, Saint-Aignan, prises des bastilles en mai 1429."
+   "use": "Dates : chevet gothique raccordé à la cathédrale romane jusqu'au XVe-XVIe s., faubourgs rasés du 8 novembre au 29 décembre 1428, Saint-Aignan, Saint-Euverte, pont (21 arches jusqu'en 1434-1435, bastille de 1417), prises des bastilles en mai 1429."
+  },
+  {
+   "title": "Focus Orléans : les enceintes urbaines (circuit patrimonial)",
+   "author": "Ville d'Orléans, service Ville d'art et d'histoire et service archéologique municipal (SAMO)",
+   "date": "2014, rééd. 2023",
+   "url": "https://www.orleans-metropole.fr/fileadmin/orleans/MEDIA/kiosque/ville_art_histoire/vdh_enceintes_urbaines.pdf",
+   "license": "Droits réservés : faits seulement",
+   "extracted": false,
+   "use": "Faits : castrum (≈ 2 000 m, 25 ha, tours de 8 m tous les 55 m, portes Dunoise, Parisie et Bourgogne), accrue (vallon de la rue Notre-Dame-de-Recouvrance, tours du Heaume, Michau-Quanteau et Barre-Flambert, 1 000 m neufs, 2 590 m et 37 ha), porte Renard place De Gaulle, boulevards 1417-1420, Tour-Neuve (début XIIIe s.)."
+  },
+  {
+   "title": "La construction d'une enceinte à Orléans. La fortification des XIVe-XVe siècles (Archéopages 33)",
+   "author": "D. Carron et T. Guillemard",
+   "date": "2012",
+   "url": "https://journals.openedition.org/archeopages/17524",
+   "license": "OpenEdition : faits seulement",
+   "extracted": false,
+   "use": "Faits : murailles achevées en 1391 sauf le front de Loire (années 1410), boulevards dès 1417, boulevard de la porte Renart 1418-1422, fossé de 15 m."
+  },
+  {
+   "title": "Orléans (Loiret). Place du Martroi (Revue archéologique du Centre de la France 26)",
+   "author": "D. Petit",
+   "date": "1987",
+   "url": "https://www.persee.fr/doc/racf_0220-6617_1987_num_26_1_2513_t1_0100_0000_2",
+   "license": "Persée : faits seulement",
+   "extracted": false,
+   "use": "Faits : accrue et porte Bannier au milieu du XIVe s., fossé en V de 6-7 m de profondeur et plus de 15 m de large."
+  },
+  {
+   "title": "La Loire (notice de l'atlas archéologique d'Orléans)",
+   "author": "Inrap (S. Caillé, E. Miéjac, C. Sauvé, V. Serna)",
+   "date": "2014",
+   "url": "https://multimedia.inrap.fr/atlas/orleans",
+   "license": "Droits réservés : faits seulement",
+   "extracted": false,
+   "use": "Faits : pont dans le prolongement de la rue des Hôtelleries, hospice et chapelle Saint-Antoine dès le XIIe s., grande bastille en bois sur la motte dès 1417."
+  },
+  {
+   "title": "Saint-Aignan d'Orléans (base des collégiales séculières de France, 816-1563)",
+   "author": "J.-V. Jourd'heuil (Université de Limoges)",
+   "date": "s. d.",
+   "url": "https://collegiales.applirecherche.unilim.fr/?i=fiche&j=648",
+   "license": "Faits seulement",
+   "extracted": false,
+   "use": "Faits : collégiale abattue pendant l'hiver 1358-1359, reconstruction interdite jusqu'en 1376, abattue de nouveau en 1428."
   }
  ],
  "plan": {
@@ -534,16 +579,16 @@
     [-382, -175]
    ],
    "closed": true,
-   "height_m": 8.0,
+   "height_m": 10.0,
    "thickness_m": 3.2,
-   "tower_spacing_m": 40.0,
+   "tower_spacing_m": 55.0,
    "tower_radius_m": 4.0,
-   "tower_height_m": 11.0,
+   "tower_height_m": 12.0,
    "ditch_m": 10.0,
    "gates": [
     {
      "name": "Porte du Pont (Châtelet)",
-     "at": [-364, -358],
+     "at": [-394, -353],
      "kind": "gate",
      "height_m": 16
     },
@@ -579,7 +624,7 @@
     }
    ],
    "until_year": 1344,
-   "note": "Tracé restitué d'après les rues héritées (Sainte-Catherine, Tour-Neuve, Bourdon-Blanc), les guichets du front de Loire et les vestiges valentiniens au nord de Sainte-Croix (OSM) ; 2 032 m et 25 ha (Inrap) ; tours rondes de 8 m de diamètre, fossé de 10 m."
+   "note": "Tracé restitué d'après les rues héritées (Sainte-Catherine, Tour-Neuve, Bourdon-Blanc), les guichets du front de Loire et les vestiges valentiniens au nord de Sainte-Croix (OSM) ; ≈ 2 000 m et 25 ha, courtine de 2,5 à 4 m d'épaisseur et d'une dizaine de mètres de haut, tours rondes de 8 m de diamètre environ tous les 55 m, fossé de 10 m ; portes Dunoise (ouest), Parisie (nord) et Bourgogne (est) (SAMO, « Les enceintes urbaines », 2014 ; Inrap)."
   },
   {
    "id": "enceinte_accrue",
@@ -602,21 +647,28 @@
     [-243, 71],
     [-360, 58],
     [-461, 88],
-    [-579, 92],
-    [-702, 95],
-    [-708, 37]
+    [-505, 55],
+    [-550, 22],
+    [-595, -3],
+    [-652, -22],
+    [-680, -60],
+    [-700, -95],
+    [-718, -125],
+    [-733, -158],
+    [-745, -210],
+    [-750, -262]
    ],
    "closed": true,
    "height_m": 9.0,
    "thickness_m": 2.8,
-   "tower_spacing_m": 45.0,
+   "tower_spacing_m": 55.0,
    "tower_radius_m": 4.5,
    "tower_height_m": 13.0,
-   "ditch_m": 12.0,
+   "ditch_m": 15.0,
    "gates": [
     {
      "name": "Porte du Pont (Châtelet)",
-     "at": [-364, -358],
+     "at": [-394, -353],
      "kind": "gate",
      "height_m": 16
     },
@@ -640,7 +692,7 @@
     },
     {
      "name": "Porte Renart",
-     "at": [-708, 37],
+     "at": [-595, -3],
      "kind": "gate",
      "height_m": 17
     },
@@ -658,7 +710,7 @@
     }
    ],
    "from_year": 1345,
-   "note": "Enceinte du siège de 1428-1429 : castrum renforcé et accrue du bourg Dunois (≈ 1 000 m, +17 ha). Date incertaine (1300-1330 ou vers 1356 selon les sources) : 1345 retenu (plan VH). Mur occidental restitué vers la longitude 1,9008 (porte Renart sur l'axe de la rue des Carmes), mur nord au sud du Martroi (porte Bannier, OSM) ; l'ancien mur ouest du castrum n'est plus figuré."
+   "note": "Enceinte du siège de 1428-1429 : castrum réparé et accrue du bourg Dunois (≈ 1 000 m de courtine neuve, 2 590 m et 37 ha en tout ; SAMO, « Les enceintes urbaines », 2014). Date incertaine : « début du XIVe s. » (SAMO), « milieu du XIVe s. » (Petit 1987), « vers 1356 », murailles achevées en 1391 sauf le front de Loire, fini dans les années 1410 (Carron et Guillemard 2012) : 1345 retenu. Tracé (relecture 2026-09-26) : de la porte Bannier (vestiges sous le Martroi) une courbe concave jusqu'à la porte Renart (place De Gaulle, fouille Inrap du tramway), puis une courbe convexe le long du vallon de la rue Notre-Dame-de-Recouvrance jusqu'à la tour de la Barre-Flambert sur la Loire ; fossés de 15 m et plus (Martroi, place De Gaulle)."
   }
  ],
  "streets": [
@@ -5911,20 +5963,20 @@
   {
    "id": "pont_des_tourelles",
    "name": "Pont des Tourelles (vers 1120-1140)",
-   "from": [-364, -358],
-   "to": [-391, -700],
+   "from": [-394, -353],
+   "to": [-409, -684],
    "width_m": 10.0,
    "deck_m": 7.0,
    "material": "stone",
    "arches": 21,
    "houses": false,
-   "note": "331 m, 9,75 à 10,40 m de large, 21 arches à l'origine (14 des Tourelles à la motte Saint-Antoine, 7 de la motte au Châtelet), 18 après reconstructions (Collin). Axe : vestiges du pont médiéval (OSM 1,9058, 47,8956) entre la place du Châtelet et le quai du Fort-des-Tourelles. Arche coupée par les Orléanais en octobre 1428 non figurée."
+   "note": "331 m, 9,75 à 10,40 m de large, 21 arches à l'origine (14 des Tourelles à la motte Saint-Antoine, 7 de la motte au Châtelet), 19 après les glaces de 1434-1435, 18 à partir du XVIe s. (Collin 1895 ; Inrap) : 21 en 1340 comme en 1429. Axe (relecture 2026-09-26) : prolongement de la rue des Hôtelleries (Inrap) et vestiges du pont médiéval (OSM 1,9058 E, 47,8956 N). Arche coupée par les Orléanais en octobre 1428 non figurée."
   }
  ],
  "monuments": [
   {
    "id": "sainte_croix_chevet",
-   "name": "Cathédrale Sainte-Croix (chevet gothique seul)",
+   "name": "Cathédrale Sainte-Croix (chevet gothique)",
    "model": "gothic_cathedral",
    "at": [42, 1],
    "angle_deg": 0.3,
@@ -5934,7 +5986,7 @@
     "length_m": 58,
     "width_m": 46,
     "nave_width_m": 13,
-    "vault_m": 30,
+    "vault_m": 32,
     "ridge_m": 40,
     "aisle_m": 14,
     "apse": "round",
@@ -5942,7 +5994,29 @@
     "open_west": true,
     "bays": 4
    },
-   "description": "Première pierre le 11 septembre 1287 ; chœur, déambulatoire et chapelles rayonnantes achevés dans la première moitié du XIVe s. En 1340 comme en 1429 seul le chevet est debout : ni transept, ni nef, ni façade, ni tours (XVe-XVIIIe s.)."
+   "description": "Première pierre le 11 septembre 1287 ; chevet puis nouveau chœur au XIVe s. ; travaux ralentis pendant la guerre de Cent Ans, croisée reprise dans la seconde moitié du XVe s., nef gothique au XVIe s. En 1340 comme en 1429, le chevet gothique est raccordé à la nef, au transept et à la façade à deux tours de la cathédrale romane (Chenesseau ; Wikipédia). Voûte du vaisseau central : 31,75 m sous clef (état actuel)."
+  },
+  {
+   "id": "sainte_croix_romane",
+   "name": "Cathédrale Sainte-Croix (nef et façade romanes)",
+   "model": "church",
+   "at": [-28, 1],
+   "angle_deg": 0.3,
+   "clear_m": 6,
+   "certainty": "probable",
+   "params": {
+    "length_m": 80,
+    "width_m": 24,
+    "height_m": 18,
+    "apse": "flat",
+    "tower": {
+     "at": "west",
+     "size": 12,
+     "height": 40,
+     "spire_m": 0
+    }
+   },
+   "description": "Cathédrale d'Arnoul (XIe s.) : nef de sept travées à bas-côtés simples, transept, façade harmonique à deux tours ; elle reste debout à l'ouest du chevet gothique jusqu'à la reprise de la croisée (seconde moitié du XVe s.) et de la nef (XVIe s.) ; les tours romanes ne sont démolies qu'en 1739 (Wikipédia d'après Chenesseau, Lefèvre-Pontalis 1905). Emprise et gabarit restitués (transept non figuré, deux tours en une)."
   },
   {
    "id": "chatelet",
@@ -5974,8 +6048,8 @@
    "id": "tourelles",
    "name": "Fort des Tourelles",
    "model": "castle",
-   "at": [-391, -700],
-   "angle_deg": 83.9,
+   "at": [-409, -684],
+   "angle_deg": 85.8,
    "clear_m": 4,
    "certainty": "probable",
    "params": {
@@ -5993,14 +6067,14 @@
      [0, 0, 14, 8, 12, 0]
     ]
    },
-   "description": "Châtelet à quatre tours sur les dernières arches du pont, côté Sologne ; pris par les Anglais le 23 octobre 1428, repris par Jeanne d'Arc le 7 mai 1429. Gabarit restitué."
+   "description": "Châtelet à tours sur les dernières arches du pont, côté Sologne, séparé de la rive par un pont-levis ; pris par les Anglais le 23-24 octobre 1428, repris le 7 mai 1429. Date de construction et gabarit non documentés (restitution)."
   },
   {
    "id": "boulevard_tourelles",
    "name": "Boulevard des Tourelles",
    "model": "earthwork",
-   "at": [-395, -752],
-   "angle_deg": -96.1,
+   "at": [-411, -736],
+   "angle_deg": -94.2,
    "clear_m": 4,
    "certainty": "probable",
    "params": {
@@ -6018,33 +6092,51 @@
     "palisade_m": 2.5,
     "closed": false
    },
-   "description": "Terrassement de terre et de bois devant les Tourelles (en dur seulement en 1591-1592) ; pris par les Anglais le 22 octobre 1428. Date de construction inconnue : boulevards d'Orléans à partir de 1404 (Inrap, à confirmer).",
-   "from_year": 1404
+   "description": "Ouvrage de terre et de bois devant les Tourelles (maçonné seulement en 1591-1592) ; pris par les Anglais le 22 octobre 1428. Date exacte inconnue : les Orléanais établissent des boulevards dès 1417 (Wikipédia d'après Collin ; SAMO : premiers boulevards 1417-1420).",
+   "from_year": 1417
   },
   {
    "id": "bastille_saint_antoine",
    "name": "Bastille Saint-Antoine (motte Saint-Antoine)",
-   "model": "castle",
-   "at": [-374, -481],
-   "angle_deg": 83.9,
+   "model": "earthwork",
+   "at": [-430, -473],
+   "angle_deg": 85.8,
    "clear_m": 3,
    "certainty": "hypothetical",
    "params": {
     "ring": [
-     [-9, -8],
-     [9, -8],
-     [9, 8],
-     [-9, 8]
+     [-16, 0],
+     [-11, 11],
+     [0, 16],
+     [11, 11],
+     [16, 0],
+     [11, -11],
+     [0, -16],
+     [-11, -11]
     ],
-    "height_m": 8,
-    "thickness_m": 1.8,
-    "tower_radius_m": 3.2,
-    "tower_height_m": 12,
-    "halls": [
-     [0, 0, 10, 7, 9, 0]
-    ]
+    "bank_m": 2.5,
+    "base_m": 7.0,
+    "palisade_m": 3.0,
+    "closed": true
    },
-   "description": "Ouvrage et chapelle Saint-Antoine sur l'îlot au tiers nord du pont (7 arches du Châtelet) ; repli des Orléanais après la perte des Tourelles (1428). Emprise et gabarit hypothétiques ; l'île n'existe pas dans la Loire de la carte fine."
+   "description": "« Grande bastille en bois » élevée par les Orléanais sur la motte Saint-Antoine dès 1417, après Azincourt (Inrap, notice « La Loire ») ; repli des Orléanais après la perte des Tourelles (1428). Figurée en levée palissadée à l'aval du pont ; emprise et gabarit hypothétiques ; l'île n'existe pas dans la Loire de la carte fine.",
+   "from_year": 1417
+  },
+  {
+   "id": "chapelle_saint_antoine",
+   "name": "Chapelle et hospice Saint-Antoine (motte Saint-Antoine)",
+   "model": "church",
+   "at": [-383, -478],
+   "angle_deg": -6.3,
+   "clear_m": 2,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 18,
+    "width_m": 8,
+    "height_m": 8,
+    "apse": "flat"
+   },
+   "description": "Hôpital et chapelle Saint-Antoine bâtis sur la motte dès la construction du pont (XIIe s.) (Inrap ; Collin 1895). Emprise et gabarit hypothétiques."
   },
   {
    "id": "tour_neuve",
@@ -6170,7 +6262,7 @@
     }
    },
    "until_year": 1358,
-   "description": "Collégiale hors les murs à l'est, consacrée en 1029 ; rasée une première fois en 1358-1359 avant l'arrivée des Anglais."
+   "description": "Collégiale hors les murs à l'est, consacrée en 1029 ; abattue par les Orléanais pendant l'hiver 1358-1359 pour que Robert Knolles ne s'y retranche pas ; reconstruction interdite jusqu'en 1376 (J.-V. Jourd'heuil, base des collégiales séculières)."
   },
   {
    "id": "saint_aignan_1420",
@@ -6194,7 +6286,7 @@
    },
    "from_year": 1420,
    "until_year": 1428,
-   "description": "Relevée vers 1420, rasée de nouveau par les Orléanais en novembre-décembre 1428. Gabarit hypothétique."
+   "description": "Relevée après 1376 (reconstruction datée de 1420 par Wikipédia), abattue de nouveau par les Orléanais en 1428, quelques mois avant le siège (Jourd'heuil). Gabarit hypothétique."
   },
   {
    "id": "cloitre_saint_aignan",
@@ -6236,7 +6328,7 @@
      "size": 34
     }
    },
-   "description": "Abbaye de chanoines réguliers hors les murs, au nord-est ; détruite par les Orléanais en 1428 (reconstruite au XVe s.)."
+   "description": "Abbaye de chanoines réguliers hors les murs, au nord-est ; démolie sur ordre du bailli en 1358 puis de nouveau en 1428 (Wikipédia, sans source ; date de la reconstruction intermédiaire inconnue), reconstruite sous Charles VII et Louis XI."
   },
   {
    "id": "saint_laurent",
@@ -6359,7 +6451,7 @@
    "angle_deg": -6.3,
    "clear_m": 6,
    "certainty": "hypothetical",
-   "until_year": 1429,
+   "until_year": 1428,
    "params": {
     "length_m": 40,
     "width_m": 13,
@@ -6369,7 +6461,35 @@
      "size": 26
     }
    },
-   "description": "Couvent à la tête sud du pont, fortifié par les Anglais et pris le 6 mai 1429."
+   "description": "Couvent à la tête sud du pont, abattu en octobre 1428 à l'arrivée des Anglais, qui fortifient ses ruines (bastille des Augustins, prise le 6 mai 1429). Emprise hypothétique."
+  },
+  {
+   "id": "bastille_augustins",
+   "name": "Bastille anglaise des Augustins",
+   "model": "earthwork",
+   "at": [-295, -839],
+   "angle_deg": -6.3,
+   "clear_m": 4,
+   "certainty": "hypothetical",
+   "from_year": 1429,
+   "until_year": 1429,
+   "params": {
+    "ring": [
+     [-24, 0],
+     [-17, 17],
+     [0, 24],
+     [17, 17],
+     [24, 0],
+     [17, -17],
+     [0, -24],
+     [-17, -17]
+    ],
+    "bank_m": 3.0,
+    "base_m": 8.0,
+    "palisade_m": 2.5,
+    "closed": true
+   },
+   "description": "Fort anglais établi sur les ruines du couvent des Augustins (octobre 1428), pris le 6 mai 1429 (Journal du siège ; Wikipédia). Emprise hypothétique."
   },
   {
    "id": "halles",
@@ -6393,13 +6513,13 @@
    "angle_deg": -3.0,
    "clear_m": 3,
    "certainty": "attested",
-   "from_year": 1411,
+   "from_year": 1415,
    "params": {
     "length_m": 18,
     "width_m": 11,
     "height_m": 9
    },
-   "description": "Seul bâtiment conservé de l'université (début du XVe s.) ; date de construction approchée."
+   "description": "Seul bâtiment conservé de l'université : librairie commencée en 1411, fondations et une partie des élévations achevées en 1414 (C. Alix et J. Noblet, Bulletin monumental, 2009) ; 1415 retenu."
   },
   {
    "id": "boulevard_bourgogne",
@@ -6424,8 +6544,8 @@
     "palisade_m": 2.2,
     "closed": false
    },
-   "description": "Boulevard de terre et de bois devant la porte (boulevards à partir de 1404, Inrap) ; emprise hypothétique.",
-   "from_year": 1404
+   "description": "Boulevard de terre et de bois devant la porte : premiers boulevards entre 1417 et 1420 (SAMO ; Carron et Guillemard 2012) ; emprise hypothétique.",
+   "from_year": 1417
   },
   {
    "id": "boulevard_parisis",
@@ -6450,8 +6570,8 @@
     "palisade_m": 2.2,
     "closed": false
    },
-   "description": "Boulevard de terre et de bois devant la porte (boulevards à partir de 1404, Inrap) ; emprise hypothétique.",
-   "from_year": 1404
+   "description": "Boulevard de terre et de bois devant la porte : premiers boulevards entre 1417 et 1420 (SAMO ; Carron et Guillemard 2012) ; emprise hypothétique.",
+   "from_year": 1417
   },
   {
    "id": "boulevard_bannier",
@@ -6476,15 +6596,15 @@
     "palisade_m": 2.2,
     "closed": false
    },
-   "description": "Boulevard de terre et de bois devant la porte (boulevards à partir de 1404, Inrap) ; emprise hypothétique.",
-   "from_year": 1404
+   "description": "Boulevard de terre et de bois devant la porte : premiers boulevards entre 1417 et 1420 (SAMO ; Carron et Guillemard 2012) ; emprise hypothétique.",
+   "from_year": 1417
   },
   {
    "id": "boulevard_renart",
    "name": "Boulevard de la porte Renart",
    "model": "earthwork",
-   "at": [-734, 40],
-   "angle_deg": -6.3,
+   "at": [-620, 3],
+   "angle_deg": -18.6,
    "clear_m": 4,
    "certainty": "hypothetical",
    "params": {
@@ -6502,8 +6622,8 @@
     "palisade_m": 2.2,
     "closed": false
    },
-   "description": "Boulevard de terre et de bois devant la porte (boulevards à partir de 1404, Inrap) ; emprise hypothétique.",
-   "from_year": 1404
+   "description": "Boulevard de la porte Renart, réalisé entre 1418 et 1422 : fossé en fer à cheval d'environ 55 m d'ouverture, 13 à 15 m de large et 6 à 7 m de profondeur autour d'un terre-plein (fouille Inrap du tramway, place De Gaulle ; Carron et Guillemard 2012). Emprise approchée.",
+   "from_year": 1418
   }
  ],
  "districts": [
@@ -6548,9 +6668,16 @@
     [-373, -58],
     [-360, 58],
     [-461, 88],
-    [-579, 92],
-    [-702, 95],
-    [-708, 37]
+    [-505, 55],
+    [-550, 22],
+    [-595, -3],
+    [-652, -22],
+    [-680, -60],
+    [-700, -95],
+    [-718, -125],
+    [-733, -158],
+    [-745, -210],
+    [-750, -262]
    ],
    "houses": {
     "townhouse": 0.45,
@@ -6571,9 +6698,16 @@
     [-373, -58],
     [-360, 58],
     [-461, 88],
-    [-579, 92],
-    [-702, 95],
-    [-708, 37]
+    [-505, 55],
+    [-550, 22],
+    [-595, -3],
+    [-652, -22],
+    [-680, -60],
+    [-700, -95],
+    [-718, -125],
+    [-733, -158],
+    [-745, -210],
+    [-750, -262]
    ],
    "until_year": 1344
   },
@@ -6583,7 +6717,10 @@
    "zone": "faubourg",
    "density": 0.45,
    "polygon": [
-    [-702, 101],
+    [-600, 5],
+    [-550, 22],
+    [-505, 55],
+    [-461, 94],
     [-363, 69],
     [-279, 155],
     [-300, 381],
@@ -6634,7 +6771,14 @@
    "density": 0.35,
    "polygon": [
     [-747, -319],
-    [-702, 101],
+    [-750, -262],
+    [-745, -210],
+    [-733, -158],
+    [-718, -125],
+    [-700, -95],
+    [-680, -60],
+    [-652, -22],
+    [-600, 5],
     [-797, 156],
     [-1045, 296],
     [-1409, 56],
@@ -6724,17 +6868,6 @@
     [90, 87],
     [104, 214],
     [-30, 228]
-   ]
-  },
-  {
-   "id": "chantier_nef",
-   "name": "Terrain de la nef à bâtir (Sainte-Croix)",
-   "kind": "yard",
-   "polygon": [
-    [-73, 22],
-    [11, 22],
-    [12, -22],
-    [-72, -22]
    ]
   },
   {

@@ -369,7 +369,8 @@ def strap(body, name, plane_co, plane_no, width, filt, material, lift=0.006):
     bm.free()
     for f in out.faces:
         c = f.calc_center_median()
-        # Outward: away from the nearest body point.
+        # Outward: away from the nearest body point (FG3: normal computed first).
+        f.normal_update()
         if f.normal.dot(c - _nearest(body, c)) < 0:
             f.normal_flip()
     obj = eq.to_object(name, out, [material])
@@ -674,6 +675,7 @@ def caparison(body, mount, level, hem=0.48):
     )
     for f in bm.faces:
         c = f.calc_center_median()
+        f.normal_update()  # FG3: new faces carry no normal until updated
         if f.normal.dot(c - Vector((0, c.y, 1.0))) < 0:
             f.normal_flip()
     uv = bm.loops.layers.uv.new("UVMap")

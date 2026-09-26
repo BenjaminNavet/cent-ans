@@ -456,7 +456,12 @@ impl CampaignState {
 
     /// [`Self::faction_administration_upkeep`] for an `income` already
     /// computed (`faction_income_effective`, without seigniorage).
-    fn administration_upkeep_for(&self, data: &GameData, faction: &FactionId, income: i64) -> i64 {
+    pub fn administration_upkeep_for(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        income: i64,
+    ) -> i64 {
         let rules = &data.economy_rules;
         let provinces = self.controlled_provinces(faction).len();
         let share = (income as f64 * rules.administration_rate(provinces)).round() as i64;
