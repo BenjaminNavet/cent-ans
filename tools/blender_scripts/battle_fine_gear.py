@@ -1179,7 +1179,7 @@ def brigandine(g, colour=(0.35, 0.05, 0.04), studs=True):
         z = bottom + 0.03
         row = 0
         while z < chest_top:
-            count = 26
+            count = 20
             for k in range(count):
                 a = 2 * math.pi * (k + 0.5 * (row % 2)) / count
                 d = Vector((math.cos(a), math.sin(a), 0.0))
@@ -1189,8 +1189,8 @@ def brigandine(g, colour=(0.35, 0.05, 0.04), studs=True):
                 hit = tree.ray_cast(origin, -d, 0.6)
                 if hit[0] is None:
                     continue
-                rivet(bm, hit[0], hit[1], 0.0055, 0)
-            z += 0.04
+                rivet(bm, hit[0], hit[1], 0.006, 0, sides=3)
+            z += 0.045
             row += 1
         rivets = finish_object("rivets", bm, [g.mat(eq.C_TRIM, BRASS)])
         kd, weights = fe.body_lookup(g.body)
