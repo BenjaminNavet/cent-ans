@@ -42,7 +42,8 @@ var _reground_chunks: Dictionary = {}
 var _last_rebuild_key := ""
 var _windmill_bodies: MultiMeshInstance3D
 var _windmill_sails: MultiMeshInstance3D
-## Moulins : [Vector2 px, lacet, graine, tourne (bool)].
+## Moulins : [Vector2 px, lacet, graine, tourne (bool), hauteur du sol (SZ4 : gardée pour les
+## réécritures d'échelle, recalée avec la surface)].
 var _windmill_points: Array = []
 var _overlay: ShaderMaterial
 var _overlay_snowy := false
@@ -187,7 +188,8 @@ func _build_windmills(province_states: Dictionary) -> void:
 		for k in count:
 			var angle := float((seed_value / (k + 2)) % 628) / 100.0
 			var distance := _layer.model_radius(i) * (1.35 + float((seed_value / (k + 5)) % 60) / 100.0)
-			_windmill_points.append([px + Vector2(cos(angle), sin(angle)) * distance, float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0, devastation < RUIN_MIN_DEVASTATION])
+			var mill_px := px + Vector2(cos(angle), sin(angle)) * distance
+			_windmill_points.append([mill_px, float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0, devastation < RUIN_MIN_DEVASTATION, _surface_y(mill_px)])
 	var body_mesh := _first_mesh("settlements/windmill_body")
 	var sails_mesh := _first_mesh("settlements/windmill_sails")
 	if body_mesh == null or sails_mesh == null:
@@ -211,9 +213,13 @@ func _build_windmills(province_states: Dictionary) -> void:
 	_windmill_sails.multimesh = sails
 
 
+func _surface_y(px: Vector2) -> float:
+	return _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
+
+
 func _windmill_transforms(point: Array) -> Array:
 	var px: Vector2 = point[0]
-	var y := _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
+	var y: float = point[4]
 	var basis := Basis(Vector3.UP, float(point[1])).scaled(Vector3.ONE * WINDMILL_SCALE * _windmill_scale)
 	var body := Transform3D(basis, Vector3(px.x, y - 0.05 * _windmill_scale, px.y))
 	return [body, Transform3D(basis, body * WINDMILL_HUB)]
@@ -325,6 +331,7 @@ func _reground() -> void:
 		for n in _windmill_points.size():
 			if not _point_changed(_windmill_points[n], changed):
 				continue
+			_windmill_points[n][4] = _surface_y(_windmill_points[n][0])
 			var xforms := _windmill_transforms(_windmill_points[n])
 			_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
 			_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
