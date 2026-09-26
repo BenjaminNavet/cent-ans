@@ -33,11 +33,24 @@ alternés, 3 passes chacun, charge 9-15 ; médianes ; passe N2 perturbée par un
 
 `request_reground` (tuile de Paris, 103 pages) : 4,7 ms (copie) → 0,04 ms (pages partagées),
 test headless hors charge ; en jeu la copie montait à ~70 ms (SZ6).
+`pb1_bench.gd --views=150,40` (3 passes alternées, médianes, charge 11-18 ; très bruité, GPU
+dominant) : zoom France ↔ Paris p50 31,8 → 25,1 ms, p95 46,9 → 34,7 ms, pire 67,6 → 74,5 ms
+(une passe N à 314 ms, isolée) ; arrivée au zoom 150 : 1 665 → 1 679 ms (pire image 137 → 142),
+zoom 40 : 839 → 877 ms (pire 67 → 51) : inchangées au bruit près (décodage et téléversement des
+pages, végétation : hors du périmètre).
+
+Captures A/B (`zg7c_recette_shots.gd`, Paris, Val de Loire, Alpes, Rouen × 3 paliers, météo
+claire) : relief identique ; seuls écarts dans les maisons de Paris au palier site, plus faibles
+que l'écart entre deux passes du repli seul (9 565 contre 15 189 pixels) — construction
+progressive de la ville. `docs/img/pb3g/ab_*.jpg` (gauche natif, droite repli).
+
 Reste dans `lod/quadtree` : `qt/collect` (téléversements + écouteurs de `surface_changed`,
 ≤ 9 ms).
 
+## Suites
+- `qt/collect` (≤ 9 ms : écouteurs de `surface_changed` à l'arrivée des pages).
+- `TownLayer` (~10 ms), `NextHintController.refresh` (15 ms/s : `get_faction_summary`,
+  `get_army` par armée) non traités.
+
 ## Prochaine étape
-1. Mesures A/B (bench-map/probe, pb1_bench), médianes de 3 ; consigner ici et dans l'ADR.
-2. Captures A/B `zg7c_recette_shots.gd --only=... --prefix=native_|gd_` → `docs/img/pb3g/`.
-3. Point 3 si le temps le permet (hameaux en lot, `TownLayer`, `NextHintController`).
-4. Fusion de `main`, tests, suppression de `core/target`.
+Fusion de `main`, tests, suppression de `core/target`, rendu à l'orchestrateur.
