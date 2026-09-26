@@ -193,3 +193,32 @@ fn capture_drops_the_construction() {
     assert!(s.construction.is_none());
     assert!(s.recruit_queue.is_empty());
 }
+
+/// Fix 7: a player who still holds a castle or a town is not defeated.
+#[test]
+fn holding_a_lesser_settlement_is_no_defeat() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 4).unwrap();
+    let cities: Vec<SettlementId> = state
+        .provinces
+        .keys()
+        .filter_map(|p| state.province_city_id(p).cloned())
+        .collect();
+    let kept = state
+        .settlements
+        .iter()
+        .find(|(id, s)| s.controller == fac("fac_france") && !cities.contains(id))
+        .map(|(id, _)| id.clone())
+        .expect("France holds a lesser settlement");
+    for (id, s) in state.settlements.iter_mut() {
+        if s.controller == fac("fac_france") && *id != kept {
+            s.controller = fac("fac_england");
+        }
+    }
+    let mut events = Vec::new();
+    crate::victory::resolve_victory(&mut state, &data, &mut events);
+    assert!(state.outcome.is_none());
+    state.settlements.get_mut(&kept).unwrap().controller = fac("fac_england");
+    crate::victory::resolve_victory(&mut state, &data, &mut events);
+    assert!(state.outcome.is_some());
+}
