@@ -194,3 +194,84 @@ def _segment_distance(p: list[float], a: list[float], b: list[float]) -> float:
         0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / max(dx * dx + dy * dy, 1e-9))
     )
     return math.hypot(px - ax - t * dx, py - ay - t * dy)
+
+
+def test_london_1340_facts() -> None:
+    """London around 1340 (VH6): open wall with dated Moorgate, inhabited bridge, 149 m spire."""
+    city = _load(DATA / "landmarks_v2" / "london.json")
+    monuments = {m["id"]: m for m in city["monuments"]}
+    wall = city["walls"][0]
+    assert not wall["closed"]  # Thames front open
+    gates = {g["name"].split(" ")[0]: g for g in wall["gates"]}
+    for name in (
+        "Aldgate",
+        "Bishopsgate",
+        "Cripplegate",
+        "Aldersgate",
+        "Newgate",
+        "Ludgate",
+    ):
+        assert name in gates
+    assert gates["Moorgate"]["from_year"] == 1415
+    pauls = monuments["old_st_pauls"]["params"]
+    assert pauls["crossing"]["height"] + pauls["crossing"]["spire_m"] == pytest.approx(
+        149, abs=3
+    )
+    assert monuments["westminster_hall"]["params"]["length_m"] == pytest.approx(
+        73, abs=1
+    )
+    assert monuments["jewel_tower"]["from_year"] >= 1365
+    assert monuments["savoy"]["until_year"] == 1381
+    bridge = city["bridges"][0]
+    assert bridge["arches"] == 19 and bridge["houses"] and "chapel_at" in bridge
+    assert any(w["origin"] == "rivers_fine" for w in city["waters"])
+    names = {s["name"] for s in city["streets"]}
+    assert "Cheapside" in names and "Queen Victoria Street" not in names
+    assert "King William Street" not in names
+
+
+def test_osm_alleys() -> None:
+    """With ``alleys``, named footway alleys and courts are kept as lanes; sidewalks are not."""
+    city = {
+        "origin_3035": [3676847.0, 2964336.0],
+        "districts": [
+            {
+                "zone": "intra",
+                "polygon": [[-300, -300], [300, -300], [300, 300], [-300, 300]],
+            }
+        ],
+        "osm_streets": {
+            "bbox_lonlat": [1.08, 49.43, 1.11, 49.45],
+            "highways": ["residential"],
+            "exclude": [],
+            "main": [],
+            "alleys": True,
+        },
+    }
+    lon0, lat0 = landmarks_v2.local_to_lonlat(
+        np.array([[-100.0, 0.0]]), city["origin_3035"]
+    )[0]
+    lon1, lat1 = landmarks_v2.local_to_lonlat(
+        np.array([[100.0, 0.0]]), city["origin_3035"]
+    )[0]
+    geometry = [{"lon": lon0, "lat": lat0}, {"lon": lon1, "lat": lat1}]
+    osm = {
+        "elements": [
+            {
+                "type": "way",
+                "id": 1,
+                "tags": {"highway": "footway", "name": "Change Alley"},
+                "geometry": geometry,
+            },
+            {
+                "type": "way",
+                "id": 2,
+                "tags": {"highway": "footway", "name": "Cheapside"},
+                "geometry": geometry,
+            },
+        ]
+    }
+    streets = landmarks_v2.osm_streets(city, osm)
+    assert [(s["name"], s["rank"]) for s in streets] == [("Change Alley", "lane")]
+    city["osm_streets"]["alleys"] = False
+    assert landmarks_v2.osm_streets(city, osm) == []
