@@ -73,15 +73,17 @@
       "id": "settlements",
       "title": "Places (vue moyenne)",
       "entries": [
-        {"sample": {"type": "settlement", "kind": "city", "owner": "player"}, "label": "Cité", "text": "Écu crénelé à point blanc : grande ville, dont le nom est écrit en plus grand."},
-        {"sample": {"type": "settlement", "kind": "town", "owner": "player"}, "label": "Ville", "text": "Disque crénelé, en forme d'étoile."},
-        {"sample": {"type": "settlement", "kind": "castle", "owner": "player"}, "label": "Château", "text": "Carré à créneaux."},
-        {"sample": {"type": "settlement", "kind": "abbey", "owner": "player"}, "label": "Abbaye", "text": "Disque à croix blanche."},
-        {"sample": {"type": "settlement", "kind": "village", "owner": "player"}, "label": "Village", "text": "Petit point."},
+        {"sample": {"type": "settlement", "kind": "city", "pictogram": "city_capital", "owner": "player"}, "label": "Capitale, grande cité", "text": "Plus la place compte, plus son dessin est grand : capitale d'un royaume, grande cité, puis cité à cathédrale. Seules les capitales, grandes cités et forteresses restent à la vue d'Europe."},
+        {"sample": {"type": "settlement", "kind": "city", "owner": "player"}, "label": "Cité", "text": "Ville close à cathédrale, dont le nom est écrit en plus grand."},
+        {"sample": {"type": "settlement", "kind": "town", "pictogram": "town_walled", "owner": "player"}, "label": "Ville", "text": "Ville close si elle est fortifiée, bourg de maisons sinon. Les petites places n'apparaissent qu'en rapprochant la caméra."},
+        {"sample": {"type": "settlement", "kind": "castle", "rank": 3, "owner": "player"}, "label": "Château", "text": "Forteresse, château ou simple tour, selon sa force."},
+        {"sample": {"type": "settlement", "kind": "abbey", "owner": "player"}, "label": "Abbaye", "text": "Abbaye ou prieuré."},
+        {"sample": {"type": "settlement", "kind": "village", "owner": "player"}, "label": "Village", "text": "Chaumières et chapelle."},
+        {"sample": {"type": "settlement", "kind": "town", "rank": 1, "port": true, "owner": "player"}, "label": "Port", "text": "Une nef en bas à gauche : la place a un port."},
         {
           "sample": {"type": "settlement_owners"},
-          "label": "Couleur d'une place",
-          "text": "Celle du royaume qui la tient : les vôtres à gauche, puis d'autres royaumes ; gris, place sans seigneur. En rapprochant la caméra, les symboles cèdent la place aux maquettes."
+          "label": "Écu d'une place",
+          "text": "Les armes du royaume qui la tient : les vôtres à gauche, puis d'autres royaumes ; sans écu, place sans seigneur. En rapprochant la caméra, les marqueurs cèdent la place aux maquettes."
         }
       ]
     },

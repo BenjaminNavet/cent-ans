@@ -48,9 +48,11 @@ pub mod crest;
 pub mod decision;
 pub mod decor;
 mod decor_gen;
+pub mod duel;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
+pub mod historical;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
@@ -81,11 +83,13 @@ pub use decor::{
     Area, AreaKind, Camp, Decor, DecorItem, DecorPlan, DecorProp, DecorPropKind, DecorRules,
     FieldState, Hamlet, HamletLayout, Moat, Mound,
 };
+pub use duel::DuelRules;
 pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,
 };
 pub use fire::{Blaze, FireRules, FireState};
+pub use historical::HistoricalMap;
 pub use hydro::{
     Bank, BankKind, Bridge, Crossing, Road, RoadKind, Stream, StreamKind, Water, WaterRules,
     WatersideSpot,

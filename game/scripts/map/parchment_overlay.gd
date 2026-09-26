@@ -21,6 +21,9 @@ const REF_DISTANCE := 1400.0
 
 var weight: float = 0.0
 var camera_distance: float = REF_DISTANCE
+## Vignettes de villes à l'encre ; faux quand les marqueurs peints de `SettlementLayer` restent
+## affichés au palier Europe (lot DA3).
+var draw_towns: bool = true
 var camera: Camera3D
 var map_data: MapData
 var decor: ParchmentDecor
@@ -207,7 +210,7 @@ func _draw() -> void:
 	# Villes trop proches à l'écran : une seule vignette (grille de cellules, capitales d'abord).
 	var cell := 30.0 * s
 	var occupied: Dictionary = {}
-	for town in _towns:
+	for town in (_towns if draw_towns else []):
 		var p := _screen_w(town["world"])
 		if not view.has_point(p):
 			continue
