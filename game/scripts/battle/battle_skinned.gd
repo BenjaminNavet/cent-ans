@@ -105,6 +105,10 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 	var fig := figure(kind, variant)
 	if not fig.has("atlas_layer") or not fine_maps_ready():
 		return
+	# Matériaux d'un autre shader qui lisent la texture d'os (drapeau porté d'EP5, etc.) :
+	# garder leur shader, sans cartes.
+	if mat.shader != SHADER and not _variants.values().has(mat.shader):
+		return
 	var corpse := mat.shader != null and mat.shader.code.contains("#define BV2_CORPSE")
 	mat.shader = _variant(["BV2_CORPSE", "FG3_BAKED"] if corpse else ["FG3_BAKED"])
 	var maps := fine_maps()
