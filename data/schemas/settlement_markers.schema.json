@@ -112,6 +112,27 @@
       }
     },
     "fade_distance": {"type": "number", "minimum": 0, "description": "Largeur (distance caméra) du fondu de disparition."},
+    "declutter": {
+      "type": "object",
+      "description": "Lot DA7d : dé-encombrement écran par priorité (placement glouton, grille spatiale).",
+      "properties": {
+        "description": {"type": "string"},
+        "marker_box": {"$ref": "#/$defs/unit_point", "description": "Emprise opaque du pictogramme (fraction du quad : largeur, hauteur), centrée."},
+        "marker_margin_px": {"type": "number", "minimum": 0, "maximum": 32, "description": "Marge (px) autour d'un marqueur."},
+        "label_margin_px": {"type": "number", "minimum": 0, "maximum": 32, "description": "Marge (px) autour d'un nom."},
+        "hidden_alpha": {"type": "number", "minimum": 0, "maximum": 1, "description": "Opacité d'un marqueur qui cède la place (0 = masqué, > 0 = estompé)."},
+        "fade_seconds": {"type": "number", "minimum": 0, "maximum": 2, "description": "Durée du fondu d'apparition / disparition."},
+        "interval_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 2, "description": "Période minimale entre deux recalculs."},
+        "recompute_move_fraction": {"type": "number", "minimum": 0, "maximum": 1, "description": "Déplacement de la caméra (fraction de sa distance) qui déclenche un recalcul."},
+        "recompute_distance_ratio": {"type": "number", "minimum": 0, "maximum": 1, "description": "Variation relative de la distance caméra qui déclenche un recalcul."},
+        "recompute_turn_degrees": {"type": "number", "minimum": 0, "maximum": 45, "description": "Rotation de la caméra (degrés) qui déclenche un recalcul."},
+        "label_screen_margin": {"type": "number", "minimum": 0, "maximum": 1, "description": "Débord de l'écran (fraction) où les noms sont encore posés."},
+        "pin_player_capital": {"type": "boolean"},
+        "pin_selected": {"type": "boolean"},
+        "pin_hovered": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
     "shield": {"$ref": "#/$defs/placement"},
     "badge": {"$ref": "#/$defs/placement"}
   },
