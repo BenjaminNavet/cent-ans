@@ -1689,6 +1689,15 @@ func _run_icons() -> void:
 	_check(str(library.call("resolve", "unit_does_not_exist")) == "cat_unit", "unit fallback expected")
 	_check(str(library.call("resolve", "bld_does_not_exist")) == "cat_building", "building fallback expected")
 	_check(library.call("get_icon", "totally_unknown") != null, "default fallback expected")
+	# DA5b : miniatures d'entité peintes, prioritaires sur l'encre et le SVG, jamais teintées.
+	var entity: Dictionary = library.get("entity")
+	_check(entity.size() >= 100, "entity miniatures missing: %d" % entity.size())
+	for id in ["unit_knights", "bld_castle", "tech_bombards", "unit_category_infantry"]:
+		if entity.has(id):
+			_check(bool(library.call("is_entity", id)) and not bool(library.call("is_ink", id)), "%s should be a painted miniature" % id)
+			_check(str(library.call("icon_path", id)).begins_with("res://assets/icons/entity/"), "%s miniature path" % id)
+			_check(library.call("get_icon", id) is Texture2D, "%s miniature not loadable" % id)
+	_check(not bool(library.call("is_entity", "hud_treasury")), "action icons stay ink")
 	var tip := RichTooltip.technology({"id": "tech_bombards", "name": "Bombardes", "branch": "military", "tier": 3, "cost": 350, "effective_cost": 350, "effects": [{"kind": "siege_resistance", "value": -5}], "historical_year": 1346})
 	_check(tip.contains("[img") and tip.contains("1346") and tip.contains("Résistance aux sièges"), "technology tooltip incomplete: %s" % tip)
 	var panel := RichTooltip.make_panel(RichTooltip.gauge("unrest", 40))

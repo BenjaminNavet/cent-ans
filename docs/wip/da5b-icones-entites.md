@@ -10,9 +10,10 @@ Bible `docs/design/2026-09-25-bible-da.md` § 8 ; complète l'ADR 0065 (section 
   7 régimes, `bld_collegiate_church`, catégories d'unité (marqueurs de bataille).
 - [x] Catalogue `data/ui/entity_icons.json` + schéma, générateur `tools/cent_ans_tools/entity_icons.py`
   (recadrage automatique, cadre or/azur peint par code), build des 101 dérivées.
-- [ ] Revue des recadrages (surcharges `crop`), image de référence, CLI `cent-ans assets entity-icons`, tests.
+- [x] Revue des recadrages (surcharges `crop`), image de référence, CLI `cent-ans assets entity-icons`, tests.
+- [x] Sonde de 3 images (0,14 $) validée ; génération complète lancée (52 images).
 - [ ] Génération : dry-run, sonde 3, puis 55 miniatures (≈ 2,5 $).
-- [ ] Branchement `IconLibrary` (index `entity/` prioritaire), marqueurs de bataille, cartes d'unité.
+- [~] (fait, à vérifier en capture) Branchement `IconLibrary` (index `entity/` prioritaire), marqueurs de bataille, cartes d'unité.
 - [ ] Planche 32/64/128, captures avant/après `docs/img/da5b/`, ADR 0065 § DA5b.
 
 ## Prochaine étape
