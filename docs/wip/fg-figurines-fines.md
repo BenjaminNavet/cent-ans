@@ -21,7 +21,7 @@ toute production. Budget : 0 $ prévu (sources CC0, cuisson Blender) ; toute gé
 
 | Lot | Objet | Dépend de | État |
 |---|---|---|---|
-| FG0 | Prototype + planche de style : homme d'armes et cheval nouvelle définition, rendus Blender côte à côte avec l'actuel ; choix de la base (MakeHuman/MPFB CC0 ou autre), méthode d'ajustement au squelette Quaternius, budget de triangles | — | lancé |
+| FG0 | Prototype + planche de style : homme d'armes et cheval nouvelle définition, rendus Blender côte à côte avec l'actuel ; choix de la base (MakeHuman/MPFB CC0 ou autre), méthode d'ajustement au squelette Quaternius, budget de triangles | — | fait (branche `feat/fg0-prototype`, 1a46930f), **attend la validation du joueur** |
 | FG1 | Corps humain : nouvelle base ajustée au rig `human`, transfert des poids, 6-8 visages, mains ; chaîne LOD0 ≈ 8-12 k / LOD1 ≈ 2,4 k / LOD2 ≈ 500 | FG0 validé | à faire |
 | FG2 | Équipement fin : mailles, plates, casques, armes, surcots avec plis, par recette de figurine (25 figurines) | FG1 | à faire |
 | FG3 | Matières cuites : atlas normal + ORM + masque de livrée, intégration shader skinné | FG1, **après DA1** (même shader) | à faire |
@@ -34,5 +34,15 @@ shader et les mêmes recettes ; FG3 passe après sa fusion. FG0-FG2 et FG4 reste
 
 Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprimé après fusion.
 
+## Pistes ultérieures
+- Figurines scannées (scans de musée, image → 3D, Gaussian Splatting) et animations réalistes
+  (capture, vidéo → mouvement) : analyse dans `docs/research/figurines-scan-et-animation.md`,
+  à reprendre après FG1 (voie pragmatique pour FG2, animations en chantier séparé).
+
 ## Journal
 - 25/09 : plan écrit ; FG0 lancé (agent en worktree).
+- 26/09 : FG0 rendu. MakeHuman/MPFB 2.0.17 (CC0) ajusté au rig `human` ; cheval « Rigged Horse »
+  OpenGameArt (CC0) sur le rig `cavalry`. LOD0 12,3 k (pied) / 16,4 k (monté). Planche
+  `docs/img/fg/planche_fg0.png` sur la branche. Défauts connus : galop (jarrets tordus), bras
+  comprimés (humérus courts du rig), camail sombre. Mémoire : un atlas 2048 par recette ×25 = trop
+  (270 Mo) → textures de détail partagées + atlas 1024 par famille. Détails : `docs/wip/fg0-prototype.md`.

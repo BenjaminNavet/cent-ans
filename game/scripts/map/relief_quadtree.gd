@@ -123,6 +123,9 @@ var _decode_ms: PackedFloat32Array = PackedFloat32Array()
 var _upload_ms_max: float = 0.0
 var _select_ms: float = 0.0
 var _update_ms_total: float = 0.0
+## ZG7a : pires durées (ms) des étapes de `update_view` (collecte et téléversement des pages,
+## écouteurs de `surface_changed` compris ; sélection ; application des nœuds ; demandes).
+var _step_ms_max: Dictionary = {"collect": 0.0, "poll": 0.0, "carve_job": 0.0, "layer": 0.0, "emit": 0.0, "select": 0.0, "apply": 0.0, "start": 0.0}
 
 
 ## `pyramid` doit être disponible ; `terrain_material` est le matériau partagé des morceaux E0
@@ -187,6 +190,7 @@ func update_view(camera: Camera3D) -> void:
 	_frame += 1
 	var t0 := Time.get_ticks_usec()
 	_collect_jobs()
+	var t1 := Time.get_ticks_usec()
 	_prepare_camera(camera)
 	_items.clear()
 	_wanted.clear()
@@ -197,8 +201,15 @@ func update_view(camera: Camera3D) -> void:
 		_px_scale = minf(_px_scale * 1.2, 8.0)
 	elif _items.size() < max_items * 0.6 and _px_scale > 1.0:
 		_px_scale = maxf(_px_scale / 1.1, 1.0)
+	var t2 := Time.get_ticks_usec()
 	_apply_items()
+	var t3 := Time.get_ticks_usec()
 	_start_jobs()
+	var t4 := Time.get_ticks_usec()
+	_note_step("collect", t1 - t0)
+	_note_step("select", t2 - t1)
+	_note_step("apply", t3 - t2)
+	_note_step("start", t4 - t3)
 	_select_ms = (Time.get_ticks_usec() - t0) / 1000.0
 	_update_ms_total += _select_ms
 	material.set_shader_parameter("qt_camera", _cam)
@@ -557,6 +568,7 @@ func _start_jobs() -> void:
 ## `block`).
 func _collect_jobs(block: bool = false) -> void:
 	var uploads := 0
+	var t_poll := Time.get_ticks_usec()
 	if _decoder != null:
 		var guard := 0
 		while not _requested.is_empty() and guard < 2000:
@@ -568,14 +580,18 @@ func _collect_jobs(block: bool = false) -> void:
 				_requested.erase(key)
 				job.bytes = item["bytes"]
 				if job.bytes.size() == PAGE_PX * PAGE_PX * 2:
-					job._finish(Time.get_ticks_usec())
+					# ZG7a : image et mipmaps faites dans un fil (1-3 ms par page sous charge au fil
+					# principal), avec le creusement du lit s'il y en a un ; téléversement quand
+					# la tâche est finie (une image plus tard).
 					job.decode_ms = float(item["ms"])
-				if _finish_job(key, job):
+					_dispatch_image(key, job)
+				elif _finish_job(key, job):
 					uploads += 1
 			if not block or _requested.is_empty():
 				break
 			OS.delay_msec(1)
 			guard += 1
+	_note_step("poll", Time.get_ticks_usec() - t_poll)
 	var t0 := Time.get_ticks_usec()
 	for key in _main_queue:
 		if not block and (uploads >= max_uploads_per_frame or Time.get_ticks_usec() - t0 > main_decode_budget_ms * 1000.0):
@@ -599,13 +615,29 @@ func _collect_jobs(block: bool = false) -> void:
 		_collect_jobs(true)  # ZG5b : pages parties au creusement pendant cette passe
 
 
+## ZG7a : octets décodés (fils natifs) → image et mipmaps dans un fil, creusement compris.
+func _dispatch_image(key: int, job: PageJob) -> void:
+	job.filter_checked = true
+	if page_filter != null:
+		var t_carve := Time.get_ticks_usec()
+		var task: Object = page_filter.call("carve_job", key)
+		_note_step("carve_job", Time.get_ticks_usec() - t_carve)
+		if task != null:
+			job.filter = task
+			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
+			return
+	_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_image, false, "relief image %d" % key), "job": job}
+
+
 func _finish_job(key: int, job: PageJob) -> bool:
 	if not job.ok:
 		pyramid.mark_broken(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
 		push_warning("ReliefQuadtree: unreadable tile %s" % job.path)
 		return false
-	if page_filter != null and job.filter == null:
+	if page_filter != null and job.filter == null and not job.filter_checked:
+		var t_carve := Time.get_ticks_usec()
 		var task: Object = page_filter.call("carve_job", key)
+		_note_step("carve_job", Time.get_ticks_usec() - t_carve)
 		if task != null:
 			job.filter = task
 			_jobs[key] = {"task": WorkerThreadPool.add_task(job.run_filter, false, "relief carve %d" % key), "job": job}
@@ -623,6 +655,7 @@ func _upload(key: int, job: PageJob) -> bool:
 	var t0 := Time.get_ticks_usec()
 	_page_array.update_layer(job.image, layer)
 	_upload_ms_max = maxf(_upload_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
+	_note_step("layer", Time.get_ticks_usec() - t0)
 	_pages[key] = {"layer": layer, "last_used": _frame, "t_upload": Time.get_ticks_msec() / 1000.0}
 	_page_bytes[key] = job.bytes
 	_layer_keys[layer] = key
@@ -631,8 +664,14 @@ func _upload(key: int, job: PageJob) -> bool:
 	var level := ReliefPyramid.level_of_key(key)
 	for index in _chunks_of(rect):
 		_chunk_top[index] = maxi(_chunk_top[index], level)
+	var t_emit := Time.get_ticks_usec()
 	surface_changed.emit(rect)
+	_note_step("emit", Time.get_ticks_usec() - t_emit)
 	return true
+
+
+func _note_step(step: String, usec: int) -> void:
+	_step_ms_max[step] = maxf(float(_step_ms_max[step]), usec / 1000.0)
 
 
 ## Morceaux E0 (index ligne × 16 + colonne) touchés par un rectangle carte.
@@ -665,10 +704,15 @@ func _alloc_layer() -> int:
 	_page_bytes.erase(oldest)
 	_residency_version += 1
 	var rect := _tile_rect(oldest)
-	var touched := _chunks_of(rect)
-	for index in touched:
-		_chunk_top[index] = -1
-	for key: int in _pages:
+	# ZG7a : seuls les morceaux dont la page évincée était l'étage le plus fin sont recalculés
+	# (un parcours des 256 pages par éviction, deux évictions par image au pire, sinon).
+	var old_level := ReliefPyramid.level_of_key(oldest)
+	var touched := PackedInt32Array()
+	for index in _chunks_of(rect):
+		if _chunk_top[index] <= old_level:
+			touched.append(index)
+			_chunk_top[index] = -1
+	for key: int in (_pages if not touched.is_empty() else {}):
 		var level := ReliefPyramid.level_of_key(key)
 		var page_rect := _tile_rect(key)
 		for index in touched:
@@ -752,6 +796,7 @@ func perf_stats() -> Dictionary:
 		"select_ms": snappedf(_select_ms, 0.01),
 		"update_ms_avg": snappedf(_update_ms_total / maxf(_frame, 1.0), 0.01),
 		"px_scale": snappedf(_px_scale, 0.01),
+		"qt_step_ms_max": _step_ms_max.duplicate(),
 	}
 
 
@@ -815,6 +860,21 @@ static func _bilinear(bytes: PackedByteArray, fx: float, fy: float, h_min: float
 ## Instantané des pages chargées qui touchent `rect`, lisible depuis un fil de travail sans
 ## verrou (octets partagés en copie sur écriture) : grille pour `TerrainBuilder.grid_height`
 ## (coordonnées locales à `origin`), repli sur la heightmap 4096 hors pages.
+## ZG7a : étage de page le plus fin chargé qui touche chacun des rectangles (-1 : aucun), en
+## un seul parcours des pages (sans copier leurs octets comme `surface_snapshot`).
+func finest_levels(rects: Array[Rect2]) -> PackedInt32Array:
+	var out := PackedInt32Array()
+	out.resize(rects.size())
+	out.fill(-1)
+	for key: int in _page_bytes:
+		var level := ReliefPyramid.level_of_key(key)
+		var page_rect := _tile_rect(key)
+		for i in rects.size():
+			if level > out[i] and page_rect.intersects(rects[i]):
+				out[i] = level
+	return out
+
+
 func surface_snapshot(rect: Rect2, origin: Vector2) -> Dictionary:
 	var pages := {}
 	for key: int in _page_bytes:
@@ -876,6 +936,14 @@ class PageJob:
 	var ok: bool = false
 	## Lot ZG5b : retouche des octets (lit creusé) dans un fil, puis image refaite.
 	var filter: Object = null
+	## ZG7a : creusement déjà demandé (ou page sans lit) : pas de second passage.
+	var filter_checked: bool = false
+
+	## ZG7a : image et mipmaps d'octets déjà décodés (fils natifs), dans un fil.
+	func run_image() -> void:
+		var decoded := decode_ms
+		_finish(Time.get_ticks_usec())
+		decode_ms += decoded
 
 	func run_filter() -> void:
 		var t0 := Time.get_ticks_usec()

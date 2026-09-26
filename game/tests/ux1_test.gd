@@ -146,7 +146,7 @@ func _test_legend() -> void:
 		_check((sample as Control).get_child_count() == 1, "sample %s has content" % sample.name)
 	var plates := legend.find_children("Plate_legend", "PanelContainer", true, false)
 	_check(plates.size() >= 3, "army plates drawn with the real plate builder (%d)" % plates.size())
-	_check(LegendSample.settlement_shape("city").size() > 20 and LegendSample.settlement_shape("town").size() == 40, "settlement shapes")
+	_check(LegendSample.catalog().atlas != null and LegendSample.catalog().cell_of("city") >= 0, "settlement markers atlas (DA3)")
 	legend.close_legend()
 	_check(not legend.visible, "close hides the legend")
 	legend.queue_free()

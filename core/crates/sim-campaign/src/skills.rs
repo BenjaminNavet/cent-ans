@@ -16,6 +16,8 @@ use data_model::{CharacterId, GameData, SkillId, TraitId};
 use crate::buildings::EffectTotals;
 use crate::state::CampaignState;
 
+/// Ceiling of the command, governance and court levels (0-10 scale).
+pub const MAX_SKILL_LEVEL: u8 = 10;
 /// XP granted to a general per battle (spec § 2): +10, +20 if victorious.
 pub const BATTLE_XP: u32 = 10;
 pub const BATTLE_VICTORY_XP: u32 = 20;
@@ -121,7 +123,7 @@ pub fn learn_skill(
         data_model::SkillBranch::Governance => &mut character.skills.governance,
         data_model::SkillBranch::Court => &mut character.skills.court,
     };
-    *level = (*level + 1).min(10);
+    *level = (*level + 1).min(MAX_SKILL_LEVEL);
     Ok(())
 }
 

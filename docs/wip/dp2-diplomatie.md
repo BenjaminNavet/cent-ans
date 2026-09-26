@@ -1,6 +1,6 @@
 # DP2 — Suites de la diplomatie (droit de passage, carte diplomatique, lisibilité des refus)
 
-Branche : `worktree-agent-aeb4f4012dbd33ec4`. ADR : `docs/decisions/0031-droit-de-passage-et-carte-diplomatique.md`.
+Branche : `worktree-agent-aeb4f4012dbd33ec4`. ADR : `docs/decisions/0075-droit-de-passage-et-carte-diplomatique.md`.
 
 ## Plan
 1. Droit de passage (`core/crates/sim-campaign/src/passage.rs`) : intrusion détectée en fin de saison
@@ -25,7 +25,7 @@ Branche : `worktree-agent-aeb4f4012dbd33ec4`. ADR : `docs/decisions/0031-droit-d
   (bouton « Diplomatie », `campaign_minimap.gd`, `minimap_controller.gd`), chemin rouge
   (`army_movement_path.gd`, `army_movement_controller.gd`), panneau (raisons pondérées,
   contre-offre, fiche « droit de passage »), smoke.
-- [x] ADR 0031 (dont le point 4 : accord commercial avec un rival, voulu).
+- [x] ADR 0075 (dont le point 4 : accord commercial avec un rival, voulu).
 - [x] Fusion de main (UX1 légende, UI1, ZG3) puis de `feat/map-modes` (MF1, pas encore sur main) :
   le mode « Diplomatie » est le filtre de `MapModeController` (positions DP2, légende, infobulle,
   minicarte qui suit le filtre) ; le bouton à part de la minicarte est retiré ; légende UX1 à jour.

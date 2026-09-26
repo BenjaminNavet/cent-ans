@@ -1,4 +1,4 @@
-//! `CampaignSim` API of lot DP2 (ADR 0031), in a secondary `#[godot_api]`
+//! `CampaignSim` API of lot DP2 (ADR 0075), in a secondary `#[godot_api]`
 //! block: right of passage (path warning, incidents), diplomatic stances of
 //! the map, and readable negotiations (every weighted reason, the single
 //! blocking point and its counter-offer). The rules live in

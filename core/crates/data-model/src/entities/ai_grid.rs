@@ -23,6 +23,11 @@ pub struct AiGrid {
     /// Settlement-graph legs an army is ordered to walk in one turn at most
     /// (one `MoveArmy` per leg; the march stops when its points run out).
     pub max_legs_per_turn: usize,
+    /// EQ5: route cost multiplier of the roads into lands the AI may cross
+    /// without right of passage (at war, by temper): the armies go round
+    /// them when a road of their own or of the enemy is not much longer.
+    #[serde(default = "default_trespass_route_factor")]
+    pub trespass_route_factor: f64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -35,7 +40,12 @@ impl Default for AiGrid {
             avoid_ratio: 1.0,
             avoid_radius_km: 12.0,
             max_legs_per_turn: 6,
+            trespass_route_factor: default_trespass_route_factor(),
             description: None,
         }
     }
+}
+
+fn default_trespass_route_factor() -> f64 {
+    1.0
 }

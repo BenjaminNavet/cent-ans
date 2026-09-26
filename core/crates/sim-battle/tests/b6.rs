@@ -171,16 +171,31 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// win 30/64 instead of 51/64.
 /// EP9 (ADR 0056): the beaten army breaks as a whole before its last
 /// regiment flees, same winners, 292 s and 186 s instead of 391 s and 225 s.
+/// SG4 (the horse counter-charges enemy horse riding at its shooters,
+/// melee height advantage): digests recomputed on EP9 + SG4, same winners.
+/// EP6: each army's camp stands behind its lines (digests unchanged).
+/// EP10 (ADR 0068, fugitives run to the rear, a routing friend behind shakes
+/// a regiment less): digests recomputed. Seed 3 changes winner: before, the
+/// French men-at-arms gave way at 248 and 262 s beside their routed knights
+/// and crossbowmen and France broke at 406 s; now they hold and the English
+/// line breaks at 245 s. Over seeds 0-63 the French win 34/64 instead of
+/// 29/64 (`ep10_rout::probe_small_battle`). Seed 11: same end, one English
+/// regiment keeps 10 more men.
+/// EP11 (ADR 0071, continuous push of the lines in melee): digests
+/// recomputed. Seed 3 goes back to the English (312 s instead of 245 s),
+/// as before EP10; seed 11: same winner, 177 s instead of 186 s. Over seeds
+/// 0-63 the French win 31/64 instead of 34/64
+/// (`ep10_rout::probe_small_battle`).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "292 Some(Defender) [20, 0, 36, 94, 90, 8, 64, 118, 118, 23]",
+            "312 Some(Defender) [29, 30, 8, 100, 100, 10, 48, 105, 97, 38]",
         ),
         (
             11,
-            "186 Some(Defender) [7, 63, 41, 48, 92, 24, 78, 112, 117, 35]",
+            "177 Some(Defender) [19, 78, 41, 100, 28, 5, 80, 116, 120, 41]",
         ),
     ];
     for (seed, digest_before) in expected {

@@ -79,6 +79,9 @@ func weight_at(distance: float) -> float:
 
 func refresh(sim: Object) -> void:
 	if overlay != null:
+		# DA3 (ADR 0066) : les lieux gardent leurs marqueurs peints au palier Europe, le parchemin
+		# ne redessine plus ses propres vignettes de villes (un seul langage).
+		overlay.draw_towns = _map.get("settlement_layer") == null
 		overlay.refresh(sim, _map.get("settlement_data"))
 
 

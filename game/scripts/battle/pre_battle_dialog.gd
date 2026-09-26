@@ -51,6 +51,7 @@ var _colors: Array[Color] = [Color(0.2, 0.3, 0.75), Color(0.75, 0.15, 0.12)]
 
 
 func _ready() -> void:
+	PanelStack.set_tier(self, PanelStack.Tier.MODAL, true)  # Q4 : modale, le conseiller s'efface
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	theme = load("res://scenes/ui/parchment_theme.tres")
@@ -239,7 +240,7 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	var sub := "%s contre %s" % [str(battle.get("attacker_name", "")), str(battle.get("defender_name", ""))]
 	if siege:
 		var breach := int(battle.get("breach", 0))
-		sub += " · murailles de niveau %d, brèche %d %%%s" % [int(battle.get("fortification", 0)), breach, " (ouverte)" if breach >= 50 else ""]
+		sub += " · murailles de niveau %d, brèche %d %%%s" % [int(battle.get("fortification", 0)), breach, " (ouverte)" if breach >= RuleValues.value("breach_open_threshold", INF) else ""]
 	elif str(battle.get("province_name", "")) != "":
 		sub += " · %s" % str(battle.get("province_name", ""))
 	if season != "":
@@ -412,7 +413,9 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 		command = int(general.get("command", 0))
 		name_text = str(general.get("name", ""))
 	var portrait := PortraitLoader.portrait_texture(character)
-	var arms := PortraitLoader.heraldry_texture(faction)
+	# DA1 : armes de la maison du général, à défaut de la faction.
+	var house := str(general.get("house", HouseArms.house_of(character))) if general is Dictionary else ""
+	var arms := PortraitLoader.house_heraldry_texture(house, faction)
 	var color := _colors[slot]
 	medallion.draw.connect(func() -> void:
 		var c := medallion.size * 0.5
@@ -431,7 +434,7 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 	var stars := "★".repeat(clampi(command, 0, 10)) + "☆".repeat(clampi(10 - command, 0, 10)) if general is Dictionary else "L'ost combat sans général : moral fragile."
 	var stars_label := BattleUiKit.label(stars, 14, BattleUiKit.GOLD if general is Dictionary else BattleUiKit.RUBRIC)
 	stars_label.set_script(RichLabel)
-	stars_label.tooltip_text = "Commandement %d / 10" % command
+	stars_label.tooltip_text = "Commandement %d / %s" % [command, RuleValues.text("max_skill_level")]
 	stars_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	texts.add_child(stars_label)
 	if slot == 0:

@@ -30,7 +30,6 @@ const INK := Color(0.16, 0.10, 0.05)
 const PARCHMENT := Color(0.95, 0.90, 0.78)
 const GOLD := Color(1.0, 0.82, 0.22)
 const ROUT_RED := Color(0.85, 0.12, 0.08)
-const EXHAUSTED_FATIGUE := 60.0  # même seuil que la simulation (vitesse réduite)
 ## B7 : regroupement en vue lointaine (distance de caméra en m, hystérésis contre le
 ## clignotement) ; deux troupes d'un camp à moins de `CLUSTER_PX` pixels écran se regroupent.
 const CLUSTER_ON := 480.0
@@ -51,6 +50,7 @@ var _selected: Array = []
 var hovered: int = -1  # repère sous la souris
 var world_hover: int = -1  # troupe survolée sur le terrain (fournie par la scène)
 var _icons: Dictionary = {}  # id -> Texture2D
+var _miniature: Dictionary = {}  # id -> vrai si l'icône est une miniature d'entité (DA5b)
 
 
 func _ready() -> void:
@@ -273,7 +273,9 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	draw_rect(inner, fill)
 	var icon := _icon_for(unit)
 	if icon != null:
-		var size := inner.size.y - 2.0
+		# DA5b : la miniature peinte porte son cadre, elle couvre la plaque ; une icône au trait
+		# garde sa marge de parchemin.
+		var size := plaque.size.y - 2.0 if _miniature.get(int(unit["id"]), false) else inner.size.y - 2.0
 		draw_texture_rect(icon, Rect2(inner.get_center() - Vector2(size, size) * 0.5, Vector2(size, size)), false)
 	draw_rect(plaque, INK, false, 1.0)
 	if bool(unit["is_general"]):
@@ -377,9 +379,15 @@ static func state_badges(unit: Dictionary) -> Array[String]:
 		badges.append("charge")
 	elif state == "melee":
 		badges.append("melee")
-	if float(unit["fatigue"]) >= EXHAUSTED_FATIGUE:
+	if is_exhausted(unit):
 		badges.append("tired")
 	return badges
+
+
+## SV4 : épuisée au-delà du seuil où la simulation lui retire du moral (`exhausted_fatigue`,
+## lu dans le cœur ; jamais épuisée si les données manquent).
+static func is_exhausted(unit: Dictionary) -> bool:
+	return float(unit.get("fatigue", 0.0)) > RuleValues.value("exhausted_fatigue", INF)
 
 
 ## Pastille ronde de 12 px (× `scale`) sur `canvas`, pictogramme vectoriel (pas de glyphe).
@@ -461,5 +469,6 @@ func _icon_for(unit: Dictionary) -> Texture2D:
 		var category := "unit_category_" + str(unit.get("render", "infantry"))
 		var icon_id: String = category if icon_library.call("has_icon", category) else str(unit.get("type", ""))
 		texture = icon_library.call("get_icon", icon_id, "unit")
+		_miniature[id] = icon_library.has_method("is_entity") and bool(icon_library.call("is_entity", icon_id, "unit"))
 	_icons[id] = texture
 	return texture

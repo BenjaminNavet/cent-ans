@@ -287,3 +287,76 @@ propriétaire unique, complétée d'un **gain de relief local** : hauteur affich
 - Écart : les « pentes » des règles d'occupation du sol (`vegetation_mask`, parcellaire) restent les pentes
   vraies ; seule la roche des falaises suit la pente exagérée.
 - Interrupteur : `enabled = false` ou `--no-relief-exaggeration` rend exactement ZG4.
+
+## Addendum (lot ZG7b, 2026-09-25) : cache absent, livraison du relief fin
+
+**Cache absent ou partiel.** Sans `data/map/pyramid/`, le jeu retombait en silence sur E0 et la
+caméra s'arrêtait vers 7 unités (recette Q3). Désormais `ReliefCacheStatus` contrôle au chargement
+de la campagne un échantillon borné de tuiles par étage (24, réparties) et des tuiles fines des
+fleuves et routes ; si le cache manque en tout ou partie, l'état est journalisé et `ReliefCacheNotice`
+affiche un avis non bloquant, une fois par session, fermable, avec la commande unique
+`uv run --project tools cent-ans geo relief-all` (ordre pyramid 1-2 → 3-4 → detail-dem → hydro-fine →
+anchors-fine, reprise, `--check`). Un manifeste sans tuiles listées (fixtures) ne déclenche rien.
+
+**Livraison.** Le cache n'entre pas dans le `.pck` Godot : `data/` n'est pas une ressource `res://`
+(lu par chemins absolus via `MapPaths`), les tuiles sont des PNG 16 bits lus par `FileAccess` dans
+des fils, et un paquet de 2,9 Go serait à réécrire en entier à chaque mise à jour du jeu, sans gain
+(Godot n'importe pas ces fichiers). Choix :
+- **par défaut, dans l'application** : `Cent Ans.app/Contents/Resources/data/map/pyramid/`, copié par
+  `tools/export_macos.sh` (`cent-ans export-data --relief bundle`). Un seul téléchargement, et le jeu
+  reste complet même quand macOS « translocalise » une application non signée (lancée depuis un
+  dossier en quarantaine, elle ne voit plus ses voisins) ;
+- **à part si besoin** (`--relief external`) : dossier « Cent Ans relief/pyramid » à côté de
+  l'application, pour une distribution en deux archives ou une mise à jour du jeu sans les 2,9 Go ;
+- **sans** (`--relief none`) : export léger, avis affiché.
+
+`MapPaths.relief_root_for(map_dir)` résout la racine du relief : `CENT_ANS_RELIEF_DIR`, `data/map`
+s'il contient `pyramid/`, « Cent Ans relief » à côté de l'application ou de l'exécutable,
+`user://relief`. Les manifestes restent dans `data/map/` (versionnés, petits). Les liens symboliques
+des worktrees sont suivis à la copie, qui utilise les clones APFS (`cp -c`) : instantanée et sans
+place disque supplémentaire sur le même volume. Rien n'est téléversé : l'hébergement d'une archive
+publique reste à décider (hors budget v1).
+
+## Addendum (lot ZG7a, 2026-09-26) : perf et finitions de la vue rapprochée
+
+Détail dans `docs/godot-map.md` (« Perf et finitions de la vue rapprochée (lot ZG7a) »).
+
+- **Villes 1:1** : blocs en un MultiMesh par ville, maisons du kit en un MultiMesh par modèle et par
+  cellule de 1 km (au lieu de détail + blocs par cellule de 250 m) ; le HLOD maison / bloc se décide
+  **par instance dans le shader** (`lod_mode`, caméra principale publiée par `TownBuilder.set_lod_view`,
+  même choix dans la passe d'ombre). Appels de dessin de la descente « villes » −43 % à cadence égale ;
+  une ville entière par nœud de détail était plus lente (tout le vertex shader dès une maison proche).
+- **Fil principal** : images et mipmaps des pages de relief, maillages des ponts-portes et des ponts fins
+  préparés dans des fils ; recalage des tuiles fines par un seul parcours des pages
+  (`ReliefQuadtree.finest_levels`). Sélection et application du quadtree (GDScript) non traitées :
+  jusqu'à 10 ms sous forte charge.
+- **Parcellaire** : 1-2,7 ms GPU de près (Vulkan, M4 Pro) ; allégé d'≈ 20 % sans changement de rendu
+  visible. Relief ZG8 : coût GPU non mesurable (≤ bruit).
+- **Largeurs des fleuves ancrés** interpolées le long de la chaîne des ancrages, quel que soit le tronçon
+  (`hydro_fine.WidthModel`) ; `hydro-fine` et `anchors-fine` relancés. Pas de lit creusé dans les zones
+  personnalisées (contrat de `river_styles.json`).
+- **Palier 3** : plancher de rehaussement monotone `max(0,5 ; min(0,85 h ; 5 m))` (`detail_dem`,
+  `BAKE_VERSION` 4) ; seule la zone de Londres est recuite (rives 2,6-3,8 m au lieu de 0,5 m).
+- Constat hors lot : le relief E1-E4 plaque encore les fonds de vallée proches de plateaux à 0,5 m (même
+  rehaussement σ 5 km + plancher de côte) ; une recuisson E1-E4 avec le même plancher monotone est à
+  prévoir (ZG8 exagère déjà le relief à l'exécution).
+
+## Addendum (lot ZG7c, 2026-09-26) : recette finale, chantier clos
+
+Détail dans `docs/godot-map.md` (« Recette finale et clôture (lot ZG7c) ») et `docs/wip/zg7c-recette.md`
+(12 lieux × 3 paliers, défauts corrigés et laissés, captures `docs/img/zg7c/`).
+
+- **Cache partiel toléré tuile par tuile** : `ReliefPyramid` ne garde que les tuiles listées présentes
+  sur le disque (un listage de dossier par étage) ; les trous retombent sur l'ancêtre le plus fin, les
+  tuiles illisibles sont écartées à l'exécution. Plus d'étage ignoré en bloc.
+- **Écart à ZG8 : relief local plafonné.** Le fond de vallée est relevé à `sommets voisins − 350 m`
+  (`local_relief_cap_m`) : le gain local reste entier sur les reliefs < 350 m (le cas « Total War »
+  visé : coteaux, falaises, collines) et ne transforme plus les montagnes en aiguilles. La formule
+  affichée est inchangée (seul le fond publié change), donc aucun consommateur à modifier.
+- **Niveaux d'eau fins ≥ 0 m** (bathymétrie des zones E5-E7 exclue de l'estimation) ; cache des
+  recalages de fleuves lié à la version de cuisson du palier 3. Palier 3 : 34 zones au plancher
+  monotone v4 ; `geo relief-all --check` complet (2,77 Go).
+- **Chantier clos.** Suites hors chantier, non bloquantes : exagération ZG4 fonction de l'amplitude
+  locale en haute montagne (palier vallée) ; recuisson E0-E4 avec le plancher monotone (fonds de
+  vallée à 0,5 m) ; villes emblématiques 1:1 (VH4) ; objets à l'échelle de la carte au palier vallée ;
+  pics d'images dominés par les scripts ; hébergement d'une archive du relief avant diffusion.

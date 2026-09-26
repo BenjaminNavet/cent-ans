@@ -170,7 +170,10 @@ fn ai_battles_last_minutes_and_either_side_can_win() {
             .collect()
     };
     let (mut wins, mut total) = (0, 0.0);
-    let runs = 8;
+    // EP6: the decor (hamlets, fields, vineyards) varies the fields more, 32
+    // seeds keep the check meaningful (attacker 21/32 with the decor, 16/32
+    // on bare fields).
+    let runs = 32;
     for seed in 0..runs {
         let mut battle = setup(army(10), army(10), None);
         battle.river = seed % 2 == 0;
@@ -189,7 +192,7 @@ fn ai_battles_last_minutes_and_either_side_can_win() {
         "AI battles should last 4-12 minutes, mean {mean:.0} s"
     );
     assert!(
-        (2..=6).contains(&wins),
+        (8..=24).contains(&wins),
         "neither side should win almost always: attacker {wins}/{runs}"
     );
 }

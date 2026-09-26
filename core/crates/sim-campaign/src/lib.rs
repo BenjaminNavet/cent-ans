@@ -33,6 +33,7 @@
 
 pub mod agents;
 pub mod ai_minimal;
+pub mod ai_replay;
 pub mod battle_auto;
 pub mod battle_forecast;
 pub mod battle_request;
@@ -65,6 +66,7 @@ pub mod religion;
 pub mod research;
 pub mod retinue;
 pub mod rng;
+pub mod rule_constants;
 pub mod save;
 pub mod settlements;
 pub mod setup_1337;
@@ -83,6 +85,7 @@ pub mod weather;
 pub use agents::{
     AgentActionOption, AgentError, AgentId, AgentRecruitOption, AgentReport, AgentsState,
 };
+pub use ai_replay::{AiMoveKind, AiMoveNotability, AiMoveRecord};
 pub use battle_auto::{
     resolve_auto, resolve_field, resolve_with, BattleContext, BattleResult, BattleUnit,
     FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,
@@ -109,7 +112,8 @@ pub use frontier::GarrisonRole;
 pub use march::{MoveReport, StopReason};
 pub use navigation::{Cell, GridPath};
 pub use orders::{
-    MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, BASE_RECRUIT_SLOTS,
+    MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, RecruitPrice,
+    BASE_RECRUIT_SLOTS,
 };
 pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};

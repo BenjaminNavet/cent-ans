@@ -103,6 +103,7 @@ func _run() -> void:
 		"max_ms": snappedf(frame_times[-1], 0.01),
 		"total_ms": snappedf(_sum(frame_times), 1.0),
 	}
+	_result["vegetation"] = vegetation.stats
 	_result["ok"] = true
 	if not _trace.is_empty():
 		_result["trace"] = _trace

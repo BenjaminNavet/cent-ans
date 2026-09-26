@@ -53,9 +53,42 @@ var _descent_hold := DESCENT_HOLD
 var _descent_ms: PackedFloat32Array = PackedFloat32Array()
 var _descent_t_start := 0
 var _descent_us := 0
+## ZG7a : attribution des pics de la descente (images > 50 ms) : temps des scripts de l'image,
+## le reste étant rendu, attente GPU ou système. ZG7c : `Performance.TIME_PROCESS` ne couvrait pas
+## l'image mesurée ; on chronomètre désormais du début de l'itération (nœud `FrameStart`, priorité
+## minimale, première `_physics_process` ou `_process` de l'itération) à ce banc (traité en dernier).
+static var frame_start_usec := 0
+static var _frame_start_tag := -1
+var _starter: Node
+var _spike_process_ms: PackedFloat32Array = PackedFloat32Array()
+var _spike_frame_ms: PackedFloat32Array = PackedFloat32Array()
+var _process_ms_all: PackedFloat32Array = PackedFloat32Array()
+
+
+## Marque le début des scripts de l'itération (physique comprise) pour `process_ms`.
+class FrameStart:
+	extends Node
+
+	func _physics_process(_delta: float) -> void:
+		_mark()
+
+	func _process(_delta: float) -> void:
+		_mark()
+
+	func _mark() -> void:
+		var tag := Engine.get_process_frames()
+		if MapBench._frame_start_tag != tag:
+			MapBench._frame_start_tag = tag
+			MapBench.frame_start_usec = Time.get_ticks_usec()
 
 
 func _ready() -> void:
+	_starter = FrameStart.new()
+	_starter.name = "MapBenchFrameStart"
+	_starter.process_priority = -1000000
+	_starter.process_physics_priority = -1000000
+	get_tree().root.add_child.call_deferred(_starter)
+	process_priority = 1000000
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--bench-distance="):
 			pan_distance = float(arg.trim_prefix("--bench-distance="))
@@ -129,6 +162,13 @@ func _process(delta: float) -> void:
 				_descent_t_start = now
 		"descent":
 			_descent_ms.append((now - _last_us) / 1000.0)
+			# Scripts de cette itération (physique comprise) jusqu'à ce banc : ils tombent dans
+			# l'intervalle mesuré (fin des scripts de l'image précédente → maintenant).
+			var process_ms := (now - frame_start_usec) / 1000.0 if frame_start_usec > 0 and frame_start_usec <= now else 0.0
+			_process_ms_all.append(process_ms)
+			if (now - _last_us) / 1000.0 > 50.0:
+				_spike_frame_ms.append((now - _last_us) / 1000.0)
+				_spike_process_ms.append(process_ms)
 			_frame_ms.append((now - _last_us) / 1000.0)
 			_sample()
 			_phase_t += delta
@@ -186,10 +226,18 @@ func _report(now: int) -> void:
 		for ms in sorted_d:
 			if ms > 50.0:
 				spikes_d += 1
+		var process_dominated := 0
+		for k in _spike_frame_ms.size():
+			if _spike_process_ms[k] > _spike_frame_ms[k] * 0.5:
+				process_dominated += 1
+		var sorted_p := _process_ms_all.duplicate()
+		sorted_p.sort()
 		descent = {
 			"frames": n, "fps_avg": snappedf(n / maxf(_descent_us / 1000000.0, 0.001), 0.1),
 			"frame_ms_p50": snappedf(sorted_d[n / 2], 0.01), "frame_ms_p99": snappedf(sorted_d[int(n * 0.99)], 0.01),
 			"frame_ms_max": snappedf(sorted_d[n - 1], 0.01), "spikes_over_50ms": spikes_d,
+			"process_ms_p50": _median(_process_ms_all), "process_ms_p99": snappedf(sorted_p[int(sorted_p.size() * 0.99)], 0.01) if not sorted_p.is_empty() else 0.0,
+			"spike_process_ms_p50": _median(_spike_process_ms), "spikes_process_dominated": process_dominated,
 		}
 	var bakes := 0
 	var bake_frame_max := 0.0
@@ -235,3 +283,8 @@ func _report(now: int) -> void:
 		report["listener_ms"] = _listener_ms
 	print("CampaignMap: bench_map %s" % JSON.stringify(report))
 	get_tree().quit()
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_starter):
+		_starter.queue_free()

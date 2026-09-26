@@ -4,13 +4,16 @@
 // while reading the others.
 #![allow(clippy::needless_range_loop)]
 
+mod camp;
 mod decision;
 mod deployment;
 mod fire;
 mod indirect;
 mod obstacles;
 mod pathing;
+mod push;
 mod reinforcements;
+mod scenario;
 mod separation;
 mod siege_assault;
 mod siege_extra;
@@ -18,6 +21,7 @@ mod standards;
 mod time_of_day;
 mod water;
 
+pub use camp::CampState;
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
@@ -71,6 +75,9 @@ const ASSAULT_DISMOUNT_SPEED: u8 = 35;
 const MELEE_RATE: f64 = 0.035;
 const RANGED_RATE: f64 = 0.3;
 const LOSS_MORALE_FACTOR: f64 = 60.0;
+/// Fatigue above which a unit loses morale over time (SV4: named so the
+/// battle markers show "exhausted" from the same threshold).
+pub const EXHAUSTED_FATIGUE: f64 = 60.0;
 
 /// Why a setup cannot start a battle.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -139,6 +146,8 @@ pub struct BattleSim {
     /// EP5: rules of the standards, their own random stream, the routs
     /// already seen and the standards taken so far.
     standard_rules: data_model::BattleStandardRules,
+    /// EP11: continuous push of the lines (`data/rules/battle_push.json`).
+    push_rules: crate::push::PushRules,
     standard_rng: BattleRng,
     standard_rout_seen: Vec<bool>,
     trophies: Vec<crate::outcome::StandardTrophy>,
@@ -146,6 +155,11 @@ pub struct BattleSim {
     crossings: std::cell::OnceCell<Vec<crate::hydro::Crossing>>,
     /// EP3: regiments whose drowning was announced.
     drown_announced: Vec<u32>,
+    /// EP6: looting of each side's camp.
+    camp_states: [camp::CampState; 2],
+    /// EP6: solid footprints of the decor by cell (derived data, reset by
+    /// `field_mut`).
+    decor_grid: std::cell::OnceCell<obstacles::DecorGrid>,
     /// EP8: hour of the day when the battle began (the day moves on with
     /// `elapsed`) and the phase last announced in the journal.
     start_hour: f64,
@@ -153,8 +167,14 @@ pub struct BattleSim {
     /// EP9: rules of the end of a field battle, the engagement clock and
     /// how the battle ended.
     decision: crate::decision::DecisionRules,
+    /// EP9b: the attacker's archery duel and the second echelon.
+    duel: crate::duel::DuelRules,
+    /// EP10: direction of the rout and contagion of morale.
+    rout: crate::rout::RoutRules,
     clock: crate::decision::EngagementClock,
     end: Option<crate::decision::BattleEnd>,
+    /// EP7: scenario of a historical battle (waves, posts, weather).
+    scenario: Option<Box<scenario::Scenario>>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -280,6 +300,20 @@ impl BattleSim {
         let is_siege = setup.siege.is_some();
         let mut field =
             Battlefield::generate_site_sized(&setup.field_site(), scale.field, weather, &mut rng);
+        if !is_siege {
+            // EP6: countryside and camps (derived stream), then the hand-made
+            // decor of a historical map.
+            // A bare field (`village: Some(false)`: labs, tests) keeps its
+            // camps only.
+            if setup.village == Some(false) {
+                field.lay_camps(&rng);
+            } else {
+                field.lay_decor(&setup.province, &rng);
+            }
+            if let Some(plan) = &setup.decor_plan {
+                field.apply_decor_plan(plan);
+            }
+        }
         let mut siege = setup.siege.as_ref().map(|s| {
             SiegeWorks::for_battle(
                 s.fortification,
@@ -396,16 +430,22 @@ impl BattleSim {
             assault: Default::default(),
             scale,
             standard_rules,
+            push_rules: crate::push::PushRules::bundled().clone(),
             standard_rng,
             standard_rout_seen: vec![false; count],
             trophies: Vec::new(),
             crossings: Default::default(),
             drown_announced: Vec::new(),
+            camp_states: Default::default(),
+            decor_grid: Default::default(),
             start_hour: crate::time_of_day::TimeOfDayRules::bundled().default_hour,
             day_phase: None,
             decision: crate::decision::DecisionRules::bundled().clone(),
+            duel: crate::duel::DuelRules::bundled().clone(),
+            rout: crate::rout::RoutRules::bundled().clone(),
             clock: Default::default(),
             end: None,
+            scenario: None,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -691,6 +731,7 @@ impl BattleSim {
         self.relief_map = Default::default();
         self.crossings = Default::default();
         self.village_props = Default::default();
+        self.decor_grid = Default::default();
         &mut self.field
     }
 
@@ -1214,10 +1255,14 @@ impl BattleSim {
         let ai_ticks = (AI_PERIOD / DT).round() as u64;
         if self.ticks.is_multiple_of(ai_ticks) {
             self.check_sortie();
+            self.tick_scenario();
             for side in SideId::BOTH {
                 if self.ai_enabled[side.index()] {
                     for command in ai::plan(self, side) {
-                        let _ = self.apply_command(command, Some(side));
+                        // EP7: held waves and posted regiments (historical maps).
+                        if let Some(command) = self.scenario_filter(command) {
+                            let _ = self.apply_command(command, Some(side));
+                        }
                     }
                 }
             }
@@ -1227,13 +1272,16 @@ impl BattleSim {
         self.separate_friends();
         self.resolve_water();
         self.resolve_siege_works();
+        self.relieve_rams();
         let contacts = self.contacts();
         self.resolve_shooting(&contacts);
         self.tower_fire();
         self.boiling_oil();
         self.resolve_fire();
+        self.resolve_push(&contacts);
         self.resolve_melee(&contacts);
         self.resolve_standards(&contacts);
+        self.resolve_camps();
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
         self.elapsed += DT;
@@ -1672,21 +1720,12 @@ impl BattleSim {
                 continue;
             }
             let state = self.units[i].state;
-            // Routing: flee away from the nearest enemy and towards the own edge.
+            // Routing: flee towards the own edge. EP10: in a field battle,
+            // straight to the rear of the army, swerving round the enemies
+            // and the friends on the way; in a siege, also away from the
+            // nearest enemy (unchanged).
             if state == UnitState::Routing {
-                let edge = match self.units[i].side {
-                    SideId::Attacker => -1.0,
-                    SideId::Defender => 1.0,
-                };
-                let (mut fx, mut fz) = (0.0, edge);
-                if let Some((j, d)) = self.nearest_enemy(i, false) {
-                    if d > 1e-6 {
-                        let e = &self.units[j];
-                        let u = &self.units[i];
-                        fx += (u.x - e.x) / d;
-                        fz += (u.z - e.z) / d;
-                    }
-                }
+                let (fx, fz) = self.flight_direction(i);
                 let (x, z) = (self.units[i].x, self.units[i].z);
                 self.advance(i, x + fx * 50.0, z + fz * 50.0, true);
                 self.check_left_field(i);
@@ -1801,6 +1840,54 @@ impl BattleSim {
                 self.log(text, Some(side));
             }
         }
+    }
+
+    /// EP10: unit vector from the front to the rear of `side`'s army (the
+    /// attacker holds the low-z edge, the defender the high-z one, on the
+    /// generated fields as on the historical maps).
+    fn rear_of(side: SideId) -> (f64, f64) {
+        match side {
+            SideId::Attacker => (0.0, -1.0),
+            SideId::Defender => (0.0, 1.0),
+        }
+    }
+
+    /// Direction of flight of the routing regiment `i` (not normalised in
+    /// a siege, as before EP10).
+    fn flight_direction(&self, i: usize) -> (f64, f64) {
+        let unit = &self.units[i];
+        let rear = Self::rear_of(unit.side);
+        if self.siege.is_some() {
+            let (mut fx, mut fz) = rear;
+            if let Some((j, d)) = self.nearest_enemy(i, false) {
+                if d > 1e-6 {
+                    let e = &self.units[j];
+                    fx += (unit.x - e.x) / d;
+                    fz += (unit.z - e.z) / d;
+                }
+            }
+            return (fx, fz);
+        }
+        let reach = self
+            .rout
+            .flight
+            .lookahead_m
+            .max(self.rout.flight.friend_lookahead_m);
+        let near = |u: &Unit| (u.x - unit.x).abs() < reach && (u.z - unit.z).abs() < reach;
+        let enemies = self
+            .units
+            .iter()
+            .filter(|u| u.side != unit.side && u.able() && near(u))
+            .map(|u| (u.x, u.z));
+        let friends = self
+            .units
+            .iter()
+            .enumerate()
+            .filter(|&(j, u)| j != i && u.side == unit.side && u.able() && near(u))
+            .map(|(_, u)| (u.x, u.z));
+        self.rout
+            .flight
+            .direction((unit.x, unit.z), rear, enemies, friends)
     }
 
     fn check_left_field(&mut self, i: usize) {
@@ -1924,10 +2011,16 @@ impl BattleSim {
         } else {
             None
         };
+        let decor = if cavalry {
+            self.field.decor_breaks_charge(to.0, to.1)
+        } else {
+            None
+        };
         if cavalry
             && (self.field.breaks_charge(from, to)
                 || self.field.in_village(to.0, to.1)
-                || water.is_some())
+                || water.is_some()
+                || decor.is_some())
         {
             self.units[i].charge_timer = 0.0;
             self.units[i].morale -= 5.0;
@@ -1938,6 +2031,8 @@ impl BattleSim {
                     "La charge des {} se brise dans le village.",
                     self.unit_label(i)
                 )
+            } else if let Some(place) = decor {
+                format!("La charge des {} se brise {place}.", self.unit_label(i))
             } else {
                 format!("La charge des {} se brise sur la haie.", self.unit_label(i))
             };
@@ -2135,11 +2230,15 @@ impl BattleSim {
         }
         if self.field.in_village(target.x, target.z) {
             kills *= crate::site::VILLAGE_COVER;
-        } else if self
-            .field
-            .hedge_between((shooter.x, shooter.z), (target.x, target.z))
-        {
-            kills *= crate::site::HEDGE_COVER;
+        } else {
+            // EP6: hamlets, churchyards, manors, orchards, vineyards, camps.
+            kills *= self.field.decor_cover(target.x, target.z);
+            if self
+                .field
+                .hedge_between((shooter.x, shooter.z), (target.x, target.z))
+            {
+                kills *= crate::site::HEDGE_COVER;
+            }
         }
         if let Some(factor) = target.pavise {
             kills *= factor;
@@ -2205,6 +2304,9 @@ impl BattleSim {
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
         self.units[i].kills += kills;
+        if !self.units[t].synthetic {
+            self.clock.missile_losses[self.units[t].side.index()] += kills;
+        }
         // ADR 0052: the arrows wound the horses too, and they panic, unless
         // the riders are already locked in a melee.
         let target = &self.units[t];
@@ -2368,7 +2470,9 @@ impl BattleSim {
         let mut damage = attacker.fighting_soldiers() * f64::from(attacker.stats.melee) / 100.0
             * armor_factor(self.defense_points(defender))
             * MELEE_RATE
-            * DT;
+            * DT
+            // EP6: walls, hedges and houses of the decor shelter the defender.
+            / self.field.decor_defense(defender.x, defender.z);
         if attacker.charge_timer > 0.0 {
             let charge = f64::from(attacker.stats.charge.unwrap_or(20));
             let lance = if attacker.has(Ability::ChargeLance) {
@@ -2419,6 +2523,10 @@ impl BattleSim {
         }
         // EP3: fords, streams, deep water, bridges and bridgeheads.
         damage *= self.water_melee_factor(attacker, defender);
+        // SG4: downhill strikes harder, uphill weaker (`battle_crest.json`).
+        damage *= crate::crest::CrestRules::bundled().melee_factor(
+            self.field.height(attacker.x, attacker.z) - self.field.height(defender.x, defender.z),
+        );
         damage *= 1.0 - attacker.fatigue / 250.0;
         damage *= 1.0 + f64::from(attacker.experience) / 20.0;
         damage *= 0.6 + attacker.morale.max(0.0) / 250.0;
@@ -2426,7 +2534,8 @@ impl BattleSim {
         if matches!(attacker.standard, crate::unit::StandardState::Fallen { .. }) {
             damage *= self.standard_rules.fallen_melee_factor;
         }
-        damage
+        // EP11: compression and wrapping files (`sim/push.rs`).
+        damage * self.push_melee_factor(attacker, defender)
     }
 
     fn resolve_melee(&mut self, contacts: &[Vec<usize>]) {
@@ -2563,6 +2672,7 @@ impl BattleSim {
             })
             .collect();
         let mut new_events: Vec<(String, SideId)> = Vec::new();
+        let siege = self.siege.is_some();
         for i in 0..n {
             if !self.units[i].present() {
                 continue;
@@ -2585,28 +2695,42 @@ impl BattleSim {
             if unit.flanked & 2 != 0 {
                 morale -= 3.0 * DT;
             }
-            if unit.fatigue > 60.0 {
-                morale -= (unit.fatigue - 60.0) * 0.02 * DT;
+            if unit.fatigue > EXHAUSTED_FATIGUE {
+                morale -= (unit.fatigue - EXHAUSTED_FATIGUE) * 0.02 * DT;
             }
             if unit.state == UnitState::Melee && unit.hp < f64::from(unit.max_soldiers) * 0.5 {
                 morale -= 0.3 * DT;
             }
-            let mut routing_friends = 0;
+            // EP10: routing friends weigh by where they are (fully beside or
+            // in front, little once behind and running away); in a siege
+            // every one within reach counts fully (unchanged).
+            let contagion = &self.rout.contagion;
+            let forward = {
+                let (rx, rz) = Self::rear_of(unit.side);
+                (-rx, -rz)
+            };
+            let mut routing_weight = 0.0;
             let mut nearest_enemy = f64::INFINITY;
             for (j, &(side, x, z, routing, able)) in snapshot.iter().enumerate() {
                 if j == i {
                     continue;
                 }
-                let d2 = (x - unit.x).powi(2) + (z - unit.z).powi(2);
+                let (dx, dz) = (x - unit.x, z - unit.z);
                 if side == unit.side {
-                    if routing && d2 < 120.0 * 120.0 {
-                        routing_friends += 1;
+                    if routing {
+                        routing_weight += if siege {
+                            f64::from(u8::from(
+                                dx * dx + dz * dz < contagion.radius_m * contagion.radius_m,
+                            ))
+                        } else {
+                            contagion.weight(dx, dz, forward)
+                        };
                     }
                 } else if able {
-                    nearest_enemy = nearest_enemy.min(d2.sqrt());
+                    nearest_enemy = nearest_enemy.min((dx * dx + dz * dz).sqrt());
                 }
             }
-            morale -= f64::from(routing_friends.min(3)) * 0.4 * DT;
+            morale -= contagion.morale_rate(routing_weight) * DT;
             let mut aura = 0.0;
             if let Some((gx, gz, command)) = general_pos[unit.side.index()] {
                 if (gx - unit.x).powi(2) + (gz - unit.z).powi(2) < GENERAL_AURA * GENERAL_AURA {
@@ -2721,6 +2845,7 @@ impl BattleSim {
         self.end = Some(end);
         self.finished = true;
         self.winner = Some(winner);
+        self.return_ram_crews();
         self.collect_field_standards(winner);
         let loser = winner.other();
         if self.general_alive[loser.index()] {
@@ -2810,6 +2935,7 @@ impl BattleSim {
                 withdrew,
                 standards_taken: self.trophies_of(side),
                 standards_lost: self.trophies.iter().filter(|t| t.taken_by != side).count() as u32,
+                baggage_lost: self.camp_states[side.index()].looted,
             }
         };
         Some(BattleOutcome {

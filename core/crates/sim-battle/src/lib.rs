@@ -32,6 +32,10 @@
 //! - Dense besieged town and solid street furniture ([`town`], [`props`],
 //!   lot BR3, ADR 0047): house blocks and props are oriented rectangles that
 //!   block the pathing and push the figures out.
+//! - Countryside of the field ([`decor`], lot EP6): hamlets, mills, church
+//!   and churchyard, moated manor, vineyards, orchards, ploughland, meadows;
+//!   cover, speed and defence of each area; each army's camp and baggage,
+//!   looted by an enemy who holds it unguarded (morale).
 //! - Tactical battle AI ([`ai`], spec `docs/design/m9-ai.md` § 2) for the side
 //!   the player does not command, every [`AI_PERIOD`] simulated seconds.
 //! - Leader's orders ([`orders`], spec `docs/design/battle-orders.md`): war
@@ -40,10 +44,15 @@
 
 pub mod ai;
 pub mod command;
+pub mod crest;
 pub mod decision;
+pub mod decor;
+mod decor_gen;
+pub mod duel;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
+pub mod historical;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
@@ -53,9 +62,12 @@ pub mod orders;
 pub mod outcome;
 pub mod position;
 pub mod props;
+pub mod push;
 pub mod relief;
 pub mod relief_ai;
+pub mod replay;
 pub mod rng;
+pub mod rout;
 pub mod scale;
 pub mod setup;
 pub mod shot;
@@ -70,11 +82,17 @@ pub mod unit;
 
 pub use command::{Command, CommandError};
 pub use decision::{BattleEnd, DecisionRules};
+pub use decor::{
+    Area, AreaKind, Camp, Decor, DecorItem, DecorPlan, DecorProp, DecorPropKind, DecorRules,
+    FieldState, Hamlet, HamletLayout, Moat, Mound,
+};
+pub use duel::DuelRules;
 pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,
 };
 pub use fire::{Blaze, FireRules, FireState};
+pub use historical::HistoricalMap;
 pub use hydro::{
     Bank, BankKind, Bridge, Crossing, Road, RoadKind, Stream, StreamKind, Water, WaterRules,
     WatersideSpot,
@@ -82,7 +100,12 @@ pub use hydro::{
 pub use impact::{ImpactEvent, ImpactKind, LossCause};
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
+pub use push::{PushRules, PushShape};
 pub use relief::ReliefStyle;
+pub use replay::{
+    BattleReplay, Divergence, ReplayAction, ReplayError, ReplayPlayer, ReplayRecorder, ReplayRules,
+    ReplayStart,
+};
 pub use rng::BattleRng;
 pub use scale::{BattleScale, BattleScaleRules, FieldSize, ScaleTier};
 pub use setup::{
@@ -93,8 +116,8 @@ pub use siege::{PieceKind, SiegeWorkRules, SiegeWorks, Tower, WallPiece};
 pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
 pub use sim::{
-    BattleSim, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION,
-    MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,
+    BattleSim, CampState, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT, FRIEND_GAP,
+    MAX_DURATION, MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,
 };
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,

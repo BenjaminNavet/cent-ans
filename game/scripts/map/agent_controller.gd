@@ -356,6 +356,7 @@ func _show_bar(agent: Dictionary) -> void:
 		info += " · a déjà agi cette saison"
 	_bar_info.text = info
 	for child in _bar_actions.get_children():
+		_bar_actions.remove_child(child)  # Q3: freed buttons widened the bar until the frame end
 		child.queue_free()
 	for option in map.sim.call("get_agent_actions", str(agent.get("id", ""))):
 		_bar_actions.add_child(_action_button(option))
@@ -364,6 +365,7 @@ func _show_bar(agent: Dictionary) -> void:
 	_bar_report.visible = _bar_report.text != ""
 	bar.show()
 	bar.reset_size()
+	bar.position.x = (bar.get_parent_area_size().x - bar.size.x) * 0.5  # centred, never off screen (Q3)
 
 
 func _action_button(option: Dictionary) -> Button:

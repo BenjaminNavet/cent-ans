@@ -1,6 +1,6 @@
 # Lot EP1 — Échelle massive (batailles épiques)
 
-Branche `worktree-agent-a8c20286fc6084f08`. Plan du chantier : `docs/wip/epic.md`. ADR : 0031.
+Branche `worktree-agent-a8c20286fc6084f08`. Plan du chantier : `docs/wip/epic.md`. ADR : 0076.
 
 ## Objectif
 Batailles de 15 000 soldats et plus, fluides (≥ 40 i/s à 15 000 en Haut, ≥ 30 à 25 000).
@@ -13,7 +13,7 @@ Batailles de 15 000 soldats et plus, fluides (≥ 40 i/s à 15 000 en Haut, ≥ 
 | 2. Plafond de régiments par palier (données) | fait (20 / 40 / 80) |
 | 3. Rendu 15 000+ (mesures A/B, imposteurs très lointains, budget d'animation) | fait |
 | 4. Option « Épique » (× 4), sonde IA 60 contre 60 | fait |
-| 5. ADR 0031 | fait |
+| 5. ADR 0076 | fait |
 
 ## Conception
 - Paliers par effectif total (soldats simulés des deux camps, réserves comprises) :

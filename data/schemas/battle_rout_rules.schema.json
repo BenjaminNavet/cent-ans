@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_rout_rules.schema.json",
+  "title": "Direction de la déroute et contagion de moral",
+  "description": "Fichier data/rules/battle_rout.json (lot EP10, ADR 0068) : où fuit un régiment en déroute, et combien un ami en déroute ébranle les régiments proches selon sa position. Lu par sim-battle (RoutRules). Batailles rangées seulement : les sièges gardent leur règle.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "contagion": {
+      "type": "object",
+      "description": "Contagion de la déroute : chaque ami en déroute à moins de radius_m compte pour un poids (1 à côté ou devant, behind_weight derrière) ; le moral baisse de morale_per_second par unité de poids, au plus max_weight.",
+      "properties": {
+        "radius_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 400,
+          "description": "Distance au-delà de laquelle un ami en déroute ne compte pas (mètres)."
+        },
+        "morale_per_second": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Perte de moral par seconde et par unité de poids (un ami qui cède à côté pèse 1). Avant EP10 : 0,4 pour tout ami à portée."
+        },
+        "max_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Plafond de la somme des poids."
+        },
+        "beside_depth_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200,
+          "description": "Un ami en déroute jusqu'à cette distance en arrière du régiment (le long de l'axe du front) compte encore comme « à côté » : poids 1 (mètres)."
+        },
+        "behind_depth_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 400,
+          "description": "Au-delà de cette distance en arrière du régiment, l'ami en déroute pèse behind_weight ; entre les deux, le poids décroît linéairement (mètres, au moins beside_depth_m)."
+        },
+        "behind_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Poids d'un ami en déroute déjà derrière le régiment, qui s'éloigne de l'ennemi."
+        }
+      },
+      "required": [
+        "radius_m",
+        "morale_per_second",
+        "max_weight",
+        "beside_depth_m",
+        "behind_depth_m",
+        "behind_weight"
+      ],
+      "additionalProperties": false
+    },
+    "flight": {
+      "type": "object",
+      "description": "Direction de la fuite : droit vers l'arrière de son camp ; un écart latéral seulement pour ne pas traverser un ennemi ou un ami en ordre placé sur la route.",
+      "properties": {
+        "lookahead_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 400,
+          "description": "Un ennemi en état de combattre sur la route de la fuite, à moins de cette distance devant le fuyard, le fait obliquer (mètres)."
+        },
+        "enemy_clearance_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 200,
+          "description": "Écart latéral en deçà duquel un ennemi est « sur la route » (mètres)."
+        },
+        "enemy_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Force de l'écart latéral devant un ennemi (relative à la direction de l'arrière, qui vaut 1)."
+        },
+        "friend_lookahead_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200,
+          "description": "Un ami en ordre sur la route à moins de cette distance devant le fuyard est contourné (mètres)."
+        },
+        "friend_clearance_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "description": "Écart latéral en deçà duquel un ami est « sur la route » (mètres)."
+        },
+        "friend_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Force de l'écart latéral devant un ami (relative à la direction de l'arrière, qui vaut 1) ; c'est aussi le plafond de la somme des écarts devant les amis, quel que soit leur nombre (des régiments empilés au même point n'envoient pas la fuite de côté)."
+        }
+      },
+      "required": [
+        "lookahead_m",
+        "enemy_clearance_m",
+        "enemy_weight",
+        "friend_lookahead_m",
+        "friend_clearance_m",
+        "friend_weight"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "contagion",
+    "flight"
+  ],
+  "additionalProperties": false
+}

@@ -33,7 +33,12 @@ correspondance identifiant → fichier → auteur est versionnée dans
 Chaque dossier contient un `SOURCE.md` (URL, licence, auteur, modifications). Les assets CC0
 n'exigent aucune attribution ; ils sont crédités par courtoisie.
 
-### Musique — CC BY 4.0 (attribution obligatoire)
+### Musique — Kevin MacLeod (incompetech.com), CC BY 4.0 (repli, DA4)
+
+Ces pistes ne servent plus qu'en repli (« fallback » de `data/audio/music.json`, utilisées
+seulement si aucune piste d'époque n'est disponible) : trop reconnaissables et anachroniques par
+rapport à la musique d'époque de la section suivante. Elles restent créditées et disponibles,
+sans avoir été retirées du jeu.
 
 - « Lord of the Land » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
@@ -70,14 +75,42 @@ n'exigent aucune attribution ; ils sont crédités par courtoisie.
 - « Pippin the Hunchback » Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
   Attribution 4.0 License — http://creativecommons.org/licenses/by/4.0/
 
-### Musique médiévale et Renaissance — Wikimedia Commons (CC BY-SA)
+### Musique médiévale et Renaissance — Wikimedia Commons (DA4)
 
-- Estampie « Retrove », Robertsbridge Codex — Metzner, CC BY-SA 3.0.
-- « Chominciamento di gioia » — Ririkuku, CC BY-SA 4.0.
+Musique d'époque libre de droits, organisée par culture (bible DA § 9 : France, Angleterre,
+Bourgogne/Flandre, Ibérie, Italie) et par contexte (campagne, cour, guerre, menu). Licence vérifiée
+page par page (domaine public, CC0, CC BY ou CC BY-SA — jamais NC ni ND).
+
+- Estampie « Retrove », Robertsbridge Codex (Angleterre, XIVe s.) — Metzner, CC BY-SA 3.0.
+- « Chominciamento di gioia » (Italie, XIVe s.) — Ririkuku, CC BY-SA 4.0.
 - Guillaume Dufay, « Se la face ay pale » — Ensemble Asteria, CC BY-SA 2.5.
+- Guillaume Dufay, « Ave Regina caelorum » — enregistrement Commons, CC0.
 - Folía d'Ahigal — Loreto Galindo, tamborilero (Fundación Joaquín Díaz), CC BY-SA 3.0.
 - Diego Ortiz, Recercadas primera et segunda (*Trattado de Glosas*, 1553) — Phillip W. Serna, CC BY-SA 4.0.
-  Sources : `game/assets/third_party/music/wikimedia/SOURCE.md` (Wikimedia Commons).
+- Cantigas de Santa María (Alphonse X, XIIIe s.), tradition orale castillane — Fundación Joaquín
+  Díaz, CC BY-SA 3.0.
+- Guillaume de Machaut, « Douce Dame Jolie » et « Riches d'amour et mandians d'amie » (Ars nova,
+  XIVe s.), Solage, « Fumeux fume par fumée » (Ars subtilior) — réalisations MIDI, Tetraktys,
+  domaine public.
+- Francesco Landini, « Ecco la primavera » et « Si dolce non sono » (XIVe s.) — réalisations MIDI,
+  Tetraktys, domaine public.
+- « Deo gracias Anglia » (Agincourt Carol, anonyme, XVe s.) — réalisation instrumentale, domaine
+  public.
+- « Sumer is Icumen In » (rota anglaise, XIIIe s.) — Brandtnight2000, CC BY-SA 4.0.
+- Gilles Binchois, « Triste plaisir » et « Dueil angoisseux » — réalisations MIDI, Tetraktys,
+  CC BY 3.0.
+- Démonstration de chalemie (Schalmei), utilisée aussi comme couche de bataille — Ajta,
+  CC BY-SA 3.0.
+
+Sources détaillées (URL, licence exacte, traitement) :
+`game/assets/third_party/music/wikimedia/SOURCE.md`.
+
+### Couches instrumentales de bataille — Freesound, CC0 1.0 (DA4)
+
+Musique de bataille en couches superposables (tambour, trompette droite, bourdon de cornemuse) au
+travers de `BattleMusicDirector` (`data/audio/battle_layers.json`) : enregistrements CC0
+(licence vérifiée page par page), coupés en boucles courtes, normalisés à -16 LUFS. Détail :
+`game/assets/audio/music/battle_layers/SOURCE.md`.
 
 ### Polices — SIL Open Font License 1.1
 
@@ -116,6 +149,13 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   assemblées en atlas avec des couches procédurales (pans de bois, plomb, vitrail, vieillissement) :
   `game/assets/textures/landmarks/` (lot L3, détail dans son `SOURCE.md`).
 
+### Textures du terrain de campagne — CC0 1.0
+
+- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Aerial Grass Rock, Aerial Mud 1,
+  Forrest Ground 01, Aerial Rocks 01, Sparse Grass, Snow Field Aerial, Aerial Beach 01 (1k),
+  téléchargées par `tools/cent_ans_tools/geo/textures.py` et réduites en albédo + normale/rugosité
+  (`game/assets/textures/terrain/`).
+
 ### Ciels HDRI — CC0 1.0
 
 - **Belfast Open Field** — Dimitrios Savva, Jarod Guest (Poly Haven).
@@ -150,6 +190,12 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
 
 ## Données géographiques
 
+Le relief et l'hydrographie de la carte de campagne sont des produits dérivés, calculés par les
+outils du projet (`tools/cent_ans_tools/geo`, `docs/geo.md`) à partir des sources ci-dessous ; le
+cache du relief fin (`data/map/pyramid/`, livré dans l'application ou dans le dossier « Cent Ans
+relief », ADR 0036) en fait partie. Les mentions d'attribution exigées par chaque licence sont
+reproduites telles quelles (entre guillemets).
+
 - **Relief (terre et bathymétrie)** : ETOPO 2022 15 Arc-Second Global Relief Model, NOAA
   National Centers for Environmental Information — domaine public (données du gouvernement des
   États-Unis). Citation : *NOAA National Centers for Environmental Information. 2022: ETOPO
@@ -159,7 +205,10 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
 - **Relief fin (terres de l'emprise jouable)** : Copernicus DEM GLO-90, © DLR e.V. 2010-2014 et
   © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par l'Union
   européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution. Tuiles lues
-  sur le bucket public AWS Open Data `copernicus-dem-90m` (lot R1, ADR 0019).
+  sur le bucket public AWS Open Data `copernicus-dem-90m` (lot R1, ADR 0019). Mention : « © DLR
+  e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the
+  European Union and ESA; all rights reserved. » Sert aussi aux étages E1-E2 de la pyramide de
+  relief (palier 1, lot ZG1) et aux horizons des batailles (`game/assets/horizon/relief/`, EP2).
 - **Relief rapproché (pyramide de relief, palier 2)** : Copernicus DEM GLO-30 Public, © DLR e.V.
   2010-2014 et © Airbus Defence and Space GmbH 2014-2018, fourni dans le cadre de COPERNICUS par
   l'Union européenne et l'ESA — tous droits réservés ; licence gratuite avec attribution
@@ -181,7 +230,8 @@ détail dans `game/assets/audio/ui/SOURCE.md`.
   combinée aux grandes forêts et zones humides nommées de `data/map/historical_forests.json` et
   `data/map/wetlands.json` (sources par entrée).
 - **Relief détaillé des zones historiques (palier 3, lot ZG3, ADR 0036)** — modèles numériques
-  de terrain sans sursol, rééchantillonnés à 11, 5,6 et 2,8 m :
+  de terrain sans sursol, rééchantillonnés à 11, 5,6 et 2,8 m (34 zones de
+  `data/map/detail_zones.json`, étages E5-E7) :
   - France : RGE ALTI® 1 m / 5 m, © IGN (Institut national de l'information géographique et
     forestière), [Licence Ouverte Etalab 2.0](https://www.etalab.gouv.fr/licence-ouverte-open-licence/) ;
     service WMS-R de la Géoplateforme (`data.geopf.fr`). Mention : « Source : IGN – RGE ALTI® ».
@@ -281,7 +331,16 @@ Images générées pour combler les manques (`ld_avignon`, `vg_famine`, `vg_trea
 ## Assets produits par le projet
 
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons
-  de `data/factions/`.
+  de `data/factions/` et `data/heraldry/houses.json`. Depuis le lot DA1b, les meubles animaux,
+  le château et la guivre sont des dessins vectoriels de Wikimedia Commons recolorés par
+  teinture (`data/heraldry/charges/`, détail dans `SOURCE.md`) :
+  - domaine public : lion, lion à la queue fourchée (et passée en sautoir) — Smasongarrison ;
+    léopard — Yann ; léopard lionné — Syryatsu ; aigle éployée — Thom.lanaud ; guivre extraite
+    des armes Visconti (1395) — RootOfAllLight ;
+  - CC0 : dauphin pâmé — Syryatsu ;
+  - CC BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>) : lion couronné (et sa
+    couronne, extraite), lion rampant ailé, château donjonné de trois tours — Jpgibert,
+    « Meuble héraldique … », Wikimedia Commons ; recolorés.
 - **Modèles 3D** (`game/assets/models/`) : générés par scripts Blender (`tools/blender_scripts/`).
 - **Sons et musiques** (`game/assets/audio/sfx/`, `game/assets/audio/music/`) : synthèse
   procédurale (numpy/scipy), sans échantillon externe. Les sons de bataille et ambiances

@@ -51,6 +51,13 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
     }
 }
 
+/// EP7: folder of the game data already loaded, if any.
+pub(crate) fn loaded_data_dir() -> Option<PathBuf> {
+    let cache = SHARED_DATA.get_or_init(|| Mutex::new(None));
+    let guard = cache.lock().ok()?;
+    guard.as_ref().map(|(dir, _)| dir.clone())
+}
+
 /// Game data already loaded by any `CampaignSim` of this process, if any
 /// (lot DF1: the faction screen lists the difficulty levels before a
 /// campaign starts).
@@ -405,7 +412,8 @@ impl CampaignSim {
     }
 
     /// Recruitment options of a settlement (or of a province's city):
-    /// `[{unit_type, name, cost, upkeep, available, reason}]`.
+    /// `[{unit_type, name, cost, upkeep, available, reason, resources,
+    /// import_cost, imported}]` (SV2: `cost` includes `import_cost`).
     #[func]
     fn get_recruitable(&self, place_id: GString) -> VarArray {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -418,6 +426,13 @@ impl CampaignSim {
             .recruitable(data, &settlement)
             .iter()
             .map(|option| {
+                let amounts = |map: &std::collections::BTreeMap<data_model::ResourceId, u32>| {
+                    let mut dict = VarDictionary::new();
+                    for (resource, amount) in map {
+                        dict.set(resource.as_str(), i64::from(*amount));
+                    }
+                    dict
+                };
                 vdict! {
                     "unit_type" => option.unit_type.as_str(),
                     "name" => option.name.as_str(),
@@ -425,6 +440,12 @@ impl CampaignSim {
                     "upkeep" => i64::from(option.upkeep),
                     "available" => option.available,
                     "reason" => option.reason.as_deref().unwrap_or(""),
+                    // SV2: resource units the unit needs, the livres of
+                    // `cost` spent importing what the faction lacks, and
+                    // the units imported (B7c rule, ADR 0053).
+                    "resources" => &amounts(&option.resources),
+                    "import_cost" => i64::from(option.import_cost),
+                    "imported" => &amounts(&option.imported),
                 }
                 .to_variant()
             })

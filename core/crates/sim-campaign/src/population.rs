@@ -38,6 +38,13 @@ pub const CLASS_TARGETING_WEALTH_OFFSET: f64 = 8.0;
 
 /// Devastation above which growth stalls entirely (spec § 1.1).
 pub const GROWTH_DEVASTATION_CAP: u8 = 50;
+/// Health at which a class neither grows nor declines, and the base of its
+/// health target (SV4: named so the UI can quote it).
+pub const HEALTH_NEUTRAL: f64 = 50.0;
+/// Base of the goods-satisfaction target...
+pub const GOODS_TARGET_BASE: f64 = 40.0;
+/// ... plus this much per category of goods the faction can reach.
+pub const GOODS_TARGET_PER_CATEGORY: f64 = 10.0;
 /// Fraction of the gap to the target closed each season, per gauge.
 const HEALTH_SPEED: f64 = 0.20;
 const WEALTH_SPEED: f64 = 0.15;
@@ -122,7 +129,7 @@ fn update_class(
     let class_points = |value: crate::buildings::EffectValue| value.flat + value.percent;
 
     // ----- growth ----------------------------------------------------
-    let health_factor = (f64::from(entry.health) - 50.0) / 50.0;
+    let health_factor = (f64::from(entry.health) - HEALTH_NEUTRAL) / HEALTH_NEUTRAL;
     let devastation_factor = if devastation > GROWTH_DEVASTATION_CAP {
         0.0
     } else {
@@ -140,7 +147,7 @@ fn update_class(
     } else {
         0.0
     };
-    let health_target = 50.0
+    let health_target = HEALTH_NEUTRAL
         + effects.health.flat
         + effects.health.percent
         + class_points(class_fx.health)
@@ -159,8 +166,8 @@ fn update_class(
     entry.wealth = move_towards(entry.wealth, wealth_target, WEALTH_SPEED);
 
     // ----- goods satisfaction -------------------------------------------
-    let goods_target = 40.0
-        + 10.0 * goods_category_count as f64
+    let goods_target = GOODS_TARGET_BASE
+        + GOODS_TARGET_PER_CATEGORY * goods_category_count as f64
         + effects.goods_satisfaction.flat
         + effects.goods_satisfaction.percent
         + class_points(class_fx.goods_satisfaction);

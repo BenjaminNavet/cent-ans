@@ -406,6 +406,11 @@ pub struct QueuedRecruit {
     pub turns_left: u32,
     /// Turn of the order: the recruitment slots are counted per turn.
     pub ordered_turn: u32,
+    /// SV2: resource units drawn from the faction's own producing provinces
+    /// for the unit's `cost.resources`, reserved until it joins the garrison
+    /// (like [`Construction::drawn`]); empty in older saves.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub drawn: BTreeMap<data_model::ResourceId, u32>,
 }
 
 impl QueuedRecruit {
@@ -424,6 +429,8 @@ enum QueuedRecruitRepr {
         unit_type: UnitTypeId,
         turns_left: u32,
         ordered_turn: u32,
+        #[serde(default)]
+        drawn: BTreeMap<data_model::ResourceId, u32>,
     },
 }
 
@@ -434,15 +441,18 @@ impl From<QueuedRecruitRepr> for QueuedRecruit {
                 unit_type,
                 turns_left: 1,
                 ordered_turn: LEGACY_RECRUIT_TURN,
+                drawn: BTreeMap::new(),
             },
             QueuedRecruitRepr::Full {
                 unit_type,
                 turns_left,
                 ordered_turn,
+                drawn,
             } => QueuedRecruit {
                 unit_type,
                 turns_left,
                 ordered_turn,
+                drawn,
             },
         }
     }
@@ -805,6 +815,10 @@ pub struct CampaignState {
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
     pub(crate) ai_turn: Option<FactionId>,
+    /// Lot CT1: record of the AI armies' moves of the last turn, for the
+    /// replay on the map (off unless the interface turns it on); never saved.
+    #[serde(skip)]
+    pub(crate) ai_replay: crate::ai_replay::AiReplayLog,
 }
 
 impl CampaignState {
@@ -844,6 +858,7 @@ impl CampaignState {
             naval: crate::naval::NavalState::default(),
             difficulty: crate::difficulty::Difficulty::Normal,
             ai_turn: None,
+            ai_replay: crate::ai_replay::AiReplayLog::default(),
         }
     }
 

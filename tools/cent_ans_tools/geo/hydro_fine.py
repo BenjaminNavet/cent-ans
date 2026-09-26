@@ -39,7 +39,14 @@ import numpy as np
 import shapely
 from pyproj import Transformer
 
-from cent_ans_tools.geo import download, fine_relief, fine_tiles, hydro_sources, pyramid
+from cent_ans_tools.geo import (
+    detail_dem,
+    download,
+    fine_relief,
+    fine_tiles,
+    hydro_sources,
+    pyramid,
+)
 from cent_ans_tools.geo import valley_snap as vs
 from cent_ans_tools.geo.project import MapGrid
 
@@ -47,12 +54,18 @@ REPO_DIR = download.TOOLS_DIR.parent
 MAP_DIR = REPO_DIR / "data" / "map"
 NOTES_FILE = "historical_hydro_notes.json"
 WIDTHS_FILE = "river_widths.json"
+#: ZG7a: a named stroke farther than this from its river's anchor chain is a
+#: homonym (or a far meander): widths from the per-stroke rule or Strahler.
+CHAIN_MAX_OFFSET_M = 25_000.0
 MANIFEST_FILE = "rivers_fine.json"
 TILES_SUBDIR = "hydro_fine"
 FEATURES_FILE = "features.json"
 SNAP_DIR = hydro_sources.CACHE_DIR / "snap"
 #: Bumped whenever the snapping parameters change (invalidates ``cache/snap``).
-SNAP_VERSION = 3
+#: ZG7c: 4 -- the snaps dated from before the ZG3b fix of the detail zones
+#: (E5-E7 up to 15 m too low): the Loire at Orleans sat 10 m under the terrain.
+#: The key now also carries ``detail_dem.BAKE_VERSION`` (re-snap after a re-bake).
+SNAP_VERSION = 4
 
 #: Smallest Strahler order kept, per source (orders computed on each network).
 MIN_ORDER = {"topage": 3, "osor": 3, "euhydro": 3, "naturalearth": 0}
@@ -69,6 +82,11 @@ EUHYDRO_ORDERS = (3, 4, 5, 6, 7, 8, 9)
 COVERAGE_CELL_M = 2000.0
 CHUNK_M = 1_500_000.0  # stroke length per parallel work unit
 JOIN_BLEND_VERTICES = 6
+#: ZG7c: lowest water level (m). The fine relief of the detail zones (E5-E7)
+#: carries real channel bathymetry (Thames at London down to -30 m, estuaries),
+#: which the valley floor then fed into the level fit: the tidal Thames sat at
+#: -7.8 m through London. No river of the map runs below mean sea level.
+MIN_WATER_LEVEL_M = 0.0
 
 
 @dataclass(frozen=True)
@@ -348,7 +366,7 @@ def snap_all(
     jobs = []
     for index, chunk in enumerate(chunks):
         digest = hashlib.sha1()
-        digest.update(f"{SNAP_VERSION}|{params}".encode())
+        digest.update(f"{SNAP_VERSION}|{detail_dem.BAKE_VERSION}|{params}".encode())
         for i in chunk:
             digest.update(np.ascontiguousarray(strokes[i].points[[0, -1]]).tobytes())
             digest.update(str(len(strokes[i].points)).encode())
@@ -443,10 +461,64 @@ class WidthModel:
         )
 
     def river_widths(self, name: str, points: np.ndarray) -> np.ndarray | None:
-        """Anchored widths along a named stroke (``None`` if not an anchored river)."""
+        """Anchored widths along a named stroke (``None`` if not an anchored river).
+
+        ZG7a: between the first and last anchors of the river, the width comes
+        from the vertex's projection on the chain of anchors (listed upstream
+        to downstream), interpolated in logarithm, whatever stroke carries it.
+        The per-stroke rule alone (anchors within ``search_km`` of the stroke)
+        left strokes without a nearby anchor at their Strahler width (the Seine
+        between Elbeuf and Rouen at 50 m, at Mantes at 60 m) and shrank every
+        stroke towards its first vertex as if it were the source (4.5 m just
+        upstream of Rouen). Upstream of the first anchor the per-stroke rule
+        (source decay) still applies; NaN where no rule applies (Strahler).
+        """
         index = self.names.get(normalise_name(name))
         if index is None or len(points) < 2:
             return None
+        per_stroke = self._stroke_widths(index, points)
+        chain_widths = self._chain_widths(index, points)
+        if chain_widths is None:
+            return per_stroke
+        widths, upstream = chain_widths
+        if per_stroke is not None:
+            widths[upstream] = per_stroke[upstream]
+        else:
+            widths[upstream] = np.nan
+        return widths
+
+    def _chain_widths(
+        self, index: int, points: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray] | None:
+        """Widths from the projection on the anchor chain, and the upstream mask.
+
+        Vertices farther than :data:`CHAIN_MAX_OFFSET_M` from the chain (a
+        homonym elsewhere) get NaN.
+        """
+        anchors = self.rivers[index]["anchors"]
+        if len(anchors) < 2:
+            return None
+        a = np.array([(x, y) for x, y, _ in anchors], dtype=np.float64)
+        logw = np.log([w for _, _, w in anchors])
+        best_t = np.zeros(len(points))
+        best_d = np.full(len(points), np.inf)
+        upstream = np.zeros(len(points), dtype=bool)
+        for i in range(len(a) - 1):
+            seg = a[i + 1] - a[i]
+            length2 = max(float(seg @ seg), 1e-6)
+            raw = ((points - a[i]) @ seg) / length2
+            u = np.clip(raw, 0.0, 1.0)
+            d = np.hypot(*(points - (a[i] + u[:, None] * seg)).T)
+            closer = d < best_d
+            best_d = np.where(closer, d, best_d)
+            best_t = np.where(closer, i + u, best_t)
+            upstream = np.where(closer, (i == 0) & (raw < 0.0), upstream)
+        widths = np.exp(np.interp(best_t, np.arange(len(a)), logw))
+        widths[best_d > CHAIN_MAX_OFFSET_M] = np.nan
+        return widths, upstream
+
+    def _stroke_widths(self, index: int, points: np.ndarray) -> np.ndarray | None:
+        """Per-stroke rule: anchors within ``search_m`` of the stroke, source decay."""
         chain = vs.chainage(points)
         found = []
         for x, y, width in self.rivers[index]["anchors"]:
@@ -491,12 +563,15 @@ def stroke_widths(
     """Width per vertex: anchors, else Strahler class, bounded by the source class."""
     base = model.order_width(orders)
     anchored = model.river_widths(name, points)
+    lo = np.where(np.isfinite(width_min), width_min, 0.0)
+    hi = np.where(np.isfinite(width_max), width_max, np.inf)
+    fallback = np.clip(base, lo, hi)
     if anchored is not None:
-        widths = np.maximum(anchored, base * 0.5)
+        widths = np.where(
+            np.isfinite(anchored), np.maximum(anchored, base * 0.5), fallback
+        )
     else:
-        lo = np.where(np.isfinite(width_min), width_min, 0.0)
-        hi = np.where(np.isfinite(width_max), width_max, np.inf)
-        widths = np.clip(base, lo, hi)
+        widths = fallback
     # Never narrower downstream.
     return np.maximum.accumulate(widths)
 
@@ -552,6 +627,18 @@ def downstream_first(receiver: np.ndarray) -> list[int]:
         stack.extend(children.get(s, []))
     order.extend(s for s in range(len(receiver)) if s not in seen)  # cycles
     return order
+
+
+def water_level(floor: np.ndarray) -> np.ndarray:
+    """Water level estimate of a snapped line from its valley floor (ZG7c).
+
+    The floor is clamped at :data:`MIN_WATER_LEVEL_M` before the monotone fit
+    (:func:`join_confluences`): a channel bed or estuary bathymetry below sea
+    level must not drag the pooled level of a tidal reach under the sea. NaN
+    stays NaN (filled later by the fit).
+    """
+    floor = np.asarray(floor, dtype=np.float64)
+    return np.where(np.isnan(floor), np.nan, np.maximum(floor, MIN_WATER_LEVEL_M))
 
 
 def join_confluences(lines: list[RiverLine]) -> None:
@@ -792,7 +879,7 @@ def build(
                     name=name,
                     order=orders[s],
                     points=xy,
-                    level=floor,
+                    level=water_level(floor),
                     width=stroke_widths(
                         widths,
                         name,

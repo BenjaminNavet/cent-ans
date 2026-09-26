@@ -1,0 +1,993 @@
+//! Scattering of campaign-map vegetation tiles (lot PB2), pure Rust.
+//!
+//! Port of the scatter, hedge and pack stages of `VegetationTileJob`
+//! (`game/scripts/map/vegetation_tile_job.gd`) and of the parcel lattice of
+//! `VegetationFields`. The coarse mask grid (noise, slopes, splat) is still
+//! sampled in GDScript off the main thread; the main thread then hands plain
+//! arrays to `VegetationScatter` (godot-bridge), whose native threads call
+//! `scatter_tile` without touching the Godot API. The random
+//! stream differs from Godot's `RandomNumberGenerator`, so the result is
+//! statistically equivalent, not identical. Rendering support only, no game
+//! rule.
+
+use std::f64::consts::TAU;
+const KIND_OAK: usize = 0;
+const KIND_BEECH: usize = 1;
+const KIND_CONIFER: usize = 2;
+pub const KIND_HEDGE: usize = 3;
+pub const KIND_COUNT: usize = 4;
+const CANOPY_SPREAD: f64 = 0.4;
+const PARTS_SIDE: usize = 2;
+const PARTS: usize = PARTS_SIDE * PARTS_SIDE;
+const SLOTS: usize = PARTS * KIND_COUNT;
+pub const FLOATS_PER_INSTANCE: usize = 16;
+const GROUND_SINK: f64 = 0.08;
+const RIVER_CLEARANCE: f64 = 0.3;
+const HEDGE_STEP: f64 = 0.62;
+const HEDGE_GAP: f64 = 0.1;
+const HEDGE_TREE: f64 = 0.07;
+/// `VegetationFields.LAYOUTS`: [k (shear), fu, fv (parcel size, px), warp phase].
+const LAYOUTS: [[f64; 4]; 2] = [[0.35, 5.0, 4.2, 0.0], [-0.8, 4.6, 3.8, 2.1]];
+
+// --- Relief pyramid (`ReliefPyramid`, `ReliefQuadtree`) ---
+pub const PAGE_PX: usize = 512;
+const ROOT_TILE_UNITS: f64 = 256.0;
+const GRID_OFFSET: f64 = -0.5;
+
+/// Map-wide rasters, shared by every job.
+#[derive(Default)]
+pub struct MapRasters {
+    /// Heightmap samples (`MapData.height_bytes`).
+    pub height: Vec<u8>,
+    pub width: usize,
+    pub height_px: usize,
+    pub bpp: usize,
+    pub little_endian: bool,
+    pub height_min_m: f64,
+    pub height_max_m: f64,
+    /// River bed signed distance, one byte per pixel (`MapData.river_bed_image`, R channel).
+    pub river: Vec<u8>,
+    pub river_width: usize,
+    pub river_height: usize,
+}
+
+impl MapRasters {
+    fn height01_px(&self, px: i64, py: i64) -> f64 {
+        let px = px.clamp(0, self.width as i64 - 1) as usize;
+        let py = py.clamp(0, self.height_px as i64 - 1) as usize;
+        let offset = py * self.width + px;
+        if self.bpp == 2 {
+            let o = offset * 2;
+            let (a, b) = (self.height[o] as u32, self.height[o + 1] as u32);
+            let value = if self.little_endian {
+                a | (b << 8)
+            } else {
+                (a << 8) | b
+            };
+            return value as f64 / 65535.0;
+        }
+        self.height[offset] as f64 / 255.0
+    }
+
+    /// `MapData.height_m_at` (bilinear, clamped).
+    fn height_m_at(&self, x: f64, y: f64) -> f64 {
+        if self.width == 0 {
+            return 0.0;
+        }
+        let fx = x.clamp(0.0, self.width as f64 - 1.0);
+        let fy = y.clamp(0.0, self.height_px as f64 - 1.0);
+        let x0 = fx as i64;
+        let y0 = fy as i64;
+        let tx = fx - x0 as f64;
+        let ty = fy - y0 as f64;
+        let top = lerp(self.height01_px(x0, y0), self.height01_px(x0 + 1, y0), tx);
+        let bottom = lerp(
+            self.height01_px(x0, y0 + 1),
+            self.height01_px(x0 + 1, y0 + 1),
+            tx,
+        );
+        let h = lerp(top, bottom, ty);
+        self.height_min_m + h * (self.height_max_m - self.height_min_m)
+    }
+
+    /// `MapData.river_sd_at` (nearest pixel; 8 without river raster).
+    fn river_sd_at(&self, x: f64, y: f64) -> f64 {
+        if self.river.is_empty() {
+            return 8.0;
+        }
+        let px = (x as i64).clamp(0, self.river_width as i64 - 1) as usize;
+        let py = (y as i64).clamp(0, self.river_height as i64 - 1) as usize;
+        (self.river[py * self.river_width + px] as f64 - 128.0) / 16.0
+    }
+}
+
+/// Valley floor of the local relief exaggeration (lot ZG8, `MapData.relief_floor_at`): metres,
+/// bilinear between cell centres, edges replicated.
+#[derive(Default)]
+pub struct ReliefFloor {
+    pub data: Vec<f32>,
+    pub side: (usize, usize),
+    pub cell: f64,
+}
+
+impl ReliefFloor {
+    fn at(&self, x: f64, z: f64) -> f64 {
+        let (sx, sz) = self.side;
+        if self.data.is_empty() || sx < 2 || sz < 2 {
+            return 0.0;
+        }
+        let half = 0.5 * (self.cell - 1.0);
+        let fx = ((x - half) / self.cell).clamp(0.0, sx as f64 - 1.0);
+        let fz = ((z - half) / self.cell).clamp(0.0, sz as f64 - 1.0);
+        let i = (fx as usize).min(sx - 2);
+        let j = (fz as usize).min(sz - 2);
+        let tx = fx - i as f64;
+        let tz = fz - j as f64;
+        let o = j * sx + i;
+        let d = &self.data;
+        let top = lerp(d[o] as f64, d[o + 1] as f64, tx);
+        let bottom = lerp(d[o + sx] as f64, d[o + sx + 1] as f64, tx);
+        lerp(top, bottom, tz)
+    }
+}
+
+/// Displayed ground under the trees (`TerrainBuilder.surface_grid`).
+pub enum Ground {
+    /// Heightmap only.
+    None,
+    /// Regular mesh grid, triangulated along the a → d diagonal.
+    Grid {
+        heights: Vec<f32>,
+        side: usize,
+        unit: f64,
+    },
+    /// Quadtree snapshot: loaded pages (key → little-endian 16-bit samples).
+    Pages {
+        pages: std::collections::HashMap<i64, Vec<u8>>,
+        max_level: i64,
+        h_min: f64,
+        h_range: f64,
+    },
+}
+
+/// One tile to scatter (fields of `VegetationTileJob`).
+pub struct TileRequest {
+    pub tile_index: i64,
+    pub origin: (f64, f64),
+    pub size_px: f64,
+    pub spacing: f64,
+    pub coarse_step: f64,
+    pub tree_scale: f64,
+    pub vertical_scale: f64,
+    /// Local relief gain (`MapData.relief_gain`, lot ZG8) and its valley floor.
+    pub relief_gain: f64,
+    pub floor: std::sync::Arc<ReliefFloor>,
+    /// Coarse grids, `side × side`: forest, crops, conifer, beech, hedge, grove, region.
+    pub coarse: [Vec<f32>; 7],
+    pub side: usize,
+    pub exclusions: Vec<(f64, f64, f64)>,
+    pub ground: Ground,
+}
+
+/// Per-slot MultiMesh buffers (`part * KIND_COUNT + kind`).
+pub struct TileResult {
+    pub buffers: Vec<Vec<f32>>,
+    pub counts: Vec<i32>,
+}
+
+/// PCG32 (XSH-RR), seeded per tile: deterministic, fast, uniform.
+struct Rng {
+    state: u64,
+}
+
+impl Rng {
+    const MUL: u64 = 6364136223846793005;
+    const INC: u64 = 1442695040888963407;
+
+    fn new(seed: u64) -> Self {
+        let mut rng = Rng { state: 0 };
+        rng.next_u32();
+        rng.state = rng.state.wrapping_add(seed);
+        rng.next_u32();
+        rng
+    }
+
+    fn next_u32(&mut self) -> u32 {
+        let old = self.state;
+        self.state = old.wrapping_mul(Self::MUL).wrapping_add(Self::INC);
+        let xorshifted = (((old >> 18) ^ old) >> 27) as u32;
+        let rot = (old >> 59) as u32;
+        xorshifted.rotate_right(rot)
+    }
+
+    /// Uniform in [0, 1).
+    fn randf(&mut self) -> f64 {
+        self.next_u32() as f64 / 4294967296.0
+    }
+
+    fn range(&mut self, lo: f64, hi: f64) -> f64 {
+        lo + (hi - lo) * self.randf()
+    }
+}
+
+fn lerp(a: f64, b: f64, t: f64) -> f64 {
+    a + (b - a) * t
+}
+
+fn smoothstep(e0: f64, e1: f64, x: f64) -> f64 {
+    let t = ((x - e0) / (e1 - e0)).clamp(0.0, 1.0);
+    t * t * (3.0 - 2.0 * t)
+}
+
+// --- Parcel lattice (`VegetationFields`, mirrored in `terrain.gdshader`) ---
+
+/// `VegetationFields.hash01` (same integer hash as the shader's `hash01i`).
+fn hash01(n: i64) -> f64 {
+    let mut h = n.wrapping_mul(1103515245).wrapping_add(12345) & 0x7fffffff;
+    h = (h ^ (h >> 13)).wrapping_mul(1274126177) & 0x7fffffff;
+    (h % 100000) as f64 / 100000.0
+}
+
+fn warp(x0: f64, y0: f64, phase: f64) -> (f64, f64) {
+    let ox = 1.7 * (0.071 * y0 + 1.9 * (0.027 * x0).sin() + phase).sin()
+        + 0.55 * (0.23 * y0 + 1.3 * (0.061 * x0).sin()).sin();
+    let oy = 1.7 * (0.063 * x0 + 1.7 * (0.023 * y0).sin() + phase * 1.3).sin()
+        + 0.55 * (0.19 * x0 + 1.1 * (0.047 * y0).sin()).sin();
+    (ox, oy)
+}
+
+fn to_map(layout: usize, u: f64, v: f64) -> (f64, f64) {
+    let [k, fu, fv, phase] = LAYOUTS[layout];
+    let a = u * fu;
+    let b = v * fv;
+    let det = 1.0 + k * k;
+    let x0 = (a - k * b) / det;
+    let y0 = (b + k * a) / det;
+    let (ox, oy) = warp(x0, y0, phase);
+    (x0 + ox, y0 + oy)
+}
+
+fn to_uv(layout: usize, x0: f64, y0: f64) -> (f64, f64) {
+    let [k, fu, fv, _] = LAYOUTS[layout];
+    ((x0 + k * y0) / fu, (y0 - k * x0) / fv)
+}
+
+fn row_offset(layout: usize, column: i64) -> f64 {
+    hash01(column * 5023 + 17 + layout as i64 * 101)
+}
+
+fn roll_u_edge(layout: usize, line: i64, segment: i64) -> f64 {
+    hash01(line * 7919 + segment * 104729 + layout as i64 * 7 + 1)
+}
+
+fn roll_v_edge(layout: usize, row: i64, column: i64) -> f64 {
+    hash01(row * 7919 + column * 104729 + layout as i64 * 7 + 31)
+}
+
+fn hedge_probability(open_land: f64, bocage: f64) -> f64 {
+    open_land * lerp(0.1, 0.75, bocage)
+}
+
+/// Bounds of `t` keeping `offset + coeff * t` in `[lo, hi]`, crossed with `[cur_lo, cur_hi]`.
+fn clip_linear(coeff: f64, offset: f64, lo: f64, hi: f64, cur: (f64, f64)) -> (f64, f64) {
+    if coeff == 0.0 {
+        return if offset >= lo && offset <= hi {
+            cur
+        } else {
+            (1.0, -1.0)
+        };
+    }
+    let t_a = (lo - offset) / coeff;
+    let t_b = (hi - offset) / coeff;
+    if coeff > 0.0 {
+        (cur.0.max(t_a), cur.1.min(t_b))
+    } else {
+        (cur.0.max(t_b), cur.1.min(t_a))
+    }
+}
+
+// --- Ground sampling ---
+
+/// Bilinear altitude (m) in a relief page (`ReliefQuadtree._bilinear`).
+fn page_bilinear(bytes: &[u8], fx: f64, fy: f64, h_min: f64, h_range: f64) -> f64 {
+    let last = (PAGE_PX - 1) as f64;
+    let fx = fx.clamp(0.0, last);
+    let fy = fy.clamp(0.0, last);
+    let i = (fx as usize).min(PAGE_PX - 2);
+    let j = (fy as usize).min(PAGE_PX - 2);
+    let tx = fx - i as f64;
+    let ty = fy - j as f64;
+    let o = (j * PAGE_PX + i) * 2;
+    let sample = |at: usize| u16::from_le_bytes([bytes[at], bytes[at + 1]]) as f64;
+    let a = sample(o);
+    let b = sample(o + 2);
+    let c = sample(o + PAGE_PX * 2);
+    let d = sample(o + PAGE_PX * 2 + 2);
+    let top = a + (b - a) * tx;
+    let v = (top + (c + (d - c) * tx - top) * ty) / 65535.0;
+    h_min + v * h_range
+}
+
+impl TileRequest {
+    /// `MapData.display_height` (lot ZG8): s·(h + g·max(h − floor, 0)).
+    fn display_height(&self, h_m: f64, x: f64, z: f64) -> f64 {
+        if self.relief_gain == 0.0 {
+            return h_m * self.vertical_scale;
+        }
+        self.vertical_scale * (h_m + self.relief_gain * (h_m - self.floor.at(x, z)).max(0.0))
+    }
+
+    /// `MapData.height_world_at` (displayed height of the 4096 heightmap).
+    fn height_world_at(&self, map: &MapRasters, x: f64, y: f64) -> f64 {
+        self.display_height(map.height_m_at(x, y), x, y)
+    }
+
+    /// `VegetationTileJob._display_ground` (`TerrainBuilder.grid_height`, never below sea level).
+    fn display_ground(&self, map: &MapRasters, x: f64, y: f64, fallback: f64) -> f64 {
+        let lx = x - self.origin.0;
+        let ly = y - self.origin.1;
+        let h = match &self.ground {
+            Ground::None => return fallback,
+            Ground::Grid {
+                heights,
+                side,
+                unit,
+            } => {
+                let limit = *side as f64 - 1.001;
+                let gx = (lx / unit).clamp(0.0, limit);
+                let gy = (ly / unit).clamp(0.0, limit);
+                let i = gx as usize;
+                let j = gy as usize;
+                let tx = gx - i as f64;
+                let ty = gy - j as f64;
+                let a = j * side + i;
+                let ha = heights[a] as f64;
+                let hb = heights[a + 1] as f64;
+                let hc = heights[a + side] as f64;
+                let hd = heights[a + side + 1] as f64;
+                if tx >= ty {
+                    ha + (hb - ha) * tx + (hd - hb) * ty
+                } else {
+                    ha + (hd - hc) * tx + (hc - ha) * ty
+                }
+            }
+            Ground::Pages {
+                pages,
+                max_level,
+                h_min,
+                h_range,
+            } => self
+                .sample_pages(pages, *max_level, *h_min, *h_range, x, y)
+                .unwrap_or_else(|| self.height_world_at(map, x, y)),
+        };
+        h.max(0.0)
+    }
+
+    /// `ReliefQuadtree.sample_pages`: finest loaded page covering (x, y).
+    fn sample_pages(
+        &self,
+        pages: &std::collections::HashMap<i64, Vec<u8>>,
+        top_level: i64,
+        h_min: f64,
+        h_range: f64,
+        x: f64,
+        y: f64,
+    ) -> Option<f64> {
+        if pages.is_empty() {
+            return None;
+        }
+        for level in (0..=top_level).rev() {
+            let units = ROOT_TILE_UNITS / (1i64 << level) as f64;
+            let col = ((x - GRID_OFFSET) / units).floor() as i64;
+            let row = ((y - GRID_OFFSET) / units).floor() as i64;
+            if col < 0 || row < 0 {
+                return None;
+            }
+            let key = (level << 24) | (row << 12) | col;
+            let Some(bytes) = pages.get(&key) else {
+                continue;
+            };
+            let px_units = units / PAGE_PX as f64;
+            let ox = col as f64 * units + GRID_OFFSET;
+            let oy = row as f64 * units + GRID_OFFSET;
+            let h_m = page_bilinear(
+                bytes,
+                (x - ox) / px_units - 0.5,
+                (y - oy) / px_units - 0.5,
+                h_min,
+                h_range,
+            );
+            return Some(self.display_height(h_m, x, y));
+        }
+        None
+    }
+}
+
+// --- Scatter ---
+
+struct Instance {
+    seed: f64,
+    /// Row-major 3×4 transform (basis columns interleaved with the origin).
+    transform: [f32; 12],
+    tint: [f32; 3],
+}
+
+struct Scatter<'a> {
+    req: &'a TileRequest,
+    map: &'a MapRasters,
+    rng: Rng,
+    raw: Vec<Vec<Instance>>,
+    rect: (f64, f64, f64, f64),
+}
+
+const FOREST: usize = 0;
+const CROPS: usize = 1;
+const CONIFER: usize = 2;
+const BEECH: usize = 3;
+const HEDGE: usize = 4;
+const GROVE: usize = 5;
+const REGION: usize = 6;
+
+impl<'a> Scatter<'a> {
+    fn has_point(&self, x: f64, y: f64) -> bool {
+        let (x0, y0, x1, y1) = self.rect;
+        x >= x0 && y >= y0 && x < x1 && y < y1
+    }
+
+    fn lerp_grid(&self, grid: usize, gx: f64, gy: f64) -> f64 {
+        let side = self.req.side;
+        let values = &self.req.coarse[grid];
+        let i0 = (gx as usize).min(side - 2);
+        let j0 = (gy as usize).min(side - 2);
+        let tx = gx - i0 as f64;
+        let ty = gy - j0 as f64;
+        let k = j0 * side + i0;
+        let top = lerp(values[k] as f64, values[k + 1] as f64, tx);
+        let bottom = lerp(values[k + side] as f64, values[k + side + 1] as f64, tx);
+        lerp(top, bottom, ty)
+    }
+
+    fn excluded(&self, x: f64, y: f64) -> bool {
+        self.req.exclusions.iter().any(|&(ex, ey, r)| {
+            let dx = x - ex;
+            let dy = y - ey;
+            dx * dx + dy * dy < r * r
+        })
+    }
+
+    fn slot(&self, kind: usize, x: f64, y: f64) -> usize {
+        let part_px = self.req.size_px / PARTS_SIDE as f64;
+        let last = PARTS_SIDE as i64 - 1;
+        let px = (((x - self.req.origin.0) / part_px) as i64).clamp(0, last) as usize;
+        let py = (((y - self.req.origin.1) / part_px) as i64).clamp(0, last) as usize;
+        (py * PARTS_SIDE + px) * KIND_COUNT + kind
+    }
+
+    fn run(&mut self) {
+        let req = self.req;
+        let (ox, oy) = req.origin;
+        let cells = (req.size_px / req.spacing).ceil() as usize;
+        for cj in 0..cells {
+            for ci in 0..cells {
+                let x = ox + (ci as f64 + self.rng.randf()) * req.spacing;
+                let y = oy + (cj as f64 + self.rng.randf()) * req.spacing;
+                let roll = self.rng.randf();
+                let roll_kind = self.rng.randf();
+                let gx = (x - ox) / req.coarse_step;
+                let gy = (y - oy) / req.coarse_step;
+                let forest = self.lerp_grid(FOREST, gx, gy);
+                let yaw = self.rng.randf() * TAU;
+                let mut kind = None;
+                let mut scale_factor = 1.0;
+                if roll < forest * 0.9 {
+                    kind = Some(if roll_kind < self.lerp_grid(CONIFER, gx, gy) {
+                        KIND_CONIFER
+                    } else if self.rng.randf() < self.lerp_grid(BEECH, gx, gy) {
+                        KIND_BEECH
+                    } else {
+                        KIND_OAK
+                    });
+                    scale_factor = 1.0 + CANOPY_SPREAD * smoothstep(0.45, 0.9, forest);
+                } else {
+                    let crops = self.lerp_grid(CROPS, gx, gy);
+                    if crops > 0.15 {
+                        let grove = self.lerp_grid(GROVE, gx, gy);
+                        if roll < crops * (grove * 0.55 + 0.012) {
+                            kind = Some(if self.rng.randf() < 0.2 {
+                                KIND_BEECH
+                            } else {
+                                KIND_OAK
+                            });
+                            scale_factor = 0.9;
+                        }
+                    }
+                }
+                let Some(kind) = kind else {
+                    continue;
+                };
+                if self.excluded(x, y) || !self.has_point(x, y) {
+                    continue;
+                }
+                if self.map.river_sd_at(x, y) < RIVER_CLEARANCE {
+                    continue;
+                }
+                let ground = req.height_world_at(self.map, x, y);
+                if ground <= 0.0 {
+                    continue;
+                }
+                let ground = req.display_ground(self.map, x, y, ground);
+                self.push(kind, x, ground, y, yaw, scale_factor);
+            }
+        }
+        self.hedges();
+    }
+
+    fn hedges(&mut self) {
+        let req = self.req;
+        let crops_max = req.coarse[CROPS].iter().fold(0.0f32, |m, &v| m.max(v)) as f64;
+        let hedge_max = req.coarse[HEDGE].iter().fold(0.0f32, |m, &v| m.max(v)) as f64;
+        if crops_max < 0.2 {
+            return;
+        }
+        let p_max = hedge_probability(crops_max, hedge_max);
+        let (rx0, ry0, rx1, ry1) = self.rect;
+        let (bx0, by0, bx1, by1) = (rx0 - 3.0, ry0 - 3.0, rx1 + 3.0, ry1 + 3.0);
+        for (layout, &[k, fu, fv, _]) in LAYOUTS.iter().enumerate() {
+            let (mut u_min, mut u_max) = (f64::INFINITY, f64::NEG_INFINITY);
+            let (mut v_min, mut v_max) = (f64::INFINITY, f64::NEG_INFINITY);
+            for (cx, cy) in [(bx0, by0), (bx1, by0), (bx0, by1), (bx1, by1)] {
+                let (u, v) = to_uv(layout, cx, cy);
+                u_min = u_min.min(u);
+                u_max = u_max.max(u);
+                v_min = v_min.min(v);
+                v_max = v_max.max(v);
+            }
+            let det = 1.0 + k * k;
+            let coeff_y = fv / det;
+            let coeff_x = -k * fv / det;
+            let dv = HEDGE_STEP / fv;
+            let (line_lo, line_hi) = (u_min.floor() as i64, u_max.ceil() as i64);
+            for line in line_lo..=line_hi {
+                let a0 = line as f64 * fu;
+                let range = clip_linear(coeff_y, k * a0 / det, by0, by1, (v_min, v_max));
+                let range = clip_linear(coeff_x, a0 / det, bx0, bx1, range);
+                if range.0 >= range.1 {
+                    continue;
+                }
+                let mut v = v_min;
+                while v < range.0 {
+                    v += dv;
+                }
+                let mut cur = None;
+                while v < range.1 {
+                    let next_v = v + dv;
+                    let roll = roll_u_edge(layout, line, v.floor() as i64);
+                    if roll < p_max {
+                        let from = cur.unwrap_or_else(|| to_map(layout, line as f64, v));
+                        let next = to_map(layout, line as f64, next_v);
+                        self.hedge_point(layout, roll, from, next);
+                        cur = Some(next);
+                    } else {
+                        cur = None;
+                    }
+                    v = next_v;
+                }
+            }
+            let du = HEDGE_STEP / fu;
+            let cx = fu / det;
+            let cy = k * fu / det;
+            let margin_x = 0.5 * cx.abs();
+            let margin_y = 0.5 * cy.abs();
+            for column in line_lo..=line_hi {
+                let offset = row_offset(layout, column);
+                let u_mid = column as f64 + 0.5;
+                let range = clip_linear(
+                    coeff_y,
+                    cy * u_mid,
+                    by0 - margin_y,
+                    by1 + margin_y,
+                    (v_min, v_max),
+                );
+                let range = clip_linear(coeff_x, cx * u_mid, bx0 - margin_x, bx1 + margin_x, range);
+                if range.0 >= range.1 {
+                    continue;
+                }
+                let row_lo = (range.0 + offset).floor() as i64 - 1;
+                let row_hi = (range.1 + offset).ceil() as i64 + 2;
+                for row in row_lo..row_hi {
+                    let roll = roll_v_edge(layout, row, column);
+                    if roll >= p_max {
+                        continue;
+                    }
+                    let v_row = row as f64 - offset;
+                    let mut u = column as f64 + du * 0.5;
+                    let mut cur = to_map(layout, u, v_row);
+                    while u < column as f64 + 1.0 {
+                        let next_u = u + du;
+                        let next = to_map(layout, next_u, v_row);
+                        self.hedge_point(layout, roll, cur, next);
+                        u = next_u;
+                        cur = next;
+                    }
+                }
+            }
+        }
+    }
+
+    fn hedge_point(&mut self, layout: usize, roll: f64, pos: (f64, f64), next: (f64, f64)) {
+        if !self.has_point(pos.0, pos.1) {
+            return;
+        }
+        let req = self.req;
+        let gx = (pos.0 - req.origin.0) / req.coarse_step;
+        let gy = (pos.1 - req.origin.1) / req.coarse_step;
+        let region = self.lerp_grid(REGION, gx, gy);
+        if (region > 0.0) != (layout == 1) || region.abs() < 0.02 {
+            return;
+        }
+        let crops = self.lerp_grid(CROPS, gx, gy);
+        if crops < 0.2 || roll >= hedge_probability(crops, self.lerp_grid(HEDGE, gx, gy)) {
+            return;
+        }
+        let gap = self.rng.randf();
+        let tree = self.rng.randf();
+        let jitter_x = self.rng.range(-0.07, 0.07);
+        let jitter_y = self.rng.range(-0.07, 0.07);
+        if gap < HEDGE_GAP || self.excluded(pos.0, pos.1) {
+            return;
+        }
+        if self.map.river_sd_at(pos.0, pos.1) < RIVER_CLEARANCE {
+            return;
+        }
+        let (rx0, ry0, rx1, ry1) = self.rect;
+        let px = (pos.0 + jitter_x).clamp(rx0, rx1 - 0.001);
+        let py = (pos.1 + jitter_y).clamp(ry0, ry1 - 0.001);
+        let ground = req.height_world_at(self.map, px, py);
+        if ground <= 0.0 {
+            return;
+        }
+        let ground = req.display_ground(self.map, px, py, ground);
+        let yaw = (-(next.1 - pos.1)).atan2(next.0 - pos.0) + self.rng.range(-0.15, 0.15);
+        if tree < HEDGE_TREE {
+            let tree_yaw = self.rng.randf() * TAU;
+            self.push(KIND_OAK, px, ground, py, tree_yaw, 0.78);
+        } else {
+            self.push(KIND_HEDGE, px, ground, py, yaw, 1.0);
+        }
+    }
+
+    /// `VegetationTileJob._make_instance`.
+    fn push(&mut self, kind: usize, x: f64, ground: f64, y: f64, yaw: f64, scale_factor: f64) {
+        let rng = &mut self.rng;
+        let (mut height, mut width, tint);
+        match kind {
+            KIND_CONIFER => {
+                height = rng.range(1.3, 2.1);
+                width = height * rng.range(0.85, 1.1);
+                let b = rng.range(0.8, 1.15);
+                tint = [b * rng.range(0.9, 1.05), b, b * rng.range(0.95, 1.1)];
+            }
+            KIND_HEDGE => {
+                height = rng.range(0.3, 0.46);
+                width = rng.range(0.72, 0.95);
+                let b = rng.range(1.0, 1.3);
+                let warm = rng.randf() > 0.7;
+                tint = [
+                    b * if warm { 1.12 } else { 1.0 },
+                    b,
+                    b * if warm { 0.78 } else { 0.9 },
+                ];
+            }
+            KIND_BEECH => {
+                height = rng.range(1.35, 1.95);
+                width = height * rng.range(0.78, 0.98);
+                let b = rng.range(0.88, 1.12);
+                tint = [b * rng.range(0.95, 1.05), b, b * rng.range(0.9, 1.0)];
+            }
+            _ => {
+                height = rng.range(1.1, 1.7);
+                width = height * rng.range(0.95, 1.3);
+                let b = rng.range(0.82, 1.18);
+                let warm = rng.randf();
+                tint = if warm > 0.9 {
+                    [b * 1.35, b * 1.15, b * 0.7]
+                } else if warm > 0.7 {
+                    [b * 1.12, b * 1.08, b * 0.85]
+                } else {
+                    [b * rng.range(0.9, 1.02), b, b * rng.range(0.9, 1.05)]
+                };
+            }
+        }
+        let tree_scale = self.req.tree_scale;
+        height *= tree_scale
+            * if scale_factor <= 1.0 {
+                scale_factor
+            } else {
+                1.0 + (scale_factor - 1.0) * 0.35
+            };
+        width *= tree_scale * scale_factor;
+        let depth = if kind == KIND_HEDGE {
+            width * 0.62
+        } else {
+            width
+        };
+        // Basis(UP, yaw) * Basis(X, tilt), then scaled_local(width, height, depth).
+        let tilt = rng.range(-0.06, 0.06);
+        let (sy, cy) = yaw.sin_cos();
+        let (st, ct) = tilt.sin_cos();
+        let col_x = [cy * width, 0.0, -sy * width];
+        let col_y = [sy * st * height, ct * height, cy * st * height];
+        let col_z = [sy * ct * depth, -st * depth, cy * ct * depth];
+        let origin = [x, ground - GROUND_SINK * height, y];
+        let mut transform = [0.0f32; 12];
+        for row in 0..3 {
+            transform[row * 4] = col_x[row] as f32;
+            transform[row * 4 + 1] = col_y[row] as f32;
+            transform[row * 4 + 2] = col_z[row] as f32;
+            transform[row * 4 + 3] = origin[row] as f32;
+        }
+        let seed = rng.randf();
+        let slot = self.slot(kind, x, y);
+        self.raw[slot].push(Instance {
+            seed,
+            transform,
+            tint: tint.map(|c| c as f32),
+        });
+    }
+}
+
+/// `VegetationTileJob._pack`: sorted by decreasing seed, seed replaced by the normalised rank.
+fn pack(mut items: Vec<Instance>) -> Vec<f32> {
+    items.sort_by(|a, b| b.seed.total_cmp(&a.seed));
+    let count = items.len();
+    let mut buffer = Vec::with_capacity(count * FLOATS_PER_INSTANCE);
+    for (i, item) in items.iter().enumerate() {
+        buffer.extend_from_slice(&item.transform);
+        buffer.extend_from_slice(&item.tint);
+        buffer.push((1.0 - (i as f64 + 0.5) / count as f64) as f32);
+    }
+    buffer
+}
+
+/// `VegetationTileJob.reground`: re-seats packed instances on `req.ground` (same sink as
+/// `push`, height = length of the basis Y column). Buffers are returned unchanged without a
+/// ground grid.
+pub fn reground(buffers: &mut [Vec<f32>], req: &TileRequest, map: &MapRasters) {
+    if matches!(req.ground, Ground::None) {
+        return;
+    }
+    for buffer in buffers.iter_mut() {
+        for item in buffer.as_chunks_mut::<FLOATS_PER_INSTANCE>().0 {
+            let height =
+                ((item[1] as f64).powi(2) + (item[5] as f64).powi(2) + (item[9] as f64).powi(2))
+                    .sqrt();
+            let ground = req.display_ground(map, item[3] as f64, item[11] as f64, 0.0);
+            item[7] = (ground - GROUND_SINK * height) as f32;
+        }
+    }
+}
+
+/// Scatters one tile (scatter, hedges, pack).
+pub fn scatter_tile(req: &TileRequest, map: &MapRasters) -> TileResult {
+    let seed = (req.tile_index as u64)
+        .wrapping_mul(0x9e3779b97f4a7c15)
+        .wrapping_add(91711);
+    let mut scatter = Scatter {
+        req,
+        map,
+        rng: Rng::new(seed),
+        raw: (0..SLOTS).map(|_| Vec::new()).collect(),
+        rect: (
+            req.origin.0,
+            req.origin.1,
+            req.origin.0 + req.size_px,
+            req.origin.1 + req.size_px,
+        ),
+    };
+    if req.side >= 2 {
+        scatter.run();
+    }
+    let counts = scatter.raw.iter().map(|items| items.len() as i32).collect();
+    let buffers = scatter.raw.into_iter().map(pack).collect();
+    TileResult { buffers, counts }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn flat_map(level: u16) -> MapRasters {
+        let (w, h) = (64usize, 64usize);
+        let mut height = Vec::with_capacity(w * h * 2);
+        for _ in 0..w * h {
+            height.extend_from_slice(&level.to_le_bytes());
+        }
+        MapRasters {
+            height,
+            width: w,
+            height_px: h,
+            bpp: 2,
+            little_endian: true,
+            height_min_m: -200.0,
+            height_max_m: 1000.0,
+            ..Default::default()
+        }
+    }
+
+    fn request(forest: f32, crops: f32, hedge: f32, region: f32) -> TileRequest {
+        let side = 64 / 4 + 2;
+        let n = side * side;
+        TileRequest {
+            tile_index: 3,
+            origin: (0.0, 0.0),
+            size_px: 64.0,
+            spacing: 1.35,
+            coarse_step: 4.0,
+            tree_scale: 1.0,
+            vertical_scale: 0.01,
+            relief_gain: 0.0,
+            floor: Default::default(),
+            coarse: [
+                vec![forest; n],
+                vec![crops; n],
+                vec![0.0; n],
+                vec![0.3; n],
+                vec![hedge; n],
+                vec![0.0; n],
+                vec![region; n],
+            ],
+            side,
+            exclusions: Vec::new(),
+            ground: Ground::None,
+        }
+    }
+
+    #[test]
+    fn hash_matches_gdscript_reference_values() {
+        // GDScript: VegetationFields.hash01(0), hash01(12345), hash01(-77).
+        let h = |n: i64| {
+            let mut h = (n * 1103515245 + 12345) & 0x7fffffff;
+            h = ((h ^ (h >> 13)) * 1274126177) & 0x7fffffff;
+            (h % 100000) as f64 / 100000.0
+        };
+        for n in [0, 1, 12345, -77, 104729 * 3 + 31] {
+            assert_eq!(hash01(n), h(n));
+            assert!((0.0..1.0).contains(&hash01(n)));
+        }
+    }
+
+    #[test]
+    fn dense_forest_fills_tile_and_is_deterministic() {
+        let map = flat_map(40000);
+        let req = request(1.0, 0.0, 0.0, 1.0);
+        let a = scatter_tile(&req, &map);
+        let b = scatter_tile(&req, &map);
+        assert_eq!(a.counts, b.counts);
+        assert_eq!(a.buffers, b.buffers);
+        let trees: i32 = a.counts.iter().sum();
+        let cells = (64.0f64 / 1.35).ceil().powi(2);
+        // roll < 0.9 on in-rect cells (the last column overflows by up to one spacing).
+        assert!(trees as f64 > cells * 0.8 && (trees as f64) < cells * 0.92);
+        for (slot, buffer) in a.buffers.iter().enumerate() {
+            assert_eq!(buffer.len(), a.counts[slot] as usize * FLOATS_PER_INSTANCE);
+            if slot % KIND_COUNT == KIND_HEDGE || slot % KIND_COUNT == KIND_CONIFER {
+                assert!(buffer.is_empty());
+            }
+            let n = a.counts[slot] as usize;
+            for i in 0..n {
+                let rank = buffer[i * FLOATS_PER_INSTANCE + 15];
+                assert!((rank - (1.0 - (i as f32 + 0.5) / n as f32)).abs() < 1e-5);
+            }
+        }
+    }
+
+    #[test]
+    fn sea_rivers_and_exclusions_stay_empty() {
+        let sea = flat_map(0);
+        assert_eq!(
+            scatter_tile(&request(1.0, 1.0, 1.0, 1.0), &sea)
+                .counts
+                .iter()
+                .sum::<i32>(),
+            0
+        );
+        let mut river = flat_map(40000);
+        river.river = vec![128; 64 * 64];
+        river.river_width = 64;
+        river.river_height = 64;
+        assert_eq!(
+            scatter_tile(&request(1.0, 1.0, 1.0, 1.0), &river)
+                .counts
+                .iter()
+                .sum::<i32>(),
+            0
+        );
+        let map = flat_map(40000);
+        let mut req = request(1.0, 1.0, 1.0, 1.0);
+        req.exclusions.push((32.0, 32.0, 100.0));
+        assert_eq!(scatter_tile(&req, &map).counts.iter().sum::<i32>(), 0);
+    }
+
+    #[test]
+    fn bocage_plants_hedges_along_parcel_edges() {
+        let map = flat_map(40000);
+        let open = scatter_tile(&request(0.0, 1.0, 1.0, 1.0), &map);
+        let hedges: i32 = (0..PARTS)
+            .map(|part| open.counts[part * KIND_COUNT + KIND_HEDGE])
+            .sum();
+        assert!(hedges > 500, "hedges {hedges}");
+        // Region near the boundary (|region| < 0.02): the lane stays clear.
+        let lane = scatter_tile(&request(0.0, 1.0, 1.0, 0.01), &map);
+        assert_eq!(lane.counts[KIND_HEDGE], 0);
+        // Hedge basis: height column ~0.3-0.46 × tree_scale, origin sunk below ground.
+        let buffer = &open.buffers[KIND_HEDGE];
+        let height = (buffer[1].powi(2) + buffer[5].powi(2) + buffer[9].powi(2)).sqrt();
+        assert!((0.29..0.47).contains(&height));
+        let ground = map.height_m_at(buffer[3] as f64, buffer[11] as f64) * 0.01;
+        assert!((buffer[7] as f64 - (ground - GROUND_SINK * height as f64)).abs() < 1e-4);
+    }
+
+    #[test]
+    fn relief_gain_lifts_ground_above_the_valley_floor() {
+        let map = flat_map(40000);
+        let h_m = map.height_m_at(10.0, 10.0);
+        let mut req = request(1.0, 0.0, 0.0, 1.0);
+        req.relief_gain = 2.0;
+        req.floor = std::sync::Arc::new(ReliefFloor {
+            data: vec![(h_m - 100.0) as f32; 4],
+            side: (2, 2),
+            cell: 64.0,
+        });
+        let lifted = 0.01 * (h_m + 2.0 * 100.0);
+        assert!((req.height_world_at(&map, 10.0, 10.0) - lifted).abs() < 1e-6);
+        let result = scatter_tile(&req, &map);
+        let buffer = result.buffers.iter().find(|b| !b.is_empty()).unwrap();
+        let height = (buffer[1].powi(2) + buffer[5].powi(2) + buffer[9].powi(2)).sqrt() as f64;
+        assert!((buffer[7] as f64 - (lifted - 0.08 * height)).abs() < 1e-4);
+    }
+
+    #[test]
+    fn reground_moves_only_the_origin_height() {
+        let map = flat_map(40000);
+        let req = request(1.0, 0.0, 0.0, 1.0);
+        let mut buffers = scatter_tile(&req, &map).buffers;
+        let before = buffers.clone();
+        let mut lifted = request(1.0, 0.0, 0.0, 1.0);
+        lifted.ground = Ground::Grid {
+            heights: vec![2.0; 4 * 4],
+            side: 4,
+            unit: 32.0,
+        };
+        reground(&mut buffers, &lifted, &map);
+        for (a, b) in before.iter().zip(&buffers) {
+            for (x, y) in a.chunks(16).zip(b.chunks(16)) {
+                let height = (x[1].powi(2) + x[5].powi(2) + x[9].powi(2)).sqrt();
+                assert!((y[7] - (2.0 - 0.08 * height)).abs() < 1e-4);
+                assert_eq!(x[..7], y[..7]);
+                assert_eq!(x[8..], y[8..]);
+            }
+        }
+    }
+
+    #[test]
+    fn quadtree_pages_drive_display_ground() {
+        let map = flat_map(40000);
+        let mut req = request(1.0, 0.0, 0.0, 1.0);
+        let mut page = Vec::with_capacity(PAGE_PX * PAGE_PX * 2);
+        for _ in 0..PAGE_PX * PAGE_PX {
+            page.extend_from_slice(&65535u16.to_le_bytes());
+        }
+        let mut pages = std::collections::HashMap::new();
+        pages.insert(0i64, page);
+        req.ground = Ground::Pages {
+            pages,
+            max_level: 3,
+            h_min: 0.0,
+            h_range: 500.0,
+        };
+        let result = scatter_tile(&req, &map);
+        let buffer = result.buffers.iter().find(|b| !b.is_empty()).unwrap();
+        let height = (buffer[1].powi(2) + buffer[5].powi(2) + buffer[9].powi(2)).sqrt();
+        assert!((buffer[7] - (5.0 - 0.08 * height)).abs() < 1e-3);
+    }
+}

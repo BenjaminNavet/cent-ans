@@ -83,6 +83,8 @@ class PortraitJob:
     character_id: str
     prompt: str
     out_path: Path
+    # DA2: optional reference picture sent with the prompt (portrait to age).
+    reference: Path | None = None
 
 
 def _year(value: str | None) -> int | None:
@@ -113,14 +115,22 @@ def is_eligible(character: dict) -> bool:
 
 
 def build_prompt(
-    character: dict, factions: dict[str, dict], traits: dict[str, dict]
+    character: dict,
+    factions: dict[str, dict],
+    traits: dict[str, dict],
+    depicted: str | None = None,
 ) -> str:
-    """Portrait prompt built from the character data only (no hard-coded people)."""
+    """Portrait prompt built from the character data only (no hard-coded people).
+
+    ``depicted`` replaces the age sentence (DA2 aged variants: "depicted at about 62").
+    """
     name = character["name"]["display"]
     local = character["name"].get("local", "")
     birth = _year(character["birth"]["value"]) or START_YEAR
     age = START_YEAR - birth
-    if age >= 18:
+    if depicted is not None:
+        age_text = depicted
+    elif age >= 18:
         age_text = f"aged {age} in 1337"
     elif age >= 0:
         age_text = f"aged {age} in 1337, depicted as a young adult of about 20"
@@ -244,8 +254,13 @@ def generate(
                 raise BudgetExceeded(
                     "Le plafond global de docs/budget.md serait dépassé"
                 )
+            extra = (
+                {"images": [job.reference.read_bytes()]}
+                if job.reference is not None
+                else {}
+            )
             image, cost = openrouter.request_image(
-                model, job.prompt, client, max_tokens=MAX_TOKENS
+                model, job.prompt, client, max_tokens=MAX_TOKENS, **extra
             )
             estimated += unit
             spent += cost if cost is not None else unit

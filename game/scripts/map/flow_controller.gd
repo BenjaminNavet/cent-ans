@@ -270,6 +270,7 @@ func before_end_turn() -> bool:
 func _show_end_turn_confirm() -> void:
 	if _confirm_panel == null:
 		_confirm_panel = PanelContainer.new()
+		PanelStack.set_tier(_confirm_panel, PanelStack.Tier.MODAL, true)  # Q4
 		_confirm_panel.theme = load("res://scenes/ui/parchment_theme.tres")
 		_confirm_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
 		_confirm_panel.offset_left = -220

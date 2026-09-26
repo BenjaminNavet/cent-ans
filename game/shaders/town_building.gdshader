@@ -27,6 +27,13 @@ uniform float meters_per_unit = 719.0;
 uniform float lift_m = 0.0;
 // ZG8 : base posée à la hauteur affichée (relief local exagéré), source unique.
 #include "res://shaders/campaign_relief.gdshaderinc"
+// ZG7a : HLOD par instance (un MultiMesh par modèle et par ville au lieu d'un par cellule).
+// 0 : toujours ; 1 : maison détaillée, repliée au-delà de `lod_range` ; 2 : bloc, replié en deçà.
+// Fondu sur les derniers 15 % (la maison s'enfonce, le bloc monte). `lod_camera` : caméra
+// principale (monde), la même pour la passe d'ombre.
+uniform int lod_mode = 0;
+uniform vec3 lod_camera = vec3(0.0, 1e6, 0.0);
+uniform float lod_range = 1.6;
 
 varying flat int layer;
 varying float tint_shift;
@@ -39,7 +46,20 @@ void vertex() {
 	tint_shift = base_source == 0 ? INSTANCE_CUSTOM.g - 0.5 : 0.0;
 	// Ancrage : origine de l'instance (bâtiments rigides) ou le sommet (maillages drapés).
 	vec2 anchor_xz = base_source == 0 ? MODEL_MATRIX[3].xz : VERTEX.xz;
-	VERTEX.y += campaign_display_height(base, anchor_xz) + lift_m * campaign_vertical_scale;
+	float keep = 1.0;
+	if (lod_mode > 0) {
+		// Hauteur approchée de l'instance (sans le relief ZG8) : suffit au choix du niveau.
+		vec3 origin = vec3(anchor_xz.x, MODEL_MATRIX[3].y + base * campaign_vertical_scale, anchor_xz.y);
+		float grow = smoothstep(lod_range * 0.85, lod_range, distance(origin, lod_camera));
+		keep = lod_mode == 1 ? 1.0 - grow : grow;
+	}
+	if (keep <= 0.0) {
+		// Instance repliée sur son origine : triangles dégénérés, aucun fragment.
+		VERTEX = MODEL_MATRIX[3].xyz;
+	} else {
+		VERTEX.y = MODEL_MATRIX[3].y + (VERTEX.y - MODEL_MATRIX[3].y) * keep;
+		VERTEX.y += campaign_display_height(base, anchor_xz) + lift_m * campaign_vertical_scale;
+	}
 	world_m = VERTEX * meters_per_unit;
 	world_n = NORMAL;
 }
