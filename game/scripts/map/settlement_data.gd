@@ -154,7 +154,11 @@ func edge_path(from_id: String, to_id: String) -> PackedVector2Array:
 ## Contrôleur et propriétaire courants depuis la simulation (`CampaignSim.settlements()`).
 ## Renvoie vrai si au moins une colonie a changé.
 func apply_live(sim: Object) -> bool:
-	if sim == null or not sim.has_method("settlements"):
+	if sim == null:
+		return false
+	if sim.has_method("get_settlements_live"):  # PB3d : tableaux groupés, sans dictionnaire par lieu
+		return _apply_live_packed(sim.call("get_settlements_live"))
+	if not sim.has_method("settlements"):
 		return false
 	var changed := false
 	for live in sim.call("settlements"):
@@ -171,6 +175,27 @@ func apply_live(sim: Object) -> bool:
 				changed = true
 		if live.has("name"):
 			entry["name"] = str(live["name"])
+	return changed
+
+
+func _apply_live_packed(live: Dictionary) -> bool:
+	var live_ids: PackedStringArray = live.get("id", PackedStringArray())
+	var controllers: PackedStringArray = live.get("controller", PackedStringArray())
+	var owners: PackedStringArray = live.get("owner", PackedStringArray())
+	var names: PackedStringArray = live.get("name", PackedStringArray())
+	var changed := false
+	for i in live_ids.size():
+		var index: int = index_by_id.get(live_ids[i], -1)
+		if index < 0:
+			continue
+		var entry: Dictionary = settlements[index]
+		if controllers[i] != entry["controller"]:
+			entry["controller"] = controllers[i]
+			changed = true
+		if owners[i] != entry["owner"]:
+			entry["owner"] = owners[i]
+			changed = true
+		entry["name"] = names[i]
 	return changed
 
 

@@ -17,6 +17,7 @@ use sim_campaign::{
     EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
 };
 
+use crate::campaign_sim_turn::TURN_PENDING_FR;
 use crate::convert::variant_to_json;
 
 /// Last successfully loaded game data and its load warnings, shared by
@@ -92,6 +93,10 @@ pub struct CampaignSim {
     pub(crate) state: Option<CampaignState>,
     /// French message of the last failed `load_from_string`.
     pub(crate) last_load_error: String,
+    /// PB3d: end of turn running on its worker thread, if any.
+    pub(crate) pending_turn: Option<crate::turn_job::TurnJob>,
+    /// PB3d: bumped by every call that may change the state.
+    pub(crate) revision: u64,
     base: Base<RefCounted>,
 }
 
@@ -102,6 +107,8 @@ impl IRefCounted for CampaignSim {
             data: None,
             state: None,
             last_load_error: String::new(),
+            pending_turn: None,
+            revision: 0,
             base,
         }
     }
@@ -124,6 +131,7 @@ impl CampaignSim {
         };
         match CampaignState::new_1337(&data, player, seed as u64) {
             Ok(state) => {
+                self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);
                 true
@@ -153,6 +161,7 @@ impl CampaignSim {
         };
         match CampaignState::load_json(&json.to_string()) {
             Ok(state) => {
+                self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);
                 self.last_load_error = String::new();
@@ -475,6 +484,9 @@ impl CampaignSim {
     /// Returns `{ok, error}`; `error` is a French message when `ok` is false.
     #[func]
     fn submit_order(&mut self, order: VarDictionary) -> VarDictionary {
+        if self.refuse_while_turn_pending("submit_order") {
+            return order_result(Err(TURN_PENDING_FR.to_owned()));
+        }
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return order_result(Err("aucune campagne en cours".to_owned()));
         };
@@ -487,15 +499,21 @@ impl CampaignSim {
         order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
     }
 
-    /// Resolves the turn and returns its events.
+    /// Resolves the turn and returns its events (synchronous: tests,
+    /// headless runs; the map uses `begin_end_turn` / `poll_end_turn`, PB3d).
+    /// An end of turn already running on its thread is waited for and its
+    /// events returned instead.
     #[func]
     fn end_turn(&mut self) -> VarArray {
+        if let Some(events) = self.finish_pending_turn() {
+            return events;
+        }
+        self.revision += 1;
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             godot_warn!("CampaignSim.end_turn called before new_campaign");
             return VarArray::new();
         };
-        // M9: every AI faction plays with the strategic planner.
-        events_array(&state.end_turn_with(data, ai::plan_turn))
+        events_array(&crate::turn_job::resolve_turn(state, data))
     }
 
     /// Character sheet (spec M4 § 3), or an empty dictionary for an unknown id.
