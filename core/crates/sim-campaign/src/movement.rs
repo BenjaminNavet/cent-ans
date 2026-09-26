@@ -919,6 +919,14 @@ fn retreat_beaten_army(
         }
         Retreat::Fallback(point) => {
             let lost = decimate(state, army_id, rules.neutral_loss_percent);
+            if state
+                .armies
+                .get(army_id)
+                .is_some_and(|a| a.units.is_empty())
+            {
+                disperse_army(state, data, army_id, events);
+                return;
+            }
             push_retreat_event(
                 state,
                 data,
