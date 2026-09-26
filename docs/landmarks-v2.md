@@ -47,13 +47,13 @@ Conversion en jeu (`LandmarkV2Library`) : unités carte = ((E − minx) / m, (ma
 | `format`, `id`, `name`, `settlement`, `landmark`, `period`, `year`, `seed` | identité ; `landmark` = maquette v1 liée | `seed` : graine du tissu généré |
 | `sources` | titre, auteur, date, URL, licence, `extracted`, usage | `extracted: true` seulement si la licence permet l'usage commercial (OSM, IGN…) ; plans Gallica, Agas/MoEML, Cassini, Open Domesday : `false` (contrôle humain) |
 | `plan` | façades et profondeurs (ville close, faubourgs), largeurs de rue par rang, mélange de maisons, `detail_cell_m` | défauts : 5-8 m × 20-40 m, faubourgs 8-16 × 25-50, cellules de 250 m |
-| `osm_streets` | recette d'extraction OSM : `bbox_lonlat`, `highways`, `exclude`, `main`, `lanes`, `unnamed`, `simplify_m` | voir « Outil » |
+| `osm_streets` | recette d'extraction OSM : `bbox_lonlat`, `highways`, `exclude`, `main`, `lanes`, `alleys`, `unnamed`, `simplify_m` | voir « Outil » ; `alleys` (VH6) garde en venelles les allées et cours nommées cartographiées en chemins piétons (… Alley, Court, Passage, Yard, Row, Churchyard) |
 | `fine_rivers` | noms des fleuves de la carte fine recopiés dans `waters` | défaut : Seine |
 | `waters` | cours d'eau `[dE, dN, largeur]`, `origin` (`rivers_fine`, `osm`, `hand`), `draw` | le fleuve principal vient de la carte fine (`draw: false`, couloir interdit seulement) ; un ruisseau absent de la carte (Robec) est tracé à la main et dessiné (`draw: true`) |
-| `walls` | enceintes : `points`, `closed`, hauteur, épaisseur, tours (espacement, rayon, hauteur), `ditch_m`, `gates` (`name`, `at`, `kind`, `height_m`), dates, `note` | une enceinte ouverte (mur de rive) est une polyligne `closed: false` ; plusieurs enceintes datées possibles (Paris : Philippe Auguste, Charles V à partir de 1356) |
+| `walls` | enceintes : `points`, `closed`, hauteur, épaisseur, tours (espacement, rayon, hauteur), `ditch_m`, `gates` (`name`, `at`, `kind`, `height_m`, dates : Moorgate à partir de 1415), dates, `note` | une enceinte ouverte (mur de rive) est une polyligne `closed: false` ; plusieurs enceintes datées possibles (Paris : Philippe Auguste, Charles V à partir de 1356) |
 | `streets` | rues : `rank` (`main`, `secondary`, `lane`), `width_m`, `origin` (`osm` régénéré par l'outil, `hand` gardé), dates | tracer à la main les rues disparues (percées ultérieures, reconstruction) |
 | `quays` | quais : polyligne, largeur, `kind` | bande pavée sans maisons |
-| `bridges` | `from`, `to`, largeur, hauteur du tablier au-dessus de l'eau, arches, `houses` + `house_span`, `gatehouses_at`, `mills_at`, `chapel_at`, dates | pont habité : maisons des deux côtés du tablier, base = tablier |
+| `bridges` | `from`, `to`, largeur, hauteur du tablier au-dessus de l'eau, arches, `houses` + `house_span`, `gatehouses_at`, `mills_at`, `chapel_at` + `chapel_side`, `drawbridge_at`, `pier_m`, `starling_m`, dates | pont habité : maisons des deux côtés du tablier, base = tablier ; travées libres au pont-levis et à la chapelle ; chapelle sur la pile (base fixe au-dessus de l'eau) ; rampes d'accès jusqu'aux rives basses ; niveaux recalculés avec les pages de relief plus fines (VH6) |
 | `monuments` | gabarit (`model`), `params` en mètres, `at`, `angle_deg`, `clear_m`, dates, `certainty` (`attested`, `probable`, `hypothetical`), `description` | voir « Gabarits » |
 | `districts` | quartiers : `zone` (`intra`, `faubourg`), `polygon`, `density` (part des façades occupées), `houses` (mélange du kit), `roofs` (réservé) | hors de tout quartier, aucune parcelle ; le premier quartier qui contient un point l'emporte |
 | `open_spaces` | places, marchés, parvis, cimetières (aîtres), jardins, prés, cloîtres, grèves | sans maisons ; places pavées ; arbres dans jardins, cimetières, prés |
@@ -75,7 +75,7 @@ de l'emprise), murs prolongés de 8 m sous terre pour les pentes. Longueurs en m
 | `church` | `length_m`, `width_m`, `height_m`, `apse`, `tower` {`at` (`west`, `crossing`), `size`, `height`, `spire_m`} |
 | `abbey` | ceux de `church` + `cloister` {`side` (`north`, `south`), `size`} |
 | `castle` | `ring` [[u, v]…] (u le long de l'axe, v à gauche), `height_m`, `thickness_m`, `tower_radius_m`, `tower_height_m`, `keep` {`at`, `radius_m`, `height_m`}, `halls` [[u, v, longueur, largeur, hauteur, angle°]…] |
-| `belfry` | `size`, `height`, `top` (`pyramid`, `lantern`) |
+| `belfry` | `size`, `height`, `top` (`pyramid`, `lantern`, `turrets` : toit plat et tourelles d'angle, VH6) |
 | `hall` | `length_m`, `width_m`, `height_m` (halle : murs bas, grand toit) |
 | `royal_palace` | `length_m`, `width_m`, `height_m`, `ranges` [[u, v, longueur, largeur, hauteur, angle°]…] |
 | `enclosure` | `length_m`, `width_m`, `height_m`, `ranges` (bâtiments le long des grands côtés) |
@@ -146,6 +146,21 @@ Options : `--no-landmarks-1to1` (rendu d'avant VH4). Captures et mesure :
    ALPAGE pour Paris), jamais en copiant un plan non commercial.
 8. Paris peut remplir `parcels` avec le parcellaire ALPAGE (ODbL) : à implémenter dans
    `LandmarkPlan` (VH5) à la place de `_line_parcels`.
+
+## Londres vers 1340 (VH6)
+
+`data/landmarks_v2/london.json` : origine = ancre de la maquette (Temple), `extent_m` 2 800 (Tour à
+2,4 km à l'est, Westminster et Lambeth à 2 km au sud-ouest). Mur ouvert sur la Tamise (le mur de
+rive romain était ruiné au XIIe s.), de la poterne de Tower Hill au débouché de la Fleet
+(prolongement vers 1280-1320 pour les Dominicains) ; 6 portes + Moorgate datée 1415. Tour :
+deux gabarits `castle` concentriques (tours aux sommets, positions OSM), Tour Blanche en `belfry`
+à tourelles, douves tracées à la main. London Bridge : 19 arches, piles de 7 m et avant-becs,
+maisons, chapelle Saint-Thomas côté aval, pont-levis, deux portes. Westminster : chevet gothique
+d'Henri III + nef romane (jusqu'en 1375, nef gothique ensuite), Westminster Hall, Saint-Étienne,
+tour du Joyau (1366), horloge (1367). Rues OSM avec exclusions (percées du XIXe s., reconstruction
+après 1666 : King William Street, Queen Victoria Street, Cannon Street, etc.) et rues disparues à
+la main (Candlewick Street, King Street de Westminster, Old Change, accès du pont, Snow Hill).
+Suivi : `docs/wip/vh6-londres.md`.
 
 ## Limites connues (VH4)
 
