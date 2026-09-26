@@ -393,7 +393,7 @@ def contact_sheet(
 def lot_spent(ledger) -> Decimal:  # noqa: ANN001
     """Real spend already recorded for the DA5 lot (rows whose subject starts with ``DA5``)."""
     return sum(
-        (entry.actual for entry in ledger.entries if entry.subject.startswith("DA5")),
+        (entry.actual for entry in ledger.entries if entry.subject.startswith("DA5 :")),
         Decimal("0.00"),
     )
 

@@ -92,3 +92,8 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   décor désaturé ; +1,5 à +3,5 % de coût, 0 $. Smoke + pytest 668 OK. Capture combinée DA1/DA1b/
   DA5/DA6 : `docs/img/da/etat_2609_bataille_combinee.jpg`. Limites : saturation automne/bocage
   > 35 % (lumière `BattleAtmosphere`), blé qui ne suit pas la saison.
+- 26/09 : **DA5b fusionné** (ADR 0065 § DA5b) : 156 miniatures d'entité (101 dérivées des
+  illustrations, 55 générées, 2,53 $), marqueurs et cartes d'unité unifiés. Budget DA recalculé
+  après conflit : **7,96 $**. Smoke + pytest 681 OK. Reste du chantier : **DA2** (141 portraits,
+  ≈ 6,4 $, génération à lancer par le joueur) ; suites listées plus haut (Ars nova réelle,
+  saturation automne, traits sans miniature, chevauchements de marqueurs).

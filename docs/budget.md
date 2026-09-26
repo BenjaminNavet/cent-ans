@@ -71,3 +71,6 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 | 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 4,84 $ |
 | 2026-09-26 | OpenRouter | DA3 : marqueurs de carte peints (3 × openai/gpt-5-image-mini) | 0,14 $ | 0,14 $ | 4,98 $ |
 | 2026-09-26 | OpenRouter | DA3 : marqueurs de carte peints (10 × openai/gpt-5-image-mini) | 0,46 $ | 0,45 $ | 5,43 $ |
+| 2026-09-26 | OpenRouter | DA5b : icônes d'entité en miniatures peintes (3 × openai/gpt-5-image-mini) | 0,14 $ | 0,14 $ | 5,57 $ |
+| 2026-09-26 | OpenRouter | DA5b : icônes d'entité en miniatures peintes (28 × openai/gpt-5-image-mini, lot de 52 interrompu par un délai réseau) | 1,28 $ | 1,29 $ | 6,86 $ |
+| 2026-09-26 | OpenRouter | DA5b : icônes d'entité en miniatures peintes (24 × openai/gpt-5-image-mini) | 1,10 $ | 1,10 $ | 7,96 $ |

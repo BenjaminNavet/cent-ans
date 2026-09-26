@@ -770,6 +770,61 @@ def assets_ink_icons(
         console.print(f"[yellow]Sans source[/yellow] : {', '.join(report['missing'])}")
 
 
+@assets_app.command("entity-icons")
+def assets_entity_icons(
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiants à générer seuls (sonde), répétable"
+    ),
+    limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    build_only: bool = typer.Option(
+        False,
+        "--build-only",
+        help="Aucune génération : dérive et encadre les miniatures",
+    ),
+    envelope: float | None = typer.Option(
+        None, "--envelope", help="Enveloppe (défaut : reste du plafond du lot DA5b)"
+    ),
+) -> None:
+    """DA5b : icônes d'entité en miniatures peintes (dérivées des illustrations, sinon générées)."""
+    from decimal import Decimal
+
+    from cent_ans_tools import entity_icons
+    from cent_ans_tools.budget import BudgetLedger
+
+    catalog = entity_icons.load_catalog()
+    if not build_only:
+        spent = entity_icons.lot_spent(BudgetLedger())
+        remaining = Decimal(str(catalog["budget_cap_usd"])) - spent
+        if envelope is not None:
+            remaining = min(remaining, Decimal(str(envelope)))
+        console.print(
+            f"Lot DA5b : {spent:.2f} $ déjà dépensés, enveloppe {remaining:.2f} $"
+        )
+        jobs = entity_icons.plan(catalog, only=only or None, limit=limit)
+        _run_art_batch(
+            jobs,
+            catalog["model"],
+            float(remaining),
+            dry_run,
+            "miniature(s)",
+            entity_icons.BUDGET_SUBJECT,
+            entity_icons.to_raw,
+        )
+        if dry_run:
+            return
+    report = entity_icons.build(catalog)
+    sheet = entity_icons.contact_sheet(catalog)
+    console.print(
+        f"[green]OK[/green] : {len(report['derived'])} dérivée(s), "
+        f"{len(report['generated'])} générée(s) ; planche {sheet}"
+    )
+    if report["missing"]:
+        console.print(f"[yellow]Sans source[/yellow] : {', '.join(report['missing'])}")
+
+
 @assets_app.command("menu-art")
 def assets_menu_art() -> None:
     """Dessine l'illustration du menu (carte ancienne 2560×1440) dans game/assets/ui/."""
