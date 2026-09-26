@@ -35,7 +35,7 @@ pub(crate) fn resolve_turn(state: &mut CampaignState, data: &GameData) -> Vec<Ga
 /// of turn then took 3 to 8 times longer in the A/B runs); it asks for
 /// `QOS_CLASS_USER_INITIATED`.
 #[cfg(target_os = "macos")]
-fn raise_thread_priority() {
+pub(crate) fn raise_thread_priority() {
     /// `QOS_CLASS_USER_INITIATED` from `<sys/qos.h>`.
     const QOS_CLASS_USER_INITIATED: u32 = 0x19;
     extern "C" {
@@ -49,7 +49,7 @@ fn raise_thread_priority() {
 }
 
 #[cfg(not(target_os = "macos"))]
-fn raise_thread_priority() {}
+pub(crate) fn raise_thread_priority() {}
 
 /// An end of turn running on its own thread.
 pub(crate) struct TurnJob {

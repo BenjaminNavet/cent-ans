@@ -13,6 +13,7 @@ use godot::prelude::*;
 
 mod battle_replay;
 mod battle_sim;
+mod battle_step_job;
 mod campaign_sim;
 mod campaign_sim_agents;
 mod campaign_sim_ai_replay;
