@@ -137,7 +137,7 @@ const int FG3_TILE_HAMMERED = 4;
 const int FG3_TILE_WOOD = 5;
 const int FG3_TILE_SKIN = 6;
 const int FG3_TILE_HAIR = 7;
-const float FG3_TILE_SIZE[8] = float[](0.072, 0.024, 0.08, 0.12, 0.16, 0.3, 0.06, 0.05);
+const float FG3_TILE_SIZE[8] = float[](0.1, 0.024, 0.08, 0.12, 0.16, 0.3, 0.06, 0.05);
 // Teints (multipliés par la couleur du sommet) : pâle, clair rosé, hâlé, olivâtre, buriné,
 // brun (bible : variation par soldat).
 const vec3 FG3_SKIN[6] = vec3[](
@@ -565,8 +565,10 @@ void fragment() {
 			} else {
 				at = textureGrad(fine_atlas1, vec3(v_atlas, float(fine_layer)), fg_da1, fg_da2);
 			}
-			// Le v de la carte descend : le repère prend -v.
-			vec3 n = fg3_perturb(NORMAL, fg_dp1, fg_dp2, vec2(fg_da1.x, -fg_da1.y), vec2(fg_da2.x, -fg_da2.y), at.rg * 2.0 - 1.0);
+			// Le v de la carte descend : le repère prend -v. Plates et garnitures : normale de
+			// forme atténuée (le bruit de cuisson des pièces lisses ressortait en bosses).
+			float shape = (code == C_PLATE || code == C_TRIM) ? 0.35 : 1.0;
+			vec3 n = fg3_perturb(NORMAL, fg_dp1, fg_dp2, vec2(fg_da1.x, -fg_da1.y), vec2(fg_da2.x, -fg_da2.y), (at.rg * 2.0 - 1.0) * shape);
 			float mask = at.a;
 			if (v_src == 2) {
 				// Cheval : relief de la robe (passe-haut de la couleur CC0) et occlusion fine.
@@ -575,6 +577,11 @@ void fragment() {
 				mask = 1.0;
 			} else {
 				fg_ao = at.b;
+			}
+			if (code == C_PLATE || code == C_TRIM) {
+				// Acier lisse : l'occlusion cuite (bruitée sur les grandes pièces) garde les creux
+				// profonds seulement.
+				fg_ao = mix(0.7, 1.0, smoothstep(0.25, 0.85, fg_ao));
 			}
 			int tl = -1;
 			float amt = 0.0;
@@ -587,11 +594,11 @@ void fragment() {
 			} else if (code == C_PLATE) {
 				// Martelage : fort sur les casques (masque), léger sur les autres plates.
 				tl = FG3_TILE_HAMMERED;
-				amt = mix(0.12, 0.45, mask);
+				amt = mix(0.05, 0.22, mask);
 				relief = 0.06;
 			} else if (code == C_TRIM) {
 				tl = FG3_TILE_HAMMERED;
-				amt = 0.2;
+				amt = 0.1;
 				relief = 0.06;
 			} else if (code == C_LIVERY || code == C_ARMS || code == C_CLOTH) {
 				tl = FG3_TILE_WEAVE;
@@ -629,7 +636,7 @@ void fragment() {
 				if (code == C_MAIL) {
 					// Mailles lisibles sans être noires : anneaux clairs, creux sombres, moins
 					// métalliques que l'acier plein (pas de reflet du ciel dans la maille serrée).
-					albedo = v_color * mix(0.85, 1.1, v_var.z) * mix(0.38, 1.15, d.b);
+					albedo = v_color * mix(0.85, 1.1, v_var.z) * mix(0.18, 1.2, d.b * d.b);
 					metallic = 0.6;
 					roughness = mix(0.7, 0.32, d.a);
 					fg_ao = mix(0.55, 1.0, fg_ao);
