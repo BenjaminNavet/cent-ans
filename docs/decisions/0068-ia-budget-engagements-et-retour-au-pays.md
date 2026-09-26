@@ -33,17 +33,20 @@ Règles d'IA seulement (`core/crates/ai`), aucune règle d'économie ni de passa
 
 **Budget** (`campaign.rs`)
 
-1. Le revenu net de l'IA retranche ses **engagements** : tributs dus, rançons (échéance
-   annuelle / 4), entretien des agents et Table de la saison passée.
+1. Le revenu net de l'IA retranche ses **engagements** : tributs dus et entretien des agents.
+   Les rançons et la Table (H3) n'y entrent pas : elles ne se paient que si le trésor le peut
+   (premier essai rejeté : compter une rançon faisait licencier à l'Écosse toutes ses garnisons
+   en pleine guerre, et elle disparaissait en difficile).
 2. Une **marge de sécurité** (5 % du revenu brut) est gardée : un bâtiment n'est lancé que si
    son entretien tient dans l'excédent moins cette marge.
 3. L'entretien des bâtiments est **plafonné à 30 % du revenu brut**, sauf ceux qui rapportent
    au moins leur entretien en impôts ou en commerce (ils ne se licencient pas quand les temps
    changent).
-4. **Impôt Haut** : une fois levé, il reste tant qu'au taux normal le budget retomberait sous la
-   marge et que la réserve (3 saisons) n'est pas refaite, ou tant que le trésor est en dette ;
+4. **Impôt Haut** : une fois levé, il reste tant qu'au taux normal le budget serait en déficit
+   et que le trésor tient moins d'une saison de revenu, ou tant que le trésor est en dette ;
    dans ces deux cas le trouble toléré monte de 30 à 40 (le garde-fou « province au bord de la
-   révolte » reste).
+   révolte » reste). Premier essai rejeté (garder Haut jusqu'à la réserve de 3 saisons) : 44-47 %
+   des échantillons en impôt Haut, au-delà de la cible E2 (< 40 %).
 5. Pas de monnaie affaiblie quand les bâtiments prennent plus d'un tiers du revenu brut (au
    lieu de la moitié).
 
@@ -67,13 +70,19 @@ Règles d'IA seulement (`core/crates/ai`), aucune règle d'économie ni de passa
 
 ## Conséquences
 
-Mesures : voir `docs/wip/eq5-ia-banqueroutes-intrusions.md` (mêmes graines qu'EQ4).
+Mesures détaillées : `docs/wip/eq5-ia-banqueroutes-intrusions.md` (mêmes graines qu'EQ4 ;
+`century_probe` 464 tours, normal et difficile 10 graines, facile et très difficile 5).
 
-- Banqueroutes : 0,42 / 0,17 / 0,19 / 0,09 → ~0,02-0,05 / faction / décennie de facile à très
-  difficile ; plus aucune faction au-dessus de ~1,5 / décennie sur une graine.
-- Intrusions divisées par deux au niveau normal, par trois en difficile et très difficile ;
-  moins en facile, où l'IA, désormais solvable, fait deux fois plus de sièges.
-- Effet de bord : IA plus riche, plus active (sièges engagés +40-50 %) ; guerre FR-EN, trêves,
-  révoltes, boule de neige et survie des majeures restent dans les bandes d'EQ4.
-- Coût : le tour de l'IA est ~40 % plus long (plus d'armées ; table de retour au pays et
-  échantillonnage des routes, mis en cache par tour).
+| Mesure | Facile | Normal | Difficile | Très difficile |
+|---|---|---|---|---|
+| Banqueroutes / fac. / déc. (EQ4 → EQ5) | 0,42 → 0,08 | 0,17 → 0,04 | 0,19 → 0,03 | 0,09 → 0,01 |
+| Pire faction sur une graine (/ déc.) | 31,4 → 1,1 | 6,7 → 1,1 | 7,8 → 2,0 | 5,4 → 0,3 |
+| Saisons d'intrusion / siècle | 593 → 251 | 1312 → 474 | 2216 → 657 | 2472 → 745 |
+| Casus belli d'intrusion / siècle | 48 → 17 | 101 → 43 | 177 → 54 | 193 → 73 |
+
+- Guerre FR-EN, trêves, révoltes, boule de neige, survie des majeures en 1400 : dans les bandes
+  d'EQ4 en moyenne (détail et écarts par graine dans la note de travail).
+- `balance_probe` 16 × 200 : impôt Haut 30-32 % (< 40 %), banqueroutes 0,07-0,11, révoltes
+  3,5-4,2 par partie (bas de la bande 4-10).
+- Coût : le tour de l'IA est un peu plus long (table de retour au pays et échantillonnage des
+  routes, mis en cache par tour ; atteignabilité par composante de la grille, sans A*).
