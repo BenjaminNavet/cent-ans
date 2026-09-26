@@ -1,32 +1,44 @@
 # SZ1 — haute montagne au palier vallée (défaut S1 de ZG7c)
 
-Branche `sz1-montagnes` (depuis `main`, worktree d'agent). Liens symboliques non versionnés :
-`data/map/pyramid`, `tools/geo/raw` → dépôt principal. Dylib : `CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/core/target`.
+Branche `sz1-montagnes` (depuis `main`, worktree d'agent ; `main` fusionnée après SZ2). Liens
+symboliques non versionnés : `data/map/pyramid`, `tools/geo/raw` → dépôt principal. Dylib :
+`CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/core/target` puis copie dans `game/bin/`.
+Attention : cible cargo partagée entre worktrees ; si `godot-bridge` ne voit pas les champs SZ1 de
+`vegetation`, `touch core/crates/vegetation/src/lib.rs` et recompiler (artefact d'un autre worktree).
 
 ## Constat (captures `docs/img/sz1/avant_*`)
 Pyrénées, Alpes, Galles au palier vallée (d = 6, ×3,41) : versants en murs, caméra au fond des
 canyons. L'amplitude régionale (2 000 m et plus) × 3,4 fait 10 unités de haut pour une caméra à 6.
 
-## Approche
+## Solution
 Écrasement des montagnes dans la fonction unique de hauteur affichée :
-`y = s·(h − c(s)·k(x,z)·max(h − base, 0) + g·max(h − fond, 0))`
+`y = s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − fond, 0))`, `K = c(s)·k(x, z)`
 - `base` : fond non plafonné (min + flou, déjà calculé par `ReliefFloor`) ;
-- `k` : facteur d'écrasement par cellule, fonction de l'amplitude régionale A = sommets − base
-  (genou `mountain_knee_m`, pente `mountain_ratio`) : 0 pour collines, falaises, plaines ;
-- `c(s)` : poids selon l'échelle (0 en vue stratégique → 1 au palier vallée).
-Fond, base et k dans une seule texture RGBF (`campaign_relief_floor`) et la grille partagée
-(GDScript `MapData`, Rust `vegetation`).
+- `k` : facteur par cellule selon l'amplitude régionale A = sommets − base (genou 350 m, pente 0,3,
+  borne 0,55) : 0 pour collines, falaises, plaines (A ≤ 290 m mesuré) ;
+- `c(s)` : 0 en vue stratégique → 1 dès ×3,5 (palier vallée et site).
+Champs dans une texture RGBF (`campaign_relief_floor`) et la grille partagée (GDScript `MapData`,
+Rust `vegetation` + `VegetationScatter.set_relief_fields`). Caméra : garde au-dessus des crêtes sur
+des cercles de rayon 0,5 × distance autour d'elle et du point visé (`close_camera.tres`).
+Réglages : `relief_exaggeration.tres` (`mountain_*`), `close_camera.tres` (`crest_*`). Drapeau
+`--no-mountain-squash` pour les captures « avant ».
 
 ## État
-- [x] Captures « avant » (`docs/img/sz1/avant_*`)
-- [x] Squelette : réglages dans `ReliefExaggerationProfile` / `relief_exaggeration.tres`
-- [x] ReliefFloor : champs base + k ; MapData : formule, inverse, poids publié
-- [x] Shaders : `campaign_relief.gdshaderinc`, `relief_quadtree.gdshaderinc`
-- [x] Rust vegetation + pont ; job d'arbres
-- [x] Bornes AABB (quadtree, villes)
-- [ ] Caméra au-dessus des crêtes voisines
-- [ ] Test `sz1_mountain_test.gd` ; zg4/zg8/smoke ; cargo
-- [ ] Captures après + itération
+- [x] Captures « avant » (`docs/img/sz1/avant_*`, `--no-mountain-squash --no-crest`)
+- [x] Réglages, ReliefFloor (base, k, amplitude), MapData (formule, inverse, poids publié)
+- [x] Shaders `campaign_relief.gdshaderinc` (gradient compris), `relief_quadtree.gdshaderinc`
+- [x] Rust vegetation + pont (`set_relief_fields`, `relief_squash`), test Rust
+- [x] Bornes AABB (quadtree, villes, E0 cuits)
+- [x] Caméra au-dessus des crêtes voisines
+- [x] Test `sz1_mountain_test.gd` ; zg2/zg4/zg8/smoke OK ; clippy OK
+- [x] Docs : `godot-map.md`, addendum ADR 0036
+- [ ] Captures « après » sur le relief SZ2 (main fusionnée) + cargo test complet
 
 ## Prochaine étape
-Première case non cochée.
+Première case non cochée, puis rapport à l'orchestrateur (ne pas fusionner dans main).
+
+## Limites
+- Galles (vallée de Conwy) : amplitude 960 m sur des vallées étroites, reste un paysage de montagne
+  encaissé au palier site (caméra à 1,1 km d'un versant de 400 m) ; plus de murs jusqu'au bord haut.
+- Alpes au palier site : relief adouci (≈ ×1,3 du vrai) ; `mountain_squash_max` règle le compromis.
+- Arbres géants près de la caméra : défaut S4 (lot SZ4), hors lot.
