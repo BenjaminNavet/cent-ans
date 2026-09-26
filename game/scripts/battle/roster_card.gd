@@ -19,6 +19,7 @@ var faction := ""
 var illustration: Texture2D = null
 var heraldry: Texture2D = null
 var class_icon: Texture2D = null
+var class_icon_is_miniature: bool = false  # DA5b : miniature peinte encadrée
 var losses: int = -1  # -1 : carte d'avant-bataille
 var killed: int = 0
 var fate: String = ""
@@ -41,6 +42,7 @@ func setup(data: Dictionary, color: Color, faction_id: String, is_general: bool 
 	var library := HudStyle.icon_library()
 	if library != null:
 		class_icon = library.call("get_icon", type_id, "unit")
+		class_icon_is_miniature = library.has_method("is_entity") and bool(library.call("is_entity", type_id, "unit"))
 	_refresh_tooltip()
 	return self
 
@@ -92,8 +94,11 @@ func _draw() -> void:
 			draw_texture_rect(class_icon, Rect2(center - Vector2(icon, icon) * 0.5, Vector2(icon, icon)), false)
 	draw_rect(Rect2(0, 0, size.x, 4), side_color)
 	if illustration != null and class_icon != null:
-		draw_rect(Rect2(1, 5, 16, 16), Color(0.95, 0.9, 0.78, 0.92))
-		draw_texture_rect(class_icon, Rect2(2, 6, 14, 14), false)
+		if class_icon_is_miniature:
+			draw_texture_rect(class_icon, Rect2(1, 5, 20, 20), false)
+		else:
+			draw_rect(Rect2(1, 5, 16, 16), Color(0.95, 0.9, 0.78, 0.92))
+			draw_texture_rect(class_icon, Rect2(2, 6, 14, 14), false)
 	var soldiers := int(unit.get("soldiers", 0))
 	var max_soldiers := maxi(int(unit.get("max_soldiers", soldiers)), 1)
 	# Bilan : la part tombée voilée de rouge, depuis le haut.

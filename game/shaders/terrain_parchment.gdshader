@@ -75,6 +75,7 @@ float border_d(vec2 uv) {
 }
 
 #include "res://shaders/parchment_map.gdshaderinc"
+#include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -87,6 +88,7 @@ void fragment() {
 	vec3 albedo;
 	vec3 emission;
 	parchment_only(p, uv, footprint, albedo, emission);
+	fr1_borders(p, uv, footprint, albedo, emission);  // FR1
 	ALBEDO = albedo;
 	EMISSION = emission;
 	ROUGHNESS = 1.0;

@@ -1,6 +1,6 @@
 # CT1 — tour de l'IA à la Total War : marches visibles, caméra qui suit, vitesse (état)
 
-Branche : `ct1-ai-turn-replay` (worktree `agent-ac735a99732c7b4b8`), partie de main `168b1acf`. ADR : `docs/decisions/0070-relecture-du-tour-ia.md`.
+Branche : `ct1-ai-turn-replay` (worktree `agent-ac735a99732c7b4b8`), partie de main `168b1acf`. ADR : `docs/decisions/0073-relecture-du-tour-ia.md`.
 
 ## État
 
@@ -12,7 +12,7 @@ Branche : `ct1-ai-turn-replay` (worktree `agent-ac735a99732c7b4b8`), partie de m
 - [x] Test Godot `game/tests/ct1_ai_turn_test.gd` (vert).
 - [x] Captures `docs/audit/captures/ct1/suivi_{1,2,3}.png` (`game/tests/ct1_capture.gd`, fenêtre).
 - [x] Alliés et vassaux jamais suivis (sauf bataille/siège contre le joueur).
-- [x] ADR 0070, doc `docs/godot-map.md` § CT1.
+- [x] ADR 0073, doc `docs/godot-map.md` § CT1.
 - [x] Vérifications complètes (fmt, clippy, cargo test, pytest 673, smoke, M4, M5a, CT1), main fusionné (b04b88ce).
 
 ## Mesures
@@ -23,4 +23,4 @@ Branche : `ct1-ai-turn-replay` (worktree `agent-ac735a99732c7b4b8`), partie de m
 
 ## Prochaine étape
 
-Terminé, en attente de fusion par l'orchestrateur (renuméroter l'ADR si 0070 est pris).
+Terminé, en attente de fusion par l'orchestrateur (renuméroter l'ADR si 0073 est pris).
