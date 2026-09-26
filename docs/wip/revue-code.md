@@ -33,7 +33,7 @@ Branche `fix/code-review`, scope `core/crates/sim-battle` seulement. Tests de r�
 Build : profil cargo isolé `review` (voir « Points ouverts ») dans le dossier target partagé.
 Référence d'équilibre avant correctifs (sondages ignorés) : ep7 `survey_all` Crécy 25/30,
 Azincourt 28/30, Poitiers 20/30 ; ep9b `survey` attaquant 4/10.
-Prochaine étape : rapport, isoler l'effet d'équilibre des n° 1-2.
+État : terminé (7 constats traités, aucun écarté).
 
 | n° | statut | commit | note |
 |----|--------|--------|------|
@@ -43,7 +43,38 @@ Prochaine étape : rapport, isoler l'effet d'équilibre des n° 1-2.
 | 4 | corrigé | a7013d12 | `Battlefield::clamp_inside` + `ai::FIELD_MARGIN` (10 m, comme `View::move_to`) : dégagement sur pieux et retrait des saignés (`react`), repli des tireurs (~1799, non cité mais même défaut), second flanc de `coordinate_flanks`. Effet : ces ordres, auparavant refusés près du bord, s'exécutent. |
 | 5 | corrigé | a2e13448 | `primary_opponent` ignore les contacts morts depuis le calcul des contacts (tirs, feu, huile) ; le coup va à un ennemi vivant au contact au lieu d'être perdu. |
 | 6 | corrigé | a6a3785f | perf, comportement identique : libellés de déroute/ralliement formatés après la boucle pour les seuls régiments concernés ; `standard_rules` en `Arc` (clone = compteur) ; `faction_name` du camp cloné seulement à l'alarme ou au pillage. Pas de nouveau test (messages couverts par battle.rs, ep10_rout.rs). |
-| 7 | corrigé (partiel) | (ce commit) | `ObstacleCache` (sim/pathing.rs) : verdict libre/bloqué de chaque cellule gardé entre les A*, par camp, rempli paresseusement (pas de précalcul complet : un incendie qui change la signature coûterait sinon une grille entière d'un coup), invalidé par la signature des chemins et par `siege_mut`/`set_scenario`. Le mémo local de `search` disparaît. Non fait (comportement modifié) : réutiliser l'A* quand le but bouge peu, string pulling moins fréquent. Gain non chiffré proprement (machine chargée ; siege/f5/sg1 pas plus lents). |
+| 7 | corrigé (partiel) | 752df541 | `ObstacleCache` (sim/pathing.rs) : verdict libre/bloqué de chaque cellule gardé entre les A*, par camp, rempli paresseusement (pas de précalcul complet : un incendie qui change la signature coûterait sinon une grille entière d'un coup), invalidé par la signature des chemins et par `siege_mut`/`set_scenario`. Le mémo local de `search` disparaît. Non fait (comportement modifié) : réutiliser l'A* quand le but bouge peu, string pulling moins fréquent. Gain non chiffré proprement (machine chargée ; siege/f5/sg1 pas plus lents). |
+
+Tests : `cargo test -p sim-battle` vert après chaque correctif (39 binaires, 7 tests de régression
+dans `review_fixes.rs`), clippy `-D warnings` propre.
+
+Équilibre (sondages ignorés, 30 graines ; entre parenthèses les graines 1-20 des tests asserts) :
+| état | Crécy | Azincourt | Poitiers | ep9b attaquant |
+|---|---|---|---|---|
+| avant | 25/30 (18/20) | 28/30 (18/20) | 20/30 | 4/10 |
+| n° 1-7 | 23/30 (16/20) | 28/30 (18/20) | 19/30 | 4/10 |
+| n° 1-7 sans le n° 2 | 24/30 | 26/30 | 21/30 | — |
+Écarts de ±2 graines sans cause unique (bruit des scénarios IA) ; tous les tests d'équilibre
+passent, Azincourt reste sous sa limite haute (18/20, limite 19). Rien à recaler.
+
+Rejeux (EP13) : format inchangé, `REPLAY_FORMAT` non incrémenté (seule la structure du fichier
+compte) ; `the_sample_file_still_reads` ne rejoue pas l'échantillon, il reste vert. Un rejeu
+enregistré avant ces correctifs divergera et affichera « règles changées », comme après EP11.
+
+Points ouverts :
+- Dossier target partagé : `gp-review` et le dépôt principal produisent les MÊMES noms d'artefacts
+  (chemins relatifs à l'espace de travail) dans `game_project/core/target/debug` ; une session sur
+  le checkout principal écrase la lib de `gp-review` et inversement (j'ai vu mes tests tourner sur
+  la lib du dépôt principal). J'ai travaillé dans un profil isolé :
+  `cargo test --config 'profile.review.inherits="dev"' --config 'profile.review.debug=0' --profile review`
+  (`target/review`, ~350 Mo). Les résultats de sim-campaign sur `gp-review` en `debug` sont à
+  revérifier ainsi.
+- `disengaging` retombe à faux au premier pas hors contact ; en pivotant, le rectangle du
+  régiment peut retoucher l'ennemi et `enter_melee` annule alors la destination (vu en test :
+  le décrochage en arrière d'une mêlée à la limite du contact échoue). Défaut préexistant, non
+  corrigé (règle de mêlée, équilibre).
+- n° 2 : les pavois attendent encore, à portée, une cible cachée (branche `pavise`), sans
+  s'approcher.
 
 ## Corrections tools
 
