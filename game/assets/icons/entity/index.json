@@ -1,0 +1,943 @@
+{
+ "source": "data/ui/entity_icons.json (lot DA5b)",
+ "crops": {
+  "unit_bombard": [
+   0.3,
+   0.55,
+   0.9
+  ],
+  "unit_breton_knights": [
+   0.453,
+   0.55,
+   0.9
+  ],
+  "unit_coutiliers": [
+   0.453,
+   0.517,
+   0.9
+  ],
+  "unit_crossbowmen": [
+   0.466,
+   0.55,
+   0.9
+  ],
+  "unit_culveriners": [
+   0.459,
+   0.55,
+   0.9
+  ],
+  "unit_ecorcheurs": [
+   0.559,
+   0.55,
+   0.9
+  ],
+  "unit_english_retinue": [
+   0.503,
+   0.55,
+   0.9
+  ],
+  "unit_flemish_pikemen": [
+   0.466,
+   0.55,
+   0.9
+  ],
+  "unit_francs_archers": [
+   0.416,
+   0.55,
+   0.9
+  ],
+  "unit_gascon_crossbowmen": [
+   0.541,
+   0.55,
+   0.9
+  ],
+  "unit_genoese_crossbowmen": [
+   0.534,
+   0.55,
+   0.9
+  ],
+  "unit_goedendag_militia": [
+   0.466,
+   0.55,
+   0.9
+  ],
+  "unit_hobelars": [
+   0.403,
+   0.55,
+   0.9
+  ],
+  "unit_jinetes": [
+   0.516,
+   0.55,
+   0.9
+  ],
+  "unit_knights": [
+   0.74,
+   0.55,
+   0.9
+  ],
+  "unit_longbowmen": [
+   0.559,
+   0.55,
+   0.9
+  ],
+  "unit_mangonel": [
+   0.541,
+   0.55,
+   0.9
+  ],
+  "unit_men_at_arms_foot": [
+   0.534,
+   0.539,
+   0.9
+  ],
+  "unit_mounted_archers": [
+   0.3,
+   0.5,
+   0.95
+  ],
+  "unit_mounted_sergeants": [
+   0.597,
+   0.55,
+   0.9
+  ],
+  "unit_ordonnance_gendarmes": [
+   0.541,
+   0.55,
+   0.9
+  ],
+  "unit_routiers": [
+   0.503,
+   0.55,
+   0.9
+  ],
+  "unit_scottish_spearmen": [
+   0.434,
+   0.55,
+   0.9
+  ],
+  "unit_siege_tower": [
+   0.2,
+   0.5,
+   1.0
+  ],
+  "unit_trebuchet": [
+   0.516,
+   0.494,
+   0.9
+  ],
+  "unit_urban_militia": [
+   0.578,
+   0.55,
+   0.9
+  ],
+  "unit_welsh_spearmen": [
+   0.566,
+   0.55,
+   0.9
+  ],
+  "bld_abbey": [
+   0.428,
+   0.517,
+   0.9
+  ],
+  "bld_apothecary": [
+   0.478,
+   0.55,
+   0.9
+  ],
+  "bld_archery_butts": [
+   0.591,
+   0.55,
+   0.9
+  ],
+  "bld_armoury": [
+   0.541,
+   0.539,
+   0.9
+  ],
+  "bld_artillery_bastion": [
+   0.609,
+   0.45,
+   0.9
+  ],
+  "bld_castle": [
+   0.472,
+   0.55,
+   0.9
+  ],
+  "bld_cathedral": [
+   0.447,
+   0.539,
+   0.9
+  ],
+  "bld_counting_house": [
+   0.459,
+   0.45,
+   0.9
+  ],
+  "bld_fair": [
+   0.491,
+   0.55,
+   0.9
+  ],
+  "bld_forge": [
+   0.541,
+   0.55,
+   0.9
+  ],
+  "bld_guild_hall": [
+   0.441,
+   0.55,
+   0.9
+  ],
+  "bld_herb_garden": [
+   0.72,
+   0.55,
+   0.9
+  ],
+  "bld_hotel_dieu": [
+   0.347,
+   0.55,
+   0.9
+  ],
+  "bld_market": [
+   0.491,
+   0.55,
+   0.9
+  ],
+  "bld_muster_field": [
+   0.516,
+   0.55,
+   0.9
+  ],
+  "bld_palisade": [
+   0.591,
+   0.55,
+   0.9
+  ],
+  "bld_parish_church": [
+   0.534,
+   0.55,
+   0.9
+  ],
+  "bld_port": [
+   0.25,
+   0.55,
+   0.9
+  ],
+  "bld_scriptorium": [
+   0.341,
+   0.55,
+   0.9
+  ],
+  "bld_siege_workshop": [
+   0.522,
+   0.55,
+   0.9
+  ],
+  "bld_stables": [
+   0.378,
+   0.539,
+   0.9
+  ],
+  "bld_stone_walls": [
+   0.522,
+   0.55,
+   0.9
+  ],
+  "bld_tin_blowing_house": [
+   0.428,
+   0.517,
+   0.9
+  ],
+  "bld_university": [
+   0.453,
+   0.506,
+   0.9
+  ],
+  "bld_vineyard_press": [
+   0.447,
+   0.494,
+   0.9
+  ],
+  "bld_water_mill": [
+   0.22,
+   0.5,
+   0.95
+  ],
+  "bld_water_supply": [
+   0.491,
+   0.483,
+   0.9
+  ],
+  "bld_weaving_workshop": [
+   0.86,
+   0.6,
+   0.8
+  ],
+  "bld_windmill": [
+   0.472,
+   0.528,
+   0.9
+  ],
+  "tech_aqua_vitae": [
+   0.703,
+   0.472,
+   0.9
+  ],
+  "tech_artillery_fortification": [
+   0.497,
+   0.55,
+   0.9
+  ],
+  "tech_barber_surgeons": [
+   0.603,
+   0.55,
+   0.9
+  ],
+  "tech_bombards": [
+   0.747,
+   0.55,
+   0.9
+  ],
+  "tech_bookkeeping": [
+   0.453,
+   0.55,
+   0.9
+  ],
+  "tech_brigandine": [
+   0.403,
+   0.55,
+   0.9
+  ],
+  "tech_chauliac_surgery": [
+   0.559,
+   0.539,
+   0.9
+  ],
+  "tech_coat_of_plates": [
+   0.359,
+   0.55,
+   0.9
+  ],
+  "tech_compagnies_d_ordonnance": [
+   0.522,
+   0.55,
+   0.9
+  ],
+  "tech_crossbow_windlass": [
+   0.709,
+   0.55,
+   0.9
+  ],
+  "tech_dismounted_tactics": [
+   0.472,
+   0.55,
+   0.9
+  ],
+  "tech_double_entry": [
+   0.334,
+   0.55,
+   0.9
+  ],
+  "tech_field_artillery": [
+   0.516,
+   0.506,
+   0.9
+  ],
+  "tech_francs_archers": [
+   0.559,
+   0.528,
+   0.9
+  ],
+  "tech_full_plate": [
+   0.534,
+   0.55,
+   0.9
+  ],
+  "tech_gothic_flamboyant": [
+   0.366,
+   0.55,
+   0.9
+  ],
+  "tech_gunpowder": [
+   0.684,
+   0.506,
+   0.9
+  ],
+  "tech_hand_cannon_drill": [
+   0.484,
+   0.55,
+   0.9
+  ],
+  "tech_handgonnes": [
+   0.672,
+   0.55,
+   0.9
+  ],
+  "tech_hanseatic_trade": [
+   0.547,
+   0.55,
+   0.9
+  ],
+  "tech_herb_garden": [
+   0.647,
+   0.55,
+   0.9
+  ],
+  "tech_hospital_reform": [
+   0.359,
+   0.55,
+   0.9
+  ],
+  "tech_humoral_theory": [
+   0.691,
+   0.55,
+   0.9
+  ],
+  "tech_leprosaria": [
+   0.372,
+   0.55,
+   0.9
+  ],
+  "tech_letters_of_credit": [
+   0.691,
+   0.55,
+   0.9
+  ],
+  "tech_longbow_drill": [
+   0.453,
+   0.55,
+   0.9
+  ],
+  "tech_masonry": [
+   0.441,
+   0.55,
+   0.9
+  ],
+  "tech_montpellier": [
+   0.453,
+   0.55,
+   0.9
+  ],
+  "tech_paper_mills": [
+   0.347,
+   0.55,
+   0.9
+  ],
+  "tech_pavise": [
+   0.709,
+   0.55,
+   0.9
+  ],
+  "tech_plague_consilia": [
+   0.653,
+   0.55,
+   0.9
+  ],
+  "tech_printing_press": [
+   0.497,
+   0.55,
+   0.9
+  ],
+  "tech_quarantine": [
+   0.528,
+   0.539,
+   0.9
+  ],
+  "tech_regimen_sanitatis": [
+   0.391,
+   0.494,
+   0.9
+  ],
+  "tech_royal_taxation": [
+   0.553,
+   0.539,
+   0.9
+  ],
+  "tech_siege_engineering": [
+   0.622,
+   0.55,
+   0.9
+  ],
+  "tech_soporific_sponge": [
+   0.447,
+   0.528,
+   0.9
+  ],
+  "tech_standing_companies": [
+   0.284,
+   0.55,
+   0.9
+  ],
+  "tech_theriac": [
+   0.503,
+   0.55,
+   0.9
+  ],
+  "tech_three_field_rotation": [
+   0.472,
+   0.55,
+   0.9
+  ],
+  "tech_universities": [
+   0.659,
+   0.55,
+   0.9
+  ],
+  "tech_urban_sanitation": [
+   0.478,
+   0.55,
+   0.9
+  ],
+  "tech_water_mills": [
+   0.266,
+   0.472,
+   0.9
+  ],
+  "tech_willow_bark": [
+   0.447,
+   0.55,
+   0.9
+  ],
+  "tech_windmills": [
+   0.497,
+   0.55,
+   0.9
+  ],
+  "unit_category_infantry": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "unit_category_archer": [
+   0.459,
+   0.522,
+   0.92
+  ],
+  "unit_category_ranged": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "unit_category_cavalry": [
+   0.541,
+   0.459,
+   0.92
+  ],
+  "unit_category_siege": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "unit_category_ram": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "unit_category_tower": [
+   0.541,
+   0.459,
+   0.92
+  ],
+  "bld_collegiate_church": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_agronome": [
+   0.528,
+   0.541,
+   0.92
+  ],
+  "skill_archerie": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_batisseur": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_beau_parleur": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_bon_justicier": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_capitaine_d_elite": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_chancelier": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_chevauchee": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_confesseur": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_courtisan": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_discipline": [
+   0.497,
+   0.516,
+   0.92
+  ],
+  "skill_entremetteur": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_espion_a_gages": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_gardien_de_la_paix": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_grand_intendant": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_hardiesse": [
+   0.459,
+   0.459,
+   0.92
+  ],
+  "skill_intendant": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_legende_de_la_cour": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_logistique_militaire": [
+   0.491,
+   0.541,
+   0.92
+  ],
+  "skill_maitre_des_sieges": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_maitre_des_travaux": [
+   0.541,
+   0.459,
+   0.92
+  ],
+  "skill_mecene": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_orateur_des_etats": [
+   0.528,
+   0.541,
+   0.92
+  ],
+  "skill_ordre_de_bataille": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_piete": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_reformateur_fiscal": [
+   0.497,
+   0.484,
+   0.92
+  ],
+  "skill_saint_protecteur": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_stratege": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "skill_tir_a_volonte": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "skill_urbaniste": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "res_cloth": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "res_fish": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "res_iron": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "res_salt": [
+   0.497,
+   0.541,
+   0.92
+  ],
+  "res_stone": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "res_tin": [
+   0.459,
+   0.459,
+   0.92
+  ],
+  "res_wheat": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "res_wine": [
+   0.503,
+   0.491,
+   0.92
+  ],
+  "res_wood": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "res_wool": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "diet_bread_pottage": [
+   0.491,
+   0.491,
+   0.92
+  ],
+  "diet_dairy": [
+   0.541,
+   0.541,
+   0.92
+  ],
+  "diet_lenten_fish": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "diet_meat_salting": [
+   0.459,
+   0.541,
+   0.92
+  ],
+  "diet_pulses": [
+   0.541,
+   0.459,
+   0.92
+  ],
+  "diet_spiced_table": [
+   0.497,
+   0.459,
+   0.92
+  ],
+  "diet_wine_bread": [
+   0.497,
+   0.497,
+   0.92
+  ]
+ },
+ "icons": {
+  "bld_abbey": "bld_abbey.png",
+  "bld_apothecary": "bld_apothecary.png",
+  "bld_archery_butts": "bld_archery_butts.png",
+  "bld_armoury": "bld_armoury.png",
+  "bld_artillery_bastion": "bld_artillery_bastion.png",
+  "bld_castle": "bld_castle.png",
+  "bld_cathedral": "bld_cathedral.png",
+  "bld_collegiate_church": "bld_collegiate_church.png",
+  "bld_counting_house": "bld_counting_house.png",
+  "bld_fair": "bld_fair.png",
+  "bld_forge": "bld_forge.png",
+  "bld_guild_hall": "bld_guild_hall.png",
+  "bld_herb_garden": "bld_herb_garden.png",
+  "bld_hotel_dieu": "bld_hotel_dieu.png",
+  "bld_market": "bld_market.png",
+  "bld_muster_field": "bld_muster_field.png",
+  "bld_palisade": "bld_palisade.png",
+  "bld_parish_church": "bld_parish_church.png",
+  "bld_port": "bld_port.png",
+  "bld_scriptorium": "bld_scriptorium.png",
+  "bld_siege_workshop": "bld_siege_workshop.png",
+  "bld_stables": "bld_stables.png",
+  "bld_stone_walls": "bld_stone_walls.png",
+  "bld_tin_blowing_house": "bld_tin_blowing_house.png",
+  "bld_university": "bld_university.png",
+  "bld_vineyard_press": "bld_vineyard_press.png",
+  "bld_water_mill": "bld_water_mill.png",
+  "bld_water_supply": "bld_water_supply.png",
+  "bld_weaving_workshop": "bld_weaving_workshop.png",
+  "bld_windmill": "bld_windmill.png",
+  "diet_bread_pottage": "diet_bread_pottage.png",
+  "diet_dairy": "diet_dairy.png",
+  "diet_lenten_fish": "diet_lenten_fish.png",
+  "diet_meat_salting": "diet_meat_salting.png",
+  "diet_pulses": "diet_pulses.png",
+  "diet_spiced_table": "diet_spiced_table.png",
+  "diet_wine_bread": "diet_wine_bread.png",
+  "res_cloth": "res_cloth.png",
+  "res_fish": "res_fish.png",
+  "res_iron": "res_iron.png",
+  "res_salt": "res_salt.png",
+  "res_stone": "res_stone.png",
+  "res_tin": "res_tin.png",
+  "res_wheat": "res_wheat.png",
+  "res_wine": "res_wine.png",
+  "res_wood": "res_wood.png",
+  "res_wool": "res_wool.png",
+  "skill_agronome": "skill_agronome.png",
+  "skill_archerie": "skill_archerie.png",
+  "skill_batisseur": "skill_batisseur.png",
+  "skill_beau_parleur": "skill_beau_parleur.png",
+  "skill_bon_justicier": "skill_bon_justicier.png",
+  "skill_capitaine_d_elite": "skill_capitaine_d_elite.png",
+  "skill_chancelier": "skill_chancelier.png",
+  "skill_chevauchee": "skill_chevauchee.png",
+  "skill_confesseur": "skill_confesseur.png",
+  "skill_courtisan": "skill_courtisan.png",
+  "skill_discipline": "skill_discipline.png",
+  "skill_entremetteur": "skill_entremetteur.png",
+  "skill_espion_a_gages": "skill_espion_a_gages.png",
+  "skill_gardien_de_la_paix": "skill_gardien_de_la_paix.png",
+  "skill_grand_intendant": "skill_grand_intendant.png",
+  "skill_hardiesse": "skill_hardiesse.png",
+  "skill_intendant": "skill_intendant.png",
+  "skill_legende_de_la_cour": "skill_legende_de_la_cour.png",
+  "skill_logistique_militaire": "skill_logistique_militaire.png",
+  "skill_maitre_des_sieges": "skill_maitre_des_sieges.png",
+  "skill_maitre_des_travaux": "skill_maitre_des_travaux.png",
+  "skill_mecene": "skill_mecene.png",
+  "skill_orateur_des_etats": "skill_orateur_des_etats.png",
+  "skill_ordre_de_bataille": "skill_ordre_de_bataille.png",
+  "skill_piete": "skill_piete.png",
+  "skill_reformateur_fiscal": "skill_reformateur_fiscal.png",
+  "skill_saint_protecteur": "skill_saint_protecteur.png",
+  "skill_stratege": "skill_stratege.png",
+  "skill_tir_a_volonte": "skill_tir_a_volonte.png",
+  "skill_urbaniste": "skill_urbaniste.png",
+  "tech_aqua_vitae": "tech_aqua_vitae.png",
+  "tech_artillery_fortification": "tech_artillery_fortification.png",
+  "tech_barber_surgeons": "tech_barber_surgeons.png",
+  "tech_bombards": "tech_bombards.png",
+  "tech_bookkeeping": "tech_bookkeeping.png",
+  "tech_brigandine": "tech_brigandine.png",
+  "tech_chauliac_surgery": "tech_chauliac_surgery.png",
+  "tech_coat_of_plates": "tech_coat_of_plates.png",
+  "tech_compagnies_d_ordonnance": "tech_compagnies_d_ordonnance.png",
+  "tech_crossbow_windlass": "tech_crossbow_windlass.png",
+  "tech_dismounted_tactics": "tech_dismounted_tactics.png",
+  "tech_double_entry": "tech_double_entry.png",
+  "tech_field_artillery": "tech_field_artillery.png",
+  "tech_francs_archers": "tech_francs_archers.png",
+  "tech_full_plate": "tech_full_plate.png",
+  "tech_gothic_flamboyant": "tech_gothic_flamboyant.png",
+  "tech_gunpowder": "tech_gunpowder.png",
+  "tech_hand_cannon_drill": "tech_hand_cannon_drill.png",
+  "tech_handgonnes": "tech_handgonnes.png",
+  "tech_hanseatic_trade": "tech_hanseatic_trade.png",
+  "tech_herb_garden": "tech_herb_garden.png",
+  "tech_hospital_reform": "tech_hospital_reform.png",
+  "tech_humoral_theory": "tech_humoral_theory.png",
+  "tech_leprosaria": "tech_leprosaria.png",
+  "tech_letters_of_credit": "tech_letters_of_credit.png",
+  "tech_longbow_drill": "tech_longbow_drill.png",
+  "tech_masonry": "tech_masonry.png",
+  "tech_montpellier": "tech_montpellier.png",
+  "tech_paper_mills": "tech_paper_mills.png",
+  "tech_pavise": "tech_pavise.png",
+  "tech_plague_consilia": "tech_plague_consilia.png",
+  "tech_printing_press": "tech_printing_press.png",
+  "tech_quarantine": "tech_quarantine.png",
+  "tech_regimen_sanitatis": "tech_regimen_sanitatis.png",
+  "tech_royal_taxation": "tech_royal_taxation.png",
+  "tech_siege_engineering": "tech_siege_engineering.png",
+  "tech_soporific_sponge": "tech_soporific_sponge.png",
+  "tech_standing_companies": "tech_standing_companies.png",
+  "tech_theriac": "tech_theriac.png",
+  "tech_three_field_rotation": "tech_three_field_rotation.png",
+  "tech_universities": "tech_universities.png",
+  "tech_urban_sanitation": "tech_urban_sanitation.png",
+  "tech_water_mills": "tech_water_mills.png",
+  "tech_willow_bark": "tech_willow_bark.png",
+  "tech_windmills": "tech_windmills.png",
+  "unit_bombard": "unit_bombard.png",
+  "unit_breton_knights": "unit_breton_knights.png",
+  "unit_category_archer": "unit_category_archer.png",
+  "unit_category_cavalry": "unit_category_cavalry.png",
+  "unit_category_infantry": "unit_category_infantry.png",
+  "unit_category_ram": "unit_category_ram.png",
+  "unit_category_ranged": "unit_category_ranged.png",
+  "unit_category_siege": "unit_category_siege.png",
+  "unit_category_tower": "unit_category_tower.png",
+  "unit_coutiliers": "unit_coutiliers.png",
+  "unit_crossbowmen": "unit_crossbowmen.png",
+  "unit_culveriners": "unit_culveriners.png",
+  "unit_ecorcheurs": "unit_ecorcheurs.png",
+  "unit_english_retinue": "unit_english_retinue.png",
+  "unit_flemish_pikemen": "unit_flemish_pikemen.png",
+  "unit_francs_archers": "unit_francs_archers.png",
+  "unit_gascon_crossbowmen": "unit_gascon_crossbowmen.png",
+  "unit_genoese_crossbowmen": "unit_genoese_crossbowmen.png",
+  "unit_goedendag_militia": "unit_goedendag_militia.png",
+  "unit_hobelars": "unit_hobelars.png",
+  "unit_jinetes": "unit_jinetes.png",
+  "unit_knights": "unit_knights.png",
+  "unit_longbowmen": "unit_longbowmen.png",
+  "unit_mangonel": "unit_mangonel.png",
+  "unit_men_at_arms_foot": "unit_men_at_arms_foot.png",
+  "unit_mounted_archers": "unit_mounted_archers.png",
+  "unit_mounted_sergeants": "unit_mounted_sergeants.png",
+  "unit_ordonnance_gendarmes": "unit_ordonnance_gendarmes.png",
+  "unit_routiers": "unit_routiers.png",
+  "unit_scottish_spearmen": "unit_scottish_spearmen.png",
+  "unit_siege_tower": "unit_siege_tower.png",
+  "unit_trebuchet": "unit_trebuchet.png",
+  "unit_urban_militia": "unit_urban_militia.png",
+  "unit_welsh_spearmen": "unit_welsh_spearmen.png"
+ }
+}

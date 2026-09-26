@@ -208,6 +208,10 @@ func decorate_button(button: Button, id: String, size: int = 20, category: Strin
 	button.add_theme_constant_override("icon_max_width", size)
 	if is_ink(id, category):
 		apply_state_tints(button)
+	elif is_entity(id, category):
+		# DA5b : miniature 128 px ; `expand_icon` la cadre dans la hauteur du bouton (bornée par
+		# `icon_max_width`) sans que sa taille native gonfle la taille minimale du bouton.
+		button.expand_icon = true
 
 
 ## BBCode `[img]` de l'icône (infobulles riches), "" si aucune.
