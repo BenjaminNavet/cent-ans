@@ -174,16 +174,23 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// SG4 (the horse counter-charges enemy horse riding at its shooters,
 /// melee height advantage): digests recomputed on EP9 + SG4, same winners.
 /// EP6: each army's camp stands behind its lines (digests unchanged).
+/// EP10 (ADR 0067, fugitives run to the rear, a routing friend behind shakes
+/// a regiment less): digests recomputed. Seed 3 changes winner: before, the
+/// French men-at-arms gave way at 248 and 262 s beside their routed knights
+/// and crossbowmen and France broke at 406 s; now they hold and the English
+/// line breaks at 245 s. Over seeds 0-63 the French win 34/64 instead of
+/// 29/64 (`ep10_rout::probe_small_battle`). Seed 11: same end, one English
+/// regiment keeps 10 more men.
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "406 Some(Defender) [4, 0, 0, 89, 90, 8, 60, 101, 120, 0]",
+            "245 Some(Attacker) [19, 41, 40, 95, 92, 10, 64, 120, 120, 22]",
         ),
         (
             11,
-            "186 Some(Defender) [7, 66, 43, 48, 92, 24, 78, 112, 120, 35]",
+            "186 Some(Defender) [7, 66, 43, 58, 92, 24, 78, 112, 120, 35]",
         ),
     ];
     for (seed, digest_before) in expected {

@@ -79,11 +79,6 @@ impl RoutRules {
     pub fn bundled() -> &'static RoutRules {
         static RULES: OnceLock<RoutRules> = OnceLock::new();
         RULES.get_or_init(|| {
-            // TEMP EP10 tuning: remove before merge.
-            if let Ok(path) = std::env::var("EP10_RULES") {
-                let text = std::fs::read_to_string(path).unwrap();
-                return serde_json::from_str(&text).unwrap();
-            }
             serde_json::from_str(BUNDLED).expect("data/rules/battle_rout.json is valid")
         })
     }
@@ -202,6 +197,10 @@ mod tests {
         assert!(d.0 < -0.3 && d.1 > 0.0, "{d:?}");
         // A friend on the way is gone round.
         let d = f.direction((0.0, 0.0), rear, [], [(-5.0, 15.0)]);
-        assert!(d.0 > 0.1 && d.1 > 0.5, "{d:?}");
+        assert!(d.0 > 0.05 && d.1 > 0.9, "{d:?}");
+        // Regiments piled on one spot: still a light swerve.
+        let piled = [(0.5, 5.0); 6];
+        let d = f.direction((0.0, 0.0), rear, [], piled);
+        assert!(d.0.abs() <= f.friend_weight + 1e-9 && d.1 > 0.9, "{d:?}");
     }
 }
