@@ -17,3 +17,10 @@ Prochaine étape : trier les constats, corriger les confirmés sur la branche `f
   inter-factions dans la faction de la mère, apply_treaty partiel (mariage), malus otages mal attribué,
   héraut ignore Hold / reste bloqué, ordre des buts de guerre, clone du state dans evaluate(Marriage),
   tribut d'une faction morte, cogues louées coulées, blocus compté double, doublons via JSON.
+- Tranches 2 à 6 reçues (voir les sections « Corrections » dans le worktree ../gp-review, branche fix/code-review).
+
+## Vague 2 — correcteurs (6 agents, worktree ../gp-review)
+sim-campaign (18 pts), sim-battle (7), ai+pont (5), tools Python (4), GDScript bataille (6), GDScript carte/UI (12).
+Déjà fait : 90343b88 fix(save) (chargement raté = sim vide écrasée à l'autosave).
+Reporté : pont get_siege_state / get_soldier_buffers groupés (changement d'API, après la vague 2).
+Intégration : orchestrateur → build.sh + smoke Godot + cargo test, puis ff dans main.
