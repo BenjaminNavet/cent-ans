@@ -5,7 +5,7 @@
     "core_alpha": 0.95,
     "core_brightness": 1.35,
     "outline_px": 2.8,
-    "outline_alpha": 0.55,
+    "outline_alpha": 0.7,
     "glow_px": 13.0,
     "glow_alpha": 0.62,
     "glow_exponent": 1.35
@@ -54,23 +54,23 @@
       "neutral": false
     },
     "religion": {
-      "alpha": 0.6,
+      "alpha": 0.9,
       "neutral": true
     },
     "unrest": {
-      "alpha": 0.6,
+      "alpha": 0.9,
       "neutral": true
     },
     "wealth": {
-      "alpha": 0.6,
+      "alpha": 0.9,
       "neutral": true
     },
     "population": {
-      "alpha": 0.6,
+      "alpha": 0.9,
       "neutral": true
     },
     "loyalty": {
-      "alpha": 0.6,
+      "alpha": 0.9,
       "neutral": true
     },
     "supply": {
@@ -78,7 +78,7 @@
       "neutral": true
     }
   },
-  "neutral_color": "#1e1710",
+  "neutral_color": "#140e08",
   "terrain_realm_band_alpha": 0.0,
   "quality": {
     "low": {

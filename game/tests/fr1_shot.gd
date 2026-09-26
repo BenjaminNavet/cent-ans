@@ -58,7 +58,7 @@ func _init() -> void:
 		# A/B entrelacé (dérive thermique, streaming) : médiane par état sur ROUNDS alternances.
 		var on_samples: Array[float] = []
 		var off_samples: Array[float] = []
-		for round in ROUNDS:
+		for _round in (0 if args.has("--shots-only") else ROUNDS):
 			_map.faction_borders.set_enabled(true)
 			on_samples.append_array(await _gpu_samples())
 			_map.faction_borders.set_enabled(false)
@@ -68,6 +68,26 @@ func _init() -> void:
 		var off_ms := _median(off_samples)
 		print("fr1_shot: %s distance=%.1f alpha=%.2f gpu_on=%.3f ms gpu_off=%.3f ms delta=%.3f ms" % [
 				view[0], _map.camera_rig.distance, _map.faction_borders.effective_alpha, on_ms, off_ms, on_ms - off_ms])
+	# Occupation simulée (Guyenne anglaise tenue par la France) et filtre religion (encre neutre).
+	_map.camera_rig.look_at_point(ground, 420.0)
+	_map.camera_rig.snap()
+	var borders: FactionBorders = _map.faction_borders
+	var owners: PackedStringArray = borders._owners.duplicate()
+	var controllers: PackedStringArray = borders._controllers.duplicate()
+	for id in ["prov_guyenne", "prov_gascogne"]:
+		var index: int = _map.map_data.index_of_id(id)
+		if index > 0:
+			controllers[index - 1] = "fac_france"
+	borders.set_ownership(owners, controllers, "fac_france")
+	for i in 30:
+		await process_frame
+	_shot(folder.path_join("fr1-occupation.png"))
+	borders.refresh()
+	_map.map_modes.set_mode("religion")
+	for i in 20:
+		await process_frame
+	_shot(folder.path_join("fr1-mode-religion.png"))
+	print("fr1_shot: religion alpha=%s neutral=%s mode=%s" % [borders.get_param("fr1_alpha"), borders.get_param("fr1_neutral"), borders.mode])
 	quit(0)
 
 
