@@ -85,7 +85,8 @@ const PRESETS := {
 		"fine_relief": false, "terrain_near": 0.6, "veg_density": 0.5, "veg_detail": 0.6,
 		"veg_shadow_distance": 0.0, "map_shadow_range": 0.6, "map_shadow_splits": 2,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.55, "grass": 0.55, "particles": 0.35,
-		"upscale_mode": "off", "upscale_scale": 1.0,
+		# PB3b (ADR 0080) : MetalFX spatial (FSR 1 hors Metal) ; carte −16 à −27 % par image.
+		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.67,
 	},
 	"medium": {
 		"msaa": Viewport.MSAA_2X, "shadow_atlas": 4096, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM,
@@ -96,7 +97,7 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 0.8, "veg_density": 0.75, "veg_detail": 0.8,
 		"veg_shadow_distance": 200.0, "map_shadow_range": 0.8, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.75, "grass": 0.75, "particles": 0.6,
-		"upscale_mode": "off", "upscale_scale": 1.0,
+		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
 	},
 	"high": {
 		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH,
@@ -111,7 +112,9 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
 		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
-		"upscale_mode": "off", "upscale_scale": 1.0,
+		# PB3b (ADR 0080) : spatial 0,75, visuellement proche du natif en 1080p ; le temporel
+		# (anticrénelage compris) efface la pluie et traîne sur les ailes des moulins : écarté.
+		"upscale_mode": "metalfx_spatial", "upscale_scale": 0.75,
 	},
 	"ultra": {
 		"msaa": Viewport.MSAA_4X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA,

@@ -42,6 +42,19 @@ func _init() -> void:
 		settings.call("set_value", "video/upscale", "off")
 		_check(RenderQuality.upscale()["mode"] == RenderQuality.UPSCALE_OFF, "off honoured")
 		settings.call("set_value", "video/upscale", "auto")
+		# Réglages > Affichage : liste « Mise à l'échelle » (Automatique + trois choix).
+		var menu := SettingsMenu.new()
+		root.add_child(menu)
+		await process_frame
+		var controls: Dictionary = menu.get("_controls")
+		var option := controls.get("video/upscale") as OptionButton
+		_check(option != null and option.item_count == RenderQuality.UPSCALE_CHOICES.size(), "settings menu: upscale option")
+		if option != null:
+			_check(option.get_item_text(0).begins_with("Automatique ("), "settings menu: auto label %s" % option.get_item_text(0))
+			option.item_selected.emit(2)  # MetalFX qualité
+			_check(str(settings.call("get_value", "video/upscale")) == "quality", "settings menu: choice saved")
+		menu.queue_free()
+		settings.call("set_value", "video/upscale", "auto")
 		DirAccess.remove_absolute(path)
 	# Le temporel coupe MSAA et FXAA ; le spatial garde l'anticrénelage du préréglage.
 	var viewport := SubViewport.new()
