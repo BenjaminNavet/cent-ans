@@ -17,7 +17,9 @@ def test_ai_turn_replay_matches_schema() -> None:
     """The replay tuning file matches its schema."""
     schema = _load("schemas/ai_turn_replay.schema.json")
     Draft202012Validator.check_schema(schema)
-    errors = list(Draft202012Validator(schema).iter_errors(_load("ui/ai_turn_replay.json")))
+    errors = list(
+        Draft202012Validator(schema).iter_errors(_load("ui/ai_turn_replay.json"))
+    )
     assert not errors, [error.message for error in errors]
 
 
