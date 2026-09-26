@@ -210,7 +210,8 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
     let start = empty_spot(&data, 25.0);
     let (mut state, french, _) = duel(&data, start, [10.0, 10.0]);
     let allowance = state.armies[&french].movement_left;
-    let target = [start[0], start[1] - 450.0 * px_per_km(&data)];
+    // Lot DC1 (ADR 0082): about 105 km of plain a season.
+    let target = [start[0], start[1] - 225.0 * px_per_km(&data)];
     let report = march(
         &mut state,
         &data,
@@ -229,7 +230,7 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
     );
     let first = state.army_point(&data, &state.armies[&french]);
     let covered = distance_km(&data, start, first);
-    assert!((150.0..=215.0).contains(&covered), "{covered} km in spring");
+    assert!((75.0..=108.0).contains(&covered), "{covered} km in spring");
     // No more points this turn.
     assert!(matches!(
         state.submit_order(&data, Order::move_to_point(french.clone(), target)),
@@ -243,10 +244,10 @@ fn a_march_spanning_several_turns_resumes_next_turn() {
         let after = state.army_point(&data, &state.armies[&french]);
         let moved = distance_km(&data, before, after);
         assert!(
-            moved > 150.0 || state.armies[&french].planned_path.is_empty(),
+            moved > 75.0 || state.armies[&french].planned_path.is_empty(),
             "the march resumed: {moved} km"
         );
-        assert!(turns <= 3, "450 km take three turns");
+        assert!(turns <= 3, "225 km take three turns");
     }
     assert!(state.armies[&french].planned_path.is_empty());
     assert!(state.armies[&french].destination.is_none());
@@ -466,13 +467,12 @@ fn hostile_places_are_walked_around() {
 fn the_loser_falls_back_on_the_grid() {
     let spot = empty_spot(&real_data(), 25.0);
     let victor_at = east(&real_data(), spot, -4.0);
-    // No friendly place within reach.
+    // No friendly place within reach; a refuge within the former 140 km
+    // (two steps of 70 km since lot DC1, ADR 0082).
     let setup = |data: &mut GameData| {
-        data.settlement_rules
-            .as_mut()
-            .unwrap()
-            .retreat
-            .friendly_radius_steps = 0.0;
+        let retreat = &mut data.settlement_rules.as_mut().unwrap().retreat;
+        retreat.friendly_radius_steps = 0.0;
+        retreat.neutral_radius_steps = 2.0;
     };
     let mut open = data_with_grid(|_| {});
     setup(&mut open);
@@ -533,6 +533,8 @@ fn a_crushed_or_cornered_loser_routs() {
     let mut data = data_with_grid(|_| {});
     let rules = &mut data.settlement_rules.as_mut().unwrap().retreat;
     rules.friendly_radius_steps = 0.0;
+    // A refuge within the former 140 km (lot DC1 halved the step).
+    rules.neutral_radius_steps = 2.0;
     rules.heavy_defeat_losses_percent = 42;
     let (state, _, english) = duel(&data, victor_at, spot);
     assert!(matches!(

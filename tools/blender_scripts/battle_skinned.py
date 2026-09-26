@@ -559,6 +559,10 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
         nm = mw.to_3x3().inverted().transposed()
         groups = {g.index: g.name for g in obj.vertex_groups}
         mask_attr = me.attributes.get("vmask")
+        # FG4: optional per-vertex shade multiplying the material colour (fine horse coat).
+        shade_attr = me.color_attributes.get("fg_shade")
+        if shade_attr is not None and shade_attr.domain != "POINT":
+            shade_attr = None
         uv_layer = me.uv_layers.active
         corner_normals = me.corner_normals
         for tri in me.loop_triangles:
@@ -577,8 +581,12 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
             )
             mask = mask_attr.data[tri.polygon_index].value if mask_attr else 0
             face = []
+            base_rgb = rgb
             for li in tri.loops:
                 vi = me.loops[li].vertex_index
+                if shade_attr is not None:
+                    k = shade_attr.data[vi].color[0]
+                    rgb = [c * k for c in base_rgb]
                 p = TO_GODOT @ (mw @ me.vertices[vi].co)
                 n = (
                     TO_GODOT.to_3x3() @ (nm @ Vector(corner_normals[li].vector))
