@@ -186,16 +186,20 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// as before EP10; seed 11: same winner, 177 s instead of 186 s. Over seeds
 /// 0-63 the French win 31/64 instead of 34/64
 /// (`ep10_rout::probe_small_battle`).
+/// EQ7 (the attacker's horse waits for its foot before riding into the
+/// range of loaded archers): seeds 3 and 11 go to the French (268 s and
+/// 245 s); over seeds 0-63 the French win 57/64 instead of 31/64
+/// (`eq7_cavalry::probe_mixed_battle`).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "312 Some(Defender) [29, 30, 8, 100, 100, 10, 48, 105, 97, 38]",
+            "268 Some(Attacker) [20, 43, 42, 100, 100, 19, 39, 100, 66, 15]",
         ),
         (
             11,
-            "177 Some(Defender) [19, 78, 41, 100, 28, 5, 80, 116, 120, 41]",
+            "245 Some(Attacker) [21, 51, 55, 100, 100, 17, 59, 118, 48, 14]",
         ),
     ];
     for (seed, digest_before) in expected {
