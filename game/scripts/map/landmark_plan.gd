@@ -347,12 +347,10 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 	var length := a.distance_to(c)
 	var width := float(b["width_m"])
 	var mid := (a + c) * 0.5
-	var bank := minf(heights.height_m(a.x, a.y), heights.height_m(c.x, c.y))
-	var water := heights.height_m(mid.x, mid.y)
-	for k in 5:
-		water = minf(water, heights.height_m(lerpf(a.x, c.x, 0.3 + 0.1 * k), lerpf(a.y, c.y, 0.3 + 0.1 * k)))
-	var deck := maxf(bank, water + float(b.get("deck_m", 7.0)))
-	var deck_info := {"id": str(b.get("id", "")), "x": mid.x, "y": mid.y, "yaw": atan2(d.y, d.x), "length": length + 8.0, "width": width, "deck": deck, "water": water, "bank": bank, "arches": int(b.get("arches", maxi(1, int(length / 18.0)))), "material": str(b.get("material", "stone"))}
+	var levels := _deck_levels(a, c, float(b.get("deck_m", 7.0)), heights)
+	var deck: float = levels[0]
+	var bridge_index := (out["bridges"] as Array).size()
+	var deck_info := {"id": str(b.get("id", "")), "x": mid.x, "y": mid.y, "yaw": atan2(d.y, d.x), "length": length + 8.0, "width": width, "deck": deck, "water": levels[1], "bank": levels[2], "arches": int(b.get("arches", maxi(1, int(length / 18.0)))), "material": str(b.get("material", "stone")), "a": a, "c": c, "deck_m": float(b.get("deck_m", 7.0))}
 	# `bridge` : premier pont (compatibilité VH4) ; `bridges` : tous les ponts (Paris : quatre en 1340).
 	if (out["bridge"] as Dictionary).is_empty():
 		out["bridge"] = deck_info
@@ -371,7 +369,7 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 				var nn := n * side
 				var hd := rng.randf_range(6.0, 8.0)
 				var center := a + d * (s + front * 0.5) + nn * (width * 0.5 + hd * 0.5)
-				fixed[houses["x"].size()] = true
+				fixed[houses["x"].size()] = bridge_index
 				houses["kind"].append(TownPlan.HOUSE_KINDS.find("timber"))
 				houses["x"].append(center.x)
 				houses["y"].append(center.y)
@@ -384,7 +382,18 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 			s += front
 	for f in b.get("gatehouses_at", []):
 		var p := a + d * float(f) * length
-		(out["gates"] as Array).append({"x": p.x, "y": p.y, "yaw": atan2(d.y, d.x), "base": deck - 0.5, "height": 13.0, "palisade": false, "fixed": true})
+		(out["gates"] as Array).append({"x": p.x, "y": p.y, "yaw": atan2(d.y, d.x), "base": deck - 0.5, "height": 13.0, "palisade": false, "fixed": true, "bridge": bridge_index})
+
+
+## Niveaux d'un pont de `a` à `c` : [tablier, eau, berges] (m). Eau = point le plus bas du
+## milieu du pont ; tablier au moins à hauteur de la berge la plus basse.
+static func _deck_levels(a: Vector2, c: Vector2, deck_m: float, heights: TownPlan.Heights) -> Array:
+	var mid := (a + c) * 0.5
+	var bank := minf(heights.height_m(a.x, a.y), heights.height_m(c.x, c.y))
+	var water := heights.height_m(mid.x, mid.y)
+	for k in 5:
+		water = minf(water, heights.height_m(lerpf(a.x, c.x, 0.3 + 0.1 * k), lerpf(a.y, c.y, 0.3 + 0.1 * k)))
+	return [maxf(bank, water + deck_m), water, bank]
 
 
 # --- Places et espaces libres ---------------------------------------------------------------
@@ -692,6 +701,26 @@ static func reground(plan: Dictionary, heights: TownPlan.Heights) -> void:
 	for i in xs.size():
 		if not fixed.has(i):
 			bases[i] = TownPlan.footprint_base(heights, Vector2(xs[i], houses["y"][i]), houses["yaw"][i], houses["front"][i], houses["depth"][i])
+	houses["base"] = bases
+	# Ponts : tablier recalculé, maisons et châtelets du pont déplacés d'autant.
+	var bridges: Array = plan.get("bridges", [])
+	for bi in bridges.size():
+		var br: Dictionary = bridges[bi]
+		if not br.has("a"):
+			continue
+		var levels := _deck_levels(br["a"], br["c"], float(br["deck_m"]), heights)
+		var delta := float(levels[0]) - float(br["deck"])
+		br["deck"] = levels[0]
+		br["water"] = levels[1]
+		br["bank"] = levels[2]
+		for i in fixed:
+			if typeof(fixed[i]) == TYPE_INT and int(fixed[i]) == bi:
+				bases[i] += delta
+		for gate in plan["gates"]:
+			if int(gate.get("bridge", -1)) == bi:
+				gate["base"] = float(gate["base"]) + delta
+	if not bridges.is_empty():
+		plan["bridge"] = bridges[0]
 	houses["base"] = bases
 	for m in plan["v2_monuments"]:
 		m["base"] = TownPlan.footprint_base(heights, Vector2(m["x"], m["y"]), m["yaw"], m["length"], m["depth"])
