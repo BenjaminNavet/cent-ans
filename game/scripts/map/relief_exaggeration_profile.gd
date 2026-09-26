@@ -49,8 +49,14 @@ extends Resource
 @export var mountain_ratio: float = 0.3
 @export var mountain_squash_far: float = 0.0
 @export var mountain_squash_full_exaggeration: float = 3.5
-## Borne du facteur d'écrasement (garde l'inverse bien conditionné).
+## Borne du facteur d'écrasement des montagnes (au-delà, les Alpes s'aplanissent au palier site).
 @export var mountain_squash_max: float = 0.55
+## Autour des villes emblématiques 1:1 (VH4) : facteur d'écrasement du relief au-dessus de la base
+## (0,7 ≈ échelle vraie aux paliers vallée et site), plein jusqu'au rayon de la ville +
+## `true_scale_full_units`, fondu sur `true_scale_fade_units` (unités carte). 0 : coupé.
+@export var true_scale_squash: float = 0.7
+@export var true_scale_full_units: float = 4.0
+@export var true_scale_fade_units: float = 6.0
 
 ## Falaises : pentes du relief exagéré localement (pente vraie × (1 + gain), m/m) où la roche
 ## remplace progressivement la couverture du sol (terrain.gdshader).
@@ -77,9 +83,10 @@ static func load_default() -> ReliefExaggerationProfile:
 		_default = _default.duplicate()
 		_default.enabled = false
 	# `--no-mountain-squash` : sans l'écrasement des montagnes du lot SZ1 (captures « avant »).
-	if _default.mountain_knee_m > 0.0 and OS.get_cmdline_user_args().has("--no-mountain-squash"):
+	if OS.get_cmdline_user_args().has("--no-mountain-squash"):
 		_default = _default.duplicate()
 		_default.mountain_knee_m = 0.0
+		_default.true_scale_squash = 0.0
 	return _default
 
 
@@ -121,7 +128,7 @@ func mountain_squash_of(amplitude_m: float) -> float:
 ## SZ1 : poids c de l'écrasement pour une échelle verticale (unités monde par mètre) :
 ## `mountain_squash_far` à `MapData.HEIGHT_SCALE`, 1 à `s_full` et en deçà (logarithme de l'échelle).
 func squash_weight_for_scale(scale: float, s_full: float) -> float:
-	if not enabled or mountain_knee_m <= 0.0:
+	if not enabled or (mountain_knee_m <= 0.0 and true_scale_squash <= 0.0):
 		return 0.0
 	var far := MapData.HEIGHT_SCALE
 	if s_full >= far * 0.999:

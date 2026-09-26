@@ -8,9 +8,9 @@ extends SceneTree
 ##     genou.
 ##  2. Double GPU : la texture RGBF relue comme le shader rend les trois champs de
 ##     `MapData.relief_fields_at` ; le .gdshaderinc porte la même expression.
-##  3. Carte réelle au palier vallée (d = 6) : amplitude affichée des Pyrénées, des Alpes et du pays
-##     de Galles nettement réduite ; collines (Crécy), falaises normandes et plaine de Paris
-##     inchangées (écart ≤ 2 % de l'amplitude affichée).
+##  3. Carte réelle au palier vallée (d = 6) : amplitude affichée des Pyrénées, des Alpes, du pays
+##     de Galles et des coteaux de Rouen (ville 1:1 VH4) nettement réduite ; collines (Crécy),
+##     falaises normandes, Loire et plaine de Paris inchangées (écart ≤ 2 % de l'amplitude affichée).
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 
@@ -23,7 +23,7 @@ const PLACES := [
 	["crecy", Vector2(2191.5, 1706.0), false],
 	["falaises_normandes", Vector2(2018.0, 1772.0), false],
 	["paris", Vector2(2213.2, 1923.9), false],
-	["rouen_seine", Vector2(2097.0, 1819.4), false],
+	["rouen_seine", Vector2(2097.0, 1819.4), true],  # ville 1:1 (VH4) : coteaux à l'échelle vraie
 	["val_de_loire", Vector2(2052.0, 2127.3), false],
 ]
 
@@ -151,9 +151,10 @@ func _test_real_map() -> void:
 		var p: Vector2 = place[1]
 		with[place[0]] = _displayed_span(map_data, p, 8.0)
 	var squash_on := MapData.relief_squash()
-	# Même échelle, écrasement coupé (profil dupliqué, genou nul).
+	# Même échelle, écrasement coupé (profil dupliqué, genou et villes 1:1 nuls).
 	var off := profile.duplicate() as ReliefExaggerationProfile
 	off.mountain_knee_m = 0.0
+	off.true_scale_squash = 0.0
 	ReliefExaggerationProfile.set_default(off)
 	MapData.set_relief_floor(ReliefFloor.compute(map_data, off))
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
