@@ -86,3 +86,11 @@ rules.json ; codex (mouvement, saisons, déroute, agents) ; tests `campaign.rs`,
   moins de dévastation ?).
 - `game/scripts/ui/encyclopedia.gd` (agents) écrit « %d pas par saison » : pas de km, inchangé.
 - `docs/design/2026-09-24-mouvement-libre.md` cite 210 km / × 140 km : spec datée, laissée telle quelle.
+
+## DC3 — équilibrage de la carte densifiée (worktree `../gp-dc3`, branche `feat/densite-dc3`)
+État : mesures de référence en cours (main / DC1 / DC3 sur les mêmes graines ; binaires de sondes
+construits depuis des worktrees détachés `../gp-dc3-main` et `../gp-dc3-dc1`, à supprimer à la fin).
+`century_probe` compte désormais les cités prises, les provinces conquises en entier (durée depuis la
+première place prise) et, pour les révoltes, dévastation moyenne, provinces occupées et
+mécontentement > 60.
+Prochaine étape : réglages d'entretien (garrison/building_upkeep_percent) puis conquête.
