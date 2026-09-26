@@ -77,6 +77,8 @@ var _devastation: Dictionary = {}
 var _colors: PackedColorArray = PackedColorArray()
 var _declutter_timer := 0.0
 var _weights := Vector3(-1, -1, -1)  # près, moyen, loin
+## Palier près (`_weights.x > 0.35`) des étiquettes au dernier placement : -1 inconnu, 0 non, 1 oui.
+var _label_near := -1
 var _camera_distance := 0.0
 var _regrounded: Dictionary = {}
 ## ZG6 : villes ordinaires à l'échelle réelle (paliers vallée et site), voir `TownLayer`.
@@ -497,7 +499,11 @@ func update_view(camera_distance: float) -> void:
 		_models_root.visible = weights.x > 0.35 and not site and not _towns_active()
 		_hamlets_root.visible = weights.x > 0.35 and not site
 		_landmarks_root.visible = not site
-		_update_label_heights()
+		# Hauteurs des étiquettes : ne dépendent que du seuil près (pas des poids continus).
+		var near := 1 if weights.x > 0.35 else 0
+		if near != _label_near:
+			_label_near = near
+			_update_label_heights()
 		_declutter_timer = 0.0
 	if _labels_dirty:
 		_labels_dirty = false
