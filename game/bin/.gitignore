@@ -1,2 +1,4 @@
-# Built by core/build.sh
+# Built by core/build.sh (macOS) and core/build-windows.sh (Windows)
 *.dylib
+*.dll
+*.pdb

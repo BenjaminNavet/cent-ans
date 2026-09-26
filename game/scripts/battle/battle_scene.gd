@@ -140,6 +140,12 @@ var _bench_timeout_s: float = 120.0
 var _bench_failed: bool = false
 var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
 var _bench_cpu_ms: float = 0.0
+## PB3c : temps de `_process` (Performance.TIME_PROCESS) et de `soldiers.update` par image mesurée.
+var _bench_process_ms: Array = []
+var _bench_soldiers_ms: Array = []
+var _bench_soldiers_last_ms: float = 0.0
+var _bench_tick_ms: Array = []  # PB3c : durée de `BattleSim.tick` (pas de simulation) par image
+var _bench_tick_last_ms: float = 0.0
 ## Compteur d'images mesurées (GPU/CPU/A-B) qui ne repart pas à zéro entre répétitions
 ## (`--bench-repeat=`), contrairement à `_bench_frames` (fenêtre de mesure courante).
 var _bench_measured: int = 0
@@ -1089,8 +1095,10 @@ func _process(delta: float) -> void:
 	# EP8 : ralenti du plan cinématique (temps de bataille et animations).
 	var slow := staging.time_scale() if staging != null else 1.0
 	var running: bool = not paused and not battle.call("is_finished")
+	var tick_start := Time.get_ticks_usec()
 	if running:
 		battle.call("tick", delta * speed * slow)
+	_bench_tick_last_ms = float(Time.get_ticks_usec() - tick_start) / 1000.0
 	_refresh_view(false, delta * slow)
 	if music != null:
 		music.update(delta, units)
@@ -1166,6 +1174,9 @@ func _run_benchmark_frame(delta: float) -> void:
 		var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
 		_bench_gpu_ms += gpu_ms
 		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+		_bench_process_ms.append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
+		_bench_soldiers_ms.append(_bench_soldiers_last_ms)
+		_bench_tick_ms.append(_bench_tick_last_ms)
 		_bench_gpu_samples += 1
 		# DA6 : sous Metal le temps GPU mesuré vaut 0 : durée de l'image à la place (vsync coupée).
 		_bench_ab_step(gpu_ms if gpu_ms > 0.0 else delta * 1000.0)
@@ -1217,6 +1228,9 @@ func _bench_finish() -> void:
 		"engine_fps": Engine.get_frames_per_second(),
 		"gpu_ms": _bench_gpu_ms / maxf(_bench_gpu_samples, 1),
 		"cpu_ms": _bench_cpu_ms / maxf(_bench_gpu_samples, 1),
+		"process_ms_median": _median(_bench_process_ms),
+		"soldiers_ms_median": _median(_bench_soldiers_ms),
+		"tick_ms_median": _median(_bench_tick_ms),
 		"quality": RenderQuality.current(),
 		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
 		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
@@ -1284,6 +1298,14 @@ func _bench_wall_elapsed_s() -> float:
 
 func _bench_timed_out() -> bool:
 	return _bench_timeout_s > 0.0 and _bench_wall_elapsed_s() > _bench_timeout_s
+
+
+static func _median(values: Array) -> float:
+	if values.is_empty():
+		return 0.0
+	var sorted := values.duplicate()
+	sorted.sort()
+	return float(sorted[sorted.size() / 2])
 
 
 static func _percentile(sorted_values: PackedFloat64Array, ratio: float) -> float:
@@ -1356,7 +1378,9 @@ func _fast_forward(seconds: float) -> void:
 func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	units = battle.call("get_units")
 	var running: bool = not paused and not battle.call("is_finished")
+	var soldiers_start := Time.get_ticks_usec()
 	soldiers.update(battle, units, delta * speed if running else 0.0, selected)
+	_bench_soldiers_last_ms = float(Time.get_ticks_usec() - soldiers_start) / 1000.0
 	_update_effects(delta * speed if running else 0.0)
 	if siege_view != null:
 		# Lu une seule fois par image (gros dictionnaire construit par le cœur) : HUD, sortie
