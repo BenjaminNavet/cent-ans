@@ -74,6 +74,8 @@ const TEXTURE_DIR := "res://assets/textures/terrain/"
 ## Délai sans changement d'échelle avant de recaler les calques (zoom continu : un seul recalage).
 @export var rescale_settle_ms: int = 180
 @export var max_far_rescales_per_frame: int = 1
+## SZ6 : budget par image des changements de niveau signalés (quadtree ; au moins un par image).
+@export var level_emit_budget_ms: float = 4.0
 ## Vrai pendant les `chunk_surface_changed` émis pour un changement d'échelle verticale seul
 ## (la surface en mètres n'a pas changé).
 var rescaling_vertical: bool = false
@@ -645,22 +647,40 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 	var t0 := Time.get_ticks_usec()
 	quadtree.update_view(camera)
 	build_stats["qt_update_ms_max"] = maxf(float(build_stats.get("qt_update_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
+	var tp := PerfProbe.lap("lod/quadtree", t0)  # SZ6
 	var wanted_fine := _wanted_fine(camera_distance, view_center, fine_distance)
 	_last_wanted_fine = wanted_fine
 	var half := chunk_px * 0.5
+	# SZ6 : un zoom fait changer de niveau jusqu'à 20 morceaux dans la même image, et chaque
+	# `chunk_surface_changed` recale colonies, ponts, routes… (jusqu'à 50 ms). Les plus proches de
+	# la caméra d'abord, dans `level_emit_budget_ms` (au moins un par image) ; les autres gardent
+	# leur niveau et sont repris aux images suivantes.
+	var changes: Array = []
 	for i in _chunks.size():
 		var center := _chunks[i].position + Vector3(half, 0.0, half)
-		var level := 2 if wanted_fine.has(i) else (1 if camera_position.distance_to(center) < near_distance else 0)
+		var d := camera_position.distance_to(center)
+		var level := 2 if wanted_fine.has(i) else (1 if d < near_distance else 0)
 		if _is_near[i] != level:
-			_is_near[i] = level
-			_surface_dirty.erase(i)
-			if _emitted_top.size() == CHUNKS * CHUNKS:
-				_emitted_top[i] = quadtree.chunk_top(i)
-			var t_emit := Time.get_ticks_usec()
-			chunk_surface_changed.emit(i)
-			_note_emit(t_emit, 1)
+			changes.append([d, i, level])
+	if changes.size() > 1:
+		changes.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var t_level := Time.get_ticks_usec()
+	for k in changes.size():
+		if k > 0 and FrameBudget.in_frame() and Time.get_ticks_usec() - t_level >= level_emit_budget_ms * 1000.0:
+			break
+		var i: int = changes[k][1]
+		_is_near[i] = changes[k][2]
+		_surface_dirty.erase(i)
+		if _emitted_top.size() == CHUNKS * CHUNKS:
+			_emitted_top[i] = quadtree.chunk_top(i)
+		var t_emit := Time.get_ticks_usec()
+		chunk_surface_changed.emit(i)
+		_note_emit(t_emit, 1)
+	tp = PerfProbe.lap("lod/level_emits", tp)
 	_flush_surface_dirty(false)
+	tp = PerfProbe.lap("lod/surface_flush", tp)
 	_flush_rescale(view_center)
+	PerfProbe.lap("lod/rescale_flush", tp)
 
 
 func _on_quadtree_surface_changed(rect: Rect2) -> void:

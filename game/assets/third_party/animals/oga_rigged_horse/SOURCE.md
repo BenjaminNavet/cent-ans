@@ -9,6 +9,10 @@
   d'origine (19 os) n'est pas utilisé.
 - **Hors dépôt** : le `.blend` n'est pas versionné (`.gitignore`) ; `battle_fine_horse.py` le
   télécharge s'il manque. Dossier ignoré par Godot (`.gdignore`).
-- **Modifications** : mise à l'échelle et déformation (RBF) sur le squelette du cheval Quaternius
-  (rig `cavalry`), poids reportés depuis le cheval Quaternius, décimation.
+- **Modifications** : mise à l'échelle, puis ajustement articulation par articulation sur le
+  squelette du cheval Quaternius (rig `cavalry`, lot FG4 ; FG0 : déformation RBF), poids par
+  chaleur des os dans la pose naturelle, paupières rouvertes, décimation en trois niveaux,
+  montures amincies (roncin, genet), ombrage du pelage reporté par sommet (textures non
+  livrées) ; harnachement modelé par script (`tools/blender_scripts/battle_fine_cavalry.py`).
+  Dérivés : `game/assets/models/battle_fine/` (`cavalry_*`, `standard_1`).
 - **Licence du dérivé** : CC0 1.0.

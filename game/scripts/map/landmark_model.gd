@@ -162,6 +162,7 @@ func _apply_height_params(material: ShaderMaterial) -> void:
 func _bake_heights() -> void:
 	_start_bake()
 	_continue_bake(INF)
+	_finish_bake()
 
 
 ## Budget par image de la cuisson étalée (ms).
@@ -171,6 +172,12 @@ var _bake_row: int = -1
 var _bake_corners: PackedFloat32Array = PackedFloat32Array()
 var _bake_pending: bool = false
 var _bake_active_us: int = 0
+## SZ6 : avec le relief quadtree, les recuissons se font d'un bloc dans un fil de travail sur un
+## instantané des pages (`_bake_snapshot`, lu par `_surface_m`) au lieu de tranches de
+## `bake_budget_ms` par maquette et par image (jusqu'à 30 ms par image avec plusieurs maquettes).
+@export var bake_in_thread: bool = true
+var _bake_task: int = -1
+var _bake_snapshot: Dictionary = {}
 
 
 func _start_bake() -> void:
@@ -182,6 +189,9 @@ func _start_bake() -> void:
 
 ## Hauteur (m) de la surface affichée au point carte ; 0 sans terrain.
 func _surface_m(x: float, z: float) -> float:
+	if not _bake_snapshot.is_empty():
+		# SZ6 (fil de travail) : même valeur que `TerrainBuilder.surface_height_at` avec le quadtree.
+		return MapData.height_from_display(maxf(ReliefQuadtree.sample_snapshot(_bake_snapshot, x, z), 0.0), x, z)
 	if _terrain == null:
 		return 0.0
 	# ZG8 : inverse de la hauteur affichée (le shader la repose avec `campaign_display_height`).
@@ -199,10 +209,11 @@ func _corner_row(j: int) -> PackedFloat32Array:
 	return row
 
 
-## Avance la cuisson dans le budget (ms) ; rend vrai quand elle est terminée.
+## Avance la cuisson dans le budget (ms) ; rend vrai quand toutes les lignes sont faites
+## (`_finish_bake` installe alors la texture, sur le fil principal).
 func _continue_bake(budget_ms: float) -> bool:
 	if _bake_row < 0:
-		return true
+		return false
 	var t0 := Time.get_ticks_usec()
 	while _bake_row < HEIGHT_RES:
 		var j := _bake_row
@@ -219,8 +230,12 @@ func _continue_bake(budget_ms: float) -> bool:
 		if (Time.get_ticks_usec() - t0) / 1000.0 >= budget_ms:
 			break
 	_bake_active_us += Time.get_ticks_usec() - t0
+	return _bake_row >= HEIGHT_RES
+
+
+func _finish_bake() -> void:
 	if _bake_row < HEIGHT_RES:
-		return false
+		return
 	_bake_row = -1
 	if _height_texture == null:
 		_height_texture = ImageTexture.create_from_image(_bake_image)
@@ -232,25 +247,58 @@ func _continue_bake(budget_ms: float) -> bool:
 	stats["bakes"] = int(stats.get("bakes", 0)) + 1
 	stats["bake_ms"] = _bake_active_us / 1000.0
 	stats["bake_ms_total"] = float(stats.get("bake_ms_total", 0.0)) + _bake_active_us / 1000.0
-	return true
 
 
 func _process(_delta: float) -> void:
+	if _bake_task >= 0:
+		if not WorkerThreadPool.is_task_completed(_bake_task):
+			return
+		_join_bake()
 	if _bake_row < 0 and _bake_pending:
 		_bake_pending = false
+		if bake_in_thread and _terrain != null and _terrain.quadtree != null:
+			_bake_snapshot = _terrain.quadtree.surface_snapshot(Rect2(_origin, Vector2(_extent, _extent)).grow(1.0), Vector2.ZERO)
+			_bake_task = WorkerThreadPool.add_task(_bake_rows, false, "landmark bake " + name)
+			return
 		_start_bake()
 	if _bake_row >= 0:
 		var t0 := Time.get_ticks_usec()
-		_continue_bake(bake_budget_ms)
+		if _continue_bake(bake_budget_ms):
+			_finish_bake()
 		stats["bake_frame_ms_max"] = maxf(float(stats.get("bake_frame_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
+
+
+## Fil de travail : toutes les lignes, sur l'instantané des pages.
+func _bake_rows() -> void:
+	_start_bake()
+	_continue_bake(INF)
+
+
+func _join_bake() -> void:
+	WorkerThreadPool.wait_for_task_completion(_bake_task)
+	_bake_task = -1
+	_bake_snapshot = {}
+	var t0 := Time.get_ticks_usec()
+	_finish_bake()
+	stats["bake_frame_ms_max"] = maxf(float(stats.get("bake_frame_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
+
+
+func _exit_tree() -> void:
+	if _bake_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_bake_task)
+		_bake_task = -1
+		_bake_snapshot = {}
 
 
 ## Termine tout de suite la cuisson en cours ou en attente (captures, tests).
 func flush_bake() -> void:
+	if _bake_task >= 0:
+		_join_bake()
 	if _bake_row < 0 and _bake_pending:
 		_bake_pending = false
 		_start_bake()
 	_continue_bake(INF)
+	_finish_bake()
 
 
 func _on_chunk_surface_changed(index: int) -> void:
