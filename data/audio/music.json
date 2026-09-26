@@ -2,6 +2,8 @@
   "playlists": {
     "campaign": {
       "primary": [
+        "assets/third_party/music/ars_nova/souvent_souspire.ogg",
+        "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
         "assets/audio/music/campaign.ogg",
         "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
         "assets/third_party/music/wikimedia/folia_ahigal_tamborilero.mp3",
@@ -21,6 +23,10 @@
     },
     "campaign_france": {
       "primary": [
+        "assets/third_party/music/ars_nova/onques_ne_fut.ogg",
+        "assets/third_party/music/ars_nova/souvent_souspire.ogg",
+        "assets/third_party/music/ars_nova/pierrekin_chancon_fas.ogg",
+        "assets/third_party/music/ars_nova/he_robinet.ogg",
         "assets/audio/music/campaign.ogg",
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
         "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3"
@@ -35,6 +41,7 @@
     },
     "campaign_england": {
       "primary": [
+        "assets/third_party/music/ars_nova/bryd_one_brere.ogg",
         "assets/third_party/music/wikimedia/sumer_is_icumen_in.mp3",
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3",
         "assets/third_party/music/wikimedia/agincourt_carol_deo_gracias.mp3"
@@ -46,6 +53,8 @@
     },
     "campaign_burgundy": {
       "primary": [
+        "assets/third_party/music/ars_nova/binchois_adieu_mamour.ogg",
+        "assets/third_party/music/ars_nova/dufay_adieu_mamour.ogg",
         "assets/third_party/music/wikimedia/dufay_ave_regina.mp3",
         "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3"
       ],
@@ -67,6 +76,9 @@
     },
     "campaign_italy": {
       "primary": [
+        "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
+        "assets/third_party/music/ars_nova/saltarello_trecento.ogg",
+        "assets/third_party/music/ars_nova/faenza_bel_fiore_danca.ogg",
         "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
         "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3"
       ],
@@ -92,6 +104,9 @@
     },
     "court": {
       "primary": [
+        "assets/third_party/music/ars_nova/binchois_adieu_mamour.ogg",
+        "assets/third_party/music/ars_nova/jacopo_fenice_fu.ogg",
+        "assets/third_party/music/ars_nova/he_robinet.ogg",
         "assets/audio/music/court.ogg",
         "assets/third_party/music/wikimedia/dufay_se_la_face_ay_pale.mp3",
         "assets/third_party/music/wikimedia/ortiz_recercada_segunda.mp3"
@@ -109,6 +124,7 @@
     },
     "menu": {
       "primary": [
+        "assets/third_party/music/ars_nova/onques_ne_fut.ogg",
         "assets/third_party/music/wikimedia/chominciamento_di_gioia.mp3",
         "assets/third_party/music/wikimedia/estampie_retrove_robertsbridge.mp3"
       ],

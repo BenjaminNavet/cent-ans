@@ -57,32 +57,6 @@
     ]
   },
   {
-    "id": "set_marienweerd",
-    "province": "prov_utrecht",
-    "kind": "abbey",
-    "name": {
-      "display": "Mariënweerd",
-      "local": "Marienweerde",
-      "local_language": "moyen néerlandais"
-    },
-    "lonlat": [
-      5.2833,
-      51.9
-    ],
-    "weight": 8,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye prémontrée sur un îlot du Linge, riche propriétaire terrienne des Pays-Bas centraux.",
-    "sources": [
-      "Mariënweerd"
-    ]
-  },
-  {
     "id": "set_ijsselstein",
     "province": "prov_utrecht",
     "kind": "village",
