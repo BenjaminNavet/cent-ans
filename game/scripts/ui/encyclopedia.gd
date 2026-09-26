@@ -1099,7 +1099,10 @@ static func _agent_fiche(definition: Dictionary) -> String:
 		", ".join(places),
 		" (avec un bâtiment religieux, ou une abbaye)" if bool(definition.get("requires_religious_building", false)) else "",
 	]
-	var moves := "%d pas par saison (un de moins l'hiver) sur le graphe des colonies ; ni les places ennemies ni les armées ne l'arrêtent." % int(definition.get("movement_steps", 3))
+	var steps := int(definition.get("movement_steps", 3))
+	var step_km := RuleValues.value("step_km")
+	var reach := "" if is_nan(step_km) else " (%s km)" % RuleValues.number(steps * step_km)
+	var moves := "%d pas par saison%s, un de moins l'hiver, sur le graphe des colonies ; ni les places ennemies ni les armées ne l'arrêtent." % [steps, reach]
 	if int(definition.get("vision_range", 0)) > 0:
 		moves += " Voit à %d pas autour de lui (brouillard)." % int(definition.get("vision_range", 0))
 	var lines := PackedStringArray()
