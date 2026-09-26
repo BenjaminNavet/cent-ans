@@ -165,6 +165,7 @@ pub fn path_to(
 /// and pays in men and morale for the disembarkation.
 pub(crate) fn land_on_hostile_shore(
     state: &mut CampaignState,
+    data: &GameData,
     army_id: &ArmyId,
     province: Option<&ProvinceId>,
     events: &mut Vec<GameEvent>,
@@ -175,6 +176,7 @@ pub(crate) fn land_on_hostile_shore(
     } else {
         LANDING_LOSS_PERCENT
     };
+    let name = state.army_name(data, army_id);
     let Some(army) = state.armies.get_mut(army_id) else {
         return;
     };
@@ -189,7 +191,6 @@ pub(crate) fn land_on_hostile_shore(
         lost += casualties;
     }
     let faction = army.faction.clone();
-    let name = state.army_name(data, army_id);
     let mut event = GameEvent::new(
         EventKind::Attrition,
         format!("Débarquement en terre hostile : {name} perd {lost} hommes."),
@@ -1131,13 +1132,10 @@ pub(crate) fn apply_outcome(
         }
         state.armies.remove(army_id);
         events.push(
-            GameEvent::new(
-                EventKind::ArmyDestroyed,
-                format!("{name} est anéanti."),
-            )
-            .province(&location)
-            .army(army_id)
-            .faction(&faction),
+            GameEvent::new(EventKind::ArmyDestroyed, format!("{name} est anéanti."))
+                .province(&location)
+                .army(army_id)
+                .faction(&faction),
         );
     }
 }
