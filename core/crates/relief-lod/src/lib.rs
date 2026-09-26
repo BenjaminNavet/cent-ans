@@ -24,6 +24,37 @@ pub const ROOT_TILE_UNITS: f64 = 256.0;
 /// Instance parameters per node, in `ReliefQuadtree.PARAM_NAMES` order.
 pub const PARAM_COUNT: usize = 7;
 
+/// Pixels per side of a page.
+pub const PAGE_PX: usize = 512;
+
+/// `ReliefQuadtree._bilinear`: altitude in metres at pixel coordinates (fx, fy) of a page of
+/// little-endian 16-bit samples (clamped to the edge), same arithmetic as GDScript.
+pub fn page_bilinear(bytes: &[u8], fx: f64, fy: f64, h_min: f64, h_range: f64) -> f64 {
+    let last = (PAGE_PX - 1) as f64;
+    let fx = fx.clamp(0.0, last);
+    let fy = fy.clamp(0.0, last);
+    let i = (fx as usize).min(PAGE_PX - 2);
+    let j = (fy as usize).min(PAGE_PX - 2);
+    let tx = fx - i as f64;
+    let ty = fy - j as f64;
+    let o = (j * PAGE_PX + i) * 2;
+    let at = |k: usize| -> i64 {
+        match bytes.get(k..k + 2) {
+            Some(b) => u16::from_le_bytes([b[0], b[1]]) as i64,
+            None => 0,
+        }
+    };
+    let (a, b, c, d) = (
+        at(o),
+        at(o + 2),
+        at(o + PAGE_PX * 2),
+        at(o + PAGE_PX * 2 + 2),
+    );
+    let top = a as f64 + (b - a) as f64 * tx;
+    let v = (top + (c as f64 + (d - c) as f64 * tx - top) * ty) / 65535.0;
+    h_min + v * h_range
+}
+
 const SIDES: [(i64, i64); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
 const DIAGONALS: [(i64, i64); 4] = [(-1, -1), (1, -1), (-1, 1), (1, 1)];
 
