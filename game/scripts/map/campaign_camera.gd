@@ -214,6 +214,11 @@ func _apply_transform() -> void:
 			var p := focus.lerp(eye, t)
 			var ground := float(ground_height.call(p.x, p.z)) + clear
 			needed = maxf(needed, focus.y + (ground - focus.y) / t)
+		# SZ1 : au-dessus des crêtes voisines (cercle autour de la caméra).
+		var radius := profile.crest_radius_factor * distance
+		for k in profile.crest_samples:
+			var angle := TAU * k / profile.crest_samples
+			needed = maxf(needed, float(ground_height.call(eye.x + radius * cos(angle), eye.z + radius * sin(angle))) + clear)
 		var lift := maxf(needed - eye.y, 0.0)
 		var rate := 1.0 if _snapping else (0.5 if lift > _occlusion_lift else 0.06)
 		_occlusion_lift = lerpf(_occlusion_lift, lift, rate)
