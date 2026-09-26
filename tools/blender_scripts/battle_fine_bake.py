@@ -594,55 +594,92 @@ def _is_head(obj):
     return obj.name.split("_")[0] in ("head", "hair", "beard")
 
 
-def atlas_unwrap(objs, size):
-    """One ``fg_atlas`` UV for all `objs`, packed at a uniform texel density (heads x1.8)."""
+def _edit(objs, fn):
+    """Run `fn()` in edit mode on `objs` (everything selected, UV selection synced)."""
     view_layer = bpy.context.view_layer
-    active = view_layer.objects.active
-    if active is not None and active.mode != "OBJECT":
-        bpy.ops.object.mode_set(mode="OBJECT")
-    previous = {}
     for o in view_layer.objects:
         o.select_set(False)
     for o in objs:
-        me = o.data
-        previous[o.name] = me.uv_layers.active.name if me.uv_layers.active else None
-        layer = me.uv_layers.get(ATLAS_UV) or me.uv_layers.new(name=ATLAS_UV)
-        me.uv_layers.active = layer
         o.select_set(True)
     view_layer.objects.active = objs[0]
     bpy.context.scene.tool_settings.use_uv_select_sync = True
-    margin = 6.0 / size
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.reveal()
     bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(
-        angle_limit=math.radians(55), island_margin=margin, scale_to_bounds=False
-    )
-    try:
-        bpy.ops.uv.average_islands_scale()
-    except RuntimeError as err:  # context dependent
-        print("FG3 average_islands_scale skipped:", err)
-    for o in objs:
-        if not _is_head(o):
-            continue
-        bm = bmesh.from_edit_mesh(o.data)
-        uv = bm.loops.layers.uv[ATLAS_UV]
-        pts = [loop[uv].uv.copy() for f in bm.faces for loop in f.loops]
-        if not pts:
-            continue
-        c = sum(pts, Vector((0.0, 0.0))) / len(pts)
-        for f in bm.faces:
-            for loop in f.loops:
-                loop[uv].uv = c + (loop[uv].uv - c) * HEAD_TEXEL_SCALE
-        bmesh.update_edit_mesh(o.data)
-    bpy.ops.uv.pack_islands(rotate=True, margin=margin)
+    fn()
     bpy.ops.object.mode_set(mode="OBJECT")
+    for o in objs:
+        o.select_set(False)
+
+
+def atlas_unwrap(objs, size):
+    """One ``fg_atlas`` UV for all `objs`, packed at a uniform texel density (heads x1.8).
+
+    The islands are seeded from the pieces' own UVs (MakeHuman UVs carried by the body,
+    head and garment shells; FG2 per-piece UVs), which survive the decimation as large
+    islands; a smart projection of the decimated shells would cut them into ~1 000 slivers.
+    Pieces without UVs are smart-projected. The packing separates overlapping islands.
+    """
+    active = bpy.context.view_layer.objects.active
+    if active is not None and active.mode != "OBJECT":
+        bpy.ops.object.mode_set(mode="OBJECT")
+    previous = {}
+    bare = []
+    for o in objs:
+        me = o.data
+        previous[o.name] = me.uv_layers.active.name if me.uv_layers.active else None
+        sources = [u for u in me.uv_layers if u.name != ATLAS_UV]
+        source = next((u for u in sources if u.name != "heraldry"), None) or (
+            sources[0] if sources else None
+        )
+        layer = me.uv_layers.get(ATLAS_UV) or me.uv_layers.new(name=ATLAS_UV)
+        if source is not None:
+            uvs = np.empty(len(source.data) * 2, np.float32)
+            source.data.foreach_get("uv", uvs)
+            layer.data.foreach_set("uv", uvs)
+        else:
+            bare.append(o)
+        me.uv_layers.active = layer
+    if bare:
+        _edit(
+            bare,
+            lambda: bpy.ops.uv.smart_project(
+                angle_limit=math.radians(66), island_margin=0.0, scale_to_bounds=False
+            ),
+        )
+    margin = 3.0 / size
+
+    def pack():
+        bpy.ops.uv.select_all(action="SELECT")
+        bpy.ops.uv.average_islands_scale()
+        for o in objs:
+            if not _is_head(o):
+                continue
+            bm = bmesh.from_edit_mesh(o.data)
+            uv = bm.loops.layers.uv[ATLAS_UV]
+            pts = [loop[uv].uv.copy() for f in bm.faces for loop in f.loops]
+            if not pts:
+                continue
+            c = sum(pts, Vector((0.0, 0.0))) / len(pts)
+            for f in bm.faces:
+                for loop in f.loops:
+                    loop[uv].uv = c + (loop[uv].uv - c) * HEAD_TEXEL_SCALE
+            bmesh.update_edit_mesh(o.data)
+        bpy.ops.uv.select_all(action="SELECT")
+        bpy.ops.uv.pack_islands(
+            rotate=True,
+            scale=True,
+            shape_method="CONCAVE",
+            margin_method="FRACTION",
+            margin=margin,
+        )
+
+    _edit(objs, pack)
     for o in objs:
         me = o.data
         name = previous[o.name]
         if name and name != ATLAS_UV and me.uv_layers.get(name):
             me.uv_layers.active = me.uv_layers[name]
-        o.select_set(False)
 
 
 # --- Bake passes --------------------------------------------------------------------------
@@ -760,6 +797,12 @@ def bake_figure_atlas(objs, others, hd, level, variants):
         for o in scene_objs:
             o.hide_render = o not in shown
         if targets:
+            extra = [
+                o.name
+                for o in bpy.context.view_layer.objects
+                if o.type == "MESH" and not o.hide_render and o not in shown
+            ]
+            print("FG3 AO variant", v, "targets", len(targets), "other visible", extra)
             _select(targets[0], targets)
             bpy.ops.object.bake(type="AO", margin=0, use_clear=False, uv_layer=ATLAS_UV)
             done.update(o.name for o in targets)
