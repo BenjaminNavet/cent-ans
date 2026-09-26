@@ -265,6 +265,110 @@ DC1 est l'ancien code (avant la revue de code et PB3) : comparer DC3 à main.
 - IA vs main : +70 % de temps moyen (plus de places, horizon doublé), sous la cible de 50 ms.
 - Rendu des hameaux (5 km) non revérifié dans Godot (`dc4_density_probe.gd`, fenêtré).
 
+## DC6a — suites du chantier (worktree `../gp-dc6a`, branche `feat/dc6-a`)
+État : **fait**, lot de données seul. `geo navgrid` sans « île sans port » ni colonie isolée ;
+`geo settlements` sans blocage (`! il faut exactement une city`, IDS EN DOUBLE, sources/description
+manquantes) ; pytest `test_settlements_schema` / `test_settlement_graph` / `test_navgrid` verts
+(174 tests). Régénéré : `geo settlements`, `geo anchors-fine`, `geo towns`, `geo navgrid`.
+
+### 1. Îles sans port
+- `set_pomposa` (prov_ferrara) : `port: true`. L'abbaye était entourée d'eau et desservie par le Po
+  di Volano jusqu'à l'Adriatique (port historique réel, confirmé par recherche).
+- `set_teylingen` (prov_holland) : coordonnées vérifiées (52.2311°N 4.5192°E, source « Teylingen
+  Castle »), mais ce point tombe aujourd'hui sur un îlot du Teylingerplas — un lac né du creusement
+  de tourbe bien après 1337, absent en réalité à l'époque du jeu, que la grille de navigation
+  (calée sur un relief moderne) rend à tort insulaire. Faute de pouvoir corriger le relief (hors
+  lot), le point a été calé sur la case de terre franchissable la plus proche (52.2562°N 4.5246°E,
+  ~2,9 km, toujours dans les dunes près de Leyde) ; l'écart et sa cause sont notés dans la
+  description plutôt que masqués par un `port: true` indu (un château terrien n'est pas un port
+  maritime).
+
+### 2. Colonies « hors province » (settlement_check, 84 entrées)
+Toutes les coordonnées ont été vérifiées contre des sources réelles ; aucune n'était fausse en soi.
+La plupart tombent hors du polygone de province du jeu parce que le lieu est authentiquement en
+zone frontalière (le raster de province est grossier) ou parce que sa position est côtière/insulaire
+et que le raster n'y porte aucune étiquette (Corse, Sardaigne, Baléares, Venise, côtes bretonne et
+irlandaise, etc.) — ces cas sont laissés tels quels, le jeu les recale automatiquement. Seuls les cas
+où le lieu appartient réellement, historiquement, à une AUTRE province du jeu ont été déplacés.
+
+| Colonie | Résultat | Raison |
+|---|---|---|
+| `set_waterford` | **déplacée** prov_dublin → prov_munster | Waterford est une cité historique du Munster (l'une des villes royales du Munster avec Cork/Limerick), pas du Leinster/Dublin. |
+| `set_saint_valery_sur_somme` | **déplacée** prov_picardie → prov_ponthieu | Port historique du comté de Ponthieu (point d'embarquement de Guillaume le Conquérant), déjà voisine de set_le_crotoy/set_rue dans ce fichier. |
+| `set_marienweerd` | **déplacée** prov_utrecht → prov_gueldre | L'abbaye de Mariënweerd est près de Beesd, en Betuwe gueldroise, pas dans l'évêché d'Utrecht (vérifié par recherche). |
+| `set_suscinio` | **déplacée** prov_bretagne_ouest → prov_bretagne | Château de la presqu'île de Rhuys (Morbihan), à 15 km de Vannes (déjà dans prov_bretagne) ; prov_bretagne_ouest ne couvre que le Finistère (Quimper/Brest), à plus de 100 km. |
+| `set_castelnau_le_lez` | **remplacée** par `set_mauguio` (Mauguio/Melgueil, comté historique réuni à Montpellier, ~11 km à l'est) | Village trop proche de Montpellier (2 km) et de faible importance ; Mauguio est mieux attesté et à bonne distance. |
+| `set_elvas`, `set_portalegre` (Alentejo) | laissées | Frontière portugaise/Extremadura réelle, à quelques km ; lieux authentiquement portugais. |
+| `set_cognac`, `set_aubeterre` (Angoumois) | laissées | Frontière Angoumois/Saintonge/Périgord historiquement floue à cet endroit précis. |
+| `set_fontevraud` (Anjou) | laissée | Abbaye à la limite Anjou/Poitou (Loire). |
+| `set_teruel` (Aragon) | laissée | Teruel est aragonais (royaume d'Aragon), pas valencien ; frontière de jeu trop au nord. |
+| `set_vaucouleurs` (Bar) | laissée | Prévôté française enclavée à la limite Bar/Lorraine. |
+| `set_interlaken` (Berne) | laissée | Oberland bernois à la limite de la province Waldstätten. |
+| `set_culan`, `set_noirlac` (Berry) | laissées | Limite Berry/Bourbonnais (Cher). |
+| `set_san_sebastian` (Biscaye) | laissée | Le polygone « Gascogne » du jeu déborde sur la côte basque espagnole ; San Sébastien reste basque/castillan. |
+| `set_ceske_budejovice` (Bohême) | laissée | À ~30 km de la frontière autrichienne. |
+| `set_gannat` (Bourbonnais) | laissée | Limite Bourbonnais/Auvergne. |
+| `set_shertogenbosch` (Brabant) | laissée | Une des quatre bonnes villes de Brabant (voir §3) ; polygone Hollande déborde au sud. |
+| `set_rostock`, `set_wismar` (prov_brandenburg) | laissées | Le fichier regroupe Brandebourg + Poméranie + Mecklembourg (pas de province dédiée) ; limite avec Holstein. |
+| `set_peyrepertuse` (Carcassonne) | laissée | Forteresse frontière historique face à l'Aragon/Roussillon (Corbières). |
+| `set_senanque` (Comtat Venaissin) | laissée | Limite Comtat/Provence (Vaucluse). |
+| `set_vienne` (Dauphiné) | laissée | Vienne, sur le Rhône, à la limite Dauphiné/Lyonnais. |
+| `set_plymouth` (Devon) | laissée | À la limite Devon/Cornouailles (Tamar). |
+| `set_mantova`, `set_modena` (Ferrare) | laissées | Mantoue (Gonzague) et Modène (Este depuis 1336) sont des seigneuries propres, groupées avec Ferrare faute de provinces dédiées ; Modène est bien este depuis 1336, pas bolonaise. |
+| `set_stirling`, `set_dunfermline` (Fife) | laissées | Pas de province « Stirlingshire » dans le jeu ; Fife regroupe le centre-est écossais. |
+| `set_douai` (Flandre wallonne) | laissée | Limite avec l'Artois. |
+| `set_salamanca` (León) | laissée | Salamanque appartient traditionnellement au León, à la limite avec la Vieille-Castille. |
+| `set_verdun` (Lorraine) | laissée | Un des Trois-Évêchés, à la limite Lorraine/Barrois. |
+| `set_luneburg` (Basse-Saxe) | laissée | Limite avec le Holstein. |
+| `set_echternach`, `set_grevenmacher` (Luxembourg) | laissées | Limite avec l'électorat de Trèves (Moselle). |
+| `set_eivissa` (Majorque) | laissée | Île sans étiquette raster ; Ibiza appartenait bien au royaume de Majorque. |
+| `set_colchester` (Middlesex) | laissée | Le fichier « Middlesex » regroupe en fait tout le grand Londres/Essex (contient déjà Maldon, Barking, en Essex) : regroupement volontaire, pas une erreur. |
+| `set_chivasso` (Montferrat) | laissée | Cité des Paléologue de Montferrat, enclavée en Piémont. |
+| `set_valmagne` (Montpellier) | laissée | Abbaye à l'ouest de Montpellier, artefact de raster (polygone Beaucaire à l'est). |
+| `set_walcourt`, `set_jardinet` (Namur) | laissées | Limite Namur/Hainaut. |
+| `set_tudela` (Navarre) | laissée | Limite avec l'Aragon (vallée de l'Èbre). |
+| `set_auxerre` (Nivernais) | laissée | Limite avec la Champagne. |
+| `set_tarascon`, `set_les_baux` (Provence) | laissées | Rive provençale du Rhône, face à Beaucaire (royaume de France). |
+| `set_figeac` (Quercy) | laissée | Limite avec le Rouergue. |
+| `set_la_rochelle` (Saintonge) | laissée | Limite avec le Poitou ; La Rochelle est traditionnellement rattachée à l'Aunis/Saintonge. |
+| `set_ecija` (Séville) | laissée | Limite avec Cordoue. |
+| `set_hastings`, `set_winchelsea`, `set_rye`, `set_battle` (Sussex) | laissées | Cinque Ports/Ancient Towns du Sussex oriental, à la limite du Kent ; lieux authentiquement sussexois malgré le nom de la confédération. |
+| `set_calatrava_la_nueva` (Tolède) | laissée | Ordre de Calatrava sous juridiction de Tolède, à la limite avec Cordoue/Andalousie. |
+| `set_chinon` (Touraine) | laissée | Château royal tourangeau au tripoint Touraine/Anjou/Poitou. |
+| `set_koblenz`, `set_ehrenbreitstein` (Trèves) | laissées | Résidence secondaire et forteresse de l'électorat de Trèves (confluent Rhin/Moselle), à la limite de Mayence. |
+| `set_rhenen` (Utrecht) | laissée | Limite Nedersticht/Gueldre. |
+| `set_alicante` (Valence) | laissée | Limite avec Murcie. |
+| `set_morella` (Valence) | laissée | Limite avec l'Aragon (Maestrat). |
+| `set_feltre` (Vérone) | laissée | Territoire disputé Vérone/Padoue/Venise en 1337. |
+| `set_corvey` (Westphalie) | laissée | Abbaye à la limite Westphalie/Basse-Saxe (Weser). |
+| autres (~25) | laissées | Points côtiers/insulaires (Corse, Sardaigne, Baléares, Venise/Chioggia, côtes irlandaise et écossaise, Ponthieu/Poitou/Danemark littoraux) sans étiquette de province sur le raster à cet endroit précis ; recalés automatiquement par le jeu, non déplacés. |
+
+### 3. Corrections signalées par DC2
+- `set_sant_antonio_di_ranverso` (prov_piemont) : coordonnées corrigées 7.5124/45.0733 (Rivoli) →
+  7.4439/45.0715 (Buttigliera Alta, position donnée par le lot).
+- `set_schloss_tirol` (prov_tirol) : coordonnées corrigées 11.15/46.6753 → 11.1448/46.6941 (site
+  réel du château, vérifié 46°41′38,9″N 11°8′41,3″E) ; l'ancienne position était ~2,4 km au sud.
+- `set_skanor` (prov_gotaland) : reclassée `village` (poids 15, hors fourchette 2-5) → `town` (poids
+  15, cohérent avec la fourchette des villes 7-35) ; ajouté `bld_market`. Justifié par son rôle
+  exceptionnel de plus grande foire au hareng de la Baltique (jusqu'à 70 000 marchands hanséates
+  l'été), malgré une population permanente modeste.
+- `set_bergerac` (prov_perigord) : `owner` `fac_england` → `null` (la province est `fac_france` ;
+  la description indique déjà Bergerac tenue par le parti français jusqu'à sa prise par Henri de
+  Grosmont le 26 août 1345) ; retiré le correctif « Liberté de jeu » de la description, devenue
+  cohérente avec l'histoire.
+- Description Bruxelles/Bois-le-Duc (« quatre bonnes villes ») : `set_louvain` citait à tort Malines
+  comme une des quatre bonnes villes du Brabant (Malines était une seigneurie distincte en 1337,
+  disputée entre Flandre et Brabant) ; corrigée pour nommer les quatre réelles (Louvain, Bruxelles,
+  Anvers, Bois-le-Duc) et préciser le statut à part de Malines.
+- Paires < 3 km : `set_tours`/`set_marmoutier_tours`, `set_winchelsea`/`set_rye`,
+  `set_treves`/`set_st_maximin_trier`, `set_koblenz`/`set_ehrenbreitstein` **gardées** (distinctes et
+  importantes historiquement : abbaye royale, Cinque Ports jumeaux, abbaye d'immédiateté impériale,
+  forteresse électorale en vis-à-vis). `set_montpellier`/`set_castelnau_le_lez` **remplacée** (voir
+  §2, `set_mauguio`).
+
+### Prochaine étape
+Lot terminé ; fusionner `feat/dc6-a` dans `feat/densite` (ou `main` selon l'état de l'intégration)
+quand l'orchestrateur DC le décide. Aucun suivi ouvert côté données.
 ## DC6c — réduction et masquage des maquettes à l'échelle effective (worktree `../gp-dc6c`, branche `feat/dc6-c`)
 État : **fait**, `main` fusionné (696713bc), prêt pour ff. Tests verts : smoke, settlements_render,
 da3_markers, cv1_campaign_life, sz4_prop_scale, sz4b_colonies_forests, dc6c_fit_scale (nouveau).
@@ -290,7 +394,6 @@ da3_markers, cv1_campaign_life, sz4_prop_scale, sz4b_colonies_forests, dc6c_fit_
   Lille (`--center=2310.3,1657.9`, vues 1400,550,250,120,20,12, `--no-valley`) :
 
 | | main | DC6c |
-|---|---|---|
 | Europe / région / comté / 120 / 20 : masquées, réduites, paires > 20 % | 0, 173, 7 | 7, 166, 0 |
 | Distance 12 : masquées, réduites, paires > 20 % | 0, 173, 2 | 1, 7, 0 |
 | Noms qui se chevauchent (toutes vues) | 0 | 0 |

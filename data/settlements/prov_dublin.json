@@ -60,33 +60,6 @@
     ]
   },
   {
-    "id": "set_waterford",
-    "province": "prov_dublin",
-    "kind": "town",
-    "name": {
-      "display": "Waterford",
-      "local": "Waterford",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -7.1101,
-      52.2593
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Ancien port viking (Veðrafjǫrðr) devenu cité royale fidèle à la couronne ; sa devise « Urbs Intacta » ne lui sera donnée qu'en 1487.",
-    "sources": [
-      "Waterford"
-    ]
-  },
-  {
     "id": "set_mellifont",
     "province": "prov_dublin",
     "kind": "abbey",

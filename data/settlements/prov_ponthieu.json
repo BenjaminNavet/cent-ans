@@ -59,6 +59,33 @@
     ]
   },
   {
+    "id": "set_saint_valery_sur_somme",
+    "province": "prov_ponthieu",
+    "kind": "town",
+    "name": {
+      "display": "Saint-Valery-sur-Somme",
+      "local": "Saint Valeri",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6333,
+      50.1833
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port à l'embouchure de la Somme, ancien point d'embarquement de Guillaume le Conquérant, dans le comté de Ponthieu.",
+    "sources": [
+      "Saint-Valery-sur-Somme"
+    ]
+  },
+  {
     "id": "set_rue",
     "province": "prov_ponthieu",
     "kind": "town",
