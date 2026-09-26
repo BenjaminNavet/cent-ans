@@ -2,7 +2,8 @@
 
 Branche `feat/sz4b-colonies-forets` (worktree d'agent, depuis `main` 01f09d2b). Liens symboliques non
 versionnés `data/map/pyramid`, `tools/geo/raw` → dépôt principal. Compilation avec
-`CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/core/target`, dylib copiée dans `game/bin`.
+une cible **privée** `CARGO_TARGET_DIR=<worktree>/core/target` (à supprimer après fusion), dylib copiée
+dans `game/bin`.
 
 ## Défauts traités (laissés par SZ4)
 1. Maquettes des colonies géantes jusqu'à d ≈ 8, puis remplacées d'un coup par les villes 1:1 (ZG6) ;
@@ -38,11 +39,16 @@ versionnés `data/map/pyramid`, `tools/geo/raw` → dépôt principal. Compilati
 - [x] `ForestDetail` (cellules 16 u, part `full_scale² (1/s² − 1)`, budget, recalage groupé par tuile)
 - [x] Défaut trouvé : pied des arbres enfoncé de 0,08 × hauteur **de carte** (80 m) → arbres à taille réelle
   enterrés ; corrigé dans `foliage.gdshaderinc` (enfoncement réduit avec l'arbre)
-- [ ] Captures avant (à refaire avec le code de `main` et le script final) / après
-- [ ] Mesures (i/s, instances)
-- [ ] Tests de non-régression : zg6_towns, cv1_campaign_life, settlements_render, smoke, cargo test
-- [ ] Doc `docs/godot-map.md` § SZ4b
+- [x] Fusion de `main` 60061b0b (sans conflit)
+- [x] Captures avant (`main` dans un worktree jetable, même dylib : API Rust additive) / après, `docs/img/sz4b/`
+- [x] Mesures `tests/sz4b_bench.gd` (3 passes alternées, médianes) : tableau dans `docs/godot-map.md` § SZ4b ;
+  primitives ×2 au palier vallée en forêt, i/s dans le bruit (sauf peut-être Compiègne d = 6 : 58 → 29)
+- [x] Tests : sz4b_colonies_forests, sz4_prop_scale, zg6_towns, cv1_campaign_life, settlements_render,
+  vh4_landmarks, smoke OK ; cargo test 653 OK. `sz1_mountain_test` échoue (Paris ×0,50) **aussi sur main** :
+  préexistant, hors lot
+- [x] Doc `docs/godot-map.md` § SZ4b (mesures, captures)
 
 ## Prochaine étape
-Captures après complètes, captures avant refaites (fichiers de `main` restaurés temporairement), mesures
-de coût (`--fps-probe` / banc), doc.
+Lot terminé, prêt à fusionner (par l'orchestrateur). Suites possibles : coût GPU de la forêt dense
+(budget `instance_budget` ou LOD des arbres proches) si le playtest le montre ; `sz1_mountain_test`
+Paris à revoir côté SZ1 / Paris 1:1.
