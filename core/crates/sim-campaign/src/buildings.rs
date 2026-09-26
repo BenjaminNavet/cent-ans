@@ -468,6 +468,15 @@ pub fn province_effect_percent(data: &GameData, kind: data_model::SettlementKind
         .unwrap_or(100)
 }
 
+/// Weight, in per cent, of the buildings of a settlement of `kind` in its controller's
+/// research points (lot DC6b, `rules.json` `research_percent`; 100 when absent).
+pub fn research_percent(data: &GameData, kind: data_model::SettlementKind) -> u32 {
+    data.settlement_rules
+        .as_ref()
+        .and_then(|rules| rules.research_percent.get(&kind).copied())
+        .unwrap_or(100)
+}
+
 /// Total upkeep of the completed buildings of a province (spec § 1.2).
 pub fn province_building_upkeep(data: &GameData, buildings: &[BuildingId]) -> i64 {
     buildings

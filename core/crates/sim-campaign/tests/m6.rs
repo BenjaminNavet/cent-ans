@@ -49,15 +49,14 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
     let data = data();
     let state = france(&data, 1);
     let france_id = fac("fac_france");
-    // DC6b: a secondary place's libraries weigh its kind's `province_effect_percent`.
+    // DC6b: a secondary place's libraries weigh its kind's `research_percent`.
     let buildings: f64 = state
         .settlements
         .values()
         .filter(|s| s.controller == france_id)
         .map(|s| {
-            let weight = f64::from(sim_campaign::buildings::province_effect_percent(
-                &data, s.kind,
-            )) / 100.0;
+            let weight =
+                f64::from(sim_campaign::buildings::research_percent(&data, s.kind)) / 100.0;
             s.buildings
                 .iter()
                 .filter_map(|b| data.buildings.get(b))
