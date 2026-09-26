@@ -1726,6 +1726,12 @@ colonie et le bouton « Garnison » restent. Avec le mock, la carte garde le com
   l'armée est dans un port relié à la colonie par mer. La réponse (`walked`, `stop`, `events`) anime
   le marqueur le long du trajet, affiche un avis (arrêt en zone de contrôle, siège…) et propose la
   bataille en attente le cas échéant.
+- **Attaque (lot AT1)** : curseur « épées croisées » (`AttackCursor`, icône `lorc-crossed-swords`) au
+  survol d'une cible attaquable (`is_attack_target` : faction en guerre, ou en paix/trêve). Sur une
+  place en guerre, `order_attack_settlement` : assaut direct si l'armée l'assiège déjà, sinon marche
+  puis ordre `assault` si le siège commence ce tour (dialogue d'avant-bataille de siège), ou
+  `attack_army` sur le défenseur qui arrête la marche aux portes. Faction en paix ou en trêve :
+  `WarDeclarationDialog` (conséquences de `evaluate_proposal`), puis `declare_war` et l'attaque.
 - **Zone de contrôle** : cercle rouge (décalque) de `zoc_radius_km` au survol d'une armée ennemie.
 - **Marqueurs** : une armée en campagne se tient à sa `position` libre ; seules les armées dans une
   colonie s'y empilent.
