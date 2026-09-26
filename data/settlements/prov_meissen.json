@@ -83,5 +83,110 @@
     "sources": [
       "Château de Stolpen"
     ]
+  },
+  {
+    "id": "set_leipzig",
+    "province": "prov_meissen",
+    "kind": "town",
+    "name": {
+      "display": "Leipzig",
+      "local": "Lipzk",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      12.3731,
+      51.3397
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_fair",
+      "bld_counting_house"
+    ],
+    "port": false,
+    "description": "Grande ville de foires de Thuringe-Misnie, à la croisée de la Via Regia et de la Via Imperii, foires attestées depuis 1165.",
+    "sources": [
+      "Leipzig",
+      "Foires de Leipzig"
+    ]
+  },
+  {
+    "id": "set_erfurt",
+    "province": "prov_meissen",
+    "kind": "town",
+    "name": {
+      "display": "Erfurt",
+      "local": "Erpesfurt",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.0299,
+      50.9787
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Grande ville de Thuringe, place de commerce du pastel (guède), sous la suzeraineté nominale de l'archevêque de Mayence mais largement autonome.",
+    "sources": [
+      "Erfurt"
+    ]
+  },
+  {
+    "id": "set_altzella",
+    "province": "prov_meissen",
+    "kind": "abbey",
+    "name": {
+      "display": "Altzella",
+      "local": "Alte Cellen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      13.2967,
+      51.1058
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1162, nécropole des margraves de Misnie de la maison de Wettin.",
+    "sources": [
+      "Abbaye d'Altzella"
+    ]
+  },
+  {
+    "id": "set_dresden",
+    "province": "prov_meissen",
+    "kind": "village",
+    "name": {
+      "display": "Dresde",
+      "local": "Dresdene",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      13.7373,
+      51.0504
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Petit bourg margravial sur l'Elbe, en amont de Meissen, bien plus modeste que sa voisine en 1337.",
+    "sources": [
+      "Dresde"
+    ]
   }
 ]
