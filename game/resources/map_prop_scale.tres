@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MapPropScale" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/map/map_prop_scale.gd" id="1_props"]
+
+[resource]
+script = ExtResource("1_props")
+shrink_start = 28.0
+shrink_end = 5.0
+tree_shrink_end = 3.0
+tree_ratio = 0.035
+windmill_ratio = 0.008
+hamlet_ratio = 0.03
+chimney_ratio = 0.02
+fire_ratio = 0.05
+chimney_real_alpha = 0.5
+rewrite_step = 0.04

@@ -22,8 +22,8 @@ toute production. Budget : 0 $ prévu (sources CC0, cuisson Blender) ; toute gé
 | Lot | Objet | Dépend de | État |
 |---|---|---|---|
 | FG0 | Prototype + planche de style : homme d'armes et cheval nouvelle définition, rendus Blender côte à côte avec l'actuel ; choix de la base (MakeHuman/MPFB CC0 ou autre), méthode d'ajustement au squelette Quaternius, budget de triangles | — | fait, validé par le joueur, fusionné (8dfc13d1) |
-| FG1 | Corps humain en production : rigs `human` et cavalier (`R:`) aux bras allongés (texture d'os recuite, mêmes clips), 6-8 visages, chaîne LOD, sortie CAM1 lisible par le shader actuel, derrière un drapeau | FG0 | lancé 26/09 |
-| FG2 | Équipement fin : mailles, plates, casques, armes, surcots avec plis, par recette de figurine (25 figurines) | FG1 | à faire |
+| FG1 | Corps humain en production : rigs `human` et cavalier (`R:`) aux bras allongés (texture d'os recuite, mêmes clips), 6-8 visages, chaîne LOD, sortie CAM1 lisible par le shader actuel, derrière un drapeau | FG0 | fait, fusionné (4522c2ad) |
+| FG2 | Équipement fin : mailles, plates, casques, armes, surcots avec plis, par recette (28 recettes) ; allonge du tir à l'arc | FG1 | lancé 26/09 |
 | FG3 | Matières cuites : atlas normal + ORM + masque de livrée, intégration shader skinné | FG1, **après DA1** (même shader) | à faire |
 | FG4 | Cheval en production : poids des jambes (galop), étriers élargis, chanfrein, harnachement, caparaçon, chaîne LOD | FG0 | lancé 26/09 |
 | FG5 | Performance A/B (`--units=50`, Ultra), captures, ADR (relève le plafond de triangles de la bible § 6) | FG1-FG4 | à faire |
@@ -52,3 +52,9 @@ Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprim�
   humains (rig `human` ET os `R:` du cavalier) ; FG4 possède les os du cheval et les étriers.
   Les deux recuisent `cavalry.bones.bin` : conflit binaire résolu par relance du script après
   fusion (FG1 fusionné d'abord).
+- 26/09 : FG1 fusionné (4522c2ad). 28 recettes sur corps MakeHuman sous `--fine-figures`
+  (`game/assets/models/battle_fine/`, point d'entrée `tools/blender_scripts/battle_fine.py rigs|figures|check`).
+  Humérus 0,176 → 0,251 m. `--units=50` : primitives +11 %, mais i/s 27-30 → 18-25 (sommets ×4 au
+  LOD0, ×3,5 au LOD1) → FG5 : LOD0 relayé plus tôt, LOD1 plus léger. Montés : cheval Quaternius en
+  attendant FG4 (raccord dans `FineMount`, `battle_fine.py`). Arc : allonge 0,55 m au lieu de 0,68.
+  FG2 lancé (équipement), sans toucher cheval/harnachement (FG4).
