@@ -285,6 +285,10 @@ struct PoseCache {
     raw: Vec<Option<Vec<f32>>>,
     /// Unit id -> the buffer handed out (poses zero-padded to the capacity).
     padded: Vec<PackedFloat32Array>,
+    /// PB3e: unit id -> serial of `padded[id]` (changes whenever it is
+    /// rebuilt): the renderer skips re-sending an unchanged buffer.
+    versions: Vec<i64>,
+    serial: i64,
 }
 
 /// Appends the `MultiMesh` transform (12 floats, rotation about Y) of a pose.
@@ -937,7 +941,8 @@ impl BattleSim {
     /// `get_soldier_buffer`), `buffers[id]` zero-padded to
     /// `max(counts[id], capacities[id])` figures. Poses are rebuilt only after
     /// a simulation step or a change of the battle; in between the same
-    /// buffers come back (copy-on-write).
+    /// buffers come back (copy-on-write). PB3e: a third element `versions:
+    /// PackedInt64Array` numbers each buffer; it changes when the buffer does.
     #[func]
     fn get_soldier_buffers(&mut self, capacities: PackedInt32Array) -> VarArray {
         let Some(sim) = &self.sim else {
@@ -953,7 +958,10 @@ impl BattleSim {
             cache.key = Some(key);
             cache.raw.resize(units.len(), None);
             cache.padded.resize(units.len(), PackedFloat32Array::new());
+            cache.versions.resize(units.len(), -1);
         }
+        let mut versions = PackedInt64Array::new();
+        versions.resize(units.len());
         let mut counts = PackedInt32Array::new();
         counts.resize(units.len());
         let mut buffers = VarArray::new();
@@ -974,16 +982,23 @@ impl BattleSim {
                 }
                 cache.padded[id] = padded_buffer(&raw, capacity);
                 cache.raw[id] = Some(raw);
+                cache.serial += 1;
+                cache.versions[id] = cache.serial;
             }
             let raw = cache.raw[id].as_deref().unwrap_or_default();
             let len = raw.len().max(capacity * 12);
             if cache.padded[id].len() != len {
                 cache.padded[id] = padded_buffer(raw, capacity);
+                cache.serial += 1;
+                cache.versions[id] = cache.serial;
             }
+            versions[id] = cache.versions[id];
             counts[id] = (raw.len() / 12) as i32;
             buffers.push(&cache.padded[id].to_variant());
         }
-        pair(&counts, &buffers)
+        let mut out = pair(&counts, &buffers);
+        out.push(&versions.to_variant());
+        out
     }
 
     /// `{width, depth, resolution, nx, nz, heights, forests[{x, z, radius}],

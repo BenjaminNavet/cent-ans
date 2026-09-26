@@ -157,17 +157,15 @@ mod tests {
         }
     }
 
-    /// The pipelined battle is bit-identical to the synchronous one, frame
-    /// after frame, with orders and uneven frame times, and the renderer
-    /// reads the same volleys, impacts and journal.
-    #[test]
-    fn pipelined_battle_matches_synchronous_battle() {
-        let mut sync_sim = demo();
-        let mut piped_sim = demo();
+    /// Plays the same battle synchronously and pipelined, frame after frame,
+    /// with orders and uneven frame times; both must stay bit-identical and
+    /// the renderer must read the same volleys, impacts, journal and siege
+    /// effects. Returns the steps adopted from the worker.
+    fn compare(mut sync_sim: BattleSim, mut piped_sim: BattleSim, frames: usize) -> u64 {
         let mut pipeline = StepPipeline::default();
         let mut epoch = 0;
         let frame_times = [1.0 / 60.0, 1.0 / 30.0, 0.013, 0.25, 1.0 / 144.0, 0.1];
-        for frame in 0..3000 {
+        for frame in 0..frames {
             for command in orders(&sync_sim, frame) {
                 let a = sync_sim.issue_command(command.clone()).is_ok();
                 let b = piped_sim.issue_command(command).is_ok();
@@ -188,8 +186,30 @@ mod tests {
                 break;
             }
         }
-        assert!(pipeline.adopted > 100, "adopted {}", pipeline.adopted);
         assert_eq!(format!("{piped_sim:?}"), format!("{sync_sim:?}"));
+        pipeline.adopted
+    }
+
+    #[test]
+    fn pipelined_battle_matches_synchronous_battle() {
+        let adopted = compare(demo(), demo(), 3000);
+        assert!(adopted > 100, "adopted {adopted}");
+    }
+
+    /// Same on a siege (walls, ladders, siege effects read by cursor).
+    #[test]
+    fn pipelined_siege_matches_synchronous_siege() {
+        let mut setup: serde_json::Value = serde_json::from_str(include_str!(
+            "../../sim-battle/tests/fixtures/demo_battle_1337.json"
+        ))
+        .unwrap();
+        setup["siege"] = serde_json::json!({"fortification": 2, "breach": 0});
+        let setup: BattleSetup = serde_json::from_value(setup).unwrap();
+        let build = || BattleSim::new(setup.clone(), 7).expect("siege builds");
+        let sim = build();
+        assert!(sim.siege().is_some());
+        let adopted = compare(sim, build(), 2500);
+        assert!(adopted > 100, "adopted {adopted}");
     }
 
     /// A fork taken before an order is not used after it.

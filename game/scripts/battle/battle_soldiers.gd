@@ -64,6 +64,12 @@ var _drawn: Dictionary = {}
 ## PB3c : tampons groupés et mis en cache côté Rust entre deux pas de simulation
 ## (`get_soldier_buffers`) ; `--no-pb3c` après `--` : un appel par camp et famille (mesures A/B).
 var pb3c_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3c")
+## PB3e : un tampon inchangé depuis son dernier envoi (même version Rust, même capacité, aucune
+## figurine masquée ou poussée) n'est pas renvoyé au `MultiMesh` (`--no-pb3e` : renvoyé à
+## chaque image comme avant).
+var pb3e_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3e")
+var _buffer_version: int = -1  # version Rust du tampon du régiment en cours (-1 : inconnue)
+var _buffer_sent: Dictionary = {}  # id d'instance du MultiMesh -> [version, instance_count]
 ## PB3c : derniers uniformes envoyés par matériau (instance id -> {nom: valeur}) : un paramètre
 ## inchangé n'est plus renvoyé (matériau non resali, pas d'appel au serveur de rendu).
 var _sent: Dictionary = {}
@@ -410,6 +416,9 @@ func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 	var result: Array = battle.call("get_soldier_buffers", capacities)
 	var counts: PackedInt32Array = result[0]
 	var buffers: Array = result[1]
+	var versions := PackedInt64Array()
+	if pb3e_enabled and result.size() > 2:
+		versions = result[2]
 	if buffers.size() != units.size():
 		_update_per_kind(battle, units, selected)
 		return
@@ -432,7 +441,9 @@ func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 					skipped_updates += 1
 					continue
 				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
+				_buffer_version = versions[i] if i < versions.size() else -1
 				_update_unit(unit, id, kind, buffers[i], n, selected.has(id))
+	_buffer_version = -1
 
 
 ## Chemin d'avant PB3c : un tampon par camp et famille, découpé en tranches par régiment.
@@ -480,6 +491,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var instance: MultiMeshInstance3D = layers[id]
 	var mm := instance.multimesh
 	# Soldats tombés depuis l'image précédente (régiment resté sur le champ).
+	# PB3e : tampon tel que rendu par Rust (sans figurines masquées ni poussées) ?
+	var version := _buffer_version if not (_hidden.has(id) or _drive.has(id) or reserved.has(id)) else -1
 	if _previous.has(id):
 		var prev: PackedFloat32Array = _previous[id]
 		var prev_n := int(_drawn[id])  # PB3c : tampons complétés à la capacité, compte dessiné gardé à part
@@ -539,14 +552,15 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		if padded.size() != mm.instance_count * 12:
 			padded = slice.duplicate()
 			padded.resize(mm.instance_count * 12)
-		if instance.visible:
+		if instance.visible and not _buffer_unchanged(mm, version):
 			mm.buffer = padded
-		if lod.visible:
+		if lod.visible and not _buffer_unchanged(lod_mm, version):
 			lod_mm.buffer = padded
 		if imp != null:
 			if imp.multimesh.instance_count != mm.instance_count:
 				imp.multimesh.instance_count = mm.instance_count
-			imp.multimesh.buffer = padded
+			if not _buffer_unchanged(imp.multimesh, version):
+				imp.multimesh.buffer = padded
 	mm.visible_instance_count = n
 	lod_mm.visible_instance_count = n
 	if imp != null:
@@ -606,6 +620,20 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
 			mat.set_meta("bv2_blood", blood)
 			mat.set_shader_parameter("blood", blood)
+
+
+## PB3e : vrai si `mm` a déjà reçu le tampon de version `version` à sa capacité actuelle (le
+## renvoyer ne changerait rien) ; sinon le note comme envoyé. `version` < 0 : toujours renvoyé.
+func _buffer_unchanged(mm: MultiMesh, version: int) -> bool:
+	var key := mm.get_instance_id()
+	if version < 0:
+		_buffer_sent.erase(key)
+		return false
+	var sent: Variant = _buffer_sent.get(key)
+	if sent != null and int(sent[0]) == version and int(sent[1]) == mm.instance_count:
+		return true
+	_buffer_sent[key] = [version, mm.instance_count]
+	return false
 
 
 ## PB3c : uniformes déjà envoyés à `mat` (hors chemin PB3c : dictionnaire jetable, tout renvoyé).

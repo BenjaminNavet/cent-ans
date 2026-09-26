@@ -199,6 +199,9 @@ var _tod_clock: String = ""  # EP8b : dernière heure affichée au bandeau (« M
 ## EP13 : rejeu d'après bataille. `--replay=<fichier>` (menu « Rejeux ») ou « Revoir la bataille »
 ## sur l'écran de fin : le cœur re-simule la bataille enregistrée, la scène la montre sans ordre.
 var replay_mode: bool = false
+## PB3e : pas de simulation calculé sur un fil (`--no-pb3e` : synchrone, mesures A/B).
+var pb3e_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3e")
+var _step_thread_on: bool = false
 var replay_bar: BattleReplayBar = null
 var replay_error: String = ""
 var replay_saved_path: String = ""  # fichier écrit à la fin de la bataille (vide : non enregistré)
@@ -1097,6 +1100,7 @@ func _process(delta: float) -> void:
 	var running: bool = not paused and not battle.call("is_finished")
 	var tick_start := Time.get_ticks_usec()
 	if running:
+		_configure_step_thread()
 		battle.call("tick", delta * speed * slow)
 	_bench_tick_last_ms = float(Time.get_ticks_usec() - tick_start) / 1000.0
 	_refresh_view(false, delta * slow)
@@ -1113,6 +1117,17 @@ func _process(delta: float) -> void:
 		_show_end()
 	if _benchmark:
 		_run_benchmark_frame(delta)
+
+
+## PB3e (ADR 0090) : le pas de simulation suivant se calcule sur un fil pendant que l'image
+## montre le pas courant (même bataille, au bit près). Synchrone en headless (tests), pendant un
+## rejeu et avec `--no-pb3e` après `--` (mesures A/B).
+func _configure_step_thread() -> void:
+	var wanted := pb3e_enabled and not replay_mode and DisplayServer.get_name() != "headless"
+	if wanted == _step_thread_on or not battle.has_method("set_step_thread"):
+		return
+	_step_thread_on = wanted
+	battle.call("set_step_thread", wanted)
 
 
 ## EP7 : la météo d'une carte historique change pendant la bataille (averse de Crécy) : la pluie
@@ -1231,6 +1246,13 @@ func _bench_finish() -> void:
 		"process_ms_median": _median(_bench_process_ms),
 		"soldiers_ms_median": _median(_bench_soldiers_ms),
 		"tick_ms_median": _median(_bench_tick_ms),
+		# PB3e : les pics d'image (pas de simulation) sont l'objectif ; pire image et p99.
+		"frame_ms_p99": _percentile(sorted_ms, 0.99),
+		"frame_ms_max": sorted_ms[sorted_ms.size() - 1] if not sorted_ms.is_empty() else 0.0,
+		"tick_ms_p99": _percentile(_sorted(_bench_tick_ms), 0.99),
+		"tick_ms_max": _sorted(_bench_tick_ms)[-1] if not _bench_tick_ms.is_empty() else 0.0,
+		"step_thread": _step_thread_on,
+		"step_stats": battle.call("get_step_stats") if battle.has_method("get_step_stats") else {},
 		"quality": RenderQuality.current(),
 		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
 		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
@@ -1298,6 +1320,12 @@ func _bench_wall_elapsed_s() -> float:
 
 func _bench_timed_out() -> bool:
 	return _bench_timeout_s > 0.0 and _bench_wall_elapsed_s() > _bench_timeout_s
+
+
+static func _sorted(values: Array) -> PackedFloat64Array:
+	var out := PackedFloat64Array(values)
+	out.sort()
+	return out
 
 
 static func _median(values: Array) -> float:
