@@ -104,8 +104,8 @@
       "bld_abbey",
       "bld_scriptorium"
     ],
-    "port": false,
-    "description": "Grande abbaye bénédictine du delta du Pô, où travailla le théoricien musical Guy d'Arezzo.",
+    "port": true,
+    "description": "Grande abbaye bénédictine du delta du Pô, entourée d'eau et desservie par le Po di Volano jusqu'à l'Adriatique, où travailla le théoricien musical Guy d'Arezzo.",
     "sources": [
       "Abbaye de Pomposa"
     ]
