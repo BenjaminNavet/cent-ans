@@ -168,6 +168,7 @@ var _dust_since: float = -1.0
 var _title_text: String = ""
 var _weather_text: String = ""
 var _tod_key: String = ""
+var _tod_clock: String = ""  # EP8b : dernière heure affichée au bandeau (« Midi, 11 h 00 »)
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -448,16 +449,21 @@ func add_smoke_source(position: Vector3, intensity: float = 1.0, kind: String = 
 	return staging.add_smoke_source(position, intensity, kind) if staging != null else -1
 
 
-## EP8 : l'heure au bandeau (« Temps clair · Crépuscule (portée des tireurs −30 %) ») ;
-## rafraîchi à chaque changement de phase.
+## EP8 : l'heure au bandeau (« Temps clair · Crépuscule, 18 h 40 (portée des tireurs −30 %) ») ;
+## EP8b (ADR 0055) : l'heure elle-même s'affiche (`BattleTimeOfDay.clock_label`), pas seulement le
+## nom de la phase, pour que le temps compressé de la bataille (0,2 min de jour par seconde
+## simulée) reste lisible ; rafraîchi à chaque changement de phase ou d'heure affichée (arrondie à
+## 10 min).
 func _update_time_label() -> void:
 	if staging == null or staging.tod.is_empty():
 		return
 	var key := str(staging.tod.get("key", ""))
-	if key == _tod_key:
+	var clock := BattleTimeOfDay.clock_label(staging.tod)
+	if key == _tod_key and clock == _tod_clock:
 		return
 	_tod_key = key
-	var label := str(staging.tod.get("label", ""))
+	_tod_clock = clock
+	var label := clock
 	var visibility := float(staging.tod.get("visibility", 1.0))
 	if visibility < 0.999:
 		label += " (portée des tireurs −%d %%)" % int(round((1.0 - visibility) * 100.0))
