@@ -3,52 +3,38 @@
 Branche `worktree-agent-add3a9bbd7d238220`. Suite de SG4 (`docs/wip/sg4-assaut.md`), ADR 0046
 (§ Suite SG4, **§ Suite SG5**), ADR 0056 (§ EP9b).
 
-## État : diagnostic en cours
+## État : terminé, à fusionner par l'orchestrateur
 
 - [x] `git merge main` (EP9b inclus).
 - [x] Mesure de départ `sg4_balance` (10 graines) : identique à ADR 0056 § EP9b.
-- [ ] Diagnostic (trace crête avec pieux).
-- [ ] Correctif côté placement / ordres (`ai.rs`, données `data/rules/`).
-- [ ] Mesures, ADR 0046 § Suite SG5, contrôles complets.
+- [x] Diagnostic (sondes `SG4_ROUTS`, `SG4_SHOTS`, `SG4_HORSE=a..b` ajoutées à `sg4_balance`).
+- [x] Correctif : ligne d'une armée sur sa crête reculée de 120 m sur la contre-pente
+  (`data/rules/battle_crest_defence.json`, schéma, `crest::CrestDefenceRules`, `ai.rs::plan_field`),
+  seulement si la ligne compte au moins 8 régiments.
+- [x] ADR 0046 § Suite SG5 (mesures, variantes écartées, points ouverts).
+- [x] fmt, clippy, cargo test, sonde SG3, `survey_crecy`, pytest, build.sh, import, smoke.
 
-## Mesure de départ (main + EP9b, attaquant / défenseur / nuls)
+## Mesures (attaquant / défenseur / nuls, 60 régiments, graines 1-10)
 
-| Terrain | Pieux | Départ |
-|---|---|---|
-| plat | oui | 3 / 7 / 0 |
-| plat | non | 7 / 3 / 0 |
-| crête | oui | 6 / 4 / 0 |
-| crête | non | 1 / 9 / 0 |
-| plaine générée | oui | 2 / 8 / 0 |
-| plaine générée | non | 6 / 4 / 0 |
-| comme ep1_scale | oui | 6 / 4 / 0 |
+| Terrain | Pieux | Départ | SG5 |
+|---|---|---|---|
+| plat | oui | 3 / 7 / 0 | 3 / 7 / 0 |
+| plat | non | 7 / 3 / 0 | 7 / 3 / 0 |
+| crête | oui | 6 / 4 / 0 | 0 / 10 / 0 |
+| crête | non | 1 / 9 / 0 | 0 / 10 / 0 |
+| plaine générée | oui | 2 / 8 / 0 | 1 / 9 / 0 |
+| plaine générée | non | 6 / 4 / 0 | 6 / 4 / 0 |
+| comme ep1_scale | oui | 6 / 4 / 0 | 5 / 5 / 0 |
 
-## Contraintes
-- Ne pas toucher contagion / engagement (`sim.rs`, `decision.rs`, session épique).
-- EP7 (cartes historiques, branche à part) : ne pas redéployer un régiment placé par un plan
-  explicite (postes `hold` du scénario).
+Sonde élargie (crête, 40-80 régiments, 20 graines) : 55/160 → 6/160 victoires de l'attaquant.
 
-## Diagnostic (traces `SG4_ROUTS=1`, `SG4_SHOTS=1`, `SG4_HORSE=a..b` ajoutées à `sg4_balance`)
-- Crête avec pieux, graines 1-10 : la première déroute est toujours la cavalerie du défenseur,
-  battue au bas du glacis (x ≈ 600, z ≈ 850) ; elle reflue à travers les tireurs de l'extrémité
-  gauche puis la ligne ; déroutes en cascade de régiments intacts (« routing friends 3-4 »,
-  ennemi à 150-200 m) qui glissent le long de la ligne. Aucune mêlée d'infanterie.
-- Les graines changent à peine le début de la bataille : 10 graines ≈ 1-2 batailles
-  indépendantes ; un réglage fait basculer tout un cas (0/10 ↔ 10/0).
-- Sans les sorties de la cavalerie du défenseur contre les tireurs « isolés » de l'attaquant, le
-  défenseur perd 10/10 : ses archers perdent 77-93 % dans le duel (ils tirent sur les arbalétriers
-  derrière leurs pavois, les archers de l'attaquant tirent sur eux).
-- Cavaliers d'une aile tous sur le même point (empilés) : une déroute emporte toute l'aile.
+## Note pour la session épique (contagion, non modifiée)
+La contagion compte tout ami en déroute à moins de 120 m (devant, derrière ou le long de la
+ligne) ; une déroute fuit « loin de l'ennemi le plus proche + vers son bord » : à l'extrémité
+d'une ligne l'ennemi est sur le flanc et la déroute court le long de la ligne (cascade observée :
+régiments intacts, ennemi à 150-200 m, qui cèdent l'un après l'autre). Pistes : fuite orientée
+vers l'arrière ; contagion réduite pour un ami en déroute derrière le régiment.
 
-## Sonde élargie (crête, 40/60/80 régiments × 10 graines ; victoires de l'attaquant sur 60)
-- départ : 13/60 (seul 60 rég. avec pieux cède, 6/4) ;
-- cavalerie aux ailes hors des tireurs (écart 20-60 m, retrait 15-40 m) : 28 à 42/60 — rejeté ;
-- cavaliers étalés sur l'aile (non empilés) : 38/60 — rejeté (la masse gagne le duel de cavalerie) ;
-- laisse des sorties contre les tireurs isolés (150-300 m) : 42/60 à 13/60 — rien de mieux ;
-- tir de contre-batterie seul : 18/60 ;
-- ligne reculée sur la contre-pente de 50 m : 29/60 ; de 100 m : 12/60 (60 sans pieux 10/0).
-
-## Prochaine étape
-Sonde élargie (40/60/80 régiments × 10 graines, `sweep2.sh` du scratchpad) pour choisir entre :
-aile de cavalerie hors des tireurs et étalée, laisse des sorties, tir de contre-batterie.
-Réglages provisoires lus dans des variables `SG5_*` (à retirer avant la fin).
+## Note pour EP7
+Les régiments postés par un scénario (`hold`) doivent être exclus du recul de ligne SG5 à la
+fusion (`scenario_post(i)`), même si le filtre de laisse rejette déjà ces ordres.
