@@ -11,7 +11,7 @@ extends RefCounted
 ##
 ## Fleuves : sommets doublés sur l'axe (le shader écarte de la demi-largeur, au moins un pixel
 ## écran) ; NORMAL = perpendiculaire signée ; UV = (largeur monde, côté ±1) ; UV2 = (abscisse
-## vers l'aval, ordre de Strahler) ; COLOR = (divagant, marée, marais, intermittent).
+## vers l'aval, ordre de Strahler + 100 × marque d'emprise, SZ2b) ; COLOR = (divagant, marée, marais, intermittent).
 ## Hauteur : niveau d'eau `z`, relevé au-dessus de la surface là où le lit n'est pas creusé.
 ## Routes : même disposition ; UV2 = (abscisse, largeur réelle m) ; COLOR = (principale,
 ## chaussée en zone humide, pavée, calculée). Hauteur : max(surface, `z` de la tuile) + soulèvement.
@@ -21,6 +21,11 @@ const RIVER_LIFT_M := 0.35
 const ROAD_LIFT_M := 0.25
 ## Pas maximal (unités monde) des routes densifiées : elles suivent les facettes du relief.
 const ROAD_STEP := 0.08
+## SZ2b : marques des sommets de fleuve (UV2.y = ordre + MARK_STEP × marque ; shader
+## `river_fine.gdshader`) : dans une emprise de colonie, dans la zone d'une ville 1:1.
+const MARK_STEP := 100.0
+const INSIDE_COVER := 1
+const INSIDE_ZONE := 2
 
 # Entrées (fil principal)
 var key: int = 0
@@ -30,8 +35,10 @@ var road_tile: CafvTile
 var snapshot: Dictionary = {}
 var snapshot_scale: float = 0.006
 var covers: PackedVector4Array = PackedVector4Array()
-## Zones personnalisées (x, y, rayon) : rien dedans.
+## Zones personnalisées (x, y, rayon) des maquettes sans ville 1:1 : rien dedans.
 var zones: PackedVector3Array = PackedVector3Array()
+## SZ2b : zones personnalisées des villes 1:1 (VH) : eau marquée `INSIDE_ZONE`.
+var open_zones: PackedVector3Array = PackedVector3Array()
 ## Villes et cités (x, y, rayon des rues pavées).
 var towns: PackedVector3Array = PackedVector3Array()
 var meters_per_unit: float = 719.0
@@ -98,6 +105,15 @@ func _cover_at(p: Vector2) -> int:
 	return -1
 
 
+## Index de la zone ouverte (ville 1:1) contenant `p`, -1 sinon.
+func _open_zone_at(p: Vector2) -> int:
+	for k in open_zones.size():
+		var zone := open_zones[k]
+		if Vector2(zone.x, zone.y).distance_squared_to(p) < zone.z * zone.z:
+			return k
+	return -1
+
+
 func _in_zone(p: Vector2) -> bool:
 	for zone in zones:
 		if Vector2(zone.x, zone.y).distance_squared_to(p) < zone.z * zone.z:
@@ -123,55 +139,69 @@ func _build_rivers() -> void:
 			1.0 if flags & CafvTile.FLAG_INTERMITTENT else 0.0)
 		var s := tile.line_start[li]
 		var n := tile.line_count[li]
-		# Morceaux hors des emprises des colonies et des zones personnalisées, coupés sur le bord
-		# de l'emprise (l'eau passe sous la ville ; pont-porte au point de coupe).
+		# SZ2b : l'eau n'est plus coupée sur les emprises des colonies ni dans les zones des villes
+		# 1:1 (VH) : ses sommets y sont marqués (`UV2.y`, voir `INSIDE_COVER`) et le shader les
+		# efface tant que la maquette est affichée (`cover_open`, `zone_open`). Seules les zones
+		# personnalisées des maquettes L1/L2 sans ville 1:1 (`zones`) coupent encore le fleuve.
+		# Pont-porte au bord de chaque emprise (visible tant que les maquettes le sont).
 		var piece := _Piece.new()
 		var prev_blocked := false
 		var prev_cover := -1
+		var prev_mark := 0
 		for k in range(s, s + n):
 			var p := Vector2(tile.x[k], tile.y[k])
 			var cover := _cover_at(p)
-			var blocked := cover >= 0 or (not zones.is_empty() and _in_zone(p))
+			var blocked := not zones.is_empty() and _in_zone(p)
+			var mark := INSIDE_COVER if cover >= 0 else (INSIDE_ZONE if _open_zone_at(p) >= 0 else 0)
 			if k > s and blocked != prev_blocked:
-				var inside_k := k if blocked else k - 1
-				var outside_k := k - 1 if blocked else k
-				var c := cover if blocked else prev_cover
-				var t := _cut_t(tile, outside_k, inside_k, c)
-				var cut := _Piece.lerp_point(tile, outside_k, inside_k, t)
+				# Zone fermée : coupe au dernier point dehors.
 				if blocked:
-					piece.add_raw(cut)
-					if c >= 0:
-						_add_gate(tile, outside_k, inside_k, c, cut)
 					_river_piece(out, piece, rank, color)
 					piece = _Piece.new()
-				else:
-					piece.add_raw(cut)
-					if c >= 0:
-						_add_gate(tile, outside_k, inside_k, c, cut)
+			elif k > s and not blocked and mark != prev_mark:
+				# Bord d'emprise ou de zone ouverte : point de coupe doublé (marque d'avant, puis
+				# d'après) pour une limite nette.
+				var entering := mark != 0
+				var inside_k := k if entering else k - 1
+				var outside_k := k - 1 if entering else k
+				var c := cover if entering else prev_cover
+				var circle := _mark_circle(tile, inside_k, c)
+				var t := _cut_circle(tile, outside_k, inside_k, circle)
+				var cut := _Piece.lerp_point(tile, outside_k, inside_k, t)
+				piece.add_raw(cut, prev_mark)
+				piece.add_raw(cut, mark)
+				if c >= 0 and (prev_mark == INSIDE_COVER or mark == INSIDE_COVER):
+					_add_gate(tile, outside_k, inside_k, c, cut)
 			if not blocked:
-				piece.add(tile, k)
+				piece.add(tile, k, mark)
 			prev_blocked = blocked
 			prev_cover = cover
+			prev_mark = mark
 		_river_piece(out, piece, rank, color)
 	river_arrays = out.commit()
 	river_aabb = out.aabb()
 	river_points = out.vertices.size() / 2
 
 
-## Paramètre t du point de [outside → inside] sur le bord de l'emprise (dichotomie ; 1 pour une
-## zone personnalisée : coupe au dernier point dehors).
-func _cut_t(tile: CafvTile, outside: int, inside: int, cover: int) -> float:
-	if cover < 0:
-		return 0.0
-	var c := covers[cover]
+## Cercle (x, y, rayon) de la marque du point `inside` : emprise `cover`, sinon zone ouverte.
+func _mark_circle(tile: CafvTile, inside: int, cover: int) -> Vector3:
+	if cover >= 0:
+		var c := covers[cover]
+		return Vector3(c.x, c.y, c.z)
+	var z := _open_zone_at(Vector2(tile.x[inside], tile.y[inside]))
+	return open_zones[z] if z >= 0 else Vector3(tile.x[inside], tile.y[inside], 0.0)
+
+
+## Paramètre t du point de [outside → inside] sur le bord du cercle (dichotomie).
+func _cut_circle(tile: CafvTile, outside: int, inside: int, circle: Vector3) -> float:
 	var a := Vector2(tile.x[outside], tile.y[outside])
 	var b := Vector2(tile.x[inside], tile.y[inside])
+	var center := Vector2(circle.x, circle.y)
 	var lo := 0.0
 	var hi := 1.0
-	var center := Vector2(c.x, c.y)
 	for _i in 16:
 		var m := (lo + hi) * 0.5
-		if a.lerp(b, m).distance_squared_to(center) < c.z * c.z:
+		if a.lerp(b, m).distance_squared_to(center) < circle.z * circle.z:
 			hi = m
 		else:
 			lo = m
@@ -201,7 +231,7 @@ func _river_piece(out: _Arrays, piece: _Piece, rank: int, color: Color) -> void:
 			out.vertices.append(Vector3(p.x, h, p.y))
 			out.normals.append(perp * side)
 			out.uvs.append(Vector2(width, side))
-			out.uv2s.append(Vector2(along, rank))
+			out.uv2s.append(Vector2(along, rank + MARK_STEP * piece.marks[i]))
 			out.colors.append(color)
 		out.grow(p, h, width * 1.5)
 	for i in count - 1:
@@ -225,17 +255,21 @@ class _Piece:
 	var pts := PackedVector2Array()
 	var zs := PackedFloat32Array()
 	var ws := PackedFloat32Array()
+	## SZ2b : 0 dehors, `INSIDE_COVER` ou `INSIDE_ZONE`.
+	var marks := PackedInt32Array()
 
-	func add(tile: CafvTile, k: int) -> void:
+	func add(tile: CafvTile, k: int, mark: int = 0) -> void:
 		pts.append(Vector2(tile.x[k], tile.y[k]))
 		zs.append(tile.z[k])
 		ws.append(tile.w[k])
+		marks.append(mark)
 
 	## Point (x, y, z, w).
-	func add_raw(p: Vector4) -> void:
+	func add_raw(p: Vector4, mark: int = 0) -> void:
 		pts.append(Vector2(p.x, p.y))
 		zs.append(p.z)
 		ws.append(p.w)
+		marks.append(mark)
 
 	static func lerp_point(tile: CafvTile, a: int, b: int, t: float) -> Vector4:
 		return Vector4(lerpf(tile.x[a], tile.x[b], t), lerpf(tile.y[a], tile.y[b], t), lerpf(tile.z[a], tile.z[b], t), lerpf(tile.w[a], tile.w[b], t))

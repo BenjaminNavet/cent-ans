@@ -386,12 +386,13 @@ func _apply_range(g: GeometryInstance3D, lod: String) -> void:
 func refresh_aabbs(vertical_scale: float) -> void:
 	var k := vertical_scale * meters_per_unit
 	var up := 1.0 + MapData.relief_gain_for_scale(vertical_scale)  # ZG8 : y ≤ s·(1 + g)·h
+	var down := 1.0 - MapData.relief_squash_max_for_scale(vertical_scale)  # SZ1 : y ≥ s·(1 − c·k)·h
 	for entry in geometry:
 		var g: GeometryInstance3D = entry[0]
 		if not is_instance_valid(g):
 			continue
 		var rect: Rect2 = entry[4]
-		var y0 := float(entry[1]) * k - 5.0
+		var y0 := float(entry[1]) * k * (down if float(entry[1]) > 0.0 else 1.0) - 5.0
 		var y1 := float(entry[2]) * k * (up if float(entry[2]) > 0.0 else 1.0) + float(entry[3])
 		g.custom_aabb = AABB(Vector3(rect.position.x, y0, rect.position.y), Vector3(rect.size.x, y1 - y0, rect.size.y))
 
@@ -402,7 +403,7 @@ func _register(g: GeometryInstance3D, lod: String, base_min: float, base_max: fl
 	_apply_range(g, lod)
 	geometry.append([g, base_min, base_max, top, rect])
 	var k := MapData.vertical_scale() * meters_per_unit
-	var y0 := base_min * k - 5.0
+	var y0 := base_min * k * ((1.0 - MapData.relief_squash_max_for_scale(MapData.vertical_scale())) if base_min > 0.0 else 1.0) - 5.0
 	var y1 := base_max * k * ((1.0 + MapData.relief_gain()) if base_max > 0.0 else 1.0) + top
 	g.custom_aabb = AABB(Vector3(rect.position.x, y0, rect.position.y), Vector3(rect.size.x, y1 - y0, rect.size.y))
 	root.add_child(g)
@@ -962,21 +963,48 @@ func _build_monuments() -> void:
 		bt.resize(block_x.size())
 		bt.fill(0.5)
 		_multimesh(block_mesh(), block_x, block_b, bt, box_mat, "all", 12.0).name = "Cloister"
-	# Pont : tablier de pierre et piles jusqu'à l'eau.
-	var bridge: Dictionary = plan.get("bridge", {})
-	if not bridge.is_empty():
+	# Ponts : tablier et piles jusqu'à l'eau (`bridges` : tous les ponts d'une ville v2 ; sinon
+	# le pont unique `bridge`).
+	var bridges: Array = plan.get("bridges", [])
+	if bridges.is_empty() and not (plan.get("bridge", {}) as Dictionary).is_empty():
+		bridges = [plan["bridge"]]
+	for bridge: Dictionary in bridges:
 		var byaw := float(bridge["yaw"])
 		var bd := Vector2(cos(byaw), sin(byaw))
 		var center := Vector3(float(bridge["x"]), 0, float(bridge["y"]))
 		var deck := float(bridge["deck"])
 		var water := float(bridge["water"])
 		var blen := float(bridge["length"])
-		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center), deck - 1.5)
+		# VH7 : tablier posé sur la base des piles (niveau de l'eau) et relevé en mètres : sous
+		# l'exagération locale du relief (ZG8), une base au niveau du tablier le décollait des piles.
+		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center + Vector3(0.0, deck - water, 0.0)), water - 1.5)
 		var piers := maxi(1, int(blen / 15.0))
+		var spread := 0.8
+		# VH7 : nombre d'arches du fichier v2 (piles entre les arches, sur toute la traversée).
+		if int(bridge.get("arches", 0)) > 1:
+			piers = int(bridge["arches"]) - 1
+			spread = 0.92
+		var pier_m := float(bridge.get("pier_m", 3.5))
+		var starling := float(bridge.get("starling_m", 0.0))
 		for k in piers:
 			var t := (float(k) + 0.5) / piers - 0.5
-			var pc := center + Vector3(bd.x, 0, bd.y) * (t * blen * 0.8)
-			add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(3.5, maxf(deck - water + 1.0, 2.0), float(bridge["width"]) + 1.0)), pc), water - 1.5)
+			var pc := center + Vector3(bd.x, 0, bd.y) * (t * blen * spread)
+			add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(pier_m, maxf(deck - water + 1.0, 2.0), float(bridge["width"]) + 1.0)), pc), water - 1.5)
+			# VH6 : avant-becs (« starlings ») au ras de l'eau, en amont et en aval de la pile.
+			if starling > 0.0:
+				add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(pier_m * 1.7, 2.6, starling)), pc), water - 1.5)
+		# VH6 : rampes d'accès du tablier jusqu'aux rives (rives basses de Londres).
+		for end: float in [-1.0, 1.0]:
+			var bank_h := float(bridge.get("bank_to" if end > 0.0 else "bank_from", deck))
+			var rise := deck - bank_h
+			if rise > 0.8:
+				var run := clampf(rise * 7.0, 8.0, 45.0)
+				var out_d := bd * end
+				var tilt := Basis(Vector3(-out_d.y, 0, out_d.x), -atan2(rise, run))
+				var start := center + Vector3(out_d.x, 0, out_d.y) * (blen * 0.5 - 1.0)
+				var ramp_c := start + Vector3(out_d.x, 0, out_d.y) * (run * 0.5)
+				add_box.call("Ashlar", Transform3D(tilt * basis_x(out_d, Vector3(sqrt(run * run + rise * rise), 1.6, float(bridge["width"]))), ramp_c), (deck + bank_h) * 0.5 - 1.5)
+	if not bridges.is_empty():
 		var bb: Array = boxes["Ashlar"]
 		_multimesh(box_mesh("Ashlar"), bb[0], bb[1], bb[2], box_mat, "all", 12.0).name = "Bridge"
 

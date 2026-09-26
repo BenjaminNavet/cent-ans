@@ -144,6 +144,9 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	mat.set_shader_parameter("anim_time", 0.0)
 	mat.set_shader_parameter("blend_since", -1000.0)
 	mat.set_shader_parameter("interp_distance", 10000.0)
+	# FG3 : la caméra est à 200 m, mais l'imposteur cuit le LOD0 avec ses cartes (atlas,
+	# tuiles de détail) ; sans effet hors de la variante `FG3_BAKED`.
+	mat.set_shader_parameter("fine_distance", 100000.0)
 	mat.set_shader_parameter("blood", 0.0)
 	mat.set_shader_parameter("hide_pavise", false)
 	var mm := MultiMesh.new()
@@ -168,8 +171,14 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	figures.material_override = mat
 	viewport.add_child(figures)
 	await RenderingServer.frame_post_draw
+	if _bake_aborted(key, viewport):
+		return
 	await get_tree().process_frame
+	if _bake_aborted(key, viewport):
+		return
 	await RenderingServer.frame_post_draw
+	if _bake_aborted(key, viewport):
+		return
 	var image := viewport.get_texture().get_image()
 	if image == null or image.is_empty():
 		# Sans rendu (headless) : pas d'atlas, le LOD2 reste dessiné.
@@ -181,6 +190,17 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	_pending.erase(key)
 	baked_count += 1
 	viewport.queue_free()
+
+
+## Cuisson interrompue (nœud sorti de l'arbre ou libéré pendant un `await`) : on abandonne
+## proprement, l'atlas pourra être redemandé.
+func _bake_aborted(key: String, viewport: SubViewport) -> bool:
+	if is_instance_valid(self) and is_inside_tree():
+		return false
+	_pending.erase(key)
+	if is_instance_valid(viewport):
+		viewport.queue_free()
+	return true
 
 
 ## Image de l'atlas (tests, captures).

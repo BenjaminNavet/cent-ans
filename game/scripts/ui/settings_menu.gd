@@ -20,6 +20,11 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	settings = get_node_or_null("/root/Settings")
+	_build()
+
+
+## Contenu de la fenêtre (voile, onglets, boutons) ; reconstruit sur place par `_on_reset`.
+func _build() -> void:
 	var veil := ColorRect.new()
 	veil.color = Color(0.05, 0.03, 0.01, 0.45)
 	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -43,6 +48,7 @@ func _ready() -> void:
 		box.add_child(missing)
 	else:
 		var tabs := TabContainer.new()
+		tabs.name = "Tabs"
 		tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		box.add_child(tabs)
 		_build_display(_tab(tabs, "Affichage"))
@@ -299,12 +305,17 @@ func _on_reset() -> void:
 	if settings == null:
 		return
 	settings.call("reset_to_defaults")
-	# Reconstruit la fenêtre sur les nouvelles valeurs.
-	var parent := get_parent()
-	var fresh := SettingsMenu.new()
-	for connection in closed.get_connections():
-		fresh.closed.connect(connection["callable"])
-	for connection in closed.get_connections():
-		closed.disconnect(connection["callable"])
-	parent.add_child(fresh)
-	queue_free()
+	# Reconstruit le contenu sur place (même nœud : les ouvreurs gardent une référence valide),
+	# après le signal du bouton qui va être libéré.
+	_rebuild.call_deferred()
+
+
+func _rebuild() -> void:
+	var tabs := find_child("Tabs", true, false) as TabContainer
+	if tabs != null and tabs.get_current_tab_control() != null:
+		initial_tab = str(tabs.get_current_tab_control().name)  # rester sur l'onglet ouvert
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+	_controls.clear()
+	_build()

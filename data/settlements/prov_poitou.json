@@ -255,8 +255,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Bourg marchand sur la Gartempe, aux confins du Berry.",

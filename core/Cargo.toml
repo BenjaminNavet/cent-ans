@@ -7,12 +7,33 @@ members = [
     "crates/ai",
     "crates/godot-bridge",
     "crates/vegetation",
+    "crates/relief-lod",
 ]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+
+[profile.release]
+# PB3a : LTO « thin » (fat : 32 min de build contre 10, ADR 0079) + une seule unité de compilation par crate (le lieur voit tout le
+# graphe d'appels, meilleures inlinings/dévirtualisations). Pas de `panic = "abort"` :
+# gdext (pont Godot) attrape les panics Rust à la frontière FFI pour éviter un crash du
+# process hôte, ce qui suppose l'unwinding par défaut. Pas de `target-cpu` : la cible
+# `aarch64-apple-darwin` par défaut correspond déjà à un baseline Apple M1 ; imposer une
+# cible plus récente (ex. M4) planterait (instruction illégale) sur le matériel des
+# joueurs M1-M3. `debug = "line-tables-only"` : lignes source dans Instruments sans le
+# poids des types/variables complets d'un débogage complet.
+lto = "thin"
+codegen-units = 1
+debug = "line-tables-only"
+
+# PB3a : profil optionnel pour des mesures locales uniquement (jamais pour l'export
+# joueur). Compiler avec `RUSTFLAGS="-C target-cpu=native" cargo build --profile
+# bench-native -p ai --example turn_perf` exploite les instructions du CPU de la machine
+# de développement (ex. Apple M4) ; à réserver aux comparaisons A/B sur cette machine.
+[profile.bench-native]
+inherits = "release"
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
@@ -22,6 +43,8 @@ serde_json = { version = "1", features = ["float_roundtrip"] }
 rand = "0.8"
 rand_chacha = "0.3"
 thiserror = "2"
+# PB3f (ADR 0091): the AI planner's read-only work on the performance cores.
+rayon = "1"
 
 # ADR 0084: parallel agent sessions each leave their own incremental cache
 # (29 GB of target/debug/incremental on 2026-09-26); rebuild from scratch instead.
@@ -40,12 +63,21 @@ opt-level = 2
 opt-level = 2
 [profile.dev.package.ai]
 opt-level = 2
+# PB3a : le pont Godot construit des Dictionary/Array et boucle sur les figurines chaque
+# image (get_units, get_soldier_buffers...) ; en dev sans opt-level explicite il hérite
+# du profil `dev` global (opt-level 0) car les crates du workspace ne sont pas couvertes
+# par `[profile.dev.package."*"]` (qui ne vise que les dépendances externes).
+[profile.dev.package.godot-bridge]
+opt-level = 2
 [profile.dev.package."*"]
 opt-level = 3
 [profile.dev.package.data-model]
 opt-level = 3
 # Lot PB2: vegetation tile scattering (millions of scalar operations per tile).
 [profile.dev.package.vegetation]
+opt-level = 3
+# Lot PB3g: relief quadtree selection (every frame while the camera moves).
+[profile.dev.package.relief-lod]
 opt-level = 3
 [profile.dev.package.png]
 opt-level = 3

@@ -11,7 +11,8 @@ pub mod campaign;
 pub mod diplomacy_eval;
 pub mod doctrine;
 pub mod grid;
+pub mod parallel;
 pub mod support;
 
-pub use campaign::plan_turn;
+pub use campaign::{plan_turn, plan_turn_sequential};
 pub use sim_campaign::ai_minimal::plan_turn as plan_turn_minimal;

@@ -228,8 +228,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": true,
     "description": "Bourg-pont sur l'Elorn, tête de navigation vers la rade de Brest.",

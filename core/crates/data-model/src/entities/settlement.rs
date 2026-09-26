@@ -186,6 +186,11 @@ pub struct SettlementRules {
     /// pay in full.
     #[serde(default)]
     pub building_upkeep_percent: BTreeMap<SettlementKind, i64>,
+    /// Weight, in per cent, of a settlement's buildings in the effects on its whole
+    /// province (population, supply, growth room), by settlement kind (lot DC3,
+    /// ADR 0082); kinds left out weigh in full.
+    #[serde(default)]
+    pub province_effect_percent: BTreeMap<SettlementKind, u32>,
     /// Most units an army can leave as a settlement's garrison, by kind
     /// (lot C7a, `Order::GarrisonUnits`); kinds left out have no cap.
     #[serde(default)]

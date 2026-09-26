@@ -169,11 +169,8 @@ impl CampaignState {
         for id in &ids {
             let s = self.settlements.get_mut(id).expect("listed above");
             s.owner = to.clone();
-            s.controller = to.clone();
-            s.siege = None;
+            s.hand_over(to);
             s.garrison.clear();
-            s.recruit_queue.clear();
-            s.construction = None;
         }
         ids
     }

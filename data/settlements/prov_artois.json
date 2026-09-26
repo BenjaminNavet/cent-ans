@@ -228,8 +228,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Bourg agricole du comté d'Artois, sur la rivière Souchez.",
@@ -254,8 +253,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Bourg fortifié sur la route d'Arras à Péronne.",

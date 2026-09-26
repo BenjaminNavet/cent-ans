@@ -130,13 +130,13 @@ func _run() -> void:
 	_check(store.load_sync(1, 40, 40) == null, "missing tile")
 
 	# 3. Lit creusé : page E4 plate à 50 m contenant le fleuve (tuile E4 (131, 118) :
-	# x ∈ [2095.5, 2111.5), y ∈ [1887.5, 1903.5)).
+	# x ∈ [2096, 2112), y ∈ [1888, 1904) depuis SZ2b, ADR 0086).
 	store.max_cached_tiles = 64
 	var carver := FineBedCarver.new(store, 719.0, -200.0, 5000.0)
 	var level := 4
 	var key := ReliefPyramid.key_of(level, 131, 118)
 	var origin := ReliefPyramid.tile_origin(level, 131, 118)
-	_check(origin.is_equal_approx(Vector2(2095.5, 1887.5)), "E4 origin %s" % origin)
+	_check(origin.is_equal_approx(Vector2(2096.0, 1888.0)), "E4 origin %s" % origin)
 	var page := _flat_page(50.0)
 	var task: Object = carver.carve_job(key)
 	if _check(task != null, "no carve task for a page crossed by a river"):
@@ -180,11 +180,46 @@ func _run() -> void:
 	_check(not job.river_arrays.is_empty() and not job.road_arrays.is_empty(), "ribbons empty")
 	if not job.river_arrays.is_empty():
 		var v: PackedVector3Array = job.river_arrays[Mesh.ARRAY_VERTEX]
+		# SZ2b : l'eau traverse l'emprise, ses sommets y sont marqués (effacés par le shader tant
+		# que les maquettes sont affichées).
+		var uv2: PackedVector2Array = job.river_arrays[Mesh.ARRAY_TEX_UV2]
 		var inside := 0
-		for p in v:
-			if Vector2(p.x, p.z).distance_to(Vector2(2080.0, 1890.0)) < 2.9:
+		var wrong := 0
+		for k in v.size():
+			var d := Vector2(v[k].x, v[k].z).distance_to(Vector2(2080.0, 1890.0))
+			var mark := int(floor(uv2[k].y / FineRibbonJob.MARK_STEP))
+			if d < 2.99:
 				inside += 1
-		_check(inside == 0, "river drawn inside a settlement cover")
+				wrong += 0 if mark == FineRibbonJob.INSIDE_COVER else 1
+			elif d > 3.01:
+				wrong += 0 if mark == 0 else 1
+		_check(inside > 0, "river cut inside a settlement cover")
+		_check(wrong == 0, "cover marks wrong on %d vertices" % wrong)
+		# Zone personnalisée d'une maquette sans ville 1:1 : coupée ; d'une ville 1:1 : marquée.
+		var closed := FineRibbonJob.new()
+		closed.river_tile = job.river_tile
+		closed.meters_per_unit = 719.0
+		closed.zones = PackedVector3Array([Vector3(2080.0, 1890.0, 3.0)])
+		closed.run()
+		var cv: PackedVector3Array = closed.river_arrays[Mesh.ARRAY_VERTEX]
+		var in_closed := 0
+		for p in cv:
+			if Vector2(p.x, p.z).distance_to(Vector2(2080.0, 1890.0)) < 2.9:
+				in_closed += 1
+		_check(in_closed == 0, "river drawn inside a closed custom zone")
+		var opened := FineRibbonJob.new()
+		opened.river_tile = job.river_tile
+		opened.meters_per_unit = 719.0
+		opened.open_zones = PackedVector3Array([Vector3(2080.0, 1890.0, 3.0)])
+		opened.run()
+		var ov: PackedVector3Array = opened.river_arrays[Mesh.ARRAY_VERTEX]
+		var ou: PackedVector2Array = opened.river_arrays[Mesh.ARRAY_TEX_UV2]
+		var zone_marks := 0
+		for k in ov.size():
+			if Vector2(ov[k].x, ov[k].z).distance_to(Vector2(2080.0, 1890.0)) < 2.9 and int(floor(ou[k].y / FineRibbonJob.MARK_STEP)) == FineRibbonJob.INSIDE_ZONE:
+				zone_marks += 1
+		_check(zone_marks > 0, "open zone (1:1 city) not marked")
+		_check(opened.gates.is_empty(), "gate bridges on an open zone")
 		_check(is_equal_approx(v[0].y, 48.0), "river height is the water level in metres: %.2f" % v[0].y)
 		var colors: PackedColorArray = job.river_arrays[Mesh.ARRAY_COLOR]
 		_check(colors[0].g > 0.5, "tidal flag lost")

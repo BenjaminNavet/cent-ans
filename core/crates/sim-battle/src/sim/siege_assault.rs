@@ -42,6 +42,14 @@ pub(crate) struct AssaultState {
     ram_loans: Vec<(usize, usize, f64)>,
 }
 
+impl AssaultState {
+    /// PB3e: keeps the renderer's read cursor of `old` (the state a
+    /// computed-ahead step replaces).
+    pub(super) fn keep_read_cursor(&mut self, old: &AssaultState) {
+        self.fx_read = old.fx_read;
+    }
+}
+
 impl BattleSim {
     /// SG1: the ladders a regiment scaling a wall has raised (empty when it
     /// is not climbing with ladders), evenly spread over its frontage along
