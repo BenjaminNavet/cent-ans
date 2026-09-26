@@ -427,7 +427,10 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	if _previous.has(id):
 		var prev: PackedFloat32Array = _previous[id]
 		var prev_n := prev.size() / 12
-		if n < prev_n and n > 0 and bool(unit["present"]):
+		# Régiment anéanti (absent sans avoir quitté le champ ni être en réserve) :
+		# ses dernières figurines tombent aussi.
+		var on_field := not bool(unit.get("left_field", false)) and not bool(unit.get("reserve", false))
+		if n < prev_n and on_field:
 			_spawn_corpses(unit, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), prev, prev_n - n)
 	_previous[id] = slice
 	# Renversés (lot BV2) : leur place dans la formation est vide jusqu'à ce qu'ils se relèvent.
