@@ -1483,6 +1483,37 @@ d = 60 ; `*_amiens_zoom_*` : Amiens à d = 6 et 3, pleine résolution recadrée)
 ![Amiens à 4 km, avant : disque de terre battue](img/sz4/avant_amiens_zoom_d6.jpg)
 ![Amiens à 4 km, après : masse de toits](img/sz4/apres_amiens_zoom_d6.jpg)
 
+## Pics d'images côté scripts (lot SZ6, ADR 0051)
+
+**Sonde.** `--bench-map --bench-probe` active `PerfProbe` (`scripts/dev/perf_probe.gd`) : minuteries
+par section de `CampaignMap._process` (`map.*`), de `update_lod` (`lod/*`) et des étapes du quadtree
+(`qt/*`) ; le rapport `probe` donne, par section, le temps cumulé dans les images > 50 ms, le nombre
+de ces images qu'elle domine, sa pire durée, et les 12 pires images avec leurs sections. Ajouter une
+section : `var t := Time.get_ticks_usec()` … `t = PerfProbe.lap("nom", t)` (coût : un test booléen) ;
+« parent/nom » pour une sous-section.
+
+**Causes trouvées et correctifs** (même rendu, au plus quelques images de décalage) :
+- Rubans de route drapés (`RoadRenderer`) : un ruban coûtait jusqu'à 115 ms au fil principal. Avec
+  le quadtree, construits dans `WorkerThreadPool` (`RibbonJob`) sur un instantané des pages de
+  l'emprise des tronçons (`surface_snapshot`, même surface que `surface_heights_at`), 4 à la fois,
+  installés dans le budget de l'image ; `flush` et le repli E0 restent synchrones.
+- Végétation : changer `MultiMesh.mesh` après `buffer` fait relire le tampon au GPU par le serveur
+  de rendu (boîte englobante), image bloquée jusqu'à 80 ms au passage détaillé / simple. Le
+  MultiMesh est recréé depuis la copie processeur du tampon (`Vegetation._with_mesh`). **Règle :** ne
+  jamais changer le maillage ni lire `buffer` / `get_instance_*` d'un MultiMesh rempli par `buffer`.
+- Villes emblématiques : recuisson des hauteurs d'un bloc dans un fil (instantané des pages) au lieu
+  de tranches de 1,5 ms par maquette et par image.
+- `TerrainBuilder` : changements de niveau des morceaux signalés du plus proche au plus lointain dans
+  `level_emit_budget_ms` (4 ms, au moins un par image ; tous hors image, `FrameBudget.in_frame`) :
+  un zoom en changeait jusqu'à 20 d'un coup (50 ms d'écouteurs).
+- Étiquettes des colonies : recalculées seulement pour les morceaux recalés, et en entier au
+  changement d'échelle verticale ou de palier près (avant : les 570 à chaque image d'un zoom).
+- `LifeEffects._reground` : points indexés par morceau (avant : parcours de tous les points).
+
+**Mesures** (`--bench-map`, M4 Pro, machine partagée à une charge de 75-150 ; passes alternées
+main / SZ6, médianes) : parcours complet p99 83 → 36 ms, images > 50 ms 204 → 1, p50 inchangée
+(17 ms) ; descente p99 86 → 37 ms. Détail et limites : `docs/wip/sz6-pics-scripts.md`.
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
