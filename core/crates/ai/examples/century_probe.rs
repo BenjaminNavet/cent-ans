@@ -835,6 +835,51 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 heretic.iter().max().copied().unwrap_or(0)
             );
         }
+        // DC6b: `DC6_TRACE=1` also follows revolts, occupations and unrest.
+        if std::env::var("DC6_TRACE").is_ok() {
+            for event in events.iter().filter(|e| {
+                matches!(e.kind, EventKind::Revolt) && !e.text_fr.contains("passe aux mains")
+            }) {
+                if let Some(pid) = event.province.as_ref() {
+                    let p = &state.provinces[pid];
+                    let c = &state.settlements[&p.city];
+                    println!(
+                        "DC6V {seed} {} {} {} {} {} {}",
+                        state.turn,
+                        pid.as_str(),
+                        u8::from(c.controller != c.owner),
+                        state.province_garrison_strength(pid),
+                        p.devastation,
+                        p.unrest
+                    );
+                }
+            }
+            let mut occupied = Vec::new();
+            let (mut hot60, mut hot75, mut gar, mut w_sum) = (0, 0, 0u64, 0.0);
+            for (pid, p) in &state.provinces {
+                let c = &state.settlements[&p.city];
+                if c.controller != c.owner {
+                    occupied.push(pid.as_str().to_owned());
+                }
+                let w = sim_campaign::population::weighted_unrest(&p.population);
+                w_sum += w;
+                if w > 60.0 {
+                    hot60 += 1;
+                }
+                if w > 75.0 {
+                    hot75 += 1;
+                }
+                gar += u64::from(state.province_garrison_strength(pid));
+            }
+            let n = state.provinces.len().max(1);
+            println!(
+                "DC6P {seed} {} {hot60} {hot75} {} {:.1} {}",
+                state.turn,
+                gar / n as u64,
+                w_sum / n as f64,
+                occupied.join(",")
+            );
+        }
         track_eq4(&state, &mut report.eq4, &eq4_before);
         eq4_before = snapshot(&state);
         if state.year == 1437 && report.eq4.snowball_1437.0.is_empty() {
