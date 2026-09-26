@@ -54,6 +54,8 @@ de `game/bin/` du dépôt principal. Aucun changement Rust.
 - Temps de plan dominé par les lanières générées (≈ 1,2-2,4 s) : optimisable.
 
 ## Faits à faire relire par l'historien
+Relus le 2026-09-26 : verdicts et corrections dans `docs/histoire/relecture-vh-paris.md`.
+
 Grand-Pont en 1340 (bois ? largeur 10 m restituée ; les 106 × 27 m sont ceux de 1413) ; pont
 aux Meuniers et Planches de Mibray en 1340 ; hauteur de la flèche de Notre-Dame (≈ 78 m restitués)
 et état des travaux vers 1340-1345 ; Charles V : levée de terre 1356-1364 puis maçonnerie datée
