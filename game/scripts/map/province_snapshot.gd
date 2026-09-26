@@ -16,6 +16,8 @@ var controller := PackedStringArray()
 var devastation := PackedInt32Array()
 var population_total := PackedInt64Array()
 var besieged := PackedByteArray()
+## Chantier en cours dans la cité ; vide sans l'appel groupé (lire alors `get_province_city`).
+var constructing := PackedByteArray()
 var _index_of: Dictionary = {}  # id → index raster - 1
 
 static var _cached: ProvinceSnapshot = null
@@ -72,6 +74,7 @@ static func read(sim: Object, province_ids: PackedStringArray) -> ProvinceSnapsh
 		snap.devastation = data.get("devastation", PackedInt32Array())
 		snap.population_total = data.get("population_total", PackedInt64Array())
 		snap.besieged = data.get("besieged", PackedByteArray())
+		snap.constructing = data.get("constructing", PackedByteArray())
 		if snap.known.size() == count:
 			return snap
 	snap.known.resize(count)
