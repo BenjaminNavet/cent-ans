@@ -25,7 +25,8 @@ extends Node3D
 ## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4),
 ## `--standard-shot=<foot|mounted|line|fallen|captured>` (capture EP5 : gros plan d'un
 ## porte-étendard à pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé,
-## étendard pris porté par le vainqueur).
+## étendard pris porté par le vainqueur) ; `--standard-side=<attacker|defender>` choisit le camp
+## cadré (DA1b : étendards aux armes de la maison du général ennemi).
 ## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
 ## `--horizon-province=<id>`, `--panorama=<id>` (captures EP2).
 ## EP8 (mise en scène, `BattleStaging`) : `--hour=<dawn|morning|midday|afternoon|dusk|night|h>`
@@ -57,6 +58,7 @@ var setup: Dictionary = {}
 var player_side: String = "attacker"
 var enemy_side: String = "defender"
 var side_colors: Dictionary = {}
+var _side_houses: Dictionary = {}  # DA1 / DA1b : maison du général par camp (écus, étendards)
 var side_names: Dictionary = {}
 var units: Array = []
 var selected: Array[int] = []
@@ -142,6 +144,7 @@ var _pad_units: int = 0
 var _scale_tier: String = ""  # EP1 : palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
+var _standard_side: String = ""  # DA1b : `--standard-side=` (camp cadré par `--standard-shot`)
 var _standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen|captured>`
 var _weather_override: String = ""
 var _camera_override: String = ""
@@ -579,6 +582,7 @@ func _build_soldier_layers() -> void:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 		var general: Variant = (setup[side] as Dictionary).get("general", null)
 		houses[side] = str((general as Dictionary).get("house", "")) if general is Dictionary else ""
+	_side_houses = houses
 	soldiers.setup(units, side_colors, factions, houses)
 	_mm = soldiers.layers
 	_setup_standards()
@@ -635,7 +639,7 @@ func _setup_standards() -> void:
 	var factions := {}
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup.get(side, {}) as Dictionary).get("faction", ""))
-	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle)
+	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle, _side_houses)
 	for id in _banners:
 		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
 	if terrain.vegetation != null:
@@ -798,7 +802,8 @@ func _make_banner(unit: Dictionary) -> void:
 ## Étoffe d'un drapeau de régiment : bannière peinte de la faction (`heraldry/banners/`,
 ## 256×512, tissu dans le haut, bas transparent) pour la noblesse, fanion à queue d'aronde (4:1)
 ## pour les autres, étendards royaux pour le général de France / d'Angleterre ; à défaut, centre
-## de l'écu de la faction (repli).
+## de l'écu de la faction (repli). DA1b : le général et les unités nobles de sa retenue portent
+## la bannière de sa maison (`heraldry/banners/houses/`) quand elle existe.
 func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
 	var dir := "res://assets/heraldry/banners/"
 	var noble := str(unit.get("type", "")) in ["unit_knights", "unit_men_at_arms_foot"]
@@ -812,6 +817,11 @@ func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
 			candidates.append([dir + ("oriflamme.png" if faction == "fac_france" else "dragon.png"), Vector2(1.3, 2.6)])
 		elif faction == "fac_england":
 			candidates.append([dir + "st_george.png", Vector2(1.3, 2.6)])
+	var house := HouseArms.id_of(str(_side_houses.get(str(unit.get("side", "")), "")))
+	if house != "" and (bool(unit.get("is_general", false)) or BattleStandards.is_house_retinue(unit)):
+		var house_banner: Array = [dir + "houses/%s_banner.png" % house, Vector2(1.3, 2.6)]
+		var no_quarter_first := not candidates.is_empty() and (str(candidates[0][0]).ends_with("oriflamme.png") or str(candidates[0][0]).ends_with("dragon.png"))
+		candidates.insert(1 if no_quarter_first else 0, house_banner)
 	if noble or str(unit.get("render", "")) == "siege":
 		candidates.append([dir + "%s_banner.png" % faction, Vector2(1.3, 2.6)])
 	else:
@@ -1700,6 +1710,8 @@ func _parse_cmdline() -> void:
 			siege_attacker = arg.trim_prefix("--siege-attacker=")
 		elif arg.begins_with("--siege-engines="):
 			_siege_engines = arg.trim_prefix("--siege-engines=")
+		elif arg.begins_with("--standard-side="):
+			_standard_side = arg.trim_prefix("--standard-side=")
 		elif arg.begins_with("--camera="):
 			_camera_override = arg.trim_prefix("--camera=")
 		elif arg == "--result-shot":
@@ -1997,7 +2009,7 @@ func _apply_standard_shot() -> void:
 				for other in units:
 					if int(other.get("standard_by", -1)) == int(unit["id"]):
 						ok = true
-		if ok and (best.is_empty() or (str(unit["side"]) == player_side and str(best["side"]) != player_side)):
+		if ok and (best.is_empty() or _standard_shot_score(unit) > _standard_shot_score(best)):
 			best = unit
 	if best.is_empty():
 		push_warning("BattleScene: no regiment for --standard-shot=%s" % _standard_shot)
@@ -2025,6 +2037,18 @@ func _apply_standard_shot() -> void:
 		camera_rig.camera.global_position = at + Vector3(sin(yaw), 0, cos(yaw)) * 6.0 + Vector3(0, 7.5, 0)
 		camera_rig.camera.look_at(at, Vector3.UP)
 	print("BattleScene: EP5 %s shot on %s (%s) at %s, standard %s, %d standards, %d figures, %d fallen" % [_standard_shot, str(best["name"]), str(best["type"]), point, str(best.get("standard", "")), standards.shown_count, standards.figure_count, standards.fallen_count])
+
+
+## Préférence de `--standard-shot` : le camp voulu d'abord, puis le général et sa retenue noble
+## (DA1b : leurs étendards portent les armes de la maison du général).
+func _standard_shot_score(unit: Dictionary) -> int:
+	var wanted := _standard_side if _standard_side != "" else player_side
+	var score := 4 if str(unit["side"]) == wanted else 0
+	if bool(unit.get("is_general", false)):
+		score += 2
+	elif BattleStandards.is_house_retinue(unit):
+		score += 1
+	return score
 
 
 ## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).

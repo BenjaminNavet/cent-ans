@@ -141,14 +141,56 @@ fn survey_epic_attacker_defender() {
             let mut sim = battle(seed, ground, stakes);
             let sides: Vec<SideId> = sim.units().iter().map(|u| u.side).collect();
             let mut shot = [0.0f64; 2];
+            let mut shots: std::collections::BTreeMap<String, (f64, f64, f64)> = Default::default();
             let mut contact_at: Option<f64> = None;
             let trace = std::env::var("SG4_TRACE").is_ok();
             let mut next_trace = 120.0;
+            let routs = std::env::var("SG4_ROUTS").is_ok();
+            let mut was_routing: Vec<bool> = vec![false; sim.units().len()];
             while !sim.is_finished() && sim.elapsed() < 1800.0 {
                 sim.step();
-                if std::env::var("SG4_HORSE").is_ok()
-                    && sim.elapsed() > 180.0
-                    && sim.elapsed() < 260.0
+                if routs {
+                    for (k, u) in sim.units().iter().enumerate() {
+                        let now = u.state == sim_battle::UnitState::Routing;
+                        if now && !was_routing[k] && u.side == SideId::Defender {
+                            let friends = sim
+                                .units()
+                                .iter()
+                                .filter(|f| {
+                                    f.side == u.side
+                                        && f.id != u.id
+                                        && f.present()
+                                        && f.state == sim_battle::UnitState::Routing
+                                        && (f.x - u.x).hypot(f.z - u.z) < 120.0
+                                })
+                                .count();
+                            let foe = sim
+                                .units()
+                                .iter()
+                                .filter(|e| e.side != u.side && e.able())
+                                .map(|e| (e.x - u.x).hypot(e.z - u.z))
+                                .fold(f64::INFINITY, f64::min);
+                            eprintln!(
+                                "  rout t {:.0} {:<22} ({:.0},{:.0}) hp {:.0} routing friends {} foe {:.0} m",
+                                sim.elapsed(), u.unit_type, u.x, u.z, u.hp, friends, foe
+                            );
+                        }
+                        if k < was_routing.len() {
+                            was_routing[k] = now;
+                        }
+                    }
+                }
+                let horse_window = std::env::var("SG4_HORSE").ok().map(|w| {
+                    w.split_once("..")
+                        .and_then(|(a, b)| Some((a.parse().ok()?, b.parse().ok()?)))
+                        .unwrap_or((180.0, 260.0))
+                });
+                if let Some((from, to)) = horse_window
+                    .filter(|&(from, to): &(f64, f64)| sim.elapsed() > from && sim.elapsed() < to)
+                {
+                    let _ = (from, to);
+                }
+                if horse_window.is_some_and(|(from, to)| sim.elapsed() > from && sim.elapsed() < to)
                     && sim.ticks().is_multiple_of(25)
                 {
                     for u in sim
@@ -202,6 +244,21 @@ fn survey_epic_attacker_defender() {
                 for s in sim.take_shots() {
                     if let Some(t) = s.target {
                         shot[sides[t as usize].index()] += s.kills;
+                        if std::env::var("SG4_SHOTS").is_ok() {
+                            let (a, b) =
+                                (&sim.units()[s.shooter as usize], &sim.units()[t as usize]);
+                            let key = format!(
+                                "{:?} {} -> {}",
+                                a.side,
+                                &a.unit_type[5..9],
+                                &b.unit_type[5..9]
+                            );
+                            let d = (s.from.0 - s.aim.0).hypot(s.from.1 - s.aim.1);
+                            let e = shots.entry(key).or_insert((0.0, 0.0, 0.0));
+                            e.0 += s.kills;
+                            e.1 += d;
+                            e.2 += 1.0;
+                        }
                     }
                 }
                 if contact_at.is_none()
@@ -212,6 +269,12 @@ fn survey_epic_attacker_defender() {
                 {
                     contact_at = Some(sim.elapsed());
                 }
+            }
+            for (k, (kills, d, n)) in &shots {
+                eprintln!(
+                    "   shots {k}: kills {kills:.0}, volleys {n}, mean range {:.0} m",
+                    d / n
+                );
             }
             let initial = |side: SideId| -> f64 {
                 sim.units()
