@@ -753,7 +753,8 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
 ### Arbre et sélection
 
 - Racine = toute la carte (4 096 unités), nœud (n, col, row) de côté `4096 / 2^n`, **aligné sur la
-  grille des tuiles** (décalage −0,5 unité du pixel centré) : profondeur n ↔ étage L = n − 4 (un nœud de
+  grille des tuiles** (tuile (k, col, row) sur [col·T, (col + 1)·T], sans décalage depuis SZ2b,
+  ADR 0086) : profondeur n ↔ étage L = n − 4 (un nœud de
   profondeur 4 est une tuile E0 de 256 unités). Profondeur maximale d'un nœud : étage de données le plus
   fin de son sous-arbre (`max_level_under`, sinon l'ancêtre existant) + `extra_depth` (3), plafond 14.
 - **CDLOD** : un nœud est accepté quand l'espacement de ses sommets (côté / 64) projeté à l'écran
@@ -1064,7 +1065,8 @@ Choix : **retoucher les pages de hauteurs** plutôt qu'une texture de lit à par
 rang suffisant (≥ 5 à E3, ≥ 3 au-delà), les hauteurs sous le niveau d'eau `z` : fond parabolique
 (0,6 m + 1,2 % de la largeur, ≤ 4 m ; 0,25 m sous l'eau au bord), berge fondue sur 35 % de la largeur
 (1,5 pixel de page à 250 m) ; au moins 0,75 pixel de page de demi-largeur (sillon d'un ruisseau). Rien sous
-les emprises des colonies (l'eau passe sous les villes). La page téléversée **et** les octets gardés pour
+les zones personnalisées des maquettes L1/L2 sans ville 1:1 (SZ2b : les emprises des colonies et les
+zones des villes 1:1 sont creusées, voir « Nappe d'eau des fleuves (lot SZ2b) »). La page téléversée **et** les octets gardés pour
 `surface_height_at` sont les mêmes : déplacement des patchs, normales (berges ombrées), morphing vers la
 page parente (creusée à sa résolution), pose des ponts et des maquettes voient le même lit. Coût : ≈ 8-10 ms
 de fil par page E4 réelle (Seine à Rouen, 11 700 pixels abaissés), 0 sur le fil principal.
@@ -1760,3 +1762,35 @@ marches des armées IA que le joueur voit :
 - **Coût** : Masquer = coût d'avant ; enregistrement actif ≈ 2 ms par tour dans le cœur (release),
   < 0,1 ms de tri côté Godot ; la relecture elle-même dure le temps de l'animation (de 0 s sans
   mouvement vu à une vingtaine de secondes à ×1 quand six mouvements sont suivis).
+
+## Nappe d'eau des fleuves et convention des rasters (lot SZ2b, ADR 0086)
+
+Défaut : au palier site, pas d'eau autour des villes (Seine à Rouen en lit sableux, Loire absente à
+Orléans et Tours), et, là où l'eau existait, lit creusé à 360 m du vrai lit du relief. Deux causes :
+
+- **Eau coupée sous les emprises** : `FineRibbonJob` coupait les rubans et `FineBedCarver` ne
+  creusait pas sous les emprises des maquettes de colonies (rayon de maquette × 0,8 : 5,2 km à
+  Orléans) ni dans les zones personnalisées (Rouen, Paris, Londres…), règle d'avant les villes 1:1
+  (ZG6, VH4). Désormais l'eau traverse les emprises et les zones des villes qui ont un fichier v2 ;
+  ses sommets y sont marqués (`UV2.y` = ordre + 100 × marque : 1 emprise, 2 zone de ville 1:1) et
+  `river_fine.gdshader` les efface tant que les maquettes sont affichées : `cover_open` = villes 1:1
+  de ZG6 actives (`TownLayer.active`, toutes les maquettes masquées), `zone_open` = 1 − opacité de la
+  maquette L1/L2 (`LandmarkCityLayer.fade`). Le lit est creusé partout sauf dans les zones des
+  maquettes sans ville 1:1 (Paris, Londres… tant que VH5-VH8 ne sont pas faits : leur maquette
+  porte sa propre eau). Ponts-portes masqués quand les maquettes le sont.
+- **Demi-pixel** : Godot lisait les rasters avec le pixel i centré en x = i (`uv = (p + 0,5) /
+  taille`, `GRID_OFFSET = −0,5`), les outils et toutes les données vectorielles avec le pixel i sur
+  [i, i + 1] (`docs/geo.md`). Le relief était affiché 0,5 unité (360 m) au nord-ouest des fleuves,
+  colonies et villes 1:1. Rendu aligné sur les outils (ADR 0086) : `GRID_OFFSET = 0`,
+  `MapData.height_m_at` en (x − 0,5, y − 0,5), `uv = p / map_size` dans les shaders du terrain, même
+  chose dans la végétation native (Rust). Aucune recuisson : les niveaux d'eau `hydro_fine` étaient
+  déjà calés sur le relief dans la convention des outils.
+
+Mesures (`game/tests/sz2b_water_shots.gd --probe-heights`, relief − eau, mètres affichés) : à l'axe
+−2,9 à −4 m partout (lit creusé) ; berges à 1,15 demi-largeur ≈ −0,2 m à Rouen et en Val de Loire
+(l'eau touche la berge) ; Orléans et Tours −2 à −4 m sur une rive (chenal du relief plus large que
+la largeur de `river_widths.json`, bras multiples) : pas de mur, eau peu profonde au bord.
+Captures `docs/img/sz2b/avant_*` / `apres_*` (Rouen, Orléans, Tours, Londres, Bordeaux ; vallée et
+site). Laissés : maillages E0 des morceaux (vue parchemin, repli sans pyramide), tuiles fines d'avant
+la pyramide et grille du fond ZG8 dans l'ancienne convention (≤ 0,5 pixel de 719 m, invisible).
+
