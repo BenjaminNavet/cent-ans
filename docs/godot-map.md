@@ -1573,11 +1573,30 @@ pas. Recalage sur les pages du quadtree groupé par tuile. `--no-forest-detail` 
 qu'au palier vallée presque tous les arbres (couche de base comprise) étaient sous le sol.
 `foliage.gdshaderinc` réduit désormais l'enfoncement avec l'arbre (`FOLIAGE_GROUND_SINK`).
 
-Captures `docs/img/sz4b/` (`avant_*` : code du point de départ, `apres_*`), Crécy, Val de Loire,
-Amiens, forêts d'Orléans et de Compiègne, d = 6, 10, 14, 20, 60 :
+Captures `docs/img/sz4b/` (`avant_*` : `main` 60061b0b dans un worktree jetable, `apres_*` : la
+branche fusionnée avec ce `main`), Crécy, Val de Loire, Amiens, forêts d'Orléans et de Compiègne,
+d = 6, 10, 14, 20, 60 :
 `godot --path game --script res://tests/sz4b_shots.gd -- --out=<dossier> --map-weather=clear
---settle-towns [--prefix=…] [--only=…] [--tiers=d6:6,…] [--full]`.
+[--settle-towns] [--prefix=…] [--only=…] [--tiers=d6:6,…] [--full]`.
+À d = 6, la ville 1:1 d'Amiens n'est qu'un disque de toits vue de si haut, comme sur `main`.
 Test : `tests/sz4b_colonies_forests_test.gd` (+ `cargo test -p vegetation`).
+
+**Coût mesuré** (`tests/sz4b_bench.gd`, fenêtre 1280 × 720 environ, vsync coupée, machine chargée
+par d'autres agents : 3 passes alternées avant/après, médianes ; bruit de ± 40 % d'une passe à
+l'autre, plafond à 60 i/s) :
+
+| Vue | i/s avant | i/s après | arbres denses affichés | primitives avant → après |
+|---|---|---|---|---|
+| Forêt d'Orléans, d = 6 | 39 | 35 | 219 000 | 6,4 M → 13,6 M |
+| Forêt d'Orléans, d = 10 | 30 | 40 | 188 000 | 6,7 M → 12,5 M |
+| Forêt de Compiègne, d = 6 | 58 | 29 | 212 000 | 5,5 M → 13,5 M |
+| Crécy, d = 10 | 43 | 38 | 181 000 | 4,4 M → 9,8 M |
+| Amiens, d = 14 | 47 | 46 | 6 500 | 4,2 M → 4,2 M |
+
+La couche de base reste à 490 000 instances. La forêt dense double à peu près les primitives au
+palier vallée (budget de 220 000 arbres atteint en forêt) ; l'écart d'i/s reste dans le bruit sauf
+peut-être à Compiègne. Levier si besoin : baisser `instance_budget` ou le maillage des arbres
+proches (LOD) dans `forest_detail.tres`.
 
 ![Amiens à d = 10, avant : maquette géante](img/sz4b/avant_amiens_d10.jpg)
 ![Amiens à d = 10, après : maquette à l'emprise réelle](img/sz4b/apres_amiens_d10.jpg)
