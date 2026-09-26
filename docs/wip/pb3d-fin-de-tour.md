@@ -20,7 +20,8 @@ ADR : `docs/decisions/0081-fin-de-tour-dans-un-fil.md`.
 - [x] Smoke + tests de campagne headless (ct1, c5, m5a, fr1, mf1, m4, cv1, hud, settlements,
   ui3, ux2) verts avec la dylib debug de la branche.
 - [x] Mesures A/B debug et release (ci-dessous).
-- [ ] Fusion de `main`, cargo test complet, smoke après fusion.
+- [x] Fusion de `main` (7cfef434, sans conflit) ; après fusion : cargo fmt/clippy -D warnings/test
+  (espace de travail complet) verts, smoke et 11 tests de campagne headless verts, pb1 fenêtré OK.
 
 ## Conventions de mesure
 - Dylibs de référence construites depuis 6a837e99 (base de la branche) dans le scratchpad ;
@@ -67,5 +68,6 @@ Essai de fusion : deux fichiers en conflit, résolution simple.
   `CampaignSim` doit commencer par `refuse_while_turn_pending` (ADR 0081).
 
 ## Prochaine étape
-Fusion de `main` (conflits attendus avec la revue de code : pont, campaign_map.gd) ; cargo
-test/clippy/fmt ; smoke et tests de campagne ; rapport.
+Lot terminé, prêt à fusionner (ff-only par l'orchestrateur). Pistes ultérieures : marqueurs
+d'armée (recréation des figurines, 8-50 ms) et maquettes de croissance étalés sur plusieurs
+images ; PB3f (IA parallèle) à l'intérieur de `resolve_turn`.
