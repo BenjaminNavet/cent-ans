@@ -1412,7 +1412,16 @@ fn plan_field(view: &mut View) {
         // A small force keeps its line by its shooters (R4); an army
         // deploys in depth.
         let rules = CrestDefenceRules::bundled();
-        if !roles.shooters.is_empty() && below && roles.line.len() >= rules.min_line_regiments {
+        // A historical deployment (EP7) keeps the regiments on their posts.
+        let posted = roles
+            .line
+            .iter()
+            .any(|&i| view.sim.scenario_post(i).is_some());
+        if !roles.shooters.is_empty()
+            && below
+            && !posted
+            && roles.line.len() >= rules.min_line_regiments
+        {
             (post.0, post.1 - view.forward * rules.line_setback_m)
         } else {
             post
