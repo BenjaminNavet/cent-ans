@@ -416,11 +416,21 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         PEACE_RUNWAY_TURNS
     };
     let uncovered_deficit = ctx.surplus() < 0 && ctx.treasury < -ctx.surplus() * runway;
-    let needs_money = in_debt || uncovered_deficit || (ctx.at_war() && low_treasury);
-    // EQ5: in debt, heavy taxes already levied stay while the realm only
-    // grumbles (without this margin the rate flipped every season around
-    // the threshold and the debt never closed).
-    let max_unrest = if in_debt && me.tax_rate == TaxRate::High {
+    // EQ5: heavy taxes already levied stay while the budget would fall back
+    // into deficit at the normal rate and the reserve is not rebuilt, and
+    // (with the debt) while the realm only grumbles: without this the rate
+    // flipped every season around the threshold and a realm whose
+    // buildings outgrew its income never left the red.
+    let levied = me.tax_rate == TaxRate::High;
+    let normal_surplus = if levied {
+        ctx.surplus()
+            - (ctx.gross_income.max(0) as f64 * (1.0 - 1.0 / TaxRate::High.multiplier())) as i64
+    } else {
+        ctx.surplus()
+    };
+    let stay_high = levied && low_treasury && normal_surplus < ctx.safety_margin();
+    let needs_money = in_debt || uncovered_deficit || stay_high || (ctx.at_war() && low_treasury);
+    let max_unrest = if levied && (in_debt || stay_high) {
         HIGH_TAX_MAX_UNREST + HIGH_TAX_HYSTERESIS
     } else {
         HIGH_TAX_MAX_UNREST
