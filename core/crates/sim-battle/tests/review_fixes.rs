@@ -128,3 +128,36 @@ fn archers_fall_back_on_a_free_enemy() {
     run(&mut sim, 20.0);
     assert!(sim.units()[3].hp < before, "the free regiment is shot at");
 }
+
+/// In a siege, a regiment withdrawing from inside the town goes round the
+/// houses and out through the breach (it used to walk into the wall).
+#[test]
+fn withdrawal_from_the_town_goes_through_the_breach() {
+    let data = data();
+    let attacker = common::units(&data, &["unit_men_at_arms_foot"]);
+    let defender = common::units(&data, &["unit_urban_militia"]);
+    let siege = sim_battle::SiegeSetup {
+        fortification: 2,
+        breach: 0,
+    };
+    let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 11).unwrap();
+    lab(&mut sim);
+    let works = sim.siege().unwrap().clone();
+    let breach = *works.front_walls().last().unwrap();
+    sim.siege_mut().unwrap().pieces[breach].hp = 0.0;
+    let (cx, cz) = works.center;
+    place(&mut sim, 0, cx, cz, 0.0);
+    place(&mut sim, 1, 1100.0, 780.0, 0.0);
+    sim.issue_command(Command::Withdraw { units: vec![0] })
+        .unwrap();
+    let mut left = false;
+    for _ in 0..6000 {
+        sim.step();
+        if sim.units()[0].left_field {
+            left = true;
+            break;
+        }
+    }
+    let u = &sim.units()[0];
+    assert!(left, "stuck at ({:.0}, {:.0})", u.x, u.z);
+}

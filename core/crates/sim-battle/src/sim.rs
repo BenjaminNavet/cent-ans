@@ -1733,7 +1733,15 @@ impl BattleSim {
             }
             if self.units[i].withdrawing {
                 if let Some((tx, tz)) = self.units[i].destination {
-                    self.advance(i, tx, tz, true);
+                    // In a siege, round the walls and the houses (F5a
+                    // pathing; no ladders on the way out, and the wall
+                    // walk is left straight inwards as before).
+                    let (gx, gz) = if self.siege.is_some() && !self.units[i].on_wall {
+                        self.grid_route(i, tx, tz).unwrap_or((tx, tz))
+                    } else {
+                        (tx, tz)
+                    };
+                    self.advance(i, gx, gz, true);
                 }
                 self.check_left_field(i);
                 continue;
