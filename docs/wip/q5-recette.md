@@ -9,7 +9,7 @@ Le joueur : une seule partie suffit (pas de seconde partie de vérification).
 - [x] partie France 1920×1080 ; partie Angleterre 1280×720
 - [x] tri des constats, rapport
 - [x] 8 corrections (voir rapport) + tests `sim-campaign/tests/q5_recette.rs`
-- [ ] fmt / clippy / tests / smoke Godot
+- [x] fmt / clippy / tests (61 binaires sim-campaign, ai) / smoke Godot vert
 - [ ] ff dans main
 
 ## Prochaine étape

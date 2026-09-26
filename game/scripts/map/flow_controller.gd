@@ -414,8 +414,15 @@ func _on_panels_changed(ui: Node) -> void:
 	if season_report == null or not season_report.visible:
 		return
 	var stack: PanelStack = ui.panels
+	# La fin de tour ouvre elle-même des panneaux (diplomatie sur offre nouvelle) dans l'image du
+	# rapport : ils restent dessous ; seuls ceux que le joueur ouvre ensuite le referment.
+	var same_frame := Engine.get_process_frames() - season_report.filled_frame <= 1
 	for panel in stack.visible_panels():
-		if stack.kind_of(panel) != PanelStack.Kind.MODAL and not _panels_under_report.has(panel):
+		if stack.kind_of(panel) == PanelStack.Kind.MODAL or _panels_under_report.has(panel):
+			continue
+		if same_frame:
+			_panels_under_report.append(panel)
+		else:
 			season_report.close()
 			return
 
