@@ -7,7 +7,7 @@ Précédents : `docs/wip/fg1-corps.md`, `docs/wip/fg0-prototype.md`.
 - [x] Squelette : `tools/blender_scripts/battle_fine_gear.py` (registre `GEAR` de constructeurs
   fins par nom d'objet V2), branché dans `battle_fine_figures.build_figure` (repli sur V2 si
   absent)
-- [ ] Casques
+- [x] Casques (bassinet pointu à camail, à visière museau de chien, ouvert ; cervelière ; chapel de fer ; heaume ; salade avec ou sans bavière ; chapeau de feutre)
 - [ ] Armures (haubert, camail, plates, brigandine, jaque, surcots)
 - [ ] Armes et écus
 - [ ] Arc long (allonge)
@@ -15,4 +15,4 @@ Précédents : `docs/wip/fg1-corps.md`, `docs/wip/fg0-prototype.md`.
 - [ ] Recuisson, captures, mesures
 
 ## Prochaine étape
-Constructeurs de casques dans `battle_fine_gear.py`.
+Armures (haubert à ourlet, plates des membres, brigandine, jaque, surcots plissés).
