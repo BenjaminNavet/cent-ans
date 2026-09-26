@@ -724,6 +724,9 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         "settlement" => army.settlement().map_or("", |s| s.as_str()),
         "movement_left" => i64::from(army.movement_left),
         "movement_max" => i64::from(state.army_grid_allowance(data, army)),
+        // Unit roster: points left as km of plain (10 points = one plain cell).
+        "movement_km" => f64::from(army.movement_left) / f64::from(data_model::PLAIN_COST)
+            * grid.cell_km,
         "planned_path" => &planned_path,
         "destination_point" => destination_point,
     };
