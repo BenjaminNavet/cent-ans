@@ -139,9 +139,12 @@ func apply_render_quality(_preset: Dictionary) -> void:
 				_configure(b)
 
 
+func _detail_range() -> float:
+	return profile.detail_range * float(_quality.get("detail", 1.0)) * _detail_override
+
+
 func _configure(b: TownBuilder) -> void:
-	var detail := profile.detail_range * float(_quality.get("detail", 1.0)) * _detail_override
-	b.set_ranges(detail, profile.block_range * float(_quality.get("block", 1.0)), bool(_quality.get("detail_shadows", true)), bool(_quality.get("block_shadows", false)))
+	b.set_ranges(_detail_range(), profile.block_range * float(_quality.get("block", 1.0)), bool(_quality.get("detail_shadows", true)), bool(_quality.get("block_shadows", false)))
 
 
 # --- Mise à jour par image ----------------------------------------------------------------
@@ -161,6 +164,10 @@ func update_view(rig_distance: float) -> void:
 	_poll_jobs()
 	if not active:
 		return
+	# ZG7a : HLOD maison par maison dans le shader (caméra principale, passe d'ombre comprise).
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if camera != null:
+		TownBuilder.set_lod_view(camera.global_position, _detail_range())
 	_stream_timer -= 1
 	if _stream_timer <= 0:
 		_stream_timer = 10

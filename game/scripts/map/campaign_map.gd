@@ -1089,6 +1089,7 @@ func _process(_delta: float) -> void:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
+	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
 	armies.update_scale(camera_rig.distance)
 	_update_trade_hover()  # C5
 	if _screenshot_countdown > 0:

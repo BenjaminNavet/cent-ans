@@ -48,12 +48,16 @@ uniform int fp_town_count = 0;
 float fp_finage(vec2 p, out float garden) {
 	float f = 0.0;
 	garden = 0.0;
+	// ZG7a : boucle de longueur fixe (déroulée ; emplacements vides à rayon nul, `TownLayer`),
+	// test sur la distance au carré avant tout fondu : la plupart des villes sont trop loin.
 	for (int i = 0; i < FP_MAX_TOWNS; i++) {
-		if (i >= fp_town_count) {
-			break;
-		}
 		vec4 t = fp_towns[i];
-		float d = distance(p, t.xy);
+		vec2 dp = p - t.xy;
+		float reach = max(t.z, t.w * 1.4);
+		if (dot(dp, dp) >= reach * reach) {
+			continue;
+		}
+		float d = length(dp);
 		f = max(f, 1.0 - smoothstep(t.z * 0.75, t.z, d));
 		garden = max(garden, smoothstep(t.w * 0.9, t.w, d) * (1.0 - smoothstep(t.w * 1.2, t.w * 1.4, d)));
 	}
@@ -66,8 +70,12 @@ float fp_hash(vec2 p) {
 	return fract((p3.x + p3.y) * p3.z);
 }
 
+// ZG7a : deux valeurs d'un seul brassage (hash22 de D. Hoskins) au lieu de deux `fp_hash` :
+// Voronoï deux fois moins cher, même loi (motif tiré différemment).
 vec2 fp_hash2(vec2 p) {
-	return vec2(fp_hash(p), fp_hash(p + vec2(19.19, 7.73)));
+	vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+	p3 += dot(p3, p3.yzx + 33.33);
+	return fract((p3.xx + p3.yz) * p3.zy);
 }
 
 // 1 aux paliers vallée / site, 0 au-delà (empreinte d'un pixel en unités monde).
@@ -280,8 +288,11 @@ void fp_parcels(vec2 p, vec2 uv, float footprint, vec2 grad_m, float slope, floa
 	}
 
 	// Détail haute fréquence (touffes, mottes) : visible de près seulement.
-	float hf = value_noise(q * 0.9) * 0.5 + value_noise(q * 3.1) * 0.3 + value_noise(q * 9.7) * 0.2;
-	pc *= 0.9 + 0.2 * mix(0.5, hf, 1.0 - smoothstep(0.4, 3.0, px_m));
+	// ZG7a : bruit calculé seulement là où il se voit (moins de 3 m par pixel).
+	if (px_m < 3.0) {
+		float hf = value_noise(q * 0.9) * 0.5 + value_noise(q * 3.1) * 0.3 + value_noise(q * 9.7) * 0.2;
+		pc *= 0.9 + 0.2 * mix(0.5, hf, 1.0 - smoothstep(0.4, 3.0, px_m));
+	}
 
 	float w = vis * clamp(open_w + assart * forest_w, 0.0, 1.0);
 	col = mix(col, pc, w * 0.92);
@@ -294,5 +305,7 @@ void fp_parcels(vec2 p, vec2 uv, float footprint, vec2 grad_m, float slope, floa
 		n = normalize(n + vec3(bump.x, 0.0, bump.y));
 	}
 	// Haies en relief (ombrage).
-	n = normalize(n + vec3((value_noise(q * 0.5) - 0.5), 0.0, (value_noise(q * 0.5 + 9.0) - 0.5)) * hedge * 0.6 * w);
+	if (hedge > 0.001) {
+		n = normalize(n + vec3((value_noise(q * 0.5) - 0.5), 0.0, (value_noise(q * 0.5 + 9.0) - 0.5)) * hedge * 0.6 * w);
+	}
 }
