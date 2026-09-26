@@ -15,6 +15,7 @@ is exported to ``CAM1`` with colours and material codes (``battle_skinned.export
 import os
 
 import battle_fine_equipment as fe
+import battle_fine_gear as gear
 import battle_fine_proto as fp
 import battle_skinned as bs
 import battle_skinned_equipment as eq
@@ -727,11 +728,14 @@ def build_figure(fig_name, level):
         gloves = (eq.C_LEATHER, (0.10, 0.06, 0.03))
     bvhs = [torso_bvh(o) for o, role in garments if role in ("torso", "coat", "skirt")]
     ctx = eq.Context(arm, level, bs.material, bs.bone_world)
+    kit_gear = gear.Gear(ctx, lm, bvhs, fig_name, mounted)
     equipment = []
     for item in recipe.get("equipment", []):
         name, mask = item[0], item[1]
         kwargs = item[2] if len(item) > 2 else {}
         objs = fine_kit_item(name, kwargs, ctx, lm, bvhs) if fine else None
+        if objs is None:
+            objs = gear.build(name, kwargs, kit_gear)
         kit = objs is not None
         if name == "tabard":
             objs = fine_tabard(garments, lm, **kwargs)
