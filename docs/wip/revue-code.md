@@ -75,3 +75,13 @@ Non exécuté (ni Godot ni cargo) : smoke test à lancer par l'orchestrateur à 
 
 Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_news_batch(items: Array) -> void`, `CodexBubbles._drop_freed_sources() -> void`, `SettingsMenu._build() -> void`, `SettingsMenu._rebuild() -> void`, `DiplomacyPanel._controller_of(province_id: String) -> String` ; nouvelles variables `CampaignMap.last_save_ok`, `MapUi._end_turn_pending`, `AudioDirector._music_tween`, `SettlementLayer._label_near`.
 | 7 | corrigé | défaite si le joueur ne contrôle plus aucune colonie (critère « terres » de `resolve_faction_deaths`) ; une armée sans terre ne suffit pas (conservateur : garde le texte « a perdu toutes ses terres » et le test m10). |
+| 8 | corrigé | otage de traité : `ransom_terms = Hold` ; `own_prisoner` refuse un otage engagé (`Held`) donc ni parole, ni rançon, ni changement de conditions avant le terme ; `ai_ransom_orders` ne libère pas un captif `Hold` ; le héraut (`check_action` Ransom et `first_captive_held_by`) ne rachète qu'un captif aux conditions « argent ». Guerre : l'otage trahi redevient simple prisonnier (`ransom_terms = None`). |
+
+## Corrections ai/pont
+
+- 1 corrigé (0a073a45) : `GridPlanner::attack_order(army)` part de la puissance de l'armée elle-même ; les armées alliées à portée d'engagement ne sont plus comptées deux fois (avant : `power_at(ancre)` + boucle). Test `nearby_friendly_armies_are_counted_once` ; sonde 50 tours × 8 graines verte (un premier passage a vu une banqueroute anglaise graine 3 pendant que sim-campaign changeait en parallèle ; relance verte : marges minces).
+- 2 corrigé (83fef09c) : `NavalBattleSim.tick` ignore les dt non finis ou ≤ 0 et plafonne à 600 pas par appel (comme `BattleSim`), arrêt si la bataille est finie.
+- 3 corrigé (9aa18fda) : `GameDataStore.load` passe par le cache partagé de `CampaignSim` (`load_shared_data`) ; un seul chargement au lancement, avertissements conservés (journalisés une fois). API GDScript inchangée ; un second `load` du même dossier rend le cache (comme `CampaignSim`).
+- 4 corrigé (97ba80f7) : `maps_in` rend un `Arc<[MapEntry]>` partagé ; `#[func]` inchangées.
+- 5 écarté : `Ground::Pages` est un `HashMap<i64, Vec<u8>>` du crate `vegetation` (hors périmètre) ; et une clé de page n'est pas immuable si la pyramide change (autre carte), un cache par clé seule serait faux.
+- Piège build : le dossier target partagé entre worktrees réutilise l'artefact `vegetation` d'une autre branche (sz1 : `relief_squash`) ; `touch core/crates/vegetation/src/*.rs` force la recompilation.
