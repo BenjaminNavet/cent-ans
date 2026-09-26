@@ -36,12 +36,22 @@ def test_schema(path: Path) -> None:
 
 @pytest.mark.parametrize("path", CITIES, ids=lambda p: p.stem)
 def test_links_and_origin(path: Path) -> None:
-    """Linked to its settlement and L1 maquette; origin within 300 m of the maquette anchor."""
+    """Linked to its settlement and L1 maquette; origin within 300 m of the maquette anchor.
+
+    A city without maquette (Orléans, VH7) is anchored on its ordinary settlement: the origin must
+    lie within half of ``extent_m`` of the settlement's fine anchor.
+    """
     city = _load(path)
-    v1 = _load(DATA / "landmarks" / f"{city['landmark']}.json")
-    assert v1["settlement"] == city["settlement"]
     grid = default_grid()
     px, py = grid.projected_to_pixel(*city["origin_3035"])
+    if "landmark" not in city:
+        anchors = _load(DATA / "map" / "fine_anchors.json")
+        anchor = anchors["settlements"][city["settlement"]]["px"]
+        offset = math.dist((float(px), float(py)), anchor) * grid.meters_per_px
+        assert offset < city["extent_m"] * 0.5, offset
+        return
+    v1 = _load(DATA / "landmarks" / f"{city['landmark']}.json")
+    assert v1["settlement"] == city["settlement"]
     offset = math.dist((float(px), float(py)), v1["anchor"]["px"]) * grid.meters_per_px
     assert offset < 300.0, offset
 
@@ -113,6 +123,54 @@ def test_rouen_1340_facts() -> None:
     assert any(w["origin"] == "rivers_fine" for w in city["waters"])
     assert len([s for s in city["streets"] if s["origin"] == "osm"]) > 200
     assert 4000.0 < landmarks_v2.wall_length(city) < 7000.0  # ≈ 5 km
+
+
+def test_orleans_facts() -> None:
+    """Orléans 1340-1429 (VH7): castrum then XIVth-c. accrue, chevet only, 1428 razing, bridge."""
+    city = _load(DATA / "landmarks_v2" / "orleans.json")
+    assert "landmark" not in city  # ordinary colony in strategic view
+    walls = {w["id"]: w for w in city["walls"]}
+    castrum_len = landmarks_v2.wall_length({"walls": [walls["castrum"]]})
+    assert 1800.0 < castrum_len < 2300.0, castrum_len  # 2 032 m (Inrap)
+    assert walls["castrum"]["until_year"] + 1 == walls["enceinte_accrue"]["from_year"]
+    gates = {g["name"] for g in walls["enceinte_accrue"]["gates"]}
+    assert {
+        "Porte Bourgogne",
+        "Porte Parisis",
+        "Porte Bannier",
+        "Porte Renart",
+    } <= gates
+    monuments = {m["id"]: m for m in city["monuments"]}
+    chevet = monuments["sainte_croix_chevet"]["params"]
+    assert (
+        chevet["open_west"]
+        and not chevet.get("west_towers")
+        and not chevet.get("transept_m")
+    )
+    assert (
+        monuments["boulevard_tourelles"]["model"] == "earthwork"
+    )  # earth and timber in 1428
+    for church in (
+        "saint_aignan_1420",
+        "saint_euverte",
+        "saint_laurent",
+        "saint_paterne",
+    ):
+        assert monuments[church]["until_year"] == 1428, church
+    faubourgs = [d for d in city["districts"] if d["zone"] == "faubourg"]
+    assert all(d.get("until_year", 9999) <= 1428 for d in faubourgs)
+    bridge = city["bridges"][0]
+    assert math.dist(bridge["from"], bridge["to"]) == pytest.approx(331, abs=30)
+    assert any(
+        w["origin"] == "rivers_fine" and w["name"] == "Loire" for w in city["waters"]
+    )
+    osm_names = {s["name"] for s in city["streets"] if s["origin"] == "osm"}
+    assert "Rue de Bourgogne" in osm_names
+    assert not osm_names & {
+        "Rue Jeanne d'Arc",
+        "Rue Royale",
+        "Boulevard Alexandre Martin",
+    }
 
 
 def test_local_roundtrip() -> None:

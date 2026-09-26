@@ -19,6 +19,8 @@ const DENSIFY_M := 10.0
 const GROUND_STEP_M := 12.0
 const WALL_STEP_M := 8.0
 const GATE_GAP_M := 7.0
+## Case de l'index des segments d'eau (VH7 : la Loire fine d'Orléans est en plusieurs bras larges).
+const WATER_CELL_M := 100.0
 
 ## Paramètres par défaut du parcellaire (remplacés par la section `plan` de la ville).
 const DEFAULT_PLAN := {
@@ -114,6 +116,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 			TownPlan.street_bases(water_street, heights)
 			(out["streets"] as Array).append(water_street)
 	out["waters"] = waters
+	var water_index := _index_waters(waters)
 	# 2. Monuments (emprise réservée avant tout le reste).
 	for m in city.get("monuments", []):
 		if LandmarkV2Library.present(m, year):
@@ -159,7 +162,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 	# 8. Parcelles en lanières le long des rues.
 	for s in ranked:
 		_line_parcels(s["points"], float(s["width"]), s["rank"] == "main", districts, occ, heights, rng, plan, out)
-	out["ground"] = _ground_grid(districts, waters, heights, out["houses"])
+	out["ground"] = _ground_grid(districts, waters, heights, out["houses"], water_index)
 	out["stats"] = {"houses": (out["houses"]["x"] as PackedFloat32Array).size(), "streets": (out["streets"] as Array).size(), "monuments": (out["v2_monuments"] as Array).size(), "towers": (out["towers"] as Array).size(), "usec": Time.get_ticks_usec() - t0}
 	return out
 
@@ -493,7 +496,7 @@ static func _line_parcels(pts: PackedVector2Array, width: float, main: bool, dis
 ## Sol des quartiers (cours, jardins, terre battue) : grille drapée carrée couvrant les
 ## quartiers, sommets dans un quartier et hors de l'eau ; `edge` : 1 en ville close, 0,4 aux
 ## faubourgs (teinte des cours plus verte).
-static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.Heights, houses: Dictionary) -> Dictionary:
+static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.Heights, houses: Dictionary, water_index: Dictionary = {}) -> Dictionary:
 	# Faubourgs : sol de la ville seulement autour des maisons (cases de 30 m), les champs du
 	# parcellaire ZG5b restent visibles entre les rues.
 	var near := {}
@@ -516,7 +519,7 @@ static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.
 		for i in n:
 			var p := origin + Vector2(i, j) * step
 			var di := districts.at(p)
-			if di < 0 or _in_water(p, waters):
+			if di < 0 or _in_water(p, waters, water_index):
 				continue
 			if str(districts.polys[di]["zone"]) == "faubourg" and not near.has(Vector2i(floori(p.x / 30.0), floori(p.y / 30.0))):
 				continue
@@ -527,7 +530,33 @@ static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.
 	return {"origin": origin, "step": step, "n": n, "inside": mask, "heights": h, "edge": edge, "radii": PackedFloat32Array([side, side, side, side])}
 
 
-static func _in_water(p: Vector2, waters: Array) -> bool:
+## Segments d'eau par case de `WATER_CELL_M` : {Vector2i(case) → [Vector2i(eau, segment)…]}.
+static func _index_waters(waters: Array) -> Dictionary:
+	var cells := {}
+	for wi in waters.size():
+		var line: PackedVector2Array = waters[wi]["line"]
+		var ws: PackedFloat32Array = waters[wi]["widths"]
+		for i in line.size() - 1:
+			var r := maxf(ws[i], ws[i + 1]) * 0.5
+			var lo := line[i].min(line[i + 1]) - Vector2(r, r)
+			var hi := line[i].max(line[i + 1]) + Vector2(r, r)
+			for cy in range(floori(lo.y / WATER_CELL_M), floori(hi.y / WATER_CELL_M) + 1):
+				for cx in range(floori(lo.x / WATER_CELL_M), floori(hi.x / WATER_CELL_M) + 1):
+					var key := Vector2i(cx, cy)
+					if not cells.has(key):
+						cells[key] = []
+					(cells[key] as Array).append(Vector2i(wi, i))
+	return cells
+
+
+static func _in_water(p: Vector2, waters: Array, index: Dictionary = {}) -> bool:
+	if not index.is_empty():
+		for ref: Vector2i in index.get(Vector2i(floori(p.x / WATER_CELL_M), floori(p.y / WATER_CELL_M)), []):
+			var wl: PackedVector2Array = waters[ref.x]["line"]
+			var wws: PackedFloat32Array = waters[ref.x]["widths"]
+			if Geometry2D.get_closest_point_to_segment(p, wl[ref.y], wl[ref.y + 1]).distance_to(p) < wws[ref.y] * 0.5:
+				return true
+		return false
 	for w in waters:
 		var line: PackedVector2Array = w["line"]
 		var ws: PackedFloat32Array = w["widths"]

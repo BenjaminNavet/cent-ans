@@ -10,7 +10,11 @@ extends SceneTree
 ##  3. `TownBuilder` : construction complète (nœuds de maisons par cellule d'îlots, enceinte
 ##     polygonale, monuments) ;
 ##  4. `LandmarkCityLayer` : chargement autour de Rouen, fondu de la maquette ;
-##  5. plancher de caméra ZG4b levé au-dessus d'une ville v2.
+##  5. plancher de caméra ZG4b levé au-dessus d'une ville v2 ;
+##  6. VH7 Orléans (ville v2 sans maquette) : enceinte datée (castrum en 1340, accrue en 1429),
+##     faubourgs et églises hors les murs rasés en 1428, chevet seul, boulevard de terre, pont de
+##     21 arches ; la ville ZG6 d'Orléans n'est plus construite ; ville 1:1 masquée tant que les
+##     maquettes des colonies sont visibles.
 ## Usage : godot --headless --path game --script res://tests/vh4_landmarks_test.gd
 
 var _failures := 0
@@ -28,6 +32,7 @@ func _init() -> void:
 	await _test_layer()
 	_test_camera_floor()
 	_test_london()
+	await _test_orleans()
 	print("vh4_landmarks_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -223,3 +228,95 @@ func _test_london() -> void:
 	for g in later["gates"]:
 		later_gates[str(g.get("name", ""))] = true
 	_check(later_gates.has("Moorgate (poterne ouverte en 1415)"), "1420: Moorgate open")
+
+# --- VH7 : Orléans ----------------------------------------------------------------------------
+
+
+static func _flat(_x: float, y: float) -> float:
+	return 95.0 + clampf(-y, 0.0, 800.0) * 0.01
+
+
+func _test_orleans() -> void:
+	var city := LandmarkV2Library.for_settlement("set_orleans")
+	if not _check(not city.is_empty(), "Orléans v2 loaded"):
+		return
+	_check(not city.has("landmark"), "Orléans: no L1/L2 maquette")
+	var h := TownPlan.Heights.new()
+	h.func_m = _flat
+	var p1340 := LandmarkPlan.generate(city, 1340, h)
+	var p1429 := LandmarkPlan.generate(city, 1429, h)
+	print("vh7: plan 1340 %s" % JSON.stringify(p1340["stats"]))
+	print("vh7: plan 1429 %s" % JSON.stringify(p1429["stats"]))
+	var ids_1340 := _monument_ids(p1340)
+	var ids_1429 := _monument_ids(p1429)
+	_check((p1340["wall_rings"] as Array).size() == 1 and (p1429["wall_rings"] as Array).size() == 1, "one dated wall ring per year")
+	_check(_gate_names(p1340).has("Porte Dunoise") and not _gate_names(p1340).has("Porte Bannier"), "1340: castrum gates")
+	_check(_gate_names(p1429).has("Porte Bannier") and _gate_names(p1429).has("Porte Renart"), "1429: accrue gates")
+	_check(ids_1340.has("saint_aignan") and ids_1340.has("saint_euverte"), "1340: churches outside the walls")
+	_check(not ids_1429.has("saint_euverte") and not ids_1429.has("saint_aignan_1420") and not ids_1429.has("saint_laurent"), "1429: churches outside the walls razed")
+	_check(ids_1429.has("tourelles") and ids_1429.has("boulevard_tourelles") and not ids_1340.has("boulevard_tourelles"), "Tourelles and boulevard (1404+)")
+	var chevet: Dictionary = ids_1340.get("sainte_croix_chevet", {})
+	_check(not chevet.is_empty() and float(chevet["length"]) < 70.0, "Sainte-Croix: chevet only")
+	var boulevard: Dictionary = ids_1429.get("boulevard_tourelles", {})
+	var verts: PackedVector3Array = (boulevard.get("arrays", []) as Array)[Mesh.ARRAY_VERTEX] if not boulevard.is_empty() else PackedVector3Array()
+	_check(verts.size() >= 36, "earthwork mesh (%d vertices)" % verts.size())
+	_check(float(boulevard.get("top", 99.0)) < 9.0, "earthwork stays low")
+	_check(int((p1429["bridge"] as Dictionary).get("arches", 0)) == 21, "bridge of 21 arches")
+	var f1340 := _zone_count(p1340, TownPlan.ZONE_FAUBOURG)
+	var f1429 := _zone_count(p1429, TownPlan.ZONE_FAUBOURG)
+	var intra := _zone_count(p1429, TownPlan.ZONE_INTRA)
+	_check(f1340 > 300 and f1429 == 0, "faubourgs razed in 1428 (%d → %d houses)" % [f1340, f1429])
+	_check(intra > 1000, "intra-muros houses in 1429: %d" % intra)
+	var wet := 0
+	for i in (p1429["houses"]["x"] as PackedFloat32Array).size():
+		if LandmarkPlan._in_water(Vector2(p1429["houses"]["x"][i], p1429["houses"]["y"][i]), p1429["waters"]):
+			wet += 1
+	_check(wet == 0, "houses in the Loire: %d" % wet)
+	# La ville ZG6 d'Orléans cède la place à la ville 1:1.
+	var towns := TownLayer.new()
+	get_root().add_child(towns)
+	towns.setup(null, null, ZoomTiers.load_default(), ["set_orleans", "set_amiens"])
+	_check(not towns.town_ids().has("set_orleans") and towns.town_ids().has("set_amiens"), "no ZG6 town for Orléans")
+	towns.queue_free()
+	var layer := LandmarkCityLayer.new()
+	get_root().add_child(layer)
+	layer.force_active = true
+	layer.setup(null, null, ZoomTiers.load_default(), ["set_orleans"])
+	_check(layer.has_city("set_orleans") and not layer.has_maquette("set_orleans"), "Orléans 1:1 without maquette")
+	var z := layer.zone_of("set_orleans")
+	layer.focus_override = Vector2(z.x, z.y)
+	layer.update_view(1.0)
+	layer.flush(Vector2(z.x, z.y))
+	_check(layer.is_shown("set_orleans"), "Orléans 1:1 shown at site tier")
+	var tiers := ZoomTiers.load_default()
+	var d := 1.0
+	while d < 60.0 and tiers.valley_weight(d) >= layer.profile.min_valley_weight:
+		d *= 1.1
+	while d < 60.0 and tiers.valley_weight(d) < LandmarkCityLayer.PREPARE_VALLEY:
+		d /= 1.05
+	layer.update_view(d)
+	_check(not layer.is_shown("set_orleans"), "hidden while colony maquettes are shown (d=%.1f, valley %.2f)" % [d, tiers.valley_weight(d)])
+	layer.queue_free()
+	await process_frame
+
+
+func _monument_ids(plan: Dictionary) -> Dictionary:
+	var ids := {}
+	for m in plan["v2_monuments"]:
+		ids[m["id"]] = m
+	return ids
+
+
+func _gate_names(plan: Dictionary) -> Dictionary:
+	var names := {}
+	for g in plan["gates"]:
+		names[str(g.get("name", ""))] = true
+	return names
+
+
+func _zone_count(plan: Dictionary, zone: int) -> int:
+	var n := 0
+	for z in (plan["houses"]["zone"] as PackedInt32Array):
+		if z == zone:
+			n += 1
+	return n
