@@ -16,6 +16,9 @@ extends Resource
 @export var shrink_start: float = 28.0
 ## Distance en deçà de laquelle les accessoires sont à leur taille réelle.
 @export var shrink_end: float = 5.0
+## Arbres : taille réelle atteinte plus bas (le semis est clairsemé pour des arbres de ~1 km ; à
+## taille réelle dès le palier vallée haut, les forêts ne seraient plus qu'un tapis sombre).
+@export var tree_shrink_end: float = 3.0
 ## Taille réelle / taille carte, par famille. Arbres : ~1,5 unité de haut sur la carte, 20-30 m en
 ## vrai. Moulins : corps de 3,3 unités (2,3 km), ~15 m en vrai. Hameaux : ~2 unités de large,
 ## 40-60 m en vrai. Panaches de cheminée : 1 × 3 km sur la carte, ~10 × 40 m en vrai ; fumées
@@ -33,25 +36,27 @@ static var _default: MapPropScale = null
 
 
 ## Avancement [0, 1] de la transition taille carte → taille réelle à la distance `distance`.
-func progress(distance: float) -> float:
+## `end` : distance de fin propre à une famille (`shrink_end` par défaut).
+func progress(distance: float, end: float = -1.0) -> float:
+	var stop := end if end > 0.0 else shrink_end
 	if distance >= shrink_start:
 		return 0.0
-	if distance <= shrink_end:
+	if distance <= stop:
 		return 1.0
-	var t := log(shrink_start / maxf(distance, 1e-4)) / log(shrink_start / shrink_end)
+	var t := log(shrink_start / maxf(distance, 1e-4)) / log(shrink_start / stop)
 	return smoothstep(0.0, 1.0, t)
 
 
 ## Échelle (1 au loin, `ratio` de près) pour une famille de taille réelle `ratio`.
-func scale_for(ratio: float, distance: float) -> float:
-	var t := progress(distance)
+func scale_for(ratio: float, distance: float, end: float = -1.0) -> float:
+	var t := progress(distance, end)
 	if t <= 0.0:
 		return 1.0
 	return pow(clampf(ratio, 1e-4, 1.0), t)
 
 
 func tree_scale(distance: float) -> float:
-	return scale_for(tree_ratio, distance)
+	return scale_for(tree_ratio, distance, tree_shrink_end)
 
 
 func windmill_scale(distance: float) -> float:
