@@ -117,8 +117,9 @@ func setup(p_province: String, p_field_size: Vector2, mean_height: float, flank:
 		return false
 	var tiles: Dictionary = (index as Dictionary).get("provinces", {})
 	var entry: Dictionary = tiles.get(province, {})
-	if site_key != "" and tiles.has(site_key):
-		entry = tiles[site_key]
+	var sites: Dictionary = (index as Dictionary).get("sites", {})  # EP7 : tuiles des cartes historiques
+	if site_key != "" and sites.has(site_key):
+		entry = sites[site_key]
 		_blend_start = SITE_BLEND_M.x
 		_blend_end = SITE_BLEND_M.y
 		flank = ""
