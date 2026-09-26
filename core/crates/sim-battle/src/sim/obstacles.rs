@@ -43,6 +43,13 @@ impl BattleSim {
                 take(prop.footprint());
             }
         }
+        // EP6: buildings and solid props of the decor, camp furniture.
+        let grid = self
+            .decor_grid
+            .get_or_init(|| DecorGrid::build(&self.field));
+        for f in grid.near(x, z, radius) {
+            take(f);
+        }
         if let Some(village) = &self.field.village {
             // Houses stand within the zone (a little slack for their size).
             if (village.zone.x - x).hypot(village.zone.z - z) < village.zone.radius + radius + 30.0
@@ -60,7 +67,9 @@ impl BattleSim {
 
     /// BR3: moves the figures of `unit` out of the footprints near it.
     pub(super) fn push_figures_out(&self, unit: &Unit, positions: &mut [(f64, f64, f64)]) {
-        if positions.is_empty() || (self.siege.is_none() && self.field.village.is_none()) {
+        if positions.is_empty()
+            || (self.siege.is_none() && self.field.village.is_none() && self.field.decor.is_empty())
+        {
             return;
         }
         let reach = positions
@@ -73,6 +82,56 @@ impl BattleSim {
         }
         let margin = TownRules::bundled().figures.margin_m;
         push_out(&near, positions, margin);
+    }
+}
+
+/// EP6: the solid footprints of the decor bucketed in square cells, so that
+/// the figures of a regiment only test the few near it.
+#[derive(Debug, Clone, Default)]
+pub(crate) struct DecorGrid {
+    all: Vec<Footprint>,
+    cells: std::collections::HashMap<(i32, i32), Vec<usize>>,
+}
+
+/// Side of a cell of the decor grid, in metres.
+const DECOR_CELL: f64 = 64.0;
+
+impl DecorGrid {
+    fn cell(v: f64) -> i32 {
+        (v / DECOR_CELL).floor() as i32
+    }
+
+    pub(crate) fn build(field: &crate::field::Battlefield) -> Self {
+        let all = field.decor_footprints_near(0.0, 0.0, f64::INFINITY);
+        let mut cells: std::collections::HashMap<(i32, i32), Vec<usize>> = Default::default();
+        for (i, f) in all.iter().enumerate() {
+            let r = f.bounding_radius();
+            for cx in Self::cell(f.x - r)..=Self::cell(f.x + r) {
+                for cz in Self::cell(f.z - r)..=Self::cell(f.z + r) {
+                    cells.entry((cx, cz)).or_default().push(i);
+                }
+            }
+        }
+        DecorGrid { all, cells }
+    }
+
+    /// Footprints whose cells meet the square round (x, z) of half side
+    /// `radius` (each once).
+    pub(crate) fn near(&self, x: f64, z: f64, radius: f64) -> Vec<Footprint> {
+        if self.all.is_empty() {
+            return Vec::new();
+        }
+        let mut found: Vec<usize> = Vec::new();
+        for cx in Self::cell(x - radius)..=Self::cell(x + radius) {
+            for cz in Self::cell(z - radius)..=Self::cell(z + radius) {
+                if let Some(list) = self.cells.get(&(cx, cz)) {
+                    found.extend(list);
+                }
+            }
+        }
+        found.sort_unstable();
+        found.dedup();
+        found.into_iter().map(|i| self.all[i]).collect()
     }
 }
 

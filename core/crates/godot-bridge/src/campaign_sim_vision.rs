@@ -1,26 +1,114 @@
-//! `CampaignSim` line of sight (lot C1, fog of war), read only.
+//! `CampaignSim` line of sight (lot C1 fog of war, per-cell radius since lot
+//! M5a), read only.
 
 use data_model::FactionId;
+use godot::classes::image::Format;
+use godot::classes::Image;
 use godot::prelude::*;
+use sim_campaign::vision::Vision;
 
 use crate::campaign_sim::CampaignSim;
 
+impl CampaignSim {
+    fn faction_vision(&self, faction: &GString) -> Option<Vision> {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return None;
+        };
+        let faction = FactionId::new(faction.to_string()).ok()?;
+        Some(state.vision(data, &faction))
+    }
+}
+
 #[godot_api(secondary)]
 impl CampaignSim {
-    /// Province ids `faction` sees this turn (`CampaignState::visible_provinces`,
-    /// ranges from `data/rules/vision.json`); empty before a campaign starts.
+    /// Province ids `faction` sees this turn (`CampaignState::visible_provinces`:
+    /// enough of its land seen, a seen settlement, a friendly army or an
+    /// agent); empty before a campaign starts.
     #[func]
     fn get_visible_provinces(&self, faction: GString) -> PackedStringArray {
-        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+        let Some(vision) = self.faction_vision(&faction) else {
             return PackedStringArray::new();
         };
-        let Ok(faction) = FactionId::new(faction.to_string()) else {
-            return PackedStringArray::new();
-        };
-        state
-            .visible_provinces(data, &faction)
+        vision
+            .provinces
             .iter()
             .map(|id| GString::from(id.as_str()))
             .collect()
+    }
+
+    /// Army ids shown to `faction`: its own and its allies', and foreign
+    /// armies whose point is seen (lot M5a).
+    #[func]
+    fn get_visible_army_ids(&self, faction: GString) -> PackedStringArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return PackedStringArray::new();
+        };
+        let Some(vision) = self.faction_vision(&faction) else {
+            return PackedStringArray::new();
+        };
+        state
+            .armies
+            .iter()
+            .filter(|(_, army)| vision.sees_army(state, data, army))
+            .map(|(id, _)| GString::from(id.as_str()))
+            .collect()
+    }
+
+    /// `true` when map pixel `point` is seen by `faction` (lot M5a).
+    #[func]
+    fn is_point_visible(&self, faction: GString, point: Vector2) -> bool {
+        let Some(data) = &self.data else {
+            return false;
+        };
+        self.faction_vision(&faction)
+            .is_some_and(|v| v.mask.sees_point(data, [point.x, point.y]))
+    }
+
+    /// Everything the map needs for the fog in one call (lot M5a):
+    /// `{image: Image R8 (512², 255 = seen, soft edges, seen from 128),
+    /// size: Vector2 (map pixels covered by the image), texel_px,
+    /// provinces: PackedStringArray, armies: PackedStringArray,
+    /// seen_share: float}`. Empty before a campaign starts.
+    #[func]
+    fn get_vision(&self, faction: GString) -> VarDictionary {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarDictionary::new();
+        };
+        let Some(vision) = self.faction_vision(&faction) else {
+            return VarDictionary::new();
+        };
+        let mask = &vision.mask;
+        let packed = PackedByteArray::from(mask.coverage.as_slice());
+        let Some(image) = Image::create_from_data(
+            mask.width as i32,
+            mask.height as i32,
+            false,
+            Format::R8,
+            &packed,
+        ) else {
+            return VarDictionary::new();
+        };
+        let provinces: PackedStringArray = vision
+            .provinces
+            .iter()
+            .map(|id| GString::from(id.as_str()))
+            .collect();
+        let armies: PackedStringArray = state
+            .armies
+            .iter()
+            .filter(|(_, army)| vision.sees_army(state, data, army))
+            .map(|(id, _)| GString::from(id.as_str()))
+            .collect();
+        vdict! {
+            "image" => &image,
+            "size" => Vector2::new(
+                mask.width as f32 * mask.texel_px,
+                mask.height as f32 * mask.texel_px,
+            ),
+            "texel_px" => mask.texel_px,
+            "provinces" => &provinces,
+            "armies" => &armies,
+            "seen_share" => mask.seen_share(),
+        }
     }
 }

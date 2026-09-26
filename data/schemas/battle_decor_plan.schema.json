@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_decor_plan.schema.json",
+  "title": "Plan de décor d'un champ de bataille",
+  "description": "Décor posé à la main (lot EP6, pour les cartes historiques d'EP7) : bâtiments, moulins, église, manoir, hameaux, parcelles, accessoires, camps et haies à des positions données (mètres, x vers l'est de 0 à la largeur du champ, z de 0 au bord de l'attaquant à la profondeur du champ ; lacet en radians, de +x vers +z). Lu par sim-battle (DecorPlan) ; porté par BattleSetup.decor_plan.",
+  "type": "object",
+  "$defs": {
+    "coord": { "type": "number", "minimum": -500, "maximum": 5000 },
+    "yaw": { "type": "number", "minimum": -7, "maximum": 7 },
+    "size": { "type": "number", "minimum": 0, "maximum": 1000 },
+    "point": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/coord" },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "clear": { "type": "boolean", "description": "Retire d'abord le décor procédural (les camps aussi si le plan pose les siens)." },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "enum": ["building", "windmill", "watermill", "church", "manor", "hamlet", "plot", "prop", "camp", "hedge"] },
+          "kind": { "type": "string" },
+          "x": { "$ref": "#/$defs/coord" },
+          "z": { "$ref": "#/$defs/coord" },
+          "yaw": { "$ref": "#/$defs/yaw" },
+          "length": { "$ref": "#/$defs/size" },
+          "width": { "$ref": "#/$defs/size" },
+          "mound": { "type": "boolean" },
+          "moat": { "type": "boolean" },
+          "layout": { "enum": ["street", "green", "farmstead"] },
+          "houses": { "type": "integer", "minimum": 0, "maximum": 40 },
+          "seed": { "type": "integer", "minimum": 0 },
+          "state": { "enum": ["ploughed", "sown", "crop", "stubble", null] },
+          "side": { "enum": ["attacker", "defender"] },
+          "a": { "$ref": "#/$defs/point" },
+          "b": { "$ref": "#/$defs/point" }
+        },
+        "required": ["type"],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": { "properties": { "type": { "const": "building" } } },
+            "then": {
+              "required": ["kind", "x", "z"],
+              "properties": { "kind": { "enum": ["cottage", "timbered", "barn", "church", "stone", "windmill", "watermill", "manor"] } }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "enum": ["windmill", "watermill", "church", "manor", "prop"] } } },
+            "then": { "required": ["x", "z"] }
+          },
+          {
+            "if": { "properties": { "type": { "const": "hamlet" } } },
+            "then": { "required": ["layout", "x", "z"] }
+          },
+          {
+            "if": { "properties": { "type": { "const": "plot" } } },
+            "then": {
+              "required": ["kind", "x", "z", "length", "width"],
+              "properties": { "kind": { "enum": ["hamlet", "church", "manor", "farmstead", "orchard", "vineyard", "ploughland", "meadow", "camp"] } }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "prop" } } },
+            "then": {
+              "required": ["kind"],
+              "properties": { "kind": { "enum": ["haystack", "cart", "tent", "pavilion", "wagon", "campfire", "horse_line", "graves", "well", "woodpile"] } }
+            }
+          },
+          {
+            "if": { "properties": { "type": { "const": "camp" } } },
+            "then": { "required": ["side", "x", "z"] }
+          },
+          {
+            "if": { "properties": { "type": { "const": "hedge" } } },
+            "then": { "required": ["a", "b"] }
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

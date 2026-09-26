@@ -3,7 +3,7 @@ extends MeshInstance3D
 
 ## Lot C5 : routes commerciales tracées sur la carte — ruban fin façon parchemin posé sur le
 ## relief (`PolylineMesh`, comme `PathPreview`), épaisseur selon la valeur de la route. Couche
-## activable (bouton de la barre de filtres ou touche `map_toggle_trade`) ; respecte le
+## activable (bouton de la barre de filtres ou touche V, `map_toggle_trade`) ; respecte le
 ## brouillard (C1) : une route dont aucun bout n'est dans une province visible de la faction
 ## joueuse est masquée.
 

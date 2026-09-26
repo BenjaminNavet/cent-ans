@@ -230,6 +230,14 @@ pub enum HouseKind {
     Barn,
     /// Small stone church.
     Church,
+    /// EP6: stone house (Midi, mountains).
+    Stone,
+    /// EP6: post mill.
+    Windmill,
+    /// EP6: water mill (wheel on the front, towards the water).
+    Watermill,
+    /// EP6: manor or tower house.
+    Manor,
 }
 
 impl HouseKind {
@@ -239,6 +247,10 @@ impl HouseKind {
             HouseKind::Timbered => "timbered",
             HouseKind::Barn => "barn",
             HouseKind::Church => "church",
+            HouseKind::Stone => "stone",
+            HouseKind::Windmill => "windmill",
+            HouseKind::Watermill => "watermill",
+            HouseKind::Manor => "manor",
         }
     }
 }
@@ -362,7 +374,7 @@ impl Occupied<'_> {
 
 /// `true` when a disc at (x, z) of `radius` sits on the centre of a
 /// deployment line (the armies must be able to form up).
-fn on_line(size: &FieldSize, x: f64, z: f64, radius: f64) -> bool {
+pub(crate) fn on_line(size: &FieldSize, x: f64, z: f64, radius: f64) -> bool {
     [size.attacker_line_z(), size.defender_line_z()]
         .iter()
         .any(|line| {

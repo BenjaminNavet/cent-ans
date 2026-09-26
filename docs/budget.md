@@ -55,3 +55,18 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 | 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « winter_lowlands » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,53 $ |
 | 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « flanders_flat » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,57 $ |
 | 2026-09-25 | Freesound (CC0) | EP4 : 27 sons libres supplémentaires (chocs acier/acier et acier/bois, impacts d'armure, cris d'effort, râles, chutes, chevaux, 3e nappe de mêlée), licence vérifiée page par page, aucun appel payant | 0,00 $ | 0,00 $ | 0,57 $ |
+
+## Direction artistique (25/09) — plafond propre de 50 $ (clé OpenRouter personnelle du joueur, depuis le 25/09 ~23 h)
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul DA |
+|---|---|---|---|---|---|
+| 2026-09-25 | OpenRouter | DA2 : portraits vivants (archétypes et variantes âgées) (6 × openai/gpt-5-image-mini) | 0,28 $ | 0,27 $ | 0,27 $ |
+| 2026-09-25 | OpenRouter | DA : planche de style, bouton de fin de tour (cloche) et planche d'icônes à l'encre (2 × openai/gpt-5-image-mini) | 0,09 $ | 0,09 $ | 0,36 $ |
+| 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (2 × openai/gpt-5-image-mini) | 0,10 $ | 0,09 $ | 0,45 $ |
+| 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (2 × openai/gpt-5-image-mini) | 0,10 $ | 0,09 $ | 0,54 $ |
+| 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (76 × openai/gpt-5-image-mini) | 3,46 $ | 3,43 $ | 3,97 $ |
+| 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (12 × openai/gpt-5-image-mini) | 0,55 $ | 0,54 $ | 4,51 $ |
+| 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (6 × openai/gpt-5-image-mini) | 0,28 $ | 0,28 $ | 4,79 $ |
+| 2026-09-26 | OpenRouter | DA5 : icônes d'action à l'encre et boutons-médaillons (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 4,84 $ |
+| 2026-09-26 | OpenRouter | DA3 : marqueurs de carte peints (3 × openai/gpt-5-image-mini) | 0,14 $ | 0,14 $ | 4,98 $ |
+| 2026-09-26 | OpenRouter | DA3 : marqueurs de carte peints (10 × openai/gpt-5-image-mini) | 0,46 $ | 0,45 $ | 5,43 $ |

@@ -40,6 +40,11 @@ fn largest_army(state: &CampaignState, faction: &str) -> ArmyId {
 /// first wall breach; gate and wall HP; battle length and winner.
 #[derive(Debug, Default, Clone)]
 struct Assault {
+    /// Soldiers of each side at the start (attacker, garrison).
+    men: (u32, u32),
+    /// Share of its soldiers each side lost.
+    lost: (f64, f64),
+    withdrew: bool,
     gate_hp: f64,
     gate_left: f64,
     wall_hp: f64,
@@ -84,7 +89,16 @@ fn assault(data: &GameData, landmark: &str, attacker: &str, seed: u64, limit_s: 
     let index = state
         .debug_stage_landmark_siege(data, &army, landmark)
         .unwrap_or_else(|e| panic!("{landmark}: {e}"));
-    let setup = state.battle_setup(data, index).expect("setup");
+    let mut setup = state.battle_setup(data, index).expect("setup");
+    // `ATTACKER_SHARE=0.5`: the besiegers at half strength (a lost assault).
+    if let Some(share) = std::env::var("ATTACKER_SHARE")
+        .ok()
+        .and_then(|s| s.parse::<f64>().ok())
+    {
+        for unit in setup.attacker.units.iter_mut() {
+            unit.soldiers = ((f64::from(unit.soldiers) * share).round() as u32).max(1);
+        }
+    }
     let mut sim = BattleSim::new(setup, seed).expect("battle");
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
@@ -92,6 +106,18 @@ fn assault(data: &GameData, landmark: &str, attacker: &str, seed: u64, limit_s: 
         sim.start_battle().expect("start");
     }
     let mut out = Assault::default();
+    let men = |sim: &BattleSim, side: SideId| -> (f64, f64) {
+        sim.units()
+            .iter()
+            .filter(|u| u.side == side && !u.synthetic)
+            .fold((0.0, 0.0), |(l, f), u| {
+                (l + u.hp.max(0.0), f + f64::from(u.initial_soldiers))
+            })
+    };
+    out.men = (
+        men(&sim, SideId::Attacker).1 as u32,
+        men(&sim, SideId::Defender).1 as u32,
+    );
     if let Some(works) = sim.siege() {
         out.gate_hp = works.pieces[works.gate].max_hp;
         out.wall_hp = works
@@ -101,8 +127,14 @@ fn assault(data: &GameData, landmark: &str, attacker: &str, seed: u64, limit_s: 
             .map(|p| p.max_hp)
             .fold(0.0, f64::max);
     }
+    let dump = std::env::var("DUMP").is_ok_and(|d| d == format!("{landmark}:{seed}"));
+    let mut next_dump = 0.0;
     while !sim.is_finished() && sim.elapsed() < limit_s {
         sim.step();
+        if dump && sim.elapsed() >= next_dump {
+            next_dump += 60.0;
+            dump_units(&sim);
+        }
     }
     for fx in sim.siege_fx() {
         match fx.kind {
@@ -123,8 +155,44 @@ fn assault(data: &GameData, landmark: &str, attacker: &str, seed: u64, limit_s: 
         .siege()
         .map_or(0.0, |w| w.pieces[w.gate].hp.max(0.0) / out.gate_hp.max(1.0));
     out.ended = sim.elapsed();
+    let (a, d) = (men(&sim, SideId::Attacker), men(&sim, SideId::Defender));
+    out.lost = (1.0 - a.0 / a.1.max(1.0), 1.0 - d.0 / d.1.max(1.0));
+    out.withdrew = sim
+        .units()
+        .iter()
+        .any(|u| u.side == SideId::Attacker && u.withdrawing);
     out.attacker_won = sim.winner() == Some(SideId::Attacker);
     out
+}
+
+/// `DUMP=<town>:<seed>`: the state of every regiment once a minute.
+fn dump_units(sim: &BattleSim) {
+    let works = sim.siege().unwrap();
+    eprintln!(
+        "--- t {:.0} s, gate {:.0} hp, openings {:?}",
+        sim.elapsed(),
+        works.pieces[works.gate].hp,
+        works.openings()
+    );
+    for u in sim.units().iter().filter(|u| u.present()) {
+        eprintln!(
+            "  {:?} {:>3} {:<28} hp {:>5.0} mor {:>3.0} {:?} ({:>4.0},{:>4.0}) in {} wall {} climb {:?} dest {:?} tgt {:?} wd {}",
+            u.side,
+            u.id,
+            u.unit_type,
+            u.hp,
+            u.morale,
+            u.state,
+            u.x,
+            u.z,
+            works.inside(u.x, u.z),
+            u.on_wall,
+            u.climbing,
+            u.destination.map(|(x, z)| (x.round(), z.round())),
+            u.target,
+            u.withdrawing
+        );
+    }
 }
 
 fn fmt(v: Option<f64>) -> String {
@@ -151,29 +219,36 @@ fn probe_landmark_assaults() {
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(1800.0);
-    println!("| Ville | PV porte | PV mur | 1er coup (s) | porte tombée | porte (médiane s) | brèche (médiane s) | victoires assaillant | durée médiane (s) |");
-    println!("|---|---|---|---|---|---|---|---|---|");
+    println!("| Ville | Hommes (ass./garn.) | PV porte | PV mur | 1er coup (s) | porte tombée | porte (médiane s) | brèche (médiane s) | victoires assaillant | nuls | retraites | durée médiane (s) |");
+    println!("|---|---|---|---|---|---|---|---|---|---|---|---|");
     for (landmark, attacker) in TOWNS {
         let runs: Vec<Assault> = (0..seeds)
             .map(|k| assault(&data, landmark, attacker, 11 + k, limit))
             .collect();
         for (k, r) in runs.iter().enumerate() {
             eprintln!(
-                "{landmark} seed {}: blow {} gate {} (left {:.0} %) breach {} blows {} end {:.0} won {}",
+                "{landmark} seed {}: men {}/{} blow {} gate {} (left {:.0} %) breach {} blows {} end {:.0} won {} withdrew {} lost {:.0} %/{:.0} %",
                 11 + k as u64,
+                r.men.0,
+                r.men.1,
                 fmt(r.first_blow),
                 fmt(r.gate_at),
                 r.gate_left * 100.0,
                 fmt(r.breach_at),
                 r.blows,
                 r.ended,
-                r.attacker_won
+                r.attacker_won,
+                r.withdrew,
+                r.lost.0 * 100.0,
+                r.lost.1 * 100.0
             );
         }
         let gates: Vec<f64> = runs.iter().filter_map(|r| r.gate_at).collect();
         let breaches: Vec<f64> = runs.iter().filter_map(|r| r.breach_at).collect();
         println!(
-            "| {landmark} | {:.0} | {:.0} | {} | {}/{} | {} | {} | {}/{} | {} |",
+            "| {landmark} | {}/{} | {:.0} | {:.0} | {} | {}/{} | {} | {} | {}/{} | {} | {} | {} |",
+            runs[0].men.0,
+            runs[0].men.1,
             runs[0].gate_hp,
             runs[0].wall_hp,
             fmt(median(runs.iter().filter_map(|r| r.first_blow).collect())),
@@ -183,6 +258,8 @@ fn probe_landmark_assaults() {
             fmt(median(breaches)),
             runs.iter().filter(|r| r.attacker_won).count(),
             runs.len(),
+            runs.iter().filter(|r| r.ended >= limit - 1.0).count(),
+            runs.iter().filter(|r| r.withdrew).count(),
             fmt(median(runs.iter().map(|r| r.ended).collect())),
         );
     }

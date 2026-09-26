@@ -2582,7 +2582,8 @@ def _arch_points(span, crown, spring, n):
 
 def bridge_stone_bay(g, rng, detail="high", length=None, depth=None, ruined=False):
     """One bay of a stone bridge: a segmental arch between two half piers with cutwaters,
-    rubble spandrels, a voussoir ring, a string course, parapets with coping, cobbled road."""
+    rubble spandrels, a voussoir ring, a string course, parapets with coping, cobbled road.
+    """
     g.ground_ao = False
     L = length or STONE_BAY
     W = depth or STONE_WIDTH
@@ -2598,15 +2599,42 @@ def bridge_stone_bay(g, rng, detail="high", length=None, depth=None, ruined=Fals
         for sign in (-1, 1):
             y = sign * hw
             # Half piers down to the river bed.
-            _face_x_z(g, y, -hl, -span / 2, BRIDGE_BOTTOM, BRIDGE_BOTTOM, 0.0, 0.0, "Rubble", sign)
-            _face_x_z(g, y, span / 2, hl, BRIDGE_BOTTOM, BRIDGE_BOTTOM, 0.0, 0.0, "Rubble", sign)
+            _face_x_z(
+                g,
+                y,
+                -hl,
+                -span / 2,
+                BRIDGE_BOTTOM,
+                BRIDGE_BOTTOM,
+                0.0,
+                0.0,
+                "Rubble",
+                sign,
+            )
+            _face_x_z(
+                g,
+                y,
+                span / 2,
+                hl,
+                BRIDGE_BOTTOM,
+                BRIDGE_BOTTOM,
+                0.0,
+                0.0,
+                "Rubble",
+                sign,
+            )
             # Spandrel between the arch and the road.
             for (xa, za), (xb, zb) in zip(arch, arch[1:], strict=False):
                 _face_x_z(g, y, xa, xb, za, zb, 0.0, 0.0, "Rubble", sign)
         # Pier faces under the springing (inside the arch opening).
         for sx in (-1, 1):
             x = sx * span / 2
-            pts = [(x, -hw, BRIDGE_BOTTOM), (x, hw, BRIDGE_BOTTOM), (x, hw, spring), (x, -hw, spring)]
+            pts = [
+                (x, -hw, BRIDGE_BOTTOM),
+                (x, hw, BRIDGE_BOTTOM),
+                (x, hw, spring),
+                (x, -hw, spring),
+            ]
             if sx < 0:
                 pts.reverse()
             g.poly(pts, "Rubble")
@@ -2640,7 +2668,12 @@ def bridge_stone_bay(g, rng, detail="high", length=None, depth=None, ruined=Fals
             for sy in (-1, 1):
                 ye = sy * hw
                 apex = (xe, sy * (hw + 1.4))
-                face = [(xi, ye, BRIDGE_BOTTOM), (apex[0], apex[1], BRIDGE_BOTTOM), (apex[0], apex[1], top), (xi, ye, top)]
+                face = [
+                    (xi, ye, BRIDGE_BOTTOM),
+                    (apex[0], apex[1], BRIDGE_BOTTOM),
+                    (apex[0], apex[1], top),
+                    (xi, ye, top),
+                ]
                 if sx * sy > 0:
                     face.reverse()
                 g.poly(face, "Ashlar")
@@ -2662,13 +2695,22 @@ def bridge_stone_bay(g, rng, detail="high", length=None, depth=None, ruined=Fals
             k.box(g, (0.0, sign * (hw - 0.22), 0.96), (L, 0.56, 0.14), "Ashlar")
     # Cobbled road.
     with tinted(g, (0.62, 0.6, 0.56)):
-        g.poly([(-hl, -hw + 0.44, 0.0), (hl, -hw + 0.44, 0.0), (hl, hw - 0.44, 0.0), (-hl, hw - 0.44, 0.0)], "Rubble")
+        g.poly(
+            [
+                (-hl, -hw + 0.44, 0.0),
+                (hl, -hw + 0.44, 0.0),
+                (hl, hw - 0.44, 0.0),
+                (-hl, hw - 0.44, 0.0),
+            ],
+            "Rubble",
+        )
     return {"height": 1.1 - BRIDGE_BOTTOM, "length": L, "depth": W + 2.8}
 
 
 def bridge_stone_end(g, rng, detail="high", length=None, depth=None, ruined=False):
     """Abutment of a stone bridge: a ramp from the deck (x = 0) down to the bank (x = +5), side
-    walls down to the river bed, parapets following the slope, ending on a stone post."""
+    walls down to the river bed, parapets following the slope, ending on a stone post.
+    """
     g.ground_ao = False
     L = length or BRIDGE_END
     W = depth or STONE_WIDTH
@@ -2683,7 +2725,9 @@ def bridge_stone_end(g, rng, detail="high", length=None, depth=None, ruined=Fals
     with tinted(g, rubble):
         for sign in (-1, 1):
             y = sign * hw
-            _face_x_z(g, y, 0.0, L, BRIDGE_BOTTOM, BRIDGE_BOTTOM, 0.0, road(L), "Rubble", sign)
+            _face_x_z(
+                g, y, 0.0, L, BRIDGE_BOTTOM, BRIDGE_BOTTOM, 0.0, road(L), "Rubble", sign
+            )
         # Parapets (sloping boxes as quads).
         for sign in (-1, 1):
             for y0, y1 in ((hw - 0.44, hw),):
@@ -2691,38 +2735,95 @@ def bridge_stone_end(g, rng, detail="high", length=None, depth=None, ruined=Fals
                 lo, hi = min(ya, yb), max(ya, yb)
                 # Outer and inner faces.
                 for y, s in ((hi, 1), (lo, -1)):
-                    _face_x_z(g, y, 0.0, L, 0.0, road(L), 0.9, road(L) + 0.9, "Rubble", s)
+                    _face_x_z(
+                        g, y, 0.0, L, 0.0, road(L), 0.9, road(L) + 0.9, "Rubble", s
+                    )
                 # Top.
-                g.poly([(0.0, lo, 0.9), (L, lo, road(L) + 0.9), (L, hi, road(L) + 0.9), (0.0, hi, 0.9)][::-1], "Rubble")
+                g.poly(
+                    [
+                        (0.0, lo, 0.9),
+                        (L, lo, road(L) + 0.9),
+                        (L, hi, road(L) + 0.9),
+                        (0.0, hi, 0.9),
+                    ][::-1],
+                    "Rubble",
+                )
         # Wing wall face at the bank end (x = L), below the road.
-        g.poly([(L, -hw, BRIDGE_BOTTOM), (L, hw, BRIDGE_BOTTOM), (L, hw, road(L)), (L, -hw, road(L))], "Rubble")
+        g.poly(
+            [
+                (L, -hw, BRIDGE_BOTTOM),
+                (L, hw, BRIDGE_BOTTOM),
+                (L, hw, road(L)),
+                (L, -hw, road(L)),
+            ],
+            "Rubble",
+        )
     with tinted(g, stone):
         for sign in (-1, 1):
             yc = sign * (hw - 0.22)
             # Coping along the slope.
             lo, hi = yc - 0.28, yc + 0.28
-            g.poly([(0.0, lo, 1.04), (L, lo, road(L) + 1.04), (L, hi, road(L) + 1.04), (0.0, hi, 1.04)][::-1], "Ashlar")
+            g.poly(
+                [
+                    (0.0, lo, 1.04),
+                    (L, lo, road(L) + 1.04),
+                    (L, hi, road(L) + 1.04),
+                    (0.0, hi, 1.04),
+                ][::-1],
+                "Ashlar",
+            )
             for y, s in ((hi, 1), (lo, -1)):
-                _face_x_z(g, y, 0.0, L, 0.9, road(L) + 0.9, 1.04, road(L) + 1.04, "Ashlar", s)
+                _face_x_z(
+                    g, y, 0.0, L, 0.9, road(L) + 0.9, 1.04, road(L) + 1.04, "Ashlar", s
+                )
             # End post.
             k.box(g, (L - 0.3, yc, road(L) + 0.7), (0.6, 0.62, 1.4), "Ashlar")
             k.box(g, (L - 0.3, yc, road(L) + 1.47), (0.72, 0.74, 0.14), "Ashlar")
             # String course.
-            _face_x_z(g, sign * (hw + 0.05), 0.0, L, -0.24, road(L) - 0.24, 0.0, road(L), "Ashlar", sign)
+            _face_x_z(
+                g,
+                sign * (hw + 0.05),
+                0.0,
+                L,
+                -0.24,
+                road(L) - 0.24,
+                0.0,
+                road(L),
+                "Ashlar",
+                sign,
+            )
     with tinted(g, (0.62, 0.6, 0.56)):
-        g.poly([(0.0, -hw + 0.44, 0.0), (L, -hw + 0.44, road(L)), (L, hw - 0.44, road(L)), (0.0, hw - 0.44, 0.0)], "Rubble")
+        g.poly(
+            [
+                (0.0, -hw + 0.44, 0.0),
+                (L, -hw + 0.44, road(L)),
+                (L, hw - 0.44, road(L)),
+                (0.0, hw - 0.44, 0.0),
+            ],
+            "Rubble",
+        )
     return {"height": 1.5 - BRIDGE_BOTTOM, "length": L, "depth": W}
 
 
 def _rail(g, x0, x1, z0, z1, y, tint):
     """Handrail and mid rail from x0 to x1 (sloping from z0 to z1), posts at both ends."""
     for h in (0.5, 0.98):
-        k.beam(g, (x0, y, z0 + h), (x1, y, z1 + h), 0.1, 0.1, "Timber", (0.0, 1.0 if y > 0 else -1.0, 0.0), color=tint)
+        k.beam(
+            g,
+            (x0, y, z0 + h),
+            (x1, y, z1 + h),
+            0.1,
+            0.1,
+            "Timber",
+            (0.0, 1.0 if y > 0 else -1.0, 0.0),
+            color=tint,
+        )
 
 
 def bridge_wood_bay(g, rng, detail="high", length=None, depth=None, ruined=False):
     """One bay of a wooden bridge: plank deck on stringers, a pile bent (three or four piles, cap
-    beam, cross braces) at the +X end, railings with posts."""
+    beam, cross braces) at the +X end, railings with posts.
+    """
     g.ground_ao = False
     L = length or WOOD_BAY
     W = depth or WOOD_WIDTH
@@ -2738,14 +2839,40 @@ def bridge_wood_bay(g, rng, detail="high", length=None, depth=None, ruined=False
         y = -hw + 0.4 + (W - 0.8) * i / (count - 1)
         k.box(g, (0.0, y, -0.4), (L, 0.26, 0.4), "Timber", bottom=True, color=tint)
     # Pile bent at +X.
-    piles = [-hw + 0.35, 0.0, hw - 0.35] if W <= 4.5 else [-hw + 0.35, -hw / 3, hw / 3, hw - 0.35]
+    piles = (
+        [-hw + 0.35, 0.0, hw - 0.35]
+        if W <= 4.5
+        else [-hw + 0.35, -hw / 3, hw / 3, hw - 0.35]
+    )
     for y in piles:
-        k.box(g, (hl - 0.2, y, (BRIDGE_BOTTOM - 0.6) / 2), (0.32, 0.32, -BRIDGE_BOTTOM - 0.6), "Timber", color=tint)
-    k.box(g, (hl - 0.2, 0.0, -0.75), (0.36, W + 0.3, 0.3), "Timber", bottom=True, color=tint)
+        k.box(
+            g,
+            (hl - 0.2, y, (BRIDGE_BOTTOM - 0.6) / 2),
+            (0.32, 0.32, -BRIDGE_BOTTOM - 0.6),
+            "Timber",
+            color=tint,
+        )
+    k.box(
+        g,
+        (hl - 0.2, 0.0, -0.75),
+        (0.36, W + 0.3, 0.3),
+        "Timber",
+        bottom=True,
+        color=tint,
+    )
     # Cross braces between the outer piles.
     xb = hl - 0.02
     for ya, yb in ((-hw + 0.35, hw - 0.35), (hw - 0.35, -hw + 0.35)):
-        k.beam(g, (xb, ya, -0.9), (xb, yb, -3.2), 0.14, 0.12, "Timber", (1.0, 0.0, 0.0), color=tint)
+        k.beam(
+            g,
+            (xb, ya, -0.9),
+            (xb, yb, -3.2),
+            0.14,
+            0.12,
+            "Timber",
+            (1.0, 0.0, 0.0),
+            color=tint,
+        )
     # Railing: posts at both ends and mid-bay, rails.
     for sign in (-1, 1):
         y = sign * (hw - 0.08)
@@ -2757,7 +2884,8 @@ def bridge_wood_bay(g, rng, detail="high", length=None, depth=None, ruined=False
 
 def bridge_wood_end(g, rng, detail="high", length=None, depth=None, ruined=False):
     """Landing of a wooden bridge: a plank ramp from the deck (x = 0) down to the bank (x = +5)
-    on a sill beam and a pile bent, sloping railings ending on stout posts."""
+    on a sill beam and a pile bent, sloping railings ending on stout posts.
+    """
     g.ground_ao = False
     L = length or BRIDGE_END
     W = depth or WOOD_WIDTH
@@ -2771,21 +2899,716 @@ def bridge_wood_end(g, rng, detail="high", length=None, depth=None, ruined=False
 
     with tinted(g, planks):
         # Sloping deck (top and bottom).
-        g.poly([(0.0, -hw, 0.0), (L, -hw, road(L)), (L, hw, road(L)), (0.0, hw, 0.0)], "Planks")
-        g.poly([(0.0, -hw, -0.2), (0.0, hw, -0.2), (L, hw, road(L) - 0.2), (L, -hw, road(L) - 0.2)], "Planks")
+        g.poly(
+            [(0.0, -hw, 0.0), (L, -hw, road(L)), (L, hw, road(L)), (0.0, hw, 0.0)],
+            "Planks",
+        )
+        g.poly(
+            [
+                (0.0, -hw, -0.2),
+                (0.0, hw, -0.2),
+                (L, hw, road(L) - 0.2),
+                (L, -hw, road(L) - 0.2),
+            ],
+            "Planks",
+        )
         for sign in (-1, 1):
-            _face_x_z(g, sign * hw, 0.0, L, -0.2, road(L) - 0.2, 0.0, road(L), "Planks", sign)
+            _face_x_z(
+                g, sign * hw, 0.0, L, -0.2, road(L) - 0.2, 0.0, road(L), "Planks", sign
+            )
     # Pile bent at mid-ramp and a sill on the bank.
     for y in (-hw + 0.35, hw - 0.35):
-        k.box(g, (L * 0.45, y, (BRIDGE_BOTTOM + road(L * 0.45) - 0.3) / 2), (0.3, 0.3, road(L * 0.45) - 0.3 - BRIDGE_BOTTOM), "Timber", color=tint)
-    k.box(g, (L * 0.45, 0.0, road(L * 0.45) - 0.4), (0.34, W + 0.2, 0.26), "Timber", bottom=True, color=tint)
-    k.box(g, (L - 0.3, 0.0, road(L) - 0.45), (0.5, W + 0.4, 0.5), "Timber", bottom=True, color=tint)
+        k.box(
+            g,
+            (L * 0.45, y, (BRIDGE_BOTTOM + road(L * 0.45) - 0.3) / 2),
+            (0.3, 0.3, road(L * 0.45) - 0.3 - BRIDGE_BOTTOM),
+            "Timber",
+            color=tint,
+        )
+    k.box(
+        g,
+        (L * 0.45, 0.0, road(L * 0.45) - 0.4),
+        (0.34, W + 0.2, 0.26),
+        "Timber",
+        bottom=True,
+        color=tint,
+    )
+    k.box(
+        g,
+        (L - 0.3, 0.0, road(L) - 0.45),
+        (0.5, W + 0.4, 0.5),
+        "Timber",
+        bottom=True,
+        color=tint,
+    )
     for sign in (-1, 1):
         y = sign * (hw - 0.08)
-        k.box(g, (L * 0.5, y, road(L * 0.5) + 0.5), (0.14, 0.14, 1.0), "Timber", color=tint)
+        k.box(
+            g,
+            (L * 0.5, y, road(L * 0.5) + 0.5),
+            (0.14, 0.14, 1.0),
+            "Timber",
+            color=tint,
+        )
         k.box(g, (L - 0.15, y, road(L) + 0.6), (0.22, 0.22, 1.2), "Timber", color=tint)
         _rail(g, 0.0, L, 0.0, road(L), y, tint)
     return {"height": 1.2 - BRIDGE_BOTTOM, "length": L, "depth": W}
+
+
+# --- battlefield decor (lot EP6) --------------------------------------------------------------
+# Villages and battlefield dressing beyond the BR1/BR2 street furniture: watermill, camp tents
+# and pavilions, hay, a baggage wagon, campfires, a churchyard wall and lychgate, graves and a
+# vine row. Same frame as the buildings above unless noted.
+
+
+def _mill_wheel(g, rng, x, y, radius, detail):
+    """Undershot mill wheel, open construction (see-through): two thin felloe rims (short timber arcs), 8 spokes per rim to a central hub, radial paddle blades between the rims, a stub axle through the gable wall."""
+    width = 0.55
+    n_paddle = 14 if detail == "high" else 9
+    n_rim = 16 if detail == "high" else 10
+    hub_r = 0.14
+    rim_r = 0.045
+    hub_sides = 10 if detail == "high" else 7
+    # Hub.
+    k.tube(
+        g,
+        (x, y - width / 2, radius),
+        (x, y + width / 2, radius),
+        hub_r,
+        "Timber",
+        hub_sides,
+        color=TIMBER_TINTS[0],
+    )
+    for sy in (-width / 2, width / 2):
+        # Rim: a ring of short curved (straight-segment) timber arcs, open in the middle.
+        pts = [
+            (x + math.cos(a) * radius, y + sy, radius + math.sin(a) * radius)
+            for a in (2 * math.pi * i / n_rim for i in range(n_rim))
+        ]
+        for p0, p1 in zip(pts, pts[1:] + pts[:1], strict=False):
+            k.tube(g, p0, p1, rim_r, "Timber", 5, caps=False, color=TIMBER_TINTS[1])
+        # Spokes: hub to rim, one per rim (8 each side).
+        for i in range(8):
+            a = 2 * math.pi * i / 8
+            p1 = (x + math.cos(a) * radius, y + sy, radius + math.sin(a) * radius)
+            k.beam(
+                g,
+                (x, y + sy, radius),
+                p1,
+                0.05,
+                0.05,
+                "Timber",
+                (0.0, 1.0, 0.0),
+                color=TIMBER_TINTS[0],
+            )
+    # Paddle blades between the two rims.
+    half_t = math.pi * radius / n_paddle * 0.4
+    out0, out1 = -0.03, 0.2
+    for i in range(n_paddle):
+        a = 2 * math.pi * i / n_paddle
+        tx, tz = -math.sin(a), math.cos(a)
+        ox, oz = math.cos(a), math.sin(a)
+        cx, cz = x + ox * radius, radius + oz * radius
+
+        def pt(sy, dt, do, cx=cx, cz=cz, tx=tx, tz=tz, ox=ox, oz=oz):
+            return (
+                cx + tx * dt + ox * do,
+                y + sy,
+                cz + tz * dt + oz * do,
+            )
+
+        pA, pB, pC, pD = (
+            pt(-width / 2, half_t, out0),
+            pt(-width / 2, -half_t, out0),
+            pt(-width / 2, -half_t, out1),
+            pt(-width / 2, half_t, out1),
+        )
+        pA2, pB2, pC2, pD2 = (
+            pt(width / 2, half_t, out0),
+            pt(width / 2, -half_t, out0),
+            pt(width / 2, -half_t, out1),
+            pt(width / 2, half_t, out1),
+        )
+        g.quad(pA, pB, pC, pD, "Planks", color=TIMBER_TINTS[2])
+        g.quad(pD2, pC2, pB2, pA2, "Planks", color=TIMBER_TINTS[2])
+        g.quad(pD, pC, pC2, pD2, "Planks", color=TIMBER_TINTS[2], occlude=False)
+    k.tube(
+        g,
+        (x, y + width / 2 - 0.05, radius),
+        (x, y + width / 2 + 0.6, radius),
+        0.13,
+        "Timber",
+        8,
+        color=TIMBER_TINTS[0],
+    )
+
+
+def watermill(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Water mill: miller's house (stone or half-timbered), an undershot wheel mounted against the -Y front wall near one corner (the water side, matching the kit's front convention), a mill race below.
+
+    ``length``/``depth`` size the house alone (world X / world Y); the wheel projects further
+    towards -Y (see the ``wheel_offset`` metric). Deviation from a literal reading of "pignon"
+    (gable): a true gable-end wheel would need the ridge along world Y, giving a ~7 x 11 footprint
+    instead of the requested 11 x 7 (length along X); this build keeps the requested footprint and
+    the kit's universal -Y-front convention, and mounts the wheel at a front corner instead (see
+    the wip note and final report).
+    """
+    ridge = length or rng.uniform(10.0, 12.0)  # world X (front width)
+    gw = depth or rng.uniform(6.0, 7.0)  # world Y (front-to-back depth)
+    stone = rng.random() < 0.5
+    roof = "RoofTile" if stone else pick(rng, ["Thatch", "RoofFlat"])
+    st = Style(
+        wall="Rubble" if stone else "Plaster",
+        frame=None if stone else pick(rng, ["rural", "close"]),
+        roof=roof,
+        shape="gable",
+        pitch=rng.uniform(44, 50),
+        floors=1,
+        shutters=0.5,
+        chimneys=1,
+        wall_tint=pick(rng, PLASTER_TINTS),
+        timber_tint=pick(rng, TIMBER_TINTS),
+        roof_tint=pick(rng, ROOF_TINTS[roof]),
+        stone_tint=pick(rng, STONE_TINTS),
+        extras={"vent": True},
+        ruined=ruined,
+    )
+    wheel_r = 1.5
+    info = house(g, rng, ridge, gw, st, detail)
+    if not ruined:
+        wx = -ridge / 2 + gw * 0.9
+        wy = -gw / 2 - wheel_r - 0.15
+        _mill_wheel(g, rng, wx, wy, wheel_r, detail)
+        k.box(g, (wx, wy - 1.0, -0.4), (0.9, 2.4, 0.8), "Planks", color=TIMBER_TINTS[1])
+    out = {"height": info["height"], "length": info["length"], "depth": info["depth"]}
+    if not ruined:
+        out["wheel_offset"] = wheel_r + 0.3
+    return out
+
+
+def tent(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Ridge tent: canvas on a ridge pole and two masts, guy ropes and pegs, front flaps tied back; undyed, ochre or striped."""
+    L = length or rng.uniform(3.6, 4.4)
+    D = depth or rng.uniform(2.6, 3.2)
+    H = rng.uniform(2.3, 2.7)
+    variant = rng.randrange(3)
+    tint = [(0.92, 0.87, 0.76), (0.82, 0.55, 0.28), (0.85, 0.8, 0.7)][variant]
+    stripe = variant == 2
+    strips = 8 if detail == "high" else 5
+    for i in range(strips):
+        x0 = -L / 2 + L * i / strips
+        x1 = -L / 2 + L * (i + 1) / strips
+        col = (0.72, 0.14, 0.12) if stripe and i % 2 == 0 else tint
+        k.prism_x(g, x0, x1, 0.0, 0.0, D / 2, H, "Canvas", color=col)
+    k.beam(
+        g,
+        (-L / 2 - 0.15, 0.0, H),
+        (L / 2 + 0.15, 0.0, H),
+        0.09,
+        0.09,
+        "Timber",
+        (0, 0, 1),
+        color=TIMBER_TINTS[0],
+    )
+    for sx in (-1, 1):
+        k.beam(
+            g,
+            (sx * (L / 2 - 0.05), 0.0, H / 2),
+            (sx * (L / 2 - 0.05), 0.0, H + 0.12),
+            0.08,
+            0.08,
+            "Timber",
+            (sx, 0, 0),
+            color=TIMBER_TINTS[0],
+        )
+    for sy in (-1, 1):
+        p0 = (-L / 2, sy * D / 2, 0.0)
+        p1 = (-L / 2 - 0.5, sy * (D / 2 + 0.15), 0.05)
+        p2 = (-L / 2 - 0.3, sy * (D / 2 - 0.05), H * 0.55)
+        g.poly([p0, p1, p2], "Canvas", color=tint)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            base = (sx * L * 0.4, sy * (D / 2 + 0.05), H * 0.35)
+            peg = (sx * L * 0.4 + sx * 0.7, sy * (D / 2 + 0.9), 0.0)
+            k.tube(g, base, peg, 0.015, "Timber", 4, color=(0.5, 0.42, 0.3))
+            k.box(g, peg, (0.05, 0.05, 0.18), "Timber", color=TIMBER_TINTS[3])
+    return {"height": H, "length": L, "depth": D + 1.9}
+
+
+def pavilion(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Round knight's pavilion: cylindrical canvas wall, conical roof, scalloped valance, mast and banner; undyed, red/white or blue/white stripes."""
+    R = (length or rng.uniform(5.2, 6.0)) / 2
+    wall_h = rng.uniform(1.9, 2.3)
+    roof_h = rng.uniform(2.4, 2.9)
+    variant = rng.randrange(3)
+    sides = 16 if detail == "high" else 10
+    if variant == 0:
+        tint_a = tint_b = (0.9, 0.85, 0.74)
+    elif variant == 1:
+        tint_a, tint_b = (0.85, 0.12, 0.1), (0.93, 0.9, 0.84)
+    else:
+        tint_a, tint_b = (0.1, 0.2, 0.55), (0.93, 0.9, 0.84)
+    for i in range(sides):
+        a0, a1 = 2 * math.pi * i / sides, 2 * math.pi * (i + 1) / sides
+        col = tint_a if i % 2 == 0 else tint_b
+        p0 = (math.cos(a0) * R, math.sin(a0) * R, 0.0)
+        p1 = (math.cos(a1) * R, math.sin(a1) * R, 0.0)
+        p2 = (math.cos(a1) * R, math.sin(a1) * R, wall_h)
+        p3 = (math.cos(a0) * R, math.sin(a0) * R, wall_h)
+        g.poly([p0, p1, p2, p3], "Canvas", color=col)
+    apex = (0.0, 0.0, wall_h + roof_h)
+    for i in range(sides):
+        a0, a1 = 2 * math.pi * i / sides, 2 * math.pi * (i + 1) / sides
+        col = tint_a if i % 2 == 0 else tint_b
+        p0 = (math.cos(a0) * (R + 0.08), math.sin(a0) * (R + 0.08), wall_h)
+        p1 = (math.cos(a1) * (R + 0.08), math.sin(a1) * (R + 0.08), wall_h)
+        g.poly([p0, p1, apex], "Canvas", occlude=False, color=col)
+    if detail == "high":
+        for i in range(sides):
+            a0, a1 = 2 * math.pi * i / sides, 2 * math.pi * (i + 1) / sides
+            a = (a0 + a1) / 2
+            dip = (math.cos(a) * (R + 0.05), math.sin(a) * (R + 0.05), wall_h - 0.25)
+            p0 = (math.cos(a0) * (R + 0.05), math.sin(a0) * (R + 0.05), wall_h)
+            p1 = (math.cos(a1) * (R + 0.05), math.sin(a1) * (R + 0.05), wall_h)
+            g.poly([p0, p1, dip], "Canvas", color=tint_a)
+    k.beam(
+        g,
+        (0, 0, 0),
+        (0, 0, wall_h + roof_h + 0.6),
+        0.09,
+        0.09,
+        "Timber",
+        (1, 0, 0),
+        color=TIMBER_TINTS[0],
+    )
+    g.quad(
+        (0.02, 0.0, wall_h + roof_h + 0.6),
+        (0.02, 0.0, wall_h + roof_h + 0.3),
+        (0.55, 0.0, wall_h + roof_h + 0.35),
+        (0.4, 0.0, wall_h + roof_h + 0.55),
+        "Banner",
+        occlude=False,
+    )
+    return {"height": wall_h + roof_h + 0.6, "length": 2 * R, "depth": 2 * R}
+
+
+def haystack(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Round beehive rick, rectangular thatched gerbier, or a small round stack."""
+    variant = rng.randrange(3)
+    hay = (0.86, 0.72, 0.32)
+    sides = 12 if detail == "high" else 8
+    if variant == 0:
+        R = rng.uniform(1.9, 2.2)
+        H = rng.uniform(3.6, 4.2)
+        bands = 5
+        r_prev, z = R, 0.0
+        for i in range(bands):
+            t = (i + 1) / bands
+            r_next = R * (1.0 - t) ** 1.3
+            h = H / bands
+            k.cylinder(
+                g,
+                (0, 0, z),
+                r_prev,
+                h,
+                "Thatch",
+                sides=sides,
+                radius_top=max(r_next, 0.05),
+                top=(i == bands - 1),
+                color=hay,
+            )
+            r_prev, z = r_next, z + h
+        k.tube(
+            g,
+            (0, 0, z - 0.2),
+            (0, 0, z + 0.6),
+            0.05,
+            "Timber",
+            6,
+            color=TIMBER_TINTS[0],
+        )
+        return {"height": z + 0.6, "length": 2 * R, "depth": 2 * R}
+    if variant == 1:
+        L = length or rng.uniform(3.5, 4.5)
+        D = depth or rng.uniform(2.2, 2.8)
+        wall_h = rng.uniform(2.2, 2.8)
+        k.box(g, (0, 0, wall_h / 2), (L, D, wall_h), "Thatch", color=hay)
+        st = Style(roof="Thatch", pitch=48, roof_tint=hay)
+        zr = roof_gable(g, L, D, wall_h, st, detail, overhang=0.15, gable_over=0.1)
+        return {"height": zr, "length": L, "depth": D}
+    R = rng.uniform(1.1, 1.4)
+    H = rng.uniform(1.6, 2.0)
+    k.cylinder(
+        g, (0, 0, 0), R, H * 0.6, "Thatch", sides=sides, radius_top=R * 0.55, color=hay
+    )
+    k.cylinder(
+        g,
+        (0, 0, H * 0.6),
+        R * 0.55,
+        H * 0.4,
+        "Thatch",
+        sides=sides,
+        radius_top=0.05,
+        color=hay,
+    )
+    return {"height": H, "length": 2 * R, "depth": 2 * R}
+
+
+def wagon(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Four-wheeled baggage wagon: canvas tilt on arcs, or open loaded with barrels or crates and sacks; timon resting on the ground towards -X."""
+    bed_l, bed_w, bed_z = 3.0, 1.5, 1.0
+    x0 = 0.3
+    wood = pick(rng, TIMBER_TINTS)
+    k.box(g, (x0, 0.0, bed_z), (bed_l, bed_w, 0.09), "Planks", color=wood, bottom=True)
+    for sy in (-1, 1):
+        k.box(
+            g,
+            (x0, sy * (bed_w / 2 - 0.03), bed_z + 0.24),
+            (bed_l, 0.06, 0.4),
+            "Planks",
+            color=wood,
+        )
+        k.beam(
+            g,
+            (x0 + bed_l / 2 - 0.2, sy * 0.5, bed_z - 0.1),
+            (x0 - bed_l / 2 - 2.3, sy * 0.4, 0.06),
+            0.1,
+            0.1,
+            "Timber",
+            (0.0, 0.0, 1.0),
+            color=TIMBER_TINTS[1],
+        )
+    for sx, sy in ((-1, -1), (-1, 1), (1, -1), (1, 1)):
+        _wheel(
+            g,
+            x0 + sx * (bed_l / 2 - 0.35),
+            sy * (bed_w / 2 + 0.14),
+            0.66 if sx > 0 else 0.5,
+            0.1,
+            detail,
+        )
+    variant = rng.randrange(3)
+    top = bed_z + 0.05
+    if variant == 0:
+        n_hoop = 4
+        cloth = pick(rng, CLOTH_TINTS)
+        xs = [-bed_l / 2 + 0.3 + bed_l * i / (n_hoop - 1) for i in range(n_hoop)]
+        for hx in xs:
+            k.beam(
+                g,
+                (x0 + hx, -bed_w / 2, top + 0.05),
+                (x0 + hx, 0.0, top + 1.1),
+                0.04,
+                0.04,
+                "Timber",
+                (1, 0, 0),
+                color=TIMBER_TINTS[0],
+            )
+            k.beam(
+                g,
+                (x0 + hx, 0.0, top + 1.1),
+                (x0 + hx, bed_w / 2, top + 0.05),
+                0.04,
+                0.04,
+                "Timber",
+                (1, 0, 0),
+                color=TIMBER_TINTS[0],
+            )
+        for i in range(n_hoop - 1):
+            x_a, x_b = xs[i], xs[i + 1]
+            for sign in (-1, 1):
+                pts = [
+                    (x0 + x_a, sign * bed_w / 2 * 0.98, top + 0.05),
+                    (x0 + x_b, sign * bed_w / 2 * 0.98, top + 0.05),
+                    (x0 + x_b, sign * bed_w * 0.15, top + 1.08),
+                    (x0 + x_a, sign * bed_w * 0.15, top + 1.08),
+                ]
+                if sign > 0:
+                    pts.reverse()
+                g.poly(pts, "Canvas", color=cloth)
+    elif variant == 1:
+        for bx in (-0.9, -0.2, 0.5, 1.2):
+            _barrel(g, x0 + bx, rng.uniform(-0.25, 0.25), top, 0.3, 0.85, detail)
+    else:
+        for i in range(4):
+            _crate(
+                g,
+                (x0 - 1.0 + i * 0.7, rng.uniform(-0.3, 0.3), top + 0.22),
+                (0.55, 0.45, 0.44),
+                rng.uniform(-0.2, 0.2),
+            )
+        for i in range(3):
+            _sack(g, rng, x0 - 0.6 + i * 0.6, bed_w / 2 - 0.35, top)
+    return {"height": bed_z + 1.3, "length": bed_l + 2.6, "depth": bed_w + 0.5}
+
+
+def campfire(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Camp fire: ring of stones and logs, with a tripod and cauldron or a spit."""
+    R = 0.8
+    n = 8 if detail == "high" else 6
+    for i in range(n):
+        a = 2 * math.pi * i / n + rng.uniform(-0.05, 0.05)
+        r = R * rng.uniform(0.92, 1.05)
+        k.cylinder(
+            g,
+            (math.cos(a) * r, math.sin(a) * r, 0.0),
+            0.13,
+            0.17,
+            "Rubble",
+            sides=5,
+            color=pick(rng, STONE_TINTS),
+        )
+    for _ in range(4):
+        a = rng.uniform(0, 2 * math.pi)
+        length_ = rng.uniform(0.5, 0.7)
+        p0 = (math.cos(a) * 0.1, math.sin(a) * 0.1, 0.05)
+        p1 = (math.cos(a) * length_, math.sin(a) * length_, 0.1)
+        k.tube(g, p0, p1, 0.045, "Timber", 5, color=pick(rng, TIMBER_TINTS))
+    if rng.randrange(2) == 0:
+        for a in (0.6, 2.6, 4.6):
+            k.beam(
+                g,
+                (math.cos(a) * 0.6, math.sin(a) * 0.6, 0.0),
+                (0.0, 0.0, 1.1),
+                0.05,
+                0.05,
+                "Timber",
+                (math.cos(a), math.sin(a), 0),
+                color=TIMBER_TINTS[0],
+            )
+        k.tube(g, (0, 0, 0.55), (0, 0, 0.85), 0.24, "Iron", 8, caps=False)
+        k.cylinder(g, (0, 0, 0.35), 0.24, 0.2, "Iron", sides=8, radius_top=0.2)
+    else:
+        for sx in (-1, 1):
+            k.beam(
+                g,
+                (sx * 0.65, 0.0, 0.0),
+                (sx * 0.15, 0.0, 0.55),
+                0.05,
+                0.05,
+                "Timber",
+                (0, 1, 0),
+                color=TIMBER_TINTS[0],
+            )
+        k.tube(g, (-0.6, 0.0, 0.5), (0.6, 0.0, 0.5), 0.02, "Iron", 6, caps=False)
+    return {"height": 1.1, "length": 1.6, "depth": 1.6}
+
+
+def wall_run(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Dry-stone churchyard wall with coping, a 10 m run along X to butt end to end."""
+    L = length or 10.0
+    D = depth or 0.6
+    H = 1.3
+    tint = pick(rng, STONE_TINTS)
+    k.box(g, (0, 0, H / 2), (L, D, H), "Rubble", color=tint)
+    if detail == "high":
+        n = max(1, int(L / 0.9))
+        for i in range(n):
+            x = -L / 2 + 0.45 + i * (L / n)
+            k.box(
+                g,
+                (x, 0.0, H + 0.06),
+                (0.55, D + 0.1, 0.12),
+                "Ashlar",
+                rng.uniform(-0.04, 0.04),
+                color=tint,
+            )
+    else:
+        k.box(g, (0, 0, H + 0.06), (L, D + 0.08, 0.12), "Ashlar", color=tint)
+    return {"height": H + 0.12, "length": L, "depth": D}
+
+
+def lychgate(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Covered lychgate: four corner posts, wall plates, a low gate, a small tiled roof."""
+    L = length or 3.0
+    D = depth or 2.5
+    H = 2.4
+    wood = pick(rng, TIMBER_TINTS[:2])
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            k.box(
+                g,
+                (sx * (L / 2 - 0.15), sy * (D / 2 - 0.15), H / 2),
+                (0.18, 0.18, H),
+                "Timber",
+                grain=True,
+                color=wood,
+            )
+    for sy in (-1, 1):
+        k.beam(
+            g,
+            (-L / 2 + 0.15, sy * (D / 2 - 0.15), H - 0.1),
+            (L / 2 - 0.15, sy * (D / 2 - 0.15), H - 0.1),
+            0.14,
+            0.14,
+            "Timber",
+            (0, 1 if sy > 0 else -1, 0),
+            color=wood,
+        )
+    k.beam(
+        g,
+        (0, -D / 2 + 0.15, H - 0.1),
+        (0, D / 2 - 0.15, H - 0.1),
+        0.14,
+        0.14,
+        "Timber",
+        (0, 0, 1),
+        color=wood,
+    )
+    for h in (0.5, 0.95):
+        k.beam(
+            g,
+            (-L / 2 + 0.15, -D / 2 + 0.15, h),
+            (L / 2 - 0.15, -D / 2 + 0.15, h),
+            0.06,
+            0.06,
+            "Timber",
+            (0, -1, 0),
+            color=wood,
+        )
+    st = Style(roof="RoofTile", pitch=42, roof_tint=pick(rng, ROOF_TINTS["RoofTile"]))
+    zr = roof_gable(g, L, D, H, st, detail, overhang=0.3, gable_over=0.2)
+    return {"height": zr, "length": L, "depth": D}
+
+
+def graves(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Scatter of graves in a churchyard patch: wooden and stone crosses, slabs, turf mounds."""
+    L = length or 6.0
+    D = depth or 4.0
+    count = rng.randint(6, 9)
+    placed = []
+    tries = 0
+    while len(placed) < count and tries < count * 6:
+        tries += 1
+        x = rng.uniform(-L / 2 + 0.5, L / 2 - 0.5)
+        y = rng.uniform(-D / 2 + 0.5, D / 2 - 0.5)
+        if all((x - px) ** 2 + (y - py) ** 2 > 0.7**2 for px, py in placed):
+            placed.append((x, y))
+            kind = rng.randrange(4)
+            yaw = rng.uniform(-0.3, 0.3)
+            if kind == 0:
+                d = (math.cos(yaw), math.sin(yaw), 0.0)
+                k.beam(
+                    g,
+                    (x, y, 0.0),
+                    (x, y, 0.75),
+                    0.07,
+                    0.05,
+                    "Timber",
+                    d,
+                    color=TIMBER_TINTS[1],
+                )
+                k.beam(
+                    g,
+                    (x - 0.22 * d[0], y - 0.22 * d[1], 0.5),
+                    (x + 0.22 * d[0], y + 0.22 * d[1], 0.5),
+                    0.05,
+                    0.04,
+                    "Timber",
+                    (0, 0, 1),
+                    color=TIMBER_TINTS[1],
+                )
+            elif kind == 1:
+                k.box(
+                    g,
+                    (x, y, 0.35),
+                    (0.14, 0.35, 0.7),
+                    "Ashlar",
+                    yaw,
+                    color=pick(rng, STONE_TINTS),
+                )
+            elif kind == 2:
+                k.box(
+                    g,
+                    (x, y, 0.06),
+                    (0.65, 1.8, 0.12),
+                    "Ashlar",
+                    yaw,
+                    color=pick(rng, STONE_TINTS),
+                )
+            else:
+                k.box(
+                    g,
+                    (x, y, 0.1),
+                    (0.7, 1.8, 0.2),
+                    "Rubble",
+                    yaw,
+                    color=(0.42, 0.4, 0.28),
+                )
+    return {"height": 0.8, "length": L, "depth": D}
+
+
+def vine_row(g, rng, detail="high", length=None, depth=None, ruined=False):
+    """Row of vines on stakes and a wire, 10 m along X: leafy with grape bunches, or bare (winter) with just the stakes, ceps and wire."""
+    L = length or 10.0
+    H = 1.4
+    n = max(3, int(L / 1.6))
+    leafy = rng.randrange(2) == 0
+    wood = TIMBER_TINTS[3]
+    for i in range(n):
+        x = -L / 2 + (i + 0.5) * (L / n)
+        jitter = rng.uniform(-0.05, 0.05)
+        k.beam(
+            g,
+            (x + jitter, 0.0, 0.0),
+            (x + jitter, 0.0, H),
+            0.045,
+            0.045,
+            "Timber",
+            (1, 0, 0),
+            color=wood,
+        )
+        stem_h = rng.uniform(0.25, 0.5)
+        twist = rng.uniform(-0.3, 0.3)
+        k.tube(
+            g,
+            (x, 0.02, 0.0),
+            (x + twist, -0.05, stem_h),
+            0.03,
+            "Timber",
+            5,
+            color=(0.32, 0.24, 0.14),
+        )
+        k.tube(
+            g,
+            (x + twist, -0.05, stem_h),
+            (x + twist * 0.4, 0.0, H * 0.7),
+            0.02,
+            "Timber",
+            5,
+            color=(0.32, 0.24, 0.14),
+        )
+    for row_h in (0.55, 1.05, H - 0.05):
+        k.tube(
+            g, (-L / 2, 0.0, row_h), (L / 2, 0.0, row_h), 0.008, "Iron", 4, caps=False
+        )
+    if leafy:
+        for i in range(n):
+            x0 = -L / 2 + i * (L / n)
+            x1 = -L / 2 + (i + 1) * (L / n)
+            z0 = 0.5 + rng.uniform(-0.06, 0.06)
+            z1 = H + 0.15 + rng.uniform(-0.06, 0.06)
+            for sign in (-1, 1):
+                pts = [
+                    (x0, sign * 0.02, z0),
+                    (x1, sign * 0.02, z0),
+                    (x1, sign * 0.32, z1),
+                    (x0, sign * 0.32, z1),
+                ]
+                if sign > 0:
+                    pts.reverse()
+                g.poly(pts, "Canvas", color=(0.5, 1.0, 0.3))
+            if rng.random() < 0.4:
+                k.cylinder(
+                    g,
+                    (rng.uniform(x0, x1), rng.uniform(-0.1, 0.1), z0 + 0.1),
+                    0.05,
+                    0.12,
+                    "Planks",
+                    sides=5,
+                    color=(0.28, 0.14, 0.32),
+                )
+    return {"height": H, "length": L, "depth": 0.8}
 
 
 RECIPES = {
@@ -2809,6 +3632,16 @@ RECIPES = {
     "bridge_stone_end": bridge_stone_end,
     "bridge_wood_bay": bridge_wood_bay,
     "bridge_wood_end": bridge_wood_end,
+    "watermill": watermill,
+    "tent": tent,
+    "pavilion": pavilion,
+    "haystack": haystack,
+    "wagon": wagon,
+    "campfire": campfire,
+    "wall_run": wall_run,
+    "lychgate": lychgate,
+    "graves": graves,
+    "vine_row": vine_row,
 }
 
 

@@ -31,6 +31,9 @@ uniform sampler2D splat_b : filter_linear, repeat_disable;
 uniform vec4 splat_rect = vec4(-400.0, -400.0, 2000.0, 1600.0);
 // Rectangle (x0, z0, x1, z1) sans parcelles cultivées (centre du champ de bataille).
 uniform vec4 calm_rect = vec4(150.0, 60.0, 1050.0, 740.0);
+// EP6 : parcelles du décor (voir `bt_decor_field`), même rectangle que les splatmaps.
+uniform sampler2D decor_fields : filter_nearest, repeat_disable;
+uniform float decor_on = 0.0;
 uniform float wetness : hint_range(0.0, 1.0) = 0.0;
 uniform float snow : hint_range(0.0, 1.0) = 0.0;
 // Lot B5 : altitude des neiges (sommets de l'horizon en montagne ou en hiver).
@@ -121,6 +124,23 @@ void fragment() {
 	float outside_calm = smoothstep(0.0, 60.0, max(calm_d.x, calm_d.y));
 	vec3 field = bt_field_info(p);
 	float field_w = (field.x > 0.5 ? 1.0 : 0.0) * outside_calm * (1.0 - sb.g) * field.z;
+	// EP6 : parcelles posées par le cœur (labours, blé, prés, semis, vignes, chaumes).
+	float decor_kind = 0.0;
+	float furrow_period = 1.3;
+	if (decor_on > 0.5 && inside) {
+		vec4 df = texture(decor_fields, suv);
+		if (df.a > 0.5) {
+			field = bt_decor_field(df, p);
+			decor_kind = field.x;
+			if (decor_kind == 4.0 || decor_kind == 5.0) {
+				field.x = 1.0;
+				furrow_period = decor_kind == 5.0 ? 2.2 : 0.9;
+			} else if (decor_kind == 6.0) {
+				field.x = 2.0;
+			}
+			field_w = field.z;
+		}
+	}
 
 	float w_forest = smoothstep(0.15, 0.6, sa.r + (fine - 0.5) * 0.4);
 	float w_dirt = smoothstep(0.2, 0.6, sa.g + (fine - 0.5) * 0.3);
@@ -190,7 +210,7 @@ void fragment() {
 	float grassy = w[int(L_GRASS)] + w[int(L_MEADOW)];
 	vec3 tint = grass_tint * mix(vec3(0.92, 1.0, 0.86), vec3(1.08, 1.02, 0.86), macro2);
 	if (field.x == 2.0) {
-		tint = mix(tint, vec3(1.45, 1.18, 0.62), field_w);
+		tint = mix(tint, decor_kind == 6.0 ? vec3(1.3, 1.1, 0.7) : vec3(1.45, 1.18, 0.62), field_w);
 	}
 	// Lot V4b : taches de prairie visibles de haut (herbe sèche blonde, prairie grasse sombre,
 	// friches roussâtres) à deux échelles, pour casser l'uniformité du champ vu d'ensemble.
@@ -209,8 +229,12 @@ void fragment() {
 	albedo *= mix(0.84, 1.1, macro) * mix(0.93, 1.05, fine);
 	// Sillons des labours.
 	if (w_plough > 0.0) {
-		float furrow = 0.5 + 0.5 * sin(field.y * 6.2832 / 1.3);
+		float furrow = 0.5 + 0.5 * sin(field.y * 6.2832 / furrow_period);
 		albedo *= mix(1.0, mix(0.72, 1.05, furrow), w[int(L_PLOUGH)]);
+		// EP6 : blé en herbe des semis (rangs verts sur la terre).
+		if (decor_kind == 4.0) {
+			albedo = mix(albedo, albedo * vec3(0.75, 1.25, 0.55), w[int(L_PLOUGH)] * (0.35 + 0.4 * furrow));
+		}
 	}
 	// Lot B7 : relief de lecture de la neige. Congères étirées par le vent (bruit anisotrope),
 	// grain fin, ombre bleutée et neige plus mince sur les pentes, crêtes plus blanches ; neige
