@@ -1,8 +1,8 @@
 extends SceneTree
 
 ## Test headless du lot FR1 (frontières de faction lumineuses) sur la vraie simulation :
-##  1. la passe des frontières est branchée sur le matériau partagé du terrain (`next_pass`) et
-##     recopie les uniformes du relief (heightmap, pages du quadtree, caméra) ;
+##  1. crochet `fr1_borders` dans les deux shaders du terrain (3D et parchemin seul), réglages
+##     posés sur le matériau partagé du terrain ;
 ##  2. `refresh` (via `refresh_all`) construit propriétaires et contrôleurs ; l'Île-de-France est
 ##     à la France, qui a son index de palette ; un second rafraîchissement sans changement ne
 ##     reconstruit rien ;
@@ -11,7 +11,7 @@ extends SceneTree
 ##  4. filtres de carte (MF1) : visibles en politique, encre neutre en religion, masquées en
 ##     ravitaillement ; retour à la politique ;
 ##  5. zoom : effacées sous ~200 m, pleines au zoom moyen ; vue parchemin : toujours branchées ;
-##  6. qualité Basse : halo et hachures coupés ; `set_enabled(false)` débranche la passe.
+##  6. qualité Basse : halo et hachures coupés ; `set_enabled(false)` met l'opacité à 0.
 ## Usage : godot --headless --path game --script res://tests/fr1_borders_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -57,18 +57,13 @@ func _run() -> void:
 		map.queue_free()
 		return
 
-	# 1. Passe branchée, uniformes du relief recopiés.
-	_check(borders.is_attached(), "border pass should be the terrain material's next_pass")
+	# 1. Crochet dans le shader du terrain, uniformes posés sur son matériau partagé.
 	_check(not borders.tuning.is_empty(), "data/map/faction_borders.json not loaded")
+	_check(borders.material() == map.terrain.material, "borders should drive the shared terrain material")
 	var terrain_material: ShaderMaterial = map.terrain.material
-	for uniform_name in ["heightmap", "province_ids", "border_dist", "map_size"]:
-		_check(borders.material.get_shader_parameter(uniform_name) == terrain_material.get_shader_parameter(uniform_name),
-				"uniform %s not mirrored from the terrain" % uniform_name)
-	if map.terrain.quadtree != null:
-		_check(borders.material.get_shader_parameter("qt_pages") != null, "quadtree pages not mirrored")
-	borders.update_view(map.camera_rig.distance)
-	_check(borders.material.get_shader_parameter("qt_camera") == terrain_material.get_shader_parameter("qt_camera"),
-			"quadtree camera not mirrored")
+	_check(TerrainBuilder.TERRAIN_SHADER.code.contains("fr1_borders("), "terrain.gdshader should call the fr1_borders hook")
+	_check((load("res://shaders/terrain_parchment.gdshader") as Shader).code.contains("fr1_borders("), "terrain_parchment.gdshader should call the fr1_borders hook")
+	_check(terrain_material.get_shader_parameter("fr1_realm_glow_px") != null, "tuning not applied to the terrain material")
 
 	# 2. Propriétaires depuis la simulation.
 	map.refresh_all()
@@ -96,7 +91,7 @@ func _run() -> void:
 	controllers[paris - 1] = "fac_france"
 	_check(borders.set_ownership(owners, controllers, "fac_france"), "occupation should rebuild")
 	_check(borders.ownership_of(paris) == Vector2i(england, france), "Paris should be English, occupied by France")
-	var info: ImageTexture = borders.material.get_shader_parameter("fr1_info")
+	var info: ImageTexture = terrain_material.get_shader_parameter("fr1_info")
 	var pixel := info.get_image().get_pixel(paris, 0)
 	_check(roundi(pixel.b * 255.0) == 255, "player flag expected on a province the player occupies")
 	borders.refresh()
@@ -108,14 +103,14 @@ func _run() -> void:
 	_check(borders.visible_now() and is_equal_approx(borders.effective_alpha, 1.0), "political map at medium zoom: fully visible, got %f" % borders.effective_alpha)
 	modes.set_mode("religion")
 	borders.update_view(300.0)
-	_check(borders.mode == "religion" and bool(borders.material.get_shader_parameter("fr1_neutral")), "religion map should use neutral ink")
+	_check(borders.mode == "religion" and bool(terrain_material.get_shader_parameter("fr1_neutral")), "religion map should use neutral ink")
 	_check(borders.visible_now(), "borders stay visible (neutral) on the religion map")
 	modes.set_mode("supply")
 	borders.update_view(300.0)
 	_check(not borders.visible_now(), "borders hidden on the supply map")
 	modes.set_mode("political")
 	borders.update_view(300.0)
-	_check(borders.visible_now() and not bool(borders.material.get_shader_parameter("fr1_neutral")), "back to political: faction colours")
+	_check(borders.visible_now() and not bool(terrain_material.get_shader_parameter("fr1_neutral")), "back to political: faction colours")
 
 	# 5. Zoom et parchemin.
 	var mpp: float = data.meters_per_px
@@ -125,21 +120,21 @@ func _run() -> void:
 	_check(borders.effective_alpha > 0.0 and borders.effective_alpha < 1.0, "borders half faded around 900 m")
 	map.strategic.update_view(3000.0)
 	borders.update_view(3000.0)
-	_check(borders.is_attached() and borders.visible_now(), "borders stay attached in the parchment view")
+	_check(borders.visible_now(), "borders stay visible in the parchment view")
 	map.strategic.update_view(300.0)
 	borders.update_view(300.0)
 
 	# 6. Qualité et interrupteur.
 	RenderQuality.override_level = "low"
 	borders.apply_render_quality(RenderQuality.preset())
-	_check(not bool(borders.material.get_shader_parameter("fr1_glow")), "low quality should drop the glow")
+	_check(not bool(terrain_material.get_shader_parameter("fr1_glow")), "low quality should drop the glow")
 	RenderQuality.override_level = ""
 	borders.apply_render_quality(RenderQuality.preset())
-	_check(bool(borders.material.get_shader_parameter("fr1_glow")), "glow back at default quality")
+	_check(bool(terrain_material.get_shader_parameter("fr1_glow")), "glow back at default quality")
 	borders.set_enabled(false)
-	_check(terrain_material.next_pass == null, "disabled borders should detach the pass")
+	_check(float(terrain_material.get_shader_parameter("fr1_alpha")) == 0.0 and not borders.visible_now(), "disabled borders should zero fr1_alpha")
 	borders.set_enabled(true)
-	_check(borders.is_attached(), "re-enabled borders should reattach")
+	_check(borders.visible_now(), "re-enabled borders should show again")
 
 	map.queue_free()
 	await process_frame

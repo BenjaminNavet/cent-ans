@@ -1,14 +1,14 @@
 {
-  "description": "Lot FR1 : frontières de faction lumineuses de la carte de campagne, façon Total War (ADR 0070). Trait de la couleur de chaque faction le long des frontières entre propriétaires différents (plus épais, avec un halo intérieur), trait fin et discret entre provinces d'une même faction ; frontière du joueur un peu rehaussée ; provinces occupées (occupant ≠ propriétaire) hachurées aux couleurs de l'occupant. Largeurs en pixels écran (1080p). Rendu seulement : aucune règle de jeu.",
+  "description": "Lot FR1 : frontières de faction lumineuses de la carte de campagne, façon Total War (ADR 0070). Trait de la couleur de chaque faction le long des frontières entre propriétaires différents (plus épais, avec un halo intérieur), trait fin et discret entre provinces d'une même faction ; frontière du joueur un peu rehaussée ; provinces occupées (occupant ≠ propriétaire) hachurées aux couleurs de l'occupant. Largeurs en pixels écran (1080p). Peint dans le fragment du terrain (crochet fr1_borders). Rendu seulement : aucune règle de jeu.",
   "realm": {
-    "core_px": 1.6,
+    "core_px": 1.8,
     "core_alpha": 0.95,
     "core_brightness": 1.35,
-    "outline_px": 2.6,
+    "outline_px": 2.8,
     "outline_alpha": 0.55,
-    "glow_px": 9.0,
-    "glow_alpha": 0.55,
-    "glow_exponent": 1.6
+    "glow_px": 13.0,
+    "glow_alpha": 0.62,
+    "glow_exponent": 1.35
   },
   "province": {
     "core_px": 0.7,
@@ -41,23 +41,66 @@
     "ink_mix": 0.35
   },
   "modes": {
-    "political": {"alpha": 1.0, "neutral": false},
-    "diplomacy": {"alpha": 0.75, "neutral": false},
-    "claims": {"alpha": 0.75, "neutral": false},
-    "religion": {"alpha": 0.6, "neutral": true},
-    "unrest": {"alpha": 0.6, "neutral": true},
-    "wealth": {"alpha": 0.6, "neutral": true},
-    "population": {"alpha": 0.6, "neutral": true},
-    "loyalty": {"alpha": 0.6, "neutral": true},
-    "supply": {"alpha": 0.0, "neutral": true}
+    "political": {
+      "alpha": 1.0,
+      "neutral": false
+    },
+    "diplomacy": {
+      "alpha": 0.75,
+      "neutral": false
+    },
+    "claims": {
+      "alpha": 0.75,
+      "neutral": false
+    },
+    "religion": {
+      "alpha": 0.6,
+      "neutral": true
+    },
+    "unrest": {
+      "alpha": 0.6,
+      "neutral": true
+    },
+    "wealth": {
+      "alpha": 0.6,
+      "neutral": true
+    },
+    "population": {
+      "alpha": 0.6,
+      "neutral": true
+    },
+    "loyalty": {
+      "alpha": 0.6,
+      "neutral": true
+    },
+    "supply": {
+      "alpha": 0.0,
+      "neutral": true
+    }
   },
   "neutral_color": "#1e1710",
   "terrain_realm_band_alpha": 0.0,
-  "depth_bias": 0.00004,
   "quality": {
-    "low": {"enabled": true, "glow": false, "hatch": false},
-    "medium": {"enabled": true, "glow": true, "hatch": true},
-    "high": {"enabled": true, "glow": true, "hatch": true},
-    "ultra": {"enabled": true, "glow": true, "hatch": true}
-  }
+    "low": {
+      "enabled": true,
+      "glow": false,
+      "hatch": false
+    },
+    "medium": {
+      "enabled": true,
+      "glow": true,
+      "hatch": true
+    },
+    "high": {
+      "enabled": true,
+      "glow": true,
+      "hatch": true
+    },
+    "ultra": {
+      "enabled": true,
+      "glow": true,
+      "hatch": true
+    }
+  },
+  "emission": 0.45
 }
