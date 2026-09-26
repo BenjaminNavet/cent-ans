@@ -118,13 +118,14 @@ func setup(scene: Node) -> void:
 	_apply_state("approach", true)
 
 
-func update(delta: float) -> void:
+## `p_units` : régiments déjà lus par la scène pour cette image (sinon relus ici).
+func update(delta: float, p_units: Variant = null) -> void:
 	if _scene == null:
 		return
 	var battle: Object = _scene.get("battle")
 	if battle == null:
 		return
-	var units: Array = battle.call("get_units")
+	var units: Array = p_units if p_units is Array else battle.call("get_units")
 	var resolved: bool = bool(battle.call("is_finished"))
 	var victory := false
 	if resolved:
