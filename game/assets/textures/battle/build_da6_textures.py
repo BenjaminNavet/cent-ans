@@ -69,16 +69,23 @@ def grass_blades(width: int = 512, height: int = 256) -> None:
                 gy = ty + k * 2.2
                 gx = tx - lean * (k * 2.2 / h) * 1.8 + rng.uniform(-1.5, 1.5)
                 g = int(np.clip(v * 1.25, 60, 245))
-                draw.ellipse((gx - 1.6, gy - 2.4, gx + 1.6, gy + 2.4), fill=(g, g, int(g * 0.9), 255))
+                draw.ellipse(
+                    (gx - 1.6, gy - 2.4, gx + 1.6, gy + 2.4),
+                    fill=(g, g, int(g * 0.9), 255),
+                )
     arr = np.array(image).astype(np.float32)
     rows = np.linspace(0.0, 1.0, height)
     # Pied assombri (occlusion dans la touffe), pointes un peu plus claires.
     ramp = (1.0 - (rows**2.2) * 0.55) * (1.0 + (1.0 - rows) ** 3 * 0.12)
     arr[:, :, :3] *= ramp[:, None, None]
-    _bleed(Image.fromarray(arr.clip(0, 255).astype(np.uint8))).save(HERE / "grass_blades.png")
+    _bleed(Image.fromarray(arr.clip(0, 255).astype(np.uint8))).save(
+        HERE / "grass_blades.png"
+    )
 
 
-def _leaf(draw: ImageDraw.ImageDraw, x: float, y: float, size: float, angle: float, col: tuple) -> None:
+def _leaf(
+    draw: ImageDraw.ImageDraw, x: float, y: float, size: float, angle: float, col: tuple
+) -> None:
     """Feuille ovale pointue (feuillus d'Europe), côté éclairé légèrement plus clair."""
     pts = []
     for k in range(12):
@@ -86,7 +93,12 @@ def _leaf(draw: ImageDraw.ImageDraw, x: float, y: float, size: float, angle: flo
         px = math.cos(t) * size
         # Pointe : le demi-côté avant s'affine.
         py = math.sin(t) * size * 0.42 * (1.0 - 0.35 * max(math.cos(t), 0.0))
-        pts.append((x + px * math.cos(angle) - py * math.sin(angle), y + px * math.sin(angle) + py * math.cos(angle)))
+        pts.append(
+            (
+                x + px * math.cos(angle) - py * math.sin(angle),
+                y + px * math.sin(angle) + py * math.cos(angle),
+            )
+        )
     draw.polygon(pts, fill=col)
 
 
@@ -108,13 +120,25 @@ def leaf_spray(size: int = 512) -> None:
             angle += rng.uniform(-0.18, 0.18)
             if depth > 0 and s in (2, 4) and rng.random() < 0.9:
                 side = rng.choice((-1, 1))
-                grow(x, y, angle + side * rng.uniform(0.5, 0.95), length * rng.uniform(0.45, 0.62), depth - 1)
+                grow(
+                    x,
+                    y,
+                    angle + side * rng.uniform(0.5, 0.95),
+                    length * rng.uniform(0.45, 0.62),
+                    depth - 1,
+                )
 
     for k in range(3):
-        grow(size * 0.5 + rng.uniform(-30, 30), size * 0.98, -math.pi / 2 + rng.uniform(-0.55, 0.55) + (k - 1) * 0.35, size * 0.62, 2)
+        grow(
+            size * 0.5 + rng.uniform(-30, 30),
+            size * 0.98,
+            -math.pi / 2 + rng.uniform(-0.55, 0.55) + (k - 1) * 0.35,
+            size * 0.62,
+            2,
+        )
     c = size / 2
     for _ in range(5200):
-        tx, ty, depth = rng.choice(twigs)
+        tx, ty, _depth = rng.choice(twigs)
         a = rng.random() * math.tau
         d = rng.uniform(2.0, 44.0) * math.sqrt(rng.random())
         x = tx + math.cos(a) * d
@@ -127,7 +151,14 @@ def leaf_spray(size: int = 512) -> None:
         g = float(np.clip(112 * shade, 36, 190))
         red = g * rng.uniform(0.7, 0.86)
         blue = g * rng.uniform(0.42, 0.55)
-        _leaf(draw, x, y, rng.uniform(7.0, 12.0), rng.random() * math.tau, (int(red), int(g), int(blue), 255))
+        _leaf(
+            draw,
+            x,
+            y,
+            rng.uniform(7.0, 12.0),
+            rng.random() * math.tau,
+            (int(red), int(g), int(blue), 255),
+        )
     _bleed(image.filter(ImageFilter.SMOOTH)).save(HERE / "leaf_spray.png")
 
 
@@ -137,22 +168,42 @@ def twig_spray(size: int = 512) -> None:
     image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
 
-    def grow(x: float, y: float, angle: float, length: float, width: float, depth: int) -> None:
+    def grow(
+        x: float, y: float, angle: float, length: float, width: float, depth: int
+    ) -> None:
         steps = 7
         for s in range(steps):
             nx = x + math.cos(angle) * length / steps
             ny = y + math.sin(angle) * length / steps
             tone = rng.uniform(0.85, 1.1)
-            draw.line((x, y, nx, ny), fill=(int(78 * tone), int(70 * tone), int(62 * tone), 255), width=max(2, round(width)))
+            draw.line(
+                (x, y, nx, ny),
+                fill=(int(78 * tone), int(70 * tone), int(62 * tone), 255),
+                width=max(2, round(width)),
+            )
             x, y = nx, ny
             angle += rng.uniform(-0.22, 0.22)
             width *= 0.93
             if depth > 0 and s % 2 == 1:
                 side = rng.choice((-1, 1))
-                grow(x, y, angle + side * rng.uniform(0.35, 0.8), length * rng.uniform(0.4, 0.6), width * 0.7, depth - 1)
+                grow(
+                    x,
+                    y,
+                    angle + side * rng.uniform(0.35, 0.8),
+                    length * rng.uniform(0.4, 0.6),
+                    width * 0.7,
+                    depth - 1,
+                )
 
     for k in range(6):
-        grow(size * 0.5 + rng.uniform(-40, 40), size * 0.99, -math.pi / 2 + (k - 2.5) * 0.24 + rng.uniform(-0.2, 0.2), size * 0.72, 6.0, 4)
+        grow(
+            size * 0.5 + rng.uniform(-40, 40),
+            size * 0.99,
+            -math.pi / 2 + (k - 2.5) * 0.24 + rng.uniform(-0.2, 0.2),
+            size * 0.72,
+            6.0,
+            4,
+        )
     _bleed(image).save(HERE / "twig_spray.png")
 
 
@@ -169,7 +220,14 @@ def dead_leaves(size: int = 512) -> None:
         x = xs[i] + rng.uniform(-5, 5)
         y = ys[i] + rng.uniform(-3, 6)
         v = rng.uniform(0.75, 1.15)
-        _leaf(draw, x, y, rng.uniform(6.0, 10.0), rng.random() * math.tau, (int(112 * v), int(94 * v), int(74 * v), 255))
+        _leaf(
+            draw,
+            x,
+            y,
+            rng.uniform(6.0, 10.0),
+            rng.random() * math.tau,
+            (int(112 * v), int(94 * v), int(74 * v), 255),
+        )
     _bleed(image).save(HERE / "dead_leaves.png")
 
 
