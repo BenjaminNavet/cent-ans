@@ -31,9 +31,9 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG6 | Villes ordinaires à l'échelle réelle vers 1340, finage ↔ parcellaire | 3 | **dans main** (7f38c532) |
 | ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | **dans main** |
 | ZG8 | Relief local exagéré façon Total War (visuel seulement), roche selon la pente, ombrage (wip `zg8-relief-exagere.md`) | 3 | **dans main** |
-| ZG7a | Perf (MultiMesh par ville, parcellaire, p99, ponts), lit de la Seine, ponts-portes, rives de Londres, PathPreview (wip `zg7a-perf-finitions.md`) | 4 | en cours |
+| ZG7a | Perf (MultiMesh par ville, parcellaire, p99, ponts), lit de la Seine, ponts-portes, rives de Londres, PathPreview (wip `zg7a-perf-finitions.md`) | 4 | **dans main** (609bbcdf) |
 | ZG7b | Cache absent (message + commande unique), embarquement de la pyramide, docs geo/godot-map, crédits (wip `zg7b-export-cache.md`) | 4 | **dans main** (0eaec278) |
-| ZG7c | Recette visuelle aux 3 paliers après ZG7a/b | 4 | — |
+| ZG7c | Recette visuelle aux 3 paliers après ZG7a/b | 4 | en cours (wip `zg7c-recette.md`) |
 
 ## Journal
 - 25/09 : ZG0 commité (ADR 0036, `data/map/relief_pyramid.json`, `detail_zones.json`, schémas,
@@ -60,3 +60,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : ZG4b et ZG8 fusionnés, plus le correctif C5 (le « ruban géant » de la Tamise était la couche des routes commerciales, affichée hors mode Commerce). Tests ZG2/4/5b/6/8 + smoke OK. ZG4b : brume météo trop couvrante de près (vraie cause du sol beige), parcellaire absent des rives à 0,5 m, plancher caméra 2,6 au-dessus des villes emblématiques (à lever par VH4), portes et bascule des ponts étalée. ZG8 : hauteur affichée = s·(h + g·max(h − fond, 0)), près ×2,5, gains 0,3/0,8 réglés à l'œil (à affiner en jeu), `--no-relief-exaggeration`. Reste à signaler à d'autres lots : `PathPreview` à l'échelle de la carte de près. Prochain : ZG7.
 - 25/09 : ZG7 découpé en ZG7a (perf + finitions visuelles) et ZG7b (export, cache, docs, crédits), lancés en parallèle ; recette finale ZG7c ensuite.
 - 26/09 : ZG7b fusionné (0eaec278) : avis « relief incomplet » + `cent-ans geo relief-all [--check]`, export `CENT_ANS_EXPORT_RELIEF=bundle|external|none` (clones APFS), `MapPaths.relief_root_for`, docs geo/godot-map/tools, crédits (textures Poly Haven ajoutées). pytest 581 OK, smoke OK. Suites : `ReliefPyramid` ignore un étage entier si sa 1re tuile manque (à rendre robuste en ZG7c) ; aucune archive « Cent Ans relief » hébergée (à décider avant diffusion).
+- 26/09 : ZG7a fusionné (609bbcdf) : appels de dessin des villes −43 % (MultiMesh par ville / cellule 1 km, HLOD par instance), parcellaire −20 %, pages et ponts hors du fil principal (fine_install 19 → 1,6 ms), Seine 133-200 m interpolée le long des ancrages, tabliers à largeur réelle, rives de Londres 2,6-3,8 m, PathPreview fin de près. Non atteint : p99 ~130 ms (≈ base), qt_update 10-16 ms. Tests zg2-zg8 + smoke OK. ZG7c lancé : pyramide partielle robuste, recuisson des 34 zones (plancher v4), Tamise −7,8 m, banc, recette visuelle aux 3 paliers, clôture.
