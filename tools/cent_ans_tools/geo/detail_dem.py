@@ -52,7 +52,13 @@ from rasterio.transform import Affine
 from rasterio.warp import reproject
 from scipy import ndimage
 
-from cent_ans_tools.geo import anachronisms, copernicus, detail_sources, terrain
+from cent_ans_tools.geo import (
+    anachronisms,
+    bake_stamp,
+    copernicus,
+    detail_sources,
+    terrain,
+)
 from cent_ans_tools.geo.detail_sources import DETAIL_RAW_DIR, SOURCES
 from cent_ans_tools.geo.project import MapGrid
 from cent_ans_tools.geo.relief_shade import (
@@ -60,6 +66,7 @@ from cent_ans_tools.geo.relief_shade import (
     BOOST_GAIN,
     BOOST_LIMIT_M,
     BOOST_SIGMA_M,
+    floor_valleys,
 )
 
 REPO_DIR = detail_sources.download.TOOLS_DIR.parent
@@ -82,15 +89,10 @@ HOLE_MAX_M2 = 250_000.0
 BASE_LEVEL = 2  # 90 m grid of the boost base
 BASE_MARGIN_M = 3.0 * BOOST_SIGMA_M
 MIN_LAND_M = 0.5
-#: ZG7a: low land keeps at least this share of its real height once boosted, up to
-#: :data:`LOW_LAND_CAP_M` (monotone floor ``max(MIN_LAND_M, min(k * h, cap))``). The
-#: flat MIN_LAND_M floor alone flattened London's banks (Southwark, Lambeth,
-#: Westminster: 2-5 m ODN) to 0.5 m, level with the Thames.
-LOW_LAND_KEEP = 0.85
-LOW_LAND_CAP_M = 5.0
 WORKERS = max(1, min(8, (os.cpu_count() or 4) - 2))
 #: Bump when the bake changes, so that ``done`` markers are invalidated.
-BAKE_VERSION = 4
+#: 5 (SZ2): valley floors not dug (:func:`relief_shade.valley_floor`), E1-E4 re-baked.
+BAKE_VERSION = 5
 #: Grey-opening width (GLO-30 pixels) turning the surface model into rough ground.
 GLO30_OPENING_PX = 5
 PREVIEW_ZONES = ("calais", "poitiers", "chateau_gaillard")
@@ -587,36 +589,20 @@ def boost_base(
 def apply_boost(height: np.ndarray, base: np.ndarray) -> np.ndarray:
     """:func:`relief_shade.boost_relief` with an external base, on land (> 0 m).
 
-    ZG3b fix: mirrors :func:`relief_shade.enforce_coast`, which the E0-E4
-    pyramid already applies after boosting -- land (source height above
-    :data:`MIN_LAND_M`) never drops below it once boosted, even where the
-    base still runs higher than the fine source nearby (real hills a few km
-    off, a residual GLO-90 fallback at a data gap). Without this floor,
-    genuine dry land could bake in below sea level; ``bake_cluster`` had no
-    equivalent of ``enforce_coast`` before this fix.
+    Land (source height above :data:`MIN_LAND_M`) never drops below
+    :func:`relief_shade.valley_floor` of its real height once boosted: the
+    same monotone floor as E0-E4 (SZ2), which also keeps it above sea level
+    (ZG3b) and low banks a few metres above the water (ZG7a), whatever the
+    base (real hills a few km off, a GLO-90 fallback at a data gap).
     """
     local = np.clip(height - base, -BOOST_LIMIT_M, BOOST_LIMIT_M)
     t = np.clip(
         (base - BOOST_FADE_M[0]) / (BOOST_FADE_M[1] - BOOST_FADE_M[0]), 0.0, 1.0
     )
     fade = 1.0 - t * t * (3.0 - 2.0 * t)
-    boosted = height + BOOST_GAIN * local * fade
+    boosted = floor_valleys(height + BOOST_GAIN * local * fade, height)
     land = height > MIN_LAND_M
-    boosted = np.where(land, np.maximum(boosted, low_land_floor(height)), boosted)
     return np.where(land, boosted, height).astype(np.float32)
-
-
-def low_land_floor(height: np.ndarray) -> np.ndarray:
-    """Lowest boosted height allowed for land of real height ``height`` (ZG7a).
-
-    ``max(MIN_LAND_M, min(LOW_LAND_KEEP * h, LOW_LAND_CAP_M))``: non-decreasing
-    in ``h`` (no terraces), so river banks a few metres above the water stay a
-    few metres above it instead of all dropping to the 0.5 m sea-level guard.
-    Only land the boost would push below :data:`LOW_LAND_CAP_M` is affected.
-    """
-    return np.maximum(
-        MIN_LAND_M, np.minimum(LOW_LAND_KEEP * height, LOW_LAND_CAP_M)
-    ).astype(np.float32)
 
 
 # -------------------------------------------------------------------------- blend
@@ -963,11 +949,15 @@ def _done_path(zone: Zone, level: int) -> Path:
     return DETAIL_RAW_DIR / zone.id / f"done_E{level}.json"
 
 
-def cluster_done(cluster: Cluster, map_dir: Path) -> bool:
-    """Whether every zone of the cluster has a current marker and every tile exists."""
+def cluster_done(cluster: Cluster, map_dir: Path, since: float | None = None) -> bool:
+    """Whether every zone of the cluster has a current marker and every tile exists.
+
+    With ``since`` (a forced or stale bake in progress, :mod:`bake_stamp`),
+    markers written before it do not count.
+    """
     for zone in cluster.zones:
         marker = _done_path(zone, cluster.level)
-        if not marker.exists():
+        if bake_stamp.needs_rebake(marker, since):
             return False
         if json.loads(marker.read_text()).get("hash") != params_hash(
             zone, cluster.level
@@ -1062,6 +1052,14 @@ def build(
         raise ValueError(f"zones inconnues : {sorted(unknown)}")
     notes: list[str] = []
     zones = [z for z in all_zones if z.id in wanted]
+    whole = wanted == {z.id for z in all_zones}
+    pyramid_dir = map_dir / PYRAMID_DIR_NAME
+    # A forced (or stale) bake of every zone is stamped and resumable; a bake of
+    # some zones only rewrites them with ``force``.
+    if whole:
+        since = bake_stamp.begin(pyramid_dir, "tier3", BAKE_VERSION, force)
+    else:
+        since = time.time() if force else None
     log(f"Téléchargement des MNT : {len(zones)} zones")
     chunks = fetch_all(zones, grid, notes)
     log("Téléchargement OSM (anachronismes)")
@@ -1073,7 +1071,7 @@ def build(
             for c in clusters(grid, all_zones, level)
             if any(z.id in wanted for z in c.zones)
         ]
-        todo = [c for c in level_clusters if force or not cluster_done(c, map_dir)]
+        todo = [c for c in level_clusters if not cluster_done(c, map_dir, since)]
         missing = {z.id for c in todo for z in c.zones} - {z.id for z in zones}
         if missing:
             extra = [z for z in all_zones if z.id in missing]
@@ -1132,6 +1130,11 @@ def build(
         )
         lines[level] = level_line(level, grid, tiles, _zones_bbox(all_zones, level))
     update_manifest(lines)
+    if whole:
+        from cent_ans_tools.geo import pyramid
+
+        bake_stamp.finish(pyramid_dir, "tier3", BAKE_VERSION, since)
+        pyramid.set_manifest_bake_versions(map_dir, {"tier3": BAKE_VERSION})
     return DetailResult(
         tiles=counts,
         bytes_by_level=sizes,
