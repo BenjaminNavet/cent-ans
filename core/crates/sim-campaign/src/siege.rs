@@ -108,14 +108,19 @@ pub(crate) fn resolve_sieges(
             }
             continue;
         }
-        let attacker = state.armies[&besiegers[0]].faction.clone();
+        let attacker = siege_leader(state, &settlement_id, &besiegers);
+        let lead = besiegers
+            .iter()
+            .find(|id| state.armies[*id].faction == attacker)
+            .unwrap_or(&besiegers[0])
+            .clone();
         let garrison_empty = state.settlements[&settlement_id].garrison.is_empty();
         if garrison_empty {
             capture(state, data, &settlement_id, &attacker, events);
             continue;
         }
         let fortification = state.fortification_level(data, &settlement_id);
-        let besieging_general = state.armies[&besiegers[0]].general.clone();
+        let besieging_general = state.armies[&lead].general.clone();
         let siege_speed_percent = besieging_general.as_ref().map_or(0.0, |g| {
             skills::character_effects(state, data, g)
                 .siege_speed
@@ -168,17 +173,55 @@ pub(crate) fn resolve_sieges(
                     }
                 }
             }
-            _ => {
-                let besieger = besiegers[0].clone();
-                begin_siege(state, data, &settlement_id, &attacker, &besieger, events);
-            }
+            _ => begin_siege(state, data, &settlement_id, &attacker, &lead, events),
         }
     }
 }
 
+/// The faction leading the siege of `settlement` among `besiegers` (not
+/// empty): the current attacker while one of its armies stays; else an ally
+/// of it takes the siege over with its progress (breach, supplies); else the
+/// first besieger.
+fn siege_leader(
+    state: &mut CampaignState,
+    settlement: &SettlementId,
+    besiegers: &[ArmyId],
+) -> FactionId {
+    let first = state.armies[&besiegers[0]].faction.clone();
+    let Some(current) = state
+        .settlements
+        .get(settlement)
+        .and_then(|s| s.siege.as_ref())
+        .map(|s| s.attacker.clone())
+    else {
+        return first;
+    };
+    let factions: Vec<FactionId> = besiegers
+        .iter()
+        .map(|id| state.armies[id].faction.clone())
+        .collect();
+    if factions.contains(&current) {
+        return current;
+    }
+    let Some(heir) = factions
+        .into_iter()
+        .find(|f| state.is_allied(f, &current) || state.is_allied(&current, f))
+    else {
+        return first;
+    };
+    if let Some(siege) = state
+        .settlements
+        .get_mut(settlement)
+        .and_then(|s| s.siege.as_mut())
+    {
+        siege.attacker = heir.clone();
+    }
+    heir
+}
+
 /// Lays siege to `settlement_id` for `attacker` (its army `army` in the
 /// lead): supplies from the province's devastation, an event. A siege of
-/// the same attacker already in place is kept.
+/// the same attacker or of one of its allies already in place is kept.
 pub(crate) fn begin_siege(
     state: &mut CampaignState,
     data: &GameData,
@@ -204,14 +247,17 @@ pub(crate) fn begin_siege(
         .get(&province_id)
         .map_or(0, |p| p.devastation);
     let turn = state.turn;
+    let kept = state
+        .settlements
+        .get(settlement_id)
+        .and_then(|s| s.siege.as_ref())
+        .is_some_and(|s| {
+            state.is_allied(&s.attacker, attacker) || state.is_allied(attacker, &s.attacker)
+        });
     let Some(settlement) = state.settlements.get_mut(settlement_id) else {
         return;
     };
-    if settlement
-        .siege
-        .as_ref()
-        .is_some_and(|s| &s.attacker == attacker)
-    {
+    if kept {
         return;
     }
     let supplies = 100u8.saturating_sub(devastation / 2).max(10);

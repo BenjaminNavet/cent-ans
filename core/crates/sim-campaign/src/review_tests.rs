@@ -109,3 +109,65 @@ fn besieged_garrison_cannot_create_an_army() {
         Err(crate::orders::OrderError::SettlementBesieged)
     );
 }
+
+/// Makes `a` and `b` allies at war with `enemy`.
+fn ally_against(state: &mut CampaignState, a: &str, b: &str, enemy: &str) {
+    for (x, y) in [(a, b), (b, a)] {
+        let f = state.factions.get_mut(&fac(x)).unwrap();
+        f.allies.insert(fac(y));
+        f.at_war_with.remove(&fac(y));
+    }
+    for x in [a, b] {
+        state
+            .factions
+            .get_mut(&fac(x))
+            .unwrap()
+            .at_war_with
+            .insert(fac(enemy));
+        state
+            .factions
+            .get_mut(&fac(enemy))
+            .unwrap()
+            .at_war_with
+            .insert(fac(x));
+    }
+}
+
+/// Fix 3: an ally joining (or taking over) a siege keeps its progress.
+#[test]
+fn allied_besieger_keeps_the_siege_progress() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    ally_against(&mut state, "fac_france", "fac_scotland", "fac_england");
+    let french = led_army(&state, "fac_france");
+    let scots = state
+        .armies
+        .iter()
+        .find(|(_, a)| a.faction == fac("fac_scotland"))
+        .map(|(id, _)| id.clone())
+        .unwrap();
+    let guyenne = city(&state, "prov_guyenne");
+    besiege(&mut state, &data, &french, &guyenne);
+    {
+        let siege = state.settlements.get_mut(&guyenne).unwrap().siege.as_mut();
+        let siege = siege.unwrap();
+        siege.breach = 40;
+        siege.supplies = 50;
+        siege.started_turn = 0;
+    }
+    besiege(&mut state, &data, &scots, &guyenne);
+    let siege = state.settlements[&guyenne].siege.clone().unwrap();
+    assert_eq!(siege.attacker, fac("fac_france"));
+    assert_eq!(siege.breach, 40);
+    // The French leave: the Scots carry on the same siege.
+    let kent = city(&state, "prov_kent");
+    state.armies.get_mut(&french).unwrap().position = ArmyPosition::Settlement(kent);
+    let mut events = Vec::new();
+    crate::siege::resolve_sieges(&mut state, &data, &mut events);
+    if let Some(siege) = state.settlements[&guyenne].siege.clone() {
+        assert_eq!(siege.attacker, fac("fac_scotland"));
+        assert!(siege.breach >= 40 && siege.supplies <= 50);
+    } else {
+        assert_eq!(state.settlements[&guyenne].controller, fac("fac_scotland"));
+    }
+}

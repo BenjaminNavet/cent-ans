@@ -21,6 +21,8 @@ Prochaine étape : constats 2 à 18 dans l'ordre (voir liste de la tranche 1-2).
 |----|--------|------|
 | 1 | corrigé | `movement::assign_captor` extrait ; appelé après un assaut (assaillant pris → défenseur) et une sortie (assiégeant pris → garnison) ; le gouverneur à la tête d'une garnison pris (`general_captured` du côté garnison) passe par `chronicle::capture_character`. |
 | 2 | corrigé | `order_create_army` refuse une place assiégée (`OrderError::SettlementBesieged`, comme `GarrisonUnits`). |
+| 3 | corrigé | `siege_leader` : le siège reste à l'assiégeant présent, sinon passe à un allié avec brèche et vivres ; `begin_siege` ne remplace plus le siège d'un allié. |
+| 4 | corrigé | repli `Fallback` : une armée vidée par `decimate` est dispersée (`disperse_army`), comme en débandade. |
 | 6 | corrigé | la sortie affronte toute la coalition assiégeante (`settlement_coalition`, forces sommées) ; le siège n'est levé que s'il ne reste aucun assiégeant. |
 
 ## Corrections tools
