@@ -58,7 +58,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 2. Fusionner DC3 dans `feat/densite`.
 3. DC5 recette : `find core/crates -name '*.rs' -exec touch {} +` puis build.sh (dylib périmée avec
    la cible partagée, vu en DC4), import + smoke Godot, cargo test, pytest ; `git merge main` ; ff dans main.
-4. Supprimer les worktrees `../gp-densite`, `../gp-dc3`, `../gp-dc3-main`, `../gp-dc3-dc1`.
+4. Supprimer les worktrees `../gp-densite`, `../gp-dc3`.
 
 ## DC1 — mouvement ralenti (worktree `../gp-dc1`, branche `feat/densite-dc1`)
 État : fait, `main` fusionné (2d33df5a), fmt + clippy + 546 tests (data-model, sim-campaign, ai) verts, pytest codex et colonies verts. À fusionner dans `feat/densite`. `points_per_step` 140 → 70 (rules.json + défaut Rust) ; description de
