@@ -1,4 +1,4 @@
-//! `CampaignSim` record of the AI turn (lot CT1, ADR 0070): the AI armies'
+//! `CampaignSim` record of the AI turn (lot CT1, ADR 0073): the AI armies'
 //! moves of the last `end_turn`, replayed by `game/scripts/map/ai_turn_replay.gd`.
 
 use godot::prelude::*;

@@ -68,3 +68,4 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
   - S4 moulins, hameaux, fumées, arbres géants au palier vallée ; S5 disque d'emprise d'Amiens avant les maisons ;
   - S6 pics d'images côté scripts (qt_update 10-16 ms) → PB ; S7 pluie en bâtonnets au palier site ;
   - relief séparé « Cent Ans relief » non hébergé : à décider avant diffusion.
+- 26/09 : note pour toute reprise des shaders du terrain : FR1 (frontières lumineuses, ADR 0074) a ajouté un `#include` de `faction_borders.gdshaderinc` et un appel `fr1_borders` dans `terrain.gdshader` et `terrain_parchment.gdshader` ; à conserver (vérifié par `fr1_borders_test.gd`).

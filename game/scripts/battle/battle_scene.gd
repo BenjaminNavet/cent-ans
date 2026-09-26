@@ -27,6 +27,8 @@ extends Node3D
 ## porte-étendard à pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé,
 ## étendard pris porté par le vainqueur) ; `--standard-side=<attacker|defender>` choisit le camp
 ## cadré (DA1b : étendards aux armes de la maison du général ennemi).
+## `--ep12-shot=<wounded|rout>` (capture EP12 : blessés au sol 2,5 s après leur chute, ou
+## régiment à pied en déroute qui a jeté ses armes) ; `--no-ep12` coupe le lot (A/B).
 ## `--no-da6` (végétation de bataille DA6 coupée : herbe, lisières, arbres, sol de près ; captures
 ## « avant »), `--bench-ab=da6,no-da6` (banc : les deux végétations alternées, DA6).
 ## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
@@ -150,6 +152,9 @@ var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
 var _standard_side: String = ""  # DA1b : `--standard-side=` (camp cadré par `--standard-shot`)
 var _standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen|captured>`
+var _ep12_shot: String = ""  # EP12 : `--ep12-shot=<wounded|rout>`
+var _ep12_focus: Variant = null  # EP12 : point cadré (blessé) ou id du régiment en déroute
+var _ep12_ticks: int = -1
 var _weather_override: String = ""
 var _camera_override: String = ""
 var _last_group_ms: int = -10000
@@ -1225,6 +1230,10 @@ func _bench_finish() -> void:
 	result["primitives_m"] = Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1.0e6
 	result["draw_calls"] = Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 	result["skipped_updates"] = self.soldiers.skipped_updates
+	# EP12 : blessés au sol, régiments désarmés, armes au sol (plafonnées).
+	result["wounded"] = self.soldiers.wounded_count
+	result["disarmed_units"] = self.soldiers.disarmed_units.size()
+	result["dropped_arms"] = self.soldiers.dropped_arms.shown_count() if self.soldiers.dropped_arms != null else 0
 	if effects != null and effects.volleys != null:
 		# BV1 : volées, traits fichés et échelle des figurines.
 		result["volley_arrows"] = effects.volleys.launched
@@ -1934,6 +1943,8 @@ func _parse_cmdline() -> void:
 			_shot_at = float(arg.trim_prefix("--shot-at="))
 		elif arg.begins_with("--standard-shot="):
 			_standard_shot = arg.trim_prefix("--standard-shot=")
+		elif arg.begins_with("--ep12-shot="):
+			_ep12_shot = arg.trim_prefix("--ep12-shot=")
 		elif arg == "--no-effects":
 			_no_effects = true
 		elif arg == "--no-bv1":
@@ -2027,6 +2038,10 @@ func _stage_screenshot() -> void:
 			# EP8 : envol des oiseaux (6 s après le choc) ou plan cinématique (dès le choc).
 			if float(battle.call("get_elapsed")) - contact_time >= (6.0 if _birds_shot else 0.5):
 				break
+		if _ep12_shot != "":
+			if _ep12_shot_ready(units):
+				break
+			continue
 		if _standard_shot == "fallen" or _standard_shot == "captured":
 			# EP5 : dès qu'un étendard gît depuis 2 s (le porte-étendard a fini de tomber).
 			if standards != null:
@@ -2090,6 +2105,7 @@ func _stage_screenshot() -> void:
 	_refresh_view(true)
 	_apply_camera_override()
 	_apply_standard_shot()
+	_apply_ep12_shot()
 	_apply_staging_shot()
 	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
 	for _i in 150 if effects != null else 40:
@@ -2251,6 +2267,60 @@ func _apply_standard_shot() -> void:
 		camera_rig.camera.global_position = at + Vector3(sin(yaw), 0, cos(yaw)) * 6.0 + Vector3(0, 7.5, 0)
 		camera_rig.camera.look_at(at, Vector3.UP)
 	print("BattleScene: EP5 %s shot on %s (%s) at %s, standard %s, %d standards, %d figures, %d fallen" % [_standard_shot, str(best["name"]), str(best["type"]), point, str(best.get("standard", "")), standards.shown_count, standards.figure_count, standards.fallen_count])
+
+
+## Capture EP12 (`--ep12-shot=`) : vrai quand l'instant est venu. Blessés : 25 pas (2,5 s)
+## après le 30e blessé, le dernier tombé cadré (il rampe, s'assoit ou s'agenouille). Déroute :
+## un régiment à pied débandé depuis 2 s (armes au sol, course de fuite).
+func _ep12_shot_ready(p_units: Array) -> bool:
+	if _ep12_ticks >= 0:
+		_ep12_ticks -= 1
+		return _ep12_ticks < 0
+	if _ep12_shot == "wounded":
+		if soldiers.wounded_count >= 30 and soldiers.last_wounded_pos != null:
+			_ep12_focus = soldiers.last_wounded_pos
+			_ep12_ticks = 25
+	elif _ep12_shot == "rout":
+		for unit in p_units:
+			var id := int(unit["id"])
+			if bool(unit["present"]) and str(unit["render"]) != "cavalry" and soldiers.disarmed_units.has(id) and soldiers.anim_time - float(soldiers.disarmed_units[id]) >= 2.0:
+				_ep12_focus = id
+				return true
+	return false
+
+
+func _apply_ep12_shot() -> void:
+	if _ep12_shot == "" or _ep12_focus == null:
+		if _ep12_shot != "":
+			push_warning("BattleScene: nothing to frame for --ep12-shot=%s" % _ep12_shot)
+		return
+	selected.clear()
+	var dropped: int = soldiers.dropped_arms.shown_count() if soldiers.dropped_arms != null else 0
+	if _ep12_shot == "wounded":
+		var at: Vector3 = _ep12_focus
+		camera_rig.look_at_point(at, 7.0, 0.7)
+		if camera_rig.camera != null:
+			# Vue plongeante : le blessé est au sol, souvent derrière les hommes debout.
+			camera_rig.set_process(false)
+			var ground := Vector3(at.x, terrain.height_at(at.x, at.z), at.z)
+			camera_rig.camera.global_position = ground + Vector3(sin(0.7), 0, cos(0.7)) * 5.5 + Vector3(0, 5.0, 0)
+			camera_rig.camera.look_at(ground, Vector3.UP)
+		print("BattleScene: EP12 wounded shot at %s, %d wounded, %d arms on the ground" % [at, soldiers.wounded_count, dropped])
+		return
+	for unit in units:
+		if int(unit["id"]) != int(_ep12_focus):
+			continue
+		# Devant les fuyards (ils courent vers la caméra), de trois quarts.
+		var facing := float(unit["facing"])
+		var at := Vector3(float(unit["x"]), 0, float(unit["z"]))
+		var yaw := atan2(sin(facing), cos(facing)) + 0.5
+		camera_rig.look_at_point(at, 16.0, yaw)
+		if camera_rig.camera != null:
+			camera_rig.set_process(false)
+			var ground := Vector3(at.x, terrain.height_at(at.x, at.z), at.z)
+			camera_rig.camera.global_position = ground + Vector3(sin(yaw), 0, cos(yaw)) * 11.0 + Vector3(0, 4.5, 0)
+			camera_rig.camera.look_at(ground + Vector3(0, 0.8, 0), Vector3.UP)
+		print("BattleScene: EP12 rout shot on %s (%s), %d arms on the ground, %d wounded" % [str(unit["name"]), str(unit["type"]), dropped, soldiers.wounded_count])
 
 
 ## Préférence de `--standard-shot` : le camp voulu d'abord, puis le général et sa retenue noble

@@ -50,6 +50,7 @@ var _selected: Array = []
 var hovered: int = -1  # repère sous la souris
 var world_hover: int = -1  # troupe survolée sur le terrain (fournie par la scène)
 var _icons: Dictionary = {}  # id -> Texture2D
+var _miniature: Dictionary = {}  # id -> vrai si l'icône est une miniature d'entité (DA5b)
 
 
 func _ready() -> void:
@@ -272,7 +273,9 @@ func _draw_marker(id: int, entry: Dictionary, blink: bool) -> void:
 	draw_rect(inner, fill)
 	var icon := _icon_for(unit)
 	if icon != null:
-		var size := inner.size.y - 2.0
+		# DA5b : la miniature peinte porte son cadre, elle couvre la plaque ; une icône au trait
+		# garde sa marge de parchemin.
+		var size := plaque.size.y - 2.0 if _miniature.get(int(unit["id"]), false) else inner.size.y - 2.0
 		draw_texture_rect(icon, Rect2(inner.get_center() - Vector2(size, size) * 0.5, Vector2(size, size)), false)
 	draw_rect(plaque, INK, false, 1.0)
 	if bool(unit["is_general"]):
@@ -466,5 +469,6 @@ func _icon_for(unit: Dictionary) -> Texture2D:
 		var category := "unit_category_" + str(unit.get("render", "infantry"))
 		var icon_id: String = category if icon_library.call("has_icon", category) else str(unit.get("type", ""))
 		texture = icon_library.call("get_icon", icon_id, "unit")
+		_miniature[id] = icon_library.has_method("is_entity") and bool(icon_library.call("is_entity", icon_id, "unit"))
 	_icons[id] = texture
 	return texture

@@ -201,10 +201,14 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 		key = "idle"
 	var entry: Dictionary = sets[key]
 	var rig_entry := rig(kind, variant)
+	var names: Array = entry["set"]
+	# EP12 : jeu de repli quand le manifeste n'a pas encore les clips (kit antérieur).
+	if entry.has("fallback") and not rig_entry.get("clips", {}).has(str(names[0])):
+		names = entry["fallback"]
 	var ids: Array[int] = []
-	for c in entry["set"]:
+	for c in names:
 		ids.append(clip_index(rig_entry, str(c)))
-	var config := {"key": cache_key, "names": entry["set"], "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
+	var config := {"key": cache_key, "names": names, "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
 	_configs[cache_key] = config
 	return config
 
@@ -220,6 +224,26 @@ static func death_config(kind: String, variant: int) -> Dictionary:
 	if ids.is_empty():
 		ids.append(0)
 	return {"key": "%s/%d/dead" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
+
+
+## Lot EP12 : blessés au sol (mode CUSTOM, INSTANCE_CUSTOM.y = indice dans ce jeu) ; vide si
+## le rig n'a pas les clips (kit antérieur) ou pour les cavaliers.
+static func wounded_config(kind: String, variant: int) -> Dictionary:
+	if kind == "cavalry":
+		return {}
+	var rig_entry := rig(kind, variant)
+	var ids: Array[int] = []
+	for c in WOUNDED_FOOT:
+		if not rig_entry.get("clips", {}).has(c):
+			return {}
+		ids.append(clip_index(rig_entry, str(c)))
+	return {"key": "%s/%d/wounded" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
+
+
+## Style d'animation de la figurine (`sword`, `pike`, `bow`...), exposé au rendu (EP12 : armes
+## laissées au sol par les fuyards).
+static func style_of(kind: String, variant: int) -> String:
+	return _style(kind, variant)
 
 
 ## Style d'animation de la figurine : champ `style` du manifeste (lot UR1), sinon règle
@@ -320,6 +344,10 @@ static func rigid_variant(kind: String, variant: int) -> int:
 
 
 const DEATHS_FOOT := ["death", "death_m", "death_back", "death_knees"]
+## Lot EP12 : blessés (rampe, assis, à genoux) ; ordre = INSTANCE_CUSTOM.y de la couche.
+const WOUNDED_FOOT := ["crawl", "wounded_sit", "wounded_kneel"]
+## Lot EP12 : drapeau ajouté au code de INSTANCE_CUSTOM.w (cadavre ou blessé désarmé).
+const CODE_UNARMED := 8
 ## Lot BV2 : `c_fall` = cavalier désarçonné (le cheval s'enfuit, code 6 du shader).
 const DEATHS_CAVALRY := ["c_death", "c_death_m", "c_fall"]
 ## Lot BV2 : parties tranchées (code de INSTANCE_CUSTOM.w, 1-5) → os du rig (plage, plus deux
@@ -403,7 +431,7 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"], "speed": 1.05},
 		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.3},
-		"routing": {"set": ["run"], "speed": 1.1},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "guard", "idle"], "mode": M_SPLIT},
 	},
 	# Lot BV2 : lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
@@ -414,7 +442,7 @@ const STYLES := {
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3},
 		"brace": {"set": ["pike_level"]},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "idle", "guard"], "mode": M_SPLIT},
 	},
 	"pike": {
@@ -425,7 +453,7 @@ const STYLES := {
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
 		# Lot BV2 : piques abaissées face à une charge de cavalerie (rendu seulement).
 		"brace": {"set": ["pike_level"]},
-		"routing": {"set": ["run"], "speed": 1.1},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "pike_idle"], "mode": M_SPLIT},
 	},
 	"bow": {
@@ -435,7 +463,7 @@ const STYLES := {
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
 		"melee": {"set": ["slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.5},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 	},
 	"crossbow": {
 		"idle": {"set": ["xbow_idle"]},
@@ -444,7 +472,7 @@ const STYLES := {
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["xbow_shoot"], "mode": M_VOLLEY, "release": 0.3},
 		"melee": {"set": ["slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.5},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 	},
 	"lance": {
 		"idle": {"set": ["c_idle"]},
