@@ -175,9 +175,10 @@
           "additionalProperties": false
         },
         "max_total": { "type": "integer", "minimum": 0, "maximum": 20000, "description": "Plafond de blessés sur le champ (au-delà : morts ordinaires)." },
-        "max_distance_m": { "type": "number", "minimum": 0, "maximum": 5000, "description": "Au-delà de cette distance à la caméra, les pertes restent des morts ordinaires (animation invisible)." }
+        "max_animated": { "type": "integer", "minimum": 0, "maximum": 5000, "description": "Plafond de blessés tombés depuis moins de `animated_seconds` (ceux qui bougent encore) ; au-delà : morts ordinaires." },
+        "animated_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 60, "description": "Durée d'animation d'un blessé (clip le plus long, 7 s)." }
       },
-      "required": ["share", "clips", "max_total", "max_distance_m"],
+      "required": ["share", "clips", "max_total", "max_animated", "animated_seconds"],
       "additionalProperties": false
     },
     "dropped_arms": {

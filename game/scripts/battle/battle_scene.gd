@@ -2099,6 +2099,12 @@ func _apply_ep12_shot() -> void:
 	if _ep12_shot == "wounded":
 		var at: Vector3 = _ep12_focus
 		camera_rig.look_at_point(at, 7.0, 0.7)
+		if camera_rig.camera != null:
+			# Vue plongeante : le blessé est au sol, souvent derrière les hommes debout.
+			camera_rig.set_process(false)
+			var ground := Vector3(at.x, terrain.height_at(at.x, at.z), at.z)
+			camera_rig.camera.global_position = ground + Vector3(sin(0.7), 0, cos(0.7)) * 5.5 + Vector3(0, 5.0, 0)
+			camera_rig.camera.look_at(ground, Vector3.UP)
 		print("BattleScene: EP12 wounded shot at %s, %d wounded, %d arms on the ground" % [at, soldiers.wounded_count, dropped])
 		return
 	for unit in units:
@@ -2107,7 +2113,13 @@ func _apply_ep12_shot() -> void:
 		# Devant les fuyards (ils courent vers la caméra), de trois quarts.
 		var facing := float(unit["facing"])
 		var at := Vector3(float(unit["x"]), 0, float(unit["z"]))
-		camera_rig.look_at_point(at, 16.0, atan2(sin(facing), cos(facing)) + 0.5)
+		var yaw := atan2(sin(facing), cos(facing)) + 0.5
+		camera_rig.look_at_point(at, 16.0, yaw)
+		if camera_rig.camera != null:
+			camera_rig.set_process(false)
+			var ground := Vector3(at.x, terrain.height_at(at.x, at.z), at.z)
+			camera_rig.camera.global_position = ground + Vector3(sin(yaw), 0, cos(yaw)) * 11.0 + Vector3(0, 4.5, 0)
+			camera_rig.camera.look_at(ground + Vector3(0, 0.8, 0), Vector3.UP)
 		print("BattleScene: EP12 rout shot on %s (%s), %d arms on the ground, %d wounded" % [str(unit["name"]), str(unit["type"]), dropped, soldiers.wounded_count])
 
 
