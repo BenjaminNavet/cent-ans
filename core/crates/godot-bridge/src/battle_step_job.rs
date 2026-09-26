@@ -180,7 +180,11 @@ mod tests {
             }
             assert_eq!(piped_sim.ticks(), sync_sim.ticks(), "frame {frame}");
             if frame % 97 == 0 || sync_sim.is_finished() {
-                assert_eq!(format!("{piped_sim:?}"), format!("{sync_sim:?}"), "frame {frame}");
+                assert_eq!(
+                    format!("{piped_sim:?}"),
+                    format!("{sync_sim:?}"),
+                    "frame {frame}"
+                );
             }
             if sync_sim.is_finished() {
                 break;
