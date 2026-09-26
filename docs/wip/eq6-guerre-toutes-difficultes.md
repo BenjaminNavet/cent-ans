@@ -6,7 +6,58 @@ Décision du joueur (2026-09-26) : la cible « France et Angleterre en guerre 55
 vaut à tous les niveaux, pas seulement en Normale. La difficulté change la dureté de la guerre
 pour le joueur, pas le fait qu'elle ait lieu.
 
-## État : terminé (à fusionner)
+## État : EN PAUSE (session suspendue par le joueur, 2026-09-26) — pas prêt à fusionner
+
+### Où l'on en est (lire d'abord)
+
+- main fusionné une seconde fois (commit de fusion après 4f07e4db) : main apportait des
+  changements de campagne (Q5 : négociation, sièges, mouvements) qui redistribuent les guerres.
+- Après cette fusion, l'Écosse disparaissait en facile (graine 2, 1396) : la règle 4
+  (« l'acculé attend d'être battu ») s'appliquait aussi à l'Écosse entrée en guerre à l'appel de
+  la France. Correctif (commit 7931b970) : la règle ne vaut que contre un prétendant au trône de
+  l'acculé (l'Angleterre contre la France) ; l'Écosse traite aussitôt comme avant. Vérifié sur
+  la graine 2 : l'Écosse vit.
+- **Mesure finale après fusion + correctif** (`century_probe` 464 tours, binaire `cp_m2`) :
+
+| Niveau | Guerre FR-EN | Trêves | Majeures 1400 | 1re faction fin (max) | Banqueroutes |
+|---|---|---|---|---|---|
+| Facile (5) | 66 % [52-72], **4/5** | 12,2 | 5/5 | 30 % | 0,07 |
+| Normale (10) | 67 % [59-73], **10/10** | 13,1 | 10/10 | 30 % | 0,07 |
+| Difficile (10) | 56 % [44-64], **5/10** ✗ | 16,0 | 10/10 | 39 % | 0,03 |
+| Très difficile (5) | 57 % [39-68], **4/5** | 18,6 ✗ | 5/5 | 35 % | 0,01 |
+
+  `balance_probe` 16 × 200 (normale, même binaire) : guerre FR-EN 65 / 70 %, révoltes 5,2 / 4,9
+  par partie (cible 4-10 ✓), banqueroutes 0,07 / 0,06, impôt Haut 30 / 32 %, milice 27 %.
+
+- **Ce qui manque** : le niveau difficile retombe à 5/10 graines après la fusion de main
+  (8/10 avant la fusion, v8) ; trêves très difficile 18,6 (> 16) ; 1re faction jusqu'à 39 % en
+  difficile (Angleterre dominant le royaume 59-86 % du siècle). Les tableaux « avant / après »
+  plus bas sont ceux d'avant la seconde fusion (v8).
+- **Vérifications** : `cargo fmt`, `cargo clippy --all-targets -D warnings` et `cargo test`
+  (workspace) verts après la fusion mais AVANT le correctif Écosse ; après le correctif, seuls
+  `cargo fmt` et les tests `eq6_main_claim` (4/4) ont tourné. `core/build.sh`, import Godot et
+  `smoke.gd` OK après le correctif. `pytest` vert avant la seconde fusion. À refaire : clippy +
+  `cargo test` complets.
+
+### Prochaine étape (reprise)
+
+1. `cargo clippy --all-targets -- -D warnings` et `cargo test` complets.
+2. Difficile : diagnostiquer avec le tableau « EQ6 » de `century_probe`
+   (`DIFFICULTY=hard … 464 1 … 10`) pourquoi la part retombe après la fusion (obstacles
+   dominants : trêve, fatigue, guerres courtes contre une France dominée ?). Pistes : l'Angleterre
+   domine davantage la France en difficile depuis Q5 (sièges) → guerres courtes ; essayer
+   `min_war_turns` 20 → 24 ou le seuil de l'acculé, en vérifiant l'Écosse et la normale.
+3. Remettre à jour les tableaux « avant / après » et l'ADR 0085 (section Conséquences) avec la
+   mesure finale, puis `git merge main` et rapport.
+
+Commandes de reprise :
+
+```
+cd core && cargo build --release -p ai --example century_probe --example balance_probe
+DIFFICULTY=hard target/release/examples/century_probe 464 1 2 3 4 5 6 7 8 9 10
+```
+
+## Historique (avant la seconde fusion de main)
 
 - [x] Sonde `century_probe` : tableau « EQ6 » (guerres ouvertes par l'Angleterre / la France,
       tours de paix et obstacles à la déclaration anglaise), `WAR_TRACE=1` (en paix : raisons et
