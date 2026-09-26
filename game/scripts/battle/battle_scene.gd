@@ -476,6 +476,13 @@ func replay_seek(seconds: float) -> void:
 ## arrière ou au début d'un rejeu lancé depuis l'écran de fin).
 func _reset_battle_visuals() -> void:
 	units = battle.call("get_units")
+	# Les imposteurs survivent au saut : atlas déjà cuits gardés, et une cuisson en cours (coroutine
+	# sur ce nœud) ne reprend jamais sur une instance libérée.
+	var kept_impostors: BattleImpostors = null
+	if soldiers != null and is_instance_valid(soldiers) and soldiers.impostors != null and is_instance_valid(soldiers.impostors):
+		kept_impostors = soldiers.impostors
+		soldiers.remove_child(kept_impostors)
+		soldiers.impostors = null
 	for node in [soldiers, standards, duels, effects, engines_fx, assault_fx]:
 		if node != null and is_instance_valid(node):
 			(node as Node).get_parent().remove_child(node)
@@ -487,7 +494,7 @@ func _reset_battle_visuals() -> void:
 	engines_fx = null
 	assault_fx = null
 	grass_flatten = null
-	_build_soldier_layers()
+	_build_soldier_layers(kept_impostors)
 
 
 ## EP13 : « Revoir la bataille » depuis l'écran de fin (résultat déjà appliqué à la campagne).
@@ -761,15 +768,18 @@ func _pad_setup(count: int) -> void:
 		setup[side]["units"] = list
 
 
-func _build_soldier_layers() -> void:
+## `kept_impostors` : imposteurs repris d'avant un saut arrière du rejeu (EP13), sinon créés.
+func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 	soldiers = BattleSoldiers.new()
 	soldiers.name = "Soldiers"
 	add_child(soldiers)
 	if not _no_bv3 and not _no_impostors:
 		# BV3 : imposteurs lointains, cuits au début de la bataille (ADR 0024).
-		soldiers.impostors = BattleImpostors.new()
+		soldiers.impostors = kept_impostors if kept_impostors != null else BattleImpostors.new()
 		soldiers.impostors.name = "Impostors"
 		soldiers.add_child(soldiers.impostors)
+	elif kept_impostors != null:
+		kept_impostors.queue_free()
 	var factions := {}
 	var houses := {}  # DA1 : maison du général par camp
 	for side in ["attacker", "defender"]:
