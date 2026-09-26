@@ -60,7 +60,8 @@ unsafe impl ExtensionLibrary for CentAnsExtension {}
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
 pub struct GameDataStore {
-    data: Option<GameData>,
+    /// Shared with `CampaignSim` (one load per data folder).
+    data: Option<std::sync::Arc<GameData>>,
     warnings: Vec<String>,
     last_image_size: Vector2i,
     base: Base<RefCounted>,
@@ -86,9 +87,9 @@ impl GameDataStore {
     #[func]
     fn load(&mut self, data_dir: GString) -> bool {
         let root = PathBuf::from(data_dir.to_string());
-        match GameData::load(&root) {
+        match campaign_sim::load_shared_data(&root) {
             Ok((data, warnings)) => {
-                self.warnings = warnings.iter().map(ToString::to_string).collect();
+                self.warnings = warnings.to_vec();
                 self.data = Some(data);
                 true
             }
