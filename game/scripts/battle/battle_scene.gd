@@ -25,7 +25,10 @@ extends Node3D
 ## `--shot-at=<s>` (capture : à cet instant de la bataille plutôt qu'au premier contact, B4),
 ## `--standard-shot=<foot|mounted|line|fallen|captured>` (capture EP5 : gros plan d'un
 ## porte-étendard à pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé,
-## étendard pris porté par le vainqueur).
+## étendard pris porté par le vainqueur) ; `--standard-side=<attacker|defender>` choisit le camp
+## cadré (DA1b : étendards aux armes de la maison du général ennemi).
+## `--no-da6` (végétation de bataille DA6 coupée : herbe, lisières, arbres, sol de près ; captures
+## « avant »), `--bench-ab=da6,no-da6` (banc : les deux végétations alternées, DA6).
 ## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
 ## `--horizon-province=<id>`, `--panorama=<id>` (captures EP2).
 ## EP8 (mise en scène, `BattleStaging`) : `--hour=<dawn|morning|midday|afternoon|dusk|night|h>`
@@ -57,6 +60,7 @@ var setup: Dictionary = {}
 var player_side: String = "attacker"
 var enemy_side: String = "defender"
 var side_colors: Dictionary = {}
+var _side_houses: Dictionary = {}  # DA1 / DA1b : maison du général par camp (écus, étendards)
 var side_names: Dictionary = {}
 var units: Array = []
 var selected: Array[int] = []
@@ -142,6 +146,7 @@ var _pad_units: int = 0
 var _scale_tier: String = ""  # EP1 : palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
+var _standard_side: String = ""  # DA1b : `--standard-side=` (camp cadré par `--standard-shot`)
 var _standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen|captured>`
 var _weather_override: String = ""
 var _camera_override: String = ""
@@ -166,8 +171,16 @@ var _dust_shot: bool = false  # EP8 : `--dust-shot` (charge de cavalerie et sa p
 var _dust_unit: int = -1
 var _dust_since: float = -1.0
 var _title_text: String = ""
+## EP7 : bataille historique (`--historical=<id>`, `--historical-side=<attacker|defender>`, vide :
+## IA contre IA) ; `historical` = `BattleSim.get_historical()` (vide hors carte historique).
+var _historical: String = ""
+var _historical_side: String = ""
+var historical: Dictionary = {}
+var _sim_weather: String = ""
+var _weather_poll: float = 0.0
 var _weather_text: String = ""
 var _tod_key: String = ""
+var _tod_clock: String = ""  # EP8b : dernière heure affichée au bandeau (« Midi, 11 h 00 »)
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -196,6 +209,14 @@ func _ready() -> void:
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_drag_rect.visible = false
 	hud.add_child(_drag_rect)
+	if campaign_sim == null and _historical != "":
+		# EP7 : carte historique jouée hors campagne (menu « Batailles historiques »).
+		standalone = true
+		if not begin_historical():
+			push_error("BattleScene: historical battle %s failed" % _historical)
+			if _benchmark:
+				_bench_fail("historical battle setup failed")
+		return
 	if campaign_sim == null:
 		standalone = true
 		if not _stage_standalone():
@@ -285,6 +306,36 @@ func begin() -> bool:
 			battle.call("set_start_hour", float(_hour_override))
 		elif not battle.call("set_start_phase", _hour_override):
 			push_warning("BattleScene: unknown --hour=%s" % _hour_override)
+	return _build_scene()
+
+
+## EP7 : bataille historique `_historical` (site réel, ordres de bataille, météo, heure) ; le
+## résultat n'est pas conservé (hors campagne).
+func begin_historical() -> bool:
+	if not ClassDB.class_exists("BattleSim"):
+		return false
+	_audio_director = get_node_or_null("/root/AudioDirector")
+	if _audio_director != null:
+		_audio_director.call("stop_all")
+	battle = ClassDB.instantiate("BattleSim")
+	if not battle.has_method("setup_historical"):
+		return false
+	var paths := get_node_or_null("/root/MapPaths")
+	var data_dir: String = paths.data_dir if paths != null else ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
+	if not battle.call("setup_historical", data_dir, _historical, _historical_side, battle_seed):
+		return false
+	setup = battle.call("get_setup")
+	padded = true  # hors campagne : pas de résultat à rapporter
+	if _hour_override != "":
+		if _hour_override.is_valid_float():
+			battle.call("set_start_hour", float(_hour_override))
+		else:
+			battle.call("set_start_phase", _hour_override)
+	return _build_scene()
+
+
+## Scène de bataille (terrain, soldats, interface) une fois `battle` et `setup` prêts.
+func _build_scene() -> bool:
 	var setup_side: Variant = setup.get("player_side", "attacker")
 	player_side = str(setup_side) if setup_side != null else ""
 	if player_side == "" and standalone and siege_landmark != "":
@@ -300,11 +351,23 @@ func begin() -> bool:
 		var side_setup: Dictionary = setup[side]
 		side_names[side] = str(side_setup.get("faction_name", side))
 		side_colors[side] = _faction_color(str(side_setup.get("faction", "")), side)
+		# DA1 : maison du général (armes du HUD et des figurines nobles), rendu seulement.
+		var general: Variant = side_setup.get("general", null)
+		if general is Dictionary and not (general as Dictionary).has("house"):
+			(general as Dictionary)["house"] = HouseArms.house_of(str((general as Dictionary).get("character", "")), campaign_sim)
 	var weather: Dictionary = battle.call("get_weather")
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
+	# EP7 : une carte historique est rendue sous son ciel final ; l'averse du début tombe de ce
+	# ciel et cesse quand la simulation change de météo (Crécy).
+	historical = battle.call("get_historical") if battle.has_method("get_historical") else {}
+	_sim_weather = str(weather.get("key", "clear"))
+	if not historical.is_empty() and _weather_override == "":
+		weather_key = str(historical.get("weather_end", weather_key))
 	_weather_key = weather_key
 	var terrain_data: Dictionary = battle.call("get_terrain")
 	terrain.province_id = str(setup.get("province", ""))  # EP2 : relief réel et panorama du lieu
+	# EP7 : tuile d'horizon du site historique (campagne sur le site ou carte du menu).
+	terrain.horizon_site = str(historical.get("horizon", setup.get("historical_horizon", "")))
 	terrain.build(terrain_data, weather_key)
 	if terrain.decor_view != null:
 		terrain.decor_view.bind(battle)  # EP6 : pillage des camps
@@ -323,6 +386,8 @@ func begin() -> bool:
 			if landmark_town != null:
 				add_child(landmark_town)
 	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	if _sim_weather == "rain" and weather_key != "rain":
+		BattleAtmosphere.add_shower(camera_rig.camera)  # EP7 : averse qui cessera
 	if terrain.horizon != null:
 		terrain.horizon.apply_atmosphere(world_env.environment, sun, weather_key)  # EP2
 	var field_center := terrain.field_center()  # EP1 : (600, 400) au palier standard
@@ -337,13 +402,21 @@ func begin() -> bool:
 		_make_banner(unit)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
+	if not historical.is_empty():
+		# EP7 : « Bataille de Crécy (26 août 1346) » ; sur le site en campagne : « … , champ de Crécy ».
+		if bool(historical.get("site_only", false)):
+			title += " — champ de bataille de %s" % str(historical.get("place", ""))
+		else:
+			title = "%s (%s)" % [str(historical.get("name", title)), str(historical.get("date_fr", ""))]
 	if landmark_town != null:
 		title = "Assaut %s (%s)" % [BattleScene.de(str(landmark_town.landmark.get("name", ""))), str(landmark_town.landmark.get("gate_name", ""))]
 	# `--weather=` ne force que le rendu (outil de capture) : la simulation, donc les règles
 	# (tir, fatigue) et le libellé, gardent la météo tirée par `core`. On le signale au bandeau
 	# plutôt que d'afficher une météo que les règles n'appliquent pas.
 	var weather_label := str(weather.get("label", ""))
-	if weather_key != str(weather.get("key", "clear")):
+	if not historical.is_empty() and _weather_override == "" and str(historical.get("weather_label", "")) != "":
+		weather_label = str(historical["weather_label"])  # EP7 : « Averse d'orage, puis… »
+	elif weather_key != str(weather.get("key", "clear")):
 		weather_label += " (rendu forcé : %s)" % weather_key
 		print("BattleScene: --weather=%s overrides rendering only; simulated weather is %s" % [weather_key, weather.get("key", "?")])
 	_title_text = title
@@ -444,16 +517,21 @@ func add_smoke_source(position: Vector3, intensity: float = 1.0, kind: String = 
 	return staging.add_smoke_source(position, intensity, kind) if staging != null else -1
 
 
-## EP8 : l'heure au bandeau (« Temps clair · Crépuscule (portée des tireurs −30 %) ») ;
-## rafraîchi à chaque changement de phase.
+## EP8 : l'heure au bandeau (« Temps clair · Crépuscule, 18 h 40 (portée des tireurs −30 %) ») ;
+## EP8b (ADR 0055) : l'heure elle-même s'affiche (`BattleTimeOfDay.clock_label`), pas seulement le
+## nom de la phase, pour que le temps compressé de la bataille (0,2 min de jour par seconde
+## simulée) reste lisible ; rafraîchi à chaque changement de phase ou d'heure affichée (arrondie à
+## 10 min).
 func _update_time_label() -> void:
 	if staging == null or staging.tod.is_empty():
 		return
 	var key := str(staging.tod.get("key", ""))
-	if key == _tod_key:
+	var clock := BattleTimeOfDay.clock_label(staging.tod)
+	if key == _tod_key and clock == _tod_clock:
 		return
 	_tod_key = key
-	var label := str(staging.tod.get("label", ""))
+	_tod_clock = clock
+	var label := clock
 	var visibility := float(staging.tod.get("visibility", 1.0))
 	if visibility < 0.999:
 		label += " (portée des tireurs −%d %%)" % int(round((1.0 - visibility) * 100.0))
@@ -507,9 +585,13 @@ func _build_soldier_layers() -> void:
 		soldiers.impostors.name = "Impostors"
 		soldiers.add_child(soldiers.impostors)
 	var factions := {}
+	var houses := {}  # DA1 : maison du général par camp
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
-	soldiers.setup(units, side_colors, factions)
+		var general: Variant = (setup[side] as Dictionary).get("general", null)
+		houses[side] = str((general as Dictionary).get("house", "")) if general is Dictionary else ""
+	_side_houses = houses
+	soldiers.setup(units, side_colors, factions, houses)
 	_mm = soldiers.layers
 	_setup_standards()
 	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
@@ -565,7 +647,7 @@ func _setup_standards() -> void:
 	var factions := {}
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup.get(side, {}) as Dictionary).get("faction", ""))
-	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle)
+	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle, _side_houses)
 	for id in _banners:
 		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
 	if terrain.vegetation != null:
@@ -728,7 +810,8 @@ func _make_banner(unit: Dictionary) -> void:
 ## Étoffe d'un drapeau de régiment : bannière peinte de la faction (`heraldry/banners/`,
 ## 256×512, tissu dans le haut, bas transparent) pour la noblesse, fanion à queue d'aronde (4:1)
 ## pour les autres, étendards royaux pour le général de France / d'Angleterre ; à défaut, centre
-## de l'écu de la faction (repli).
+## de l'écu de la faction (repli). DA1b : le général et les unités nobles de sa retenue portent
+## la bannière de sa maison (`heraldry/banners/houses/`) quand elle existe.
 func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
 	var dir := "res://assets/heraldry/banners/"
 	var noble := str(unit.get("type", "")) in ["unit_knights", "unit_men_at_arms_foot"]
@@ -742,6 +825,11 @@ func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
 			candidates.append([dir + ("oriflamme.png" if faction == "fac_france" else "dragon.png"), Vector2(1.3, 2.6)])
 		elif faction == "fac_england":
 			candidates.append([dir + "st_george.png", Vector2(1.3, 2.6)])
+	var house := HouseArms.id_of(str(_side_houses.get(str(unit.get("side", "")), "")))
+	if house != "" and (bool(unit.get("is_general", false)) or BattleStandards.is_house_retinue(unit)):
+		var house_banner: Array = [dir + "houses/%s_banner.png" % house, Vector2(1.3, 2.6)]
+		var no_quarter_first := not candidates.is_empty() and (str(candidates[0][0]).ends_with("oriflamme.png") or str(candidates[0][0]).ends_with("dragon.png"))
+		candidates.insert(1 if no_quarter_first else 0, house_banner)
 	if noble or str(unit.get("render", "")) == "siege":
 		candidates.append([dir + "%s_banner.png" % faction, Vector2(1.3, 2.6)])
 	else:
@@ -814,10 +902,31 @@ func _process(delta: float) -> void:
 		staging.update(units, delta * speed * slow if running else 0.0, delta, bool(battle.call("is_finished")))
 		_update_time_label()
 	_update_audio(delta)
+	_poll_weather(delta)
 	if battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
 		_run_benchmark_frame(delta)
+
+
+## EP7 : la météo d'une carte historique change pendant la bataille (averse de Crécy) : la pluie
+## cesse de tomber, le journal l'annonce (le ciel est déjà celui de la fin).
+func _poll_weather(delta: float) -> void:
+	if historical.is_empty():
+		return
+	_weather_poll -= delta
+	if _weather_poll > 0.0:
+		return
+	_weather_poll = 1.0
+	var key := str((battle.call("get_weather") as Dictionary).get("key", _sim_weather))
+	if key == _sim_weather:
+		return
+	var camera := camera_rig.camera
+	if _sim_weather == "rain" and camera.get_node_or_null("Precipitation") != null and _weather_key != "rain":
+		camera.get_node("Precipitation").queue_free()
+	elif key == "rain" and _weather_key != "rain":
+		BattleAtmosphere.add_shower(camera)
+	_sim_weather = key
 
 
 ## T8 : une image du banc d'essai (`--benchmark`). Fenêtre de `BENCH_FRAMES` images mesurées,
@@ -860,7 +969,8 @@ func _run_benchmark_frame(delta: float) -> void:
 		_bench_gpu_ms += gpu_ms
 		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
 		_bench_gpu_samples += 1
-		_bench_ab_step(gpu_ms)
+		# DA6 : sous Metal le temps GPU mesuré vaut 0 : durée de l'image à la place (vsync coupée).
+		_bench_ab_step(gpu_ms if gpu_ms > 0.0 else delta * 1000.0)
 	if _bench_timed_out():
 		_bench_fail("timeout after %d frames of repeat %d/%d (%.0f s wall budget)" % [_bench_frames, _bench_repeat_done + 1, _bench_repeat, _bench_timeout_s])
 		return
@@ -887,10 +997,15 @@ func _bench_finish() -> void:
 	for ms in sorted_ms:
 		total_s += ms / 1000.0
 	var ab_result := {}
+	var ab_mean := {}  # DA6 : moyenne aussi (la médiane colle aux paliers de la cadence d'affichage)
 	for level in _bench_ab_ms:
 		var samples: Array = _bench_ab_ms[level]
 		samples.sort()
 		ab_result[level] = samples[samples.size() / 2] if not samples.is_empty() else 0.0
+		var sum := 0.0
+		for v in samples:
+			sum += float(v)
+		ab_mean[level] = sum / maxf(float(samples.size()), 1.0)
 	var result := {
 		"ok": true,
 		"units": units.size(),
@@ -913,6 +1028,7 @@ func _bench_finish() -> void:
 	}
 	if not ab_result.is_empty():
 		result["ab"] = ab_result
+		result["ab_mean"] = ab_mean
 	# EP1 : palier d'échelle, champ, soldats présents, figurines, primitives, budget d'animation.
 	var on_field := 0
 	var figures := 0
@@ -1003,8 +1119,11 @@ func _bench_ab_step(gpu_ms: float) -> void:
 	var phase := (_bench_measured - 11) % 30
 	var level := _bench_ab[slot % _bench_ab.size()]
 	if phase == 0:
-		RenderQuality.override_level = level
-		RenderQuality.reapply(get_tree())
+		if level in ["da6", "no-da6"]:
+			terrain.set_da6_view(level == "da6")  # DA6 : végétation de bataille A/B
+		else:
+			RenderQuality.override_level = level
+			RenderQuality.reapply(get_tree())
 	elif phase >= 4:
 		if not _bench_ab_ms.has(level):
 			_bench_ab_ms[level] = []
@@ -1609,6 +1728,8 @@ func _parse_cmdline() -> void:
 			siege_attacker = arg.trim_prefix("--siege-attacker=")
 		elif arg.begins_with("--siege-engines="):
 			_siege_engines = arg.trim_prefix("--siege-engines=")
+		elif arg.begins_with("--standard-side="):
+			_standard_side = arg.trim_prefix("--standard-side=")
 		elif arg.begins_with("--camera="):
 			_camera_override = arg.trim_prefix("--camera=")
 		elif arg == "--result-shot":
@@ -1642,6 +1763,10 @@ func _parse_cmdline() -> void:
 			_weather_override = arg.trim_prefix("--weather=")
 		elif arg.begins_with("--hour="):
 			_hour_override = arg.trim_prefix("--hour=")
+		elif arg.begins_with("--historical="):
+			_historical = arg.trim_prefix("--historical=")
+		elif arg.begins_with("--historical-side="):
+			_historical_side = arg.trim_prefix("--historical-side=")
 		elif arg == "--cinematic":
 			_force_cinematic = true
 		elif arg == "--birds-shot":
@@ -1678,7 +1803,8 @@ func _stage_screenshot() -> void:
 		await _stage_result_screenshot()
 		return
 	var contact_time := -1.0
-	for _i in 3000:
+	# EP7 : sur une carte historique, les batailles françaises montent longtemps avant le choc.
+	for _i in (9000 if not historical.is_empty() else 3000):
 		battle.call("tick", 0.1)
 		# Les soldats tombés pendant l'avance rapide laissent aussi leurs cadavres.
 		units = battle.call("get_units")
@@ -1901,7 +2027,7 @@ func _apply_standard_shot() -> void:
 				for other in units:
 					if int(other.get("standard_by", -1)) == int(unit["id"]):
 						ok = true
-		if ok and (best.is_empty() or (str(unit["side"]) == player_side and str(best["side"]) != player_side)):
+		if ok and (best.is_empty() or _standard_shot_score(unit) > _standard_shot_score(best)):
 			best = unit
 	if best.is_empty():
 		push_warning("BattleScene: no regiment for --standard-shot=%s" % _standard_shot)
@@ -1929,6 +2055,18 @@ func _apply_standard_shot() -> void:
 		camera_rig.camera.global_position = at + Vector3(sin(yaw), 0, cos(yaw)) * 6.0 + Vector3(0, 7.5, 0)
 		camera_rig.camera.look_at(at, Vector3.UP)
 	print("BattleScene: EP5 %s shot on %s (%s) at %s, standard %s, %d standards, %d figures, %d fallen" % [_standard_shot, str(best["name"]), str(best["type"]), point, str(best.get("standard", "")), standards.shown_count, standards.figure_count, standards.fallen_count])
+
+
+## Préférence de `--standard-shot` : le camp voulu d'abord, puis le général et sa retenue noble
+## (DA1b : leurs étendards portent les armes de la maison du général).
+func _standard_shot_score(unit: Dictionary) -> int:
+	var wanted := _standard_side if _standard_side != "" else player_side
+	var score := 4 if str(unit["side"]) == wanted else 0
+	if bool(unit.get("is_general", false)):
+		score += 2
+	elif BattleStandards.is_house_retinue(unit):
+		score += 1
+	return score
 
 
 ## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).
@@ -1975,6 +2113,9 @@ static func de(name: String) -> String:
 func _open_deployment() -> void:
 	if autoplay and not _deploy_shot:
 		return
+	if not historical.is_empty() and not bool(historical.get("site_only", false)):
+		return  # EP7 : déploiement historique imposé
+
 	deployment = DeploymentController.new()
 	deployment.name = "Deployment"
 	add_child(deployment)

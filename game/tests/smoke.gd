@@ -297,6 +297,10 @@ func _run_start_menu() -> void:
 			if str(demo["id"]) == "siege_bruges":
 				var args := BattleDemosMenu.args_for(demo)
 				_check(args.has("--siege-landmark=bruges") and args.has("--siege-attacker=fac_france"), "Bruges demo args: %s" % str(args))
+	# EP7 : batailles historiques (détail : tests/ep7_historical_test.gd).
+	menu.open_historical()
+	await process_frame
+	_check(menu.overlay_open() and menu._overlay is HistoricalBattlesMenu, "historical battles overlay should open")
 	if _failures == 0:
 		print("smoke OK: start menu, %d cards" % menu.card_count())
 	menu.queue_free()

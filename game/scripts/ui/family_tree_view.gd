@@ -421,7 +421,7 @@ class FamilyTreeNode:
 		node._texture = PortraitLoader.portrait_texture(id)
 		node._is_portrait = node._texture != null
 		if node._texture == null:
-			node._texture = PortraitLoader.heraldry_texture(str(data.get("faction", "")))
+			node._texture = PortraitLoader.house_heraldry_texture(str(data.get("house", "")), str(data.get("faction", "")))  # DA1
 		# Médaillon dessiné par un enfant : seul le portrait est grisé pour un défunt.
 		var disc := Control.new()
 		disc.name = "Disc"

@@ -70,6 +70,7 @@ var _records: Dictionary = {}  # unit id -> fiche du régiment (cf. `_record`)
 var _shown: Dictionary = {}  # unit id -> true : étendard porté affiché
 var _side_colors: Dictionary = {}
 var _side_factions: Dictionary = {}
+var _side_houses: Dictionary = {}  # DA1b : id de la maison du général par camp
 var _battle: Object = null
 var _cloth_of: Callable
 var _layer_keys: Dictionary = {}
@@ -139,7 +140,9 @@ func apply_wind(mat: ShaderMaterial) -> void:
 ## `cloth_of(unit)` → {texture, size, full} : étoffe de repli (drapeau-repère du régiment)
 ## quand les étoffes d'EP5 manquent. `side_factions` : faction de chaque camp ; `battle` : la
 ## simulation (ordre « pas de quartier » du général : oriflamme, dragon).
-func setup(units: Array, side_colors: Dictionary, cloth_of: Callable, wind: Dictionary, side_factions: Dictionary = {}, battle: Object = null) -> void:
+## `side_houses` (DA1b) : maison du général de chaque camp (nom ou id de `houses.json`) ; son
+## étendard et ceux des unités nobles de sa retenue portent ses armes.
+func setup(units: Array, side_colors: Dictionary, cloth_of: Callable, wind: Dictionary, side_factions: Dictionary = {}, battle: Object = null, side_houses: Dictionary = {}) -> void:
 	_cfg = settings().get("standards", {})
 	_fx = fx()
 	_render = _fx.get("render", {})
@@ -148,6 +151,8 @@ func setup(units: Array, side_colors: Dictionary, cloth_of: Callable, wind: Dict
 	wind_gust = float(wind["gust"])
 	_side_colors = side_colors
 	_side_factions = side_factions
+	for side in side_houses:
+		_side_houses[side] = HouseArms.id_of(str(side_houses[side]))
 	_battle = battle
 	_cloth_of = cloth_of
 	if ResourceLoader.exists("res://scripts/audio/battle_audio.gd"):
@@ -178,7 +183,7 @@ func _record(unit: Dictionary) -> Dictionary:
 		"general": general,
 		"role": bearer_role,
 		"dedicated": _has_role(bearer_role),
-		"layers": [_layer_for_kind(unit, faction, _kind_of(unit, faction, false)), _layer_for_kind(unit, faction, str(_fx.get("second_bearer_kind", "pennon")))],
+		"layers": _bearer_layers(unit, faction, str(_side_houses.get(side, ""))),
 		"musicians": [] if mounted else _instruments(unit),
 		"phase": fmod(float(id) * 0.618, 1.0) * 9.0,
 		"standard": "carried",
@@ -189,6 +194,28 @@ func _record(unit: Dictionary) -> Dictionary:
 		# « Pas de quartier » donné en cours de bataille : étoffe prête d'avance.
 		rec["layer_no_quarter"] = _layer_for_kind(unit, faction, _kind_of(unit, faction, true))
 	return rec
+
+
+## Couches des deux porte-étendards d'un régiment. DA1b : le général porte la bannière de sa
+## maison ; son second porte-étendard garde l'étendard de l'armée (bannière royale, saint
+## Georges, oriflamme du roi en personne). « Pas de quartier » remplace toujours la première
+## (`layer_no_quarter`). Les unités nobles de la retenue (`house_arms.unit_types`) portent les
+## armes de la maison du général ; le commun garde celles de la faction.
+func _bearer_layers(unit: Dictionary, faction: String, house: String) -> Array:
+	var kind := _kind_of(unit, faction, false)
+	var second := str(_fx.get("second_bearer_kind", "pennon"))
+	if house != "" and bool(unit.get("is_general", false)):
+		var house_kind := str((_fx.get("house_arms", {}) as Dictionary).get("general_kind", "royal"))
+		return [_layer_for_kind(unit, faction, house_kind, house), _layer_for_kind(unit, faction, kind)]
+	if house != "" and is_house_retinue(unit):
+		return [_layer_for_kind(unit, faction, kind, house), _layer_for_kind(unit, faction, second)]
+	return [_layer_for_kind(unit, faction, kind), _layer_for_kind(unit, faction, second)]
+
+
+## Unité noble de la retenue du général (DA1b) : ses étendards portent les armes de sa maison.
+static func is_house_retinue(unit: Dictionary) -> bool:
+	var types: Array = (fx().get("house_arms", {}) as Dictionary).get("unit_types", [])
+	return str(unit.get("type", "")) in types
 
 
 func _has_role(role: String) -> bool:
@@ -222,7 +249,7 @@ func _kind_of(unit: Dictionary, faction: String, no_quarter: bool) -> String:
 
 ## Couche d'étoffe (Texture2DArray) d'un genre d'étendard pour la faction ; repli sur la
 ## bannière ou le pennon de la faction, puis sur l'étoffe du drapeau-repère.
-func _layer_for_kind(unit: Dictionary, faction: String, kind: String) -> int:
+func _layer_for_kind(unit: Dictionary, faction: String, kind: String, house: String = "") -> int:
 	var kinds: Dictionary = _fx.get("kinds", {})
 	var entry: Dictionary = kinds.get(kind, kinds.get("pennon", {}))
 	var size := Vector2(1.9, 0.5)
@@ -234,6 +261,10 @@ func _layer_for_kind(unit: Dictionary, faction: String, kind: String) -> int:
 	var cloth := str(entry.get("cloth", "pennon"))
 	var paths: Array[String] = []
 	if cloth in ["pennon", "banner", "standard"]:
+		if house != "":
+			# DA1b : étoffe aux armes de la maison du général, repli sur celle de la faction.
+			paths.append(BANNERS_DIR + "houses/%s_%s.png" % [house, cloth])
+			paths.append(BANNERS_DIR + "houses/%s_banner.png" % house)
 		paths.append(BANNERS_DIR + "%s_%s.png" % [faction, cloth])
 		paths.append(BANNERS_DIR + "%s_banner.png" % faction)
 	else:

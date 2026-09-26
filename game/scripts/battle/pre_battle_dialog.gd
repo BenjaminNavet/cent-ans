@@ -413,7 +413,9 @@ func _general_row(general: Variant, faction: String, slot: int) -> Control:
 		command = int(general.get("command", 0))
 		name_text = str(general.get("name", ""))
 	var portrait := PortraitLoader.portrait_texture(character)
-	var arms := PortraitLoader.heraldry_texture(faction)
+	# DA1 : armes de la maison du général, à défaut de la faction.
+	var house := str(general.get("house", HouseArms.house_of(character))) if general is Dictionary else ""
+	var arms := PortraitLoader.house_heraldry_texture(house, faction)
 	var color := _colors[slot]
 	medallion.draw.connect(func() -> void:
 		var c := medallion.size * 0.5

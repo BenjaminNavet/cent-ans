@@ -12,6 +12,7 @@ mod indirect;
 mod obstacles;
 mod pathing;
 mod reinforcements;
+mod scenario;
 mod separation;
 mod siege_assault;
 mod siege_extra;
@@ -163,8 +164,12 @@ pub struct BattleSim {
     /// EP9: rules of the end of a field battle, the engagement clock and
     /// how the battle ended.
     decision: crate::decision::DecisionRules,
+    /// EP9b: the attacker's archery duel and the second echelon.
+    duel: crate::duel::DuelRules,
     clock: crate::decision::EngagementClock,
     end: Option<crate::decision::BattleEnd>,
+    /// EP7: scenario of a historical battle (waves, posts, weather).
+    scenario: Option<Box<scenario::Scenario>>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -430,8 +435,10 @@ impl BattleSim {
             start_hour: crate::time_of_day::TimeOfDayRules::bundled().default_hour,
             day_phase: None,
             decision: crate::decision::DecisionRules::bundled().clone(),
+            duel: crate::duel::DuelRules::bundled().clone(),
             clock: Default::default(),
             end: None,
+            scenario: None,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
@@ -1241,10 +1248,14 @@ impl BattleSim {
         let ai_ticks = (AI_PERIOD / DT).round() as u64;
         if self.ticks.is_multiple_of(ai_ticks) {
             self.check_sortie();
+            self.tick_scenario();
             for side in SideId::BOTH {
                 if self.ai_enabled[side.index()] {
                     for command in ai::plan(self, side) {
-                        let _ = self.apply_command(command, Some(side));
+                        // EP7: held waves and posted regiments (historical maps).
+                        if let Some(command) = self.scenario_filter(command) {
+                            let _ = self.apply_command(command, Some(side));
+                        }
                     }
                 }
             }
@@ -2246,6 +2257,9 @@ impl BattleSim {
         self.units[t].hp -= kills;
         self.units[t].tick_losses += kills;
         self.units[i].kills += kills;
+        if !self.units[t].synthetic {
+            self.clock.missile_losses[self.units[t].side.index()] += kills;
+        }
         // ADR 0052: the arrows wound the horses too, and they panic, unless
         // the riders are already locked in a melee.
         let target = &self.units[t];

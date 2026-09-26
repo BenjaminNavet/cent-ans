@@ -17,6 +17,7 @@ shader adds the cloth shading. Output (RGBA, powers of two, transparent outside 
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import replace
 from pathlib import Path
 
@@ -69,6 +70,9 @@ def _draw_square_tressure(field: Image.Image, color: Color) -> None:
 
 def render_arms(blazon: Blazon) -> Image.Image:
     """Arms painted on a full square (CANVAS × CANVAS, RGB), flat colours."""
+    if heraldry.is_quarterly(blazon.text):
+        # Castile, Hainaut: drawn with the grammar v2 like their shields (DA1b).
+        return render_house_arms(blazon.text)
     tressure = blazon.has("trescheur")
     if tressure:
         blazon = replace(blazon, text=blazon.text.replace("trescheur", "--"))
@@ -83,6 +87,34 @@ def render_arms(blazon: Blazon) -> Image.Image:
     if tressure:
         _draw_square_tressure(field, blazon.charge)
     return field
+
+
+def render_house_arms(blazon: str) -> Image.Image:
+    """House arms (grammar v2) on a full square, bordures along the cloth edge."""
+    original = heraldry.shield_polygon
+    heraldry.shield_polygon = _full_cloth_polygon
+    try:
+        return heraldry.render_house_field(blazon)
+    finally:
+        heraldry.shield_polygon = original
+
+
+def house_livery(blazon: str) -> tuple[Color, Color]:
+    """Livery of a house standard: the first two distinct tinctures of its blazon."""
+    names = re.findall(
+        r"\b(or|argent|gueules|azur|sable|sinople|pourpre)\b",
+        heraldry.normalize_blazon(blazon),
+    )
+    colors = list(dict.fromkeys(TINCTURES[name] for name in names))
+    if not colors:
+        return (TINCTURES["argent"], TINCTURES["gueules"])
+    if len(colors) == 1:
+        colors.append(
+            TINCTURES["argent"]
+            if colors[0] != TINCTURES["argent"]
+            else TINCTURES["gueules"]
+        )
+    return (colors[0], colors[1])
 
 
 def _blazon_of(faction: dict) -> Blazon:
@@ -261,6 +293,7 @@ def build(
             path = out_dir / f"{faction['id']}_{kind}.png"
             image.save(path, optimize=True)
             written.append(path)
+    written += build_houses(out_dir / "houses")
     for name, image in (
         ("oriflamme", render_oriflamme()),
         ("st_george", render_st_george()),
@@ -269,4 +302,32 @@ def build(
         path = out_dir / f"{name}.png"
         image.save(path, optimize=True)
         written.append(path)
+    return written
+
+
+def build_houses(out_dir: Path = BANNERS_DIR / "houses") -> list[Path]:
+    """Banner, pennon and standard of every house (lot DA1b, standards of the general).
+
+    Houses bearing the arms of a faction (``arms_of``) reuse its cloth drawing.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    factions = {faction["id"]: faction for faction in heraldry.load_factions()}
+    houses = sorted(heraldry.load_houses()["houses"], key=lambda h: h["id"])
+    written: list[Path] = []
+    for index, house in enumerate(houses):
+        if house.get("arms_of"):
+            blazon = _blazon_of(factions[house["arms_of"]])
+            arms = render_arms(blazon)
+            livery = (blazon.field, blazon.charge)
+        else:
+            arms = render_house_arms(house["blazon"])
+            livery = house_livery(house["blazon"])
+        for kind, image in (
+            ("banner", render_banner(arms, seed=100 + index)),
+            ("pennon", render_pennon(arms, livery)),
+            ("standard", render_standard(arms, livery)),
+        ):
+            path = out_dir / f"{house['id']}_{kind}.png"
+            image.save(path, optimize=True)
+            written.append(path)
     return written

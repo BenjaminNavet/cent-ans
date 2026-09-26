@@ -63,3 +63,32 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   à lancer par le joueur (`uv run --project tools cent-ans assets portrait-archetypes --envelope 7.6`
   dans le worktree de DA2, ≈ 6,42 $), puis import Godot, commit des images, captures `apres`,
   fusion. DA3/DA5 risquent le même blocage pour leurs images.
+- 26/09 : **DA4 dans main** (`fa3cee8d`) avec revue DA : rendus MIDI (Machaut, Solage, Landini,
+  Binchois) passés en repli (bible § 9, test `test_midi_renders_are_fallback_only`) ; test des
+  playlists adapté. Dette : vrais enregistrements libres d'Ars nova pour France/Italie.
+- 26/09 : **DA1 fusionné** (ADR 0064) ; vérifié en bataille réelle après EP6
+  (`docs/img/da1/apres_bataille_reelle.jpg`), smoke + pytest 601 OK. Suites : **DA1b** meubles
+  animaux (lions, léopards, aigles) trop schématiques dans `heraldry.py` ; armes du général sur
+  les étendards EP5.
+- 26/09 : main = `f98386ce` (DA0 + DA1 + DA4). Worktrees DA1/DA4 supprimés. Lancés : **DA6**
+  (végétation de bataille, EP6 fusionné) et **DA1b** (meubles héraldiques SVG libres + armes du
+  général sur les étendards EP5). En cours : DA3, DA5. DA2 : génération des 141 portraits en
+  attente du joueur.
+- 26/09 : **DA5 fusionné** (ADR 0065) : 78 icônes à l'encre (110 identifiants), 15 médaillons
+  (cloche validée), 4,46 $ réels. Smoke + pytest 611 OK. Suites : icônes d'entité (unités,
+  bâtiments, techniques…) encore en game-icons → miniatures peintes (bible § 8) ; marqueurs
+  d'unité en bataille mélangés ; médaillons journal/research non branchés.
+- 26/09 : **DA3 fusionné** (ADR renuméroté **0066**, le 0060 étant la musique) : 12 pictogrammes
+  peints + atlas, écu du contrôleur, tri par rang selon le zoom dans les données, 0,59 $.
+  Cumul DA : 5,43 $. Suites : chevauchements en régions denses, légende petite, écus de maison
+  dans l'atlas.
+- 26/09 : **DA1b fusionné** (ADR 0064 révisé) : 12 meubles SVG libres (PD/CC0/CC BY 4.0) rendus
+  par rôle de couleur (`resvg-py`), 80 écus et 240 étoffes régénérés, bannière de maison du
+  général et de sa retenue sur les étendards EP5 (oriflamme en second porte-étendard). Smoke +
+  pytest 666 OK. Limites : cadrage EP5 `--standard-shot=foot` côté France, petits châteaux
+  polygonaux, dauphin pâmé.
+- 26/09 : **DA6 fusionné** (ADR renuméroté **0067**) : lisières ondulées et fondues, touffes à 4
+  cartes cintrées, feuillus procéduraux par essence (LOD + imposteurs), texture de détail du sol,
+  décor désaturé ; +1,5 à +3,5 % de coût, 0 $. Smoke + pytest 668 OK. Capture combinée DA1/DA1b/
+  DA5/DA6 : `docs/img/da/etat_2609_bataille_combinee.jpg`. Limites : saturation automne/bocage
+  > 35 % (lumière `BattleAtmosphere`), blé qui ne suit pas la saison.

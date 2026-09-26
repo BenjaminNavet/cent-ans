@@ -113,14 +113,18 @@ func _test_builder(data: TownData) -> void:
 	_check(builder.done, "builder completes")
 	var detail := 0
 	var blocks := 0
+	var detail_nodes := 0
+	var block_nodes := 0
 	var base_ok := true
 	for child in builder.root.get_children():
 		if child is MultiMeshInstance3D:
 			var mm := (child as MultiMeshInstance3D).multimesh
 			if child.name.begins_with("Detail_"):
 				detail += mm.instance_count
-			elif child.name.begins_with("Blocks_"):
+				detail_nodes += 1
+			elif child.name.begins_with("Blocks"):
 				blocks += mm.instance_count
+				block_nodes += 1
 				# Serveur de rendu factice (--headless) : le tampon n'est pas relu, on vérifie la
 				# présence des données d'instance seulement.
 				base_ok = base_ok and mm.use_custom_data
@@ -128,6 +132,11 @@ func _test_builder(data: TownData) -> void:
 	var houses: int = plan["houses"]["x"].size()
 	_check(detail == houses and blocks == houses, "one detail and one block instance per house (%d / %d / %d)" % [detail, blocks, houses])
 	_check(base_ok, "base heights (m) carried by the instance data")
+	# ZG7a : un MultiMesh par modèle et par ville (plus un pour les blocs), pas par cellule.
+	var prepared_detail := 0
+	for cell: Dictionary in plan["prepared"]["detail"]:
+		prepared_detail += (cell["models"] as Dictionary).size()
+	_check(block_nodes == 1 and detail_nodes == prepared_detail, "one block multimesh per town, one detail multimesh per model per cell (%d detail, %d block)" % [detail_nodes, block_nodes])
 	_check(builder.root.get_node_or_null("Streets_0") != null and builder.root.get_node_or_null("Ground_0") != null and builder.root.get_node_or_null("Walls") != null, "streets and walls meshes")
 	_check(is_equal_approx(builder.root.scale.x, 1.0 / data.meters_per_unit), "town root in metres")
 	builder.free_nodes()

@@ -45,18 +45,50 @@ static func materials() -> Array[StandardMaterial3D]:
 ## Maillage d'un franchissement. `structure` : stone, wood, boats, ferry, ford, gate ; `width` :
 ## largeur du fleuve (unités monde) ; `seed_value` : variations déterministes.
 static func build(structure: String, width: float, seed_value: int) -> ArrayMesh:
-	# Cache : largeur arrondie à 0,05, trois variantes par ouvrage (quelques centaines de ponts).
-	var width_q := maxf(snappedf(width, 0.05), 0.1)
-	var key := "%s_%d_%d" % [structure, int(width_q * 20.0), seed_value % 3]
+	var key := cache_key(structure, width, seed_value)
 	if not _cache.has(key):
-		_cache[key] = _build(structure, width_q, seed_value % 3)
+		_cache[key] = from_arrays(build_arrays(structure, width, seed_value))
 	return _cache[key]
 
 
 static var _cache: Dictionary = {}
 
 
-static func _build(structure: String, width: float, seed_value: int) -> ArrayMesh:
+## Clé du cache : largeur arrondie à 0,05, trois variantes par ouvrage (quelques centaines de ponts).
+static func cache_key(structure: String, width: float, seed_value: int) -> String:
+	return "%s_%d_%d" % [structure, int(maxf(snappedf(width, 0.05), 0.1) * 20.0), seed_value % 3]
+
+
+## ZG7a : maillage déjà en cache (fil principal).
+static func cached(key: String) -> ArrayMesh:
+	return _cache.get(key)
+
+
+## ZG7a : maillage à partir de tableaux préparés dans un fil (`build_arrays`), mis en cache.
+static func build_from(key: String, surfaces: Array) -> ArrayMesh:
+	if not _cache.has(key):
+		_cache[key] = from_arrays(surfaces)
+	return _cache[key]
+
+
+static func from_arrays(surfaces: Array) -> ArrayMesh:
+	var mesh := ArrayMesh.new()
+	var mats := materials()
+	for kind in surfaces.size():
+		var arrays: Array = surfaces[kind]
+		if arrays.is_empty():
+			continue
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		mesh.surface_set_material(mesh.get_surface_count() - 1, mats[kind])
+	return mesh
+
+
+## Tableaux des deux surfaces (pierre, bois) d'un ouvrage : sans ressource ni cache, utilisable
+## dans un fil de travail (ZG7a : ponts-portes préparés par `FineRibbonJob`, 16 ms au fil
+## principal sinon).
+static func build_arrays(structure: String, width: float, seed_value: int) -> Array:
+	width = maxf(snappedf(width, 0.05), 0.1)
+	seed_value = seed_value % 3
 	var tools: Array[SurfaceTool] = [SurfaceTool.new(), SurfaceTool.new()]
 	for st in tools:
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -75,16 +107,15 @@ static func _build(structure: String, width: float, seed_value: int) -> ArrayMes
 			_stone_bridge(tools, width, rng, true)
 		_:
 			_stone_bridge(tools, width, rng, false)
-	var mesh := ArrayMesh.new()
-	var mats := materials()
+	var surfaces: Array = []
 	for kind in 2:
 		var arrays := tools[kind].commit_to_arrays()
 		if arrays[Mesh.ARRAY_VERTEX] == null or (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():
+			surfaces.append([])
 			continue
 		_to_godot_winding(arrays)
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-		mesh.surface_set_material(mesh.get_surface_count() - 1, mats[kind])
-	return mesh
+		surfaces.append(arrays)
+	return surfaces
 
 
 ## Les aides ci-dessous construisent des triangles dans le sens trigonométrique vu de
@@ -111,6 +142,32 @@ static func span_length(width: float) -> float:
 
 static func deck_width(width: float) -> float:
 	return 0.15 + 0.05 * width
+
+
+## Lot ZG7a : largeur réelle du tablier (m) des ouvrages à l'échelle réelle (ponts fins, ponts-
+## portes). Ponts médiévaux : 4-8 m entre parapets (pont Valentré 5 m, pont Saint-Bénézet 4 m,
+## London Bridge ≈ 6 m hors maisons) ; pont-porte un peu plus large (châtelet).
+const FINE_DECK_M := {"gate": 9.0, "stone": 7.0, "wood": 4.5, "boats": 5.0, "ferry": 8.0, "ford": 6.0}
+
+
+## Largeur du tablier dans le repère du maillage (`build`), parapets compris.
+static func mesh_deck_width(structure: String, width: float) -> float:
+	match structure:
+		"gate":
+			return deck_width(width) * 1.35
+		"wood":
+			return deck_width(width) * 0.9
+		_:
+			return deck_width(width)
+
+
+## Échelle à appliquer le long du courant (axe Z du maillage) pour un tablier de largeur réelle
+## `FINE_DECK_M`, jamais plus que `uniform_scale` (échelle des autres axes). À l'échelle réelle,
+## la largeur du tablier du maillage (0,15 + 0,05 × portée, pensée pour la carte) donnait 30 à
+## 45 m sur la Seine ou la Loire.
+static func fine_deck_scale(structure: String, mesh_width: float, meters_per_unit: float, uniform_scale: float) -> float:
+	var target := float(FINE_DECK_M.get(structure, 7.0)) / maxf(meters_per_unit, 1e-3)
+	return minf(uniform_scale, target / maxf(mesh_deck_width(structure, mesh_width), 1e-4))
 
 
 # --- Formes de base -------------------------------------------------------------------------
