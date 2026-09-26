@@ -733,10 +733,11 @@ def build_figure(fig_name, level):
     for item in recipe.get("equipment", []):
         name, mask = item[0], item[1]
         kwargs = item[2] if len(item) > 2 else {}
-        objs = fine_kit_item(name, kwargs, ctx, lm, bvhs) if fine else None
-        if objs is None:
-            objs = gear.build(name, kwargs, kit_gear)
-        kit = objs is not None
+        objs = gear.build(name, kwargs, kit_gear)
+        kit = "gear" if objs is not None else None
+        if objs is None and fine:
+            objs = fine_kit_item(name, kwargs, ctx, lm, bvhs)
+            kit = "kit" if objs is not None else None
         if name == "tabard":
             objs = fine_tabard(garments, lm, **kwargs)
         if objs is None:
@@ -751,7 +752,7 @@ def build_figure(fig_name, level):
             equipment.append((obj, m, kit))
     if fine:
         for obj in fe.scabbard(lm):
-            equipment.append((obj, 0, True))
+            equipment.append((obj, 0, "kit"))
     # Heads: one face per variant at LOD0, the variant-0 face below.
     hair_ok, beard_ok = headgear_visibility(recipe)
     heads = []
@@ -843,7 +844,7 @@ def build_figure(fig_name, level):
         target = 0
         if obj.name.startswith("tabard"):
             target = budget("tabard", level, mounted)
-        elif kit and level:
+        elif kit == "kit" and level:
             target = max(16, int(fp._tris(obj) * KIT_SHARE[level - 1]))
         decimate(obj, target)
         bs.set_face_mask(obj, mask)
