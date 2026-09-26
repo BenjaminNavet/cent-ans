@@ -623,8 +623,10 @@ def ride_bow_shoot(arm, t):
 
 
 def _javelin_grip(arm, cock, aim_v=None):
-    """Right-hand javelin held as a prop: `cock` 1 = drawn back by the ear, 0 = arm thrown
-    fully forward (release). Left hand stays on the reins (`ride_javelin_*`).
+    """Right-hand javelin held as a prop.
+
+    `cock` 1 = drawn back by the ear, 0 = arm thrown fully forward (release). Left hand stays
+    on the reins (`ride_javelin_*`).
     """
     shoulder = pos(arm, "UpperArm.R")
     if aim_v is None:
@@ -763,8 +765,10 @@ std_wave.frames = 58  # 2.4 s
 
 
 def std_death(arm, t):
-    """Struck down (`Death`, falling backwards): the pole goes down with him, toppling
-    backwards and a little to the right about its butt, and lies on the ground."""
+    """Struck down (`Death`, falling backwards): the pole goes down with him.
+
+    It topples backwards and a little to the right about its butt, and lies on the ground.
+    """
     if t == 0.0 or "std_death" not in CLIP_CACHE:
         grip = _std_grip(arm)
         axis = Vector((0.0, -0.05, 1.0)).normalized()
@@ -776,7 +780,9 @@ def std_death(arm, t):
     butt = butt0 + Vector((-0.1, 0.5, 0.0)) * fall
     butt.z = lerp(butt0.z, 0.03, fall)
     grip = butt + axis * STD_BELOW
-    prop = prop_matrix(grip, axis, Vector((0, -1, 0)) if axis.z > 0.5 else Vector((0, 0, 1)))
+    prop = prop_matrix(
+        grip, axis, Vector((0, -1, 0)) if axis.z > 0.5 else Vector((0, 0, 1))
+    )
     STATE["prop"] = prop
     _std_hands(arm, prop, release=smooth(0.35, 0.6, t))
 
@@ -851,7 +857,9 @@ def ride_std_death(arm, t):
     butt = butt0 + Vector((0.2, -0.2, 0.0)) * fall
     butt.z = lerp(butt0.z, 0.03, fall)
     grip = butt + axis * STD_MOUNTED_BELOW
-    STATE["prop"] = prop_matrix(grip, axis, Vector((0, -1, 0)) if axis.z > 0.5 else Vector((0, 0, 1)))
+    STATE["prop"] = prop_matrix(
+        grip, axis, Vector((0, -1, 0)) if axis.z > 0.5 else Vector((0, 0, 1))
+    )
     _ = m
 
 
@@ -882,7 +890,12 @@ def _drum_hands(arm, beats, t):
         lift = lift**1.6  # quick stroke, longer hold up
         hit = top + Vector((0.055 * sx, 0.0, 0.0))
         stick = Vector((0.0, -0.45, -0.89)).normalized()
-        wrist = hit - stick * 0.3 + Vector((0.05 * sx, 0.0, 0.0)) + Vector((0, 0.03, 0.13)) * lift
+        wrist = (
+            hit
+            - stick * 0.3
+            + Vector((0.05 * sx, 0.0, 0.0))
+            + Vector((0, 0.03, 0.13)) * lift
+        )
         shoulder = pos(arm, f"UpperArm.{side}")
         ik2(
             arm,
@@ -1090,3 +1103,179 @@ def push(arm, t):
         chest + Vector((-0.2, -0.46, 0.14)),
         chest + Vector((0.2, -0.46, 0.14)),
     )
+
+
+# --- Lot EP12: wounded on the ground and routers running without their arms --------------
+
+CRAWL_STEPS = 5.0  # hand-over-hand pulls before the crawler gives up
+CRAWL_STEP = 0.5  # metres gained per pull
+CRAWL_REACH = 0.42  # hand planted this far ahead of the shoulder
+
+
+def _ease_out(a, b, t):
+    """Progress from 0 to 1 over [a, b], fast at first then slowing to a stop."""
+    u = min(max((t - a) / (b - a), 0.0), 1.0)
+    return 1.0 - (1.0 - u) * (1.0 - u)
+
+
+def crawl(arm, t):
+    """Wounded crawler (EP12, not looped): pitches onto his face, then drags himself.
+
+    He pulls himself a few metres on his forearms, slower and slower, lifts his head a last
+    time and lies still. The figure moves along its facing (-Y), so the renderer turns
+    crawlers away from the fight.
+    """
+    fall = smooth(0.0, 0.14, t)
+    steps = CRAWL_STEPS * _ease_out(0.16, 0.86, t)
+    feet = (pos(arm, "Foot.L") + pos(arm, "Foot.R")) / 2
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.35 * math.sin(math.pi * fall))
+    rotate_about(
+        arm, "Root", Vector((1, 0, 0)), 1.5 * fall, Vector((feet.x, feet.y, 0.14))
+    )
+    translate(arm, "Root", Vector((0, -CRAWL_STEP * steps, 0)))
+    lift_head = 0.55 * fall * (1.0 - smooth(0.86, 0.97, t))
+    rotate_about(arm, "Neck", Vector((1, 0, 0)), -lift_head)
+    for side, sx, offset in (("R", -1.0, 0.0), ("L", 1.0, 0.5)):
+        phase = (steps + offset) % 1.0
+        if phase < 0.6:
+            rel, lift = -CRAWL_REACH + CRAWL_STEP * phase, 0.0
+        else:
+            u = (phase - 0.6) / 0.4
+            rel = lerp(-CRAWL_REACH + 0.6 * CRAWL_STEP, -CRAWL_REACH, smooth(0, 1, u))
+            lift = 0.12 * math.sin(math.pi * u)
+        shoulder = pos(arm, f"UpperArm.{side}")
+        hand = Vector((shoulder.x + 0.1 * sx, shoulder.y + rel, 0.06 + lift))
+        hand = pos(arm, f"Wrist.{side}").lerp(hand, fall)
+        ik2(
+            arm,
+            f"UpperArm.{side}",
+            f"LowerArm.{side}",
+            f"Wrist.{side}",
+            hand,
+            shoulder + Vector((0.5 * sx, 0.0, 0.6)),
+        )
+        # Knee drawn up now and then, the heel lifting off the ground.
+        bend = 0.35 * max(0.0, math.sin(2.0 * math.pi * (steps + offset))) * fall
+        rotate_about(arm, f"LowerLeg.{side}", Vector((1, 0, 0)), bend)
+
+
+crawl.frames = 168  # 7 s
+
+
+def wounded_sit(arm, t):
+    """Wounded sitting (EP12, not looped): sinks onto his backside, one leg bent.
+
+    He clutches his belly and rocks, propped on his other hand, then slumps onto his back
+    and lies still.
+    """
+    down = smooth(0.0, 0.18, t)
+    slump = smooth(0.8, 0.95, t)
+    hips = pos(arm, "Body")
+    feet = {side: pos(arm, f"Foot.{side}") for side in ("L", "R")}
+    translate(arm, "Body", Vector((0, 0.25 * down, -(hips.z - 0.2) * down)))
+    seat = pos(arm, "Body")
+    for side, ahead, knee_up in (("L", 0.62, 0.0), ("R", 0.4, 0.2)):
+        target = Vector((feet[side].x, seat.y - ahead, 0.06))
+        target = feet[side].lerp(target, down)
+        ik2(
+            arm,
+            f"UpperLeg.{side}",
+            f"LowerLeg.{side}",
+            f"Foot.{side}",
+            target,
+            seat + Vector((0, -1.0, 0.6 + knee_up)),
+        )
+        translate(arm, f"Foot.{side}", target - pos(arm, f"Foot.{side}"))
+    rock = 0.08 * math.sin(2.0 * math.pi * 3.0 * t) * smooth(0.18, 0.3, t) * (1 - slump)
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), (0.35 + rock) * down - 1.5 * slump)
+    rotate_about(arm, "Neck", Vector((1, 0, 0)), 0.3 * down)
+    belly = pos(arm, "Abdomen") + Vector((0.02, -0.17, 0.06))
+    right = pos(arm, "Wrist.R").lerp(belly, down * (1 - slump))
+    ik2(
+        arm,
+        "UpperArm.R",
+        "LowerArm.R",
+        "Wrist.R",
+        right,
+        pos(arm, "UpperArm.R") + Vector((-0.5, 0.2, -0.4)),
+    )
+    prop_l = Vector((seat.x + 0.28, seat.y + 0.28, 0.06))
+    left = pos(arm, "Wrist.L").lerp(prop_l, down * (1 - slump))
+    ik2(
+        arm,
+        "UpperArm.L",
+        "LowerArm.L",
+        "Wrist.L",
+        left,
+        pos(arm, "UpperArm.L") + Vector((0.5, 0.4, 0.2)),
+    )
+
+
+wounded_sit.frames = 144  # 6 s
+
+
+def wounded_kneel(arm, t):
+    """Wounded on his knees (EP12, not looped): hunched, both hands on the wound, swaying.
+
+    He then keels over onto his side and lies still.
+    """
+    sink = smooth(0.0, 0.15, t)
+    topple = smooth(0.78, 0.92, t)
+    hips = pos(arm, "Body")
+    translate(arm, "Body", Vector((0, 0.05 * sink, -0.42 * sink)))
+    for side in ("L", "R"):
+        foot = pos(arm, f"Foot.{side}")
+        ik2(
+            arm,
+            f"UpperLeg.{side}",
+            f"LowerLeg.{side}",
+            f"Foot.{side}",
+            foot,
+            hips + Vector((0, -1.0, -0.3)),
+        )
+    sway = 0.06 * math.sin(2.0 * math.pi * 2.5 * t) * smooth(0.15, 0.25, t)
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.55 * sink + sway)
+    rotate_about(arm, "Neck", Vector((1, 0, 0)), 0.35 * sink)
+    belly = pos(arm, "Abdomen") + Vector((0, -0.18, 0.06))
+    for side, sx in (("R", -1.0), ("L", 1.0)):
+        hand = pos(arm, f"Wrist.{side}").lerp(
+            belly + Vector((0.07 * sx, 0, 0)), sink * (1 - topple)
+        )
+        ik2(
+            arm,
+            f"UpperArm.{side}",
+            f"LowerArm.{side}",
+            f"Wrist.{side}",
+            hand,
+            pos(arm, f"UpperArm.{side}") + Vector((0.5 * sx, 0.2, -0.4)),
+        )
+    if topple > 0:
+        knees = (pos(arm, "LowerLeg.L") + pos(arm, "LowerLeg.R")) / 2
+        rotate_about(
+            arm,
+            "Root",
+            Vector((0, 1, 0)),
+            1.4 * topple,
+            Vector((knees.x, knees.y, 0.1)),
+        )
+
+
+wounded_kneel.frames = 144  # 6 s
+
+
+def flee(arm, t):
+    """Router running for his life without weapon or shield (EP12, loop on `Run`).
+
+    Bent forwards, elbows pumping high, he throws a glance over his shoulder.
+    """
+    rotate_about(arm, "Abdomen", Vector((1, 0, 0)), 0.45)
+    glance = smooth(0.45, 0.6, t) * (1.0 - smooth(0.75, 0.9, t))
+    rotate_about(arm, "Neck", Vector((0, 0, 1)), 1.1 * glance)
+    rotate_about(arm, "Neck", Vector((1, 0, 0)), -0.35)
+    for side, sx in (("L", 1.0), ("R", -1.0)):
+        # Empty hands thrown wide, elbows bent: nothing held any more.
+        rotate_about(arm, f"UpperArm.{side}", Vector((0, 1, 0)), -0.45 * sx)
+        rotate_about(arm, f"LowerArm.{side}", Vector((1, 0, 0)), -0.6)
+
+
+flee.frames = 60  # three `Run` strides (2.5 s): the glance comes once per loop
