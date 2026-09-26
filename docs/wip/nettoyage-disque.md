@@ -1,6 +1,6 @@
 # Nettoyage disque — WIP
 
-Mis à jour le 2026-09-26. Statut : **en pause**. Mandat : une fois que les sessions ont fini leur
+Mis à jour le 2026-09-26. Statut : **fait (lot 3 le 26/09 au soir)**, à relancer si le disque se remplit. Mandat : une fois que les sessions ont fini leur
 travail, supprimer les reliquats (worktrees fusionnés, caches `core/target`).
 
 ## Contrainte
@@ -20,7 +20,12 @@ prépare la commande, et le joueur la lance lui-même avec le préfixe `!`.
 - ADR 0084 (`3bff25b8`) : `[profile.dev] incremental = false`. Les sessions parallèles
   empilaient 29 Go de `debug/incremental`.
 
-## État à la pause
+- **Lot 3** (après la pause) : `core/target/debug/incremental` de `main` (30 Go) supprimé ;
+  caches `core/target` des worktrees en pause vidés (`eq6` 13 Go, `pb3f`, `pb3g`, `aacdb07`) ;
+  `gp-night-merge` et `gp-sz-merge` supprimés (branches `integration/night` et `integration/sz`) ;
+  8 instantanés Time Machine purgés. Résultat : **397 Go libres (56 %)**.
+
+## État à la pause (historique, avant le lot 3)
 
 - 209 Go libres (77 %), 17 worktrees, environ 9 sessions Claude actives.
 - `core/target` de `main` : 67 Go, dont **30 Go de `debug/incremental`** laissés avant l'ADR 0084.
@@ -37,6 +42,12 @@ prépare la commande, et le joueur la lance lui-même avec le préfixe `!`.
   n'y a bougé depuis 30 min.
 - `tools/disk_cleanup/cleanup_cmd.sh` : génère la commande `!` correspondante (déverrouillage,
   suppression du worktree, puis `git branch -d`).
+
+## Restant (à garder tant que le travail n'est pas fusionné)
+
+Worktrees non fusionnés : `gp-da` (DA2), `gp-dc3` et `gp-densite` (DC, actifs), `fg3-materials`,
+`sz4b` (verrouillé), `pb3f`/`pb3g`, `eq6`, `mapmodes`, `ade9b18`, `aacdb07`. À supprimer une fois
+fusionnés ou abandonnés.
 
 ## Prochaine étape (reprise)
 
