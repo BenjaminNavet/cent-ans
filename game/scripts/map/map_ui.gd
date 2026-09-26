@@ -499,6 +499,7 @@ func journal_text(event: Dictionary) -> String:
 ## Ajoute les événements d'un tour en tête du journal (plus récents en haut).
 func add_events(events: Array, date_text: String) -> void:
 	var new_lines := PackedStringArray()
+	var new_news: Array = []  # lettres du tour, poussées en un seul lot (une reconstruction, un son)
 	for event in events:
 		if not journal_keeps(event):
 			continue
@@ -506,7 +507,7 @@ func add_events(events: Array, date_text: String) -> void:
 		if not news.is_empty() and keeps_news(event):  # U5 : filtre d'intérêt
 			if news_interest != null:
 				news["interest"] = NewsInterest.interest_label(news_interest.event_interest(event))
-			news_letters.push_news(news)
+			new_news.append(news)
 		var kind: String = str(event.get("kind", ""))
 		var text: String = journal_text(event)
 		if text == "":
@@ -565,6 +566,7 @@ func add_events(events: Array, date_text: String) -> void:
 		else:
 			line = text
 		new_lines.append(line)
+	news_letters.push_news_batch(new_news)
 	if new_lines.is_empty():
 		new_lines.append("[i]Rien à signaler.[/i]")
 	var header := "[b]— %s —[/b]" % date_text
