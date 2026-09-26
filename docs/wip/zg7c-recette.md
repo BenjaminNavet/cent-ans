@@ -16,7 +16,7 @@ dans `game/bin/libcent_ans.debug.dylib`. Visuel et données seulement, rien dans
 6. Clôture : `docs/godot-map.md` (vue d'ensemble ZG), addendum final ADR 0036.
 
 ## État
-- [ ] 1 · [ ] 2 · [ ] 3 · [ ] 4 · [ ] 5 · [ ] 6
+- [x] 1 (repli par tuile, `tests/zg7c_partial_cache_test.gd` OK) · [ ] 2 (recuisson detail-dem en cours) · [ ] 3 · [ ] 4 · [ ] 5 · [ ] 6
 
 ## Prochaine étape
-Lire `relief_pyramid.gd` et écrire le repli par tuile.
+Suivre la recuisson (journal scratchpad `zg7c_detail_dem.log`), puis Tamise (hydro_fine).
