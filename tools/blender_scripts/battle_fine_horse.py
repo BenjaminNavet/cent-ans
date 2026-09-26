@@ -559,6 +559,31 @@ HORSE_BUDGET = {
 }
 
 
+def open_eyes(pieces, lift=0.009, radius=0.045, grow=1.12):
+    """Open the drowsy lids of the source.
+
+    Raise the upper lid, lower the lower one a little and enlarge the eyeballs (dark in
+    game, they read as a slit otherwise).
+    """
+    body = pieces["horse_body"]
+    for side in ("horse_eye_l", "horse_eye_r"):
+        eye = pieces[side]
+        pts = [v.co.copy() for v in eye.data.vertices]
+        c = sum(pts, Vector()) / len(pts)
+        for v in eye.data.vertices:
+            v.co = c + (v.co - c) * grow
+        eye.data.update()
+        for v in body.data.vertices:
+            d = v.co - c
+            r = d.length
+            if r > radius:
+                continue
+            f = 1 - r / radius
+            f = f * f * (3 - 2 * f)
+            v.co.z += (lift if d.z > -0.004 else -0.35 * lift) * f
+        body.data.update()
+
+
 def build_horse(mount, budget=None):
     """New horse fitted and skinned onto the Quaternius horse bones; returns objects.
 
@@ -571,6 +596,7 @@ def build_horse(mount, budget=None):
     similarity(pieces, mount)
     oga, q = joints(pieces, mount)
     fit = fit_transforms(oga, q)
+    open_eyes(pieces)
     for name, o in pieces.items():
         decimate(o, budget.get(name, 0))
     body = pieces["horse_body"]

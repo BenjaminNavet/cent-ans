@@ -4,9 +4,9 @@ Branche : `feat/fg4-horse` (worktree agent). Plan : `docs/wip/fg-figurines-fines
 Prototype : `docs/wip/fg0-prototype.md`.
 
 ## État
-- [ ] Squelette : `tools/blender_scripts/battle_fine_cavalry.py` (pipeline de production)
-- [ ] Déformation : poids des jambes (jarrets, boulets, paturons, épaules, grasset), tête, yeux
-- [ ] Étriers +6 cm dans `battle_skinned_cavalry.py`, `cavalry.bones.bin` recuit
+- [x] Squelette : `tools/blender_scripts/battle_fine_cavalry.py` (pipeline de production)
+- [x] Déformation : ajustement articulation par articulation (`OGA_JOINTS`) au lieu du RBF ; poids par chaleur dans la pose naturelle ; tête rigide ; paupières ouvertes
+- [x] Étriers +6 cm dans `battle_skinned_cavalry.py` (`STIRRUP_HALF_WIDTH`), `cavalry.bones.bin` recuit (`human.bones.bin` et `manifest.json` identiques)
 - [ ] Harnachement : selle, bride, rênes, chanfrein, caparaçon deux pièces, flançois
 - [ ] Types de chevaux (destrier / roncin / genet) et robes (teintes du shader)
 - [ ] Faces cachées sous le caparaçon supprimées
@@ -14,4 +14,4 @@ Prototype : `docs/wip/fg0-prototype.md`.
 - [ ] Planches `docs/img/fg/fg4_*.png`
 
 ## Prochaine étape
-Squelette du script, puis reprise des poids.
+Script de production `battle_fine_cavalry.py` : harnachement, types de chevaux, LOD, export.
