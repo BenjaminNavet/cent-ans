@@ -131,6 +131,9 @@ pub struct BattleSim {
     deploying: bool,
     /// Siege pathing cache, one slot per regiment (F5a; derived data).
     path_cache: std::cell::RefCell<Vec<Option<pathing::CachedPath>>>,
+    /// Siege pathing: obstacle cells per side (review 2026-09-26; derived
+    /// data, reset with the walls, the houses or [`BattleSim::siege_mut`]).
+    obstacle_cache: std::cell::RefCell<pathing::ObstacleCache>,
     /// Tactical reading of the relief for the AI (R2b; derived data, read
     /// once per battle, reset by [`BattleSim::field_mut`]).
     relief_map: std::cell::OnceCell<crate::relief_ai::ReliefMap>,
@@ -425,6 +428,7 @@ impl BattleSim {
             no_quarter: [false; 2],
             deploying: false,
             path_cache: Default::default(),
+            obstacle_cache: Default::default(),
             relief_map: Default::default(),
             village_props: Default::default(),
             fire,
@@ -753,6 +757,7 @@ impl BattleSim {
 
     /// Mutable walls, for tests and scripted scenarios.
     pub fn siege_mut(&mut self) -> Option<&mut SiegeWorks> {
+        self.obstacle_cache = Default::default();
         self.siege.as_mut()
     }
 
