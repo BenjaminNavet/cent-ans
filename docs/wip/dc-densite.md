@@ -65,3 +65,12 @@ Attendre la vague 1 ; fusionner DC2a-e (fichiers disjoints) puis DC1 dans feat/d
   `set_bergerac` (prov_perigord) a un commentaire de liberté de jeu assumé (Anglais dès 1337) à
   vérifier par un lot d'équilibrage.
 Lancer/poursuivre la vague 1 (DC1, DC2a, DC2c-e) ; DC2b terminé, prêt pour fusion dans `feat/densite`.
+
+## DC4 — Affichage (worktree ../gp-dc4, branche feat/densite-dc4)
+État : sonde `game/tests/dc4_density_probe.gd` écrite (fenêtrée : temps d'image, temps de
+`declutter()`, marqueurs et étiquettes à l'écran, chevauchements, maquettes voisines, hameaux sur
+colonies, travelling au palier vallée ZG6). Mesures « avant » en cours.
+Build : `CARGO_TARGET_DIR` partagé ; attention, `deps/libcent_ans.dylib` n'a pas de hachage et est
+écrasé par la dernière construction de n'importe quel worktree : `touch
+core/crates/godot-bridge/src/lib.rs` avant `cargo build`, puis copier aussitôt.
+Prochaine étape : mesures avant (570 et 1 192), rangs, grille spatiale du désencombrement.
