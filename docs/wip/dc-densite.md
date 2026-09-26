@@ -67,10 +67,19 @@ Attendre la vague 1 ; fusionner DC2a-e (fichiers disjoints) puis DC1 dans feat/d
 Lancer/poursuivre la vague 1 (DC1, DC2a, DC2c-e) ; DC2b terminé, prêt pour fusion dans `feat/densite`.
 
 ## DC4 — Affichage (worktree ../gp-dc4, branche feat/densite-dc4)
-État : sonde `game/tests/dc4_density_probe.gd` écrite (fenêtrée : temps d'image, temps de
-`declutter()`, marqueurs et étiquettes à l'écran, chevauchements, maquettes voisines, hameaux sur
-colonies, travelling au palier vallée ZG6). Mesures « avant » en cours.
-Build : `CARGO_TARGET_DIR` partagé ; attention, `deps/libcent_ans.dylib` n'a pas de hachage et est
-écrasé par la dernière construction de n'importe quel worktree : `touch
-core/crates/godot-bridge/src/lib.rs` avant `cargo build`, puis copier aussitôt.
-Prochaine étape : mesures avant (570 et 1 192), rangs, grille spatiale du désencombrement.
+État (en cours) :
+- Sonde `game/tests/dc4_density_probe.gd` (fenêtrée).
+- Rangs : châteaux rang 2 seulement si fortification ≥ 3 ET poids ≥ 10 ; villes rang 2 aussi si
+  fortification ≥ 2 ET poids ≥ 25 (`settlement_markers.json`). Vue région : 276 → 264 places.
+- Désencombrement : grille spatiale (`LabelPlacer.SpatialGrid`), rectangles mesurés avec la police
+  (l'ancienne estimation sous-évaluait la largeur : chevauchements réels), tri cité > ville >
+  château > abbaye > village puis poids décroissant (`SettlementData`).
+- Maquettes : `_fit_model` répétable (taille d'origine gardée), positions de rendu, ville
+  emblématique non réduite, plancher 0,4, maquette de faubourg masquée (`_absorb`) ; CV1 passe la
+  maquette de croissance à pleine taille (réduction faite par `replace_model`).
+- Hameaux : non posés dans l'emprise d'une maquette de colonie (`on_settlement_model`).
+Build : `CARGO_TARGET_DIR` partagé entre worktrees : les rlib des crates du dépôt ont le même nom
+d'un worktree à l'autre et cargo les croit à jour (mtime) même construites depuis un autre
+worktree (constatée : dylib avec plafond 6 au lieu de 16). Parade : `find core/crates -name '*.rs'
+-exec touch {} +` avant `cargo build`, puis copier aussitôt.
+Prochaine étape : mesures avant (570 / 1 192, ancien code) avec la sonde finale, ZG6, captures.
