@@ -149,7 +149,7 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var color: Color = color_of.call(faction)
 		var signature := _signature(army, color, faction == player_faction)
 		var marker: ArmyMarker = previous.get(army_id)
-		var reused := marker != null and marker.get_meta("pb1_signature", "") == signature
+		var reused: bool = marker != null and marker.get_meta("pb1_signature", "") == signature
 		if reused:
 			previous.erase(army_id)
 		else:
