@@ -45,21 +45,25 @@ OUTFIT_OF_PART = {
 
 # Triangle budgets per piece role and level of detail (0 = as modelled).
 BUDGET = {
-    "head": (1300, 320, 70),
-    "body": (900, 260, 60),
+    "head": (1300, 320, 56),
+    "body": (900, 240, 36),
     "legs_bare": (900, 200, 40),
-    "torso": (2200, 460, 80),
-    "coat": (900, 200, 40),
-    "skirt": (700, 160, 34),
-    "legs": (1100, 220, 50),
+    "torso": (2200, 440, 70),
+    "coat": (900, 180, 30),
+    "skirt": (700, 150, 28),
+    "legs": (1100, 200, 36),
     "shoes": (320, 60, 16),
     "hair": (260, 70, 0),
     "beard": (160, 40, 0),
-    "hood": (600, 140, 30),
-    "hat": (0, 0, 0),
-    "belt": (0, 90, 0),
+    "hood": (600, 140, 24),
+    "hat": (0, 80, 30),
+    "belt": (0, 60, 0),
     "scabbard": (0, 40, 12),
 }
+# Pieces dropped at a level of detail (budget 0 there, but kept whole at LOD0).
+DROPPED = {"hair": (2,), "beard": (2,), "belt": (2,)}
+# FG0 kit pieces (modelled finely): share of their LOD0 triangles kept at LOD1 / LOD2.
+KIT_SHARE = (0.18, 0.04)
 RIDER_FACTOR = 0.75  # riders are seen from farther and half hidden by the horse
 
 
@@ -134,6 +138,11 @@ def fitted_body(arm, face):
     posed = fp.fit_pose(rig, joints, scale)
     fp.apply_pose_to_mesh(rig, body, posed)
     fp.remap_weights(body)
+    # MPFB's `body` group weighs every vertex 1.0: it would win every "dominant bone"
+    # lookup of the equipment builders (head box, torso rings).
+    group = body.vertex_groups.get("body")
+    if group is not None:
+        body.vertex_groups.remove(group)
     parent_keep(body, arm)
     return body
 
@@ -306,10 +315,16 @@ def sleeves_in(obj, material):
             p.material_index = k
 
 
-def skirt(lm, bvh, material, name):
-    """Split skirt from the waist to the knee (FG0 surcoat skirt) in `material`."""
+def skirt(lm, bvh, material, name, hem=None):
+    """Split skirt from the waist to `hem` (FG0 surcoat skirt, knee) in `material`."""
     obj = fe._skirt(lm, bvh)
     obj.name = obj.data.name = name
+    if hem is not None:
+        # The FG0 skirt ends at the knee (+5 cm): stretch it to the wanted hem.
+        waist = lm.waist_z
+        k = (hem - waist) / (lm.knee_z + 0.05 - waist)
+        for v in obj.data.vertices:
+            v.co.z = waist + (v.co.z - waist) * k
     recolour_mat(obj, material)
     return obj
 
@@ -381,8 +396,6 @@ def straw_hat(lm, code_rgb, band):
 
 def dress(outfit, recipe, body, lm, level, rider):
     """Garment shells of `outfit` (list of (object, budget role)) and the uncovered bones."""
-    from mathutils.bvhtree import BVHTree
-
     out = []
     bare = {"Head", "Neck", "Wrist.L", "Wrist.R"}
     thigh = lm.knee_z + (lm.bone["UpperLeg.L"].z - lm.knee_z) * 0.3
@@ -397,7 +410,7 @@ def dress(outfit, recipe, body, lm, level, rider):
         top = lm.knee_z + (lm.bone["UpperLeg.L"].z - lm.knee_z) * 0.7
         out.append((legs_shell(body, lm, "chausses", mat(legs), top), "legs"))
         out.append((shoes(body, feet), "shoes"))
-        bvh = BVHTree.FromObject(hauberk, bpy.context.evaluated_depsgraph_get())
+        bvh = torso_bvh(hauberk)
         if coat[0] in (eq.C_LIVERY, eq.C_ARMS):
             top_coat, skirt_obj = fe.surcoat(body, lm, hauberk, bvh)
             recolour(top_coat, coat)
@@ -421,7 +434,7 @@ def dress(outfit, recipe, body, lm, level, rider):
             feet = colour(recipe, "Adventurer_Legs:Brown", (eq.C_LEATHER, eq.LEATHER))
             belt_c = colour(recipe, "Gold", (eq.C_LEATHER, (0.12, 0.08, 0.04)))
             sleeves = None
-            long_skirt = False
+            hem = 0.14
         elif outfit == "peasant":
             coat = colour(recipe, "Farmer_Body:LightBlue", (eq.C_CLOTH, figures.RUSSET))
             panel = None
@@ -429,7 +442,7 @@ def dress(outfit, recipe, body, lm, level, rider):
             hose = colour(recipe, "Farmer_Pants:LightBlue", (eq.C_CLOTH, figures.HOSE))
             feet = colour(recipe, "Farmer_Feet:Brown", (eq.C_LEATHER, eq.LEATHER))
             belt_c = (eq.C_LEATHER, (0.10, 0.06, 0.03))
-            long_skirt = True
+            hem = 0.03
         else:
             coat = colour(
                 recipe, "Medieval_Body:Black", (eq.C_CLOTH, (0.1, 0.08, 0.06))
@@ -443,17 +456,17 @@ def dress(outfit, recipe, body, lm, level, rider):
             belt_c = colour(
                 recipe, "Medieval_Body:LightBrown", (eq.C_LEATHER, (0.16, 0.09, 0.04))
             )
-            long_skirt = True
+            hem = 0.03
         offset = 0.018 if coat[0] == eq.C_QUILT else 0.012
-        tunic = torso_shell(body, lm, "tunic", mat(coat), thigh, offset, relax=30)
+        hip_z = lm.bone["UpperLeg.L"].z - 0.03
+        tunic = torso_shell(body, lm, "tunic", mat(coat), hip_z, offset, relax=30)
         if panel is not None and panel[0] in (eq.C_LIVERY, eq.C_ARMS):
             livery_panel(tunic, lm, panel)
         if sleeves is not None:
             sleeves_in(tunic, mat(sleeves))
         out.append((tunic, "torso"))
-        bvh = BVHTree.FromObject(tunic, bpy.context.evaluated_depsgraph_get())
-        if long_skirt:
-            out.append((skirt(lm, bvh, mat(coat), "tunic_skirt"), "skirt"))
+        bvh = torso_bvh(tunic)
+        out.append((skirt(lm, bvh, mat(coat), "tunic_skirt", lm.knee_z + hem), "skirt"))
         if hose[0] == eq.C_SKIN:
             bare |= LEGS | {"Foot.L", "Foot.R"}
         else:
@@ -474,6 +487,26 @@ def dress(outfit, recipe, body, lm, level, rider):
 def recolour_first(obj, code_rgb):
     """Replace the first material slot of `obj` (leather of the FG0 belt)."""
     obj.data.materials[0] = mat(code_rgb)
+
+
+def torso_bvh(obj):
+    """BVH of a garment without its sleeves (hanging arms reach the belt's height)."""
+    from mathutils.bvhtree import BVHTree
+
+    dom = fe.dominant(obj)
+    mw = obj.matrix_world
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.transform(mw)
+    doomed = [
+        f
+        for f in bm.faces
+        if any(dom[v.index] in ARMS | {"Wrist.L", "Wrist.R"} for v in f.verts)
+    ]
+    bmesh.ops.delete(bm, geom=doomed, context="FACES")
+    tree = BVHTree.FromBMesh(bm)
+    bm.free()
+    return tree
 
 
 def trim(body, keep_bones):
@@ -592,7 +625,6 @@ def build_figure(fig_name, level):
     import battle_fine as bf
     import battle_skinned_cavalry as cav
     import battle_skinned_poses as poses
-    from mathutils.bvhtree import BVHTree
 
     recipe = figures.FIGURES[fig_name]
     mounted = recipe["rig"] == "cavalry"
@@ -613,11 +645,7 @@ def build_figure(fig_name, level):
     fine = fig_name in FINE_KIT
     if fine:
         gloves = (eq.C_LEATHER, (0.10, 0.06, 0.03))
-    bvhs = [
-        BVHTree.FromObject(o, bpy.context.evaluated_depsgraph_get())
-        for o, role in garments
-        if role in ("torso", "coat", "skirt")
-    ]
+    bvhs = [torso_bvh(o) for o, role in garments if role in ("torso", "coat", "skirt")]
     ctx = eq.Context(arm, level, bs.material, bs.bone_world)
     equipment = []
     for item in recipe.get("equipment", []):
@@ -706,6 +734,9 @@ def build_figure(fig_name, level):
         bs.set_face_mask(obj, mask)
         out.append(obj)
     for obj, role in garments:
+        if level in DROPPED.get(role, ()):
+            bpy.data.objects.remove(obj)
+            continue
         decimate(obj, budget(role, level, mounted))
         bs.set_face_mask(obj, 0)
         out.append(obj)
@@ -717,7 +748,7 @@ def build_figure(fig_name, level):
     for obj, mask, kit in equipment:
         target = 0
         if kit and level:
-            target = max(24, int(fp._tris(obj) * (0.25, 0.08)[level - 1]))
+            target = max(16, int(fp._tris(obj) * KIT_SHARE[level - 1]))
         decimate(obj, target)
         bs.set_face_mask(obj, mask)
         out.append(obj)
@@ -812,6 +843,12 @@ def check_poses(out, only=None):
         if only and fig_name not in only:
             continue
         arm, objs, _recipe = build_figure(fig_name, 0)
+        for o in objs:
+            attr = o.data.attributes.get("vmask")
+            for d in attr.data if attr else ():
+                d.value &= (
+                    0b0011_1111  # part flags (held arms, pavise) are not variants
+                )
         objs = fp.apply_variant(objs, 0)
         _pose_objects(arm, objs)
         fp.PROBE["rig"] = fp.probe_rig(arm)

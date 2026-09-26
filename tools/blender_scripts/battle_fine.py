@@ -50,6 +50,7 @@ def load_fine_human(keep_meshes=False):
         meshes = []
     bpy.context.view_layer.update()
     fine_rig.apply_proportions(arm)
+    fine_rig.use_fine_poses()
     bs.rest_pose(arm)
     return arm, meshes
 
@@ -78,6 +79,7 @@ def use_fine_mount():
     import battle_skinned_cavalry as cav
 
     cav.Mount = fine_mount_class()
+    fine_rig.use_fine_poses()
 
 
 def bake_human_rig():
