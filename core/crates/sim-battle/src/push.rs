@@ -170,6 +170,12 @@ impl PushRules {
         })
     }
 
+    /// False when the rules switch the push off (no recoil and no wrap):
+    /// the step skips it entirely (A/B probes).
+    pub fn enabled(&self) -> bool {
+        self.pressure.max_speed_mps > 0.0 || self.wrap.grow_per_second > 0.0
+    }
+
     /// Melee blows of `attacker` on `defender` are multiplied by this:
     /// the attacker's compression hampers it, the defender's exposes it,
     /// wrapped files strike the defender's flanks.
@@ -295,8 +301,12 @@ pub fn deform_figures(unit: &Unit, rules: &PushRules, positions: &mut [(f64, f64
     let front = d * 0.5;
     let max_turn = rules.wrap.max_turn_deg.to_radians();
     let rear_share = rules.bulge.rear_share;
+    let (fx, fz) = unit.forward();
+    let (rx, rz) = unit.right();
+    let turns = wraps.map(|wrap| (wrap * max_turn).sin_cos());
     for pos in positions.iter_mut() {
-        let (mut lx, mut lz) = to_local(unit, pos.0, pos.1);
+        let (dx, dz) = (pos.0 - unit.x, pos.1 - unit.z);
+        let (mut lx, mut lz) = (dx * rx + dz * rz, dx * fx + dz * fz);
         let mut angle = pos.2;
         if squeeze > 0.0 {
             lz = front - (front - lz) * (1.0 - squeeze);
@@ -319,7 +329,7 @@ pub fn deform_figures(unit: &Unit, rules: &PushRules, positions: &mut [(f64, f64
             }
             let ez = lz - front;
             let theta = wrap * max_turn;
-            let (sn, cs) = theta.sin_cos();
+            let (sn, cs) = turns[s];
             // Right wing turns anticlockwise in (lateral, forward), left
             // wing clockwise: both swing forward round the opponent.
             let (rx, rz) = if sign > 0.0 {
@@ -331,8 +341,11 @@ pub fn deform_figures(unit: &Unit, rules: &PushRules, positions: &mut [(f64, f64
             lz = front + rz;
             angle -= sign * theta;
         }
-        let (x, z) = to_world(unit, lx, lz);
-        *pos = (x, z, angle);
+        *pos = (
+            unit.x + rx * lx + fx * lz,
+            unit.z + rz * lx + fz * lz,
+            angle,
+        );
     }
 }
 

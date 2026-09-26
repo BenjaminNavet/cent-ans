@@ -110,7 +110,7 @@ impl BattleSim {
 
     /// One step of the push (called just before the melee blows).
     pub(super) fn resolve_push(&mut self, contacts: &[Vec<usize>]) {
-        if self.siege.is_some() {
+        if self.siege.is_some() || !self.push_rules.enabled() {
             return;
         }
         let n = self.units.len();

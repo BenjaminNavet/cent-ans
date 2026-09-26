@@ -408,3 +408,72 @@ fn probe_historical() {
         println!("{:5.0} {}", e.time, e.text_fr);
     }
 }
+
+/// Probe (ignored): cost of a step at the EP1 scale (60 regiments of 120 men
+/// a side, 14 400 soldiers, both AIs), with and without the push: mean ms per
+/// tick over each 60 s window, with the number of regiments in melee.
+#[test]
+#[ignore = "probe"]
+fn probe_step_cost() {
+    const KINDS: [&str; 5] = [
+        "unit_men_at_arms_foot",
+        "unit_longbowmen",
+        "unit_knights",
+        "unit_urban_militia",
+        "unit_crossbowmen",
+    ];
+    let data = data();
+    let army: Vec<&str> = (0..60).map(|i| KINDS[i % KINDS.len()]).collect();
+    for push in [false, true] {
+        let mut battle = setup(units(&data, &army), units(&data, &army), None);
+        for unit in battle
+            .attacker
+            .units
+            .iter_mut()
+            .chain(battle.defender.units.iter_mut())
+        {
+            unit.soldiers = 120;
+            unit.max_soldiers = 120;
+        }
+        let mut sim = BattleSim::new(battle, 11).unwrap();
+        sim.set_ai(SideId::Attacker, true);
+        sim.set_ai(SideId::Defender, true);
+        if !push {
+            let mut rules = sim.push_rules().clone();
+            rules.pressure.max_speed_mps = 0.0;
+            rules.wrap.grow_per_second = 0.0;
+            sim.set_push_rules(rules);
+        }
+        let mut total = 0.0;
+        let mut ticks = 0u32;
+        let mut worst: f64 = 0.0;
+        let window = (60.0 / DT).round() as u32;
+        while !sim.is_finished() && sim.elapsed() < 600.0 {
+            let mut elapsed = 0.0;
+            let mut melee_peak = 0;
+            for _ in 0..window {
+                let start = std::time::Instant::now();
+                sim.step();
+                elapsed += start.elapsed().as_secs_f64();
+                melee_peak = melee_peak.max(
+                    sim.units()
+                        .iter()
+                        .filter(|u| u.state == UnitState::Melee)
+                        .count(),
+                );
+            }
+            let ms = elapsed * 1000.0 / f64::from(window);
+            total += elapsed * 1000.0;
+            ticks += window;
+            worst = worst.max(ms);
+            println!(
+                "push {push}: t {:>4.0} s  {ms:.3} ms/tick  melee peak {melee_peak}",
+                sim.elapsed()
+            );
+        }
+        println!(
+            "push {push}: mean {:.3} ms/tick, worst window {worst:.3} ms/tick",
+            total / f64::from(ticks)
+        );
+    }
+}
