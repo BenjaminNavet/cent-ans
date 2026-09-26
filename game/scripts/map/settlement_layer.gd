@@ -81,6 +81,8 @@ var _camera_distance := 1000.0  # SZ4b : maquettes à la taille de carte avant l
 var _regrounded: Dictionary = {}
 ## ZG6 : villes ordinaires à l'échelle réelle (paliers vallée et site), voir `TownLayer`.
 var towns: TownLayer
+## VH4 (ADR 0078) : villes emblématiques à l'échelle 1:1 (format v2), voir `LandmarkCityLayer`.
+var landmark_cities: LandmarkCityLayer
 var _towns_version := -1
 ## Lot ZG5b : positions de rendu affinées (`fine_anchors.json`) des maquettes (index → Vector2)
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
@@ -229,6 +231,18 @@ func _model_base_y(i: int) -> float:
 	return (_models[i] as Node3D).position.y
 
 
+## VH4 : cercles des villes emblématiques encore sans ville 1:1 (format v2) : le plancher de
+## caméra provisoire de ZG4b (`landmark_min_distance`) ne s'applique plus qu'à elles.
+func landmark_floor_zones() -> PackedVector3Array:
+	var zones := PackedVector3Array()
+	for i in _landmarks:
+		if landmark_cities != null and landmark_cities.is_enabled() and landmark_cities.has_city(str(data.settlements[i]["id"])):
+			continue
+		var landmark := _landmarks[i] as LandmarkModel
+		zones.append(Vector3(landmark.position.x, landmark.position.z, landmark.zone_radius))
+	return zones
+
+
 ## Cercles (x, z, rayon) des villes emblématiques, pour le zoom rapproché de la caméra.
 func landmark_zones() -> PackedVector3Array:
 	var zones := PackedVector3Array()
@@ -358,7 +372,8 @@ func _update_settlement_scale(camera_distance: float) -> void:
 	_settlement_scale_ref = wanted
 	for i in _models.size():
 		_place_model(i)
-	_labels_dirty = true
+	# Hauteurs des étiquettes : toutes, par pas d'échelle seulement (pas à chaque image, SZ6).
+	_update_label_heights()
 
 
 func _build_label(i: int, entry: Dictionary) -> void:
@@ -511,6 +526,8 @@ func refresh(sim: Object, color_of: Callable) -> void:
 		if year > 0:
 			for landmark in _landmarks.values():
 				(landmark as LandmarkModel).set_year(year)
+			if landmark_cities != null:
+				landmark_cities.set_year(year)
 	_refresh_shields()
 	for i in data.settlements.size():
 		var entry: Dictionary = data.settlements[i]
@@ -532,9 +549,20 @@ func refresh(sim: Object, color_of: Callable) -> void:
 			var state: Dictionary = sim.call("get_province_state", province_id)
 			devastation[province_id] = float(state.get("devastation", 0.0))
 	if devastation != _devastation:
+		# Seules les tuiles dont un hameau est dans une province à la dévastation changée.
+		var changed := {}
+		for province_id in devastation:
+			if not _devastation.has(province_id) or float(_devastation[province_id]) != float(devastation[province_id]):
+				changed[province_id] = true
+		for province_id in _devastation:
+			if not devastation.has(province_id):
+				changed[province_id] = true
 		_devastation = devastation
 		for index in _hamlet_nodes:
-			_hamlet_dirty[index] = true
+			for h in _hamlets_by_chunk.get(index, []):
+				if changed.has(data.hamlets[h]["province"]):
+					_hamlet_dirty[index] = true
+					break
 
 
 # --- Mise à jour par image -----------------------------------------------------------
@@ -563,16 +591,30 @@ func update_view(camera_distance: float) -> void:
 		# SZ4 : hameaux à leur taille réelle sous le palier comté, gardés au palier site.
 		_hamlets_root.visible = weights.x > 0.35
 		_landmarks_root.visible = not site
-		_update_label_heights()
+		# SZ6 : les hauteurs d'étiquettes ne dépendent des poids que par le palier près et les
+		# villes 1:1 : pas de recalcul des 570 étiquettes à chaque image d'un zoom.
+		var label_state := Vector2i(int(weights.x > 0.35), int(_towns_active()))
+		if label_state != _label_state:
+			_update_label_heights()
 		_declutter_timer = 0.0
-	if _labels_dirty:
+	if MapData.vertical_scale() != _label_scale:
 		_labels_dirty = false
-		_update_label_heights()
+		_update_label_heights()  # ZG4 : toutes les étiquettes du palier moyen suivent l'échelle
+	elif _labels_dirty:
+		_labels_dirty = false
+		# SZ6 : seules les colonies des morceaux recalés (hauteur de leur maquette ou de leur ville
+		# emblématique) changent.
+		var near := _weights.x > 0.35
+		for index: int in _label_chunks:
+			for i in _settlements_by_chunk.get(index, PackedInt32Array()):
+				_update_label_height(i, near)
+		_label_chunks.clear()
 	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
 	_update_settlement_scale(camera_distance)
 	_update_towns(camera_distance)
+	_update_landmark_cities(camera_distance)
 	_update_hamlet_scale(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
@@ -589,31 +631,46 @@ func _on_chunk_surface_changed(index: int) -> void:
 		_hamlet_dirty[index] = true
 	# ZG4 : hauteurs des étiquettes une fois par image (et non à chaque morceau recalé).
 	_labels_dirty = true
+	_label_chunks[index] = true
+
+
+## SZ6 : morceaux recalés depuis la dernière mise à jour des étiquettes ; état (palier près,
+## villes 1:1) de la dernière mise à jour complète.
+var _label_chunks: Dictionary = {}
+var _label_state := Vector2i(-1, -1)
+var _label_scale := -1.0
 
 
 ## Hauteur des étiquettes : au-dessus de la maquette (près) ou de l'icône (moyen).
 func _update_label_heights() -> void:
 	var near := _weights.x > 0.35
+	_label_state = Vector2i(int(near), int(_towns_active()))
+	_label_scale = MapData.vertical_scale()
+	_label_chunks.clear()
 	for i in _labels.size():
-		var label := _labels[i]
-		var px: Vector2 = data.settlements[i]["px"]
-		if near and _models[i] != null:
-			if not _landmarks.has(i):
-				var model_at := model_px(i)  # ZG5b : au-dessus de la maquette ancrée
-				label.position.x = model_at.x
-				label.position.z = model_at.y
-			if _landmarks.has(i):
-				label.position.y = _model_base_y(i) + _model_top[i] + 0.8
-			else:
-				# SZ4b : au-dessus de la maquette à l'échelle courante ; au sol pour une ville 1:1.
-				var s := _model_scale[i]
-				var lift := 0.12 + 0.68 * clampf((s - _real_ratio(i)) / maxf(1.0 - _real_ratio(i), 1e-4), 0.0, 1.0)
-				label.position.y = _model_base_y(i) + _model_top[i] * s + lift
-			label.offset = Vector2.ZERO
+		_update_label_height(i, near)
+
+
+func _update_label_height(i: int, near: bool) -> void:
+	var label := _labels[i]
+	var px: Vector2 = data.settlements[i]["px"]
+	if near and _models[i] != null:
+		if not _landmarks.has(i):
+			var model_at := model_px(i)  # ZG5b : au-dessus de la maquette ancrée
+			label.position.x = model_at.x
+			label.position.z = model_at.y
+		if not _landmarks.has(i):
+			# SZ4b : au-dessus de la maquette à l'échelle courante ; au sol pour une ville 1:1.
+			var s := _model_scale[i]
+			var lift := 0.12 + 0.68 * clampf((s - _real_ratio(i)) / maxf(1.0 - _real_ratio(i), 1e-4), 0.0, 1.0)
+			label.position.y = _model_base_y(i) + _model_top[i] * s + lift
 		else:
-			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
-			label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
-			label.offset = Vector2(0.0, marker_size(i) * (0.5 + ICON_CENTER_LIFT) + label.font_size * 0.4)
+			label.position.y = _model_base_y(i) + _model_top[i] + 0.8
+		label.offset = Vector2.ZERO
+	else:
+		# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
+		label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+		label.offset = Vector2(0.0, marker_size(i) * (0.5 + ICON_CENTER_LIFT) + label.font_size * 0.4)
 
 
 ## Opacité d'une étiquette selon le type et le palier (cité : moyen et près ; ville : moyen
@@ -757,6 +814,9 @@ func flush() -> void:
 	if towns != null:  # ZG6 : villes 1:1 autour de la caméra
 		towns.flush()
 		_update_towns(_camera_distance)
+	if landmark_cities != null:  # VH4 : villes emblématiques 1:1
+		landmark_cities.flush()
+		_update_landmark_cities(_camera_distance)
 	_labels_dirty = false
 	_update_label_heights()
 
@@ -1046,6 +1106,20 @@ func _setup_towns() -> void:
 		ids.append(entry["id"])
 	towns.setup(map_data, terrain, tiers, ids)
 	_compute_real_radii()
+	landmark_cities = LandmarkCityLayer.new()
+	add_child(landmark_cities)
+	landmark_cities.setup(map_data, terrain, tiers, ids)
+
+
+## VH4 : villes emblématiques 1:1 et fondu de leur maquette L1/L2 (tramage).
+func _update_landmark_cities(camera_distance: float) -> void:
+	if landmark_cities == null:
+		return
+	landmark_cities.update_view(camera_distance)
+	for i in _landmarks:
+		var id := str(data.settlements[i]["id"])
+		if landmark_cities.has_city(id):
+			(_landmarks[i] as LandmarkModel).set_fade(landmark_cities.fade(id))
 
 
 ## SZ4b : rayon réel de chaque colonie : rayon bâti vers 1340 (`towns_1340.json`, lot ZG6) ×

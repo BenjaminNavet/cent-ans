@@ -102,6 +102,7 @@ var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerr
 var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
 var movement_ctl: ArmyMovementController = null  # M4 : bulle, chemin, clic au sol, animation
 var agents_ctl: AgentController = null  # C6 (agents) : espions, hérauts, prédicateurs
+var units_ctl: UnitRosterController = null  # liste « Mes unités » (U) : armées et agents
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -175,6 +176,9 @@ func _ready() -> void:
 	agents_ctl = AgentController.new()  # C6 agents (après C5 : chaîne ses intercepteurs de clic)
 	add_child(agents_ctl)
 	agents_ctl.setup(self)
+	units_ctl = UnitRosterController.new()  # après M4 et C6 : lit leurs états
+	add_child(units_ctl)
+	units_ctl.setup(self)
 	minimap_ctl = MinimapController.new()  # C1
 	minimap_ctl.name = "MinimapController"
 	add_child(minimap_ctl)
@@ -260,6 +264,8 @@ func _setup_settlements() -> void:
 	settlement_layer.settlement_selected.connect(_on_settlement_selected)
 	armies.settlement_position = settlement_layer.world_position_of  # C4
 	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
+	camera_rig.floor_zones = settlement_layer.landmark_floor_zones()  # VH4 : plancher levé (v2)
+	camera_rig.floor_zones_set = true
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
 		return settlement_layer.screen_label_rects(view_camera) + cities.screen_label_rects(view_camera)
@@ -377,6 +383,8 @@ func refresh_all() -> void:
 		settlements_ctl.refresh()
 	if agents_ctl != null:  # C6 agents
 		agents_ctl.refresh()
+	if units_ctl != null:  # liste « Mes unités »
+		units_ctl.refresh()
 	_refresh_trade_layer()  # C5 : routes commerciales
 	if map_modes != null:  # MF1 : repeint par-dessus les couleurs politiques
 		map_modes.refresh()
@@ -1022,7 +1030,10 @@ func _on_end_turn() -> void:
 	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
 	refresh_all()
 	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
+		var sim_before: Object = sim
 		await ai_replay.play()
+		if sim != sim_before:  # une autre partie a été chargée entre-temps : ces événements sont périmés
+			return
 	if diplomacy != null:
 		diplomacy.after_end_turn()
 	if victory != null:
@@ -1043,16 +1054,26 @@ func _on_end_turn() -> void:
 # --- Sauvegarde ----------------------------------------------------------------------
 
 
+## Vrai si la dernière demande de sauvegarde a écrit l'état (lu par `FlowController`).
+var last_save_ok := false
+
+
 func _on_save(save_name: String) -> void:
+	last_save_ok = false
 	if sim == null:
 		return
-	if SimFacade.save_game(save_name):
+	# Fiche `.meta.json` écrite seulement si l'état l'a été (la vignette suit dans FlowController).
+	last_save_ok = SaveSlots.save(save_name)
+	if last_save_ok:
 		ui.show_toast("Partie sauvegardée : %s" % save_name)
 	else:
 		ui.show_toast("Échec de la sauvegarde.", true)
 
 
 func _on_load(path: String) -> void:
+	if ai_replay != null and ai_replay.playing:  # la fin de tour en cours vise la partie actuelle
+		ui.show_toast("Attendez la fin des mouvements adverses (Espace pour passer).", true)
+		return
 	if not SimFacade.load_game(path):
 		ui.show_toast("Impossible de charger cette sauvegarde.", true)
 		return
@@ -1080,36 +1101,48 @@ func _process(_delta: float) -> void:
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
 	var t0 := Time.get_ticks_usec()
+	var tp := t0  # SZ6 : minuteries `PerfProbe` (banc `--bench-probe`)
 	if dynamic_exaggeration and terrain.quadtree != null and camera_rig.profile != null:  # ZG4
 		terrain.set_vertical_scale(camera_rig.profile.quantized_scale(distance, MapData.vertical_scale()))
+	tp = PerfProbe.lap("map.vertical_scale", tp)
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
+	tp = PerfProbe.lap("map.update_lod", tp)
 	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
+	tp = PerfProbe.lap("map.cities", tp)
 	if zoom_tiers != null:  # C6 : paliers de zoom
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
+		tp = PerfProbe.lap("map.settlements", tp)
 		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
 		# palier « site » (routes drapées à leur vraie largeur : lot ZG5b).
 		var site_hide := 1.0 - zoom_tiers.site_weight(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
+		tp = PerfProbe.lap("map.roads", tp)
 		if rivers.crossings != null:
 			# ZG5b : avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.
 			rivers.crossings.visible = site_hide > 0.5 or rivers.fine != null
 		trade_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
 		_apply_close_tiers(distance)
+		tp = PerfProbe.lap("map.close_tiers", tp)
 	if life != null:  # CV1
 		life.update_view(distance)
+	tp = PerfProbe.lap("map.life", tp)
 	strategic.update_view(distance)  # CM2
 	if faction_borders != null:  # FR1 : après CM2 (shader du terrain substitué au parchemin)
 		faction_borders.update_view(distance)
+	tp = PerfProbe.lap("map.strategic_borders", tp)
 	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
+	tp = PerfProbe.lap("map.weather", tp)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
+	tp = PerfProbe.lap("map.rivers", tp)
 	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
 	armies.update_scale(camera_rig.distance)
 	_update_trade_hover()  # C5
+	tp = PerfProbe.lap("map.misc", tp)
 	if _screenshot_countdown > 0:
 		# C6 : la capture attend le relief fin et les rubans / hameaux des tuiles proches.
 		if _screenshot_countdown == 3 and not terrain.fine_ready():

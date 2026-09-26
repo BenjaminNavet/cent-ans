@@ -1543,6 +1543,70 @@ Test : `tests/sz4b_colonies_forests_test.gd` (+ `cargo test -p vegetation`).
 ![Forêt de Compiègne à d = 6, après](img/sz4b/apres_foret_compiegne_d6.jpg)
 ![Crécy à d = 14, après : exagération commune](img/sz4b/apres_crecy_d14.jpg)
 
+## Pics d'images côté scripts (lot SZ6, ADR 0051)
+
+**Sonde.** `--bench-map --bench-probe` active `PerfProbe` (`scripts/dev/perf_probe.gd`) : minuteries
+par section de `CampaignMap._process` (`map.*`), de `update_lod` (`lod/*`) et des étapes du quadtree
+(`qt/*`) ; le rapport `probe` donne, par section, le temps cumulé dans les images > 50 ms, le nombre
+de ces images qu'elle domine, sa pire durée, et les 12 pires images avec leurs sections. Ajouter une
+section : `var t := Time.get_ticks_usec()` … `t = PerfProbe.lap("nom", t)` (coût : un test booléen) ;
+« parent/nom » pour une sous-section.
+
+**Causes trouvées et correctifs** (même rendu, au plus quelques images de décalage) :
+- Rubans de route drapés (`RoadRenderer`) : un ruban coûtait jusqu'à 115 ms au fil principal. Avec
+  le quadtree, construits dans `WorkerThreadPool` (`RibbonJob`) sur un instantané des pages de
+  l'emprise des tronçons (`surface_snapshot`, même surface que `surface_heights_at`), 4 à la fois,
+  installés dans le budget de l'image ; `flush` et le repli E0 restent synchrones.
+- Végétation : changer `MultiMesh.mesh` après `buffer` fait relire le tampon au GPU par le serveur
+  de rendu (boîte englobante), image bloquée jusqu'à 80 ms au passage détaillé / simple. Le
+  MultiMesh est recréé depuis la copie processeur du tampon (`Vegetation._with_mesh`). **Règle :** ne
+  jamais changer le maillage ni lire `buffer` / `get_instance_*` d'un MultiMesh rempli par `buffer`.
+- Villes emblématiques : recuisson des hauteurs d'un bloc dans un fil (instantané des pages) au lieu
+  de tranches de 1,5 ms par maquette et par image.
+- `TerrainBuilder` : changements de niveau des morceaux signalés du plus proche au plus lointain dans
+  `level_emit_budget_ms` (4 ms, au moins un par image ; tous hors image, `FrameBudget.in_frame`) :
+  un zoom en changeait jusqu'à 20 d'un coup (50 ms d'écouteurs).
+- Étiquettes des colonies : recalculées seulement pour les morceaux recalés, et en entier au
+  changement d'échelle verticale ou de palier près (avant : les 570 à chaque image d'un zoom).
+- `LifeEffects._reground` : points indexés par morceau (avant : parcours de tous les points).
+
+**Mesures** (`--bench-map`, M4 Pro, machine partagée à une charge de 75-150 ; 4 passes alternées
+main c4064c29 / SZ6, médianes) : parcours complet p99 91 → 38 ms, pire image 182 → 52 ms, images
+> 50 ms 231 → 3, p50 20 → 19 ms ; descente p99 93 → 38 ms, scripts p99 87 → 29 ms. Détail et limites : `docs/wip/sz6-pics-scripts.md`.
+
+## Villes emblématiques à l'échelle 1:1 (lots VH0/VH4, ADR 0078)
+
+Défaut S3 de ZG7c : au palier site, les villes emblématiques étaient des maquettes à la loupe
+posées sur un relief 1:1 (Rouen : falaise au milieu de la ville, plan d'eau vertical), et la caméra
+était bloquée par un plancher provisoire (ZG4b). Une ville emblématique qui a un fichier
+`data/landmarks_v2/<id>.json` (format v2 géoréférencé EPSG:3035) est désormais rendue à l'échelle
+réelle au zoom rapproché ; format, outil et moteur : **`docs/landmarks-v2.md`**.
+
+- `SettlementLayer` crée `LandmarkCityLayer` à côté du `TownLayer` de ZG6 ; la ville se planifie
+  dès le poids vallée 0,15 (fil de travail, ≈ 2-4 s pour Rouen sous charge), puis se construit
+  par étapes (`TownBuilder`, budget ZG6) ; la maquette L1/L2 se dissout par tramage
+  (`landmark.gdshader`, `fade`) entre les poids vallée 0,35 et 0,65.
+- Caméra : `CampaignCamera.floor_zones` (fourni par `SettlementLayer.landmark_floor_zones`) ne
+  contient plus que les villes sans v2 ; au-dessus de Rouen, la caméra descend au plancher du
+  relief (0,3 unité).
+- `TownBuilder` étendu sans changer les villes ordinaires : cellules de détail par plan
+  (`detail_cell_m`, 250 m pour les îlots des villes 1:1), enceintes polygonales `wall_rings`,
+  monuments préparés (`v2_monuments`), rues pavées et ruisseaux dessinés, bord du sol par sommet.
+- Rouen vers 1340 : 706 rues (OSM, percées du XIXᵉ s. exclues), enceinte de ≈ 5 km avec 9 portes
+  et 65 tours, pont Mathilde habité, 26 monuments à gabarit réel (cathédrale 137 m, tour
+  Saint-Romain, tour-lanterne et flèche ; chœur gothique et nef romane de Saint-Ouen ; château de
+  Philippe Auguste ; halles de la Vieille-Tour ; beffroi communal jusqu'en 1382, Gros-Horloge à
+  partir de 1389), ≈ 4 800 parcelles et 5 800 bâtiments.
+- Captures `docs/img/vh4/` (`rouen_strategique`, `rouen_transition`, `rouen_vallee`,
+  `rouen_site`, `rouen_site_ouest`, `rouen_toits`, `rouen_pont`, `rouen_chateau`) :
+  `godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear`.
+- Mesure (`vh4_shots.gd`, 4 s par point, machine chargée : charge moyenne ≈ 100-110 sur 14 cœurs,
+  autres agents actifs ; après fusion de SZ2/SZ4) : **55 i/s au-dessus de Rouen à d = 1,6 et 56 i/s
+  à d = 0,6** (pire image 33-34 ms), contre 60 et 46 i/s au-dessus d'Amiens (ville ordinaire ZG6)
+  dans la même session : pas de régression par rapport à une ville ordinaire ; un premier passage,
+  plus chargé, donnait 27-28 i/s (Rouen) contre 23-25 (Amiens). 60 i/s à confirmer au repos.
+- Tests : `res://tests/vh4_landmarks_test.gd` (headless), `tools/tests/test_landmarks_v2.py`.
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),

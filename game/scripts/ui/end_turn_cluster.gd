@@ -41,6 +41,7 @@ const SHORT_LABELS := {
 	"coinage": "Monnaie",
 	"chivalry": "Chevalerie",
 	"agent": "Agents",
+	"diplomacy_offer": "Proposition",
 }
 const KIND_LABELS := {
 	"chronicle_decision": "Décision de chronique",
@@ -55,9 +56,10 @@ const KIND_LABELS := {
 	"herbarium": "Herbier",
 	"research_idle": "Aucune recherche en cours",
 	"ransom": "Captifs et rançons",
+	"diplomacy_offer": "Proposition diplomatique",
 }
 ## Icône d'un type sans icône propre (`hud_<alias>`).
-const ICON_ALIASES := {"research_idle": "research", "ransom": "treasury", "coinage": "treasury", "other": "chronicle"}
+const ICON_ALIASES := {"diplomacy_offer": "diplomacy", "research_idle": "research", "ransom": "treasury", "coinage": "treasury", "other": "chronicle"}
 ## Types dessinés sur cire rouge (danger) ; les autres sur parchemin.
 const DANGER_KINDS := ["chronicle_decision", "enemy_army", "siege", "debt"]
 const BUTTON_RADIUS := 62.0

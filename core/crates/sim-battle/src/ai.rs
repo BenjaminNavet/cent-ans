@@ -78,6 +78,7 @@ use data_model::{Ability, BattleOrder, BattleOrderKind, BattleOrderScope, UnitCa
 
 use crate::command::Command;
 use crate::crest::CrestDefenceRules;
+use crate::horse_wait::HorseWaitRules;
 use crate::position::{military_crest, score_position, Front};
 use crate::relief_ai::ReliefMap;
 use crate::setup::SideId;
@@ -98,6 +99,9 @@ pub const SHOOTER_SAFETY: f64 = 70.0;
 /// R4: shooters behind a hedge, a ditch or in a village fall back when enemy
 /// foot comes this close.
 pub const COVER_SAFETY: f64 = 20.0;
+/// Distance kept from the field's edges by the AI's moves (a move outside
+/// the field is refused).
+pub(crate) const FIELD_MARGIN: f64 = 10.0;
 /// Enemy shooters farther than this from their own melee troops are
 /// "isolated" (a cavalry target).
 pub const ISOLATION_DISTANCE: f64 = 80.0;
@@ -359,10 +363,7 @@ impl<'a> View<'a> {
             return;
         }
         let field = self.sim.field();
-        let (x, z) = (
-            x.clamp(10.0, field.width - 10.0),
-            z.clamp(10.0, field.depth - 10.0),
-        );
+        let (x, z) = field.clamp_inside(x, z, FIELD_MARGIN);
         let z = dry_z(field, x, z, u.z, self.forward);
         let far = match u.destination {
             Some((dx, dz)) => (dx - x).powi(2) + (dz - z).powi(2) > 36.0,
@@ -1796,10 +1797,14 @@ fn plan_shooter(
             let rear = (line_z * view.forward).min(anchor.1 * view.forward) * view.forward;
             let behind = (unit.x, rear - view.forward * 45.0);
             if (unit.z - behind.1) * view.forward > 8.0 || view.engaged(i) {
+                let (x, z) = view
+                    .sim
+                    .field()
+                    .clamp_inside(behind.0, behind.1, FIELD_MARGIN);
                 view.commands.push(Command::Move {
                     units: vec![unit.id],
-                    x: behind.0,
-                    z: behind.1,
+                    x,
+                    z,
                     run: true,
                     facing: Some(facing),
                 });
@@ -2104,6 +2109,9 @@ fn plan_horse(
         horse.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
         // B6: horsemen behind a hedge are ridden round, or left alone.
         for (j, d) in horse {
+            if waits_for_foot(view, roles, i, j) {
+                continue;
+            }
             if charge_or_detour(view, i, j, d < CHARGE_DISTANCE * 3.0) {
                 return;
             }
@@ -2213,7 +2221,12 @@ fn plan_horse(
             && (e.morale < 40.0 || e.hp < f64::from(e.initial_soldiers) * 0.5)
     };
     if let Some((j, d)) = view.nearest_enemy(i, shaken) {
-        if d < 110.0 && !defensive && !general_only && !charge_breaks(view, i, j) {
+        if d < 110.0
+            && !defensive
+            && !general_only
+            && !charge_breaks(view, i, j)
+            && !waits_for_foot(view, roles, i, j)
+        {
             view.attack(i, j, true);
             return;
         }
@@ -2237,10 +2250,48 @@ fn plan_horse(
     view.move_to(i, x, z, false, Some(facing));
 }
 
+/// EQ7 (suite of ADR 0052): the horse of an attacker with foot does not
+/// ride at enemy horse or at a shaken regiment covered by enemy shooters who
+/// still have arrows before its foot is close to that target, or already in
+/// a melee (Crécy, Poitiers: the knights sent ahead alone broke under the
+/// arrows). It holds the wing meanwhile, and goes on once committed close
+/// to its target. The defender's horse, which waits for the enemy, and the
+/// charge at isolated shooters (which pins them) are unchanged.
+fn waits_for_foot(view: &View, roles: &Roles, i: usize, j: usize) -> bool {
+    if view.side != SideId::Attacker {
+        return false;
+    }
+    let rules = HorseWaitRules::bundled();
+    let units = view.units;
+    let (unit, target) = (&units[i], &units[j]);
+    if dist(unit, target) < rules.committed_m {
+        return false;
+    }
+    let covered = view.able_enemies().any(|s| {
+        let shooter = &units[s];
+        is_shooter(shooter)
+            && shooter.state != UnitState::Melee
+            && dist(shooter, target)
+                <= view.sim.effective_range(shooter, target.x, target.z) * rules.range_margin
+    });
+    let foot: Vec<&Unit> = roles
+        .line
+        .iter()
+        .map(|&k| &units[k])
+        .filter(|u| u.able())
+        .collect();
+    covered
+        && !foot.is_empty()
+        && !foot
+            .iter()
+            .any(|u| u.state == UnitState::Melee || dist(u, target) < rules.foot_close_m)
+}
+
 /// Reactions common to every plan: face flank attacks, pull out wavering
 /// regiments.
 fn react(view: &mut View, roles: &Roles) {
     let units = view.units;
+    let field = view.sim.field();
     let own = view.own.clone();
     for i in own {
         let u = &units[i];
@@ -2256,10 +2307,11 @@ fn react(view: &mut View, roles: &Roles) {
                     t.state == UnitState::Routing && stakes_in_path(units, (u.x, u.z), t)
                 });
         if rout_into_stakes {
+            let (x, z) = field.clamp_inside(u.x, u.z - view.forward * 60.0, FIELD_MARGIN);
             view.commands.push(Command::Move {
                 units: vec![u.id],
-                x: u.x,
-                z: u.z - view.forward * 60.0,
+                x,
+                z,
                 run: true,
                 facing: None,
             });
@@ -2271,10 +2323,11 @@ fn react(view: &mut View, roles: &Roles) {
             && roles.reserve.is_some_and(|r| r != i)
             && !u.is_general
         {
+            let (x, z) = field.clamp_inside(u.x, u.z - view.forward * 70.0, FIELD_MARGIN);
             view.commands.push(Command::Move {
                 units: vec![u.id],
-                x: u.x,
-                z: u.z - view.forward * 70.0,
+                x,
+                z,
                 run: true,
                 facing: None,
             });

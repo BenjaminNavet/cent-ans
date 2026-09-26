@@ -15,7 +15,7 @@
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BinaryHeap};
 
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, Terrain};
+use data_model::{CharacterId, FactionId, GameData, ProvinceId, SettlementId, Terrain};
 
 use crate::battle_auto::{resolve_field, BattleContext, BattleUnit, Side, Winner};
 use crate::dynasty;
@@ -165,6 +165,7 @@ pub fn path_to(
 /// and pays in men and morale for the disembarkation.
 pub(crate) fn land_on_hostile_shore(
     state: &mut CampaignState,
+    data: &GameData,
     army_id: &ArmyId,
     province: Option<&ProvinceId>,
     events: &mut Vec<GameEvent>,
@@ -175,6 +176,7 @@ pub(crate) fn land_on_hostile_shore(
     } else {
         LANDING_LOSS_PERCENT
     };
+    let name = state.army_name(data, army_id);
     let Some(army) = state.armies.get_mut(army_id) else {
         return;
     };
@@ -191,7 +193,7 @@ pub(crate) fn land_on_hostile_shore(
     let faction = army.faction.clone();
     let mut event = GameEvent::new(
         EventKind::Attrition,
-        format!("Débarquement en terre hostile : l'armée {army_id} perd {lost} hommes."),
+        format!("Débarquement en terre hostile : {name} perd {lost} hommes."),
     )
     .army(army_id)
     .faction(&faction);
@@ -669,18 +671,8 @@ pub(crate) fn apply_battle_result(
         apply_outcome(state, data, id, outcome, events);
     }
     // F1: a captured commander is held by the victor.
-    for (general, captor) in [
-        (&attacker_general, &defender_faction),
-        (&defender_general, &attacker_faction),
-    ] {
-        if let Some(c) = general
-            .as_ref()
-            .and_then(|g| state.characters.get_mut(g))
-            .filter(|c| c.captive && c.captor.is_none())
-        {
-            c.captor = Some(captor.clone());
-        }
-    }
+    assign_captor(state, attacker_general.as_ref(), &defender_faction);
+    assign_captor(state, defender_general.as_ref(), &attacker_faction);
     // M5 war score: a lopsided battle counts double.
     let (winner, loser, winner_losses, loser_losses) = match result.winner {
         Winner::Attacker => (
@@ -929,12 +921,21 @@ fn retreat_beaten_army(
         }
         Retreat::Fallback(point) => {
             let lost = decimate(state, army_id, rules.neutral_loss_percent);
+            if state
+                .armies
+                .get(army_id)
+                .is_some_and(|a| a.units.is_empty())
+            {
+                disperse_army(state, data, army_id, events);
+                return;
+            }
             push_retreat_event(
                 state,
                 data,
                 army_id,
                 format!(
-                    "L'armée {army_id}, coupée de ses places, recule et perd {lost} traînards."
+                    "{}, coupé de ses places, recule et perd {lost} traînards.",
+                    crate::events::capitalize(&state.army_name(data, army_id))
                 ),
                 events,
             );
@@ -958,7 +959,8 @@ fn retreat_beaten_army(
                         data,
                         army_id,
                         format!(
-                            "Débandade : l'armée {army_id}, coupée de ses places, perd {lost} hommes avant de se rallier."
+                            "Débandade : {}, coupé de ses places, perd {lost} hommes avant de se rallier.",
+                            state.army_name(data, army_id)
                         ),
                         events,
                     );
@@ -967,6 +969,22 @@ fn retreat_beaten_army(
                 None => disperse_army(state, data, army_id, events),
             }
         }
+    }
+}
+
+/// F1: a general taken in battle (made `captive` by [`apply_outcome`]) is
+/// held by `captor`; without a captor he could never be ransomed. No-op when
+/// the general was not captured or already has a captor.
+pub(crate) fn assign_captor(
+    state: &mut CampaignState,
+    general: Option<&CharacterId>,
+    captor: &FactionId,
+) {
+    if let Some(c) = general
+        .and_then(|g| state.characters.get_mut(g))
+        .filter(|c| c.captive && c.captor.is_none())
+    {
+        c.captor = Some(captor.clone());
     }
 }
 
@@ -1032,13 +1050,14 @@ fn disperse_army(
     };
     let faction = army.faction.clone();
     let province = state.army_province(data, army);
+    let name = state.army_name(data, army_id);
     if let Some(general) = army.general.clone() {
         state.detach_general(&general);
     }
     state.armies.remove(army_id);
     let mut event = GameEvent::new(
         EventKind::ArmyDestroyed,
-        format!("Débandade : l'armée {army_id}, coupée de ses places, se disperse."),
+        format!("Débandade : {name}, coupé de ses places, se disperse."),
     )
     .army(army_id)
     .faction(&faction);
@@ -1089,7 +1108,10 @@ pub(crate) fn apply_outcome(
         events.push(
             GameEvent::new(
                 EventKind::Medicine,
-                format!("{tended} blessés soignés rejoignent les rangs de l'armée {army_id}."),
+                format!(
+                    "{tended} blessés soignés rejoignent les rangs de {}.",
+                    state.army_name(data, army_id)
+                ),
             )
             .province(&location)
             .army(army_id)
@@ -1118,18 +1140,16 @@ pub(crate) fn apply_outcome(
         }
     }
     if destroyed {
+        let name = crate::events::capitalize(&state.army_name(data, army_id));
         if let Some(general) = &general {
             state.detach_general(general);
         }
         state.armies.remove(army_id);
         events.push(
-            GameEvent::new(
-                EventKind::ArmyDestroyed,
-                format!("L'armée {army_id} est anéantie."),
-            )
-            .province(&location)
-            .army(army_id)
-            .faction(&faction),
+            GameEvent::new(EventKind::ArmyDestroyed, format!("{name} est anéanti."))
+                .province(&location)
+                .army(army_id)
+                .faction(&faction),
         );
     }
 }

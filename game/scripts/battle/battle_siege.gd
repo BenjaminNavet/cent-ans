@@ -203,7 +203,7 @@ func _build_piece(piece: Dictionary) -> void:
 		stump.material_override = rubble_mat
 		stump.position = Vector3(side * (length * 0.5 - 1.25), height * 0.22, 0)
 		rubble.add_child(stump)
-	_pieces.append({"node": node, "wall": wall, "rubble": rubble, "material": mat, "gate": gate, "ratio": 1.0})
+	_pieces.append({"node": node, "wall": wall, "rubble": rubble, "material": mat, "gate": gate, "ratio": 1.0, "intact": true})
 
 
 func _build_tower(parent: Node3D, tower: Dictionary) -> void:
@@ -628,10 +628,13 @@ func update(p_siege: Dictionary, units: Array) -> void:
 		var piece: Dictionary = pieces[i]
 		var view: Dictionary = _pieces[i]
 		var ratio := clampf(float(piece["hp"]) / maxf(float(piece["max_hp"]), 1.0), 0.0, 1.0)
-		if absf(ratio - float(view["ratio"])) < 0.01:
+		var intact := bool(piece["intact"])
+		# Un changement d'état (brèche, porte tombée) passe même sous le seuil
+		# de 0,01 : des dégâts continus (porte en feu) le franchiraient sinon.
+		if absf(ratio - float(view["ratio"])) < 0.01 and intact == bool(view.get("intact", true)):
 			continue
 		view["ratio"] = ratio
-		var intact := bool(piece["intact"])
+		view["intact"] = intact
 		var wall: Node3D = view["wall"]
 		var rubble: Node3D = view["rubble"]
 		if view["gate"]:

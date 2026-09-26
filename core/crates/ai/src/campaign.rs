@@ -1358,7 +1358,7 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         // once the battle has spent the army's movement, and apply when the
         // attack was refused (target out of reach).
         if !broken && !besieging {
-            if let Some(order) = ctx.grid.attack_order(army_id, power) {
+            if let Some(order) = ctx.grid.attack_order(army_id) {
                 orders.push(order);
             }
         }

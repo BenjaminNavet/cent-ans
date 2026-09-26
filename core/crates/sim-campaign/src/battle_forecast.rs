@@ -115,13 +115,40 @@ impl CampaignState {
         if !is_live(self, request) {
             return Err(BattleRequestError::Stale(index));
         }
+        self.forecast_request(data, request)
+            .ok_or(BattleRequestError::Stale(index))
+    }
+
+    /// Chance (0-1) that `army` storms the settlement it besieges, computed
+    /// exactly like the pre-battle screen of that assault (Q5: the army bar
+    /// and the assault dialog used to show two different numbers).
+    pub fn assault_win_chance(&self, data: &GameData, army: &crate::state::ArmyId) -> Option<f64> {
+        let a = self.armies.get(army)?;
+        let place = a.settlement()?.clone();
+        let siege = self.settlements.get(&place)?.siege.as_ref()?;
+        if siege.attacker != a.faction {
+            return None;
+        }
+        let request = BattleRequest {
+            attacker: army.clone(),
+            defender: army.clone(),
+            province: crate::siege::province_of(self, &place),
+            location: place,
+            siege: true,
+        };
+        self.forecast_request(data, &request)
+            .map(|f| f.attacker_win_chance)
+    }
+
+    /// Forecast of any battle request, pending or hypothetical; `None` when
+    /// the garrison of an assault is gone.
+    fn forecast_request(&self, data: &GameData, request: &BattleRequest) -> Option<BattleForecast> {
         let mut modifiers = Vec::new();
         let mut garrison_is_player = false;
         let (mut attacker_side, mut defender_side, context, attackers, defenders) = if request.siege
         {
             let attackers = crate::siege::assault_coalition(self, &request.attacker);
-            let garrison = crate::siege::garrison_army(self, &request.location)
-                .ok_or(BattleRequestError::Stale(index))?;
+            let garrison = crate::siege::garrison_army(self, &request.location)?;
             garrison_is_player = garrison.faction == self.player_faction;
             let walls = crate::siege::walls_stand(self, data, &request.attacker, &request.location);
             let context = BattleContext {
@@ -208,7 +235,7 @@ impl CampaignState {
                 .get(id)
                 .is_some_and(|a| a.faction == self.player_faction)
         });
-        Ok(BattleForecast {
+        Some(BattleForecast {
             attacker_power,
             defender_power,
             attacker_share: if total > f64::EPSILON {

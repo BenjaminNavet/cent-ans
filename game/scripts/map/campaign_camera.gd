@@ -3,7 +3,7 @@ extends Node3D
 
 ## Caméra RTS : point de focus au sol, distance (zoom), lacet (Q/E), tangage
 ## dérivé du zoom (30° de près, plus rasant en vue comté → 70° de loin), amortissement.
-## Entrées : WASD/flèches, bords d'écran (désactivable), molette, glisser molette.
+## Entrées : WASD/flèches, bords d'écran (désactivable), molette ou pad (deux doigts / pincement), glisser molette.
 ##
 ## Lot ZG4 (ADR 0036) : caméra rapprochée quand la pyramide de relief est en cache (`relief`
 ## posé par la carte) : distance minimale selon l'étage le plus fin sous le point visé
@@ -29,6 +29,10 @@ extends Node3D
 ## leurs cercles (x, z, rayon) en unités carte, fournis par `SettlementLayer.landmark_zones`.
 @export var close_min_distance: float = 7.0
 var close_zones: PackedVector3Array = PackedVector3Array()
+## VH4 (ADR 0078) : zones du plancher provisoire ZG4b (villes emblématiques sans ville 1:1) ;
+## tant qu'elles ne sont pas fournies (`floor_zones_set`), `close_zones` sert.
+var floor_zones: PackedVector3Array = PackedVector3Array()
+var floor_zones_set := false
 ## Lot ZG4 : réglages de la caméra rapprochée ; `relief` (`ReliefPyramid` : étages disponibles) et
 ## `ground_height(x, y) -> float` (surface affichée, `TerrainBuilder.surface_height_at`) sont posés
 ## par la carte ; null / vide = comportement historique.
@@ -93,7 +97,8 @@ func min_distance_at(point: Vector3) -> float:
 	if relief != null and profile != null:
 		result = minf(result, _soft_min(point))
 		# ZG4b : plancher provisoire au-dessus des villes emblématiques (levé par VH4).
-		result = maxf(result, minf(profile.landmark_floor(Vector2(point.x, point.z), close_zones), min_distance))
+		var zones := floor_zones if floor_zones_set else close_zones
+		result = maxf(result, minf(profile.landmark_floor(Vector2(point.x, point.z), zones), min_distance))
 	return result
 
 
@@ -112,16 +117,26 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
-			target_distance = clampf(target_distance * (1.0 - zoom_step), min_distance_at(target_focus), max_distance)
+			_zoom_by(1.0 - zoom_step)
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
-			target_distance = clampf(target_distance * (1.0 + zoom_step), min_distance_at(target_focus), max_distance)
+			_zoom_by(1.0 + zoom_step)
 		elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 			_dragging = mb.pressed
+	elif event is InputEventPanGesture:
+		# Pad macOS : glissement vertical à deux doigts = molette continue.
+		_zoom_by(exp(zoom_step * (event as InputEventPanGesture).delta.y))
+	elif event is InputEventMagnifyGesture:
+		# Pad macOS : pincement (facteur > 1 = écarter les doigts = rapprocher).
+		_zoom_by(1.0 / maxf((event as InputEventMagnifyGesture).factor, 0.01))
 	elif event is InputEventMouseMotion and _dragging:
 		var motion := event as InputEventMouseMotion
 		var viewport_height := float(get_viewport().get_visible_rect().size.y)
 		var units_per_px := distance * 1.6 / maxf(viewport_height, 1.0)
 		_pan(Vector2(-motion.relative.x, -motion.relative.y) * units_per_px)
+
+
+func _zoom_by(factor: float) -> void:
+	target_distance = clampf(target_distance * factor, min_distance_at(target_focus), max_distance)
 
 
 func _process(delta: float) -> void:
