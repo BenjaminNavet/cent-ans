@@ -15,7 +15,7 @@
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BinaryHeap};
 
-use data_model::{FactionId, GameData, ProvinceId, SettlementId, Terrain};
+use data_model::{CharacterId, FactionId, GameData, ProvinceId, SettlementId, Terrain};
 
 use crate::battle_auto::{resolve_field, BattleContext, BattleUnit, Side, Winner};
 use crate::dynasty;
@@ -669,18 +669,8 @@ pub(crate) fn apply_battle_result(
         apply_outcome(state, data, id, outcome, events);
     }
     // F1: a captured commander is held by the victor.
-    for (general, captor) in [
-        (&attacker_general, &defender_faction),
-        (&defender_general, &attacker_faction),
-    ] {
-        if let Some(c) = general
-            .as_ref()
-            .and_then(|g| state.characters.get_mut(g))
-            .filter(|c| c.captive && c.captor.is_none())
-        {
-            c.captor = Some(captor.clone());
-        }
-    }
+    assign_captor(state, attacker_general.as_ref(), &defender_faction);
+    assign_captor(state, defender_general.as_ref(), &attacker_faction);
     // M5 war score: a lopsided battle counts double.
     let (winner, loser, winner_losses, loser_losses) = match result.winner {
         Winner::Attacker => (
@@ -967,6 +957,22 @@ fn retreat_beaten_army(
                 None => disperse_army(state, data, army_id, events),
             }
         }
+    }
+}
+
+/// F1: a general taken in battle (made `captive` by [`apply_outcome`]) is
+/// held by `captor`; without a captor he could never be ransomed. No-op when
+/// the general was not captured or already has a captor.
+pub(crate) fn assign_captor(
+    state: &mut CampaignState,
+    general: Option<&CharacterId>,
+    captor: &FactionId,
+) {
+    if let Some(c) = general
+        .and_then(|g| state.characters.get_mut(g))
+        .filter(|c| c.captive && c.captor.is_none())
+    {
+        c.captor = Some(captor.clone());
     }
 }
 
