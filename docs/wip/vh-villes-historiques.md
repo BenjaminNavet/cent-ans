@@ -5,7 +5,7 @@ Chantier **suivant** ZG (ADR 0036, `docs/wip/zg-zoom-geographique.md`). Demandé
 nouvelle échelle ; créer des représentations réalistes des villes de l'époque (Paris, Londres,
 Orléans…) en profitant du fait que la carte soit plus précise ».
 
-ADR réservé : **0037** (à rédiger au lancement de VH0, quand ZG2/ZG4 auront fixé l'API du relief).
+ADR réservé : **0078** (0037 a été pris par la difficulté) (à rédiger au lancement de VH0, quand ZG2/ZG4 auront fixé l'API du relief).
 
 ## Pourquoi un chantier à part
 

@@ -19,7 +19,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 |---|---|---|---|---|
 | SZ1 | S1 | Haute montagne au palier vallée : exagération ZG4 modulée par l'amplitude locale / plafond de hauteur affichée selon la distance ; caméra hors des canyons | 1 | lancé |
 | SZ2 | S2 | Recuisson E0-E4 avec plancher monotone des fonds de vallée (continuité E0/E1), puis `detail-dem`, `hydro-fine`, `anchors-fine` ; Loire d'Orléans au niveau des berges. Cuisson dans un dossier de préparation, bascule atomique par l'orchestrateur | 1 | lancé |
-| VH0+VH4 | S3 | Squelette VH (ADR 0037) et moteur des villes emblématiques 1:1 géoréférencées ; levée du plancher caméra ZG4b | 1 | lancé |
+| VH0+VH4 | S3 | Squelette VH (ADR 0078, 0037 étant pris par la difficulté) et moteur des villes emblématiques 1:1 géoréférencées ; levée du plancher caméra ZG4b | 1 | lancé |
 | SZ4 | S4, S5 | Moulins, hameaux, fumées, arbres proches à l'échelle aux paliers intermédiaires ; disque d'emprise d'Amiens | 1 | lancé |
 | SZ5 | S7 | Pluie au palier site (gouttes et stries à l'échelle de la caméra) | 1 | lancé |
 | SZ6 | S6 | Pics d'images côté scripts : profilage et étalement (qt_update, recalages, écouteurs) | 1 | lancé |
