@@ -34,7 +34,7 @@ Suite de PB1 (`pb1-benchmark-perf.md`) et PB2 (`pb2-vegetation-shader.md`).
 | PB3d | Campagne : `end_turn` hors du fil principal ; `refresh_all` par appels groupés Packed*Array | 1 | **fusionné** 3a74df31 (ADR 0081) : pire image fin de tour 229 → 78 ms (release), refresh_all ~59 ms ; fil en QoS USER_INITIATED. Reste : marqueurs d'armée 8-50 ms |
 | PB3e | Bataille : pas de sim N+1 dans un fil, piétinement en Rust, soldiers.update/étendards (ADR 0090) | 2 | lancé |
 | PB3f | rayon : pré-calcul IA en lecture seule en parallèle, phases par province, déterminisme gardé (ADR 0091) | 2 | lancé |
-| PB3g | Quadtree de relief (pas 9-12 ms, SZ6) en Rust, `request_reground` sans copie (70 ms), hameaux en lot (ADR 0092) | 2 | lancé |
+| PB3g | Quadtree de relief (pas 9-12 ms, SZ6) en Rust, `request_reground` sans copie (70 ms), hameaux en lot (ADR 0092) | 2 | **fusionné** 818030e1 : sélection quadtree pire 14,9 → 0,22 ms, `lod/quadtree` pire 24 → 9 ms, images > 50 ms 3 → 0, zoom France↔Paris p50 31,8 → 25,1 / p95 46,9 → 34,7 ; `request_reground` 4,7 → 0,04 ms ; repli `--no-native-quadtree`. Reste : `qt/collect` ≤ 9 ms (écouteurs surface_changed), TownLayer, NextHintController |
 
 ## Journal
 - 26/09 : audit, plan, vague 1 lancée (4 agents).
@@ -46,6 +46,7 @@ Suite de PB1 (`pb1-benchmark-perf.md`) et PB2 (`pb2-vegetation-shader.md`).
   la crate `vegetation` contaminée dans `core/target` partagé (champ `detail` d'un worktree SZ).
 - 26/09 : **PAUSE demandée par le joueur** pendant la vague 2 ; agents priés de commiter leur wip.
 - 26/09 : **REPRISE** demandée par le joueur ; PB3e, PB3f, PB3g relancés dans leurs worktrees.
+- 26/09 : PB3g fusionné (smoke, pb3g, sz1, zg2, zg8, settlements OK après fusion de main).
 
 ## Reprise (vague 2 en pause)
 | Lot | Worktree | Branche (dernier commit) | État à la pause |

@@ -7,6 +7,7 @@ members = [
     "crates/ai",
     "crates/godot-bridge",
     "crates/vegetation",
+    "crates/relief-lod",
 ]
 
 [workspace.package]
@@ -74,6 +75,9 @@ opt-level = 3
 opt-level = 3
 # Lot PB2: vegetation tile scattering (millions of scalar operations per tile).
 [profile.dev.package.vegetation]
+opt-level = 3
+# Lot PB3g: relief quadtree selection (every frame while the camera moves).
+[profile.dev.package.relief-lod]
 opt-level = 3
 [profile.dev.package.png]
 opt-level = 3
