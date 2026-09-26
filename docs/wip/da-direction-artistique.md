@@ -140,3 +140,8 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
 - 26/09 soir : **DA7d fusionné** (main `d8946f7f`, ADR 0066 § DA7d) : un seul dé-encombrement
   (marqueurs + noms, par priorité) remplace le masquage de noms DC4, dont il reprend la mesure du
   texte ; 0 chevauchement aux 12 vues, ~2,2 ms. Reste : 21 hameaux sur une ville (sonde DC4).
+- 26/09 soir : **DA7a fusionné** (main `45dac842`, ADR 0060 § DA7a) : 10 enregistrements réels
+  (bande du Studio der frühen Musik, Stockholm 1963, domaine public ; codex de Faenza CC BY 4.0)
+  en tête des playlists France/Italie/Bourgogne/Angleterre, MIDI en repli. Pas de vrai Machaut/
+  Landini/Solage libre trouvé. **À écouter** : attribution titre ↔ plage de la bande 1963 faite
+  sans écoute humaine ; piste Landini possible dans la bande d'orgue Arnér 1966 (Commons, PD).
