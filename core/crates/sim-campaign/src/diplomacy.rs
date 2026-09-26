@@ -913,6 +913,22 @@ impl CampaignState {
         let excommunicate = religion::is_catholic(self, data, attacker)
             && religion::is_catholic(self, data, target)
             && self.factions[attacker].papal_favor < 10;
+        // Attacking the holder of our hostages abandons them (ADR 0025 § 6):
+        // our word is broken, not when the holder attacks us.
+        let pledged = self.factions[target]
+            .ledger
+            .hostages
+            .iter()
+            .any(|h| &h.from == attacker);
+        if pledged {
+            self.add_modifier(
+                target,
+                attacker,
+                -20,
+                crate::negotiation::HOSTAGE_BETRAYAL_REASON,
+                60,
+            );
+        }
         // Break any vassal tie between the two.
         self.cut_vassal_tie(attacker, target);
         self.start_war(attacker, target);

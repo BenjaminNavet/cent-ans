@@ -275,3 +275,29 @@ fn treaty_hostage_is_held_for_his_term() {
     );
     assert!(state.characters[&hostage].captive);
 }
+
+/// Fix 11: the holder attacking the giver of its hostages does not make the
+/// giver a perjurer; the giver attacking the holder does.
+#[test]
+fn hostage_betrayal_falls_on_the_aggressor_only() {
+    let data = data();
+    let (ar, ca) = (fac("fac_aragon"), fac("fac_castile"));
+    let betrayed = |state: &CampaignState| {
+        state.factions[&ca]
+            .modifiers
+            .iter()
+            .any(|m| m.with == ar && m.reason_fr == crate::negotiation::HOSTAGE_BETRAYAL_REASON)
+    };
+    let idle = |_: &CampaignState, _: &GameData, _: &FactionId| Vec::new();
+    // The holder attacks.
+    let mut state = CampaignState::new_1337(&data, fac("fac_aragon"), 10).unwrap();
+    aragonese_hostage(&mut state, &data);
+    state.declare_war(&data, &ca, &ar).unwrap();
+    state.end_turn_with(&data, idle);
+    assert!(!betrayed(&state));
+    // The giver attacks.
+    let mut state = CampaignState::new_1337(&data, fac("fac_aragon"), 10).unwrap();
+    aragonese_hostage(&mut state, &data);
+    state.declare_war(&data, &ar, &ca).unwrap();
+    assert!(betrayed(&state));
+}

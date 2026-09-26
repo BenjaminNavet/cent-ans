@@ -1528,8 +1528,9 @@ pub(crate) fn resolve_negotiation(
             .filter(|h| at_war.contains(&h.from))
             .cloned()
             .collect();
+        // The broken word (`HOSTAGE_BETRAYAL_REASON`) weighs on the giver
+        // only when it declared the war (`declare_war`).
         for pledge in betrayed {
-            state.add_modifier(id, &pledge.from, -20, HOSTAGE_BETRAYAL_REASON, 60);
             // Hostages of an enemy become plain prisoners (ransom rules).
             if let Some(c) = state
                 .characters
