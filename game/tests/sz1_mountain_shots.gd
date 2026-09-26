@@ -105,6 +105,9 @@ func _init() -> void:
 			image.save_jpg(path, 0.82)
 			var level := terrain.quadtree.chunk_top(terrain.chunk_index_at(point.x, point.y)) if terrain != null and terrain.quadtree != null else -1
 			var eye := rig.camera.global_position
+			var active := root.get_viewport().get_camera_3d()
+			if active != rig.camera or not active.global_position.is_equal_approx(eye):
+				print("SZ1 note: active camera %s at %s, rig camera at %s" % [active.get_path(), active.global_position, eye])
 			var highest := -INF
 			for k in 16:
 				var angle := TAU * k / 16.0
