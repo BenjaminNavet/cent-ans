@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ai_turn_replay.schema.json",
+  "title": "Relecture du tour de l'IA (CT1)",
+  "description": "Mise en scène des mouvements des armées IA en fin de tour : nombre de mouvements suivis par la caméra, durées, distance de caméra, vitesses proposées. Lu par game/scripts/map/ai_turn_replay.gd ; notable_radius_km est transmis au cœur (set_ai_turn_recording). Aucune règle de jeu.",
+  "type": "object",
+  "required": [
+    "max_followed_moves", "notable_radius_km", "march_speed_px_per_s", "min_move_duration_s",
+    "max_move_duration_s", "camera_pan_duration_s", "camera_hold_s", "camera_follow_distance_share",
+    "camera_return_duration_s", "background_batch_duration_s", "speeds"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "max_followed_moves": {
+      "description": "Mouvements au plus suivis par la caméra par tour (les plus importants : bataille, siège, territoire du joueur, proximité).",
+      "type": "integer", "minimum": 0, "maximum": 50
+    },
+    "notable_radius_km": {
+      "description": "Un mouvement qui finit à moins de ce rayon d'une armée ou d'une colonie du joueur le concerne.",
+      "type": "number", "minimum": 0
+    },
+    "march_speed_px_per_s": {
+      "description": "Vitesse de marche affichée (pixels carte par seconde, à la vitesse ×1).",
+      "type": "number", "exclusiveMinimum": 0
+    },
+    "min_move_duration_s": {"description": "Durée minimale d'un mouvement (×1).", "type": "number", "minimum": 0},
+    "max_move_duration_s": {"description": "Durée maximale d'un mouvement (×1).", "type": "number", "exclusiveMinimum": 0},
+    "camera_pan_duration_s": {"description": "Travelling vers un mouvement suivi (×1).", "type": "number", "minimum": 0},
+    "camera_hold_s": {"description": "Arrêt sur l'issue d'un mouvement suivi (bataille, siège) (×1).", "type": "number", "minimum": 0},
+    "camera_follow_distance_share": {"description": "Distance de la caméra pendant le suivi, en part de la plus grande dimension de la carte (0,09 = cadrage « aller à l'armée »).", "type": "number", "exclusiveMinimum": 0, "maximum": 1},
+    "camera_return_duration_s": {"description": "Retour de la caméra au point de départ du joueur (×1).", "type": "number", "minimum": 0},
+    "background_batch_duration_s": {"description": "Durée des mouvements non suivis, joués ensemble (×1).", "type": "number", "exclusiveMinimum": 0},
+    "speeds": {
+      "description": "Multiplicateurs de vitesse proposés dans les Réglages.",
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"type": "number", "exclusiveMinimum": 0}
+    }
+  }
+}
