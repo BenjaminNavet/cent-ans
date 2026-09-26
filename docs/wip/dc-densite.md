@@ -73,6 +73,14 @@ Chantier terminé et fusionné dans `main` (ff a661314f). Correctif après recet
 Dokkum, Leeuwarden et Appingedam deviennent des ports (sinon îles sans accès sur la navgrid).
 Worktrees et branches supprimés. Dylib du checkout principal reconstruite, smoke vert.
 
+## DC6 — suites (lancé 26/09, accord du joueur « ok pour la suite »)
+| Lot | Contenu | Worktree | État |
+|---|---|---|---|
+| DC6a | Données : Pomposa et Teylingen accessibles ; audit des ~40 colonies recalées (coordonnées fausses vs frontière approximative) ; erreurs signalées par DC2 (Ranverso, Schloss Tirol, Skanör, Marienweerd, Bergerac, paires < 3 km) | ../gp-dc6a (feat/dc6-a) | lancé |
+| DC6b | Équilibrage : recherche des abbayes et bâtiments religieux contre l'hérésie pondérés comme province_effect_percent ; révoltes (3,2 vs 5,7) | ../gp-dc6b (feat/dc6-b) | lancé |
+| DC6c | Affichage : masquage/réduction des maquettes voisines à l'échelle réelle en vue rapprochée | ../gp-dc6c (feat/dc6-c) | lancé |
+Frontière Sussex/Kent (polygones de provinces) : hors DC6, changement de géométrie lourd.
+
 ## Suites possibles
 - Pomposa et Teylingen : îles sans port sur la navgrid (déjà dans main avant DC).
 - Masquage de près des maquettes voisines calculé à l'échelle de carte (un peu trop large).
