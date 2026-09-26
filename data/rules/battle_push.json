@@ -6,6 +6,8 @@
     "full_speed_share": 0.45,
     "mounted_weight": 2.2,
     "armor_weight_per_point": 0.01,
+    "melee_base": 0.5,
+    "melee_per_point": 0.01,
     "rank_cap": 8,
     "min_freshness": 0.4,
     "fatigue_scale": 150,
@@ -18,7 +20,7 @@
   "compression": {
     "gain_per_second": 0.25,
     "decay_per_second": 0.1,
-    "friend_gap_m": 0.5,
+    "friend_gap_m": 1.2,
     "damage_taken_bonus": 0.35,
     "fighting_malus": 0.25,
     "morale_per_second": 0.5,

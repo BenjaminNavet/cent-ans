@@ -5,7 +5,7 @@
 //!
 //! - **Pressure.** Each regiment in contact leans on its opponent with a
 //!   pressure ([`PressureRules::pressure`]): weight per man (armour, horse)
-//!   × √ranks (capped) × freshness × morale × charge impetus × formation.
+//!   × skill (melee) × √ranks (capped) × freshness × morale × charge impetus × formation.
 //!   The relative gap `(Pa − Pb)/(Pa + Pb)` sets the recoil speed of the
 //!   weaker ([`PressureRules::recoil_speed`]): nothing inside a dead band,
 //!   then up to a few metres per ten seconds; the winner follows.
@@ -52,6 +52,9 @@ pub struct PressureRules {
     pub mounted_weight: f64,
     /// Weight added per point of armour.
     pub armor_weight_per_point: f64,
+    /// Skill factor: `melee_base + melee × melee_per_point`.
+    pub melee_base: f64,
+    pub melee_per_point: f64,
     /// Ranks beyond this one add no push.
     pub rank_cap: u32,
     /// Lowest freshness factor.
@@ -179,6 +182,7 @@ impl PressureRules {
         if unit.mounted {
             weight *= self.mounted_weight;
         }
+        weight *= self.melee_base + f64::from(unit.stats.melee) * self.melee_per_point;
         let (ranks, _) = unit.ranks_files(unit.soldiers());
         let depth = f64::from(ranks.min(self.rank_cap).max(1)).sqrt();
         let freshness = (1.0 - unit.fatigue / self.fatigue_scale).max(self.min_freshness);
