@@ -9,7 +9,7 @@
 //!   the map (`historical_site`, JSON text) and `BattleSim.setup` lays it.
 
 use std::path::{Path, PathBuf};
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::load::load_entities;
 use data_model::{BattleOrder, BattleStandardRules, UnitType, UnitTypeId};
@@ -18,19 +18,23 @@ use sim_battle::{BattleSetup, HistoricalMap, SideId};
 
 use crate::battle_sim::BattleSim;
 
-/// Maps found in a data folder (read once per folder).
-type MapCache = Option<(PathBuf, Vec<(HistoricalMap, String)>)>;
+/// A historical map with its JSON text.
+pub(crate) type MapEntry = (HistoricalMap, String);
+
+/// Maps found in a data folder (read once per folder, shared).
+type MapCache = Option<(PathBuf, Arc<[MapEntry]>)>;
 static MAPS: OnceLock<Mutex<MapCache>> = OnceLock::new();
 
-/// Every historical map of `data_dir` with its JSON text, sorted by year.
-pub(crate) fn maps_in(data_dir: &Path) -> Vec<(HistoricalMap, String)> {
+/// Every historical map of `data_dir` with its JSON text, sorted by year
+/// (cached: a call on the same folder only clones the `Arc`).
+pub(crate) fn maps_in(data_dir: &Path) -> Arc<[MapEntry]> {
     let cache = MAPS.get_or_init(|| Mutex::new(None));
     let Ok(mut guard) = cache.lock() else {
-        return Vec::new();
+        return Arc::new([]);
     };
     if let Some((dir, maps)) = guard.as_ref() {
         if dir == data_dir {
-            return maps.clone();
+            return Arc::clone(maps);
         }
     }
     let mut maps = Vec::new();
@@ -55,23 +59,21 @@ pub(crate) fn maps_in(data_dir: &Path) -> Vec<(HistoricalMap, String)> {
         }
     }
     maps.sort_by_key(|(m, _)| m.year);
-    *guard = Some((data_dir.to_path_buf(), maps.clone()));
+    let maps: Arc<[MapEntry]> = maps.into();
+    *guard = Some((data_dir.to_path_buf(), Arc::clone(&maps)));
     maps
 }
 
 /// The map a campaign battle in `province` in `year` is fought on, if any
 /// (never a siege).
-pub(crate) fn campaign_site(
-    data_dir: &Path,
-    setup: &BattleSetup,
-    year: i32,
-) -> Option<(HistoricalMap, String)> {
+pub(crate) fn campaign_site(data_dir: &Path, setup: &BattleSetup, year: i32) -> Option<MapEntry> {
     if setup.siege.is_some() {
         return None;
     }
     maps_in(data_dir)
-        .into_iter()
+        .iter()
         .find(|(map, _)| map.matches_campaign(&setup.province, year))
+        .cloned()
 }
 
 /// Unit types, leader's orders and standards rules of a data folder.
@@ -179,9 +181,10 @@ impl BattleSim {
             sim_battle::ReplayStart,
         );
         let built = (|| -> Result<Built, String> {
-            let (map, _) = maps_in(&dir)
-                .into_iter()
+            let map = maps_in(&dir)
+                .iter()
                 .find(|(m, _)| m.id == id)
+                .map(|(m, _)| m.clone())
                 .ok_or_else(|| format!("unknown historical map {id}"))?;
             let (units, orders, standards) = battle_data(&dir)?;
             let side = SideId::parse(&player_side.to_string());
