@@ -91,7 +91,7 @@ var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
 var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une charge
 var _frame_dt: float = 0.0
 var _audio: Script = null
-## Lot EP12 (ADR 0073) : blessés au sol et fuyards désarmés. `--no-ep12` après `--` : rendu
+## Lot EP12 (ADR 0070) : blessés au sol et fuyards désarmés. `--no-ep12` après `--` : rendu
 ## d'avant (mesures A/B).
 var ep12_enabled: bool = not OS.get_cmdline_user_args().has("--no-ep12")
 var dropped_arms: BattleDroppedArms = null

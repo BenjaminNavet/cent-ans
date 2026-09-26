@@ -1,7 +1,7 @@
 # Lot EP12 — Blessés qui rampent, fuyards qui jettent leurs armes
 
 Branche `worktree-agent-ab10bccc115923724`. Rendu seulement (game/, tools/blender_scripts, data/fx) ;
-aucun changement du cœur. ADR 0073 (0072 prise par EP13, 0070 par CT1, 0071 laissée à EP11).
+aucun changement du cœur. ADR 0070 (renumérotée 0073 → 0070 à la fusion : CT1 a repris 0073 ; 0071 laissée à EP11).
 
 ## Fait
 1. Kit Blender (`battle_skinned_poses.py`) : clips `crawl` (7 s), `wounded_sit` (6 s),
@@ -46,4 +46,4 @@ simulation, pas d'un compteur du rendu. `ep13_replay_test` OK après fusion de m
 - Le choix de la figurine qui tombe reste tiré par `_rng` (comme avant EP12).
 
 ## Prochaine étape
-Fusion par l'orchestrateur (ADR 0073, ligne EP12 dans `docs/wip/epic.md`).
+Fusion par l'orchestrateur (ADR 0070, ligne EP12 dans `docs/wip/epic.md`).

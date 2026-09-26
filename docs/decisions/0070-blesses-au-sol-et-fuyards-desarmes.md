@@ -1,4 +1,4 @@
-# 0073 — Blessés au sol et fuyards désarmés (lot EP12)
+# 0070 — Blessés au sol et fuyards désarmés (lot EP12)
 
 Date : 26/09/2026. Statut : accepté.
 
