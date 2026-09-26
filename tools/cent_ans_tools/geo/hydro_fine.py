@@ -39,7 +39,14 @@ import numpy as np
 import shapely
 from pyproj import Transformer
 
-from cent_ans_tools.geo import download, fine_relief, fine_tiles, hydro_sources, pyramid
+from cent_ans_tools.geo import (
+    detail_dem,
+    download,
+    fine_relief,
+    fine_tiles,
+    hydro_sources,
+    pyramid,
+)
 from cent_ans_tools.geo import valley_snap as vs
 from cent_ans_tools.geo.project import MapGrid
 
@@ -55,7 +62,10 @@ TILES_SUBDIR = "hydro_fine"
 FEATURES_FILE = "features.json"
 SNAP_DIR = hydro_sources.CACHE_DIR / "snap"
 #: Bumped whenever the snapping parameters change (invalidates ``cache/snap``).
-SNAP_VERSION = 3
+#: ZG7c: 4 -- the snaps dated from before the ZG3b fix of the detail zones
+#: (E5-E7 up to 15 m too low): the Loire at Orleans sat 10 m under the terrain.
+#: The key now also carries ``detail_dem.BAKE_VERSION`` (re-snap after a re-bake).
+SNAP_VERSION = 4
 
 #: Smallest Strahler order kept, per source (orders computed on each network).
 MIN_ORDER = {"topage": 3, "osor": 3, "euhydro": 3, "naturalearth": 0}
@@ -356,7 +366,7 @@ def snap_all(
     jobs = []
     for index, chunk in enumerate(chunks):
         digest = hashlib.sha1()
-        digest.update(f"{SNAP_VERSION}|{params}".encode())
+        digest.update(f"{SNAP_VERSION}|{detail_dem.BAKE_VERSION}|{params}".encode())
         for i in chunk:
             digest.update(np.ascontiguousarray(strokes[i].points[[0, -1]]).tobytes())
             digest.update(str(len(strokes[i].points)).encode())
