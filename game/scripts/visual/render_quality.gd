@@ -222,6 +222,9 @@ static func apply_global(viewport: Viewport = null) -> void:
 static func upscale(p: Dictionary = {}) -> Dictionary:
 	if upscale_override != "":
 		return parse_upscale(upscale_override)
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--upscale="):  # captures et mesures : `--upscale=metalfx_t:0.75`
+			return parse_upscale(arg.trim_prefix("--upscale="))
 	if p.is_empty():
 		p = preset()
 	var choice := "auto"
