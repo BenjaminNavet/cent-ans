@@ -4,7 +4,7 @@ Branche : `feat/fg3-materials` (worktree agent `agent-aba08b13133c215dc`). Plan 
 `docs/wip/fg-figurines-fines.md`. Précédents : `fg0-prototype.md` (cuisson test),
 `fg1-corps.md`, `fg2-equipement.md`, `fg4-cheval.md`.
 
-## État : REPRIS 26/09 — main fusionné (4c89ce24, sans conflit), smoke OK, fg3_maps OK ; captures/banc/ADR en cours
+## État : TERMINÉ 26/09 (branche prête, non fusionnée dans main) — main fusionné (4c89ce24, sans conflit), smoke OK, fg3_maps OK
 - [x] Commande `bake` (`battle_fine.py -- bake [--only a,b]`, `all` = rigs + bake), format
   `CAM2` (UV d'atlas), variante `FG3_BAKED` du shader, chargement des cartes dans
   `BattleSkinned`, `--no-fg3` (figurines fines sans cartes, A/B)
@@ -26,8 +26,13 @@ Branche : `feat/fg3-materials` (worktree agent `agent-aba08b13133c215dc`). Plan 
   `battle_skinned.gd` de main contre ceux de la branche, `v2_figures_shot` infantry_0 + cavalry_1)
 - [x] Mémoire mesurée (`tests/fg3_maps_test.gd`, BC7) : atlas LOD0 9,33 Mo + LOD1 2,33 +
   tuiles 2,67 + cheval 1,33 = **15,7 Mo** (budget 60)
-- [ ] Captures `docs/img/fg/fg3_*.png`, smoke + DA1/EP12 avec et sans drapeau, banc
-  `--units=50`, réglages de goût, ADR, `battle_fine/SOURCE.md`, journal de l'orchestration
+- [x] Captures `docs/img/fg/fg3_*.png` (défaut | FG3 | `--no-fg3`) : `fg3_gros_plan_infanterie`,
+  `fg3_cavalier`, `fg3_melee_26m` (bataille `--closeup`) ; défaut | FG3 : `fg3_armoiries_da1`,
+  `fg3_blesses_ep12`, `fg3_fuyards_ep12` (tout s'affiche ; fuyards identiques à `--no-fg3`)
+- [x] Bogue corrigé : le drapeau porté d'EP5 disparaissait sous FG3 (`BattleStandards` appelle
+  `setup_material` sur un matériau `battle_standard_flag` que `_setup_fine_maps` basculait sur le
+  shader skinné) : seuls les matériaux au shader skinné (ou une de ses variantes) basculent
+- [x] Réglages de goût (voir plus bas), banc `--units=50`, ADR 0088, `battle_fine/SOURCE.md`
 
 ## Choix d'architecture
 - UV d'atlas empaquetée dans UV2.y (11 bits u, 11 bits v, 2 bits source : 1 atlas LOD0,
@@ -42,10 +47,28 @@ Branche : `feat/fg3-materials` (worktree agent `agent-aba08b13133c215dc`). Plan 
   (4 figurines = 1 atlas 1024²), sans partage d'UV entre recettes différentes.
 
 ## Réglages vus en gros plan (v2_figures_shot)
-- Camail visible (cape de mailles sur le surcot), mailles claires lisibles.
+- Camail visible (cape de mailles sur le surcot).
 - Barbe : plus de masque noir, bords fondus dans la peau ; teintes `FG3_HAIR` ; léger liseré
   géométrique à la lèvre (bord de la coque).
-- Martelage des casques et bois adoucis une fois (casques 0,45) : à revoir en capture.
+- Reprise 26/09 : plates (casques, canons) « papier froissé » : venait surtout de l'AO cuite
+  (bruit Cycles sur les grandes pièces lisses) et un peu de la normale de forme. Plates et
+  garnitures : AO ramenée à `mix(0.7, 1, smoothstep(0.25, 0.85, ao))`, normale de forme ×0,35,
+  martelage 0,05-0,22 (garnitures 0,1). Les bosses restantes sont géométriques (aussi en
+  `--no-fg3`).
+- Mailles trop claires et plates, confondues avec l'acier : albédo `mix(0.18, 1.2, b²)`, tuile
+  0,072 -> 0,1 m (anneaux ~12 mm) ; la maille se lit maintenant plus sombre que les plates.
+
+## Banc `--units=50 --benchmark --bench-at=90` (1600×900, ~11 960 soldats, 4 passes alternées)
+| | défaut | `--fine-figures` (FG3) | `--fine-figures --no-fg3` |
+|---|---|---|---|
+| primitives (M) | 3,14 | 3,49 | 3,50 |
+| i/s moyens | 38,6 | 36,5 | 38,2 |
+| image médiane (ms) | 26,7 | 29,1 | 26,3 |
+| p95 (ms) | 33,6 | 37,3 | 32,7 |
+
+Bruit d'une passe à l'autre ±20 % (i/s 26-50 pour une même configuration) ; tendance : FG3
+≈ +2,5 ms en médiane (≈ 9 %) sur les figurines fines sans cartes, qui coûtent autant que le
+défaut. Piste FG5 : `fine_distance` plus court (80 -> 40 m) ou tuiles seulement au LOD0.
 
 ## Pièges
 - `bake --only` en parallèle : verrou `textures/.lock` (ne pas commiter) ; manifeste relu
@@ -64,13 +87,12 @@ godot --headless --path game --import
 godot --headless --path game --script res://tests/fg3_maps_test.gd -- --fine-figures
 godot --path game --resolution 1600x900 --script res://tests/v2_figures_shot.gd -- \
   --fine-figures [--no-fg3] --out=<png> --fig=infantry_0 --cols=3 --rows=1 --cam=1.6,1.6,2.6,1.1,1.2,0
-godot --path game res://scenes/battle/battle.tscn -- --fine-figures --screenshot=<png> --closeup
+godot --path game res://scenes/battle/battle.tscn -- --fine-figures --screenshot=<png> --closeup --no-hud
+# zsh : ne pas passer les options dans une variable ($F n'est pas découpé), les écrire en clair
 godot --path game res://scenes/battle/battle.tscn -- --units=50 --benchmark --bench-at=90 [--fine-figures] [--no-fg3]
 blender -b --factory-startup --python tools/blender_scripts/battle_fine.py -- bake [--only a,b]
 ```
 
 ## Prochaine étape
-Captures défaut | `--fine-figures` (gros plan, mêlée 6/12/26 m, archers, charge, armoiries
-de maison via `da1_arms_shot.gd`), smoke, `ep12_shot.gd`, banc avec/sans drapeau, ADR (numéro
-libre à vérifier, ~0088), `battle_fine/SOURCE.md` (textures), journal de
-`fg-figurines-fines.md`.
+Fusion dans main par l'orchestrateur ; puis FG5 (perf A/B, `--fine-figures` par défaut ?).
+Pistes : coutures des UV projetées de très près, liseré barbe/lèvre, coût FG3 (voir banc).
