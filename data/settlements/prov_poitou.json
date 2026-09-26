@@ -3,70 +3,315 @@
     "id": "set_poitiers",
     "province": "prov_poitou",
     "kind": "city",
-    "name": { "display": "Poitiers", "local": "Poitiers", "local_language": "ancien français" },
-    "lonlat": [0.3404, 46.5802],
+    "name": {
+      "display": "Poitiers",
+      "local": "Poitiers",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.3404,
+      46.5802
+    ],
     "weight": 36,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
     "port": false,
     "description": "Capitale du comté de Poitou, domaine royal depuis 1271, siège de la sénéchaussée.",
-    "sources": ["Poitiers", "Comté de Poitou"]
+    "sources": [
+      "Poitiers",
+      "Comté de Poitou"
+    ]
   },
   {
     "id": "set_niort",
     "province": "prov_poitou",
     "kind": "town",
-    "name": { "display": "Niort", "local": "Niort", "local_language": "ancien français" },
-    "lonlat": [-0.4586, 46.3239],
+    "name": {
+      "display": "Niort",
+      "local": "Niort",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.4586,
+      46.3239
+    ],
     "weight": 15,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Ville close à l'orée du Marais poitevin, marché du sel et du cuir.",
-    "sources": ["Niort"]
+    "sources": [
+      "Niort"
+    ]
   },
   {
     "id": "set_les_sables_d_olonne",
     "province": "prov_poitou",
     "kind": "town",
-    "name": { "display": "Les Sables-d'Olonne", "local": "Les Sables", "local_language": "ancien français" },
-    "lonlat": [-1.7833, 46.5000],
+    "name": {
+      "display": "Les Sables-d'Olonne",
+      "local": "Les Sables",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.7833,
+      46.5
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
     "port": true,
     "description": "Port fondé en 1218 sur le cordon dunaire, pour la pêche et le sel.",
-    "sources": ["Les Sables-d'Olonne"]
+    "sources": [
+      "Les Sables-d'Olonne"
+    ]
   },
   {
     "id": "set_lusignan",
     "province": "prov_poitou",
     "kind": "castle",
-    "name": { "display": "Lusignan", "local": "Luziegnen", "local_language": "ancien français" },
-    "lonlat": [0.1167, 46.4333],
+    "name": {
+      "display": "Lusignan",
+      "local": "Luziegnen",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.1167,
+      46.4333
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse légendaire de la fée Mélusine, ancien berceau de la maison de Lusignan.",
-    "sources": ["Château de Lusignan"]
+    "sources": [
+      "Château de Lusignan"
+    ]
   },
   {
     "id": "set_maillezais",
     "province": "prov_poitou",
     "kind": "abbey",
-    "name": { "display": "Maillezais", "local": "Malliazais", "local_language": "ancien français" },
-    "lonlat": [-0.7333, 46.3667],
+    "name": {
+      "display": "Maillezais",
+      "local": "Malliazais",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.7333,
+      46.3667
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey"],
+    "buildings": [
+      "bld_abbey"
+    ],
     "port": false,
     "description": "Abbaye bénédictine fortifiée aux confins du Marais poitevin, érigée en évêché en 1317.",
-    "sources": ["Abbaye de Maillezais"]
+    "sources": [
+      "Abbaye de Maillezais"
+    ]
+  },
+  {
+    "id": "set_fontenay_le_comte",
+    "province": "prov_poitou",
+    "kind": "town",
+    "name": {
+      "display": "Fontenay-le-Comte",
+      "local": "Fontenay le Conte",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.8006,
+      46.4653
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande du Bas-Poitou, porte du Marais poitevin.",
+    "sources": [
+      "Fontenay-le-Comte"
+    ]
+  },
+  {
+    "id": "set_chatellerault",
+    "province": "prov_poitou",
+    "kind": "town",
+    "name": {
+      "display": "Châtellerault",
+      "local": "Chastelherault",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.5461,
+      46.8181
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville-pont sur la Vienne, chef-lieu de vicomté.",
+    "sources": [
+      "Châtellerault"
+    ]
+  },
+  {
+    "id": "set_parthenay",
+    "province": "prov_poitou",
+    "kind": "castle",
+    "name": {
+      "display": "Parthenay",
+      "local": "Partenay",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.2469,
+      46.6489
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Puissante forteresse des seigneurs de Parthenay-Larchevêque, verrou de la Gâtine.",
+    "sources": [
+      "Parthenay"
+    ]
+  },
+  {
+    "id": "set_saint_maixent_l_ecole",
+    "province": "prov_poitou",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Maixent-l'École",
+      "local": "Saint Maixent",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.2039,
+      46.4111
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine sur la Sèvre Niortaise.",
+    "sources": [
+      "Abbaye Saint-Maixent"
+    ]
+  },
+  {
+    "id": "set_montmorillon",
+    "province": "prov_poitou",
+    "kind": "village",
+    "name": {
+      "display": "Montmorillon",
+      "local": "Montmorillon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.8686,
+      46.4283
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg marchand sur la Gartempe, aux confins du Berry.",
+    "sources": [
+      "Montmorillon"
+    ]
+  },
+  {
+    "id": "set_vouvant",
+    "province": "prov_poitou",
+    "kind": "village",
+    "name": {
+      "display": "Vouvant",
+      "local": "Vouvant",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.7433,
+      46.6103
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié des Lusignan, en lisière de la forêt de Vouvant.",
+    "sources": [
+      "Vouvant"
+    ]
+  },
+  {
+    "id": "set_melle",
+    "province": "prov_poitou",
+    "kind": "village",
+    "name": {
+      "display": "Melle",
+      "local": "Melle",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.1436,
+      46.2225
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg minier ayant frappé le denier carolingien, réputé pour ses mines d'argent.",
+    "sources": [
+      "Melle (Deux-Sèvres)"
+    ]
   }
 ]
