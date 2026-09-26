@@ -15,7 +15,8 @@ Prochaine étape : trier les constats, corriger les confirmés sur la branche `f
 ## Corrections sim-campaign
 
 Branche `fix/code-review`. Tests de régression : `core/crates/sim-campaign/src/review_tests.rs`.
-Prochaine étape : constats 2 à 18 dans l'ordre (voir liste de la tranche 1-2).
+État : constats 1 à 18 traités (17 corrigés, 18c écarté). `cargo test -p sim-campaign -p ai` (profil isolé `review`) : 523 réussis, 0 échec, 6 ignorés ; clippy `-D warnings` vert. Les 12 tests de régression échouent sur les sources d'avant correctifs (b06cfc38) et passent après.
+Prochaine étape : intégration (ff dans main) par le coordinateur.
 
 | n° | statut | note |
 |----|--------|------|
