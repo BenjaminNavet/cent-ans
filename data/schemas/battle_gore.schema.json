@@ -154,8 +154,45 @@
       },
       "required": ["per_loss_share", "melee_seconds", "max"],
       "additionalProperties": false
+    },
+    "wounded": {
+      "type": "object",
+      "description": "Lot EP12 : part des soldats à pied tombés qui ne meurent pas sur le coup (rampent, assis, à genoux, puis immobiles). Tirage déterministe côté rendu (id du régiment × rang de la perte) : la simulation ne distingue pas blessés et tués (ADR 0072).",
+      "properties": {
+        "share": {
+          "type": "object",
+          "description": "Part des pertes rendues en blessés, par cause (clés de `deaths`) ; cause absente = 0.",
+          "additionalProperties": { "$ref": "#/$defs/share" }
+        },
+        "clips": {
+          "type": "object",
+          "description": "Poids relatifs des clips de blessés.",
+          "properties": {
+            "crawl": { "type": "number", "minimum": 0 },
+            "wounded_sit": { "type": "number", "minimum": 0 },
+            "wounded_kneel": { "type": "number", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "max_total": { "type": "integer", "minimum": 0, "maximum": 20000, "description": "Plafond de blessés sur le champ (au-delà : morts ordinaires)." },
+        "max_distance_m": { "type": "number", "minimum": 0, "maximum": 5000, "description": "Au-delà de cette distance à la caméra, les pertes restent des morts ordinaires (animation invisible)." }
+      },
+      "required": ["share", "clips", "max_total", "max_distance_m"],
+      "additionalProperties": false
+    },
+    "dropped_arms": {
+      "type": "object",
+      "description": "Lot EP12 : armes et boucliers laissés au sol par les fuyards et les blessés (tampons circulaires par sorte d'objet).",
+      "properties": {
+        "max_per_kind": { "type": "integer", "minimum": 0, "maximum": 20000, "description": "Plafond d'objets au sol par sorte (épée, bouclier, arme d'hast, arc, arbalète)." },
+        "max_per_rout": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Figurines d'un régiment en déroute qui laissent tomber leurs armes (au plus)." },
+        "scatter_m": { "type": "number", "minimum": 0, "maximum": 10 },
+        "far_m": { "type": "number", "minimum": 10, "maximum": 2000, "description": "Distance de masquage des objets." }
+      },
+      "required": ["max_per_kind", "max_per_rout", "scatter_m", "far_m"],
+      "additionalProperties": false
     }
   },
-  "required": ["levels", "deaths", "weapons", "critical_chance", "heavy_charge_mass", "pieces", "corpses", "knockdown", "horses", "cadence", "sprays", "severed", "living_stains"],
+  "required": ["levels", "deaths", "weapons", "critical_chance", "heavy_charge_mass", "pieces", "corpses", "knockdown", "horses", "cadence", "sprays", "severed", "living_stains", "wounded", "dropped_arms"],
   "additionalProperties": false
 }

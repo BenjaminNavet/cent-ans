@@ -91,6 +91,16 @@ var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
 var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une charge
 var _frame_dt: float = 0.0
 var _audio: Script = null
+## Lot EP12 (ADR 0072) : blessés au sol et fuyards désarmés. `--no-ep12` après `--` : rendu
+## d'avant (mesures A/B).
+var ep12_enabled: bool = not OS.get_cmdline_user_args().has("--no-ep12")
+var dropped_arms: BattleDroppedArms = null
+var wounded_count: int = 0
+var last_wounded_pos: Variant = null  # capture `--ep12-shot=wounded`
+var last_wounded_time: float = -1.0e6
+var disarmed_units: Dictionary = {}  # unit id -> instant de la débandade (armes jetées)
+var _wounded_total: int = 0
+var _losses: Dictionary = {}  # unit id -> pertes rendues (rang de tirage des blessés)
 ## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
 ## BV3 : imposteurs lointains (au-delà de `BattleImpostors.DISTANCE`), null si coupés.
 var impostors: BattleImpostors = null
@@ -124,6 +134,11 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary, sid
 	gore = BattleGore.new()
 	gore.name = "Gore"
 	add_child(gore)
+	if ep12_enabled:
+		dropped_arms = BattleDroppedArms.new()
+		dropped_arms.name = "DroppedArms"
+		add_child(dropped_arms)
+		dropped_arms.setup(_gore.get("dropped_arms", {}))
 	if ResourceLoader.exists("res://scripts/audio/battle_audio.gd"):
 		_audio = load("res://scripts/audio/battle_audio.gd")
 	_side_colors = side_colors
@@ -507,6 +522,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	track["ammo"] = ammo
 	track["state"] = state
 	mat.set_shader_parameter("state_time", local - float(track["since"]))
+	if skinned and ep12_enabled and kind != "cavalry":
+		_update_disarmed(unit, id, kind, slice, n, mat, state == "routing")
 	if skinned:
 		BattleSkinned.apply_config(mat, config, local)
 		# SG1 : soldats de tête sur les échelles ou le pont du beffroi (clip d'escalade).
@@ -678,7 +695,22 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	var death_count: int = (BattleSkinned.death_config(kind, variant)["set"] as Array).size() if skinned else 1
 	var prev_n := prev.size() / 12
 	var sprays: Dictionary = _gore.get("sprays", {})
+	# EP12 : blessés (part tirée par cause), fuyards désarmés.
+	var uid := int(unit["id"])
+	var wounded_cfg: Dictionary = _gore.get("wounded", {})
+	var wounded_share := float(wounded_cfg.get("share", {}).get(cause, 0.0)) if ep12_enabled and skinned and not mounted else 0.0
+	if wounded_share > 0.0 and BattleSkinned.wounded_config(kind, variant).is_empty():
+		wounded_share = 0.0
+	if wounded_share > 0.0 and _camera_pos.distance_to(_unit_pos.get(uid, _camera_pos)) > float(wounded_cfg.get("max_distance_m", 320.0)):
+		wounded_share = 0.0
+	var unarmed_flag := BattleSkinned.CODE_UNARMED if ep12_enabled and disarmed_units.has(uid) else 0
 	for _i in mini(count, int(limits.get("spawn_per_update", 60))):
+		var ordinal := int(_losses.get(uid, 0))
+		_losses[uid] = ordinal + 1
+		if wounded_share > 0.0 and _wounded_total < int(wounded_cfg.get("max_total", 1500)) and BattleDroppedArms.hash4(uid * 100003 + ordinal).x < wounded_share:
+			var kw := mini(int(pow(_rng.randf(), 1.6) * prev_n), prev_n - 1)
+			_spawn_wounded(unit, side, kind, variant, prev, kw, uid, ordinal, killer_pos, limits, wounded_cfg)
+			continue
 		var k := mini(int(pow(_rng.randf(), 1.6) * prev_n), prev_n - 1)
 		var o := k * 12
 		var pos := Vector3(prev[o + 3], prev[o + 7], prev[o + 11])
@@ -720,12 +752,84 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 		record[12] = anim_time
 		record[13] = float(index)
 		record[14] = speed if skinned else 0.0
-		record[15] = float(code) + minf(blood, 0.99)
+		record[15] = float(code + (unarmed_flag if skinned else 0)) + minf(blood, 0.99)
 		_add_corpse(side, kind, variant, skinned, pos, record, limits)
 		if gore != null:
 			gore.spray(pos, away, int(sprays.get("droplets_per_death", 6)), 2.0 if mounted else 1.2)
 		corpse_fallen.emit(pos, side, kind, cause)
 		corpse_count += 1
+
+
+## EP12 : blessé au sol (rampe, assis ou à genoux, puis immobile), rangé dans les cellules de
+## cadavres (couche « blessés ») ; il a lâché son arme, laissée à côté de lui. Le rampant
+## tourne le dos au tueur (il s'éloigne du combat).
+func _spawn_wounded(unit: Dictionary, side: String, kind: String, variant: int, prev: PackedFloat32Array, k: int, uid: int, ordinal: int, killer_pos: Variant, limits: Dictionary, cfg: Dictionary) -> void:
+	var o := k * 12
+	var pos := Vector3(prev[o + 3], prev[o + 7], prev[o + 11])
+	var h := BattleDroppedArms.hash4(uid * 7717 + ordinal * 13 + 5)
+	var weights: Dictionary = cfg.get("clips", {})
+	var total := 0.0
+	for c in BattleSkinned.WOUNDED_FOOT:
+		total += float(weights.get(c, 1.0))
+	var r := h.y * total
+	var index := 0
+	for c in BattleSkinned.WOUNDED_FOOT:
+		r -= float(weights.get(c, 1.0))
+		if r <= 0.0:
+			break
+		index += 1
+	index = mini(index, BattleSkinned.WOUNDED_FOOT.size() - 1)
+	var record := PackedFloat32Array()
+	record.resize(16)
+	for j in 12:
+		record[j] = prev[o + j]
+	var facing := atan2(prev[o + 2], prev[o + 10])
+	if BattleSkinned.WOUNDED_FOOT[index] == "crawl":
+		# Le modèle rampe vers son avant (+Z) : dos au tueur, sinon demi-tour, à ±25° près.
+		var away := facing + PI
+		if killer_pos != null:
+			var d: Vector3 = pos - (killer_pos as Vector3)
+			if Vector2(d.x, d.z).length() > 0.5:
+				away = atan2(d.x, d.z)
+		var angle := away + (h.z - 0.5) * 0.9
+		var c := cos(angle)
+		var sn := sin(angle)
+		record[0] = c
+		record[2] = sn
+		record[8] = -sn
+		record[10] = c
+	var blood := float(_level.get("corpse_blood", 0.0)) * (0.4 + 0.5 * h.w)
+	record[12] = anim_time
+	record[13] = float(index)
+	record[14] = 0.0
+	record[15] = float(BattleSkinned.CODE_UNARMED) + minf(blood, 0.99)
+	_add_corpse(side, kind, variant, true, pos, record, limits, true)
+	_wounded_total += 1
+	corpse_count += 1
+	wounded_count += 1
+	last_wounded_pos = pos
+	last_wounded_time = anim_time
+	if dropped_arms != null:
+		dropped_arms.drop_one(BattleSkinned.style_of(kind, variant), pos, facing, _side_colors.get(side, Color(0.5, 0.5, 0.5)), uid * 131 + ordinal)
+	if gore != null:
+		var sprays: Dictionary = _gore.get("sprays", {})
+		gore.spray(pos, Vector3(-prev[o + 2], 0.0, -prev[o + 10]), int(sprays.get("droplets_per_death", 6)) / 2, 1.1)
+	corpse_fallen.emit(pos, side, kind, str(unit.get("loss_cause", "other")))
+
+
+## EP12 : un régiment à pied qui se débande jette armes et boucliers (faces `HELD_MASK`
+## masquées, objets posés au sol une fois) ; rallié, il les a ramassés.
+func _update_disarmed(unit: Dictionary, id: int, kind: String, slice: PackedFloat32Array, n: int, mat: ShaderMaterial, routing: bool) -> void:
+	if routing == disarmed_units.has(id):
+		return
+	if routing:
+		disarmed_units[id] = anim_time
+		if dropped_arms != null and n > 0:
+			var variant := BattleMeshes.variant_of(str(unit.get("type", "")))
+			dropped_arms.drop_from_rout(slice, n, BattleSkinned.style_of(kind, variant), _side_colors.get(str(unit["side"]), Color(0.5, 0.5, 0.5)), id)
+	else:
+		disarmed_units.erase(id)
+	mat.set_shader_parameter("drop_arms", routing)
 
 
 ## Chance de coup critique (démembrement) selon la cause et l'arme du tueur.
@@ -755,19 +859,24 @@ func _pick_part(mounted: bool) -> String:
 
 
 ## Range un cadavre dans la cellule de terrain de `pos` (tampon circulaire par cellule).
-func _add_corpse(side: String, kind: String, variant: int, skinned: bool, pos: Vector3, record: PackedFloat32Array, limits: Dictionary) -> void:
+func _add_corpse(side: String, kind: String, variant: int, skinned: bool, pos: Vector3, record: PackedFloat32Array, limits: Dictionary, wounded: bool = false) -> void:
 	var cell_m := float(limits.get("cell_m", 80.0))
 	var cx := int(floor(pos.x / cell_m))
 	var cz := int(floor(pos.z / cell_m))
 	# Démembrés : couche à part avec la variante `discard` du shader (early-z conservé ailleurs).
-	var severed := int(record[15]) >= 1 and int(record[15]) <= 5
-	var skey := "%s/%s/%d%s" % [side, kind, variant, "/cut" if severed else ""]
+	var part := int(record[15]) % BattleSkinned.CODE_UNARMED
+	var severed := part >= 1 and part <= 5
+	# EP12 : blessés dans des couches à part (jeu de clips des blessés), mêmes cellules.
+	var skey := "%s/%s/%d%s" % [side, kind, variant, "/cut" if severed else "/wounded" if wounded else ""]
 	var key := "%s/%d/%d" % [skey, cx, cz]
 	if not _corpse_layers.has(key):
 		if not _corpse_materials.has(skey):
 			var material := _make_skinned_material(side, kind, variant, true) if skinned else _make_material(side, kind, variant, true)
 			if severed:
 				material.shader = BattleSkinned.corpse_shader()
+			if wounded and skinned:
+				material.set_meta("v2_config", {})
+				BattleSkinned.apply_config(material, BattleSkinned.wounded_config(kind, variant), anim_time)
 			if skinned:
 				material.set_shader_parameter("gravity", 9.8)
 			_corpse_materials[skey] = material
