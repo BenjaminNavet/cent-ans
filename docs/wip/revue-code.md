@@ -1,6 +1,21 @@
 # Revue de code globale (2026-09-26)
 
-État : vagues 1 (revue) et 2 (corrections) terminées ; intégration en cours (merge main → fix/code-review, tests, smoke).
+État : TERMINÉ — fix/code-review fusionnée dans main (ff).
+Bilan : 55 constats traités sur 6 tranches → 50 corrigés, 3 en partie, 2 écartés (faux constats).
+Vérifications à l'intégration : cargo fmt/clippy -D warnings OK, cargo test workspace 856 ok / 0 échec,
+pytest 728 ok, smoke Godot OK (28 sections). Un bug de typage GDScript (army_markers.gd `reused`)
+trouvé par le smoke et corrigé.
+
+Suites possibles (non faites) :
+- Pont : lectures groupées get_province_controllers / get_devastation (diplomacy_panel, alerts, settlement_layer).
+- Pont get_siege_state / get_soldier_buffers groupés : repris par PB3c.
+- trade.rs : précalculer les chemins des routes au chargement de data.trade.
+- sim-battle : `disengaging` retombe au 1er pas hors contact (décrochage en bord de mêlée) ; pavois attend une cible cachée.
+- Mock : événements "movement", "appointment", "skill_learned" absents d'EventKind.
+- Tests manquants : campagne n° 4, 13, 14, 15.
+- Relancer la sonde release ai `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` (une instabilité vue pendant la correction).
+- Leçon outillage : un CARGO_TARGET_DIR partagé entre worktrees mélange les artefacts des crates du workspace ;
+  utiliser un profil dédié (`--config 'profile.X.inherits="dev"' --profile X`).
 Tranches :
 1. sim-campaign A : diplomacy, negotiation, agents, chronicle, dynasty, naval
 2. sim-campaign B : orders, movement, state, battle_auto, battle_request, reste
