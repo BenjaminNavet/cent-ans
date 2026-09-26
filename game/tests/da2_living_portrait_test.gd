@@ -121,6 +121,11 @@ func _test_frame() -> void:
 	_check(placed and frame.has_portrait(), "frame shows the archetype")
 	_check(frame.get_node("Picture").material != null, "dead portrait uses the grisaille shader")
 	_check(not (frame.get_node("Initials") as Label).visible, "initials hidden under a portrait")
+	# Anti-clones : jamais de miroir sur un portrait historique ; décision stable par id.
+	var boy := {"id": "chr_gen_boy"}
+	_check(not LivingPortrait.mirrored(boy, {"kind": "fixed"}), "historical portraits are never mirrored")
+	_check(LivingPortrait.mirrored(boy, {"kind": "archetype"}) == LivingPortrait.mirrored(boy, {"kind": "archetype"}),
+		"mirror decision is stable")
 	var empty := PortraitFrame.new()
 	holder.add_child(empty)
 	empty.show_character({"id": "", "name": "Jean Sans Terre", "sex": "female", "age": 40, "faction": "fac_nowhere"}, "", {"ruler": ""})

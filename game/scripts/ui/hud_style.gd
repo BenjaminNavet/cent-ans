@@ -174,7 +174,7 @@ static func draw_texture_fit(canvas: CanvasItem, texture: Texture2D, center: Vec
 
 
 ## Texture découpée en disque (portrait) — polygone texturé, sans shader.
-static func draw_texture_disc(canvas: CanvasItem, texture: Texture2D, center: Vector2, radius: float) -> void:
+static func draw_texture_disc(canvas: CanvasItem, texture: Texture2D, center: Vector2, radius: float, flip_h: bool = false) -> void:
 	if texture == null:
 		return
 	var points := circle_points(center, radius, 64)
@@ -185,6 +185,8 @@ static func draw_texture_disc(canvas: CanvasItem, texture: Texture2D, center: Ve
 	var origin := Vector2((tex_size.x - side) * 0.5, (tex_size.y - side) * 0.25)
 	for point in points:
 		var local := (point - center) / (radius * 2.0) + Vector2(0.5, 0.5)
+		if flip_h:
+			local.x = 1.0 - local.x
 		uvs.append((origin + local * side) / tex_size)
 	canvas.draw_colored_polygon(points, Color.WHITE, uvs, texture)
 
