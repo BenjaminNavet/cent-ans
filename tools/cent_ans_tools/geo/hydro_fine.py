@@ -39,7 +39,14 @@ import numpy as np
 import shapely
 from pyproj import Transformer
 
-from cent_ans_tools.geo import download, fine_relief, fine_tiles, hydro_sources, pyramid
+from cent_ans_tools.geo import (
+    detail_dem,
+    download,
+    fine_relief,
+    fine_tiles,
+    hydro_sources,
+    pyramid,
+)
 from cent_ans_tools.geo import valley_snap as vs
 from cent_ans_tools.geo.project import MapGrid
 
@@ -55,7 +62,10 @@ TILES_SUBDIR = "hydro_fine"
 FEATURES_FILE = "features.json"
 SNAP_DIR = hydro_sources.CACHE_DIR / "snap"
 #: Bumped whenever the snapping parameters change (invalidates ``cache/snap``).
-SNAP_VERSION = 3
+#: ZG7c: 4 -- the snaps dated from before the ZG3b fix of the detail zones
+#: (E5-E7 up to 15 m too low): the Loire at Orleans sat 10 m under the terrain.
+#: The key now also carries ``detail_dem.BAKE_VERSION`` (re-snap after a re-bake).
+SNAP_VERSION = 4
 
 #: Smallest Strahler order kept, per source (orders computed on each network).
 MIN_ORDER = {"topage": 3, "osor": 3, "euhydro": 3, "naturalearth": 0}
@@ -72,6 +82,11 @@ EUHYDRO_ORDERS = (3, 4, 5, 6, 7, 8, 9)
 COVERAGE_CELL_M = 2000.0
 CHUNK_M = 1_500_000.0  # stroke length per parallel work unit
 JOIN_BLEND_VERTICES = 6
+#: ZG7c: lowest water level (m). The fine relief of the detail zones (E5-E7)
+#: carries real channel bathymetry (Thames at London down to -30 m, estuaries),
+#: which the valley floor then fed into the level fit: the tidal Thames sat at
+#: -7.8 m through London. No river of the map runs below mean sea level.
+MIN_WATER_LEVEL_M = 0.0
 
 
 @dataclass(frozen=True)
@@ -351,7 +366,7 @@ def snap_all(
     jobs = []
     for index, chunk in enumerate(chunks):
         digest = hashlib.sha1()
-        digest.update(f"{SNAP_VERSION}|{params}".encode())
+        digest.update(f"{SNAP_VERSION}|{detail_dem.BAKE_VERSION}|{params}".encode())
         for i in chunk:
             digest.update(np.ascontiguousarray(strokes[i].points[[0, -1]]).tobytes())
             digest.update(str(len(strokes[i].points)).encode())
@@ -614,6 +629,18 @@ def downstream_first(receiver: np.ndarray) -> list[int]:
     return order
 
 
+def water_level(floor: np.ndarray) -> np.ndarray:
+    """Water level estimate of a snapped line from its valley floor (ZG7c).
+
+    The floor is clamped at :data:`MIN_WATER_LEVEL_M` before the monotone fit
+    (:func:`join_confluences`): a channel bed or estuary bathymetry below sea
+    level must not drag the pooled level of a tidal reach under the sea. NaN
+    stays NaN (filled later by the fit).
+    """
+    floor = np.asarray(floor, dtype=np.float64)
+    return np.where(np.isnan(floor), np.nan, np.maximum(floor, MIN_WATER_LEVEL_M))
+
+
 def join_confluences(lines: list[RiverLine]) -> None:
     """Level caps and geometric joins at confluences, receivers first.
 
@@ -852,7 +879,7 @@ def build(
                     name=name,
                     order=orders[s],
                     points=xy,
-                    level=floor,
+                    level=water_level(floor),
                     width=stroke_widths(
                         widths,
                         name,

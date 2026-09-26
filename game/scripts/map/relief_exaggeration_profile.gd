@@ -31,6 +31,11 @@ extends Resource
 @export var floor_min_radius: int = 1
 @export var floor_blur_radius: int = 2
 @export var floor_blur_passes: int = 2
+## ZG7c : plafond du relief local exagéré (m). Le fond est relevé à `sommets voisins − plafond`,
+## donc `h − fond` ≲ plafond : collines, coteaux et falaises (< 300 m) gardent tout leur gain, les
+## montagnes n'en reçoivent que sur leurs `plafond` derniers mètres (sinon aiguilles et murs aux
+## paliers vallée et site). 0 : pas de plafond (rendu ZG8 d'origine).
+@export var local_relief_cap_m: float = 350.0
 
 ## Falaises : pentes du relief exagéré localement (pente vraie × (1 + gain), m/m) où la roche
 ## remplace progressivement la couverture du sol (terrain.gdshader).
