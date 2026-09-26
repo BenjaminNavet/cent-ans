@@ -1,4 +1,4 @@
-//! EP11 (ADR 0070): continuous push of the lines in melee.
+//! EP11 (ADR 0073): continuous push of the lines in melee.
 //!
 //! Lab scenarios on a flat, bare field, both AIs off: two regiments put in
 //! contact front to front fight where they stand. A heavier line drives a

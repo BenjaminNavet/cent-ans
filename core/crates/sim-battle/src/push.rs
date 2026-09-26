@@ -1,4 +1,4 @@
-//! EP11 (ADR 0070): continuous push of the lines in melee. Rules in
+//! EP11 (ADR 0073): continuous push of the lines in melee. Rules in
 //! `data/rules/battle_push.json` (schema
 //! `data/schemas/battle_push_rules.schema.json`); the per-tick resolution is
 //! in `sim/push.rs`. Field battles only: sieges keep their fixed melee.
