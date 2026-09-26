@@ -14,7 +14,10 @@ reste `battle_skinned/` jusqu'au lot FG5). Même format que `battle_skinned/` (v
 - **Sources** :
   - corps, visages (cibles MPFB) et poids : MakeHuman via MPFB 2.0.17, **CC0 1.0**
     (`game/assets/third_party/characters/makehuman_base/`, voir son `SOURCE.md`) ;
-  - squelette, animations et cheval : Quaternius, **CC0 1.0** (voir `battle_skinned/SOURCE.md`).
+  - squelette et animations : Quaternius, **CC0 1.0** (voir `battle_skinned/SOURCE.md`) ;
+  - cheval des montés (lot FG4) : « Rigged Horse » de Lyndon Daniels (OpenGameArt), **CC0 1.0**
+    (`game/assets/third_party/animals/oga_rigged_horse/SOURCE.md`), ajusté aux os du cheval
+    Quaternius par `battle_fine_horse.py`, harnachement et bardes par `battle_fine_cavalry.py`.
 - **Modifications** : rig `human` et os `R:` du rig `cavalry` aux proportions réalistes
   (humérus 0,25 m, avant-bras 0,26 m, tronc +5 %, épaules élargies ; mêmes os, mêmes clips) ;
   corps ajusté membres joint à joint, 8 visages, cheveux courts et barbes, vêtements en coques
