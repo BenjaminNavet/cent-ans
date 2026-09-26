@@ -292,10 +292,11 @@ propriétaire unique, complétée d'un **gain de relief local** : hauteur affich
 
 Détail dans `docs/godot-map.md` (« Perf et finitions de la vue rapprochée (lot ZG7a) »).
 
-- **Villes 1:1** : un MultiMesh par modèle du kit et par ville (plus un pour les blocs) au lieu d'un par
-  cellule de 250 m ; le HLOD maison / bloc se décide **par instance dans le shader** (`lod_mode`,
-  caméra principale publiée par `TownBuilder.set_lod_view`, même choix dans la passe d'ombre). Appels de
-  dessin de la descente « villes » divisés par ≈ 2.
+- **Villes 1:1** : blocs en un MultiMesh par ville, maisons du kit en un MultiMesh par modèle et par
+  cellule de 1 km (au lieu de détail + blocs par cellule de 250 m) ; le HLOD maison / bloc se décide
+  **par instance dans le shader** (`lod_mode`, caméra principale publiée par `TownBuilder.set_lod_view`,
+  même choix dans la passe d'ombre). Appels de dessin de la descente « villes » −43 % à cadence égale ;
+  une ville entière par nœud de détail était plus lente (tout le vertex shader dès une maison proche).
 - **Fil principal** : images et mipmaps des pages de relief, maillages des ponts-portes et des ponts fins
   préparés dans des fils ; recalage des tuiles fines par un seul parcours des pages
   (`ReliefQuadtree.finest_levels`). Sélection et application du quadtree (GDScript) non traitées :
