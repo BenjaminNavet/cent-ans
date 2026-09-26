@@ -120,6 +120,7 @@ var decor_render := true
 ## volume, feuillus ramifiés par essence avec imposteurs au loin, détail du sol de près.
 ## `--no-da6` rend l'ancienne végétation (banc A/B, captures « avant »).
 var da6 := true
+var tree_view: BattleTrees = null
 var _decor_clear: Array = []  # [centre: Vector2, demi-tailles: Vector2, lacet] (arbres écartés)
 var _coast: Dictionary = {}
 var _pools: Array = []
@@ -1459,15 +1460,17 @@ func _plant_orchards(sets: Dictionary, tints: Dictionary) -> void:
 				u += step
 				if rng.randf() < 0.06 or _near_road(p, 3.0):
 					continue  # un arbre mort arraché, ou le chemin
-				var t := _tree_transform(rng, p.x, p.y, 0.38, 0.52)
+				# DA6 : fruitiers à part (essence « fruit », taille réelle : échelle 0,85-1,1).
+				var fruit := "fruit" if da6 else "oak"
+				var t := _tree_transform(rng, p.x, p.y, 0.85, 1.1) if da6 else _tree_transform(rng, p.x, p.y, 0.38, 0.52)
 				t.origin.y = height_at(p.x, p.y) - 0.2
-				sets["oak"].append(t)
+				sets[fruit].append(t)
 				if blossom:
 					# Fleurs blanc rosé mêlées aux jeunes feuilles : éclairci, pas blanc pur.
 					var w := rng.randf_range(1.12, 1.35)
-					tints["oak"].append(Color(w * 1.08, w * rng.randf_range(0.92, 1.0), w * rng.randf_range(0.82, 0.92)))
+					tints[fruit].append(Color(w * 1.08, w * rng.randf_range(0.92, 1.0), w * rng.randf_range(0.82, 0.92)))
 				else:
-					tints["oak"].append(_tree_tint(rng) * Color(0.95, 1.05, 0.9))
+					tints[fruit].append(_tree_tint(rng) * Color(0.95, 1.05, 0.9))
 			v += step
 			row += 1
 
@@ -1501,6 +1504,10 @@ func _tree_tint(rng: RandomNumberGenerator) -> Color:
 			"summer":
 				autumn_share = 0.04
 			"winter":
+				if da6:
+					# DA6 : feuillus nus (ramilles grises) ; la teinte ne module que la luminance.
+					var g := rng.randf_range(0.85, 1.12)
+					return Color(g, g * 0.98, g * 0.95)
 				var w := rng.randf_range(0.62, 0.85)
 				if snowy():
 					w *= 1.15
@@ -1518,8 +1525,8 @@ func _tree_tint(rng: RandomNumberGenerator) -> Color:
 func _build_trees() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1337
-	var sets := {"oak": [], "poplar": [], "bush": [], "far": [], "hedge": []}
-	var tints := {"oak": [], "poplar": [], "bush": [], "far": [], "hedge": []}
+	var sets := {"oak": [], "poplar": [], "bush": [], "far": [], "hedge": [], "fruit": []}
+	var tints := {"oak": [], "poplar": [], "bush": [], "far": [], "hedge": [], "fruit": []}
 	var siege_center := Vector2(-1e6, -1e6)
 	if terrain.has("siege"):
 		siege_center = terrain["siege"].get("center", Vector2(600, 560))
@@ -1622,7 +1629,116 @@ func _build_trees() -> void:
 		_plant_orchards(sets, tints)
 	for kind in sets:
 		tree_count += (sets[kind] as Array).size()
+	if da6:
+		_plant_da6(sets, tints)
+		return
+	for kind in sets:
 		_tree_layer(kind, sets[kind], tints[kind])
+
+
+## DA6 : essences des feuillus (chêne, hêtre, frêne ; saule et peuplier près de l'eau), tuiles par
+## niveau de détail (choix par instance dans les shaders) et imposteurs au-delà de 300 m.
+func _plant_da6(sets: Dictionary, tints: Dictionary) -> void:
+	tree_view = BattleTrees.new()
+	tree_view.name = "Trees"
+	add_child(tree_view)
+	var by_species := {}
+	var impostors := {}  # tuile (640 m) -> [transforms, tints, rows]
+	for kind in sets:
+		var transforms: Array = sets[kind]
+		for i in transforms.size():
+			var t: Transform3D = transforms[i]
+			var species := str(kind)
+			match kind:
+				"oak", "far":
+					species = _broadleaf_species(t.origin, kind == "oak")
+				"hedge":
+					species = "bush"
+			if kind == "far":
+				# Anneau lointain : arbres ramenés à la taille réelle, imposteurs seuls.
+				t.basis = t.basis * 0.62
+			if not by_species.has(species):
+				by_species[species] = [[], []]
+			if kind != "far":
+				by_species[species][0].append(t)
+				by_species[species][1].append(tints[kind][i])
+			var row := BattleTrees.impostor_row(species)
+			if row >= 0:
+				var key := Vector2i(floori(t.origin.x / (TREE_TILE * 4.0)), floori(t.origin.z / (TREE_TILE * 4.0)))
+				if not impostors.has(key):
+					impostors[key] = [[], [], []]
+				impostors[key][0].append(t)
+				impostors[key][1].append(tints[kind][i])
+				impostors[key][2].append(row)
+	var winter := site_render and season_key == "winter"
+	var lod_k := RenderQuality.battle_lod_scale
+	var lod1 := BattleTrees.LOD1_DISTANCE * lod_k
+	var far := BattleTrees.IMPOSTOR_DISTANCE
+	var slack := TREE_TILE * 0.75 + BattleTrees.LOD_BAND
+	for species in by_species:
+		var transforms: Array = by_species[species][0]
+		var tile_tints: Array = by_species[species][1]
+		if transforms.is_empty():
+			continue
+		var tiles := {}
+		for i in transforms.size():
+			var o: Vector3 = (transforms[i] as Transform3D).origin
+			var key := Vector2i(floori(o.x / TREE_TILE), floori(o.z / TREE_TILE))
+			if not tiles.has(key):
+				tiles[key] = []
+			(tiles[key] as Array).append(i)
+		for key in tiles:
+			var members: Array = tiles[key]
+			if species == "bush":
+				# Buissons et haies : maillage unique ; portée des tuiles comme avant.
+				var reach := (HEDGE_DISTANCE if sets["hedge"].size() > 0 else BUSH_DISTANCE) * lod_k
+				_da6_tile(species, 0, winter, 0.0, 100000.0, members, transforms, tile_tints, key, 0.0, reach, false)
+				continue
+			_da6_tile(species, 0, winter, 0.0, lod1, members, transforms, tile_tints, key, 0.0, lod1 + slack, true)
+			_da6_tile(species, 1, winter, lod1, far, members, transforms, tile_tints, key, maxf(lod1 - slack, 0.0), far + slack, true)
+	for key in impostors:
+		var entry: Array = impostors[key]
+		tree_view.add_impostor_tile("Impostors_%d_%d" % [key.x, key.y], entry[0], entry[1], entry[2])
+	tree_view.bake_impostors.call_deferred(winter)
+
+
+func _da6_tile(species: String, lod: int, winter: bool, lod_near: float, lod_far: float, members: Array, transforms: Array, tints: Array, key: Vector2i, range_begin: float, range_end: float, shadows: bool) -> void:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
+	mm.mesh = BattleTrees.mesh(species, lod, winter, lod_near, lod_far)
+	mm.instance_count = members.size()
+	for k in members.size():
+		var i: int = members[k]
+		mm.set_instance_transform(k, transforms[i])
+		mm.set_instance_color(k, tints[i])
+	var instance := MultiMeshInstance3D.new()
+	instance.name = "Trees_%s_%d_%d_%d" % [species, lod, key.x, key.y]
+	instance.multimesh = mm
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	instance.visibility_range_begin = range_begin
+	instance.visibility_range_end = range_end
+	tree_view.add_child(instance)
+
+
+## DA6 : essence d'un feuillu selon le lieu (tirage haché, stable) : saules et peupliers au bord de
+## l'eau ; chênes, hêtres (forêts, collines) et frênes (bocage, fonds frais) ailleurs.
+func _broadleaf_species(o: Vector3, near: bool) -> String:
+	var h := fposmod(sin(o.x * 12.9898 + o.z * 78.233) * 43758.5453, 1.0)
+	var wet := near and (river_distance(o.x, o.z) < river_span_at(o.x) + 28.0 or _in_zones(_pools, o.x, o.z, 20.0))
+	if wet or terrain_key == "marsh":
+		if h < 0.55:
+			return "willow"
+		if h < 0.75:
+			return "poplar"
+		return "ash"
+	var beech := 0.35 if terrain_key in ["forest", "hills", "mountains"] else 0.2
+	var ash := 0.3 if terrain_key == "bocage" else 0.2
+	if h < beech:
+		return "beech"
+	if h < beech + ash:
+		return "ash"
+	return "oak"
 
 
 ## EP2 : seuil des bois lointains ; au loin, les forêts réelles de la tuile d'horizon.
@@ -1730,10 +1846,11 @@ func _plant_hedges(rng: RandomNumberGenerator, sets: Dictionary, tints: Dictiona
 				break
 		if near_house:
 			continue
-		var t := _tree_transform(rng, p.x, p.y, 0.4, 0.6)
+		var fruit := "fruit" if da6 else "oak"
+		var t := _tree_transform(rng, p.x, p.y, 0.9, 1.2) if da6 else _tree_transform(rng, p.x, p.y, 0.4, 0.6)
 		t.origin.y = height_at(p.x, p.y) - 0.2
-		sets["oak"].append(t)
-		tints["oak"].append(_tree_tint(rng))
+		sets[fruit].append(t)
+		tints[fruit].append(_tree_tint(rng))
 
 
 ## Arbres par tuiles (lot V4b) : une tuile de `TREE_TILE` m par MultiMesh pour que le moteur
