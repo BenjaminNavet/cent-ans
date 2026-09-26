@@ -33,7 +33,7 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG8 | Relief local exagéré façon Total War (visuel seulement), roche selon la pente, ombrage (wip `zg8-relief-exagere.md`) | 3 | **dans main** |
 | ZG7a | Perf (MultiMesh par ville, parcellaire, p99, ponts), lit de la Seine, ponts-portes, rives de Londres, PathPreview (wip `zg7a-perf-finitions.md`) | 4 | **dans main** (609bbcdf) |
 | ZG7b | Cache absent (message + commande unique), embarquement de la pyramide, docs geo/godot-map, crédits (wip `zg7b-export-cache.md`) | 4 | **dans main** (0eaec278) |
-| ZG7c | Recette visuelle aux 3 paliers après ZG7a/b | 4 | en cours (wip `zg7c-recette.md`) |
+| ZG7c | Recette visuelle aux 3 paliers après ZG7a/b | 4 | **dans main** — chantier clos |
 
 ## Journal
 - 25/09 : ZG0 commité (ADR 0036, `data/map/relief_pyramid.json`, `detail_zones.json`, schémas,
@@ -61,3 +61,10 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : ZG7 découpé en ZG7a (perf + finitions visuelles) et ZG7b (export, cache, docs, crédits), lancés en parallèle ; recette finale ZG7c ensuite.
 - 26/09 : ZG7b fusionné (0eaec278) : avis « relief incomplet » + `cent-ans geo relief-all [--check]`, export `CENT_ANS_EXPORT_RELIEF=bundle|external|none` (clones APFS), `MapPaths.relief_root_for`, docs geo/godot-map/tools, crédits (textures Poly Haven ajoutées). pytest 581 OK, smoke OK. Suites : `ReliefPyramid` ignore un étage entier si sa 1re tuile manque (à rendre robuste en ZG7c) ; aucune archive « Cent Ans relief » hébergée (à décider avant diffusion).
 - 26/09 : ZG7a fusionné (609bbcdf) : appels de dessin des villes −43 % (MultiMesh par ville / cellule 1 km, HLOD par instance), parcellaire −20 %, pages et ponts hors du fil principal (fine_install 19 → 1,6 ms), Seine 133-200 m interpolée le long des ancrages, tabliers à largeur réelle, rives de Londres 2,6-3,8 m, PathPreview fin de près. Non atteint : p99 ~130 ms (≈ base), qt_update 10-16 ms. Tests zg2-zg8 + smoke OK. ZG7c lancé : pyramide partielle robuste, recuisson des 34 zones (plancher v4), Tamise −7,8 m, banc, recette visuelle aux 3 paliers, clôture.
+- 26/09 : ZG7c fusionné, **chantier ZG clos**. Cache partiel robuste (repli par tuile), 34 zones recuites (plancher v4), niveaux d'eau ≥ 0 (Tamise 1,9 m), recalages fleuves invalidés par BAKE_VERSION, banc process_ms fiable (pics > 50 ms = scripts), plafond du relief local ZG8 (`local_relief_cap_m` 350 m) contre les aiguilles. Tests zg2-zg8 + zg7c + smoke + pytest 671 OK. Suites (hors ZG) :
+  - S1 murs en haute montagne au palier vallée (×3,4 ZG4) — régler l'exagération près des massifs ;
+  - S2 fonds de vallée E1-E4 à 0,5 m (Loire à Orléans 5 m sous les berges) — recuisson complète de la pyramide ;
+  - S3 villes emblématiques au palier site (Rouen, Orléans) → VH4, plancher caméra ZG4b à lever ;
+  - S4 moulins, hameaux, fumées, arbres géants au palier vallée ; S5 disque d'emprise d'Amiens avant les maisons ;
+  - S6 pics d'images côté scripts (qt_update 10-16 ms) → PB ; S7 pluie en bâtonnets au palier site ;
+  - relief séparé « Cent Ans relief » non hébergé : à décider avant diffusion.

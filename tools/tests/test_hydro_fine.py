@@ -91,6 +91,20 @@ def test_isotonic_fills_nan() -> None:
     assert np.all(np.isfinite(level)) and np.all(np.diff(level) <= 1e-9)
 
 
+def test_water_level_ignores_bathymetry() -> None:
+    """ZG7c: a channel bed below sea level (Thames at London) keeps the water at 0 m."""
+    from cent_ans_tools.geo import hydro_fine
+
+    floor = np.array([3.0, 1.5, np.nan, -12.0, -30.0, -8.0, 0.4])
+    level = hydro_fine.water_level(floor)
+    assert np.isnan(level[2])
+    assert level[0] == 3.0 and level[1] == 1.5 and level[-1] == 0.4
+    assert np.all(level[3:6] == hydro_fine.MIN_WATER_LEVEL_M)
+    fitted = valley_snap.isotonic_decreasing(level)
+    assert fitted.min() >= hydro_fine.MIN_WATER_LEVEL_M
+    assert np.all(np.diff(fitted) <= 1e-9)
+
+
 def test_enforce_cap() -> None:
     """A tributary never ends above the level of the river it joins."""
     out = valley_snap.enforce_cap(np.array([10.0, 12.0, 8.0]), 9.0)

@@ -340,3 +340,23 @@ Détail dans `docs/godot-map.md` (« Perf et finitions de la vue rapprochée (lo
 - Constat hors lot : le relief E1-E4 plaque encore les fonds de vallée proches de plateaux à 0,5 m (même
   rehaussement σ 5 km + plancher de côte) ; une recuisson E1-E4 avec le même plancher monotone est à
   prévoir (ZG8 exagère déjà le relief à l'exécution).
+
+## Addendum (lot ZG7c, 2026-09-26) : recette finale, chantier clos
+
+Détail dans `docs/godot-map.md` (« Recette finale et clôture (lot ZG7c) ») et `docs/wip/zg7c-recette.md`
+(12 lieux × 3 paliers, défauts corrigés et laissés, captures `docs/img/zg7c/`).
+
+- **Cache partiel toléré tuile par tuile** : `ReliefPyramid` ne garde que les tuiles listées présentes
+  sur le disque (un listage de dossier par étage) ; les trous retombent sur l'ancêtre le plus fin, les
+  tuiles illisibles sont écartées à l'exécution. Plus d'étage ignoré en bloc.
+- **Écart à ZG8 : relief local plafonné.** Le fond de vallée est relevé à `sommets voisins − 350 m`
+  (`local_relief_cap_m`) : le gain local reste entier sur les reliefs < 350 m (le cas « Total War »
+  visé : coteaux, falaises, collines) et ne transforme plus les montagnes en aiguilles. La formule
+  affichée est inchangée (seul le fond publié change), donc aucun consommateur à modifier.
+- **Niveaux d'eau fins ≥ 0 m** (bathymétrie des zones E5-E7 exclue de l'estimation) ; cache des
+  recalages de fleuves lié à la version de cuisson du palier 3. Palier 3 : 34 zones au plancher
+  monotone v4 ; `geo relief-all --check` complet (2,77 Go).
+- **Chantier clos.** Suites hors chantier, non bloquantes : exagération ZG4 fonction de l'amplitude
+  locale en haute montagne (palier vallée) ; recuisson E0-E4 avec le plancher monotone (fonds de
+  vallée à 0,5 m) ; villes emblématiques 1:1 (VH4) ; objets à l'échelle de la carte au palier vallée ;
+  pics d'images dominés par les scripts ; hébergement d'une archive du relief avant diffusion.

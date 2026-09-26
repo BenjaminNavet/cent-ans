@@ -29,6 +29,8 @@ var height_range_m: float = 5000.0
 ## Étage le plus fin présent (0 sans cache).
 var max_level: int = 0
 var load_error: String = ""
+## Tuiles listées par le manifeste mais absentes du disque (cache partiel, ZG7c).
+var missing_tiles: int = 0
 
 ## Par étage (index = étage) : ensemble des clés `row * cols + col` des tuiles présentes.
 var _tiles: Array[Dictionary] = []
@@ -91,6 +93,7 @@ func load_manifest(dir: String, manifest_path: String = "", tiles_override: Stri
 	_max_under.clear()
 	_broken.clear()
 	_tile_count = 0
+	missing_tiles = 0
 	for level in MAX_LEVEL + 1:
 		_tiles.append({})
 	_load_e0()
@@ -134,11 +137,14 @@ func load_manifest(dir: String, manifest_path: String = "", tiles_override: Stri
 				for col in range(maxi(start, 0), mini(start + length, cols)):
 					set_[row * cols + col] = true
 		if not set_.is_empty():
-			# Contrôle d'une tuile : un manifeste en avance sur le cache ne doit pas activer le moteur.
-			var any_key: int = set_.keys()[0]
-			if not FileAccess.file_exists(tile_path(level, any_key % cols, any_key / cols)):
-				push_warning("ReliefPyramid: level %d listed but not on disk (%s), ignored" % [level, tiles_dir])
-				set_.clear()
+			# ZG7c : un manifeste en avance sur le cache (cuisson interrompue, cache partiel) ne garde
+			# que les tuiles présentes sur disque ; les trous retombent tuile par tuile sur l'ancêtre
+			# le plus fin présent (`finest_ancestor`). Un seul listage de dossier par étage.
+			var missing := _drop_missing_tiles(level, set_)
+			if missing > 0:
+				missing_tiles += missing
+				push_warning("ReliefPyramid: level %d, %d of %d listed tiles missing on disk (%s), ancestors used" % [level, missing, missing + set_.size(), tiles_dir])
+			if set_.is_empty():
 				continue
 			max_level = maxi(max_level, level)
 			_tile_count += set_.size()
@@ -146,6 +152,28 @@ func load_manifest(dir: String, manifest_path: String = "", tiles_override: Stri
 	if max_level == 0:
 		load_error = "no tile above E0"
 	return max_level > 0
+
+
+## Retire de `set_` (clés `row * cols + col` de l'étage) les tuiles absentes du disque ; rend leur
+## nombre. Les fichiers du dossier de l'étage sont listés une fois (≈ 7 000 tuiles à E4) au lieu
+## d'un `file_exists` par tuile.
+func _drop_missing_tiles(level: int, set_: Dictionary) -> int:
+	var cols := tiles_per_side(level)
+	var relative := pattern.replace("{level}", str(level))
+	var level_dir := tiles_dir.path_join(relative.get_base_dir())
+	var file_pattern := relative.get_file()
+	var present := {}
+	if DirAccess.dir_exists_absolute(level_dir):
+		for name in DirAccess.get_files_at(level_dir):
+			present[name] = true
+	var missing: Array[int] = []
+	for key: int in set_:
+		var name := file_pattern.replace("{col}", str(key % cols)).replace("{row}", str(key / cols))
+		if not present.has(name):
+			missing.append(key)
+	for key in missing:
+		set_.erase(key)
+	return missing.size()
 
 
 func is_available() -> bool:
