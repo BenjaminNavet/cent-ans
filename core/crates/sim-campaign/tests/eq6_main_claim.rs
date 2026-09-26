@@ -8,7 +8,8 @@ use std::path::PathBuf;
 
 use data_model::{ClaimKind, FactionId, GameData};
 use sim_campaign::difficulty::Difficulty;
-use sim_campaign::diplomacy::{main_claim, plan_diplomacy, Claim, OpinionModifier};
+use sim_campaign::diplomacy::{is_cornered, main_claim, plan_diplomacy, Claim, OpinionModifier};
+use sim_campaign::negotiation::plan_peace;
 use sim_campaign::{CampaignState, Order};
 
 fn data() -> GameData {
@@ -136,4 +137,56 @@ fn easy_level_goodwill_does_not_stop_the_claim_war() {
     assert_eq!(state.difficulty_attitude(&data, &england, &france), 10);
     assert_eq!(declares(&state, &data), Some(france.clone()));
     assert_ne!(declares(&state, &old), Some(france));
+}
+
+/// France (AI, England played) at war with England since this very
+/// season, with France's war score set to `score`.
+fn fresh_war(data: &GameData, score: i32) -> CampaignState {
+    let mut state = CampaignState::new_1337(data, fac("fac_england"), 11).expect("1337 start");
+    state.chronicle.disabled = true;
+    let (france, england) = (fac("fac_france"), fac("fac_england"));
+    state.turn = 40;
+    let ids: Vec<FactionId> = state.factions.keys().cloned().collect();
+    for id in &ids {
+        state.factions.get_mut(id).unwrap().at_war_with.clear();
+    }
+    for (a, b) in [(&france, &england), (&england, &france)] {
+        let f = state.factions.get_mut(a).unwrap();
+        f.at_war_with.insert(b.clone());
+        f.truces.remove(b);
+        f.war_started.insert(b.clone(), 40);
+        f.war_scores.insert(b.clone(), 0);
+    }
+    let base = state.war_score(data, &france, &england);
+    let me = state.factions.get_mut(&france).unwrap();
+    me.war_scores.insert(england.clone(), score - base);
+    // Weary and well disposed enough to sign a white peace.
+    me.ledger.weariness = 100;
+    me.modifiers.push(OpinionModifier {
+        with: england.clone(),
+        value: 40,
+        reason_fr: "Ambassade d'un héraut".to_owned(),
+        expires_turn: 80,
+    });
+    assert_eq!(state.war_score(data, &france, &england), score);
+    state
+}
+
+#[test]
+fn a_cornered_crown_fights_before_it_sues() {
+    let mut data = data();
+    // Every crown counts as cornered.
+    data.ai_diplomacy.peace.cornered_provinces = 1000;
+    data.ai_diplomacy.peace.cornered_waits_for_defeat = true;
+    let france = fac("fac_france");
+    let fresh = fresh_war(&data, 0);
+    assert!(is_cornered(&fresh, &data, &france));
+    assert_eq!(plan_peace(&fresh, &data, &france), None);
+    let beaten = fresh_war(&data, -60);
+    let beaten_offer = plan_peace(&beaten, &data, &france);
+    // Before EQ6 it sued the very season war was declared.
+    data.ai_diplomacy.peace.cornered_waits_for_defeat = false;
+    assert!(plan_peace(&fresh, &data, &france).is_some());
+    // Once beaten, it treats as before.
+    assert_eq!(plan_peace(&beaten, &data, &france), beaten_offer);
 }
