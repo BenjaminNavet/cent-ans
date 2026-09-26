@@ -22,5 +22,12 @@ Textures **procédurales** (générées par `build_textures.py`, CC0 elles aussi
 - `foliage_leaves.png` : carte alpha d'un amas de feuilles (houppiers, buissons) ;
 - `grass_clump.png` : carte alpha d'une touffe d'herbe.
 
+Textures **procédurales du lot DA6** (générées par `build_da6_textures.py`, CC0, aucune source
+tierce ; `uv run --with pillow --with numpy python build_da6_textures.py`) :
+- `grass_blades.png` : touffe en éventail (luminance et alpha seuls) ;
+- `leaf_spray.png` : rameau feuillu des arbres (`BattleTrees`) ;
+- `twig_spray.png` : ramilles nues (feuillus en hiver) ;
+- `dead_leaves.png` : feuilles sèches (chêne marcescent en hiver).
+
 Régénérer : télécharger les fichiers `<id>_diff_1k.jpg` et `<id>_nor_gl_1k.jpg` dans un dossier,
 puis `uv run --with pillow --with numpy python build_textures.py <dossier>`.
