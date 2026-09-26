@@ -76,6 +76,8 @@ pub struct CampaignSim {
     pub(crate) last_load_error: String,
     /// PB3d: end of turn running on its worker thread, if any.
     pub(crate) pending_turn: Option<crate::turn_job::TurnJob>,
+    /// PB3d: bumped by every call that may change the state.
+    pub(crate) revision: u64,
     base: Base<RefCounted>,
 }
 
@@ -87,6 +89,7 @@ impl IRefCounted for CampaignSim {
             state: None,
             last_load_error: String::new(),
             pending_turn: None,
+            revision: 0,
             base,
         }
     }
@@ -486,6 +489,7 @@ impl CampaignSim {
         if let Some(events) = self.finish_pending_turn() {
             return events;
         }
+        self.revision += 1;
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             godot_warn!("CampaignSim.end_turn called before new_campaign");
             return VarArray::new();

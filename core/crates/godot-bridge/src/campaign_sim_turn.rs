@@ -18,13 +18,16 @@ use crate::turn_job::TurnJob;
 pub(crate) const TURN_PENDING_FR: &str = "la fin de tour est en cours";
 
 impl CampaignSim {
-    /// True (with a warning naming `method`) while an end of turn runs on
-    /// its worker thread: the caller must then leave the state untouched.
-    pub(crate) fn refuse_while_turn_pending(&self, method: &str) -> bool {
+    /// Called first by every method that may change the state. True (with
+    /// a warning naming `method`) while an end of turn runs on its worker
+    /// thread: the caller must then leave the state untouched. Otherwise the
+    /// state revision is bumped (see `get_state_revision`).
+    pub(crate) fn refuse_while_turn_pending(&mut self, method: &str) -> bool {
         if self.pending_turn.is_some() {
             godot_warn!("CampaignSim.{method}: refused, the end of turn is running");
             return true;
         }
+        self.revision += 1;
         false
     }
 
@@ -32,12 +35,14 @@ impl CampaignSim {
     /// its own and its result is never installed.
     pub(crate) fn cancel_pending_turn(&mut self) {
         self.pending_turn = None;
+        self.revision += 1;
     }
 
     /// Waits for the running end of turn, installs its state and returns
     /// its events (`None` when no end of turn is running).
     pub(crate) fn finish_pending_turn(&mut self) -> Option<VarArray> {
         let job = self.pending_turn.take()?;
+        self.revision += 1;
         match job.join() {
             Ok((state, events)) => {
                 self.state = Some(state);
@@ -100,5 +105,12 @@ impl CampaignSim {
     #[func]
     fn is_end_turn_pending(&self) -> bool {
         self.pending_turn.is_some()
+    }
+
+    /// Counter bumped by every call that may change the state (orders,
+    /// end of turn, load…): the map caches its grouped reads by it.
+    #[func]
+    fn get_state_revision(&self) -> i64 {
+        self.revision as i64
     }
 }
