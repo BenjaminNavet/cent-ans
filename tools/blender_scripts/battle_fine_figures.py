@@ -787,9 +787,10 @@ def hide_covered(garments, equipment, variants):
 
 
 # Triangle caps of a figure per level of detail (FG2 brief: on foot LOD0 12 k, LOD1
-# 2 000, LOD2 350); riders (the horse is FG4's) get a rider share.
-TRI_CAP = (11900, 1980, 345)
-RIDER_CAP = (9000, 1500, 250)
+# 2 000, LOD2 350; FG5: LOD1 1 350, LOD2 260, since the LOD0 only draws the soldiers within
+# ~12 m and LOD1 takes over from there); riders (the horse is FG4's) get a rider share.
+TRI_CAP = (11900, 1350, 260)
+RIDER_CAP = (9000, 1000, 180)
 # Decimation weight per piece: the faces keep more than the rest.
 CUT_WEIGHT = {"head": 0.35, "hair": 0.6, "beard": 0.6}
 

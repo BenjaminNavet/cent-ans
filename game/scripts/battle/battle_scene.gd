@@ -1234,6 +1234,7 @@ func _bench_finish() -> void:
 		"quality": RenderQuality.current(),
 		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
 		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+		"fg5_lods": soldiers.call("fg5_lod_counts"),  # FG5 temporary
 		"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"missiles_launched": effects.launched if effects != null else 0,
 		"wall_s": _bench_wall_elapsed_s(),
@@ -2380,6 +2381,27 @@ func _standard_shot_score(unit: Dictionary) -> int:
 
 ## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).
 func _apply_camera_override() -> void:
+	# FG5 : `--benchmark --closeup` : banc rapproché (caméra de la capture `--closeup`, 26 m de la
+	# mêlée) où les figurines passent par leurs LOD0 et LOD1.
+	if _benchmark and _closeup and _camera_override == "":
+		# Régiment du joueur le plus proche de l'ennemi (pas de mêlée garantie à `--bench-at`).
+		var best := INF
+		var focus := Vector3.ZERO
+		var yaw := 0.0
+		for unit in units:
+			if str(unit["side"]) != player_side or not bool(unit["present"]):
+				continue
+			for other in units:
+				if str(other["side"]) == player_side or not bool(other["present"]):
+					continue
+				var a := Vector2(float(unit["x"]), float(unit["z"]))
+				var b := Vector2(float(other["x"]), float(other["z"]))
+				if a.distance_to(b) < best:
+					best = a.distance_to(b)
+					focus = Vector3(a.x, 0.0, a.y)
+					yaw = atan2(a.x - b.x, a.y - b.y) + 1.05
+		camera_rig.look_at_point(focus, 26.0, yaw)
+		return
 	if _camera_override == "":
 		return
 	var parts := _camera_override.split(",")
