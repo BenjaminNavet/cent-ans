@@ -270,6 +270,14 @@ reproduites telles quelles (entre guillemets).
   d'[OpenStreetMap](https://www.openstreetmap.org/copyright), base de données sous licence
   ODbL 1.0. Les plans anciens (Le Lieur, Braun et Hogenberg, plans Gallica, carte d'Agas) ne
   servent qu'au contrôle humain et ne sont ni extraits ni redistribués.
+- **Paris vers 1340 à l'échelle 1:1** (`data/landmarks_v2/paris.json`, lot VH5) : réseau des
+  rues, enceintes, portes, emprises des monuments, îlots, îles et lit de la Seine d'après « Paris
+  en 1380 » ; gabarit des parcelles d'après les données Vasserot version 1. © ALPAGE :
+  P. Rouet (Paris en 1380), A.-L. Bethe (données Vasserot) ; Arch. nat. F31 73-96 – Arch. Paris
+  © ALPAGE. Base de données sous licence
+  [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/), https://alpage.huma-num.fr/gis-data/
+  (consortium ALPAGE : LAMOP-Paris 1, LIENSs, ArScAn, L3i ; dir. H. Noizet). Les données
+  dérivées (`paris.json`) restent sous ODbL.
 - **Réseau hydrographique fin (lot ZG5a, ADR 0036)** — tracés recalés sur la pyramide de relief,
   canaux postérieurs à 1340 retirés :
   - France : BD TOPAGE® 2025, tronçons hydrographiques (IGN, OFB, agences de l'eau ; diffusion
