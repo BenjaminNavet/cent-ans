@@ -721,14 +721,14 @@ VIEWS = {
 }
 
 
-def render_views(prefix, out, views=("face", "trois_quarts", "tete"), shift=Vector()):
+def render_views(prefix, out, views=("face", "trois_quarts", "tete")):
     """Render the named views of the current scene to `out/<prefix>_<view>.png`."""
     cam = camera()
     paths = []
     for v in views:
         eye, target, lens, res = VIEWS[v]
         setup_eevee(res)
-        look_at(cam, Vector(eye) + shift, Vector(target) + shift, lens)
+        look_at(cam, Vector(eye), Vector(target), lens)
         path = os.path.join(out, f"{prefix}_{v}.png")
         render(path)
         paths.append(path)
@@ -950,8 +950,8 @@ RIDER_BUDGET = {
 }
 
 CAVALRY_VIEWS = {
-    "face": ((0.0, -6.2, 1.5), (0.0, -0.2, 1.3), 50, (900, 1000)),
-    "trois_quarts": ((-4.2, -4.6, 1.9), (0.0, -0.1, 1.25), 50, (900, 1000)),
+    "face": ((0.0, -5.0, 1.5), (0.0, -0.2, 1.25), 55, (900, 1000)),
+    "trois_quarts": ((-3.6, -3.9, 1.9), (0.0, -0.1, 1.2), 55, (900, 1000)),
     "tete": ((-0.45, -1.35, 2.45), (0.0, -0.08, 2.32), 85, (700, 700)),
 }
 

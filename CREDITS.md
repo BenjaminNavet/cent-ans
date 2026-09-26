@@ -100,6 +100,9 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   base, cibles et poids du squelette `game_engine` (CC0 depuis 2020), générés avec l'extension
   Blender MPFB 2 (code GPL, non redistribué) ; corps de base des figurines fines (lot FG0,
   `game/assets/third_party/characters/makehuman_base/`).
+- **Lyndon Daniels** — « Rigged Horse » ([OpenGameArt](https://opengameart.org/content/rigged-horse)) :
+  cheval de trait texturé (couleur, normale, occlusion 2k), base du cheval des figurines fines
+  (lot FG0, `game/assets/third_party/animals/oga_rigged_horse/`).
 - **Kenney** ([kenney.nl](https://kenney.nl)) : Castle Kit.
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Fir Tree 01, Pine Tree 01, Grass
   Medium 01 (Rico Cilliers, Rob Tuytel), Grass Medium 02 (Rico Cilliers). Modifiés : LOD2
