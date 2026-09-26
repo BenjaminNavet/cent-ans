@@ -27,6 +27,7 @@
         "gain": { "$ref": "#/$defs/rgb" },
         "contrast": { "type": "number", "minimum": 0.5, "maximum": 1.5 },
         "saturation": { "type": "number", "minimum": 0, "maximum": 2 },
+        "shadow_saturation": { "type": "number", "minimum": 0, "maximum": 1, "description": "DA7b : saturation gardée par les tons sombres (pleine effet au noir, nul au-delà de la luminance 0,5)." },
         "shadows": { "$ref": "#/$defs/rgb", "description": "Multiplicateur des tons sombres." },
         "highlights": { "$ref": "#/$defs/rgb", "description": "Multiplicateur des tons clairs." }
       },
@@ -81,6 +82,19 @@
           "grade": { "$ref": "#/$defs/grade" }
         },
         "required": ["sky", "sky_luminance", "grade"]
+      }
+    },
+    "battle_seasons": {
+      "type": "object",
+      "description": "DA7b : réglages de saison propres aux batailles.",
+      "propertyNames": { "enum": ["spring", "summer", "autumn", "winter"] },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "grade": { "$ref": "#/$defs/grade", "description": "Étalonnage de saison en bataille (remplace celui de seasons)." },
+          "decor_saturation": { "type": "number", "minimum": 0, "maximum": 1, "description": "Part de saturation gardée par l'albédo du sol et de l'herbe (bible DA § 3.3)." }
+        },
+        "additionalProperties": false
       }
     },
     "campaign": {
