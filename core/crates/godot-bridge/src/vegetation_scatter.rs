@@ -125,16 +125,10 @@ fn detail_of(params: &VarDictionary) -> Option<DetailArea> {
             .map(|values| {
                 values
                     .as_slice()
-                    .chunks_exact(5)
-                    .map(|c| {
-                        [
-                            c[0] as f64,
-                            c[1] as f64,
-                            c[2] as f64,
-                            c[3] as f64,
-                            c[4] as f64,
-                        ]
-                    })
+                    .as_chunks::<5>()
+                    .0
+                    .iter()
+                    .map(|c| c.map(|v| v as f64))
                     .collect()
             })
             .unwrap_or_default(),
