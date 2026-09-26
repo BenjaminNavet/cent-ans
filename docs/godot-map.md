@@ -1510,9 +1510,9 @@ section : `var t := Time.get_ticks_usec()` … `t = PerfProbe.lap("nom", t)` (co
   changement d'échelle verticale ou de palier près (avant : les 570 à chaque image d'un zoom).
 - `LifeEffects._reground` : points indexés par morceau (avant : parcours de tous les points).
 
-**Mesures** (`--bench-map`, M4 Pro, machine partagée à une charge de 75-150 ; passes alternées
-main / SZ6, médianes) : parcours complet p99 83 → 36 ms, images > 50 ms 204 → 1, p50 inchangée
-(17 ms) ; descente p99 86 → 37 ms. Détail et limites : `docs/wip/sz6-pics-scripts.md`.
+**Mesures** (`--bench-map`, M4 Pro, machine partagée à une charge de 75-150 ; 4 passes alternées
+main c4064c29 / SZ6, médianes) : parcours complet p99 91 → 38 ms, pire image 182 → 52 ms, images
+> 50 ms 231 → 3, p50 20 → 19 ms ; descente p99 93 → 38 ms, scripts p99 87 → 29 ms. Détail et limites : `docs/wip/sz6-pics-scripts.md`.
 
 ## Interface des colonies (lot C5)
 
