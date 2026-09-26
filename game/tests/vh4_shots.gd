@@ -32,7 +32,7 @@ const PARIS_SHOTS := [
 	["vallee", PARIS, 4.0, 0.0],
 	["site", PARIS + Vector2(-0.2, -0.3), 2.2, 0.0],
 	["cite", PARIS + Vector2(-0.25, -0.35), 0.7, 20.0],
-	["notre_dame", PARIS + Vector2(-0.05, 0.0), 0.35, -40.0],
+	["notre_dame", PARIS + Vector2(0.0, 0.0), 0.3, 135.0],
 	["louvre", PARIS + Vector2(-1.12, -1.21), 0.5, 30.0],
 	["grand_pont", PARIS + Vector2(-0.25, -0.61), 0.4, 160.0],
 	["rive_gauche", PARIS + Vector2(-0.55, 0.45), 0.9, 180.0],
