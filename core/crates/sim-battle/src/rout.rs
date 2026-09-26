@@ -127,34 +127,43 @@ impl FlightRules {
     ) -> (f64, f64) {
         // Lateral axis of the flight (left of `rear`).
         let side = (-rear.1, rear.0);
-        let mut steer = 0.0;
-        let mut push = |p: (f64, f64), lookahead: f64, clearance: f64, weight: f64| {
+        let push = |p: (f64, f64), lookahead: f64, clearance: f64, weight: f64| {
             let (ox, oz) = (p.0 - pos.0, p.1 - pos.1);
             let ahead = ox * rear.0 + oz * rear.1;
             let lateral = ox * side.0 + oz * side.1;
             if ahead <= 0.0 || ahead >= lookahead || lateral.abs() >= clearance {
-                return;
+                return 0.0;
             }
             // Away from the obstacle; one straight ahead is passed on the left.
             let away = if lateral > 0.0 { -1.0 } else { 1.0 };
-            steer += away * weight * (1.0 - lateral.abs() / clearance) * (1.0 - ahead / lookahead);
+            away * weight * (1.0 - lateral.abs() / clearance) * (1.0 - ahead / lookahead)
         };
-        for e in enemies {
-            push(
-                e,
-                self.lookahead_m,
-                self.enemy_clearance_m,
-                self.enemy_weight,
-            );
-        }
-        for f in friends {
-            push(
-                f,
-                self.friend_lookahead_m,
-                self.friend_clearance_m,
-                self.friend_weight,
-            );
-        }
+        let enemy: f64 = enemies
+            .into_iter()
+            .map(|e| {
+                push(
+                    e,
+                    self.lookahead_m,
+                    self.enemy_clearance_m,
+                    self.enemy_weight,
+                )
+            })
+            .sum();
+        // Going round friends stays a light swerve, however many of them
+        // (regiments piled on one spot must not send the flight sideways).
+        let friend: f64 = friends
+            .into_iter()
+            .map(|f| {
+                push(
+                    f,
+                    self.friend_lookahead_m,
+                    self.friend_clearance_m,
+                    self.friend_weight,
+                )
+            })
+            .sum::<f64>()
+            .clamp(-self.friend_weight, self.friend_weight);
+        let steer = enemy + friend;
         let (x, z) = (rear.0 + side.0 * steer, rear.1 + side.1 * steer);
         let norm = (x * x + z * z).sqrt();
         (x / norm, z / norm)
