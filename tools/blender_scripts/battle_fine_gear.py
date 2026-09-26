@@ -925,3 +925,7 @@ def cloth_cap(g, colour=(0.25, 0.10, 0.05)):
     return [
         finish_object("cloth_cap", bm, [g.mat(eq.C_CLOTH, tuple(colour))], bone="Head")
     ]
+
+
+# Weapons and shields register themselves in GEAR (import at the end: they use the helpers).
+import battle_fine_weapons  # noqa: E402, F401
