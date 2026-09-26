@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_replay_rules.schema.json",
+  "title": "Réglages du rejeu d'après bataille",
+  "description": "Fichier data/rules/battle_replay.json (lot EP13, ADR 0072). Lu par sim-battle (ReplayRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "keep_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200,
+      "description": "Rejeux conservés dans le dossier utilisateur ; les plus anciens sont effacés."
+    },
+    "checkpoint_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 600,
+      "description": "Période (secondes de bataille) des empreintes d'état enregistrées : la lecture les compare pour détecter une divergence (règles changées)."
+    },
+    "keyframe_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 600,
+      "description": "Période (secondes de bataille) des instantanés gardés en mémoire pendant la lecture, pour les sauts en arrière."
+    },
+    "max_keyframes": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 1000,
+      "description": "Instantanés au plus : au-delà, la période s'allonge (mémoire bornée pour les longues batailles)."
+    }
+  },
+  "required": ["keep_count", "checkpoint_seconds", "keyframe_seconds", "max_keyframes"],
+  "additionalProperties": false
+}

@@ -65,6 +65,7 @@ pub mod props;
 pub mod push;
 pub mod relief;
 pub mod relief_ai;
+pub mod replay;
 pub mod rng;
 pub mod rout;
 pub mod scale;
@@ -101,6 +102,10 @@ pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
 pub use push::{PushRules, PushShape};
 pub use relief::ReliefStyle;
+pub use replay::{
+    BattleReplay, Divergence, ReplayAction, ReplayError, ReplayPlayer, ReplayRecorder, ReplayRules,
+    ReplayStart,
+};
 pub use rng::BattleRng;
 pub use scale::{BattleScale, BattleScaleRules, FieldSize, ScaleTier};
 pub use setup::{

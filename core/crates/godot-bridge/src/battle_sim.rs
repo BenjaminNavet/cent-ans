@@ -12,6 +12,7 @@ use godot::prelude::*;
 use serde_json::Value;
 use sim_battle::{BattleOutcome, BattleSetup, Command, SideId, Unit, UnitState};
 
+use crate::battle_replay::{note, REPLAY_REFUSAL};
 use crate::campaign_sim::{events_array, CampaignSim};
 use crate::convert::variant_to_json;
 
@@ -253,6 +254,10 @@ pub struct BattleSim {
     scale_key: String,
     /// EP7: the historical map of the battle (menu or campaign site).
     pub(crate) historical: Option<sim_battle::HistoricalMap>,
+    /// EP13: recording of the battle being fought (`battle_replay.rs`).
+    pub(crate) recorder: Option<sim_battle::ReplayRecorder>,
+    /// EP13: playback of a replay; the battle then takes no order.
+    pub(crate) player: Option<sim_battle::ReplayPlayer>,
     base: Base<RefCounted>,
 }
 
@@ -264,6 +269,8 @@ impl IRefCounted for BattleSim {
             figure_scale: 1.0,
             scale_key: String::new(),
             historical: None,
+            recorder: None,
+            player: None,
             base,
         }
     }
@@ -289,29 +296,24 @@ impl BattleSim {
                     }
                 },
             );
-        let parsed = from_dict::<BattleSetup>(&setup).and_then(|setup| {
-            match (&site, forced) {
-                (Some(map), _) => {
-                    sim_battle::BattleSim::new_scaled(setup, seed as u64, map.scale()).map(
-                        |mut sim| {
-                            map.apply_site(sim.field_mut());
-                            sim
-                        },
-                    )
-                }
-                (None, Some(scale)) => sim_battle::BattleSim::new_scaled(setup, seed as u64, scale),
-                (None, None) => sim_battle::BattleSim::new(setup, seed as u64),
-            }
-            .map_err(|e| e.to_string())
+        // EP13: one construction path, recorded for the replay.
+        let start = from_dict::<BattleSetup>(&setup).map(|setup| match (&site, forced) {
+            (Some(map), _) => sim_battle::ReplayStart::on_site(setup, seed as u64, map.clone()),
+            (None, Some(scale)) => sim_battle::ReplayStart::scaled(setup, seed as u64, scale),
+            (None, None) => sim_battle::ReplayStart::plain(setup, seed as u64),
         });
+        let parsed = start.and_then(|start| start.build().map(|sim| (start, sim)));
         self.historical = site;
+        self.player = None;
+        self.recorder = None;
         match parsed {
-            Ok(mut sim) => {
+            Ok((start, sim)) => {
+                self.recorder = Some(sim_battle::ReplayRecorder::new(start, &sim));
+                self.sim = Some(sim);
                 // EP8: starting hour drawn by the campaign (`get_battle_setup`).
                 if let Some(hour) = setup.get("hour").and_then(|v| v.try_to::<f64>().ok()) {
-                    sim.set_start_hour(hour);
+                    self.set_start_hour(hour);
                 }
-                self.sim = Some(sim);
                 true
             }
             Err(error) => {
@@ -325,9 +327,7 @@ impl BattleSim {
     /// EP8: starts the battle at `hour` (0-24), e.g. a quick battle setting.
     #[func]
     fn set_start_hour(&mut self, hour: f64) {
-        if let Some(sim) = &mut self.sim {
-            sim.set_start_hour(hour);
-        }
+        self.drive(sim_battle::ReplayAction::StartHour { hour });
     }
 
     /// EP8: starts the battle in phase `key` (`dawn`, `morning`, `midday`,
@@ -335,9 +335,9 @@ impl BattleSim {
     #[func]
     fn set_start_phase(&mut self, key: GString) -> bool {
         let rules = sim_battle::TimeOfDayRules::bundled();
-        match (rules.start_hour_of(&key.to_string()), &mut self.sim) {
-            (Some(hour), Some(sim)) => {
-                sim.set_start_hour(hour);
+        match rules.start_hour_of(&key.to_string()) {
+            Some(hour) if self.sim.is_some() && self.player.is_none() => {
+                self.drive(sim_battle::ReplayAction::StartHour { hour });
                 true
             }
             _ => false,
@@ -444,8 +444,17 @@ impl BattleSim {
     /// Advances the battle by `dt` seconds (fixed 0.1 s steps inside).
     #[func]
     fn tick(&mut self, dt: f64) {
-        if let Some(sim) = &mut self.sim {
-            sim.tick(dt);
+        let Some(sim) = &mut self.sim else {
+            return;
+        };
+        // EP13: a replay advances by its recorded inputs.
+        if let Some(player) = &mut self.player {
+            player.advance(sim, dt);
+            return;
+        }
+        sim.tick(dt);
+        if let Some(recorder) = &mut self.recorder {
+            recorder.observe(sim);
         }
     }
 
@@ -488,12 +497,24 @@ impl BattleSim {
     /// units: [ids] (selected-scope orders; empty = every eligible one)}`.
     #[func]
     fn issue_command(&mut self, command: VarDictionary) -> VarDictionary {
+        if self.player.is_some() {
+            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+        }
         let Some(sim) = &mut self.sim else {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
         let result = from_dict::<Command>(&command)
             .map_err(|e| crate::campaign_sim::invalid_order_message(&e))
-            .and_then(|command| sim.issue_command(command).map_err(|e| e.to_string()));
+            .and_then(|command| {
+                note(
+                    &mut self.recorder,
+                    sim,
+                    sim_battle::ReplayAction::Command {
+                        command: command.clone(),
+                    },
+                );
+                sim.issue_command(command).map_err(|e| e.to_string())
+            });
         result_dict(result)
     }
 
@@ -528,8 +549,8 @@ impl BattleSim {
     /// Lets the AI command `side` (`"attacker"`/`"defender"`), e.g. for autoplay.
     #[func]
     fn set_ai(&mut self, side: GString, enabled: bool) {
-        if let (Some(sim), Some(side)) = (&mut self.sim, parse_side(&side)) {
-            sim.set_ai(side, enabled);
+        if let Some(side) = parse_side(&side) {
+            self.drive(sim_battle::ReplayAction::SetAi { side, enabled });
         }
     }
 
@@ -537,7 +558,18 @@ impl BattleSim {
     /// any `tick`). `false` once the battle has started.
     #[func]
     fn begin_deployment(&mut self) -> bool {
-        self.sim.as_mut().is_some_and(|sim| sim.begin_deployment())
+        if self.player.is_some() {
+            return false;
+        }
+        let Some(sim) = &mut self.sim else {
+            return false;
+        };
+        note(
+            &mut self.recorder,
+            sim,
+            sim_battle::ReplayAction::BeginDeployment,
+        );
+        sim.begin_deployment()
     }
 
     /// `true` during the deployment phase (ticks do nothing).
@@ -559,6 +591,9 @@ impl BattleSim {
     /// current facing. → `{ok, error}` (French error).
     #[func]
     fn deploy_unit(&mut self, id: i64, x: f64, z: f64, facing: f64) -> VarDictionary {
+        if self.player.is_some() {
+            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+        }
         let Some(sim) = &mut self.sim else {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
@@ -566,6 +601,16 @@ impl BattleSim {
         let result = u32::try_from(id)
             .map_err(|_| format!("unité inconnue : {id}"))
             .and_then(|id| {
+                note(
+                    &mut self.recorder,
+                    sim,
+                    sim_battle::ReplayAction::DeployUnit {
+                        unit: id,
+                        x,
+                        z,
+                        facing,
+                    },
+                );
                 sim.deploy_unit(id, x, z, facing)
                     .map_err(|e| sim.error_text(&e))
             });
@@ -575,9 +620,17 @@ impl BattleSim {
     /// Ends the deployment phase → `{ok, error}`.
     #[func]
     fn start_battle(&mut self) -> VarDictionary {
+        if self.player.is_some() {
+            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+        }
         let Some(sim) = &mut self.sim else {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
+        note(
+            &mut self.recorder,
+            sim,
+            sim_battle::ReplayAction::StartBattle,
+        );
         result_dict(sim.start_battle().map_err(|e| e.to_string()))
     }
 
@@ -1101,9 +1154,18 @@ impl BattleSim {
     /// when `house` < 0; `false` when it already burns or is not a siege.
     #[func]
     fn debug_ignite(&mut self, house: i64) -> bool {
+        if self.player.is_some() {
+            return false;
+        }
         let Some(sim) = &mut self.sim else {
             return false;
         };
+        let target = usize::try_from(house).ok();
+        note(
+            &mut self.recorder,
+            sim,
+            sim_battle::ReplayAction::Ignite { house: target },
+        );
         if house < 0 {
             sim.ignite_gate()
         } else {
@@ -1115,6 +1177,16 @@ impl BattleSim {
     /// its maximum; 0 opens it). `false` outside a siege or for a bad index.
     #[func]
     fn debug_set_piece_hp(&mut self, index: i64, hp: f64) -> bool {
+        if self.player.is_some() {
+            return false;
+        }
+        if let (Some(sim), Ok(piece)) = (&self.sim, usize::try_from(index)) {
+            note(
+                &mut self.recorder,
+                sim,
+                sim_battle::ReplayAction::PieceHp { piece, hp },
+            );
+        }
         let Some(works) = self.sim.as_mut().and_then(|s| s.siege_mut()) else {
             return false;
         };
