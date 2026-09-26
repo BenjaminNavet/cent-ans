@@ -1,4 +1,4 @@
-//! EP10 (ADR 0067): direction of the rout and contagion of morale.
+//! EP10 (ADR 0068): direction of the rout and contagion of morale.
 //!
 //! Reproduction of the SG5 night diagnosis: a defensive line whose wing
 //! regiment is routed by an enemy on its flank. Before EP10 the fugitive

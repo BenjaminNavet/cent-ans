@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/battle_rout_rules.schema.json",
   "title": "Direction de la déroute et contagion de moral",
-  "description": "Fichier data/rules/battle_rout.json (lot EP10, ADR 0067) : où fuit un régiment en déroute, et combien un ami en déroute ébranle les régiments proches selon sa position. Lu par sim-battle (RoutRules). Batailles rangées seulement : les sièges gardent leur règle.",
+  "description": "Fichier data/rules/battle_rout.json (lot EP10, ADR 0068) : où fuit un régiment en déroute, et combien un ami en déroute ébranle les régiments proches selon sa position. Lu par sim-battle (RoutRules). Batailles rangées seulement : les sièges gardent leur règle.",
   "type": "object",
   "properties": {
     "description": {

@@ -1,7 +1,7 @@
 # EP10 — direction de la déroute et contagion de moral
 
 Branche : `worktree-agent-adc8c89fbb2be1ac1` (worktree agent), main fusionné (SG5, 222080a4).
-ADR : `docs/decisions/0067-direction-de-la-deroute-et-contagion.md` (mesures avant/après).
+ADR : `docs/decisions/0068-direction-de-la-deroute-et-contagion.md` (mesures avant/après).
 
 ## État : terminé, en attente de fusion
 - `data/rules/battle_rout.json` + schéma + pytest ; `sim-battle/src/rout.rs` ; branché dans `sim.rs`
