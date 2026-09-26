@@ -31,6 +31,18 @@ extends Resource
 ## Opacité des panaches de cheminée à taille réelle (fondu avec l'échelle) : un filet de fumée de
 ## 20 m vu à un kilomètre n'est qu'un voile.
 @export var chimney_real_alpha: float = 0.5
+## Lot SZ4b : maquettes des colonies (villages, villes, châteaux, abbayes). Même courbe, taille réelle
+## propre à chaque colonie (rayon bâti vers 1340 de `towns_1340.json` / rayon de la maquette),
+## atteinte à `settlement_shrink_end` : le seuil du palier vallée, où la ville 1:1 (ZG6) prend le
+## relais de la maquette.
+@export var settlement_shrink_end: float = 8.0
+## Taille réelle / taille carte d'une maquette sans emprise connue, et bornes du rapport.
+@export var settlement_default_ratio: float = 0.15
+@export var settlement_ratio_min: float = 0.05
+@export var settlement_ratio_max: float = 0.6
+## Rayon réel d'une maquette = rayon bâti × ce facteur (la maquette montre aussi faubourgs, jardins
+## et champs proches).
+@export var settlement_footprint_gain: float = 1.25
 ## Variation relative d'échelle en deçà de laquelle les instances recalculées sur le processeur
 ## (moulins, hameaux) ne sont pas réécrites (évite une réécriture par image pendant un zoom).
 @export var rewrite_step: float = 0.04
@@ -77,6 +89,16 @@ func chimney_scale(distance: float) -> float:
 ## Facteur d'opacité des panaches de cheminée (1 au loin, `chimney_real_alpha` de près).
 func chimney_alpha(distance: float) -> float:
 	return lerpf(1.0, chimney_real_alpha, progress(distance))
+
+
+## Échelle d'une maquette de colonie dont la taille réelle vaut `ratio` × sa taille de carte.
+func settlement_scale(ratio: float, distance: float) -> float:
+	return scale_for(clampf(ratio, settlement_ratio_min, settlement_ratio_max), distance, settlement_shrink_end)
+
+
+## Avancement [0, 1] de la transition des maquettes (1 : taille réelle).
+func settlement_progress(distance: float) -> float:
+	return progress(distance, settlement_shrink_end)
 
 
 func fire_scale(distance: float) -> float:

@@ -77,7 +77,7 @@ var _devastation: Dictionary = {}
 var _colors: PackedColorArray = PackedColorArray()
 var _declutter_timer := 0.0
 var _weights := Vector3(-1, -1, -1)  # près, moyen, loin
-var _camera_distance := 0.0
+var _camera_distance := 1000.0  # SZ4b : maquettes à la taille de carte avant la première vue
 var _regrounded: Dictionary = {}
 ## ZG6 : villes ordinaires à l'échelle réelle (paliers vallée et site), voir `TownLayer`.
 var towns: TownLayer
@@ -89,6 +89,16 @@ var _hamlet_anchors: PackedVector4Array = PackedVector4Array()
 ## Lot SZ4 : échelle appliquée aux hameaux (1 au loin, taille réelle au palier vallée,
 ## `MapPropScale.hamlet_scale`) ; les tuiles sont reconstruites par pas de `rewrite_step`.
 var _hamlet_scale := 1.0
+## Lot SZ4b : maquettes des colonies à l'échelle continue (`MapPropScale.settlement_scale`).
+## Par colonie : rayon réel au sol (unités, < 0 si inconnu), échelle appliquée, sol au centre de la
+## pose réelle et point bas de l'emprise de carte (pose interpolée selon l'échelle, sans relire le
+## relief à chaque pas de zoom).
+var _real_radius: PackedFloat32Array = PackedFloat32Array()
+var _model_scale: PackedFloat32Array = PackedFloat32Array()
+var _ground_real: PackedFloat32Array = PackedFloat32Array()
+var _ground_map: PackedFloat32Array = PackedFloat32Array()
+## Échelle de référence (rapport par défaut) appliquée : réécriture par pas de `rewrite_step`.
+var _settlement_scale_ref := -1.0
 
 
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
@@ -124,6 +134,13 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	_colors.fill(Color(0.6, 0.6, 0.6))
 	_model_radius.resize(count)
 	_model_top.resize(count)
+	_real_radius.resize(count)
+	_real_radius.fill(-1.0)
+	_model_scale.resize(count)
+	_model_scale.fill(1.0)
+	_ground_real.resize(count)
+	_ground_map.resize(count)
+	_settlement_scale_ref = -1.0
 	for i in count:
 		var entry: Dictionary = data.settlements[i]
 		var px: Vector2 = entry["px"]
@@ -288,17 +305,60 @@ static func _relative_transform(root: Node3D, node: Node3D) -> Transform3D:
 
 ## Pose la maquette sur la surface affichée : point le plus bas de l'emprise (les fondations des
 ## modèles descendent sous z = 0, rien ne flotte sur une pente).
+## SZ4b : deux poses gardées (emprise de carte, emprise réelle), interpolées selon l'échelle.
 func _ground_model(i: int) -> void:
 	var holder: Node3D = _models[i]
 	if holder == null or _landmarks.has(i):
 		return
 	var px := model_px(i)
-	var radius := _model_radius[i] * 0.7
-	var low := terrain.surface_height_at(px.x, px.y)
+	var center := terrain.surface_height_at(px.x, px.y)
+	_ground_map[i] = _low_point(px, _model_radius[i] * 0.7, center)
+	_ground_real[i] = _low_point(px, _model_radius[i] * _real_ratio(i) * 0.7, center)
+	_place_model(i)
+
+
+func _low_point(px: Vector2, radius: float, center: float) -> float:
+	var low := center
 	for k in 8:
 		var angle := k * TAU / 8.0
 		low = minf(low, terrain.surface_height_at(px.x + cos(angle) * radius, px.y + sin(angle) * radius))
-	holder.position.y = low - 0.03
+	return low
+
+
+## SZ4b : taille réelle / taille de carte de la maquette `i` (bornée, `MapPropScale`).
+func _real_ratio(i: int) -> float:
+	var props := MapPropScale.shared()
+	if _landmarks.has(i):
+		return 1.0
+	var ratio := props.settlement_default_ratio
+	if i < _real_radius.size() and _real_radius[i] > 0.0 and _model_radius[i] > 0.0:
+		ratio = _real_radius[i] / _model_radius[i]
+	return clampf(ratio, props.settlement_ratio_min, props.settlement_ratio_max)
+
+
+## SZ4b : applique l'échelle courante de la maquette `i` (taille, pose sur le relief).
+func _place_model(i: int) -> void:
+	var holder: Node3D = _models[i]
+	if holder == null or _landmarks.has(i):
+		return
+	var s := MapPropScale.shared().settlement_scale(_real_ratio(i), _camera_distance)
+	_model_scale[i] = s
+	holder.scale = Vector3.ONE * s
+	var ratio := _real_ratio(i)
+	var along := clampf((s - ratio) / maxf(1.0 - ratio, 1e-4), 0.0, 1.0)
+	holder.position.y = lerpf(_ground_real[i], _ground_map[i], along) - 0.03 * s
+
+
+## SZ4b : échelle des maquettes réécrite par pas de `rewrite_step` (≈ 0,3 ms pour 560 maquettes).
+func _update_settlement_scale(camera_distance: float) -> void:
+	var props := MapPropScale.shared()
+	var wanted := props.settlement_scale(props.settlement_default_ratio, camera_distance)
+	if not props.needs_rewrite(_settlement_scale_ref, wanted):
+		return
+	_settlement_scale_ref = wanted
+	for i in _models.size():
+		_place_model(i)
+	_labels_dirty = true
 
 
 func _build_label(i: int, entry: Dictionary) -> void:
@@ -497,7 +557,9 @@ func update_view(camera_distance: float) -> void:
 		var icon_alpha := 1.0 - weights.x
 		_icon_material.set_shader_parameter("alpha", icon_alpha)
 		_icons.visible = icon_alpha > 0.01
-		_models_root.visible = weights.x > 0.35 and not site and not _towns_active()
+		# SZ4b : maquettes à leur taille réelle sous le palier vallée, masquées une par une quand
+		# leur ville 1:1 est affichée (`_update_model_visibility`).
+		_models_root.visible = weights.x > 0.35
 		# SZ4 : hameaux à leur taille réelle sous le palier comté, gardés au palier site.
 		_hamlets_root.visible = weights.x > 0.35
 		_landmarks_root.visible = not site
@@ -509,6 +571,7 @@ func update_view(camera_distance: float) -> void:
 	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
+	_update_settlement_scale(camera_distance)
 	_update_towns(camera_distance)
 	_update_hamlet_scale(camera_distance)
 	_update_hamlets()
@@ -539,10 +602,13 @@ func _update_label_heights() -> void:
 				var model_at := model_px(i)  # ZG5b : au-dessus de la maquette ancrée
 				label.position.x = model_at.x
 				label.position.z = model_at.y
-			if _towns_active() and not _landmarks.has(i):
-				label.position.y = _model_base_y(i) + 0.12  # ZG6 : ville 1:1, pas de maquette
-			else:
+			if _landmarks.has(i):
 				label.position.y = _model_base_y(i) + _model_top[i] + 0.8
+			else:
+				# SZ4b : au-dessus de la maquette à l'échelle courante ; au sol pour une ville 1:1.
+				var s := _model_scale[i]
+				var lift := 0.12 + 0.68 * clampf((s - _real_ratio(i)) / maxf(1.0 - _real_ratio(i), 1e-4), 0.0, 1.0)
+				label.position.y = _model_base_y(i) + _model_top[i] * s + lift
 			label.offset = Vector2.ZERO
 		else:
 			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
@@ -777,11 +843,11 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 		var px: Vector2 = data.settlements[i]["px"]
 		if near and _models[i] != null:
 			var holder: Node3D = _models[i]
-			var center := Vector3(holder.position.x, _model_base_y(i) + _model_top[i] * 0.4, holder.position.z)
+			var center := Vector3(holder.position.x, _model_base_y(i) + _model_top[i] * model_scale(i) * 0.4, holder.position.z)
 			if camera.is_position_behind(center):
 				continue
 			var screen_center := camera.unproject_position(center)
-			var edge := camera.unproject_position(center + camera.global_transform.basis.x * _model_radius[i])
+			var edge := camera.unproject_position(center + camera.global_transform.basis.x * _model_radius[i] * model_scale(i))
 			var radius_px := maxf(screen_center.distance_to(edge), 8.0)
 			var d := screen_center.distance_to(screen_position)
 			if d < radius_px and d / radius_px < best_score:
@@ -828,7 +894,7 @@ func _update_selection_ring() -> void:
 	var show := index >= 0 and holder != null and _weights.x > 0.35
 	_selection_ring.visible = show
 	if show:
-		var radius := _model_radius[index] * 1.1
+		var radius := _model_radius[index] * model_scale(index) * 1.1
 		_selection_ring.position = Vector3(holder.position.x, _model_base_y(index) + 0.15, holder.position.z)
 		_selection_ring.scale = Vector3(radius, 1.0, radius)
 
@@ -911,6 +977,23 @@ func model_top(i: int) -> float:
 	return _model_top[i] if i >= 0 and i < _model_top.size() else 2.0
 
 
+## SZ4b : échelle courante de la maquette `i` (1 au loin, taille réelle au palier vallée).
+func model_scale(i: int) -> float:
+	return _model_scale[i] if i >= 0 and i < _model_scale.size() else 1.0
+
+
+## SZ4b : échelle de la maquette `i` à la distance de caméra `distance` (effets de `LifeEffects`).
+func model_scale_at(i: int, distance: float) -> float:
+	if i < 0 or i >= _models.size() or _landmarks.has(i):
+		return 1.0
+	return MapPropScale.shared().settlement_scale(_real_ratio(i), distance)
+
+
+## SZ4b : rayon réel au sol (unités) de la colonie `i` (emprise vers 1340), < 0 si inconnu.
+func real_radius(i: int) -> float:
+	return _real_radius[i] if i >= 0 and i < _real_radius.size() else -1.0
+
+
 ## Remplace la maquette de la colonie `i` (lot CV1 : croissance) ; `model` est déjà à l'échelle
 ## monde. Garde position, orientation, portée de visibilité et teinte de bannière ; l'écart
 ## aux voisines (`_fit_models`) est réappliqué.
@@ -962,6 +1045,25 @@ func _setup_towns() -> void:
 	for entry in data.settlements:
 		ids.append(entry["id"])
 	towns.setup(map_data, terrain, tiers, ids)
+	_compute_real_radii()
+
+
+## SZ4b : rayon réel de chaque colonie : rayon bâti vers 1340 (`towns_1340.json`, lot ZG6) ×
+## `settlement_footprint_gain` ; les maquettes rétrécissent vers ce rayon.
+func _compute_real_radii() -> void:
+	if towns == null or towns.data == null:
+		return
+	var gain := MapPropScale.shared().settlement_footprint_gain
+	var mpu := towns.data.meters_per_unit
+	for i in data.settlements.size():
+		var id := str(data.settlements[i]["id"])
+		if not towns.data.has_town(id):
+			continue
+		var built_ha := float(towns.data.towns[id].get("built_ha", 0.0))
+		if built_ha > 0.0:
+			_real_radius[i] = sqrt(built_ha * 10000.0 / PI) * gain / mpu
+	for i in _models.size():
+		_ground_model(i)
 
 
 ## Rendu 1:1 aux paliers vallée / site. Tant qu'il est actif, les maquettes à la loupe des
@@ -975,9 +1077,19 @@ func _update_towns(camera_distance: float) -> void:
 	if towns.version == _towns_version:
 		return
 	_towns_version = towns.version
+	_update_model_visibility()
 	if was_active != towns.active:
-		_models_root.visible = _weights.x > 0.35 and not _site_hidden and not towns.active
 		_update_label_heights()
+
+
+## SZ4b : maquette masquée seulement quand la ville 1:1 de sa colonie est affichée (ZG6) ; ailleurs
+## (hors du rayon de chargement, ville en cours de construction), la maquette à taille réelle reste.
+func _update_model_visibility() -> void:
+	for i in _models.size():
+		var holder: Node3D = _models[i]
+		if holder == null or _landmarks.has(i):
+			continue
+		holder.visible = not (towns.active and towns.is_shown(str(data.settlements[i]["id"])))
 
 
 func _towns_active() -> bool:
