@@ -1239,6 +1239,86 @@ inchangée), France entière (900).
 ![Pyrénées de près, après](img/zg8/apres_pyrenees_pres.jpg)
 ![Paris, après (plaine inchangée)](img/zg8/apres_paris.jpg)
 
+## Perf et finitions de la vue rapprochée (lot ZG7a, ADR 0036)
+
+**Villes (ZG6).** Blocs : un MultiMesh par ville ; maisons du kit : un MultiMesh par modèle et par
+cellule de 1 km (`TownBuilder.DETAIL_CELL_M`) au lieu de détail + blocs par cellule de 250 m. Le choix
+maison / bloc se fait **par instance** dans `town_building.gdshader` (`lod_mode` 1 détail, 2 bloc ;
+distance à `lod_camera`, publiée chaque image par `TownLayer` via `TownBuilder.set_lod_view`) : la
+passe d'ombre fait le même choix que la vue principale. Une instance écartée est repliée sur l'origine
+de son modèle (triangles dégénérés). Essai « un MultiMesh par modèle et par ville » abandonné : moitié
+moins d'appels de dessin, mais toutes les maisons de la ville passaient dans le vertex shader (et chaque
+cascade d'ombre) dès qu'une seule était proche, −9 % d'images/s.
+
+**Fil principal.** Image et mipmaps des pages de relief décodées dans `WorkerThreadPool`
+(`ReliefQuadtree._dispatch_image`) ; maillages des ponts-portes (`FineRibbonJob._prepare_gate_meshes`)
+et des ponts fins (`RiverCrossings._prepare_fine`) préparés dans des fils (`BridgeMeshes.build_arrays`,
+cache par clé partagé avec `build`) ; recalage des tuiles fines sur un changement de surface par un
+seul parcours des pages (`ReliefQuadtree.finest_levels`) ; éviction des couches sans recalcul global
+de `_chunk_top`. Minuteries par étape dans `perf_stats` (`qt_step_ms_max`, `fine_install_mesh_ms_max`,
+`fine_install_gates_ms_max`, `bridge_reshape_ms_max`).
+
+**GPU** (`tests/zg7a_gpu_ab.gd`, Vulkan obligatoire pour `viewport_get_measured_render_time_gpu` :
+`godot --path game --rendering-driver vulkan --script res://tests/zg7a_gpu_ab.gd -- --configs=base,no_parcels`).
+Parcellaire ZG5b : 1,4-2,7 ms de près (Amiens, Paris) ; allégé d'≈ 20 % (boucle fixe de 16 villes du
+finage, hash de Hoskins, bruit fin et normale des haies seulement quand ils se voient), rendu identique.
+Relief ZG8 : non mesurable (dans le bruit). Villes : 1,9-2,6 ms à Amiens.
+
+**Seine et fleuves ancrés.** Le « chenal brun » venait du fond de vallée plaqué à 0,5 m par le relief
+E1-E4 sans parcellaire (corrigé par ZG4b) ; les largeurs, elles, étaient incohérentes par tronçon (4,5 m
+en amont de Rouen, 50 m d'Elbeuf à Rouen, 60 m à Mantes). `hydro_fine.WidthModel` interpole désormais la
+largeur le long de la chaîne des ancrages (projection jusqu'à 25 km), règle par tronçon en amont du
+premier ancrage, repli Strahler. Nouveaux ancrages La Bouille 250, Duclair 300, Caudebec 450 m
+(`data/map/river_widths.json`). Résultat : Paris 133 m (îles comprises : 150-200), Mantes 146-150,
+Vernon 158, Elbeuf 175, Rouen 200. `geo hydro-fine` et `geo anchors-fine` relancés (pont de Mantes
+69,5 → 150,5 m). Plus de lit creusé dans les zones personnalisées (`river_styles.json`).
+
+**Ponts-portes et ponts fins.** Le tablier garde sa largeur réelle (`BridgeMeshes.FINE_DECK_M` : porte
+9 m, pierre 7, bois 4,5, bateaux 5, bac 8, gué 6 ; `fine_deck_scale`) au lieu de 0,15 + 0,05 × portée
+à l'échelle fine (30-45 m sur la Loire).
+
+**Londres.** Plancher de rehaussement monotone `max(0,5 ; min(0,85 h ; 5 m))` dans
+`detail_dem.apply_boost` (`BAKE_VERSION` 4) ; seule la zone `londres` du palier 3 a été recuite (rives
+2,6-3,8 m au-dessus de la Tamise au lieu de 0,5 m). Les autres zones suivront au prochain `geo
+detail-dem` complet (marqueurs invalidés).
+
+**Aperçu de chemin.** `PathPreview.width_at(d)` : plancher 0,01 unité (≈ 7 m) de près, 0,8 en vue
+stratégique (lissé entre d = 40 et 160) ; soulèvement `lift_at(d)` 0,004 × d ; subdivision plus fine de
+près (≤ 2 000 points) ; `update_view` reconstruit quand la distance varie de plus de 30 %.
+
+**Mesures** (M4 Pro, `--bench-map --bench-descent-only [--bench-towns]`, base = `main` 369bc6e7,
+passes base / ZG7a alternées, médiane de 3 passes, machine partagée avec d'autres sessions) :
+
+| Mesure | Villes base | Villes ZG7a | Descente base | Descente ZG7a |
+|---|---|---|---|---|
+| images/s | 46,9 | 46,0 | 37,2 | 35,5 |
+| p50 (ms) | 15,1 | 14,6 | 15,4 | 15,0 |
+| p99 (ms) | 130 | 131 | 139 | 138 |
+| pics > 50 ms | 203 | 193 | 182 | 186 |
+| appels de dessin | 897 | **508** | 666 | 665 |
+| `qt_update` max (ms) | 18,2 | 16,4 | 18,9 | 17,0 |
+| `fine_update` max (ms) | 20,5 | **5,5** | 17,2 | **5,7** |
+| `fine_install` max (ms) | 18,9 | **1,6** | 16,4 | **1,2** |
+| `surface_emit` max (ms) | 17,9 | **7,5** | 14,4 | **7,9** |
+
+Bascule des ponts : `bridge_reshape_ms_max` 0,3-0,35 ms, `fine_install_gates_ms_max` 0,5-1,1 ms (maillages préparés hors fil).
+
+**Limites.** p99 ≈ 130 ms (cible ≈ 115 non atteinte) : les pics > 50 ms sont communs à la base et
+dominés par le rendu / l'attente GPU et la création des ressources, pas par une tâche de script ; la
+sélection et l'application du quadtree (GDScript) montent encore à 10-16 ms sous forte charge (au-delà
+des 8 ms visés) ; relief E1-E4 : fonds de vallée proches de plateaux toujours à 0,5 m (recuisson E1-E4
+hors lot) ; niveau fin de la Tamise à −7,8 m (PAVA mêlé à la bathymétrie de l'estuaire).
+
+![Aperçu de chemin, avant](img/zg7a/chemin_avant.jpg)
+![Aperçu de chemin, après](img/zg7a/chemin_apres.jpg)
+![Pont-porte d'Orléans, avant](img/zg7a/pont_porte_avant.jpg)
+![Pont-porte d'Orléans, après](img/zg7a/pont_porte_apres.jpg)
+![Londres, avant](img/zg7a/londres_avant.jpg)
+![Londres, après](img/zg7a/londres_apres.jpg)
+![Rives de la Tamise, avant](img/zg7a/londres_rives_avant.jpg)
+![Rives de la Tamise, après](img/zg7a/londres_rives_apres.jpg)
+![Seine à Mantes, après](img/zg7a/seine_mantes_apres.jpg)
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
