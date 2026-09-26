@@ -157,7 +157,7 @@
     },
     "wounded": {
       "type": "object",
-      "description": "Lot EP12 : part des soldats à pied tombés qui ne meurent pas sur le coup (rampent, assis, à genoux, puis immobiles). Tirage déterministe côté rendu (id du régiment × rang de la perte) : la simulation ne distingue pas blessés et tués (ADR 0072).",
+      "description": "Lot EP12 : part des soldats à pied tombés qui ne meurent pas sur le coup (rampent, assis, à genoux, puis immobiles). Tirage déterministe côté rendu (id du régiment, effectif restant dans la simulation, rang dans le lot de pertes) : la simulation ne distingue pas blessés et tués (ADR 0073).",
       "properties": {
         "share": {
           "type": "object",
