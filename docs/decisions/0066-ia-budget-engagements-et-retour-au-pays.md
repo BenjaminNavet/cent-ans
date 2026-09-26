@@ -1,0 +1,79 @@
+# ADR 0066 — L'IA budgète ses engagements et ne campe plus en terre étrangère (lot EQ5)
+
+Date : 2026-09-26. Statut : accepté.
+
+## Contexte
+
+La mesure combinée EQ4 (`docs/wip/eq4-equilibre-combine.md`, addendum de l'ADR 0054) laissait
+deux défauts de l'IA de campagne :
+
+1. **Banqueroutes chroniques** de petites IA : Grenade à tous les niveaux (jusqu'à 7,8 / déc.),
+   Suisses et Gueldre en facile (Suisses 31 / déc. sur une graine), soit 0,42 / faction /
+   décennie en facile. Baisser l'entretien des armées de l'IA (données) n'y changeait rien.
+2. **Intrusions** : ~1 300 saisons par siècle (normal) d'armées de l'IA sur les terres d'un
+   royaume en paix sans droit de passage (DP2, ADR 0031), 2 200-2 500 en difficile.
+
+Diagnostic (sonde `century_probe` : `ECON_TRACE`, `TRESPASS_TRACE`, `DEBUG_ARMY`) :
+
+- Grenade perdait des guerres lointaines (Angleterre, Écosse, Holstein) et payait des tributs
+  par saison que le budget de l'IA ignorait ; les agents et la Table (H3) non plus.
+- Les Suisses avaient bâti sur leur trésor initial : après la peste, l'entretien des bâtiments
+  mangeait 60-75 % du revenu, sans armée à licencier. L'impôt oscillait Haut / Normal à chaque
+  saison autour du seuil de trouble ; l'affaiblissement de la monnaie gonflait pour toujours
+  l'entretien des bâtiments (prix 100 → 124).
+- 38 % des saisons d'intrusion étaient des armées dans leur propre place (château tenu) d'une
+  province étrangère ; les terres fermées bloquaient aussi la **sortie** d'une armée prise là
+  par une paix (table de routes vide : elle restait des années) ; l'IA poursuivait des armées
+  ennemies réfugiées en terre neutre ; les routes du graphe des colonies mordaient sur des
+  provinces fermées (le Véronais sur les routes de la plaine du Pô).
+
+## Décision
+
+Règles d'IA seulement (`core/crates/ai`), aucune règle d'économie ni de passage changée.
+
+**Budget** (`campaign.rs`)
+
+1. Le revenu net de l'IA retranche ses **engagements** : tributs dus, rançons (échéance
+   annuelle / 4), entretien des agents et Table de la saison passée.
+2. Une **marge de sécurité** (5 % du revenu brut) est gardée : un bâtiment n'est lancé que si
+   son entretien tient dans l'excédent moins cette marge.
+3. L'entretien des bâtiments est **plafonné à 30 % du revenu brut**, sauf ceux qui rapportent
+   au moins leur entretien en impôts ou en commerce (ils ne se licencient pas quand les temps
+   changent).
+4. **Impôt Haut** : une fois levé, il reste tant qu'au taux normal le budget retomberait sous la
+   marge et que la réserve (3 saisons) n'est pas refaite, ou tant que le trésor est en dette ;
+   dans ces deux cas le trouble toléré monte de 30 à 40 (le garde-fou « province au bord de la
+   révolte » reste).
+5. Pas de monnaie affaiblie quand les bâtiments prennent plus d'un tiers du revenu brut (au
+   lieu de la moitié).
+
+**Armées** (`grid.rs`, `campaign.rs`, `diplomacy_eval.rs`)
+
+6. Les places que la faction tient ne sont jamais des terres fermées pour elle ; une route qui
+   part de terres fermées peut traverser les terres de ce même maître (la sortie).
+7. Une armée sans objectif (défense, siège, chevauchée) en terre étrangère sans droit de passage
+   **rentre au pays** : la place à elle la plus proche hors des terres fermées, dans la portée de
+   planification puis quatre fois plus loin en traversant les terres fermées (une courte
+   intrusion vaut mieux que des années de camp), sinon une place à elle quelconque ; seulement
+   une place sur la même terre de la grille (une route par la mer n'est pas un chemin).
+8. En paix, une armée dans sa propre place d'une province étrangère entre en garnison si les
+   murs peuvent la tenir entière.
+9. L'IA ne poursuit plus une armée ennemie réfugiée sur des terres où elle ne passerait pas.
+10. Une route du graphe des colonies qui traverse (ligne droite échantillonnée) une province
+    fermée est fermée ; celle qui traverse des terres ouvertes par tempérament coûte
+    `trespass_route_factor` fois plus (`data/ai/grid.json`, 2 ; 1 par défaut).
+11. L'IA demande le droit de passage (accès militaire, réciproque s'il manque) aux royaumes IA
+    sur les terres desquels ses armées se trouvent, s'ils l'accepteraient.
+
+## Conséquences
+
+Mesures : voir `docs/wip/eq5-ia-banqueroutes-intrusions.md` (mêmes graines qu'EQ4).
+
+- Banqueroutes : 0,42 / 0,17 / 0,19 / 0,09 → ~0,02-0,05 / faction / décennie de facile à très
+  difficile ; plus aucune faction au-dessus de ~1,5 / décennie sur une graine.
+- Intrusions divisées par deux au niveau normal, par trois en difficile et très difficile ;
+  moins en facile, où l'IA, désormais solvable, fait deux fois plus de sièges.
+- Effet de bord : IA plus riche, plus active (sièges engagés +40-50 %) ; guerre FR-EN, trêves,
+  révoltes, boule de neige et survie des majeures restent dans les bandes d'EQ4.
+- Coût : le tour de l'IA est ~40 % plus long (plus d'armées ; table de retour au pays et
+  échantillonnage des routes, mis en cache par tour).
