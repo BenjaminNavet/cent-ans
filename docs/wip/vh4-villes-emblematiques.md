@@ -27,8 +27,8 @@ dans `docs/landmarks-v2.md` (à lire en premier pour VH5-VH8).
 - [x] Fusion de `main` (SZ2 : pyramide rebasculée, SZ4, SZ5) ; `geo landmarks` relancé (inchangé)
 - [x] Captures `docs/img/vh4/` (après SZ2) ; mesure i/s (machine chargée ≈ 110) : Rouen 55-56 i/s,
       Amiens 46-60 i/s dans la même session
-- [x] Tests : `vh4_landmarks_test`, `zg4_camera_test`, `zg6_towns_test`, `smoke` OK ;
-      pytest `test_landmarks_v2.py` (+ `test_landmarks`, `test_detail_dem`) OK
+- [x] Tests après fusion de `main` : `vh4_landmarks_test`, `zg4_camera_test`, `zg6_towns_test`,
+      `smoke` OK ; pytest complet 708 OK ; ruff propre sur les fichiers du lot
 - [x] Docs `docs/landmarks-v2.md`, `docs/godot-map.md`
 
 ## Limites / suites
