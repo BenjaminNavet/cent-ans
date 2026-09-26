@@ -64,6 +64,24 @@
    "license": "Projet (faits recoupés : Agas, Hollar, OSM)",
    "extracted": false,
    "use": "Dates : tour du Joyau 1365, horloge de Westminster 1367, Savoie jusqu'en 1381."
+  },
+  {
+   "title": "National Heritage List for England (monuments classés : London Wall, Greyfriars, Jewel Tower, salle capitulaire de Westminster, palais de Winchester)",
+   "author": "Historic England",
+   "date": "2026-09-26",
+   "url": "https://opendata-historicengland.hub.arcgis.com/",
+   "license": "Open Government Licence v3",
+   "extracted": false,
+   "use": "Relecture historique (docs/histoire/relecture-vh-londres.md) : emprises des tronçons classés du mur et des portes (Newgate, Aldersgate, Moorgate), de l'église des Franciscains ; positions recopiées à la main dans `walls` et `monuments`."
+  },
+  {
+   "title": "London Bridge and its Houses, c. 1209-1761 ; A History of the County of London, vol. 1 (1909)",
+   "author": "D. Gerhold (2019, recension The Past) ; W. Page (éd.), Victoria County History (British History Online)",
+   "date": "2019 ; 1909",
+   "url": "https://www.british-history.ac.uk/vch/london/vol1",
+   "license": "Faits seulement",
+   "extracted": false,
+   "use": "Piles de la chapelle, du pont-levis et de la porte de pierre de London Bridge ; dates des couvents (Dominicains, Franciscains 1306-1327, Augustins 1253, Carmes 1241)."
   }
  ],
  "plan": {
