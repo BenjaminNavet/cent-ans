@@ -35,9 +35,17 @@ uniform sampler2D flatten_map : filter_linear, repeat_disable;
 uniform vec4 flatten_rect = vec4(0.0, -100.0, 1200.0, 1000.0);
 uniform float flatten_on = 0.0;
 uniform vec3 grass_blood_color : source_color = vec3(0.2, 0.02, 0.02);
+// DA6 : lisières douces (touffes mêlées au bord des parcelles), touffes en volume (cartes cintrées,
+// normales arrondies portées par le maillage, normale de carte dans COLOR), cartes vues par la
+// tranche amincies, pied assombri. `--no-da6` : 0 (ancien rendu).
+uniform float da6_on = 0.0;
+uniform float decor_saturation = 0.6; // DA6 : même désaturation que le sol
+uniform float tex_lum = 0.14; // luminance moyenne (linéaire) de la carte, ramenée à ~0,6
 
 varying float v_shade;
 varying vec3 v_tint;
+varying vec3 v_normal;
+varying float v_facing;
 
 float terrain_h(vec2 p) {
 	vec2 uv = (p - height_rect.xy) / height_rect.zw;
@@ -45,6 +53,7 @@ float terrain_h(vec2 p) {
 }
 
 void vertex() {
+	vec3 mesh_normal = NORMAL;
 	vec3 origin = MODEL_MATRIX[3].xyz;
 	vec2 cell = floor(origin.xz / spacing + 0.5);
 	vec2 rnd = bt_hash22(cell);
@@ -56,6 +65,8 @@ void vertex() {
 	float density = smoothstep(0.15, 0.45, bt_value_noise(wp * 0.05)) * (1.0 - snow * 0.93);
 	v_tint = vec3(0.0);
 	v_shade = 0.0;
+	v_normal = vec3(0.0, 1.0, 0.0);
+	v_facing = 1.0;
 	if (fade <= 0.0 || r3 >= density) {
 		// Touffe absente : triangle dégénéré sous le sol (aucun pixel).
 		VERTEX = vec3(0.0, -500.0, 0.0);
@@ -69,7 +80,8 @@ void vertex() {
 		density *= mix(1.0, 0.45, smoothstep(0.3, 0.8, sa.r)); // sous-bois : clairsemé
 		vec2 calm_d = max(calm_rect.xy - wp, wp - calm_rect.zw);
 		float outside_calm = smoothstep(0.0, 60.0, max(calm_d.x, calm_d.y));
-		vec3 field = bt_field_info(wp);
+		bool soft = da6_on > 0.5;
+		vec3 field = soft ? bt_field_info_soft(wp) : bt_field_info(wp);
 		float height_mul = 1.0;
 		// Couleur de base : celle du sol dessous (couches herbe et prairie, très floues), pour que
 		// l'herbe se fonde dans la texture du terrain.
@@ -81,15 +93,16 @@ void vertex() {
 		float patch2 = texture(macro_noise, wp * 0.0047 + vec2(0.27, 0.83)).r;
 		float dry = smoothstep(0.42, 0.66, patch * 0.7 + patch2 * 0.45);
 		float lush = smoothstep(0.45, 0.7, (1.0 - patch) * 0.75 + patch2 * 0.35);
-		v_tint = mix(v_tint, v_tint * vec3(1.35, 1.12, 0.62), dry * 0.85);
+		v_tint = mix(v_tint, v_tint * (soft ? vec3(0.9, 0.85, 0.6) : vec3(1.35, 1.12, 0.62)), dry * 0.85);
 		v_tint = mix(v_tint, v_tint * vec3(0.7, 0.86, 0.66), lush * 0.8);
 		height_mul *= mix(1.0, 1.25, lush) * mix(1.0, 0.8, dry);
 		float in_field = outside_calm * (1.0 - sb.g) * field.z;
 		if (decor_on > 0.5) {
-			vec4 df = texture(decor_fields, suv);
+			vec2 duv = soft ? (wp + bt_edge_warp(wp) - splat_rect.xy) / splat_rect.zw : suv;
+			vec4 df = texture(decor_fields, duv);
 			if (df.a > 0.5) {
 				field = bt_decor_field(df, wp);
-				in_field = field.z;
+				in_field = soft ? bt_decor_edge_soft(field.z, wp) : field.z;
 				if (field.x == 4.0) {
 					// Semis : herbe courte et claire en rangs.
 					density *= 0.55;
@@ -102,19 +115,26 @@ void vertex() {
 				} else if (field.x == 6.0) {
 					// Chaume : tiges courtes et blondes.
 					height_mul *= 0.5;
-					v_tint = mix(v_tint, vec3(1.2, 1.02, 0.62), in_field * 0.8);
+					v_tint = mix(v_tint, soft ? vec3(0.85, 0.73, 0.46) : vec3(1.2, 1.02, 0.62), in_field * 0.8);
 					field.x = 0.0;
 				}
 			}
+		}
+		if (soft) {
+			// Chaque touffe bascule à son propre seuil : au bord, les touffes des deux côtés se
+			// mêlent sur quelques mètres au lieu d'un fondu uniforme (ou d'une ligne).
+			float r_edge = bt_hash21(cell + 71.3) * 0.8 + 0.1;
+			in_field = mix(in_field, smoothstep(r_edge - 0.18, r_edge + 0.18, in_field), 0.8);
 		}
 		if (field.x == 1.0) {
 			density *= 1.0 - in_field;
 		} else if (field.x == 2.0) {
 			height_mul = mix(1.0, 2.1, in_field);
-			v_tint = mix(v_tint, vec3(0.5, 0.36, 0.11), in_field);
+			v_tint = mix(v_tint, soft ? vec3(0.4, 0.33, 0.17) : vec3(0.5, 0.36, 0.11), in_field);
 		} else if (field.x == 3.0) {
 			height_mul = mix(1.0, 1.4, in_field);
-			v_tint = mix(v_tint, vec3(1.25, 1.1, 0.7), in_field * 0.7);
+			// DA6 : jachère herbeuse (vert passé, fleurs rares) et non plus crème vif.
+			v_tint = soft ? mix(v_tint, v_tint * vec3(1.02, 1.0, 0.82), in_field) : mix(v_tint, vec3(1.25, 1.1, 0.7), in_field * 0.7);
 		}
 		height_mul *= 1.0 - snow * 0.5;
 		// BV3 : herbe couchée par les troupes et sous les corps, sang sur les brins.
@@ -134,6 +154,10 @@ void vertex() {
 		}
 		float keep = step(r3, density);
 		float s = (0.6 + 0.8 * rnd.x) * blade_scale * fade * keep;
+		if (soft) {
+			// Hauteur : variation propre à la touffe et par plaques (~6 m).
+			height_mul *= mix(0.7, 1.3, bt_value_noise(wp * 0.17 + 2.3)) * mix(0.85, 1.15, r3);
+		}
 
 		float angle = rnd.y * 6.2832;
 		mat2 rot = mat2(vec2(cos(angle), sin(angle)), vec2(-sin(angle), cos(angle)));
@@ -150,6 +174,20 @@ void vertex() {
 		vec3 world = vec3(wp.x, terrain_h(wp) - 0.05, wp.y) + v;
 		VERTEX = world - origin;
 		NORMAL = normalize(vec3(0.0, 1.0, 0.0) + vec3(wind_dir.x, 0.0, wind_dir.y) * sway * 0.3);
+		if (soft) {
+			// Normale arrondie du maillage tournée avec la touffe ; carte vue par la tranche
+			// (vue rasante) : amincie par le seuil d'alpha dans `fragment`.
+			vec3 n = mesh_normal;
+			n.xz = rot * n.xz;
+			v_normal = normalize(n + vec3(wind_dir.x, 0.0, wind_dir.y) * sway * 0.3);
+			vec3 card = COLOR.rgb * 2.0 - 1.0;
+			card.xz = rot * card.xz;
+			vec3 to_cam = CAMERA_POSITION_WORLD - vec3(wp.x, 0.0, wp.y);
+			to_cam.y = CAMERA_POSITION_WORLD.y - terrain_h(wp);
+			vec3 vdir = normalize(to_cam);
+			float face_h = abs(dot(normalize(card.xz + 1e-4), normalize(vdir.xz + 1e-4)));
+			v_facing = max(face_h, abs(vdir.y) * 1.3);
+		}
 		v_shade = mix(0.85, 1.12, rnd.x) * mix(0.9, 1.05, gust);
 		v_tint *= mix(vec3(0.95, 1.0, 0.9), vec3(1.08, 1.03, 0.9), r3);
 	}
@@ -157,14 +195,23 @@ void vertex() {
 
 void fragment() {
 	// Normale « verticale » pour toutes les faces (pas d'assombrissement des faces arrière).
-	NORMAL = normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+	NORMAL = normalize((VIEW_MATRIX * vec4(da6_on > 0.5 ? v_normal : vec3(0.0, 1.0, 0.0), 0.0)).xyz);
 	vec4 tex = texture(grass_texture, UV);
 	// La carte ne donne que la découpe et les nuances claires/sombres des brins ; la couleur
 	// vient du sol (v_tint) pour que l'herbe prolonge la texture du terrain.
-	float l = dot(tex.rgb, vec3(0.3, 0.59, 0.11)) / 0.14;
+	float l = dot(tex.rgb, vec3(0.3, 0.59, 0.11)) / tex_lum;
 	vec3 hue = tex.rgb / max(dot(tex.rgb, vec3(0.333)), 0.001) * 0.333;
 	ALBEDO = v_tint * clamp(l, 0.45, 1.5) * mix(vec3(1.0), hue * 3.0, 0.2) * v_shade;
 	ALPHA = tex.a;
+	if (da6_on > 0.5) {
+		// Pied de touffe dans l'ombre des brins, pointes un peu plus sèches ; cartes vues par la
+		// tranche amincies (le seuil d'alpha mange d'abord les bords des brins).
+		float top = 1.0 - UV.y;
+		ALBEDO *= mix(0.7, 1.0, smoothstep(0.0, 0.55, top));
+		ALBEDO = mix(ALBEDO, ALBEDO * vec3(1.08, 1.04, 0.9), top * top * 0.5);
+		ALPHA *= mix(0.45, 1.0, smoothstep(0.12, 0.5, v_facing));
+		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, decor_saturation);
+	}
 	ALPHA_SCISSOR_THRESHOLD = 0.4;
 	ROUGHNESS = 0.9;
 	BACKLIGHT = vec3(0.18, 0.22, 0.08);
