@@ -248,7 +248,7 @@ static func _bilerp(grid: PackedFloat32Array, o: int, w: int, tx: float, tz: flo
 ## Hauteur affichée (unités monde) d'une altitude `h_m` (m) au point carte (x, z), à l'échelle, au
 ## gain et à l'écrasement courants. Double GDScript de `campaign_display_height`
 ## (campaign_relief.gdshaderinc) : tout ce qui pose un objet au sol passe par ici.
-##     y = s·(h − c·k·max(h − base, 0) + g·max(h − fond, 0))
+##     y = s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − fond, 0)), K = c·k
 static func display_height(h_m: float, x: float, z: float) -> float:
 	return display_height_with(h_m, x, z, _vertical_scale, _relief_gain, _relief_squash)
 
@@ -262,7 +262,8 @@ static func display_height_with(h_m: float, x: float, z: float, scale: float, ga
 
 ## `display_height_with` avec les champs (fond, base, k) déjà lus au même point.
 static func display_height_fields(h_m: float, fields: Vector3, scale: float, gain: float, squash: float) -> float:
-	return scale * (h_m - squash * fields.z * maxf(h_m - fields.y, 0.0) + gain * maxf(h_m - fields.x, 0.0))
+	var k := squash * fields.z
+	return scale * (h_m - k * maxf(h_m - fields.y, 0.0) + gain * (1.0 - k) * maxf(h_m - fields.x, 0.0))
 
 
 ## Inverse de `display_height` : altitude (m) dont la hauteur affichée en (x, z) vaut `y`.
@@ -284,7 +285,8 @@ static func height_from_display_with(y: float, x: float, z: float, scale: float,
 	var v_f := f - k * (f - b)
 	if v <= v_f:
 		return (v - k * b) / (1.0 - k)
-	return (v - k * b + gain * f) / (1.0 - k + gain)
+	var g := gain * (1.0 - k)
+	return (v - k * b + g * f) / (1.0 - k + g)
 
 
 static func load_from_dir(dir: String) -> MapData:

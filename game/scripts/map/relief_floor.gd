@@ -74,6 +74,8 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	var base := grid.duplicate()
 	var squash := PackedFloat32Array()
 	squash.resize(grid.size())
+	var amplitude := PackedFloat32Array()
+	amplitude.resize(grid.size())
 	if profile.local_relief_cap_m > 0.0 or profile.mountain_knee_m > 0.0:
 		var tops := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[1]))
 		# Maximum sur le rayon total des flous qui suivent : un pic isolé (puy, aiguille) garde sa
@@ -85,8 +87,9 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 		for i in grid.size():
 			if profile.local_relief_cap_m > 0.0:
 				grid[i] = maxf(grid[i], tops[i] - profile.local_relief_cap_m)
-			squash[i] = profile.mountain_squash_of(tops[i] - base[i])
-	return {"data": grid, "base": base, "squash": squash, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
+			amplitude[i] = tops[i] - base[i]
+			squash[i] = profile.mountain_squash_of(amplitude[i])
+	return {"data": grid, "base": base, "squash": squash, "amplitude": amplitude, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
 
 
 const MODE_MIN := 0

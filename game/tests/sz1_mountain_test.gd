@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Lot SZ1 (défaut S1 de ZG7c) : écrasement des montagnes dans la hauteur affichée
-##     y = s·(h − c(s)·k·max(h − base, 0) + g·max(h − fond, 0)).
+##     y = s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − fond, 0)), K = c(s)·k.
 ## godot --headless --path game --script res://tests/sz1_mountain_test.gd
 ##  1. Formule sur des champs synthétiques : sous la base inchangée, écrasement proportionnel à
 ##     c·k, monotone, inverse exacte ; c nul en vue stratégique, 1 au palier vallée ; k nul sous le
@@ -23,6 +23,8 @@ const PLACES := [
 	["crecy", Vector2(2191.5, 1706.0), false],
 	["falaises_normandes", Vector2(2018.0, 1772.0), false],
 	["paris", Vector2(2213.2, 1923.9), false],
+	["rouen_seine", Vector2(2097.0, 1819.4), false],
+	["val_de_loire", Vector2(2052.0, 2127.3), false],
 ]
 
 var _failures := 0
@@ -86,7 +88,7 @@ func _test_formula() -> void:
 	_check(MapData.relief_fields_at(x, z).distance_to(Vector3(1000.0, 400.0, 0.5)) < 1e-4, "fields at a cell centre")
 	_check(absf(MapData.display_height(300.0, x, z) - 300.0 * s) < 1e-6, "below the base: unchanged")
 	_check(absf(MapData.display_height(800.0, x, z) - s * (800.0 - 0.5 * 400.0)) < 1e-6, "between base and floor: squashed")
-	_check(absf(MapData.display_height(2000.0, x, z) - s * (2000.0 - 0.5 * 1600.0 + g * 1000.0)) < 1e-6, "above the floor: squashed and raised")
+	_check(absf(MapData.display_height(2000.0, x, z) - s * (2000.0 - 0.5 * 1600.0 + g * 0.5 * 1000.0)) < 1e-6, "above the floor: squashed and raised")
 	_check(MapData.display_height(0.0, x, z) == 0.0, "coast stays at sea level")
 	var previous := -INF
 	for k in 80:
@@ -102,13 +104,13 @@ func _test_formula() -> void:
 	var c := image.get_pixel(2, 2)
 	_check(Vector3(c.r, c.g, c.b).distance_to(Vector3(1000.0, 400.0, 0.5)) < 1e-3, "texture channels = floor, base, squash")
 	var inc := FileAccess.get_file_as_string("res://shaders/campaign_relief.gdshaderinc")
-	_check(inc.contains("campaign_vertical_scale * (h_m - campaign_relief_squash * fields.z * max(h_m - fields.y, 0.0)"), "shader formula changed: update MapData.display_height_fields and the Rust twin")
-	_check(inc.contains("+ campaign_relief_gain * max(h_m - fields.x, 0.0));"), "shader gain term changed: update the twins")
+	_check(inc.contains("return campaign_vertical_scale * (h_m - k * max(h_m - fields.y, 0.0)"), "shader formula changed: update MapData.display_height_fields and the Rust twin")
+	_check(inc.contains("+ campaign_relief_gain * (1.0 - k) * max(h_m - fields.x, 0.0));"), "shader gain term changed: update the twins")
 	var map_data_code := FileAccess.get_file_as_string("res://scripts/map/map_data.gd")
-	_check(map_data_code.contains("return scale * (h_m - squash * fields.z * maxf(h_m - fields.y, 0.0) + gain * maxf(h_m - fields.x, 0.0))"), "GDScript twin changed")
-	var rust := FileAccess.get_file_as_string("res://../core/crates/vegetation/src/lib.rs")
-	if rust != "":
-		_check(rust.contains("(h_m - self.relief_squash * k * (h_m - base).max(0.0)"), "Rust twin (vegetation) changed")
+	_check(map_data_code.contains("return scale * (h_m - k * maxf(h_m - fields.y, 0.0) + gain * (1.0 - k) * maxf(h_m - fields.x, 0.0))"), "GDScript twin changed")
+	var rust := FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../core/crates/vegetation/src/lib.rs"))
+	if _check(rust != "", "Rust twin readable"):
+		_check(rust.contains("* (h_m - squash * (h_m - base).max(0.0)") and rust.contains("self.relief_gain * (1.0 - squash) * (h_m - floor).max(0.0)"), "Rust twin (vegetation) changed")
 
 
 ## Amplitude affichée (unités monde) autour d'un point : max − min de la hauteur affichée sur un
@@ -163,8 +165,8 @@ func _test_real_map() -> void:
 		var after: Vector2 = with[place[0]]
 		var fields := MapData.relief_fields_at(p.x, p.y)
 		var ratio := after.x / maxf(before.x, 1e-6)
-		print("sz1_mountain_test: %s true span %.0f m, displayed %.2f → %.2f units (×%.2f), squash c=%.2f k=%.2f" % [
-			place[0], after.y, before.x, after.x, ratio, squash_on, _k_at(grid, p)])
+		print("sz1_mountain_test: %s true span %.0f m, displayed %.2f → %.2f units (×%.2f), squash c=%.2f k=%.2f, regional amplitude %.0f m" % [
+			place[0], after.y, before.x, after.x, ratio, squash_on, _cell_at(grid, "squash", p), _cell_at(grid, "amplitude", p)])
 		if place[2]:
 			_check(ratio < 0.8, "%s should be squashed (×%.2f)" % [place[0], ratio])
 		elif place[0] != "massif_central":
@@ -173,9 +175,9 @@ func _test_real_map() -> void:
 	ReliefExaggerationProfile.set_default(null)
 
 
-func _k_at(grid: Dictionary, p: Vector2) -> float:
+func _cell_at(grid: Dictionary, key: String, p: Vector2) -> float:
 	var cell := float(grid["cell"])
 	var side: Vector2i = grid["side"]
 	var i := clampi(int(p.x / cell), 0, side.x - 1)
 	var j := clampi(int(p.y / cell), 0, side.y - 1)
-	return (grid["squash"] as PackedFloat32Array)[j * side.x + i]
+	return (grid[key] as PackedFloat32Array)[j * side.x + i]

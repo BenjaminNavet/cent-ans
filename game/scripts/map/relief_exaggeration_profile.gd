@@ -41,11 +41,12 @@ extends Resource
 ## (`base`) ; au-delà du genou `mountain_knee_m`, le relief au-dessus de la base n'est plus affiché
 ## qu'à `mountain_ratio` : amplitude affichée D = genou + (A − genou)·ratio, facteur k = 1 − D/A
 ## (0 pour les collines, falaises et plaines). Hauteur affichée :
-##     y = s·(h − c(s)·k·max(h − base, 0) + g·max(h − fond, 0))
+##     y = s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − fond, 0)), K = c(s)·k
+## (le gain local ZG8 est écrasé d'autant : pas d'aiguilles sur des montagnes aplaties)
 ## `c(s)` va de `mountain_squash_far` (échelle stratégique) à 1 à l'exagération
 ## `mountain_squash_full_exaggeration` (palier vallée) et en deçà. Genou ≤ 0 : désactivé.
-@export var mountain_knee_m: float = 450.0
-@export var mountain_ratio: float = 0.35
+@export var mountain_knee_m: float = 350.0
+@export var mountain_ratio: float = 0.3
 @export var mountain_squash_far: float = 0.0
 @export var mountain_squash_full_exaggeration: float = 3.5
 ## Borne du facteur d'écrasement (garde l'inverse bien conditionné).
