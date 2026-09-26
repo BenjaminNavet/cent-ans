@@ -13909,6 +13909,7 @@
    "houses": true,
    "house_span": [0.05, 0.95],
    "chapel_at": 0.48,
+   "chapel_side": "left",
    "drawbridge_at": 0.66,
    "gatehouses_at": [0.62, 0.9],
    "pier_m": 7.0,

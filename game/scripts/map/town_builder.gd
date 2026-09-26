@@ -973,10 +973,26 @@ func _build_monuments() -> void:
 		var blen := float(bridge["length"])
 		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center), deck - 1.5)
 		var piers := maxi(1, int(blen / 15.0))
+		var pier_m := float(bridge.get("pier_m", 3.5))
+		var starling := float(bridge.get("starling_m", 0.0))
 		for k in piers:
 			var t := (float(k) + 0.5) / piers - 0.5
 			var pc := center + Vector3(bd.x, 0, bd.y) * (t * blen * 0.8)
-			add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(3.5, maxf(deck - water + 1.0, 2.0), float(bridge["width"]) + 1.0)), pc), water - 1.5)
+			add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(pier_m, maxf(deck - water + 1.0, 2.0), float(bridge["width"]) + 1.0)), pc), water - 1.5)
+			# VH6 : avant-becs (« starlings ») au ras de l'eau, en amont et en aval de la pile.
+			if starling > 0.0:
+				add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(pier_m * 1.7, 2.6, starling)), pc), water - 1.5)
+		# VH6 : rampes d'accès du tablier jusqu'aux rives (rives basses de Londres).
+		for end: float in [-1.0, 1.0]:
+			var bank_h := float(bridge.get("bank_to" if end > 0.0 else "bank_from", deck))
+			var rise := deck - bank_h
+			if rise > 0.8:
+				var run := clampf(rise * 7.0, 8.0, 45.0)
+				var out_d := bd * end
+				var tilt := Basis(Vector3(-out_d.y, 0, out_d.x), -atan2(rise, run))
+				var start := center + Vector3(out_d.x, 0, out_d.y) * (blen * 0.5 - 1.0)
+				var ramp_c := start + Vector3(out_d.x, 0, out_d.y) * (run * 0.5)
+				add_box.call("Ashlar", Transform3D(tilt * basis_x(out_d, Vector3(sqrt(run * run + rise * rise), 1.6, float(bridge["width"]))), ramp_c), (deck + bank_h) * 0.5 - 1.5)
 		var bb: Array = boxes["Ashlar"]
 		_multimesh(box_mesh("Ashlar"), bb[0], bb[1], bb[2], box_mat, "all", 12.0).name = "Bridge"
 

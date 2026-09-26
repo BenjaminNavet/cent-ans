@@ -527,6 +527,13 @@
             },
             "description": "Moulins pendants entre deux piles (fractions de la longueur)."
           },
+          "chapel_side": {
+            "enum": [
+              "left",
+              "right"
+            ],
+            "description": "Côté de la chapelle (sens `from` → `to`) ; défaut : droite. VH6 : chapelle Saint-Thomas côté aval."
+          },
           "drawbridge_at": {
             "type": "number",
             "minimum": 0,

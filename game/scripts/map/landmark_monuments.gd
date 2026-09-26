@@ -261,6 +261,15 @@ static func _belfry(st: SurfaceTool, p: Dictionary) -> float:
 	var h := float(p.get("height", 30.0))
 	var id := Transform3D.IDENTITY
 	_box(st, id, Vector3.ZERO, Vector3(size, h, size), WALL, STONE_TINT)
+	# VH6 : donjon à toit plat et tourelles d'angle (Tour Blanche, tour du Joyau).
+	if str(p.get("top", "pyramid")) == "turrets":
+		var t := maxf(size * 0.16, 2.5)
+		var th := maxf(size * 0.18, 3.0)
+		for sx: float in [-1.0, 1.0]:
+			for sz: float in [-1.0, 1.0]:
+				_box(st, id, Vector3(sx * (size - t) * 0.5, h, sz * (size - t) * 0.5), Vector3(t, th, t), WALL, STONE_TINT, h)
+		_box(st, id, Vector3(0, h, 0), Vector3(size - 2.0 * t, 1.2, size - 2.0 * t), MASONRY, STONE_TINT, h)
+		return h + th
 	if str(p.get("top", "pyramid")) == "lantern":
 		_box(st, id, Vector3(0, h, 0), Vector3(size * 0.55, size * 0.6, size * 0.55), WALL, STONE_TINT, h)
 		_pyramid(st, id, size * 0.35, h + size * 0.6, h + size * 1.3, ROOF)
