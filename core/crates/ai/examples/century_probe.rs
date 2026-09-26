@@ -22,7 +22,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::Instant;
 
-use data_model::{CharacterId, FactionId, GameData, SettlementId};
+use data_model::{CharacterId, FactionId, GameData, ProvinceId, SettlementId};
 use sim_campaign::{CampaignState, EventKind};
 
 /// First turn of 1350 (the treasury rule applies from then on).
@@ -129,6 +129,15 @@ struct Eq4 {
     trespass_seasons: u32,
     /// DP2: casus belli won by a trespass.
     trespass_grievances: u32,
+    /// DC3: province cities taken by a crown (rebels excluded).
+    city_captures: u32,
+    /// DC3: provinces whose every settlement came to be held by one crown that did not hold
+    /// them all before, and the turns since that crown's first foothold there.
+    provinces_completed: u32,
+    conquest_turns: u32,
+    /// DC3: (province, crown) -> turn that crown took its first place in a province where
+    /// it held none.
+    footholds: BTreeMap<(ProvinceId, FactionId), u32>,
 }
 
 /// Faction controlling the most provinces and its share.
@@ -220,6 +229,51 @@ fn track_eq4(state: &CampaignState, eq4: &mut Eq4, before: &Snapshot) {
             && old_sieges.get(id) != Some(&s.controller)
         {
             eq4.direct_captures += 1;
+        }
+    }
+    // DC3: city captures, footholds and completed conquests.
+    for (province_id, province) in &state.provinces {
+        let Some(city) = state.settlements.get(&province.city) else {
+            continue;
+        };
+        if old_controllers.get(&province.city) != Some(&city.controller)
+            && city.controller.as_str() != "fac_rebels"
+        {
+            eq4.city_captures += 1;
+        }
+        let places: Vec<&SettlementId> = state
+            .settlements
+            .iter()
+            .filter(|(_, s)| &s.province == province_id)
+            .map(|(id, _)| id)
+            .collect();
+        let holders: BTreeSet<&FactionId> = places
+            .iter()
+            .map(|id| &state.settlements[*id].controller)
+            .collect();
+        eq4.footholds
+            .retain(|(p, f), _| p != province_id || holders.contains(f));
+        for holder in &holders {
+            let newly = !places
+                .iter()
+                .any(|id| old_controllers.get(*id) == Some(*holder));
+            if newly && holder.as_str() != "fac_rebels" {
+                eq4.footholds
+                    .entry((province_id.clone(), (*holder).clone()))
+                    .or_insert(state.turn);
+            }
+        }
+        if holders.len() == 1 {
+            let holder = *holders.iter().next().expect("one");
+            let was_whole = places
+                .iter()
+                .all(|id| old_controllers.get(*id) == Some(holder));
+            if !was_whole && holder.as_str() != "fac_rebels" {
+                if let Some(start) = eq4.footholds.remove(&(province_id.clone(), holder.clone())) {
+                    eq4.provinces_completed += 1;
+                    eq4.conquest_turns += state.turn.saturating_sub(start);
+                }
+            }
         }
     }
     let (access, trespass) = passage(state);
@@ -954,6 +1008,15 @@ fn print_eq4(reports: &[Report]) {
         ("Saisons d'intrusion", |r| f64::from(r.eq4.trespass_seasons)),
         ("Casus belli d'intrusion", |r| {
             f64::from(r.eq4.trespass_grievances)
+        }),
+        ("DC3 cités prises / déc.", |r| {
+            f64::from(r.eq4.city_captures) * 40.0 / f64::from(r.turns)
+        }),
+        ("DC3 provinces conquises en entier / déc.", |r| {
+            f64::from(r.eq4.provinces_completed) * 40.0 / f64::from(r.turns)
+        }),
+        ("DC3 durée moy. d'une conquête (tours)", |r| {
+            f64::from(r.eq4.conquest_turns) / f64::from(r.eq4.provinces_completed.max(1))
         }),
     ];
     println!("Moyennes EQ4 :");
