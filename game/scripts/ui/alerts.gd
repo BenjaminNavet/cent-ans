@@ -23,12 +23,16 @@ static func collect(map: Node, last_events: Array) -> Array:
 	var summary: Dictionary = sim.call("get_faction_summary", player)
 	var enemies: PackedStringArray = summary.get("at_war_with", PackedStringArray())
 	var owned: Dictionary = {}  # province id → true (possédée et tenue par le joueur)
+	# PB3d : propriétaires et sièges par l'instantané groupé ; détail du siège seulement si besoin.
+	var snapshot := ProvinceSnapshot.of(sim, map_data)
 	for index in range(1, map_data.province_count + 1):
-		var province_id := str(map_data.get_province(index).get("id", ""))
-		var state: Dictionary = sim.call("get_province_state", province_id)
-		if str(state.get("owner", "")) != player:
+		var province_id := snapshot.ids[index - 1]
+		if not snapshot.has(index - 1) or snapshot.owner[index - 1] != player:
 			continue
 		owned[province_id] = true
+		if snapshot.besieged[index - 1] == 0:
+			continue
+		var state: Dictionary = sim.call("get_province_state", province_id)
 		var siege: Dictionary = state.get("siege", {})
 		if not siege.is_empty() and str(siege.get("attacker", "")) != player:
 			result.append({
