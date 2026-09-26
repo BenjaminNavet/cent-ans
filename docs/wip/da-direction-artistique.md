@@ -132,3 +132,8 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   de traits (≤ 4 $, `docs/wip/da7c-icones-traits.md`), **DA7d** chevauchements de marqueurs de
   ville (0 $, `docs/wip/da7d-chevauchements.md`). Chaque lot complète l'ADR DA existant
   (0060, 0067, 0065, 0066).
+- 26/09 soir : **DA7b fusionné** (main `1f723a84`, ADR 0067 § DA7b) : automne 44,7 → 32,7 %, bocage
+  haies 39,1 → 33,7 %, toutes les vues ≤ 35 % ; `battle_seasons` + `shadow_saturation` dans
+  `data/fx/atmosphere.json`, outil `scene_saturation.py`. DA7d fini (664 → 0 chevauchements)
+  mais en conflit avec le dé-encombrement de noms DC4 dans `settlement_layer.gd` : renvoyé à
+  l'agent pour unifier les deux avant fusion.
