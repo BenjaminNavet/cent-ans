@@ -6,7 +6,7 @@
 script = ExtResource("1_props")
 shrink_start = 28.0
 shrink_end = 5.0
-tree_shrink_end = 3.0
+tree_shrink_end = 5.0
 tree_ratio = 0.035
 windmill_ratio = 0.008
 hamlet_ratio = 0.03
