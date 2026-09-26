@@ -17,7 +17,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 ## Lots
 | Lot | Défaut (ZG7c) | Contenu | Vague | État |
 |---|---|---|---|---|
-| SZ1 | S1 | Haute montagne au palier vallée : exagération ZG4 modulée par l'amplitude locale / plafond de hauteur affichée selon la distance ; caméra hors des canyons | 1 | lancé |
+| SZ1 | S1 | Haute montagne au palier vallée : exagération ZG4 modulée par l'amplitude locale / plafond de hauteur affichée selon la distance ; caméra hors des canyons | 1 | **dans main** (f8ee130f) : écrasement des montagnes (amplitude > 350 m), relief quasi 1:1 autour des villes v2, garde des crêtes |
 | SZ2 | S2 | Recuisson E0-E4 avec plancher monotone des fonds de vallée (continuité E0/E1), puis `detail-dem`, `hydro-fine`, `anchors-fine` ; Loire d'Orléans au niveau des berges. Cuisson dans un dossier de préparation, bascule atomique par l'orchestrateur | 1 | **dans main** + pyramide basculée : plancher `valley_floor` à tous les étages, `BAKE_VERSION` pyramide 2 / détail 5, estampille `bake.json` ; Loire d'Orléans −0,1 m sous les berges |
 | VH0+VH4 | S3 | Squelette VH (ADR 0078, 0037 étant pris par la difficulté) et moteur des villes emblématiques 1:1 géoréférencées ; levée du plancher caméra ZG4b | 1 | **dans main** (80fb0004) : ADR 0078, format `data/landmarks_v2/`, `docs/landmarks-v2.md`, Rouen vers 1340 (706 rues, 26 monuments, ≈ 5 800 bâtiments) |
 | SZ4 | S4, S5 | Moulins, hameaux, fumées, arbres proches à l'échelle aux paliers intermédiaires ; disque d'emprise d'Amiens | 1 | **dans main** (4b6c1057) : `MapPropScale` (`map_prop_scale.tres`), toits vus de loin sur le sol bâti (`roofscape_*`) |
@@ -25,8 +25,8 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 | SZ5 | S7 | Pluie au palier site (gouttes et stries à l'échelle de la caméra) | 1 | **dans main** (e73abe8d) : `PrecipitationProfile` (`precipitation.tres`), tailles ancrées en mètres de près, identiques à l'ancien au-delà de d = 30 |
 | SZ6 | S6 | Pics d'images côté scripts : profilage et étalement (qt_update, recalages, écouteurs) | 1 | **dans main** (26b1d806) : p99 91 → 38 ms, pics > 50 ms 231 → 3 ; `--bench-probe` |
 | SZ7 | hébergement | Décision (ADR 0077) + outillage : paquet « Cent Ans relief » découpé, sommes de contrôle, commande de téléchargement | 2 | **dans main** : `relief-pack` / `relief-fetch`, `relief_hosting.json`, avis du jeu ; **publication en attente de l'accord du joueur** (commandes dans `docs/geo.md`) |
-| VH5/6/7 | S3 | Paris, Londres, Orléans au format v2 1:1 (Rouen fait par VH4) | 2 | lancés |
-| SZ2b | suite SZ2 | Fleuves au palier site : lit sableux sans nappe d'eau (Seine à Rouen) | 2 | lancé |
+| VH5/6/7 | S3 | Paris, Londres, Orléans au format v2 1:1 (Rouen fait par VH4) | 2 | Londres et Orléans **dans main** (f8ee130f) ; Paris en cours |
+| SZ2b | suite SZ2 | Fleuves au palier site : lit sableux sans nappe d'eau (Seine à Rouen) | 2 | rendu : eau coupée sous les emprises de colonies + relief décalé d'un demi-pixel (ADR 0086) ; fusion en cours |
 
 ## Journal
 - 26/09 : plan écrit ; vague 1 lancée (6 agents).
@@ -41,3 +41,4 @@ lit la pyramide en écriture ; puis vague 2 (villes VH5-VH7 + Rouen, outillage S
 - 26/09 : SZ7 fusionné (outillage, 12 tests hors réseau, pytest complet 707 OK). Rien publié.
 - 26/09 : SZ6 fusionné. Causes : rubans de routes drapés (fils), bascule de maillage d'un MultiMesh rempli par `buffer` (relecture GPU, 86 ms), recuisson des maquettes, changements de niveau des tronçons étalés (4 ms/image), étiquettes, index par tronçon. Reste pour PB3/PB3g : pas du quadtree 9-12 ms, `request_reground` de la végétation (copie des pages vers Rust, 70 ms), `NextHintController.refresh` 15 ms/s, `TownLayer` 10 ms.
 - 26/09 : VH0+VH4 fusionnés (80fb0004), tests vh4/sz4/sz6/zg4/zg6 + smoke OK sur l'intégration. Défauts vus sur les captures de Rouen : Seine sans nappe d'eau au palier site (→ SZ2b), côtes en murs (SZ1 en cours). Correctif de sécurité SZ7 (noms de parts du manifeste, 5c1c4dc9). Vague 2 : VH5 Paris, VH6 Londres, VH7 Orléans, SZ2b.
+- 26/09 : SZ1, VH6 (Londres), VH7 (Orléans) fusionnés (f8ee130f), conflits ponts/tests résolus (piles par arches VH7 + avant-becs et rampes VH6). Incident : ff refusé (revue de code arrivée dans main) mais dylib installée quand même pendant ~10 min ; main réintégré, dylib reconstruite, tests OK, puis ff. La dylib release de main reste celle d'avant (08:32).
