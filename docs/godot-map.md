@@ -669,6 +669,23 @@ Tout est rendu seulement : aucune règle de jeu ne lit la pyramide.
 | ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | « Villes ordinaires à l'échelle réelle » |
 | ZG7a / ZG7b | Perf et finitions ; cache absent, export, docs, crédits | ce paragraphe ; `docs/wip/zg7*.md` |
 | ZG8 | Relief local exagéré « façon Total War » | « Relief exagéré façon Total War » |
+| ZG7c | Recette aux 3 paliers, cache partiel, niveaux d'eau, plafond du relief local, clôture | « Recette finale et clôture (lot ZG7c) » |
+
+**État final (chantier clos le 26/09/2026).** Du continent (parchemin, d = 1 500) au terrain à
+quelques mètres (d = 0,3 dans les 34 zones E7) sans rupture : relief streamé E1-E7 (2,77 Go, cache
+complet), fleuves et routes fins drapés, villes ordinaires 1:1, exagération dynamique ZG4 + relief
+local ZG8 plafonné à 350 m, cache absent ou partiel signalé et toléré tuile par tuile. Limites connues
+(suites, détail et captures dans `docs/wip/zg7c-recette.md`) :
+- haute montagne au palier vallée : l'exagération ZG4 (×3,4 à d = 6) fait encore des murs dans les
+  vallées pyrénéennes et galloises ; à rendre fonction de l'amplitude locale du relief ;
+- fonds de vallée E1-E4 plaqués à 0,5 m près des plateaux (Seine de Paris à Rouen, Loire en
+  Touraine) : recuisson E0-E4 avec le plancher monotone du palier 3, plusieurs heures ;
+- villes emblématiques au palier site (maquettes à la loupe sur relief 1:1, plancher caméra 2,6) :
+  lot VH4 ;
+- objets à l'échelle de la carte au palier vallée (moulins, hameaux, fumées, arbres près de la
+  caméra) et disque d'emprise des villes ordinaires avant leurs maisons ;
+- pics d'images > 50 ms dominés par les scripts (sélection / application du quadtree, recalages) ;
+- aucune archive « Cent Ans relief » hébergée (à décider avant diffusion).
 
 **Cache du relief fin.** Tuiles E1-E7 et fleuves/routes fins sous `data/map/pyramid/` (≈ 2,8 Go,
 hors git). Une seule commande le régénère dans l'ordre, avec reprise :
@@ -710,8 +727,9 @@ l'application (livraison séparée), puis `user://relief`. `TerrainBuilder` (pyr
   `--bench-seconds`, `--bench-descent-only`, `--bench-towns`), voir « Options, test et banc ».
 
 **Tests headless** : `tests/zg2_quadtree_test.gd`, `zg4_camera_test.gd`, `zg5b_fine_geo_test.gd`,
-`zg6_towns_test.gd`, `zg7b_cache_test.gd`, `zg8_relief_test.gd` (captures : `zg8_relief_shots.gd`),
-tous sans le vrai cache (pyramides factices dans `user://`).
+`zg6_towns_test.gd`, `zg7a_test.gd`, `zg7b_cache_test.gd`, `zg7c_partial_cache_test.gd`,
+`zg8_relief_test.gd`, tous sans le vrai cache (pyramides factices dans `user://`). Captures (fenêtre) :
+`zg8_relief_shots.gd`, `zg7c_recette_shots.gd` (12 lieux × 3 paliers, parchemin, filtres).
 
 ## Relief streamé : pyramide et quadtree (lot ZG2, ADR 0036)
 
@@ -1379,6 +1397,49 @@ hors lot) ; niveau fin de la Tamise à −7,8 m (PAVA mêlé à la bathymétrie 
 ![Rives de la Tamise, avant](img/zg7a/londres_rives_avant.jpg)
 ![Rives de la Tamise, après](img/zg7a/londres_rives_apres.jpg)
 ![Seine à Mantes, après](img/zg7a/seine_mantes_apres.jpg)
+
+## Recette finale et clôture (lot ZG7c, ADR 0036)
+
+**Cache partiel.** `ReliefPyramid` ne garde, par étage, que les tuiles listées **et** présentes sur
+le disque (un listage du dossier de l'étage, `_drop_missing_tiles`, `missing_tiles`) ; une tuile
+absente retombe sur l'ancêtre le plus fin présent (`finest_ancestor`), une tuile illisible est écartée
+à l'exécution (`mark_broken`). Avant, un étage entier était ignoré si sa première tuile manquait.
+Les reliquats d'écriture (`*.part.png`, `*.tmp`) ne sont jamais pris pour des tuiles : toutes les
+commandes `geo` écrivent puis renomment. Test : `tests/zg7c_partial_cache_test.gd` (trous à E1-E3,
+E3 sous un trou E2, tuile corrompue ; quadtree stable à d = 40, 10 et 4).
+
+**Relief local plafonné.** `ReliefFloor` relève le fond de vallée à `sommets voisins −
+local_relief_cap_m` (`relief_exaggeration.tres`, 350 m ; maximum par cellule, filtre maximum sur le
+rayon total des flous, mêmes flous). Le terme `h − fond` de ZG8 reste entier sur les collines, coteaux
+et falaises, mais ne dépasse plus ≈ 350 m en montagne : plus d'aiguilles au puy de Dôme ni dans les
+Alpes. Même formule partout (le fond publié est lu par les shaders, `MapData` et le semis natif) ;
+0 = rendu ZG8 d'origine.
+
+**Niveaux d'eau.** `hydro_fine.water_level` borne le fond des lignes à 0 m avant l'ajustement
+monotone (la bathymétrie des zones E5-E7 tirait la Tamise à −7,8 m à Londres, la Garonne à −15,8 m à
+Bordeaux) ; clé du cache de recalage liée à `detail_dem.BAKE_VERSION` (`SNAP_VERSION` 4 : les
+recalages dataient d'avant ZG3b, la Loire passait 10 m sous le relief d'Orléans). Palier 3 : les
+34 zones recuites avec le plancher monotone v4.
+
+**Banc.** `process_ms` du banc `--bench-map` est chronométré du début de l'itération (nœud
+`MapBenchFrameStart`, priorité minimale, physique comprise) jusqu'au banc (priorité maximale), au lieu
+de `Performance.TIME_PROCESS` (qui ne couvrait pas l'image mesurée) : les pics > 50 ms de la descente
+sont dominés par les scripts (médiane ≈ 59 ms de scripts sur ≈ 60), pas par le GPU.
+
+**Recette.** `godot --path game --script res://tests/zg7c_recette_shots.gd -- --map-weather=clear
+--out=<dossier> [--only=paris,londres] [--extras]` (brouillard de guerre coupé : sans cela, les terres
+inconnues du camp joué paraissent beiges de près). Captures et défauts laissés :
+`docs/wip/zg7c-recette.md`.
+
+![Alpes au palier vallée, avant le plafond](img/zg7c/alpes_vallee_avant.jpg)
+![Alpes au palier vallée, relief local plafonné](img/zg7c/alpes_vallee.jpg)
+![Puy de Dôme, avant](img/zg7c/massif_central_vallee_avant.jpg)
+![Puy de Dôme, relief local plafonné](img/zg7c/massif_central_vallee.jpg)
+![Londres au palier site : Tamise au niveau de la mer](img/zg7c/londres_site.jpg)
+![Paris au palier vallée](img/zg7c/paris_vallee.jpg)
+![Crécy au palier site](img/zg7c/crecy_site.jpg)
+![Suite S1 : murs pyrénéens au palier vallée](img/zg7c/pyrenees_vallee.jpg)
+![Suite S3 : Rouen au palier site (VH4)](img/zg7c/rouen_seine_site.jpg)
 
 ## Interface des colonies (lot C5)
 
