@@ -55,6 +55,8 @@ impl CampaignState {
             .map(|(id, _)| id.clone())
             .collect();
         let mut timings = Vec::with_capacity(ai_factions.len());
+        // CT1: the record of the AI moves (for the replay) starts afresh.
+        self.ai_replay_begin(data);
         for faction in ai_factions {
             let started = std::time::Instant::now();
             self.play_ai_turn(data, &faction, &planner, &mut events);
@@ -62,6 +64,7 @@ impl CampaignState {
         }
 
         self.resolve_end_of_turn(data, &mut events);
+        self.ai_replay_finish(data);
         self.record_budget_history(&purses, resolved_turn);
         (events, timings)
     }
@@ -84,9 +87,10 @@ impl CampaignState {
             return;
         }
         self.ai_turn = Some(faction.clone());
-        march::continue_marches(self, data, Some(faction), events);
+        // CT1: both record the moves when the replay record is on.
+        self.continue_ai_marches(data, faction, events);
         for order in planner(self, data, faction) {
-            let _ = self.apply_order(data, faction, order);
+            self.apply_ai_order(data, faction, order);
         }
         self.ai_turn = None;
     }
