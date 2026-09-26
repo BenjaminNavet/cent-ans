@@ -5,7 +5,8 @@ extends SceneTree
 ## Fenêtre réelle (pas headless) :
 ##   godot --path game --script res://tests/zg7c_recette_shots.gd -- --out=<dossier>
 ## Options : `--only=<nom>[,<nom>]`, `--tiers=strat,vallee,site`, `--prefix=<préfixe>`,
-## `--keep-fog` (garde le brouillard de guerre, coupé par défaut), et celles de la carte
+## `--keep-fog` (garde le brouillard de guerre, coupé par défaut), `--extras` (vue parchemin et
+## filtres MF1 au-dessus de Paris, interface visible ; `--only=none` pour ne faire qu'elles), et celles de la carte
 ## (`--map-weather=clear`, `--no-relief-exaggeration`…).
 ## JPEG ≤ 960 px de large, `<lieu>_<palier>.jpg`. Imprime une ligne par capture (distance,
 ## échelle verticale, étage le plus fin chargé sous le point).
@@ -21,7 +22,7 @@ const PLACES := [
 	["massif_central", Vector2(2233.0, 2405.0)],
 	["galles", Vector2(1694.0, 1188.0)],
 	["falaises_normandes", Vector2(2018.0, 1772.0)],
-	["val_de_loire", Vector2(2052.0, 2118.0)],
+	["val_de_loire", Vector2(2052.0, 2127.3)],
 	["amiens", Vector2(2224.0, 1763.6)],
 	["crecy", Vector2(2191.5, 1706.0)],
 ]
@@ -33,6 +34,7 @@ func _init() -> void:
 	var out_dir := "user://zg7c"
 	var only := ""
 	var keep_fog := false
+	var extras := false
 	var prefix := ""
 	var tiers: PackedStringArray = PackedStringArray(TIERS.keys())
 	for arg in OS.get_cmdline_user_args():
@@ -40,6 +42,8 @@ func _init() -> void:
 			out_dir = arg.substr(6)
 		elif arg.begins_with("--only="):
 			only = arg.substr(7)
+		elif arg == "--extras":
+			extras = true
 		elif arg == "--keep-fog":
 			keep_fog = true
 		elif arg.begins_with("--prefix="):
@@ -106,6 +110,31 @@ func _init() -> void:
 			print("ZG7c shot %s d=%.2f scale ×%.2f gain %.2f level E%d waited %d%s" % [
 				path, distance, MapData.vertical_exaggeration(), MapData.relief_gain(), level, guard,
 				" (NOT SETTLED)" if guard >= 1500 else ""])
+	if extras:
+		# Vue parchemin (distance maximale), puis filtres MF1 aux paliers stratégique et vallée.
+		var paris := Vector2(2213.2, 1923.9)
+		var focus := Vector3(paris.x, data.surface_world_at(paris.x, paris.y), paris.y)
+		var shots := [["parchemin", "", rig.max_distance], ["filtre_richesse_strat", "wealth", 60.0],
+			["filtre_richesse_vallee", "wealth", 6.0], ["filtre_ravitaillement_vallee", "supply", 6.0],
+			["filtre_politique_site", "political", 2.73]]
+		for shot: Array in shots:
+			var modes: Node = map.get("map_modes")
+			if modes != null and shot[1] != "":
+				modes.call("set_mode", shot[1])
+			rig.look_at_point(focus, shot[2])
+			rig.snap()
+			for i in 120:
+				await process_frame
+			if terrain != null:
+				terrain.wait_fine_jobs()
+			for i in 30:
+				await process_frame
+			var image := root.get_viewport().get_texture().get_image()
+			if image.get_width() > 960:
+				image.resize(960, roundi(image.get_height() * 960.0 / image.get_width()), Image.INTERPOLATE_LANCZOS)
+			var path := out_dir.path_join("%s%s.jpg" % [prefix, shot[0]])
+			image.save_jpg(path, 0.82)
+			print("ZG7c shot %s d=%.2f" % [path, shot[2]])
 	map.queue_free()
 	await process_frame
 	quit(0)

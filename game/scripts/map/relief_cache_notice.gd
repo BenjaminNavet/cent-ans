@@ -83,6 +83,10 @@ func setup(checked: ReliefCacheStatus) -> void:
 	command_field.selecting_enabled = true
 	command_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	command_field.tooltip_text = "À lancer à la racine du dépôt. État détaillé : %s" % ReliefCacheStatus.CHECK_COMMAND
+	# ZG7c : un champ non modifiable prend la couleur « désactivée » du thème (gris sur parchemin,
+	# illisible) ; la commande est à lire et à copier : encre normale du champ.
+	command_field.ready.connect(func() -> void:
+		command_field.add_theme_color_override("font_uneditable_color", command_field.get_theme_color("font_color")))
 	row.add_child(command_field)
 	var copy := Button.new()
 	copy.text = "Copier"
