@@ -27,7 +27,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 | DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | fait, fusionné |
 | DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | fait, fusionné (DC5) |
 | DC4 | Affichage : niveaux de détail des marqueurs, désencombrement des étiquettes (O(n²)), maquettes proches, captures | 2 | fait, fusionné |
-| DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | |
+| DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | recette verte, ff dans `main` à faire |
 
 ## Journal
 - 26/09 : plan, squelette DC0 (6f74c214) ; vague 1 lancée (DC1 opus, DC2a-e sonnet, worktrees ../gp-dc1, ../gp-dc2a-e).
@@ -44,6 +44,29 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 - 26/09 : DC2 fusionné : 1 192 colonies (city 132, town 407, village 291, abbey 189, castle 173). Régénéré : graphe (2 987 arêtes), positions, fine_anchors, hameaux, towns_1340 (1 185). À surveiller DC3 : +66 châteaux (entretien) ; côte est du Sussex dans le polygone du Kent. DC4 lancé.
 
 - 26/09 : DC1 fusionné (main inclus, fine_anchors/towns régénérés sur le nouveau relief, 159aff80) ; DC3 lancé ; DC4 fusionné (848fff43 : 0 chevauchement d'étiquettes, désencombrement en grille, captures docs/img/dc4/).
+
+## DC5 — recette (26/09, worktree `../gp-densite`)
+État : recette verte sur `feat/densite` (4bc56f38 + ce commit) ; reste le ff dans `main` (orchestrateur)
+puis la suppression des worktrees `../gp-densite`, `../gp-dc3`.
+- Fusion `feat/densite-dc3` (5d44a9d5) : `settlement_layer.gd` combine DC4 et SZ4b. Les échelles se
+  composent : la réduction DC4 porte sur la maquette enfant (`model.scale *= fit`, `_model_radius` =
+  rayon d'origine × fit), l'échelle SZ4b sur le porteur (`holder.scale = model_scale(i)`) ; rayon
+  affiché = rayon d'origine × fit × `model_scale(i)`. Le clic garde le filtre DC4 (portée de
+  maquette, absorbées ignorées) et multiplie rayon/hauteur par `model_scale(i)`. `_real_ratio` =
+  rayon réel / rayon après fit : de près la maquette converge vers l'emprise réelle quel que soit fit.
+  `fine_anchors.json` de DC3 (1 192 colonies), `towns_1340.json` régénéré (1 185 villes).
+- `data/map/navgrid.png` était périmé (test_navgrid) : `geo navgrid` relancé (96d628ba).
+- `main` fusionné (4bc56f38, DA2 : aucun changement Rust ni carte).
+- Résultats (target privé `gp-densite/core/target`) : fmt, clippy -D warnings, 877 tests Rust (espace
+  de travail) ; dylib copiée, aucun avertissement « expected 1-6 » ; import Godot ; smoke,
+  settlements_render (1 192 colonies, 2 999 hameaux), da3_markers, cv1_campaign_life, sz4_prop_scale,
+  sz4b_colonies_forests, da2_living_portrait : OK ; pytest 764 passed ; ruff : 10 erreurs
+  préexistantes dans `tools/blender_scripts/` (identiques dans main).
+- Points ouverts : `geo navgrid` signale 5 nouvelles « îles sans port » (Hollande/Frise : Delft,
+  Den Haag, Egmond, Haarlem, Leiden ; Appingedam ; Dokkum ; Gouda ; Leeuwarden — Pomposa et Teylingen
+  l'étaient déjà dans main) : places sans accès terrestre ni port sur la grille, à corriger (port ou
+  passage) ; `_absorb` et `_fit_model` raisonnent sur la taille de carte (échelle 1), pas sur la
+  taille réduite de près (masquage un peu conservateur au palier vallée).
 
 ## Prochaine étape (pause du 26/09, à reprendre dans une autre session)
 1. Relancer un agent DC3 dans `../gp-dc3` (branche `feat/densite-dc3`) : sa section « DC3 » y liste
