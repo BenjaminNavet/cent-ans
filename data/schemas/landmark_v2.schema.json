@@ -325,6 +325,13 @@
                 "height_m": {
                   "type": "number",
                   "exclusiveMinimum": 0
+                },
+                "from_year": {
+                  "type": "integer",
+                  "description": "Porte ouverte cette année-là (VH6 : Moorgate, 1415) ; avant, mur continu."
+                },
+                "until_year": {
+                  "type": "integer"
                 }
               },
               "required": [
@@ -519,6 +526,22 @@
               "maximum": 1
             },
             "description": "Moulins pendants entre deux piles (fractions de la longueur)."
+          },
+          "drawbridge_at": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Pont-levis (fraction de la longueur) : travée sans maisons (VH6, London Bridge)."
+          },
+          "pier_m": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Épaisseur des piles le long du pont (défaut 3,5 m)."
+          },
+          "starling_m": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Longueur des avant-becs (« starlings ») en travers du pont, au ras de l'eau (0 : aucun)."
           },
           "from_year": {
             "type": "integer"
