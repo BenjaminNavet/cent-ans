@@ -50,3 +50,24 @@ Rien d'écarté dans ce lot : les 4 constats étaient confirmés à la lecture d
 6. Corrigé (f1b0be8c) : les imposteurs sont conservés d'un saut arrière à l'autre (atlas et cuissons en cours) ; `_bake` abandonne proprement si le nœud sort de l'arbre pendant un `await`.
 
 Signatures modifiées : `BattleMusicDirector.update(delta, p_units = null)`, `BattleScene._check_sortie(siege)`, `BattleScene._build_soldier_layers(kept_impostors = null)`.
+
+## Corrections GDScript carte/UI
+
+Non exécuté (ni Godot ni cargo) : smoke test à lancer par l'orchestrateur à l'intégration.
+
+| n° | statut | commit | note |
+|---|---|---|---|
+| 1 | corrigé | `3198fc03` | `_on_load` refuse pendant `ai_replay.playing` (toast) ; `_on_end_turn` sort après `await ai_replay.play()` si `sim` a changé. |
+| 2 | corrigé | `94304f4d` | `MapUi._end_turn_pending` : une seule fin de tour tant que les deux images d'attente ne sont pas passées. |
+| 3 | corrigé | `9cdb6547` | `siege_started` / `province_captured` dans `AudioDirector.EVENT_SFX` et le journal ; mock : `province_captured`, `recruited`. Types du mock encore absents de `EventKind` : `movement`, `appointment`, `skill_learned` (laissés, traités par l'UI). Les tests n'utilisaient pas les anciens noms (les `"siege"` restants sont des alertes UI, pas des événements). |
+| 4 | corrigé | `89780e8e` | `_music_tween` tué avant un nouveau fondu ; le lecteur entrant repart de -40 dB. |
+| 5 | corrigé | `80fd6c59` | `_on_save` passe par `SaveSlots.save` (fiche écrite seulement si l'état l'est) ; `FlowController._on_save_requested` ne fait plus que la vignette, sur `map.last_save_ok`. Nuance : la fiche et la vignette étaient déjà écrites par `FlowController` ; le vrai défaut était la fiche réécrite sur un échec. |
+| 6 | corrigé | `4d14fbb3` | `_drop_freed_sources()` (tête de `_process`, clic, `pin_top_bubble`, `_remove`) + garde dans `_index_of_source`. |
+| 7 | corrigé | `ffd2540d` | `_on_reset` reconstruit le contenu sur `self` (différé, onglet courant conservé) : les ouvreurs gardent un nœud valide. |
+| 8 | corrigé | `fce38ff1` | `NewsLetters.push_news_batch(items)` : une reconstruction, un son ; utilisé par `MapUi.add_events`. |
+| 9 | corrigé (partiel) | `38e47cc8` | Minicarte diplomatique : contrôleur lu une fois par province, et pas du tout sans faction sélectionnée. Pas de fonction groupée du pont pour le contrôleur. `alerts.gd` écarté : déjà une lecture par province, qui sert aussi au siège. |
+| 10 | corrigé | `01ee9bca` | `_update_label_heights` seulement quand le seuil `weights.x > 0.35` bascule (`_label_near`) ; les hauteurs ne dépendent pas des poids continus ni du palier site ; l'alpha reste géré par `declutter`. |
+| 11 | corrigé (partiel) | `fe60b198` | Seules les tuiles de hameaux d'une province dont la dévastation a changé sont marquées. Les lectures `get_province_state` restent : aucune fonction groupée ne donne la dévastation, et elle change aussi hors fin de tour (décisions de chronique). |
+| 12 | corrigé | `0be83d77` | Plaque gardée quand le marqueur est réutilisé (même signature), `_style_plate` réappliqué ; plaques orphelines libérées. |
+
+Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_news_batch(items: Array) -> void`, `CodexBubbles._drop_freed_sources() -> void`, `SettingsMenu._build() -> void`, `SettingsMenu._rebuild() -> void`, `DiplomacyPanel._controller_of(province_id: String) -> String` ; nouvelles variables `CampaignMap.last_save_ok`, `MapUi._end_turn_pending`, `AudioDirector._music_tween`, `SettlementLayer._label_near`.
