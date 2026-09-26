@@ -56,3 +56,12 @@ faction mineure éliminée par partie, aucune majeure.
 
 Deux correctifs de données essayés puis annulés faute de dérive réelle (Paix de Dieu adoucie ;
 entretien IA en facile).
+
+## Addendum (lot EQ6, 2026-09-26) — la cible vaut à tous les niveaux de difficulté
+
+Décision du joueur : 55-75 % de guerre FR-EN à tous les niveaux (ADR 0037). Quatre règles
+nouvelles (ADR 0085) : la prétention principale passe avant les autres guerres et ne dépend pas
+de la difficulté, « Guerre interminable » au-delà de 8 ans, une couronne acculée se défend avant
+de traiter. `century_probe` : facile 48 → 63 %, normale 62 → 69 %, difficile 56 → 60 %, très
+difficile 50 → 59 % ; trêves 11,6 / 12,7 / 16,2 / 15,6 par siècle
+(`docs/wip/eq6-guerre-toutes-difficultes.md`).
