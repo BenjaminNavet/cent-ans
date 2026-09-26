@@ -78,3 +78,7 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   (cloche validée), 4,46 $ réels. Smoke + pytest 611 OK. Suites : icônes d'entité (unités,
   bâtiments, techniques…) encore en game-icons → miniatures peintes (bible § 8) ; marqueurs
   d'unité en bataille mélangés ; médaillons journal/research non branchés.
+- 26/09 : **DA3 fusionné** (ADR renuméroté **0066**, le 0060 étant la musique) : 12 pictogrammes
+  peints + atlas, écu du contrôleur, tri par rang selon le zoom dans les données, 0,59 $.
+  Cumul DA : 5,43 $. Suites : chevauchements en régions denses, légende petite, écus de maison
+  dans l'atlas.
