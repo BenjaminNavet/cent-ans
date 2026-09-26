@@ -48,16 +48,17 @@ Conversion en jeu (`LandmarkV2Library`) : unités carte = ((E − minx) / m, (ma
 | `sources` | titre, auteur, date, URL, licence, `extracted`, usage | `extracted: true` seulement si la licence permet l'usage commercial (OSM, IGN…) ; plans Gallica, Agas/MoEML, Cassini, Open Domesday : `false` (contrôle humain) |
 | `plan` | façades et profondeurs (ville close, faubourgs), largeurs de rue par rang, mélange de maisons, `detail_cell_m` | défauts : 5-8 m × 20-40 m, faubourgs 8-16 × 25-50, cellules de 250 m |
 | `osm_streets` | recette d'extraction OSM : `bbox_lonlat`, `highways`, `exclude`, `main`, `lanes`, `unnamed`, `simplify_m` | voir « Outil » |
-| `fine_rivers` | noms des fleuves de la carte fine recopiés dans `waters` | défaut : Seine |
-| `waters` | cours d'eau `[dE, dN, largeur]`, `origin` (`rivers_fine`, `osm`, `hand`), `draw` | le fleuve principal vient de la carte fine (`draw: false`, couloir interdit seulement) ; un ruisseau absent de la carte (Robec) est tracé à la main et dessiné (`draw: true`) |
+| `alpage` | recette ALPAGE (Paris seulement) : `streets` (rues de 1380) et `parcels` (parcelles Vasserot) | voir « Paris et ALPAGE » |
+| `fine_rivers` | noms des fleuves de la carte fine recopiés dans `waters` | défaut : Seine ; `[]` : pas de fleuve fin (Paris) |
+| `waters` | cours d'eau `[dE, dN, largeur]` ou lit en `polygon` (+ `holes` : îles), `origin` (`rivers_fine`, `osm`, `alpage`, `hand`), `draw` | le fleuve principal vient de la carte fine (`draw: false`, couloir interdit seulement) ; un ruisseau absent de la carte (Robec) est tracé à la main et dessiné (`draw: true`) |
 | `walls` | enceintes : `points`, `closed`, hauteur, épaisseur, tours (espacement, rayon, hauteur), `ditch_m`, `gates` (`name`, `at`, `kind`, `height_m`), dates, `note` | une enceinte ouverte (mur de rive) est une polyligne `closed: false` ; plusieurs enceintes datées possibles (Paris : Philippe Auguste, Charles V à partir de 1356) |
-| `streets` | rues : `rank` (`main`, `secondary`, `lane`), `width_m`, `origin` (`osm` régénéré par l'outil, `hand` gardé), dates | tracer à la main les rues disparues (percées ultérieures, reconstruction) |
+| `streets` | rues : `rank` (`main`, `secondary`, `lane`), `width_m`, `origin` (`osm` ou `alpage` régénérés par l'outil, `hand` gardé), dates | tracer à la main les rues disparues (percées ultérieures, reconstruction) |
 | `quays` | quais : polyligne, largeur, `kind` | bande pavée sans maisons |
 | `bridges` | `from`, `to`, largeur, hauteur du tablier au-dessus de l'eau, arches, `houses` + `house_span`, `gatehouses_at`, `mills_at`, `chapel_at`, dates | pont habité : maisons des deux côtés du tablier, base = tablier |
 | `monuments` | gabarit (`model`), `params` en mètres, `at`, `angle_deg`, `clear_m`, dates, `certainty` (`attested`, `probable`, `hypothetical`), `description` | voir « Gabarits » |
 | `districts` | quartiers : `zone` (`intra`, `faubourg`), `polygon`, `density` (part des façades occupées), `houses` (mélange du kit), `roofs` (réservé) | hors de tout quartier, aucune parcelle ; le premier quartier qui contient un point l'emporte |
 | `open_spaces` | places, marchés, parvis, cimetières (aîtres), jardins, prés, cloîtres, grèves | sans maisons ; places pavées ; arbres dans jardins, cimetières, prés |
-| `parcels` | réservé à VH5 | parcellaire importé (ALPAGE, ODbL) à la place du parcellaire généré |
+| `parcels` | parcellaire importé : `[dE, dN, angle°, façade, profondeur]` (milieu de la façade sur rue, normale vers l'intérieur) | Paris : parcelles Vasserot d'ALPAGE (ODbL) ; placées avant les lanières générées, qui comblent les façades restées libres |
 | `render` | `fade_valley` | fenêtre du fondu de la maquette |
 
 Éléments datés : `from_year` / `until_year` inclus, filtrés par l'année de la partie
@@ -146,6 +147,42 @@ Options : `--no-landmarks-1to1` (rendu d'avant VH4). Captures et mesure :
    ALPAGE pour Paris), jamais en copiant un plan non commercial.
 8. Paris peut remplir `parcels` avec le parcellaire ALPAGE (ODbL) : à implémenter dans
    `LandmarkPlan` (VH5) à la place de `_line_parcels`.
+
+## Paris et ALPAGE (VH5)
+
+Le consortium ALPAGE (LAMOP-Paris 1, dir. H. Noizet) publie sous ODbL 1.0, en téléchargement libre
+(https://alpage.huma-num.fr/gis-data/), un SIG de Paris : **« Paris en 1380 »** (P. Rouet : voies,
+îlots, usages du sol, hydrographie) et les **données Vasserot** (A.-L. Bethe : parcelles
+1810-1836). `tools/cent_ans_tools/geo/alpage.py` lit ces GeoPackage (EPSG:2154, cache
+`tools/geo/raw/alpage/`, téléchargés au besoin) :
+
+- **Rues** : le réseau de 1380 remplace la recette OSM (plus besoin d'exclure les percées
+  haussmanniennes, la rue de Rivoli ou les boulevards : ils n'y sont pas). Rang `main` pour les
+  axes majeurs ALPAGE (`AXE_MAJEUR`), `lane` pour les ruelles et voies sans nom ; recette
+  `alpage.streets` : `skip_regions` (`PONT` : ponts dans `bridges`), `exclude` (quais, tracés dans
+  `quays`), `main`, `simplify_m`. Coupées aux quartiers (+ 25 m) comme les rues OSM.
+- **Parcelles** : le cadastre Vasserot est postérieur de cinq siècles ; il ne sert que de gabarit
+  des lanières. Une parcelle est gardée si elle est dans un quartier de `alpage.parcels.districts`
+  (Cité, Ville, Université), si sa surface est plausible (15-2 500 m²), si aucune rue de 1380 ne la
+  traverse, si elle ne recouvre pas (> 30 %) un usage du sol non résidentiel de 1380 (églises,
+  couvents, palais, marchés, cimetières, eau, champs, enceintes) et si l'un de ses côtés longe
+  une rue de 1380 (à ≤ `reach_m` du bord, parallèle à 30° près). ≈ 4 800 parcelles sur ≈ 6 800
+  dans la ville close.
+- **Le reste** du fichier (enceintes, portes et poternes, emprises et orientations des églises,
+  abbayes, palais, Louvre, Châtelets, Temple, halles ; quartiers tirés des îlots de 1380 et des
+  zones bâties hors les murs ; îles, cimetières, prés ; lit de la Seine de 1380) a été écrit une
+  fois à partir des géométries ALPAGE puis est maintenu à la main.
+
+La Seine de la carte fine (axe à largeur) est trop large (≈ 130 m) et passe sur le nord de la
+Cité : Paris met `fine_rivers: []` et décrit le lit de 1380 en polygones (`waters.polygon`, îles en
+`holes`), interdits en entier aux maisons. Le rendu de l'eau reste celui de la carte fine.
+
+Moteur (rétrocompatible, Rouen inchangé) : index en grille des quartiers et des eaux
+(`LandmarkPlan.Districts.build_index`, `_water_index`), eaux en polygone, parcellaire importé
+(`_imported_parcels` : façade partagée en maisons de ≤ 11 m, profondeur réduite si la parcelle
+touche un monument ou une muraille), minutage par étape (`stats.marks_usec`). Plan de Paris :
+≈ 2-5 s dans le fil de travail selon la charge (Rouen : ≈ 2-3 s), ≈ 8 800 maisons, 110 monuments.
+Captures : `godot --path game --script res://tests/vh4_shots.gd -- --city=paris --out=<dossier>`.
 
 ## Limites connues (VH4)
 
