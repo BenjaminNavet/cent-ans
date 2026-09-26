@@ -1509,9 +1509,16 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 homes.sort();
                 homes.into_iter().map(|(_, id)| id).collect()
             };
+            // Same land mass on the grid (a cheap check: no path search).
+            let grid = data.navgrid();
+            let here = state.army_cell(data, army);
+            let land = grid.component(i64::from(here.x), i64::from(here.y));
             let reachable = |target: &SettlementId| {
-                data.settlement_point(target)
-                    .is_some_and(|p| state.find_path(data, army_id, p).is_some())
+                data.settlement_point(target).is_some_and(|p| {
+                    let cell = sim_campaign::Cell::of_point(grid, p);
+                    let (x, y) = (i64::from(cell.x), i64::from(cell.y));
+                    grid.passable(x, y) && grid.component(x, y) == land
+                })
             };
             let found = [(&table, false), (&far, false), (&table, true), (&far, true)]
                 .into_iter()
