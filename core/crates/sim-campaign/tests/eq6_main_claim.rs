@@ -1,4 +1,4 @@
-//! Lot EQ6 (ADR 0077): the war of a pretender for its main crown comes
+//! Lot EQ6 (ADR 0085): the war of a pretender for its main crown comes
 //! first (`war.main_claim_first`) and does not depend on the difficulty
 //! level (`war.claim_war_ignores_difficulty`): England presses its claim on
 //! France whatever other wars it declared lately and whatever goodwill the

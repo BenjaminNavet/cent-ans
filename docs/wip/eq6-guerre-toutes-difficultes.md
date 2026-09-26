@@ -14,7 +14,7 @@ vaut à tous les niveaux, pas seulement en Normale.
 - [x] Correctif v1 : `war.main_claim_first` + `war.claim_war_ignores_difficulty`
       (`data/ai/diplomacy.json`, cœur `diplomacy.rs::war_target`).
 - [ ] Mesure v1, réglage, non-régression EQ4/EQ5.
-- [ ] ADR 0077.
+- [ ] ADR 0085.
 
 ## Diagnostic (référence main)
 
@@ -33,6 +33,23 @@ Obstacles comptés à chaque tour de paix FR-EN (plusieurs par tour possibles) :
 - **Normale** : même mécanisme, moins marqué (l'Angleterre moins riche déclare moins ailleurs) ;
   graines 4 et 8 bloquées par l'attitude (mariages, hérauts).
 
+- **Facile, guerres de 60 ans** (graine 1, déjà 72 ans sur main) : l'Angleterre est à 100 de
+  fatigue et -82 de score pendant 50 ans, la France gagne sans rien pouvoir prendre (aucune
+  province anglaise tenue) et refuse toute paix payée ; le vainqueur ne se lasse jamais
+  (+1 par guerre, -4 de récupération par tour).
+- **Très difficile** : la France de la sonde (IA avec les handicaps du joueur) est dominée par
+  l'Angleterre 80-90 % du siècle dès 1342 ; réduite à sa capitale, elle est « acculée » et signe
+  la paix le tour même de chaque déclaration anglaise (graine 4 : une paix tous les 2 ans de 1399
+  à 1448, 21 guerres de 0 tour).
+
+## Essais
+
+| Essai | Facile (5) | Normale (10) | Difficile (10) | Très difficile (5) |
+|---|---|---|---|---|
+| main (référence) | 48 % [32-70], 1/5, 6,4 trêves | 62 % [42-75], 8/10, 11,1 | 56 % [39-65], 5/10, 13,0 | 50 % [41-60], 1/5, 15,4 |
+| v1 : prétention principale d'abord + indépendante de la difficulté | 74 % [64-83], 3/5 | 68 % [62-75], 10/10, 13,6 | 60 % [50-67], 8/10, 16,5 | 48 % [35-58], 1/5 |
+| v1 + très difficile moral IA 10 → 7 | — | — | — | 56 % [36-67], 4/5, 17,8 ; 1re faction jusqu'à 46 % |
+
 ## Prochaine étape
-Lire la mesure v1 (`scratchpad/v1`), régler la durée des trêves ou la fatigue si la Normale
-dépasse 75 %.
+Mesure v4 (v1 + « Guerre interminable » 10 ans / 3 pts / 30 max + moral très difficile 7),
+puis `balance_probe` 16 × 200 (révoltes), puis ADR 0085.

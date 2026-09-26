@@ -24,8 +24,8 @@
         "front_share": { "type": "number", "minimum": 0, "description": "Pas de nouvelle guerre tant que les ennemis qui pèsent sur nous (frontaliers ou tenant nos terres) dépassent cette part de notre puissance." },
         "pretender_ratio": { "type": "number", "minimum": 0, "description": "Rapport de puissance de coalition qu'un prétendant allié ou frontalier de sa cible doit atteindre." },
         "pretender_ratio_alone": { "type": "number", "minimum": 0, "description": "Même rapport, sans allié ni frontière." },
-        "main_claim_first": { "type": "boolean", "description": "EQ6 (ADR 0077) : la guerre pour la couronne principale revendiquée (le plus grand royaume dont on revendique le trône) passe avant toute autre prétention, et le repos qui suit une autre déclaration ne la retarde pas. Faux par défaut (comportement antérieur)." },
-        "claim_war_ignores_difficulty": { "type": "boolean", "description": "EQ6 (ADR 0077) : le niveau de difficulté (attitude et rapport de forces envers le joueur) ne décide pas si le prétendant presse sa revendication principale. Faux par défaut." }
+        "main_claim_first": { "type": "boolean", "description": "EQ6 (ADR 0085) : la guerre pour la couronne principale revendiquée (le plus grand royaume dont on revendique le trône) passe avant toute autre prétention, et le repos qui suit une autre déclaration ne la retarde pas. Faux par défaut (comportement antérieur)." },
+        "claim_war_ignores_difficulty": { "type": "boolean", "description": "EQ6 (ADR 0085) : le niveau de difficulté (attitude et rapport de forces envers le joueur) ne décide pas si le prétendant presse sa revendication principale. Faux par défaut." }
       },
       "required": ["front_share", "pretender_ratio", "pretender_ratio_alone"],
       "additionalProperties": false
@@ -85,7 +85,7 @@
         "sue_weariness": {"type": "integer", "minimum": 0, "maximum": 100, "description": "Fatigue à partir de laquelle l'IA achète la paix (terres, or, tribut)."},
         "min_war_turns": {"type": "integer", "minimum": 0, "description": "Saisons de guerre avant que l'IA ne propose un traité de paix (sauf si elle est acculée)."},
         "truce_binds_allies": {"type": "boolean", "description": "Une paix met aussi fin aux guerres des alliés et vassaux entrés dans ce conflit : ils signent la même trêve (trêve de Leulinghem, 1389, qui liait l'Écosse)."},
-        "long_war_years": {"type": "integer", "minimum": 0, "description": "EQ6 (ADR 0077) : au-delà de ce nombre d'années de guerre, les deux camps, vainqueur compris, penchent vers un traité qui y met fin (« Guerre interminable ») : une guerre que personne ne gagne finit en trêve (Brétigny, Leulinghem). 0 : désactivé."},
+        "long_war_years": {"type": "integer", "minimum": 0, "description": "EQ6 (ADR 0085) : au-delà de ce nombre d'années de guerre, les deux camps, vainqueur compris, penchent vers un traité qui y met fin (« Guerre interminable ») : une guerre que personne ne gagne finit en trêve (Brétigny, Leulinghem). 0 : désactivé."},
         "long_war_points_per_year": {"type": "integer", "minimum": 0, "description": "EQ6 : points de traité en faveur de la paix par année de guerre au-delà de long_war_years."},
         "long_war_max_points": {"type": "integer", "minimum": 0, "description": "EQ6 : plafond de ces points."}
       },
