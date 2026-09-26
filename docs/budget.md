@@ -55,6 +55,7 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 | 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « winter_lowlands » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,53 $ |
 | 2026-09-25 | OpenRouter | EP2 : panorama d'horizon « flanders_flat » (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,04 $ | 0,57 $ |
 | 2026-09-25 | Freesound (CC0) | EP4 : 27 sons libres supplémentaires (chocs acier/acier et acier/bois, impacts d'armure, cris d'effort, râles, chutes, chevaux, 3e nappe de mêlée), licence vérifiée page par page, aucun appel payant | 0,00 $ | 0,00 $ | 0,57 $ |
+| 2026-09-26 | — (données ouvertes) | EP7 : cartes historiques Crécy, Poitiers, Azincourt — relief Copernicus GLO-30 et couvert ESA WorldCover déjà en cache, tuiles d'horizon et aperçus calculés localement, aucune image générée | 0,00 $ | 0,00 $ | 0,57 $ |
 
 ## Direction artistique (25/09) — plafond propre de 50 $ (clé OpenRouter personnelle du joueur, depuis le 25/09 ~23 h)
 
