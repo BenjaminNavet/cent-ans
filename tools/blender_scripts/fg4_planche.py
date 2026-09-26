@@ -54,25 +54,41 @@ def _sheet(title, subtitle, rows, tile=TILE, label_w=260):
     return sheet
 
 
+def meta_type(meta, fig):
+    """Horse build of `fig` in the render metadata."""
+    return next((t for f, _r, t in meta["types"] if f == fig), "")
+
+
 def main():
     """Compose both sheets from the render directory given on the command line."""
     src = sys.argv[1]
     with open(os.path.join(src, "meta.json")) as f:
         meta = json.load(f)
     fig = meta["figure"]
-    rows = []
-    for clip, count in meta["clips"].items():
-        items = [
-            (os.path.join(src, f"clip_{fig}_{clip}_{k}.png"), f"image {k + 1}/{count}")
-            for k in range(count)
-        ]
-        rows.append((CLIP_LABELS.get(clip, clip), items))
-    _sheet(
-        f"FG4 — cheval fin sur les clips du rig « cavalry » ({fig})",
-        "Mêmes os, même texture d'os : poids calculés dans la pose naturelle, articulations "
-        "posées sur les pivots des clips. Rendu Eevee, cavalier actuel (en attendant FG1).",
-        rows,
-    ).save(os.path.join(OUT_DIR, "fg4_clips.png"), optimize=True)
+    for k, (cfig, clips) in enumerate(meta["clips"].items()):
+        rows = []
+        for clip, count in clips.items():
+            items = [
+                (
+                    os.path.join(src, f"clip_{cfig}_{clip}_{i}.png"),
+                    f"image {i + 1}/{count}",
+                )
+                for i in range(count)
+            ]
+            rows.append((CLIP_LABELS.get(clip, clip), items))
+        horse = TYPE_LABELS.get(meta_type(meta, cfig), "")
+        _sheet(
+            f"FG4 — cheval fin sur les clips du rig « cavalry » ({cfig}, {horse})",
+            "Mêmes os, même texture d'os : poids calculés dans la pose naturelle, "
+            "articulations posées sur les pivots des clips. Rendu Eevee, cavalier actuel "
+            "(en attendant FG1).",
+            rows,
+        ).save(
+            os.path.join(
+                OUT_DIR, "fg4_clips.png" if k == 0 else f"fg4_clips_{cfig}.png"
+            ),
+            optimize=True,
+        )
     types = [
         (
             os.path.join(src, f"type_{f}_{robe}.png"),
