@@ -14,6 +14,10 @@
 // Changement d'état : fondu de `blend_time` secondes depuis le jeu précédent (`prev_*`).
 // Matières selon COLOR.a × 16 (code) : livrée, bordure, plates, mailles, tissu, couleur exacte,
 // armoiries (UV), peau, cuir, cheveux, robe du cheval, bois, gambison matelassé.
+// Lot FG3 : variante `FG3_BAKED` (posée par BattleSkinned pour les figurines fines cuites
+// seulement ; le rendu par défaut est compilé sans ces lignes) : atlas par figurine (normale de
+// forme, occlusion, masque) et tuiles de détail partagées par matière, lus au LOD0/LOD1 (UV
+// d'atlas empaquetée dans UV2.y ; LOD2 : aucune lecture).
 shader_type spatial;
 render_mode cull_back, diffuse_burley, specular_schlick_ggx;
 
@@ -110,6 +114,45 @@ const int CODE_UNARMED = 8;
 // Lisibilité lointaine (A1-01) : la livrée s'éclaire au-delà de `far_start` mètres.
 uniform float far_start = 70.0;
 uniform float far_boost = 0.35;
+
+#ifdef FG3_BAKED
+// Atlas des figurines fines (couche = figurine) : RG normale de forme (espace tangent de l'UV
+// d'atlas), B occlusion cuite, A masque selon la matière (barbe/cheveux : densité ; peau :
+// sourcils, lèvres, barbe naissante ; plates : martelage ; étoffe teinte : zone de livrée ;
+// autres : 1). Tuiles de détail (couches FG3_TILE_*) : RG normale, B relief (albédo), A rugosité.
+// Pelage du cheval (CC0 réduit, UV d'origine) : RG normale, B relief de la robe, A occlusion.
+uniform sampler2DArray fine_atlas0 : filter_linear_mipmap_anisotropic, repeat_disable;
+uniform sampler2DArray fine_atlas1 : filter_linear_mipmap, repeat_disable;
+uniform sampler2DArray fine_detail : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D fine_horse : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform int fine_layer = -1;
+// Au-delà (m), plus aucune lecture de carte (LOD2 et imposteurs lointains).
+uniform float fine_distance = 80.0;
+// Tuiles : couche et taille (m) par matière.
+const int FG3_TILE_MAIL = 0;
+const int FG3_TILE_WEAVE = 1;
+const int FG3_TILE_FELT = 2;
+const int FG3_TILE_LEATHER = 3;
+const int FG3_TILE_HAMMERED = 4;
+const int FG3_TILE_WOOD = 5;
+const int FG3_TILE_SKIN = 6;
+const int FG3_TILE_HAIR = 7;
+const float FG3_TILE_SIZE[8] = float[](0.072, 0.024, 0.08, 0.12, 0.16, 0.3, 0.06, 0.05);
+// Teints (multipliés par la couleur du sommet) : pâle, clair rosé, hâlé, olivâtre, buriné,
+// brun (bible : variation par soldat).
+const vec3 FG3_SKIN[6] = vec3[](
+	vec3(1.12, 1.04, 0.98), vec3(1.08, 0.94, 0.86), vec3(0.96, 0.82, 0.66),
+	vec3(0.88, 0.80, 0.62), vec3(0.84, 0.66, 0.52), vec3(0.62, 0.48, 0.36)
+);
+// Cheveux et barbes (linéaires) : châtain, brun, blond cendré, roux, noir, grisonnant, blanc.
+const vec3 FG3_HAIR[7] = vec3[](
+	vec3(0.11, 0.065, 0.035), vec3(0.065, 0.04, 0.022), vec3(0.30, 0.22, 0.12),
+	vec3(0.26, 0.10, 0.04), vec3(0.035, 0.03, 0.028), vec3(0.20, 0.18, 0.16),
+	vec3(0.42, 0.40, 0.37)
+);
+varying vec2 v_atlas;
+varying flat int v_src;
+#endif
 
 varying vec3 v_color;
 varying float v_code;
@@ -313,6 +356,12 @@ void vertex() {
 	v_code = COLOR.a;
 	v_var = h;
 	v_blood = max(own_blood, blood);
+#ifdef FG3_BAKED
+	// UV d'atlas : u, v sur 11 bits, source sur 2 (1 atlas LOD0, 3 atlas LOD1, 2 cheval).
+	int packed = int(UV2.y + 0.5);
+	v_src = fine_layer >= 0 ? (packed >> 22) & 3 : 0;
+	v_atlas = vec2(float(packed & 2047), float((packed >> 11) & 2047)) / 2047.0;
+#endif
 }
 
 // Couleurs naturelles (linéaires) des vêtements non teints aux couleurs de la livrée.
@@ -376,6 +425,23 @@ vec4 arms_sample(vec2 uv) {
 	}
 	return has_heraldry ? texture(heraldry, uv) : vec4(0.0);
 }
+
+#ifdef FG3_BAKED
+// Normale perturbée par une carte d'espace tangent sans tangentes stockées : repère
+// cotangent tiré des dérivées écran de la position et de l'UV (v vers le haut de la carte).
+vec3 fg3_perturb(vec3 n, vec3 dp1, vec3 dp2, vec2 duv1, vec2 duv2, vec2 nxy) {
+	vec3 dp2perp = cross(dp2, n);
+	vec3 dp1perp = cross(n, dp1);
+	vec3 t = dp2perp * duv1.x + dp1perp * duv2.x;
+	vec3 b = dp2perp * duv1.y + dp1perp * duv2.y;
+	float m = max(dot(t, t), dot(b, b));
+	if (m < 1e-20) {
+		return n;
+	}
+	float inv = inversesqrt(m);
+	return normalize(t * (inv * nxy.x) + b * (inv * nxy.y) + n);
+}
+#endif
 
 void fragment() {
 	int code = int(v_code * 16.0 + 0.5);
@@ -478,6 +544,109 @@ void fragment() {
 		albedo = COATS[int(v_var.w * 4.99)] * v_color;
 		roughness = 0.6;
 	}
+#ifdef FG3_BAKED
+	// Lot FG3 : cartes cuites (LOD0/LOD1 des figurines fines). Dérivées prises hors des
+	// branches (contrôle de flux uniforme), lectures en textureGrad.
+	vec3 fg_dp1 = dFdx(VERTEX);
+	vec3 fg_dp2 = dFdy(VERTEX);
+	vec2 fg_da1 = dFdx(v_atlas);
+	vec2 fg_da2 = dFdy(v_atlas);
+	vec2 fg_dq1 = dFdx(q);
+	vec2 fg_dq2 = dFdy(q);
+	float fg_ao = 1.0;
+	if (v_src != 0 && dist < fine_distance) {
+		vec4 at;
+		if (v_src == 2) {
+			at = textureGrad(fine_horse, v_atlas, fg_da1, fg_da2);
+		} else if (v_src == 1) {
+			at = textureGrad(fine_atlas0, vec3(v_atlas, float(fine_layer)), fg_da1, fg_da2);
+		} else {
+			at = textureGrad(fine_atlas1, vec3(v_atlas, float(fine_layer)), fg_da1, fg_da2);
+		}
+		// Le v de la carte descend : le repère prend -v.
+		vec3 n = fg3_perturb(NORMAL, fg_dp1, fg_dp2, vec2(fg_da1.x, -fg_da1.y), vec2(fg_da2.x, -fg_da2.y), at.rg * 2.0 - 1.0);
+		float mask = at.a;
+		if (v_src == 2) {
+			// Cheval : relief de la robe (passe-haut de la couleur CC0) et occlusion fine.
+			albedo *= mix(0.6, 1.4, at.b);
+			fg_ao = at.a;
+			mask = 1.0;
+		} else {
+			fg_ao = at.b;
+		}
+		int tl = -1;
+		float amt = 0.0;
+		float relief = 0.5;
+		vec3 skin_tone = vec3(0.50, 0.33, 0.24) * FG3_SKIN[int(h6 * 5.99)];
+		if (code == C_MAIL) {
+			tl = FG3_TILE_MAIL;
+			amt = 1.0;
+			relief = 0.0; // albédo refait ci-dessous
+		} else if (code == C_PLATE) {
+			// Martelage : fort sur les casques (masque), léger sur les autres plates.
+			tl = FG3_TILE_HAMMERED;
+			amt = mix(0.2, 0.85, mask);
+			relief = 0.12;
+		} else if (code == C_TRIM) {
+			tl = FG3_TILE_HAMMERED;
+			amt = 0.3;
+			relief = 0.1;
+		} else if (code == C_LIVERY || code == C_ARMS || code == C_CLOTH) {
+			tl = FG3_TILE_WEAVE;
+			amt = 0.55;
+			relief = 0.25;
+		} else if (code == C_QUILT) {
+			tl = FG3_TILE_FELT;
+			amt = 0.7;
+			relief = 0.35;
+		} else if (code == C_LEATHER) {
+			tl = FG3_TILE_LEATHER;
+			amt = 0.8;
+			relief = 0.45;
+		} else if (code == C_WOOD) {
+			tl = FG3_TILE_WOOD;
+			amt = 0.7;
+			relief = 0.5;
+		} else if (code == C_SKIN) {
+			tl = FG3_TILE_SKIN;
+			amt = 0.35;
+			relief = 0.12;
+			// Teints variés ; le masque assombrit sourcils et barbe naissante vers le poil.
+			albedo = v_color * FG3_SKIN[int(h6 * 5.99)] * mix(0.94, 1.06, v_var.z);
+			albedo = mix(FG3_HAIR[int(h5 * 6.99)] * 1.4, albedo, mix(0.35, 1.0, mask));
+		} else if (code == C_HAIR || code == C_COAT) {
+			tl = FG3_TILE_HAIR;
+			amt = code == C_HAIR ? 0.9 : 0.45;
+			relief = code == C_HAIR ? 0.0 : 0.3;
+		}
+		if (tl >= 0) {
+			float size = FG3_TILE_SIZE[tl];
+			vec4 d = textureGrad(fine_detail, vec3(vec2(q.x, -q.y) / size, float(tl)), vec2(fg_dq1.x, -fg_dq1.y) / size, vec2(fg_dq2.x, -fg_dq2.y) / size);
+			n = fg3_perturb(n, fg_dp1, fg_dp2, fg_dq1, fg_dq2, (d.rg * 2.0 - 1.0) * amt);
+			albedo *= 1.0 + relief * (d.b * 2.0 - 1.0);
+			if (code == C_MAIL) {
+				// Mailles lisibles sans être noires : anneaux clairs, creux sombres, moins
+				// métalliques que l'acier plein (pas de reflet du ciel dans la maille serrée).
+				albedo = v_color * mix(0.85, 1.1, v_var.z) * mix(0.42, 1.3, d.b);
+				metallic = 0.6;
+				roughness = mix(0.7, 0.32, d.a);
+				fg_ao = mix(0.55, 1.0, fg_ao);
+			} else if (code == C_HAIR) {
+				// Barbes et cheveux : couleur plus claire et variée ; la densité (masque) fond
+				// les bords et la bouche dans la peau, les mèches cassent la lisière.
+				vec3 hair = FG3_HAIR[int(h6 * 6.99)] * (v_color.r > 0.2 ? 1.2 : 1.0);
+				float cover = smoothstep(0.25, 0.75, mask * (0.55 + 0.9 * d.b));
+				albedo = mix(skin_tone, hair * mix(0.75, 1.2, d.b), cover);
+				roughness = mix(0.6, 0.75, cover);
+			} else {
+				roughness = mix(roughness, roughness * (0.6 + 0.8 * d.a), min(amt, 1.0));
+			}
+		}
+		albedo *= mix(1.0, fg_ao, 0.55);
+		NORMAL = n;
+	}
+	AO = fg_ao;
+#endif
 	// Taches de sang : invisibles au loin, pas calculées au-delà de 90 m (coût des vivants).
 	if (v_blood > 0.0 && code != C_PLATE && dist < 90.0) {
 		// Deux octaves : taches arrondies et éclaboussures fines (lot BV2).

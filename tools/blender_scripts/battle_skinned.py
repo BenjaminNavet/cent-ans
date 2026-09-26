@@ -540,9 +540,27 @@ def held_mask(name, mask, kwargs):
     return mask
 
 
+ATLAS_UV = "fg_atlas"
+ATLAS_BITS = 11  # per coordinate; 2 more bits for the source (exact in a float32)
+
+
+def pack_atlas_uv(uv, src):
+    """FG3: atlas UV (Blender convention, v up) and source packed in one float.
+
+    ``src * 2^22 + v * 2^11 + u`` with u, v quantised to 11 bits in the texture's convention
+    (v down); the shader unpacks it per vertex (``CAM2``, UV2.y).
+    """
+    top = (1 << ATLAS_BITS) - 1
+    u = min(max(int(round((uv[0] % 1.0 if uv[0] != 1.0 else 1.0) * top)), 0), top)
+    v = min(max(int(round((1.0 - (uv[1] % 1.0 if uv[1] != 1.0 else 1.0)) * top)), 0), top)
+    return float((src << (2 * ATLAS_BITS)) | (v << ATLAS_BITS) | u)
+
+
 def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
     """Write the figure (world space, rest pose) with skinning data to `path`."""
     positions, normals, colors, uvs, bones, weights, masks = [], [], [], [], [], [], []
+    atlas = []  # FG3: packed atlas UV per vertex (0 = none), written as ``CAM2``
+    has_atlas = False
     indices = []
     lookup = {}
     tris = 0
@@ -564,6 +582,13 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
         if shade_attr is not None and shade_attr.domain != "POINT":
             shade_attr = None
         uv_layer = me.uv_layers.active
+        # FG3: optional ``fg_atlas`` UV layer (baked maps of the fine figures), source
+        # code in the object property ``fg_atlas_src`` (1 figure atlas, 2 horse coat).
+        atlas_layer = me.uv_layers.get(ATLAS_UV)
+        atlas_src = int(obj.get("fg_atlas_src", 1)) if atlas_layer else 0
+        if atlas_layer is not None and atlas_layer == uv_layer:
+            uv_layer = next((u for u in me.uv_layers if u.name != ATLAS_UV), None)
+        has_atlas = has_atlas or atlas_layer is not None
         corner_normals = me.corner_normals
         for tri in me.loop_triangles:
             mat = (
@@ -592,6 +617,11 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
                     TO_GODOT.to_3x3() @ (nm @ Vector(corner_normals[li].vector))
                 ).normalized()
                 uv = tuple(uv_layer.data[li].uv) if uv_layer else (0.0, 0.0)
+                packed = (
+                    pack_atlas_uv(atlas_layer.data[li].uv, atlas_src)
+                    if atlas_layer
+                    else 0.0
+                )
                 acc = {}
                 for g in me.vertices[vi].groups:
                     name = groups.get(g.group)
@@ -615,6 +645,7 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
                     tuple(round(c, 4) for c in uv),
                     mask,
                     tuple((b, round(w, 3)) for b, w in top),
+                    packed,
                 )
                 idx = lookup.get(key)
                 if idx is None:
@@ -627,6 +658,7 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
                     bones.append([float(b) for b, _w in top])
                     weights.append([w for _b, w in top])
                     masks.append(float(mask))
+                    atlas.append(packed)
                 face.append(idx)
             # Godot front faces are clockwise: swap the winding of Blender's CCW triangles.
             indices.extend((face[0], face[2], face[1]))
@@ -645,9 +677,11 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
         for item in arr:
             raw += struct.pack(f"<{width}f", *item)
     raw += struct.pack(f"<{n}f", *masks)
+    if has_atlas:
+        raw += struct.pack(f"<{n}f", *atlas)
     raw += struct.pack(f"<{len(indices)}I", *indices)
     with open(path, "wb") as f:
-        f.write(b"CAM1")
+        f.write(b"CAM2" if has_atlas else b"CAM1")
         f.write(struct.pack("<III", n, len(indices), len(raw)))
         f.write(zlib.compress(bytes(raw), 9))
     xs = [p[0] for p in positions]
