@@ -113,6 +113,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 		"gates": [],
 		"trees": PackedVector3Array(),
 		"bridge": {},
+		"bridges": [],
 		"v2_monuments": [],
 		"fixed_bases": {},
 		"detail_cell_m": float(plan.get("detail_cell_m", 250.0)),
@@ -351,7 +352,11 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 	for k in 5:
 		water = minf(water, heights.height_m(lerpf(a.x, c.x, 0.3 + 0.1 * k), lerpf(a.y, c.y, 0.3 + 0.1 * k)))
 	var deck := maxf(bank, water + float(b.get("deck_m", 7.0)))
-	out["bridge"] = {"x": mid.x, "y": mid.y, "yaw": atan2(d.y, d.x), "length": length + 8.0, "width": width, "deck": deck, "water": water, "arches": int(b.get("arches", maxi(1, int(length / 18.0))))}
+	var deck_info := {"id": str(b.get("id", "")), "x": mid.x, "y": mid.y, "yaw": atan2(d.y, d.x), "length": length + 8.0, "width": width, "deck": deck, "water": water, "bank": bank, "arches": int(b.get("arches", maxi(1, int(length / 18.0)))), "material": str(b.get("material", "stone"))}
+	# `bridge` : premier pont (compatibilité VH4) ; `bridges` : tous les ponts (Paris : quatre en 1340).
+	if (out["bridge"] as Dictionary).is_empty():
+		out["bridge"] = deck_info
+	(out["bridges"] as Array).append(deck_info)
 	occ.segment(a - d * 10.0, c + d * 10.0, width * 0.5 + 1.0)
 	var n := Vector2(-d.y, d.x)
 	# Maisons du pont : façade sur le tablier, en encorbellement au-dessus de l'eau.

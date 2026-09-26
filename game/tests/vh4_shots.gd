@@ -92,6 +92,9 @@ func _init() -> void:
 		var path := out_dir.path_join("%s_%s.jpg" % [city, shot[0]])
 		image.save_jpg(path, 0.85)
 		var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
+		if lc != null and shot[0] == "cite":
+			for b: Dictionary in lc.plan_of(settlement).get("bridges", []):
+				print("VH4 bridge %s deck %.1f water %.1f bank %.1f m" % [b["id"], b["deck"], b["water"], b["bank"]])
 		print("VH4 shot %s d=%.2f (min %.2f) fade %.2f city %s" % [path, rig.target_distance, rig.min_distance_at(focus),
 			lc.fade(settlement) if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
 	if fps:
