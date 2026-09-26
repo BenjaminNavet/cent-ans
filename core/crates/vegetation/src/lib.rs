@@ -32,7 +32,9 @@ const LAYOUTS: [[f64; 4]; 2] = [[0.35, 5.0, 4.2, 0.0], [-0.8, 4.6, 3.8, 2.1]];
 // --- Relief pyramid (`ReliefPyramid`, `ReliefQuadtree`) ---
 pub const PAGE_PX: usize = 512;
 const ROOT_TILE_UNITS: f64 = 256.0;
-const GRID_OFFSET: f64 = -0.5;
+/// Tile grid offset from map coordinates: 0 since SZ2b (ADR 0086, map pixel i centred at
+/// x = i + 0.5 like every tool-side vector).
+const GRID_OFFSET: f64 = 0.0;
 
 /// Map-wide rasters, shared by every job.
 #[derive(Default)]
@@ -69,13 +71,13 @@ impl MapRasters {
         self.height[offset] as f64 / 255.0
     }
 
-    /// `MapData.height_m_at` (bilinear, clamped).
+    /// `MapData.height_m_at` (bilinear, clamped; pixel i centred at x = i + 0.5, ADR 0086).
     fn height_m_at(&self, x: f64, y: f64) -> f64 {
         if self.width == 0 {
             return 0.0;
         }
-        let fx = x.clamp(0.0, self.width as f64 - 1.0);
-        let fy = y.clamp(0.0, self.height_px as f64 - 1.0);
+        let fx = (x - 0.5).clamp(0.0, self.width as f64 - 1.0);
+        let fy = (y - 0.5).clamp(0.0, self.height_px as f64 - 1.0);
         let x0 = fx as i64;
         let y0 = fy as i64;
         let tx = fx - x0 as f64;
