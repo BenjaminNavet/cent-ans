@@ -88,15 +88,10 @@ def _shot(out, name, view, res=(640, 480)):
 
 
 def build(fig_name, level):
-    """Posable figure (rider + fine horse + harness) at `level`."""
-    import battle_skinned_figures as figures
-
-    mount, rider, horse, extra = fc.build_figure(
-        fig_name, figures.FIGURES[fig_name], level
-    )
+    """Posable figure (fine rider + fine horse + harness) at `level`."""
+    mount, rider, horse, extra = fc.build_figure(fig_name, level)
     fp.PROBE["rig"] = fp.probe_rig(mount.rarm, "R:")
     _rig_rider(rider, mount)
-    fc.attach(horse, mount)
     return mount, rider, horse, extra
 
 

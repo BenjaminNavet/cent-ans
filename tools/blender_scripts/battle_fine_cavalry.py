@@ -1,29 +1,23 @@
-"""Lot FG4: fine horse in production for the mounted battle figures (``cavalry`` rig).
+r"""Lot FG4: fine horse, harness and bards of the mounted battle figures (``cavalry`` rig).
 
-Run from the repository root:
-
-    blender -b --factory-startup --python tools/blender_scripts/battle_fine_cavalry.py -- \
-        [--only cavalry_0,standard_1] [--render DIR] [--no-export]
-
-For every mounted recipe of ``battle_skinned_figures`` (``cavalry_0``-``6``, ``standard_1``)
-and every level of detail: the current Quaternius rider and his equipment
-(``battle_skinned_cavalry.build_cavalry``), the CC0 horse fitted on the same bones
-(``battle_fine_horse.build_horse``) in one of three builds (destrier, rouncey, jennet),
-harness and bards, then one ``CAM1`` mesh per LOD in ``game/assets/models/battle_fine/``
-and a manifest fragment ``manifest_horse.json`` (same entries as ``battle_skinned``'s
-manifest; the ``--fine-figures`` loader of lot FG1 merges it). The bone texture stays
-``battle_skinned/cavalry.bones.bin`` (same bones, same clips).
+Used by the FG1 pipeline (``battle_fine.py figures``, ``battle_fine_figures.build_figure``):
+for every mounted recipe (``cavalry_0``-``6``, ``standard_1``) and level of detail, the
+CC0 horse fitted on the Quaternius horse bones (``battle_fine_horse.build_horse``) in one of
+three builds (destrier, rouncey, jennet), with its harness and the bards of the recipe
+(``horse_and_harness``), replaces the Quaternius horse under the fine rider.
 
 Colour and material codes per vertex as in ``battle_skinned``: the coat is ``C_COAT`` with a
 per-vertex shade (``fg_shade``) that the shader's robe tint multiplies (bay, chestnut, black,
 grey, dun by soldier); mane and tail follow the robe, darker.
 
-``--render DIR``: clip sheets (Eevee, several frames per clip) and the horse builds / robes
-sheet, composed into ``docs/img/fg/fg4_*.png`` by ``fg4_planche.py``.
+Check renders (Eevee, several frames per clip, horse builds and robes, LODs):
+
+    blender -b --factory-startup --python tools/blender_scripts/battle_fine_cavalry.py \
+        -- --render DIR [--only cavalry_0,cavalry_1]
+    uv run --project tools python tools/blender_scripts/fg4_planche.py DIR
 """
 
 import contextlib
-import json
 import math
 import os
 import sys
@@ -41,10 +35,6 @@ import bpy  # noqa: E402
 from mathutils import Vector  # noqa: E402
 from mathutils.bvhtree import BVHTree  # noqa: E402
 from mathutils.kdtree import KDTree  # noqa: E402
-
-OUT_DIR = os.path.join(bs.ROOT, "game", "assets", "models", "battle_fine")
-MANIFEST = os.path.join(OUT_DIR, "manifest_horse.json")
-SKINNED_MANIFEST = os.path.join(bs.OUT_DIR, "manifest.json")
 
 MOUNTED = [
     "cavalry_0",
@@ -768,13 +758,12 @@ def attach(objs, mount):
         o.matrix_parent_inverse = mount.harm.matrix_world.inverted()
 
 
-def build_figure(fig_name, recipe, level):
-    """Rider (current kit) + fine horse + harness of a mounted figure at `level`."""
-    rider_recipe = dict(recipe, horse_equipment=[], horse_budget=[0, 0, 0])
-    objs = cav.build_cavalry(rider_recipe, level)
-    mount = poses.RIDE["mount"]
-    q_meshes = set(mount.hmeshes)
-    rider = [o for o in objs if o not in q_meshes]
+def horse_and_harness(fig_name, recipe, level, mount):
+    """Fine horse, harness and bards of a mounted figure at `level`, on `mount`.
+
+    `mount` is the ``battle_skinned_cavalry`` mount just built (its Quaternius horse meshes
+    are replaced). Returns the objects, variant masks set, tagged ``fg4``.
+    """
     _BVH.clear()
     horse = fine_horse(mount, level, HORSE_OF[fig_name])
     body = next(o for o in horse if o.name == "horse_body")
@@ -787,13 +776,34 @@ def build_figure(fig_name, recipe, level):
         set_mask(obj, mask)
         if obj.name == "caparison":
             faces = hidden_faces(body, obj)
-            print(f"HIDDEN {fig_name} LOD{level} {len(faces)} faces under the caparison")
+            print(
+                f"HIDDEN {fig_name} LOD{level} {len(faces)} faces under the caparison"
+            )
             if mask == 0:
                 _delete_faces(body, faces)
             else:
                 set_mask(body, everyone & ~mask, faces)
-    extra = [o for o, _m in kit]
-    attach(extra, mount)
+    out = horse + [o for o, _m in kit]
+    for o in out:
+        o["fg4"] = True
+    print(
+        f"HORSE {fig_name} LOD{level} {HORSE_OF[fig_name]} horse={_tris(horse)} "
+        f"harness={_tris(out) - _tris(horse)}"
+    )
+    return out
+
+
+def build_figure(fig_name, level):
+    """Whole fine figure (FG1 rider, fine horse): (mount, rider, horse, harness)."""
+    import battle_fine_figures as ff
+
+    _arm, objs, _recipe = ff.build_figure(fig_name, level)
+    mount = poses.RIDE["mount"]
+    mine = [o for o in objs if o.get("fg4")]
+    rider = [o for o in objs if not o.get("fg4")]
+    horse = [o for o in mine if o.name.startswith("horse_")]
+    extra = [o for o in mine if not o.name.startswith("horse_")]
+    attach(mine, mount)
     return mount, rider, horse, extra
 
 
@@ -815,67 +825,12 @@ def _tris(objs):
     return total
 
 
-def export(names):
-    """Export the fine mounted figures and write the manifest fragment."""
-    import battle_skinned_figures as figures
-
-    os.makedirs(OUT_DIR, exist_ok=True)
-    with open(SKINNED_MANIFEST) as f:
-        rig = bs.rig_stub("cavalry", json.load(f)["rigs"]["cavalry"]["bones"])
-    manifest = {"figures": {}}
-    if os.path.exists(MANIFEST):
-        with open(MANIFEST) as f:
-            manifest = json.load(f)
-    for fig_name in names:
-        recipe = figures.FIGURES[fig_name]
-        files, tris, horse_tris = [], [], []
-        for level in range(3):
-            mount, rider, horse, extra = build_figure(fig_name, recipe, level)
-            name = f"{fig_name}_lod{level}.mesh.bin"
-            tris.append(
-                bs.export_mesh(
-                    rider + horse + extra,
-                    rig,
-                    cav.cavalry_alias,
-                    os.path.join(OUT_DIR, name),
-                    influences=bs.INFLUENCES[level],
-                )
-            )
-            horse_tris.append(_tris(horse))
-            files.append(name)
-            print(
-                f"FINE {fig_name} LOD{level} total={tris[-1]} horse={horse_tris[-1]} "
-                f"harness={_tris(extra)} rider={_tris(rider)}"
-            )
-        entry = {
-            "rig": "cavalry",
-            "lods": files,
-            "tris": tris,
-            "horse": HORSE_OF[fig_name],
-            "horse_tris": horse_tris,
-            "variants": recipe.get("variants", 1),
-            "style": recipe.get("style", ""),
-            "noble": recipe.get("noble", False),
-        }
-        entry.update(bs.pole_entry(recipe, poses.RIDE["mount"].rarm))
-        manifest["figures"][fig_name] = entry
-    manifest["source"] = (
-        "tools/blender_scripts/battle_fine_cavalry.py (lot FG4: CC0 OpenGameArt horse, "
-        "see game/assets/third_party/animals/oga_rigged_horse/SOURCE.md)"
-    )
-    manifest["bones"] = "battle_skinned/cavalry.bones.bin"
-    with open(MANIFEST, "w") as f:
-        json.dump(manifest, f, indent=1, sort_keys=True)
-
-
 def main():
-    """Parse the arguments and run the export and/or the renders."""
+    """Check renders (``--render DIR``) of the fine mounted figures."""
     args = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     names = MOUNTED
     if "--only" in args:
         names = [n for n in args[args.index("--only") + 1].split(",") if n in MOUNTED]
-    if "--no-export" not in args:
-        export(names)
     if "--render" in args:
         import fg4_render
 
