@@ -67,7 +67,7 @@ Points ouverts :
   le checkout principal écrase la lib de `gp-review` et inversement (j'ai vu mes tests tourner sur
   la lib du dépôt principal). J'ai travaillé dans un profil isolé :
   `cargo test --config 'profile.review.inherits="dev"' --config 'profile.review.debug=0' --profile review`
-  (`target/review`, ~350 Mo). Les résultats de sim-campaign sur `gp-review` en `debug` sont à
+  (`target/review`, ~1,7 Go, supprimé à la fin). Les résultats de sim-campaign sur `gp-review` en `debug` sont à
   revérifier ainsi.
 - `disengaging` retombe à faux au premier pas hors contact ; en pivotant, le rectangle du
   régiment peut retoucher l'ennemi et `enter_melee` annule alors la destination (vu en test :
