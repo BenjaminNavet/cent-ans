@@ -1,0 +1,148 @@
+extends SceneTree
+
+## Test headless du lot PB3g (sélection native du quadtree de relief, ADR 0092) sur les vraies
+## données et la pyramide en cache (sauté, avec un message, sans quadtree ou sans extension) :
+##  1. pour plusieurs caméras (France entière, Paris de haut, Paris proche, au ras du sol vers
+##     l'horizon, Loire en oblique) et plusieurs images, la sélection native (`ReliefLod`) et la
+##     sélection GDScript sur le même état des pages donnent les mêmes nœuds (clés), les mêmes
+##     pages fines et grossières, les mêmes pages voulues ;
+##  2. les nœuds affichés correspondent à la sélection (un `MeshInstance3D` visible par nœud) ;
+##  3. `VegetationScatter.request_reground` : même résultat avec les pages partagées du magasin
+##     natif (`qt_store`) qu'avec la copie des octets.
+## Usage : godot --headless --path game --script res://tests/pb3g_quadtree_test.gd
+
+const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
+
+var _failures := 0
+
+
+func _init() -> void:
+	await process_frame
+	await _run()
+	print("pb3g_quadtree_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
+	quit(1 if _failures > 0 else 0)
+
+
+func _check(condition: bool, message: String) -> bool:
+	if not condition:
+		_failures += 1
+		push_error("pb3g_quadtree_test: " + message)
+	return condition
+
+
+func _run() -> void:
+	if not ClassDB.class_exists("ReliefLod"):
+		print("pb3g_quadtree_test: extension without ReliefLod, skipped")
+		return
+	var map_dir := MAP_PATHS.default_data_dir().path_join("map")
+	var map_data := MapData.load_from_dir(map_dir)
+	if not _check(map_data.load_error == "", "map load failed: %s" % map_data.load_error):
+		return
+	var world := Node3D.new()
+	root.add_child(world)
+	var terrain := TerrainBuilder.new()
+	world.add_child(terrain)
+	terrain.build(map_data)
+	if terrain.quadtree == null:
+		print("pb3g_quadtree_test: no relief pyramid in cache, skipped")
+		return
+	var qt := terrain.quadtree
+	_check(qt.is_native(), "quadtree should use the native selection")
+	var camera := Camera3D.new()
+	world.add_child(camera)
+	camera.current = true
+	var paris := Vector2(2213.2, 1923.9)
+	var loire := Vector2(1850.0, 2330.0)
+	var views := [
+		["france", Vector2(2048.0, 2048.0), Vector3(0.0, 2600.0, 1400.0)],
+		["paris_150", paris, Vector3(0.0, 110.0, 100.0)],
+		["paris_40", paris, Vector3(0.0, 25.0, 30.0)],
+		["paris_ground", paris, Vector3(0.0, 1.5, 6.0)],
+		["loire_oblique", loire, Vector3(60.0, 18.0, 70.0)],
+	]
+	var compared := 0
+	for view: Array in views:
+		var at: Vector2 = view[1]
+		var focus := Vector3(at.x, map_data.surface_world_at(at.x, at.y), at.y)
+		camera.look_at_from_position(focus + (view[2] as Vector3), focus, Vector3.UP)
+		var d := (view[2] as Vector3).length()
+		for frame in 6:
+			terrain.update_lod(camera.global_position, d, focus, 170.0)
+			compared += _compare(qt, camera, "%s/%d" % [view[0], frame])
+			if frame % 2 == 1:
+				qt.wait_jobs()
+			await process_frame
+		_check_slots(qt, str(view[0]))
+	_check(compared >= 25, "too few comparisons: %d" % compared)
+	print("pb3g_quadtree_test: %d selections compared, %d pages resident" % [compared, qt.page_count()])
+	_check_reground(qt, paris)
+
+
+## Compare la sélection native de la dernière image à la sélection GDScript ; 1 si comparée.
+func _compare(qt: ReliefQuadtree, camera: Camera3D, label: String) -> int:
+	var cmp := qt.compare_selection(camera)
+	if not _check(not cmp.is_empty(), "%s: no comparison" % label):
+		return 0
+	var native: Dictionary = cmp["native"]
+	var gd: Dictionary = cmp["gdscript"]
+	var keys_n: PackedInt64Array = native["keys"]
+	var keys_g: PackedInt64Array = gd["keys"]
+	_check(keys_n.size() > 0, "%s: empty selection" % label)
+	if not _check(keys_n == keys_g, "%s: node keys differ (%d native / %d GDScript)" % [label, keys_n.size(), keys_g.size()]):
+		return 1
+	_check(native["fine"] == gd["fine"], "%s: fine pages differ" % label)
+	_check(native["coarse"] == gd["coarse"], "%s: coarse pages differ" % label)
+	var dist_n: PackedFloat64Array = native["dist"]
+	var dist_g: PackedFloat64Array = gd["dist"]
+	var worst := 0.0
+	for i in dist_n.size():
+		worst = maxf(worst, absf(dist_n[i] - dist_g[i]))
+	_check(worst == 0.0, "%s: distances differ by %f" % [label, worst])
+	_check(int(cmp["native_missing"]) == int(cmp["gd_missing"]), "%s: missing pages %d / %d" % [label, cmp["native_missing"], cmp["gd_missing"]])
+	_check(cmp["native_wanted"] == cmp["gd_wanted"], "%s: wanted pages differ" % label)
+	return 1
+
+
+## Un nœud visible par élément sélectionné, aux clés de la sélection.
+func _check_slots(qt: ReliefQuadtree, label: String) -> void:
+	var visible := 0
+	for child in qt.get_children():
+		if child is MeshInstance3D and child.visible:
+			visible += 1
+	_check(visible == qt.item_count(), "%s: %d visible nodes for %d items" % [label, visible, qt.item_count()])
+
+
+## Recalage natif : pages partagées (`qt_store`) = pages copiées.
+func _check_reground(qt: ReliefQuadtree, at: Vector2) -> void:
+	if not ClassDB.class_exists("VegetationScatter"):
+		return
+	var origin := Vector2(floorf(at.x / 256.0) * 256.0, floorf(at.y / 256.0) * 256.0)
+	var shared := qt.surface_snapshot(Rect2(origin, Vector2(256.0, 256.0)), origin)
+	_check(shared["qt_store"] != null and not (shared["qt_pages"] as Dictionary).is_empty(), "snapshot should carry the native store and pages")
+	var copied := shared.duplicate()
+	copied.erase("qt_store")
+	var results := []
+	for grid: Dictionary in [shared, copied]:
+		var scatter: Object = ClassDB.instantiate("VegetationScatter")
+		scatter.call("start", 1)
+		var buffer := PackedFloat32Array()
+		for i in 64:
+			var x := fposmod(i * 37.3, 256.0)
+			var z := fposmod(i * 91.7, 256.0)
+			buffer.append_array([1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 0.0])
+		var buffers: Array = [buffer]
+		scatter.call("request_reground", 1, buffers, grid, origin, MapData.vertical_scale(), MapData.relief_gain(), MapData.relief_squash())
+		var polled: Array = []
+		for _i in 2000:
+			polled = scatter.call("poll", 1)
+			if not polled.is_empty():
+				break
+			OS.delay_msec(1)
+		if not _check(not polled.is_empty(), "reground did not answer"):
+			return
+		results.append((polled[0]["buffers"] as Array)[0])
+	_check(results[0] == results[1], "reground with shared pages differs from copied pages")
+	var moved := false
+	for i in range(7, (results[0] as PackedFloat32Array).size(), 16):
+		moved = moved or absf((results[0] as PackedFloat32Array)[i]) > 1e-6
+	_check(moved, "reground should seat the instances on the relief")
