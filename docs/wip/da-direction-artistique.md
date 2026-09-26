@@ -145,3 +145,8 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   en tête des playlists France/Italie/Bourgogne/Angleterre, MIDI en repli. Pas de vrai Machaut/
   Landini/Solage libre trouvé. **À écouter** : attribution titre ↔ plage de la bande 1963 faite
   sans écoute humaine ; piste Landini possible dans la bande d'orgue Arnér 1966 (Commons, PD).
+- 26/09 soir : **DA7c fusionné** (main `7d76e7a3`, ADR 0065 § DA7c) : 59 icônes à l'encre, une
+  par trait (fiche, infobulle, encyclopédie), 2,68 $ ; budget DA **20,56 $**. **Vague DA7
+  terminée** (DA7a-d dans main). Note : après la fusion de DC6b, la dylib doit être
+  reconstruite (`research_percent` inconnu sinon). Suites : écoute de la bande 1963 (titres),
+  Landini dans la bande Arnér 1966, 21 hameaux sur une ville (DC4), marge bocage printemps 33,7 %.
