@@ -85,5 +85,110 @@
     "sources": [
       "Abbaye de Klosterneuburg"
     ]
+  },
+  {
+    "id": "set_graz",
+    "province": "prov_austria",
+    "kind": "town",
+    "name": {
+      "display": "Graz",
+      "local": "Gretz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      15.4395,
+      47.0707
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Principale ville du duché de Styrie, sur la Mur, résidence secondaire des ducs de Styrie.",
+    "sources": [
+      "Graz",
+      "Duché de Styrie"
+    ]
+  },
+  {
+    "id": "set_wiener_neustadt",
+    "province": "prov_austria",
+    "kind": "town",
+    "name": {
+      "display": "Wiener Neustadt",
+      "local": "Wienerisch Neustat",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      16.2445,
+      47.8121
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville-forteresse fondée par les Babenberg en 1194 pour verrouiller la marche face à la Hongrie, place forte majeure des Habsbourg.",
+    "sources": [
+      "Wiener Neustadt"
+    ]
+  },
+  {
+    "id": "set_melk",
+    "province": "prov_austria",
+    "kind": "abbey",
+    "name": {
+      "display": "Melk",
+      "local": "Medlick",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      15.3333,
+      48.2233
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine dominant le Danube depuis son promontoire, ancienne résidence des margraves Babenberg.",
+    "sources": [
+      "Abbaye de Melk"
+    ]
+  },
+  {
+    "id": "set_steyr",
+    "province": "prov_austria",
+    "kind": "village",
+    "name": {
+      "display": "Steyr",
+      "local": "Steyer",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      14.4212,
+      48.0405
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg au confluent de l'Enns et de la Steyr, porte du commerce du fer de l'Eisenwurzen styrien.",
+    "sources": [
+      "Steyr"
+    ]
   }
 ]
