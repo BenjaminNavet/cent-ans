@@ -28,6 +28,19 @@ pub struct WarPlanningRules {
     pub pretender_ratio: f64,
     /// Ratio a pretender needs with neither.
     pub pretender_ratio_alone: f64,
+    /// EQ6: the war of a pretender for its main crown (the largest realm
+    /// whose throne it claims) comes first: it outranks lesser claims
+    /// whatever their odds, and the rest after another declaration (a
+    /// crusade, a small dynastic quarrel) does not hold it back. `false`:
+    /// the weakest claimed crown first, every war waits the rest (pre-EQ6).
+    #[serde(default)]
+    pub main_claim_first: bool,
+    /// EQ6: the difficulty level (ADR 0037) leaves the main claim war
+    /// alone: neither the attitude nor the power ratio it adds towards the
+    /// player decide whether the pretender presses its claim. Difficulty
+    /// still weighs on every other war, on peace and on battles.
+    #[serde(default)]
+    pub claim_war_ignores_difficulty: bool,
 }
 
 /// When a faction joins an ally's war (co-belligerence).
@@ -91,6 +104,8 @@ impl Default for AiDiplomacy {
                 front_share: 0.5,
                 pretender_ratio: 0.5,
                 pretender_ratio_alone: 0.8,
+                main_claim_first: false,
+                claim_war_ignores_difficulty: false,
             },
             join_war: JoinWarRules {
                 ratio: 0.6,

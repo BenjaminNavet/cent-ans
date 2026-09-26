@@ -23,7 +23,9 @@
       "properties": {
         "front_share": { "type": "number", "minimum": 0, "description": "Pas de nouvelle guerre tant que les ennemis qui pèsent sur nous (frontaliers ou tenant nos terres) dépassent cette part de notre puissance." },
         "pretender_ratio": { "type": "number", "minimum": 0, "description": "Rapport de puissance de coalition qu'un prétendant allié ou frontalier de sa cible doit atteindre." },
-        "pretender_ratio_alone": { "type": "number", "minimum": 0, "description": "Même rapport, sans allié ni frontière." }
+        "pretender_ratio_alone": { "type": "number", "minimum": 0, "description": "Même rapport, sans allié ni frontière." },
+        "main_claim_first": { "type": "boolean", "description": "EQ6 (ADR 0077) : la guerre pour la couronne principale revendiquée (le plus grand royaume dont on revendique le trône) passe avant toute autre prétention, et le repos qui suit une autre déclaration ne la retarde pas. Faux par défaut (comportement antérieur)." },
+        "claim_war_ignores_difficulty": { "type": "boolean", "description": "EQ6 (ADR 0077) : le niveau de difficulté (attitude et rapport de forces envers le joueur) ne décide pas si le prétendant presse sa revendication principale. Faux par défaut." }
       },
       "required": ["front_share", "pretender_ratio", "pretender_ratio_alone"],
       "additionalProperties": false
