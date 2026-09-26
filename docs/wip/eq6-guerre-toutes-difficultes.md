@@ -49,7 +49,19 @@ Obstacles comptés à chaque tour de paix FR-EN (plusieurs par tour possibles) :
 | main (référence) | 48 % [32-70], 1/5, 6,4 trêves | 62 % [42-75], 8/10, 11,1 | 56 % [39-65], 5/10, 13,0 | 50 % [41-60], 1/5, 15,4 |
 | v1 : prétention principale d'abord + indépendante de la difficulté | 74 % [64-83], 3/5 | 68 % [62-75], 10/10, 13,6 | 60 % [50-67], 8/10, 16,5 | 48 % [35-58], 1/5 |
 | v1 + très difficile moral IA 10 → 7 | — | — | — | 56 % [36-67], 4/5, 17,8 ; 1re faction jusqu'à 46 % |
+| v4 : v1 + « Guerre interminable » 10 ans / 3 pts / 30 max + moral 7 | 71 % [62-78], 3/5, 12,0 | 67 % [59-75], 10/10, 13,3 | 62 % [50-73], 7/10, 14,8 | 50 % [40-61], 1/5, 16,8 |
+| v6 : v4 avec 8 ans / 8 pts / 100 max + très difficile revenus IA 130 | 65 % [55-73], **5/5**, 12,6 | — | — | 54 % [44-69], 1/5, 19,4 |
+| v7 : v6, données de difficulté rendues à DF1, acculé attend un score < 0 | — | — | 60 % [52-68], 8/10, 15,2 | 59 % [51-70], 3/5, 17,2 |
+| v8 : v7, acculé attend d'être battu (score ≤ -25) | (en cours) | (en cours) | (en cours) | **59 % [52-67], 4/5, 15,6** ; 1re faction ≤ 34 % |
+
+Lecture des essais :
+
+- La difficulté des données (moral, revenus de l'IA en très difficile) ne change rien de net :
+  l'écart entre graines l'emporte ; rendues aux valeurs DF1 (aucune donnée de difficulté changée).
+- Très difficile : les guerres « de 0 tour » (8 à 21 par siècle et par graine) venaient de la
+  France acculée qui achetait la paix la saison même de la déclaration ; la règle « l'acculé
+  attend d'être battu » les supprime (0-1 par graine).
 
 ## Prochaine étape
-Mesure v4 (v1 + « Guerre interminable » 10 ans / 3 pts / 30 max + moral très difficile 7),
-puis `balance_probe` 16 × 200 (révoltes), puis ADR 0085.
+Mesure v8 complète (normale, facile, difficile), `balance_probe` 16 × 200, `cargo test`,
+puis ADR 0085 et addendum.
