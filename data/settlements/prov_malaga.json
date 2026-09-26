@@ -110,5 +110,79 @@
     "sources": [
       "Comares"
     ]
+  },
+  {
+    "id": "set_antequera",
+    "province": "prov_malaga",
+    "kind": "town",
+    "name": {
+      "display": "Antequera",
+      "local": "Antaqira",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -4.5597,
+      37.0183
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville nasride fortifiée de la frontière nord, prise par la Castille seulement en 1410.",
+    "sources": [
+      "Antequera"
+    ]
+  },
+  {
+    "id": "set_marbella",
+    "province": "prov_malaga",
+    "kind": "town",
+    "name": {
+      "display": "Marbella",
+      "local": "Marbal·la",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -4.885,
+      36.5108
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Petite ville côtière nasride close de murs, dotée d'une alcazaba.",
+    "sources": [
+      "Marbella"
+    ]
+  },
+  {
+    "id": "set_alora",
+    "province": "prov_malaga",
+    "kind": "village",
+    "name": {
+      "display": "Álora",
+      "local": "Alura",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -4.705,
+      36.8267
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la vallée du Guadalhorce, sous un château nasride.",
+    "sources": [
+      "Álora"
+    ]
   }
 ]
