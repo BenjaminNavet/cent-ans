@@ -831,7 +831,7 @@ def assets_ink_icons(
     group: str | None = typer.Option(
         None,
         "--group",
-        help="Ne traite que les entrées de ce groupe du catalogue (ex. \"trait\", DA7c)",
+        help='Ne traite que les entrées de ce groupe du catalogue (ex. "trait", DA7c)',
     ),
     subject: str | None = typer.Option(
         None,
