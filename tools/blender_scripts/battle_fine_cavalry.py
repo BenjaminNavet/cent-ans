@@ -71,11 +71,11 @@ HORSE_OF = {
 }
 
 # Triangles per horse piece and level (cards are doubled afterwards: no alpha, back faces
-# culled). Horse alone: LOD0 ~5.7 k, LOD1 ~1.1 k, LOD2 < 300.
+# culled). Horse alone: LOD0 ~5.7 k, LOD1 ~0.8 k, LOD2 ~200 (FG5: LOD1 and LOD2 lighter).
 HORSE_LOD = [
     {"horse_body": 3700, "horse_mane": 600, "horse_tail": 350, "eyes": True},
-    {"horse_body": 850, "horse_mane": 90, "horse_tail": 50, "eyes": False},
-    {"horse_body": 235, "horse_mane": 16, "horse_tail": 10, "eyes": False},
+    {"horse_body": 600, "horse_mane": 60, "horse_tail": 36, "eyes": False},
+    {"horse_body": 170, "horse_mane": 12, "horse_tail": 8, "eyes": False},
 ]
 CARDS = ("horse_mane", "horse_tail")
 
