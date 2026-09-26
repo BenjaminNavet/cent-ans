@@ -24,7 +24,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 | SZ4b | suite SZ4 | Maquettes de colonies géantes jusqu'à d ≈ 8 puis bascule brusque vers les villes 1:1 ; densité des forêts au palier vallée | 2 | lancé |
 | SZ5 | S7 | Pluie au palier site (gouttes et stries à l'échelle de la caméra) | 1 | **dans main** (e73abe8d) : `PrecipitationProfile` (`precipitation.tres`), tailles ancrées en mètres de près, identiques à l'ancien au-delà de d = 30 |
 | SZ6 | S6 | Pics d'images côté scripts : profilage et étalement (qt_update, recalages, écouteurs) | 1 | lancé |
-| SZ7 | hébergement | Décision (ADR 0077) + outillage : paquet « Cent Ans relief » découpé, sommes de contrôle, commande de téléchargement | 2 | outillage lancé |
+| SZ7 | hébergement | Décision (ADR 0077) + outillage : paquet « Cent Ans relief » découpé, sommes de contrôle, commande de téléchargement | 2 | **dans main** : `relief-pack` / `relief-fetch`, `relief_hosting.json`, avis du jeu ; **publication en attente de l'accord du joueur** (commandes dans `docs/geo.md`) |
 | VH5/6/7 + Rouen | S3 | Paris, Londres, Orléans, Rouen au format v2 1:1 | 2 | après VH4 |
 
 ## Journal
@@ -37,3 +37,4 @@ lit la pyramide en écriture ; puis vague 2 (villes VH5-VH7 + Rouen, outillage S
 
 - 26/09 : SZ4 fusionné (4b6c1057). Limites : maquettes de colonies géantes jusqu'à d ≈ 8 puis bascule, forêts clairsemées au palier vallée → SZ4b. SZ7 (outillage) lancé.
 - 26/09 : SZ2 fusionné et pyramide basculée (`relief-all --check` complet, 2,69 Go). Limites : altitudes absolues 2-6 m sous le réel (GLO-30), bourrelets E4 du Val de Loire au palier site, contraste E0 un peu réduit, `horizon.py` non recuit, `detail-check` p95 > 5 m sur 31 zones (écart de source, amélioré partout). Agents en cours prévenus de fusionner `main` (E0 recuit).
+- 26/09 : SZ7 fusionné (outillage, 12 tests hors réseau, pytest complet 707 OK). Rien publié.
