@@ -140,3 +140,5 @@ Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_n
 | 12 | corrigé | `resolve_negotiation` : le registre de tributs d'une faction morte est vidé, elle ne paie plus. |
 | 13 | corrigé | `plan_peace` : buts de guerre non tenus ajoutés avec la clé `false` (avant les provinces hors but) ; `score <= 2 * SURRENDER_WAR_SCORE` (ADR 0025 § 5, « score ≤ -50 »). Pas de test dédié. |
 | 9 | corrigé | naissance : l'enfant prend la faction du père, sauf si la mère est souveraine ou héritière de sa faction (maison du père inchangée, lieu de naissance = celui de la mère). |
+| 10 | corrigé | `dynasty::check_marriage` (validation pure) extraite de `propose_marriage` ; appelée dans `check_treaty` (plus un même époux dans deux mariages refusé), donc `apply_treaty` n'applique plus la paix avant d'échouer ; `evaluate(Proposal::Marriage)` n'appelle plus `state.clone()`. |
+| 18a | corrigé | `check_treaty` : doublons détectés par `articles[..i].contains(a)` au lieu de `serde_json::to_string` (même commit que 10). |

@@ -382,3 +382,99 @@ fn cross_faction_child_follows_the_father() {
     }
     panic!("no child born");
 }
+
+/// Fix 10: a treaty whose marriage is impossible is refused as a whole
+/// (the peace is not applied by halves).
+#[test]
+fn impossible_marriage_refuses_the_whole_treaty() {
+    use crate::negotiation::Article;
+    use data_model::Sex;
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let (fr, en) = (fac("fac_france"), fac("fac_england"));
+    assert!(state.is_at_war(&fr, &en));
+    let man = |state: &CampaignState, f: &FactionId| {
+        state
+            .characters
+            .iter()
+            .find(|(_, c)| c.alive && &c.faction == f && c.sex == Sex::Male)
+            .map(|(id, _)| id.clone())
+            .unwrap()
+    };
+    let (a, b) = (man(&state, &fr), man(&state, &en));
+    let articles = [
+        Article::Peace,
+        Article::Marriage {
+            character: a,
+            spouse: b,
+        },
+    ];
+    assert!(crate::negotiation::apply_treaty(&mut state, &data, &fr, &en, &articles).is_err());
+    assert!(state.is_at_war(&fr, &en));
+}
+
+/// Fix 16: a port bordering two enemy-held seas is blockaded once.
+#[test]
+fn a_port_on_two_enemy_seas_is_blockaded_once() {
+    use crate::naval::SeaControl;
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    state.naval.ensure(&data);
+    let (province, seas) = data
+        .provinces
+        .iter()
+        .find(|(id, p)| {
+            p.has_port() && p.sea_zones.len() >= 2 && state.province_owner(id).is_some()
+        })
+        .map(|(id, p)| (id.clone(), p.sea_zones.clone()))
+        .expect("a port on two seas");
+    let owner = state.province_owner(&province).unwrap().clone();
+    let enemy = state
+        .factions
+        .keys()
+        .find(|f| **f != owner && !state.is_allied(f, &owner))
+        .unwrap()
+        .clone();
+    state
+        .factions
+        .get_mut(&owner)
+        .unwrap()
+        .at_war_with
+        .insert(enemy.clone());
+    state
+        .factions
+        .get_mut(&enemy)
+        .unwrap()
+        .at_war_with
+        .insert(owner.clone());
+    state.naval.control.clear();
+    for sea in &seas[..2] {
+        state.naval.control.insert(
+            sea.clone(),
+            SeaControl {
+                faction: enemy.clone(),
+                level: 100,
+            },
+        );
+    }
+    let expected = data
+        .provinces
+        .iter()
+        .filter(|(id, p)| {
+            p.has_port()
+                && p.sea_zones.iter().any(|s| seas[..2].contains(s))
+                && state.province_owner(id) == Some(&owner)
+        })
+        .count();
+    let mut events = Vec::new();
+    crate::naval::resolve_season(&mut state, &data, &mut events);
+    let text = events
+        .iter()
+        .find(|e| e.text_fr.starts_with("Blocus") && e.faction.as_ref() == Some(&owner))
+        .map(|e| e.text_fr.clone())
+        .expect("a blockade");
+    assert!(
+        text.starts_with(&format!("Blocus : {expected} port(s)")),
+        "{text}"
+    );
+}
