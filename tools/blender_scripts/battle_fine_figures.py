@@ -709,8 +709,21 @@ def build_figure(fig_name, level):
     mounted = recipe["rig"] == "cavalry"
     horse = []
     if mounted:
+        import battle_fine_cavalry as fc
+
         bf.use_fine_mount()
-        horse = cav.build_cavalry({**recipe, "parts": [], "equipment": []}, level)
+        # FG4: the fine horse, its harness and bards replace the Quaternius horse.
+        cav.build_cavalry(
+            {
+                **recipe,
+                "parts": [],
+                "equipment": [],
+                "horse_equipment": [],
+                "horse_budget": [0, 0, 0],
+            },
+            level,
+        )
+        horse = fc.horse_and_harness(fig_name, recipe, level, poses.RIDE["mount"])
         arm = poses.RIDE["mount"].rarm
     else:
         arm, _meshes = bf.load_fine_human()
