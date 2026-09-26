@@ -301,3 +301,30 @@ fn hostage_betrayal_falls_on_the_aggressor_only() {
     state.declare_war(&data, &ar, &ca).unwrap();
     assert!(betrayed(&state));
 }
+
+/// Fix 12: a vanished faction pays no more tribute.
+#[test]
+fn dead_faction_pays_no_tribute() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let (payer, payee) = (fac("fac_navarre"), fac("fac_castile"));
+    let turn = state.turn;
+    {
+        let f = state.factions.get_mut(&payer).unwrap();
+        f.alive = false;
+        f.ledger.tributes.push(crate::negotiation::TributeDue {
+            to: payee.clone(),
+            per_season: 100,
+            until_turn: turn + 10,
+        });
+    }
+    let before = (
+        state.factions[&payer].treasury,
+        state.factions[&payee].treasury,
+    );
+    let mut events = Vec::new();
+    crate::negotiation::resolve_negotiation(&mut state, &data, &mut events);
+    assert_eq!(state.factions[&payer].treasury, before.0);
+    assert_eq!(state.factions[&payee].treasury, before.1);
+    assert!(state.factions[&payer].ledger.tributes.is_empty());
+}
