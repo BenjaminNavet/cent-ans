@@ -23,7 +23,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 | SZ4 | S4, S5 | Moulins, hameaux, fumées, arbres proches à l'échelle aux paliers intermédiaires ; disque d'emprise d'Amiens | 1 | **dans main** (4b6c1057) : `MapPropScale` (`map_prop_scale.tres`), toits vus de loin sur le sol bâti (`roofscape_*`) |
 | SZ4b | suite SZ4 | Maquettes de colonies géantes jusqu'à d ≈ 8 puis bascule brusque vers les villes 1:1 ; densité des forêts au palier vallée | 2 | lancé |
 | SZ5 | S7 | Pluie au palier site (gouttes et stries à l'échelle de la caméra) | 1 | **dans main** (e73abe8d) : `PrecipitationProfile` (`precipitation.tres`), tailles ancrées en mètres de près, identiques à l'ancien au-delà de d = 30 |
-| SZ6 | S6 | Pics d'images côté scripts : profilage et étalement (qt_update, recalages, écouteurs) | 1 | lancé |
+| SZ6 | S6 | Pics d'images côté scripts : profilage et étalement (qt_update, recalages, écouteurs) | 1 | **dans main** (26b1d806) : p99 91 → 38 ms, pics > 50 ms 231 → 3 ; `--bench-probe` |
 | SZ7 | hébergement | Décision (ADR 0077) + outillage : paquet « Cent Ans relief » découpé, sommes de contrôle, commande de téléchargement | 2 | **dans main** : `relief-pack` / `relief-fetch`, `relief_hosting.json`, avis du jeu ; **publication en attente de l'accord du joueur** (commandes dans `docs/geo.md`) |
 | VH5/6/7 + Rouen | S3 | Paris, Londres, Orléans, Rouen au format v2 1:1 | 2 | après VH4 |
 
@@ -38,3 +38,4 @@ lit la pyramide en écriture ; puis vague 2 (villes VH5-VH7 + Rouen, outillage S
 - 26/09 : SZ4 fusionné (4b6c1057). Limites : maquettes de colonies géantes jusqu'à d ≈ 8 puis bascule, forêts clairsemées au palier vallée → SZ4b. SZ7 (outillage) lancé.
 - 26/09 : SZ2 fusionné et pyramide basculée (`relief-all --check` complet, 2,69 Go). Limites : altitudes absolues 2-6 m sous le réel (GLO-30), bourrelets E4 du Val de Loire au palier site, contraste E0 un peu réduit, `horizon.py` non recuit, `detail-check` p95 > 5 m sur 31 zones (écart de source, amélioré partout). Agents en cours prévenus de fusionner `main` (E0 recuit).
 - 26/09 : SZ7 fusionné (outillage, 12 tests hors réseau, pytest complet 707 OK). Rien publié.
+- 26/09 : SZ6 fusionné. Causes : rubans de routes drapés (fils), bascule de maillage d'un MultiMesh rempli par `buffer` (relecture GPU, 86 ms), recuisson des maquettes, changements de niveau des tronçons étalés (4 ms/image), étiquettes, index par tronçon. Reste pour PB3/PB3g : pas du quadtree 9-12 ms, `request_reground` de la végétation (copie des pages vers Rust, 70 ms), `NextHintController.refresh` 15 ms/s, `TownLayer` 10 ms.
