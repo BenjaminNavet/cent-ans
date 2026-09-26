@@ -1,18 +1,15 @@
 # EQ7 — la cavalerie attend son infanterie sous les flèches
 
-Suite de l'ADR 0052 (panique des chevaux). Branche `feat/eq7-cavalry-waits`, worktree `../gp-eq7`.
-
-## But
-L'IA d'un assaillant ne lance plus sa cavalerie à portée d'archers pourvus de flèches avant
-l'arrivée de son infanterie (ou la fait passer par le flanc). Rendre aux Français une partie
-des victoires perdues dans la bataille mixte `b6` (30-31/64 depuis ADR 0052 / EP11).
+Suite de l'ADR 0052. ADR **0083**. Branche `feat/eq7-cavalry-waits`, worktree `../gp-eq7`.
 
 ## État
-- [x] worktree, sonde `tests/eq7_cavalry.rs` (`probe_mixed_battle`, `EQ7_SEED=n` pour la trace)
-- [ ] mesure de référence
-- [ ] règle dans `plan_horse` (`src/ai.rs`)
-- [ ] mesures : b6 64 graines, R4 (`R4_FRENCH=heavy R4_JITTER=1`), R2b active/passive
-- [ ] empreintes des tests, ADR, fusion
+- [x] sonde `tests/eq7_cavalry.rs` (`probe_mixed_battle`, `probe_symmetric_battle`)
+- [x] règle `waits_for_foot` dans `plan_horse` (étapes 1b et 5, assaillant seulement),
+      `data/rules/battle_horse_wait.json` + schéma + test Python
+- [x] mesures : b6 31 → 57/64 ; R4 identique ; R2b 118 → 115/128 ; EP9b vert
+- [x] empreintes b6 (graines 3 et 11 passent aux Français), test de garde 16 graines
+- [ ] suite complète workspace, fusion ff dans main
 
-## Prochaine étape
-Mesure de référence puis trace d'une graine perdue.
+## Limites / suites
+- R2b perd 3/128 (l'IA active attaque moins tôt avec sa cavalerie contre des archers passifs).
+- Pas de manœuvre de flanc distincte (les tireurs pivotent) : voir ADR 0083.
