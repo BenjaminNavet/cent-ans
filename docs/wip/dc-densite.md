@@ -88,7 +88,9 @@ rules.json ; codex (mouvement, saisons, déroute, agents) ; tests `campaign.rs`,
 - `docs/design/2026-09-24-mouvement-libre.md` cite 210 km / × 140 km : spec datée, laissée telle quelle.
 
 ## DC4 — Affichage (worktree ../gp-dc4, branche feat/densite-dc4)
-État : terminé, prêt pour fusion dans `feat/densite`.
+État : terminé, `feat/densite` et `main` fusionnés (smoke, settlements_render, da3, cv1 verts ; sonde
+rejouée : 0 chevauchement de noms ni de maquettes, 8 maquettes masquées, 109 hameaux non posés
+après les ancrages fins de `main`). Prêt pour fusion dans `feat/densite`.
 - Sonde `game/tests/dc4_density_probe.gd` (fenêtrée ; `--center=2310.3,1657.9` = Lille, zone la
   plus dense : 14 places à moins de 40 unités ; `CENT_ANS_DATA_DIR` pour rejouer 570 places).
 - Rangs (`settlement_markers.json`, règles dérivées des données, les listes d'ids restent en tête) :
