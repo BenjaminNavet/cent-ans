@@ -478,3 +478,33 @@ fn a_port_on_two_enemy_seas_is_blockaded_once() {
         "{text}"
     );
 }
+
+/// Fix 17: research counts the libraries of the places a faction holds
+/// (controller), not those it merely owns de jure.
+#[test]
+fn research_follows_the_controller() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let (fr, en) = (fac("fac_france"), fac("fac_england"));
+    let library = data
+        .buildings
+        .values()
+        .find(|b| {
+            b.effects.iter().any(|e| {
+                e.effect == data_model::EffectKind::ResearchPoints
+                    && e.mode == data_model::EffectMode::Add
+                    && e.value >= 1.0
+            })
+        })
+        .map(|b| b.id.clone())
+        .expect("a research building");
+    let place = city(&state, "prov_guyenne");
+    let base_fr = state.research_points_per_turn(&data, &fr);
+    let base_en = state.research_points_per_turn(&data, &en);
+    let s = state.settlements.get_mut(&place).unwrap();
+    s.owner = en.clone();
+    s.controller = fr.clone();
+    s.buildings.push(library);
+    assert!(state.research_points_per_turn(&data, &fr) > base_fr);
+    assert!(state.research_points_per_turn(&data, &en) <= base_en);
+}
