@@ -64,11 +64,17 @@ VIEWS: dict[str, list[str]] = {
 
 @dataclass(frozen=True)
 class SaturationStats:
-    """Mean and 90th percentile HSV saturation (0-1) and mean HSV value of the measured area."""
+    """HSV statistics of the measured area.
+
+    Mean and 90th percentile saturation (0-1), mean value (0-1) and circular mean hue in
+    degrees of the coloured pixels (saturation above 10 %; NaN if there are none), so that a
+    season can be checked to move the hue rather than the saturation.
+    """
 
     mean: float
     p90: float
     value: float
+    hue: float
 
 
 def measured_pixels(rgb: np.ndarray) -> np.ndarray:
@@ -100,6 +106,21 @@ def saturation_stats(rgb: np.ndarray) -> SaturationStats:
         float(saturation.mean()),
         float(np.percentile(saturation, 90)),
         float(high.mean()),
+        mean_hue(pixels[saturation > 0.1]),
+    )
+
+
+def mean_hue(pixels: np.ndarray) -> float:
+    """Circular mean HSV hue (degrees, 0-360) of float RGB pixels (N, 3); NaN if empty."""
+    if len(pixels) == 0:
+        return float("nan")
+    red, green, blue = pixels[:, 0], pixels[:, 1], pixels[:, 2]
+    # Hue angle from the opponent-colour axes (same angle as HSV hue up to its hexagonal warp).
+    alpha = red - 0.5 * (green + blue)
+    beta = np.sqrt(3.0) / 2.0 * (green - blue)
+    angles = np.arctan2(beta, alpha)
+    return float(
+        np.degrees(np.arctan2(np.sin(angles).mean(), np.cos(angles).mean())) % 360.0
     )
 
 
@@ -148,7 +169,8 @@ def report(paths: list[Path]) -> int:
         stats = measure_file(path)
         flag = " > 35 %" if stats.mean > BIBLE_MAX_SATURATION else ""
         print(
-            f"{path.name}: sat moy {stats.mean * 100:.1f} %, p90 {stats.p90 * 100:.1f} %, val moy {stats.value:.2f}{flag}"
+            f"{path.name}: sat moy {stats.mean * 100:.1f} %, p90 {stats.p90 * 100:.1f} %, "
+            f"val moy {stats.value:.2f}, teinte {stats.hue:.0f}°{flag}"
         )
         over += stats.mean > BIBLE_MAX_SATURATION
     return over
