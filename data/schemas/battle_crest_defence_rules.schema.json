@@ -11,8 +11,14 @@
       "minimum": 0,
       "maximum": 300,
       "description": "Recul de la ligne (mètres) derrière son poste de contre-pente quand ses tireurs tiennent la crête devant elle."
+    },
+    "min_line_regiments": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Nombre minimal de régiments de ligne pour ce déploiement en profondeur (une petite troupe garde sa ligne près de ses tireurs)."
     }
   },
-  "required": ["line_setback_m"],
+  "required": ["line_setback_m", "min_line_regiments"],
   "additionalProperties": false
 }
