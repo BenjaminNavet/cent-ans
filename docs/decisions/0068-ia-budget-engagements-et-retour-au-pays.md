@@ -1,4 +1,4 @@
-# ADR 0066 — L'IA budgète ses engagements et ne campe plus en terre étrangère (lot EQ5)
+# ADR 0068 — L'IA budgète ses engagements et ne campe plus en terre étrangère (lot EQ5)
 
 Date : 2026-09-26. Statut : accepté.
 
