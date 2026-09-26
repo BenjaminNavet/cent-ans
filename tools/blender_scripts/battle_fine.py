@@ -159,7 +159,11 @@ def main():
     if step in ("figures", "all"):
         import battle_fine_figures as ff
 
-        ff.build_all(manifest, only)
+        built = {"rigs": manifest["rigs"], "figures": {}}
+        ff.build_all(built, only)
+        # Re-read before writing: several builds (--only subsets) may run in parallel.
+        manifest = load_manifest()
+        manifest["figures"].update(built["figures"])
         save_manifest(manifest)
     if step == "check":
         import battle_fine_figures as ff

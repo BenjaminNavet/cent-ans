@@ -59,6 +59,7 @@ BUDGET = {
     "hat": (0, 80, 30),
     "belt": (0, 60, 0),
     "scabbard": (0, 40, 12),
+    "tabard": (500, 110, 16),
 }
 # Pieces dropped at a level of detail (budget 0 there, but kept whole at LOD0).
 DROPPED = {"hair": (2,), "beard": (2,), "belt": (2,)}
@@ -196,13 +197,18 @@ def is_head(bones):
     return bones == {"Head"}
 
 
-def skin_materials(obj, hands, eyes=True):
-    """Skin, eyes and hands (`hands`: (code, rgb) of gloves, or None for bare hands)."""
+def skin_materials(obj, hands, eyes=True, feet=None, drop_eyes=False):
+    """Skin, eyes, hands and feet of a body piece.
+
+    `hands` / `feet`: (code, rgb) of gloves / shoes, or None for bare skin. `drop_eyes`
+    deletes the eyeballs (LOD2: a few pixels, too many triangles).
+    """
     skin = (eq.C_SKIN, (0.50, 0.33, 0.24))
     obj.data.materials.clear()
     obj.data.materials.append(mat(skin))
     obj.data.materials.append(mat((eq.C_EXACT, (0.03, 0.025, 0.02))))
     obj.data.materials.append(mat(hands or skin))
+    obj.data.materials.append(mat(feet or skin))
     dom = fe.dominant(obj)
     groups = [obj.vertex_groups.get(n) for n in ("helper-l-eye", "helper-r-eye")]
     eye_idx = {g.index for g in groups if g is not None}
@@ -211,13 +217,28 @@ def skin_materials(obj, hands, eyes=True):
         for v in obj.data.vertices
         if any(g.group in eye_idx and g.weight > 0.5 for g in v.groups)
     }
+    doomed = []
     for p in obj.data.polygons:
-        if eyes and all(i in eye_verts for i in p.vertices):
+        if eye_verts and all(i in eye_verts for i in p.vertices):
             p.material_index = 1
+            if drop_eyes or not eyes:
+                doomed.append(p.index)
         elif any(dom[i].startswith("Wrist") for i in p.vertices):
             p.material_index = 2
+        elif any(dom[i].startswith("Foot") for i in p.vertices):
+            p.material_index = 3
         else:
             p.material_index = 0
+    if drop_eyes and doomed:
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        bm.faces.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[bm.faces[i] for i in doomed], context="FACES")
+        bmesh.ops.delete(
+            bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS"
+        )
+        bm.to_mesh(obj.data)
+        bm.free()
 
 
 def hair_shell(body, lm, name, beard=False):
@@ -397,6 +418,7 @@ def straw_hat(lm, code_rgb, band):
 def dress(outfit, recipe, body, lm, level, rider):
     """Garment shells of `outfit` (list of (object, budget role)) and the uncovered bones."""
     out = []
+    shod = None
     bare = {"Head", "Neck", "Wrist.L", "Wrist.R"}
     thigh = lm.knee_z + (lm.bone["UpperLeg.L"].z - lm.knee_z) * 0.3
     if outfit == "harness":
@@ -409,7 +431,7 @@ def dress(outfit, recipe, body, lm, level, rider):
         out.append((hauberk, "torso"))
         top = lm.knee_z + (lm.bone["UpperLeg.L"].z - lm.knee_z) * 0.7
         out.append((legs_shell(body, lm, "chausses", mat(legs), top), "legs"))
-        out.append((shoes(body, feet), "shoes"))
+        shod = feet
         bvh = torso_bvh(hauberk)
         if coat[0] in (eq.C_LIVERY, eq.C_ARMS):
             top_coat, skirt_obj = fe.surcoat(body, lm, hauberk, bvh)
@@ -472,16 +494,22 @@ def dress(outfit, recipe, body, lm, level, rider):
         else:
             top = lm.bone["UpperLeg.L"].z
             out.append((legs_shell(body, lm, "hose", mat(hose), top, 0.005), "legs"))
-            out.append((shoes(body, feet), "shoes"))
+            shod = feet
         for obj in fe.belt(lm, bvh):
             recolour_first(obj, belt_c)
             out.append((obj, "belt"))
         gloves = None
     else:
         raise KeyError(outfit)
+    shoe_colour = None
+    if shod is not None and level == 2:
+        bare |= {"Foot.L", "Foot.R"}  # LOD2: the body's feet in the shoe colour
+        shoe_colour = shod
+    elif shod is not None:
+        out.append((shoes(body, shod), "shoes"))
     for obj, _role in out:
         parent_keep(obj, body.parent)
-    return out, bare, gloves
+    return out, bare, gloves, shoe_colour
 
 
 def recolour_first(obj, code_rgb):
@@ -604,8 +632,18 @@ def budget(role, level, mounted):
 
 
 def decimate(obj, target):
-    """Weld and collapse-decimate `obj` to about `target` triangles (0 = weld only)."""
-    return bs.weld_and_decimate(obj, target)
+    """Weld and collapse-decimate `obj` to about `target` triangles (0 = weld only).
+
+    ``weld_and_decimate`` never goes below 1 % in one pass (the MakeHuman pieces start at
+    ~10 k triangles): repeat until the target is reached or nothing collapses any more.
+    """
+    tris = bs.weld_and_decimate(obj, target)
+    while target and tris > target * 1.1:
+        before = tris
+        tris = bs.weld_and_decimate(obj, target)
+        if tris >= before * 0.97:
+            break
+    return tris
 
 
 def fine_kit_item(name, kwargs, ctx, lm, bvhs):
@@ -681,7 +719,9 @@ def build_figure(fig_name, level):
     body = fitted_body(arm, base_face)
     lm = fe.Landmarks(body, arm)
     outfit = outfit_of(recipe)
-    garments, bare, gloves = dress(outfit, recipe, body, lm, level, mounted)
+    garments, bare, gloves, shoe_colour = dress(
+        outfit, recipe, body, lm, level, mounted
+    )
     fine = fig_name in FINE_KIT
     if fine:
         gloves = (eq.C_LEATHER, (0.10, 0.06, 0.03))
@@ -760,8 +800,16 @@ def build_figure(fig_name, level):
     # Body without the head (separate) nor the faces under the garments.
     trim(body, bare - {"Head"})
     out = []
-    skin_materials(body, gloves, eyes=False)
-    decimate(body, budget("legs_bare" if bare >= LEGS else "body", level, mounted))
+    skin_materials(body, gloves, eyes=False, feet=shoe_colour)
+    body_role = "legs_bare" if bare >= LEGS else "body"
+    if level == 2:
+        # One piece with the head: the neck seam welds, the decimation goes further.
+        head = heads.pop(0)[0]
+        skin_materials(head, None, drop_eyes=True)
+        body = fe.join([body, head], "body")
+        decimate(body, budget(body_role, level, mounted) + budget("head", 2, mounted))
+    else:
+        decimate(body, budget(body_role, level, mounted))
     bs.set_face_mask(body, 0)
     out.append(body)
     head_count = sum(1 for o, _m in heads if o.name.startswith("head"))
@@ -789,7 +837,9 @@ def build_figure(fig_name, level):
         out.append(obj)
     for obj, mask, kit in equipment:
         target = 0
-        if kit and level:
+        if obj.name.startswith("tabard"):
+            target = budget("tabard", level, mounted)
+        elif kit and level:
             target = max(16, int(fp._tris(obj) * KIT_SHARE[level - 1]))
         decimate(obj, target)
         bs.set_face_mask(obj, mask)
