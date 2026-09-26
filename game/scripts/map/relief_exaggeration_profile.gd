@@ -37,6 +37,20 @@ extends Resource
 ## paliers vallée et site). 0 : pas de plafond (rendu ZG8 d'origine).
 @export var local_relief_cap_m: float = 350.0
 
+## SZ1 : écrasement des montagnes. Amplitude régionale A = sommets voisins − fond non plafonné
+## (`base`) ; au-delà du genou `mountain_knee_m`, le relief au-dessus de la base n'est plus affiché
+## qu'à `mountain_ratio` : amplitude affichée D = genou + (A − genou)·ratio, facteur k = 1 − D/A
+## (0 pour les collines, falaises et plaines). Hauteur affichée :
+##     y = s·(h − c(s)·k·max(h − base, 0) + g·max(h − fond, 0))
+## `c(s)` va de `mountain_squash_far` (échelle stratégique) à 1 à l'exagération
+## `mountain_squash_full_exaggeration` (palier vallée) et en deçà. Genou ≤ 0 : désactivé.
+@export var mountain_knee_m: float = 450.0
+@export var mountain_ratio: float = 0.35
+@export var mountain_squash_far: float = 0.0
+@export var mountain_squash_full_exaggeration: float = 3.5
+## Borne du facteur d'écrasement (garde l'inverse bien conditionné).
+@export var mountain_squash_max: float = 0.85
+
 ## Falaises : pentes du relief exagéré localement (pente vraie × (1 + gain), m/m) où la roche
 ## remplace progressivement la couverture du sol (terrain.gdshader).
 @export var cliff_slope_start: float = 0.45
@@ -89,3 +103,23 @@ func gain_for_scale(scale: float, s_near: float) -> float:
 ## Plus grand gain possible (boîtes englobantes conservatrices).
 func max_gain() -> float:
 	return maxf(gain_far, gain_near) if enabled else 0.0
+
+
+## SZ1 : facteur d'écrasement k d'une amplitude régionale A (m), dans [0, mountain_squash_max].
+func mountain_squash_of(amplitude_m: float) -> float:
+	if not enabled or mountain_knee_m <= 0.0 or amplitude_m <= mountain_knee_m:
+		return 0.0
+	var shown := mountain_knee_m + (amplitude_m - mountain_knee_m) * mountain_ratio
+	return clampf(1.0 - shown / amplitude_m, 0.0, mountain_squash_max)
+
+
+## SZ1 : poids c de l'écrasement pour une échelle verticale (unités monde par mètre) :
+## `mountain_squash_far` à `MapData.HEIGHT_SCALE`, 1 à `s_full` et en deçà (logarithme de l'échelle).
+func squash_weight_for_scale(scale: float, s_full: float) -> float:
+	if not enabled or mountain_knee_m <= 0.0:
+		return 0.0
+	var far := MapData.HEIGHT_SCALE
+	if s_full >= far * 0.999:
+		return 1.0
+	var t := clampf(log(far / maxf(scale, 1e-9)) / log(far / s_full), 0.0, 1.0)
+	return lerpf(mountain_squash_far, 1.0, t)
