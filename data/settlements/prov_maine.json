@@ -3,56 +3,312 @@
     "id": "set_le_mans",
     "province": "prov_maine",
     "kind": "city",
-    "name": { "display": "Le Mans", "local": "Le Mans", "local_language": "ancien français" },
-    "lonlat": [0.1996, 48.0061],
+    "name": {
+      "display": "Le Mans",
+      "local": "Le Mans",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.1996,
+      48.0061
+    ],
     "weight": 34,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_weaving_workshop", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_weaving_workshop",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale du comté du Maine, apanage de Jean, duc de Normandie, depuis 1332, ceinte de son enceinte gallo-romaine.",
-    "sources": ["Le Mans", "Comté du Maine"]
+    "sources": [
+      "Le Mans",
+      "Comté du Maine"
+    ]
   },
   {
     "id": "set_alencon",
     "province": "prov_maine",
     "kind": "town",
-    "name": { "display": "Alençon", "local": "Alençon", "local_language": "ancien français" },
-    "lonlat": [0.0925, 48.4319],
+    "name": {
+      "display": "Alençon",
+      "local": "Alençon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.0925,
+      48.4319
+    ],
     "weight": 16,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Capitale du comté d'Alençon et du Perche, tenu par Charles II d'Alençon, frère du roi.",
-    "sources": ["Alençon", "Comté d'Alençon"]
+    "sources": [
+      "Alençon",
+      "Comté d'Alençon"
+    ]
   },
   {
     "id": "set_sainte_suzanne",
     "province": "prov_maine",
     "kind": "castle",
-    "name": { "display": "Sainte-Suzanne", "local": "Sainte Susanne", "local_language": "ancien français" },
-    "lonlat": [-0.3564, 48.0925],
+    "name": {
+      "display": "Sainte-Suzanne",
+      "local": "Sainte Susanne",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.3564,
+      48.0925
+    ],
     "weight": 9,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse restée invaincue face à Guillaume le Conquérant, dominant l'Erve.",
-    "sources": ["Château de Sainte-Suzanne"]
+    "sources": [
+      "Château de Sainte-Suzanne"
+    ]
   },
   {
     "id": "set_epau",
     "province": "prov_maine",
     "kind": "abbey",
-    "name": { "display": "L'Épau", "local": "L'Espau", "local_language": "ancien français" },
-    "lonlat": [0.2333, 47.9833],
+    "name": {
+      "display": "L'Épau",
+      "local": "L'Espau",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.2333,
+      47.9833
+    ],
     "weight": 7,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey"],
+    "buildings": [
+      "bld_abbey"
+    ],
     "port": false,
     "description": "Abbaye cistercienne fondée en 1229 par Bérengère de Navarre, près du Mans.",
-    "sources": ["Abbaye de l'Épau"]
+    "sources": [
+      "Abbaye de l'Épau"
+    ]
+  },
+  {
+    "id": "set_ballon",
+    "province": "prov_maine",
+    "kind": "town",
+    "name": {
+      "display": "Ballon",
+      "local": "Balon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.2181,
+      48.1758
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourg-château fortifié au nord du Maine, chef-lieu de châtellenie.",
+    "sources": [
+      "Ballon (Sarthe)"
+    ]
+  },
+  {
+    "id": "set_evron",
+    "province": "prov_maine",
+    "kind": "abbey",
+    "name": {
+      "display": "Évron",
+      "local": "Evron",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.4053,
+      48.1553
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Abbaye et collégiale bénédictine du nord du Maine, importante étape de pèlerinage.",
+    "sources": [
+      "Abbaye Notre-Dame d'Évron"
+    ]
+  },
+  {
+    "id": "set_sille_le_guillaume",
+    "province": "prov_maine",
+    "kind": "castle",
+    "name": {
+      "display": "Sillé-le-Guillaume",
+      "local": "Sillé",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.1381,
+      48.1808
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château forestier gardant la lisière nord du Maine.",
+    "sources": [
+      "Sillé-le-Guillaume"
+    ]
+  },
+  {
+    "id": "set_solesmes",
+    "province": "prov_maine",
+    "kind": "abbey",
+    "name": {
+      "display": "Solesmes",
+      "local": "Solesmes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.1908,
+      47.8419
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré bénédictin sur la Sarthe.",
+    "sources": [
+      "Abbaye Saint-Pierre de Solesmes"
+    ]
+  },
+  {
+    "id": "set_fresnay_sur_sarthe",
+    "province": "prov_maine",
+    "kind": "village",
+    "name": {
+      "display": "Fresnay-sur-Sarthe",
+      "local": "Fresnay",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.0056,
+      48.2792
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-château sur la Sarthe, aux confins de la Normandie.",
+    "sources": [
+      "Fresnay-sur-Sarthe"
+    ]
+  },
+  {
+    "id": "set_la_ferte_bernard",
+    "province": "prov_maine",
+    "kind": "village",
+    "name": {
+      "display": "La Ferté-Bernard",
+      "local": "La Ferté Bernard",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.6547,
+      48.1897
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg fortifié du Perche mainiot, sur l'Huisne.",
+    "sources": [
+      "La Ferté-Bernard"
+    ]
+  },
+  {
+    "id": "set_chateau_du_loir",
+    "province": "prov_maine",
+    "kind": "village",
+    "name": {
+      "display": "Château-du-Loir",
+      "local": "Chastel du Loir",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.4108,
+      47.6906
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-château sur le Loir, au sud du Maine.",
+    "sources": [
+      "Château-du-Loir"
+    ]
+  },
+  {
+    "id": "set_beaumont_sur_sarthe",
+    "province": "prov_maine",
+    "kind": "village",
+    "name": {
+      "display": "Beaumont-sur-Sarthe",
+      "local": "Beaumont",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.1319,
+      48.2242
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg-château sur la Sarthe, entre Le Mans et Alençon.",
+    "sources": [
+      "Beaumont-sur-Sarthe"
+    ]
   }
 ]
