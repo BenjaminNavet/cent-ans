@@ -104,12 +104,14 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 	var previous := _markers
 	_markers = {}
 	_homes.clear()
-	for plate in _plates.values():
-		plate.queue_free()
-	_plates.clear()
+	# Plaques gardées avec leur marqueur inchangé (contenu lu du marqueur), sinon reconstruites.
+	var previous_plates := _plates
+	_plates = {}
 	if sim == null or map_data == null:
 		for marker in previous.values():
 			marker.queue_free()
+		for plate in previous_plates.values():
+			plate.queue_free()
 		return
 	var per_province: Dictionary = {}
 	for army_id in sim.call("get_army_ids"):
@@ -147,7 +149,8 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		var color: Color = color_of.call(faction)
 		var signature := _signature(army, color, faction == player_faction)
 		var marker: ArmyMarker = previous.get(army_id)
-		if marker != null and marker.get_meta("pb1_signature", "") == signature:
+		var reused := marker != null and marker.get_meta("pb1_signature", "") == signature
+		if reused:
 			previous.erase(army_id)
 		else:
 			if marker != null:
@@ -169,11 +172,20 @@ func refresh(sim: Object, color_of: Callable, player_faction: String) -> void:
 		_markers[army_id] = marker
 		_homes[army_id] = marker.base_position
 		if _plate_layer != null:
-			var plate := build_plate(marker, marker.army_id == selected_army)
-			_plate_layer.add_child(plate)
+			var plate: PanelContainer = previous_plates.get(army_id)
+			previous_plates.erase(army_id)
+			if reused and plate != null and is_instance_valid(plate):
+				_style_plate(plate, marker, marker.army_id == selected_army)
+			else:
+				if plate != null and is_instance_valid(plate):
+					plate.queue_free()
+				plate = build_plate(marker, marker.army_id == selected_army)
+				_plate_layer.add_child(plate)
 			_plates[army_id] = plate
 	for marker in previous.values():
 		marker.queue_free()
+	for plate in previous_plates.values():
+		plate.queue_free()
 	if not _markers.has(selected_army):
 		selected_army = ""
 	_placement_dirty = true
