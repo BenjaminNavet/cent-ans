@@ -471,9 +471,20 @@ func refresh(sim: Object, color_of: Callable) -> void:
 			var state: Dictionary = sim.call("get_province_state", province_id)
 			devastation[province_id] = float(state.get("devastation", 0.0))
 	if devastation != _devastation:
+		# Seules les tuiles dont un hameau est dans une province à la dévastation changée.
+		var changed := {}
+		for province_id in devastation:
+			if not _devastation.has(province_id) or float(_devastation[province_id]) != float(devastation[province_id]):
+				changed[province_id] = true
+		for province_id in _devastation:
+			if not devastation.has(province_id):
+				changed[province_id] = true
 		_devastation = devastation
 		for index in _hamlet_nodes:
-			_hamlet_dirty[index] = true
+			for h in _hamlets_by_chunk.get(index, []):
+				if changed.has(data.hamlets[h]["province"]):
+					_hamlet_dirty[index] = true
+					break
 
 
 # --- Mise à jour par image -----------------------------------------------------------
