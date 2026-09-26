@@ -149,6 +149,11 @@ func _on_alert_activated(alert: Dictionary) -> void:
 		"research_idle":
 			ui.tech_panel_requested.emit()
 			return
+		"diplomacy_offer":  # Q5
+			var diplomacy: Node = map.get("diplomacy")
+			if diplomacy != null and diplomacy.call("available"):
+				diplomacy.call("open_panel")
+			return
 		"ransom":  # H11 : panneau de faction puis fenêtre des captifs et rançons
 			ui.faction_panel_requested.emit()
 			if not (ui.faction_panel.ransom_panel != null and ui.faction_panel.ransom_panel.visible):

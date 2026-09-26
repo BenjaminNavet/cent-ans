@@ -70,6 +70,9 @@ var vignette: TextureRect
 var vignette_caption: Label
 ## Identifiant de la vignette affichée (tests, captures).
 var vignette_id: String = ""
+## Q5 : image du dernier remplissage (les panneaux ouverts par la fin de tour dans cette image
+## restent sous le rapport ; ceux que le joueur ouvre ensuite le referment).
+var filled_frame := 0
 
 
 func _ready() -> void:
@@ -262,6 +265,7 @@ static func has_news(report_groups: Array) -> bool:
 
 ## Affiche le rapport ; renvoie faux (et reste fermé) s'il n'y a rien de notable.
 func show_report(date_label: String, report_groups: Array) -> bool:
+	filled_frame = Engine.get_process_frames()
 	groups = report_groups
 	_title = date_label
 	_render()
@@ -278,6 +282,7 @@ func show_report(date_label: String, report_groups: Array) -> bool:
 ## dialogue) dans les rubriques déjà construites, et rouvre le rapport s'il avait été fermé.
 ## Mêmes paramètres que `build_groups`. `date_label` : titre du rapport s'il n'en a pas encore.
 func add_events(new_events: Array, is_relevant: Callable, keeps_world: Callable = Callable(), player: String = "", date_label: String = "") -> bool:
+	filled_frame = Engine.get_process_frames()
 	var new_groups := build_groups(new_events, is_relevant, keeps_world, player)
 	if new_groups.is_empty():
 		return false
