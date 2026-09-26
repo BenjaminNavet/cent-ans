@@ -113,9 +113,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    11291,
-    2235,
-    554
+    17920,
+    3227,
+    779
    ],
    "variants": 2
   },
@@ -130,9 +130,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    8150,
-    1669,
-    419
+    14287,
+    2626,
+    635
    ],
    "variants": 2
   },
@@ -147,9 +147,9 @@
    "rig": "cavalry",
    "style": "horse_bow",
    "tris": [
-    8029,
-    1628,
-    390
+    14166,
+    2585,
+    606
    ],
    "variants": 2
   },
@@ -164,9 +164,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    8228,
-    1672,
-    436
+    15270,
+    2734,
+    671
    ],
    "variants": 2
   },
@@ -181,9 +181,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    8238,
-    1653,
-    409
+    14375,
+    2610,
+    625
    ],
    "variants": 2
   },
@@ -198,9 +198,9 @@
    "rig": "cavalry",
    "style": "horse_javelin",
    "tris": [
-    8090,
-    1620,
-    414
+    14226,
+    2577,
+    631
    ],
    "variants": 2
   },
@@ -215,9 +215,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    8206,
-    1635,
-    415
+    14343,
+    2592,
+    631
    ],
    "variants": 2
   },
@@ -490,9 +490,9 @@
    "rig": "cavalry",
    "style": "standard_mounted",
    "tris": [
-    8824,
-    1802,
-    467
+    15453,
+    2794,
+    692
    ],
    "variants": 2
   }

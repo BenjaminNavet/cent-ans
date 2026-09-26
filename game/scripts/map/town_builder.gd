@@ -304,6 +304,10 @@ func _init(p_plan: Dictionary, anchor: Vector2, p_meters_per_unit: float, parent
 		_tasks.append(_draped_node.bind("Streets_%d" % k, groups[k], 0.9, 2.0, false))
 	_tasks.append(_build_walls)
 	_tasks.append(_build_monuments)
+	for k in (prepared.get("wall_rings", []) as Array).size():
+		_tasks.append(_draped_node.bind("WallRing_%d" % k, prepared["wall_rings"][k], 0.0, float(prepared["wall_rings"][k].get("top", 12.0)), true))
+	for extra: Dictionary in prepared.get("extras", []):
+		_tasks.append(_build_extra.bind(extra))
 	# Modèles du kit pas encore chargés : un chargement par tâche (étalé sur les images).
 	var to_load := {}
 	for cell: Dictionary in prepared["detail"]:
@@ -446,6 +450,8 @@ static func prepare(plan: Dictionary) -> void:
 	var ys: PackedFloat32Array = houses["y"]
 	var all := manifest()
 	var cells := {}  # Vector2i → {modèle → [xforms, bases, tints]}
+	# VH4 : cellules plus petites (îlots) pour les villes emblématiques 1:1.
+	var cell_m := float(plan.get("detail_cell_m", DETAIL_CELL_M))
 	var block_x: Array = []
 	var block_b: Array = []
 	var block_t: Array = []
@@ -462,7 +468,7 @@ static func prepare(plan: Dictionary) -> void:
 			var sx := front / float(entry["length"])
 			var sz := depth / float(entry["depth"])
 			var sy := clampf(sqrt(sx * sz), 0.85, 1.2)
-			var key := Vector2i(floori(xs[i] / DETAIL_CELL_M), floori(ys[i] / DETAIL_CELL_M))
+			var key := Vector2i(floori(xs[i] / cell_m), floori(ys[i] / cell_m))
 			if not cells.has(key):
 				cells[key] = {}
 			var groups: Dictionary = cells[key]
@@ -491,7 +497,7 @@ static func prepare(plan: Dictionary) -> void:
 			var g: Array = groups[model]
 			models[model] = pack_instances(g[0], g[1], g[2])
 		detail.append({"key": key, "models": models})
-	plan["prepared"] = {"detail": detail, "blocks": pack_instances(block_x, block_b, block_t), "ground": _ground_strips(plan), "streets": _street_groups(plan), "walls": _wall_arrays(plan)}
+	plan["prepared"] = {"detail": detail, "blocks": pack_instances(block_x, block_b, block_t), "ground": _ground_strips(plan), "streets": _street_groups(plan), "walls": _wall_arrays(plan), "wall_rings": _wall_ring_arrays(plan), "extras": _extra_meshes(plan)}
 
 
 func _instances_node(mesh: Mesh, packed: Dictionary, mat: Material, lod: String, top: float) -> MultiMeshInstance3D:
@@ -613,7 +619,7 @@ static func _ground_arrays(plan: Dictionary, built: PackedFloat32Array, row0: in
 	for k in range(row0 * n, mini((row1 + 1) * n, n * n)):
 		if mask[k] == 1:
 			var p: Vector2 = origin + Vector2(k % n, k / n) * step
-			var edge := clampf((TownPlan.radius_at(radii, atan2(p.y, p.x)) - p.length()) / 40.0, 0.0, 1.0)
+			var edge := float(ground["edge"][k]) if ground.has("edge") else clampf((TownPlan.radius_at(radii, atan2(p.y, p.x)) - p.length()) / 40.0, 0.0, 1.0)
 			var yard := Color(0.24, 0.26, 0.18).lerp(Color(0.25, 0.23, 0.18), edge)
 			colors[k] = layer_color("Rubble", Color(0.17, 0.23, 0.11).lerp(yard, built[k]))
 			lo = minf(lo, h[k])
@@ -661,6 +667,7 @@ static func _street_arrays(streets: Array) -> Dictionary:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var earth := layer_color("Rubble", Color(0.62, 0.55, 0.46))
 	var paved := layer_color("Rubble", Color(0.78, 0.74, 0.68))
+	var water := layer_color("Plaster", Color(0.16, 0.22, 0.24))
 	var lo := INF
 	var hi := -INF
 	var rect := Rect2()
@@ -670,7 +677,9 @@ static func _street_arrays(streets: Array) -> Dictionary:
 		var bl: PackedFloat32Array = street["bases_l"]
 		var br: PackedFloat32Array = street["bases_r"]
 		var half := float(street["width"]) * 0.5
-		var color := paved if bool(street.get("market", false)) or half >= 3.5 else earth
+		var color := paved if bool(street.get("market", false)) or bool(street.get("paved", false)) or half >= 3.5 else earth
+		if bool(street.get("water", false)):
+			color = water  # VH4 : ruisseau dessiné (Robec)
 		var along := 0.0
 		for i in range(1, pts.size()):
 			var a := pts[i - 1]
@@ -736,6 +745,78 @@ static func _wall_arrays(plan: Dictionary) -> Dictionary:
 		_wall_top(st, a + na, b + nb, b - nb, a - na, ha, hb, height, color)
 		along += seg
 	return {"arrays": st.commit_to_arrays(), "lo": lo, "hi": hi, "rect": rect.grow(10.0), "top": height + 2.0}
+
+
+## VH4 : enceintes polygonales quelconques (`plan.wall_rings`, normales explicites, fermées ou
+## non) : faces extérieure et intérieure, chemin de ronde, crénelage simplifié.
+static func _wall_ring_arrays(plan: Dictionary) -> Array:
+	var out: Array = []
+	for r: Dictionary in plan.get("wall_rings", []):
+		var ring: PackedVector2Array = r["ring"]
+		if ring.size() < 2:
+			continue
+		var normals: PackedVector2Array = r["normals"]
+		var bases: PackedFloat32Array = r["bases"]
+		var gaps: PackedInt32Array = r["gaps"]
+		var height := float(r.get("height", 9.0))
+		var half := float(r.get("thickness", 2.2)) * 0.5
+		var color := layer_color("Masonry", Color(0.95, 0.93, 0.88))
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var along := 0.0
+		var lo := INF
+		var hi := -INF
+		var rect := Rect2(ring[0], Vector2.ZERO)
+		for i in range(1, ring.size()):
+			var a := ring[i - 1]
+			var b := ring[i]
+			var seg := a.distance_to(b)
+			rect = rect.expand(b)
+			lo = minf(lo, bases[i])
+			hi = maxf(hi, bases[i])
+			if gaps[i] == 1 or gaps[i - 1] == 1:
+				along += seg
+				continue
+			var na := normals[i - 1] * half
+			var nb := normals[i] * half
+			_wall_quad(st, a + na, b + nb, bases[i - 1], bases[i], -2.5, height, along, seg, color)
+			_wall_quad(st, b - nb, a - na, bases[i], bases[i - 1], -2.5, height, along, seg, color)
+			_wall_top(st, a + na, b + nb, b - nb, a - na, bases[i - 1], bases[i], height, color)
+			# Parapet extérieur (merlons simplifiés en une lisse).
+			var pa := a + na * 0.6
+			var pb := b + nb * 0.6
+			_wall_quad(st, pa + na * 0.4, pb + nb * 0.4, bases[i - 1], bases[i], height, height + 1.6, along, seg, color)
+			_wall_quad(st, pb, pa, bases[i], bases[i - 1], height, height + 1.6, along, seg, color)
+			along += seg
+		if lo == INF:
+			continue
+		out.append({"arrays": st.commit_to_arrays(), "lo": lo, "hi": hi, "rect": rect.grow(10.0), "top": height + 3.0})
+	return out
+
+
+## VH4 : maillages uniques (monuments à gabarit réel) préparés dans le fil du plan.
+static func _extra_meshes(plan: Dictionary) -> Array:
+	var out: Array = []
+	for m: Dictionary in plan.get("v2_monuments", []):
+		out.append(m)
+	return out
+
+
+func _build_extra(m: Dictionary) -> void:
+	var arrays: Array = m["arrays"]
+	if arrays.is_empty() or (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():
+		return
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var d := Vector2(cos(float(m["yaw"])), sin(float(m["yaw"])))
+	var xform := Transform3D(basis_x(d), Vector3(float(m["x"]), 0.0, float(m["y"])))
+	var node := _multimesh(mesh, [xform], [float(m["base"])], [0.5], material(0, true, 0.0, meters_per_unit), "all", float(m.get("top", 40.0)) + 10.0)
+	node.name = "Monument_" + str(m.get("id", ""))
+	# L'emprise d'un grand monument dépasse le rayon forfaitaire des instances.
+	var r := maxf(float(m.get("length", 40.0)), float(m.get("depth", 40.0)))
+	var rect := Rect2(Vector2(float(m["x"]), float(m["y"])) - Vector2(r, r), Vector2(r, r) * 2.0)
+	geometry[geometry.size() - 1][4] = rect
+	refresh_aabbs(MapData.vertical_scale())
 
 
 func _build_walls() -> void:
