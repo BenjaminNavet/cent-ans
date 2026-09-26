@@ -1434,7 +1434,11 @@ y = s · (h − K · max(h − base, 0) + g · (1 − K) · max(h − fond, 0)),
 - `c(s)` : poids selon l'échelle, `mountain_squash_far` (0) en vue stratégique → 1 dès l'exagération
   `mountain_squash_full_exaggeration` (×3,5, avant le palier vallée) ; publié avec l'échelle
   (`campaign_relief_squash`), recalé par les mêmes signaux ;
-- le gain local ZG8 est écrasé d'autant (`g · (1 − K)`) : pas d'aiguilles sur une montagne aplanie.
+- le gain local ZG8 est écrasé d'autant (`g · (1 − K)`) : pas d'aiguilles sur une montagne aplanie ;
+- autour des villes emblématiques 1:1 (VH4, `LandmarkV2Library`) : k ≥ `true_scale_squash` (0,7)
+  jusqu'au rayon de la ville + `true_scale_full_units` (4), fondu sur `true_scale_fade_units` (6) :
+  relief ≈ échelle vraie aux paliers vallée et site (coteaux de Rouen, côte Sainte-Catherine, plus
+  des murs de 600 m à côté de maisons à l'échelle ; amplitude affichée ×0,65).
 
 Fond, base et k partagent une texture RGBF (`campaign_relief_floor` : R, G, B) et la grille publiée
 (`MapData.relief_floor_grid` : `data`, `base`, `squash`) ; doubles exacts : `campaign_relief.gdshaderinc`
@@ -1450,7 +1454,7 @@ la caméra reste au-dessus du sol affiché (plus la garde) sur un cercle de rayo
 hauteur pondérée par `crest_focus_weight`) : elle monte au-dessus des crêtes au lieu de rester dans
 la vallée. Sur les collines, rien ne change (≤ 1 cm de plus à Crécy au palier site).
 Captures avant / après : `docs/img/sz1/` (`tests/sz1_mountain_shots.gd`, « avant » avec
-`--no-mountain-squash --no-crest`).
+`--no-mountain-squash --no-crest` ; Rouen : `tests/vh4_shots.gd`, « avant » = `docs/img/vh4/`).
 
 **Niveaux d'eau.** `hydro_fine.water_level` borne le fond des lignes à 0 m avant l'ajustement
 monotone (la bathymétrie des zones E5-E7 tirait la Tamise à −7,8 m à Londres, la Garonne à −15,8 m à

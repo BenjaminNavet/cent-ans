@@ -394,5 +394,7 @@ Détail dans `docs/godot-map.md` (« Montagnes écrasées ») et `docs/wip/sz1-m
   350 m, pente 0,3, borne 0,55), à partir de ×3,5 d'exagération (palier vallée) ; collines, falaises et
   plaines (amplitude < 300 m) gardent exactement le rendu ZG8. Toujours une seule fonction, avec ses
   doubles GDScript et Rust (semis d'arbres), et les champs dans la même texture que le fond (RGBF).
+- **Villes 1:1** : autour des villes emblématiques v2 (VH4), relief ramené près de l'échelle vraie
+  (k ≥ 0,7) pour que coteaux et maisons partagent la même échelle.
 - **Caméra** : garde au-dessus des crêtes voisines (cercles autour de la caméra et du point visé).
 

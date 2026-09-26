@@ -32,7 +32,11 @@ Réglages : `relief_exaggeration.tres` (`mountain_*`), `close_camera.tres` (`cre
 - [x] Caméra au-dessus des crêtes voisines
 - [x] Test `sz1_mountain_test.gd` ; zg2/zg4/zg8/smoke OK ; clippy OK
 - [x] Docs : `godot-map.md`, addendum ADR 0036
-- [ ] Captures « après » sur le relief SZ2 (main fusionnée) + cargo test complet
+- [x] Fusion de `main` (SZ2, VH4, SZ6) ; captures avant/après refaites sur le relief SZ2
+- [x] Rouen (VH4) : relief près de l'échelle vraie autour des villes 1:1 (`true_scale_*`),
+      captures `avant_rouen_*` (= `docs/img/vh4/`) / `apres_rouen_*`
+- [x] Tests après fusion : sz1, zg2, zg4, zg8, vh4_landmarks, smoke OK
+- [ ] cargo fmt/clippy/test complet (cible privée : la cible partagée mélange les worktrees)
 
 ## Prochaine étape
 Première case non cochée, puis rapport à l'orchestrateur (ne pas fusionner dans main).
@@ -41,4 +45,8 @@ Première case non cochée, puis rapport à l'orchestrateur (ne pas fusionner da
 - Galles (vallée de Conwy) : amplitude 960 m sur des vallées étroites, reste un paysage de montagne
   encaissé au palier site (caméra à 1,1 km d'un versant de 400 m) ; plus de murs jusqu'au bord haut.
 - Alpes au palier site : relief adouci (≈ ×1,3 du vrai) ; `mountain_squash_max` règle le compromis.
-- Arbres géants près de la caméra : défaut S4 (lot SZ4), hors lot.
+- Arbres géants près de la caméra : défaut S4 (lot SZ4, fusionné), hors lot.
+- Rouen : fumées blanches au-dessus de la ville et falaise résiduelle au bord de la Seine (bras de
+  l'île Lacroix, limite VH4) hors lot.
+- Villes 1:1 : le champ est calculé au chargement depuis `LandmarkV2Library` (toutes les villes v2,
+  quelle que soit l'année) ; `--no-landmarks-1to1` le coupe.
