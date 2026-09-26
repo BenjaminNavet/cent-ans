@@ -166,5 +166,58 @@
     "sources": [
       "Lodi"
     ]
+  },
+  {
+    "id": "set_vigevano",
+    "province": "prov_milano",
+    "kind": "town",
+    "name": {
+      "display": "Vigevano",
+      "local": "Vigevan",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      8.859,
+      45.3168
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de la Lomellina, territoire viscontéen.",
+    "sources": [
+      "Vigevano"
+    ]
+  },
+  {
+    "id": "set_abbiategrasso",
+    "province": "prov_milano",
+    "kind": "village",
+    "name": {
+      "display": "Abbiategrasso",
+      "local": "Abiagrass",
+      "local_language": "lombard"
+    },
+    "lonlat": [
+      8.9152,
+      45.3985
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg agricole du contado milanais, sur le Naviglio Grande.",
+    "sources": [
+      "Abbiategrasso"
+    ]
   }
 ]

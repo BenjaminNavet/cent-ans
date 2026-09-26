@@ -111,5 +111,109 @@
     "sources": [
       "Illasi"
     ]
+  },
+  {
+    "id": "set_soave",
+    "province": "prov_verona",
+    "kind": "town",
+    "name": {
+      "display": "Soave",
+      "local": "Soàe",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.1642,
+      45.4292
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg viticole clos de murs par les Scaligers, aux portes de Vérone.",
+    "sources": [
+      "Soave (Italie)"
+    ]
+  },
+  {
+    "id": "set_cologna_veneta",
+    "province": "prov_verona",
+    "kind": "village",
+    "name": {
+      "display": "Cologna Veneta",
+      "local": "Cołogna",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.3387,
+      45.3252
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg agricole de la basse plaine véronaise.",
+    "sources": [
+      "Cologna Veneta"
+    ]
+  },
+  {
+    "id": "set_lazise",
+    "province": "prov_verona",
+    "kind": "village",
+    "name": {
+      "display": "Lazise",
+      "local": "Laxise",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      10.7336,
+      45.5053
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg du lac de Garde doté d'un château scaligère, port de la flotte véronaise du lac.",
+    "sources": [
+      "Lazise"
+    ]
+  },
+  {
+    "id": "set_schio",
+    "province": "prov_verona",
+    "kind": "village",
+    "name": {
+      "display": "Schio",
+      "local": "Scio",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.3561,
+      45.7134
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg lainier des Préalpes vicentines, sous la seigneurie des Scaligers.",
+    "sources": [
+      "Schio"
+    ]
   }
 ]

@@ -84,5 +84,110 @@
       "Alghero",
       "Famille Doria"
     ]
+  },
+  {
+    "id": "set_oristano",
+    "province": "prov_sardegna",
+    "kind": "town",
+    "name": {
+      "display": "Oristano",
+      "local": "Aristanis",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      8.5911,
+      39.9036
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Capitale du judicat d'Arborée, dernier État sarde indépendant, en résistance ouverte à la conquête aragonaise.",
+    "sources": [
+      "Judicat d'Arborea",
+      "Oristano"
+    ]
+  },
+  {
+    "id": "set_iglesias",
+    "province": "prov_sardegna",
+    "kind": "town",
+    "name": {
+      "display": "Iglesias",
+      "local": "Villa di Chiesa",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      8.5347,
+      39.3087
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville minière (argent, plomb) fondée par Pise, passée sous la Couronne d'Aragon en 1324.",
+    "sources": [
+      "Iglesias (Italie)"
+    ]
+  },
+  {
+    "id": "set_castelsardo",
+    "province": "prov_sardegna",
+    "kind": "castle",
+    "name": {
+      "display": "Castelsardo",
+      "local": "Castrum Ianuae",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      8.7139,
+      40.9161
+    ],
+    "weight": 8,
+    "owner": "fac_genoa",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse fondée vers 1102 par les Doria sous le nom de Castelgenovese, tenue par Gênes en 1337.",
+    "sources": [
+      "Castelsardo",
+      "Famille Doria"
+    ]
+  },
+  {
+    "id": "set_bosa",
+    "province": "prov_sardegna",
+    "kind": "village",
+    "name": {
+      "display": "Bosa",
+      "local": "Bosa",
+      "local_language": "sarde"
+    },
+    "lonlat": [
+      8.4989,
+      40.2986
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Bourg côtier au pied du château Malaspina, sur la côte occidentale de l'île.",
+    "sources": [
+      "Bosa (Italie)"
+    ]
   }
 ]
