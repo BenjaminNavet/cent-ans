@@ -957,11 +957,11 @@ def plate_shell(body, name, material, keep, offset, relax=8, depth=0.004):
     return obj
 
 
-def limb_harness(g, body, era, colour):
+def limb_harness(g, body, era, colour, cuisses=False):
     """Plates of the arms and legs over the mail (one object, the body's weights).
 
-    Early: spaudler of three lames, couter, tubular vambrace, poleyn, greave. Late adds the
-    rerebrace, a fourth lame and the cuisse.
+    Early: spaudler of two lames, couter, tubular vambrace, poleyn, greave. Late adds the
+    rerebrace and a third lame; `cuisses` (thighs not hidden by a coat skirt) the cuisse.
     """
     lm = g.lm
     material = g.mat(eq.C_PLATE, colour)
@@ -984,7 +984,11 @@ def limb_harness(g, body, era, colour):
         def poleyn(c, bones, knee=knee, lower_leg=lower_leg, upper_leg=upper_leg):
             if not bones & {lower_leg, upper_leg} or bones & LIMBS_OUT:
                 return False
-            return (c - knee).length < 0.085 and c.y < knee.y + 0.01
+            return (
+                (c - knee).length < 0.08
+                and c.y < knee.y + 0.01
+                and c.z < knee.z + 0.035
+            )
 
         def cuisse(c, bones, knee=knee, hip=hip, upper_leg=upper_leg):
             return (
@@ -1015,16 +1019,17 @@ def limb_harness(g, body, era, colour):
         legs = [("greave", greave, 0.02), ("poleyn", poleyn, 0.03)]
         arms = [("couter", couter, 0.034), ("vambrace", vambrace, 0.03)]
         if late:
-            legs.append(("cuisse", cuisse, 0.022))
+            if cuisses:
+                legs.append(("cuisse", cuisse, 0.022))
             arms.append(("rerebrace", rerebrace, 0.03))
         for name, keep, off in legs + arms:
             obj = plate_shell(body, f"{name}_{s}", material, keep, off)
             if obj is not None:
                 pieces.append(obj)
         # Spaudler: lames overlapping downwards from the top of the shoulder.
-        lames = 4 if late else 3
-        top = shoulder.z + 0.09
-        step = 0.045
+        lames = 3 if late else 2
+        top = shoulder.z + 0.065
+        step = 0.036
         for k in range(lames):
             z_hi = top - k * step
             z_lo = z_hi - step - 0.012
@@ -1042,10 +1047,10 @@ def limb_harness(g, body, era, colour):
                     return False
                 if bones & LIMBS_OUT:
                     return False
-                return z_lo < c.z < z_hi and (c.x - shoulder.x) * sign > -0.05
+                return z_lo < c.z < z_hi and (c.x - shoulder.x) * sign > -0.015
 
             obj = plate_shell(
-                body, f"spaudler_{s}{k}", material, lame, 0.036 + 0.005 * k, relax=4
+                body, f"spaudler_{s}{k}", material, lame, 0.03 + 0.004 * k, relax=4
             )
             if obj is not None:
                 pieces.append(obj)
@@ -1140,7 +1145,8 @@ def jack(g, colour=(0.55, 0.47, 0.32), skirt=0.3, livery=False):
     if g.level == 0:
         quilt(top, lm, 0.006)
     hem(top, 0.008)
-    hem_z = lm.bone["Hips"].z - skirt
+    # Hem at least a hand below the tunic's (FG1 tunic: knee + 14 cm), which it hides.
+    hem_z = min(lm.bone["Hips"].z - skirt, lm.knee_z + 0.12)
     low = skirt_piece(lm, _torso_tree(top), material, "jack_skirt", hem_z, push=0.024)
     if g.level == 0:
         quilt(low, lm, 0.005)
