@@ -42,9 +42,34 @@ workspace ont les mêmes empreintes d'un worktree à l'autre, la dylib copiée p
 autre agent (constaté : dylib sans `get_soldier_buffers`). PB3c compile dans le `core/target`
 de son worktree (ignoré par git).
 
-## Mesures
-(A/B base 6a837e99 contre HEAD en cours, script `ab2.sh` du scratchpad : scripts et dylib
-échangés, ordre alterné.)
+## Mesures (A/B base 6a837e99 contre la branche, scripts + dylib échangés, ordre alterné, 3 paires)
+`--benchmark --quality=high --disable-vsync 1600x900` ; grosse bataille `--units=120
+--bench-at=60` (28 770 soldats, 240 régiments) ; siège `--siege --bench-at=60` (967 soldats).
+Médianes des 3 passages ; machine partagée très chargée (bruit ±30 %).
+
+| Cas | i/s base → PB3c | image médiane (ms) | TIME_PROCESS médian (ms) |
+|---|---|---|---|
+| Grosse bataille, release | 25,1 → 40,4 | 38,3 → 25,0 | 66,4 → 47,1 |
+| Grosse bataille, debug | 24,8 → 51,9 | 38,9 → 17,6 | 68,4 → 47,3 |
+| Siège, release | 49,3 → 58,4 | 20,0 → 16,7 | 28,7 → 17,3 |
+| Siège, debug (7 paires) | 55,4 → 52,6 | 18,1 → 18,5 | 22,8 → 27,2 (bruit) |
+
+Profil du siège (branche) : scripts de bataille ~2,1 ms/image en tout ; le reste du temps
+d'image vient d'ailleurs (rendu), d'où un A/B siège dominé par le bruit.
+`soldiers.update` : ~3,3 ms (grosse bataille) des deux côtés en release ; le cache des poses ne
+gagne rien de mesurable en release (poses Rust déjà bon marché), un peu en debug.
+
+## Tests
+`cargo fmt/clippy -D warnings/test` OK ; Godot : pb3c_buffers, b4_pacing, bv3_check, ep13 (rejeux
+identiques), ep2, ep4, ep7, ep8, ep8b, s2_fire_fx, smoke OK. `bv1_check` échoue (« traits dans
+les pavois 0/256 », `BattleVolleys.arrow_landing`, fichier non touché : antérieur à PB3c).
+
+## Reste / réserves
+- `get_units` et les tampons renvoyés entre deux pas sont partagés : lecture seule côté GDScript.
+- `_find_braced` laissé tel quel (déjà O(n) hors charge de cavalerie).
+- Pistes suivantes : `soldiers.update` (~3,3 ms, boucles GDScript), étendards 1,7 ms, audio
+  1,3 ms, herbe couchée 1,2 ms.
 
 ## Prochaine étape
-A/B debug et release, fusion de `main`, rapport.
+Fusion ff par l'orchestrateur ; conflit attendu avec fix/code-review (bb251b68 repris à
+l'identique, 08555828 sans objet avec les tampons complétés côté Rust).
