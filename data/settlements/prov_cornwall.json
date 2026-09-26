@@ -82,5 +82,132 @@
     "sources": [
       "Château de Restormel"
     ]
+  },
+  {
+    "id": "set_bodmin",
+    "province": "prov_cornwall",
+    "kind": "town",
+    "name": {
+      "display": "Bodmin",
+      "local": "Bodmyn",
+      "local_language": "cornique"
+    },
+    "lonlat": [
+      -4.7167,
+      50.4667
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché autour du prieuré de saint Petroc, siège du parlement stannaire de Cornouailles.",
+    "sources": [
+      "Bodmin",
+      "Prieuré de Bodmin"
+    ]
+  },
+  {
+    "id": "set_truro",
+    "province": "prov_cornwall",
+    "kind": "town",
+    "name": {
+      "display": "Truro",
+      "local": "Truru",
+      "local_language": "cornique"
+    },
+    "lonlat": [
+      -5.05,
+      50.26
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": true,
+    "description": "Port et ville stannaire au fond de son estuaire, l'une des quatre villes de l'étain de Cornouailles.",
+    "sources": [
+      "Truro"
+    ]
+  },
+  {
+    "id": "set_liskeard",
+    "province": "prov_cornwall",
+    "kind": "village",
+    "name": {
+      "display": "Liskeard",
+      "local": "Lyskerrys",
+      "local_language": "cornique"
+    },
+    "lonlat": [
+      -4.4667,
+      50.45
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg stannaire et marché du sud-est des Cornouailles.",
+    "sources": [
+      "Liskeard"
+    ]
+  },
+  {
+    "id": "set_st_germans",
+    "province": "prov_cornwall",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Germans",
+      "local": "Lannaled",
+      "local_language": "cornique"
+    },
+    "lonlat": [
+      -4.3167,
+      50.3833
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré augustinien de Saint-Germans, ancien siège épiscopal des Cornouailles.",
+    "sources": [
+      "St Germans Priory"
+    ]
+  },
+  {
+    "id": "set_padstow",
+    "province": "prov_cornwall",
+    "kind": "village",
+    "name": {
+      "display": "Padstow",
+      "local": "Lannwedhenek",
+      "local_language": "cornique"
+    },
+    "lonlat": [
+      -4.9358,
+      50.5372
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Petit port de pêche de la côte nord, lié au culte de saint Petroc.",
+    "sources": [
+      "Padstow"
+    ]
   }
 ]
