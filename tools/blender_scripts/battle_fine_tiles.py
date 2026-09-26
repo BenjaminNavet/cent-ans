@@ -7,7 +7,7 @@ the image), plus a relief channel (albedo modulation, mean 0.5) and a roughness 
 ====  =========  ========  =========================================================
 layer name       size (m)  content
 ====  =========  ========  =========================================================
-0     mail       0.072     riveted rings, 9 mm pitch, 12 interlinked rows (4-in-1)
+0     mail       0.1       riveted rings, ~12 mm pitch, 12 interlinked rows (4-in-1)
 1     weave      0.024     plain weave (tabby) of 1 mm woollen threads, uneven yarn
 2     felt       0.08      felted / padded wool (gambeson), lumps and fibres
 3     leather    0.12      grain creases and scuffs
@@ -31,7 +31,7 @@ import numpy as np
 
 TILE = 512
 LAYERS = ("mail", "weave", "felt", "leather", "hammered", "wood", "skin", "hair")
-TILE_SIZE_M = (0.072, 0.024, 0.08, 0.12, 0.16, 0.3, 0.06, 0.05)
+TILE_SIZE_M = (0.1, 0.024, 0.08, 0.12, 0.16, 0.3, 0.06, 0.05)
 
 
 # --- PNG ------------------------------------------------------------------------------
