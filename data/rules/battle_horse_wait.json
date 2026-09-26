@@ -1,0 +1,6 @@
+{
+  "description": "La cavalerie attend son infanterie (lot EQ7, suite de l'ADR 0052). La cavalerie d'une armée qui a de l'infanterie ne charge pas une cible couverte par des tireurs ennemis pourvus de traits (cible à portée × range_margin d'un tireur qui n'est pas pris en mêlée) tant que son infanterie n'est pas à moins de foot_close_m de cette cible ou déjà en mêlée : elle tient l'aile. Une troupe déjà à moins de committed_m de sa cible ne s'arrête plus sous les flèches.",
+  "foot_close_m": 120,
+  "range_margin": 1.1,
+  "committed_m": 90
+}
