@@ -1451,7 +1451,8 @@ cheminée 1 × 3 km) : lisibles en vue stratégique, absurdes au palier vallée.
 (`scripts/map/map_prop_scale.gd`, réglages `resources/map_prop_scale.tres`) donne leur échelle selon
 la distance du rig : 1 au-delà de `shrink_start` (28 unités, rien ne change en vue stratégique ni en
 haut du palier comté), taille réelle (`*_ratio` = taille réelle / taille carte) en deçà de
-`shrink_end` (5 ; `tree_shrink_end` = 3 pour les arbres, dont le semis est clairsemé), `smoothstep`
+`shrink_end` (5 ; `tree_shrink_end` = 3 pour les arbres, dont le semis est clairsemé ; **lot SZ4b :
+exagération commune et fin à 8 unités, voir plus bas**), `smoothstep`
 sur le logarithme de la distance entre les deux : aucune marche visible pendant un zoom.
 - arbres : paramètre global `campaign_prop_scale` (remplace `ZoomTiers.prop_scale`) ;
 - panaches (`life_smoke.gdshader`) : paramètre `prop_scale` des deux matériaux ; l'origine des
@@ -1482,6 +1483,65 @@ d = 60 ; `*_amiens_zoom_*` : Amiens à d = 6 et 3, pleine résolution recadrée)
 ![Val de Loire au palier vallée, après](img/sz4/apres_val_de_loire_vallee.jpg)
 ![Amiens à 4 km, avant : disque de terre battue](img/sz4/avant_amiens_zoom_d6.jpg)
 ![Amiens à 4 km, après : masse de toits](img/sz4/apres_amiens_zoom_d6.jpg)
+
+## Maquettes continues et forêts denses (lot SZ4b, suites SZ4)
+
+**Exagération commune.** `MapPropScale` ne donne plus une courbe par famille mais une seule
+exagération E(d) (taille affichée / taille réelle) : `max_exaggeration` (125 = 1 / rapport des
+moulins) à `shrink_start` (28), 1 à `shrink_end` (**8**, seuil du palier vallée où les villes 1:1
+de ZG6 s'activent), `smoothstep` sur le logarithme de la distance. Échelle d'une famille =
+min(1, rapport × E) : arbres, moulins, hameaux, panaches et maquettes sont grossis du même facteur
+à une distance donnée (à d = 14, E ≈ 8 : arbre ~250 m, maison de village ~80 m) ; une famille ne
+quitte sa taille de carte que quand E passe sous 1 / rapport. Au-delà de 28 : rien ne change.
+
+**Maquettes des colonies.** Chaque maquette (`SettlementLayer`) rétrécit vers sa taille réelle
+propre : rayon bâti vers 1340 (`towns_1340.json`, `built_ha`) × `settlement_footprint_gain` (1,25)
+/ rayon de la maquette, borné à [0,05 ; 0,6] (Crécy : 0,05, Amiens : ~0,25). Échelle appliquée au
+support (`holder.scale`) par pas de `rewrite_step` de E (560 maquettes, < 0,5 ms), pose interpolée
+entre le point bas de l'emprise de carte et celui de l'emprise réelle (gardés au recalage de la
+surface). Masquage **par colonie** : une maquette n'est cachée que si sa ville 1:1 est construite
+et affichée (`TownLayer.is_shown`) ; hors du rayon de chargement ZG6 (ou pendant la construction),
+la maquette reste, à sa taille réelle, et n'est plus masquée au palier site. Étiquettes, picking
+et anneau de sélection suivent l'échelle (`model_scale`, `real_radius`).
+
+**Moulins et panaches** (`LifeEffects`) : chaque point d'une colonie garde son décalage à l'échelle
+de la carte autour de la maquette ancrée (ancrage fin ZG5b) et le sol de ses deux poses extrêmes ;
+position courante = centre + décalage × échelle de la maquette, sol interpolé. À taille réelle, les
+moulins tombent juste hors de la ville 1:1 (1,7-2,4 × le rayon bâti), les fumées dedans. Les fumées
+des hameaux partent de leur ancrage fin.
+
+**Forêts denses** (`ForestDetail`, enfant de `Vegetation`, réglages `resources/forest_detail.tres`).
+Le semis de la carte (pas 1,35 unité pour des arbres de ~1 km) devient clairsemé quand les arbres
+rétrécissent. Autour du point visé, la couche sème des cellules de 16 × 16 unités au pas fin
+`spacing × full_scale` (0,047 unité, ~34 m) avec les grilles grossières de la tuile de base (mêmes
+masques de forêt, d'essences et de bosquets), sans haies, dans le pool natif (`VegetationScatter`,
+crate `vegetation` : `DetailArea` = rectangle, part des graines gardées `keep`, parties 4 × 4,
+couloirs). Part affichée `full_scale² (1/s² − 1)` (s = échelle des arbres) : couvert constant ;
+décroissance au-delà de 0,55 × le rayon (3,5 × la distance du rig, 6-50 unités) ; budget
+`instance_budget` (220 000 instances affichées, le rayon se resserre au-delà), cache borné
+(`max_cells`, `max_stored_instances`). Les graines étant triées, `visible_instance_count` garde les
+premières et le paramètre d'instance `instance_cut` / `instance_band` de `foliage.gdshaderinc` fait
+grandir celles qui apparaissent ; le flux aléatoire ne dépend pas de `keep` (resemer plus dense
+ajoute des arbres sans déplacer les autres). Couloirs sans arbres : fleuves fins affichés et routes
+drapées de ZG5b (tuiles CAFV, demi-largeur + 25 m / + 10 m), que la trame 4096 du lit ne connaît
+pas. Recalage sur les pages du quadtree groupé par tuile. `--no-forest-detail` coupe la couche.
+
+**Défaut corrigé au passage** : le pied des instances d'arbres est enfoncé de 0,08 × leur hauteur
+**de carte** (~80 m) ; `campaign_prop_scale` réduisait l'arbre autour de ce pied enterré, si bien
+qu'au palier vallée presque tous les arbres (couche de base comprise) étaient sous le sol.
+`foliage.gdshaderinc` réduit désormais l'enfoncement avec l'arbre (`FOLIAGE_GROUND_SINK`).
+
+Captures `docs/img/sz4b/` (`avant_*` : code du point de départ, `apres_*`), Crécy, Val de Loire,
+Amiens, forêts d'Orléans et de Compiègne, d = 6, 10, 14, 20, 60 :
+`godot --path game --script res://tests/sz4b_shots.gd -- --out=<dossier> --map-weather=clear
+--settle-towns [--prefix=…] [--only=…] [--tiers=d6:6,…] [--full]`.
+Test : `tests/sz4b_colonies_forests_test.gd` (+ `cargo test -p vegetation`).
+
+![Amiens à d = 10, avant : maquette géante](img/sz4b/avant_amiens_d10.jpg)
+![Amiens à d = 10, après : maquette à l'emprise réelle](img/sz4b/apres_amiens_d10.jpg)
+![Forêt de Compiègne à d = 6, avant](img/sz4b/avant_foret_compiegne_d6.jpg)
+![Forêt de Compiègne à d = 6, après](img/sz4b/apres_foret_compiegne_d6.jpg)
+![Crécy à d = 14, après : exagération commune](img/sz4b/apres_crecy_d14.jpg)
 
 ## Interface des colonies (lot C5)
 

@@ -79,6 +79,12 @@ func visible_count() -> int:
 ## `focus` : point visé (x, z) ; `camera_distance` : distance du rig ; `shadows` : ombres des
 ## arbres permises (zoom et qualité, décidé par `Vegetation`).
 func update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void:
+	var t_start := Time.get_ticks_usec()
+	_update_view(focus, camera_distance, shadows)
+	stats["update_ms_max"] = maxf(float(stats.get("update_ms_max", 0.0)), (Time.get_ticks_usec() - t_start) / 1000.0)
+
+
+func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void:
 	_frame += 1
 	var usable := vegetation != null and terrain != null and terrain.quadtree != null and vegetation.has_native()
 	var tree_scale := MapPropScale.shared().tree_scale(camera_distance)
@@ -207,6 +213,7 @@ func _start_jobs(wanted: Array) -> void:
 		var key: int = item[1]
 		if _jobs.has(key):
 			continue
+		var t0 := Time.get_ticks_usec()
 		var rect: Rect2 = item[2]
 		var tile := terrain.chunk_index_at(rect.position.x + 0.5, rect.position.y + 0.5)
 		var coarse := vegetation.tile_coarse(tile)
@@ -229,6 +236,8 @@ func _start_jobs(wanted: Array) -> void:
 			return
 		_jobs[key] = {"id": id, "keep": float(item[3]), "rect": rect, "tile": tile}
 		_job_ids[id] = key
+		# Fil principal : grilles, instantané des pages, couloirs, conversion Rust.
+		stats["request_ms_max"] = maxf(float(stats.get("request_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
 
 
 ## Couloirs sans arbres d'une cellule : fleuves fins (rang affiché, lot ZG5b) et routes drapées,
@@ -448,3 +457,9 @@ func flush(focus: Vector2, camera_distance: float) -> void:
 			update_view(focus, camera_distance, false)
 			if _jobs.is_empty() and _cells.size() == before:
 				return
+
+
+## `--forest-stats` : statistiques imprimées en quittant (bancs, `map_bench.gd`).
+func _exit_tree() -> void:
+	if OS.get_cmdline_user_args().has("--forest-stats"):
+		print("ForestDetail: %s" % JSON.stringify(stats))
