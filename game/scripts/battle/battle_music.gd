@@ -118,21 +118,20 @@ func setup(scene: Node) -> void:
 	_apply_state("approach", true)
 
 
-## `units` : `get_units()` de l'image quand la scène l'a déjà lu (PB3c) ; sinon relu ici.
-func update(delta: float, units: Variant = null) -> void:
+## `p_units` : régiments déjà lus par la scène pour cette image (sinon relus ici).
+func update(delta: float, p_units: Variant = null) -> void:
 	if _scene == null:
 		return
 	var battle: Object = _scene.get("battle")
 	if battle == null:
 		return
-	if not (units is Array):
-		units = battle.call("get_units")
+	var units: Array = p_units if p_units is Array else battle.call("get_units")
 	var resolved: bool = bool(battle.call("is_finished"))
 	var victory := false
 	if resolved:
 		var outcome: Dictionary = battle.call("get_outcome")
 		victory = str(outcome.get("winner", "")) == str(_scene.get("player_side"))
-	_advance(compute_state(units as Array, resolved, victory), delta)
+	_advance(compute_state(units, resolved, victory), delta)
 
 
 func _advance(wanted: String, delta: float) -> void:
