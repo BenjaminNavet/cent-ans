@@ -513,7 +513,7 @@ func add_events(events: Array, date_text: String) -> void:
 			continue
 		text = CodexText.format(text, true)  # BP1 : liens du Codex
 		var line: String
-		if kind == "battle" or kind == "siege" or kind == "province_taken":
+		if kind == "battle" or kind == "siege_started" or kind == "province_captured":
 			line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
 		elif kind == "revolt":
 			line = "[color=#a1121a][b]⚑ %s[/b][/color]" % text
