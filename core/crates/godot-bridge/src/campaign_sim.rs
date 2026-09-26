@@ -3,7 +3,7 @@
 //! The game data is loaded once per data directory and shared between
 //! instances so that `load_from_string` works on a fresh object.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::{
@@ -20,28 +20,47 @@ use sim_campaign::{
 use crate::campaign_sim_turn::TURN_PENDING_FR;
 use crate::convert::variant_to_json;
 
-/// Last successfully loaded game data, shared by every `CampaignSim`.
-type CachedData = Option<(PathBuf, Arc<GameData>)>;
+/// Last successfully loaded game data and its load warnings, shared by
+/// every `CampaignSim` and `GameDataStore` (one load at start-up).
+type CachedData = Option<(PathBuf, Arc<GameData>, Arc<[String]>)>;
 static SHARED_DATA: OnceLock<Mutex<CachedData>> = OnceLock::new();
 
-fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
+/// Game data of `data_dir` with the warnings of its load: the cached copy
+/// when it comes from the same folder, else loaded from disk (the cache is
+/// then replaced; a failed load leaves it untouched). The warnings are
+/// logged once, when the data is read from disk.
+pub(crate) fn load_shared_data(data_dir: &Path) -> Result<(Arc<GameData>, Arc<[String]>), String> {
     let cache = SHARED_DATA.get_or_init(|| Mutex::new(None));
-    let mut guard = cache.lock().ok()?;
-    if let Some((cached_dir, data)) = guard.as_ref() {
-        if data_dir.is_none_or(|dir| dir == cached_dir) {
-            return Some(Arc::clone(data));
+    let mut guard = cache
+        .lock()
+        .map_err(|_| "cache des données empoisonné".to_owned())?;
+    if let Some((cached_dir, data, warnings)) = guard.as_ref() {
+        if cached_dir == data_dir {
+            return Ok((Arc::clone(data), Arc::clone(warnings)));
         }
     }
-    let dir = data_dir?;
-    match GameData::load(dir) {
-        Ok((data, warnings)) => {
-            for warning in &warnings {
-                godot_warn!("CampaignSim data: {warning}");
-            }
-            let data = Arc::new(data);
-            *guard = Some((dir.clone(), Arc::clone(&data)));
-            Some(data)
-        }
+    let (data, warnings) = GameData::load(data_dir).map_err(|error| error.to_string())?;
+    let warnings: Arc<[String]> = warnings.iter().map(ToString::to_string).collect();
+    for warning in warnings.iter() {
+        godot_warn!("game data: {warning}");
+    }
+    let data = Arc::new(data);
+    *guard = Some((
+        data_dir.to_path_buf(),
+        Arc::clone(&data),
+        Arc::clone(&warnings),
+    ));
+    Ok((data, warnings))
+}
+
+fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
+    let Some(dir) = data_dir else {
+        let cache = SHARED_DATA.get_or_init(|| Mutex::new(None));
+        let guard = cache.lock().ok()?;
+        return guard.as_ref().map(|(_, data, _)| Arc::clone(data));
+    };
+    match load_shared_data(dir) {
+        Ok((data, _)) => Some(data),
         Err(error) => {
             godot_error!(
                 "CampaignSim: cannot load data from {}: {error}",
@@ -56,7 +75,7 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
 pub(crate) fn loaded_data_dir() -> Option<PathBuf> {
     let cache = SHARED_DATA.get_or_init(|| Mutex::new(None));
     let guard = cache.lock().ok()?;
-    guard.as_ref().map(|(dir, _)| dir.clone())
+    guard.as_ref().map(|(dir, _, _)| dir.clone())
 }
 
 /// Game data already loaded by any `CampaignSim` of this process, if any
@@ -723,6 +742,9 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
         "settlement" => army.settlement().map_or("", |s| s.as_str()),
         "movement_left" => i64::from(army.movement_left),
         "movement_max" => i64::from(state.army_grid_allowance(data, army)),
+        // Unit roster: points left as km of plain (10 points = one plain cell).
+        "movement_km" => f64::from(army.movement_left) / f64::from(data_model::PLAIN_COST)
+            * grid.cell_km,
         "planned_path" => &planned_path,
         "destination_point" => destination_point,
     };

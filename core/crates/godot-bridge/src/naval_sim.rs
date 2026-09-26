@@ -252,9 +252,10 @@ impl NavalBattleSim {
         let Some(sim) = &mut self.sim else {
             return;
         };
-        self.pending += dt.max(0.0);
-        while self.pending >= NAVAL_DT {
-            self.pending -= NAVAL_DT;
+        for _ in 0..steps_due(&mut self.pending, dt) {
+            if sim.is_finished() {
+                break;
+            }
             sim.step();
         }
     }
@@ -536,5 +537,56 @@ impl CampaignSim {
         state
             .debug_stage_naval(data, &army, &to, &by)
             .map_or(-1, |i| i as i64)
+    }
+}
+
+/// Most fixed steps one `tick` runs (like `BattleSim`): a huge `dt` (a
+/// hitch, a debugger pause) never freezes the frame.
+const MAX_NAVAL_STEPS_PER_CALL: u32 = 600;
+
+/// Adds `dt` to the `pending` time and takes the fixed steps now due, at
+/// most [`MAX_NAVAL_STEPS_PER_CALL`] (the rest is dropped). A non-finite or
+/// non-positive `dt` is ignored.
+fn steps_due(pending: &mut f64, dt: f64) -> u32 {
+    if !dt.is_finite() || dt <= 0.0 {
+        return 0;
+    }
+    *pending += dt;
+    let due = (*pending / NAVAL_DT).floor();
+    if due >= f64::from(MAX_NAVAL_STEPS_PER_CALL) {
+        *pending = 0.0;
+        return MAX_NAVAL_STEPS_PER_CALL;
+    }
+    let steps = due as u32;
+    *pending -= f64::from(steps) * NAVAL_DT;
+    steps
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bad_dt_takes_no_step() {
+        let mut pending = 0.0;
+        for dt in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY, -1.0, 0.0] {
+            assert_eq!(steps_due(&mut pending, dt), 0, "dt {dt}");
+            assert_eq!(pending, 0.0);
+        }
+    }
+
+    #[test]
+    fn huge_dt_is_capped() {
+        let mut pending = 0.0;
+        assert_eq!(steps_due(&mut pending, 1.0e12), MAX_NAVAL_STEPS_PER_CALL);
+        assert_eq!(pending, 0.0);
+    }
+
+    #[test]
+    fn steps_accumulate() {
+        let mut pending = 0.0;
+        assert_eq!(steps_due(&mut pending, NAVAL_DT * 0.5), 0);
+        assert_eq!(steps_due(&mut pending, NAVAL_DT * 2.0), 2);
+        assert!((pending - NAVAL_DT * 0.5).abs() < 1e-9);
     }
 }

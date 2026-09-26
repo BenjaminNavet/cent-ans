@@ -112,6 +112,7 @@ var end_turns_refreshed: int = 0
 ## installation + journal, `refresh_all`.
 var last_end_turn_stats: Dictionary = {}
 var _construction_ids := PackedStringArray()  # PB3d : chantiers marqués au dernier rafraîchissement
+var units_ctl: UnitRosterController = null  # liste « Mes unités » (U) : armées et agents
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -185,6 +186,9 @@ func _ready() -> void:
 	agents_ctl = AgentController.new()  # C6 agents (après C5 : chaîne ses intercepteurs de clic)
 	add_child(agents_ctl)
 	agents_ctl.setup(self)
+	units_ctl = UnitRosterController.new()  # après M4 et C6 : lit leurs états
+	add_child(units_ctl)
+	units_ctl.setup(self)
 	minimap_ctl = MinimapController.new()  # C1
 	minimap_ctl.name = "MinimapController"
 	add_child(minimap_ctl)
@@ -391,6 +395,8 @@ func refresh_all() -> void:
 		settlements_ctl.refresh()
 	if agents_ctl != null:  # C6 agents
 		agents_ctl.refresh()
+	if units_ctl != null:  # liste « Mes unités »
+		units_ctl.refresh()
 	_refresh_trade_layer()  # C5 : routes commerciales
 	if map_modes != null:  # MF1 : repeint par-dessus les couleurs politiques
 		map_modes.refresh()
@@ -1053,7 +1059,10 @@ func _on_end_turn(threaded: bool = false) -> void:
 	last_end_turn_stats["refresh_ms"] = (Time.get_ticks_usec() - t_refresh) / 1000.0
 	end_turns_refreshed += 1
 	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
+		var sim_before: Object = sim
 		await ai_replay.play()
+		if sim != sim_before:  # une autre partie a été chargée entre-temps : ces événements sont périmés
+			return
 	if diplomacy != null:
 		diplomacy.after_end_turn()
 	if victory != null:
@@ -1119,16 +1128,26 @@ func _refuse_during_end_turn() -> bool:
 # --- Sauvegarde ----------------------------------------------------------------------
 
 
+## Vrai si la dernière demande de sauvegarde a écrit l'état (lu par `FlowController`).
+var last_save_ok := false
+
+
 func _on_save(save_name: String) -> void:
+	last_save_ok = false
 	if sim == null or _refuse_during_end_turn():  # PB3d : on sauve l'état résolu, pas celui d'avant
 		return
-	if SimFacade.save_game(save_name):
+	# Fiche `.meta.json` écrite seulement si l'état l'a été (la vignette suit dans FlowController).
+	last_save_ok = SaveSlots.save(save_name)
+	if last_save_ok:
 		ui.show_toast("Partie sauvegardée : %s" % save_name)
 	else:
 		ui.show_toast("Échec de la sauvegarde.", true)
 
 
 func _on_load(path: String) -> void:
+	if ai_replay != null and ai_replay.playing:  # la fin de tour en cours vise la partie actuelle
+		ui.show_toast("Attendez la fin des mouvements adverses (Espace pour passer).", true)
+		return
 	if not SimFacade.load_game(path):
 		ui.show_toast("Impossible de charger cette sauvegarde.", true)
 		return
