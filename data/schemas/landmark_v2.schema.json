@@ -193,6 +193,10 @@
           },
           "description": "Noms traités en venelles."
         },
+        "alleys": {
+          "type": "boolean",
+          "description": "Garde aussi, en venelles, les allées et cours nommées cartographiées en chemins piétons ou de service (… Alley, Court, Passage, Yard, Row, Churchyard : VH6, Londres)."
+        },
         "unnamed": {
           "type": "boolean",
           "description": "Garde aussi les voies sans nom (venelles)."
