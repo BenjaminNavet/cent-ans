@@ -1764,11 +1764,12 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
                 .map(|p| (!goals.contains(p), p.clone()))
                 .collect();
             // The war goals themselves, even unheld: a clear victory buys
-            // the lands it was fought for (Brétigny).
+            // the lands it was fought for (Brétigny); they come before the
+            // other provinces held (ADR 0025 § 5).
             for goal in &goals {
                 if state.province_owner(goal) == Some(enemy) && !held.iter().any(|(_, p)| p == goal)
                 {
-                    held.push((true, goal.clone()));
+                    held.push((false, goal.clone()));
                 }
             }
             held.sort();
@@ -1797,7 +1798,7 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
         }
         // Only a beaten or exhausted crown buys its peace (lands, gold,
         // tribute); otherwise the war goes on until one side prevails.
-        let beaten = score < 2 * diplomacy::SURRENDER_WAR_SCORE
+        let beaten = score <= 2 * diplomacy::SURRENDER_WAR_SCORE
             || me.ledger.weariness >= rules.sue_weariness
             || cornered;
         if beaten {
