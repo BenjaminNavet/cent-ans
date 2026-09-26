@@ -22,9 +22,10 @@ var _materials: Array[ShaderMaterial] = []
 var _ground_y: float = 0.0
 
 
-func build(terrain: BattleTerrain, weather: String) -> void:
+## `da6_on` : −1 = selon le terrain (`BattleTerrain.da6`), 0/1 forcé (banc A/B DA6).
+func build(terrain: BattleTerrain, weather: String, da6_on: int = -1) -> void:
 	_ground_y = terrain.height_at(terrain.FIELD_W * 0.5, terrain.FIELD_D * 0.5)
-	var da6 := terrain.da6
+	var da6 := terrain.da6 if da6_on < 0 else da6_on == 1
 	var mesh := _clump_mesh_da6() if da6 else _clump_mesh()
 	for layer in LAYERS:
 		var spacing: float = layer[0]
