@@ -110,5 +110,157 @@
     "sources": [
       "Abbaye de Buckfast"
     ]
+  },
+  {
+    "id": "set_torre",
+    "province": "prov_devon",
+    "kind": "abbey",
+    "name": {
+      "display": "Torre Abbey",
+      "local": "Torre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.535,
+      50.463
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye prémontrée de Torre, sur la côte sud du Devon près de Torquay.",
+    "sources": [
+      "Torre Abbey"
+    ]
+  },
+  {
+    "id": "set_barnstaple",
+    "province": "prov_devon",
+    "kind": "town",
+    "name": {
+      "display": "Barnstaple",
+      "local": "Barnastapol",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -4.059,
+      51.0806
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port et ville marchande de la côte nord du Devon, sur l'estuaire de la Taw.",
+    "sources": [
+      "Barnstaple"
+    ]
+  },
+  {
+    "id": "set_totnes",
+    "province": "prov_devon",
+    "kind": "town",
+    "name": {
+      "display": "Totnes",
+      "local": "Totenays",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.6839,
+      50.4315
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": true,
+    "description": "Ville close fortifiée au bord de la Dart, marché du sud du Devon.",
+    "sources": [
+      "Totnes"
+    ]
+  },
+  {
+    "id": "set_okehampton",
+    "province": "prov_devon",
+    "kind": "castle",
+    "name": {
+      "display": "Okehampton",
+      "local": "Okehamptone",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -4.0058,
+      50.7361
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château des barons de Okehampton, gardien de la lisière nord du Dartmoor.",
+    "sources": [
+      "Château d'Okehampton"
+    ]
+  },
+  {
+    "id": "set_crediton",
+    "province": "prov_devon",
+    "kind": "village",
+    "name": {
+      "display": "Crediton",
+      "local": "Cridiantun",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.65,
+      50.7833
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de marché, ancien siège épiscopal du Devon avant son transfert à Exeter.",
+    "sources": [
+      "Crediton"
+    ]
+  },
+  {
+    "id": "set_tiverton",
+    "province": "prov_devon",
+    "kind": "village",
+    "name": {
+      "display": "Tiverton",
+      "local": "Tuverton",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.4914,
+      50.9036
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg drapier sur l'Exe, au nord d'Exeter.",
+    "sources": [
+      "Tiverton"
+    ]
   }
 ]
