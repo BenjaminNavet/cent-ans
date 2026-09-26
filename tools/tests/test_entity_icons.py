@@ -73,9 +73,9 @@ def test_plan_skips_derived_and_existing_raws(tmp_path, monkeypatch) -> None:
     assert len(jobs) == len(generated)
     generated[0].raw_path.write_bytes(b"x")
     assert len(entity_icons.plan(catalog)) == len(generated) - 1
-    assert [j.character_id for j in entity_icons.plan(catalog, only=[generated[1].id])] == [
-        generated[1].id
-    ]
+    assert [
+        j.character_id for j in entity_icons.plan(catalog, only=[generated[1].id])
+    ] == [generated[1].id]
     assert len(entity_icons.plan(catalog, limit=2)) == 2
 
 

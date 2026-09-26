@@ -761,7 +761,9 @@ def assets_entity_icons(
         False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
     ),
     build_only: bool = typer.Option(
-        False, "--build-only", help="Aucune génération : dérive et encadre les miniatures"
+        False,
+        "--build-only",
+        help="Aucune génération : dérive et encadre les miniatures",
     ),
     envelope: float | None = typer.Option(
         None, "--envelope", help="Enveloppe (défaut : reste du plafond du lot DA5b)"

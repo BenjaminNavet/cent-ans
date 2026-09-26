@@ -55,3 +55,39 @@ fin de saison) et des icônes au trait d'encre brune, une seule main.
   (`CREDITS.md` inchangé).
 - Modulation > 1 : dépend du fait que le canevas 2D ne borne pas `modulate` avant le produit avec
   la texture (vrai en Godot 4) ; à défaut, l'icône resterait à l'encre au survol, sans autre effet.
+
+## DA5b — Icônes d'entité en miniatures peintes (2026-09-26)
+
+Bible § 8 : « Icônes d'entité : petites miniatures peintes, cadre commun. Jamais de pictogramme
+plat au milieu d'une liste de miniatures. » Les icônes d'entité restaient des SVG game-icons.net.
+
+1. **Catalogue** `data/ui/entity_icons.json` (schéma `data/schemas/entity_icons.schema.json`) :
+   une miniature par entité (unités, bâtiments, techniques, compétences, ressources, régimes,
+   catégories d'unité des marqueurs de bataille), taille 128 px, paramètres du cadre et du
+   recadrage, bloc de style commun de génération.
+2. **Réutiliser d'abord** : une entrée `source` dérive gratuitement une illustration peinte
+   existante (`game/assets/illustrations/unit_*`, `bld_*`, `tech_*`, 16:9). Le carré est découpé
+   sur le sujet : `crop` explicite dans les données quand l'œil l'a corrigé (texte peint, sujet
+   décentré), sinon recherche automatique déterministe (énergie de détail et saturation, fonds
+   d'azur diaprés atténués, léger biais central, somme maximale par image intégrale).
+3. **Générer seulement ce qui manque** : une entrée `subject` (pas d'illustration) est générée
+   une fois (`openai/gpt-5-image-mini` via `portraits.generate`, image de référence
+   `docs/img/da5b/reference_miniature.png`, prompt = amorce + sujet puis bloc de style commun,
+   un seul sujet lisible à 32 px sur fond d'azur diapré). Source brute gardée dans
+   `tools/da5b_raw/` (jamais régénérée). Enveloppe du lot 6 $ (lignes « DA5b » de
+   `docs/budget.md`).
+4. **Cadre commun peint par code** : filet d'encre, or bruni en dégradé (clair en haut à gauche),
+   filet d'azur, filet d'encre, coins arrondis ; peinture réduite avec léger contraste,
+   saturation et accentuation pour rester lisible à 32 px. PNG RGBA dans
+   `game/assets/icons/entity/` + `index.json` (id → fichier, recadrages utilisés).
+   CLI : `cent-ans assets entity-icons` (`--dry-run`, `--only`, `--limit`, `--build-only`,
+   `--envelope`), planche `docs/img/da5b/planche_miniatures.png` (32/64/128 px).
+5. **Rendu** : `IconLibrary` lit `entity/index.json` en premier — priorité miniature d'entité >
+   encre > SVG ; `is_entity(id)` ; une miniature n'est jamais teintée. Marqueurs de bataille et
+   cartes d'unité : tous passent par la miniature de catégorie (`unit_category_<rendu>`), un seul
+   registre ; la miniature couvre la plaque (elle porte son cadre) au lieu d'être posée sur le
+   parchemin.
+
+Conséquences : les SVG d'entité ne servent plus que de repli (identifiant sans miniature) ;
+`CREDITS.md` inchangé tant qu'ils restent dans le dépôt. Les traits s'affichent toujours par
+catégorie (icônes à l'encre) : des miniatures par trait (59) sont un lot possible.
