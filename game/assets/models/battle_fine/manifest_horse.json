@@ -1,0 +1,192 @@
+{
+ "bones": "battle_skinned/cavalry.bones.bin",
+ "figures": {
+  "cavalry_0": {
+   "horse": "destrier",
+   "horse_tris": [
+    5510,
+    1087,
+    279
+   ],
+   "lods": [
+    "cavalry_0_lod0.mesh.bin",
+    "cavalry_0_lod1.mesh.bin",
+    "cavalry_0_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    9681,
+    1792,
+    651
+   ],
+   "variants": 2
+  },
+  "cavalry_1": {
+   "horse": "rouncey",
+   "horse_tris": [
+    5716,
+    1128,
+    284
+   ],
+   "lods": [
+    "cavalry_1_lod0.mesh.bin",
+    "cavalry_1_lod1.mesh.bin",
+    "cavalry_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    8884,
+    1650,
+    557
+   ],
+   "variants": 2
+  },
+  "cavalry_2": {
+   "horse": "rouncey",
+   "horse_tris": [
+    5716,
+    1128,
+    284
+   ],
+   "lods": [
+    "cavalry_2_lod0.mesh.bin",
+    "cavalry_2_lod1.mesh.bin",
+    "cavalry_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "horse_bow",
+   "tris": [
+    8686,
+    1639,
+    526
+   ],
+   "variants": 2
+  },
+  "cavalry_3": {
+   "horse": "destrier",
+   "horse_tris": [
+    5716,
+    1128,
+    284
+   ],
+   "lods": [
+    "cavalry_3_lod0.mesh.bin",
+    "cavalry_3_lod1.mesh.bin",
+    "cavalry_3_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    10147,
+    1839,
+    626
+   ],
+   "variants": 2
+  },
+  "cavalry_4": {
+   "horse": "rouncey",
+   "horse_tris": [
+    5716,
+    1128,
+    284
+   ],
+   "lods": [
+    "cavalry_4_lod0.mesh.bin",
+    "cavalry_4_lod1.mesh.bin",
+    "cavalry_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    9089,
+    1670,
+    561
+   ],
+   "variants": 2
+  },
+  "cavalry_5": {
+   "horse": "jennet",
+   "horse_tris": [
+    5716,
+    1128,
+    284
+   ],
+   "lods": [
+    "cavalry_5_lod0.mesh.bin",
+    "cavalry_5_lod1.mesh.bin",
+    "cavalry_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "horse_javelin",
+   "tris": [
+    8629,
+    1631,
+    551
+   ],
+   "variants": 2
+  },
+  "cavalry_6": {
+   "horse": "rouncey",
+   "horse_tris": [
+    5716,
+    1128,
+    284
+   ],
+   "lods": [
+    "cavalry_6_lod0.mesh.bin",
+    "cavalry_6_lod1.mesh.bin",
+    "cavalry_6_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    8744,
+    1645,
+    552
+   ],
+   "variants": 2
+  },
+  "standard_1": {
+   "horse": "destrier",
+   "horse_tris": [
+    5510,
+    1087,
+    279
+   ],
+   "lods": [
+    "standard_1_lod0.mesh.bin",
+    "standard_1_lod1.mesh.bin",
+    "standard_1_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "pole_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pole_top": [
+    -0.21751,
+    1.7135,
+    3.07709
+   ],
+   "rig": "cavalry",
+   "style": "standard_mounted",
+   "tris": [
+    9807,
+    1786,
+    623
+   ],
+   "variants": 2
+  }
+ },
+ "source": "tools/blender_scripts/battle_fine_cavalry.py (lot FG4: CC0 OpenGameArt horse, see game/assets/third_party/animals/oga_rigged_horse/SOURCE.md)"
+}

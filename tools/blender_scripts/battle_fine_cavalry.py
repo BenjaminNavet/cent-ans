@@ -718,8 +718,9 @@ def hidden_faces(body, cover, max_dist=0.25):
     table = fh.weight_table(body)
     out = []
     for poly in body.data.polygons:
+        # Upper legs swing out from under the cloth: keep them, and the lower flanks.
         legs = sum(table[i].get(b, 0) for i in poly.vertices for b in LEG_BONES)
-        if legs / len(poly.vertices) > 0.05:
+        if legs / len(poly.vertices) > 0.3 or poly.center.z < 0.85:
             continue
         n = poly.normal
         if n.z < -0.6:
@@ -786,6 +787,7 @@ def build_figure(fig_name, recipe, level):
         set_mask(obj, mask)
         if obj.name == "caparison":
             faces = hidden_faces(body, obj)
+            print(f"HIDDEN {fig_name} LOD{level} {len(faces)} faces under the caparison")
             if mask == 0:
                 _delete_faces(body, faces)
             else:
