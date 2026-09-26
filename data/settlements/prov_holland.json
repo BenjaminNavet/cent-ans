@@ -183,7 +183,7 @@
       "bld_market",
       "bld_stone_walls"
     ],
-    "port": false,
+    "port": true,
     "description": "Ville comtale de Hollande sur le Spaarne, résidence occasionnelle des comtes.",
     "sources": [
       "Haarlem"
@@ -234,7 +234,7 @@
       "bld_parish_church",
       "bld_windmill"
     ],
-    "port": false,
+    "port": true,
     "description": "Bourg de marché de Hollande charté en 1272, au confluent de la Gouwe et de l'Yssel hollandais.",
     "sources": [
       "Gouda"
