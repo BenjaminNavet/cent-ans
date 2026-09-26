@@ -12,8 +12,9 @@ var cell_px: float = 64.0
 
 var _rects: Array[Rect2] = []
 var _owners: PackedInt32Array = PackedInt32Array()
-## Case (clé entière) → indices des rectangles posés qui la touchent.
+## Case (clé entière) → indices (Array) des rectangles posés qui la touchent.
 var _grid: Dictionary = {}
+const _EMPTY: Array = []
 
 
 func reset(cell: float = 64.0) -> void:
@@ -35,7 +36,7 @@ func placed_rects() -> Array[Rect2]:
 func overlaps(rect: Rect2, ignore_owner: int = -1) -> bool:
 	var seen := {}
 	for key in _keys(rect):
-		for index: int in _grid.get(key, PackedInt32Array()):
+		for index: int in _grid.get(key, _EMPTY):
 			if seen.has(index):
 				continue
 			seen[index] = true
@@ -52,9 +53,10 @@ func try_place(rect: Rect2, owner: int = -1, force: bool = false) -> bool:
 	_rects.append(rect)
 	_owners.append(owner)
 	for key in _keys(rect):
-		if not _grid.has(key):
-			_grid[key] = PackedInt32Array()
-		(_grid[key] as PackedInt32Array).append(index)
+		var bucket: Array = _grid.get(key, [])
+		if bucket.is_empty():
+			_grid[key] = bucket  # Array : type référence, modifié en place
+		bucket.append(index)
 	return true
 
 
