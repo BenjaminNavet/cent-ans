@@ -148,6 +148,8 @@ const TRAMPLE_STEP := 0.5
 var trample_image: Image = null
 var _trample_texture: ImageTexture
 var _trample_bytes := PackedByteArray()
+## PB3e : empreintes tamponnées en Rust (`StampMap`) ; `--no-pb3e` : boucles GDScript d'avant.
+var _trample_map: RefCounted = null
 var _trample_timer: float = 0.0
 var _trample_last: Dictionary = {}  # id -> dernière position (x, z) imprimée
 var _trample_snow: bool = true  # B8 : false = carte de boue (sol détrempé)
@@ -344,6 +346,10 @@ func _setup_trample() -> void:
 	var w := int(SPLAT_RECT.size.x / TRAMPLE_TEXEL)
 	var h := int(SPLAT_RECT.size.y / TRAMPLE_TEXEL)
 	_trample_bytes.resize(w * h)
+	_trample_map = null
+	if ClassDB.class_exists(&"StampMap") and not OS.get_cmdline_user_args().has("--no-pb3e"):
+		_trample_map = ClassDB.instantiate(&"StampMap")
+		_trample_map.call("setup", w, h, 1, SPLAT_RECT.position, TRAMPLE_TEXEL)
 	trample_image = Image.create_from_data(w, h, false, Image.FORMAT_L8, _trample_bytes)
 	_trample_texture = ImageTexture.create_from_image(trample_image)
 	ground_material.set_shader_parameter("trample_map", _trample_texture)
@@ -379,6 +385,9 @@ func update_trample(units: Array, dt: float) -> void:
 				continue
 		var half := Vector2(float(unit["width"]), float(unit["depth"])) * 0.5 + Vector2(1.5, 1.5)
 		var facing := float(unit["facing"])
+		if _trample_map != null:
+			_trample_map.call("stamp_box", pos, facing, half, add, 0, 255)
+			continue
 		var axis_x := Vector2(cos(facing), -sin(facing))
 		var axis_z := Vector2(sin(facing), cos(facing))
 		var reach := half.length()
@@ -391,6 +400,9 @@ func update_trample(units: Array, dt: float) -> void:
 					continue
 				var i := iz * w + ix
 				_trample_bytes[i] = mini(_trample_bytes[i] + add, 255)
+	if _trample_map != null:
+		_trample_map.call("upload", trample_image, _trample_texture)
+		return
 	trample_image.set_data(w, h, false, Image.FORMAT_L8, _trample_bytes)
 	_trample_texture.update(trample_image)
 
@@ -399,6 +411,8 @@ func update_trample(units: Array, dt: float) -> void:
 func trample_at(x: float, z: float) -> float:
 	if trample_image == null:
 		return 0.0
+	if _trample_map != null:
+		return float(_trample_map.call("sample", x, z, 0))
 	var c := ((Vector2(x, z) - SPLAT_RECT.position) / TRAMPLE_TEXEL).floor()
 	if c.x < 0 or c.y < 0 or c.x >= trample_image.get_width() or c.y >= trample_image.get_height():
 		return 0.0

@@ -64,6 +64,17 @@ var _drawn: Dictionary = {}
 ## PB3c : tampons groupés et mis en cache côté Rust entre deux pas de simulation
 ## (`get_soldier_buffers`) ; `--no-pb3c` après `--` : un appel par camp et famille (mesures A/B).
 var pb3c_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3c")
+## PB3e : un tampon inchangé depuis son dernier envoi (même version Rust, même capacité, aucune
+## figurine masquée ou poussée) n'est pas renvoyé au `MultiMesh` (`--no-pb3e` : renvoyé à
+## chaque image comme avant).
+var pb3e_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3e")
+## `--pb3e-verify` : compare chaque tampon non renvoyé au contenu du MultiMesh (banc, lent).
+var pb3e_verify: bool = OS.get_cmdline_user_args().has("--pb3e-verify")
+var pb3e_mismatches: int = 0
+var _buffer_version: int = -1  # version Rust du tampon du régiment en cours (-1 : inconnue)
+var _buffer_sent: Dictionary = {}  # id d'instance du MultiMesh -> version × 2^20 + instance_count
+var _reserved_out: Dictionary = {}  # id -> [version, places, n, tampon masqué, version dérivée]
+var _derived_serial: int = 1 << 40  # versions dérivées, disjointes de celles de Rust
 ## PB3c : derniers uniformes envoyés par matériau (instance id -> {nom: valeur}) : un paramètre
 ## inchangé n'est plus renvoyé (matériau non resali, pas d'appel au serveur de rendu).
 var _sent: Dictionary = {}
@@ -410,6 +421,9 @@ func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 	var result: Array = battle.call("get_soldier_buffers", capacities)
 	var counts: PackedInt32Array = result[0]
 	var buffers: Array = result[1]
+	var versions := PackedInt64Array()
+	if pb3e_enabled and result.size() > 2:
+		versions = result[2]
 	if buffers.size() != units.size():
 		_update_per_kind(battle, units, selected)
 		return
@@ -432,7 +446,9 @@ func _update_batched(battle: Object, units: Array, selected: Array) -> void:
 					skipped_updates += 1
 					continue
 				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
+				_buffer_version = versions[i] if i < versions.size() else -1
 				_update_unit(unit, id, kind, buffers[i], n, selected.has(id))
+	_buffer_version = -1
 
 
 ## Chemin d'avant PB3c : un tampon par camp et famille, découpé en tranches par régiment.
@@ -480,6 +496,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var instance: MultiMeshInstance3D = layers[id]
 	var mm := instance.multimesh
 	# Soldats tombés depuis l'image précédente (régiment resté sur le champ).
+	# PB3e : tampon tel que rendu par Rust (sans figurines masquées ni poussées) ?
+	var version := _buffer_version if not (_hidden.has(id) or _drive.has(id)) else -1
 	if _previous.has(id):
 		var prev: PackedFloat32Array = _previous[id]
 		var prev_n := int(_drawn[id])  # PB3c : tampons complétés à la capacité, compte dessiné gardé à part
@@ -496,7 +514,21 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	if _drive.has(id):
 		slice = _drive_in(id, slice, n)
 	if reserved.has(id):
-		slice = _hide_reserved(reserved[id], slice, n)
+		# PB3e : mêmes places réservées (étendards, musiciens) sur le même tampon : même résultat,
+		# repris tel quel (ni copie ni renvoi) sous une version dérivée.
+		var slots: PackedInt32Array = reserved[id]
+		var cached: Variant = _reserved_out.get(id) if version >= 0 else null
+		if cached != null and int(cached[0]) == version and cached[1] == slots and int(cached[2]) == n:
+			slice = cached[3]
+			version = int(cached[4])
+		else:
+			slice = _hide_reserved(slots, slice, n)
+			if version >= 0:
+				_derived_serial += 1
+				_reserved_out[id] = [version, slots, n, slice, _derived_serial]
+				version = _derived_serial
+			else:
+				_reserved_out.erase(id)
 	var lod: MultiMeshInstance3D = _lod_layers[id]
 	var lod_mm := lod.multimesh
 	if n > mm.instance_count:
@@ -539,14 +571,19 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		if padded.size() != mm.instance_count * 12:
 			padded = slice.duplicate()
 			padded.resize(mm.instance_count * 12)
-		if instance.visible:
+		if instance.visible and not _buffer_unchanged(mm, version):
 			mm.buffer = padded
-		if lod.visible:
+		elif instance.visible and pb3e_verify and mm.buffer != padded:
+			pb3e_mismatches += 1
+		if lod.visible and not _buffer_unchanged(lod_mm, version):
 			lod_mm.buffer = padded
+		elif lod.visible and pb3e_verify and lod_mm.buffer != padded:
+			pb3e_mismatches += 1
 		if imp != null:
 			if imp.multimesh.instance_count != mm.instance_count:
 				imp.multimesh.instance_count = mm.instance_count
-			imp.multimesh.buffer = padded
+			if not _buffer_unchanged(imp.multimesh, version):
+				imp.multimesh.buffer = padded
 	mm.visible_instance_count = n
 	lod_mm.visible_instance_count = n
 	if imp != null:
@@ -606,6 +643,21 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
 			mat.set_meta("bv2_blood", blood)
 			mat.set_shader_parameter("blood", blood)
+
+
+## PB3e : vrai si `mm` a déjà reçu le tampon de version `version` à sa capacité actuelle (le
+## renvoyer ne changerait rien) ; sinon le note comme envoyé. `version` < 0 : toujours renvoyé.
+func _buffer_unchanged(mm: MultiMesh, version: int) -> bool:
+	var key := mm.get_instance_id()
+	if version < 0:
+		_buffer_sent.erase(key)
+		return false
+	# Version (< 2^41) et capacité (< 2^20) dans un seul entier.
+	var stamp := version * 1048576 + mm.instance_count
+	if int(_buffer_sent.get(key, -1)) == stamp:
+		return true
+	_buffer_sent[key] = stamp
+	return false
 
 
 ## PB3c : uniformes déjà envoyés à `mat` (hors chemin PB3c : dictionnaire jetable, tout renvoyé).

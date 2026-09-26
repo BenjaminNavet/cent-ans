@@ -18,8 +18,10 @@ pub const KIND_HEDGE: usize = 3;
 pub const KIND_COUNT: usize = 4;
 const CANOPY_SPREAD: f64 = 0.4;
 const PARTS_SIDE: usize = 2;
+#[cfg(test)]
 const PARTS: usize = PARTS_SIDE * PARTS_SIDE;
-const SLOTS: usize = PARTS * KIND_COUNT;
+/// Detail cells (lot SZ4b): at most this many parts per side.
+const MAX_DETAIL_PARTS_SIDE: usize = 8;
 pub const FLOATS_PER_INSTANCE: usize = 16;
 const GROUND_SINK: f64 = 0.08;
 const RIVER_CLEARANCE: f64 = 0.3;
@@ -157,6 +159,10 @@ impl ReliefFloor {
     }
 }
 
+/// Bytes of a quadtree page, shared with the page store of `ReliefLod` (lot PB3g: no copy per
+/// request).
+pub type PageBytes = std::sync::Arc<Vec<u8>>;
+
 /// Displayed ground under the trees (`TerrainBuilder.surface_grid`).
 pub enum Ground {
     /// Heightmap only.
@@ -169,7 +175,7 @@ pub enum Ground {
     },
     /// Quadtree snapshot: loaded pages (key → little-endian 16-bit samples).
     Pages {
-        pages: std::collections::HashMap<i64, Vec<u8>>,
+        pages: std::collections::HashMap<i64, PageBytes>,
         max_level: i64,
         h_min: f64,
         h_range: f64,
@@ -195,6 +201,87 @@ pub struct TileRequest {
     pub side: usize,
     pub exclusions: Vec<(f64, f64, f64)>,
     pub ground: Ground,
+    /// Lot SZ4b: dense forest cell scattered inside the tile whose coarse grids are given.
+    pub detail: Option<DetailArea>,
+}
+
+/// Lot SZ4b (dense forest near the camera at the valley tier): a sub-rectangle of the tile
+/// (`TileRequest::origin`, `size_px` still describe the coarse grids), scattered without hedges.
+/// Only instances whose random seed is at least `1 − keep` are kept; the random stream does not
+/// depend on `keep`, so a cell scattered with a smaller `keep` is an exact subset of the same
+/// cell scattered with a larger one. Parts: `parts_side²` slots per kind over the rectangle.
+/// `corridors`: segments `[x0, y0, x1, y1, half_width]` (world units) kept free of trees (fine
+/// rivers and draped roads of lot ZG5b, which the 4096 river raster does not know).
+#[derive(Clone, Debug, Default)]
+pub struct DetailArea {
+    pub rect: (f64, f64, f64, f64),
+    pub keep: f64,
+    pub parts_side: usize,
+    pub corridors: Vec<[f64; 5]>,
+}
+
+/// Corridor segments binned on a regular grid over the scattered rectangle.
+struct CorridorBins {
+    origin: (f64, f64),
+    cell: f64,
+    side_x: usize,
+    side_y: usize,
+    bins: Vec<Vec<u32>>,
+}
+
+impl CorridorBins {
+    const CELL: f64 = 1.0;
+
+    fn new(rect: (f64, f64, f64, f64), corridors: &[[f64; 5]]) -> Self {
+        let cell = Self::CELL;
+        let side_x = (((rect.2 - rect.0) / cell).ceil() as usize).max(1);
+        let side_y = (((rect.3 - rect.1) / cell).ceil() as usize).max(1);
+        let mut bins = vec![Vec::new(); side_x * side_y];
+        for (index, c) in corridors.iter().enumerate() {
+            let (x0, x1) = (c[0].min(c[2]) - c[4], c[0].max(c[2]) + c[4]);
+            let (y0, y1) = (c[1].min(c[3]) - c[4], c[1].max(c[3]) + c[4]);
+            let i0 = ((x0 - rect.0) / cell).floor().max(0.0) as usize;
+            let j0 = ((y0 - rect.1) / cell).floor().max(0.0) as usize;
+            let i1 = (((x1 - rect.0) / cell).floor().max(-1.0) as i64).min(side_x as i64 - 1);
+            let j1 = (((y1 - rect.1) / cell).floor().max(-1.0) as i64).min(side_y as i64 - 1);
+            for j in j0 as i64..=j1 {
+                for i in i0 as i64..=i1 {
+                    bins[j as usize * side_x + i as usize].push(index as u32);
+                }
+            }
+        }
+        CorridorBins {
+            origin: (rect.0, rect.1),
+            cell,
+            side_x,
+            side_y,
+            bins,
+        }
+    }
+
+    fn blocks(&self, corridors: &[[f64; 5]], x: f64, y: f64) -> bool {
+        let i = ((x - self.origin.0) / self.cell).floor();
+        let j = ((y - self.origin.1) / self.cell).floor();
+        if i < 0.0 || j < 0.0 || i as usize >= self.side_x || j as usize >= self.side_y {
+            return false;
+        }
+        self.bins[j as usize * self.side_x + i as usize]
+            .iter()
+            .any(|&k| segment_distance(&corridors[k as usize], x, y) < corridors[k as usize][4])
+    }
+}
+
+/// Distance from (x, y) to the segment `[x0, y0, x1, y1, _]`.
+fn segment_distance(c: &[f64; 5], x: f64, y: f64) -> f64 {
+    let (dx, dy) = (c[2] - c[0], c[3] - c[1]);
+    let len2 = dx * dx + dy * dy;
+    let t = if len2 > 0.0 {
+        (((x - c[0]) * dx + (y - c[1]) * dy) / len2).clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
+    let (px, py) = (c[0] + t * dx - x, c[1] + t * dy - y);
+    (px * px + py * py).sqrt()
 }
 
 /// Per-slot MultiMesh buffers (`part * KIND_COUNT + kind`).
@@ -399,7 +486,7 @@ impl TileRequest {
     /// `ReliefQuadtree.sample_pages`: finest loaded page covering (x, y).
     fn sample_pages(
         &self,
-        pages: &std::collections::HashMap<i64, Vec<u8>>,
+        pages: &std::collections::HashMap<i64, PageBytes>,
         top_level: i64,
         h_min: f64,
         h_range: f64,
@@ -451,6 +538,9 @@ struct Scatter<'a> {
     rng: Rng,
     raw: Vec<Vec<Instance>>,
     rect: (f64, f64, f64, f64),
+    parts_side: usize,
+    keep: f64,
+    corridors: Option<CorridorBins>,
 }
 
 const FOREST: usize = 0;
@@ -480,6 +570,13 @@ impl<'a> Scatter<'a> {
         lerp(top, bottom, ty)
     }
 
+    fn in_corridor(&self, x: f64, y: f64) -> bool {
+        match (&self.corridors, &self.req.detail) {
+            (Some(bins), Some(area)) => bins.blocks(&area.corridors, x, y),
+            _ => false,
+        }
+    }
+
     fn excluded(&self, x: f64, y: f64) -> bool {
         self.req.exclusions.iter().any(|&(ex, ey, r)| {
             let dx = x - ex;
@@ -489,21 +586,24 @@ impl<'a> Scatter<'a> {
     }
 
     fn slot(&self, kind: usize, x: f64, y: f64) -> usize {
-        let part_px = self.req.size_px / PARTS_SIDE as f64;
-        let last = PARTS_SIDE as i64 - 1;
-        let px = (((x - self.req.origin.0) / part_px) as i64).clamp(0, last) as usize;
-        let py = (((y - self.req.origin.1) / part_px) as i64).clamp(0, last) as usize;
-        (py * PARTS_SIDE + px) * KIND_COUNT + kind
+        let (x0, y0, x1, y1) = self.rect;
+        let side = self.parts_side;
+        let last = side as i64 - 1;
+        let px = (((x - x0) / (x1 - x0) * side as f64) as i64).clamp(0, last) as usize;
+        let py = (((y - y0) / (y1 - y0) * side as f64) as i64).clamp(0, last) as usize;
+        (py * side + px) * KIND_COUNT + kind
     }
 
     fn run(&mut self) {
         let req = self.req;
         let (ox, oy) = req.origin;
-        let cells = (req.size_px / req.spacing).ceil() as usize;
-        for cj in 0..cells {
-            for ci in 0..cells {
-                let x = ox + (ci as f64 + self.rng.randf()) * req.spacing;
-                let y = oy + (cj as f64 + self.rng.randf()) * req.spacing;
+        let (rx0, ry0, rx1, ry1) = self.rect;
+        let cells_x = ((rx1 - rx0) / req.spacing).ceil() as usize;
+        let cells_y = ((ry1 - ry0) / req.spacing).ceil() as usize;
+        for cj in 0..cells_y {
+            for ci in 0..cells_x {
+                let x = rx0 + (ci as f64 + self.rng.randf()) * req.spacing;
+                let y = ry0 + (cj as f64 + self.rng.randf()) * req.spacing;
                 let roll = self.rng.randf();
                 let roll_kind = self.rng.randf();
                 let gx = (x - ox) / req.coarse_step;
@@ -538,7 +638,7 @@ impl<'a> Scatter<'a> {
                 let Some(kind) = kind else {
                     continue;
                 };
-                if self.excluded(x, y) || !self.has_point(x, y) {
+                if self.excluded(x, y) || !self.has_point(x, y) || self.in_corridor(x, y) {
                     continue;
                 }
                 if self.map.river_sd_at(x, y) < RIVER_CLEARANCE {
@@ -552,7 +652,9 @@ impl<'a> Scatter<'a> {
                 self.push(kind, x, ground, y, yaw, scale_factor);
             }
         }
-        self.hedges();
+        if req.detail.is_none() {
+            self.hedges();
+        }
     }
 
     fn hedges(&mut self) {
@@ -760,6 +862,9 @@ impl<'a> Scatter<'a> {
             transform[row * 4 + 3] = origin[row] as f32;
         }
         let seed = rng.randf();
+        if seed < 1.0 - self.keep {
+            return; // SZ4b: thinned detail cell (stream consumed as for `keep` = 1)
+        }
         let slot = self.slot(kind, x, y);
         self.raw[slot].push(Instance {
             seed,
@@ -805,17 +910,37 @@ pub fn scatter_tile(req: &TileRequest, map: &MapRasters) -> TileResult {
     let seed = (req.tile_index as u64)
         .wrapping_mul(0x9e3779b97f4a7c15)
         .wrapping_add(91711);
+    let (rect, parts_side, keep) = match &req.detail {
+        Some(area) => (
+            area.rect,
+            area.parts_side.clamp(1, MAX_DETAIL_PARTS_SIDE),
+            area.keep.clamp(0.0, 1.0),
+        ),
+        None => (
+            (
+                req.origin.0,
+                req.origin.1,
+                req.origin.0 + req.size_px,
+                req.origin.1 + req.size_px,
+            ),
+            PARTS_SIDE,
+            1.0,
+        ),
+    };
+    let slots = parts_side * parts_side * KIND_COUNT;
     let mut scatter = Scatter {
         req,
         map,
         rng: Rng::new(seed),
-        raw: (0..SLOTS).map(|_| Vec::new()).collect(),
-        rect: (
-            req.origin.0,
-            req.origin.1,
-            req.origin.0 + req.size_px,
-            req.origin.1 + req.size_px,
-        ),
+        raw: (0..slots).map(|_| Vec::new()).collect(),
+        rect,
+        parts_side,
+        keep,
+        corridors: req
+            .detail
+            .as_ref()
+            .filter(|area| !area.corridors.is_empty())
+            .map(|area| CorridorBins::new(rect, &area.corridors)),
     };
     if req.side >= 2 {
         scatter.run();
@@ -873,7 +998,88 @@ mod tests {
             side,
             exclusions: Vec::new(),
             ground: Ground::None,
+            detail: None,
         }
+    }
+
+    #[test]
+    fn detail_cell_is_dense_thinned_and_nested() {
+        let map = flat_map(30000);
+        let mut req = request(1.0, 0.0, 1.0, 1.0);
+        req.spacing = 0.05;
+        req.tile_index = 77;
+        let area = |keep: f64| DetailArea {
+            rect: (16.0, 20.0, 20.0, 24.0),
+            keep,
+            parts_side: 4,
+            corridors: Vec::new(),
+        };
+        req.detail = Some(area(1.0));
+        let full = scatter_tile(&req, &map);
+        assert_eq!(full.counts.len(), 16 * KIND_COUNT);
+        let total: i32 = full.counts.iter().sum();
+        // 80 × 80 candidates, roll < 0.9 in a full forest, no hedges.
+        assert!(total > 5200 && total < 6300, "{total}");
+        assert_eq!(full.counts[KIND_HEDGE], 0);
+        for buffer in &full.buffers {
+            for item in buffer.chunks(FLOATS_PER_INSTANCE) {
+                assert!((16.0..20.0).contains(&item[3]) && (20.0..24.0).contains(&item[11]));
+            }
+        }
+        req.detail = Some(area(0.25));
+        let thin = scatter_tile(&req, &map);
+        let kept: i32 = thin.counts.iter().sum();
+        assert!(
+            (kept as f64 - total as f64 * 0.25).abs() < total as f64 * 0.04,
+            "{kept}"
+        );
+        // Same stream: every thinned instance is one of the full cell (same origin).
+        let origins: std::collections::HashSet<(u32, u32)> = full
+            .buffers
+            .iter()
+            .flat_map(|b| b.chunks(FLOATS_PER_INSTANCE))
+            .map(|i| (i[3].to_bits(), i[11].to_bits()))
+            .collect();
+        for buffer in &thin.buffers {
+            for item in buffer.chunks(FLOATS_PER_INSTANCE) {
+                assert!(origins.contains(&(item[3].to_bits(), item[11].to_bits())));
+            }
+        }
+    }
+
+    #[test]
+    fn detail_corridors_stay_clear() {
+        let map = flat_map(30000);
+        let mut req = request(1.0, 0.0, 1.0, 1.0);
+        req.spacing = 0.05;
+        // A river across the cell (y = 22, half width 0.2) and a road along x = 17.
+        req.detail = Some(DetailArea {
+            rect: (16.0, 20.0, 20.0, 24.0),
+            keep: 1.0,
+            parts_side: 2,
+            corridors: vec![
+                [15.0, 22.0, 21.0, 22.0, 0.2],
+                [17.0, 19.0, 17.0, 25.0, 0.05],
+            ],
+        });
+        let result = scatter_tile(&req, &map);
+        let mut total = 0;
+        for buffer in &result.buffers {
+            for item in buffer.chunks(FLOATS_PER_INSTANCE) {
+                total += 1;
+                assert!(
+                    (item[11] - 22.0).abs() >= 0.2,
+                    "tree in the river at {}",
+                    item[11]
+                );
+                assert!(
+                    (item[3] - 17.0).abs() >= 0.05,
+                    "tree on the road at {}",
+                    item[3]
+                );
+            }
+        }
+        assert!(total > 4000, "{total}");
     }
 
     #[test]
@@ -1036,7 +1242,7 @@ mod tests {
             page.extend_from_slice(&65535u16.to_le_bytes());
         }
         let mut pages = std::collections::HashMap::new();
-        pages.insert(0i64, page);
+        pages.insert(0i64, std::sync::Arc::new(page));
         req.ground = Ground::Pages {
             pages,
             max_level: 3,
