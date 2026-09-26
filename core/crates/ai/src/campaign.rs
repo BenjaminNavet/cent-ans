@@ -538,13 +538,15 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // wood, iron) leave the faction's free supply; the next ones of the
     // same kind are priced with their import (B7c rule, ADR 0053).
     let mut supply = state.free_supply(data, ctx.faction);
+    // DC3: the options are priced on the supply before this turn's draws, as before.
+    let base_supply = supply.clone();
     'sites: for site in &sites {
         if !ctx.owns_settlement(site) {
             continue;
         }
         // E1: the doctrine's mix decides, among what fits the budget.
         let options: Vec<sim_campaign::RecruitOption> = state
-            .recruitable(data, site)
+            .recruitable_with_supply(data, site, &base_supply)
             .into_iter()
             .filter(|o| o.available)
             .collect();
@@ -631,6 +633,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let mut upkeep_room =
         ctx.gross_income * MAX_BUILDING_UPKEEP_PERCENT / 100 - ctx.building_upkeep;
     let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = Vec::new();
+    // DC3: one supply for every place the faction holds (it was recomputed per place).
+    let supply = state.free_supply(data, ctx.faction);
     for (id, settlement) in state
         .settlements
         .iter()
@@ -644,7 +648,11 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         };
         let unrest = weighted_unrest(&province.population);
         let health = f64::from(province.population.peasants.health);
-        for option in state.buildable(data, id).iter().filter(|o| o.available) {
+        for option in state
+            .buildable_with_supply(data, id, &supply)
+            .iter()
+            .filter(|o| o.available)
+        {
             let value = building_value(ctx, id, &option.building, unrest, health);
             if value > 0.0 {
                 options.push((

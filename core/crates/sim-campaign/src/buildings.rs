@@ -621,18 +621,33 @@ impl CampaignState {
         let Some(state) = self.settlements.get(settlement) else {
             return Vec::new();
         };
+        let supply = self.free_supply(data, &state.controller);
+        self.buildable_with_supply(data, settlement, &supply)
+    }
+
+    /// [`CampaignState::buildable`] with the controller's free resource `supply` already
+    /// computed (lot DC3: the AI weighs every place it holds, and the supply is the same
+    /// for all of them).
+    pub fn buildable_with_supply(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        supply: &BTreeMap<ResourceId, u32>,
+    ) -> Vec<BuildOption> {
+        let Some(state) = self.settlements.get(settlement) else {
+            return Vec::new();
+        };
         let Some(province_data) = data.provinces.get(&state.province) else {
             return Vec::new();
         };
         let Some(faction) = self.factions.get(&state.controller) else {
             return Vec::new();
         };
-        let supply = self.free_supply(data, &state.controller);
         data.buildings
             .values()
             .filter(|building| building.allowed_in(state.kind))
             .map(|building| {
-                let draw = resource_draw(data, &supply, &building.cost.resources);
+                let draw = resource_draw(data, supply, &building.cost.resources);
                 let priced = |livres: i64| crate::coinage::priced(self, &state.controller, livres);
                 let cost = priced(i64::from(building.cost.money) + draw.import_cost);
                 let mut option = BuildOption {
