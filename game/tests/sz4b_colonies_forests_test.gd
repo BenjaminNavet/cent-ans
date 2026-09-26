@@ -55,8 +55,8 @@ func _test_curves() -> void:
 	_check(is_zero_approx(forest.fraction_for(1.0)), "no dense forest at map scale")
 	_check(forest.fraction_for(forest.full_scale) > 0.99, "full dense forest at real size")
 	# Couvert constant : (arbres de base + part dense × densité fine) × s² ≈ couvert de la carte.
-	for s in [0.5, 0.2, 0.08, 0.04]:
-		var cover := (1.0 + forest.fraction_for(s) / (forest.full_scale * forest.full_scale)) * s * s
+	for s: float in [0.5, 0.2, 0.08, 0.04]:
+		var cover: float = (1.0 + forest.fraction_for(s) / (forest.full_scale * forest.full_scale)) * s * s
 		_check(absf(cover - 1.0) < 0.02, "constant canopy cover at scale %.2f (%.3f)" % [s, cover])
 	_check(forest.keep_for(0.01) <= 0.0625 and forest.keep_for(0.9) == 1.0, "keep levels")
 
@@ -80,6 +80,7 @@ func _test_map() -> void:
 		map.queue_free()
 		return
 	var rig: CampaignCamera = map.camera_rig
+	rig.edge_pan_enabled = false  # souris au bord de la fenêtre : pas de défilement pendant l'attente
 	var data: MapData = map.map_data
 	var layer: SettlementLayer = map.get("settlement_layer")
 	var life: CampaignLife = map.get("life")

@@ -58,6 +58,7 @@ func _init() -> void:
 		return
 	var vegetation: Node = map.get_node_or_null("Vegetation")
 	var rig: CampaignCamera = map.camera_rig
+	rig.edge_pan_enabled = false  # souris au bord de la fenêtre : pas de défilement pendant l'attente
 	var data: MapData = map.map_data
 	var terrain: TerrainBuilder = map.get("terrain")
 	for place in PLACES:
@@ -87,6 +88,10 @@ func _init() -> void:
 			var layer_s: SettlementLayer = map.get("settlement_layer")
 			if settle_towns and layer_s != null and layer_s.towns != null:
 				layer_s.towns.flush()
+			# SZ4b : forêt dense semée avant la capture.
+			var forest: Variant = vegetation.get("forest_detail") if vegetation != null else null
+			if forest != null:
+				(forest as ForestDetail).flush(point, distance)
 			for i in 60:
 				await process_frame
 			for layer in root.find_children("*", "CanvasLayer", true, false):
@@ -99,9 +104,9 @@ func _init() -> void:
 				for i in 2:
 					await process_frame
 			# L'interface peut se réafficher (premier tour, conseils) : masquée de nouveau.
-			for layer in root.find_children("*", "CanvasLayer", true, false):
-				(layer as CanvasLayer).visible = false
-			for i in 2:
+			for i in 4:
+				for layer in root.find_children("*", "CanvasLayer", true, false):
+					(layer as CanvasLayer).visible = false
 				await process_frame
 			var image := root.get_viewport().get_texture().get_image()
 			if image.get_width() > 960 and not full:
