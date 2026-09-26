@@ -109,5 +109,80 @@
     "sources": [
       "Ayr"
     ]
+  },
+  {
+    "id": "set_paisley",
+    "province": "prov_renfrew",
+    "kind": "abbey",
+    "name": {
+      "display": "Paisley",
+      "local": "Passelet",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -4.4239,
+      55.8456
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye clunisienne de Paisley, berceau de la dynastie Stuart.",
+    "sources": [
+      "Abbaye de Paisley"
+    ]
+  },
+  {
+    "id": "set_irvine",
+    "province": "prov_renfrew",
+    "kind": "village",
+    "name": {
+      "display": "Irvine",
+      "local": "Irewin",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -4.6681,
+      55.6144
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Bourg royal et petit port de l'Ayrshire.",
+    "sources": [
+      "Irvine, Ayrshire"
+    ]
+  },
+  {
+    "id": "set_rothesay",
+    "province": "prov_renfrew",
+    "kind": "castle",
+    "name": {
+      "display": "Rothesay",
+      "local": "Baile Bhòid",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -5.0533,
+      55.8386
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château royal des Stewart sur l'île de Bute.",
+    "sources": [
+      "Château de Rothesay"
+    ]
   }
 ]
