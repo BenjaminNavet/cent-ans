@@ -97,3 +97,24 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   après conflit : **7,96 $**. Smoke + pytest 681 OK. Reste du chantier : **DA2** (141 portraits,
   ≈ 6,4 $, génération à lancer par le joueur) ; suites listées plus haut (Ars nova réelle,
   saturation automne, traits sans miniature, chevauchements de marqueurs).
+- 26/09 matin : **DA2 — génération faite** par l'orchestrateur à la demande du joueur (« ne valide
+  plus par moi ») : 141 portraits, 0 échec, **6,33 $** (retries par image ajoutés à
+  `portraits.generate`). Banque complète : 122 archétypes + 25 variantes âgées. Budget DA
+  recalculé après conflit : **14,29 $** (14 lignes, aucune dédoublonnée).
+  Fusion de DA2 dans `feat/da-direction-artistique` (conflits DA1/DA2 résolus : portrait vivant
+  → armes de la maison → faction → initiales ; cadre DA2 avec armes de maison ; fiche de
+  personnage : déclaration `house` rétablie, écu toujours affiché). Test DA2 adapté à la banque
+  complète. Correctifs après captures : miroir des visages types selon l'id (anti-clones),
+  vignettes de cour 64 px. Dernier commit `b8cc931f`, **pas encore dans main**.
+- **PAUSE (26/09 matin)**, reprise dans une autre session. Prochaines étapes :
+  1. Défaut ouvert : dans l'arbre familial (1367, `docs/img/da2/apres-arbre.png`), **Mahaut de
+     Valois (22 ans) et Gille de Valois (17 ans) n'ont que l'écu**. Le code de l'arbre est bon
+     (`LivingPortrait.texture_for`) ; soupçon : champ manquant dans le nœud d'arbre (`sex`,
+     `age`/`birth_year`, `faction`) ou rang résolu vers une case sans image. Diagnostic :
+     script qui déroule 120 tours puis affiche `LivingPortrait.resolve(n, context_for(n))` pour
+     ces nœuds (lent sur la machine partagée : > 10 min).
+  2. L'arbre n'applique pas le miroir anti-clones (il dessine `_texture` directement).
+  3. Relancer smoke + `da2_living_portrait_test.gd` + pytest, recapturer (`da2_screenshot.gd`),
+     puis fusionner main dans la branche, reconstruire la dylib (`CARGO_TARGET_DIR` partagé),
+     et **ff main**.
+  4. Nettoyer les worktrees d'agents fusionnés (DA2 : `.claude/worktrees/agent-ade9b18af852c5bfe`).
