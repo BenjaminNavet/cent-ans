@@ -148,7 +148,7 @@ impl<'a> Context<'a> {
             .and_then(|p| p.aggression)
             .map_or(50, i32::from);
         let (grid, (anchors, gross_income)) = mode.join(
-            || crate::grid::GridPlanner::new(state, data, faction),
+            || crate::grid::GridPlanner::with_mode(mode, state, data, faction),
             || {
                 let armies: Vec<(&ArmyId, &sim_campaign::Army)> = state.armies.iter().collect();
                 let anchors: BTreeMap<ArmyId, SettlementId> = mode
@@ -670,6 +670,10 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // wood, iron) leave the faction's free supply; the next ones of the
     // same kind are priced with their import (B7c rule, ADR 0053).
     let mut supply = state.free_supply(data, ctx.faction);
+    // PB3f: the free supply before this turn's recruits, computed once for
+    // the recruitment and building options of every settlement (all held
+    // by the faction: `owns_settlement`).
+    let free_supply = supply.clone();
     // PB3f: the recruitment options of every site (a read of the state),
     // on the planner's pool; the loop below spends the budget in order.
     let site_options: Vec<Vec<sim_campaign::RecruitOption>> = ctx.mode.map(&sites, |site| {
@@ -677,7 +681,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             return Vec::new();
         }
         state
-            .recruitable(data, site)
+            .recruitable_with_supply(data, site, &free_supply)
             .into_iter()
             .filter(|o| o.available)
             .collect()
@@ -785,7 +789,7 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
             let unrest = weighted_unrest(&province.population);
             let health = f64::from(province.population.peasants.health);
             state
-                .buildable(data, id)
+                .buildable_with_supply(data, id, &free_supply)
                 .iter()
                 .filter(|o| o.available)
                 .filter_map(|option| {
