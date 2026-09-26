@@ -58,6 +58,15 @@ var _lod_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (maillage loi
 var _near_level: Dictionary = {}  # unit id -> niveau de détail du maillage proche (0 ou 1)
 var _camera_pos: Vector3 = Vector3.ZERO
 var _previous: Dictionary = {}  # unit id -> PackedFloat32Array (tranche de l'image précédente)
+## PB3c : figurines de `_previous[id]` (le tampon groupé est complété à la capacité du MultiMesh :
+## sa taille ne dit plus l'effectif dessiné).
+var _drawn: Dictionary = {}
+## PB3c : tampons groupés et mis en cache côté Rust entre deux pas de simulation
+## (`get_soldier_buffers`) ; `--no-pb3c` après `--` : un appel par camp et famille (mesures A/B).
+var pb3c_enabled: bool = not OS.get_cmdline_user_args().has("--no-pb3c")
+## PB3c : derniers uniformes envoyés par matériau (instance id -> {nom: valeur}) : un paramètre
+## inchangé n'est plus renvoyé (matériau non resali, pas d'appel au serveur de rendu).
+var _sent: Dictionary = {}
 var _corpse_layers: Dictionary = {}  # "side/kind/variant" -> {mm, data, count, next}
 var _side_colors: Dictionary = {}
 var _side_heraldry: Dictionary = {}
@@ -374,6 +383,60 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 		_find_braced(units)
 	if gore != null:
 		gore.update(anim_dt, _camera_pos)
+	if pb3c_enabled and battle.has_method("get_soldier_buffers"):
+		_update_batched(battle, units, selected)
+	else:
+		_update_per_kind(battle, units, selected)
+	# Lot BV2 : chocs de cavalerie résolus par le cœur depuis l'image précédente.
+	if bv2_enabled and battle.has_method("get_impacts"):
+		var impacts: Array = battle.call("get_impacts")
+		if not impacts.is_empty():
+			apply_impacts(impacts)
+	if not _dirty_corpses.is_empty():
+		_flush_corpses()
+
+
+## PB3c : tous les tampons en un appel (`get_soldier_buffers`), un par régiment, déjà complétés à
+## la capacité de son MultiMesh ; régiments parcourus dans le même ordre qu'avant (camp, famille,
+## ordre de `get_units`) : les tirages aléatoires (cadavres) restent les mêmes.
+func _update_batched(battle: Object, units: Array, selected: Array) -> void:
+	var capacities := PackedInt32Array()
+	capacities.resize(units.size())
+	capacities.fill(-1)
+	for i in units.size():
+		var id := int(units[i]["id"])
+		if layers.has(id):
+			capacities[i] = (layers[id] as MultiMeshInstance3D).multimesh.instance_count
+	var result: Array = battle.call("get_soldier_buffers", capacities)
+	var counts: PackedInt32Array = result[0]
+	var buffers: Array = result[1]
+	if buffers.size() != units.size():
+		_update_per_kind(battle, units, selected)
+		return
+	for side in ["attacker", "defender"]:
+		for kind in KINDS:
+			for i in units.size():
+				var unit: Dictionary = units[i]
+				if str(unit["side"]) != side or str(unit["render"]) != kind:
+					continue
+				var id := int(unit["id"])
+				if not layers.has(id):
+					continue
+				var n := int(unit.get("figures", unit["soldiers"])) if bool(unit["present"]) else 0
+				if n > counts[i]:
+					if not _warned:
+						push_warning("BattleSoldiers: soldier buffer shorter than expected (%s/%s)" % [side, kind])
+						_warned = true
+					n = counts[i]
+				if budget_enabled and _skip_far(unit, id, n):
+					skipped_updates += 1
+					continue
+				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
+				_update_unit(unit, id, kind, buffers[i], n, selected.has(id))
+
+
+## Chemin d'avant PB3c : un tampon par camp et famille, découpé en tranches par régiment.
+func _update_per_kind(battle: Object, units: Array, selected: Array) -> void:
 	for side in ["attacker", "defender"]:
 		for kind in KINDS:
 			var buffer: PackedFloat32Array = battle.call("get_soldier_buffer", side, kind)
@@ -399,19 +462,12 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 				offset += n
 				_unit_scale[id] = float(n) / maxf(float(unit["soldiers"]), 1.0) if bool(unit["present"]) else 1.0
 				_update_unit(unit, id, kind, slice, n, selected.has(id))
-	# Lot BV2 : chocs de cavalerie résolus par le cœur depuis l'image précédente.
-	if bv2_enabled and battle.has_method("get_impacts"):
-		var impacts: Array = battle.call("get_impacts")
-		if not impacts.is_empty():
-			apply_impacts(impacts)
-	if not _dirty_corpses.is_empty():
-		_flush_corpses()
 
 
 ## EP1 : `true` quand le régiment lointain saute cette image (budget d'animation). Jamais quand
 ## son effectif dessiné change (morts, renforts) ni pour un régiment encore jamais dessiné.
 func _skip_far(unit: Dictionary, id: int, n: int) -> bool:
-	if not _previous.has(id) or (_previous[id] as PackedFloat32Array).size() != n * 12:
+	if not _previous.has(id) or int(_drawn.get(id, -1)) != n:
 		return false
 	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
 	if distance < BUDGET_NEAR:
@@ -426,10 +482,14 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	# Soldats tombés depuis l'image précédente (régiment resté sur le champ).
 	if _previous.has(id):
 		var prev: PackedFloat32Array = _previous[id]
-		var prev_n := prev.size() / 12
-		if n < prev_n and n > 0 and bool(unit["present"]):
-			_spawn_corpses(unit, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), prev, prev_n - n)
+		var prev_n := int(_drawn[id])  # PB3c : tampons complétés à la capacité, compte dessiné gardé à part
+		# Régiment anéanti (absent sans avoir quitté le champ ni être en réserve) :
+		# ses dernières figurines tombent aussi.
+		var on_field := not bool(unit.get("left_field", false)) and not bool(unit.get("reserve", false))
+		if n < prev_n and on_field:
+			_spawn_corpses(unit, str(unit["side"]), kind, BattleMeshes.variant_of(str(unit.get("type", ""))), prev, prev_n - n, prev_n)
 	_previous[id] = slice
+	_drawn[id] = n
 	# Renversés (lot BV2) : leur place dans la formation est vide jusqu'à ce qu'ils se relèvent.
 	if _hidden.has(id):
 		slice = _hide_knocked(id, slice, n)
@@ -440,6 +500,11 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var lod: MultiMeshInstance3D = _lod_layers[id]
 	var lod_mm := lod.multimesh
 	if n > mm.instance_count:
+		mm.instance_count = n
+		lod_mm.instance_count = n
+	elif n > 0 and n * 4 < mm.instance_count * 3:
+		# Pertes de plus d'un quart : on réduit les couches à l'effectif pour ne pas recopier
+		# un tampon complété à chaque image (les instances en trop étaient déjà invisibles).
 		mm.instance_count = n
 		lod_mm.instance_count = n
 	# Distance au régiment : caméra → centre du régiment (x, z de la simulation).
@@ -487,10 +552,11 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	if imp != null:
 		imp.multimesh.visible_instance_count = n
 		var imp_mat := imp.material_override as ShaderMaterial
-		imp_mat.set_shader_parameter("anim_time", anim_time - float(_lag.get(id, 0.0)))
-		imp_mat.set_shader_parameter("imp_set", BattleImpostors.state_set(str(unit.get("state", "")), bool(unit.get("running", false))))
-		imp_mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
-		imp_mat.set_shader_parameter("thin_out", 1.0 if budget_enabled and distance > THIN_DISTANCE and not is_selected else 0.0)
+		var imp_sent := _sent_of(imp_mat)
+		_param(imp_mat, imp_sent, &"anim_time", anim_time - float(_lag.get(id, 0.0)))
+		_param(imp_mat, imp_sent, &"imp_set", BattleImpostors.state_set(str(unit.get("state", "")), bool(unit.get("running", false))))
+		_param(imp_mat, imp_sent, &"highlight", 1.0 if is_selected else 0.0)
+		_param(imp_mat, imp_sent, &"thin_out", 1.0 if budget_enabled and distance > THIN_DISTANCE and not is_selected else 0.0)
 	var mat: ShaderMaterial = _materials[id]
 	var ammo := int(unit.get("ammo", 0))
 	var state := str(unit.get("state", ""))
@@ -506,10 +572,11 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	# Horloge propre du régiment (retard des chevaux ralentis, cadence) : tous les instants
 	# du matériau (fondus, volées, état) sont pris sur elle.
 	var local := anim_time - float(_lag.get(id, 0.0))
-	mat.set_shader_parameter("anim_time", local)
-	mat.set_shader_parameter("anim_state", anim_state(unit))
-	mat.set_shader_parameter("highlight", 1.0 if is_selected else 0.0)
-	mat.set_shader_parameter("far_blend", smoothstep(READABLE_NEAR, READABLE_FAR, distance))
+	var sent := _sent_of(mat)
+	_param(mat, sent, &"anim_time", local)
+	_param(mat, sent, &"anim_state", anim_state(unit))
+	_param(mat, sent, &"highlight", 1.0 if is_selected else 0.0)
+	_param(mat, sent, &"far_blend", smoothstep(READABLE_NEAR, READABLE_FAR, distance))
 	# Lot B4 : décoche calée sur la volée (munitions qui baissent), choc au changement d'état.
 	var track: Dictionary = _anim_track.get(id, {})
 	if track.is_empty():
@@ -521,13 +588,13 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		track["since"] = local
 	track["ammo"] = ammo
 	track["state"] = state
-	mat.set_shader_parameter("state_time", local - float(track["since"]))
+	_param(mat, sent, &"state_time", local - float(track["since"]))
 	if skinned and ep12_enabled and kind != "cavalry":
 		_update_disarmed(unit, id, kind, slice, n, mat, state == "routing")
 	if skinned:
 		BattleSkinned.apply_config(mat, config, local)
 		# SG1 : soldats de tête sur les échelles ou le pont du beffroi (clip d'escalade).
-		mat.set_shader_parameter("split_count", int(unit.get("climbers_shown", 0)))
+		_param(mat, sent, &"split_count", int(unit.get("climbers_shown", 0)))
 		# Sang : uniforme mis à jour seulement quand il change sensiblement.
 		# BV3 : pavois du dos masqué tant que la rangée est plantée (même règle que BV1).
 		if hide_planted_pavise:
@@ -541,13 +608,31 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			mat.set_shader_parameter("blood", blood)
 
 
+## PB3c : uniformes déjà envoyés à `mat` (hors chemin PB3c : dictionnaire jetable, tout renvoyé).
+func _sent_of(mat: ShaderMaterial) -> Dictionary:
+	if not pb3c_enabled:
+		return {}
+	var key := mat.get_instance_id()
+	if not _sent.has(key):
+		_sent[key] = {}
+	return _sent[key]
+
+
+## PB3c : `set_shader_parameter` seulement quand la valeur change.
+static func _param(mat: ShaderMaterial, sent: Dictionary, param: StringName, value: Variant) -> void:
+	if sent.has(param) and sent[param] == value:
+		return
+	sent[param] = value
+	mat.set_shader_parameter(param, value)
+
+
 ## BV3 : repère (position au sol, cap) de la figurine placée à `rank` (0 première, 1 dernière)
 ## dans le tampon courant du régiment ; null si le régiment n'a pas de figurine dessinée.
 func figure_frame(id: int, rank: float) -> Variant:
 	if not _previous.has(id):
 		return null
 	var slice: PackedFloat32Array = _previous[id]
-	var n := slice.size() / 12
+	var n := int(_drawn[id])
 	if n <= 0:
 		return null
 	var o := clampi(int(rank * float(n - 1)), 0, n - 1) * 12
@@ -560,7 +645,7 @@ func figure_at(id: int, index: int) -> Variant:
 	if not _previous.has(id):
 		return null
 	var slice: PackedFloat32Array = _previous[id]
-	if index < 0 or index >= slice.size() / 12:
+	if index < 0 or index >= int(_drawn[id]):
 		return null
 	var o := index * 12
 	var basis := Basis(Vector3(slice[o], slice[o + 4], slice[o + 8]), Vector3(slice[o + 1], slice[o + 5], slice[o + 9]), Vector3(slice[o + 2], slice[o + 6], slice[o + 10]))
@@ -569,7 +654,7 @@ func figure_at(id: int, index: int) -> Variant:
 
 ## EP5 : figurines dessinées du régiment (tampon courant).
 func figure_count(id: int) -> int:
-	return (_previous[id] as PackedFloat32Array).size() / 12 if _previous.has(id) else 0
+	return int(_drawn[id]) if _previous.has(id) else 0
 
 
 ## EP5 : masque (échelle nulle) les figurines remplacées par un porte-étendard ou un musicien.
@@ -592,7 +677,7 @@ func figure_slot_near(id: int, point: Vector3) -> int:
 	var slice: PackedFloat32Array = _previous[id]
 	var best := -1
 	var best_d := INF
-	for i in slice.size() / 12:
+	for i in int(_drawn[id]):
 		var dx := slice[i * 12 + 3] - point.x
 		var dz := slice[i * 12 + 11] - point.z
 		var d := dx * dx + dz * dz
@@ -663,7 +748,7 @@ func soldier_positions(id: int, count: int) -> PackedVector3Array:
 	if not _previous.has(id) or count <= 0:
 		return out
 	var slice: PackedFloat32Array = _previous[id]
-	var n := slice.size() / 12
+	var n := int(_drawn[id])
 	if n == 0:
 		return out
 	var step := maxf(float(n) / float(count), 1.0)
@@ -679,7 +764,9 @@ func soldier_positions(id: int, count: int) -> PackedVector3Array:
 ## Lot BV2 : mort tirée selon la cause des pertes (`loss_cause`), projection en arrière loin du
 ## tueur (charge, boulet), démembrement sur coup critique (réglage « complet »), sang, gerbe ;
 ## cadavres rangés par cellules de terrain (LOD, plafond global `corpses.max_total`).
-func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, prev: PackedFloat32Array, count: int) -> void:
+func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, prev: PackedFloat32Array, count: int, prev_n: int = -1) -> void:
+	if prev_n < 0:
+		prev_n = prev.size() / 12
 	var skinned := BattleSkinned.has_figure(kind, variant)
 	var mounted := kind == "cavalry"
 	var limits: Dictionary = _gore.get("corpses", {})
@@ -693,7 +780,6 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	var killer_pos: Variant = _unit_pos.get(killer)
 	var crit_chance := _critical_chance(cause, killer) * float(death.get("critical", 0.0)) if gore != null and gore.dismember_enabled() else 0.0
 	var death_count: int = (BattleSkinned.death_config(kind, variant)["set"] as Array).size() if skinned else 1
-	var prev_n := prev.size() / 12
 	var sprays: Dictionary = _gore.get("sprays", {})
 	# EP12 : blessés (part tirée par cause), fuyards désarmés.
 	var uid := int(unit["id"])
@@ -988,7 +1074,7 @@ func _knock_down(id: int, at: Vector3, heading: float, mass: float, knocked: int
 	if kind == "cavalry" or not BattleSkinned.has_figure(kind, variant):
 		return
 	var slice: PackedFloat32Array = _previous[id]
-	var n := slice.size() / 12
+	var n := int(_drawn[id])
 	var k := mini(mini(int(round(knocked * float(_unit_scale.get(id, 1.0)))), int(knock.get("max_per_impact", 48))), n)
 	if k <= 0:
 		return

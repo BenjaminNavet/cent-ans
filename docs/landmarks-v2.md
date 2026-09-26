@@ -16,6 +16,11 @@ d'exemple complet.
 - Le **plancher de caméra provisoire** de ZG4b (`landmark_min_distance`) ne s'applique plus à une
   ville qui a un fichier v2 (`SettlementLayer.landmark_floor_zones`) : la caméra descend jusqu'au
   plancher général du relief (≈ 200 m).
+- **Ville sans maquette** (VH7, Orléans) : le champ `landmark` est absent. En vue stratégique, la
+  colonie garde sa maquette de colonie ordinaire ; au zoom rapproché, la ville v2 remplace la ville
+  ordinaire ZG6 (`TownLayer` ne la construit plus, sauf `--no-landmarks-1to1`) et ne s'affiche qu'à
+  partir du même poids vallée que les villes ZG6 (`TownRenderProfile.min_valley_weight`), quand les
+  maquettes des colonies sont masquées (`LandmarkCityLayer.has_maquette`). Pas de plancher ZG4b.
 - Tout est **rendu** : aucune règle de jeu, rien dans `core/`.
 
 ## Fichier `data/landmarks_v2/<id>.json`
@@ -44,20 +49,21 @@ Conversion en jeu (`LandmarkV2Library`) : unités carte = ((E − minx) / m, (ma
 
 | Section | Contenu | Remarques |
 |---|---|---|
-| `format`, `id`, `name`, `settlement`, `landmark`, `period`, `year`, `seed` | identité ; `landmark` = maquette v1 liée | `seed` : graine du tissu généré |
+| `format`, `id`, `name`, `settlement`, `landmark`, `period`, `year`, `seed` | identité ; `landmark` = maquette v1 liée (facultatif : absent pour une ville sans maquette, Orléans) | `seed` : graine du tissu généré |
 | `sources` | titre, auteur, date, URL, licence, `extracted`, usage | `extracted: true` seulement si la licence permet l'usage commercial (OSM, IGN…) ; plans Gallica, Agas/MoEML, Cassini, Open Domesday : `false` (contrôle humain) |
 | `plan` | façades et profondeurs (ville close, faubourgs), largeurs de rue par rang, mélange de maisons, `detail_cell_m` | défauts : 5-8 m × 20-40 m, faubourgs 8-16 × 25-50, cellules de 250 m |
-| `osm_streets` | recette d'extraction OSM : `bbox_lonlat`, `highways`, `exclude`, `main`, `lanes`, `unnamed`, `simplify_m` | voir « Outil » |
-| `fine_rivers` | noms des fleuves de la carte fine recopiés dans `waters` | défaut : Seine |
-| `waters` | cours d'eau `[dE, dN, largeur]`, `origin` (`rivers_fine`, `osm`, `hand`), `draw` | le fleuve principal vient de la carte fine (`draw: false`, couloir interdit seulement) ; un ruisseau absent de la carte (Robec) est tracé à la main et dessiné (`draw: true`) |
-| `walls` | enceintes : `points`, `closed`, hauteur, épaisseur, tours (espacement, rayon, hauteur), `ditch_m`, `gates` (`name`, `at`, `kind`, `height_m`), dates, `note` | une enceinte ouverte (mur de rive) est une polyligne `closed: false` ; plusieurs enceintes datées possibles (Paris : Philippe Auguste, Charles V à partir de 1356) |
-| `streets` | rues : `rank` (`main`, `secondary`, `lane`), `width_m`, `origin` (`osm` régénéré par l'outil, `hand` gardé), dates | tracer à la main les rues disparues (percées ultérieures, reconstruction) |
+| `osm_streets` | recette d'extraction OSM : `bbox_lonlat`, `highways`, `exclude`, `main`, `lanes`, `alleys`, `unnamed`, `simplify_m` | voir « Outil » |
+| `alpage` | recette ALPAGE (Paris seulement) : `streets` (rues de 1380) et `parcels` (parcelles Vasserot) | voir « Paris et ALPAGE » |
+| `fine_rivers` | noms des fleuves de la carte fine recopiés dans `waters` | défaut : Seine ; `[]` : pas de fleuve fin (Paris) |
+| `waters` | cours d'eau `[dE, dN, largeur]` ou lit en `polygon` (+ `holes` : îles), `origin` (`rivers_fine`, `osm`, `alpage`, `hand`), `draw` | le fleuve principal vient de la carte fine (`draw: false`, couloir interdit seulement) ; un ruisseau absent de la carte (Robec) est tracé à la main et dessiné (`draw: true`) |
+| `walls` | enceintes : `points`, `closed`, hauteur, épaisseur, tours (espacement, rayon, hauteur), `ditch_m`, `gates` (`name`, `at`, `kind`, `height_m`, dates : Moorgate à partir de 1415), dates, `note` | une enceinte ouverte (mur de rive) est une polyligne `closed: false` ; plusieurs enceintes datées possibles (Paris : Philippe Auguste, Charles V à partir de 1356) |
+| `streets` | rues : `rank` (`main`, `secondary`, `lane`), `width_m`, `origin` (`osm` ou `alpage` régénérés par l'outil, `hand` gardé), dates | tracer à la main les rues disparues (percées ultérieures, reconstruction) |
 | `quays` | quais : polyligne, largeur, `kind` | bande pavée sans maisons |
-| `bridges` | `from`, `to`, largeur, hauteur du tablier au-dessus de l'eau, arches, `houses` + `house_span`, `gatehouses_at`, `mills_at`, `chapel_at`, dates | pont habité : maisons des deux côtés du tablier, base = tablier |
+| `bridges` | `from`, `to`, largeur, hauteur du tablier au-dessus de l'eau, arches, `houses` + `house_span`, `gatehouses_at`, `mills_at`, `chapel_at` + `chapel_side`, `drawbridge_at`, `pier_m`, `starling_m`, dates | pont habité : maisons des deux côtés du tablier, base = tablier ; travées libres au pont-levis et à la chapelle ; chapelle sur la pile (base fixe au-dessus de l'eau) ; rampes d'accès jusqu'aux rives basses ; niveaux recalculés avec les pages de relief plus fines (VH6) ; `arches` donne le nombre de piles (arches − 1, VH7) ; tablier posé sur la base des piles puis relevé en mètres (VH7) |
 | `monuments` | gabarit (`model`), `params` en mètres, `at`, `angle_deg`, `clear_m`, dates, `certainty` (`attested`, `probable`, `hypothetical`), `description` | voir « Gabarits » |
 | `districts` | quartiers : `zone` (`intra`, `faubourg`), `polygon`, `density` (part des façades occupées), `houses` (mélange du kit), `roofs` (réservé) | hors de tout quartier, aucune parcelle ; le premier quartier qui contient un point l'emporte |
 | `open_spaces` | places, marchés, parvis, cimetières (aîtres), jardins, prés, cloîtres, grèves | sans maisons ; places pavées ; arbres dans jardins, cimetières, prés |
-| `parcels` | réservé à VH5 | parcellaire importé (ALPAGE, ODbL) à la place du parcellaire généré |
+| `parcels` | parcellaire importé : `[dE, dN, angle°, façade, profondeur]` (milieu de la façade sur rue, normale vers l'intérieur) | Paris : parcelles Vasserot d'ALPAGE (ODbL) ; placées avant les lanières générées, qui comblent les façades restées libres |
 | `render` | `fade_valley` | fenêtre du fondu de la maquette |
 
 Éléments datés : `from_year` / `until_year` inclus, filtrés par l'année de la partie
@@ -75,11 +81,12 @@ de l'emprise), murs prolongés de 8 m sous terre pour les pentes. Longueurs en m
 | `church` | `length_m`, `width_m`, `height_m`, `apse`, `tower` {`at` (`west`, `crossing`), `size`, `height`, `spire_m`} |
 | `abbey` | ceux de `church` + `cloister` {`side` (`north`, `south`), `size`} |
 | `castle` | `ring` [[u, v]…] (u le long de l'axe, v à gauche), `height_m`, `thickness_m`, `tower_radius_m`, `tower_height_m`, `keep` {`at`, `radius_m`, `height_m`}, `halls` [[u, v, longueur, largeur, hauteur, angle°]…] |
-| `belfry` | `size`, `height`, `top` (`pyramid`, `lantern`) |
+| `belfry` | `size`, `height`, `top` (`pyramid`, `lantern`, `turrets` : toit plat et tourelles d'angle, VH6) |
 | `hall` | `length_m`, `width_m`, `height_m` (halle : murs bas, grand toit) |
 | `royal_palace` | `length_m`, `width_m`, `height_m`, `ranges` [[u, v, longueur, largeur, hauteur, angle°]…] |
 | `enclosure` | `length_m`, `width_m`, `height_m`, `ranges` (bâtiments le long des grands côtés) |
 | `keep`, `tower`, `gate_tower` | `radius_m` ou `size`, `height` |
+| `earthwork` (VH7) | `ring` [[u, v]…] (comme `castle`), `bank_m` (hauteur de la levée), `base_m` (largeur à la base), `palisade_m`, `closed` (faux : fer à cheval ouvert côté porte ou fort) : boulevard de terre et de bois |
 
 Un monument phasé se découpe en plusieurs entrées (Saint-Ouen en 1340 : chœur gothique de
 1318-1339 en `gothic_cathedral` avec `open_west`, nef romane en `church`, cloître en `enclosure`).
@@ -146,6 +153,86 @@ Options : `--no-landmarks-1to1` (rendu d'avant VH4). Captures et mesure :
    ALPAGE pour Paris), jamais en copiant un plan non commercial.
 8. Paris peut remplir `parcels` avec le parcellaire ALPAGE (ODbL) : à implémenter dans
    `LandmarkPlan` (VH5) à la place de `_line_parcels`.
+
+## Londres vers 1340 (VH6)
+
+`data/landmarks_v2/london.json` : origine = ancre de la maquette (Temple), `extent_m` 2 800 (Tour à
+2,4 km à l'est, Westminster et Lambeth à 2 km au sud-ouest). Mur ouvert sur la Tamise (le mur de
+rive romain était ruiné au XIIe s.), de la poterne de Tower Hill au débouché de la Fleet
+(prolongement vers 1280-1320 pour les Dominicains) ; 6 portes + Moorgate datée 1415. Tour :
+deux gabarits `castle` concentriques (tours aux sommets, positions OSM), Tour Blanche en `belfry`
+à tourelles, douves tracées à la main. London Bridge : 19 arches, piles de 7 m et avant-becs,
+maisons, chapelle Saint-Thomas côté aval, pont-levis, deux portes. Westminster : chevet gothique
+d'Henri III + nef romane (jusqu'en 1375, nef gothique ensuite), Westminster Hall, Saint-Étienne,
+tour du Joyau (1366), horloge (1367). Rues OSM avec exclusions (percées du XIXe s., reconstruction
+après 1666 : King William Street, Queen Victoria Street, Cannon Street, etc.) et rues disparues à
+la main (Candlewick Street, King Street de Westminster, Old Change, accès du pont, Snow Hill).
+Suivi : `docs/wip/vh6-londres.md`.
+
+## Orléans vers 1340-1429 (VH7)
+
+`data/landmarks_v2/orleans.json`, origine sur Sainte-Croix, `extent_m` 1 850 (jusqu'à Saint-Loup).
+Suivi : `docs/wip/vh7-orleans.md` ; captures `docs/img/vh7/` (`res://tests/vh7_shots.gd`,
+`--year=1429` pour l'état du siège).
+
+- **Vue stratégique** : Orléans n'a pas de maquette L1/L2 ; la colonie ordinaire (maquette de ville
+  sous loupe) reste l'image lointaine, la ville 1:1 remplace la ville ZG6 au palier vallée (voir
+  « Principe »). Une petite maquette L1/L2 (et un bloc `siege.battle`, ADR 0026) reste possible
+  plus tard ; elle ferait basculer Orléans dans le cas des autres villes (fondu).
+- **Enceintes datées** : castrum (2 032 m, 25 ha, portes Bourgogne, Parisis, Dunoise et du Pont)
+  jusqu'en 1344 ; à partir de 1345, castrum et accrue du bourg Dunois (portes Bannier et Renart) :
+  c'est l'enceinte du siège de 1428-1429 (la grande accrue de 1467-1480 n'existe pas encore).
+  Deux anneaux fermés datés plutôt qu'un mur ouvert : les normales et les fossés restent justes.
+- **Pont des Tourelles** (21 arches), Châtelet, bastille Saint-Antoine (hypothétique), fort des
+  Tourelles, boulevard de terre et de bois (`earthwork`) ; boulevards des portes à partir de 1404
+  (emprises hypothétiques).
+- **Sainte-Croix** : chevet gothique seul (`gothic_cathedral`, `open_west`), sans transept, nef,
+  façade ni tours ; terrain de la nef à bâtir en espace libre.
+- **Faubourgs et églises hors les murs** (Saint-Aignan, Saint-Euverte, Saint-Laurent, Saint-Paterne,
+  Saint-Vincent, Saint-Marceau) : `until_year` 1428 ; Saint-Loup, Saint-Jean-le-Blanc et les
+  Augustins (bastilles anglaises prises en mai 1429) jusqu'en 1429.
+- **Rues** : 438 rues OSM ; exclusions (rue Jeanne-d'Arc, rue Royale, rue de la République,
+  boulevards des XVIIIe-XIXe s., quais, rues de la reconstruction d'après 1940) ; trois chemins
+  tracés à la main (Portereau, Saint-Marceau, chemin de Blois).
+- **Loire** : la carte fine donne cinq tronçons larges (≈ 350 m) qui se recouvrent ; ils ne servent
+  qu'au couloir interdit (`draw: false`) ; `LandmarkPlan` indexe désormais les segments d'eau par
+  cases de 40 m (polygones de Paris compris) (sol des quartiers).
+
+## Paris et ALPAGE (VH5)
+
+Le consortium ALPAGE (LAMOP-Paris 1, dir. H. Noizet) publie sous ODbL 1.0, en téléchargement libre
+(https://alpage.huma-num.fr/gis-data/), un SIG de Paris : **« Paris en 1380 »** (P. Rouet : voies,
+îlots, usages du sol, hydrographie) et les **données Vasserot** (A.-L. Bethe : parcelles
+1810-1836). `tools/cent_ans_tools/geo/alpage.py` lit ces GeoPackage (EPSG:2154, cache
+`tools/geo/raw/alpage/`, téléchargés au besoin) :
+
+- **Rues** : le réseau de 1380 remplace la recette OSM (plus besoin d'exclure les percées
+  haussmanniennes, la rue de Rivoli ou les boulevards : ils n'y sont pas). Rang `main` pour les
+  axes majeurs ALPAGE (`AXE_MAJEUR`), `lane` pour les ruelles et voies sans nom ; recette
+  `alpage.streets` : `skip_regions` (`PONT` : ponts dans `bridges`), `exclude` (quais, tracés dans
+  `quays`), `main`, `simplify_m`. Coupées aux quartiers (+ 25 m) comme les rues OSM.
+- **Parcelles** : le cadastre Vasserot est postérieur de cinq siècles ; il ne sert que de gabarit
+  des lanières. Une parcelle est gardée si elle est dans un quartier de `alpage.parcels.districts`
+  (Cité, Ville, Université), si sa surface est plausible (15-2 500 m²), si aucune rue de 1380 ne la
+  traverse, si elle ne recouvre pas (> 30 %) un usage du sol non résidentiel de 1380 (églises,
+  couvents, palais, marchés, cimetières, eau, champs, enceintes) et si l'un de ses côtés longe
+  une rue de 1380 (à ≤ `reach_m` du bord, parallèle à 30° près). ≈ 4 800 parcelles sur ≈ 6 800
+  dans la ville close.
+- **Le reste** du fichier (enceintes, portes et poternes, emprises et orientations des églises,
+  abbayes, palais, Louvre, Châtelets, Temple, halles ; quartiers tirés des îlots de 1380 et des
+  zones bâties hors les murs ; îles, cimetières, prés ; lit de la Seine de 1380) a été écrit une
+  fois à partir des géométries ALPAGE puis est maintenu à la main.
+
+La Seine de la carte fine (axe à largeur) est trop large (≈ 130 m) et passe sur le nord de la
+Cité : Paris met `fine_rivers: []` et décrit le lit de 1380 en polygones (`waters.polygon`, îles en
+`holes`), interdits en entier aux maisons. Le rendu de l'eau reste celui de la carte fine.
+
+Moteur (rétrocompatible, Rouen inchangé) : index en grille des quartiers et des eaux
+(`LandmarkPlan.Districts.build_index`, `_water_index`), eaux en polygone, parcellaire importé
+(`_imported_parcels` : façade partagée en maisons de ≤ 11 m, profondeur réduite si la parcelle
+touche un monument ou une muraille), minutage par étape (`stats.marks_usec`). Plan de Paris :
+≈ 2-5 s dans le fil de travail selon la charge (Rouen : ≈ 2-3 s), ≈ 8 800 maisons, 110 monuments.
+Captures : `godot --path game --script res://tests/vh4_shots.gd -- --city=paris --out=<dossier>`.
 
 ## Limites connues (VH4)
 

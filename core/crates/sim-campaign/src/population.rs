@@ -345,8 +345,8 @@ pub(crate) fn resolve_population(
                         let province = state.provinces.get_mut(&id).expect("exists");
                         province.revolt_seasons = 0;
                         let city = state.settlements.get_mut(&city_id).expect("exists");
-                        city.controller = rebels.clone();
-                        city.siege = None;
+                        // The mutinous garrison goes over to the rebels.
+                        city.hand_over(&rebels);
                         events.push(
                             GameEvent::new(
                                 EventKind::Revolt,

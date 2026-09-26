@@ -52,6 +52,9 @@ impl CampaignSim {
     /// as the smoke test's economy step); pending decisions still expire.
     #[func]
     fn set_chronicle_enabled(&mut self, enabled: bool) {
+        if self.refuse_while_turn_pending("set_chronicle_enabled") {
+            return;
+        }
         if let Some(state) = &mut self.state {
             state.chronicle.disabled = !enabled;
         }
@@ -60,6 +63,9 @@ impl CampaignSim {
     /// Answers a pending decision (same as the `choose_event_option` order).
     #[func]
     fn choose_event_option(&mut self, decision: i64, option: i64) -> VarDictionary {
+        if self.refuse_while_turn_pending("choose_event_option") {
+            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+        }
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return order_result(Err("aucune campagne en cours".to_owned()));
         };

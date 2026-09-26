@@ -6,11 +6,19 @@ Une carte de campagne au tour par saison sur l'Europe réelle, puis des bataille
 temps réel avec pause, dans l'esprit de *Total War*. Incarnez la France des Valois, l'Angleterre des
 Plantagenêts ou la Bourgogne, et menez un siècle de guerre, de diplomatie, de dynasties et de crises.
 
-![Bataille](docs/img/godot-battle.png)
+![Mêlée de chevaliers autour des étendards de France et d'Angleterre](docs/img/readme/bataille.jpg)
 
-| Carte de campagne | Siège | Codex historique |
-|---|---|---|
-| ![Campagne](docs/img/godot-campaign-models.png) | ![Siège](docs/img/godot-siege.png) | ![Codex](docs/img/codex-window.png) |
+| Paris en 1337 sur la carte de campagne | Londres et la Tamise |
+|---|---|
+| ![Paris : la Cité, Notre-Dame et la Seine](docs/img/readme/paris.jpg) | ![Londres au bord de la Tamise](docs/img/readme/londres.jpg) |
+
+| Carte de campagne | Bataille de Poitiers (1356) |
+|---|---|
+| ![Carte de campagne : provinces, armées et relief](docs/img/readme/campagne.jpg) | ![Bataille de Poitiers en temps réel](docs/img/readme/bataille_poitiers.jpg) |
+
+![Écran d'accueil : Notre-Dame au crépuscule](docs/img/readme/menu.jpg)
+
+*Captures en jeu. Pour les refaire : `godot --path game --resolution 1920x1080 --script res://tests/readme_shots.gd -- --out=<dossier>`.*
 
 ## Fonctionnalités
 

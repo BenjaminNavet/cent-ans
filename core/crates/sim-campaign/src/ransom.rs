@@ -445,6 +445,14 @@ fn own_prisoner(
     if c.captor.as_ref() != Some(faction) {
         return Err(RansomError::NotYourPrisoner);
     }
+    // ADR 0025 § 6: a treaty hostage stays until the end of his term.
+    let pledged = state
+        .factions
+        .get(faction)
+        .is_some_and(|f| f.ledger.hostages.iter().any(|h| &h.character == character));
+    if pledged {
+        return Err(RansomError::Held);
+    }
     Ok(c.faction.clone())
 }
 
@@ -663,6 +671,7 @@ pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &Factio
                 _ => {}
             }
         } else if captor == faction
+            && c.ransom_terms != Some(RansomTerms::Hold)
             && !state.is_at_war(faction, &c.faction)
             && captive_rank(state, id) == CaptiveRank::Knight
         {
