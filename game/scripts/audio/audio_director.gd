@@ -65,6 +65,7 @@ var silent: bool = false
 
 var _streams: Dictionary = {}  # chemin → AudioStream ou null
 var _music_players: Array[AudioStreamPlayer] = []
+var _music_tween: Tween = null  # fondu enchaîné en cours (tué au changement suivant)
 var _active_music := 0
 var _sfx_players: Array[AudioStreamPlayer] = []
 var _next_voice := 0
@@ -367,10 +368,14 @@ func play_music(context: String) -> void:
 	var old_player := _music_players[_active_music]
 	_active_music = 1 - _active_music
 	var new_player := _music_players[_active_music]
+	# Fondu précédent interrompu : sinon son arrêt différé couperait le lecteur réutilisé ici.
+	if _music_tween != null and _music_tween.is_valid():
+		_music_tween.kill()
 	new_player.stream = stream
 	new_player.volume_db = -40.0
 	new_player.play()
 	var tween := create_tween()
+	_music_tween = tween
 	tween.set_parallel(true)
 	tween.tween_property(new_player, "volume_db", 0.0, FADE_SECONDS)
 	if old_player.playing:
