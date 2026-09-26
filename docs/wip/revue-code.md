@@ -11,3 +11,9 @@ Tranches :
 
 Prochaine étape : trier les constats, corriger les confirmés sur la branche `fix/code-review`
 (worktree ../gp-review), tests, ff dans main.
+
+## Constats reçus
+- Tranche 1 (sim-campaign A) : 12 constats — otages de traité libérables (Hold), enfants de mariage
+  inter-factions dans la faction de la mère, apply_treaty partiel (mariage), malus otages mal attribué,
+  héraut ignore Hold / reste bloqué, ordre des buts de guerre, clone du state dans evaluate(Marriage),
+  tribut d'une faction morte, cogues louées coulées, blocus compté double, doublons via JSON.
