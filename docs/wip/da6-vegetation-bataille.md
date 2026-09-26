@@ -2,40 +2,53 @@
 
 Branche `feat/da6-vegetation-bataille` (worktree `.claude/worktrees/agent-abf402aacfc74bffd`).
 Bible : `docs/design/2026-09-25-bible-da.md` § 3.3, § 6 « Végétation », § 10 ligne 6.
-Suivi DA : `docs/wip/da-direction-artistique.md`. Rendu seulement (aucun Rust prévu).
+Suivi DA : `docs/wip/da-direction-artistique.md`. ADR 0066. Rendu seulement (aucun Rust).
 
-## Problème (capture `docs/img/da/etat_2509_battle_close.jpg`, avant : `docs/img/da6/avant_*`)
-1. Herbe en cartes plates, parcelles à lisière rectiligne, touffes lues comme des plans.
-2. Arbres « sucette » (boule sur bâton) au loin comme de près.
-3. Sol flou de près.
+## État : terminé, à fusionner par l'orchestrateur
+- [x] Drapeau `BattleTerrain.da6` (`--no-da6` : ancien rendu, captures « avant »).
+- [x] Lisières douces : `bt_edge_warp` / `bt_field_info_soft` / `bt_decor_edge_soft`
+  (`battle_common.gdshaderinc`), sol et herbe d'accord ; rampe 9 m (procédurales), 8 m (décor
+  EP6, `_stamp_decor`) ; touffes mêlées au bord (seuil par touffe).
+- [x] Touffes en volume (`_clump_mesh_da6`, 4 cartes cintrées/évasées, normales arrondies, pied
+  assombri, cartes par la tranche amincies) ; `grass_blades.png` ; hauteurs variées.
+- [x] Arbres `battle_trees.gd` : chêne, hêtre, frêne, peuplier noir, saule têtard (bord de
+  l'eau), fruitier (vergers, courtils), buisson (haies) ; hiver nu (chêne marcescent).
+- [x] LOD par instance (120 m × qualité / 300 m, fondu tramé) et imposteurs cuits au lancement.
+- [x] Sol de près : détail de la couche dominante (luminance + normale) fondu 45-117 m.
+- [x] Décor sourd : `decor_saturation` 0,6 (automne 0,5) sol, herbe, feuillage, imposteurs.
+- [x] Banc A/B dans un processus (`--bench-ab=da6,no-da6`, `ab_mean`).
+- [x] Captures `docs/img/da6/` (avant/après), planches `planche_essences*.jpg` + atlas.
+- [x] pytest 601 OK, ruff OK, smoke Godot exit 0.
 
-## Plan
-- [x] Squelette : drapeau `BattleTerrain.da6` (`--no-da6`), wip, captures avant.
-- [x] Lisières douces : déformation (bruit) des bords de parcelles procédurales et du décor EP6,
-  rampe plus large, touffes mêlées au bord (tirage par touffe) — `battle_common.gdshaderinc`,
-  `battle_ground.gdshader`, `battle_grass.gdshader`, `_stamp_decor`.
-- [x] Touffes en volume : 4 cartes cintrées et évasées, normales arrondies, pied assombri,
-  cartes vues par la tranche effacées ; nouvelle texture de touffe (pied resserré) ; variation
-  de hauteur et de teinte.
-- [x] Arbres : `battle_trees.gd` (`BattleTrees`), feuillus ramifiés procéduraux par essence
-  (chêne, hêtre, frêne, peuplier noir, saule têtard au bord de l'eau, fruitier, buisson), LOD1
-  issu du même squelette, hiver = branches nues (chêne : feuilles sèches marcescentes).
-- [x] Imposteurs d'arbres au-delà de 300 m (atlas cuit au lancement, comme ADR 0024).
-- [x] Sol de près : couche de détail (luminance) fondue avec la distance.
-- [ ] Saturation ≤ 35 % (mesure sur captures), saisons (hiver, automne).
-- [ ] Banc A/B `game/tests/da6_perf.gd` (un seul processus, alternance), budget ≤ 5 %.
-- [ ] Captures après `docs/img/da6/`, ADR, docs.
+## Mesures (Mac M4 Pro, 1600 × 900, vsync coupée, `--bench-repeat=4`, moyenne `ab_mean`)
+Deux passes (la 2e pendant un pytest : même charge pour A et B, bascule toutes les 30 images).
+
+| Bataille | DA6 ms | sans DA6 ms | écart |
+|---|---|---|---|
+| standard (1 160 soldats) | 9,54 · 9,22 | 9,38 · 8,92 | +1,7 % · +3,5 % |
+| `--closeup` | 9,57 · 9,47 | 9,40 · 9,31 | +1,8 % · +1,7 % |
+| bocage `--closeup` (haies, pire cas) | 9,41 · 9,84 | 9,18 · 9,69 | +2,4 % · +1,5 % |
+| forêt | 9,16 · 9,35 | 8,98 · 9,22 | +1,9 % · +1,4 % |
+| hiver `--closeup` | 9,31 · 9,29 | 9,12 · 9,15 | +2,1 % · +1,6 % |
+| épique `--units=63 --bench-at=90` | 31,24 · 35,34 | 31,54 · 35,73 | −0,9 % · −1,1 % |
+
+Budget ≤ 5 % tenu. Avant allègement des buissons (haies), le bocage rapproché coûtait +26 %.
+
+Saturation moyenne HSV (zone 3D sous l'horizon, `avant` → `après`) : gros plan 38 → 29 %,
+vue haute 53 → 33 %, ligne 33 → 26 %, hiver 23 → 15 %, bocage 67 → 41 %, automne 53 → 44 %.
+
+## Limites / suites
+- Automne et bocage restent > 35 % à la mesure : la lumière et le brouillard dorés d'automne
+  (`BattleAtmosphere`) et les ombres sombres (saturation HSV gonflée) pèsent ; hors lot.
+- Blé et chaume ne suivent pas la saison (blé « doré » au printemps, hérité) : à faire par saison.
+- Imposteurs : 4 angles, sans ombre, cylindriques (vus de très haut, un peu plats).
+- Arbres d'un seul modèle par essence (variété par lacet, échelle, teinte) ; deux variantes par
+  essence doubleraient les tuiles.
+- `--standard-shot=foot` cadre un mur de pont (cadrage EP5, identique avant/après).
+- La bible § 10 ligne 6 reste à marquer « fait » par l'orchestrateur.
 
 ## Journal
-- 26/09 01 h : worktree avancé sur main (4c627f4a), branche créée, dylib construite, import,
-  captures avant (`avant_closeup`, `avant_foot` — plan de mur, cadrage EP5 —, `avant_haute`,
-  `avant_hiver`, `avant_automne`).
-
-- 26/09 ~02 h 30 : herbe, lisières, sol, arbres (`battle_trees.gd`), imposteurs, désaturation
-  (0,66 ; automne 0,55) commités. Banc A/B en un processus : `--bench-ab=da6,no-da6` (moyenne
-  `ab_mean` en plus de la médiane : sous Metal la médiane colle aux paliers d'affichage).
-  Premières mesures : plaine +0 %, bocage gros plan +5 % avant allègement des buissons, ~+1 %
-  après (machine bruitée). Planche des essences : `game/tests/da6_trees_shot.gd`.
-
-## Prochaine étape
-Captures après (dont un bois proche), banc final (plaine, bocage, épique), ADR, CREDITS/SOURCE.
+- 26/09 01 h : worktree avancé sur main (4c627f4a), branche, dylib, import, captures avant.
+- 26/09 ~02 h 30 : herbe, lisières, sol, arbres, imposteurs, désaturation.
+- 26/09 ~04 h : buissons allégés, LOD1 sans ombre, brindilles d'hiver épaissies, saturation 0,6,
+  captures finales, banc final, ADR 0066.

@@ -42,14 +42,17 @@ Rendu seulement, tout derrière `BattleTerrain.da6` (`--no-da6` rend l'ancienne 
    (ancien « far ») n'a plus que des imposteurs, ramenés à la taille réelle.
 6. **Sol de près** (`battle_ground.gdshader`) : la couche dominante relue à ~1/4 d'échelle
    module la luminance et la normale, fondue de 45 à 117 m.
-7. **Décor sourd** : saturation ramenée vers la luminance (`decor_saturation` 0,66 ; 0,55 à
+7. **Décor sourd** : saturation ramenée vers la luminance (`decor_saturation` 0,6 ; 0,5 à
    l'automne) dans le sol, l'herbe, le feuillage et les imposteurs ; les armoiries n'y passent pas.
 
 ## Mesures
 Banc dans un seul processus (`--benchmark --bench-ab=da6,no-da6` : les deux végétations sont
 construites, bascule toutes les 30 images ; moyenne `ab_mean`, la médiane collant aux paliers de
-la cadence sous Metal). Chiffres et captures : `docs/wip/da6-vegetation-bataille.md`,
-`docs/img/da6/`. Saturation moyenne mesurée sur les captures (zone 3D sous l'horizon).
+la cadence sous Metal). Écart DA6 / ancien rendu : +1,5 à +3,5 % (standard, gros plan, bocage,
+forêt, hiver), −1 % au palier épique (imposteurs moins chers que l'ancien LOD lointain) ; budget
+de 5 % tenu. Saturation moyenne (zone 3D sous l'horizon) : gros plan 38 → 29 %, vue haute
+53 → 33 %. Détail : `docs/wip/da6-vegetation-bataille.md`, captures `docs/img/da6/`.
+`decor_saturation` final : 0,6 (automne 0,5).
 
 ## Conséquences
 - Plus de géométrie par arbre proche (chêne complet ≈ 800 triangles contre ≈ 150), compensée par
