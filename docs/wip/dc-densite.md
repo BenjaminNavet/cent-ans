@@ -31,7 +31,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 | DC2c | Colonies îles Britanniques (Angleterre cible 10 ; Galles, Irlande, Écosse 7) | 1 | à lancer |
 | DC2d | Colonies Pays-Bas (11), Empire rhénan (9), reste de l'Empire et Scandinavie (7) | 1 | à lancer |
 | DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | fait |
-| DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | après DC1 + DC2 |
+| DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | en pause (branche feat/densite-dc3, ../gp-dc3) |
 | DC4 | Affichage : niveaux de détail des marqueurs, désencombrement des étiquettes (O(n²)), maquettes proches, captures | 2 | fait, fusionné |
 | DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | |
 
@@ -52,8 +52,13 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 
 - 26/09 : DC1 fusionné (main inclus, fine_anchors/towns régénérés sur le nouveau relief, 159aff80) ; DC3 lancé ; DC4 fusionné (848fff43 : 0 chevauchement d'étiquettes, désencombrement en grille, captures docs/img/dc4/).
 
-## Prochaine étape
-Attendre DC3 (../gp-dc3), le fusionner, puis DC5 : `touch` des .rs avant build (dylib périmée avec la cible partagée, vu en DC4), build.sh, smoke, cargo test, pytest, ff dans main.
+## Prochaine étape (pause du 26/09, à reprendre dans une autre session)
+1. Relancer un agent DC3 dans `../gp-dc3` (branche `feat/densite-dc3`) : sa section « DC3 » y liste
+   ce qui est fait (économie réglée, Angleterre lève de nouveau) et les 6 points restants.
+2. Fusionner DC3 dans `feat/densite`.
+3. DC5 recette : `find core/crates -name '*.rs' -exec touch {} +` puis build.sh (dylib périmée avec
+   la cible partagée, vu en DC4), import + smoke Godot, cargo test, pytest ; `git merge main` ; ff dans main.
+4. Supprimer les worktrees `../gp-densite`, `../gp-dc3`, `../gp-dc3-main`, `../gp-dc3-dc1`.
 
 ## DC1 — mouvement ralenti (worktree `../gp-dc1`, branche `feat/densite-dc1`)
 État : fait, `main` fusionné (2d33df5a), fmt + clippy + 546 tests (data-model, sim-campaign, ai) verts, pytest codex et colonies verts. À fusionner dans `feat/densite`. `points_per_step` 140 → 70 (rules.json + défaut Rust) ; description de
