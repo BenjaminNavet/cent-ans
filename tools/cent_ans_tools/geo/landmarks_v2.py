@@ -49,9 +49,7 @@ def lonlat_to_local(
 ) -> np.ndarray:
     """WGS84 degrees to local offsets ``[dE, dN]`` (m) from ``origin`` (EPSG:3035)."""
     e, n = _to_3035.transform(np.asarray(lon), np.asarray(lat))
-    return np.column_stack(
-        [np.atleast_1d(e) - origin[0], np.atleast_1d(n) - origin[1]]
-    )
+    return np.column_stack([np.atleast_1d(e) - origin[0], np.atleast_1d(n) - origin[1]])
 
 
 def local_to_lonlat(points: np.ndarray, origin: list[float]) -> np.ndarray:
@@ -61,7 +59,9 @@ def local_to_lonlat(points: np.ndarray, origin: list[float]) -> np.ndarray:
     return np.column_stack([lon, lat])
 
 
-def local_to_units(points: np.ndarray, origin: list[float], bounds: list[float]) -> np.ndarray:
+def local_to_units(
+    points: np.ndarray, origin: list[float], bounds: list[float]
+) -> np.ndarray:
     """Local offsets to map world units (4096 px grid, +y southwards)."""
     mpp = (bounds[2] - bounds[0]) / 4096.0
     points = np.asarray(points, dtype=np.float64).reshape(-1, 2)
@@ -89,7 +89,9 @@ def fetch_osm(city: dict, raw_dir: Path = RAW_OSM_DIR, refresh: bool = False) ->
     import httpx
 
     lon0, lat0, lon1, lat1 = city["osm_streets"]["bbox_lonlat"]
-    query = f'[out:json][timeout:90];way["highway"]({lat0},{lon0},{lat1},{lon1});out geom;'
+    query = (
+        f'[out:json][timeout:90];way["highway"]({lat0},{lon0},{lat1},{lon1});out geom;'
+    )
     response = httpx.post(
         OVERPASS_URL,
         data={"data": query},
@@ -155,7 +157,10 @@ def osm_streets(city: dict, osm: dict) -> list[dict]:
         tags = element.get("tags", {})
         if tags.get("highway") not in highways or tags.get("area") == "yes":
             continue
-        if tags.get("tunnel") in ("yes", "building_passage") or tags.get("bridge") == "yes":
+        if (
+            tags.get("tunnel") in ("yes", "building_passage")
+            or tags.get("bridge") == "yes"
+        ):
             continue
         name = tags.get("name", "")
         if name in excluded or (not name and not keep_unnamed):
@@ -168,8 +173,14 @@ def osm_streets(city: dict, osm: dict) -> list[dict]:
         )
         clipped = LineString(local).intersection(area)
         parts = getattr(clipped, "geoms", [clipped])
-        rank = "main" if name in main else ("lane" if (name in lanes or not name) else "secondary")
-        width = float(widths.get(rank, {"main": 8.0, "secondary": 5.0, "lane": 3.0}[rank]))
+        rank = (
+            "main"
+            if name in main
+            else ("lane" if (name in lanes or not name) else "secondary")
+        )
+        width = float(
+            widths.get(rank, {"main": 8.0, "secondary": 5.0, "lane": 3.0}[rank])
+        )
         for k, part in enumerate(parts):
             if part.is_empty or part.geom_type != "LineString" or part.length < 12.0:
                 continue
@@ -181,10 +192,18 @@ def osm_streets(city: dict, osm: dict) -> list[dict]:
                     "rank": rank,
                     "width_m": width,
                     "origin": "osm",
-                    "points": [[round(float(x), 1), round(float(y), 1)] for x, y in coords],
+                    "points": [
+                        [round(float(x), 1), round(float(y), 1)] for x, y in coords
+                    ],
                 }
             )
-    streets.sort(key=lambda s: ({"main": 0, "secondary": 1, "lane": 2}[s["rank"]], s["name"], s["id"]))
+    streets.sort(
+        key=lambda s: (
+            {"main": 0, "secondary": 1, "lane": 2}[s["rank"]],
+            s["name"],
+            s["id"],
+        )
+    )
     return streets
 
 
@@ -204,9 +223,13 @@ def fine_river_lines(
     features = json.loads(features_path.read_text(encoding="utf-8"))["features"]
     targets = {hydro_fine.normalise_name(n) for n in names}
     wanted = {
-        i for i, f in enumerate(features) if hydro_fine.normalise_name(f["name"]) in targets
+        i
+        for i, f in enumerate(features)
+        if hydro_fine.normalise_name(f["name"]) in targets
     }
-    bounds = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))["bounds_projected"]
+    bounds = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))[
+        "bounds_projected"
+    ]
     mpp = (bounds[2] - bounds[0]) / 4096.0
     origin = city["origin_3035"]
     reach = float(city["extent_m"]) + 400.0
@@ -214,8 +237,12 @@ def fine_river_lines(
     side = fine_tiles.tile_units(fine_tiles.TILE_LEVEL)
     r_units = reach / mpp
     lines = []
-    for col in range(int((center[0] - r_units) // side), int((center[0] + r_units) // side) + 1):
-        for row in range(int((center[1] - r_units) // side), int((center[1] + r_units) // side) + 1):
+    for col in range(
+        int((center[0] - r_units) // side), int((center[0] + r_units) // side) + 1
+    ):
+        for row in range(
+            int((center[1] - r_units) // side), int((center[1] + r_units) // side) + 1
+        ):
             path = tiles_dir / f"E{fine_tiles.TILE_LEVEL}" / f"{col}_{row}.bin"
             if not path.exists():
                 continue
@@ -224,14 +251,19 @@ def fine_river_lines(
                     continue
                 xy = np.asarray(line["xy"], dtype=np.float64)
                 local = np.column_stack(
-                    [bounds[0] + xy[:, 0] * mpp - origin[0], bounds[3] - xy[:, 1] * mpp - origin[1]]
+                    [
+                        bounds[0] + xy[:, 0] * mpp - origin[0],
+                        bounds[3] - xy[:, 1] * mpp - origin[1],
+                    ]
                 )
                 inside = np.hypot(local[:, 0], local[:, 1]) <= reach
                 if inside.sum() < 2:
                     continue
                 lines.append(
                     {
-                        "name": hydro_fine.normalise_name(features[line["feature"]]["name"]).title(),
+                        "name": hydro_fine.normalise_name(
+                            features[line["feature"]]["name"]
+                        ).title(),
                         "points": local[inside],
                         "width": np.asarray(line["w"], dtype=np.float64)[inside],
                     }
@@ -261,7 +293,9 @@ def chain_lines(lines: list[dict], join_m: float = 30.0) -> list[dict]:
     return pieces
 
 
-def fine_waters(city: dict, map_dir: Path = MAP_DIR, step_m: float = 40.0) -> list[dict]:
+def fine_waters(
+    city: dict, map_dir: Path = MAP_DIR, step_m: float = 40.0
+) -> list[dict]:
     """``waters`` entries (origin ``rivers_fine``) for the rivers the fine map draws."""
     names = tuple(city.get("fine_rivers", ["Seine"]))
     out = []
@@ -317,7 +351,9 @@ class LandmarksResult:
 def write_city(path: Path, city: dict) -> None:
     """Write a v2 file (indented, stable key order as authored)."""
     tmp = path.with_suffix(".part")
-    tmp.write_text(json.dumps(city, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    tmp.write_text(
+        json.dumps(city, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
     tmp.replace(path)
 
 
@@ -339,7 +375,9 @@ def build(
         if "osm_streets" in city:
             osm = fetch_osm(city, raw_dir, refresh_osm)
             generated = osm_streets(city, osm)
-            city["streets"] = [s for s in city["streets"] if s["origin"] != "osm"] + generated
+            city["streets"] = [
+                s for s in city["streets"] if s["origin"] != "osm"
+            ] + generated
             n_streets += len(generated)
         waters = fine_waters(city, map_dir)
         if waters:
@@ -348,10 +386,14 @@ def build(
             ] + waters
             n_waters += len(waters)
         else:
-            log(f"{city['id']} : aucun fleuve fin trouvé (pyramide absente ?), section gardée")
+            log(
+                f"{city['id']} : aucun fleuve fin trouvé (pyramide absente ?), section gardée"
+            )
         write_city(path, city)
         done.append(city["id"])
-        log(f"{city['id']} : {len(city['streets'])} rues, {len(city.get('waters', []))} eaux")
+        log(
+            f"{city['id']} : {len(city['streets'])} rues, {len(city.get('waters', []))} eaux"
+        )
     return LandmarksResult(done, n_streets, n_waters, time.time() - started)
 
 

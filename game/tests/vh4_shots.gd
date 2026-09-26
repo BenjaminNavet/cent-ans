@@ -7,7 +7,7 @@ extends SceneTree
 ## Fenêtre réelle (pas headless) :
 ##   godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> [--only=a,b] [--no-fps]
 ##   [--no-landmarks-1to1] (rendu d'avant VH4 : maquette et plancher ZG4b)
-## JPEG ≤ 1280 px, `rouen_<vue>.jpg`.
+## JPEG ≤ 960 px, `rouen_<vue>.jpg`.
 
 const ROUEN := Vector2(2096.54, 1819.88)
 const AMIENS := Vector2(2224.0, 1763.6)
@@ -66,8 +66,8 @@ func _init() -> void:
 		for i in 4:
 			await process_frame
 		var image := root.get_viewport().get_texture().get_image()
-		if image.get_width() > 1280:
-			image.resize(1280, roundi(image.get_height() * 1280.0 / image.get_width()), Image.INTERPOLATE_LANCZOS)
+		if image.get_width() > 960:
+			image.resize(960, roundi(image.get_height() * 960.0 / image.get_width()), Image.INTERPOLATE_LANCZOS)
 		var path := out_dir.path_join("rouen_%s.jpg" % shot[0])
 		image.save_jpg(path, 0.85)
 		var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
