@@ -76,3 +76,52 @@ libres uniquement), moins de 80 Mo ajoutés, aucune ligne de jeu codée en dur.
   (`entry is Array`) si un autre lot en dépendait encore au moment du merge.
 - Limite connue : pas d'écoute humaine des niveaux (session sans sortie audio) ; à affiner à
   l'oreille comme le signalait déjà AU1.
+
+## DA7a — vrais enregistrements libres d'Ars nova (2026-09-26)
+
+Complément sans nouvel ADR (suivi `docs/wip/da7a-ars-nova.md`). But : remplacer en tête de
+playlist les rendus MIDI d'Ars nova (Machaut, Solage, Landini, Binchois) par des interprétations
+réelles sous licence libre, le MIDI restant en `fallback`.
+
+**Trouvé et retenu** (licence relue sur la page Commons de chaque fichier, via l'API) :
+
+- Bande de concert du **Studio der frühen Musik** (Thomas Binkley, Andrea von Ramm, Nigel Rogers,
+  Sterling Jones), Stockholm, 23 octobre 1963, numérisée et versée sur Commons par Musikverket
+  (Svenskt visarkiv) en **domaine public** (`{{PD-old}}` ; enregistrement non publié, droits
+  voisins suédois de 50 ans échus). Copie d'écoute montée, sans annonces : 10 plages séparées par
+  ~15 s de silence numérique, découpées par `silencedetect` et attribuées dans l'ordre du
+  programme de la page (10 pièces). Retenues : Jacopo da Bologna « Fenice fu » et un Saltarello
+  (Italie), « Onques ne fut », « Souvent souspire », Pierrekin de la Coupele, « Hé Robinet »
+  (France), Binchois et Dufay « Adieu m'amour » (Bourgogne), « Bryd one brere » (Angleterre).
+- « Bel fiore dança » (codex de Faenza), Francesco Ariis au clavier, **CC BY 4.0** (Italie).
+
+10 pistes, ~20 Mo, OGG Vorbis q5, `loudnorm` -16 LUFS (mesuré -14,3 à -16,5 LUFS), pipeline
+reproductible `tools/cent_ans_tools/ars_nova.py` (écrit aussi `SOURCE.md` et les `.import`
+Godot). Crédits : `game/assets/third_party/music/ars_nova/SOURCE.md`, `CREDITS.md`. Placement
+(`data/audio/music.json`, en tête de `primary`) : `campaign_france` (4), `campaign_italy` (3),
+`campaign_burgundy` (2), `campaign_england` (1), `court` (3), `menu` (1), `campaign` (2).
+Test `tools/tests/test_ars_nova_recordings.py` : France et Italie ont au moins un enregistrement
+réel DA7a en `primary`, aucun rendu MIDI en `primary`, et chaque piste tierce déclare une
+licence autorisée (domaine public, CC0, CC BY, CC BY-SA ; NC/ND refusés).
+
+**Écarté** :
+
+- Commons : Machaut, Landini, Solage, Vitry, Senleches, Ciconia, Dunstable, Power n'ont que des
+  réalisations MIDI (Tetraktys, Future Perfect…) ou des extraits de 15-30 s sans source claire
+  (« Je ne cuit pas qu'onques », « Le harpe de melodie »).
+- Commons, concert d'orgue de **Gotthard Arnér** (1966, Musikverket, domaine public) : contient
+  la ballata de Landini « Angelica biltà » et le *Lamento di Tristano*, mais la bande (15 plages
+  pour 11 titres, dont une partie très faible) ne peut pas être associée au programme sans
+  écoute ; non utilisée pour ne pas mal attribuer. Piste de suite la plus prometteuse.
+- archive.org : « ProyectoMachaut » (CC BY-NC-SA), « Kyrie/Credo » Nielrow et Ensemble Le Remède
+  de Fortune (BY-NC-ND), STRANG (BY-NC-SA) — NC/ND interdits. « Messe de Nostre Dame » marquée
+  domaine public par l'uploader (interprètes inconnus, LP des années 1950 : statut aux États-Unis
+  douteux) et « Srednjeveške ljubezenske pesmi » (netlabel Vanzemlja, CC0, interprète non
+  identifié, pas de métadonnées) : licence non vérifiable, écartés. « Missa de Barcelona »
+  (Atrium Musicae, disque commercial marqué PD) : écarté.
+- Free Music Archive : Gregor Quendel « Douce Dame Jolie » (BY-NC-ND). Musopen : pas de
+  répertoire médiéval.
+
+**Manques** : aucun enregistrement réel libre de Machaut, Landini (hors bande Arnér), Solage ni
+de la *Messe de Nostre Dame* : ces titres restent en MIDI (`fallback`). Pas d'écoute humaine :
+l'attribution titre ↔ plage de la bande de 1963 et les niveaux sont à confirmer à l'oreille.
