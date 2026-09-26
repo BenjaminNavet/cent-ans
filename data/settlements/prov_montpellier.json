@@ -42,18 +42,18 @@
     "sources": ["Abbaye de Valmagne"]
   },
   {
-    "id": "set_castelnau_le_lez",
+    "id": "set_mauguio",
     "province": "prov_montpellier",
     "kind": "village",
-    "name": { "display": "Castelnau-le-Lez", "local": "Castèlnòu", "local_language": "occitan" },
-    "lonlat": [3.9000, 43.6167],
+    "name": { "display": "Mauguio", "local": "Mauguiò", "local_language": "occitan" },
+    "lonlat": [4.0083, 43.6169],
     "weight": 6,
     "owner": null,
-    "fortification_level": 0,
+    "fortification_level": 1,
     "buildings": ["bld_parish_church"],
     "port": false,
-    "description": "Bourg agricole sur le Lez, à l'est de Montpellier.",
-    "sources": ["Castelnau-le-Lez"]
+    "description": "Ancienne cité de Melgueil, siège du comté du même nom (droit de frappe monétaire réputé) réuni à la seigneurie de Montpellier.",
+    "sources": ["Mauguio", "Comté de Melgueil"]
   },
   {
     "id": "set_aumelas",

@@ -288,5 +288,31 @@
     "sources": [
       "Doetinchem"
     ]
+  },
+  {
+    "id": "set_marienweerd",
+    "province": "prov_gueldre",
+    "kind": "abbey",
+    "name": {
+      "display": "Mariënweerd",
+      "local": "Marienweerde",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.2833,
+      51.9
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye prémontrée sur un îlot du Linge près de Beesd, riche propriétaire terrienne de la Betuwe gueldroise.",
+    "sources": [
+      "Mariënweerd"
+    ]
   }
 ]

@@ -164,6 +164,31 @@
     ]
   },
   {
+    "id": "set_suscinio",
+    "province": "prov_bretagne",
+    "kind": "castle",
+    "name": {
+      "display": "Suscinio",
+      "local": "Susinioù",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -2.75,
+      47.5167
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château ducal de chasse sur la presqu'île de Rhuys, près de Vannes.",
+    "sources": [
+      "Château de Suscinio"
+    ]
+  },
+  {
     "id": "set_dinan",
     "province": "prov_bretagne",
     "kind": "town",
