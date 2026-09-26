@@ -72,7 +72,7 @@ pub struct PeaceRules {
     /// peace every season, whatever the war score (0: never).
     pub cornered_provinces: usize,
     /// EQ6: a cornered crown sues before `min_war_turns` only once this
-    /// war goes against it (war score below 0): it does not buy its peace
+    /// war has beaten it (war score at or below `SURRENDER_WAR_SCORE`, -25): it does not buy its peace
     /// on the very season war is declared. `false`: at once (pre-EQ6).
     #[serde(default)]
     pub cornered_waits_for_defeat: bool,
