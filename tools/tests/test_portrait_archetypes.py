@@ -60,9 +60,9 @@ def test_references_are_consistent() -> None:
 
 
 def test_bank_size_and_unique_keys() -> None:
-    """About 100-140 archetypes (lot spec), all distinct."""
+    """About 100-220 archetypes (lot spec + crowded-cell faces), all distinct."""
     specs = portrait_archetypes.iter_archetypes(_config())
-    assert 100 <= len(specs) <= 140
+    assert 100 <= len(specs) <= 220
     assert len({spec.key for spec in specs}) == len(specs)
 
 
