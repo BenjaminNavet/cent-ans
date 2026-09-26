@@ -374,3 +374,28 @@ fn report(replay: BattleReplay) {
         player.divergence()
     );
 }
+
+/// Sample replay file, validated by `tools/tests/test_battle_replay_schema.py`.
+const SAMPLE: &str = "tests/fixtures/replay_sample.json";
+
+/// Rewrites the sample (after a deliberate format change, with
+/// `REPLAY_FORMAT` bumped): `cargo test -p sim-battle --test ep13_replay
+/// write_sample -- --ignored`.
+#[test]
+#[ignore]
+fn write_sample() {
+    let (_, replay) = record_demo(1337);
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(SAMPLE);
+    std::fs::write(path, serde_json::to_string_pretty(&replay).unwrap()).unwrap();
+}
+
+/// A file written by an earlier build still reads: changing the structure
+/// of a replay without bumping `REPLAY_FORMAT` breaks this test.
+#[test]
+fn the_sample_file_still_reads() {
+    let replay = BattleReplay::from_json(include_str!("fixtures/replay_sample.json"))
+        .expect("the replay format changed: bump REPLAY_FORMAT and rewrite the sample");
+    assert_eq!(replay.header.format, sim_battle::replay::REPLAY_FORMAT);
+    let (player, sim) = ReplayPlayer::load(replay).expect("the sample battle rebuilds");
+    assert!(sim.ticks() == 0 && player.duration() > 0.0);
+}
