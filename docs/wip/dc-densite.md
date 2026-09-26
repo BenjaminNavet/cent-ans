@@ -32,7 +32,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 | DC2d | Colonies Pays-Bas (11), Empire rhénan (9), reste de l'Empire et Scandinavie (7) | 1 | à lancer |
 | DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | fait |
 | DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | après DC1 + DC2 |
-| DC4 | Affichage : niveaux de détail des marqueurs, désencombrement des étiquettes (O(n²)), maquettes proches, captures | 2 | lancé (../gp-dc4) |
+| DC4 | Affichage : niveaux de détail des marqueurs, désencombrement des étiquettes (O(n²)), maquettes proches, captures | 2 | fait, fusionné |
 | DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | |
 
 ## Journal
@@ -50,9 +50,11 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
   `settlement_check` et `pytest tools/tests/test_settlements_schema.py` verts sur les 35 provinces.
 - 26/09 : DC2 fusionné : 1 192 colonies (city 132, town 407, village 291, abbey 189, castle 173). Régénéré : graphe (2 987 arêtes), positions, fine_anchors, hameaux, towns_1340 (1 185). À surveiller DC3 : +66 châteaux (entretien) ; côte est du Sussex dans le polygone du Kent. DC4 lancé.
 
+- 26/09 : DC1 fusionné (main inclus, fine_anchors/towns régénérés sur le nouveau relief, 159aff80) ; DC3 lancé ; DC4 fusionné (848fff43 : 0 chevauchement d'étiquettes, désencombrement en grille, captures docs/img/dc4/).
+
 ## Prochaine étape
-Attendre DC1, le fusionner, puis lancer DC3 (équilibrage) ; fusionner DC4.
-Lancer la vague 1 (DC1 + DC2a-e, 6 agents).
+Attendre DC3 (../gp-dc3), le fusionner, puis DC5 : `touch` des .rs avant build (dylib périmée avec la cible partagée, vu en DC4), build.sh, smoke, cargo test, pytest, ff dans main.
+
 ## DC1 — mouvement ralenti (worktree `../gp-dc1`, branche `feat/densite-dc1`)
 État : fait, `main` fusionné (2d33df5a), fmt + clippy + 546 tests (data-model, sim-campaign, ai) verts, pytest codex et colonies verts. À fusionner dans `feat/densite`. `points_per_step` 140 → 70 (rules.json + défaut Rust) ; description de
 rules.json ; codex (mouvement, saisons, déroute, agents) ; tests `campaign.rs`, `m2_free_movement.rs`,
