@@ -145,7 +145,8 @@ pub struct BattleSim {
     scale: BattleScale,
     /// EP5: rules of the standards, their own random stream, the routs
     /// already seen and the standards taken so far.
-    standard_rules: data_model::BattleStandardRules,
+    /// Shared: cloned cheaply by each step of the standards.
+    standard_rules: std::sync::Arc<data_model::BattleStandardRules>,
     /// EP11: continuous push of the lines (`data/rules/battle_push.json`).
     push_rules: crate::push::PushRules,
     standard_rng: BattleRng,
@@ -396,7 +397,7 @@ impl BattleSim {
         ];
         let count = units.len();
         let standard_rng = rng.derive(standards::STANDARD_SALT);
-        let standard_rules = setup.standards.clone().unwrap_or_default();
+        let standard_rules = std::sync::Arc::new(setup.standards.clone().unwrap_or_default());
         let mut sim = BattleSim {
             setup,
             field,
@@ -2698,13 +2699,14 @@ impl BattleSim {
                 )
             })
             .collect();
-        let mut new_events: Vec<(String, SideId)> = Vec::new();
+        // Rout and rally events, worded after the loop (the labels are only
+        // formatted for the few regiments concerned).
+        let mut new_events: Vec<(usize, &'static str)> = Vec::new();
         let siege = self.siege.is_some();
         for i in 0..n {
             if !self.units[i].present() {
                 continue;
             }
-            let label = self.unit_label(i);
             let unit = &mut self.units[i];
             let mut morale = unit.morale;
             // Behind battlements the garrison takes its losses more calmly.
@@ -2814,9 +2816,9 @@ impl BattleSim {
                 unit.climbing = None;
                 unit.climb_progress = 0.0;
                 if std::mem::take(&mut unit.on_wall) {
-                    new_events.push((format!("Les {label} abandonnent le rempart !"), unit.side));
+                    new_events.push((i, "abandonnent le rempart !"));
                 }
-                new_events.push((format!("Les {label} sont en déroute !"), unit.side));
+                new_events.push((i, "sont en déroute !"));
             } else if unit.state == UnitState::Routing
                 && unit.morale > RALLY_MORALE
                 && nearest_enemy > RALLY_SAFE_DISTANCE
@@ -2824,10 +2826,12 @@ impl BattleSim {
             {
                 unit.state = UnitState::Rallied;
                 unit.rally_timer = RALLY_PAUSE;
-                new_events.push((format!("Les {label} se rallient."), unit.side));
+                new_events.push((i, "se rallient."));
             }
         }
-        for (text, side) in new_events {
+        for (i, what) in new_events {
+            let text = format!("Les {} {what}", self.unit_label(i));
+            let side = self.units[i].side;
             self.log(text, Some(side));
         }
     }

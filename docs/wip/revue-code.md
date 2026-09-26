@@ -33,7 +33,7 @@ Branche `fix/code-review`, scope `core/crates/sim-battle` seulement. Tests de r�
 Build : profil cargo isolé `review` (voir « Points ouverts ») dans le dossier target partagé.
 Référence d'équilibre avant correctifs (sondages ignorés) : ep7 `survey_all` Crécy 25/30,
 Azincourt 28/30, Poitiers 20/30 ; ep9b `survey` attaquant 4/10.
-Prochaine étape : constat 6.
+Prochaine étape : constat 7.
 
 | n° | statut | commit | note |
 |----|--------|--------|------|
@@ -41,7 +41,8 @@ Prochaine étape : constat 6.
 | 2 | corrigé | b514f5b1 | avec une cible ordonnée, arrêt à portée seulement si elle est visible (`visible`) ; sinon on s'approche. `pick_shooting_target` : cible ordonnée intirable + tir à volonté → balayage du plus proche tirable. |
 | 3 | corrigé | 2ed1b26a | en siège, `Withdraw` suit `grid_route` (A* rues/brèches) ; pas `route()` : sa branche échelles renvoie la ligne droite pour un assaillant, or on ne grimpe pas en se retirant. Sur le chemin de ronde : inchangé (tout droit vers l'intérieur). Hors siège : inchangé. |
 | 4 | corrigé | a7013d12 | `Battlefield::clamp_inside` + `ai::FIELD_MARGIN` (10 m, comme `View::move_to`) : dégagement sur pieux et retrait des saignés (`react`), repli des tireurs (~1799, non cité mais même défaut), second flanc de `coordinate_flanks`. Effet : ces ordres, auparavant refusés près du bord, s'exécutent. |
-| 5 | corrigé | (ce commit) | `primary_opponent` ignore les contacts morts depuis le calcul des contacts (tirs, feu, huile) ; le coup va à un ennemi vivant au contact au lieu d'être perdu. |
+| 5 | corrigé | a2e13448 | `primary_opponent` ignore les contacts morts depuis le calcul des contacts (tirs, feu, huile) ; le coup va à un ennemi vivant au contact au lieu d'être perdu. |
+| 6 | corrigé | (ce commit) | perf, comportement identique : libellés de déroute/ralliement formatés après la boucle pour les seuls régiments concernés ; `standard_rules` en `Arc` (clone = compteur) ; `faction_name` du camp cloné seulement à l'alarme ou au pillage. Pas de nouveau test (messages couverts par battle.rs, ep10_rout.rs). |
 
 ## Corrections tools
 
