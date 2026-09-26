@@ -1509,10 +1509,11 @@ réelle au zoom rapproché ; format, outil et moteur : **`docs/landmarks-v2.md`*
 - Captures `docs/img/vh4/` (`rouen_strategique`, `rouen_transition`, `rouen_vallee`,
   `rouen_site`, `rouen_site_ouest`, `rouen_toits`, `rouen_pont`, `rouen_chateau`) :
   `godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear`.
-- Mesure (machine chargée, charge moyenne ≈ 100 sur 14 cœurs, autres agents actifs) : 28 i/s au-
-  dessus de Rouen à d = 1,6 et 27 i/s à d = 0,6, contre 23 et 25 i/s au-dessus d'Amiens (ville
-  ordinaire ZG6) dans la même session : pas de régression par rapport à une ville ordinaire ;
-  l'objectif de 60 i/s est à remesurer sur machine au repos.
+- Mesure (`vh4_shots.gd`, 4 s par point, machine chargée : charge moyenne ≈ 100-110 sur 14 cœurs,
+  autres agents actifs ; après fusion de SZ2/SZ4) : **55 i/s au-dessus de Rouen à d = 1,6 et 56 i/s
+  à d = 0,6** (pire image 33-34 ms), contre 60 et 46 i/s au-dessus d'Amiens (ville ordinaire ZG6)
+  dans la même session : pas de régression par rapport à une ville ordinaire ; un premier passage,
+  plus chargé, donnait 27-28 i/s (Rouen) contre 23-25 (Amiens). 60 i/s à confirmer au repos.
 - Tests : `res://tests/vh4_landmarks_test.gd` (headless), `tools/tests/test_landmarks_v2.py`.
 
 ## Interface des colonies (lot C5)
