@@ -507,10 +507,11 @@ func height01_px(px: int, py: int) -> float:
 	return float(height_bytes[offset]) / 255.0
 
 
-## Altitude en mètres, interpolée bilinéairement en coordonnées carte.
+## Altitude en mètres, interpolée bilinéairement en coordonnées carte (SZ2b, ADR 0086 : le
+## pixel i de la heightmap couvre [i, i + 1], centré en x = i + 0,5, comme dans les outils).
 func height_m_at(x: float, y: float) -> float:
-	var fx := clampf(x, 0.0, size.x - 1.0)
-	var fy := clampf(y, 0.0, size.y - 1.0)
+	var fx := clampf(x - 0.5, 0.0, size.x - 1.0)
+	var fy := clampf(y - 0.5, 0.0, size.y - 1.0)
 	var x0 := int(fx)
 	var y0 := int(fy)
 	var tx := fx - x0
