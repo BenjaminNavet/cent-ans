@@ -237,6 +237,23 @@ func has_tile(level: int, col: int, row: int) -> bool:
 	return _tiles[level].has(row * cols + col)
 
 
+## PB3g : indices `row × tiles_per_side + col` des tuiles de l'étage (pour `ReliefLod`).
+func tile_indices(level: int) -> PackedInt32Array:
+	var out := PackedInt32Array()
+	if level >= 0 and level < _tiles.size():
+		for index: int in _tiles[level]:
+			out.append(index)
+	return out
+
+
+## PB3g : clés des tuiles marquées illisibles.
+func broken_keys() -> PackedInt64Array:
+	var out := PackedInt64Array()
+	for key: int in _broken:
+		out.append(key)
+	return out
+
+
 ## Marque une tuile illisible (fichier absent ou corrompu) : `has_tile` devient faux.
 func mark_broken(level: int, col: int, row: int) -> void:
 	_broken[key_of(level, col, row)] = true

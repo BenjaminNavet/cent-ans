@@ -777,12 +777,33 @@ func _update_hamlet_scale(camera_distance: float) -> void:
 ## réelle, emprise de quelques dizaines de mètres) et le point le plus bas de l'emprise de carte
 ## (taille de carte, rien ne flotte sur une pente), au prorata de l'échelle.
 func _write_hamlet_transforms(multimesh: MultiMesh, entries: Array) -> void:
-	var s := _hamlet_scale
+	multimesh.buffer = hamlet_buffer(entries, _hamlet_scale)
+
+
+## PB3g : tampon `MultiMesh.buffer` des hameaux, écrit en une fois (disposition de
+## `set_instance_transform` : chaque ligne de la base suivie de la composante de l'origine) au
+## lieu d'un appel au serveur de rendu par instance.
+static func hamlet_buffer(entries: Array, s: float) -> PackedFloat32Array:
+	var buffer := PackedFloat32Array()
+	buffer.resize(entries.size() * 12)
 	for t in entries.size():
 		var e: PackedFloat32Array = entries[t]
 		var basis := Basis(Vector3.UP, e[2]).scaled(Vector3.ONE * (e[3] * s))
 		var y := lerpf(e[4], e[5], s) - 0.03 * s
-		multimesh.set_instance_transform(t, Transform3D(basis, Vector3(e[0], y, e[1])))
+		var o := t * 12
+		buffer[o] = basis.x.x
+		buffer[o + 1] = basis.y.x
+		buffer[o + 2] = basis.z.x
+		buffer[o + 3] = e[0]
+		buffer[o + 4] = basis.x.y
+		buffer[o + 5] = basis.y.y
+		buffer[o + 6] = basis.z.y
+		buffer[o + 7] = y
+		buffer[o + 8] = basis.x.z
+		buffer[o + 9] = basis.y.z
+		buffer[o + 10] = basis.z.z
+		buffer[o + 11] = e[1]
+	return buffer
 
 func _update_hamlets() -> void:
 	var show := _weights.x > 0.35
@@ -845,6 +866,9 @@ func _build_hamlets(index: int) -> void:
 		return
 	# Groupes : (variante, brûlé) → transformations.
 	var groups := {}
+	# PB3g : hauteurs (centre + 4 points de l'emprise) en un seul appel groupé.
+	var pending: Array = []
+	var points := PackedVector2Array()
 	for h in _hamlets_by_chunk[index]:
 		var hamlet: Dictionary = data.hamlets[h]
 		var px: Vector2 = hamlet["px"]
@@ -858,15 +882,23 @@ func _build_hamlets(index: int) -> void:
 		var key := variant * 2 + (1 if burned else 0)
 		var yaw := float((seed_value / 13) % 628) / 100.0
 		var scale := ModelLibrary.HAMLET_SCALE * (0.85 + float((seed_value / 17) % 30) / 100.0)
-		var center := terrain.surface_height_at(px.x, px.y)
-		var low := center
+		points.append(px)
 		for k in 4:
 			var angle := k * TAU / 4.0 + yaw
-			low = minf(low, terrain.surface_height_at(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
+			points.append(Vector2(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
+		pending.append([key, px, yaw, scale])
+	var heights := terrain.surface_heights_at(points)
+	for p in pending.size():
+		var key: int = pending[p][0]
+		var px: Vector2 = pending[p][1]
+		var center := heights[p * 5]
+		var low := center
+		for k in range(1, 5):
+			low = minf(low, heights[p * 5 + k])
 		if not groups.has(key):
 			groups[key] = []
 		# SZ4 : (x, z, lacet, échelle de carte, sol au centre, sol le plus bas de l'emprise de carte).
-		groups[key].append(PackedFloat32Array([px.x, px.y, yaw, scale, center, low]))
+		groups[key].append(PackedFloat32Array([px.x, px.y, pending[p][2], pending[p][3], center, low]))
 	for key in groups:
 		var entries: Array = groups[key]
 		var multimesh := MultiMesh.new()
