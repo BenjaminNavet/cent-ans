@@ -97,9 +97,119 @@ struct Report {
     refused: u32,
     /// EQ4: combined balance measures.
     eq4: Eq4,
+    /// EQ6: peace turns per England war blocker (`BLOCKERS`).
+    blockers: Vec<u32>,
+    /// EQ6: France-England wars opened by England / by France.
+    declared_by_england: u32,
+    declared_by_france: u32,
     /// UR2: whether each of `CENTURY_15` was ever seen in an army or a garrison (any faction).
     recruited_15th: Vec<bool>,
     seconds: f64,
+}
+
+/// EQ6: why England, at peace with France, does not declare war (one count
+/// per peace turn and blocker; `free` when nothing in the claim-war gate
+/// blocks it).
+const BLOCKERS: &[&str] = &[
+    "truce", "rest", "regency", "captive", "treasury", "weary", "front", "ratio", "attitude",
+    "free",
+];
+
+/// EQ6: the gates of `war_target` / `plan_diplomacy` England fails against
+/// France this turn (a mirror of `sim_campaign::diplomacy`).
+fn war_blockers(
+    state: &CampaignState,
+    data: &GameData,
+    england: &FactionId,
+    france: &FactionId,
+) -> Vec<&'static str> {
+    use sim_campaign::diplomacy::{PRETENDER_AGGRESSION, WAR_REST_TURNS};
+    let me = &state.factions[england];
+    let mut out = Vec::new();
+    if state.has_truce(england, france) {
+        out.push("truce");
+    }
+    if me
+        .last_war_declared
+        .is_some_and(|t| t + WAR_REST_TURNS > state.turn)
+    {
+        out.push("rest");
+    }
+    if me.regency {
+        out.push("regency");
+    }
+    if me
+        .ruler
+        .as_ref()
+        .and_then(|r| state.characters.get(r))
+        .is_some_and(|r| r.captive)
+    {
+        out.push("captive");
+    }
+    if me.treasury <= 0 || me.treasury < me.upkeep_last_turn.max(0) {
+        out.push("treasury");
+    }
+    let most = data.ai_diplomacy.negotiation.max_weariness_to_declare;
+    if me.ledger.weariness > most + 20 {
+        out.push("weary");
+    }
+    let pressing: f64 = me
+        .at_war_with
+        .iter()
+        .filter(|e| e.as_str() != "fac_rebels")
+        .filter(|e| {
+            state.are_neighbors(data, england, e)
+                || state.provinces.keys().any(|id| {
+                    state.province_owner(id) == Some(england) && state.controls_province(e, id)
+                })
+        })
+        .map(|e| state.faction_power(e))
+        .sum();
+    if pressing > data.ai_diplomacy.war.front_share * 2.0 * state.faction_power(england) {
+        out.push("front");
+    }
+    let aggression = data
+        .factions
+        .get(england)
+        .and_then(|f| f.ai_personality.as_ref())
+        .and_then(|p| p.aggression)
+        .map_or(50, i32::from);
+    let has_allies = me
+        .allies
+        .iter()
+        .any(|a| state.factions.get(a).is_some_and(|f| f.alive));
+    let supported = has_allies || state.are_neighbors(data, england, france);
+    let rules = &data.ai_diplomacy.war;
+    let needed = state.difficulty_war_ratio_factor(data, france)
+        * if supported {
+            rules.pretender_ratio
+        } else {
+            rules.pretender_ratio_alone
+        };
+    let ratio = state.coalition_power(england) / state.faction_power(france).max(1.0);
+    if aggression < PRETENDER_AGGRESSION || ratio < needed {
+        out.push("ratio");
+    }
+    let attitude = state.attitude(data, england, france);
+    if attitude.0 >= 20 {
+        out.push("attitude");
+    }
+    // `WAR_TRACE=1`: England's reasons and gates every 5 years of peace.
+    if std::env::var("WAR_TRACE").is_ok() && state.turn.is_multiple_of(20) {
+        println!(
+            "  t{} {} ratio {ratio:.2} (needed {needed:.2}) weariness {} treasury {} upkeep {} attitude {:?} blockers {out:?}",
+            state.turn,
+            state.date_label(),
+            me.ledger.weariness,
+            me.treasury,
+            me.upkeep_last_turn,
+            attitude,
+        );
+    }
+    if out.is_empty() {
+        out.push("free");
+    }
+    out
 }
 
 /// EQ4: combined balance measures of one campaign.
@@ -457,6 +567,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         majors_1400: vec![true; MAJORS.len()],
         majors_fall: vec![None; MAJORS.len()],
         recruited_15th: vec![false; CENTURY_15.len()],
+        blockers: vec![0; BLOCKERS.len()],
         ..Report::default()
     };
     let names: Vec<String> = [&france, &england]
@@ -634,6 +745,27 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 report.truces += 1;
             }
             war_run = 0;
+            if state.factions[&england].alive && state.factions[&france].alive {
+                for blocker in war_blockers(&state, data, &england, &france) {
+                    let index = BLOCKERS
+                        .iter()
+                        .position(|b| *b == blocker)
+                        .expect("blocker");
+                    report.blockers[index] += 1;
+                }
+            }
+        }
+        if at_war && !was_at_war {
+            let by_france = events.iter().any(|e| {
+                matches!(e.kind, EventKind::WarDeclared)
+                    && e.text_fr.starts_with(names[0].as_str())
+                    && e.text_fr.contains(names[1].as_str())
+            });
+            if by_france {
+                report.declared_by_france += 1;
+            } else {
+                report.declared_by_england += 1;
+            }
         }
         was_at_war = at_war;
         report.max_held = report.max_held.max(ai::alignment::realm_held_by(
@@ -879,6 +1011,30 @@ fn main() {
     println!("Types du XVe s. recrutés (UR2) : {}", century_15.join(", "));
     print_summary(&reports, decades);
     print_eq4(&reports);
+    print_eq6(&reports);
+}
+
+/// EQ6: who opens the France-England wars and what keeps England at peace.
+fn print_eq6(reports: &[Report]) {
+    println!("\nEQ6 — tours de paix FR-EN, obstacles à la déclaration anglaise :");
+    println!(
+        "| graine | guerre | ouvertes par Angl. / Fr. | tours de paix | {} |",
+        BLOCKERS.join(" | ")
+    );
+    println!("|---|---|---|---|{}", "---|".repeat(BLOCKERS.len()));
+    for r in reports {
+        let peace = r.turns - r.war_turns;
+        let cells: Vec<String> = r.blockers.iter().map(|n| n.to_string()).collect();
+        println!(
+            "| {} | {:.0} % | {} / {} | {} | {} |",
+            r.seed,
+            100.0 * f64::from(r.war_turns) / f64::from(r.turns),
+            r.declared_by_england,
+            r.declared_by_france,
+            peace,
+            cells.join(" | ")
+        );
+    }
 }
 
 /// Bankruptcies per faction and decade.
