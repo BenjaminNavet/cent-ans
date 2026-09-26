@@ -72,8 +72,9 @@ impl AiMoveKind {
     }
 }
 
-/// Why a move concerns the player (the camera follows it), by decreasing
-/// priority.
+/// Why a move concerns the player (the camera follows it), by increasing
+/// priority. Moves of the player's allies and vassals only concern him when
+/// they fight or besiege him (never, in practice).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AiMoveNotability {
@@ -392,7 +393,8 @@ impl CampaignState {
                 record.visible_from = *first;
                 record.visible_to = *last;
             }
-            record.notable = notability(data, record, &player, &before, radius);
+            let allied = self.is_allied(&record.faction, &player);
+            record.notable = notability(data, record, &player, allied, &before, radius);
         }
         self.ai_replay.records = records;
     }
@@ -402,6 +404,7 @@ fn notability(
     data: &GameData,
     record: &AiMoveRecord,
     player: &FactionId,
+    allied: bool,
     before: &PlayerSnapshot,
     radius_px: f32,
 ) -> Option<AiMoveNotability> {
@@ -414,6 +417,11 @@ fn notability(
     ) && record.settlement_controller.as_ref() == Some(player)
     {
         return Some(AiMoveNotability::Siege);
+    }
+    // An ally's (or vassal's) army on the player's land or next to his
+    // armies is no news: the camera keeps to threats.
+    if allied {
+        return None;
     }
     let on_player_land = record.path.iter().any(|p| {
         data.province_at_point(p[0], p[1])
