@@ -747,25 +747,111 @@ def render_far(prefix, out, distance=30.0, target=(0, 0, 0.9)):
     return path
 
 
-def step_infantry(out):
-    """Prototype man-at-arms: build, count, render (no baked maps)."""
-    build_infantry()
+def bake_and_look(objs, prefix, out, size=2048):
+    """Join the pieces, bake their atlas (normal, ORM, mask), plug it in; returns the mesh."""
+    import battle_fine_bake as fb
+
+    joined = fb.join_for_bake(objs, f"{prefix}_fine")
+    imgs = fb.bake_atlas(joined, out, prefix, size)
     for m in bpy.data.materials:
         if m.get("fg"):
             look_fine(m)
+    fb.use_baked(joined, imgs)
+    return joined
+
+
+def make_lod(obj, target, name):
+    """Copy of `obj` collapse-decimated to about `target` triangles (same materials)."""
+    lod = obj.copy()
+    lod.data = obj.data.copy()
+    lod.name = name
+    bpy.context.scene.collection.objects.link(lod)
+    mod = lod.modifiers.new("dec", "DECIMATE")
+    mod.ratio = target / _tris(obj)
+    mod.use_collapse_triangulate = True
+    # Decimate before the armature (rest shape), like the export pipeline.
+    with bpy.context.temp_override(
+        object=lod, active_object=lod, selected_objects=[lod]
+    ):
+        bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=0)
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    print(f"LOD {name} tris={_tris(lod)}")
+    return lod
+
+
+def render_lods(groups, prefix, out, target=(0, 0, 0.9)):
+    """LOD1 / LOD2 of each group, counts, and the 30 m game view with LOD0 and with LOD1.
+
+    `groups`: [(objects, (LOD1 triangles, LOD2 triangles))]; each group is reduced as a
+    whole (its objects in proportion to their size).
+    """
+    lods = {1: [], 2: []}
+    counts = {0: 0, 1: 0, 2: 0}
+    for objs, targets in groups:
+        total = sum(_tris(o) for o in objs)
+        counts[0] += total
+        for level, t in zip((1, 2), targets, strict=True):
+            for o in objs:
+                lod = make_lod(
+                    o, max(12, t * _tris(o) // total), f"{o.name}_lod{level}"
+                )
+                lod.hide_render = True
+                lods[level].append(lod)
+                counts[level] += _tris(lod)
+    base = [o for objs, _t in groups for o in objs]
+    print(f"LODS {prefix} lod0={counts[0]} lod1={counts[1]} lod2={counts[2]}")
+    render_far(f"{prefix}_lod0", out, target=target)
+    for o in base:
+        o.hide_render = True
+    for o in lods[1]:
+        o.hide_render = False
+    render_far(f"{prefix}_lod1", out, target=target)
+    for o in lods[1]:
+        o.hide_render = True
+    for o in base:
+        o.hide_render = False
+    return counts
+
+
+# LOD1 / LOD2 targets (FG plan: LOD0 ~10 k, LOD1 ~2.4 k, LOD2 ~500); mounted: rider + horse.
+LOD_TRIS = {"infantry": (2400, 500), "rider": (1400, 350), "horse": (1400, 350)}
+
+
+def step_infantry(out):
+    """Prototype man-at-arms: build, bake, render the style-sheet views and LODs."""
+    arm, objs = build_infantry()
+    joined = bake_and_look(objs, "infantry", out)
     render_views("proto_infantry", out)
+    render_lods([([joined], LOD_TRIS["infantry"])], "proto_infantry", out)
+    render_clips(arm, "proto_infantry", out)
+
+
+def render_clips(arm, prefix, out):
+    """The dressed figure on the test clips (deformation check), Eevee."""
+    prime_virtuals(arm)
+    cam = camera()
+    for _label, clip, fracs in TEST_CLIPS:
+        fr = fracs[1]
+        pose_clip(arm, clip, fr)
+        setup_eevee((600, 800))
+        look_at(cam, Vector((-1.9, -2.6, 1.3)), Vector((0, 0, 0.85)), 45)
+        render(os.path.join(out, f"{prefix}_clip_{clip}.png"))
+    bs.rest_pose(arm)
 
 
 def step_current_infantry(out):
-    """Current ``infantry_0`` (LOD0) rendered with the same light."""
+    """Current ``infantry_0`` rendered with the same light (views at LOD0, 30 m at LOD0/1)."""
     import battle_skinned_figures as figures
 
-    arm, objs = bs.build_human(figures.FIGURES["infantry_0"], 0)
-    objs = apply_variant(objs, 0)  # with the heater shield
-    for m in bpy.data.materials:
-        look_current(m)
-    print(f"FIGURE infantry_0 LOD0 tris={sum(_tris(o) for o in objs)}")
-    render_views("current_infantry", out)
+    for level in (0, 1):
+        _arm, objs = bs.build_human(figures.FIGURES["infantry_0"], level)
+        objs = apply_variant(objs, 0)  # with the heater shield
+        for m in bpy.data.materials:
+            look_current(m)
+        print(f"FIGURE infantry_0 LOD{level} tris={sum(_tris(o) for o in objs)}")
+        if level == 0:
+            render_views("current_infantry", out)
+        render_far(f"current_infantry_lod{level}", out)
 
 
 # --- Horse ------------------------------------------------------------------------------
@@ -968,22 +1054,33 @@ class _Ctx:
 
 def step_cavalry(out):
     """Prototype knight: build, count, render (no baked maps)."""
-    mount, _h, _r, _e = build_cavalry()
+    mount, horse, rider, extra = build_cavalry()
+    lance = [o for o in rider if o.name.startswith("lance")]
+    pieces = [o for o in rider + extra if o not in lance]
+    joined = bake_and_look(pieces, "cavalry", out)
     pose_cavalry(mount, "c_idle", 0.0)
-    for m in bpy.data.materials:
-        if m.get("fg"):
-            look_fine(m)
     VIEWS.update(CAVALRY_VIEWS)
     render_views("proto_cavalry", out)
+    render_lods(
+        [([joined], LOD_TRIS["rider"]), (horse, LOD_TRIS["horse"])],
+        "proto_cavalry",
+        out,
+        target=(0, 0, 1.3),
+    )
 
 
 def step_current_cavalry(out):
-    """Current ``cavalry_0`` (LOD0) rendered with the same light, seated (clip c_idle)."""
+    """Current ``cavalry_0`` rendered with the same light, seated (clip c_idle)."""
+    for level in (1, 0):
+        _current_cavalry(out, level)
+
+
+def _current_cavalry(out, level):
     import battle_skinned_cavalry as cav
     import battle_skinned_figures as figures
     import battle_skinned_poses as poses
 
-    objs = cav.build_cavalry(figures.FIGURES["cavalry_0"], 0)
+    objs = cav.build_cavalry(figures.FIGURES["cavalry_0"], level)
     objs = apply_variant(objs, 1)  # bassinet variant, like the prototype
     mount = poses.RIDE["mount"]
     PROBE["rig"] = probe_rig(mount.rarm, "R:")
@@ -1002,9 +1099,11 @@ def step_current_cavalry(out):
     pose_cavalry(mount, "c_idle", 0.0)
     for m in bpy.data.materials:
         look_current(m)
-    print(f"FIGURE cavalry_0 LOD0 tris={sum(_tris(o) for o in objs)}")
+    print(f"FIGURE cavalry_0 LOD{level} tris={sum(_tris(o) for o in objs)}")
     VIEWS.update(CAVALRY_VIEWS)
-    render_views("current_cavalry", out)
+    if level == 0:
+        render_views("current_cavalry", out)
+    render_far(f"current_cavalry_lod{level}", out, target=(0, 0, 1.3))
 
 
 STEPS = {
