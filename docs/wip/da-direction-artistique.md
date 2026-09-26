@@ -137,3 +137,6 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   `data/fx/atmosphere.json`, outil `scene_saturation.py`. DA7d fini (664 → 0 chevauchements)
   mais en conflit avec le dé-encombrement de noms DC4 dans `settlement_layer.gd` : renvoyé à
   l'agent pour unifier les deux avant fusion.
+- 26/09 soir : **DA7d fusionné** (main `d8946f7f`, ADR 0066 § DA7d) : un seul dé-encombrement
+  (marqueurs + noms, par priorité) remplace le masquage de noms DC4, dont il reprend la mesure du
+  texte ; 0 chevauchement aux 12 vues, ~2,2 ms. Reste : 21 hameaux sur une ville (sonde DC4).
