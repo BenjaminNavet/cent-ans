@@ -127,11 +127,16 @@ impl BattleSim {
                     continue;
                 }
                 let (a, b) = (&self.units[i], &self.units[j]);
-                let (pa, pb) = (pressure.pressure(a, b), pressure.pressure(b, a));
-                let (winner, loser, speed) = if pa >= pb {
-                    (i, j, pressure.recoil_speed(pa, pb))
+                // The defensive factors (square, stakes) are at least 1: at
+                // most one of the two drives the other back.
+                let a_drives =
+                    pressure.recoil_speed(pressure.drive(a, b), pressure.resistance(b, a));
+                let b_drives =
+                    pressure.recoil_speed(pressure.drive(b, a), pressure.resistance(a, b));
+                let (winner, loser, speed) = if a_drives >= b_drives {
+                    (i, j, a_drives)
                 } else {
-                    (j, i, pressure.recoil_speed(pb, pa))
+                    (j, i, b_drives)
                 };
                 if speed <= 0.0 {
                     continue;
@@ -170,7 +175,12 @@ impl BattleSim {
         let follow_share = self.push_rules.pressure.follow_share;
         let mut follow = vec![(0.0_f64, 0.0_f64, 0.0_f64); n];
         for &(winner, loser, dir) in &pairs {
-            if pushed_speed[winner] > 0.0 {
+            // Archers keep to their stakes rather than follow; a regiment
+            // also engaged by another enemy is pinned where it stands.
+            if pushed_speed[winner] > 0.0
+                || self.units[winner].stakes_planted
+                || contacts[winner].len() > 1
+            {
                 continue;
             }
             let along = (moved[loser].0 * dir.0 + moved[loser].1 * dir.1) * follow_share;
@@ -201,7 +211,11 @@ impl BattleSim {
                 None
             };
             let shape = self.push_shape(i, primary, speed, blocked, pushed_speed[i]);
-            let morale_loss = shape.compression * self.push_rules.compression.morale_per_second;
+            // Giving ground shakes a regiment; being crushed against an
+            // obstacle more so.
+            let morale_loss = shape.compression * self.push_rules.compression.morale_per_second
+                + pushed_speed[i] / max_speed.max(1e-9)
+                    * self.push_rules.pressure.recoil_morale_per_second;
             let unit = &mut self.units[i];
             unit.push = shape;
             if morale_loss > 0.0 {
