@@ -45,9 +45,15 @@ fn play(data: &GameData, seed: u64, turns: u32, record: bool) -> (Vec<Vec<AiMove
 #[test]
 fn the_record_is_deterministic_and_does_not_change_the_game() {
     let data = data();
-    let (first, save_on) = play(&data, 3, 3, true);
-    let (second, _) = play(&data, 3, 3, true);
+    let _ = play(&data, 3, 1, false); // warm-up (lazy rasters)
+    let started = std::time::Instant::now();
     let (off, save_off) = play(&data, 3, 3, false);
+    let off_time = started.elapsed();
+    let started = std::time::Instant::now();
+    let (first, save_on) = play(&data, 3, 3, true);
+    let on_time = started.elapsed();
+    let (second, _) = play(&data, 3, 3, true);
+    eprintln!("3 turns: record on {on_time:?}, off {off_time:?}");
     assert_eq!(first, second, "same seed, same records");
     assert!(
         first.iter().all(|turn| !turn.is_empty()),
