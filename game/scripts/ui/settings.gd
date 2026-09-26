@@ -94,7 +94,7 @@ const PARCHMENT_THEME := "res://scenes/ui/parchment_theme.tres"
 const AUTOSAVE_CHOICES: Array[int] = [0, 1, 2, 4, 8]
 const BLOOD_CHOICES: Array[int] = [0, 1, 2]
 const UNIT_SIZES: Array[float] = [0.5, 1.0, 1.5, 2.5, 4.0]  # EP1 : 4 = Épique
-# EP1 : 20 000 à 30 000 pour les batailles rangées (mesuré ≥ 30 i/s à 28 600 figurines, ADR 0031).
+# EP1 : 20 000 à 30 000 pour les batailles rangées (mesuré ≥ 30 i/s à 28 600 figurines, ADR 0076).
 const MAX_FIGURES_CHOICES: Array[int] = [1000, 2000, 3000, 4000, 6000, 8000, 10000, 12000, 15000, 20000, 25000, 30000]
 
 var path: String = SETTINGS_PATH

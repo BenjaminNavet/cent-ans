@@ -27,7 +27,7 @@ extends Node3D
 ## affleurantes), ponts du kit Blender (`BattleBridges`), routes de la simulation (`roads`)
 ## prolongées hors du champ (ornières et bas-côtés dans la splatmap).
 
-## EP1 (ADR 0031) : dimensions du champ lues dans `get_terrain()` (`width`, `depth` : 1200 × 800 au
+## EP1 (ADR 0076) : dimensions du champ lues dans `get_terrain()` (`width`, `depth` : 1200 × 800 au
 ## palier « escarmouche », jusqu'à 2400 × 1600) ; la splatmap et les anneaux suivent
 ## (`_set_field_size`). Variables (et non constantes) aux anciens noms.
 var FIELD_W := 1200.0

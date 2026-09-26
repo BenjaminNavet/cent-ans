@@ -16,7 +16,7 @@ uniform vec4 set_len = vec4(1.0);
 uniform int imp_set = 0;
 uniform float anim_time = 0.0;
 uniform float highlight = 0.0;
-// EP1 (ADR 0031) : palier très lointain. À 1, une figurine sur deux est effacée (quadrilatère
+// EP1 (ADR 0076) : palier très lointain. À 1, une figurine sur deux est effacée (quadrilatère
 // réduit à un point) et les autres sont élargies d'autant : même masse lue, moitié moins de
 // fragments et de mélange alpha.
 uniform float thin_out = 0.0;

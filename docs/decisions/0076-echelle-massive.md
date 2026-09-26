@@ -1,4 +1,7 @@
-# ADR 0031 — Échelle massive des batailles
+# ADR 0076 — Échelle massive des batailles
+
+
+Renumérotée de 0031 en 0076 le 26/09 (doublon avec 0031-dossier-utilisateur-du-jeu-exporte).
 
 Date : 2026-09-25. Statut : accepté. Lot EP1 du chantier « batailles épiques »
 (`docs/wip/epic.md`, suivi `docs/wip/ep1-echelle-massive.md`).
