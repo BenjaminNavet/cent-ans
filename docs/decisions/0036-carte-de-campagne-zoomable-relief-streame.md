@@ -287,3 +287,26 @@ propriétaire unique, complétée d'un **gain de relief local** : hauteur affich
 - Écart : les « pentes » des règles d'occupation du sol (`vegetation_mask`, parcellaire) restent les pentes
   vraies ; seule la roche des falaises suit la pente exagérée.
 - Interrupteur : `enabled = false` ou `--no-relief-exaggeration` rend exactement ZG4.
+
+## Addendum (lot ZG7a, 2026-09-26) : perf et finitions de la vue rapprochée
+
+Détail dans `docs/godot-map.md` (« Perf et finitions de la vue rapprochée (lot ZG7a) »).
+
+- **Villes 1:1** : un MultiMesh par modèle du kit et par ville (plus un pour les blocs) au lieu d'un par
+  cellule de 250 m ; le HLOD maison / bloc se décide **par instance dans le shader** (`lod_mode`,
+  caméra principale publiée par `TownBuilder.set_lod_view`, même choix dans la passe d'ombre). Appels de
+  dessin de la descente « villes » divisés par ≈ 2.
+- **Fil principal** : images et mipmaps des pages de relief, maillages des ponts-portes et des ponts fins
+  préparés dans des fils ; recalage des tuiles fines par un seul parcours des pages
+  (`ReliefQuadtree.finest_levels`). Sélection et application du quadtree (GDScript) non traitées :
+  jusqu'à 10 ms sous forte charge.
+- **Parcellaire** : 1-2,7 ms GPU de près (Vulkan, M4 Pro) ; allégé d'≈ 20 % sans changement de rendu
+  visible. Relief ZG8 : coût GPU non mesurable (≤ bruit).
+- **Largeurs des fleuves ancrés** interpolées le long de la chaîne des ancrages, quel que soit le tronçon
+  (`hydro_fine.WidthModel`) ; `hydro-fine` et `anchors-fine` relancés. Pas de lit creusé dans les zones
+  personnalisées (contrat de `river_styles.json`).
+- **Palier 3** : plancher de rehaussement monotone `max(0,5 ; min(0,85 h ; 5 m))` (`detail_dem`,
+  `BAKE_VERSION` 4) ; seule la zone de Londres est recuite (rives 2,6-3,8 m au lieu de 0,5 m).
+- Constat hors lot : le relief E1-E4 plaque encore les fonds de vallée proches de plateaux à 0,5 m (même
+  rehaussement σ 5 km + plancher de côte) ; une recuisson E1-E4 avec le même plancher monotone est à
+  prévoir (ZG8 exagère déjà le relief à l'exécution).
