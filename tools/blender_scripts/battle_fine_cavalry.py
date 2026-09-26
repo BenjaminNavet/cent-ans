@@ -271,10 +271,24 @@ def fine_horse(mount, level, htype):
 # --- Harness ------------------------------------------------------------------------------
 
 
+def _no_legs(table):
+    """Weight table without the leg bones (renormalised; the saddle bone if empty)."""
+    out = []
+    for w in table:
+        kept = {k: x for k, x in w.items() if k not in LEG_BONES}
+        total = sum(kept.values())
+        out.append(
+            {k: x / total for k, x in kept.items()}
+            if total > 1e-3
+            else {cav.SADDLE_BONE: 1.0}
+        )
+    return out
+
+
 def _skin_like(obj, body):
-    """Weights of the nearest body point (rest pose)."""
+    """Weights of the nearest body point (rest pose), leg bones left out."""
     table = fh.nearest_weights(obj, body, fh.weight_table(body))
-    fh.set_weights(obj, table)
+    fh.set_weights(obj, _no_legs(table))
 
 
 def _faces_copy(body, keep, offset, name, material):
@@ -422,10 +436,13 @@ def bridle(body, mount):
         ),
     ]
     # Bit rings at the corners of the mouth: lateral extremes of the head at `mouth`.
+    head_w = fh.weight_table(body)
     pts = [
         v.co
         for v in body.data.vertices
-        if abs((v.co - mouth).dot(axis)) < 0.03 and (v.co - mouth).dot(down) > -0.05
+        if head_w[v.index].get("Head", 0.0) > 0.8
+        and abs((v.co - mouth).dot(axis)) < 0.03
+        and (v.co - mouth).dot(down) > -0.05
     ]
     rings = {}
     for s, sx in (("L", 1), ("R", -1)):
@@ -470,7 +487,7 @@ def reins(body, mount, rings, leather):
             prev = p
     eq.finish(bm)
     obj = eq.to_object("reins", bm, [leather])
-    table = fh.nearest_weights(obj, body, fh.weight_table(body))
+    table = _no_legs(fh.nearest_weights(obj, body, fh.weight_table(body)))
     for i, t in enumerate(params):
         w = table[i]
         if t < 0.12:

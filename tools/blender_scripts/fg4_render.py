@@ -120,7 +120,7 @@ def render_all(out, names):
         _shot(
             out,
             f"head_{fig}.png",
-            (head + Vector((1.1, -0.9, 0.25)), head + Vector((0, -0.25, -0.2)), 50),
+            (head + Vector((1.5, -1.4, 0.35)), head + Vector((0, -0.25, -0.2)), 40),
         )
         for robe2 in ("noir", "gris", "isabelle"):
             _look(robe2)
