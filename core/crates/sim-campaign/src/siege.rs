@@ -68,7 +68,7 @@ fn besiegers(
 }
 
 /// Province of a settlement, for events (a placeholder when unknown).
-fn province_of(state: &CampaignState, settlement: &SettlementId) -> ProvinceId {
+pub(crate) fn province_of(state: &CampaignState, settlement: &SettlementId) -> ProvinceId {
     state
         .settlement_province(settlement)
         .cloned()
@@ -753,6 +753,13 @@ pub(crate) fn capture(
     settlement.siege = None;
     settlement.garrison.clear();
     settlement.recruit_queue.clear();
+    // Q5: the besiegers stand down once the place is theirs (the army kept
+    // its siege stance, and its "siège" label, for the rest of the game).
+    for army in state.armies.values_mut() {
+        if army.stance == Stance::Siege && army.settlement() == Some(settlement_id) {
+            army.stance = Stance::Normal;
+        }
+    }
     let unrest = if is_city {
         CAPTURE_UNREST
     } else {
