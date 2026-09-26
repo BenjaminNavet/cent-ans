@@ -67,19 +67,45 @@ Attendre la vague 1 ; fusionner DC2a-e (fichiers disjoints) puis DC1 dans feat/d
 Lancer/poursuivre la vague 1 (DC1, DC2a, DC2c-e) ; DC2b terminé, prêt pour fusion dans `feat/densite`.
 
 ## DC4 — Affichage (worktree ../gp-dc4, branche feat/densite-dc4)
-État (en cours) :
-- Sonde `game/tests/dc4_density_probe.gd` (fenêtrée).
-- Rangs : châteaux rang 2 seulement si fortification ≥ 3 ET poids ≥ 10 ; villes rang 2 aussi si
-  fortification ≥ 2 ET poids ≥ 25 (`settlement_markers.json`). Vue région : 276 → 264 places.
-- Désencombrement : grille spatiale (`LabelPlacer.SpatialGrid`), rectangles mesurés avec la police
-  (l'ancienne estimation sous-évaluait la largeur : chevauchements réels), tri cité > ville >
-  château > abbaye > village puis poids décroissant (`SettlementData`).
-- Maquettes : `_fit_model` répétable (taille d'origine gardée), positions de rendu, ville
-  emblématique non réduite, plancher 0,4, maquette de faubourg masquée (`_absorb`) ; CV1 passe la
-  maquette de croissance à pleine taille (réduction faite par `replace_model`).
-- Hameaux : non posés dans l'emprise d'une maquette de colonie (`on_settlement_model`).
+État : terminé, prêt pour fusion dans `feat/densite`.
+- Sonde `game/tests/dc4_density_probe.gd` (fenêtrée ; `--center=2310.3,1657.9` = Lille, zone la
+  plus dense : 14 places à moins de 40 unités ; `CENT_ANS_DATA_DIR` pour rejouer 570 places).
+- Rangs (`settlement_markers.json`, règles dérivées des données, les listes d'ids restent en tête) :
+  château rang 2 = fortification ≥ 3 ET poids ≥ 10 (les petits châteaux ajoutés restent rang 1) ;
+  ville rang 2 aussi si fortification ≥ 2 ET poids ≥ 25. Vue Europe 68 places (inchangé), région
+  264 (570 places : 245 ; 1 192 sans DC4 : 276), comté tout (1 192).
+- Désencombrement des noms : grille spatiale (`LabelPlacer.SpatialGrid`), rectangles mesurés avec
+  la police (l'ancienne estimation sous-évaluait la largeur : il y avait de vrais chevauchements),
+  tri cité > ville > château > abbaye > village puis poids décroissant (`SettlementData`), aucun
+  calcul au palier Europe ; noms dessinés au-dessus des marqueurs (priorité 4/3 contre 2).
+- Maquettes : `_fit_model` répétable (taille d'origine gardée), aux positions de rendu (ancrages
+  fins), ville emblématique non réduite (la voisine prend l'écart), plancher 0,55 → 0,4, maquette
+  de faubourg masquée (`_absorb` : Saint-Maximin sous Trèves, Marmoutier sous Tours…) ; CV1 remet
+  la maquette de croissance à pleine taille (réduction faite par `replace_model`, avant elle
+  empilait une réduction périmée).
+- Hameaux : non posés dans l'emprise d'une maquette de colonie (`on_settlement_model`, 60 cas).
+- Picking : positions des marqueurs en cache, maquettes hors portée ignorées.
+- ZG6 : choix des 16 finages par insertion au lieu d'un tri complet des 1 185 villes.
+
+Mesures (1600×900, build debug ; temps d'image non comparables : charge machine 120-180 due aux
+autres agents) :
+
+| | 570, avant | 1 192, avant | 1 192, après |
+|---|---|---|---|
+| Noms qui se chevauchent (comté / près) | 4 / 6 | 7 / 13 | 0 / 0 |
+| `declutter()` Europe / région / comté / près (µs) | 246 / 344 / 457 / 498 | 541 / 612 / 906 / 1 253 | 76 / 458 / 700 / 942 |
+| Picking au comté (µs) | — | 4 091 | 230 |
+| Marqueurs à l'écran Europe / région / comté | 37 / 72 / 95 | 37 / 81 / 218 | 37 / 78 / 218 |
+| Maquettes voisines qui se recouvrent (> 20 %) | 14 | 34 | 0 (7 masquées, 174 réduites) |
+| Hameaux dans l'emprise d'une colonie | 31 | 63 | 60, non posés |
+| ZG6 : villes 1:1 chargées au max / tri streaming (µs, toutes les 10 images) | 1 / 811 | 5 / 1 946 | 5 / 617 |
+
+Captures : `docs/img/dc4/` (avant570-comte, avant1192-comte, apres-comte, apres-region,
+apres-europe).
+Points ouverts : au comté, 35 paires de marqueurs se recouvrent à plus de moitié sur 218 (villages
+serrés autour de Lille) — pas de désencombrement écran des marqueurs (le cahier veut tout au comté) ;
+temps d'image à remesurer sur machine calme (`pb1_bench.gd`).
 Build : `CARGO_TARGET_DIR` partagé entre worktrees : les rlib des crates du dépôt ont le même nom
 d'un worktree à l'autre et cargo les croit à jour (mtime) même construites depuis un autre
-worktree (constatée : dylib avec plafond 6 au lieu de 16). Parade : `find core/crates -name '*.rs'
--exec touch {} +` avant `cargo build`, puis copier aussitôt.
-Prochaine étape : mesures avant (570 / 1 192, ancien code) avec la sonde finale, ZG6, captures.
+worktree (constaté : dylib avec plafond 6 au lieu de 16, 126 avertissements « expected 1-6 »).
+Parade : `find core/crates -name '*.rs' -exec touch {} +` avant `cargo build`, copier aussitôt.
