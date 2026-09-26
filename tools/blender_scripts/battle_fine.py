@@ -18,8 +18,9 @@ Steps (after ``--``):
 
 Output: ``game/assets/models/battle_fine/`` (``CAM1`` meshes, ``CAB1`` bone textures and a
 ``manifest.json`` of the same shape as ``battle_skinned/manifest.json``), read by
-``BattleSkinned`` when the game runs with ``--fine-figures`` after ``--``. The Quaternius
-pipeline (``battle_skinned.py``, ``battle_skinned/``) is untouched.
+``BattleSkinned`` by default since lot FG5 (``--coarse-figures`` after ``--`` falls back to
+the Quaternius figures). The Quaternius pipeline (``battle_skinned.py``, ``battle_skinned/``)
+is untouched.
 """
 
 import json

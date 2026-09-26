@@ -107,5 +107,186 @@
     "sources": [
       "Doornenburg"
     ]
+  },
+  {
+    "id": "set_tiel",
+    "province": "prov_gueldre",
+    "kind": "town",
+    "name": {
+      "display": "Tiel",
+      "local": "Tiel",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.4283,
+      51.8875
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande du Betuwe sur le Waal, membre de la ligue rhénane, réputée pour son commerce de vin et d'étain.",
+    "sources": [
+      "Tiel (Pays-Bas)"
+    ]
+  },
+  {
+    "id": "set_doesburg",
+    "province": "prov_gueldre",
+    "kind": "town",
+    "name": {
+      "display": "Doesburg",
+      "local": "Doesborch",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      6.155,
+      52.0167
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville fortifiée du comté de Zutphen au confluent de l'Yssel et de l'Oude IJssel, chartée en 1237.",
+    "sources": [
+      "Doesburg"
+    ]
+  },
+  {
+    "id": "set_wageningen",
+    "province": "prov_gueldre",
+    "kind": "village",
+    "name": {
+      "display": "Wageningen",
+      "local": "Wageninghen",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.6653,
+      51.9689
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg de marché du Betuwe au pied de la colline de Wageningen, charté en 1263.",
+    "sources": [
+      "Wageningen (Pays-Bas)"
+    ]
+  },
+  {
+    "id": "set_geldern",
+    "province": "prov_gueldre",
+    "kind": "town",
+    "name": {
+      "display": "Gueldre",
+      "local": "Gelre",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      6.3236,
+      51.5186
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville éponyme du comté, chartée en 1229, née au pied du premier château des comtes de Gueldre.",
+    "sources": [
+      "Geldern",
+      "Duché de Gueldre"
+    ]
+  },
+  {
+    "id": "set_groenlo",
+    "province": "prov_gueldre",
+    "kind": "village",
+    "name": {
+      "display": "Groenlo",
+      "local": "Grolle",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      6.615,
+      52.0417
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg frontalier de l'Achterhoek face à l'évêché de Münster, charté en 1277 par le comte Renaud Ier.",
+    "sources": [
+      "Groenlo"
+    ]
+  },
+  {
+    "id": "set_lochem",
+    "province": "prov_gueldre",
+    "kind": "village",
+    "name": {
+      "display": "Lochem",
+      "local": "Lochem",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      6.4153,
+      52.16
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Petit bourg du comté de Zutphen sur la Berkel, doté de droits urbains en 1233.",
+    "sources": [
+      "Lochem"
+    ]
+  },
+  {
+    "id": "set_doetinchem",
+    "province": "prov_gueldre",
+    "kind": "village",
+    "name": {
+      "display": "Doetinchem",
+      "local": "Deutekem",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      6.2986,
+      51.965
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de marché de l'Achterhoek sur l'Oude IJssel, doté de droits urbains par le comte de Gueldre en 1236.",
+    "sources": [
+      "Doetinchem"
+    ]
   }
 ]

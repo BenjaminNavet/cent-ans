@@ -165,5 +165,210 @@
     "sources": [
       "Abbaye des Dunes"
     ]
+  },
+  {
+    "id": "set_oudenaarde",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "Audenarde",
+      "local": "Oudenaarde",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.6058,
+      50.8458
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_weaving_workshop"
+    ],
+    "port": false,
+    "description": "Ville drapière flamande sur l'Escaut, chef-lieu de châtellenie.",
+    "sources": [
+      "Audenarde"
+    ]
+  },
+  {
+    "id": "set_aalst",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "Alost",
+      "local": "Aalst",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.0397,
+      50.9378
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_guild_hall"
+    ],
+    "port": false,
+    "description": "Ville drapière sur la Dendre, chef-lieu du Land van Aalst tenu par le comte de Flandre en fief de l'Empire.",
+    "sources": [
+      "Alost"
+    ]
+  },
+  {
+    "id": "set_dendermonde",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "Termonde",
+      "local": "Dendermonde",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.1017,
+      51.0281
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville fortifiée au confluent de l'Escaut et de la Dendre, place de marché du nord-est flamand.",
+    "sources": [
+      "Termonde"
+    ]
+  },
+  {
+    "id": "set_damme",
+    "province": "prov_flandre",
+    "kind": "town",
+    "name": {
+      "display": "Damme",
+      "local": "Damme",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.2823,
+      51.25
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_port",
+      "bld_market"
+    ],
+    "port": true,
+    "description": "Avant-port de Bruges fondé au XIIe siècle, où transbordent les grands navires ne pouvant remonter le Zwin.",
+    "sources": [
+      "Damme"
+    ]
+  },
+  {
+    "id": "set_poperinge",
+    "province": "prov_flandre",
+    "kind": "village",
+    "name": {
+      "display": "Poperinghe",
+      "local": "Poperinge",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      2.7264,
+      50.857
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg drapier de la châtellenie d'Ypres, réputé pour son houblon et ses draps.",
+    "sources": [
+      "Poperinge"
+    ]
+  },
+  {
+    "id": "set_diksmuide",
+    "province": "prov_flandre",
+    "kind": "village",
+    "name": {
+      "display": "Dixmude",
+      "local": "Diksmuide",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      2.8686,
+      51.0322
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Petite ville marchande sur l'Yser, dans les polders du littoral flamand.",
+    "sources": [
+      "Dixmude"
+    ]
+  },
+  {
+    "id": "set_boudelo",
+    "province": "prov_flandre",
+    "kind": "abbey",
+    "name": {
+      "display": "Abbaye de Boudelo",
+      "local": "Boudeloabdij",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.0561,
+      51.1725
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1197 dans le Pays de Waes, au nord-est du comté.",
+    "sources": [
+      "Abbaye de Boudelo"
+    ]
+  },
+  {
+    "id": "set_wijnendale",
+    "province": "prov_flandre",
+    "kind": "castle",
+    "name": {
+      "display": "Wynendaele",
+      "local": "Wijnendale",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      3.0503,
+      51.0806
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château comtal près de Thourout, résidence favorite des comtes de Flandre, où meurt Robert de Béthune en 1322.",
+    "sources": [
+      "Château de Wijnendale",
+      "Robert III de Flandre"
+    ]
   }
 ]

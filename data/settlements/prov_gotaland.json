@@ -132,5 +132,31 @@
     "sources": [
       "Skanör med Falsterbo"
     ]
+  },
+  {
+    "id": "set_skara",
+    "province": "prov_gotaland",
+    "kind": "town",
+    "name": {
+      "display": "Skara",
+      "local": "Skara",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      13.4413,
+      58.3833
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Plus ancien évêché de Suède (fondé v. 1014), au cœur du Västergötland, ancienne capitale régionale des rois goths.",
+    "sources": [
+      "Skara"
+    ]
   }
 ]

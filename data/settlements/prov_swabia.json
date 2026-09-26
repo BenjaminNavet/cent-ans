@@ -109,5 +109,84 @@
     "sources": [
       "Kaisheim"
     ]
+  },
+  {
+    "id": "set_konstanz",
+    "province": "prov_swabia",
+    "kind": "town",
+    "name": {
+      "display": "Constance",
+      "local": "Kostenz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.1829,
+      47.6603
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité impériale et siège d'un vaste évêché sur les rives du lac de Constance, grand carrefour commercial vers l'Italie.",
+    "sources": [
+      "Constance (Allemagne)",
+      "Évêché de Constance"
+    ]
+  },
+  {
+    "id": "set_ravensburg",
+    "province": "prov_swabia",
+    "kind": "town",
+    "name": {
+      "display": "Ravensbourg",
+      "local": "Ravensburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.6116,
+      47.7817
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire depuis 1276, berceau du tissage de la toile de lin en Haute-Souabe.",
+    "sources": [
+      "Ravensbourg"
+    ]
+  },
+  {
+    "id": "set_weingarten",
+    "province": "prov_swabia",
+    "kind": "abbey",
+    "name": {
+      "display": "Weingarten",
+      "local": "Wingarten",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.6402,
+      47.8062
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Puissante abbaye bénédictine, l'une des plus riches d'Empire, qui conserve une relique du Saint-Sang vénérée en pèlerinage.",
+    "sources": [
+      "Abbaye de Weingarten"
+    ]
   }
 ]

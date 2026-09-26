@@ -104,5 +104,182 @@
     "sources": [
       "Belcastel"
     ]
+  },
+  {
+    "id": "set_villefranche_de_rouergue",
+    "province": "prov_rouergue",
+    "kind": "town",
+    "name": {
+      "display": "Villefranche-de-Rouergue",
+      "local": "Vilafranca de Roergue",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      2.0333,
+      44.35
+    ],
+    "weight": 13,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bastide royale fondée en 1252 au confluent de l'Aveyron et de l'Alzou, grand marché du sel et du blé.",
+    "sources": [
+      "Villefranche-de-Rouergue"
+    ]
+  },
+  {
+    "id": "set_millau",
+    "province": "prov_rouergue",
+    "kind": "town",
+    "name": {
+      "display": "Millau",
+      "local": "Milhau",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      3.0833,
+      44.1
+    ],
+    "weight": 11,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville du Rouergue sur le Tarn, réputée pour ses gantiers et mégissiers.",
+    "sources": [
+      "Millau"
+    ]
+  },
+  {
+    "id": "set_severac_le_chateau",
+    "province": "prov_rouergue",
+    "kind": "castle",
+    "name": {
+      "display": "Sévérac-le-Château",
+      "local": "Severac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      3.0667,
+      44.3333
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Puissante forteresse des seigneurs de Sévérac, verrou entre Rouergue et Gévaudan.",
+    "sources": [
+      "Château de Sévérac"
+    ]
+  },
+  {
+    "id": "set_estaing",
+    "province": "prov_rouergue",
+    "kind": "castle",
+    "name": {
+      "display": "Estaing",
+      "local": "Estanh",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      2.6667,
+      44.55
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château des seigneurs d'Estaing dominant un pont médiéval sur le Lot.",
+    "sources": [
+      "Château d'Estaing"
+    ]
+  },
+  {
+    "id": "set_espalion",
+    "province": "prov_rouergue",
+    "kind": "village",
+    "name": {
+      "display": "Espalion",
+      "local": "Espalion",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      2.7639,
+      44.5228
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg sur le Lot, franchi par le Pont-Vieux, marché du haut Rouergue.",
+    "sources": [
+      "Espalion"
+    ]
+  },
+  {
+    "id": "set_sauveterre_de_rouergue",
+    "province": "prov_rouergue",
+    "kind": "village",
+    "name": {
+      "display": "Sauveterre-de-Rouergue",
+      "local": "Sauvatèrra de Roergue",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      2.3333,
+      44.2333
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bastide fondée en 1281 par les comtes de Rodez, bâtie sur plan régulier autour de sa place à couverts.",
+    "sources": [
+      "Sauveterre-de-Rouergue"
+    ]
+  },
+  {
+    "id": "set_bonneval",
+    "province": "prov_rouergue",
+    "kind": "abbey",
+    "name": {
+      "display": "Bonneval",
+      "local": "Bonaval",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      2.9333,
+      44.6167
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne isolée aux confins de l'Aubrac, fondée au XIIe siècle.",
+    "sources": [
+      "Abbaye de Bonneval (Aveyron)"
+    ]
   }
 ]

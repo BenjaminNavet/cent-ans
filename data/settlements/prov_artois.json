@@ -3,70 +3,312 @@
     "id": "set_arras",
     "province": "prov_artois",
     "kind": "city",
-    "name": { "display": "Arras", "local": "Arras", "local_language": "ancien français" },
-    "lonlat": [2.7775, 50.2910],
+    "name": {
+      "display": "Arras",
+      "local": "Arras",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.7775,
+      50.291
+    ],
     "weight": 38,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_windmill", "bld_weaving_workshop", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_weaving_workshop",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
     "port": false,
     "description": "Capitale du comté d'Artois, célèbre pour ses draperies et ses tapisseries.",
-    "sources": ["Arras", "Comté d'Artois"]
+    "sources": [
+      "Arras",
+      "Comté d'Artois"
+    ]
   },
   {
     "id": "set_saint_omer",
     "province": "prov_artois",
     "kind": "town",
-    "name": { "display": "Saint-Omer", "local": "Saint Omer", "local_language": "ancien français" },
-    "lonlat": [2.2500, 50.7500],
+    "name": {
+      "display": "Saint-Omer",
+      "local": "Saint Omer",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.25,
+      50.75
+    ],
     "weight": 18,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_weaving_workshop", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_weaving_workshop",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Grande ville drapière close, autour de l'abbaye Saint-Bertin.",
-    "sources": ["Saint-Omer"]
+    "sources": [
+      "Saint-Omer"
+    ]
   },
   {
     "id": "set_hesdin",
     "province": "prov_artois",
     "kind": "castle",
-    "name": { "display": "Hesdin", "local": "Hesdin", "local_language": "ancien français" },
-    "lonlat": [2.0500, 50.3667],
+    "name": {
+      "display": "Hesdin",
+      "local": "Hesdin",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.05,
+      50.3667
+    ],
     "weight": 11,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Résidence fortifiée des comtes d'Artois sur la Canche.",
-    "sources": ["Hesdin", "Vieil-Hesdin"]
+    "sources": [
+      "Hesdin",
+      "Vieil-Hesdin"
+    ]
   },
   {
     "id": "set_mont_saint_eloi",
     "province": "prov_artois",
     "kind": "abbey",
-    "name": { "display": "Mont-Saint-Éloi", "local": "Mont Saint Eloy", "local_language": "ancien français" },
-    "lonlat": [2.6167, 50.3667],
+    "name": {
+      "display": "Mont-Saint-Éloi",
+      "local": "Mont Saint Eloy",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.6167,
+      50.3667
+    ],
     "weight": 7,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey"],
+    "buildings": [
+      "bld_abbey"
+    ],
     "port": false,
     "description": "Abbaye augustinienne sur une colline dominant la plaine d'Arras.",
-    "sources": ["Abbaye du Mont-Saint-Éloi"]
+    "sources": [
+      "Abbaye du Mont-Saint-Éloi"
+    ]
   },
   {
     "id": "set_azincourt",
     "province": "prov_artois",
     "kind": "village",
-    "name": { "display": "Azincourt", "local": "Azincourt", "local_language": "ancien français" },
-    "lonlat": [2.1300, 50.4667],
+    "name": {
+      "display": "Azincourt",
+      "local": "Azincourt",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.13,
+      50.4667
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Village agricole aux confins de l'Artois et du comté de Saint-Pol, où se livrera la bataille du 25 octobre 1415.",
-    "sources": ["Azincourt"]
+    "sources": [
+      "Azincourt"
+    ]
+  },
+  {
+    "id": "set_bethune",
+    "province": "prov_artois",
+    "kind": "town",
+    "name": {
+      "display": "Béthune",
+      "local": "Bethune",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.6425,
+      50.5303
+    ],
+    "weight": 11,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville close, chef-lieu d'une importante seigneurie artésienne.",
+    "sources": [
+      "Béthune"
+    ]
+  },
+  {
+    "id": "set_aire_sur_la_lys",
+    "province": "prov_artois",
+    "kind": "town",
+    "name": {
+      "display": "Aire-sur-la-Lys",
+      "local": "Aire",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.2117,
+      50.6367
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville fortifiée gardant le passage de la Lys à la frontière de Flandre.",
+    "sources": [
+      "Aire-sur-la-Lys"
+    ]
+  },
+  {
+    "id": "set_blangy_sur_ternoise",
+    "province": "prov_artois",
+    "kind": "abbey",
+    "name": {
+      "display": "Blangy-sur-Ternoise",
+      "local": "Blangi",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.2494,
+      50.4633
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye de femmes bénédictine sur la Ternoise, fondée au haut Moyen Âge.",
+    "sources": [
+      "Blangy-sur-Ternoise"
+    ]
+  },
+  {
+    "id": "set_lens",
+    "province": "prov_artois",
+    "kind": "village",
+    "name": {
+      "display": "Lens",
+      "local": "Lens",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.8319,
+      50.4322
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg agricole du comté d'Artois, sur la rivière Souchez.",
+    "sources": [
+      "Lens (Pas-de-Calais)"
+    ]
+  },
+  {
+    "id": "set_bapaume",
+    "province": "prov_artois",
+    "kind": "village",
+    "name": {
+      "display": "Bapaume",
+      "local": "Bapaume",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.85,
+      50.1058
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié sur la route d'Arras à Péronne.",
+    "sources": [
+      "Bapaume"
+    ]
+  },
+  {
+    "id": "set_saint_pol_sur_ternoise",
+    "province": "prov_artois",
+    "kind": "village",
+    "name": {
+      "display": "Saint-Pol-sur-Ternoise",
+      "local": "Saint Pol",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3383,
+      50.3853
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg siège des comtes de Saint-Pol, sur la Ternoise.",
+    "sources": [
+      "Saint-Pol-sur-Ternoise"
+    ]
+  },
+  {
+    "id": "set_avesnes_le_comte",
+    "province": "prov_artois",
+    "kind": "village",
+    "name": {
+      "display": "Avesnes-le-Comte",
+      "local": "Avesnes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.5556,
+      50.2711
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Petit bourg seigneurial de l'Artois central.",
+    "sources": [
+      "Avesnes-le-Comte"
+    ]
   }
 ]

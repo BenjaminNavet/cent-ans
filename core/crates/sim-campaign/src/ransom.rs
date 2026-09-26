@@ -632,7 +632,8 @@ pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &Factio
         return orders;
     };
     let mut treasury = f.treasury;
-    let income = state.faction_income_effective(data, faction).max(0);
+    // DC3: the income walks every place; weighed only for a captive heir or sovereign.
+    let mut income = None;
     for (id, c) in &state.characters {
         if !c.alive || !c.captive {
             continue;
@@ -653,7 +654,10 @@ pub fn ai_ransom_orders(state: &CampaignState, data: &GameData, faction: &Factio
                             installments: 1,
                         });
                     } else if matches!(rank, CaptiveRank::Sovereign | CaptiveRank::Heir)
-                        && treasury - first >= income / 2
+                        && treasury - first
+                            >= *income.get_or_insert_with(|| {
+                                state.faction_income_effective(data, faction).max(0)
+                            }) / 2
                     {
                         treasury -= first;
                         orders.push(Order::PayRansom {

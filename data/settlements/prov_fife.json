@@ -109,5 +109,80 @@
     "sources": [
       "Abbaye de Dunfermline"
     ]
+  },
+  {
+    "id": "set_kirkcaldy",
+    "province": "prov_fife",
+    "kind": "village",
+    "name": {
+      "display": "Kirkcaldy",
+      "local": "Kirkcaldin",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.15,
+      56.1167
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Petit port marchand du Firth of Forth.",
+    "sources": [
+      "Kirkcaldy"
+    ]
+  },
+  {
+    "id": "set_falkland",
+    "province": "prov_fife",
+    "kind": "castle",
+    "name": {
+      "display": "Falkland",
+      "local": "Falkland",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.2075,
+      56.2517
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence de chasse des rois d'Écosse, dans le Fife.",
+    "sources": [
+      "Château de Falkland"
+    ]
+  },
+  {
+    "id": "set_culross",
+    "province": "prov_fife",
+    "kind": "abbey",
+    "name": {
+      "display": "Culross",
+      "local": "Culross",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.63,
+      56.0642
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne de Culross, sur la rive nord du Forth.",
+    "sources": [
+      "Abbaye de Culross"
+    ]
   }
 ]

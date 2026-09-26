@@ -114,5 +114,83 @@
     "sources": [
       "Château de Ponferrada"
     ]
+  },
+  {
+    "id": "set_astorga",
+    "province": "prov_leon",
+    "kind": "town",
+    "name": {
+      "display": "Astorga",
+      "local": "Astorga",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -6.0525,
+      42.4553
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Siège épiscopal romain sur le chemin de Compostelle, carrefour de la via de la Plata.",
+    "sources": [
+      "Astorga"
+    ]
+  },
+  {
+    "id": "set_sahagun",
+    "province": "prov_leon",
+    "kind": "abbey",
+    "name": {
+      "display": "Sahagún",
+      "local": "Sahagún",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.0308,
+      42.3706
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye clunisienne du royaume de León, foyer du repeuplement franc sur le chemin de Saint-Jacques.",
+    "sources": [
+      "Sahagún",
+      "Abbaye de Sahagún"
+    ]
+  },
+  {
+    "id": "set_valencia_de_don_juan",
+    "province": "prov_leon",
+    "kind": "village",
+    "name": {
+      "display": "Valencia de Don Juan",
+      "local": "Valencia de Don Juan",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.5183,
+      42.2925
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié sur l'Esla, connu au Moyen Âge sous le nom de Coyanza, siège d'un concile en 1055.",
+    "sources": [
+      "Valencia de Don Juan"
+    ]
   }
 ]

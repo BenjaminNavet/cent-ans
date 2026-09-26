@@ -409,12 +409,16 @@ pub fn ai_found_order(state: &CampaignState, data: &GameData, faction: &FactionI
     if f.chivalric_order.is_some() {
         return Vec::new();
     }
-    let reserve = 4 * state.faction_income_effective(data, faction).max(0);
+    // DC3: the income walks every place; weighed only once an order can be founded.
+    let mut reserve = None;
     orders_for(data, faction)
         .into_iter()
         .find(|o| {
             found_blocker(state, data, faction, &o.id).is_none()
-                && f.treasury - foundation_cost(state, faction, o) >= reserve
+                && f.treasury - foundation_cost(state, faction, o)
+                    >= *reserve.get_or_insert_with(|| {
+                        4 * state.faction_income_effective(data, faction).max(0)
+                    })
         })
         .map(|o| {
             vec![Order::FoundChivalricOrder {

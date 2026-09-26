@@ -3,56 +3,283 @@
     "id": "set_bourges",
     "province": "prov_berry",
     "kind": "city",
-    "name": { "display": "Bourges", "local": "Bourges", "local_language": "ancien français" },
-    "lonlat": [2.3988, 47.0810],
+    "name": {
+      "display": "Bourges",
+      "local": "Bourges",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3988,
+      47.081
+    ],
     "weight": 38,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_windmill", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
     "port": false,
     "description": "Vicomté royale depuis 1101, siège de la cathédrale Saint-Étienne, au cœur du Berry.",
-    "sources": ["Bourges"]
+    "sources": [
+      "Bourges"
+    ]
   },
   {
     "id": "set_issoudun",
     "province": "prov_berry",
     "kind": "town",
-    "name": { "display": "Issoudun", "local": "Ysoudun", "local_language": "ancien français" },
-    "lonlat": [2.0000, 46.9500],
+    "name": {
+      "display": "Issoudun",
+      "local": "Ysoudun",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.0,
+      46.95
+    ],
     "weight": 15,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Ville close et forteresse, ancienne pomme de discorde entre Capétiens et Plantagenêts.",
-    "sources": ["Issoudun"]
+    "sources": [
+      "Issoudun"
+    ]
   },
   {
     "id": "set_culan",
     "province": "prov_berry",
     "kind": "castle",
-    "name": { "display": "Culan", "local": "Culant", "local_language": "ancien français" },
-    "lonlat": [2.3500, 46.5500],
+    "name": {
+      "display": "Culan",
+      "local": "Culant",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.35,
+      46.55
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château féodal des XIIe-XIIIe siècles aux confins du Berry et du Bourbonnais.",
-    "sources": ["Château de Culan"]
+    "sources": [
+      "Château de Culan"
+    ]
   },
   {
     "id": "set_noirlac",
     "province": "prov_berry",
     "kind": "abbey",
-    "name": { "display": "Noirlac", "local": "Noirlac", "local_language": "ancien français" },
-    "lonlat": [2.4919, 46.6489],
+    "name": {
+      "display": "Noirlac",
+      "local": "Noirlac",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.4919,
+      46.6489
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey"],
+    "buildings": [
+      "bld_abbey"
+    ],
     "port": false,
     "description": "Abbaye cistercienne fondée en 1136 sur le Cher.",
-    "sources": ["Abbaye de Noirlac"]
+    "sources": [
+      "Abbaye de Noirlac"
+    ]
+  },
+  {
+    "id": "set_vierzon",
+    "province": "prov_berry",
+    "kind": "town",
+    "name": {
+      "display": "Vierzon",
+      "local": "Vierzon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.0672,
+      47.2231
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande au confluent du Cher et de l'Yèvre.",
+    "sources": [
+      "Vierzon"
+    ]
+  },
+  {
+    "id": "set_sancerre",
+    "province": "prov_berry",
+    "kind": "town",
+    "name": {
+      "display": "Sancerre",
+      "local": "Sancerre",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.8378,
+      47.3306
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville haute fortifiée dominant la Loire, chef-lieu du comté de Sancerre.",
+    "sources": [
+      "Sancerre"
+    ]
+  },
+  {
+    "id": "set_mehun_sur_yevre",
+    "province": "prov_berry",
+    "kind": "castle",
+    "name": {
+      "display": "Mehun-sur-Yèvre",
+      "local": "Meun sur Yèvre",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.2306,
+      47.15
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château fort sur l'Yèvre, futur séjour favori du duc Jean de Berry.",
+    "sources": [
+      "Mehun-sur-Yèvre"
+    ]
+  },
+  {
+    "id": "set_aubigny_sur_nere",
+    "province": "prov_berry",
+    "kind": "village",
+    "name": {
+      "display": "Aubigny-sur-Nère",
+      "local": "Aubigny",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.4406,
+      47.4864
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg marchand de Sologne berrichonne.",
+    "sources": [
+      "Aubigny-sur-Nère"
+    ]
+  },
+  {
+    "id": "set_dun_sur_auron",
+    "province": "prov_berry",
+    "kind": "village",
+    "name": {
+      "display": "Dun-sur-Auron",
+      "local": "Dun le Roi",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.5667,
+      46.8833
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg royal sur l'Auron, au sud de Bourges.",
+    "sources": [
+      "Dun-sur-Auron"
+    ]
+  },
+  {
+    "id": "set_levroux",
+    "province": "prov_berry",
+    "kind": "village",
+    "name": {
+      "display": "Levroux",
+      "local": "Levroux",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6114,
+      46.9797
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg tanneur de Champagne berrichonne.",
+    "sources": [
+      "Levroux"
+    ]
+  },
+  {
+    "id": "set_chateaumeillant",
+    "province": "prov_berry",
+    "kind": "village",
+    "name": {
+      "display": "Châteaumeillant",
+      "local": "Chastel Meillant",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.2003,
+      46.5644
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancien oppidum devenu bourg fortifié aux confins du Berry et de la Marche.",
+    "sources": [
+      "Châteaumeillant"
+    ]
   }
 ]

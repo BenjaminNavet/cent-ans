@@ -139,6 +139,11 @@ fn routes_avoid_the_zone_of_control_of_stronger_armies() {
 fn england_embarks_at_dover_for_the_continent() {
     let data = data();
     let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    // DC3: the planning horizon (10 steps of 70 km) reaches Edinburgh, which the Scots
+    // threaten in 1337: only the French war is kept, so that the host looks to France.
+    for faction in state.factions.values_mut() {
+        faction.at_war_with.clear();
+    }
     at_war(&mut state, "fac_england", "fac_france");
     let english = main_army(&state, "fac_england");
     let dover = set("set_dover");

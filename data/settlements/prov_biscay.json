@@ -112,5 +112,83 @@
     "sources": [
       "Orduña"
     ]
+  },
+  {
+    "id": "set_bermeo",
+    "province": "prov_biscay",
+    "kind": "town",
+    "name": {
+      "display": "Bermeo",
+      "local": "Bermeo",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -2.7241,
+      43.4213
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de pêche et de baleiniers basque, chef-lieu de la seigneurie de Biscaye jusqu'au XIVe siècle.",
+    "sources": [
+      "Bermeo",
+      "Seigneurie de Biscaye"
+    ]
+  },
+  {
+    "id": "set_durango",
+    "province": "prov_biscay",
+    "kind": "town",
+    "name": {
+      "display": "Durango",
+      "local": "Durango",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -2.6322,
+      43.1706
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié fondé au XIIe siècle sur la route de Castille, chef-lieu de la Merindad de Durango.",
+    "sources": [
+      "Durango (Espagne)"
+    ]
+  },
+  {
+    "id": "set_balmaseda",
+    "province": "prov_biscay",
+    "kind": "village",
+    "name": {
+      "display": "Balmaseda",
+      "local": "Balmaseda",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -3.1971,
+      43.1804
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de marché sur le Cadagua, la première ville fondée par charte en Biscaye (1199).",
+    "sources": [
+      "Balmaseda"
+    ]
   }
 ]

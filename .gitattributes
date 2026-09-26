@@ -1,0 +1,3 @@
+# Shell scripts must keep LF line endings: Git for Windows (core.autocrlf=true by default)
+# would otherwise check them out with CRLF and Git Bash fails on "\r" (ADR 0087).
+*.sh text eol=lf

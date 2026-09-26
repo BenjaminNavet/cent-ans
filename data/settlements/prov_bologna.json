@@ -117,5 +117,109 @@
       "Forlì",
       "Ordelaffi"
     ]
+  },
+  {
+    "id": "set_imola",
+    "province": "prov_bologna",
+    "kind": "town",
+    "name": {
+      "display": "Imola",
+      "local": "Imola",
+      "local_language": "émilien"
+    },
+    "lonlat": [
+      11.7143,
+      44.3535
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville d'Émilie sur la via Émilienne, disputée entre communes rivales et petites seigneuries.",
+    "sources": [
+      "Imola"
+    ]
+  },
+  {
+    "id": "set_faenza",
+    "province": "prov_bologna",
+    "kind": "town",
+    "name": {
+      "display": "Faenza",
+      "local": "Faenza",
+      "local_language": "romagnol"
+    },
+    "lonlat": [
+      11.8828,
+      44.2857
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de Romagne sous la seigneurie des Manfredi, déjà réputée pour ses céramiques.",
+    "sources": [
+      "Faenza",
+      "Manfredi (famille)"
+    ]
+  },
+  {
+    "id": "set_nonantola",
+    "province": "prov_bologna",
+    "kind": "abbey",
+    "name": {
+      "display": "Nonantola",
+      "local": "Nonantola",
+      "local_language": "émilien"
+    },
+    "lonlat": [
+      11.0398,
+      44.6772
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine d'Émilie fondée en 752, célèbre pour son scriptorium et ses reliques.",
+    "sources": [
+      "Abbaye de Nonantola"
+    ]
+  },
+  {
+    "id": "set_persiceto",
+    "province": "prov_bologna",
+    "kind": "village",
+    "name": {
+      "display": "San Giovanni in Persiceto",
+      "local": "San Giovanni in Persiceto",
+      "local_language": "émilien"
+    },
+    "lonlat": [
+      11.1897,
+      44.6376
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de la plaine bolonaise, érigé en « terra murata » par la commune de Bologne en 1223.",
+    "sources": [
+      "San Giovanni in Persiceto"
+    ]
   }
 ]

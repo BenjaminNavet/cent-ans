@@ -110,5 +110,82 @@
     "sources": [
       "Tui"
     ]
+  },
+  {
+    "id": "set_ourense",
+    "province": "prov_galicia",
+    "kind": "town",
+    "name": {
+      "display": "Orense",
+      "local": "Ourense",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -7.8639,
+      42.3358
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Siège épiscopal sur le Miño, réputé pour ses sources thermales et son pont romain.",
+    "sources": [
+      "Orense"
+    ]
+  },
+  {
+    "id": "set_pontevedra",
+    "province": "prov_galicia",
+    "kind": "town",
+    "name": {
+      "display": "Pontevedra",
+      "local": "Pontevedra",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -8.6444,
+      42.431
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port et place de commerce sur l'estuaire du Lérez, un des plus actifs de Galice au XIVe siècle.",
+    "sources": [
+      "Pontevedra"
+    ]
+  },
+  {
+    "id": "set_oseira",
+    "province": "prov_galicia",
+    "kind": "abbey",
+    "name": {
+      "display": "Osera",
+      "local": "Oseira",
+      "local_language": "galicien"
+    },
+    "lonlat": [
+      -7.9942,
+      42.4028
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1137, l'une des plus riches de Galice.",
+    "sources": [
+      "Monastère d'Osera"
+    ]
   }
 ]

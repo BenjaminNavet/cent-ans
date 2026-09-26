@@ -108,5 +108,155 @@
     "sources": [
       "Abbaye de Stoneleigh"
     ]
+  },
+  {
+    "id": "set_stratford_upon_avon",
+    "province": "prov_warwick",
+    "kind": "town",
+    "name": {
+      "display": "Stratford-upon-Avon",
+      "local": "Stratford",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.7064,
+      52.1917
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg-marché fondé par l'évêque de Worcester sur l'Avon.",
+    "sources": [
+      "Stratford-upon-Avon"
+    ]
+  },
+  {
+    "id": "set_alcester",
+    "province": "prov_warwick",
+    "kind": "village",
+    "name": {
+      "display": "Alcester",
+      "local": "Alencestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.8656,
+      52.2136
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg romain puis médiéval au confluent de l'Alne et de l'Arrow.",
+    "sources": [
+      "Alcester"
+    ]
+  },
+  {
+    "id": "set_maxstoke",
+    "province": "prov_warwick",
+    "kind": "abbey",
+    "name": {
+      "display": "Maxstoke",
+      "local": "Maxstok",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.6167,
+      52.4667
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré augustinien de Maxstoke, au nord du Warwickshire.",
+    "sources": [
+      "Maxstoke Priory"
+    ]
+  },
+  {
+    "id": "set_henley_in_arden",
+    "province": "prov_warwick",
+    "kind": "village",
+    "name": {
+      "display": "Henley-in-Arden",
+      "local": "Henley in Ardern",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.7767,
+      52.2967
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché de la forêt d'Arden.",
+    "sources": [
+      "Henley-in-Arden"
+    ]
+  },
+  {
+    "id": "set_nuneaton",
+    "province": "prov_warwick",
+    "kind": "abbey",
+    "name": {
+      "display": "Nuneaton",
+      "local": "Etone",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4644,
+      52.5225
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré bénédictin de femmes de Nuneaton.",
+    "sources": [
+      "Nuneaton"
+    ]
+  },
+  {
+    "id": "set_tamworth",
+    "province": "prov_warwick",
+    "kind": "castle",
+    "name": {
+      "display": "Tamworth",
+      "local": "Tamewurthe",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.6939,
+      52.6336
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château sur la Tame, ancienne capitale du royaume de Mercie.",
+    "sources": [
+      "Château de Tamworth"
+    ]
   }
 ]

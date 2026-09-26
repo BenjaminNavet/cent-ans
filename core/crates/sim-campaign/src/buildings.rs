@@ -444,6 +444,11 @@ pub fn capacity(data: &GameData, province: &ProvinceId, buildings: &[BuildingId]
         .filter(|b| b.category == data_model::BuildingCategory::Production)
         .map(|b| u64::from(b.tier))
         .sum();
+    capacity_with_tiers_percent(data, province, bonus_tiers * 100)
+}
+
+/// [`capacity`] for production tiers counted in hundredths (lot DC3: weighed tiers).
+fn capacity_with_tiers_percent(data: &GameData, province: &ProvinceId, tiers_percent: u64) -> u64 {
     // The 1337 population is the reference: a province can grow ~25 % above
     // it before crowding hurts health, plus 10 % per production tier.
     let base = data
@@ -451,7 +456,16 @@ pub fn capacity(data: &GameData, province: &ProvinceId, buildings: &[BuildingId]
         .get(province)
         .map_or(BASE_CAPACITY, |p| p.population.classes.total())
         .max(BASE_CAPACITY);
-    base * (125 + 10 * bonus_tiers) / 100
+    base * (12_500 + 10 * tiers_percent) / 10_000
+}
+
+/// Weight, in per cent, of the buildings of a settlement of `kind` in the effects on
+/// its whole province (lot DC3, `rules.json` `province_effect_percent`; 100 when absent).
+pub fn province_effect_percent(data: &GameData, kind: data_model::SettlementKind) -> u32 {
+    data.settlement_rules
+        .as_ref()
+        .and_then(|rules| rules.province_effect_percent.get(&kind).copied())
+        .unwrap_or(100)
 }
 
 /// Total upkeep of the completed buildings of a province (spec § 1.2).
@@ -538,10 +552,61 @@ impl CampaignState {
     /// its governor's trait/skill effects and its active regional edict
     /// (spec § 2, lot C4).
     pub fn province_effects(&self, data: &GameData, province: &ProvinceId) -> EffectTotals {
-        let mut totals = effects_of(data, &self.province_buildings(province));
+        let mut totals = self.province_building_effects(data, province);
         totals.merge(&self.governor_effects(data, province));
         totals.merge(&crate::edicts::edict_effects(self, data, province));
         totals
+    }
+
+    /// Effects of the buildings of every settlement of `province` on the whole province,
+    /// each settlement's weighing its kind's `province_effect_percent` (lot DC3, ADR 0082:
+    /// the secondary places count for half, so that twice as many of them do not double
+    /// the appeasement of their churches and abbeys).
+    pub fn province_building_effects(
+        &self,
+        data: &GameData,
+        province: &ProvinceId,
+    ) -> EffectTotals {
+        let mut totals = EffectTotals::default();
+        for (_, settlement) in self.settlements_of(province) {
+            let percent = province_effect_percent(data, settlement.kind);
+            for building in settlement
+                .buildings
+                .iter()
+                .filter_map(|id| data.buildings.get(id))
+            {
+                for effect in &building.effects {
+                    if percent == 100 {
+                        totals.add_effect(effect);
+                    } else {
+                        let mut weighed = effect.clone();
+                        weighed.value = effect.value * f64::from(percent) / 100.0;
+                        totals.add_effect(&weighed);
+                    }
+                }
+            }
+        }
+        totals
+    }
+
+    /// Population capacity of `province` ([`capacity`]), its places' production
+    /// buildings weighing their kind's `province_effect_percent` (lot DC3).
+    pub fn province_capacity(&self, data: &GameData, province: &ProvinceId) -> u64 {
+        // Production tiers in hundredths, so that full weights give exactly `capacity`.
+        let tiers_percent: u64 = self
+            .settlements_of(province)
+            .map(|(_, settlement)| {
+                let percent = u64::from(province_effect_percent(data, settlement.kind));
+                settlement
+                    .buildings
+                    .iter()
+                    .filter_map(|id| data.buildings.get(id))
+                    .filter(|b| b.category == data_model::BuildingCategory::Production)
+                    .map(|b| u64::from(b.tier) * percent)
+                    .sum::<u64>()
+            })
+            .sum();
+        capacity_with_tiers_percent(data, province, tiers_percent)
     }
 
     /// Sum of the building effects of `settlement`, plus the trait/skill
@@ -852,7 +917,7 @@ impl CampaignState {
             buildings: city.buildings.clone(),
             construction: city.construction.clone(),
             fortification_level: self.fortification_level(data, &state.city),
-            capacity: capacity(data, id, &self.province_buildings(id)),
+            capacity: self.province_capacity(data, id),
             buildable: self.buildable(data, &state.city),
             resources: province_data.resources.clone(),
             effects: self.province_effects(data, id),
