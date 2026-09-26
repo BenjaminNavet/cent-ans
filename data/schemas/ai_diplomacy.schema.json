@@ -48,7 +48,7 @@
       "properties": {
         "keep_capital": { "type": "boolean", "description": "Une couronne ne cède jamais sa capitale ni sa dernière province par traité." },
         "cornered_provinces": { "type": "integer", "minimum": 0, "description": "Une couronne qui ne tient plus que ce nombre de ses provinces (ou moins) demande la paix à chaque saison, quel que soit le score de guerre (0 : jamais)." },
-        "cornered_waits_for_defeat": { "type": "boolean", "description": "EQ6 (ADR 0085) : une couronne acculée ne demande la paix avant min_war_turns qu'une fois battue dans cette guerre (score de guerre de -25 ou moins) ; elle n'achète plus la paix la saison même de la déclaration. Faux par défaut." }
+        "cornered_waits_for_defeat": { "type": "boolean", "description": "EQ6 (ADR 0085) : une couronne acculée en guerre contre un prétendant à son trône ne demande la paix avant min_war_turns qu'une fois battue dans cette guerre (score de guerre de -25 ou moins) : elle n'achète plus la paix la saison même de la déclaration. Contre tout autre ennemi, elle traite aussitôt comme avant. Faux par défaut." }
       },
       "required": ["keep_capital", "cornered_provinces"],
       "additionalProperties": false
