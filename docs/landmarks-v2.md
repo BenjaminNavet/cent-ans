@@ -183,14 +183,17 @@ Suivi : `docs/wip/vh7-orleans.md` ; captures `docs/img/vh7/` (`res://tests/vh7_s
   jusqu'en 1344 ; à partir de 1345, castrum et accrue du bourg Dunois (portes Bannier et Renart) :
   c'est l'enceinte du siège de 1428-1429 (la grande accrue de 1467-1480 n'existe pas encore).
   Deux anneaux fermés datés plutôt qu'un mur ouvert : les normales et les fossés restent justes.
-- **Pont des Tourelles** (21 arches), Châtelet, bastille Saint-Antoine (hypothétique), fort des
-  Tourelles, boulevard de terre et de bois (`earthwork`) ; boulevards des portes à partir de 1404
-  (emprises hypothétiques).
-- **Sainte-Croix** : chevet gothique seul (`gothic_cathedral`, `open_west`), sans transept, nef,
-  façade ni tours ; terrain de la nef à bâtir en espace libre.
+  Porte Renart sous la place De Gaulle, mur ouest le long du vallon de la rue
+  Notre-Dame-de-Recouvrance (relecture historique : `docs/histoire/relecture-vh-orleans.md`).
+- **Pont des Tourelles** (21 arches jusqu'en 1434-1435, axe de la rue des Hôtelleries), Châtelet,
+  chapelle Saint-Antoine sur la motte, bastille Saint-Antoine en bois à partir de 1417, fort des
+  Tourelles, boulevard de terre et de bois (`earthwork`) ; boulevards des portes à partir de 1417
+  (porte Renart 1418) (emprises hypothétiques).
+- **Sainte-Croix** : chevet gothique (`gothic_cathedral`, `open_west`) raccordé à la cathédrale
+  romane (nef, façade à deux tours, en `church`), remplacée seulement aux XVe-XVIe s.
 - **Faubourgs et églises hors les murs** (Saint-Aignan, Saint-Euverte, Saint-Laurent, Saint-Paterne,
-  Saint-Vincent, Saint-Marceau) : `until_year` 1428 ; Saint-Loup, Saint-Jean-le-Blanc et les
-  Augustins (bastilles anglaises prises en mai 1429) jusqu'en 1429.
+  Saint-Vincent, Saint-Marceau, couvent des Augustins) : `until_year` 1428 ; Saint-Loup,
+  Saint-Jean-le-Blanc et la bastille anglaise des Augustins (prises en mai 1429) jusqu'en 1429.
 - **Rues** : 438 rues OSM ; exclusions (rue Jeanne-d'Arc, rue Royale, rue de la République,
   boulevards des XVIIIe-XIXe s., quais, rues de la reconstruction d'après 1940) ; trois chemins
   tracés à la main (Portereau, Saint-Marceau, chemin de Blois).

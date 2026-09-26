@@ -13,6 +13,8 @@ use std::time::Instant;
 
 use godot::classes::RefCounted;
 use godot::prelude::*;
+
+use crate::relief_lod_bridge::ReliefLod;
 use vegetation::{
     reground, scatter_tile, DetailArea, Ground, MapRasters, ReliefFloor, TileRequest, TileResult,
     PAGE_PX,
@@ -77,12 +79,23 @@ fn ground_of(grid: &VarDictionary) -> Ground {
         .get("qt_pages")
         .and_then(|v| v.try_to::<VarDictionary>().ok())
     {
+        // Lot PB3g: pages already held by the quadtree's native store are shared, not copied
+        // (a snapshot holds up to 256 pages of 512 KB).
+        let store = grid
+            .get("qt_store")
+            .and_then(|v| v.try_to::<Gd<ReliefLod>>().ok());
+        let store = store.as_ref().map(|s| s.bind());
         let pages = pages
             .iter_shared()
             .filter_map(|(key, bytes)| {
                 let key = key.try_to::<i64>().ok()?;
+                if let Some(shared) = store.as_ref().and_then(|s| s.page_bytes(key)) {
+                    if shared.len() >= PAGE_PX * PAGE_PX * 2 {
+                        return Some((key, shared));
+                    }
+                }
                 let bytes = bytes.try_to::<PackedByteArray>().ok()?;
-                (bytes.len() >= PAGE_PX * PAGE_PX * 2).then(|| (key, bytes.to_vec()))
+                (bytes.len() >= PAGE_PX * PAGE_PX * 2).then(|| (key, Arc::new(bytes.to_vec())))
             })
             .collect();
         return Ground::Pages {

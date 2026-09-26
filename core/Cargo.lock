@@ -152,6 +152,7 @@ dependencies = [
  "data-model",
  "godot",
  "png",
+ "relief-lod",
  "serde",
  "serde_json",
  "sim-battle",
@@ -363,6 +364,10 @@ dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
 ]
+
+[[package]]
+name = "relief-lod"
+version = "0.1.0"
 
 [[package]]
 name = "serde"
