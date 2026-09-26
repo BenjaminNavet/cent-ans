@@ -118,3 +118,11 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
      puis fusionner main dans la branche, reconstruire la dylib (`CARGO_TARGET_DIR` partagé),
      et **ff main**.
   4. Nettoyer les worktrees d'agents fusionnés (DA2 : `.claude/worktrees/agent-ade9b18af852c5bfe`).
+- 26/09 après-midi : **reprise et fin de DA2.** Fusion de main (357 commits ; conflit
+  `portraits.generate` : nouvelles tentatives par image + coût réel des refus facturés de main,
+  test adapté). Défaut « Mahaut/Gille sans visage » : import Godot incomplet, disparu après
+  réimport. Nouveau défaut corrigé : **clones de fratrie** → miroir partagé (`LivingPortrait.mirrored`,
+  bit de `fnv1a`) dans le cadre et l'arbre, et **80 visages de plus** pour les cases peuplées
+  (nobles/chevaliers hommes 4, nobles femmes 3, enfants 3 ; **3,59 $**). Banque : 202 archétypes
+  + 25 variantes âgées. Budget DA : **17,88 $**. Smoke + test DA2 OK. Note : `da2_screenshot.gd
+  --out=` est relatif au dossier `game/` (utiliser le défaut).
