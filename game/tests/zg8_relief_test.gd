@@ -164,7 +164,7 @@ func _test_real_map() -> void:
 	var best_h := -INF
 	for j in 41:
 		for i in 41:
-			var p := Vector2(1835.0 + i, 2814.0 + j)
+			var p := Vector2(1835.5 + i, 2814.5 + j)  # centres des pixels (SZ2b, ADR 0086)
 			var h := map_data.height_m_at(p.x, p.y)
 			if h > best_h:
 				best_h = h
