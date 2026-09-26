@@ -45,6 +45,13 @@ uniform float fog_cloud_amount = 0.40;
 uniform float fog_cloud_scale = 0.045;    // par pixel carte (≈ 22 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
 uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
+// M5a : brouillard par case (texture de vue R8 de la simulation, filtrage linéaire).
+uniform sampler2D fog_cells : filter_linear, repeat_disable, hint_default_white;
+uniform bool fog_by_cell = false;
+uniform vec2 fog_cells_size = vec2(4096.0, 4096.0);   // pixels carte couverts par la texture
+uniform float fog_edge_jitter_px = 7.0;
+uniform vec3 fog_rim_color = vec3(0.10, 0.065, 0.03);
+uniform float fog_rim_amount = 0.22;
 
 uniform sampler2D splat : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_splat = false;
@@ -287,6 +294,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/campaign_weather.gdshaderinc"
 #include "res://shaders/relief_quadtree.gdshaderinc"  // ZG2 : relief streamé en quadtree
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
+#include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -307,13 +315,19 @@ void fragment() {
 	float lod = log2(k);
 	vec2 du = vec2(k / map_size.x, 0.0);
 	vec2 dv = vec2(0.0, k / map_size.y);
-	float hc = height_m_lod(uv, max(lod - 1.0, 0.0));
-	float h_l = height_m_lod(uv - du, lod);
-	float h_r = height_m_lod(uv + du, lod);
-	float h_u = height_m_lod(uv - dv, lod);
-	float h_d = height_m_lod(uv + dv, lod);
-	vec2 grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
-	rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
+	float hc = 0.0;
+	vec2 grad_m = vec2(0.0);
+	// PB2 : sur une page du quadtree, `qt_relief` remplace altitude et gradient (9 lectures de
+	// heightmap et de relief fin évitées, même résultat).
+	if (!qt_has_page()) {
+		hc = height_m_lod(uv, max(lod - 1.0, 0.0));
+		float h_l = height_m_lod(uv - du, lod);
+		float h_r = height_m_lod(uv + du, lod);
+		float h_u = height_m_lod(uv - dv, lod);
+		float h_d = height_m_lod(uv + dv, lod);
+		grad_m = vec2(h_r - h_l, h_d - h_u) / (2.0 * k);     // mètres par pixel carte
+		rl_relief(uv, footprint, grad_m);  // lot R1 : relief fin
+	}
 	qt_relief(p, footprint, hc, grad_m);  // ZG2 : relief de la page du quadtree
 	float slope = length(grad_m) / meters_per_px;              // pente réelle (m/m)
 	vec2 grad_disp = campaign_display_gradient(hc, grad_m, p);  // ZG8 : pente de la surface affichée
@@ -617,11 +631,23 @@ void fragment() {
 	}
 
 	if (fog_enabled && id > 0) {
-		float fog = 1.0 - step(0.5, fog_seen(id));
-		if (other_id != id && other_id > 0) {
-			float fog_other = 1.0 - step(0.5, fog_seen(other_id));
-			if (fog_other != fog) {
-				fog = mix(0.5, fog, smoothstep(0.0, fog_feather_px, d));
+		float fog;
+		if (fog_by_cell) {
+			// M5a : vue par case (texture 512² de la simulation, 255 = vu, seuil à 128).
+			// Bord effrangé : la prise est décalée de quelques pixels par un bruit lent.
+			vec2 jitter = vec2(fbm(p * 0.035), fbm(p * 0.035 + vec2(31.7, 5.3))) - 0.5;
+			float seen_r = texture(fog_cells, (p + jitter * fog_edge_jitter_px) / fog_cells_size).r;
+			fog = 1.0 - smoothstep(0.32, 0.68, seen_r);
+			// Liseré d'encre sépia sur la lisière, comme un bord de parchemin.
+			float rim = smoothstep(0.18, 0.5, seen_r) * (1.0 - smoothstep(0.5, 0.82, seen_r));
+			col = mix(col, fog_rim_color, rim * fog_rim_amount);
+		} else {
+			fog = 1.0 - step(0.5, fog_seen(id));
+			if (other_id != id && other_id > 0) {
+				float fog_other = 1.0 - step(0.5, fog_seen(other_id));
+				if (fog_other != fog) {
+					fog = mix(0.5, fog, smoothstep(0.0, fog_feather_px, d));
+				}
 			}
 		}
 		if (fog > 0.0) {
@@ -642,6 +668,7 @@ void fragment() {
 	col = weather_ground(col, p, hc, slope, footprint, roughness, wx_emit);  // CM2 : météo
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
+	fr1_borders(p, uv, footprint, col, pm_emit);  // FR1 : frontières de faction lumineuses
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2

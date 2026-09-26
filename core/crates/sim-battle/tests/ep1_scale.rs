@@ -1,4 +1,4 @@
-//! EP1 tests (ADR 0031): battle scale tiers, field size by head count,
+//! EP1 tests (ADR 0076): battle scale tiers, field size by head count,
 //! regiments per side, AI against AI with 40+ regiments.
 
 mod common;
@@ -132,14 +132,23 @@ fn reinforcements_beyond_the_epic_cap() {
 /// instead of 14-18, before the whole line is locked in melee (11-12
 /// regiments at most over seeds 3, 5, 11): the threshold of 20 cannot come
 /// back; the battle must end within 12 minutes.
+///
+/// SG4 (horse guarding its shooters, melee height advantage): the test
+/// also counts the regiments that fought hand to hand at least once.
 #[test]
 fn ai_handles_sixty_regiments_a_side() {
-    let mut sim = BattleSim::new(big_setup(60), 11).unwrap();
+    // `EP1_SEED=<n>`: another seed (probe).
+    let seed: u64 = std::env::var("EP1_SEED").map_or(11, |s| s.parse().unwrap());
+    let mut sim = BattleSim::new(big_setup(60), seed).unwrap();
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);
     let mut melee_seen = 0usize;
+    let mut fought = vec![false; sim.units().len()];
     while !sim.is_finished() && sim.elapsed() < 1800.0 {
         sim.step();
+        for (k, u) in sim.units().iter().enumerate() {
+            fought[k] |= u.state == UnitState::Melee;
+        }
         melee_seen = melee_seen.max(
             sim.units()
                 .iter()
@@ -147,7 +156,14 @@ fn ai_handles_sixty_regiments_a_side() {
                 .count(),
         );
     }
+    let fought = fought.iter().filter(|&&f| f).count();
+    eprintln!(
+        "seed {seed}: {melee_seen} in melee, {fought} fought, winner {:?} at {:.0}",
+        sim.winner(),
+        sim.elapsed()
+    );
     assert!(melee_seen >= 10, "at most {melee_seen} regiments in melee");
+    assert!(fought >= 25, "only {fought} regiments fought hand to hand");
     assert!(sim.is_finished(), "still running at {:.0} s", sim.elapsed());
     assert!(sim.elapsed() <= 720.0, "over at {:.0} s", sim.elapsed());
     println!(

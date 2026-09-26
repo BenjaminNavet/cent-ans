@@ -215,6 +215,23 @@ func _check_advisor(settings: Node) -> void:
 	advisor.dismiss()
 	Advisor.on_turn_events([{"kind": "siege_started", "faction": "fac_france"}], "fac_france", 21)
 	_check(advisor.said.back() == "adv_first_siege", "first siege")
+	# Q4 : la bulle ne capte pas la souris (sauf « × ») et attend la fermeture d'une modale.
+	_check(advisor._panel.mouse_filter == Control.MOUSE_FILTER_IGNORE, "advisor bubble ignores the mouse")
+	_check(advisor._close_button != null and advisor._close_button.mouse_filter == Control.MOUSE_FILTER_STOP, "dismiss button")
+	_check(advisor._layer.layer < 20, "advisor layer below the modal layers")
+	advisor.dismiss()
+	var modal := Control.new()
+	PanelStack.mark_blocking(modal)
+	get_root().add_child(modal)
+	advisor._time += 5.0
+	advisor._process(0.0)
+	advisor.say({"id": "q4_probe", "text": "Essai."})
+	_check(advisor.said.back() != "q4_probe" and not advisor._panel.visible, "advisor waits while a modal is open")
+	modal.hide()
+	advisor._time += 5.0
+	advisor._process(0.3)
+	_check(advisor.said.back() == "q4_probe", "advisor speaks once the modal is closed")
+	modal.free()
 	advisor.dismiss()
 	if settings != null:
 		settings.call("set_value", "voice/advisor", false, false)

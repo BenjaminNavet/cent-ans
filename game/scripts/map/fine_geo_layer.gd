@@ -71,6 +71,8 @@ var _update_us_max := 0
 var _updates := 0
 var _build_ms_total := 0.0
 var _install_ms_max := 0.0
+var _install_mesh_ms_max := 0.0
+var _install_gates_ms_max := 0.0
 var _builds := 0
 ## Préréglage de qualité (PF1) : ordre minimal des cours d'eau, rayon, parcellaire (0-2).
 var _min_order := 3
@@ -89,7 +91,8 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	if terrain == null or terrain.quadtree == null or OS.get_cmdline_user_args().has("--no-fine-geo"):
 		return false
 	store = FineGeoStore.new()
-	if not store.load_from(map_data.map_dir) or not store.available(CafvTile.LAYER_RIVERS):
+	var relief_root: String = preload("res://scripts/map/map_paths.gd").relief_root_for(map_data.map_dir)  # ZG7b
+	if not store.load_from(map_data.map_dir, relief_root) or not store.available(CafvTile.LAYER_RIVERS):
 		store = null
 		return false
 	enabled = true
@@ -99,6 +102,11 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 	for zone in rivers.zones:
 		var c: Vector2 = zone["px"]
 		_zones.append(Vector3(c.x, c.y, float(zone["radius_px"])))
+		# ZG7a : pas de lit creusé dans les zones personnalisées (villes emblématiques) : les
+		# rubans n'y sont pas dessinés, le lit restait une tranchée vide (Tamise à -7,8 m sous
+		# des rives à 2-4 m à Londres). Contrat de `river_styles.json` : le rendu générique
+		# (eau, lit, berges, ponts) se retire dans ces cercles.
+		carver.covers.append(Vector4(c.x, c.y, float(zone["radius_px"]), -1.0))
 	_collect_towns()
 	river_material = ShaderMaterial.new()
 	river_material.shader = RIVER_SHADER
@@ -310,11 +318,11 @@ func _start_job(key: int) -> void:
 	job.river_tile = store.get_tile(CafvTile.LAYER_RIVERS, col, row)
 	job.road_tile = store.get_tile(CafvTile.LAYER_ROADS, col, row)
 	job.snapshot = terrain.quadtree.surface_snapshot(rect.grow(1.0), rect.position)
-	job.finest = _finest_level(terrain.quadtree.surface_snapshot(rect, rect.position))
+	job.finest = terrain.quadtree.finest_levels([rect] as Array[Rect2])[0]
 	job.snapshot_scale = MapData.vertical_scale()
 	job.meters_per_unit = map_data.meters_per_px
 	job.min_order = _min_order
-	for c in carver.covers:
+	for c in rivers.covers:
 		if rect.grow(c.z + 1.0).has_point(Vector2(c.x, c.y)):
 			job.covers.append(c)
 	for z in _zones:
@@ -323,6 +331,11 @@ func _start_job(key: int) -> void:
 	for t in _towns:
 		if rect.grow(t.z).has_point(Vector2(t.x, t.y)):
 			job.towns.append(t)
+	if settlements != null and settlements.data != null:
+		for c in job.covers:
+			var index := int(c.w)
+			if index >= 0 and index < settlements.data.settlements.size():
+				job.cover_kinds[index] = str(settlements.data.settlements[index].get("kind", ""))
 	if _built.has(key):
 		(_built[key] as Dictionary)["dirty"] = -1
 	_jobs[key] = {"task": WorkerThreadPool.add_task(job.run, false, "fine ribbons"), "job": job}
@@ -368,12 +381,16 @@ func _install(job: FineRibbonJob) -> void:
 		node.add_child(road)
 		entry = {"node": node, "river": river, "road": road, "used": _frame, "dirty": -1, "version": 0, "gates": []}
 		_built[job.key] = entry
+	var t_mesh := Time.get_ticks_usec()
 	(entry["river"] as MeshInstance3D).mesh = _mesh(job.river_arrays, job.river_aabb)
 	(entry["road"] as MeshInstance3D).mesh = _mesh(job.road_arrays, job.road_aabb)
+	_install_mesh_ms_max = maxf(_install_mesh_ms_max, (Time.get_ticks_usec() - t_mesh) / 1000.0)
 	entry["version"] = int(entry["version"]) + 1
 	entry["finest"] = job.finest
 	entry["points"] = job.river_points + job.road_points
+	var t_gates := Time.get_ticks_usec()
 	_build_gates(entry, job.gates)
+	_install_gates_ms_max = maxf(_install_gates_ms_max, (Time.get_ticks_usec() - t_gates) / 1000.0)
 	_build_ms_total += job.build_ms
 	_builds += 1
 	_install_ms_max = maxf(_install_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
@@ -407,24 +424,26 @@ func _evict() -> void:
 ## pendant un panoramique).
 func _on_surface_rect_changed(rect: Rect2) -> void:
 	var now := Time.get_ticks_msec()
+	# ZG7a : étages les plus fins de toutes les tuiles touchées en un parcours des pages (un
+	# instantané par tuile coûtait jusqu'à 9 ms par page arrivée sous charge).
+	var keys: Array[int] = []
+	var rects: Array[Rect2] = []
 	for key: int in _built:
 		var tile_rect := FineGeoStore.tile_rect(key & 0xFFF, key >> 12)
-		if not tile_rect.intersects(rect):
-			continue
-		var entry: Dictionary = _built[key]
-		var finest := _finest_level(terrain.quadtree.surface_snapshot(tile_rect, tile_rect.position))
+		if tile_rect.intersects(rect):
+			keys.append(key)
+			rects.append(tile_rect)
+	if keys.is_empty():
+		return
+	var levels := terrain.quadtree.finest_levels(rects)
+	for i in keys.size():
+		var entry: Dictionary = _built[keys[i]]
+		var finest := levels[i]
 		var built_at := int(entry.get("finest", -1))
 		# E5-E7 (zones de détail) : lit déjà creusé dans leurs pages, écart de surface faible ; on
 		# ne remaille que jusqu'à E4.
 		if finest != built_at and mini(finest, 4) != mini(built_at, 4):
 			entry["dirty"] = now
-
-
-static func _finest_level(snapshot: Dictionary) -> int:
-	var finest := -1
-	for page_key: int in snapshot.get("qt_pages", {}):
-		finest = maxi(finest, ReliefPyramid.level_of_key(page_key))
-	return finest
 
 
 # --- Ponts ----------------------------------------------------------------------------
@@ -437,16 +456,17 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 	var nodes: Array[Node3D] = []
 	for gate in gates:
 		var index: int = gate["cover"]
-		var kind := str(settlements.data.settlements[index].get("kind", "")) if settlements != null and settlements.data != null else "city"
-		var width: float = gate["width"]
-		var structure := ("gate" if width >= GATE_MIN_WIDTH else "stone") if kind in WALLED else "wood"
 		var instance := MeshInstance3D.new()
 		instance.name = "Gate_%d" % index
 		# ZG4b : échelle réelle (ZG5b les laissait à l'échelle exagérée de la carte, ×2 en hauteur et
 		# en largeur de tablier, culées de 50-100 m) : maillage d'une portée `width / FINE_SCALE`
 		# réduit de `FINE_SCALE`, hauteur recalculée à chaque échelle verticale (`_ground_gate`).
-		var mesh_width := maxf(width, 0.01) / RiverCrossings.FINE_SCALE
-		instance.mesh = BridgeMeshes.build(structure, mesh_width, absi(str(index).hash()) + nodes.size())
+		# ZG7a : type, largeur et tableaux préparés dans le fil du maillage (`FineRibbonJob`).
+		var mesh_width: float = gate["mesh_width"]
+		var key: String = gate["mesh_key"]
+		instance.mesh = BridgeMeshes.cached(key)
+		if instance.mesh == null:
+			instance.mesh = BridgeMeshes.build_from(key, gate["surfaces"])
 		var dir: Vector2 = gate["dir"]
 		var across := Vector3(-dir.y, 0.0, dir.x)
 		var along := across.cross(Vector3.UP)
@@ -456,6 +476,7 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 		instance.set_meta("across", across)
 		instance.set_meta("along", along)
 		instance.set_meta("mesh_width", mesh_width)
+		instance.set_meta("deck_scale", BridgeMeshes.fine_deck_scale(str(gate["structure"]), mesh_width, map_data.meters_per_px, RiverCrossings.FINE_SCALE))
 		instance.visibility_range_end = RiverCrossings.VISIBILITY_RANGE
 		(entry["node"] as Node3D).add_child(instance)
 		instance.visible = _bridges_fine
@@ -469,7 +490,9 @@ func _ground_gate(instance: MeshInstance3D) -> void:
 	var k := RiverCrossings.FINE_SCALE
 	var deck_top := (0.05 + 0.02 * float(instance.get_meta("mesh_width", 1.0))) * k
 	var k_h := clampf(GATE_DECK_RISE_M * vs / maxf(deck_top, 1e-4), 0.3, 12.0)
-	instance.transform.basis = Basis(instance.get_meta("across", Vector3.RIGHT) * k, Vector3.UP * k * k_h, instance.get_meta("along", Vector3.BACK) * k)
+	# ZG7a : tablier à sa largeur réelle (`BridgeMeshes.fine_deck_scale`), pas × `FINE_SCALE`.
+	var k_along := float(instance.get_meta("deck_scale", k))
+	instance.transform.basis = Basis(instance.get_meta("across", Vector3.RIGHT) * k, Vector3.UP * k * k_h, instance.get_meta("along", Vector3.BACK) * k_along)
 	instance.position.y = maxf(MapData.display_height(float(instance.get_meta("z_m", 0.0)), instance.position.x, instance.position.z), 0.0)
 
 
@@ -546,5 +569,8 @@ func perf_stats() -> Dictionary:
 		"fine_builds": _builds,
 		"fine_build_ms_avg": snappedf(_build_ms_total / maxf(_builds, 1), 0.1),
 		"fine_install_ms_max": snappedf(_install_ms_max, 0.01),
+		"fine_install_mesh_ms_max": snappedf(_install_mesh_ms_max, 0.01),
+		"fine_install_gates_ms_max": snappedf(_install_gates_ms_max, 0.01),
 		"carved_pages": int(carver.stats.get("pages", 0)) if carver != null else 0,
+		"bridge_reshape_ms_max": snappedf(rivers.crossings.reshape_ms_max, 0.01) if rivers != null and rivers.crossings != null else 0.0,
 	}

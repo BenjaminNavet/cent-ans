@@ -26,6 +26,8 @@ static var _relief_gain: float = 0.0
 static var _floor: PackedFloat32Array = PackedFloat32Array()
 static var _floor_side: Vector2i = Vector2i.ZERO
 static var _floor_cell: float = 8.0
+## Lot PB2 : incrémenté à chaque publication du fond (le semis natif le recopie alors).
+static var _floor_version: int = 0
 
 
 var map_dir: String = ""
@@ -155,7 +157,13 @@ static func set_relief_floor(grid: Dictionary) -> void:
 		_floor_cell = float(grid.get("cell", 8.0))
 		RenderingServer.global_shader_parameter_set("campaign_relief_floor", ReliefFloor.texture_of(grid))
 		RenderingServer.global_shader_parameter_set("campaign_relief_floor_info", Vector4(_floor_cell, 0.5 * (_floor_cell - 1.0), 0.0, 0.0))
+	_floor_version += 1
 	_publish_gain()
+
+
+## Lot PB2 : fond de vallée publié {data, side, cell, version} (lecture seule ; semis natif).
+static func relief_floor_grid() -> Dictionary:
+	return {"data": _floor, "side": _floor_side, "cell": _floor_cell, "version": _floor_version}
 
 
 ## Vrai si un fond de vallée est publié.

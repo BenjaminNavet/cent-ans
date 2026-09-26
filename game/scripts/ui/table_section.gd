@@ -13,7 +13,7 @@ signal diet_changed(province_id: String, diet_id: String)
 const ROW_ICON := 20.0
 const ERROR_COLOR := Color(0.55, 0.20, 0.15)
 const MUTED_COLOR := Color(0.42, 0.33, 0.20)
-const LENT_TEXT := "[b]Carême[/b] — quarante jours de [[cdx_careme|jeûne]] avant Pâques : une table de viande ou de laitages coûte 3 de piété au souverain et fâche le clergé de la province (+10 de mécontentement) ; le poisson de carême rapporte +2 de piété."
+const LENT_TEXT := "[b]Carême[/b] — quarante jours de [[cdx_careme|jeûne]] avant Pâques : une table de viande ou de laitages coûte {rule.lent_piety_penalty} de piété au souverain et fâche le clergé de la province (+{rule.lent_clergy_unrest} de mécontentement) ; le poisson de carême rapporte +{rule.lent_fish_piety} de piété."
 
 var province_id: String = ""
 var is_player_owner: bool = false
@@ -147,7 +147,7 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 	var lent := bool(_sim.call("is_lent")) if _sim.has_method("is_lent") else false
 	lent_banner.visible = lent
 	if lent:
-		lent_text.text = CodexText.format(LENT_TEXT)
+		lent_text.text = CodexText.format(RuleValues.format(LENT_TEXT))
 	choose_button.visible = player_owned
 	choose_button.disabled = changed
 	choose_button.tooltip_text = "Un seul changement par province et par tour." if changed else "Choisir la table de la province (effet à la fin du tour)."

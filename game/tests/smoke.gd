@@ -297,6 +297,10 @@ func _run_start_menu() -> void:
 			if str(demo["id"]) == "siege_bruges":
 				var args := BattleDemosMenu.args_for(demo)
 				_check(args.has("--siege-landmark=bruges") and args.has("--siege-attacker=fac_france"), "Bruges demo args: %s" % str(args))
+	# EP7 : batailles historiques (détail : tests/ep7_historical_test.gd).
+	menu.open_historical()
+	await process_frame
+	_check(menu.overlay_open() and menu._overlay is HistoricalBattlesMenu, "historical battles overlay should open")
 	if _failures == 0:
 		print("smoke OK: start menu, %d cards" % menu.card_count())
 	menu.queue_free()
@@ -599,10 +603,13 @@ func _run_minimap_fog() -> void:
 		_check(minimap.visible_province_count() > 0 and minimap.visible_province_count() < map.map_data.province_count,
 			"minimap fog mask should cover part of the map (%d visible)" % minimap.visible_province_count())
 		_check(map.terrain.material.get_shader_parameter("fog_enabled") == true, "terrain shader fog should be enabled")
+		_check(ctl.fog_by_cell and map.terrain.material.get_shader_parameter("fog_by_cell") == true and ctl.fog_texture != null,
+			"terrain fog should come from the per-cell vision texture (M5a)")
 		for army_id in map.sim.call("get_army_ids"):
 			var army: Dictionary = map.sim.call("get_army", army_id)
-			if str(army.get("faction", "")) != map.player_faction and not ctl.is_province_visible(str(army.get("location_province", army.get("location", "")))):
-				_check(not map.armies.has_army(army_id), "foreign army %s in hidden %s should have no marker" % [army_id, army.get("location", "")])
+			# M5a : vue par case ; une armée étrangère dont le point n'est pas vu n'a pas de marqueur.
+			if not ctl.is_army_visible(str(army_id), army):
+				_check(not map.armies.has_army(army_id), "foreign army %s out of sight should have no marker" % army_id)
 		var settings: Node = root.get_node_or_null("/root/Settings")
 		if settings != null:
 			settings.call("set_value", "map/fog_of_war", false, false)
@@ -1686,6 +1693,15 @@ func _run_icons() -> void:
 	_check(str(library.call("resolve", "unit_does_not_exist")) == "cat_unit", "unit fallback expected")
 	_check(str(library.call("resolve", "bld_does_not_exist")) == "cat_building", "building fallback expected")
 	_check(library.call("get_icon", "totally_unknown") != null, "default fallback expected")
+	# DA5b : miniatures d'entité peintes, prioritaires sur l'encre et le SVG, jamais teintées.
+	var entity: Dictionary = library.get("entity")
+	_check(entity.size() >= 100, "entity miniatures missing: %d" % entity.size())
+	for id in ["unit_knights", "bld_castle", "tech_bombards", "unit_category_infantry"]:
+		if entity.has(id):
+			_check(bool(library.call("is_entity", id)) and not bool(library.call("is_ink", id)), "%s should be a painted miniature" % id)
+			_check(str(library.call("icon_path", id)).begins_with("res://assets/icons/entity/"), "%s miniature path" % id)
+			_check(library.call("get_icon", id) is Texture2D, "%s miniature not loadable" % id)
+	_check(not bool(library.call("is_entity", "hud_treasury")), "action icons stay ink")
 	var tip := RichTooltip.technology({"id": "tech_bombards", "name": "Bombardes", "branch": "military", "tier": 3, "cost": 350, "effective_cost": 350, "effects": [{"kind": "siege_resistance", "value": -5}], "historical_year": 1346})
 	_check(tip.contains("[img") and tip.contains("1346") and tip.contains("Résistance aux sièges"), "technology tooltip incomplete: %s" % tip)
 	var panel := RichTooltip.make_panel(RichTooltip.gauge("unrest", 40))

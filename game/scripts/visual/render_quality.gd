@@ -83,8 +83,9 @@ const PRESETS := {
 		"glow": true, "fog_grid": [64, 48],
 		# PF1 : filtre moyen sur la carte (ombres douces à contact durci, PCSS) : invisible au
 		# zoom comté, ≈ 4 ms de GPU de moins qu'en « haut ». Quadtree de relief à 6 px par sommet (ZG2 : 4,
-		# gardé en Ultra) : aucune différence visible au zoom comté, ≈ 6 ms de GPU de moins.
-		"relief_vertex_px": 6.0, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 1,
+		# gardé en Ultra) : aucune différence visible au zoom comté, ≈ 6 ms de GPU de moins. Q4 : 7,5 px
+		# (vue de Paris à 40 u., 1080p : 25,9 → 24,2 ms, 7,81 → 7,57 M primitives, captures identiques).
+		"relief_vertex_px": 7.5, "relief_items": 700, "relief_extra_depth": 3, "relief_pages": 256, "relief_shadow_cascades": 1,
 		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
 		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
@@ -199,10 +200,20 @@ static func _install_particle_hook(tree: SceneTree) -> void:
 	tree.node_added.connect(_on_node_added)
 
 
-## Différé : les scripts règlent souvent `amount` juste après `add_child`.
+## Différé : les scripts règlent souvent `amount` juste après `add_child`. Les particules d'un
+## effet ponctuel (ex. incendie) peuvent être libérées avant que l'appel différé ne s'exécute ;
+## passer l'objet directement à `call_deferred` fait alors échouer la file de messages (« Cannot
+## convert argument 1 from Object to Object », le slot mémoire étant réutilisé par un autre objet
+## d'ici là). On passe donc l'ID d'instance et on ne résout le nœud qu'au moment de l'appel.
 static func _on_node_added(node: Node) -> void:
 	if node is GPUParticles3D or node is CPUParticles3D:
-		scale_particles.call_deferred(node)
+		_scale_particles_by_id.call_deferred(node.get_instance_id())
+
+
+static func _scale_particles_by_id(id: int) -> void:
+	var node := instance_from_id(id)
+	if node != null:
+		scale_particles(node)
 
 
 static func scale_particles(node: Node) -> void:

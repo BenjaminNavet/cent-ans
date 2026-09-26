@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "entity_icons.schema.json",
+  "title": "Icônes d'entité en miniatures peintes (DA5b)",
+  "description": "Catalogue du lot DA5b : une miniature peinte par entité (unité, bâtiment, technique, compétence, ressource, régime, catégorie d'unité), dans un cadre commun peint par code. Une entrée dérive une illustration existante (`source`, recadrage `crop` facultatif, sinon automatique) ou décrit le sujet d'une miniature à générer (`subject`). Rendu seulement, aucune règle de jeu.",
+  "type": "object",
+  "required": ["version", "model", "budget_cap_usd", "size", "frame", "picture", "crop", "generation", "icons"],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "colour": {"type": "string", "pattern": "^#[0-9a-f]{6}$"},
+    "px": {"type": "number", "minimum": 0, "maximum": 16},
+    "entry": {
+      "type": "object",
+      "required": ["id", "label", "group"],
+      "additionalProperties": false,
+      "oneOf": [
+        {"required": ["source"], "not": {"required": ["subject"]}},
+        {"required": ["subject"], "not": {"required": ["source"]}}
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "label": {"type": "string", "minLength": 1, "description": "Nom français (planche de contrôle)."},
+        "group": {"type": "string", "enum": ["unit", "unit_category", "building", "technology", "skill", "resource", "diet", "trait"]},
+        "source": {"type": "string", "pattern": "^game/assets/.+\\.(jpg|png)$", "description": "Illustration peinte existante (chemin depuis la racine du dépôt) : miniature dérivée, gratuite."},
+        "crop": {
+          "type": "object",
+          "required": ["x", "y", "scale"],
+          "additionalProperties": false,
+          "description": "Carré découpé : centre (fraction de la largeur et de la hauteur) et côté (fraction du petit côté). Absent : recherche automatique du sujet.",
+          "properties": {
+            "x": {"type": "number", "minimum": 0, "maximum": 1},
+            "y": {"type": "number", "minimum": 0, "maximum": 1},
+            "scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+          }
+        },
+        "subject": {"type": "string", "minLength": 10, "description": "Sujet en anglais d'une miniature à générer, ajouté à la fin du bloc de style."},
+        "targets": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "Identifiants d'interface servis par la miniature (défaut : `id`)."}
+      }
+    }
+  },
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "model": {"type": "string", "minLength": 3},
+    "budget_cap_usd": {"type": "number", "exclusiveMinimum": 0, "maximum": 50},
+    "size": {"type": "integer", "minimum": 32, "maximum": 512},
+    "frame": {
+      "type": "object",
+      "required": ["ink", "gold_light", "gold_dark", "azure", "ink_px", "gold_px", "azure_px", "corner_px"],
+      "additionalProperties": false,
+      "description": "Cadre commun (épaisseurs en pixels à 128 px) : filet d'encre, or bruni en dégradé, filet d'azur, filet d'encre.",
+      "properties": {
+        "ink": {"$ref": "#/$defs/colour"},
+        "gold_light": {"$ref": "#/$defs/colour"},
+        "gold_dark": {"$ref": "#/$defs/colour"},
+        "azure": {"$ref": "#/$defs/colour"},
+        "ink_px": {"$ref": "#/$defs/px"},
+        "gold_px": {"$ref": "#/$defs/px"},
+        "azure_px": {"$ref": "#/$defs/px"},
+        "corner_px": {"$ref": "#/$defs/px"}
+      }
+    },
+    "picture": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Retouche de la peinture réduite (lisibilité à 32 px).",
+      "properties": {
+        "contrast": {"type": "number", "minimum": 0.5, "maximum": 2},
+        "saturation": {"type": "number", "minimum": 0.5, "maximum": 2},
+        "sharpen": {"type": "integer", "minimum": 0, "maximum": 300}
+      }
+    },
+    "crop": {
+      "type": "object",
+      "required": ["derived_scale", "generated_scale"],
+      "additionalProperties": false,
+      "properties": {
+        "derived_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "generated_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+      }
+    },
+    "generation": {
+      "type": "object",
+      "required": ["lead", "prompt"],
+      "additionalProperties": false,
+      "properties": {
+        "lead": {"type": "string", "minLength": 10, "description": "Début du prompt, suivi du sujet de l'entrée."},
+        "reference": {"type": "string", "description": "Image de référence envoyée avec le prompt (chemin depuis la racine du dépôt)."},
+        "prompt": {"type": "string", "minLength": 40, "description": "Bloc de style commun, en fin de prompt."}
+      }
+    },
+    "icons": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}}
+  }
+}

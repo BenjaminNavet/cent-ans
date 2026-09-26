@@ -37,6 +37,9 @@ pub(crate) struct AssaultState {
     intact: Vec<bool>,
     primed: bool,
     fell_back: bool,
+    /// SG4: men lent to a ram by a foot regiment, `(ram index, regiment
+    /// index, men)`: the survivors return to their regiment at the end.
+    ram_loans: Vec<(usize, usize, f64)>,
 }
 
 impl BattleSim {
@@ -120,6 +123,8 @@ impl BattleSim {
     /// [`Unit::figure_positions`].
     pub fn soldier_poses(&self, unit: &Unit, scale: f64) -> Vec<[f64; 4]> {
         let mut positions = unit.figure_positions(scale);
+        // EP11: bulging front, squeezed ranks, wrapping files.
+        crate::push::deform_figures(unit, &self.push_rules, &mut positions);
         // BR3: no figure in a house or a prop.
         self.push_figures_out(unit, &mut positions);
         let (Some(piece), Some(works)) = (unit.climbing, &self.siege) else {
@@ -231,6 +236,110 @@ impl BattleSim {
             Some(RAM_PERIOD)
         } else {
             None
+        }
+    }
+
+    /// SG4: relief of the ram's crew. While the gate stands, the nearest
+    /// foot regiment of the attacker within `ram.relief_range_m` of a ram
+    /// short of men (or abandoned, its crew all dead) passes men to it,
+    /// `ram.relief_men_per_s` a second, up to the full crew; an abandoned
+    /// ram is manned again.
+    pub(super) fn relieve_rams(&mut self) {
+        let Some(works) = &self.siege else {
+            return;
+        };
+        if !works.pieces[works.gate].intact() {
+            return;
+        }
+        let rules = &crate::siege::SiegeWorkRules::bundled().ram;
+        if rules.relief_range_m <= 0.0 || rules.relief_men_per_s <= 0.0 {
+            return;
+        }
+        for r in 0..self.units.len() {
+            let ram = &self.units[r];
+            if !ram.ram || ram.left_field || ram.reserve || ram.withdrawing {
+                continue;
+            }
+            let full = f64::from(ram.initial_soldiers);
+            let missing = full - ram.hp.max(0.0);
+            if missing <= 1e-6 {
+                continue;
+            }
+            let donor = (0..self.units.len())
+                .filter(|&k| {
+                    let u = &self.units[k];
+                    u.side == ram.side
+                        && k != r
+                        && u.able()
+                        && u.can_climb()
+                        && u.climbing.is_none()
+                        && !u.on_wall
+                        && u.state != UnitState::Melee
+                        && u.hp > 2.0
+                })
+                .map(|k| {
+                    let u = &self.units[k];
+                    (k, (u.x - ram.x).hypot(u.z - ram.z))
+                })
+                .filter(|&(_, d)| d <= rules.relief_range_m)
+                .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
+            let Some((k, _)) = donor else {
+                continue;
+            };
+            let men = (rules.relief_men_per_s * DT)
+                .min(missing)
+                .min(self.units[k].hp - 1.0);
+            if men <= 0.0 {
+                continue;
+            }
+            let morale = self.units[k].morale;
+            self.units[k].hp -= men;
+            let abandoned = self.units[r].hp <= 0.0;
+            let ram = &mut self.units[r];
+            ram.hp = ram.hp.max(0.0) + men;
+            if abandoned || ram.state == UnitState::Routing {
+                ram.state = UnitState::Idle;
+                ram.morale = ram.morale.max(morale);
+                ram.destination = None;
+                ram.target = None;
+                let text = format!(
+                    "Les {} reprennent le bélier abandonné !",
+                    self.unit_label(k)
+                );
+                self.log(text, Some(SideId::Attacker));
+            }
+            match self
+                .assault
+                .ram_loans
+                .iter_mut()
+                .find(|l| l.0 == r && l.1 == k)
+            {
+                Some(loan) => loan.2 += men,
+                None => self.assault.ram_loans.push((r, k, men)),
+            }
+        }
+    }
+
+    /// SG4: at the end of the battle the survivors of the men lent to a ram
+    /// go back to their regiments (still on the field), in proportion to
+    /// what each lent; the dead are losses of their regiment.
+    pub(super) fn return_ram_crews(&mut self) {
+        let loans = std::mem::take(&mut self.assault.ram_loans);
+        for r in 0..self.units.len() {
+            let lent: f64 = loans.iter().filter(|l| l.0 == r).map(|l| l.2).sum();
+            if lent <= 0.0 {
+                continue;
+            }
+            let back = self.units[r].hp.max(0.0).min(lent);
+            if back <= 0.0 {
+                continue;
+            }
+            self.units[r].hp -= back;
+            for &(_, k, men) in loans.iter().filter(|l| l.0 == r) {
+                if self.units[k].present() {
+                    self.units[k].hp += back * men / lent;
+                }
+            }
         }
     }
 

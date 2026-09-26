@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# EP1 (ADR 0031): A/B battle benchmark at massive scale. Prints one BENCH_JSON line per run.
+# EP1 (ADR 0076): A/B battle benchmark at massive scale. Prints one BENCH_JSON line per run.
 # Usage: tools/bench_ep1.sh <label> <extra args after --...>
 # Example: tools/bench_ep1.sh budget --units=63 --bench-at=90
 set -uo pipefail

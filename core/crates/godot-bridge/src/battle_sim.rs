@@ -12,6 +12,7 @@ use godot::prelude::*;
 use serde_json::Value;
 use sim_battle::{BattleOutcome, BattleSetup, Command, SideId, Unit, UnitState};
 
+use crate::battle_replay::{note, REPLAY_REFUSAL};
 use crate::campaign_sim::{events_array, CampaignSim};
 use crate::convert::variant_to_json;
 
@@ -86,6 +87,122 @@ fn prop_dict(prop: &sim_battle::Prop) -> VarDictionary {
     }
 }
 
+/// EP6: a decor prop `{kind, x, z, yaw, length, depth, count}`.
+fn decor_prop_dict(prop: &sim_battle::DecorProp) -> VarDictionary {
+    vdict! {
+        "kind" => prop.kind.key(),
+        "x" => prop.x,
+        "z" => prop.z,
+        "yaw" => prop.yaw,
+        "length" => prop.length,
+        "depth" => prop.depth,
+        "count" => prop.count as i64,
+    }
+}
+
+/// EP6: a decor area `{kind, x, z, length, width, yaw, state}` (`state`:
+/// ploughed|sown|crop|stubble for ploughland, else "").
+fn decor_area_dict(area: &sim_battle::Area) -> VarDictionary {
+    vdict! {
+        "kind" => area.kind.key(),
+        "x" => area.x,
+        "z" => area.z,
+        "length" => area.length,
+        "width" => area.width,
+        "yaw" => area.yaw,
+        "state" => area.state.map_or("", |s| s.key()),
+    }
+}
+
+/// EP6: the decor of the field (see [`BattleSim::get_terrain`]).
+fn decor_dict(decor: &sim_battle::Decor) -> VarDictionary {
+    let buildings: VarArray = decor
+        .buildings
+        .iter()
+        .map(|h| {
+            vdict! {
+                "x" => h.x, "z" => h.z, "length" => h.length, "width" => h.width,
+                "yaw" => h.yaw, "kind" => h.kind.key(),
+            }
+            .to_variant()
+        })
+        .collect();
+    let hamlets: VarArray = decor
+        .hamlets
+        .iter()
+        .map(|h| {
+            let buildings: PackedInt32Array = h.buildings.iter().map(|&i| i as i32).collect();
+            vdict! {
+                "layout" => h.layout.key(), "x" => h.x, "z" => h.z, "yaw" => h.yaw,
+                "buildings" => &buildings,
+            }
+            .to_variant()
+        })
+        .collect();
+    let areas: VarArray = decor
+        .areas
+        .iter()
+        .map(|a| decor_area_dict(a).to_variant())
+        .collect();
+    let props: VarArray = decor
+        .props
+        .iter()
+        .map(|p| decor_prop_dict(p).to_variant())
+        .collect();
+    let mounds: VarArray = decor
+        .mounds
+        .iter()
+        .map(|m| {
+            vdict! { "x" => m.x, "z" => m.z, "radius" => m.radius, "height" => m.height }
+                .to_variant()
+        })
+        .collect();
+    let moats: VarArray = decor
+        .moats
+        .iter()
+        .map(|m| {
+            vdict! {
+                "x" => m.x, "z" => m.z, "length" => m.length, "width" => m.width,
+                "yaw" => m.yaw, "ring" => m.ring,
+            }
+            .to_variant()
+        })
+        .collect();
+    let camps: VarArray = decor
+        .camps
+        .iter()
+        .map(|c| {
+            let items: VarArray = c
+                .items
+                .iter()
+                .map(|p| decor_prop_dict(p).to_variant())
+                .collect();
+            let convoy: VarArray = c
+                .convoy
+                .iter()
+                .map(|p| decor_prop_dict(p).to_variant())
+                .collect();
+            vdict! {
+                "side" => c.side.key(), "area" => &decor_area_dict(&c.area),
+                "items" => &items, "convoy" => &convoy,
+            }
+            .to_variant()
+        })
+        .collect();
+    vdict! {
+        "profile" => decor.profile.as_str(),
+        "vines_leafy" => decor.vines_leafy,
+        "orchard_blossom" => decor.orchard_blossom,
+        "buildings" => &buildings,
+        "hamlets" => &hamlets,
+        "areas" => &areas,
+        "props" => &props,
+        "mounds" => &mounds,
+        "moats" => &moats,
+        "camps" => &camps,
+    }
+}
+
 fn render_key(unit: &Unit) -> &'static str {
     if unit.ram {
         return "ram";
@@ -128,13 +245,19 @@ fn state_label_fr(state: UnitState) -> &'static str {
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
 pub struct BattleSim {
-    sim: Option<sim_battle::BattleSim>,
+    pub(crate) sim: Option<sim_battle::BattleSim>,
     /// Visual unit-size multiplier (BV1, ADR 0016): figures drawn per
     /// simulated soldier. Rendering only.
     figure_scale: f64,
     /// Forced battle scale tier (EP1, `data/rules/battle_scale.json`);
     /// empty: by head count.
     scale_key: String,
+    /// EP7: the historical map of the battle (menu or campaign site).
+    pub(crate) historical: Option<sim_battle::HistoricalMap>,
+    /// EP13: recording of the battle being fought (`battle_replay.rs`).
+    pub(crate) recorder: Option<sim_battle::ReplayRecorder>,
+    /// EP13: playback of a replay; the battle then takes no order.
+    pub(crate) player: Option<sim_battle::ReplayPlayer>,
     base: Base<RefCounted>,
 }
 
@@ -145,6 +268,9 @@ impl IRefCounted for BattleSim {
             sim: None,
             figure_scale: 1.0,
             scale_key: String::new(),
+            historical: None,
+            recorder: None,
+            player: None,
             base,
         }
     }
@@ -156,20 +282,38 @@ impl BattleSim {
     #[func]
     fn setup(&mut self, setup: VarDictionary, seed: i64) -> bool {
         let forced = sim_battle::BattleScale::named(&self.scale_key);
-        let parsed = from_dict::<BattleSetup>(&setup).and_then(|setup| {
-            match forced {
-                Some(scale) => sim_battle::BattleSim::new_scaled(setup, seed as u64, scale),
-                None => sim_battle::BattleSim::new(setup, seed as u64),
-            }
-            .map_err(|e| e.to_string())
+        // EP7: a campaign battle on a historical site (`historical_site`,
+        // the map's JSON text, added by `get_battle_setup`).
+        let site = setup
+            .get("historical_site")
+            .and_then(|v| v.try_to::<GString>().ok())
+            .and_then(
+                |text| match sim_battle::HistoricalMap::from_json(&text.to_string()) {
+                    Ok(map) => Some(map),
+                    Err(error) => {
+                        godot_warn!("BattleSim.setup: historical site: {error}");
+                        None
+                    }
+                },
+            );
+        // EP13: one construction path, recorded for the replay.
+        let start = from_dict::<BattleSetup>(&setup).map(|setup| match (&site, forced) {
+            (Some(map), _) => sim_battle::ReplayStart::on_site(setup, seed as u64, map.clone()),
+            (None, Some(scale)) => sim_battle::ReplayStart::scaled(setup, seed as u64, scale),
+            (None, None) => sim_battle::ReplayStart::plain(setup, seed as u64),
         });
+        let parsed = start.and_then(|start| start.build().map(|sim| (start, sim)));
+        self.historical = site;
+        self.player = None;
+        self.recorder = None;
         match parsed {
-            Ok(mut sim) => {
+            Ok((start, sim)) => {
+                self.recorder = Some(sim_battle::ReplayRecorder::new(start, &sim));
+                self.sim = Some(sim);
                 // EP8: starting hour drawn by the campaign (`get_battle_setup`).
                 if let Some(hour) = setup.get("hour").and_then(|v| v.try_to::<f64>().ok()) {
-                    sim.set_start_hour(hour);
+                    self.set_start_hour(hour);
                 }
-                self.sim = Some(sim);
                 true
             }
             Err(error) => {
@@ -183,9 +327,7 @@ impl BattleSim {
     /// EP8: starts the battle at `hour` (0-24), e.g. a quick battle setting.
     #[func]
     fn set_start_hour(&mut self, hour: f64) {
-        if let Some(sim) = &mut self.sim {
-            sim.set_start_hour(hour);
-        }
+        self.drive(sim_battle::ReplayAction::StartHour { hour });
     }
 
     /// EP8: starts the battle in phase `key` (`dawn`, `morning`, `midday`,
@@ -193,9 +335,9 @@ impl BattleSim {
     #[func]
     fn set_start_phase(&mut self, key: GString) -> bool {
         let rules = sim_battle::TimeOfDayRules::bundled();
-        match (rules.start_hour_of(&key.to_string()), &mut self.sim) {
-            (Some(hour), Some(sim)) => {
-                sim.set_start_hour(hour);
+        match rules.start_hour_of(&key.to_string()) {
+            Some(hour) if self.sim.is_some() && self.player.is_none() => {
+                self.drive(sim_battle::ReplayAction::StartHour { hour });
                 true
             }
             _ => false,
@@ -302,8 +444,17 @@ impl BattleSim {
     /// Advances the battle by `dt` seconds (fixed 0.1 s steps inside).
     #[func]
     fn tick(&mut self, dt: f64) {
-        if let Some(sim) = &mut self.sim {
-            sim.tick(dt);
+        let Some(sim) = &mut self.sim else {
+            return;
+        };
+        // EP13: a replay advances by its recorded inputs.
+        if let Some(player) = &mut self.player {
+            player.advance(sim, dt);
+            return;
+        }
+        sim.tick(dt);
+        if let Some(recorder) = &mut self.recorder {
+            recorder.observe(sim);
         }
     }
 
@@ -346,12 +497,24 @@ impl BattleSim {
     /// units: [ids] (selected-scope orders; empty = every eligible one)}`.
     #[func]
     fn issue_command(&mut self, command: VarDictionary) -> VarDictionary {
+        if self.player.is_some() {
+            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+        }
         let Some(sim) = &mut self.sim else {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
         let result = from_dict::<Command>(&command)
             .map_err(|e| crate::campaign_sim::invalid_order_message(&e))
-            .and_then(|command| sim.issue_command(command).map_err(|e| e.to_string()));
+            .and_then(|command| {
+                note(
+                    &mut self.recorder,
+                    sim,
+                    sim_battle::ReplayAction::Command {
+                        command: command.clone(),
+                    },
+                );
+                sim.issue_command(command).map_err(|e| e.to_string())
+            });
         result_dict(result)
     }
 
@@ -386,8 +549,8 @@ impl BattleSim {
     /// Lets the AI command `side` (`"attacker"`/`"defender"`), e.g. for autoplay.
     #[func]
     fn set_ai(&mut self, side: GString, enabled: bool) {
-        if let (Some(sim), Some(side)) = (&mut self.sim, parse_side(&side)) {
-            sim.set_ai(side, enabled);
+        if let Some(side) = parse_side(&side) {
+            self.drive(sim_battle::ReplayAction::SetAi { side, enabled });
         }
     }
 
@@ -395,7 +558,18 @@ impl BattleSim {
     /// any `tick`). `false` once the battle has started.
     #[func]
     fn begin_deployment(&mut self) -> bool {
-        self.sim.as_mut().is_some_and(|sim| sim.begin_deployment())
+        if self.player.is_some() {
+            return false;
+        }
+        let Some(sim) = &mut self.sim else {
+            return false;
+        };
+        note(
+            &mut self.recorder,
+            sim,
+            sim_battle::ReplayAction::BeginDeployment,
+        );
+        sim.begin_deployment()
     }
 
     /// `true` during the deployment phase (ticks do nothing).
@@ -417,6 +591,9 @@ impl BattleSim {
     /// current facing. → `{ok, error}` (French error).
     #[func]
     fn deploy_unit(&mut self, id: i64, x: f64, z: f64, facing: f64) -> VarDictionary {
+        if self.player.is_some() {
+            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+        }
         let Some(sim) = &mut self.sim else {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
@@ -424,6 +601,16 @@ impl BattleSim {
         let result = u32::try_from(id)
             .map_err(|_| format!("unité inconnue : {id}"))
             .and_then(|id| {
+                note(
+                    &mut self.recorder,
+                    sim,
+                    sim_battle::ReplayAction::DeployUnit {
+                        unit: id,
+                        x,
+                        z,
+                        facing,
+                    },
+                );
                 sim.deploy_unit(id, x, z, facing)
                     .map_err(|e| sim.error_text(&e))
             });
@@ -433,9 +620,17 @@ impl BattleSim {
     /// Ends the deployment phase → `{ok, error}`.
     #[func]
     fn start_battle(&mut self) -> VarDictionary {
+        if self.player.is_some() {
+            return result_dict(Err(REPLAY_REFUSAL.to_owned()));
+        }
         let Some(sim) = &mut self.sim else {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
+        note(
+            &mut self.recorder,
+            sim,
+            sim_battle::ReplayAction::StartBattle,
+        );
         result_dict(sim.start_battle().map_err(|e| e.to_string()))
     }
 
@@ -511,6 +706,11 @@ impl BattleSim {
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
                 }
+                // EP11: push of the lines in melee (m/s, > 0 driving the enemy
+                // back, < 0 giving ground), compression (0-1), ground given (m).
+                dict.set("push_speed", unit.push.speed);
+                dict.set("compression", unit.push.compression);
+                dict.set("ground_lost", unit.push.ground_lost);
                 // EP5: the regiment's standard (`carried`, `fallen`, `captured`,
                 // `lost`), where it lies on the ground, the regiment that took it,
                 // and the figures of the buffer that carry it.
@@ -627,6 +827,12 @@ impl BattleSim {
     /// deck, stone, arches, stream}]` (`stream` = -1 on the river),
     /// `streams[{kind: tributary|brook, points, width}]`, `roads[{kind:
     /// main|track, points, width}]`; oxbows are appended to `pools`.
+    /// EP6: `decor{profile, vines_leafy, orchard_blossom, buildings[{x, z,
+    /// length, width, yaw, kind}], hamlets[{layout, x, z, yaw, buildings}],
+    /// areas[{kind, x, z, length, width, yaw, state}], props[{kind, x, z,
+    /// yaw, length, depth, count}], mounds[{x, z, radius, height}],
+    /// moats[{x, z, length, width, yaw, ring}], camps[{side, area, items,
+    /// convoy}]}` (windmill mounds are already in `heights`).
     #[func]
     fn get_terrain(&self) -> VarDictionary {
         let Some(sim) = &self.sim else {
@@ -793,6 +999,7 @@ impl BattleSim {
             })
             .collect();
         dict.set("roads", &roads);
+        dict.set("decor", &decor_dict(&field.decor));
         if sim.siege().is_some() {
             dict.set("siege", &self.get_siege());
         }
@@ -952,9 +1159,18 @@ impl BattleSim {
     /// when `house` < 0; `false` when it already burns or is not a siege.
     #[func]
     fn debug_ignite(&mut self, house: i64) -> bool {
+        if self.player.is_some() {
+            return false;
+        }
         let Some(sim) = &mut self.sim else {
             return false;
         };
+        let target = usize::try_from(house).ok();
+        note(
+            &mut self.recorder,
+            sim,
+            sim_battle::ReplayAction::Ignite { house: target },
+        );
         if house < 0 {
             sim.ignite_gate()
         } else {
@@ -966,6 +1182,16 @@ impl BattleSim {
     /// its maximum; 0 opens it). `false` outside a siege or for a bad index.
     #[func]
     fn debug_set_piece_hp(&mut self, index: i64, hp: f64) -> bool {
+        if self.player.is_some() {
+            return false;
+        }
+        if let (Some(sim), Ok(piece)) = (&self.sim, usize::try_from(index)) {
+            note(
+                &mut self.recorder,
+                sim,
+                sim_battle::ReplayAction::PieceHp { piece, hp },
+            );
+        }
         let Some(works) = self.sim.as_mut().and_then(|s| s.siege_mut()) else {
             return false;
         };
@@ -1193,6 +1419,17 @@ impl CampaignSim {
         match state.battle_setup(data, index.max(0) as usize) {
             Ok(setup) => {
                 let mut dict = to_dict(&setup);
+                // EP7: in the province and years of a historical map, the
+                // battle is fought on the real site.
+                if let Some(dir) = crate::campaign_sim::loaded_data_dir() {
+                    if let Some((map, text)) =
+                        crate::historical_battles::campaign_site(&dir, &setup, state.year())
+                    {
+                        dict.set("historical_site", text.as_str());
+                        dict.set("historical_site_id", map.id.as_str());
+                        dict.set("historical_horizon", map.horizon_key().as_str());
+                    }
+                }
                 // EP8: hour of the day drawn from the battle (turn, index,
                 // province), no random stream consumed.
                 let key = sim_battle::time_of_day::campaign_battle_key(
@@ -1368,6 +1605,35 @@ impl CampaignSim {
 }
 
 /// `snake_case` key of a battle season (B5, `get_terrain`).
+#[godot_api(secondary)]
+impl BattleSim {
+    /// EP6: state of each side's camp, `[{side, progress (0-1), looted,
+    /// alarmed, looters, guards}]` (empty without camps).
+    #[func]
+    fn get_camps(&self) -> VarArray {
+        let Some(sim) = &self.sim else {
+            return VarArray::new();
+        };
+        sim_battle::SideId::BOTH
+            .iter()
+            .filter_map(|&side| {
+                let state = sim.camp_state(side)?;
+                Some(
+                    vdict! {
+                        "side" => side.key(),
+                        "progress" => state.progress,
+                        "looted" => state.looted,
+                        "alarmed" => state.alarmed,
+                        "looters" => state.looters as i64,
+                        "guards" => state.guards as i64,
+                    }
+                    .to_variant(),
+                )
+            })
+            .collect()
+    }
+}
+
 fn season_key(season: sim_battle::BattleSeason) -> &'static str {
     match season {
         sim_battle::BattleSeason::Spring => "spring",

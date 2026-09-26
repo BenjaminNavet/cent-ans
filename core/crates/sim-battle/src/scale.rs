@@ -1,4 +1,4 @@
-//! Scale of a battle (lot EP1, ADR 0031): size of the field, gap between the
+//! Scale of a battle (lot EP1, ADR 0076): size of the field, gap between the
 //! two battle lines, depth of the deployment zones and number of regiments a
 //! side may field at once, by tier of total head count
 //! (`data/rules/battle_scale.json`, schema

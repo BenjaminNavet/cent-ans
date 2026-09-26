@@ -999,6 +999,7 @@ fn run_3d(data: &GameData, scenario: &Scenario, runs: u32) -> Reference3d {
             siege_layout: None,
             orders: Vec::new(),
             standards: None,
+            decor_plan: None,
         };
         let mut sim = BattleSim::new(setup, seed).expect("battle setup");
         let mut steps = 0;

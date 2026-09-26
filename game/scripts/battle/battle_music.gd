@@ -1,20 +1,21 @@
 class_name BattleMusicDirector
 extends Node
 
-## B3 / T4 : musique dynamique de bataille par intensité — calme / approche avant contact →
+## B3 / T4 / DA4 : musique dynamique de bataille par intensité — calme / approche avant contact →
 ## engagement (mêlée ou tir nourri) → moment critique (un camp proche de la déroute) →
-## victoire / défaite. Aucune piste dédiée n'existe pour ces états : on réutilise et transforme
-## `music/war.ogg` (volume, filtre passe-bas pour l'assourdir à l'approche) plutôt que d'en
-## générer — la piste de base est tirée au hasard dans la liste « war » de
-## `data/audio/music.json` (via `AudioDirector.playlist`), `war.ogg` à défaut —, avec deux couches d'ambiance en boucle réutilisant des effets déjà présents
-## (`sfx/sword_clash.ogg` pour la clameur / le fer, `sfx/march_drum.ogg` pour la percussion du
-## moment critique) et un stinger de victoire (`fanfare`) ou de défaite (`choir`).
+## victoire / défaite. La piste de base (tirée au hasard dans la liste « war » de
+## `data/audio/music.json` via `AudioDirector.playlist`, `war.ogg` à défaut) est transformée
+## (volume, filtre passe-bas pour l'assourdir à l'approche) et superposée à des couches
+## d'instruments d'époque en boucle — tambour, trompette droite, bourdon de cornemuse, chalemie,
+## plus la clameur de mêlée héritée de B3 — dont le mélange par état vient de
+## `data/audio/battle_layers.json` (schéma `data/schemas/battle_layers.schema.json`, DA4) :
+## aucun paramètre n'est codé en dur ici, seule la mécanique (fondu, hystérésis) l'est.
 ##
-## Hystérésis : une montée d'intensité (approche → engagement → critique) est immédiate, une
-## descente exige que le nouvel état soit stable pendant `HYSTERESIS_SECONDS` pour éviter les
-## bascules incessantes autour d'un seuil. L'intensité vient de `BattleSim.get_units()`
-## (état des régiments, moral, effectifs présents) — `compute_state` est une fonction pure,
-## testable sans nœud ni audio.
+## Hystérésis : une montée d'intensité (approach → engagement → critical) est immédiate, une
+## descente exige que le nouvel état soit stable pendant `hysteresis_seconds` (config) pour
+## éviter les bascules incessantes autour d'un seuil. L'intensité vient de
+## `BattleSim.get_units()` (état des régiments, moral, effectifs présents) — `compute_state` est
+## une fonction pure, testable sans nœud ni audio.
 ##
 ## Silencieux en tête (headless / smoke test) : les flux sont chargés et les états suivis
 ## normalement, mais rien n'est joué (même convention que `AudioDirector.silent`).
@@ -23,29 +24,14 @@ signal state_changed(state: String)
 
 const BUS_NAME := "BatailleMusique"
 const PARENT_BUS := "Musique"
-const FADE_SECONDS := 2.0
-const HYSTERESIS_SECONDS := 2.5
+const CONFIG_PATH := "audio/battle_layers.json"
+const MUSIC_PATH := "res://assets/audio/music/war.ogg"
 
 const URGENCY := {"approach": 0, "engagement": 1, "critical": 2, "victory": 3, "defeat": 3}
 const ENGAGED_STATES := {"melee": true, "shooting": true, "charging": true}
 const CRITICAL_MORALE := 0.32
 const CRITICAL_ROUT_FRACTION := 0.3
-
-const MUSIC_PATH := "res://assets/audio/music/war.ogg"
-const AMBIENCE_PATH := "res://assets/audio/sfx/sword_clash.ogg"
-const PERCUSSION_PATH := "res://assets/audio/sfx/march_drum.ogg"
-const VICTORY_STINGER := "res://assets/audio/sfx/fanfare.ogg"
-const DEFEAT_STINGER := "res://assets/audio/sfx/choir.ogg"
-
-## Réglages par état : [volume_db piste de base, coupure du filtre passe-bas (Hz),
-## volume_db ambiance, volume_db percussion, hauteur de la piste de base].
-const PRESETS := {
-	"approach": [-11.0, 900.0, -80.0, -80.0, 1.0],
-	"engagement": [-3.0, 20000.0, -14.0, -80.0, 1.0],
-	"critical": [0.0, 20000.0, -8.0, -6.0, 1.05],
-	"victory": [-40.0, 20000.0, -80.0, -80.0, 1.0],
-	"defeat": [-40.0, 500.0, -80.0, -80.0, 0.94],
-}
+const DEFAULT_STATE_PRESET := {"base_db": -40.0, "base_cutoff_hz": 20000.0, "base_pitch": 1.0, "layers": {}}
 
 var current_state: String = "approach"
 var silent: bool = false
@@ -55,10 +41,14 @@ var _pending_state: String = "approach"
 var _pending_elapsed: float = 0.0
 var _filter: AudioEffectLowPassFilter = null
 var _base: AudioStreamPlayer
-var _ambience: AudioStreamPlayer
-var _percussion: AudioStreamPlayer
+var _layer_players: Dictionary = {}  # nom de couche -> AudioStreamPlayer
 var _stinger: AudioStreamPlayer
 var _tween: Tween
+## Paramétrage chargé de `data/audio/battle_layers.json` (DA4).
+var _config: Dictionary = {}
+var _fade_seconds: float = 2.0
+var _hysteresis_seconds: float = 2.5
+var _mute_when_battle_audio_active: Array = []
 
 
 ## Détermine l'état d'intensité à partir de `BattleSim.get_units()` (fonction pure, sans nœud :
@@ -99,15 +89,31 @@ static func compute_state(units: Array, resolved: bool, victory: bool) -> String
 	return "engagement"
 
 
+## Lit `data/audio/battle_layers.json` (vide si absent : les couches restent silencieuses, la
+## piste de base seule joue, cf. `_apply_state`).
+static func _load_config() -> Dictionary:
+	var path := SoundBank.data_path(CONFIG_PATH)
+	if not FileAccess.file_exists(path):
+		return {}
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	return parsed if parsed is Dictionary else {}
+
+
 ## `scene` : `BattleScene` (attend `battle`, `resolved`, `player_side`). À appeler une fois la
 ## bataille prête ; `update(delta)` ensuite à chaque image.
 func setup(scene: Node) -> void:
 	_scene = scene
 	silent = DisplayServer.get_name() == "headless"
+	_config = _load_config()
+	_fade_seconds = float(_config.get("fade_seconds", 2.0))
+	_hysteresis_seconds = float(_config.get("hysteresis_seconds", 2.5))
+	_mute_when_battle_audio_active = _config.get("mute_when_battle_audio_active", [])
 	_ensure_bus()
 	_base = _make_player("Base", _pick_base_track(), true)
-	_ambience = _make_player("Ambience", AMBIENCE_PATH, true)
-	_percussion = _make_player("Percussion", PERCUSSION_PATH, true)
+	var layers: Dictionary = _config.get("layers", {})
+	for layer_name in layers:
+		var path := "res://" + str(layers[layer_name])
+		_layer_players[str(layer_name)] = _make_player(str(layer_name).capitalize(), path, true)
 	_stinger = _make_player("Stinger", "", false)
 	_apply_state("approach", true)
 
@@ -140,7 +146,7 @@ func _advance(wanted: String, delta: float) -> void:
 		_pending_elapsed = 0.0
 		return
 	_pending_elapsed += delta
-	if _pending_elapsed >= HYSTERESIS_SECONDS:
+	if _pending_elapsed >= _hysteresis_seconds:
 		_commit(wanted)
 
 
@@ -153,28 +159,19 @@ func _commit(state: String) -> void:
 
 
 func _apply_state(state: String, instant: bool = false) -> void:
-	var preset: Array = PRESETS.get(state, PRESETS["approach"])
-	var base_db: float = preset[0]
-	var cutoff: float = preset[1]
-	var ambience_db: float = preset[2]
-	var percussion_db: float = preset[3]
-	var pitch: float = preset[4]
-	if state == "victory":
-		_play_stinger(VICTORY_STINGER)
-	elif state == "defeat":
-		_play_stinger(DEFEAT_STINGER)
+	var states: Dictionary = _config.get("states", {})
+	var preset: Dictionary = states.get(state, DEFAULT_STATE_PRESET)
+	var base_db: float = float(preset.get("base_db", -40.0))
+	var cutoff: float = float(preset.get("base_cutoff_hz", 20000.0))
+	var pitch: float = float(preset.get("base_pitch", 1.0))
+	var layer_volumes: Dictionary = preset.get("layers", {})
+	var stingers: Dictionary = _config.get("stingers", {})
+	if stingers.has(state):
+		_play_stinger("res://" + str(stingers[state]))
 	if silent:
 		return
 	_start_if_needed(_base)
-	# AU1 : quand l'audio spatialisé de bataille est actif, ses nappes de mêlée remplacent cette
-	# couche 2D (sinon le fer serait entendu deux fois).
-	if BattleAudio.active != null:
-		ambience_db = -80.0
-	if ambience_db > -79.0:
-		_start_if_needed(_ambience)
-	if percussion_db > -79.0:
-		_start_if_needed(_percussion)
-	var time := 0.05 if instant else FADE_SECONDS
+	var time := 0.05 if instant else _fade_seconds
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
 	_tween = create_tween()
@@ -183,8 +180,17 @@ func _apply_state(state: String, instant: bool = false) -> void:
 	_tween.tween_property(_base, "pitch_scale", pitch, time)
 	if _filter != null:
 		_tween.tween_property(_filter, "cutoff_hz", cutoff, time)
-	_tween.tween_property(_ambience, "volume_db", ambience_db, time)
-	_tween.tween_property(_percussion, "volume_db", percussion_db, time)
+	for layer_name in _layer_players:
+		var player: AudioStreamPlayer = _layer_players[layer_name]
+		var volume_db: float = float(layer_volumes.get(layer_name, -80.0))
+		# AU1 : quand l'audio spatialisé de bataille est actif, ses nappes de mêlée remplacent les
+		# couches listées dans `mute_when_battle_audio_active` (sinon le fer serait entendu deux
+		# fois) — par défaut `melee_din` (`sfx/sword_clash.ogg`).
+		if BattleAudio.active != null and _mute_when_battle_audio_active.has(layer_name):
+			volume_db = -80.0
+		if volume_db > -79.0:
+			_start_if_needed(player)
+		_tween.tween_property(player, "volume_db", volume_db, time)
 
 
 func _play_stinger(path: String) -> void:
@@ -248,7 +254,9 @@ static func _load(path: String, loop: bool) -> AudioStream:
 
 
 func _exit_tree() -> void:
-	for player in [_base, _ambience, _percussion, _stinger]:
+	var players: Array = [_base, _stinger]
+	players.append_array(_layer_players.values())
+	for player in players:
 		if player != null:
 			player.stop()
 			player.stream = null

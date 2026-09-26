@@ -31,7 +31,9 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 | ZG6 | Villes ordinaires à l'échelle réelle vers 1340, finage ↔ parcellaire | 3 | **dans main** (7f38c532) |
 | ZG4b | Correctifs recette Q3 : sol nu au-dessus des villes emblématiques (plancher provisoire jusqu'à VH4), pont géant sur Londres, pic des ponts | 3 | **dans main** |
 | ZG8 | Relief local exagéré façon Total War (visuel seulement), roche selon la pente, ombrage (wip `zg8-relief-exagere.md`) | 3 | **dans main** |
-| ZG7 | Perf, recette aux 3 paliers (relief ZG8 compris), export, docs, crédits | 4 | — |
+| ZG7a | Perf (MultiMesh par ville, parcellaire, p99, ponts), lit de la Seine, ponts-portes, rives de Londres, PathPreview (wip `zg7a-perf-finitions.md`) | 4 | **dans main** (609bbcdf) |
+| ZG7b | Cache absent (message + commande unique), embarquement de la pyramide, docs geo/godot-map, crédits (wip `zg7b-export-cache.md`) | 4 | **dans main** (0eaec278) |
+| ZG7c | Recette visuelle aux 3 paliers après ZG7a/b | 4 | **dans main** — chantier clos |
 
 ## Journal
 - 25/09 : ZG0 commité (ADR 0036, `data/map/relief_pyramid.json`, `detail_zones.json`, schémas,
@@ -56,3 +58,14 @@ Session orchestratrice « zoom ». Fusion via le worktree `../gp-zoom-merge` (br
 - 25/09 : ZG6 fusionné (villes ordinaires 1:1 vers 1340, finage raccordé au parcellaire ZG5b), **main = 7f38c532**, tests ZG2/4/5b/6 + smoke OK. Coût : 48 vs 57 i/s, appels de dessin ×3 (MultiMesh par cellule → par ville à faire en ZG7). Suites VH3 : populations 1328, Gand vide au sud.
 - 25/09 : ajout de ZG8 à la demande du joueur (capture Total War) : exagérer le relief local, pas l'altitude ; purement visuel, une seule fonction de hauteur affichée. Passe avant la recette ZG7.
 - 25/09 : ZG4b et ZG8 fusionnés, plus le correctif C5 (le « ruban géant » de la Tamise était la couche des routes commerciales, affichée hors mode Commerce). Tests ZG2/4/5b/6/8 + smoke OK. ZG4b : brume météo trop couvrante de près (vraie cause du sol beige), parcellaire absent des rives à 0,5 m, plancher caméra 2,6 au-dessus des villes emblématiques (à lever par VH4), portes et bascule des ponts étalée. ZG8 : hauteur affichée = s·(h + g·max(h − fond, 0)), près ×2,5, gains 0,3/0,8 réglés à l'œil (à affiner en jeu), `--no-relief-exaggeration`. Reste à signaler à d'autres lots : `PathPreview` à l'échelle de la carte de près. Prochain : ZG7.
+- 25/09 : ZG7 découpé en ZG7a (perf + finitions visuelles) et ZG7b (export, cache, docs, crédits), lancés en parallèle ; recette finale ZG7c ensuite.
+- 26/09 : ZG7b fusionné (0eaec278) : avis « relief incomplet » + `cent-ans geo relief-all [--check]`, export `CENT_ANS_EXPORT_RELIEF=bundle|external|none` (clones APFS), `MapPaths.relief_root_for`, docs geo/godot-map/tools, crédits (textures Poly Haven ajoutées). pytest 581 OK, smoke OK. Suites : `ReliefPyramid` ignore un étage entier si sa 1re tuile manque (à rendre robuste en ZG7c) ; aucune archive « Cent Ans relief » hébergée (à décider avant diffusion).
+- 26/09 : ZG7a fusionné (609bbcdf) : appels de dessin des villes −43 % (MultiMesh par ville / cellule 1 km, HLOD par instance), parcellaire −20 %, pages et ponts hors du fil principal (fine_install 19 → 1,6 ms), Seine 133-200 m interpolée le long des ancrages, tabliers à largeur réelle, rives de Londres 2,6-3,8 m, PathPreview fin de près. Non atteint : p99 ~130 ms (≈ base), qt_update 10-16 ms. Tests zg2-zg8 + smoke OK. ZG7c lancé : pyramide partielle robuste, recuisson des 34 zones (plancher v4), Tamise −7,8 m, banc, recette visuelle aux 3 paliers, clôture.
+- 26/09 : ZG7c fusionné, **chantier ZG clos**. Cache partiel robuste (repli par tuile), 34 zones recuites (plancher v4), niveaux d'eau ≥ 0 (Tamise 1,9 m), recalages fleuves invalidés par BAKE_VERSION, banc process_ms fiable (pics > 50 ms = scripts), plafond du relief local ZG8 (`local_relief_cap_m` 350 m) contre les aiguilles. Tests zg2-zg8 + zg7c + smoke + pytest 671 OK. Suites (hors ZG) :
+  - S1 murs en haute montagne au palier vallée (×3,4 ZG4) — régler l'exagération près des massifs ;
+  - S2 fonds de vallée E1-E4 à 0,5 m (Loire à Orléans 5 m sous les berges) — recuisson complète de la pyramide ;
+  - S3 villes emblématiques au palier site (Rouen, Orléans) → VH4, plancher caméra ZG4b à lever ;
+  - S4 moulins, hameaux, fumées, arbres géants au palier vallée ; S5 disque d'emprise d'Amiens avant les maisons ;
+  - S6 pics d'images côté scripts (qt_update 10-16 ms) → PB ; S7 pluie en bâtonnets au palier site ;
+  - relief séparé « Cent Ans relief » non hébergé : à décider avant diffusion.
+- 26/09 : note pour toute reprise des shaders du terrain : FR1 (frontières lumineuses, ADR 0074) a ajouté un `#include` de `faction_borders.gdshaderinc` et un appel `fr1_borders` dans `terrain.gdshader` et `terrain_parchment.gdshader` ; à conserver (vérifié par `fr1_borders_test.gd`).

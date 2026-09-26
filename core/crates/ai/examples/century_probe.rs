@@ -7,11 +7,22 @@
 //! Usage: `century_probe [turns] [seed...]`; `VERBOSE=1` prints the
 //! France-England wars and peaces; `DIFFICULTY=hard` (any DF1 level id)
 //! plays at that level instead of normal.
+//!
+//! EQ4 adds the combined balance table (`docs/wip/eq4-equilibre-combine.md`):
+//! revolts, sieges and their outcome, territorial snowball in 1437 and 1453,
+//! factions eliminated and the use of the right of passage (DP2).
+//!
+//! EQ5 diagnostics (`docs/wip/eq5-ia-banqueroutes-intrusions.md`):
+//! `ECON_TRACE=fac_swiss` prints that faction's budget, economic orders,
+//! events and unexplained treasury moves every turn; `TRESPASS_TRACE=1`
+//! lists the armies standing on foreign lands without right of passage;
+//! `DEBUG_ARMY=army_0012` prints that army's orders (and, for France, their
+//! result).
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::Instant;
 
-use data_model::{CharacterId, FactionId, GameData};
+use data_model::{CharacterId, FactionId, GameData, SettlementId};
 use sim_campaign::{CampaignState, EventKind};
 
 /// First turn of 1350 (the treasury rule applies from then on).
@@ -84,9 +95,147 @@ struct Report {
     destroyed: u32,
     issued: u32,
     refused: u32,
+    /// EQ4: combined balance measures.
+    eq4: Eq4,
     /// UR2: whether each of `CENTURY_15` was ever seen in an army or a garrison (any faction).
     recruited_15th: Vec<bool>,
     seconds: f64,
+}
+
+/// EQ4: combined balance measures of one campaign.
+#[derive(Default)]
+struct Eq4 {
+    /// Revolts proper (not the hand-over of a province to the rebels).
+    revolts: u32,
+    /// `SiegeStarted` events.
+    sieges_started: u32,
+    /// Sieges seen at the end of a turn that ended with the besieger holding the place.
+    sieges_won: u32,
+    /// Sieges seen at the end of a turn that ended without a capture (lifted, relieved).
+    sieges_failed: u32,
+    /// Settlements taken by a crown without a siege seen at the end of the previous turn
+    /// (empty garrison, assault within the turn, relief battle...).
+    direct_captures: u32,
+    /// (faction, share of provinces controlled) in 1437 and at the end.
+    snowball_1437: (String, f64),
+    snowball_end: (String, f64),
+    /// Factions dead at the end (rebels excluded).
+    eliminated: Vec<String>,
+    /// DP2: military access treaties granted (new giver -> taker pairs).
+    access_grants: u32,
+    /// DP2: access pairs in force, summed over turns.
+    access_pair_turns: u64,
+    /// DP2: seasons of trespass (one per victim-intruder pair and season).
+    trespass_seasons: u32,
+    /// DP2: casus belli won by a trespass.
+    trespass_grievances: u32,
+}
+
+/// Faction controlling the most provinces and its share.
+fn snowball(state: &CampaignState) -> (String, f64) {
+    let mut counts: BTreeMap<&FactionId, usize> = BTreeMap::new();
+    for province in state.provinces.keys() {
+        if let Some(controller) = state.province_controller(province) {
+            *counts.entry(controller).or_default() += 1;
+        }
+    }
+    let total = state.provinces.len().max(1) as f64;
+    counts
+        .into_iter()
+        .filter(|(f, _)| f.as_str() != "fac_rebels")
+        .max_by_key(|(f, n)| (*n, std::cmp::Reverse((*f).clone())))
+        .map_or(("-".to_owned(), 0.0), |(f, n)| {
+            (
+                f.as_str().trim_start_matches("fac_").to_owned(),
+                100.0 * n as f64 / total,
+            )
+        })
+}
+
+/// Sieges in place at the end of a turn: settlement -> attacker.
+type Sieges = BTreeMap<SettlementId, FactionId>;
+
+fn sieges(state: &CampaignState) -> Sieges {
+    state
+        .settlements
+        .iter()
+        .filter_map(|(id, s)| Some((id.clone(), s.siege.as_ref()?.attacker.clone())))
+        .collect()
+}
+
+/// DP2 snapshot: military access pairs (giver, taker) and trespass records
+/// (victim, intruder) -> (total seasons, casus belli until).
+type Passage = (
+    BTreeSet<(FactionId, FactionId)>,
+    BTreeMap<(FactionId, FactionId), (u32, u32)>,
+);
+
+fn passage(state: &CampaignState) -> Passage {
+    let mut access = BTreeSet::new();
+    let mut trespass = BTreeMap::new();
+    for (id, f) in &state.factions {
+        for taker in &f.ledger.military_access {
+            access.insert((id.clone(), taker.clone()));
+        }
+        for (intruder, t) in &f.ledger.trespassers {
+            trespass.insert((id.clone(), intruder.clone()), (t.total, t.grievance_until));
+        }
+    }
+    (access, trespass)
+}
+
+fn controllers(state: &CampaignState) -> BTreeMap<SettlementId, FactionId> {
+    state
+        .settlements
+        .iter()
+        .map(|(id, s)| (id.clone(), s.controller.clone()))
+        .collect()
+}
+
+/// End-of-turn snapshot compared by [`track_eq4`].
+type Snapshot = (Sieges, Passage, BTreeMap<SettlementId, FactionId>);
+
+fn snapshot(state: &CampaignState) -> Snapshot {
+    (sieges(state), passage(state), controllers(state))
+}
+
+/// EQ4: compares the state with the previous end-of-turn snapshot.
+fn track_eq4(state: &CampaignState, eq4: &mut Eq4, before: &Snapshot) {
+    let (old_sieges, (old_access, old_trespass), old_controllers) = before;
+    let now = sieges(state);
+    for (id, attacker) in old_sieges {
+        let controller = &state.settlements[id].controller;
+        if controller == attacker {
+            eq4.sieges_won += 1;
+        } else if now.get(id) != Some(attacker) {
+            eq4.sieges_failed += 1;
+        }
+    }
+    for (id, s) in &state.settlements {
+        let Some(previous) = old_controllers.get(id) else {
+            continue;
+        };
+        if previous != &s.controller
+            && s.controller.as_str() != "fac_rebels"
+            && old_sieges.get(id) != Some(&s.controller)
+        {
+            eq4.direct_captures += 1;
+        }
+    }
+    let (access, trespass) = passage(state);
+    eq4.access_grants += access.difference(old_access).count() as u32;
+    eq4.access_pair_turns += access.len() as u64;
+    for (key, (total, until)) in &trespass {
+        let (old_total, old_until) = old_trespass.get(key).copied().unwrap_or((0, 0));
+        eq4.trespass_seasons += if *total >= old_total {
+            total - old_total
+        } else {
+            *total
+        };
+        if *until > old_until && old_until < state.turn {
+            eq4.trespass_grievances += 1;
+        }
+    }
 }
 
 /// `TRACE=1`: Burgundy's standing every 5 years (G4).
@@ -162,6 +311,124 @@ fn trace_burgundy(state: &CampaignState, data: &GameData, seed: u64) {
     }
 }
 
+/// EQ5: one line of `faction`'s budget and economic orders at plan time.
+fn trace_economy(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    orders: &[sim_campaign::Order],
+) {
+    use sim_campaign::Order;
+    let Some(f) = state.factions.get(faction) else {
+        return;
+    };
+    let field: usize = state
+        .armies
+        .values()
+        .filter(|a| &a.faction == faction)
+        .map(|a| a.units.len())
+        .sum();
+    let armies_abroad = state
+        .armies
+        .values()
+        .filter(|a| &a.faction == faction)
+        .count();
+    let garrison: usize = state
+        .settlements
+        .values()
+        .filter(|s| &s.controller == faction)
+        .map(|s| s.garrison.len())
+        .sum();
+    let unrests: Vec<f64> = state
+        .provinces
+        .iter()
+        .filter(|(id, _)| state.controls_province(faction, id))
+        .map(|(_, p)| sim_campaign::population::weighted_unrest(&p.population))
+        .collect();
+    println!(
+        "{:>16}   unrest max {:.0} mean {:.0} price {} coinage {:?} tributes {:?}",
+        "",
+        unrests.iter().copied().fold(0.0, f64::max),
+        unrests.iter().sum::<f64>() / unrests.len().max(1) as f64,
+        f.price_level,
+        f.coinage,
+        f.ledger
+            .tributes
+            .iter()
+            .map(|t| t.per_season)
+            .collect::<Vec<_>>(),
+    );
+    let count = |pred: fn(&Order) -> bool| orders.iter().filter(|o| pred(o)).count();
+    println!(
+        "{:>16} tr {:>7} inc {:>5} (last {:>5}) adm {:>5} army {:>5} bld {:>5} upk_last {:>5} table {:>4} tax {:?} war {} | armies {} units {} garr {} | disb {} recr {} build {} other {:?}",
+        state.date_label(),
+        f.treasury,
+        state.faction_income_effective(data, faction),
+        f.income_last_turn,
+        state.faction_administration_upkeep(data, faction),
+        state.faction_army_upkeep(data, faction),
+        state.faction_building_upkeep(data, faction),
+        f.upkeep_last_turn,
+        f.table_upkeep_last_turn,
+        f.tax_rate,
+        f.at_war_with.len(),
+        armies_abroad,
+        field,
+        garrison,
+        count(|o| matches!(o, Order::DisbandUnit { .. })),
+        count(|o| matches!(o, Order::Recruit { .. })),
+        count(|o| matches!(o, Order::Build { .. })),
+        orders
+            .iter()
+            .filter(|o| !matches!(
+                o,
+                Order::DisbandUnit { .. }
+                    | Order::Recruit { .. }
+                    | Order::Build { .. }
+                    | Order::MoveArmy { .. }
+            ))
+            .map(|o| format!("{o:?}").chars().take(40).collect::<String>())
+            .collect::<Vec<_>>(),
+    );
+}
+
+/// EQ5: one line per army trespassing at the end of the turn.
+fn trace_trespass(state: &CampaignState, data: &GameData) {
+    for (id, army) in &state.armies {
+        if army.units.is_empty() || army.faction.as_str() == "fac_rebels" {
+            continue;
+        }
+        let Some(province) = state.army_province(data, army) else {
+            continue;
+        };
+        let Some(owner) = sim_campaign::passage::trespassed_owner(state, &army.faction, &province)
+        else {
+            continue;
+        };
+        let f = &state.factions[&army.faction];
+        println!(
+            "TRESPASS t{} {} {} in {} of {} | wars {} | at {:?} | units {} | stance {:?} | mv {} | supply {} | truce {} | may {}",
+            state.turn,
+            id.as_str(),
+            army.faction.as_str(),
+            province.as_str(),
+            owner.as_str(),
+            f.at_war_with.len(),
+            army.settlement().map(|s| format!(
+                "{} held by {}",
+                s.as_str(),
+                state.settlements.get(s).map_or("?", |x| x.controller.as_str())
+            )),
+            army.units.len(),
+            army.stance,
+            army.movement_left,
+            army.supply,
+            state.has_truce(&army.faction, &owner),
+            sim_campaign::passage::ai_may_trespass(state, data, &army.faction, &owner),
+        );
+    }
+}
+
 fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     // `TRACE=1` follows Burgundy; any other value filters events by that word.
     let trace_word =
@@ -215,6 +482,14 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     let mut incomes: BTreeMap<FactionId, Vec<i64>> = BTreeMap::new();
     let mut was_at_war = false;
     let mut war_run = 0u32;
+    let mut eq4_before = snapshot(&state);
+    // EQ5: `ECON_TRACE=fac_swiss` dumps that faction's budget and economic
+    // orders every turn.
+    // EQ5: `TRESPASS_TRACE=1` lists every army standing on foreign lands
+    // without right of passage at the end of each turn.
+    let trespass_trace = std::env::var("TRESPASS_TRACE").is_ok();
+    let debug_army = std::env::var("DEBUG_ARMY").ok();
+    let econ_trace = std::env::var("ECON_TRACE").ok().map(|f| id(&f));
     for _ in 0..turns {
         // France is the "player": it answers offers as the AI would judge
         // them (otherwise no peace offered to France is ever signed).
@@ -237,12 +512,64 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             );
         }
         for order in ai::plan_turn(&state, data, &france) {
+            let text = debug_army
+                .as_ref()
+                .map(|army| (army.clone(), format!("{order:?}")))
+                .filter(|(army, text)| text.contains(&format!("\"{army}\"")));
             report.issued += 1;
-            if state.submit_order(data, order).is_err() {
+            let result = state.submit_order(data, order);
+            if let Some((army, text)) = text {
+                println!("t{} {army} order {text} -> {result:?}", state.turn);
+            }
+            if result.is_err() {
                 report.refused += 1;
             }
         }
-        let events = state.end_turn_with(data, ai::plan_turn);
+        let treasuries_before: BTreeMap<FactionId, i64> = state
+            .factions
+            .iter()
+            .map(|(f, s)| (f.clone(), s.treasury))
+            .collect();
+        let events = if econ_trace.is_some() || debug_army.is_some() {
+            state.end_turn_with(data, |s, d, f| {
+                let orders = ai::plan_turn(s, d, f);
+                if econ_trace.as_ref() == Some(f) {
+                    trace_economy(s, d, f, &orders);
+                }
+                if let Some(army) = &debug_army {
+                    let needle = format!("\"{army}\"");
+                    for order in orders.iter().map(|o| format!("{o:?}")) {
+                        if order.contains(&needle) {
+                            println!("t{} {army} order {order}", s.turn);
+                        }
+                    }
+                }
+                orders
+            })
+        } else {
+            state.end_turn_with(data, ai::plan_turn)
+        };
+        if let Some(traced) = &econ_trace {
+            let residual = |f: &FactionId| {
+                let now = &state.factions[f];
+                now.treasury
+                    - treasuries_before.get(f).copied().unwrap_or(0)
+                    - (now.income_last_turn - now.upkeep_last_turn)
+            };
+            let own = residual(traced);
+            if own.abs() > 100 {
+                let others: Vec<(String, i64)> = state
+                    .factions
+                    .keys()
+                    .filter(|f| *f != traced && residual(f).abs() > 100)
+                    .map(|f| (f.as_str().to_owned(), residual(f)))
+                    .collect();
+                println!("{:>16}   residual {own} ; others {others:?}", "");
+            }
+            for event in events.iter().filter(|e| e.faction.as_ref() == Some(traced)) {
+                println!("{:>16}   event {:?}: {}", "", event.kind, event.text_fr);
+            }
+        }
         for event in &events {
             match event.kind {
                 EventKind::Bankruptcy => {
@@ -258,6 +585,10 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                     report.battles_fr_en += 1;
                 }
                 EventKind::ProvinceCaptured => report.captures += 1,
+                EventKind::Revolt if !event.text_fr.contains("passe aux mains") => {
+                    report.eq4.revolts += 1;
+                }
+                EventKind::SiegeStarted => report.eq4.sieges_started += 1,
                 EventKind::FactionDestroyed => report.destroyed += 1,
                 EventKind::WarDeclared if event.text_fr.contains("répond à l'appel") => {
                     report.calls_honoured += 1;
@@ -281,6 +612,14 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             {
                 println!("  [{seed}] {:>16} {}", state.date_label(), event.text_fr);
             }
+        }
+        if trespass_trace {
+            trace_trespass(&state, data);
+        }
+        track_eq4(&state, &mut report.eq4, &eq4_before);
+        eq4_before = snapshot(&state);
+        if state.year == 1437 && report.eq4.snowball_1437.0.is_empty() {
+            report.eq4.snowball_1437 = snowball(&state);
         }
         let at_war = state.is_at_war(&france, &england);
         if at_war {
@@ -378,6 +717,13 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             }
         }
     }
+    report.eq4.snowball_end = snowball(&state);
+    report.eq4.eliminated = state
+        .factions
+        .iter()
+        .filter(|(id, f)| !f.alive && id.as_str() != "fac_rebels")
+        .map(|(id, _)| id.as_str().trim_start_matches("fac_").to_owned())
+        .collect();
     report.idle_count = over_limit.values().filter(|n| **n > 4).count();
     report.factions = state
         .factions
@@ -532,6 +878,89 @@ fn main() {
         .collect();
     println!("Types du XVe s. recrutés (UR2) : {}", century_15.join(", "));
     print_summary(&reports, decades);
+    print_eq4(&reports);
+}
+
+/// Bankruptcies per faction and decade.
+fn bankruptcy_rate(r: &Report) -> f64 {
+    let total: u32 = r.bankruptcies.values().sum();
+    f64::from(total) / r.factions as f64 / (f64::from(r.turns) / 40.0)
+}
+
+/// Share of the sieges seen at the end of a turn that ended in a capture.
+fn siege_success(r: &Report) -> f64 {
+    let resolved = (r.eq4.sieges_won + r.eq4.sieges_failed).max(1);
+    100.0 * f64::from(r.eq4.sieges_won) / f64::from(resolved)
+}
+
+/// One EQ4 measure of a campaign.
+type Measure = fn(&Report) -> f64;
+
+/// EQ4: the combined balance table, one row per seed and the means.
+fn print_eq4(reports: &[Report]) {
+    println!(
+        "\nEQ4 — tableau combiné ({}) :",
+        std::env::var("DIFFICULTY").unwrap_or_else(|_| "normal".to_owned())
+    );
+    println!(
+        "| graine | guerre FR-EN | trêves | révoltes (/200 t.) | banqueroutes / fac. / déc. | sièges engagés | sièges réussis | prises directes | 1437 : 1re faction | fin : 1re faction | éliminées | accès militaires (accords, paires moy.) | intrusions (saisons, casus belli) |"
+    );
+    println!("|---|---|---|---|---|---|---|---|---|---|---|---|---|");
+    for r in reports {
+        let e = &r.eq4;
+        println!(
+            "| {} | {:.0} % | {} | {} ({:.1}) | {:.2} | {} | {:.0} % ({}/{}) | {} | {} {:.0} % | {} {:.0} % | {} ({}) | {} ({:.1}) | {} ({}) |",
+            r.seed,
+            100.0 * f64::from(r.war_turns) / f64::from(r.turns),
+            r.truces,
+            e.revolts,
+            f64::from(e.revolts) * 200.0 / f64::from(r.turns),
+            bankruptcy_rate(r),
+            e.sieges_started,
+            siege_success(r),
+            e.sieges_won,
+            e.sieges_won + e.sieges_failed,
+            e.direct_captures,
+            e.snowball_1437.0,
+            e.snowball_1437.1,
+            e.snowball_end.0,
+            e.snowball_end.1,
+            e.eliminated.len(),
+            e.eliminated.join(", "),
+            e.access_grants,
+            e.access_pair_turns as f64 / f64::from(r.turns),
+            e.trespass_seasons,
+            e.trespass_grievances,
+        );
+    }
+    let rows: &[(&str, Measure)] = &[
+        ("Guerre FR-EN (%)", |r| {
+            100.0 * f64::from(r.war_turns) / f64::from(r.turns)
+        }),
+        ("Trêves FR-EN / siècle", |r| f64::from(r.truces)),
+        ("Révoltes / 200 tours", |r| {
+            f64::from(r.eq4.revolts) * 200.0 / f64::from(r.turns)
+        }),
+        ("Banqueroutes / fac. / déc.", bankruptcy_rate),
+        ("Sièges engagés", |r| f64::from(r.eq4.sieges_started)),
+        ("Sièges réussis (%)", siege_success),
+        ("Prises directes", |r| f64::from(r.eq4.direct_captures)),
+        ("1re faction 1437 (% prov.)", |r| r.eq4.snowball_1437.1),
+        ("1re faction fin (% prov.)", |r| r.eq4.snowball_end.1),
+        ("Factions éliminées", |r| r.eq4.eliminated.len() as f64),
+        ("Accès militaires accordés", |r| {
+            f64::from(r.eq4.access_grants)
+        }),
+        ("Saisons d'intrusion", |r| f64::from(r.eq4.trespass_seasons)),
+        ("Casus belli d'intrusion", |r| {
+            f64::from(r.eq4.trespass_grievances)
+        }),
+    ];
+    println!("Moyennes EQ4 :");
+    for (label, f) in rows {
+        let (m, lo, hi) = spread(&reports.iter().map(f).collect::<Vec<_>>());
+        println!("  {label} : moy. {m:.2} [{lo:.2}-{hi:.2}]");
+    }
 }
 
 /// Mean, minimum and maximum of `values`.

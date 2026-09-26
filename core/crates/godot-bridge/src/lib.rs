@@ -11,9 +11,11 @@ use data_model::{GameData, HistoricalDate};
 use godot::classes::RefCounted;
 use godot::prelude::*;
 
+mod battle_replay;
 mod battle_sim;
 mod campaign_sim;
 mod campaign_sim_agents;
+mod campaign_sim_ai_replay;
 mod campaign_sim_difficulty;
 mod campaign_sim_diplomacy;
 mod campaign_sim_dp2;
@@ -34,13 +36,17 @@ mod campaign_sim_victory;
 mod campaign_sim_vision;
 mod campaign_sim_weather;
 mod convert;
+mod data_store_rules;
+mod historical_battles;
 mod naval_sim;
 mod relief_decoder;
+mod vegetation_scatter;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
 pub use naval_sim::NavalBattleSim;
 pub use relief_decoder::ReliefDecoder;
+pub use vegetation_scatter::VegetationScatter;
 
 struct CentAnsExtension;
 

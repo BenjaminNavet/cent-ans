@@ -285,6 +285,18 @@ func _build_bottom() -> void:
 func _draw_command_icon(button: Button, command: String, key: String) -> void:
 	var c := button.size * 0.5 + Vector2(2, 1)
 	var ink := INK
+	# DA5 : icône d'ordre à l'encre (or au survol), repli sur le pictogramme vectoriel.
+	var texture := HudStyle.icon("battle_" + command)
+	if texture != null:
+		var side := minf(button.size.x, button.size.y) - 12.0
+		# Encre cuite dans le PNG ; modulation = couleur voulue / encre (or au survol).
+		var tint := Color.WHITE
+		if button.disabled:
+			tint = Color(HudStyle.INK_FADED.r / INK.r, HudStyle.INK_FADED.g / INK.g, HudStyle.INK_FADED.b / INK.b, 0.55)
+		elif button.is_hovered() or button.button_pressed:
+			tint = Color(HudStyle.GOLD.r / INK.r, HudStyle.GOLD.g / INK.g, HudStyle.GOLD.b / INK.b)
+		button.draw_texture_rect(texture, Rect2(c - Vector2(side, side) * 0.5, Vector2(side, side)), false, tint)
+		command = ""
 	match command:
 		"formation":  # trois rangs
 			for i in 3:
@@ -330,7 +342,9 @@ func _build_leader_seal() -> Control:
 func set_leader(general: Variant, faction: String) -> void:
 	_leader = general if general is Dictionary else {}
 	_leader_portrait = PortraitLoader.portrait_texture(str(_leader.get("character", "")))
-	_leader_arms = PortraitLoader.heraldry_texture(faction)
+	# DA1 : armes de la maison du général (`house` posé par la scène), à défaut de la faction.
+	var house := str(_leader.get("house", HouseArms.house_of(str(_leader.get("character", "")))))
+	_leader_arms = PortraitLoader.house_heraldry_texture(house, faction)
 	_refresh_leader_tooltip()
 	leader_seal.queue_redraw()
 
@@ -343,7 +357,7 @@ func _refresh_leader_tooltip() -> void:
 	if _leader.is_empty():
 		leader_seal.tooltip_text = "L'ost combat sans général."
 		return
-	var text := "%s\nCommandement %d / 10" % [str(_leader.get("name", "")), int(_leader.get("command", 0))]
+	var text := "%s\nCommandement %d / %s" % [str(_leader.get("name", "")), int(_leader.get("command", 0)), RuleValues.text("max_skill_level")]
 	if not _leader_unit.is_empty():
 		text += "\nGarde du chef : %d hommes · moral %d" % [int(_leader_unit["soldiers"]), int(_leader_unit["morale"])]
 		if not bool(_leader_unit["present"]):

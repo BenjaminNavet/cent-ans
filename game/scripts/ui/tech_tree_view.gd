@@ -189,7 +189,7 @@ static func tooltip_for(node: Dictionary) -> String:
 	var cost := int(node.get("cost", 0))
 	var effective := int(node.get("effective_cost", cost))
 	if effective > cost:
-		lines.append("Coût : %d points (%d + 25 %% : trop en avance sur son temps)" % [effective, cost])
+		lines.append("Coût : %d points (%d + %s %% : trop en avance sur son temps)" % [effective, cost, RuleValues.text("anachronism_surcharge_percent")])
 	else:
 		lines.append("Coût : %d points" % cost)
 	return "\n".join(lines)

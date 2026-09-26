@@ -652,6 +652,86 @@ après changement de niveau).
 - Les rubans et hameaux ne sont construits que sur les tuiles au niveau proche ou fin (≤ 512 unités de
   la caméra), largement au-delà du champ utile en vue comté.
 
+## Vue d'ensemble ZG : carte zoomable jusqu'à 1-5 m (ADR 0036)
+
+Le chantier ZG rend la carte de campagne zoomable du continent jusqu'au terrain à quelques mètres,
+en trois paliers de relief (1 : 180-90 m, 2 : 45-22 m, 3 : 11-2,8 m sur 34 zones historiques).
+Tout est rendu seulement : aucune règle de jeu ne lit la pyramide.
+
+| Lot | Contenu | Où lire |
+|---|---|---|
+| ZG0 | ADR, manifeste `data/map/relief_pyramid.json`, zones `detail_zones.json`, squelettes | ADR 0036 |
+| ZG1 | Pyramide E1-E4 (`geo pyramid`) | `docs/geo.md`, « Pyramide de relief, paliers 1-2 » |
+| ZG2 | Quadtree streamé, pages de hauteurs, surface côté processeur | ci-dessous, « Relief streamé » |
+| ZG3 / ZG3b | Relief E5-E7 des zones (`geo detail-dem`), correctif du rehaussement | `docs/geo.md`, « Relief palier 3 » |
+| ZG4 / ZG4b | Caméra rapprochée par étage, exagération verticale dynamique ; correctifs de recette | « Caméra rapprochée et exagération verticale » |
+| ZG5a / ZG5b | Fleuves et routes fins, ancrages (données) ; rubans, lit creusé, parcellaire (rendu) | `docs/geo.md`, « Hydrographie fine » ; « Hydrographie fine, routes drapées… » |
+| ZG6 | Villes ordinaires à l'échelle réelle vers 1340 | « Villes ordinaires à l'échelle réelle » |
+| ZG7a / ZG7b | Perf et finitions ; cache absent, export, docs, crédits | ce paragraphe ; `docs/wip/zg7*.md` |
+| ZG8 | Relief local exagéré « façon Total War » | « Relief exagéré façon Total War » |
+| ZG7c | Recette aux 3 paliers, cache partiel, niveaux d'eau, plafond du relief local, clôture | « Recette finale et clôture (lot ZG7c) » |
+
+**État final (chantier clos le 26/09/2026).** Du continent (parchemin, d = 1 500) au terrain à
+quelques mètres (d = 0,3 dans les 34 zones E7) sans rupture : relief streamé E1-E7 (2,77 Go, cache
+complet), fleuves et routes fins drapés, villes ordinaires 1:1, exagération dynamique ZG4 + relief
+local ZG8 plafonné à 350 m, cache absent ou partiel signalé et toléré tuile par tuile. Limites connues
+(suites, détail et captures dans `docs/wip/zg7c-recette.md`) :
+- haute montagne au palier vallée : l'exagération ZG4 (×3,4 à d = 6) fait encore des murs dans les
+  vallées pyrénéennes et galloises ; à rendre fonction de l'amplitude locale du relief ;
+- fonds de vallée E1-E4 plaqués à 0,5 m près des plateaux (Seine de Paris à Rouen, Loire en
+  Touraine), d'où une Loire fine ≈ 5 m sous les berges E7 d'Orléans : recuisson E0-E4 avec le plancher
+  monotone du palier 3 (plusieurs heures), puis `geo hydro-fine` ;
+- villes emblématiques au palier site (maquettes à la loupe sur relief 1:1, plancher caméra 2,6) :
+  lot VH4 ;
+- objets à l'échelle de la carte au palier vallée (moulins, hameaux, fumées, arbres près de la
+  caméra) et disque d'emprise des villes ordinaires avant leurs maisons ;
+- pics d'images > 50 ms dominés par les scripts (sélection / application du quadtree, recalages) ;
+- aucune archive « Cent Ans relief » hébergée (à décider avant diffusion).
+
+**Cache du relief fin.** Tuiles E1-E7 et fleuves/routes fins sous `data/map/pyramid/` (≈ 2,8 Go,
+hors git). Une seule commande le régénère dans l'ordre, avec reprise :
+`uv run --project tools cent-ans geo relief-all` (`--check` : ce qui manque ; `docs/geo.md`,
+« Cache du relief fin »). Au chargement de la campagne, `ReliefCacheStatus`
+(`scripts/map/relief_cache_status.gd`) lit le manifeste et cherche sur le disque au plus 24 tuiles
+par étage (réparties, bornes comprises) et autant pour les fleuves et routes fins : états
+`DISABLED` (pas de manifeste listant des tuiles : fixtures, essais), `COMPLETE`, `PARTIAL`,
+`MISSING`. Le résultat est journalisé (`ReliefCache: …`, avertissement si incomplet) et, si le cache
+manque en tout ou partie, `ReliefCacheNotice` (`scripts/map/relief_cache_notice.gd`) affiche sous
+la barre supérieure un avis non bloquant « Relief rapproché limité / incomplet » : ce qui manque, la
+commande (champ sélectionnable, bouton « Copier ») ou, dans le jeu exporté, « réinstallez le jeu
+complet… », et « Fermer ». Une fois par session (`ReliefCacheNotice.shown_this_session`). Ignoré avec
+`--no-pyramid` ou `--pyramid-dir=`. Test : `tests/zg7b_cache_test.gd`.
+
+**Où le jeu cherche le relief** (`MapPaths.relief_root_for`, dossier contenant `pyramid/`) :
+variable `CENT_ANS_RELIEF_DIR`, puis `data/map/` (dépôt ; jeu exporté avec le relief dans
+`Cent Ans.app/Contents/Resources/data/map/pyramid`), puis un dossier « Cent Ans relief » à côté de
+l'application (livraison séparée), puis `user://relief`. `TerrainBuilder` (pyramide) et
+`FineGeoLayer` (fleuves, routes) lisent leurs tuiles sous cette racine ; les manifestes restent dans
+`data/map/`. Export : `CENT_ANS_EXPORT_RELIEF=bundle|external|none tools/export_macos.sh`
+(`cent-ans export-data`, voir l'addendum ZG7b de l'ADR 0036).
+
+**Réglages** (ressources, modifiables sans code) :
+- `resources/close_camera.tres` (`CloseCameraProfile`, ZG4/ZG4b) : distance minimale par étage E0-E7,
+  plancher au-dessus des villes emblématiques (`landmark_min_distance`), exagération verticale loin /
+  près et son pas de quantification, inclinaison, plans de découpe ;
+- `resources/relief_exaggeration.tres` (`ReliefExaggerationProfile`, ZG8) : `enabled`, exagération
+  de près (`near_exaggeration`), gains de relief local (`gain_far`, `gain_near`), calcul du fond de
+  vallée (`floor_*`), roche des falaises (`cliff_slope_*`), soleil de l'ombrage.
+
+**Drapeaux de ligne de commande** (après `--`) :
+- désactiver : `--no-pyramid` (relief E0 seul, comportement d'avant ZG), `--no-fine-geo` (ni
+  fleuves ni routes fins), `--no-towns` (villes ZG6), `--no-relief-exaggeration` (ZG8 → rendu ZG4
+  exact), `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
+- essais : `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--camera-min=N`,
+  `--qt-debug=1|2`, `--fine-debug`, `--town-lod=blocks|detail` ;
+- banc : `--stage=map --hide-armies --bench-map` (panoramique + descentes ; `--bench-distance`,
+  `--bench-seconds`, `--bench-descent-only`, `--bench-towns`), voir « Options, test et banc ».
+
+**Tests headless** : `tests/zg2_quadtree_test.gd`, `zg4_camera_test.gd`, `zg5b_fine_geo_test.gd`,
+`zg6_towns_test.gd`, `zg7a_test.gd`, `zg7b_cache_test.gd`, `zg7c_partial_cache_test.gd`,
+`zg8_relief_test.gd`, tous sans le vrai cache (pyramides factices dans `user://`). Captures (fenêtre) :
+`zg8_relief_shots.gd`, `zg7c_recette_shots.gd` (12 lieux × 3 paliers, parchemin, filtres).
+
 ## Relief streamé : pyramide et quadtree (lot ZG2, ADR 0036)
 
 Quand la pyramide de relief est en cache (`data/map/relief_pyramid.json` + tuiles non versionnées
@@ -1239,6 +1319,130 @@ inchangée), France entière (900).
 ![Pyrénées de près, après](img/zg8/apres_pyrenees_pres.jpg)
 ![Paris, après (plaine inchangée)](img/zg8/apres_paris.jpg)
 
+## Perf et finitions de la vue rapprochée (lot ZG7a, ADR 0036)
+
+**Villes (ZG6).** Blocs : un MultiMesh par ville ; maisons du kit : un MultiMesh par modèle et par
+cellule de 1 km (`TownBuilder.DETAIL_CELL_M`) au lieu de détail + blocs par cellule de 250 m. Le choix
+maison / bloc se fait **par instance** dans `town_building.gdshader` (`lod_mode` 1 détail, 2 bloc ;
+distance à `lod_camera`, publiée chaque image par `TownLayer` via `TownBuilder.set_lod_view`) : la
+passe d'ombre fait le même choix que la vue principale. Une instance écartée est repliée sur l'origine
+de son modèle (triangles dégénérés). Essai « un MultiMesh par modèle et par ville » abandonné : moitié
+moins d'appels de dessin, mais toutes les maisons de la ville passaient dans le vertex shader (et chaque
+cascade d'ombre) dès qu'une seule était proche, −9 % d'images/s.
+
+**Fil principal.** Image et mipmaps des pages de relief décodées dans `WorkerThreadPool`
+(`ReliefQuadtree._dispatch_image`) ; maillages des ponts-portes (`FineRibbonJob._prepare_gate_meshes`)
+et des ponts fins (`RiverCrossings._prepare_fine`) préparés dans des fils (`BridgeMeshes.build_arrays`,
+cache par clé partagé avec `build`) ; recalage des tuiles fines sur un changement de surface par un
+seul parcours des pages (`ReliefQuadtree.finest_levels`) ; éviction des couches sans recalcul global
+de `_chunk_top`. Minuteries par étape dans `perf_stats` (`qt_step_ms_max`, `fine_install_mesh_ms_max`,
+`fine_install_gates_ms_max`, `bridge_reshape_ms_max`).
+
+**GPU** (`tests/zg7a_gpu_ab.gd`, Vulkan obligatoire pour `viewport_get_measured_render_time_gpu` :
+`godot --path game --rendering-driver vulkan --script res://tests/zg7a_gpu_ab.gd -- --configs=base,no_parcels`).
+Parcellaire ZG5b : 1,4-2,7 ms de près (Amiens, Paris) ; allégé d'≈ 20 % (boucle fixe de 16 villes du
+finage, hash de Hoskins, bruit fin et normale des haies seulement quand ils se voient), rendu identique.
+Relief ZG8 : non mesurable (dans le bruit). Villes : 1,9-2,6 ms à Amiens.
+
+**Seine et fleuves ancrés.** Le « chenal brun » venait du fond de vallée plaqué à 0,5 m par le relief
+E1-E4 sans parcellaire (corrigé par ZG4b) ; les largeurs, elles, étaient incohérentes par tronçon (4,5 m
+en amont de Rouen, 50 m d'Elbeuf à Rouen, 60 m à Mantes). `hydro_fine.WidthModel` interpole désormais la
+largeur le long de la chaîne des ancrages (projection jusqu'à 25 km), règle par tronçon en amont du
+premier ancrage, repli Strahler. Nouveaux ancrages La Bouille 250, Duclair 300, Caudebec 450 m
+(`data/map/river_widths.json`). Résultat : Paris 133 m (îles comprises : 150-200), Mantes 146-150,
+Vernon 158, Elbeuf 175, Rouen 200. `geo hydro-fine` et `geo anchors-fine` relancés (pont de Mantes
+69,5 → 150,5 m). Plus de lit creusé dans les zones personnalisées (`river_styles.json`).
+
+**Ponts-portes et ponts fins.** Le tablier garde sa largeur réelle (`BridgeMeshes.FINE_DECK_M` : porte
+9 m, pierre 7, bois 4,5, bateaux 5, bac 8, gué 6 ; `fine_deck_scale`) au lieu de 0,15 + 0,05 × portée
+à l'échelle fine (30-45 m sur la Loire).
+
+**Londres.** Plancher de rehaussement monotone `max(0,5 ; min(0,85 h ; 5 m))` dans
+`detail_dem.apply_boost` (`BAKE_VERSION` 4) ; seule la zone `londres` du palier 3 a été recuite (rives
+2,6-3,8 m au-dessus de la Tamise au lieu de 0,5 m). Les autres zones suivront au prochain `geo
+detail-dem` complet (marqueurs invalidés).
+
+**Aperçu de chemin.** `PathPreview.width_at(d)` : plancher 0,01 unité (≈ 7 m) de près, 0,8 en vue
+stratégique (lissé entre d = 40 et 160) ; soulèvement `lift_at(d)` 0,004 × d ; subdivision plus fine de
+près (≤ 2 000 points) ; `update_view` reconstruit quand la distance varie de plus de 30 %.
+
+**Mesures** (M4 Pro, `--bench-map --bench-descent-only [--bench-towns]`, base = `main` 369bc6e7,
+passes base / ZG7a alternées, médiane de 3 passes, machine partagée avec d'autres sessions) :
+
+| Mesure | Villes base | Villes ZG7a | Descente base | Descente ZG7a |
+|---|---|---|---|---|
+| images/s | 46,9 | 46,0 | 37,2 | 35,5 |
+| p50 (ms) | 15,1 | 14,6 | 15,4 | 15,0 |
+| p99 (ms) | 130 | 131 | 139 | 138 |
+| pics > 50 ms | 203 | 193 | 182 | 186 |
+| appels de dessin | 897 | **508** | 666 | 665 |
+| `qt_update` max (ms) | 18,2 | 16,4 | 18,9 | 17,0 |
+| `fine_update` max (ms) | 20,5 | **5,5** | 17,2 | **5,7** |
+| `fine_install` max (ms) | 18,9 | **1,6** | 16,4 | **1,2** |
+| `surface_emit` max (ms) | 17,9 | **7,5** | 14,4 | **7,9** |
+
+Bascule des ponts : `bridge_reshape_ms_max` 0,3-0,35 ms, `fine_install_gates_ms_max` 0,5-1,1 ms (maillages préparés hors fil).
+
+**Limites.** p99 ≈ 130 ms (cible ≈ 115 non atteinte) : les pics > 50 ms sont communs à la base et
+dominés par le rendu / l'attente GPU et la création des ressources, pas par une tâche de script ; la
+sélection et l'application du quadtree (GDScript) montent encore à 10-16 ms sous forte charge (au-delà
+des 8 ms visés) ; relief E1-E4 : fonds de vallée proches de plateaux toujours à 0,5 m (recuisson E1-E4
+hors lot) ; niveau fin de la Tamise à −7,8 m (PAVA mêlé à la bathymétrie de l'estuaire).
+
+![Aperçu de chemin, avant](img/zg7a/chemin_avant.jpg)
+![Aperçu de chemin, après](img/zg7a/chemin_apres.jpg)
+![Pont-porte d'Orléans, avant](img/zg7a/pont_porte_avant.jpg)
+![Pont-porte d'Orléans, après](img/zg7a/pont_porte_apres.jpg)
+![Londres, avant](img/zg7a/londres_avant.jpg)
+![Londres, après](img/zg7a/londres_apres.jpg)
+![Rives de la Tamise, avant](img/zg7a/londres_rives_avant.jpg)
+![Rives de la Tamise, après](img/zg7a/londres_rives_apres.jpg)
+![Seine à Mantes, après](img/zg7a/seine_mantes_apres.jpg)
+
+## Recette finale et clôture (lot ZG7c, ADR 0036)
+
+**Cache partiel.** `ReliefPyramid` ne garde, par étage, que les tuiles listées **et** présentes sur
+le disque (un listage du dossier de l'étage, `_drop_missing_tiles`, `missing_tiles`) ; une tuile
+absente retombe sur l'ancêtre le plus fin présent (`finest_ancestor`), une tuile illisible est écartée
+à l'exécution (`mark_broken`). Avant, un étage entier était ignoré si sa première tuile manquait.
+Les reliquats d'écriture (`*.part.png`, `*.tmp`) ne sont jamais pris pour des tuiles : toutes les
+commandes `geo` écrivent puis renomment. Test : `tests/zg7c_partial_cache_test.gd` (trous à E1-E3,
+E3 sous un trou E2, tuile corrompue ; quadtree stable à d = 40, 10 et 4).
+
+**Relief local plafonné.** `ReliefFloor` relève le fond de vallée à `sommets voisins −
+local_relief_cap_m` (`relief_exaggeration.tres`, 350 m ; maximum par cellule, filtre maximum sur le
+rayon total des flous, mêmes flous). Le terme `h − fond` de ZG8 reste entier sur les collines, coteaux
+et falaises, mais ne dépasse plus ≈ 350 m en montagne : plus d'aiguilles au puy de Dôme ni dans les
+Alpes. Même formule partout (le fond publié est lu par les shaders, `MapData` et le semis natif) ;
+0 = rendu ZG8 d'origine.
+
+**Niveaux d'eau.** `hydro_fine.water_level` borne le fond des lignes à 0 m avant l'ajustement
+monotone (la bathymétrie des zones E5-E7 tirait la Tamise à −7,8 m à Londres, la Garonne à −15,8 m à
+Bordeaux) ; clé du cache de recalage liée à `detail_dem.BAKE_VERSION` (`SNAP_VERSION` 4 : les
+recalages dataient d'avant ZG3b : la Loire passait 10 m sous le relief d'Orléans, encore ≈ 5 m après
+recalage, car l'ajustement monotone la mêle aux biefs E4 d'amont abaissés, voir les limites). Tamise à
+Londres : 1,9 m. Palier 3 : les 34 zones recuites avec le plancher monotone v4.
+
+**Banc.** `process_ms` du banc `--bench-map` est chronométré du début de l'itération (nœud
+`MapBenchFrameStart`, priorité minimale, physique comprise) jusqu'au banc (priorité maximale), au lieu
+de `Performance.TIME_PROCESS` (qui ne couvrait pas l'image mesurée) : les pics > 50 ms de la descente
+sont dominés par les scripts (médiane ≈ 59 ms de scripts sur ≈ 60), pas par le GPU.
+
+**Recette.** `godot --path game --script res://tests/zg7c_recette_shots.gd -- --map-weather=clear
+--out=<dossier> [--only=paris,londres] [--extras]` (brouillard de guerre coupé : sans cela, les terres
+inconnues du camp joué paraissent beiges de près). Captures et défauts laissés :
+`docs/wip/zg7c-recette.md`.
+
+![Alpes au palier vallée, avant le plafond](img/zg7c/alpes_vallee_avant.jpg)
+![Alpes au palier vallée, relief local plafonné](img/zg7c/alpes_vallee.jpg)
+![Puy de Dôme, avant](img/zg7c/massif_central_vallee_avant.jpg)
+![Puy de Dôme, relief local plafonné](img/zg7c/massif_central_vallee.jpg)
+![Londres au palier site : Tamise au niveau de la mer](img/zg7c/londres_site.jpg)
+![Paris au palier vallée](img/zg7c/paris_vallee.jpg)
+![Crécy au palier site](img/zg7c/crecy_site.jpg)
+![Suite S1 : murs pyrénéens au palier vallée](img/zg7c/pyrenees_vallee.jpg)
+![Suite S3 : Rouen au palier site (VH4)](img/zg7c/rouen_seine_site.jpg)
+
 ## Interface des colonies (lot C5)
 
 Scripts : `settlement_controller.gd` (contrôleur), `settlement_panel.gd` (panneau construit en code),
@@ -1309,6 +1513,29 @@ colonie et le bouton « Garnison » restent. Avec le mock, la carte garde le com
 ![Bulle et chemin sur deux tours](img/m4/bulle-chemin.png)
 ![Bord de la bulle, fin de l'étape de ce tour](img/m4/bord-de-bulle.png)
 
+## Vision par rayon (lot M5a)
+
+- Règle (cœur, `sim-campaign/src/vision.rs`) : un point est vu à moins de `vision_army_km` (30) d'une
+  armée amie ou de `vision_settlement_km` (20) d'une colonie tenue (`data/movement/rules.json`) ;
+  alliés, vassaux et suzerains partagent leur vue (`data/rules/vision.json`). Toutes les terres des
+  provinces tenues par la faction ou ses alliés sont vues (`own_provinces_visible`). Une province est
+  visible si `province_seen_percent` (25 %) de ses terres sont vues, si elle contient une colonie
+  vue ou une armée amie, ou si un agent la surveille. La vue est recalculée, jamais sauvegardée
+  (≈ 1 ms par faction en release).
+- Pont : `get_vision(faction)` → `{image (R8 512², 255 = vu, bord doux, vu dès 128), size,
+  texel_px, provinces, armies, seen_share}` ; `get_visible_army_ids`, `is_point_visible` ;
+  `get_visible_provinces` inchangé.
+- Rendu : `MinimapController.refresh_fog` pose la texture sur le terrain
+  (`TerrainBuilder.set_fog_cells`, `terrain.gdshader` : prise filtrée, bord effrangé par un bruit
+  lent, liseré sépia) et sur la minicarte (`CampaignMinimap.set_fog_cells`). Les armées étrangères
+  dont le point n'est pas vu n'ont ni marqueur (`ArmyMarkers.visible_armies`) ni point sur la
+  minicarte. Sans `get_vision` (simulation de repli), l'ancien masque par province reste utilisé.
+- Test : `godot --headless --path game --script res://tests/m5a_vision_ui_test.gd`.
+
+![Avant : brouillard par province](img/m5a/avant-brouillard-province.png)
+![Après : brouillard par case](img/m5a/apres-brouillard-case.png)
+![Lisière du brouillard, gros plan](img/m5a/apres-lisiere-proche.png)
+
 ## Performances mesurées (M4 Pro)
 
 | Jeu de données | Chargement | Terrain (LOD lointain) | Tuile proche |
@@ -1365,3 +1592,27 @@ fenêtre, bandeau, journal, panneaux de droite).
   `UI/NewsLetters`.
 - Captures : `--stage=army` (défaut), `--stage=province`, `--stage=chronicle` →
   `docs/img/hud-campaign*.png` (1440×900 et 1920×1080).
+
+## Tour de l'IA à la Total War (lot CT1, ADR 0073)
+
+En fin de tour, après la résolution du cœur et avant la diplomatie, la victoire et le rapport de
+saison, `AiTurnReplay` (`game/scripts/map/ai_turn_replay.gd`, créé par `campaign_map.gd`) rejoue les
+marches des armées IA que le joueur voit :
+
+- **Données** : `CampaignSim.get_ai_turn_moves()` (trajet réel, issue, partie vue, intérêt pour le
+  joueur ; format dans l'ADR 0073), enregistré seulement si `set_ai_turn_recording(true, …)` a été
+  appelé avant `end_turn` ; mise en scène dans `data/ui/ai_turn_replay.json`.
+- **Réglages** (Réglages › Carte) : « Mouvements de l'IA » = Suivre (défaut ; la caméra se porte sur
+  les 6 mouvements au plus qui concernent le joueur — bataille, siège de ses places, marche sur ses
+  terres, arrivée près de ses armées ou colonies — puis revient), Montrer (marches sans caméra),
+  Masquer (fin de tour immédiate, rien d'enregistré) ; « Vitesse » ×1 / ×2 / ×4. Espace passe le
+  reste. Les armées alliées et vassales marchent sans être suivies.
+- **Rendu** : chaque armée rejouée repart de son point de départ (figurines CV2 en marche le long
+  du trajet, `ArmyMarkers.place_marker`), les autres mouvements vus se jouent en même temps ; une
+  légende « Tour de l'IA : <faction> — Espace : passer » remplace le bandeau des autres factions.
+- **Tests** : `game/tests/ct1_ai_turn_test.gd` (headless, les trois modes, Espace),
+  `core/crates/ai/tests/ct1_ai_replay.rs` (déterminisme, jeu inchangé, bataille notable) ;
+  captures `game/tests/ct1_capture.gd` → `docs/audit/captures/ct1/`.
+- **Coût** : Masquer = coût d'avant ; enregistrement actif ≈ 2 ms par tour dans le cœur (release),
+  < 0,1 ms de tri côté Godot ; la relecture elle-même dure le temps de l'animation (de 0 s sans
+  mouvement vu à une vingtaine de secondes à ×1 quand six mouvements sont suivis).

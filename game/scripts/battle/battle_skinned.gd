@@ -201,10 +201,14 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 		key = "idle"
 	var entry: Dictionary = sets[key]
 	var rig_entry := rig(kind, variant)
+	var names: Array = entry["set"]
+	# EP12 : jeu de repli quand le manifeste n'a pas encore les clips (kit antérieur).
+	if entry.has("fallback") and not rig_entry.get("clips", {}).has(str(names[0])):
+		names = entry["fallback"]
 	var ids: Array[int] = []
-	for c in entry["set"]:
+	for c in names:
 		ids.append(clip_index(rig_entry, str(c)))
-	var config := {"key": cache_key, "names": entry["set"], "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
+	var config := {"key": cache_key, "names": names, "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
 	_configs[cache_key] = config
 	return config
 
@@ -220,6 +224,26 @@ static func death_config(kind: String, variant: int) -> Dictionary:
 	if ids.is_empty():
 		ids.append(0)
 	return {"key": "%s/%d/dead" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
+
+
+## Lot EP12 : blessés au sol (mode CUSTOM, INSTANCE_CUSTOM.y = indice dans ce jeu) ; vide si
+## le rig n'a pas les clips (kit antérieur) ou pour les cavaliers.
+static func wounded_config(kind: String, variant: int) -> Dictionary:
+	if kind == "cavalry":
+		return {}
+	var rig_entry := rig(kind, variant)
+	var ids: Array[int] = []
+	for c in WOUNDED_FOOT:
+		if not rig_entry.get("clips", {}).has(c):
+			return {}
+		ids.append(clip_index(rig_entry, str(c)))
+	return {"key": "%s/%d/wounded" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
+
+
+## Style d'animation de la figurine (`sword`, `pike`, `bow`...), exposé au rendu (EP12 : armes
+## laissées au sol par les fuyards).
+static func style_of(kind: String, variant: int) -> String:
+	return _style(kind, variant)
 
 
 ## Style d'animation de la figurine : champ `style` du manifeste (lot UR1), sinon règle
@@ -240,6 +264,55 @@ static func _style(kind: String, variant: int) -> String:
 
 ## Figurine « noble » (livrée plus présente) : champ `noble` du manifeste (lot UR1), sinon
 ## variante 0 des fantassins et des cavaliers.
+## DA1 : boîte du buste en pose de repos, où le shader peint les armoiries (surcot, jaque) ou la
+## croix de livrée : sommets livrée (code 0) dont l'os dominant est le torse ou la poitrine.
+## {center: Vector2(x, y), size: Vector2(largeur, hauteur), depth: Vector2(z min, z max)} ;
+## vide si la figurine n'a pas de livrée au buste (plates complètes).
+static var _chest_boxes: Dictionary = {}
+
+
+static func chest_box(kind: String, variant: int) -> Dictionary:
+	var key := figure_name(kind, variant)
+	if _chest_boxes.has(key):
+		return _chest_boxes[key]
+	var result := {}
+	var mesh_lod := mesh(kind, variant, 0)
+	var bones: Array = rig(kind, variant).get("bones", [])
+	var torso := {}
+	for index in bones.size():
+		var bone_name := str(bones[index]).trim_prefix("R:")
+		if bone_name == "Torso" or bone_name == "Chest":
+			torso[index] = true
+	if mesh_lod != null and not torso.is_empty():
+		var arrays := mesh_lod.surface_get_arrays(0)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var colors: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+		var bone_idx: PackedFloat32Array = arrays[Mesh.ARRAY_CUSTOM0]
+		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_CUSTOM1]
+		var low := Vector3(INF, INF, INF)
+		var high := -low
+		for i in verts.size():
+			if int(colors[i].a * 16.0 + 0.5) != 0:
+				continue
+			var best := 0
+			for k in range(1, 4):
+				if weights[i * 4 + k] > weights[i * 4 + best]:
+					best = k
+			if not torso.has(int(bone_idx[i * 4 + best] + 0.5)):
+				continue
+			low = low.min(verts[i])
+			high = high.max(verts[i])
+		if low.x < high.x:
+			var width := (high.x - low.x) + 0.06
+			result = {
+				"center": Vector2((low.x + high.x) * 0.5, (low.y + high.y) * 0.5),
+				"size": Vector2(width, width * 1.25),
+				"depth": Vector2(low.z - 0.06, high.z + 0.06),
+			}
+	_chest_boxes[key] = result
+	return result
+
+
 static func is_noble(kind: String, variant: int) -> bool:
 	var fig := figure(kind, variant)
 	if fig.has("noble"):
@@ -271,6 +344,10 @@ static func rigid_variant(kind: String, variant: int) -> int:
 
 
 const DEATHS_FOOT := ["death", "death_m", "death_back", "death_knees"]
+## Lot EP12 : blessés (rampe, assis, à genoux) ; ordre = INSTANCE_CUSTOM.y de la couche.
+const WOUNDED_FOOT := ["crawl", "wounded_sit", "wounded_kneel"]
+## Lot EP12 : drapeau ajouté au code de INSTANCE_CUSTOM.w (cadavre ou blessé désarmé).
+const CODE_UNARMED := 8
 ## Lot BV2 : `c_fall` = cavalier désarçonné (le cheval s'enfuit, code 6 du shader).
 const DEATHS_CAVALRY := ["c_death", "c_death_m", "c_fall"]
 ## Lot BV2 : parties tranchées (code de INSTANCE_CUSTOM.w, 1-5) → os du rig (plage, plus deux
@@ -354,7 +431,7 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"], "speed": 1.05},
 		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.3},
-		"routing": {"set": ["run"], "speed": 1.1},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "guard", "idle"], "mode": M_SPLIT},
 	},
 	# Lot BV2 : lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
@@ -365,7 +442,7 @@ const STYLES := {
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3},
 		"brace": {"set": ["pike_level"]},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "idle", "guard"], "mode": M_SPLIT},
 	},
 	"pike": {
@@ -376,7 +453,7 @@ const STYLES := {
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
 		# Lot BV2 : piques abaissées face à une charge de cavalerie (rendu seulement).
 		"brace": {"set": ["pike_level"]},
-		"routing": {"set": ["run"], "speed": 1.1},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "pike_idle"], "mode": M_SPLIT},
 	},
 	"bow": {
@@ -386,7 +463,7 @@ const STYLES := {
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
 		"melee": {"set": ["slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.5},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 	},
 	"crossbow": {
 		"idle": {"set": ["xbow_idle"]},
@@ -395,7 +472,7 @@ const STYLES := {
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["xbow_shoot"], "mode": M_VOLLEY, "release": 0.3},
 		"melee": {"set": ["slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.5},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 	},
 	"lance": {
 		"idle": {"set": ["c_idle"]},

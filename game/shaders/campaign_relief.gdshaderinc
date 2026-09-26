@@ -48,6 +48,14 @@ float campaign_display_height(float h_m, vec2 xz) {
 }
 
 // Même chose à une échelle et un gain donnés (rubans cuits).
+// `campaign_display_height` avec le fond déjà lu au même point (même expression, même résultat).
+float campaign_display_height_at_floor(float h_m, float floor_m) {
+	if (campaign_relief_gain == 0.0) {
+		return h_m * campaign_vertical_scale;
+	}
+	return campaign_vertical_scale * (h_m + campaign_relief_gain * max(h_m - floor_m, 0.0));
+}
+
 float campaign_display_height_with(float h_m, vec2 xz, float scale, float gain) {
 	if (gain == 0.0) {
 		return h_m * scale;

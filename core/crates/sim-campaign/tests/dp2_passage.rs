@@ -1,4 +1,4 @@
-//! Lot DP2 (ADR 0031): right of passage and trespass incidents, the AI's
+//! Lot DP2 (ADR 0075): right of passage and trespass incidents, the AI's
 //! respect of it, the path warning and the diplomatic stance of the map.
 
 use std::path::PathBuf;

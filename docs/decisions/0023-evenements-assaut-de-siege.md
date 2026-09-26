@@ -88,3 +88,46 @@ versée des mâchicoulis.
 - LOD : `<modèle>_lod.glb` (mêmes pièces nommées, petites pièces retirées) au-delà de
   `lod.simple_m`, pose ralentie et servants cachés au-delà de `lod.far_m` (= distance des
   imposteurs BV3) ; `SiegeEnginesFx.lod_distances()` pour les préréglages de qualité.
+
+## Suite SG4 (2026-09-25) : IA d'assaut, relève du bélier, retraite
+
+Constat (sonde SG3, `ENGINES=1`) : à Avignon, 4 assauts sur 10 finissaient en nul à 1800 s : l'huile
+tuait l'équipage du bélier à 85 % de la porte, les régiments passés par-dessus le mur restaient
+plantés à leur point d'échelle, l'infanterie attendait au pied du mur.
+
+- **Relève de l'équipage du bélier** (règle du cœur, `BattleSim::relieve_rams`,
+  `sim/siege_assault.rs`) : tant que la porte tient, le régiment à pied de l'assaillant le plus proche
+  à moins de `ram.relief_range_m` (18 m) d'un bélier à court d'hommes (ou abandonné, équipage mort)
+  lui passe `ram.relief_men_per_s` (0,5) homme par seconde jusqu'à l'équipage complet ; un bélier
+  abandonné repart (« … reprennent le bélier abandonné ! »). Les hommes prêtés survivants rentrent
+  dans leur régiment à la fin de la bataille (`return_ram_crews`), les morts sont ses pertes.
+  Données dans `data/rules/siege_works.json` (`relief_range_m` à 0 désactive la règle).
+- **IA d'assaut** (`ai.rs::plan_siege_attack`) : un bélier sous 60 % de son équipage appelle le
+  régiment libre le plus proche, qui se poste 14 m derrière lui, hors de portée de l'huile ; échelles
+  sur tous les pans du front à la fois (un régiment par pan, les pans tenus par plus de deux fois la
+  moyenne de la garnison en dernier) ; un régiment par beffroi accosté ; infanterie par la brèche ou
+  la porte dès l'ouverture ; tout régiment déjà sur le mur ou dans la ville va à la place (même
+  correctif que BR3b) ; les engins visent le pan le plus faible, à PV égaux le plus proche
+  (2 PV par mètre) ; archers et arbalétriers à pied sans munitions escaladent aussi (`can_climb`).
+- **Retraite** : l'assaillant sonne la retraite (`Withdraw`) quand l'assaut est clairement perdu :
+  aucune ouverture, personne sur le mur, sur les échelles ou dans la ville, aucun beffroi en marche,
+  et soit rien n'a progressé (coup de bélier, échelles, prise du chemin de ronde, beffroi accosté,
+  ouvrage tombé) depuis 300 s passé les 420 s d'attente des engins, soit sa force est tombée sous
+  35 % de celle de la garnison.
+
+Mesures (`SEEDS=10 … sg3_assault_probe`, 1800 s, colonnes nuls et retraites ajoutées ;
+`ATTACKER_SHARE=0.5` réduit les assaillants de moitié) :
+
+| Ville (niv. 5 sauf Bruges) | avec engins avant → après | sans engins avant → après | ½ armée + engins | ½ armée sans engins |
+|---|---|---|---|---|
+| Paris | 10/10 → 10/10 | 10/10 → 10/10 | 9/10 | 3/10 (1 retraite) |
+| Avignon | 6/10, **4 nuls** → **10/10, 0 nul** | 10/10 → 10/10 | 5/10 | 0/10 (1 retraite) |
+| Bruges | 10/10 → 10/10 | 10/10 → 10/10 | 10/10 | 10/10 |
+| Calais | 10/10 → 10/10 | 10/10 → 10/10 | 10/10 | 9/10 |
+| Rouen | 8/10, 2 nuls → 10/10 | 8/10 → 8/10 | 2/10 | 4/10 |
+
+Aucun nul dans aucune configuration. Les armées de démonstration sont plus fortes que les garnisons
+(550 contre 420 à Avignon) : elles prennent la ville ; à moitié d'effectif, l'assaut d'une ville de
+niveau 5 réussit de 0 à 5 fois sur 10 selon la garnison et les engins. `f5d` (escalade sans brèche
+ni engin, 8 régiments contre 5, niveau 2) : 13/24 → 20/24 victoires sur les graines 0-23 (la porte
+tombe désormais, bélier relevé) ; fourchette du test portée de 2-4 à 2-5 sur 6.

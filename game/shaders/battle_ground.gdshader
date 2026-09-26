@@ -31,6 +31,9 @@ uniform sampler2D splat_b : filter_linear, repeat_disable;
 uniform vec4 splat_rect = vec4(-400.0, -400.0, 2000.0, 1600.0);
 // Rectangle (x0, z0, x1, z1) sans parcelles cultivées (centre du champ de bataille).
 uniform vec4 calm_rect = vec4(150.0, 60.0, 1050.0, 740.0);
+// EP6 : parcelles du décor (voir `bt_decor_field`), même rectangle que les splatmaps.
+uniform sampler2D decor_fields : filter_nearest, repeat_disable;
+uniform float decor_on = 0.0;
 uniform float wetness : hint_range(0.0, 1.0) = 0.0;
 uniform float snow : hint_range(0.0, 1.0) = 0.0;
 // Lot B5 : altitude des neiges (sommets de l'horizon en montagne ou en hiver).
@@ -48,6 +51,10 @@ uniform float relief_on = 0.0;
 // Roche affleurante (0 en plaine, 1 en montagne) et force des normales de détail.
 uniform float outcrops : hint_range(0.0, 1.0) = 0.0;
 uniform float detail_bump = 0.7;
+// DA6 : lisières douces des parcelles et détail du sol de près (`--no-da6` : 0).
+uniform float da6_on = 0.0;
+uniform float decor_saturation = 0.6; // DA6 : part de la saturation gardée (bible § 3.3)
+uniform float detail_near = 45.0; // distance (m) sous laquelle le détail est plein
 
 varying vec3 world_pos;
 varying vec3 world_normal;
@@ -119,8 +126,27 @@ void fragment() {
 	// Parcelles cultivées hors du centre du champ.
 	vec2 calm_d = max(calm_rect.xy - p, p - calm_rect.zw);
 	float outside_calm = smoothstep(0.0, 60.0, max(calm_d.x, calm_d.y));
-	vec3 field = bt_field_info(p);
+	// DA6 : lisières ondulées et fondues (mêmes formules que l'herbe).
+	vec3 field = da6_on > 0.5 ? bt_field_info_soft(p) : bt_field_info(p);
 	float field_w = (field.x > 0.5 ? 1.0 : 0.0) * outside_calm * (1.0 - sb.g) * field.z;
+	// EP6 : parcelles posées par le cœur (labours, blé, prés, semis, vignes, chaumes).
+	float decor_kind = 0.0;
+	float furrow_period = 1.3;
+	if (decor_on > 0.5 && inside) {
+		vec2 duv = da6_on > 0.5 ? (p + bt_edge_warp(p) - splat_rect.xy) / splat_rect.zw : suv;
+		vec4 df = texture(decor_fields, duv);
+		if (df.a > 0.5) {
+			field = bt_decor_field(df, p);
+			decor_kind = field.x;
+			if (decor_kind == 4.0 || decor_kind == 5.0) {
+				field.x = 1.0;
+				furrow_period = decor_kind == 5.0 ? 2.2 : 0.9;
+			} else if (decor_kind == 6.0) {
+				field.x = 2.0;
+			}
+			field_w = da6_on > 0.5 ? bt_decor_edge_soft(field.z, p) : field.z;
+		}
+	}
 
 	float w_forest = smoothstep(0.15, 0.6, sa.r + (fine - 0.5) * 0.4);
 	float w_dirt = smoothstep(0.2, 0.6, sa.g + (fine - 0.5) * 0.3);
@@ -190,7 +216,7 @@ void fragment() {
 	float grassy = w[int(L_GRASS)] + w[int(L_MEADOW)];
 	vec3 tint = grass_tint * mix(vec3(0.92, 1.0, 0.86), vec3(1.08, 1.02, 0.86), macro2);
 	if (field.x == 2.0) {
-		tint = mix(tint, vec3(1.45, 1.18, 0.62), field_w);
+		tint = mix(tint, decor_kind == 6.0 ? vec3(1.3, 1.1, 0.7) : vec3(1.45, 1.18, 0.62), field_w);
 	}
 	// Lot V4b : taches de prairie visibles de haut (herbe sèche blonde, prairie grasse sombre,
 	// friches roussâtres) à deux échelles, pour casser l'uniformité du champ vu d'ensemble.
@@ -207,10 +233,37 @@ void fragment() {
 	tint = mix(tint, tint * vec3(1.14, 1.06, 0.8), crest * 0.55);
 	albedo = mix(albedo, albedo * tint, grassy);
 	albedo *= mix(0.84, 1.1, macro) * mix(0.93, 1.05, fine);
+	// DA6 : détail de près (sol net sous la caméra rapprochée). La couche dominante est relue à
+	// ~1/4 de son échelle, tournée : sa luminance seule module l'albédo (grain, brindilles,
+	// mottes), sa normale s'ajoute à celle du sol ; fondu avec la distance (coût nul au loin).
+	float near_k = da6_on > 0.5 ? 1.0 - smoothstep(detail_near, detail_near * 2.6, view_dist) : 0.0;
+	if (near_k > 0.01) {
+		float dom = 0.0;
+		float wmax = -1.0;
+		for (int i = 0; i < 9; i++) {
+			if (w[i] > wmax) {
+				wmax = w[i];
+				dom = float(i);
+			}
+		}
+		vec2 duv = mat2(vec2(0.6, -0.8), vec2(0.8, 0.6)) * p / (layer_size(dom) * 0.27) + vec2(0.19, 0.83);
+		vec3 dcol = texture(albedo_array, vec3(duv, dom)).rgb;
+		vec3 dref = textureLod(albedo_array, vec3(duv, dom), 9.0).rgb;
+		float dl = dot(dcol, vec3(0.3, 0.59, 0.11)) / max(dot(dref, vec3(0.3, 0.59, 0.11)), 0.02);
+		albedo *= mix(1.0, clamp(dl, 0.55, 1.5), near_k * 0.5);
+		vec3 dn = texture(normal_array, vec3(duv, dom)).rgb;
+		vec3 n_near = nrm * 2.0 - 1.0;
+		n_near.xy += (dn.xy * 2.0 - 1.0) * near_k * 0.6;
+		nrm = normalize(n_near) * 0.5 + 0.5;
+	}
 	// Sillons des labours.
 	if (w_plough > 0.0) {
-		float furrow = 0.5 + 0.5 * sin(field.y * 6.2832 / 1.3);
+		float furrow = 0.5 + 0.5 * sin(field.y * 6.2832 / furrow_period);
 		albedo *= mix(1.0, mix(0.72, 1.05, furrow), w[int(L_PLOUGH)]);
+		// EP6 : blé en herbe des semis (rangs verts sur la terre).
+		if (decor_kind == 4.0) {
+			albedo = mix(albedo, albedo * vec3(0.75, 1.25, 0.55), w[int(L_PLOUGH)] * (0.35 + 0.4 * furrow));
+		}
 	}
 	// Lot B7 : relief de lecture de la neige. Congères étirées par le vent (bruit anisotrope),
 	// grain fin, ombre bleutée et neige plus mince sur les pentes, crêtes plus blanches ; neige
@@ -241,6 +294,10 @@ void fragment() {
 	albedo *= mix(1.0, 0.62, wet);
 	albedo *= 1.0 - dip * 0.08;
 
+	// DA6 (bible § 3.3) : décor sourd, saturation ramenée vers la luminance.
+	if (da6_on > 0.5) {
+		albedo = mix(vec3(dot(albedo, vec3(0.3, 0.59, 0.11))), albedo, decor_saturation);
+	}
 	ALBEDO = albedo;
 	// Lot R2 : relief de détail sous la grille de 10 m (normales, rendu seulement), plus marqué sur
 	// les sols caillouteux, effacé au loin (anti-crénelage) et sous la neige.

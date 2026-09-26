@@ -32,13 +32,13 @@ nuit : NV2, SG3, EQ1, PF1, DP2, AR1).
 
 | Lot | Objet | ADR | Dépend de | État |
 |---|---|---|---|---|
-| EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0031 | — | **fusionné** 13506bf1 |
+| EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0076 (ex-0031) | — | **fusionné** 13506bf1 |
 | EP2 | Horizon : relief réel (DEM) autour du lieu en anneau lointain, panoramas peints par région (mer, Alpes, Pyrénées, collines), silhouettes lointaines (clocher, château), brume de chaleur/fumée de camp | 0032 | — | **fusionné** 13506bf1 |
 | EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | **fusionné** 13506bf1 |
 | EP4 | Son de mêlée de proximité : émetteurs par front de mêlée, couches proche/moyen/lointain, grande banque CC0 (chocs, cris, râles, chevaux, ordres), foule qui monte avec l'effectif | — | — | **fusionné** a30b461b (27 clips CC0, 112 générés ; ordres criés sans source CC0 ; volumes à régler à l'oreille) |
 | EP5 | Étendards : figurine porte-étendard dédiée (pose et clips), musiciens (tambours, trompettes), étendard qui tombe, relevé ou pris (moral, écran de fin) | 0034 | — | **fusionné** 13506bf1 |
-| EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | — | EP3 | en cours (repris 25/09 soir) |
-| EP7 | Cartes historiques Crécy (26/08/1346), Poitiers (19/09/1356), Azincourt (25/10/1415) : relief réel, décor d'époque, déploiement historique, entrée depuis la campagne et le menu | 0035 | EP1-EP3, EP6 | vague 2 |
+| EP6 | Villages et décor du champ : hameaux variés, moulin à vent/à eau, église et cimetière, manoir fortifié, vignes, vergers, meules, charrettes, camp et convoi derrière les lignes, pieux | 0061 | EP3 | **fusionné** ade1b9a7 |
+| EP7 | Cartes historiques Crécy (26/08/1346), Poitiers (19/09/1356), Azincourt (25/10/1415) : relief réel, décor d'époque, déploiement historique, entrée depuis la campagne et le menu | 0035 | EP1-EP3, EP6 | branche `feat/ep7-historical-maps` prête (26/09) : Anglais 23/30 Crécy, 24/30 Azincourt, 20/30 Poitiers ; 0 $ |
 | EP8 | Mise en scène : heure du jour (aube, crépuscule), ombres de nuages, poussière des charges, fumées, oiseaux qui s'envolent, caméra cinématique au premier choc | 0055 | EP2 | **fusionné** 3805ef66 |
 
 ## Budget (plafond 20 $)
@@ -109,3 +109,38 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
 - EP7 attend EP6 (API de placement explicite) et utilise `set_start_hour` d'EP8.
 - Points ouverts EP9 : passage de rivière profonde par l'IA attaquante (jusqu'à 22 min) ; l'IA
   attaquante perd face à un défenseur immobile (10-12/12) ; seuil `ep1_scale` à 10 régiments en mêlée.
+- EP6 fusionné (ade1b9a7, ADR 0061) : décor procédural, camps et pillage, API `DecorPlan`.
+  Suites : l'IA ne vise pas les camps ; léger avantage attaquant avec décor (21/32) ;
+  `hydro::chaikin` ne lisse pas ; 40 fps à 15 k à remesurer au calme (30 i/s ce soir, machine chargée).
+- EP9b lancé (retour SG4 : défenseur 10/10 sur plat sans pieux ; duel prolongé si gagné, milice en
+  second échelon). EP7 lancé (Crécy d'abord, puis Azincourt, Poitiers).
+- EP9b fusionné (1ffb3926, ADR 0056 § EP9b) : duel prolongé jusqu'à 300 s s'il est gagné
+  (`data/rules/battle_duel.json`), milice 35 m en second échelon. Plat sans pieux : attaquant 0/10 → 7/10 ;
+  Crécy-like 12/12 anglais. Point ouvert (renvoyé à SG4/R4) : crête + pieux en miroir, attaquant 6/10
+  (contagion de déroute des archers du défenseur à travers sa ligne).
+- EP7 fusionné (a9f57cd7, ADR 0035) : Crécy 23/30, Azincourt 24/30, Poitiers 20/30 victoires anglaises
+  (IA contre IA) ; menu « Batailles historiques » ; site réel appliqué aux batailles de campagne de la
+  province. Suites : les postes anglais ne tiennent pas le joueur ; Poitiers localisé approximativement ;
+  garde `scenario_post` contre le repli de contre-pente SG5 (demandée à la session de nuit).
+- Lancés 26/09 : EP10 (déroute vers l'arrière, contagion pondérée par la position, renvoyé par SG5),
+  EP8b (horloge d'Azincourt : « Midi » après 2 min 50).
+- EP8b fusionné (0921f8e4) : le bandeau affiche l'heure (« Midi, 11 h 00 ») ; compression inchangée
+  (0,2 min de jour par seconde de bataille, ADR 0055 addendum).
+- EP10 fusionné (03f4dffa, ADR 0068) : déroute vers l'arrière, contagion pondérée par la position
+  (`data/rules/battle_rout.json`). Repro : 7/7 régiments cédaient → 0/7. EP7 dans les fourchettes
+  (Crécy 16, Azincourt 19 — limite haute, Poitiers 12 sur 20). Prix : miroir ep9b attaquant 18/30 → 7/30,
+  sg4 plat pieux 3/7 → 1/9 ; digests b6 recalculés (graine 3 passe aux Français).
+  Suites : équilibre attaquant en miroir à surveiller ; Azincourt en limite haute.
+
+### Vague 3 (26/09, reprise du backlog TW, docs/audit/backlog-tw.md)
+| Lot | Contenu | Wip | État |
+|---|---|---|---|
+| EP11 | Poussée continue des lignes : front qui se bombe, enroulement, compression (ADR 0022 → module push) | ep11-poussee-lignes.md | **fusionné** 87ec2d16 (ADR 0071) |
+| EP12 | Blessés qui rampent, fuyards qui jettent armes et boucliers (clips Blender, rendu) | ep12-blesses-armes.md | **fusionné** 78e3b69c (ADR 0070) |
+| EP13 | Rejeu d'après bataille (re-simulation déterministe, barre de temps) | ep13-rejeu.md | **fusionné** 311458ff (ADR 0072) |
+Partage : EP11 possède le pas de simulation ; EP13 reste au niveau commandes/API ; EP12 côté rendu.
+ai.rs / relief_ai.rs restent à la session de nuit.
+Vague 3 terminée (26/09). Marges minces après EP11 : Azincourt 18/20 (limite 19), ep9b 4/10 (limite 3) —
+toute règle de mêlée future doit revérifier ep7_historical, ep9b_duel et ai. Les rejeux enregistrés
+avant EP11 signalent (voulu) « règles changées ». Suites : fatigue de poussée, poussée en siège, IA qui
+évite de coller une seconde ligne ; cavaliers blessés ; armes au sol inclinées sur les pentes.

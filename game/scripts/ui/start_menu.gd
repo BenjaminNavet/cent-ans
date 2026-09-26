@@ -11,7 +11,7 @@ extends Control
 ## illustré 2D (`MenuBackground`).
 ##
 ## Options (après `--`) : `--screenshot=<png>` capture puis quitte ; `--menu-stage=settings`,
-## `credits`, `faction`, `intro`, `demos` ou `loading` ouvre l'écran correspondant avant la capture ;
+## `credits`, `faction`, `intro`, `demos`, `historical` ou `loading` ouvre l'écran correspondant avant la capture ;
 ## `--autostart[=fac_x]` démarre directement une campagne (jeu exporté).
 
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
@@ -30,6 +30,8 @@ var load_button: Button
 var intro_button: Button
 var codex_button: Button
 var demos_button: Button
+var historical_button: Button  # EP7
+var replays_button: Button  # EP13
 var settings_button: Button
 var credits_button: Button
 var quit_button: Button
@@ -107,6 +109,9 @@ func _ready() -> void:
 			staged = true
 		elif arg == "--menu-stage=demos":
 			open_demos()
+			staged = true
+		elif arg == "--menu-stage=historical":
+			open_historical()
 			staged = true
 		elif arg == "--menu-stage=intro":
 			open_intro()
@@ -220,7 +225,9 @@ func _build_main_column() -> void:
 	load_button = _menu_button(column, "Charger une partie", func() -> void: save_load_dialog.open_load())
 	intro_button = _menu_button(column, "Prologue : 1328-1337", open_intro)
 	codex_button = _menu_button(column, "Codex", open_codex)
+	historical_button = _menu_button(column, "Batailles historiques", open_historical)  # EP7
 	demos_button = _menu_button(column, "Batailles de démonstration", open_demos)  # SG2
+	replays_button = _menu_button(column, "Rejeux", open_replays)  # EP13
 	settings_button = _menu_button(column, "Réglages", open_settings)
 	credits_button = _menu_button(column, "Crédits", open_credits)
 	quit_button = _menu_button(column, "Quitter", func() -> void: get_tree().quit())
@@ -356,9 +363,19 @@ func open_intro() -> void:
 	_open_overlay(intro, false)
 
 
+## EP7 : batailles historiques (Crécy, Poitiers, Azincourt) sur leur site réel.
+func open_historical() -> void:
+	_open_overlay(HistoricalBattlesMenu.new())
+
+
 ## SG2 : batailles de démonstration (sièges d'Avignon, de Bruges, de Paris...).
 func open_demos() -> void:
 	_open_overlay(BattleDemosMenu.new())
+
+
+## EP13 : rejeux des dernières batailles livrées.
+func open_replays() -> void:
+	_open_overlay(ReplaysMenu.new())
 
 
 func open_codex() -> void:

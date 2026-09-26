@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "description": "DA2 : banque d'archétypes de portraits pour les personnages sans portrait historique (nés en jeu) et variantes âgées des grandes figures. Les images sont générées par `cent-ans assets portrait-archetypes` (tools/cent_ans_tools/portrait_archetypes.py) ; le jeu choisit l'image par hachage déterministe de l'id du personnage dans la case (rang, sexe, tranche d'âge, aire culturelle). Rendu seulement : aucune règle de jeu.",
+  "image_size": 512,
+  "archetype_dir": "portraits/archetypes",
+  "aged_dir": "portraits/aged",
+  "age_bands": [
+    {"id": "child", "label": "Enfant", "max_age": 15, "prompt": "a child of about 8 years old"},
+    {"id": "young", "label": "Jeune", "max_age": 29, "prompt": "a young adult of about 22"},
+    {"id": "adult", "label": "Adulte", "max_age": 49, "prompt": "a mature adult of about 40"},
+    {"id": "old", "label": "Âgé", "prompt": "an elderly person of about 62, greying or white hair, lined face"}
+  ],
+  "cultures": [
+    {
+      "id": "france",
+      "label": "France, Bourgogne et Pays-Bas",
+      "factions": ["fac_france", "fac_burgundy", "fac_brittany", "fac_flanders", "fac_brabant", "fac_hainaut", "fac_guelders", "fac_savoy", "fac_papacy", "fac_rebels"],
+      "prompt": "French and Burgundian court fashion: fitted cotehardie, hood (chaperon) with long liripipe, fur-lined mantle, rich wool and silk in muted earth tones"
+    },
+    {
+      "id": "england",
+      "label": "Angleterre et Écosse",
+      "factions": ["fac_england", "fac_scotland"],
+      "prompt": "English and Scottish fashion: cotehardie with low hip belt, hood with liripipe, heavy wool mantle with fur trim, sober colours"
+    },
+    {
+      "id": "iberia",
+      "label": "Ibérie",
+      "factions": ["fac_castile", "fac_aragon", "fac_portugal", "fac_navarre", "fac_granada"],
+      "prompt": "Iberian (Castilian and Aragonese) fashion: long saya tunic, pellote over-gown with wide armholes, mantle with Mudejar geometric silk borders"
+    },
+    {
+      "id": "italy_empire",
+      "label": "Italie et Empire",
+      "factions": ["fac_empire", "fac_austria", "fac_bohemia", "fac_holstein", "fac_sweden", "fac_swiss", "fac_milan", "fac_verona", "fac_venice", "fac_genoa", "fac_florence", "fac_naples"],
+      "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
+    }
+  ],
+  "default_culture": "france",
+  "ranks": [
+    {
+      "id": "child",
+      "label": "Enfant",
+      "prompt": {
+        "male": "a boy of a noble house, simple but rich tunic, bare head",
+        "female": "a girl of a noble house, simple rich gown, braided hair with a small ribbon"
+      },
+      "headwear": "none"
+    },
+    {
+      "id": "sovereign",
+      "label": "Souverain ou consort",
+      "prompt": {
+        "male": "a crowned sovereign king, gold crown with fleurons, ermine-lined mantle, gold clasp",
+        "female": "a crowned queen, gold crown over a fine veil, ermine-lined mantle"
+      },
+      "headwear": "crown",
+      "frame": "sovereign"
+    },
+    {
+      "id": "noble",
+      "label": "Grand noble",
+      "prompt": {
+        "male": "a great lord of a princely house, rich silk and fur, heavy gold chain, jewelled chaplet (no crown)",
+        "female": "a great lady of a princely house, silk gown with fur, gold net headdress (crespine) and jewelled circlet (no crown)"
+      },
+      "headwear": "none",
+      "frame": "noble"
+    },
+    {
+      "id": "knight",
+      "label": "Chevalier ou capitaine",
+      "prompt": {
+        "male": "a knight and war captain, mail aventail and steel bascinet worn with the visor raised, plain dark surcoat, sword belt"
+      },
+      "headwear": "none",
+      "frame": "knight"
+    },
+    {
+      "id": "prelate",
+      "label": "Prélat",
+      "prompt": {
+        "male": "a bishop in a gold-embroidered cope and jewelled white mitre, holding a crozier",
+        "female": "an abbess in a black Benedictine habit and white wimple, holding a crozier"
+      },
+      "headwear": "mitre",
+      "frame": "prelate"
+    },
+    {
+      "id": "burgher",
+      "label": "Bourgeois",
+      "prompt": {
+        "male": "a wealthy burgher and town magistrate, sober dark wool gown with fur trim, felt hat, leather purse",
+        "female": "a rich burgher's wife, linen wimple and veil, fine wool gown, keys at the belt"
+      },
+      "headwear": "none",
+      "frame": "burgher"
+    }
+  ],
+  "faces": {
+    "male": [
+      "dark brown hair, long oval face, brown eyes, straight nose",
+      "fair blond hair, broad square face, blue eyes",
+      "auburn red hair, narrow face with high cheekbones, grey-green eyes",
+      "black hair, round face, dark eyes, heavy brows"
+    ],
+    "female": [
+      "dark brown hair, oval face, brown eyes",
+      "golden blond hair, round face, blue eyes",
+      "auburn hair, heart-shaped face, grey eyes",
+      "black hair, long face, dark eyes"
+    ]
+  },
+  "cells": [
+    {"rank": "child", "sexes": ["male", "female"], "bands": ["child"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 2},
+    {"rank": "sovereign", "sexes": ["male", "female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
+    {"rank": "noble", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 2},
+    {"rank": "noble", "sexes": ["female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
+    {"rank": "knight", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 2},
+    {"rank": "prelate", "sexes": ["male"], "bands": ["adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
+    {"rank": "prelate", "sexes": ["female"], "bands": ["adult", "old"], "cultures": ["any"], "faces": 1},
+    {"rank": "burgher", "sexes": ["male"], "bands": ["adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
+    {"rank": "burgher", "sexes": ["female"], "bands": ["adult"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1}
+  ],
+  "fallbacks": {
+    "rank": {"sovereign": "noble", "knight": "noble", "prelate": "noble", "burgher": "noble", "noble": "knight"},
+    "band": {"child": "young", "young": "adult", "adult": "old", "old": "adult"}
+  },
+  "rank_rules": {
+    "data_roles": {
+      "ruler": "sovereign",
+      "consort": "sovereign",
+      "regent": "noble",
+      "heir": "noble",
+      "prince": "noble",
+      "claimant": "noble",
+      "noble": "noble",
+      "exile": "noble",
+      "commander": "knight",
+      "prelate": "prelate",
+      "burgher": "burgher"
+    },
+    "title_keywords": [
+      {"rank": "prelate", "words": ["évêque", "archevêque", "abbé", "abbesse", "cardinal", "pape", "prieur", "prieure", "chanoine"]},
+      {"rank": "burgher", "words": ["bourgeois", "marchand", "prévôt des marchands", "échevin", "doge", "capitaine du peuple"]},
+      {"rank": "sovereign", "words": ["roi ", "reine ", "empereur", "impératrice"]}
+    ],
+    "ruler_house_rank": "noble",
+    "army_rank": "knight",
+    "default_rank": {"male": "knight", "female": "noble"}
+  },
+  "aged_variants": [
+    {"character": "chr_edward_iii", "band": "adult"},
+    {"character": "chr_edward_iii", "band": "old"},
+    {"character": "chr_philippe_vi", "band": "old"},
+    {"character": "chr_jean_de_normandie", "band": "adult"},
+    {"character": "chr_charles_v", "band": "adult"},
+    {"character": "chr_edward_of_woodstock", "band": "adult"},
+    {"character": "chr_philippe_le_hardi", "band": "adult"},
+    {"character": "chr_philippe_le_hardi", "band": "old"},
+    {"character": "chr_jean_de_berry", "band": "adult"},
+    {"character": "chr_jean_de_berry", "band": "old"},
+    {"character": "chr_jean_de_gand", "band": "adult"},
+    {"character": "chr_jean_de_gand", "band": "old"},
+    {"character": "chr_charles_vi", "band": "adult"},
+    {"character": "chr_louis_d_anjou", "band": "adult"},
+    {"character": "chr_philippa_of_hainault", "band": "adult"},
+    {"character": "chr_charles_ii_de_navarre", "band": "adult"},
+    {"character": "chr_pedro_iv", "band": "adult"},
+    {"character": "chr_charles_de_luxembourg", "band": "adult"},
+    {"character": "chr_david_ii", "band": "adult"},
+    {"character": "chr_robert_stewart", "band": "old"},
+    {"character": "chr_gautier_de_mauny", "band": "adult"},
+    {"character": "chr_henry_of_grosmont", "band": "adult"},
+    {"character": "chr_louis_de_male", "band": "adult"},
+    {"character": "chr_jeanne_de_penthievre", "band": "adult"},
+    {"character": "chr_petrarque", "band": "old"}
+  ],
+  "marks": {
+    "sick_traits": ["trait_sickly"],
+    "wound_traits": ["trait_wounded", "trait_maimed", "trait_one_eyed"],
+    "mourning_years": 1
+  }
+}

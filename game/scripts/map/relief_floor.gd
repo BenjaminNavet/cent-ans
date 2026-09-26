@@ -7,7 +7,12 @@ extends RefCounted
 ##    tous les `floor_sample_step` pixels, altitudes bornées à 0 (la mer ne creuse pas le fond :
 ##    la côte reste au niveau 0, `fond` ≥ 0) ;
 ## 2. filtre minimum de rayon `floor_min_radius` cellules (fonds de vallée, ~17 km) ;
-## 3. `floor_blur_passes` flous de boîte de rayon `floor_blur_radius` (pas de marches).
+## 3. `floor_blur_passes` flous de boîte de rayon `floor_blur_radius` (pas de marches) ;
+## 4. ZG7c : fond relevé à `sommets − local_relief_cap_m` (maximum par cellule, filtre maximum
+##    sur le rayon total des flous, puis mêmes flous) : le terme local `h − fond` ne dépasse plus ≈ le plafond, les montagnes ne
+##    deviennent pas des aiguilles (Alpes, Pyrénées, puys, Snowdonia : +100 % de relief exagéré
+##    en plus du ×2,5-3,4 de ZG4) ; collines et falaises sous le plafond ne changent pas.
+##    Relever le fond ne fait que baisser la hauteur affichée (jamais sous `s·h`).
 ## Tout est séparable et réparti sur le `WorkerThreadPool` (lignes indépendantes).
 ##
 ## Convention (même que la heightmap) : le pixel carte i est centré en x monde = i ; la cellule c
@@ -33,8 +38,11 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	var rows := func(r: int) -> void:
 		var line := PackedFloat32Array()
 		line.resize(side.x)
+		var line_max := PackedFloat32Array()
+		line_max.resize(side.x)
 		for c in side.x:
 			var best := INF
+			var top := -INF
 			var y := r * cell
 			while y < mini((r + 1) * cell, size.y):
 				var row := y * size.x
@@ -49,20 +57,37 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 					else:
 						v = float(bytes[o]) / 255.0
 					best = minf(best, h_min + v * h_range)
+					top = maxf(top, h_min + v * h_range)
 					x += step
 				y += step
 			line[c] = maxf(best if best < INF else 0.0, 0.0)
-		out_rows[r] = line
+			line_max[c] = maxf(top if top > -INF else 0.0, 0.0)
+		out_rows[r] = [line, line_max]
 	_parallel(rows, side.y, "relief floor cells")
-	var mins := _join(out_rows)
-	var grid := _filter(mins, side, maxi(profile.floor_min_radius, 0), true)
+	var mins := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[0]))
+	var grid := _filter(mins, side, maxi(profile.floor_min_radius, 0), MODE_MIN)
 	for pass_index in maxi(profile.floor_blur_passes, 0):
-		grid = _filter(grid, side, maxi(profile.floor_blur_radius, 0), false)
+		grid = _filter(grid, side, maxi(profile.floor_blur_radius, 0), MODE_MEAN)
+	if profile.local_relief_cap_m > 0.0:
+		var tops := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[1]))
+		# Maximum sur le rayon total des flous qui suivent : un pic isolé (puy, aiguille) garde sa
+		# hauteur au centre après lissage au lieu d'être dilué par ses voisins plus bas.
+		var reach := maxi(profile.floor_min_radius, 0) + maxi(profile.floor_blur_radius, 0) * maxi(profile.floor_blur_passes, 0)
+		tops = _filter(tops, side, reach, MODE_MAX)
+		for pass_index in maxi(profile.floor_blur_passes, 0):
+			tops = _filter(tops, side, maxi(profile.floor_blur_radius, 0), MODE_MEAN)
+		for i in grid.size():
+			grid[i] = maxf(grid[i], tops[i] - profile.local_relief_cap_m)
 	return {"data": grid, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
 
 
-## Filtre séparable (minimum ou moyenne de boîte) de rayon `radius`, bords répliqués.
-static func _filter(src: PackedFloat32Array, side: Vector2i, radius: int, use_min: bool) -> PackedFloat32Array:
+const MODE_MIN := 0
+const MODE_MEAN := 1
+const MODE_MAX := 2
+
+
+## Filtre séparable (minimum, moyenne de boîte ou maximum) de rayon `radius`, bords répliqués.
+static func _filter(src: PackedFloat32Array, side: Vector2i, radius: int, mode: int) -> PackedFloat32Array:
 	if radius <= 0:
 		return src
 	var inv := 1.0 / (2 * radius + 1)
@@ -73,11 +98,16 @@ static func _filter(src: PackedFloat32Array, side: Vector2i, radius: int, use_mi
 		var line := PackedFloat32Array()
 		line.resize(side.x)
 		for c in side.x:
-			var acc := INF if use_min else 0.0
-			for k in range(-radius, radius + 1):
+			var acc := src[base + clampi(c - radius, 0, side.x - 1)]
+			for k in range(-radius + 1, radius + 1):
 				var v := src[base + clampi(c + k, 0, side.x - 1)]
-				acc = minf(acc, v) if use_min else acc + v
-			line[c] = acc if use_min else acc * inv
+				if mode == MODE_MEAN:
+					acc += v
+				elif mode == MODE_MIN:
+					acc = minf(acc, v)
+				else:
+					acc = maxf(acc, v)
+			line[c] = acc * inv if mode == MODE_MEAN else acc
 		rows[r] = line
 	_parallel(horizontal, side.y, "relief floor filter h")
 	var tmp := _join(rows)
@@ -85,11 +115,16 @@ static func _filter(src: PackedFloat32Array, side: Vector2i, radius: int, use_mi
 		var line := PackedFloat32Array()
 		line.resize(side.x)
 		for c in side.x:
-			var acc := INF if use_min else 0.0
-			for k in range(-radius, radius + 1):
+			var acc := tmp[clampi(r - radius, 0, side.y - 1) * side.x + c]
+			for k in range(-radius + 1, radius + 1):
 				var v := tmp[clampi(r + k, 0, side.y - 1) * side.x + c]
-				acc = minf(acc, v) if use_min else acc + v
-			line[c] = acc if use_min else acc * inv
+				if mode == MODE_MEAN:
+					acc += v
+				elif mode == MODE_MIN:
+					acc = minf(acc, v)
+				else:
+					acc = maxf(acc, v)
+			line[c] = acc * inv if mode == MODE_MEAN else acc
 		rows[r] = line
 	_parallel(vertical, side.y, "relief floor filter v")
 	return _join(rows)

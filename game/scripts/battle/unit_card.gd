@@ -30,6 +30,8 @@ var art: Control  # vignette dessinée
 var illustration: Texture2D = null
 var heraldry: Texture2D = null
 var class_icon: Texture2D = null
+## DA5b : l'icône de classe est une miniature peinte encadrée (pas de pastille de parchemin).
+var class_icon_is_miniature: bool = false
 var is_general: bool = false
 var _unit: Dictionary = {}
 var _selected: bool = false
@@ -97,7 +99,9 @@ func setup(unit: Dictionary, icon_library: Node, faction: String = "", color: Co
 	heraldry = PortraitLoader.heraldry_texture(faction)
 	if icon_library != null:
 		var category := "unit_category_" + str(unit.get("render", "infantry"))
-		class_icon = icon_library.call("get_icon", category if icon_library.call("has_icon", category) else unit_type, "unit")
+		var icon_id: String = category if icon_library.call("has_icon", category) else unit_type
+		class_icon = icon_library.call("get_icon", icon_id, "unit")
+		class_icon_is_miniature = icon_library.has_method("is_entity") and bool(icon_library.call("is_entity", icon_id, "unit"))
 	art = Control.new()
 	art.name = "Art"
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -172,8 +176,11 @@ func _draw_art() -> void:
 	# Bandeau aux couleurs du camp, icône de classe, étoile, groupes.
 	art.draw_rect(Rect2(0, 0, size.x, 4), side_color)
 	if illustration != null and class_icon != null:
-		art.draw_rect(Rect2(1, 5, 17, 17), Color(0.95, 0.9, 0.78, 0.92))
-		art.draw_texture_rect(class_icon, Rect2(2, 6, 15, 15), false)
+		if class_icon_is_miniature:
+			art.draw_texture_rect(class_icon, Rect2(1, 5, 20, 20), false)
+		else:
+			art.draw_rect(Rect2(1, 5, 17, 17), Color(0.95, 0.9, 0.78, 0.92))
+			art.draw_texture_rect(class_icon, Rect2(2, 6, 15, 15), false)
 	var font := get_theme_default_font()
 	if is_general:
 		_draw_star(Vector2(size.x - 8, 12), 6.0)
@@ -231,7 +238,7 @@ func _draw_cross(size: Vector2) -> void:
 ## Infobulle : fiche du type (F2) + état, effectif, moral, fatigue, munitions et formation.
 func _refresh_tooltip(unit: Dictionary) -> void:
 	var detail := "État : %s" % state_text(unit)
-	if float(unit["fatigue"]) >= BattleUnitMarkers.EXHAUSTED_FATIGUE:
+	if BattleUnitMarkers.is_exhausted(unit):
 		detail += " · épuisée"
 	detail += "\nEffectif : %d / %d · moral %d · fatigue %d" % [int(unit["soldiers"]), int(unit["initial_soldiers"]), int(unit["morale"]), int(unit["fatigue"])]
 	if bool(unit["can_shoot"]):

@@ -47,8 +47,6 @@ const NEUTRAL := Color(0.62, 0.60, 0.56)
 const SUPPLY_GAIN := Color(0.22, 0.55, 0.25)
 const SUPPLY_LOSS := Color(0.85, 0.55, 0.15)
 const SUPPLY_STARVE := Color(0.60, 0.08, 0.06)
-## Perte de ravitaillement (points par saison) rendue en rouge sombre (hiver hors de nos terres).
-const SUPPLY_LOSS_MAX := 35.0
 const CLAIM_COLORS := {
 	"ours": Color(0.85, 0.68, 0.20), "against_us": Color(0.72, 0.12, 0.10), "contested": Color(0.50, 0.25, 0.65),
 }
@@ -87,6 +85,7 @@ func setup(campaign_map: Node) -> void:
 	button.tooltip_text = "Filtres de la carte : diplomatie, religion, ordre public, richesse… (F)"
 	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(toggle_menu)
+	_decorate_ink(button, "map_filters", 14)  # DA5
 	_build_menu()
 	var minimap: Node = map.ui.get("minimap") if map.ui != null else null
 	if minimap != null and minimap.has_method("add_layer_button"):
@@ -99,6 +98,14 @@ func setup(campaign_map: Node) -> void:
 		trade_button.hide()
 	if map.ui != null and map.ui.has_method("add_keycap"):
 		map.ui.add_keycap(button, "map_filters_menu")
+
+
+## DA5 : icône d'action à l'encre sur un bouton (or au survol) ; rien si l'icône manque.
+static func _decorate_ink(target: Button, icon_id: String, size: int) -> void:
+	var library := HudStyle.icon_library()
+	if library == null or not bool(library.call("has_icon", icon_id)):
+		return
+	library.call("decorate_button", target, icon_id, size)
 
 
 func _build_menu() -> void:
@@ -125,6 +132,7 @@ func _build_menu() -> void:
 		var key := ShortcutSheet.first_key(str(entry[2])) if str(entry[2]) != "" else ""
 		item.text = "%s   (%s)" % [entry[1], key] if key != "" else str(entry[1])
 		item.tooltip_text = entry[3]
+		_decorate_ink(item, "lens_" + id, 18)  # DA5
 		item.pressed.connect(func() -> void:
 			set_mode(id)
 			menu.hide())
@@ -396,7 +404,9 @@ func _lens_color(row: Dictionary, rank: float) -> Color:
 			var change := int(row.get("supply_change", 0))
 			if change >= 0:
 				return SUPPLY_GAIN
-			return SUPPLY_LOSS.lerp(SUPPLY_STARVE, clampf(-change / SUPPLY_LOSS_MAX, 0.0, 1.0))
+			# SV4 : rouge sombre à la perte d'hiver hors de nos terres (`supply_loss_winter`, cœur).
+			var worst := RuleValues.value("supply_loss_winter", 0.0)
+			return SUPPLY_LOSS.lerp(SUPPLY_STARVE, clampf(-change / worst, 0.0, 1.0) if worst > 0.0 else 1.0)
 		"claims":
 			return CLAIM_COLORS.get(str(row.get("claim", "")), NEUTRAL)
 	return Color(0, 0, 0, 0)

@@ -80,6 +80,7 @@ var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes,
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
 var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenant »
+var ai_replay: AiTurnReplay = null  # CT1 : marches des armées IA rejouées en fin de tour
 ## Lot C6 : paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
 var settlement_data: SettlementData = null
@@ -88,6 +89,7 @@ var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
 var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
+var faction_borders: FactionBorders = null  # FR1 : frontières de faction lumineuses (ADR 0074)
 ## ZG4 : exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
 var dynamic_exaggeration: bool = true
 var _fps_probe_frames: int = -1
@@ -163,6 +165,7 @@ func _ready() -> void:
 	path_preview.setup(map_data)
 	trade_layer.setup(map_data, settlement_layer, settlement_data)  # C5
 	_connect_ui()
+	ReliefCacheNotice.report(ui, map_dir, MapPaths.relief_root())  # ZG7b : cache de relief absent
 	settlements_ctl = SettlementController.new()  # C5
 	add_child(settlements_ctl)
 	settlements_ctl.setup(self)
@@ -183,6 +186,10 @@ func _ready() -> void:
 	map_modes.name = "MapModeController"
 	add_child(map_modes)
 	map_modes.setup(self)
+	faction_borders = FactionBorders.new()  # FR1
+	faction_borders.name = "FactionBorders"
+	add_child(faction_borders)
+	faction_borders.setup(self)
 	sieges = SiegeController.new()
 	add_child(sieges)
 	sieges.setup(self)
@@ -215,6 +222,10 @@ func _ready() -> void:
 	next_hint.name = "NextHintController"
 	add_child(next_hint)
 	next_hint.setup(self)
+	ai_replay = AiTurnReplay.new()  # CT1
+	ai_replay.name = "AiTurnReplay"
+	add_child(ai_replay)
+	ai_replay.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -345,6 +356,8 @@ func refresh_all() -> void:
 	if sim == null:
 		return
 	_refresh_owner_colors()
+	if faction_borders != null:  # FR1
+		faction_borders.refresh()
 	if minimap_ctl != null:  # C1 : brouillard avant les marqueurs d'armée
 		minimap_ctl.refresh_fog()
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
@@ -992,11 +1005,13 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 
 
 func _on_end_turn() -> void:
-	if sim == null or ui.is_dialog_open():
+	if sim == null or ui.is_dialog_open() or (ai_replay != null and ai_replay.playing):
 		return
 	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
 		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
+	if ai_replay != null:  # CT1 : le cœur enregistre les marches de l'IA si elles seront rejouées
+		ai_replay.before_end_turn()
 	var events: Array = sim.call("end_turn")
 	if hud != null:  # U5 : voisins, alliés et ennemis du nouveau tour (filtre des lettres)
 		hud.update_interest()
@@ -1006,6 +1021,8 @@ func _on_end_turn() -> void:
 		audio.on_turn_events(events)
 	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
 	refresh_all()
+	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
+		await ai_replay.play()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
 	if victory != null:
@@ -1083,11 +1100,14 @@ func _process(_delta: float) -> void:
 	if life != null:  # CV1
 		life.update_view(distance)
 	strategic.update_view(distance)  # CM2
+	if faction_borders != null:  # FR1 : après CM2 (shader du terrain substitué au parchemin)
+		faction_borders.update_view(distance)
 	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
+	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
 	armies.update_scale(camera_rig.distance)
 	_update_trade_hover()  # C5
 	if _screenshot_countdown > 0:
@@ -1106,7 +1126,7 @@ func _process(_delta: float) -> void:
 
 ## Lot ZG4 : paliers vallée / site : frontières et voile du brouillard de guerre estompés sur le
 ## matériau du terrain (valeurs par défaut du shader × `ZoomTiers.border_alpha` / `fog_alpha`).
-const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_veil_amount", "fog_cloud_amount"]
+const _CLOSE_TIER_PARAMS: Array[String] = ["province_border_alpha", "realm_border_alpha", "fog_veil_amount", "fog_cloud_amount", "fog_rim_amount"]
 var _close_tier_defaults: Dictionary = {}
 var _close_tier_alphas := Vector2(-1.0, -1.0)
 var _prop_scale: float = 1.0
@@ -1117,6 +1137,9 @@ var _prop_scale: float = 1.0
 func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("campaign_prop_scale", 1.0)
 	MapData.set_vertical_scale(MapData.HEIGHT_SCALE)
+	if _parked_environment != null and not _parked_environment.is_inside_tree():
+		_parked_environment.queue_free()  # Q4 : carte quittée pendant une bataille
+		_parked_environment = null
 
 
 func _apply_close_tiers(distance: float) -> void:
@@ -1694,8 +1717,28 @@ func _set_campaign_active(active: bool) -> void:
 			layer.set_meta(&"visible_before_battle", layer.visible)
 			layer.visible = false
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	_set_world_environment_active(active)
 	if active:
 		camera.make_current()
+
+
+var _parked_environment: WorldEnvironment = null
+
+
+## Q4 : un `WorldEnvironment` ne suit pas la visibilité du Node3D parent, et le monde 3D prend
+## le premier du groupe (celui de la carte, avant la scène de bataille ajoutée à la racine) :
+## batailles et sièges lancés depuis la campagne étaient rendus avec le brouillard et le ciel de
+## la carte (brouillard épais par « Temps clair »). La carte retire le sien pendant la bataille.
+func _set_world_environment_active(active: bool) -> void:
+	if not active:
+		var env := get_node_or_null("WorldEnvironment") as WorldEnvironment
+		if env != null:
+			_parked_environment = env
+			remove_child(env)
+	elif _parked_environment != null:
+		add_child(_parked_environment)
+		move_child(_parked_environment, 0)
+		_parked_environment = null
 
 
 ## `--stage=assault` (UB1) : assaut français de la Guyenne mis en scène, écran ouvert.
