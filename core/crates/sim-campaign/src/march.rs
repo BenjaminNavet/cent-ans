@@ -734,7 +734,7 @@ impl CampaignState {
             .as_ref()
             .is_some_and(|p| self.is_hostile_territory(&army_faction, p))
         {
-            crate::movement::land_on_hostile_shore(self, army, province.as_ref(), events);
+            crate::movement::land_on_hostile_shore(self, data, army, province.as_ref(), events);
         }
         if let Some(defender) =
             crate::movement::strongest(self, &self.hostile_armies_at(&army_faction, to_port))

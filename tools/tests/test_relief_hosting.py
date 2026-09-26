@@ -309,3 +309,18 @@ def test_download_part_rejects_a_bad_checksum(tmp_path: Path, http_server) -> No
             base_url + "small.bin", dest, "0" * 64, log=lambda *_: None
         )
     assert not dest.exists()
+
+
+def test_manifest_rejects_traversal_part_names(tmp_path):
+    """A manifest whose part names leave the parts folder is refused."""
+    import json
+
+    import pytest
+
+    for bad in ("../evil", "/etc/passwd", "a/b", "..", "x\\y"):
+        path = tmp_path / "manifest.json"
+        path.write_text(
+            json.dumps({"parts": [{"name": bad, "sha256": "0"}]}), encoding="utf-8"
+        )
+        with pytest.raises(ValueError):
+            relief_fetch._read_manifest(path)

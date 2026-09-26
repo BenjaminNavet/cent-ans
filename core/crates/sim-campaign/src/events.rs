@@ -115,6 +115,14 @@ impl GameEvent {
     }
 }
 
+/// First letter in upper case ("l'ost de France" → "L'ost de France").
+pub fn capitalize(text: &str) -> String {
+    let mut chars = text.chars();
+    chars.next().map_or_else(String::new, |first| {
+        first.to_uppercase().chain(chars).collect()
+    })
+}
+
 /// French preposition "de" with elision before a vowel: `de("Île-de-France")`
 /// gives "d'Île-de-France", `de("Guyenne")` gives "de Guyenne". A leading "h"
 /// is treated as aspirated ("de Hainaut"), as for most place names of the
