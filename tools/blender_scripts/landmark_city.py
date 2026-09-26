@@ -156,6 +156,10 @@ class Plan:
         f = self.radius(r) / r
         return (x * f, y * f)
 
+    def monument_exaggeration(self, monument):
+        """Size factor of a monument: its own ``scale`` overrides the plan's."""
+        return monument.get("scale", self.monument_scale)
+
     def local_scale(self, x, y):
         """Tangential scale (units per metre) at a plan point."""
         r = math.hypot(x, y)
@@ -190,6 +194,10 @@ class SiegePlan(Plan):
         angle = math.radians(siege["rotate_deg"])
         self.rot = (math.cos(angle), math.sin(angle))
         self.export_scale = 1.0 / self.a
+
+    def monument_exaggeration(self, monument):
+        """Real proportions: a monument's ``scale`` only magnifies the campaign plan."""
+        return 1.0
 
     def radius(self, r):
         """Linear: no magnifier."""
@@ -659,7 +667,8 @@ def build_bridge(plan, site, bridge, layer, rng):
 def build_monument(plan, site, monument, layers, variant=""):
     """Place a dedicated mesh; returns nothing (adds to the right layer)."""
     x, y = plan.warp(*monument["at"])
-    k = plan.a * monument.get("scale", plan.monument_scale)
+    exaggeration = plan.monument_exaggeration(monument)
+    k = plan.a * exaggeration
     transform = g.Transform(
         (x, y), math.radians(monument.get("angle_deg", 0.0)), k, k * plan.height_scale
     )
@@ -673,7 +682,6 @@ def build_monument(plan, site, monument, layers, variant=""):
     if variant:
         layer_name = f"{monument['id']}__{variant}"
     layer = layers.setdefault(layer_name, g.Layer(layer_name))
-    exaggeration = monument.get("scale", plan.monument_scale)
     for mat, shape in parts:
         verts, faces = transform.apply(shape)
         layer.add(mat, verts, faces, anchor=(x, y), color=(1.0, 1.0, 1.0, exaggeration))

@@ -462,6 +462,17 @@ impl SettlementState {
     pub fn garrison_strength(&self) -> u32 {
         self.garrison.iter().map(|u| u.strength).sum()
     }
+
+    /// The settlement passes to `controller` (capture, cession, revolt): the
+    /// siege ends, the former holder's recruits in training and building
+    /// site are lost (no refund). The garrison is the caller's business.
+    /// Returns the former controller.
+    pub(crate) fn hand_over(&mut self, controller: &FactionId) -> FactionId {
+        self.siege = None;
+        self.recruit_queue.clear();
+        self.construction = None;
+        std::mem::replace(&mut self.controller, controller.clone())
+    }
 }
 
 /// Dynamic state of a faction.

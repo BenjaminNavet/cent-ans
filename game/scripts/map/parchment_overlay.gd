@@ -35,6 +35,7 @@ var _realms: Array[Dictionary] = []  # {name, points: PackedVector2Array (arc), 
 var _provinces: Array[Dictionary] = []  # {name, px, area}
 var _towns: Array[Dictionary] = []  # {px, capital: bool, color}
 var _heraldry_cache: Dictionary = {}
+var _refresh_key: Array = []  # PB3d : propriétaires, vignettes et colonies du dernier `refresh`
 
 
 func _ready() -> void:
@@ -45,6 +46,14 @@ func _ready() -> void:
 
 ## Relit propriétaires, noms et villes (une fois par tour, ou au chargement).
 func refresh(sim: Object, settlement_data: SettlementData) -> void:
+	if map_data == null:
+		return
+	# PB3d : propriétaires en un appel groupé ; rien n'est reconstruit s'ils n'ont pas changé.
+	var snapshot: ProvinceSnapshot = ProvinceSnapshot.of(sim, map_data) if sim != null else null
+	var refresh_key := [snapshot.owner if snapshot != null else PackedStringArray(), draw_towns, settlement_data.get_instance_id() if settlement_data != null else 0]
+	if refresh_key == _refresh_key and not _provinces.is_empty():
+		return
+	_refresh_key = refresh_key
 	_provinces.clear()
 	_realms.clear()
 	_towns.clear()
@@ -57,9 +66,8 @@ func refresh(sim: Object, settlement_data: SettlementData) -> void:
 			continue
 		var id := str(province.get("id", ""))
 		var owner := str(province.get("owner", ""))
-		if sim != null and sim.has_method("get_province_state"):
-			var state: Dictionary = sim.call("get_province_state", id)
-			owner = str(state.get("owner", owner))
+		if snapshot != null and snapshot.has(index - 1):
+			owner = snapshot.owner[index - 1]
 		owner_of[id] = owner
 		var name := str(province.get("name", id))
 		var paren := name.find(" (")

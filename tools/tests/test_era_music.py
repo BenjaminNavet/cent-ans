@@ -4,7 +4,10 @@ import json
 import re
 from pathlib import Path
 
+import pytest
 from jsonschema import Draft202012Validator
+
+from cent_ans_tools import era_music
 
 REPO = Path(__file__).resolve().parents[2]
 DATA = REPO / "data"
@@ -176,3 +179,40 @@ def test_battle_layers_states_cover_the_intensity_ladder() -> None:
     for state, preset in states.items():
         undeclared = set(preset["layers"]) - layer_names
         assert not undeclared, f"{state} : couche(s) non déclarée(s) : {undeclared}"
+
+
+def test_run_ffmpeg_atomic_writes_dst_only_on_success(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A successful ffmpeg run leaves only `dst`, never a stray `.part` file."""
+    dst = tmp_path / "out.mp3"
+    calls: list[list[str]] = []
+
+    def fake_run(cmd, check, capture_output):  # noqa: ARG001 - mocked ffmpeg
+        calls.append(cmd)
+        Path(cmd[-1]).write_bytes(b"fake-audio")
+
+    monkeypatch.setattr(era_music.subprocess, "run", fake_run)
+    era_music._run_ffmpeg_atomic(["ffmpeg", "-y", "-i", "src.mp3", str(dst)], dst)
+
+    assert dst.read_bytes() == b"fake-audio"
+    assert calls[0][-1] == str(dst.with_suffix(dst.suffix + ".part"))
+    assert not dst.with_suffix(dst.suffix + ".part").exists()
+
+
+def test_run_ffmpeg_atomic_leaves_no_dst_and_no_part_on_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An interrupted/failing encode never creates `dst` (so callers correctly retry it)."""
+    dst = tmp_path / "out.mp3"
+
+    def fake_run(cmd, check, capture_output):  # noqa: ARG001 - mocked ffmpeg
+        Path(cmd[-1]).write_bytes(b"partial")
+        raise era_music.subprocess.CalledProcessError(1, cmd)
+
+    monkeypatch.setattr(era_music.subprocess, "run", fake_run)
+    with pytest.raises(era_music.subprocess.CalledProcessError):
+        era_music._run_ffmpeg_atomic(["ffmpeg", "-y", "-i", "src.mp3", str(dst)], dst)
+
+    assert not dst.exists()
+    assert not dst.with_suffix(dst.suffix + ".part").exists()

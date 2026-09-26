@@ -29,11 +29,13 @@ static func default_data_dir() -> String:
 	var from_env := OS.get_environment(ENV_VAR)
 	if from_env != "":
 		return from_env.simplify_path()
-	# Jeu exporté (macOS) : `data/` est copié dans `Cent Ans.app/Contents/Resources/data`.
+	# Jeu exporté : `data/` est copié dans `Cent Ans.app/Contents/Resources/data` (macOS) ou à
+	# côté de `Cent Ans.exe` (Windows, ADR 0087).
 	if OS.has_feature("template"):
-		var bundled := OS.get_executable_path().get_base_dir().path_join("../Resources/data").simplify_path()
-		if DirAccess.dir_exists_absolute(bundled):
-			return bundled
+		var exe_dir := OS.get_executable_path().get_base_dir()
+		for bundled: String in [exe_dir.path_join("../Resources/data").simplify_path(), exe_dir.path_join("data")]:
+			if DirAccess.dir_exists_absolute(bundled):
+				return bundled
 	return project_root().path_join("data")
 
 
@@ -70,6 +72,7 @@ static func relief_candidates() -> PackedStringArray:
 		var exe_dir := OS.get_executable_path().get_base_dir()
 		# macOS : `<dossier>/Cent Ans.app/Contents/MacOS/Cent Ans` → `<dossier>/Cent Ans relief`.
 		out.append(exe_dir.path_join("../../..").path_join(RELIEF_SIBLING_DIR).simplify_path())
+		# Windows : `<dossier>/Cent Ans.exe` → `<dossier>/Cent Ans relief`.
 		out.append(exe_dir.path_join(RELIEF_SIBLING_DIR))
 	out.append(ProjectSettings.globalize_path("user://relief"))
 	return out

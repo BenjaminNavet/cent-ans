@@ -170,9 +170,19 @@ func _run() -> void:
 		core_ms.append((Time.get_ticks_usec() - t) / 1000.0)
 		await _frames_passed(2)
 	_result["end_turn_core_ms"] = core_ms
-	var t_full := Time.get_ticks_usec()
-	map.call("_on_end_turn")
-	_result["end_turn_full_ms"] = (Time.get_ticks_usec() - t_full) / 1000.0
+	# PB3d : fin de tour « joueur » (fil du cœur) jusqu'à la carte rafraîchie, et pire image.
+	var full_ms: Array[float] = []
+	var worst_ms: Array[float] = []
+	for i in _turns:
+		var timing := await _measure_end_turn(map)
+		full_ms.append(timing["total_ms"])
+		worst_ms.append(timing["worst_frame_ms"])
+		await _frames_passed(10)
+		var ui: Object = map.get("ui")
+		if ui != null and ui.has_method("close_all_dialogs"):
+			ui.call("close_all_dialogs")
+	_result["end_turn_full_ms"] = full_ms
+	_result["end_turn_worst_frame_ms"] = worst_ms
 	await _frames_passed(10)
 	# Sauvegarde dans un dossier isolé (les sauvegardes du joueur ne sont pas touchées).
 	if facade != null:
@@ -210,6 +220,39 @@ func _run() -> void:
 	print("JOURNEY_JSON %s" % JSON.stringify(_result))
 	_cleanup()
 	get_tree().quit(0)
+
+
+## PB3d : fin de tour lancée comme par le joueur ; `total_ms` jusqu'à la carte rafraîchie,
+## `worst_frame_ms` = plus long intervalle entre deux images pendant ce temps (même mesure que
+## `tests/pb1_turns.gd`). Carte d'avant PB3d : appel synchrone.
+func _measure_end_turn(map: Node) -> Dictionary:
+	var tree := get_tree()
+	# Rejeu des marches de l'IA du tour précédent : passé, sinon la fin de tour est ignorée.
+	var replay: Object = map.get("ai_replay")
+	while replay != null and bool(replay.get("playing")):
+		replay.call("skip")
+		await tree.process_frame
+	await tree.process_frame
+	var frame_start := Time.get_ticks_usec()
+	var started := frame_start
+	var has_counter := map.get("end_turns_refreshed") != null
+	var before := int(map.get("end_turns_refreshed")) if has_counter else 0
+	if has_counter:
+		map.call("_on_end_turn", true)
+	else:
+		map.call("_on_end_turn")
+	var done_at := Time.get_ticks_usec()
+	var worst := 0.0
+	var deadline := Time.get_ticks_msec() + 60000
+	while has_counter and int(map.get("end_turns_refreshed")) == before and Time.get_ticks_msec() < deadline:
+		await tree.process_frame
+		var now := Time.get_ticks_usec()
+		worst = maxf(worst, (now - frame_start) / 1000.0)
+		frame_start = now
+		done_at = now
+	await tree.process_frame
+	worst = maxf(worst, (Time.get_ticks_usec() - frame_start) / 1000.0)
+	return {"total_ms": (done_at - started) / 1000.0, "worst_frame_ms": worst}
 
 
 func _aim(map: Node, distance: float) -> void:

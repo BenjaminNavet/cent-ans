@@ -183,8 +183,11 @@ pub fn coordinate_flanks(sim: &BattleSim, side: SideId, commands: &mut [Command]
         };
         if taken.iter().any(|&(k, l)| k == j && l * lateral > 0.0) {
             let (rx, rz) = units[j].right();
-            *x -= 2.0 * lateral * rx;
-            *z -= 2.0 * lateral * rz;
+            (*x, *z) = sim.field().clamp_inside(
+                *x - 2.0 * lateral * rx,
+                *z - 2.0 * lateral * rz,
+                crate::ai::FIELD_MARGIN,
+            );
             taken.push((j, -lateral));
         } else {
             taken.push((j, lateral));
