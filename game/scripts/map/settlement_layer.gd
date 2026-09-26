@@ -29,6 +29,9 @@ const MIN_FIT_SCALE := 0.4
 ## DC4 : une maquette dont le centre tombe à moins de ce facteur × son rayon du bord d'une voisine
 ## prioritaire (faubourg : Saint-Maximin sous Trèves) n'est pas affichée ; marqueur et nom restent.
 const ABSORB_FACTOR := 0.5
+## DC6c : maquette masquée aussi si elle recouvre une voisine prioritaire de plus de cette part du
+## plus petit rayon (réduction bloquée au plancher `MIN_FIT_SCALE`).
+const ABSORB_OVERLAP := 0.2
 
 @export var tiers: ZoomTiers
 ## Échelle globale des marqueurs (tailles par rang dans `data/map/settlement_markers.json`).
@@ -69,6 +72,13 @@ var _model_top: PackedFloat32Array = PackedFloat32Array()
 var _base_radius: PackedFloat32Array = PackedFloat32Array()
 var _base_top: PackedFloat32Array = PackedFloat32Array()
 var _fit_scale: PackedFloat32Array = PackedFloat32Array()
+## DC6c : place (unités) laissée par les voisines à chaque maquette (INF si aucune) : réduction à
+## l'échelle effective (`SettlementFit`) ; paires de voisines candidates au masquage (clés
+## `SettlementFit.pair_key` triées), positions de rendu et masquage courant.
+var _room: PackedFloat32Array = PackedFloat32Array()
+var _model_pairs: PackedInt64Array = PackedInt64Array()
+var _pair_px: PackedVector2Array = PackedVector2Array()
+var _absorbed: PackedByteArray = PackedByteArray()
 var _models_root: Node3D
 ## Villes emblématiques (lot L1) : index de colonie → LandmarkModel (toujours visibles, LOD par
 ## portées de visibilité), sous `_landmarks_root`.
@@ -153,6 +163,13 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	_model_top.resize(count)
 	_fit_scale.resize(count)
 	_fit_scale.fill(1.0)
+	_base_radius.resize(count)
+	_base_top.resize(count)
+	_room.resize(count)
+	_room.fill(INF)
+	_absorbed.resize(count)
+	_absorbed.fill(0)
+	_model_pairs.clear()
 	_real_radius.resize(count)
 	_real_radius.fill(-1.0)
 	_model_scale.resize(count)
@@ -166,8 +183,6 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 		_register(_settlements_by_chunk, terrain.chunk_index_at(px.x, px.y), i)
 		_build_model(i, entry)
 		_build_label(i, entry)
-	_base_radius = _model_radius.duplicate()
-	_base_top = _model_top.duplicate()
 	_fit_models()
 	for i in data.hamlets.size():
 		var hpx: Vector2 = data.hamlets[i]["px"]
@@ -203,6 +218,8 @@ func _build_model(i: int, entry: Dictionary) -> void:
 		_models.append(null)
 		_model_radius[i] = 2.0
 		_model_top[i] = 2.0
+		_base_radius[i] = 2.0
+		_base_top[i] = 2.0
 		return
 	var holder := Node3D.new()
 	holder.name = str(entry["id"])
@@ -213,6 +230,8 @@ func _build_model(i: int, entry: Dictionary) -> void:
 	var aabb := _model_aabb(model)
 	_model_radius[i] = maxf(aabb.size.x, aabb.size.z) * 0.5
 	_model_top[i] = aabb.end.y
+	_base_radius[i] = _model_radius[i]
+	_base_top[i] = _model_top[i]
 	for geometry in model.find_children("*", "GeometryInstance3D", true, false):
 		var g := geometry as GeometryInstance3D
 		g.visibility_range_end = tiers.model_range
@@ -236,6 +255,8 @@ func _build_landmark(i: int, entry: Dictionary) -> bool:
 	_models.append(landmark)
 	_model_radius[i] = landmark.core_radius
 	_model_top[i] = 1.1
+	_base_radius[i] = _model_radius[i]
+	_base_top[i] = _model_top[i]
 	return true
 
 
@@ -297,46 +318,91 @@ func covered_by_landmark(px: Vector2) -> bool:
 ## `MIN_FIT_SCALE`. Étiquettes et picking utilisent le rayon réduit. DC4 (ADR 0082) : positions
 ## de rendu (ancrages fins) ; une ville emblématique ne se réduit pas, sa voisine prend tout
 ## l'écart restant ; recalcul à partir de la taille d'origine (appel répétable). Une maquette
-## encore dans l'emprise d'une voisine prioritaire est masquée (`_absorb`).
+## encore dans l'emprise d'une voisine prioritaire est masquée (`_update_absorption`).
+## DC6c : `_model_radius` reste le rayon réduit à la taille de carte (hameaux, végétation, effets) ;
+## de près, la réduction est recalculée sur le rayon rétréci (`SettlementFit.zoom_scale`, porté
+## par `_model_scale`) et le masquage sur les rayons affichés, à chaque pas d'échelle.
 func _fit_models() -> void:
 	for i in data.settlements.size():
 		_fit_model(i)
+	_build_model_pairs()
+	for i in _models.size():
+		_place_model(i)
+	_update_absorption()
+
+
+## DC6c : paires de maquettes voisines qui peuvent se masquer (rayons à la taille de carte, les
+## plus grands affichés : sur-ensemble valable à toute échelle).
+func _build_model_pairs() -> void:
+	_pair_px.resize(data.settlements.size())
 	for i in data.settlements.size():
-		_absorb(i)
+		_pair_px[i] = model_px(i)
+	_model_pairs.clear()
+	for i in data.settlements.size():
+		_append_pairs_of(i, false)
+	_model_pairs.sort()
 
 
-## Réévalue le masquage de `i` et des voisines moins prioritaires (maquette `i` changée).
-func _absorb_around(i: int) -> void:
-	var px := model_px(i)
+## Ajoute les paires (`j` < `i`, ou toutes les voisines si `both`) de la maquette `i`.
+func _append_pairs_of(i: int, both: bool) -> void:
+	if _models[i] == null:
+		return
+	var px := _pair_px[i]
 	var index := terrain.chunk_index_at(px.x, px.y)
-	var around: Array[int] = []
 	for dy in [-1, 0, 1]:
 		for dx in [-1, 0, 1]:
 			for j in _settlements_by_chunk.get(index + dy * TerrainBuilder.CHUNKS + dx, PackedInt32Array()):
-				if j >= i:
-					around.append(j)
-	around.sort()
-	for j in around:
-		_absorb(j)
+				if j == i or (j > i and not both) or _models[j] == null:
+					continue
+				if px.distance_to(_pair_px[j]) < _model_radius[i] + _model_radius[j]:
+					_model_pairs.append(SettlementFit.pair_key(i, j))
 
 
-## Masque la maquette `i` si son centre est dans l'emprise d'une voisine prioritaire (placée
-## avant dans l'ordre de priorité) à `ABSORB_FACTOR` × son rayon près.
-func _absorb(i: int) -> void:
+## DC6c : paires de la maquette `i` recalculées (maquette remplacée, CV1).
+func _refresh_pairs_of(i: int) -> void:
+	var kept := PackedInt64Array()
+	for key in _model_pairs:
+		if key >> 16 != i and key & 0xFFFF != i:
+			kept.append(key)
+	_model_pairs = kept
+	_append_pairs_of(i, true)
+	_model_pairs.sort()
+
+
+## Masque les maquettes dont le centre est dans l'emprise affichée d'une voisine prioritaire
+## (placée avant dans l'ordre de priorité) à `ABSORB_FACTOR` × leur rayon affiché près.
+func _update_absorption() -> void:
+	if _pair_px.size() != _models.size():
+		return
+	var count := _models.size()
+	var radius := PackedFloat32Array()
+	radius.resize(count)
+	var protected := PackedByteArray()
+	protected.resize(count)
+	for i in count:
+		if _models[i] == null:
+			radius[i] = 0.0
+			protected[i] = 1
+		elif _landmarks.has(i):
+			radius[i] = _model_radius[i]
+			protected[i] = 1
+		else:
+			radius[i] = _model_radius[i] * _model_scale[i]
+			protected[i] = 0
+	var result := SettlementFit.absorbed(_model_pairs, _pair_px, radius, protected, ABSORB_FACTOR, ABSORB_OVERLAP)
+	for i in count:
+		if result[i] != _absorbed[i]:
+			_absorbed[i] = result[i]
+			_apply_model_visibility(i)
+
+
+## Maquette affichée sauf masquée (DC4/DC6c) ou remplacée par sa ville 1:1 (ZG6, SZ4b).
+func _apply_model_visibility(i: int) -> void:
 	var holder: Node3D = _models[i]
 	if holder == null or _landmarks.has(i):
 		return
-	var px := model_px(i)
-	var index := terrain.chunk_index_at(px.x, px.y)
-	var absorbed := false
-	for dy in [-1, 0, 1]:
-		for dx in [-1, 0, 1]:
-			for j in _settlements_by_chunk.get(index + dy * TerrainBuilder.CHUNKS + dx, PackedInt32Array()):
-				if j >= i or _models[j] == null or not (_models[j] as Node3D).visible:
-					continue
-				if px.distance_to(model_px(j)) < _model_radius[j] + ABSORB_FACTOR * _model_radius[i]:
-					absorbed = true
-	holder.visible = not absorbed
+	var town_shown := towns != null and towns.active and towns.is_shown(str(data.settlements[i]["id"]))
+	holder.visible = _absorbed[i] == 0 and not town_shown
 
 
 func _fit_model(i: int) -> void:
@@ -359,7 +425,8 @@ func _fit_model(i: int) -> void:
 				else:
 					var other_weight: float = FIT_WEIGHT.get(str(data.settlements[j]["kind"]), 1.0)
 					allowed = minf(allowed, d * weight / (weight + other_weight))
-	var factor := clampf(allowed / maxf(_base_radius[i], 0.001), MIN_FIT_SCALE, 1.0)
+	_room[i] = allowed
+	var factor := SettlementFit.fit_factor(allowed, _base_radius[i], MIN_FIT_SCALE)
 	if is_equal_approx(factor, _fit_scale[i]):
 		return
 	var model := holder.get_child(0) as Node3D
@@ -417,15 +484,29 @@ func _low_point(px: Vector2, radius: float, center: float) -> float:
 	return low
 
 
-## SZ4b : taille réelle / taille de carte de la maquette `i` (bornée, `MapPropScale`).
+## SZ4b : échelle de la maquette `i` à taille réelle (distance nulle), relative à la maquette
+## réduite à la taille de carte (DC6c : la réduction DC4 est recalculée sur l'emprise réelle).
 func _real_ratio(i: int) -> float:
+	return _effective_scale(i, 0.0)
+
+
+## DC6c : rétrécissement SZ4b de la maquette d'origine `i` (taille réelle / taille d'origine,
+## bornée) à la distance `distance`, sans réduction DC4.
+func _effective_sigma(i: int, distance: float) -> float:
 	var props := MapPropScale.shared()
+	var ratio := props.settlement_default_ratio
+	if i < _real_radius.size() and _real_radius[i] > 0.0 and _base_radius[i] > 0.0:
+		ratio = _real_radius[i] / _base_radius[i]
+	return props.settlement_scale(ratio, distance)
+
+
+## DC6c : échelle du porteur de la maquette `i` à la distance `distance` : rétrécissement SZ4b de
+## la maquette d'origine (taille réelle / taille d'origine, bornée) puis réduction DC4 recalculée
+## sur ce rayon (`SettlementFit.zoom_scale`), relative à la réduction de carte.
+func _effective_scale(i: int, distance: float) -> float:
 	if _landmarks.has(i):
 		return 1.0
-	var ratio := props.settlement_default_ratio
-	if i < _real_radius.size() and _real_radius[i] > 0.0 and _model_radius[i] > 0.0:
-		ratio = _real_radius[i] / _model_radius[i]
-	return clampf(ratio, props.settlement_ratio_min, props.settlement_ratio_max)
+	return SettlementFit.zoom_scale(_base_radius[i], _room[i], _effective_sigma(i, distance), MIN_FIT_SCALE)
 
 
 ## SZ4b : applique l'échelle courante de la maquette `i` (taille, pose sur le relief).
@@ -433,7 +514,7 @@ func _place_model(i: int) -> void:
 	var holder: Node3D = _models[i]
 	if holder == null or _landmarks.has(i):
 		return
-	var s := MapPropScale.shared().settlement_scale(_real_ratio(i), _camera_distance)
+	var s := _effective_scale(i, _camera_distance)
 	_model_scale[i] = s
 	holder.scale = Vector3.ONE * s
 	var ratio := _real_ratio(i)
@@ -450,6 +531,7 @@ func _update_settlement_scale(camera_distance: float) -> void:
 	_settlement_scale_ref = wanted
 	for i in _models.size():
 		_place_model(i)
+	_update_absorption()  # DC6c : masquage aux rayons affichés
 	# Hauteurs des étiquettes : toutes, par pas d'échelle seulement (pas à chaque image, SZ6).
 	_update_label_heights()
 
@@ -1193,11 +1275,30 @@ func model_scale(i: int) -> float:
 	return _model_scale[i] if i >= 0 and i < _model_scale.size() else 1.0
 
 
+## DC6c : rayon affiché de la maquette `i` (réduction DC4 à l'échelle courante × échelle SZ4b),
+## 0 sans maquette ; `shown_fit` : réduction DC4 à l'échelle courante (1 = taille pleine) ;
+## `model_absorbed` : maquette masquée sous une voisine prioritaire.
+func shown_radius(i: int) -> float:
+	if i < 0 or i >= _models.size() or _models[i] == null:
+		return 0.0
+	return _model_radius[i] if _landmarks.has(i) else _model_radius[i] * _model_scale[i]
+
+
+func shown_fit(i: int) -> float:
+	if i < 0 or i >= _models.size() or _models[i] == null or _landmarks.has(i):
+		return 1.0
+	return _fit_scale[i] * _model_scale[i] / maxf(_effective_sigma(i, _camera_distance), 1e-6)
+
+
+func model_absorbed(i: int) -> bool:
+	return i >= 0 and i < _absorbed.size() and _absorbed[i] != 0
+
+
 ## SZ4b : échelle de la maquette `i` à la distance de caméra `distance` (effets de `LifeEffects`).
 func model_scale_at(i: int, distance: float) -> float:
 	if i < 0 or i >= _models.size() or _landmarks.has(i):
 		return 1.0
-	return MapPropScale.shared().settlement_scale(_real_ratio(i), distance)
+	return _effective_scale(i, distance)
 
 
 ## SZ4b : rayon réel au sol (unités) de la colonie `i` (emprise vers 1340), < 0 si inconnu.
@@ -1222,6 +1323,7 @@ func replace_model(i: int, model: Node3D) -> void:
 	_base_radius[i] = _model_radius[i]
 	_base_top[i] = _model_top[i]
 	_fit_scale[i] = 1.0
+	_model_scale[i] = 1.0
 	for geometry in model.find_children("*", "GeometryInstance3D", true, false):
 		var g := geometry as GeometryInstance3D
 		g.visibility_range_end = tiers.model_range
@@ -1230,7 +1332,10 @@ func replace_model(i: int, model: Node3D) -> void:
 		ModelLibrary.tint_banner(holder, _colors[i])
 	_ground_model(i)
 	_fit_model(i)
-	_absorb_around(i)
+	_place_model(i)
+	if _pair_px.size() == _models.size():
+		_refresh_pairs_of(i)
+	_update_absorption()
 	_update_label_heights()
 
 
@@ -1316,10 +1421,7 @@ func _update_towns(camera_distance: float) -> void:
 ## (hors du rayon de chargement, ville en cours de construction), la maquette à taille réelle reste.
 func _update_model_visibility() -> void:
 	for i in _models.size():
-		var holder: Node3D = _models[i]
-		if holder == null or _landmarks.has(i):
-			continue
-		holder.visible = not (towns.active and towns.is_shown(str(data.settlements[i]["id"])))
+		_apply_model_visibility(i)
 
 
 func _towns_active() -> bool:

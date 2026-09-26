@@ -1,7 +1,7 @@
 # Figurines de bataille fines (lots FG1 à FG4)
 
-Chargées par `BattleSkinned` seulement avec `--fine-figures` après `--` (le rendu par défaut
-reste `battle_skinned/` jusqu'au lot FG5). Même format que `battle_skinned/` (voir son
+Chargées par `BattleSkinned` par défaut depuis le lot FG5 (ADR 0089) ; `--coarse-figures`
+après `--` revient aux figurines Quaternius de `battle_skinned/` le temps de la transition. Même format que `battle_skinned/` (voir son
 `SOURCE.md` : `CAM1`, `CAB1`, `manifest.json`) ; le manifeste fusionné renomme les rigs
 `fine_human` / `fine_cavalry`.
 
