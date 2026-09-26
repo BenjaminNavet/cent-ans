@@ -776,6 +776,7 @@ pub(crate) fn resolve_attrition(
                 .is_some_and(|s| state.is_friendly_settlement(&faction, s));
         let change =
             seasonal_supply_change(state, data, &location, friendly, general.as_ref(), winter);
+        let army_label = crate::events::capitalize(&state.army_name(data, &army_id));
         let army = state.armies.get_mut(&army_id).expect("exists");
         if friendly {
             army.supply = army.supply.saturating_add(change.unsigned_abs()).min(100);
@@ -807,7 +808,7 @@ pub(crate) fn resolve_attrition(
                         EventKind::Attrition
                     },
                     format!(
-                        "L'armée {army_id} souffre de la disette en {} : {lost} hommes perdus.",
+                        "{army_label} souffre de la disette en {} : {lost} hommes perdus.",
                         data.provinces
                             .get(&location)
                             .map_or_else(|| location.to_string(), |p| p.name.display.clone())
