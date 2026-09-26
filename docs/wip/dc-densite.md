@@ -19,18 +19,18 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 | Lot | Contenu | Vague | État |
 |---|---|---|---|
 | DC0 | Squelette : ADR 0082, ce plan, plafond 6 → 16 (schéma, chargeur Rust, tests), outil `geo/settlement_check.py` | 0 | fait |
-| DC1 | Mouvement : `points_per_step` 140 → 70 (rules.json + défaut Rust), vérifier traversées, horizon IA, agents, repli ; tests ; textes du codex et description de rules.json ; sondes `march_range_probe`, `turn_perf` | 1 | à lancer |
-| DC2a | Colonies France nord, ouest, centre (19 prov., cible 12) | 1 | à lancer |
-| DC2b | Colonies Aquitaine, Languedoc, France est, Provence-Alpes (22 prov., cible 11) | 1 | à lancer |
-| DC2c | Colonies îles Britanniques (Angleterre cible 10 ; Galles, Irlande, Écosse 7) | 1 | à lancer |
-| DC2d | Colonies Pays-Bas (11), Empire rhénan (9), reste de l'Empire et Scandinavie (7) | 1 | à lancer |
-| DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | à lancer |
+| DC1 | Mouvement : `points_per_step` 140 → 70 (rules.json + défaut Rust), vérifier traversées, horizon IA, agents, repli ; tests ; textes du codex et description de rules.json ; sondes `march_range_probe`, `turn_perf` | 1 | lancé |
+| DC2a | Colonies France nord, ouest, centre (19 prov., cible 12) | 1 | lancé |
+| DC2b | Colonies Aquitaine, Languedoc, France est, Provence-Alpes (22 prov., cible 11) | 1 | lancé |
+| DC2c | Colonies îles Britanniques (Angleterre cible 10 ; Galles, Irlande, Écosse 7) | 1 | lancé |
+| DC2d | Colonies Pays-Bas (11), Empire rhénan (9), reste de l'Empire et Scandinavie (7) | 1 | lancé |
+| DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | lancé |
 | DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | après DC1 + DC2 |
 | DC4 | Affichage : niveaux de détail des marqueurs, désencombrement des étiquettes (O(n²)), maquettes proches, captures | 2 | après DC2 |
 | DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | |
 
 ## Journal
-- 26/09 : plan, squelette DC0.
+- 26/09 : plan, squelette DC0 (6f74c214) ; vague 1 lancée (DC1 opus, DC2a-e sonnet, worktrees ../gp-dc1, ../gp-dc2a-e).
 
 ## Prochaine étape
-Lancer la vague 1 (DC1 + DC2a-e, 6 agents).
+Attendre la vague 1 ; fusionner DC2a-e (fichiers disjoints) puis DC1 dans feat/densite ; lancer DC3 + DC4.
