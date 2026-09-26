@@ -89,7 +89,32 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 				grid[i] = maxf(grid[i], tops[i] - profile.local_relief_cap_m)
 			amplitude[i] = tops[i] - base[i]
 			squash[i] = profile.mountain_squash_of(amplitude[i])
+	_add_true_scale_zones(squash, side, cell, profile)
 	return {"data": grid, "base": base, "squash": squash, "amplitude": amplitude, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
+
+
+## SZ1 : autour des villes emblématiques 1:1 (VH4, `LandmarkV2Library`), relief au-dessus de la
+## base ramené près de l'échelle vraie (k ≥ `true_scale_squash`, plein jusqu'à
+## `rayon + true_scale_full_units`, fondu linéaire sur `true_scale_fade_units`) : les coteaux de
+## Rouen ne deviennent pas des murs à côté de maisons à l'échelle.
+static func _add_true_scale_zones(squash: PackedFloat32Array, side: Vector2i, cell: int, profile: ReliefExaggerationProfile) -> void:
+	if not profile.enabled or profile.true_scale_squash <= 0.0 or OS.get_cmdline_user_args().has("--no-landmarks-1to1"):
+		return
+	for city: Dictionary in LandmarkV2Library.all():
+		var center := LandmarkV2Library.anchor_units(city)
+		var full := LandmarkV2Library.extent_units(city) + profile.true_scale_full_units
+		var reach := full + maxf(profile.true_scale_fade_units, 0.0)
+		var c0 := clampi(floori((center.x - reach) / cell), 0, side.x - 1)
+		var c1 := clampi(ceili((center.x + reach) / cell), 0, side.x - 1)
+		var r0 := clampi(floori((center.y - reach) / cell), 0, side.y - 1)
+		var r1 := clampi(ceili((center.y + reach) / cell), 0, side.y - 1)
+		for r in range(r0, r1 + 1):
+			for c in range(c0, c1 + 1):
+				var p := Vector2(c * cell + 0.5 * (cell - 1), r * cell + 0.5 * (cell - 1))
+				var d := p.distance_to(center)
+				var w := 1.0 if d <= full else clampf(1.0 - (d - full) / maxf(profile.true_scale_fade_units, 1e-3), 0.0, 1.0)
+				var i := r * side.x + c
+				squash[i] = maxf(squash[i], profile.true_scale_squash * w)
 
 
 const MODE_MIN := 0
