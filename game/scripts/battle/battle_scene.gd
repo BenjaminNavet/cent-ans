@@ -57,6 +57,7 @@ var setup: Dictionary = {}
 var player_side: String = "attacker"
 var enemy_side: String = "defender"
 var side_colors: Dictionary = {}
+var _side_houses: Dictionary = {}  # DA1 / DA1b : maison du général par camp (écus, étendards)
 var side_names: Dictionary = {}
 var units: Array = []
 var selected: Array[int] = []
@@ -516,6 +517,7 @@ func _build_soldier_layers() -> void:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
 		var general: Variant = (setup[side] as Dictionary).get("general", null)
 		houses[side] = str((general as Dictionary).get("house", "")) if general is Dictionary else ""
+	_side_houses = houses
 	soldiers.setup(units, side_colors, factions, houses)
 	_mm = soldiers.layers
 	_setup_standards()
@@ -572,7 +574,7 @@ func _setup_standards() -> void:
 	var factions := {}
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup.get(side, {}) as Dictionary).get("faction", ""))
-	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle)
+	standards.setup(units, side_colors, func(unit: Dictionary) -> Dictionary: return _banner_cloth(unit, str((setup[str(unit["side"])] as Dictionary).get("faction", ""))), wind, factions, battle, _side_houses)
 	for id in _banners:
 		standards.apply_wind((_banners[id] as Dictionary)["flag_mat"])
 	if terrain.vegetation != null:
@@ -735,7 +737,8 @@ func _make_banner(unit: Dictionary) -> void:
 ## Étoffe d'un drapeau de régiment : bannière peinte de la faction (`heraldry/banners/`,
 ## 256×512, tissu dans le haut, bas transparent) pour la noblesse, fanion à queue d'aronde (4:1)
 ## pour les autres, étendards royaux pour le général de France / d'Angleterre ; à défaut, centre
-## de l'écu de la faction (repli).
+## de l'écu de la faction (repli). DA1b : le général et les unités nobles de sa retenue portent
+## la bannière de sa maison (`heraldry/banners/houses/`) quand elle existe.
 func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
 	var dir := "res://assets/heraldry/banners/"
 	var noble := str(unit.get("type", "")) in ["unit_knights", "unit_men_at_arms_foot"]
@@ -749,6 +752,13 @@ func _banner_cloth(unit: Dictionary, faction: String) -> Dictionary:
 			candidates.append([dir + ("oriflamme.png" if faction == "fac_france" else "dragon.png"), Vector2(1.3, 2.6)])
 		elif faction == "fac_england":
 			candidates.append([dir + "st_george.png", Vector2(1.3, 2.6)])
+	var house := HouseArms.id_of(str(_side_houses.get(str(unit.get("side", "")), "")))
+	if house != "" and (bool(unit.get("is_general", false)) or BattleStandards.is_house_retinue(unit)):
+		var house_banner: Array = [dir + "houses/%s_banner.png" % house, Vector2(1.3, 2.6)]
+		if bool(unit.get("is_general", false)) and not candidates.is_empty() and not str(candidates[0][0]).ends_with("st_george.png"):
+			candidates.append(house_banner)  # oriflamme ou dragon : pas de quartier d'abord
+		else:
+			candidates.insert(0, house_banner)
 	if noble or str(unit.get("render", "")) == "siege":
 		candidates.append([dir + "%s_banner.png" % faction, Vector2(1.3, 2.6)])
 	else:

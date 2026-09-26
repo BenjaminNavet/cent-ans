@@ -19,9 +19,9 @@ basée sur main (4c627f4a, DA1 fusionné). ADR : révision de `docs/decisions/00
 - [x] 1. SVG vendus (`data/heraldry/charges/`, SOURCE.md, CREDITS.md, schéma)
 - [x] 2. Rendu par rôles (`heraldic_charges.py`), branché en v1 et v2 ; écartelés de faction (Castille, Hainaut) en v2
 - [x] 3. Tests `test_heraldic_charges.py` (non-régression par blasons), bannières de maisons
-- [ ] 4. Régénérer les assets
-- [ ] 5. EP5
+- [x] 4. Assets régénérés (écus, maisons, bannières + `banners/houses/`)
+- [x] 5. EP5 : `_bearer_layers` (battle_standards.gd), `house_arms` dans data/fx/battle_standards.json, `_banner_cloth` ; smoke vert
 - [ ] 6. Planche, captures, ADR
 
 ## Prochaine étape
-Régénérer `cent-ans assets heraldry` et `cent-ans assets banners`, puis EP5 (battle_standards.gd).
+Captures bataille (--standard-shot=mounted|foot), planche docs/img/da1b/, ADR 0064 § Révision DA1b.
