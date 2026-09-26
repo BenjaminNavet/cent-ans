@@ -27,11 +27,12 @@ Objectif : le jeu se lance et s'exporte sous Windows x86_64.
   Windows 4.7.2 (`windows_*.exe`) dans `~/Library/Application Support/Godot/export_templates/4.7.2.stable/`.
 
 ## Reste à faire
-1. **CI** : la branche `windows/port` (= main au commit 2509864b) était en cours de push vers
-   origin au moment de la pause. Vérifier `git ls-remote origin refs/heads/windows/port` ;
-   sinon `git push origin windows/port`. Puis `gh run list --workflow windows` / `gh run watch`.
-   Corriger ce qui casse (chemins, `\` vs `/`, fins de ligne, smoke). Dépôt privé : minutes
-   Windows ×2 sur le quota gratuit (0 $ attendu, noter dans docs/budget.md sinon).
+1. **CI** : branche `windows/port` poussée sur origin (2509864b), mais **aucun run n'est
+   apparu** (`gh run list --branch windows/port` vide, le workflow n'est pas sur la branche par
+   défaut d'origin). Vérifier que GitHub Actions est activé sur le dépôt, sinon pousser main
+   (qui contient le workflow) ou lancer `gh workflow run windows.yml --ref windows/port`.
+   Corriger ce qui casse (chemins, fins de ligne, smoke). Dépôt privé : minutes Windows ×2 sur
+   le quota gratuit (0 $ attendu, noter dans docs/budget.md sinon).
 2. **Export réel** : `CENT_ANS_EXPORT_RELIEF=none tools/export_windows.sh` (release ≈ 10 min
    de LTO), vérifier que `export/windows/` contient exe, pck, `cent_ans.dll`, `data/`.
    Si l'export Godot refuse une option du préréglage, l'ouvrir une fois dans l'éditeur
