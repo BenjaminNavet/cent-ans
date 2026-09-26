@@ -124,6 +124,8 @@ func _test_frame() -> void:
 	var empty := PortraitFrame.new()
 	holder.add_child(empty)
 	empty.show_character({"id": "", "name": "Jean Sans Terre", "sex": "female", "age": 40, "faction": "fac_nowhere"}, "", {"ruler": ""})
-	_check(not empty.has_portrait(), "no archetype for a female knight-less cell without images")
+	# Banque complète (147 images) : toute case a un visage, la culture par défaut couvre les
+	# factions inconnues.
+	_check(empty.has_portrait(), "full bank: default-culture archetype for an unknown faction")
 	_check(PortraitFrame.initials("Jean de Valois") == "JV", "initials skip particles")
 	holder.queue_free()
