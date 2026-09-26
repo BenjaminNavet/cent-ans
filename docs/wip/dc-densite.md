@@ -31,6 +31,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 
 ## Journal
 - 26/09 : plan, squelette DC0 (6f74c214) ; vague 1 lancée (DC1 opus, DC2a-e sonnet, worktrees ../gp-dc1, ../gp-dc2a-e).
+- 26/09 : DC2c : 105 colonies ajoutées (îles Britanniques ; village 43, abbey 27, town 18, castle 17). Fusionné.
 
 ## Prochaine étape
 Attendre la vague 1 ; fusionner DC2a-e (fichiers disjoints) puis DC1 dans feat/densite ; lancer DC3 + DC4.

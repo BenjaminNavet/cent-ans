@@ -109,5 +109,181 @@
     "sources": [
       "Abbaye d'Abingdon"
     ]
+  },
+  {
+    "id": "set_thame",
+    "province": "prov_oxford",
+    "kind": "village",
+    "name": {
+      "display": "Thame",
+      "local": "Tame",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.9761,
+      51.746
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché de la vallée de la Tamise, à l'est d'Oxford.",
+    "sources": [
+      "Thame"
+    ]
+  },
+  {
+    "id": "set_henley_on_thames",
+    "province": "prov_oxford",
+    "kind": "village",
+    "name": {
+      "display": "Henley-on-Thames",
+      "local": "Hanleye",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.8987,
+      51.5364
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fluvial sur la Tamise, port de transbordement du bois et du blé vers Londres.",
+    "sources": [
+      "Henley-on-Thames"
+    ]
+  },
+  {
+    "id": "set_dorchester_on_thames",
+    "province": "prov_oxford",
+    "kind": "abbey",
+    "name": {
+      "display": "Dorchester-on-Thames",
+      "local": "Dorchestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.1656,
+      51.6432
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Ancien siège épiscopal saxon, abbaye augustinienne sur la Tamise.",
+    "sources": [
+      "Dorchester-on-Thames"
+    ]
+  },
+  {
+    "id": "set_witney",
+    "province": "prov_oxford",
+    "kind": "village",
+    "name": {
+      "display": "Witney",
+      "local": "Wyteneye",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4844,
+      51.7861
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg drapier réputé pour ses couvertures de laine.",
+    "sources": [
+      "Witney"
+    ]
+  },
+  {
+    "id": "set_woodstock",
+    "province": "prov_oxford",
+    "kind": "town",
+    "name": {
+      "display": "Woodstock",
+      "local": "Wodestoke",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.3548,
+      51.8464
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg royal doté d'un palais où résident souvent les rois d'Angleterre.",
+    "sources": [
+      "Woodstock, Oxfordshire"
+    ]
+  },
+  {
+    "id": "set_deddington",
+    "province": "prov_oxford",
+    "kind": "castle",
+    "name": {
+      "display": "Deddington",
+      "local": "Dadyngton",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.3167,
+      51.9833
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château à motte du nord de l'Oxfordshire.",
+    "sources": [
+      "Château de Deddington"
+    ]
+  },
+  {
+    "id": "set_reading",
+    "province": "prov_oxford",
+    "kind": "abbey",
+    "name": {
+      "display": "Reading",
+      "local": "Radynge",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.9781,
+      51.4543
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Grande abbaye clunisienne fondée par Henri Ier, lieu de sa sépulture.",
+    "sources": [
+      "Abbaye de Reading"
+    ]
   }
 ]

@@ -111,5 +111,156 @@
     "sources": [
       "Château de Berkeley"
     ]
+  },
+  {
+    "id": "set_cirencester",
+    "province": "prov_gloucester",
+    "kind": "town",
+    "name": {
+      "display": "Cirencester",
+      "local": "Cirencestre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.9666,
+      51.719
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Ville marchande sur les Cotswolds, siège d'une riche abbaye augustinienne et centre lainier.",
+    "sources": [
+      "Cirencester"
+    ]
+  },
+  {
+    "id": "set_stroud",
+    "province": "prov_gloucester",
+    "kind": "village",
+    "name": {
+      "display": "Stroud",
+      "local": "Strode",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.216,
+      51.744
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg drapier de la vallée de la Frome, dans les Cotswolds.",
+    "sources": [
+      "Stroud"
+    ]
+  },
+  {
+    "id": "set_winchcombe",
+    "province": "prov_gloucester",
+    "kind": "abbey",
+    "name": {
+      "display": "Winchcombe",
+      "local": "Wynchecombe",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.9636,
+      51.9536
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine de Winchcombe, ancienne capitale du royaume de Mercie.",
+    "sources": [
+      "Abbaye de Winchcombe"
+    ]
+  },
+  {
+    "id": "set_st_briavels",
+    "province": "prov_gloucester",
+    "kind": "castle",
+    "name": {
+      "display": "St Briavels",
+      "local": "Seint Briavel",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.6522,
+      51.7364
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château royal de la Forêt de Dean, centre de fabrication des carreaux d'arbalète.",
+    "sources": [
+      "Château de St Briavels"
+    ]
+  },
+  {
+    "id": "set_dursley",
+    "province": "prov_gloucester",
+    "kind": "village",
+    "name": {
+      "display": "Dursley",
+      "local": "Durseleye",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.355,
+      51.683
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg drapier du sud des Cotswolds.",
+    "sources": [
+      "Dursley"
+    ]
+  },
+  {
+    "id": "set_thornbury",
+    "province": "prov_gloucester",
+    "kind": "village",
+    "name": {
+      "display": "Thornbury",
+      "local": "Thornebury",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.525,
+      51.607
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du Gloucestershire, sur la route de Bristol au pays de Galles.",
+    "sources": [
+      "Thornbury"
+    ]
   }
 ]
