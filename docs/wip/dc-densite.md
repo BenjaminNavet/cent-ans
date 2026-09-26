@@ -137,6 +137,18 @@ optimisation de fin de tour ; tests sim-campaign + ai et clippy verts, **pas enc
   revenus paresseux (rançons, ordres de chevalerie), sites de recrutement sans place libre sautés,
   GridPlanner : propriétaire traversé par province. Résultats de sonde identiques.
 
+- Révoltes (cause trouvée) : DC1 les divise par ~3 (occupations plus courtes : 0,8 → 0,3 % des
+  provinces-tours) et la densité achève : les effets de province somment les bâtiments de toutes les
+  places (+268 églises paroissiales, +102 abbayes) → apaisement moyen −10 → −21, biens, santé et
+  place pour croître en hausse ; l'IA garde l'impôt haut (28 → 37 % des tours). Règle ajoutée
+  (`province_effect_percent`, rules.json + schéma + `province_building_effects`/`province_capacity`) :
+  bâtiments des places secondaires à 50 % sur la province. Essai « une fois par sorte » écarté :
+  il divise les biens de moitié (marchés) et l'IA lève 16 % d'hommes de moins que main.
+  Sur 12 graines : révoltes 5,7 → 5,0, mécontentement > 60 7,2 → 7,2, impôt haut 28,5 → 30,1,
+  hommes 27,0 k → 26,6 k, cités 9,25 → 7,64, provinces 3,75 → 3,28, durée 5,0 → 5,2.
+- Refuge neutre 1 → 2 pas essayé (12 graines) : sans effet mesurable (replis neutres 0,1 → 0,2,
+  dispersions 1,25 → 1,1 ; main 0,5 / 0,6) : la densité fournit déjà des refuges. Gardé à 1.
+
 Reste à faire en DC3 :
 1. Mesurer `turn_perf 50 3 1` (branche vs DC1 : moyenne 5,86 ms, p99 63,8 ms).
 2. Conquête : cités prises −33 % vs main ; cible ±25 % (OFFENSIVE_RANGE / PLANNING_RANGE,
