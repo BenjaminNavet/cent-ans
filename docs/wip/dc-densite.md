@@ -256,3 +256,11 @@ DC1 est l'ancien code (avant la revue de code et PB3) : comparer DC3 à main.
 - Hérésie : le compte des bâtiments religieux de la province n'est pas pondéré.
 - IA vs main : +70 % de temps moyen (plus de places, horizon doublé), sous la cible de 50 ms.
 - Rendu des hameaux (5 km) non revérifié dans Godot (`dc4_density_probe.gd`, fenêtré).
+
+## DC6c — réduction et masquage des maquettes à l'échelle effective (worktree `../gp-dc6c`, branche `feat/dc6-c`)
+État : en cours. `SettlementFit` (fonctions pures, `game/scripts/map/settlement_fit.gd`) ; la
+couche garde la place laissée par les voisines (`_room`) et recalcule réduction (échelle du
+porteur) et masquage (paires candidates) à chaque pas d'échelle SZ4b. Test
+`game/tests/dc6c_fit_scale_test.gd`.
+Prochaine étape : build, import, tests, sonde DC4 (vues comté / près + 20 et 12), captures
+`docs/img/dc6c/`.
