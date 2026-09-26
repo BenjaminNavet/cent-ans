@@ -121,6 +121,12 @@ var decor_render := true
 ## `--no-da6` rend l'ancienne végétation (banc A/B, captures « avant »).
 var da6 := true
 var tree_view: BattleTrees = null
+## DA6 : banc A/B dans un seul processus (`--bench-ab=da6,no-da6`) : les deux végétations sont
+## construites, `set_da6_view` bascule de l'une à l'autre.
+var da6_ab := false
+var _old_trees: Node3D = null
+var _old_vegetation: BattleVegetation = null
+var _tree_parent: Node = null
 
 
 ## DA6 (bible § 3.3) : part de saturation gardée par le sol et l'herbe ; l'automne (lumière déjà
@@ -190,6 +196,10 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	site_render = not OS.get_cmdline_user_args().has("--no-site")
 	da6 = not OS.get_cmdline_user_args().has("--no-da6")
 	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--bench-ab=") and arg.contains("da6"):
+			da6_ab = true
+			da6 = true
+	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--ground="):
 			ground_key = arg.trim_prefix("--ground=")  # rendu seulement, comme --weather=
 	biome = BIOMES.get(terrain_key, BIOMES["plains"]) if site_render else BIOMES["plains"]
@@ -254,6 +264,12 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	vegetation.name = "Vegetation"
 	add_child(vegetation)
 	vegetation.build(self, weather)
+	if da6_ab:
+		_old_vegetation = BattleVegetation.new()
+		_old_vegetation.name = "VegetationNoDa6"
+		_old_vegetation.visible = false
+		add_child(_old_vegetation)
+		_old_vegetation.build(self, weather, false)
 	if site_render:
 		village_view = BattleVillage.new()
 		village_view.name = "Site"
@@ -1638,9 +1654,34 @@ func _build_trees() -> void:
 		tree_count += (sets[kind] as Array).size()
 	if da6:
 		_plant_da6(sets, tints)
-		return
+		if not da6_ab:
+			return
+		_old_trees = Node3D.new()
+		_old_trees.name = "TreesNoDa6"
+		_old_trees.visible = false
+		add_child(_old_trees)
+		_tree_parent = _old_trees
+		# Ancienne végétation du banc A/B : fruitiers remis parmi les chênes, à l'ancienne échelle.
+		for i in (sets["fruit"] as Array).size():
+			var t: Transform3D = sets["fruit"][i]
+			t.basis = t.basis * 0.45
+			sets["oak"].append(t)
+			tints["oak"].append(tints["fruit"][i])
+		sets["fruit"] = []
 	for kind in sets:
 		_tree_layer(kind, sets[kind], tints[kind])
+	_tree_parent = null
+
+
+## DA6 : bascule du banc A/B (`--bench-ab=da6,no-da6`) entre la végétation DA6 et l'ancienne.
+func set_da6_view(on: bool) -> void:
+	if not da6_ab:
+		return
+	tree_view.visible = on
+	_old_trees.visible = not on
+	vegetation.visible = on
+	_old_vegetation.visible = not on
+	ground_material.set_shader_parameter("da6_on", 1.0 if on else 0.0)
 
 
 ## DA6 : essences des feuillus (chêne, hêtre, frêne ; saule et peuplier près de l'eau), tuiles par
@@ -1699,10 +1740,12 @@ func _plant_da6(sets: Dictionary, tints: Dictionary) -> void:
 			if species == "bush":
 				# Buissons et haies : maillage unique ; portée des tuiles comme avant.
 				var reach := (HEDGE_DISTANCE if sets["hedge"].size() > 0 else BUSH_DISTANCE) * lod_k
-				_da6_tile(species, 0, winter, 0.0, 100000.0, members, transforms, tile_tints, key, 0.0, reach, false)
+				var bush_lod1 := BattleTrees.BUSH_LOD1_DISTANCE * lod_k
+				_da6_tile(species, 0, winter, 0.0, bush_lod1, members, transforms, tile_tints, key, 0.0, bush_lod1 + slack, false)
+				_da6_tile(species, 1, winter, bush_lod1, 100000.0, members, transforms, tile_tints, key, maxf(bush_lod1 - slack, 0.0), reach, false)
 				continue
 			_da6_tile(species, 0, winter, 0.0, lod1, members, transforms, tile_tints, key, 0.0, lod1 + slack, true)
-			_da6_tile(species, 1, winter, lod1, far, members, transforms, tile_tints, key, maxf(lod1 - slack, 0.0), far + slack, true)
+			_da6_tile(species, 1, winter, lod1, far, members, transforms, tile_tints, key, maxf(lod1 - slack, 0.0), far + slack, false)
 	for key in impostors:
 		var entry: Array = impostors[key]
 		tree_view.add_impostor_tile("Impostors_%d_%d" % [key.x, key.y], entry[0], entry[1], entry[2])
@@ -1907,7 +1950,7 @@ func _tree_tile(kind: String, members: Array, transforms: Array, tints: Array, k
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	instance.visibility_range_begin = range_begin
 	instance.visibility_range_end = range_end
-	add_child(instance)
+	(_tree_parent if _tree_parent != null else self).add_child(instance)
 
 
 ## Rochers : sur les pentes raides du champ et dans les collines de l'anneau proche.

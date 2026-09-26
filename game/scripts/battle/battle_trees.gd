@@ -1,5 +1,5 @@
 class_name BattleTrees
-extends Node
+extends Node3D
 
 ## Arbres des batailles (lot DA6, bible DA § 6) : feuillus ramifiés procéduraux par essence, en
 ## remplacement des houppiers « sucette » (boule de cartes sur un bâton) de `BattleMeshes.tree`.
@@ -29,6 +29,8 @@ const IMPOSTOR_SHADER := preload("res://shaders/battle_tree_impostor.gdshader")
 const LOD1_DISTANCE := 120.0
 const IMPOSTOR_DISTANCE := 300.0
 const LOD_BAND := 16.0
+## Buissons et haies : maillage complet de près seulement.
+const BUSH_LOD1_DISTANCE := 60.0
 ## Essences qui ont un imposteur (ligne de l'atlas = rang dans cette liste).
 const IMPOSTOR_SPECIES := ["oak", "beech", "ash", "poplar", "willow", "fruit"]
 const COLS := 4
@@ -49,7 +51,7 @@ const SPECIES := {
 	"poplar": {"height": 22.0, "width": 9.0, "crown_base": 5.0, "trunk": 6.0, "radius": 0.42, "limbs": 6, "spread": 0.45, "leader": true, "levels": 3, "card": 2.8, "gnarl": 0.3, "rise": 0.5, "leafy": 3, "bark": Color(0.7, 0.68, 0.64), "smooth": 0.2, "leaf": Color(0.94, 1.0, 0.82), "marcescent": false},
 	"willow": {"height": 8.5, "width": 7.5, "crown_base": 2.6, "trunk": 2.5, "radius": 0.52, "limbs": 12, "spread": 0.5, "leader": false, "levels": 1, "card": 2.1, "gnarl": 0.06, "rise": 0.55, "leafy": 4, "bark": Color(0.68, 0.66, 0.62), "smooth": 0.0, "leaf": Color(0.95, 1.0, 0.96), "marcescent": false},
 	"fruit": {"height": 5.6, "width": 6.2, "crown_base": 1.8, "trunk": 1.6, "radius": 0.17, "limbs": 4, "spread": 1.0, "leader": false, "levels": 2, "card": 2.0, "gnarl": 0.45, "rise": 0.1, "leafy": 3, "bark": Color(0.7, 0.66, 0.6), "smooth": 0.0, "leaf": Color(0.95, 1.0, 0.84), "marcescent": false},
-	"bush": {"height": 2.4, "width": 3.0, "crown_base": 0.2, "trunk": 0.0, "radius": 0.06, "limbs": 5, "spread": 0.55, "leader": false, "levels": 2, "card": 1.6, "gnarl": 0.3, "rise": 0.3, "leafy": 2, "bark": Color(0.7, 0.66, 0.6), "smooth": 0.0, "leaf": Color(0.9, 0.96, 0.82), "marcescent": false},
+	"bush": {"height": 2.4, "width": 3.0, "crown_base": 0.2, "trunk": 0.0, "radius": 0.06, "limbs": 6, "spread": 0.55, "leader": false, "levels": 1, "card": 1.8, "gnarl": 0.3, "rise": 0.3, "leafy": 3, "bark": Color(0.7, 0.66, 0.6), "smooth": 0.0, "leaf": Color(0.9, 0.96, 0.82), "marcescent": false},
 }
 
 static var _cache: Dictionary = {}
@@ -60,7 +62,7 @@ var _impostor_nodes: Array[MultiMeshInstance3D] = []
 
 
 ## Maillage de `species` au niveau `lod` (0 complet, 1 allégé), feuillé ou d'hiver. Surface 0 =
-## écorce, surface 1 = feuillage. `lod_near`/`lod_far` : plage de distances (m) de ce niveau.
+## écorce, dernière surface = feuillage (buisson allégé : feuillage seul). `lod_near`/`lod_far` : plage de distances (m) de ce niveau.
 static func mesh(species: String, lod: int, winter: bool, lod_near: float, lod_far: float) -> ArrayMesh:
 	var key := "%s/%d/%s/%.0f/%.0f" % [species, lod, winter, lod_near, lod_far]
 	if _cache.has(key):
@@ -69,11 +71,12 @@ static func mesh(species: String, lod: int, winter: bool, lod_near: float, lod_f
 	var mesh := ArrayMesh.new()
 	var bark: SurfaceTool = built["bark"]
 	var leaves: SurfaceTool = built["leaves"]
-	bark.generate_tangents()
-	bark.commit(mesh)
-	mesh.surface_set_material(0, bark_material(species, lod_near, lod_far))
+	if int(built["bark_quads"]) > 0:
+		bark.generate_tangents()
+		bark.commit(mesh)
+		mesh.surface_set_material(0, bark_material(species, lod_near, lod_far))
 	leaves.commit(mesh)
-	mesh.surface_set_material(1, foliage_material(species, winter, lod_near, lod_far))
+	mesh.surface_set_material(mesh.get_surface_count() - 1, foliage_material(species, winter, lod_near, lod_far))
 	_cache[key] = mesh
 	return mesh
 
@@ -129,6 +132,7 @@ static func _build(species: String, lod: int, winter: bool) -> Dictionary:
 		"center": Vector3(0, (base + height) * 0.5, 0),
 		"radii": Vector3(float(p["width"]) * 0.5, (height - base) * 0.5, float(p["width"]) * 0.5),
 		"clusters": 0,
+		"bark_quads": 0,
 	}
 	var trunk := float(p["trunk"])
 	var radius := float(p["radius"])
@@ -157,7 +161,7 @@ static func _build(species: String, lod: int, winter: bool) -> Dictionary:
 			var tilt := float(p["spread"]) * rng.randf_range(0.5, 1.2)
 			var dir := (Vector3.UP * cos(tilt) + Vector3(cos(az), 0.0, sin(az)) * sin(tilt)).normalized()
 			_branch(ctx, Vector3(rng.randf_range(-0.2, 0.2), -0.1, rng.randf_range(-0.2, 0.2)), dir, reach * 1.2, radius, 1)
-	return {"bark": bark, "leaves": leaves, "clusters": ctx["clusters"]}
+	return {"bark": bark, "leaves": leaves, "clusters": ctx["clusters"], "bark_quads": ctx["bark_quads"]}
 
 
 static func _branch(ctx: Dictionary, start: Vector3, dir: Vector3, length: float, radius: float, level: int) -> void:
@@ -272,6 +276,12 @@ static func _cylinder(ctx: Dictionary, a: Vector3, b: Vector3, ra: float, rb: fl
 	var sides: int = [8, 6, 4][mini(level, 2)]
 	if int(ctx["lod"]) == 1:
 		sides = maxi(sides - 3, 3)
+	if float(ctx["p"]["trunk"]) <= 0.0:
+		# Buissons (haies : des milliers) : tiges à 3 pans au maillage complet, aucune au loin.
+		if int(ctx["lod"]) == 1:
+			return
+		sides = 3
+	ctx["bark_quads"] = int(ctx["bark_quads"]) + sides
 	var axis := (b - a).normalized()
 	var ref := Vector3.FORWARD if absf(axis.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT
 	var u := axis.cross(ref).normalized()

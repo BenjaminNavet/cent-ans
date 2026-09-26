@@ -26,6 +26,8 @@ extends Node3D
 ## `--standard-shot=<foot|mounted|line|fallen|captured>` (capture EP5 : gros plan d'un
 ## porte-étendard à pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé,
 ## étendard pris porté par le vainqueur).
+## `--no-da6` (végétation de bataille DA6 coupée : herbe, lisières, arbres, sol de près ; captures
+## « avant »), `--bench-ab=da6,no-da6` (banc : les deux végétations alternées, DA6).
 ## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
 ## `--horizon-province=<id>`, `--panorama=<id>` (captures EP2).
 ## EP8 (mise en scène, `BattleStaging`) : `--hour=<dawn|morning|midday|afternoon|dusk|night|h>`
@@ -867,7 +869,8 @@ func _run_benchmark_frame(delta: float) -> void:
 		_bench_gpu_ms += gpu_ms
 		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
 		_bench_gpu_samples += 1
-		_bench_ab_step(gpu_ms)
+		# DA6 : sous Metal le temps GPU mesuré vaut 0 : durée de l'image à la place (vsync coupée).
+		_bench_ab_step(gpu_ms if gpu_ms > 0.0 else delta * 1000.0)
 	if _bench_timed_out():
 		_bench_fail("timeout after %d frames of repeat %d/%d (%.0f s wall budget)" % [_bench_frames, _bench_repeat_done + 1, _bench_repeat, _bench_timeout_s])
 		return
@@ -894,10 +897,15 @@ func _bench_finish() -> void:
 	for ms in sorted_ms:
 		total_s += ms / 1000.0
 	var ab_result := {}
+	var ab_mean := {}  # DA6 : moyenne aussi (la médiane colle aux paliers de la cadence d'affichage)
 	for level in _bench_ab_ms:
 		var samples: Array = _bench_ab_ms[level]
 		samples.sort()
 		ab_result[level] = samples[samples.size() / 2] if not samples.is_empty() else 0.0
+		var sum := 0.0
+		for v in samples:
+			sum += float(v)
+		ab_mean[level] = sum / maxf(float(samples.size()), 1.0)
 	var result := {
 		"ok": true,
 		"units": units.size(),
@@ -920,6 +928,7 @@ func _bench_finish() -> void:
 	}
 	if not ab_result.is_empty():
 		result["ab"] = ab_result
+		result["ab_mean"] = ab_mean
 	# EP1 : palier d'échelle, champ, soldats présents, figurines, primitives, budget d'animation.
 	var on_field := 0
 	var figures := 0
@@ -1010,8 +1019,11 @@ func _bench_ab_step(gpu_ms: float) -> void:
 	var phase := (_bench_measured - 11) % 30
 	var level := _bench_ab[slot % _bench_ab.size()]
 	if phase == 0:
-		RenderQuality.override_level = level
-		RenderQuality.reapply(get_tree())
+		if level in ["da6", "no-da6"]:
+			terrain.set_da6_view(level == "da6")  # DA6 : végétation de bataille A/B
+		else:
+			RenderQuality.override_level = level
+			RenderQuality.reapply(get_tree())
 	elif phase >= 4:
 		if not _bench_ab_ms.has(level):
 			_bench_ab_ms[level] = []
