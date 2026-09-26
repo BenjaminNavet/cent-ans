@@ -43,9 +43,13 @@ impl CampaignSim {
         let Some(id) = ArmyId::parse(&army.to_string()) else {
             return vdict! { "available" => false };
         };
-        let Some((odds, walls)) = state.assault_odds(data, &id) else {
+        let Some((_, walls)) = state.assault_odds(data, &id) else {
             return vdict! { "available" => false };
         };
+        // Q5: the same estimate as the assault's pre-battle screen.
+        let odds = state
+            .assault_win_chance(data, &id)
+            .map_or(0, |chance| (chance * 100.0).round() as i64);
         let siege = state
             .armies
             .get(&id)
@@ -54,7 +58,7 @@ impl CampaignSim {
             .and_then(|s| s.siege.clone());
         vdict! {
             "available" => true,
-            "odds" => i64::from(odds),
+            "odds" => odds,
             "walls" => walls,
             "breach" => siege.as_ref().map_or(0, |s| i64::from(s.breach)),
             "supplies" => siege.as_ref().map_or(0, |s| i64::from(s.supplies)),

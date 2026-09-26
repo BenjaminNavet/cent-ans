@@ -9,7 +9,8 @@ extends Control
 ## de lire `label.text`) ; il est seulement rendu transparent et la lettrine redessine le titre.
 ## Suit les changements de texte et de couleur du label. Rendu seulement, aucune image.
 
-const GAP := 5.0
+## Q5 : 5 px faisaient lire « D iplomatie » (recettes Q3 et Q5) ; l'initiale colle au mot.
+const GAP := 1.0
 ## Les lettrines médiévales ne portent pas d'accents (et l'accent déborderait du champ) :
 ## l'initiale est dessinée sans, le reste du titre les garde.
 const UNACCENTED := {
