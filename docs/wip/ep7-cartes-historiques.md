@@ -36,7 +36,9 @@ EP9 (fin de bataille).
 - [x] Test Godot `game/tests/ep7_historical_test.gd` (liste, `setup_historical`, vagues, boutons) + smoke (menu).
 - [x] Captures `docs/img/ep7/` : `<id>_opening.png`, `<id>_melee.png`, `menu.png`, `<id>_site.png`.
 - [x] ADR 0035, budget (0 $), `docs/wip/epic.md`.
-- [ ] Merge main, mesures d'équilibre finales, vérifications complètes.
+- [x] Merge main (9bfbf27f), équilibre remesuré sur 30 graines : Crécy 23, Azincourt 24, Poitiers 20 ;
+  fmt, clippy, `cargo test --workspace` (800 ok), build.sh, pytest, ruff, import + smoke + test EP7 Godot.
+- Tuiles d'horizon des sites dans `index.json` → section `sites` (pas `provinces` : test_horizon).
 
 ## Décisions
 - ai.rs n'est pas modifié (demande de coordination : SG5 y travaille). Les vagues françaises sont
@@ -44,4 +46,5 @@ EP9 (fin de bataille).
   `scenario_filter` (sim.rs::step) ; les Anglais « tiennent » leur poste (laisse).
 
 ## Prochaine étape
-Merge main, relancer les tests d'équilibre, fmt/clippy/test workspace, build.sh, pytest, ruff, import + smoke Godot.
+Lot terminé, prêt à fusionner. Suites possibles : voir « Points ouverts » de l'ADR 0035 (vagues scriptées,
+site appliqué à toute bataille de la province, ciel = météo finale).
