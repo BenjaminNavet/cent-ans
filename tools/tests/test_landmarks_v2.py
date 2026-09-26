@@ -118,11 +118,23 @@ def test_rouen_1340_facts() -> None:
     assert [t["side"] for t in towers] == [
         "north"
     ]  # tour Saint-Romain seule (Beurre : 1485)
-    assert monuments["cathedrale"]["params"]["length_m"] == pytest.approx(137, abs=3)
+    # 144 m hors œuvre (136,86 m dans œuvre) : relecture historique de 2026-09-26
+    assert monuments["cathedrale"]["params"]["length_m"] == pytest.approx(144, abs=3)
     assert "vieux_palais" not in monuments  # Henri V, 1419-1420
     assert any(w["origin"] == "rivers_fine" for w in city["waters"])
     assert len([s for s in city["streets"] if s["origin"] == "osm"]) > 200
-    assert 4000.0 < landmarks_v2.wall_length(city) < 7000.0  # ≈ 5 km
+    # Enceinte des XIIe-XIIIe s. jusqu'en 1345, accrue orientale de Philippe VI à partir de 1346.
+    walls = {w["id"]: w for w in city["walls"]}
+    assert (
+        walls["enceinte_xiiie"]["until_year"] + 1
+        == walls["enceinte"]["from_year"]
+        == 1346
+    )
+    old_gates = {g["name"] for g in walls["enceinte_xiiie"]["gates"]}
+    assert not old_gates & {"Porte Saint-Hilaire", "Porte Martainville"}
+    old_len = landmarks_v2.wall_length({"walls": [walls["enceinte_xiiie"]]})
+    new_len = landmarks_v2.wall_length({"walls": [walls["enceinte"]]})
+    assert 3500.0 < old_len < new_len < 7000.0  # ≈ 5 km après 1346
 
 
 def test_orleans_facts() -> None:
