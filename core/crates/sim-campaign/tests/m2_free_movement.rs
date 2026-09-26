@@ -493,6 +493,14 @@ fn the_loser_falls_back_on_the_grid() {
         }
     });
     setup(&mut walled);
+    // DC3: on the densified map the empty spot moved and no refuge lies within two
+    // steps on this side of the wall (a rout at 2): the radius is widened.
+    walled
+        .settlement_rules
+        .as_mut()
+        .unwrap()
+        .retreat
+        .neutral_radius_steps = 4.0;
     let (state, _, english) = duel(&walled, victor_at, spot);
     match retreat_target(&state, &walled, &english, victor_at) {
         Some(Retreat::Fallback(point)) => {

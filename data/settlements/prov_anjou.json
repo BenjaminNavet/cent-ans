@@ -225,8 +225,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Bourg fortifié de la vallée angevine, marché agricole.",
@@ -251,8 +250,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Bourg du sud angevin bâti sur d'anciennes carrières de tuffeau, marché agricole.",

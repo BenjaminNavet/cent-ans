@@ -178,8 +178,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Bourg sur l'Yonne, port du flottage du bois du Morvan vers Paris.",
@@ -204,8 +203,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Petit port marchand sur la Loire.",

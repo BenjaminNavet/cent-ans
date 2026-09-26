@@ -138,6 +138,17 @@ struct Eq4 {
     /// DC3: (province, crown) -> turn that crown took its first place in a province where
     /// it held none.
     footholds: BTreeMap<(ProvinceId, FactionId), u32>,
+    /// DC3 (revolts): devastation summed over provinces and turns, province-turns occupied
+    /// (controller != owner) and province-turns above 60 of weighted unrest.
+    devastation_sum: u64,
+    occupied_turns: u32,
+    hot_turns: u32,
+    /// DC3: province-turns counted in the three sums above.
+    province_turns: u32,
+    /// DC3: beaten armies that fell back to a neutral refuge, routed and rallied, dispersed.
+    retreat_fallback: u32,
+    retreat_rout: u32,
+    retreat_dispersed: u32,
 }
 
 /// Faction controlling the most provinces and its share.
@@ -236,6 +247,14 @@ fn track_eq4(state: &CampaignState, eq4: &mut Eq4, before: &Snapshot) {
         let Some(city) = state.settlements.get(&province.city) else {
             continue;
         };
+        eq4.province_turns += 1;
+        eq4.devastation_sum += u64::from(province.devastation);
+        if city.controller != city.owner {
+            eq4.occupied_turns += 1;
+        }
+        if sim_campaign::population::weighted_unrest(&province.population) > 60.0 {
+            eq4.hot_turns += 1;
+        }
         if old_controllers.get(&province.city) != Some(&city.controller)
             && city.controller.as_str() != "fac_rebels"
         {
@@ -641,8 +660,37 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 EventKind::ProvinceCaptured => report.captures += 1,
                 EventKind::Revolt if !event.text_fr.contains("passe aux mains") => {
                     report.eq4.revolts += 1;
+                    // DC3: `REVOLT_TRACE=1` prints each revolt and the province's state.
+                    if std::env::var("REVOLT_TRACE").is_ok() {
+                        if let Some(p) =
+                            event.province.as_ref().and_then(|p| state.provinces.get(p))
+                        {
+                            let city = &state.settlements[&p.city];
+                            println!(
+                                "  [{seed}] {:>16} {} ctrl {} owner {} dev {} disorder {} garrison {} places {}",
+                                state.date_label(),
+                                event.text_fr,
+                                city.controller.as_str(),
+                                city.owner.as_str(),
+                                p.devastation,
+                                p.unrest,
+                                state.province_garrison_strength(event.province.as_ref().expect("province")),
+                                state.settlements.values().filter(|s| s.province == city.province).count(),
+                            );
+                        }
+                    }
                 }
                 EventKind::SiegeStarted => report.eq4.sieges_started += 1,
+                // DC3: outcomes of a beaten army's retreat (a friendly retreat has no event).
+                EventKind::Attrition if event.text_fr.contains("recule et perd") => {
+                    report.eq4.retreat_fallback += 1;
+                }
+                EventKind::Attrition if event.text_fr.contains("avant de se rallier") => {
+                    report.eq4.retreat_rout += 1;
+                }
+                EventKind::ArmyDestroyed if event.text_fr.contains("se disperse") => {
+                    report.eq4.retreat_dispersed += 1;
+                }
                 EventKind::FactionDestroyed => report.destroyed += 1,
                 EventKind::WarDeclared if event.text_fr.contains("répond à l'appel") => {
                     report.calls_honoured += 1;
@@ -669,6 +717,32 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         }
         if trespass_trace {
             trace_trespass(&state, data);
+        }
+        // DC3: `REVOLT_TRACE=1` also lists the provinces above 70 of weighted unrest.
+        if std::env::var("REVOLT_TRACE").is_ok() {
+            for (pid, p) in &state.provinces {
+                let w = sim_campaign::population::weighted_unrest(&p.population);
+                if w > 70.0 {
+                    let c = &state.settlements[&p.city];
+                    let pe = &p.population.peasants;
+                    println!(
+                        "  [{seed}] {:>16} HOT {} {w:.0} ctrl {} owner {} tax {:?} peasants u{} h{} g{} w{} dev {} dis {} gar {} rs {}",
+                        state.date_label(),
+                        pid.as_str(),
+                        c.controller.as_str(),
+                        c.owner.as_str(),
+                        state.factions.get(&c.controller).map(|f| f.tax_rate),
+                        pe.unrest,
+                        pe.health,
+                        pe.goods_satisfaction,
+                        pe.wealth,
+                        p.devastation,
+                        p.unrest,
+                        state.province_garrison_strength(pid),
+                        p.revolt_seasons,
+                    );
+                }
+            }
         }
         track_eq4(&state, &mut report.eq4, &eq4_before);
         eq4_before = snapshot(&state);
@@ -1014,6 +1088,24 @@ fn print_eq4(reports: &[Report]) {
         }),
         ("DC3 provinces conquises en entier / déc.", |r| {
             f64::from(r.eq4.provinces_completed) * 40.0 / f64::from(r.turns)
+        }),
+        ("DC3 dévastation moy. (par province)", |r| {
+            r.eq4.devastation_sum as f64 / f64::from(r.eq4.province_turns.max(1))
+        }),
+        ("DC3 provinces occupées (% prov.-tours)", |r| {
+            100.0 * f64::from(r.eq4.occupied_turns) / f64::from(r.eq4.province_turns.max(1))
+        }),
+        ("DC3 mécontentement > 60 (‰ prov.-tours)", |r| {
+            1000.0 * f64::from(r.eq4.hot_turns) / f64::from(r.eq4.province_turns.max(1))
+        }),
+        ("DC3 replis vers un refuge neutre", |r| {
+            f64::from(r.eq4.retreat_fallback)
+        }),
+        ("DC3 débandades ralliées", |r| {
+            f64::from(r.eq4.retreat_rout)
+        }),
+        ("DC3 armées dispersées", |r| {
+            f64::from(r.eq4.retreat_dispersed)
         }),
         ("DC3 durée moy. d'une conquête (tours)", |r| {
             f64::from(r.eq4.conquest_turns) / f64::from(r.eq4.provinces_completed.max(1))
