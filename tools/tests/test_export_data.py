@@ -94,3 +94,15 @@ def test_unknown_mode_is_rejected(tmp_path: Path) -> None:
     """Only bundle / external / none."""
     with pytest.raises(ValueError):
         export_data.stage(_resources(tmp_path), "pck", repo_dir=_fake_repo(tmp_path))
+
+
+def test_windows_folder_gets_data_and_relief_beside_the_exe(tmp_path: Path) -> None:
+    """Windows (ADR 0087): ``data/`` and ``Cent Ans relief/`` next to ``Cent Ans.exe``."""
+    repo = _fake_repo(tmp_path)
+    folder = tmp_path / "export" / "windows"
+    result = export_data.stage(
+        folder, "external", repo_dir=repo, external_parent=folder
+    )
+    assert (folder / "data" / "rules" / "r.json").is_file()
+    assert (folder / "Cent Ans relief" / "pyramid" / "E1" / "0_0.png").is_file()
+    assert result.relief_dir == folder / "Cent Ans relief" / "pyramid"

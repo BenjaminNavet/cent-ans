@@ -1,0 +1,56 @@
+# WIN (ADR 0087): proves the game runs on Windows x86_64 — native MSVC build of the
+# GDExtension, Godot import, then the headless smoke test (dummy renderer, no GPU).
+# Manual or on the windows/* branches only: Windows minutes count double on a private repo.
+name: windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["windows/**"]
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      GODOT_VERSION: "4.7.2-stable"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Rust toolchain
+        run: rustup target add x86_64-pc-windows-msvc
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: core
+
+      - name: Build cent_ans.dll (debug)
+        shell: bash
+        run: core/build-windows.sh
+
+      - name: Install Godot
+        shell: bash
+        run: |
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_win64.exe.zip"
+          unzip -q godot.zip -d godot
+          ls godot
+
+      - name: Import
+        shell: bash
+        run: ./godot/Godot_v${GODOT_VERSION}_win64_console.exe --headless --path game --import
+
+      - name: Smoke test
+        shell: bash
+        run: |
+          set -o pipefail
+          # Exit code 1 on any failure, including "CampaignSim class not registered"
+          # (cent_ans.dll not loaded).
+          ./godot/Godot_v${GODOT_VERSION}_win64_console.exe --headless --path game --script res://tests/smoke.gd 2>&1 | tee smoke.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-log
+          path: smoke.log
