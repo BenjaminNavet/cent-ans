@@ -16,7 +16,7 @@ const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const REGIONS := {"flandre": Vector2(2330, 1630), "ile_de_france": Vector2(2213, 1923), "normandie": Vector2(2030, 1840)}
 const DISTANCES := [1100.0, 600.0, 330.0, 200.0]
 ## Borne du temps moyen d'un recalcul complet (ms), machine de dev partagée.
-const MAX_DECLUTTER_MS := 6.0
+const MAX_DECLUTTER_MS := 4.0
 
 var _failures := 0
 var _measure := false
@@ -110,20 +110,55 @@ func _test_map() -> void:
 			print("da7d: %-13s %8.0f %8d %7d %9d" % [region, distance, occupancy["markers"], occupancy["labels"], overlaps])
 			if not _measure:
 				_check(overlaps == 0, "%s at %.0f: %d overlapping pairs" % [region, distance, overlaps])
+				var capital := layer.capital_index()
+				if region == "ile_de_france":
+					_check(capital >= 0 and layer.marker_visible(capital), "player capital always shown (%.0f)" % distance)
 	print("da7d: total overlapping pairs %d" % total)
+	if not _measure:
+		await _test_selection_pinned(map, layer)
 	# Temps d'un recalcul complet (Flandre, palier province : le plus chargé).
 	var flandre: Vector2 = REGIONS["flandre"]
 	map.camera_rig.look_at_point(Vector3(flandre.x, 0.0, flandre.y), 330.0)
 	map.camera_rig.snap()
 	for f in 4:
 		await process_frame
-	var runs := 20
-	var t0 := Time.get_ticks_usec()
-	for r in runs:
-		layer.declutter()
-	var ms := float(Time.get_ticks_usec() - t0) / 1000.0 / runs
+	# Meilleur de 5 séries de 10 (machine partagée : on borne le coût propre, pas la charge).
+	var ms := INF
+	for batch in 5:
+		var t0 := Time.get_ticks_usec()
+		for r in 10:
+			layer.declutter()
+		ms = minf(ms, float(Time.get_ticks_usec() - t0) / 1000.0 / 10.0)
 	print("da7d: declutter %.3f ms per full pass" % ms)
 	if not _measure:
 		_check(ms < MAX_DECLUTTER_MS, "declutter too slow: %.2f ms" % ms)
 	map.queue_free()
 	await process_frame
+
+
+## Une petite colonie sélectionnée à côté de Paris reste affichée (épinglée), à toute distance.
+func _test_selection_pinned(map: Node3D, layer: SettlementLayer) -> void:
+	var paris: Vector2 = REGIONS["ile_de_france"]
+	var small := ""
+	var data: SettlementData = layer.data
+	for distance: float in [330.0, 1100.0]:
+		map.camera_rig.look_at_point(Vector3(paris.x, 0.0, paris.y), distance)
+		map.camera_rig.snap()
+		for f in 3:
+			await process_frame
+		layer.declutter()
+		if small == "":
+			# Une colonie proche de Paris masquée par le dé-encombrement.
+			for i in data.settlements.size():
+				if layer.marker_in_tier(i) and not layer.marker_visible(i) and (data.settlements[i]["px"] as Vector2).distance_to(paris) < 80.0:
+					small = str(data.settlements[i]["id"])
+					break
+			if not _check(small != "", "a hidden settlement near Paris at 330"):
+				return
+			layer.select(small)
+			layer.declutter()
+		var index: int = data.index_by_id[small]
+		_check(layer.marker_visible(index), "selected %s stays shown at %.0f" % [small, distance])
+		_check(layer.marker_visible(layer.capital_index()), "capital still shown with a selection at %.0f" % distance)
+	layer.select("")
+	layer.declutter()
