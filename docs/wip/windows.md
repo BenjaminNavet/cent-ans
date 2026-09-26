@@ -1,18 +1,39 @@
-# Portage Windows (WIN)
+# Portage Windows (WIN) — TERMINÉ le 2026-09-26 (ADR 0087)
 
 Objectif : le jeu se lance et s'exporte sous Windows x86_64.
 
-## Plan
-1. `.gdextension` : entrées `windows.*.x86_64` vers `res://bin/cent_ans.{debug,release}.dll`.
-2. Compilation croisée depuis le Mac : `cargo xwin build --target x86_64-pc-windows-msvc`
-   (script `core/build-windows.sh`).
-3. Profil d'export « Windows Desktop » dans `game/export_presets.cfg` (sortie `export/windows/`).
-4. Vérification réelle : workflow GitHub Actions `windows-latest` (compile la dll, lance
-   `smoke.gd` en headless).
-5. ADR + README.
+## Fait (dans main)
+- `game/bin/cent_ans.gdextension` : entrées `windows.{debug,release}.x86_64` →
+  `res://bin/cent_ans.{debug,release}.dll` (`.dll`/`.pdb` ignorés dans `game/bin/.gitignore`).
+- `core/build-windows.sh [--release]` : compilation croisée depuis le Mac avec `cargo xwin`
+  (cible `x86_64-pc-windows-msvc`), `cargo build` simple sous Windows (Git Bash / CI).
+  **Vérifié** : la DLL debug compile (≈ 1 min 15), exporte `gdext_rust_init`, n'importe que
+  des DLL système.
+- `core/.cargo/config.toml` : CRT statique (`+crt-static`, pas besoin du redistribuable
+  Visual C++) et `/ignore:4099` (PDB de libcmt absents, inoffensif).
+- `MapPaths.default_data_dir` : jeu exporté Windows → `data/` à côté de `Cent Ans.exe` ;
+  relief externe : dossier `Cent Ans relief` à côté de l'exe (déjà prévu).
+- `cent-ans export-data --dir <dossier>` (en plus de `--app`) + test pytest (7/7 verts).
+- `game/export_presets.cfg` : préréglage `[preset.1]` « Windows Desktop » (x86_64, pck
+  séparé, S3TC/BPTC, `modify_resources=false` pour éviter rcedit/wine, wrapper console).
+- `tools/export_windows.sh` : dll release → export Godot → data/ → CREDITS → zip.
+- `.github/workflows/windows.yml` : sur `windows-latest`, build dll debug, import Godot,
+  `smoke.gd` headless. Déclenché par `workflow_dispatch` ou push sur `windows/**`.
 
-## État
-- [ ] 1  - [ ] 2  - [ ] 3  - [ ] 4  - [ ] 5
+## Pièges rencontrés
+- Le `cargo`/`rustc` du PATH est celui de Homebrew (pas de std Windows) : le script met
+  `~/.cargo/bin` (rustup, mis à jour en 1.98.1 + cible msvc) en tête du PATH.
+- Installés sur le Mac : `brew install lld`, `cargo install cargo-xwin`, modèles d'export
+  Windows 4.7.2 (`windows_*.exe`) dans `~/Library/Application Support/Godot/export_templates/4.7.2.stable/`.
 
-## Prochaine étape
-Installer `lld`, `cargo-xwin`, cible rustup `x86_64-pc-windows-msvc`.
+## Reste à faire
+- [x] 1. CI : run 36228061477 vert sous Windows (21 min, vraie sim Rust).
+- [x] 2. Export réel OK (`export/windows/`, 845 Mo sans relief : exe 104 Mo, pck 576 Mo — tous les
+  assets importés, pas propre à Windows —, dll 18 Mo, data 147 Mo, console.exe).
+- [ ] 3. Partie d'essai sur un vrai PC (joueur) : seul point non vérifié (rendu Vulkan/D3D12, perfs).
+  Non testé non plus : l'exe exporté lui-même (la CI teste la DLL debug dans l'éditeur).
+- [x] 4. ADR 0087 (b0b4807c).
+- [x] 5. README (99bb1f53, seulement la section ; Remerciements d'une autre session non touché).
+- [x] 6. docs/tools.md « Export Windows ».
+- [x] 7. Branche `windows/port` supprimée (locale + distante). Pour relancer la CI : pousser une
+  branche `windows/…` ou, une fois main poussée, `gh workflow run windows.yml`.
