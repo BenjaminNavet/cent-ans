@@ -1735,8 +1735,9 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
         let started = me.war_started.get(enemy).copied().unwrap_or(0);
         let score = state.war_score(data, faction, enemy);
         // EQ6: a cornered crown first fights the war it is dealt.
-        let sues_early =
-            cornered && (!data.ai_diplomacy.peace.cornered_waits_for_defeat || score < 0);
+        let sues_early = cornered
+            && (!data.ai_diplomacy.peace.cornered_waits_for_defeat
+                || score <= diplomacy::SURRENDER_WAR_SCORE);
         if !sues_early && state.turn < started + rules.min_war_turns {
             continue;
         }
