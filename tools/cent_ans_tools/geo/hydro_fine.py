@@ -72,6 +72,11 @@ EUHYDRO_ORDERS = (3, 4, 5, 6, 7, 8, 9)
 COVERAGE_CELL_M = 2000.0
 CHUNK_M = 1_500_000.0  # stroke length per parallel work unit
 JOIN_BLEND_VERTICES = 6
+#: ZG7c: lowest water level (m). The fine relief of the detail zones (E5-E7)
+#: carries real channel bathymetry (Thames at London down to -30 m, estuaries),
+#: which the valley floor then fed into the level fit: the tidal Thames sat at
+#: -7.8 m through London. No river of the map runs below mean sea level.
+MIN_WATER_LEVEL_M = 0.0
 
 
 @dataclass(frozen=True)
@@ -614,6 +619,18 @@ def downstream_first(receiver: np.ndarray) -> list[int]:
     return order
 
 
+def water_level(floor: np.ndarray) -> np.ndarray:
+    """Water level estimate of a snapped line from its valley floor (ZG7c).
+
+    The floor is clamped at :data:`MIN_WATER_LEVEL_M` before the monotone fit
+    (:func:`join_confluences`): a channel bed or estuary bathymetry below sea
+    level must not drag the pooled level of a tidal reach under the sea. NaN
+    stays NaN (filled later by the fit).
+    """
+    floor = np.asarray(floor, dtype=np.float64)
+    return np.where(np.isnan(floor), np.nan, np.maximum(floor, MIN_WATER_LEVEL_M))
+
+
 def join_confluences(lines: list[RiverLine]) -> None:
     """Level caps and geometric joins at confluences, receivers first.
 
@@ -852,7 +869,7 @@ def build(
                     name=name,
                     order=orders[s],
                     points=xy,
-                    level=floor,
+                    level=water_level(floor),
                     width=stroke_widths(
                         widths,
                         name,

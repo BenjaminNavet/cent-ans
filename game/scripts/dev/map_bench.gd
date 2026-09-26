@@ -53,14 +53,42 @@ var _descent_hold := DESCENT_HOLD
 var _descent_ms: PackedFloat32Array = PackedFloat32Array()
 var _descent_t_start := 0
 var _descent_us := 0
-## ZG7a : attribution des pics de la descente (images > 50 ms) : temps de traitement (scripts,
-## `_process`) et de physique de l'image, le reste étant rendu, attente GPU ou système.
+## ZG7a : attribution des pics de la descente (images > 50 ms) : temps des scripts de l'image,
+## le reste étant rendu, attente GPU ou système. ZG7c : `Performance.TIME_PROCESS` ne couvrait pas
+## l'image mesurée ; on chronomètre désormais du début de l'itération (nœud `FrameStart`, priorité
+## minimale, première `_physics_process` ou `_process` de l'itération) à ce banc (traité en dernier).
+static var frame_start_usec := 0
+static var _frame_start_tag := -1
+var _starter: Node
 var _spike_process_ms: PackedFloat32Array = PackedFloat32Array()
 var _spike_frame_ms: PackedFloat32Array = PackedFloat32Array()
 var _process_ms_all: PackedFloat32Array = PackedFloat32Array()
 
 
+## Marque le début des scripts de l'itération (physique comprise) pour `process_ms`.
+class FrameStart:
+	extends Node
+
+	func _physics_process(_delta: float) -> void:
+		_mark()
+
+	func _process(_delta: float) -> void:
+		_mark()
+
+	func _mark() -> void:
+		var tag := Engine.get_process_frames()
+		if MapBench._frame_start_tag != tag:
+			MapBench._frame_start_tag = tag
+			MapBench.frame_start_usec = Time.get_ticks_usec()
+
+
 func _ready() -> void:
+	_starter = FrameStart.new()
+	_starter.name = "MapBenchFrameStart"
+	_starter.process_priority = -1000000
+	_starter.process_physics_priority = -1000000
+	get_tree().root.add_child.call_deferred(_starter)
+	process_priority = 1000000
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--bench-distance="):
 			pan_distance = float(arg.trim_prefix("--bench-distance="))
@@ -134,8 +162,9 @@ func _process(delta: float) -> void:
 				_descent_t_start = now
 		"descent":
 			_descent_ms.append((now - _last_us) / 1000.0)
-			# Moniteurs de l'image précédente, celle dont on vient de mesurer la durée.
-			var process_ms := (Performance.get_monitor(Performance.TIME_PROCESS) + Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)) * 1000.0
+			# Scripts de cette itération (physique comprise) jusqu'à ce banc : ils tombent dans
+			# l'intervalle mesuré (fin des scripts de l'image précédente → maintenant).
+			var process_ms := (now - frame_start_usec) / 1000.0 if frame_start_usec > 0 and frame_start_usec <= now else 0.0
 			_process_ms_all.append(process_ms)
 			if (now - _last_us) / 1000.0 > 50.0:
 				_spike_frame_ms.append((now - _last_us) / 1000.0)
@@ -254,3 +283,8 @@ func _report(now: int) -> void:
 		report["listener_ms"] = _listener_ms
 	print("CampaignMap: bench_map %s" % JSON.stringify(report))
 	get_tree().quit()
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_starter):
+		_starter.queue_free()
