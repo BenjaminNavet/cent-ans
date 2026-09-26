@@ -46,5 +46,5 @@ EP9 (fin de bataille).
   `scenario_filter` (sim.rs::step) ; les Anglais « tiennent » leur poste (laisse).
 
 ## Prochaine étape
-Lot terminé, prêt à fusionner. Suites possibles : voir « Points ouverts » de l'ADR 0035 (vagues scriptées,
+Lot terminé, prêt à fusionner. Suites possibles : voir « Conséquences » de l’ADR 0035 (vagues scriptées,
 site appliqué à toute bataille de la province, ciel = météo finale).
