@@ -204,6 +204,9 @@ func _test_paris() -> void:
 		ids[m["id"]] = m
 	for id in ["notre_dame", "sainte_chapelle", "palais_grand_salle", "louvre", "grand_chatelet", "petit_chatelet", "temple_enclos", "saint_germain_des_pres", "sainte_genevieve", "saint_victor", "hotel_dieu"]:
 		_check(ids.has(id), "1340 monument %s" % id)
+	for m in plan["v2_monuments"]:
+		var verts: PackedVector3Array = (m["arrays"] as Array)[Mesh.ARRAY_VERTEX]
+		_check(verts.size() >= 36 and verts.size() % 3 == 0, "Paris monument %s mesh (%d vertices)" % [m["id"], verts.size()])
 	_check(ids.has("notre_dame") and float(ids["notre_dame"]["length"]) >= 125.0 and float(ids["notre_dame"]["top"]) > 68.0, "Notre-Dame at real size")
 	for id in ["tour_horloge", "bastille", "louvre_charles_v", "celestins"]:
 		_check(not ids.has(id), "1340: no %s" % id)
