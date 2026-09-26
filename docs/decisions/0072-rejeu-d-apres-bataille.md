@@ -56,8 +56,9 @@ changement de structure sans incrément du format casse le test `the_sample_file
 
 `BattleSim` est `Clone` : la lecture garde une copie de la simulation toutes les `keyframe_seconds`
 (20 s ; au plus `max_keyframes` = 90, la période s'allonge au-delà). Un saut en arrière repart de la
-copie la plus proche, un saut en avant simule. Une copie coûte 0,03 ms (le champ, lourd, est partagé
-en lecture) ; un saut en arrière quelques millisecondes. La re-simulation depuis le début (0,1 à 0,5 s
+copie la plus proche, un saut en avant simule. Une copie coûte 0,03 ms et de l'ordre de 0,3 à 1 Mo (la
+grille de relief du champ en est l'essentiel : 241 × 161 hauteurs au palier épique), soit au plus
+quelques dizaines de Mo pour une longue bataille ; un saut en arrière prend quelques millisecondes. La re-simulation depuis le début (0,1 à 0,5 s
 pour une bataille entière) aurait suffi pour les petites batailles mais aurait figé l'image lors des
 sauts sur les grandes batailles épiques ; la sérialisation de l'état n'est pas nécessaire.
 
