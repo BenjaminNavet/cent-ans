@@ -1009,6 +1009,22 @@ func surface_height_at(x: float, y: float) -> float:
 	return NAN
 
 
+## PB3g : `surface_height_at` pour une série de points (NAN hors pages) ; bilinéaire natif
+## (`ReliefLod.heights_m`, même arithmétique) quand la sélection est native.
+func surface_heights_at(points: PackedVector2Array) -> PackedFloat64Array:
+	var out := PackedFloat64Array()
+	if _native == null or pyramid == null:
+		out.resize(points.size())
+		for n in points.size():
+			out[n] = surface_height_at(points[n].x, points[n].y)
+		return out
+	out = _native.call("heights_m", points, pyramid.height_min_m, pyramid.height_range_m)
+	for n in points.size():
+		if not is_nan(out[n]):
+			out[n] = MapData.display_height(out[n], points[n].x, points[n].y)
+	return out
+
+
 ## Bilinéaire aux coordonnées pixel (fx, fy) d'une page (bornées au bord), altitude en MÈTRES
 ## (ZG8 : la hauteur affichée passe par `MapData.display_height`, qui dépend du point).
 static func _bilinear(bytes: PackedByteArray, fx: float, fy: float, h_min: float, h_range: float) -> float:

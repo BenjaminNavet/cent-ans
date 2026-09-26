@@ -324,6 +324,13 @@ func surface_height_at(x: float, y: float) -> float:
 func surface_heights_at(points: PackedVector2Array) -> PackedFloat32Array:
 	var result := PackedFloat32Array()
 	result.resize(points.size())
+	if quadtree != null and map_data != null:
+		# PB3g : bilinéaire des pages en une fois (natif), repli heightmap hors pages.
+		var hs := quadtree.surface_heights_at(points)
+		for n in points.size():
+			var h := hs[n]
+			result[n] = maxf(h if not is_nan(h) else map_data.height_world_at(points[n].x, points[n].y), 0.0)
+		return result
 	if quadtree != null or map_data == null:
 		for n in points.size():
 			result[n] = surface_height_at(points[n].x, points[n].y)

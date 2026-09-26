@@ -204,6 +204,47 @@ impl ReliefLod {
         out
     }
 
+    /// Altitude in metres of each point (map units) in the finest resident page covering it
+    /// (`ReliefQuadtree.surface_height_at` before `MapData.display_height`), NAN if none.
+    #[func]
+    fn heights_m(
+        &self,
+        points: PackedVector2Array,
+        h_min: f64,
+        h_range: f64,
+    ) -> PackedFloat64Array {
+        let top = self
+            .bytes
+            .keys()
+            .map(|&k| relief_lod::level_of_key(k))
+            .max()
+            .unwrap_or(-1);
+        let out: Vec<f64> = points
+            .as_slice()
+            .iter()
+            .map(|p| {
+                let (x, y) = (p.x as f64, p.y as f64);
+                if !(0.0..4096.0).contains(&x) || !(0.0..4096.0).contains(&y) {
+                    return f64::NAN;
+                }
+                for level in (0..=top).rev() {
+                    let units = relief_lod::tile_units(level);
+                    let col = (x / units).floor() as i64;
+                    let row = (y / units).floor() as i64;
+                    let Some(bytes) = self.bytes.get(&relief_lod::key_of(level, col, row)) else {
+                        continue;
+                    };
+                    let px = units / relief_lod::PAGE_PX as f64;
+                    let fx = (x - (col as f64 * units) as f32 as f64) / px - 0.5;
+                    let fy = (y - (row as f64 * units) as f32 as f64) / px - 0.5;
+                    return relief_lod::page_bilinear(bytes, fx, fy, h_min, h_range);
+                }
+                f64::NAN
+            })
+            .collect();
+        PackedFloat64Array::from(out)
+    }
+
     #[func]
     fn px_scale(&self) -> f64 {
         self.selector.px_scale()

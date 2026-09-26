@@ -76,6 +76,39 @@ func _run() -> void:
 	_check(compared >= 25, "too few comparisons: %d" % compared)
 	print("pb3g_quadtree_test: %d selections compared, %d pages resident" % [compared, qt.page_count()])
 	_check_reground(qt, paris)
+	_check_heights(terrain, paris)
+	_check_hamlet_buffer()
+
+
+## Hauteurs groupées (bilinéaire natif) = `surface_height_at` point par point.
+func _check_heights(terrain: TerrainBuilder, at: Vector2) -> void:
+	var points := PackedVector2Array()
+	for k in 500:
+		points.append(at + Vector2(fposmod(k * 7.31, 600.0) - 300.0, fposmod(k * 3.17, 600.0) - 300.0))
+	points.append(Vector2(-5.0, 10.0))
+	var batch := terrain.surface_heights_at(points)
+	var worst := 0.0
+	for n in points.size():
+		worst = maxf(worst, absf(batch[n] - float(terrain.surface_height_at(points[n].x, points[n].y))))
+	_check(worst < 1e-4, "surface_heights_at differs from surface_height_at by %f" % worst)
+
+
+## Tampon des hameaux écrit en une fois = transformations de `set_instance_transform`.
+func _check_hamlet_buffer() -> void:
+	var layer := SettlementLayer.new()
+	var entries: Array = []
+	for i in 5:
+		entries.append(PackedFloat32Array([100.0 + i, 200.0 - i, i * 1.3, 0.4 + i * 0.05, 1.0 + i * 0.1, 0.9 + i * 0.1]))
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.instance_count = entries.size()
+	layer._write_hamlet_transforms(multimesh, entries)
+	var s: float = layer._hamlet_scale
+	for t in entries.size():
+		var e: PackedFloat32Array = entries[t]
+		var expected := Transform3D(Basis(Vector3.UP, e[2]).scaled(Vector3.ONE * (e[3] * s)), Vector3(e[0], lerpf(e[4], e[5], s) - 0.03 * s, e[1]))
+		_check(multimesh.get_instance_transform(t).is_equal_approx(expected), "hamlet buffer transform %d differs" % t)
+	layer.free()
 
 
 ## Compare la sélection native de la dernière image à la sélection GDScript ; 1 si comparée.
