@@ -162,14 +162,14 @@ func refresh() -> bool:
 	var controllers := PackedStringArray()
 	owners.resize(data.province_count)
 	controllers.resize(data.province_count)
+	# PB3d : un instantané groupé au lieu d'un `get_province_state` par province.
+	var snapshot: ProvinceSnapshot = ProvinceSnapshot.of(sim, data) if sim != null else null
 	for index in range(1, data.province_count + 1):
-		var province: Dictionary = data.get_province(index)
-		var owner := str(province.get("owner", ""))
+		var owner := str(data.get_province(index).get("owner", ""))
 		var controller := owner
-		if sim != null and sim.has_method("get_province_state"):
-			var state: Dictionary = sim.call("get_province_state", str(province.get("id", "")))
-			owner = str(state.get("owner", owner))
-			controller = str(state.get("controller", owner))
+		if snapshot != null and snapshot.has(index - 1):
+			owner = snapshot.owner[index - 1]
+			controller = snapshot.controller[index - 1]
 			if controller == "":
 				controller = owner
 		owners[index - 1] = owner

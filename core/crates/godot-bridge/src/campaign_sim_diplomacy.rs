@@ -229,6 +229,9 @@ impl CampaignSim {
     /// Answers an offer (same result shape as `submit_order`).
     #[func]
     fn answer_offer(&mut self, offer: i64, accept: bool) -> VarDictionary {
+        if self.refuse_while_turn_pending("answer_offer") {
+            return order_result(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+        }
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return order_result(Err("aucune campagne en cours".to_owned()));
         };
