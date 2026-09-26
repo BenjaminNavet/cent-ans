@@ -84,5 +84,105 @@
     "sources": [
       "Elgin (Écosse)"
     ]
+  },
+  {
+    "id": "set_dunnottar",
+    "province": "prov_highlands",
+    "kind": "castle",
+    "name": {
+      "display": "Dunnottar",
+      "local": "Dùn Fhoithear",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -2.1994,
+      56.9483
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse perchée sur un promontoire de la côte du Kincardine.",
+    "sources": [
+      "Château de Dunnottar"
+    ]
+  },
+  {
+    "id": "set_kinloss",
+    "province": "prov_highlands",
+    "kind": "abbey",
+    "name": {
+      "display": "Kinloss",
+      "local": "Kynlos",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.5667,
+      57.65
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne de Kinloss, près de Forres.",
+    "sources": [
+      "Abbaye de Kinloss"
+    ]
+  },
+  {
+    "id": "set_dornoch",
+    "province": "prov_highlands",
+    "kind": "village",
+    "name": {
+      "display": "Dornoch",
+      "local": "Dornoch",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -4.0281,
+      57.8814
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg épiscopal du Sutherland, sur le Dornoch Firth.",
+    "sources": [
+      "Dornoch"
+    ]
+  },
+  {
+    "id": "set_forres",
+    "province": "prov_highlands",
+    "kind": "village",
+    "name": {
+      "display": "Forres",
+      "local": "Forais",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.6167,
+      57.6064
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancien bourg royal du Moray, sur la route entre Inverness et Elgin.",
+    "sources": [
+      "Forres"
+    ]
   }
 ]
