@@ -52,6 +52,10 @@ func _init() -> void:
 	# Intro du premier tour (interface, conseils) passée avant la première capture.
 	for i in 180:
 		await process_frame
+	# Interface masquée à chaque image (les fenêtres du premier tour peuvent se rouvrir).
+	process_frame.connect(func() -> void:
+		for layer in root.find_children("*", "CanvasLayer", true, false):
+			(layer as CanvasLayer).visible = false)
 	if not map.get("load_ok"):
 		push_error("sz4b shots: campaign map failed to load")
 		quit(1)

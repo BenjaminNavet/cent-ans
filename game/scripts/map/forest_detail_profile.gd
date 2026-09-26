@@ -20,9 +20,9 @@ extends Resource
 @export var parts_side: int = 4
 ## Rayon autour du point visé = `radius_factor` × distance du rig, borné ; décroissance de la part
 ## affichée à partir de `fade_from` × ce rayon.
-@export var radius_factor: float = 2.5
+@export var radius_factor: float = 3.5
 @export var radius_min: float = 6.0
-@export var radius_max: float = 40.0
+@export var radius_max: float = 50.0
 @export var fade_from: float = 0.55
 ## Budget d'instances affichées : au-delà, le rayon se resserre (gain lissé, ≥ `min_gain`).
 @export var instance_budget: int = 220000
