@@ -6,12 +6,13 @@ extends SceneTree
 ## (Amiens) à la même distance.
 ## Fenêtre réelle (pas headless) :
 ##   godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear
-##   [--only=a,b] [--no-fps]
+##   [--only=a,b] [--no-fps] [--city=rouen|paris] (VH5 : Paris vers 1340)
 ##   [--no-landmarks-1to1] (rendu d'avant VH4 : maquette et plancher ZG4b)
-## JPEG ≤ 960 px, `rouen_<vue>.jpg`.
+## JPEG ≤ 960 px, `<ville>_<vue>.jpg`.
 
 const ROUEN := Vector2(2096.54, 1819.88)
 const AMIENS := Vector2(2224.0, 1763.6)
+const PARIS := Vector2(2212.975, 1924.511)
 ## [nom, point, distance (unités), décalage de cap (degrés)]
 const SHOTS := [
 	["strategique", ROUEN, 60.0, 0.0],
@@ -24,12 +25,26 @@ const SHOTS := [
 	["chateau", ROUEN + Vector2(-0.05, -0.85), 0.5, 150.0],
 	["seine_sud", ROUEN + Vector2(0.0, 0.3), 1.2, 180.0],
 ]
+## Lot VH5 : Paris (origine = Notre-Dame ; 1 unité ≈ 719 m).
+const PARIS_SHOTS := [
+	["strategique", PARIS, 60.0, 0.0],
+	["transition", PARIS, 8.0, 0.0],
+	["vallee", PARIS, 4.0, 0.0],
+	["site", PARIS + Vector2(-0.2, -0.3), 2.2, 0.0],
+	["cite", PARIS + Vector2(-0.25, -0.35), 0.7, 20.0],
+	["notre_dame", PARIS + Vector2(0.0, 0.0), 0.3, 135.0],
+	["louvre", PARIS + Vector2(-1.12, -1.21), 0.5, 30.0],
+	["grand_pont", PARIS + Vector2(-0.25, -0.61), 0.4, 160.0],
+	["rive_gauche", PARIS + Vector2(-0.55, 0.45), 0.9, 180.0],
+	["ville", PARIS + Vector2(-0.1, -1.2), 1.0, 0.0],
+]
 
 
 func _init() -> void:
 	var out_dir := "user://vh4"
 	var only := ""
 	var fps := true
+	var city := "rouen"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.substr(6)
@@ -37,6 +52,8 @@ func _init() -> void:
 			only = arg.substr(7)
 		elif arg == "--no-fps":
 			fps = false
+		elif arg.begins_with("--city="):
+			city = arg.substr(7)
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	await process_frame
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
@@ -51,7 +68,9 @@ func _init() -> void:
 	var data: MapData = map.map_data
 	var terrain: TerrainBuilder = map.get("terrain")
 	var settlements: SettlementLayer = map.get("settlement_layer")
-	for shot: Array in SHOTS:
+	var shots: Array = PARIS_SHOTS if city == "paris" else SHOTS
+	var settlement := "set_paris" if city == "paris" else "set_rouen"
+	for shot: Array in shots:
 		if only != "" and not (shot[0] as String) in only.split(","):
 			continue
 		var point: Vector2 = shot[1]
@@ -70,13 +89,17 @@ func _init() -> void:
 		var image := root.get_viewport().get_texture().get_image()
 		if image.get_width() > 960:
 			image.resize(960, roundi(image.get_height() * 960.0 / image.get_width()), Image.INTERPOLATE_LANCZOS)
-		var path := out_dir.path_join("rouen_%s.jpg" % shot[0])
+		var path := out_dir.path_join("%s_%s.jpg" % [city, shot[0]])
 		image.save_jpg(path, 0.85)
 		var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
+		if lc != null and shot[0] == "cite":
+			for b: Dictionary in lc.plan_of(settlement).get("bridges", []):
+				print("VH4 bridge %s deck %.1f water %.1f bank %.1f m" % [b["id"], b["deck"], b["water"], b["bank"]])
 		print("VH4 shot %s d=%.2f (min %.2f) fade %.2f city %s" % [path, rig.target_distance, rig.min_distance_at(focus),
-			lc.fade("set_rouen") if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
+			lc.fade(settlement) if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
 	if fps:
-		for place: Array in [["rouen", ROUEN], ["amiens", AMIENS]]:
+		var places: Array = [["rouen", ROUEN], ["paris", PARIS]] if city == "paris" else [["rouen", ROUEN], ["amiens", AMIENS]]
+		for place: Array in places:
 			for d: float in [1.6, 0.6]:
 				var p: Vector2 = place[1]
 				rig.look_at_point(Vector3(p.x, data.surface_world_at(p.x, p.y), p.y), d)

@@ -963,9 +963,12 @@ func _build_monuments() -> void:
 		bt.resize(block_x.size())
 		bt.fill(0.5)
 		_multimesh(block_mesh(), block_x, block_b, bt, box_mat, "all", 12.0).name = "Cloister"
-	# Pont : tablier de pierre et piles jusqu'à l'eau.
-	var bridge: Dictionary = plan.get("bridge", {})
-	if not bridge.is_empty():
+	# Ponts : tablier et piles jusqu'à l'eau (`bridges` : tous les ponts d'une ville v2 ; sinon
+	# le pont unique `bridge`).
+	var bridges: Array = plan.get("bridges", [])
+	if bridges.is_empty() and not (plan.get("bridge", {}) as Dictionary).is_empty():
+		bridges = [plan["bridge"]]
+	for bridge: Dictionary in bridges:
 		var byaw := float(bridge["yaw"])
 		var bd := Vector2(cos(byaw), sin(byaw))
 		var center := Vector3(float(bridge["x"]), 0, float(bridge["y"]))
@@ -1001,6 +1004,7 @@ func _build_monuments() -> void:
 				var start := center + Vector3(out_d.x, 0, out_d.y) * (blen * 0.5 - 1.0)
 				var ramp_c := start + Vector3(out_d.x, 0, out_d.y) * (run * 0.5)
 				add_box.call("Ashlar", Transform3D(tilt * basis_x(out_d, Vector3(sqrt(run * run + rise * rise), 1.6, float(bridge["width"]))), ramp_c), (deck + bank_h) * 0.5 - 1.5)
+	if not bridges.is_empty():
 		var bb: Array = boxes["Ashlar"]
 		_multimesh(box_mesh("Ashlar"), bb[0], bb[1], bb[2], box_mat, "all", 12.0).name = "Bridge"
 
