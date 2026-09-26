@@ -24,6 +24,9 @@ const LABEL_FONT := {"city": 22, "town": 18, "castle": 16, "abbey": 16, "village
 const PICK_ICON_FRACTION := 0.45
 ## Hauteur du centre du marqueur au-dessus du lieu, en fraction de sa taille (cf. shader).
 const ICON_CENTER_LIFT := 0.42
+## Nom au-dessus du marqueur : centre du texte à tant de fois la taille de police au-dessus du
+## haut du quad (DA7d : 0,55 pour que le texte ne touche plus les flèches du pictogramme).
+const LABEL_LIFT := 0.55
 ## Proportion de hameaux brûlés = dévastation (%) × ce facteur (au-delà d'un seuil).
 const BURN_THRESHOLD := 10.0
 ## Partage de l'écart entre deux maquettes voisines (voir `_fit_models`).
@@ -771,7 +774,7 @@ func _update_label_height(i: int, near: bool) -> void:
 	else:
 		# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
 		label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
-		label.offset = Vector2(0.0, marker_size(i) * (0.5 + ICON_CENTER_LIFT) + label.font_size * 0.4)
+		label.offset = Vector2(0.0, marker_size(i) * (0.5 + ICON_CENTER_LIFT) + label.font_size * LABEL_LIFT)
 
 
 ## Opacité d'une étiquette selon le type et le palier (cité : moyen et près ; ville : moyen

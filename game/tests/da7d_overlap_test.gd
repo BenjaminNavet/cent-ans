@@ -4,7 +4,7 @@ extends SceneTree
 ## leurs noms dans les régions denses, aux zooms types de la carte de campagne.
 ##  1. `MarkerDeclutter` sur des rectangles synthétiques (priorité, épinglés, grille) ;
 ##  2. vraie carte : Flandre, Île-de-France, Normandie à 4 distances caméra : 0 paire de
-##     rectangles écran visibles qui se recouvrent (marqueurs + noms, hors paire marqueur / son nom),
+##     rectangles écran visibles qui se recouvrent (marqueurs + noms, y compris un marqueur et son nom),
 ##     épinglés (capitale du joueur, sélection) toujours affichés ;
 ##  3. borne sur le temps d'un recalcul complet.
 ## Usage : godot --headless --path game --script res://tests/da7d_overlap_test.gd [-- --measure]
@@ -103,7 +103,8 @@ func _test_map() -> void:
 				await process_frame
 			layer.declutter()
 			var occupancy := layer.screen_occupancy(camera)
-			var overlaps := MarkerDeclutter.count_overlaps(occupancy["rects"], occupancy["owners"])
+			# Toutes les paires, y compris un marqueur et son propre nom.
+			var overlaps := MarkerDeclutter.count_overlaps(occupancy["rects"])
 			total += overlaps
 			if OS.get_cmdline_user_args().has("--debug"):
 				print("  cam %s dist %.1f fov %.1f vp %s" % [camera.global_position, map.camera_rig.distance, camera.fov, camera.get_viewport().get_visible_rect().size])
