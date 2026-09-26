@@ -1,14 +1,16 @@
 # WIP Q5 — recette « comme un joueur » (2026-09-26)
 
 Demande du joueur : tester le jeu comme un joueur, identifier les problèmes, puis les corriger
-en autonomie. Pilote : `game/tests/q3_playtest.gd` (Q3) lancé sur main f82a03a6.
-Captures et journaux dans le scratchpad de la session (non versionnés).
+en autonomie. Pilote `game/tests/q3_playtest.gd` sur main f82a03a6. Rapport :
+`docs/audit/q5-recette.md`. Branche `fix/q5-recette`, worktree `../gp-q5`.
+Le joueur : une seule partie suffit (pas de seconde partie de vérification).
 
 ## État
-- [ ] partie France 1920×1080 (toutes phases)
-- [ ] partie Angleterre 1280×720
-- [ ] tri des constats
-- [ ] corrections (branche `fix/q5-recette`)
+- [x] partie France 1920×1080 ; partie Angleterre 1280×720
+- [x] tri des constats, rapport
+- [x] 8 corrections (voir rapport) + tests `sim-campaign/tests/q5_recette.rs`
+- [ ] fmt / clippy / tests / smoke Godot
+- [ ] ff dans main
 
-## Constats
-(à venir)
+## Prochaine étape
+Vérifications puis fusion ; les restes (batailles trop faciles, mort du roi) vont au lot EQ.
