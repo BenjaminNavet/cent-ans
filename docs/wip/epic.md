@@ -135,8 +135,12 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
 ### Vague 3 (26/09, reprise du backlog TW, docs/audit/backlog-tw.md)
 | Lot | Contenu | Wip | État |
 |---|---|---|---|
-| EP11 | Poussée continue des lignes : front qui se bombe, enroulement, compression (ADR 0022 → module push) | ep11-poussee-lignes.md | en cours |
+| EP11 | Poussée continue des lignes : front qui se bombe, enroulement, compression (ADR 0022 → module push) | ep11-poussee-lignes.md | **fusionné** 87ec2d16 (ADR 0071) |
 | EP12 | Blessés qui rampent, fuyards qui jettent armes et boucliers (clips Blender, rendu) | ep12-blesses-armes.md | **fusionné** 78e3b69c (ADR 0070) |
 | EP13 | Rejeu d'après bataille (re-simulation déterministe, barre de temps) | ep13-rejeu.md | **fusionné** 311458ff (ADR 0072) |
 Partage : EP11 possède le pas de simulation ; EP13 reste au niveau commandes/API ; EP12 côté rendu.
 ai.rs / relief_ai.rs restent à la session de nuit.
+Vague 3 terminée (26/09). Marges minces après EP11 : Azincourt 18/20 (limite 19), ep9b 4/10 (limite 3) —
+toute règle de mêlée future doit revérifier ep7_historical, ep9b_duel et ai. Les rejeux enregistrés
+avant EP11 signalent (voulu) « règles changées ». Suites : fatigue de poussée, poussée en siège, IA qui
+évite de coller une seconde ligne ; cavaliers blessés ; armes au sol inclinées sur les pentes.
