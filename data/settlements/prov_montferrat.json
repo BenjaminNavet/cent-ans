@@ -108,5 +108,108 @@
     "sources": [
       "Abbaye de Lucedio"
     ]
+  },
+  {
+    "id": "set_trino",
+    "province": "prov_montferrat",
+    "kind": "village",
+    "name": {
+      "display": "Trino",
+      "local": "Trin",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      8.2986,
+      45.1927
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg du marquisat de Montferrat, sur la rive gauche du Pô.",
+    "sources": [
+      "Trino"
+    ]
+  },
+  {
+    "id": "set_acqui",
+    "province": "prov_montferrat",
+    "kind": "town",
+    "name": {
+      "display": "Acqui",
+      "local": "Acqui",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      8.4694,
+      44.6772
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Cité thermale et épiscopale disputée entre le marquisat de Montferrat et Gênes.",
+    "sources": [
+      "Acqui Terme"
+    ]
+  },
+  {
+    "id": "set_vignale",
+    "province": "prov_montferrat",
+    "kind": "village",
+    "name": {
+      "display": "Vignale",
+      "local": "Vignal",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      8.3945,
+      45.0206
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole des collines du Monferrato, fief des marquis Paléologues.",
+    "sources": [
+      "Vignale Monferrato"
+    ]
+  },
+  {
+    "id": "set_nizza_della_paglia",
+    "province": "prov_montferrat",
+    "kind": "village",
+    "name": {
+      "display": "Nizza della Paglia",
+      "local": "Nissa",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      8.3492,
+      44.7729
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg de marché du Montferrat méridional, sur la Belbo.",
+    "sources": [
+      "Nizza Monferrato"
+    ]
   }
 ]

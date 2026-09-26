@@ -85,5 +85,105 @@
     "sources": [
       "Alhama de Granada"
     ]
+  },
+  {
+    "id": "set_guadix",
+    "province": "prov_granada",
+    "kind": "town",
+    "name": {
+      "display": "Guadix",
+      "local": "Wadi Ash",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -3.1361,
+      37.301
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville nasride close dotée d'une alcazaba, sur la route de Grenade à Almería.",
+    "sources": [
+      "Guadix"
+    ]
+  },
+  {
+    "id": "set_loja",
+    "province": "prov_granada",
+    "kind": "town",
+    "name": {
+      "display": "Loja",
+      "local": "Lawsha",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -4.1494,
+      37.1706
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Place forte nasride sur le Genil, gardant l'accès occidental de la vega de Grenade.",
+    "sources": [
+      "Loja (Espagne)"
+    ]
+  },
+  {
+    "id": "set_salobrena",
+    "province": "prov_granada",
+    "kind": "castle",
+    "name": {
+      "display": "Salobreña",
+      "local": "Shalubaniya",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -3.5883,
+      36.7454
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse côtière nasride servant aussi de prison aux princes de la dynastie.",
+    "sources": [
+      "Salobreña"
+    ]
+  },
+  {
+    "id": "set_motril",
+    "province": "prov_granada",
+    "kind": "village",
+    "name": {
+      "display": "Motril",
+      "local": "Mutril",
+      "local_language": "arabe andalou"
+    },
+    "lonlat": [
+      -3.5198,
+      36.7473
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la côte nasride vivant de la canne à sucre.",
+    "sources": [
+      "Motril"
+    ]
   }
 ]
