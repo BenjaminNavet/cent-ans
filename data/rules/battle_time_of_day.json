@@ -1,5 +1,5 @@
 {
-  "description": "Heure du jour des batailles (lot EP8, ADR 0055) : phases de la journée, visibilité (facteur sur la portée efficace des tireurs, cumulé avec la météo), écoulement du temps pendant la bataille et tirage de l'heure de début par la campagne. Heures décimales (0-24) ; une phase peut passer minuit (from_hour > to_hour). Embarqué dans sim-battle à la compilation.",
+  "description": "Heure du jour des batailles (lot EP8, ADR 0055) : phases de la journée, visibilité (facteur sur la portée efficace des tireurs, cumulé avec la météo), écoulement du temps pendant la bataille et tirage de l'heure de début par la campagne. Heures décimales (0-24) ; une phase peut passer minuit (from_hour > to_hour). Embarqué dans sim-battle à la compilation. `minutes_per_battle_second` compresse le temps : à 0,2, une bataille de 20 min (1200 s simulées) dure 4 h de jour, soit 12 minutes de jour par minute jouée ; le bandeau de bataille (EP8b) affiche donc l'heure elle-même (`BattleTimeOfDay.clock_label`), pas seulement le nom de la phase, pour que cette avance rapide reste lisible.",
   "minutes_per_battle_second": 0.2,
   "default_hour": 12.0,
   "phases": [

@@ -280,6 +280,25 @@ def geo_horizon(
     )
 
 
+@geo_app.command("battle-site")
+def geo_battle_site(
+    maps: str = typer.Option(
+        "",
+        "--maps",
+        help="Ne cuire que ces cartes (ids séparés par des virgules)",
+    ),
+    no_tiles: bool = typer.Option(
+        False, "--no-tiles", help="Relief du champ seulement, sans tuile d'horizon"
+    ),
+) -> None:
+    """Relief réel des champs de bataille historiques et tuile d'horizon du site (EP7)."""
+    from cent_ans_tools.geo import battle_site
+
+    only = [m.strip() for m in maps.split(",") if m.strip()]
+    done = battle_site.bake(only or None, tiles=not no_tiles)
+    console.print(f"Sites cuits : {', '.join(done) or 'aucun'}")
+
+
 @app.command("export-data")
 def export_data_command(
     app_path: str = typer.Option(
@@ -649,6 +668,10 @@ def assets_heraldry() -> None:
 
     paths = heraldry.build()
     console.print(f"[green]OK[/green] : {len(paths)} écus dans {heraldry.HERALDRY_DIR}")
+    houses = heraldry.build_houses()
+    console.print(
+        f"[green]OK[/green] : {len(houses)} écus de maison dans {heraldry.HOUSES_DIR}"
+    )
 
 
 @assets_app.command("banners")
@@ -679,6 +702,72 @@ def assets_icons(
         f"[green]OK[/green] : {len(rows)} identifiants, {files} SVG, "
         f"{written} fichier(s) écrit(s) dans {icons.ICONS_DIR}"
     )
+
+
+@assets_app.command("ink-icons")
+def assets_ink_icons(
+    kind: str = typer.Option(
+        "all", "--kind", help="icon, medallion ou all (les deux, icônes d'abord)"
+    ),
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Identifiants à générer seuls (sonde), répétable"
+    ),
+    limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    build_only: bool = typer.Option(
+        False, "--build-only", help="Aucune génération : dérive les PNG des sources"
+    ),
+    envelope: float | None = typer.Option(
+        None, "--envelope", help="Enveloppe (défaut : reste du plafond du lot DA5)"
+    ),
+) -> None:
+    """DA5 : icônes d'action à l'encre et boutons-médaillons (une image par icône)."""
+    from decimal import Decimal
+
+    from cent_ans_tools import ink_icons
+    from cent_ans_tools.budget import BudgetLedger
+
+    catalog = ink_icons.load_catalog()
+    model = catalog["model"]
+    if not build_only:
+        spent = ink_icons.lot_spent(BudgetLedger())
+        remaining = Decimal(str(catalog["budget_cap_usd"])) - spent
+        if envelope is not None:
+            remaining = min(remaining, Decimal(str(envelope)))
+        console.print(
+            f"Lot DA5 : {spent:.2f} $ déjà dépensés, enveloppe {remaining:.2f} $"
+        )
+        kinds = ["icon", "medallion"] if kind == "all" else [kind]
+        for current in kinds:
+            jobs = ink_icons.plan(catalog, kind=current, only=only or None, limit=limit)
+            convert = (
+                ink_icons.to_raw_icon
+                if current == "icon"
+                else ink_icons.to_raw_medallion
+            )
+            before = ink_icons.lot_spent(BudgetLedger())
+            _run_art_batch(
+                jobs,
+                model,
+                float(remaining),
+                dry_run,
+                f"image(s) ({current})",
+                ink_icons.BUDGET_SUBJECT,
+                convert,
+            )
+            remaining -= ink_icons.lot_spent(BudgetLedger()) - before
+        if dry_run:
+            return
+    report = ink_icons.build(catalog)
+    sheet = ink_icons.contact_sheet(catalog)
+    console.print(
+        f"[green]OK[/green] : {len(report['icons'])} icône(s), "
+        f"{len(report['medallions'])} médaillon(s) ; planche {sheet}"
+    )
+    if report["missing"]:
+        console.print(f"[yellow]Sans source[/yellow] : {', '.join(report['missing'])}")
 
 
 @assets_app.command("menu-art")
@@ -820,6 +909,48 @@ def assets_portrait_archetypes(
         "DA2 : portraits vivants (archétypes et variantes âgées)",
         portrait_archetypes.to_archetype_jpg,
     )
+
+
+@assets_app.command("map-markers")
+def assets_map_markers(
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Pictogrammes à générer seuls (sonde), répétable"
+    ),
+    limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    atlas_only: bool = typer.Option(
+        False, "--atlas-only", help="Reconstruit l'atlas sans rien générer (gratuit)"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="Modèle OpenRouter (défaut : celui des portraits)"
+    ),
+    envelope: float = typer.Option(
+        1.5, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """DA3 : pictogrammes peints des lieux de la carte, puis atlas unique."""
+    from cent_ans_tools import map_markers, portraits
+
+    if not atlas_only:
+        model = model or portraits.DEFAULT_MODEL
+        jobs = map_markers.plan(only=only or None, limit=limit)
+        _run_art_batch(
+            jobs,
+            model,
+            envelope,
+            dry_run,
+            "pictogramme(s) de carte",
+            "DA3 : marqueurs de carte peints",
+            map_markers.to_raw_jpg,
+        )
+        if dry_run:
+            return
+    path, missing = map_markers.build_atlas()
+    console.print(f"[green]OK[/green] : atlas {path}")
+    if missing:
+        console.print(f"Cellules vides (sans peinture) : {', '.join(missing)}")
 
 
 def _run_art_batch(jobs, model, envelope, dry_run, noun, subject, convert) -> None:
