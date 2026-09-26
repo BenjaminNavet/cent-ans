@@ -31,6 +31,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 
 ## Journal
 - 26/09 : plan, squelette DC0.
+- 26/09 : DC2c : 105 colonies ajoutées (îles Britanniques ; village 43, abbey 27, town 18, castle 17).
 
 ## Prochaine étape
 Lancer la vague 1 (DC1 + DC2a-e, 6 agents).
