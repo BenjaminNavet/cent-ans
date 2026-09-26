@@ -56,8 +56,8 @@ jamais dans le code.
 
 ## Compiler et lancer
 
-Plateforme prise en charge pour l'instant : **macOS Apple Silicon** (la GDExtension n'est déclarée que
-pour macOS ; les portages Linux et Windows sont bienvenus).
+Plateformes prises en charge : **macOS Apple Silicon** et **Windows 10/11 x86_64** (ADR 0087). Linux
+n'est pas encore déclaré, mais un portage suivrait le même schéma et serait le bienvenu.
 
 Prérequis : [Rust](https://rustup.rs) stable, [Godot 4.7](https://godotengine.org),
 [uv](https://docs.astral.sh/uv/) (outils Python, facultatif pour jouer).
@@ -72,6 +72,33 @@ godot --path game                           # lancer le jeu
 
 Application autonome : `tools/export_macos.sh` produit `export/Cent Ans.app` (modèles d'export
 Godot 4.7 requis).
+
+### Windows
+
+**Jouer** : décompresser `Cent Ans Windows.zip` et lancer `Cent Ans.exe`. Il faut une carte graphique
+compatible Vulkan ou Direct3D 12, mais aucune installation supplémentaire (la bibliothèque C de
+Microsoft est intégrée à `cent_ans.dll`). En cas de problème, `Cent Ans.console.exe` lance le jeu
+en gardant son journal affiché.
+
+**Compiler sous Windows** (Git Bash, avec [Rust](https://rustup.rs) et Visual Studio Build Tools) :
+
+```sh
+core/build-windows.sh                       # compile cent_ans.dll et la copie dans game/bin/
+godot --headless --path game --import       # une fois après le clone
+godot --path game
+```
+
+**Préparer la version Windows depuis un Mac** (compilation croisée avec
+[cargo-xwin](https://github.com/rust-cross/cargo-xwin), détails dans `docs/tools.md`) :
+
+```sh
+rustup target add x86_64-pc-windows-msvc
+brew install llvm lld && cargo install --locked cargo-xwin
+tools/export_windows.sh                     # export/windows/ et export/Cent Ans Windows.zip
+```
+
+Le workflow GitHub Actions `windows` compile la DLL et lance le test de fumée sur une vraie machine
+Windows (`gh workflow run windows.yml`).
 
 ## Tests
 
