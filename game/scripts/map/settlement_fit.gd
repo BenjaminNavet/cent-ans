@@ -32,11 +32,13 @@ static func pair_key(a: int, b: int) -> int:
 
 
 ## Masquage DC4 : `b` est masquée si son centre tombe à moins de `factor` × son rayon du bord
-## d'une voisine prioritaire `a` < `b` non masquée. `pairs` : clés `pair_key` triées (croissantes),
+## d'une voisine prioritaire `a` < `b` non masquée, ou si les deux emprises se recouvrent de plus de
+## `overlap_limit` × le plus petit rayon (réduction bloquée au plancher : Marmoutier sous Tours,
+## ville emblématique qui ne se réduit pas). `pairs` : clés `pair_key` triées (croissantes),
 ## sur-ensemble des paires possibles ; `radius` : rayons affichés (0 : pas de maquette, ne masque
 ## rien) ; `protected` : 1 pour une maquette jamais masquée (ville emblématique, pas de maquette).
 ## Renvoie 1 par maquette masquée.
-static func absorbed(pairs: PackedInt64Array, positions: PackedVector2Array, radius: PackedFloat32Array, protected: PackedByteArray, factor: float) -> PackedByteArray:
+static func absorbed(pairs: PackedInt64Array, positions: PackedVector2Array, radius: PackedFloat32Array, protected: PackedByteArray, factor: float, overlap_limit: float) -> PackedByteArray:
 	var result := PackedByteArray()
 	result.resize(radius.size())
 	result.fill(0)
@@ -45,6 +47,7 @@ static func absorbed(pairs: PackedInt64Array, positions: PackedVector2Array, rad
 		var a := key & 0xFFFF
 		if result[b] != 0 or protected[b] != 0 or result[a] != 0 or radius[a] <= 0.0:
 			continue
-		if positions[a].distance_to(positions[b]) < radius[a] + factor * radius[b]:
+		var d := positions[a].distance_to(positions[b])
+		if d < radius[a] + factor * radius[b] or radius[a] + radius[b] - d > overlap_limit * minf(radius[a], radius[b]):
 			result[b] = 1
 	return result

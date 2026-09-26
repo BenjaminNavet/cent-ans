@@ -65,11 +65,17 @@ func _test_pure() -> void:
 	pairs.sort()
 	var positions := PackedVector2Array([Vector2(0, 0), Vector2(4.5, 0), Vector2(6.0, 0), Vector2(0, 1)])
 	var protected := PackedByteArray([0, 0, 0, 1])
-	var hidden := SettlementFit.absorbed(pairs, positions, PackedFloat32Array([4.0, 2.0, 1.0, 1.0]), protected, 0.5)
+	var hidden := SettlementFit.absorbed(pairs, positions, PackedFloat32Array([4.0, 2.0, 1.0, 1.0]), protected, 0.5, 0.2)
 	_check(hidden == PackedByteArray([0, 1, 0, 0]), "absorbed at map size %s" % hidden)
 	# De près (rayons / 4) : plus rien de masqué.
-	hidden = SettlementFit.absorbed(pairs, positions, PackedFloat32Array([1.0, 0.5, 0.25, 1.0]), protected, 0.5)
+	hidden = SettlementFit.absorbed(pairs, positions, PackedFloat32Array([1.0, 0.5, 0.25, 1.0]), protected, 0.5, 0.2)
 	_check(hidden == PackedByteArray([0, 0, 0, 0]), "nothing absorbed close up %s" % hidden)
+	# Recouvrement > 20 % sans centre dans l'emprise (réduction au plancher) : masquée.
+	var two := PackedInt64Array([SettlementFit.pair_key(0, 1)])
+	hidden = SettlementFit.absorbed(two, PackedVector2Array([Vector2.ZERO, Vector2(2.33, 0)]), PackedFloat32Array([1.82, 0.71]), PackedByteArray([1, 0]), 0.5, 0.2)
+	_check(hidden == PackedByteArray([0, 1]), "absorbed when overlapping %s" % hidden)
+	hidden = SettlementFit.absorbed(two, PackedVector2Array([Vector2.ZERO, Vector2(2.33, 0)]), PackedFloat32Array([1.82, 0.4]), PackedByteArray([1, 0]), 0.5, 0.2)
+	_check(hidden == PackedByteArray([0, 0]), "kept when the overlap is small %s" % hidden)
 	_check(SettlementFit.pair_key(7, 3) == SettlementFit.pair_key(3, 7) and SettlementFit.pair_key(3, 7) >> 16 == 7, "pair key")
 
 
@@ -93,6 +99,16 @@ func _test_map() -> void:
 		var t0 := Time.get_ticks_usec()
 		_rescale(layer, d)
 		var cost_ms := (Time.get_ticks_usec() - t0) / 1000.0
+		t0 = Time.get_ticks_usec()
+		for i in count:
+			layer.call("_place_model", i)
+		var place_ms := (Time.get_ticks_usec() - t0) / 1000.0
+		t0 = Time.get_ticks_usec()
+		layer.call("_update_absorption")
+		var absorb_ms := (Time.get_ticks_usec() - t0) / 1000.0
+		t0 = Time.get_ticks_usec()
+		layer.call("_update_label_heights")
+		print("dc6c: d=%.0f place %.2f ms, absorb %.2f ms, labels %.2f ms" % [d, place_ms, absorb_ms, (Time.get_ticks_usec() - t0) / 1000.0])
 		var hidden := 0
 		var shrunk := 0
 		var ones := true
@@ -145,4 +161,6 @@ func _overlaps(layer: SettlementLayer, pairs: PackedInt64Array) -> int:
 		var overlap := ra + rb - layer.model_px(a).distance_to(layer.model_px(b))
 		if overlap > 0.2 * minf(ra, rb):
 			result += 1
+			print("dc6c: overlap %s/%s d=%.2f r=%.2f/%.2f fit=%.2f/%.2f" % [layer.data.settlements[a]["id"], layer.data.settlements[b]["id"],
+				layer.model_px(a).distance_to(layer.model_px(b)), ra, rb, layer.shown_fit(a), layer.shown_fit(b)])
 	return result

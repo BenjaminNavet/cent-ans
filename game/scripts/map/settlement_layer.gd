@@ -29,6 +29,9 @@ const MIN_FIT_SCALE := 0.4
 ## DC4 : une maquette dont le centre tombe à moins de ce facteur × son rayon du bord d'une voisine
 ## prioritaire (faubourg : Saint-Maximin sous Trèves) n'est pas affichée ; marqueur et nom restent.
 const ABSORB_FACTOR := 0.5
+## DC6c : maquette masquée aussi si elle recouvre une voisine prioritaire de plus de cette part du
+## plus petit rayon (réduction bloquée au plancher `MIN_FIT_SCALE`).
+const ABSORB_OVERLAP := 0.2
 
 @export var tiers: ZoomTiers
 ## Échelle globale des marqueurs (tailles par rang dans `data/map/settlement_markers.json`).
@@ -386,7 +389,7 @@ func _update_absorption() -> void:
 		else:
 			radius[i] = _model_radius[i] * _model_scale[i]
 			protected[i] = 0
-	var result := SettlementFit.absorbed(_model_pairs, _pair_px, radius, protected, ABSORB_FACTOR)
+	var result := SettlementFit.absorbed(_model_pairs, _pair_px, radius, protected, ABSORB_FACTOR, ABSORB_OVERLAP)
 	for i in count:
 		if result[i] != _absorbed[i]:
 			_absorbed[i] = result[i]
