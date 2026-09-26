@@ -62,4 +62,52 @@ sur les anciennes formes symétriques). `abs()` rétablit le sens.
   `cent-ans assets map-markers` (génère ce qui manque, reconstruit l'atlas).
 - Limites : un écu de maison (DA1) pourra remplacer celui de faction via le même atlas ; les
   marqueurs proches se chevauchent encore dans les régions denses au palier moyen (pas de
-  dé-encombrement écran, seulement par rang).
+  dé-encombrement écran, seulement par rang) — traité par DA7d, ci-dessous.
+
+## DA7d — Dé-encombrement écran par priorité (2026-09-26)
+
+### Constat
+Le dé-encombrement par rang et distance laissait les marqueurs se chevaucher dans les régions
+denses (Flandre, Île-de-France, Normandie, horizon anglais en vue inclinée), et les noms passaient
+sous les pictogrammes voisins. Mesure (`game/tests/da7d_overlap_test.gd -- --measure`, 1600×900,
+3 régions × 4 distances 1100 / 600 / 330 / 200) : **664 paires** de rectangles écran visibles
+qui se recouvrent (marqueurs et noms, hors paire marqueur / son propre nom), jusqu'à 138 paires
+dans une seule vue (Île-de-France à 330). Captures `docs/img/da7d/*_avant.jpg`.
+
+### Décision
+1. **Placement glouton par priorité, à la Total War** (`MarkerDeclutter`, grille spatiale à cases
+   de la taille du plus grand marqueur) : les colonies sont parcourues dans un ordre fixe (rang
+   décroissant, poids, puis ordre des données) ; pour chacune, le marqueur puis le nom. Un
+   marqueur qui recouvre un rectangle déjà posé **cède la place** (fondu du shader) et son nom
+   avec lui ; un nom qui recouvre quelque chose est masqué, le marqueur reste.
+2. **Épinglés** : colonie sélectionnée (affichée même hors de son palier de rang), colonie survolée
+   (le marqueur sous la souris ne disparaît pas pendant un zoom à la molette) et capitale du
+   joueur (colonie la plus prioritaire de la province capitale) sont posées d'abord et toujours.
+3. **Pas de CPU par image** : recalcul seulement quand la caméra bouge nettement (déplacement
+   > 1 % de la distance, distance ± 1,5 %, rotation > 0,5°, écran redimensionné), quand le palier
+   ou les épinglés changent, au plus toutes les 0,15 s. Le shader reçoit l'état par instance
+   (`COLOR.b` affiché / cédé, `COLOR.a` instant de la bascule) et fait le fondu seul ; l'horloge
+   n'est transmise que pendant un fondu. Les marqueurs hors de l'écran élargi (20 %) ne sont pas
+   départagés. Coût d'un recalcul complet : **~1,2-1,5 ms** (GDScript, build debug, meilleur de 5
+   séries), contre ~3,3 ms pour l'ancien dé-encombrement des seuls noms, qui tournait lui toutes
+   les 0,15 s même caméra immobile.
+4. **Règle de rendu, côté Godot** : la logique dépend de la caméra et des tailles écran, sans
+   effet sur la simulation ; elle reste dans `game/` mais isolée dans une classe pure et testée
+   (`MarkerDeclutter`), et non dans `core/`.
+5. **Paramètres dans les données** : bloc `declutter` de `data/map/settlement_markers.json`
+   (emprise opaque du pictogramme 0,8 × 0,94 du quad, marges, opacité d'un marqueur cédé —
+   0 = masqué, > 0 = estompé —, durée du fondu, seuils de recalcul, épinglés), validé par le schéma.
+6. Les noms montent un peu (`LABEL_LIFT` 0,55 × la police au-dessus du quad) pour ne plus toucher
+   les flèches de leur propre pictogramme.
+
+### Résultat
+Même mesure, plus stricte (paires marqueur / son propre nom comprises) : **0 paire** aux 12 vues ;
+le test échoue au premier chevauchement et si un recalcul dépasse 4 ms. Captures
+`docs/img/da7d/*_apres.jpg`.
+
+### Limites
+- Les noms de provinces (`CityMarkers`, palier loin) ne participent pas au placement.
+- Le haut de l'écran sous la barre supérieure n'est pas soustrait (des marqueurs peuvent y passer
+  sous l'interface).
+- Pas de regroupement (« +3 ») ni de décalage : un marqueur cède ou reste ; le zoom rapproché
+  révèle les lieux masqués.
