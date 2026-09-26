@@ -134,10 +134,10 @@ var _old_vegetation: BattleVegetation = null
 var _tree_parent: Node = null
 
 
-## DA6 (bible § 3.3) : part de saturation gardée par le sol et l'herbe (0,6) ; l'automne (lumière déjà
-## dorée) est désaturé davantage : la saison déplace la teinte, pas la saturation.
+## DA6 (bible § 3.3) : part de saturation gardée par le sol et l'herbe ; la saison déplace la teinte,
+## pas la saturation. DA7b : valeur par saison dans `data/fx/atmosphere.json` (`battle_seasons`).
 func decor_saturation() -> float:
-	return 0.5 if site_render and season_key == "autumn" else 0.6
+	return AtmosphereLibrary.battle_decor_saturation(season_key if site_render else "summer")
 var _decor_clear: Array = []  # [centre: Vector2, demi-tailles: Vector2, lacet] (arbres écartés)
 var _coast: Dictionary = {}
 var _pools: Array = []

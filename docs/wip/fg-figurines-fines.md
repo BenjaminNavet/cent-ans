@@ -26,7 +26,7 @@ toute production. Budget : 0 $ prévu (sources CC0, cuisson Blender) ; toute gé
 | FG2 | Équipement fin : mailles, plates, casques, armes, surcots avec plis, par recette (28 recettes) ; allonge du tir à l'arc | FG1 | fait, fusionné (bda81191) |
 | FG3 | Matières cuites : atlas normal + ORM + masque de livrée, intégration shader skinné | FG1, **après DA1** (même shader) | fait 26/09, branche `feat/fg3-materials` prête (ADR 0088), fusion par l'orchestrateur |
 | FG4 | Cheval en production : poids des jambes (galop), étriers élargis, chanfrein, harnachement, caparaçon, chaîne LOD | FG0 | fait, fusionné (0a53488e) |
-| FG5 | Performance A/B (`--units=50`, Ultra), captures, ADR (relève le plafond de triangles de la bible § 6) | FG1-FG4 | à faire |
+| FG5 | Performance A/B (`--units=50`, Ultra), captures, ADR (relève le plafond de triangles de la bible § 6) | FG1-FG4 | fait 26/09, branche `feat/fg5-perf` (ADR 0089), fusion par l'orchestrateur |
 
 Coordination : DA1 (armoiries sur les figurines, en pause dans une autre session) touche le même
 shader et les mêmes recettes ; FG3 passe après sa fusion. FG0-FG2 et FG4 restent dans
@@ -89,3 +89,11 @@ Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprim�
   de forme adoucies), martelage léger, mailles plus sombres. Bogue trouvé et corrigé : drapeaux
   portés (EP5) invisibles sous FG3. Banc `--units=50` : FG3 ≈ +2,5 ms médiane (≈ 9 %, bruit
   ±20 %). Captures `docs/img/fg/fg3_*.png`. Détails : `docs/wip/fg3-matieres.md`.
+- 26/09 : FG5 fait (branche `feat/fg5-perf`, ADR 0089). Le banc standard ne voit aucune figurine
+  en LOD0/LOD1 (LOD2 + imposteurs) ; banc rapproché ajouté (`--benchmark --closeup`) : fines
+  +94 %, parce que le LOD0 se choisissait par régiment. Désormais **LOD0 par soldat** (< 12 m ×
+  préréglage, dans le champ ; calque compacté, rang en donnée perso) ; LOD1 1 273-1 319 à pied /
+  1 885-2 055 monté, LOD2 235-252 / 446-534 (recuisson). Rendu fin **par défaut** ;
+  `--coarse-figures` pour l'ancien, `--no-fg3` gardé. Banc Ultra (4 passes, durée moyenne) :
+  standard 16,58 → 17,04 ms (+2,8 %, contre +8,3 % avant), rapproché 15,15 → 18,09 ms (+19 %,
+  contre +94 %). Bible § 6 relevée. Captures `docs/img/fg/fg5_*.png`. Détails : `docs/wip/fg5-perf.md`.
