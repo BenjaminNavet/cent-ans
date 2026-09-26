@@ -21,6 +21,8 @@ use sim_campaign::movement::{edges, is_sea_crossing, path_to, Reach};
 use sim_campaign::passage;
 use sim_campaign::{Army, ArmyId, CampaignState, Order};
 
+use crate::parallel::Mode;
+
 /// A Dijkstra table of the settlement graph.
 pub type Table = BTreeMap<SettlementId, Reach>;
 
@@ -91,6 +93,17 @@ fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
 
 impl<'a> GridPlanner<'a> {
     pub fn new(state: &'a CampaignState, data: &'a GameData, faction: &'a FactionId) -> Self {
+        Self::with_mode(Mode::Sequential, state, data, faction)
+    }
+
+    /// [`GridPlanner::new`], the lands and enemy armies read on the
+    /// planner's pool in [`Mode::Parallel`] (PB3f, same planner).
+    pub fn with_mode(
+        mode: Mode,
+        state: &'a CampaignState,
+        data: &'a GameData,
+        faction: &'a FactionId,
+    ) -> Self {
         let rules = &data.ai_grid;
         let px_per_km = sim_campaign::march::px_per_km(data);
         let avoid_px = rules.avoid_radius_km as f32 * px_per_km;
@@ -107,15 +120,19 @@ impl<'a> GridPlanner<'a> {
         };
         let mut forbidden: BTreeMap<SettlementId, FactionId> = BTreeMap::new();
         let mut crossable: BTreeSet<SettlementId> = BTreeSet::new();
-        for (id, _) in state
+        let foreign: Vec<&SettlementId> = state
             .settlements
             .iter()
             .filter(|(_, s)| &s.controller != faction)
-        {
-            let Some(owner) = state
+            .map(|(id, _)| id)
+            .collect();
+        let owners = mode.map(&foreign, |id| {
+            state
                 .settlement_province(id)
                 .and_then(|p| passage::trespassed_owner(state, faction, p))
-            else {
+        });
+        for (id, owner) in foreign.into_iter().zip(owners) {
+            let Some(owner) = owner else {
                 continue;
             };
             if may_cross(&owner) {
@@ -124,28 +141,36 @@ impl<'a> GridPlanner<'a> {
                 forbidden.insert(id.clone(), owner);
             }
         }
-        let enemies: Vec<Enemy> = state
+        let hostile: Vec<(&ArmyId, &Army)> = state
             .armies
             .iter()
             .filter(|(_, a)| state.is_at_war(faction, &a.faction))
-            .map(|(id, a)| {
-                let point = state.army_point(data, a);
-                Enemy {
-                    id: id.clone(),
-                    faction: a.faction.clone(),
-                    point,
-                    power: state.army_power(data, id),
-                    settlement: a.settlement().cloned(),
-                    beyond_passage: state
-                        .army_province(data, a)
-                        .and_then(|p| passage::trespassed_owner(state, faction, &p))
-                        .is_some_and(|owner| !may_cross(&owner)),
-                    near: points
-                        .iter()
-                        .filter(|(_, p)| distance(*p, point) <= avoid_px)
-                        .map(|(s, _)| s.clone())
-                        .collect(),
-                }
+            .collect();
+        let read = mode.map(&hostile, |(id, a)| {
+            let point = state.army_point(data, a);
+            let enemy = Enemy {
+                id: (*id).clone(),
+                faction: a.faction.clone(),
+                point,
+                power: state.army_power(data, id),
+                settlement: a.settlement().cloned(),
+                beyond_passage: false,
+                near: points
+                    .iter()
+                    .filter(|(_, p)| distance(*p, point) <= avoid_px)
+                    .map(|(s, _)| s.clone())
+                    .collect(),
+            };
+            let owner = state
+                .army_province(data, a)
+                .and_then(|p| passage::trespassed_owner(state, faction, &p));
+            (enemy, owner)
+        });
+        let enemies: Vec<Enemy> = read
+            .into_iter()
+            .map(|(mut enemy, owner)| {
+                enemy.beyond_passage = owner.is_some_and(|owner| !may_cross(&owner));
+                enemy
             })
             .collect();
         let mut stops: BTreeSet<SettlementId> = state
