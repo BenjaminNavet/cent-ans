@@ -145,6 +145,11 @@ struct Eq4 {
     devastation_sum: u64,
     occupied_turns: u32,
     hot_turns: u32,
+    /// DC3: faction-turns (living factions) at high tax, and all faction-turns.
+    high_tax_turns: u32,
+    faction_turns: u32,
+    /// DC3: men under arms (field armies) summed over turns, all factions.
+    men_sum: u64,
     /// DC3: province-turns counted in the three sums above.
     province_turns: u32,
     /// DC3: beaten armies that fell back to a neutral refuge, routed and rallied, dispersed.
@@ -244,6 +249,18 @@ fn track_eq4(state: &CampaignState, eq4: &mut Eq4, before: &Snapshot) {
             eq4.direct_captures += 1;
         }
     }
+    for f in state.factions.values().filter(|f| f.alive) {
+        eq4.faction_turns += 1;
+        if f.tax_rate == sim_campaign::TaxRate::High {
+            eq4.high_tax_turns += 1;
+        }
+    }
+    eq4.men_sum += state
+        .armies
+        .values()
+        .flat_map(|a| a.units.iter())
+        .map(|u| u64::from(u.strength))
+        .sum::<u64>();
     // DC3: city captures, footholds and completed conquests.
     for (province_id, province) in &state.provinces {
         let Some(city) = state.settlements.get(&province.city) else {
@@ -1128,6 +1145,12 @@ fn print_eq4(reports: &[Report]) {
         }),
         ("DC3 cités prises / déc.", |r| {
             f64::from(r.eq4.city_captures) * 40.0 / f64::from(r.turns)
+        }),
+        ("DC3 impôt haut (% fac.-tours)", |r| {
+            100.0 * f64::from(r.eq4.high_tax_turns) / f64::from(r.eq4.faction_turns.max(1))
+        }),
+        ("DC3 hommes en campagne (moy. / tour)", |r| {
+            r.eq4.men_sum as f64 / f64::from(r.turns.max(1))
         }),
         ("DC3 dont reprises aux rebelles / déc.", |r| {
             f64::from(r.eq4.city_from_rebels) * 40.0 / f64::from(r.turns)
