@@ -24,7 +24,7 @@ toute production. Budget : 0 $ prévu (sources CC0, cuisson Blender) ; toute gé
 | FG0 | Prototype + planche de style : homme d'armes et cheval nouvelle définition, rendus Blender côte à côte avec l'actuel ; choix de la base (MakeHuman/MPFB CC0 ou autre), méthode d'ajustement au squelette Quaternius, budget de triangles | — | fait, validé par le joueur, fusionné (8dfc13d1) |
 | FG1 | Corps humain en production : rigs `human` et cavalier (`R:`) aux bras allongés (texture d'os recuite, mêmes clips), 6-8 visages, chaîne LOD, sortie CAM1 lisible par le shader actuel, derrière un drapeau | FG0 | fait, fusionné (4522c2ad) |
 | FG2 | Équipement fin : mailles, plates, casques, armes, surcots avec plis, par recette (28 recettes) ; allonge du tir à l'arc | FG1 | fait, fusionné (bda81191) |
-| FG3 | Matières cuites : atlas normal + ORM + masque de livrée, intégration shader skinné | FG1, **après DA1** (même shader) | lancé 26/09 (DA1/DA1b dans main) |
+| FG3 | Matières cuites : atlas normal + ORM + masque de livrée, intégration shader skinné | FG1, **après DA1** (même shader) | **en pause** : cuisson faite, vérifs/captures/ADR restantes (branche `feat/fg3-materials`) |
 | FG4 | Cheval en production : poids des jambes (galop), étriers élargis, chanfrein, harnachement, caparaçon, chaîne LOD | FG0 | fait, fusionné (0a53488e) |
 | FG5 | Performance A/B (`--units=50`, Ultra), captures, ADR (relève le plafond de triangles de la bible § 6) | FG1-FG4 | à faire |
 
@@ -68,3 +68,18 @@ Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprim�
   cervelière), harnois début/tardif, jaque, brigandine, plis ; armes et écus refaits ; UV par pièce.
   LOD0 9,4-11,9 k à pied, 15,2-17,4 k monté ; primitives +12 %, i/s non significatif. Arc : tirage
   0,59 m, flèche raccourcie. Barbes FG1 trop sombres → FG3. DA1 constaté fusionné dans main → FG3 lancé.
+- 26/09 : **PAUSE demandée par le joueur** (reprise dans une autre session). État :
+  - FG0, FG1, FG2, FG4 fusionnés dans main (dernier : bda81191). Rendu fin sous `--fine-figures`.
+  - FG3 en pause, non fusionné : branche `feat/fg3-materials` (commit 672930e2), worktree
+    `.claude/worktrees/agent-aba08b13133c215dc` (cache `.godot` supprimé). Fait : cuisson des 28
+    recettes (atlas 512² LOD0 / 256² LOD1 : normale de forme, occlusion, masque barbe/cheveux/
+    martelage), 8 tuiles de détail partagées, une texture cheval 1024², variante shader
+    `FG3_BAKED` seulement sous `--fine-figures` (défaut identique au pixel, vivants et cadavres),
+    LOD2 sans texture, 15,7 Mo BC7. Camail noir corrigé (faces inversées depuis FG0), barbes OK.
+    Reste : captures `fg3_*.png`, smoke + captures DA1 (`da1_arms_shot.gd`) et EP12
+    (`ep12_shot.gd`) avec/sans drapeau, banc `--units=50`, réglages martelage/bois, ADR (~0088),
+    `battle_fine/SOURCE.md`. Détails et commandes : `docs/wip/fg3-matieres.md` sur la branche.
+  - **Reprise** : ouvrir le worktree FG3 (ou relancer un agent dessus), finir les vérifs, fusionner
+    main dans la branche puis ff-only dans main ; ensuite FG5 (perf : LOD0 relayé plus tôt,
+    LOD1 plus léger ; bascule du rendu fin par défaut ; ADR relevant le plafond de triangles de la
+    bible § 6) ; nettoyer le worktree FG3 après fusion.
