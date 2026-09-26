@@ -295,7 +295,10 @@ impl std::fmt::Display for ReplayError {
                  celui-ci lit le format {REPLAY_FORMAT})"
             ),
             ReplayError::Build(detail) => {
-                write!(f, "la bataille de ce rejeu ne peut être reconstruite : {detail}")
+                write!(
+                    f,
+                    "la bataille de ce rejeu ne peut être reconstruite : {detail}"
+                )
             }
         }
     }
@@ -538,7 +541,9 @@ impl ReplayPlayer {
         let mut sim = replay.start.build().map_err(ReplayError::Build)?;
         let rules = ReplayRules::bundled();
         let period = ReplayRules::period_ticks(rules.keyframe_seconds);
-        let spread = replay.last_tick.div_ceil(rules.max_keyframes.max(2) as u64 - 1);
+        let spread = replay
+            .last_tick
+            .div_ceil(rules.max_keyframes.max(2) as u64 - 1);
         let mut player = ReplayPlayer {
             replay,
             cursor: 0,
