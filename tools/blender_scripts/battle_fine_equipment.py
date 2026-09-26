@@ -624,7 +624,11 @@ def aventail(lm, frame, bvh, extra=(), n=36, rows=12):
         v.co = Vector((cx, cy, v.co.z)) + Vector((rx * k * d.x, ry * k * d.y, 0))
     for a_, b_ in zip(grid, grid[1:], strict=False):
         eq.bridge(bm, a_, b_, 0)
-    eq.finish(bm)
+    # Open surface: orient every face away from the neck axis (outside = visible side).
+    for f in bm.faces:
+        c = f.calc_center_median()
+        if f.normal.dot(Vector((c.x - axis.x, c.y - axis.y, 0))) < 0:
+            f.normal_flip()
     obj = eq.to_object("aventail", bm, [mat("mail")])
     top_z = lm.chin.z
     bot_z = lm.shoulder_z
