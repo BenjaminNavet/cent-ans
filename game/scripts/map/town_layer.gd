@@ -227,10 +227,22 @@ func _stream(rig_distance: float, center: Variant = null) -> int:
 func _push_finage(here: Vector2) -> void:
 	if terrain == null or terrain.material == null:
 		return
+	# DC4 (ADR 0082) : ~1 200 villes ; on garde les `FINAGE_SLOTS` plus proches par insertion
+	# (au lieu de trier toute la liste toutes les 10 images).
 	var near: Array = []
+	var worst := INF
 	for id in _ids:
-		near.append([here.distance_squared_to(_anchor[id]), id])
-	near.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+		var d2 := here.distance_squared_to(_anchor[id])
+		if d2 >= worst:
+			continue
+		var k := near.size()
+		while k > 0 and float(near[k - 1][0]) > d2:
+			k -= 1
+		near.insert(k, [d2, id])
+		if near.size() > FINAGE_SLOTS:
+			near.pop_back()
+		if near.size() == FINAGE_SLOTS:
+			worst = float(near[-1][0])
 	var slots: Array[Vector4] = []
 	var key := ""
 	for k in mini(FINAGE_SLOTS, near.size()):
