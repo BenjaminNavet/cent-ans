@@ -552,7 +552,9 @@ def pack_atlas_uv(uv, src):
     """
     top = (1 << ATLAS_BITS) - 1
     u = min(max(int(round((uv[0] % 1.0 if uv[0] != 1.0 else 1.0) * top)), 0), top)
-    v = min(max(int(round((1.0 - (uv[1] % 1.0 if uv[1] != 1.0 else 1.0)) * top)), 0), top)
+    v = min(
+        max(int(round((1.0 - (uv[1] % 1.0 if uv[1] != 1.0 else 1.0)) * top)), 0), top
+    )
     return float((src << (2 * ATLAS_BITS)) | (v << ATLAS_BITS) | u)
 
 
