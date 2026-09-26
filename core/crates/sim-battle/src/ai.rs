@@ -2131,9 +2131,6 @@ fn plan_horse(
     if !general_only {
         // B6: shooters behind a hedge are ridden round, or left alone.
         for (j, _) in isolated {
-            if waits_for_foot(view, roles, i, j) {
-                continue;
-            }
             if charge_or_detour(view, i, j, true) {
                 return;
             }
@@ -2249,13 +2246,17 @@ fn plan_horse(
     view.move_to(i, x, z, false, Some(facing));
 }
 
-/// EQ7 (suite of ADR 0052): the horse of an army with foot does not ride at
-/// a target covered by enemy shooters who still have arrows before its foot
-/// is close to that target, or already in a melee (Crécy, Poitiers: the
-/// knights sent ahead alone broke under the arrows). It holds the wing
-/// meanwhile. An army of horse alone, or a troop already close to its
-/// target, goes on.
+/// EQ7 (suite of ADR 0052): the horse of an attacker with foot does not
+/// ride at enemy horse or at a shaken regiment covered by enemy shooters who
+/// still have arrows before its foot is close to that target, or already in
+/// a melee (Crécy, Poitiers: the knights sent ahead alone broke under the
+/// arrows). It holds the wing meanwhile, and goes on once committed close
+/// to its target. The defender's horse, which waits for the enemy, and the
+/// charge at isolated shooters (which pins them) are unchanged.
 fn waits_for_foot(view: &View, roles: &Roles, i: usize, j: usize) -> bool {
+    if view.side != SideId::Attacker {
+        return false;
+    }
     let rules = HorseWaitRules::bundled();
     let units = view.units;
     let (unit, target) = (&units[i], &units[j]);
@@ -2269,16 +2270,17 @@ fn waits_for_foot(view: &View, roles: &Roles, i: usize, j: usize) -> bool {
             && dist(shooter, target)
                 <= view.sim.effective_range(shooter, target.x, target.z) * rules.range_margin
     });
-    if !covered {
-        return false;
-    }
-    let mut foot = roles.line.iter().map(|&k| &units[k]).filter(|u| u.able());
-    let mut any_foot = false;
-    let arrived = foot.any(|u| {
-        any_foot = true;
-        u.state == UnitState::Melee || dist(u, target) < rules.foot_close_m
-    });
-    any_foot && !arrived
+    let foot: Vec<&Unit> = roles
+        .line
+        .iter()
+        .map(|&k| &units[k])
+        .filter(|u| u.able())
+        .collect();
+    covered
+        && !foot.is_empty()
+        && !foot
+            .iter()
+            .any(|u| u.state == UnitState::Melee || dist(u, target) < rules.foot_close_m)
 }
 
 /// Reactions common to every plan: face flank attacks, pull out wavering
