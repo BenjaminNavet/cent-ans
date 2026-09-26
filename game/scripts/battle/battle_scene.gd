@@ -142,6 +142,11 @@ var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
 var _bench_cpu_ms: float = 0.0
 ## PB3c : temps de `_process` (Performance.TIME_PROCESS) et de `soldiers.update` par image mesurée.
 var _bench_process_ms: Array = []
+## PB3e : durée de `_process` (scripts + pont) des images avec un pas de simulation et des autres.
+var _bench_step_frame_ms: Array = []
+var _bench_plain_frame_ms: Array = []
+var _bench_proc_start_us: int = 0
+var _bench_ticks_before: int = -1
 var _bench_soldiers_ms: Array = []
 var _bench_soldiers_last_ms: float = 0.0
 var _bench_tick_ms: Array = []  # PB3c : durée de `BattleSim.tick` (pas de simulation) par image
@@ -1099,6 +1104,9 @@ func _process(delta: float) -> void:
 	var slow := staging.time_scale() if staging != null else 1.0
 	var running: bool = not paused and not battle.call("is_finished")
 	var tick_start := Time.get_ticks_usec()
+	if _benchmark:
+		_bench_proc_start_us = tick_start
+		_bench_ticks_before = int(battle.call("get_ticks"))
 	if running:
 		_configure_step_thread()
 		battle.call("tick", delta * speed * slow)
@@ -1117,6 +1125,12 @@ func _process(delta: float) -> void:
 		_show_end()
 	if _benchmark:
 		_run_benchmark_frame(delta)
+		if _bench_measured > 10 and battle != null:
+			var proc_ms := float(Time.get_ticks_usec() - _bench_proc_start_us) / 1000.0
+			if int(battle.call("get_ticks")) != _bench_ticks_before:
+				_bench_step_frame_ms.append(proc_ms)
+			else:
+				_bench_plain_frame_ms.append(proc_ms)
 
 
 ## PB3e (ADR 0090) : le pas de simulation suivant se calcule sur un fil pendant que l'image
@@ -1252,6 +1266,10 @@ func _bench_finish() -> void:
 		"tick_ms_p99": _percentile(_sorted(_bench_tick_ms), 0.99),
 		"tick_ms_max": _sorted(_bench_tick_ms)[-1] if not _bench_tick_ms.is_empty() else 0.0,
 		"step_thread": _step_thread_on,
+		"proc_step_ms_median": _median(_bench_step_frame_ms),
+		"proc_step_ms_p99": _percentile(_sorted(_bench_step_frame_ms), 0.99),
+		"proc_plain_ms_median": _median(_bench_plain_frame_ms),
+		"proc_plain_ms_p99": _percentile(_sorted(_bench_plain_frame_ms), 0.99),
 		"step_stats": battle.call("get_step_stats") if battle.has_method("get_step_stats") else {},
 		"quality": RenderQuality.current(),
 		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
