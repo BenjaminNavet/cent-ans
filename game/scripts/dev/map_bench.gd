@@ -14,6 +14,7 @@ extends Node
 ## en `DESCENT_SECONDS` (logarithme de la distance), pause, remontée ; `--bench-descent-only` saute
 ## panoramique et zoom. Rapporte aussi les recalages d'échelle verticale et les cuissons des
 ## maquettes.
+## SZ6 : `--bench-probe` attribue les pics aux sections de `PerfProbe` (`probe` dans le rapport).
 
 ## Étapes (x, y carte, distance) : Caen → Rouen → Paris → Chartres → Évreux, puis zoom sur Paris.
 const PAN_PATH: Array[Vector2] = [
@@ -101,6 +102,7 @@ func _ready() -> void:
 			_descent_hold = TOWN_DESCENT_HOLD
 	if OS.get_cmdline_user_args().has("--bench-listeners"):
 		_wrap_listeners.call_deferred()
+	PerfProbe.enabled = OS.get_cmdline_user_args().has("--bench-probe")
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = 0
 	camera_rig.edge_pan_enabled = false
@@ -123,6 +125,62 @@ func _wrap_listeners() -> void:
 			_listener_ms[label] = float(_listener_ms.get(label, 0.0)) + (Time.get_ticks_usec() - t0) / 1000.0)
 
 
+## SZ6 `--bench-probe` : par section de `PerfProbe`, temps cumulé dans les pics (> 50 ms), nombre
+## de pics où elle domine, pire durée sur tout le parcours ; les pires images et leurs sections.
+var _probe_spike_ms: Dictionary = {}
+var _probe_top: Dictionary = {}
+var _probe_max_ms: Dictionary = {}
+var _probe_worst: Array = []
+
+
+func _probe_frame(now: int) -> void:
+	var sections := PerfProbe.take_frame()
+	if _phase == "warmup" or _phase == "done" or _last_us == 0:
+		return
+	var frame_ms := (now - _last_us) / 1000.0
+	var process_ms := (now - frame_start_usec) / 1000.0 if frame_start_usec > 0 and frame_start_usec <= now else 0.0
+	var attributed := 0
+	for label: String in sections:
+		if not label.contains("/"):  # sous-sections (« a/b ») déjà comptées dans leur section
+			attributed += int(sections[label])
+	sections["(unattributed)"] = maxi(0, int(process_ms * 1000.0) - attributed)
+	var top := ""
+	var top_ms := 0.0
+	for label: String in sections:
+		var ms := int(sections[label]) / 1000.0
+		_probe_max_ms[label] = maxf(float(_probe_max_ms.get(label, 0.0)), ms)
+		if ms > top_ms and not label.contains("/"):
+			top_ms = ms
+			top = label
+	if frame_ms <= 50.0:
+		return
+	for label: String in sections:
+		_probe_spike_ms[label] = float(_probe_spike_ms.get(label, 0.0)) + int(sections[label]) / 1000.0
+	_probe_top[top] = int(_probe_top.get(top, 0)) + 1
+	var parts: Array = []
+	for label: String in sections:
+		parts.append([int(sections[label]) / 1000.0, label])
+	parts.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
+	var summary := {"frame_ms": snappedf(frame_ms, 0.1), "process_ms": snappedf(process_ms, 0.1), "phase": _phase}
+	for part: Array in parts.slice(0, 5):
+		summary[part[1]] = snappedf(part[0], 0.1)
+	_probe_worst.append(summary)
+	_probe_worst.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["frame_ms"] > b["frame_ms"])
+	if _probe_worst.size() > 12:
+		_probe_worst.resize(12)
+
+
+func _probe_report() -> Dictionary:
+	var rows: Array = []
+	for label: String in _probe_max_ms:
+		rows.append([float(_probe_spike_ms.get(label, 0.0)), label])
+	rows.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
+	var sections := {}
+	for row: Array in rows:
+		sections[row[1]] = {"spike_ms": snappedf(row[0], 0.1), "top": int(_probe_top.get(row[1], 0)), "max_ms": snappedf(float(_probe_max_ms[row[1]]), 0.1)}
+	return {"sections": sections, "worst": _probe_worst}
+
+
 func _place(p: Vector2, distance: float) -> void:
 	camera_rig.target_focus = Vector3(p.x, map_data.surface_world_at(p.x, p.y), p.y)
 	camera_rig.target_distance = distance
@@ -132,6 +190,8 @@ func _place(p: Vector2, distance: float) -> void:
 func _process(delta: float) -> void:
 	_frame += 1
 	var now := Time.get_ticks_usec()
+	if PerfProbe.enabled:
+		_probe_frame(now)
 	match _phase:
 		"warmup":
 			if _frame >= WARMUP_FRAMES and (terrain.fine_ready() or _frame > WARMUP_FRAMES * 8):
@@ -281,10 +341,13 @@ func _report(now: int) -> void:
 			report[key] = snappedf(float(terrain.build_stats[key]), 0.01)
 	if not _listener_ms.is_empty():
 		report["listener_ms"] = _listener_ms
+	if PerfProbe.enabled:
+		report["probe"] = _probe_report()
 	print("CampaignMap: bench_map %s" % JSON.stringify(report))
 	get_tree().quit()
 
 
 func _exit_tree() -> void:
+	PerfProbe.enabled = false
 	if is_instance_valid(_starter):
 		_starter.queue_free()

@@ -163,6 +163,7 @@ impl BattleSim {
         }
         self.scenario = Some(Box::new(scenario));
         self.path_cache = Default::default();
+        self.obstacle_cache = Default::default();
     }
 
     /// EP7: replaces the opening line of the journal (the weather drawn

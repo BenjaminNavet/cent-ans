@@ -20,6 +20,7 @@ from mathutils import Matrix, Vector
 from mathutils.kdtree import KDTree
 
 SADDLE_BONE = "Torso2"
+STIRRUP_HALF_WIDTH = 0.36  # m from the horse's midline (FG4; 0.30 before)
 TORSO_BONES = {
     "Back",
     "Torso",
@@ -86,8 +87,11 @@ class Mount:
             r.location = self.seat - hips
         bpy.context.view_layer.update()
         self.r_rest = self.rarm.matrix_world.copy()
+        # FG4: stirrups 6 cm wider than the Quaternius mount's (0.30 m) so that the rider's
+        # legs clear the fine horse's broader barrel (same bones, same clips; the thinner
+        # Quaternius horse just shows a little air between boot and flank).
         self.stirrups = {
-            s: self.seat + Vector((0.3 * sx, -0.08, -0.84))
+            s: self.seat + Vector((STIRRUP_HALF_WIDTH * sx, -0.08, -0.84))
             for s, sx in (("L", 1), ("R", -1))
         }
         self.pommel = self.seat + Vector((0.0, -0.3, 0.12))
