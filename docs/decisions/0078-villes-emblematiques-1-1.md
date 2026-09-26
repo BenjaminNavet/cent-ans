@@ -69,8 +69,8 @@ remplace au zoom rapproché, avec un fondu.
 
 - Les villes emblématiques sont posées dans la vraie vallée : les rues suivent le relief fin, les
   quais le fleuve affiché, les monuments ont leur gabarit réel (cathédrale de Rouen : 137 m).
-- Une ville v2 est une donnée texte (quelques dizaines de ko) ; le tissu est régénéré à chaque
-  chargement (déterministe, graine de la ville), comme les villes ordinaires.
+- Une ville v2 est une donnée texte (≈ 140 ko pour Rouen, rues OSM comprises) ; le tissu est
+  régénéré à chaque chargement (déterministe, graine de la ville), comme les villes ordinaires.
 - La maquette L1/L2 et le décor de siège L3 restent inchangés (le fichier v1 garde la loupe).
 - Les sources non commerciales (Cassini-Geopeuple, Open Domesday, carte d'Agas/MoEML, scans
   Gallica) ne servent qu'au contrôle humain, jamais à une extraction. OSM est cité dans

@@ -144,10 +144,6 @@
             "$ref": "#/$defs/weights"
           }
         },
-        "infill": {
-          "type": "boolean",
-          "description": "Venelles générées au cœur des îlots trop profonds (défaut vrai)."
-        },
         "detail_cell_m": {
           "type": "number",
           "exclusiveMinimum": 0,
@@ -647,10 +643,12 @@
             "description": "Part des façades sur rue occupées."
           },
           "houses": {
-            "$ref": "#/$defs/weights"
+            "$ref": "#/$defs/weights",
+            "description": "Mélange des types de maisons du kit (townhouse, timber, stonehouse, cottage, longere, barn), remplace celui de la section `plan`."
           },
           "roofs": {
-            "$ref": "#/$defs/weights"
+            "$ref": "#/$defs/weights",
+            "description": "Réservé : répartition des couvertures (ardoise, tuile, chaume) ; non rendue en VH4 (un toit par modèle du kit bas détail)."
           },
           "from_year": {
             "type": "integer"

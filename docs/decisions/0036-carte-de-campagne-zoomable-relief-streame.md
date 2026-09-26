@@ -360,3 +360,12 @@ Détail dans `docs/godot-map.md` (« Recette finale et clôture (lot ZG7c) ») e
   locale en haute montagne (palier vallée) ; recuisson E0-E4 avec le plancher monotone (fonds de
   vallée à 0,5 m) ; villes emblématiques 1:1 (VH4) ; objets à l'échelle de la carte au palier vallée ;
   pics d'images dominés par les scripts ; hébergement d'une archive du relief avant diffusion.
+
+## Addendum (lot VH4, 2026-09-26) : villes emblématiques 1:1
+
+L'addendum « villes emblématiques » est réalisé par l'ADR 0078 : format `landmark` v2 géoréférencé
+(EPSG:3035, `data/landmarks_v2/`), ville rendue à l'échelle réelle au palier vallée par le moteur
+ZG6 étendu (`LandmarkPlan`, `LandmarkMonuments`, `LandmarkCityLayer`), maquette L1/L2 gardée en vue
+stratégique avec un fondu tramé. Le plancher `landmark_min_distance` de ZG4b ne s'applique plus
+qu'aux villes sans fichier v2. Rouen vers 1340 est la première ville migrée ; Paris, Londres et
+Orléans suivent (VH5-VH7). Voir `docs/landmarks-v2.md`.

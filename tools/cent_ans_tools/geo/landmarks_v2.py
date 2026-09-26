@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -348,12 +349,21 @@ class LandmarksResult:
         )
 
 
+_NUMBER_ARRAY = re.compile(r"\[\s*(-?[\d.eE+-]+(?:,\s*-?[\d.eE+-]+)*)\s*\]")
+
+
+def dumps_city(city: dict) -> str:
+    """Indented JSON, each array of numbers (a point) kept on one line."""
+    text = json.dumps(city, ensure_ascii=False, indent=1)
+    return _NUMBER_ARRAY.sub(
+        lambda m: "[" + ", ".join(v.strip() for v in m.group(1).split(",")) + "]", text
+    )
+
+
 def write_city(path: Path, city: dict) -> None:
     """Write a v2 file (indented, stable key order as authored)."""
     tmp = path.with_suffix(".part")
-    tmp.write_text(
-        json.dumps(city, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
-    )
+    tmp.write_text(dumps_city(city) + "\n", encoding="utf-8")
     tmp.replace(path)
 
 
