@@ -130,3 +130,6 @@ pub use state::{
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};
 pub use weather::{MapWeather, ProvinceWeather};
+
+#[cfg(test)]
+mod review_tests;

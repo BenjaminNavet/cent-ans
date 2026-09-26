@@ -108,14 +108,19 @@ pub(crate) fn resolve_sieges(
             }
             continue;
         }
-        let attacker = state.armies[&besiegers[0]].faction.clone();
+        let attacker = siege_leader(state, &settlement_id, &besiegers);
+        let lead = besiegers
+            .iter()
+            .find(|id| state.armies[*id].faction == attacker)
+            .unwrap_or(&besiegers[0])
+            .clone();
         let garrison_empty = state.settlements[&settlement_id].garrison.is_empty();
         if garrison_empty {
             capture(state, data, &settlement_id, &attacker, events);
             continue;
         }
         let fortification = state.fortification_level(data, &settlement_id);
-        let besieging_general = state.armies[&besiegers[0]].general.clone();
+        let besieging_general = state.armies[&lead].general.clone();
         let siege_speed_percent = besieging_general.as_ref().map_or(0.0, |g| {
             skills::character_effects(state, data, g)
                 .siege_speed
@@ -168,17 +173,55 @@ pub(crate) fn resolve_sieges(
                     }
                 }
             }
-            _ => {
-                let besieger = besiegers[0].clone();
-                begin_siege(state, data, &settlement_id, &attacker, &besieger, events);
-            }
+            _ => begin_siege(state, data, &settlement_id, &attacker, &lead, events),
         }
     }
 }
 
+/// The faction leading the siege of `settlement` among `besiegers` (not
+/// empty): the current attacker while one of its armies stays; else an ally
+/// of it takes the siege over with its progress (breach, supplies); else the
+/// first besieger.
+fn siege_leader(
+    state: &mut CampaignState,
+    settlement: &SettlementId,
+    besiegers: &[ArmyId],
+) -> FactionId {
+    let first = state.armies[&besiegers[0]].faction.clone();
+    let Some(current) = state
+        .settlements
+        .get(settlement)
+        .and_then(|s| s.siege.as_ref())
+        .map(|s| s.attacker.clone())
+    else {
+        return first;
+    };
+    let factions: Vec<FactionId> = besiegers
+        .iter()
+        .map(|id| state.armies[id].faction.clone())
+        .collect();
+    if factions.contains(&current) {
+        return current;
+    }
+    let Some(heir) = factions
+        .into_iter()
+        .find(|f| state.is_allied(f, &current) || state.is_allied(&current, f))
+    else {
+        return first;
+    };
+    if let Some(siege) = state
+        .settlements
+        .get_mut(settlement)
+        .and_then(|s| s.siege.as_mut())
+    {
+        siege.attacker = heir.clone();
+    }
+    heir
+}
+
 /// Lays siege to `settlement_id` for `attacker` (its army `army` in the
 /// lead): supplies from the province's devastation, an event. A siege of
-/// the same attacker already in place is kept.
+/// the same attacker or of one of its allies already in place is kept.
 pub(crate) fn begin_siege(
     state: &mut CampaignState,
     data: &GameData,
@@ -204,14 +247,17 @@ pub(crate) fn begin_siege(
         .get(&province_id)
         .map_or(0, |p| p.devastation);
     let turn = state.turn;
+    let kept = state
+        .settlements
+        .get(settlement_id)
+        .and_then(|s| s.siege.as_ref())
+        .is_some_and(|s| {
+            state.is_allied(&s.attacker, attacker) || state.is_allied(attacker, &s.attacker)
+        });
     let Some(settlement) = state.settlements.get_mut(settlement_id) else {
         return;
     };
-    if settlement
-        .siege
-        .as_ref()
-        .is_some_and(|s| &s.attacker == attacker)
-    {
+    if kept {
         return;
     }
     let supplies = 100u8.saturating_sub(devastation / 2).max(10);
@@ -611,6 +657,9 @@ pub(crate) fn apply_assault_result(
     for (id, outcome) in crate::movement::split_outcome(state, attackers, &result.attacker) {
         crate::movement::apply_outcome(state, data, &id, &outcome, events);
     }
+    // F1: a storming general taken on the walls is held by the defender.
+    crate::movement::assign_captor(state, general.as_ref(), &defender_faction);
+    capture_garrison_general(state, data, settlement, &result.defender, &faction, events);
     apply_garrison_losses(state, settlement, &result.defender);
     let allies = if attackers.len() > 1 {
         format!(" (+{} armée(s) alliée(s))", attackers.len() - 1)
@@ -660,8 +709,9 @@ pub(crate) fn apply_assault_result(
     }
 }
 
-/// The garrison attacks the besiegers when clearly stronger; returns `true`
-/// when the siege is broken.
+/// The garrison attacks the besiegers when clearly stronger than the whole
+/// besieging coalition (the lead besieger and its allies, as for an
+/// assault); returns `true` when the siege is broken.
 fn sortie(
     state: &mut CampaignState,
     data: &GameData,
@@ -669,29 +719,31 @@ fn sortie(
     besiegers: &[ArmyId],
     events: &mut Vec<GameEvent>,
 ) -> bool {
-    let Some(target) = besiegers.first() else {
+    let Some(lead) = besiegers.first() else {
         return false;
     };
     let Some(garrison) = garrison_army(state, settlement) else {
         return false;
     };
+    let targets = crate::movement::settlement_coalition(state, lead, &garrison.faction);
     let garrison_power = crate::state::unit_power(data, &garrison.units);
-    if garrison_power <= 1.3 * state.army_power(data, target) {
+    let besieging_power: f64 = targets.iter().map(|id| state.army_power(data, id)).sum();
+    if garrison_power <= 1.3 * besieging_power {
         return false;
     }
     let mut sallying = crate::movement::side_from_army(state, data, &garrison);
-    let mut besieging = crate::movement::side_from_army(state, data, &state.armies[target]);
+    let mut besieging = crate::movement::coalition_side(state, data, &targets);
     // DF1: the AI's morale against the player follows the difficulty.
     state.apply_difficulty_morale(
         data,
         &mut sallying,
         garrison.faction == state.player_faction,
         &mut besieging,
-        state.armies[target].faction == state.player_faction,
+        state.coalition_has_player(&targets),
     );
     // N1: a sortie is a field battle before the walls.
     let sallying_profiles = crate::battle_auto::army_profiles(data, &garrison);
-    let besieging_profiles = crate::battle_auto::army_profiles(data, &state.armies[target]);
+    let besieging_profiles = crate::battle_auto::coalition_profiles(state, data, &targets);
     let province = state
         .settlement_province(settlement)
         .and_then(|p| data.provinces.get(p));
@@ -703,9 +755,24 @@ fn sortie(
         &crate::battle_auto::BattleContext::default(),
         province,
     );
-    let besieger_faction = state.armies[target].faction.clone();
+    let besieger_faction = state.armies[lead].faction.clone();
+    let besieger_general = crate::movement::coalition_commander(state, &targets)
+        .and_then(|id| state.armies.get(&id))
+        .and_then(|a| a.general.clone());
+    capture_garrison_general(
+        state,
+        data,
+        settlement,
+        &result.attacker,
+        &besieger_faction,
+        events,
+    );
     apply_garrison_losses(state, settlement, &result.attacker);
-    crate::movement::apply_outcome(state, data, target, &result.defender, events);
+    for (id, outcome) in crate::movement::split_outcome(state, &targets, &result.defender) {
+        crate::movement::apply_outcome(state, data, &id, &outcome, events);
+    }
+    // F1: a besieging general taken in the sortie is held by the garrison.
+    crate::movement::assign_captor(state, besieger_general.as_ref(), &garrison.faction);
     let won = result.winner == crate::battle_auto::Winner::Attacker;
     events.push(
         GameEvent::new(
@@ -725,14 +792,47 @@ fn sortie(
     );
     if won {
         state.record_battle(&garrison.faction, &besieger_faction, false);
-        if let Some(s) = state.settlements.get_mut(settlement) {
-            s.siege = None;
+        for id in &targets {
+            if let Some(army) = state.armies.get_mut(id) {
+                army.stance = Stance::Normal;
+            }
         }
-        if let Some(army) = state.armies.get_mut(target) {
-            army.stance = Stance::Normal;
+        // The siege is lifted only when no other army still besieges.
+        if besiegers_of(state, settlement).is_empty() {
+            if let Some(s) = state.settlements.get_mut(settlement) {
+                s.siege = None;
+            }
         }
     }
     won
+}
+
+/// The armies still besieging `settlement` (its current controller).
+fn besiegers_of(state: &CampaignState, settlement: &SettlementId) -> Vec<ArmyId> {
+    state
+        .settlements
+        .get(settlement)
+        .map(|s| besiegers(state, settlement, &s.controller))
+        .unwrap_or_default()
+}
+
+/// F1: the governor leading a garrison (see [`garrison_army`]) taken in a
+/// siege battle becomes the prisoner of `captor`. Call before the losses
+/// are applied and before any capture of the place.
+fn capture_garrison_general(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    outcome: &crate::battle_auto::SideOutcome,
+    captor: &FactionId,
+    events: &mut Vec<GameEvent>,
+) {
+    if !outcome.general_captured {
+        return;
+    }
+    if let Some(general) = garrison_army(state, settlement).and_then(|a| a.general) {
+        crate::chronicle::capture_character(state, data, &general, captor, events);
+    }
 }
 
 /// Hands `settlement` to `new_controller` (occupation: the de jure owner is
@@ -749,10 +849,8 @@ pub(crate) fn capture(
     let Some(settlement) = state.settlements.get_mut(settlement_id) else {
         return;
     };
-    let previous = std::mem::replace(&mut settlement.controller, new_controller.clone());
-    settlement.siege = None;
+    let previous = settlement.hand_over(new_controller);
     settlement.garrison.clear();
-    settlement.recruit_queue.clear();
     // Q5: the besiegers stand down once the place is theirs (the army kept
     // its siege stance, and its "siège" label, for the rest of the game).
     for army in state.armies.values_mut() {
