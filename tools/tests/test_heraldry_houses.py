@@ -89,7 +89,7 @@ def test_every_house_blazon_renders() -> None:
     assert duplicates == 0
 
 
-def test_build_houses_deterministic_and_factions_unchanged(tmp_path: Path) -> None:
+def test_build_houses_deterministic_and_arms_of_reuses_faction(tmp_path: Path) -> None:
     """Two builds give identical pixels; arms_of houses reuse the faction drawing."""
     first = heraldry.build_houses(out_dir=tmp_path / "a")
     second = heraldry.build_houses(out_dir=tmp_path / "b")

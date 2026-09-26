@@ -48,6 +48,17 @@
       "required": ["kind"],
       "additionalProperties": false
     },
+    "house_arms": {
+      "type": "object",
+      "description": "DA1b : étendards aux armes de la maison du général (lui et les unités nobles de sa retenue).",
+      "properties": {
+        "note": { "type": "string" },
+        "general_kind": { "$ref": "#/$defs/kind_id" },
+        "unit_types": { "type": "array", "items": { "type": "string", "pattern": "^unit_[a-z_]+$" }, "uniqueItems": true }
+      },
+      "required": ["general_kind", "unit_types"],
+      "additionalProperties": false
+    },
     "musicians": {
       "type": "object",
       "properties": {

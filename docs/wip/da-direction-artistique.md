@@ -82,3 +82,13 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   peints + atlas, écu du contrôleur, tri par rang selon le zoom dans les données, 0,59 $.
   Cumul DA : 5,43 $. Suites : chevauchements en régions denses, légende petite, écus de maison
   dans l'atlas.
+- 26/09 : **DA1b fusionné** (ADR 0064 révisé) : 12 meubles SVG libres (PD/CC0/CC BY 4.0) rendus
+  par rôle de couleur (`resvg-py`), 80 écus et 240 étoffes régénérés, bannière de maison du
+  général et de sa retenue sur les étendards EP5 (oriflamme en second porte-étendard). Smoke +
+  pytest 666 OK. Limites : cadrage EP5 `--standard-shot=foot` côté France, petits châteaux
+  polygonaux, dauphin pâmé.
+- 26/09 : **DA6 fusionné** (ADR renuméroté **0067**) : lisières ondulées et fondues, touffes à 4
+  cartes cintrées, feuillus procéduraux par essence (LOD + imposteurs), texture de détail du sol,
+  décor désaturé ; +1,5 à +3,5 % de coût, 0 $. Smoke + pytest 668 OK. Capture combinée DA1/DA1b/
+  DA5/DA6 : `docs/img/da/etat_2609_bataille_combinee.jpg`. Limites : saturation automne/bocage
+  > 35 % (lumière `BattleAtmosphere`), blé qui ne suit pas la saison.
