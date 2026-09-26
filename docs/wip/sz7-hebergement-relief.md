@@ -19,9 +19,37 @@ réservée à l'accord explicite du joueur. Voir ADR 0077.
 6. Docs (`docs/geo.md`, commandes de publication à la main du joueur) + addendum ADR 0077 si besoin.
 
 ## État
-- Squelette en cours d'écriture (ce commit) : schéma + données + modules vides + plan de test.
+- Squelette (schéma, `relief_hosting.json`, modules vides) : fait.
+- Fusion de `main` (SZ2, c4064c29) faite : `bake_versions` (lot SZ2, `bake_stamp.py`) est la
+  source d'autorité de la version de cuisson des étages 1-3 ; `bake_signature()` la combine avec
+  `generated_at` des fleuves/routes fins (pas encore versionnés individuellement).
+- `relief_pack.py` : `pack()` (tar non compressé en flux, split < 1,9 Gio, manifeste SHA-256 +
+  crédits extraits de `CREDITS.md`), `bump_version_if_rebaked()` (dérive `version` de
+  `bake_signature`), `check_free_space()`. Décision compression : zstd -19 testé sur échantillon
+  synthétique (PNG 16 bits, blob CAFV) → gain ≈ 0 %, pas de compression (conforme à l'ADR).
+- `relief_fetch.py` : `fetch()` (HTTP Range resume via `urllib`, ou `--from-dir`), vérification
+  SHA-256 par part, extraction atomique par renommage (parts chaînées, jamais de tar complet
+  matérialisé), `default_dest()` (`CENT_ANS_RELIEF_DIR` puis `data/map`).
+- CLI : `cent-ans geo relief-pack [--out]`, `geo relief-fetch [--dest] [--base-url] [--from-dir]`.
+- `ReliefCacheNotice`/`ReliefCacheStatus` (jeu) : `FETCH_COMMAND` proposé en premier, `REGEN_COMMAND`
+  en repli ; texte de l'avis mis à jour ; `zg7b_cache_test.gd` mis à jour et **passe**
+  (`godot --headless --path game --script res://tests/zg7b_cache_test.gd`).
+- Tests pytest `tools/tests/test_relief_hosting.py` (12 tests : split/checksums, bump de version
+  par cuisson de pyramide, crédits, disque insuffisant, fetch `--from-dir` round-trip et
+  remplacement, somme fausse/part manquante refusées, HTTP réel avec reprise sur un
+  `http.server.ThreadingHTTPServer` local) : **12/12 OK**.
+- Docs : `docs/geo.md` (« Hébergement du paquet « Cent Ans relief » », commandes `gh repo create`
+  / `gh release create` à la main du joueur) ; addendum ADR 0077 (version dérivée de
+  `bake_versions`, décision compression, absence d'archive intermédiaire complète).
+- **Non fait** : empaquetage réel de la vraie pyramide (2,4-2,8 Go) — interdit par le mandat
+  (disque presque plein) ; publication réseau (`gh repo create` / `gh release create`) — réservée
+  au joueur.
 
 ## Prochaine étape
-Implémenter `relief_pack.py` (tar streaming + split + manifeste), puis `relief_fetch.py`
-(téléchargement/repli `--from-dir`, vérification, extraction atomique), brancher le CLI, mettre
-à jour l'avis du jeu et son test, écrire les tests pytest, documenter.
+Lot terminé côté outillage. Reste, à la main du joueur : lancer
+`uv run --project tools cent-ans geo relief-pack --out <dossier avec assez de place>` sur un
+poste avec assez de disque, puis les commandes `gh` de `docs/geo.md` pour publier.
+`cd core && cargo fmt && cargo clippy --all-targets -- -D warnings && cargo test` non lancé (aucun
+fichier Rust touché par ce lot). `uv run --project tools pytest` (suite complète, pas seulement
+`test_relief_hosting.py`) à confirmer par l'orchestrateur avant fusion : lent sur cette machine
+(tests géo à base d'images), lancé en fin de session, résultat à vérifier.
