@@ -36,10 +36,10 @@ Réglages : `relief_exaggeration.tres` (`mountain_*`), `close_camera.tres` (`cre
 - [x] Rouen (VH4) : relief près de l'échelle vraie autour des villes 1:1 (`true_scale_*`),
       captures `avant_rouen_*` (= `docs/img/vh4/`) / `apres_rouen_*`
 - [x] Tests après fusion : sz1, zg2, zg4, zg8, vh4_landmarks, smoke OK
-- [ ] cargo fmt/clippy/test complet (cible privée : la cible partagée mélange les worktrees)
+- [x] cargo fmt/clippy/test complet : 831 OK (cible privée ; la cible partagée mélange les worktrees)
 
 ## Prochaine étape
-Première case non cochée, puis rapport à l'orchestrateur (ne pas fusionner dans main).
+Lot terminé, en attente de fusion par l'orchestrateur (ff-only).
 
 ## Limites
 - Galles (vallée de Conwy) : amplitude 960 m sur des vallées étroites, reste un paysage de montagne
