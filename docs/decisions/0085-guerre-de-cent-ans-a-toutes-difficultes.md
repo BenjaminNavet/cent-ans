@@ -57,10 +57,13 @@ comportement antérieur ; schéma `ai_diplomacy.schema.json`).
    « Guerre interminable » (+8 par an, plafond 100) à l'évaluation d'un traité qui y met fin
    (`negotiation::context_reasons`). Une guerre que personne ne peut gagner finit en trêve
    (Brétigny 1360, Leulinghem 1389).
-4. `peace.cornered_waits_for_defeat` : une couronne acculée ne demande la paix avant
-   `min_war_turns` qu'une fois battue dans cette guerre (score ≤ `SURRENDER_WAR_SCORE`, -25)
-   (`negotiation::plan_peace`). Elle défend sa dernière terre au lieu de capituler d'emblée ;
-   l'Écosse de Halidon Hill traite toujours une fois battue.
+4. `peace.cornered_waits_for_defeat` : une couronne acculée, en guerre contre un prétendant à
+   son trône, ne demande la paix avant `min_war_turns` qu'une fois battue dans cette guerre
+   (score ≤ `SURRENDER_WAR_SCORE`, -25) (`negotiation::plan_peace`) : achetée, la paix ne
+   ferait que ramener le prétendant après la trêve ; elle défend sa dernière terre. Contre tout
+   autre ennemi elle traite aussitôt, comme avant (l'Écosse après Halidon Hill). Une première
+   version sans cette restriction faisait disparaître l'Écosse (facile, 1396 et 1436) : entrée
+   en guerre à l'appel de la France, acculée, elle ne traitait plus.
 
 Aucune donnée de difficulté (`data/rules/difficulty.json`) n'est changée.
 

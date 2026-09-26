@@ -1768,9 +1768,12 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
         // `min_war_turns`, unless the realm is down to its last lands.
         let started = me.war_started.get(enemy).copied().unwrap_or(0);
         let score = state.war_score(data, faction, enemy);
-        // EQ6: a cornered crown first fights the war it is dealt.
+        // EQ6: a cornered crown first fights a pretender to its throne
+        // (bought off, he would be back after the truce); against anyone
+        // else it treats at once (the Scots after Halidon Hill).
         let sues_early = cornered
             && (!data.ai_diplomacy.peace.cornered_waits_for_defeat
+                || !diplomacy::claim_stakes(state, enemy, faction).throne
                 || score <= diplomacy::SURRENDER_WAR_SCORE);
         if !sues_early && state.turn < started + rules.min_war_turns {
             continue;
