@@ -47,7 +47,8 @@
       "description": "Conditions de paix demandées ou offertes par l'IA.",
       "properties": {
         "keep_capital": { "type": "boolean", "description": "Une couronne ne cède jamais sa capitale ni sa dernière province par traité." },
-        "cornered_provinces": { "type": "integer", "minimum": 0, "description": "Une couronne qui ne tient plus que ce nombre de ses provinces (ou moins) demande la paix à chaque saison, quel que soit le score de guerre (0 : jamais)." }
+        "cornered_provinces": { "type": "integer", "minimum": 0, "description": "Une couronne qui ne tient plus que ce nombre de ses provinces (ou moins) demande la paix à chaque saison, quel que soit le score de guerre (0 : jamais)." },
+        "cornered_waits_for_defeat": { "type": "boolean", "description": "EQ6 (ADR 0085) : une couronne acculée ne demande la paix avant min_war_turns qu'une fois cette guerre tournée contre elle (score de guerre négatif) ; elle n'achète plus la paix la saison même de la déclaration. Faux par défaut." }
       },
       "required": ["keep_capital", "cornered_provinces"],
       "additionalProperties": false

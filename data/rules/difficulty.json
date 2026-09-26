@@ -45,14 +45,14 @@
       "id": "very_hard",
       "label": "Très difficile",
       "description": "Pour les connétables aguerris : l'IA est riche, recrute et entretient ses osts à bon compte et vous déclare la guerre au moindre signe de faiblesse ; vos revenus sont maigres et vos provinces promptes à gronder.",
-      "ai_income_percent": 130,
+      "ai_income_percent": 140,
       "player_income_percent": 90,
       "ai_upkeep_percent": 80,
       "ai_recruit_cost_percent": 85,
       "player_unrest": 6,
       "ai_attitude_to_player": -20,
       "ai_war_ratio_percent": 80,
-      "ai_morale_vs_player": 7
+      "ai_morale_vs_player": 10
     }
   ]
 }
