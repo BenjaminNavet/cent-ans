@@ -374,3 +374,12 @@ Détail dans `docs/geo.md` (« Fonds de vallée non creusés », « Versions de 
   à l'exécution.
 - **Versions de cuisson** : `bake_versions` dans le manifeste, `pyramid/bake.json` dans le cache ;
   un palier périmé est recuit par `geo relief-all` sans `--force`, avec reprise après interruption.
+
+## Addendum (lot VH4, 2026-09-26) : villes emblématiques 1:1
+
+L'addendum « villes emblématiques » est réalisé par l'ADR 0078 : format `landmark` v2 géoréférencé
+(EPSG:3035, `data/landmarks_v2/`), ville rendue à l'échelle réelle au palier vallée par le moteur
+ZG6 étendu (`LandmarkPlan`, `LandmarkMonuments`, `LandmarkCityLayer`), maquette L1/L2 gardée en vue
+stratégique avec un fondu tramé. Le plancher `landmark_min_distance` de ZG4b ne s'applique plus
+qu'aux villes sans fichier v2. Rouen vers 1340 est la première ville migrée ; Paris, Londres et
+Orléans suivent (VH5-VH7). Voir `docs/landmarks-v2.md`.

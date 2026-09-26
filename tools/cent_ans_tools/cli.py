@@ -475,6 +475,24 @@ def geo_towns() -> None:
     console.print(result.summary())
 
 
+@geo_app.command("landmarks")
+def geo_landmarks(
+    city: list[str] = typer.Option(  # noqa: B008
+        None, "--city", help="Identifiant de ville (répétable)"
+    ),
+    refresh_osm: bool = typer.Option(
+        False, "--refresh-osm", help="Retélécharge l'extrait OpenStreetMap (Overpass)"
+    ),
+) -> None:
+    """Villes emblématiques 1:1 (ADR 0078, lot VH4) : rues OSM et fleuve fin de data/landmarks_v2/."""
+    from cent_ans_tools.geo import landmarks_v2
+
+    result = landmarks_v2.build(
+        only=city or None, refresh_osm=refresh_osm, log=console.print
+    )
+    console.print(result.summary())
+
+
 @geo_app.command("relief-all")
 def geo_relief_all(
     check: bool = typer.Option(

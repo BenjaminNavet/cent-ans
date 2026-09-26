@@ -263,6 +263,13 @@ reproduites telles quelles (entre guillemets).
   d'[OpenStreetMap](https://www.openstreetmap.org/copyright) (ODbL 1.0), arrondis. Les plans
   anciens de Wikimedia Commons cités dans ces fichiers ont servi de référence et ne sont pas
   redistribués.
+- **Villes emblématiques à l'échelle 1:1** (`data/landmarks_v2/`, ADR 0078) : tracés des rues
+  actuelles héritées du plan médiéval, positions et orientations des églises, tracé des
+  boulevards bâtis sur les enceintes arasées, extraits d'OpenStreetMap (Overpass) par
+  `cent-ans geo landmarks` : © les contributeurs
+  d'[OpenStreetMap](https://www.openstreetmap.org/copyright), base de données sous licence
+  ODbL 1.0. Les plans anciens (Le Lieur, Braun et Hogenberg, plans Gallica, carte d'Agas) ne
+  servent qu'au contrôle humain et ne sont ni extraits ni redistribués.
 - **Réseau hydrographique fin (lot ZG5a, ADR 0036)** — tracés recalés sur la pyramide de relief,
   canaux postérieurs à 1340 retirés :
   - France : BD TOPAGE® 2025, tronçons hydrographiques (IGN, OFB, agences de l'eau ; diffusion
