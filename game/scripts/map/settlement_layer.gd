@@ -86,6 +86,9 @@ var _towns_version := -1
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
 var _hamlet_anchors: PackedVector4Array = PackedVector4Array()
+## Lot SZ4 : échelle appliquée aux hameaux (1 au loin, taille réelle au palier vallée,
+## `MapPropScale.hamlet_scale`) ; les tuiles sont reconstruites par pas de `rewrite_step`.
+var _hamlet_scale := 1.0
 
 
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
@@ -495,7 +498,8 @@ func update_view(camera_distance: float) -> void:
 		_icon_material.set_shader_parameter("alpha", icon_alpha)
 		_icons.visible = icon_alpha > 0.01
 		_models_root.visible = weights.x > 0.35 and not site and not _towns_active()
-		_hamlets_root.visible = weights.x > 0.35 and not site
+		# SZ4 : hameaux à leur taille réelle sous le palier comté, gardés au palier site.
+		_hamlets_root.visible = weights.x > 0.35
 		_landmarks_root.visible = not site
 		_update_label_heights()
 		_declutter_timer = 0.0
@@ -506,6 +510,7 @@ func update_view(camera_distance: float) -> void:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
 	_update_towns(camera_distance)
+	_update_hamlet_scale(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
@@ -628,6 +633,32 @@ func visible_label_count() -> int:
 # --- Hameaux -------------------------------------------------------------------------
 
 
+## SZ4 : nouvelle échelle des hameaux (par pas de `rewrite_step`) → transformations des tuiles
+## construites réécrites depuis les données gardées à la construction (sans relire le relief).
+func _update_hamlet_scale(camera_distance: float) -> void:
+	var props := MapPropScale.shared()
+	var wanted := props.hamlet_scale(camera_distance)
+	if not props.needs_rewrite(_hamlet_scale, wanted):
+		return
+	_hamlet_scale = wanted
+	for node: Node3D in _hamlet_nodes.values():
+		for mmi in node.get_children():
+			var instance := mmi as MultiMeshInstance3D
+			if instance != null and instance.multimesh != null and instance.has_meta("hamlet_entries"):
+				_write_hamlet_transforms(instance.multimesh, instance.get_meta("hamlet_entries"))
+
+
+## SZ4 : transformations des hameaux à l'échelle courante. Pose : entre le sol au centre (taille
+## réelle, emprise de quelques dizaines de mètres) et le point le plus bas de l'emprise de carte
+## (taille de carte, rien ne flotte sur une pente), au prorata de l'échelle.
+func _write_hamlet_transforms(multimesh: MultiMesh, entries: Array) -> void:
+	var s := _hamlet_scale
+	for t in entries.size():
+		var e: PackedFloat32Array = entries[t]
+		var basis := Basis(Vector3.UP, e[2]).scaled(Vector3.ONE * (e[3] * s))
+		var y := lerpf(e[4], e[5], s) - 0.03 * s
+		multimesh.set_instance_transform(t, Transform3D(basis, Vector3(e[0], y, e[1])))
+
 func _update_hamlets() -> void:
 	var show := _weights.x > 0.35
 	var builds := 0
@@ -699,23 +730,24 @@ func _build_hamlets(index: int) -> void:
 		var key := variant * 2 + (1 if burned else 0)
 		var yaw := float((seed_value / 13) % 628) / 100.0
 		var scale := ModelLibrary.HAMLET_SCALE * (0.85 + float((seed_value / 17) % 30) / 100.0)
-		var y := terrain.surface_height_at(px.x, px.y)
+		var center := terrain.surface_height_at(px.x, px.y)
+		var low := center
 		for k in 4:
 			var angle := k * TAU / 4.0 + yaw
-			y = minf(y, terrain.surface_height_at(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
-		var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale)
+			low = minf(low, terrain.surface_height_at(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
 		if not groups.has(key):
 			groups[key] = []
-		groups[key].append(Transform3D(basis, Vector3(px.x, y - 0.03, px.y)))
+		# SZ4 : (x, z, lacet, échelle de carte, sol au centre, sol le plus bas de l'emprise de carte).
+		groups[key].append(PackedFloat32Array([px.x, px.y, yaw, scale, center, low]))
 	for key in groups:
-		var transforms: Array = groups[key]
+		var entries: Array = groups[key]
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.mesh = meshes[key / 2]
-		multimesh.instance_count = transforms.size()
-		for t in transforms.size():
-			multimesh.set_instance_transform(t, transforms[t])
+		multimesh.instance_count = entries.size()
+		_write_hamlet_transforms(multimesh, entries)
 		var mmi := MultiMeshInstance3D.new()
+		mmi.set_meta("hamlet_entries", entries)
 		mmi.multimesh = multimesh
 		if key % 2 == 1:
 			mmi.material_override = _burned_material
