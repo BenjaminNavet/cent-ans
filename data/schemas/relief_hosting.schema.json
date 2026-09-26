@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/relief_hosting.schema.json",
+  "title": "Hébergement du paquet « Cent Ans relief »",
+  "description": "Fichier data/map/relief_hosting.json (lot SZ7, ADR 0077) : où télécharger le cache du relief fin (data/map/pyramid/, ~2,8 Go, hors git) quand il n'est pas recalculé sur place. `version` suit la cuisson de la pyramide (relief_pyramid.json, rivers_fine.json, fine_anchors.json) : `cent-ans geo relief-pack` l'incrémente automatiquement si l'empreinte de cuisson (`bake.signature`) a changé depuis le dernier paquet publié. `base_url` contient le gabarit `{version}`. Lu par `cent_ans_tools.geo.relief_fetch`. Rendu/outillage seulement, aucune règle de jeu.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "package_name": { "type": "string", "minLength": 1 },
+    "base_url": {
+      "type": "string",
+      "description": "URL de base des Releases GitHub du dépôt de données, avec le gabarit {version} (ex. .../download/v{version}/).",
+      "pattern": "\\{version\\}"
+    },
+    "version": { "type": "integer", "minimum": 1 },
+    "manifest_name": { "type": "string", "minLength": 1, "description": "Nom du fichier manifeste dans chaque version publiée." },
+    "bake": {
+      "type": "object",
+      "description": "Empreinte de la cuisson correspondant à `version` (remplie par `relief-pack`).",
+      "properties": {
+        "pyramid_generated_at": { "type": ["string", "null"] },
+        "rivers_generated_at": { "type": ["string", "null"] },
+        "roads_generated_at": { "type": ["string", "null"] },
+        "signature": { "type": ["string", "null"], "description": "SHA-256 des trois manifestes concaténés." }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["package_name", "base_url", "version", "manifest_name"],
+  "additionalProperties": false
+}

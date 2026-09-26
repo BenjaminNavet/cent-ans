@@ -1,0 +1,13 @@
+{
+  "description": "Hébergement du cache de relief fin (lot SZ7, ADR 0077). Publication (dépôt public, envoi des parts) réservée à l'accord explicite du joueur : voir docs/geo.md, « Publier le paquet Cent Ans relief ».",
+  "package_name": "cent-ans-relief",
+  "base_url": "https://github.com/BenjaminNavet/cent-ans-relief/releases/download/v{version}/",
+  "version": 1,
+  "manifest_name": "manifest.json",
+  "bake": {
+    "pyramid_generated_at": null,
+    "rivers_generated_at": null,
+    "roads_generated_at": null,
+    "signature": null
+  }
+}
