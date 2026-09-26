@@ -27,11 +27,24 @@ Objectif : moins de CPU par image en bataille, rendu identique, simulation incha
 - Constat : en Godot 4, les Packed*Array sont partagés par référence en GDScript (vérifié) :
   `_hide_knocked` / `_drive_in` ne copiaient pas ; seule `_hide_reserved` copie (gardée).
 
+## Trouvailles du profilage (grosse bataille, release, par image)
+Avant : `_update_effects` ~16 ms dont `battle_effects.update` ~15 ms : `_wet_span` appelle
+`terrain.in_water` 5 fois par régiment en marche, qui parcourait tout le tracé des ruisseaux
+(points tous les 4 m) en GDScript. Corrigé : tronçons de 24 segments avec boîte englobante
+(`_stream_chunks`, résultat identique) + `_wet_span` en cache par régiment tant que position,
+cap et profondeur ne changent pas. Ensuite : `get_units` ~2,4 ms (désormais en cache Rust entre
+deux pas), `soldiers.update` ~3,3 ms, étendards ~1,7, audio ~1,3, herbe couchée ~1,2.
+Les poses Rust ne coûtaient presque rien en release : le cache des poses aide surtout en debug.
+
+## Piège de build
+Le `target` partagé (`core/target` du dépôt principal) mélange les worktrees : les crates du
+workspace ont les mêmes empreintes d'un worktree à l'autre, la dylib copiée peut venir d'un
+autre agent (constaté : dylib sans `get_soldier_buffers`). PB3c compile dans le `core/target`
+de son worktree (ignoré par git).
+
 ## Mesures
-Script d'A/B (scratchpad) : `--benchmark --quality=high --disable-vsync 1600x900`, grosse
-bataille `--units=120 --bench-at=60` (28 760 soldats), siège `--siege --bench-at=60`.
-Premier passage debug (3 paires) : grosse bataille 23,9 vs 21,4 i/s (médianes), siège très
-bruité (machine partagée ; l'ordre des passages domine).
+(A/B base 6a837e99 contre HEAD en cours, script `ab2.sh` du scratchpad : scripts et dylib
+échangés, ordre alterné.)
 
 ## Prochaine étape
-A/B debug avec soldiers_ms, puis release ; tests Godot (battle, ep*, siege*, smoke) ; fusion main.
+A/B debug et release, fusion de `main`, rapport.
