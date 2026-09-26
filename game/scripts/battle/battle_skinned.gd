@@ -6,9 +6,11 @@ extends RefCounted
 ## `battle_soldier_skinned.gdshader` et correspondance état du régiment → clips.
 ## Repli : sans manifeste, ou avec `--rigid-figures` / `--legacy-figures` après `--`, les
 ## figurines à membres rigides (lots B1/B4, `BattleMeshes`) restent utilisées.
-## Lot FG1 : avec `--fine-figures` après `--`, les figurines fines (corps MakeHuman, rigs aux
-## proportions réalistes) de `assets/models/battle_fine/` remplacent celles qu'elles couvrent
-## (rigs renommés `fine_human` / `fine_cavalry`, chemins absolus dans le manifeste fusionné).
+## Lot FG1 : les figurines fines (corps MakeHuman, rigs aux proportions réalistes) de
+## `assets/models/battle_fine/` remplacent celles qu'elles couvrent (rigs renommés `fine_human` /
+## `fine_cavalry`, chemins absolus dans le manifeste fusionné). Lot FG5 (ADR 0089) : rendu par
+## défaut ; `--coarse-figures` après `--` rend les figurines Quaternius (V2) le temps de la
+## transition, `--no-fg3` les figurines fines sans cartes cuites.
 
 const DIR := "res://assets/models/battle_skinned/"
 const FINE_DIR := "res://assets/models/battle_fine/"
@@ -130,9 +132,15 @@ static func manifest() -> Dictionary:
 	return _manifest
 
 
-## Lot FG1 : figurines fines demandées (`--fine-figures` après `--`).
+## Lot FG1 : figurines fines actives. FG5 : par défaut ; `--coarse-figures` après `--` les
+## coupe (figurines Quaternius du lot V2). `--fine-figures` reste accepté (sans effet).
 static func fine_enabled() -> bool:
-	return OS.get_cmdline_user_args().has("--fine-figures")
+	return not OS.get_cmdline_user_args().has("--coarse-figures")
+
+
+## FG5 : figurine fine (LOD0 dessiné par soldat, voir `BattleSoldiers.FINE_DETAIL_DISTANCE`).
+static func is_fine(kind: String, variant: int) -> bool:
+	return bool(figure(kind, variant).get("fine", false))
 
 
 ## Lot FG1 : ajoute au manifeste les rigs fins (renommés) et remplace les figurines fines.
@@ -140,7 +148,7 @@ static func _merge_fine(base: Dictionary) -> void:
 	var text := FileAccess.get_file_as_string(FINE_DIR + "manifest.json")
 	var parsed = JSON.parse_string(text) if text != "" else null
 	if not parsed is Dictionary:
-		push_warning("BattleSkinned: --fine-figures sans manifeste %s" % FINE_DIR)
+		push_warning("BattleSkinned: figurines fines sans manifeste %s" % FINE_DIR)
 		return
 	var rigs: Dictionary = base.get("rigs", {})
 	for rig_name in (parsed as Dictionary).get("rigs", {}):

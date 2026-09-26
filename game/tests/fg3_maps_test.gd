@@ -3,8 +3,8 @@ extends SceneTree
 ## Lot FG3 : cartes cuites des figurines fines. Vérifie que les textures se chargent (formats
 ## compressés, mémoire), que les figurines cuites basculent sur la variante `FG3_BAKED` avec
 ## leur couche, que les maillages `CAM2` portent l'UV d'atlas (LOD0/LOD1) et pas le LOD2, et
-## que sans `--fine-figures` rien ne change (shader par défaut).
-## Usage : godot --headless --path game --script res://tests/fg3_maps_test.gd [-- --fine-figures]
+## qu'avec `--coarse-figures` (figurines Quaternius, FG5) rien ne change (shader par défaut).
+## Usage : godot --headless --path game --script res://tests/fg3_maps_test.gd [-- --coarse-figures]
 
 
 func _init() -> void:

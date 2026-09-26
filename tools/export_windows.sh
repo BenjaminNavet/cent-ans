@@ -27,7 +27,9 @@ cp "$ROOT/CREDITS.md" "$OUT/CREDITS.md"
 du -sh "$OUT"
 if [[ "${CENT_ANS_NO_ZIP:-0}" != "1" ]]; then
     rm -f "$ROOT/export/Cent Ans Windows.zip"
-    (cd "$ROOT/export" && zip -qr "Cent Ans Windows.zip" windows)
+    # The archive unpacks to "Cent Ans/" (zip follows the symlink and stores its files).
+    (cd "$ROOT/export" && rm -f "Cent Ans" && ln -s windows "Cent Ans" \
+        && zip -qr "Cent Ans Windows.zip" "Cent Ans" && rm "Cent Ans")
     du -sh "$ROOT/export/Cent Ans Windows.zip"
 fi
 echo "Exporté : $OUT"

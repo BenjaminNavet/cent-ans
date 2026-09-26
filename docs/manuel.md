@@ -153,11 +153,19 @@ un point quelconque de la carte, ou dans une colonie (stationnée, en garnison o
   marche ; un train de siège la ralentit.
 - **Zone de contrôle** : chaque armée tient un cercle de 8 km autour d'elle (affiché en rouge au survol d'une
   armée ennemie). Une armée ennemie qui y entre s'arrête net.
-- **Attaque** : clic droit sur une armée ennemie à portée ; votre armée marche au contact (à moins de 5 km)
-  et la bataille est livrée aussitôt, tactique ou automatique à votre choix. Plus aucun mouvement ensuite.
-- **Colonies** : clic droit sur une colonie ennemie pour l'**assiéger** (l'armée s'y installe ; le siège
-  progresse à partir de la fin du tour suivant) ; un village sans garnison est pris sur-le-champ. L'assaut
-  reste un ordre à part. Sur une colonie amie, l'armée **stationne** : elle peut y laisser des unités en
+- **Attaque** : armée sélectionnée, le curseur prend la forme de deux **épées croisées** au survol de ce
+  qu'un clic droit attaquerait (armée ou place). Clic droit sur une armée ennemie à portée : votre armée
+  marche au contact (à moins de 5 km) et la bataille est livrée aussitôt, tactique ou automatique à votre
+  choix. Plus aucun mouvement ensuite.
+- **Colonies** : clic droit sur une colonie ennemie pour l'**attaquer** : si l'armée l'atteint ce tour,
+  elle met le siège et l'**assaut** est aussitôt proposé (bataille de siège, résolution automatique, ou
+  « Maintenir le siège » pour affamer la place) ; sinon elle marche et l'assaut se donne au tour suivant
+  (nouveau clic droit ou bouton « Donner l'assaut »). Une armée ennemie postée dans la place est attaquée
+  aux portes. Un village sans garnison est pris sur-le-champ.
+- **Faction en paix** : attaquer une armée ou une place d'une faction avec laquelle vous n'êtes pas en
+  guerre ouvre une confirmation « Déclarer la guerre ? » qui détaille les conséquences (motif, réputation,
+  prestige) ; confirmer déclare la guerre puis lance l'attaque. Alliés et vassaux ne s'attaquent pas ainsi.
+- **Stationner** : sur une colonie amie, l'armée **stationne** : elle peut y laisser des unités en
   garnison et en ressortir dans la même saison si elle a encore des points.
 - **Fleuves et gués** : les grands fleuves (Loire, Seine, Somme, Rhône, Saône, Garonne, Dordogne, Meuse,
   Escaut, Rhin, Tamise…) ne se franchissent qu'aux **ponts et gués** de 1337 (Orléans, Blois, Tours,
