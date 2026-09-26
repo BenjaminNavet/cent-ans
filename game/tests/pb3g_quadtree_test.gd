@@ -8,7 +8,9 @@ extends SceneTree
 ##     pages fines et grossières, les mêmes pages voulues ;
 ##  2. les nœuds affichés correspondent à la sélection (un `MeshInstance3D` visible par nœud) ;
 ##  3. `VegetationScatter.request_reground` : même résultat avec les pages partagées du magasin
-##     natif (`qt_store`) qu'avec la copie des octets.
+##     natif (`qt_store`) qu'avec la copie des octets ;
+##  4. hauteurs groupées `TerrainBuilder.surface_heights_at` (bilinéaire natif) = point par point ;
+##  5. tampon des hameaux écrit en une fois (`SettlementLayer.hamlet_buffer`).
 ## Usage : godot --headless --path game --script res://tests/pb3g_quadtree_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -93,22 +95,25 @@ func _check_heights(terrain: TerrainBuilder, at: Vector2) -> void:
 	_check(worst < 1e-4, "surface_heights_at differs from surface_height_at by %f" % worst)
 
 
-## Tampon des hameaux écrit en une fois = transformations de `set_instance_transform`.
+## Tampon des hameaux écrit en une fois = transformations attendues, dans la disposition de
+## `MultiMesh.buffer` (lignes de la base, puis origine ; le serveur factice headless ne relit pas
+## les instances, d'où la comparaison directe du tampon).
 func _check_hamlet_buffer() -> void:
-	var layer := SettlementLayer.new()
 	var entries: Array = []
 	for i in 5:
 		entries.append(PackedFloat32Array([100.0 + i, 200.0 - i, i * 1.3, 0.4 + i * 0.05, 1.0 + i * 0.1, 0.9 + i * 0.1]))
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.instance_count = entries.size()
-	layer._write_hamlet_transforms(multimesh, entries)
-	var s: float = layer._hamlet_scale
+	var s := 0.7
+	var buffer := SettlementLayer.hamlet_buffer(entries, s)
+	_check(buffer.size() == entries.size() * 12, "hamlet buffer size")
 	for t in entries.size():
 		var e: PackedFloat32Array = entries[t]
-		var expected := Transform3D(Basis(Vector3.UP, e[2]).scaled(Vector3.ONE * (e[3] * s)), Vector3(e[0], lerpf(e[4], e[5], s) - 0.03 * s, e[1]))
-		_check(multimesh.get_instance_transform(t).is_equal_approx(expected), "hamlet buffer transform %d differs" % t)
-	layer.free()
+		var x := Transform3D(Basis(Vector3.UP, e[2]).scaled(Vector3.ONE * (e[3] * s)), Vector3(e[0], lerpf(e[4], e[5], s) - 0.03 * s, e[1]))
+		var expected := PackedFloat32Array([
+			x.basis.x.x, x.basis.y.x, x.basis.z.x, x.origin.x,
+			x.basis.x.y, x.basis.y.y, x.basis.z.y, x.origin.y,
+			x.basis.x.z, x.basis.y.z, x.basis.z.z, x.origin.z,
+		])
+		_check(buffer.slice(t * 12, t * 12 + 12) == expected, "hamlet buffer transform %d differs" % t)
 
 
 ## Compare la sélection native de la dernière image à la sélection GDScript ; 1 si comparée.
@@ -164,7 +169,9 @@ func _check_reground(qt: ReliefQuadtree, at: Vector2) -> void:
 			var z := fposmod(i * 91.7, 256.0)
 			buffer.append_array([1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 0.0])
 		var buffers: Array = [buffer]
+		var t0 := Time.get_ticks_usec()
 		scatter.call("request_reground", 1, buffers, grid, origin, MapData.vertical_scale(), MapData.relief_gain(), MapData.relief_squash())
+		print("pb3g_quadtree_test: request_reground %s, %d pages: %.2f ms" % ["shared" if grid.has("qt_store") else "copied", (grid["qt_pages"] as Dictionary).size(), (Time.get_ticks_usec() - t0) / 1000.0])
 		var polled: Array = []
 		for _i in 2000:
 			polled = scatter.call("poll", 1)
