@@ -378,6 +378,7 @@ HORSE_SRC = 2
 HORSE_SIZE = 1024
 DILATE = (8, 4)
 HEAD_TEXEL_SCALE = 1.8  # heads, hair and beards get more texels than the rest
+LONG_ISLAND = 0.45  # longest piece extent, in sides of the square of the whole UV area
 HELMETS = {
     "bassinet",
     "fine_bassinet",
@@ -551,7 +552,7 @@ def hair_mask(obj, lm, beard):
     mouth_z = lm.eye.z - 0.068
     values = []
     for v, d in zip(obj.data.vertices, dist, strict=True):
-        m = _smooth(0.0, 0.016 if beard else 0.012, d)
+        m = _smooth(0.0, 0.022 if beard else 0.012, d)
         if beard:
             p = mw @ v.co
             if p.y < lm.eye.y:
@@ -652,18 +653,38 @@ def atlas_unwrap(objs, size):
     def pack():
         bpy.ops.uv.select_all(action="SELECT")
         bpy.ops.uv.average_islands_scale()
+        meshes = {}
+        area = 0.0
         for o in objs:
-            if not _is_head(o):
-                continue
             bm = bmesh.from_edit_mesh(o.data)
             uv = bm.loops.layers.uv[ATLAS_UV]
+            meshes[o.name] = (bm, uv)
+            for f in bm.faces:
+                pts = [loop[uv].uv for loop in f.loops]
+                for i in range(1, len(pts) - 1):
+                    e1 = pts[i] - pts[0]
+                    e2 = pts[i + 1] - pts[0]
+                    area += abs(e1.x * e2.y - e1.y * e2.x) / 2
+        side = math.sqrt(max(area, 1e-9))
+        for o in objs:
+            bm, uv = meshes[o.name]
             pts = [loop[uv].uv.copy() for f in bm.faces for loop in f.loops]
             if not pts:
                 continue
             c = sum(pts, Vector((0.0, 0.0))) / len(pts)
+            extent = max(
+                max(p.x for p in pts) - min(p.x for p in pts),
+                max(p.y for p in pts) - min(p.y for p in pts),
+            )
+            # Heads get more texels; long shafts (pikes, lances) fewer, else they set
+            # the size of the square and shrink everything else.
+            k = HEAD_TEXEL_SCALE if _is_head(o) else 1.0
+            k = min(k, LONG_ISLAND * side / max(extent, 1e-9))
+            if abs(k - 1.0) < 1e-3:
+                continue
             for f in bm.faces:
                 for loop in f.loops:
-                    loop[uv].uv = c + (loop[uv].uv - c) * HEAD_TEXEL_SCALE
+                    loop[uv].uv = c + (loop[uv].uv - c) * k
             bmesh.update_edit_mesh(o.data)
         bpy.ops.uv.select_all(action="SELECT")
         bpy.ops.uv.pack_islands(
@@ -785,27 +806,22 @@ def bake_figure_atlas(objs, others, hd, level, variants):
     _assign(objs, _bake_material(mask_img, emit_mask=True))
     _select(objs[0], objs)
     bpy.ops.object.bake(type="EMIT", margin=0, use_clear=False, uv_layer=ATLAS_UV)
-    # 2. Ambient occlusion, variant by variant (the variants' pieces overlap).
+    # 2. Ambient occlusion by variant group: the pieces worn by every variant see only each
+    # other (a tabard or helmet of one variant must not darken the others' torso or face);
+    # a variant piece also sees the pieces worn by all of its variants.
     _cycles(48 if level == 0 else 32)
     ao_img = _image("fg3_ao", size, (1, 1, 1, 0))
     _assign(objs, _bake_material(ao_img))
-    done = set()
     scene_objs = objs + others
-    for v in range(max(variants, 1)):
-        shown = [o for o in scene_objs if _shown(o, v)]
-        targets = [o for o in objs if o in shown and o.name not in done]
+    groups = sorted({_variant_bits(o) for o in objs})
+    for bits in groups:
+        targets = [o for o in objs if _variant_bits(o) == bits]
         for o in scene_objs:
-            o.hide_render = o not in shown
-        if targets:
-            extra = [
-                o.name
-                for o in bpy.context.view_layer.objects
-                if o.type == "MESH" and not o.hide_render and o not in shown
-            ]
-            print("FG3 AO variant", v, "targets", len(targets), "other visible", extra)
-            _select(targets[0], targets)
-            bpy.ops.object.bake(type="AO", margin=0, use_clear=False, uv_layer=ATLAS_UV)
-            done.update(o.name for o in targets)
+            own = _variant_bits(o)
+            o.hide_render = not (own == 0 or (bits and own & bits == bits))
+        print("FG3 AO group", bits, "targets", len(targets))
+        _select(targets[0], targets)
+        bpy.ops.object.bake(type="AO", margin=0, use_clear=False, uv_layer=ATLAS_UV)
     for o in scene_objs:
         o.hide_render = False
     # 3. Shape normal from the high-definition sources, piece by piece.

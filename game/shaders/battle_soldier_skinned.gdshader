@@ -585,12 +585,12 @@ void fragment() {
 		} else if (code == C_PLATE) {
 			// Martelage : fort sur les casques (masque), léger sur les autres plates.
 			tl = FG3_TILE_HAMMERED;
-			amt = mix(0.2, 0.85, mask);
-			relief = 0.12;
+			amt = mix(0.12, 0.45, mask);
+			relief = 0.06;
 		} else if (code == C_TRIM) {
 			tl = FG3_TILE_HAMMERED;
-			amt = 0.3;
-			relief = 0.1;
+			amt = 0.2;
+			relief = 0.06;
 		} else if (code == C_LIVERY || code == C_ARMS || code == C_CLOTH) {
 			tl = FG3_TILE_WEAVE;
 			amt = 0.55;
@@ -605,8 +605,8 @@ void fragment() {
 			relief = 0.45;
 		} else if (code == C_WOOD) {
 			tl = FG3_TILE_WOOD;
-			amt = 0.7;
-			relief = 0.5;
+			amt = 0.45;
+			relief = 0.22;
 		} else if (code == C_SKIN) {
 			tl = FG3_TILE_SKIN;
 			amt = 0.35;
@@ -627,7 +627,7 @@ void fragment() {
 			if (code == C_MAIL) {
 				// Mailles lisibles sans être noires : anneaux clairs, creux sombres, moins
 				// métalliques que l'acier plein (pas de reflet du ciel dans la maille serrée).
-				albedo = v_color * mix(0.85, 1.1, v_var.z) * mix(0.42, 1.3, d.b);
+				albedo = v_color * mix(0.85, 1.1, v_var.z) * mix(0.38, 1.15, d.b);
 				metallic = 0.6;
 				roughness = mix(0.7, 0.32, d.a);
 				fg_ao = mix(0.55, 1.0, fg_ao);
