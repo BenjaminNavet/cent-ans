@@ -47,6 +47,8 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 
 - 26/09 : relectures historiennes de Londres (23 confirmés / 20 corrigés / 6 incertains : London Bridge à l'ouest de St Magnus, mur recalé sur Historic England, Old St Paul's) et d'Orléans (12/12/11 : porte Renart, Sainte-Croix romane encore debout, boulevards 1417, pont recalé) fusionnées (f83b00bd). Les quatre rapports sont dans `docs/histoire/relecture-vh-*.md`. Question laissée au joueur : accrue d'Orléans en 1345 (gardée) ou 1391 (Carron et Guillemard 2012).
 
+- 26/09 : publication du relief **suspendue par le joueur** (le jeu n'est pas encore public). Paquet v1 préparé hors dépôt (`/Users/jean_hubert/dev/cent-ans-relief-dist`, 2 parts, 2,72 Go) ; dépôt `BenjaminNavet/cent-ans-relief` créé puis repassé **privé**, vide, aucune release. À la diffusion : repasser public (`gh repo edit … --visibility public`) puis `gh release create` (docs/geo.md).
+
 ## Prochaine étape (reprise)
 1. **SZ4b** : worktree `.claude/worktrees/agent-af6b91aaabd8c3484`, branche `feat/sz4b-colonies-forets`
    (36d97138, `main` fusionnée jusqu'à 82100583). Code fait (maquettes continues, masquage par
@@ -57,8 +59,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
    settlements_render, sz4_prop_scale, smoke, cargo test, doc `godot-map.md`. Puis fusion via
    `../gp-sz-merge` (branche `integration/sz`), ff-only dans main, installer la dylib dans
    `game/bin` de main (rm puis cp) seulement si le ff a réussi (`set -o pipefail`).
-2. **Publication du relief** (ADR 0077, SZ7) : attend l'accord explicite du joueur (commandes dans
-   `docs/geo.md`).
+2. **Publication du relief** (ADR 0077, SZ7) : suspendue jusqu'à la diffusion du jeu ; dépôt privé vide prêt, paquet v1 dans `/Users/jean_hubert/dev/cent-ans-relief-dist` (commandes dans `docs/geo.md`).
 3. ~~Relecture historienne~~ faite le 26/09 (rapports `docs/histoire/relecture-vh-*.md`) ; points incertains listés dans chaque rapport. Ancien intitulé : faits marqués `probable`/`hypothetical` de Rouen (Martainville, porte
    Saint-Hilaire), Londres (mur vers Aldersgate, Old St Paul's, tablier du pont, dates Westminster),
    Orléans (accrue 1345, portes, Saint-Aignan, boulevards 1404), Paris (Grand-Pont 1340, flèche de
