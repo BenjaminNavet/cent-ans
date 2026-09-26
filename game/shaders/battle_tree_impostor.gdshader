@@ -15,7 +15,7 @@ uniform int rows = 6;
 // Côté (m) d'une cellule pour une échelle d'instance de 1, par ligne ; marge sous le pied.
 uniform float cell_m[8];
 uniform float foot = 0.04;
-uniform float decor_saturation = 0.75;
+uniform float decor_saturation = 0.66;
 uniform vec3 backlight = vec3(0.25, 0.28, 0.12);
 
 varying vec2 v_uv;

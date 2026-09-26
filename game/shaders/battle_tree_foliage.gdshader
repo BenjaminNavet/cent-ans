@@ -14,7 +14,7 @@ uniform float alpha_cut = 0.5;
 uniform float wind_strength = 1.0;
 uniform float sway_height = 12.0; // hauteur (m) où le balancement est plein
 uniform vec3 tint : source_color = vec3(1.0);
-uniform float decor_saturation = 0.75;
+uniform float decor_saturation = 0.66;
 uniform vec3 backlight = vec3(0.3, 0.34, 0.14);
 
 void vertex() {

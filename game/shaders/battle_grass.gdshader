@@ -39,7 +39,7 @@ uniform vec3 grass_blood_color : source_color = vec3(0.2, 0.02, 0.02);
 // normales arrondies portées par le maillage, normale de carte dans COLOR), cartes vues par la
 // tranche amincies, pied assombri. `--no-da6` : 0 (ancien rendu).
 uniform float da6_on = 0.0;
-uniform float decor_saturation = 0.75; // DA6 : même désaturation que le sol
+uniform float decor_saturation = 0.66; // DA6 : même désaturation que le sol
 uniform float tex_lum = 0.14; // luminance moyenne (linéaire) de la carte, ramenée à ~0,6
 
 varying float v_shade;
