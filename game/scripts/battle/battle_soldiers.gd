@@ -445,6 +445,11 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	if n > mm.instance_count:
 		mm.instance_count = n
 		lod_mm.instance_count = n
+	elif n > 0 and n * 4 < mm.instance_count * 3:
+		# Pertes de plus d'un quart : on réduit les couches à l'effectif pour ne pas recopier
+		# un tampon complété à chaque image (les instances en trop étaient déjà invisibles).
+		mm.instance_count = n
+		lod_mm.instance_count = n
 	# Distance au régiment : caméra → centre du régiment (x, z de la simulation).
 	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
 	# PF1 : distances de LOD, d'ombre et d'imposteurs selon le préréglage de qualité.
