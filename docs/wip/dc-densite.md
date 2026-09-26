@@ -21,7 +21,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 | DC0 | Squelette : ADR 0082, ce plan, plafond 6 → 16 (schéma, chargeur Rust, tests), outil `geo/settlement_check.py` | 0 | fait |
 | DC1 | Mouvement : `points_per_step` 140 → 70 (rules.json + défaut Rust), vérifier traversées, horizon IA, agents, repli ; tests ; textes du codex et description de rules.json ; sondes `march_range_probe`, `turn_perf` | 1 | à lancer |
 | DC2a | Colonies France nord, ouest, centre (19 prov., cible 12) | 1 | à lancer |
-| DC2b | Colonies Aquitaine, Languedoc, France est, Provence-Alpes (22 prov., cible 11) | 1 | à lancer |
+| DC2b | Colonies Aquitaine, Languedoc, France est, Provence-Alpes (22 prov., cible 11) | 1 | fait |
 | DC2c | Colonies îles Britanniques (Angleterre cible 10 ; Galles, Irlande, Écosse 7) | 1 | à lancer |
 | DC2d | Colonies Pays-Bas (11), Empire rhénan (9), reste de l'Empire et Scandinavie (7) | 1 | à lancer |
 | DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | à lancer |
@@ -31,6 +31,20 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 
 ## Journal
 - 26/09 : plan, squelette DC0.
+- 26/09 : DC2b : 132 colonies ajoutées sur 22 provinces (Aquitaine 49, Languedoc 33, France est 32,
+  Provence-Alpes 18) — village 48, town 46, abbey 22, castle 16.
+  `settlement_check` et `pytest tools/tests/test_settlements_schema.py`
+  passent sur les 22 provinces. Comtat Venaissin et Dauphiné restent sous la cible (7 et 9 au lieu de
+  7 et 10) faute de lieux attestés supplémentaires assez notables (provinces alpines pauvres) ; conforme
+  à la consigne « adapte, ne force pas ». Anomalies préexistantes signalées, non corrigées (hors mandat) :
+  `set_vaucouleurs` (prov_bar), `set_cognac`/`set_aubeterre` (prov_angoumois), `set_peyrepertuse`
+  (prov_carcassonne), `set_valmagne` + paire `set_montpellier`/`set_castelnau_le_lez` à 2 km
+  (prov_montpellier), `set_senanque` (prov_comtat_venaissin), `set_vienne` (prov_dauphine),
+  `set_tarascon`/`set_les_baux` (prov_provence), `set_figeac` (prov_quercy), `set_la_rochelle`
+  (prov_saintonge) — tous signalés « hors province (sera recalée) » par l'outil géographique, points
+  historiquement corrects sur des frontières de province qui suivent une géométrie différente ;
+  `set_bergerac` (prov_perigord) a un commentaire de liberté de jeu assumé (Anglais dès 1337) à
+  vérifier par un lot d'équilibrage.
 
 ## Prochaine étape
-Lancer la vague 1 (DC1 + DC2a-e, 6 agents).
+Lancer/poursuivre la vague 1 (DC1, DC2a, DC2c-e) ; DC2b terminé, prêt pour fusion dans `feat/densite`.
