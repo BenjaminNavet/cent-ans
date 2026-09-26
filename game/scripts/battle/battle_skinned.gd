@@ -51,8 +51,6 @@ static var _variants: Dictionary = {}
 
 ## Variante du shader skinné avec les `defines` en tête (après `shader_type`).
 static func _variant(defines: Array) -> Shader:
-	if defines.has("FG3_BAKED") and OS.get_cmdline_user_args().has("--fg5-noao"):  # FG5 knob (temporary)
-		defines = defines + ["FG5_NOAO"]
 	var key := ",".join(defines)
 	if _variants.has(key):
 		return _variants[key]
@@ -121,12 +119,6 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 	mat.set_shader_parameter("fine_detail", maps["detail"])
 	mat.set_shader_parameter("fine_horse", maps["horse"])
 	mat.set_shader_parameter("fine_layer", int(fig["atlas_layer"]))
-	# FG5 knobs (temporary)
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--fg5-fine-dist="):
-			mat.set_shader_parameter("fine_distance", float(arg.get_slice("=", 1)))
-		elif arg.begins_with("--fg5-tile-dist="):
-			mat.set_shader_parameter("fine_tile_distance", float(arg.get_slice("=", 1)))
 
 
 static func manifest() -> Dictionary:
@@ -212,8 +204,6 @@ static func mesh(kind: String, variant: int, level: int) -> ArrayMesh:
 	var lods: Array = fig.get("lods", [])
 	if lods.is_empty():
 		return null
-	if level == 1 and OS.get_cmdline_user_args().has("--fg5-lod1-as-lod2"):  # FG5 knob (temporary)
-		level = 2
 	var file: String = lods[clampi(level, 0, lods.size() - 1)]
 	if _meshes.has(file):
 		return _meshes[file]
