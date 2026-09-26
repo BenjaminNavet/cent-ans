@@ -23,6 +23,13 @@ Avant EP10 — régiments qui cèdent par contagion en 120 s (sur 7), course lat
   (sièges : règle inchangée). Sonde : 0 régiment ne cède à moral 27-40 (7 à moral 24).
 - [x] Mesures avant (main 2ecdd019) : EP7 Crécy 16/20, Azincourt 15/20, Poitiers 14/20 ; ep9b 7/10 ;
   SG4 plat pieux 3/7, plat sans 7/3, crête pieux 6/4, crête sans 1/9, générée 2/8 et 6/4, ep1 6/4.
+- [x] main fusionné (SG5, 222080a4). Base SG5 (règles anciennes reproduites exactement par
+  `old_rules.json` + `EP10_OLD_FLIGHT`, empreintes b6 identiques) : EP7 16/15/14 sur 20, ep9b 18/30,
+  crête avec/sans pieux 0/10.
+- [x] Contournement des amis plafonné (0,8 sans plafond : ep9b 29/30 attaquant, les cavaliers empilés
+  au même point envoyaient la fuite de côté).
+- Constat EP7 : la contagion pondérée soulage les vagues françaises (les fuyards passent derrière
+  elles) ; Crécy 16 → ~10/20 à 0,4/s. Essai : taux relevé (0,5-0,6) pour compenser devant/à côté.
 - [ ] Réglage : première version (15/50/0,15) → EP7 6, 10, 9 /20 (hors fourchettes), ep9b 9/10 (hors 3-7).
   Fuite seule (contagion ancienne) : EP7 19, 17, 15 ; ep9b 9/10. Variantes en cours.
 - [ ] ADR 0067, epic.md, b6.
