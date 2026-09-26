@@ -122,7 +122,7 @@ Hauteurs : mètres non exagérés, posés par `town_building.gdshader` à la hau
 (maquette seule).
 
 Options : `--no-landmarks-1to1` (rendu d'avant VH4). Captures et mesure :
-`godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier>`. Test headless :
+`godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear`. Test headless :
 `res://tests/vh4_landmarks_test.gd`.
 
 ## Ce que chaque ville (VH5-VH8) doit fournir

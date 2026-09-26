@@ -115,6 +115,11 @@ static func _dated_signature(city: Dictionary, p_year: int) -> String:
 	return sig
 
 
+## Faux avec `--no-landmarks-1to1` (rendu d'avant VH4 : maquette et plancher ZG4b).
+func is_enabled() -> bool:
+	return not _disabled
+
+
 func has_city(id: String) -> bool:
 	return _cities.has(id)
 

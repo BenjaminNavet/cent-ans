@@ -5,7 +5,8 @@ extends SceneTree
 ## des toits ; mesure d'images par seconde au-dessus de Rouen et d'une ville ordinaire ZG6
 ## (Amiens) à la même distance.
 ## Fenêtre réelle (pas headless) :
-##   godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> [--only=a,b] [--no-fps]
+##   godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear
+##   [--only=a,b] [--no-fps]
 ##   [--no-landmarks-1to1] (rendu d'avant VH4 : maquette et plancher ZG4b)
 ## JPEG ≤ 960 px, `rouen_<vue>.jpg`.
 
@@ -21,6 +22,7 @@ const SHOTS := [
 	["toits", ROUEN + Vector2(0.05, -0.05), 0.45, 20.0],
 	["pont", ROUEN + Vector2(-0.36, 0.45), 0.55, -30.0],
 	["chateau", ROUEN + Vector2(-0.05, -0.85), 0.5, 150.0],
+	["seine_sud", ROUEN + Vector2(0.0, 0.3), 1.2, 180.0],
 ]
 
 
