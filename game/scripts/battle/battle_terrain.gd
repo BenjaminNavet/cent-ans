@@ -93,6 +93,11 @@ var river_flow: float = 1.0
 ## EP3 : largeur de chaque route de `roads` (même ordre), ruisseaux rééchantillonnés.
 var road_widths: Array[float] = []
 var _streams: Array = []  # [{points: PackedVector2Array, width, kind}]
+## PB3c : tronçons des ruisseaux pour `in_water` : [{box: Rect2 (élargi de la demi-largeur),
+## points: PackedVector2Array, half: demi-largeur}] ; seuls les tronçons dont la boîte contient
+## le point sont mesurés (même résultat, sans parcourir tout le tracé à chaque appel).
+var _stream_chunks: Array = []
+const STREAM_CHUNK := 24
 var bridges_view: BattleBridges
 var _hills := FastNoiseLite.new()
 var _woods := FastNoiseLite.new()
@@ -143,6 +148,8 @@ const TRAMPLE_STEP := 0.5
 var trample_image: Image = null
 var _trample_texture: ImageTexture
 var _trample_bytes := PackedByteArray()
+## PB3e : empreintes tamponnées en Rust (`StampMap`) ; `--no-pb3e` : boucles GDScript d'avant.
+var _trample_map: RefCounted = null
 var _trample_timer: float = 0.0
 var _trample_last: Dictionary = {}  # id -> dernière position (x, z) imprimée
 var _trample_snow: bool = true  # B8 : false = carte de boue (sol détrempé)
@@ -217,6 +224,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	roads.clear()
 	road_widths.clear()
 	_streams.clear()
+	_stream_chunks.clear()
 	if _nx < 2 or _nz < 2:
 		return
 	_mean_height = 0.0
@@ -338,6 +346,10 @@ func _setup_trample() -> void:
 	var w := int(SPLAT_RECT.size.x / TRAMPLE_TEXEL)
 	var h := int(SPLAT_RECT.size.y / TRAMPLE_TEXEL)
 	_trample_bytes.resize(w * h)
+	_trample_map = null
+	if ClassDB.class_exists(&"StampMap") and not OS.get_cmdline_user_args().has("--no-pb3e"):
+		_trample_map = ClassDB.instantiate(&"StampMap")
+		_trample_map.call("setup", w, h, 1, SPLAT_RECT.position, TRAMPLE_TEXEL)
 	trample_image = Image.create_from_data(w, h, false, Image.FORMAT_L8, _trample_bytes)
 	_trample_texture = ImageTexture.create_from_image(trample_image)
 	ground_material.set_shader_parameter("trample_map", _trample_texture)
@@ -373,6 +385,9 @@ func update_trample(units: Array, dt: float) -> void:
 				continue
 		var half := Vector2(float(unit["width"]), float(unit["depth"])) * 0.5 + Vector2(1.5, 1.5)
 		var facing := float(unit["facing"])
+		if _trample_map != null:
+			_trample_map.call("stamp_box", pos, facing, half, add, 0, 255)
+			continue
 		var axis_x := Vector2(cos(facing), -sin(facing))
 		var axis_z := Vector2(sin(facing), cos(facing))
 		var reach := half.length()
@@ -385,6 +400,9 @@ func update_trample(units: Array, dt: float) -> void:
 					continue
 				var i := iz * w + ix
 				_trample_bytes[i] = mini(_trample_bytes[i] + add, 255)
+	if _trample_map != null:
+		_trample_map.call("upload", trample_image, _trample_texture)
+		return
 	trample_image.set_data(w, h, false, Image.FORMAT_L8, _trample_bytes)
 	_trample_texture.update(trample_image)
 
@@ -393,6 +411,8 @@ func update_trample(units: Array, dt: float) -> void:
 func trample_at(x: float, z: float) -> float:
 	if trample_image == null:
 		return 0.0
+	if _trample_map != null:
+		return float(_trample_map.call("sample", x, z, 0))
 	var c := ((Vector2(x, z) - SPLAT_RECT.position) / TRAMPLE_TEXEL).floor()
 	if c.x < 0 or c.y < 0 or c.x >= trample_image.get_width() or c.y >= trample_image.get_height():
 		return 0.0
@@ -586,10 +606,30 @@ func river_center_z(x: float) -> float:
 func in_water(x: float, z: float) -> bool:
 	if _river_points.size() >= 2 and river_distance(x, z) < river_width_at(x) * 0.5:
 		return true
-	for stream in _streams:
-		if _polyline_distance(stream["points"], Vector2(x, z)) < float(stream["width"]) * 0.5:
-			return true
+	var p := Vector2(x, z)
+	for chunk in _stream_chunks:
+		if not (chunk["box"] as Rect2).has_point(p):
+			continue
+		var points: PackedVector2Array = chunk["points"]
+		var half := float(chunk["half"])
+		for i in range(points.size() - 1):
+			if Geometry2D.get_closest_point_to_segment(p, points[i], points[i + 1]).distance_to(p) < half:
+				return true
 	return false
+
+
+## PB3c : découpe un ruisseau en tronçons de `STREAM_CHUNK` segments (boîtes élargies de la
+## demi-largeur, plus une marge : un point hors de la boîte est à plus d'une demi-largeur).
+func _add_stream_chunks(pts: PackedVector2Array, half: float) -> void:
+	var start := 0
+	while start < pts.size() - 1:
+		var end := mini(start + STREAM_CHUNK, pts.size() - 1)
+		var chunk := pts.slice(start, end + 1)
+		var box := Rect2(chunk[0], Vector2.ZERO)
+		for q in chunk:
+			box = box.expand(q)
+		_stream_chunks.append({"box": box.grow(half + 0.5), "points": chunk, "half": half})
+		start = end
 
 
 ## EP3 : niveau de l'eau de la rivière au droit de x (-INF sans rivière).
@@ -1242,6 +1282,7 @@ func _build_streams() -> void:
 			for s in range(1, steps + 1):
 				pts.append(raw[i].lerp(raw[i + 1], float(s) / float(steps)))
 		_streams.append({"points": pts, "width": width, "kind": str(stream["kind"])})
+		_add_stream_chunks(pts, width * 0.5)
 		var levels := PackedFloat32Array()
 		levels.resize(pts.size())
 		for i in pts.size():

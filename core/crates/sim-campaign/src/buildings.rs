@@ -690,9 +690,9 @@ impl CampaignState {
         self.buildable_with_supply(data, settlement, &supply)
     }
 
-    /// [`CampaignState::buildable`] with the controller's free resource `supply` already
-    /// computed (lot DC3: the AI weighs every place it holds, and the supply is the same
-    /// for all of them).
+    /// [`CampaignState::buildable`] with the controller's
+    /// [`CampaignState::free_supply`] already computed (PB3f: the AI values
+    /// every settlement of a realm against the same supply).
     pub fn buildable_with_supply(
         &self,
         data: &GameData,
@@ -708,7 +708,7 @@ impl CampaignState {
         let Some(faction) = self.factions.get(&state.controller) else {
             return Vec::new();
         };
-        // DC3: the speed depends on the place only, not on the building.
+        // PB3f: the settlement's construction speed, once for all buildings.
         let speed_percent = self.construction_speed_percent(data, settlement);
         data.buildings
             .values()
@@ -998,8 +998,8 @@ pub(crate) fn goods_map(
     goods
 }
 
-/// Build time in turns of a `base_turns` work at a place whose construction speed is
-/// `speed_percent` ([`CampaignState::construction_speed_percent`]).
+/// [`CampaignState::build_time`] for a construction speed already computed
+/// (`construction_speed_percent`, before clamping).
 fn build_time_at(speed_percent: f64, base_turns: u32) -> u32 {
     let percent = speed_percent.clamp(-50.0, MAX_CONSTRUCTION_SPEED_PERCENT);
     let turns = (f64::from(base_turns) * 100.0 / (100.0 + percent)).round();

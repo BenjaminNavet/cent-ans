@@ -23,6 +23,10 @@ extends Node3D
 ##   nœud et table des pages en `instance uniform` (couche, emprise, couches des 8 voisines).
 ##   Décodage PNG dans `WorkerThreadPool` (Rust `GameDataStore.load_heightmap_u16`, repli `Png16`),
 ##   téléversement ≤ `max_uploads_per_frame` par image, LRU, fondu d'arrivée `fade_seconds`.
+## - PB3g (ADR 0092) : sélection, résidence (LRU) et paramètres d'instance calculés par la classe
+##   native `ReliefLod` (crate `relief-lod`) quand l'extension l'expose ; GDScript ne fait que
+##   créer, déplacer et masquer les nœuds signalés. Repli GDScript complet sans l'extension ou
+##   avec `--no-native-quadtree` (mêmes nœuds sélectionnés, `pb3g_quadtree_test.gd`).
 ## - Processeur : les octets des pages chargées sont gardés ; `surface_height_at` rend la surface
 ##   bilinéaire de la page chargée la plus fine (indépendante de la vue), `surface_changed(rect)`
 ##   signale l'arrivée ou l'éviction d'une page.
@@ -39,6 +43,8 @@ const PARAM_NAMES: Array[String] = ["qt_fine", "qt_coarse", "qt_fine_nbr", "qt_f
 const SIDES: Array[Vector2i] = [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1), Vector2i(0, 1)]
 const DIAGONALS: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]
 
+## PB3g : sélection native (`ReliefLod`) si l'extension l'expose.
+@export var use_native_select: bool = true
 ## Espacement maximal des sommets à l'écran (pixels).
 @export var max_vertex_px: float = 4.0
 @export var max_items: int = 700
@@ -117,6 +123,14 @@ var _hit_units: float = 0.0
 var _hit_px: float = 1.0
 var _hit_bytes: PackedByteArray = PackedByteArray()
 var _param_cache: Dictionary = {}
+## PB3g : sélection native (`ReliefLod`), pages voulues triées par priorité, nombre de nœuds,
+## `px_scale` utilisé par la dernière sélection native (comparaison des sélections), facteur de
+## projection de la dernière caméra.
+var _native: Object = null
+var _wanted_order: PackedInt64Array = PackedInt64Array()
+var _item_count: int = 0
+var _native_px_used: float = 1.0
+var _last_k: float = 1.0
 var _param_cache_version: int = -1
 var _missing_wanted: int = 0
 var _decode_ms: PackedFloat32Array = PackedFloat32Array()
@@ -166,9 +180,31 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	_free_layers.clear()
 	for i in range(max_pages - 1, -1, -1):
 		_free_layers.append(i)
+	_setup_native()
 	material.set_shader_parameter("qt_pages", _page_array)
 	material.set_shader_parameter("qt_page_h_min", pyramid.height_min_m)
 	material.set_shader_parameter("qt_page_h_range", pyramid.height_range_m)
+
+
+## PB3g : `ReliefLod` avec les tuiles de la pyramide et les bornes des morceaux.
+func _setup_native() -> void:
+	_native = null
+	_wanted_order = PackedInt64Array()
+	if not use_native_select or not ClassDB.class_exists("ReliefLod") or "--no-native-quadtree" in OS.get_cmdline_user_args():
+		return
+	_native = ClassDB.instantiate("ReliefLod")
+	var tiles: Array = []
+	for level in pyramid.max_level + 1:
+		tiles.append(pyramid.tile_indices(level))
+	_native.call("set_pyramid", pyramid.max_level, tiles)
+	for key: int in pyramid.broken_keys():
+		_native.call("mark_broken", key)
+	_native.call("set_bounds", _bounds)
+
+
+## Vrai si la sélection passe par `ReliefLod`.
+func is_native() -> bool:
+	return _native != null
 
 
 func _exit_tree() -> void:
@@ -185,24 +221,34 @@ func update_view(camera: Camera3D) -> void:
 		# manquantes et `is_settled()` ne deviendrait jamais vrai (constaté par PB1 à d = 1500).
 		_collect_jobs()
 		_wanted.clear()
+		_wanted_order = PackedInt64Array()
 		_missing_wanted = 0
 		return
 	_frame += 1
 	var t0 := Time.get_ticks_usec()
 	_collect_jobs()
 	var t1 := Time.get_ticks_usec()
+	var t2 := t1
+	# Portées et facteur de projection : aussi en natif (miroir pour les comparaisons, bon marché).
 	_prepare_camera(camera)
-	_items.clear()
-	_wanted.clear()
-	_page_cache.clear()
-	_missing_wanted = 0
-	_select(0, 0, 0)
-	if _items.size() > max_items:
-		_px_scale = minf(_px_scale * 1.2, 8.0)
-	elif _items.size() < max_items * 0.6 and _px_scale > 1.0:
-		_px_scale = maxf(_px_scale / 1.1, 1.0)
-	var t2 := Time.get_ticks_usec()
-	_apply_items()
+	if _native != null:
+		var result := _native_update()
+		t2 = Time.get_ticks_usec()
+		_apply_native(result)
+	else:
+		_items.clear()
+		_wanted.clear()
+		_page_cache.clear()
+		_missing_wanted = 0
+		_select(0, 0, 0)
+		if _items.size() > max_items:
+			_px_scale = minf(_px_scale * 1.2, 8.0)
+		elif _items.size() < max_items * 0.6 and _px_scale > 1.0:
+			_px_scale = maxf(_px_scale / 1.1, 1.0)
+		_item_count = _items.size()
+		_wanted_order = _sorted_wanted(_wanted)
+		t2 = Time.get_ticks_usec()
+		_apply_items()
 	var t3 := Time.get_ticks_usec()
 	_start_jobs()
 	var t4 := Time.get_ticks_usec()
@@ -226,6 +272,7 @@ func _prepare_camera(camera: Camera3D) -> void:
 	if viewport != null:
 		viewport_h = maxf(viewport.get_visible_rect().size.y, 64.0)
 	var k := viewport_h * 0.5 / tan(deg_to_rad(camera.fov) * 0.5)
+	_last_k = k
 	var threshold := max_vertex_px * _px_scale
 	if absf(k / threshold - _k_proj) > 0.001 * _k_proj or _ranges.is_empty():
 		_k_proj = k / threshold
@@ -236,6 +283,118 @@ func _prepare_camera(camera: Camera3D) -> void:
 			# 3 côtés (le morphing doit s'achever avant le voisin plus grossier).
 			_ranges[n] = maxf(2.0 * size / PATCH_QUADS * _k_proj, 3.0 * size)
 		_range_version += 1
+
+
+## Clés voulues triées par priorité croissante (étage le plus grossier, puis distance ; clé).
+static func _sorted_wanted(wanted: Dictionary) -> PackedInt64Array:
+	var order: Array = []
+	for key: int in wanted:
+		order.append([float(wanted[key]), key])
+	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+	var out := PackedInt64Array()
+	out.resize(order.size())
+	for i in order.size():
+		out[i] = order[i][1]
+	return out
+
+
+# --- Sélection native (PB3g) -----------------------------------------------------------
+
+
+func _native_update() -> Dictionary:
+	var vs := MapData.vertical_scale()
+	var view := PackedFloat64Array([
+		_last_k, vs, 1.0 + MapData.relief_gain(), 1.0 - MapData.relief_squash_max_for_scale(vs),
+		Time.get_ticks_msec() / 1000.0, shadow_cast_distance, float(_frame),
+	])
+	var config := PackedFloat64Array([max_vertex_px, max_items, max_depth, extra_depth, morph_ratio, skirt_factor, skirt_max, fade_seconds])
+	_native_px_used = _px_scale
+	var result: Dictionary = _native.call("update", _cam, _planes, view, config)
+	_px_scale = float(result["px_scale"])
+	_item_count = int(result["items"])
+	_missing_wanted = int(result["missing"])
+	_wanted_order = result["wanted"]
+	return result
+
+
+## Applique les changements rendus par `ReliefLod.update` : nœuds retirés, ajoutés, ombres et
+## paramètres d'instance changés (seuls ceux marqués dans le masque).
+func _apply_native(result: Dictionary) -> void:
+	for key: int in (result["removed"] as PackedInt64Array):
+		var slot: MeshInstance3D = _slots.get(key)
+		if slot == null:
+			continue
+		_slots.erase(key)
+		slot.visible = false
+		_pool.append(slot)
+	var added_keys: PackedInt64Array = result["added_keys"]
+	var added: PackedFloat32Array = result["added"]
+	for i in added_keys.size():
+		var o := i * 9
+		var slot := _take_slot()
+		_slots[added_keys[i]] = slot
+		var s := added[o + 2]
+		var quads := added[o + 5]
+		slot.mesh = _patch_full if int(added[o + 4]) == 4 else _patch_half
+		slot.transform = Transform3D(Basis.from_scale(Vector3(s, 1.0, s)), Vector3(added[o], 0.0, added[o + 1]))
+		slot.custom_aabb = AABB(Vector3(0.0, added[o + 6], 0.0), Vector3(quads, added[o + 7], quads))
+		slot.set_instance_shader_parameter("qt_node", Vector4(added[o], added[o + 1], s, added[o + 3]))
+		slot.visible = true
+		var cast := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if added[o + 8] > 0.5 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if slot.cast_shadow != cast:
+			slot.cast_shadow = cast
+	var cast_keys: PackedInt64Array = result["cast_keys"]
+	var cast_on: PackedByteArray = result["cast_on"]
+	for i in cast_keys.size():
+		(_slots[cast_keys[i]] as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast_on[i] != 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var keys: PackedInt64Array = result["param_keys"]
+	var masks: PackedByteArray = result["param_masks"]
+	var values: PackedFloat32Array = result["param_values"]
+	for i in keys.size():
+		var slot: MeshInstance3D = _slots[keys[i]]
+		var mask := masks[i]
+		var base := i * 28
+		for p in 7:
+			if mask & (1 << p):
+				var o := base + p * 4
+				slot.set_instance_shader_parameter(PARAM_NAMES[p], Vector4(values[o], values[o + 1], values[o + 2], values[o + 3]))
+	stats["items"] = _item_count
+
+
+## PB3g (tests) : sélections native et GDScript de la dernière image, sur le même état des pages
+## et le même `px_scale` : {native: `ReliefLod.items()`, gdscript: {keys, fine, coarse, dist},
+## native_missing, gd_missing, native_wanted, gd_wanted}. Vide sans sélection native.
+func compare_selection(camera: Camera3D) -> Dictionary:
+	if _native == null:
+		return {}
+	var saved_px := _px_scale
+	var saved_missing := _missing_wanted
+	_px_scale = _native_px_used
+	_prepare_camera(camera)
+	_items.clear()
+	_wanted.clear()
+	_page_cache.clear()
+	_missing_wanted = 0
+	_select(0, 0, 0)
+	var keys := PackedInt64Array()
+	var fine := PackedInt64Array()
+	var coarse := PackedInt64Array()
+	var dist := PackedFloat64Array()
+	for item in _items:
+		keys.append(item["key"])
+		fine.append(item["fine"])
+		coarse.append(item["coarse"])
+		dist.append(item["dist"])
+	var out := {
+		"native": _native.call("items"), "gdscript": {"keys": keys, "fine": fine, "coarse": coarse, "dist": dist},
+		"native_missing": saved_missing, "gd_missing": _missing_wanted,
+		"native_wanted": _wanted_order, "gd_wanted": _sorted_wanted(_wanted),
+	}
+	_items.clear()
+	_wanted.clear()
+	_missing_wanted = saved_missing
+	_px_scale = saved_px
+	return out
 
 
 func node_size(n: int) -> float:
@@ -291,11 +450,12 @@ func _y_bounds(n: int, c: int, r: int) -> Vector2:
 	return _to_world_bounds(result)
 
 
-## Bornes en mètres → hauteurs affichées (ZG8 : s·h ≤ y ≤ s·(1 + g)·h pour h ≥ 0).
+## Bornes en mètres → hauteurs affichées (ZG8, SZ1 : s·(1 − c·k)·h ≤ y ≤ s·(1 + g)·h pour h ≥ 0).
 static func _to_world_bounds(bounds_m: Vector2) -> Vector2:
 	var vs := MapData.vertical_scale()
 	var up := 1.0 + MapData.relief_gain()
-	return Vector2(bounds_m.x * vs, bounds_m.y * vs * (up if bounds_m.y > 0.0 else 1.0))
+	var down := 1.0 - MapData.relief_squash_max_for_scale(vs)
+	return Vector2(bounds_m.x * vs * (down if bounds_m.x > 0.0 else 1.0), bounds_m.y * vs * (up if bounds_m.y > 0.0 else 1.0))
 
 
 func _box_in_sphere(bmin: Vector3, bmax: Vector3, radius: float) -> bool:
@@ -477,9 +637,11 @@ func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
 	var ratio := new_scale / maxf(old_scale, 1e-9)
 	# ZG8 : le gain local suit l'échelle ; le haut positif de la boîte suit s·(1 + g).
 	var ratio_up := ratio * (1.0 + MapData.relief_gain_for_scale(new_scale)) / (1.0 + MapData.relief_gain_for_scale(old_scale))
+	# SZ1 : le bas positif suit s·(1 − c·k).
+	var ratio_down := ratio * (1.0 - MapData.relief_squash_max_for_scale(new_scale)) / (1.0 - MapData.relief_squash_max_for_scale(old_scale))
 	for slot: MeshInstance3D in _slots.values():
 		var box := slot.custom_aabb
-		var lo := box.position.y * ratio
+		var lo := box.position.y * (ratio_down if box.position.y > 0.0 else ratio)
 		var hi := box.end.y * (ratio_up if box.end.y > 0.0 else ratio)
 		# Jupe (constante, non proportionnelle) : marge de sécurité en plus.
 		var margin := absf(hi - lo) * 0.02 + 0.05
@@ -529,34 +691,32 @@ static func _build_patch(quads: int) -> ArrayMesh:
 ## `main_decode_budget_ms`), sinon confiées à `WorkerThreadPool` (repli GDScript `Png16`).
 func _start_jobs() -> void:
 	_main_queue.clear()
-	if _wanted.is_empty():
+	if _wanted_order.is_empty():
 		return
-	var order: Array = []
-	for key: int in _wanted:
-		if not _jobs.has(key):
-			order.append([float(_wanted[key]), key])
-	order.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	if _decoder != null:
-		for entry in order:
+		for key: int in _wanted_order:
 			if _requested.size() >= max_jobs:
 				break
-			var key: int = entry[1]
-			if _requested.has(key):
+			if _requested.has(key) or _jobs.has(key):
 				continue
 			var path := pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
 			if _decoder.call("request", key, path):
 				_requested[key] = path
 		return
 	if _main_store != null:
-		for entry in order.slice(0, max_main_decodes_per_frame):
-			_main_queue.append(entry[1])
+		for key: int in _wanted_order:
+			if _main_queue.size() >= max_main_decodes_per_frame:
+				break
+			if not _jobs.has(key):
+				_main_queue.append(key)
 		return
 	if _jobs.size() >= max_jobs:
 		return
-	for entry in order:
+	for key: int in _wanted_order:
 		if _jobs.size() >= max_jobs:
 			break
-		var key: int = entry[1]
+		if _jobs.has(key):
+			continue
 		var job := PageJob.new()
 		job.key = key
 		job.path = pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
@@ -632,6 +792,8 @@ func _dispatch_image(key: int, job: PageJob) -> void:
 func _finish_job(key: int, job: PageJob) -> bool:
 	if not job.ok:
 		pyramid.mark_broken(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
+		if _native != null:
+			_native.call("mark_broken", key)
 		push_warning("ReliefQuadtree: unreadable tile %s" % job.path)
 		return false
 	if page_filter != null and job.filter == null and not job.filter_checked:
@@ -656,8 +818,11 @@ func _upload(key: int, job: PageJob) -> bool:
 	_page_array.update_layer(job.image, layer)
 	_upload_ms_max = maxf(_upload_ms_max, (Time.get_ticks_usec() - t0) / 1000.0)
 	_note_step("layer", Time.get_ticks_usec() - t0)
-	_pages[key] = {"layer": layer, "last_used": _frame, "t_upload": Time.get_ticks_msec() / 1000.0}
+	var t_upload := Time.get_ticks_msec() / 1000.0
+	_pages[key] = {"layer": layer, "last_used": _frame, "t_upload": t_upload}
 	_page_bytes[key] = job.bytes
+	if _native != null:
+		_native.call("add_page", key, layer, t_upload, _frame, job.bytes)
 	_layer_keys[layer] = key
 	_residency_version += 1
 	var rect := _tile_rect(key)
@@ -692,17 +857,22 @@ func _alloc_layer() -> int:
 	if not _free_layers.is_empty():
 		return _free_layers.pop_back()
 	var oldest := -1
-	var oldest_frame := _frame - 1
-	for key: int in _pages:
-		var used: int = _pages[key]["last_used"]
-		if used < oldest_frame:
-			oldest_frame = used
-			oldest = key
+	if _native != null:
+		oldest = int(_native.call("oldest_page", _frame - 1))  # PB3g : `last_used` tenu en Rust
+	else:
+		var oldest_frame := _frame - 1
+		for key: int in _pages:
+			var used: int = _pages[key]["last_used"]
+			if used < oldest_frame:
+				oldest_frame = used
+				oldest = key
 	if oldest < 0:
 		return -1
 	var layer: int = _pages[oldest]["layer"]
 	_pages.erase(oldest)
 	_page_bytes.erase(oldest)
+	if _native != null:
+		_native.call("remove_page", oldest)
 	_residency_version += 1
 	var rect := _tile_rect(oldest)
 	# ZG7a : seuls les morceaux dont la page évincée était l'étage le plus fin sont recalculés
@@ -737,11 +907,11 @@ func wait_jobs(upload: bool = true) -> void:
 		max_uploads_per_frame = 1 << 20
 		if _main_store != null:
 			_main_queue.clear()
-			for key: int in _wanted:
+			for key: int in _wanted_order:
 				if not _pages.has(key):
 					_main_queue.append(key)
 		if _decoder != null:
-			for key: int in _wanted:
+			for key: int in _wanted_order:
 				if not _pages.has(key) and not _requested.has(key):
 					var path := pyramid.tile_path(ReliefPyramid.level_of_key(key), ReliefPyramid.col_of_key(key), ReliefPyramid.row_of_key(key))
 					if _decoder.call("request", key, path):
@@ -775,7 +945,7 @@ func pending_jobs() -> int:
 
 
 func item_count() -> int:
-	return _items.size()
+	return _item_count
 
 
 ## Mesures : nœuds, pages, VRAM des pages, décodage moyen / max, téléversement max, sélection.
@@ -786,7 +956,7 @@ func perf_stats() -> Dictionary:
 		total += ms
 		worst = maxf(worst, ms)
 	return {
-		"items": _items.size(),
+		"items": _item_count,
 		"pages": _pages.size(),
 		"page_layers": max_pages,
 		"page_vram_mb": snappedf(max_pages * PAGE_PX * PAGE_PX * 2 * 4.0 / 3.0 / 1048576.0, 0.1),
@@ -822,8 +992,8 @@ func surface_height_at(x: float, y: float) -> float:
 	var side := 1 << top
 	for level in range(top, -1, -1):
 		var units := ROOT_TILE_UNITS / side
-		var col := int(floor((x + 0.5) / units))
-		var row := int(floor((y + 0.5) / units))
+		var col := int(floor((x - ReliefPyramid.GRID_OFFSET) / units))
+		var row := int(floor((y - ReliefPyramid.GRID_OFFSET) / units))
 		var key := (level << 24) | (row << 12) | col
 		side >>= 1
 		if not _page_bytes.has(key):
@@ -831,12 +1001,28 @@ func surface_height_at(x: float, y: float) -> float:
 		var bytes: PackedByteArray = _page_bytes[key]
 		_hit_level = level if level == top else -1
 		_hit_version = _residency_version
-		_hit_origin = Vector2(col * units - 0.5, row * units - 0.5)
+		_hit_origin = Vector2(col * units + ReliefPyramid.GRID_OFFSET, row * units + ReliefPyramid.GRID_OFFSET)
 		_hit_units = units
 		_hit_px = units / PAGE_PX
 		_hit_bytes = bytes
 		return MapData.display_height(_bilinear(bytes, (x - _hit_origin.x) / _hit_px - 0.5, (y - _hit_origin.y) / _hit_px - 0.5, pyramid.height_min_m, pyramid.height_range_m), x, y)
 	return NAN
+
+
+## PB3g : `surface_height_at` pour une série de points (NAN hors pages) ; bilinéaire natif
+## (`ReliefLod.heights_m`, même arithmétique) quand la sélection est native.
+func surface_heights_at(points: PackedVector2Array) -> PackedFloat64Array:
+	var out := PackedFloat64Array()
+	if _native == null or pyramid == null:
+		out.resize(points.size())
+		for n in points.size():
+			out[n] = surface_height_at(points[n].x, points[n].y)
+		return out
+	out = _native.call("heights_m", points, pyramid.height_min_m, pyramid.height_range_m)
+	for n in points.size():
+		if not is_nan(out[n]):
+			out[n] = MapData.display_height(out[n], points[n].x, points[n].y)
+	return out
 
 
 ## Bilinéaire aux coordonnées pixel (fx, fy) d'une page (bornées au bord), altitude en MÈTRES
@@ -884,6 +1070,8 @@ func surface_snapshot(rect: Rect2, origin: Vector2) -> Dictionary:
 	return {
 		"qt_pages": pages, "max_level": pyramid.max_level, "h_min": pyramid.height_min_m,
 		"h_range": pyramid.height_range_m, "origin": origin, "map": map_data,
+		# PB3g : magasin natif des mêmes pages (octets partagés, sans copie côté Rust).
+		"qt_store": _native,
 	}
 
 

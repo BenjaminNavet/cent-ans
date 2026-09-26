@@ -8,10 +8,13 @@ Steps (after ``--``):
     rigs                    bake ``human`` and ``cavalry`` bone textures with the realistic
                             proportions of ``battle_fine_rig`` (same bones, same clips)
     figures [--only a,b]    build the fine figures of ``battle_fine_figures`` (3 LODs each)
+    bake [--only a,b]       lot FG3: build the figures as ``figures`` does, plus their baked
+                            maps (atlas per figure and LOD, shared detail tiles, horse coat)
+                            in ``battle_fine/textures/`` and ``CAM2`` meshes (atlas UV)
     check <dir>             render the computed poses (bow, crossbow, pike, riders) on the
                             fitted body, to check hands on weapons, arrow at the cheek, feet
                             in the stirrups
-    all                     rigs then figures
+    all                     rigs then bake
 
 Output: ``game/assets/models/battle_fine/`` (``CAM1`` meshes, ``CAB1`` bone textures and a
 ``manifest.json`` of the same shape as ``battle_skinned/manifest.json``), read by
@@ -156,11 +159,15 @@ def main():
     if step in ("rigs", "all"):
         step_rigs(manifest)
         save_manifest(manifest)
-    if step in ("figures", "all"):
+    if step in ("figures", "bake", "all"):
+        import battle_fine_bake as fb
         import battle_fine_figures as ff
 
+        bake = step in ("bake", "all")
+        if bake:
+            fb.make_detail(FINE_DIR)
         built = {"rigs": manifest["rigs"], "figures": {}}
-        ff.build_all(built, only)
+        ff.build_all(built, only, bake=bake)
         # Re-read before writing: several builds (--only subsets) may run in parallel.
         manifest = load_manifest()
         manifest["figures"].update(built["figures"])

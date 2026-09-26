@@ -301,8 +301,13 @@ def geo_battle_site(
 
 @app.command("export-data")
 def export_data_command(
-    app_path: str = typer.Option(
-        ..., "--app", help="Application exportée (…/Cent Ans.app)"
+    app_path: str | None = typer.Option(
+        None, "--app", help="Application exportée macOS (…/Cent Ans.app)"
+    ),
+    folder_path: str | None = typer.Option(
+        None,
+        "--dir",
+        help="Dossier de l'export Windows (celui de Cent Ans.exe, ADR 0087)",
     ),
     relief: str = typer.Option(
         "bundle",
@@ -310,12 +315,18 @@ def export_data_command(
         help="Cache du relief fin : bundle (dans l'app), external (dossier « Cent Ans relief » à côté), none",
     ),
 ) -> None:
-    """Copie data/ et le cache de relief dans un export (tools/export_macos.sh, lot ZG7b)."""
+    """Copie data/ et le cache de relief dans un export (tools/export_macos.sh, export_windows.sh)."""
     from pathlib import Path
 
     from cent_ans_tools import export_data
 
-    result = export_data.stage(Path(app_path) / "Contents" / "Resources", relief)
+    if (app_path is None) == (folder_path is None):
+        raise typer.BadParameter("indiquer soit --app (macOS), soit --dir (Windows)")
+    if app_path is not None:
+        result = export_data.stage(Path(app_path) / "Contents" / "Resources", relief)
+    else:
+        folder = Path(folder_path)
+        result = export_data.stage(folder, relief, external_parent=folder)
     console.print(f"data/ : {result.data_bytes / 1e6:.0f} Mo → {result.data_dir}")
     if result.relief_dir is not None:
         console.print(
@@ -472,6 +483,24 @@ def geo_towns() -> None:
     from cent_ans_tools.geo import towns
 
     result = towns.build(log=console.print)
+    console.print(result.summary())
+
+
+@geo_app.command("landmarks")
+def geo_landmarks(
+    city: list[str] = typer.Option(  # noqa: B008
+        None, "--city", help="Identifiant de ville (répétable)"
+    ),
+    refresh_osm: bool = typer.Option(
+        False, "--refresh-osm", help="Retélécharge l'extrait OpenStreetMap (Overpass)"
+    ),
+) -> None:
+    """Villes emblématiques 1:1 (ADR 0078, lot VH4) : rues OSM et fleuve fin de data/landmarks_v2/."""
+    from cent_ans_tools.geo import landmarks_v2
+
+    result = landmarks_v2.build(
+        only=city or None, refresh_osm=refresh_osm, log=console.print
+    )
     console.print(result.summary())
 
 

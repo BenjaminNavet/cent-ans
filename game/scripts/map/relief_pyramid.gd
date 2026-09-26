@@ -7,15 +7,18 @@ extends RefCounted
 ## `height_tiles`, versionné). Sans cache (aucune tuile E1+ sur disque), `is_available()` est
 ## faux et la carte se comporte comme avant (relief fin `FineTerrainJob`).
 ##
-## Géoréférencement (même convention que les tuiles E0 et la heightmap 4096) : le pixel global j
-## de l'étage k (taille `0,5 / 2^k` unité) est centré en `(j + 0,5) × taille − 0,5` ; la tuile
-## (k, col, row) couvre donc `[col × T − 0,5, (col + 1) × T − 0,5]` avec T = `tile_units(k)`.
+## Géoréférencement (ADR 0086, lot SZ2b ; même convention que les outils `geo` et toutes les
+## données vectorielles, x = (E − minx) / m) : le pixel global j de l'étage k (taille
+## `0,5 / 2^k` unité) est centré en `(j + 0,5) × taille` ; la tuile (k, col, row) couvre
+## `[col × T, (col + 1) × T]` avec T = `tile_units(k)`. Avant SZ2b, la grille était décalée de
+## −0,5 unité (pixel de la heightmap centré en x = i) : relief affiché 360 m au nord-ouest des
+## fleuves fins, colonies et villes 1:1.
 ## Rendu seulement : aucune règle de jeu ne lit la pyramide.
 
 const TILE_PX := 512
 const ROOT_TILE_UNITS := 256.0
-## Décalage de la grille des tuiles par rapport aux coordonnées carte (pixel centré).
-const GRID_OFFSET := -0.5
+## Décalage de la grille des tuiles par rapport aux coordonnées carte (0 depuis SZ2b, ADR 0086).
+const GRID_OFFSET := 0.0
 const MAX_LEVEL := 7
 
 var map_dir: String = ""
@@ -232,6 +235,23 @@ func has_tile(level: int, col: int, row: int) -> bool:
 	if _broken.has(key_of(level, col, row)):
 		return false
 	return _tiles[level].has(row * cols + col)
+
+
+## PB3g : indices `row × tiles_per_side + col` des tuiles de l'étage (pour `ReliefLod`).
+func tile_indices(level: int) -> PackedInt32Array:
+	var out := PackedInt32Array()
+	if level >= 0 and level < _tiles.size():
+		for index: int in _tiles[level]:
+			out.append(index)
+	return out
+
+
+## PB3g : clés des tuiles marquées illisibles.
+func broken_keys() -> PackedInt64Array:
+	var out := PackedInt64Array()
+	for key: int in _broken:
+		out.append(key)
+	return out
 
 
 ## Marque une tuile illisible (fichier absent ou corrompu) : `has_tile` devient faux.

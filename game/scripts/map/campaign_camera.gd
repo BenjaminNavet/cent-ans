@@ -29,6 +29,10 @@ extends Node3D
 ## leurs cercles (x, z, rayon) en unités carte, fournis par `SettlementLayer.landmark_zones`.
 @export var close_min_distance: float = 7.0
 var close_zones: PackedVector3Array = PackedVector3Array()
+## VH4 (ADR 0078) : zones du plancher provisoire ZG4b (villes emblématiques sans ville 1:1) ;
+## tant qu'elles ne sont pas fournies (`floor_zones_set`), `close_zones` sert.
+var floor_zones: PackedVector3Array = PackedVector3Array()
+var floor_zones_set := false
 ## Lot ZG4 : réglages de la caméra rapprochée ; `relief` (`ReliefPyramid` : étages disponibles) et
 ## `ground_height(x, y) -> float` (surface affichée, `TerrainBuilder.surface_height_at`) sont posés
 ## par la carte ; null / vide = comportement historique.
@@ -93,7 +97,8 @@ func min_distance_at(point: Vector3) -> float:
 	if relief != null and profile != null:
 		result = minf(result, _soft_min(point))
 		# ZG4b : plancher provisoire au-dessus des villes emblématiques (levé par VH4).
-		result = maxf(result, minf(profile.landmark_floor(Vector2(point.x, point.z), close_zones), min_distance))
+		var zones := floor_zones if floor_zones_set else close_zones
+		result = maxf(result, minf(profile.landmark_floor(Vector2(point.x, point.z), zones), min_distance))
 	return result
 
 
@@ -224,6 +229,13 @@ func _apply_transform() -> void:
 			var p := focus.lerp(eye, t)
 			var ground := float(ground_height.call(p.x, p.z)) + clear
 			needed = maxf(needed, focus.y + (ground - focus.y) / t)
+		# SZ1 : au-dessus des crêtes voisines (cercles autour de la caméra et du point visé).
+		var radius := profile.crest_radius_factor * distance
+		for k in profile.crest_samples:
+			var angle := TAU * k / profile.crest_samples
+			var ring := Vector2(cos(angle), sin(angle)) * radius
+			needed = maxf(needed, float(ground_height.call(eye.x + ring.x, eye.z + ring.y)) + clear)
+			needed = maxf(needed, float(ground_height.call(focus.x + ring.x, focus.z + ring.y)) * profile.crest_focus_weight + clear)
 		var lift := maxf(needed - eye.y, 0.0)
 		var rate := 1.0 if _snapping else (0.5 if lift > _occlusion_lift else 0.06)
 		_occlusion_lift = lerpf(_occlusion_lift, lift, rate)

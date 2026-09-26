@@ -13,8 +13,11 @@ use std::time::Instant;
 
 use godot::classes::RefCounted;
 use godot::prelude::*;
+
+use crate::relief_lod_bridge::ReliefLod;
 use vegetation::{
-    reground, scatter_tile, Ground, MapRasters, ReliefFloor, TileRequest, TileResult, PAGE_PX,
+    reground, scatter_tile, DetailArea, Ground, MapRasters, ReliefFloor, TileRequest, TileResult,
+    PAGE_PX,
 };
 
 struct Job {
@@ -76,12 +79,23 @@ fn ground_of(grid: &VarDictionary) -> Ground {
         .get("qt_pages")
         .and_then(|v| v.try_to::<VarDictionary>().ok())
     {
+        // Lot PB3g: pages already held by the quadtree's native store are shared, not copied
+        // (a snapshot holds up to 256 pages of 512 KB).
+        let store = grid
+            .get("qt_store")
+            .and_then(|v| v.try_to::<Gd<ReliefLod>>().ok());
+        let store = store.as_ref().map(|s| s.bind());
         let pages = pages
             .iter_shared()
             .filter_map(|(key, bytes)| {
                 let key = key.try_to::<i64>().ok()?;
+                if let Some(shared) = store.as_ref().and_then(|s| s.page_bytes(key)) {
+                    if shared.len() >= PAGE_PX * PAGE_PX * 2 {
+                        return Some((key, shared));
+                    }
+                }
                 let bytes = bytes.try_to::<PackedByteArray>().ok()?;
-                (bytes.len() >= PAGE_PX * PAGE_PX * 2).then(|| (key, bytes.to_vec()))
+                (bytes.len() >= PAGE_PX * PAGE_PX * 2).then(|| (key, Arc::new(bytes.to_vec())))
             })
             .collect();
         return Ground::Pages {
@@ -103,6 +117,35 @@ fn ground_of(grid: &VarDictionary) -> Ground {
         },
         _ => Ground::None,
     }
+}
+
+/// Lot SZ4b: optional dense-forest cell of a request (`detail_rect` Rect2, `keep`, `parts_side`,
+/// `corridors` PackedFloat32Array of `x0, y0, x1, y1, half_width` segments kept free of trees).
+fn detail_of(params: &VarDictionary) -> Option<DetailArea> {
+    let rect = params.get("detail_rect")?.try_to::<Rect2>().ok()?;
+    Some(DetailArea {
+        rect: (
+            rect.position.x as f64,
+            rect.position.y as f64,
+            (rect.position.x + rect.size.x) as f64,
+            (rect.position.y + rect.size.y) as f64,
+        ),
+        keep: float_of(params, "keep", 1.0),
+        parts_side: int_of(params, "parts_side", 4).max(1) as usize,
+        corridors: params
+            .get("corridors")
+            .and_then(|v| v.try_to::<PackedFloat32Array>().ok())
+            .map(|values| {
+                values
+                    .as_slice()
+                    .as_chunks::<5>()
+                    .0
+                    .iter()
+                    .map(|c| c.map(|v| v as f64))
+                    .collect()
+            })
+            .unwrap_or_default(),
+    })
 }
 
 #[godot_api]
@@ -156,6 +199,28 @@ impl VegetationScatter {
             data: if valid { data } else { Vec::new() },
             side: if valid { side } else { (0, 0) },
             cell: cell.max(1.0),
+            ..Default::default()
+        });
+    }
+
+    /// Lot SZ1: uncapped base and mountain squash factor of the current floor grid
+    /// (`MapData.relief_floor_grid` "base" / "squash"); call after `set_floor`. Arrays of another
+    /// size are ignored (base = floor, k = 0).
+    #[func]
+    fn set_relief_fields(&mut self, base: PackedFloat32Array, squash: PackedFloat32Array) {
+        let n = self.floor.data.len();
+        let base = base.to_vec();
+        let squash = squash.to_vec();
+        self.floor = Arc::new(ReliefFloor {
+            data: self.floor.data.clone(),
+            base: if base.len() == n { base } else { Vec::new() },
+            squash: if squash.len() == n {
+                squash
+            } else {
+                Vec::new()
+            },
+            side: self.floor.side,
+            cell: self.floor.cell,
         });
     }
 
@@ -181,7 +246,8 @@ impl VegetationScatter {
     /// Queues a tile under the caller's `id`. `params`: tile_index, origin_x, origin_y, size_px,
     /// spacing, coarse_step, tree_scale, vertical_scale, side, coarse (Array of 7
     /// PackedFloat32Array: forest, crops, conifer, beech, hedge, grove, region), exclusions
-    /// (PackedVector3Array), ground_grid (`TerrainBuilder.surface_grid`), relief_gain (ZG8).
+    /// (PackedVector3Array), ground_grid (`TerrainBuilder.surface_grid`), relief_gain (ZG8),
+    /// relief_squash (SZ1).
     /// False if not started or malformed.
     #[func]
     fn request(&mut self, id: i64, params: VarDictionary) -> bool {
@@ -235,11 +301,13 @@ impl VegetationScatter {
             tree_scale: float_of(&params, "tree_scale", 1.0),
             vertical_scale: float_of(&params, "vertical_scale", 1.0),
             relief_gain: float_of(&params, "relief_gain", 0.0),
+            relief_squash: float_of(&params, "relief_squash", 0.0),
             floor: Arc::clone(&self.floor),
             coarse: grids,
             side,
             exclusions,
             ground,
+            detail: detail_of(&params),
         };
         self.send(Job {
             id,
@@ -253,6 +321,7 @@ impl VegetationScatter {
     /// (`TerrainBuilder.surface_grid`, local to `origin`); the result comes back from `poll`
     /// like a scatter (`counts` unchanged).
     #[func]
+    #[allow(clippy::too_many_arguments)]
     fn request_reground(
         &mut self,
         id: i64,
@@ -261,6 +330,7 @@ impl VegetationScatter {
         origin: Vector2,
         vertical_scale: f64,
         relief_gain: f64,
+        relief_squash: f64,
     ) -> bool {
         let buffers: Vec<Vec<f32>> = buffers
             .iter_shared()
@@ -279,11 +349,13 @@ impl VegetationScatter {
             tree_scale: 1.0,
             vertical_scale,
             relief_gain,
+            relief_squash,
             floor: Arc::clone(&self.floor),
             coarse: Default::default(),
             side: 0,
             exclusions: Vec::new(),
             ground: ground_of(&ground_grid),
+            detail: None,
         };
         self.send(Job {
             id,

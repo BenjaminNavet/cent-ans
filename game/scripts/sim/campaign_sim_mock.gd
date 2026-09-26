@@ -697,7 +697,7 @@ func _advance_army(army_id: String, army: Dictionary) -> void:
 		province["controller"] = army["faction"]
 		province["owner"] = army["faction"]
 		province.erase("siege")
-		_events.append({"kind": "province_taken", "text_fr": "%s tombe aux mains de %s." % [province["name"], _faction_label(army["faction"])], "province": army["location"], "faction": army["faction"]})
+		_events.append({"kind": "province_captured", "text_fr": "%s tombe aux mains de %s." % [province["name"], _faction_label(army["faction"])], "province": army["location"], "faction": army["faction"]})
 	elif not province.is_empty() and army["stance"] == "raid" and province["owner"] != army["faction"]:
 		province["devastation"] = mini(int(province["devastation"]) + 30, 100)
 		_events.append({"kind": "raid", "text_fr": "Chevauchée en %s : dévastation %d." % [province["name"], province["devastation"]], "province": army["location"], "army": army_id})
@@ -745,7 +745,7 @@ func _apply_recruits() -> void:
 		for unit_type in FAKE_UNIT_TYPES:
 			if unit_type["unit_type"] == recruit["unit_type"]:
 				province["garrison"].append(_make_unit(unit_type))
-				_events.append({"kind": "recruit", "text_fr": "%s : %s rejoignent la garnison." % [province["name"], unit_type["name"]], "province": recruit["province"]})
+				_events.append({"kind": "recruited", "text_fr": "%s : %s rejoignent la garnison." % [province["name"], unit_type["name"]], "province": recruit["province"]})
 	_pending_recruits.clear()
 
 
