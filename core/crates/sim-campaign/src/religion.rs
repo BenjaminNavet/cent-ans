@@ -288,6 +288,24 @@ fn religious_buildings(data: &GameData, buildings: &[data_model::BuildingId]) ->
         .count() as u32
 }
 
+/// Religious buildings of every place of `province` against heresy, each place weighing
+/// its kind's `province_effect_percent` (lot DC6b, ADR 0082: the dense map's doubled
+/// parish churches and abbeys would otherwise stamp a heresy out twice as fast).
+pub fn weighted_religious_buildings(
+    state: &CampaignState,
+    data: &GameData,
+    province: &ProvinceId,
+) -> f64 {
+    state
+        .settlements_of(province)
+        .map(|(_, s)| {
+            f64::from(religious_buildings(data, &s.buildings))
+                * f64::from(crate::buildings::province_effect_percent(data, s.kind))
+                / 100.0
+        })
+        .sum()
+}
+
 /// G1: a character's piety as the rules read it — the stored value plus the
 /// `Piety` effects of its traits and skills (pious +10, lustful −5,
 /// excommunicated −20…), clamped to 0-100. The stored value only moves with
@@ -516,7 +534,6 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
         let Some(controller) = state.province_controller(id).cloned() else {
             continue;
         };
-        let province_buildings = state.province_buildings(id);
         let clergy = &p.population.clergy;
         let governor_piety = state
             .province_governor(id)
@@ -525,7 +542,7 @@ fn resolve_heresy(state: &mut CampaignState, data: &GameData, events: &mut Vec<G
         let growth = f64::from(clergy.unrest) / 20.0
             + (100.0 - f64::from(clergy.goods_satisfaction)) / 40.0
             + 1.0
-            - f64::from(religious_buildings(data, &province_buildings))
+            - weighted_religious_buildings(state, data, id)
             - f64::from(piety) / 40.0;
         let value = (f64::from(p.heresy) + growth).round().clamp(0.0, 100.0) as u8;
         let p = state.provinces.get_mut(id).expect("exists");
