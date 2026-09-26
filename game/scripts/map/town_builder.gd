@@ -972,13 +972,20 @@ func _build_monuments() -> void:
 		var deck := float(bridge["deck"])
 		var water := float(bridge["water"])
 		var blen := float(bridge["length"])
-		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center), deck - 1.5)
+		# VH7 : tablier posé sur la base des piles (niveau de l'eau) et relevé en mètres : sous
+		# l'exagération locale du relief (ZG8), une base au niveau du tablier le décollait des piles.
+		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center + Vector3(0.0, deck - water, 0.0)), water - 1.5)
 		var piers := maxi(1, int(blen / 15.0))
+		var spread := 0.8
+		# VH7 : nombre d'arches du fichier v2 (piles entre les arches, sur toute la traversée).
+		if int(bridge.get("arches", 0)) > 1:
+			piers = int(bridge["arches"]) - 1
+			spread = 0.92
 		var pier_m := float(bridge.get("pier_m", 3.5))
 		var starling := float(bridge.get("starling_m", 0.0))
 		for k in piers:
 			var t := (float(k) + 0.5) / piers - 0.5
-			var pc := center + Vector3(bd.x, 0, bd.y) * (t * blen * 0.8)
+			var pc := center + Vector3(bd.x, 0, bd.y) * (t * blen * spread)
 			add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(pier_m, maxf(deck - water + 1.0, 2.0), float(bridge["width"]) + 1.0)), pc), water - 1.5)
 			# VH6 : avant-becs (« starlings ») au ras de l'eau, en amont et en aval de la pile.
 			if starling > 0.0:

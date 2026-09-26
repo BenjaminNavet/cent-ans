@@ -24,7 +24,7 @@
     "landmark": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]*$",
-      "description": "Maquette L1/L2 (data/landmarks/<id>.json) affichée en vue stratégique."
+      "description": "Maquette L1/L2 (data/landmarks/<id>.json) affichée en vue stratégique. Absente : la colonie garde en vue stratégique la maquette de colonie ordinaire, et la ville 1:1 remplace sa ville ZG6 (Orléans, VH7)."
     },
     "period": {
       "type": "string",
@@ -598,7 +598,8 @@
               "royal_palace",
               "gate_tower",
               "tower",
-              "enclosure"
+              "enclosure",
+              "earthwork"
             ],
             "description": "Gabarit paramétré de `LandmarkMonuments` (Godot), à l'échelle réelle. Paramètres en mètres, voir docs/landmarks-v2.md."
           },
@@ -780,7 +781,6 @@
     "id",
     "name",
     "settlement",
-    "landmark",
     "period",
     "year",
     "seed",
