@@ -36,6 +36,9 @@ var zones: PackedVector3Array = PackedVector3Array()
 var towns: PackedVector3Array = PackedVector3Array()
 var meters_per_unit: float = 719.0
 var min_order: int = 3
+## ZG7a : genre de la colonie (`city`, `town`…) par index de couverture, pour préparer ici les
+## maillages des ponts-portes (`BridgeMeshes.build_arrays`).
+var cover_kinds: Dictionary = {}
 ## Étage de page le plus fin sous la tuile au moment de l'instantané.
 var finest: int = -1
 
@@ -44,7 +47,8 @@ var river_arrays: Array = []
 var road_arrays: Array = []
 var river_aabb: AABB
 var road_aabb: AABB
-## Ponts-portes : {px: Vector2, dir: Vector2, width: float (unités), cover: int}.
+## Ponts-portes : {px: Vector2, dir: Vector2, width: float (unités), cover: int, z: float,
+## structure, mesh_width, mesh_key, surfaces (ZG7a : tableaux du maillage préparés ici)}.
 var gates: Array[Dictionary] = []
 var river_points: int = 0
 var road_points: int = 0
@@ -57,7 +61,24 @@ func run() -> void:
 		_build_rivers()
 	if road_tile != null:
 		_build_roads()
+	_prepare_gate_meshes()
 	build_ms = (Time.get_ticks_usec() - t0) / 1000.0
+
+
+## ZG7a : type, largeur de maillage et tableaux de chaque pont-porte (fil de travail).
+func _prepare_gate_meshes() -> void:
+	for k in gates.size():
+		var gate := gates[k]
+		var index: int = gate["cover"]
+		var kind := str(cover_kinds.get(index, "city"))
+		var width: float = gate["width"]
+		var structure := ("gate" if width >= FineGeoLayer.GATE_MIN_WIDTH else "stone") if kind in FineGeoLayer.WALLED else "wood"
+		var mesh_width := maxf(width, 0.01) / RiverCrossings.FINE_SCALE
+		var seed_value := absi(str(index).hash()) + k
+		gate["structure"] = structure
+		gate["mesh_width"] = mesh_width
+		gate["mesh_key"] = BridgeMeshes.cache_key(structure, mesh_width, seed_value)
+		gate["surfaces"] = BridgeMeshes.build_arrays(structure, mesh_width, seed_value)
 
 
 ## Surface (m) sous un point, NAN hors pages.
