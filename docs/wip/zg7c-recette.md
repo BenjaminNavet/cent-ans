@@ -36,21 +36,24 @@ dans `game/bin/libcent_ans.debug.dylib`. Visuel et données seulement, rien dans
   Recette : la Loire à Orléans passait **10 m sous le relief E7** (eau 71 m, berges 82-86 m) : les
   recalages des fleuves en cache dataient d'avant le correctif ZG3b. `SNAP_VERSION` 4 et clé de
   cache incluant `detail_dem.BAKE_VERSION` (nouveau recalage après toute recuisson) ;
-  `hydro-fine` complet puis `anchors-fine` relancés.
+  `hydro-fine` complet (tous les traits recalés, ≈ 4 min) puis `anchors-fine` relancés : Tamise à
+  Londres 1,88 m (berges 2,6-3,8 m), Loire à Orléans 71 → 76 m, encore ≈ 5 m sous les berges E7
+  (82-88 m) : l'ajustement monotone mêle la zone aux biefs E4 d'amont, abaissés par S2.
 - [x] 4. `map_bench` : `process_ms` = début de l'itération (nœud `FrameStart`, priorité minimale,
   physique comprise) → banc (priorité maximale). Descente : process p50 5,2 ms, p99 75 ms ; 131 pics
   > 50 ms sur 131 dominés par les scripts (médiane 59 ms) : contrairement à ce que concluait ZG7a
   avec `TIME_PROCESS`, les pics sont côté scripts (hydro-fine tournait en parallèle : relatif).
 - [x] 5. Recette (script `tests/zg7c_recette_shots.gd`, `--map-weather=clear`, brouillard de guerre
   coupé) : 12 lieux × 3 paliers + parchemin, filtres, avis de cache. Défauts ci-dessous.
-- [ ] 6. Docs de clôture.
+- [x] 6. Docs de clôture : `docs/godot-map.md` (« Vue d'ensemble ZG » : état final et limites ;
+  section ZG7c), addendum « chantier clos » de l'ADR 0036.
 
 ## Recette : défauts corrigés dans le lot
 | # | Défaut | Correctif | Capture |
 |---|---|---|---|
 | C1 | Montagnes en aiguilles et murs aux paliers vallée / site (Alpes, puys, Pyrénées, Snowdonia) : le gain ZG8 s'applique à `h − fond` jusqu'à 2 000 m | `ReliefFloor` relève le fond à `sommets voisins − local_relief_cap_m` (350 m, `relief_exaggeration.tres`) : collines et falaises inchangées, montagnes +≤ 350 × g m ; fond en 0,27 s au lieu de 0,22 | `alpes_vallee_avant/alpes_vallee`, `massif_central_vallee_avant/massif_central_vallee` |
 | C2 | Tamise à −7,8 m, Garonne à −15,8 m (bathymétrie dans le niveau d'eau) | `hydro_fine.water_level` (≥ 0 m) | `londres_vallee`, `londres_site` |
-| C3 | Loire sous le relief à Orléans (recalages en cache périmés) | `SNAP_VERSION` 4, clé liée à `BAKE_VERSION` | `orleans_vallee` (avant) |
+| C3 | Recalages des fleuves en cache antérieurs à ZG3b (Loire 10 m sous le relief d'Orléans) | `SNAP_VERSION` 4, clé liée à `BAKE_VERSION` ; Loire 71 → 76 m (reste S2) | `orleans_vallee` |
 | C4 | Avis « relief incomplet » : commande grisée illisible (champ non modifiable) | encre normale du champ | `avis_cache_absent` |
 | C5 | Cache partiel : étage entier ignoré si sa 1re tuile manque | repli par tuile | test `zg7c_partial_cache_test` |
 
@@ -58,7 +61,7 @@ dans `game/bin/libcent_ans.debug.dylib`. Visuel et données seulement, rien dans
 | # | Défaut | Piste | Capture |
 |---|---|---|---|
 | S1 | Haute montagne au palier vallée : l'exagération ZG4 seule (×3,4 à d = 6) fait des murs qui remplissent la vue (Pyrénées, Galles) ; caméra au fond de canyons | exagération fonction aussi de l'amplitude locale du relief (ou plafond de hauteur affichée par distance) ; touche caméra ZG4 et bornes du quadtree | `pyrenees_vallee`, `galles_vallee` |
-| S2 | Fonds de vallée E1-E4 plaqués à 0,5 m (Seine 0,5-3 m de Paris à Rouen, Loire à 16 m à Amboise au lieu de ~55 m) ; marches sombres le long des coteaux de la Loire | recuisson E0-E4 avec le plancher monotone de ZG7a (plusieurs heures, continuité E0/E1) | `val_de_loire_site` |
+| S2 | Fonds de vallée E1-E4 abaissés par le rehaussement de rendu, plaqués à 0,5 m près des plateaux (Seine 0,5-3 m de Paris à Rouen, Loire à 16 m à Amboise au lieu de ~55 m) ; marches sombres le long des coteaux de la Loire ; conséquence : la Loire fine d'Orléans reste ≈ 5 m sous les berges E7 (zone plus haute que ses biefs E4 d'amont) | recuisson E0-E4 avec le plancher monotone de ZG7a (plusieurs heures, continuité E0/E1), puis `hydro-fine` | `val_de_loire_site`, `orleans_vallee` |
 | S3 | Villes emblématiques au palier site : maquette à la loupe sur relief 1:1 (Rouen : falaise au milieu de la ville, plan d'eau vertical) ; au palier vallée, Orléans n'est qu'un disque d'emprise | lot VH4 (1:1 géoréférencé) | `rouen_seine_site`, `orleans_vallee` |
 | S4 | Objets à l'échelle de la carte au palier vallée : moulins, hameaux, fumées de colonies (colonnes blanches), arbres géants près de la caméra | étendre `campaign_prop_scale` / le masquage du palier site aux paliers intermédiaires | `crecy_vallee`, `paris_vallee`, `val_de_loire_vallee` |
 | S5 | Ville ordinaire (Amiens) au palier vallée : disque d'emprise brun avant les maisons | seuil d'activation de la couche ZG6 (poids ≥ 0,5) à abaisser, ou emprise moins visible | `amiens_vallee` |
@@ -72,6 +75,4 @@ ravitaillement, politique) : corrects aux trois paliers. Le « sol beige » de L
 Galles dans les premières captures était le brouillard de guerre (camp France), pas le relief.
 
 ## Prochaine étape
-Vérifier la Loire à Orléans après le nouveau recalage (journal scratchpad `zg7c_hydro2.log`),
-`anchors-fine`, docs de clôture (godot-map « Vue d'ensemble ZG », addendum ADR 0036), fusion de
-`main`, tests.
+Fusion de `main`, tests Godot (smoke, zg2, zg4, zg5b, zg6, zg7a, zg7b, zg7c, zg8), pytest, ruff.
