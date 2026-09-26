@@ -202,7 +202,10 @@ def fine_river_lines(
     if not features_path.exists():
         return []
     features = json.loads(features_path.read_text(encoding="utf-8"))["features"]
-    wanted = {i for i, f in enumerate(features) if f["name"] in names}
+    targets = {hydro_fine.normalise_name(n) for n in names}
+    wanted = {
+        i for i, f in enumerate(features) if hydro_fine.normalise_name(f["name"]) in targets
+    }
     bounds = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))["bounds_projected"]
     mpp = (bounds[2] - bounds[0]) / 4096.0
     origin = city["origin_3035"]
@@ -228,7 +231,7 @@ def fine_river_lines(
                     continue
                 lines.append(
                     {
-                        "name": features[line["feature"]]["name"],
+                        "name": hydro_fine.normalise_name(features[line["feature"]]["name"]).title(),
                         "points": local[inside],
                         "width": np.asarray(line["w"], dtype=np.float64)[inside],
                     }
