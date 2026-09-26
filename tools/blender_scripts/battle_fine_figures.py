@@ -62,6 +62,7 @@ BUDGET = {
     "scabbard": (0, 40, 12),
     "tabard": (500, 110, 16),
     "plates": (1500, 220, 0),
+    "jack": (1900, 400, 60),
 }
 # Pieces dropped at a level of detail (budget 0 there, but kept whole at LOD0).
 DROPPED = {"hair": (2,), "beard": (2,), "belt": (2,)}
@@ -708,6 +709,7 @@ def fine_tabard(garments, lm, length=0.34, colour=(1.0, 1.0, 1.0)):
             relax=6,
         )
         if len(piece.data.polygons):
+            gear.hem(piece, 0.004)  # FG2: cloth thickness at the hems
             parent_keep(piece, obj.parent)
             out.append(piece)
         else:
@@ -775,6 +777,23 @@ RIDER_CAP = (9000, 1500, 250)
 CUT_WEIGHT = {"head": 0.35, "hair": 0.6, "beard": 0.6}
 
 
+# FG2: budget roles of the equipment pieces modelled from the body (shells).
+GEAR_ROLES = (
+    ("jack_skirt", "skirt"),
+    ("jack", "jack"),
+    ("brigandine", "coat"),
+    ("tabard", "tabard"),
+)
+
+
+def gear_role(name):
+    """Budget role of an equipment piece (None: kept as built)."""
+    for prefix, role in GEAR_ROLES:
+        if name.startswith(prefix):
+            return role
+    return None
+
+
 def fit_budget(objs, level, mounted):
     """Decimate the pieces proportionally until the figure fits its cap (FG2)."""
     cap = (RIDER_CAP if mounted else TRI_CAP)[level]
@@ -792,7 +811,8 @@ def fit_budget(objs, level, mounted):
         for o in objs:
             if o.name in weights:
                 cut = excess * 1.05 * weights[o.name] / wsum
-                decimate(o, max(12, int(tris[o.name] - cut)))
+                floor = max(12, int(tris[o.name] * 0.4))
+                decimate(o, max(floor, int(tris[o.name] - cut)))
 
 
 def build_figure(fig_name, level):
@@ -867,11 +887,14 @@ def build_figure(fig_name, level):
                 or getattr(eq, name)
             )
             objs = builder(ctx, **kwargs)
+            for obj in objs:
+                gear.unwrap(obj)  # FG2: per-piece UVs for the baked maps of FG3
         m = mask if mounted else bs.held_mask(name, mask, kwargs)
         for obj in objs:
             equipment.append((obj, m, kit))
     if fine:
         for obj in fe.scabbard(lm):
+            gear.unwrap(obj)
             equipment.append((obj, 0, "kit"))
     # Heads: one face per variant at LOD0, the variant-0 face below.
     hair_ok, beard_ok = headgear_visibility(recipe)
@@ -921,7 +944,9 @@ def build_figure(fig_name, level):
     if outfit == "peasant" and "Farmer_Head" in masks:
         straw = colour(recipe, "Farmer_Head:Beige", (eq.C_CLOTH, figures.STRAW))
         band = colour(recipe, "Farmer_Head:Red", (eq.C_CLOTH, (0.25, 0.05, 0.03)))
-        extra.append((straw_hat(lm, straw, band), masks["Farmer_Head"], "hat"))
+        hat = straw_hat(lm, straw, band)
+        gear.unwrap(hat)
+        extra.append((hat, masks["Farmer_Head"], "hat"))
     # FG2: faces of the garments hidden under other pieces (jack, plates, tabard...).
     hide_covered(garments, equipment, variants)
     # Body without the head (separate) nor the faces under the garments.
@@ -964,8 +989,12 @@ def build_figure(fig_name, level):
         out.append(obj)
     for obj, mask, kit in equipment:
         target = 0
-        if obj.name.startswith("tabard"):
-            target = budget("tabard", level, mounted)
+        role = gear_role(obj.name)
+        if role == "drop":
+            bpy.data.objects.remove(obj)
+            continue
+        if role is not None:
+            target = budget(role, level, mounted)
         elif kit == "kit" and level:
             target = max(16, int(fp._tris(obj) * KIT_SHARE[level - 1]))
         decimate(obj, target)
