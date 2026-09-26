@@ -25,9 +25,9 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 | DC2c | Colonies îles Britanniques (Angleterre cible 10 ; Galles, Irlande, Écosse 7) | 1 | fait, fusionné |
 | DC2d | Colonies Pays-Bas (11), Empire rhénan (9), reste de l'Empire et Scandinavie (7) | 1 | fait, fusionné |
 | DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | fait, fusionné |
-| DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | fait, fusionné (DC5) |
+| DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | fait, fusionné |
 | DC4 | Affichage : niveaux de détail des marqueurs, désencombrement des étiquettes (O(n²)), maquettes proches, captures | 2 | fait, fusionné |
-| DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | recette verte, ff dans `main` à faire |
+| DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | fait |
 
 ## Journal
 - 26/09 : plan, squelette DC0 (6f74c214) ; vague 1 lancée (DC1 opus, DC2a-e sonnet, worktrees ../gp-dc1, ../gp-dc2a-e).
@@ -68,13 +68,17 @@ puis la suppression des worktrees `../gp-densite`, `../gp-dc3`.
   passage) ; `_absorb` et `_fit_model` raisonnent sur la taille de carte (échelle 1), pas sur la
   taille réduite de près (masquage un peu conservateur au palier vallée).
 
-## Prochaine étape (pause du 26/09, à reprendre dans une autre session)
-1. Relancer un agent DC3 dans `../gp-dc3` (branche `feat/densite-dc3`) : sa section « DC3 » y liste
-   ce qui est fait (économie réglée, Angleterre lève de nouveau) et les 6 points restants.
-2. Fusionner DC3 dans `feat/densite`.
-3. DC5 recette : `find core/crates -name '*.rs' -exec touch {} +` puis build.sh (dylib périmée avec
-   la cible partagée, vu en DC4), import + smoke Godot, cargo test, pytest ; `git merge main` ; ff dans main.
-4. Supprimer les worktrees `../gp-densite`, `../gp-dc3`.
+## État final (26/09)
+Chantier terminé et fusionné dans `main` (ff a661314f). Correctif après recette : Haarlem, Gouda,
+Dokkum, Leeuwarden et Appingedam deviennent des ports (sinon îles sans accès sur la navgrid).
+Worktrees et branches supprimés. Dylib du checkout principal reconstruite, smoke vert.
+
+## Suites possibles
+- Pomposa et Teylingen : îles sans port sur la navgrid (déjà dans main avant DC).
+- Masquage de près des maquettes voisines calculé à l'échelle de carte (un peu trop large).
+- Points de recherche des +102 abbayes et compte des bâtiments religieux contre l'hérésie non pondérés.
+- Révoltes 3,2 / 200 tours contre 5,7 avant (occupations plus courtes avec le pas de 70 km).
+- ~40 colonies recalées dans leur province (frontières approximatives, ex. côte est du Sussex dans le Kent).
 
 ## DC1 — mouvement ralenti (worktree `../gp-dc1`, branche `feat/densite-dc1`)
 État : fait, `main` fusionné (2d33df5a), fmt + clippy + 546 tests (data-model, sim-campaign, ai) verts, pytest codex et colonies verts. À fusionner dans `feat/densite`. `points_per_step` 140 → 70 (rules.json + défaut Rust) ; description de
