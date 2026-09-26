@@ -24,3 +24,5 @@ sim-campaign (18 pts), sim-battle (7), ai+pont (5), tools Python (4), GDScript b
 Déjà fait : 90343b88 fix(save) (chargement raté = sim vide écrasée à l'autosave).
 Reporté : pont get_siege_state / get_soldier_buffers groupés (changement d'API, après la vague 2).
 Intégration : orchestrateur → build.sh + smoke Godot + cargo test, puis ff dans main.
+
+Note PB3 (26/09) : l'item reporté « get_siege_state / get_soldier_buffers groupés » est repris par PB3c (`docs/wip/pb3-performance.md`).
