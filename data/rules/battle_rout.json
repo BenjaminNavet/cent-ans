@@ -1,5 +1,5 @@
 {
-  "description": "Direction de la déroute et contagion de moral (lot EP10, ADR 0067). Un régiment en déroute fuit vers l'arrière de son camp, loin du front ; il ne tient compte de l'ennemi que pour ne pas le traverser et contourne les amis en ordre qui lui barrent la route. Un ami en déroute ébranle le moral des régiments proches, pleinement s'il cède à côté d'eux ou devant eux, beaucoup moins s'il est déjà derrière eux et s'éloigne de l'ennemi. Batailles rangées seulement : les sièges gardent leur règle.",
+  "description": "Direction de la déroute et contagion de moral (lot EP10, ADR 0068). Un régiment en déroute fuit vers l'arrière de son camp, loin du front ; il ne tient compte de l'ennemi que pour ne pas le traverser et contourne les amis en ordre qui lui barrent la route. Un ami en déroute ébranle le moral des régiments proches, pleinement s'il cède à côté d'eux ou devant eux, beaucoup moins s'il est déjà derrière eux et s'éloigne de l'ennemi. Batailles rangées seulement : les sièges gardent leur règle.",
   "contagion": {
     "radius_m": 120,
     "morale_per_second": 0.5,

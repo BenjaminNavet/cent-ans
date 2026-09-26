@@ -1,4 +1,4 @@
-//! EP10 (ADR 0067): direction of the rout and contagion of morale. Rules in
+//! EP10 (ADR 0068): direction of the rout and contagion of morale. Rules in
 //! `data/rules/battle_rout.json` (schema
 //! `data/schemas/battle_rout_rules.schema.json`). Field battles only: the
 //! sieges keep their rule (flight away from the nearest enemy, every routing

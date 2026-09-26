@@ -1,4 +1,4 @@
-# ADR 0067 — Direction de la déroute et contagion de moral
+# ADR 0068 — Direction de la déroute et contagion de moral
 
 Date : 2026-09-26. Statut : accepté. Lot EP10 (suivi : `docs/wip/ep10-deroute-contagion.md`),
 renvoyé par SG5 (ADR 0046 § Suite SG5).

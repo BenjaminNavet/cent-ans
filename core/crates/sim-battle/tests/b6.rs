@@ -174,7 +174,7 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// SG4 (the horse counter-charges enemy horse riding at its shooters,
 /// melee height advantage): digests recomputed on EP9 + SG4, same winners.
 /// EP6: each army's camp stands behind its lines (digests unchanged).
-/// EP10 (ADR 0067, fugitives run to the rear, a routing friend behind shakes
+/// EP10 (ADR 0068, fugitives run to the rear, a routing friend behind shakes
 /// a regiment less): digests recomputed. Seed 3 changes winner: before, the
 /// French men-at-arms gave way at 248 and 262 s beside their routed knights
 /// and crossbowmen and France broke at 406 s; now they hold and the English
