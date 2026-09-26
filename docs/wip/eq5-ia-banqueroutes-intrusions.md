@@ -1,6 +1,6 @@
 # EQ5 — IA de campagne : banqueroutes chroniques et intrusions
 
-Branche : `worktree-agent-a745acdb29a9168ed` (main + EQ4 fusionnés). ADR 0068.
+Branche : `worktree-agent-a745acdb29a9168ed` (main + EQ4 fusionnés). ADR 0069 (renumérotée : 0068 pris par EP10).
 
 ## État : terminé (à fusionner)
 
