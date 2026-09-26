@@ -1,5 +1,5 @@
 {
-  "description": "Échelle des batailles de campagne (lot EP1, ADR 0031) : taille du champ, écart des lignes de déploiement, profondeur des zones de déploiement et plafond de régiments présents à la fois par camp, par palier d'effectif total (soldats simulés des deux camps, réserves comprises). Le premier palier dont max_soldiers couvre l'effectif s'applique ; le dernier n'a pas de plafond. Les sièges gardent toujours le premier palier (plan de la ville fixe). Embarqué dans sim-battle à la compilation.",
+  "description": "Échelle des batailles de campagne (lot EP1, ADR 0076) : taille du champ, écart des lignes de déploiement, profondeur des zones de déploiement et plafond de régiments présents à la fois par camp, par palier d'effectif total (soldats simulés des deux camps, réserves comprises). Le premier palier dont max_soldiers couvre l'effectif s'applique ; le dernier n'a pas de plafond. Les sièges gardent toujours le premier palier (plan de la ville fixe). Embarqué dans sim-battle à la compilation.",
   "tiers": [
     {
       "key": "skirmish",

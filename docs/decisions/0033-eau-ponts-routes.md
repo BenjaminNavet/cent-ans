@@ -42,7 +42,7 @@ supposer un champ de 1200 × 800 m (EP1 rend la taille du champ paramétrique).
   reforme au-delà. Pas de charge dans l'eau, sur un pont ni contre une berge escarpée.
 - **Dimensions** : toute position se lit sur le champ (`field.width`, `field.depth`,
   `hydro::battle_lines`, `ai::deployment_center(field, side)`), jamais sur 1200 × 800 ; à la fusion
-  d'EP1 (ADR 0031), `battle_lines` cède la place à `Battlefield::attacker_line_z/defender_line_z`.
+  d'EP1 (ADR 0076), `battle_lines` cède la place à `Battlefield::attacker_line_z/defender_line_z`.
 - **Données** : tous les nombres dans `data/rules/battle_water.json`, validé par
   `data/schemas/battle_water_rules.schema.json` (test pytest), embarqué à la compilation.
 - **Rendu** (Godot) : rivière de largeur variable, ruisseaux, pierres des gués, ponts du kit Blender

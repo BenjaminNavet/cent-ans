@@ -38,7 +38,7 @@ const SHADOW_DISTANCE := 190.0
 ## A1-01 : fondu de lisibilité à distance (teinte de camp, liseré, échelle), en mètres.
 const READABLE_NEAR := 80.0
 const READABLE_FAR := 260.0
-## EP1 (ADR 0031) : budget d'animation décroissant avec la distance. Au-delà de
+## EP1 (ADR 0076) : budget d'animation décroissant avec la distance. Au-delà de
 ## `BUDGET_NEAR` mètres, un régiment n'est remis à jour (tampon d'instances, matériau) qu'une
 ## image sur 2, au-delà de `BUDGET_FAR` une sur 3 (décalé selon l'id : charge étalée).
 const BUDGET_NEAR := 450.0
