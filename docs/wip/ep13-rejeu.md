@@ -1,6 +1,6 @@
 # EP13 — Rejeu d'après bataille
 
-Branche `feat/ep13-replay` (worktree agent). ADR 0072 (numéro choisi pour éviter EP11/EP12).
+Branche `feat/ep13-replay` (worktree agent). ADR 0072 (numéro choisi pour laisser 0070-0071 à EP11/EP12).
 
 ## Approche
 - Simulation déterministe : on enregistre le départ (`ReplayStart` : setup, graine, échelle, site
@@ -12,12 +12,15 @@ Branche `feat/ep13-replay` (worktree agent). ADR 0072 (numéro choisi pour évit
   réglages `data/rules/battle_replay.json`.
 
 ## État
-- [x] `core/crates/sim-battle/src/replay.rs` (enregistreur, lecteur, empreinte) — compile
-- [x] tests Rust `tests/ep13_replay.rs` (déterminisme, divergence, saut) + mesures (re-simulation ≈ 2000× temps réel, copie 0,03 ms)
-- [x] serde_json `float_roundtrip` (sinon un rejeu relu diffère d un ulp)
-- [ ] pont : enregistrement dans `battle_sim.rs`, `battle_replay.rs` (save/list/load/seek)
-- [ ] Godot : barre de rejeu, bouton écran de fin, menu « Rejeux », test UI
-- [ ] ADR 0072, schéma du fichier, pytest schéma
+- [x] `core/crates/sim-battle/src/replay.rs` (enregistreur, lecteur, empreinte)
+- [x] tests Rust `tests/ep13_replay.rs` (déterminisme, divergence, sauts, format, exemple) + mesures
+  (re-simulation ≈ 2000× temps réel, copie 0,03 ms)
+- [x] serde_json `float_roundtrip` (sinon un rejeu relu diffère d'un ulp)
+- [x] pont : `battle_sim.rs` (enregistrement de chaque entrée, refus en rejeu), `battle_replay.rs`
+  (save/list/load/start/seek/get_replay), `historical_battles.rs`
+- [x] Godot : `BattleReplayBar`, mode rejeu de `battle_scene.gd`, bouton de l'écran de fin, menu
+  « Rejeux » (`ReplaysMenu`, bouton du menu principal), test `tests/ep13_replay_test.gd` (OK)
+- [x] ADR 0072, schémas, pytest `test_battle_replay_schema.py`
 
 ## Prochaine étape
-Pont GDExtension.
+Vérifications finales (merge main, fmt, clippy, cargo test --workspace, build.sh, pytest, smoke).
