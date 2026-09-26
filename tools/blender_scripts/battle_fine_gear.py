@@ -50,6 +50,8 @@ class Gear:
         self.bvhs = bvhs
         self.fig = fig_name
         self.mounted = mounted
+        self.body = None  # fitted body (untrimmed), set by the figure builder
+        self.garments = []  # (object, budget role) of the outfit
 
     @property
     def level(self):
@@ -925,6 +927,336 @@ def cloth_cap(g, colour=(0.25, 0.10, 0.05)):
     return [
         finish_object("cloth_cap", bm, [g.mat(eq.C_CLOTH, tuple(colour))], bone="Head")
     ]
+
+
+# --- Armour -------------------------------------------------------------------------------
+
+# Harness of the men-at-arms per figure: "early" (1340s-1360s: spaudlers, couters and
+# vambraces over the mail sleeves, poleyns and greaves over mail chausses) or "late"
+# (1400s-1440s: full arm and leg harness, cuisses, plate gauntlets).
+HARNESS_ERA = {
+    "infantry_0": "early",
+    "cavalry_0": "early",
+    "standard_0": "early",
+    "standard_1": "early",
+    "infantry_7": "late",
+    "cavalry_3": "late",
+}
+LIMBS_OUT = {"Head", "Neck", "Wrist.L", "Wrist.R", "Foot.L", "Foot.R"}
+ARM_BONES = {"UpperArm.L", "UpperArm.R", "LowerArm.L", "LowerArm.R"}
+
+
+def plate_shell(body, name, material, keep, offset, relax=8, depth=0.004):
+    """Shell of the body faces selected by `keep`, with a rolled thickness (or None)."""
+    obj = fe.shell(body, name, material, keep, offset, relax=relax)
+    if not obj.data.polygons:
+        bpy.data.objects.remove(obj)
+        return None
+    if depth:
+        hem(obj, depth)
+    return obj
+
+
+def limb_harness(g, body, era, colour):
+    """Plates of the arms and legs over the mail (one object, the body's weights).
+
+    Early: spaudler of three lames, couter, tubular vambrace, poleyn, greave. Late adds the
+    rerebrace, a fourth lame and the cuisse.
+    """
+    lm = g.lm
+    material = g.mat(eq.C_PLATE, colour)
+    late = era == "late"
+    pieces = []
+    for s in "LR":
+        sign = 1.0 if s == "L" else -1.0
+        knee = lm.bone[f"LowerLeg.{s}"]
+        ankle = lm.bone[f"Foot.{s}"]
+        hip = lm.bone[f"UpperLeg.{s}"]
+        shoulder = lm.bone[f"UpperArm.{s}"]
+        elbow = lm.bone[f"LowerArm.{s}"]
+        wrist = lm.bone[f"Wrist.{s}"]
+        lower_leg, upper_leg = f"LowerLeg.{s}", f"UpperLeg.{s}"
+        lower_arm, upper_arm = f"LowerArm.{s}", f"UpperArm.{s}"
+
+        def greave(c, bones, lower_leg=lower_leg, knee=knee, ankle=ankle):
+            return bones <= {lower_leg} and ankle.z + 0.045 < c.z < knee.z - 0.075
+
+        def poleyn(c, bones, knee=knee, lower_leg=lower_leg, upper_leg=upper_leg):
+            if not bones & {lower_leg, upper_leg} or bones & LIMBS_OUT:
+                return False
+            return (c - knee).length < 0.085 and c.y < knee.y + 0.01
+
+        def cuisse(c, bones, knee=knee, hip=hip, upper_leg=upper_leg):
+            return (
+                bones <= {upper_leg}
+                and knee.z + 0.075 < c.z < hip.z - 0.1
+                and c.y < knee.y + 0.03
+            )
+
+        def couter(c, bones, elbow=elbow, lower_arm=lower_arm, upper_arm=upper_arm):
+            if not bones & {lower_arm, upper_arm} or bones & LIMBS_OUT:
+                return False
+            return (c - elbow).length < 0.07
+
+        def vambrace(c, bones, elbow=elbow, wrist=wrist, lower_arm=lower_arm):
+            return (
+                bones <= {lower_arm}
+                and (c - elbow).length > 0.07
+                and (c - wrist).length > 0.035
+            )
+
+        def rerebrace(c, bones, elbow=elbow, shoulder=shoulder, upper_arm=upper_arm):
+            return (
+                bones <= {upper_arm}
+                and (c - elbow).length > 0.07
+                and (c - shoulder).length > 0.1
+            )
+
+        legs = [("greave", greave, 0.02), ("poleyn", poleyn, 0.03)]
+        arms = [("couter", couter, 0.034), ("vambrace", vambrace, 0.03)]
+        if late:
+            legs.append(("cuisse", cuisse, 0.022))
+            arms.append(("rerebrace", rerebrace, 0.03))
+        for name, keep, off in legs + arms:
+            obj = plate_shell(body, f"{name}_{s}", material, keep, off)
+            if obj is not None:
+                pieces.append(obj)
+        # Spaudler: lames overlapping downwards from the top of the shoulder.
+        lames = 4 if late else 3
+        top = shoulder.z + 0.09
+        step = 0.045
+        for k in range(lames):
+            z_hi = top - k * step
+            z_lo = z_hi - step - 0.012
+
+            def lame(
+                c,
+                bones,
+                z_hi=z_hi,
+                z_lo=z_lo,
+                shoulder=shoulder,
+                sign=sign,
+                s=s,
+            ):
+                if not bones & {f"Shoulder.{s}", f"UpperArm.{s}"}:
+                    return False
+                if bones & LIMBS_OUT:
+                    return False
+                return z_lo < c.z < z_hi and (c.x - shoulder.x) * sign > -0.05
+
+            obj = plate_shell(
+                body, f"spaudler_{s}{k}", material, lame, 0.036 + 0.005 * k, relax=4
+            )
+            if obj is not None:
+                pieces.append(obj)
+    if not pieces:
+        return []
+    return [fe.join(pieces, "limb_plates")]
+
+
+def quilt(obj, lm, amp=0.005, spacing=0.05):
+    """Model the quilting of a padded coat: vertical channels, rings on the sleeves."""
+    me = obj.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.normal_update()
+    dom = fe.dominant(obj)
+    axis = lm.bone["Hips"]
+    n = max(8, int(2 * math.pi * 0.16 / spacing))
+    mw = obj.matrix_world
+    inv = mw.inverted()
+    bm.verts.ensure_lookup_table()
+    for v in bm.verts:
+        p = mw @ v.co
+        bone = dom[v.index]
+        if bone in ARM_BONES:
+            side = bone[-1]
+            d = (p - lm.bone[f"UpperArm.{side}"]).length
+            ridge = 0.5 + 0.5 * math.cos(2 * math.pi * d / spacing)
+        else:
+            phi = math.atan2(p.y - axis.y, p.x - axis.x)
+            ridge = 0.5 + 0.5 * math.cos(phi * n)
+        v.co = inv @ (p + (mw.to_3x3() @ v.normal).normalized() * amp * ridge)
+    bm.to_mesh(me)
+    bm.free()
+
+
+def skirt_piece(lm, bvh, material, name, hem_z, push=0.0, folds=1.0):
+    """Split skirt from the waist to `hem_z` (FG0 skirt), pushed out by `push`."""
+    obj = fe._skirt(lm, bvh, folds=folds)
+    obj.name = obj.data.name = name
+    waist = lm.waist_z
+    k = (hem_z - waist) / (lm.knee_z + 0.05 - waist)
+    centre = (lm.bone["UpperLeg.L"] + lm.bone["UpperLeg.R"]) / 2
+    for v in obj.data.vertices:
+        v.co.z = waist + (v.co.z - waist) * k
+        if push:
+            d = Vector((v.co.x - centre.x, v.co.y - centre.y, 0.0))
+            if d.length > 1e-4:
+                v.co += d.normalized() * push
+    obj.data.materials.clear()
+    obj.data.materials.append(material)
+    for p in obj.data.polygons:
+        p.material_index = 0
+    return obj
+
+
+def _torso_tree(obj):
+    """BVH of `obj` without its sleeves."""
+    from mathutils.bvhtree import BVHTree
+
+    dom = fe.dominant(obj)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.transform(obj.matrix_world)
+    doomed = [
+        f
+        for f in bm.faces
+        if any(dom[v.index] in ARM_BONES | {"Wrist.L", "Wrist.R"} for v in f.verts)
+    ]
+    bmesh.ops.delete(bm, geom=doomed, context="FACES")
+    tree = BVHTree.FromBMesh(bm)
+    bm.free()
+    return tree
+
+
+@gear("jack")
+def jack(g, colour=(0.55, 0.47, 0.32), skirt=0.3, livery=False):
+    """Jaque: padded jacket to mid-thigh, sleeves to the wrist, modelled quilting.
+
+    `livery=True` dyes it in the side's colours (francs-archers' hoquetons).
+    """
+    lm = g.lm
+    code = eq.C_LIVERY if livery else eq.C_QUILT
+    material = g.mat(code, tuple(colour))
+    hip_z = lm.bone["UpperLeg.L"].z - 0.03
+
+    def keep(c, bones):
+        if bones & LIMBS_OUT or bones & {"LowerLeg.L", "LowerLeg.R"}:
+            return False
+        return c.z > hip_z
+
+    top = fe.shell(g.body, "jack", material, keep, 0.036, relax=30)
+    if g.level == 0:
+        quilt(top, lm, 0.006)
+    hem(top, 0.008)
+    hem_z = lm.bone["Hips"].z - skirt
+    low = skirt_piece(lm, _torso_tree(top), material, "jack_skirt", hem_z, push=0.024)
+    if g.level == 0:
+        quilt(low, lm, 0.005)
+    hem(low, 0.008)
+    return [top, low]
+
+
+@gear("brigandine")
+def brigandine(g, colour=(0.35, 0.05, 0.04), studs=True):
+    """Brigandine: cloth-covered plates to the hips, rows of gilt rivets front and back."""
+    from mathutils.bvhtree import BVHTree
+
+    lm = g.lm
+    hips = lm.bone["Hips"]
+    bottom = hips.z - 0.1
+    material = g.mat(eq.C_CLOTH, tuple(colour))
+
+    def keep(c, bones):
+        if bones & LIMBS_OUT or bones & ARM_BONES:
+            return False
+        if bones & {"LowerLeg.L", "LowerLeg.R"}:
+            return False
+        return c.z > bottom
+
+    body_shell = fe.shell(g.body, "brigandine", material, keep, 0.04, relax=25)
+    hem(body_shell, 0.008)
+    out = [body_shell]
+    if studs and g.level == 0:
+        bm_src = bmesh.new()
+        bm_src.from_mesh(body_shell.data)
+        bm_src.transform(body_shell.matrix_world)
+        tree = BVHTree.FromBMesh(bm_src)
+        bm_src.free()
+        bm = bmesh.new()
+        chest_top = lm.shoulder_z - 0.06
+        z = bottom + 0.03
+        row = 0
+        while z < chest_top:
+            count = 26
+            for k in range(count):
+                a = 2 * math.pi * (k + 0.5 * (row % 2)) / count
+                d = Vector((math.cos(a), math.sin(a), 0.0))
+                if abs(d.y) < 0.35:
+                    continue  # the sides are laced, no rivets
+                origin = Vector((hips.x, hips.y, z)) + d * 0.5
+                hit = tree.ray_cast(origin, -d, 0.6)
+                if hit[0] is None:
+                    continue
+                rivet(bm, hit[0], hit[1], 0.0055, 0)
+            z += 0.04
+            row += 1
+        rivets = finish_object("rivets", bm, [g.mat(eq.C_TRIM, BRASS)])
+        kd, weights = fe.body_lookup(g.body)
+        eq.bind_by(rivets, fe.weights_from(kd, weights))
+        out.append(rivets)
+    return out
+
+
+# --- Hidden faces -------------------------------------------------------------------------
+
+
+def world_tree(obj):
+    """BVH of `obj` in world space."""
+    from mathutils.bvhtree import BVHTree
+
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.transform(obj.matrix_world)
+    tree = BVHTree.FromBMesh(bm)
+    bm.free()
+    return tree
+
+
+def cull_hidden(inner, groups, max_dist=0.06):
+    """Delete the faces of `inner` covered in every group of outer pieces.
+
+    `groups`: one list of world-space BVH trees per variant in which `inner` is shown. A
+    face is hidden in a group when the rays cast outwards (along its normal) from its
+    centre and from near each of its corners all meet, within `max_dist`, the back of one
+    of the group's pieces (the ray leaves from inside it). Pieces deforming with the same
+    weights stay covered in motion; slits, armholes and open hems let the rays through.
+    Returns the number of faces removed.
+    """
+    if not groups or any(not g for g in groups) or not inner.data.polygons:
+        return 0
+    mw = inner.matrix_world
+    nm = mw.to_3x3().inverted().transposed()
+    bm = bmesh.new()
+    bm.from_mesh(inner.data)
+    bm.normal_update()
+
+    def covered(p, n, trees):
+        for tree in trees:
+            hit = tree.ray_cast(p + n * 0.0005, n, max_dist)
+            if hit[0] is not None and hit[1].dot(n) > 0.0:
+                return True
+        return False
+
+    doomed = []
+    for f in bm.faces:
+        n = nm @ f.normal
+        if n.length < 1e-6:
+            continue
+        n.normalize()
+        centre = f.calc_center_median()
+        pts = [mw @ centre] + [mw @ v.co.lerp(centre, 0.15) for v in f.verts]
+        if all(all(covered(p, n, trees) for p in pts) for trees in groups):
+            doomed.append(f)
+    if doomed:
+        bmesh.ops.delete(bm, geom=doomed, context="FACES")
+        bmesh.ops.delete(
+            bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS"
+        )
+        bm.to_mesh(inner.data)
+    bm.free()
+    return len(doomed)
 
 
 # Weapons and shields register themselves in GEAR (import at the end: they use the helpers).
