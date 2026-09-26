@@ -3,7 +3,8 @@
 Branche : `feat/fg5-perf` (worktree `.claude/worktrees/fg5-perf`). Plan : `docs/wip/fg-figurines-fines.md`.
 Précédents : `fg1-corps.md`, `fg3-matieres.md`, ADR 0088. Décision : **ADR 0089**.
 
-## État : TERMINÉ 26/09 (branche prête, non fusionnée dans main)
+## État : TERMINÉ 26/09 (branche prête, main fusionné — conflit PB3e dans `battle_soldiers.gd` résolu —, non fusionnée dans main)
+Après fusion de main : smoke, `pb3c_buffers_test`, `pb3e_step_thread_test`, `bv3_check`, `fg3_maps_test` OK.
 - [x] Bancs de référence (standard et rapproché, 4 passes alternées)
 - [x] LOD0 par soldat (calque compacté, frustum, `lod_band` / `id_in_custom` en `instance uniform`)
 - [x] LOD1 et LOD2 allégés, recuisson complète (`battle_fine.py -- bake`, ~45 min)
