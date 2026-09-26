@@ -526,6 +526,83 @@ def geo_relief_all(
     console.print("[green]Cache de relief complet.[/green]")
 
 
+@geo_app.command("relief-pack")
+def geo_relief_pack(
+    out: str = typer.Option(
+        "dist/relief", "--out", help="Dossier de sortie (parts + manifeste)"
+    ),
+) -> None:
+    """Empaquette le cache de relief fin en parts « Cent Ans relief » (ADR 0077, lot SZ7).
+
+    N'envoie rien : la publication (dépôt public, `gh release create`) est un geste
+    à part, réservé à l'accord du joueur (voir docs/geo.md). Ne pas lancer sur le
+    vrai cache (≈ 2,8 Go) si le disque est presque plein.
+    """
+    from pathlib import Path
+
+    from cent_ans_tools.geo import relief_pack
+
+    result = relief_pack.pack(Path(out))
+    console.print(
+        f"v{result.version} : {len(result.parts)} part(s), "
+        f"{result.total_bytes / 1e9:.2f} Go → {result.out_dir}"
+    )
+    console.print(f"Manifeste : {result.manifest_path}")
+
+
+@geo_app.command("relief-fetch")
+def geo_relief_fetch(
+    dest: str = typer.Option(
+        "",
+        "--dest",
+        help="Dossier d'installation (défaut : CENT_ANS_RELIEF_DIR ou data/map)",
+    ),
+    base_url: str = typer.Option(
+        "",
+        "--base-url",
+        help="URL de base des parts (défaut : data/map/relief_hosting.json)",
+    ),
+    from_dir: str = typer.Option(
+        "",
+        "--from-dir",
+        help="Installer depuis des parts locales (clé USB, tests) plutôt que par HTTP",
+    ),
+) -> None:
+    """Télécharge, vérifie et installe le cache de relief fin (ADR 0077, lot SZ7).
+
+    Reprend les téléchargements interrompus (HTTP Range), refuse toute part dont
+    la somme SHA-256 ne correspond pas au manifeste, puis installe atomiquement.
+    Lancer ensuite `geo relief-all --check` pour confirmer l'état complet.
+    """
+    from pathlib import Path
+
+    from cent_ans_tools.geo import relief_cache, relief_fetch
+
+    result = relief_fetch.fetch(
+        dest=Path(dest) if dest else None,
+        base_url=base_url or None,
+        from_dir=Path(from_dir) if from_dir else None,
+        log=console.print,
+    )
+    console.print(
+        f"{result.parts} part(s), {result.total_bytes / 1e9:.2f} Go → {result.pyramid_dir}"
+    )
+    if (result.dest_dir / relief_cache.MANIFEST).exists():
+        report = relief_cache.check(result.dest_dir)
+        for line in report.lines():
+            console.print(line)
+        if not report.complete:
+            console.print(
+                "[yellow]Cache encore incomplet après installation : compléter avec "
+                "uv run --project tools cent-ans geo relief-all[/yellow]"
+            )
+    else:
+        console.print(
+            "[yellow]Installé hors du dépôt : lancer le jeu pour vérifier "
+            "(avis « relief rapproché »).[/yellow]"
+        )
+
+
 @geo_app.command("detail-check")
 def geo_detail_check(
     zones: str = typer.Option(

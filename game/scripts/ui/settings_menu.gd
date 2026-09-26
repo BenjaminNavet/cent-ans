@@ -164,6 +164,11 @@ func _build_display(grid: GridContainer) -> void:
 	_options(grid, "video/quality", "Qualité graphique", [RenderQuality.AUTO] + Array(RenderQuality.LEVELS),
 		["Automatique (%s)" % detected_label] + Array(RenderQuality.LABELS),
 		"Automatique : choisie selon la carte graphique détectée. Basse : sans anticrénelage, ombres simples et proches, sans occlusion ni halo, relief sans détail fin, moitié moins d'arbres et de particules, soldats simplifiés plus tôt. Moyenne : occlusion ambiante, trois quarts des arbres et de l'herbe. Haute : lumière rebondie (SSIL), brume volumétrique par mauvais temps, tout le détail. Ultra : illumination globale (SDFGI), brume volumétrique permanente, ombres et détails plus lointains.")
+	# PB3b (ADR 0080) : mise à l'échelle 3D MetalFX (FSR hors Metal).
+	var upscale_labels: Array = Array(RenderQuality.UPSCALE_LABELS).duplicate()
+	upscale_labels[0] = "Automatique (%s)" % RenderQuality.upscale_label(RenderQuality.preset_upscale(RenderQuality.preset()))
+	_options(grid, "video/upscale", "Mise à l'échelle", Array(RenderQuality.UPSCALE_CHOICES), upscale_labels,
+		"Calcule l'image 3D en plus petit puis l'agrandit avec MetalFX (puces Apple ; FSR ailleurs) : plus d'images par seconde, image un peu plus douce. Qualité : trois quarts de la définition. Performance : moitié de la définition, pour les machines modestes ou les très grands écrans. Automatique : selon la qualité graphique. L'interface reste nette dans tous les cas.")
 	# Lot U4 : l'échelle suit la hauteur de la fenêtre ; ces réglages l'ajustent.
 	var sizes: Array = _constant("UI_SIZES")
 	var size_labels := {0.8: "Très petite", 0.9: "Petite", 1.0: "Normale", 1.1: "Grande", 1.25: "Très grande"}

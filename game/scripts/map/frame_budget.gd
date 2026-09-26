@@ -24,6 +24,12 @@ static func begin_frame() -> void:
 ## Vrai s'il reste du temps pour une construction de plus dans l'image courante. Hors d'une
 ## image ouverte par `begin_frame` (tests, outils), toujours vrai : seuls les plafonds
 ## `max_*_per_frame` s'appliquent.
+## SZ6 : vrai dans une image ouverte par `begin_frame`, hors `flush()` (budgets propres à un
+## système, mesurés depuis son début plutôt que depuis le début de l'image).
+static func in_frame() -> bool:
+	return not unlimited and _frame == Engine.get_process_frames()
+
+
 static func has_time() -> bool:
 	if unlimited or _frame != Engine.get_process_frames():
 		return true
