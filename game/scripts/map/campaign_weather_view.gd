@@ -19,8 +19,10 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 @export var cloud_height: float = 36.0
 ## Distances caméra : nuées visibles au-delà de `cloud_near` (fondu), pluie en particules en deçà
 ## de `particles_far`.
-@export var cloud_near: Vector2 = Vector2(90.0, 200.0)
-@export var cloud_max_alpha: float = 0.8
+## Q5 : à (90, 200) et 0,8, les nuées couvraient l'Île-de-France dès la vue de départ ; elles
+## n'apparaissent plus qu'en vue stratégique lointaine, et laissent voir la carte dessous.
+@export var cloud_near: Vector2 = Vector2(260.0, 520.0)
+@export var cloud_max_alpha: float = 0.6
 @export var particles_far: float = 320.0
 ## Durée (s) du lever du brouillard matinal après le début d'un tour.
 @export var fog_lift_seconds: float = 40.0
