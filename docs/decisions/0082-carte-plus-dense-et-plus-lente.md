@@ -64,3 +64,21 @@ Mesures `century_probe 120` sur 12 graines, même code que `main` (35783bcf) : v
 
 Gardés : refuge neutre à 1 pas (2 pas essayé : sans effet mesurable, la densité fournit déjà
 des refuges) ; garnisons de départ ; bonus de province complète.
+
+## Addendum DC6b (2026-09-26) : recherche et hérésie pondérées
+
+Mesures `century_probe 120` (graines 1-24) contre `main` d'avant la fusion DC (9c107692) : voir
+`docs/wip/dc-densite.md` § DC6b. Deux sommes sur toutes les places échappaient à l'addendum DC3 :
+
+1. **Points de recherche** : `research_percent` (nouveau réglage de `data/settlements/rules.json`,
+   schéma `settlement_rules`) : les bâtiments des villes, châteaux, abbayes et bourgs comptent à
+   **70 %** dans les points de recherche de la faction, la cité 100 %. À 100 % les +102 abbayes et
+   leurs scriptoriums relevaient la recherche de 18 % au tour 1 (France +35 %) ; 50 % (le poids des
+   effets de province) la faisait tomber de 16 % au tour 40. Réglage dédié : un scriptorium
+   d'abbaye est un vrai foyer de savoir, plus qu'une église paroissiale n'apaise une province.
+2. **Hérésie** : le compte des bâtiments religieux qui freine sa croissance pèse désormais le
+   `province_effect_percent` de chaque place (50 % hors cité). Le compte brut avait doublé
+   (3,0 → 6,4 par province) et les Lollards et Hussites s'éteignaient deux fois plus vite.
+3. **Révoltes** : inchangées. Sur 24 graines l'écart est de 5,6 à 4,4 / 200 tours (les 12 premières
+   graines l'exagéraient) ; il ne vient pas d'occupations plus courtes (elles sont plus rares et
+   plus longues) et les réglages d'apaisement par la garnison essayés ne le réduisent pas.
