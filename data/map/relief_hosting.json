@@ -5,7 +5,7 @@
   "version": 1,
   "manifest_name": "manifest.json",
   "bake": {
-    "pyramid_generated_at": null,
+    "pyramid_bake_versions": {},
     "rivers_generated_at": null,
     "roads_generated_at": null,
     "signature": null

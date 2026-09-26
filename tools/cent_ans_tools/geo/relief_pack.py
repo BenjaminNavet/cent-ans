@@ -17,7 +17,8 @@ import hashlib
 import json
 import shutil
 import tarfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parents[3]
@@ -34,6 +35,10 @@ DISK_MARGIN = 1.1
 PART_NAME = "{package}-v{version}.part{index:03d}.tar"
 MANIFEST_NAME = "manifest.json"
 
+PYRAMID_MANIFEST = "relief_pyramid.json"
+RIVERS_MANIFEST = "rivers_fine.json"
+ANCHORS_MANIFEST = "fine_anchors.json"
+
 
 @dataclass
 class PackResult:
@@ -41,43 +46,176 @@ class PackResult:
 
     out_dir: Path
     manifest_path: Path
-    parts: list[Path]
-    total_bytes: int
-    version: int
+    parts: list[Path] = field(default_factory=list)
+    total_bytes: int = 0
+    version: int = 1
+
+
+def _read_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return data if isinstance(data, dict) else {}
 
 
 def bake_signature(map_dir: Path = MAP_DIR) -> dict:
-    """Read the three fine-relief manifests and compute a combined signature.
+    """Combined bake fingerprint of the pyramid, the fine rivers and the fine roads.
 
-    Returns a dict with each manifest's own ``generated_at`` plus a SHA-256
-    ``signature`` over their concatenated bytes: it changes whenever any of
-    them changes, i.e. whenever the pyramid, the fine rivers or the fine
-    roads are rebaked (ADR 0077: "toute recuisson... incrémente la version").
+    The pyramid (tiers 1-3) already carries an authoritative bake version per
+    tier (lot SZ2, :mod:`cent_ans_tools.geo.bake_stamp`): ``relief_pyramid.json``
+    ``bake_versions``. The fine rivers and roads have no such version yet, only
+    their own ``generated_at``. The combination is hashed (SHA-256 of the
+    canonical JSON) into ``signature``, which changes whenever any of the three
+    is rebaked (ADR 0077: "toute recuisson... incrémente la version").
     """
-    raise NotImplementedError
+    pyramid = _read_json(map_dir / PYRAMID_MANIFEST)
+    bake_versions = pyramid.get("bake_versions") or {}
+    rivers_generated_at = _read_json(map_dir / RIVERS_MANIFEST).get("generated_at")
+    roads_generated_at = _read_json(map_dir / ANCHORS_MANIFEST).get("generated_at")
+    pyramid_bake_versions = {str(k): int(v) for k, v in sorted(bake_versions.items())}
+    payload = {
+        "pyramid_bake_versions": pyramid_bake_versions,
+        "rivers_generated_at": rivers_generated_at,
+        "roads_generated_at": roads_generated_at,
+    }
+    has_data = bool(pyramid_bake_versions) or rivers_generated_at or roads_generated_at
+    signature = (
+        hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()
+        if has_data
+        else None
+    )
+    return {**payload, "signature": signature}
 
 
 def load_hosting(hosting_file: Path = HOSTING_FILE) -> dict:
     """Read ``relief_hosting.json`` (created by SZ7's skeleton commit)."""
-    raise NotImplementedError
+    if not hosting_file.exists():
+        raise FileNotFoundError(
+            f"{hosting_file} : absent (attendu, voir data/schemas/relief_hosting.schema.json)"
+        )
+    return _read_json(hosting_file)
 
 
-def bump_version_if_rebaked(map_dir: Path = MAP_DIR, hosting_file: Path = HOSTING_FILE) -> dict:
+def bump_version_if_rebaked(
+    map_dir: Path = MAP_DIR, hosting_file: Path = HOSTING_FILE
+) -> dict:
     """Increment ``version`` and update ``bake`` in-place if the cache changed.
 
     Writes the updated ``relief_hosting.json`` back to disk and returns it.
     """
-    raise NotImplementedError
+    hosting = load_hosting(hosting_file)
+    current = bake_signature(map_dir)
+    previous_signature = (hosting.get("bake") or {}).get("signature")
+    if current["signature"] is not None and current["signature"] != previous_signature:
+        hosting["version"] = int(hosting.get("version", 1)) + (
+            1 if previous_signature is not None else 0
+        )
+        hosting["bake"] = current
+        hosting_file.write_text(
+            json.dumps(hosting, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+    return hosting
 
 
 def extract_credits(credits_file: Path = CREDITS_FILE) -> str:
     """Text of the "Données géographiques" section of ``CREDITS.md``."""
-    raise NotImplementedError
+    if not credits_file.exists():
+        return ""
+    lines = credits_file.read_text(encoding="utf-8").splitlines()
+    try:
+        start = next(
+            i for i, line in enumerate(lines) if line.strip() == CREDITS_HEADING
+        )
+    except StopIteration:
+        return ""
+    end = len(lines)
+    for i in range(start + 1, len(lines)):
+        if lines[i].startswith("## "):
+            end = i
+            break
+    return "\n".join(lines[start:end]).strip()
 
 
 def check_free_space(target_dir: Path, estimated_bytes: int) -> None:
     """Raise ``OSError`` if ``target_dir``'s filesystem lacks room for the pack."""
-    raise NotImplementedError
+    target_dir.mkdir(parents=True, exist_ok=True)
+    needed = int(estimated_bytes * DISK_MARGIN)
+    free = shutil.disk_usage(target_dir).free
+    if free < needed:
+        raise OSError(
+            f"Espace disque insuffisant dans {target_dir} : {free / 1e9:.2f} Go libres, "
+            f"{needed / 1e9:.2f} Go nécessaires (paquet {estimated_bytes / 1e9:.2f} Go × "
+            f"{DISK_MARGIN} de marge)."
+        )
+
+
+def _tree_bytes(path: Path) -> int:
+    return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
+
+
+class _SplitWriter:
+    """File-like sink for :mod:`tarfile`'s stream mode, rolling to new parts.
+
+    Splits the raw tar byte stream on :data:`MAX_PART_BYTES` boundaries,
+    independent of tar member boundaries (like ``split(1)``): reassembly is
+    just concatenating the parts back, in order, before feeding them to a
+    streaming tar reader.
+
+    The threshold is only checked between the writes :mod:`tarfile` itself
+    issues (its stream mode writes fixed ``RECORDSIZE`` blocks, 10 KiB by
+    default), so a part can exceed ``max_bytes`` by up to one such block.
+    Negligible at the real ~1.9 GiB scale.
+    """
+
+    def __init__(
+        self, out_dir: Path, package: str, version: int, max_bytes: int
+    ) -> None:
+        self._out_dir = out_dir
+        self._package = package
+        self._version = version
+        self._max_bytes = max_bytes
+        self._index = 0
+        self._current_size = 0
+        self._current_file = None
+        self.parts: list[Path] = []
+        self.part_sha256: list[str] = []
+        self._part_digest = hashlib.sha256()
+        self.global_sha256 = hashlib.sha256()
+        self.total_bytes = 0
+        self._open_next()
+
+    def _part_path(self) -> Path:
+        name = PART_NAME.format(
+            package=self._package, version=self._version, index=self._index
+        )
+        return self._out_dir / name
+
+    def _open_next(self) -> None:
+        if self._current_file is not None:
+            self._current_file.close()
+            self.part_sha256.append(self._part_digest.hexdigest())
+        path = self._part_path()
+        self._current_file = path.open("wb")
+        self.parts.append(path)
+        self._current_size = 0
+        self._part_digest = hashlib.sha256()
+        self._index += 1
+
+    def write(self, data: bytes) -> int:
+        if self._current_size >= self._max_bytes:
+            self._open_next()
+        self._current_file.write(data)
+        self._part_digest.update(data)
+        self.global_sha256.update(data)
+        self._current_size += len(data)
+        self.total_bytes += len(data)
+        return len(data)
+
+    def close(self) -> None:
+        if self._current_file is not None:
+            self._current_file.close()
+            self.part_sha256.append(self._part_digest.hexdigest())
+            self._current_file = None
 
 
 def pack(
@@ -99,4 +237,48 @@ def pack(
         credits_file: ``CREDITS.md`` (geo section copied into the manifest).
         max_part_bytes: Split threshold.
     """
-    raise NotImplementedError
+    pyramid_dir = pyramid_dir or (map_dir / "pyramid")
+    if not pyramid_dir.is_dir():
+        raise FileNotFoundError(
+            f"{pyramid_dir} : cache de relief absent, rien à empaqueter"
+        )
+    out_dir = Path(out_dir)
+    estimated = _tree_bytes(pyramid_dir)
+    check_free_space(out_dir, estimated)
+
+    hosting = bump_version_if_rebaked(map_dir, hosting_file)
+    version = int(hosting["version"])
+    package = str(hosting["package_name"])
+
+    writer = _SplitWriter(out_dir, package, version, max_part_bytes)
+    with tarfile.open(fileobj=writer, mode="w|") as tar:
+        tar.add(pyramid_dir, arcname="pyramid")
+    writer.close()
+
+    parts_info = [
+        {"name": path.name, "bytes": path.stat().st_size, "sha256": sha}
+        for path, sha in zip(writer.parts, writer.part_sha256, strict=True)
+    ]
+    manifest = {
+        "description": "Manifeste du paquet « Cent Ans relief » (lot SZ7, ADR 0077). "
+        "Concaténer les parts dans l'ordre reconstitue le flux tar (data/map/pyramid/).",
+        "package_name": package,
+        "version": version,
+        "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "total_bytes": writer.total_bytes,
+        "sha256": writer.global_sha256.hexdigest(),
+        "bake": hosting.get("bake", {}),
+        "parts": parts_info,
+        "credits": extract_credits(credits_file),
+    }
+    manifest_path = out_dir / MANIFEST_NAME
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return PackResult(
+        out_dir=out_dir,
+        manifest_path=manifest_path,
+        parts=writer.parts,
+        total_bytes=writer.total_bytes,
+        version=version,
+    )

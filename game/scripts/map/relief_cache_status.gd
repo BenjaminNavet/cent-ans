@@ -25,6 +25,10 @@ enum State {
 ## Commande unique qui régénère tout le cache, dans l'ordre et avec reprise (docs/geo.md).
 const REGEN_COMMAND := "uv run --project tools cent-ans geo relief-all"
 const CHECK_COMMAND := "uv run --project tools cent-ans geo relief-all --check"
+## Lot SZ7 (ADR 0077) : télécharge le paquet « Cent Ans relief » déjà cuit (plus rapide que de
+## recalculer). Proposé en premier par l'avis ; `REGEN_COMMAND` reste la solution de repli sans
+## hébergement disponible.
+const FETCH_COMMAND := "uv run --project tools cent-ans geo relief-fetch"
 const SAMPLES_PER_LEVEL := 24
 const MAX_LEVEL := 7
 const RIVERS_MANIFEST := "rivers_fine.json"
@@ -115,7 +119,7 @@ func notice_text(exported: bool = false) -> String:
 		what = "Le cache du relief fin est incomplet (%s) : par endroits, le zoom rapproché s'arrête plus haut ou montre un relief grossier." % " ; ".join(gaps)
 	if exported:
 		return what + "\nRéinstallez le jeu complet, ou placez le dossier « Cent Ans relief » à côté de l'application."
-	return what + "\nPour le régénérer (données ouvertes, reprise possible, plusieurs heures) :"
+	return what + "\nPour le récupérer (paquet déjà cuit, plus rapide) ou le recalculer :"
 
 
 # --- Contrôle ---------------------------------------------------------------------------------
