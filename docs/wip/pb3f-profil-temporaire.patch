@@ -1,0 +1,266 @@
+diff --git a/core/crates/ai/examples/pb3f_profile.rs b/core/crates/ai/examples/pb3f_profile.rs
+new file mode 100644
+index 00000000..7ad8c78f
+--- /dev/null
++++ b/core/crates/ai/examples/pb3f_profile.rs
+@@ -0,0 +1,69 @@
++//! PB3F-TEMP: where the end of turn goes.
++use std::cell::RefCell;
++use std::collections::BTreeMap;
++use std::path::Path;
++use std::time::{Duration, Instant};
++
++use data_model::{FactionId, GameData};
++use sim_campaign::CampaignState;
++
++fn main() {
++    let args: Vec<String> = std::env::args().skip(1).collect();
++    let turns: u32 = args.first().and_then(|a| a.parse().ok()).unwrap_or(20);
++    let seed: u64 = args.get(1).and_then(|a| a.parse().ok()).unwrap_or(1);
++    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
++    let data = GameData::load(&root).expect("game data loads").0;
++    let _ = data.navgrid().component(0, 0);
++    let france = FactionId::new("fac_france").expect("id");
++    let mut state = CampaignState::new_1337(&data, france.clone(), seed).expect("state");
++    state.interactive_battles = false;
++    let ms = |d: Duration| d.as_secs_f64() * 1000.0;
++    let mut sum_total = Duration::ZERO;
++    let mut sum_ai = Duration::ZERO;
++    let mut sum_plan = Duration::ZERO;
++    let mut plan_by: BTreeMap<String, Duration> = BTreeMap::new();
++    let mut phases: BTreeMap<String, Duration> = BTreeMap::new();
++    for _ in 0..turns {
++        for order in ai::plan_turn(&state, &data, &france) {
++            let _ = state.submit_order(&data, order);
++        }
++        let plan_time = RefCell::new(Vec::new());
++        let planner = |s: &CampaignState, d: &GameData, f: &FactionId| {
++            let t = Instant::now();
++            let o = ai::plan_turn(s, d, f);
++            plan_time.borrow_mut().push((f.to_string(), t.elapsed()));
++            o
++        };
++        sim_campaign::turn::PROFILE.lock().unwrap().clear();
++        let t = Instant::now();
++        let (_, timings) = state.end_turn_profiled(&data, planner);
++        let total = t.elapsed();
++        sum_total += total;
++        sum_ai += timings.iter().map(|t| t.1).sum::<Duration>();
++        for (f, d) in plan_time.into_inner() {
++            sum_plan += d;
++            *plan_by.entry(f).or_default() += d;
++        }
++        for (n, d) in sim_campaign::turn::PROFILE.lock().unwrap().iter() {
++            *phases.entry(n.clone()).or_default() += *d;
++        }
++    }
++    let n = f64::from(turns);
++    println!(
++        "per turn: total {:.1} ms, AI factions {:.1} ms (planner {:.1} ms), rest {:.1} ms",
++        ms(sum_total) / n,
++        ms(sum_ai) / n,
++        ms(sum_plan) / n,
++        ms(sum_total - sum_ai) / n
++    );
++    let mut v: Vec<_> = plan_by.into_iter().collect();
++    v.sort_by_key(|a| std::cmp::Reverse(a.1));
++    for (f, d) in v.iter().take(10) {
++        println!("  plan {f}: {:.2} ms", ms(*d) / n);
++    }
++    let mut v: Vec<_> = phases.into_iter().collect();
++    v.sort_by_key(|a| std::cmp::Reverse(a.1));
++    for (f, d) in v.iter().take(30) {
++        println!("  phase {f}: {:.2} ms", ms(*d) / n);
++    }
++}
+diff --git a/core/crates/ai/src/campaign.rs b/core/crates/ai/src/campaign.rs
+index 0b7614db..08ba7d59 100644
+--- a/core/crates/ai/src/campaign.rs
++++ b/core/crates/ai/src/campaign.rs
+@@ -303,14 +303,21 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
+     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
+         return Vec::new();
+     }
++    let __t = std::time::Instant::now();
+     let Some(mut ctx) = Context::new(state, data, faction) else {
+         return Vec::new();
+     };
++    sim_campaign::turn::prof_pub("ctx_new", __t);
++    let __t = std::time::Instant::now();
+     let mut orders = sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+     // DP1: trade agreements and military access (ADR 0025).
++    let __t = std::time::Instant::now();
+     orders.extend(crate::diplomacy_eval::plan_treaties(state, data, faction));
++    sim_campaign::turn::prof_pub("orders_extend_crate__diplomacy_eval__pla", __t);
+     // G2: historical side changes (Artevelde, Troyes).
++    let __t = std::time::Instant::now();
+     orders.extend(crate::alignment::plan_side_change(state, data, faction));
++    sim_campaign::turn::prof_pub("orders_extend_crate__alignment__plan_sid", __t);
+     orders.extend(crate::alignment::plan_dynastic_alliance(
+         state, data, faction,
+     ));
+@@ -334,8 +341,12 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
+     if let Some(technology) = sim_campaign::research::ai_choose_research(state, data, faction) {
+         orders.push(Order::Research { technology });
+     }
++    let __t = std::time::Instant::now();
+     orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
++    sim_campaign::turn::prof_pub("orders_extend_sim_campaign__table__ai_ch", __t);
++    let __t = std::time::Instant::now();
+     orders.extend(sim_campaign::edicts::ai_choose_edicts(state, data, faction));
++    sim_campaign::turn::prof_pub("orders_extend_sim_campaign__edicts__ai_c", __t);
+     // G2: a realm whose buildings eat half its income does not debase: the
+     // inflation of their upkeep outweighs the seigniorage (Scots spiral).
+     // EQ5: a third is enough: the prices stay up after the money is sound
+@@ -354,13 +365,25 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
+                     )
+             }),
+     );
++    let __t = std::time::Instant::now();
+     orders.extend(sim_campaign::ransom::ai_ransom_orders(state, data, faction));
++    sim_campaign::turn::prof_pub("orders_extend_sim_campaign__ransom__ai_r", __t);
++    let __t = std::time::Instant::now();
+     orders.extend(sim_campaign::chivalry::ai_found_order(state, data, faction));
++    sim_campaign::turn::prof_pub("orders_extend_sim_campaign__chivalry__ai", __t);
+     // C6: spies, heralds and preachers (recruitment keeps a reserve).
++    let __t = std::time::Instant::now();
+     orders.extend(sim_campaign::agents::plan_agents(state, data, faction));
++    sim_campaign::turn::prof_pub("orders_extend_sim_campaign__agents__plan", __t);
++    let __t = std::time::Instant::now();
+     plan_economy(&ctx, &mut orders);
++    sim_campaign::turn::prof_pub("plan_economy__ctx___mut_orders__", __t);
++    let __t = std::time::Instant::now();
+     plan_characters(&ctx, &mut orders);
++    sim_campaign::turn::prof_pub("plan_characters__ctx___mut_orders__", __t);
++    let __t = std::time::Instant::now();
+     plan_armies(&ctx, &mut orders);
++    sim_campaign::turn::prof_pub("plan_armies__ctx___mut_orders__", __t);
+     orders
+ }
+ 
+diff --git a/core/crates/sim-campaign/src/turn.rs b/core/crates/sim-campaign/src/turn.rs
+index 28a19622..8a305a58 100644
+--- a/core/crates/sim-campaign/src/turn.rs
++++ b/core/crates/sim-campaign/src/turn.rs
+@@ -103,64 +103,64 @@ impl CampaignState {
+     pub fn resolve_end_of_turn(&mut self, data: &GameData, events: &mut Vec<GameEvent>) {
+         // Numbers below: the phases of spec § 1.3 (1, movement, is gone).
+         // 2-4. Sieges, chevauchées.
+-        siege::resolve_sieges(self, data, events);
+-        siege::resolve_raids(self, data, events);
++        { let __t = std::time::Instant::now(); siege::resolve_sieges(self, data, events); crate::turn::prof("resolve_sieges", __t); }
++        { let __t = std::time::Instant::now(); siege::resolve_raids(self, data, events); crate::turn::prof("resolve_raids", __t); }
+ 
+         // 5. Buildings and goods, ahead of the economy that reads them (M3).
+-        buildings::resolve_construction(self, data, events);
+-        economy::resolve_goods(self, data);
++        { let __t = std::time::Instant::now(); buildings::resolve_construction(self, data, events); crate::turn::prof("resolve_construction", __t); }
++        { let __t = std::time::Instant::now(); economy::resolve_goods(self, data); crate::turn::prof("resolve_goods", __t); }
+         // H3: diets whose requirements no longer hold fall back to the default.
+-        table::resolve_requirements(self, data, events);
++        { let __t = std::time::Instant::now(); table::resolve_requirements(self, data, events); crate::turn::prof("resolve_requirements", __t); }
+         // Lot C4: edicts of a province no longer fully held fall back to the
+         // default, and a change becomes active once its delay has elapsed.
+-        edicts::resolve_requirements(self, data, events);
++        { let __t = std::time::Instant::now(); edicts::resolve_requirements(self, data, events); crate::turn::prof("edicts_requirements", __t); }
+ 
+         // 6-8. Economy, attrition, recovery.
+-        economy::resolve_economy(self, data, events);
++        { let __t = std::time::Instant::now(); economy::resolve_economy(self, data, events); crate::turn::prof("resolve_economy", __t); }
+         // C5: trade routes and agreements, after the treasury's tax income.
+-        crate::trade::resolve_trade(self, data, events);
++        { let __t = std::time::Instant::now(); crate::trade::resolve_trade(self, data, events); crate::turn::prof("trade::resolve_trade", __t); }
+         // H5: prices follow the coinage.
+-        crate::coinage::resolve_coinage(self, events);
++        { let __t = std::time::Instant::now(); crate::coinage::resolve_coinage(self, events); crate::turn::prof("coinage::resolve_coinage", __t); }
+         // H6: ransom installments, captive rulers.
+-        crate::ransom::resolve_ransoms(self, data, events);
++        { let __t = std::time::Instant::now(); crate::ransom::resolve_ransoms(self, data, events); crate::turn::prof("ransom::resolve_ransoms", __t); }
+         // H6: chivalric orders (collapse, new members, yearly prestige).
+-        crate::chivalry::resolve_chivalry(self, data, events);
+-        research::resolve_research(self, data, events);
+-        economy::resolve_attrition(self, data, events);
+-        economy::resolve_decay(self, data);
++        { let __t = std::time::Instant::now(); crate::chivalry::resolve_chivalry(self, data, events); crate::turn::prof("chivalry::resolve_chivalry", __t); }
++        { let __t = std::time::Instant::now(); research::resolve_research(self, data, events); crate::turn::prof("resolve_research", __t); }
++        { let __t = std::time::Instant::now(); economy::resolve_attrition(self, data, events); crate::turn::prof("resolve_attrition", __t); }
++        { let __t = std::time::Instant::now(); economy::resolve_decay(self, data); crate::turn::prof("resolve_decay", __t); }
+         // NV1: blockades, sea control, shipyards.
+-        crate::naval::resolve_season(self, data, events);
++        { let __t = std::time::Instant::now(); crate::naval::resolve_season(self, data, events); crate::turn::prof("naval::resolve_season", __t); }
+ 
+         // 8b. Diplomacy (vassal tribute after the economy, expiries,
+         // rebellions) and religion (favour, Schism, heresy) before the
+         // population reads their unrest (M5).
+         // DP2: armies camping on the lands of a faction at peace without
+         // right of passage (incident, casus belli), before the diplomacy.
+-        crate::passage::resolve_trespass(self, data, events);
+-        diplomacy::resolve_diplomacy(self, data, events);
+-        religion::resolve_religion(self, data, events);
++        { let __t = std::time::Instant::now(); crate::passage::resolve_trespass(self, data, events); crate::turn::prof("passage::resolve_trespass", __t); }
++        { let __t = std::time::Instant::now(); diplomacy::resolve_diplomacy(self, data, events); crate::turn::prof("resolve_diplomacy", __t); }
++        { let __t = std::time::Instant::now(); religion::resolve_religion(self, data, events); crate::turn::prof("resolve_religion", __t); }
+         // 8b'. Agents: upkeep, counter-espionage, stale intelligence (C6).
+-        crate::agents::resolve_agents(self, data, events);
++        { let __t = std::time::Instant::now(); crate::agents::resolve_agents(self, data, events); crate::turn::prof("agents::resolve_agents", __t); }
+ 
+         // 8c. Chronicle: historical and random events (M10).
+-        chronicle::resolve_chronicle(self, data, events);
++        { let __t = std::time::Instant::now(); chronicle::resolve_chronicle(self, data, events); crate::turn::prof("resolve_chronicle", __t); }
+ 
+         // 8d. The table: ruler piety/prestige and Lent in spring (H3).
+-        table::resolve_lent(self, data, events);
++        { let __t = std::time::Instant::now(); table::resolve_lent(self, data, events); crate::turn::prof("resolve_lent", __t); }
+ 
+         // 9. Population dynamics: growth, health, wealth, goods
+         // satisfaction, unrest, revolt, plague, famine (M3).
+-        population::resolve_population(self, data, events);
++        { let __t = std::time::Instant::now(); population::resolve_population(self, data, events); crate::turn::prof("resolve_population", __t); }
+ 
+         // 10. Characters: governance XP, deaths, winter births, regencies
+         // (M4), then dead factions.
+-        dynasty::resolve_governance(self);
+-        dynasty::resolve_court_prestige(self, data);
+-        crate::retinue::resolve_retinue(self, data, events);
+-        characters::resolve_characters(self, data, events);
+-        dynasty::resolve_births(self, data, events);
+-        dynasty::resolve_regencies(self, data, events);
+-        characters::resolve_faction_deaths(self, data, events);
++        { let __t = std::time::Instant::now(); dynasty::resolve_governance(self); crate::turn::prof("resolve_governance", __t); }
++        { let __t = std::time::Instant::now(); dynasty::resolve_court_prestige(self, data); crate::turn::prof("resolve_court_prestige", __t); }
++        { let __t = std::time::Instant::now(); crate::retinue::resolve_retinue(self, data, events); crate::turn::prof("retinue::resolve_retinue", __t); }
++        { let __t = std::time::Instant::now(); characters::resolve_characters(self, data, events); crate::turn::prof("resolve_characters", __t); }
++        { let __t = std::time::Instant::now(); dynasty::resolve_births(self, data, events); crate::turn::prof("resolve_births", __t); }
++        { let __t = std::time::Instant::now(); dynasty::resolve_regencies(self, data, events); crate::turn::prof("resolve_regencies", __t); }
++        { let __t = std::time::Instant::now(); characters::resolve_faction_deaths(self, data, events); crate::turn::prof("resolve_faction_deaths", __t); }
+ 
+         // 11. New season (step 4 of § 3.4): movement points are refilled,
+         // then the player plays.
+@@ -178,15 +178,24 @@ impl CampaignState {
+         // The player's multi-turn marches resume at the start of
+         // his turn.
+         let player = self.player_faction.clone();
+-        march::continue_marches(self, data, Some(&player), events);
++        { let __t = std::time::Instant::now(); march::continue_marches(self, data, Some(&player), events); crate::turn::prof("continue_marches", __t); }
+         // C6: agents get their points back and resume their march.
+-        crate::agents::start_season(self, data);
++        { let __t = std::time::Instant::now(); crate::agents::start_season(self, data); crate::turn::prof("agents::start_season", __t); }
+         let turn = self.turn;
+         for faction in self.factions.values_mut() {
+             faction.truces.retain(|_, until| *until > turn);
+         }
+         // M10: victory, defeat or end of the campaign for the player.
+-        crate::victory::resolve_victory(self, data, events);
++        { let __t = std::time::Instant::now(); crate::victory::resolve_victory(self, data, events); crate::turn::prof("victory::resolve_victory", __t); }
+         self.events = events.clone();
+     }
+ }
++
++/// PB3F-TEMP profiling.
++pub static PROFILE: std::sync::Mutex<Vec<(String, std::time::Duration)>> = std::sync::Mutex::new(Vec::new());
++pub(crate) fn prof(name: &str, t: std::time::Instant) {
++    PROFILE.lock().unwrap().push((name.to_string(), t.elapsed()));
++}
++pub fn prof_pub(name: &str, t: std::time::Instant) {
++    prof(name, t)
++}
