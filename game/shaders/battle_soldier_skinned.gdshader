@@ -75,9 +75,12 @@ uniform float size_jitter = 0.05;
 // Distance (m) au-delà de laquelle les images ne sont plus interpolées.
 uniform float interp_distance = 45.0;
 // Lot FG5 : bande de distance (m, caméra → soldat) où ce calque dessine ses soldats. Hors de la
-// bande, le soldat est replié en un point avant tout skinning : le LOD0 des figurines fines ne
-// dessine que les soldats proches (calque LOD0 [0, r[, calque LOD1 [r, ∞[, même tampon).
+// bande, le soldat est replié en un point avant tout skinning : le calque principal d'une
+// figurine fine dessine le LOD1 sur [r, ∞[, son calque LOD0 les soldats proches sur [0, r[.
 instance uniform vec2 lod_band = vec2(0.0, 1.0e9);
+// FG5 : calque LOD0 compacté (seulement les soldats proches) : le rang du soldat dans le régiment
+// (hachage des variantes, visages, clips) est lu dans INSTANCE_CUSTOM.x au lieu d'INSTANCE_ID.
+instance uniform bool id_in_custom = false;
 
 uniform vec3 livery : source_color = vec3(0.2, 0.3, 0.75);
 uniform vec3 trim : source_color = vec3(0.85, 0.7, 0.25);
@@ -132,8 +135,6 @@ uniform sampler2D fine_horse : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform int fine_layer = -1;
 // Au-delà (m), plus aucune lecture de carte (LOD2 et imposteurs lointains).
 uniform float fine_distance = 80.0;
-// FG5 knob (temporary)
-uniform float fine_tile_distance = 100000.0;
 // Tuiles : couche et taille (m) par matière.
 const int FG3_TILE_MAIL = 0;
 const int FG3_TILE_WEAVE = 1;
@@ -278,9 +279,9 @@ void vertex() {
 		// FG5 : soldat hors de la bande de ce calque, replié en un point sans skinning.
 		VERTEX = vec3(0.0);
 	} else {
-		float id = float(INSTANCE_ID);
+		float id = id_in_custom ? INSTANCE_CUSTOM.x : float(INSTANCE_ID);
 		vec4 h = vec4(hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53), hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3));
-		vec4 custom = INSTANCE_CUSTOM;
+		vec4 custom = id_in_custom ? vec4(0.0) : INSTANCE_CUSTOM;
 		v_rest = VERTEX;
 		v_rest_n = NORMAL;
 
@@ -640,7 +641,7 @@ void fragment() {
 				amt = code == C_HAIR ? 0.9 : 0.45;
 				relief = code == C_HAIR ? 0.0 : 0.3;
 			}
-			if (tl >= 0 && dist < fine_tile_distance) {
+			if (tl >= 0) {
 				float size = FG3_TILE_SIZE[tl];
 				vec4 d = textureGrad(fine_detail, vec3(vec2(q.x, -q.y) / size, float(tl)), vec2(fg_dq1.x, -fg_dq1.y) / size, vec2(fg_dq2.x, -fg_dq2.y) / size);
 				n = fg3_perturb(n, fg_dp1, fg_dp2, fg_dq1, fg_dq2, (d.rg * 2.0 - 1.0) * amt);
@@ -667,9 +668,7 @@ void fragment() {
 			NORMAL = n;
 		}
 	}
-#ifndef FG5_NOAO
 	AO = fg_ao;
-#endif
 #endif
 	// Taches de sang : invisibles au loin, pas calculées au-delà de 90 m (coût des vivants).
 	if (v_blood > 0.0 && code != C_PLATE && dist < 90.0) {

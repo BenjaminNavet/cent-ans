@@ -65,6 +65,7 @@ var _near_level: Dictionary = {}  # unit id -> niveau de détail du maillage pro
 var _fine: Dictionary = {}  # unit id -> true : figurine fine (LOD0 par soldat, FG5)
 var _fine_near: Dictionary = {}  # unit id -> MultiMeshInstance3D (LOD0 des soldats proches, FG5)
 var _fine_band: Dictionary = {}  # unit id -> rayon du LOD0 posé sur les calques (0 : aucun)
+var _camera_frustum: Array[Plane] = []  # FG5 : plans du champ de la caméra (LOD0 hors champ omis)
 var _camera_pos: Vector3 = Vector3.ZERO
 var _previous: Dictionary = {}  # unit id -> PackedFloat32Array (tranche de l'image précédente)
 ## PB3c : figurines de `_previous[id]` (le tampon groupé est complété à la capacité du MultiMesh :
@@ -376,6 +377,7 @@ func update(battle: Object, units: Array, anim_dt: float, selected: Array) -> vo
 	var camera := get_viewport().get_camera_3d()
 	if camera != null:
 		_camera_pos = camera.global_position
+		_camera_frustum = camera.get_frustum()
 	_frame_dt = anim_dt
 	_frame_index += 1
 	var smooth := 1.0 - exp(-anim_dt / 0.6)
@@ -624,11 +626,14 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			mat.set_shader_parameter("blood", blood)
 
 
-## FG5 : LOD0 des soldats d'une figurine fine à moins de `radius` m de la caméra. Le calque
-## LOD0 n'est montré que si un soldat au moins est dans le rayon (test sur le tampon, marge 1 m) ;
-## le shader replie ensuite chaque soldat hors de sa bande avant le skinning.
+## FG5 : LOD0 des soldats d'une figurine fine à moins de `radius` m de la caméra, dans un
+## calque compacté (seulement ces soldats, et seulement ceux dans le champ de la caméra ; rang
+## d'origine en donnée perso pour garder visage et variante) ; le calque principal replie ces
+## mêmes soldats (bande `lod_band` du shader, qui tranche exactement : le tri CPU prend 1 m de
+## marge). Ni l'un ni l'autre ne porte d'ombre (c'est le LOD2 qui la porte).
 func _update_fine_near(id: int, kind: String, instance: MultiMeshInstance3D, padded: PackedFloat32Array, n: int, radius: float) -> void:
-	var any := false
+	var near_buf := PackedFloat32Array()
+	var count := 0
 	if n > 0:
 		var r2 := (radius + 1.0) * (radius + 1.0)
 		var cx := _camera_pos.x
@@ -639,21 +644,24 @@ func _update_fine_near(id: int, kind: String, instance: MultiMeshInstance3D, pad
 			var dx := padded[o + 3] - cx
 			var dy := padded[o + 7] - cy
 			var dz := padded[o + 11] - cz
-			if dx * dx + dy * dy + dz * dz < r2:
-				any = true
-				break
-	var band := radius if any else 0.0
+			if dx * dx + dy * dy + dz * dz < r2 and _in_view(Vector3(padded[o + 3], padded[o + 7], padded[o + 11])):
+				near_buf.append_array(padded.slice(o, o + 12))
+				near_buf.append_array([float(i), 0.0, 0.0, 0.0])
+				count += 1
+	var band := radius if count > 0 else 0.0
 	var near_layer: MultiMeshInstance3D = _fine_near.get(id)
-	if any and near_layer == null:
+	if count > 0 and near_layer == null:
 		var info: Dictionary = _unit_info[id]
 		var near_mm := MultiMesh.new()
 		near_mm.transform_format = MultiMesh.TRANSFORM_3D
+		near_mm.use_custom_data = true
 		near_mm.mesh = BattleSkinned.mesh(kind, int(info["variant"]), 0)
 		near_layer = MultiMeshInstance3D.new()
 		near_layer.name = "%s_lod0" % instance.name
 		near_layer.multimesh = near_mm
 		near_layer.material_override = instance.material_override
 		near_layer.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		near_layer.set_instance_shader_parameter(&"id_in_custom", true)
 		add_child(near_layer)
 		_fine_near[id] = near_layer
 	if not is_equal_approx(float(_fine_band.get(id, 0.0)), band):
@@ -663,18 +671,32 @@ func _update_fine_near(id: int, kind: String, instance: MultiMeshInstance3D, pad
 			near_layer.set_instance_shader_parameter(&"lod_band", Vector2(0.0, band))
 	if near_layer == null:
 		return
-	near_layer.visible = any
-	if any:
+	near_layer.visible = count > 0
+	if count > 0:
 		var near_mm := near_layer.multimesh
-		if near_mm.instance_count != instance.multimesh.instance_count:
-			near_mm.instance_count = instance.multimesh.instance_count
-		near_mm.buffer = padded
-		near_mm.visible_instance_count = n
+		if near_mm.instance_count < count:
+			near_mm.instance_count = maxi(count, 32)
+		near_buf.resize(near_mm.instance_count * 16)
+		near_mm.buffer = near_buf
+		near_mm.visible_instance_count = count
 
 
-## FG5 temporary: regiments per level (near LOD0, near LOD1, far LOD2 only, impostor).
-func fg5_lod_counts() -> Array:
-	var out := [0, 0, 0, 0]
+## FG5 : soldat (sphère de 2,5 m autour de son pied, cavalier compris) dans le champ de la caméra.
+func _in_view(p: Vector3) -> bool:
+	for plane in _camera_frustum:
+		if plane.distance_to(p + Vector3(0.0, 1.2, 0.0)) > 2.5:
+			return false
+	return true
+
+
+## Banc d'essai (FG5) : régiments par niveau (proche LOD0, proche LOD1, LOD2 seul, imposteurs),
+## puis calques LOD0 fins visibles et soldats qu'ils dessinent.
+func lod_counts() -> Array:
+	var out := [0, 0, 0, 0, 0, 0]
+	for id in _fine_near:
+		if (_fine_near[id] as MultiMeshInstance3D).visible:
+			out[4] += 1
+			out[5] += (_fine_near[id] as MultiMeshInstance3D).multimesh.visible_instance_count
 	for id in layers:
 		var inst: MultiMeshInstance3D = layers[id]
 		if inst.visible:
