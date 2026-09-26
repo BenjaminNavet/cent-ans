@@ -176,6 +176,10 @@ func save_path(save_name: String) -> String:
 
 ## Écrit `user://saves/<nom>.json` : état de la sim + métadonnées.
 func save_game(save_name: String) -> bool:
+	var state := str(sim.call("save_to_string"))
+	if state.is_empty():
+		push_error("SimFacade: no campaign state, refusing to overwrite %s" % save_name)
+		return false
 	DirAccess.make_dir_recursive_absolute(SAVES_DIR)
 	var wrapper := {
 		"version": SAVE_VERSION,
@@ -185,7 +189,7 @@ func save_game(save_name: String) -> bool:
 		"turn": int(sim.call("get_turn")),
 		"difficulty": current_difficulty(),
 		"timestamp": Time.get_datetime_string_from_system(),
-		"state": str(sim.call("save_to_string")),
+		"state": state,
 	}
 	var file := FileAccess.open(save_path(save_name), FileAccess.WRITE)
 	if file == null:
@@ -212,6 +216,10 @@ func load_game(path: String) -> bool:
 		push_error("SimFacade: invalid save %s" % path)
 		return false
 	var engine: String = str(wrapper.get("engine", "mock"))
+	# The running campaign is only replaced once the save has loaded: a refused
+	# save must not leave an empty sim that the next autosave would write out.
+	var previous_sim: Object = sim
+	var previous_is_real := is_real
 	_init_sim()
 	if engine == "mock" and is_real:
 		push_warning("SimFacade: save made with the mock; loading with mock")
@@ -219,8 +227,14 @@ func load_game(path: String) -> bool:
 		is_real = false
 	elif engine == "real" and not is_real:
 		push_error("SimFacade: save made with the real simulation, unavailable here")
+		sim = previous_sim
+		is_real = previous_is_real
 		return false
-	return bool(sim.call("load_from_string", str(wrapper["state"])))
+	if not bool(sim.call("load_from_string", str(wrapper["state"]))):
+		sim = previous_sim
+		is_real = previous_is_real
+		return false
+	return true
 
 
 ## Liste des sauvegardes : [{path, name, faction, date, timestamp}], plus récentes d'abord.
