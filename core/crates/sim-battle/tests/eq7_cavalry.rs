@@ -31,6 +31,23 @@ fn small_mixed_battle(seed: u64) -> BattleSim {
     sim
 }
 
+/// The richer French army (knights, men-at-arms, crossbows, 5 800) wins
+/// the mixed battle against English longbows screened by their knights
+/// (3 750) most of the time again: its knights no longer ride alone through
+/// the arrows ahead of their foot. Main before EQ7: 31/64 (about 8 of these
+/// 16); with EQ7: 15/16, 57/64.
+#[test]
+fn french_knights_wait_for_their_foot_and_win_the_mixed_battle() {
+    let french = (0..16)
+        .filter(|&seed| {
+            let mut sim = small_mixed_battle(seed);
+            run_to_end(&mut sim);
+            sim.winner() == Some(SideId::Attacker)
+        })
+        .count();
+    assert!(french >= 12, "French win {french}/16");
+}
+
 /// Probe (ignored): French wins over seeds 0-63, then a trace of seed
 /// `EQ7_SEED` (default 3) every 10 s.
 #[test]
