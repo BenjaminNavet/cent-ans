@@ -9,6 +9,7 @@ Every builder returns mesh objects in world space (bind pose of the ``human`` ri
 vertex groups named after the rig's bones and one of the ``MATS`` materials.
 """
 
+import contextlib
 import math
 
 import battle_skinned_equipment as eq
@@ -764,10 +765,8 @@ def heater_shield(ctx, width=0.52, height=0.66, cols=14, rows=16):
         k = (i + 1) % m
         a, b, c, d = border_f[i], border_f[k], border_b[k], border_b[i]
         if len({a, b, c, d}) == 4:
-            try:
+            with contextlib.suppress(ValueError):  # face already exists at the tip
                 bm.faces.new((a, d, c, b)).material_index = 2
-            except ValueError:
-                pass
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
     eq.finish(bm)
     obj = eq.to_object("shield", bm, [mat("arms"), mat("wood"), mat("leather")])

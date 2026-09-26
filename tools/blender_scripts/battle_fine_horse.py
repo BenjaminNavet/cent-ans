@@ -177,8 +177,8 @@ def landmarks(pieces, mount):
 
     pts = _verts(pieces["horse_body"])
     pairs = []
-    for side, sx in (("L", 1), ("R", -1)):
-        for joints, front in ((FRONT_JOINTS, True), (BACK_JOINTS, False)):
+    for side in ("L", "R"):
+        for joints in (FRONT_JOINTS, BACK_JOINTS):
             targets = [q(f"{j}.{side}") for j in joints]
             # Track the leg upwards from the hoof, starting under the target hoof.
             around = targets[-1].copy()

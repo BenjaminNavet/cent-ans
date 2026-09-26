@@ -98,9 +98,9 @@ def strip_helpers(basemesh):
     bm.to_mesh(me)
     bm.free()
     for vg in list(basemesh.vertex_groups):
-        if vg.name.startswith("joint-") or vg.name.startswith("helper-"):
-            if vg.name not in KEEP_HELPERS:
-                basemesh.vertex_groups.remove(vg)
+        helper = vg.name.startswith("joint-") or vg.name.startswith("helper-")
+        if helper and vg.name not in KEEP_HELPERS:
+            basemesh.vertex_groups.remove(vg)
 
 
 def main():
