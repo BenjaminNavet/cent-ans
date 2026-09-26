@@ -120,7 +120,8 @@
     "share": { "arrow": 0.3, "bolt": 0.25, "melee": 0.2, "charge": 0.12, "stakes": 0.1, "pikes": 0.15, "stone": 0.1, "other": 0.15 },
     "clips": { "crawl": 0.45, "wounded_sit": 0.3, "wounded_kneel": 0.25 },
     "max_total": 1500,
-    "max_distance_m": 320.0
+    "max_animated": 300,
+    "animated_seconds": 7.0
   },
   "dropped_arms": {
     "max_per_kind": 500,

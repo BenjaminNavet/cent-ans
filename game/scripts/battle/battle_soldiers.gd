@@ -101,6 +101,7 @@ var last_wounded_time: float = -1.0e6
 var disarmed_units: Dictionary = {}  # unit id -> instant de la débandade (armes jetées)
 var _wounded_total: int = 0
 var _losses: Dictionary = {}  # unit id -> pertes rendues (rang de tirage des blessés)
+var _recent_wounded: Array = []  # instants de chute des blessés qui bougent encore
 ## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
 ## BV3 : imposteurs lointains (au-delà de `BattleImpostors.DISTANCE`), null si coupés.
 var impostors: BattleImpostors = null
@@ -701,13 +702,15 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	var wounded_share := float(wounded_cfg.get("share", {}).get(cause, 0.0)) if ep12_enabled and skinned and not mounted else 0.0
 	if wounded_share > 0.0 and BattleSkinned.wounded_config(kind, variant).is_empty():
 		wounded_share = 0.0
-	if wounded_share > 0.0 and _camera_pos.distance_to(_unit_pos.get(uid, _camera_pos)) > float(wounded_cfg.get("max_distance_m", 320.0)):
-		wounded_share = 0.0
+	# Plafond des blessés qui bougent encore (tombés depuis moins de `animated_seconds`).
+	var window := float(wounded_cfg.get("animated_seconds", 7.0))
+	while not _recent_wounded.is_empty() and anim_time - float(_recent_wounded[0]) > window:
+		_recent_wounded.pop_front()
 	var unarmed_flag := BattleSkinned.CODE_UNARMED if ep12_enabled and disarmed_units.has(uid) else 0
 	for _i in mini(count, int(limits.get("spawn_per_update", 60))):
 		var ordinal := int(_losses.get(uid, 0))
 		_losses[uid] = ordinal + 1
-		if wounded_share > 0.0 and _wounded_total < int(wounded_cfg.get("max_total", 1500)) and BattleDroppedArms.hash4(uid * 100003 + ordinal).x < wounded_share:
+		if wounded_share > 0.0 and _wounded_total < int(wounded_cfg.get("max_total", 1500)) and _recent_wounded.size() < int(wounded_cfg.get("max_animated", 300)) and BattleDroppedArms.hash4(uid * 100003 + ordinal).x < wounded_share:
 			var kw := mini(int(pow(_rng.randf(), 1.6) * prev_n), prev_n - 1)
 			_spawn_wounded(unit, side, kind, variant, prev, kw, uid, ordinal, killer_pos, limits, wounded_cfg)
 			continue
@@ -805,6 +808,7 @@ func _spawn_wounded(unit: Dictionary, side: String, kind: String, variant: int, 
 	record[15] = float(BattleSkinned.CODE_UNARMED) + minf(blood, 0.99)
 	_add_corpse(side, kind, variant, true, pos, record, limits, true)
 	_wounded_total += 1
+	_recent_wounded.append(anim_time)
 	corpse_count += 1
 	wounded_count += 1
 	last_wounded_pos = pos
