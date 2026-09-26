@@ -374,3 +374,16 @@ Détail dans `docs/geo.md` (« Fonds de vallée non creusés », « Versions de 
   à l'exécution.
 - **Versions de cuisson** : `bake_versions` dans le manifeste, `pyramid/bake.json` dans le cache ;
   un palier périmé est recuit par `geo relief-all` sans `--force`, avec reprise après interruption.
+
+## Addendum (lot SZ1, 2026-09-26) : montagnes écrasées au palier vallée
+
+Détail dans `docs/godot-map.md` (« Montagnes écrasées ») et `docs/wip/sz1-montagnes.md`.
+
+- **Écart à ZG4/ZG8** : l'exagération n'est plus uniforme en montagne. La hauteur affichée devient
+  `y = s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − fond, 0))`, `K = c(s)·k(x, z)` : le relief
+  au-dessus d'une base régionale (fond non plafonné) est écrasé selon l'amplitude régionale (genou
+  350 m, pente 0,3, borne 0,55), à partir de ×3,5 d'exagération (palier vallée) ; collines, falaises et
+  plaines (amplitude < 300 m) gardent exactement le rendu ZG8. Toujours une seule fonction, avec ses
+  doubles GDScript et Rust (semis d'arbres), et les champs dans la même texture que le fond (RGBF).
+- **Caméra** : garde au-dessus des crêtes voisines (cercles autour de la caméra et du point visé).
+
