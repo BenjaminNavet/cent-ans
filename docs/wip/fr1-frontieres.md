@@ -1,6 +1,6 @@
 # FR1 — Frontières de faction lumineuses (façon Total War)
 
-Branche : `feat/fr1-faction-borders`. ADR : `docs/decisions/0070-frontieres-de-faction.md`.
+Branche : `feat/fr1-faction-borders`. ADR : `docs/decisions/0074-frontieres-de-faction.md`.
 **État : terminé, prêt à fusionner** (main fusionnée dans la branche le 2026-09-26).
 
 ## Approche

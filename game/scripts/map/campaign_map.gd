@@ -89,7 +89,7 @@ var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
 var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
-var faction_borders: FactionBorders = null  # FR1 : frontières de faction lumineuses (ADR 0070)
+var faction_borders: FactionBorders = null  # FR1 : frontières de faction lumineuses (ADR 0074)
 ## ZG4 : exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
 var dynamic_exaggeration: bool = true
 var _fps_probe_frames: int = -1

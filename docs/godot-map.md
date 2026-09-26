@@ -1593,14 +1593,14 @@ fenêtre, bandeau, journal, panneaux de droite).
 - Captures : `--stage=army` (défaut), `--stage=province`, `--stage=chronicle` →
   `docs/img/hud-campaign*.png` (1440×900 et 1920×1080).
 
-## Tour de l'IA à la Total War (lot CT1, ADR 0070)
+## Tour de l'IA à la Total War (lot CT1, ADR 0073)
 
 En fin de tour, après la résolution du cœur et avant la diplomatie, la victoire et le rapport de
 saison, `AiTurnReplay` (`game/scripts/map/ai_turn_replay.gd`, créé par `campaign_map.gd`) rejoue les
 marches des armées IA que le joueur voit :
 
 - **Données** : `CampaignSim.get_ai_turn_moves()` (trajet réel, issue, partie vue, intérêt pour le
-  joueur ; format dans l'ADR 0070), enregistré seulement si `set_ai_turn_recording(true, …)` a été
+  joueur ; format dans l'ADR 0073), enregistré seulement si `set_ai_turn_recording(true, …)` a été
   appelé avant `end_turn` ; mise en scène dans `data/ui/ai_turn_replay.json`.
 - **Réglages** (Réglages › Carte) : « Mouvements de l'IA » = Suivre (défaut ; la caméra se porte sur
   les 6 mouvements au plus qui concernent le joueur — bataille, siège de ses places, marche sur ses

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "faction_borders.schema.json",
   "title": "Frontières de faction de la carte de campagne (FR1)",
-  "description": "Réglages du rendu des frontières de faction lumineuses (ADR 0070) : largeurs en pixels écran, opacités, halo, hachures d'occupation, fondus de zoom, vue parchemin, modes de carte et préréglages de qualité. Rendu seulement.",
+  "description": "Réglages du rendu des frontières de faction lumineuses (ADR 0074) : largeurs en pixels écran, opacités, halo, hachures d'occupation, fondus de zoom, vue parchemin, modes de carte et préréglages de qualité. Rendu seulement.",
   "type": "object",
   "required": ["realm", "province", "player", "occupied", "zoom", "parchment", "modes", "neutral_color", "quality"],
   "additionalProperties": false,
