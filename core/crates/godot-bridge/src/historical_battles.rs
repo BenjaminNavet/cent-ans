@@ -193,6 +193,7 @@ impl BattleSim {
         })();
         self.player = None;
         self.recorder = None;
+        self.touch_poses();
         match built {
             Ok((map, sim, start)) => {
                 self.recorder = Some(sim_battle::ReplayRecorder::new(start, &sim));
