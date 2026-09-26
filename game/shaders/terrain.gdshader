@@ -294,6 +294,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/campaign_weather.gdshaderinc"
 #include "res://shaders/relief_quadtree.gdshaderinc"  // ZG2 : relief streamé en quadtree
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
+#include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -667,6 +668,7 @@ void fragment() {
 	col = weather_ground(col, p, hc, slope, footprint, roughness, wx_emit);  // CM2 : météo
 	vec3 pm_emit;
 	parchment_apply(p, uv, footprint, coast, lake, id, other_id, d, col, n, roughness, pm_emit);  // CM2
+	fr1_borders(p, uv, footprint, col, pm_emit);  // FR1 : frontières de faction lumineuses
 	col = qt_debug_color(col);  // ZG2 : teintes de débogage du quadtree (désactivées par défaut)
 	ALBEDO = col;
 	EMISSION = pm_emit + wx_emit * (1.0 - pm_weight());  // CM2
