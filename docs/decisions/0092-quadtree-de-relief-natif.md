@@ -32,7 +32,13 @@ tuile (jusqu'à 256 × 512 Ko, ~70 ms en une image).
   `--no-native-quadtree` (comparaisons A/B).
 
 ## Conséquences
-- Voir les mesures dans `docs/wip/pb3g-quadtree-natif.md`.
+- `--bench-map --bench-probe`, médianes de 3 passes alternées : sélection 14,9 → 0,22 ms au
+  pire, application 7,0 → 0,9 ms, `lod/quadtree` 24 → 9 ms ; p99 38 → 34 ms, descente p99
+  40 → 25 ms, images > 50 ms 3 → 0. `request_reground` : copie des pages supprimée
+  (4,7 → 0,04 ms hors charge pour 103 pages, ~70 ms en jeu sous charge).
+- Hauteurs des hameaux en un appel groupé (`ReliefLod.heights_m`, même bilinéaire) et tampon
+  `MultiMesh.buffer` écrit en une fois.
+- Captures A/B identiques (`docs/img/pb3g/`). Détail : `docs/wip/pb3g-quadtree-natif.md`.
 - Deux implémentations de la sélection (GDScript de repli, Rust) : toute modification de la
   sélection doit être reportée dans les deux, le test de comparaison le vérifie.
 - Rendu seulement, aucune règle de jeu.
