@@ -46,11 +46,17 @@
     "winter": {"temperature": -0.5, "saturation": 0.72, "lift": [0.0, 0.006, 0.02], "highlights": [0.97, 1.0, 1.04]}
   },
   "battle_seasons": {
-    "spring": {"decor_saturation": 0.6},
-    "summer": {"decor_saturation": 0.6},
+    "spring": {
+      "decor_saturation": 0.6,
+      "grade": {"temperature": -0.05, "tint": -0.03, "saturation": 1.0, "shadow_saturation": 0.7, "gain": [0.99, 1.01, 1.0]}
+    },
+    "summer": {
+      "decor_saturation": 0.6,
+      "grade": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03, "shadow_saturation": 0.7}
+    },
     "autumn": {
       "decor_saturation": 0.5,
-      "grade": {"temperature": 0.25, "saturation": 0.96, "gain": [1.03, 1.0, 0.94], "highlights": [1.03, 0.99, 0.92]}
+      "grade": {"temperature": 0.22, "saturation": 0.92, "shadow_saturation": 0.5, "gain": [1.03, 1.0, 0.94], "highlights": [1.03, 0.99, 0.92]}
     },
     "winter": {"decor_saturation": 0.6}
   },
@@ -58,7 +64,7 @@
     "clear": {
       "sky": {"spring": "clear_midday", "summer": "clear_midday", "autumn": "autumn_clear", "winter": "winter_clear"},
       "sky_luminance": 0.62, "sky_saturation": 1.0, "sky_tint": [1.0, 1.0, 1.0], "sun_disc": 1.0, "haze": 0.3,
-      "grade": {"contrast": 1.05, "saturation": 0.98, "shadow_saturation": 0.75, "shadows": [0.98, 0.99, 1.03]}
+      "grade": {"contrast": 1.05, "saturation": 0.98, "shadows": [0.98, 0.99, 1.03]}
     },
     "fog": {
       "sky": {"spring": "misty_morning", "summer": "misty_morning", "autumn": "dawn", "winter": "misty_morning"},

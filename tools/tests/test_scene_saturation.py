@@ -2,7 +2,12 @@
 
 import numpy as np
 
-from cent_ans_tools.scene_saturation import VIEWS, measured_pixels, saturation_stats
+from cent_ans_tools.scene_saturation import (
+    VIEWS,
+    mean_hue,
+    measured_pixels,
+    saturation_stats,
+)
 
 
 def test_grey_image_has_no_saturation() -> None:
@@ -38,3 +43,12 @@ def test_other_sizes_are_rescaled() -> None:
 def test_views_cover_the_da6_table() -> None:
     """Every DA6 view is known, bocage and autumn included."""
     assert {"haute", "ligne", "hiver", "bocage", "automne", "closeup"} <= set(VIEWS)
+
+
+def test_mean_hue_of_primaries() -> None:
+    """Red, green and blue sit at 0°, 120° and 240°; an orange at about 30°."""
+    assert abs(mean_hue(np.array([[1.0, 0.0, 0.0]]))) < 1e-6
+    assert abs(mean_hue(np.array([[0.0, 1.0, 0.0]])) - 120.0) < 1e-6
+    assert abs(mean_hue(np.array([[0.0, 0.0, 1.0]])) - 240.0) < 1e-6
+    assert 25.0 < mean_hue(np.array([[1.0, 0.5, 0.0]])) < 35.0
+    assert np.isnan(mean_hue(np.zeros((0, 3))))
