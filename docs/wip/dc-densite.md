@@ -266,9 +266,39 @@ DC1 est l'ancien code (avant la revue de code et PB3) : comparer DC3 à main.
 - Rendu des hameaux (5 km) non revérifié dans Godot (`dc4_density_probe.gd`, fenêtré).
 
 ## DC6c — réduction et masquage des maquettes à l'échelle effective (worktree `../gp-dc6c`, branche `feat/dc6-c`)
-État : en cours. `SettlementFit` (fonctions pures, `game/scripts/map/settlement_fit.gd`) ; la
-couche garde la place laissée par les voisines (`_room`) et recalcule réduction (échelle du
-porteur) et masquage (paires candidates) à chaque pas d'échelle SZ4b. Test
-`game/tests/dc6c_fit_scale_test.gd`.
-Prochaine étape : build, import, tests, sonde DC4 (vues comté / près + 20 et 12), captures
-`docs/img/dc6c/`.
+État : **fait**, `main` fusionné (696713bc), prêt pour ff. Tests verts : smoke, settlements_render,
+da3_markers, cv1_campaign_life, sz4_prop_scale, sz4b_colonies_forests, dc6c_fit_scale (nouveau).
+- `SettlementFit` (`game/scripts/map/settlement_fit.gd`, fonctions pures) : la place laissée par
+  les voisines (`_room`, part de l'écart au prorata des poids, ou écart − rayon d'une ville
+  emblématique) ne dépend pas des rayons ; la réduction est recalculée sur le rayon rétréci par
+  SZ4b : rayon affiché = rayon d'origine × sigma × `fit_factor(room, rayon d'origine × sigma)`.
+  `_model_radius` garde le rayon réduit à la taille de carte (hameaux, végétation, effets CV1 :
+  inchangés) ; l'échelle du porteur `_model_scale` = `zoom_scale(...)` (1 au loin, ≤ 1) porte
+  la différence, donc picking, anneau et hauteurs d'étiquettes suivent sans changement.
+- Masquage : paires candidates (rayons de carte, sur-ensemble valable à toute échelle : 21 paires)
+  calculées une fois (ancrages fins, `replace_model` CV1 : paires de la maquette seulement),
+  masquage réévalué à chaque pas d'échelle SZ4b (`rewrite_step`), 0,13 ms. Nouvelle règle
+  `ABSORB_OVERLAP` : masquée aussi si le recouvrement dépasse 20 % du plus petit rayon (réduction
+  bloquée au plancher : Marmoutier sous Tours restait à 0,71 contre 0,51 de place à d = 14).
+- **Régression trouvée dans `main`** : `_update_model_visibility` (villes 1:1, SZ4b) remettait
+  `visible = true` sur toutes les maquettes, annulant le masquage DC4 dès la première mise à jour
+  des villes : dans `main`, 0 maquette masquée et 7 paires qui se recouvrent en vue comté
+  (Trèves/Saint-Maximin, Tours/Marmoutier, Le Mans/Épau…). Corrigé : `_apply_model_visibility`
+  combine masquage et ville 1:1.
+- Sonde `dc4_density_probe.gd` : statistiques de maquettes par vue (`models_shown` : masquées,
+  réduites, paires affichées > 20 %), vues 20 (`rapproche`) et 12 (`vallee-haut`) nommées.
+  Lille (`--center=2310.3,1657.9`, vues 1400,550,250,120,20,12, `--no-valley`) :
+
+| | main | DC6c |
+|---|---|---|
+| Europe / région / comté / 120 / 20 : masquées, réduites, paires > 20 % | 0, 173, 7 | 7, 166, 0 |
+| Distance 12 : masquées, réduites, paires > 20 % | 0, 173, 2 | 1, 7, 0 |
+| Noms qui se chevauchent (toutes vues) | 0 | 0 |
+
+  Test headless (toute la carte) : masquées/réduites 7/166 de 1000 à 20, 4/35 à 14, 0/2 à 10, 0/1 à
+  7 ; 0 paire > 20 % à toutes les distances ; vue stratégique : échelle 1 pour toutes les maquettes.
+- Captures `docs/img/dc6c/` (960 px) : `lille-*` et `lemans-*` (L'Épau), `avant`/`apres`, `comte`
+  (250 : marqueurs, identiques) et `pres` (distance 12 : L'Épau de nouveau affichée à côté du Mans).
+- Points ouverts : coût de `_place_model` pour 1 192 maquettes par pas d'échelle ~3,5 ms en debug
+  sous charge (préexistant, SZ4b ; le masquage n'ajoute que 0,13 ms) ; les maquettes masquées
+  à mi-zoom réapparaissent d'un coup (pas de fondu).
