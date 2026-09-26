@@ -265,6 +265,10 @@ pub struct BattleSim {
     /// PB3c: bumped by every change of the battle outside a simulation step
     /// (orders, deployment, new battle, replay jump): invalidates `poses`.
     pose_epoch: u64,
+    /// PB3e (ADR 0090): the next step computed on a worker thread, when
+    /// `set_step_thread(true)` (the battle scene; tests stay synchronous).
+    step_thread: bool,
+    steps: crate::battle_step_job::StepPipeline,
     base: Base<RefCounted>,
 }
 
@@ -322,6 +326,8 @@ impl IRefCounted for BattleSim {
             poses: PoseCache::default(),
             units_cache: None,
             pose_epoch: 0,
+            step_thread: false,
+            steps: Default::default(),
             base,
         }
     }
@@ -332,6 +338,8 @@ impl BattleSim {
     /// poses must be rebuilt.
     pub(crate) fn touch_poses(&mut self) {
         self.pose_epoch = self.pose_epoch.wrapping_add(1);
+        // PB3e: a step computed ahead from the state of before is useless.
+        self.steps.clear();
     }
 }
 
@@ -509,12 +517,43 @@ impl BattleSim {
         };
         // EP13: a replay advances by its recorded inputs.
         if let Some(player) = &mut self.player {
+            self.steps.clear();
             player.advance(sim, dt);
             return;
         }
-        sim.tick(dt);
+        if self.step_thread {
+            self.steps.tick(sim, dt, self.pose_epoch);
+        } else {
+            sim.tick(dt);
+        }
         if let Some(recorder) = &mut self.recorder {
             recorder.observe(sim);
+        }
+    }
+
+    /// PB3e (ADR 0090): computes the next fixed step on a worker thread
+    /// while the frames show the current one (same battle, bit for bit, as
+    /// the synchronous mode kept by default for tests and headless runs).
+    #[func]
+    fn set_step_thread(&mut self, enabled: bool) {
+        self.step_thread = enabled;
+        if !enabled {
+            self.steps.clear();
+        }
+    }
+
+    #[func]
+    fn get_step_thread(&self) -> bool {
+        self.step_thread
+    }
+
+    /// PB3e measures: `{adopted, in_place}` steps since the battle began
+    /// (adopted: computed ahead on the worker thread).
+    #[func]
+    fn get_step_stats(&self) -> VarDictionary {
+        vdict! {
+            "adopted" => self.steps.adopted as i64,
+            "in_place" => self.steps.in_place as i64,
         }
     }
 
