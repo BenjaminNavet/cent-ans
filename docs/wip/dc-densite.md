@@ -267,4 +267,8 @@ de chaque tour).
   50 % (= `province_effect_percent`) essayé : −6 % au tour 1 mais −16 % au tour 40 (France −21 %).
 - Hérésie : compte des bâtiments religieux pondéré par `province_effect_percent` (50 %)
   (`religion::weighted_religious_buildings`) : province-tours hérétiques 17,7 → 9,7 (DC) → 17,3.
-- Prochaine étape : remesure recherche à 70 %, puis révoltes (`DC6_TRACE` : lignes DC6V/DC6P).
+- Recherche à 70 % remesurée : +5 % au tour 1, −6 % au tour 40 (France +7/−4, Angleterre 0/−4).
+- Révoltes : l'explication DC3 ne tient pas (occupations plus longues, pas plus courtes ; la baisse
+  porte sur les provinces non occupées, surtout Luxembourg, Alentejo, Savoie ; garnison par province
+  690 → 1 032 hommes). Variantes `garrison_relief_per_100_men` / `_max` (population.json) : très
+  bruitées sur 12 graines ; relance sur 24 graines (13-24) en cours.

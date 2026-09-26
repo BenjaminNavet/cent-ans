@@ -1012,7 +1012,11 @@ fn main() {
         seeds = vec![1, 2, 3, 4, 5];
     }
     let verbose = std::env::var("VERBOSE").is_ok();
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    // DC6b: `CENT_ANS_DATA_DIR` plays another copy of the data (variants of a rule).
+    let root = std::env::var("CENT_ANS_DATA_DIR").map_or_else(
+        |_| Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data"),
+        std::path::PathBuf::from,
+    );
     let (data, _) = GameData::load(&root).expect("data");
     // Seeds run in parallel (each campaign is deterministic on its own).
     let reports: Vec<Report> = std::thread::scope(|scope| {
