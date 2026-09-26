@@ -1043,10 +1043,17 @@ func _on_end_turn() -> void:
 # --- Sauvegarde ----------------------------------------------------------------------
 
 
+## Vrai si la dernière demande de sauvegarde a écrit l'état (lu par `FlowController`).
+var last_save_ok := false
+
+
 func _on_save(save_name: String) -> void:
+	last_save_ok = false
 	if sim == null:
 		return
-	if SimFacade.save_game(save_name):
+	# Fiche `.meta.json` écrite seulement si l'état l'a été (la vignette suit dans FlowController).
+	last_save_ok = SaveSlots.save(save_name)
+	if last_save_ok:
 		ui.show_toast("Partie sauvegardée : %s" % save_name)
 	else:
 		ui.show_toast("Échec de la sauvegarde.", true)
