@@ -150,6 +150,25 @@ def test_orleans_facts() -> None:
     assert (
         monuments["boulevard_tourelles"]["model"] == "earthwork"
     )  # earth and timber in 1428
+    # Historical review 2026-09-26: Romanesque nave still standing, boulevards from 1417,
+    # wooden bastille on the motte Saint-Antoine from 1417, Augustins razed in 1428.
+    assert "sainte_croix_romane" in monuments
+    assert all(
+        m["from_year"] >= 1417
+        for i, m in monuments.items()
+        if i.startswith("boulevard_")
+    )
+    assert monuments["bastille_saint_antoine"]["from_year"] == 1417
+    assert monuments["augustins"]["until_year"] == 1428
+    ring = walls["enceinte_accrue"]["points"]
+    area_m2 = abs(
+        sum(
+            ring[i][0] * ring[i - 1][1] - ring[i - 1][0] * ring[i][1]
+            for i in range(len(ring))
+        )
+        / 2
+    )
+    assert 36.0 < area_m2 / 1e4 < 41.0, area_m2  # 37 ha (SAMO)
     for church in (
         "saint_aignan_1420",
         "saint_euverte",
