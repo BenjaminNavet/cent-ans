@@ -143,7 +143,7 @@ def twig_spray(size: int = 512) -> None:
             nx = x + math.cos(angle) * length / steps
             ny = y + math.sin(angle) * length / steps
             tone = rng.uniform(0.85, 1.1)
-            draw.line((x, y, nx, ny), fill=(int(78 * tone), int(70 * tone), int(62 * tone), 255), width=max(1, round(width)))
+            draw.line((x, y, nx, ny), fill=(int(78 * tone), int(70 * tone), int(62 * tone), 255), width=max(2, round(width)))
             x, y = nx, ny
             angle += rng.uniform(-0.22, 0.22)
             width *= 0.93
@@ -151,8 +151,8 @@ def twig_spray(size: int = 512) -> None:
                 side = rng.choice((-1, 1))
                 grow(x, y, angle + side * rng.uniform(0.35, 0.8), length * rng.uniform(0.4, 0.6), width * 0.7, depth - 1)
 
-    for k in range(4):
-        grow(size * 0.5 + rng.uniform(-40, 40), size * 0.99, -math.pi / 2 + (k - 1.5) * 0.3 + rng.uniform(-0.2, 0.2), size * 0.7, 4.0, 3)
+    for k in range(6):
+        grow(size * 0.5 + rng.uniform(-40, 40), size * 0.99, -math.pi / 2 + (k - 2.5) * 0.24 + rng.uniform(-0.2, 0.2), size * 0.72, 6.0, 4)
     _bleed(image).save(HERE / "twig_spray.png")
 
 

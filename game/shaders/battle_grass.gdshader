@@ -39,7 +39,7 @@ uniform vec3 grass_blood_color : source_color = vec3(0.2, 0.02, 0.02);
 // normales arrondies portées par le maillage, normale de carte dans COLOR), cartes vues par la
 // tranche amincies, pied assombri. `--no-da6` : 0 (ancien rendu).
 uniform float da6_on = 0.0;
-uniform float decor_saturation = 0.66; // DA6 : même désaturation que le sol
+uniform float decor_saturation = 0.6; // DA6 : même désaturation que le sol
 uniform float tex_lum = 0.14; // luminance moyenne (linéaire) de la carte, ramenée à ~0,6
 
 varying float v_shade;
@@ -93,7 +93,7 @@ void vertex() {
 		float patch2 = texture(macro_noise, wp * 0.0047 + vec2(0.27, 0.83)).r;
 		float dry = smoothstep(0.42, 0.66, patch * 0.7 + patch2 * 0.45);
 		float lush = smoothstep(0.45, 0.7, (1.0 - patch) * 0.75 + patch2 * 0.35);
-		v_tint = mix(v_tint, v_tint * (soft ? vec3(1.16, 1.06, 0.72) : vec3(1.35, 1.12, 0.62)), dry * 0.85);
+		v_tint = mix(v_tint, v_tint * (soft ? vec3(0.9, 0.85, 0.6) : vec3(1.35, 1.12, 0.62)), dry * 0.85);
 		v_tint = mix(v_tint, v_tint * vec3(0.7, 0.86, 0.66), lush * 0.8);
 		height_mul *= mix(1.0, 1.25, lush) * mix(1.0, 0.8, dry);
 		float in_field = outside_calm * (1.0 - sb.g) * field.z;
@@ -115,7 +115,7 @@ void vertex() {
 				} else if (field.x == 6.0) {
 					// Chaume : tiges courtes et blondes.
 					height_mul *= 0.5;
-					v_tint = mix(v_tint, vec3(1.2, 1.02, 0.62), in_field * 0.8);
+					v_tint = mix(v_tint, soft ? vec3(0.85, 0.73, 0.46) : vec3(1.2, 1.02, 0.62), in_field * 0.8);
 					field.x = 0.0;
 				}
 			}
@@ -130,7 +130,7 @@ void vertex() {
 			density *= 1.0 - in_field;
 		} else if (field.x == 2.0) {
 			height_mul = mix(1.0, 2.1, in_field);
-			v_tint = mix(v_tint, soft ? vec3(0.5, 0.4, 0.2) : vec3(0.5, 0.36, 0.11), in_field);
+			v_tint = mix(v_tint, soft ? vec3(0.4, 0.33, 0.17) : vec3(0.5, 0.36, 0.11), in_field);
 		} else if (field.x == 3.0) {
 			height_mul = mix(1.0, 1.4, in_field);
 			// DA6 : jachère herbeuse (vert passé, fleurs rares) et non plus crème vif.
@@ -207,7 +207,7 @@ void fragment() {
 		// Pied de touffe dans l'ombre des brins, pointes un peu plus sèches ; cartes vues par la
 		// tranche amincies (le seuil d'alpha mange d'abord les bords des brins).
 		float top = 1.0 - UV.y;
-		ALBEDO *= mix(0.62, 1.0, smoothstep(0.0, 0.55, top));
+		ALBEDO *= mix(0.7, 1.0, smoothstep(0.0, 0.55, top));
 		ALBEDO = mix(ALBEDO, ALBEDO * vec3(1.08, 1.04, 0.9), top * top * 0.5);
 		ALPHA *= mix(0.45, 1.0, smoothstep(0.12, 0.5, v_facing));
 		ALBEDO = mix(vec3(dot(ALBEDO, vec3(0.3, 0.59, 0.11))), ALBEDO, decor_saturation);
