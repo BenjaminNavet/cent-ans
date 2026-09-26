@@ -33,7 +33,10 @@ EP9 (fin de bataille).
 - [x] Poitiers (Maupertuis, haie percée du chemin creux, vignes, Miosson, captal de Buch) ; Anglais 20/30
   (test : 11 à 18 sur 20).
 - [x] Test Rust du site en campagne (`a_campaign_battle_can_be_fought_on_the_site`).
-- [ ] Essai Godot réel, captures `docs/img/ep7/`, ADR 0035, test Godot, vérifications finales.
+- [x] Test Godot `game/tests/ep7_historical_test.gd` (liste, `setup_historical`, vagues, boutons) + smoke (menu).
+- [x] Captures `docs/img/ep7/` : `<id>_opening.png`, `<id>_melee.png`, `menu.png`, `<id>_site.png`.
+- [x] ADR 0035, budget (0 $), `docs/wip/epic.md`.
+- [ ] Merge main, mesures d'équilibre finales, vérifications complètes.
 
 ## Décisions
 - ai.rs n'est pas modifié (demande de coordination : SG5 y travaille). Les vagues françaises sont
@@ -41,4 +44,4 @@ EP9 (fin de bataille).
   `scenario_filter` (sim.rs::step) ; les Anglais « tiennent » leur poste (laisse).
 
 ## Prochaine étape
-Test Godot (smoke : menu historique + `setup_historical`), captures, ADR 0035, merge main, vérifications finales.
+Merge main, relancer les tests d'équilibre, fmt/clippy/test workspace, build.sh, pytest, ruff, import + smoke Godot.
