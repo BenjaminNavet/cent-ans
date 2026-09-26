@@ -35,6 +35,7 @@ var _materials: Array[ShaderMaterial] = []
 var _dated: Dictionary = {}  # nom de nœud → {from, until}
 var _extent := 1.0
 var _origin := Vector2.ZERO
+var _fade := 1.0
 
 
 ## Construit la maquette ; null si le modèle n'est pas importé.
@@ -330,6 +331,17 @@ func set_year(new_year: int) -> void:
 		if _dated.has(layer):
 			var span: Vector2i = _dated[layer]
 			(child as Node3D).visible = year >= span.x and year <= span.y
+
+
+## VH4 (ADR 0078) : opacité de la maquette (tramage) pendant le fondu vers la ville 1:1 ;
+## cachée sous 1 %.
+func set_fade(alpha: float) -> void:
+	if is_equal_approx(alpha, _fade):
+		return
+	_fade = alpha
+	visible = alpha > 0.01
+	for material in _materials:
+		material.set_shader_parameter("fade", alpha)
 
 
 ## Hauteur de la surface au centre (pose des étiquettes et du picking).

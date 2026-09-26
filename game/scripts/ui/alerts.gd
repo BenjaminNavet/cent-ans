@@ -87,6 +87,14 @@ static func collect(map: Node, last_events: Array) -> Array:
 					"text": "Aucune recherche en cours",
 					"tooltip": "Ouvrir les technologies (T).",
 				})
+	if sim.has_method("get_offers"):  # Q5 : offres en attente, sans rouvrir la diplomatie à chaque tour
+		var offers: Array = sim.call("get_offers")
+		if not offers.is_empty():
+			result.append({
+				"id": "offers", "kind": "diplomacy_offer", "severity": "warning",
+				"text": "%s en attente" % FrText.count(offers.size(), "proposition diplomatique", "propositions diplomatiques"),
+				"tooltip": "Ouvrir la diplomatie (P) pour accepter ou refuser.",
+			})
 	if sim.has_method("get_pending_decisions"):
 		for decision in sim.call("get_pending_decisions"):
 			result.append({

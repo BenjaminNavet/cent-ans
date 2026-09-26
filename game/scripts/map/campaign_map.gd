@@ -270,6 +270,8 @@ func _setup_settlements() -> void:
 	settlement_layer.settlement_selected.connect(_on_settlement_selected)
 	armies.settlement_position = settlement_layer.world_position_of  # C4
 	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
+	camera_rig.floor_zones = settlement_layer.landmark_floor_zones()  # VH4 : plancher levé (v2)
+	camera_rig.floor_zones_set = true
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
 		return settlement_layer.screen_label_rects(view_camera) + cities.screen_label_rects(view_camera)
