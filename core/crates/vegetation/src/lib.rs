@@ -336,15 +336,16 @@ fn page_bilinear(bytes: &[u8], fx: f64, fy: f64, h_min: f64, h_range: f64) -> f6
 
 impl TileRequest {
     /// `MapData.display_height` (lots ZG8, SZ1):
-    /// s·(h − c·k·max(h − base, 0) + g·max(h − floor, 0)).
+    /// s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − floor, 0)), K = c·k.
     fn display_height(&self, h_m: f64, x: f64, z: f64) -> f64 {
         if self.relief_gain == 0.0 && self.relief_squash == 0.0 {
             return h_m * self.vertical_scale;
         }
         let (floor, base, k) = self.floor.fields_at(x, z);
+        let squash = self.relief_squash * k;
         self.vertical_scale
-            * (h_m - self.relief_squash * k * (h_m - base).max(0.0)
-                + self.relief_gain * (h_m - floor).max(0.0))
+            * (h_m - squash * (h_m - base).max(0.0)
+                + self.relief_gain * (1.0 - squash) * (h_m - floor).max(0.0))
     }
 
     /// `MapData.height_world_at` (displayed height of the 4096 heightmap).
@@ -992,8 +993,8 @@ mod tests {
             side: (2, 2),
             cell: 64.0,
         });
-        // s·(h − c·k·(h − base) + g·(h − floor)), same as `MapData.display_height_fields`.
-        let expected = 0.01 * (h_m - 0.8 * 0.5 * 1000.0 + 0.5 * 100.0);
+        // s·(h − K·(h − base) + g·(1 − K)·(h − floor)), K = c·k, as `MapData.display_height_fields`.
+        let expected = 0.01 * (h_m - 0.4 * 1000.0 + 0.5 * 0.6 * 100.0);
         assert!((req.height_world_at(&map, 10.0, 10.0) - expected).abs() < 1e-6);
         // Below the base: unchanged.
         assert!(
