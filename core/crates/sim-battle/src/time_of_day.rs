@@ -248,6 +248,20 @@ mod tests {
     }
 
     #[test]
+    fn azincourt_report_matches_the_documented_compression() {
+        // EP8b: bug report said the battle-day clock "runs much faster than the battle" on
+        // the Agincourt map (ADR 0035: start 10 h 30) — the banner read "Midi" after 2 min 50 s
+        // (170 s) of simulated battle. That is exactly the documented compression (0.2 minute of
+        // day per simulated second: 20 min of battle = 4 h of day), applied once, not a bug.
+        // Pinned so a change to the factor, or a regression that applies it twice, is caught.
+        let r = rules();
+        let hour = r.hour_after(10.5, 170.0);
+        assert!((hour - (10.5 + 170.0 * 0.2 / 60.0)).abs() < 1e-9, "{hour}");
+        assert!((hour - 11.066_666_666_666_666).abs() < 1e-9, "{hour}");
+        assert_eq!(r.phase_at(hour).key, "midday");
+    }
+
+    #[test]
     fn wrap_hour_stays_in_range() {
         assert_eq!(wrap_hour(24.0), 0.0);
         assert_eq!(wrap_hour(-1.0), 23.0);

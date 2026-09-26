@@ -76,3 +76,54 @@ faction que sur l'écu, le pavois et le caparaçon. Le surcot restait d'une livr
   les rendus DA1 et shader de main (`--base-shader=`) alternent toutes les 30 images. Écart
   mesuré : +0,22 %, -0,17 % (29,7 ms par image, `--density=3`) et +0,03 % (plafond à 60 Hz,
   `--density=2`). Coût négligeable, bien sous le seuil de 3 %.
+
+## Révision DA1b (2026-09-26) : meubles dessinés et étendards aux armes du général
+
+Contexte : les lions, léopards, aigle, guivre, dauphin et château étaient des silhouettes
+polygonales en blocs, visibles sur une vingtaine d'écus (Angleterre, Empire, Flandre, Bohême,
+Écosse, Plantagenêt, Lancastre, Luxembourg, Visconti…). Les étendards EP5 portaient encore les
+armes de la faction.
+
+Décisions :
+
+1. **Meubles vectoriels du domaine public** : 12 SVG de Wikimedia Commons (série « Meuble
+   héraldique » du projet Blasons, armes Visconti de 1395), licence vérifiée page par page :
+   domaine public, CC0 ou CC BY 4.0, aucun CC BY-SA. Ils sont vendus dans
+   `data/heraldry/charges/` avec `SOURCE.md` (auteur, lien, modification) et crédités dans
+   `CREDITS.md`. Le manifeste `charges.json` (schéma `heraldry_charges.schema.json`) donne à
+   chaque couleur du dessin un rôle : corps, ombre, armé (griffes, langue, bec, nageoires),
+   couronne, ouvertures, issant, argent, trait.
+2. **Recoloration exacte** : `heraldic_charges.py` rend chaque SVG avec `resvg` (roue
+   `resvg-py`, déterministe) une fois par rôle, couleurs du rôle en blanc et le reste en noir.
+   Le niveau de gris donne la couverture du rôle, anticrénelage compris. Les masques sont
+   recadrés et mis en cache, puis peints avec les teintes du blason : `armé/lampassé/becqué/
+   peautré de …` (gueules par défaut, azur sur un meuble ou un champ de gueules), `couronné de …`
+   (or par défaut), `ouvert et ajouré de …` (sinon le champ transparaît). Un meuble de sable a
+   des traits clairs. Le trait est épaissi d'un pixel de rendu pour survivre à la réduction en
+   128².
+3. **Variantes lues dans le texte** : lion couronné, lion à la queue fourchée (Bohême), queue
+   fourchée passée en sautoir (Luxembourg), lion ailé de saint Marc (Venise), léopard lionné
+   (Armagnac). Une couronne extraite du lion couronné est rapportée sur les lions dessinés tête
+   nue (`crown_anchor`). L'aigle de l'Empire perd la couronne du dessin (pas avant 1433).
+4. **Les écus de faction changent volontairement.** Le principe « identiques à l'octet » de DA1
+   est abandonné au profit d'un test de non-régression **par blason**
+   (`tools/tests/test_heraldic_charges.py`) : chaque écu témoin doit montrer les teintes que
+   nomme son blason, dans une part minimale, et un lion dessiné doit garder ses traits
+   intérieurs. Les écartelés de faction (Castille, Hainaut) passent par la grammaire v2, qui lit
+   la teinte de chaque quartier (le Hainaut était faux en v1).
+5. **Étendards EP5** : `banners.build_houses()` produit bannière, pennon et étendard de chaque
+   maison (`game/assets/heraldry/banners/houses/`, livrée = deux premières teintes du blason).
+   `BattleStandards` reçoit la maison du général de chaque camp. Le premier porte-étendard du
+   général porte la bannière de sa maison, en taille royale. Le second garde l'étendard de
+   l'armée (bannière royale, saint Georges, oriflamme du roi en personne). « Pas de quartier »
+   remplace toujours le premier. Les unités nobles de sa retenue (`house_arms.unit_types` de
+   `data/fx/battle_standards.json`) portent aussi ses armes. Le commun garde l'étoffe de la
+   faction. Maison inconnue ou fichier absent : repli sur la faction. Le drapeau-repère de
+   `battle_scene.gd` (`_banner_cloth`) suit la même règle.
+
+Conséquences : 29 écus de faction, 51 de maison, 87 étoffes de faction et 153 de maison
+régénérés (`cent-ans assets heraldry`, `cent-ans assets banners`). Planches :
+`docs/img/da1b/`. Limites : le dauphin est le dessin « pâmé » (bouche ouverte) faute d'un
+dauphin vif libre de droits. Le lion de saint Marc est rampant, pas « en moleca ». Les petits
+châteaux de la bordure de Portugal et des lambels restent polygonaux (trop petits pour le
+dessin). Les porte-étendards eux-mêmes gardent le surcot de faction.

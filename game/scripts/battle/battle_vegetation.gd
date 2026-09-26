@@ -9,6 +9,9 @@ extends Node3D
 
 const GRASS_SHADER := preload("res://shaders/battle_grass.gdshader")
 const GRASS_TEXTURE := preload("res://assets/textures/battle/grass_clump.png")
+## DA6 : touffe en éventail (luminance et alpha seuls), luminance moyenne linéaire de la carte.
+const GRASS_TEXTURE_DA6 := preload("res://assets/textures/battle/grass_blades.png")
+const GRASS_TEX_LUM_DA6 := 0.21
 const MAX_CAMERA_HEIGHT := 170.0
 
 ## [maille (m), rayon (m), échelle des touffes, rayon intérieur (m)]
@@ -19,16 +22,22 @@ var _materials: Array[ShaderMaterial] = []
 var _ground_y: float = 0.0
 
 
-func build(terrain: BattleTerrain, weather: String) -> void:
+## `da6_on` : −1 = selon le terrain (`BattleTerrain.da6`), 0/1 forcé (banc A/B DA6).
+func build(terrain: BattleTerrain, weather: String, da6_on: int = -1) -> void:
 	_ground_y = terrain.height_at(terrain.FIELD_W * 0.5, terrain.FIELD_D * 0.5)
-	var mesh := _clump_mesh()
+	var da6 := terrain.da6 if da6_on < 0 else da6_on == 1
+	var mesh := _clump_mesh_da6() if da6 else _clump_mesh()
 	for layer in LAYERS:
 		var spacing: float = layer[0]
 		# PF1 : rayon (donc nombre de touffes, au carré) selon le préréglage de qualité.
 		var radius: float = float(layer[1]) * float(RenderQuality.preset().get("grass", 1.0))
 		var mat := ShaderMaterial.new()
 		mat.shader = GRASS_SHADER
-		mat.set_shader_parameter("grass_texture", GRASS_TEXTURE)
+		mat.set_shader_parameter("grass_texture", GRASS_TEXTURE_DA6 if da6 else GRASS_TEXTURE)
+		if da6:
+			mat.set_shader_parameter("da6_on", 1.0)
+			mat.set_shader_parameter("decor_saturation", terrain.decor_saturation())
+			mat.set_shader_parameter("tex_lum", GRASS_TEX_LUM_DA6)
 		mat.set_shader_parameter("height_map", terrain.height_texture)
 		var hr := terrain.SPLAT_RECT
 		var t := BattleTerrain.HEIGHT_TEXEL
@@ -159,5 +168,39 @@ static func _clump_mesh() -> ArrayMesh:
 			st.set_normal(n)
 			st.set_uv(uvs[idx])
 			st.add_vertex(corners[idx])
+	st.index()
+	return st.commit()
+
+
+## DA6 : touffe en volume — quatre cartes à 45°, cintrées (colonne centrale décalée le long de la
+## normale) et évasées (pied de 0,24 m, sommet de 0,64 m) ; normales arrondies (verticale +
+## direction depuis l'axe de la touffe) ; normale propre de la carte dans COLOR (le shader amincit
+## les cartes vues par la tranche). 0,44 m de haut, pied à l'origine.
+static func _clump_mesh_da6() -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for k in 4:
+		var a := PI * float(k) / 4.0 + 0.2
+		var along := Vector3(cos(a), 0.0, sin(a))
+		var n := Vector3(-sin(a), 0.0, cos(a))
+		var bend := 0.05 if k % 2 == 0 else -0.05
+		# Grille 3 colonnes × 2 rangées : [u, v, demi-largeur, hauteur, décalage normal].
+		var grid := []
+		for row in 2:
+			var y := 0.0 if row == 0 else 0.44
+			var half := 0.12 if row == 0 else 0.32
+			for col in 3:
+				var u := float(col) * 0.5
+				var off := bend * (0.4 if row == 0 else 1.0) if col == 1 else 0.0
+				var p := along * (u * 2.0 - 1.0) * half + n * off + Vector3(0, y, 0)
+				var radial := Vector3(p.x, 0.0, p.z)
+				var normal := (Vector3.UP * 0.8 + (radial.normalized() * 0.55 if radial.length() > 0.01 else n * 0.2)).normalized()
+				grid.append([p, Vector2(u, 1.0 - float(row)), normal])
+		for idx in [0, 1, 4, 0, 4, 3, 1, 2, 5, 1, 5, 4]:
+			var g: Array = grid[idx]
+			st.set_normal(g[2])
+			st.set_uv(g[1])
+			st.set_color(Color(n.x * 0.5 + 0.5, 0.5, n.z * 0.5 + 0.5))
+			st.add_vertex(g[0])
 	st.index()
 	return st.commit()

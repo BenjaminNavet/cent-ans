@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/heraldry_charges.schema.json",
+  "title": "Meubles héraldiques vectoriels (DA1b)",
+  "description": "Fichier data/heraldry/charges/charges.json : dessins SVG des meubles (lions, léopards, aigle, dauphin, château, guivre, couronne) lus par tools/cent_ans_tools/heraldic_charges.py pour les écus et bannières. Chaque couleur du SVG reçoit un rôle recoloré par teinture. Rendu seulement : aucune règle de jeu.",
+  "type": "object",
+  "required": ["roles", "charges"],
+  "additionalProperties": false,
+  "$defs": {
+    "role": { "enum": ["body", "shade", "armed", "crown", "openings", "issant", "argent", "outline"] },
+    "hex": { "type": "string", "pattern": "^#[0-9a-f]{6}$" }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "roles": { "type": "array", "items": { "$ref": "#/$defs/role" }, "uniqueItems": true },
+    "charges": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z_]+$" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["file", "source", "author", "license", "colors"],
+        "additionalProperties": false,
+        "properties": {
+          "file": { "type": "string", "pattern": "^[a-z_]+\\.svg$" },
+          "source": { "type": "string", "pattern": "^https://commons\\.wikimedia\\.org/wiki/File:" },
+          "author": { "type": "string", "minLength": 1 },
+          "license": { "enum": ["Domaine public", "CC0", "CC BY 4.0"], "description": "Licences admises : domaine public, CC0, CC BY (pas de partage à l'identique)." },
+          "note": { "type": "string" },
+          "colors": {
+            "type": "object",
+            "propertyNames": { "pattern": "^#[0-9a-f]{6}$" },
+            "additionalProperties": { "$ref": "#/$defs/role" },
+            "minProperties": 1
+          },
+          "drop": { "type": "array", "items": { "$ref": "#/$defs/hex" } },
+          "crown_anchor": {
+            "type": "array",
+            "items": { "type": "number", "minimum": 0, "maximum": 1 },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "Centre [x, y] et largeur de la couronne rapportée, en fraction du dessin recadré."
+          }
+        }
+      }
+    }
+  }
+}
