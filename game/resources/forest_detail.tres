@@ -20,3 +20,4 @@ detail_factor = 1.2
 max_jobs = 3
 max_ground_jobs = 1
 max_cells = 96
+max_stored_instances = 600000

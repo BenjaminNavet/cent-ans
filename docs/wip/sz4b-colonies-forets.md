@@ -30,15 +30,19 @@ versionnés `data/map/pyramid`, `tools/geo/raw` → dépôt principal. Compilati
   rétrécissent ; décroissance avec la distance au point visé, budget d'instances mesuré.
 
 ## État
-- [ ] Squelette (ce fichier, ressources, tests désactivés)
-- [ ] Maquettes : échelle continue, masquage par colonie, étiquettes / picking / anneau
-- [ ] Moulins et panaches liés à l'échelle de la colonie
-- [ ] Rust : rectangle de semis, `keep`, `parts_side`, sans haies (+ tests)
-- [ ] `ForestDetail` (streaming, fractions, budget, recalage)
-- [ ] Captures avant/après `docs/img/sz4b/` (Crécy, Val de Loire, Amiens, forêt d'Orléans ; d = 6, 10, 14, 20, 60)
+- [x] Squelette, ressources, test dédié `tests/sz4b_colonies_forests_test.gd`, script de captures `tests/sz4b_shots.gd`
+- [x] Maquettes : échelle continue vers l'emprise réelle, masquage par colonie (ville 1:1 affichée), étiquettes / picking / anneau
+- [x] Moulins et panaches liés à l'échelle de leur colonie (poses de carte et réelle, sols interpolés)
+- [x] `MapPropScale` : exagération commune E(d) (125 → 1 entre d = 28 et 8), échelle = min(1, ratio × E)
+- [x] Rust : `DetailArea` (rectangle, `keep`, parties) dans `vegetation`, `detail_rect` dans le pont (+ test)
+- [x] `ForestDetail` (cellules 16 u, part `full_scale² (1/s² − 1)`, budget, recalage groupé par tuile)
+- [x] Défaut trouvé : pied des arbres enfoncé de 0,08 × hauteur **de carte** (80 m) → arbres à taille réelle
+  enterrés ; corrigé dans `foliage.gdshaderinc` (enfoncement réduit avec l'arbre)
+- [ ] Captures avant (à refaire avec le code de `main` et le script final) / après
 - [ ] Mesures (i/s, instances)
-- [ ] Tests : sz4b dédié, sz4_prop_scale, zg6_towns, cv1_campaign_life, settlements_render, smoke, cargo test
+- [ ] Tests de non-régression : zg6_towns, cv1_campaign_life, settlements_render, smoke, cargo test
 - [ ] Doc `docs/godot-map.md` § SZ4b
 
 ## Prochaine étape
-Squelette puis captures « avant ».
+Captures après complètes, captures avant refaites (fichiers de `main` restaurés temporairement), mesures
+de coût (`--fps-probe` / banc), doc.

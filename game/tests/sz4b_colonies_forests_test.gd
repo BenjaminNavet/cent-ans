@@ -40,11 +40,11 @@ func _test_curves() -> void:
 	_check(ResourceLoader.exists("res://resources/forest_detail.tres"), "forest detail resource")
 	for ratio in [0.08, 0.15, 0.4]:
 		_check(is_equal_approx(props.settlement_scale(ratio, 40.0), 1.0), "model at map scale far away (%.2f)" % ratio)
-		_check(is_equal_approx(props.settlement_scale(ratio, props.settlement_shrink_end), ratio), "model at real size at the valley threshold (%.2f)" % ratio)
+		_check(is_equal_approx(props.settlement_scale(ratio, props.shrink_end), ratio), "model at real size at the valley threshold (%.2f)" % ratio)
 	var previous := 1.0
 	var max_jump := 0.0
 	var d := props.shrink_start + 1.0
-	while d > props.settlement_shrink_end - 1.0:
+	while d > props.shrink_end - 1.0:
 		var s := props.settlement_scale(0.1, d)
 		_check(s <= previous + 1e-6, "model scale monotonic at d=%.2f" % d)
 		max_jump = maxf(max_jump, absf(log(previous) - log(s)))
@@ -99,7 +99,7 @@ func _test_map() -> void:
 	var real := layer.real_radius(index)
 	print("sz4b: %s real radius %.3f u, model radius %.3f u, scales %s" % [layer.data.settlements[index]["id"], real, layer.model_radius(index), scales])
 	_check(is_equal_approx(float(scales[60.0]), 1.0), "model at map scale in strategic view")
-	_check(float(scales[20.0]) < 1.0 and float(scales[14.0]) < float(scales[20.0]) and float(scales[10.0]) < float(scales[14.0]), "model shrinks progressively")
+	_check(float(scales[14.0]) < 1.0 and float(scales[14.0]) <= float(scales[20.0]) and float(scales[10.0]) < float(scales[14.0]), "model shrinks progressively")
 	_check(real > 0.0, "real footprint known")
 	var at_valley := layer.model_radius(index) * float(scales[6.0])
 	_check(absf(at_valley - real) < real * 0.25, "model at its real footprint at the valley tier (%.3f vs %.3f)" % [at_valley, real])

@@ -352,7 +352,7 @@ func _place_model(i: int) -> void:
 ## SZ4b : échelle des maquettes réécrite par pas de `rewrite_step` (≈ 0,3 ms pour 560 maquettes).
 func _update_settlement_scale(camera_distance: float) -> void:
 	var props := MapPropScale.shared()
-	var wanted := props.settlement_scale(props.settlement_default_ratio, camera_distance)
+	var wanted := props.exaggeration(camera_distance)  # exagération commune
 	if not props.needs_rewrite(_settlement_scale_ref, wanted):
 		return
 	_settlement_scale_ref = wanted

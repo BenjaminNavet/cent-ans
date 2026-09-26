@@ -37,6 +37,9 @@ extends Resource
 @export var max_jobs: int = 3
 @export var max_ground_jobs: int = 1
 @export var max_cells: int = 96
+## Instances gardées (mémoire : 64 octets par instance côté processeur et autant côté GPU) :
+## au-delà, les cellules hors champ les plus anciennes sont libérées.
+@export var max_stored_instances: int = 600000
 
 static var _default: ForestDetailProfile = null
 
