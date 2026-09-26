@@ -1052,27 +1052,37 @@ def adarga(g, width=0.5, height=0.62):
     side = normal.cross(fore).normalized()
     n = g.seg(32, 14, 8)
 
-    def outline(a):
-        # Polar radius of the heart (lobes towards +fore), from the V2 curve.
-        best = 0.0
-        for k in range(64):
-            t = 2 * math.pi * k / 64
-            hx = math.sin(t) ** 3 * width / 2
-            hy = (
-                (
-                    13 * math.cos(t)
-                    - 5 * math.cos(2 * t)
-                    - 2 * math.cos(3 * t)
-                    - math.cos(4 * t)
-                )
-                / 17
-                * height
-                / 2
+    # Polar radius of the heart (V2 curve, lobes towards +fore), sampled densely and
+    # interpolated by angle.
+    samples = []
+    for k in range(512):
+        t = 2 * math.pi * k / 512
+        hx = math.sin(t) ** 3 * width / 2
+        hy = (
+            (
+                13 * math.cos(t)
+                - 5 * math.cos(2 * t)
+                - 2 * math.cos(3 * t)
+                - math.cos(4 * t)
             )
-            ang = math.atan2(hy, hx)
-            if abs((ang - a + math.pi) % (2 * math.pi) - math.pi) < math.pi / 64:
-                best = max(best, math.hypot(hx, hy))
-        return best or width / 2
+            / 17
+            * height
+            / 2
+        )
+        samples.append((math.atan2(hy, hx) % (2 * math.pi), math.hypot(hx, hy)))
+    samples.sort()
+
+    def outline(a):
+        a %= 2 * math.pi
+        for (a0, r0), (a1, r1) in zip(
+            samples,
+            samples[1:] + [(samples[0][0] + 2 * math.pi, samples[0][1])],
+            strict=False,
+        ):
+            if a0 <= a <= a1 or a0 <= a + 2 * math.pi <= a1:
+                u = ((a if a >= a0 else a + 2 * math.pi) - a0) / max(a1 - a0, 1e-9)
+                return r0 + (r1 - r0) * u
+        return width / 2
 
     radii = [outline(2 * math.pi * i / n) for i in range(n)]
     bm = bmesh.new()
