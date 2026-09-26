@@ -1030,10 +1030,25 @@ impl CampaignState {
             return Vec::new();
         };
         let supply = self.free_supply(data, &controller);
+        self.recruitable_with_supply(data, settlement, &supply)
+    }
+
+    /// [`CampaignState::recruitable`] with the controller's
+    /// [`CampaignState::free_supply`] already computed (PB3f: the AI weighs
+    /// every recruitment site of a realm against the same supply).
+    pub fn recruitable_with_supply(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        supply: &BTreeMap<data_model::ResourceId, u32>,
+    ) -> Vec<RecruitOption> {
+        let Some(controller) = self.settlements.get(settlement).map(|s| &s.controller) else {
+            return Vec::new();
+        };
         data.unit_types
             .keys()
             .filter_map(|unit_type| {
-                self.recruit_option_with_supply(data, &controller, settlement, unit_type, &supply)
+                self.recruit_option_with_supply(data, controller, settlement, unit_type, supply)
             })
             .collect()
     }
@@ -1278,6 +1293,11 @@ impl CampaignState {
         general: Option<CharacterId>,
     ) -> Result<(), OrderError> {
         self.own_settlement(faction, settlement)?;
+        // A friendly army on the place would lift the siege for free
+        // (`resolve_sieges`): the garrison cannot march out while besieged.
+        if self.settlements[settlement].siege.is_some() {
+            return Err(OrderError::SettlementBesieged);
+        }
         let garrison_len = self.settlements[settlement].garrison.len();
         let indices = unique_sorted(indices, garrison_len)?;
         let province = self.settlements[settlement].province.clone();

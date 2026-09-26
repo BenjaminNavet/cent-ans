@@ -5,12 +5,16 @@
 [resource]
 script = ExtResource("1_props")
 shrink_start = 28.0
-shrink_end = 5.0
-tree_shrink_end = 3.0
+shrink_end = 8.0
+max_exaggeration = 125.0
 tree_ratio = 0.035
 windmill_ratio = 0.008
 hamlet_ratio = 0.03
 chimney_ratio = 0.02
 fire_ratio = 0.05
 chimney_real_alpha = 0.5
+settlement_default_ratio = 0.15
+settlement_ratio_min = 0.05
+settlement_ratio_max = 0.6
+settlement_footprint_gain = 1.25
 rewrite_step = 0.04

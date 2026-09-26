@@ -311,7 +311,7 @@ func _frames(unit: Dictionary, id: int, count: int) -> Array[Transform3D]:
 	var positions := PackedVector3Array()
 	if soldiers != null and soldiers._previous.has(id):
 		var slice: PackedFloat32Array = soldiers._previous[id]
-		for k in mini(slice.size() / 12, count):
+		for k in mini(soldiers.figure_count(id), count):
 			positions.append(Vector3(slice[k * 12 + 3], slice[k * 12 + 7], slice[k * 12 + 11]))
 	if positions.is_empty():
 		positions.append(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))

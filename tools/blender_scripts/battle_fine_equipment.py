@@ -387,8 +387,11 @@ def surcoat(body, lm, garment, bvh):
     return [top, skirt]
 
 
-def _skirt(lm, bvh, n=40, rows=10):
-    """Skirt from the waist to the knees, slit front and back over the lower 55 %."""
+def _skirt(lm, bvh, n=48, rows=10, folds=1.0):
+    """Skirt from the waist to the knees, slit front and back over the lower 55 %.
+
+    `folds` scales the pleats (FG2: twelve rounded pleats deepening towards the hem).
+    """
     waist = lm.waist_z
     hem = lm.knee_z + 0.05
     hip_l = lm.bone["UpperLeg.L"]
@@ -424,8 +427,11 @@ def _skirt(lm, bvh, n=40, rows=10):
             if base is not None:
                 blend = t / 0.35
                 rad = (base + 0.012) * (1 - blend) + rad * blend
-            # Soft folds, deeper towards the hem.
-            rad += 0.012 * t * math.sin(a * 9 + 1.3) + 0.006 * t * math.sin(a * 17)
+            # Pleats, deeper towards the hem: rounded ridges, slightly irregular.
+            pleat = abs(math.sin(a * 6 + 1.3 + 0.6 * math.sin(a * 2)))
+            rad += folds * (
+                0.024 * t**0.8 * (pleat - 0.5) + 0.005 * t * math.sin(a * 17)
+            )
             row.append(bm.verts.new(centre + d * rad))
         grid.append(row)
     slit_rows = int(rows * 0.6)
@@ -626,6 +632,9 @@ def aventail(lm, frame, bvh, extra=(), n=36, rows=12):
     for a_, b_ in zip(grid, grid[1:], strict=False):
         eq.bridge(bm, a_, b_, 0)
     # Open surface: orient every face away from the neck axis (outside = visible side).
+    # FG3: new faces carry no normal until updated (the test never flipped anything and the
+    # bridged faces looked inwards: culled from outside, dark from inside).
+    bm.normal_update()
     for f in bm.faces:
         c = f.calc_center_median()
         if f.normal.dot(Vector((c.x - axis.x, c.y - axis.y, 0))) < 0:

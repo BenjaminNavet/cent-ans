@@ -1,0 +1,5 @@
+# WIN (ADR 0087): link the C runtime statically into cent_ans.dll so that players do not
+# need the Visual C++ Redistributable installed (no VCRUNTIME140.dll dependency).
+# /ignore:4099: Microsoft ships libcmt.lib without its PDBs; the warning is harmless.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static", "-C", "link-arg=/ignore:4099"]

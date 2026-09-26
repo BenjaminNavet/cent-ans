@@ -110,6 +110,7 @@ class BudgetLedger:
         self.path = Path(path)
         self.cap = cap
         self.sessions: list[BudgetSession] = []
+        self.trailing = ""
         self._load()
 
     def _load(self) -> None:
@@ -130,6 +131,11 @@ class BudgetLedger:
             preamble.append(line)
         if in_table:
             raw_sections.append((preamble, table))
+        else:
+            # Text after the last table (e.g. a closing note or a new, table-less
+            # section) has no table to attach to: keep it verbatim and re-emit it
+            # in render(), instead of silently dropping it on the next save().
+            self.trailing = "\n".join(preamble)
         if not raw_sections:
             raise ValueError(f"Aucun tableau de budget trouvé dans {self.path}")
         self.sessions = [
@@ -283,10 +289,14 @@ class BudgetLedger:
         this one) is stripped of trailing blank lines and reattached to its table with exactly
         one blank line, same as the single-table file always looked.
         """
-        return "".join(
+        rendered = "".join(
             session.preamble.rstrip("\n") + "\n\n" + self._render_table(session)
             for session in self.sessions
         )
+        trailing = self.trailing.strip("\n")
+        if trailing:
+            rendered = rendered.rstrip("\n") + "\n\n" + trailing + "\n"
+        return rendered
 
     def save(self) -> None:
         """Write the ledger back to disk."""

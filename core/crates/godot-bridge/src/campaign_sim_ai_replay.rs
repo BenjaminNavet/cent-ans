@@ -41,6 +41,9 @@ impl CampaignSim {
     /// or settlement concerns the player (`data/ui/ai_turn_replay.json`).
     #[func]
     fn set_ai_turn_recording(&mut self, enabled: bool, notable_radius_km: f64) {
+        if self.refuse_while_turn_pending("set_ai_turn_recording") {
+            return;
+        }
         if let Some(state) = &mut self.state {
             state.set_ai_replay_recording(enabled, notable_radius_km);
         }

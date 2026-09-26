@@ -690,6 +690,37 @@ fn transport_side(
     }
 }
 
+/// Ships of its own fleet `faction` lost (sunk or taken) in a battle: in
+/// each class, the first ships of the setup up to its fleet's count are its
+/// own, the rest hired cogs (see `transport_side`) that are not its to lose.
+fn own_ships_lost(
+    state: &CampaignState,
+    faction: &FactionId,
+    side: &NavalSideSetup,
+    result: &sim_battle::naval::NavalSideResult,
+) -> Vec<ShipClassId> {
+    let fleet = state.naval.fleets.get(faction);
+    let mut rank: BTreeMap<ShipClassId, u32> = BTreeMap::new();
+    let owned: Vec<bool> = side
+        .ships
+        .iter()
+        .map(|ship| {
+            let id = &ship.class.id;
+            let r = rank.entry(id.clone()).or_insert(0);
+            let own = fleet.and_then(|f| f.get(id)).copied().unwrap_or(0) > *r;
+            *r += 1;
+            own
+        })
+        .collect();
+    result
+        .ships
+        .iter()
+        .filter(|ship| matches!(ship.fate, ShipFate::Captured | ShipFate::Sunk))
+        .filter(|ship| owned.get(ship.index).copied().unwrap_or(false))
+        .filter_map(|ship| side.ships.get(ship.index).map(|s| s.class.id.clone()))
+        .collect()
+}
+
 /// Applies a naval battle to the campaign. Returns whether the crossing
 /// goes on (the army survived and its side was not beaten).
 pub(crate) fn apply_outcome(
@@ -718,11 +749,13 @@ pub(crate) fn apply_outcome(
         (&request.interceptor, &outcome.attacker, &setup.attacker),
         (&army_faction, &outcome.defender, &setup.defender),
     ];
-    for (faction, result, _) in sides {
-        for ship in &result.ships {
-            if matches!(ship.fate, ShipFate::Captured | ShipFate::Sunk) {
-                state.naval.remove_ship(faction, &ship.class);
-            }
+    let lost: Vec<Vec<ShipClassId>> = sides
+        .iter()
+        .map(|(faction, result, side)| own_ships_lost(state, faction, side, result))
+        .collect();
+    for ((faction, result, _), lost) in sides.into_iter().zip(lost) {
+        for class in lost {
+            state.naval.remove_ship(faction, class.as_str());
         }
         for prize in &result.prizes {
             state.naval.add_ship(faction, prize);
@@ -1008,6 +1041,9 @@ pub(crate) fn resolve_season(
     let rules = data.naval.rules.clone();
     // Blockades.
     let mut blockaded = Vec::new();
+    // A port bordering two enemy-held seas is blockaded (and tolled) once.
+    let mut tolled: std::collections::BTreeSet<&data_model::ProvinceId> =
+        std::collections::BTreeSet::new();
     let mut tolls: BTreeMap<FactionId, (u32, i64)> = BTreeMap::new();
     for (sea, control) in &state.naval.control {
         if control.level < rules.blockade_control {
@@ -1020,7 +1056,7 @@ pub(crate) fn resolve_season(
             let Some(owner) = state.province_owner(province_id).cloned() else {
                 continue;
             };
-            if !state.is_at_war(&control.faction, &owner) {
+            if !state.is_at_war(&control.faction, &owner) || !tolled.insert(province_id) {
                 continue;
             }
             if let Some(city) = state.provinces.get(province_id).map(|p| p.city.clone()) {
