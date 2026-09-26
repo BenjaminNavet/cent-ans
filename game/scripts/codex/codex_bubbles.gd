@@ -110,6 +110,7 @@ func pin_current() -> bool:
 
 ## Épingle la bulle en attente de survol (ouverte aussitôt) ou la bulle non épinglée la plus récente.
 func pin_top_bubble() -> bool:
+	_drop_freed_sources()
 	if _pending_id != "":
 		var id := _pending_id
 		var source := _pending_source
@@ -283,6 +284,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_mouse_pressed(event: InputEventMouseButton) -> void:
+	_drop_freed_sources()
 	var under := _bubble_under_mouse()
 	if event.button_index == MOUSE_BUTTON_RIGHT:
 		if _hover_id != "":
@@ -328,7 +330,19 @@ func _on_meta_clicked(meta: Variant) -> void:
 		open_entry(id)
 
 
+## Oublie les sources de survol libérées (panneau fermé sans `meta_hover_ended`) : sinon
+## `_hover_id` resterait posé (bulles jamais refermées) et le clic droit lirait un objet libéré.
+func _drop_freed_sources() -> void:
+	if _hover_source != null and not is_instance_valid(_hover_source):
+		_hover_id = ""
+		_hover_source = null
+	if _pending_source != null and not is_instance_valid(_pending_source):
+		_pending_id = ""
+		_pending_source = null
+
+
 func _process(delta: float) -> void:
+	_drop_freed_sources()
 	var hovered := get_viewport().gui_get_hovered_control()
 	if hovered != _hovered_control:
 		_hovered_control = hovered
@@ -481,6 +495,7 @@ func _remove(bubble: PanelContainer) -> void:
 				child.set_meta("parent", grandparent)
 			else:
 				child.remove_meta("parent")
+	_drop_freed_sources()
 	if _hover_source != null and bubble.is_ancestor_of(_hover_source):
 		_hover_id = ""
 		_hover_source = null
@@ -515,7 +530,7 @@ func _tooltip_delay() -> float:
 
 ## Index de la bulle contenant `source`, -1 si `source` est hors des bulles.
 func _index_of_source(source: Control) -> int:
-	if source == null:
+	if source == null or not is_instance_valid(source):
 		return -1
 	for index in bubbles.size():
 		if bubbles[index].is_ancestor_of(source):
