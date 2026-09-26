@@ -116,8 +116,13 @@ def entries(catalog: dict, group: str | None = None) -> list[Entry]:
 
 
 def build_prompt(catalog: dict, entry: Entry) -> str:
-    """Prompt of a generated miniature: the shared style block, then the subject."""
-    return f"{catalog['generation']['prompt']} {entry.subject}."
+    """Prompt of a generated miniature: lead and subject, then the shared style block.
+
+    The prompt ends with the common style block, as every illumination tool does
+    (bible § 5).
+    """
+    generation = catalog["generation"]
+    return f"{generation['lead']} {entry.subject}.\n{generation['prompt']}"
 
 
 def plan(

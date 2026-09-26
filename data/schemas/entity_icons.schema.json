@@ -81,11 +81,12 @@
     },
     "generation": {
       "type": "object",
-      "required": ["prompt"],
+      "required": ["lead", "prompt"],
       "additionalProperties": false,
       "properties": {
+        "lead": {"type": "string", "minLength": 10, "description": "Début du prompt, suivi du sujet de l'entrée."},
         "reference": {"type": "string", "description": "Image de référence envoyée avec le prompt (chemin depuis la racine du dépôt)."},
-        "prompt": {"type": "string", "minLength": 40}
+        "prompt": {"type": "string", "minLength": 40, "description": "Bloc de style commun, en fin de prompt."}
       }
     },
     "icons": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}}
