@@ -98,7 +98,7 @@ func _init() -> void:
 		print("VH4 shot %s d=%.2f (min %.2f) fade %.2f city %s" % [path, rig.target_distance, rig.min_distance_at(focus),
 			lc.fade(settlement) if lc != null else -1.0, JSON.stringify(lc.stats) if lc != null else "-"])
 	if fps:
-		var places: Array = [["paris", PARIS], ["rouen", ROUEN]] if city == "paris" else [["rouen", ROUEN], ["amiens", AMIENS]]
+		var places: Array = [["rouen", ROUEN], ["paris", PARIS]] if city == "paris" else [["rouen", ROUEN], ["amiens", AMIENS]]
 		for place: Array in places:
 			for d: float in [1.6, 0.6]:
 				var p: Vector2 = place[1]
