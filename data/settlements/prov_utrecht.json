@@ -81,5 +81,133 @@
     "sources": [
       "Mariënweerd"
     ]
+  },
+  {
+    "id": "set_ijsselstein",
+    "province": "prov_utrecht",
+    "kind": "village",
+    "name": {
+      "display": "IJsselstein",
+      "local": "Ysselsteyn",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.0392,
+      52.0203
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié des seigneurs d'IJsselstein sur la Hollandse IJssel, ayant obtenu des droits de ville en 1330.",
+    "sources": [
+      "IJsselstein"
+    ]
+  },
+  {
+    "id": "set_wijk_bij_duurstede",
+    "province": "prov_utrecht",
+    "kind": "town",
+    "name": {
+      "display": "Wijk bij Duurstede",
+      "local": "Wijc",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.3389,
+      51.9761
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville sur le Rhin-Lek héritière de l'ancien emporium de Dorestad, dotée de droits urbains vers 1300.",
+    "sources": [
+      "Wijk bij Duurstede"
+    ]
+  },
+  {
+    "id": "set_rhenen",
+    "province": "prov_utrecht",
+    "kind": "village",
+    "name": {
+      "display": "Rhenen",
+      "local": "Rhenen",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.5667,
+      51.9578
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Ancien bourg sur le Rhin, doté de droits de marché depuis 1258.",
+    "sources": [
+      "Rhenen"
+    ]
+  },
+  {
+    "id": "set_oostbroek",
+    "province": "prov_utrecht",
+    "kind": "abbey",
+    "name": {
+      "display": "Oostbroek",
+      "local": "Oostbroec",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.1953,
+      52.1
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fondée en 1122 près de De Bilt, aux portes d'Utrecht.",
+    "sources": [
+      "Abdij Oostbroek"
+    ]
+  },
+  {
+    "id": "set_montfoort",
+    "province": "prov_utrecht",
+    "kind": "castle",
+    "name": {
+      "display": "Montfoort",
+      "local": "Montfoert",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.9986,
+      52.0389
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château des seigneurs de Montfoort, vassaux puissants de l'évêque d'Utrecht, sur la Hollandse IJssel.",
+    "sources": [
+      "Montfoort"
+    ]
   }
 ]
