@@ -29,7 +29,7 @@ Lot voisin ZG7b (export, message cache absent, `docs/geo.md`, crédits) : ne pas
   `geo detail-dem` complet (marqueurs invalidés).
 - [x] 5. `PathPreview` fin aux paliers proches (`update_view` chaque image)
 - [x] captures `docs/img/zg7a/`, docs, addendum ADR, test `zg7a`
-- [ ] fusion de main, tests, rapport
+- [x] fusion de main (fecf87ec), tests Godot zg2/zg4/zg5b/zg6/zg7a/zg8/smoke OK, pytest 623 OK, ruff OK
 
 ## Découvertes hors lot
 - Le relief E1-E4 (ZG1) plaque les fonds de vallée proches de plateaux à 0,5 m (rehaussement de
@@ -39,4 +39,4 @@ Lot voisin ZG7b (export, message cache absent, `docs/geo.md`, crédits) : ne pas
 - Tamise fine : niveau d'eau -7,8 m à Londres (PAVA mêlé à la bathymétrie de l'estuaire).
 
 ## Prochaine étape
-`git merge main`, import Godot, tests zg2/zg4/zg5b/zg6/zg7a/zg8/smoke, pytest, ruff, rapport.
+Lot terminé ; reste la fusion dans main par l orchestrateur. Pistes : recuisson E1-E4 (plancher monotone), quadtree select/apply > 8 ms.
