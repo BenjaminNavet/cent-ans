@@ -45,6 +45,8 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 
 - 26/09 : SZ4b fusionné (b91572d6, dylib installée). `sz1_mountain_test` adapté : Paris est une ville 1:1, relief à l'échelle vraie. Relecture historienne (accord du joueur) : Paris (13 confirmés / 11 corrigés / 5 incertains, `docs/histoire/relecture-vh-paris.md`) et Rouen (14/10/7, enceinte coupée en 1345/1346, `relecture-vh-rouen.md`) fusionnés ; Londres et Orléans en cours. Publication du relief : accord du joueur, mais empaquetage refusé par le filtre de permissions (« Create Public Surface ») ; commandes données au joueur.
 
+- 26/09 : relectures historiennes de Londres (23 confirmés / 20 corrigés / 6 incertains : London Bridge à l'ouest de St Magnus, mur recalé sur Historic England, Old St Paul's) et d'Orléans (12/12/11 : porte Renart, Sainte-Croix romane encore debout, boulevards 1417, pont recalé) fusionnées (f83b00bd). Les quatre rapports sont dans `docs/histoire/relecture-vh-*.md`. Question laissée au joueur : accrue d'Orléans en 1345 (gardée) ou 1391 (Carron et Guillemard 2012).
+
 ## Prochaine étape (reprise)
 1. **SZ4b** : worktree `.claude/worktrees/agent-af6b91aaabd8c3484`, branche `feat/sz4b-colonies-forets`
    (36d97138, `main` fusionnée jusqu'à 82100583). Code fait (maquettes continues, masquage par
@@ -57,7 +59,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
    `game/bin` de main (rm puis cp) seulement si le ff a réussi (`set -o pipefail`).
 2. **Publication du relief** (ADR 0077, SZ7) : attend l'accord explicite du joueur (commandes dans
    `docs/geo.md`).
-3. **Relecture historienne** : faits marqués `probable`/`hypothetical` de Rouen (Martainville, porte
+3. ~~Relecture historienne~~ faite le 26/09 (rapports `docs/histoire/relecture-vh-*.md`) ; points incertains listés dans chaque rapport. Ancien intitulé : faits marqués `probable`/`hypothetical` de Rouen (Martainville, porte
    Saint-Hilaire), Londres (mur vers Aldersgate, Old St Paul's, tablier du pont, dates Westminster),
    Orléans (accrue 1345, portes, Saint-Aignan, boulevards 1404), Paris (Grand-Pont 1340, flèche de
    Notre-Dame, Charles V, noms ALPAGE des portes) ; listes dans `docs/wip/vh4…vh7*.md`.
