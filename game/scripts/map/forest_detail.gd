@@ -31,6 +31,7 @@ var _job_ids: Dictionary = {}
 ## Recalages : id natif → {tile, keys: Array, sizes: Array (tampons par cellule)}
 var _ground_ids: Dictionary = {}
 var _ground_dirty: Dictionary = {}  # tuile → true
+var _ground_queue: Dictionary = {}  # clé de cellule → true
 var _gain := 1.0
 var _frame := 0
 var _active := false
@@ -53,6 +54,7 @@ func clear() -> void:
 	_job_ids.clear()
 	_ground_ids.clear()
 	_ground_dirty.clear()
+	_ground_queue.clear()
 	stats["cells"] = 0
 
 
@@ -125,9 +127,17 @@ func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void
 		node.visible = show
 		if show:
 			entry["last_seen"] = _frame
+			if entry.get("stale_ground", false):
+				entry.erase("stale_ground")
+				_ground_queue[key] = true
 			total_visible += _apply_parts(entry, focus, fraction, radius, camera_distance, shadows)
+	var t_jobs := Time.get_ticks_usec()
 	_start_jobs(wanted)
+	var t_ground := Time.get_ticks_usec()
 	_start_ground_jobs()
+	var t_evict := Time.get_ticks_usec()
+	stats["jobs_ms_max"] = maxf(float(stats.get("jobs_ms_max", 0.0)), (t_ground - t_jobs) / 1000.0)
+	stats["ground_ms_max"] = maxf(float(stats.get("ground_ms_max", 0.0)), (t_evict - t_ground) / 1000.0)
 	# Budget : rayon resserré si trop d'arbres affichés, relâché lentement sinon.
 	if total_visible > profile.instance_budget:
 		_gain = maxf(_gain * 0.92, profile.min_gain)
@@ -396,36 +406,37 @@ func _on_chunk_surface_changed(index: int) -> void:
 			return
 
 
-## Un recalage par tuile (toutes ses cellules visibles dans une requête, instantané des pages sur
-## leur enveloppe).
+## Recalage cellule par cellule (instantané des pages sur la cellule seulement : les copies
+## des pages et des tampons restent petites sur le fil principal), au plus `max_ground_jobs` en vol.
 func _start_ground_jobs() -> void:
-	if _ground_dirty.is_empty() or _ground_ids.size() >= profile.max_ground_jobs:
-		return
 	for tile in _ground_dirty.keys():
-		if _ground_ids.size() >= profile.max_ground_jobs:
-			return
-		var keys: Array = []
-		var sizes: Array = []
-		var buffers: Array = []
-		var bounds := Rect2()
+		var pending_scatter := _jobs.values().any(func(j: Dictionary) -> bool: return int(j["tile"]) == tile)
 		for key in _cells:
 			var entry: Dictionary = _cells[key]
-			if int(entry["tile"]) != tile or not (entry["node"] as Node3D).visible:
-				continue
-			keys.append(key)
-			sizes.append((entry["buffers"] as Array).size())
-			buffers.append_array(entry["buffers"])
-			bounds = entry["rect"] if keys.size() == 1 else bounds.merge(entry["rect"])
-		if keys.is_empty():
-			if not _jobs.values().any(func(j: Dictionary) -> bool: return int(j["tile"]) == tile):
-				_ground_dirty.erase(tile)
+			if int(entry["tile"]) == tile:
+				_ground_queue[key] = true
+		if not pending_scatter:
+			_ground_dirty.erase(tile)
+	if _ground_queue.is_empty():
+		return
+	for key in _ground_queue.keys():
+		if _ground_ids.size() >= profile.max_ground_jobs:
+			return
+		_ground_queue.erase(key)
+		var entry: Dictionary = _cells.get(key, {})
+		if entry.is_empty():
 			continue
-		_ground_dirty.erase(tile)
-		var grid := terrain.quadtree.surface_snapshot(bounds, bounds.position)
-		var id := vegetation.native_submit_reground(buffers, grid, bounds.position)
+		if not (entry["node"] as Node3D).visible:
+			entry["stale_ground"] = true  # recalée quand elle redevient visible
+			continue
+		var t0 := Time.get_ticks_usec()
+		var rect: Rect2 = entry["rect"]
+		var grid := terrain.quadtree.surface_snapshot(rect, rect.position)
+		var id := vegetation.native_submit_reground(entry["buffers"], grid, rect.position)
+		stats["ground_request_ms_max"] = maxf(float(stats.get("ground_request_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
 		if id < 0:
 			return
-		_ground_ids[id] = {"tile": tile, "keys": keys, "sizes": sizes, "generations": keys.map(func(k: int) -> int: return (_cells[k]["node"] as Node).get_instance_id())}
+		_ground_ids[id] = {"keys": [key], "sizes": [(entry["buffers"] as Array).size()], "generations": [(entry["node"] as Node).get_instance_id()]}
 
 
 func _apply_ground(job: Dictionary, result: Dictionary) -> void:
@@ -452,7 +463,7 @@ func flush(focus: Vector2, camera_distance: float) -> void:
 	for _i in 64:
 		update_view(focus, camera_distance, false)
 		vegetation.poll_native_blocking()
-		if _jobs.is_empty() and _ground_ids.is_empty() and _ground_dirty.is_empty():
+		if _jobs.is_empty() and _ground_ids.is_empty() and _ground_dirty.is_empty() and _ground_queue.is_empty():
 			var before := _cells.size()
 			update_view(focus, camera_distance, false)
 			if _jobs.is_empty() and _cells.size() == before:
