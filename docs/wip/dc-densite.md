@@ -31,6 +31,9 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 
 ## Journal
 - 26/09 : plan, squelette DC0.
+- 26/09 : DC2d : 139 colonies ajoutées (village 52, town 55, abbey 24, castle 8) dans les 33
+  provinces Pays-Bas/Empire/Scandinavie ; `settlement_check` et `pytest test_settlements_schema.py`
+  passent (134 passed, aucun id en double, aucune paire <3 km introduite).
 
 ## Prochaine étape
 Lancer la vague 1 (DC1 + DC2a-e, 6 agents).
