@@ -15,7 +15,7 @@ edition = "2021"
 license = "MIT"
 
 [profile.release]
-# PB3a : LTO complet + une seule unité de compilation par crate (le lieur voit tout le
+# PB3a : LTO « thin » (fat : 32 min de build contre 10, ADR 0079) + une seule unité de compilation par crate (le lieur voit tout le
 # graphe d'appels, meilleures inlinings/dévirtualisations). Pas de `panic = "abort"` :
 # gdext (pont Godot) attrape les panics Rust à la frontière FFI pour éviter un crash du
 # process hôte, ce qui suppose l'unwinding par défaut. Pas de `target-cpu` : la cible
