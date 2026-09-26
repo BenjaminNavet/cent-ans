@@ -1408,10 +1408,12 @@ pub fn apply_treaty(
             }
             Article::CedeSettlement { settlement, .. } => {
                 let to = taker.expect("taker");
+                // As `cede_province`: the giver's garrison, recruits and
+                // building site do not pass to the taker.
                 if let Some(s) = state.settlements.get_mut(settlement) {
                     s.owner = to.clone();
-                    s.controller = to;
-                    s.siege = None;
+                    s.hand_over(&to);
+                    s.garrison.clear();
                 }
             }
             Article::ReleaseCaptive { character, .. } => {
