@@ -74,5 +74,11 @@ dossier vide, l'avis s'affiche (MISSING, 9 couches) et la caméra s'arrête vers
 ravitaillement, politique) : corrects aux trois paliers. Le « sol beige » de Londres et du pays de
 Galles dans les premières captures était le brouillard de guerre (camp France), pas le relief.
 
+## Tests (après fusion de `main` 2371235d)
+smoke, zg2_quadtree, zg4_camera, zg5b_fine_geo, zg6_towns, zg7a, zg7b_cache, zg7c_partial_cache,
+zg8_relief : OK. pytest 671 OK. ruff : fichiers du lot propres (`ruff check`/`format --check` signalent
+des fichiers d'autres lots : `tools/blender_scripts/*`, quelques tests de schémas, `ui_illumination.py`,
+`test_pyramid.py`).
+
 ## Prochaine étape
-Fusion de `main`, tests Godot (smoke, zg2, zg4, zg5b, zg6, zg7a, zg7b, zg7c, zg8), pytest, ruff.
+Lot terminé : fusion par l'orchestrateur. Suites S1-S7 ci-dessus (hors chantier ZG, clos).
