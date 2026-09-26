@@ -162,7 +162,7 @@ def main():
     if step == "check":
         import battle_fine_figures as ff
 
-        ff.check_poses(args[1] if len(args) > 1 else "/tmp/fg1_check")
+        ff.check_poses(args[1] if len(args) > 1 else "/tmp/fg1_check", only)
     print("OK")
 
 
