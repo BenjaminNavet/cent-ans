@@ -451,6 +451,8 @@ func _sync_native_floor() -> void:
 	_native_floor_version = grid["version"]
 	var side: Vector2i = grid["side"]
 	_native.call("set_floor", grid["data"], side.x, side.y, grid["cell"])
+	# SZ1 : base et écrasement des montagnes (même grille).
+	_native.call("set_relief_fields", grid["base"], grid["squash"])
 
 
 ## Lot PB2 : grille grossière prête → semis natif (conversion des données sur le fil principal).
@@ -546,7 +548,7 @@ func _start_ground_jobs() -> void:
 			_native_serial += 1
 			var untyped: Array = []  # le pont Rust attend un Array non typé
 			untyped.assign(job.buffers)
-			if _native.call("request_reground", _native_serial, untyped, job.grid, job.origin, MapData.vertical_scale(), MapData.relief_gain()):
+			if _native.call("request_reground", _native_serial, untyped, job.grid, job.origin, MapData.vertical_scale(), MapData.relief_gain(), MapData.relief_squash()):
 				_native_ground_ids[_native_serial] = index
 				_ground_jobs[index] = {"native": _native_serial, "job": job}
 				continue

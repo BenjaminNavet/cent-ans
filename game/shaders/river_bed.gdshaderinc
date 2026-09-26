@@ -29,7 +29,7 @@ float fine_zone_mask(vec2 p) {
 }
 
 float river_sd_at(vec2 p, vec2 size) {
-	return (textureLod(river_bed, (p + vec2(0.5)) / size, 0.0).r * 255.0 - 128.0) / river_bed_scale;
+	return (textureLod(river_bed, p / size, 0.0).r * 255.0 - 128.0) / river_bed_scale;
 }
 
 // 1 au cœur d'une tuile creusée, 0 hors des tuiles creusées.
