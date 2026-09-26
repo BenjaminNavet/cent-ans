@@ -418,6 +418,7 @@ class FamilyTreeNode:
 	var is_root := false
 	var zoom := 1.0
 	var _texture: Texture2D
+	var _mirror := false  # DA2 : visage type retourné (anti-clones)
 	var _is_portrait := false
 	var _hover := false
 
@@ -437,6 +438,9 @@ class FamilyTreeNode:
 		# DA2 : portrait vivant (tranche d'âge et rang courants, archétype pour les nés en jeu).
 		node._texture = LivingPortrait.texture_for(data, context) if id != "" else null
 		node._is_portrait = node._texture != null
+		if node._is_portrait:
+			var ctx := context if not context.is_empty() else LivingPortrait.context_for(data)
+			node._mirror = LivingPortrait.mirrored(data, LivingPortrait.resolve(data, ctx))
 		if node._texture == null:
 			node._texture = PortraitLoader.house_heraldry_texture(str(data.get("house", "")), str(data.get("faction", "")))  # DA1
 		# Médaillon dessiné par un enfant : seul le portrait est grisé pour un défunt.
@@ -543,7 +547,7 @@ class FamilyTreeNode:
 		canvas.draw_circle(center + Vector2(1.5, 2.5) * z, radius + 3.0 * z, HudStyle.SHADOW)
 		canvas.draw_circle(center, radius + 3.0 * z, HudStyle.PARCHMENT_DARK)
 		if _is_portrait:
-			HudStyle.draw_texture_disc(canvas, _texture, center, radius)
+			HudStyle.draw_texture_disc(canvas, _texture, center, radius, _mirror)
 		else:
 			canvas.draw_circle(center, radius, HudStyle.PARCHMENT)
 			HudStyle.draw_texture_fit(canvas, _texture, center, radius * 1.3)

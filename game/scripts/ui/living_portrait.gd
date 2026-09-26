@@ -296,6 +296,14 @@ static func _archetype(id: String, sex: String, rank: String, band: String, cult
 	return {}
 
 
+## Miroir horizontal d'un visage type, décidé par l'identifiant (bit de `fnv1a`, stable entre
+## versions) : deux frères de la même case ne sont plus des clones. Les portraits historiques et
+## variantes âgées ne sont jamais retournés (armoiries, sens de lecture).
+static func mirrored(character: Dictionary, resolved: Dictionary) -> bool:
+	return str(resolved.get("kind", "")) == "archetype" \
+			and (fnv1a(str(character.get("id", ""))) >> 11) & 1 == 1
+
+
 ## Texture du portrait vivant (null si aucune image).
 static func texture_for(character: Dictionary, context: Dictionary = {}) -> Texture2D:
 	if context.is_empty():
