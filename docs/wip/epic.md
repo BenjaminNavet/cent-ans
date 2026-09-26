@@ -126,3 +126,8 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
   EP8b (horloge d'Azincourt : « Midi » après 2 min 50).
 - EP8b fusionné (0921f8e4) : le bandeau affiche l'heure (« Midi, 11 h 00 ») ; compression inchangée
   (0,2 min de jour par seconde de bataille, ADR 0055 addendum).
+- EP10 fusionné (03f4dffa, ADR 0068) : déroute vers l'arrière, contagion pondérée par la position
+  (`data/rules/battle_rout.json`). Repro : 7/7 régiments cédaient → 0/7. EP7 dans les fourchettes
+  (Crécy 16, Azincourt 19 — limite haute, Poitiers 12 sur 20). Prix : miroir ep9b attaquant 18/30 → 7/30,
+  sg4 plat pieux 3/7 → 1/9 ; digests b6 recalculés (graine 3 passe aux Français).
+  Suites : équilibre attaquant en miroir à surveiller ; Azincourt en limite haute.
