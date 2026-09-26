@@ -53,6 +53,9 @@ pub struct CrestDefenceRules {
     /// With its shooters holding the crest in front, the line stands this
     /// far behind its post on the reverse slope (metres).
     pub line_setback_m: f64,
+    /// ... when it counts at least this many regiments (a small force keeps
+    /// its line by its shooters).
+    pub min_line_regiments: usize,
 }
 
 const BUNDLED_DEFENCE: &str = include_str!("../../../../data/rules/battle_crest_defence.json");

@@ -1,4 +1,5 @@
 {
-  "description": "Défense d'une crête (lot SG5, ADR 0046 § Suite SG5). Une armée en défense sur ses hauteurs, dont les tireurs tiennent la crête militaire devant elle, garde sa ligne en retrait sur la contre-pente, à line_setback_m derrière son poste habituel : hors de portée de la contagion de déroute (120 m) des tireurs et de la cavalerie qui combattent devant, qui refluaient à travers elle et la faisaient céder avant la mêlée.",
-  "line_setback_m": 120
+  "description": "Défense d'une crête (lot SG5, ADR 0046 § Suite SG5). Une armée en défense sur ses hauteurs (au moins min_line_regiments régiments de ligne), dont les tireurs tiennent la crête militaire devant elle, garde sa ligne en retrait sur la contre-pente, à line_setback_m derrière son poste habituel : hors de portée de la contagion de déroute (120 m) des tireurs et de la cavalerie qui combattent devant, qui refluaient à travers elle et la faisaient céder avant la mêlée. Une petite troupe garde sa ligne près de ses tireurs (R4).",
+  "line_setback_m": 120,
+  "min_line_regiments": 8
 }

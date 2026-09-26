@@ -1398,13 +1398,22 @@ fn plan_field(view: &mut View) {
         (c.center.0, c.z_at(c.center.0) - view.forward * back)
     } else if let Some((crest, _)) = ground {
         let post = reverse_slope_anchor(view, crest, !roles.shooters.is_empty());
-        // SG5: on its heights, with its shooters holding the crest in front,
-        // the line stands back out of reach of their rout (and of the horse
+        // SG5: an army on its heights, with its shooters holding the crest
+        // in front, stands its line back out of reach of their rout (and of the horse
         // fighting in front of them): a broken regiment there no longer
         // carries the line with it before the melee (ADR 0046 § Suite SG5).
-        if !roles.shooters.is_empty() && height_edge(view) > HOLD_HEIGHT {
-            let back = CrestDefenceRules::bundled().line_setback_m;
-            (post.0, post.1 - view.forward * back)
+        // Measured from the crest itself: the line stepping back must not
+        // change the decision.
+        let field = view.sim.field();
+        let enemies: Vec<usize> = view.able_enemies().collect();
+        let below = view.centroid(&enemies).is_some_and(|(x, z)| {
+            field.height(crest.0, crest.1) - field.height(x, z) > HOLD_HEIGHT
+        });
+        // A small force keeps its line by its shooters (R4); an army
+        // deploys in depth.
+        let rules = CrestDefenceRules::bundled();
+        if !roles.shooters.is_empty() && below && roles.line.len() >= rules.min_line_regiments {
+            (post.0, post.1 - view.forward * rules.line_setback_m)
         } else {
             post
         }
