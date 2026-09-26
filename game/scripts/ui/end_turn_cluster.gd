@@ -81,6 +81,10 @@ var _badges: Array[AlertBadge] = []
 var _button: Button
 var _hover := false
 var _enabled := true
+var _down := false
+## DA5 : états du médaillon enluminé de la cloche (`IconLibrary.medallion_states`), vide si absent
+## (repli : cloche dessinée au trait).
+var _medallion: Dictionary = {}
 
 
 func _ready() -> void:
@@ -98,8 +102,18 @@ func _ready() -> void:
 		queue_redraw())
 	_button.mouse_exited.connect(func() -> void:
 		_hover = false
+		_down = false
+		queue_redraw())
+	_button.button_down.connect(func() -> void:
+		_down = true
+		queue_redraw())
+	_button.button_up.connect(func() -> void:
+		_down = false
 		queue_redraw())
 	add_child(_button)
+	var library := get_node_or_null("/root/IconLibrary")
+	if library != null and library.has_method("medallion_states"):
+		_medallion = library.call("medallion_states", "end_turn")
 	if use_shortcut and InputMap.has_action("campaign_end_turn"):
 		var action := InputEventAction.new()
 		action.action = "campaign_end_turn"
@@ -301,6 +315,9 @@ func _draw() -> void:
 	# Filet d'or reliant la colonne des pastilles à la cloche.
 	if not _badges.is_empty():
 		draw_line(Vector2(center.x, stack_top() + 4.0), Vector2(center.x, center.y - BUTTON_RADIUS), HudStyle.GOLD, 1.5, true)
+	if not _medallion.is_empty():
+		_draw_medallion(center, blocked)
+		return
 	# Disque : ombre, parchemin, double filet (encre + or ; rubrique si bloqué).
 	draw_circle(center + Vector2(2, 3), BUTTON_RADIUS, HudStyle.SHADOW)
 	var face := HudStyle.PARCHMENT
@@ -323,6 +340,39 @@ func _draw() -> void:
 	_draw_centered(font, line1, center + Vector2(0, 17), 15, ink)
 	if line2 != "":
 		_draw_centered(font, line2, center + Vector2(0, 34), 13, HudStyle.RUBRIC if blocked else HudStyle.INK_SOFT)
+
+
+## DA5 : médaillon enluminé de la cloche (planche validée), état dérivé de la même image
+## (éclairci au survol, assombri enfoncé, désaturé désactivé), et banderole de parchemin
+## portant la saison et l'année (ou « Décision en attente », filet rubrique autour du disque).
+func _draw_medallion(center: Vector2, blocked: bool) -> void:
+	var state := "normal"
+	if not _enabled:
+		state = "disabled"
+	elif _down:
+		state = "pressed"
+	elif _hover:
+		state = "hover"
+	var texture: Texture2D = _medallion.get(state, _medallion["normal"])
+	# Les fleurons de l'image touchent le bord du disque ; l'anneau d'or vaut ~0.86 du rayon.
+	var half := BUTTON_RADIUS
+	draw_circle(center + Vector2(2, 3), BUTTON_RADIUS * 0.86, HudStyle.SHADOW)
+	draw_texture_rect(texture, Rect2(center - Vector2(half, half), Vector2(half, half) * 2.0), false)
+	if blocked:
+		draw_arc(center, BUTTON_RADIUS * 0.86 + 2.0, 0.0, TAU, 64, HudStyle.RUBRIC, 3.5, true)
+	var font := get_theme_default_font()
+	var parts := date_label.split(" ", false)
+	var line1 := "Décision" if blocked else (parts[0] if parts.size() > 0 else "Fin de tour")
+	var line2 := "en attente" if blocked else (" ".join(parts.slice(1)) if parts.size() > 1 else "")
+	var ink := HudStyle.INK_FADED if not _enabled else (HudStyle.RUBRIC if blocked else HudStyle.INK)
+	var band := Rect2(center + Vector2(-50, BUTTON_RADIUS * 0.50), Vector2(100, 34 if line2 != "" else 20))
+	draw_rect(Rect2(band.position + Vector2(1.5, 2.0), band.size), HudStyle.SHADOW)
+	draw_rect(band, HudStyle.PARCHMENT_LIGHT if _hover and _enabled else HudStyle.PARCHMENT)
+	draw_rect(band, HudStyle.RUBRIC if blocked else HudStyle.INK_SOFT, false, 1.5)
+	draw_line(band.position + Vector2(3, band.size.y - 3), band.end - Vector2(3, 3), HudStyle.GOLD, 1.0)
+	_draw_centered(font, line1, band.position + Vector2(band.size.x * 0.5, 15), 14, ink)
+	if line2 != "":
+		_draw_centered(font, line2, band.position + Vector2(band.size.x * 0.5, 30), 12, HudStyle.RUBRIC if blocked else HudStyle.INK_SOFT)
 
 
 func _draw_centered(font: Font, text: String, baseline_center: Vector2, font_size: int, color: Color) -> void:

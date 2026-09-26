@@ -198,11 +198,29 @@ def test_apply_boost_never_sinks_land_below_sea_level() -> None:
     Mirrors relief_shade.enforce_coast. The London bug baked -11 to -15 m
     over real land at ~4 m before this floor existed.
     """
-    height = np.full((1, 1), 4.0, dtype=np.float32)
+    height = np.full((1, 1), 0.55, dtype=np.float32)
     base = np.full((1, 1), 23.0, dtype=np.float32)  # observed Southwark base, E7
     boosted = detail_dem.apply_boost(height, base)
     assert boosted[0, 0] == pytest.approx(detail_dem.MIN_LAND_M)
     assert boosted[0, 0] >= detail_dem.MIN_LAND_M
+
+
+def test_apply_boost_keeps_low_banks_above_the_water() -> None:
+    """ZG7a: London's low banks (2-5 m ODN) keep most of their height.
+
+    Before, the flat 0.5 m floor put Southwark, Lambeth and Westminster level
+    with the Thames. The floor is monotone and only acts below LOW_LAND_CAP_M.
+    """
+    base = np.full((1, 4), 23.0, dtype=np.float32)
+    height = np.array([[2.0, 3.5, 5.0, 12.0]], dtype=np.float32)
+    boosted = detail_dem.apply_boost(height, base)[0]
+    assert boosted[0] == pytest.approx(2.0 * detail_dem.LOW_LAND_KEEP)
+    assert boosted[1] >= 2.9 and boosted[2] >= 4.2
+    assert boosted[3] == pytest.approx(detail_dem.LOW_LAND_CAP_M)
+    assert all(boosted[i] <= boosted[i + 1] for i in range(3))
+    # Land the boost leaves above the cap is untouched by the floor.
+    hills = detail_dem.apply_boost(np.full((1, 1), 80.0, np.float32), base[:, :1])
+    assert hills[0, 0] == pytest.approx(80.0 + 0.8 * 57.0)
 
 
 def test_boost_base_ignores_glo90_when_fine_data_exists(monkeypatch) -> None:

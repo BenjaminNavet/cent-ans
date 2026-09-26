@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_crest_defence_rules.schema.json",
+  "title": "Défense d'une crête",
+  "description": "Fichier data/rules/battle_crest_defence.json (lot SG5, ADR 0046) : placement de la ligne d'une armée en défense sur ses hauteurs. Lu par sim-battle (CrestDefenceRules) pour l'IA de bataille.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "line_setback_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 300,
+      "description": "Recul de la ligne (mètres) derrière son poste de contre-pente quand ses tireurs tiennent la crête devant elle."
+    },
+    "min_line_regiments": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Nombre minimal de régiments de ligne pour ce déploiement en profondeur (une petite troupe garde sa ligne près de ses tireurs)."
+    }
+  },
+  "required": ["line_setback_m", "min_line_regiments"],
+  "additionalProperties": false
+}

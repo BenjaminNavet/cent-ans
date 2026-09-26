@@ -211,10 +211,12 @@ func _decorate_top_bar() -> void:
 	_add_codex_button()
 	var objectives := _add_action_button("ObjectivesButton", "⚑", "Objectifs", "map_toggle_objectives",
 		"[b]Objectifs[/b]\nObjectifs historiques de votre faction et score.", tech_button.get_index() + 2)
-	_register_top_label(objectives, "Objectifs", "⚑")
+	_register_top_label(objectives, "Objectifs", "" if _apply_top_medallion(objectives, "hud_objectives") else "⚑")
 	var agents := _add_action_button("AgentsButton", "✦", "Agents", "map_toggle_agents",
 		"[b]Agents[/b]\nRegistre des espions, hérauts et prédicateurs.", tech_button.get_index() + 3)
-	_register_top_label(agents, "Agents", "✦")
+	_register_top_label(agents, "Agents", "" if _apply_top_medallion(agents, "hud_agents") else "✦")
+	if _apply_top_medallion(menu_button, "hud_menu"):
+		menu_button.add_theme_font_size_override("font_size", TOP_LABEL_FONT)
 	get_viewport().size_changed.connect(queue_fit_top_bar)
 	($TopBar as Control).resized.connect(queue_fit_top_bar)
 	var settings := get_node_or_null("/root/Settings")
@@ -234,8 +236,32 @@ func _insert_icon_before(control: Control, icon_id: String) -> TextureRect:
 	return rect
 
 
+## DA5 : boutons de la barre du haut portant un médaillon enluminé (id d'icône → médaillon).
+const TOP_MEDALLIONS := {
+	"hud_court": "court", "hud_technologies": "technologies", "hud_codex": "codex",
+	"hud_diplomacy": "diplomacy", "hud_chronicle": "chronicle", "hud_objectives": "objectives",
+	"hud_agents": "agents", "hud_menu": "menu",
+}
+## Diamètre du médaillon dans la barre (l'icône à l'encre reste le repli à `TOP_ICON_SIZE`).
+const TOP_MEDALLION_SIZE := 26
+
+
+## Médaillon enluminé sur un bouton de la barre (DA5) : le médaillon remplace le fond plat au
+## repos (le cadre du thème ne revient qu'au survol) ; faux si l'image manque (repli : icône).
+func _apply_top_medallion(button: Button, icon_id: String) -> bool:
+	if not TOP_MEDALLIONS.has(icon_id):
+		return false
+	if not IconLibrary.decorate_medallion(button, str(TOP_MEDALLIONS[icon_id]), TOP_MEDALLION_SIZE):
+		return false
+	button.set_meta("medallion", true)
+	button.add_theme_constant_override("h_separation", 5)
+	_pad_for_keycap(button, true)
+	return true
+
+
 func _decorate_button(button: Button, icon_id: String, icon_only: bool = false) -> void:
 	IconLibrary.decorate_button(button, icon_id, int(TOP_ICON_SIZE) + (6 if icon_only else 0))
+	_apply_top_medallion(button, icon_id)
 	if icon_only:
 		button.text = ""
 	if not (button is RichButton):
@@ -1350,15 +1376,22 @@ func _pad_for_keycap(button: Button, labelled: bool) -> void:
 	for state: String in KEYCAP_PAD_STATES:
 		if button.has_theme_stylebox_override(state):
 			button.remove_theme_stylebox_override(state)
-	if cap == null or not cap.visible or not labelled:
+	var medallion := bool(button.get_meta("medallion", false))
+	var padded_caps := cap != null and cap.visible and labelled
+	if not padded_caps and not medallion:
 		return
-	var cap_width := cap.get_combined_minimum_size().x
+	var cap_width := cap.get_combined_minimum_size().x + KEYCAP_GAP if padded_caps else 0.0
 	for state: String in KEYCAP_PAD_STATES:
 		var base := button.get_theme_stylebox(state)
 		if base == null:
 			continue
-		var padded := base.duplicate() as StyleBox
-		padded.content_margin_right = maxf(base.get_margin(SIDE_RIGHT), 0.0) + cap_width + KEYCAP_GAP
+		var padded: StyleBox = base.duplicate() as StyleBox
+		# DA5 : au repos, le médaillon se pose sur le bandeau sans cadre plat.
+		if medallion and state in ["normal", "disabled", "focus"]:
+			padded = StyleBoxEmpty.new()
+			for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+				padded.set_content_margin(side, maxf(base.get_margin(side), 0.0))
+		padded.content_margin_right = maxf(base.get_margin(SIDE_RIGHT), 0.0) + cap_width
 		button.add_theme_stylebox_override(state, padded)
 
 

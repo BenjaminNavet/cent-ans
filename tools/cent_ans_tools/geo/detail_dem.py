@@ -82,9 +82,15 @@ HOLE_MAX_M2 = 250_000.0
 BASE_LEVEL = 2  # 90 m grid of the boost base
 BASE_MARGIN_M = 3.0 * BOOST_SIGMA_M
 MIN_LAND_M = 0.5
+#: ZG7a: low land keeps at least this share of its real height once boosted, up to
+#: :data:`LOW_LAND_CAP_M` (monotone floor ``max(MIN_LAND_M, min(k * h, cap))``). The
+#: flat MIN_LAND_M floor alone flattened London's banks (Southwark, Lambeth,
+#: Westminster: 2-5 m ODN) to 0.5 m, level with the Thames.
+LOW_LAND_KEEP = 0.85
+LOW_LAND_CAP_M = 5.0
 WORKERS = max(1, min(8, (os.cpu_count() or 4) - 2))
 #: Bump when the bake changes, so that ``done`` markers are invalidated.
-BAKE_VERSION = 3
+BAKE_VERSION = 4
 #: Grey-opening width (GLO-30 pixels) turning the surface model into rough ground.
 GLO30_OPENING_PX = 5
 PREVIEW_ZONES = ("calais", "poitiers", "chateau_gaillard")
@@ -596,8 +602,21 @@ def apply_boost(height: np.ndarray, base: np.ndarray) -> np.ndarray:
     fade = 1.0 - t * t * (3.0 - 2.0 * t)
     boosted = height + BOOST_GAIN * local * fade
     land = height > MIN_LAND_M
-    boosted = np.where(land, np.maximum(boosted, MIN_LAND_M), boosted)
+    boosted = np.where(land, np.maximum(boosted, low_land_floor(height)), boosted)
     return np.where(land, boosted, height).astype(np.float32)
+
+
+def low_land_floor(height: np.ndarray) -> np.ndarray:
+    """Lowest boosted height allowed for land of real height ``height`` (ZG7a).
+
+    ``max(MIN_LAND_M, min(LOW_LAND_KEEP * h, LOW_LAND_CAP_M))``: non-decreasing
+    in ``h`` (no terraces), so river banks a few metres above the water stay a
+    few metres above it instead of all dropping to the 0.5 m sea-level guard.
+    Only land the boost would push below :data:`LOW_LAND_CAP_M` is affected.
+    """
+    return np.maximum(
+        MIN_LAND_M, np.minimum(LOW_LAND_KEEP * height, LOW_LAND_CAP_M)
+    ).astype(np.float32)
 
 
 # -------------------------------------------------------------------------- blend

@@ -22,6 +22,9 @@
             "construction", "trade_route", "minimap_army", "minimap_frame"
           ]
         },
+        "pictogram": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Lot DA3 : pictogramme de data/map/settlement_markers.json (sinon celui du type et du rang)."},
+        "rank": {"type": "integer", "minimum": 1, "maximum": 4},
+        "port": {"type": "boolean"},
         "from": {"$ref": "#/$defs/hex_color"},
         "to": {"$ref": "#/$defs/hex_color"},
         "color": {"$ref": "#/$defs/hex_color"},

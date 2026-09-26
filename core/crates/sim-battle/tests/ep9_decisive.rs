@@ -270,18 +270,19 @@ fn large_and_epic_battles_without_orders_end_in_time() {
 }
 
 /// The attacker under the AI always engages: against an idle defender it
-/// never lets the battle be refused (no river to cross).
+/// never lets the battle be refused (no river to cross). EP9b: the idle
+/// army may also rout to the last regiment before it counts as broken.
 #[test]
 fn the_ai_attacker_always_engages() {
     for terrain in [Terrain::Plains, Terrain::Hills] {
         for seed in 0..4 {
             let mut sim = sim(Tier::Standard, terrain, false, Mode::IdleDefender, seed);
             play(&mut sim);
-            assert_eq!(
-                sim.end_kind(),
-                Some(BattleEnd::Broken),
-                "{} seed {seed}",
-                terrain.key()
+            assert!(
+                matches!(sim.end_kind(), Some(BattleEnd::Broken | BattleEnd::Rout)),
+                "{} seed {seed}: {:?}",
+                terrain.key(),
+                sim.end_kind()
             );
         }
     }

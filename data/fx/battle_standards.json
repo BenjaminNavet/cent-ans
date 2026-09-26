@@ -77,6 +77,11 @@
     "sovereign_by_faction": { "fac_france": "oriflamme", "fac_england": "royal" },
     "no_quarter_by_faction": { "fac_france": "oriflamme", "fac_england": "dragon" }
   },
+  "house_arms": {
+    "note": "DA1b : l'étendard du général porte les armes de sa maison (bannière royale en taille, `general_kind`), le second porte-étendard celles de l'armée ; les unités nobles de sa retenue portent aussi ses armes, le commun garde l'étoffe de la faction. Repli sur la faction si la maison est inconnue.",
+    "general_kind": "royal",
+    "unit_types": ["unit_knights", "unit_breton_knights", "unit_ordonnance_gendarmes", "unit_english_retinue", "unit_men_at_arms_foot"]
+  },
   "musicians": {
     "note": "Tambourins (tabors) et busines (trompettes droites) : les communes et les compagnies à pied marchent au tambour ; les busines sonnent la charge et le ralliement auprès des grands seigneurs.",
     "by_unit_type": {

@@ -324,7 +324,16 @@ Images générées pour combler les manques (`ld_avignon`, `vg_famine`, `vg_trea
 ## Assets produits par le projet
 
 - **Écus** (`game/assets/heraldry/`) : dessinés procéduralement (Pillow) à partir des blasons
-  de `data/factions/`.
+  de `data/factions/` et `data/heraldry/houses.json`. Depuis le lot DA1b, les meubles animaux,
+  le château et la guivre sont des dessins vectoriels de Wikimedia Commons recolorés par
+  teinture (`data/heraldry/charges/`, détail dans `SOURCE.md`) :
+  - domaine public : lion, lion à la queue fourchée (et passée en sautoir) — Smasongarrison ;
+    léopard — Yann ; léopard lionné — Syryatsu ; aigle éployée — Thom.lanaud ; guivre extraite
+    des armes Visconti (1395) — RootOfAllLight ;
+  - CC0 : dauphin pâmé — Syryatsu ;
+  - CC BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>) : lion couronné (et sa
+    couronne, extraite), lion rampant ailé, château donjonné de trois tours — Jpgibert,
+    « Meuble héraldique … », Wikimedia Commons ; recolorés.
 - **Modèles 3D** (`game/assets/models/`) : générés par scripts Blender (`tools/blender_scripts/`).
 - **Sons et musiques** (`game/assets/audio/sfx/`, `game/assets/audio/music/`) : synthèse
   procédurale (numpy/scipy), sans échantillon externe. Les sons de bataille et ambiances
