@@ -55,6 +55,21 @@ def _read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _read_manifest(path: Path) -> dict:
+    """Read a package manifest, rejecting part names that could escape their folder."""
+    manifest = _read_json(path)
+    for entry in manifest["parts"]:
+        name = entry["name"]
+        if (
+            not isinstance(name, str)
+            or name in ("", ".", "..")
+            or Path(name).name != name
+            or "\\" in name
+        ):
+            raise ValueError(f"nom de part invalide dans le manifeste : {name!r}")
+    return manifest
+
+
 def download_part(url: str, dest: Path, expected_sha256: str, log=print) -> None:  # noqa: ANN001
     """Fetch one part with HTTP Range resume; verify its SHA-256 when done."""
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -187,7 +202,7 @@ def fetch(
     dest_dir = Path(dest) if dest is not None else default_dest(hosting_file)
     if from_dir is not None:
         from_dir = Path(from_dir)
-        manifest = _read_json(from_dir / relief_pack.MANIFEST_NAME)
+        manifest = _read_manifest(from_dir / relief_pack.MANIFEST_NAME)
         verify_parts(from_dir, manifest)
         parts = [from_dir / entry["name"] for entry in manifest["parts"]]
     else:
@@ -200,7 +215,7 @@ def fetch(
         manifest_path = staging / relief_pack.MANIFEST_NAME
         with urllib.request.urlopen(base + relief_pack.MANIFEST_NAME) as response:  # noqa: S310
             manifest_path.write_bytes(response.read())
-        manifest = _read_json(manifest_path)
+        manifest = _read_manifest(manifest_path)
         for entry in manifest["parts"]:
             download_part(
                 base + entry["name"], staging / entry["name"], entry["sha256"], log
