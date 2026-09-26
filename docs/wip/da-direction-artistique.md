@@ -87,3 +87,8 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   général et de sa retenue sur les étendards EP5 (oriflamme en second porte-étendard). Smoke +
   pytest 666 OK. Limites : cadrage EP5 `--standard-shot=foot` côté France, petits châteaux
   polygonaux, dauphin pâmé.
+- 26/09 : **DA6 fusionné** (ADR renuméroté **0067**) : lisières ondulées et fondues, touffes à 4
+  cartes cintrées, feuillus procéduraux par essence (LOD + imposteurs), texture de détail du sol,
+  décor désaturé ; +1,5 à +3,5 % de coût, 0 $. Smoke + pytest 668 OK. Capture combinée DA1/DA1b/
+  DA5/DA6 : `docs/img/da/etat_2609_bataille_combinee.jpg`. Limites : saturation automne/bocage
+  > 35 % (lumière `BattleAtmosphere`), blé qui ne suit pas la saison.

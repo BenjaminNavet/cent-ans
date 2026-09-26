@@ -124,3 +124,5 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
   garde `scenario_post` contre le repli de contre-pente SG5 (demandée à la session de nuit).
 - Lancés 26/09 : EP10 (déroute vers l'arrière, contagion pondérée par la position, renvoyé par SG5),
   EP8b (horloge d'Azincourt : « Midi » après 2 min 50).
+- EP8b fusionné (0921f8e4) : le bandeau affiche l'heure (« Midi, 11 h 00 ») ; compression inchangée
+  (0,2 min de jour par seconde de bataille, ADR 0055 addendum).
