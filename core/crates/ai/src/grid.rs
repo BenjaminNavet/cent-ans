@@ -12,10 +12,9 @@
 //!
 //! Tuning: `data/ai/grid.json` ([`data_model::AiGrid`]).
 
-use std::cell::RefCell;
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap};
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 use data_model::{AiGrid, FactionId, GameData, SettlementId, PLAIN_COST};
 use sim_campaign::movement::{edges, is_sea_crossing, path_to, Reach};
@@ -64,13 +63,13 @@ pub struct GridPlanner<'a> {
     crossable: BTreeSet<SettlementId>,
     /// EQ5: may this faction's AI cross the lands of each realm at peace
     /// without right of passage (`passage::ai_may_trespass`)?
-    may_cross: RefCell<BTreeMap<FactionId, bool>>,
+    may_cross: Mutex<BTreeMap<FactionId, bool>>,
     /// EQ5: lands a road of the settlement graph runs through besides those
     /// of its two ends (sampled on the straight line, like the grid march):
     /// closed ones (owners) and whether it crosses lands open by temper.
-    roads: RefCell<BTreeMap<(SettlementId, SettlementId), Rc<RoadLands>>>,
+    roads: Mutex<BTreeMap<(SettlementId, SettlementId), Arc<RoadLands>>>,
     /// Route tables by (start, budget, cap, avoided enemy armies).
-    tables: RefCell<BTreeMap<TableKey, Rc<Table>>>,
+    tables: Mutex<BTreeMap<TableKey, Arc<Table>>>,
 }
 
 /// (start, budget, cap, avoided enemy armies, homeward).
@@ -166,28 +165,62 @@ impl<'a> GridPlanner<'a> {
             stops,
             forbidden,
             crossable,
-            may_cross: RefCell::new(crossing),
-            roads: RefCell::new(BTreeMap::new()),
-            tables: RefCell::new(BTreeMap::new()),
+            may_cross: Mutex::new(crossing),
+            roads: Mutex::new(BTreeMap::new()),
+            tables: Mutex::new(BTreeMap::new()),
         }
     }
 
     /// EQ5: may this faction's AI cross `owner`'s lands without passage?
     fn may_cross(&self, owner: &FactionId) -> bool {
-        *self
+        // PB3f: a pure memo, filled outside the lock (the prefetch threads
+        // may ask at once; they compute the same answer).
+        let known = self
             .may_cross
-            .borrow_mut()
-            .entry(owner.clone())
-            .or_insert_with(|| passage::ai_may_trespass(self.state, self.data, self.faction, owner))
+            .lock()
+            .expect("planner cache")
+            .get(owner)
+            .copied();
+        known.unwrap_or_else(|| {
+            let open = passage::ai_may_trespass(self.state, self.data, self.faction, owner);
+            self.may_cross
+                .lock()
+                .expect("planner cache")
+                .insert(owner.clone(), open);
+            open
+        })
+    }
+
+    /// PB3f (ADR 0091): computes the route tables of `keys` (start, budget,
+    /// cap, power) on the planner's pool ahead of the sequential army loop,
+    /// which then finds them in the cache. The tables are a pure memo:
+    /// filling it ahead changes no order.
+    pub fn prefetch_tables(
+        &self,
+        mode: crate::parallel::Mode,
+        keys: &[(SettlementId, u32, u32, f64)],
+    ) where
+        Self: Sync,
+    {
+        let mut seen = BTreeSet::new();
+        let fresh: Vec<&(SettlementId, u32, u32, f64)> = keys
+            .iter()
+            .filter(|(start, budget, cap, power)| {
+                seen.insert((start.clone(), *budget, *cap, self.avoided(*power)))
+            })
+            .collect();
+        mode.map(&fresh, |(start, budget, cap, power)| {
+            self.table(start, *budget, *cap, *power);
+        });
     }
 
     /// EQ5: the foreign lands the road `from` → `to` runs through between
     /// its ends: a road between two open places may still clip a closed
     /// province (the Po valley roads through the Veronese).
-    fn road_lands(&self, from: &SettlementId, to: &SettlementId) -> Rc<RoadLands> {
+    fn road_lands(&self, from: &SettlementId, to: &SettlementId) -> Arc<RoadLands> {
         let key = (from.clone(), to.clone());
-        if let Some(road) = self.roads.borrow().get(&key) {
-            return Rc::clone(road);
+        if let Some(road) = self.roads.lock().expect("planner cache").get(&key) {
+            return Arc::clone(road);
         }
         let mut road = RoadLands::default();
         if let (Some(a), Some(b)) = (
@@ -223,8 +256,11 @@ impl<'a> GridPlanner<'a> {
                 }
             }
         }
-        let road = Rc::new(road);
-        self.roads.borrow_mut().insert(key, Rc::clone(&road));
+        let road = Arc::new(road);
+        self.roads
+            .lock()
+            .expect("planner cache")
+            .insert(key, Arc::clone(&road));
         road
     }
 
@@ -245,7 +281,7 @@ impl<'a> GridPlanner<'a> {
     /// `power` (lot M3): the army may head for them, never through them.
     /// EQ5: from a start in forbidden lands (an army caught there by a
     /// peace), the lands of that same owner are open: the army can leave.
-    pub fn table(&self, start: &SettlementId, budget: u32, cap: u32, power: f64) -> Rc<Table> {
+    pub fn table(&self, start: &SettlementId, budget: u32, cap: u32, power: f64) -> Arc<Table> {
         self.routes(start, budget, cap, power, false)
     }
 
@@ -258,7 +294,7 @@ impl<'a> GridPlanner<'a> {
         budget: u32,
         cap: u32,
         power: f64,
-    ) -> Rc<Table> {
+    ) -> Arc<Table> {
         self.routes(start, budget, cap, power, true)
     }
 
@@ -269,11 +305,11 @@ impl<'a> GridPlanner<'a> {
         cap: u32,
         power: f64,
         homeward: bool,
-    ) -> Rc<Table> {
+    ) -> Arc<Table> {
         let avoided = self.avoided(power);
         let key = (start.clone(), budget, cap, avoided, homeward);
-        if let Some(table) = self.tables.borrow().get(&key) {
-            return Rc::clone(table);
+        if let Some(table) = self.tables.lock().expect("planner cache").get(&key) {
+            return Arc::clone(table);
         }
         let blocked: BTreeSet<&SettlementId> = key
             .3
@@ -335,8 +371,11 @@ impl<'a> GridPlanner<'a> {
                 }
             }
         }
-        let table = Rc::new(best);
-        self.tables.borrow_mut().insert(key, Rc::clone(&table));
+        let table = Arc::new(best);
+        self.tables
+            .lock()
+            .expect("planner cache")
+            .insert(key, Arc::clone(&table));
         table
     }
 

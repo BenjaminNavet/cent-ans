@@ -42,6 +42,8 @@ serde_json = { version = "1", features = ["float_roundtrip"] }
 rand = "0.8"
 rand_chacha = "0.3"
 thiserror = "2"
+# PB3f (ADR 0091): the AI planner's read-only work on the performance cores.
+rayon = "1"
 
 # ADR 0084: parallel agent sessions each leave their own incremental cache
 # (29 GB of target/debug/incremental on 2026-09-26); rebuild from scratch instead.

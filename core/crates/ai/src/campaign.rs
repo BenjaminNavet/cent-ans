@@ -23,6 +23,8 @@ use sim_campaign::passage;
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
+use crate::parallel::Mode;
+
 /// Maximum path cost considered for an objective, in province steps (times
 /// `MovementRules::points_per_step`).
 pub const PLANNING_RANGE: u32 = 5;
@@ -123,10 +125,21 @@ struct Context<'a> {
     anchors: BTreeMap<ArmyId, SettlementId>,
     /// Lot M3: routes on the settlement graph and orders on the grid.
     grid: crate::grid::GridPlanner<'a>,
+    /// PB3f: sequential reference or planner's pool (ADR 0091).
+    mode: Mode,
 }
 
 impl<'a> Context<'a> {
-    fn new(state: &'a CampaignState, data: &'a GameData, faction: &'a FactionId) -> Option<Self> {
+    /// PB3f: `upkeep` is (army, building) upkeep, computed once by the
+    /// caller; the grid planner and the army anchors are built concurrently
+    /// in [`Mode::Parallel`].
+    fn new(
+        mode: Mode,
+        state: &'a CampaignState,
+        data: &'a GameData,
+        faction: &'a FactionId,
+        upkeep: (i64, i64),
+    ) -> Option<Self> {
         let me = state.factions.get(faction)?;
         let aggression = data
             .factions
@@ -134,35 +147,44 @@ impl<'a> Context<'a> {
             .and_then(|f| f.ai_personality.as_ref())
             .and_then(|p| p.aggression)
             .map_or(50, i32::from);
+        let (grid, (anchors, gross_income)) = mode.join(
+            || crate::grid::GridPlanner::new(state, data, faction),
+            || {
+                let armies: Vec<(&ArmyId, &sim_campaign::Army)> = state.armies.iter().collect();
+                let anchors: BTreeMap<ArmyId, SettlementId> = mode
+                    .map(&armies, |(id, a)| {
+                        Some(((*id).clone(), state.army_anchor(data, a)?))
+                    })
+                    .into_iter()
+                    .flatten()
+                    .collect();
+                (anchors, state.faction_income_effective(data, faction))
+            },
+        );
+        // Net of court and administration (M10 balance) and of the tribute
+        // owed to a suzerain.
+        let tribute = if me.suzerain.is_some() {
+            (gross_income * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100).max(0)
+        } else {
+            0
+        };
+        let income = gross_income
+            - state.administration_upkeep_for(data, faction, gross_income)
+            - tribute
+            - commitments(state, faction);
         Some(Context {
-            anchors: state
-                .armies
-                .iter()
-                .filter_map(|(id, a)| Some((id.clone(), state.army_anchor(data, a)?)))
-                .collect(),
-            grid: crate::grid::GridPlanner::new(state, data, faction),
+            anchors,
+            grid,
+            mode,
             state,
             data,
             faction,
             enemies: me.at_war_with.clone(),
             aggression,
-            // Net of court and administration (M10 balance) and of the
-            // tribute owed to a suzerain.
-            income: {
-                let gross = state.faction_income_effective(data, faction);
-                let tribute = if me.suzerain.is_some() {
-                    (gross * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100).max(0)
-                } else {
-                    0
-                };
-                gross
-                    - state.faction_administration_upkeep(data, faction)
-                    - tribute
-                    - commitments(state, faction)
-            },
-            gross_income: state.faction_income_effective(data, faction),
-            army_upkeep: state.faction_army_upkeep(data, faction),
-            building_upkeep: state.faction_building_upkeep(data, faction),
+            income,
+            gross_income,
+            army_upkeep: upkeep.0,
+            building_upkeep: upkeep.1,
             treasury: me.treasury,
         })
     }
@@ -298,66 +320,176 @@ fn commitments(state: &CampaignState, faction: &FactionId) -> i64 {
     tributes + agents
 }
 
-/// Orders of `faction` for this turn.
+/// Orders of `faction` for this turn (PB3f: independent read-only work on
+/// the planner's pool, same orders as [`plan_turn_sequential`]).
 pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
+    plan_turn_in(Mode::Parallel, state, data, faction)
+}
+
+/// [`plan_turn`] entirely on the calling thread: the reference of the
+/// equality tests (ADR 0091).
+pub fn plan_turn_sequential(
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Vec<Order> {
+    plan_turn_in(Mode::Sequential, state, data, faction)
+}
+
+/// The planners that read the state alone (diplomacy, treaties, gifts,
+/// research, diets, edicts, coinage, ransoms, chivalry, agents), in the
+/// order their orders are issued.
+struct StatePlans {
+    diplomacy: Vec<Order>,
+    money_fief: Option<Order>,
+    embargoes: Vec<Order>,
+    subsidies: Vec<Order>,
+    research: Option<Order>,
+    diets: Vec<Order>,
+    edicts: Vec<Order>,
+    coinage: Vec<Order>,
+    ransoms: Vec<Order>,
+    chivalry: Vec<Order>,
+    agents: Vec<Order>,
+}
+
+fn gift_amount(order: &Order) -> i64 {
+    match order {
+        Order::SendGift { amount, .. } => *amount,
+        _ => 0,
+    }
+}
+
+/// PB3f: [`StatePlans`] in four concurrent groups. The subsidies are paid
+/// out of the treasury left by the money fief (`upkeep`: army, buildings).
+fn state_plans(
+    mode: Mode,
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    upkeep: (i64, i64),
+) -> StatePlans {
+    let ((diplomacy, (money_fief, embargoes, subsidies)), ((research, diets, edicts), rest)) = mode
+        .join(
+            || {
+                mode.join(
+                    || {
+                        let mut orders =
+                            sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
+                        // DP1: trade agreements and military access (ADR 0025).
+                        orders.extend(crate::diplomacy_eval::plan_treaties(state, data, faction));
+                        // G2: historical side changes (Artevelde, Troyes).
+                        orders.extend(crate::alignment::plan_side_change(state, data, faction));
+                        orders.extend(crate::alignment::plan_dynastic_alliance(
+                            state, data, faction,
+                        ));
+                        orders
+                    },
+                    || {
+                        let money_fief = crate::alignment::plan_money_fief(state, data, faction);
+                        let embargoes = crate::alignment::lift_embargoes_on_cobelligerents(
+                            state, data, faction,
+                        );
+                        // G2: subsidies first, out of what the donor would
+                        // otherwise hoard.
+                        let treasury = state.factions.get(faction).map_or(0, |f| f.treasury)
+                            - money_fief.as_ref().map_or(0, gift_amount);
+                        let spare = (treasury - upkeep.0 - upkeep.1).max(0)
+                            / crate::support::SUBSIDY_SPARE_DIVISOR;
+                        let subsidies = crate::support::plan_subsidies(state, data, faction, spare);
+                        (money_fief, embargoes, subsidies)
+                    },
+                )
+            },
+            || {
+                mode.join(
+                    || {
+                        (
+                            sim_campaign::research::ai_choose_research(state, data, faction)
+                                .map(|technology| Order::Research { technology }),
+                            sim_campaign::table::ai_choose_diets(state, data, faction),
+                            sim_campaign::edicts::ai_choose_edicts(state, data, faction),
+                        )
+                    },
+                    || {
+                        (
+                            sim_campaign::coinage::ai_choose_coinage(state, data, faction),
+                            sim_campaign::ransom::ai_ransom_orders(state, data, faction),
+                            sim_campaign::chivalry::ai_found_order(state, data, faction),
+                            // C6: spies, heralds and preachers (recruitment
+                            // keeps a reserve).
+                            sim_campaign::agents::plan_agents(state, data, faction),
+                        )
+                    },
+                )
+            },
+        );
+    let (coinage, ransoms, chivalry, agents) = rest;
+    StatePlans {
+        diplomacy,
+        money_fief,
+        embargoes,
+        subsidies,
+        research,
+        diets,
+        edicts,
+        coinage,
+        ransoms,
+        chivalry: chivalry.into_iter().collect(),
+        agents,
+    }
+}
+
+fn plan_turn_in(
+    mode: Mode,
+    state: &CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+) -> Vec<Order> {
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
         return Vec::new();
     }
-    let Some(mut ctx) = Context::new(state, data, faction) else {
+    let upkeep = (
+        state.faction_army_upkeep(data, faction),
+        state.faction_building_upkeep(data, faction),
+    );
+    let (ctx, plans) = mode.join(
+        || Context::new(mode, state, data, faction, upkeep),
+        || state_plans(mode, state, data, faction, upkeep),
+    );
+    let Some(mut ctx) = ctx else {
         return Vec::new();
     };
-    let mut orders = sim_campaign::diplomacy::plan_diplomacy(state, data, faction);
-    // DP1: trade agreements and military access (ADR 0025).
-    orders.extend(crate::diplomacy_eval::plan_treaties(state, data, faction));
-    // G2: historical side changes (Artevelde, Troyes).
-    orders.extend(crate::alignment::plan_side_change(state, data, faction));
-    orders.extend(crate::alignment::plan_dynastic_alliance(
-        state, data, faction,
-    ));
-    if let Some(order) = crate::alignment::plan_money_fief(state, data, faction) {
-        if let Order::SendGift { amount, .. } = &order {
-            ctx.treasury -= amount;
-        }
+    let mut orders = plans.diplomacy;
+    if let Some(order) = plans.money_fief {
+        ctx.treasury -= gift_amount(&order);
         orders.push(order);
     }
-    orders.extend(crate::alignment::lift_embargoes_on_cobelligerents(
-        state, data, faction,
-    ));
-    // G2: subsidies first, out of what the donor would otherwise hoard.
-    let spare = (ctx.treasury - ctx.upkeep()).max(0) / crate::support::SUBSIDY_SPARE_DIVISOR;
-    for order in crate::support::plan_subsidies(state, data, faction, spare) {
-        if let Order::SendGift { amount, .. } = &order {
-            ctx.treasury -= amount;
-        }
+    orders.extend(plans.embargoes);
+    for order in plans.subsidies {
+        ctx.treasury -= gift_amount(&order);
         orders.push(order);
     }
-    if let Some(technology) = sim_campaign::research::ai_choose_research(state, data, faction) {
-        orders.push(Order::Research { technology });
-    }
-    orders.extend(sim_campaign::table::ai_choose_diets(state, data, faction));
-    orders.extend(sim_campaign::edicts::ai_choose_edicts(state, data, faction));
+    orders.extend(plans.research);
+    orders.extend(plans.diets);
+    orders.extend(plans.edicts);
     // G2: a realm whose buildings eat half its income does not debase: the
     // inflation of their upkeep outweighs the seigniorage (Scots spiral).
     // EQ5: a third is enough: the prices stay up after the money is sound
     // again (Swiss buildings 158 → 201 after two years of debasement).
     let upkeep_heavy = 3 * ctx.building_upkeep > ctx.gross_income;
-    orders.extend(
-        sim_campaign::coinage::ai_choose_coinage(state, data, faction)
-            .into_iter()
-            .filter(|o| {
-                !upkeep_heavy
-                    || !matches!(
-                        o,
-                        Order::SetCoinage {
-                            level: CoinageLevel::Debased | CoinageLevel::HeavilyDebased
-                        }
-                    )
-            }),
-    );
-    orders.extend(sim_campaign::ransom::ai_ransom_orders(state, data, faction));
-    orders.extend(sim_campaign::chivalry::ai_found_order(state, data, faction));
-    // C6: spies, heralds and preachers (recruitment keeps a reserve).
-    orders.extend(sim_campaign::agents::plan_agents(state, data, faction));
+    orders.extend(plans.coinage.into_iter().filter(|o| {
+        !upkeep_heavy
+            || !matches!(
+                o,
+                Order::SetCoinage {
+                    level: CoinageLevel::Debased | CoinageLevel::HeavilyDebased
+                }
+            )
+    }));
+    orders.extend(plans.ransoms);
+    orders.extend(plans.chivalry);
+    orders.extend(plans.agents);
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
     plan_armies(&ctx, &mut orders);
@@ -538,16 +670,23 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // wood, iron) leave the faction's free supply; the next ones of the
     // same kind are priced with their import (B7c rule, ADR 0053).
     let mut supply = state.free_supply(data, ctx.faction);
-    'sites: for site in &sites {
+    // PB3f: the recruitment options of every site (a read of the state),
+    // on the planner's pool; the loop below spends the budget in order.
+    let site_options: Vec<Vec<sim_campaign::RecruitOption>> = ctx.mode.map(&sites, |site| {
+        if !ctx.owns_settlement(site) {
+            return Vec::new();
+        }
+        state
+            .recruitable(data, site)
+            .into_iter()
+            .filter(|o| o.available)
+            .collect()
+    });
+    'sites: for (site, options) in sites.iter().zip(site_options) {
         if !ctx.owns_settlement(site) {
             continue;
         }
         // E1: the doctrine's mix decides, among what fits the budget.
-        let options: Vec<sim_campaign::RecruitOption> = state
-            .recruitable(data, site)
-            .into_iter()
-            .filter(|o| o.available)
-            .collect();
         if options.is_empty() {
             continue;
         }
@@ -630,32 +769,41 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     // (Buildings that pay for themselves in taxes or trade escape the cap.)
     let mut upkeep_room =
         ctx.gross_income * MAX_BUILDING_UPKEEP_PERCENT / 100 - ctx.building_upkeep;
-    let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = Vec::new();
-    for (id, settlement) in state
+    // PB3f: each settlement's options are valued on the planner's pool, then
+    // gathered in the settlements' order (the sort below is stable).
+    let idle: Vec<(&SettlementId, &sim_campaign::SettlementState)> = state
         .settlements
         .iter()
-        .filter(|(id, _)| ctx.owns_settlement(id))
-    {
-        if settlement.construction.is_some() {
-            continue;
-        }
-        let Some(province) = state.provinces.get(&settlement.province) else {
-            continue;
-        };
-        let unrest = weighted_unrest(&province.population);
-        let health = f64::from(province.population.peasants.health);
-        for option in state.buildable(data, id).iter().filter(|o| o.available) {
-            let value = building_value(ctx, id, &option.building, unrest, health);
-            if value > 0.0 {
-                options.push((
-                    value / f64::from(option.cost.max(1)),
-                    id.clone(),
-                    option.building.clone(),
-                    i64::from(option.cost),
-                ));
-            }
-        }
-    }
+        .filter(|(id, s)| ctx.owns_settlement(id) && s.construction.is_none())
+        .collect();
+    let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = ctx
+        .mode
+        .map(&idle, |(id, settlement)| {
+            let Some(province) = state.provinces.get(&settlement.province) else {
+                return Vec::new();
+            };
+            let unrest = weighted_unrest(&province.population);
+            let health = f64::from(province.population.peasants.health);
+            state
+                .buildable(data, id)
+                .iter()
+                .filter(|o| o.available)
+                .filter_map(|option| {
+                    let value = building_value(ctx, id, &option.building, unrest, health);
+                    (value > 0.0).then(|| {
+                        (
+                            value / f64::from(option.cost.max(1)),
+                            (*id).clone(),
+                            option.building.clone(),
+                            i64::from(option.cost),
+                        )
+                    })
+                })
+                .collect::<Vec<_>>()
+        })
+        .into_iter()
+        .flatten()
+        .collect();
     options.sort_by(|a, b| {
         b.0.total_cmp(&a.0)
             .then_with(|| a.1.cmp(&b.1))
@@ -1280,6 +1428,19 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             _ => None,
         })
         .collect();
+
+    // PB3f: the route tables the loop below asks for, computed ahead on
+    // the planner's pool (a memo of the grid planner: same tables).
+    let table_keys: Vec<(SettlementId, u32, u32, f64)> = armies
+        .iter()
+        .filter(|(id, _)| !merged.contains(id))
+        .filter_map(|(id, _)| {
+            let anchor = ctx.anchors.get(id)?;
+            let cap = state.army_movement_allowance(data, &state.armies[id]);
+            Some((anchor.clone(), range, cap, power_at(anchor)))
+        })
+        .collect();
+    ctx.grid.prefetch_tables(ctx.mode, &table_keys);
 
     for (army_id, _) in armies.iter().filter(|(id, _)| !merged.contains(id)) {
         let army = &state.armies[army_id];
