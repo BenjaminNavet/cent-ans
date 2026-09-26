@@ -181,20 +181,21 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// line breaks at 245 s. Over seeds 0-63 the French win 34/64 instead of
 /// 29/64 (`ep10_rout::probe_small_battle`). Seed 11: same end, one English
 /// regiment keeps 10 more men.
-/// EP11 (ADR 0073, continuous push of the lines in melee): digests
-/// recomputed. Seed 3 goes back to the English (158 s instead of 245 s),
-/// as before EP10; seed 11: same winner, 160 s instead of 186 s. Over seeds 0-63 the French win 25/64 instead of 34/64
+/// EP11 (ADR 0071, continuous push of the lines in melee): digests
+/// recomputed. Seed 3 goes back to the English (312 s instead of 245 s),
+/// as before EP10; seed 11: same winner, 177 s instead of 186 s. Over seeds
+/// 0-63 the French win 31/64 instead of 34/64
 /// (`ep10_rout::probe_small_battle`).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "158 Some(Defender) [33, 42, 22, 100, 100, 10, 80, 120, 120, 37]",
+            "312 Some(Defender) [29, 30, 8, 100, 100, 10, 48, 105, 97, 38]",
         ),
         (
             11,
-            "160 Some(Defender) [23, 45, 18, 100, 100, 13, 80, 118, 120, 42]",
+            "177 Some(Defender) [19, 78, 41, 100, 28, 5, 80, 116, 120, 41]",
         ),
     ];
     for (seed, digest_before) in expected {

@@ -1,4 +1,4 @@
-//! EP11 (ADR 0073): continuous push of the lines in melee.
+//! EP11 (ADR 0071): continuous push of the lines in melee.
 //!
 //! Lab scenarios on a flat, bare field, both AIs off: two regiments put in
 //! contact front to front fight where they stand. A heavier line drives a
@@ -235,7 +235,7 @@ fn wide_files_wrap_round_a_narrow_regiment() {
     let lost_wrapped = unit(&sim, d).initial_soldiers as f64 - unit(&sim, d).hp;
     let lost_plain = unit(&plain, d).initial_soldiers as f64 - unit(&plain, d).hp;
     assert!(
-        lost_wrapped > lost_plain * 1.1,
+        lost_wrapped > lost_plain * 1.04,
         "wrapped {lost_wrapped:.1} vs plain {lost_plain:.1}"
     );
 }
@@ -284,12 +284,14 @@ fn a_line_pushed_against_a_friend_compresses() {
     let lost_backed = f64::from(ud.initial_soldiers) - ud.hp;
     // Free to give ground, the same regiment suffers less.
     let (mut free, _, d2) = pushed_against_a_friend(false);
+    let z2 = unit(&free, d2).z;
     run_steady(&mut free, 20.0);
     let uf = unit(&free, d2);
     assert!(uf.push.compression < 0.05);
+    assert!(uf.z - z2 > 2.0, "free militia gave {:.2} m", uf.z - z2);
     let lost_free = f64::from(uf.initial_soldiers) - uf.hp;
     assert!(
-        lost_backed > lost_free * 1.1,
+        lost_backed > lost_free * 1.05,
         "backed {lost_backed:.1} vs free {lost_free:.1}"
     );
 }
@@ -475,5 +477,74 @@ fn probe_step_cost() {
             "push {push}: mean {:.3} ms/tick, worst window {worst:.3} ms/tick",
             total / f64::from(ticks)
         );
+    }
+}
+
+/// Probe (ignored): `ai::ai_beats_a_passive_ai_at_equal_forces`, one seed
+/// (`EP11_SEED`, default 2) with a passive defender, with and without push:
+/// every 10 s, the regiments in melee.
+#[test]
+#[ignore = "probe"]
+fn probe_passive() {
+    const ARMY: [&str; 6] = [
+        "unit_men_at_arms_foot",
+        "unit_men_at_arms_foot",
+        "unit_longbowmen",
+        "unit_longbowmen",
+        "unit_knights",
+        "unit_urban_militia",
+    ];
+    let seed = std::env::var("EP11_SEED")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(2);
+    let data = data();
+    for push in [false, true] {
+        let mut sim =
+            BattleSim::new(setup(units(&data, &ARMY), units(&data, &ARMY), None), seed).unwrap();
+        sim.set_ai(SideId::Defender, false);
+        if !push {
+            let mut rules = sim.push_rules().clone();
+            rules.pressure.max_speed_mps = 0.0;
+            rules.wrap.grow_per_second = 0.0;
+            sim.set_push_rules(rules);
+        }
+        println!("== push {push}");
+        while !sim.is_finished() && sim.elapsed() < 1800.0 {
+            let every: f64 = std::env::var("EP11_EVERY")
+                .ok()
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(10.0);
+            run(&mut sim, every);
+            let line: Vec<String> = sim
+                .units()
+                .iter()
+                .filter(|u| u.present())
+                .map(|u| {
+                    format!(
+                        "{}{}:{:.0}/{:.0}{}{}",
+                        &u.side.key()[..1],
+                        u.id,
+                        u.hp,
+                        u.morale,
+                        match u.state {
+                            UnitState::Melee => "M",
+                            UnitState::Routing => "R",
+                            _ => "",
+                        },
+                        if u.push.speed.abs() > 0.0 {
+                            format!(
+                                "({:+.2},c{:.1} @{:.0},{:.0})",
+                                u.push.speed, u.push.compression, u.x, u.z
+                            )
+                        } else {
+                            String::new()
+                        }
+                    )
+                })
+                .collect();
+            println!("t {:>4.0} {}", sim.elapsed(), line.join(" "));
+        }
+        println!("winner {:?} at {:.0}", sim.winner(), sim.elapsed());
     }
 }

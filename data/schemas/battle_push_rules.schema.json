@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/battle_push_rules.schema.json",
   "title": "Poussée continue des lignes en mêlée",
-  "description": "Fichier data/rules/battle_push.json (lot EP11, ADR 0073) : pression de deux régiments au contact, recul continu du plus faible, compression contre un obstacle, enroulement des files débordantes autour d'un adversaire plus étroit, bombement du front. Lu par sim-battle (PushRules). Batailles rangées seulement.",
+  "description": "Fichier data/rules/battle_push.json (lot EP11, ADR 0071) : pression de deux régiments au contact, recul continu du plus faible, compression contre un obstacle, enroulement des files débordantes autour d'un adversaire plus étroit, bombement du front. Lu par sim-battle (PushRules). Batailles rangées seulement.",
   "type": "object",
   "properties": {
     "description": {
@@ -233,7 +233,7 @@
     },
     "bulge": {
       "type": "object",
-      "description": "Rendu : le front de celui qui pousse se bombe, celui de celui qui recule se creuse (mètres, profil parabolique centré sur le point de contact).",
+      "description": "Rendu : le front de celui qui pousse se bombe, celui de celui qui recule se creuse d'autant (mètres, profil parabolique centré sur le point de contact) ; à l'équilibre, les deux premiers rangs se jettent en avant et s'entremêlent.",
       "properties": {
         "max_m": {
           "type": "number",
