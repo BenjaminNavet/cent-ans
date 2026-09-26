@@ -710,9 +710,13 @@ func _update_hamlet_scale(camera_distance: float) -> void:
 ## réelle, emprise de quelques dizaines de mètres) et le point le plus bas de l'emprise de carte
 ## (taille de carte, rien ne flotte sur une pente), au prorata de l'échelle.
 func _write_hamlet_transforms(multimesh: MultiMesh, entries: Array) -> void:
-	var s := _hamlet_scale
-	# PB3g : tampon écrit en une fois (même disposition que `set_instance_transform` : lignes de la
-	# base puis origine) au lieu d'un appel au serveur de rendu par instance.
+	multimesh.buffer = hamlet_buffer(entries, _hamlet_scale)
+
+
+## PB3g : tampon `MultiMesh.buffer` des hameaux, écrit en une fois (disposition de
+## `set_instance_transform` : chaque ligne de la base suivie de la composante de l'origine) au
+## lieu d'un appel au serveur de rendu par instance.
+static func hamlet_buffer(entries: Array, s: float) -> PackedFloat32Array:
 	var buffer := PackedFloat32Array()
 	buffer.resize(entries.size() * 12)
 	for t in entries.size():
@@ -732,7 +736,7 @@ func _write_hamlet_transforms(multimesh: MultiMesh, entries: Array) -> void:
 		buffer[o + 9] = basis.y.z
 		buffer[o + 10] = basis.z.z
 		buffer[o + 11] = e[1]
-	multimesh.buffer = buffer
+	return buffer
 
 func _update_hamlets() -> void:
 	var show := _weights.x > 0.35
