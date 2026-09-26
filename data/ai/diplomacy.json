@@ -20,7 +20,8 @@
   },
   "peace": {
     "keep_capital": true,
-    "cornered_provinces": 1
+    "cornered_provinces": 1,
+    "cornered_waits_for_defeat": true
   },
   "negotiation": {
     "enabled": true,
