@@ -95,7 +95,7 @@ func _init() -> void:
 			# SZ4b : forêt dense semée avant la capture.
 			var forest: Variant = vegetation.get("forest_detail") if vegetation != null else null
 			if forest != null:
-				(forest as ForestDetail).flush(point, distance)
+				(forest as Object).call("flush", point, distance)
 			for i in 60:
 				await process_frame
 			for layer in root.find_children("*", "CanvasLayer", true, false):
