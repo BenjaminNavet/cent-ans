@@ -244,13 +244,15 @@ fn state_label_fr(state: UnitState) -> &'static str {
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
 pub struct BattleSim {
-    sim: Option<sim_battle::BattleSim>,
+    pub(crate) sim: Option<sim_battle::BattleSim>,
     /// Visual unit-size multiplier (BV1, ADR 0016): figures drawn per
     /// simulated soldier. Rendering only.
     figure_scale: f64,
     /// Forced battle scale tier (EP1, `data/rules/battle_scale.json`);
     /// empty: by head count.
     scale_key: String,
+    /// EP7: the historical map of the battle (menu or campaign site).
+    pub(crate) historical: Option<sim_battle::HistoricalMap>,
     base: Base<RefCounted>,
 }
 
@@ -261,6 +263,7 @@ impl IRefCounted for BattleSim {
             sim: None,
             figure_scale: 1.0,
             scale_key: String::new(),
+            historical: None,
             base,
         }
     }
@@ -272,13 +275,36 @@ impl BattleSim {
     #[func]
     fn setup(&mut self, setup: VarDictionary, seed: i64) -> bool {
         let forced = sim_battle::BattleScale::named(&self.scale_key);
+        // EP7: a campaign battle on a historical site (`historical_site`,
+        // the map's JSON text, added by `get_battle_setup`).
+        let site = setup
+            .get("historical_site")
+            .and_then(|v| v.try_to::<GString>().ok())
+            .and_then(
+                |text| match sim_battle::HistoricalMap::from_json(&text.to_string()) {
+                    Ok(map) => Some(map),
+                    Err(error) => {
+                        godot_warn!("BattleSim.setup: historical site: {error}");
+                        None
+                    }
+                },
+            );
         let parsed = from_dict::<BattleSetup>(&setup).and_then(|setup| {
-            match forced {
-                Some(scale) => sim_battle::BattleSim::new_scaled(setup, seed as u64, scale),
-                None => sim_battle::BattleSim::new(setup, seed as u64),
+            match (&site, forced) {
+                (Some(map), _) => {
+                    sim_battle::BattleSim::new_scaled(setup, seed as u64, map.scale()).map(
+                        |mut sim| {
+                            map.apply_site(sim.field_mut());
+                            sim
+                        },
+                    )
+                }
+                (None, Some(scale)) => sim_battle::BattleSim::new_scaled(setup, seed as u64, scale),
+                (None, None) => sim_battle::BattleSim::new(setup, seed as u64),
             }
             .map_err(|e| e.to_string())
         });
+        self.historical = site;
         match parsed {
             Ok(mut sim) => {
                 // EP8: starting hour drawn by the campaign (`get_battle_setup`).
@@ -1316,6 +1342,17 @@ impl CampaignSim {
         match state.battle_setup(data, index.max(0) as usize) {
             Ok(setup) => {
                 let mut dict = to_dict(&setup);
+                // EP7: in the province and years of a historical map, the
+                // battle is fought on the real site.
+                if let Some(dir) = crate::campaign_sim::loaded_data_dir() {
+                    if let Some((map, text)) =
+                        crate::historical_battles::campaign_site(&dir, &setup, state.year())
+                    {
+                        dict.set("historical_site", text.as_str());
+                        dict.set("historical_site_id", map.id.as_str());
+                        dict.set("historical_horizon", map.horizon_key().as_str());
+                    }
+                }
                 // EP8: hour of the day drawn from the battle (turn, index,
                 // province), no random stream consumed.
                 let key = sim_battle::time_of_day::campaign_battle_key(

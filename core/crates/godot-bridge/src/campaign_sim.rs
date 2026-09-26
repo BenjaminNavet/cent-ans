@@ -51,6 +51,13 @@ fn shared_data(data_dir: Option<&PathBuf>) -> Option<Arc<GameData>> {
     }
 }
 
+/// EP7: folder of the game data already loaded, if any.
+pub(crate) fn loaded_data_dir() -> Option<PathBuf> {
+    let cache = SHARED_DATA.get_or_init(|| Mutex::new(None));
+    let guard = cache.lock().ok()?;
+    guard.as_ref().map(|(dir, _)| dir.clone())
+}
+
 /// Game data already loaded by any `CampaignSim` of this process, if any
 /// (lot DF1: the faction screen lists the difficulty levels before a
 /// campaign starts).
