@@ -214,6 +214,108 @@
       ],
       "additionalProperties": false
     },
+    "alpage": {
+      "type": "object",
+      "description": "Recette ALPAGE (Paris seulement, lot VH5 ; ODbL, https://alpage.huma-num.fr/gis-data/) de `cent-ans geo landmarks` : rues de Paris en 1380 (`origin: \"alpage\"`) et parcelles Vasserot gardées comme gabarit des lanières (section `parcels`).",
+      "properties": {
+        "streets": {
+          "type": "object",
+          "properties": {
+            "layer": {
+              "type": "string"
+            },
+            "skip_regions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Régions ALPAGE ignorées (PONT : les ponts sont dans `bridges`)."
+            },
+            "exclude": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Noms exclus (quais tracés dans `quays`, voies postérieures)."
+            },
+            "exclude_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "main": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Rues principales en plus des axes majeurs ALPAGE (`AXE_MAJEUR`)."
+            },
+            "lane_words": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "simplify_m": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "parcels": {
+          "type": "object",
+          "properties": {
+            "layer": {
+              "type": "string"
+            },
+            "districts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Quartiers où le parcellaire Vasserot est importé."
+            },
+            "min_area_m2": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_area_m2": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_front_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_depth_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "reach_m": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Écart toléré entre la façade et le bord de la rue de 1380."
+            },
+            "max_landuse_overlap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "exclude_landuse": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Légendes ALPAGE 1380 (usages du sol) où aucune parcelle n'est gardée."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "waters": {
       "type": "array",
       "description": "Cours d'eau : axe d'amont en aval, chaque point [dE, dN, largeur m]. Le fleuve principal vient de la carte fine (`origin` : rivers_fine) pour que les quais tombent sur l'eau affichée ; les petits cours (Robec) sont tracés à la main.",
@@ -237,6 +339,7 @@
             "enum": [
               "rivers_fine",
               "osm",
+              "alpage",
               "hand"
             ]
           },
@@ -250,16 +353,46 @@
             "items": {
               "$ref": "#/$defs/point_width"
             }
+          },
+          "polygon": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/point"
+            },
+            "description": "Lit en polygone [dE, dN] (Paris : Seine de 1380, ALPAGE) au lieu d'un axe à largeur ; interdit en entier aux maisons."
+          },
+          "holes": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "$ref": "#/$defs/point"
+              }
+            },
+            "description": "Îles du lit en polygone."
           }
         },
         "required": [
           "id",
           "name",
           "kind",
-          "origin",
-          "points"
+          "origin"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "points"
+            ]
+          },
+          {
+            "required": [
+              "polygon"
+            ]
+          }
+        ]
       }
     },
     "walls": {
@@ -391,6 +524,7 @@
           "origin": {
             "enum": [
               "osm",
+              "alpage",
               "hand"
             ]
           },
@@ -562,6 +696,13 @@
           },
           "note": {
             "type": "string"
+          },
+          "certainty": {
+            "enum": [
+              "attested",
+              "probable",
+              "hypothetical"
+            ]
           }
         },
         "required": [
@@ -753,9 +894,14 @@
     },
     "parcels": {
       "type": "array",
-      "description": "Réservé (VH5) : parcellaire importé (ALPAGE, ODbL) ; polygones de parcelles avec la rue sur laquelle elles donnent. Absent : parcellaire généré.",
+      "description": "Lot VH5 : parcellaire importé (ALPAGE, parcelles Vasserot gardées comme gabarit des lanières, ODbL). Chaque parcelle : [dE, dN, angle°, façade m, profondeur m] = milieu de la façade sur rue, direction de la normale vers l'intérieur de la parcelle (convention v2), longueur de façade, profondeur. Vide ou absent : parcellaire généré seulement.",
       "items": {
-        "type": "object"
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 5,
+        "maxItems": 5
       }
     },
     "render": {
