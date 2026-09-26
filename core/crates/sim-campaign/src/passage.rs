@@ -1,4 +1,4 @@
-//! Lot DP2 (ADR 0031): right of passage and trespass.
+//! Lot DP2 (ADR 0075): right of passage and trespass.
 //!
 //! An army that ends its season in lands controlled by a faction at peace
 //! with its own (not allied, not vassal nor suzerain, no military access by
