@@ -24,8 +24,10 @@ use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
 /// Maximum path cost considered for an objective, in province steps (times
-/// `MovementRules::points_per_step`).
-pub const PLANNING_RANGE: u32 = 5;
+/// `MovementRules::points_per_step`). Lot DC3 (ADR 0082): 5 → 10 when the step went
+/// from 140 to 70 km, so that the AI weighs the same 700 km as before (at 5 steps, half
+/// the cities it used to besiege fell out of its sight and conquests slowed by half).
+pub const PLANNING_RANGE: u32 = 10;
 /// Siege value bonus of a city (it hands over the province, lot C4).
 pub const CITY_TARGET_BONUS: f64 = 25.0;
 /// Siege value lost per fortification level of the target.
@@ -134,6 +136,8 @@ impl<'a> Context<'a> {
             .and_then(|f| f.ai_personality.as_ref())
             .and_then(|p| p.aggression)
             .map_or(50, i32::from);
+        // DC3: the gross income walks every place; computed once.
+        let gross = state.faction_income_effective(data, faction);
         Some(Context {
             anchors: state
                 .armies
@@ -149,18 +153,17 @@ impl<'a> Context<'a> {
             // Net of court and administration (M10 balance) and of the
             // tribute owed to a suzerain.
             income: {
-                let gross = state.faction_income_effective(data, faction);
                 let tribute = if me.suzerain.is_some() {
                     (gross * sim_campaign::diplomacy::VASSAL_TRIBUTE_PERCENT / 100).max(0)
                 } else {
                     0
                 };
                 gross
-                    - state.faction_administration_upkeep(data, faction)
+                    - state.faction_administration_upkeep_for(data, faction, gross)
                     - tribute
                     - commitments(state, faction)
             },
-            gross_income: state.faction_income_effective(data, faction),
+            gross_income: gross,
             army_upkeep: state.faction_army_upkeep(data, faction),
             building_upkeep: state.faction_building_upkeep(data, faction),
             treasury: me.treasury,
@@ -542,6 +545,14 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let base_supply = supply.clone();
     'sites: for site in &sites {
         if !ctx.owns_settlement(site) {
+            continue;
+        }
+        // DC3: nothing more to recruit, or no slot free here: the options (priced per
+        // unit type) are not worth computing.
+        if recruits >= max_recruits {
+            break;
+        }
+        if state.recruit_slots_free(data, site) == 0 {
             continue;
         }
         // E1: the doctrine's mix decides, among what fits the budget.
