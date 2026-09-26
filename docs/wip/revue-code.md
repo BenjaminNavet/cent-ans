@@ -26,6 +26,19 @@ Prochaine étape : constats 2 à 18 dans l'ordre (voir liste de la tranche 1-2).
 | 5 | corrigé | `SettlementState::hand_over` (fin du siège, file de recrutement et chantier perdus, sans remboursement) utilisé par `capture`, `cede_province`, la révolte (la garnison mutinée reste aux rebelles, inchangé) et la restitution des places occupées à la paix (`diplomacy`). |
 | 6 | corrigé | la sortie affronte toute la coalition assiégeante (`settlement_coalition`, forces sommées) ; le siège n'est levé que s'il ne reste aucun assiégeant. |
 
+## Corrections sim-battle
+
+Branche `fix/code-review`, scope `core/crates/sim-battle` seulement. Tests de régression :
+`core/crates/sim-battle/tests/review_fixes.rs`.
+Build : profil cargo isolé `review` (voir « Points ouverts ») dans le dossier target partagé.
+Référence d'équilibre avant correctifs (sondages ignorés) : ep7 `survey_all` Crécy 25/30,
+Azincourt 28/30, Poitiers 20/30 ; ep9b `survey` attaquant 4/10.
+Prochaine étape : constat 2.
+
+| n° | statut | commit | note |
+|----|--------|--------|------|
+| 1 | corrigé | (ce commit) | hors contact, un régiment qui a décroché repasse `Marching` (resté `Melee` tant qu'il est au contact et `disengaging`). |
+
 ## Corrections tools
 
 Branche `fix/code-review`, worktree `../gp-review`, scope `tools/` uniquement. Tests :

@@ -1818,7 +1818,9 @@ impl BattleSim {
                     if let Some(facing) = unit.destination_facing.take() {
                         unit.facing = facing;
                     }
-                } else if self.units[i].state != UnitState::Melee {
+                } else if !self.units[i].disengaging {
+                    // Out of contact after breaking off a melee: marching
+                    // again (still `Melee` while pulling out under blows).
                     self.units[i].state = UnitState::Marching;
                 }
                 continue;
