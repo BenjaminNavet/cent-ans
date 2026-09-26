@@ -26,7 +26,7 @@
       "properties": {
         "id": {"$ref": "#/$defs/id"},
         "label": {"type": "string", "minLength": 1, "description": "Nom français (planche de contrôle)."},
-        "group": {"type": "string", "enum": ["hud", "alert", "gauge", "class", "category", "building", "stance", "battle", "map", "action"]},
+        "group": {"type": "string", "enum": ["hud", "alert", "gauge", "class", "category", "building", "stance", "battle", "map", "action", "trait"]},
         "subject": {"type": "string", "minLength": 3, "description": "Sujet en anglais, ajouté à la fin du prompt de style."},
         "source": {"type": "string", "description": "Image déjà validée réutilisée telle quelle (aucune génération)."},
         "targets": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/target"}}

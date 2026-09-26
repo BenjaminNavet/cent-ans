@@ -1655,6 +1655,7 @@ func _run_assets() -> void:
 ## les entrées de la table se chargent ; chaque id de `data/` (unités, bâtiments, ressources,
 ## technologies) a sa propre icône, chaque branche de compétence et catégorie de trait aussi ;
 ## replis par catégorie ; BBCode d'infobulle non vide et panneau constructible.
+## DA7c : chaque trait a en plus sa propre icône à l'encre (pas seulement celle de sa catégorie).
 func _run_icons() -> void:
 	var library: Node = root.get_node_or_null("/root/IconLibrary")
 	if not _check(library != null, "IconLibrary autoload missing"):
@@ -1668,6 +1669,7 @@ func _run_icons() -> void:
 	_check(broken.is_empty(), "icons not loadable: %s" % [broken])
 	var data_dir := ProjectSettings.globalize_path("res://").path_join("../data").simplify_path()
 	var missing: Array = []
+	var traits_without_own_icon: Array = []
 	var checked := 0
 	for directory in ["unit_types", "buildings", "resources", "technologies", "skills", "traits"]:
 		var dir := DirAccess.open(data_dir.path_join(directory))
@@ -1681,11 +1683,15 @@ func _run_icons() -> void:
 			if directory == "skills":
 				id = "branch_" + str(entry.get("branch", ""))
 			elif directory == "traits":
+				# DA7c : icône propre au trait (pas seulement celle de sa catégorie).
+				if not library.call("has_icon", id):
+					traits_without_own_icon.append(id)
 				id = "trait_category_" + str(entry.get("category", ""))
 			checked += 1
 			if not library.call("has_icon", id):
 				missing.append(id)
 	_check(missing.is_empty(), "data ids without icon: %s" % [missing])
+	_check(traits_without_own_icon.is_empty(), "traits without their own DA7c icon: %s" % [traits_without_own_icon])
 	for hud_id in ["hud_treasury", "hud_income", "hud_research", "hud_season_spring", "hud_season_summer", "hud_season_autumn", "hud_season_winter", "hud_diplomacy", "hud_chronicle", "hud_court", "hud_technologies", "class_peasants", "class_burghers", "class_clergy", "class_nobility", "gauge_unrest", "gauge_health", "gauge_wealth", "gauge_goods_satisfaction"]:
 		if not library.call("has_icon", hud_id):
 			missing.append(hud_id)
