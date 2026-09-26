@@ -115,4 +115,17 @@ Tests adaptés : c6_agents (le héraut se recrute dans une cité ; les nouvelles
 avant), m2 `the_loser_falls_back_on_the_grid` (le point vide a changé : rayon neutre élargi dans le
 cas du mur).
 
-Prochaine étape : conquête (cités prises −33 % vs main), refuge neutre, perf `turn_perf`.
+### Pause (26/09, demande du joueur)
+Agent DC3 arrêté en cours de lot. Dernier travail commité : l'IA évalue recrutement et chantiers sur
+une seule réserve de ressources par tour (`recruitable_with_supply`, `buildable_with_supply`) —
+optimisation de fin de tour ; tests sim-campaign + ai et clippy verts, **pas encore mesurée**
+(`turn_perf`). L'agent préparait des « variantes de partage de la réserve » (non commencées).
+
+Reste à faire en DC3 :
+1. Mesurer `turn_perf 50 3 1` (branche vs DC1 : moyenne 5,86 ms, p99 63,8 ms).
+2. Conquête : cités prises −33 % vs main ; cible ±25 % (OFFENSIVE_RANGE / PLANNING_RANGE,
+   priorité IA aux cités, garnisons des nouvelles places).
+3. Refuge neutre : neutral_radius_steps 1 → 2 ? (débandades loin de chez soi).
+4. Révoltes quasi nulles (9,4 → 0,6 / 200 tours) : cause à trouver (`REVOLT_TRACE=1 century_probe`).
+5. 109 hameaux sur l'emprise d'une colonie (masqués au rendu par DC4) : `geo hamlets` à revoir.
+6. Supprimer les worktrees de sonde `../gp-dc3-main` et `../gp-dc3-dc1`.
