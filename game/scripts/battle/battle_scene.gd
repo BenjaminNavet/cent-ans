@@ -1049,6 +1049,10 @@ func _bench_finish() -> void:
 	result["primitives_m"] = Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1.0e6
 	result["draw_calls"] = Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 	result["skipped_updates"] = self.soldiers.skipped_updates
+	# EP12 : blessés au sol, régiments désarmés, armes au sol (plafonnées).
+	result["wounded"] = self.soldiers.wounded_count
+	result["disarmed_units"] = self.soldiers.disarmed_units.size()
+	result["dropped_arms"] = self.soldiers.dropped_arms.shown_count() if self.soldiers.dropped_arms != null else 0
 	if effects != null and effects.volleys != null:
 		# BV1 : volées, traits fichés et échelle des figurines.
 		result["volley_arrows"] = effects.volleys.launched
