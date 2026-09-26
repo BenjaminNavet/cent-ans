@@ -85,3 +85,4 @@ Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_n
 - 4 corrigé (97ba80f7) : `maps_in` rend un `Arc<[MapEntry]>` partagé ; `#[func]` inchangées.
 - 5 écarté : `Ground::Pages` est un `HashMap<i64, Vec<u8>>` du crate `vegetation` (hors périmètre) ; et une clé de page n'est pas immuable si la pyramide change (autre carte), un cache par clé seule serait faux.
 - Piège build : le dossier target partagé entre worktrees réutilise l'artefact `vegetation` d'une autre branche (sz1 : `relief_squash`) ; `touch core/crates/vegetation/src/*.rs` force la recompilation.
+| 14 | corrigé | `ai_emissary` étape 1 : ne vise qu'un captif rachetable (conditions « argent ») dont le prix + coût de l'action tient dans le trésor ; sinon étapes 2 et 3. Pas de test dédié (IA d'agent, couverte par c6_agents). |
