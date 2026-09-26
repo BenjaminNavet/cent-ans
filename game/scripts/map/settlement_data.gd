@@ -16,7 +16,7 @@ const KINDS: Array[String] = ["city", "town", "castle", "abbey", "village"]
 ## Priorité d'étiquette (plus petit = prioritaire) : cité > ville > autres.
 const LABEL_PRIORITY := {"city": 0, "town": 1, "castle": 2, "abbey": 3, "village": 4}
 
-## Colonies triées par priorité puis id : {id, province, kind, name, px: Vector2, controller,
+## Colonies triées par priorité, poids décroissant puis id : {id, province, kind, name, px: Vector2, controller,
 ## owner, fortification_level, port, weight}.
 var settlements: Array[Dictionary] = []
 var index_by_id: Dictionary = {}
@@ -90,7 +90,13 @@ func _load_settlements(data_dir: String, map_dir: String) -> void:
 	settlements.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var pa: int = LABEL_PRIORITY.get(a["kind"], 9)
 		var pb: int = LABEL_PRIORITY.get(b["kind"], 9)
-		return pa < pb if pa != pb else str(a["id"]) < str(b["id"]))
+		if pa != pb:
+			return pa < pb
+		# DC4 : à type égal, la place la plus importante d'abord (étiquette gardée au
+		# désencombrement, marqueur dessiné par-dessus).
+		if int(a["weight"]) != int(b["weight"]):
+			return int(a["weight"]) > int(b["weight"])
+		return str(a["id"]) < str(b["id"]))
 	for i in settlements.size():
 		index_by_id[settlements[i]["id"]] = i
 
