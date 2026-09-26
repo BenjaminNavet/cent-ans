@@ -236,7 +236,7 @@ func _rebuild() -> void:
 	medallions.clear()
 	var extent := Vector2.ZERO
 	for id in _positions:
-		var medallion := FamilyTreeNode.create(_nodes[id], id == ruler_id, id == heir_id, id == root_id, zoom)
+		var medallion := FamilyTreeNode.create(_nodes[id], id == ruler_id, id == heir_id, id == root_id, zoom, _portrait_context(id))
 		medallion.position = _screen(id)
 		medallion.pressed.connect(func() -> void: character_selected.emit(id))
 		medallion.recenter.connect(func() -> void: recenter_requested.emit(id))
@@ -248,6 +248,19 @@ func _rebuild() -> void:
 		(medallions[id] as Control).position = _screen(id)
 	_canvas.custom_minimum_size = (extent + MARGIN) * zoom
 	_canvas.queue_redraw()
+
+
+## DA2 : contexte de rang du portrait vivant (souverain de l'arbre, maison régnante).
+func _portrait_context(id: String) -> Dictionary:
+	var entry: Dictionary = _nodes[id]
+	var context := LivingPortrait.context_for(entry)
+	var root_faction := str((_nodes.get(root_id, {}) as Dictionary).get("faction", ""))
+	if ruler_id != "" and str(entry.get("faction", "")) == root_faction:
+		context["ruler"] = ruler_id
+		context["heir"] = heir_id
+		if _nodes.has(ruler_id):
+			context["ruler_house"] = str((_nodes[ruler_id] as Dictionary).get("house", ""))
+	return context
 
 
 ## Décalage horizontal qui centre un arbre plus étroit que la vue.
@@ -405,10 +418,11 @@ class FamilyTreeNode:
 	var is_root := false
 	var zoom := 1.0
 	var _texture: Texture2D
+	var _mirror := false  # DA2 : visage type retourné (anti-clones)
 	var _is_portrait := false
 	var _hover := false
 
-	static func create(data: Dictionary, ruler: bool, heir: bool, root: bool, zoom_value: float) -> FamilyTreeNode:
+	static func create(data: Dictionary, ruler: bool, heir: bool, root: bool, zoom_value: float, context: Dictionary = {}) -> FamilyTreeNode:
 		var node := FamilyTreeNode.new()
 		node.entry = data
 		node.is_ruler = ruler
@@ -421,8 +435,12 @@ class FamilyTreeNode:
 		node.mouse_filter = Control.MOUSE_FILTER_STOP
 		node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		var id := str(data.get("id", ""))
-		node._texture = PortraitLoader.portrait_texture(id)
+		# DA2 : portrait vivant (tranche d'âge et rang courants, archétype pour les nés en jeu).
+		node._texture = LivingPortrait.texture_for(data, context) if id != "" else null
 		node._is_portrait = node._texture != null
+		if node._is_portrait:
+			var ctx := context if not context.is_empty() else LivingPortrait.context_for(data)
+			node._mirror = LivingPortrait.mirrored(data, LivingPortrait.resolve(data, ctx))
 		if node._texture == null:
 			node._texture = PortraitLoader.house_heraldry_texture(str(data.get("house", "")), str(data.get("faction", "")))  # DA1
 		# Médaillon dessiné par un enfant : seul le portrait est grisé pour un défunt.
@@ -529,7 +547,7 @@ class FamilyTreeNode:
 		canvas.draw_circle(center + Vector2(1.5, 2.5) * z, radius + 3.0 * z, HudStyle.SHADOW)
 		canvas.draw_circle(center, radius + 3.0 * z, HudStyle.PARCHMENT_DARK)
 		if _is_portrait:
-			HudStyle.draw_texture_disc(canvas, _texture, center, radius)
+			HudStyle.draw_texture_disc(canvas, _texture, center, radius, _mirror)
 		else:
 			canvas.draw_circle(center, radius, HudStyle.PARCHMENT)
 			HudStyle.draw_texture_fit(canvas, _texture, center, radius * 1.3)

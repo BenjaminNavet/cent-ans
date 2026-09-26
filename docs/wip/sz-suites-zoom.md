@@ -21,7 +21,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 | SZ2 | S2 | Recuisson E0-E4 avec plancher monotone des fonds de vallée (continuité E0/E1), puis `detail-dem`, `hydro-fine`, `anchors-fine` ; Loire d'Orléans au niveau des berges. Cuisson dans un dossier de préparation, bascule atomique par l'orchestrateur | 1 | **dans main** + pyramide basculée : plancher `valley_floor` à tous les étages, `BAKE_VERSION` pyramide 2 / détail 5, estampille `bake.json` ; Loire d'Orléans −0,1 m sous les berges |
 | VH0+VH4 | S3 | Squelette VH (ADR 0078, 0037 étant pris par la difficulté) et moteur des villes emblématiques 1:1 géoréférencées ; levée du plancher caméra ZG4b | 1 | **dans main** (80fb0004) : ADR 0078, format `data/landmarks_v2/`, `docs/landmarks-v2.md`, Rouen vers 1340 (706 rues, 26 monuments, ≈ 5 800 bâtiments) |
 | SZ4 | S4, S5 | Moulins, hameaux, fumées, arbres proches à l'échelle aux paliers intermédiaires ; disque d'emprise d'Amiens | 1 | **dans main** (4b6c1057) : `MapPropScale` (`map_prop_scale.tres`), toits vus de loin sur le sol bâti (`roofscape_*`) |
-| SZ4b | suite SZ4 | Maquettes de colonies géantes jusqu'à d ≈ 8 puis bascule brusque vers les villes 1:1 ; densité des forêts au palier vallée | 2 | **en pause** : code fait, reste captures/mesures/tests/doc (voir ci-dessous) |
+| SZ4b | suite SZ4 | Maquettes de colonies géantes jusqu'à d ≈ 8 puis bascule brusque vers les villes 1:1 ; densité des forêts au palier vallée | 2 | **dans main** (b91572d6) : maquettes continues vers leur emprise, forêt dense `ForestDetail` (budget 220 000 arbres, primitives ×2 en forêt au palier vallée) |
 | SZ5 | S7 | Pluie au palier site (gouttes et stries à l'échelle de la caméra) | 1 | **dans main** (e73abe8d) : `PrecipitationProfile` (`precipitation.tres`), tailles ancrées en mètres de près, identiques à l'ancien au-delà de d = 30 |
 | SZ6 | S6 | Pics d'images côté scripts : profilage et étalement (qt_update, recalages, écouteurs) | 1 | **dans main** (26b1d806) : p99 91 → 38 ms, pics > 50 ms 231 → 3 ; `--bench-probe` |
 | SZ7 | hébergement | Décision (ADR 0077) + outillage : paquet « Cent Ans relief » découpé, sommes de contrôle, commande de téléchargement | 2 | **dans main** : `relief-pack` / `relief-fetch`, `relief_hosting.json`, avis du jeu ; **publication en attente de l'accord du joueur** (commandes dans `docs/geo.md`) |
@@ -43,6 +43,10 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 - 26/09 : **pause demandée par le joueur.** SZ4b arrêté proprement (dernier commit 36d97138, worktree verrouillé).
 - 26/09 : reprise demandée par le joueur ; agent SZ4b relancé dans son worktree (fusion de main, cible cargo privée, captures, mesures, tests, doc).
 
+- 26/09 : SZ4b fusionné (b91572d6, dylib installée). `sz1_mountain_test` adapté : Paris est une ville 1:1, relief à l'échelle vraie. Relecture historienne (accord du joueur) : Paris (13 confirmés / 11 corrigés / 5 incertains, `docs/histoire/relecture-vh-paris.md`) et Rouen (14/10/7, enceinte coupée en 1345/1346, `relecture-vh-rouen.md`) fusionnés ; Londres et Orléans en cours. Publication du relief : accord du joueur, mais empaquetage refusé par le filtre de permissions (« Create Public Surface ») ; commandes données au joueur.
+
+- 26/09 : relectures historiennes de Londres (23 confirmés / 20 corrigés / 6 incertains : London Bridge à l'ouest de St Magnus, mur recalé sur Historic England, Old St Paul's) et d'Orléans (12/12/11 : porte Renart, Sainte-Croix romane encore debout, boulevards 1417, pont recalé) fusionnées (f83b00bd). Les quatre rapports sont dans `docs/histoire/relecture-vh-*.md`. Question laissée au joueur : accrue d'Orléans en 1345 (gardée) ou 1391 (Carron et Guillemard 2012).
+
 ## Prochaine étape (reprise)
 1. **SZ4b** : worktree `.claude/worktrees/agent-af6b91aaabd8c3484`, branche `feat/sz4b-colonies-forets`
    (36d97138, `main` fusionnée jusqu'à 82100583). Code fait (maquettes continues, masquage par
@@ -55,7 +59,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
    `game/bin` de main (rm puis cp) seulement si le ff a réussi (`set -o pipefail`).
 2. **Publication du relief** (ADR 0077, SZ7) : attend l'accord explicite du joueur (commandes dans
    `docs/geo.md`).
-3. **Relecture historienne** : faits marqués `probable`/`hypothetical` de Rouen (Martainville, porte
+3. ~~Relecture historienne~~ faite le 26/09 (rapports `docs/histoire/relecture-vh-*.md`) ; points incertains listés dans chaque rapport. Ancien intitulé : faits marqués `probable`/`hypothetical` de Rouen (Martainville, porte
    Saint-Hilaire), Londres (mur vers Aldersgate, Old St Paul's, tablier du pont, dates Westminster),
    Orléans (accrue 1345, portes, Saint-Aignan, boulevards 1404), Paris (Grand-Pont 1340, flèche de
    Notre-Dame, Charles V, noms ALPAGE des portes) ; listes dans `docs/wip/vh4…vh7*.md`.

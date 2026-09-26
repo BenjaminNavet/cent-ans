@@ -64,6 +64,24 @@
    "license": "Projet (faits recoupés : Agas, Hollar, OSM)",
    "extracted": false,
    "use": "Dates : tour du Joyau 1365, horloge de Westminster 1367, Savoie jusqu'en 1381."
+  },
+  {
+   "title": "National Heritage List for England (monuments classés : London Wall, Greyfriars, Jewel Tower, salle capitulaire de Westminster, palais de Winchester)",
+   "author": "Historic England",
+   "date": "2026-09-26",
+   "url": "https://opendata-historicengland.hub.arcgis.com/",
+   "license": "Open Government Licence v3",
+   "extracted": false,
+   "use": "Relecture historique (docs/histoire/relecture-vh-londres.md) : emprises des tronçons classés du mur et des portes (Newgate, Aldersgate, Moorgate), de l'église des Franciscains ; positions recopiées à la main dans `walls` et `monuments`."
+  },
+  {
+   "title": "London Bridge and its Houses, c. 1209-1761 ; A History of the County of London, vol. 1 (1909)",
+   "author": "D. Gerhold (2019, recension The Past) ; W. Page (éd.), Victoria County History (British History Online)",
+   "date": "2019 ; 1909",
+   "url": "https://www.british-history.ac.uk/vch/london/vol1",
+   "license": "Faits seulement",
+   "extracted": false,
+   "use": "Piles de la chapelle, du pont-levis et de la porte de pierre de London Bridge ; dates des couvents (Dominicains, Franciscains 1306-1327, Augustins 1253, Carmes 1241)."
   }
  ],
  "plan": {
@@ -105,6 +123,13 @@
    "pedestrian"
   ],
   "exclude": [
+   "Essex Street",
+   "Mitre Street",
+   "Mitre Passage",
+   "St James's Passage",
+   "Sugar Bakers Court",
+   "Austin Friars",
+   "Greyfriars Passage",
    "Queen Victoria Street",
    "King William Street",
    "Cannon Street",
@@ -468,11 +493,11 @@
     [2060, 118],
     [2018, 150],
     [1880, 197],
-    [1750, 257],
-    [1640, 305],
-    [1548, 347],
-    [1440, 382],
-    [1360, 414],
+    [1750, 242],
+    [1640, 290],
+    [1540, 325],
+    [1440, 365],
+    [1360, 400],
     [1290, 445],
     [1241, 472],
     [1150, 522],
@@ -480,13 +505,14 @@
     [1102, 450],
     [1045, 350],
     [1025, 315],
-    [970, 345],
-    [900, 378],
-    [800, 392],
-    [700, 375],
-    [628, 336],
-    [598, 250],
-    [572, 160],
+    [972, 332],
+    [890, 347],
+    [800, 352],
+    [700, 357],
+    [660, 354],
+    [626, 325],
+    [617, 240],
+    [588, 160],
     [556, 88],
     [500, 100],
     [440, 110],
@@ -522,7 +548,7 @@
     },
     {
      "name": "Moorgate (poterne ouverte en 1415)",
-     "at": [1548, 347],
+     "at": [1520, 333],
      "kind": "postern",
      "height_m": 11,
      "from_year": 1415
@@ -535,13 +561,13 @@
     },
     {
      "name": "Aldersgate",
-     "at": [970, 345],
+     "at": [972, 332],
      "kind": "gate",
      "height_m": 17
     },
     {
      "name": "Newgate (et sa prison)",
-     "at": [628, 336],
+     "at": [626, 325],
      "kind": "gate",
      "height_m": 18
     },
@@ -552,7 +578,7 @@
      "height_m": 16
     }
    ],
-   "note": "Tracé terrestre du mur romain (vers 200) : vestiges OSM (Cooper's Row, St Alphage, Noble Street, fort de Cripplegate) et rues qui le longent (Jewry Street, Bevis Marks, Camomile et Wormwood Street, London Wall, Old Bailey) ; portes au croisement des rues qui les traversaient. Prolongement de Ludgate à la Fleet puis le long de la Fleet jusqu'à la Tamise pour l'enclos des Dominicains (autorisé en 1276, achevé vers 1320). Front de Tamise ouvert : le mur de rive romain était ruiné au XIIe s. (FitzStephen). Moorgate n'est percée qu'en 1415. Bastions espacés de façon régulière (restitution)."
+   "note": "Tracé terrestre du mur romain (vers 200) : vestiges OSM (Cooper's Row, St Alphage, Noble Street, fort de Cripplegate) et rues qui le longent (Jewry Street, Bevis Marks, Camomile et Wormwood Street, London Wall, Old Bailey) ; portes au croisement des rues qui les traversaient. Prolongement de Ludgate à la Fleet puis le long de la Fleet jusqu'à la Tamise pour l'enclos des Dominicains (site concédé en 1276, mur abattu puis reconstruit par étapes entre les années 1280 et vers 1320 ; VCH London I, MoEML). Relecture 2026-09 : tronçons Ludgate-Newgate-Aldersgate et Moorgate-Bishopsgate recalés sur les monuments classés de Historic England (NHLE, OGL : 1018884, 1002068, 1003773, 1018883, 1018882, 1002051). Front de Tamise ouvert : le mur de rive romain était ruiné au XIIe s. (FitzStephen). Moorgate : poterne ouverte ou agrandie en 1415 par le maire Thomas Falconer (Stow) ; une poterne plus ancienne est possible (sources divergentes), non représentée. Bastions espacés de façon régulière (restitution)."
   }
  ],
  "streets": [
@@ -599,8 +625,9 @@
    "rank": "main",
    "origin": "hand",
    "points": [
-    [1571, -553],
-    [1606, -598]
+    [1604, -500],
+    [1570, -550],
+    [1558, -592]
    ]
   },
   {
@@ -609,8 +636,8 @@
    "rank": "main",
    "origin": "hand",
    "points": [
-    [1450, -880],
-    [1420, -900],
+    [1410, -860],
+    [1398, -890],
     [1387, -917]
    ]
   },
@@ -5891,22 +5918,6 @@
    ]
   },
   {
-   "id": "osm_241428909",
-   "name": "Austin Friars",
-   "rank": "secondary",
-   "width_m": 5.0,
-   "origin": "osm",
-   "points": [
-    [1721.4, 39.8],
-    [1721.1, 48.7],
-    [1698.0, 61.3],
-    [1696.0, 65.5],
-    [1701.3, 89.1],
-    [1712.3, 120.7],
-    [1759.3, 97.0]
-   ]
-  },
-  {
    "id": "osm_1416946270",
    "name": "Ave Maria Lane",
    "rank": "secondary",
@@ -8116,18 +8127,6 @@
    ]
   },
   {
-   "id": "osm_4276413",
-   "name": "Essex Street",
-   "rank": "secondary",
-   "width_m": 5.0,
-   "origin": "osm",
-   "points": [
-    [-220.4, 100.4],
-    [-217.0, 96.7],
-    [-183.7, 20.4]
-   ]
-  },
-  {
    "id": "osm_32728727",
    "name": "Exeter Street",
    "rank": "secondary",
@@ -10316,39 +10315,6 @@
     [75.7, 147.0],
     [63.2, 144.9],
     [63.7, 134.3]
-   ]
-  },
-  {
-   "id": "osm_1054944830",
-   "name": "Mitre Street",
-   "rank": "secondary",
-   "width_m": 5.0,
-   "origin": "osm",
-   "points": [
-    [2230.4, -203.6],
-    [2241.4, -215.7]
-   ]
-  },
-  {
-   "id": "osm_244550579",
-   "name": "Mitre Street",
-   "rank": "secondary",
-   "width_m": 5.0,
-   "origin": "osm",
-   "points": [
-    [2206.0, -181.9],
-    [2230.4, -203.6]
-   ]
-  },
-  {
-   "id": "osm_4551644",
-   "name": "Mitre Street",
-   "rank": "secondary",
-   "width_m": 5.0,
-   "origin": "osm",
-   "points": [
-    [2155.8, -144.5],
-    [2206.0, -181.9]
    ]
   },
   {
@@ -14376,17 +14342,6 @@
    ]
   },
   {
-   "id": "osm_851938702",
-   "name": "Greyfriars Passage",
-   "rank": "lane",
-   "width_m": 3.0,
-   "origin": "osm",
-   "points": [
-    [776.7, 257.4],
-    [781.8, 281.7]
-   ]
-  },
-  {
    "id": "osm_159925742",
    "name": "Groveland Court",
    "rank": "lane",
@@ -14721,39 +14676,6 @@
     [845.5, 577.9],
     [861.9, 589.1],
     [863.3, 602.1]
-   ]
-  },
-  {
-   "id": "osm_156731609",
-   "name": "Mitre Passage",
-   "rank": "lane",
-   "width_m": 3.0,
-   "origin": "osm",
-   "points": [
-    [2213.9, -141.7],
-    [2198.8, -129.2]
-   ]
-  },
-  {
-   "id": "osm_156731612",
-   "name": "Mitre Passage",
-   "rank": "lane",
-   "width_m": 3.0,
-   "origin": "osm",
-   "points": [
-    [2198.8, -129.2],
-    [2170.7, -111.1]
-   ]
-  },
-  {
-   "id": "osm_358319121",
-   "name": "Mitre Passage",
-   "rank": "lane",
-   "width_m": 3.0,
-   "origin": "osm",
-   "points": [
-    [2213.9, -141.7],
-    [2232.4, -156.6]
    ]
   },
   {
@@ -15308,18 +15230,6 @@
    ]
   },
   {
-   "id": "osm_36918245",
-   "name": "St James's Passage",
-   "rank": "lane",
-   "width_m": 3.0,
-   "origin": "osm",
-   "points": [
-    [2237.6, -152.3],
-    [2254.4, -138.9],
-    [2257.7, -140.1]
-   ]
-  },
-  {
    "id": "osm_56441655",
    "name": "St Katherine's Row",
    "rank": "lane",
@@ -15669,18 +15579,6 @@
    ]
   },
   {
-   "id": "osm_36918249",
-   "name": "Sugar Bakers Court",
-   "rank": "lane",
-   "width_m": 3.0,
-   "origin": "osm",
-   "points": [
-    [2155.4, -127.4],
-    [2180.6, -146.5],
-    [2181.6, -145.3]
-   ]
-  },
-  {
    "id": "osm_837365149",
    "name": "Swedeland Court",
    "rank": "lane",
@@ -15944,21 +15842,21 @@
   {
    "id": "london_bridge",
    "name": "London Bridge (pont de pierre, 1176-1209)",
-   "from": [1606, -598],
-   "to": [1450, -880],
+   "from": [1558, -592],
+   "to": [1410, -860],
    "width_m": 12.0,
    "deck_m": 5.5,
    "material": "stone",
    "arches": 19,
    "houses": true,
    "house_span": [0.05, 0.95],
-   "chapel_at": 0.48,
+   "chapel_at": 0.45,
    "chapel_side": "left",
-   "drawbridge_at": 0.66,
-   "gatehouses_at": [0.62, 0.9],
+   "drawbridge_at": 0.675,
+   "gatehouses_at": [0.65, 0.9],
    "pier_m": 7.0,
    "starling_m": 26.0,
-   "note": "Pont de Pierre de Colechurch (1176-1209) : 19 arches sur piles à avant-becs (« starlings ») et un pont-levis près de la rive de Southwark, porte du pont-levis au nord de celui-ci et grande porte de pierre au deuxième pilier depuis Southwark, chapelle Saint-Thomas sur la pile centrale côté aval (achevée en 1209). Maisons attestées dès 1201, espaces libres à la chapelle et au pont-levis. Passe à l'est de St Magnus comme l'ancien pont (≈ 30 m en aval du pont actuel). Hauteur du tablier au-dessus de l'eau : restitution (≈ 5,5 m)."
+   "note": "Pont de Pierre de Colechurch (1176-1209) : 19 arches et un pont-levis sur 19 piles à avant-becs (« starlings »), ≈ 282 m (926 pieds). Positions d'après D. Gerhold (London Bridge and its Houses, 2019) : chapelle Saint-Thomas sur la 9e pile depuis la Cité (la plus large, 11e depuis Southwark), côté aval (est), achevée en 1209 ; tour du pont-levis sur la 13e pile, pont-levis (mentionné dès 1257) juste au sud ; grande porte de pierre sur la 18e pile (2e depuis Southwark). Fractions calculées sur 20 travées égales (piles réelles inégales). Maisons attestées dès 1201 (≈ 140 en 1358). Tête nord dans l'axe de New Fish Street (Fish Street Hill), à l'ouest de St Magnus : l'église bordait l'accès du pont à l'est (passage piéton percé sous sa tour en 1762) ; ≈ 30 m en aval du pont actuel. Hauteur du tablier au-dessus de l'eau : restitution (≈ 5,5 m), non vérifiée."
   }
  ],
  "monuments": [
@@ -15966,7 +15864,7 @@
    "id": "old_st_pauls",
    "name": "Cathédrale Saint-Paul (Old St Paul's)",
    "model": "gothic_cathedral",
-   "at": [819, 30],
+   "at": [804, 34],
    "angle_deg": -4,
    "clear_m": 12,
    "certainty": "attested",
@@ -15977,7 +15875,7 @@
     "vault_m": 28,
     "ridge_m": 40,
     "aisle_m": 13,
-    "transept_m": 90,
+    "transept_m": 88,
     "transept_width_m": 14,
     "transept_at": 0.49,
     "apse": "flat",
@@ -16002,13 +15900,13 @@
      "spire_m": 62
     }
    },
-   "description": "Nef normande (après 1087), chœur gothique du « New Work » (1256-1314) à chevet plat ; flèche de bois couverte de plomb achevée en 1315, ≈ 149 m (489 pieds, fourchette 140-149 m), détruite par la foudre en 1561. Longueur ≈ 178 m (586 pieds). Emprise restituée sous la cathédrale de Wren (axe légèrement différent, chevet plus à l'est)."
+   "description": "Nef normande (après 1087), chœur gothique du « New Work » (consacré en 1300, achevé en 1314) à chevet plat ; clocher de croisée et flèche de bois couverte de plomb (clocher élevé vers 1221, flèche achevée ou refaite vers 1314-1315 selon les sources), ≈ 149 m selon la tradition (489 pieds ; Wren : 460 pieds ≈ 140 m), détruite par la foudre en 1561. Longueur 585-586 pieds (≈ 178 m), largeur 100 pieds, 290 pieds au transept (fouilles de Penrose, 1878). Emprise : les extrémités nord, est et sud correspondent à peu près à celles de la cathédrale de Wren, dont l'axe est plus tourné vers le nord (Encyclopaedia Britannica 1911) ; la nef ancienne dépassait donc à l'ouest. Décalage angulaire exact non publié en ligne (−4° de grille, restitution)."
   },
   {
    "id": "st_pauls_cloister",
    "name": "Cloître et salle capitulaire de Saint-Paul (1332)",
    "model": "enclosure",
-   "at": [786, -8],
+   "at": [776, -6],
    "angle_deg": -4,
    "certainty": "probable",
    "params": {
@@ -16017,7 +15915,7 @@
     "height_m": 8,
     "ranges": true
    },
-   "description": "Cloître à deux niveaux et salle capitulaire octogonale de William Ramsey, commencés en 1332, au sud de la nef."
+   "description": "Cloître à deux niveaux et salle capitulaire octogonale de William Ramsey, commencés en 1332, dans l'angle entre la nef et le croisillon sud (Britannica 1911 ; tracé rappelé dans les jardins du parvis sud)."
   },
   {
    "id": "tower_outer",
@@ -16122,8 +16020,8 @@
    "id": "guildhall",
    "name": "Guildhall (salle antérieure à 1411)",
    "model": "hall",
-   "at": [1275, 190],
-   "angle_deg": -12,
+   "at": [1278, 197],
+   "angle_deg": -6,
    "clear_m": 6,
    "certainty": "hypothetical",
    "params": {
@@ -16131,7 +16029,7 @@
     "width_m": 15,
     "height_m": 15
    },
-   "description": "Siège du gouvernement de la Cité attesté dès 1128 ; la grande salle actuelle date de 1411-1440. En 1340, bâtiment civique plus modeste au même endroit (cryptes du XIIe s.) : gabarit restitué, forme mal connue."
+   "description": "Siège du gouvernement de la Cité attesté en 1127-1128 (fondations des années 1120-1130) ; la grande salle actuelle date de 1411-1440. En 1340 : salle reconstruite vers 1300 sur une crypte voûtée de cinq travées (l'actuelle crypte ouest), chapelle des années 1290, porterie du XIIIe s. sur Cat Street (MOLA, Bowsher et al. 2007). Placée sur la moitié ouest de la grande salle actuelle, au-dessus de la crypte ouest ; gabarit restitué."
   },
   {
    "id": "cheapside_cross",
@@ -16481,7 +16379,7 @@
    "id": "st_magnus",
    "name": "St Magnus the Martyr (au pied du pont)",
    "model": "church",
-   "at": [1578, -574],
+   "at": [1586, -577],
    "angle_deg": -8,
    "clear_m": 5,
    "certainty": "probable",
@@ -16544,8 +16442,8 @@
    "id": "greyfriars",
    "name": "Couvent des Franciscains (Greyfriars)",
    "model": "abbey",
-   "at": [715, 329],
-   "angle_deg": -30,
+   "at": [782, 291],
+   "angle_deg": 0,
    "clear_m": 6,
    "certainty": "probable",
    "params": {
@@ -16558,7 +16456,7 @@
      "size": 34
     }
    },
-   "description": "Église reconstruite de 1306 à 1348 (≈ 91 m, deuxième de Londres), le long de Newgate Street ; cloître au nord, contre le mur."
+   "description": "Église reconstruite à partir de 1306 (première pierre au nom de la reine Marguerite), achevée vers 1327, non encore dédicacée en 1357 (VCH London I) : 300 × 89 pieds (≈ 91 × 27 m), deuxième de Londres, au nord de Newgate Street. Emprise d'après le site classé de l'église (Historic England 1002002) ; cloître au nord, entre l'église et le mur."
   },
   {
    "id": "st_bartholomew",
@@ -16604,8 +16502,8 @@
    "id": "holy_trinity_aldgate",
    "name": "Prieuré de la Sainte-Trinité d'Aldgate (1108)",
    "model": "abbey",
-   "at": [2225, -140],
-   "angle_deg": -8,
+   "at": [2210, -164],
+   "angle_deg": -40,
    "clear_m": 6,
    "certainty": "hypothetical",
    "params": {
@@ -16620,17 +16518,17 @@
      "spire_m": 12
     },
     "cloister": {
-     "side": "south",
+     "side": "north",
      "size": 32
     }
    },
-   "description": "Prieuré augustin fondé par la reine Mathilde en 1108, contre le mur près d'Aldgate ; plan restitué."
+   "description": "Prieuré augustin fondé par la reine Mathilde en 1107-1108, premier établissement religieux intra-muros après la Conquête, juste à l'intérieur d'Aldgate, au nord de Leadenhall Street (MOLA, Schofield et Lea 2005). Mitre Street suit à peu près la nef et Mitre Square le cloître (au nord) ; un arc subsiste au sous-sol du 71-77 Leadenhall Street. Élévation et abside restituées."
   },
   {
    "id": "austin_friars",
    "name": "Couvent des Augustins (Austin Friars, 1253)",
    "model": "abbey",
-   "at": [1710, 72],
+   "at": [1736, 80],
    "angle_deg": -8,
    "clear_m": 5,
    "certainty": "hypothetical",
@@ -16644,7 +16542,7 @@
      "size": 30
     }
    },
-   "description": "L'église hollandaise actuelle occupe l'emplacement de la nef (rebâtie à partir de 1354)."
+   "description": "Fondé en 1253 par Humphrey de Bohun (VCH London I) ; en 1340, église d'avant la reconstruction de 1354 (nef de 149 pieds et chœur de 96 pieds après 1354), gabarit inconnu. L'église hollandaise actuelle occupe l'emplacement de la nef : emprise centrée sur elle, chœur à l'est."
   },
   {
    "id": "steelyard",
@@ -16722,7 +16620,7 @@
   },
   {
    "id": "whitefriars",
-   "name": "Couvent des Carmes (Whitefriars, 1253)",
+   "name": "Couvent des Carmes (Whitefriars, 1241)",
    "model": "abbey",
    "at": [190, 30],
    "angle_deg": -8,
@@ -16737,13 +16635,14 @@
      "side": "south",
      "size": 30
     }
-   }
+   },
+   "description": "Fondé par Sir Richard Gray en 1241 (VCH London I) ; enclos de Fleet Street à la Tamise, entre Water Lane et le Temple ; prieuré rebâti par Hugh Courtenay en 1350, église agrandie vers 1396 : état de 1340 restitué."
   },
   {
    "id": "exeter_inn",
    "name": "Hôtel de l'évêque d'Exeter (Outer Temple)",
    "model": "enclosure",
-   "at": [-330, -40],
+   "at": [-205, 10],
    "angle_deg": -20,
    "certainty": "hypothetical",
    "params": {
@@ -16751,7 +16650,8 @@
     "width_m": 45,
     "height_m": 10,
     "ranges": true
-   }
+   },
+   "description": "Hôtel acquis par l'évêque Walter de Stapledon dans les années 1320 (futur Essex House), entre Milford Lane et le Temple ; Essex Street (vers 1675) est percée sur son emplacement. Gabarit restitué."
   },
   {
    "id": "savoy",
@@ -16806,14 +16706,14 @@
    "id": "charing_cross",
    "name": "Croix d'Éléonore de Charing (1291-1294)",
    "model": "tower",
-   "at": [-1270, -462],
+   "at": [-1287, -402],
    "certainty": "probable",
    "clear_m": 0,
    "params": {
     "radius_m": 2.5,
     "height": 12
    },
-   "description": "Dernière croix du convoi de la reine Éléonore, à la fourche du Strand et de la route de Westminster."
+   "description": "Dernière croix du convoi de la reine Éléonore, à la fourche du Strand et de la route de Westminster ; site marqué par la statue de Charles Ier (OSM)."
   },
   {
    "id": "york_place",
@@ -16995,7 +16895,7 @@
     "height_m": 20,
     "apse": "flat"
    },
-   "description": "Chapelle palatine à deux niveaux reconstruite de 1292 à 1348."
+   "description": "Chapelle palatine à deux niveaux (Saint-Étienne en haut, Sainte-Marie de la crypte en bas) reconstruite à partir de 1292 pour Édouard Ier, largement achevée en 1348, décor jusqu'aux années 1360 (UK Parliament, Virtual St Stephen's) : encore en chantier en 1340."
   },
   {
    "id": "westminster_palace",
@@ -17159,11 +17059,11 @@
     [2060, 118],
     [2018, 150],
     [1880, 197],
-    [1750, 257],
-    [1640, 305],
-    [1548, 347],
-    [1440, 382],
-    [1360, 414],
+    [1750, 242],
+    [1640, 290],
+    [1540, 325],
+    [1440, 365],
+    [1360, 400],
     [1290, 445],
     [1241, 472],
     [1150, 522],
@@ -17171,13 +17071,14 @@
     [1102, 450],
     [1045, 350],
     [1025, 315],
-    [970, 345],
-    [900, 378],
-    [800, 392],
-    [700, 375],
-    [628, 336],
-    [598, 250],
-    [572, 160],
+    [972, 332],
+    [890, 347],
+    [800, 352],
+    [700, 357],
+    [660, 354],
+    [626, 325],
+    [617, 240],
+    [588, 160],
     [556, 88],
     [500, 100],
     [440, 110],
