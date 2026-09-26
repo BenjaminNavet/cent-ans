@@ -1,4 +1,4 @@
-//! Lot DP2 (ADR 0031): readable refusals (every weighted reason), the
+//! Lot DP2 (ADR 0075): readable refusals (every weighted reason), the
 //! single blocking point and its counter-offer, and the trade agreement
 //! with a rival (low value, on purpose).
 
@@ -209,7 +209,7 @@ fn an_acceptable_treaty_says_why() {
 }
 
 /// C5R noted a low value of a trade agreement with England: the rival
-/// malus (« Enrichir un rival », −12) is intended (ADR 0031 § 4). The
+/// malus (« Enrichir un rival », −12) is intended (ADR 0075 § 4). The
 /// agreement stays possible once the attitude is good or with a sweetener.
 #[test]
 fn a_trade_agreement_with_a_rival_is_worth_little_on_purpose() {

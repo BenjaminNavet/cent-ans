@@ -1,4 +1,4 @@
-//! Lot DP2 (ADR 0031): diplomatic stance of a faction towards another, for
+//! Lot DP2 (ADR 0075): diplomatic stance of a faction towards another, for
 //! the « Diplomatie » map mode and minimap (green ally, blue agreement,
 //! yellow neutral, orange tension, red war, grey vassal). Pure.
 
