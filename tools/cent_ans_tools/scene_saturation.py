@@ -42,6 +42,23 @@ VIEWS: dict[str, list[str]] = {
         "--shot-at=45",
         "--no-hud",
     ],
+    # DA7b: the DA6 `bocage` close-up no longer frames the hedges on main (open field); these
+    # views show the hedges and the village, and the autumn field from above.
+    "bocage_haies": [
+        "--terrain=bocage",
+        "--camera=600,400,90,200",
+        "--shot-at=40",
+        "--no-hud",
+    ],
+    "bocage_haute": ["--terrain=bocage", "--shot-at=40"],
+    "automne_haute": ["--season=autumn", "--shot-at=40"],
+    "automne_bocage": [
+        "--season=autumn",
+        "--terrain=bocage",
+        "--camera=600,400,90,200",
+        "--shot-at=40",
+        "--no-hud",
+    ],
 }
 
 
