@@ -1296,6 +1296,8 @@ func _bench_finish() -> void:
 	result["primitives_m"] = Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1.0e6
 	result["draw_calls"] = Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 	result["skipped_updates"] = self.soldiers.skipped_updates
+	if self.soldiers.pb3e_verify:
+		result["pb3e_buffer_mismatches"] = self.soldiers.pb3e_mismatches
 	# EP12 : blessés au sol, régiments désarmés, armes au sol (plafonnées).
 	result["wounded"] = self.soldiers.wounded_count
 	result["disarmed_units"] = self.soldiers.disarmed_units.size()
