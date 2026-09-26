@@ -328,3 +328,57 @@ fn dead_faction_pays_no_tribute() {
     assert_eq!(state.factions[&payee].treasury, before.1);
     assert!(state.factions[&payer].ledger.tributes.is_empty());
 }
+
+/// Fix 9: the child of a cross-faction marriage belongs to its father's
+/// faction when the mother holds no crown there.
+#[test]
+fn cross_faction_child_follows_the_father() {
+    use data_model::Sex;
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 3).unwrap();
+    let crowned = |state: &CampaignState, id: &data_model::CharacterId| {
+        state
+            .factions
+            .values()
+            .any(|f| f.ruler.as_ref() == Some(id) || f.heir.as_ref() == Some(id))
+    };
+    let pick = |state: &CampaignState, faction: &str, sex: Sex| {
+        state
+            .characters
+            .iter()
+            .find(|(id, c)| {
+                c.alive && c.faction == fac(faction) && c.sex == sex && !crowned(state, id)
+            })
+            .map(|(id, _)| id.clone())
+            .expect("a courtier")
+    };
+    let father = pick(&state, "fac_england", Sex::Male);
+    let mother = pick(&state, "fac_france", Sex::Female);
+    // Only this couple is married and fertile.
+    for c in state.characters.values_mut() {
+        c.spouse = None;
+    }
+    let year = state.year;
+    let m = state.characters.get_mut(&mother).unwrap();
+    m.spouse = Some(father.clone());
+    m.birth_year = year - 25;
+    let f = state.characters.get_mut(&father).unwrap();
+    f.spouse = Some(mother.clone());
+    f.birth_year = year - 30;
+    state.season = crate::state::Season::Winter;
+    let before: Vec<data_model::CharacterId> = state.characters.keys().cloned().collect();
+    let mut events = Vec::new();
+    for _ in 0..60 {
+        crate::dynasty::resolve_births(&mut state, &data, &mut events);
+        if let Some(child) = state
+            .characters
+            .iter()
+            .find(|(id, c)| c.mother.as_ref() == Some(&mother) && !before.contains(id))
+            .map(|(_, c)| c)
+        {
+            assert_eq!(child.faction, fac("fac_england"));
+            return;
+        }
+    }
+    panic!("no child born");
+}
