@@ -1413,6 +1413,8 @@ pub fn apply_treaty(
                     c.captive = true;
                     c.captor = Some(holder.clone());
                     c.governor_of = None;
+                    // ADR 0025 § 6: held for the whole term, not for sale.
+                    c.ransom_terms = Some(crate::ransom::RansomTerms::Hold);
                 }
                 let until_turn = state.turn + HOSTAGE_TURNS;
                 state
@@ -1528,6 +1530,14 @@ pub(crate) fn resolve_negotiation(
             .collect();
         for pledge in betrayed {
             state.add_modifier(id, &pledge.from, -20, HOSTAGE_BETRAYAL_REASON, 60);
+            // Hostages of an enemy become plain prisoners (ransom rules).
+            if let Some(c) = state
+                .characters
+                .get_mut(&pledge.character)
+                .filter(|c| c.captor.as_ref() == Some(id))
+            {
+                c.ransom_terms = None;
+            }
         }
         let f = state.factions.get_mut(id).expect("listed");
         f.ledger.trade_agreements.retain(|o| !at_war.contains(o));

@@ -222,3 +222,56 @@ fn holding_a_lesser_settlement_is_no_defeat() {
     crate::victory::resolve_victory(&mut state, &data, &mut events);
     assert!(state.outcome.is_some());
 }
+
+/// Aragon hands a courtier as a hostage to Castile (treaty article).
+fn aragonese_hostage(state: &mut CampaignState, data: &GameData) -> data_model::CharacterId {
+    let (ar, ca) = (fac("fac_aragon"), fac("fac_castile"));
+    let ruler = state.factions[&ar].ruler.clone();
+    let hostage = state
+        .characters
+        .iter()
+        .find(|(id, c)| {
+            c.alive
+                && c.faction == ar
+                && !c.captive
+                && c.army.is_none()
+                && Some(*id) != ruler.as_ref()
+        })
+        .map(|(id, _)| id.clone())
+        .expect("an Aragonese courtier");
+    let article = crate::negotiation::Article::Hostage {
+        giver: crate::negotiation::Party::Proposer,
+        character: hostage.clone(),
+    };
+    crate::negotiation::apply_treaty(state, data, &ar, &ca, &[article]).unwrap();
+    hostage
+}
+
+/// Fix 8: a treaty hostage can be neither bought back nor freed on parole
+/// before his term (ADR 0025 § 6).
+#[test]
+fn treaty_hostage_is_held_for_his_term() {
+    use crate::ransom::{self, RansomError, RansomTerms};
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_aragon"), 10).unwrap();
+    let hostage = aragonese_hostage(&mut state, &data);
+    let (ar, ca) = (fac("fac_aragon"), fac("fac_castile"));
+    assert_eq!(
+        state.characters[&hostage].ransom_terms,
+        Some(RansomTerms::Hold)
+    );
+    state.factions.get_mut(&ar).unwrap().treasury = 1_000_000;
+    assert_eq!(
+        ransom::pay_ransom(&mut state, &data, &ar, &hostage, 1),
+        Err(RansomError::Held)
+    );
+    assert_eq!(
+        ransom::release_on_parole(&mut state, &data, &ca, &hostage),
+        Err(RansomError::Held)
+    );
+    assert_eq!(
+        ransom::set_ransom_terms(&mut state, &data, &ca, &hostage, RansomTerms::Money),
+        Err(RansomError::Held)
+    );
+    assert!(state.characters[&hostage].captive);
+}

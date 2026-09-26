@@ -633,6 +633,9 @@ impl CampaignState {
                 if !held {
                     return invalid("ce captif n'est pas détenu ici");
                 }
+                if !herald_may_ransom(self, &captive) {
+                    return invalid("son geôlier refuse de le rendre contre de l'argent");
+                }
                 cost = ransom_price(self, data, &captive, agent.level);
                 character_out = Some(captive);
             }
@@ -713,8 +716,12 @@ impl CampaignState {
     ) -> Option<CharacterId> {
         self.characters
             .iter()
-            .find(|(_, c)| {
-                c.alive && c.captive && &c.faction == faction && c.captor.as_ref() == Some(captor)
+            .find(|(id, c)| {
+                c.alive
+                    && c.captive
+                    && &c.faction == faction
+                    && c.captor.as_ref() == Some(captor)
+                    && herald_may_ransom(self, id)
             })
             .map(|(id, _)| id.clone())
     }
@@ -764,6 +771,17 @@ impl CampaignState {
 }
 
 /// Price paid by a herald of seal `level` for `captive`.
+/// A herald buys back only a captive held for money: not one his captor
+/// keeps (`Hold`, treaty hostages included) or frees against a province.
+fn herald_may_ransom(state: &CampaignState, captive: &CharacterId) -> bool {
+    state.characters.get(captive).is_some_and(|c| {
+        matches!(
+            c.ransom_terms.clone().unwrap_or_default(),
+            crate::ransom::RansomTerms::Money
+        )
+    })
+}
+
 fn ransom_price(state: &CampaignState, data: &GameData, captive: &CharacterId, level: u8) -> i64 {
     let effects = &rules(data).effects;
     let percent = (effects.ransom_price_percent
