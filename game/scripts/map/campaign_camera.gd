@@ -3,7 +3,7 @@ extends Node3D
 
 ## Caméra RTS : point de focus au sol, distance (zoom), lacet (Q/E), tangage
 ## dérivé du zoom (30° de près, plus rasant en vue comté → 70° de loin), amortissement.
-## Entrées : WASD/flèches, bords d'écran (désactivable), molette, glisser molette.
+## Entrées : WASD/flèches, bords d'écran (désactivable), molette ou pad (deux doigts / pincement), glisser molette.
 ##
 ## Lot ZG4 (ADR 0036) : caméra rapprochée quand la pyramide de relief est en cache (`relief`
 ## posé par la carte) : distance minimale selon l'étage le plus fin sous le point visé
@@ -112,16 +112,26 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
-			target_distance = clampf(target_distance * (1.0 - zoom_step), min_distance_at(target_focus), max_distance)
+			_zoom_by(1.0 - zoom_step)
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
-			target_distance = clampf(target_distance * (1.0 + zoom_step), min_distance_at(target_focus), max_distance)
+			_zoom_by(1.0 + zoom_step)
 		elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 			_dragging = mb.pressed
+	elif event is InputEventPanGesture:
+		# Pad macOS : glissement vertical à deux doigts = molette continue.
+		_zoom_by(exp(zoom_step * (event as InputEventPanGesture).delta.y))
+	elif event is InputEventMagnifyGesture:
+		# Pad macOS : pincement (facteur > 1 = écarter les doigts = rapprocher).
+		_zoom_by(1.0 / maxf((event as InputEventMagnifyGesture).factor, 0.01))
 	elif event is InputEventMouseMotion and _dragging:
 		var motion := event as InputEventMouseMotion
 		var viewport_height := float(get_viewport().get_visible_rect().size.y)
 		var units_per_px := distance * 1.6 / maxf(viewport_height, 1.0)
 		_pan(Vector2(-motion.relative.x, -motion.relative.y) * units_per_px)
+
+
+func _zoom_by(factor: float) -> void:
+	target_distance = clampf(target_distance * factor, min_distance_at(target_focus), max_distance)
 
 
 func _process(delta: float) -> void:

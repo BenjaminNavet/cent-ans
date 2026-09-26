@@ -28,6 +28,10 @@ extends Node3D
 ## Pas d'échantillonnage des rubans le long de la route (unités monde).
 @export var sample_step: float = 0.5
 @export var max_ribbon_builds_per_frame: int = 3
+## SZ6 : avec le relief quadtree, rubans construits dans des fils (`WorkerThreadPool`) sur un
+## instantané des pages (une tuile coûtait jusqu'à 115 ms au fil principal) : au plus N
+## constructions en cours, installées sur le fil principal dans le budget de l'image.
+@export var max_ribbon_jobs: int = 4
 
 const ROAD_LINE_SHADER := preload("res://shaders/road_line.gdshader")
 
@@ -45,6 +49,11 @@ var _runs_by_chunk: Dictionary = {}
 ## index de tuile → MeshInstance3D
 var _ribbons: Dictionary = {}
 var _dirty: Dictionary = {}
+## SZ6 : emprise (carte) des tronçons de chaque tuile, élargie de la demi-largeur des rubans :
+## rectangle de l'instantané des pages lu par le fil de travail.
+var _run_bounds: Dictionary = {}
+## index de tuile → {"task": id `WorkerThreadPool`, "job": RibbonJob}
+var _jobs: Dictionary = {}
 var _near_alpha := -1.0
 var _medium_alpha := -1.0
 
@@ -52,8 +61,10 @@ var _medium_alpha := -1.0
 func build(data: MapData, settlement_data: SettlementData, terrain_builder: TerrainBuilder) -> void:
 	for child in get_children():
 		child.queue_free()
+	_wait_jobs(false)
 	_ribbons.clear()
 	_runs_by_chunk.clear()
+	_run_bounds.clear()
 	_dirty.clear()
 	map_data = data
 	terrain = terrain_builder
@@ -132,6 +143,11 @@ func _flush_run(index: int, run: PackedVector2Array, width: float) -> void:
 	if not _runs_by_chunk.has(index):
 		_runs_by_chunk[index] = []
 	_runs_by_chunk[index].append({"points": run, "width": width})
+	var bounds := Rect2(run[0], Vector2.ZERO)
+	for p in run:
+		bounds = bounds.expand(p)
+	bounds = bounds.grow(width * 0.5 + 0.01)
+	_run_bounds[index] = (_run_bounds[index] as Rect2).merge(bounds) if _run_bounds.has(index) else bounds
 	stats["runs"] = int(stats["runs"]) + 1
 
 
@@ -155,13 +171,20 @@ func update_view(medium: float, near: float) -> void:
 		_near_alpha = near
 		_ribbon_material.set_shader_parameter("alpha", near)
 	var show_ribbons := near > 0.01
+	var threaded := _threaded()
 	var builds := 0
+	if not _jobs.is_empty():
+		_install_jobs(show_ribbons, false)
 	for index in _runs_by_chunk:
 		var level := terrain.chunk_level(index)
 		var wanted := show_ribbons and level >= 1
 		var ribbon: MeshInstance3D = _ribbons.get(index)
 		if wanted:
 			if ribbon == null or _dirty.has(index):
+				if threaded:
+					if not _jobs.has(index) and _jobs.size() < max_ribbon_jobs:
+						_start_job(index)
+					continue
 				if builds >= max_ribbon_builds_per_frame or (builds > 0 and not FrameBudget.has_time()):
 					continue
 				builds += 1
@@ -182,8 +205,11 @@ func flush(near: float) -> void:
 	var saved := max_ribbon_builds_per_frame
 	max_ribbon_builds_per_frame = 1 << 20
 	FrameBudget.unlimited = true
+	_wait_jobs(true)
+	_sync = true
 	_near_alpha = -1.0
 	update_view(maxf(_medium_alpha, 0.0), near)
+	_sync = false
 	FrameBudget.unlimited = false
 	max_ribbon_builds_per_frame = saved
 
@@ -192,14 +218,113 @@ func ribbon_count() -> int:
 	return _ribbons.size()
 
 
+## Constructions de rubans en cours dans des fils (tests, mesures).
+func pending_jobs() -> int:
+	return _jobs.size()
+
+
+func _exit_tree() -> void:
+	_wait_jobs(false)
+
+
+# --- Construction dans des fils (SZ6) ----------------------------------------------------
+
+## Vrai pendant `flush` : tout se construit sur le fil principal.
+var _sync := false
+
+
+## Les fils de travail lisent un instantané des pages du quadtree ; sans quadtree (repli E0),
+## les grilles des tuiles changent de niveau : construction sur le fil principal comme avant.
+func _threaded() -> bool:
+	return not _sync and max_ribbon_jobs > 0 and terrain != null and terrain.quadtree != null
+
+
+func _start_job(index: int) -> void:
+	_dirty.erase(index)
+	var job := RibbonJob.new()
+	job.runs = _runs_by_chunk[index]
+	job.sample_step = sample_step
+	job.lift = lift
+	job.snapshot = terrain.quadtree.surface_snapshot(_run_bounds[index], Vector2.ZERO)
+	_jobs[index] = {"task": WorkerThreadPool.add_task(job.run, false, "road ribbon %d" % index), "job": job}
+
+
+## Installe les rubans terminés (au moins un par image, puis dans le budget de l'image ; tous
+## si `block`). Un ruban d'une tuile repassée au niveau lointain est abandonné.
+func _install_jobs(show_ribbons: bool, block: bool) -> void:
+	var installed := 0
+	for index: int in _jobs.keys():
+		var entry: Dictionary = _jobs[index]
+		if not block:
+			if not WorkerThreadPool.is_task_completed(entry["task"]):
+				continue
+			if installed > 0 and not FrameBudget.has_time():
+				break
+		WorkerThreadPool.wait_for_task_completion(entry["task"])
+		_jobs.erase(index)
+		if not block and terrain.chunk_level(index) == 0:
+			continue
+		_install_ribbon(index, (entry["job"] as RibbonJob).arrays, show_ribbons or block)
+		installed += 1
+
+
+## Attend les constructions en cours ; les installe si `install` (sinon les abandonne).
+func _wait_jobs(install: bool) -> void:
+	if install:
+		_install_jobs(true, true)
+		return
+	for index: int in _jobs:
+		WorkerThreadPool.wait_for_task_completion(_jobs[index]["task"])
+	_jobs.clear()
+
+
+## Rubans d'une tuile construits hors du fil principal.
+class RibbonJob:
+	extends RefCounted
+
+	var runs: Array = []
+	var sample_step: float = 0.5
+	var lift: float = 0.06
+	var snapshot: Dictionary = {}
+	var arrays: Array = []
+
+	func run() -> void:
+		arrays = RoadRenderer.ribbon_arrays(runs, sample_step, lift, snapshot, null)
+
+
 func _build_ribbon(index: int) -> void:
 	_dirty.erase(index)
+	_install_ribbon(index, ribbon_arrays(_runs_by_chunk[index], sample_step, lift, {}, terrain), true)
+
+
+func _install_ribbon(index: int, arrays: Array, show: bool) -> void:
+	var ribbon: MeshInstance3D = _ribbons.get(index)
+	if ribbon == null:
+		ribbon = MeshInstance3D.new()
+		ribbon.name = "Ribbon_%d" % index
+		ribbon.material_override = _ribbon_material
+		ribbon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(ribbon)
+		_ribbons[index] = ribbon
+	ribbon.visible = show
+	if arrays.is_empty():
+		ribbon.mesh = null
+		return
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	ribbon.mesh = mesh
+
+
+## Tableaux du maillage des rubans de `runs` (vide s'il n'y a aucun sommet). Hauteurs : surface
+## affichée du terrain (`terrain.surface_heights_at`), ou, sans `terrain`, l'instantané des pages
+## `snapshot` (origine (0, 0)), même résultat : fil de travail.
+static func ribbon_arrays(runs: Array, sample_step: float, lift: float, snapshot: Dictionary, terrain: TerrainBuilder) -> Array:
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var uvs := PackedVector2Array()
 	var indices := PackedInt32Array()
-	for run in _runs_by_chunk[index]:
-		var dense := _densify(run["points"])
+	for run: Dictionary in runs:
+		var dense := _densify(run["points"], sample_step)
 		var half: float = run["width"] * 0.5
 		var base := vertices.size()
 		var count := dense.size()
@@ -216,7 +341,7 @@ func _build_ribbon(index: int) -> void:
 			var perp := Vector2(-dir.y, dir.x) * half
 			edges[i * 2] = p + perp
 			edges[i * 2 + 1] = p - perp
-		var edge_heights := terrain.surface_heights_at(edges)
+		var edge_heights := terrain.surface_heights_at(edges) if terrain != null else snapshot_heights(snapshot, edges)
 		vertices.resize(base + count * 2)
 		normals.resize(base + count * 2)
 		uvs.resize(base + count * 2)
@@ -243,31 +368,30 @@ func _build_ribbon(index: int) -> void:
 			indices[k + 3] = a
 			indices[k + 4] = a + 3
 			indices[k + 5] = a + 2
-	var ribbon: MeshInstance3D = _ribbons.get(index)
-	if ribbon == null:
-		ribbon = MeshInstance3D.new()
-		ribbon.name = "Ribbon_%d" % index
-		ribbon.material_override = _ribbon_material
-		ribbon.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(ribbon)
-		_ribbons[index] = ribbon
-	ribbon.visible = true
 	if vertices.is_empty():
-		ribbon.mesh = null
-		return
+		return []
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_NORMAL] = normals
 	arrays[Mesh.ARRAY_TEX_UV] = uvs
 	arrays[Mesh.ARRAY_INDEX] = indices
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	ribbon.mesh = mesh
+	return arrays
+
+
+## Hauteurs de la surface affichée en une série de points dans un instantané des pages
+## (`ReliefQuadtree.surface_snapshot`, origine (0, 0)) : même résultat que
+## `TerrainBuilder.surface_heights_at` avec le quadtree (repli `MapData`, jamais sous la mer).
+static func snapshot_heights(snapshot: Dictionary, points: PackedVector2Array) -> PackedFloat32Array:
+	var result := PackedFloat32Array()
+	result.resize(points.size())
+	for n in points.size():
+		result[n] = maxf(ReliefQuadtree.sample_snapshot(snapshot, points[n].x, points[n].y), 0.0)
+	return result
 
 
 ## Points intermédiaires tous les `sample_step` (le ruban suit les facettes du terrain).
-func _densify(points: PackedVector2Array) -> PackedVector2Array:
+static func _densify(points: PackedVector2Array, sample_step: float) -> PackedVector2Array:
 	var result := PackedVector2Array([points[0]])
 	for i in range(1, points.size()):
 		var a := points[i - 1]

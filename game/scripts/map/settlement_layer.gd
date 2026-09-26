@@ -99,6 +99,9 @@ var _towns_version := -1
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
 var _hamlet_anchors: PackedVector4Array = PackedVector4Array()
+## Lot SZ4 : échelle appliquée aux hameaux (1 au loin, taille réelle au palier vallée,
+## `MapPropScale.hamlet_scale`) ; les tuiles sont reconstruites par pas de `rewrite_step`.
+var _hamlet_scale := 1.0
 
 
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
@@ -577,17 +580,32 @@ func update_view(camera_distance: float) -> void:
 		_icon_material.set_shader_parameter("alpha", icon_alpha)
 		_icons.visible = icon_alpha > 0.01
 		_models_root.visible = weights.x > 0.35 and not site and not _towns_active()
-		_hamlets_root.visible = weights.x > 0.35 and not site
+		# SZ4 : hameaux à leur taille réelle sous le palier comté, gardés au palier site.
+		_hamlets_root.visible = weights.x > 0.35
 		_landmarks_root.visible = not site
-		_update_label_heights()
+		# SZ6 : les hauteurs d'étiquettes ne dépendent des poids que par le palier près et les
+		# villes 1:1 : pas de recalcul des 570 étiquettes à chaque image d'un zoom.
+		var label_state := Vector2i(int(weights.x > 0.35), int(_towns_active()))
+		if label_state != _label_state:
+			_update_label_heights()
 		_declutter_timer = 0.0
-	if _labels_dirty:
+	if MapData.vertical_scale() != _label_scale:
 		_labels_dirty = false
-		_update_label_heights()
+		_update_label_heights()  # ZG4 : toutes les étiquettes du palier moyen suivent l'échelle
+	elif _labels_dirty:
+		_labels_dirty = false
+		# SZ6 : seules les colonies des morceaux recalés (hauteur de leur maquette ou de leur ville
+		# emblématique) changent.
+		var near := _weights.x > 0.35
+		for index: int in _label_chunks:
+			for i in _settlements_by_chunk.get(index, PackedInt32Array()):
+				_update_label_height(i, near)
+		_label_chunks.clear()
 	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
 	_update_towns(camera_distance)
+	_update_hamlet_scale(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
@@ -603,28 +621,43 @@ func _on_chunk_surface_changed(index: int) -> void:
 		_hamlet_dirty[index] = true
 	# ZG4 : hauteurs des étiquettes une fois par image (et non à chaque morceau recalé).
 	_labels_dirty = true
+	_label_chunks[index] = true
+
+
+## SZ6 : morceaux recalés depuis la dernière mise à jour des étiquettes ; état (palier près,
+## villes 1:1) de la dernière mise à jour complète.
+var _label_chunks: Dictionary = {}
+var _label_state := Vector2i(-1, -1)
+var _label_scale := -1.0
 
 
 ## Hauteur des étiquettes : au-dessus de la maquette (près) ou de l'icône (moyen).
 func _update_label_heights() -> void:
 	var near := _weights.x > 0.35
+	_label_state = Vector2i(int(near), int(_towns_active()))
+	_label_scale = MapData.vertical_scale()
+	_label_chunks.clear()
 	for i in _labels.size():
-		var label := _labels[i]
-		var px: Vector2 = data.settlements[i]["px"]
-		if near and _models[i] != null:
-			if not _landmarks.has(i):
-				var model_at := model_px(i)  # ZG5b : au-dessus de la maquette ancrée
-				label.position.x = model_at.x
-				label.position.z = model_at.y
-			if _towns_active() and not _landmarks.has(i):
-				label.position.y = _model_base_y(i) + 0.12  # ZG6 : ville 1:1, pas de maquette
-			else:
-				label.position.y = _model_base_y(i) + _model_top[i] + 0.8
-			label.offset = Vector2.ZERO
+		_update_label_height(i, near)
+
+
+func _update_label_height(i: int, near: bool) -> void:
+	var label := _labels[i]
+	var px: Vector2 = data.settlements[i]["px"]
+	if near and _models[i] != null:
+		if not _landmarks.has(i):
+			var model_at := model_px(i)  # ZG5b : au-dessus de la maquette ancrée
+			label.position.x = model_at.x
+			label.position.z = model_at.y
+		if _towns_active() and not _landmarks.has(i):
+			label.position.y = _model_base_y(i) + 0.12  # ZG6 : ville 1:1, pas de maquette
 		else:
-			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
-			label.position = _marker_world[i] if i < _marker_world.size() else Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
-			label.offset = Vector2(0.0, marker_size(i) * (0.5 + ICON_CENTER_LIFT) + label.font_size * 0.4)
+			label.position.y = _model_base_y(i) + _model_top[i] + 0.8
+		label.offset = Vector2.ZERO
+	else:
+		# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
+		label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+		label.offset = Vector2(0.0, marker_size(i) * (0.5 + ICON_CENTER_LIFT) + label.font_size * 0.4)
 
 
 ## Opacité d'une étiquette selon le type et le palier (cité : moyen et près ; ville : moyen
@@ -736,6 +769,32 @@ func visible_label_count() -> int:
 # --- Hameaux -------------------------------------------------------------------------
 
 
+## SZ4 : nouvelle échelle des hameaux (par pas de `rewrite_step`) → transformations des tuiles
+## construites réécrites depuis les données gardées à la construction (sans relire le relief).
+func _update_hamlet_scale(camera_distance: float) -> void:
+	var props := MapPropScale.shared()
+	var wanted := props.hamlet_scale(camera_distance)
+	if not props.needs_rewrite(_hamlet_scale, wanted):
+		return
+	_hamlet_scale = wanted
+	for node: Node3D in _hamlet_nodes.values():
+		for mmi in node.get_children():
+			var instance := mmi as MultiMeshInstance3D
+			if instance != null and instance.multimesh != null and instance.has_meta("hamlet_entries"):
+				_write_hamlet_transforms(instance.multimesh, instance.get_meta("hamlet_entries"))
+
+
+## SZ4 : transformations des hameaux à l'échelle courante. Pose : entre le sol au centre (taille
+## réelle, emprise de quelques dizaines de mètres) et le point le plus bas de l'emprise de carte
+## (taille de carte, rien ne flotte sur une pente), au prorata de l'échelle.
+func _write_hamlet_transforms(multimesh: MultiMesh, entries: Array) -> void:
+	var s := _hamlet_scale
+	for t in entries.size():
+		var e: PackedFloat32Array = entries[t]
+		var basis := Basis(Vector3.UP, e[2]).scaled(Vector3.ONE * (e[3] * s))
+		var y := lerpf(e[4], e[5], s) - 0.03 * s
+		multimesh.set_instance_transform(t, Transform3D(basis, Vector3(e[0], y, e[1])))
+
 func _update_hamlets() -> void:
 	var show := _weights.x > 0.35
 	var builds := 0
@@ -809,23 +868,24 @@ func _build_hamlets(index: int) -> void:
 		var key := variant * 2 + (1 if burned else 0)
 		var yaw := float((seed_value / 13) % 628) / 100.0
 		var scale := ModelLibrary.HAMLET_SCALE * (0.85 + float((seed_value / 17) % 30) / 100.0)
-		var y := terrain.surface_height_at(px.x, px.y)
+		var center := terrain.surface_height_at(px.x, px.y)
+		var low := center
 		for k in 4:
 			var angle := k * TAU / 4.0 + yaw
-			y = minf(y, terrain.surface_height_at(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
-		var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale)
+			low = minf(low, terrain.surface_height_at(px.x + cos(angle) * scale * 0.4, px.y + sin(angle) * scale * 0.4))
 		if not groups.has(key):
 			groups[key] = []
-		groups[key].append(Transform3D(basis, Vector3(px.x, y - 0.03, px.y)))
+		# SZ4 : (x, z, lacet, échelle de carte, sol au centre, sol le plus bas de l'emprise de carte).
+		groups[key].append(PackedFloat32Array([px.x, px.y, yaw, scale, center, low]))
 	for key in groups:
-		var transforms: Array = groups[key]
+		var entries: Array = groups[key]
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.mesh = meshes[key / 2]
-		multimesh.instance_count = transforms.size()
-		for t in transforms.size():
-			multimesh.set_instance_transform(t, transforms[t])
+		multimesh.instance_count = entries.size()
+		_write_hamlet_transforms(multimesh, entries)
 		var mmi := MultiMeshInstance3D.new()
+		mmi.set_meta("hamlet_entries", entries)
 		mmi.multimesh = multimesh
 		if key % 2 == 1:
 			mmi.material_override = _burned_material

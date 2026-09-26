@@ -5,6 +5,8 @@ extends Node3D
 ## colonies et des hameaux (plus fournies l'hiver), fumées d'incendie des hameaux brûlés et des
 ## villes assiégées, vols d'oiseaux, bateaux. Instanciés par `MultiMesh` (un appel de rendu par
 ## famille), visibles au palier près (fumées d'incendie jusqu'au palier moyen).
+## Lot SZ4 : sous le palier comté, moulins et fumées passent continûment de leur taille de carte à
+## leur taille réelle (`MapPropScale`), et restent affichés jusqu'au palier site.
 
 const SMOKE_SHADER := preload("res://shaders/life_smoke.gdshader")
 const OVERLAY_SHADER := preload("res://shaders/life_overlay.gdshader")
@@ -40,7 +42,8 @@ var _reground_chunks: Dictionary = {}
 var _last_rebuild_key := ""
 var _windmill_bodies: MultiMeshInstance3D
 var _windmill_sails: MultiMeshInstance3D
-## Moulins : [Vector2 px, lacet, graine, tourne (bool)].
+## Moulins : [Vector2 px, lacet, graine, tourne (bool), hauteur du sol (SZ4 : gardée pour les
+## réécritures d'échelle, recalée avec la surface)].
 var _windmill_points: Array = []
 var _overlay: ShaderMaterial
 var _overlay_snowy := false
@@ -49,6 +52,9 @@ var _ruin_overlays: Dictionary = {}
 var _ruin: Dictionary = {}
 var _season_boost := 1.0
 var _snow := 0.0
+## SZ4 : échelles appliquées (moulins : instances réécrites ; fumées : paramètre du matériau).
+var _windmill_scale := 1.0
+var _smoke_scales := Vector2(-1.0, -1.0)
 
 
 func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
@@ -171,6 +177,7 @@ func _rebuild_key(province_states: Dictionary) -> String:
 
 ## Moulins à vent sur la couronne de champs des colonies ; ailes arrêtées en pays dévasté.
 func _build_windmills(province_states: Dictionary) -> void:
+	_points_version += 1
 	_windmill_points.clear()
 	var data := _layer.data
 	for i in data.settlements.size():
@@ -182,7 +189,8 @@ func _build_windmills(province_states: Dictionary) -> void:
 		for k in count:
 			var angle := float((seed_value / (k + 2)) % 628) / 100.0
 			var distance := _layer.model_radius(i) * (1.35 + float((seed_value / (k + 5)) % 60) / 100.0)
-			_windmill_points.append([px + Vector2(cos(angle), sin(angle)) * distance, float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0, devastation < RUIN_MIN_DEVASTATION])
+			var mill_px := px + Vector2(cos(angle), sin(angle)) * distance
+			_windmill_points.append([mill_px, float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0, devastation < RUIN_MIN_DEVASTATION, _surface_y(mill_px)])
 	var body_mesh := _first_mesh("settlements/windmill_body")
 	var sails_mesh := _first_mesh("settlements/windmill_sails")
 	if body_mesh == null or sails_mesh == null:
@@ -206,11 +214,15 @@ func _build_windmills(province_states: Dictionary) -> void:
 	_windmill_sails.multimesh = sails
 
 
+func _surface_y(px: Vector2) -> float:
+	return _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
+
+
 func _windmill_transforms(point: Array) -> Array:
 	var px: Vector2 = point[0]
-	var y := _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
-	var basis := Basis(Vector3.UP, float(point[1])).scaled(Vector3.ONE * WINDMILL_SCALE)
-	var body := Transform3D(basis, Vector3(px.x, y - 0.05, px.y))
+	var y: float = point[4]
+	var basis := Basis(Vector3.UP, float(point[1])).scaled(Vector3.ONE * WINDMILL_SCALE * _windmill_scale)
+	var body := Transform3D(basis, Vector3(px.x, y - 0.05 * _windmill_scale, px.y))
 	return [body, Transform3D(basis, body * WINDMILL_HUB)]
 
 
@@ -285,6 +297,7 @@ func _update_overlays() -> void:
 
 
 func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: float) -> void:
+	_points_version += 1
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
 	quad.center_offset = Vector3(0.0, 0.5, 0.0)
@@ -297,34 +310,39 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 		var point: Array = points[n]
 		var seed_value: float = point[2]
 		var s := 0.8 + 0.4 * seed_value
-		var basis := Basis.from_scale(Vector3(size.x * s, size.y * s, 1.0))
+		# SZ4 : origine au sol, levée dans la colonne z (lue et mise à l'échelle par le shader).
+		var basis := Basis(Vector3(size.x * s, 0.0, 0.0), Vector3(0.0, size.y * s, 0.0), Vector3(0.0, float(point[1]), 1.0))
 		multimesh.set_instance_transform(n, Transform3D(basis, _ground(point)))
 		multimesh.set_instance_custom_data(n, Color(seed_value, darkness, 0.75 + 0.25 * fposmod(seed_value * 7.0, 1.0), fposmod(seed_value * 13.0, 1.0)))
 	mmi.multimesh = multimesh
 
 
+## Pied d'un panache (au sol ; la levée `point[1]` est portée par la base d'instance, SZ4).
 func _ground(point: Array) -> Vector3:
 	var px: Vector2 = point[0]
 	var y := _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
-	return Vector3(px.x, y + float(point[1]), px.y)
+	return Vector3(px.x, y, px.y)
 
 
 ## PB1 : seuls les points des tuiles dont la surface a changé (`_reground_chunks`) sont recalés :
-## la hauteur d'un point ne dépend que de sa tuile.
+## la hauteur d'un point ne dépend que de sa tuile. SZ6 : points indexés par tuile (plus de
+## parcours de tous les points à chaque recalage), tampon lu et écrit seulement si un point bouge.
 func _reground() -> void:
 	var changed := _reground_chunks
 	_reground_chunks = {}
 	if _windmill_bodies.multimesh != null and _windmill_sails.multimesh != null:
-		for n in _windmill_points.size():
-			if not _point_changed(_windmill_points[n], changed):
-				continue
+		for n: int in _changed_points("windmills", _windmill_points, changed):
+			_windmill_points[n][4] = _surface_y(_windmill_points[n][0])
 			var xforms := _windmill_transforms(_windmill_points[n])
 			_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
 			_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
-	for pair in [[_chimneys, _chimney_points], [_fires, _fire_points]]:
-		var mmi: MultiMeshInstance3D = pair[0]
-		var points: Array = pair[1]
+	for triple in [[_chimneys, _chimney_points, "chimneys"], [_fires, _fire_points, "fires"]]:
+		var mmi: MultiMeshInstance3D = triple[0]
+		var points: Array = triple[1]
 		if mmi.multimesh == null:
+			continue
+		var todo := _changed_points(triple[2], points, changed)
+		if todo.is_empty():
 			continue
 		# Tampon complet lu et écrit une fois (12 flottants de transformation + 4 de données
 		# personnalisées par instance ; hauteur de l'origine au rang 7) plutôt que deux appels au
@@ -333,27 +351,43 @@ func _reground() -> void:
 		var stride := 16
 		if buffer.size() != points.size() * stride:
 			# Rendu factice (headless) : pas de tampon lisible, repli point par point.
-			for n in points.size():
-				if _point_changed(points[n], changed):
-					var xform := mmi.multimesh.get_instance_transform(n)
-					xform.origin = _ground(points[n])
-					mmi.multimesh.set_instance_transform(n, xform)
+			for n: int in todo:
+				var xform := mmi.multimesh.get_instance_transform(n)
+				xform.origin = _ground(points[n])
+				mmi.multimesh.set_instance_transform(n, xform)
 			continue
-		var touched := false
-		for n in points.size():
-			if not _point_changed(points[n], changed):
-				continue
+		for n: int in todo:
 			buffer[n * stride + 7] = _ground(points[n]).y
-			touched = true
-		if touched:
-			mmi.multimesh.buffer = buffer
+		mmi.multimesh.buffer = buffer
 
 
-func _point_changed(point: Array, changed: Dictionary) -> bool:
+## SZ6 : index par tuile des points (`_windmill_points`, `_chimney_points`, `_fire_points`),
+## refait quand les listes sont reconstruites (`_points_version`).
+var _points_version := 0
+var _points_by_chunk: Dictionary = {}
+
+
+## Indices croissants des points de `points` situés dans une tuile de `changed` (tous sans terrain).
+func _changed_points(list_name: String, points: Array, changed: Dictionary) -> Array:
 	if _terrain == null:
-		return true
-	var px: Vector2 = point[0]
-	return changed.has(_terrain.chunk_index_at(px.x, px.y))
+		return range(points.size())
+	var cached: Dictionary = _points_by_chunk.get(list_name, {})
+	if int(cached.get("version", -1)) != _points_version or int(cached.get("size", -1)) != points.size():
+		var index_of: Dictionary = {}
+		for n in points.size():
+			var px: Vector2 = points[n][0]
+			var index := _terrain.chunk_index_at(px.x, px.y)
+			if not index_of.has(index):
+				index_of[index] = []
+			(index_of[index] as Array).append(n)
+		cached = {"version": _points_version, "size": points.size(), "by_chunk": index_of}
+		_points_by_chunk[list_name] = cached
+	var by_chunk: Dictionary = cached["by_chunk"]
+	var result: Array = []
+	for index: int in changed:
+		result.append_array(by_chunk.get(index, []))
+	result.sort()
+	return result
 
 
 func _on_surface_changed(index: int) -> void:
@@ -368,15 +402,39 @@ func set_season(weights: Vector4) -> void:
 	_season_boost = 0.55 * weights.y + 0.8 * weights.x + 0.95 * weights.z + 1.15 * weights.w
 
 
+## SZ4 : échelle des panaches (paramètre des matériaux) et des moulins (instances réécrites par
+## pas de `MapPropScale.rewrite_step`).
+func _apply_prop_scale(camera_distance: float) -> void:
+	var props := MapPropScale.shared()
+	var smoke := Vector2(props.chimney_scale(camera_distance), props.fire_scale(camera_distance))
+	if not smoke.is_equal_approx(_smoke_scales):
+		_smoke_scales = smoke
+		_chimney_material.set_shader_parameter("prop_scale", smoke.x)
+		_fire_material.set_shader_parameter("prop_scale", smoke.y)
+	var mill := props.windmill_scale(camera_distance)
+	if props.needs_rewrite(_windmill_scale, mill):
+		_windmill_scale = mill
+		_rewrite_windmills()
+
+
+func _rewrite_windmills() -> void:
+	if _windmill_bodies.multimesh == null or _windmill_sails.multimesh == null:
+		return
+	if _windmill_bodies.multimesh.instance_count != _windmill_points.size():
+		return
+	for n in _windmill_points.size():
+		var xforms := _windmill_transforms(_windmill_points[n])
+		_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
+		_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
+
+
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	near_weight = tiers.near_weight(camera_distance) if tiers != null else 1.0
 	var medium := tiers.medium_weight(camera_distance) if tiers != null else 0.0
-	# ZG4 : au palier « site », fumées, feux et moulins à l'échelle de la carte (des centaines de
-	# mètres) s'effacent avec les maquettes qu'ils accompagnent.
-	var site := tiers.site_weight(camera_distance) if tiers != null else 0.0
-	near_weight *= 1.0 - site
-	medium *= 1.0 - site
-	var chimney_alpha := near_weight * _season_boost * 0.85
+	# SZ4 : fumées, feux et moulins à leur taille réelle sous le palier comté (ZG4 les masquait au
+	# palier site, à leur taille de carte : des colonnes de plusieurs kilomètres).
+	_apply_prop_scale(camera_distance)
+	var chimney_alpha := near_weight * _season_boost * 0.85 * MapPropScale.shared().chimney_alpha(camera_distance)
 	_chimneys.visible = chimney_alpha > 0.02
 	_chimney_material.set_shader_parameter("fade", chimney_alpha)
 	var fire_alpha := clampf(near_weight + medium * 0.8, 0.0, 1.0) * 0.9
