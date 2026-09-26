@@ -80,8 +80,8 @@ def main():
         _sheet(
             f"FG4 — cheval fin sur les clips du rig « cavalry » ({cfig}, {horse})",
             "Mêmes os, même texture d'os : poids calculés dans la pose naturelle, "
-            "articulations posées sur les pivots des clips. Rendu Eevee, cavalier actuel "
-            "(en attendant FG1).",
+            "articulations posées sur les pivots des clips. Rendu Eevee, cavalier fin FG1 "
+            "(corps MakeHuman).",
             rows,
         ).save(
             os.path.join(
