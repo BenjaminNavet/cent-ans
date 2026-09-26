@@ -275,9 +275,26 @@ def fetch_freesound(sound_id: int) -> Path:
     return audio_path
 
 
+def _run_ffmpeg_atomic(cmd: list[str], dst: Path) -> None:
+    """Run an ffmpeg command that ends with ``dst``, via a ``.part`` temp file.
+
+    ``dst`` is only ever created by an atomic ``replace()`` once ffmpeg has
+    exited successfully, so an interrupted encode never leaves a file behind
+    that would make the caller think the conversion already happened (and
+    skip retrying it).
+    """
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    part = dst.with_suffix(dst.suffix + ".part")
+    part_cmd = [*cmd[:-1], str(part)]
+    try:
+        subprocess.run(part_cmd, check=True, capture_output=True)
+        part.replace(dst)
+    finally:
+        part.unlink(missing_ok=True)
+
+
 def convert_music(src: Path, dst: Path, *, max_seconds: float | None = None) -> None:
     """Convert to MP3 128 kbit/s, ~-16 LUFS integrated loudness (ffmpeg loudnorm)."""
-    dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = ["ffmpeg", "-y", "-i", str(src)]
     if max_seconds is not None:
         cmd += ["-t", str(max_seconds)]
@@ -290,12 +307,11 @@ def convert_music(src: Path, dst: Path, *, max_seconds: float | None = None) -> 
         "128k",
         str(dst),
     ]
-    subprocess.run(cmd, check=True, capture_output=True)
+    _run_ffmpeg_atomic(cmd, dst)
 
 
 def convert_layer(src: Path, dst: Path, *, loop_seconds: float = 8.0) -> None:
     """Convert to a loopable stereo OGG Vorbis layer, trimmed and loudness-normalised."""
-    dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
         "ffmpeg",
         "-y",
@@ -319,7 +335,7 @@ def convert_layer(src: Path, dst: Path, *, loop_seconds: float = 8.0) -> None:
         "4",
         str(dst),
     ]
-    subprocess.run(cmd, check=True, capture_output=True)
+    _run_ffmpeg_atomic(cmd, dst)
 
 
 def write_wikimedia_source_md() -> None:
@@ -433,14 +449,18 @@ def main() -> None:
         SHAWM_WIKIMEDIA_FILE, SHAWM_OUT_NAME, "", "", "", "battle", "CC BY-SA 3.0"
     )
     shawm_dst = WIKIMEDIA_DIR / f"{SHAWM_OUT_NAME}.mp3"
-    if not shawm_dst.exists():
+    shawm_layer_dst = BATTLE_LAYERS_DIR / f"{SHAWM_OUT_NAME}.ogg"
+    # Both outputs share one source fetch; retry whichever is missing (music track,
+    # battle layer, or both), not just the music track, so a run interrupted between
+    # the two conversions is retried in full instead of leaving the layer stuck.
+    if not shawm_dst.exists() or not shawm_layer_dst.exists():
         print(f"[wikimedia] {SHAWM_WIKIMEDIA_FILE}")
         try:
             shawm_src = fetch_wikimedia(shawm_track)
-            convert_music(shawm_src, shawm_dst, max_seconds=6.0)
-            convert_layer(
-                shawm_src, BATTLE_LAYERS_DIR / f"{SHAWM_OUT_NAME}.ogg", loop_seconds=6.0
-            )
+            if not shawm_dst.exists():
+                convert_music(shawm_src, shawm_dst, max_seconds=6.0)
+            if not shawm_layer_dst.exists():
+                convert_layer(shawm_src, shawm_layer_dst, loop_seconds=6.0)
         except Exception as exc:  # noqa: BLE001
             failures.append(f"{SHAWM_WIKIMEDIA_FILE}: {exc}")
             print(f"  echec: {exc}")
