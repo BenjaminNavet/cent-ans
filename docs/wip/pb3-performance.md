@@ -42,5 +42,23 @@ Suite de PB1 (`pb1-benchmark-perf.md`) et PB2 (`pb2-vegetation-shader.md`).
 - 26/09 : PB3a fusionné ; dylib release reconstruite depuis main.
 - 26/09 : PB3d puis PB3c fusionnés après fusion de la revue de code (conflits campaign_map.gd, battle_soldiers.gd résolus : garde de sauvegarde + compte dessiné `_drawn` avec condition `on_field` de la revue). Vague 2 lancée (PB3e, PB3f, PB3g).
 
+- 26/09 ~09:45 : `main` recompilé (dylibs debug + release avec PB3a-d, smoke OK) après nettoyage de
+  la crate `vegetation` contaminée dans `core/target` partagé (champ `detail` d'un worktree SZ).
+- 26/09 : **PAUSE demandée par le joueur** pendant la vague 2 ; agents priés de commiter leur wip.
+
+## Reprise (vague 2 en pause)
+| Lot | Worktree | Branche | Fichier wip |
+|---|---|---|---|
+| PB3e | `.claude/worktrees/agent-aacdb076cb5ce2218` | `worktree-agent-aacdb076cb5ce2218` | `docs/wip/pb3e-bataille-fil.md` |
+| PB3f | `.claude/worktrees/agent-a27afc73c1888787a` | `perf/pb3f-rayon` | `docs/wip/pb3f-rayon.md` |
+| PB3g | `.claude/worktrees/agent-a390841202fac1ad2` | `perf/pb3g-native-quadtree` | `docs/wip/pb3g-quadtree-natif.md` |
+
+Pour reprendre : lire le fichier wip du lot DANS son worktree (pas dans main), relancer un agent
+`cent-ans-dev` sur ce worktree/branche (il peut être verrouillé : `git worktree unlock`) avec la
+consigne d'origine (ci-dessus, section Lots) et CARGO_TARGET_DIR privé `<worktree>/core/target`.
+Après fusion de `main` dans une branche : `godot --headless --path game --import` avant les tests.
+Intégration : fusion de `main` dans la branche, cargo fmt/clippy/test, smoke + tests du lot, ff-only.
+
 ## Prochaine étape
-Suivre la vague 1, fusionner lot par lot (build.sh + smoke + cargo test), puis vague 2.
+Reprendre PB3e, PB3f, PB3g (voir « Reprise ») ; puis mesures en plein écran Retina (PB3b) et
+mesure en jeu de l'effet de PB3a (pb1_turns, banc bataille, dylib release).
