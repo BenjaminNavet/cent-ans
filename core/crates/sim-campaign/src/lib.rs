@@ -65,6 +65,7 @@ pub mod religion;
 pub mod research;
 pub mod retinue;
 pub mod rng;
+pub mod rule_constants;
 pub mod save;
 pub mod settlements;
 pub mod setup_1337;
@@ -109,7 +110,8 @@ pub use frontier::GarrisonRole;
 pub use march::{MoveReport, StopReason};
 pub use navigation::{Cell, GridPath};
 pub use orders::{
-    MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, BASE_RECRUIT_SLOTS,
+    MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, RecruitPrice,
+    BASE_RECRUIT_SLOTS,
 };
 pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};

@@ -2,8 +2,8 @@ class_name LegendSample
 extends Control
 
 ## Lot UX1 : échantillon dessiné d'un symbole de la carte pour la légende (`MapLegend`).
-## Les symboles reprennent le vrai rendu : formes du shader `settlement_icon.gdshader`
-## redessinées en 2D, plaque d'effectif (`ArmyMarkers.build_plate`), jeton d'agent
+## Les symboles reprennent le vrai rendu : marqueurs peints de l'atlas du lot DA3
+## (`SettlementMarkers`, écu du royaume composé comme dans `settlement_icon.gdshader`), plaque d'effectif (`ArmyMarkers.build_plate`), jeton d'agent
 ## (`AgentController.Token`), étendard de faction (`ArmyMarker.standard_for`), couleurs de
 ## relation (`MapModeController.RELATION_COLORS`), anneaux et chemins aux couleurs des couches.
 ## `build(sample, context)` renvoie le contrôle adapté ; `context` : {player_color: Color,
@@ -12,8 +12,6 @@ extends Control
 const SIZE := Vector2(96, 30)
 const AGENT_SCRIPT := "res://scripts/map/agent_controller.gd"
 const NEUTRAL := Color(0.62, 0.6, 0.55)  # colonie sans contrôleur (`SettlementLayer.refresh`)
-const ICON_INK := Color(0.10, 0.07, 0.04)
-const ICON_DOT := Color(0.97, 0.94, 0.86)
 ## Couleurs des couches (reprises de leurs scripts : `ArmyMovementPath`, `TradeRouteLayer`,
 ## `ConstructionMarkers`, `CampaignMinimap`).
 const PATH_NOW := Color(0.40, 0.88, 0.32, 1.0)
@@ -27,6 +25,8 @@ const FOG_MIST := Color(0.43, 0.42, 0.39)
 
 var sample: Dictionary = {}
 var context: Dictionary = {}
+## Catalogue des marqueurs (lot DA3), chargé une fois.
+static var _markers: SettlementMarkers
 
 
 ## Contrôle d'échantillon pour une entrée `sample` de `data/ui/map_legend.json`.
@@ -124,26 +124,29 @@ static func _swatch_row(legend_context: Dictionary) -> Control:
 	return row
 
 
-## Couleur d'une place selon `owner` (joueur, autre royaume) ; gris sans seigneur.
-func _owner_color(owner: String) -> Color:
+## Faction d'une place selon `owner` (joueur, autre royaume) ; "" sans seigneur.
+func _owner_faction(owner: String) -> String:
+	if owner == "none":
+		return ""
 	if owner == "other":
 		var others: Array = context.get("factions", [])
-		return others[0][1] if not others.is_empty() else NEUTRAL
-	return context.get("player_color", NEUTRAL)
+		return str(others[0][0]) if not others.is_empty() else ""
+	return str(context.get("player_faction", ""))
 
 
 func _draw() -> void:
 	var center := size * 0.5
 	match str(sample.get("type", "")):
 		"settlement":
-			draw_settlement(self, str(sample.get("kind", "village")), center, 13.0, _owner_color(str(sample.get("owner", "player"))))
+			var markers := catalog()
+			var pictogram := str(sample.get("pictogram", markers.pictogram_for(str(sample.get("kind", "village")), int(sample.get("rank", 2)))))
+			draw_marker(self, pictogram, center, 16.0, _owner_faction(str(sample.get("owner", "player"))), bool(sample.get("port", false)))
 		"settlement_owners":
-			var colors: Array = [context.get("player_color", NEUTRAL)]
+			var factions: Array = [str(context.get("player_faction", ""))]
 			for entry in (context.get("factions", []) as Array).slice(0, 2):
-				colors.append(entry[1])
-			colors.append(NEUTRAL)
-			for i in colors.size():
-				draw_settlement(self, "city", Vector2(9.0 + i * 15.5, center.y), 7.5, colors[i])
+				factions.append(str(entry[0]))
+			for i in factions.size():
+				draw_marker(self, "city", Vector2(14.0 + i * 24.0, center.y), 12.0, factions[i])
 		"relation":
 			# DP2 : positions diplomatiques (allié, accord, neutre, tension...) d'abord.
 			var relation := str(sample.get("relation", ""))
@@ -206,61 +209,37 @@ func _draw_swatch(color: Color) -> void:
 	draw_rect(rect, HudStyle.INK, false, 1.0)
 
 
-## Forme d'une colonie (même dessin que `settlement_icon.gdshader`) : contour d'encre, aplat
-## à la couleur du contrôleur. `half` : demi-taille en pixels.
-static func draw_settlement(canvas: CanvasItem, kind: String, center: Vector2, half: float, color: Color) -> void:
-	var outline := settlement_shape(kind)
-	var fill := PackedVector2Array()
-	var inset := 0.72 if kind != "village" else 0.62
-	for point in outline:
-		fill.append(point * inset)
-	canvas.draw_colored_polygon(_to_screen(outline, center, half), ICON_INK)
-	canvas.draw_colored_polygon(_to_screen(fill, center, half), color)
-	if kind == "abbey":
-		canvas.draw_rect(Rect2(center + Vector2(-0.12, -0.5) * half, Vector2(0.24, 1.0) * half), ICON_DOT)
-		canvas.draw_rect(Rect2(center + Vector2(-0.36, -0.25) * half, Vector2(0.72, 0.22) * half), ICON_DOT)
-	elif kind == "city":
-		canvas.draw_circle(center + Vector2(0.0, -0.05) * half, 0.18 * half, ICON_DOT)
+## Lot DA3 : catalogue des marqueurs de lieux (chargé une fois).
+static func catalog() -> SettlementMarkers:
+	if _markers == null:
+		_markers = SettlementMarkers.load_default()
+	return _markers
 
 
-static func _to_screen(points: PackedVector2Array, center: Vector2, half: float) -> PackedVector2Array:
-	var result := PackedVector2Array()
-	for point in points:
-		result.append(center + Vector2(point.x, -point.y) * half)
-	return result
+## Marqueur de lieu (lot DA3) : pictogramme peint de l'atlas, insigne de port, écu du royaume
+## `faction` ("" : sans écu), placés comme dans `settlement_icon.gdshader`. `half` : demi-taille
+## en pixels ; la base du pictogramme est sous `center`.
+static func draw_marker(canvas: CanvasItem, pictogram: String, center: Vector2, half: float, faction: String, port: bool = false) -> void:
+	var markers := catalog()
+	if markers.atlas == null:
+		return
+	var box := Rect2(center - Vector2(half, half), Vector2(half, half) * 2.0)
+	var atlas_size := markers.atlas.get_size()
+	var cell := markers.cell_of(pictogram)
+	if cell >= 0:
+		var region := markers.cell_uv_rect(cell)
+		canvas.draw_texture_rect_region(markers.atlas, box, Rect2(region.position * atlas_size, region.size * atlas_size))
+	if port and markers.port_cell() >= 0:
+		var badge := _placed(box, markers.placement("badge"))
+		var badge_region := markers.cell_uv_rect(markers.port_cell())
+		canvas.draw_texture_rect_region(markers.atlas, badge, Rect2(badge_region.position * atlas_size, badge_region.size * atlas_size))
+	var shield := PortraitLoader.heraldry_texture(faction)
+	if shield != null:
+		canvas.draw_texture_rect(shield, _placed(box, markers.placement("shield")), false)
 
 
-## Contour d'une forme de colonie dans [-1, 1] (y vers le haut, comme le shader).
-static func settlement_shape(kind: String) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	match kind:
-		"city":
-			# Écu crénelé : trois créneaux en haut, pointe arrondie en bas.
-			var top := 0.62
-			var notch := 0.5
-			for x in [-0.72, -0.56, -0.56, -0.40, -0.40, -0.08, -0.08, 0.08, 0.08, 0.40, 0.40, 0.56, 0.56, 0.72]:
-				points.append(Vector2(x, top))
-			for i in [1, 2, 5, 6, 9, 10]:
-				points[i] = Vector2(points[i].x, notch)
-			for i in 17:
-				var angle := -PI * float(i) / 16.0
-				points.append(Vector2(0.0, -0.1) + Vector2(cos(angle), sin(angle)) * 0.72)
-		"town":
-			# Disque crénelé (dix créneaux).
-			for i in 40:
-				var angle := TAU * float(i) / 40.0
-				var radius := 0.64 if fmod(float(i) / 4.0, 1.0) < 0.4 else 0.8
-				points.append(Vector2(cos(angle), sin(angle)) * radius)
-		"castle":
-			var top := 0.72
-			for x in [-0.6, -0.47, -0.47, -0.33, -0.33, -0.07, -0.07, 0.07, 0.07, 0.33, 0.33, 0.47, 0.47, 0.6]:
-				points.append(Vector2(x, top))
-			for i in [1, 2, 5, 6, 9, 10]:
-				points[i] = Vector2(points[i].x, 0.5)
-			points.append(Vector2(0.6, -0.52))
-			points.append(Vector2(-0.6, -0.52))
-		"abbey":
-			points = HudStyle.circle_points(Vector2.ZERO, 0.78, 28)
-		_:
-			points = HudStyle.circle_points(Vector2.ZERO, 0.62, 20)
-	return points
+## Rectangle écran d'un élément placé (centre et demi-taille en fraction, origine en bas à gauche).
+static func _placed(box: Rect2, place: Vector3) -> Rect2:
+	var center := box.position + Vector2(place.x, 1.0 - place.y) * box.size
+	var half := place.z * box.size
+	return Rect2(center - half, half * 2.0)

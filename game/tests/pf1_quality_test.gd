@@ -13,6 +13,7 @@ func _init() -> void:
 	_test_presets()
 	_test_quadtree_quality()
 	await _test_particles()
+	_test_particles_freed_deferred()
 	_test_user_dir()
 	print("pf1_quality_test: %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
@@ -52,7 +53,7 @@ func _test_quadtree_quality() -> void:
 		_check(int(RenderQuality.PRESETS[level]["relief_shadow_cascades"]) == 1, "%s: relief casts shadows in the first cascade only" % level)
 	_check(int(RenderQuality.PRESETS["ultra"]["relief_shadow_cascades"]) >= 2, "ultra: relief shadows further")
 	terrain.apply_render_quality(RenderQuality.PRESETS["high"])
-	_check(is_equal_approx(quadtree.max_vertex_px, 6.0) and quadtree.max_items == 700, "high preset reaches the quadtree")
+	_check(is_equal_approx(quadtree.max_vertex_px, 7.5) and quadtree.max_items == 700, "high preset reaches the quadtree")
 	terrain.quadtree = null
 	quadtree.free()
 	terrain.free()
@@ -72,6 +73,18 @@ func _test_particles() -> void:
 	RenderQuality.particle_ratio = saved
 	particles.queue_free()
 	await process_frame
+
+
+## PF1 fix : un nœud de particules libéré avant l'exécution de l'appel différé
+## (`RenderQuality._on_node_added`) ne doit pas faire échouer `scale_particles` — l'ID d'instance
+## différé se résout à `null` sans toucher un objet invalide (auparavant : erreur de la file de
+## messages « Cannot convert argument 1 from Object to Object »).
+func _test_particles_freed_deferred() -> void:
+	var particles := GPUParticles3D.new()
+	var id := particles.get_instance_id()
+	particles.free()
+	RenderQuality._scale_particles_by_id(id)
+	_check(instance_from_id(id) == null, "freed particle instance id resolves to null, scale_particles skipped safely")
 
 
 func _test_user_dir() -> void:

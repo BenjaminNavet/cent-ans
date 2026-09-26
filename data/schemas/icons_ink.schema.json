@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "icons_ink.schema.json",
+  "title": "Icônes d'action à l'encre et boutons-médaillons enluminés (DA5)",
+  "description": "Catalogue du lot DA5 : une image par icône d'action (trait d'encre monochrome, teinte INK/GOLD au rendu) et par bouton-médaillon enluminé. Chaque entrée décrit le sujet (fin du prompt de génération) et les identifiants d'interface (`targets`) qu'elle remplace dans `IconLibrary`. Rendu seulement, aucune règle de jeu.",
+  "type": "object",
+  "required": ["version", "model", "budget_cap_usd", "icon_style", "medallion_style", "icons", "medallions"],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "target": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "style": {
+      "type": "object",
+      "required": ["size", "reference", "prompt"],
+      "additionalProperties": false,
+      "properties": {
+        "size": {"type": "integer", "minimum": 32, "maximum": 512},
+        "reference": {"type": "string", "description": "Image de référence (chemin depuis la racine du dépôt) envoyée avec le prompt."},
+        "prompt": {"type": "string", "minLength": 40}
+      }
+    },
+    "entry": {
+      "type": "object",
+      "required": ["id", "label", "subject", "targets"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "label": {"type": "string", "minLength": 1, "description": "Nom français (planche de contrôle)."},
+        "group": {"type": "string", "enum": ["hud", "alert", "gauge", "class", "category", "building", "stance", "battle", "map", "action"]},
+        "subject": {"type": "string", "minLength": 3, "description": "Sujet en anglais, ajouté à la fin du prompt de style."},
+        "source": {"type": "string", "description": "Image déjà validée réutilisée telle quelle (aucune génération)."},
+        "targets": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/target"}}
+      }
+    }
+  },
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "model": {"type": "string", "minLength": 3},
+    "budget_cap_usd": {"type": "number", "exclusiveMinimum": 0, "maximum": 50},
+    "icon_style": {"$ref": "#/$defs/style"},
+    "medallion_style": {"$ref": "#/$defs/style"},
+    "icons": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}},
+    "medallions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}}
+  }
+}

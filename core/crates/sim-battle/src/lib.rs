@@ -32,6 +32,10 @@
 //! - Dense besieged town and solid street furniture ([`town`], [`props`],
 //!   lot BR3, ADR 0047): house blocks and props are oriented rectangles that
 //!   block the pathing and push the figures out.
+//! - Countryside of the field ([`decor`], lot EP6): hamlets, mills, church
+//!   and churchyard, moated manor, vineyards, orchards, ploughland, meadows;
+//!   cover, speed and defence of each area; each army's camp and baggage,
+//!   looted by an enemy who holds it unguarded (morale).
 //! - Tactical battle AI ([`ai`], spec `docs/design/m9-ai.md` § 2) for the side
 //!   the player does not command, every [`AI_PERIOD`] simulated seconds.
 //! - Leader's orders ([`orders`], spec `docs/design/battle-orders.md`): war
@@ -40,7 +44,11 @@
 
 pub mod ai;
 pub mod command;
+pub mod crest;
 pub mod decision;
+pub mod decor;
+mod decor_gen;
+pub mod duel;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
@@ -70,6 +78,11 @@ pub mod unit;
 
 pub use command::{Command, CommandError};
 pub use decision::{BattleEnd, DecisionRules};
+pub use decor::{
+    Area, AreaKind, Camp, Decor, DecorItem, DecorPlan, DecorProp, DecorPropKind, DecorRules,
+    FieldState, Hamlet, HamletLayout, Moat, Mound,
+};
+pub use duel::DuelRules;
 pub use field::{
     Battlefield, Ford, River, Weather, Zone, ATTACKER_LINE_Z, DEFENDER_LINE_Z, FIELD_DEPTH,
     FIELD_WIDTH, GRID_RESOLUTION,
@@ -93,8 +106,8 @@ pub use siege::{PieceKind, SiegeWorkRules, SiegeWorks, Tower, WallPiece};
 pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
 pub use sim::{
-    BattleSim, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT, FRIEND_GAP, MAX_DURATION,
-    MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,
+    BattleSim, CampState, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT, FRIEND_GAP,
+    MAX_DURATION, MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,
 };
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,

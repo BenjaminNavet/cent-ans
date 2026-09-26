@@ -6,6 +6,8 @@ extends RefCounted
 ## disponibilité et les raisons de refus viennent de la simulation.
 
 const ROW_ICON := 20.0
+## DA5 : diamètre des médaillons enluminés des boutons d'action (Recruter, Former une armée).
+const MEDALLION_SIZE := 26
 const REASON_COLOR := Color(0.55, 0.20, 0.15)
 
 
@@ -53,6 +55,9 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		var line := HBoxContainer.new()
 		var button := RichButton.new()
 		button.text = "%s — %s / %s" % [str(row.get("name", row.get("unit_type", "?"))), Money.amount(int(row.get("cost", 0))), Money.amount(int(row.get("upkeep", 0)))]
+		# SV2 : le coût comprend l'importation des matériaux manquants (détail dans la bulle).
+		if int(row.get("import_cost", 0)) > 0:
+			button.text += " (dont import %s)" % Money.amount(int(row["import_cost"]))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var available: bool = bool(row.get("available", false))
@@ -126,8 +131,22 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		line.add_child(button)
 		if not available:
 			line.add_child(reason_label(str(row.get("reason", "Indisponible"))))
+		# SV3 : surcoût d'import (B7c) déjà visible dans la bulle ; rappel court sur la ligne
+		# pour ne pas avoir à ouvrir la bulle pour le repérer.
+		var import_cost := int(row.get("import_cost", 0))
+		if import_cost > 0:
+			line.add_child(import_cost_label(import_cost))
 		button.tooltip_text = RichTooltip.building(building_id, row)
 		list.add_child(line)
+
+
+## SV3 : « Dont import : X ₶ » en rouge, même couleur que la bulle (`RichTooltip.RED`).
+static func import_cost_label(import_cost: int) -> Label:
+	var label := Label.new()
+	label.text = "Dont import : %s" % Money.amount(import_cost)
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", Color(RichTooltip.RED))
+	return label
 
 
 static func reason_label(text: String) -> Label:

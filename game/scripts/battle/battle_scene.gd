@@ -148,6 +148,8 @@ var _camera_override: String = ""
 var _last_group_ms: int = -10000
 var deployment: DeploymentController = null  # F5c : phase de déploiement du joueur
 var _deploy_shot: bool = false
+## Q4 : `--open-shot` capture la vue d'ouverture (caméra de `_frame_camera`), sans rien jouer.
+var _open_shot: bool = false
 var _sortie_shown: bool = false
 var music: BattleMusicDirector = null  # B3 : musique dynamique par intensité
 var battle_audio: BattleAudio = null  # AU1 : sons spatialisés (mêlée, volées, siège, météo)
@@ -298,12 +300,18 @@ func begin() -> bool:
 		var side_setup: Dictionary = setup[side]
 		side_names[side] = str(side_setup.get("faction_name", side))
 		side_colors[side] = _faction_color(str(side_setup.get("faction", "")), side)
+		# DA1 : maison du général (armes du HUD et des figurines nobles), rendu seulement.
+		var general: Variant = side_setup.get("general", null)
+		if general is Dictionary and not (general as Dictionary).has("house"):
+			(general as Dictionary)["house"] = HouseArms.house_of(str((general as Dictionary).get("character", "")), campaign_sim)
 	var weather: Dictionary = battle.call("get_weather")
 	var weather_key := _weather_override if _weather_override != "" else str(weather.get("key", "clear"))
 	_weather_key = weather_key
 	var terrain_data: Dictionary = battle.call("get_terrain")
 	terrain.province_id = str(setup.get("province", ""))  # EP2 : relief réel et panorama du lieu
 	terrain.build(terrain_data, weather_key)
+	if terrain.decor_view != null:
+		terrain.decor_view.bind(battle)  # EP6 : pillage des camps
 	if terrain_data.has("siege"):
 		siege_view = BattleSiege.new()
 		siege_view.name = "Siege"
@@ -378,8 +386,13 @@ func begin() -> bool:
 func _setup_staging(terrain_data: Dictionary) -> void:
 	staging = BattleStaging.new()
 	add_child(staging)
+	var decor_view: BattleDecor = terrain.decor_view
+	if decor_view != null and decor_view.has_camps():
+		staging.auto_campfires = false  # EP6 : les camps du décor portent leurs feux
 	staging.setup(self, battle, world_env.environment, sun, _weather_key, terrain_data, _ep8_disabled)
 	staging.configure_effects(effects, str(terrain_data.get("terrain", "plains")), terrain.season_key)
+	if decor_view != null:
+		decor_view.attach_smoke(self, staging, _weather_key)
 	if effects != null:
 		effects.cannon_fired.connect(staging.on_cannon_fired)
 	if staging.cinematic != null and not _force_cinematic and (autoplay or _benchmark or _screenshot_path != ""):
@@ -498,9 +511,12 @@ func _build_soldier_layers() -> void:
 		soldiers.impostors.name = "Impostors"
 		soldiers.add_child(soldiers.impostors)
 	var factions := {}
+	var houses := {}  # DA1 : maison du général par camp
 	for side in ["attacker", "defender"]:
 		factions[side] = str((setup[side] as Dictionary).get("faction", ""))
-	soldiers.setup(units, side_colors, factions)
+		var general: Variant = (setup[side] as Dictionary).get("general", null)
+		houses[side] = str((general as Dictionary).get("house", "")) if general is Dictionary else ""
+	soldiers.setup(units, side_colors, factions, houses)
 	_mm = soldiers.layers
 	_setup_standards()
 	BattleAudio.auto_volley = true  # BV1 : repris ci-dessous par les tirs du cœur (effets actifs)
@@ -755,11 +771,36 @@ func _frame_camera() -> void:
 			sz += float(unit["z"])
 			n += 1
 	var center := Vector3(sx / maxf(n, 1), 0, sz / maxf(n, 1))
+	if siege_view != null and player_side == "attacker" and n > 0 and _frame_siege_camera(center):
+		return
 	var yaw := PI if player_side == "attacker" else 0.0
 	# Regarder un peu devant sa propre ligne, vers l'ennemi.
 	center.z += 70.0 if player_side == "attacker" else -70.0
 	# A1-06 : vue d'ouverture plus basse et plus proche (on voit des hommes, pas des points).
 	camera_rig.look_at_point(center, 170.0, yaw)
+
+
+## Q4 (Q3 : caméra d'assaut cadrant un bélier sur une plaine vide) : l'assaillant ouvre derrière
+## son armée, face à la porte, murailles et régiments dans le même plan.
+func _frame_siege_camera(army: Vector3) -> bool:
+	var siege: Dictionary = battle.call("get_siege") if battle.has_method("get_siege") else {}
+	var pieces: Array = siege.get("pieces", [])
+	var gate_index := int(siege.get("gate", -1))
+	if gate_index < 0 or gate_index >= pieces.size():
+		return false
+	var gate: Dictionary = pieces[gate_index]
+	var mid: Vector2 = ((gate["a"] as Vector2) + (gate["b"] as Vector2)) * 0.5
+	var wall := Vector3(mid.x, 0, mid.y)
+	var to_wall := Vector3(wall.x - army.x, 0, wall.z - army.z)
+	var gap := to_wall.length()
+	if gap < 1.0:
+		return false
+	var dir := to_wall / gap
+	# Point visé un peu au-delà du milieu, recul selon l'écart (murs et armée à l'écran).
+	var focus := army + dir * gap * 0.45
+	var distance := clampf(gap * 0.9 + 140.0, 220.0, 520.0)
+	camera_rig.look_at_point(focus, distance, atan2(-dir.x, -dir.z))
+	return true
 
 
 # --- Boucle ---------------------------------------------------------------------------
@@ -1141,6 +1182,9 @@ func _show_end() -> void:
 	var aftermath := {}
 	if bool(_resolution.get("ok", false)):
 		aftermath = BattleAftermath.diff(before, BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id))
+	# A toast shown in the last seconds (garrison sortie) was drawn over the result table (Q3).
+	if hud.toast_label != null:
+		hud.toast_label.get_parent().visible = false
 	result_screen = BattleResultScreen.new()
 	hud.root.add_child(result_screen)
 	result_screen.return_pressed.connect(_on_return)
@@ -1558,6 +1602,8 @@ func _parse_cmdline() -> void:
 			autoplay = true
 		elif arg == "--deploy-shot":
 			_deploy_shot = true
+		elif arg == "--open-shot":
+			_open_shot = true
 		elif arg == "--siege":
 			siege_demo = true
 		elif arg.begins_with("--siege-province="):
@@ -1624,6 +1670,11 @@ func _stage_screenshot() -> void:
 		get_tree().quit(1)
 		return
 	camera_rig.edge_pan_enabled = false
+	if _open_shot:
+		for _i in 90:
+			await get_tree().process_frame
+		_take_screenshot(_screenshot_path, true)
+		return
 	if _deploy_shot:
 		await _stage_deploy_screenshot()
 		return

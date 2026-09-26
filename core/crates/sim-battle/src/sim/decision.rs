@@ -3,6 +3,7 @@
 
 use super::{BattleSim, AI_PERIOD, DT};
 use crate::decision::{BattleEnd, DecisionRules};
+use crate::duel::DuelRules;
 use crate::setup::SideId;
 use crate::unit::UnitState;
 
@@ -15,6 +16,16 @@ impl BattleSim {
     /// Replaces the rules of the end of this battle (tests, quick battles).
     pub fn set_decision_rules(&mut self, rules: DecisionRules) {
         self.decision = rules;
+    }
+
+    /// EP9b: rules of the attacker's archery duel and second echelon.
+    pub fn duel_rules(&self) -> &DuelRules {
+        &self.duel
+    }
+
+    /// Replaces the rules of the archery duel (tests).
+    pub fn set_duel_rules(&mut self, rules: DuelRules) {
+        self.duel = rules;
     }
 
     /// How the battle ended, once finished.
@@ -54,6 +65,30 @@ impl BattleSim {
         } else {
             0.0
         }
+    }
+
+    /// Initial soldiers of `side` (battle-only regiments excepted).
+    fn initial_soldiers(&self, side: SideId) -> f64 {
+        self.units
+            .iter()
+            .filter(|u| u.side == side && !u.synthetic)
+            .map(|u| f64::from(u.initial_soldiers))
+            .sum()
+    }
+
+    /// EP9b: share of its initial soldiers `side` lost to missiles over the
+    /// last `seconds` (at most the duel window of
+    /// `data/rules/battle_duel.json`, sampled every AI period).
+    pub fn recent_missile_losses(&self, side: SideId, seconds: f64) -> f64 {
+        let log = &self.clock.missile_log;
+        let Some(&(now, latest)) = log.back() else {
+            return 0.0;
+        };
+        let start = log
+            .iter()
+            .find(|&&(t, _)| now - t <= seconds)
+            .map_or(latest, |&(_, l)| l);
+        (latest[side.index()] - start[side.index()]).max(0.0)
     }
 
     /// Share of its initial soldiers `side` has lost.
@@ -137,6 +172,25 @@ impl BattleSim {
         let period = (AI_PERIOD / DT).round() as u64;
         if !self.ticks.is_multiple_of(period) {
             return;
+        }
+        // EP9b: the sliding window of the attacker's archery duel.
+        let keep = self.duel.window_seconds + AI_PERIOD;
+        let struck = SideId::BOTH.map(|s| {
+            let initial = self.initial_soldiers(s);
+            if initial > 0.0 {
+                self.clock.missile_losses[s.index()] / initial
+            } else {
+                0.0
+            }
+        });
+        self.clock.missile_log.push_back((self.elapsed, struck));
+        while self
+            .clock
+            .missile_log
+            .front()
+            .is_some_and(|&(t, _)| self.elapsed - t > keep)
+        {
+            self.clock.missile_log.pop_front();
         }
         let Some(gap) = self.army_gap() else {
             return;

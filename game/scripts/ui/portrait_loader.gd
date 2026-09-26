@@ -47,6 +47,15 @@ static func heraldry_texture(faction_id: String) -> Texture2D:
 	return load_texture(HERALDRY_DIR + faction_id + ".png")
 
 
+## DA1 : écu de la maison `house` (nom affiché ou id, `HouseArms`), à défaut celui de la
+## faction `faction_id`.
+static func house_heraldry_texture(house: String, faction_id: String = "") -> Texture2D:
+	var texture: Texture2D = HouseArms.texture(house) if house != "" else null
+	if texture == null:
+		texture = heraldry_texture(faction_id)
+	return texture
+
+
 static func has_portrait(character_id: String) -> bool:
 	return portrait_texture(character_id) != null
 
@@ -75,11 +84,11 @@ static func _overlay(target: Control, texture: Texture2D, min_size: Vector2) -> 
 	return true
 
 
-## Portrait peint du personnage ; à défaut, blason de sa faction (personnages générés).
-static func overlay_portrait(target: Control, character_id: String, faction_id: String, min_size: Vector2 = Vector2.ZERO) -> bool:
+## Portrait peint du personnage ; à défaut, armes de sa maison (DA1), puis de sa faction.
+static func overlay_portrait(target: Control, character_id: String, faction_id: String, min_size: Vector2 = Vector2.ZERO, house: String = "") -> bool:
 	var texture := portrait_texture(character_id)
 	if texture == null:
-		texture = heraldry_texture(faction_id)
+		texture = house_heraldry_texture(house, faction_id)
 	var placed := _overlay(target, texture, min_size)
 	# Les initiales du placeholder sont masquées sous une image.
 	for child in target.get_children():

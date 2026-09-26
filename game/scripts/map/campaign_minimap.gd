@@ -90,6 +90,7 @@ func _init() -> void:
 		button.focus_mode = Control.FOCUS_NONE
 		button.add_theme_font_size_override("font_size", HudStyle.FONT_SMALL)
 		var mode_id: String = entry[0]
+		_decorate_ink(button, "lens_" + mode_id, 14)  # DA5
 		button.pressed.connect(func() -> void: set_mode(mode_id))
 		modes.add_child(button)
 		_mode_buttons[mode_id] = button
@@ -101,11 +102,16 @@ func _init() -> void:
 	legend_button.toggle_mode = true
 	legend_button.focus_mode = Control.FOCUS_NONE
 	legend_button.add_theme_font_size_override("font_size", HudStyle.FONT_SMALL)
-	var book := HudStyle.icon("hud_codex")
+	# DA5 : rose des vents à l'encre (repli : livre du Codex, puis « ? »).
+	var book := HudStyle.icon("map_legend")
 	if book != null:
+		_decorate_ink(legend_button, "map_legend", 14)
+	else:
+		book = HudStyle.icon("hud_codex")
+	if book != null and legend_button.icon == null:
 		legend_button.icon = book
 		legend_button.add_theme_constant_override("icon_max_width", 14)
-	else:
+	elif book == null:
 		legend_button.text = "? Légende"
 	legend_button.toggled.connect(func(pressed: bool) -> void: legend_toggled.emit(pressed))
 	modes.add_child(legend_button)
@@ -246,6 +252,19 @@ func set_fog(enabled: bool, visible_ids: PackedStringArray) -> void:
 			_visible_count += 1
 	_material.set_shader_parameter("fog_mask", ImageTexture.create_from_image(image))
 	_material.set_shader_parameter("fog_enabled", enabled)
+	_material.set_shader_parameter("fog_by_cell", false)
+
+
+## Brouillard par case (lot M5a) : `cells` = texture de vue de la simulation couvrant `size_px`
+## pixels carte ; `visible_count` = nombre de provinces visibles (statistique, tests).
+func set_fog_cells(enabled: bool, cells: Texture2D, size_px: Vector2, visible_count: int) -> void:
+	fog_enabled = enabled
+	_visible_count = visible_count if enabled else 0
+	var size := Vector2(maxf(size_px.x, 1.0), maxf(size_px.y, 1.0))
+	_material.set_shader_parameter("fog_cells", cells)
+	_material.set_shader_parameter("fog_crop", Vector4(crop.position.x / size.x, crop.position.y / size.y, crop.size.x / size.x, crop.size.y / size.y))
+	_material.set_shader_parameter("fog_by_cell", enabled and cells != null)
+	_material.set_shader_parameter("fog_enabled", enabled)
 
 
 ## Armées affichées : `[{pos: Vector2 (carte), color: Color, player: bool}]` (déjà filtrées).
@@ -271,6 +290,14 @@ func set_mode(new_mode: String) -> void:
 	_sync_mode_buttons()
 	if changed:
 		mode_changed.emit(mode)
+
+
+## DA5 : icône d'action à l'encre sur un bouton de la rangée (or au survol) ; rien si absente.
+static func _decorate_ink(target: Button, icon_id: String, size: int) -> void:
+	var library := HudStyle.icon_library()
+	if library == null or not bool(library.call("has_icon", icon_id)):
+		return
+	library.call("decorate_button", target, icon_id, size)
 
 
 func _sync_mode_buttons() -> void:

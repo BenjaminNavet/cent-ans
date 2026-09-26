@@ -123,16 +123,9 @@ pub const TAX_EFFICIENCY: f64 = 0.082;
 pub const UPKEEP_MONTHS_PER_SEASON: i64 = 4;
 /// Garrison units are part-time local levies: they cost this share of field upkeep.
 pub const GARRISON_UPKEEP_PERCENT: i64 = 50;
-/// Supply lost per turn outside friendly territory.
-pub const ATTRITION_SUPPLY_LOSS: u8 = 20;
-/// Supply lost per winter turn outside friendly territory.
-pub const ATTRITION_SUPPLY_LOSS_WINTER: u8 = 35;
-/// Supply regained per turn in friendly territory.
-pub const SUPPLY_RECOVERY: u8 = 40;
-/// Strength lost (per cent) each turn an army sits at zero supply.
-pub const STARVATION_LOSS_PERCENT: u32 = 10;
-/// Devastation healed per turn.
-pub const DEVASTATION_DECAY: u8 = 5;
+// SV4: the supply losses, recovery, starvation and devastation decay are in
+// `data/rules/economy.json` (`EconomyRules::supply_*`, `starvation_loss_percent`,
+// `devastation_decay`).
 
 /// Seasonal tax income of a province (livres).
 pub fn province_income(province: &ProvinceState) -> f64 {
@@ -711,7 +704,7 @@ fn supply_modifiers(
     if friendly {
         let province_fx = state.province_effects(data, location);
         let bonus = province_fx.supply.apply(0.0) + general_fx.supply.flat;
-        let cut = (f64::from(SUPPLY_RECOVERY) + bonus).max(0.0)
+        let cut = (f64::from(rules.supply_recovery) + bonus).max(0.0)
             * devastation
             * rules.supply_devastation_recovery_cut_percent
             / 100.0;
@@ -739,15 +732,16 @@ pub fn seasonal_supply_change(
     winter: bool,
 ) -> i8 {
     let (recovery_bonus, loss_relief) = supply_modifiers(state, data, location, friendly, general);
+    let rules = &data.economy_rules;
     if friendly {
-        return (f64::from(SUPPLY_RECOVERY) + recovery_bonus)
+        return (f64::from(rules.supply_recovery) + recovery_bonus)
             .round()
             .clamp(0.0, 100.0) as i8;
     }
     let base_loss = if winter {
-        ATTRITION_SUPPLY_LOSS_WINTER
+        rules.supply_loss_winter
     } else {
-        ATTRITION_SUPPLY_LOSS
+        rules.supply_loss
     };
     -((f64::from(base_loss) * (1.0 - loss_relief / 100.0))
         .round()
@@ -790,8 +784,9 @@ pub(crate) fn resolve_attrition(
         army.supply = army.supply.saturating_sub(change.unsigned_abs());
         if army.supply == 0 {
             let mut lost = 0;
+            let starvation = data.economy_rules.starvation_loss_percent;
             for unit in &mut army.units {
-                let casualties = (unit.strength * STARVATION_LOSS_PERCENT).div_ceil(100);
+                let casualties = (unit.strength * starvation).div_ceil(100);
                 unit.strength = unit.strength.saturating_sub(casualties);
                 lost += casualties;
             }
@@ -854,8 +849,9 @@ pub(crate) fn resolve_decay(state: &mut CampaignState, data: &GameData) {
         .cloned()
         .collect();
     let rules = &data.population_rules;
+    let devastation_decay = data.economy_rules.devastation_decay;
     for (id, province) in state.provinces.iter_mut() {
-        province.devastation = province.devastation.saturating_sub(DEVASTATION_DECAY);
+        province.devastation = province.devastation.saturating_sub(devastation_decay);
         // EQ2: the decay grows with the gauge (it stayed at 100 for years in
         // provinces taken and retaken, at 2 points a season).
         let decay = u32::from(rules.disorder_decay_flat)

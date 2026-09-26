@@ -111,7 +111,7 @@ func _decorate() -> void:
 		_branch_chips[pair[1]] = chip
 	IconLibrary.decorate_button(governor_button, "hud_governor", 20)
 	IconLibrary.decorate_button(general_button, "hud_army", 20)
-	IconLibrary.decorate_button(marry_button, "class_nobility", 20)
+	IconLibrary.decorate_button(marry_button, "act_marry", 20)
 
 # --- H2 : description et fiche du Codex --------------------------------------------------
 
@@ -175,11 +175,13 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 	var faction: String = str(character.get("faction", ""))
 	swatch.color = SimFacade.faction_color(faction)
 	# M10 assets : portrait peint (ou blason de faction) à la place du carré de couleur.
-	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE):
+	var house := str(character.get("house", ""))
+	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE, house):
 		swatch.color = Color(0, 0, 0, 0)
-	# C3 : écu de la faction en bas à droite du portrait (s'il y a un portrait peint).
-	_heraldry.texture = PortraitLoader.heraldry_texture(faction) if PortraitLoader.has_portrait(character_id) else null
-	_heraldry.tooltip_text = "Écu : %s" % SimFacade.faction_short_name(faction) if faction != "" else ""
+	# C3, DA1 : écu de la maison (à défaut de la faction) en bas à droite du portrait peint.
+	_heraldry.texture = PortraitLoader.house_heraldry_texture(house, faction) if PortraitLoader.has_portrait(character_id) else null
+	var arms_tip := HouseArms.tooltip(house)
+	_heraldry.tooltip_text = arms_tip if arms_tip != "" else ("Écu : %s" % SimFacade.faction_short_name(faction) if faction != "" else "")
 	swatch.move_child(_heraldry, -1)
 	var alive_now: bool = bool(character.get("alive", true))
 	var female := str(character.get("sex", "")) == "female"

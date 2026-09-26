@@ -599,10 +599,13 @@ func _run_minimap_fog() -> void:
 		_check(minimap.visible_province_count() > 0 and minimap.visible_province_count() < map.map_data.province_count,
 			"minimap fog mask should cover part of the map (%d visible)" % minimap.visible_province_count())
 		_check(map.terrain.material.get_shader_parameter("fog_enabled") == true, "terrain shader fog should be enabled")
+		_check(ctl.fog_by_cell and map.terrain.material.get_shader_parameter("fog_by_cell") == true and ctl.fog_texture != null,
+			"terrain fog should come from the per-cell vision texture (M5a)")
 		for army_id in map.sim.call("get_army_ids"):
 			var army: Dictionary = map.sim.call("get_army", army_id)
-			if str(army.get("faction", "")) != map.player_faction and not ctl.is_province_visible(str(army.get("location_province", army.get("location", "")))):
-				_check(not map.armies.has_army(army_id), "foreign army %s in hidden %s should have no marker" % [army_id, army.get("location", "")])
+			# M5a : vue par case ; une armée étrangère dont le point n'est pas vu n'a pas de marqueur.
+			if not ctl.is_army_visible(str(army_id), army):
+				_check(not map.armies.has_army(army_id), "foreign army %s out of sight should have no marker" % army_id)
 		var settings: Node = root.get_node_or_null("/root/Settings")
 		if settings != null:
 			settings.call("set_value", "map/fog_of_war", false, false)

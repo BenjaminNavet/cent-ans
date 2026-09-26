@@ -6,11 +6,12 @@ extends Node
 ## - Minicarte (`CampaignMinimap`) posée dans `MapUI` (placement : `MapUI.layout_hud`, en haut à
 ##   droite sous la barre, lettres scellées dessous) ; clic ou glisser = recentre la caméra par son
 ##   API publique (`CampaignCamera.look_at_point`) ; cadre de la vue suivi à chaque image.
-## - Brouillard : la portée de vue est une règle de jeu, calculée par la simulation
-##   (`CampaignSim.get_visible_provinces`, `data/rules/vision.json`) ; ici on ne fait qu'afficher :
-##   provinces hors de vue voilées (terrain et minicarte), armées étrangères qui s'y trouvent
-##   masquées (marqueurs et minicarte). Réglage `map/fog_of_war` (menu Réglages, onglet Carte).
-##   Sans getter (simulation de repli), pas de brouillard.
+## - Brouillard : la portée de vue est une règle de jeu, calculée par la simulation ; ici on ne
+##   fait qu'afficher. Lot M5a : vue par case (`CampaignSim.get_vision` : texture R8 512², bords
+##   doux, provinces visibles, armées vues ; rayons dans `data/movement/rules.json`) ; le terrain et
+##   la minicarte voilent ce qui n'est pas vu, les armées étrangères hors de vue n'ont ni marqueur
+##   ni point. Repli sans `get_vision` : masque par province (`get_visible_provinces`, lot C1).
+##   Réglage `map/fog_of_war` (menu Réglages, onglet Carte). Sans getter, pas de brouillard.
 ##
 ## `campaign_map.gd` n'appelle que `setup`, `refresh_fog` (avant les marqueurs d'armée),
 ## `refresh` et `set_province_colors`.
@@ -21,6 +22,13 @@ var map: Node = null  # CampaignMap
 var minimap: CampaignMinimap = null
 ## Provinces vues par le joueur (id → true) ; vide quand le brouillard est inactif.
 var visible_provinces: Dictionary = {}
+## Lot M5a : armées montrées au joueur (id → true) ; vide quand le brouillard est inactif.
+var visible_armies: Dictionary = {}
+## Lot M5a : vrai quand la vue vient de la texture par case (`get_vision`).
+var fog_by_cell: bool = false
+## Lot M5a : dernière texture de vue (tests, captures) et part de la carte vue.
+var fog_texture: ImageTexture = null
+var seen_share: float = 0.0
 var fog_active: bool = false
 ## Lot UX1 : légende de la carte (créée à la première ouverture).
 var legend: MapLegend = null
@@ -129,12 +137,23 @@ func is_province_visible(province_id: String) -> bool:
 ## (à appeler avant `ArmyMarkers.refresh`).
 func refresh_fog() -> void:
 	visible_provinces.clear()
+	visible_armies.clear()
 	fog_active = fog_wanted()
+	var sim := _sim()
+	fog_by_cell = fog_active and sim.has_method("get_vision")
+	var vision: Dictionary = {}
 	var ids := PackedStringArray()
-	if fog_active:
-		ids = _sim().call("get_visible_provinces", str(map.get("player_faction")))
-		for id in ids:
-			visible_provinces[id] = true
+	if fog_by_cell:
+		vision = sim.call("get_vision", str(map.get("player_faction")))
+		fog_by_cell = vision.has("image")
+	if fog_by_cell:
+		ids = vision.get("provinces", PackedStringArray())
+		for army_id in vision.get("armies", PackedStringArray()):
+			visible_armies[army_id] = true
+	elif fog_active:
+		ids = sim.call("get_visible_provinces", str(map.get("player_faction")))
+	for id in ids:
+		visible_provinces[id] = true
 	var map_data: MapData = map.get("map_data")
 	var indices := PackedInt32Array()
 	var hidden: Dictionary = {}
@@ -145,10 +164,33 @@ func refresh_fog() -> void:
 				indices.append(index)
 			elif id != "":
 				hidden[id] = true
-	(map.get("terrain") as TerrainBuilder).set_fog(fog_active, indices)
-	(map.get("armies") as ArmyMarkers).hidden_provinces = hidden
-	if minimap != null:
-		minimap.set_fog(fog_active, ids)
+	var terrain: TerrainBuilder = map.get("terrain")
+	var armies: ArmyMarkers = map.get("armies")
+	armies.hidden_provinces = hidden
+	armies.visible_armies = visible_armies
+	armies.army_filter_active = fog_by_cell
+	if fog_by_cell:
+		fog_texture = ImageTexture.create_from_image(vision["image"])
+		seen_share = float(vision.get("seen_share", 0.0))
+		var size: Vector2 = vision.get("size", Vector2(map_data.size))
+		terrain.set_fog_cells(true, fog_texture, size)
+		if minimap != null:
+			minimap.set_fog_cells(true, fog_texture, size, ids.size())
+	else:
+		fog_texture = null
+		seen_share = 0.0 if fog_active else 1.0
+		terrain.set_fog(fog_active, indices)
+		if minimap != null:
+			minimap.set_fog(fog_active, ids)
+
+
+## Vrai si l'armée `army` (dictionnaire de `get_army`) est montrée au joueur.
+func is_army_visible(army_id: String, army: Dictionary) -> bool:
+	if not fog_active or str(army.get("faction", "")) == str(map.get("player_faction")):
+		return true
+	if fog_by_cell:
+		return visible_armies.has(army_id)
+	return is_province_visible(str(army.get("location_province", army.get("location", ""))))
 
 
 ## Couleurs de faction par province (mêmes que le terrain), à la fin de chaque tour.
@@ -170,10 +212,12 @@ func refresh() -> void:
 	for army_id in sim.call("get_army_ids"):
 		var army: Dictionary = sim.call("get_army", army_id)
 		var faction := str(army.get("faction", ""))
-		var location := str(army.get("location_province", army.get("location", "")))
-		if faction != player and not is_province_visible(location):
+		if not is_army_visible(str(army_id), army):
 			continue
-		var centroid := map_data.centroid_of_id(location)
+		# Lot M5a : le point suit la position libre de l'armée (M2), à défaut sa province.
+		var centroid: Vector2 = army.get("position", Vector2(-1.0, -1.0))
+		if centroid.x < 0.0:
+			centroid = map_data.centroid_of_id(str(army.get("location_province", army.get("location", ""))))
 		if centroid.x < 0.0:
 			continue
 		dots.append({"pos": centroid, "color": facade.call("faction_color", faction) if facade != null else Color.WHITE, "player": faction == player})
