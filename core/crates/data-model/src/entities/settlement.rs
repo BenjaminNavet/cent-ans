@@ -247,8 +247,9 @@ impl Default for RetreatRules {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MovementRules {
-    /// Movement points worth one v1 province step (mean distance between
-    /// the cities of neighbouring provinces).
+    /// Movement points worth one v1 province step. C4 set it to the mean
+    /// distance between the cities of neighbouring provinces (140 km); lot
+    /// DC1 (ADR 0082) halves it to 70 km to slow the campaign down.
     pub points_per_step: f64,
     /// Cost of a port-to-port crossing in steps (fallback graph).
     pub sea_crossing_steps: f64,
@@ -281,7 +282,7 @@ fn baked_road_factor() -> f64 {
 impl Default for MovementRules {
     fn default() -> Self {
         MovementRules {
-            points_per_step: 140.0,
+            points_per_step: 70.0,
             sea_crossing_steps: 2.0,
             fallback_links_per_neighbor: 2,
             season_scale: 1.0,

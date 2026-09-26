@@ -34,3 +34,12 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 
 ## Prochaine étape
 Lancer la vague 1 (DC1 + DC2a-e, 6 agents).
+
+## DC1 — mouvement ralenti (worktree `../gp-dc1`, branche `feat/densite-dc1`)
+État : `points_per_step` 140 → 70 (rules.json + défaut Rust), description de rules.json, codex
+(mouvement, saisons, déroute, agents), test `campaign.rs` (105 km). Sondes « avant » faites.
+Prochaine étape : cargo test, sondes « après », merge `main`.
+
+### Sondes avant (140)
+- `march_range_probe` : été 1460 pts (210 km), hiver 974 (140 km).
+- `turn_perf 50 3 1` : moyenne 9,30 ms, p95 42,6, p99 105,9, max 271 ms (Angleterre, tour 10).
