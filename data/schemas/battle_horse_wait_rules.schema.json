@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_horse_wait_rules.schema.json",
+  "title": "La cavalerie attend son infanterie",
+  "description": "Fichier data/rules/battle_horse_wait.json (lot EQ7, suite de l'ADR 0052) : quand l'IA de bataille retient sa cavalerie hors de portée des tireurs ennemis. Lu par sim-battle (HorseWaitRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "foot_close_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 500,
+      "description": "La cavalerie charge une cible couverte par des tireurs dès que son infanterie est à moins de cette distance (mètres) de la cible."
+    },
+    "range_margin": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 2,
+      "description": "Une cible est couverte si elle est à moins de la portée effective d'un tireur ennemi multipliée par ce facteur."
+    },
+    "committed_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 300,
+      "description": "Une troupe à moins de cette distance (mètres) de sa cible ne s'arrête plus."
+    }
+  },
+  "required": ["foot_close_m", "range_margin", "committed_m"],
+  "additionalProperties": false
+}
