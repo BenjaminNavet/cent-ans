@@ -18,6 +18,12 @@ render_mode blend_mix, depth_draw_never, cull_disabled, diffuse_lambert, specula
 // Disque couvert par le rendu fin (centre x, z ; rayon ; poids du palier près).
 uniform vec4 fine_zone = vec4(0.0, 0.0, -1.0, 0.0);
 uniform float fine_weight = 1.0;
+// SZ2b : ouverture de l'eau dans les emprises des colonies (maquettes masquées, villes 1:1 de
+// ZG6 affichées) et dans les zones des villes 1:1 (VH, fondu de leur maquette L1/L2). Marque
+// par sommet dans UV2.y (ordre + 100 × marque : 1 emprise, 2 zone).
+uniform float cover_open = 0.0;
+uniform float shallow_alpha = 0.9;
+uniform float zone_open = 0.0;
 // Débogage (`--fine-debug`) : eau en magenta opaque.
 uniform bool debug_flat = false;
 
@@ -65,6 +71,7 @@ varying vec2 v_flow;       // (abscisse, écart à l'axe) en unités monde
 varying vec3 v_world;
 varying vec4 v_flags;
 varying float v_width;
+varying float v_open;
 
 float hash21(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -99,7 +106,9 @@ void vertex() {
 	world += to_cam / dist * min(depth_bias * dist, 0.5);
 	VERTEX = world;
 	float true_px = UV.x / world_per_px;
-	float order = UV2.y;
+	float mark = floor(UV2.y / 100.0 + 0.001);
+	float order = UV2.y - 100.0 * mark;
+	v_open = mark < 0.5 ? 1.0 : (mark < 1.5 ? cover_open : zone_open);
 	float reach = order_distance * exp2(order - 3.0);
 	v_alpha = mix(1.0, clamp(true_px / min_px, 0.25, 1.0), thin_fade) * (1.0 - smoothstep(reach * 0.75, reach, dist));
 	v_side = UV.y * half_w / max(water_half, 1e-5);
@@ -113,7 +122,7 @@ void vertex() {
 
 void fragment() {
 	float edge = abs(v_side);
-	float zone = zone_mask(v_world.xz) * fine_weight;
+	float zone = zone_mask(v_world.xz) * fine_weight * v_open;
 	if (zone <= 0.001 || v_alpha <= 0.001) {
 		discard;
 	}
@@ -179,7 +188,9 @@ void fragment() {
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
 	ALBEDO = mix(ALBEDO, sky_color, clamp(fresnel * sky_reflect + 0.12, 0.0, 0.8) * water);
-	float water_alpha = mix(0.75, 0.97, smoothstep(0.0, 0.35, depth_t));
+	// SZ2b : nappe peu transparente même sur un lit peu creusé (à 0,75 les facettes du relief
+	// se voyaient à travers l'eau : effet de voile sur la Loire et la Seine au palier site).
+	float water_alpha = mix(shallow_alpha, 0.97, smoothstep(0.0, 0.35, depth_t));
 	float alpha = max(water * water_alpha, bank_alpha * (1.0 - water));
 	ALPHA = clamp(alpha * v_alpha * zone, 0.0, 1.0);
 	if (debug_flat) {

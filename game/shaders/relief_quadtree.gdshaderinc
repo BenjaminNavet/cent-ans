@@ -64,7 +64,7 @@ float qt_texel(ivec2 t, float layer, vec4 nbr, vec4 diag) {
 // Altitude (m) au point monde p : bilinéaire dans la page (et ses voisines), ou heightmap 4096.
 float qt_height_m(vec2 p, vec4 page, vec4 nbr, vec4 diag, float hm_lod) {
 	if (page.x < 0.0) {
-		return height_m_lod((p + vec2(0.5)) / map_size, hm_lod);
+		return height_m_lod(p / map_size, hm_lod);  // SZ2b : pixel i centré en i + 0,5 (ADR 0086)
 	}
 	vec2 t = (p - page.yz) / page.w * float(QT_PAGE_PX) - 0.5;
 	vec2 f = floor(t);
