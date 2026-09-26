@@ -279,16 +279,23 @@ impl CampaignState {
                 }
             }
         };
-        // The places held (controller), as for taxes and upkeep.
+        // The places held (controller), as for taxes and upkeep. DC6b (ADR 0082): a
+        // secondary place's libraries weigh its kind's `province_effect_percent`, as on
+        // the province-wide effects, so that the doubled abbeys of the dense map do not
+        // raise research by a fifth.
         for settlement in self
             .settlements
             .values()
             .filter(|s| &s.controller == faction)
         {
+            let weight = f64::from(crate::buildings::province_effect_percent(
+                data,
+                settlement.kind,
+            )) / 100.0;
             for id in &settlement.buildings {
                 if let Some(building) = data.buildings.get(id) {
                     for effect in &building.effects {
-                        add(effect.effect, effect.mode, effect.value);
+                        add(effect.effect, effect.mode, effect.value * weight);
                     }
                 }
             }

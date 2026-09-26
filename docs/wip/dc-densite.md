@@ -256,3 +256,13 @@ DC1 est l'ancien code (avant la revue de code et PB3) : comparer DC3 à main.
 - Hérésie : le compte des bâtiments religieux de la province n'est pas pondéré.
 - IA vs main : +70 % de temps moyen (plus de places, horizon doublé), sous la cible de 50 ms.
 - Rendu des hameaux (5 km) non revérifié dans Godot (`dc4_density_probe.gd`, fenêtré).
+
+## DC6b — sommes non pondérées et révoltes (worktree `../gp-dc6b`, branche `feat/dc6-b`)
+État : en cours. Référence d'avant densification : worktree détaché `../gp-dc6b-ref` sur
+**9c107692** (dernier `main` avant la fusion DC : même code que 35783bcf de DC3 + DA2 ;
+89bc960a, proposé, précède PB3 et la revue de code, donc un autre code d'IA). Sonde :
+`DC6_TRACE=1 century_probe` (points de recherche par faction aux tours 1/40/120/200, hérésie
+de chaque tour).
+- Recherche : +18 % en moyenne au tour 1 (France +35 %, Angleterre +24 %, Empire +65 %) :
+  pondérée par `province_effect_percent` (`research_points_per_turn`), à remesurer.
+- Prochaine étape : hérésie (runs de 464 tours : Lollards 1381, Hussites 1419), puis révoltes.

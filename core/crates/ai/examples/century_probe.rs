@@ -804,6 +804,37 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 }
             }
         }
+        // DC6b: `DC6_TRACE=1` prints research points per faction (turns 1, 40, 120)
+        // and the heresy of every province each turn.
+        if std::env::var("DC6_TRACE").is_ok() {
+            if [1, 40, 120, 200].contains(&state.turn) {
+                for fid in state.factions.keys().filter(|f| f.as_str() != "fac_rebels") {
+                    if state.factions[fid].alive {
+                        println!(
+                            "DC6R {seed} {} {} {}",
+                            state.turn,
+                            fid.as_str(),
+                            state.research_points_per_turn(data, fid)
+                        );
+                    }
+                }
+            }
+            let heretic: Vec<u8> = state
+                .provinces
+                .values()
+                .filter(|p| p.heresy_religion.is_some())
+                .map(|p| p.heresy)
+                .collect();
+            let sum: u32 = state.provinces.values().map(|p| u32::from(p.heresy)).sum();
+            println!(
+                "DC6H {seed} {} {} {} {} {}",
+                state.turn,
+                heretic.len(),
+                sum,
+                state.provinces.len(),
+                heretic.iter().max().copied().unwrap_or(0)
+            );
+        }
         track_eq4(&state, &mut report.eq4, &eq4_before);
         eq4_before = snapshot(&state);
         if state.year == 1437 && report.eq4.snowball_1437.0.is_empty() {
