@@ -716,12 +716,13 @@ l'application (livraison séparée), puis `user://relief`. `TerrainBuilder` (pyr
   près et son pas de quantification, inclinaison, plans de découpe ;
 - `resources/relief_exaggeration.tres` (`ReliefExaggerationProfile`, ZG8) : `enabled`, exagération
   de près (`near_exaggeration`), gains de relief local (`gain_far`, `gain_near`), calcul du fond de
-  vallée (`floor_*`), roche des falaises (`cliff_slope_*`), soleil de l'ombrage.
+  vallée (`floor_*`), écrasement des montagnes (`mountain_*`, SZ1), roche des falaises
+  (`cliff_slope_*`), soleil de l'ombrage.
 
 **Drapeaux de ligne de commande** (après `--`) :
 - désactiver : `--no-pyramid` (relief E0 seul, comportement d'avant ZG), `--no-fine-geo` (ni
   fleuves ni routes fins), `--no-towns` (villes ZG6), `--no-relief-exaggeration` (ZG8 → rendu ZG4
-  exact), `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
+  exact), `--no-mountain-squash` (sans l'écrasement des montagnes SZ1), `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
 - essais : `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--camera-min=N`,
   `--qt-debug=1|2`, `--fine-debug`, `--town-lod=blocks|detail` ;
 - banc : `--stage=map --hide-armies --bench-map` (panoramique + descentes ; `--bench-distance`,
@@ -752,7 +753,8 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
 ### Arbre et sélection
 
 - Racine = toute la carte (4 096 unités), nœud (n, col, row) de côté `4096 / 2^n`, **aligné sur la
-  grille des tuiles** (décalage −0,5 unité du pixel centré) : profondeur n ↔ étage L = n − 4 (un nœud de
+  grille des tuiles** (tuile (k, col, row) sur [col·T, (col + 1)·T], sans décalage depuis SZ2b,
+  ADR 0086) : profondeur n ↔ étage L = n − 4 (un nœud de
   profondeur 4 est une tuile E0 de 256 unités). Profondeur maximale d'un nœud : étage de données le plus
   fin de son sous-arbre (`max_level_under`, sinon l'ancêtre existant) + `extra_depth` (3), plafond 14.
 - **CDLOD** : un nœud est accepté quand l'espacement de ses sommets (côté / 64) projeté à l'écran
@@ -922,9 +924,9 @@ et `game/resources/zoom_tiers.tres` (paliers vallée / site).
 Voir le tableau des paliers (lot C6). `ZoomTiers.valley_weight` / `site_weight` sont cumulatifs (1 à ce palier
 et en deçà), `border_alpha` / `fog_alpha` pilotent `province_border_alpha`, `realm_border_alpha`,
 `fog_veil_amount` et `fog_cloud_amount` du matériau de terrain (valeurs par défaut du shader × facteur),
-`prop_scale` le paramètre global `campaign_prop_scale` (arbres de `foliage.gdshaderinc` : 1 au-dessus de
-22 unités, `(d / 22)^0,8` en deçà, au moins 0,04 ; remis à 1 en quittant la carte car les batailles
-partagent ce shader). Marqueurs d'armée : échelle proportionnelle à la distance sous 12 unités
+le paramètre global `campaign_prop_scale` l'échelle des arbres de `foliage.gdshaderinc` (depuis SZ4 :
+`MapPropScale.tree_scale`, voir « Objets à l'échelle aux paliers intermédiaires » ; remis à 1 en quittant
+la carte car les batailles partagent ce shader). Marqueurs d'armée : échelle proportionnelle à la distance sous 12 unités
 (`ArmyMarkers.CLOSE_KNEE_DISTANCE`), plaques au-delà de 40 × la distance masquées sous 12. Pluie et neige
 (`CampaignWeatherView`) : taille des gouttes proportionnelle à la distance sous 22. Atmosphère
 (`CampaignAtmosphere`) sous 30 unités (pleinement sous 6) : brouillard de profondeur au moins de 18 à 240
@@ -1063,7 +1065,8 @@ Choix : **retoucher les pages de hauteurs** plutôt qu'une texture de lit à par
 rang suffisant (≥ 5 à E3, ≥ 3 au-delà), les hauteurs sous le niveau d'eau `z` : fond parabolique
 (0,6 m + 1,2 % de la largeur, ≤ 4 m ; 0,25 m sous l'eau au bord), berge fondue sur 35 % de la largeur
 (1,5 pixel de page à 250 m) ; au moins 0,75 pixel de page de demi-largeur (sillon d'un ruisseau). Rien sous
-les emprises des colonies (l'eau passe sous les villes). La page téléversée **et** les octets gardés pour
+les zones personnalisées des maquettes L1/L2 sans ville 1:1 (SZ2b : les emprises des colonies et les
+zones des villes 1:1 sont creusées, voir « Nappe d'eau des fleuves (lot SZ2b) »). La page téléversée **et** les octets gardés pour
 `surface_height_at` sont les mêmes : déplacement des patchs, normales (berges ombrées), morphing vers la
 page parente (creusée à sa résolution), pose des ponts et des maquettes voient le même lit. Coût : ≈ 8-10 ms
 de fil par page E4 réelle (Seine à Rouen, 11 700 pixels abaissés), 0 sur le fil principal.
@@ -1416,6 +1419,45 @@ et falaises, mais ne dépasse plus ≈ 350 m en montagne : plus d'aiguilles au p
 Alpes. Même formule partout (le fond publié est lu par les shaders, `MapData` et le semis natif) ;
 0 = rendu ZG8 d'origine.
 
+**Montagnes écrasées (lot SZ1, défaut S1).** Au palier vallée, l'exagération ZG4 (×3,4 à d = 6) de
+2 000 m de relief pyrénéen faisait 10 unités de murs pour une caméra à 6 : caméra au fond des canyons.
+La hauteur affichée devient
+
+```
+y = s · (h − K · max(h − base, 0) + g · (1 − K) · max(h − fond, 0)),   K = c(s) · k(x, z)
+```
+
+- `base` : fond non plafonné (min + flous de `ReliefFloor`, ≤ `fond`) ;
+- `k` : facteur d'écrasement par cellule, fonction de l'amplitude régionale A = sommets voisins
+  (maximum puis flous, déjà calculés pour le plafond) − base : 0 sous le genou `mountain_knee_m`
+  (350 m), au-delà amplitude affichée `genou + (A − genou) · mountain_ratio` (0,3), borné à
+  `mountain_squash_max` (0,55). Collines, coteaux, falaises et plaines (A ≤ 290 m mesuré : Crécy,
+  falaises normandes, Seine, Loire, Paris) : k = 0, rendu inchangé ;
+- `c(s)` : poids selon l'échelle, `mountain_squash_far` (0) en vue stratégique → 1 dès l'exagération
+  `mountain_squash_full_exaggeration` (×3,5, avant le palier vallée) ; publié avec l'échelle
+  (`campaign_relief_squash`), recalé par les mêmes signaux ;
+- le gain local ZG8 est écrasé d'autant (`g · (1 − K)`) : pas d'aiguilles sur une montagne aplanie ;
+- autour des villes emblématiques 1:1 (VH4, `LandmarkV2Library`) : k ≥ `true_scale_squash` (0,7)
+  jusqu'au rayon de la ville + `true_scale_full_units` (4), fondu sur `true_scale_fade_units` (6) :
+  relief ≈ échelle vraie aux paliers vallée et site (coteaux de Rouen, côte Sainte-Catherine, plus
+  des murs de 600 m à côté de maisons à l'échelle ; amplitude affichée ×0,65).
+
+Fond, base et k partagent une texture RGBF (`campaign_relief_floor` : R, G, B) et la grille publiée
+(`MapData.relief_floor_grid` : `data`, `base`, `squash`) ; doubles exacts : `campaign_relief.gdshaderinc`
+(`campaign_display_height_at_fields`, gradient compris), `MapData.display_height_fields` (et l'inverse
+par morceaux `height_from_display_with`), `vegetation::TileRequest::display_height` (Rust, semis natif,
+`VegetationScatter.set_relief_fields`). Bornes des boîtes : `s·(1 − K_max)·h ≤ y ≤ s·(1 + g)·h`
+(quadtree, villes). Palier vallée, amplitude affichée dans 8 px : Pyrénées ×0,48, Alpes ×0,42,
+pays de Galles ×0,56, Massif central ×0,54, collines ×1,00 (`tests/sz1_mountain_test.gd`).
+
+**Caméra au-dessus des crêtes voisines (SZ1).** En plus de la garde au sol et de la visée dégagée,
+la caméra reste au-dessus du sol affiché (plus la garde) sur un cercle de rayon
+`crest_radius_factor` × distance (0,5) autour d'elle et autour du point visé (`crest_samples` = 8,
+hauteur pondérée par `crest_focus_weight`) : elle monte au-dessus des crêtes au lieu de rester dans
+la vallée. Sur les collines, rien ne change (≤ 1 cm de plus à Crécy au palier site).
+Captures avant / après : `docs/img/sz1/` (`tests/sz1_mountain_shots.gd`, « avant » avec
+`--no-mountain-squash --no-crest` ; Rouen : `tests/vh4_shots.gd`, « avant » = `docs/img/vh4/`).
+
 **Niveaux d'eau.** `hydro_fine.water_level` borne le fond des lignes à 0 m avant l'ajustement
 monotone (la bathymétrie des zones E5-E7 tirait la Tamise à −7,8 m à Londres, la Garonne à −15,8 m à
 Bordeaux) ; clé du cache de recalage liée à `detail_dem.BAKE_VERSION` (`SNAP_VERSION` 4 : les
@@ -1442,6 +1484,110 @@ inconnues du camp joué paraissent beiges de près). Captures et défauts laiss�
 ![Crécy au palier site](img/zg7c/crecy_site.jpg)
 ![Suite S1 : murs pyrénéens au palier vallée](img/zg7c/pyrenees_vallee.jpg)
 ![Suite S3 : Rouen au palier site (VH4)](img/zg7c/rouen_seine_site.jpg)
+
+## Objets à l'échelle aux paliers intermédiaires (lot SZ4, suites ZG7c S4 et S5)
+
+**Accessoires de carte.** Arbres, moulins, hameaux et panaches de fumée sont dessinés à l'échelle de
+la carte (1 unité ≈ 719 m : arbre ~1 km, corps de moulin 2,3 km, hameau ~1,4 km, panache de
+cheminée 1 × 3 km) : lisibles en vue stratégique, absurdes au palier vallée. `MapPropScale`
+(`scripts/map/map_prop_scale.gd`, réglages `resources/map_prop_scale.tres`) donne leur échelle selon
+la distance du rig : 1 au-delà de `shrink_start` (28 unités, rien ne change en vue stratégique ni en
+haut du palier comté), taille réelle (`*_ratio` = taille réelle / taille carte) en deçà de
+`shrink_end` (5 ; `tree_shrink_end` = 3 pour les arbres, dont le semis est clairsemé), `smoothstep`
+sur le logarithme de la distance entre les deux : aucune marche visible pendant un zoom.
+- arbres : paramètre global `campaign_prop_scale` (remplace `ZoomTiers.prop_scale`) ;
+- panaches (`life_smoke.gdshader`) : paramètre `prop_scale` des deux matériaux ; l'origine des
+  instances est au sol et la levée (sommet de la maquette, toit du hameau) est dans la colonne z de la
+  base (`MODEL_MATRIX[2].y`), mise à l'échelle avec la largeur et la hauteur ; opacité des cheminées
+  × `chimney_real_alpha` à taille réelle ;
+- moulins (`LifeEffects`) et hameaux (`SettlementLayer`) : instances réécrites quand l'échelle varie
+  de plus de `rewrite_step` (4 %), depuis des données gardées à la construction (sol du moulin ; sol
+  au centre et point bas de l'emprise de carte du hameau, interpolés selon l'échelle) : ≈ 0,3-0,7 ms
+  pour ~500 moulins ou ~400 hameaux chargés, sans relire le relief ;
+- moulins, fumées et hameaux ne sont plus masqués au palier site (ils y sont à leur taille réelle).
+
+**Villes ZG6 vues de loin.** À 4 km, les maisons (blocs du HLOD) sont sous-pixel : on ne voyait que
+le sol de terre battue, un disque brun. Le sol bâti (`TownBuilder` : part bâtie dans `UV2.y`,
+matériau `roofscape`) prend de loin la couleur moyenne (dernier mip) d'une couche de toit de l'atlas,
+tirée par cellule de 9 m avec ruelles sombres, en fondu selon la distance caméra (`town_render.tres` :
+`roofscape_near` 1,2 → `roofscape_far` 3,5 unités, `roofscape_strength`, `roofscape_gain`) : la ville
+se lit comme une masse de toits, et redevient sol sous les maisons détaillées.
+
+Captures `docs/img/sz4/` (`avant_*` / `apres_*`, paliers vallée d = 6, comté d = 14, stratégique
+d = 60 ; `*_amiens_zoom_*` : Amiens à d = 6 et 3, pleine résolution recadrée) :
+`godot --path game --script res://tests/sz4_shots.gd -- --out=<dossier> --map-weather=clear
+[--tiers=vallee:6,comte:14] [--full] [--settle-towns]`. Test : `tests/sz4_prop_scale_test.gd`.
+
+![Crécy au palier vallée, avant : moulin et fumées géants](img/sz4/avant_crecy_vallee.jpg)
+![Crécy au palier vallée, après](img/sz4/apres_crecy_vallee.jpg)
+![Val de Loire au palier vallée, avant : hameau géant](img/sz4/avant_val_de_loire_vallee.jpg)
+![Val de Loire au palier vallée, après](img/sz4/apres_val_de_loire_vallee.jpg)
+![Amiens à 4 km, avant : disque de terre battue](img/sz4/avant_amiens_zoom_d6.jpg)
+![Amiens à 4 km, après : masse de toits](img/sz4/apres_amiens_zoom_d6.jpg)
+
+## Pics d'images côté scripts (lot SZ6, ADR 0051)
+
+**Sonde.** `--bench-map --bench-probe` active `PerfProbe` (`scripts/dev/perf_probe.gd`) : minuteries
+par section de `CampaignMap._process` (`map.*`), de `update_lod` (`lod/*`) et des étapes du quadtree
+(`qt/*`) ; le rapport `probe` donne, par section, le temps cumulé dans les images > 50 ms, le nombre
+de ces images qu'elle domine, sa pire durée, et les 12 pires images avec leurs sections. Ajouter une
+section : `var t := Time.get_ticks_usec()` … `t = PerfProbe.lap("nom", t)` (coût : un test booléen) ;
+« parent/nom » pour une sous-section.
+
+**Causes trouvées et correctifs** (même rendu, au plus quelques images de décalage) :
+- Rubans de route drapés (`RoadRenderer`) : un ruban coûtait jusqu'à 115 ms au fil principal. Avec
+  le quadtree, construits dans `WorkerThreadPool` (`RibbonJob`) sur un instantané des pages de
+  l'emprise des tronçons (`surface_snapshot`, même surface que `surface_heights_at`), 4 à la fois,
+  installés dans le budget de l'image ; `flush` et le repli E0 restent synchrones.
+- Végétation : changer `MultiMesh.mesh` après `buffer` fait relire le tampon au GPU par le serveur
+  de rendu (boîte englobante), image bloquée jusqu'à 80 ms au passage détaillé / simple. Le
+  MultiMesh est recréé depuis la copie processeur du tampon (`Vegetation._with_mesh`). **Règle :** ne
+  jamais changer le maillage ni lire `buffer` / `get_instance_*` d'un MultiMesh rempli par `buffer`.
+- Villes emblématiques : recuisson des hauteurs d'un bloc dans un fil (instantané des pages) au lieu
+  de tranches de 1,5 ms par maquette et par image.
+- `TerrainBuilder` : changements de niveau des morceaux signalés du plus proche au plus lointain dans
+  `level_emit_budget_ms` (4 ms, au moins un par image ; tous hors image, `FrameBudget.in_frame`) :
+  un zoom en changeait jusqu'à 20 d'un coup (50 ms d'écouteurs).
+- Étiquettes des colonies : recalculées seulement pour les morceaux recalés, et en entier au
+  changement d'échelle verticale ou de palier près (avant : les 570 à chaque image d'un zoom).
+- `LifeEffects._reground` : points indexés par morceau (avant : parcours de tous les points).
+
+**Mesures** (`--bench-map`, M4 Pro, machine partagée à une charge de 75-150 ; 4 passes alternées
+main c4064c29 / SZ6, médianes) : parcours complet p99 91 → 38 ms, pire image 182 → 52 ms, images
+> 50 ms 231 → 3, p50 20 → 19 ms ; descente p99 93 → 38 ms, scripts p99 87 → 29 ms. Détail et limites : `docs/wip/sz6-pics-scripts.md`.
+
+## Villes emblématiques à l'échelle 1:1 (lots VH0/VH4, ADR 0078)
+
+Défaut S3 de ZG7c : au palier site, les villes emblématiques étaient des maquettes à la loupe
+posées sur un relief 1:1 (Rouen : falaise au milieu de la ville, plan d'eau vertical), et la caméra
+était bloquée par un plancher provisoire (ZG4b). Une ville emblématique qui a un fichier
+`data/landmarks_v2/<id>.json` (format v2 géoréférencé EPSG:3035) est désormais rendue à l'échelle
+réelle au zoom rapproché ; format, outil et moteur : **`docs/landmarks-v2.md`**.
+
+- `SettlementLayer` crée `LandmarkCityLayer` à côté du `TownLayer` de ZG6 ; la ville se planifie
+  dès le poids vallée 0,15 (fil de travail, ≈ 2-4 s pour Rouen sous charge), puis se construit
+  par étapes (`TownBuilder`, budget ZG6) ; la maquette L1/L2 se dissout par tramage
+  (`landmark.gdshader`, `fade`) entre les poids vallée 0,35 et 0,65.
+- Caméra : `CampaignCamera.floor_zones` (fourni par `SettlementLayer.landmark_floor_zones`) ne
+  contient plus que les villes sans v2 ; au-dessus de Rouen, la caméra descend au plancher du
+  relief (0,3 unité).
+- `TownBuilder` étendu sans changer les villes ordinaires : cellules de détail par plan
+  (`detail_cell_m`, 250 m pour les îlots des villes 1:1), enceintes polygonales `wall_rings`,
+  monuments préparés (`v2_monuments`), rues pavées et ruisseaux dessinés, bord du sol par sommet.
+- Rouen vers 1340 : 706 rues (OSM, percées du XIXᵉ s. exclues), enceinte de ≈ 5 km avec 9 portes
+  et 65 tours, pont Mathilde habité, 26 monuments à gabarit réel (cathédrale 137 m, tour
+  Saint-Romain, tour-lanterne et flèche ; chœur gothique et nef romane de Saint-Ouen ; château de
+  Philippe Auguste ; halles de la Vieille-Tour ; beffroi communal jusqu'en 1382, Gros-Horloge à
+  partir de 1389), ≈ 4 800 parcelles et 5 800 bâtiments.
+- Captures `docs/img/vh4/` (`rouen_strategique`, `rouen_transition`, `rouen_vallee`,
+  `rouen_site`, `rouen_site_ouest`, `rouen_toits`, `rouen_pont`, `rouen_chateau`) :
+  `godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear`.
+- Mesure (`vh4_shots.gd`, 4 s par point, machine chargée : charge moyenne ≈ 100-110 sur 14 cœurs,
+  autres agents actifs ; après fusion de SZ2/SZ4) : **55 i/s au-dessus de Rouen à d = 1,6 et 56 i/s
+  à d = 0,6** (pire image 33-34 ms), contre 60 et 46 i/s au-dessus d'Amiens (ville ordinaire ZG6)
+  dans la même session : pas de régression par rapport à une ville ordinaire ; un premier passage,
+  plus chargé, donnait 27-28 i/s (Rouen) contre 23-25 (Amiens). 60 i/s à confirmer au repos.
+- Tests : `res://tests/vh4_landmarks_test.gd` (headless), `tools/tests/test_landmarks_v2.py`.
 
 ## Interface des colonies (lot C5)
 
@@ -1593,14 +1739,14 @@ fenêtre, bandeau, journal, panneaux de droite).
 - Captures : `--stage=army` (défaut), `--stage=province`, `--stage=chronicle` →
   `docs/img/hud-campaign*.png` (1440×900 et 1920×1080).
 
-## Tour de l'IA à la Total War (lot CT1, ADR 0070)
+## Tour de l'IA à la Total War (lot CT1, ADR 0073)
 
 En fin de tour, après la résolution du cœur et avant la diplomatie, la victoire et le rapport de
 saison, `AiTurnReplay` (`game/scripts/map/ai_turn_replay.gd`, créé par `campaign_map.gd`) rejoue les
 marches des armées IA que le joueur voit :
 
 - **Données** : `CampaignSim.get_ai_turn_moves()` (trajet réel, issue, partie vue, intérêt pour le
-  joueur ; format dans l'ADR 0070), enregistré seulement si `set_ai_turn_recording(true, …)` a été
+  joueur ; format dans l'ADR 0073), enregistré seulement si `set_ai_turn_recording(true, …)` a été
   appelé avant `end_turn` ; mise en scène dans `data/ui/ai_turn_replay.json`.
 - **Réglages** (Réglages › Carte) : « Mouvements de l'IA » = Suivre (défaut ; la caméra se porte sur
   les 6 mouvements au plus qui concernent le joueur — bataille, siège de ses places, marche sur ses
@@ -1616,3 +1762,35 @@ marches des armées IA que le joueur voit :
 - **Coût** : Masquer = coût d'avant ; enregistrement actif ≈ 2 ms par tour dans le cœur (release),
   < 0,1 ms de tri côté Godot ; la relecture elle-même dure le temps de l'animation (de 0 s sans
   mouvement vu à une vingtaine de secondes à ×1 quand six mouvements sont suivis).
+
+## Nappe d'eau des fleuves et convention des rasters (lot SZ2b, ADR 0086)
+
+Défaut : au palier site, pas d'eau autour des villes (Seine à Rouen en lit sableux, Loire absente à
+Orléans et Tours), et, là où l'eau existait, lit creusé à 360 m du vrai lit du relief. Deux causes :
+
+- **Eau coupée sous les emprises** : `FineRibbonJob` coupait les rubans et `FineBedCarver` ne
+  creusait pas sous les emprises des maquettes de colonies (rayon de maquette × 0,8 : 5,2 km à
+  Orléans) ni dans les zones personnalisées (Rouen, Paris, Londres…), règle d'avant les villes 1:1
+  (ZG6, VH4). Désormais l'eau traverse les emprises et les zones des villes qui ont un fichier v2 ;
+  ses sommets y sont marqués (`UV2.y` = ordre + 100 × marque : 1 emprise, 2 zone de ville 1:1) et
+  `river_fine.gdshader` les efface tant que les maquettes sont affichées : `cover_open` = villes 1:1
+  de ZG6 actives (`TownLayer.active`, toutes les maquettes masquées), `zone_open` = 1 − opacité de la
+  maquette L1/L2 (`LandmarkCityLayer.fade`). Le lit est creusé partout sauf dans les zones des
+  maquettes sans ville 1:1 (Paris, Londres… tant que VH5-VH8 ne sont pas faits : leur maquette
+  porte sa propre eau). Ponts-portes masqués quand les maquettes le sont.
+- **Demi-pixel** : Godot lisait les rasters avec le pixel i centré en x = i (`uv = (p + 0,5) /
+  taille`, `GRID_OFFSET = −0,5`), les outils et toutes les données vectorielles avec le pixel i sur
+  [i, i + 1] (`docs/geo.md`). Le relief était affiché 0,5 unité (360 m) au nord-ouest des fleuves,
+  colonies et villes 1:1. Rendu aligné sur les outils (ADR 0086) : `GRID_OFFSET = 0`,
+  `MapData.height_m_at` en (x − 0,5, y − 0,5), `uv = p / map_size` dans les shaders du terrain, même
+  chose dans la végétation native (Rust). Aucune recuisson : les niveaux d'eau `hydro_fine` étaient
+  déjà calés sur le relief dans la convention des outils.
+
+Mesures (`game/tests/sz2b_water_shots.gd --probe-heights`, relief − eau, mètres affichés) : à l'axe
+−2,9 à −4 m partout (lit creusé) ; berges à 1,15 demi-largeur ≈ −0,2 m à Rouen et en Val de Loire
+(l'eau touche la berge) ; Orléans et Tours −2 à −4 m sur une rive (chenal du relief plus large que
+la largeur de `river_widths.json`, bras multiples) : pas de mur, eau peu profonde au bord.
+Captures `docs/img/sz2b/avant_*` / `apres_*` (Rouen, Orléans, Tours, Londres, Bordeaux ; vallée et
+site). Laissés : maillages E0 des morceaux (vue parchemin, repli sans pyramide), tuiles fines d'avant
+la pyramide et grille du fond ZG8 dans l'ancienne convention (≤ 0,5 pixel de 719 m, invisible).
+

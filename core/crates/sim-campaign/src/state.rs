@@ -462,6 +462,17 @@ impl SettlementState {
     pub fn garrison_strength(&self) -> u32 {
         self.garrison.iter().map(|u| u.strength).sum()
     }
+
+    /// The settlement passes to `controller` (capture, cession, revolt): the
+    /// siege ends, the former holder's recruits in training and building
+    /// site are lost (no refund). The garrison is the caller's business.
+    /// Returns the former controller.
+    pub(crate) fn hand_over(&mut self, controller: &FactionId) -> FactionId {
+        self.siege = None;
+        self.recruit_queue.clear();
+        self.construction = None;
+        std::mem::replace(&mut self.controller, controller.clone())
+    }
 }
 
 /// Dynamic state of a faction.
@@ -698,6 +709,23 @@ fn default_interactive_battles() -> bool {
 impl CampaignState {
     /// Display name of a character: the static historical name, else the
     /// generated one, else the raw id.
+    /// Name of an army in French messages, lower case (Q5: the journal
+    /// showed raw ids such as "l'armée army_0012"): "l'ost d'Édouard III"
+    /// after its general, else "l'ost de France", else "une armée".
+    pub fn army_name(&self, data: &GameData, id: &ArmyId) -> String {
+        let Some(army) = self.armies.get(id) else {
+            return "une armée".to_owned();
+        };
+        let owner = match &army.general {
+            Some(general) => self.character_name(data, general),
+            None => data.factions.get(&army.faction).map_or_else(
+                || army.faction.to_string(),
+                |f| f.short_or_display_name().to_owned(),
+            ),
+        };
+        format!("l'ost {}", crate::events::de(&owner))
+    }
+
     pub fn character_name(&self, data: &GameData, id: &CharacterId) -> String {
         data.characters
             .get(id)

@@ -1,5 +1,5 @@
 //! Lot CT1: the record of the AI turn, for the Total War-style replay of the
-//! AI armies' marches on the campaign map (ADR 0070).
+//! AI armies' marches on the campaign map (ADR 0073).
 //!
 //! The AI turn is resolved at once inside `end_turn` (lot M3). When the
 //! interface asks for it ([`CampaignState::set_ai_replay_recording`]), each

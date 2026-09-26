@@ -1,4 +1,4 @@
-//! `CampaignSim` record of the AI turn (lot CT1, ADR 0070): the AI armies'
+//! `CampaignSim` record of the AI turn (lot CT1, ADR 0073): the AI armies'
 //! moves of the last `end_turn`, replayed by `game/scripts/map/ai_turn_replay.gd`.
 
 use godot::prelude::*;
@@ -41,6 +41,9 @@ impl CampaignSim {
     /// or settlement concerns the player (`data/ui/ai_turn_replay.json`).
     #[func]
     fn set_ai_turn_recording(&mut self, enabled: bool, notable_radius_km: f64) {
+        if self.refuse_while_turn_pending("set_ai_turn_recording") {
+            return;
+        }
         if let Some(state) = &mut self.state {
             state.set_ai_replay_recording(enabled, notable_radius_km);
         }

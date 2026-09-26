@@ -25,6 +25,8 @@ var map: Node = null  # CampaignMap
 var settings: Node = null
 var pause_menu: PauseMenu = null
 var season_report: SeasonReport = null
+## Panneaux déjà ouverts quand le rapport de saison s'est affiché (Q5).
+var _panels_under_report: Array[Control] = []
 var last_events: Array = []
 var last_autosave: String = ""
 var _last_saved_turn: int = 0
@@ -48,6 +50,12 @@ func setup(campaign_map: Node) -> void:
 	if chronicle != null and chronicle.get("window") != null:
 		ui.move_child(season_report, (chronicle.get("window") as Node).get_index())
 	season_report.entry_selected.connect(_on_report_entry)
+	# Q5 : le rapport cède la place à tout panneau que le joueur ouvre après lui (il restait
+	# par-dessus la fiche de colonie et la diplomatie, recrutement caché dessous).
+	season_report.visibility_changed.connect(func() -> void:
+		if season_report.visible:
+			_panels_under_report = ui.panels.visible_panels())
+	ui.panels.changed.connect(_on_panels_changed.bind(ui))
 	season_report.disable_requested.connect(func() -> void:
 		if settings != null:
 			settings.call("set_value", "interface/season_report", false))
@@ -215,11 +223,10 @@ func _capture_now() -> Image:
 
 
 ## Après `CampaignMap._on_save` (connecté avant) : fiche et vignette de l'emplacement.
+## La fiche est écrite par `SaveSlots.save` ; rien si l'écriture a échoué (ancienne fiche intacte).
 func _on_save_requested(save_name: String) -> void:
-	var path: String = SaveSlots.SAVES_DIR.path_join(save_name.validate_filename() + ".json")
-	if not FileAccess.file_exists(path):
+	if not bool(map.get("last_save_ok")):
 		return
-	SaveSlots.write_meta(save_name)
 	_last_saved_turn = _turn()
 	if _pause_snapshot != null:
 		SaveSlots.write_thumbnail(save_name, _pause_snapshot)
@@ -400,6 +407,23 @@ func _concerns_player(event: Dictionary) -> bool:
 
 func refresh() -> void:
 	pass  # F10b : les alertes sont rafraîchies par `HudController.refresh`.
+
+
+func _on_panels_changed(ui: Node) -> void:
+	if season_report == null or not season_report.visible:
+		return
+	var stack: PanelStack = ui.panels
+	# La fin de tour ouvre elle-même des panneaux (diplomatie sur offre nouvelle) dans l'image du
+	# rapport : ils restent dessous ; seuls ceux que le joueur ouvre ensuite le referment.
+	var same_frame := Engine.get_process_frames() - season_report.filled_frame <= 1
+	for panel in stack.visible_panels():
+		if stack.kind_of(panel) == PanelStack.Kind.MODAL or _panels_under_report.has(panel):
+			continue
+		if same_frame:
+			_panels_under_report.append(panel)
+		else:
+			season_report.close()
+			return
 
 
 func _on_report_entry(event: Dictionary) -> void:

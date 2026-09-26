@@ -1,7 +1,7 @@
 # SG4 — IA d'assaut de siège et équilibre défenseur / attaquant à l'échelle épique
 
 Branche `worktree-agent-af1d6ff622ee45890` (worktree `agent-af1d6ff622ee45890`). Suite de SG3
-(`docs/wip/sg3-sieges.md`), ADR 0023 (SG2, SG3, **SG4**), 0031-0034 (EP), 0046 (R4, **SG4**).
+(`docs/wip/sg3-sieges.md`), ADR 0023 (SG2, SG3, **SG4**), 0076 et 0032-0034 (EP), 0046 (R4, **SG4**).
 
 ## État : terminé, à fusionner par l'orchestrateur
 

@@ -129,6 +129,13 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   obtenus via [Poly Pizza](https://poly.pizza). Les figurines de bataille skinnées
   (`game/assets/models/battle_skinned/`, lot V2) en dérivent : pièces recolorées, habillées
   d'équipement procédural, décimées, animations rééchantillonnées et complétées.
+- **MakeHuman** ([makehumancommunity.org](http://www.makehumancommunity.org)) : maillage de
+  base, cibles et poids du squelette `game_engine` (CC0 depuis 2020), générés avec l'extension
+  Blender MPFB 2 (code GPL, non redistribué) ; corps de base des figurines fines (lot FG0,
+  `game/assets/third_party/characters/makehuman_base/`).
+- **Lyndon Daniels** — « Rigged Horse » ([OpenGameArt](https://opengameart.org/content/rigged-horse)) :
+  cheval de trait texturé (couleur, normale, occlusion 2k), base du cheval des figurines fines
+  (lot FG0, `game/assets/third_party/animals/oga_rigged_horse/`).
 - **Kenney** ([kenney.nl](https://kenney.nl)) : Castle Kit.
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Fir Tree 01, Pine Tree 01, Grass
   Medium 01 (Rico Cilliers, Rob Tuytel), Grass Medium 02 (Rico Cilliers). Modifiés : LOD2
@@ -256,6 +263,21 @@ reproduites telles quelles (entre guillemets).
   d'[OpenStreetMap](https://www.openstreetmap.org/copyright) (ODbL 1.0), arrondis. Les plans
   anciens de Wikimedia Commons cités dans ces fichiers ont servi de référence et ne sont pas
   redistribués.
+- **Villes emblématiques à l'échelle 1:1** (`data/landmarks_v2/`, ADR 0078) : tracés des rues
+  actuelles héritées du plan médiéval, positions et orientations des églises, tracé des
+  boulevards bâtis sur les enceintes arasées, extraits d'OpenStreetMap (Overpass) par
+  `cent-ans geo landmarks` : © les contributeurs
+  d'[OpenStreetMap](https://www.openstreetmap.org/copyright), base de données sous licence
+  ODbL 1.0. Les plans anciens (Le Lieur, Braun et Hogenberg, plans Gallica, carte d'Agas) ne
+  servent qu'au contrôle humain et ne sont ni extraits ni redistribués.
+- **Paris vers 1340 à l'échelle 1:1** (`data/landmarks_v2/paris.json`, lot VH5) : réseau des
+  rues, enceintes, portes, emprises des monuments, îlots, îles et lit de la Seine d'après « Paris
+  en 1380 » ; gabarit des parcelles d'après les données Vasserot version 1. © ALPAGE :
+  P. Rouet (Paris en 1380), A.-L. Bethe (données Vasserot) ; Arch. nat. F31 73-96 – Arch. Paris
+  © ALPAGE. Base de données sous licence
+  [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/), https://alpage.huma-num.fr/gis-data/
+  (consortium ALPAGE : LAMOP-Paris 1, LIENSs, ArScAn, L3i ; dir. H. Noizet). Les données
+  dérivées (`paris.json`) restent sous ODbL.
 - **Réseau hydrographique fin (lot ZG5a, ADR 0036)** — tracés recalés sur la pyramide de relief,
   canaux postérieurs à 1340 retirés :
   - France : BD TOPAGE® 2025, tronçons hydrographiques (IGN, OFB, agences de l'eau ; diffusion

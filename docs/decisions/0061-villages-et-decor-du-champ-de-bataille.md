@@ -1,7 +1,7 @@
 # ADR 0061 — Villages et décor du champ de bataille
 
 Date : 2026-09-25. Statut : accepté. Lot EP6 du chantier « batailles épiques » (suivi :
-`docs/wip/ep6-villages-decor.md`, `docs/wip/epic.md`). S'appuie sur EP1 (taille du champ, ADR 0031),
+`docs/wip/ep6-villages-decor.md`, `docs/wip/epic.md`). S'appuie sur EP1 (taille du champ, ADR 0076),
 EP3 (eau, ponts, routes, ADR 0033) et le kit de bâtiments (BR1-BR3, ADR 0021 et 0047).
 
 ## Contexte

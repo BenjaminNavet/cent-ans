@@ -57,7 +57,8 @@ impl BattleSim {
     /// One step of the standards: falls, raising, capture (after the
     /// casualties of the step, before morale).
     pub(super) fn resolve_standards(&mut self, contacts: &[Vec<usize>]) {
-        let rules = self.standard_rules.clone();
+        // A shared handle: the rules stay readable while `self` changes.
+        let rules = std::sync::Arc::clone(&self.standard_rules);
         let n = self.units.len();
         if self.standard_rout_seen.len() != n {
             self.standard_rout_seen.resize(n, false);

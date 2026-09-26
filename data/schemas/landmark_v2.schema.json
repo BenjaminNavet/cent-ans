@@ -1,0 +1,978 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/landmark_v2.schema.json",
+  "title": "Ville emblématique à l'échelle 1:1 (format v2)",
+  "description": "Fichier data/landmarks_v2/<id>.json (lots VH0/VH4, ADR 0078) : ville emblématique vers 1340 rendue à l'échelle réelle au zoom rapproché, sur le relief fin. Géoréférencée en EPSG:3035 : `origin_3035` = [E, N] en mètres ; toute la géométrie est en décalages [dE, dN] en mètres dans les axes de la grille EPSG:3035 (translation seule : ni rotation, ni échelle, ni loupe). Angles en degrés, antihoraires depuis l'est de la grille. Hauteurs en mètres réels (non exagérées). Le tissu (parcelles, maisons) est généré à l'exécution par `LandmarkPlan` (Godot) le long des rues ; les sections `streets` (origine `osm`) et `waters` (origine `rivers_fine`) peuvent être régénérées par `cent-ans geo landmarks`. Rendu seulement : aucune règle de jeu. Voir docs/landmarks-v2.md.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": 2
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "settlement": {
+      "type": "string",
+      "pattern": "^set_[a-z0-9_]+$",
+      "description": "Colonie représentée."
+    },
+    "landmark": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Maquette L1/L2 (data/landmarks/<id>.json) affichée en vue stratégique. Absente : la colonie garde en vue stratégique la maquette de colonie ordinaire, et la ville 1:1 remplace sa ville ZG6 (Orléans, VH7)."
+    },
+    "period": {
+      "type": "string",
+      "description": "État représenté, en français."
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 1300,
+      "maximum": 1500,
+      "description": "Année de référence du plan ; les éléments datés (`from_year`, `until_year`) sont filtrés par l'année de la partie."
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Graine du tissu généré (déterministe)."
+    },
+    "crs": {
+      "const": "EPSG:3035"
+    },
+    "origin_3035": {
+      "$ref": "#/$defs/point",
+      "description": "Origine [E, N] (m) du repère local, en EPSG:3035."
+    },
+    "fine_rivers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Noms des fleuves de la carte fine recopiés dans `waters` par `cent-ans geo landmarks` (défaut : Seine)."
+    },
+    "extent_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Rayon (m) couvert par la ville et ses faubourgs autour de l'origine (streaming, plancher de caméra, exclusions)."
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "license": {
+            "type": "string"
+          },
+          "extracted": {
+            "type": "boolean",
+            "description": "Vrai si des données en sont tirées automatiquement (licence compatible exigée) ; faux : contrôle humain seulement."
+          },
+          "use": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "license",
+          "extracted",
+          "use"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "plan": {
+      "type": "object",
+      "description": "Paramètres du parcellaire (défauts : data/map/towns_1340.json, section `plan`).",
+      "properties": {
+        "frontage_m": {
+          "$ref": "#/$defs/range"
+        },
+        "depth_m": {
+          "$ref": "#/$defs/range"
+        },
+        "faubourg_frontage_m": {
+          "$ref": "#/$defs/range"
+        },
+        "faubourg_depth_m": {
+          "$ref": "#/$defs/range"
+        },
+        "street_width_m": {
+          "type": "object",
+          "properties": {
+            "main": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "secondary": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "lane": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "quay": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "house_kinds": {
+          "type": "object",
+          "description": "Mélange des types du kit par zone (intra, faubourg) ; remplacé par celui d'un quartier.",
+          "additionalProperties": {
+            "$ref": "#/$defs/weights"
+          }
+        },
+        "detail_cell_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Côté (m) des cellules d'îlots du HLOD (nœud par cellule et par modèle)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "osm_streets": {
+      "type": "object",
+      "description": "Recette de `cent-ans geo landmarks` : rues actuelles héritées du tracé médiéval, tirées d'OpenStreetMap (ODbL) dans les quartiers de la ville.",
+      "properties": {
+        "bbox_lonlat": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "[lon_min, lat_min, lon_max, lat_max] de la requête Overpass."
+        },
+        "highways": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Valeurs de `highway` retenues."
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Noms exclus : percées postérieures à l'époque (XIXe s., reconstruction), voies des remparts arasés, quais modernes."
+        },
+        "main": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Noms des rues principales (axes de portes, grandes rues)."
+        },
+        "lanes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Noms traités en venelles."
+        },
+        "alleys": {
+          "type": "boolean",
+          "description": "Garde aussi, en venelles, les allées et cours nommées cartographiées en chemins piétons ou de service (… Alley, Court, Passage, Yard, Row, Churchyard : VH6, Londres)."
+        },
+        "unnamed": {
+          "type": "boolean",
+          "description": "Garde aussi les voies sans nom (venelles)."
+        },
+        "simplify_m": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "bbox_lonlat",
+        "highways",
+        "exclude",
+        "main"
+      ],
+      "additionalProperties": false
+    },
+    "alpage": {
+      "type": "object",
+      "description": "Recette ALPAGE (Paris seulement, lot VH5 ; ODbL, https://alpage.huma-num.fr/gis-data/) de `cent-ans geo landmarks` : rues de Paris en 1380 (`origin: \"alpage\"`) et parcelles Vasserot gardées comme gabarit des lanières (section `parcels`).",
+      "properties": {
+        "streets": {
+          "type": "object",
+          "properties": {
+            "layer": {
+              "type": "string"
+            },
+            "skip_regions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Régions ALPAGE ignorées (PONT : les ponts sont dans `bridges`)."
+            },
+            "exclude": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Noms exclus (quais tracés dans `quays`, voies postérieures)."
+            },
+            "exclude_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "main": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Rues principales en plus des axes majeurs ALPAGE (`AXE_MAJEUR`)."
+            },
+            "lane_words": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "simplify_m": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "parcels": {
+          "type": "object",
+          "properties": {
+            "layer": {
+              "type": "string"
+            },
+            "districts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Quartiers où le parcellaire Vasserot est importé."
+            },
+            "min_area_m2": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_area_m2": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_front_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_depth_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "reach_m": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Écart toléré entre la façade et le bord de la rue de 1380."
+            },
+            "max_landuse_overlap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "exclude_landuse": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Légendes ALPAGE 1380 (usages du sol) où aucune parcelle n'est gardée."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "waters": {
+      "type": "array",
+      "description": "Cours d'eau : axe d'amont en aval, chaque point [dE, dN, largeur m]. Le fleuve principal vient de la carte fine (`origin` : rivers_fine) pour que les quais tombent sur l'eau affichée ; les petits cours (Robec) sont tracés à la main.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "river",
+              "stream",
+              "moat"
+            ]
+          },
+          "origin": {
+            "enum": [
+              "rivers_fine",
+              "osm",
+              "alpage",
+              "hand"
+            ]
+          },
+          "draw": {
+            "type": "boolean",
+            "description": "Vrai : le moteur dessine l'eau (petits cours absents de la carte) ; faux : couloir interdit seulement (fleuve déjà rendu par la carte)."
+          },
+          "points": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/point_width"
+            }
+          },
+          "polygon": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/point"
+            },
+            "description": "Lit en polygone [dE, dN] (Paris : Seine de 1380, ALPAGE) au lieu d'un axe à largeur ; interdit en entier aux maisons."
+          },
+          "holes": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "$ref": "#/$defs/point"
+              }
+            },
+            "description": "Îles du lit en polygone."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "origin"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "points"
+            ]
+          },
+          {
+            "required": [
+              "polygon"
+            ]
+          }
+        ]
+      }
+    },
+    "walls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          },
+          "closed": {
+            "type": "boolean"
+          },
+          "height_m": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "thickness_m": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "tower_spacing_m": {
+            "type": "number",
+            "minimum": 0
+          },
+          "tower_radius_m": {
+            "type": "number",
+            "minimum": 0
+          },
+          "tower_height_m": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ditch_m": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Largeur du fossé extérieur (0 : aucun)."
+          },
+          "gates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "at": {
+                  "$ref": "#/$defs/point"
+                },
+                "kind": {
+                  "enum": [
+                    "gate",
+                    "postern",
+                    "water_gate"
+                  ]
+                },
+                "height_m": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "from_year": {
+                  "type": "integer",
+                  "description": "Porte ouverte cette année-là (VH6 : Moorgate, 1415) ; avant, mur continu."
+                },
+                "until_year": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "name",
+                "at"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "from_year": {
+            "type": "integer"
+          },
+          "until_year": {
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "points",
+          "height_m"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "streets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rank": {
+            "enum": [
+              "main",
+              "secondary",
+              "lane",
+              "quay",
+              "square"
+            ]
+          },
+          "width_m": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "origin": {
+            "enum": [
+              "osm",
+              "alpage",
+              "hand"
+            ]
+          },
+          "points": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          },
+          "from_year": {
+            "type": "integer"
+          },
+          "until_year": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "rank",
+          "origin",
+          "points"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "quays": {
+      "type": "array",
+      "description": "Quais : ligne de berge maçonnée (mur de quai jusqu'à l'eau) et grève en arrière, sans maisons.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          },
+          "width_m": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "kind": {
+            "enum": [
+              "stone",
+              "timber",
+              "strand"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "points",
+          "width_m"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "bridges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/$defs/point"
+          },
+          "to": {
+            "$ref": "#/$defs/point"
+          },
+          "width_m": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "deck_m": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Hauteur du tablier au-dessus de l'eau (m)."
+          },
+          "material": {
+            "enum": [
+              "stone",
+              "wood"
+            ]
+          },
+          "arches": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "houses": {
+            "type": "boolean",
+            "description": "Pont habité : maisons des deux côtés du tablier."
+          },
+          "house_span": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Partie habitée (fractions de la longueur depuis `from`)."
+          },
+          "chapel_at": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "gatehouses_at": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "mills_at": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "description": "Moulins pendants entre deux piles (fractions de la longueur)."
+          },
+          "chapel_side": {
+            "enum": [
+              "left",
+              "right"
+            ],
+            "description": "Côté de la chapelle (sens `from` → `to`) ; défaut : droite. VH6 : chapelle Saint-Thomas côté aval."
+          },
+          "drawbridge_at": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Pont-levis (fraction de la longueur) : travée sans maisons (VH6, London Bridge)."
+          },
+          "pier_m": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Épaisseur des piles le long du pont (défaut 3,5 m)."
+          },
+          "starling_m": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Longueur des avant-becs (« starlings ») en travers du pont, au ras de l'eau (0 : aucun)."
+          },
+          "from_year": {
+            "type": "integer"
+          },
+          "until_year": {
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "certainty": {
+            "enum": [
+              "attested",
+              "probable",
+              "hypothetical"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "from",
+          "to",
+          "width_m"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "monuments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "enum": [
+              "gothic_cathedral",
+              "church",
+              "abbey",
+              "castle",
+              "keep",
+              "belfry",
+              "hall",
+              "royal_palace",
+              "gate_tower",
+              "tower",
+              "enclosure",
+              "earthwork"
+            ],
+            "description": "Gabarit paramétré de `LandmarkMonuments` (Godot), à l'échelle réelle. Paramètres en mètres, voir docs/landmarks-v2.md."
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "at": {
+            "$ref": "#/$defs/point"
+          },
+          "angle_deg": {
+            "type": "number",
+            "description": "Axe +x du gabarit (églises : vers le chœur), antihoraire depuis l'est de la grille EPSG:3035."
+          },
+          "clear_m": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Marge sans maisons autour de l'emprise."
+          },
+          "from_year": {
+            "type": "integer"
+          },
+          "until_year": {
+            "type": "integer"
+          },
+          "certainty": {
+            "enum": [
+              "attested",
+              "probable",
+              "hypothetical"
+            ],
+            "description": "Emprise et gabarit : attestés (vestiges, plans), probables, ou restitution hypothétique."
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "model",
+          "at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "districts": {
+      "type": "array",
+      "description": "Quartiers : un point prend le premier quartier qui le contient. Hors de tout quartier, aucune parcelle.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "zone": {
+            "enum": [
+              "intra",
+              "faubourg"
+            ]
+          },
+          "polygon": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          },
+          "density": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Part des façades sur rue occupées."
+          },
+          "houses": {
+            "$ref": "#/$defs/weights",
+            "description": "Mélange des types de maisons du kit (townhouse, timber, stonehouse, cottage, longere, barn), remplace celui de la section `plan`."
+          },
+          "roofs": {
+            "$ref": "#/$defs/weights",
+            "description": "Réservé : répartition des couvertures (ardoise, tuile, chaume) ; non rendue en VH4 (un toit par modèle du kit bas détail)."
+          },
+          "from_year": {
+            "type": "integer"
+          },
+          "until_year": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "zone",
+          "polygon",
+          "density"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "open_spaces": {
+      "type": "array",
+      "description": "Espaces sans maisons : places, cimetières (aîtres), jardins, prés, cours de monastère.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "square",
+              "market",
+              "parvis",
+              "cemetery",
+              "garden",
+              "meadow",
+              "cloister",
+              "vineyard",
+              "yard",
+              "strand"
+            ]
+          },
+          "polygon": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          },
+          "from_year": {
+            "type": "integer"
+          },
+          "until_year": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "polygon"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "parcels": {
+      "type": "array",
+      "description": "Lot VH5 : parcellaire importé (ALPAGE, parcelles Vasserot gardées comme gabarit des lanières, ODbL). Chaque parcelle : [dE, dN, angle°, façade m, profondeur m] = milieu de la façade sur rue, direction de la normale vers l'intérieur de la parcelle (convention v2), longueur de façade, profondeur. Vide ou absent : parcellaire généré seulement.",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 5,
+        "maxItems": 5
+      }
+    },
+    "render": {
+      "type": "object",
+      "properties": {
+        "fade_valley": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Poids du palier vallée où la maquette se dissout au-dessus de la ville 1:1 (début, fin)."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "format",
+    "id",
+    "name",
+    "settlement",
+    "period",
+    "year",
+    "seed",
+    "crs",
+    "origin_3035",
+    "extent_m",
+    "sources",
+    "walls",
+    "streets",
+    "monuments",
+    "districts"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "point": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "point_width": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "[dE, dN, largeur m]"
+    },
+    "range": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "weights": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    }
+  }
+}

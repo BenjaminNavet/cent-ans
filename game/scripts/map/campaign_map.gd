@@ -89,6 +89,7 @@ var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
 var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
+var faction_borders: FactionBorders = null  # FR1 : frontières de faction lumineuses (ADR 0074)
 ## ZG4 : exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
 var dynamic_exaggeration: bool = true
 var _fps_probe_frames: int = -1
@@ -101,6 +102,17 @@ var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerr
 var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
 var movement_ctl: ArmyMovementController = null  # M4 : bulle, chemin, clic au sol, animation
 var agents_ctl: AgentController = null  # C6 (agents) : espions, hérauts, prédicateurs
+## PB3d : vrai pendant que le cœur résout la fin de tour dans son fil (ordres refusés, cloche
+## désactivée ; l'interface lit l'état d'avant, la caméra et l'animation continuent).
+var end_turn_running: bool = false
+var turn_wait: TurnWaitIndicator = null
+## PB3d : fins de tour résolues et rafraîchies (bancs `pb1_turns.gd`, parcours RL1).
+var end_turns_refreshed: int = 0
+## PB3d : durées (ms) de la dernière fin de tour : lancement du fil (clone de l'état), attente,
+## installation + journal, `refresh_all`.
+var last_end_turn_stats: Dictionary = {}
+var _construction_ids := PackedStringArray()  # PB3d : chantiers marqués au dernier rafraîchissement
+var units_ctl: UnitRosterController = null  # liste « Mes unités » (U) : armées et agents
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -174,6 +186,9 @@ func _ready() -> void:
 	agents_ctl = AgentController.new()  # C6 agents (après C5 : chaîne ses intercepteurs de clic)
 	add_child(agents_ctl)
 	agents_ctl.setup(self)
+	units_ctl = UnitRosterController.new()  # après M4 et C6 : lit leurs états
+	add_child(units_ctl)
+	units_ctl.setup(self)
 	minimap_ctl = MinimapController.new()  # C1
 	minimap_ctl.name = "MinimapController"
 	add_child(minimap_ctl)
@@ -185,6 +200,10 @@ func _ready() -> void:
 	map_modes.name = "MapModeController"
 	add_child(map_modes)
 	map_modes.setup(self)
+	faction_borders = FactionBorders.new()  # FR1
+	faction_borders.name = "FactionBorders"
+	add_child(faction_borders)
+	faction_borders.setup(self)
 	sieges = SiegeController.new()
 	add_child(sieges)
 	sieges.setup(self)
@@ -255,6 +274,8 @@ func _setup_settlements() -> void:
 	settlement_layer.settlement_selected.connect(_on_settlement_selected)
 	armies.settlement_position = settlement_layer.world_position_of  # C4
 	camera_rig.close_zones = settlement_layer.landmark_zones()  # L1
+	camera_rig.floor_zones = settlement_layer.landmark_floor_zones()  # VH4 : plancher levé (v2)
+	camera_rig.floor_zones_set = true
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
 		return settlement_layer.screen_label_rects(view_camera) + cities.screen_label_rects(view_camera)
@@ -285,7 +306,7 @@ func _configure_lod() -> void:
 
 
 func _connect_ui() -> void:
-	ui.end_turn_pressed.connect(_on_end_turn)
+	ui.end_turn_pressed.connect(_on_end_turn.bind(true))  # PB3d : le joueur attend le fil du cœur
 	ui.save_requested.connect(_on_save)
 	ui.load_requested.connect(_on_load)
 	ui.main_menu_requested.connect(func() -> void:
@@ -350,7 +371,11 @@ func _setup_campaign() -> void:
 func refresh_all() -> void:
 	if sim == null:
 		return
+	if not sim.has_method("get_state_revision"):  # PB3d : simulation factice sans compteur d'état
+		ProvinceSnapshot.invalidate()
 	_refresh_owner_colors()
+	if faction_borders != null:  # FR1
+		faction_borders.refresh()
 	if minimap_ctl != null:  # C1 : brouillard avant les marqueurs d'armée
 		minimap_ctl.refresh_fog()
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
@@ -370,6 +395,8 @@ func refresh_all() -> void:
 		settlements_ctl.refresh()
 	if agents_ctl != null:  # C6 agents
 		agents_ctl.refresh()
+	if units_ctl != null:  # liste « Mes unités »
+		units_ctl.refresh()
 	_refresh_trade_layer()  # C5 : routes commerciales
 	if map_modes != null:  # MF1 : repeint par-dessus les couleurs politiques
 		map_modes.refresh()
@@ -431,20 +458,15 @@ func _refresh_top_bar() -> void:
 ## Couleur de chaque province = couleur héraldique du propriétaire courant (simulation),
 ## initialisée par `GameDataStore.get_province_owner_colors` ; palette de repli sans store.
 func _refresh_owner_colors() -> void:
-	var ids := PackedStringArray()
-	ids.resize(map_data.province_count)
-	for index in range(1, map_data.province_count + 1):
-		ids[index - 1] = str(map_data.get_province(index).get("id", ""))
+	# PB3d : propriétaires lus en un appel groupé (instantané partagé par les calques).
+	var snapshot := ProvinceSnapshot.of(sim, map_data)
+	var ids := snapshot.ids
 	var colors := PackedColorArray()
-	if SimFacade.store_loaded():
-		colors = SimFacade.store.call("get_province_owner_colors", ids)
-	if colors.size() != ids.size():
-		colors.resize(ids.size())
-		colors.fill(Color(0, 0, 0, 0))
+	colors.resize(ids.size())
+	colors.fill(Color(0, 0, 0, 0))
 	var fallback_by_owner: Dictionary = {}
 	for i in ids.size():
-		var state: Dictionary = sim.call("get_province_state", ids[i])
-		var owner: String = str(state.get("owner", map_data.get_province(i + 1).get("owner", "")))
+		var owner: String = snapshot.owner[i] if snapshot.has(i) else str(map_data.get_province(i + 1).get("owner", ""))
 		if owner == "":
 			colors[i] = Color(0, 0, 0, 0)
 		elif SimFacade.store_loaded():
@@ -454,7 +476,8 @@ func _refresh_owner_colors() -> void:
 				fallback_by_owner[owner] = TerrainBuilder.FALLBACK_PALETTE[fallback_by_owner.size() % TerrainBuilder.FALLBACK_PALETTE.size()]
 			colors[i] = fallback_by_owner[owner]
 		colors[i].a = 1.0 if owner != "" else 0.0
-	terrain.set_province_colors(colors)
+	if colors != terrain._province_colors:  # PB3d : texture refaite seulement si changée
+		terrain.set_province_colors(colors)
 	if minimap_ctl != null:  # C1
 		minimap_ctl.set_province_colors(colors)
 
@@ -700,6 +723,8 @@ func _on_province_right_clicked(index: int) -> void:
 
 ## Soumet un ordre `move_army` via `find_path` ; renvoie la réponse de la simulation.
 func order_move(army_id: String, target_id: String) -> Dictionary:
+	if _refuse_during_end_turn():
+		return {"ok": false, "error": TurnWaitIndicator.TEXT}
 	var path: PackedStringArray = sim.call("find_path", army_id, target_id)
 	if path.is_empty():
 		return {"ok": false, "error": "Aucun chemin vers %s." % province_name_of(target_id)}
@@ -964,10 +989,19 @@ func _trade_route_tooltip(route: Dictionary) -> String:
 func _refresh_construction_markers() -> void:
 	if not _city_available():
 		return
-	var ids := PackedStringArray()
-	for index in range(1, map_data.province_count + 1):
-		ids.append(str(map_data.get_province(index).get("id", "")))
-	construction_markers.refresh(ids, _is_under_construction, _construction_marker_position)
+	# PB3d : chantiers lus dans l'instantané groupé ; marqueurs refaits seulement s'ils changent.
+	var snapshot := ProvinceSnapshot.of(sim, map_data)
+	var building := PackedStringArray()
+	for i in snapshot.ids.size():
+		if snapshot.constructing.size() == snapshot.ids.size():
+			if snapshot.constructing[i] != 0:
+				building.append(snapshot.ids[i])
+		elif _is_under_construction(snapshot.ids[i]):
+			building.append(snapshot.ids[i])
+	if building == _construction_ids and construction_markers.marker_count() == building.size():
+		return
+	_construction_ids = building
+	construction_markers.refresh(building, func(_id: String) -> bool: return true, _construction_marker_position)
 
 
 func _is_under_construction(province_id: String) -> bool:
@@ -985,6 +1019,8 @@ func _construction_marker_position(province_id: String) -> Vector3:
 func _submit(order: Dictionary, success_text: String) -> Dictionary:
 	if sim == null:
 		return {"ok": false, "error": "Simulation absente"}
+	if _refuse_during_end_turn():
+		return {"ok": false, "error": TurnWaitIndicator.TEXT}
 	var result: Dictionary = sim.call("submit_order", order)
 	if result.get("ok", false):
 		# UB1 / U13 : recrutement, construction ou ordre ordinaire.
@@ -997,15 +1033,20 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 	return result
 
 
-func _on_end_turn() -> void:
-	if sim == null or ui.is_dialog_open() or (ai_replay != null and ai_replay.playing):
+## `threaded` (PB3d) : le cœur résout le tour dans un fil et la carte continue de s'animer ; les
+## appels directs (tests, captures, mode headless) restent synchrones.
+func _on_end_turn(threaded: bool = false) -> void:
+	if sim == null or end_turn_running or ui.is_dialog_open() or (ai_replay != null and ai_replay.playing):
 		return
 	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
 		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	if ai_replay != null:  # CT1 : le cœur enregistre les marches de l'IA si elles seront rejouées
 		ai_replay.before_end_turn()
-	var events: Array = sim.call("end_turn")
+	var turn_sim: Object = sim
+	var events: Variant = await _resolve_end_turn(threaded and DisplayServer.get_name() != "headless")
+	if events == null or sim != turn_sim or not is_inside_tree():
+		return  # PB3d : partie chargée ou carte quittée pendant le calcul
 	if hud != null:  # U5 : voisins, alliés et ennemis du nouveau tour (filtre des lettres)
 		hud.update_interest()
 	ui.add_events(events, str(sim.call("get_date_label")))
@@ -1013,9 +1054,15 @@ func _on_end_turn() -> void:
 	if audio != null:
 		audio.on_turn_events(events)
 	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
+	var t_refresh := Time.get_ticks_usec()
 	refresh_all()
+	last_end_turn_stats["refresh_ms"] = (Time.get_ticks_usec() - t_refresh) / 1000.0
+	end_turns_refreshed += 1
 	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
+		var sim_before: Object = sim
 		await ai_replay.play()
+		if sim != sim_before:  # une autre partie a été chargée entre-temps : ces événements sont périmés
+			return
 	if diplomacy != null:
 		diplomacy.after_end_turn()
 	if victory != null:
@@ -1033,19 +1080,74 @@ func _on_end_turn() -> void:
 	_offer_pending_battles()  # M7
 
 
+## PB3d : fin de tour résolue dans un fil du cœur (`begin_end_turn` / `poll_end_turn`) quand le
+## pont le permet ; synchrone sinon (simulation factice, pont ancien). Renvoie les événements du
+## tour, ou `null` si la fin de tour a été abandonnée (chargement d'une partie pendant le calcul).
+func _resolve_end_turn(threaded: bool) -> Variant:
+	last_end_turn_stats = {}
+	var t0 := Time.get_ticks_usec()
+	if not threaded or not sim.has_method("begin_end_turn") or not bool(sim.call("begin_end_turn")):
+		var sync_events: Variant = sim.call("end_turn")
+		last_end_turn_stats["sync_ms"] = (Time.get_ticks_usec() - t0) / 1000.0
+		return sync_events
+	last_end_turn_stats["begin_ms"] = (Time.get_ticks_usec() - t0) / 1000.0
+	end_turn_running = true
+	ui.set_end_turn_enabled(false)
+	if turn_wait == null:
+		turn_wait = TurnWaitIndicator.new()
+		ui.add_child(turn_wait)
+	turn_wait.begin()
+	var turn_sim: Object = sim
+	var events: Variant = turn_sim.call("poll_end_turn")
+	while events == null:
+		await get_tree().process_frame
+		if not is_instance_valid(turn_sim) or not bool(turn_sim.call("is_end_turn_pending")):
+			events = turn_sim.call("poll_end_turn") if is_instance_valid(turn_sim) else null
+			break
+		var t_poll := Time.get_ticks_usec()
+		events = turn_sim.call("poll_end_turn")
+		if events != null:
+			last_end_turn_stats["install_ms"] = (Time.get_ticks_usec() - t_poll) / 1000.0
+	last_end_turn_stats["wait_ms"] = (Time.get_ticks_usec() - t0) / 1000.0
+	end_turn_running = false
+	if is_instance_valid(turn_wait):
+		turn_wait.end()
+	ui.set_end_turn_enabled(true)
+	return events
+
+
+## PB3d : ordre refusé pendant la fin de tour (message discret).
+func _refuse_during_end_turn() -> bool:
+	if not end_turn_running:
+		return false
+	UiSounds.play("refused")
+	ui.show_toast(TurnWaitIndicator.TEXT)
+	return true
+
+
 # --- Sauvegarde ----------------------------------------------------------------------
 
 
+## Vrai si la dernière demande de sauvegarde a écrit l'état (lu par `FlowController`).
+var last_save_ok := false
+
+
 func _on_save(save_name: String) -> void:
-	if sim == null:
+	last_save_ok = false
+	if sim == null or _refuse_during_end_turn():  # PB3d : on sauve l'état résolu, pas celui d'avant
 		return
-	if SimFacade.save_game(save_name):
+	# Fiche `.meta.json` écrite seulement si l'état l'a été (la vignette suit dans FlowController).
+	last_save_ok = SaveSlots.save(save_name)
+	if last_save_ok:
 		ui.show_toast("Partie sauvegardée : %s" % save_name)
 	else:
 		ui.show_toast("Échec de la sauvegarde.", true)
 
 
 func _on_load(path: String) -> void:
+	if ai_replay != null and ai_replay.playing:  # la fin de tour en cours vise la partie actuelle
+		ui.show_toast("Attendez la fin des mouvements adverses (Espace pour passer).", true)
+		return
 	if not SimFacade.load_game(path):
 		ui.show_toast("Impossible de charger cette sauvegarde.", true)
 		return
@@ -1073,34 +1175,48 @@ func _process(_delta: float) -> void:
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
 	var t0 := Time.get_ticks_usec()
+	var tp := t0  # SZ6 : minuteries `PerfProbe` (banc `--bench-probe`)
 	if dynamic_exaggeration and terrain.quadtree != null and camera_rig.profile != null:  # ZG4
 		terrain.set_vertical_scale(camera_rig.profile.quantized_scale(distance, MapData.vertical_scale()))
+	tp = PerfProbe.lap("map.vertical_scale", tp)
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
+	tp = PerfProbe.lap("map.update_lod", tp)
 	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
+	tp = PerfProbe.lap("map.cities", tp)
 	if zoom_tiers != null:  # C6 : paliers de zoom
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
+		tp = PerfProbe.lap("map.settlements", tp)
 		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
 		# palier « site » (routes drapées à leur vraie largeur : lot ZG5b).
 		var site_hide := 1.0 - zoom_tiers.site_weight(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
+		tp = PerfProbe.lap("map.roads", tp)
 		if rivers.crossings != null:
 			# ZG5b : avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.
 			rivers.crossings.visible = site_hide > 0.5 or rivers.fine != null
 		trade_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
 		_apply_close_tiers(distance)
+		tp = PerfProbe.lap("map.close_tiers", tp)
 	if life != null:  # CV1
 		life.update_view(distance)
+	tp = PerfProbe.lap("map.life", tp)
 	strategic.update_view(distance)  # CM2
+	if faction_borders != null:  # FR1 : après CM2 (shader du terrain substitué au parchemin)
+		faction_borders.update_view(distance)
+	tp = PerfProbe.lap("map.strategic_borders", tp)
 	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
+	tp = PerfProbe.lap("map.weather", tp)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
+	tp = PerfProbe.lap("map.rivers", tp)
 	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
 	armies.update_scale(camera_rig.distance)
 	_update_trade_hover()  # C5
+	tp = PerfProbe.lap("map.misc", tp)
 	if _screenshot_countdown > 0:
 		# C6 : la capture attend le relief fin et les rubans / hameaux des tuiles proches.
 		if _screenshot_countdown == 3 and not terrain.fine_ready():
@@ -1134,7 +1250,7 @@ func _exit_tree() -> void:
 
 
 func _apply_close_tiers(distance: float) -> void:
-	var props := zoom_tiers.prop_scale(distance)
+	var props := MapPropScale.shared().tree_scale(distance)  # SZ4 : taille réelle au palier vallée
 	if absf(props - _prop_scale) > props * 0.01:
 		_prop_scale = props
 		RenderingServer.global_shader_parameter_set("campaign_prop_scale", props)

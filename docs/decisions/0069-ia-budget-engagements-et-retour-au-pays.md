@@ -11,7 +11,7 @@ deux défauts de l'IA de campagne :
    Suisses et Gueldre en facile (Suisses 31 / déc. sur une graine), soit 0,42 / faction /
    décennie en facile. Baisser l'entretien des armées de l'IA (données) n'y changeait rien.
 2. **Intrusions** : ~1 300 saisons par siècle (normal) d'armées de l'IA sur les terres d'un
-   royaume en paix sans droit de passage (DP2, ADR 0031), 2 200-2 500 en difficile.
+   royaume en paix sans droit de passage (DP2, ADR 0075), 2 200-2 500 en difficile.
 
 Diagnostic (sonde `century_probe` : `ECON_TRACE`, `TRESPASS_TRACE`, `DEBUG_ARMY`) :
 

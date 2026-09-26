@@ -1,5 +1,5 @@
 //! Lot CT1: the record of the AI turn replayed on the campaign map (ADR
-//! 0070) — deterministic, harmless to the game, and telling which moves
+//! 0073) — deterministic, harmless to the game, and telling which moves
 //! concern the player.
 
 use std::path::PathBuf;

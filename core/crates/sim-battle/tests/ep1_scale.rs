@@ -1,4 +1,4 @@
-//! EP1 tests (ADR 0031): battle scale tiers, field size by head count,
+//! EP1 tests (ADR 0076): battle scale tiers, field size by head count,
 //! regiments per side, AI against AI with 40+ regiments.
 
 mod common;

@@ -1,4 +1,4 @@
-//! Lot DP2 (ADR 0031): the AI's routes respect the right of passage at
+//! Lot DP2 (ADR 0075): the AI's routes respect the right of passage at
 //! peace and break it at war according to its temper.
 
 use std::path::PathBuf;

@@ -301,8 +301,13 @@ def geo_battle_site(
 
 @app.command("export-data")
 def export_data_command(
-    app_path: str = typer.Option(
-        ..., "--app", help="Application exportée (…/Cent Ans.app)"
+    app_path: str | None = typer.Option(
+        None, "--app", help="Application exportée macOS (…/Cent Ans.app)"
+    ),
+    folder_path: str | None = typer.Option(
+        None,
+        "--dir",
+        help="Dossier de l'export Windows (celui de Cent Ans.exe, ADR 0087)",
     ),
     relief: str = typer.Option(
         "bundle",
@@ -310,12 +315,18 @@ def export_data_command(
         help="Cache du relief fin : bundle (dans l'app), external (dossier « Cent Ans relief » à côté), none",
     ),
 ) -> None:
-    """Copie data/ et le cache de relief dans un export (tools/export_macos.sh, lot ZG7b)."""
+    """Copie data/ et le cache de relief dans un export (tools/export_macos.sh, export_windows.sh)."""
     from pathlib import Path
 
     from cent_ans_tools import export_data
 
-    result = export_data.stage(Path(app_path) / "Contents" / "Resources", relief)
+    if (app_path is None) == (folder_path is None):
+        raise typer.BadParameter("indiquer soit --app (macOS), soit --dir (Windows)")
+    if app_path is not None:
+        result = export_data.stage(Path(app_path) / "Contents" / "Resources", relief)
+    else:
+        folder = Path(folder_path)
+        result = export_data.stage(folder, relief, external_parent=folder)
     console.print(f"data/ : {result.data_bytes / 1e6:.0f} Mo → {result.data_dir}")
     if result.relief_dir is not None:
         console.print(
@@ -475,6 +486,24 @@ def geo_towns() -> None:
     console.print(result.summary())
 
 
+@geo_app.command("landmarks")
+def geo_landmarks(
+    city: list[str] = typer.Option(  # noqa: B008
+        None, "--city", help="Identifiant de ville (répétable)"
+    ),
+    refresh_osm: bool = typer.Option(
+        False, "--refresh-osm", help="Retélécharge l'extrait OpenStreetMap (Overpass)"
+    ),
+) -> None:
+    """Villes emblématiques 1:1 (ADR 0078, lot VH4) : rues OSM et fleuve fin de data/landmarks_v2/."""
+    from cent_ans_tools.geo import landmarks_v2
+
+    result = landmarks_v2.build(
+        only=city or None, refresh_osm=refresh_osm, log=console.print
+    )
+    console.print(result.summary())
+
+
 @geo_app.command("relief-all")
 def geo_relief_all(
     check: bool = typer.Option(
@@ -524,6 +553,83 @@ def geo_relief_all(
         )
         raise typer.Exit(1)
     console.print("[green]Cache de relief complet.[/green]")
+
+
+@geo_app.command("relief-pack")
+def geo_relief_pack(
+    out: str = typer.Option(
+        "dist/relief", "--out", help="Dossier de sortie (parts + manifeste)"
+    ),
+) -> None:
+    """Empaquette le cache de relief fin en parts « Cent Ans relief » (ADR 0077, lot SZ7).
+
+    N'envoie rien : la publication (dépôt public, `gh release create`) est un geste
+    à part, réservé à l'accord du joueur (voir docs/geo.md). Ne pas lancer sur le
+    vrai cache (≈ 2,8 Go) si le disque est presque plein.
+    """
+    from pathlib import Path
+
+    from cent_ans_tools.geo import relief_pack
+
+    result = relief_pack.pack(Path(out))
+    console.print(
+        f"v{result.version} : {len(result.parts)} part(s), "
+        f"{result.total_bytes / 1e9:.2f} Go → {result.out_dir}"
+    )
+    console.print(f"Manifeste : {result.manifest_path}")
+
+
+@geo_app.command("relief-fetch")
+def geo_relief_fetch(
+    dest: str = typer.Option(
+        "",
+        "--dest",
+        help="Dossier d'installation (défaut : CENT_ANS_RELIEF_DIR ou data/map)",
+    ),
+    base_url: str = typer.Option(
+        "",
+        "--base-url",
+        help="URL de base des parts (défaut : data/map/relief_hosting.json)",
+    ),
+    from_dir: str = typer.Option(
+        "",
+        "--from-dir",
+        help="Installer depuis des parts locales (clé USB, tests) plutôt que par HTTP",
+    ),
+) -> None:
+    """Télécharge, vérifie et installe le cache de relief fin (ADR 0077, lot SZ7).
+
+    Reprend les téléchargements interrompus (HTTP Range), refuse toute part dont
+    la somme SHA-256 ne correspond pas au manifeste, puis installe atomiquement.
+    Lancer ensuite `geo relief-all --check` pour confirmer l'état complet.
+    """
+    from pathlib import Path
+
+    from cent_ans_tools.geo import relief_cache, relief_fetch
+
+    result = relief_fetch.fetch(
+        dest=Path(dest) if dest else None,
+        base_url=base_url or None,
+        from_dir=Path(from_dir) if from_dir else None,
+        log=console.print,
+    )
+    console.print(
+        f"{result.parts} part(s), {result.total_bytes / 1e9:.2f} Go → {result.pyramid_dir}"
+    )
+    if (result.dest_dir / relief_cache.MANIFEST).exists():
+        report = relief_cache.check(result.dest_dir)
+        for line in report.lines():
+            console.print(line)
+        if not report.complete:
+            console.print(
+                "[yellow]Cache encore incomplet après installation : compléter avec "
+                "uv run --project tools cent-ans geo relief-all[/yellow]"
+            )
+    else:
+        console.print(
+            "[yellow]Installé hors du dépôt : lancer le jeu pour vérifier "
+            "(avis « relief rapproché »).[/yellow]"
+        )
 
 
 @geo_app.command("detail-check")

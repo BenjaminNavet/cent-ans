@@ -6,8 +6,13 @@ extends RefCounted
 ## `battle_soldier_skinned.gdshader` et correspondance état du régiment → clips.
 ## Repli : sans manifeste, ou avec `--rigid-figures` / `--legacy-figures` après `--`, les
 ## figurines à membres rigides (lots B1/B4, `BattleMeshes`) restent utilisées.
+## Lot FG1 : avec `--fine-figures` après `--`, les figurines fines (corps MakeHuman, rigs aux
+## proportions réalistes) de `assets/models/battle_fine/` remplacent celles qu'elles couvrent
+## (rigs renommés `fine_human` / `fine_cavalry`, chemins absolus dans le manifeste fusionné).
 
 const DIR := "res://assets/models/battle_skinned/"
+const FINE_DIR := "res://assets/models/battle_fine/"
+const FINE_RIG_PREFIX := "fine_"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 48
 ## Modes du shader.
@@ -46,7 +51,44 @@ static func manifest() -> Dictionary:
 		var text := FileAccess.get_file_as_string(DIR + "manifest.json")
 		var parsed = JSON.parse_string(text) if text != "" else null
 		_manifest = parsed if parsed is Dictionary else {}
+		if fine_enabled() and not _manifest.is_empty():
+			_merge_fine(_manifest)
 	return _manifest
+
+
+## Lot FG1 : figurines fines demandées (`--fine-figures` après `--`).
+static func fine_enabled() -> bool:
+	return OS.get_cmdline_user_args().has("--fine-figures")
+
+
+## Lot FG1 : ajoute au manifeste les rigs fins (renommés) et remplace les figurines fines.
+static func _merge_fine(base: Dictionary) -> void:
+	var text := FileAccess.get_file_as_string(FINE_DIR + "manifest.json")
+	var parsed = JSON.parse_string(text) if text != "" else null
+	if not parsed is Dictionary:
+		push_warning("BattleSkinned: --fine-figures sans manifeste %s" % FINE_DIR)
+		return
+	var rigs: Dictionary = base.get("rigs", {})
+	for rig_name in (parsed as Dictionary).get("rigs", {}):
+		var entry: Dictionary = (parsed["rigs"][rig_name] as Dictionary).duplicate(true)
+		entry["texture"] = FINE_DIR + str(entry.get("texture", ""))
+		rigs[FINE_RIG_PREFIX + str(rig_name)] = entry
+	var figures: Dictionary = base.get("figures", {})
+	for fig_name in (parsed as Dictionary).get("figures", {}):
+		var entry: Dictionary = (parsed["figures"][fig_name] as Dictionary).duplicate(true)
+		var lods: Array = []
+		for file in entry.get("lods", []):
+			lods.append(FINE_DIR + str(file))
+		entry["lods"] = lods
+		entry["rig"] = FINE_RIG_PREFIX + str(entry.get("rig", ""))
+		figures[fig_name] = entry
+	base["rigs"] = rigs
+	base["figures"] = figures
+
+
+## Chemin d'un binaire du manifeste (relatif à `DIR`, ou absolu pour les figurines fines).
+static func _path(file: String) -> String:
+	return file if file.begins_with("res://") else DIR + file
 
 
 static func enabled() -> bool:
@@ -83,7 +125,7 @@ static func mesh(kind: String, variant: int, level: int) -> ArrayMesh:
 	var file: String = lods[clampi(level, 0, lods.size() - 1)]
 	if _meshes.has(file):
 		return _meshes[file]
-	var mesh := _load_mesh(DIR + file, str(fig.get("rig", "")) != "human")
+	var mesh := _load_mesh(_path(file), not str(fig.get("rig", "")).ends_with("human"))
 	_meshes[file] = mesh
 	return mesh
 
@@ -146,7 +188,7 @@ static func bone_texture(rig_name: String) -> ImageTexture:
 	if _textures.has(rig_name):
 		return _textures[rig_name]
 	var entry: Dictionary = manifest().get("rigs", {}).get(rig_name, {})
-	var bytes := FileAccess.get_file_as_bytes(DIR + str(entry.get("texture", "")))
+	var bytes := FileAccess.get_file_as_bytes(_path(str(entry.get("texture", ""))))
 	var tex: ImageTexture = null
 	if bytes.size() > 12 and bytes.slice(0, 4).get_string_from_ascii() == "CAB1":
 		var bones := bytes.decode_u32(4)
@@ -201,10 +243,14 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 		key = "idle"
 	var entry: Dictionary = sets[key]
 	var rig_entry := rig(kind, variant)
+	var names: Array = entry["set"]
+	# EP12 : jeu de repli quand le manifeste n'a pas encore les clips (kit antérieur).
+	if entry.has("fallback") and not rig_entry.get("clips", {}).has(str(names[0])):
+		names = entry["fallback"]
 	var ids: Array[int] = []
-	for c in entry["set"]:
+	for c in names:
 		ids.append(clip_index(rig_entry, str(c)))
-	var config := {"key": cache_key, "names": entry["set"], "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
+	var config := {"key": cache_key, "names": names, "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
 	_configs[cache_key] = config
 	return config
 
@@ -220,6 +266,26 @@ static func death_config(kind: String, variant: int) -> Dictionary:
 	if ids.is_empty():
 		ids.append(0)
 	return {"key": "%s/%d/dead" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
+
+
+## Lot EP12 : blessés au sol (mode CUSTOM, INSTANCE_CUSTOM.y = indice dans ce jeu) ; vide si
+## le rig n'a pas les clips (kit antérieur) ou pour les cavaliers.
+static func wounded_config(kind: String, variant: int) -> Dictionary:
+	if kind == "cavalry":
+		return {}
+	var rig_entry := rig(kind, variant)
+	var ids: Array[int] = []
+	for c in WOUNDED_FOOT:
+		if not rig_entry.get("clips", {}).has(c):
+			return {}
+		ids.append(clip_index(rig_entry, str(c)))
+	return {"key": "%s/%d/wounded" % [kind, variant], "set": ids, "mode": M_CUSTOM, "speed": 1.0, "cycle": 1.0, "release": 1.0}
+
+
+## Style d'animation de la figurine (`sword`, `pike`, `bow`...), exposé au rendu (EP12 : armes
+## laissées au sol par les fuyards).
+static func style_of(kind: String, variant: int) -> String:
+	return _style(kind, variant)
 
 
 ## Style d'animation de la figurine : champ `style` du manifeste (lot UR1), sinon règle
@@ -320,6 +386,10 @@ static func rigid_variant(kind: String, variant: int) -> int:
 
 
 const DEATHS_FOOT := ["death", "death_m", "death_back", "death_knees"]
+## Lot EP12 : blessés (rampe, assis, à genoux) ; ordre = INSTANCE_CUSTOM.y de la couche.
+const WOUNDED_FOOT := ["crawl", "wounded_sit", "wounded_kneel"]
+## Lot EP12 : drapeau ajouté au code de INSTANCE_CUSTOM.w (cadavre ou blessé désarmé).
+const CODE_UNARMED := 8
 ## Lot BV2 : `c_fall` = cavalier désarçonné (le cheval s'enfuit, code 6 du shader).
 const DEATHS_CAVALRY := ["c_death", "c_death_m", "c_fall"]
 ## Lot BV2 : parties tranchées (code de INSTANCE_CUSTOM.w, 1-5) → os du rig (plage, plus deux
@@ -403,7 +473,7 @@ const STYLES := {
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"], "speed": 1.05},
 		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.3},
-		"routing": {"set": ["run"], "speed": 1.1},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "guard", "idle"], "mode": M_SPLIT},
 	},
 	# Lot BV2 : lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
@@ -414,7 +484,7 @@ const STYLES := {
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_level"], "mode": M_CYCLE, "cycle": 1.3},
 		"brace": {"set": ["pike_level"]},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "idle", "guard"], "mode": M_SPLIT},
 	},
 	"pike": {
@@ -425,7 +495,7 @@ const STYLES := {
 		"melee": {"set": ["pike_thrust", "pike_thrust", "pike_idle"], "mode": M_CYCLE, "cycle": 1.2},
 		# Lot BV2 : piques abaissées face à une charge de cavalerie (rendu seulement).
 		"brace": {"set": ["pike_level"]},
-		"routing": {"set": ["run"], "speed": 1.1},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "pike_idle"], "mode": M_SPLIT},
 	},
 	"bow": {
@@ -435,7 +505,7 @@ const STYLES := {
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
 		"melee": {"set": ["slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.5},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 	},
 	"crossbow": {
 		"idle": {"set": ["xbow_idle"]},
@@ -444,7 +514,7 @@ const STYLES := {
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["xbow_shoot"], "mode": M_VOLLEY, "release": 0.3},
 		"melee": {"set": ["slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.5},
-		"routing": {"set": ["run"], "speed": 1.15},
+		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
 	},
 	"lance": {
 		"idle": {"set": ["c_idle"]},

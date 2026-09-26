@@ -279,7 +279,12 @@ impl CampaignState {
                 }
             }
         };
-        for settlement in self.settlements.values().filter(|s| &s.owner == faction) {
+        // The places held (controller), as for taxes and upkeep.
+        for settlement in self
+            .settlements
+            .values()
+            .filter(|s| &s.controller == faction)
+        {
             for id in &settlement.buildings {
                 if let Some(building) = data.buildings.get(id) {
                     for effect in &building.effects {

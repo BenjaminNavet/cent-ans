@@ -5,7 +5,7 @@ extends Node3D
 ## (rasante de près, plongeante de loin). A1-06 : courbe d'inclinaison adoucie
 ## (presque à hauteur d'homme au zoom maximal, plongée au loin), visée relevée vers la poitrine
 ## des soldats de près, hauteur minimale au-dessus du relief qui descend avec le zoom. W A S D (positions physiques) et bords d'écran pour
-## se déplacer, molette pour zoomer, Q / E pour tourner, glisser bouton du milieu pour panoramiquer.
+## se déplacer, molette ou pad (deux doigts / pincement) pour zoomer, Q / E pour tourner, glisser bouton du milieu pour panoramiquer.
 ##
 ## B3 / T6 : suivi de régiment — `follow_unit(id, position_of)` verrouille `target` sur la
 ## position (fournie par une Callable, pour ne pas dépendre de `BattleScene`) du régiment ou du
@@ -129,17 +129,27 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var button := event as InputEventMouseButton
 		if button.button_index == MOUSE_BUTTON_WHEEL_UP and button.pressed:
-			_target_distance = clampf(_target_distance * 0.88, min_distance, max_distance)
+			_zoom_by(0.88)
 		elif button.button_index == MOUSE_BUTTON_WHEEL_DOWN and button.pressed:
-			_target_distance = clampf(_target_distance * 1.14, min_distance, max_distance)
+			_zoom_by(1.14)
 		elif button.button_index == MOUSE_BUTTON_MIDDLE:
 			_dragging = button.pressed
+	elif event is InputEventPanGesture:
+		# Pad macOS : glissement vertical à deux doigts = molette continue.
+		_zoom_by(exp(0.13 * (event as InputEventPanGesture).delta.y))
+	elif event is InputEventMagnifyGesture:
+		# Pad macOS : pincement (facteur > 1 = écarter les doigts = rapprocher).
+		_zoom_by(1.0 / maxf((event as InputEventMagnifyGesture).factor, 0.01))
 	elif event is InputEventMouseMotion and _dragging:
 		var motion := event as InputEventMouseMotion
 		if follow_id >= 0:
 			yaw += -motion.relative.x * ORBIT_MOUSE_SPEED
 		else:
 			_pan(-motion.relative * distance * 0.0022)
+
+
+func _zoom_by(factor: float) -> void:
+	_target_distance = clampf(_target_distance * factor, min_distance, max_distance)
 
 
 func _apply() -> void:

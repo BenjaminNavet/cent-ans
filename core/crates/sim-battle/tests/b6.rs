@@ -181,16 +181,25 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// line breaks at 245 s. Over seeds 0-63 the French win 34/64 instead of
 /// 29/64 (`ep10_rout::probe_small_battle`). Seed 11: same end, one English
 /// regiment keeps 10 more men.
+/// EP11 (ADR 0071, continuous push of the lines in melee): digests
+/// recomputed. Seed 3 goes back to the English (312 s instead of 245 s),
+/// as before EP10; seed 11: same winner, 177 s instead of 186 s. Over seeds
+/// 0-63 the French win 31/64 instead of 34/64
+/// (`ep10_rout::probe_small_battle`).
+/// EQ7 (the attacker's horse waits for its foot before riding into the
+/// range of loaded archers): seeds 3 and 11 go to the French (268 s and
+/// 245 s); over seeds 0-63 the French win 57/64 instead of 31/64
+/// (`eq7_cavalry::probe_mixed_battle`).
 #[test]
 fn battles_without_a_site_are_unchanged() {
     let expected = [
         (
             3,
-            "245 Some(Attacker) [19, 41, 40, 95, 92, 10, 64, 120, 120, 22]",
+            "268 Some(Attacker) [20, 43, 42, 100, 100, 19, 39, 100, 66, 15]",
         ),
         (
             11,
-            "186 Some(Defender) [7, 66, 43, 58, 92, 24, 78, 112, 120, 35]",
+            "245 Some(Attacker) [21, 51, 55, 100, 100, 17, 59, 118, 48, 14]",
         ),
     ];
     for (seed, digest_before) in expected {

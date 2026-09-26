@@ -107,6 +107,7 @@ impl BattleSim {
     /// Applies `action` to the live battle and records it (no-op during a
     /// replay).
     pub(crate) fn drive(&mut self, action: ReplayAction) {
+        self.touch_poses();
         if self.player.is_some() {
             return;
         }
@@ -120,6 +121,7 @@ impl BattleSim {
     fn begin_playback(&mut self, replay: BattleReplay) -> Result<(), String> {
         let site = replay.start.site.clone();
         let (player, sim) = ReplayPlayer::load(replay).map_err(|e| e.to_string())?;
+        self.touch_poses();
         self.historical = site;
         self.sim = Some(sim);
         self.player = Some(player);
@@ -258,6 +260,7 @@ impl BattleSim {
     /// (volleys, impacts, journal) are emptied. → steps simulated.
     #[func]
     fn replay_seek(&mut self, seconds: f64) -> i64 {
+        self.touch_poses();
         let (Some(player), Some(sim)) = (&mut self.player, &mut self.sim) else {
             return 0;
         };
