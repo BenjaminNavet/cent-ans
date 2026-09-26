@@ -16,9 +16,10 @@ extends Resource
 @export var shrink_start: float = 28.0
 ## Distance en deçà de laquelle les accessoires sont à leur taille réelle.
 @export var shrink_end: float = 5.0
-## Arbres : taille réelle atteinte plus bas (le semis est clairsemé pour des arbres de ~1 km ; à
-## taille réelle dès le palier vallée haut, les forêts ne seraient plus qu'un tapis sombre).
-@export var tree_shrink_end: float = 3.0
+## Arbres : distance de la taille réelle. SZ4 : 3 (semis clairsemé pour des arbres de ~1 km) ;
+## SZ4b : 5 comme les autres accessoires, la couche de forêt dense (`ForestDetail`) densifie le
+## semis à mesure que les arbres rétrécissent.
+@export var tree_shrink_end: float = 5.0
 ## Taille réelle / taille carte, par famille. Arbres : ~1,5 unité de haut sur la carte, 20-30 m en
 ## vrai. Moulins : corps de 3,3 unités (2,3 km), ~15 m en vrai. Hameaux : ~2 unités de large,
 ## 40-60 m en vrai. Panaches de cheminée : 1 × 3 km sur la carte, ~10 × 40 m en vrai ; fumées
