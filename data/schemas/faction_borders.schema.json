@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "faction_borders.schema.json",
+  "title": "Frontières de faction de la carte de campagne (FR1)",
+  "description": "Réglages du rendu des frontières de faction lumineuses (ADR 0070) : largeurs en pixels écran, opacités, halo, hachures d'occupation, fondus de zoom, vue parchemin, modes de carte et préréglages de qualité. Rendu seulement.",
+  "type": "object",
+  "required": ["realm", "province", "player", "occupied", "zoom", "parchment", "modes", "neutral_color", "quality"],
+  "additionalProperties": false,
+  "$defs": {
+    "px": {"type": "number", "minimum": 0, "maximum": 64},
+    "unit": {"type": "number", "minimum": 0, "maximum": 1},
+    "scale": {"type": "number", "minimum": 0, "maximum": 8},
+    "mode": {
+      "type": "object",
+      "required": ["alpha", "neutral"],
+      "additionalProperties": false,
+      "properties": {
+        "alpha": {"$ref": "#/$defs/unit", "description": "Opacité des frontières dans ce mode (0 = masquées)."},
+        "neutral": {"type": "boolean", "description": "Vrai : trait à l'encre neutre (les couleurs de faction entreraient en conflit avec celles du mode)."}
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": ["enabled", "glow", "hatch"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "glow": {"type": "boolean", "description": "Halo intérieur des frontières de royaume."},
+        "hatch": {"type": "boolean", "description": "Hachures des provinces occupées (sinon trait de l'occupant seul)."}
+      }
+    }
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "realm": {
+      "type": "object",
+      "description": "Frontière entre deux propriétaires (ou contrôleurs) différents.",
+      "required": ["core_px", "core_alpha", "core_brightness", "outline_px", "outline_alpha", "glow_px", "glow_alpha", "glow_exponent"],
+      "additionalProperties": false,
+      "properties": {
+        "core_px": {"$ref": "#/$defs/px", "description": "Demi-largeur du trait coloré."},
+        "core_alpha": {"$ref": "#/$defs/unit"},
+        "core_brightness": {"$ref": "#/$defs/scale", "description": "Facteur de luminosité de la couleur de faction sur le trait."},
+        "outline_px": {"$ref": "#/$defs/px", "description": "Demi-largeur du liseré sombre sous le trait (contraste sur le terrain clair)."},
+        "outline_alpha": {"$ref": "#/$defs/unit"},
+        "glow_px": {"$ref": "#/$defs/px", "description": "Largeur du halo intérieur, de chaque côté, dans la couleur de la faction de ce côté."},
+        "glow_alpha": {"$ref": "#/$defs/unit"},
+        "glow_exponent": {"$ref": "#/$defs/scale", "description": "Raideur de la décroissance du halo."}
+      }
+    },
+    "province": {
+      "type": "object",
+      "description": "Frontière entre deux provinces d'une même faction.",
+      "required": ["core_px", "core_alpha", "core_brightness"],
+      "additionalProperties": false,
+      "properties": {
+        "core_px": {"$ref": "#/$defs/px"},
+        "core_alpha": {"$ref": "#/$defs/unit"},
+        "core_brightness": {"$ref": "#/$defs/scale"}
+      }
+    },
+    "player": {
+      "type": "object",
+      "description": "Rehaut de la frontière du joueur.",
+      "required": ["width_scale", "glow_scale", "brightness", "pulse_amount", "pulse_period_s"],
+      "additionalProperties": false,
+      "properties": {
+        "width_scale": {"$ref": "#/$defs/scale"},
+        "glow_scale": {"$ref": "#/$defs/scale"},
+        "brightness": {"$ref": "#/$defs/scale"},
+        "pulse_amount": {"$ref": "#/$defs/unit", "description": "Amplitude de la lente respiration du halo (0 = fixe)."},
+        "pulse_period_s": {"type": "number", "exclusiveMinimum": 0, "maximum": 60}
+      }
+    },
+    "occupied": {
+      "type": "object",
+      "description": "Province occupée : hachures diagonales aux couleurs de l'occupant le long de sa frontière.",
+      "required": ["hatch_period_px", "hatch_duty", "band_px", "alpha"],
+      "additionalProperties": false,
+      "properties": {
+        "hatch_period_px": {"type": "number", "minimum": 2, "maximum": 64},
+        "hatch_duty": {"$ref": "#/$defs/unit"},
+        "band_px": {"$ref": "#/$defs/px"},
+        "alpha": {"$ref": "#/$defs/unit"}
+      }
+    },
+    "zoom": {
+      "type": "object",
+      "required": ["fade_out_m", "fade_in_m", "far_width_scale", "far_distance"],
+      "additionalProperties": false,
+      "properties": {
+        "fade_out_m": {"type": "number", "minimum": 0, "description": "Distance caméra (m) sous laquelle les frontières sont effacées."},
+        "fade_in_m": {"type": "number", "minimum": 0, "description": "Distance caméra (m) au-delà de laquelle elles sont pleinement visibles."},
+        "far_width_scale": {"$ref": "#/$defs/scale", "description": "Facteur de largeur au dézoom (distance caméra ≥ far_distance, unités carte)."},
+        "far_distance": {"type": "number", "minimum": 1}
+      }
+    },
+    "parchment": {
+      "type": "object",
+      "description": "Vue stratégique parchemin (CM2) : frontières plus appuyées, halo réduit, teinte d'encre.",
+      "required": ["width_scale", "alpha_scale", "glow_scale", "ink_mix"],
+      "additionalProperties": false,
+      "properties": {
+        "width_scale": {"$ref": "#/$defs/scale"},
+        "alpha_scale": {"$ref": "#/$defs/scale"},
+        "glow_scale": {"$ref": "#/$defs/scale"},
+        "ink_mix": {"$ref": "#/$defs/unit"}
+      }
+    },
+    "modes": {
+      "type": "object",
+      "description": "Par filtre de carte (MF1) : opacité et encre neutre.",
+      "required": ["political"],
+      "propertyNames": {"enum": ["political", "diplomacy", "religion", "unrest", "wealth", "population", "loyalty", "supply", "claims"]},
+      "additionalProperties": {"$ref": "#/$defs/mode"}
+    },
+    "neutral_color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"},
+    "terrain_realm_band_alpha": {"$ref": "#/$defs/unit", "description": "Liseré sombre intérieur du shader de terrain, remplacé par le halo (0 = supprimé)."},
+    "emission": {"$ref": "#/$defs/unit", "description": "Part émissive de la couleur du trait et du halo en vue 3D (lisible à l'ombre du relief)."},
+    "quality": {
+      "type": "object",
+      "required": ["low", "medium", "high", "ultra"],
+      "additionalProperties": false,
+      "properties": {
+        "low": {"$ref": "#/$defs/quality"},
+        "medium": {"$ref": "#/$defs/quality"},
+        "high": {"$ref": "#/$defs/quality"},
+        "ultra": {"$ref": "#/$defs/quality"}
+      }
+    }
+  }
+}
