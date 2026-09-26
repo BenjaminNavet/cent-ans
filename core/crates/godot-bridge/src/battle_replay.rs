@@ -76,12 +76,18 @@ fn order_key(path: &Path) -> (u64, u64, String) {
 pub(crate) fn store(dir: &Path, replay: &BattleReplay, keep: usize) -> Result<PathBuf, String> {
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let stamp = replay.header.recorded_at;
-    let mut path = dir.join(format!("{PREFIX}{stamp:010}.json"));
-    let mut n = 2;
-    while path.exists() {
-        path = dir.join(format!("{PREFIX}{stamp:010}-{n}.json"));
-        n += 1;
-    }
+    // After the latest file of the same second (the older ones may have
+    // been removed: never reuse a lower number).
+    let last = replay_files(dir)
+        .iter()
+        .map(|p| order_key(p))
+        .filter(|(s, _, _)| *s == stamp)
+        .map(|(_, n, _)| n)
+        .max();
+    let path = match last {
+        None => dir.join(format!("{PREFIX}{stamp:010}.json")),
+        Some(n) => dir.join(format!("{PREFIX}{stamp:010}-{}.json", n + 1)),
+    };
     std::fs::write(&path, replay.to_json()).map_err(|e| e.to_string())?;
     let files = replay_files(dir);
     let excess = files.len().saturating_sub(keep.max(1));
@@ -279,6 +285,9 @@ mod tests {
         for stamp in [100, 300, 200, 300] {
             store(&dir, &recorder.finish("t", stamp), 3).unwrap();
         }
+        // The oldest of second 300 goes; the next one still sorts last.
+        std::fs::remove_file(dir.join("rejeu-0000000300.json")).unwrap();
+        store(&dir, &recorder.finish("t", 300), 3).unwrap();
         let files = replay_files(&dir);
         let names: Vec<String> = files
             .iter()
@@ -288,8 +297,8 @@ mod tests {
             names,
             [
                 "rejeu-0000000200.json",
-                "rejeu-0000000300.json",
-                "rejeu-0000000300-2.json"
+                "rejeu-0000000300-2.json",
+                "rejeu-0000000300-3.json"
             ]
         );
         let text = std::fs::read_to_string(&files[0]).unwrap();

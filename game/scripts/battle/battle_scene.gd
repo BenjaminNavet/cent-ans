@@ -403,7 +403,8 @@ func _enter_replay() -> void:
 		deployment.queue_free()
 		deployment = null
 	if _leader_bar != null:
-		_leader_bar.visible = false
+		_leader_bar.queue_free()  # ordres du chef : rien à ordonner pendant un rejeu
+		_leader_bar = null
 	if hud.withdraw_all_button != null:
 		hud.withdraw_all_button.get_parent().visible = false  # ordres et retraite générale
 	if not hud._speed_buttons.is_empty():
