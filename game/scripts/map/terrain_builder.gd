@@ -138,6 +138,8 @@ var pyramid: ReliefPyramid
 var quadtree: ReliefQuadtree
 ## ZG8 : gain de relief local des maillages cuits (E0, repli), durée du calcul du fond.
 var _baked_gain: float = 0.0
+## SZ1 : poids de l'écrasement des montagnes des maillages cuits (échelle stratégique).
+var _baked_squash: float = 0.0
 var _relief_floor_ms: float = 0.0
 ## Morceaux dont la surface a changé (page arrivée ou évincée), signalés par paquets.
 var _surface_dirty: Dictionary = {}
@@ -627,7 +629,8 @@ func _chunk_bounds_m() -> PackedVector2Array:
 				hi = maxf(hi, h)
 		# ZG8 : hauteurs cuites exagérées (y = s·(h + g·local), local ≤ h) : h ≥ y / (s·(1 + g)).
 		lo = lo / MapData.HEIGHT_SCALE if lo < 0.0 else lo / (MapData.HEIGHT_SCALE * (1.0 + _baked_gain))
-		hi /= MapData.HEIGHT_SCALE
+		# SZ1 : écrasement des montagnes cuit (y ≥ s·(1 − c·k)·h).
+		hi /= MapData.HEIGHT_SCALE * (1.0 - MapData.relief_squash_max_for_scale(MapData.HEIGHT_SCALE)) if hi > 0.0 else MapData.HEIGHT_SCALE
 		bounds[i] = Vector2(minf(lo, 0.0) - 150.0, hi + maxf(0.5 * (hi - lo), 200.0))
 	return bounds
 
@@ -878,6 +881,7 @@ func _start_fine_job(index: int) -> void:
 	job.h_range = map_data.height_max_m - map_data.height_min_m
 	job.height_scale = MapData.HEIGHT_SCALE
 	job.relief_gain = _baked_gain
+	job.relief_squash = _baked_squash
 	job.map_bytes = map_data.height_bytes
 	job.map_bpp = map_data.height_bpp
 	job.map_little_endian = map_data.height_little_endian
@@ -969,6 +973,7 @@ func _build_relief_floor() -> void:
 	else:
 		MapData.set_relief_floor({})
 	_baked_gain = MapData.relief_gain_for_scale(MapData.HEIGHT_SCALE)
+	_baked_squash = MapData.relief_squash_for_scale(MapData.HEIGHT_SCALE)
 
 
 ## Soleil plus rasant (ZG8, `sun_elevation_deg`) : même azimut, hauteur imposée.
@@ -1231,6 +1236,7 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 	var scale := MapData.HEIGHT_SCALE
 	# ZG8 : maillages cuits à l'échelle stratégique, relief local exagéré compris (gain lointain).
 	var gain := _baked_gain
+	var squash := _baked_squash
 	var vertices := PackedVector3Array()
 	vertices.resize(side * side)
 	heights.resize(side * side)
@@ -1264,7 +1270,7 @@ func _chunk_vertices(cx: int, cy: int, step: int, heights: PackedFloat32Array) -
 					v01 = float((bytes[o] << 8) | bytes[o + 1]) / 65535.0
 			else:
 				v01 = float(bytes[row + px]) / 255.0
-			var y := MapData.display_height_with(h_min + v01 * h_range, px, py, scale, gain)
+			var y := MapData.display_height_with(h_min + v01 * h_range, px, py, scale, gain, squash)
 			vertices[k] = Vector3(px - x0, y, py - y0)
 			heights[k] = y
 			k += 1

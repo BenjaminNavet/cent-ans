@@ -19,7 +19,9 @@ extends RefCounted
 ## couvre les pixels [c·C, (c+1)·C − 1], centre en x = c·C + (C − 1) / 2.
 
 
-## Calcule le fond (mètres) : {"data": PackedFloat32Array, "side": Vector2i, "cell": float, "ms": float}.
+## Calcule le fond (mètres) : {"data": PackedFloat32Array, "base": PackedFloat32Array (SZ1, fond non
+## plafonné), "squash": PackedFloat32Array (SZ1, facteur k d'écrasement des montagnes, 0..1),
+## "side": Vector2i, "cell": float, "ms": float}.
 static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictionary:
 	var t0 := Time.get_ticks_usec()
 	var cell := maxi(profile.floor_cell_px, 1)
@@ -68,7 +70,11 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 	var grid := _filter(mins, side, maxi(profile.floor_min_radius, 0), MODE_MIN)
 	for pass_index in maxi(profile.floor_blur_passes, 0):
 		grid = _filter(grid, side, maxi(profile.floor_blur_radius, 0), MODE_MEAN)
-	if profile.local_relief_cap_m > 0.0:
+	# SZ1 : base (fond non plafonné) et facteur d'écrasement des montagnes (amplitude régionale).
+	var base := grid.duplicate()
+	var squash := PackedFloat32Array()
+	squash.resize(grid.size())
+	if profile.local_relief_cap_m > 0.0 or profile.mountain_knee_m > 0.0:
 		var tops := _join(out_rows.map(func(pair: Array) -> PackedFloat32Array: return pair[1]))
 		# Maximum sur le rayon total des flous qui suivent : un pic isolé (puy, aiguille) garde sa
 		# hauteur au centre après lissage au lieu d'être dilué par ses voisins plus bas.
@@ -77,8 +83,10 @@ static func compute(data: MapData, profile: ReliefExaggerationProfile) -> Dictio
 		for pass_index in maxi(profile.floor_blur_passes, 0):
 			tops = _filter(tops, side, maxi(profile.floor_blur_radius, 0), MODE_MEAN)
 		for i in grid.size():
-			grid[i] = maxf(grid[i], tops[i] - profile.local_relief_cap_m)
-	return {"data": grid, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
+			if profile.local_relief_cap_m > 0.0:
+				grid[i] = maxf(grid[i], tops[i] - profile.local_relief_cap_m)
+			squash[i] = profile.mountain_squash_of(tops[i] - base[i])
+	return {"data": grid, "base": base, "squash": squash, "side": side, "cell": float(cell), "ms": (Time.get_ticks_usec() - t0) / 1000.0}
 
 
 const MODE_MIN := 0
@@ -142,9 +150,18 @@ static func _parallel(task: Callable, count: int, label: String) -> void:
 	WorkerThreadPool.wait_for_group_task_completion(id)
 
 
-## Texture du fond pour les shaders (RF, lue au texel près par `campaign_relief.gdshaderinc`).
+## Texture du fond pour les shaders (RGBF : R fond, G base, B facteur d'écrasement SZ1 ; lue au
+## texel près par `campaign_relief.gdshaderinc`). Grille sans base ni écrasement : G = R, B = 0.
 static func texture_of(grid: Dictionary) -> ImageTexture:
 	var side: Vector2i = grid["side"]
 	var data: PackedFloat32Array = grid["data"]
-	var image := Image.create_from_data(side.x, side.y, false, Image.FORMAT_RF, data.to_byte_array())
+	var base: PackedFloat32Array = grid.get("base", data)
+	var squash: PackedFloat32Array = grid.get("squash", PackedFloat32Array())
+	var packed := PackedFloat32Array()
+	packed.resize(data.size() * 3)
+	for i in data.size():
+		packed[3 * i] = data[i]
+		packed[3 * i + 1] = base[i] if base.size() == data.size() else data[i]
+		packed[3 * i + 2] = squash[i] if squash.size() == data.size() else 0.0
+	var image := Image.create_from_data(side.x, side.y, false, Image.FORMAT_RGBF, packed.to_byte_array())
 	return ImageTexture.create_from_image(image)
