@@ -35,7 +35,6 @@ import numpy as np
 import rasterio
 from PIL import Image
 from pyproj import Transformer
-from rasterio.windows import from_bounds
 from scipy import ndimage
 
 from cent_ans_tools.geo import glo30, horizon
@@ -82,7 +81,9 @@ class Frame:
             float(field["depth_m"]),
         )
 
-    def field_to_map(self, x: np.ndarray, z: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def field_to_map(
+        self, x: np.ndarray, z: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
         """EPSG:3035 coordinates of battle-field points."""
         e = np.asarray(x, dtype=np.float64) - self.width / 2.0
         n = self.depth / 2.0 - np.asarray(z, dtype=np.float64)
@@ -124,8 +125,11 @@ class LonLatRaster:
         inv = ~self.transform
         col, row = inv * (np.asarray(lon), np.asarray(lat))
         return ndimage.map_coordinates(
-            self.data, [np.asarray(row) - 0.5, np.asarray(col) - 0.5], order=order,
-            mode="nearest", cval=np.nan,
+            self.data,
+            [np.asarray(row) - 0.5, np.asarray(col) - 0.5],
+            order=order,
+            mode="nearest",
+            cval=np.nan,
         )
 
 
@@ -143,7 +147,9 @@ def _glo30(bbox: tuple[float, float, float, float]) -> LonLatRaster:
         for lon in range(math.floor(bbox[0]), math.floor(bbox[2]) + 1)
         for lat in range(math.floor(bbox[1]), math.floor(bbox[3]) + 1)
     ]
-    paths = [glo30.glo30_path(name) for name in names if glo30.glo30_path(name).exists()]
+    paths = [
+        glo30.glo30_path(name) for name in names if glo30.glo30_path(name).exists()
+    ]
     if not paths:
         raise FileNotFoundError(f"no GLO-30 tile for {bbox} (cent-ans geo fetch-glo30)")
     return LonLatRaster(paths, bbox)
@@ -151,7 +157,9 @@ def _glo30(bbox: tuple[float, float, float, float]) -> LonLatRaster:
 
 def _trees(bbox: tuple[float, float, float, float]) -> LonLatRaster | None:
     names = glo30.worldcover_tiles_in_bbox(bbox)
-    paths = [glo30.worldcover_path(n) for n in names if glo30.worldcover_path(n).exists()]
+    paths = [
+        glo30.worldcover_path(n) for n in names if glo30.worldcover_path(n).exists()
+    ]
     if not paths:
         return None
     datasets = [rasterio.open(path) for path in paths]
@@ -211,7 +219,9 @@ def field_relief(site: dict, field: dict) -> tuple[dict, np.ndarray, np.ndarray]
     return relief, ground, trees
 
 
-def bake_site_tile(key: str, site: dict, field: dict, sources: horizon.Sources) -> horizon.HorizonTile:
+def bake_site_tile(
+    key: str, site: dict, field: dict, sources: horizon.Sources
+) -> horizon.HorizonTile:
     """Horizon tile of a site, in the battle frame."""
     frame = Frame.of(site, field)
     half = horizon.TILE_SPAN_M / 2.0
@@ -226,7 +236,9 @@ def bake_site_tile(key: str, site: dict, field: dict, sources: horizon.Sources) 
     fine = sources.fine_height(mx, my)
     has = np.isfinite(dsm)
     # A 100 m tile: average the 30 m surface (3 x 3) and take the canopy off loosely.
-    heights = np.where(has, ndimage.uniform_filter(np.nan_to_num(dsm, nan=0.0), 3), fine)
+    heights = np.where(
+        has, ndimage.uniform_filter(np.nan_to_num(dsm, nan=0.0), 3), fine
+    )
     coarse_sea = sources.open_sea(mx, my)
     sea = (has & (np.abs(np.nan_to_num(dsm)) <= 0.01) & (fine < 5.0)) | (
         ~has & coarse_sea & (fine <= 0.5)
@@ -267,21 +279,26 @@ def bake_site_tile(key: str, site: dict, field: dict, sources: horizon.Sources) 
     )
 
 
-def write_preview(path: Path, ground: np.ndarray, trees: np.ndarray, step_m: float) -> None:
+def write_preview(
+    path: Path, ground: np.ndarray, trees: np.ndarray, step_m: float
+) -> None:
     """Hillshade of the field (x right, z up: the attacker at the bottom), woods in green."""
     gy, gx = np.gradient(ground, step_m)
     # Light from the upper left of the image.
     shade = np.clip(0.6 - (gx * 0.7 - gy * 0.7) * 4.0, 0.0, 1.0)
     span = max(float(ground.max() - ground.min()), 1.0)
     level = (ground - ground.min()) / span
-    rgb = np.stack(
-        [
-            0.55 + 0.35 * level,
-            0.52 + 0.30 * level,
-            0.40 + 0.20 * level,
-        ],
-        axis=-1,
-    ) * shade[..., None]
+    rgb = (
+        np.stack(
+            [
+                0.55 + 0.35 * level,
+                0.52 + 0.30 * level,
+                0.40 + 0.20 * level,
+            ],
+            axis=-1,
+        )
+        * shade[..., None]
+    )
     woods = ndimage.gaussian_filter(trees, 0.8) > 0.4
     rgb[woods] = rgb[woods] * 0.45 + np.array([0.05, 0.25, 0.05]) * 0.55
     # Contours every 5 m.
@@ -300,10 +317,17 @@ def with_relief(text: str, relief: dict) -> str:
     The block is written on a single line ``  "relief": {...},`` right before the
     top-level ``"weather"`` key, so that the hand-written map keeps its layout.
     """
-    line = '  "relief": ' + json.dumps(relief, ensure_ascii=False, separators=(",", ":")) + ","
-    lines = [row for row in text.splitlines() if not row.lstrip().startswith('"relief": ')]
+    line = (
+        '  "relief": '
+        + json.dumps(relief, ensure_ascii=False, separators=(",", ":"))
+        + ","
+    )
+    lines = [
+        row for row in text.splitlines() if not row.lstrip().startswith('"relief": ')
+    ]
     at = next(
-        (i for i, row in enumerate(lines) if row.lstrip().startswith('"weather": ')), None
+        (i for i, row in enumerate(lines) if row.lstrip().startswith('"weather": ')),
+        None,
     )
     if at is None:
         raise ValueError('the map has no "weather" line to put the relief before')
@@ -328,13 +352,15 @@ def bake(map_ids: list[str] | None = None, tiles: bool = True) -> list[str]:
         path.write_text(
             with_relief(path.read_text(encoding="utf-8"), relief), encoding="utf-8"
         )
-        write_preview(PREVIEW_DIR / f"{data['id']}_site.png", ground, trees, FIELD_STEP_M)
+        write_preview(
+            PREVIEW_DIR / f"{data['id']}_site.png", ground, trees, FIELD_STEP_M
+        )
         if tiles and sources is not None:
             key = data.get("horizon") or f"hist_{data['id']}"
             tile = bake_site_tile(key, data["site"], data["field"], sources)
             blob = horizon.encode_tile(tile)
             (horizon.OUT_DIR / f"{key}.bin").write_bytes(blob)
-            index["provinces"][key] = {
+            index.setdefault("sites", {})[key] = {
                 "file": f"{key}.bin",
                 "lon": round(tile.lon, 4),
                 "lat": round(tile.lat, 4),
@@ -346,12 +372,14 @@ def bake(map_ids: list[str] | None = None, tiles: bool = True) -> list[str]:
                 else round(tile.coast_bearing_deg, 1),
                 "skyline_max_deg": round(float(tile.skyline_deg.max()), 2),
                 "relief_max_m": round(float(tile.heights_m.max()), 0),
-                "sea_share": round(float((tile.classes == horizon.SEA_CLASS).mean()), 3),
+                "sea_share": round(
+                    float((tile.classes == horizon.SEA_CLASS).mean()), 3
+                ),
                 "site": data["id"],
             }
         done.append(data["id"])
     if tiles:
-        index["provinces"] = dict(sorted(index["provinces"].items()))
+        index["sites"] = dict(sorted(index["sites"].items()))
         index_path.write_text(
             json.dumps(index, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
         )
