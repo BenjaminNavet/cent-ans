@@ -135,5 +135,159 @@
     "sources": [
       "Château de Teylingen"
     ]
+  },
+  {
+    "id": "set_leiden",
+    "province": "prov_holland",
+    "kind": "town",
+    "name": {
+      "display": "Leyde",
+      "local": "Leyden",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.497,
+      52.1601
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_weaving_workshop",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville drapière comtale de Hollande sur le Vieux Rhin, l'une des principales places textiles du comté.",
+    "sources": [
+      "Leyde"
+    ]
+  },
+  {
+    "id": "set_haarlem",
+    "province": "prov_holland",
+    "kind": "town",
+    "name": {
+      "display": "Haarlem",
+      "local": "Haerlem",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.6462,
+      52.3808
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville comtale de Hollande sur le Spaarne, résidence occasionnelle des comtes.",
+    "sources": [
+      "Haarlem"
+    ]
+  },
+  {
+    "id": "set_delft",
+    "province": "prov_holland",
+    "kind": "village",
+    "name": {
+      "display": "Delft",
+      "local": "Delf",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.3571,
+      52.0116
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fluvial de Hollande charté en 1246, relié à Delfshaven sur la Meuse.",
+    "sources": [
+      "Delft"
+    ]
+  },
+  {
+    "id": "set_gouda",
+    "province": "prov_holland",
+    "kind": "village",
+    "name": {
+      "display": "Gouda",
+      "local": "Ter Gouw",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.7096,
+      52.0116
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_windmill"
+    ],
+    "port": false,
+    "description": "Bourg de marché de Hollande charté en 1272, au confluent de la Gouwe et de l'Yssel hollandais.",
+    "sources": [
+      "Gouda"
+    ]
+  },
+  {
+    "id": "set_den_haag",
+    "province": "prov_holland",
+    "kind": "village",
+    "name": {
+      "display": "La Haye",
+      "local": "Die Haghe",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.3007,
+      52.0799
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Domaine comtal non chartré autour du Binnenhof, résidence de chasse et siège administratif des comtes de Hollande depuis Floris IV.",
+    "sources": [
+      "La Haye",
+      "Binnenhof"
+    ]
+  },
+  {
+    "id": "set_egmond",
+    "province": "prov_holland",
+    "kind": "abbey",
+    "name": {
+      "display": "Egmond",
+      "local": "Egmond",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      4.7167,
+      52.6167
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Plus ancienne abbaye bénédictine de Hollande, fondée au Xe siècle, nécropole des premiers comtes.",
+    "sources": [
+      "Abbaye d'Egmond"
+    ]
   }
 ]
