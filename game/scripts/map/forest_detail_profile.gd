@@ -31,12 +31,15 @@ extends Resource
 ## quand la part voulue dépasse la part semée ; marge `keep_margin`.
 @export var keep_levels: PackedFloat32Array = PackedFloat32Array([0.015625, 0.0625, 0.25, 1.0])
 @export var keep_margin: float = 1.25
-## Maillage détaillé (et ombres) des parties à moins de `detail_factor` × la distance du rig.
+## Ombres des parties à moins de `detail_factor` × la distance du rig (maillage bas partout).
 @export var detail_factor: float = 1.2
 ## Couloirs laissés sans arbres de part et d'autre des fleuves fins et des routes drapées (lot ZG5b),
 ## en mètres au-delà de la demi-largeur : berges, et houppiers qui débordent (~15 m).
 @export var river_clearance_m: float = 25.0
 @export var road_clearance_m: float = 10.0
+## Parties (4 MultiMesh au plus chacune) réécrites par image au plus : part affichée, maillage,
+## ombres, paramètres d'instance (étalement du coût pendant un zoom).
+@export var max_part_updates: int = 96
 ## Semis simultanés, recalages simultanés, cellules gardées en cache.
 @export var max_jobs: int = 3
 @export var max_ground_jobs: int = 1

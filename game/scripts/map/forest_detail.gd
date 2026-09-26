@@ -33,6 +33,8 @@ var _ground_ids: Dictionary = {}
 var _ground_dirty: Dictionary = {}  # tuile → true
 var _ground_queue: Dictionary = {}  # clé de cellule → true
 var _gain := 1.0
+var _part_updates_left := 0
+var _flushing := false
 var _frame := 0
 var _active := false
 
@@ -120,6 +122,8 @@ func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void
 			if keep < minf(need, 1.0) - 1e-6 and job_keep < minf(need, 1.0) - 1e-6:
 				wanted.append([d, key, rect, profile.keep_for(need)])
 	var total_visible := 0
+	_part_updates_left = (1 << 20) if _flushing else profile.max_part_updates
+	var t_parts := Time.get_ticks_usec()
 	for key in _cells:
 		var entry: Dictionary = _cells[key]
 		var node := entry["node"] as Node3D
@@ -132,6 +136,7 @@ func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void
 				_ground_queue[key] = true
 			total_visible += _apply_parts(entry, focus, fraction, radius, camera_distance, shadows)
 	var t_jobs := Time.get_ticks_usec()
+	stats["parts_ms_max"] = maxf(float(stats.get("parts_ms_max", 0.0)), (t_jobs - t_parts) / 1000.0)
 	_start_jobs(wanted)
 	var t_ground := Time.get_ticks_usec()
 	_start_ground_jobs()
@@ -146,7 +151,9 @@ func _update_view(focus: Vector2, camera_distance: float, shadows: bool) -> void
 	stats["visible"] = total_visible
 	stats["gain"] = _gain
 	stats["jobs"] = _jobs.size()
+	var t_ev := Time.get_ticks_usec()
 	_evict()
+	stats["evict_ms_max"] = maxf(float(stats.get("evict_ms_max", 0.0)), (Time.get_ticks_usec() - t_ev) / 1000.0)
 
 
 static func _key(cx: int, cy: int) -> int:
@@ -170,38 +177,43 @@ func _apply_parts(entry: Dictionary, focus: Vector2, fraction: float, radius: fl
 	var detail_limit := profile.detail_factor * camera_distance
 	for part: Dictionary in entry["parts"]:
 		var d := _rect_distance(part["rect"], focus)
-		var share := clampf(fraction * _falloff(d, radius) / keep, 0.0, 1.0)
-		var detailed := d < detail_limit
+		var share := snappedf(clampf(fraction * _falloff(d, radius) / keep, 0.0, 1.0), 0.004)
+		var cast := shadows and d < detail_limit
+		var state := Vector3(share, 0.0, 1.0 if cast else 0.0)
+		# PB : rien à écrire si l'état n'a pas changé ; sinon au plus `max_part_updates` parties
+		# réécrites par image (les autres gardent leur état, réessayées à l'image suivante).
+		if part.get("state", Vector3(-1, -1, -1)) == state or _part_updates_left <= 0:
+			total += int(part.get("count", 0))
+			continue
+		_part_updates_left -= 1
+		part["state"] = state
 		var part_node := part["node"] as Node3D
 		part_node.visible = share > 0.0
 		if share <= 0.0:
+			part["count"] = 0
 			continue
-		if part.get("detailed", null) != detailed:
-			part["detailed"] = detailed
-			var meshes := _meshes(detailed)
-			for kind in (part["mmis"] as Array).size():
-				var mmi: MultiMeshInstance3D = part["mmis"][kind]
-				if mmi != null:
-					mmi.multimesh.mesh = meshes[kind]
-		var cast := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows and detailed else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# Maillage bas (≈ 20 triangles) partout : changer le maillage d'un MultiMesh coûte ~1 ms
+		# de fil principal (mesuré) et les arbres à taille réelle ne font que quelques pixels ;
+		# la proximité ne règle que les ombres.
+		var cast_setting := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# Bande de croissance proportionnelle à la part : les arbres qui apparaissent grandissent,
 		# et la part moyenne affichée reste `share` (bande centrée sur le seuil).
 		var band := clampf(share * 0.5, 0.02, 0.18)
 		var cut := maxf(1.0 - share - band * 0.5, 0.0)
 		var shown := minf(share + band * 0.5, 1.0)
-		var cut_key := snappedf(share, 0.005)
+		var count_part := 0
 		for mmi in part["mmis"]:
 			if mmi == null:
 				continue
 			var instance := mmi as MultiMeshInstance3D
 			var count := ceili(instance.multimesh.instance_count * shown)
 			instance.multimesh.visible_instance_count = count
-			total += count
-			instance.cast_shadow = cast
-			if part.get("cut", -1.0) != cut_key:
-				instance.set_instance_shader_parameter("instance_cut", cut)
-				instance.set_instance_shader_parameter("instance_band", band)
-		part["cut"] = cut_key
+			count_part += count
+			instance.cast_shadow = cast_setting
+			instance.set_instance_shader_parameter("instance_cut", cut)
+			instance.set_instance_shader_parameter("instance_band", band)
+		part["count"] = count_part
+		total += count_part
 	return total
 
 
@@ -217,8 +229,10 @@ func _start_jobs(wanted: Array) -> void:
 	if wanted.is_empty():
 		return
 	wanted.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var submitted := 0
 	for item in wanted:
-		if _jobs.size() >= profile.max_jobs:
+		# Une requête par image hors captures (~2-3 ms de fil principal : grilles, pages, couloirs).
+		if _jobs.size() >= profile.max_jobs or (submitted >= 1 and not _flushing):
 			return
 		var key: int = item[1]
 		if _jobs.has(key):
@@ -244,6 +258,7 @@ func _start_jobs(wanted: Array) -> void:
 		var id := vegetation.native_submit(params)
 		if id < 0:
 			return
+		submitted += 1
 		_jobs[key] = {"id": id, "keep": float(item[3]), "rect": rect, "tile": tile}
 		_job_ids[id] = key
 		# Fil principal : grilles, instantané des pages, couloirs, conversion Rust.
@@ -345,6 +360,11 @@ func _install(key: int, job: Dictionary, result: Dictionary) -> void:
 			multimesh.mesh = meshes[kind]
 			multimesh.instance_count = count
 			multimesh.buffer = buffers[slot]
+			multimesh.visible_instance_count = 0  # part affichée posée par `_apply_parts`
+			# Boîte fixe : sans elle, chaque changement de part affichée recalcule la boîte sur
+			# toutes les instances (fil principal, ~1 ms par MultiMesh de 30 000 arbres).
+			var part_rect := Rect2(rect.position + Vector2(part_index % side, part_index / side) * (rect.size / float(side)), rect.size / float(side)).grow(1.0)
+			multimesh.custom_aabb = AABB(Vector3(part_rect.position.x, -5.0, part_rect.position.y), Vector3(part_rect.size.x, 60.0, part_rect.size.y))
 			var mmi := MultiMeshInstance3D.new()
 			mmi.multimesh = multimesh
 			mmi.material_override = vegetation.foliage_material()
@@ -460,6 +480,12 @@ func _apply_ground(job: Dictionary, result: Dictionary) -> void:
 
 ## Sème et recale tout de suite ce qui est voulu (captures, tests).
 func flush(focus: Vector2, camera_distance: float) -> void:
+	_flushing = true
+	_flush(focus, camera_distance)
+	_flushing = false
+
+
+func _flush(focus: Vector2, camera_distance: float) -> void:
 	for _i in 64:
 		update_view(focus, camera_distance, false)
 		vegetation.poll_native_blocking()
