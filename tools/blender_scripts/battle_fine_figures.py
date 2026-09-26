@@ -620,6 +620,46 @@ def fine_kit_item(name, kwargs, ctx, lm, bvhs):
     return None
 
 
+def fine_tabard(garments, lm, length=0.34, colour=(1.0, 1.0, 1.0)):
+    """Livery tabard draped on the garments: front and back panels, open at the sides.
+
+    Replaces the flat Quaternius panels (``battle_skinned_weapons.tabard``): shells of the
+    torso garment and of its skirt within a band of the chest's width, `length` below the
+    hips like the original.
+    """
+    chest = lm.bone["Chest"]
+    bottom = lm.bone["Hips"].z - length
+    top_z = lm.shoulder_z - 0.04
+    out = []
+    for obj, role in garments:
+        if role not in ("torso", "skirt"):
+            continue
+
+        def keep(c, bones, role=role):
+            if bones & ARMS or bones & {"Wrist.L", "Wrist.R", "Head", "Neck"}:
+                return False
+            half = 0.15 + 0.04 * eq.smoothstep(lm.waist_z, bottom, c.z)
+            if abs(c.x - chest.x) > half or c.z < bottom:
+                return False
+            # Over the shoulders the band narrows to a yoke around the neck opening.
+            return c.z < top_z or abs(c.x - chest.x) < 0.11
+
+        piece = fe.shell(
+            obj,
+            f"tabard_{role}",
+            mat((eq.C_LIVERY, colour)),
+            keep,
+            0.008,
+            relax=6,
+        )
+        if len(piece.data.polygons):
+            parent_keep(piece, obj.parent)
+            out.append(piece)
+        else:
+            bpy.data.objects.remove(piece)
+    return out
+
+
 def build_figure(fig_name, level):
     """Fine figure `fig_name` at `level`; returns (armature, objects, recipe)."""
     import battle_fine as bf
@@ -653,6 +693,8 @@ def build_figure(fig_name, level):
         kwargs = item[2] if len(item) > 2 else {}
         objs = fine_kit_item(name, kwargs, ctx, lm, bvhs) if fine else None
         kit = objs is not None
+        if name == "tabard":
+            objs = fine_tabard(garments, lm, **kwargs)
         if objs is None:
             builder = (
                 (getattr(cav, name, None) if mounted else None)
