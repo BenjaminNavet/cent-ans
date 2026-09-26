@@ -124,6 +124,17 @@ func fade_distance() -> float:
 	return float(catalog.get("fade_distance", 60.0))
 
 
+## Lot DA7d : paramètre du dé-encombrement écran (bloc `declutter` du catalogue).
+func declutter_value(key: String, default: Variant) -> Variant:
+	return catalog.get("declutter", {}).get(key, default)
+
+
+## Lot DA7d : emprise opaque du pictogramme (fraction du quad, largeur × hauteur).
+func marker_box() -> Vector2:
+	var box: Array = declutter_value("marker_box", [0.8, 0.8])
+	return Vector2(float(box[0]), float(box[1]))
+
+
 ## Placement (centre, demi-taille en fraction du quad) de l'écu ou de l'insigne.
 func placement(key: String) -> Vector3:
 	var data: Dictionary = catalog.get(key, {})
