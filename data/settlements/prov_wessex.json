@@ -134,5 +134,132 @@
     "sources": [
       "Abbaye de Beaulieu"
     ]
+  },
+  {
+    "id": "set_wilton",
+    "province": "prov_wessex",
+    "kind": "abbey",
+    "name": {
+      "display": "Wilton",
+      "local": "Wiltone",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.8608,
+      51.0806
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine de femmes de Wilton, ancienne capitale du royaume du Wessex.",
+    "sources": [
+      "Wilton, Wiltshire",
+      "Abbaye de Wilton"
+    ]
+  },
+  {
+    "id": "set_newbury",
+    "province": "prov_wessex",
+    "kind": "village",
+    "name": {
+      "display": "Newbury",
+      "local": "Neubury",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.3234,
+      51.4014
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg drapier du Berkshire sur la Kennet.",
+    "sources": [
+      "Newbury"
+    ]
+  },
+  {
+    "id": "set_marlborough",
+    "province": "prov_wessex",
+    "kind": "castle",
+    "name": {
+      "display": "Marlborough",
+      "local": "Marleberge",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.7309,
+      51.4222
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château royal du Wiltshire, résidence fréquente des rois d'Angleterre.",
+    "sources": [
+      "Château de Marlborough"
+    ]
+  },
+  {
+    "id": "set_devizes",
+    "province": "prov_wessex",
+    "kind": "village",
+    "name": {
+      "display": "Devizes",
+      "local": "Divises",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.0111,
+      51.35
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du Wiltshire, autour d'un château royal.",
+    "sources": [
+      "Devizes"
+    ]
+  },
+  {
+    "id": "set_romsey",
+    "province": "prov_wessex",
+    "kind": "abbey",
+    "name": {
+      "display": "Romsey",
+      "local": "Rumesye",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4986,
+      50.9897
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine de femmes de Romsey, dans la vallée du Test.",
+    "sources": [
+      "Abbaye de Romsey"
+    ]
   }
 ]

@@ -132,5 +132,130 @@
     "sources": [
       "Château de Lewes"
     ]
+  },
+  {
+    "id": "set_arundel",
+    "province": "prov_sussex",
+    "kind": "castle",
+    "name": {
+      "display": "Arundel",
+      "local": "Arundell",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.5559,
+      50.8551
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château des comtes d'Arundel, sur l'Arun.",
+    "sources": [
+      "Château d'Arundel"
+    ]
+  },
+  {
+    "id": "set_battle",
+    "province": "prov_sussex",
+    "kind": "abbey",
+    "name": {
+      "display": "Battle",
+      "local": "Batailge",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.4856,
+      50.9152
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye fondée par Guillaume le Conquérant sur le site de la bataille de Hastings (1066).",
+    "sources": [
+      "Abbaye de Battle"
+    ]
+  },
+  {
+    "id": "set_horsham",
+    "province": "prov_sussex",
+    "kind": "village",
+    "name": {
+      "display": "Horsham",
+      "local": "Horsham",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.3272,
+      51.0631
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du Weald du Sussex.",
+    "sources": [
+      "Horsham"
+    ]
+  },
+  {
+    "id": "set_steyning",
+    "province": "prov_sussex",
+    "kind": "village",
+    "name": {
+      "display": "Steyning",
+      "local": "Stanynges",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.3325,
+      50.8886
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancien port fluvial sur l'Adur, bourg royal saxon puis normand.",
+    "sources": [
+      "Steyning"
+    ]
+  },
+  {
+    "id": "set_midhurst",
+    "province": "prov_sussex",
+    "kind": "village",
+    "name": {
+      "display": "Midhurst",
+      "local": "Middehurst",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.7375,
+      50.9836
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du Sussex occidental sur la Rother.",
+    "sources": [
+      "Midhurst"
+    ]
   }
 ]
