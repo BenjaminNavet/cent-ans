@@ -139,6 +139,12 @@ def _slug(name: str) -> str:
     return "_".join(p for p in "".join(out).split("_") if p)
 
 
+# Named alleys and courts (footways, service ways) kept as lanes when the recipe sets ``alleys``
+# (VH6: the City of London keeps its medieval alleys as footways).
+ALLEY_NAME = re.compile(r"\b(Alley|Court|Passage|Yard|Churchyard|Row)$")
+ALLEY_HIGHWAYS = ("footway", "service", "steps", "pedestrian")
+
+
 def osm_streets(city: dict, osm: dict) -> list[dict]:
     """Streets of the recipe, clipped to the districts, as v2 ``streets`` entries."""
     recipe = city["osm_streets"]
@@ -156,7 +162,14 @@ def osm_streets(city: dict, osm: dict) -> list[dict]:
         if element.get("type") != "way":
             continue
         tags = element.get("tags", {})
-        if tags.get("highway") not in highways or tags.get("area") == "yes":
+        alley = (
+            bool(recipe.get("alleys", False))
+            and tags.get("highway") in ALLEY_HIGHWAYS
+            and bool(ALLEY_NAME.search(tags.get("name", "")))
+        )
+        if (tags.get("highway") not in highways and not alley) or tags.get(
+            "area"
+        ) == "yes":
             continue
         if (
             tags.get("tunnel") in ("yes", "building_passage")
@@ -177,7 +190,7 @@ def osm_streets(city: dict, osm: dict) -> list[dict]:
         rank = (
             "main"
             if name in main
-            else ("lane" if (name in lanes or not name) else "secondary")
+            else ("lane" if (name in lanes or not name or alley) else "secondary")
         )
         width = float(
             widths.get(rank, {"main": 8.0, "secondary": 5.0, "lane": 3.0}[rank])

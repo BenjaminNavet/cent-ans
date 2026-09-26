@@ -186,6 +186,28 @@ impl VegetationScatter {
             data: if valid { data } else { Vec::new() },
             side: if valid { side } else { (0, 0) },
             cell: cell.max(1.0),
+            ..Default::default()
+        });
+    }
+
+    /// Lot SZ1: uncapped base and mountain squash factor of the current floor grid
+    /// (`MapData.relief_floor_grid` "base" / "squash"); call after `set_floor`. Arrays of another
+    /// size are ignored (base = floor, k = 0).
+    #[func]
+    fn set_relief_fields(&mut self, base: PackedFloat32Array, squash: PackedFloat32Array) {
+        let n = self.floor.data.len();
+        let base = base.to_vec();
+        let squash = squash.to_vec();
+        self.floor = Arc::new(ReliefFloor {
+            data: self.floor.data.clone(),
+            base: if base.len() == n { base } else { Vec::new() },
+            squash: if squash.len() == n {
+                squash
+            } else {
+                Vec::new()
+            },
+            side: self.floor.side,
+            cell: self.floor.cell,
         });
     }
 
@@ -211,7 +233,8 @@ impl VegetationScatter {
     /// Queues a tile under the caller's `id`. `params`: tile_index, origin_x, origin_y, size_px,
     /// spacing, coarse_step, tree_scale, vertical_scale, side, coarse (Array of 7
     /// PackedFloat32Array: forest, crops, conifer, beech, hedge, grove, region), exclusions
-    /// (PackedVector3Array), ground_grid (`TerrainBuilder.surface_grid`), relief_gain (ZG8).
+    /// (PackedVector3Array), ground_grid (`TerrainBuilder.surface_grid`), relief_gain (ZG8),
+    /// relief_squash (SZ1).
     /// False if not started or malformed.
     #[func]
     fn request(&mut self, id: i64, params: VarDictionary) -> bool {
@@ -265,6 +288,7 @@ impl VegetationScatter {
             tree_scale: float_of(&params, "tree_scale", 1.0),
             vertical_scale: float_of(&params, "vertical_scale", 1.0),
             relief_gain: float_of(&params, "relief_gain", 0.0),
+            relief_squash: float_of(&params, "relief_squash", 0.0),
             floor: Arc::clone(&self.floor),
             coarse: grids,
             side,
@@ -284,6 +308,7 @@ impl VegetationScatter {
     /// (`TerrainBuilder.surface_grid`, local to `origin`); the result comes back from `poll`
     /// like a scatter (`counts` unchanged).
     #[func]
+    #[allow(clippy::too_many_arguments)]
     fn request_reground(
         &mut self,
         id: i64,
@@ -292,6 +317,7 @@ impl VegetationScatter {
         origin: Vector2,
         vertical_scale: f64,
         relief_gain: f64,
+        relief_squash: f64,
     ) -> bool {
         let buffers: Vec<Vec<f32>> = buffers
             .iter_shared()
@@ -310,6 +336,7 @@ impl VegetationScatter {
             tree_scale: 1.0,
             vertical_scale,
             relief_gain,
+            relief_squash,
             floor: Arc::clone(&self.floor),
             coarse: Default::default(),
             side: 0,

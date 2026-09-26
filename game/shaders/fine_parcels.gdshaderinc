@@ -127,7 +127,7 @@ vec4 fp_splat(vec4 s, vec2 p, float footprint) {
 	vec2 w = vec2(value_noise(p * 0.9), value_noise(p * 0.9 + vec2(31.7, 11.3))) - 0.5;
 	w += (vec2(value_noise(p * 3.7 + 5.1), value_noise(p * 3.7 + 17.9)) - 0.5) * 0.45;
 	w += (vec2(value_noise(p * 14.0 + 2.3), value_noise(p * 14.0 + 8.1)) - 0.5) * 0.18;
-	vec4 warped = texture(splat, (p + w * 1.1 + vec2(0.5)) / map_size);
+	vec4 warped = texture(splat, (p + w * 1.1) / map_size);
 	return mix(s, warped, vis);
 }
 
