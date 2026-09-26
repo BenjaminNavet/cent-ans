@@ -81,6 +81,9 @@ static var _fine_maps_loaded := false
 static func fine_maps() -> Dictionary:
 	if not _fine_maps_loaded:
 		_fine_maps_loaded = true
+		# `--no-fg3` : figurines fines sans cartes cuites (mesures A/B).
+		if OS.get_cmdline_user_args().has("--no-fg3"):
+			return _fine_maps
 		for key in FINE_MAPS:
 			var path: String = FINE_TEX_DIR + str(FINE_MAPS[key])
 			if ResourceLoader.exists(path):

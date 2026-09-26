@@ -144,6 +144,9 @@ func _bake(key: String, kind: String, variant: int, source: ShaderMaterial) -> v
 	mat.set_shader_parameter("anim_time", 0.0)
 	mat.set_shader_parameter("blend_since", -1000.0)
 	mat.set_shader_parameter("interp_distance", 10000.0)
+	# FG3 : la caméra est à 200 m, mais l'imposteur cuit le LOD0 avec ses cartes (atlas,
+	# tuiles de détail) ; sans effet hors de la variante `FG3_BAKED`.
+	mat.set_shader_parameter("fine_distance", 100000.0)
 	mat.set_shader_parameter("blood", 0.0)
 	mat.set_shader_parameter("hide_pavise", false)
 	var mm := MultiMesh.new()

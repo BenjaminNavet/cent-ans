@@ -632,6 +632,9 @@ def aventail(lm, frame, bvh, extra=(), n=36, rows=12):
     for a_, b_ in zip(grid, grid[1:], strict=False):
         eq.bridge(bm, a_, b_, 0)
     # Open surface: orient every face away from the neck axis (outside = visible side).
+    # FG3: new faces carry no normal until updated (the test never flipped anything and the
+    # bridged faces looked inwards: culled from outside, dark from inside).
+    bm.normal_update()
     for f in bm.faces:
         c = f.calc_center_median()
         if f.normal.dot(Vector((c.x - axis.x, c.y - axis.y, 0))) < 0:
