@@ -149,6 +149,35 @@ def test_generate_refuses_beyond_global_cap(
     assert "/api/v1/chat/completions" not in calls
 
 
+def test_generate_records_billed_refusal(
+    budget_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Billed refusals are retried, each attempt recorded, then the image is skipped."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    calls: list[str] = []
+    jobs = portraits.plan(out_dir=tmp_path, limit=1)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request.url.path)
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json=MODELS_PAYLOAD)
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"content": "refus"}}],
+                "usage": {"cost": 0.04},
+            },
+        )
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        result = portraits.generate(
+            jobs, "vendor/imager", budget_path=budget_file, client=client
+        )
+    assert result.written == []
+    ledger = BudgetLedger(budget_file)
+    assert ledger.entries[-1].actual == Decimal("0.04") * portraits.MAX_ATTEMPTS
+
+
 def test_dry_run_makes_no_network_call(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

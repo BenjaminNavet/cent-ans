@@ -32,7 +32,7 @@ nuit : NV2, SG3, EQ1, PF1, DP2, AR1).
 
 | Lot | Objet | ADR | Dépend de | État |
 |---|---|---|---|---|
-| EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0031 | — | **fusionné** 13506bf1 |
+| EP1 | Échelle massive : champ plus grand selon l'effectif, plafond de régiments relevé, rendu 15 000+ (imposteurs très lointains, budget d'animation par distance), banc ≥ 40 i/s | 0076 (ex-0031) | — | **fusionné** 13506bf1 |
 | EP2 | Horizon : relief réel (DEM) autour du lieu en anneau lointain, panoramas peints par région (mer, Alpes, Pyrénées, collines), silhouettes lointaines (clocher, château), brume de chaleur/fumée de camp | 0032 | — | **fusionné** 13506bf1 |
 | EP3 | Eau et chemins : plusieurs cours d'eau et ruisseaux, ponts de bois et de pierre (goulots), gués multiples, routes qui accélèrent la marche, IA qui tient ponts et gués | 0033 | — | **fusionné** 13506bf1 |
 | EP4 | Son de mêlée de proximité : émetteurs par front de mêlée, couches proche/moyen/lointain, grande banque CC0 (chocs, cris, râles, chevaux, ordres), foule qui monte avec l'effectif | — | — | **fusionné** a30b461b (27 clips CC0, 112 générés ; ordres criés sans source CC0 ; volumes à régler à l'oreille) |
@@ -135,8 +135,12 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
 ### Vague 3 (26/09, reprise du backlog TW, docs/audit/backlog-tw.md)
 | Lot | Contenu | Wip | État |
 |---|---|---|---|
-| EP11 | Poussée continue des lignes : front qui se bombe, enroulement, compression (ADR 0022 → module push) | ep11-poussee-lignes.md | en cours |
-| EP12 | Blessés qui rampent, fuyards qui jettent armes et boucliers (clips Blender, rendu) | ep12-blesses-armes.md | en cours |
+| EP11 | Poussée continue des lignes : front qui se bombe, enroulement, compression (ADR 0022 → module push) | ep11-poussee-lignes.md | **fusionné** 87ec2d16 (ADR 0071) |
+| EP12 | Blessés qui rampent, fuyards qui jettent armes et boucliers (clips Blender, rendu) | ep12-blesses-armes.md | **fusionné** 78e3b69c (ADR 0070) |
 | EP13 | Rejeu d'après bataille (re-simulation déterministe, barre de temps) | ep13-rejeu.md | **fusionné** 311458ff (ADR 0072) |
 Partage : EP11 possède le pas de simulation ; EP13 reste au niveau commandes/API ; EP12 côté rendu.
 ai.rs / relief_ai.rs restent à la session de nuit.
+Vague 3 terminée (26/09). Marges minces après EP11 : Azincourt 18/20 (limite 19), ep9b 4/10 (limite 3) —
+toute règle de mêlée future doit revérifier ep7_historical, ep9b_duel et ai. Les rejeux enregistrés
+avant EP11 signalent (voulu) « règles changées ». Suites : fatigue de poussée, poussée en siège, IA qui
+évite de coller une seconde ligne ; cavaliers blessés ; armes au sol inclinées sur les pentes.

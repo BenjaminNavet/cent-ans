@@ -2,7 +2,7 @@
 
 Date : 2026-09-26. Statut : accepté. Lot EP7 du chantier « batailles épiques » (suivi :
 `docs/wip/ep7-cartes-historiques.md`, `docs/wip/epic.md`). S'appuie sur EP1 (taille du champ, ADR
-0031), EP2 (horizon, ADR 0032), EP3 (eau et routes, ADR 0033), EP6 (décor, ADR 0061), EP8 (heure,
+0076), EP2 (horizon, ADR 0032), EP3 (eau et routes, ADR 0033), EP6 (décor, ADR 0061), EP8 (heure,
 ADR 0055) et EP9 (fin de bataille, ADR 0056).
 
 ## Contexte

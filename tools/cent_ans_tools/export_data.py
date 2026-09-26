@@ -1,5 +1,8 @@
 """Game data staged into an exported build (``tools/export_macos.sh``, lot ZG7b).
 
+The Windows export (``tools/export_windows.sh``, ADR 0087) uses the same staging
+with the folder of ``Cent Ans.exe`` as ``resources_dir`` and ``external_parent``.
+
 ``data/`` is read at runtime from absolute paths (``MapPaths``), never from the
 Godot ``.pck``: the export copies it next to the executable. The fine relief
 cache ``data/map/pyramid/`` (about 2.9 GB, ~15 000 files, ADR 0036) is placed
@@ -74,7 +77,8 @@ def stage(
     """Copy ``data/`` (without schemas) and the relief cache into an export.
 
     Args:
-        resources_dir: ``Cent Ans.app/Contents/Resources`` (receives ``data/``).
+        resources_dir: ``Cent Ans.app/Contents/Resources`` (macOS) or the folder
+            of ``Cent Ans.exe`` (Windows); receives ``data/``.
         relief: One of :data:`RELIEF_MODES`.
         repo_dir: Repository root (tests use a fake one).
         external_parent: Folder receiving ``Cent Ans relief/`` in ``external`` mode

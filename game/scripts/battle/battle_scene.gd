@@ -27,6 +27,8 @@ extends Node3D
 ## porte-étendard à pied ou à cheval, ligne de bataille et ses étendards au loin, étendard tombé,
 ## étendard pris porté par le vainqueur) ; `--standard-side=<attacker|defender>` choisit le camp
 ## cadré (DA1b : étendards aux armes de la maison du général ennemi).
+## `--ep12-shot=<wounded|rout>` (capture EP12 : blessés au sol 2,5 s après leur chute, ou
+## régiment à pied en déroute qui a jeté ses armes) ; `--no-ep12` coupe le lot (A/B).
 ## `--no-da6` (végétation de bataille DA6 coupée : herbe, lisières, arbres, sol de près ; captures
 ## « avant »), `--bench-ab=da6,no-da6` (banc : les deux végétations alternées, DA6).
 ## `--no-horizon` (relief réel lointain, panorama et silhouettes EP2 coupés : mesures A/B),
@@ -65,6 +67,8 @@ var side_colors: Dictionary = {}
 var _side_houses: Dictionary = {}  # DA1 / DA1b : maison du général par camp (écus, étendards)
 var side_names: Dictionary = {}
 var units: Array = []
+## État du siège lu par `_refresh_view` pour l'image courante (vide hors siège).
+var _frame_siege: Dictionary = {}
 var selected: Array[int] = []
 var paused: bool = false
 var speed: float = 1.0
@@ -136,6 +140,12 @@ var _bench_timeout_s: float = 120.0
 var _bench_failed: bool = false
 var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
 var _bench_cpu_ms: float = 0.0
+## PB3c : temps de `_process` (Performance.TIME_PROCESS) et de `soldiers.update` par image mesurée.
+var _bench_process_ms: Array = []
+var _bench_soldiers_ms: Array = []
+var _bench_soldiers_last_ms: float = 0.0
+var _bench_tick_ms: Array = []  # PB3c : durée de `BattleSim.tick` (pas de simulation) par image
+var _bench_tick_last_ms: float = 0.0
 ## Compteur d'images mesurées (GPU/CPU/A-B) qui ne repart pas à zéro entre répétitions
 ## (`--bench-repeat=`), contrairement à `_bench_frames` (fenêtre de mesure courante).
 var _bench_measured: int = 0
@@ -150,6 +160,9 @@ var _closeup: bool = false
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
 var _standard_side: String = ""  # DA1b : `--standard-side=` (camp cadré par `--standard-shot`)
 var _standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen|captured>`
+var _ep12_shot: String = ""  # EP12 : `--ep12-shot=<wounded|rout>`
+var _ep12_focus: Variant = null  # EP12 : point cadré (blessé) ou id du régiment en déroute
+var _ep12_ticks: int = -1
 var _weather_override: String = ""
 var _camera_override: String = ""
 var _last_group_ms: int = -10000
@@ -469,6 +482,13 @@ func replay_seek(seconds: float) -> void:
 ## arrière ou au début d'un rejeu lancé depuis l'écran de fin).
 func _reset_battle_visuals() -> void:
 	units = battle.call("get_units")
+	# Les imposteurs survivent au saut : atlas déjà cuits gardés, et une cuisson en cours (coroutine
+	# sur ce nœud) ne reprend jamais sur une instance libérée.
+	var kept_impostors: BattleImpostors = null
+	if soldiers != null and is_instance_valid(soldiers) and soldiers.impostors != null and is_instance_valid(soldiers.impostors):
+		kept_impostors = soldiers.impostors
+		soldiers.remove_child(kept_impostors)
+		soldiers.impostors = null
 	for node in [soldiers, standards, duels, effects, engines_fx, assault_fx]:
 		if node != null and is_instance_valid(node):
 			(node as Node).get_parent().remove_child(node)
@@ -480,7 +500,7 @@ func _reset_battle_visuals() -> void:
 	engines_fx = null
 	assault_fx = null
 	grass_flatten = null
-	_build_soldier_layers()
+	_build_soldier_layers(kept_impostors)
 
 
 ## EP13 : « Revoir la bataille » depuis l'écran de fin (résultat déjà appliqué à la campagne).
@@ -754,15 +774,18 @@ func _pad_setup(count: int) -> void:
 		setup[side]["units"] = list
 
 
-func _build_soldier_layers() -> void:
+## `kept_impostors` : imposteurs repris d'avant un saut arrière du rejeu (EP13), sinon créés.
+func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 	soldiers = BattleSoldiers.new()
 	soldiers.name = "Soldiers"
 	add_child(soldiers)
 	if not _no_bv3 and not _no_impostors:
 		# BV3 : imposteurs lointains, cuits au début de la bataille (ADR 0024).
-		soldiers.impostors = BattleImpostors.new()
+		soldiers.impostors = kept_impostors if kept_impostors != null else BattleImpostors.new()
 		soldiers.impostors.name = "Impostors"
 		soldiers.add_child(soldiers.impostors)
+	elif kept_impostors != null:
+		kept_impostors.queue_free()
 	var factions := {}
 	var houses := {}  # DA1 : maison du général par camp
 	for side in ["attacker", "defender"]:
@@ -1072,11 +1095,13 @@ func _process(delta: float) -> void:
 	# EP8 : ralenti du plan cinématique (temps de bataille et animations).
 	var slow := staging.time_scale() if staging != null else 1.0
 	var running: bool = not paused and not battle.call("is_finished")
+	var tick_start := Time.get_ticks_usec()
 	if running:
 		battle.call("tick", delta * speed * slow)
-	if music != null:
-		music.update(delta)
+	_bench_tick_last_ms = float(Time.get_ticks_usec() - tick_start) / 1000.0
 	_refresh_view(false, delta * slow)
+	if music != null:
+		music.update(delta, units)
 	if staging != null:
 		staging.update(units, delta * speed * slow if running else 0.0, delta, bool(battle.call("is_finished")))
 		_update_time_label()
@@ -1149,6 +1174,9 @@ func _run_benchmark_frame(delta: float) -> void:
 		var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
 		_bench_gpu_ms += gpu_ms
 		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+		_bench_process_ms.append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
+		_bench_soldiers_ms.append(_bench_soldiers_last_ms)
+		_bench_tick_ms.append(_bench_tick_last_ms)
 		_bench_gpu_samples += 1
 		# DA6 : sous Metal le temps GPU mesuré vaut 0 : durée de l'image à la place (vsync coupée).
 		_bench_ab_step(gpu_ms if gpu_ms > 0.0 else delta * 1000.0)
@@ -1200,6 +1228,9 @@ func _bench_finish() -> void:
 		"engine_fps": Engine.get_frames_per_second(),
 		"gpu_ms": _bench_gpu_ms / maxf(_bench_gpu_samples, 1),
 		"cpu_ms": _bench_cpu_ms / maxf(_bench_gpu_samples, 1),
+		"process_ms_median": _median(_bench_process_ms),
+		"soldiers_ms_median": _median(_bench_soldiers_ms),
+		"tick_ms_median": _median(_bench_tick_ms),
 		"quality": RenderQuality.current(),
 		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
 		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
@@ -1225,6 +1256,10 @@ func _bench_finish() -> void:
 	result["primitives_m"] = Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1.0e6
 	result["draw_calls"] = Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 	result["skipped_updates"] = self.soldiers.skipped_updates
+	# EP12 : blessés au sol, régiments désarmés, armes au sol (plafonnées).
+	result["wounded"] = self.soldiers.wounded_count
+	result["disarmed_units"] = self.soldiers.disarmed_units.size()
+	result["dropped_arms"] = self.soldiers.dropped_arms.shown_count() if self.soldiers.dropped_arms != null else 0
 	if effects != null and effects.volleys != null:
 		# BV1 : volées, traits fichés et échelle des figurines.
 		result["volley_arrows"] = effects.volleys.launched
@@ -1265,6 +1300,14 @@ func _bench_timed_out() -> bool:
 	return _bench_timeout_s > 0.0 and _bench_wall_elapsed_s() > _bench_timeout_s
 
 
+static func _median(values: Array) -> float:
+	if values.is_empty():
+		return 0.0
+	var sorted := values.duplicate()
+	sorted.sort()
+	return float(sorted[sorted.size() / 2])
+
+
 static func _percentile(sorted_values: PackedFloat64Array, ratio: float) -> float:
 	if sorted_values.is_empty():
 		return 0.0
@@ -1284,7 +1327,7 @@ func _update_audio(delta: float) -> void:
 		_siege_audio_timer -= delta
 		if _siege_audio_timer <= 0.0:
 			_siege_audio_timer = 0.25
-			battle_audio.update_siege(battle.call("get_siege"), elapsed)
+			battle_audio.update_siege(_frame_siege, elapsed)
 	if voices != null:
 		voices.update(delta)
 
@@ -1302,6 +1345,10 @@ func _bench_ab_step(gpu_ms: float) -> void:
 	if phase == 0:
 		if level in ["da6", "no-da6"]:
 			terrain.set_da6_view(level == "da6")  # DA6 : végétation de bataille A/B
+		elif level == "off" or level.contains(":"):
+			# PB3b : mise à l'échelle 3D (`off`, `metalfx_s:0.75`, `metalfx_t:0.67`, `bilinear:0.75`).
+			RenderQuality.upscale_override = level
+			RenderQuality.reapply(get_tree())
 		else:
 			RenderQuality.override_level = level
 			RenderQuality.reapply(get_tree())
@@ -1331,10 +1378,15 @@ func _fast_forward(seconds: float) -> void:
 func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	units = battle.call("get_units")
 	var running: bool = not paused and not battle.call("is_finished")
+	var soldiers_start := Time.get_ticks_usec()
 	soldiers.update(battle, units, delta * speed if running else 0.0, selected)
+	_bench_soldiers_last_ms = float(Time.get_ticks_usec() - soldiers_start) / 1000.0
 	_update_effects(delta * speed if running else 0.0)
 	if siege_view != null:
-		siege_view.update(battle.call("get_siege"), units)
+		# Lu une seule fois par image (gros dictionnaire construit par le cœur) : HUD, sortie
+		# et sons du siège reprennent cette lecture.
+		_frame_siege = battle.call("get_siege")
+		siege_view.update(_frame_siege, units)
 	var banner_scale := _banner_scale()
 	# Les drapeaux se présentent de trois quarts à la caméra (lisibles sans être des panneaux).
 	var cam_yaw := camera_rig.yaw + PI * 0.5 + 0.35
@@ -1377,8 +1429,8 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
 		hud.set_balance(side_names[player_side], int(battle.call("get_strength", player_side)), side_names[enemy_side], int(battle.call("get_strength", enemy_side)))
 		if siege_view != null:
-			hud.set_siege_status(siege_status(battle.call("get_siege")))
-			_check_sortie()
+			hud.set_siege_status(siege_status(_frame_siege))
+			_check_sortie(_frame_siege)
 		hud.update_cards(units, player_side, selected)
 		hud.minimap.update(units, camera_frame())
 		var events: Array = battle.call("get_events")
@@ -1934,6 +1986,8 @@ func _parse_cmdline() -> void:
 			_shot_at = float(arg.trim_prefix("--shot-at="))
 		elif arg.begins_with("--standard-shot="):
 			_standard_shot = arg.trim_prefix("--standard-shot=")
+		elif arg.begins_with("--ep12-shot="):
+			_ep12_shot = arg.trim_prefix("--ep12-shot=")
 		elif arg == "--no-effects":
 			_no_effects = true
 		elif arg == "--no-bv1":
@@ -2027,6 +2081,10 @@ func _stage_screenshot() -> void:
 			# EP8 : envol des oiseaux (6 s après le choc) ou plan cinématique (dès le choc).
 			if float(battle.call("get_elapsed")) - contact_time >= (6.0 if _birds_shot else 0.5):
 				break
+		if _ep12_shot != "":
+			if _ep12_shot_ready(units):
+				break
+			continue
 		if _standard_shot == "fallen" or _standard_shot == "captured":
 			# EP5 : dès qu'un étendard gît depuis 2 s (le porte-étendard a fini de tomber).
 			if standards != null:
@@ -2090,6 +2148,7 @@ func _stage_screenshot() -> void:
 	_refresh_view(true)
 	_apply_camera_override()
 	_apply_standard_shot()
+	_apply_ep12_shot()
 	_apply_staging_shot()
 	# B4 : laisser la poussière se lever (les particules vivent en temps réel, bataille en pause).
 	for _i in 150 if effects != null else 40:
@@ -2253,6 +2312,60 @@ func _apply_standard_shot() -> void:
 	print("BattleScene: EP5 %s shot on %s (%s) at %s, standard %s, %d standards, %d figures, %d fallen" % [_standard_shot, str(best["name"]), str(best["type"]), point, str(best.get("standard", "")), standards.shown_count, standards.figure_count, standards.fallen_count])
 
 
+## Capture EP12 (`--ep12-shot=`) : vrai quand l'instant est venu. Blessés : 25 pas (2,5 s)
+## après le 30e blessé, le dernier tombé cadré (il rampe, s'assoit ou s'agenouille). Déroute :
+## un régiment à pied débandé depuis 2 s (armes au sol, course de fuite).
+func _ep12_shot_ready(p_units: Array) -> bool:
+	if _ep12_ticks >= 0:
+		_ep12_ticks -= 1
+		return _ep12_ticks < 0
+	if _ep12_shot == "wounded":
+		if soldiers.wounded_count >= 30 and soldiers.last_wounded_pos != null:
+			_ep12_focus = soldiers.last_wounded_pos
+			_ep12_ticks = 25
+	elif _ep12_shot == "rout":
+		for unit in p_units:
+			var id := int(unit["id"])
+			if bool(unit["present"]) and str(unit["render"]) != "cavalry" and soldiers.disarmed_units.has(id) and soldiers.anim_time - float(soldiers.disarmed_units[id]) >= 2.0:
+				_ep12_focus = id
+				return true
+	return false
+
+
+func _apply_ep12_shot() -> void:
+	if _ep12_shot == "" or _ep12_focus == null:
+		if _ep12_shot != "":
+			push_warning("BattleScene: nothing to frame for --ep12-shot=%s" % _ep12_shot)
+		return
+	selected.clear()
+	var dropped: int = soldiers.dropped_arms.shown_count() if soldiers.dropped_arms != null else 0
+	if _ep12_shot == "wounded":
+		var at: Vector3 = _ep12_focus
+		camera_rig.look_at_point(at, 7.0, 0.7)
+		if camera_rig.camera != null:
+			# Vue plongeante : le blessé est au sol, souvent derrière les hommes debout.
+			camera_rig.set_process(false)
+			var ground := Vector3(at.x, terrain.height_at(at.x, at.z), at.z)
+			camera_rig.camera.global_position = ground + Vector3(sin(0.7), 0, cos(0.7)) * 5.5 + Vector3(0, 5.0, 0)
+			camera_rig.camera.look_at(ground, Vector3.UP)
+		print("BattleScene: EP12 wounded shot at %s, %d wounded, %d arms on the ground" % [at, soldiers.wounded_count, dropped])
+		return
+	for unit in units:
+		if int(unit["id"]) != int(_ep12_focus):
+			continue
+		# Devant les fuyards (ils courent vers la caméra), de trois quarts.
+		var facing := float(unit["facing"])
+		var at := Vector3(float(unit["x"]), 0, float(unit["z"]))
+		var yaw := atan2(sin(facing), cos(facing)) + 0.5
+		camera_rig.look_at_point(at, 16.0, yaw)
+		if camera_rig.camera != null:
+			camera_rig.set_process(false)
+			var ground := Vector3(at.x, terrain.height_at(at.x, at.z), at.z)
+			camera_rig.camera.global_position = ground + Vector3(sin(yaw), 0, cos(yaw)) * 11.0 + Vector3(0, 4.5, 0)
+			camera_rig.camera.look_at(ground + Vector3(0, 0.8, 0), Vector3.UP)
+		print("BattleScene: EP12 rout shot on %s (%s), %d arms on the ground, %d wounded" % [str(unit["name"]), str(unit["type"]), dropped, soldiers.wounded_count])
+
+
 ## Préférence de `--standard-shot` : le camp voulu d'abord, puis le général et sa retenue noble
 ## (DA1b : leurs étendards portent les armes de la maison du général).
 func _standard_shot_score(unit: Dictionary) -> int:
@@ -2330,8 +2443,8 @@ func _deploy_selection(press: Vector2, release: Vector2) -> void:
 
 
 ## Sortie de la garnison (F5a) : message éphémère une fois, et mention dans la ligne du siège.
-func _check_sortie() -> void:
-	if _sortie_shown or not bool(battle.call("get_siege").get("sortie", false)):
+func _check_sortie(siege: Dictionary) -> void:
+	if _sortie_shown or not bool(siege.get("sortie", false)):
 		return
 	_sortie_shown = true
 	hud.show_toast("La garnison ouvre ses portes et fait une sortie !", player_side == "attacker")

@@ -360,3 +360,41 @@ Détail dans `docs/godot-map.md` (« Recette finale et clôture (lot ZG7c) ») e
   locale en haute montagne (palier vallée) ; recuisson E0-E4 avec le plancher monotone (fonds de
   vallée à 0,5 m) ; villes emblématiques 1:1 (VH4) ; objets à l'échelle de la carte au palier vallée ;
   pics d'images dominés par les scripts ; hébergement d'une archive du relief avant diffusion.
+
+## Addendum (lot SZ2, 2026-09-26) : fonds de vallée non creusés, versions de cuisson
+
+Détail dans `docs/geo.md` (« Fonds de vallée non creusés », « Versions de cuisson ») et
+`docs/wip/sz2-fonds-de-vallee.md`.
+
+- **Écart à l'ADR 0019 (rehaussement de rendu)** : la terre rehaussée ne descend plus sous
+  `max(0,5 ; 0,85 h ; h − 2 m)` de son altitude réelle `h`, à tous les étages E0-E7. Le masque flou
+  creusait les vallées encaissées (Seine à 0,5 m de Paris à Rouen, Loire à 15 m au lieu de ~52 m
+  à Amboise), et différemment à chaque étage : la continuité E0/E1…E7 des fonds de vallée (et des
+  niveaux d'eau fins) en dépendait. Le relief au-dessus des fonds reste rehaussé, et ZG8 l'exagère
+  à l'exécution.
+- **Versions de cuisson** : `bake_versions` dans le manifeste, `pyramid/bake.json` dans le cache ;
+  un palier périmé est recuit par `geo relief-all` sans `--force`, avec reprise après interruption.
+
+## Addendum (lot VH4, 2026-09-26) : villes emblématiques 1:1
+
+L'addendum « villes emblématiques » est réalisé par l'ADR 0078 : format `landmark` v2 géoréférencé
+(EPSG:3035, `data/landmarks_v2/`), ville rendue à l'échelle réelle au palier vallée par le moteur
+ZG6 étendu (`LandmarkPlan`, `LandmarkMonuments`, `LandmarkCityLayer`), maquette L1/L2 gardée en vue
+stratégique avec un fondu tramé. Le plancher `landmark_min_distance` de ZG4b ne s'applique plus
+qu'aux villes sans fichier v2. Rouen vers 1340 est la première ville migrée ; Paris, Londres et
+Orléans suivent (VH5-VH7). Voir `docs/landmarks-v2.md`.
+
+## Addendum (lot SZ1, 2026-09-26) : montagnes écrasées au palier vallée
+
+Détail dans `docs/godot-map.md` (« Montagnes écrasées ») et `docs/wip/sz1-montagnes.md`.
+
+- **Écart à ZG4/ZG8** : l'exagération n'est plus uniforme en montagne. La hauteur affichée devient
+  `y = s·(h − K·max(h − base, 0) + g·(1 − K)·max(h − fond, 0))`, `K = c(s)·k(x, z)` : le relief
+  au-dessus d'une base régionale (fond non plafonné) est écrasé selon l'amplitude régionale (genou
+  350 m, pente 0,3, borne 0,55), à partir de ×3,5 d'exagération (palier vallée) ; collines, falaises et
+  plaines (amplitude < 300 m) gardent exactement le rendu ZG8. Toujours une seule fonction, avec ses
+  doubles GDScript et Rust (semis d'arbres), et les champs dans la même texture que le fond (RGBF).
+- **Villes 1:1** : autour des villes emblématiques v2 (VH4), relief ramené près de l'échelle vraie
+  (k ≥ 0,7) pour que coteaux et maisons partagent la même échelle.
+- **Caméra** : garde au-dessus des crêtes voisines (cercles autour de la caméra et du point visé).
+

@@ -27,7 +27,7 @@ extends Node3D
 ## affleurantes), ponts du kit Blender (`BattleBridges`), routes de la simulation (`roads`)
 ## prolongées hors du champ (ornières et bas-côtés dans la splatmap).
 
-## EP1 (ADR 0031) : dimensions du champ lues dans `get_terrain()` (`width`, `depth` : 1200 × 800 au
+## EP1 (ADR 0076) : dimensions du champ lues dans `get_terrain()` (`width`, `depth` : 1200 × 800 au
 ## palier « escarmouche », jusqu'à 2400 × 1600) ; la splatmap et les anneaux suivent
 ## (`_set_field_size`). Variables (et non constantes) aux anciens noms.
 var FIELD_W := 1200.0
@@ -93,6 +93,11 @@ var river_flow: float = 1.0
 ## EP3 : largeur de chaque route de `roads` (même ordre), ruisseaux rééchantillonnés.
 var road_widths: Array[float] = []
 var _streams: Array = []  # [{points: PackedVector2Array, width, kind}]
+## PB3c : tronçons des ruisseaux pour `in_water` : [{box: Rect2 (élargi de la demi-largeur),
+## points: PackedVector2Array, half: demi-largeur}] ; seuls les tronçons dont la boîte contient
+## le point sont mesurés (même résultat, sans parcourir tout le tracé à chaque appel).
+var _stream_chunks: Array = []
+const STREAM_CHUNK := 24
 var bridges_view: BattleBridges
 var _hills := FastNoiseLite.new()
 var _woods := FastNoiseLite.new()
@@ -217,6 +222,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	roads.clear()
 	road_widths.clear()
 	_streams.clear()
+	_stream_chunks.clear()
 	if _nx < 2 or _nz < 2:
 		return
 	_mean_height = 0.0
@@ -586,10 +592,30 @@ func river_center_z(x: float) -> float:
 func in_water(x: float, z: float) -> bool:
 	if _river_points.size() >= 2 and river_distance(x, z) < river_width_at(x) * 0.5:
 		return true
-	for stream in _streams:
-		if _polyline_distance(stream["points"], Vector2(x, z)) < float(stream["width"]) * 0.5:
-			return true
+	var p := Vector2(x, z)
+	for chunk in _stream_chunks:
+		if not (chunk["box"] as Rect2).has_point(p):
+			continue
+		var points: PackedVector2Array = chunk["points"]
+		var half := float(chunk["half"])
+		for i in range(points.size() - 1):
+			if Geometry2D.get_closest_point_to_segment(p, points[i], points[i + 1]).distance_to(p) < half:
+				return true
 	return false
+
+
+## PB3c : découpe un ruisseau en tronçons de `STREAM_CHUNK` segments (boîtes élargies de la
+## demi-largeur, plus une marge : un point hors de la boîte est à plus d'une demi-largeur).
+func _add_stream_chunks(pts: PackedVector2Array, half: float) -> void:
+	var start := 0
+	while start < pts.size() - 1:
+		var end := mini(start + STREAM_CHUNK, pts.size() - 1)
+		var chunk := pts.slice(start, end + 1)
+		var box := Rect2(chunk[0], Vector2.ZERO)
+		for q in chunk:
+			box = box.expand(q)
+		_stream_chunks.append({"box": box.grow(half + 0.5), "points": chunk, "half": half})
+		start = end
 
 
 ## EP3 : niveau de l'eau de la rivière au droit de x (-INF sans rivière).
@@ -1242,6 +1268,7 @@ func _build_streams() -> void:
 			for s in range(1, steps + 1):
 				pts.append(raw[i].lerp(raw[i + 1], float(s) / float(steps)))
 		_streams.append({"points": pts, "width": width, "kind": str(stream["kind"])})
+		_add_stream_chunks(pts, width * 0.5)
 		var levels := PackedFloat32Array()
 		levels.resize(pts.size())
 		for i in pts.size():

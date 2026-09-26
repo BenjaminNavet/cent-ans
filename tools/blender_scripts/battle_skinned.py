@@ -7,7 +7,7 @@ Run from the repository root:
 Options (after ``--``):
     --only <figure>[,<figure>...]   build only these figures (the rigs are always baked)
     --no-rigs                       skip the bone textures (mesh work only)
-    --preview <png> <figure> <clip> <frame>[,<frame>...]
+    --preview <png> <figure> <clip> <frame>[,<frame>...] [--wide]
                                     render the figure posed at clip frames (Workbench), no export
 
 Pipeline:
@@ -356,6 +356,13 @@ def human_clip_specs():
         ("load", "Idle", True, poses.load, False),
         ("swab", "Idle", True, poses.swab, False),
         ("push", "Walk", True, poses.push, False),
+        # Lot EP12: wounded on the ground (not looped, still at the end) and routers who
+        # threw their arms away (the shader hides the `HELD_MASK` faces while they flee).
+        ("crawl", "Idle", False, poses.crawl, False),
+        ("wounded_sit", "Idle", False, poses.wounded_sit, False),
+        ("wounded_kneel", "Idle", False, poses.wounded_kneel, False),
+        ("flee", "Run", True, poses.flee, False),
+        ("flee_m", "Run", True, poses.flee, True),
     ]
 
 
@@ -502,6 +509,36 @@ def set_face_mask(obj, mask):
 
 INFLUENCES = (4, 2, 1)  # bones per vertex at each level of detail
 
+# Lot EP12: face flag (bit 6 of the variant mask) of the weapons and shields a foot soldier
+# holds; battle_soldier_skinned.gdshader hides them when his regiment routs (`drop_arms`)
+# and on the corpses of routers. Bits 0-5 stay the variant bits, bit 7 the back pavise.
+HELD_MASK = 0b0100_0000
+HELD_ITEMS = {
+    "sword",
+    "heater_shield",
+    "round_shield",
+    "adarga",
+    "longbow",
+    "crossbow",
+    "pike",
+    "spear",
+    "bill",
+    "pitchfork",
+    "goedendag",
+    "coustille",
+    "pollaxe",
+    "hand_culverin",
+    "javelin",
+    "pavise",
+}
+
+
+def held_mask(name, mask, kwargs):
+    """Variant mask of an equipment piece, with `HELD_MASK` when it is dropped in a rout."""
+    if name in HELD_ITEMS and not kwargs.get("back", False):
+        return mask | HELD_MASK
+    return mask
+
 
 def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
     """Write the figure (world space, rest pose) with skinning data to `path`."""
@@ -522,6 +559,10 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
         nm = mw.to_3x3().inverted().transposed()
         groups = {g.index: g.name for g in obj.vertex_groups}
         mask_attr = me.attributes.get("vmask")
+        # FG4: optional per-vertex shade multiplying the material colour (fine horse coat).
+        shade_attr = me.color_attributes.get("fg_shade")
+        if shade_attr is not None and shade_attr.domain != "POINT":
+            shade_attr = None
         uv_layer = me.uv_layers.active
         corner_normals = me.corner_normals
         for tri in me.loop_triangles:
@@ -540,8 +581,12 @@ def export_mesh(objs, rig, alias, path, smooth_angle=50.0, influences=4):
             )
             mask = mask_attr.data[tri.polygon_index].value if mask_attr else 0
             face = []
+            base_rgb = rgb
             for li in tri.loops:
                 vi = me.loops[li].vertex_index
+                if shade_attr is not None:
+                    k = shade_attr.data[vi].color[0]
+                    rgb = [c * k for c in base_rgb]
                 p = TO_GODOT @ (mw @ me.vertices[vi].co)
                 n = (
                     TO_GODOT.to_3x3() @ (nm @ Vector(corner_normals[li].vector))
@@ -729,7 +774,7 @@ def build_human(recipe, level):
         kwargs = item[2] if len(item) > 2 else {}
         builder = getattr(weapons, name, None) or getattr(equip, name)
         for obj in builder(ctx, **kwargs):
-            set_face_mask(obj, mask)
+            set_face_mask(obj, held_mask(name, mask, kwargs))
             out.append(obj)
     for fn in recipe.get("post", []):
         fn(ctx, out)
@@ -793,8 +838,11 @@ def rig_stub(name, bones):
 # --- Preview ----------------------------------------------------------------------------
 
 
-def preview(png, fig_name, clip_source, frames):
-    """Render the posed figure (Blender armature deform) for quick checks."""
+def preview(png, fig_name, clip_source, frames, wide=False):
+    """Render the posed figure (Blender armature deform) for quick checks.
+
+    `wide` (option `--wide`): camera following the body near the ground (EP12 crawl).
+    """
     import battle_skinned_figures as figures
 
     recipe = figures.FIGURES[fig_name]
@@ -818,6 +866,8 @@ def preview(png, fig_name, clip_source, frames):
     sun = bpy.data.objects.new("sun", bpy.data.lights.new("sun", "SUN"))
     sun.rotation_euler = (math.radians(50), 0, math.radians(30))
     scene.collection.objects.link(sun)
+    if wide:
+        bpy.ops.mesh.primitive_plane_add(size=12.0, location=(0.0, 0.0, 0.0))
     scene.render.engine = "BLENDER_WORKBENCH"
     scene.display.shading.light = "STUDIO"
     scene.display.shading.color_type = "MATERIAL"
@@ -826,10 +876,24 @@ def preview(png, fig_name, clip_source, frames):
     first = int(act.frame_range[0])
     last = int(act.frame_range[1])
     base, ext = os.path.splitext(png)
+    import battle_skinned_poses as poses
+
+    count = getattr(spec[3], "frames", None) if spec and spec[3] else None
+    count = count or (last - first + 1)
     for k, fr in enumerate(frames):
-        scene.frame_set(first + min(fr, last - first))
+        # Same sampling as `sample_action` (frame `fr` of the baked clip, overrides reset).
+        for pb in arm.pose.bones:
+            pb.matrix_basis.identity()
+        scene.frame_set(first + fr % max(last - first + 1, 1))
+        poses.reset_state()
         if spec and spec[3]:
-            spec[3](arm, fr / max(last - first, 1))
+            spec[3](arm, fr / max(count - 1, 1))
+        bpy.context.view_layer.update()
+        # The render re-evaluates the action: freeze the overridden pose without it.
+        bases = {pb.name: pb.matrix_basis.copy() for pb in arm.pose.bones}
+        arm.animation_data.action = None
+        for pb in arm.pose.bones:
+            pb.matrix_basis = bases[pb.name]
         bpy.context.view_layer.update()
         for view, (loc, rot) in enumerate(
             (
@@ -840,8 +904,15 @@ def preview(png, fig_name, clip_source, frames):
             cam.location = loc
             cam.rotation_euler = tuple(math.radians(a) for a in rot)
             cam.data.lens = 75
+            if wide:
+                # Follow the body at ground level (clips that travel or lie down).
+                body = bone_world(arm, "Body", posed=True).to_translation()
+                cam.location = (body.x + loc[0], body.y + loc[1], 0.55)
+                cam.rotation_euler = (math.radians(84), 0, math.radians(rot[2]))
+                cam.data.lens = 55
             scene.render.filepath = f"{base}_{k}_{view}{ext}"
             bpy.ops.render.render(write_still=True)
+        set_action(arm, act)
 
 
 # --- Main -------------------------------------------------------------------------------
@@ -856,7 +927,7 @@ def main():
     if "--preview" in args:
         i = args.index("--preview")
         png, fig, clip, frames = args[i + 1 : i + 5]
-        preview(png, fig, clip, [int(f) for f in frames.split(",")])
+        preview(png, fig, clip, [int(f) for f in frames.split(",")], "--wide" in args)
         return
     only = None
     if "--only" in args:

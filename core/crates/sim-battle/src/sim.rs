@@ -11,6 +11,7 @@ mod fire;
 mod indirect;
 mod obstacles;
 mod pathing;
+mod push;
 mod reinforcements;
 mod scenario;
 mod separation;
@@ -130,6 +131,9 @@ pub struct BattleSim {
     deploying: bool,
     /// Siege pathing cache, one slot per regiment (F5a; derived data).
     path_cache: std::cell::RefCell<Vec<Option<pathing::CachedPath>>>,
+    /// Siege pathing: obstacle cells per side (review 2026-09-26; derived
+    /// data, reset with the walls, the houses or [`BattleSim::siege_mut`]).
+    obstacle_cache: std::cell::RefCell<pathing::ObstacleCache>,
     /// Tactical reading of the relief for the AI (R2b; derived data, read
     /// once per battle, reset by [`BattleSim::field_mut`]).
     relief_map: std::cell::OnceCell<crate::relief_ai::ReliefMap>,
@@ -144,7 +148,10 @@ pub struct BattleSim {
     scale: BattleScale,
     /// EP5: rules of the standards, their own random stream, the routs
     /// already seen and the standards taken so far.
-    standard_rules: data_model::BattleStandardRules,
+    /// Shared: cloned cheaply by each step of the standards.
+    standard_rules: std::sync::Arc<data_model::BattleStandardRules>,
+    /// EP11: continuous push of the lines (`data/rules/battle_push.json`).
+    push_rules: crate::push::PushRules,
     standard_rng: BattleRng,
     standard_rout_seen: Vec<bool>,
     trophies: Vec<crate::outcome::StandardTrophy>,
@@ -393,7 +400,7 @@ impl BattleSim {
         ];
         let count = units.len();
         let standard_rng = rng.derive(standards::STANDARD_SALT);
-        let standard_rules = setup.standards.clone().unwrap_or_default();
+        let standard_rules = std::sync::Arc::new(setup.standards.clone().unwrap_or_default());
         let mut sim = BattleSim {
             setup,
             field,
@@ -421,12 +428,14 @@ impl BattleSim {
             no_quarter: [false; 2],
             deploying: false,
             path_cache: Default::default(),
+            obstacle_cache: Default::default(),
             relief_map: Default::default(),
             village_props: Default::default(),
             fire,
             assault: Default::default(),
             scale,
             standard_rules,
+            push_rules: crate::push::PushRules::bundled().clone(),
             standard_rng,
             standard_rout_seen: vec![false; count],
             trophies: Vec::new(),
@@ -748,6 +757,7 @@ impl BattleSim {
 
     /// Mutable walls, for tests and scripted scenarios.
     pub fn siege_mut(&mut self) -> Option<&mut SiegeWorks> {
+        self.obstacle_cache = Default::default();
         self.siege.as_mut()
     }
 
@@ -1274,6 +1284,7 @@ impl BattleSim {
         self.tower_fire();
         self.boiling_oil();
         self.resolve_fire();
+        self.resolve_push(&contacts);
         self.resolve_melee(&contacts);
         self.resolve_standards(&contacts);
         self.resolve_camps();
@@ -1728,7 +1739,15 @@ impl BattleSim {
             }
             if self.units[i].withdrawing {
                 if let Some((tx, tz)) = self.units[i].destination {
-                    self.advance(i, tx, tz, true);
+                    // In a siege, round the walls and the houses (F5a
+                    // pathing; no ladders on the way out, and the wall
+                    // walk is left straight inwards as before).
+                    let (gx, gz) = if self.siege.is_some() && !self.units[i].on_wall {
+                        self.grid_route(i, tx, tz).unwrap_or((tx, tz))
+                    } else {
+                        (tx, tz)
+                    };
+                    self.advance(i, gx, gz, true);
                 }
                 self.check_left_field(i);
                 continue;
@@ -1761,7 +1780,13 @@ impl BattleSim {
                 let (tx, tz) = (self.units[t].x, self.units[t].z);
                 let unit = &self.units[i];
                 let dist = ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt();
-                if unit.can_shoot() && unit.ammo > 0 && dist <= self.effective_range(unit, tx, tz) {
+                // A target hidden (forest, walls, crest) is closed in on,
+                // not waited for within range.
+                if unit.can_shoot()
+                    && unit.ammo > 0
+                    && dist <= self.effective_range(unit, tx, tz)
+                    && self.visible(unit, &self.units[t], dist)
+                {
                     let unit = &mut self.units[i];
                     unit.state = UnitState::Shooting;
                     unit.facing = turn_towards(
@@ -1813,7 +1838,9 @@ impl BattleSim {
                     if let Some(facing) = unit.destination_facing.take() {
                         unit.facing = facing;
                     }
-                } else if self.units[i].state != UnitState::Melee {
+                } else if !self.units[i].disengaging {
+                    // Out of contact after breaking off a melee: marching
+                    // again (still `Melee` while pulling out under blows).
                     self.units[i].state = UnitState::Marching;
                 }
                 continue;
@@ -2082,18 +2109,26 @@ impl BattleSim {
         (b.x + dir.0 * reach, b.z + dir.1 * reach)
     }
 
+    /// The enemy `i` strikes among `contacts`: its target, else the nearest.
+    /// The contacts are those of the start of the step: regiments killed
+    /// since (missiles, fire) are skipped.
     fn primary_opponent(&self, i: usize, contacts: &[usize]) -> Option<usize> {
+        let alive = |j: usize| self.units[j].present();
         if let Some(t) = self.units[i].target {
-            if contacts.contains(&(t as usize)) {
+            if contacts.contains(&(t as usize)) && alive(t as usize) {
                 return Some(t as usize);
             }
         }
         let unit = &self.units[i];
-        contacts.iter().copied().min_by(|&a, &b| {
-            let da = (self.units[a].x - unit.x).powi(2) + (self.units[a].z - unit.z).powi(2);
-            let db = (self.units[b].x - unit.x).powi(2) + (self.units[b].z - unit.z).powi(2);
-            da.total_cmp(&db).then(a.cmp(&b))
-        })
+        contacts
+            .iter()
+            .copied()
+            .filter(|&j| alive(j))
+            .min_by(|&a, &b| {
+                let da = (self.units[a].x - unit.x).powi(2) + (self.units[a].z - unit.z).powi(2);
+                let db = (self.units[b].x - unit.x).powi(2) + (self.units[b].z - unit.z).powi(2);
+                da.total_cmp(&db).then(a.cmp(&b))
+            })
     }
 
     fn general_bonus(&self, side: SideId) -> Option<&crate::setup::GeneralSetup> {
@@ -2185,9 +2220,12 @@ impl BattleSim {
             if in_range(t as usize).is_some() {
                 return Some(t as usize);
             }
-            return None;
-        }
-        if !unit.fire_at_will {
+            // The ordered target cannot be shot (hidden, in a melee): at
+            // will, the nearest enemy that can be.
+            if !unit.fire_at_will {
+                return None;
+            }
+        } else if !unit.fire_at_will {
             return None;
         }
         (0..self.units.len())
@@ -2529,7 +2567,8 @@ impl BattleSim {
         if matches!(attacker.standard, crate::unit::StandardState::Fallen { .. }) {
             damage *= self.standard_rules.fallen_melee_factor;
         }
-        damage
+        // EP11: compression and wrapping files (`sim/push.rs`).
+        damage * self.push_melee_factor(attacker, defender)
     }
 
     fn resolve_melee(&mut self, contacts: &[Vec<usize>]) {
@@ -2665,13 +2704,14 @@ impl BattleSim {
                 )
             })
             .collect();
-        let mut new_events: Vec<(String, SideId)> = Vec::new();
+        // Rout and rally events, worded after the loop (the labels are only
+        // formatted for the few regiments concerned).
+        let mut new_events: Vec<(usize, &'static str)> = Vec::new();
         let siege = self.siege.is_some();
         for i in 0..n {
             if !self.units[i].present() {
                 continue;
             }
-            let label = self.unit_label(i);
             let unit = &mut self.units[i];
             let mut morale = unit.morale;
             // Behind battlements the garrison takes its losses more calmly.
@@ -2781,9 +2821,9 @@ impl BattleSim {
                 unit.climbing = None;
                 unit.climb_progress = 0.0;
                 if std::mem::take(&mut unit.on_wall) {
-                    new_events.push((format!("Les {label} abandonnent le rempart !"), unit.side));
+                    new_events.push((i, "abandonnent le rempart !"));
                 }
-                new_events.push((format!("Les {label} sont en déroute !"), unit.side));
+                new_events.push((i, "sont en déroute !"));
             } else if unit.state == UnitState::Routing
                 && unit.morale > RALLY_MORALE
                 && nearest_enemy > RALLY_SAFE_DISTANCE
@@ -2791,10 +2831,12 @@ impl BattleSim {
             {
                 unit.state = UnitState::Rallied;
                 unit.rally_timer = RALLY_PAUSE;
-                new_events.push((format!("Les {label} se rallient."), unit.side));
+                new_events.push((i, "se rallient."));
             }
         }
-        for (text, side) in new_events {
+        for (i, what) in new_events {
+            let text = format!("Les {} {what}", self.unit_label(i));
+            let side = self.units[i].side;
             self.log(text, Some(side));
         }
     }

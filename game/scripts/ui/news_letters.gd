@@ -116,6 +116,19 @@ func push_news(item: Dictionary) -> void:
 	_rebuild(true)
 
 
+## Ajoute plusieurs nouvelles (ordre chronologique : la dernière finit en tête) avec une seule
+## reconstruction et un seul son (fin de tour).
+func push_news_batch(items: Array) -> void:
+	if items.is_empty():
+		return
+	for item in items:
+		_items.push_front((item as Dictionary).duplicate(true))
+	UiSounds.play("letter")
+	if _items.size() > MAX_KEPT:
+		_items.resize(MAX_KEPT)
+	_rebuild(true)
+
+
 ## Toutes les lettres conservées, plus récente en premier.
 func get_items() -> Array:
 	return _items

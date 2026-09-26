@@ -215,6 +215,9 @@ func _decorate_top_bar() -> void:
 	var agents := _add_action_button("AgentsButton", "✦", "Agents", "map_toggle_agents",
 		"[b]Agents[/b]\nRegistre des espions, hérauts et prédicateurs.", tech_button.get_index() + 3)
 	_register_top_label(agents, "Agents", "" if _apply_top_medallion(agents, "hud_agents") else "✦")
+	var units := _add_action_button("UnitsButton", "⚔", "Unités", "map_toggle_units",
+		"[b]Mes unités[/b]\nListe de vos armées et agents, avec leur portée restante ; un clic y mène.", tech_button.get_index() + 4)
+	_register_top_label(units, "Unités", "" if _apply_top_medallion(units, "hud_army") else "⚔")
 	if _apply_top_medallion(menu_button, "hud_menu"):
 		menu_button.add_theme_font_size_override("font_size", TOP_LABEL_FONT)
 	get_viewport().size_changed.connect(queue_fit_top_bar)
@@ -499,6 +502,7 @@ func journal_text(event: Dictionary) -> String:
 ## Ajoute les événements d'un tour en tête du journal (plus récents en haut).
 func add_events(events: Array, date_text: String) -> void:
 	var new_lines := PackedStringArray()
+	var new_news: Array = []  # lettres du tour, poussées en un seul lot (une reconstruction, un son)
 	for event in events:
 		if not journal_keeps(event):
 			continue
@@ -506,14 +510,14 @@ func add_events(events: Array, date_text: String) -> void:
 		if not news.is_empty() and keeps_news(event):  # U5 : filtre d'intérêt
 			if news_interest != null:
 				news["interest"] = NewsInterest.interest_label(news_interest.event_interest(event))
-			news_letters.push_news(news)
+			new_news.append(news)
 		var kind: String = str(event.get("kind", ""))
 		var text: String = journal_text(event)
 		if text == "":
 			continue
 		text = CodexText.format(text, true)  # BP1 : liens du Codex
 		var line: String
-		if kind == "battle" or kind == "siege" or kind == "province_taken":
+		if kind == "battle" or kind == "siege_started" or kind == "province_captured":
 			line = "[color=#8b1a1a][b]⚔ %s[/b][/color]" % text
 		elif kind == "revolt":
 			line = "[color=#a1121a][b]⚑ %s[/b][/color]" % text
@@ -565,6 +569,7 @@ func add_events(events: Array, date_text: String) -> void:
 		else:
 			line = text
 		new_lines.append(line)
+	news_letters.push_news_batch(new_news)
 	if new_lines.is_empty():
 		new_lines.append("[i]Rien à signaler.[/i]")
 	var header := "[b]— %s —[/b]" % date_text
@@ -838,16 +843,22 @@ var _turn_banner_title: Label
 var _turn_banner_detail: Label
 var _turn_banner_tween: Tween
 const TURN_BANNER_HOLD := 1.1
+## Fin de tour demandée, pas encore émise (deux déclenchements rapprochés = une seule saison).
+var _end_turn_pending := false
 
 
 ## Cloche ou Entrée : bandeau des autres factions, une image pour l'afficher, puis la fin de tour.
 func request_end_turn() -> void:
+	if _end_turn_pending:
+		return
 	if end_turn_gate.is_valid() and not bool(end_turn_gate.call()):
 		end_turn_pressed.emit()
 		return
+	_end_turn_pending = true
 	show_turn_banner()
 	await get_tree().process_frame
 	await get_tree().process_frame
+	_end_turn_pending = false
 	end_turn_pressed.emit()
 	finish_turn_banner()
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/battle_scale_rules.schema.json",
   "title": "Échelle des batailles",
-  "description": "Fichier data/rules/battle_scale.json (lot EP1, ADR 0031) : paliers de taille du champ de bataille selon l'effectif total. Lu par sim-battle (BattleScaleRules).",
+  "description": "Fichier data/rules/battle_scale.json (lot EP1, ADR 0076) : paliers de taille du champ de bataille selon l'effectif total. Lu par sim-battle (BattleScaleRules).",
   "type": "object",
   "properties": {
     "description": { "type": "string" },

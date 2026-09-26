@@ -185,6 +185,9 @@ impl CampaignSim {
     /// at map pixel `(x, y)`. `false` when the army is unknown.
     #[func]
     fn debug_place_army(&mut self, army_id: GString, x: f64, y: f64) -> bool {
+        if self.refuse_while_turn_pending("debug_place_army") {
+            return false;
+        }
         let Some(state) = &mut self.state else {
             return false;
         };
@@ -217,6 +220,9 @@ impl CampaignSim {
 
 impl CampaignSim {
     fn run_order_json(&mut self, json: Value) -> VarDictionary {
+        if self.refuse_while_turn_pending("run_order_json") {
+            return failure(crate::campaign_sim_turn::TURN_PENDING_FR);
+        }
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return failure("aucune campagne en cours");
         };

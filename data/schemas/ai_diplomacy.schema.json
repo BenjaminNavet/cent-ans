@@ -88,7 +88,7 @@
     },
     "passage": {
       "type": "object",
-      "description": "Lot DP2 (ADR 0031) : droit de passage. Une armée qui finit la saison sur les terres d'une faction en paix, sans accès militaire, crée un incident (malus d'attitude croissant, casus belli pour la victime). Sans cette section (ou avec enabled faux), l'intrusion est ignorée.",
+      "description": "Lot DP2 (ADR 0075) : droit de passage. Une armée qui finit la saison sur les terres d'une faction en paix, sans accès militaire, crée un incident (malus d'attitude croissant, casus belli pour la victime). Sans cette section (ou avec enabled faux), l'intrusion est ignorée.",
       "properties": {
         "enabled": {"type": "boolean", "description": "Active les incidents d'intrusion."},
         "base_penalty": {"type": "integer", "minimum": 0, "description": "Malus d'attitude de la première saison d'intrusion."},

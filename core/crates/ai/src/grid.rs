@@ -343,9 +343,14 @@ impl<'a> GridPlanner<'a> {
     /// `Attack` on the nearest enemy army within `army_id`'s bubble that
     /// its side outweighs by `attack_ratio` (lot M3). Enemies behind the
     /// walls of a place hostile to us are left to the siege planner.
-    pub fn attack_order(&self, army_id: &ArmyId, power: f64) -> Option<Order> {
+    ///
+    /// Our side is `army_id` itself plus every friendly army within the
+    /// engagement radius of the enemy: armies merely sharing its anchor are
+    /// not counted beforehand (they would be counted twice).
+    pub fn attack_order(&self, army_id: &ArmyId) -> Option<Order> {
         let state = self.state;
         let army = state.armies.get(army_id)?;
+        let power = state.army_power(self.data, army_id);
         if army.movement_left == 0 || power <= 0.0 {
             return None;
         }

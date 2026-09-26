@@ -1,4 +1,4 @@
-//! Lot DP2 (ADR 0031): readable negotiations, « à la Total War Warhammer 3 ».
+//! Lot DP2 (ADR 0075): readable negotiations, « à la Total War Warhammer 3 ».
 //!
 //! [`explain_treaty`] turns the recipient's evaluation
 //! ([`negotiation::evaluate_treaty`]) into one line per weighted reason

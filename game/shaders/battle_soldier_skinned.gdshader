@@ -9,7 +9,8 @@
 // son rang dans la formation l'est) avec sa phase propre. Mode 3 (cadavres, renversés, poses
 // figées) : INSTANCE_CUSTOM = (instant de la chute, clip dans le jeu, vitesse de projection en
 // arrière m/s, partie tranchée + sang) — lot BV2 : w = code entier (0 aucune, 1 tête, 2 avant-bras
-// droit, 3 gauche, 4 jambe droite, 5 gauche, 6 cheval qui s'enfuit) + sang 0-0,99 en fraction.
+// droit, 3 gauche, 4 jambe droite, 5 gauche, 6 cheval qui s'enfuit ; + 8 : désarmé, lot EP12)
+// + sang 0-0,99 en fraction.
 // Changement d'état : fondu de `blend_time` secondes depuis le jeu précédent (`prev_*`).
 // Matières selon COLOR.a × 16 (code) : livrée, bordure, plates, mailles, tissu, couleur exacte,
 // armoiries (UV), peau, cuir, cheveux, robe du cheval, bois, gambison matelassé.
@@ -100,6 +101,12 @@ uniform ivec4 sever_bones[6];
 // Couche des renversés : la projection s'annule à la fin du clip (le soldat regagne sa place).
 uniform bool tumble = false;
 uniform float gravity = 9.8;
+// Lot EP12 : régiment en déroute qui a jeté armes et boucliers (faces marquées du bit 6 du
+// masque de variante, `HELD_MASK` de tools/blender_scripts/battle_skinned.py). En mode 3, le
+// drapeau 8 du code de INSTANCE_CUSTOM.w fait de même pour un cadavre ou un blessé.
+uniform bool drop_arms = false;
+const int HELD_MASK = 64;
+const int CODE_UNARMED = 8;
 // Lisibilité lointaine (A1-01) : la livrée s'éclaire au-delà de `far_start` mètres.
 uniform float far_start = 70.0;
 uniform float far_boost = 0.35;
@@ -226,8 +233,14 @@ void vertex() {
 	// Variante du soldat : pièces absentes repliées en un point (triangles dégénérés).
 	int mask = int(UV2.x + 0.5);
 	int variant = min(int(h.w * float(variant_count)), variant_count - 1);
-	bool shown = mask == 0 || ((mask >> variant) & 1) == 1;
+	// Bits 0-5 : variantes ; bit 6 : arme tenue (EP12) ; bit 7 : pavois du dos (BV3).
+	int variant_bits = mask & 63;
+	bool shown = variant_bits == 0 || ((variant_bits >> variant) & 1) == 1;
 	if (hide_pavise && (mask & 128) != 0) {
+		shown = false;
+	}
+	bool held = (mask & HELD_MASK) != 0;
+	if (drop_arms && held) {
 		shown = false;
 	}
 
@@ -275,6 +288,11 @@ void vertex() {
 			v += offset;
 		}
 		int code = int(part + 0.5);
+		if (code >= CODE_UNARMED) {
+			// EP12 : blessé ou fuyard tombé, désarmé.
+			code -= CODE_UNARMED;
+			shown = shown && !held;
+		}
 		if (code >= 1 && code <= 5) {
 			// Poids de la partie tranchée, interpolé : le fragment coupe à 0,5 (variante
 			// BV2_CORPSE du shader), le moignon rougit en deçà.

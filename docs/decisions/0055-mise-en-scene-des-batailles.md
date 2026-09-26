@@ -2,7 +2,7 @@
 
 Date : 2026-09-25. Statut : accepté. Lot EP8 du chantier « batailles épiques » (suivi :
 `docs/wip/ep8-mise-en-scene.md`, plan `docs/wip/epic.md`). Complète les ADR 0017 (atmosphère),
-0031 (échelle massive) et 0032 (horizon). Le numéro 0052 prévu au départ a été pris entre-temps
+0076 (échelle massive, ex-0031) et 0032 (horizon). Le numéro 0052 prévu au départ a été pris entre-temps
 par un autre lot.
 
 ## Contexte

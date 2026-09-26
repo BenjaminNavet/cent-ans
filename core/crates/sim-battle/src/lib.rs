@@ -53,6 +53,7 @@ pub mod field;
 pub mod fire;
 pub mod formation_ai;
 pub mod historical;
+pub mod horse_wait;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
@@ -62,6 +63,7 @@ pub mod orders;
 pub mod outcome;
 pub mod position;
 pub mod props;
+pub mod push;
 pub mod relief;
 pub mod relief_ai;
 pub mod replay;
@@ -99,6 +101,7 @@ pub use hydro::{
 pub use impact::{ImpactEvent, ImpactKind, LossCause};
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
+pub use push::{PushRules, PushShape};
 pub use relief::ReliefStyle;
 pub use replay::{
     BattleReplay, Divergence, ReplayAction, ReplayError, ReplayPlayer, ReplayRecorder, ReplayRules,

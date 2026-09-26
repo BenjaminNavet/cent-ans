@@ -266,21 +266,23 @@ def generate(
             )
             image = None
             for _attempt in range(MAX_ATTEMPTS):
+                estimated += unit
                 try:
                     image, cost = openrouter.request_image(
                         model, job.prompt, client, max_tokens=MAX_TOKENS, **extra
                     )
-                except (RuntimeError, httpx.HTTPError) as error:
-                    # A refused or text-only answer may still be billed: count it.
-                    estimated += unit
-                    spent += unit
-                    last_error = error
+                except openrouter.ImageExtractionError as exc:
+                    # A refused or text-only answer may be billed: record its real cost.
+                    spent += exc.cost if exc.cost is not None else unit
+                    last_error = exc
+                    continue
+                except httpx.HTTPError as exc:
+                    last_error = exc
                     continue
                 break
             if image is None:
                 failed.append((job, str(last_error)))
                 continue
-            estimated += unit
             spent += cost if cost is not None else unit
             job.out_path.parent.mkdir(parents=True, exist_ok=True)
             job.out_path.write_bytes(convert(image))
@@ -288,7 +290,7 @@ def generate(
             if on_progress is not None:
                 on_progress(job, spent)
     finally:
-        if written:
+        if spent > 0:
             budget.add_entry(
                 date.today().isoformat(),
                 openrouter.SERVICE_NAME,
