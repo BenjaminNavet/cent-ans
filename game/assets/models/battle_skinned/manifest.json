@@ -697,6 +697,11 @@
      "loop": true,
      "start": 1336
     },
+    "crawl": {
+     "frames": 168,
+     "loop": false,
+     "start": 1525
+    },
     "death": {
      "frames": 26,
      "loop": false,
@@ -731,6 +736,16 @@
      "frames": 33,
      "loop": true,
      "start": 1121
+    },
+    "flee": {
+     "frames": 60,
+     "loop": true,
+     "start": 1981
+    },
+    "flee_m": {
+     "frames": 60,
+     "loop": true,
+     "start": 2041
     },
     "guard": {
      "frames": 41,
@@ -856,6 +871,16 @@
      "frames": 33,
      "loop": true,
      "start": 82
+    },
+    "wounded_kneel": {
+     "frames": 144,
+     "loop": false,
+     "start": 1837
+    },
+    "wounded_sit": {
+     "frames": 144,
+     "loop": false,
+     "start": 1693
     },
     "xbow_idle": {
      "frames": 41,
