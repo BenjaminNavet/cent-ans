@@ -483,7 +483,9 @@ func _fill_traits(traits: Array) -> void:
 		return
 	for trait_entry in traits:
 		var category: String = str(trait_entry.get("category", ""))
-		var chip := IconChip.create("trait_category_" + category, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, 13, "trait")
+		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
+		var trait_id: String = str(trait_entry.get("id", ""))
+		var chip := IconChip.create(trait_id, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, 13, "trait")
 		var color: Color = TRAIT_COLORS.get(category, HudStyle.INK_SOFT)
 		var pill := _pill(chip, color.lerp(HudStyle.PARCHMENT_LIGHT, 0.68), HudStyle.INK)
 		((pill.get_theme_stylebox("panel") as StyleBoxFlat)).border_color = color
