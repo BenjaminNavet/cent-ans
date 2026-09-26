@@ -17,6 +17,10 @@ const ROOF := "RoofSlate"
 const ROOF_TILE := "RoofTile"
 const STONE_TINT := Color(0.97, 0.94, 0.86)
 const RUBBLE_TINT := Color(0.9, 0.86, 0.78)
+const RUBBLE := "Rubble"
+const TIMBER := "Timber"
+const EARTH_TINT := Color(0.62, 0.52, 0.38)
+const WOOD_TINT := Color(0.72, 0.6, 0.46)
 
 
 ## Emprise (longueur le long de l'axe, largeur) en mètres, pour réserver le sol.
@@ -40,6 +44,14 @@ static func footprint(m: Dictionary) -> Vector2:
 				hi = hi.max(Vector2(float(q[0]), float(q[1])))
 			var r := float(p.get("tower_radius_m", 5.0))
 			return (hi - lo) + Vector2(r, r) * 2.0
+		"earthwork":
+			var lo_e := Vector2(INF, INF)
+			var hi_e := Vector2(-INF, -INF)
+			for q in p.get("ring", [[-20, -20], [20, -20], [20, 20], [-20, 20]]):
+				lo_e = lo_e.min(Vector2(float(q[0]), float(q[1])))
+				hi_e = hi_e.max(Vector2(float(q[0]), float(q[1])))
+			var b := float(p.get("base_m", 9.0))
+			return (hi_e - lo_e) + Vector2(b, b)
 		"belfry", "keep", "tower", "gate_tower":
 			var s := float(p.get("size", float(p.get("radius_m", 5.0)) * 2.0))
 			return Vector2(s, s)
@@ -70,6 +82,8 @@ static func build(m: Dictionary) -> Dictionary:
 			top = _palace(st, p)
 		"enclosure":
 			top = _enclosure(st, p)
+		"earthwork":
+			top = _earthwork(st, p)
 		"keep", "tower", "gate_tower":
 			var r := float(p.get("radius_m", float(p.get("size", 10.0)) * 0.5))
 			var h := float(p.get("height", float(p.get("height_m", 20.0))))
@@ -261,6 +275,15 @@ static func _belfry(st: SurfaceTool, p: Dictionary) -> float:
 	var h := float(p.get("height", 30.0))
 	var id := Transform3D.IDENTITY
 	_box(st, id, Vector3.ZERO, Vector3(size, h, size), WALL, STONE_TINT)
+	# VH6 : donjon à toit plat et tourelles d'angle (Tour Blanche, tour du Joyau).
+	if str(p.get("top", "pyramid")) == "turrets":
+		var t := maxf(size * 0.16, 2.5)
+		var th := maxf(size * 0.18, 3.0)
+		for sx: float in [-1.0, 1.0]:
+			for sz: float in [-1.0, 1.0]:
+				_box(st, id, Vector3(sx * (size - t) * 0.5, h, sz * (size - t) * 0.5), Vector3(t, th, t), WALL, STONE_TINT, h)
+		_box(st, id, Vector3(0, h, 0), Vector3(size - 2.0 * t, 1.2, size - 2.0 * t), MASONRY, STONE_TINT, h)
+		return h + th
 	if str(p.get("top", "pyramid")) == "lantern":
 		_box(st, id, Vector3(0, h, 0), Vector3(size * 0.55, size * 0.6, size * 0.55), WALL, STONE_TINT, h)
 		_pyramid(st, id, size * 0.35, h + size * 0.6, h + size * 1.3, ROOF)
@@ -312,6 +335,41 @@ static func _enclosure(st: SurfaceTool, p: Dictionary) -> float:
 			_gable_roof_x(st, t, -rl * 0.5, rl * 0.5, rw * 0.5 + 0.4, h + 3.0, h + 3.0 + rw * 0.5, ROOF_TILE, true, true)
 			top = h + 3.0 + rw * 0.5
 	return top
+
+
+## VH7 : ouvrage de terre et de bois (boulevard) : levée trapézoïdale le long de `ring`
+## ([[u, v]…], u le long de l'axe, v à gauche, comme `castle`), haute de `bank_m`, large de
+## `base_m` à la base, surmontée d'une palissade de `palisade_m` ; `closed` : faux pour un fer à
+## cheval ouvert (côté de la porte ou du fort).
+static func _earthwork(st: SurfaceTool, p: Dictionary) -> float:
+	var pts: Array[Vector3] = []
+	for q in p.get("ring", []):
+		pts.append(Vector3(float(q[0]), 0, -float(q[1])))
+	var bank := float(p.get("bank_m", 4.0))
+	var base := float(p.get("base_m", 9.0))
+	var crest := base * 0.3
+	var palisade := float(p.get("palisade_m", 2.5))
+	var closed := bool(p.get("closed", false))
+	var earth := EARTH_TINT
+	var count := pts.size() if closed else pts.size() - 1
+	for i in count:
+		var a := pts[i]
+		var b := pts[(i + 1) % pts.size()]
+		var d := b - a
+		var length := d.length() + base * 0.25  # recouvrement aux angles
+		var t := Transform3D(Basis(Vector3.UP, -atan2(d.z, d.x)), (a + b) * 0.5)
+		var hx := length * 0.5
+		var hb := base * 0.5
+		var hc := crest * 0.5
+		var ref := Vector3(0, bank * 0.3, 0)
+		for side: float in [-1.0, 1.0]:
+			_quad_oriented(st, t, Vector3(-hx, -2.0, side * hb), Vector3(hx, -2.0, side * hb), Vector3(hx, bank, side * hc), Vector3(-hx, bank, side * hc), RUBBLE, earth, ref)
+		_quad_oriented(st, t, Vector3(-hx, bank, -hc), Vector3(hx, bank, -hc), Vector3(hx, bank, hc), Vector3(-hx, bank, hc), RUBBLE, earth, Vector3(0, 0, 0))
+		for sx: float in [-hx, hx]:
+			_quad_oriented(st, t, Vector3(sx, -2.0, -hb), Vector3(sx, -2.0, hb), Vector3(sx, bank, hc), Vector3(sx, bank, -hc), RUBBLE, earth, Vector3(0, bank * 0.3, 0))
+		if palisade > 0.0:
+			_box(st, t, Vector3(0, bank, 0), Vector3(d.length(), palisade, 0.45), TIMBER, WOOD_TINT, bank - 0.5)
+	return bank + palisade
 
 
 # --- Primitives (repère du monument, mètres) ------------------------------------------------

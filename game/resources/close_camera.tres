@@ -26,4 +26,7 @@ clearance_factor = 0.06
 clearance_min = 0.004
 occlusion_samples = 6
 occlusion_min_t = 0.25
+crest_samples = 8
+crest_radius_factor = 0.5
+crest_focus_weight = 1.0
 look_up_factor = 0.3
