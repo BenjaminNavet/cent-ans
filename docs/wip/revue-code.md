@@ -142,3 +142,5 @@ Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_n
 | 9 | corrigé | naissance : l'enfant prend la faction du père, sauf si la mère est souveraine ou héritière de sa faction (maison du père inchangée, lieu de naissance = celui de la mère). |
 | 10 | corrigé | `dynasty::check_marriage` (validation pure) extraite de `propose_marriage` ; appelée dans `check_treaty` (plus un même époux dans deux mariages refusé), donc `apply_treaty` n'applique plus la paix avant d'échouer ; `evaluate(Proposal::Marriage)` n'appelle plus `state.clone()`. |
 | 18a | corrigé | `check_treaty` : doublons détectés par `articles[..i].contains(a)` au lieu de `serde_json::to_string` (même commit que 10). |
+| 15 | corrigé | `naval::own_ships_lost` : par classe, seuls les premiers navires du dispositif jusqu'à l'effectif de la flotte sont propres ; les cogues louées perdues ne sont plus retirées de la flotte. Pas de test dédié (dispositif naval lourd à construire ; nv1/nv2 verts). |
+| 16 | corrigé | blocus : un `BTreeSet` des provinces déjà comptées, un port bordant deux mers ennemies ne paie qu'un péage. |
