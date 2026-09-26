@@ -53,6 +53,8 @@ const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 ## Lot PB2 : semis natif (`VegetationScatter`, Rust) quand l'extension l'expose ; sinon tout le
 ## semis tourne en GDScript dans le `WorkerThreadPool`.
 @export var use_native_scatter: bool = true
+## Lot SZ4b : forêt dense autour du point visé (`ForestDetail`, semis natif requis).
+@export var use_forest_detail: bool = true
 @export var max_cached_tiles: int = 64
 @export var cast_shadows: bool = true
 ## Au-delà de cette distance caméra (zoom global, pas la distance d'une tuile), plus aucune
@@ -122,6 +124,8 @@ func _ready() -> void:
 			_log_bursts = true
 		elif arg == "--no-native-vegetation":  # PB2 : comparaisons avec le semis GDScript
 			use_native_scatter = false
+		elif arg == "--no-forest-detail":  # SZ4b : captures « avant », mesures A/B
+			use_forest_detail = false
 
 
 
@@ -148,7 +152,7 @@ func build(data: MapData) -> void:
 		if capital.x >= 0.0:
 			_exclusions.append(Vector3(capital.x, capital.y, 11.0))
 	_exclusions.append_array(extra_exclusions)
-	if _native != null:
+	if _native != null and use_forest_detail:
 		forest_detail = ForestDetail.new()
 		add_child(forest_detail)
 		forest_detail.setup(self, terrain)

@@ -18,8 +18,10 @@ pub const KIND_HEDGE: usize = 3;
 pub const KIND_COUNT: usize = 4;
 const CANOPY_SPREAD: f64 = 0.4;
 const PARTS_SIDE: usize = 2;
+#[cfg(test)]
 const PARTS: usize = PARTS_SIDE * PARTS_SIDE;
-const SLOTS: usize = PARTS * KIND_COUNT;
+/// Detail cells (lot SZ4b): at most this many parts per side.
+const MAX_DETAIL_PARTS_SIDE: usize = 8;
 pub const FLOATS_PER_INSTANCE: usize = 16;
 const GROUND_SINK: f64 = 0.08;
 const RIVER_CLEARANCE: f64 = 0.3;
@@ -167,6 +169,20 @@ pub struct TileRequest {
     pub side: usize,
     pub exclusions: Vec<(f64, f64, f64)>,
     pub ground: Ground,
+    /// Lot SZ4b: dense forest cell scattered inside the tile whose coarse grids are given.
+    pub detail: Option<DetailArea>,
+}
+
+/// Lot SZ4b (dense forest near the camera at the valley tier): a sub-rectangle of the tile
+/// (`TileRequest::origin`, `size_px` still describe the coarse grids), scattered without hedges.
+/// Only instances whose random seed is at least `1 − keep` are kept; the random stream does not
+/// depend on `keep`, so a cell scattered with a smaller `keep` is an exact subset of the same
+/// cell scattered with a larger one. Parts: `parts_side²` slots per kind over the rectangle.
+#[derive(Clone, Copy, Debug)]
+pub struct DetailArea {
+    pub rect: (f64, f64, f64, f64),
+    pub keep: f64,
+    pub parts_side: usize,
 }
 
 /// Per-slot MultiMesh buffers (`part * KIND_COUNT + kind`).
@@ -418,6 +434,8 @@ struct Scatter<'a> {
     rng: Rng,
     raw: Vec<Vec<Instance>>,
     rect: (f64, f64, f64, f64),
+    parts_side: usize,
+    keep: f64,
 }
 
 const FOREST: usize = 0;
@@ -456,21 +474,24 @@ impl<'a> Scatter<'a> {
     }
 
     fn slot(&self, kind: usize, x: f64, y: f64) -> usize {
-        let part_px = self.req.size_px / PARTS_SIDE as f64;
-        let last = PARTS_SIDE as i64 - 1;
-        let px = (((x - self.req.origin.0) / part_px) as i64).clamp(0, last) as usize;
-        let py = (((y - self.req.origin.1) / part_px) as i64).clamp(0, last) as usize;
-        (py * PARTS_SIDE + px) * KIND_COUNT + kind
+        let (x0, y0, x1, y1) = self.rect;
+        let side = self.parts_side;
+        let last = side as i64 - 1;
+        let px = (((x - x0) / (x1 - x0) * side as f64) as i64).clamp(0, last) as usize;
+        let py = (((y - y0) / (y1 - y0) * side as f64) as i64).clamp(0, last) as usize;
+        (py * side + px) * KIND_COUNT + kind
     }
 
     fn run(&mut self) {
         let req = self.req;
         let (ox, oy) = req.origin;
-        let cells = (req.size_px / req.spacing).ceil() as usize;
-        for cj in 0..cells {
-            for ci in 0..cells {
-                let x = ox + (ci as f64 + self.rng.randf()) * req.spacing;
-                let y = oy + (cj as f64 + self.rng.randf()) * req.spacing;
+        let (rx0, ry0, rx1, ry1) = self.rect;
+        let cells_x = ((rx1 - rx0) / req.spacing).ceil() as usize;
+        let cells_y = ((ry1 - ry0) / req.spacing).ceil() as usize;
+        for cj in 0..cells_y {
+            for ci in 0..cells_x {
+                let x = rx0 + (ci as f64 + self.rng.randf()) * req.spacing;
+                let y = ry0 + (cj as f64 + self.rng.randf()) * req.spacing;
                 let roll = self.rng.randf();
                 let roll_kind = self.rng.randf();
                 let gx = (x - ox) / req.coarse_step;
@@ -519,7 +540,9 @@ impl<'a> Scatter<'a> {
                 self.push(kind, x, ground, y, yaw, scale_factor);
             }
         }
-        self.hedges();
+        if req.detail.is_none() {
+            self.hedges();
+        }
     }
 
     fn hedges(&mut self) {
@@ -727,6 +750,9 @@ impl<'a> Scatter<'a> {
             transform[row * 4 + 3] = origin[row] as f32;
         }
         let seed = rng.randf();
+        if seed < 1.0 - self.keep {
+            return; // SZ4b: thinned detail cell (stream consumed as for `keep` = 1)
+        }
         let slot = self.slot(kind, x, y);
         self.raw[slot].push(Instance {
             seed,
@@ -772,17 +798,32 @@ pub fn scatter_tile(req: &TileRequest, map: &MapRasters) -> TileResult {
     let seed = (req.tile_index as u64)
         .wrapping_mul(0x9e3779b97f4a7c15)
         .wrapping_add(91711);
+    let (rect, parts_side, keep) = match req.detail {
+        Some(area) => (
+            area.rect,
+            area.parts_side.clamp(1, MAX_DETAIL_PARTS_SIDE),
+            area.keep.clamp(0.0, 1.0),
+        ),
+        None => (
+            (
+                req.origin.0,
+                req.origin.1,
+                req.origin.0 + req.size_px,
+                req.origin.1 + req.size_px,
+            ),
+            PARTS_SIDE,
+            1.0,
+        ),
+    };
+    let slots = parts_side * parts_side * KIND_COUNT;
     let mut scatter = Scatter {
         req,
         map,
         rng: Rng::new(seed),
-        raw: (0..SLOTS).map(|_| Vec::new()).collect(),
-        rect: (
-            req.origin.0,
-            req.origin.1,
-            req.origin.0 + req.size_px,
-            req.origin.1 + req.size_px,
-        ),
+        raw: (0..slots).map(|_| Vec::new()).collect(),
+        rect,
+        parts_side,
+        keep,
     };
     if req.side >= 2 {
         scatter.run();
@@ -839,6 +880,51 @@ mod tests {
             side,
             exclusions: Vec::new(),
             ground: Ground::None,
+            detail: None,
+        }
+    }
+
+    #[test]
+    fn detail_cell_is_dense_thinned_and_nested() {
+        let map = flat_map(30000);
+        let mut req = request(1.0, 0.0, 1.0, 1.0);
+        req.spacing = 0.05;
+        req.tile_index = 77;
+        let area = |keep: f64| DetailArea {
+            rect: (16.0, 20.0, 20.0, 24.0),
+            keep,
+            parts_side: 4,
+        };
+        req.detail = Some(area(1.0));
+        let full = scatter_tile(&req, &map);
+        assert_eq!(full.counts.len(), 16 * KIND_COUNT);
+        let total: i32 = full.counts.iter().sum();
+        // 80 × 80 candidates, roll < 0.9 in a full forest, no hedges.
+        assert!(total > 5200 && total < 6300, "{total}");
+        assert_eq!(full.counts[KIND_HEDGE], 0);
+        for buffer in &full.buffers {
+            for item in buffer.chunks(FLOATS_PER_INSTANCE) {
+                assert!((16.0..20.0).contains(&item[3]) && (20.0..24.0).contains(&item[11]));
+            }
+        }
+        req.detail = Some(area(0.25));
+        let thin = scatter_tile(&req, &map);
+        let kept: i32 = thin.counts.iter().sum();
+        assert!(
+            (kept as f64 - total as f64 * 0.25).abs() < total as f64 * 0.04,
+            "{kept}"
+        );
+        // Same stream: every thinned instance is one of the full cell (same origin).
+        let origins: std::collections::HashSet<(u32, u32)> = full
+            .buffers
+            .iter()
+            .flat_map(|b| b.chunks(FLOATS_PER_INSTANCE))
+            .map(|i| (i[3].to_bits(), i[11].to_bits()))
+            .collect();
+        for buffer in &thin.buffers {
+            for item in buffer.chunks(FLOATS_PER_INSTANCE) {
+                assert!(origins.contains(&(item[3].to_bits(), item[11].to_bits())));
+            }
         }
     }
 

@@ -168,17 +168,23 @@ func _apply_parts(entry: Dictionary, focus: Vector2, fraction: float, radius: fl
 				if mmi != null:
 					mmi.multimesh.mesh = meshes[kind]
 		var cast := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows and detailed else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var cut_key := snappedf(share, 0.01)
+		# Bande de croissance proportionnelle à la part : les arbres qui apparaissent grandissent,
+		# et la part moyenne affichée reste `share` (bande centrée sur le seuil).
+		var band := clampf(share * 0.5, 0.02, 0.18)
+		var cut := maxf(1.0 - share - band * 0.5, 0.0)
+		var shown := minf(share + band * 0.5, 1.0)
+		var cut_key := snappedf(share, 0.005)
 		for mmi in part["mmis"]:
 			if mmi == null:
 				continue
 			var instance := mmi as MultiMeshInstance3D
-			var count := ceili(instance.multimesh.instance_count * share)
+			var count := ceili(instance.multimesh.instance_count * shown)
 			instance.multimesh.visible_instance_count = count
 			total += count
 			instance.cast_shadow = cast
 			if part.get("cut", -1.0) != cut_key:
-				instance.set_instance_shader_parameter("instance_cut", 1.0 - share)
+				instance.set_instance_shader_parameter("instance_cut", cut)
+				instance.set_instance_shader_parameter("instance_band", band)
 		part["cut"] = cut_key
 	return total
 
