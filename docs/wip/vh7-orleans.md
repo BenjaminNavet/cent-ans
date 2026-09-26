@@ -60,6 +60,8 @@ Addendum à l'ADR 0078 ; `landmark` devient facultatif dans le schéma v2.
 - Routes de la carte (rubans) traversent la ville au palier site (comme à Rouen).
 
 ## Faits à faire relire (restitutions)
+Relus le 2026-09-26 : voir `docs/histoire/relecture-vh-orleans.md` (porte Renart place De Gaulle,
+boulevards 1417, bastille Saint-Antoine 1417, nef romane de Sainte-Croix, pont recalé).
 - Date de l'accrue du bourg Dunois (1345 retenu ; sources : 1300-1330 ou vers 1356).
 - Tracé du mur occidental de l'accrue (≈ 1,9008 E) et place de la porte Renart (axe de la rue des
   Carmes) ; mur nord au sud du Martroi (porte Bannier d'après le nœud OSM « Ancienne porte Bannier »).
