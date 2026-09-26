@@ -822,8 +822,8 @@ func surface_height_at(x: float, y: float) -> float:
 	var side := 1 << top
 	for level in range(top, -1, -1):
 		var units := ROOT_TILE_UNITS / side
-		var col := int(floor((x + 0.5) / units))
-		var row := int(floor((y + 0.5) / units))
+		var col := int(floor((x - ReliefPyramid.GRID_OFFSET) / units))
+		var row := int(floor((y - ReliefPyramid.GRID_OFFSET) / units))
 		var key := (level << 24) | (row << 12) | col
 		side >>= 1
 		if not _page_bytes.has(key):
@@ -831,7 +831,7 @@ func surface_height_at(x: float, y: float) -> float:
 		var bytes: PackedByteArray = _page_bytes[key]
 		_hit_level = level if level == top else -1
 		_hit_version = _residency_version
-		_hit_origin = Vector2(col * units - 0.5, row * units - 0.5)
+		_hit_origin = Vector2(col * units + ReliefPyramid.GRID_OFFSET, row * units + ReliefPyramid.GRID_OFFSET)
 		_hit_units = units
 		_hit_px = units / PAGE_PX
 		_hit_bytes = bytes

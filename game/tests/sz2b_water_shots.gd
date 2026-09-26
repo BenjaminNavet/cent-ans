@@ -99,30 +99,43 @@ func _init() -> void:
 var debug_heights := false
 
 
-## Diagnostic : écart hauteur affichée de l'eau − surface du relief sous les sommets proches.
+## Diagnostic (`--probe-heights`) : sous les sommets d'axe proches du point, surface du relief
+## − niveau d'eau (m) à l'axe et juste hors de l'eau (1,15 demi-largeur) ; médianes et extrêmes.
+## Axe < 0 : lit creusé sous l'eau ; berge ≥ 0 : l'eau touche une berge plus haute (pas de mur).
 func _probe_heights(mesh: Mesh, terrain: TerrainBuilder, point: Vector2) -> void:
-	var verts: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
-	var below := 0
-	var n := 0
-	var worst := 0.0
-	var samples := []
+	var arrays := mesh.surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
+	var scale := MapData.vertical_scale()
+	var axis: Array[float] = []
+	var bank: Array[float] = []
 	for k in range(0, verts.size(), 2):
 		var v := verts[k]
-		if Vector2(v.x, v.z).distance_to(point) > 1.5:
+		if Vector2(v.x, v.z).distance_to(point) > 1.2 or uvs[k].x * 719.0 < 60.0:
 			continue
 		var water := MapData.display_height(v.y, v.x, v.z)
 		var ground := terrain.surface_height_at(v.x, v.z)
 		if is_nan(ground):
 			continue
-		n += 1
-		var gap := (water - ground) / MapData.vertical_scale()
-		if gap < 0.0:
-			below += 1
-			worst = minf(worst, gap)
-		if samples.size() < 6 and n % 20 == 0:
-			samples.append("%.2f,%.2f z=%.1f gap=%.1f" % [v.x, v.z, v.y, gap])
-	if n > 0:
-		print("  heights: %d vertices, %d below ground (worst %.1f m) %s" % [n, below, worst, str(samples)])
+		axis.append((ground - water) / scale)
+		if axis.size() == 3:
+			var prof := "  profile at %.2f,%.2f z=%.1f w=%.0f gain %.2f:" % [v.x, v.z, v.y, uvs[k].x * 719.0, MapData.relief_gain()]
+			for off in [-2.0, -1.5, -1.15, -0.5, 0.0, 0.5, 1.15, 1.5, 2.0]:
+				var q: Vector3 = v + normals[k] * off * uvs[k].x * 0.5
+				prof += " %+.2f:%.1f" % [off, (terrain.surface_height_at(q.x, q.z) - MapData.display_height(v.y, q.x, q.z)) / scale]
+			print(prof)
+		for side in [1.0, -1.0]:
+			var q: Vector3 = v + normals[k] * side * uvs[k].x * 0.5 * 1.15
+			var g := terrain.surface_height_at(q.x, q.z)
+			if not is_nan(g):
+				bank.append((g - MapData.display_height(v.y, q.x, q.z)) / scale)
+	if axis.is_empty():
+		return
+	axis.sort()
+	bank.sort()
+	print("  heights: %d axis vertices, relief - water at axis: median %.1f max %.1f m ; at banks: p10 %.1f median %.1f min %.1f m" % [
+		axis.size(), axis[axis.size() / 2], axis[-1], bank[bank.size() / 10], bank[bank.size() / 2], bank[0]])
 
 
 func _settle(terrain: TerrainBuilder, settlements: SettlementLayer) -> void:
