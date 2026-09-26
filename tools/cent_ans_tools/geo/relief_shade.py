@@ -24,6 +24,14 @@ Render-only relief enhancement (unsharp mask): on land, the local relief
 ±:data:`BOOST_LIMIT_M`, fading out above :data:`BOOST_FADE_M` so that rolling
 plains read as hills without making the Alps absurd. The sign of every pixel
 relative to sea level follows ``heightmap.png`` (coasts do not move).
+
+Valley floors are not dug (lot SZ2): the unsharp mask used to push incised
+valleys down by ``0.8 x (base - floor)`` because the σ 5 km base holds the
+plateaux around them (Seine 0.5 m instead of 10-30 m from Paris to Rouen, Loire
+16 m instead of 55 m at Amboise), differently at every pyramid level. Boosted
+land never drops below :func:`valley_floor` of its real height, a monotone floor
+shared by E0-E7; the runtime exaggeration (ZG8) already raises the relief above
+the valley floors.
 """
 
 from __future__ import annotations
@@ -54,6 +62,11 @@ DETAIL_SCALE_M = 1.5  # metres per level of the detail channel (±190 m)
 #: Curvature scales (metres) and normalisation (metres of local relief) of the occlusion channel.
 OCCLUSION_SCALES = ((500.0, 12.0, 0.3), (1500.0, 35.0, 0.4), (4500.0, 90.0, 0.3))
 MIN_LAND_M = 0.5
+#: SZ2: boosted land keeps its real height ``h`` within :data:`VALLEY_DIG_MAX_M`,
+#: low land at least :data:`VALLEY_KEEP` of it (ZG7a London banks), see
+#: :func:`valley_floor`.
+VALLEY_KEEP = 0.85
+VALLEY_DIG_MAX_M = 2.0
 
 
 @dataclass(frozen=True)
@@ -114,8 +127,36 @@ def boost_relief(
         (base - BOOST_FADE_M[0]) / (BOOST_FADE_M[1] - BOOST_FADE_M[0]), 0.0, 1.0
     )
     fade = 1.0 - t * t * (3.0 - 2.0 * t)
-    boosted = height_m + BOOST_GAIN * local * fade
+    boosted = floor_valleys(height_m + BOOST_GAIN * local * fade, height_m)
     return np.where(land, boosted, height_m).astype(np.float32)
+
+
+def valley_floor(height_m: np.ndarray) -> np.ndarray:
+    """Lowest boosted height allowed for land of real height ``height_m`` (SZ2).
+
+    ``max(MIN_LAND_M, VALLEY_KEEP * h, h - VALLEY_DIG_MAX_M)``: non-decreasing in
+    ``h`` (no terraces, the drainage order of the source is kept), so a valley
+    floor stays within a couple of metres of its real altitude whatever the
+    blurred base around it, and every pyramid level puts it at the same height.
+    Low land (below ``VALLEY_DIG_MAX_M / (1 - VALLEY_KEEP)``, ≈ 13 m) keeps
+    ``VALLEY_KEEP`` of its height, like the ZG7a floor of London's banks.
+    """
+    height = np.asarray(height_m, dtype=np.float32)
+    return np.maximum(
+        MIN_LAND_M, np.maximum(VALLEY_KEEP * height, height - VALLEY_DIG_MAX_M)
+    ).astype(np.float32)
+
+
+def floor_valleys(boosted_m: np.ndarray, height_m: np.ndarray) -> np.ndarray:
+    """``boosted_m`` raised to :func:`valley_floor` where the real height is land.
+
+    Only land above :data:`MIN_LAND_M` is floored; lower pixels (sea, shore,
+    polders) keep the boosted value and are left to the coast rules.
+    """
+    land = height_m > MIN_LAND_M
+    return np.where(
+        land, np.maximum(boosted_m, valley_floor(height_m)), boosted_m
+    ).astype(np.float32)
 
 
 def enforce_coast(height_m: np.ndarray, land: np.ndarray) -> np.ndarray:
@@ -170,6 +211,8 @@ def update_map_json(map_dir: Path, names: list[str]) -> None:
             "gain": BOOST_GAIN,
             "limit_m": BOOST_LIMIT_M,
             "fade_m": list(BOOST_FADE_M),
+            "valley_keep": VALLEY_KEEP,
+            "valley_dig_max_m": VALLEY_DIG_MAX_M,
         },
     }
     metadata["relief_shade"] = {"file": RELIEF_SHADE, "detail_scale_m": DETAIL_SCALE_M}
