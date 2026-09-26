@@ -37,7 +37,7 @@ impl IRefCounted for ReliefLod {
 }
 
 fn v3(v: Vector3) -> V3 {
-    V3::new(v.x as f32, v.y as f32, v.z as f32)
+    V3::new(v.x, v.y, v.z)
 }
 
 #[godot_api]
@@ -60,13 +60,8 @@ impl ReliefLod {
     /// 16 × 16 (min, max) heights in metres per E0 chunk.
     #[func]
     fn set_bounds(&mut self, bounds: PackedVector2Array) {
-        self.selector.set_bounds(
-            bounds
-                .as_slice()
-                .iter()
-                .map(|b| (b.x as f32, b.y as f32))
-                .collect(),
-        );
+        self.selector
+            .set_bounds(bounds.as_slice().iter().map(|b| (b.x, b.y)).collect());
     }
 
     #[func]
@@ -126,7 +121,7 @@ impl ReliefLod {
     fn update(
         &mut self,
         camera: Vector3,
-        planes: VarArray,
+        planes: Array<Plane>,
         view: PackedFloat64Array,
         config: PackedFloat64Array,
     ) -> VarDictionary {
@@ -222,15 +217,11 @@ impl ReliefLod {
     }
 }
 
-fn view_of(camera: Vector3, planes: &VarArray, view: &PackedFloat64Array) -> View {
+fn view_of(camera: Vector3, planes: &Array<Plane>, view: &PackedFloat64Array) -> View {
     let v = |i: usize, default: f64| view.get(i).unwrap_or(default);
     View {
         cam: v3(camera),
-        planes: planes
-            .iter_shared()
-            .filter_map(|p| p.try_to::<Plane>().ok())
-            .map(|p| (v3(p.normal), p.d as f32))
-            .collect(),
+        planes: planes.iter_shared().map(|p| (v3(p.normal), p.d)).collect(),
         k: v(0, 1.0),
         vertical_scale: v(1, 1.0),
         up: v(2, 1.0),
