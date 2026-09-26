@@ -101,6 +101,65 @@ def apply_proportions(arm):
     view_layer.update()
 
 
+# --- Computed poses on the fine rig -------------------------------------------------------
+
+# Longbow anchor: corner of the mouth on the right side, from the head joint (base of the
+# skull), in the figure's frame before the torso turns side-on (figures face -Y, right = -X).
+BOW_ANCHOR = Vector((-0.045, -0.09, 0.0))
+# Draw length from the bow hand to the anchor (a real war bow draws ~0.72-0.76 m; the
+# rig's bow arm reaches ~0.58 m from the shoulder, which caps it).
+BOW_DRAW = 0.68
+BOW_TURN = -60.0  # torso turned side-on at full draw (degrees about Z)
+
+
+def fine_bow_arm(arm, raise_t):
+    """Bow arm from hanging (0) to aimed (1), the arrow line through the cheek anchor.
+
+    Replaces ``battle_skinned_poses._bow_arm`` for the fine rig: the Quaternius version
+    aims the bow hand from the left shoulder, which puts the nock at the chest; with real
+    arm lengths the hand is placed on the line anchor + aim * draw instead, so that the full
+    draw brings the nock (``_draw_hand``) and the right hand to the cheek.
+    """
+    import math
+
+    import battle_skinned_poses as poses
+    from mathutils import Matrix
+
+    turn = math.radians(BOW_TURN) * raise_t
+    poses.rotate_about(arm, "Torso", Vector((0, 0, 1)), turn)
+    shoulder = poses.pos(arm, "UpperArm.L")
+    aim_v = poses.aim_dir(poses.BOW_ELEVATION * raise_t, -8.0)
+    rest_target = shoulder + Vector((0.08, -0.38, -0.42))
+    anchor = poses.pos(arm, "Head") + Matrix.Rotation(turn, 3, "Z") @ BOW_ANCHOR
+    grip = anchor + aim_v * BOW_DRAW
+    target = rest_target.lerp(grip - aim_v * 0.075, raise_t)
+    poses.ik2(
+        arm,
+        "UpperArm.L",
+        "LowerArm.L",
+        "Wrist.L",
+        target,
+        shoulder + Vector((0.4, 0.2, -0.6)),
+    )
+    fore = (poses.pos(arm, "Wrist.L") - poses.pos(arm, "LowerArm.L")).normalized()
+    poses.bow_upright(arm, fore)
+    poses.rotate_about(arm, "Wrist.L", fore, math.radians(-10))
+    if raise_t > 0.0:
+        # Where the bow hand actually got to (the arm may fall short of the full draw):
+        # the draw ends at the anchor, whatever the reach.
+        reached = poses.pos(arm, "Wrist.L") + fore * 0.075
+        poses.DRAW_LENGTH = max(0.4, (reached - anchor).dot(aim_v))
+    return aim_v
+
+
+def use_fine_poses():
+    """Swap the pose helpers that depend on the rig's proportions (fine bakes only)."""
+    import battle_skinned_poses as poses
+
+    poses._bow_arm = fine_bow_arm
+    poses.DRAW_LENGTH = BOW_DRAW
+
+
 def segment_lengths(arm, bones):
     """Joint-to-joint lengths (metres, rest) of consecutive `bones` pairs, for the logs."""
     mw = arm.matrix_world
