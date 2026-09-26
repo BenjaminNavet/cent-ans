@@ -109,5 +109,155 @@
     "sources": [
       "Château de Bamburgh"
     ]
+  },
+  {
+    "id": "set_hexham",
+    "province": "prov_northumberland",
+    "kind": "abbey",
+    "name": {
+      "display": "Hexham",
+      "local": "Hextildesham",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.1017,
+      54.9711
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré augustinien de Hexham, fondé sur un site abbatial du VIIe siècle.",
+    "sources": [
+      "Abbaye de Hexham"
+    ]
+  },
+  {
+    "id": "set_morpeth",
+    "province": "prov_northumberland",
+    "kind": "village",
+    "name": {
+      "display": "Morpeth",
+      "local": "Morthpath",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.6889,
+      55.1667
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché sur la Wansbeck, au centre du Northumberland.",
+    "sources": [
+      "Morpeth, Northumberland"
+    ]
+  },
+  {
+    "id": "set_warkworth",
+    "province": "prov_northumberland",
+    "kind": "castle",
+    "name": {
+      "display": "Warkworth",
+      "local": "Werkworthe",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.6083,
+      55.3444
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château des Percy sur la Coquet, près de la côte.",
+    "sources": [
+      "Château de Warkworth"
+    ]
+  },
+  {
+    "id": "set_tynemouth",
+    "province": "prov_northumberland",
+    "kind": "abbey",
+    "name": {
+      "display": "Tynemouth",
+      "local": "Tynemuthe",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4256,
+      55.0181
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré bénédictin fortifié dominant l'embouchure de la Tyne.",
+    "sources": [
+      "Prieuré de Tynemouth"
+    ]
+  },
+  {
+    "id": "set_wooler",
+    "province": "prov_northumberland",
+    "kind": "village",
+    "name": {
+      "display": "Wooler",
+      "local": "Wulloure",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.0167,
+      55.55
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché au pied des Cheviot, près de la frontière écossaise.",
+    "sources": [
+      "Wooler"
+    ]
+  },
+  {
+    "id": "set_rothbury",
+    "province": "prov_northumberland",
+    "kind": "village",
+    "name": {
+      "display": "Rothbury",
+      "local": "Routhebiria",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.9139,
+      55.3125
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg du Coquetdale, au cœur du Northumberland.",
+    "sources": [
+      "Rothbury"
+    ]
   }
 ]

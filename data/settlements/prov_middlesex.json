@@ -159,5 +159,81 @@
     "sources": [
       "Kingston upon Thames"
     ]
+  },
+  {
+    "id": "set_enfield",
+    "province": "prov_middlesex",
+    "kind": "village",
+    "name": {
+      "display": "Enfield",
+      "local": "Enefelde",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.0827,
+      51.6521
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg au nord de Londres, dans la forêt d'Enfield.",
+    "sources": [
+      "Enfield"
+    ]
+  },
+  {
+    "id": "set_uxbridge",
+    "province": "prov_middlesex",
+    "kind": "village",
+    "name": {
+      "display": "Uxbridge",
+      "local": "Woxebrugge",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.479,
+      51.5464
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg-marché sur la route de Londres à Oxford, au bord de la Colne.",
+    "sources": [
+      "Uxbridge"
+    ]
+  },
+  {
+    "id": "set_barking",
+    "province": "prov_middlesex",
+    "kind": "abbey",
+    "name": {
+      "display": "Barking",
+      "local": "Berkynge",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.0806,
+      51.5361
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine de femmes de Barking, l'une des plus riches d'Angleterre.",
+    "sources": [
+      "Abbaye de Barking"
+    ]
   }
 ]

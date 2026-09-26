@@ -139,5 +139,180 @@
     "sources": [
       "Bury St Edmunds"
     ]
+  },
+  {
+    "id": "set_thetford",
+    "province": "prov_norfolk",
+    "kind": "town",
+    "name": {
+      "display": "Thetford",
+      "local": "Thetforde",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.75,
+      52.4167
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne capitale des rois d'Est-Anglie, importante ville monastique et marché.",
+    "sources": [
+      "Thetford"
+    ]
+  },
+  {
+    "id": "set_walsingham",
+    "province": "prov_norfolk",
+    "kind": "abbey",
+    "name": {
+      "display": "Walsingham",
+      "local": "Walsyngham",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.8683,
+      52.8983
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré augustinien de Walsingham, l'un des plus grands sanctuaires marials d'Europe.",
+    "sources": [
+      "Walsingham"
+    ]
+  },
+  {
+    "id": "set_castle_acre",
+    "province": "prov_norfolk",
+    "kind": "castle",
+    "name": {
+      "display": "Castle Acre",
+      "local": "Castelacre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.69,
+      52.6997
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château et prieuré clunisien des Warenne, comtes de Surrey.",
+    "sources": [
+      "Castle Acre"
+    ]
+  },
+  {
+    "id": "set_cromer",
+    "province": "prov_norfolk",
+    "kind": "village",
+    "name": {
+      "display": "Cromer",
+      "local": "Crowmere",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      1.2983,
+      52.9333
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Petit port de pêche de la côte nord du Norfolk.",
+    "sources": [
+      "Cromer"
+    ]
+  },
+  {
+    "id": "set_swaffham",
+    "province": "prov_norfolk",
+    "kind": "village",
+    "name": {
+      "display": "Swaffham",
+      "local": "Swafham",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.6958,
+      52.6528
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du centre du Norfolk.",
+    "sources": [
+      "Swaffham"
+    ]
+  },
+  {
+    "id": "set_wymondham",
+    "province": "prov_norfolk",
+    "kind": "abbey",
+    "name": {
+      "display": "Wymondham",
+      "local": "Wymondeham",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      1.1167,
+      52.5667
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré bénédictin de Wymondham, au sud de Norwich.",
+    "sources": [
+      "Wymondham Abbey"
+    ]
+  },
+  {
+    "id": "set_north_walsham",
+    "province": "prov_norfolk",
+    "kind": "village",
+    "name": {
+      "display": "North Walsham",
+      "local": "Walsham",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      1.3833,
+      52.8167
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché drapier du nord-est du Norfolk.",
+    "sources": [
+      "North Walsham"
+    ]
   }
 ]
