@@ -133,7 +133,10 @@ func _test_builder(data: TownData) -> void:
 	_check(detail == houses and blocks == houses, "one detail and one block instance per house (%d / %d / %d)" % [detail, blocks, houses])
 	_check(base_ok, "base heights (m) carried by the instance data")
 	# ZG7a : un MultiMesh par modèle et par ville (plus un pour les blocs), pas par cellule.
-	_check(block_nodes == 1 and detail_nodes == (plan["prepared"]["detail"] as Dictionary).size(), "one multimesh per model per town (%d detail, %d block)" % [detail_nodes, block_nodes])
+	var prepared_detail := 0
+	for cell: Dictionary in plan["prepared"]["detail"]:
+		prepared_detail += (cell["models"] as Dictionary).size()
+	_check(block_nodes == 1 and detail_nodes == prepared_detail, "one block multimesh per town, one detail multimesh per model per cell (%d detail, %d block)" % [detail_nodes, block_nodes])
 	_check(builder.root.get_node_or_null("Streets_0") != null and builder.root.get_node_or_null("Ground_0") != null and builder.root.get_node_or_null("Walls") != null, "streets and walls meshes")
 	_check(is_equal_approx(builder.root.scale.x, 1.0 / data.meters_per_unit), "town root in metres")
 	builder.free_nodes()
