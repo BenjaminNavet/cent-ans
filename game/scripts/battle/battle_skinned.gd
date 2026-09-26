@@ -6,8 +6,13 @@ extends RefCounted
 ## `battle_soldier_skinned.gdshader` et correspondance état du régiment → clips.
 ## Repli : sans manifeste, ou avec `--rigid-figures` / `--legacy-figures` après `--`, les
 ## figurines à membres rigides (lots B1/B4, `BattleMeshes`) restent utilisées.
+## Lot FG1 : avec `--fine-figures` après `--`, les figurines fines (corps MakeHuman, rigs aux
+## proportions réalistes) de `assets/models/battle_fine/` remplacent celles qu'elles couvrent
+## (rigs renommés `fine_human` / `fine_cavalry`, chemins absolus dans le manifeste fusionné).
 
 const DIR := "res://assets/models/battle_skinned/"
+const FINE_DIR := "res://assets/models/battle_fine/"
+const FINE_RIG_PREFIX := "fine_"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
 const MAX_CLIPS := 48
 ## Modes du shader.
@@ -46,7 +51,44 @@ static func manifest() -> Dictionary:
 		var text := FileAccess.get_file_as_string(DIR + "manifest.json")
 		var parsed = JSON.parse_string(text) if text != "" else null
 		_manifest = parsed if parsed is Dictionary else {}
+		if fine_enabled() and not _manifest.is_empty():
+			_merge_fine(_manifest)
 	return _manifest
+
+
+## Lot FG1 : figurines fines demandées (`--fine-figures` après `--`).
+static func fine_enabled() -> bool:
+	return OS.get_cmdline_user_args().has("--fine-figures")
+
+
+## Lot FG1 : ajoute au manifeste les rigs fins (renommés) et remplace les figurines fines.
+static func _merge_fine(base: Dictionary) -> void:
+	var text := FileAccess.get_file_as_string(FINE_DIR + "manifest.json")
+	var parsed = JSON.parse_string(text) if text != "" else null
+	if not parsed is Dictionary:
+		push_warning("BattleSkinned: --fine-figures sans manifeste %s" % FINE_DIR)
+		return
+	var rigs: Dictionary = base.get("rigs", {})
+	for rig_name in (parsed as Dictionary).get("rigs", {}):
+		var entry: Dictionary = (parsed["rigs"][rig_name] as Dictionary).duplicate(true)
+		entry["texture"] = FINE_DIR + str(entry.get("texture", ""))
+		rigs[FINE_RIG_PREFIX + str(rig_name)] = entry
+	var figures: Dictionary = base.get("figures", {})
+	for fig_name in (parsed as Dictionary).get("figures", {}):
+		var entry: Dictionary = (parsed["figures"][fig_name] as Dictionary).duplicate(true)
+		var lods: Array = []
+		for file in entry.get("lods", []):
+			lods.append(FINE_DIR + str(file))
+		entry["lods"] = lods
+		entry["rig"] = FINE_RIG_PREFIX + str(entry.get("rig", ""))
+		figures[fig_name] = entry
+	base["rigs"] = rigs
+	base["figures"] = figures
+
+
+## Chemin d'un binaire du manifeste (relatif à `DIR`, ou absolu pour les figurines fines).
+static func _path(file: String) -> String:
+	return file if file.begins_with("res://") else DIR + file
 
 
 static func enabled() -> bool:
@@ -83,7 +125,7 @@ static func mesh(kind: String, variant: int, level: int) -> ArrayMesh:
 	var file: String = lods[clampi(level, 0, lods.size() - 1)]
 	if _meshes.has(file):
 		return _meshes[file]
-	var mesh := _load_mesh(DIR + file, str(fig.get("rig", "")) != "human")
+	var mesh := _load_mesh(_path(file), not str(fig.get("rig", "")).ends_with("human"))
 	_meshes[file] = mesh
 	return mesh
 
@@ -146,7 +188,7 @@ static func bone_texture(rig_name: String) -> ImageTexture:
 	if _textures.has(rig_name):
 		return _textures[rig_name]
 	var entry: Dictionary = manifest().get("rigs", {}).get(rig_name, {})
-	var bytes := FileAccess.get_file_as_bytes(DIR + str(entry.get("texture", "")))
+	var bytes := FileAccess.get_file_as_bytes(_path(str(entry.get("texture", ""))))
 	var tex: ImageTexture = null
 	if bytes.size() > 12 and bytes.slice(0, 4).get_string_from_ascii() == "CAB1":
 		var bones := bytes.decode_u32(4)
