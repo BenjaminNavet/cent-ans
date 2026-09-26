@@ -2,6 +2,8 @@
 
 Date : 2026-09-24. Statut : validé par le joueur. Complète `2026-09-24-echelle-colonies.md` et remplace son choix « déplacement sur le graphe des colonies » (ADR 0010).
 
+> Note du 2026-09-26 (lot DC1, ADR 0082 « Carte plus dense et plus lente ») : `points_per_step` passe de 140 à 70 km. Les chiffres de cette spec (≈ 210 km de plaine par saison, rayons de repli en multiples de 140 km) valent pour l'ancien réglage ; ils sont désormais divisés par deux (≈ 105 km de plaine par saison, 70 l'hiver ; repli ami 140 km, refuge neutre voir l'ADR 0082 et `data/settlements/rules.json`). La spec est laissée telle qu'elle a été validée.
+
 ## 1. Objectif
 
 Les armées se déplacent librement sur la terre, comme dans la carte de campagne de Total War. Pendant son tour, le joueur bouge une armée : elle avance aussitôt, s'arrête où il veut dans la limite de ses points de mouvement, et peut attaquer ou assiéger dans la foulée. Les factions IA jouent ensuite une par une.

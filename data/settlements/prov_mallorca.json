@@ -86,5 +86,81 @@
     "sources": [
       "Ibiza (ville)"
     ]
+  },
+  {
+    "id": "set_alcudia",
+    "province": "prov_mallorca",
+    "kind": "town",
+    "name": {
+      "display": "Alcúdia",
+      "local": "Alcúdia",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      3.1417,
+      39.7928
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié bâti sur le site de l'antique Pollentia, au nord de Majorque.",
+    "sources": [
+      "Alcúdia"
+    ]
+  },
+  {
+    "id": "set_manacor",
+    "province": "prov_mallorca",
+    "kind": "village",
+    "name": {
+      "display": "Manacor",
+      "local": "Manacor",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      3.2103,
+      39.5696
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg agricole du Llevant mallorquin.",
+    "sources": [
+      "Manacor"
+    ]
+  },
+  {
+    "id": "set_soller",
+    "province": "prov_mallorca",
+    "kind": "village",
+    "name": {
+      "display": "Sóller",
+      "local": "Sóller",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.7147,
+      39.7636
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg de la vallée des orangers, sur la côte nord-ouest de la Serra de Tramuntana.",
+    "sources": [
+      "Sóller"
+    ]
   }
 ]

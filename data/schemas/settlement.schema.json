@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/settlement.schema.json",
   "title": "Colonies d'une province",
-  "description": "Fichier data/settlements/<province_id>.json : les 3 à 6 colonies prenables d'une province en 1337 (cité, villes, châteaux, abbayes, bourgs). Voir docs/design/2026-09-24-echelle-colonies.md.",
+  "description": "Fichier data/settlements/<province_id>.json : les 3 à 16 colonies prenables d'une province en 1337 (cité, villes, châteaux, abbayes, bourgs). Voir docs/design/2026-09-24-echelle-colonies.md.",
   "type": "array",
   "minItems": 1,
-  "maxItems": 6,
+  "maxItems": 16,
   "items": { "$ref": "#/$defs/settlement" },
   "$defs": {
     "settlement": {

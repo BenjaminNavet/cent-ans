@@ -140,5 +140,82 @@
     "sources": [
       "Abbaye de San Fruttuoso"
     ]
+  },
+  {
+    "id": "set_sestri_levante",
+    "province": "prov_genova",
+    "kind": "village",
+    "name": {
+      "display": "Sestri Levante",
+      "local": "Sestri Levante",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      9.3903,
+      44.2716
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de pêcheurs sur son isthme, sujet de la commune de Gênes.",
+    "sources": [
+      "Sestri Levante"
+    ]
+  },
+  {
+    "id": "set_albenga",
+    "province": "prov_genova",
+    "kind": "town",
+    "name": {
+      "display": "Albenga",
+      "local": "Arbenga",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      8.2131,
+      44.049
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Cité épiscopale de la riviera du Ponant, liée à Gênes par convention depuis 1251.",
+    "sources": [
+      "Albenga"
+    ]
+  },
+  {
+    "id": "set_levanto",
+    "province": "prov_genova",
+    "kind": "village",
+    "name": {
+      "display": "Levanto",
+      "local": "Levanto",
+      "local_language": "ligure"
+    },
+    "lonlat": [
+      9.6107,
+      44.17
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg de la riviera du Levant, possession génoise depuis le XIIIe siècle.",
+    "sources": [
+      "Levanto"
+    ]
   }
 ]

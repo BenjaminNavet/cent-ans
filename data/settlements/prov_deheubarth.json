@@ -137,5 +137,55 @@
     "sources": [
       "Abbaye de Whitland"
     ]
+  },
+  {
+    "id": "set_kidwelly",
+    "province": "prov_deheubarth",
+    "kind": "castle",
+    "name": {
+      "display": "Kidwelly",
+      "local": "Cydweli",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.305,
+      51.735
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château normand de Kidwelly, verrouillant l'estuaire du Gwendraeth.",
+    "sources": [
+      "Château de Kidwelly"
+    ]
+  },
+  {
+    "id": "set_llandeilo",
+    "province": "prov_deheubarth",
+    "kind": "village",
+    "name": {
+      "display": "Llandeilo",
+      "local": "Llandeilo Fawr",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.0161,
+      51.8814
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg du Tywi, dans le Deheubarth intérieur.",
+    "sources": [
+      "Llandeilo"
+    ]
   }
 ]

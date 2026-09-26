@@ -26,8 +26,10 @@ use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 use crate::parallel::Mode;
 
 /// Maximum path cost considered for an objective, in province steps (times
-/// `MovementRules::points_per_step`).
-pub const PLANNING_RANGE: u32 = 5;
+/// `MovementRules::points_per_step`). Lot DC3 (ADR 0082): 5 → 10 when the step went
+/// from 140 to 70 km, so that the AI weighs the same 700 km as before (at 5 steps, half
+/// the cities it used to besiege fell out of its sight and conquests slowed by half).
+pub const PLANNING_RANGE: u32 = 10;
 /// Siege value bonus of a city (it hands over the province, lot C4).
 pub const CITY_TARGET_BONUS: f64 = 25.0;
 /// Siege value lost per fortification level of the target.

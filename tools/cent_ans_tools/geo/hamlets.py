@@ -54,7 +54,9 @@ PLACE_CODES = {
 TARGET_COUNT = 3000
 MIN_SPACING_KM = 6.0
 SPACING_FACTOR = 0.6
-MIN_SETTLEMENT_DISTANCE_KM = 3.0
+# DC3 (ADR 0082): 3 -> 5 km, the settlement models (up to ~4 km across) covered 109
+# hamlets once the map held 1 192 settlements.
+MIN_SETTLEMENT_DISTANCE_KM = 5.0
 AREA_SHARE = 0.5
 SEED = 1337
 

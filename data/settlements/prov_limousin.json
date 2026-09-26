@@ -3,70 +3,285 @@
     "id": "set_limoges",
     "province": "prov_limousin",
     "kind": "city",
-    "name": { "display": "Limoges", "local": "Lemòtges", "local_language": "occitan" },
-    "lonlat": [1.2611, 45.8336],
+    "name": {
+      "display": "Limoges",
+      "local": "Lemòtges",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.2611,
+      45.8336
+    ],
     "weight": 35,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Vicomté tenue par la maison de Bretagne (duc Jean III), enjeu de la future guerre de Succession de Bretagne ; ville réputée pour ses émaux.",
-    "sources": ["Limoges", "Vicomté de Limoges"]
+    "sources": [
+      "Limoges",
+      "Vicomté de Limoges"
+    ]
   },
   {
     "id": "set_uzerche",
     "province": "prov_limousin",
     "kind": "town",
-    "name": { "display": "Uzerche", "local": "Usercha", "local_language": "occitan" },
-    "lonlat": [1.5667, 45.4167],
+    "name": {
+      "display": "Uzerche",
+      "local": "Usercha",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.5667,
+      45.4167
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Ville close sur un éperon dominant la Vézère, surnommée la « pucelle du Limousin » pour n'avoir jamais été prise.",
-    "sources": ["Uzerche"]
+    "sources": [
+      "Uzerche"
+    ]
   },
   {
     "id": "set_chalusset",
     "province": "prov_limousin",
     "kind": "castle",
-    "name": { "display": "Chalusset", "local": "Chalucet", "local_language": "occitan" },
-    "lonlat": [1.3667, 45.7167],
+    "name": {
+      "display": "Chalusset",
+      "local": "Chalucet",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.3667,
+      45.7167
+    ],
     "weight": 11,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château des vicomtes de Limoges, place forte disputée.",
-    "sources": ["Château de Chalusset"]
+    "sources": [
+      "Château de Chalusset"
+    ]
   },
   {
     "id": "set_grandmont",
     "province": "prov_limousin",
     "kind": "abbey",
-    "name": { "display": "Grandmont", "local": "Grandmont", "local_language": "occitan" },
-    "lonlat": [1.2833, 45.9667],
+    "name": {
+      "display": "Grandmont",
+      "local": "Grandmont",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.2833,
+      45.9667
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Maison mère de l'ordre de Grandmont, fondée au XIe siècle dans les monts d'Ambazac.",
-    "sources": ["Abbaye de Grandmont"]
+    "sources": [
+      "Abbaye de Grandmont"
+    ]
   },
   {
     "id": "set_segur_le_chateau",
     "province": "prov_limousin",
     "kind": "village",
-    "name": { "display": "Ségur-le-Château", "local": "Segur", "local_language": "occitan" },
-    "lonlat": [1.1167, 45.4833],
+    "name": {
+      "display": "Ségur-le-Château",
+      "local": "Segur",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.1167,
+      45.4833
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Bourg castral sur l'Auvézère, siège d'une châtellenie vicomtale.",
-    "sources": ["Ségur-le-Château"]
+    "sources": [
+      "Ségur-le-Château"
+    ]
+  },
+  {
+    "id": "set_tulle",
+    "province": "prov_limousin",
+    "kind": "town",
+    "name": {
+      "display": "Tulle",
+      "local": "Tula",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.7714,
+      45.2667
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité abbatiale et épiscopale sur la Corrèze.",
+    "sources": [
+      "Tulle"
+    ]
+  },
+  {
+    "id": "set_brive_la_gaillarde",
+    "province": "prov_limousin",
+    "kind": "town",
+    "name": {
+      "display": "Brive-la-Gaillarde",
+      "local": "Briva",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.5333,
+      45.1594
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande fortifiée du Bas-Limousin.",
+    "sources": [
+      "Brive-la-Gaillarde"
+    ]
+  },
+  {
+    "id": "set_rochechouart",
+    "province": "prov_limousin",
+    "kind": "castle",
+    "name": {
+      "display": "Rochechouart",
+      "local": "Rochachoart",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.8253,
+      45.8228
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse des vicomtes de Rochechouart, aux confins du Poitou.",
+    "sources": [
+      "Rochechouart"
+    ]
+  },
+  {
+    "id": "set_solignac",
+    "province": "prov_limousin",
+    "kind": "abbey",
+    "name": {
+      "display": "Solignac",
+      "local": "Solinhac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.2469,
+      45.79
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fondée par saint Éloi, réputée pour ses orfèvres.",
+    "sources": [
+      "Abbaye de Solignac"
+    ]
+  },
+  {
+    "id": "set_bellac",
+    "province": "prov_limousin",
+    "kind": "village",
+    "name": {
+      "display": "Bellac",
+      "local": "Bellac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.05,
+      46.1167
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de la Basse-Marche limousine.",
+    "sources": [
+      "Bellac"
+    ]
+  },
+  {
+    "id": "set_le_dorat",
+    "province": "prov_limousin",
+    "kind": "village",
+    "name": {
+      "display": "Le Dorat",
+      "local": "Lo Dorat",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.0842,
+      46.2158
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg autour d'une collégiale romane, en Basse-Marche.",
+    "sources": [
+      "Le Dorat"
+    ]
   }
 ]

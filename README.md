@@ -80,13 +80,25 @@ compatible Vulkan ou Direct3D 12, mais aucune installation supplémentaire (la b
 Microsoft est intégrée à `cent_ans.release.dll`). En cas de problème, `Cent Ans.console.exe` lance le jeu
 en gardant son journal affiché.
 
-**Compiler sous Windows** (Git Bash, avec [Rust](https://rustup.rs) et Visual Studio Build Tools) :
+**Lancer depuis les sources sous Windows** (le dépôt ne contient pas la DLL compilée) :
 
-```sh
-core/build-windows.sh                       # compile cent_ans.dll et la copie dans game/bin/
-godot --headless --path game --import       # une fois après le clone
-godot --path game
-```
+1. Installer [Git pour Windows](https://git-scm.com/download/win) (fournit Git Bash),
+   [Rust](https://rustup.rs) (l'installateur propose les « Visual Studio Build Tools », les accepter)
+   et [Godot 4.7.2](https://godotengine.org/download/windows/) (version standard, pas .NET).
+2. Dans Git Bash :
+
+   ```sh
+   git clone https://github.com/BenjaminNavet/cent-ans.git
+   cd cent-ans
+   core/build-windows.sh                    # compile cent_ans.debug.dll dans game/bin/ (quelques minutes)
+   ```
+
+3. Ouvrir Godot, **Importer** → `cent-ans/game/project.godot`, attendre la fin de l'import, puis
+   **Lancer** (F5). En ligne de commande : `Godot_v4.7.2-stable_win64.exe --path game`.
+
+Le cache du relief fin (`data/map/pyramid/`, ≈ 3 Go) n'est pas dans le dépôt : sans lui, le zoom
+rapproché est limité (avis affiché en jeu). Il se régénère avec les outils Python
+(`uv run --project tools cent-ans geo relief-all`, voir `docs/geo.md`).
 
 **Préparer la version Windows depuis un Mac** (compilation croisée avec
 [cargo-xwin](https://github.com/rust-cross/cargo-xwin), détails dans `docs/tools.md`) :

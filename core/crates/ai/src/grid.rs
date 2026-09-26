@@ -107,11 +107,19 @@ impl<'a> GridPlanner<'a> {
         let rules = &data.ai_grid;
         let px_per_km = sim_campaign::march::px_per_km(data);
         let avoid_px = rules.avoid_radius_km as f32 * px_per_km;
-        let points: Vec<(SettlementId, [f32; 2])> = data
-            .settlements
-            .keys()
-            .filter_map(|id| Some((id.clone(), data.settlement_point(id)?)))
-            .collect();
+        // DC3: positions read in one walk (`settlement_px` is sorted like `settlements`).
+        let points: Vec<(SettlementId, [f32; 2])> =
+            if data.settlements.keys().eq(data.settlement_px.keys()) {
+                data.settlement_px
+                    .iter()
+                    .map(|(id, p)| (id.clone(), *p))
+                    .collect()
+            } else {
+                data.settlements
+                    .keys()
+                    .filter_map(|id| Some((id.clone(), data.settlement_point(id)?)))
+                    .collect()
+            };
         let mut crossing: BTreeMap<FactionId, bool> = BTreeMap::new();
         let mut may_cross = |owner: &FactionId| {
             *crossing

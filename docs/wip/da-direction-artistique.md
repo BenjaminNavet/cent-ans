@@ -126,3 +126,9 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   (nobles/chevaliers hommes 4, nobles femmes 3, enfants 3 ; **3,59 $**). Banque : 202 archétypes
   + 25 variantes âgées. Budget DA : **17,88 $**. Smoke + test DA2 OK. Note : `da2_screenshot.gd
   --out=` est relatif au dossier `game/` (utiliser le défaut).
+- 26/09 soir : **vague DA7** lancée (4 agents en worktree, fusion via `feat/da-direction-artistique`
+  puis ff main) : **DA7a** vrais enregistrements libres d'Ars nova (0 $, `docs/wip/da7a-ars-nova.md`),
+  **DA7b** saturation automne/bocage ≤ 35 % (0 $, `docs/wip/da7b-saturation.md`), **DA7c** icônes
+  de traits (≤ 4 $, `docs/wip/da7c-icones-traits.md`), **DA7d** chevauchements de marqueurs de
+  ville (0 $, `docs/wip/da7d-chevauchements.md`). Chaque lot complète l'ADR DA existant
+  (0060, 0067, 0065, 0066).
