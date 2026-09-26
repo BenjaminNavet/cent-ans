@@ -111,5 +111,112 @@
     "sources": [
       "Fonte Avellana"
     ]
+  },
+  {
+    "id": "set_fabriano",
+    "province": "prov_ancona",
+    "kind": "village",
+    "name": {
+      "display": "Fabriano",
+      "local": "Fabriano",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.9057,
+      43.3358
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg des Marches réputé pour ses moulins à papier, activité attestée dès la fin du XIIIe siècle.",
+    "sources": [
+      "Fabriano",
+      "Papeterie de Fabriano"
+    ]
+  },
+  {
+    "id": "set_assisi",
+    "province": "prov_ancona",
+    "kind": "town",
+    "name": {
+      "display": "Assise",
+      "local": "Ascesi",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.6155,
+      43.0707
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ville ombrienne fortifiée, grand centre de pèlerinage autour de la basilique Saint-François.",
+    "sources": [
+      "Assise",
+      "Basilique Saint-François d'Assise"
+    ]
+  },
+  {
+    "id": "set_gubbio",
+    "province": "prov_ancona",
+    "kind": "town",
+    "name": {
+      "display": "Gubbio",
+      "local": "Agobbio",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      12.5766,
+      43.3506
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne commune ombrienne, prospère aux XIIe-XIIIe siècles grâce à ses statuts communaux (Tables eugubines).",
+    "sources": [
+      "Gubbio"
+    ]
+  },
+  {
+    "id": "set_camerino",
+    "province": "prov_ancona",
+    "kind": "castle",
+    "name": {
+      "display": "Camerino",
+      "local": "Camerino",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      13.0684,
+      43.1361
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Place forte des Marches, siège de la seigneurie des Da Varano depuis la fin du XIIIe siècle.",
+    "sources": [
+      "Camerino",
+      "Da Varano"
+    ]
   }
 ]
