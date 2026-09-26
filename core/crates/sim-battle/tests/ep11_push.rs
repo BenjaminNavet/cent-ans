@@ -478,6 +478,68 @@ fn probe_step_cost() {
             total / f64::from(ticks)
         );
     }
+    // Worst case for the push: the 60 regiments of each side in one line,
+    // all in contact from the start (AIs off, steady morale), 60 s.
+    for push in [false, true] {
+        let mut battle = setup(units(&data, &army), units(&data, &army), None);
+        for unit in battle
+            .attacker
+            .units
+            .iter_mut()
+            .chain(battle.defender.units.iter_mut())
+        {
+            unit.soldiers = 120;
+            unit.max_soldiers = 120;
+        }
+        let mut sim = BattleSim::new(battle, 11).unwrap();
+        lab(&mut sim);
+        if !push {
+            let mut rules = sim.push_rules().clone();
+            rules.pressure.max_speed_mps = 0.0;
+            rules.wrap.grow_per_second = 0.0;
+            sim.set_push_rules(rules);
+        }
+        let width = sim.field().width;
+        let ids: Vec<(u32, SideId)> = sim.units().iter().map(|u| (u.id, u.side)).collect();
+        let (mut xa, mut xd) = (60.0, 60.0);
+        for (id, side) in ids {
+            let (w, d) = sim.units()[id as usize].extent();
+            let (x, z, facing) = match side {
+                SideId::Attacker => {
+                    xa += w * 0.5;
+                    let x = xa;
+                    xa += w * 0.5 + 1.5;
+                    (x, FRONT_Z - d * 0.5, 0.0)
+                }
+                SideId::Defender => {
+                    xd += w * 0.5;
+                    let x = xd;
+                    xd += w * 0.5 + 1.5;
+                    (x, FRONT_Z + 0.3 + d * 0.5, std::f64::consts::PI)
+                }
+            };
+            place(&mut sim, id, x.min(width - 20.0), z, facing);
+        }
+        let steps = (60.0 / DT).round() as u32;
+        let mut elapsed = 0.0;
+        let mut melee = 0;
+        for _ in 0..steps {
+            steady(&mut sim);
+            let start = std::time::Instant::now();
+            sim.step();
+            elapsed += start.elapsed().as_secs_f64();
+            melee = melee.max(
+                sim.units()
+                    .iter()
+                    .filter(|u| u.state == UnitState::Melee)
+                    .count(),
+            );
+        }
+        println!(
+            "lines, push {push}: {:.3} ms/tick over 60 s, {melee} regiments in melee",
+            elapsed * 1000.0 / f64::from(steps)
+        );
+    }
 }
 
 /// Probe (ignored): `ai::ai_beats_a_passive_ai_at_equal_forces`, one seed

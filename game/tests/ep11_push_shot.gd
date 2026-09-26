@@ -7,10 +7,10 @@ extends SceneTree
 ## Scènes (`--scene=`) :
 ##   line   : ligne lourde contre ligne légère — le front de l'attaquant se bombe, la milice recule ;
 ##   wrap   : la milice en colonne étroite — les files débordantes s'enroulent autour d'elle ;
-##   backed : une seconde milice juste derrière la première — elle ne peut reculer, se comprime.
+##   edge   : la milice adossée au bord du champ — elle ne peut reculer, se comprime.
 ## Usage (avec affichage) :
 ##   godot --path game --resolution 1600x900 --script res://tests/ep11_push_shot.gd -- \
-##     --out=<préfixe> [--scene=line|wrap|backed] [--after=1,10,25] [--cam=dx,dy,dz]
+##     --out=<préfixe> [--scene=line|wrap|edge] [--after=1,10,25] [--cam=dx,dy,dz]
 ## Sans affichage (`--headless`) : vérifie seulement que le contact a lieu et, en scène `line`, que
 ## la milice cède du terrain (code de retour 0).
 
@@ -51,7 +51,7 @@ func _run() -> int:
 		push_error("ep11_push_shot: unit types missing")
 		return 1
 	setup["attacker"]["units"] = [heavy]
-	setup["defender"]["units"] = [light, light.duplicate(true)] if _scene == "backed" else [light]
+	setup["defender"]["units"] = [light]
 	setup["river"] = false
 	setup["village"] = false
 	# Laboratoire : les deux camps obéissent aux ordres du script.
@@ -89,20 +89,17 @@ func _run() -> int:
 		if not bool(result.get("ok", false)):
 			push_error("ep11_push_shot: column refused: %s" % str(result.get("error", "")))
 			return 1
-	elif _scene == "backed":
-		# La seconde milice se range juste derrière la première (côté défenseur : z croissant).
-		var depth := float(front["depth"])
-		battle.call("issue_command", {"type": "move", "units": [defenders[1]], "x": float(front["x"]), "z": float(front["z"]) + depth + 1.2, "facing": float(front["facing"])})
-		for _i in 900:
-			battle.call("tick", 0.1)
-		units = battle.call("get_units")
-		var back: Dictionary = _unit(units, defenders[1])
-		print("EP11_SHOT backed: rear militia at (%.1f, %.1f)" % [float(back["x"]), float(back["z"])])
+	elif _scene == "edge":
+		# La milice recule jusqu'au bord de son camp (z croissant), face à l'ennemi.
+		var terrain_depth := float((battle.call("get_terrain") as Dictionary)["depth"])
+		var z_edge := terrain_depth - 1.5
+		# Sans attendre : une armée qui ne s'engage pas refuse la bataille au bout de 5 min (EP9).
+		battle.call("issue_command", {"type": "move", "units": [defenders[0]], "x": float(front["x"]), "z": z_edge, "facing": float(front["facing"])})
 	battle.call("issue_command", {"type": "attack", "units": [attacker], "target": defenders[0], "run": false})
 	var contact_time := -1.0
 	var start_z := 0.0
 	var shots := 0
-	for _i in 6000:
+	for _i in 12000:
 		battle.call("tick", 0.1)
 		units = battle.call("get_units")
 		soldiers.update(battle, units, 0.1, [])
@@ -112,7 +109,7 @@ func _run() -> int:
 		if contact_time < 0.0 and str(a["state"]) == "melee":
 			contact_time = elapsed
 			start_z = float(d["z"])
-			print("EP11_SHOT contact at %.1f s" % elapsed)
+			print("EP11_SHOT contact at %.1f s, militia at (%.1f, %.1f)" % [elapsed, float(d["x"]), float(d["z"])])
 		if contact_time < 0.0:
 			continue
 		# Caméra haute derrière l'attaquant, tournée vers le point de contact.
@@ -122,8 +119,7 @@ func _run() -> int:
 		var eye := focus + right * _cam.x + Vector3.UP * _cam.y + fwd * _cam.z
 		camera.look_at_from_position(eye, focus)
 		if shots < _after.size() and elapsed >= contact_time + _after[shots]:
-			print("EP11_SHOT t+%.0f s: militia gave %.1f m" % [_after[shots], float(d["z"]) - start_z])
-			print("DEBUG a %s | d %s" % [str(a), str(d)])
+			print("EP11_SHOT t+%.0f s: militia gave %.1f m, push %.2f m/s, compression %.2f" % [_after[shots], float(d["z"]) - start_z, float(d.get("push_speed", 0.0)), float(d.get("compression", 0.0))])
 			if not headless and _out != "":
 				for _f in 3:
 					await process_frame
@@ -136,10 +132,14 @@ func _run() -> int:
 		if shots >= _after.size():
 			break
 	if contact_time < 0.0:
-		push_error("ep11_push_shot: no contact")
+		var la: Dictionary = _unit(units, attacker)
+		push_error("ep11_push_shot: no contact (attacker at %.1f, %.1f, %s)" % [float(la["x"]), float(la["z"]), str(la["state"])])
 		return 1
 	var last: Dictionary = _unit(units, defenders[0])
 	var gave := float(last["z"]) - start_z
+	if _scene == "edge" and float(last.get("compression", 0.0)) < 0.3:
+		push_error("ep11_push_shot: the militia did not compress against the edge")
+		return 1
 	if _scene == "line" and gave < 1.0:
 		push_error("ep11_push_shot: the militia did not give ground (%.2f m)" % gave)
 		return 1

@@ -162,10 +162,6 @@ impl PushRules {
     pub fn bundled() -> &'static PushRules {
         static RULES: OnceLock<PushRules> = OnceLock::new();
         RULES.get_or_init(|| {
-            if let Ok(path) = std::env::var("EP11_RULES_PROBE") {
-                let text = std::fs::read_to_string(path).expect("probe rules");
-                return serde_json::from_str(&text).expect("probe rules valid");
-            }
             serde_json::from_str(BUNDLED).expect("data/rules/battle_push.json is valid")
         })
     }
