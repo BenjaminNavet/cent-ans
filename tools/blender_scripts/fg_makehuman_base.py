@@ -56,6 +56,100 @@ DETAILS = {
 
 KEEP_HELPERS = ("helper-l-eye", "helper-r-eye")
 
+# Lot FG1: face variants, stored as shape keys ``face_<k>`` on the body (full body shape;
+# the battle pipeline only takes the head from them). Each face = (age macro, detail
+# targets added to ``DETAILS``). Age 0.5 = 25 years, 0.6875 = 45, 0.75 = 55 (MakeHuman).
+FACES = [
+    # 0: the FG0 man-at-arms (base), 25 years.
+    (0.5, {}),
+    # 1: veteran, ~45, heavy brow, broken hooked nose, drawn cheeks.
+    (
+        0.69,
+        {
+            "nose-hump-incr": 0.6,
+            "nose-point-down": 0.3,
+            "l-cheek-volume-decr": 0.4,
+            "r-cheek-volume-decr": 0.4,
+            "mouth-angles-down": 0.4,
+            "eyebrows-trans-down": 0.4,
+            "head-age-incr": 0.4,
+        },
+    ),
+    # 2: youth, ~18, round face, short upturned nose.
+    (
+        0.43,
+        {
+            "head-round": 0.4,
+            "nose-point-up": 0.35,
+            "nose-scale-vert-decr": 0.3,
+            "chin-prominent-decr": 0.3,
+            "l-cheek-volume-incr": 0.3,
+            "r-cheek-volume-incr": 0.3,
+        },
+    ),
+    # 3: broad square jaw, wide nose.
+    (
+        0.55,
+        {
+            "head-square": 0.6,
+            "chin-width-incr": 0.6,
+            "chin-bones-incr": 0.5,
+            "nose-width2-incr": 0.4,
+            "nose-flaring-incr": 0.3,
+            "neck-scale-horiz-incr": 0.3,
+        },
+    ),
+    # 4: long gaunt face, long straight nose.
+    (
+        0.58,
+        {
+            "head-oval": 0.6,
+            "head-scale-vert-incr": 0.25,
+            "l-cheek-volume-decr": 0.6,
+            "r-cheek-volume-decr": 0.6,
+            "nose-scale-vert-incr": 0.4,
+            "nose-greek-incr": 0.4,
+            "chin-height-incr": 0.3,
+        },
+    ),
+    # 5: brawler, flattened broad nose, low brow.
+    (
+        0.6,
+        {
+            "nose-compression-compress": 0.5,
+            "nose-width1-incr": 0.5,
+            "nose-width2-incr": 0.5,
+            "nose-curve-concave": 0.4,
+            "eyebrows-trans-down": 0.5,
+            "head-scale-horiz-incr": 0.2,
+            "mouth-scale-horiz-incr": 0.3,
+        },
+    ),
+    # 6: aquiline, jutting chin, narrow head.
+    (
+        0.52,
+        {
+            "nose-hump-incr": 0.9,
+            "nose-point-down": 0.5,
+            "nose-scale-depth-incr": 0.4,
+            "chin-prognathism-incr": 0.4,
+            "head-triangular": 0.4,
+            "head-scale-horiz-decr": 0.2,
+        },
+    ),
+    # 7: old soldier, ~55, fleshy nose, heavy jowls.
+    (
+        0.76,
+        {
+            "nose-volume-incr": 0.5,
+            "head-fat-incr": 0.4,
+            "mouth-laugh-lines-in": 0.5,
+            "mouth-angles-down": 0.3,
+            "head-age-incr": 0.6,
+        },
+    ),
+]
+
 
 def mpfb_module():
     """Import the MPFB 2 extension package (enabled in the user preferences)."""
@@ -103,6 +197,45 @@ def strip_helpers(basemesh):
             basemesh.vertex_groups.remove(vg)
 
 
+def face_coords(human_service, target_service, age, details):
+    """Vertex coordinates of the body with face `details` at `age` (helpers stripped)."""
+    basemesh = human_service.create_human(
+        mask_helpers=False,
+        detailed_helpers=True,
+        extra_vertex_groups=True,
+        feet_on_ground=True,
+        scale=0.1,
+        macro_detail_dict={**MACRO, "age": age},
+    )
+    apply_details(basemesh, target_service)
+    for name, weight in details.items():
+        path = target_service.target_full_path(name)
+        if path is None:
+            print(f"WARN target not found: {name}")
+            continue
+        target_service.load_target(basemesh, path, weight=weight, name=name)
+    target_service.bake_targets(basemesh)
+    strip_helpers(basemesh)
+    coords = [basemesh.matrix_world @ v.co for v in basemesh.data.vertices]
+    bpy.data.objects.remove(basemesh)
+    return coords
+
+
+def add_faces(basemesh, human_service, target_service):
+    """Shape keys ``face_<k>`` (lot FG1) on the finished body, one per `FACES` entry."""
+    inv = basemesh.matrix_world.inverted()
+    if basemesh.data.shape_keys is None:
+        basemesh.shape_key_add(name="Basis", from_mix=False)
+    for k, (age, details) in enumerate(FACES):
+        coords = face_coords(human_service, target_service, age, details)
+        if len(coords) != len(basemesh.data.vertices):
+            raise RuntimeError(f"face {k}: topology differs ({len(coords)} verts)")
+        key = basemesh.shape_key_add(name=f"face_{k}", from_mix=False)
+        for i, co in enumerate(coords):
+            key.data[i].co = inv @ co
+        print(f"FACE {k} age={age} targets={len(details)}")
+
+
 def main():
     """Create the human, bake the targets, rig it and save the .blend."""
     # No factory reset: it would unload the extension. Empty the startup scene instead.
@@ -130,6 +263,7 @@ def main():
         if mod.type != "ARMATURE":
             basemesh.modifiers.remove(mod)
     strip_helpers(basemesh)
+    add_faces(basemesh, human_service, target_service)
     basemesh.name = basemesh.data.name = "MH_Body"
     rig.name = rig.data.name = "MH_Rig"
     zs = [(basemesh.matrix_world @ v.co).z for v in basemesh.data.vertices]
