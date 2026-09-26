@@ -8,6 +8,11 @@ uniform float fade_end = 700.0;
 // Densité globale (1 = toutes les instances) : au dézoom, seules les graines > 1 − density
 // restent, agrandies de 1/√density pour garder le même couvert.
 uniform float density : hint_range(0.05, 1.0) = 1.0;
+// Lot SZ4b : seuil de graine propre à une instance de MultiMesh (forêt dense, `ForestDetail`) :
+// les arbres dont la graine dépasse à peine ce seuil sont petits et grandissent quand il baisse.
+instance uniform float instance_cut = 0.0;
+// Largeur de la bande de croissance au-dessus du seuil (0,18 : éclaircissement des tuiles de base).
+instance uniform float instance_band = 0.18;
 uniform float wind_strength = 0.035;
 uniform float wind_speed = 1.1;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.88;
@@ -18,6 +23,7 @@ global uniform vec4 campaign_season;
 // de la carte font ~1 km de haut, lisibles de loin, absurdes vus à 200 m). Lot SZ4 :
 // MapPropScale.tree_scale, taille réelle dès le palier vallée.
 global uniform float campaign_prop_scale;
+const float FOLIAGE_GROUND_SINK = 0.08;
 uniform vec3 spring_tint = vec3(1.03, 1.10, 0.9);
 uniform vec3 autumn_oak = vec3(0.19, 0.13, 0.035);
 uniform vec3 autumn_beech = vec3(0.30, 0.10, 0.018);
@@ -56,8 +62,8 @@ void vertex() {
 	float seed = INSTANCE_CUSTOM.a;
 	float dist = distance(origin.xz, view_origin.xz) + abs(origin.y - view_origin.y) * 0.5;
 	float t = clamp((dist - fade_start) / max(fade_end - fade_start, 1.0), 0.0, 1.0);
-	t = max(t, 1.0 - density);
-	float keep = smoothstep(0.0, 0.18, seed - t) * (1.0 + 0.5 * t) * inversesqrt(density);
+	t = max(max(t, 1.0 - density), instance_cut);
+	float keep = smoothstep(0.0, instance_band, seed - t) * (1.0 + 0.5 * t) * inversesqrt(density);
 	// Vent : rafales lentes qui balaient la carte, plus un frémissement propre à chaque arbre.
 	float phase = TIME * wind_speed + origin.x * 0.045 + origin.z * 0.03;
 	float gust = 0.6 + 0.4 * sin(phase * 0.37);
@@ -75,6 +81,10 @@ void vertex() {
 	VERTEX.x += sway * weight;
 	VERTEX.z += sway * 0.6 * weight;
 	VERTEX *= keep * campaign_prop_scale;
+	// Lot SZ4b : le pied de l'instance est enfoncé de GROUND_SINK × sa hauteur de carte
+	// (`VegetationTileJob.GROUND_SINK`, crate `vegetation`) ; réduit avec l'arbre, sinon un arbre à
+	// taille réelle reste enterré sous 80 m de sol (forêts invisibles au palier vallée).
+	VERTEX.y += FOLIAGE_GROUND_SINK * (1.0 - campaign_prop_scale);
 	v_ao = mix(0.55, 1.0, COLOR.a);
 	v_tint = INSTANCE_CUSTOM.rgb;
 }
