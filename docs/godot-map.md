@@ -1468,7 +1468,7 @@ réelle au zoom rapproché ; format, outil et moteur : **`docs/landmarks-v2.md`*
   partir de 1389), ≈ 4 800 parcelles et 5 800 bâtiments.
 - Captures `docs/img/vh4/` (`rouen_strategique`, `rouen_transition`, `rouen_vallee`,
   `rouen_site`, `rouen_site_ouest`, `rouen_toits`, `rouen_pont`, `rouen_chateau`) :
-  `godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier>`.
+  `godot --path game --script res://tests/vh4_shots.gd -- --out=<dossier> --map-weather=clear`.
 - Mesure (machine chargée, charge moyenne ≈ 100 sur 14 cœurs, autres agents actifs) : 28 i/s au-
   dessus de Rouen à d = 1,6 et 27 i/s à d = 0,6, contre 23 et 25 i/s au-dessus d'Amiens (ville
   ordinaire ZG6) dans la même session : pas de régression par rapport à une ville ordinaire ;

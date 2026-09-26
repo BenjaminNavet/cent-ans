@@ -216,7 +216,7 @@ func _model_base_y(i: int) -> float:
 func landmark_floor_zones() -> PackedVector3Array:
 	var zones := PackedVector3Array()
 	for i in _landmarks:
-		if landmark_cities != null and landmark_cities.has_city(str(data.settlements[i]["id"])):
+		if landmark_cities != null and landmark_cities.is_enabled() and landmark_cities.has_city(str(data.settlements[i]["id"])):
 			continue
 		var landmark := _landmarks[i] as LandmarkModel
 		zones.append(Vector3(landmark.position.x, landmark.position.z, landmark.zone_radius))
