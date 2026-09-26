@@ -91,7 +91,7 @@ var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
 var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une charge
 var _frame_dt: float = 0.0
 var _audio: Script = null
-## Lot EP12 (ADR 0072) : blessés au sol et fuyards désarmés. `--no-ep12` après `--` : rendu
+## Lot EP12 (ADR 0073) : blessés au sol et fuyards désarmés. `--no-ep12` après `--` : rendu
 ## d'avant (mesures A/B).
 var ep12_enabled: bool = not OS.get_cmdline_user_args().has("--no-ep12")
 var dropped_arms: BattleDroppedArms = null
@@ -100,7 +100,6 @@ var last_wounded_pos: Variant = null  # capture `--ep12-shot=wounded`
 var last_wounded_time: float = -1.0e6
 var disarmed_units: Dictionary = {}  # unit id -> instant de la débandade (armes jetées)
 var _wounded_total: int = 0
-var _losses: Dictionary = {}  # unit id -> pertes rendues (rang de tirage des blessés)
 var _recent_wounded: Array = []  # instants de chute des blessés qui bougent encore
 ## `--no-bv2` après `--` : rendu d'avant BV2 (mesures A/B) — ni chocs, ni sang, ni cadence.
 ## BV3 : imposteurs lointains (au-delà de `BattleImpostors.DISTANCE`), null si coupés.
@@ -707,10 +706,12 @@ func _spawn_corpses(unit: Dictionary, side: String, kind: String, variant: int, 
 	while not _recent_wounded.is_empty() and anim_time - float(_recent_wounded[0]) > window:
 		_recent_wounded.pop_front()
 	var unarmed_flag := BattleSkinned.CODE_UNARMED if ep12_enabled and disarmed_units.has(uid) else 0
-	for _i in mini(count, int(limits.get("spawn_per_update", 60))):
-		var ordinal := int(_losses.get(uid, 0))
-		_losses[uid] = ordinal + 1
-		if wounded_share > 0.0 and _wounded_total < int(wounded_cfg.get("max_total", 1500)) and _recent_wounded.size() < int(wounded_cfg.get("max_animated", 300)) and BattleDroppedArms.hash4(uid * 100003 + ordinal).x < wounded_share:
+	# Rang de tirage tiré de l'état de la simulation (effectif restant du régiment) et non d'un
+	# compteur du rendu : le rejeu (EP13) retrouve les mêmes blessés après un saut.
+	var sim_left := int(unit["soldiers"])
+	for i in mini(count, int(limits.get("spawn_per_update", 60))):
+		var ordinal := sim_left * 512 + i
+		if wounded_share > 0.0 and _wounded_total < int(wounded_cfg.get("max_total", 1500)) and _recent_wounded.size() < int(wounded_cfg.get("max_animated", 300)) and BattleDroppedArms.hash4(uid * 1000003 + ordinal).x < wounded_share:
 			var kw := mini(int(pow(_rng.randf(), 1.6) * prev_n), prev_n - 1)
 			_spawn_wounded(unit, side, kind, variant, prev, kw, uid, ordinal, killer_pos, limits, wounded_cfg)
 			continue
