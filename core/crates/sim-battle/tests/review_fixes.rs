@@ -53,3 +53,78 @@ fn disengaged_regiment_marches_again() {
     assert!(u.destination.is_some(), "still on its way");
     assert_eq!(u.state, UnitState::Marching);
 }
+
+/// Archers ordered to shoot a regiment hidden in a wood (seen from 60 m
+/// only) close in instead of standing in range without a shot.
+#[test]
+fn archers_close_in_on_a_hidden_target() {
+    let data = data();
+    let mut sim = lab_sim(
+        vec![unit(&data, "unit_longbowmen")],
+        vec![unit(&data, "unit_urban_militia")],
+    );
+    sim.field_mut().forests.clear();
+    sim.field_mut().forest_parts.clear();
+    sim.field_mut().forests.push(sim_battle::Zone {
+        x: 600.0,
+        z: 520.0,
+        radius: 40.0,
+    });
+    place(&mut sim, 0, 600.0, 380.0, 0.0);
+    place(&mut sim, 1, 600.0, 520.0, std::f64::consts::PI);
+    let before = sim.units()[1].hp;
+    sim.issue_command(Command::Attack {
+        units: vec![0],
+        target: 1,
+        run: false,
+    })
+    .unwrap();
+    run(&mut sim, 60.0);
+    assert!(sim.units()[0].z > 440.0, "z {}", sim.units()[0].z);
+    assert!(sim.units()[1].hp < before, "the hidden regiment is shot at");
+}
+
+/// Archers whose ordered target is locked in a melee shoot, at will, the
+/// nearest enemy they can.
+#[test]
+fn archers_fall_back_on_a_free_enemy() {
+    let data = data();
+    let mut sim = lab_sim(
+        vec![
+            unit(&data, "unit_longbowmen"),
+            unit(&data, "unit_men_at_arms_foot"),
+        ],
+        vec![
+            unit(&data, "unit_urban_militia"),
+            unit(&data, "unit_urban_militia"),
+        ],
+    );
+    sim.field_mut().forests.clear();
+    sim.field_mut().forest_parts.clear();
+    place(&mut sim, 0, 600.0, 380.0, 0.0);
+    place(&mut sim, 1, 520.0, 440.0, 0.0);
+    place(&mut sim, 2, 520.0, 480.0, std::f64::consts::PI);
+    place(&mut sim, 3, 680.0, 480.0, std::f64::consts::PI);
+    sim.issue_command(Command::Attack {
+        units: vec![1],
+        target: 2,
+        run: false,
+    })
+    .unwrap();
+    for _ in 0..600 {
+        sim.step();
+        if sim.units()[2].state == UnitState::Melee {
+            break;
+        }
+    }
+    assert_eq!(sim.units()[2].state, UnitState::Melee, "contact reached");
+    let before = sim.units()[3].hp;
+    sim.issue_command(Command::Attack {
+        units: vec![0],
+        target: 2,
+        run: false,
+    })
+    .unwrap();
+    run(&mut sim, 20.0);
+    assert!(sim.units()[3].hp < before, "the free regiment is shot at");
+}

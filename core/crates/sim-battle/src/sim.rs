@@ -1766,7 +1766,13 @@ impl BattleSim {
                 let (tx, tz) = (self.units[t].x, self.units[t].z);
                 let unit = &self.units[i];
                 let dist = ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt();
-                if unit.can_shoot() && unit.ammo > 0 && dist <= self.effective_range(unit, tx, tz) {
+                // A target hidden (forest, walls, crest) is closed in on,
+                // not waited for within range.
+                if unit.can_shoot()
+                    && unit.ammo > 0
+                    && dist <= self.effective_range(unit, tx, tz)
+                    && self.visible(unit, &self.units[t], dist)
+                {
                     let unit = &mut self.units[i];
                     unit.state = UnitState::Shooting;
                     unit.facing = turn_towards(
@@ -2192,9 +2198,12 @@ impl BattleSim {
             if in_range(t as usize).is_some() {
                 return Some(t as usize);
             }
-            return None;
-        }
-        if !unit.fire_at_will {
+            // The ordered target cannot be shot (hidden, in a melee): at
+            // will, the nearest enemy that can be.
+            if !unit.fire_at_will {
+                return None;
+            }
+        } else if !unit.fire_at_will {
             return None;
         }
         (0..self.units.len())

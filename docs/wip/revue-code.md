@@ -33,11 +33,12 @@ Branche `fix/code-review`, scope `core/crates/sim-battle` seulement. Tests de r�
 Build : profil cargo isolé `review` (voir « Points ouverts ») dans le dossier target partagé.
 Référence d'équilibre avant correctifs (sondages ignorés) : ep7 `survey_all` Crécy 25/30,
 Azincourt 28/30, Poitiers 20/30 ; ep9b `survey` attaquant 4/10.
-Prochaine étape : constat 2.
+Prochaine étape : constat 3.
 
 | n° | statut | commit | note |
 |----|--------|--------|------|
-| 1 | corrigé | (ce commit) | hors contact, un régiment qui a décroché repasse `Marching` (resté `Melee` tant qu'il est au contact et `disengaging`). |
+| 1 | corrigé | 2b7973b6 | hors contact, un régiment qui a décroché repasse `Marching` (resté `Melee` tant qu'il est au contact et `disengaging`). |
+| 2 | corrigé | (ce commit) | avec une cible ordonnée, arrêt à portée seulement si elle est visible (`visible`) ; sinon on s'approche. `pick_shooting_target` : cible ordonnée intirable + tir à volonté → balayage du plus proche tirable. |
 
 ## Corrections tools
 
