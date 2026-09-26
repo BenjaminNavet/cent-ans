@@ -53,4 +53,4 @@ Reste dans `lod/quadtree` : `qt/collect` (téléversements + écouteurs de `surf
   `get_army` par armée) non traités.
 
 ## Prochaine étape
-Fusion de `main`, tests, suppression de `core/target`, rendu à l'orchestrateur.
+Lot terminé (main fusionné, tests OK, `core/target` supprimé) : fusion ff par l'orchestrateur (dylib à reconstruire : nouvelle crate `relief-lod`).
