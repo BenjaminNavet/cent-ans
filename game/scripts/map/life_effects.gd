@@ -407,7 +407,7 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	# SZ4 : fumées, feux et moulins à leur taille réelle sous le palier comté (ZG4 les masquait au
 	# palier site, à leur taille de carte : des colonnes de plusieurs kilomètres).
 	_apply_prop_scale(camera_distance)
-	var chimney_alpha := near_weight * _season_boost * 0.85
+	var chimney_alpha := near_weight * _season_boost * 0.85 * MapPropScale.shared().chimney_alpha(camera_distance)
 	_chimneys.visible = chimney_alpha > 0.02
 	_chimney_material.set_shader_parameter("fade", chimney_alpha)
 	var fire_alpha := clampf(near_weight + medium * 0.8, 0.0, 1.0) * 0.9

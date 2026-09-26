@@ -12,4 +12,5 @@ windmill_ratio = 0.008
 hamlet_ratio = 0.03
 chimney_ratio = 0.02
 fire_ratio = 0.05
+chimney_real_alpha = 0.5
 rewrite_step = 0.04

@@ -28,6 +28,9 @@ extends Resource
 @export var hamlet_ratio: float = 0.03
 @export var chimney_ratio: float = 0.02
 @export var fire_ratio: float = 0.05
+## Opacité des panaches de cheminée à taille réelle (fondu avec l'échelle) : un filet de fumée de
+## 20 m vu à un kilomètre n'est qu'un voile.
+@export var chimney_real_alpha: float = 0.5
 ## Variation relative d'échelle en deçà de laquelle les instances recalculées sur le processeur
 ## (moulins, hameaux) ne sont pas réécrites (évite une réécriture par image pendant un zoom).
 @export var rewrite_step: float = 0.04
@@ -69,6 +72,11 @@ func hamlet_scale(distance: float) -> float:
 
 func chimney_scale(distance: float) -> float:
 	return scale_for(chimney_ratio, distance)
+
+
+## Facteur d'opacité des panaches de cheminée (1 au loin, `chimney_real_alpha` de près).
+func chimney_alpha(distance: float) -> float:
+	return lerpf(1.0, chimney_real_alpha, progress(distance))
 
 
 func fire_scale(distance: float) -> float:
