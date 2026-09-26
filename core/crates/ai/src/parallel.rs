@@ -51,6 +51,9 @@ impl Mode {
     }
 }
 
+/// Stack of each worker of the pool.
+const WORKER_STACK_BYTES: usize = 64 * 1024 * 1024;
+
 /// Threads of the pool: the performance cores (`hw.perflevel0.physicalcpu`
 /// on Apple silicon: 10 on an M4 Pro), else the available parallelism.
 pub fn pool_threads() -> usize {
@@ -69,6 +72,9 @@ pub fn pool() -> &'static rayon::ThreadPool {
         rayon::ThreadPoolBuilder::new()
             .num_threads(pool_threads())
             .thread_name(|i| format!("ai-plan-{i}"))
+            // Like the bridge's turn thread (ADR 0081): the planner may
+            // recurse on route tables; the pages are only touched if used.
+            .stack_size(WORKER_STACK_BYTES)
             .start_handler(|_| raise_thread_priority())
             .build()
             .expect("AI planner thread pool")
