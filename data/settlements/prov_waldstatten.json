@@ -77,5 +77,51 @@
     "sources": [
       "Altdorf (Uri)"
     ]
+  },
+  {
+    "id": "set_stans",
+    "province": "prov_waldstatten",
+    "kind": "village",
+    "name": {
+      "display": "Stans",
+      "local": "Stans",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.3667,
+      46.9581
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Chef-lieu de Nidwald, l'une des deux moitiés du canton fondateur d'Unterwald.",
+    "sources": [
+      "Stans (Nidwald)"
+    ]
+  },
+  {
+    "id": "set_sarnen",
+    "province": "prov_waldstatten",
+    "kind": "village",
+    "name": {
+      "display": "Sarnen",
+      "local": "Sarnen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.2467,
+      46.897
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Chef-lieu d'Obwald, l'autre moitié du canton fondateur d'Unterwald.",
+    "sources": [
+      "Sarnen"
+    ]
   }
 ]
