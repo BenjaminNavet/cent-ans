@@ -32,21 +32,26 @@ pub fn plan_subsidies(
     spare: i64,
 ) -> Vec<Order> {
     let wealth = |f: &FactionId| state.faction_income_effective(data, f).max(0);
-    let my_wealth = wealth(faction);
     let Some(me) = state.factions.get(faction) else {
         return Vec::new();
     };
     // Our enemies and pretenders (or the realms we claim): the Scots and the
     // French share England, in war as in truce.
     let my_rivals = rivals(state, faction);
+    // DC3: the incomes (a walk over every place) are weighed last, on the few
+    // needy allies left, and ours only once.
+    let mut my_wealth = None;
     let mut needy: Vec<(i64, FactionId)> = me
         .allies
         .iter()
         .filter(|a| state.factions.get(*a).is_some_and(|f| f.alive))
-        .filter(|a| my_wealth >= SUBSIDY_WEALTH_RATIO * wealth(a))
         .filter(|a| !rivals(state, a).is_disjoint(&my_rivals))
         .map(|a| (subsidy_need(state, a), a.clone()))
         .filter(|(need, _)| *need >= SUBSIDY_MIN)
+        .filter(|(_, a)| {
+            let mine = *my_wealth.get_or_insert_with(|| wealth(faction));
+            mine >= SUBSIDY_WEALTH_RATIO * wealth(a)
+        })
         .collect();
     needy.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1)));
     let mut left = spare;

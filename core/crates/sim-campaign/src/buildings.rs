@@ -643,6 +643,8 @@ impl CampaignState {
         let Some(faction) = self.factions.get(&state.controller) else {
             return Vec::new();
         };
+        // DC3: the speed depends on the place only, not on the building.
+        let speed_percent = self.construction_speed_percent(data, settlement);
         data.buildings
             .values()
             .filter(|building| building.allowed_in(state.kind))
@@ -654,7 +656,7 @@ impl CampaignState {
                     building: building.id.clone(),
                     name: building.name.display.clone(),
                     cost: cost as u32,
-                    turns: self.build_time(data, settlement, building.build_time_turns),
+                    turns: build_time_at(speed_percent, building.build_time_turns),
                     available: true,
                     reason: None,
                     import_cost: priced(draw.import_cost) as u32,
@@ -741,11 +743,10 @@ impl CampaignState {
     /// (B7b): `base × 100 / (100 + speed %)`, rounded, at least one turn
     /// (+15 % turns 4 into 3, +50 % turns 8 into 5).
     pub fn build_time(&self, data: &GameData, settlement: &SettlementId, base_turns: u32) -> u32 {
-        let percent = self
-            .construction_speed_percent(data, settlement)
-            .clamp(-50.0, MAX_CONSTRUCTION_SPEED_PERCENT);
-        let turns = (f64::from(base_turns) * 100.0 / (100.0 + percent)).round();
-        (turns as u32).max(1)
+        build_time_at(
+            self.construction_speed_percent(data, settlement),
+            base_turns,
+        )
     }
 
     /// Build options of the city of `province` (v1 signature).
@@ -930,4 +931,12 @@ pub(crate) fn goods_map(
         }
     }
     goods
+}
+
+/// Build time in turns of a `base_turns` work at a place whose construction speed is
+/// `speed_percent` ([`CampaignState::construction_speed_percent`]).
+fn build_time_at(speed_percent: f64, base_turns: u32) -> u32 {
+    let percent = speed_percent.clamp(-50.0, MAX_CONSTRUCTION_SPEED_PERCENT);
+    let turns = (f64::from(base_turns) * 100.0 / (100.0 + percent)).round();
+    (turns as u32).max(1)
 }

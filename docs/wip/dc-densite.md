@@ -121,6 +121,13 @@ une seule réserve de ressources par tour (`recruitable_with_supply`, `buildable
 optimisation de fin de tour ; tests sim-campaign + ai et clippy verts, **pas encore mesurée**
 (`turn_perf`). L'agent préparait des « variantes de partage de la réserve » (non commencées).
 
+### Reprise (agent DC3 n° 2, 26/09)
+- Target cargo privé `gp-dc3/core/target` ; tests refaits : fmt, clippy, 546 tests verts.
+- `turn_perf 50 3 1` remesuré machine au repos : DC1 moy 3,09 ms, p99 15,4 ; DC3 brut moy 5,22, p99 22,7
+  (+48 %) → optimisé (vitesse de chantier calculée une fois par place, `nearest_settlement` en
+  parcours fusionné, subsides : revenus pesés en dernier) : moy 3,79, p99 17,7 (+15 %). Résultats
+  de `century_probe` identiques (graine 1), 83 → 23 s.
+
 Reste à faire en DC3 :
 1. Mesurer `turn_perf 50 3 1` (branche vs DC1 : moyenne 5,86 ms, p99 63,8 ms).
 2. Conquête : cités prises −33 % vs main ; cible ±25 % (OFFENSIVE_RANGE / PLANNING_RANGE,
