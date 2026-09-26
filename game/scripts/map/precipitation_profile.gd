@@ -35,16 +35,19 @@ extends Resource
 ## image (dépend de la carte chargée), valeur par défaut si absent.
 @export var meters_per_unit: float = 719.0
 
-## Pluie : largeur / longueur réelles (m) de la strie au palier site.
-@export var rain_width_m_at_near: float = 0.05
-@export var rain_length_m_at_near: float = 0.35
+## Pluie : largeur / longueur réelles (m) de la strie au palier site. Une goutte réellement fidèle
+## (millimétrique) serait sous un pixel à la distance caméra la plus proche (≈ 200 m au sol) : ces
+## valeurs restent stylisées (quelques dizaines de cm), mais très en deçà de l'ancien comportement
+## (des dizaines de mètres, d'où les « bâtonnets géants »).
+@export var rain_width_m_at_near: float = 0.35
+@export var rain_length_m_at_near: float = 2.5
 ## Pluie : ratio (taille / distance) en vue lointaine, repris de l'ancienne formule
 ## (`0,035 / 100` et `1,1 / 100`).
 @export var rain_width_far_ratio: float = 0.00035
 @export var rain_length_far_ratio: float = 0.011
 
 ## Neige : côté réel (m) du flocon au palier site, puis ratio lointain (ancien `0,18 / 100`).
-@export var snow_size_m_at_near: float = 0.025
+@export var snow_size_m_at_near: float = 0.2
 @export var snow_size_far_ratio: float = 0.0018
 
 ## Boîte d'émission (horizontale / verticale) : réelle (m) au palier site, ratio (rayon / distance)
