@@ -23,10 +23,12 @@ static var _cached_key: Array = []
 static var _ids_cache: Dictionary = {}  # instance MapData → PackedStringArray
 
 
-## Instantané courant pour `sim` et `map_data` (relu au plus une fois par image, et après
-## `invalidate`).
+## Instantané courant pour `sim` et `map_data` : relu quand l'état de la simulation a changé
+## (`CampaignSim.get_state_revision`, augmenté par tout ordre, fin de tour ou chargement) ; sans ce
+## compteur (simulation factice), au plus une fois par image. `invalidate` force la relecture.
 static func of(sim: Object, map_data: MapData) -> ProvinceSnapshot:
-	var key := [sim.get_instance_id() if sim != null else 0, map_data.get_instance_id() if map_data != null else 0, Engine.get_process_frames()]
+	var stamp: int = int(sim.call("get_state_revision")) if sim != null and sim.has_method("get_state_revision") else -Engine.get_process_frames() - 1
+	var key := [sim.get_instance_id() if sim != null else 0, map_data.get_instance_id() if map_data != null else 0, stamp]
 	if _cached != null and key == _cached_key:
 		return _cached
 	_cached = read(sim, province_ids(map_data))

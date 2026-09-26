@@ -361,7 +361,8 @@ func _setup_campaign() -> void:
 func refresh_all() -> void:
 	if sim == null:
 		return
-	ProvinceSnapshot.invalidate()  # PB3d : l'état a pu changer (ordre, fin de tour, chargement)
+	if not sim.has_method("get_state_revision"):  # PB3d : simulation factice sans compteur d'état
+		ProvinceSnapshot.invalidate()
 	_refresh_owner_colors()
 	if faction_borders != null:  # FR1
 		faction_borders.refresh()
