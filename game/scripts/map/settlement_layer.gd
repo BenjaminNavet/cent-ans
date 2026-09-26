@@ -820,17 +820,20 @@ func declutter() -> void:
 	for i in sequence:
 		var has_marker := icons_on and marker_in_tier(i)
 		var shown := true
+		_marker_screen[i] = Vector2(-1.0e6, -1.0e6)
 		if has_marker and not camera.is_position_behind(_marker_world[i]):
 			var marker_rect := _marker_rect(i, camera, marker_margin, box_fraction)
-			shown = _placer.try_place(marker_rect, i, pins.has(i))
-			_marker_screen[i] = marker_rect.get_center() if shown else Vector2(-1.0e6, -1.0e6)
-		else:
-			_marker_screen[i] = Vector2(-1.0e6, -1.0e6)
+			# Hors de l'écran élargi : rien à départager (recalcul dès que la caméra bouge).
+			if label_screen.intersects(marker_rect):
+				shown = _placer.try_place(marker_rect, i, pins.has(i))
+				if shown:
+					_marker_screen[i] = marker_rect.get_center()
 		_set_marker_shown(i, shown)
 		var label := _labels[i]
 		var alpha: float = alpha_by_kind.get(data.settlements[i]["kind"], _weights.x)
 		if not shown or alpha < 0.02:
-			label.visible = false
+			if label.visible:
+				label.visible = false
 			continue
 		var label_at := label.global_position
 		if (close_w > 0.5 and camera.global_position.distance_to(label_at) > label_range) or camera.is_position_behind(label_at):
