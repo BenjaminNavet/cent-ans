@@ -6,26 +6,38 @@ extends RefCounted
 ## Le nœud racine est posé à l'ancrage de la ville et mis à l'échelle 1 / (m par unité) : tout
 ## est en mètres dessous. Hauteurs de base en mètres dans les instances (`INSTANCE_CUSTOM.r`) ou
 ## les sommets (`UV2.x`), multipliées par `campaign_vertical_scale` dans `town_building.gdshader`.
-## HLOD par cellule de `cell_m` : maisons du kit bas détail (`game/assets/models/town_kit/`) de
-## près, blocs simples (une boîte à pignon par maison) plus loin ; murailles, rues, monuments
-## et pont toujours présents jusqu'à la portée des blocs. Rendu seulement.
+## HLOD par maison (ZG7a) : maisons du kit bas détail (`game/assets/models/town_kit/`) de près,
+## blocs simples (une boîte à pignon par maison) plus loin ; murailles, rues, monuments et pont
+## toujours présents jusqu'à la portée des blocs. Blocs : un MultiMesh par ville ; maisons
+## détaillées : un MultiMesh par modèle et par cellule de `DETAIL_CELL_M` (le nœud n'est envoyé
+## que près de la caméra, ombres comprises). Le choix détail / bloc se fait par instance dans
+## `town_building.gdshader` (`lod_mode`, distance à `lod_camera`), plus par nœud de cellule de
+## 250 m (ZG6 : deux fois plus d'appels de dessin).
+## Rendu seulement.
 
 const KIT_DIR := "res://assets/models/town_kit/"
 const SHADER := preload("res://shaders/town_building.gdshader")
 ## Hauteur moyenne (m) des blocs du HLOD lointain, par type de maison.
 const GROUND_STRIP_ROWS := 24
 const STREET_GROUP := 40
+## ZG7a : côté des cellules des maisons détaillées (m). Une ville entière par nœud faisait passer
+## toutes les maisons de chaque modèle dans le vertex shader (et chaque cascade d'ombre) dès
+## qu'une seule était proche : plus lent que ZG6 malgré moitié moins d'appels de dessin.
+const DETAIL_CELL_M := 1000.0
 const BLOCK_HEIGHT := {"townhouse": 13.5, "timber": 11.2, "stonehouse": 11.2, "cottage": 7.2, "longere": 7.3, "barn": 11.6}
 
 static var _manifest: Dictionary = {}
 static var _meshes: Dictionary = {}  # nom → Mesh
 static var _materials: Dictionary = {}  # clé → ShaderMaterial
+## ZG7a : matériaux dont le HLOD dépend de la caméra (`lod_mode` > 0), mis à jour par image.
+static var _lod_materials: Array[ShaderMaterial] = []
+static var _lod_camera := Vector3(INF, INF, INF)
+static var _lod_range := -1.0
 
 var plan: Dictionary
 var root: Node3D
 var meters_per_unit := 719.0
-var cell_m := 250.0
-## Portées (unités monde, distance caméra → cellule) : maisons détaillées, blocs.
+## Portées (unités monde, distance caméra → maison) : maisons détaillées, blocs.
 var detail_range := 1.6
 var block_range := 14.0
 var detail_shadows := true
@@ -94,9 +106,10 @@ static func kit_mesh(model_name: String) -> Mesh:
 	return mesh
 
 
-## Matériau atlas des villes : `base_source` 0 (instances) ou 1 (sommets), UV en boîte, levée.
-static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters_per_unit: float = 719.0) -> ShaderMaterial:
-	var key := "%d|%s|%.2f|%.1f" % [base_source, box_uv, lift_m, meters_per_unit]
+## Matériau atlas des villes : `base_source` 0 (instances) ou 1 (sommets), UV en boîte, levée,
+## `lod_mode` (ZG7a : 0 toujours, 1 maisons détaillées de près, 2 blocs au-delà).
+static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters_per_unit: float = 719.0, lod_mode: int = 0) -> ShaderMaterial:
+	var key := "%d|%s|%.2f|%.1f|%d" % [base_source, box_uv, lift_m, meters_per_unit, lod_mode]
 	if _materials.has(key):
 		return _materials[key]
 	var mat := ShaderMaterial.new()
@@ -109,14 +122,34 @@ static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters
 	mat.set_shader_parameter("box_uv", box_uv)
 	mat.set_shader_parameter("lift_m", lift_m)
 	mat.set_shader_parameter("meters_per_unit", meters_per_unit)
+	mat.set_shader_parameter("lod_mode", lod_mode)
+	if lod_mode > 0:
+		_lod_materials.append(mat)
+		if _lod_range > 0.0:
+			mat.set_shader_parameter("lod_range", _lod_range)
+			mat.set_shader_parameter("lod_camera", _lod_camera)
 	_materials[key] = mat
 	return mat
+
+
+## ZG7a : position de la caméra (monde) et portée des maisons détaillées pour le HLOD par
+## instance. Appelé à chaque image par `TownLayer` (ombres comprises : même choix dans la passe
+## d'ombre, qui ne connaît pas la caméra principale).
+static func set_lod_view(camera_world: Vector3, detail_range: float) -> void:
+	if camera_world.is_equal_approx(_lod_camera) and is_equal_approx(detail_range, _lod_range):
+		return
+	_lod_camera = camera_world
+	_lod_range = detail_range
+	for mat in _lod_materials:
+		mat.set_shader_parameter("lod_camera", camera_world)
+		mat.set_shader_parameter("lod_range", detail_range)
 
 
 static func clear_cache() -> void:
 	_manifest.clear()
 	_meshes.clear()
 	_materials.clear()
+	_lod_materials.clear()
 
 
 ## Couleur de sommet d'une couche de l'atlas (alpha = (indice + 0,5) / 16).
@@ -239,7 +272,7 @@ func _init(p_plan: Dictionary, anchor: Vector2, p_meters_per_unit: float, parent
 	root.transform = Transform3D(Basis().scaled(Vector3(s, s, s)), Vector3(anchor.x, 0.0, anchor.y))
 	parent.add_child(root)
 	if not plan.has("prepared"):
-		prepare(plan, cell_m)
+		prepare(plan)
 	var prepared: Dictionary = plan["prepared"]
 	var strips: Array = prepared["ground"]
 	for k in strips.size():
@@ -251,14 +284,15 @@ func _init(p_plan: Dictionary, anchor: Vector2, p_meters_per_unit: float, parent
 	_tasks.append(_build_monuments)
 	# Modèles du kit pas encore chargés : un chargement par tâche (étalé sur les images).
 	var to_load := {}
-	for cell in prepared["cells"]:
-		for model in cell["detail"]:
+	for cell: Dictionary in prepared["detail"]:
+		for model in cell["models"]:
 			if not _meshes.has(model):
 				to_load[model] = true
 	for model in to_load:
 		_tasks.append(_load_model.bind(model))
-	for cell in prepared["cells"]:
-		_tasks.append(_build_cell.bind(cell))
+	for cell: Dictionary in prepared["detail"]:
+		_tasks.append(_build_detail.bind(cell))
+	_tasks.append(_build_blocks)
 
 
 ## Avance la construction ; rend vrai quand tout est fait. Au moins une étape par appel.
@@ -302,13 +336,14 @@ func set_ranges(p_detail: float, p_block: float, p_detail_shadows: bool, p_block
 func _apply_range(g: GeometryInstance3D, lod: String) -> void:
 	match lod:
 		"detail":
-			g.visibility_range_end = detail_range
-			g.visibility_range_end_margin = detail_range * 0.15
-			g.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			# ZG7a : le shader choisit maison par maison (`lod_mode` 1) ; le nœud (une cellule)
+			# n'est envoyé que si une maison peut être à moins de `detail_range` de la caméra.
+			g.visibility_range_end = detail_range + float(g.get_meta("radius_units", 0.0))
+			g.visibility_range_end_margin = 0.0
+			g.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 			g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if detail_shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		"block":
-			g.visibility_range_begin = detail_range
-			g.visibility_range_begin_margin = detail_range * 0.15
+			# Blocs repliés près de la caméra par le shader (`lod_mode` 2).
 			g.visibility_range_end = block_range
 			g.visibility_range_end_margin = block_range * 0.1
 			g.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
@@ -337,6 +372,7 @@ func refresh_aabbs(vertical_scale: float) -> void:
 
 func _register(g: GeometryInstance3D, lod: String, base_min: float, base_max: float, top: float, rect: Rect2) -> void:
 	g.set_meta("lod", lod)
+	g.set_meta("radius_units", rect.size.length() * 0.5 / meters_per_unit)
 	_apply_range(g, lod)
 	geometry.append([g, base_min, base_max, top, rect])
 	var k := MapData.vertical_scale() * meters_per_unit
@@ -377,60 +413,62 @@ static func pack_instances(xforms: Array, bases: Array, tints: Array) -> Diction
 	return {"buffer": buf, "count": xforms.size(), "lo": lo, "hi": hi, "rect": rect.grow(60.0)}
 
 
-## Préparation hors fil principal (fil de travail du plan) : tampons des maisons par cellule
-## (détail et blocs) et tableaux des maillages drapés (sol, rues, murailles). Le fil principal
-## n'a plus qu'à créer les nœuds (`step`). Le manifeste du kit doit être chargé avant (`manifest()`).
-static func prepare(plan: Dictionary, cell_m: float = 250.0) -> void:
+## Préparation hors fil principal (fil de travail du plan) : tampons des maisons par cellule et
+## par modèle (détail) et des blocs de toute la ville (ZG7a), et tableaux des maillages drapés (sol, rues,
+## murailles). Le fil principal n'a plus qu'à créer les nœuds (`step`). Le manifeste du kit doit
+## être chargé avant (`manifest()`).
+static func prepare(plan: Dictionary) -> void:
 	var houses: Dictionary = plan["houses"]
 	var xs: PackedFloat32Array = houses["x"]
 	var ys: PackedFloat32Array = houses["y"]
-	var cells := {}
-	var keys: Array = []
-	for i in xs.size():
-		var key := Vector2i(floori(xs[i] / cell_m), floori(ys[i] / cell_m))
-		if not cells.has(key):
-			cells[key] = []
-			keys.append(key)
-		(cells[key] as Array).append(i)
 	var all := manifest()
-	var out_cells: Array = []
-	for key in keys:
-		var groups := {}  # modèle → [xforms, bases, tints]
-		var block_x: Array = []
-		var block_b: Array = []
-		var block_t: Array = []
-		for i: int in cells[key]:
-			var kind: String = TownPlan.HOUSE_KINDS[houses["kind"][i]]
-			var front: float = houses["front"][i]
-			var depth: float = houses["depth"][i]
-			var yaw: float = houses["yaw"][i]
-			var d := Vector2(cos(yaw), sin(yaw))
-			var pos := Vector3(xs[i], 0.0, ys[i])
-			var model := pick(kind, front, depth, i)
-			if model != "":
-				var entry: Dictionary = all[model]
-				var sx := front / float(entry["length"])
-				var sz := depth / float(entry["depth"])
-				var sy := clampf(sqrt(sx * sz), 0.85, 1.2)
-				if not groups.has(model):
-					groups[model] = [[], [], []]
-				groups[model][0].append(Transform3D(basis_x(d, Vector3(sx, sy, sz)), pos))
-				groups[model][1].append(houses["base"][i])
-				groups[model][2].append(houses["tint"][i])
-			var h: float = BLOCK_HEIGHT.get(kind, 10.0)
-			# Faîtage du bloc le long du grand côté (maison de ville : pignon sur rue).
-			if depth > front:
-				block_x.append(Transform3D(basis_x(Vector2(-d.y, d.x), Vector3(depth, h, front)), pos))
-			else:
-				block_x.append(Transform3D(basis_x(d, Vector3(front, h, depth)), pos))
-			block_b.append(houses["base"][i])
-			block_t.append(houses["tint"][i])
-		var detail := {}
-		for model in groups:
+	var cells := {}  # Vector2i → {modèle → [xforms, bases, tints]}
+	var block_x: Array = []
+	var block_b: Array = []
+	var block_t: Array = []
+	for i in xs.size():
+		var kind: String = TownPlan.HOUSE_KINDS[houses["kind"][i]]
+		var front: float = houses["front"][i]
+		var depth: float = houses["depth"][i]
+		var yaw: float = houses["yaw"][i]
+		var d := Vector2(cos(yaw), sin(yaw))
+		var pos := Vector3(xs[i], 0.0, ys[i])
+		var model := pick(kind, front, depth, i)
+		if model != "":
+			var entry: Dictionary = all[model]
+			var sx := front / float(entry["length"])
+			var sz := depth / float(entry["depth"])
+			var sy := clampf(sqrt(sx * sz), 0.85, 1.2)
+			var key := Vector2i(floori(xs[i] / DETAIL_CELL_M), floori(ys[i] / DETAIL_CELL_M))
+			if not cells.has(key):
+				cells[key] = {}
+			var groups: Dictionary = cells[key]
+			if not groups.has(model):
+				groups[model] = [[], [], []]
+			groups[model][0].append(Transform3D(basis_x(d, Vector3(sx, sy, sz)), pos))
+			groups[model][1].append(houses["base"][i])
+			groups[model][2].append(houses["tint"][i])
+		var h: float = BLOCK_HEIGHT.get(kind, 10.0)
+		# Faîtage du bloc le long du grand côté (maison de ville : pignon sur rue).
+		if depth > front:
+			block_x.append(Transform3D(basis_x(Vector2(-d.y, d.x), Vector3(depth, h, front)), pos))
+		else:
+			block_x.append(Transform3D(basis_x(d, Vector3(front, h, depth)), pos))
+		block_b.append(houses["base"][i])
+		block_t.append(houses["tint"][i])
+	var detail: Array = []
+	var keys := cells.keys()
+	keys.sort()
+	for key: Vector2i in keys:
+		var groups: Dictionary = cells[key]
+		var names := groups.keys()
+		names.sort()
+		var models := {}
+		for model in names:
 			var g: Array = groups[model]
-			detail[model] = pack_instances(g[0], g[1], g[2])
-		out_cells.append({"key": key, "detail": detail, "blocks": pack_instances(block_x, block_b, block_t)})
-	plan["prepared"] = {"cells": out_cells, "ground": _ground_strips(plan), "streets": _street_groups(plan), "walls": _wall_arrays(plan)}
+			models[model] = pack_instances(g[0], g[1], g[2])
+		detail.append({"key": key, "models": models})
+	plan["prepared"] = {"detail": detail, "blocks": pack_instances(block_x, block_b, block_t), "ground": _ground_strips(plan), "streets": _street_groups(plan), "walls": _wall_arrays(plan)}
 
 
 func _instances_node(mesh: Mesh, packed: Dictionary, mat: Material, lod: String, top: float) -> MultiMeshInstance3D:
@@ -452,16 +490,19 @@ func _multimesh(mesh: Mesh, xforms: Array, bases: Variant, tints: Variant, mat: 
 	return _instances_node(mesh, pack_instances(xforms, Array(bases), Array(tints)), mat, lod, top)
 
 
-func _build_cell(cell: Dictionary) -> void:
+func _build_detail(cell: Dictionary) -> void:
 	var key: Vector2i = cell["key"]
-	var mat := material(0, false, 0.0, meters_per_unit)
-	for model in cell["detail"]:
+	var models: Dictionary = cell["models"]
+	for model: String in models:
 		var mesh := kit_mesh(model)
 		if mesh != null:
-			_instances_node(mesh, cell["detail"][model], mat, "detail", 30.0).name = "Detail_%d_%d_%s" % [key.x, key.y, model]
-	var blocks: Dictionary = cell["blocks"]
+			_instances_node(mesh, models[model], material(0, false, 0.0, meters_per_unit, 1), "detail", 30.0).name = "Detail_%d_%d_%s" % [key.x, key.y, model]
+
+
+func _build_blocks() -> void:
+	var blocks: Dictionary = plan["prepared"]["blocks"]
 	if int(blocks["count"]) > 0:
-		_instances_node(block_mesh(), blocks, material(0, true, 0.0, meters_per_unit), "block", 20.0).name = "Blocks_%d_%d" % [key.x, key.y]
+		_instances_node(block_mesh(), blocks, material(0, true, 0.0, meters_per_unit, 2), "block", 20.0).name = "Blocks"
 
 
 ## Nœud d'un maillage drapé préparé (`prepare`).

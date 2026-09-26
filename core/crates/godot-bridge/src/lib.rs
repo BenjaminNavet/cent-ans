@@ -35,6 +35,7 @@ mod campaign_sim_vision;
 mod campaign_sim_weather;
 mod convert;
 mod data_store_rules;
+mod historical_battles;
 mod naval_sim;
 mod relief_decoder;
 mod vegetation_scatter;
