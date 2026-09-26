@@ -971,7 +971,9 @@ func _build_monuments() -> void:
 		var deck := float(bridge["deck"])
 		var water := float(bridge["water"])
 		var blen := float(bridge["length"])
-		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center), deck - 1.5)
+		# VH7 : tablier posé sur la base des piles (niveau de l'eau) et relevé en mètres : sous
+		# l'exagération locale du relief (ZG8), une base au niveau du tablier le décollait des piles.
+		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center + Vector3(0.0, deck - water, 0.0)), water - 1.5)
 		var piers := maxi(1, int(blen / 15.0))
 		var spread := 0.8
 		# VH7 : nombre d'arches du fichier v2 (piles entre les arches, sur toute la traversée).
