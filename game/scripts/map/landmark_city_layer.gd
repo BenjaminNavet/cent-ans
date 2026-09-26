@@ -112,6 +112,10 @@ static func _dated_signature(city: Dictionary, p_year: int) -> String:
 		for item in city.get(key, []):
 			if (item.has("from_year") or item.has("until_year")) and LandmarkV2Library.present(item, p_year):
 				sig += str(item.get("id", "")) + ","
+			# Portes datées (VH6 : Moorgate, 1415).
+			for g in item.get("gates", []):
+				if (g.has("from_year") or g.has("until_year")) and LandmarkV2Library.present(g, p_year):
+					sig += str(g.get("name", "")) + ","
 	return sig
 
 

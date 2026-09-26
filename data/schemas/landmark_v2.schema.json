@@ -193,6 +193,10 @@
           },
           "description": "Noms traités en venelles."
         },
+        "alleys": {
+          "type": "boolean",
+          "description": "Garde aussi, en venelles, les allées et cours nommées cartographiées en chemins piétons ou de service (… Alley, Court, Passage, Yard, Row, Churchyard : VH6, Londres)."
+        },
         "unnamed": {
           "type": "boolean",
           "description": "Garde aussi les voies sans nom (venelles)."
@@ -325,6 +329,13 @@
                 "height_m": {
                   "type": "number",
                   "exclusiveMinimum": 0
+                },
+                "from_year": {
+                  "type": "integer",
+                  "description": "Porte ouverte cette année-là (VH6 : Moorgate, 1415) ; avant, mur continu."
+                },
+                "until_year": {
+                  "type": "integer"
                 }
               },
               "required": [
@@ -519,6 +530,29 @@
               "maximum": 1
             },
             "description": "Moulins pendants entre deux piles (fractions de la longueur)."
+          },
+          "chapel_side": {
+            "enum": [
+              "left",
+              "right"
+            ],
+            "description": "Côté de la chapelle (sens `from` → `to`) ; défaut : droite. VH6 : chapelle Saint-Thomas côté aval."
+          },
+          "drawbridge_at": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Pont-levis (fraction de la longueur) : travée sans maisons (VH6, London Bridge)."
+          },
+          "pier_m": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Épaisseur des piles le long du pont (défaut 3,5 m)."
+          },
+          "starling_m": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Longueur des avant-becs (« starlings ») en travers du pont, au ras de l'eau (0 : aucun)."
           },
           "from_year": {
             "type": "integer"
