@@ -50,8 +50,7 @@ Deux itérations ont été nécessaires après la première capture :
 - [x] 3. Captures avant/après `docs/img/sz5/` (pluie : palier site Val de Loire et vallée Paris,
   lointain Paris ; neige : palier site Val de Loire)
 - [x] 4. Test dédié `game/tests/sz5_precipitation_test.gd` (continuité, échelle réaliste au palier
-  site, comportement legacy inchangé au-delà de `far_distance`, monotonie) : OK. `smoke` : OK
-  (lancé en tâche de fond, à confirmer avant fusion).
+  site, comportement legacy inchangé au-delà de `far_distance`, monotonie) : OK. `smoke` : OK.
 
 ## Captures
 - `val_de_loire_site_avant.jpg` / `val_de_loire_site_apres.jpg` : palier site, pluie forcée
@@ -82,5 +81,4 @@ Deux itérations ont été nécessaires après la première capture :
   défectueuse dans ZG7c) ; vérifiée sans régression.
 
 ## Prochaine étape
-Lot terminé, fusion par l'orchestrateur (ff-only, hors checkout principal). Suivre le résultat de
-`smoke` (lancé en tâche de fond au moment de la rédaction).
+Lot terminé : fusion par l'orchestrateur (ff-only, hors checkout principal).
