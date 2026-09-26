@@ -34,11 +34,23 @@ pub(crate) struct CachedPath {
     waypoints: Vec<(f64, f64)>,
 }
 
+/// Walls, houses and props do not move between two A* searches: the
+/// verdict of each cell is kept, per side (the gate of a sortie opens for
+/// the garrison only), until the walls or the houses change (same
+/// signature as the paths). Filled lazily: 0 unknown, 1 free, 2 blocked.
+#[derive(Debug, Clone, Default)]
+pub(crate) struct ObstacleCache {
+    signature: Option<(usize, bool, usize)>,
+    cells: [Vec<u8>; 2],
+}
+
 struct Grid<'a> {
     works: &'a SiegeWorks,
     nx: usize,
     nz: usize,
     side: SideId,
+    /// This side's cells of the [`ObstacleCache`] (lent for the search).
+    known: std::cell::RefCell<Vec<u8>>,
 }
 
 impl Grid<'_> {
@@ -69,6 +81,17 @@ impl Grid<'_> {
         !wall && w.house_at(x, z, house_margin()).is_none() && !w.prop_at(x, z, prop_margin())
     }
 
+    /// [`Self::free`], remembered in the obstacle cache.
+    fn free_cached(&self, c: usize) -> bool {
+        let known = self.known.borrow()[c];
+        if known != 0 {
+            return known == 1;
+        }
+        let free = self.free(c);
+        self.known.borrow_mut()[c] = if free { 1 } else { 2 };
+        free
+    }
+
     /// A* from `start` to `goal` (both treated as free); cell path.
     fn search(&self, start: usize, goal: usize) -> Option<Vec<usize>> {
         let n = self.nx * self.nz;
@@ -80,7 +103,6 @@ impl Grid<'_> {
         };
         let mut cost = vec![i64::MAX; n];
         let mut from = vec![usize::MAX; n];
-        let mut free: Vec<Option<bool>> = vec![None; n];
         let mut open = BinaryHeap::new();
         cost[start] = 0;
         open.push(Reverse((h(start), start)));
@@ -111,7 +133,7 @@ impl Grid<'_> {
                     continue;
                 }
                 let next = z as usize * self.nx + x as usize;
-                let ok = *free[next].get_or_insert_with(|| next == goal || self.free(next));
+                let ok = next == goal || self.free_cached(next);
                 if !ok {
                     continue;
                 }
@@ -167,7 +189,44 @@ pub(crate) fn segment_clear(works: &SiegeWorks, a: (f64, f64), b: (f64, f64)) ->
         && works.path_props().all(|p| clear(p.footprint(), prop))
 }
 
+/// What the cached paths and obstacles depend on: openings in the walls,
+/// the sortie gate, houses burnt down.
+fn path_signature(works: &SiegeWorks) -> (usize, bool, usize) {
+    (works.openings().len(), works.sortie, works.burnt_houses())
+}
+
 impl BattleSim {
+    /// The pathing grid of `side`, lent this side's obstacle cache (reset
+    /// when the walls or the houses changed).
+    fn grid<'a>(&self, works: &'a SiegeWorks, side: SideId) -> Grid<'a> {
+        let (nx, nz) = (
+            (self.field.width / CELL).ceil() as usize,
+            (self.field.depth / CELL).ceil() as usize,
+        );
+        let signature = path_signature(works);
+        let mut cache = self.obstacle_cache.borrow_mut();
+        if cache.signature != Some(signature) {
+            *cache = ObstacleCache {
+                signature: Some(signature),
+                ..Default::default()
+            };
+        }
+        let mut known = std::mem::take(&mut cache.cells[side.index()]);
+        known.resize(nx * nz, 0);
+        Grid {
+            works,
+            nx,
+            nz,
+            side,
+            known: std::cell::RefCell::new(known),
+        }
+    }
+
+    /// Returns the grid's cells to the obstacle cache.
+    fn give_back(&self, grid: Grid<'_>, side: SideId) {
+        self.obstacle_cache.borrow_mut().cells[side.index()] = grid.known.into_inner();
+    }
+
     /// BR3 (tests, probes): the A* way on the siege grid from `from` to `to`
     /// for a regiment of `side`, as cell centres; `None` when the streets
     /// give no way (or in a field battle).
@@ -178,14 +237,12 @@ impl BattleSim {
         to: (f64, f64),
     ) -> Option<Vec<(f64, f64)>> {
         let works = self.siege.as_ref()?;
-        let grid = Grid {
-            works,
-            nx: (self.field.width / CELL).ceil() as usize,
-            nz: (self.field.depth / CELL).ceil() as usize,
-            side,
-        };
-        let cells = grid.search(grid.cell(from.0, from.1), grid.cell(to.0, to.1))?;
-        Some(cells.into_iter().map(|c| grid.centre(c)).collect())
+        let grid = self.grid(works, side);
+        let way = grid
+            .search(grid.cell(from.0, from.1), grid.cell(to.0, to.1))
+            .map(|cells| cells.into_iter().map(|c| grid.centre(c)).collect());
+        self.give_back(grid, side);
+        way
     }
 
     /// A step from `from` to `to` walks into a house (routing regiments slip
@@ -219,14 +276,9 @@ impl BattleSim {
         if segment_clear(works, from, (tx, tz)) {
             return Some((tx, tz));
         }
-        let grid = Grid {
-            works,
-            nx: (self.field.width / CELL).ceil() as usize,
-            nz: (self.field.depth / CELL).ceil() as usize,
-            side: unit.side,
-        };
+        let grid = self.grid(works, unit.side);
         let goal = grid.cell(tx, tz);
-        let signature = (works.openings().len(), works.sortie, works.burnt_houses());
+        let signature = path_signature(works);
         let mut cache = self.path_cache.borrow_mut();
         if cache.len() < self.units.len() {
             cache.resize(self.units.len(), None);
@@ -245,6 +297,7 @@ impl BattleSim {
                 waypoints,
             });
         }
+        self.give_back(grid, unit.side);
         let path = &cache[index].as_ref()?.waypoints;
         if path.is_empty() {
             return None;

@@ -163,3 +163,39 @@ def test_generate_image_saves_file_and_records_budget(
     assert ledger.entries[-1].subject == "portrait test"
     assert ledger.entries[-1].estimated == Decimal("0.04")
     assert ledger.total() == Decimal("0.04")
+
+
+def test_generate_image_records_billed_refusal(
+    monkeypatch: pytest.MonkeyPatch, budget_file: Path, tmp_path: Path
+) -> None:
+    """A billed response with no image still records its cost in docs/budget.md."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json=MODELS_PAYLOAD)
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"content": "Je ne peux pas générer ceci."}}],
+                "usage": {"cost": 0.0371},
+            },
+        )
+
+    with (
+        _client(handler) as client,
+        pytest.raises(openrouter.ImageExtractionError),
+    ):
+        openrouter.generate_image(
+            "vendor/imager",
+            "a knight",
+            tmp_path / "out.png",
+            subject="refusal test",
+            budget_path=budget_file,
+            client=client,
+        )
+    ledger = BudgetLedger(budget_file)
+    assert ledger.entries[-1].subject == "refusal test"
+    assert ledger.entries[-1].actual == Decimal("0.04")
+    assert ledger.total() == Decimal("0.04")
+    assert not (tmp_path / "out.png").exists()

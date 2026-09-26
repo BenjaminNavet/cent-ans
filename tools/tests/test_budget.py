@@ -139,6 +139,34 @@ def test_multi_session_file_round_trips_byte_identical(
     assert multi_session_budget_file.read_text(encoding="utf-8") == before
 
 
+def test_trailing_text_after_last_table_is_preserved(tmp_path: Path) -> None:
+    """A closing section with no table (after the last one) survives load/save."""
+    path = tmp_path / "budget.md"
+    path.write_text(
+        "# Budget\n"
+        "\n"
+        "| Date | Service | Objet | Coût estimé | Coût réel | Cumul |\n"
+        "|---|---|---|---|---|---|\n"
+        "| 2026-09-23 | OpenRouter | test | 1,00 $ | 1,00 $ | 1,00 $ |\n"
+        "\n"
+        "## Notes de clôture\n"
+        "\n"
+        "Session terminée, plafond respecté.\n",
+        encoding="utf-8",
+    )
+    ledger = BudgetLedger(path)
+    assert "Notes de clôture" in ledger.trailing
+    ledger.save()
+    text = path.read_text(encoding="utf-8")
+    assert "## Notes de clôture" in text
+    assert "Session terminée, plafond respecté." in text
+
+    # A later add_entry() must not lose it either.
+    ledger.add_entry("2026-09-24", "OpenRouter", "test 2", 1, 1)
+    text = path.read_text(encoding="utf-8")
+    assert "## Notes de clôture" in text
+
+
 def test_real_budget_file_parses_and_round_trips() -> None:
     """The actual docs/budget.md (two tables since session 7) parses cleanly and round-trips."""
     from cent_ans_tools.budget import DEFAULT_BUDGET_PATH

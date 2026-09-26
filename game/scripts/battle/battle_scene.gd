@@ -67,6 +67,8 @@ var side_colors: Dictionary = {}
 var _side_houses: Dictionary = {}  # DA1 / DA1b : maison du général par camp (écus, étendards)
 var side_names: Dictionary = {}
 var units: Array = []
+## État du siège lu par `_refresh_view` pour l'image courante (vide hors siège).
+var _frame_siege: Dictionary = {}
 var selected: Array[int] = []
 var paused: bool = false
 var speed: float = 1.0
@@ -474,6 +476,13 @@ func replay_seek(seconds: float) -> void:
 ## arrière ou au début d'un rejeu lancé depuis l'écran de fin).
 func _reset_battle_visuals() -> void:
 	units = battle.call("get_units")
+	# Les imposteurs survivent au saut : atlas déjà cuits gardés, et une cuisson en cours (coroutine
+	# sur ce nœud) ne reprend jamais sur une instance libérée.
+	var kept_impostors: BattleImpostors = null
+	if soldiers != null and is_instance_valid(soldiers) and soldiers.impostors != null and is_instance_valid(soldiers.impostors):
+		kept_impostors = soldiers.impostors
+		soldiers.remove_child(kept_impostors)
+		soldiers.impostors = null
 	for node in [soldiers, standards, duels, effects, engines_fx, assault_fx]:
 		if node != null and is_instance_valid(node):
 			(node as Node).get_parent().remove_child(node)
@@ -485,7 +494,7 @@ func _reset_battle_visuals() -> void:
 	engines_fx = null
 	assault_fx = null
 	grass_flatten = null
-	_build_soldier_layers()
+	_build_soldier_layers(kept_impostors)
 
 
 ## EP13 : « Revoir la bataille » depuis l'écran de fin (résultat déjà appliqué à la campagne).
@@ -759,15 +768,18 @@ func _pad_setup(count: int) -> void:
 		setup[side]["units"] = list
 
 
-func _build_soldier_layers() -> void:
+## `kept_impostors` : imposteurs repris d'avant un saut arrière du rejeu (EP13), sinon créés.
+func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 	soldiers = BattleSoldiers.new()
 	soldiers.name = "Soldiers"
 	add_child(soldiers)
 	if not _no_bv3 and not _no_impostors:
 		# BV3 : imposteurs lointains, cuits au début de la bataille (ADR 0024).
-		soldiers.impostors = BattleImpostors.new()
+		soldiers.impostors = kept_impostors if kept_impostors != null else BattleImpostors.new()
 		soldiers.impostors.name = "Impostors"
 		soldiers.add_child(soldiers.impostors)
+	elif kept_impostors != null:
+		kept_impostors.queue_free()
 	var factions := {}
 	var houses := {}  # DA1 : maison du général par camp
 	for side in ["attacker", "defender"]:
@@ -1079,9 +1091,9 @@ func _process(delta: float) -> void:
 	var running: bool = not paused and not battle.call("is_finished")
 	if running:
 		battle.call("tick", delta * speed * slow)
-	if music != null:
-		music.update(delta)
 	_refresh_view(false, delta * slow)
+	if music != null:
+		music.update(delta, units)
 	if staging != null:
 		staging.update(units, delta * speed * slow if running else 0.0, delta, bool(battle.call("is_finished")))
 		_update_time_label()
@@ -1293,7 +1305,7 @@ func _update_audio(delta: float) -> void:
 		_siege_audio_timer -= delta
 		if _siege_audio_timer <= 0.0:
 			_siege_audio_timer = 0.25
-			battle_audio.update_siege(battle.call("get_siege"), elapsed)
+			battle_audio.update_siege(_frame_siege, elapsed)
 	if voices != null:
 		voices.update(delta)
 
@@ -1311,6 +1323,10 @@ func _bench_ab_step(gpu_ms: float) -> void:
 	if phase == 0:
 		if level in ["da6", "no-da6"]:
 			terrain.set_da6_view(level == "da6")  # DA6 : végétation de bataille A/B
+		elif level == "off" or level.contains(":"):
+			# PB3b : mise à l'échelle 3D (`off`, `metalfx_s:0.75`, `metalfx_t:0.67`, `bilinear:0.75`).
+			RenderQuality.upscale_override = level
+			RenderQuality.reapply(get_tree())
 		else:
 			RenderQuality.override_level = level
 			RenderQuality.reapply(get_tree())
@@ -1343,7 +1359,10 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	soldiers.update(battle, units, delta * speed if running else 0.0, selected)
 	_update_effects(delta * speed if running else 0.0)
 	if siege_view != null:
-		siege_view.update(battle.call("get_siege"), units)
+		# Lu une seule fois par image (gros dictionnaire construit par le cœur) : HUD, sortie
+		# et sons du siège reprennent cette lecture.
+		_frame_siege = battle.call("get_siege")
+		siege_view.update(_frame_siege, units)
 	var banner_scale := _banner_scale()
 	# Les drapeaux se présentent de trois quarts à la caméra (lisibles sans être des panneaux).
 	var cam_yaw := camera_rig.yaw + PI * 0.5 + 0.35
@@ -1386,8 +1405,8 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
 		hud.set_balance(side_names[player_side], int(battle.call("get_strength", player_side)), side_names[enemy_side], int(battle.call("get_strength", enemy_side)))
 		if siege_view != null:
-			hud.set_siege_status(siege_status(battle.call("get_siege")))
-			_check_sortie()
+			hud.set_siege_status(siege_status(_frame_siege))
+			_check_sortie(_frame_siege)
 		hud.update_cards(units, player_side, selected)
 		hud.minimap.update(units, camera_frame())
 		var events: Array = battle.call("get_events")
@@ -2400,8 +2419,8 @@ func _deploy_selection(press: Vector2, release: Vector2) -> void:
 
 
 ## Sortie de la garnison (F5a) : message éphémère une fois, et mention dans la ligne du siège.
-func _check_sortie() -> void:
-	if _sortie_shown or not bool(battle.call("get_siege").get("sortie", false)):
+func _check_sortie(siege: Dictionary) -> void:
+	if _sortie_shown or not bool(siege.get("sortie", false)):
 		return
 	_sortie_shown = true
 	hud.show_toast("La garnison ouvre ses portes et fait une sortie !", player_side == "attacker")

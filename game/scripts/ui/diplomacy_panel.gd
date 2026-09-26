@@ -657,10 +657,8 @@ func _render_map() -> void:
 		for index in ids.size():
 			var key := stances[index] if index < stances.size() else ""
 			var stance_color := DiplomaticStances.color_of(key)
-			if key != "" and key != "self":
-				var owner_state: Dictionary = sim.call("get_province_state", ids[index])
-				if str(owner_state.get("controller", "")) == _selected:
-					stance_color = stance_color.lightened(0.3)
+			if key != "" and key != "self" and _selected != "" and _controller_of(ids[index]) == _selected:
+				stance_color = stance_color.lightened(0.3)
 			stance_colors.append(stance_color)
 		_minimap.set_province_colors(stance_colors)
 		return
@@ -672,18 +670,23 @@ func _render_map() -> void:
 	for index in ids.size():
 		var relation := relations[index] if index < relations.size() else ""
 		var color := Color(0, 0, 0, 0)
+		# Contrôleur lu une seule fois par province (et seulement s'il sert).
+		var controller: String = _controller_of(ids[index]) if relation != "" and relation != "self" else ""
 		if MAP_COLORS.has(relation):
 			color = MAP_COLORS[relation]
 		elif relation == "peace":
-			var state: Dictionary = sim.call("get_province_state", ids[index])
-			var attitude := int(attitude_of.get(str(state.get("controller", "")), 0))
+			var attitude := int(attitude_of.get(controller, 0))
 			color = NEUTRAL.lerp(FRIENDLY if attitude >= 0 else HOSTILE, clampf(absf(attitude) / 60.0, 0.0, 1.0))
-		if relation != "" and relation != "self":
-			var state: Dictionary = sim.call("get_province_state", ids[index])
-			if str(state.get("controller", "")) == _selected:
-				color = color.lightened(0.22)
+		if relation != "" and relation != "self" and _selected != "" and controller == _selected:
+			color = color.lightened(0.22)
 		colors.append(color)
 	_minimap.set_province_colors(colors)
+
+
+## Contrôleur d'une province (une lecture `get_province_state` ; pas d'accès groupé au pont).
+func _controller_of(province_id: String) -> String:
+	var state: Dictionary = sim.call("get_province_state", province_id)
+	return str(state.get("controller", ""))
 
 
 func _on_map_clicked(map_pos: Vector2) -> void:

@@ -162,6 +162,7 @@ func _build_balance() -> Control:
 	row.add_child(balance_bar)
 	chance_label = BattleUiKit.label("", 14, BattleUiKit.INK_SOFT)
 	chance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	chance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # Q5 : libellé plus long
 	box.add_child(chance_label)
 	return box
 
@@ -300,7 +301,9 @@ func _fill_balance(siege: bool) -> void:
 		_share = share
 		verdict_label.text = BattleUiKit.verdict(chance)
 		verdict_label.add_theme_color_override("font_color", BattleUiKit.verdict_color(chance))
-		chance_label.text = "Chances de victoire estimées : %d %% · puissance %s contre %s%s" % [
+		# Q5 : ces chances sont celles de la résolution automatique ; la bataille jouée en 3D
+		# dépend des ordres (une « défaite certaine à 3 % » a été gagnée en 2 min 36 en recette).
+		chance_label.text = "En résolution automatique : %d %% de chances · puissance %s contre %s%s · une bataille menée peut renverser l'issue" % [
 			roundi(chance * 100.0),
 			BattleUiKit.thousands(roundi(float(forecast.get("%s_power" % player_side, 0.0)))),
 			BattleUiKit.thousands(roundi(float(forecast.get("%s_power" % ("defender" if player_side == "attacker" else "attacker"), 0.0)))),
