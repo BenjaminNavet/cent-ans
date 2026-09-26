@@ -14,6 +14,26 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 
+[profile.release]
+# PB3a : LTO « thin » (fat : 32 min de build contre 10, ADR 0079) + une seule unité de compilation par crate (le lieur voit tout le
+# graphe d'appels, meilleures inlinings/dévirtualisations). Pas de `panic = "abort"` :
+# gdext (pont Godot) attrape les panics Rust à la frontière FFI pour éviter un crash du
+# process hôte, ce qui suppose l'unwinding par défaut. Pas de `target-cpu` : la cible
+# `aarch64-apple-darwin` par défaut correspond déjà à un baseline Apple M1 ; imposer une
+# cible plus récente (ex. M4) planterait (instruction illégale) sur le matériel des
+# joueurs M1-M3. `debug = "line-tables-only"` : lignes source dans Instruments sans le
+# poids des types/variables complets d'un débogage complet.
+lto = "thin"
+codegen-units = 1
+debug = "line-tables-only"
+
+# PB3a : profil optionnel pour des mesures locales uniquement (jamais pour l'export
+# joueur). Compiler avec `RUSTFLAGS="-C target-cpu=native" cargo build --profile
+# bench-native -p ai --example turn_perf` exploite les instructions du CPU de la machine
+# de développement (ex. Apple M4) ; à réserver aux comparaisons A/B sur cette machine.
+[profile.bench-native]
+inherits = "release"
+
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
 # EP13 (ADR 0072): exact float parsing, so a replay file (and a save) reads back the very
@@ -39,6 +59,12 @@ opt-level = 2
 [profile.dev.package.sim-battle]
 opt-level = 2
 [profile.dev.package.ai]
+opt-level = 2
+# PB3a : le pont Godot construit des Dictionary/Array et boucle sur les figurines chaque
+# image (get_units, get_soldier_buffers...) ; en dev sans opt-level explicite il hérite
+# du profil `dev` global (opt-level 0) car les crates du workspace ne sont pas couvertes
+# par `[profile.dev.package."*"]` (qui ne vise que les dépendances externes).
+[profile.dev.package.godot-bridge]
 opt-level = 2
 [profile.dev.package."*"]
 opt-level = 3
