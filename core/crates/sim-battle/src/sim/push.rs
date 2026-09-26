@@ -1,4 +1,4 @@
-//! EP11 (ADR 0073): continuous push of the lines in melee, resolved once per
+//! EP11 (ADR 0071): continuous push of the lines in melee, resolved once per
 //! tick just before the melee blows (rules and geometry in
 //! [`crate::push`]).
 //!
@@ -24,20 +24,16 @@ fn engaged(unit: &Unit) -> bool {
         && unit.category != UnitCategory::Siege
 }
 
-/// Gap between the rectangles of `a` moved by `delta` and `b` (same test as
-/// the contacts and the friendly separation).
+/// Gap between the rectangles of `a` moved by `delta` and `b`: the widest
+/// gap over the four axes of the two rectangles (separating axes). Unlike
+/// the centre-to-centre test of the contacts, it stays exact for two wide
+/// lines one behind the other and slightly offset.
 fn gap_after(a: &Unit, delta: (f64, f64), b: &Unit) -> f64 {
-    let (ax, az) = (a.x + delta.0, a.z + delta.1);
-    let (dx, dz) = (b.x - ax, b.z - az);
-    let dist = (dx * dx + dz * dz).sqrt();
-    let dir = if dist > 1e-6 {
-        (dx / dist, dz / dist)
-    } else {
-        (0.0, 1.0)
-    };
-    let gap_ab = a.distance_to_rect(b.x - delta.0, b.z - delta.1) - b.support(dir);
-    let gap_ba = b.distance_to_rect(ax, az) - a.support(dir);
-    gap_ab.max(gap_ba)
+    let (cx, cz) = (b.x - a.x - delta.0, b.z - a.z - delta.1);
+    [a.forward(), a.right(), b.forward(), b.right()]
+        .into_iter()
+        .map(|axis| (cx * axis.0 + cz * axis.1).abs() - a.support(axis) - b.support(axis))
+        .fold(f64::NEG_INFINITY, f64::max)
 }
 
 fn normalized(v: (f64, f64)) -> Option<(f64, f64)> {
@@ -247,8 +243,11 @@ impl BattleSim {
         }
         // Bulge of the front around the point of contact.
         let b = &rules.bulge;
+        // The pusher bulges by as much as the pushed dents: the two fronts
+        // stay pressed together instead of passing through each other.
         let target = match primary {
-            Some(_) => (b.melee_surge_m + b.per_mps * speed).clamp(-b.max_m, b.max_m),
+            Some(_) if speed < 0.0 => -(b.melee_surge_m + b.per_mps * -speed).min(b.max_m),
+            Some(_) => (b.melee_surge_m + b.per_mps * speed).min(b.max_m),
             None => 0.0,
         };
         let step = b.rate_mps * DT;

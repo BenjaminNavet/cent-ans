@@ -706,6 +706,11 @@ impl BattleSim {
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
                 }
+                // EP11: push of the lines in melee (m/s, > 0 driving the enemy
+                // back, < 0 giving ground), compression (0-1), ground given (m).
+                dict.set("push_speed", unit.push.speed);
+                dict.set("compression", unit.push.compression);
+                dict.set("ground_lost", unit.push.ground_lost);
                 // EP5: the regiment's standard (`carried`, `fallen`, `captured`,
                 // `lost`), where it lies on the ground, the regiment that took it,
                 // and the figures of the buffer that carry it.
