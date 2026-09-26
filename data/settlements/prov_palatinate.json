@@ -109,5 +109,135 @@
     "sources": [
       "Château de Trifels"
     ]
+  },
+  {
+    "id": "set_deidesheim",
+    "province": "prov_palatinate",
+    "kind": "village",
+    "name": {
+      "display": "Deidesheim",
+      "local": "Tiedesheim",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.1864,
+      49.4142
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole du Palatinat rhénan, sur la route des vins de la Haardt.",
+    "sources": [
+      "Deidesheim"
+    ]
+  },
+  {
+    "id": "set_landau",
+    "province": "prov_palatinate",
+    "kind": "village",
+    "name": {
+      "display": "Landau",
+      "local": "Landowe",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.1129,
+      49.1974
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg élevé au rang de ville libre d'empire en 1291, au pied de la forêt palatine.",
+    "sources": [
+      "Landau"
+    ]
+  },
+  {
+    "id": "set_neustadt_weinstrasse",
+    "province": "prov_palatinate",
+    "kind": "town",
+    "name": {
+      "display": "Neustadt-sur-la-Route-des-Vins",
+      "local": "Nuwenstat",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.1387,
+      49.3502
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Ville palatine sur la Haardt, marché du vignoble du Wasgau.",
+    "sources": [
+      "Neustadt an der Weinstraße"
+    ]
+  },
+  {
+    "id": "set_kaiserslautern",
+    "province": "prov_palatinate",
+    "kind": "town",
+    "name": {
+      "display": "Kaiserslautern",
+      "local": "Lutra",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.7712,
+      49.4432
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville née autour du palais impérial fondé par Frédéric Barberousse, tenue par les comtes palatins.",
+    "sources": [
+      "Kaiserslautern"
+    ]
+  },
+  {
+    "id": "set_kloster_limburg",
+    "province": "prov_palatinate",
+    "kind": "abbey",
+    "name": {
+      "display": "Abbaye de Limbourg",
+      "local": "Limpurg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.1735,
+      49.4529
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine impériale fondée en 1030, nécropole des empereurs saliens près de Dürkheim.",
+    "sources": [
+      "Abbaye de Limbourg (Bad Dürkheim)"
+    ]
   }
 ]

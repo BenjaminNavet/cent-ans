@@ -114,5 +114,83 @@
     "sources": [
       "Syracuse"
     ]
+  },
+  {
+    "id": "set_trapani",
+    "province": "prov_sicilia",
+    "kind": "town",
+    "name": {
+      "display": "Trapani",
+      "local": "Trapani",
+      "local_language": "sicilien"
+    },
+    "lonlat": [
+      12.5157,
+      38.0176
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de l'ouest sicilien, escale entre le royaume et la Sardaigne aragonaise.",
+    "sources": [
+      "Trapani"
+    ]
+  },
+  {
+    "id": "set_agrigento",
+    "province": "prov_sicilia",
+    "kind": "town",
+    "name": {
+      "display": "Agrigente",
+      "local": "Girgenti",
+      "local_language": "sicilien"
+    },
+    "lonlat": [
+      13.5765,
+      37.3111
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ancienne cité grecque de la côte méridionale, siège épiscopal sicilien.",
+    "sources": [
+      "Agrigente"
+    ]
+  },
+  {
+    "id": "set_enna",
+    "province": "prov_sicilia",
+    "kind": "castle",
+    "name": {
+      "display": "Enna",
+      "local": "Castrogiovanni",
+      "local_language": "sicilien"
+    },
+    "lonlat": [
+      14.2775,
+      37.5651
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse au centre géographique de l'île, surnommée l'« ombilic de la Sicile », verrou stratégique du royaume.",
+    "sources": [
+      "Enna"
+    ]
   }
 ]

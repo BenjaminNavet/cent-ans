@@ -110,5 +110,108 @@
     "sources": [
       "Calatayud"
     ]
+  },
+  {
+    "id": "set_jaca",
+    "province": "prov_aragon",
+    "kind": "town",
+    "name": {
+      "display": "Jaca",
+      "local": "Iacca",
+      "local_language": "aragonais"
+    },
+    "lonlat": [
+      -0.5497,
+      42.5709
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ancienne capitale du royaume d'Aragon avant Huesca, siège épiscopal pyrénéen et étape du chemin de Saint-Jacques.",
+    "sources": [
+      "Jaca"
+    ]
+  },
+  {
+    "id": "set_daroca",
+    "province": "prov_aragon",
+    "kind": "town",
+    "name": {
+      "display": "Daroca",
+      "local": "Daroca",
+      "local_language": "aragonais"
+    },
+    "lonlat": [
+      -1.4166,
+      41.1167
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ville close par une longue muraille médiévale, siège de la collégiale Santa María dotée des reliques des Corporales.",
+    "sources": [
+      "Daroca"
+    ]
+  },
+  {
+    "id": "set_veruela",
+    "province": "prov_aragon",
+    "kind": "abbey",
+    "name": {
+      "display": "Veruela",
+      "local": "Veruela",
+      "local_language": "aragonais"
+    },
+    "lonlat": [
+      -1.7325,
+      41.8425
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1146 au pied du Moncayo.",
+    "sources": [
+      "Monastère de Veruela"
+    ]
+  },
+  {
+    "id": "set_ainsa",
+    "province": "prov_aragon",
+    "kind": "village",
+    "name": {
+      "display": "Aínsa",
+      "local": "Aínsa",
+      "local_language": "aragonais"
+    },
+    "lonlat": [
+      0.1372,
+      42.4167
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancien siège du comté de Sobrarbe, bourg fortifié dominant le confluent de l'Ara et du Cinca.",
+    "sources": [
+      "Aínsa"
+    ]
   }
 ]

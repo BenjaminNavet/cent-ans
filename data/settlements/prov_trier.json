@@ -107,5 +107,135 @@
     "sources": [
       "Abbaye Saint-Maximin de Trèves"
     ]
+  },
+  {
+    "id": "set_zell_mosel",
+    "province": "prov_trier",
+    "kind": "village",
+    "name": {
+      "display": "Zell",
+      "local": "Celle",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.1808,
+      50.0281
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole de la Moselle moyenne, sous la suzeraineté de l'archevêque de Trèves.",
+    "sources": [
+      "Zell (Mosel)"
+    ]
+  },
+  {
+    "id": "set_wittlich",
+    "province": "prov_trier",
+    "kind": "village",
+    "name": {
+      "display": "Wittlich",
+      "local": "Witelich",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.8917,
+      49.9889
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg de l'Eifel méridional doté de droits de marché, terre de l'électorat de Trèves.",
+    "sources": [
+      "Wittlich"
+    ]
+  },
+  {
+    "id": "set_bernkastel",
+    "province": "prov_trier",
+    "kind": "town",
+    "name": {
+      "display": "Bernkastel",
+      "local": "Bernkastel",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.0742,
+      49.9169
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Ville viticole de la Moselle moyenne, dotée de droits de marché en 1291, dominée par le château de Landshut.",
+    "sources": [
+      "Bernkastel-Kues"
+    ]
+  },
+  {
+    "id": "set_cochem",
+    "province": "prov_trier",
+    "kind": "town",
+    "name": {
+      "display": "Cochem",
+      "local": "Cochheym",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.1656,
+      50.1467
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de la Moselle mise en gage à l'électorat de Trèves en 1294, dominée par la Reichsburg impériale.",
+    "sources": [
+      "Cochem"
+    ]
+  },
+  {
+    "id": "set_pruem",
+    "province": "prov_trier",
+    "kind": "abbey",
+    "name": {
+      "display": "Prüm",
+      "local": "Prumia",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.4217,
+      50.2033
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Puissante abbaye bénédictine carolingienne de l'Eifel, où se retira l'empereur Lothaire Ier.",
+    "sources": [
+      "Abbaye de Prüm"
+    ]
   }
 ]

@@ -97,8 +97,11 @@ dans une seule vue (Île-de-France à 330). Captures `docs/img/da7d/*_avant.jpg`
 5. **Paramètres dans les données** : bloc `declutter` de `data/map/settlement_markers.json`
    (emprise opaque du pictogramme 0,8 × 0,94 du quad, marges, opacité d'un marqueur cédé —
    0 = masqué, > 0 = estompé —, durée du fondu, seuils de recalcul, épinglés), validé par le schéma.
-6. Les noms montent un peu (`LABEL_LIFT` 0,55 × la police au-dessus du quad) pour ne plus toucher
-   les flèches de leur propre pictogramme.
+6. Les noms montent au-dessus de l'emprise du pictogramme (texte mesuré avec la police, 2 px
+   d'écart) pour ne plus toucher les flèches de leur propre pictogramme.
+7. Cohabitation avec DC4 / DC6c (ADR 0082) : ce placement unique remplace le masquage des seuls
+   noms de DC4 et en reprend la mesure réelle du texte (`_label_size`) ; la réduction et le
+   masquage des maquettes voisines (DC4 / DC6c) restent indépendants (palier près).
 
 ### Résultat
 Même mesure, plus stricte (paires marqueur / son propre nom comprises) : **0 paire** aux 12 vues ;

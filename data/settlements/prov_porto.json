@@ -110,5 +110,109 @@
     "sources": [
       "Viana do Castelo"
     ]
+  },
+  {
+    "id": "set_barcelos",
+    "province": "prov_porto",
+    "kind": "town",
+    "name": {
+      "display": "Barcelos",
+      "local": "Barcelos",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.6151,
+      41.5388
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Siège du comté de Barcelos, chef-lieu de la maison ducale de Bragance, sur le Cávado.",
+    "sources": [
+      "Barcelos",
+      "Comté de Barcelos"
+    ]
+  },
+  {
+    "id": "set_vila_do_conde",
+    "province": "prov_porto",
+    "kind": "town",
+    "name": {
+      "display": "Vila do Conde",
+      "local": "Vila do Conde",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.7431,
+      41.3517
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Port chartré en 1224, réputé pour ses chantiers navals à l'embouchure de l'Ave.",
+    "sources": [
+      "Vila do Conde"
+    ]
+  },
+  {
+    "id": "set_amarante",
+    "province": "prov_porto",
+    "kind": "village",
+    "name": {
+      "display": "Amarante",
+      "local": "Amarante",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.0788,
+      41.2695
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-pont sur le Tâmega, sur la route de Braga vers l'intérieur du Douro.",
+    "sources": [
+      "Amarante"
+    ]
+  },
+  {
+    "id": "set_bouro",
+    "province": "prov_porto",
+    "kind": "abbey",
+    "name": {
+      "display": "Bouro",
+      "local": "Bouro",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -8.3552,
+      41.6543
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère cistercien Santa Maria do Bouro, fondé en 1148 dans le Minho.",
+    "sources": [
+      "Mosteiro de Santa Maria do Bouro"
+    ]
   }
 ]

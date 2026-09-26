@@ -110,5 +110,82 @@
     "sources": [
       "Palais royal d'Olite"
     ]
+  },
+  {
+    "id": "set_sanguesa",
+    "province": "prov_navarra",
+    "kind": "town",
+    "name": {
+      "display": "Sangüesa",
+      "local": "Sangüesa",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.2842,
+      42.5722
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Étape du chemin de Saint-Jacques sur l'Aragón, ville franche fondée au XIe siècle.",
+    "sources": [
+      "Sangüesa"
+    ]
+  },
+  {
+    "id": "set_roncesvalles",
+    "province": "prov_navarra",
+    "kind": "abbey",
+    "name": {
+      "display": "Roncevaux",
+      "local": "Orreaga",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -1.3194,
+      43.0089
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Collégiale augustinienne et hospice fondés au col pour les pèlerins de Compostelle, lieu légendaire de la mort de Roland.",
+    "sources": [
+      "Roncevaux (col)",
+      "Collégiale royale de Roncevaux"
+    ]
+  },
+  {
+    "id": "set_puente_la_reina",
+    "province": "prov_navarra",
+    "kind": "village",
+    "name": {
+      "display": "Puente la Reina",
+      "local": "Gares",
+      "local_language": "basque"
+    },
+    "lonlat": [
+      -1.8144,
+      42.6717
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg né de la jonction des chemins de Saint-Jacques autour de son pont roman sur l'Arga.",
+    "sources": [
+      "Puente la Reina"
+    ]
   }
 ]

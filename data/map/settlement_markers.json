@@ -32,9 +32,10 @@
     {"ids": ["set_bordeaux", "set_rouen", "set_lyon", "set_toulouse", "set_montpellier", "set_orleans", "set_tours", "set_poitiers", "set_lille", "set_arras", "set_caen", "set_york", "set_bristol", "set_norwich", "set_dublin", "set_cologne", "set_saragosse", "set_seville", "set_burgos", "set_cordoue", "set_valence", "set_rome", "set_palerme", "set_nuremberg", "set_lubeck", "set_mayence", "set_liege", "set_utrecht", "set_bayonne", "set_limoges", "set_amiens", "set_bourges", "set_strasbourg"], "rank": 3},
     {"kind": "castle", "min_fortification": 4, "rank": 3},
     {"kind": "city", "rank": 2},
-    {"kind": "castle", "min_fortification": 3, "rank": 2},
+    {"kind": "castle", "min_fortification": 3, "min_weight": 10, "rank": 2},
     {"kind": "town", "min_fortification": 3, "rank": 2},
     {"kind": "town", "min_weight": 30, "rank": 2},
+    {"kind": "town", "min_fortification": 2, "min_weight": 25, "rank": 2},
     {"kind": "abbey", "min_fortification": 2, "rank": 2},
     {"kind": "abbey", "min_weight": 15, "rank": 2}
   ],

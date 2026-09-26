@@ -173,5 +173,58 @@
       "Certaldo",
       "Boccace"
     ]
+  },
+  {
+    "id": "set_prato",
+    "province": "prov_firenze",
+    "kind": "town",
+    "name": {
+      "display": "Prato",
+      "local": "Prato",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      11.0955,
+      43.8777
+    ],
+    "weight": 10,
+    "owner": "fac_naples",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_weaving_workshop"
+    ],
+    "port": false,
+    "description": "Ville drapière toscane, seigneurie directe des rois angevins de Naples depuis son achat en 1313 (jusqu'à sa vente à Florence en 1350).",
+    "sources": [
+      "Prato",
+      "Robert Ier de Naples"
+    ]
+  },
+  {
+    "id": "set_san_gimignano",
+    "province": "prov_firenze",
+    "kind": "town",
+    "name": {
+      "display": "San Gimignano",
+      "local": "San Gimignano",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      11.0431,
+      43.4677
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Petite commune toscane fortifiée, célèbre pour ses tours-maisons, encore indépendante de Florence en 1337.",
+    "sources": [
+      "San Gimignano"
+    ]
   }
 ]

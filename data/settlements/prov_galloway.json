@@ -82,5 +82,105 @@
     "sources": [
       "Château de Caerlaverock"
     ]
+  },
+  {
+    "id": "set_whithorn",
+    "province": "prov_galloway",
+    "kind": "abbey",
+    "name": {
+      "display": "Whithorn",
+      "local": "Quhithirne",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -4.4211,
+      54.7333
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré de Whithorn, berceau du christianisme écossais fondé par saint Ninian.",
+    "sources": [
+      "Whithorn"
+    ]
+  },
+  {
+    "id": "set_wigtown",
+    "province": "prov_galloway",
+    "kind": "village",
+    "name": {
+      "display": "Wigtown",
+      "local": "Wigtoun",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -4.4394,
+      54.8667
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Bourg royal et port du Machars, en Galloway occidental.",
+    "sources": [
+      "Wigtown"
+    ]
+  },
+  {
+    "id": "set_sweetheart_abbey",
+    "province": "prov_galloway",
+    "kind": "abbey",
+    "name": {
+      "display": "Sweetheart Abbey",
+      "local": "New Abbey",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.6072,
+      54.9797
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne de Sweetheart, fondée par Dervorguilla de Galloway.",
+    "sources": [
+      "Sweetheart Abbey"
+    ]
+  },
+  {
+    "id": "set_stranraer",
+    "province": "prov_galloway",
+    "kind": "village",
+    "name": {
+      "display": "Stranraer",
+      "local": "Stranraer",
+      "local_language": "gaélique écossais"
+    },
+    "lonlat": [
+      -5.0231,
+      54.9006
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Petit port du Rhins de Galloway, sur le Loch Ryan.",
+    "sources": [
+      "Stranraer"
+    ]
   }
 ]

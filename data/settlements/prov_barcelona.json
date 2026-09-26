@@ -143,5 +143,84 @@
     "sources": [
       "Montserrat (monastère)"
     ]
+  },
+  {
+    "id": "set_vic",
+    "province": "prov_barcelona",
+    "kind": "town",
+    "name": {
+      "display": "Vic",
+      "local": "Vic",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.2545,
+      41.9302
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Siège épiscopal d'Osona, important marché drapier de l'intérieur catalan.",
+    "sources": [
+      "Vic (Espagne)"
+    ]
+  },
+  {
+    "id": "set_manresa",
+    "province": "prov_barcelona",
+    "kind": "town",
+    "name": {
+      "display": "Manresa",
+      "local": "Manresa",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.8261,
+      41.7231
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville marchande du Bages, sur la route entre Barcelone et l'intérieur catalan.",
+    "sources": [
+      "Manresa"
+    ]
+  },
+  {
+    "id": "set_cardona",
+    "province": "prov_barcelona",
+    "kind": "castle",
+    "name": {
+      "display": "Cardone",
+      "local": "Cardona",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.6829,
+      41.9135
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse des vicomtes puis ducs de Cardona, dominant la montagne de sel.",
+    "sources": [
+      "Château de Cardona",
+      "Cardona (Espagne)"
+    ]
   }
 ]

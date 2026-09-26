@@ -107,5 +107,82 @@
     "sources": [
       "Interlaken"
     ]
+  },
+  {
+    "id": "set_laupen",
+    "province": "prov_bern",
+    "kind": "town",
+    "name": {
+      "display": "Laupen",
+      "local": "Loupen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.2229,
+      46.9089
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_palisade"
+    ],
+    "port": false,
+    "description": "Petite ville acquise par Berne en 1324, à la frontière avec les terres de Fribourg et de Kybourg ; elle sera assiégée en 1339.",
+    "sources": [
+      "Laupen",
+      "Bataille de Laupen"
+    ]
+  },
+  {
+    "id": "set_frutigen",
+    "province": "prov_bern",
+    "kind": "village",
+    "name": {
+      "display": "Frutigen",
+      "local": "Frutingen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.6577,
+      46.5885
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg du Frutigland, dans le Haut-Simmental, sur la route des cols alpins vers le Valais.",
+    "sources": [
+      "Frutigen"
+    ]
+  },
+  {
+    "id": "set_wimmis",
+    "province": "prov_bern",
+    "kind": "castle",
+    "name": {
+      "display": "Wimmis",
+      "local": "Wimmis",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.6412,
+      46.6188
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château seigneurial sous suzeraineté des Habsbourg-Kybourg, gardant l'entrée du Simmental au sud du lac de Thoune.",
+    "sources": [
+      "Wimmis"
+    ]
   }
 ]
