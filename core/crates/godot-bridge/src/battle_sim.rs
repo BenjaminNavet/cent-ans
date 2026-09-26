@@ -258,7 +258,53 @@ pub struct BattleSim {
     pub(crate) recorder: Option<sim_battle::ReplayRecorder>,
     /// EP13: playback of a replay; the battle then takes no order.
     pub(crate) player: Option<sim_battle::ReplayPlayer>,
+    /// PB3c: figure buffers kept between simulation steps (rendering only).
+    poses: PoseCache,
+    /// PB3c: bumped by every change of the battle outside a simulation step
+    /// (orders, deployment, new battle, replay jump): invalidates `poses`.
+    pose_epoch: u64,
     base: Base<RefCounted>,
+}
+
+/// PB3c: per-regiment `MultiMesh.buffer`s of the latest [`BattleSim::get_soldier_buffers`].
+/// The simulation moves by fixed 0.1 s steps and the poses are not
+/// interpolated between steps, so they are rebuilt only when the step count,
+/// the pose epoch or the figure scale changes; between steps the same packed
+/// arrays are handed out again (copy-on-write: the renderer may alter its copy).
+#[derive(Default)]
+struct PoseCache {
+    /// `(ticks, pose epoch, figure scale bits)` the buffers were built for.
+    key: Option<(u64, u64, u64)>,
+    /// Unit id -> poses (12 floats per figure), `None` when not requested.
+    raw: Vec<Option<Vec<f32>>>,
+    /// Unit id -> the buffer handed out (poses zero-padded to the capacity).
+    padded: Vec<PackedFloat32Array>,
+}
+
+/// Appends the `MultiMesh` transform (12 floats, rotation about Y) of a pose.
+fn push_pose(buffer: &mut Vec<f32>, [x, y, z, angle]: [f64; 4]) {
+    let (s, c) = (angle.sin() as f32, angle.cos() as f32);
+    buffer.extend_from_slice(&[
+        c, 0.0, s, x as f32, 0.0, 1.0, 0.0, y as f32, -s, 0.0, c, z as f32,
+    ]);
+}
+
+/// `[a, b]` as a Godot array.
+fn pair(a: &PackedInt32Array, b: &VarArray) -> VarArray {
+    let mut out = VarArray::new();
+    out.push(&a.to_variant());
+    out.push(&b.to_variant());
+    out
+}
+
+/// The poses zero-padded to `capacity` figures (never cut).
+fn padded_buffer(raw: &[f32], capacity: usize) -> PackedFloat32Array {
+    let len = raw.len().max(capacity * 12);
+    let mut out = PackedFloat32Array::from(raw);
+    if len > raw.len() {
+        out.resize(len);
+    }
+    out
 }
 
 #[godot_api]
@@ -271,8 +317,18 @@ impl IRefCounted for BattleSim {
             historical: None,
             recorder: None,
             player: None,
+            poses: PoseCache::default(),
+            pose_epoch: 0,
             base,
         }
+    }
+}
+
+impl BattleSim {
+    /// PB3c: the battle changed outside a simulation step: the cached figure
+    /// poses must be rebuilt.
+    pub(crate) fn touch_poses(&mut self) {
+        self.pose_epoch = self.pose_epoch.wrapping_add(1);
     }
 }
 
@@ -281,6 +337,7 @@ impl BattleSim {
     /// Builds the battle from a `CampaignSim.get_battle_setup` dictionary.
     #[func]
     fn setup(&mut self, setup: VarDictionary, seed: i64) -> bool {
+        self.touch_poses();
         let forced = sim_battle::BattleScale::named(&self.scale_key);
         // EP7: a campaign battle on a historical site (`historical_site`,
         // the map's JSON text, added by `get_battle_setup`).
@@ -497,6 +554,7 @@ impl BattleSim {
     /// units: [ids] (selected-scope orders; empty = every eligible one)}`.
     #[func]
     fn issue_command(&mut self, command: VarDictionary) -> VarDictionary {
+        self.touch_poses();
         if self.player.is_some() {
             return result_dict(Err(REPLAY_REFUSAL.to_owned()));
         }
@@ -558,6 +616,7 @@ impl BattleSim {
     /// any `tick`). `false` once the battle has started.
     #[func]
     fn begin_deployment(&mut self) -> bool {
+        self.touch_poses();
         if self.player.is_some() {
             return false;
         }
@@ -591,6 +650,7 @@ impl BattleSim {
     /// current facing. → `{ok, error}` (French error).
     #[func]
     fn deploy_unit(&mut self, id: i64, x: f64, z: f64, facing: f64) -> VarDictionary {
+        self.touch_poses();
         if self.player.is_some() {
             return result_dict(Err(REPLAY_REFUSAL.to_owned()));
         }
@@ -620,6 +680,7 @@ impl BattleSim {
     /// Ends the deployment phase → `{ok, error}`.
     #[func]
     fn start_battle(&mut self) -> VarDictionary {
+        self.touch_poses();
         if self.player.is_some() {
             return result_dict(Err(REPLAY_REFUSAL.to_owned()));
         }
@@ -786,7 +847,8 @@ impl BattleSim {
 
     /// `MultiMesh.buffer` (12 floats per instance, rotation about Y) of the
     /// living soldiers of `side` whose regiment renders as `render`
-    /// (`infantry`, `archer`, `cavalry`, `siege`).
+    /// (`infantry`, `archer`, `cavalry`, `siege`). Uncached; the renderer uses
+    /// [`Self::get_soldier_buffers`].
     #[func]
     fn get_soldier_buffer(&self, side: GString, render: GString) -> PackedFloat32Array {
         let (Some(sim), Some(side)) = (&self.sim, parse_side(&side)) else {
@@ -800,14 +862,67 @@ impl BattleSim {
             .filter(|u| u.side == side && render_key(u) == render)
         {
             // SG1: climbers drawn on their ladders / the tower bridge.
-            for [x, y, z, angle] in sim.soldier_poses(unit, self.figure_scale) {
-                let (s, c) = (angle.sin() as f32, angle.cos() as f32);
-                buffer.extend_from_slice(&[
-                    c, 0.0, s, x as f32, 0.0, 1.0, 0.0, y as f32, -s, 0.0, c, z as f32,
-                ]);
+            for pose in sim.soldier_poses(unit, self.figure_scale) {
+                push_pose(&mut buffer, pose);
             }
         }
         PackedFloat32Array::from(buffer.as_slice())
+    }
+
+    /// PB3c: every regiment's `MultiMesh.buffer` in one call. `capacities[id]`
+    /// is the instance count of regiment `id`'s `MultiMesh` (< 0 or missing:
+    /// not drawn, no buffer). → `[counts: PackedInt32Array, buffers: Array]`
+    /// indexed by unit id: `counts[id]` figures (12 floats each, as
+    /// `get_soldier_buffer`), `buffers[id]` zero-padded to
+    /// `max(counts[id], capacities[id])` figures. Poses are rebuilt only after
+    /// a simulation step or a change of the battle; in between the same
+    /// buffers come back (copy-on-write).
+    #[func]
+    fn get_soldier_buffers(&mut self, capacities: PackedInt32Array) -> VarArray {
+        let Some(sim) = &self.sim else {
+            return pair(&PackedInt32Array::new(), &VarArray::new());
+        };
+        let key = (sim.ticks(), self.pose_epoch, self.figure_scale.to_bits());
+        let units = sim.units();
+        let capacities = capacities.as_slice();
+        let wanted = |id: usize| capacities.get(id).is_some_and(|&c| c >= 0);
+        let cache = &mut self.poses;
+        let fresh = cache.key == Some(key) && cache.raw.len() == units.len();
+        if !fresh {
+            cache.key = Some(key);
+            cache.raw.resize(units.len(), None);
+            cache.padded.resize(units.len(), PackedFloat32Array::new());
+        }
+        let mut counts = PackedInt32Array::new();
+        counts.resize(units.len());
+        let mut buffers = VarArray::new();
+        for (id, unit) in units.iter().enumerate() {
+            if !wanted(id) {
+                cache.raw[id] = None;
+                cache.padded[id] = PackedFloat32Array::new();
+                buffers.push(&PackedFloat32Array::new().to_variant());
+                continue;
+            }
+            let capacity = capacities[id].max(0) as usize;
+            if !fresh || cache.raw[id].is_none() {
+                // SG1: climbers drawn on their ladders / the tower bridge.
+                let poses = sim.soldier_poses(unit, self.figure_scale);
+                let mut raw = Vec::with_capacity(poses.len() * 12);
+                for pose in poses {
+                    push_pose(&mut raw, pose);
+                }
+                cache.padded[id] = padded_buffer(&raw, capacity);
+                cache.raw[id] = Some(raw);
+            }
+            let raw = cache.raw[id].as_deref().unwrap_or_default();
+            let len = raw.len().max(capacity * 12);
+            if cache.padded[id].len() != len {
+                cache.padded[id] = padded_buffer(raw, capacity);
+            }
+            counts[id] = (raw.len() / 12) as i32;
+            buffers.push(&cache.padded[id].to_variant());
+        }
+        pair(&counts, &buffers)
     }
 
     /// `{width, depth, resolution, nx, nz, heights, forests[{x, z, radius}],
@@ -1159,6 +1274,7 @@ impl BattleSim {
     /// when `house` < 0; `false` when it already burns or is not a siege.
     #[func]
     fn debug_ignite(&mut self, house: i64) -> bool {
+        self.touch_poses();
         if self.player.is_some() {
             return false;
         }
@@ -1182,6 +1298,7 @@ impl BattleSim {
     /// its maximum; 0 opens it). `false` outside a siege or for a bad index.
     #[func]
     fn debug_set_piece_hp(&mut self, index: i64, hp: f64) -> bool {
+        self.touch_poses();
         if self.player.is_some() {
             return false;
         }
