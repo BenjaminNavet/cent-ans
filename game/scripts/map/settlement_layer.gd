@@ -25,7 +25,10 @@ const ICON_CENTER_LIFT := 0.42
 const BURN_THRESHOLD := 10.0
 ## Partage de l'écart entre deux maquettes voisines (voir `_fit_models`).
 const FIT_WEIGHT := {"city": 3.0, "town": 2.0, "castle": 1.5, "abbey": 1.3, "village": 1.0}
-const MIN_FIT_SCALE := 0.55
+const MIN_FIT_SCALE := 0.4
+## DC4 : une maquette dont le centre tombe à moins de ce facteur × son rayon du bord d'une voisine
+## prioritaire (faubourg : Saint-Maximin sous Trèves) n'est pas affichée ; marqueur et nom restent.
+const ABSORB_FACTOR := 0.5
 
 @export var tiers: ZoomTiers
 ## Échelle globale des marqueurs (tailles par rang dans `data/map/settlement_markers.json`).
@@ -49,13 +52,23 @@ var markers: SettlementMarkers
 var _marker_rank: PackedInt32Array = PackedInt32Array()
 var _marker_size: PackedFloat32Array = PackedFloat32Array()
 var _marker_until: PackedFloat32Array = PackedFloat32Array()
+## DC4 : position monde de chaque marqueur (picking sans relire le relief).
+var _marker_world: PackedVector3Array = PackedVector3Array()
 ## Écu affiché par colonie (faction), pour ne réécrire que ce qui change.
 var _marker_holder: PackedStringArray = PackedStringArray()
 var _icon_distance := -1.0
 var _labels: Array[Label3D] = []
+## DC4 : taille du texte de chaque étiquette (police, contour compris), mesurée à la demande.
+var _label_size: PackedVector2Array = PackedVector2Array()
+var _label_kind: PackedStringArray = PackedStringArray()
 var _models: Array = []  # par colonie : Node3D ou null
 var _model_radius: PackedFloat32Array = PackedFloat32Array()
 var _model_top: PackedFloat32Array = PackedFloat32Array()
+## DC4 : rayon et hauteur des maquettes avant réduction, et facteur de réduction appliqué
+## (`_fit_model`, recalculé après les ancrages fins et la croissance CV1).
+var _base_radius: PackedFloat32Array = PackedFloat32Array()
+var _base_top: PackedFloat32Array = PackedFloat32Array()
+var _fit_scale: PackedFloat32Array = PackedFloat32Array()
 var _models_root: Node3D
 ## Villes emblématiques (lot L1) : index de colonie → LandmarkModel (toujours visibles, LOD par
 ## portées de visibilité), sous `_landmarks_root`.
@@ -111,6 +124,8 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	data = settlement_data
 	tiers = zoom_tiers if zoom_tiers != null else ZoomTiers.new()
 	_labels.clear()
+	_label_size.clear()
+	_label_kind.clear()
 	_models.clear()
 	_settlements_by_chunk.clear()
 	_hamlets_by_chunk.clear()
@@ -136,6 +151,8 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	_colors.fill(Color(0.6, 0.6, 0.6))
 	_model_radius.resize(count)
 	_model_top.resize(count)
+	_fit_scale.resize(count)
+	_fit_scale.fill(1.0)
 	_real_radius.resize(count)
 	_real_radius.fill(-1.0)
 	_model_scale.resize(count)
@@ -149,6 +166,8 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 		_register(_settlements_by_chunk, terrain.chunk_index_at(px.x, px.y), i)
 		_build_model(i, entry)
 		_build_label(i, entry)
+	_base_radius = _model_radius.duplicate()
+	_base_top = _model_top.duplicate()
 	_fit_models()
 	for i in data.hamlets.size():
 		var hpx: Vector2 = data.hamlets[i]["px"]
@@ -252,6 +271,19 @@ func landmark_zones() -> PackedVector3Array:
 	return zones
 
 
+## DC4 (ADR 0082) : vrai si un point carte tombe dans l'emprise de la maquette d'une colonie
+## (hameau de `hamlets.json` resté sur une place ajoutée depuis : il n'est pas posé).
+func on_settlement_model(px: Vector2) -> bool:
+	var index := terrain.chunk_index_at(px.x, px.y)
+	var margin := ModelLibrary.HAMLET_SCALE * 0.3
+	for dy in [-1, 0, 1]:
+		for dx in [-1, 0, 1]:
+			for j in _settlements_by_chunk.get(index + dy * TerrainBuilder.CHUNKS + dx, PackedInt32Array()):
+				if _models[j] != null and not _landmarks.has(j) and px.distance_to(model_px(j)) < _model_radius[j] + margin:
+					return true
+	return false
+
+
 ## Vrai si un point carte est couvert par une ville emblématique (hameaux, végétation).
 func covered_by_landmark(px: Vector2) -> bool:
 	for landmark in _landmarks.values():
@@ -262,34 +294,80 @@ func covered_by_landmark(px: Vector2) -> bool:
 
 ## Réduit les maquettes trop proches d'une voisine (Paris / Vincennes / Saint-Denis) : l'écart
 ## entre deux colonies est partagé au prorata du poids du type, sans descendre sous
-## `MIN_FIT_SCALE`. Étiquettes et picking utilisent le rayon réduit.
+## `MIN_FIT_SCALE`. Étiquettes et picking utilisent le rayon réduit. DC4 (ADR 0082) : positions
+## de rendu (ancrages fins) ; une ville emblématique ne se réduit pas, sa voisine prend tout
+## l'écart restant ; recalcul à partir de la taille d'origine (appel répétable). Une maquette
+## encore dans l'emprise d'une voisine prioritaire est masquée (`_absorb`).
 func _fit_models() -> void:
 	for i in data.settlements.size():
-		var holder: Node3D = _models[i]
-		if holder == null or _landmarks.has(i):
-			continue
-		var entry: Dictionary = data.settlements[i]
-		var px: Vector2 = entry["px"]
-		var weight: float = FIT_WEIGHT.get(str(entry["kind"]), 1.0)
-		var allowed := INF
-		var index := terrain.chunk_index_at(px.x, px.y)
-		for dy in [-1, 0, 1]:
-			for dx in [-1, 0, 1]:
-				var neighbor: int = index + dy * TerrainBuilder.CHUNKS + dx
-				for j in _settlements_by_chunk.get(neighbor, PackedInt32Array()):
-					if j == i:
-						continue
-					var other: Dictionary = data.settlements[j]
-					var d := px.distance_to(other["px"])
-					var other_weight: float = FIT_WEIGHT.get(str(other["kind"]), 1.0)
+		_fit_model(i)
+	for i in data.settlements.size():
+		_absorb(i)
+
+
+## Réévalue le masquage de `i` et des voisines moins prioritaires (maquette `i` changée).
+func _absorb_around(i: int) -> void:
+	var px := model_px(i)
+	var index := terrain.chunk_index_at(px.x, px.y)
+	var around: Array[int] = []
+	for dy in [-1, 0, 1]:
+		for dx in [-1, 0, 1]:
+			for j in _settlements_by_chunk.get(index + dy * TerrainBuilder.CHUNKS + dx, PackedInt32Array()):
+				if j >= i:
+					around.append(j)
+	around.sort()
+	for j in around:
+		_absorb(j)
+
+
+## Masque la maquette `i` si son centre est dans l'emprise d'une voisine prioritaire (placée
+## avant dans l'ordre de priorité) à `ABSORB_FACTOR` × son rayon près.
+func _absorb(i: int) -> void:
+	var holder: Node3D = _models[i]
+	if holder == null or _landmarks.has(i):
+		return
+	var px := model_px(i)
+	var index := terrain.chunk_index_at(px.x, px.y)
+	var absorbed := false
+	for dy in [-1, 0, 1]:
+		for dx in [-1, 0, 1]:
+			for j in _settlements_by_chunk.get(index + dy * TerrainBuilder.CHUNKS + dx, PackedInt32Array()):
+				if j >= i or _models[j] == null or not (_models[j] as Node3D).visible:
+					continue
+				if px.distance_to(model_px(j)) < _model_radius[j] + ABSORB_FACTOR * _model_radius[i]:
+					absorbed = true
+	holder.visible = not absorbed
+
+
+func _fit_model(i: int) -> void:
+	var holder: Node3D = _models[i]
+	if holder == null or _landmarks.has(i) or holder.get_child_count() == 0:
+		return
+	var px := model_px(i)
+	var weight: float = FIT_WEIGHT.get(str(data.settlements[i]["kind"]), 1.0)
+	var allowed := INF
+	var index := terrain.chunk_index_at(px.x, px.y)
+	for dy in [-1, 0, 1]:
+		for dx in [-1, 0, 1]:
+			var neighbor: int = index + dy * TerrainBuilder.CHUNKS + dx
+			for j in _settlements_by_chunk.get(neighbor, PackedInt32Array()):
+				if j == i or _models[j] == null:
+					continue
+				var d := px.distance_to(model_px(j))
+				if _landmarks.has(j):
+					allowed = minf(allowed, d - _model_radius[j])
+				else:
+					var other_weight: float = FIT_WEIGHT.get(str(data.settlements[j]["kind"]), 1.0)
 					allowed = minf(allowed, d * weight / (weight + other_weight))
-		if allowed < _model_radius[i]:
-			var factor := maxf(allowed / _model_radius[i], MIN_FIT_SCALE)
-			var model := holder.get_child(0) as Node3D
-			model.scale *= factor
-			_model_radius[i] *= factor
-			_model_top[i] *= factor
-			_ground_model(i)
+	var factor := clampf(allowed / maxf(_base_radius[i], 0.001), MIN_FIT_SCALE, 1.0)
+	if is_equal_approx(factor, _fit_scale[i]):
+		return
+	var model := holder.get_child(0) as Node3D
+	model.scale *= factor / _fit_scale[i]
+	_fit_scale[i] = factor
+	_model_radius[i] = _base_radius[i] * factor
+	_model_top[i] = _base_top[i] * factor
+	_ground_model(i)
 
 
 static func _model_aabb(root: Node3D) -> AABB:
@@ -389,13 +467,15 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	label.fixed_size = true
 	label.pixel_size = 0.0011
 	label.no_depth_test = true
-	label.render_priority = 3
-	label.outline_render_priority = 2
+	label.render_priority = 4  # DC4 : texte et contour au-dessus des marqueurs (2)
+	label.outline_render_priority = 3
 	label.visible = false
 	var px: Vector2 = entry["px"]
 	label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y), px.y)
 	_labels_root.add_child(label)
 	_labels.append(label)
+	_label_size.append(Vector2.ZERO)
+	_label_kind.append(kind)
 
 
 ## Instance du `MultiMesh` d'une colonie : ordre inverse de la priorité, pour que les lieux de
@@ -410,6 +490,7 @@ func _build_icons() -> void:
 	_marker_rank.resize(count)
 	_marker_size.resize(count)
 	_marker_until.resize(count)
+	_marker_world.resize(count)
 	_marker_holder.resize(count)
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
@@ -430,7 +511,8 @@ func _build_icons() -> void:
 		_marker_holder[i] = ""
 		var cell := markers.cell_of(markers.pictogram_for(kind, rank))
 		var k := _icon_instance(i)
-		multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)))
+		_marker_world[i] = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+		multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, _marker_world[i]))
 		multimesh.set_instance_color(k, Color(-1.0, 1.0 if bool(entry.get("port", false)) else 0.0, 0.0, 1.0))
 		multimesh.set_instance_custom_data(k, Color(cell, 0.0, _marker_size[i], _marker_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
@@ -688,51 +770,77 @@ func _label_alpha(kind: String) -> float:
 			return _weights.x
 
 
-## Masque les étiquettes qui en chevauchent une plus prioritaire (colonies déjà triées).
+## Masque les étiquettes qui en chevauchent une plus prioritaire. Les colonies sont triées par
+## priorité (cité > ville > château > abbaye > village, puis poids décroissant) : une étiquette
+## est gardée si son rectangle écran (mesuré avec la police, `LabelPlacer.label3d_screen_rect`,
+## élargi de `declutter_margin`) ne coupe aucune étiquette déjà gardée. DC4 (ADR 0082) : les
+## rectangles gardés sont rangés dans une grille spatiale (`LabelPlacer.SpatialGrid`), coût
+## linéaire au lieu de O(n × gardées) avec ~1 200 colonies.
 func declutter() -> void:
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
 	if camera == null:
 		return
 	var screen := get_viewport().get_visible_rect()
-	var placed: Array[Rect2] = []
+	var grid := LabelPlacer.SpatialGrid.new()
 	# ZG4 : paliers vallée / site (vue rasante) : seulement les colonies proches, l'horizon ne se
 	# couvre pas de noms.
 	var close_w := tiers.valley_weight(_camera_distance) if tiers != null else 0.0
 	var label_range := tiers.close_label_range_factor * _camera_distance if tiers != null else INF
+	var alpha_by_kind := {}
+	var any_label := false
+	for kind in KIND_INDEX:
+		alpha_by_kind[kind] = _label_alpha(kind)
+		any_label = any_label or alpha_by_kind[kind] >= 0.02
+	if not any_label:  # palier Europe : aucun nom de colonie
+		for i in _labels.size():
+			if _labels[i].visible:
+				_labels[i].visible = false
+		return
+	var camera_at := camera.global_position
+	# Échelle écran d'un `Label3D` à taille fixe (cf. `LabelPlacer.label3d_screen_rect`).
+	var scale := 1.0
+	if camera.projection == Camera3D.PROJECTION_PERSPECTIVE and not _labels.is_empty():
+		scale = _labels[0].pixel_size * screen.size.y / (2.0 * tan(deg_to_rad(camera.fov) * 0.5))
 	for i in _labels.size():
 		var label := _labels[i]
-		var alpha := _label_alpha(str(data.settlements[i]["kind"]))
-		if close_w > 0.5 and camera.global_position.distance_to(label.global_position) > label_range:
+		var alpha: float = alpha_by_kind.get(_label_kind[i], _weights.x)
+		if alpha < 0.02:
+			_show_label(i, false, alpha)
+			continue
+		var at := label.global_position
+		if close_w > 0.5 and camera_at.distance_to(at) > label_range:
 			alpha = 0.0
-		if alpha < 0.02 or camera.is_position_behind(label.global_position):
-			label.visible = false
+		if alpha < 0.02 or camera.is_position_behind(at):
+			_show_label(i, false, alpha)
 			continue
-		var rect := _label_rect(label, camera, declutter_margin)
-		if not screen.intersects(rect):
-			label.visible = false
+		var size := _label_size[i]
+		if size == Vector2.ZERO:
+			var font := label.font if label.font != null else ThemeDB.fallback_font
+			size = font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, label.font_size) + Vector2.ONE * float(label.outline_size)
+			_label_size[i] = size
+		size *= scale
+		var center := camera.unproject_position(at) - label.offset * Vector2(-1.0, 1.0) * scale
+		var rect := Rect2(center - size * 0.5, size).grow(declutter_margin)
+		if not screen.intersects(rect) or grid.hits(rect):
+			_show_label(i, false, alpha)
 			continue
-		var free := true
-		for other in placed:
-			if other.intersects(rect):
-				free = false
-				break
-		label.visible = free
-		if free:
-			placed.append(rect)
-			var modulate := label_color
-			modulate.a = alpha
-			label.modulate = modulate
-			var outline := label_outline
-			outline.a = alpha
-			label.outline_modulate = outline
+		grid.insert(rect)
+		_show_label(i, true, alpha)
 
 
-## Rectangle écran estimé d'une étiquette (taille de police et longueur du texte).
-static func _label_rect(label: Label3D, camera: Camera3D, margin: float) -> Rect2:
-	var center := camera.unproject_position(label.global_position) - Vector2(0.0, label.offset.y)
-	var width := label.text.length() * label.font_size * 0.5 + margin * 2.0
-	var height := label.font_size * 1.05 + margin * 2.0
-	return Rect2(center - Vector2(width, height) * 0.5, Vector2(width, height))
+## Affiche ou masque l'étiquette `i` ; couleurs réécrites seulement quand l'opacité change.
+func _show_label(i: int, shown: bool, alpha: float) -> void:
+	var label := _labels[i]
+	if label.visible != shown:
+		label.visible = shown
+	if not shown or is_equal_approx(label.modulate.a, alpha):
+		return
+	var modulate := label_color
+	modulate.a = alpha
+	label.modulate = modulate
+	var outline := label_outline
+	outline.a = alpha
+	label.outline_modulate = outline
 
 
 ## Lot UX1 : rectangles écran des noms de colonies affichés (obstacles des plaques d'armée).
@@ -876,6 +984,8 @@ func _build_hamlets(index: int) -> void:
 			continue
 		var seed_value := _hash(str(hamlet["name"]) + str(px))
 		px = hamlet_px(h)  # ZG5b : ancrage fin (tirages inchangés)
+		if on_settlement_model(px):
+			continue
 		var variant := seed_value % meshes.size()
 		var devastation: float = _devastation.get(hamlet["province"], 0.0)
 		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
@@ -933,22 +1043,28 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	var icons := _weights.x < 0.65
 	var best := ""
 	var best_score := INF
+	var right := camera.global_transform.basis.x
+	var eye := camera.global_position
+	var model_range_sq := tiers.model_range * tiers.model_range
 	for i in data.settlements.size():
-		var px: Vector2 = data.settlements[i]["px"]
-		if near and _models[i] != null:
+		if near and _models[i] != null and (_models[i] as Node3D).visible:  # DC4 : pas les absorbées
 			var holder: Node3D = _models[i]
-			var center := Vector3(holder.position.x, _model_base_y(i) + _model_top[i] * model_scale(i) * 0.4, holder.position.z)
+			if eye.distance_squared_to(holder.position) > model_range_sq:
+				continue  # maquette hors de sa portée de visibilité
+			# Rayon effectif = rayon d'origine × réduction DC4 (`_model_radius`) × échelle SZ4b.
+			var zoom_scale := model_scale(i)
+			var center := Vector3(holder.position.x, _model_base_y(i) + _model_top[i] * zoom_scale * 0.4, holder.position.z)
 			if camera.is_position_behind(center):
 				continue
 			var screen_center := camera.unproject_position(center)
-			var edge := camera.unproject_position(center + camera.global_transform.basis.x * _model_radius[i] * model_scale(i))
+			var edge := camera.unproject_position(center + right * _model_radius[i] * zoom_scale)
 			var radius_px := maxf(screen_center.distance_to(edge), 8.0)
 			var d := screen_center.distance_to(screen_position)
 			if d < radius_px and d / radius_px < best_score:
 				best_score = d / radius_px
 				best = str(data.settlements[i]["id"])
-		elif icons and marker_visible(i):
-			var world := Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+		elif icons and _camera_distance < _marker_until[i]:
+			var world := _marker_world[i]
 			if camera.is_position_behind(world):
 				continue
 			var size := marker_size(i)
@@ -1031,6 +1147,7 @@ func apply_fine_anchors(store: FineGeoStore) -> void:
 		holder.position.x = p.x
 		holder.position.z = p.y
 		_ground_model(i)
+	_fit_models()  # DC4 : écarts recalculés aux positions de rendu
 	_hamlet_anchors = store.hamlets if store.hamlets.size() == data.hamlets.size() else PackedVector4Array()
 	for index in _hamlet_nodes:
 		_hamlet_dirty[index] = true
@@ -1102,6 +1219,9 @@ func replace_model(i: int, model: Node3D) -> void:
 	var aabb := _model_aabb(model)
 	_model_radius[i] = maxf(aabb.size.x, aabb.size.z) * 0.5
 	_model_top[i] = aabb.end.y
+	_base_radius[i] = _model_radius[i]
+	_base_top[i] = _model_top[i]
+	_fit_scale[i] = 1.0
 	for geometry in model.find_children("*", "GeometryInstance3D", true, false):
 		var g := geometry as GeometryInstance3D
 		g.visibility_range_end = tiers.model_range
@@ -1109,6 +1229,8 @@ func replace_model(i: int, model: Node3D) -> void:
 	if i < _colors.size():
 		ModelLibrary.tint_banner(holder, _colors[i])
 	_ground_model(i)
+	_fit_model(i)
+	_absorb_around(i)
 	_update_label_heights()
 
 

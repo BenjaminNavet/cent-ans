@@ -91,10 +91,21 @@ pub fn nearest_settlement_where(
     point: [f32; 2],
     accept: impl Fn(&SettlementId) -> bool,
 ) -> Option<SettlementId> {
+    // DC3: `settlement_px` and `settlements` are both sorted by id; walk them side by side
+    // instead of looking every position up (1 200 places, once per army and faction turn).
+    let mut positions = data.settlement_px.iter().peekable();
     data.settlements
         .keys()
-        .filter(|id| accept(id))
-        .filter_map(|id| data.settlement_point(id).map(|p| (distance(p, point), id)))
+        .filter_map(|id| {
+            while positions.next_if(|(known, _)| *known < id).is_some() {}
+            let point = match positions.peek() {
+                Some((known, p)) if *known == id => Some(**p),
+                _ => data.settlement_point(id),
+            };
+            point.map(|p| (p, id))
+        })
+        .filter(|(_, id)| accept(id))
+        .map(|(p, id)| (distance(p, point), id))
         .min_by(|a, b| a.0.total_cmp(&b.0).then_with(|| a.1.cmp(b.1)))
         .map(|(_, id)| id.clone())
 }

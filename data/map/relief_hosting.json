@@ -5,9 +5,13 @@
   "version": 1,
   "manifest_name": "manifest.json",
   "bake": {
-    "pyramid_bake_versions": {},
-    "rivers_generated_at": null,
-    "roads_generated_at": null,
-    "signature": null
+    "pyramid_bake_versions": {
+      "tier1": 2,
+      "tier2": 2,
+      "tier3": 5
+    },
+    "rivers_generated_at": "2026-09-26T04:49:07+00:00",
+    "roads_generated_at": "2026-09-26T04:55:07+00:00",
+    "signature": "fb96845dee30c0491afdc67d125bcd07d90b900f2187a830238b150fdb356993"
   }
 }

@@ -3,56 +3,284 @@
     "id": "set_moulins",
     "province": "prov_bourbonnais",
     "kind": "city",
-    "name": { "display": "Moulins", "local": "Molins", "local_language": "ancien français" },
-    "lonlat": [3.3336, 46.5657],
+    "name": {
+      "display": "Moulins",
+      "local": "Molins",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.3336,
+      46.5657
+    ],
     "weight": 32,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_water_mill", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_water_mill",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale montante du duché de Bourbon, érigé en 1327 pour Louis Ier, sur l'Allier.",
-    "sources": ["Moulins (Allier)", "Duché de Bourbon"]
+    "sources": [
+      "Moulins (Allier)",
+      "Duché de Bourbon"
+    ]
   },
   {
     "id": "set_bourbon_l_archambault",
     "province": "prov_bourbonnais",
     "kind": "castle",
-    "name": { "display": "Bourbon-l'Archambault", "local": "Bourbon", "local_language": "ancien français" },
-    "lonlat": [3.0333, 46.5833],
+    "name": {
+      "display": "Bourbon-l'Archambault",
+      "local": "Bourbon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0333,
+      46.5833
+    ],
     "weight": 16,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse ancestrale de la maison de Bourbon, berceau de la dynastie.",
-    "sources": ["Château de Bourbon"]
+    "sources": [
+      "Château de Bourbon"
+    ]
   },
   {
     "id": "set_gannat",
     "province": "prov_bourbonnais",
     "kind": "town",
-    "name": { "display": "Gannat", "local": "Ganat", "local_language": "ancien français" },
-    "lonlat": [3.1953, 46.1000],
+    "name": {
+      "display": "Gannat",
+      "local": "Ganat",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.1953,
+      46.1
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Ville close aux confins du Bourbonnais et de l'Auvergne.",
-    "sources": ["Gannat"]
+    "sources": [
+      "Gannat"
+    ]
   },
   {
     "id": "set_souvigny",
     "province": "prov_bourbonnais",
     "kind": "abbey",
-    "name": { "display": "Souvigny", "local": "Souvigny", "local_language": "ancien français" },
-    "lonlat": [3.1975, 46.5486],
+    "name": {
+      "display": "Souvigny",
+      "local": "Souvigny",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.1975,
+      46.5486
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Prieuré clunisien, nécropole traditionnelle des sires puis ducs de Bourbon.",
-    "sources": ["Prieuré de Souvigny"]
+    "sources": [
+      "Prieuré de Souvigny"
+    ]
+  },
+  {
+    "id": "set_montlucon",
+    "province": "prov_bourbonnais",
+    "kind": "town",
+    "name": {
+      "display": "Montluçon",
+      "local": "Montluçon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.6033,
+      46.34
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville-château sur le Cher, place forte occidentale du Bourbonnais.",
+    "sources": [
+      "Montluçon"
+    ]
+  },
+  {
+    "id": "set_herisson",
+    "province": "prov_bourbonnais",
+    "kind": "castle",
+    "name": {
+      "display": "Hérisson",
+      "local": "Herichon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.715,
+      46.5386
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse des sires de Bourbon dominant l'Aumance.",
+    "sources": [
+      "Hérisson (Allier)"
+    ]
+  },
+  {
+    "id": "set_abbaye_de_sept_fons",
+    "province": "prov_bourbonnais",
+    "kind": "abbey",
+    "name": {
+      "display": "Sept-Fons",
+      "local": "Sept Fons",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.7967,
+      46.3839
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1132 dans la forêt bourbonnaise.",
+    "sources": [
+      "Abbaye Notre-Dame de Sept-Fons"
+    ]
+  },
+  {
+    "id": "set_saint_pourcain_sur_sioule",
+    "province": "prov_bourbonnais",
+    "kind": "village",
+    "name": {
+      "display": "Saint-Pourçain-sur-Sioule",
+      "local": "Saint Pourçain",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.2872,
+      46.3153
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole sur la Sioule, vins réputés dès le Moyen Âge.",
+    "sources": [
+      "Saint-Pourçain-sur-Sioule"
+    ]
+  },
+  {
+    "id": "set_varennes_sur_allier",
+    "province": "prov_bourbonnais",
+    "kind": "village",
+    "name": {
+      "display": "Varennes-sur-Allier",
+      "local": "Varennes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.3986,
+      46.3181
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg sur l'Allier, entre Moulins et Vichy.",
+    "sources": [
+      "Varennes-sur-Allier"
+    ]
+  },
+  {
+    "id": "set_cerilly",
+    "province": "prov_bourbonnais",
+    "kind": "village",
+    "name": {
+      "display": "Cérilly",
+      "local": "Cerilliacum",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.8236,
+      46.6203
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg forestier aux confins du Berry.",
+    "sources": [
+      "Cérilly"
+    ]
+  },
+  {
+    "id": "set_dompierre_sur_besbre",
+    "province": "prov_bourbonnais",
+    "kind": "village",
+    "name": {
+      "display": "Dompierre-sur-Besbre",
+      "local": "Dompierre",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.6819,
+      46.5225
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg agricole sur la Besbre, à l'est du Bourbonnais.",
+    "sources": [
+      "Dompierre-sur-Besbre"
+    ]
   }
 ]

@@ -3,70 +3,314 @@
     "id": "set_amiens",
     "province": "prov_picardie",
     "kind": "city",
-    "name": { "display": "Amiens", "local": "Amiens", "local_language": "ancien français" },
-    "lonlat": [2.2957, 49.8942],
+    "name": {
+      "display": "Amiens",
+      "local": "Amiens",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.2957,
+      49.8942
+    ],
     "weight": 38,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_weaving_workshop", "bld_cathedral", "bld_stone_walls", "bld_muster_field", "bld_stables"],
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_stables"
+    ],
     "port": false,
     "description": "Capitale de la Picardie sur la Somme, grande ville drapière (waide) au vaste chœur de sa cathédrale.",
-    "sources": ["Amiens"]
+    "sources": [
+      "Amiens"
+    ]
   },
   {
     "id": "set_saint_quentin",
     "province": "prov_picardie",
     "kind": "town",
-    "name": { "display": "Saint-Quentin", "local": "Saint Quentin", "local_language": "ancien français" },
-    "lonlat": [3.2879, 49.8467],
+    "name": {
+      "display": "Saint-Quentin",
+      "local": "Saint Quentin",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.2879,
+      49.8467
+    ],
     "weight": 18,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_weaving_workshop", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_weaving_workshop",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Grande commune du Vermandois, siège d'une riche draperie.",
-    "sources": ["Saint-Quentin (Aisne)"]
+    "sources": [
+      "Saint-Quentin (Aisne)"
+    ]
   },
   {
     "id": "set_saint_valery_sur_somme",
     "province": "prov_picardie",
     "kind": "town",
-    "name": { "display": "Saint-Valery-sur-Somme", "local": "Saint Valeri", "local_language": "ancien français" },
-    "lonlat": [1.6333, 50.1833],
+    "name": {
+      "display": "Saint-Valery-sur-Somme",
+      "local": "Saint Valeri",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6333,
+      50.1833
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
     "port": true,
     "description": "Port à l'embouchure de la Somme, ancien point d'embarquement de Guillaume le Conquérant.",
-    "sources": ["Saint-Valery-sur-Somme"]
+    "sources": [
+      "Saint-Valery-sur-Somme"
+    ]
   },
   {
     "id": "set_coucy",
     "province": "prov_picardie",
     "kind": "castle",
-    "name": { "display": "Coucy", "local": "Couci", "local_language": "ancien français" },
-    "lonlat": [3.3333, 49.5167],
+    "name": {
+      "display": "Coucy",
+      "local": "Couci",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.3333,
+      49.5167
+    ],
     "weight": 14,
     "owner": null,
     "fortification_level": 4,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Immense forteresse des sires de Coucy en Laonnois, dotée du plus grand donjon du royaume.",
-    "sources": ["Château de Coucy"]
+    "sources": [
+      "Château de Coucy"
+    ]
   },
   {
     "id": "set_corbie",
     "province": "prov_picardie",
     "kind": "abbey",
-    "name": { "display": "Corbie", "local": "Corbie", "local_language": "ancien français" },
-    "lonlat": [2.5167, 49.9167],
+    "name": {
+      "display": "Corbie",
+      "local": "Corbie",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.5167,
+      49.9167
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Grande abbaye royale sur la Somme, ancien foyer de copie des manuscrits carolingiens.",
-    "sources": ["Abbaye de Corbie"]
+    "sources": [
+      "Abbaye de Corbie"
+    ]
+  },
+  {
+    "id": "set_peronne",
+    "province": "prov_picardie",
+    "kind": "town",
+    "name": {
+      "display": "Péronne",
+      "local": "Péronne",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.9333,
+      49.9333
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville forte sur la Somme, dite « la Pucelle » pour n'avoir jamais été prise.",
+    "sources": [
+      "Péronne (Somme)"
+    ]
+  },
+  {
+    "id": "set_ham",
+    "province": "prov_picardie",
+    "kind": "town",
+    "name": {
+      "display": "Ham",
+      "local": "Han",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0733,
+      49.7472
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville close sur la Somme, dotée d'un château comtal réputé imprenable.",
+    "sources": [
+      "Château de Ham"
+    ]
+  },
+  {
+    "id": "set_doullens",
+    "province": "prov_picardie",
+    "kind": "castle",
+    "name": {
+      "display": "Doullens",
+      "local": "Doullens",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3419,
+      50.1583
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse royale gardant la frontière picarde face à l'Artois.",
+    "sources": [
+      "Doullens"
+    ]
+  },
+  {
+    "id": "set_montdidier",
+    "province": "prov_picardie",
+    "kind": "village",
+    "name": {
+      "display": "Montdidier",
+      "local": "Montdidier",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.5667,
+      49.65
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Petite ville et prévôté royale sur le plateau santerrois.",
+    "sources": [
+      "Montdidier"
+    ]
+  },
+  {
+    "id": "set_roye",
+    "province": "prov_picardie",
+    "kind": "village",
+    "name": {
+      "display": "Roye",
+      "local": "Roye",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.7972,
+      49.7014
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg marchand du Santerre, étape sur la route de Paris à Arras.",
+    "sources": [
+      "Roye (Somme)"
+    ]
+  },
+  {
+    "id": "set_moreuil",
+    "province": "prov_picardie",
+    "kind": "village",
+    "name": {
+      "display": "Moreuil",
+      "local": "Moreuil",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.4736,
+      49.7719
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg seigneurial dominant la vallée de l'Avre.",
+    "sources": [
+      "Moreuil"
+    ]
+  },
+  {
+    "id": "set_nesle",
+    "province": "prov_picardie",
+    "kind": "village",
+    "name": {
+      "display": "Nesle",
+      "local": "Nesle",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.9111,
+      49.7583
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Chef-lieu du comté de Nesle, bourg agricole du Santerre.",
+    "sources": [
+      "Nesle (Somme)"
+    ]
   }
 ]

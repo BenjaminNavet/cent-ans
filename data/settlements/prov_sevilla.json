@@ -136,5 +136,56 @@
     "sources": [
       "Monastère de San Isidoro del Campo"
     ]
+  },
+  {
+    "id": "set_ecija",
+    "province": "prov_sevilla",
+    "kind": "town",
+    "name": {
+      "display": "Écija",
+      "local": "Écija",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.0792,
+      37.5398
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville marchande close sur le Genil, reconquise en 1240.",
+    "sources": [
+      "Écija"
+    ]
+  },
+  {
+    "id": "set_utrera",
+    "province": "prov_sevilla",
+    "kind": "village",
+    "name": {
+      "display": "Utrera",
+      "local": "Utrera",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -5.7789,
+      37.1859
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de la campagne sévillane, protégé par un château de frontière.",
+    "sources": [
+      "Utrera"
+    ]
   }
 ]

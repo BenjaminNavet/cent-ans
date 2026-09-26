@@ -139,9 +139,10 @@ class SpatialGrid:
 
 	## Vrai si `rect` coupe un rectangle de la grille.
 	func hits(rect: Rect2) -> bool:
-		for index in _candidates(rect):
-			if _rects[index].intersects(rect):
-				return true
+		for key in _keys(rect):
+			for index in _cells.get(key, PackedInt32Array()):
+				if _rects[index].intersects(rect):
+					return true
 		return false
 
 	## Aire totale recouverte par les rectangles de la grille.

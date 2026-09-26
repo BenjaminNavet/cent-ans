@@ -3,70 +3,312 @@
     "id": "set_quimper",
     "province": "prov_bretagne_ouest",
     "kind": "city",
-    "name": { "display": "Quimper", "local": "Kemper", "local_language": "breton" },
-    "lonlat": [-4.0970, 47.9960],
+    "name": {
+      "display": "Quimper",
+      "local": "Kemper",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -4.097,
+      47.996
+    ],
     "weight": 30,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_market", "bld_windmill", "bld_port", "bld_cathedral", "bld_palisade", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_windmill",
+      "bld_port",
+      "bld_cathedral",
+      "bld_palisade",
+      "bld_muster_field"
+    ],
     "port": true,
     "description": "Cité épiscopale de Cornouaille au confluent de l'Odet et du Steir.",
-    "sources": ["Quimper"]
+    "sources": [
+      "Quimper"
+    ]
   },
   {
     "id": "set_brest",
     "province": "prov_bretagne_ouest",
     "kind": "town",
-    "name": { "display": "Brest", "local": "Brest", "local_language": "breton" },
-    "lonlat": [-4.4860, 48.3904],
+    "name": {
+      "display": "Brest",
+      "local": "Brest",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -4.486,
+      48.3904
+    ],
     "weight": 16,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
     "port": true,
     "description": "Château et port au fond de la rade, place forte qui deviendra un bastion montfortiste pendant la guerre de Succession de Bretagne.",
-    "sources": ["Brest", "Guerre de Succession de Bretagne"]
+    "sources": [
+      "Brest",
+      "Guerre de Succession de Bretagne"
+    ]
   },
   {
     "id": "set_hennebont",
     "province": "prov_bretagne_ouest",
     "kind": "town",
-    "name": { "display": "Hennebont", "local": "Henbont", "local_language": "breton" },
-    "lonlat": [-3.2833, 47.8083],
+    "name": {
+      "display": "Hennebont",
+      "local": "Henbont",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -3.2833,
+      47.8083
+    ],
     "weight": 14,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Ville close sur le Blavet, future place forte de Jeanne de Montfort.",
-    "sources": ["Hennebont"]
+    "sources": [
+      "Hennebont"
+    ]
   },
   {
     "id": "set_suscinio",
     "province": "prov_bretagne_ouest",
     "kind": "castle",
-    "name": { "display": "Suscinio", "local": "Susinioù", "local_language": "breton" },
-    "lonlat": [-2.7500, 47.5167],
+    "name": {
+      "display": "Suscinio",
+      "local": "Susinioù",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -2.75,
+      47.5167
+    ],
     "weight": 9,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château ducal de chasse sur la presqu'île de Rhuys.",
-    "sources": ["Château de Suscinio"]
+    "sources": [
+      "Château de Suscinio"
+    ]
   },
   {
     "id": "set_locronan",
     "province": "prov_bretagne_ouest",
     "kind": "village",
-    "name": { "display": "Locronan", "local": "Lokorn", "local_language": "breton" },
-    "lonlat": [-4.2000, 48.1000],
+    "name": {
+      "display": "Locronan",
+      "local": "Lokorn",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -4.2,
+      48.1
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Bourg de pèlerinage autour du culte de saint Ronan (la Troménie) ; ses toiles à voile ne feront sa richesse qu'au XVe siècle.",
-    "sources": ["Locronan"]
+    "sources": [
+      "Locronan"
+    ]
+  },
+  {
+    "id": "set_concarneau",
+    "province": "prov_bretagne_ouest",
+    "kind": "town",
+    "name": {
+      "display": "Concarneau",
+      "local": "Konk Kerne",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -3.9186,
+      47.8747
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Ville close bâtie sur un îlot du port de pêche de Cornouaille.",
+    "sources": [
+      "Concarneau"
+    ]
+  },
+  {
+    "id": "set_morlaix",
+    "province": "prov_bretagne_ouest",
+    "kind": "town",
+    "name": {
+      "display": "Morlaix",
+      "local": "Montroulez",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -3.8281,
+      48.5778
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port fortifié au fond de sa rivière, débouché commercial du Léon et du Trégor.",
+    "sources": [
+      "Morlaix"
+    ]
+  },
+  {
+    "id": "set_landevennec",
+    "province": "prov_bretagne_ouest",
+    "kind": "abbey",
+    "name": {
+      "display": "Landévennec",
+      "local": "Landevenneg",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -4.2839,
+      48.2833
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Plus ancien monastère de Bretagne, fondé par saint Guénolé.",
+    "sources": [
+      "Abbaye de Landévennec"
+    ]
+  },
+  {
+    "id": "set_landerneau",
+    "province": "prov_bretagne_ouest",
+    "kind": "village",
+    "name": {
+      "display": "Landerneau",
+      "local": "Landerne",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -4.2569,
+      48.4514
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Bourg-pont sur l'Elorn, tête de navigation vers la rade de Brest.",
+    "sources": [
+      "Landerneau"
+    ]
+  },
+  {
+    "id": "set_le_faou",
+    "province": "prov_bretagne_ouest",
+    "kind": "village",
+    "name": {
+      "display": "Le Faou",
+      "local": "Ar Faou",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -4.1706,
+      48.3161
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Petit port au fond de la rade de Brest.",
+    "sources": [
+      "Le Faou"
+    ]
+  },
+  {
+    "id": "set_daoulas",
+    "province": "prov_bretagne_ouest",
+    "kind": "village",
+    "name": {
+      "display": "Daoulas",
+      "local": "Daoulaz",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -4.295,
+      48.365
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg autour d'un prieuré augustin sur la rade de Brest.",
+    "sources": [
+      "Daoulas"
+    ]
+  },
+  {
+    "id": "set_douarnenez",
+    "province": "prov_bretagne_ouest",
+    "kind": "village",
+    "name": {
+      "display": "Douarnenez",
+      "local": "Douarnenez",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -4.3333,
+      48.0928
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Port de pêche de la baie de Douarnenez.",
+    "sources": [
+      "Douarnenez"
+    ]
   }
 ]

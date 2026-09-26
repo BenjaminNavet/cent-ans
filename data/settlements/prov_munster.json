@@ -107,5 +107,80 @@
     "sources": [
       "Kinsale"
     ]
+  },
+  {
+    "id": "set_cashel",
+    "province": "prov_munster",
+    "kind": "abbey",
+    "name": {
+      "display": "Cashel",
+      "local": "Caiseal",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -7.8917,
+      52.5197
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Rocher de Cashel, siège archiépiscopal et ancienne capitale des rois de Munster.",
+    "sources": [
+      "Rocher de Cashel"
+    ]
+  },
+  {
+    "id": "set_clonmel",
+    "province": "prov_munster",
+    "kind": "village",
+    "name": {
+      "display": "Clonmel",
+      "local": "Cluain Meala",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -7.7,
+      52.3564
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié sur la Suir, dans le Munster oriental.",
+    "sources": [
+      "Clonmel"
+    ]
+  },
+  {
+    "id": "set_kilmallock",
+    "province": "prov_munster",
+    "kind": "town",
+    "name": {
+      "display": "Kilmallock",
+      "local": "Cill Mocheallóg",
+      "local_language": "anglo-normand"
+    },
+    "lonlat": [
+      -8.5764,
+      52.4025
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville close des Fitzgerald, marché fortifié du Munster.",
+    "sources": [
+      "Kilmallock"
+    ]
   }
 ]

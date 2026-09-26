@@ -110,5 +110,84 @@
     "sources": [
       "Kronach"
     ]
+  },
+  {
+    "id": "set_bamberg",
+    "province": "prov_franconia",
+    "kind": "town",
+    "name": {
+      "display": "Bamberg",
+      "local": "Bamberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.888,
+      49.8988
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Siège de la principauté épiscopale de Bamberg, fondée par l'empereur Henri II en 1007, sur les sept collines de la Regnitz.",
+    "sources": [
+      "Bamberg",
+      "Évêché de Bamberg"
+    ]
+  },
+  {
+    "id": "set_ebrach",
+    "province": "prov_franconia",
+    "kind": "abbey",
+    "name": {
+      "display": "Ebrach",
+      "local": "Ebrach",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.498,
+      49.8377
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1127, première de l'ordre en Franconie, dans la forêt de Steigerwald.",
+    "sources": [
+      "Ebrach"
+    ]
+  },
+  {
+    "id": "set_volkach",
+    "province": "prov_franconia",
+    "kind": "village",
+    "name": {
+      "display": "Volkach",
+      "local": "Volkach",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.228,
+      49.8657
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole sur une boucle du Main, mentionné dès le haut Moyen Âge, au cœur du vignoble franconien.",
+    "sources": [
+      "Volkach"
+    ]
   }
 ]

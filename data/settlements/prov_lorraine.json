@@ -137,5 +137,111 @@
     "sources": [
       "Abbaye de Gorze"
     ]
+  },
+  {
+    "id": "set_verdun",
+    "province": "prov_lorraine",
+    "kind": "town",
+    "name": {
+      "display": "Verdun",
+      "local": "Verdun",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      5.3833,
+      49.1593
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Cité épiscopale libre d'empire, troisième des Trois-Évêchés lorrains avec Metz et Toul.",
+    "sources": [
+      "Verdun"
+    ]
+  },
+  {
+    "id": "set_pont_a_mousson",
+    "province": "prov_lorraine",
+    "kind": "village",
+    "name": {
+      "display": "Pont-à-Mousson",
+      "local": "Pont a Mousson",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.0561,
+      48.9088
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg fortifié sur la Moselle, point de passage entre duché de Lorraine et évêché de Metz.",
+    "sources": [
+      "Pont-à-Mousson"
+    ]
+  },
+  {
+    "id": "set_vic_sur_seille",
+    "province": "prov_lorraine",
+    "kind": "village",
+    "name": {
+      "display": "Vic-sur-Seille",
+      "local": "Vic",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.5142,
+      48.7561
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg du Saulnois, centre des salines exploitées par l'évêché de Metz et le duché de Lorraine.",
+    "sources": [
+      "Vic-sur-Seille",
+      "Saulnois"
+    ]
+  },
+  {
+    "id": "set_etival_clairefontaine",
+    "province": "prov_lorraine",
+    "kind": "abbey",
+    "name": {
+      "display": "Étival-Clairefontaine",
+      "local": "Estival",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      6.8508,
+      48.3672
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye augustinienne (fondée bénédictine en 1147) de la vallée de la Meurthe, dans les Vosges lorraines.",
+    "sources": [
+      "Abbaye Saint-Pierre d'Étival"
+    ]
   }
 ]

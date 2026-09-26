@@ -139,5 +139,130 @@
     "sources": [
       "Abbaye de Faversham"
     ]
+  },
+  {
+    "id": "set_maidstone",
+    "province": "prov_kent",
+    "kind": "village",
+    "name": {
+      "display": "Maidstone",
+      "local": "Maydenstane",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.5227,
+      51.2704
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché sur le Medway, au centre du Kent.",
+    "sources": [
+      "Maidstone"
+    ]
+  },
+  {
+    "id": "set_tonbridge",
+    "province": "prov_kent",
+    "kind": "castle",
+    "name": {
+      "display": "Tonbridge",
+      "local": "Tonebrigge",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.2733,
+      51.1958
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château à motte des Clare, verrouillant la vallée du Medway.",
+    "sources": [
+      "Château de Tonbridge"
+    ]
+  },
+  {
+    "id": "set_new_romney",
+    "province": "prov_kent",
+    "kind": "village",
+    "name": {
+      "display": "New Romney",
+      "local": "Romene",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.9391,
+      50.9919
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Un des Cinq-Ports, ancien port aujourd'hui ensablé par les galets de la côte.",
+    "sources": [
+      "New Romney"
+    ]
+  },
+  {
+    "id": "set_malling",
+    "province": "prov_kent",
+    "kind": "abbey",
+    "name": {
+      "display": "West Malling",
+      "local": "Mallynges",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.4167,
+      51.2833
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine de femmes de West Malling, fondée au XIe siècle.",
+    "sources": [
+      "Malling Abbey"
+    ]
+  },
+  {
+    "id": "set_ashford",
+    "province": "prov_kent",
+    "kind": "village",
+    "name": {
+      "display": "Ashford",
+      "local": "Essetesford",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      0.8724,
+      51.1465
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du Weald du Kent, sur la route de Cantorbéry à la côte.",
+    "sources": [
+      "Ashford"
+    ]
   }
 ]

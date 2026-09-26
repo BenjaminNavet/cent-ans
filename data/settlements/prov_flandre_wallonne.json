@@ -106,5 +106,182 @@
     "sources": [
       "Abbaye de Marchiennes"
     ]
+  },
+  {
+    "id": "set_seclin",
+    "province": "prov_flandre_wallonne",
+    "kind": "town",
+    "name": {
+      "display": "Seclin",
+      "local": "Seclin",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0281,
+      50.5628
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Chef-lieu de châtellenie au sud de Lille, doté d'une collégiale et d'un marché actif.",
+    "sources": [
+      "Seclin"
+    ]
+  },
+  {
+    "id": "set_armentieres",
+    "province": "prov_flandre_wallonne",
+    "kind": "town",
+    "name": {
+      "display": "Armentières",
+      "local": "Armentières",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.8794,
+      50.6881
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_weaving_workshop"
+    ],
+    "port": false,
+    "description": "Ville drapière sur la Lys, à la frontière du comté de Flandre.",
+    "sources": [
+      "Armentières"
+    ]
+  },
+  {
+    "id": "set_tourcoing",
+    "province": "prov_flandre_wallonne",
+    "kind": "village",
+    "name": {
+      "display": "Tourcoing",
+      "local": "Tourcoing",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.1614,
+      50.7239
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Village de la châtellenie de Lille, mentionné dès le haut Moyen Âge.",
+    "sources": [
+      "Tourcoing"
+    ]
+  },
+  {
+    "id": "set_templeuve",
+    "province": "prov_flandre_wallonne",
+    "kind": "village",
+    "name": {
+      "display": "Templeuve",
+      "local": "Templeuve",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.1861,
+      50.5661
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Village du Pévèle, ancienne possession de l'ordre du Temple.",
+    "sources": [
+      "Templeuve (Nord)"
+    ]
+  },
+  {
+    "id": "set_pont_a_marcq",
+    "province": "prov_flandre_wallonne",
+    "kind": "village",
+    "name": {
+      "display": "Pont-à-Marcq",
+      "local": "Pont-a-Marcq",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.1167,
+      50.5667
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Village du Pévèle sur la Marcq, sur la route entre Lille et Douai.",
+    "sources": [
+      "Pont-à-Marcq"
+    ]
+  },
+  {
+    "id": "set_cysoing",
+    "province": "prov_flandre_wallonne",
+    "kind": "abbey",
+    "name": {
+      "display": "Cysoing",
+      "local": "Cysoing",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.2214,
+      50.6006
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye de chanoines réguliers fondée au IXe siècle, importante seigneurie ecclésiastique du Pévèle.",
+    "sources": [
+      "Abbaye de Cysoing"
+    ]
+  },
+  {
+    "id": "set_comines",
+    "province": "prov_flandre_wallonne",
+    "kind": "village",
+    "name": {
+      "display": "Comines",
+      "local": "Comines",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0083,
+      50.7614
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_windmill"
+    ],
+    "port": false,
+    "description": "Bourg drapier et seigneurie sur la Lys, à la limite de la châtellenie de Lille.",
+    "sources": [
+      "Comines (Nord)"
+    ]
   }
 ]

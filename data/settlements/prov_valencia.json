@@ -111,5 +111,107 @@
       "Peñíscola",
       "Ordre de Montesa"
     ]
+  },
+  {
+    "id": "set_morella",
+    "province": "prov_valencia",
+    "kind": "town",
+    "name": {
+      "display": "Morella",
+      "local": "Morella",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.0997,
+      40.6197
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Ville close des Ports de Morella, prise aux musulmans en 1232, dominée par son château.",
+    "sources": [
+      "Morella"
+    ]
+  },
+  {
+    "id": "set_sagunto",
+    "province": "prov_valencia",
+    "kind": "castle",
+    "name": {
+      "display": "Sagonte",
+      "local": "Sagunt",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.2733,
+      39.6786
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse antique de l'acropole ibéro-romaine, reconstruite au Moyen Âge sur la côte valencienne.",
+    "sources": [
+      "Sagonte"
+    ]
+  },
+  {
+    "id": "set_gandia",
+    "province": "prov_valencia",
+    "kind": "village",
+    "name": {
+      "display": "Gandie",
+      "local": "Gandia",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.1841,
+      38.9665
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Bourg côtier de la Safor, futur duché des Borgia.",
+    "sources": [
+      "Gandie"
+    ]
+  },
+  {
+    "id": "set_onda",
+    "province": "prov_valencia",
+    "kind": "village",
+    "name": {
+      "display": "Onda",
+      "local": "Onda",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.2667,
+      39.9667
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de la Plana, à la population mêlée chrétienne et morisque.",
+    "sources": [
+      "Onda"
+    ]
   }
 ]
