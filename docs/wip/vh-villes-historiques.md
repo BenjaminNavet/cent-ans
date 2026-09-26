@@ -59,7 +59,11 @@ Vagues (≤ 6 agents) : VH0 ; puis VH1 + VH2 + VH4 ; puis VH3 + VH5 + VH6 + VH7 
 
 - [x] Plan (ce fichier), 2026-09-25
 - [x] Dossier de sources `docs/research/vh-sources.md` (2026-09-25) : licences vérifiées, faits datés, parcellaire type, recommandations par lot. Plans Gallica et carte d'Agas : faits seulement, jamais les images. Parcellaire de Paris : ALPAGE SIG (ODbL). Sainte-Croix d'Orléans : chevet seul en 1340 comme en 1429
-- [ ] Attente : fusion de ZG2 et ZG4 (API du relief), puis VH0
+- [x] VH0 + VH4 (2026-09-26, branche `feat/vh4-landmarks-1to1`) : ADR **0078**, format `landmark`
+  v2 géoréférencé EPSG:3035 (`data/landmarks_v2/`), outil `cent-ans geo landmarks`, moteur 1:1
+  (`LandmarkPlan`, `LandmarkMonuments`, `LandmarkCityLayer`), Rouen vers 1340 ; suivi
+  `docs/wip/vh4-villes-emblematiques.md`, format `docs/landmarks-v2.md`. Schémas `forest_mask` et
+  `villages` (VH1, VH2) non écrits : laissés à ces lots
 
 ## Prochaine étape
 
