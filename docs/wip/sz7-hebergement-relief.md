@@ -46,10 +46,12 @@ réservée à l'accord explicite du joueur. Voir ADR 0077.
   au joueur.
 
 ## Prochaine étape
-Lot terminé côté outillage. Reste, à la main du joueur : lancer
+Lot terminé côté outillage. `uv run --project tools pytest` (suite complète) : **707 passed,
+2 skipped** (7 min 27, machine lente sur les tests géo à base d'images ; rien de cassé par SZ7).
+`uvx ruff check`/`format` propres sur les fichiers du lot (le reste des erreurs ruff du dépôt,
+`blender_scripts/campaign_trees.py`, est hors lot). Test Godot `zg7b_cache_test.gd` : OK.
+Aucun fichier Rust touché (pas de `cargo fmt`/`clippy`/`test` à lancer).
+
+Reste, à la main du joueur : lancer
 `uv run --project tools cent-ans geo relief-pack --out <dossier avec assez de place>` sur un
 poste avec assez de disque, puis les commandes `gh` de `docs/geo.md` pour publier.
-`cd core && cargo fmt && cargo clippy --all-targets -- -D warnings && cargo test` non lancé (aucun
-fichier Rust touché par ce lot). `uv run --project tools pytest` (suite complète, pas seulement
-`test_relief_hosting.py`) à confirmer par l'orchestrateur avant fusion : lent sur cette machine
-(tests géo à base d'images), lancé en fin de session, résultat à vérifier.
