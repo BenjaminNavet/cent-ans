@@ -22,5 +22,11 @@ Branche `feat/ep13-replay` (worktree agent). ADR 0072 (numéro choisi pour laiss
   « Rejeux » (`ReplaysMenu`, bouton du menu principal), test `tests/ep13_replay_test.gd` (OK)
 - [x] ADR 0072, schémas, pytest `test_battle_replay_schema.py`
 
+## Vérifications (26/09, après merge de main b04b88ce)
+fmt, clippy --all-targets -D warnings, cargo test --workspace (118 binaires OK), build.sh,
+pytest (674 OK), smoke Godot OK, `ep13_replay_test.gd` OK, `ep7_historical_test.gd` OK.
+
 ## Prochaine étape
-Vérifications finales (merge main, fmt, clippy, cargo test --workspace, build.sh, pytest, smoke).
+Fusion dans main par l'orchestrateur. Points ouverts : voir ADR 0072 § Conséquences (corps non
+redessinés après un saut en arrière, empreintes sans décor/étendards) ; relecture à l'œil de la barre
+de rejeu (non vérifiée en fenêtre) ; `core/Cargo.toml` touché (`float_roundtrip`), à signaler à EP11/EP12.
