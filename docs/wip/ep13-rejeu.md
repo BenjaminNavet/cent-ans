@@ -13,10 +13,11 @@ Branche `feat/ep13-replay` (worktree agent). ADR 0072 (numéro choisi pour évit
 
 ## État
 - [x] `core/crates/sim-battle/src/replay.rs` (enregistreur, lecteur, empreinte) — compile
-- [ ] tests Rust `tests/ep13_replay.rs` (déterminisme, divergence, saut) + mesures
+- [x] tests Rust `tests/ep13_replay.rs` (déterminisme, divergence, saut) + mesures (re-simulation ≈ 2000× temps réel, copie 0,03 ms)
+- [x] serde_json `float_roundtrip` (sinon un rejeu relu diffère d un ulp)
 - [ ] pont : enregistrement dans `battle_sim.rs`, `battle_replay.rs` (save/list/load/seek)
 - [ ] Godot : barre de rejeu, bouton écran de fin, menu « Rejeux », test UI
 - [ ] ADR 0072, schéma du fichier, pytest schéma
 
 ## Prochaine étape
-Tests Rust de déterminisme.
+Pont GDExtension.
