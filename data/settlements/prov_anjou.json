@@ -3,70 +3,313 @@
     "id": "set_angers",
     "province": "prov_anjou",
     "kind": "city",
-    "name": { "display": "Angers", "local": "Angiers", "local_language": "ancien français" },
-    "lonlat": [-0.5541, 47.4784],
+    "name": {
+      "display": "Angers",
+      "local": "Angiers",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.5541,
+      47.4784
+    ],
     "weight": 38,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Capitale du comté d'Anjou, réuni à la couronne avec Philippe VI en 1328 puis donné en apanage à son fils Jean de Normandie (1332) ; réputée pour son ardoise.",
-    "sources": ["Angers", "Comté d'Anjou"]
+    "sources": [
+      "Angers",
+      "Comté d'Anjou"
+    ]
   },
   {
     "id": "set_saumur",
     "province": "prov_anjou",
     "kind": "castle",
-    "name": { "display": "Saumur", "local": "Saumur", "local_language": "ancien français" },
-    "lonlat": [-0.0761, 47.2597],
+    "name": {
+      "display": "Saumur",
+      "local": "Saumur",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.0761,
+      47.2597
+    ],
     "weight": 16,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse dominant le confluent de la Loire et du Thouet.",
-    "sources": ["Château de Saumur"]
+    "sources": [
+      "Château de Saumur"
+    ]
   },
   {
     "id": "set_bauge",
     "province": "prov_anjou",
     "kind": "town",
-    "name": { "display": "Baugé", "local": "Baugié", "local_language": "ancien français" },
-    "lonlat": [-0.1069, 47.5439],
+    "name": {
+      "display": "Baugé",
+      "local": "Baugié",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.1069,
+      47.5439
+    ],
     "weight": 9,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Petite ville close du Baugeois, à l'est d'Angers.",
-    "sources": ["Baugé-en-Anjou"]
+    "sources": [
+      "Baugé-en-Anjou"
+    ]
   },
   {
     "id": "set_fontevraud",
     "province": "prov_anjou",
     "kind": "abbey",
-    "name": { "display": "Fontevraud", "local": "Fontevrault", "local_language": "ancien français" },
-    "lonlat": [0.0500, 47.1833],
+    "name": {
+      "display": "Fontevraud",
+      "local": "Fontevrault",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.05,
+      47.1833
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Grande abbaye royale double, nécropole des Plantagenêts.",
-    "sources": ["Abbaye de Fontevraud"]
+    "sources": [
+      "Abbaye de Fontevraud"
+    ]
   },
   {
     "id": "set_behuard",
     "province": "prov_anjou",
     "kind": "village",
-    "name": { "display": "Béhuard", "local": "Béhuard", "local_language": "ancien français" },
-    "lonlat": [-0.6667, 47.3667],
+    "name": {
+      "display": "Béhuard",
+      "local": "Béhuard",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.6667,
+      47.3667
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Village de l'île de Béhuard sur la Loire, lieu de dévotion mariale.",
-    "sources": ["Béhuard"]
+    "sources": [
+      "Béhuard"
+    ]
+  },
+  {
+    "id": "set_chateau_gontier",
+    "province": "prov_anjou",
+    "kind": "town",
+    "name": {
+      "display": "Château-Gontier",
+      "local": "Chastel Gontier",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.7061,
+      47.8283
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville fortifiée sur la Mayenne, marché du Haut-Anjou.",
+    "sources": [
+      "Château-Gontier"
+    ]
+  },
+  {
+    "id": "set_le_plessis_mace",
+    "province": "prov_anjou",
+    "kind": "castle",
+    "name": {
+      "display": "Le Plessis-Macé",
+      "local": "Plessis Macé",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.6797,
+      47.5306
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château fort des sires du Plessis, vassaux des comtes d'Anjou, à l'ouest d'Angers.",
+    "sources": [
+      "Château du Plessis-Macé"
+    ]
+  },
+  {
+    "id": "set_cunault",
+    "province": "prov_anjou",
+    "kind": "abbey",
+    "name": {
+      "display": "Cunault",
+      "local": "Cunauld",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.085,
+      47.3239
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré roman de Trèves-Cunault sur la Loire, dépendant de Marmoutier.",
+    "sources": [
+      "Cunault"
+    ]
+  },
+  {
+    "id": "set_beaufort_en_vallee",
+    "province": "prov_anjou",
+    "kind": "village",
+    "name": {
+      "display": "Beaufort-en-Vallée",
+      "local": "Belfort",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.1214,
+      47.4364
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg fortifié de la vallée angevine, marché agricole.",
+    "sources": [
+      "Beaufort-en-Vallée"
+    ]
+  },
+  {
+    "id": "set_doue_la_fontaine",
+    "province": "prov_anjou",
+    "kind": "village",
+    "name": {
+      "display": "Doué-la-Fontaine",
+      "local": "Doué",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.2725,
+      47.1928
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg du sud angevin bâti sur d'anciennes carrières de tuffeau, marché agricole.",
+    "sources": [
+      "Doué-la-Fontaine"
+    ]
+  },
+  {
+    "id": "set_le_lion_d_angers",
+    "province": "prov_anjou",
+    "kind": "village",
+    "name": {
+      "display": "Le Lion-d'Angers",
+      "local": "Lion d'Angers",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.7228,
+      47.6289
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg sur l'Oudon, au nord d'Angers.",
+    "sources": [
+      "Le Lion-d'Angers"
+    ]
+  },
+  {
+    "id": "set_chalonnes_sur_loire",
+    "province": "prov_anjou",
+    "kind": "village",
+    "name": {
+      "display": "Chalonnes-sur-Loire",
+      "local": "Chalonnes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -0.755,
+      47.3567
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole sur la Loire en aval d'Angers.",
+    "sources": [
+      "Chalonnes-sur-Loire"
+    ]
   }
 ]
