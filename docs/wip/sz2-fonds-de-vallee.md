@@ -27,13 +27,35 @@ de creusement, puis le plancher de côte 0,5 m. E5-E7 (même formule, autre base
 autrement : d'où les écarts d'étage à étage (Loire d'Orléans sous ses berges E7). ZG8 exagère déjà
 à l'exécution le relief *au-dessus du fond de vallée* : le creusement cuit fait double emploi.
 
+## Correctif (outils)
+- `relief_shade.valley_floor(h) = max(0,5 ; 0,85 h ; h − 2 m)` : plancher **monotone** de la terre
+  rehaussée, commun à E0 (`boost_relief`), E1-E4 (`pyramid.boost_with_base`, donc aussi
+  `surface.tier2_heights`) et E5-E7 (`detail_dem.apply_boost`, remplace `low_land_floor` de ZG7a,
+  identique sous 5,9 m). Les collines restent rehaussées ; les fonds de vallée restent à ≤ 2 m de
+  leur altitude réelle quel que soit l'étage → continuité E0/E1…E7.
+- Versions : `pyramid.BAKE_VERSION = 2` (E1-E4), `detail_dem.BAKE_VERSION = 5` (E5-E7, clé des
+  recalages `hydro-fine`). Nouveau module `geo/bake_stamp.py` : le cache porte
+  `pyramid/bake.json` (version, début, fini) ; le manifeste versionné porte `bake_versions`.
+  Un palier périmé est signalé par `relief-all --check` et recuit par `geo pyramid` /
+  `detail-dem` / `relief-all` sans `--force` ; une cuisson interrompue reprend (tuiles plus
+  anciennes que son début seulement).
+
 ## État
-- [ ] Correctif outils (plancher de vallée commun E0-E7) + tests
-- [ ] E0 recuit (`geo relief-shade`), commité
-- [ ] E1-E4 recuits dans `pyramid.sz2`
+- [x] Correctif outils + tests (`tests/test_bake_stamp.py`, tests adaptés) — e13efe90
+- [x] E0 recuit (`geo relief-shade`, 176 tuiles sur 256 changent) — 22cb2e06.
+  E0 après : Paris 29,6 ; Vernon 9,4 ; Rouen 3,4 ; Orléans 88,4 ; Amboise 49,4 ; Tours 40,5.
+- [ ] E1-E4 recuits dans `pyramid.sz2` — EN COURS
 - [ ] `detail-dem --force`, `hydro-fine`, `anchors-fine`
 - [ ] Vérifications (Orléans, Amboise, Seine, `detail-check`, `relief-all --check`)
 - [ ] Captures, docs, commande de bascule
 
+## Commande en cours (reprise : relancer telle quelle, elle saute les tuiles déjà recuites)
+```sh
+cd <worktree> && uv run --project tools cent-ans geo pyramid --levels 1,2,3,4 --workers 12
+```
+Journal : `scratchpad/logs/pyramid.log`. Ensuite, dans l'ordre :
+`geo detail-dem --force` (ou sans : l'estampille périmée suffit), `geo hydro-fine`,
+`geo anchors-fine`, puis `geo relief-all --check`.
+
 ## Prochaine étape
-Écrire le correctif dans `relief_shade.py` / `pyramid.py` / `detail_dem.py`.
+Attendre la fin de E1-E4, puis la suite ci-dessus.
