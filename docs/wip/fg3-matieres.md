@@ -4,7 +4,7 @@ Branche : `feat/fg3-materials` (worktree agent `agent-aba08b13133c215dc`). Plan 
 `docs/wip/fg-figurines-fines.md`. Précédents : `fg0-prototype.md` (cuisson test),
 `fg1-corps.md`, `fg2-equipement.md`, `fg4-cheval.md`.
 
-## État : EN PAUSE (demande du joueur, 26/09) — code et cuisson complets, vérifs à finir
+## État : REPRIS 26/09 — main fusionné (4c89ce24, sans conflit), smoke OK, fg3_maps OK ; captures/banc/ADR en cours
 - [x] Commande `bake` (`battle_fine.py -- bake [--only a,b]`, `all` = rigs + bake), format
   `CAM2` (UV d'atlas), variante `FG3_BAKED` du shader, chargement des cartes dans
   `BattleSkinned`, `--no-fg3` (figurines fines sans cartes, A/B)
