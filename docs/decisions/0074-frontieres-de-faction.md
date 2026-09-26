@@ -1,4 +1,4 @@
-# ADR 0070 — Frontières de faction lumineuses peintes dans le fragment du terrain (lot FR1)
+# ADR 0074 — Frontières de faction lumineuses peintes dans le fragment du terrain (lot FR1)
 
 Date : 2026-09-26. Statut : accepté.
 

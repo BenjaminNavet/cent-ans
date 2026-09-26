@@ -1,4 +1,4 @@
-// Lot FR1 (ADR 0070) — frontières de faction lumineuses, façon Total War.
+// Lot FR1 (ADR 0074) — frontières de faction lumineuses, façon Total War.
 // Inclus par terrain.gdshader et terrain_parchment.gdshader APRÈS parchment_map.gdshaderinc
 // (s'appuie sur province_at, border_d, map_size, pm_weight, pm_emission, pm_emission_gain) ;
 // crochet d'une ligne en fin de fragment : `fr1_borders(p, uv, footprint, albedo, emission)`.

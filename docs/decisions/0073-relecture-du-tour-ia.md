@@ -1,4 +1,4 @@
-# 0070 — Relecture du tour de l'IA : enregistrement des marches dans le cœur
+# 0073 — Relecture du tour de l'IA : enregistrement des marches dans le cœur
 
 Date : 2026-09-26. Lot CT1. Statut : accepté.
 

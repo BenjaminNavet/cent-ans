@@ -1,5 +1,5 @@
 {
-  "description": "Lot FR1 : frontières de faction lumineuses de la carte de campagne, façon Total War (ADR 0070). Trait de la couleur de chaque faction le long des frontières entre propriétaires différents (plus épais, avec un halo intérieur), trait fin et discret entre provinces d'une même faction ; frontière du joueur un peu rehaussée ; provinces occupées (occupant ≠ propriétaire) hachurées aux couleurs de l'occupant. Largeurs en pixels écran (1080p). Peint dans le fragment du terrain (crochet fr1_borders). Rendu seulement : aucune règle de jeu.",
+  "description": "Lot FR1 : frontières de faction lumineuses de la carte de campagne, façon Total War (ADR 0074). Trait de la couleur de chaque faction le long des frontières entre propriétaires différents (plus épais, avec un halo intérieur), trait fin et discret entre provinces d'une même faction ; frontière du joueur un peu rehaussée ; provinces occupées (occupant ≠ propriétaire) hachurées aux couleurs de l'occupant. Largeurs en pixels écran (1080p). Peint dans le fragment du terrain (crochet fr1_borders). Rendu seulement : aucune règle de jeu.",
   "realm": {
     "core_px": 1.8,
     "core_alpha": 0.95,

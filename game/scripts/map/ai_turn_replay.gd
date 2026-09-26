@@ -1,7 +1,7 @@
 class_name AiTurnReplay
 extends Node
 
-## Lot CT1 — relecture du tour de l'IA à la Total War (ADR 0070).
+## Lot CT1 — relecture du tour de l'IA à la Total War (ADR 0073).
 ##
 ## Le cœur résout tout le tour de l'IA dans `end_turn` ; quand l'enregistrement est actif
 ## (`set_ai_turn_recording`), il rend chaque mouvement d'armée IA (`get_ai_turn_moves` : trajet

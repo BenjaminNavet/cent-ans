@@ -1,7 +1,7 @@
 class_name FactionBorders
 extends Node
 
-## Lot FR1 (ADR 0070) : frontières de faction lumineuses de la carte de campagne, façon Total War.
+## Lot FR1 (ADR 0074) : frontières de faction lumineuses de la carte de campagne, façon Total War.
 ##
 ## Rendu dans le fragment du terrain (`faction_borders.gdshaderinc`, crochet `fr1_borders` de
 ## terrain.gdshader et terrain_parchment.gdshader) : les frontières sont peintes sur le relief
