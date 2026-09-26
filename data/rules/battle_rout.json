@@ -4,9 +4,9 @@
     "radius_m": 120,
     "morale_per_second": 0.4,
     "max_weight": 3,
-    "beside_depth_m": 25,
-    "behind_depth_m": 60,
-    "behind_weight": 0.2
+    "beside_depth_m": 15,
+    "behind_depth_m": 50,
+    "behind_weight": 0.15
   },
   "flight": {
     "lookahead_m": 80,

@@ -159,3 +159,13 @@ fn probe() {
         println!("| {morale:.0} | {routed} | {lateral:.0} |");
     }
 }
+
+/// The SG5 case: before EP10 the whole shaken line (morale 30) gave way
+/// behind its routed wing, 7 regiments out of 7, the fugitive running 113 m
+/// along the line. Now the wing runs to the rear and the line holds.
+#[test]
+fn a_wing_routed_from_the_flank_does_not_break_the_line() {
+    let (routed, lateral) = contagion(30.0, 120.0, false);
+    assert!(routed <= 1, "{routed} regiments of the line gave way");
+    assert!(lateral < 25.0, "the wing ran {lateral:.0} m along the line");
+}
