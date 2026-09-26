@@ -38,3 +38,29 @@ vont trop vite ; je voudrais plus de villes pour une région donnée »). Plan :
 - Codex : les distances citées (210/140 km, un pas = 70 km, repli 280/140 km) sont réécrites.
 - Sauvegardes antérieures : colonies inconnues absentes, nouvelles colonies initialisées au chargement
   comme aujourd'hui pour une province sans fichier ; pas de migration dédiée.
+
+## Addendum DC3 (2026-09-26) : équilibrage de la carte densifiée
+
+Mesures `century_probe 120` sur 12 graines, même code que `main` (35783bcf) : voir
+`docs/wip/dc-densite.md` § DC3. Trois règles changent :
+
+1. **Horizon de l'IA** : `PLANNING_RANGE` 5 → **10 pas** (`ai/src/campaign.rs`). Le pas de 70 km
+   avait divisé par deux le rayon géographique (350 km) : l'Angleterre ne voyait plus que les
+   places côtières au-delà de la Manche et les cités prises par décennie tombaient de 40 %.
+   L'IA pèse de nouveau 700 km (plus de saisons de marche). L'ancien `OFFENSIVE_RANGE` de l'IA
+   minimale (tests) est inchangé.
+2. **Effets de province des places secondaires** : `province_effect_percent` (nouveau réglage de
+   `data/settlements/rules.json`, schéma `settlement_rules`) : les bâtiments des villes, châteaux,
+   abbayes et bourgs pèsent **50 %** sur les effets de toute la province (ordre public, santé,
+   biens, ravitaillement, place pour croître), la cité 100 %. Sans cela les ~630 nouvelles
+   places (268 églises paroissiales, 102 abbayes de plus) doublaient l'apaisement moyen des
+   provinces (−10 → −21), l'IA gardait l'impôt haut 37 % des tours au lieu de 28 % et les
+   révoltes disparaissaient. Écarté : « chaque sorte de bâtiment une fois par province », qui
+   divise par deux la satisfaction des biens (marchés) et fait lever 16 % d'hommes de moins.
+   Les effets propres d'une place (impôt, murailles, recrutement) et le compte des bâtiments
+   religieux contre l'hérésie ne changent pas.
+3. **Hameaux décoratifs** : à plus de 5 km (au lieu de 3) de toute colonie
+   (`geo/hamlets.py`), pour ne plus tomber dans l'emprise d'une maquette.
+
+Gardés : refuge neutre à 1 pas (2 pas essayé : sans effet mesurable, la densité fournit déjà
+des refuges) ; garnisons de départ ; bonus de province complète.
