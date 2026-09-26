@@ -22,6 +22,12 @@ static func lap(label: String, t0_usec: int) -> int:
 	return now
 
 
+## Ajoute une durée déjà mesurée (µs) à `label`.
+static func add(label: String, usec: int) -> void:
+	if enabled:
+		_frame[label] = int(_frame.get(label, 0)) + usec
+
+
 ## Temps (µs) par section depuis le dernier appel ; remet à zéro.
 static func take_frame() -> Dictionary:
 	var frame := _frame
