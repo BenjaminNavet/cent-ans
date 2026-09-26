@@ -86,6 +86,9 @@ var _towns_version := -1
 ## et des hameaux (x, y, z, déplacement), sans toucher aux positions de règles (`data`).
 var _anchor_px: Dictionary = {}
 var _hamlet_anchors: PackedVector4Array = PackedVector4Array()
+## Lot SZ4 : échelle appliquée aux hameaux (1 au loin, taille réelle au palier vallée,
+## `MapPropScale.hamlet_scale`) ; les tuiles sont reconstruites par pas de `rewrite_step`.
+var _hamlet_scale := 1.0
 
 
 func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: SettlementData, zoom_tiers: ZoomTiers) -> void:
@@ -495,7 +498,8 @@ func update_view(camera_distance: float) -> void:
 		_icon_material.set_shader_parameter("alpha", icon_alpha)
 		_icons.visible = icon_alpha > 0.01
 		_models_root.visible = weights.x > 0.35 and not site and not _towns_active()
-		_hamlets_root.visible = weights.x > 0.35 and not site
+		# SZ4 : hameaux à leur taille réelle sous le palier comté, gardés au palier site.
+		_hamlets_root.visible = weights.x > 0.35
 		_landmarks_root.visible = not site
 		_update_label_heights()
 		_declutter_timer = 0.0
@@ -506,6 +510,7 @@ func update_view(camera_distance: float) -> void:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
 	_update_towns(camera_distance)
+	_update_hamlet_scale(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
@@ -628,6 +633,19 @@ func visible_label_count() -> int:
 # --- Hameaux -------------------------------------------------------------------------
 
 
+## SZ4 : nouvelle échelle des hameaux → tuiles construites marquées à refaire (étalé par
+## `max_hamlet_builds_per_frame` ; un pas de `rewrite_step` d'écart entre tuiles voisines ne se
+## voit pas).
+func _update_hamlet_scale(camera_distance: float) -> void:
+	var props := MapPropScale.shared()
+	var wanted := props.hamlet_scale(camera_distance)
+	if not props.needs_rewrite(_hamlet_scale, wanted):
+		return
+	_hamlet_scale = wanted
+	for index in _hamlet_nodes:
+		_hamlet_dirty[index] = true
+
+
 func _update_hamlets() -> void:
 	var show := _weights.x > 0.35
 	var builds := 0
@@ -698,7 +716,7 @@ func _build_hamlets(index: int) -> void:
 		var burned := devastation >= BURN_THRESHOLD and float((seed_value / 7) % 100) < devastation
 		var key := variant * 2 + (1 if burned else 0)
 		var yaw := float((seed_value / 13) % 628) / 100.0
-		var scale := ModelLibrary.HAMLET_SCALE * (0.85 + float((seed_value / 17) % 30) / 100.0)
+		var scale := ModelLibrary.HAMLET_SCALE * (0.85 + float((seed_value / 17) % 30) / 100.0) * _hamlet_scale
 		var y := terrain.surface_height_at(px.x, px.y)
 		for k in 4:
 			var angle := k * TAU / 4.0 + yaw
@@ -706,7 +724,7 @@ func _build_hamlets(index: int) -> void:
 		var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale)
 		if not groups.has(key):
 			groups[key] = []
-		groups[key].append(Transform3D(basis, Vector3(px.x, y - 0.03, px.y)))
+		groups[key].append(Transform3D(basis, Vector3(px.x, y - 0.03 * _hamlet_scale, px.y)))
 	for key in groups:
 		var transforms: Array = groups[key]
 		var multimesh := MultiMesh.new()
