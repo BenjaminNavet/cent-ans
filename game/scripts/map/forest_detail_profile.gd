@@ -33,6 +33,10 @@ extends Resource
 @export var keep_margin: float = 1.25
 ## Maillage détaillé (et ombres) des parties à moins de `detail_factor` × la distance du rig.
 @export var detail_factor: float = 1.2
+## Couloirs laissés sans arbres de part et d'autre des fleuves fins et des routes drapées (lot ZG5b),
+## en mètres au-delà de la demi-largeur : berges, et houppiers qui débordent (~15 m).
+@export var river_clearance_m: float = 25.0
+@export var road_clearance_m: float = 10.0
 ## Semis simultanés, recalages simultanés, cellules gardées en cache.
 @export var max_jobs: int = 3
 @export var max_ground_jobs: int = 1

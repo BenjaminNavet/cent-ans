@@ -220,6 +220,7 @@ func _start_jobs(wanted: Array) -> void:
 		params["relief_gain"] = MapData.relief_gain()
 		params["exclusions"] = vegetation.exclusions_for(rect)
 		params["ground_grid"] = terrain.quadtree.surface_snapshot(rect, rect.position)
+		params["corridors"] = _corridors(rect)
 		params["detail_rect"] = rect
 		params["keep"] = float(item[3])
 		params["parts_side"] = profile.parts_side
@@ -228,6 +229,53 @@ func _start_jobs(wanted: Array) -> void:
 			return
 		_jobs[key] = {"id": id, "keep": float(item[3]), "rect": rect, "tile": tile}
 		_job_ids[id] = key
+
+
+## Couloirs sans arbres d'une cellule : fleuves fins (rang affiché, lot ZG5b) et routes drapées,
+## segments `x0, y0, x1, y1, demi-largeur` (unités monde) ; la trame du lit des fleuves 4096 ne
+## connaît pas ces tracés fins. Tuiles CAFV lues à la demande (cache LRU du magasin).
+func _corridors(rect: Rect2) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var store := _fine_store()
+	if store == null:
+		return out
+	var fine: Object = _fine_layer()
+	var min_order := int(fine.get("_min_order")) if fine != null else 3
+	var mpu := vegetation.map_data.meters_per_px if vegetation.map_data != null else 719.0
+	var bounds := rect.grow(0.5)
+	var size := FineGeoStore.TILE_UNITS
+	for layer in [CafvTile.LAYER_RIVERS, CafvTile.LAYER_ROADS]:
+		var clearance: float = profile.river_clearance_m if layer == CafvTile.LAYER_RIVERS else profile.road_clearance_m
+		for row in range(int(floor(bounds.position.y / size)), int(floor(bounds.end.y / size)) + 1):
+			for col in range(int(floor(bounds.position.x / size)), int(floor(bounds.end.x / size)) + 1):
+				var tile := store.load_sync(layer, col, row)
+				if tile == null:
+					continue
+				for li in tile.lines():
+					var lb := tile.line_bounds[li]
+					if lb.z < bounds.position.x or lb.x > bounds.end.x or lb.w < bounds.position.y or lb.y > bounds.end.y:
+						continue
+					if layer == CafvTile.LAYER_RIVERS and tile.line_rank[li] < min_order:
+						continue
+					var first := tile.line_start[li]
+					for k in range(first, first + tile.line_count[li] - 1):
+						var half := (tile.w[k] * 0.5 + clearance) / mpu
+						out.append_array([tile.x[k], tile.y[k], tile.x[k + 1], tile.y[k + 1], half])
+	stats["corridor_segments_max"] = maxi(int(stats.get("corridor_segments_max", 0)), out.size() / 5)
+	return out
+
+
+func _fine_layer() -> Object:
+	var parent := vegetation.get_parent() if vegetation != null else null
+	var rivers: Variant = parent.get("rivers") if parent != null else null
+	return (rivers as Object).get("fine") if rivers is Object else null
+
+
+func _fine_store() -> FineGeoStore:
+	var fine: Object = _fine_layer()
+	if fine == null or not bool(fine.get("enabled")):
+		return null
+	return fine.get("store") as FineGeoStore
 
 
 ## Résultat natif (appelé par `Vegetation._poll_native`).

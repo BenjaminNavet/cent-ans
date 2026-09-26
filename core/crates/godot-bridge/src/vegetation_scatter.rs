@@ -106,7 +106,8 @@ fn ground_of(grid: &VarDictionary) -> Ground {
     }
 }
 
-/// Lot SZ4b: optional dense-forest cell of a request (`detail_rect` Rect2, `keep`, `parts_side`).
+/// Lot SZ4b: optional dense-forest cell of a request (`detail_rect` Rect2, `keep`, `parts_side`,
+/// `corridors` PackedFloat32Array of `x0, y0, x1, y1, half_width` segments kept free of trees).
 fn detail_of(params: &VarDictionary) -> Option<DetailArea> {
     let rect = params.get("detail_rect")?.try_to::<Rect2>().ok()?;
     Some(DetailArea {
@@ -118,6 +119,25 @@ fn detail_of(params: &VarDictionary) -> Option<DetailArea> {
         ),
         keep: float_of(params, "keep", 1.0),
         parts_side: int_of(params, "parts_side", 4).max(1) as usize,
+        corridors: params
+            .get("corridors")
+            .and_then(|v| v.try_to::<PackedFloat32Array>().ok())
+            .map(|values| {
+                values
+                    .as_slice()
+                    .chunks_exact(5)
+                    .map(|c| {
+                        [
+                            c[0] as f64,
+                            c[1] as f64,
+                            c[2] as f64,
+                            c[3] as f64,
+                            c[4] as f64,
+                        ]
+                    })
+                    .collect()
+            })
+            .unwrap_or_default(),
     })
 }
 
