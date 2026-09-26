@@ -1592,3 +1592,27 @@ fenêtre, bandeau, journal, panneaux de droite).
   `UI/NewsLetters`.
 - Captures : `--stage=army` (défaut), `--stage=province`, `--stage=chronicle` →
   `docs/img/hud-campaign*.png` (1440×900 et 1920×1080).
+
+## Tour de l'IA à la Total War (lot CT1, ADR 0070)
+
+En fin de tour, après la résolution du cœur et avant la diplomatie, la victoire et le rapport de
+saison, `AiTurnReplay` (`game/scripts/map/ai_turn_replay.gd`, créé par `campaign_map.gd`) rejoue les
+marches des armées IA que le joueur voit :
+
+- **Données** : `CampaignSim.get_ai_turn_moves()` (trajet réel, issue, partie vue, intérêt pour le
+  joueur ; format dans l'ADR 0070), enregistré seulement si `set_ai_turn_recording(true, …)` a été
+  appelé avant `end_turn` ; mise en scène dans `data/ui/ai_turn_replay.json`.
+- **Réglages** (Réglages › Carte) : « Mouvements de l'IA » = Suivre (défaut ; la caméra se porte sur
+  les 6 mouvements au plus qui concernent le joueur — bataille, siège de ses places, marche sur ses
+  terres, arrivée près de ses armées ou colonies — puis revient), Montrer (marches sans caméra),
+  Masquer (fin de tour immédiate, rien d'enregistré) ; « Vitesse » ×1 / ×2 / ×4. Espace passe le
+  reste. Les armées alliées et vassales marchent sans être suivies.
+- **Rendu** : chaque armée rejouée repart de son point de départ (figurines CV2 en marche le long
+  du trajet, `ArmyMarkers.place_marker`), les autres mouvements vus se jouent en même temps ; une
+  légende « Tour de l'IA : <faction> — Espace : passer » remplace le bandeau des autres factions.
+- **Tests** : `game/tests/ct1_ai_turn_test.gd` (headless, les trois modes, Espace),
+  `core/crates/ai/tests/ct1_ai_replay.rs` (déterminisme, jeu inchangé, bataille notable) ;
+  captures `game/tests/ct1_capture.gd` → `docs/audit/captures/ct1/`.
+- **Coût** : Masquer = coût d'avant ; enregistrement actif ≈ 2 ms par tour dans le cœur (release),
+  < 0,1 ms de tri côté Godot ; la relecture elle-même dure le temps de l'animation (de 0 s sans
+  mouvement vu à une vingtaine de secondes à ×1 quand six mouvements sont suivis).
