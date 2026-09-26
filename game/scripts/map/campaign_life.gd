@@ -123,16 +123,18 @@ func _read_provinces(sim: Object) -> void:
 		ids[str(entry["province"])] = true
 	for hamlet in _settlements.data.hamlets:
 		ids[str(hamlet["province"])] = true
-	var can_read := sim.has_method("get_province_state")
+	# PB3d : instantané groupé (partagé avec les autres calques du même rafraîchissement).
+	var snapshot := ProvinceSnapshot.of(sim, _map_data) if _map_data != null else ProvinceSnapshot.read(sim, PackedStringArray(ids.keys()))
 	for province_id in ids:
-		var state: Dictionary = sim.call("get_province_state", province_id) if can_read else {}
-		var devastation := float(state.get("devastation", 0.0))
+		var i := snapshot.index_of(str(province_id))
+		var known := snapshot.has(i)
+		var devastation := float(snapshot.devastation[i]) if known else 0.0
 		if forced_devastation.has(province_id):
 			devastation = float(forced_devastation[province_id])
 		province_states[province_id] = {
 			"devastation": devastation,
-			"population": float(state.get("population_total", TerroirMask.REFERENCE_POPULATION)),
-			"siege": state.has("siege"),
+			"population": float(snapshot.population_total[i]) if known else TerroirMask.REFERENCE_POPULATION,
+			"siege": known and snapshot.besieged[i] != 0,
 		}
 
 

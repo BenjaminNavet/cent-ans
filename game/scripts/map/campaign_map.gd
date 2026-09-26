@@ -102,6 +102,12 @@ var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerr
 var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
 var movement_ctl: ArmyMovementController = null  # M4 : bulle, chemin, clic au sol, animation
 var agents_ctl: AgentController = null  # C6 (agents) : espions, hérauts, prédicateurs
+## PB3d : vrai pendant que le cœur résout la fin de tour dans son fil (ordres refusés, cloche
+## désactivée ; l'interface lit l'état d'avant, la caméra et l'animation continuent).
+var end_turn_running: bool = false
+var turn_wait: TurnWaitIndicator = null
+## PB3d : fins de tour résolues et rafraîchies (bancs `pb1_turns.gd`, parcours RL1).
+var end_turns_refreshed: int = 0
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -290,7 +296,7 @@ func _configure_lod() -> void:
 
 
 func _connect_ui() -> void:
-	ui.end_turn_pressed.connect(_on_end_turn)
+	ui.end_turn_pressed.connect(_on_end_turn.bind(true))  # PB3d : le joueur attend le fil du cœur
 	ui.save_requested.connect(_on_save)
 	ui.load_requested.connect(_on_load)
 	ui.main_menu_requested.connect(func() -> void:
@@ -355,6 +361,7 @@ func _setup_campaign() -> void:
 func refresh_all() -> void:
 	if sim == null:
 		return
+	ProvinceSnapshot.invalidate()  # PB3d : l'état a pu changer (ordre, fin de tour, chargement)
 	_refresh_owner_colors()
 	if faction_borders != null:  # FR1
 		faction_borders.refresh()
@@ -438,20 +445,15 @@ func _refresh_top_bar() -> void:
 ## Couleur de chaque province = couleur héraldique du propriétaire courant (simulation),
 ## initialisée par `GameDataStore.get_province_owner_colors` ; palette de repli sans store.
 func _refresh_owner_colors() -> void:
-	var ids := PackedStringArray()
-	ids.resize(map_data.province_count)
-	for index in range(1, map_data.province_count + 1):
-		ids[index - 1] = str(map_data.get_province(index).get("id", ""))
+	# PB3d : propriétaires lus en un appel groupé (instantané partagé par les calques).
+	var snapshot := ProvinceSnapshot.of(sim, map_data)
+	var ids := snapshot.ids
 	var colors := PackedColorArray()
-	if SimFacade.store_loaded():
-		colors = SimFacade.store.call("get_province_owner_colors", ids)
-	if colors.size() != ids.size():
-		colors.resize(ids.size())
-		colors.fill(Color(0, 0, 0, 0))
+	colors.resize(ids.size())
+	colors.fill(Color(0, 0, 0, 0))
 	var fallback_by_owner: Dictionary = {}
 	for i in ids.size():
-		var state: Dictionary = sim.call("get_province_state", ids[i])
-		var owner: String = str(state.get("owner", map_data.get_province(i + 1).get("owner", "")))
+		var owner: String = snapshot.owner[i] if snapshot.has(i) else str(map_data.get_province(i + 1).get("owner", ""))
 		if owner == "":
 			colors[i] = Color(0, 0, 0, 0)
 		elif SimFacade.store_loaded():
@@ -461,7 +463,8 @@ func _refresh_owner_colors() -> void:
 				fallback_by_owner[owner] = TerrainBuilder.FALLBACK_PALETTE[fallback_by_owner.size() % TerrainBuilder.FALLBACK_PALETTE.size()]
 			colors[i] = fallback_by_owner[owner]
 		colors[i].a = 1.0 if owner != "" else 0.0
-	terrain.set_province_colors(colors)
+	if colors != terrain._province_colors:  # PB3d : texture refaite seulement si changée
+		terrain.set_province_colors(colors)
 	if minimap_ctl != null:  # C1
 		minimap_ctl.set_province_colors(colors)
 
@@ -707,6 +710,8 @@ func _on_province_right_clicked(index: int) -> void:
 
 ## Soumet un ordre `move_army` via `find_path` ; renvoie la réponse de la simulation.
 func order_move(army_id: String, target_id: String) -> Dictionary:
+	if _refuse_during_end_turn():
+		return {"ok": false, "error": TurnWaitIndicator.TEXT}
 	var path: PackedStringArray = sim.call("find_path", army_id, target_id)
 	if path.is_empty():
 		return {"ok": false, "error": "Aucun chemin vers %s." % province_name_of(target_id)}
@@ -992,6 +997,8 @@ func _construction_marker_position(province_id: String) -> Vector3:
 func _submit(order: Dictionary, success_text: String) -> Dictionary:
 	if sim == null:
 		return {"ok": false, "error": "Simulation absente"}
+	if _refuse_during_end_turn():
+		return {"ok": false, "error": TurnWaitIndicator.TEXT}
 	var result: Dictionary = sim.call("submit_order", order)
 	if result.get("ok", false):
 		# UB1 / U13 : recrutement, construction ou ordre ordinaire.
@@ -1004,15 +1011,20 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 	return result
 
 
-func _on_end_turn() -> void:
-	if sim == null or ui.is_dialog_open() or (ai_replay != null and ai_replay.playing):
+## `threaded` (PB3d) : le cœur résout le tour dans un fil et la carte continue de s'animer ; les
+## appels directs (tests, captures, mode headless) restent synchrones.
+func _on_end_turn(threaded: bool = false) -> void:
+	if sim == null or end_turn_running or ui.is_dialog_open() or (ai_replay != null and ai_replay.playing):
 		return
 	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
 		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
 	if ai_replay != null:  # CT1 : le cœur enregistre les marches de l'IA si elles seront rejouées
 		ai_replay.before_end_turn()
-	var events: Array = sim.call("end_turn")
+	var turn_sim: Object = sim
+	var events: Variant = await _resolve_end_turn(threaded and DisplayServer.get_name() != "headless")
+	if events == null or sim != turn_sim or not is_inside_tree():
+		return  # PB3d : partie chargée ou carte quittée pendant le calcul
 	if hud != null:  # U5 : voisins, alliés et ennemis du nouveau tour (filtre des lettres)
 		hud.update_interest()
 	ui.add_events(events, str(sim.call("get_date_label")))
@@ -1021,6 +1033,7 @@ func _on_end_turn() -> void:
 		audio.on_turn_events(events)
 	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
 	refresh_all()
+	end_turns_refreshed += 1
 	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
 		await ai_replay.play()
 	if diplomacy != null:
@@ -1040,11 +1053,47 @@ func _on_end_turn() -> void:
 	_offer_pending_battles()  # M7
 
 
+## PB3d : fin de tour résolue dans un fil du cœur (`begin_end_turn` / `poll_end_turn`) quand le
+## pont le permet ; synchrone sinon (simulation factice, pont ancien). Renvoie les événements du
+## tour, ou `null` si la fin de tour a été abandonnée (chargement d'une partie pendant le calcul).
+func _resolve_end_turn(threaded: bool) -> Variant:
+	if not threaded or not sim.has_method("begin_end_turn") or not bool(sim.call("begin_end_turn")):
+		return sim.call("end_turn")
+	end_turn_running = true
+	ui.set_end_turn_enabled(false)
+	if turn_wait == null:
+		turn_wait = TurnWaitIndicator.new()
+		ui.add_child(turn_wait)
+	turn_wait.begin()
+	var turn_sim: Object = sim
+	var events: Variant = turn_sim.call("poll_end_turn")
+	while events == null:
+		await get_tree().process_frame
+		if not is_instance_valid(turn_sim) or not bool(turn_sim.call("is_end_turn_pending")):
+			events = turn_sim.call("poll_end_turn") if is_instance_valid(turn_sim) else null
+			break
+		events = turn_sim.call("poll_end_turn")
+	end_turn_running = false
+	if is_instance_valid(turn_wait):
+		turn_wait.end()
+	ui.set_end_turn_enabled(true)
+	return events
+
+
+## PB3d : ordre refusé pendant la fin de tour (message discret).
+func _refuse_during_end_turn() -> bool:
+	if not end_turn_running:
+		return false
+	UiSounds.play("refused")
+	ui.show_toast(TurnWaitIndicator.TEXT)
+	return true
+
+
 # --- Sauvegarde ----------------------------------------------------------------------
 
 
 func _on_save(save_name: String) -> void:
-	if sim == null:
+	if sim == null or _refuse_during_end_turn():  # PB3d : on sauve l'état résolu, pas celui d'avant
 		return
 	if SimFacade.save_game(save_name):
 		ui.show_toast("Partie sauvegardée : %s" % save_name)
