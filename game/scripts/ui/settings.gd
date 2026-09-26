@@ -41,6 +41,10 @@ const DEFAULTS := {
 	"camera/speed": 1.0,
 	# C1 : brouillard de guerre (provinces hors de vue voilées, armées ennemies masquées).
 	"map/fog_of_war": true,
+	# CT1 : mouvements des armées IA en fin de tour (« follow » Suivre, « show » Montrer, « hide »
+	# Masquer, voir `AiTurnReplay`) et leur vitesse (×1, ×2, ×4).
+	"map/ai_moves": "follow",
+	"map/ai_moves_speed": 1.0,
 	"game/autosave_interval": 4,
 	"game/interactive_battles": true,
 	# F8 : tutoriel des premiers tours (désactivable, progression persistée).

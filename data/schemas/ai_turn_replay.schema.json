@@ -6,7 +6,7 @@
   "type": "object",
   "required": [
     "max_followed_moves", "notable_radius_km", "march_speed_px_per_s", "min_move_duration_s",
-    "max_move_duration_s", "camera_pan_duration_s", "camera_hold_s", "camera_follow_distance",
+    "max_move_duration_s", "camera_pan_duration_s", "camera_hold_s", "camera_follow_distance_share",
     "camera_return_duration_s", "background_batch_duration_s", "speeds"
   ],
   "additionalProperties": false,
@@ -28,7 +28,7 @@
     "max_move_duration_s": {"description": "Durée maximale d'un mouvement (×1).", "type": "number", "exclusiveMinimum": 0},
     "camera_pan_duration_s": {"description": "Travelling vers un mouvement suivi (×1).", "type": "number", "minimum": 0},
     "camera_hold_s": {"description": "Arrêt sur l'issue d'un mouvement suivi (bataille, siège) (×1).", "type": "number", "minimum": 0},
-    "camera_follow_distance": {"description": "Distance de la caméra pendant le suivi (unités carte).", "type": "number", "exclusiveMinimum": 0},
+    "camera_follow_distance_share": {"description": "Distance de la caméra pendant le suivi, en part de la plus grande dimension de la carte (0,09 = cadrage « aller à l'armée »).", "type": "number", "exclusiveMinimum": 0, "maximum": 1},
     "camera_return_duration_s": {"description": "Retour de la caméra au point de départ du joueur (×1).", "type": "number", "minimum": 0},
     "background_batch_duration_s": {"description": "Durée des mouvements non suivis, joués ensemble (×1).", "type": "number", "exclusiveMinimum": 0},
     "speeds": {
