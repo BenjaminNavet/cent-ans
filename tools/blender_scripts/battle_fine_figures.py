@@ -732,6 +732,10 @@ COVERS = (
 )
 
 
+# Garments dropped whole under a piece worn by every variant (the slits show the hose).
+REPLACED_BY = {"tunic_skirt": "jack_skirt"}
+
+
 def hide_covered(garments, equipment, variants):
     """Delete the garment faces covered in every variant by another piece (FG2)."""
     pieces = [(o, 0) for o, _r in garments] + [
@@ -756,7 +760,16 @@ def hide_covered(garments, equipment, variants):
         if inner.name.startswith("belt"):
             continue
         groups = [outers(inner, v) for v in range(variants)]
+        before = len(inner.data.polygons)
         removed += gear.cull_hidden(inner, groups)
+        replaced = any(
+            o.name.startswith(REPLACED_BY.get(inner.name, "-")) and m & 0b0011_1111 == 0
+            for o, m in pieces
+        )
+        if replaced or len(inner.data.polygons) < before * 0.25:
+            # Mostly hidden: the leftovers are slivers showing through slits and hems.
+            removed += len(inner.data.polygons)
+            inner.data.clear_geometry()
     for obj, mask, _k in equipment:
         if not obj.name.startswith(COVERS):
             continue
@@ -864,7 +877,9 @@ def build_figure(fig_name, level):
     if outfit == "harness" and era and level < 2:
         # FG2: arm and leg plates over the mail, in the harness colour of the recipe.
         plate_c = colour(recipe, "King_Legs:Metal", (eq.C_PLATE, eq.STEEL))[1]
-        for obj in gear.limb_harness(kit_gear, body, era, plate_c):
+        # Cuisses only where no coat skirt hides the thighs (white harness).
+        bare_thighs = colour(recipe, "King_Body:Metal", (eq.C_LIVERY,))[0] == eq.C_PLATE
+        for obj in gear.limb_harness(kit_gear, body, era, plate_c, bare_thighs):
             parent_keep(obj, arm)
             garments.append((obj, "plates"))
         if era == "late":
@@ -976,7 +991,7 @@ def build_figure(fig_name, level):
         bs.set_face_mask(obj, mask)
         out.append(obj)
     for obj, role in garments:
-        if level in DROPPED.get(role, ()):
+        if level in DROPPED.get(role, ()) or not obj.data.polygons:
             bpy.data.objects.remove(obj)
             continue
         decimate(obj, budget(role, level, mounted))
