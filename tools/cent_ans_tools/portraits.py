@@ -259,10 +259,15 @@ def generate(
                 if job.reference is not None
                 else {}
             )
-            image, cost = openrouter.request_image(
-                model, job.prompt, client, max_tokens=MAX_TOKENS, **extra
-            )
             estimated += unit
+            try:
+                image, cost = openrouter.request_image(
+                    model, job.prompt, client, max_tokens=MAX_TOKENS, **extra
+                )
+            except openrouter.ImageExtractionError as exc:
+                if exc.cost is not None:
+                    spent += exc.cost
+                raise
             spent += cost if cost is not None else unit
             job.out_path.parent.mkdir(parents=True, exist_ok=True)
             job.out_path.write_bytes(convert(image))
@@ -270,7 +275,7 @@ def generate(
             if on_progress is not None:
                 on_progress(job, spent)
     finally:
-        if written:
+        if spent > 0:
             budget.add_entry(
                 date.today().isoformat(),
                 openrouter.SERVICE_NAME,
