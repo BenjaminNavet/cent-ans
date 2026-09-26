@@ -37,3 +37,16 @@ Aucun appel réseau ni build lancé (tout testé avec `httpx.MockTransport` / mo
 | 4 | corrigé | `fix(tools): encode era-music tracks atomically to avoid stuck retries` | `convert_music`/`convert_layer` passent par `_run_ffmpeg_atomic` : ffmpeg écrit dans `<dst>.part`, remplacé par `dst` uniquement après succès (`Path.replace`), `.part` nettoyé dans un `finally` — un encodage interrompu ne laisse plus jamais croire que le fichier est prêt. Le bloc chalemie de `main()` vérifie maintenant l'existence de la piste musicale *et* de la couche de bataille séparément et ne retente que celle(s) qui manque(nt), au lieu de sauter les deux dès que le MP3 existe. Tests : `test_run_ffmpeg_atomic_writes_dst_only_on_success`, `test_run_ffmpeg_atomic_leaves_no_dst_and_no_part_on_failure` (la retente shawm/couche n'est pas testée unitairement : logique inline dans `main()`, dépendante du réseau — vérifiée par lecture de code). |
 
 Rien d'écarté dans ce lot : les 4 constats étaient confirmés à la lecture du code.
+
+## Corrections GDScript bataille
+
+État : terminé (non exécuté : smoke test à lancer à l'intégration).
+
+1. Corrigé (e85e0935) : `battle_siege.gd` met à jour un pan ou la porte aussi quand `intact` change (mémorisé dans `view["intact"]`), même sous le seuil de 0,01.
+2. Corrigé (d976a741) : `battle_soldiers.gd` crée les cadavres des dernières figurines d'un régiment anéanti (absent sans `left_field` ni `reserve`).
+3. Écarté : en Godot 4, un `PackedFloat32Array` lu d'un dictionnaire partage la même référence (`PackedArrayRef`), pas un tampon en copie sur écriture ; l'écriture se fait en place (déjà supposé par `battle_gore._write(data, ...)`). Vider `layer["data"]` avant d'écrire ne changerait rien.
+4. Corrigé (bb251b68) : `get_units` et `get_siege` lus une fois par image dans `battle_scene` ; `music.update(delta, units)`, `_frame_siege` pour la vue, le HUD, la sortie et l'audio. `battle_staging._sync_fires` (1 Hz) lit encore `get_siege` séparément.
+5. Corrigé (08555828) : les couches d'un régiment passent à l'effectif quand il perd plus d'un quart des figurines, ce qui supprime la copie de complément à chaque image dans le cas courant.
+6. Corrigé (f1b0be8c) : les imposteurs sont conservés d'un saut arrière à l'autre (atlas et cuissons en cours) ; `_bake` abandonne proprement si le nœud sort de l'arbre pendant un `await`.
+
+Signatures modifiées : `BattleMusicDirector.update(delta, p_units = null)`, `BattleScene._check_sortie(siege)`, `BattleScene._build_soldier_layers(kept_impostors = null)`.
