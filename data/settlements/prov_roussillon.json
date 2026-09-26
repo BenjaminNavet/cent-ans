@@ -86,5 +86,106 @@
     "sources": [
       "Elne"
     ]
+  },
+  {
+    "id": "set_ceret",
+    "province": "prov_roussillon",
+    "kind": "village",
+    "name": {
+      "display": "Céret",
+      "local": "Ceret",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.7497,
+      42.4897
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg du Vallespir, au pied du Canigou.",
+    "sources": [
+      "Céret"
+    ]
+  },
+  {
+    "id": "set_prades",
+    "province": "prov_roussillon",
+    "kind": "village",
+    "name": {
+      "display": "Prades",
+      "local": "Prada",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.4258,
+      42.6172
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg du Conflent, marché des vallées du Canigou.",
+    "sources": [
+      "Prades (Pyrénées-Orientales)"
+    ]
+  },
+  {
+    "id": "set_ille_sur_tet",
+    "province": "prov_roussillon",
+    "kind": "village",
+    "name": {
+      "display": "Ille-sur-Têt",
+      "local": "Illa",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.6167,
+      42.6667
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole du Roussillon, sur la Têt.",
+    "sources": [
+      "Ille-sur-Têt"
+    ]
+  },
+  {
+    "id": "set_saint_michel_de_cuxa",
+    "province": "prov_roussillon",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Michel-de-Cuxa",
+      "local": "Sant Miquel de Cuixà",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.3986,
+      42.5844
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye bénédictine du Conflent, fondée au Xe siècle.",
+    "sources": [
+      "Abbaye Saint-Michel-de-Cuxa"
+    ]
   }
 ]
