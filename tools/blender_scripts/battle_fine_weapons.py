@@ -42,9 +42,9 @@ GRIP = (0.10, 0.06, 0.03)
 HIDE = (0.42, 0.30, 0.16)
 
 # Visible arrow: shaft length from the nock to the head's base. Real livery arrows measure
-# ~0.76 m; the fine rig draws ~0.55-0.6 m (FG1), so the nocked arrow is shortened to end a
-# hand's breadth past the bow (see ``battle_fine_rig.BOW_DRAW``).
-ARROW_LENGTH = 0.66
+# ~0.76 m; the fine rig draws ~0.59 m (FG2: torso -75 degrees, bow shoulder pushed 20), so
+# the nocked arrow is shortened to end a hand's breadth past the bow (``battle_fine_rig``).
+ARROW_LENGTH = 0.62
 
 
 def _at(fr, x, y, z=0.0):
