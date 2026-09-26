@@ -258,6 +258,9 @@ pub struct Unit {
     /// (a target of indirect volleys for a few seconds after).
     #[serde(default = "unseen")]
     pub seen_at: f64,
+    /// EP11: push state and shape of the front in melee.
+    #[serde(default)]
+    pub push: crate::push::PushShape,
 }
 
 /// `missile_timer` of a regiment never shot at.
@@ -333,6 +336,7 @@ impl Unit {
             knocked_timer: 0.0,
             standard: StandardState::Carried,
             seen_at: unseen(),
+            push: Default::default(),
         }
     }
 

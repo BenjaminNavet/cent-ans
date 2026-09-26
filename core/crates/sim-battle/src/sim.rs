@@ -11,6 +11,7 @@ mod fire;
 mod indirect;
 mod obstacles;
 mod pathing;
+mod push;
 mod reinforcements;
 mod scenario;
 mod separation;
@@ -145,6 +146,8 @@ pub struct BattleSim {
     /// EP5: rules of the standards, their own random stream, the routs
     /// already seen and the standards taken so far.
     standard_rules: data_model::BattleStandardRules,
+    /// EP11: continuous push of the lines (`data/rules/battle_push.json`).
+    push_rules: crate::push::PushRules,
     standard_rng: BattleRng,
     standard_rout_seen: Vec<bool>,
     trophies: Vec<crate::outcome::StandardTrophy>,
@@ -427,6 +430,7 @@ impl BattleSim {
             assault: Default::default(),
             scale,
             standard_rules,
+            push_rules: crate::push::PushRules::bundled().clone(),
             standard_rng,
             standard_rout_seen: vec![false; count],
             trophies: Vec::new(),
@@ -1274,6 +1278,7 @@ impl BattleSim {
         self.tower_fire();
         self.boiling_oil();
         self.resolve_fire();
+        self.resolve_push(&contacts);
         self.resolve_melee(&contacts);
         self.resolve_standards(&contacts);
         self.resolve_camps();
@@ -2529,7 +2534,8 @@ impl BattleSim {
         if matches!(attacker.standard, crate::unit::StandardState::Fallen { .. }) {
             damage *= self.standard_rules.fallen_melee_factor;
         }
-        damage
+        // EP11: compression and wrapping files (`sim/push.rs`).
+        damage * self.push_melee_factor(attacker, defender)
     }
 
     fn resolve_melee(&mut self, contacts: &[Vec<usize>]) {

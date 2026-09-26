@@ -123,6 +123,8 @@ impl BattleSim {
     /// [`Unit::figure_positions`].
     pub fn soldier_poses(&self, unit: &Unit, scale: f64) -> Vec<[f64; 4]> {
         let mut positions = unit.figure_positions(scale);
+        // EP11: bulging front, squeezed ranks, wrapping files.
+        crate::push::deform_figures(unit, &self.push_rules, &mut positions);
         // BR3: no figure in a house or a prop.
         self.push_figures_out(unit, &mut positions);
         let (Some(piece), Some(works)) = (unit.climbing, &self.siege) else {

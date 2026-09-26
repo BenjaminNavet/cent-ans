@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_push_rules.schema.json",
+  "title": "Poussée continue des lignes en mêlée",
+  "description": "Fichier data/rules/battle_push.json (lot EP11, ADR 0070) : pression de deux régiments au contact, recul continu du plus faible, compression contre un obstacle, enroulement des files débordantes autour d'un adversaire plus étroit, bombement du front. Lu par sim-battle (PushRules). Batailles rangées seulement.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "pressure": {
+      "type": "object",
+      "description": "Pression d'un régiment = poids par homme × racine du nombre de rangs × fraîcheur × moral × charge × formation. L'écart relatif des deux pressions fixe la vitesse de recul du plus faible.",
+      "properties": {
+        "max_speed_mps": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Recul le plus rapide (mètres par seconde)."
+        },
+        "dead_band": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Écart relatif (Pa − Pb)/(Pa + Pb) sous lequel les lignes se tiennent."
+        },
+        "full_speed_share": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Écart relatif à partir duquel le recul atteint max_speed_mps (doit dépasser dead_band)."
+        },
+        "mounted_weight": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Poids d'un cavalier (un fantassin sans armure pèse 1)."
+        },
+        "armor_weight_per_point": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Poids ajouté par point d'armure."
+        },
+        "rank_cap": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40,
+          "description": "Au-delà de ce nombre de rangs, la profondeur ne pousse plus davantage."
+        },
+        "min_freshness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Facteur de fraîcheur le plus bas (troupe épuisée)."
+        },
+        "fatigue_scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "description": "Fraîcheur = 1 − fatigue / fatigue_scale."
+        },
+        "charge_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Pendant l'élan de charge, pression × (1 + charge/100 × charge_factor)."
+        },
+        "square_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Pression d'un carré ou schiltron."
+        },
+        "stakes_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Pression d'archers derrière leurs pieux plantés."
+        },
+        "pikes_against_horse_factor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Pression de piquiers (capacité schiltron) face à des cavaliers."
+        },
+        "follow_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part du recul de l'adversaire que le régiment qui pousse suit (1 : il reste au contact)."
+        }
+      },
+      "required": [
+        "max_speed_mps",
+        "dead_band",
+        "full_speed_share",
+        "mounted_weight",
+        "armor_weight_per_point",
+        "rank_cap",
+        "min_freshness",
+        "fatigue_scale",
+        "charge_factor",
+        "square_factor",
+        "stakes_factor",
+        "pikes_against_horse_factor",
+        "follow_share"
+      ],
+      "additionalProperties": false
+    },
+    "compression": {
+      "type": "object",
+      "description": "Un régiment poussé qui ne peut reculer (mur, maison, eau profonde, bord du champ, régiment ami) se comprime (0 à 1).",
+      "properties": {
+        "gain_per_second": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Gain de compression par seconde à pleine poussée."
+        },
+        "decay_per_second": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Perte de compression par seconde quand la poussée cesse ou que le régiment peut reculer."
+        },
+        "friend_gap_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Un régiment ami plus proche que cet écart derrière bloque le recul (mètres)."
+        },
+        "damage_taken_bonus": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Pertes subies en mêlée × (1 + compression × damage_taken_bonus)."
+        },
+        "fighting_malus": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Coups portés en mêlée × (1 − compression × fighting_malus)."
+        },
+        "morale_per_second": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Moral perdu par seconde à compression 1."
+        },
+        "squeeze": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.9,
+          "description": "Rendu : part de la profondeur perdue par les rangs serrés à compression 1."
+        }
+      },
+      "required": [
+        "gain_per_second",
+        "decay_per_second",
+        "friend_gap_m",
+        "damage_taken_bonus",
+        "fighting_malus",
+        "morale_per_second",
+        "squeeze"
+      ],
+      "additionalProperties": false
+    },
+    "wrap": {
+      "type": "object",
+      "description": "Les files d'un régiment qui débordent un adversaire plus étroit pivotent autour de son coin et l'attaquent de flanc.",
+      "properties": {
+        "min_overhang_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Débordement minimal d'un côté pour que les files s'enroulent (mètres)."
+        },
+        "grow_per_second": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Progression de l'enroulement par seconde (0 à 1)."
+        },
+        "decay_per_second": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Retour en ligne par seconde quand le débordement cesse."
+        },
+        "max_turn_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 90,
+          "description": "Angle de pivot des files débordantes à enroulement complet (degrés)."
+        },
+        "flank_damage_bonus": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Coups portés à l'adversaire enveloppé × (1 + enroulement moyen des deux côtés × flank_damage_bonus)."
+        }
+      },
+      "required": [
+        "min_overhang_m",
+        "grow_per_second",
+        "decay_per_second",
+        "max_turn_deg",
+        "flank_damage_bonus"
+      ],
+      "additionalProperties": false
+    },
+    "bulge": {
+      "type": "object",
+      "description": "Rendu : le front de celui qui pousse se bombe, celui de celui qui recule se creuse (mètres, profil parabolique centré sur le point de contact).",
+      "properties": {
+        "max_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Bombement ou creux le plus marqué (mètres)."
+        },
+        "per_mps": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Bombement par mètre par seconde de poussée."
+        },
+        "melee_surge_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Bombement de toute ligne en mêlée, même à l'équilibre (les premiers rangs se jettent en avant)."
+        },
+        "rate_mps": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 10,
+          "description": "Vitesse à laquelle le front prend sa forme (mètres par seconde)."
+        },
+        "rear_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Part du bombement que garde le dernier rang."
+        }
+      },
+      "required": [
+        "max_m",
+        "per_mps",
+        "melee_surge_m",
+        "rate_mps",
+        "rear_share"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "pressure",
+    "compression",
+    "wrap",
+    "bulge"
+  ],
+  "additionalProperties": false
+}
