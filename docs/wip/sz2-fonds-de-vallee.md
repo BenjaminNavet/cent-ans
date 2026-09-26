@@ -44,8 +44,8 @@ autrement : d'où les écarts d'étage à étage (Loire d'Orléans sous ses berg
 - [x] Correctif outils + tests (`tests/test_bake_stamp.py`, tests adaptés) — e13efe90
 - [x] E0 recuit (`geo relief-shade`, 176 tuiles sur 256 changent) — 22cb2e06.
   E0 après : Paris 29,6 ; Vernon 9,4 ; Rouen 3,4 ; Orléans 88,4 ; Amboise 49,4 ; Tours 40,5.
-- [ ] E1-E4 recuits dans `pyramid.sz2` — EN COURS
-- [ ] `detail-dem --force`, `hydro-fine`, `anchors-fine`
+- [x] E1-E4 recuits dans `pyramid.sz2` (9 833 tuiles, 2,44 Go, 12 min). E4 : Paris 23,3 ; Vernon 6,8 ; Orléans 84,3 ; Blois 60 ; Amboise 48 ; Tours 37,4 (avant 0,5 ; 0,5 ; 67 ; 31 ; 15 ; 7)
+- [ ] `detail-dem --force` EN COURS (journal `scratchpad/logs/detail.log`), puis `hydro-fine`, `anchors-fine`
 - [ ] Vérifications (Orléans, Amboise, Seine, `detail-check`, `relief-all --check`)
 - [ ] Captures, docs, commande de bascule
 
