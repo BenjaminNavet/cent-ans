@@ -14,46 +14,26 @@ bataille, résultat identique.
 3. soldiers.update / étendards / audio / herbe couchée : ce qui se porte simplement.
 4. Banc : p99 et pire image ajoutés au JSON ; A/B release et debug.
 
-## État (PAUSE demandée par le joueur, 26/09)
-- [~] 1. fil de pas : code écrit, **jamais compilé ni testé** (la compilation release lancée
-  avant les modifications a réussi, mais ne prouve rien pour le code actuel).
-  - `core/crates/sim-battle/src/sim/pipeline.rs` : `tick_with` (boucle de `tick`, qui
-    l'appelle désormais), `can_step`, `fork_for_step` (clone sans files `shots`/`impacts`),
-    `adopt_step` (garde accumulateur, files non lues + nouvelles via `record_shot`/
-    `record_impact`, curseurs `events_read` et `fx_read` via `AssaultState::keep_read_cursor`).
-  - `core/crates/godot-bridge/src/battle_step_job.rs` : `StepPipeline` (clé `(ticks,
-    pose_epoch)`, fil QoS USER_INITIATED via `turn_job::raise_thread_priority` rendu
-    `pub(crate)`, ancien état jeté dans le fil suivant) + 2 tests (bit-à-bit avec ordres ;
-    fourche périmée). Module déclaré dans `lib.rs`.
-  - `battle_sim.rs` : champs `step_thread`/`steps`, `tick` passe par le pipeline si activé,
-    rejeu : `steps.clear()`, `touch_poses` vide la fourche, funcs `set_step_thread`,
-    `get_step_thread`, `get_step_stats`.
-- [ ] GDScript : `battle_scene.gd` doit appeler `set_step_thread(true)` hors headless et hors
-  rejeu (pas encore fait).
-- [ ] 2. piétinement : conception prête, pas de code. Classe Rust `StampMap` (RefCounted) :
-  `setup(w,h,channels,origin,texel)`, `stamp_box` (sémantique de `_stamp_box` d'herbe
-  couchée, qui couvre aussi le piétinement avec cap 255), `stamp_disc`, `sample`,
-  `upload(texture, image)` seulement si modifiée. Pas de mise à jour partielle de texture
-  dans Godot 4.7 (sondé : seulement `texture_2d_update`/`ImageTexture.update` complets) ;
-  à utiliser pour `battle_terrain.gd` (piétinement) et `battle_grass_flatten.gd`.
-- [ ] 3. soldiers.update : piste = ne pas réaffecter `mm.buffer` quand le tampon Rust n'a pas
-  changé (renvoyer une génération par `get_soldier_buffers`), sans `_hidden/_drive/reserved`.
-- [ ] 4. banc (ajouter p99 + pire image dans `_bench_finish`), mesures, ADR 0090, tests Godot.
+## État (reprise 26/09 après pause ; `main` fusionné 4d22e33b)
+- [x] 1. Pas N+1 dans un fil : `sim/pipeline.rs` (`tick_with`, `fork_for_step`, `adopt_step`),
+  `battle_step_job.rs` (`StepPipeline`), `set_step_thread`/`get_step_stats` ; `battle_scene.gd`
+  l'active hors headless, hors rejeu, sans `--no-pb3e`. Tests Rust bit-à-bit bataille + siège.
+- [x] 2. Piétinement et herbe couchée : classe Rust `StampMap` (`stamp_map.rs`), mêmes octets que
+  les boucles GDScript (vérifié par `pb3e_step_thread_test.gd`), envoi seulement si modifiée.
+  Pas de mise à jour partielle de texture dans Godot 4.7.
+- [x] 3. `mm.buffer` pas réaffecté si inchangé (versions rendues par `get_soldier_buffers`) ; les
+  places réservées (étendards, musiciens) reprennent le tampon masqué précédent sous une version
+  dérivée. `--pb3e-verify` : 0 écart sur la grosse bataille et le siège.
+- [ ] Étendards (1,7 ms) et audio (1,3 ms) : non traités (pas de portage simple sans changer le
+  rendu).
+- [x] Banc : `frame_ms_p99`, `frame_ms_max`, `tick_ms_p99/max`, `proc_step_ms_*` (durée de
+  `_process` des images avec un pas) / `proc_plain_ms_*`, `step_stats`.
+- [x] ADR 0090.
+- [ ] Mesures A/B (en cours : `bench.sh`/`runall.sh` du scratchpad ; base = même binaire avec
+  `--no-pb3e`, qui coupe fil, StampMap et saut de tampons).
 
-## Reprise
-1. `bash <scratchpad>/build.sh debug` (script : `CARGO_TARGET_DIR=<worktree>/core/target
-   cargo build -p godot-bridge [--release]`, copie optionnelle) ; ou directement
-   `cd core && CARGO_TARGET_DIR=$PWD/target cargo test -p godot-bridge battle_step_job` puis
-   `cargo test -p sim-battle`.
-2. Corriger la compilation, faire passer les tests, fmt/clippy.
-3. Dylibs de base pour l'A/B : à reconstruire depuis main a7877ac6 (non sauvegardées ; le
-   dossier `base/` du scratchpad n'existe pas). Les changements de sim-battle sont un
-   refactor sans effet, une base « branche avec set_step_thread(false) » est aussi possible.
-4. Lien `data/map/pyramid` déjà créé (non versionné) ; `godot --headless --path game --import`
-   pas encore lancé.
+## Constat de mesure
+Le pas de sim lui-même est court à la 60e seconde de la grosse bataille (tick p99 ≈ 1,1 ms,
+pire ≈ 1,5 ms en release) : les images de pas coûtent surtout par `get_units`, les poses et le
+renvoi de tous les tampons (≈ +3-4 ms de `_process` par rapport aux autres images).
 
-## Build
-Cible privée `core/target` du worktree (à supprimer à la fin, pas avant).
-
-## Prochaine étape
-Compiler et tester le pipeline (étape 1 de la reprise).

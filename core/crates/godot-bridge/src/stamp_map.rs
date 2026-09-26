@@ -180,13 +180,15 @@ impl StampMap {
         add_g: i64,
         cap_r: i64,
     ) -> bool {
-        self.marks.stamp_box(pair(center), facing, pair(half), add_r, add_g, cap_r)
+        self.marks
+            .stamp_box(pair(center), facing, pair(half), add_r, add_g, cap_r)
     }
 
     /// Disc with a soft edge: R and G rise towards `r_value` / `g_value`.
     #[func]
     fn stamp_disc(&mut self, center: Vector2, radius: f64, r_value: i64, g_value: i64) {
-        self.marks.stamp_disc(pair(center), radius, r_value, g_value);
+        self.marks
+            .stamp_disc(pair(center), radius, r_value, g_value);
     }
 
     /// Byte of `channel` at world point (x, z), 0-1 (0 outside).
@@ -211,7 +213,13 @@ impl StampMap {
     #[func]
     fn make_image(&self) -> Option<Gd<Image>> {
         let m = &self.marks;
-        Image::create_from_data(m.width as i32, m.height as i32, false, m.format(), &self.get_bytes())
+        Image::create_from_data(
+            m.width as i32,
+            m.height as i32,
+            false,
+            m.format(),
+            &self.get_bytes(),
+        )
     }
 
     /// Sends the map to `texture` through `image` if it changed (full
