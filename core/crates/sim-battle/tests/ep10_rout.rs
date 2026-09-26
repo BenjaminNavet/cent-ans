@@ -282,3 +282,63 @@ fn a_wing_routed_from_the_flank_does_not_break_the_line() {
     assert!(routed <= 1, "{routed} regiments of the line gave way");
     assert!(lateral < 25.0, "the wing ran {lateral:.0} m along the line");
 }
+
+/// The small mixed battle of `b6::battles_without_a_site_are_unchanged`
+/// (6 French regiments against 4 English, plains, no village, both AIs).
+fn small_mixed_battle(seed: u64) -> BattleSim {
+    let data = data();
+    let french = [
+        "unit_knights",
+        "unit_men_at_arms_foot",
+        "unit_men_at_arms_foot",
+        "unit_crossbowmen",
+        "unit_crossbowmen",
+        "unit_knights",
+    ];
+    let english = [
+        "unit_men_at_arms_foot",
+        "unit_longbowmen",
+        "unit_longbowmen",
+        "unit_knights",
+    ];
+    let mut battle = setup(units(&data, &french), units(&data, &english), None);
+    battle.village = Some(false);
+    let mut sim = BattleSim::new(battle, seed).unwrap();
+    sim.set_ai(SideId::Attacker, true);
+    sim.set_ai(SideId::Defender, true);
+    sim
+}
+
+/// Probe (ignored): winners of the small mixed battle of `b6` over seeds
+/// 0-63, and the routs of seed `EP10_B6_SEED` (default 3).
+#[test]
+#[ignore = "probe"]
+fn probe_small_battle() {
+    let mut french = 0;
+    let mut durations = Vec::new();
+    for seed in 0..64 {
+        let mut sim = small_mixed_battle(seed);
+        run_to_end(&mut sim);
+        if sim.winner() == Some(SideId::Attacker) {
+            french += 1;
+        }
+        durations.push(sim.elapsed());
+    }
+    durations.sort_by(f64::total_cmp);
+    println!(
+        "French win {french}/64, duration min {:.0} med {:.0} max {:.0}",
+        durations[0], durations[32], durations[63]
+    );
+    let seed = std::env::var("EP10_B6_SEED")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(3);
+    let mut sim = small_mixed_battle(seed);
+    run_to_end(&mut sim);
+    for e in sim.events() {
+        let t = &e.text_fr;
+        if t.contains("déroute") || t.contains("rallient") || t.contains("brisée") {
+            println!("{:5.0} {t}", e.time);
+        }
+    }
+}
