@@ -9,7 +9,7 @@ extends SceneTree
 ## `_fit_models`, hameaux posés sur une colonie ; enfin un balayage au palier vallée (villes 1:1
 ## en streaming, ZG6) : temps d'image pendant un travelling sur la zone dense.
 ## Usage : godot --path game --script res://tests/dc4_density_probe.gd -- --out=<dossier> --tag=<nom>
-##   [--views=1400,550,250,120] [--no-shots] [--no-valley]
+##   [--views=1400,550,250,120] [--center=x,y] [--no-shots] [--no-valley]
 ## Sortie : une ligne `DC4_JSON {...}` ; code 1 si des étiquettes se chevauchent.
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -26,6 +26,8 @@ var _out := ""
 var _tag := "probe"
 var _shots := true
 var _valley := true
+## Point visé imposé (`--center=x,y`, pour comparer deux jeux de données), sinon zone la plus dense.
+var _center := Vector2(-1.0, -1.0)
 
 
 func _init() -> void:
@@ -46,6 +48,9 @@ func _run() -> void:
 			_out = arg.trim_prefix("--out=")
 		elif arg.begins_with("--tag="):
 			_tag = arg.trim_prefix("--tag=")
+		elif arg.begins_with("--center="):
+			var xy := arg.trim_prefix("--center=").split(",")
+			_center = Vector2(float(xy[0]), float(xy[1]))
 		elif arg == "--no-shots":
 			_shots = false
 		elif arg == "--no-valley":
@@ -81,7 +86,7 @@ func _run() -> void:
 	_result["hamlets"] = layer.data.hamlets.size()
 	_result["towns_1to1"] = layer.towns.stats.get("towns", 0) if layer.towns != null else 0
 	_result["ranks"] = _rank_histogram(layer)
-	var center := _densest_point(layer, 40.0)
+	var center := _densest_point(layer, 40.0) if _center.x < 0.0 else _center
 	_result["center"] = [snappedf(center.x, 0.1), snappedf(center.y, 0.1)]
 	var surface_y := data.surface_world_at(center.x, center.y)
 	await _settle(settled)
@@ -173,7 +178,7 @@ func _screen_stats(layer: SettlementLayer, camera: Camera3D) -> Dictionary:
 	var rects: Array[Rect2] = []
 	for label in layer._labels:
 		if label.visible:
-			rects.append(SettlementLayer._label_rect(label, camera, 0.0))
+			rects.append(LabelPlacer.label3d_screen_rect(label, camera, screen.size.y))
 	var label_overlaps := 0
 	for a in rects.size():
 		for b in range(a + 1, rects.size()):
@@ -190,10 +195,10 @@ func _model_overlaps(layer: SettlementLayer) -> Dictionary:
 	var worst := 0.0
 	var examples: Array = []
 	for i in count:
-		if layer.model_holder(i) == null:
+		if not _has_model(layer, i):
 			continue
 		for j in range(i + 1, count):
-			if layer.model_holder(j) == null:
+			if not _has_model(layer, j):
 				continue
 			var d := layer.model_px(i).distance_to(layer.model_px(j))
 			var ri := layer.model_radius(i)
@@ -202,9 +207,23 @@ func _model_overlaps(layer: SettlementLayer) -> Dictionary:
 			if overlap > 0.2 * minf(ri, rj):
 				pairs += 1
 				worst = maxf(worst, overlap / minf(ri, rj))
-				if examples.size() < 8:
-					examples.append("%s/%s" % [layer.data.settlements[i]["id"], layer.data.settlements[j]["id"]])
-	return {"overlapping_pairs": pairs, "worst_ratio": snappedf(worst, 0.01), "examples": examples}
+				if examples.size() < 20:
+					examples.append("%s%s/%s%s d=%.2f r=%.2f/%.2f" % [layer.data.settlements[i]["id"], "*" if layer._is_landmark(i) else "",
+						layer.data.settlements[j]["id"], "*" if layer._is_landmark(j) else "", d, ri, rj])
+	var hidden := 0
+	var shrunk := 0
+	for i in count:
+		var holder: Node3D = layer._models[i]
+		if holder != null and not layer._is_landmark(i):
+			hidden += 0 if holder.visible else 1
+			shrunk += 1 if layer._fit_scale[i] < 0.999 else 0
+	return {"overlapping_pairs": pairs, "worst_ratio": snappedf(worst, 0.01), "examples": examples, "absorbed": hidden, "shrunk": shrunk}
+
+
+## Maquette affichée (générique ou ville emblématique) pour la colonie `i`.
+func _has_model(layer: SettlementLayer, i: int) -> bool:
+	var holder: Node3D = layer._models[i]
+	return holder != null and holder.visible
 
 
 ## Hameaux dont la position de rendu tombe dans l'emprise d'une maquette de colonie.

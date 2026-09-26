@@ -38,8 +38,6 @@ var _camera_distance := 0.0
 var _refreshed_once := false
 ## Empreinte des états utilisés par le masque (reconstruit seulement s'il change).
 var _terroir_key: String = ""
-## Facteur de réduction `_fit_models` d'origine par colonie (gardé au remplacement).
-var _fit: Dictionary = {}
 var _turn_key: String = ""
 var _off: Dictionary = {}
 
@@ -168,14 +166,10 @@ func _refresh_growth(sim: Object) -> void:
 		var holder := _settlements.model_holder(i)
 		if holder == null:
 			continue
-		if not _fit.has(id):
-			var old := holder.get_child(0) as Node3D if holder.get_child_count() > 0 else null
-			var base_scale: float = ModelLibrary.SETTLEMENT_SCALE.get(kind, 1.0)
-			_fit[id] = clampf(old.scale.x / base_scale, 0.3, 1.0) if old != null else 1.0
 		var model := SettlementGrowth.build_model(level, absi(id.hash()) / 7, castle)
 		if model == null:
 			continue
-		model.scale = Vector3.ONE * float(_fit[id])
+		# DC4 : maquette à pleine taille ; `replace_model` applique la réduction des voisines.
 		_settlements.replace_model(i, model)
 		replaced += 1
 	stats["growth_ms"] = Time.get_ticks_msec() - t0
