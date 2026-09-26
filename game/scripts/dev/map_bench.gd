@@ -53,6 +53,11 @@ var _descent_hold := DESCENT_HOLD
 var _descent_ms: PackedFloat32Array = PackedFloat32Array()
 var _descent_t_start := 0
 var _descent_us := 0
+## ZG7a : attribution des pics de la descente (images > 50 ms) : temps de traitement (scripts,
+## `_process`) et de physique de l'image, le reste étant rendu, attente GPU ou système.
+var _spike_process_ms: PackedFloat32Array = PackedFloat32Array()
+var _spike_frame_ms: PackedFloat32Array = PackedFloat32Array()
+var _process_ms_all: PackedFloat32Array = PackedFloat32Array()
 
 
 func _ready() -> void:
@@ -129,6 +134,12 @@ func _process(delta: float) -> void:
 				_descent_t_start = now
 		"descent":
 			_descent_ms.append((now - _last_us) / 1000.0)
+			# Moniteurs de l'image précédente, celle dont on vient de mesurer la durée.
+			var process_ms := (Performance.get_monitor(Performance.TIME_PROCESS) + Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)) * 1000.0
+			_process_ms_all.append(process_ms)
+			if (now - _last_us) / 1000.0 > 50.0:
+				_spike_frame_ms.append((now - _last_us) / 1000.0)
+				_spike_process_ms.append(process_ms)
 			_frame_ms.append((now - _last_us) / 1000.0)
 			_sample()
 			_phase_t += delta
@@ -186,10 +197,18 @@ func _report(now: int) -> void:
 		for ms in sorted_d:
 			if ms > 50.0:
 				spikes_d += 1
+		var process_dominated := 0
+		for k in _spike_frame_ms.size():
+			if _spike_process_ms[k] > _spike_frame_ms[k] * 0.5:
+				process_dominated += 1
+		var sorted_p := _process_ms_all.duplicate()
+		sorted_p.sort()
 		descent = {
 			"frames": n, "fps_avg": snappedf(n / maxf(_descent_us / 1000000.0, 0.001), 0.1),
 			"frame_ms_p50": snappedf(sorted_d[n / 2], 0.01), "frame_ms_p99": snappedf(sorted_d[int(n * 0.99)], 0.01),
 			"frame_ms_max": snappedf(sorted_d[n - 1], 0.01), "spikes_over_50ms": spikes_d,
+			"process_ms_p50": _median(_process_ms_all), "process_ms_p99": snappedf(sorted_p[int(sorted_p.size() * 0.99)], 0.01) if not sorted_p.is_empty() else 0.0,
+			"spike_process_ms_p50": _median(_spike_process_ms), "spikes_process_dominated": process_dominated,
 		}
 	var bakes := 0
 	var bake_frame_max := 0.0

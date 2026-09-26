@@ -13,10 +13,13 @@
         { "place": "Paris (Cité)", "lonlat": [2.348, 48.855], "width_m": 130 },
         { "place": "Vernon", "lonlat": [1.485, 49.09], "width_m": 160 },
         { "place": "Rouen", "lonlat": [1.09, 49.437], "width_m": 200 },
+        { "place": "La Bouille", "lonlat": [0.935, 49.352], "width_m": 250 },
+        { "place": "Duclair", "lonlat": [0.876, 49.482], "width_m": 300 },
+        { "place": "Caudebec", "lonlat": [0.726, 49.526], "width_m": 450 },
         { "place": "Quillebeuf", "lonlat": [0.53, 49.475], "width_m": 1200 },
         { "place": "Honfleur (embouchure)", "lonlat": [0.24, 49.44], "width_m": 3000 }
       ],
-      "source": "Largeurs actuelles d'après les cartes IGN (Seine à Paris 110-150 m selon les bras, à Rouen ~200 m) ; estuaire non endigué en 1340."
+      "source": "Largeurs actuelles d'après les cartes IGN (Seine à Paris 110-150 m selon les bras, à Rouen ~200 m) ; estuaire non endigué en 1340 ; ZG7a : La Bouille, Duclair et Caudebec ajoutés (la Seine maritime ne s'évase qu'après Villequier), largeur interpolée le long de la chaîne des ancrages quel que soit le tronçon."
     },
     {
       "id": "loire", "names": ["la Loire", "Loire", "Fleuve la Loire"],
