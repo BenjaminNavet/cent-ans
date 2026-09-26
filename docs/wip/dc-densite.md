@@ -35,6 +35,9 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 - 26/09 : DC2d : 139 colonies ajoutées (village 52, town 55, abbey 24, castle 8) dans les 33
   provinces Pays-Bas/Empire/Scandinavie ; `settlement_check` et `pytest test_settlements_schema.py`
   passent (134 passed, aucun id en double, aucune paire <3 km introduite).
+- 26/09 : plan, squelette DC0.
+- 26/09 : DC2a : 128 colonies ajoutées (31 town, 15 castle, 15 abbey, 67 village) sur 19 provinces de
+  France nord/ouest/centre ; `settlement_check` et `test_settlements_schema.py` passent.
 
 ## Prochaine étape
 Attendre la vague 1 ; fusionner DC2a-e (fichiers disjoints) puis DC1 dans feat/densite ; lancer DC3 + DC4.

@@ -3,70 +3,317 @@
     "id": "set_nantes",
     "province": "prov_bretagne",
     "kind": "city",
-    "name": { "display": "Nantes", "local": "Nantes", "local_language": "ancien français" },
-    "lonlat": [-1.5536, 47.2184],
+    "name": {
+      "display": "Nantes",
+      "local": "Nantes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.5536,
+      47.2184
+    ],
     "weight": 34,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_port", "bld_vineyard_press", "bld_cathedral", "bld_hotel_dieu", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_port",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_hotel_dieu",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": true,
     "description": "Capitale ducale sur la Loire, résidence de Jean III de Bretagne.",
-    "sources": ["Nantes", "Duché de Bretagne"]
+    "sources": [
+      "Nantes",
+      "Duché de Bretagne"
+    ]
   },
   {
     "id": "set_rennes",
     "province": "prov_bretagne",
     "kind": "town",
-    "name": { "display": "Rennes", "local": "Rennes", "local_language": "ancien français" },
-    "lonlat": [-1.6778, 48.1147],
+    "name": {
+      "display": "Rennes",
+      "local": "Rennes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.6778,
+      48.1147
+    ],
     "weight": 22,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_collegiate_church", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Autre capitale ducale, siège d'un évêché, porte orientale de la Bretagne.",
-    "sources": ["Rennes"]
+    "sources": [
+      "Rennes"
+    ]
   },
   {
     "id": "set_saint_malo",
     "province": "prov_bretagne",
     "kind": "town",
-    "name": { "display": "Saint-Malo", "local": "Saint Malo", "local_language": "ancien français" },
-    "lonlat": [-2.0261, 48.6493],
+    "name": {
+      "display": "Saint-Malo",
+      "local": "Saint Malo",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -2.0261,
+      48.6493
+    ],
     "weight": 14,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
     "port": true,
     "description": "Cité épiscopale fortifiée sur son rocher, port de la Manche.",
-    "sources": ["Saint-Malo"]
+    "sources": [
+      "Saint-Malo"
+    ]
   },
   {
     "id": "set_josselin",
     "province": "prov_bretagne",
     "kind": "castle",
-    "name": { "display": "Josselin", "local": "Josselin", "local_language": "breton" },
-    "lonlat": [-2.5500, 47.9597],
+    "name": {
+      "display": "Josselin",
+      "local": "Josselin",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -2.55,
+      47.9597
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château du comté de Porhoët sur l'Oust, que tiendra Jean de Beaumanoir lors du Combat des Trente (1351) ; il ne passera aux Rohan qu'en 1407.",
-    "sources": ["Château de Josselin"]
+    "sources": [
+      "Château de Josselin"
+    ]
   },
   {
     "id": "set_redon",
     "province": "prov_bretagne",
     "kind": "abbey",
-    "name": { "display": "Redon", "local": "Redon", "local_language": "breton" },
-    "lonlat": [-2.0833, 47.6500],
+    "name": {
+      "display": "Redon",
+      "local": "Redon",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -2.0833,
+      47.65
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Grande abbaye bénédictine fondée en 832, foyer des chartes bretonnes anciennes.",
-    "sources": ["Abbaye Saint-Sauveur de Redon"]
+    "sources": [
+      "Abbaye Saint-Sauveur de Redon"
+    ]
+  },
+  {
+    "id": "set_vannes",
+    "province": "prov_bretagne",
+    "kind": "town",
+    "name": {
+      "display": "Vannes",
+      "local": "Gwened",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -2.7594,
+      47.6558
+    ],
+    "weight": 11,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Cité épiscopale du golfe du Morbihan, où se tiennent parfois les États de Bretagne.",
+    "sources": [
+      "Vannes"
+    ]
+  },
+  {
+    "id": "set_dinan",
+    "province": "prov_bretagne",
+    "kind": "town",
+    "name": {
+      "display": "Dinan",
+      "local": "Dinan",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -2.0453,
+      48.4547
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville close dominant la Rance, place forte de Haute-Bretagne.",
+    "sources": [
+      "Dinan"
+    ]
+  },
+  {
+    "id": "set_vitre",
+    "province": "prov_bretagne",
+    "kind": "town",
+    "name": {
+      "display": "Vitré",
+      "local": "Vitré",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.2114,
+      48.1236
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville et seigneurie marchoise gardant la frontière avec le duché de Normandie.",
+    "sources": [
+      "Vitré (Ille-et-Vilaine)"
+    ]
+  },
+  {
+    "id": "set_fougeres",
+    "province": "prov_bretagne",
+    "kind": "castle",
+    "name": {
+      "display": "Fougères",
+      "local": "Fougères",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -1.2,
+      48.35
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Immense forteresse des marches de Bretagne face à la Normandie.",
+    "sources": [
+      "Château de Fougères"
+    ]
+  },
+  {
+    "id": "set_paimpont",
+    "province": "prov_bretagne",
+    "kind": "abbey",
+    "name": {
+      "display": "Paimpont",
+      "local": "Paimpont",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -2.1567,
+      48.04
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye au cœur de la forêt de Brocéliande.",
+    "sources": [
+      "Abbaye de Paimpont"
+    ]
+  },
+  {
+    "id": "set_ploermel",
+    "province": "prov_bretagne",
+    "kind": "village",
+    "name": {
+      "display": "Ploërmel",
+      "local": "Ploermel",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -2.3986,
+      47.9319
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg où réside souvent la cour ducale, proche de Josselin.",
+    "sources": [
+      "Ploërmel"
+    ]
+  },
+  {
+    "id": "set_guerande",
+    "province": "prov_bretagne",
+    "kind": "village",
+    "name": {
+      "display": "Guérande",
+      "local": "Guerrande",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      -2.4275,
+      47.3283
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié dominant les marais salants presqu'îliens.",
+    "sources": [
+      "Guérande"
+    ]
   }
 ]
