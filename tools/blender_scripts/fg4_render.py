@@ -100,6 +100,19 @@ def build(fig_name, level):
     return mount, rider, horse, extra
 
 
+LEGS_FIGURE = "cavalry_1"  # unbarded rouncey: the legs are in full view
+
+
+def _clips(out, fig, mount, meta):
+    """Frames of every clip of the rig for `fig` (side view)."""
+    meta["clips"][fig] = {}
+    for clip, fracs in CLIPS:
+        for k, fr in enumerate(fracs):
+            fp.pose_cavalry(mount, clip, fr)
+            _shot(out, f"clip_{fig}_{clip}_{k}.png", SIDE, (800, 600))
+        meta["clips"][fig][clip] = len(fracs)
+
+
 def render_all(out, names):
     """All check renders for `names` (clips on the first one, builds on all)."""
     os.makedirs(out, exist_ok=True)
@@ -114,6 +127,8 @@ def render_all(out, names):
         fp.pose_cavalry(mount, "c_idle", 0.0)
         _shot(out, f"type_{fig}_{robe}.png", THREE_Q)
         meta["types"].append([fig, robe, fc.HORSE_OF[fig]])
+        if fig == LEGS_FIGURE and fig != first:
+            _clips(out, fig, mount, meta)
         if fig != first:
             continue
         head = mount.harm.matrix_world @ mount.harm.data.bones["Head"].head_local
@@ -127,11 +142,7 @@ def render_all(out, names):
             _shot(out, f"type_{fig}_{robe2}.png", THREE_Q)
             meta["types"].append([fig, robe2, fc.HORSE_OF[fig]])
         _look(robe)
-        for clip, fracs in CLIPS:
-            for k, fr in enumerate(fracs):
-                fp.pose_cavalry(mount, clip, fr)
-                _shot(out, f"clip_{fig}_{clip}_{k}.png", SIDE)
-            meta["clips"][clip] = len(fracs)
+        _clips(out, fig, mount, meta)
         # LOD: same view for the three levels (30 m-like framing).
         for level in (0, 1, 2):
             if level:
