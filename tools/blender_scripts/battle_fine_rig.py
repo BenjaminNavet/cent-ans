@@ -109,7 +109,8 @@ BOW_ANCHOR = Vector((-0.045, -0.09, 0.0))
 # Draw length from the bow hand to the anchor (a real war bow draws ~0.72-0.76 m; the
 # rig's bow arm reaches ~0.58 m from the shoulder, which caps it).
 BOW_DRAW = 0.68
-BOW_TURN = -60.0  # torso turned side-on at full draw (degrees about Z)
+BOW_TURN = -75.0  # torso turned side-on at full draw (degrees about Z; FG1: -60)
+CLAVICLE_REACH = 20.0  # FG2: bow shoulder swung towards the aim at full draw (degrees)
 
 
 def fine_bow_arm(arm, raise_t):
@@ -127,8 +128,17 @@ def fine_bow_arm(arm, raise_t):
 
     turn = math.radians(BOW_TURN) * raise_t
     poses.rotate_about(arm, "Torso", Vector((0, 0, 1)), turn)
-    shoulder = poses.pos(arm, "UpperArm.L")
     aim_v = poses.aim_dir(poses.BOW_ELEVATION * raise_t, -8.0)
+    if CLAVICLE_REACH and raise_t > 0.0:
+        # FG2: the bow shoulder pushed towards the target (clavicle swung along the aim),
+        # as archers do to lengthen the draw.
+        root = poses.pos(arm, "Shoulder.L")
+        tip = poses.pos(arm, "UpperArm.L")
+        axis = (tip - root).cross(aim_v)
+        if axis.length > 1e-6:
+            angle = math.radians(CLAVICLE_REACH) * raise_t
+            poses.rotate_about(arm, "Shoulder.L", axis.normalized(), angle, root)
+    shoulder = poses.pos(arm, "UpperArm.L")
     rest_target = shoulder + Vector((0.08, -0.38, -0.42))
     anchor = poses.pos(arm, "Head") + Matrix.Rotation(turn, 3, "Z") @ BOW_ANCHOR
     grip = anchor + aim_v * BOW_DRAW

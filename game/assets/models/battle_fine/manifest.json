@@ -11,9 +11,9 @@
    "rig": "human",
    "style": "bow",
    "tris": [
-    9593,
-    1700,
-    299
+    10926,
+    1964,
+    338
    ],
    "variants": 3
   },
@@ -28,9 +28,9 @@
    "rig": "human",
    "style": "crossbow",
    "tris": [
-    8846,
-    1716,
-    317
+    10210,
+    1968,
+    335
    ],
    "variants": 2
   },
@@ -45,9 +45,9 @@
    "rig": "human",
    "style": "crossbow",
    "tris": [
-    9146,
-    1760,
-    353
+    11422,
+    1957,
+    332
    ],
    "variants": 2
   },
@@ -62,9 +62,9 @@
    "rig": "human",
    "style": "bow",
    "tris": [
-    9080,
-    1749,
-    324
+    9776,
+    1958,
+    339
    ],
    "variants": 2
   },
@@ -79,9 +79,9 @@
    "rig": "human",
    "style": "crossbow",
    "tris": [
-    10085,
-    1979,
-    382
+    11859,
+    1943,
+    332
    ],
    "variants": 2
   },
@@ -96,9 +96,9 @@
    "rig": "human",
    "style": "crossbow",
    "tris": [
-    9049,
-    1800,
-    347
+    9471,
+    1913,
+    339
    ],
    "variants": 2
   },
@@ -113,9 +113,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    17920,
-    3227,
-    779
+    16865,
+    2827,
+    631
    ],
    "variants": 2
   },
@@ -130,9 +130,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    14287,
-    2626,
-    635
+    16269,
+    2749,
+    599
    ],
    "variants": 2
   },
@@ -147,9 +147,9 @@
    "rig": "cavalry",
    "style": "horse_bow",
    "tris": [
-    14166,
-    2585,
-    606
+    15501,
+    2753,
+    602
    ],
    "variants": 2
   },
@@ -164,9 +164,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    15270,
-    2734,
-    671
+    17414,
+    2933,
+    650
    ],
    "variants": 2
   },
@@ -181,9 +181,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    14375,
-    2610,
-    625
+    15557,
+    2752,
+    606
    ],
    "variants": 2
   },
@@ -198,9 +198,9 @@
    "rig": "cavalry",
    "style": "horse_javelin",
    "tris": [
-    14226,
-    2577,
-    631
+    15783,
+    2754,
+    600
    ],
    "variants": 2
   },
@@ -215,9 +215,9 @@
    "rig": "cavalry",
    "style": "lance",
    "tris": [
-    14343,
-    2592,
-    631
+    15193,
+    2759,
+    603
    ],
    "variants": 2
   },
@@ -232,9 +232,9 @@
    "rig": "human",
    "style": "crew",
    "tris": [
-    9397,
-    1691,
-    277
+    9794,
+    1784,
+    320
    ],
    "variants": 3
   },
@@ -249,9 +249,9 @@
    "rig": "human",
    "style": "crew",
    "tris": [
-    8983,
-    1723,
-    302
+    9380,
+    1816,
+    345
    ],
    "variants": 2
   },
@@ -266,9 +266,9 @@
    "rig": "human",
    "style": "sword",
    "tris": [
-    12266,
-    2237,
-    400
+    11844,
+    1948,
+    333
    ],
    "variants": 2
   },
@@ -283,9 +283,9 @@
    "rig": "human",
    "style": "pike",
    "tris": [
-    9441,
-    1703,
-    324
+    11069,
+    1963,
+    332
    ],
    "variants": 3
   },
@@ -300,9 +300,9 @@
    "rig": "human",
    "style": "militia",
    "tris": [
-    10873,
-    2005,
-    406
+    11859,
+    1945,
+    325
    ],
    "variants": 4
   },
@@ -317,9 +317,9 @@
    "rig": "human",
    "style": "militia",
    "tris": [
-    8094,
-    1378,
-    284
+    9862,
+    1810,
+    335
    ],
    "variants": 3
   },
@@ -334,9 +334,9 @@
    "rig": "human",
    "style": "pike",
    "tris": [
-    9791,
-    1813,
-    394
+    11859,
+    1950,
+    330
    ],
    "variants": 3
   },
@@ -351,9 +351,9 @@
    "rig": "human",
    "style": "militia",
    "tris": [
-    9950,
-    1948,
-    343
+    11131,
+    1958,
+    334
    ],
    "variants": 2
   },
@@ -368,9 +368,9 @@
    "rig": "human",
    "style": "militia",
    "tris": [
-    9587,
-    1755,
-    363
+    11828,
+    1950,
+    335
    ],
    "variants": 2
   },
@@ -385,9 +385,9 @@
    "rig": "human",
    "style": "militia",
    "tris": [
-    9626,
-    1863,
-    400
+    11809,
+    1932,
+    329
    ],
    "variants": 2
   },
@@ -402,9 +402,9 @@
    "rig": "human",
    "style": "sword",
    "tris": [
-    10497,
-    1948,
-    386
+    11816,
+    1941,
+    331
    ],
    "variants": 3
   },
@@ -419,9 +419,9 @@
    "rig": "human",
    "style": "drum",
    "tris": [
-    9906,
-    1941,
-    348
+    10967,
+    1965,
+    337
    ],
    "variants": 2
   },
@@ -436,9 +436,9 @@
    "rig": "human",
    "style": "horn",
    "tris": [
-    9678,
-    1855,
-    308
+    10151,
+    1949,
+    340
    ],
    "variants": 2
   },
@@ -463,9 +463,9 @@
    "rig": "human",
    "style": "standard",
    "tris": [
-    9880,
-    1877,
-    334
+    11872,
+    1953,
+    339
    ],
    "variants": 2
   },
@@ -490,9 +490,9 @@
    "rig": "cavalry",
    "style": "standard_mounted",
    "tris": [
-    15453,
-    2794,
-    692
+    16911,
+    2841,
+    639
    ],
    "variants": 2
   }

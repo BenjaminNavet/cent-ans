@@ -102,6 +102,7 @@ var minimap_ctl: MinimapController = null  # C1 : minicarte, brouillard de guerr
 var settlements_ctl: SettlementController = null  # C5 : panneau de colonie, ordres par colonie
 var movement_ctl: ArmyMovementController = null  # M4 : bulle, chemin, clic au sol, animation
 var agents_ctl: AgentController = null  # C6 (agents) : espions, hérauts, prédicateurs
+var units_ctl: UnitRosterController = null  # liste « Mes unités » (U) : armées et agents
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -175,6 +176,9 @@ func _ready() -> void:
 	agents_ctl = AgentController.new()  # C6 agents (après C5 : chaîne ses intercepteurs de clic)
 	add_child(agents_ctl)
 	agents_ctl.setup(self)
+	units_ctl = UnitRosterController.new()  # après M4 et C6 : lit leurs états
+	add_child(units_ctl)
+	units_ctl.setup(self)
 	minimap_ctl = MinimapController.new()  # C1
 	minimap_ctl.name = "MinimapController"
 	add_child(minimap_ctl)
@@ -379,6 +383,8 @@ func refresh_all() -> void:
 		settlements_ctl.refresh()
 	if agents_ctl != null:  # C6 agents
 		agents_ctl.refresh()
+	if units_ctl != null:  # liste « Mes unités »
+		units_ctl.refresh()
 	_refresh_trade_layer()  # C5 : routes commerciales
 	if map_modes != null:  # MF1 : repeint par-dessus les couleurs politiques
 		map_modes.refresh()
