@@ -263,6 +263,8 @@ DC1 est l'ancien code (avant la revue de code et PB3) : comparer DC3 à main.
 89bc960a, proposé, précède PB3 et la revue de code, donc un autre code d'IA). Sonde :
 `DC6_TRACE=1 century_probe` (points de recherche par faction aux tours 1/40/120/200, hérésie
 de chaque tour).
-- Recherche : +18 % en moyenne au tour 1 (France +35 %, Angleterre +24 %, Empire +65 %) :
-  pondérée par `province_effect_percent` (`research_points_per_turn`), à remesurer.
-- Prochaine étape : hérésie (runs de 464 tours : Lollards 1381, Hussites 1419), puis révoltes.
+- Recherche : pondérée par un réglage dédié `research_percent` (rules.json, 70 % hors cité) ;
+  50 % (= `province_effect_percent`) essayé : −6 % au tour 1 mais −16 % au tour 40 (France −21 %).
+- Hérésie : compte des bâtiments religieux pondéré par `province_effect_percent` (50 %)
+  (`religion::weighted_religious_buildings`) : province-tours hérétiques 17,7 → 9,7 (DC) → 17,3.
+- Prochaine étape : remesure recherche à 70 %, puis révoltes (`DC6_TRACE` : lignes DC6V/DC6P).
