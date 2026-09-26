@@ -16,7 +16,7 @@ uniform float pm_tree_min = 0.56;
 uniform float pm_wash_strength = 0.55;
 
 float pm_height(vec2 p, float lod) {
-	return height_m_lod((p + vec2(0.5)) / map_size, lod);
+	return height_m_lod(p / map_size, lod);  // SZ2b : pixel i centré en i + 0,5 (ADR 0086)
 }
 
 // Montagne d'une cellule : forme en cloche, versant est hachuré ; renvoie (couverture, encre, ombre).
@@ -52,7 +52,7 @@ vec3 pm_mountain(vec2 p, vec2 cell, float footprint) {
 vec3 pm_tree(vec2 p, vec2 cell, float footprint) {
 	vec2 jitter = pm_hash2(cell + 11.0) - 0.5;
 	vec2 base = (cell + vec2(0.5, 0.8) + jitter * 0.35) * pm_tree_cell_px;
-	vec4 sp = texture(splat, (base + vec2(0.5)) / map_size);
+	vec4 sp = texture(splat, base / map_size);
 	float forest = sp.b / max(sp.r + sp.g + sp.b + sp.a, 1e-3);
 	if (forest < pm_tree_min + (pm_hash(cell) - 0.5) * 0.25 || pm_hash(cell + 2.7) < 0.35 || pm_height(base, 0.0) <= 0.0) {
 		return vec3(0.0);

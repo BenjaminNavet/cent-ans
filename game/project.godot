@@ -178,6 +178,10 @@ campaign_relief_gain={
 "type": "float",
 "value": 0.0
 }
+campaign_relief_squash={
+"type": "float",
+"value": 0.0
+}
 campaign_relief_floor={
 "type": "sampler2D",
 "value": ""

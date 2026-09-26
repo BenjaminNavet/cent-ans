@@ -716,12 +716,13 @@ l'application (livraison séparée), puis `user://relief`. `TerrainBuilder` (pyr
   près et son pas de quantification, inclinaison, plans de découpe ;
 - `resources/relief_exaggeration.tres` (`ReliefExaggerationProfile`, ZG8) : `enabled`, exagération
   de près (`near_exaggeration`), gains de relief local (`gain_far`, `gain_near`), calcul du fond de
-  vallée (`floor_*`), roche des falaises (`cliff_slope_*`), soleil de l'ombrage.
+  vallée (`floor_*`), écrasement des montagnes (`mountain_*`, SZ1), roche des falaises
+  (`cliff_slope_*`), soleil de l'ombrage.
 
 **Drapeaux de ligne de commande** (après `--`) :
 - désactiver : `--no-pyramid` (relief E0 seul, comportement d'avant ZG), `--no-fine-geo` (ni
   fleuves ni routes fins), `--no-towns` (villes ZG6), `--no-relief-exaggeration` (ZG8 → rendu ZG4
-  exact), `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
+  exact), `--no-mountain-squash` (sans l'écrasement des montagnes SZ1), `--static-exaggeration` (échelle ×4,3 fixe, captures « avant » ZG4) ;
 - essais : `--pyramid-dir=<dossier>` (manifeste + `pyramid/` d'essai), `--camera-min=N`,
   `--qt-debug=1|2`, `--fine-debug`, `--town-lod=blocks|detail` ;
 - banc : `--stage=map --hide-armies --bench-map` (panoramique + descentes ; `--bench-distance`,
@@ -752,7 +753,8 @@ construits : repli, bornes, vue parchemin). Sans cache, ou avec `--no-pyramid`, 
 ### Arbre et sélection
 
 - Racine = toute la carte (4 096 unités), nœud (n, col, row) de côté `4096 / 2^n`, **aligné sur la
-  grille des tuiles** (décalage −0,5 unité du pixel centré) : profondeur n ↔ étage L = n − 4 (un nœud de
+  grille des tuiles** (tuile (k, col, row) sur [col·T, (col + 1)·T], sans décalage depuis SZ2b,
+  ADR 0086) : profondeur n ↔ étage L = n − 4 (un nœud de
   profondeur 4 est une tuile E0 de 256 unités). Profondeur maximale d'un nœud : étage de données le plus
   fin de son sous-arbre (`max_level_under`, sinon l'ancêtre existant) + `extra_depth` (3), plafond 14.
 - **CDLOD** : un nœud est accepté quand l'espacement de ses sommets (côté / 64) projeté à l'écran
@@ -1063,7 +1065,8 @@ Choix : **retoucher les pages de hauteurs** plutôt qu'une texture de lit à par
 rang suffisant (≥ 5 à E3, ≥ 3 au-delà), les hauteurs sous le niveau d'eau `z` : fond parabolique
 (0,6 m + 1,2 % de la largeur, ≤ 4 m ; 0,25 m sous l'eau au bord), berge fondue sur 35 % de la largeur
 (1,5 pixel de page à 250 m) ; au moins 0,75 pixel de page de demi-largeur (sillon d'un ruisseau). Rien sous
-les emprises des colonies (l'eau passe sous les villes). La page téléversée **et** les octets gardés pour
+les zones personnalisées des maquettes L1/L2 sans ville 1:1 (SZ2b : les emprises des colonies et les
+zones des villes 1:1 sont creusées, voir « Nappe d'eau des fleuves (lot SZ2b) »). La page téléversée **et** les octets gardés pour
 `surface_height_at` sont les mêmes : déplacement des patchs, normales (berges ombrées), morphing vers la
 page parente (creusée à sa résolution), pose des ponts et des maquettes voient le même lit. Coût : ≈ 8-10 ms
 de fil par page E4 réelle (Seine à Rouen, 11 700 pixels abaissés), 0 sur le fil principal.
@@ -1415,6 +1418,45 @@ rayon total des flous, mêmes flous). Le terme `h − fond` de ZG8 reste entier 
 et falaises, mais ne dépasse plus ≈ 350 m en montagne : plus d'aiguilles au puy de Dôme ni dans les
 Alpes. Même formule partout (le fond publié est lu par les shaders, `MapData` et le semis natif) ;
 0 = rendu ZG8 d'origine.
+
+**Montagnes écrasées (lot SZ1, défaut S1).** Au palier vallée, l'exagération ZG4 (×3,4 à d = 6) de
+2 000 m de relief pyrénéen faisait 10 unités de murs pour une caméra à 6 : caméra au fond des canyons.
+La hauteur affichée devient
+
+```
+y = s · (h − K · max(h − base, 0) + g · (1 − K) · max(h − fond, 0)),   K = c(s) · k(x, z)
+```
+
+- `base` : fond non plafonné (min + flous de `ReliefFloor`, ≤ `fond`) ;
+- `k` : facteur d'écrasement par cellule, fonction de l'amplitude régionale A = sommets voisins
+  (maximum puis flous, déjà calculés pour le plafond) − base : 0 sous le genou `mountain_knee_m`
+  (350 m), au-delà amplitude affichée `genou + (A − genou) · mountain_ratio` (0,3), borné à
+  `mountain_squash_max` (0,55). Collines, coteaux, falaises et plaines (A ≤ 290 m mesuré : Crécy,
+  falaises normandes, Seine, Loire, Paris) : k = 0, rendu inchangé ;
+- `c(s)` : poids selon l'échelle, `mountain_squash_far` (0) en vue stratégique → 1 dès l'exagération
+  `mountain_squash_full_exaggeration` (×3,5, avant le palier vallée) ; publié avec l'échelle
+  (`campaign_relief_squash`), recalé par les mêmes signaux ;
+- le gain local ZG8 est écrasé d'autant (`g · (1 − K)`) : pas d'aiguilles sur une montagne aplanie ;
+- autour des villes emblématiques 1:1 (VH4, `LandmarkV2Library`) : k ≥ `true_scale_squash` (0,7)
+  jusqu'au rayon de la ville + `true_scale_full_units` (4), fondu sur `true_scale_fade_units` (6) :
+  relief ≈ échelle vraie aux paliers vallée et site (coteaux de Rouen, côte Sainte-Catherine, plus
+  des murs de 600 m à côté de maisons à l'échelle ; amplitude affichée ×0,65).
+
+Fond, base et k partagent une texture RGBF (`campaign_relief_floor` : R, G, B) et la grille publiée
+(`MapData.relief_floor_grid` : `data`, `base`, `squash`) ; doubles exacts : `campaign_relief.gdshaderinc`
+(`campaign_display_height_at_fields`, gradient compris), `MapData.display_height_fields` (et l'inverse
+par morceaux `height_from_display_with`), `vegetation::TileRequest::display_height` (Rust, semis natif,
+`VegetationScatter.set_relief_fields`). Bornes des boîtes : `s·(1 − K_max)·h ≤ y ≤ s·(1 + g)·h`
+(quadtree, villes). Palier vallée, amplitude affichée dans 8 px : Pyrénées ×0,48, Alpes ×0,42,
+pays de Galles ×0,56, Massif central ×0,54, collines ×1,00 (`tests/sz1_mountain_test.gd`).
+
+**Caméra au-dessus des crêtes voisines (SZ1).** En plus de la garde au sol et de la visée dégagée,
+la caméra reste au-dessus du sol affiché (plus la garde) sur un cercle de rayon
+`crest_radius_factor` × distance (0,5) autour d'elle et autour du point visé (`crest_samples` = 8,
+hauteur pondérée par `crest_focus_weight`) : elle monte au-dessus des crêtes au lieu de rester dans
+la vallée. Sur les collines, rien ne change (≤ 1 cm de plus à Crécy au palier site).
+Captures avant / après : `docs/img/sz1/` (`tests/sz1_mountain_shots.gd`, « avant » avec
+`--no-mountain-squash --no-crest` ; Rouen : `tests/vh4_shots.gd`, « avant » = `docs/img/vh4/`).
 
 **Niveaux d'eau.** `hydro_fine.water_level` borne le fond des lignes à 0 m avant l'ajustement
 monotone (la bathymétrie des zones E5-E7 tirait la Tamise à −7,8 m à Londres, la Garonne à −15,8 m à
@@ -1780,3 +1822,35 @@ marches des armées IA que le joueur voit :
 - **Coût** : Masquer = coût d'avant ; enregistrement actif ≈ 2 ms par tour dans le cœur (release),
   < 0,1 ms de tri côté Godot ; la relecture elle-même dure le temps de l'animation (de 0 s sans
   mouvement vu à une vingtaine de secondes à ×1 quand six mouvements sont suivis).
+
+## Nappe d'eau des fleuves et convention des rasters (lot SZ2b, ADR 0086)
+
+Défaut : au palier site, pas d'eau autour des villes (Seine à Rouen en lit sableux, Loire absente à
+Orléans et Tours), et, là où l'eau existait, lit creusé à 360 m du vrai lit du relief. Deux causes :
+
+- **Eau coupée sous les emprises** : `FineRibbonJob` coupait les rubans et `FineBedCarver` ne
+  creusait pas sous les emprises des maquettes de colonies (rayon de maquette × 0,8 : 5,2 km à
+  Orléans) ni dans les zones personnalisées (Rouen, Paris, Londres…), règle d'avant les villes 1:1
+  (ZG6, VH4). Désormais l'eau traverse les emprises et les zones des villes qui ont un fichier v2 ;
+  ses sommets y sont marqués (`UV2.y` = ordre + 100 × marque : 1 emprise, 2 zone de ville 1:1) et
+  `river_fine.gdshader` les efface tant que les maquettes sont affichées : `cover_open` = villes 1:1
+  de ZG6 actives (`TownLayer.active`, toutes les maquettes masquées), `zone_open` = 1 − opacité de la
+  maquette L1/L2 (`LandmarkCityLayer.fade`). Le lit est creusé partout sauf dans les zones des
+  maquettes sans ville 1:1 (Paris, Londres… tant que VH5-VH8 ne sont pas faits : leur maquette
+  porte sa propre eau). Ponts-portes masqués quand les maquettes le sont.
+- **Demi-pixel** : Godot lisait les rasters avec le pixel i centré en x = i (`uv = (p + 0,5) /
+  taille`, `GRID_OFFSET = −0,5`), les outils et toutes les données vectorielles avec le pixel i sur
+  [i, i + 1] (`docs/geo.md`). Le relief était affiché 0,5 unité (360 m) au nord-ouest des fleuves,
+  colonies et villes 1:1. Rendu aligné sur les outils (ADR 0086) : `GRID_OFFSET = 0`,
+  `MapData.height_m_at` en (x − 0,5, y − 0,5), `uv = p / map_size` dans les shaders du terrain, même
+  chose dans la végétation native (Rust). Aucune recuisson : les niveaux d'eau `hydro_fine` étaient
+  déjà calés sur le relief dans la convention des outils.
+
+Mesures (`game/tests/sz2b_water_shots.gd --probe-heights`, relief − eau, mètres affichés) : à l'axe
+−2,9 à −4 m partout (lit creusé) ; berges à 1,15 demi-largeur ≈ −0,2 m à Rouen et en Val de Loire
+(l'eau touche la berge) ; Orléans et Tours −2 à −4 m sur une rive (chenal du relief plus large que
+la largeur de `river_widths.json`, bras multiples) : pas de mur, eau peu profonde au bord.
+Captures `docs/img/sz2b/avant_*` / `apres_*` (Rouen, Orléans, Tours, Londres, Bordeaux ; vallée et
+site). Laissés : maillages E0 des morceaux (vue parchemin, repli sans pyramide), tuiles fines d'avant
+la pyramide et grille du fond ZG8 dans l'ancienne convention (≤ 0,5 pixel de 719 m, invisible).
+

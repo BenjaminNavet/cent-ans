@@ -291,11 +291,12 @@ func _y_bounds(n: int, c: int, r: int) -> Vector2:
 	return _to_world_bounds(result)
 
 
-## Bornes en mètres → hauteurs affichées (ZG8 : s·h ≤ y ≤ s·(1 + g)·h pour h ≥ 0).
+## Bornes en mètres → hauteurs affichées (ZG8, SZ1 : s·(1 − c·k)·h ≤ y ≤ s·(1 + g)·h pour h ≥ 0).
 static func _to_world_bounds(bounds_m: Vector2) -> Vector2:
 	var vs := MapData.vertical_scale()
 	var up := 1.0 + MapData.relief_gain()
-	return Vector2(bounds_m.x * vs, bounds_m.y * vs * (up if bounds_m.y > 0.0 else 1.0))
+	var down := 1.0 - MapData.relief_squash_max_for_scale(vs)
+	return Vector2(bounds_m.x * vs * (down if bounds_m.x > 0.0 else 1.0), bounds_m.y * vs * (up if bounds_m.y > 0.0 else 1.0))
 
 
 func _box_in_sphere(bmin: Vector3, bmax: Vector3, radius: float) -> bool:
@@ -477,9 +478,11 @@ func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
 	var ratio := new_scale / maxf(old_scale, 1e-9)
 	# ZG8 : le gain local suit l'échelle ; le haut positif de la boîte suit s·(1 + g).
 	var ratio_up := ratio * (1.0 + MapData.relief_gain_for_scale(new_scale)) / (1.0 + MapData.relief_gain_for_scale(old_scale))
+	# SZ1 : le bas positif suit s·(1 − c·k).
+	var ratio_down := ratio * (1.0 - MapData.relief_squash_max_for_scale(new_scale)) / (1.0 - MapData.relief_squash_max_for_scale(old_scale))
 	for slot: MeshInstance3D in _slots.values():
 		var box := slot.custom_aabb
-		var lo := box.position.y * ratio
+		var lo := box.position.y * (ratio_down if box.position.y > 0.0 else ratio)
 		var hi := box.end.y * (ratio_up if box.end.y > 0.0 else ratio)
 		# Jupe (constante, non proportionnelle) : marge de sécurité en plus.
 		var margin := absf(hi - lo) * 0.02 + 0.05
@@ -822,8 +825,8 @@ func surface_height_at(x: float, y: float) -> float:
 	var side := 1 << top
 	for level in range(top, -1, -1):
 		var units := ROOT_TILE_UNITS / side
-		var col := int(floor((x + 0.5) / units))
-		var row := int(floor((y + 0.5) / units))
+		var col := int(floor((x - ReliefPyramid.GRID_OFFSET) / units))
+		var row := int(floor((y - ReliefPyramid.GRID_OFFSET) / units))
 		var key := (level << 24) | (row << 12) | col
 		side >>= 1
 		if not _page_bytes.has(key):
@@ -831,7 +834,7 @@ func surface_height_at(x: float, y: float) -> float:
 		var bytes: PackedByteArray = _page_bytes[key]
 		_hit_level = level if level == top else -1
 		_hit_version = _residency_version
-		_hit_origin = Vector2(col * units - 0.5, row * units - 0.5)
+		_hit_origin = Vector2(col * units + ReliefPyramid.GRID_OFFSET, row * units + ReliefPyramid.GRID_OFFSET)
 		_hit_units = units
 		_hit_px = units / PAGE_PX
 		_hit_bytes = bytes

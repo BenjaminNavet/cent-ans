@@ -28,6 +28,8 @@ var h_range: float = 5000.0
 var height_scale: float = 0.006
 ## ZG8 : gain de relief local (`MapData.display_height_with`), celui des maillages cuits.
 var relief_gain: float = 0.0
+## SZ1 : poids de l'écrasement des montagnes des maillages cuits.
+var relief_squash: float = 0.0
 ## Profil des bords : heightmap 4096 (MapData).
 var map_bytes: PackedByteArray = PackedByteArray()
 var map_bpp: int = 2
@@ -57,7 +59,7 @@ func run() -> void:
 			var sx := mini(i * step, tile_side - 1)
 			var sx1 := mini(sx + 1, tile_side - 1)
 			var v := (_sample(sx, sy) + _sample(sx1, sy) + _sample(sx, sy1) + _sample(sx1, sy1)) * 0.25
-			heights[k] = MapData.display_height_with(h_min + v * h_range, origin_px.x + i * unit, origin_px.y + j * unit, height_scale, relief_gain)
+			heights[k] = MapData.display_height_with(h_min + v * h_range, origin_px.x + i * unit, origin_px.y + j * unit, height_scale, relief_gain, relief_squash)
 			k += 1
 	# Pourtour : profil du LOD proche 4096.
 	for i in side:
@@ -103,7 +105,7 @@ func _map_height(px: int, py: int) -> float:
 			v = float((map_bytes[o] << 8) | map_bytes[o + 1]) / 65535.0
 	else:
 		v = float(map_bytes[o]) / 255.0
-	return MapData.display_height_with(h_min + v * h_range, px, py, height_scale, relief_gain)
+	return MapData.display_height_with(h_min + v * h_range, px, py, height_scale, relief_gain, relief_squash)
 
 
 ## Hauteur du LOD proche 4096 sur un bord de tuile (x ou y multiple de `edge_step`).
