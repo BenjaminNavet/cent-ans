@@ -260,6 +260,8 @@ pub struct BattleSim {
     pub(crate) player: Option<sim_battle::ReplayPlayer>,
     /// PB3c: figure buffers kept between simulation steps (rendering only).
     poses: PoseCache,
+    /// PB3c: `get_units` of the current step, with its key (see `PoseCache`).
+    units_cache: Option<((u64, u64, u64), VarArray)>,
     /// PB3c: bumped by every change of the battle outside a simulation step
     /// (orders, deployment, new battle, replay jump): invalidates `poses`.
     pose_epoch: u64,
@@ -318,6 +320,7 @@ impl IRefCounted for BattleSim {
             recorder: None,
             player: None,
             poses: PoseCache::default(),
+            units_cache: None,
             pose_epoch: 0,
             base,
         }
@@ -696,8 +699,27 @@ impl BattleSim {
     }
 
     /// One dictionary per regiment (spec § 3), plus rendering helpers.
+    /// PB3c: rebuilt only after a simulation step or a change of the battle
+    /// (same key as the figure poses); in between the same array comes back —
+    /// read-only for the caller.
     #[func]
-    fn get_units(&self) -> VarArray {
+    fn get_units(&mut self) -> VarArray {
+        let Some(sim) = &self.sim else {
+            return VarArray::new();
+        };
+        let key = (sim.ticks(), self.pose_epoch, self.figure_scale.to_bits());
+        if let Some((cached, units)) = &self.units_cache {
+            if *cached == key {
+                return units.clone();
+            }
+        }
+        let units = self.build_units();
+        self.units_cache = Some((key, units.clone()));
+        units
+    }
+
+    /// The dictionaries of [`Self::get_units`].
+    fn build_units(&self) -> VarArray {
         let Some(sim) = &self.sim else {
             return VarArray::new();
         };
