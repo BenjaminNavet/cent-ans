@@ -1,18 +1,19 @@
-"""Lot FG0: finer horse on the ``cavalry`` rig (Quaternius horse bones kept).
+"""Lots FG0/FG4: finer horse on the ``cavalry`` rig (Quaternius horse bones kept).
 
 Source: "Rigged Horse" by Lyndon Daniels (OpenGameArt, CC0), a textured draught horse
 (7 400 triangles of body, 3 900 of mane, 1 750 of tail, 2k colour / normal / AO maps). Its own
 19-bone rig is dropped.
 
-Fit:
-1. Every piece is baked to world space (standing rest shape), scaled uniformly so the
-   back at the saddle matches the Quaternius horse, and centred on its legs.
-2. A Gaussian RBF space warp moves landmarks of the new horse onto the Quaternius ones:
-   each leg sliced at the joint heights (elbow/stifle, knee/hock, fetlock, hoof), the head,
-   the withers and the croup. Legs then pivot where the Quaternius bones do.
-3. Weights: body by bone heat (Blender automatic weights) on a copy of the horse armature
-   whose stub bones get real segments (head to child head); mane and tail by the nearest
-   point on the Quaternius horse surface (barycentric), relaxed; eyes rigid on ``Head``.
+Fit (FG4, replaces the FG0 RBF warp):
+1. Every piece is baked to world space (natural standing shape), scaled uniformly so the
+   back at the saddle matches the Quaternius horse, centred on its legs and narrowed to its
+   barrel (``similarity``).
+2. The anatomical joints of the new horse (``OGA_JOINTS``) are mapped joint to joint onto
+   the Quaternius bones, one affine map per bone (``fit_transforms``).
+3. Weights are computed in the natural stance: body by bone heat on an armature whose bones
+   run between the new horse's own joints, mane from the nearest body point, tail along
+   the tail chain, eyes rigid on ``Head``; the blended bone maps then move every vertex to
+   the rest pose (``apply_fit``): the bends sit on the clips' pivots.
 """
 
 import math
@@ -44,9 +45,6 @@ PIECES = {
     "Sphere": "horse_eye_l",
     "Sphere.002": "horse_eye_r",
 }
-
-FRONT_JOINTS = ("FrontUpperLeg", "FrontLowerLeg", "FF")
-BACK_JOINTS = ("BackUpperLeg", "BackLowerLeg", "FFB")
 
 
 def fetch_oga():
@@ -168,116 +166,254 @@ def _q_leg_mid(mount):
     return sum(ps, Vector()) / 4
 
 
-def landmarks(pieces, mount):
-    """(source, target) landmark pairs for the warp."""
+# --- Joint-to-joint fit (lot FG4) ---------------------------------------------------------
+#
+# The Quaternius horse stands "camped out": fore legs straight under the point of the
+# shoulder, hocks far behind the croup, neck upright. The CC0 horse stands naturally. Rather
+# than warp the mesh (FG0: a Gaussian RBF, which put the bends away from the pivots and
+# twisted hocks and pasterns at the gallop), the new horse is *posed* onto the Quaternius
+# bones: its own anatomical joints (read on the mesh, table below) are mapped joint to joint
+# onto the Quaternius ones by one affine transform per bone (rotation about the joint +
+# stretch along the segment), blended with the skin weights computed in the natural stance.
+# Joints then sit exactly on the pivots of the ``cavalry`` clips, and the head, carried by a
+# single rigid transform, keeps its shape.
+
+# Anatomical joints of the CC0 horse after ``similarity`` (left side; metres, y forwards is
+# negative): read on orthographic side views with a 5 cm grid (docs/wip/fg4-cheval.md).
+# Leg joints outside the body take their x from the mesh slice at their height.
+OGA_JOINTS = {
+    "FrontUpperLeg": (None, -0.60, 1.02),  # point of the shoulder
+    "FrontLowerLeg": ("slice", -0.32, 0.51),  # knee (carpus)
+    "IKFrontLeg": ("slice", -0.26, 0.18),  # fetlock
+    "FF": ("slice", -0.27, 0.063),  # hoof
+    "BackUpperLeg": (None, 0.52, 0.95),  # stifle
+    "BackLowerLeg": ("slice", 0.69, 0.57),  # hock
+    "IKBackLeg": ("slice", 0.61, 0.19),  # hind fetlock
+    "FFB": ("slice", 0.50, 0.063),  # hind hoof
+    "Neck2": (0.0, -0.711, 1.360),
+    "Neck3": (0.0, -0.921, 1.487),
+    "Head": (0.0, -1.14, 1.62),  # poll
+}
+
+# Bone -> the joint its segment runs to (the bone's region of the skin).
+SEGMENT_TO = {
+    "Back": "Torso",
+    "Torso": "Torso2",
+    "Torso2": "Torso3",
+    "Torso3": "Neck1",
+    "Neck1": "Neck2",
+    "Neck2": "Neck3",
+    "Neck3": "Head",
+}
+for _s in "LR":
+    SEGMENT_TO.update(
+        {
+            f"FrontShoulder.{_s}": f"FrontUpperLeg.{_s}",
+            f"FrontUpperLeg.{_s}": f"FrontLowerLeg.{_s}",
+            f"FrontLowerLeg.{_s}": f"IKFrontLeg.{_s}",
+            f"IKFrontLeg.{_s}": f"FF.{_s}",
+            f"BackShoulder.{_s}": f"BackLeg.{_s}",
+            f"BackLeg.{_s}": f"BackUpperLeg.{_s}",
+            f"BackUpperLeg.{_s}": f"BackLowerLeg.{_s}",
+            f"BackLowerLeg.{_s}": f"IKBackLeg.{_s}",
+            f"IKBackLeg.{_s}": f"FFB.{_s}",
+        }
+    )
+for _k in range(1, 7):
+    SEGMENT_TO[f"Tail{_k}"] = f"Tail{_k + 1}"
+
+# Bones whose transform is the identity (trunk, girdles, tail: already aligned by
+# ``similarity``); the others are fitted joint to joint.
+RIGID_BONES = {"Back", "Torso", "Torso2", "Torso3", "Neck1"} | {
+    f"{b}.{s}" for b in ("FrontShoulder", "BackShoulder", "BackLeg") for s in "LR"
+}
+# Skin of the body: every horse bone but the ears (rigid on the head) and the tail.
+TAIL_BONES = [f"Tail{k}" for k in range(1, 8)]
+BODY_BONES = (set(SEGMENT_TO) - set(TAIL_BONES)) | {
+    "Head",
+    "FF.L",
+    "FF.R",
+    "FFB.L",
+    "FFB.R",
+}
+
+
+def _slice_x(pts, y, z, dz=0.025, dy=0.14):
+    sel = [p.x for p in pts if p.x > 0 and abs(p.z - z) < dz and abs(p.y - y) < dy]
+    return sum(sel) / len(sel) if sel else None
+
+
+def joints(pieces, mount):
+    """(natural-stance joints, Quaternius rest joints) of every horse bone, world space."""
     arm = mount.harm
-
-    def q(name):
-        return arm.matrix_world @ arm.data.bones[name].head_local
-
+    q = {b.name: arm.matrix_world @ b.head_local for b in arm.data.bones}
     pts = _verts(pieces["horse_body"])
-    pairs = []
-    for side in ("L", "R"):
-        for joints in (FRONT_JOINTS, BACK_JOINTS):
-            targets = [q(f"{j}.{side}") for j in joints]
-            # Track the leg upwards from the hoof, starting under the target hoof.
-            around = targets[-1].copy()
-            prev = None
-            track = {}
-            for tgt in reversed(targets):
-                z = max(tgt.z, 0.06)
-                guess = prev if prev is not None else around
-                c = _slice_centroid(pts, z, guess, radius=0.2)
-                if c is None or z > 0.75:
-                    c = None
-                track[tgt.z] = c
-                if c is not None:
-                    prev = c
-            last_src, last_tgt = None, None
-            for tgt in reversed(targets):
-                c = track[tgt.z]
-                if c is not None:
-                    src = Vector((c.x, c.y, tgt.z))
-                    last_src, last_tgt = src, tgt
-                elif last_src is not None:
-                    # Upper joint merged with the body: move it with the joint below.
-                    src = tgt - (last_tgt - last_src)
-                else:
-                    continue
-                pairs.append((src, tgt))
-    # Head, withers and croup: mesh-centroid correspondences.
-    q_pts = [p for m in mount.hmeshes for p in _verts(m)]
-    # (No head landmark: the Quaternius head is a different shape; raise_neck aligns it.)
-    for fn in (_withers, _croup):
-        pairs.append((fn(pts), fn(q_pts)))
-    return pairs
+    oga = dict(q)
+    for base, (xs, y, z) in OGA_JOINTS.items():
+        names = (
+            [base] if base.startswith(("Neck", "Head")) else [f"{base}.L", f"{base}.R"]
+        )
+        for name in names:
+            sx = -1.0 if name.endswith(".R") else 1.0
+            if xs == "slice":
+                x = _slice_x(pts, y, max(z, 0.1)) or abs(q[name].x)
+            elif xs is None:
+                x = abs(q[name].x)
+            else:
+                x = xs
+            oga[name] = Vector((x * sx, y, z))
+    # Hoof tips (segment ends of the leaf bones): 8 cm ahead, 6 cm down.
+    for s in "LR":
+        for hoof in (f"FF.{s}", f"FFB.{s}"):
+            oga[hoof + ">"] = oga[hoof] + Vector((0, -0.08, -0.05))
+            q[hoof + ">"] = q[hoof] + Vector((0, -0.08, -0.05))
+    # Head: from the poll to the muzzle (same length on both, rotated with the neck).
+    return oga, q
 
 
-def _head_centroid(pts):
-    y0 = min(p.y for p in pts)
-    sel = [p for p in pts if p.y < y0 + 0.3]
-    return sum(sel, Vector()) / len(sel)
+def _rotation_between(a, b):
+    """Rotation (3x3) taking direction `a` onto direction `b` (shortest arc)."""
+    return a.normalized().rotation_difference(b.normalized()).to_matrix()
 
 
-def _withers(pts):
-    y0 = min(p.y for p in pts)
-    y1 = max(p.y for p in pts)
-    band = [
-        p
-        for p in pts
-        if y0 + 0.35 * (y1 - y0) < p.y < y0 + 0.45 * (y1 - y0) and abs(p.x) < 0.1
+def fit_transforms(oga, q):
+    """Affine map (4x4) per bone from the natural stance onto the Quaternius rest pose."""
+    out = {}
+    rots = {}
+    for name in oga:
+        if name.endswith(">") or name not in q:
+            continue
+        child = SEGMENT_TO.get(name)
+        if name in RIGID_BONES or name.startswith(("Tail", "Ear", "Pole", "Body")):
+            out[name] = Matrix.Identity(4)
+            continue
+        if child is None:
+            continue
+        d_o = oga[child] - oga[name]
+        d_q = q[child] - q[name]
+        rot = _rotation_between(d_o, d_q)
+        rots[name] = rot
+        axis = d_o.normalized()
+        s = max(0.6, min(1.6, d_q.length / max(d_o.length, 1e-6)))
+        stretch = Matrix.Identity(3) + (s - 1.0) * Matrix(
+            [[axis[i] * axis[j] for j in range(3)] for i in range(3)]
+        )
+        lin = (rot @ stretch).to_4x4()
+        out[name] = Matrix.Translation(q[name]) @ lin @ Matrix.Translation(-oga[name])
+    # Leaves: the head turns with the last neck segment; hooves stay level (translation).
+    rot = rots["Neck3"].to_4x4()
+    out["Head"] = Matrix.Translation(q["Head"]) @ rot @ Matrix.Translation(-oga["Head"])
+    for s in "LR":
+        for hoof in (f"FF.{s}", f"FFB.{s}"):
+            out[hoof] = Matrix.Translation(q[hoof] - oga[hoof])
+    return out
+
+
+def heat_armature(oga, bones):
+    """Armature with a bone per skin region, at the natural-stance joints (for bone heat)."""
+    data = bpy.data.armatures.new("fg_heat")
+    arm = bpy.data.objects.new("fg_heat", data)
+    bpy.context.scene.collection.objects.link(arm)
+    with bpy.context.temp_override(
+        active_object=arm, object=arm, selected_objects=[arm]
+    ):
+        bpy.context.view_layer.objects.active = arm
+        bpy.ops.object.mode_set(mode="EDIT")
+        for name in bones:
+            eb = data.edit_bones.new(name)
+            eb.head = oga[name]
+            child = SEGMENT_TO.get(name)
+            if child is not None:
+                eb.tail = oga[child]
+            elif name == "Head":
+                eb.tail = oga[name] + Vector((0, -0.42, -0.38))
+            else:
+                eb.tail = oga[name + ">"]
+            if (eb.tail - eb.head).length < 0.02:
+                eb.tail = eb.head + Vector((0, 0, 0.05))
+        bpy.ops.object.mode_set(mode="OBJECT")
+    return arm
+
+
+def heat_weights(obj, arm):
+    """Bone-heat weights of `obj` from `arm` (Blender's automatic weights)."""
+    obj.vertex_groups.clear()
+    for o in bpy.context.view_layer.objects:
+        o.select_set(False)
+    obj.select_set(True)
+    arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    with bpy.context.temp_override(
+        active_object=arm,
+        object=arm,
+        selected_objects=[obj, arm],
+        selected_editable_objects=[obj, arm],
+    ):
+        bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    mw = obj.matrix_world.copy()
+    obj.parent = None
+    obj.matrix_world = mw
+    obj.modifiers.clear()
+
+
+def weight_table(obj):
+    """[{bone: weight}] per vertex."""
+    names = {g.index: g.name for g in obj.vertex_groups}
+    return [
+        {names[g.group]: g.weight for g in v.groups if g.weight > 1e-4}
+        for v in obj.data.vertices
     ]
-    return max(band, key=lambda p: p.z)
 
 
-def _croup(pts):
-    y0 = min(p.y for p in pts)
-    y1 = max(p.y for p in pts)
-    band = [
-        p
-        for p in pts
-        if y0 + 0.78 * (y1 - y0) < p.y < y0 + 0.88 * (y1 - y0) and abs(p.x) < 0.1
-    ]
-    return max(band, key=lambda p: p.z)
+def set_weights(obj, table, influences=4):
+    """Replace the vertex groups of `obj` by `table` (top `influences`, normalised)."""
+    obj.vertex_groups.clear()
+    groups = {}
+    for i, w in enumerate(table):
+        top = sorted(w.items(), key=lambda kv: -kv[1])[:influences]
+        total = sum(x for _k, x in top) or 1.0
+        for k, x in top:
+            if k not in groups:
+                groups[k] = obj.vertex_groups.new(name=k)
+            groups[k].add([i], x / total, "REPLACE")
 
 
-def rbf_warp(pieces, pairs, sigma=0.3):
-    """Gaussian RBF displacement field through the landmark pairs, applied to every piece."""
-    src = np.array([tuple(s) for s, _t in pairs])
-    dst = np.array([tuple(t) for _s, t in pairs])
-    d2 = ((src[:, None, :] - src[None, :, :]) ** 2).sum(-1)
-    k = np.exp(-d2 / (2 * sigma * sigma)) + 1e-6 * np.eye(len(src))
-    w = np.linalg.solve(k, dst - src)
-    for o in pieces.values():
-        n = len(o.data.vertices)
-        co = np.empty(n * 3)
-        o.data.vertices.foreach_get("co", co)
-        co = co.reshape(n, 3)
-        d2 = ((co[:, None, :] - src[None, :, :]) ** 2).sum(-1)
-        co = co + np.exp(-d2 / (2 * sigma * sigma)) @ w
-        o.data.vertices.foreach_set("co", co.ravel())
-        o.data.update()
-    err = max((Vector(t) - Vector(s)).length for s, t in pairs)
-    print(f"HORSE warp landmarks={len(pairs)} max_move={err:.3f}")
+def smooth_weights(obj, table, passes=2, only=None):
+    """Laplacian relaxation of the weights along the mesh edges.
+
+    `only`: vertex indices to relax (others are kept, but still feed their neighbours).
+    """
+    adj = [[] for _ in obj.data.vertices]
+    for e in obj.data.edges:
+        i, j = e.vertices
+        adj[i].append(j)
+        adj[j].append(i)
+    for _ in range(passes):
+        new = []
+        for i, w in enumerate(table):
+            if not adj[i] or (only is not None and i not in only):
+                new.append(w)
+                continue
+            acc = {k: v * 0.5 for k, v in w.items()}
+            share = 0.5 / len(adj[i])
+            for j in adj[i]:
+                for k, v in table[j].items():
+                    acc[k] = acc.get(k, 0.0) + v * share
+            new.append(acc)
+        table = new
+    return table
 
 
-def transfer_weights(obj, q_mesh, relax=3):
-    """Barycentric weights of the nearest Quaternius horse triangle, then relaxed."""
-    q_me = q_mesh.data
-    q_me.calc_loop_triangles()
-    mw = q_mesh.matrix_world
-    verts = [mw @ v.co for v in q_me.vertices]
-    tris = [tuple(t.vertices) for t in q_me.loop_triangles]
+def nearest_weights(obj, source, source_table):
+    """Weights of the nearest point of `source` (barycentric over its triangle)."""
+    me = source.data
+    me.calc_loop_triangles()
+    verts = [source.matrix_world @ v.co for v in me.vertices]
+    tris = [tuple(t.vertices) for t in me.loop_triangles]
     bvh = BVHTree.FromPolygons(verts, tris)
-    names = {g.index: g.name for g in q_mesh.vertex_groups}
-    vw = [
-        {names[g.group]: g.weight for g in v.groups if g.weight > 0}
-        for v in q_me.vertices
-    ]
-    weights = []
+    out = []
     for v in obj.data.vertices:
-        p = obj.matrix_world @ v.co
-        loc, _n, ti, _d = bvh.find_nearest(p)
+        loc, _n, ti, _d = bvh.find_nearest(obj.matrix_world @ v.co)
         a, b, c = tris[ti]
         bary = barycentric_transform(
             loc,
@@ -290,36 +426,195 @@ def transfer_weights(obj, q_mesh, relax=3):
         )
         acc = {}
         for idx, f in zip((a, b, c), bary, strict=True):
-            for k, w in vw[idx].items():
+            for k, w in source_table[idx].items():
                 acc[k] = acc.get(k, 0.0) + w * max(f, 0.0)
-        weights.append(acc)
-    adj = [[] for _ in obj.data.vertices]
-    for e in obj.data.edges:
-        i, j = e.vertices
-        adj[i].append(j)
-        adj[j].append(i)
-    for _ in range(relax):
-        new = []
-        for i, w in enumerate(weights):
-            if not adj[i]:
-                new.append(w)
+        out.append(acc)
+    return out
+
+
+def chain_weights(obj, chain, blend=0.3):
+    """Weights along a bone chain [(bone, head, tail)]: nearest segment, blended at joints."""
+    out = []
+    for v in obj.data.vertices:
+        p = obj.matrix_world @ v.co
+        best = None
+        for k, (_name, a, b) in enumerate(chain):
+            ab = b - a
+            t = max(0.0, min(1.0, (p - a).dot(ab) / max(ab.length_squared, 1e-9)))
+            d = (a + ab * t - p).length
+            if best is None or d < best[0]:
+                best = (d, k, t)
+        _d, k, t = best
+        w = {chain[k][0]: 1.0}
+        if t > 1 - blend and k + 1 < len(chain):
+            f = 0.5 * (t - (1 - blend)) / blend
+            w = {chain[k][0]: 1 - f, chain[k + 1][0]: f}
+        elif t < blend and k > 0:
+            f = 0.5 * (blend - t) / blend
+            w = {chain[k][0]: 1 - f, chain[k - 1][0]: f}
+        out.append(w)
+    return out
+
+
+def apply_fit(obj, table, fit):
+    """Move every vertex from the natural stance to the rest pose (blended bone maps)."""
+    n = len(obj.data.vertices)
+    co = np.empty(n * 3)
+    obj.data.vertices.foreach_get("co", co)
+    co = co.reshape(n, 3)
+    mats = {k: np.array(m) for k, m in fit.items()}
+    out = np.zeros_like(co)
+    hom = np.concatenate([co, np.ones((n, 1))], axis=1)
+    for i, w in enumerate(table):
+        total = 0.0
+        acc = np.zeros(3)
+        for k, x in w.items():
+            m = mats.get(k)
+            if m is None:
                 continue
-            acc = {k: v * 0.5 for k, v in w.items()}
-            share = 0.5 / len(adj[i])
-            for j in adj[i]:
-                for k, v in weights[j].items():
-                    acc[k] = acc.get(k, 0.0) + v * share
-            new.append(acc)
-        weights = new
-    obj.vertex_groups.clear()
-    groups = {}
-    for i, w in enumerate(weights):
-        top = sorted(w.items(), key=lambda kv: -kv[1])[:4]
-        total = sum(x for _k, x in top) or 1.0
-        for k, x in top:
-            if k not in groups:
-                groups[k] = obj.vertex_groups.new(name=k)
-            groups[k].add([i], x / total, "REPLACE")
+            acc += x * (m @ hom[i])[:3]
+            total += x
+        out[i] = acc / total if total > 0 else co[i]
+    obj.data.vertices.foreach_set("co", out.ravel())
+    obj.data.update()
+
+
+def coat_shade(body, points_below=0.42):
+    """Per-vertex shade of the coat, colour attribute ``fg_shade``.
+
+    The CC0 AO and coat relief, darker lower legs and muzzle ("points"); the shader's
+    robe tint multiplies it.
+
+    The painted white socks and blaze of the source are not kept (every horse of a
+    regiment would carry the same markings): the shade is clamped around the coat.
+    """
+    imgs = {i.name.split(".")[0]: i for i in bpy.data.images}
+    col = imgs["HorseMain4k00"]
+    ao = imgs.get("HorseMain4k00AO00")
+    w, h = col.size
+    px = np.array(col.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    lum = px[..., :3] @ np.array([0.3, 0.59, 0.11], dtype=np.float32)
+    ao_px = None
+    if ao is not None and ao.size[0]:
+        aw, ah = ao.size
+        ao_px = np.array(ao.pixels[:], dtype=np.float32).reshape(ah, aw, 4)[..., 0]
+    me = body.data
+    uv = me.uv_layers.get("UVTex") or me.uv_layers.active
+    acc = np.zeros((len(me.vertices), 2))
+    for loop in me.loops:
+        acc[loop.vertex_index] += (*uv.data[loop.index].uv,)
+    counts = np.zeros(len(me.vertices))
+    for loop in me.loops:
+        counts[loop.vertex_index] += 1
+    uvs = acc / np.maximum(counts, 1)[:, None]
+    xi = np.clip((uvs[:, 0] % 1.0) * (w - 1), 0, w - 1).astype(int)
+    yi = np.clip((uvs[:, 1] % 1.0) * (h - 1), 0, h - 1).astype(int)
+    lv = lum[yi, xi]
+    rel = np.clip(lv / np.median(lv), 0.72, 1.12)
+    if ao_px is not None:
+        a = ao_px[
+            np.clip(yi * ao_px.shape[0] // h, 0, ao_px.shape[0] - 1),
+            np.clip(xi * ao_px.shape[1] // w, 0, ao_px.shape[1] - 1),
+        ]
+        a = np.clip(a / max(np.percentile(a, 90), 1e-3), 0.0, 1.0)
+        rel *= 0.55 + 0.45 * a
+    shade = []
+    for i, v in enumerate(me.vertices):
+        p = body.matrix_world @ v.co
+        s = float(rel[i])
+        # Points: lower legs darken from the knee/hock down; hooves are a separate material.
+        f = min(max((points_below - p.z) / 0.25, 0.0), 1.0)
+        s *= 1.0 - 0.5 * f
+        shade.append(s)
+    # Muzzle: the front 20 cm of the head.
+    ys = [(body.matrix_world @ v.co).y for v in me.vertices]
+    y_nose = min(ys)
+    for i, v in enumerate(me.vertices):
+        p = body.matrix_world @ v.co
+        f = min(max((y_nose + 0.2 - p.y) / 0.12, 0.0), 1.0)
+        shade[i] *= 1.0 - 0.45 * f
+    attr = me.color_attributes.get("fg_shade") or me.color_attributes.new(
+        "fg_shade", "FLOAT_COLOR", "POINT"
+    )
+    for i, s in enumerate(shade):
+        attr.data[i].color = (s, s, s, 1.0)
+
+
+def hoof_faces(body, top=0.1):
+    """Face indices of the hooves (natural stance, below `top` metres)."""
+    mw = body.matrix_world
+    return [
+        f.index
+        for f in body.data.polygons
+        if all((mw @ body.data.vertices[i].co).z < top for i in f.vertices)
+    ]
+
+
+HORSE_BUDGET = {
+    "horse_body": 4200,
+    "horse_mane": 1000,
+    "horse_tail": 600,
+    "horse_eye_l": 80,
+    "horse_eye_r": 80,
+}
+
+
+def build_horse(mount, budget=None):
+    """New horse fitted and skinned onto the Quaternius horse bones; returns objects.
+
+    Every piece carries its weights (vertex groups named after the ``cavalry`` horse
+    bones), an armature modifier on ``mount.harm`` and, for the body, the ``fg_shade``
+    colour attribute and the ``fg_hoof`` face flag.
+    """
+    budget = budget or HORSE_BUDGET
+    pieces = load_oga()
+    similarity(pieces, mount)
+    oga, q = joints(pieces, mount)
+    fit = fit_transforms(oga, q)
+    for name, o in pieces.items():
+        decimate(o, budget.get(name, 0))
+    body = pieces["horse_body"]
+    heat = heat_armature(oga, sorted(BODY_BONES))
+    heat_weights(body, heat)
+    bpy.data.objects.remove(heat)
+    table = smooth_weights(body, weight_table(body), passes=1)
+    coat_shade(body)
+    hooves = set(hoof_faces(body))
+    flag = body.data.attributes.new("fg_hoof", "INT", "FACE")
+    for i in range(len(body.data.polygons)):
+        flag.data[i].value = 1 if i in hooves else 0
+    tables = {"horse_body": table}
+    tables["horse_mane"] = smooth_weights(
+        pieces["horse_mane"],
+        nearest_weights(pieces["horse_mane"], body, table),
+        passes=2,
+    )
+    tail_chain = []
+    for k, name in enumerate(TAIL_BONES):
+        a = q[name]
+        b = (
+            q[TAIL_BONES[k + 1]]
+            if k + 1 < len(TAIL_BONES)
+            else a + Vector((0, 0.05, -0.7))
+        )
+        tail_chain.append((name, a, b))
+    tables["horse_tail"] = chain_weights(pieces["horse_tail"], tail_chain)
+    out = []
+    for name, o in pieces.items():
+        t = tables.get(name) or [{"Head": 1.0} for _v in o.data.vertices]
+        apply_fit(o, t, fit)
+        set_weights(o, t)
+        mod = o.modifiers.new("arm", "ARMATURE")
+        mod.object = mount.harm
+        o.parent = mount.harm
+        o.matrix_parent_inverse = mount.harm.matrix_world.inverted()
+        o.data.shade_smooth()
+        o.data.calc_loop_triangles()
+        print(f"PIECE {name} tris={len(o.data.loop_triangles)}")
+        out.append(o)
+    for m in mount.hmeshes:
+        m.hide_render = True
+    return out
 
 
 def rigid(obj, bone):
@@ -343,161 +638,6 @@ def decimate(obj, target):
             bpy.ops.object.modifier_apply(modifier=mod.name)
     obj.data.calc_loop_triangles()
     return len(obj.data.loop_triangles)
-
-
-HORSE_BUDGET = {
-    "horse_body": 4200,
-    "horse_mane": 1000,
-    "horse_tail": 600,
-    "horse_eye_l": 80,
-    "horse_eye_r": 80,
-}
-
-# Tail of each deforming bone for the bone-heat weights (the imported bones are stubs).
-TAIL_TO = {
-    "Body": "Back",
-    "Back": "Tail2",
-    "Torso": "Torso2",
-    "Torso2": "Torso3",
-    "Torso3": "Neck1",
-    "Neck1": "Neck2",
-    "Neck2": "Neck3",
-    "Neck3": "Head",
-}
-for _s in "LR":
-    TAIL_TO.update(
-        {
-            f"FrontShoulder.{_s}": f"FrontUpperLeg.{_s}",
-            f"FrontUpperLeg.{_s}": f"FrontLowerLeg.{_s}",
-            f"FrontLowerLeg.{_s}": f"IKFrontLeg.{_s}",
-            f"IKFrontLeg.{_s}": f"FF.{_s}",
-            f"BackShoulder.{_s}": f"BackLeg.{_s}",
-            f"BackLeg.{_s}": f"BackUpperLeg.{_s}",
-            f"BackUpperLeg.{_s}": f"BackLowerLeg.{_s}",
-            f"BackLowerLeg.{_s}": f"IKBackLeg.{_s}",
-            f"IKBackLeg.{_s}": f"FFB.{_s}",
-            f"Ear1.{_s}": f"Ear2.{_s}",
-            f"Ear2.{_s}": f"Ear3.{_s}",
-            f"Ear3.{_s}": f"Ear4.{_s}",
-        }
-    )
-for _k in range(1, 7):
-    TAIL_TO[f"Tail{_k}"] = f"Tail{_k + 1}"
-
-
-def heat_rig(mount, deform):
-    """Copy of the horse armature with real bone segments, for automatic weights."""
-    src = mount.harm
-    arm = src.copy()
-    arm.data = src.data.copy()
-    arm.animation_data_clear()
-    bpy.context.scene.collection.objects.link(arm)
-    heads = {b.name: b.head_local.copy() for b in src.data.bones}
-    with bpy.context.temp_override(
-        active_object=arm, object=arm, selected_objects=[arm]
-    ):
-        bpy.ops.object.mode_set(mode="EDIT")
-        eb = arm.data.edit_bones
-        for b in eb:
-            b.use_connect = False
-        for b in eb:
-            b.use_deform = b.name in deform
-            if b.name in TAIL_TO:
-                t = heads[TAIL_TO[b.name]]
-                if (t - b.head).length > 1e-3:
-                    b.tail = t
-            elif b.name in ("FF.L", "FF.R", "FFB.L", "FFB.R"):
-                b.tail = (
-                    b.head + Vector((0, -0.08, -0.06)) / src.matrix_world.to_scale().x
-                )
-            elif b.name == "Head":
-                b.tail = (
-                    b.head + Vector((0, -0.45, -0.3)) / src.matrix_world.to_scale().x
-                )
-            elif b.name in ("Ear4.L", "Ear4.R", "Tail7"):
-                b.tail = b.head + (b.head - b.parent.head) * 0.8
-        bpy.ops.object.mode_set(mode="OBJECT")
-    return arm
-
-
-def auto_weights(obj, arm):
-    """Bone-heat weights of `obj` from `arm` (Blender's automatic weights)."""
-    obj.vertex_groups.clear()
-    for o in bpy.context.view_layer.objects:
-        o.select_set(False)
-    obj.select_set(True)
-    arm.select_set(True)
-    bpy.context.view_layer.objects.active = arm
-    with bpy.context.temp_override(
-        active_object=arm,
-        object=arm,
-        selected_objects=[obj, arm],
-        selected_editable_objects=[obj, arm],
-    ):
-        bpy.ops.object.parent_set(type="ARMATURE_AUTO")
-    mw = obj.matrix_world.copy()
-    obj.parent = None
-    obj.matrix_world = mw
-    obj.modifiers.clear()
-    print(f"WEIGHTS {obj.name} groups={len(obj.vertex_groups)}")
-
-
-def raise_neck(pieces, mount):
-    """Swing the neck and head up about the withers onto the Quaternius head carriage."""
-    body = pieces["horse_body"]
-    pts = _verts(body)
-    q_pts = [p for m in mount.hmeshes for p in _verts(m)]
-    pivot = _withers(pts) + Vector((0, -0.05, -0.25))
-    src = _head_centroid(pts) - pivot
-    dst = _head_centroid(q_pts) - pivot
-    a_src = math.atan2(src.z, -src.y)
-    a_dst = math.atan2(dst.z, -dst.y)
-    angle = a_dst - a_src
-    y0 = pivot.y + 0.05
-    y1 = pivot.y - 0.35
-    print(f"HORSE neck raise={math.degrees(angle):.1f} deg")
-    for o in pieces.values():
-        for v in o.data.vertices:
-            p = v.co
-            if p.y > y0:
-                continue
-            f = min(max((y0 - p.y) / (y0 - y1), 0.0), 1.0)
-            f = f * f * (3 - 2 * f)
-            rot = Matrix.Rotation(-angle * f, 3, "X")
-            v.co = pivot + rot @ (p - pivot)
-        o.data.update()
-
-
-def build_horse(mount):
-    """New horse fitted and skinned onto the Quaternius horse bones; returns objects."""
-    pieces = load_oga()
-    similarity(pieces, mount)
-    raise_neck(pieces, mount)
-    rbf_warp(pieces, landmarks(pieces, mount))
-    q_mesh = mount.hmeshes[0]
-    deform = set(q_mesh.vertex_groups.keys())
-    arm = heat_rig(mount, deform)
-    out = []
-    for name, o in pieces.items():
-        tris = decimate(o, HORSE_BUDGET.get(name, 0))
-        if name.startswith("horse_eye"):
-            rigid(o, "Head")
-        elif name == "horse_body":
-            # Bone heat beat a height-band copy of the Quaternius leg weights (tried in
-            # FG0: the draught legs are thicker, the copy twisted them at the gallop).
-            auto_weights(o, arm)
-        else:
-            transfer_weights(o, q_mesh)
-        mod = o.modifiers.new("arm", "ARMATURE")
-        mod.object = mount.harm
-        o.parent = mount.harm
-        o.matrix_parent_inverse = mount.harm.matrix_world.inverted()
-        o.data.shade_smooth()
-        print(f"PIECE {name} tris={tris}")
-        out.append(o)
-    q_mesh.hide_render = True
-    bpy.data.objects.remove(arm)
-    return out
 
 
 def horse_materials(objs):
