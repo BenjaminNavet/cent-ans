@@ -104,3 +104,4 @@ Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_n
 | 14 | corrigé | `ai_emissary` étape 1 : ne vise qu'un captif rachetable (conditions « argent ») dont le prix + coût de l'action tient dans le trésor ; sinon étapes 2 et 3. Pas de test dédié (IA d'agent, couverte par c6_agents). |
 | 11 | corrigé | malus « otages abandonnés » déplacé dans `declare_war` : seulement si le donneur déclare la guerre au détenteur. Un donneur entraîné par un appel aux armes n'est pas puni (conservateur). |
 | 12 | corrigé | `resolve_negotiation` : le registre de tributs d'une faction morte est vidé, elle ne paie plus. |
+| 13 | corrigé | `plan_peace` : buts de guerre non tenus ajoutés avec la clé `false` (avant les provinces hors but) ; `score <= 2 * SURRENDER_WAR_SCORE` (ADR 0025 § 5, « score ≤ -50 »). Pas de test dédié. |
