@@ -74,3 +74,4 @@ Non exécuté (ni Godot ni cargo) : smoke test à lancer par l'orchestrateur à 
 | 12 | corrigé | `0be83d77` | Plaque gardée quand le marqueur est réutilisé (même signature), `_style_plate` réappliqué ; plaques orphelines libérées. |
 
 Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_news_batch(items: Array) -> void`, `CodexBubbles._drop_freed_sources() -> void`, `SettingsMenu._build() -> void`, `SettingsMenu._rebuild() -> void`, `DiplomacyPanel._controller_of(province_id: String) -> String` ; nouvelles variables `CampaignMap.last_save_ok`, `MapUi._end_turn_pending`, `AudioDirector._music_tween`, `SettlementLayer._label_near`.
+| 7 | corrigé | défaite si le joueur ne contrôle plus aucune colonie (critère « terres » de `resolve_faction_deaths`) ; une armée sans terre ne suffit pas (conservateur : garde le texte « a perdu toutes ses terres » et le test m10). |
