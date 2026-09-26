@@ -82,5 +82,108 @@
     "sources": [
       "Emden"
     ]
+  },
+  {
+    "id": "set_leeuwarden",
+    "province": "prov_frisia",
+    "kind": "village",
+    "name": {
+      "display": "Leeuwarden",
+      "local": "Ljouwert",
+      "local_language": "frison"
+    },
+    "lonlat": [
+      5.7972,
+      53.2038
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_windmill"
+    ],
+    "port": false,
+    "description": "Bourg frison né de la fusion de plusieurs terpen autour de trois places, en pleine croissance mais sans charte de ville en 1337.",
+    "sources": [
+      "Leeuwarden"
+    ]
+  },
+  {
+    "id": "set_dokkum",
+    "province": "prov_frisia",
+    "kind": "town",
+    "name": {
+      "display": "Dokkum",
+      "local": "Dockum",
+      "local_language": "frison"
+    },
+    "lonlat": [
+      5.9989,
+      53.3247
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville fortifiée du nord de la Frise (droits urbains dès 1298), lieu de martyre attribué à saint Boniface (754).",
+    "sources": [
+      "Dokkum"
+    ]
+  },
+  {
+    "id": "set_klaarkamp",
+    "province": "prov_frisia",
+    "kind": "abbey",
+    "name": {
+      "display": "Klaarkamp",
+      "local": "Claercamp",
+      "local_language": "frison"
+    },
+    "lonlat": [
+      5.9758,
+      53.2814
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1165 près de Rinsumageest, principale maison religieuse de Frise et centre d'influence politique frison.",
+    "sources": [
+      "Abbaye de Klaarkamp"
+    ]
+  },
+  {
+    "id": "set_appingedam",
+    "province": "prov_frisia",
+    "kind": "town",
+    "name": {
+      "display": "Appingedam",
+      "local": "Appingedam",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      6.8578,
+      53.3178
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Petite ville du Fivelingo (Ommelanden de Groningue) ayant obtenu droits de marché et de tonlieu en 1327.",
+    "sources": [
+      "Appingedam"
+    ]
   }
 ]
