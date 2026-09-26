@@ -223,11 +223,10 @@ func _capture_now() -> Image:
 
 
 ## Après `CampaignMap._on_save` (connecté avant) : fiche et vignette de l'emplacement.
+## La fiche est écrite par `SaveSlots.save` ; rien si l'écriture a échoué (ancienne fiche intacte).
 func _on_save_requested(save_name: String) -> void:
-	var path: String = SaveSlots.SAVES_DIR.path_join(save_name.validate_filename() + ".json")
-	if not FileAccess.file_exists(path):
+	if not bool(map.get("last_save_ok")):
 		return
-	SaveSlots.write_meta(save_name)
 	_last_saved_turn = _turn()
 	if _pause_snapshot != null:
 		SaveSlots.write_thumbnail(save_name, _pause_snapshot)

@@ -375,3 +375,43 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
         mean(&|g| f64::from(g.battles))
     );
 }
+
+/// Review fix: a friendly army near the enemy counts once. Before, the
+/// caller passed the power of every army of the faction at the same anchor
+/// and the loop added the nearby ones again, overstating the odds.
+#[test]
+fn nearby_friendly_armies_are_counted_once() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    at_war(&mut state, "fac_england", "fac_france");
+    let english = main_army(&state, "fac_england");
+    let french = main_army(&state, "fac_france");
+    let meaux = data.settlement_point(&set("set_meaux")).unwrap();
+    state.armies.get_mut(&english).unwrap().position = ArmyPosition::field(meaux);
+    // A second English army next to the French one, within engagement range.
+    let mut second = state.armies[&english].clone();
+    second.position = ArmyPosition::field(east_of(&data, "set_meaux", 19.0));
+    let second_id = ArmyId::from_index(9999);
+    state.armies.insert(second_id.clone(), second);
+    let f = state.armies.get_mut(&french).unwrap();
+    f.position = ArmyPosition::field(east_of(&data, "set_meaux", 20.0));
+    f.units.truncate(1);
+    f.units[0].strength = 100;
+    let ours = state.army_power(&data, &english) + state.army_power(&data, &second_id);
+    let per_man = state.army_power(&data, &french) / 100.0;
+    let ratio = data.ai_grid.attack_ratio;
+    let england = fac("fac_england");
+    // Enemy just too strong for the true odds (but not for doubled ones).
+    let too_strong = ((ours * 1.1 / ratio) / per_man).ceil() as u32;
+    state.armies.get_mut(&french).unwrap().units[0].strength = too_strong;
+    let planner = ai::grid::GridPlanner::new(&state, &data, &england);
+    assert_eq!(planner.attack_order(&english), None, "odds overstated");
+    // Enemy weak enough for the true odds.
+    let weak = ((ours * 0.9 / ratio) / per_man).floor() as u32;
+    state.armies.get_mut(&french).unwrap().units[0].strength = weak;
+    let planner = ai::grid::GridPlanner::new(&state, &data, &england);
+    assert!(
+        matches!(planner.attack_order(&english), Some(Order::Attack { .. })),
+        "the joint host attacks a weaker army"
+    );
+}

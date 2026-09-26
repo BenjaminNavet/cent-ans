@@ -59,7 +59,6 @@ impl BattleSim {
                     guards += 1;
                 }
             }
-            let name = self.setup.side(side).faction_name.clone();
             let state = &mut self.camp_states[side.index()];
             state.looters = looters.len() as u32;
             state.guards = guards;
@@ -77,6 +76,10 @@ impl BattleSim {
                 state.progress = 1.0;
                 state.looted = true;
             }
+            if !alarm && !looted {
+                continue;
+            }
+            let name = self.setup.side(side).faction_name.clone();
             if alarm {
                 self.shake_side(side, rules.alarm_morale);
                 self.log(
