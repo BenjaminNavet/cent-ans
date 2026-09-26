@@ -77,3 +77,12 @@ remplace au zoom rapproché, avec un fondu.
   `sources` de chaque ville et dans `docs/credits.md`.
 - Limite : le parcellaire est généré le long des rues (pas de cadastre réel) ; Paris pourra
   importer le parcellaire ALPAGE (ODbL) dans un champ `parcels` réservé par le schéma (VH5).
+
+## Addendum VH7 (2026-09-26) : ville 1:1 sans maquette
+
+Orléans n'a ni maquette L1/L2 ni bloc de siège : c'était une colonie ordinaire (ville ZG6). Plutôt
+que de cuire une petite maquette dans Blender, le champ `landmark` devient facultatif : sans lui, la
+colonie garde en vue stratégique sa maquette de colonie ordinaire, et la ville v2 remplace la ville
+ZG6 au zoom rapproché, affichée au même poids vallée que les villes ZG6 (pas de fondu, pas de
+plancher ZG4b). Une maquette L1/L2 et un bloc `siege.battle` (ADR 0026) pourront être ajoutés plus
+tard sans changer le fichier v2.
