@@ -105,6 +105,7 @@
    "pedestrian"
   ],
   "exclude": [
+   "Essex Street",
    "Mitre Street",
    "Mitre Passage",
    "St James's Passage",
@@ -8105,18 +8106,6 @@
    "points": [
     [838.9, -723.5],
     [847.1, -704.6]
-   ]
-  },
-  {
-   "id": "osm_4276413",
-   "name": "Essex Street",
-   "rank": "secondary",
-   "width_m": 5.0,
-   "origin": "osm",
-   "points": [
-    [-220.4, 100.4],
-    [-217.0, 96.7],
-    [-183.7, 20.4]
    ]
   },
   {
@@ -16613,7 +16602,7 @@
   },
   {
    "id": "whitefriars",
-   "name": "Couvent des Carmes (Whitefriars, 1253)",
+   "name": "Couvent des Carmes (Whitefriars, 1241)",
    "model": "abbey",
    "at": [190, 30],
    "angle_deg": -8,
@@ -16628,13 +16617,14 @@
      "side": "south",
      "size": 30
     }
-   }
+   },
+   "description": "Fondé par Sir Richard Gray en 1241 (VCH London I) ; enclos de Fleet Street à la Tamise, entre Water Lane et le Temple ; prieuré rebâti par Hugh Courtenay en 1350, église agrandie vers 1396 : état de 1340 restitué."
   },
   {
    "id": "exeter_inn",
    "name": "Hôtel de l'évêque d'Exeter (Outer Temple)",
    "model": "enclosure",
-   "at": [-330, -40],
+   "at": [-205, 10],
    "angle_deg": -20,
    "certainty": "hypothetical",
    "params": {
@@ -16642,7 +16632,8 @@
     "width_m": 45,
     "height_m": 10,
     "ranges": true
-   }
+   },
+   "description": "Hôtel acquis par l'évêque Walter de Stapledon dans les années 1320 (futur Essex House), entre Milford Lane et le Temple ; Essex Street (vers 1675) est percée sur son emplacement. Gabarit restitué."
   },
   {
    "id": "savoy",
@@ -16697,14 +16688,14 @@
    "id": "charing_cross",
    "name": "Croix d'Éléonore de Charing (1291-1294)",
    "model": "tower",
-   "at": [-1270, -462],
+   "at": [-1287, -402],
    "certainty": "probable",
    "clear_m": 0,
    "params": {
     "radius_m": 2.5,
     "height": 12
    },
-   "description": "Dernière croix du convoi de la reine Éléonore, à la fourche du Strand et de la route de Westminster."
+   "description": "Dernière croix du convoi de la reine Éléonore, à la fourche du Strand et de la route de Westminster ; site marqué par la statue de Charles Ier (OSM)."
   },
   {
    "id": "york_place",
@@ -16886,7 +16877,7 @@
     "height_m": 20,
     "apse": "flat"
    },
-   "description": "Chapelle palatine à deux niveaux reconstruite de 1292 à 1348."
+   "description": "Chapelle palatine à deux niveaux (Saint-Étienne en haut, Sainte-Marie de la crypte en bas) reconstruite à partir de 1292 pour Édouard Ier, largement achevée en 1348, décor jusqu'aux années 1360 (UK Parliament, Virtual St Stephen's) : encore en chantier en 1340."
   },
   {
    "id": "westminster_palace",
