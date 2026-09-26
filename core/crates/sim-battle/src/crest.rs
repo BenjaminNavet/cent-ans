@@ -43,6 +43,34 @@ impl CrestRules {
     }
 }
 
+/// SG5: contents of `data/rules/battle_crest_defence.json`: where a
+/// defensive side holding its heights keeps its line (ADR 0046 § Suite SG5).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CrestDefenceRules {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    /// With its shooters holding the crest in front, the line stands this
+    /// far behind its post on the reverse slope (metres).
+    pub line_setback_m: f64,
+    /// ... when it counts at least this many regiments (a small force keeps
+    /// its line by its shooters).
+    pub min_line_regiments: usize,
+}
+
+const BUNDLED_DEFENCE: &str = include_str!("../../../../data/rules/battle_crest_defence.json");
+
+impl CrestDefenceRules {
+    /// `data/rules/battle_crest_defence.json` as compiled into the crate.
+    pub fn bundled() -> &'static CrestDefenceRules {
+        static RULES: OnceLock<CrestDefenceRules> = OnceLock::new();
+        RULES.get_or_init(|| {
+            serde_json::from_str(BUNDLED_DEFENCE)
+                .expect("data/rules/battle_crest_defence.json is valid")
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -58,5 +86,11 @@ mod tests {
             rules.melee_factor(100.0),
             rules.melee_factor(rules.max_height_m)
         );
+    }
+
+    #[test]
+    fn crest_defence_rules_load() {
+        let rules = CrestDefenceRules::bundled();
+        assert!(rules.line_setback_m >= 0.0);
     }
 }

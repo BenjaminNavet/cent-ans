@@ -239,3 +239,77 @@ l'attaquant (moral 40) traverse 180 m de flèches après `ATTACKER_DUEL_LIMIT` (
 débande (moral 14 à 300 s) alors que ses tireurs gagnaient le duel ; son armée est brisée. Point
 ouvert pour EP9 (logique hors de SG4), traité par EP9b (ADR 0056 § EP9b : plat sans pieux 0/10 → 7/3, crête avec pieux 0/10 → 6/4). `b6.rs` : empreintes recalculées sur EP9 + SG4 (mêmes
 vainqueurs) ; `ep1_scale` : pic 10-19 en mêlée, 28-59 régiments au contact (seuil 25).
+
+
+## Suite SG5 (2026-09-26) : la ligne d'une armée sur sa crête se tient hors de la contagion
+
+Constat (après EP9b, ADR 0056) : `sg4_balance` crête avec pieux passe de 0/10 à 6/4 pour
+l'attaquant. Traces (`SG4_ROUTS=1` : chaque déroute du défenseur, avec le nombre d'amis en déroute à
+moins de 120 m et la distance du premier ennemi ; `SG4_SHOTS=1` : pertes par tireur et cible ;
+`SG4_HORSE=a..b` : fenêtre de la trace des cavaliers) : la première déroute est toujours celle
+d'une aile de cavalerie du défenseur, battue au bas du glacis ; elle reflue à travers les tireurs
+de l'extrémité de la ligne puis la ligne elle-même, et des régiments intacts (ennemi à 150-200 m)
+cèdent l'un après l'autre par contagion (−0,4 de moral par seconde et par ami en déroute à moins de
+120 m) en glissant le long de la ligne. Aucune mêlée d'infanterie n'a lieu.
+
+Deux remarques sur la mesure : d'une graine à l'autre, le début de ces batailles miroirs ne change
+presque pas (10 graines ≈ une ou deux batailles indépendantes, un réglage fait basculer tout un cas
+de 0/10 à 10/0) ; les variantes ont donc été jugées sur une sonde élargie (crête avec et sans
+pieux, 40, 50, 60, 70 et 80 régiments par camp, 10 ou 20 graines).
+
+Variantes écartées (victoires de l'attaquant sur 60 batailles, 40/60/80 régiments, graines 1-10 ;
+départ 13/60) :
+- cavalerie tenue aux ailes au-delà des tireurs, en retrait, contre-charge seulement à courte
+  distance : 28 à 42/60 (la cavalerie qui attend reçoit la charge ; les archers de l'extrémité sont
+  pris de flanc) ;
+- cavaliers étalés sur l'aile au lieu d'être groupés : 38/60 (la masse gagne le duel de cavalerie) ;
+- sorties contre les tireurs isolés limitées aux abords de la position : jusqu'à 42/60 (ces
+  sorties sont ce qui gagne la bataille au défenseur : sans elles ses archers perdent 77-93 % dans
+  le duel) ;
+- tir de contre-batterie des tireurs sur la crête (archers ennemis sans pavois plutôt que le plus
+  proche) : 18/60 ;
+- tireurs répartis sur le front de la ligne (pas au-delà de ses extrémités) : pire ;
+- ligne reculée de 50 m : 29/60 ; « ne pas descendre sous le sol du déploiement » : 10/0 à 60.
+
+Décision (`data/rules/battle_crest_defence.json`, schéma
+`battle_crest_defence_rules.schema.json`, `crest::CrestDefenceRules`, `ai.rs::plan_field`) :
+**une armée en défense sur ses hauteurs se déploie en profondeur.** Quand elle tient une crête nue
+(pas un couvert), que ses tireurs tiennent la crête militaire devant elle, que la crête domine
+l'ennemi de plus de `HOLD_HEIGHT` (6 m, mesuré depuis la crête et non depuis les régiments, pour
+que le recul ne change pas la décision) et que sa ligne compte au moins `min_line_regiments` (8)
+régiments, sa ligne se tient `line_setback_m` (120 m, la portée de la contagion) derrière son poste
+de contre-pente. Les tireurs et la cavalerie gardent leurs postes (crête militaire, ailes) ; la
+contagion de leur déroute n'atteint plus la ligne, qui reprend son moral loin de l'ennemi, et
+l'attaquant doit passer la crête pour l'atteindre. Une petite troupe (Crécy-like, sondes R2b/R4)
+garde sa ligne près de ses tireurs, comme avant.
+
+Mesures `sg4_balance` (60 régiments × 120 hommes, graines 1-10 ; attaquant / défenseur / nuls) :
+
+| Terrain | Pieux | EP9b (départ) | SG5 |
+|---|---|---|---|
+| plat | oui | 3 / 7 / 0 | 3 / 7 / 0 |
+| plat | non | 7 / 3 / 0 | 7 / 3 / 0 |
+| crête | oui | **6 / 4** / 0 | **0 / 10** / 0 |
+| crête | non | 1 / 9 / 0 | 0 / 10 / 0 |
+| plaine générée | oui | 2 / 8 / 0 | 1 / 9 / 0 |
+| plaine générée | non | 6 / 4 / 0 | 6 / 4 / 0 |
+| comme `ep1_scale` | oui | 6 / 4 / 0 | 5 / 5 / 0 |
+
+Sonde élargie (crête avec et sans pieux) : graines 11-20 à 40/60/80 régiments 21/60 → 0/60 ;
+50 et 70 régiments 21/40 → 6/40 (70 sans pieux 10/0 → 4/6). Crécy-like (`survey_crecy`, 12
+graines) : 12/12 anglais, inchangé. Sièges (sonde SG3 avec engins) : 10/10 partout, aucun nul.
+`b6.rs` : empreintes inchangées ; `ep1_scale`, `ep9_decisive`, `ep9b_duel`, `ai`, `ai_relief`,
+`r4` verts sans modification.
+
+Limites et points ouverts :
+- Sur la crête miroir, l'attaquant ne gagne plus du tout (cible « au plus 3/10 ») : la crête nue
+  bien tenue est désormais décisive, comme à SG4 avant EP9b.
+- Le seuil de 8 régiments est un seuil d'échelle : une ligne qui fond sous ce nombre en cours de
+  bataille revient à son poste de contre-pente.
+- Pour la session épique (contagion, `sim.rs`, non modifiée) : la contagion compte tout ami en
+  déroute à moins de 120 m, qu'il passe devant, derrière ou le long de la ligne, et un régiment en
+  déroute fuit « loin de l'ennemi le plus proche + vers son bord » : à l'extrémité d'une ligne,
+  l'ennemi est sur le flanc et la déroute court le long de la ligne, d'où la cascade. Piste : fuite
+  orientée vers l'arrière, ou contagion réduite pour un ami en déroute derrière le régiment.
+- EP7 (cartes historiques, branche à part) : les régiments postés par le scénario sont filtrés par
+  leur laisse ; à la fusion, exclure explicitement ces régiments de ce recul (`scenario_post`).
