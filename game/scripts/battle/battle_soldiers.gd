@@ -34,6 +34,12 @@ const DETAIL_DISTANCE := 32.0
 ## Figurines skinnées (lot V2) : maillage complet plus tôt relayé (skinning plus coûteux).
 const SKINNED_DETAIL_DISTANCE := 24.0
 const LOD_DISTANCE := 75.0
+## Lot FG5 (ADR 0089) : figurines fines, LOD0 par soldat. Leur LOD0 (9-17 k triangles) n'est
+## dessiné que pour les soldats à moins de `FINE_DETAIL_DISTANCE` m de la caméra (× préréglage),
+## par un calque à part qui partage le tampon du régiment ; le calque principal dessine le LOD1
+## des autres (bande `lod_band` du shader). Par régiment (lignes de 40 à 150 m), le LOD0 coûtait
+## le double de l'image en vue rapprochée.
+const FINE_DETAIL_DISTANCE := 12.0
 const SHADOW_DISTANCE := 190.0
 ## A1-01 : fondu de lisibilité à distance (teinte de camp, liseré, échelle), en mètres.
 const READABLE_NEAR := 80.0
@@ -56,6 +62,9 @@ var _materials: Dictionary = {}  # unit id -> ShaderMaterial
 var _unit_kind: Dictionary = {}  # unit id -> famille de rendu
 var _lod_layers: Dictionary = {}  # unit id -> MultiMeshInstance3D (maillage lointain)
 var _near_level: Dictionary = {}  # unit id -> niveau de détail du maillage proche (0 ou 1)
+var _fine: Dictionary = {}  # unit id -> true : figurine fine (LOD0 par soldat, FG5)
+var _fine_near: Dictionary = {}  # unit id -> MultiMeshInstance3D (LOD0 des soldats proches, FG5)
+var _fine_band: Dictionary = {}  # unit id -> rayon du LOD0 posé sur les calques (0 : aucun)
 var _camera_pos: Vector3 = Vector3.ZERO
 var _previous: Dictionary = {}  # unit id -> PackedFloat32Array (tranche de l'image précédente)
 ## PB3c : figurines de `_previous[id]` (le tampon groupé est complété à la capacité du MultiMesh :
@@ -193,6 +202,8 @@ func setup(units: Array, side_colors: Dictionary, side_factions: Dictionary, sid
 		_unit_kind[id] = kind
 		if skinned:
 			_skinned[id] = true
+			if BattleSkinned.is_fine(kind, variant):
+				_fine[id] = true
 			if impostors != null:
 				impostors.request(BattleImpostors.key_of(side, kind, variant), kind, variant, mat)
 
@@ -515,6 +526,9 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var shadow := cast_shadows and distance < SHADOW_DISTANCE * lod_k
 	var skinned := _skinned.has(id)
 	var level := BattleMeshes.LEVEL_FULL if distance < (SKINNED_DETAIL_DISTANCE if skinned else DETAIL_DISTANCE) * lod_k else BattleMeshes.LEVEL_MEDIUM
+	var fine := _fine.has(id)
+	if fine:
+		level = BattleMeshes.LEVEL_MEDIUM  # FG5 : LOD0 par soldat, calque `_fine_near`
 	if near and int(_near_level.get(id, -1)) != level:
 		_near_level[id] = level
 		var variant := BattleMeshes.variant_of(str(unit.get("type", "")))
@@ -534,8 +548,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		lod.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	else:
 		lod.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var padded := slice
 	if n > 0:
-		var padded := slice
 		if padded.size() != mm.instance_count * 12:
 			padded = slice.duplicate()
 			padded.resize(mm.instance_count * 12)
@@ -547,6 +561,8 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 			if imp.multimesh.instance_count != mm.instance_count:
 				imp.multimesh.instance_count = mm.instance_count
 			imp.multimesh.buffer = padded
+	if fine:
+		_update_fine_near(id, kind, instance, padded, n if instance.visible else 0, FINE_DETAIL_DISTANCE * lod_k)
 	mm.visible_instance_count = n
 	lod_mm.visible_instance_count = n
 	if imp != null:
@@ -606,6 +622,68 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 		if not is_equal_approx(float(mat.get_meta("bv2_blood", -1.0)), blood):
 			mat.set_meta("bv2_blood", blood)
 			mat.set_shader_parameter("blood", blood)
+
+
+## FG5 : LOD0 des soldats d'une figurine fine à moins de `radius` m de la caméra. Le calque
+## LOD0 n'est montré que si un soldat au moins est dans le rayon (test sur le tampon, marge 1 m) ;
+## le shader replie ensuite chaque soldat hors de sa bande avant le skinning.
+func _update_fine_near(id: int, kind: String, instance: MultiMeshInstance3D, padded: PackedFloat32Array, n: int, radius: float) -> void:
+	var any := false
+	if n > 0:
+		var r2 := (radius + 1.0) * (radius + 1.0)
+		var cx := _camera_pos.x
+		var cy := _camera_pos.y
+		var cz := _camera_pos.z
+		for i in n:
+			var o := i * 12
+			var dx := padded[o + 3] - cx
+			var dy := padded[o + 7] - cy
+			var dz := padded[o + 11] - cz
+			if dx * dx + dy * dy + dz * dz < r2:
+				any = true
+				break
+	var band := radius if any else 0.0
+	var near_layer: MultiMeshInstance3D = _fine_near.get(id)
+	if any and near_layer == null:
+		var info: Dictionary = _unit_info[id]
+		var near_mm := MultiMesh.new()
+		near_mm.transform_format = MultiMesh.TRANSFORM_3D
+		near_mm.mesh = BattleSkinned.mesh(kind, int(info["variant"]), 0)
+		near_layer = MultiMeshInstance3D.new()
+		near_layer.name = "%s_lod0" % instance.name
+		near_layer.multimesh = near_mm
+		near_layer.material_override = instance.material_override
+		near_layer.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(near_layer)
+		_fine_near[id] = near_layer
+	if not is_equal_approx(float(_fine_band.get(id, 0.0)), band):
+		_fine_band[id] = band
+		instance.set_instance_shader_parameter(&"lod_band", Vector2(band, 1.0e9))
+		if near_layer != null:
+			near_layer.set_instance_shader_parameter(&"lod_band", Vector2(0.0, band))
+	if near_layer == null:
+		return
+	near_layer.visible = any
+	if any:
+		var near_mm := near_layer.multimesh
+		if near_mm.instance_count != instance.multimesh.instance_count:
+			near_mm.instance_count = instance.multimesh.instance_count
+		near_mm.buffer = padded
+		near_mm.visible_instance_count = n
+
+
+## FG5 temporary: regiments per level (near LOD0, near LOD1, far LOD2 only, impostor).
+func fg5_lod_counts() -> Array:
+	var out := [0, 0, 0, 0]
+	for id in layers:
+		var inst: MultiMeshInstance3D = layers[id]
+		if inst.visible:
+			out[int(_near_level.get(id, 1))] += 1
+		elif _imp_layers.has(id) and (_imp_layers[id] as MultiMeshInstance3D).visible:
+			out[3] += 1
+		elif (_lod_layers[id] as MultiMeshInstance3D).visible:
+			out[2] += 1
+	return out
 
 
 ## PB3c : uniformes déjà envoyés à `mat` (hors chemin PB3c : dictionnaire jetable, tout renvoyé).

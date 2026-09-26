@@ -74,6 +74,10 @@ uniform bool hide_pavise = false;
 uniform float size_jitter = 0.05;
 // Distance (m) au-delà de laquelle les images ne sont plus interpolées.
 uniform float interp_distance = 45.0;
+// Lot FG5 : bande de distance (m, caméra → soldat) où ce calque dessine ses soldats. Hors de la
+// bande, le soldat est replié en un point avant tout skinning : le LOD0 des figurines fines ne
+// dessine que les soldats proches (calque LOD0 [0, r[, calque LOD1 [r, ∞[, même tampon).
+instance uniform vec2 lod_band = vec2(0.0, 1.0e9);
 
 uniform vec3 livery : source_color = vec3(0.2, 0.3, 0.75);
 uniform vec3 trim : source_color = vec3(0.85, 0.7, 0.25);
@@ -128,6 +132,8 @@ uniform sampler2D fine_horse : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform int fine_layer = -1;
 // Au-delà (m), plus aucune lecture de carte (LOD2 et imposteurs lointains).
 uniform float fine_distance = 80.0;
+// FG5 knob (temporary)
+uniform float fine_tile_distance = 100000.0;
 // Tuiles : couche et taille (m) par matière.
 const int FG3_TILE_MAIL = 0;
 const int FG3_TILE_WEAVE = 1;
@@ -267,101 +273,107 @@ void pose_rows(int clip, float t, ivec4 idx, vec4 w, bool smooth_frames, out vec
 }
 
 void vertex() {
-	float id = float(INSTANCE_ID);
-	vec4 h = vec4(hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53), hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3));
-	vec4 custom = INSTANCE_CUSTOM;
-	v_rest = VERTEX;
-	v_rest_n = NORMAL;
+	float inst_dist = length((MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz);
+	if (inst_dist < lod_band.x || inst_dist >= lod_band.y) {
+		// FG5 : soldat hors de la bande de ce calque, replié en un point sans skinning.
+		VERTEX = vec3(0.0);
+	} else {
+		float id = float(INSTANCE_ID);
+		vec4 h = vec4(hash1(id * 1.37 + 0.11), hash1(id * 2.71 + 0.53), hash1(id * 0.73 + 1.9), hash1(id * 3.91 + 2.3));
+		vec4 custom = INSTANCE_CUSTOM;
+		v_rest = VERTEX;
+		v_rest_n = NORMAL;
 
-	// Variante du soldat : pièces absentes repliées en un point (triangles dégénérés).
-	int mask = int(UV2.x + 0.5);
-	int variant = min(int(h.w * float(variant_count)), variant_count - 1);
-	// Bits 0-5 : variantes ; bit 6 : arme tenue (EP12) ; bit 7 : pavois du dos (BV3).
-	int variant_bits = mask & 63;
-	bool shown = variant_bits == 0 || ((variant_bits >> variant) & 1) == 1;
-	if (hide_pavise && (mask & 128) != 0) {
-		shown = false;
-	}
-	bool held = (mask & HELD_MASK) != 0;
-	if (drop_arms && held) {
-		shown = false;
-	}
+		// Variante du soldat : pièces absentes repliées en un point (triangles dégénérés).
+		int mask = int(UV2.x + 0.5);
+		int variant = min(int(h.w * float(variant_count)), variant_count - 1);
+		// Bits 0-5 : variantes ; bit 6 : arme tenue (EP12) ; bit 7 : pavois du dos (BV3).
+		int variant_bits = mask & 63;
+		bool shown = variant_bits == 0 || ((variant_bits >> variant) & 1) == 1;
+		if (hide_pavise && (mask & 128) != 0) {
+			shown = false;
+		}
+		bool held = (mask & HELD_MASK) != 0;
+		if (drop_arms && held) {
+			shown = false;
+		}
 
-	ivec4 idx = ivec4(CUSTOM0 + 0.5);
-	vec4 w = CUSTOM1;
-	int clip;
-	float t;
-	choose(clip_mode, clip_set, clip_set_size, anim_speed, h, custom, id, clip, t);
-	vec4 a; vec4 b; vec4 c;
-	// Au loin, image la plus proche sans interpolation (moitié moins de lectures).
-	bool smooth_frames = length((MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz) < interp_distance;
-	pose_rows(clip, t, idx, w, smooth_frames, a, b, c);
-	float blend = clamp((anim_time - blend_since) / max(blend_time, 0.01), 0.0, 1.0);
-	if (blend < 1.0 && clip_mode != M_CUSTOM) {
-		int pclip;
-		float pt;
-		choose(prev_mode, prev_set, prev_set_size, prev_speed, h, custom, id, pclip, pt);
-		vec4 pa; vec4 pb; vec4 pc;
-		pose_rows(pclip, pt, idx, w, smooth_frames, pa, pb, pc);
-		float s = smoothstep(0.0, 1.0, blend);
-		a = mix(pa, a, s);
-		b = mix(pb, b, s);
-		c = mix(pc, c, s);
-	}
-	vec4 p = vec4(VERTEX, 1.0);
-	vec3 v = vec3(dot(a, p), dot(b, p), dot(c, p));
-	vec3 n = vec3(dot(a.xyz, NORMAL), dot(b.xyz, NORMAL), dot(c.xyz, NORMAL));
-	v *= mix(1.0 - size_jitter, 1.0 + size_jitter, h.y);
-	float own_blood = 0.0;
-	v_stump = 0.0;
-	if (clip_mode == M_CUSTOM) {
-		// Lot BV2 : projection balistique en arrière (-Z du modèle), partie tranchée masquée.
-		float part = floor(custom.w + 0.001);
-		own_blood = clamp((custom.w - part) / 0.99, 0.0, 1.0);
-		float imp = custom.z;
-		if (abs(imp) > 0.05) {
-			float vy = 0.35 * abs(imp) + 0.6;
-			float fly = 2.0 * vy / gravity;
-			float tt = clamp(t, 0.0, fly);
-			vec3 offset = vec3(0.0, vy * tt - 0.5 * gravity * tt * tt, -imp * tt);
-			if (tumble) {
-				float len = clips[clip].y / bone_fps;
-				offset *= 1.0 - smoothstep(len - 0.9, len, t);
+		ivec4 idx = ivec4(CUSTOM0 + 0.5);
+		vec4 w = CUSTOM1;
+		int clip;
+		float t;
+		choose(clip_mode, clip_set, clip_set_size, anim_speed, h, custom, id, clip, t);
+		vec4 a; vec4 b; vec4 c;
+		// Au loin, image la plus proche sans interpolation (moitié moins de lectures).
+		bool smooth_frames = inst_dist < interp_distance;
+		pose_rows(clip, t, idx, w, smooth_frames, a, b, c);
+		float blend = clamp((anim_time - blend_since) / max(blend_time, 0.01), 0.0, 1.0);
+		if (blend < 1.0 && clip_mode != M_CUSTOM) {
+			int pclip;
+			float pt;
+			choose(prev_mode, prev_set, prev_set_size, prev_speed, h, custom, id, pclip, pt);
+			vec4 pa; vec4 pb; vec4 pc;
+			pose_rows(pclip, pt, idx, w, smooth_frames, pa, pb, pc);
+			float s = smoothstep(0.0, 1.0, blend);
+			a = mix(pa, a, s);
+			b = mix(pb, b, s);
+			c = mix(pc, c, s);
+		}
+		vec4 p = vec4(VERTEX, 1.0);
+		vec3 v = vec3(dot(a, p), dot(b, p), dot(c, p));
+		vec3 n = vec3(dot(a.xyz, NORMAL), dot(b.xyz, NORMAL), dot(c.xyz, NORMAL));
+		v *= mix(1.0 - size_jitter, 1.0 + size_jitter, h.y);
+		float own_blood = 0.0;
+		v_stump = 0.0;
+		if (clip_mode == M_CUSTOM) {
+			// Lot BV2 : projection balistique en arrière (-Z du modèle), partie tranchée masquée.
+			float part = floor(custom.w + 0.001);
+			own_blood = clamp((custom.w - part) / 0.99, 0.0, 1.0);
+			float imp = custom.z;
+			if (abs(imp) > 0.05) {
+				float vy = 0.35 * abs(imp) + 0.6;
+				float fly = 2.0 * vy / gravity;
+				float tt = clamp(t, 0.0, fly);
+				vec3 offset = vec3(0.0, vy * tt - 0.5 * gravity * tt * tt, -imp * tt);
+				if (tumble) {
+					float len = clips[clip].y / bone_fps;
+					offset *= 1.0 - smoothstep(len - 0.9, len, t);
+				}
+				v += offset;
 			}
-			v += offset;
-		}
-		int code = int(part + 0.5);
-		if (code >= CODE_UNARMED) {
-			// EP12 : blessé ou fuyard tombé, désarmé.
-			code -= CODE_UNARMED;
-			shown = shown && !held;
-		}
-		if (code >= 1 && code <= 5) {
-			// Poids de la partie tranchée, interpolé : le fragment coupe à 0,5 (variante
-			// BV2_CORPSE du shader), le moignon rougit en deçà.
-			v_stump = part_weight(code, idx, w);
-		} else if (code == 6) {
-			// Cavalier désarçonné : le cheval détale puis disparaît.
-			float horse = part_weight(0, idx, w);
-			if (horse > 0.5) {
-				float run = max(t - 0.4, 0.0);
-				v.z += run * run * 1.5 + run * 4.0;
-				shown = shown && t < 4.5;
+			int code = int(part + 0.5);
+			if (code >= CODE_UNARMED) {
+				// EP12 : blessé ou fuyard tombé, désarmé.
+				code -= CODE_UNARMED;
+				shown = shown && !held;
+			}
+			if (code >= 1 && code <= 5) {
+				// Poids de la partie tranchée, interpolé : le fragment coupe à 0,5 (variante
+				// BV2_CORPSE du shader), le moignon rougit en deçà.
+				v_stump = part_weight(code, idx, w);
+			} else if (code == 6) {
+				// Cavalier désarçonné : le cheval détale puis disparaît.
+				float horse = part_weight(0, idx, w);
+				if (horse > 0.5) {
+					float run = max(t - 0.4, 0.0);
+					v.z += run * run * 1.5 + run * 4.0;
+					shown = shown && t < 4.5;
+				}
 			}
 		}
+		VERTEX = shown ? v : vec3(0.0);
+		NORMAL = normalize(n);
+		v_color = COLOR.rgb;
+		v_code = COLOR.a;
+		v_var = h;
+		v_blood = max(own_blood, blood);
+	#ifdef FG3_BAKED
+		// UV d'atlas : u, v sur 11 bits, source sur 2 (1 atlas LOD0, 3 atlas LOD1, 2 cheval).
+		int packed = int(UV2.y + 0.5);
+		v_src = fine_layer >= 0 ? (packed >> 22) & 3 : 0;
+		v_atlas = vec2(float(packed & 2047), float((packed >> 11) & 2047)) / 2047.0;
+	#endif
 	}
-	VERTEX = shown ? v : vec3(0.0);
-	NORMAL = normalize(n);
-	v_color = COLOR.rgb;
-	v_code = COLOR.a;
-	v_var = h;
-	v_blood = max(own_blood, blood);
-#ifdef FG3_BAKED
-	// UV d'atlas : u, v sur 11 bits, source sur 2 (1 atlas LOD0, 3 atlas LOD1, 2 cheval).
-	int packed = int(UV2.y + 0.5);
-	v_src = fine_layer >= 0 ? (packed >> 22) & 3 : 0;
-	v_atlas = vec2(float(packed & 2047), float((packed >> 11) & 2047)) / 2047.0;
-#endif
 }
 
 // Couleurs naturelles (linéaires) des vêtements non teints aux couleurs de la livrée.
@@ -628,7 +640,7 @@ void fragment() {
 				amt = code == C_HAIR ? 0.9 : 0.45;
 				relief = code == C_HAIR ? 0.0 : 0.3;
 			}
-			if (tl >= 0) {
+			if (tl >= 0 && dist < fine_tile_distance) {
 				float size = FG3_TILE_SIZE[tl];
 				vec4 d = textureGrad(fine_detail, vec3(vec2(q.x, -q.y) / size, float(tl)), vec2(fg_dq1.x, -fg_dq1.y) / size, vec2(fg_dq2.x, -fg_dq2.y) / size);
 				n = fg3_perturb(n, fg_dp1, fg_dp2, fg_dq1, fg_dq2, (d.rg * 2.0 - 1.0) * amt);
@@ -655,7 +667,9 @@ void fragment() {
 			NORMAL = n;
 		}
 	}
+#ifndef FG5_NOAO
 	AO = fg_ao;
+#endif
 #endif
 	// Taches de sang : invisibles au loin, pas calculées au-delà de 90 m (coût des vivants).
 	if (v_blood > 0.0 && code != C_PLATE && dist < 90.0) {

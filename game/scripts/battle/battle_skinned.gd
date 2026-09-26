@@ -6,9 +6,11 @@ extends RefCounted
 ## `battle_soldier_skinned.gdshader` et correspondance état du régiment → clips.
 ## Repli : sans manifeste, ou avec `--rigid-figures` / `--legacy-figures` après `--`, les
 ## figurines à membres rigides (lots B1/B4, `BattleMeshes`) restent utilisées.
-## Lot FG1 : avec `--fine-figures` après `--`, les figurines fines (corps MakeHuman, rigs aux
-## proportions réalistes) de `assets/models/battle_fine/` remplacent celles qu'elles couvrent
-## (rigs renommés `fine_human` / `fine_cavalry`, chemins absolus dans le manifeste fusionné).
+## Lot FG1 : les figurines fines (corps MakeHuman, rigs aux proportions réalistes) de
+## `assets/models/battle_fine/` remplacent celles qu'elles couvrent (rigs renommés `fine_human` /
+## `fine_cavalry`, chemins absolus dans le manifeste fusionné). Lot FG5 (ADR 0089) : rendu par
+## défaut ; `--coarse-figures` après `--` rend les figurines Quaternius (V2) le temps de la
+## transition, `--no-fg3` les figurines fines sans cartes cuites.
 
 const DIR := "res://assets/models/battle_skinned/"
 const FINE_DIR := "res://assets/models/battle_fine/"
@@ -49,6 +51,8 @@ static var _variants: Dictionary = {}
 
 ## Variante du shader skinné avec les `defines` en tête (après `shader_type`).
 static func _variant(defines: Array) -> Shader:
+	if defines.has("FG3_BAKED") and OS.get_cmdline_user_args().has("--fg5-noao"):  # FG5 knob (temporary)
+		defines = defines + ["FG5_NOAO"]
 	var key := ",".join(defines)
 	if _variants.has(key):
 		return _variants[key]
@@ -117,6 +121,12 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 	mat.set_shader_parameter("fine_detail", maps["detail"])
 	mat.set_shader_parameter("fine_horse", maps["horse"])
 	mat.set_shader_parameter("fine_layer", int(fig["atlas_layer"]))
+	# FG5 knobs (temporary)
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--fg5-fine-dist="):
+			mat.set_shader_parameter("fine_distance", float(arg.get_slice("=", 1)))
+		elif arg.begins_with("--fg5-tile-dist="):
+			mat.set_shader_parameter("fine_tile_distance", float(arg.get_slice("=", 1)))
 
 
 static func manifest() -> Dictionary:
@@ -130,9 +140,15 @@ static func manifest() -> Dictionary:
 	return _manifest
 
 
-## Lot FG1 : figurines fines demandées (`--fine-figures` après `--`).
+## Lot FG1 : figurines fines actives. FG5 : par défaut ; `--coarse-figures` après `--` les
+## coupe (figurines Quaternius du lot V2). `--fine-figures` reste accepté (sans effet).
 static func fine_enabled() -> bool:
-	return OS.get_cmdline_user_args().has("--fine-figures")
+	return not OS.get_cmdline_user_args().has("--coarse-figures")
+
+
+## FG5 : figurine fine (LOD0 dessiné par soldat, voir `BattleSoldiers.FINE_DETAIL_DISTANCE`).
+static func is_fine(kind: String, variant: int) -> bool:
+	return bool(figure(kind, variant).get("fine", false))
 
 
 ## Lot FG1 : ajoute au manifeste les rigs fins (renommés) et remplace les figurines fines.
@@ -140,7 +156,7 @@ static func _merge_fine(base: Dictionary) -> void:
 	var text := FileAccess.get_file_as_string(FINE_DIR + "manifest.json")
 	var parsed = JSON.parse_string(text) if text != "" else null
 	if not parsed is Dictionary:
-		push_warning("BattleSkinned: --fine-figures sans manifeste %s" % FINE_DIR)
+		push_warning("BattleSkinned: figurines fines sans manifeste %s" % FINE_DIR)
 		return
 	var rigs: Dictionary = base.get("rigs", {})
 	for rig_name in (parsed as Dictionary).get("rigs", {}):
@@ -196,6 +212,8 @@ static func mesh(kind: String, variant: int, level: int) -> ArrayMesh:
 	var lods: Array = fig.get("lods", [])
 	if lods.is_empty():
 		return null
+	if level == 1 and OS.get_cmdline_user_args().has("--fg5-lod1-as-lod2"):  # FG5 knob (temporary)
+		level = 2
 	var file: String = lods[clampi(level, 0, lods.size() - 1)]
 	if _meshes.has(file):
 		return _meshes[file]
