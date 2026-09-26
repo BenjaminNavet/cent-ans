@@ -255,7 +255,7 @@ func _make_row(row: Dictionary) -> Control:
 	swatch.add_child(initials)
 	# DA2 : portrait vivant encadré (âge, rang, marques) ; armes de la maison (DA1), de la
 	# faction, puis initiales en repli.
-	PortraitLoader.overlay_portrait(swatch, str(row.get("id", "")), str(row.get("faction", "")), Vector2(48, 48), row)
+	PortraitLoader.overlay_portrait(swatch, str(row.get("id", "")), str(row.get("faction", "")), Vector2(64, 64), row)
 	line.add_child(portrait)
 
 	var name_box := VBoxContainer.new()

@@ -80,6 +80,10 @@ func show_character(data: Dictionary, faction: String = "", context: Dictionary 
 	else:
 		_picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_picture.texture = texture
+	# Visages types : miroir décidé par l'identifiant, deux frères de la même case ne sont plus
+	# des clones (les archétypes ne portent ni armoiries ni texte).
+	_picture.flip_h = str(resolved.get("kind", "")) == "archetype" \
+			and (hash(str(data.get("id", ""))) >> 7) & 1 == 1
 	_picture.material = _marks_material() if has_portrait else null
 	_initials.text = initials(str(data.get("name", "?")))
 	_initials.visible = texture == null
