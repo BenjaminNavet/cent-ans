@@ -173,7 +173,12 @@ impl BattleSim {
     ) -> bool {
         let dir = PathBuf::from(data_dir.to_string());
         let id = id.to_string();
-        let built = (|| -> Result<(HistoricalMap, sim_battle::BattleSim), String> {
+        type Built = (
+            HistoricalMap,
+            sim_battle::BattleSim,
+            sim_battle::ReplayStart,
+        );
+        let built = (|| -> Result<Built, String> {
             let (map, _) = maps_in(&dir)
                 .into_iter()
                 .find(|(m, _)| m.id == id)
@@ -181,11 +186,16 @@ impl BattleSim {
             let (units, orders, standards) = battle_data(&dir)?;
             let side = SideId::parse(&player_side.to_string());
             let setup = map.battle_setup(&units, orders, standards, side)?;
-            let sim = map.start(setup, seed as u64)?;
-            Ok((map, sim))
+            // EP13: built through the replay start, recorded.
+            let start = sim_battle::ReplayStart::historical(setup, seed as u64, map.clone());
+            let sim = start.build()?;
+            Ok((map, sim, start))
         })();
+        self.player = None;
+        self.recorder = None;
         match built {
-            Ok((map, sim)) => {
+            Ok((map, sim, start)) => {
+                self.recorder = Some(sim_battle::ReplayRecorder::new(start, &sim));
                 self.sim = Some(sim);
                 self.historical = Some(map);
                 true

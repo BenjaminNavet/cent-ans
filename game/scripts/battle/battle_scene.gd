@@ -43,6 +43,8 @@ signal returned(result: Dictionary)
 const BENCH_FRAMES := 600
 const KINDS := ["infantry", "archer", "cavalry", "siege"]
 const SPEEDS := [1.0, 2.0, 4.0]
+## EP13 : vitesses du rejeu (barre de rejeu, + / −).
+const REPLAY_SPEEDS := [1.0, 2.0, 4.0, 8.0]
 const DOUBLE_CLICK_MS := 350
 const PICK_RADIUS_PX := 26.0
 const BANNER_HEIGHT := 7.0
@@ -181,6 +183,14 @@ var _weather_poll: float = 0.0
 var _weather_text: String = ""
 var _tod_key: String = ""
 var _tod_clock: String = ""  # EP8b : dernière heure affichée au bandeau (« Midi, 11 h 00 »)
+## EP13 : rejeu d'après bataille. `--replay=<fichier>` (menu « Rejeux ») ou « Revoir la bataille »
+## sur l'écran de fin : le cœur re-simule la bataille enregistrée, la scène la montre sans ordre.
+var replay_mode: bool = false
+var replay_bar: BattleReplayBar = null
+var replay_error: String = ""
+var replay_saved_path: String = ""  # fichier écrit à la fin de la bataille (vide : non enregistré)
+var _replay_path: String = ""
+var _leader_bar: CanvasLayer = null
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -209,6 +219,13 @@ func _ready() -> void:
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_drag_rect.visible = false
 	hud.add_child(_drag_rect)
+	if _replay_path != "":
+		# EP13 : rejeu d'un fichier (menu « Rejeux »), hors campagne.
+		standalone = true
+		if not begin_replay(_replay_path):
+			push_error("BattleScene: replay %s failed: %s" % [_replay_path, replay_error])
+			_replay_failed()
+		return
 	if campaign_sim == null and _historical != "":
 		# EP7 : carte historique jouée hors campagne (menu « Batailles historiques »).
 		standalone = true
@@ -334,6 +351,166 @@ func begin_historical() -> bool:
 	return _build_scene()
 
 
+## EP13 : rejeu du fichier `path` ; `replay_error` dit pourquoi en cas d'échec (autre format,
+## bataille impossible à reconstruire).
+func begin_replay(path: String) -> bool:
+	if not ClassDB.class_exists("BattleSim"):
+		replay_error = "extension absente"
+		return false
+	_audio_director = get_node_or_null("/root/AudioDirector")
+	if _audio_director != null:
+		_audio_director.call("stop_all")
+	battle = ClassDB.instantiate("BattleSim")
+	if not battle.has_method("load_replay"):
+		replay_error = "extension trop ancienne"
+		return false
+	var result: Dictionary = battle.call("load_replay", path)
+	if not bool(result.get("ok", false)):
+		replay_error = str(result.get("error", "?"))
+		battle = null
+		return false
+	setup = battle.call("get_setup")
+	padded = true  # hors campagne : rien à rapporter
+	replay_mode = true
+	if not _build_scene():
+		return false
+	var info: Dictionary = battle.call("get_replay")
+	if str(info.get("title", "")) != "":
+		_title_text = str(info["title"])
+		hud.set_title(_title_text, _weather_text, [side_colors[player_side], side_colors[enemy_side]])
+	_enter_replay()
+	return true
+
+
+## EP13 : le rejeu ne peut être lu : message, puis retour au menu principal.
+func _replay_failed() -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title = "Rejeu"
+	dialog.dialog_text = "Ce rejeu ne peut être revu : %s." % replay_error
+	dialog.confirmed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/start_menu.tscn"))
+	dialog.canceled.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/start_menu.tscn"))
+	hud.add_child(dialog)
+	dialog.popup_centered()
+
+
+## EP13 : passe la scène en rejeu (barre de rejeu, ordres, déploiement et vitesses de combat cachés).
+func _enter_replay() -> void:
+	replay_mode = true
+	paused = false
+	speed = 1.0
+	selected.clear()
+	if deployment != null:
+		deployment.queue_free()
+		deployment = null
+	if _leader_bar != null:
+		_leader_bar.queue_free()  # ordres du chef : rien à ordonner pendant un rejeu
+		_leader_bar = null
+	if hud.withdraw_all_button != null:
+		hud.withdraw_all_button.get_parent().visible = false  # ordres et retraite générale
+	if not hud._speed_buttons.is_empty():
+		hud._speed_buttons[0].get_parent().visible = false  # la barre de rejeu a ses vitesses
+	if hud.toast_label != null:
+		hud.toast_label.get_parent().visible = true
+	replay_bar = BattleReplayBar.new()
+	hud.root.add_child(replay_bar)
+	var info: Dictionary = battle.call("get_replay")
+	replay_bar.setup(_title_text, float(info.get("duration", 0.0)))
+	replay_bar.play_toggled.connect(replay_toggle_play)
+	replay_bar.speed_chosen.connect(replay_set_speed)
+	replay_bar.seek_requested.connect(replay_seek)
+	replay_bar.quit_pressed.connect(_on_return)
+	hud.add_events([{"time": float(battle.call("get_elapsed")), "text_fr": "Rejeu de la bataille : on regarde, on ne commande pas."}])
+	var divergence: Dictionary = info.get("divergence", {})
+	if not divergence.is_empty():
+		hud.add_events([{"time": 0.0, "text_fr": str(divergence.get("message", ""))}])
+	_update_replay()
+
+
+## EP13 : état de la barre de rejeu ; pause d'elle-même à la fin de l'enregistrement.
+func _update_replay() -> void:
+	if replay_bar == null or battle == null:
+		return
+	var info: Dictionary = battle.call("get_replay")
+	if bool(info.get("at_end", false)) and not paused:
+		paused = true
+	replay_bar.show_state(float(battle.call("get_elapsed")), paused, speed, info.get("divergence", {}))
+
+
+## EP13 : lecture / pause ; « Lecture » à la fin repart du début.
+func replay_toggle_play() -> void:
+	if paused and bool((battle.call("get_replay") as Dictionary).get("at_end", false)):
+		replay_seek(0.0)
+	paused = not paused
+	_update_replay()
+
+
+func replay_set_speed(value: float) -> void:
+	speed = value
+	paused = false
+	_update_replay()
+
+
+## EP13 : saut dans la barre de temps (le cœur repart de l'instantané le plus proche). Un saut en
+## arrière reconstruit les figurines et effets (sang, traits, corps) pour ne pas montrer l'avenir.
+func replay_seek(seconds: float) -> void:
+	if battle == null or not replay_mode:
+		return
+	var before := float(battle.call("get_elapsed"))
+	battle.call("replay_seek", seconds)
+	var after := float(battle.call("get_elapsed"))
+	if after < before - 0.05:
+		_reset_battle_visuals()
+	_refresh_view(true)
+	hud.add_events([{"time": after, "text_fr": "Rejeu : saut à %s." % BattleReplayBar.clock(after)}])
+	_update_replay()
+
+
+## EP13 : figurines, étendards, effets, sang et herbe couchée refaits à neuf (après un saut en
+## arrière ou au début d'un rejeu lancé depuis l'écran de fin).
+func _reset_battle_visuals() -> void:
+	units = battle.call("get_units")
+	for node in [soldiers, standards, duels, effects, engines_fx, assault_fx]:
+		if node != null and is_instance_valid(node):
+			(node as Node).get_parent().remove_child(node)
+			(node as Node).queue_free()
+	standards = null
+	duels = null
+	effects = null
+	blood = null
+	engines_fx = null
+	assault_fx = null
+	grass_flatten = null
+	_build_soldier_layers()
+
+
+## EP13 : « Revoir la bataille » depuis l'écran de fin (résultat déjà appliqué à la campagne).
+func start_replay_in_place() -> bool:
+	if battle == null or not battle.has_method("start_replay"):
+		return false
+	var result: Dictionary = battle.call("start_replay")
+	if not bool(result.get("ok", false)):
+		push_warning("BattleScene: start_replay: %s" % result.get("error", "?"))
+		return false
+	if result_screen != null:
+		result_screen.queue_free()
+		result_screen = null
+	_reset_battle_visuals()
+	_enter_replay()
+	_refresh_view(true)
+	return true
+
+
+## EP13 : enregistre la bataille (dossier utilisateur, N derniers gardés par le cœur). Pas pendant
+## un rejeu, ni en banc d'essai ou capture ; en mode sans affichage (tests) seulement si un dossier
+## de test est imposé (`ReplaysMenu.dir_override`).
+func _save_replay() -> void:
+	if replay_mode or _benchmark or _screenshot_path != "" or battle == null or not battle.has_method("save_replay"):
+		return
+	if DisplayServer.get_name() == "headless" and ReplaysMenu.dir_override == "":
+		return
+	replay_saved_path = str(battle.call("save_replay", ReplaysMenu.replays_dir(), _title_text))
+
+
 ## Scène de bataille (terrain, soldats, interface) une fois `battle` et `setup` prêts.
 func _build_scene() -> bool:
 	var setup_side: Variant = setup.get("player_side", "attacker")
@@ -434,7 +611,8 @@ func _build_scene() -> bool:
 	hud.minimap.flipped = player_side == "attacker"
 	hud.minimap.setup(terrain_data, side_colors)
 	hud.add_events(battle.call("get_events"))
-	add_child(LEADER_ORDERS_BAR.new(self))
+	_leader_bar = LEADER_ORDERS_BAR.new(self)
+	add_child(_leader_bar)
 	music = BATTLE_MUSIC.new()
 	music.name = "Music"
 	add_child(music)
@@ -446,8 +624,9 @@ func _build_scene() -> bool:
 	add_child(voices)
 	voices.setup(self)
 	_refresh_view(true)
-	_start_speech()
-	_advise_first_battle()
+	if not replay_mode:  # EP13 : pas de discours ni de conseil pendant un rejeu
+		_start_speech()
+		_advise_first_battle()
 	return true
 
 
@@ -903,7 +1082,9 @@ func _process(delta: float) -> void:
 		_update_time_label()
 	_update_audio(delta)
 	_poll_weather(delta)
-	if battle.call("is_finished") and not finished_shown:
+	if replay_mode:
+		_update_replay()  # EP13 : pas d'écran de fin pendant un rejeu
+	elif battle.call("is_finished") and not finished_shown:
 		_show_end()
 	if _benchmark:
 		_run_benchmark_frame(delta)
@@ -1301,6 +1482,11 @@ func _show_end() -> void:
 	hud.root.add_child(result_screen)
 	result_screen.return_pressed.connect(_on_return)
 	result_screen.show_result(hud.title_label.text, player_side, sides, battle.call("get_units"), outcome, aftermath)
+	# EP13 : la bataille est enregistrée ; « Revoir la bataille » la rejoue ici même.
+	_save_replay()
+	if battle.has_method("start_replay") and not _benchmark and result_screen.replay_button != null:
+		result_screen.replay_button.visible = true
+		result_screen.replay_pressed.connect(func() -> void: start_replay_in_place())
 
 
 var _resolution: Dictionary = {}
@@ -1351,9 +1537,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_SPACE:
 				_toggle_pause()
 			KEY_PLUS, KEY_EQUAL, KEY_KP_ADD:
-				_on_speed_pressed(mini(SPEEDS.find(speed) + 1, SPEEDS.size() - 1))
+				if replay_mode:
+					replay_set_speed(REPLAY_SPEEDS[mini(REPLAY_SPEEDS.find(speed) + 1, REPLAY_SPEEDS.size() - 1)])
+				else:
+					_on_speed_pressed(mini(SPEEDS.find(speed) + 1, SPEEDS.size() - 1))
 			KEY_MINUS, KEY_KP_SUBTRACT:
-				_on_speed_pressed(maxi(SPEEDS.find(speed) - 1, 0))
+				if replay_mode:
+					replay_set_speed(REPLAY_SPEEDS[maxi(REPLAY_SPEEDS.find(speed) - 1, 0)])
+				else:
+					_on_speed_pressed(maxi(SPEEDS.find(speed) - 1, 0))
 			KEY_F1:
 				hud.toggle_help()
 			KEY_U:
@@ -1470,7 +1662,7 @@ func _finish_left(position: Vector2, additive: bool) -> void:
 func _finish_right(position: Vector2) -> void:
 	var press := _right_press
 	_right_press = Vector2(-1, -1)
-	if selected.is_empty():
+	if selected.is_empty() or replay_mode:  # EP13 : aucun ordre pendant un rejeu
 		return
 	if deployment != null and deployment.active:
 		_deploy_selection(press, position)
@@ -1502,6 +1694,8 @@ func _finish_right(position: Vector2) -> void:
 
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
 func issue(command: Dictionary) -> Dictionary:
+	if replay_mode:
+		return {"ok": false, "error": "rejeu"}  # EP13 : on regarde, on ne commande pas
 	var result: Dictionary = battle.call("issue_command", command)
 	UiSounds.play_order_result(result)  # UB1 / U13 : ordre donné ou refusé
 	if voices != null:
@@ -1703,6 +1897,8 @@ func _parse_cmdline() -> void:
 			_bench_timeout_s = float(arg.trim_prefix("--bench-timeout="))
 		elif arg.begins_with("--bench-ab="):
 			_bench_ab = arg.trim_prefix("--bench-ab=").split(",", false)
+		elif arg.begins_with("--replay="):
+			_replay_path = arg.trim_prefix("--replay=")  # EP13
 		elif arg == "--benchmark":
 			_benchmark = true
 			autoplay = true
@@ -2111,6 +2307,8 @@ static func de(name: String) -> String:
 ## Phase de déploiement pour toute bataille du joueur (champ et siège) ; sautée quand l'IA
 ## joue les deux camps (`--autoplay`, `--screenshot`, smoke), sauf `--deploy-shot`.
 func _open_deployment() -> void:
+	if replay_mode:
+		return  # EP13 : le déploiement enregistré est rejoué par le cœur
 	if autoplay and not _deploy_shot:
 		return
 	if not historical.is_empty() and not bool(historical.get("site_only", false)):

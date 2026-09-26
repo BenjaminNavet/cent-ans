@@ -80,6 +80,7 @@ var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes,
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
 var next_hint: NextHintController = null  # UX2 : conseil « que faire maintenant »
+var ai_replay: AiTurnReplay = null  # CT1 : marches des armées IA rejouées en fin de tour
 ## Lot C6 : paliers de zoom, colonies, hameaux et routes.
 var zoom_tiers: ZoomTiers = null
 var settlement_data: SettlementData = null
@@ -216,6 +217,10 @@ func _ready() -> void:
 	next_hint.name = "NextHintController"
 	add_child(next_hint)
 	next_hint.setup(self)
+	ai_replay = AiTurnReplay.new()  # CT1
+	ai_replay.name = "AiTurnReplay"
+	add_child(ai_replay)
+	ai_replay.setup(self)
 	var audio_director := get_node_or_null("/root/AudioDirector")  # M10 assets
 	if audio_director != null:
 		audio_director.attach_campaign(self)
@@ -993,11 +998,13 @@ func _submit(order: Dictionary, success_text: String) -> Dictionary:
 
 
 func _on_end_turn() -> void:
-	if sim == null or ui.is_dialog_open():
+	if sim == null or ui.is_dialog_open() or (ai_replay != null and ai_replay.playing):
 		return
 	if flow != null and not flow.before_end_turn():  # F3 : confirmation (réglage)
 		return
 	_close_battle_dialog()  # M7 : les batailles laissées en attente sont auto-résolues
+	if ai_replay != null:  # CT1 : le cœur enregistre les marches de l'IA si elles seront rejouées
+		ai_replay.before_end_turn()
 	var events: Array = sim.call("end_turn")
 	if hud != null:  # U5 : voisins, alliés et ennemis du nouveau tour (filtre des lettres)
 		hud.update_interest()
@@ -1007,6 +1014,8 @@ func _on_end_turn() -> void:
 		audio.on_turn_events(events)
 	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
 	refresh_all()
+	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
+		await ai_replay.play()
 	if diplomacy != null:
 		diplomacy.after_end_turn()
 	if victory != null:
