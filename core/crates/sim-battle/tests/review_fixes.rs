@@ -213,3 +213,43 @@ fn ai_pull_out_stays_on_the_field() {
         assert!(sim.field().inside(x, z), "({x:.0}, {z:.0}) off the field");
     }
 }
+
+/// A regiment killed by missiles during the step is no longer the melee
+/// opponent of that step: the blow goes to a living enemy in contact.
+#[test]
+fn no_blow_wasted_on_a_regiment_shot_dead_this_step() {
+    let data = data();
+    let mut sim = lab_sim(
+        vec![
+            unit(&data, "unit_men_at_arms_foot"),
+            unit(&data, "unit_longbowmen"),
+        ],
+        vec![
+            unit(&data, "unit_urban_militia"),
+            unit(&data, "unit_urban_militia"),
+        ],
+    );
+    sim.field_mut().forests.clear();
+    sim.field_mut().forest_parts.clear();
+    let depth = |sim: &BattleSim, i: usize| sim.units()[i].extent().1;
+    let front = 400.0 + (depth(&sim, 0) + depth(&sim, 3)) * 0.5 + 0.5;
+    place(&mut sim, 0, 600.0, 400.0, 0.0);
+    place(&mut sim, 1, 600.0, 300.0, 0.0);
+    // A routing, nearly spent regiment right on top of the men-at-arms
+    // (their nearest contact), a fresh one in front of them.
+    place(&mut sim, 2, 600.0, 400.0, 0.0);
+    place(&mut sim, 3, 600.0, front, std::f64::consts::PI);
+    {
+        let units = sim.units_mut();
+        units[2].state = UnitState::Routing;
+        units[2].hp = 0.5;
+        units[1].reload = 0.0;
+    }
+    let before = sim.units()[3].hp;
+    sim.step();
+    assert!(!sim.units()[2].present(), "shot dead");
+    assert!(
+        sim.units()[3].hp < before,
+        "the fresh regiment takes the blow"
+    );
+}
