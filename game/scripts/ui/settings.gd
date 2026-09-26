@@ -23,6 +23,9 @@ const DEFAULTS := {
 	# V3 (A1-14) : préréglage de qualité du rendu (low, medium, high, ultra), voir `RenderQuality`.
 	# RL1 : "auto" (défaut) suit le GPU détecté ; un choix enregistré par le joueur est gardé.
 	"video/quality": "auto",
+	# PB3b (ADR 0080) : mise à l'échelle 3D : "auto" suit le préréglage de qualité, "off",
+	# "quality", "performance" (voir `RenderQuality.UPSCALE_PLAYER`).
+	"video/upscale": "auto",
 	# Lot U4 (audit A3) : échelle automatique (hauteur de la fenêtre / 900, bornée entre 0,9 et
 	# 1,6) multipliée par « Taille de l'interface » ; « Taille du texte » agit sur les polices seules.
 	"interface/ui_size": 1.0,
@@ -157,7 +160,7 @@ func set_value(key: String, value: Variant, persist: bool = true) -> void:
 	values[key] = _coerce(key, value)
 	if key == "video/resolution" or key == "video/fullscreen":
 		window_overridden_by_cmdline = false
-	if key == "video/quality":
+	if key == "video/quality" or key == "video/upscale":
 		if is_inside_tree():
 			RenderQuality.reapply(get_tree())
 	elif key.begins_with("video/") or key == "interface/ui_size" or key == "interface/text_size":
