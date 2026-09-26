@@ -44,6 +44,25 @@ const SCENE_KEYS := ["relief_vertex_px", "relief_items", "relief_extra_depth", "
 
 ## Coûts par niveau. `shadow_distance` : facteur sur la portée d'ombre demandée par la scène.
 ## `volumetric` : "off", "weather" (brouillard, pluie, neige seulement) ou "always".
+## PB3b (ADR 0080) : mise à l'échelle 3D du viewport racine (carte et bataille), clés globales
+## `upscale_mode` ("off", "metalfx_spatial", "metalfx_temporal") et `upscale_scale` (part de la
+## définition rendue, 0,5-1). Hors Metal (Vulkan, autres systèmes) : FSR 1 au lieu du MetalFX
+## spatial, FSR 2 au lieu du temporel. Le temporel fait aussi l'anticrénelage : MSAA et FXAA coupés.
+const UPSCALE_OFF := "off"
+const UPSCALE_SPATIAL := "metalfx_spatial"
+const UPSCALE_TEMPORAL := "metalfx_temporal"
+## Banc seulement : mise à l'échelle bilinéaire (référence sans MetalFX).
+const UPSCALE_BILINEAR := "bilinear"
+## Réglage joueur `video/upscale` : "auto" suit le préréglage de qualité.
+const UPSCALE_CHOICES: Array[String] = ["auto", "off", "quality", "performance"]
+const UPSCALE_LABELS: Array[String] = ["Automatique", "Désactivée", "MetalFX qualité", "MetalFX performance"]
+## Mode et échelle des choix explicites du joueur (mesures : ADR 0080).
+const UPSCALE_PLAYER := {
+	"off": [UPSCALE_OFF, 1.0],
+	"quality": [UPSCALE_SPATIAL, 0.75],
+	"performance": [UPSCALE_SPATIAL, 0.5],
+}
+
 const PRESETS := {
 	# Réglages d'avant le lot V3 (project.godot) : référence des mesures (`--bench-ab=`), hors menu.
 	"legacy": {
@@ -55,6 +74,7 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
 		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
+		"upscale_mode": "off", "upscale_scale": 1.0,
 	},
 	"low": {
 		"msaa": Viewport.MSAA_DISABLED, "shadow_atlas": 2048, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW,
@@ -65,6 +85,7 @@ const PRESETS := {
 		"fine_relief": false, "terrain_near": 0.6, "veg_density": 0.5, "veg_detail": 0.6,
 		"veg_shadow_distance": 0.0, "map_shadow_range": 0.6, "map_shadow_splits": 2,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.55, "grass": 0.55, "particles": 0.35,
+		"upscale_mode": "off", "upscale_scale": 1.0,
 	},
 	"medium": {
 		"msaa": Viewport.MSAA_2X, "shadow_atlas": 4096, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM,
@@ -75,6 +96,7 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 0.8, "veg_density": 0.75, "veg_detail": 0.8,
 		"veg_shadow_distance": 200.0, "map_shadow_range": 0.8, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "battle_lod": 0.75, "grass": 0.75, "particles": 0.6,
+		"upscale_mode": "off", "upscale_scale": 1.0,
 	},
 	"high": {
 		"msaa": Viewport.MSAA_2X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH,
@@ -89,6 +111,7 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 1.0, "veg_density": 1.0, "veg_detail": 1.0,
 		"veg_shadow_distance": 300.0, "map_shadow_range": 1.0, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "battle_lod": 1.0, "grass": 1.0, "particles": 1.0,
+		"upscale_mode": "off", "upscale_scale": 1.0,
 	},
 	"ultra": {
 		"msaa": Viewport.MSAA_4X, "shadow_atlas": 8192, "soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_ULTRA,
@@ -99,6 +122,7 @@ const PRESETS := {
 		"fine_relief": true, "terrain_near": 1.2, "veg_density": 1.0, "veg_detail": 1.3,
 		"veg_shadow_distance": 400.0, "map_shadow_range": 1.2, "map_shadow_splits": 4,
 		"map_soft_shadows": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "battle_lod": 1.3, "grass": 1.2, "particles": 1.0,
+		"upscale_mode": "off", "upscale_scale": 1.0,
 	},
 }
 
@@ -113,6 +137,9 @@ static var particle_ratio: float = 1.0
 ## filtre des ombres douces est global au serveur de rendu.
 static var active_context: String = "battle"
 static var _particle_hook: bool = false
+## PB3b : mise à l'échelle imposée par un banc (`metalfx_s:0.75`, `metalfx_t:0.67`,
+## `bilinear:0.75`, `off`), "" sinon.
+static var upscale_override: String = ""
 
 
 ## Niveau courant : `--quality=` puis réglage `video/quality`, sinon `DEFAULT_LEVEL`.
@@ -187,8 +214,88 @@ static func apply_global(viewport: Viewport = null) -> void:
 		var tree := Engine.get_main_loop() as SceneTree
 		viewport = tree.root if tree != null else null
 	if viewport != null:
-		viewport.msaa_3d = p["msaa"]
+		apply_upscale(viewport, p)
 		_install_particle_hook(viewport.get_tree())
+
+
+## PB3b : mode et échelle de la mise à l'échelle 3D : banc, puis réglage du joueur, sinon préréglage.
+static func upscale(p: Dictionary = {}) -> Dictionary:
+	if upscale_override != "":
+		return parse_upscale(upscale_override)
+	if p.is_empty():
+		p = preset()
+	var choice := "auto"
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null and tree.root != null:
+		var settings := tree.root.get_node_or_null("Settings")
+		if settings != null:
+			choice = str(settings.call("get_value", "video/upscale"))
+	if UPSCALE_PLAYER.has(choice):
+		var entry: Array = UPSCALE_PLAYER[choice]
+		return {"mode": entry[0], "scale": float(entry[1])}
+	return preset_upscale(p)
+
+
+## Mise à l'échelle prévue par un préréglage (choix « Automatique »).
+static func preset_upscale(p: Dictionary) -> Dictionary:
+	var mode := str(p.get("upscale_mode", UPSCALE_OFF))
+	return {"mode": mode, "scale": float(p.get("upscale_scale", 1.0)) if mode != UPSCALE_OFF else 1.0}
+
+
+## Libellé court d'une mise à l'échelle (menu Réglages).
+static func upscale_label(up: Dictionary) -> String:
+	var mode := str(up["mode"])
+	if mode == UPSCALE_OFF or float(up["scale"]) >= 1.0 and mode != UPSCALE_TEMPORAL:
+		return "désactivée"
+	var name := "MetalFX" if is_metal() else "FSR"
+	return "%s %s %d %%" % [name, "temporel" if mode == UPSCALE_TEMPORAL else "spatial", roundi(float(up["scale"]) * 100.0)]
+
+
+## `metalfx_s:<échelle>`, `metalfx_t:<échelle>`, `bilinear:<échelle>` ou `off` (bancs A/B).
+static func parse_upscale(config: String) -> Dictionary:
+	var parts := config.split(":")
+	var mode := UPSCALE_OFF
+	match parts[0]:
+		"metalfx_s":
+			mode = UPSCALE_SPATIAL
+		"metalfx_t":
+			mode = UPSCALE_TEMPORAL
+		"bilinear", "scale":
+			mode = UPSCALE_BILINEAR
+	var scale := float(parts[1]) if parts.size() > 1 else 1.0
+	return {"mode": mode, "scale": clampf(scale, 0.25, 1.0) if mode != UPSCALE_OFF else 1.0}
+
+
+## Mode de mise à l'échelle du moteur : MetalFX sous Metal, repli FSR 1 / FSR 2 ailleurs.
+static func scaling_mode_for(mode: String, metal: bool) -> Viewport.Scaling3DMode:
+	match mode:
+		UPSCALE_SPATIAL:
+			return Viewport.SCALING_3D_MODE_METALFX_SPATIAL if metal else Viewport.SCALING_3D_MODE_FSR
+		UPSCALE_TEMPORAL:
+			return Viewport.SCALING_3D_MODE_METALFX_TEMPORAL if metal else Viewport.SCALING_3D_MODE_FSR2
+	return Viewport.SCALING_3D_MODE_BILINEAR
+
+
+static func is_metal() -> bool:
+	return RenderingServer.get_current_rendering_driver_name() == "metal"
+
+
+## Vrai si le mode fait aussi l'anticrénelage (MetalFX temporel, FSR 2).
+static func is_temporal(scaling_mode: int) -> bool:
+	return scaling_mode == Viewport.SCALING_3D_MODE_METALFX_TEMPORAL or scaling_mode == Viewport.SCALING_3D_MODE_FSR2
+
+
+static func apply_upscale(viewport: Viewport, p: Dictionary) -> void:
+	var up := upscale(p)
+	var scaling_mode := scaling_mode_for(str(up["mode"]), is_metal())
+	viewport.scaling_3d_mode = scaling_mode
+	viewport.scaling_3d_scale = float(up["scale"])
+	# Le temporel accumule les images précédentes : il remplace MSAA et FXAA (sinon coût double
+	# et flou). Hors temporel, FXAA suit project.godot.
+	var temporal := is_temporal(scaling_mode)
+	viewport.msaa_3d = Viewport.MSAA_DISABLED if temporal else p["msaa"]
+	var fxaa := int(ProjectSettings.get_setting("rendering/anti_aliasing/quality/screen_space_aa", 0))
+	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if temporal else fxaa as Viewport.ScreenSpaceAA
 
 
 ## PF1 : particules réduites selon le niveau dès leur entrée dans l'arbre (`amount` d'origine
