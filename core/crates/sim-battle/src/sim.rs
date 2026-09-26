@@ -2103,18 +2103,26 @@ impl BattleSim {
         (b.x + dir.0 * reach, b.z + dir.1 * reach)
     }
 
+    /// The enemy `i` strikes among `contacts`: its target, else the nearest.
+    /// The contacts are those of the start of the step: regiments killed
+    /// since (missiles, fire) are skipped.
     fn primary_opponent(&self, i: usize, contacts: &[usize]) -> Option<usize> {
+        let alive = |j: usize| self.units[j].present();
         if let Some(t) = self.units[i].target {
-            if contacts.contains(&(t as usize)) {
+            if contacts.contains(&(t as usize)) && alive(t as usize) {
                 return Some(t as usize);
             }
         }
         let unit = &self.units[i];
-        contacts.iter().copied().min_by(|&a, &b| {
-            let da = (self.units[a].x - unit.x).powi(2) + (self.units[a].z - unit.z).powi(2);
-            let db = (self.units[b].x - unit.x).powi(2) + (self.units[b].z - unit.z).powi(2);
-            da.total_cmp(&db).then(a.cmp(&b))
-        })
+        contacts
+            .iter()
+            .copied()
+            .filter(|&j| alive(j))
+            .min_by(|&a, &b| {
+                let da = (self.units[a].x - unit.x).powi(2) + (self.units[a].z - unit.z).powi(2);
+                let db = (self.units[b].x - unit.x).powi(2) + (self.units[b].z - unit.z).powi(2);
+                da.total_cmp(&db).then(a.cmp(&b))
+            })
     }
 
     fn general_bonus(&self, side: SideId) -> Option<&crate::setup::GeneralSetup> {
