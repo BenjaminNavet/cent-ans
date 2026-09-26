@@ -35,6 +35,8 @@ uniform int debug_view = 0;
 // 0 : couleurs unies (ancien rendu) ; 1 : matériaux de l'atlas.
 uniform float material_detail : hint_range(0.0, 1.0) = 1.0;
 uniform float aging : hint_range(0.0, 2.0) = 1.0;
+// VH4 (ADR 0078) : opacité de la maquette (tramage ordonné) pendant le fondu vers la ville 1:1.
+uniform float fade : hint_range(0.0, 1.0) = 1.0;
 // Atlas partagé (réglage global du projet, `shader_globals` : aucun script à modifier).
 global uniform sampler2DArray landmark_albedo_array : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 global uniform sampler2DArray landmark_normal_array : filter_linear_mipmap_anisotropic, repeat_enable;
@@ -74,6 +76,15 @@ vec4 tri(sampler2DArray tex, vec3 p, vec3 w, float layer) {
 }
 
 void fragment() {
+	if (fade < 0.999) {
+		// Matrice de Bayer 4 × 4 : la maquette se dissout sans tri de transparence.
+		int bx = int(mod(FRAGCOORD.x, 4.0));
+		int by = int(mod(FRAGCOORD.y, 4.0));
+		int bayer[16] = int[](0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5);
+		if ((float(bayer[by * 4 + bx]) + 0.5) / 16.0 > fade) {
+			discard;
+		}
+	}
 	vec3 tint = mix(vec3(1.0), COLOR.rgb * 1.2, tint_strength);
 	vec3 base = albedo.rgb * tint;
 	float rough = roughness;
