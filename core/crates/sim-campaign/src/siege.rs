@@ -849,10 +849,8 @@ pub(crate) fn capture(
     let Some(settlement) = state.settlements.get_mut(settlement_id) else {
         return;
     };
-    let previous = std::mem::replace(&mut settlement.controller, new_controller.clone());
-    settlement.siege = None;
+    let previous = settlement.hand_over(new_controller);
     settlement.garrison.clear();
-    settlement.recruit_queue.clear();
     let unrest = if is_city {
         CAPTURE_UNREST
     } else {

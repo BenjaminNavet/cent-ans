@@ -171,3 +171,25 @@ fn allied_besieger_keeps_the_siege_progress() {
         assert_eq!(state.settlements[&guyenne].controller, fac("fac_scotland"));
     }
 }
+
+/// Fix 5: a captured settlement loses its building site (the occupant
+/// cannot cancel it for the refund).
+#[test]
+fn capture_drops_the_construction() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let guyenne = city(&state, "prov_guyenne");
+    let building = data.buildings.keys().next().unwrap().clone();
+    state.settlements.get_mut(&guyenne).unwrap().construction = Some(crate::state::Construction {
+        building,
+        turns_left: 3,
+        paid: 100,
+        drawn: Default::default(),
+    });
+    let mut events = Vec::new();
+    crate::siege::capture(&mut state, &data, &guyenne, &fac("fac_france"), &mut events);
+    let s = &state.settlements[&guyenne];
+    assert_eq!(s.controller, fac("fac_france"));
+    assert!(s.construction.is_none());
+    assert!(s.recruit_queue.is_empty());
+}
