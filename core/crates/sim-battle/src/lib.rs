@@ -65,6 +65,7 @@ pub mod props;
 pub mod relief;
 pub mod relief_ai;
 pub mod rng;
+pub mod rout;
 pub mod scale;
 pub mod setup;
 pub mod shot;

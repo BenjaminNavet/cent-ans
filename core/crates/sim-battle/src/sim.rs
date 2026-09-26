@@ -166,6 +166,8 @@ pub struct BattleSim {
     decision: crate::decision::DecisionRules,
     /// EP9b: the attacker's archery duel and the second echelon.
     duel: crate::duel::DuelRules,
+    /// EP10: direction of the rout and contagion of morale.
+    rout: crate::rout::RoutRules,
     clock: crate::decision::EngagementClock,
     end: Option<crate::decision::BattleEnd>,
     /// EP7: scenario of a historical battle (waves, posts, weather).
@@ -436,6 +438,7 @@ impl BattleSim {
             day_phase: None,
             decision: crate::decision::DecisionRules::bundled().clone(),
             duel: crate::duel::DuelRules::bundled().clone(),
+            rout: crate::rout::RoutRules::bundled().clone(),
             clock: Default::default(),
             end: None,
             scenario: None,
@@ -1712,21 +1715,12 @@ impl BattleSim {
                 continue;
             }
             let state = self.units[i].state;
-            // Routing: flee away from the nearest enemy and towards the own edge.
+            // Routing: flee towards the own edge. EP10: in a field battle,
+            // straight to the rear of the army, swerving round the enemies
+            // and the friends on the way; in a siege, also away from the
+            // nearest enemy (unchanged).
             if state == UnitState::Routing {
-                let edge = match self.units[i].side {
-                    SideId::Attacker => -1.0,
-                    SideId::Defender => 1.0,
-                };
-                let (mut fx, mut fz) = (0.0, edge);
-                if let Some((j, d)) = self.nearest_enemy(i, false) {
-                    if d > 1e-6 {
-                        let e = &self.units[j];
-                        let u = &self.units[i];
-                        fx += (u.x - e.x) / d;
-                        fz += (u.z - e.z) / d;
-                    }
-                }
+                let (fx, fz) = self.flight_direction(i);
                 let (x, z) = (self.units[i].x, self.units[i].z);
                 self.advance(i, x + fx * 50.0, z + fz * 50.0, true);
                 self.check_left_field(i);
@@ -1841,6 +1835,54 @@ impl BattleSim {
                 self.log(text, Some(side));
             }
         }
+    }
+
+    /// EP10: unit vector from the front to the rear of `side`'s army (the
+    /// attacker holds the low-z edge, the defender the high-z one, on the
+    /// generated fields as on the historical maps).
+    fn rear_of(side: SideId) -> (f64, f64) {
+        match side {
+            SideId::Attacker => (0.0, -1.0),
+            SideId::Defender => (0.0, 1.0),
+        }
+    }
+
+    /// Direction of flight of the routing regiment `i` (not normalised in
+    /// a siege, as before EP10).
+    fn flight_direction(&self, i: usize) -> (f64, f64) {
+        let unit = &self.units[i];
+        let rear = Self::rear_of(unit.side);
+        if self.siege.is_some() {
+            let (mut fx, mut fz) = rear;
+            if let Some((j, d)) = self.nearest_enemy(i, false) {
+                if d > 1e-6 {
+                    let e = &self.units[j];
+                    fx += (unit.x - e.x) / d;
+                    fz += (unit.z - e.z) / d;
+                }
+            }
+            return (fx, fz);
+        }
+        let reach = self
+            .rout
+            .flight
+            .lookahead_m
+            .max(self.rout.flight.friend_lookahead_m);
+        let near = |u: &Unit| (u.x - unit.x).abs() < reach && (u.z - unit.z).abs() < reach;
+        let enemies = self
+            .units
+            .iter()
+            .filter(|u| u.side != unit.side && u.able() && near(u))
+            .map(|u| (u.x, u.z));
+        let friends = self
+            .units
+            .iter()
+            .enumerate()
+            .filter(|&(j, u)| j != i && u.side == unit.side && u.able() && near(u))
+            .map(|(_, u)| (u.x, u.z));
+        self.rout
+            .flight
+            .direction((unit.x, unit.z), rear, enemies, friends)
     }
 
     fn check_left_field(&mut self, i: usize) {
@@ -2624,6 +2666,7 @@ impl BattleSim {
             })
             .collect();
         let mut new_events: Vec<(String, SideId)> = Vec::new();
+        let siege = self.siege.is_some();
         for i in 0..n {
             if !self.units[i].present() {
                 continue;
@@ -2652,22 +2695,36 @@ impl BattleSim {
             if unit.state == UnitState::Melee && unit.hp < f64::from(unit.max_soldiers) * 0.5 {
                 morale -= 0.3 * DT;
             }
-            let mut routing_friends = 0;
+            // EP10: routing friends weigh by where they are (fully beside or
+            // in front, little once behind and running away); in a siege
+            // every one within reach counts fully (unchanged).
+            let contagion = &self.rout.contagion;
+            let forward = {
+                let (rx, rz) = Self::rear_of(unit.side);
+                (-rx, -rz)
+            };
+            let mut routing_weight = 0.0;
             let mut nearest_enemy = f64::INFINITY;
             for (j, &(side, x, z, routing, able)) in snapshot.iter().enumerate() {
                 if j == i {
                     continue;
                 }
-                let d2 = (x - unit.x).powi(2) + (z - unit.z).powi(2);
+                let (dx, dz) = (x - unit.x, z - unit.z);
                 if side == unit.side {
-                    if routing && d2 < 120.0 * 120.0 {
-                        routing_friends += 1;
+                    if routing {
+                        routing_weight += if siege {
+                            f64::from(u8::from(
+                                dx * dx + dz * dz < contagion.radius_m * contagion.radius_m,
+                            ))
+                        } else {
+                            contagion.weight(dx, dz, forward)
+                        };
                     }
                 } else if able {
-                    nearest_enemy = nearest_enemy.min(d2.sqrt());
+                    nearest_enemy = nearest_enemy.min((dx * dx + dz * dz).sqrt());
                 }
             }
-            morale -= f64::from(routing_friends.min(3)) * 0.4 * DT;
+            morale -= contagion.morale_rate(routing_weight) * DT;
             let mut aura = 0.0;
             if let Some((gx, gz, command)) = general_pos[unit.side.index()] {
                 if (gx - unit.x).powi(2) + (gz - unit.z).powi(2) < GENERAL_AURA * GENERAL_AURA {
