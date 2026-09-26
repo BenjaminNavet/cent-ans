@@ -77,3 +77,17 @@ remplace au zoom rapproché, avec un fondu.
   `sources` de chaque ville et dans `docs/credits.md`.
 - Limite : le parcellaire est généré le long des rues (pas de cadastre réel) ; Paris pourra
   importer le parcellaire ALPAGE (ODbL) dans un champ `parcels` réservé par le schéma (VH5).
+
+## Addendum VH5 (Paris, 2026-09-26)
+
+- **ALPAGE plutôt qu'OSM pour Paris** : le SIG ALPAGE (ODbL 1.0, téléchargement libre) fournit
+  le réseau des rues de 1380 (P. Rouet) ; il remplace la recette OSM et sa liste d'exclusions
+  (percées haussmanniennes). Rues `origin: "alpage"`, régénérées par `cent-ans geo landmarks`.
+- **Parcellaire importé** : les parcelles Vasserot (1810-1836) ne servent que de gabarit des
+  lanières (filtres dans `docs/landmarks-v2.md`) ; format compact `parcels` =
+  `[dE, dN, angle, façade, profondeur]`, placées avant les lanières générées.
+- **Eau en polygone** : la Seine fine (axe à largeur, ≈ 130 m) recouvre le nord de la Cité ;
+  Paris décrit le lit de 1380 en polygones (`waters.polygon`, îles en `holes`) et met
+  `fine_rivers: []`. Le rendu de l'eau reste celui de la carte fine (hors lot).
+- **Plusieurs ponts** par ville (`plan.bridges`), tabliers recalculés avec le relief fin.
+- Crédit ALPAGE dans `CREDITS.md` et dans `sources` ; le fichier dérivé reste sous ODbL.
