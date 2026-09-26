@@ -137,6 +137,6 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
 |---|---|---|---|
 | EP11 | Poussée continue des lignes : front qui se bombe, enroulement, compression (ADR 0022 → module push) | ep11-poussee-lignes.md | en cours |
 | EP12 | Blessés qui rampent, fuyards qui jettent armes et boucliers (clips Blender, rendu) | ep12-blesses-armes.md | en cours |
-| EP13 | Rejeu d'après bataille (re-simulation déterministe, barre de temps) | ep13-rejeu.md | en cours |
+| EP13 | Rejeu d'après bataille (re-simulation déterministe, barre de temps) | ep13-rejeu.md | **fusionné** 311458ff (ADR 0072) |
 Partage : EP11 possède le pas de simulation ; EP13 reste au niveau commandes/API ; EP12 côté rendu.
 ai.rs / relief_ai.rs restent à la session de nuit.

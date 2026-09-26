@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_replay.schema.json",
+  "title": "Fichier de rejeu d'une bataille",
+  "description": "Fichier user://replays/rejeu-<heure unix>[-n].json écrit par BattleSim.save_replay (lot EP13, ADR 0072) : le départ de la bataille et les entrées horodatées par pas de simulation ; la bataille est re-simulée pour la revoir. Les empreintes d'état permettent de signaler une divergence (règles changées depuis l'enregistrement). Tout changement de structure incrémente header.format (sim_battle::replay::REPLAY_FORMAT).",
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "format": {"type": "integer", "const": 1, "description": "Version du format de fichier."},
+        "game_version": {"type": "string"},
+        "recorded_at": {"type": "integer", "minimum": 0, "description": "Heure unix de l'enregistrement (secondes)."},
+        "title": {"type": "string"},
+        "attacker": {"type": "string"},
+        "defender": {"type": "string"},
+        "player_side": {"enum": ["attacker", "defender"]},
+        "winner": {"enum": ["attacker", "defender"]},
+        "duration": {"type": "number", "minimum": 0, "description": "Secondes de bataille enregistrées."}
+      },
+      "required": ["format", "game_version", "attacker", "defender", "duration"],
+      "additionalProperties": false
+    },
+    "start": {
+      "type": "object",
+      "description": "Départ de la bataille : ReplayStart::build la reconstruit à l'identique.",
+      "properties": {
+        "setup": {"type": "object", "description": "BattleSetup (armées, site, ordres du chef, étendards)."},
+        "seed": {"type": "integer", "minimum": 0},
+        "scale": {
+          "type": "object",
+          "properties": {
+            "key": {"type": "string"},
+            "field": {"type": "object"},
+            "max_on_field": {"type": "integer", "minimum": 1}
+          },
+          "required": ["key", "field", "max_on_field"]
+        },
+        "site": {"type": "object", "description": "Carte historique (EP7) du champ, s'il y en a une."},
+        "scripted": {"type": "boolean", "description": "La bataille historique elle-même (ordres de bataille, météo, scénario) plutôt qu'une bataille de campagne sur le site."}
+      },
+      "required": ["setup", "seed", "scale"],
+      "additionalProperties": false
+    },
+    "initial_digest": {"$ref": "#/$defs/digest"},
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tick": {"type": "integer", "minimum": 0, "description": "Pas de simulation (0,1 s) après lequel l'entrée a été donnée."},
+          "action": {
+            "enum": ["start_hour", "set_ai", "begin_deployment", "deploy_unit", "start_battle", "command", "ignite", "piece_hp"]
+          },
+          "hour": {"type": "number"},
+          "side": {"enum": ["attacker", "defender"]},
+          "enabled": {"type": "boolean"},
+          "unit": {"type": "integer", "minimum": 0},
+          "x": {"type": "number"},
+          "z": {"type": "number"},
+          "facing": {"type": "number"},
+          "command": {"type": "object", "properties": {"type": {"type": "string"}}, "required": ["type"]},
+          "house": {"type": "integer", "minimum": 0},
+          "piece": {"type": "integer", "minimum": 0},
+          "hp": {"type": "number"}
+        },
+        "required": ["tick", "action"],
+        "additionalProperties": false
+      }
+    },
+    "checkpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tick": {"type": "integer", "minimum": 0},
+          "digest": {"$ref": "#/$defs/digest"}
+        },
+        "required": ["tick", "digest"],
+        "additionalProperties": false
+      }
+    },
+    "last_tick": {"type": "integer", "minimum": 0},
+    "end": {
+      "type": "object",
+      "properties": {
+        "tick": {"type": "integer", "minimum": 0},
+        "digest": {"$ref": "#/$defs/digest"},
+        "outcome": {"type": "object", "required": ["winner", "attacker", "defender"]}
+      },
+      "required": ["tick", "digest", "outcome"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["header", "start", "initial_digest", "actions", "checkpoints", "last_tick"],
+  "additionalProperties": false,
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$",
+      "description": "Empreinte FNV-1a 64 bits de l'état (sim_battle::replay::state_digest), en hexadécimal."
+    }
+  }
+}

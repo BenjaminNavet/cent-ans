@@ -31,6 +31,7 @@ var intro_button: Button
 var codex_button: Button
 var demos_button: Button
 var historical_button: Button  # EP7
+var replays_button: Button  # EP13
 var settings_button: Button
 var credits_button: Button
 var quit_button: Button
@@ -226,6 +227,7 @@ func _build_main_column() -> void:
 	codex_button = _menu_button(column, "Codex", open_codex)
 	historical_button = _menu_button(column, "Batailles historiques", open_historical)  # EP7
 	demos_button = _menu_button(column, "Batailles de démonstration", open_demos)  # SG2
+	replays_button = _menu_button(column, "Rejeux", open_replays)  # EP13
 	settings_button = _menu_button(column, "Réglages", open_settings)
 	credits_button = _menu_button(column, "Crédits", open_credits)
 	quit_button = _menu_button(column, "Quitter", func() -> void: get_tree().quit())
@@ -369,6 +371,11 @@ func open_historical() -> void:
 ## SG2 : batailles de démonstration (sièges d'Avignon, de Bruges, de Paris...).
 func open_demos() -> void:
 	_open_overlay(BattleDemosMenu.new())
+
+
+## EP13 : rejeux des dernières batailles livrées.
+func open_replays() -> void:
+	_open_overlay(ReplaysMenu.new())
 
 
 func open_codex() -> void:
