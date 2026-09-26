@@ -243,12 +243,15 @@ func _start_jobs(wanted: Array) -> void:
 		var coarse := vegetation.tile_coarse(tile)
 		if coarse.is_empty():
 			continue  # tuile de base pas encore semée : grilles grossières indisponibles
+		if not _flushing and not _corridor_tiles_ready(rect):
+			continue  # tuiles CAFV demandées en tâche de fond : cellule semée à leur arrivée
 		var params := coarse.duplicate()
 		params["tile_index"] = 1_000_000 + key  # graine propre à la cellule, indépendante de `keep`
 		params["spacing"] = vegetation.spacing * profile.full_scale
 		params["tree_scale"] = vegetation.tree_scale
 		params["vertical_scale"] = MapData.vertical_scale()
 		params["relief_gain"] = MapData.relief_gain()
+		params["relief_squash"] = MapData.relief_squash()  # SZ1 : écrasement des montagnes
 		params["exclusions"] = vegetation.exclusions_for(rect)
 		params["ground_grid"] = terrain.quadtree.surface_snapshot(rect, rect.position)
 		params["corridors"] = _corridors(rect)
@@ -297,6 +300,25 @@ func _corridors(rect: Rect2) -> PackedFloat32Array:
 						out.append_array([tile.x[k], tile.y[k], tile.x[k + 1], tile.y[k + 1], half])
 	stats["corridor_segments_max"] = maxi(int(stats.get("corridor_segments_max", 0)), out.size() / 5)
 	return out
+
+
+## Vrai si les tuiles CAFV (fleuves, routes) couvrant `rect` sont en cache ; sinon les demande au
+## magasin (lecture dans `WorkerThreadPool`, relevée par `FineGeoLayer`) : pas de lecture disque
+## sur le fil principal.
+func _corridor_tiles_ready(rect: Rect2) -> bool:
+	var store := _fine_store()
+	if store == null:
+		return true
+	var bounds := rect.grow(0.5)
+	var size := FineGeoStore.TILE_UNITS
+	var ready := true
+	for layer in [CafvTile.LAYER_RIVERS, CafvTile.LAYER_ROADS]:
+		for row in range(int(floor(bounds.position.y / size)), int(floor(bounds.end.y / size)) + 1):
+			for col in range(int(floor(bounds.position.x / size)), int(floor(bounds.end.x / size)) + 1):
+				if store.has_tile(layer, col, row) and not store.is_loaded(layer, col, row):
+					store.request(layer, col, row)
+					ready = false
+	return ready
 
 
 func _fine_layer() -> Object:
