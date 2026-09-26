@@ -17,7 +17,7 @@ const KINDS: Array[String] = ["city", "town", "castle", "abbey", "village"]
 const LABEL_PRIORITY := {"city": 0, "town": 1, "castle": 2, "abbey": 3, "village": 4}
 
 ## Colonies triées par priorité puis id : {id, province, kind, name, px: Vector2, controller,
-## owner, fortification_level, port}.
+## owner, fortification_level, port, weight}.
 var settlements: Array[Dictionary] = []
 var index_by_id: Dictionary = {}
 var hamlets: Array[Dictionary] = []  # {name, px: Vector2, province}
@@ -85,6 +85,7 @@ func _load_settlements(data_dir: String, map_dir: String) -> void:
 				"controller": owner_id,
 				"fortification_level": int(entry.get("fortification_level", 0)),
 				"port": bool(entry.get("port", false)),
+				"weight": int(entry.get("weight", 0)),
 			})
 	settlements.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var pa: int = LABEL_PRIORITY.get(a["kind"], 9)

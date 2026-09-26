@@ -892,6 +892,48 @@ def assets_portrait_archetypes(
     )
 
 
+@assets_app.command("map-markers")
+def assets_map_markers(
+    only: list[str] = typer.Option(  # noqa: B008
+        None, "--only", help="Pictogrammes à générer seuls (sonde), répétable"
+    ),
+    limit: int | None = typer.Option(None, "--limit", help="Nombre maximal d'images"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Affiche prompts et coût, sans appel payant"
+    ),
+    atlas_only: bool = typer.Option(
+        False, "--atlas-only", help="Reconstruit l'atlas sans rien générer (gratuit)"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="Modèle OpenRouter (défaut : celui des portraits)"
+    ),
+    envelope: float = typer.Option(
+        1.5, "--envelope", help="Enveloppe maximale de ce lot en dollars"
+    ),
+) -> None:
+    """DA3 : pictogrammes peints des lieux de la carte, puis atlas unique."""
+    from cent_ans_tools import map_markers, portraits
+
+    if not atlas_only:
+        model = model or portraits.DEFAULT_MODEL
+        jobs = map_markers.plan(only=only or None, limit=limit)
+        _run_art_batch(
+            jobs,
+            model,
+            envelope,
+            dry_run,
+            "pictogramme(s) de carte",
+            "DA3 : marqueurs de carte peints",
+            map_markers.to_raw_jpg,
+        )
+        if dry_run:
+            return
+    path, missing = map_markers.build_atlas()
+    console.print(f"[green]OK[/green] : atlas {path}")
+    if missing:
+        console.print(f"Cellules vides (sans peinture) : {', '.join(missing)}")
+
+
 def _run_art_batch(jobs, model, envelope, dry_run, noun, subject, convert) -> None:
     """Dry-run listing or paid batch for an image job list (event art, illustrations)."""
     from decimal import Decimal

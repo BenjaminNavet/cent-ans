@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/settlement_markers.schema.json",
+  "title": "Marqueurs de lieux de la carte de campagne",
+  "description": "Fichier data/map/settlement_markers.json (lot DA3, ADR 0066) : catalogue des pictogrammes peints (atlas unique), choix du pictogramme par type et rang, règles de rang, tailles écran et dé-encombrement par distance caméra.",
+  "type": "object",
+  "$defs": {
+    "kind": {"enum": ["city", "town", "village", "castle", "abbey"]},
+    "rank_key": {"type": "string", "pattern": "^[1-4]$"},
+    "unit_point": {
+      "type": "array",
+      "items": {"type": "number", "minimum": 0, "maximum": 1},
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "placement": {
+      "type": "object",
+      "description": "Position (fraction du quad, origine en bas à gauche) et demi-taille d'un élément composé dans le shader.",
+      "properties": {
+        "center": {"$ref": "#/$defs/unit_point"},
+        "half_size": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.5}
+      },
+      "required": ["center", "half_size"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "atlas": {
+      "type": "object",
+      "properties": {
+        "path": {"type": "string", "pattern": "^res://.+\\.png$"},
+        "cell_px": {"type": "integer", "minimum": 32, "maximum": 512},
+        "columns": {"type": "integer", "minimum": 1, "maximum": 16}
+      },
+      "required": ["path", "cell_px", "columns"],
+      "additionalProperties": false
+    },
+    "pictograms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "cell": {"type": "integer", "minimum": 0},
+          "label": {"type": "string", "description": "Nom affiché (légende)."},
+          "badge": {"type": "boolean", "description": "Vrai pour un insigne composé (port), pas un type."},
+          "subject": {"type": "string", "description": "Sujet du prompt de génération (anglais)."}
+        },
+        "required": ["id", "cell", "label", "subject"],
+        "additionalProperties": false
+      }
+    },
+    "kinds": {
+      "type": "object",
+      "description": "Pictogramme par type de colonie et par rang (1 à 4). Rang absent : celui du rang inférieur le plus proche.",
+      "propertyNames": {"$ref": "#/$defs/kind"},
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": {"$ref": "#/$defs/rank_key"},
+        "additionalProperties": {"type": "string"},
+        "minProperties": 1
+      }
+    },
+    "port_badge": {"type": "string", "description": "Pictogramme insigne des colonies portuaires."},
+    "rank_rules": {
+      "type": "array",
+      "description": "Règles de rang, la première qui s'applique l'emporte ; sinon `default_rank`.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ids": {"type": "array", "items": {"type": "string", "pattern": "^set_"}, "minItems": 1},
+          "kind": {"$ref": "#/$defs/kind"},
+          "min_fortification": {"type": "integer", "minimum": 0},
+          "min_weight": {"type": "integer", "minimum": 0},
+          "rank": {"type": "integer", "minimum": 1, "maximum": 4}
+        },
+        "required": ["rank"],
+        "additionalProperties": false
+      }
+    },
+    "default_rank": {"type": "integer", "minimum": 1, "maximum": 4},
+    "size_px": {
+      "type": "object",
+      "description": "Taille écran (px, à 900 px de haut) du marqueur par rang.",
+      "propertyNames": {"$ref": "#/$defs/rank_key"},
+      "additionalProperties": {"type": "number", "minimum": 8, "maximum": 96}
+    },
+    "kind_size_factor": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/kind"},
+      "additionalProperties": {"type": "number", "exclusiveMinimum": 0, "maximum": 2}
+    },
+    "visibility": {
+      "type": "array",
+      "description": "Paliers de dé-encombrement, par distance caméra croissante : un lieu est visible jusqu'à la plus grande `max_distance` des paliers où son rang atteint `min_rank` de son type (type absent : jamais).",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "tier": {"type": "string"},
+          "max_distance": {"type": "number", "exclusiveMinimum": 0},
+          "min_rank": {
+            "type": "object",
+            "propertyNames": {"$ref": "#/$defs/kind"},
+            "additionalProperties": {"type": "integer", "minimum": 1, "maximum": 4}
+          }
+        },
+        "required": ["tier", "max_distance", "min_rank"],
+        "additionalProperties": false
+      }
+    },
+    "fade_distance": {"type": "number", "minimum": 0, "description": "Largeur (distance caméra) du fondu de disparition."},
+    "shield": {"$ref": "#/$defs/placement"},
+    "badge": {"$ref": "#/$defs/placement"}
+  },
+  "required": ["atlas", "pictograms", "kinds", "rank_rules", "default_rank", "size_px", "visibility", "fade_distance", "shield"],
+  "additionalProperties": false
+}
