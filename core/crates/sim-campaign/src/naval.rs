@@ -301,8 +301,9 @@ pub(crate) fn intercept(
             GameEvent::new(
                 EventKind::Battle,
                 format!(
-                    "En mer, une escadre {} barre la route de l'armée {army}.",
-                    crate::events::de(&faction_name(data, &hostile))
+                    "En mer, une escadre {} barre la route de {}.",
+                    crate::events::de(&faction_name(data, &hostile)),
+                    state.army_name(data, army)
                 ),
             )
             .army(army)
@@ -740,10 +741,11 @@ pub(crate) fn apply_outcome(
         .get(&request.army)
         .is_none_or(|a| a.units.is_empty());
     let sea = data.naval.sea_name(&request.sea);
+    let army_name = state.army_name(data, &request.army);
     let text = format!(
-        "Bataille navale dans {sea} : l'escadre {} contre l'armée {} ({}). {} Navires pris : {} ; coulés : {} ({} contre {}). Pertes : {} hommes contre {}.",
+        "Bataille navale dans {sea} : l'escadre {} contre {} ({}). {} Navires pris : {} ; coulés : {} ({} contre {}). Pertes : {} hommes contre {}.",
         crate::events::de(&faction_name(data, &request.interceptor)),
-        request.army,
+        army_name,
         faction_name(data, &army_faction),
         match &winner {
             Some(w) if w == &request.interceptor => "La traversée est brisée.".to_owned(),
@@ -774,7 +776,7 @@ pub(crate) fn apply_outcome(
         events.push(
             GameEvent::new(
                 EventKind::ArmyDestroyed,
-                format!("L'armée {} a péri en mer.", request.army),
+                format!("{} a péri en mer.", crate::events::capitalize(&army_name)),
             )
             .faction(&army_faction),
         );
@@ -899,8 +901,8 @@ impl CampaignState {
     ) -> Result<Vec<GameEvent>, NavalRequestError> {
         let request = self.take_naval(index)?;
         let text = format!(
-            "La flotte de l'armée {} rentre au port de {} sans combattre.",
-            request.army,
+            "La flotte de {} rentre au port de {} sans combattre.",
+            self.army_name(data, &request.army),
             crate::siege::settlement_name(data, &request.from)
         );
         let mut event = GameEvent::new(EventKind::Battle, text).army(&request.army);
