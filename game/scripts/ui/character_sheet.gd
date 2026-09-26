@@ -174,12 +174,12 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 
 	var faction: String = str(character.get("faction", ""))
 	swatch.color = SimFacade.faction_color(faction)
-	# M10 assets : portrait peint (ou blason de faction) à la place du carré de couleur.
 	var house := str(character.get("house", ""))
-	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE, house):
+	# DA2 : portrait vivant (ou armes) à la place du carré de couleur ; l'écu est posé ci-dessous.
+	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE, character, false):
 		swatch.color = Color(0, 0, 0, 0)
 	# C3, DA1 : écu de la maison (à défaut de la faction) en bas à droite du portrait peint.
-	_heraldry.texture = PortraitLoader.house_heraldry_texture(house, faction) if PortraitLoader.has_portrait(character_id) else null
+	_heraldry.texture = PortraitLoader.house_heraldry_texture(house, faction)
 	var arms_tip := HouseArms.tooltip(house)
 	_heraldry.tooltip_text = arms_tip if arms_tip != "" else ("Écu : %s" % SimFacade.faction_short_name(faction) if faction != "" else "")
 	swatch.move_child(_heraldry, -1)
