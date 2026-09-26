@@ -82,3 +82,8 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   peints + atlas, écu du contrôleur, tri par rang selon le zoom dans les données, 0,59 $.
   Cumul DA : 5,43 $. Suites : chevauchements en régions denses, légende petite, écus de maison
   dans l'atlas.
+- 26/09 : **DA1b fusionné** (ADR 0064 révisé) : 12 meubles SVG libres (PD/CC0/CC BY 4.0) rendus
+  par rôle de couleur (`resvg-py`), 80 écus et 240 étoffes régénérés, bannière de maison du
+  général et de sa retenue sur les étendards EP5 (oriflamme en second porte-étendard). Smoke +
+  pytest 666 OK. Limites : cadrage EP5 `--standard-shot=foot` côté France, petits châteaux
+  polygonaux, dauphin pâmé.

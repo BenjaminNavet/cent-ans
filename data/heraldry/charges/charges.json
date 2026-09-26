@@ -1,0 +1,96 @@
+{
+  "description": "Meubles héraldiques vectoriels (lot DA1b) : dessins du domaine public, CC0 ou CC BY de Wikimedia Commons, recolorés par teinture. `colors` associe chaque couleur du fichier à un rôle : `body` (teinte du meuble), `shade` (ombre du corps), `armed` (griffes, langue, bec, pattes, nageoires : « armé, lampassé, becqué, peautré »), `crown` (couronne), `openings` (portes et fenêtres : « ouvert, ajouré »), `issant` (enfant de la guivre), `argent` (reste argent), `outline` (trait). `drop` : éléments supprimés (couronne de l'aigle). `crown_anchor` : centre et largeur de la couronne rapportée [x, y, largeur] en fraction du dessin recadré. Crédits : SOURCE.md.",
+  "roles": ["body", "shade", "armed", "crown", "openings", "issant", "argent", "outline"],
+  "charges": {
+    "lion": {
+      "file": "lion.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_Lion.svg",
+      "author": "Smasongarrison",
+      "license": "Domaine public",
+      "colors": {"#ffffff": "body", "#2b5df2": "armed", "#000000": "outline"},
+      "crown_anchor": [0.5, 0.03, 0.28]
+    },
+    "lion_couronne": {
+      "file": "lion_couronne.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_Lion_couronn%C3%A9.svg",
+      "author": "Jpgibert",
+      "license": "CC BY 4.0",
+      "colors": {"#ffffff": "body", "#2b5df2": "armed", "#fcef3c": "crown", "#000000": "outline"}
+    },
+    "lion_queue_fourchee": {
+      "file": "lion_queue_fourchee.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_Lion_(queue_fourch%C3%A9e).svg",
+      "author": "Smasongarrison",
+      "license": "Domaine public",
+      "colors": {"#ffffff": "body", "#2b5df2": "armed", "#000000": "outline"},
+      "crown_anchor": [0.44, 0.03, 0.24]
+    },
+    "lion_queue_fourchee_sautoir": {
+      "file": "lion_queue_fourchee_sautoir.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_Lion_(queue_fourch%C3%A9e_sautoir).svg",
+      "author": "Smasongarrison",
+      "license": "Domaine public",
+      "colors": {"#ffffff": "body", "#2b5df2": "armed", "#000000": "outline"},
+      "crown_anchor": [0.44, 0.03, 0.24]
+    },
+    "lion_aile": {
+      "file": "lion_aile.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_Lion_rampant_ail%C3%A9.svg",
+      "author": "Jpgibert",
+      "license": "CC BY 4.0",
+      "colors": {"#ffffff": "body", "#2b5df2": "armed", "#000000": "outline"}
+    },
+    "leopard": {
+      "file": "leopard.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_L%C3%A9opard.svg",
+      "author": "Yann",
+      "license": "Domaine public",
+      "colors": {"#ffffff": "body", "#2b5df2": "armed", "#fcef3c": "armed", "#666666": "outline", "#000000": "outline"}
+    },
+    "leopard_lionne": {
+      "file": "leopard_lionne.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_L%C3%A9opard_lionn%C3%A9.svg",
+      "author": "Syryatsu",
+      "license": "Domaine public",
+      "colors": {"#ffffff": "body", "#2b5df2": "armed", "#666666": "outline", "#000000": "outline"}
+    },
+    "aigle": {
+      "file": "aigle.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_Aigle_%C3%A9ploy%C3%A9e.svg",
+      "author": "Thom.lanaud",
+      "license": "Domaine public",
+      "colors": {"#2b5df2": "body", "#fcef3c": "armed", "#e20909": "armed", "#000000": "outline"},
+      "drop": ["#fff03c"]
+    },
+    "dauphin": {
+      "file": "dauphin.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_Dauphin_p%C3%A2m%C3%A9.svg",
+      "author": "Syryatsu",
+      "license": "CC0",
+      "colors": {"#2b5df2": "body", "#e20909": "armed", "#ffffff": "argent", "#666666": "outline", "#000000": "outline"}
+    },
+    "chateau": {
+      "file": "chateau.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_ch%C3%A2teau_donjonn%C3%A9_de_trois_tours.svg",
+      "author": "Jpgibert",
+      "license": "CC BY 4.0",
+      "colors": {"#ffffff": "body", "#2b5df2": "openings", "#e20909": "openings", "#000000": "outline"}
+    },
+    "guivre": {
+      "file": "guivre.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_the_House_of_Visconti_(1395).svg",
+      "author": "RootOfAllLight",
+      "license": "Domaine public",
+      "note": "Guivre extraite des armes Visconti (écu et fond retirés).",
+      "colors": {"#0094c9": "body", "#0b698b": "shade", "#74361a": "issant", "#87761a": "issant", "#be5525": "issant", "#fed700": "crown", "#ffffff": "argent", "#000000": "outline"}
+    },
+    "couronne": {
+      "file": "couronne.svg",
+      "source": "https://commons.wikimedia.org/wiki/File:Meuble_h%C3%A9raldique_Lion_couronn%C3%A9.svg",
+      "author": "Jpgibert",
+      "license": "CC BY 4.0",
+      "note": "Couronne extraite du lion couronné, rapportée sur les lions sans couronne.",
+      "colors": {"#fcef3c": "crown", "#000000": "outline"}
+    }
+  }
+}
