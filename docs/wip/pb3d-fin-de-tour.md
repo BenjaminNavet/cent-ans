@@ -54,6 +54,18 @@ Reste de `refresh_all` (instrumentation temporaire) : marqueurs d'armée 8-50 ms
 recréées pour les armées qui ont changé), vie des campagnes 4-45 ms (maquettes de croissance),
 panneau diplomatique ouvert 18 ms, barre du haut 4 ms, routes commerciales 4 ms.
 
+## Conflits attendus avec `fix/code-review` (pas encore dans `main` au 26/09 matin)
+Essai de fusion : deux fichiers en conflit, résolution simple.
+- `campaign_map.gd` `_on_end_turn` : garder ma version (`threaded`, `_resolve_end_turn`,
+  `end_turns_refreshed`) et y ajouter le garde de la revue après `await ai_replay.play()`
+  (`sim_before` → `return` si une autre partie a été chargée) ; `_on_save` : garder
+  `_refuse_during_end_turn()` + `last_save_ok`/`SaveSlots.save` de la revue ; `_on_load` : garder
+  le refus pendant le rejeu de la revue.
+- `settlement_layer.gd` `refresh` : garder ma lecture `ProvinceSnapshot` et la mise à jour des
+  seules tuiles de hameaux changées de la revue.
+- Pont : la revue n'ajoute aucune méthode mutante ; toute future méthode `&mut self` de
+  `CampaignSim` doit commencer par `refuse_while_turn_pending` (ADR 0081).
+
 ## Prochaine étape
 Fusion de `main` (conflits attendus avec la revue de code : pont, campaign_map.gd) ; cargo
 test/clippy/fmt ; smoke et tests de campagne ; rapport.
