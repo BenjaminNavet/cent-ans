@@ -70,3 +70,11 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   (`docs/img/da1/apres_bataille_reelle.jpg`), smoke + pytest 601 OK. Suites : **DA1b** meubles
   animaux (lions, léopards, aigles) trop schématiques dans `heraldry.py` ; armes du général sur
   les étendards EP5.
+- 26/09 : main = `f98386ce` (DA0 + DA1 + DA4). Worktrees DA1/DA4 supprimés. Lancés : **DA6**
+  (végétation de bataille, EP6 fusionné) et **DA1b** (meubles héraldiques SVG libres + armes du
+  général sur les étendards EP5). En cours : DA3, DA5. DA2 : génération des 141 portraits en
+  attente du joueur.
+- 26/09 : **DA5 fusionné** (ADR 0065) : 78 icônes à l'encre (110 identifiants), 15 médaillons
+  (cloche validée), 4,46 $ réels. Smoke + pytest 611 OK. Suites : icônes d'entité (unités,
+  bâtiments, techniques…) encore en game-icons → miniatures peintes (bible § 8) ; marqueurs
+  d'unité en bataille mélangés ; médaillons journal/research non branchés.

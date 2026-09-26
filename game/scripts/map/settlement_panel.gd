@@ -170,13 +170,15 @@ func _build_garrison_tab() -> void:
 	recruit_button.name = "RecruitButton"
 	recruit_button.text = "Recruter"
 	recruit_button.pressed.connect(func() -> void: recruit_panel.visible = not recruit_panel.visible)
-	IconLibrary.decorate_button(recruit_button, "cat_unit", int(PanelWidgets.ROW_ICON))
+	IconLibrary.decorate_button(recruit_button, "act_recruit", int(PanelWidgets.ROW_ICON))
+	IconLibrary.decorate_medallion(recruit_button, "recruit", PanelWidgets.MEDALLION_SIZE)  # DA5
 	actions.add_child(recruit_button)
 	create_army_button = Button.new()
 	create_army_button.name = "CreateArmyButton"
 	create_army_button.text = "Former une armée"
 	create_army_button.pressed.connect(_on_create_army)
-	IconLibrary.decorate_button(create_army_button, "hud_army", int(PanelWidgets.ROW_ICON))
+	IconLibrary.decorate_button(create_army_button, "act_form_army", int(PanelWidgets.ROW_ICON))
+	IconLibrary.decorate_medallion(create_army_button, "form_army", PanelWidgets.MEDALLION_SIZE)  # DA5
 	actions.add_child(create_army_button)
 	queue_label = Label.new()
 	queue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -209,7 +211,7 @@ func _build_buildings_tab() -> void:
 	cancel_build_button.name = "CancelBuildButton"
 	cancel_build_button.text = "Annuler"
 	cancel_build_button.pressed.connect(func() -> void: cancel_build_requested.emit(settlement_id))
-	IconLibrary.decorate_button(cancel_build_button, "cat_building", int(PanelWidgets.ROW_ICON))
+	IconLibrary.decorate_button(cancel_build_button, "act_cancel_build", int(PanelWidgets.ROW_ICON))
 	row.add_child(cancel_build_button)
 	_header(inner, "Construire")
 	buildable_list = VBoxContainer.new()
