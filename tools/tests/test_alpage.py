@@ -69,8 +69,16 @@ def test_paris_1340_facts() -> None:
     )
     assert 4500.0 < pa < 6000.0, pa  # ≈ 5 100 m on both banks
     gates = [g["name"] for w in city["walls"] for g in w["gates"]]
-    for name in ("Porte Saint-Denis", "Porte Saint-Jacques", "Porte de Buci"):
+    # Gate names of 1340 (ALPAGE gives those of 1380: Buci from 1352, Saint-Michel from 1394).
+    for name in (
+        "Porte Saint-Denis",
+        "Porte Saint-Jacques",
+        "Porte Saint-Germain (porte de Buci en 1352)",
+        "Porte des Cordeliers",
+        "Porte d'Enfer ou Gibard (porte Saint-Michel en 1394)",
+    ):
         assert name in gates
+    assert not any("Braque" in g for g in gates)
     bridges = {b["id"]: b for b in city["bridges"]}
     assert bridges["grand_pont"]["houses"] and bridges["petit_pont"]["houses"]
     assert bridges["pont_saint_michel"]["from_year"] == 1378
@@ -82,6 +90,9 @@ def test_paris_1340_facts() -> None:
     assert mon["bastille"]["from_year"] == 1370
     assert mon["louvre"]["until_year"] < mon["louvre_charles_v"]["from_year"] == 1364
     assert mon["sainte_chapelle"]["certainty"] == "attested"
+    # Historian review: the Filles-Dieu reach this site in 1360; Sainte-Agnès is Saint-Eustache.
+    assert mon["filles_dieu"]["from_year"] == 1360
+    assert mon["sainte_agnes"]["name"].startswith("Saint-Eustache")
     spaces = {s["id"] for s in city["open_spaces"]}
     assert {
         "ile_notre_dame",

@@ -197,3 +197,30 @@ tools/export_macos.sh
 open "export/Cent Ans.app"
 "export/Cent Ans.app/Contents/MacOS/Cent Ans" -- --autostart --screenshot=/tmp/exported.png
 ```
+
+## Export Windows (`tools/export_windows.sh`, ADR 0087)
+
+Produit depuis le Mac le dossier `export/windows/` (Windows x86_64) et son archive
+`export/Cent Ans Windows.zip`. Étapes : build release de la GDExtension en compilation croisée
+(`core/build-windows.sh --release`, `cargo xwin`, cible `x86_64-pc-windows-msvc`), puis export
+Godot avec le préréglage « Windows Desktop ». Le dossier obtenu contient `Cent Ans.exe`,
+`Cent Ans.console.exe` (garde une console ouverte avec le journal), `Cent Ans.pck` et
+`cent_ans.release.dll`. Le script y copie ensuite `data/` avec `cent-ans export-data --dir` et
+`CREDITS.md`. `CENT_ANS_EXPORT_RELIEF` fonctionne comme pour macOS : avec `external`, le dossier
+`Cent Ans relief/` est placé à côté de l'exe. `CENT_ANS_NO_ZIP=1` saute l'archive.
+
+Prérequis ponctuels sur le Mac :
+
+```sh
+rustup target add x86_64-pc-windows-msvc
+brew install llvm lld
+cargo install --locked cargo-xwin
+```
+
+Il faut aussi les modèles d'export Windows de Godot 4.7.2 (`windows_*_x86_64.exe`) dans
+`~/Library/Application Support/Godot/export_templates/4.7.2.stable/`.
+
+Aucun lancement n'est possible depuis le Mac. La vérification sous Windows passe par le workflow
+GitHub Actions `windows` (`.github/workflows/windows.yml`), déclenché à la main
+(`gh workflow run windows.yml`) ou par un push sur une branche `windows/**`. Il compile la DLL
+en natif et lance `smoke.gd` en headless.
