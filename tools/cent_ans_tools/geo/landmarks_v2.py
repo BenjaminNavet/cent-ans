@@ -401,8 +401,13 @@ def build(
             if "parcels" in city["alpage"]:
                 city["parcels"] = alpage.alpage_parcels(city, city["streets"])
                 log(f"{city['id']} : {len(city['parcels'])} parcelles ALPAGE")
-        waters = fine_waters(city, map_dir)
-        if waters:
+        # ``fine_rivers: []`` (Paris): the fine river is not used, its section is dropped.
+        waters = fine_waters(city, map_dir) if city.get("fine_rivers", ["Seine"]) else []
+        if not city.get("fine_rivers", ["Seine"]):
+            city["waters"] = [
+                w for w in city.get("waters", []) if w["origin"] != "rivers_fine"
+            ]
+        elif waters:
             city["waters"] = [
                 w for w in city.get("waters", []) if w["origin"] != "rivers_fine"
             ] + waters

@@ -349,16 +349,46 @@
             "items": {
               "$ref": "#/$defs/point_width"
             }
+          },
+          "polygon": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/point"
+            },
+            "description": "Lit en polygone [dE, dN] (Paris : Seine de 1380, ALPAGE) au lieu d'un axe à largeur ; interdit en entier aux maisons."
+          },
+          "holes": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "$ref": "#/$defs/point"
+              }
+            },
+            "description": "Îles du lit en polygone."
           }
         },
         "required": [
           "id",
           "name",
           "kind",
-          "origin",
-          "points"
+          "origin"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "points"
+            ]
+          },
+          {
+            "required": [
+              "polygon"
+            ]
+          }
+        ]
       }
     },
     "walls": {
