@@ -106,8 +106,6 @@ func _test_map() -> void:
 			# Toutes les paires, y compris un marqueur et son propre nom.
 			var overlaps := MarkerDeclutter.count_overlaps(occupancy["rects"])
 			total += overlaps
-			if OS.get_cmdline_user_args().has("--debug"):
-				print("  cam %s dist %.1f fov %.1f vp %s" % [camera.global_position, map.camera_rig.distance, camera.fov, camera.get_viewport().get_visible_rect().size])
 			print("da7d: %-13s %8.0f %8d %7d %9d" % [region, distance, occupancy["markers"], occupancy["labels"], overlaps])
 			if not _measure:
 				_check(overlaps == 0, "%s at %.0f: %d overlapping pairs" % [region, distance, overlaps])
