@@ -23,8 +23,14 @@ des rives basses ; ≥ 60 i/s ou pas de régression vs Rouen.
       10 espaces libres
 - [x] Moteur : petits ajouts rétrocompatibles (ci-dessous)
 - [x] Test `vh4_landmarks_test` étendu à Londres (OK) ; pytest landmarks v2 (17 OK)
-- [ ] Captures `docs/img/vh6/`, mesure i/s, itérations
-- [ ] Tests complets (zg4_camera, zg6_towns, smoke, pytest complet), doc `docs/landmarks-v2.md`
+- [x] Allées nommées de la Cité (`osm_streets.alleys`, +176 venelles) : 1 326 rues OSM, ≈ 7 100 maisons
+- [x] Captures `docs/img/vh6/` (stratégique, transition, vallée, site, Tour, pont, pont bas,
+      St Paul's, Westminster, toits) ; script `game/tests/vh6_shots.gd`
+- [x] Mesure (machine chargée par d'autres agents) : 1er passage Londres 59,9 i/s à d = 1,6 et
+      0,6 (pont idem), Rouen 59,9 / 52,1 dans la même session ; 2e passage (plus chargé) Londres
+      36,7-59,9, Rouen 48-58. Plan ≈ 2,6-5 s dans le fil de travail (Rouen ≈ 2,9 s)
+- [x] Tests : vh4_landmarks_test (Rouen + Londres) OK, zg4_camera OK, zg6_towns OK, smoke OK,
+      pytest complet 731 OK ; ruff propre ; doc `docs/landmarks-v2.md` (section Londres)
 
 ## Changements du moteur commun (rétrocompatibles, Rouen inchangé)
 - Schéma : portes datées (`gates[].from_year/until_year`) ; pont : `chapel_side`,
@@ -40,6 +46,29 @@ des rives basses ; ≥ 60 i/s ou pas de régression vs Rouen.
 - `LandmarkMonuments._belfry` : `top: "turrets"` (toit plat, tourelles d'angle : Tour Blanche).
 - `LandmarkCityLayer._dated_signature` : tient compte des portes datées.
 
+- Outil `geo landmarks` : option de recette `alleys` (voir ci-dessus), testée.
+
+## Limites / suites
+- Tamise invisible aux paliers vallée et site (sol vert à la place de l'eau) : absence de nappe
+  d'eau de la carte fine, traitée par SZ2b ; à revoir après sa fusion (quais, avant-becs et
+  tablier ont été calés sur les hauteurs du relief : eau ≈ 1,9 m, rives 2,6-3,8 m, tablier
+  = eau + 5,5 m, rampes jusqu'aux rives).
+- Bosses sombres dans la Cité : relief GLO-30 (modèle de surface : immeubles modernes) sous la
+  ville ; correction dans le relief, pas dans la ville.
+- Tissu moins dense que le Londres réel : parcelles le long des rues OSM seulement, îlots
+  modernes plus grands que les îlots médiévaux (cœurs d'îlots vides).
+- Nombreux gabarits hypothétiques (hôtels du Strand, Guildhall d'avant 1411, prieuré de la
+  Trinité, Austin Friars, palais de Westminster) : marqués `certainty`.
+- Pas d'autre enceinte à Southwark ; Walbrook non dessiné (couvert en grande partie au XIVe s.,
+  à vérifier).
+
+## Faits à faire relire
+- Tracé du mur entre Newgate et Aldersgate et position d'Aldersgate ; point de départ à la Tour.
+- Position et axe d'Old St Paul's (−4° grille, centre 15 m à l'est de la cathédrale de Wren),
+  hauteur de la tour de croisée (87 m) + flèche (62 m).
+- London Bridge : extrémités (à l'est de St Magnus), hauteur du tablier (5,5 m au-dessus de
+  l'eau), fractions du pont-levis (0,66) et de la chapelle (0,48).
+- Dates : nef romane de Westminster jusqu'en 1375, Moorgate 1415, tour du Joyau 1366.
+
 ## Prochaine étape
-Regarder les captures (`godot --path game --script res://tests/vh6_shots.gd -- --out=docs/img/vh6
---map-weather=clear`), corriger, mesurer i/s vs Rouen, puis tests complets et doc.
+Fusion par l'orchestrateur ; revoir les captures quand SZ2b (eau au palier site) est dans `main`.
