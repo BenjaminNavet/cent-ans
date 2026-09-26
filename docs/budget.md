@@ -76,3 +76,4 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 | 2026-09-26 | OpenRouter | DA5b : icônes d'entité en miniatures peintes (24 × openai/gpt-5-image-mini) | 1,10 $ | 1,10 $ | 7,96 $ |
 | 2026-09-26 | OpenRouter | DA2 : portraits vivants (archétypes et variantes âgées) (141 × openai/gpt-5-image-mini) | 6,47 $ | 6,33 $ | 14,29 $ |
 | 2026-09-26 | OpenRouter | DA2 : portraits vivants (archétypes et variantes âgées) (80 × openai/gpt-5-image-mini) | 3,69 $ | 3,59 $ | 17,88 $ |
+| 2026-09-26 | OpenRouter | DA7c : icônes de trait à l'encre (59 × openai/gpt-5-image-mini) | 2,69 $ | 2,68 $ | 20,56 $ |
