@@ -815,6 +815,10 @@ pub struct CampaignState {
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
     pub(crate) ai_turn: Option<FactionId>,
+    /// Lot CT1: record of the AI armies' moves of the last turn, for the
+    /// replay on the map (off unless the interface turns it on); never saved.
+    #[serde(skip)]
+    pub(crate) ai_replay: crate::ai_replay::AiReplayLog,
 }
 
 impl CampaignState {
@@ -854,6 +858,7 @@ impl CampaignState {
             naval: crate::naval::NavalState::default(),
             difficulty: crate::difficulty::Difficulty::Normal,
             ai_turn: None,
+            ai_replay: crate::ai_replay::AiReplayLog::default(),
         }
     }
 

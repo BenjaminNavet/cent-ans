@@ -33,6 +33,7 @@
 
 pub mod agents;
 pub mod ai_minimal;
+pub mod ai_replay;
 pub mod battle_auto;
 pub mod battle_forecast;
 pub mod battle_request;
@@ -84,6 +85,7 @@ pub mod weather;
 pub use agents::{
     AgentActionOption, AgentError, AgentId, AgentRecruitOption, AgentReport, AgentsState,
 };
+pub use ai_replay::{AiMoveKind, AiMoveNotability, AiMoveRecord};
 pub use battle_auto::{
     resolve_auto, resolve_field, resolve_with, BattleContext, BattleResult, BattleUnit,
     FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,

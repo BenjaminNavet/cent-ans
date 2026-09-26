@@ -1,0 +1,7 @@
+{
+  "description": "Rejeu d'après bataille (lot EP13, ADR 0072) : combien de rejeux garder, tous les combien vérifier que la re-simulation suit l'enregistrement, tous les combien garder un instantané pour les sauts en arrière.",
+  "keep_count": 20,
+  "checkpoint_seconds": 10.0,
+  "keyframe_seconds": 20.0,
+  "max_keyframes": 90
+}
