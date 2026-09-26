@@ -22,7 +22,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 5,
-          "description": "Perte de moral par seconde et par unité de poids (un ami qui cède à côté pèse 1)."
+          "description": "Perte de moral par seconde et par unité de poids (un ami qui cède à côté pèse 1). Avant EP10 : 0,4 pour tout ami à portée."
         },
         "max_weight": {
           "type": "number",
@@ -97,7 +97,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 10,
-          "description": "Force de l'écart latéral devant un ami (relative à la direction de l'arrière, qui vaut 1)."
+          "description": "Force de l'écart latéral devant un ami (relative à la direction de l'arrière, qui vaut 1) ; c'est aussi le plafond de la somme des écarts devant les amis, quel que soit leur nombre (des régiments empilés au même point n'envoient pas la fuite de côté)."
         }
       },
       "required": [
