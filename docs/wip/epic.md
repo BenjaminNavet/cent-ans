@@ -118,3 +118,9 @@ scène). EP6 et EP8 peuvent partir en parallèle ; EP7 après EP6.
   (`data/rules/battle_duel.json`), milice 35 m en second échelon. Plat sans pieux : attaquant 0/10 → 7/10 ;
   Crécy-like 12/12 anglais. Point ouvert (renvoyé à SG4/R4) : crête + pieux en miroir, attaquant 6/10
   (contagion de déroute des archers du défenseur à travers sa ligne).
+- EP7 fusionné (a9f57cd7, ADR 0035) : Crécy 23/30, Azincourt 24/30, Poitiers 20/30 victoires anglaises
+  (IA contre IA) ; menu « Batailles historiques » ; site réel appliqué aux batailles de campagne de la
+  province. Suites : les postes anglais ne tiennent pas le joueur ; Poitiers localisé approximativement ;
+  garde `scenario_post` contre le repli de contre-pente SG5 (demandée à la session de nuit).
+- Lancés 26/09 : EP10 (déroute vers l'arrière, contagion pondérée par la position, renvoyé par SG5),
+  EP8b (horloge d'Azincourt : « Midi » après 2 min 50).
