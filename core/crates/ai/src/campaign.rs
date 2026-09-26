@@ -19,6 +19,7 @@ use data_model::{
 };
 use sim_campaign::coinage::CoinageLevel;
 use sim_campaign::movement::{edges, points_per_step};
+use sim_campaign::passage;
 use sim_campaign::population::weighted_unrest;
 use sim_campaign::{ArmyId, CampaignState, Order, Season, Stance, TaxRate};
 
@@ -46,6 +47,16 @@ pub const HIGH_TAX_MAX_UNREST: f64 = 30.0;
 /// EQ1: a province this close to the revolt threshold keeps the realm off
 /// « Haut » taxes.
 pub const REVOLT_MARGIN: f64 = 10.0;
+/// EQ5: unrest tolerated above [`HIGH_TAX_MAX_UNREST`] while « Haut » taxes
+/// already levied are still needed.
+pub const HIGH_TAX_HYSTERESIS: f64 = 10.0;
+/// EQ5: seasonal surplus kept as a margin against events, in percent of
+/// gross income.
+pub const SAFETY_MARGIN_PERCENT: i64 = 5;
+/// EQ5: buildings may not take more than this share (percent) of the gross
+/// income in upkeep: they cannot be dismissed when times turn bad (a
+/// plague, a lost province).
+pub const MAX_BUILDING_UPKEEP_PERCENT: i64 = 30;
 /// A debt must be repaid within this many turns, or units are dismissed.
 const DEBT_REPAYMENT_TURNS: i64 = 8;
 /// Units dismissed at most per turn to cut a debt.
@@ -56,6 +67,11 @@ pub const INCOME_PER_RECRUIT: i64 = 6000;
 pub const ASSAULT_ODDS: u32 = 65;
 /// Armies below this share of their maximum strength fall back.
 pub const RETREAT_STRENGTH: f64 = 0.4;
+/// EQ5: an army trespassing with no place of its own within the planning
+/// range looks this many times farther for the way home.
+pub const HOMEWARD_RANGE_FACTOR: u32 = 4;
+/// EQ5: places of its own tried (nearest first) before giving up a way home.
+const HOMEWARD_CANDIDATES: usize = 3;
 /// Siege value bonus of a settlement the faction owns de jure but an enemy
 /// holds (lot C7a: win back lost places first, above a throne claim's 30).
 pub const RECLAIM_TARGET_BONUS: f64 = 35.0;
@@ -139,7 +155,10 @@ impl<'a> Context<'a> {
                 } else {
                     0
                 };
-                gross - state.faction_administration_upkeep(data, faction) - tribute
+                gross
+                    - state.faction_administration_upkeep(data, faction)
+                    - tribute
+                    - commitments(state, faction)
             },
             gross_income: state.faction_income_effective(data, faction),
             army_upkeep: state.faction_army_upkeep(data, faction),
@@ -164,6 +183,11 @@ impl<'a> Context<'a> {
     /// Seasonal surplus (negative: deficit) at the current upkeep.
     fn surplus(&self) -> i64 {
         self.income - self.upkeep()
+    }
+
+    /// EQ5: surplus kept against events (fines, fires, lost harvests).
+    fn safety_margin(&self) -> i64 {
+        self.gross_income.max(0) * SAFETY_MARGIN_PERCENT / 100
     }
 
     /// Treasury above [`RESERVE_SEASONS`] of gross income: idle money the
@@ -256,6 +280,24 @@ impl<'a> Context<'a> {
     }
 }
 
+/// EQ5: seasonal charges the treasury pays whatever it holds, besides the
+/// army, buildings and administration: tributes of a lost war (a Granada
+/// paying England, Scotland and Holstein went bankrupt for decades, its
+/// budget blind to them) and agents. Ransom installments and the diets
+/// (« Table ») are left out: they are only paid when the treasury can.
+fn commitments(state: &CampaignState, faction: &FactionId) -> i64 {
+    let tributes: i64 = state.factions.get(faction).map_or(0, |me| {
+        me.ledger.tributes.iter().map(|t| t.per_season).sum()
+    });
+    let agents = state
+        .agents
+        .upkeep_last_turn
+        .get(faction)
+        .copied()
+        .unwrap_or(0);
+    tributes + agents
+}
+
 /// Orders of `faction` for this turn.
 pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<Order> {
     if faction.as_str() == REBELS || !state.factions.get(faction).is_some_and(|f| f.alive) {
@@ -296,7 +338,9 @@ pub fn plan_turn(state: &CampaignState, data: &GameData, faction: &FactionId) ->
     orders.extend(sim_campaign::edicts::ai_choose_edicts(state, data, faction));
     // G2: a realm whose buildings eat half its income does not debase: the
     // inflation of their upkeep outweighs the seigniorage (Scots spiral).
-    let upkeep_heavy = 2 * ctx.building_upkeep > ctx.gross_income;
+    // EQ5: a third is enough: the prices stay up after the money is sound
+    // again (Swiss buildings 158 → 201 after two years of debasement).
+    let upkeep_heavy = 3 * ctx.building_upkeep > ctx.gross_income;
     orders.extend(
         sim_campaign::coinage::ai_choose_coinage(state, data, faction)
             .into_iter()
@@ -365,10 +409,29 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         PEACE_RUNWAY_TURNS
     };
     let uncovered_deficit = ctx.surplus() < 0 && ctx.treasury < -ctx.surplus() * runway;
-    let needs_money = in_debt || uncovered_deficit || (ctx.at_war() && low_treasury);
+    // EQ5: heavy taxes already levied stay while the budget would fall back
+    // into deficit at the normal rate and the treasury holds less than a
+    // season of income, and (with the debt) while the realm only grumbles:
+    // without this the rate
+    // flipped every season around the threshold and a realm whose
+    // buildings outgrew its income never left the red.
+    let levied = me.tax_rate == TaxRate::High;
+    let normal_surplus = if levied {
+        ctx.surplus()
+            - (ctx.gross_income.max(0) as f64 * (1.0 - 1.0 / TaxRate::High.multiplier())) as i64
+    } else {
+        ctx.surplus()
+    };
+    let stay_high = levied && ctx.treasury < ctx.gross_income.max(0) && normal_surplus < 0;
+    let needs_money = in_debt || uncovered_deficit || stay_high || (ctx.at_war() && low_treasury);
+    let max_unrest = if levied && (in_debt || stay_high) {
+        HIGH_TAX_MAX_UNREST + HIGH_TAX_HYSTERESIS
+    } else {
+        HIGH_TAX_MAX_UNREST
+    };
     let rate = if unrest > 55.0 {
         TaxRate::Low
-    } else if needs_money && unrest < HIGH_TAX_MAX_UNREST && !revolt_risk {
+    } else if needs_money && unrest < max_unrest && !revolt_risk {
         TaxRate::High
     } else {
         TaxRate::Normal
@@ -558,8 +621,15 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let builds = (1 + (budget / 15_000).max(0) as usize).min(6);
     // F4: a new building's upkeep must fit in the surplus left by the army
     // (or in the hoard being spent).
-    let mut spare =
-        ctx.surplus() - (planned_upkeep - ctx.army_upkeep) + hoard / HOARD_SPENDING_TURNS;
+    // EQ5: with the safety margin kept, and within a share of the gross
+    // income (the net one shrinks with a hoard's opulence): buildings
+    // cannot be dismissed when times turn bad.
+    let mut spare = ctx.surplus() - (planned_upkeep - ctx.army_upkeep)
+        + hoard / HOARD_SPENDING_TURNS
+        - ctx.safety_margin();
+    // (Buildings that pay for themselves in taxes or trade escape the cap.)
+    let mut upkeep_room =
+        ctx.gross_income * MAX_BUILDING_UPKEEP_PERCENT / 100 - ctx.building_upkeep;
     let mut options: Vec<(f64, SettlementId, data_model::BuildingId, i64)> = Vec::new();
     for (id, settlement) in state
         .settlements
@@ -600,6 +670,13 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
         if used.len() >= builds || used.contains(&settlement) || budget < cost || upkeep > spare {
             continue;
         }
+        let pays_for_itself = building_income(ctx, &settlement, &building) >= upkeep as f64;
+        if !pays_for_itself {
+            if upkeep > upkeep_room {
+                continue;
+            }
+            upkeep_room -= upkeep;
+        }
         spare -= upkeep;
         budget -= cost;
         used.insert(settlement.clone());
@@ -636,6 +713,31 @@ fn unit_value(data: &GameData, unit_type: &UnitTypeId, cost: u32) -> f64 {
         let defence = f64::from(t.stats.armor) / 2.0 + f64::from(t.stats.morale) / 4.0;
         f64::from(t.soldiers) * (attack + defence) / f64::from(cost.max(1))
     })
+}
+
+/// EQ5: seasonal taxes and trade `building` adds in `settlement`.
+fn building_income(
+    ctx: &Context,
+    settlement: &SettlementId,
+    building: &data_model::BuildingId,
+) -> f64 {
+    let Some(def) = ctx.data.buildings.get(building) else {
+        return 0.0;
+    };
+    let income = ctx
+        .province_of(settlement)
+        .map_or(0.0, |p| ctx.province_income(p));
+    def.effects
+        .iter()
+        .filter(|e| matches!(e.effect, EffectKind::TaxIncome | EffectKind::TradeIncome))
+        .map(|e| {
+            if matches!(e.mode, data_model::EffectMode::Percent) {
+                income * e.value / 100.0
+            } else {
+                e.value
+            }
+        })
+        .sum()
 }
 
 /// Seasonal value (livres-equivalent) of building `building` in `settlement`.
@@ -1046,6 +1148,33 @@ fn garrison_order(ctx: &Context, army_id: &ArmyId) -> Option<Order> {
     })
 }
 
+/// EQ5: at peace, an army standing in a place of its own inside the lands
+/// of another realm (a castle held in a foreign province) joins the
+/// garrison when the walls can hold it all, instead of camping there as a
+/// field army without right of passage.
+fn trespasser_garrison_order(ctx: &Context, army_id: &ArmyId) -> Option<Order> {
+    let state = ctx.state;
+    let army = state.armies.get(army_id)?;
+    let place = state.settlements.get(army.settlement()?)?;
+    if &place.controller != ctx.faction || place.siege.is_some() || army.units.is_empty() {
+        return None;
+    }
+    let cap = ctx
+        .data
+        .settlement_rules
+        .as_ref()
+        .and_then(|r| r.garrison_cap.get(&place.kind))
+        .copied()
+        .unwrap_or(usize::MAX);
+    if place.garrison.len() + army.units.len() > cap {
+        return None;
+    }
+    Some(Order::GarrisonUnits {
+        army: army_id.clone(),
+        unit_indices: (0..army.units.len()).collect(),
+    })
+}
+
 /// True when the planned path to `target` includes a sea crossing.
 fn crosses_sea(
     data: &GameData,
@@ -1154,6 +1283,18 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
 
     for (army_id, _) in armies.iter().filter(|(id, _)| !merged.contains(id)) {
         let army = &state.armies[army_id];
+        // EQ5: standing without right of passage in the lands of a realm at
+        // peace (after a peace, or in a place of its own inside a foreign
+        // province).
+        let trespassing = state
+            .army_province(data, army)
+            .and_then(|p| passage::trespassed_owner(state, ctx.faction, &p));
+        if trespassing.is_some() && !disbanding.contains(army_id) && !ctx.at_war() {
+            if let Some(order) = trespasser_garrison_order(ctx, army_id) {
+                orders.push(order);
+                continue;
+            }
+        }
         if !disbanding.contains(army_id) {
             if let Some(order) = garrison_order(ctx, army_id) {
                 orders.push(order);
@@ -1335,6 +1476,66 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .map(|(id, reach, _)| (id, reach))
                 .min_by_key(|(id, reach)| (reach.cost, (*id).clone()))
                 .map(|(id, _)| (Objective::Raid, id.clone()));
+        }
+
+        // EQ5: with nothing to fight for here, an army trespassing on the
+        // lands of a realm at peace goes home: a place of its own outside
+        // closed lands first (within the planning range, then farther
+        // across those lands), else any place of its own, and only a place
+        // the grid can actually reach (a road over water is no way home).
+        if choice.is_none() && !besieging && trespassing.is_some() {
+            let far = ctx
+                .grid
+                .homeward_table(&anchor, range * HOMEWARD_RANGE_FACTOR, cap, power);
+            let homes = |table: &crate::grid::Table, abroad_ok: bool| -> Vec<SettlementId> {
+                let mut homes: Vec<(u32, SettlementId)> = table
+                    .iter()
+                    .filter(|(id, _)| {
+                        ctx.owns_settlement(id)
+                            && state.hostile_armies_at(ctx.faction, id).is_empty()
+                            && (abroad_ok
+                                || ctx.province_of(id).is_none_or(|p| {
+                                    passage::trespassed_owner(state, ctx.faction, p).is_none()
+                                }))
+                    })
+                    .map(|(id, reach)| (reach.cost, id.clone()))
+                    .collect();
+                homes.sort();
+                homes.into_iter().map(|(_, id)| id).collect()
+            };
+            // Same land mass on the grid (a cheap check: no path search).
+            let grid = data.navgrid();
+            let here = state.army_cell(data, army);
+            let land = grid.component(i64::from(here.x), i64::from(here.y));
+            let reachable = |target: &SettlementId| {
+                data.settlement_point(target).is_some_and(|p| {
+                    let cell = sim_campaign::Cell::of_point(grid, p);
+                    let (x, y) = (i64::from(cell.x), i64::from(cell.y));
+                    grid.passable(x, y) && grid.component(x, y) == land
+                })
+            };
+            let found = [(&table, false), (&far, false), (&table, true), (&far, true)]
+                .into_iter()
+                .find_map(|(route, abroad_ok)| {
+                    homes(route, abroad_ok)
+                        .into_iter()
+                        .take(HOMEWARD_CANDIDATES)
+                        .find(|id| reachable(id))
+                        .map(|id| (route, id))
+                });
+            if let Some((route, target)) = found {
+                if army.stance != Stance::Normal {
+                    orders.push(Order::SetStance {
+                        army: army_id.clone(),
+                        stance: Stance::Normal,
+                    });
+                }
+                orders.extend(
+                    ctx.grid
+                        .march_orders(army_id, army, &anchor, &target, route),
+                );
+                continue;
+            }
         }
 
         // 4. Regroup with the main army when much weaker.
