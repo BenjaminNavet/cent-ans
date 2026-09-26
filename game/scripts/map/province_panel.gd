@@ -92,10 +92,12 @@ func _ready() -> void:
 		label.set_script(RichLabel)
 		label.mouse_filter = Control.MOUSE_FILTER_PASS
 		label.tooltip_text = RichTooltip.gauge(pair[1])
-	IconLibrary.decorate_button(recruit_button, "cat_unit", int(ROW_ICON))
-	IconLibrary.decorate_button(create_army_button, "hud_army", int(ROW_ICON))
+	IconLibrary.decorate_button(recruit_button, "act_recruit", int(ROW_ICON))
+	IconLibrary.decorate_medallion(recruit_button, "recruit", PanelWidgets.MEDALLION_SIZE)  # DA5
+	IconLibrary.decorate_button(create_army_button, "act_form_army", int(ROW_ICON))
+	IconLibrary.decorate_medallion(create_army_button, "form_army", PanelWidgets.MEDALLION_SIZE)  # DA5
 	IconLibrary.decorate_button(governor_court_button, "hud_court", int(ROW_ICON))
-	IconLibrary.decorate_button(cancel_build_button, "cat_building", int(ROW_ICON))
+	IconLibrary.decorate_button(cancel_build_button, "act_cancel_build", int(ROW_ICON))
 	tabs.add_theme_constant_override("icon_max_width", 18)
 	tabs.set_tab_icon(0, IconLibrary.get_icon("hud_army"))
 	if tabs.get_tab_count() > 1:
