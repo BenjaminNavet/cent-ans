@@ -168,9 +168,11 @@ func tick_time(now: float, dt: float) -> void:
 ## des munitions), gardé pour les bancs d'essai hors simulation.
 func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camera_pos: Vector3, shots: Variant = null) -> void:
 	tick_time(now, dt)
+	# PB3c : index des régiments construit seulement s'il sert (tirs de l'image, ancien déclencheur).
 	var by_id := {}
-	for unit in units:
-		by_id[int(unit["id"])] = unit
+	if not (shots is Array) or not (shots as Array).is_empty():
+		for unit in units:
+			by_id[int(unit["id"])] = unit
 	if shots is Array:
 		for shot in shots:
 			_on_core_shot(shot, by_id, soldiers, camera_pos)

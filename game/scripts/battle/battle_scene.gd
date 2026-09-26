@@ -121,6 +121,11 @@ var _right_press_ground: Vector3 = Vector3.ZERO
 var _last_right_click_ms: int = -10000
 var _drag_rect: ColorRect
 var _hud_timer: float = 0.0
+## PB3c : `get_siege` lu une fois par image (vue, HUD, sortie, son, fumées) : image et instant
+## simulé de la lecture en cache. `--no-pb3c` après `--` : un appel par lecteur (mesures A/B).
+var _pb3c: bool = not OS.get_cmdline_user_args().has("--no-pb3c")
+var _siege_cache: Dictionary = {}
+var _siege_cache_key: Vector2 = Vector2(-1.0, -1.0)
 var _screenshot_path: String = ""
 var _benchmark: bool = false
 var _bench_frames: int = 0
@@ -138,6 +143,7 @@ var _bench_timeout_s: float = 120.0
 var _bench_failed: bool = false
 var _bench_gpu_ms: float = 0.0  # V3 : temps de rendu GPU cumulé
 var _bench_cpu_ms: float = 0.0
+var _bench_process_ms: Array = []  # PB3c : temps de `_process` par image mesurée (Performance.TIME_PROCESS)
 ## Compteur d'images mesurées (GPU/CPU/A-B) qui ne repart pas à zéro entre répétitions
 ## (`--bench-repeat=`), contrairement à `_bench_frames` (fenêtre de mesure courante).
 var _bench_measured: int = 0
@@ -1079,9 +1085,11 @@ func _process(delta: float) -> void:
 	var running: bool = not paused and not battle.call("is_finished")
 	if running:
 		battle.call("tick", delta * speed * slow)
-	if music != null:
+	if music != null and not _pb3c:
 		music.update(delta)
 	_refresh_view(false, delta * slow)
+	if music != null and _pb3c:
+		music.update(delta, units)  # PB3c : les régiments de l'image, sans second `get_units`
 	if staging != null:
 		staging.update(units, delta * speed * slow if running else 0.0, delta, bool(battle.call("is_finished")))
 		_update_time_label()
@@ -1154,6 +1162,7 @@ func _run_benchmark_frame(delta: float) -> void:
 		var gpu_ms := RenderingServer.viewport_get_measured_render_time_gpu(viewport_rid)
 		_bench_gpu_ms += gpu_ms
 		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
+		_bench_process_ms.append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
 		_bench_gpu_samples += 1
 		# DA6 : sous Metal le temps GPU mesuré vaut 0 : durée de l'image à la place (vsync coupée).
 		_bench_ab_step(gpu_ms if gpu_ms > 0.0 else delta * 1000.0)
@@ -1205,6 +1214,7 @@ func _bench_finish() -> void:
 		"engine_fps": Engine.get_frames_per_second(),
 		"gpu_ms": _bench_gpu_ms / maxf(_bench_gpu_samples, 1),
 		"cpu_ms": _bench_cpu_ms / maxf(_bench_gpu_samples, 1),
+		"process_ms_median": _median(_bench_process_ms),
 		"quality": RenderQuality.current(),
 		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
 		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
@@ -1274,6 +1284,14 @@ func _bench_timed_out() -> bool:
 	return _bench_timeout_s > 0.0 and _bench_wall_elapsed_s() > _bench_timeout_s
 
 
+static func _median(values: Array) -> float:
+	if values.is_empty():
+		return 0.0
+	var sorted := values.duplicate()
+	sorted.sort()
+	return float(sorted[sorted.size() / 2])
+
+
 static func _percentile(sorted_values: PackedFloat64Array, ratio: float) -> float:
 	if sorted_values.is_empty():
 		return 0.0
@@ -1293,7 +1311,7 @@ func _update_audio(delta: float) -> void:
 		_siege_audio_timer -= delta
 		if _siege_audio_timer <= 0.0:
 			_siege_audio_timer = 0.25
-			battle_audio.update_siege(battle.call("get_siege"), elapsed)
+			battle_audio.update_siege(current_siege(), elapsed)
 	if voices != null:
 		voices.update(delta)
 
@@ -1343,7 +1361,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	soldiers.update(battle, units, delta * speed if running else 0.0, selected)
 	_update_effects(delta * speed if running else 0.0)
 	if siege_view != null:
-		siege_view.update(battle.call("get_siege"), units)
+		siege_view.update(current_siege(), units)
 	var banner_scale := _banner_scale()
 	# Les drapeaux se présentent de trois quarts à la caméra (lisibles sans être des panneaux).
 	var cam_yaw := camera_rig.yaw + PI * 0.5 + 0.35
@@ -1386,13 +1404,25 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
 		hud.set_balance(side_names[player_side], int(battle.call("get_strength", player_side)), side_names[enemy_side], int(battle.call("get_strength", enemy_side)))
 		if siege_view != null:
-			hud.set_siege_status(siege_status(battle.call("get_siege")))
+			hud.set_siege_status(siege_status(current_siege()))
 			_check_sortie()
 		hud.update_cards(units, player_side, selected)
 		hud.minimap.update(units, camera_frame())
 		var events: Array = battle.call("get_events")
 		if not events.is_empty():
 			hud.add_events(events)
+
+
+## PB3c : `BattleSim.get_siege()` de l'image (relu seulement quand l'image ou l'instant simulé
+## change). Le dictionnaire est partagé : lecture seule.
+func current_siege() -> Dictionary:
+	if not _pb3c:
+		return battle.call("get_siege")
+	var key := Vector2(float(Engine.get_process_frames()), float(battle.call("get_elapsed")))
+	if key != _siege_cache_key:
+		_siege_cache_key = key
+		_siege_cache = battle.call("get_siege")
+	return _siege_cache
 
 
 ## Ligne d'état du siège pour le HUD : murailles, brèches, porte, tenue de la place.
@@ -2401,7 +2431,7 @@ func _deploy_selection(press: Vector2, release: Vector2) -> void:
 
 ## Sortie de la garnison (F5a) : message éphémère une fois, et mention dans la ligne du siège.
 func _check_sortie() -> void:
-	if _sortie_shown or not bool(battle.call("get_siege").get("sortie", false)):
+	if _sortie_shown or not bool(current_siege().get("sortie", false)):
 		return
 	_sortie_shown = true
 	hud.show_toast("La garnison ouvre ses portes et fait une sortie !", player_side == "attacker")

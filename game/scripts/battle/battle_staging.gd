@@ -229,7 +229,8 @@ func _place_campfires(terrain_data: Dictionary, height_at: Callable) -> void:
 
 ## Incendies S2 (sièges) : une colonne sombre par maison en feu, visible de loin.
 func _sync_fires() -> void:
-	var siege: Dictionary = _battle.call("get_siege")
+	# PB3c : lecture de l'image partagée avec la scène quand elle existe.
+	var siege: Dictionary = _scene.call("current_siege") if _scene != null and _scene.has_method("current_siege") else _battle.call("get_siege")
 	if siege.is_empty():
 		return
 	var seen := {}
