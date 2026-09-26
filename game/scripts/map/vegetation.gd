@@ -243,7 +243,7 @@ func native_submit_reground(buffers: Array, grid: Dictionary, origin: Vector2) -
 	_native_serial += 1
 	var untyped: Array = []
 	untyped.assign(buffers)
-	if _native.call("request_reground", _native_serial, untyped, grid, origin, MapData.vertical_scale(), MapData.relief_gain()):
+	if _native.call("request_reground", _native_serial, untyped, grid, origin, MapData.vertical_scale(), MapData.relief_gain(), MapData.relief_squash()):
 		return _native_serial
 	return -1
 
