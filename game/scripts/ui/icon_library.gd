@@ -15,9 +15,17 @@ extends Node
 ## l'icône à l'encre, sinon le SVG (repli si le PNG manque). Teinte au rendu : `tint(color)`
 ## donne la modulation qui change l'encre en `color` (or au survol, encre pâlie désactivé).
 ## Médaillons enluminés : `get_medallion(id)` (`res://assets/ui/medallions/`, même index).
+##
+## Lot DA5b : icônes d'entité en miniatures peintes (unités, bâtiments, techniques, compétences,
+## ressources, régimes, catégories d'unité), PNG 128 px encadrés or et azur
+## (`cent-ans assets entity-icons`, catalogue `data/ui/entity_icons.json`). `entity/index.json`
+## est lu en premier : priorité miniature d'entité > encre > SVG. Une miniature n'est jamais
+## teintée (elle porte ses couleurs), elle garde ses couleurs au survol.
 
 const ICONS_DIR := "res://assets/icons"
 const TABLE_PATH := "res://assets/icons/icons.json"
+const ENTITY_DIR := "res://assets/icons/entity"
+const ENTITY_INDEX_PATH := "res://assets/icons/entity/index.json"
 const INK_DIR := "res://assets/icons/ink"
 const INK_INDEX_PATH := "res://assets/icons/ink/index.json"
 const MEDALLIONS_DIR := "res://assets/ui/medallions"
@@ -39,6 +47,8 @@ var fallbacks: Dictionary = {}
 ## DA5 : id → chemin `res://` du PNG à l'encre ; id → chemin du médaillon.
 var ink: Dictionary = {}
 var medallions: Dictionary = {}
+## DA5b : id → chemin `res://` de la miniature peinte encadrée.
+var entity: Dictionary = {}
 var _textures: Dictionary = {}  # chemin → Texture2D (ou états d'un médaillon)
 
 
@@ -53,6 +63,7 @@ func load_table() -> bool:
 	fallbacks = {}
 	_textures.clear()
 	ink = _read_index(INK_INDEX_PATH, INK_DIR)
+	entity = _read_index(ENTITY_INDEX_PATH, ENTITY_DIR)
 	medallions = _read_index(MEDALLIONS_INDEX_PATH, MEDALLIONS_DIR)
 	if not FileAccess.file_exists(TABLE_PATH):
 		push_warning("IconLibrary: %s missing (run cent-ans assets icons)" % TABLE_PATH)
@@ -85,12 +96,18 @@ func _read_index(path: String, directory: String) -> Dictionary:
 
 
 func has_icon(id: String) -> bool:
-	return icons.has(id) or ink.has(id)
+	return icons.has(id) or ink.has(id) or entity.has(id)
 
 
 ## Vrai si `id` s'affiche avec une icône de la famille à l'encre (DA5).
 func is_ink(id: String, category: String = "") -> bool:
-	return ink.has(resolve(id, category))
+	var resolved := resolve(id, category)
+	return ink.has(resolved) and not entity.has(resolved)
+
+
+## Vrai si `id` s'affiche avec une miniature d'entité peinte et encadrée (DA5b).
+func is_entity(id: String, category: String = "") -> bool:
+	return entity.has(resolve(id, category))
 
 
 ## Catégorie déduite d'un identifiant (`unit_knights` → `unit`), "default" sinon.
@@ -105,21 +122,23 @@ func category_of(id: String) -> String:
 
 ## Identifiant effectivement affiché pour `id` (lui-même, ou le repli de sa catégorie).
 func resolve(id: String, category: String = "") -> String:
-	if icons.has(id) or ink.has(id):
+	if has_icon(id):
 		return id
 	var fallback_category := category if category != "" else category_of(id)
 	var fallback: String = str(fallbacks.get(fallback_category, fallbacks.get("default", "")))
-	if icons.has(fallback) or ink.has(fallback):
+	if has_icon(fallback):
 		return fallback
 	return ""
 
 
-## Chemin `res://` de l'icône (pour `[img]` en BBCode), "" si aucune : PNG à l'encre (DA5)
-## s'il existe, sinon SVG.
+## Chemin `res://` de l'icône (pour `[img]` en BBCode), "" si aucune : miniature d'entité (DA5b),
+## sinon PNG à l'encre (DA5), sinon SVG.
 func icon_path(id: String, category: String = "") -> String:
 	var resolved := resolve(id, category)
 	if resolved == "":
 		return ""
+	if entity.has(resolved):
+		return str(entity[resolved])
 	if ink.has(resolved):
 		return str(ink[resolved])
 	return ICONS_DIR.path_join(str(icons[resolved].get("file", "")))
@@ -141,6 +160,8 @@ func get_icon(id: String, category: String = "") -> Texture2D:
 
 func author_of(id: String) -> String:
 	var resolved := resolve(id)
+	if entity.has(resolved):
+		return "Cent Ans (DA5b)"
 	if ink.has(resolved):
 		return "Cent Ans (DA5)"
 	return str(icons.get(resolved, {}).get("author", ""))
@@ -187,6 +208,10 @@ func decorate_button(button: Button, id: String, size: int = 20, category: Strin
 	button.add_theme_constant_override("icon_max_width", size)
 	if is_ink(id, category):
 		apply_state_tints(button)
+	elif is_entity(id, category):
+		# DA5b : miniature 128 px ; `expand_icon` la cadre dans la hauteur du bouton (bornée par
+		# `icon_max_width`) sans que sa taille native gonfle la taille minimale du bouton.
+		button.expand_icon = true
 
 
 ## BBCode `[img]` de l'icône (infobulles riches), "" si aucune.
