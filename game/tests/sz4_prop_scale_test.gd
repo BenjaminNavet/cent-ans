@@ -98,10 +98,6 @@ func _test_map() -> void:
 		var t0 := Time.get_ticks_usec()
 		life.effects.call("_rewrite_windmills")
 		var ms := (Time.get_ticks_usec() - t0) / 1000.0
-		var t2 := Time.get_ticks_usec()
-		for p: Array in life.effects.get("_windmill_points"):
-			life.effects.call("_windmill_transforms", p)
-		print("transforms only %.2f ms" % ((Time.get_ticks_usec() - t2) / 1000.0))
 		print("sz4_prop_scale_test: windmill rewrite %.2f ms (%d)" % [ms, int(life.effects.stats.get("windmills", 0))])
 	# Coût : réécriture d'échelle des hameaux des tuiles chargées.
 	layer.set("_hamlet_scale", 0.5)
