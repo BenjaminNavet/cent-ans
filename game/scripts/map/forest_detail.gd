@@ -305,7 +305,7 @@ static func _sum(counts: PackedInt32Array) -> int:
 ## Libère les cellules invisibles les plus anciennes au-delà de `max_cells` (toutes quand la
 ## couche est éteinte depuis longtemps).
 func _evict() -> void:
-	if _cells.size() <= profile.max_cells:
+	if _cells.size() <= profile.max_cells and int(stats["instances"]) <= profile.max_stored_instances:
 		return
 	var idle: Array = []
 	for key in _cells:
@@ -313,8 +313,10 @@ func _evict() -> void:
 		if not (entry["node"] as Node3D).visible or not _active:
 			idle.append([int(entry["last_seen"]), key])
 	idle.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	for i in mini(_cells.size() - profile.max_cells, idle.size()):
-		var key: int = idle[i][1]
+	for item in idle:
+		if _cells.size() <= profile.max_cells and int(stats["instances"]) <= profile.max_stored_instances:
+			break
+		var key: int = item[1]
 		var entry: Dictionary = _cells[key]
 		stats["instances"] = int(stats["instances"]) - _sum(entry["counts"])
 		(entry["node"] as Node).queue_free()

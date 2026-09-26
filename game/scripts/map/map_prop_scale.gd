@@ -2,24 +2,29 @@ class_name MapPropScale
 extends Resource
 
 ## Lot SZ4 (suites du zoom ZG, ADR 0036) : échelle des accessoires dessinés à l'échelle de la carte
-## (arbres, moulins, hameaux, fumées) selon la distance du rig de caméra
-## (`res://resources/map_prop_scale.tres`). Purement visuel.
+## (arbres, moulins, hameaux, fumées ; lot SZ4b : maquettes des colonies) selon la distance du rig
+## de caméra (`res://resources/map_prop_scale.tres`). Purement visuel.
 ##
 ## Au-delà de `shrink_start` (paliers moyen / Europe, haut du palier comté), les accessoires gardent
 ## leur taille de carte (lisibles de loin : un arbre fait ~1 km, un moulin ~2 km). En deçà, ils
 ## rétrécissent continûment jusqu'à leur taille réelle (`*_ratio` = taille réelle / taille carte),
-## atteinte à `shrink_end`, avant le palier site : cohérents avec les maisons 1:1 du lot ZG6. La
-## transition est un `smoothstep` sur le logarithme de la distance : la taille apparente décroît
-## sans saut, et l'échelle ne varie jamais plus vite que la distance elle-même.
+## atteinte à `shrink_end` : le seuil du palier vallée, où les villes 1:1 du lot ZG6 prennent le
+## relais des maquettes.
+##
+## Lot SZ4b : une seule **exagération** E(d) pour toutes les familles (taille affichée / taille
+## réelle), de `max_exaggeration` à `shrink_start` jusqu'à 1 à `shrink_end`, `smoothstep` sur le
+## logarithme de la distance ; échelle d'une famille = min(1, ratio × E). À une distance donnée, un
+## arbre, un moulin, un hameau et une maison de village sont donc grossis du même facteur (plus de
+## moulin rétréci à côté d'un village géant), et chaque famille ne quitte sa taille de carte que
+## quand E passe sous 1 / ratio.
 
 ## Distance du rig (unités monde, 1 unité ≈ 719 m) au-dessus de laquelle rien ne change.
 @export var shrink_start: float = 28.0
-## Distance en deçà de laquelle les accessoires sont à leur taille réelle.
-@export var shrink_end: float = 5.0
-## Arbres : distance de la taille réelle. SZ4 : 3 (semis clairsemé pour des arbres de ~1 km) ;
-## SZ4b : 5 comme les autres accessoires, la couche de forêt dense (`ForestDetail`) densifie le
-## semis à mesure que les arbres rétrécissent.
-@export var tree_shrink_end: float = 5.0
+## Distance en deçà de laquelle tout est à sa taille réelle (seuil du palier vallée, SZ4b).
+@export var shrink_end: float = 8.0
+## Exagération à `shrink_start` : 1 / plus petit rapport (moulins), toutes les familles y sont
+## encore à leur taille de carte.
+@export var max_exaggeration: float = 125.0
 ## Taille réelle / taille carte, par famille. Arbres : ~1,5 unité de haut sur la carte, 20-30 m en
 ## vrai. Moulins : corps de 3,3 unités (2,3 km), ~15 m en vrai. Hameaux : ~2 unités de large,
 ## 40-60 m en vrai. Panaches de cheminée : 1 × 3 km sur la carte, ~10 × 40 m en vrai ; fumées
@@ -32,47 +37,45 @@ extends Resource
 ## Opacité des panaches de cheminée à taille réelle (fondu avec l'échelle) : un filet de fumée de
 ## 20 m vu à un kilomètre n'est qu'un voile.
 @export var chimney_real_alpha: float = 0.5
-## Lot SZ4b : maquettes des colonies (villages, villes, châteaux, abbayes). Même courbe, taille réelle
-## propre à chaque colonie (rayon bâti vers 1340 de `towns_1340.json` / rayon de la maquette),
-## atteinte à `settlement_shrink_end` : le seuil du palier vallée, où la ville 1:1 (ZG6) prend le
-## relais de la maquette.
-@export var settlement_shrink_end: float = 8.0
-## Taille réelle / taille carte d'une maquette sans emprise connue, et bornes du rapport.
+## Lot SZ4b : maquettes des colonies (villages, villes, châteaux, abbayes). Taille réelle propre à
+## chaque colonie : rayon bâti vers 1340 (`towns_1340.json`, lot ZG6) × `settlement_footprint_gain`
+## / rayon de la maquette. Rapport par défaut (emprise inconnue) et bornes.
 @export var settlement_default_ratio: float = 0.15
 @export var settlement_ratio_min: float = 0.05
 @export var settlement_ratio_max: float = 0.6
-## Rayon réel d'une maquette = rayon bâti × ce facteur (la maquette montre aussi faubourgs, jardins
-## et champs proches).
+## La maquette montre aussi faubourgs, jardins et champs proches.
 @export var settlement_footprint_gain: float = 1.25
 ## Variation relative d'échelle en deçà de laquelle les instances recalculées sur le processeur
-## (moulins, hameaux) ne sont pas réécrites (évite une réécriture par image pendant un zoom).
+## (moulins, hameaux, maquettes) ne sont pas réécrites (évite une réécriture par image pendant un
+## zoom).
 @export var rewrite_step: float = 0.04
 
 static var _default: MapPropScale = null
 
 
 ## Avancement [0, 1] de la transition taille carte → taille réelle à la distance `distance`.
-## `end` : distance de fin propre à une famille (`shrink_end` par défaut).
-func progress(distance: float, end: float = -1.0) -> float:
-	var stop := end if end > 0.0 else shrink_end
+func progress(distance: float) -> float:
 	if distance >= shrink_start:
 		return 0.0
-	if distance <= stop:
+	if distance <= shrink_end:
 		return 1.0
-	var t := log(shrink_start / maxf(distance, 1e-4)) / log(shrink_start / stop)
+	var t := log(shrink_start / maxf(distance, 1e-4)) / log(shrink_start / shrink_end)
 	return smoothstep(0.0, 1.0, t)
 
 
-## Échelle (1 au loin, `ratio` de près) pour une famille de taille réelle `ratio`.
-func scale_for(ratio: float, distance: float, end: float = -1.0) -> float:
-	var t := progress(distance, end)
-	if t <= 0.0:
-		return 1.0
-	return pow(clampf(ratio, 1e-4, 1.0), t)
+## Exagération commune (taille affichée / taille réelle) à la distance `distance`.
+func exaggeration(distance: float) -> float:
+	return pow(maxf(max_exaggeration, 1.0), 1.0 - progress(distance))
+
+
+## Échelle (1 au loin, `ratio` de près) d'une famille de taille réelle `ratio` × sa taille de carte.
+func scale_for(ratio: float, distance: float) -> float:
+	var r := clampf(ratio, 1e-4, 1.0)
+	return minf(1.0, r * exaggeration(distance))
 
 
 func tree_scale(distance: float) -> float:
-	return scale_for(tree_ratio, distance, tree_shrink_end)
+	return scale_for(tree_ratio, distance)
 
 
 func windmill_scale(distance: float) -> float:
@@ -92,18 +95,13 @@ func chimney_alpha(distance: float) -> float:
 	return lerpf(1.0, chimney_real_alpha, progress(distance))
 
 
-## Échelle d'une maquette de colonie dont la taille réelle vaut `ratio` × sa taille de carte.
-func settlement_scale(ratio: float, distance: float) -> float:
-	return scale_for(clampf(ratio, settlement_ratio_min, settlement_ratio_max), distance, settlement_shrink_end)
-
-
-## Avancement [0, 1] de la transition des maquettes (1 : taille réelle).
-func settlement_progress(distance: float) -> float:
-	return progress(distance, settlement_shrink_end)
-
-
 func fire_scale(distance: float) -> float:
 	return scale_for(fire_ratio, distance)
+
+
+## Échelle d'une maquette de colonie dont la taille réelle vaut `ratio` × sa taille de carte.
+func settlement_scale(ratio: float, distance: float) -> float:
+	return scale_for(clampf(ratio, settlement_ratio_min, settlement_ratio_max), distance)
 
 
 ## Vrai si l'échelle `now` s'écarte assez de `applied` pour réécrire des instances.

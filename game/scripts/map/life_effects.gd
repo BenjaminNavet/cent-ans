@@ -260,10 +260,10 @@ func _pose_y(point: Array) -> float:
 	return lerpf(float(point[6]), float(point[5]), along)
 
 
-## SZ4b : échelle de référence des maquettes (rapport par défaut) à la distance courante.
+## SZ4b : exagération commune à la distance courante (réécriture des positions par pas).
 func _reference_scale() -> float:
 	var props := MapPropScale.shared()
-	return props.settlement_scale(props.settlement_default_ratio, _camera_distance)
+	return props.exaggeration(_camera_distance)  # exagération commune (lot SZ4b)
 
 
 func _windmill_transforms(point: Array) -> Array:
