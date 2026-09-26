@@ -86,24 +86,22 @@ fn is_parent_of(parent_id: &CharacterId, child: &CharacterState) -> bool {
     child.father.as_ref() == Some(parent_id) || child.mother.as_ref() == Some(parent_id)
 }
 
-/// Validates and applies `propose_marriage { character, spouse }` (spec § 2).
-/// The engine already accepts spouses of two different factions (M5
-/// diplomacy decides whether the AI proposes them).
-pub fn propose_marriage(
-    state: &mut CampaignState,
-    _data: &GameData,
+/// Validation of a marriage between `character` and `spouse`, without
+/// side effects (used by [`propose_marriage`], treaty checks and the AI
+/// evaluation): both alive, of opposite sex, of age, unmarried and not close
+/// relatives.
+pub fn check_marriage(
+    state: &CampaignState,
     character: &CharacterId,
     spouse: &CharacterId,
 ) -> Result<(), MarriageError> {
     let a = state
         .characters
         .get(character)
-        .cloned()
         .ok_or_else(|| MarriageError::UnknownCharacter(character.clone()))?;
     let b = state
         .characters
         .get(spouse)
-        .cloned()
         .ok_or_else(|| MarriageError::UnknownCharacter(spouse.clone()))?;
     if !a.alive || !b.alive {
         return Err(MarriageError::Dead);
@@ -117,9 +115,22 @@ pub fn propose_marriage(
     if a.spouse.is_some() || b.spouse.is_some() {
         return Err(MarriageError::AlreadyMarried);
     }
-    if is_parent_of(character, &b) || is_parent_of(spouse, &a) || are_siblings(&a, &b) {
+    if is_parent_of(character, b) || is_parent_of(spouse, a) || are_siblings(a, b) {
         return Err(MarriageError::Related);
     }
+    Ok(())
+}
+
+/// Validates and applies `propose_marriage { character, spouse }` (spec § 2).
+/// The engine already accepts spouses of two different factions (M5
+/// diplomacy decides whether the AI proposes them).
+pub fn propose_marriage(
+    state: &mut CampaignState,
+    _data: &GameData,
+    character: &CharacterId,
+    spouse: &CharacterId,
+) -> Result<(), MarriageError> {
+    check_marriage(state, character, spouse)?;
     state
         .characters
         .get_mut(character)

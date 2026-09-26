@@ -429,10 +429,8 @@ pub fn check_treaty(
     }
     let at_war = state.is_at_war(proposer, recipient);
     let ends_war = articles.iter().any(Article::ends_war);
-    let mut seen = BTreeSet::new();
-    for article in articles {
-        let key = serde_json::to_string(article).unwrap_or_default();
-        if !seen.insert(key) {
+    for (i, article) in articles.iter().enumerate() {
+        if articles[..i].contains(article) {
             return Err(DiplomacyError::Refused("article en double".to_owned()));
         }
         let giver = article.giver().map(|g| party_id(g, proposer, recipient));
@@ -482,6 +480,18 @@ pub fn check_treaty(
                 };
                 if !own(character, proposer) || !own(spouse, recipient) {
                     return Err(DiplomacyError::Refused("époux invalides".to_owned()));
+                }
+                // Checked here so that the treaty never applies by halves.
+                crate::dynasty::check_marriage(state, character, spouse)
+                    .map_err(|e| DiplomacyError::Refused(e.to_string()))?;
+                let wed_twice = articles[..i].iter().any(|other| {
+                    matches!(other, Article::Marriage { character: c, spouse: s }
+                        if [c, s].iter().any(|x| *x == character || *x == spouse))
+                });
+                if wed_twice {
+                    return Err(DiplomacyError::Refused(
+                        "un même époux dans deux mariages".to_owned(),
+                    ));
                 }
             }
             Article::Tribute {

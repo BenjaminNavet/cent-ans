@@ -760,10 +760,7 @@ pub fn evaluate(
             }
         }
         Proposal::Marriage { character, spouse } => {
-            let mut probe = state.clone();
-            if let Err(error) =
-                crate::dynasty::propose_marriage(&mut probe, data, character, spouse)
-            {
+            if let Err(error) = crate::dynasty::check_marriage(state, character, spouse) {
                 reasons.push((format!("Mariage impossible : {error}"), -100));
                 hard_no = true;
             }
