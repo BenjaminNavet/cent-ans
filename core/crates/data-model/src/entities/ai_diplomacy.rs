@@ -192,6 +192,18 @@ pub struct NegotiationRules {
     /// EQ3: a peace also ends the wars of the allies and vassals who joined
     /// it (they sign the same truce).
     pub truce_binds_allies: bool,
+    /// EQ6: past this many years of war, both sides lean towards a treaty
+    /// ending it, the winner too ("Guerre interminable"): a war nobody can
+    /// win outright ends in a truce, as at Brétigny or Leulinghem. 0: off.
+    #[serde(default)]
+    pub long_war_years: u32,
+    /// EQ6: treaty points in favour of peace per year of war beyond
+    /// `long_war_years`.
+    #[serde(default)]
+    pub long_war_points_per_year: i32,
+    /// EQ6: cap of those points.
+    #[serde(default)]
+    pub long_war_max_points: i32,
 }
 
 impl Default for NegotiationRules {
@@ -226,6 +238,9 @@ impl Default for NegotiationRules {
             sue_weariness: 60,
             min_war_turns: 0,
             truce_binds_allies: false,
+            long_war_years: 0,
+            long_war_points_per_year: 0,
+            long_war_max_points: 0,
         }
     }
 }

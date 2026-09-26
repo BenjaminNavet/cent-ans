@@ -613,6 +613,7 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
     // EQ5: `TRESPASS_TRACE=1` lists every army standing on foreign lands
     // without right of passage at the end of each turn.
     let trespass_trace = std::env::var("TRESPASS_TRACE").is_ok();
+    let war_trace = std::env::var("WAR_TRACE").is_ok();
     let debug_army = std::env::var("DEBUG_ARMY").ok();
     let econ_trace = std::env::var("ECON_TRACE").ok().map(|f| id(&f));
     for _ in 0..turns {
@@ -747,6 +748,31 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             report.eq4.snowball_1437 = snowball(&state);
         }
         let at_war = state.is_at_war(&france, &england);
+        // EQ6 `WAR_TRACE=1`: both sides' weariness and war score every
+        // 5 years of war.
+        if at_war && war_trace && state.turn.is_multiple_of(20) {
+            let side = |f: &FactionId, e: &FactionId| {
+                let s = &state.factions[f];
+                format!(
+                    "weariness {} score {} treasury {} provinces {}",
+                    s.ledger.weariness,
+                    state.war_score(data, f, e),
+                    s.treasury,
+                    state
+                        .provinces
+                        .keys()
+                        .filter(|p| state.controls_province(f, p))
+                        .count()
+                )
+            };
+            println!(
+                "  t{} {} WAR england [{}] france [{}]",
+                state.turn,
+                state.date_label(),
+                side(&england, &france),
+                side(&france, &england)
+            );
+        }
         if at_war {
             report.war_turns += 1;
             war_run += 1;

@@ -685,6 +685,19 @@ fn context_reasons(
                 "Fatigue de guerre".to_owned(),
                 (rec.ledger.weariness / rules.weariness_peace_divisor.max(1)) as i32,
             ));
+            // EQ6: a war nobody wins outright ends in a truce, the winner
+            // weary of it too.
+            if rules.long_war_years > 0 {
+                let years = rec
+                    .war_started
+                    .get(proposer)
+                    .map_or(0, |started| state.turn.saturating_sub(*started) / 4);
+                let beyond = years.saturating_sub(rules.long_war_years) as i32;
+                reasons.push((
+                    "Guerre interminable".to_owned(),
+                    (beyond * rules.long_war_points_per_year).min(rules.long_war_max_points),
+                ));
+            }
             // A pretender does not give up a crown for nothing.
             let gains_land = articles.iter().any(|a| {
                 matches!(

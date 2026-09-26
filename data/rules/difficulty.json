@@ -52,7 +52,7 @@
       "player_unrest": 6,
       "ai_attitude_to_player": -20,
       "ai_war_ratio_percent": 80,
-      "ai_morale_vs_player": 10
+      "ai_morale_vs_player": 7
     }
   ]
 }

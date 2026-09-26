@@ -49,7 +49,11 @@ fn campaign(data: &GameData, level: Difficulty) -> CampaignState {
         .as_str()
         .bytes()
         .fold(0u32, |acc, b| acc.wrapping_add(u32::from(b)));
-    state.turn = if (40 + slot).is_multiple_of(2) { 40 } else { 41 };
+    state.turn = if (40 + slot).is_multiple_of(2) {
+        40
+    } else {
+        41
+    };
     let me = state.factions.get_mut(&england).unwrap();
     me.treasury = 100_000;
     me.upkeep_last_turn = 1_000;
