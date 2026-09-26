@@ -135,5 +135,55 @@
     "sources": [
       "Abbaye de Cymer"
     ]
+  },
+  {
+    "id": "set_bangor",
+    "province": "prov_gwynedd",
+    "kind": "town",
+    "name": {
+      "display": "Bangor",
+      "local": "Bangor",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -4.13,
+      53.228
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville cathédrale au bord du détroit de Menai.",
+    "sources": [
+      "Bangor, Pays de Galles"
+    ]
+  },
+  {
+    "id": "set_dolgellau",
+    "province": "prov_gwynedd",
+    "kind": "village",
+    "name": {
+      "display": "Dolgellau",
+      "local": "Dolgellau",
+      "local_language": "gallois"
+    },
+    "lonlat": [
+      -3.8844,
+      52.7419
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du sud du Gwynedd, près de l'abbaye de Cymer.",
+    "sources": [
+      "Dolgellau"
+    ]
   }
 ]
