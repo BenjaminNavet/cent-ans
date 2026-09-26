@@ -76,10 +76,15 @@ Worktrees et branches supprimés. Dylib du checkout principal reconstruite, smok
 ## DC6 — suites (lancé 26/09, accord du joueur « ok pour la suite »)
 | Lot | Contenu | Worktree | État |
 |---|---|---|---|
-| DC6a | Données : Pomposa et Teylingen accessibles ; audit des ~40 colonies recalées (coordonnées fausses vs frontière approximative) ; erreurs signalées par DC2 (Ranverso, Schloss Tirol, Skanör, Marienweerd, Bergerac, paires < 3 km) | ../gp-dc6a (feat/dc6-a) | lancé |
-| DC6b | Équilibrage : recherche des abbayes et bâtiments religieux contre l'hérésie pondérés comme province_effect_percent ; révoltes (3,2 vs 5,7) | ../gp-dc6b (feat/dc6-b) | lancé |
-| DC6c | Affichage : masquage/réduction des maquettes voisines à l'échelle réelle en vue rapprochée | ../gp-dc6c (feat/dc6-c) | lancé |
+| DC6a | Données : Pomposa et Teylingen accessibles ; audit des ~40 colonies recalées (coordonnées fausses vs frontière approximative) ; erreurs signalées par DC2 (Ranverso, Schloss Tirol, Skanör, Marienweerd, Bergerac, paires < 3 km) | ../gp-dc6a (feat/dc6-a) | fait, dans main |
+| DC6b | Équilibrage : recherche des abbayes et bâtiments religieux contre l'hérésie pondérés comme province_effect_percent ; révoltes (3,2 vs 5,7) | ../gp-dc6b (feat/dc6-b) | fait, dans main |
+| DC6c | Affichage : masquage/réduction des maquettes voisines à l'échelle réelle en vue rapprochée | ../gp-dc6c (feat/dc6-c) | fait, dans main |
 Frontière Sussex/Kent (polygones de provinces) : hors DC6, changement de géométrie lourd.
+
+DC6 fusionné dans main le 26/09 (DC6c 7368e5a7, DC6a a8abf59e, DC6b e3de9330) ; dylib du checkout principal reconstruite, smoke vert.
+Restes DC6b : révoltes 4,4 / 200 tours (5,6 avant DC) — relever demanderait de pondérer la garnison qui apaise (code) ;
+banqueroutes 0,09 → 0,13 (Écosse surtout, France 2) à surveiller ; sommes non pondérées : peste, faveur pontificale,
+garnison qui apaise, estimations de l'IA.
 
 ## Suites possibles
 - Pomposa et Teylingen : îles sans port sur la navgrid (déjà dans main avant DC).
