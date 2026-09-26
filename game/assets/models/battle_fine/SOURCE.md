@@ -1,4 +1,4 @@
-# Figurines de bataille fines (lot FG1)
+# Figurines de bataille fines (lots FG1 à FG4)
 
 Chargées par `BattleSkinned` seulement avec `--fine-figures` après `--` (le rendu par défaut
 reste `battle_skinned/` jusqu'au lot FG5). Même format que `battle_skinned/` (voir son
@@ -24,4 +24,19 @@ reste `battle_skinned/` jusqu'au lot FG5). Même format que `battle_skinned/` (v
   corps ajusté membres joint à joint, 8 visages, cheveux courts et barbes, vêtements en coques
   du corps ; équipement fin par script (FG2 : casques, plates des membres, jaque, brigandine,
   surcots plissés, armes et écus d'époque, UV par pièce, faces cachées supprimées).
+- **Textures (lot FG3, `textures/`)** : toutes produites par script, aucune image tierce
+  hormis le pelage CC0 du cheval ; ADR 0088.
+  - `fine_atlas_lod0.png` (512² × 28) et `fine_atlas_lod1.png` (256² × 28) : atlas par
+    figurine (bandes verticales lues en `Texture2DArray`, couche = `atlas_layer` du manifeste),
+    **cuits** dans Blender/Cycles par `battle_fine_bake.py` (`battle_fine.py -- bake`) : RG
+    normale de forme (pièces avant décimation, plis subdivisés des étoffes), B occlusion
+    (par groupe de variantes), A masque (barbe/cheveux, sourcils, martelage des plates) ;
+  - `fine_detail.png` (512² × 8) : tuiles de détail répétables (mailles, tissage, feutre,
+    cuir, acier martelé, bois, peau, cheveux), **calculées** en numpy par
+    `battle_fine_tiles.py` (champs de hauteur procéduraux, aucune photo) ;
+  - `fine_horse.png` (1024²) : normale, relief de la robe et occlusion du pelage réduits depuis
+    les textures 2k de « Rigged Horse » (Lyndon Daniels, OpenGameArt, **CC0 1.0**, voir
+    `game/assets/third_party/animals/oga_rigged_horse/SOURCE.md`) ;
+  - les `.import` (BC7, Texture2DArray) sont écrits par le script ; ne pas retoucher à la main.
+  - Maillages `CAM2` (LOD0/LOD1 des figurines cuites) : UV d'atlas empaquetée dans `UV2.y`.
 - **Licence du dérivé** : CC0 1.0.

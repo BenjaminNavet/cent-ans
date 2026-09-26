@@ -14,6 +14,7 @@ is exported to ``CAM1`` with colours and material codes (``battle_skinned.export
 
 import os
 
+import battle_fine_bake as fb
 import battle_fine_equipment as fe
 import battle_fine_gear as gear
 import battle_fine_proto as fp
@@ -279,6 +280,7 @@ def hair_shell(body, lm, name, beard=False):
         0.007 if beard else 0.006,
         relax=3,
     )
+    fb.hair_mask(obj, lm, beard)  # FG3: density, thin border, open mouth
     return obj
 
 
@@ -655,6 +657,8 @@ def decimate(obj, target):
     ``weld_and_decimate`` never goes below 1 % in one pass (the MakeHuman pieces start at
     ~10 k triangles): repeat until the target is reached or nothing collapses any more.
     """
+    if target:
+        fb.capture(obj)  # FG3: high-definition source of the baked normal
     tris = bs.weld_and_decimate(obj, target)
     while target and tris > target * 1.1:
         before = tris
@@ -881,6 +885,7 @@ def build_figure(fig_name, level):
         bare_thighs = colour(recipe, "King_Body:Metal", (eq.C_LIVERY,))[0] == eq.C_PLATE
         for obj in gear.limb_harness(kit_gear, body, era, plate_c, bare_thighs):
             parent_keep(obj, arm)
+            fb.gear_mask("limb_plates", [obj])
             garments.append((obj, "plates"))
         if era == "late":
             gloves = (eq.C_PLATE, plate_c)  # plate gauntlets
@@ -905,6 +910,7 @@ def build_figure(fig_name, level):
             for obj in objs:
                 gear.unwrap(obj)  # FG2: per-piece UVs for the baked maps of FG3
         m = mask if mounted else bs.held_mask(name, mask, kwargs)
+        fb.gear_mask(name, objs)
         for obj in objs:
             equipment.append((obj, m, kit))
     if fine:
@@ -921,6 +927,7 @@ def build_figure(fig_name, level):
             parent_keep(head, arm)
             heads.append((head, 1 << v))
             hlm = fe.Landmarks(src, arm)
+            fb.skin_mask(head, hlm)
             if hair_ok[v]:
                 heads.append((hair_shell(src, hlm, f"hair_{v}"), 1 << v))
             if beard_ok[v] and FACE_BEARD.get(face, False):
@@ -930,6 +937,7 @@ def build_figure(fig_name, level):
     else:
         head = region_mesh(body, "head_0", lambda c, b: is_head(b))
         parent_keep(head, arm)
+        fb.skin_mask(head, lm)
         heads.append((head, 0))
         if level < 2:
             shown = [v for v in range(variants) if hair_ok[v]]
@@ -1026,8 +1034,12 @@ def build_figure(fig_name, level):
     return arm, horse + out, recipe
 
 
-def export_figure(fig_name, rigs):
-    """Every LOD of a fine figure into ``battle_fine``; returns its manifest entry."""
+def export_figure(fig_name, rigs, bake=False):
+    """Every LOD of a fine figure into ``battle_fine``; returns its manifest entry.
+
+    `bake` (lot FG3): LOD0 and LOD1 get their atlas (``battle_fine_bake``), written as a
+    layer of the texture strips, and ``CAM2`` meshes carrying the atlas UV.
+    """
     import battle_fine as bf
     import battle_skinned_cavalry as cav
     import battle_skinned_poses as poses
@@ -1037,8 +1049,18 @@ def export_figure(fig_name, rigs):
     alias = cav.cavalry_alias if recipe["rig"] == "cavalry" else bs.human_bone_alias
     files, tris = [], []
     arm = None
+    layer = list(figures.FIGURES).index(fig_name)
     for level in range(3):
+        if bake and level < 2:
+            fb.capture_begin()
         arm, objs, _recipe = build_figure(fig_name, level)
+        if bake and level < 2:
+            hd = fb.capture_end()
+            atlas = fb.prepare_and_bake(objs, hd, level, recipe.get("variants", 1))
+            fb.discard_hd(hd)
+            fb.store_layer(bf.FINE_DIR, level, layer, len(figures.FIGURES), atlas)
+            if recipe["rig"] == "cavalry":
+                fb.make_horse(bf.FINE_DIR)
         name = f"{fig_name}_lod{level}.mesh.bin"
         tris.append(
             bs.export_mesh(
@@ -1059,13 +1081,15 @@ def export_figure(fig_name, rigs):
         "noble": recipe.get("noble", False),
         "fine": True,
     }
+    if bake:
+        entry["atlas_layer"] = layer
     if recipe["rig"] == "cavalry":
         arm = poses.RIDE["mount"].rarm
     entry.update(bs.pole_entry(recipe, arm))
     return entry
 
 
-def build_all(manifest, only=None):
+def build_all(manifest, only=None, bake=False):
     """Build every fine figure (or those in `only`) and record them in `manifest`."""
     rigs = {
         name: bs.rig_stub(name, entry["bones"])
@@ -1074,7 +1098,7 @@ def build_all(manifest, only=None):
     for fig_name in figures.FIGURES:
         if only and fig_name not in only:
             continue
-        manifest["figures"][fig_name] = export_figure(fig_name, rigs)
+        manifest["figures"][fig_name] = export_figure(fig_name, rigs, bake)
 
 
 # --- Pose check -----------------------------------------------------------------------

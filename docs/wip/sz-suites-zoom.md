@@ -41,6 +41,7 @@ Référence des défauts : `docs/wip/zg7c-recette.md` (tableau « défauts laiss
 - 26/09 : SZ2b fusionné par-dessus SZ1 (dylib reconstruite, tests sz1/zg5b/zg8/zg2/vh4 + smoke OK, captures combinées Rouen, Orléans, Londres correctes). Suites : bande sèche le long d'une rive (largeurs `river_widths.json`), maisons de faubourg au bord de l'eau à Orléans/Tours (`towns_1340.json` sans couloir de fleuve).
 - 26/09 : VH5 Paris fusionné par l'orchestrateur (accord du joueur : l'agent était bloqué par le filtre de permissions pendant la fusion). Conflits résolus : plusieurs ponts par ville (`plan.bridges`) avec les ajouts VH6 (piles, avant-becs, chapelle, pont-levis, rampes via `_bridge_levels`) et VH7 (piles selon `arches`, tablier sur les piles) ; un seul recalage des ponts dans `LandmarkPlan.reground` ; un seul index d'eau (`_water_index` VH5, cases de 40 m, polygones). Tests vh4 (Rouen 5 838, Londres 7 076, Orléans 2 590, Paris), zg4, zg6, zg5b, smoke, pytest OK ; Seine visible autour de la Cité (`docs/img/vh5/`). main = 22a953e6.
 - 26/09 : **pause demandée par le joueur.** SZ4b arrêté proprement (dernier commit 36d97138, worktree verrouillé).
+- 26/09 : reprise demandée par le joueur ; agent SZ4b relancé dans son worktree (fusion de main, cible cargo privée, captures, mesures, tests, doc).
 
 ## Prochaine étape (reprise)
 1. **SZ4b** : worktree `.claude/worktrees/agent-af6b91aaabd8c3484`, branche `feat/sz4b-colonies-forets`
