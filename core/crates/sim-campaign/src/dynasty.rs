@@ -737,7 +737,16 @@ pub(crate) fn resolve_births(
         } else {
             Sex::Female
         };
-        let faction = mother.faction.clone();
+        // The child belongs to the father's house and faction (it can inherit
+        // there), unless the mother reigns or is the heir of her own crown.
+        let mother_crown = state.factions.get(&mother.faction).is_some_and(|f| {
+            f.ruler.as_ref() == Some(&mother_id) || f.heir.as_ref() == Some(&mother_id)
+        });
+        let faction = if mother_crown {
+            mother.faction.clone()
+        } else {
+            father.faction.clone()
+        };
         let house = state.characters[&father_id].house.clone();
         let location = mother.location.clone();
         let first_name = pick_name(data, &faction, sex, &mut state.rng);
