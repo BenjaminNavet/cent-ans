@@ -11,7 +11,7 @@ import pytest
 from PIL import Image
 from typer.testing import CliRunner
 
-from cent_ans_tools import cli, portraits
+from cent_ans_tools import cli, openrouter, portraits
 from cent_ans_tools.budget import BudgetExceeded, BudgetLedger
 
 MODELS_PAYLOAD = {
@@ -147,6 +147,37 @@ def test_generate_refuses_beyond_global_cap(
             jobs, "vendor/imager", budget_path=budget_file, client=client
         )
     assert "/api/v1/chat/completions" not in calls
+
+
+def test_generate_records_billed_refusal(
+    budget_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A billed refusal (no image) still records its cost, even with no file written."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    calls: list[str] = []
+    jobs = portraits.plan(out_dir=tmp_path, limit=1)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request.url.path)
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json=MODELS_PAYLOAD)
+        return httpx.Response(
+            200,
+            json={
+                "choices": [{"message": {"content": "refus"}}],
+                "usage": {"cost": 0.04},
+            },
+        )
+
+    with (
+        httpx.Client(transport=httpx.MockTransport(handler)) as client,
+        pytest.raises(openrouter.ImageExtractionError),
+    ):
+        portraits.generate(
+            jobs, "vendor/imager", budget_path=budget_file, client=client
+        )
+    ledger = BudgetLedger(budget_file)
+    assert ledger.entries[-1].actual == Decimal("0.04")
 
 
 def test_dry_run_makes_no_network_call(

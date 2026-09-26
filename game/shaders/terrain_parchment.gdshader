@@ -83,7 +83,7 @@ void vertex() {
 
 void fragment() {
 	vec2 p = world_pos.xz;
-	vec2 uv = (p + vec2(0.5)) / map_size;
+	vec2 uv = p / map_size;  // SZ2b : pixel carte i centré en x = i + 0,5, comme les outils (ADR 0086)
 	float footprint = max(length(dFdx(p)), length(dFdy(p)));
 	vec3 albedo;
 	vec3 emission;

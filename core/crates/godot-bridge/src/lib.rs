@@ -13,6 +13,7 @@ use godot::prelude::*;
 
 mod battle_replay;
 mod battle_sim;
+mod battle_step_job;
 mod campaign_sim;
 mod campaign_sim_agents;
 mod campaign_sim_ai_replay;
@@ -25,6 +26,7 @@ mod campaign_sim_family;
 mod campaign_sim_h5h6;
 mod campaign_sim_map_lens;
 mod campaign_sim_movement;
+mod campaign_sim_provinces;
 mod campaign_sim_retinue;
 mod campaign_sim_settlements;
 mod campaign_sim_siege;
@@ -32,6 +34,7 @@ mod campaign_sim_table;
 mod campaign_sim_tech;
 mod campaign_sim_trade;
 mod campaign_sim_treaty;
+mod campaign_sim_turn;
 mod campaign_sim_victory;
 mod campaign_sim_vision;
 mod campaign_sim_weather;
@@ -40,12 +43,16 @@ mod data_store_rules;
 mod historical_battles;
 mod naval_sim;
 mod relief_decoder;
+mod relief_lod_bridge;
+mod stamp_map;
+mod turn_job;
 mod vegetation_scatter;
 
 pub use battle_sim::BattleSim;
 pub use campaign_sim::CampaignSim;
 pub use naval_sim::NavalBattleSim;
 pub use relief_decoder::ReliefDecoder;
+pub use relief_lod_bridge::ReliefLod;
 pub use vegetation_scatter::VegetationScatter;
 
 struct CentAnsExtension;
@@ -60,7 +67,8 @@ unsafe impl ExtensionLibrary for CentAnsExtension {}
 #[derive(GodotClass)]
 #[class(base = RefCounted)]
 pub struct GameDataStore {
-    data: Option<GameData>,
+    /// Shared with `CampaignSim` (one load per data folder).
+    data: Option<std::sync::Arc<GameData>>,
     warnings: Vec<String>,
     last_image_size: Vector2i,
     base: Base<RefCounted>,
@@ -86,9 +94,9 @@ impl GameDataStore {
     #[func]
     fn load(&mut self, data_dir: GString) -> bool {
         let root = PathBuf::from(data_dir.to_string());
-        match GameData::load(&root) {
+        match campaign_sim::load_shared_data(&root) {
             Ok((data, warnings)) => {
-                self.warnings = warnings.iter().map(ToString::to_string).collect();
+                self.warnings = warnings.to_vec();
                 self.data = Some(data);
                 true
             }

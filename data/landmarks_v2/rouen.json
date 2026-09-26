@@ -1,0 +1,7672 @@
+{
+ "format": 2,
+ "id": "rouen",
+ "name": "Rouen",
+ "settlement": "set_rouen",
+ "landmark": "rouen",
+ "period": "vers 1340 (avant l'accrue orientale de 1346, la peste de 1348, le beffroi de 1389 et la tour de Beurre)",
+ "year": 1340,
+ "seed": 1340076,
+ "crs": "EPSG:3035",
+ "origin_3035": [3676847, 2964336],
+ "extent_m": 1700,
+ "sources": [
+  {
+   "title": "OpenStreetMap (voies, églises, places, vestiges de l'enceinte, tour Jeanne-d'Arc)",
+   "author": "Contributeurs d'OpenStreetMap",
+   "date": "2026-09-26",
+   "url": "https://www.openstreetmap.org/copyright",
+   "license": "ODbL 1.0 (© contributeurs d'OpenStreetMap)",
+   "extracted": true,
+   "use": "Tracés des rues actuelles héritées du plan médiéval (extraction par `cent-ans geo landmarks`, percées du XIXe s. exclues) ; positions et orientations des églises et de la tour Jeanne-d'Arc ; tracé des boulevards bâtis sur l'enceinte arasée (XVIIIe s.)."
+  },
+  {
+   "title": "Relief fin et fleuves de la carte (hydro_fine)",
+   "author": "Projet Cent Ans (IGN RGE ALTI, Copernicus DEM, BD TOPAGE)",
+   "date": "2026",
+   "url": "https://geoservices.ign.fr/rgealti",
+   "license": "Licence Ouverte 2.0 / licence Copernicus (voir docs/credits.md)",
+   "extracted": true,
+   "use": "Axe et largeur de la Seine recopiés de la carte fine (section `waters`) ; les hauteurs viennent du relief affiché à l'exécution."
+  },
+  {
+   "title": "Le Livre des Fontaines de Rouen",
+   "author": "Jacques Le Lieur",
+   "date": "1525",
+   "url": "https://commons.wikimedia.org/wiki/Category:Livre_des_fontaines_de_Rouen",
+   "license": "Domaine public (Bibliothèque municipale de Rouen)",
+   "extracted": false,
+   "use": "Contrôle humain : enceinte et portes, quais, pont de pierre, silhouettes de la cathédrale et de Saint-Ouen (état de 1525, postérieur : à relire pour 1340)."
+  },
+  {
+   "title": "Rothomagus, plan cavalier (Civitates orbis terrarum)",
+   "author": "Georg Braun et Frans Hogenberg",
+   "date": "1572",
+   "url": "https://commons.wikimedia.org/wiki/Category:Old_maps_of_Rouen",
+   "license": "Domaine public",
+   "extracted": false,
+   "use": "Contrôle humain : tracé de l'enceinte, pont Mathilde et faubourg Saint-Sever."
+  },
+  {
+   "title": "Données de la maquette L1/L2 (data/landmarks/rouen.json)",
+   "author": "Projet Cent Ans",
+   "date": "2026",
+   "url": "https://commons.wikimedia.org/wiki/Category:Maps_of_Rouen",
+   "license": "Projet (faits recoupés : Le Lieur, Braun et Hogenberg, OSM)",
+   "extracted": false,
+   "use": "Dates : chœur de Saint-Ouen 1318-1339, beffroi 1389, tour de Beurre 1485-1506 ; gabarit de la cathédrale (137 m)."
+  },
+  {
+   "title": "Beffroi dit Gros Horloge (notice IA00021886)",
+   "author": "Inventaire général du patrimoine culturel, région Normandie (POP, Mérimée)",
+   "url": "https://pop.culture.gouv.fr/notice/merimee/IA00021886",
+   "license": "Licence Ouverte (notice POP) ; faits seulement",
+   "extracted": false,
+   "use": "Beffroi primitif démoli en 1382 (Harelle), reconstruit sur ses vestiges de 1389 à 1398 ; flèche primitive remplacée par le dôme en 1711."
+  },
+  {
+   "title": "Pont de l'Impératrice Mathilde (notice IA00021781)",
+   "author": "Inventaire général du patrimoine culturel, région Normandie (POP, Mérimée)",
+   "url": "https://pop.culture.gouv.fr/notice/merimee/IA00021781",
+   "license": "Licence Ouverte (notice POP) ; faits seulement",
+   "extracted": false,
+   "use": "Dates du pont de pierre (1151-1167) ; démolition des piles 1659-1661."
+  },
+  {
+   "title": "Rouen ville forte (Fortifs/XIIe.htm, XIVe.htm, Portes.htm) ; Ponts/Mathilde.htm",
+   "author": "Jacques Tanguy (rouen-histoire.fr)",
+   "date": "2006-2007",
+   "url": "https://rouen-histoire.fr/Fortifs/index.htm",
+   "license": "Tous droits réservés ; faits seulement",
+   "extracted": false,
+   "use": "Enceinte des XIIe-XIIIe s. englobant Saint-Ouen et le quartier Saint-Maclou ; accrue orientale de part et d'autre du Robec sous Philippe VI ; 5 portes vers la campagne en 1525 ; pont Mathilde et Barbacane."
+  },
+  {
+   "title": "La dernière enceinte de Rouen : un patrimoine à redécouvrir",
+   "author": "Érik Follain (Patrimoine normand)",
+   "date": "2006, mis à jour 2026",
+   "url": "https://patrimoinenormand.com/article-148959-fortifications-rouen.html",
+   "license": "Tous droits réservés ; faits seulement",
+   "extracted": false,
+   "use": "Dernière enceinte entreprise à partir de 1346, achevée au début du XVe s."
+  },
+  {
+   "title": "Château de Rouen ; Abbatiale Saint-Ouen ; Cathédrale Notre-Dame de Rouen ; Clos aux galées ; Aître Saint-Maclou (articles)",
+   "author": "Wikipédia (contributeurs), recoupés avec les notices POP",
+   "date": "2026",
+   "url": "https://fr.wikipedia.org/wiki/Ch%C3%A2teau_de_Rouen",
+   "license": "CC BY-SA 4.0 ; faits seulement",
+   "extracted": false,
+   "use": "Château 1204-1210 (enceinte ≈ 90 × 90 m, donjon ≈ 14 m de diamètre, ≈ 35 m) ; Saint-Ouen 1318-1339 ; cathédrale 144 m hors œuvre ; clos des galées 1293-1418, rebâti en 1451 ; aître : première mention 1362."
+  }
+ ],
+ "plan": {
+  "frontage_m": [5.0, 8.0],
+  "depth_m": [20.0, 40.0],
+  "faubourg_frontage_m": [8.0, 16.0],
+  "faubourg_depth_m": [25.0, 50.0],
+  "street_width_m": {
+   "main": 8.0,
+   "secondary": 5.0,
+   "lane": 3.0,
+   "quay": 14.0
+  },
+  "house_kinds": {
+   "intra": {
+    "townhouse": 0.55,
+    "timber": 0.33,
+    "stonehouse": 0.12
+   },
+   "faubourg": {
+    "timber": 0.35,
+    "cottage": 0.35,
+    "longere": 0.2,
+    "barn": 0.1
+   }
+  },
+  "detail_cell_m": 250.0
+ },
+ "osm_streets": {
+  "bbox_lonlat": [1.08, 49.434, 1.112, 49.451],
+  "highways": [
+   "primary",
+   "secondary",
+   "tertiary",
+   "unclassified",
+   "residential",
+   "living_street",
+   "pedestrian"
+  ],
+  "exclude": [
+   "Rue Jeanne d'Arc",
+   "Rue de la République",
+   "Rue Jean Lecanuet",
+   "Rue du Général Leclerc",
+   "Rue Alsace Lorraine",
+   "Rue Louis Ricard",
+   "Boulevard des Belges",
+   "Boulevard de la Marne",
+   "Boulevard de l'Yser",
+   "Boulevard Gambetta",
+   "Boulevard de Verdun",
+   "Rampe Cauchoise",
+   "Rampe Bouvreuil",
+   "Rampe Beauvoisine",
+   "Rampe Saint-Hilaire",
+   "Quai du Havre",
+   "Quai de la Bourse",
+   "Quai Pierre Corneille",
+   "Quai de Paris",
+   "Quai Jean Moulin",
+   "Quai Cavelier de la Salle",
+   "Voie sur Berge Rive Droite",
+   "Tunnel de Boieldieu",
+   "Tunnel Saint-Herbland",
+   "Tranchée Couverte de Saint-Paul",
+   "Pont Boieldieu",
+   "Pont Jeanne d'Arc",
+   "Pont Guillaume-le-Conquérant",
+   "Pont Corneille",
+   "Avenue Jacques Cartier",
+   "Place du Général de Gaulle",
+   "Allée Eugène Delacroix",
+   "Esplanade Marcel Duchamp",
+   "Rue Thiers",
+   "Rue de Crosne",
+   "Rue du Docteur Robert Rambert",
+   "Rue Robert Schuman",
+   "Promenade Éric Tabarly",
+   "Promenade du Commandant Charcot",
+   "Promenade de la France Libre",
+   "Rue Duguay Trouin",
+   "Rue de Buffon",
+   "Avenue Gustave Flaubert",
+   "Place Maréchal Foch",
+   "Rue Anatole France",
+   "Rue du Général Giraud",
+   "Rue André Gide",
+   "Rue Paul Paray",
+   "Rue Jacques Lelieur",
+   "Rue de la Champmesle",
+   "Rue Camille Saint-Saëns",
+   "Rue Adrien Pasquier",
+   "Rue Armand Carrel",
+   "Rue Ambroise Fleury",
+   "Rue Mollien",
+   "Rue du Général Sarrail",
+   "Rue du Docteur Blanche",
+   "Rue Géricault",
+   "Avenue de la Porte des Champs"
+  ],
+  "main": [
+   "Rue du Gros-Horloge",
+   "Rue Grand Pont",
+   "Rue Beauvoisine",
+   "Rue Cauchoise",
+   "Rue Martainville",
+   "Rue Saint-Romain",
+   "Rue aux Juifs",
+   "Rue de la Vicomte",
+   "Rue Eau de Robec",
+   "Rue Damiette",
+   "Rue des Carmes",
+   "Rue Ganterie",
+   "Rue de l'Hôpital",
+   "Rue Saint-Hilaire",
+   "Rue Bouvreuil",
+   "Rue Écuyère",
+   "Rue Saint-Vivien",
+   "Rue du Faubourg Martainville",
+   "Rue Saint-Sever",
+   "Rue Saint-Gervais"
+  ],
+  "lanes": [],
+  "unnamed": false,
+  "simplify_m": 1.5
+ },
+ "fine_rivers": [
+  "Seine"
+ ],
+ "waters": [
+  {
+   "id": "robec",
+   "name": "Robec",
+   "kind": "stream",
+   "origin": "hand",
+   "draw": true,
+   "points": [
+    [1290, -18, 5],
+    [1116, 18, 5],
+    [909, 59, 5],
+    [826, 82, 5],
+    [662, 74, 5],
+    [576, 60, 5],
+    [454, 83, 5],
+    [345, 102, 5],
+    [311, 111, 5],
+    [250, 40, 5],
+    [200, -120, 5],
+    [120, -290, 5]
+   ]
+  },
+  {
+   "id": "seine_0",
+   "name": "Seine",
+   "kind": "river",
+   "origin": "rivers_fine",
+   "draw": false,
+   "points": [
+    [907.0, -1830.3, 198.2],
+    [882.5, -1798.8, 198.2],
+    [855.5, -1769.3, 198.3],
+    [828.6, -1739.7, 198.3],
+    [801.7, -1710.1, 198.3],
+    [774.8, -1680.5, 198.4],
+    [749.3, -1649.7, 198.4],
+    [725.3, -1617.8, 198.4],
+    [701.2, -1585.8, 198.5],
+    [677.2, -1553.8, 198.5],
+    [653.2, -1521.8, 198.5],
+    [629.1, -1489.9, 198.6],
+    [605.1, -1457.9, 198.6],
+    [581.0, -1425.9, 198.7],
+    [557.0, -1394.0, 198.7],
+    [533.0, -1362.0, 198.7],
+    [508.9, -1330.0, 198.8],
+    [484.9, -1298.1, 198.8],
+    [460.8, -1266.1, 198.8],
+    [436.8, -1234.1, 198.9],
+    [412.8, -1202.2, 198.9],
+    [389.1, -1169.9, 198.9],
+    [365.7, -1137.4, 199.0],
+    [342.4, -1104.9, 199.0],
+    [319.1, -1072.5, 199.1],
+    [295.7, -1040.0, 199.1],
+    [272.4, -1007.5, 199.1],
+    [249.1, -975.0, 199.2],
+    [225.7, -942.5, 199.2],
+    [202.4, -910.0, 199.2],
+    [179.1, -877.5, 199.3],
+    [155.7, -845.0, 199.3],
+    [132.4, -812.5, 199.4],
+    [109.1, -780.1, 199.4],
+    [85.7, -747.6, 199.4],
+    [62.0, -715.4, 199.5],
+    [38.3, -683.1, 199.5],
+    [14.6, -650.9, 199.5],
+    [-9.1, -618.7, 199.6],
+    [-32.8, -586.4, 199.6],
+    [-56.5, -554.2, 199.6],
+    [-80.2, -522.0, 199.7],
+    [-103.8, -489.8, 199.7],
+    [-126.1, -456.6, 199.8],
+    [-147.0, -422.5, 199.8],
+    [-167.9, -388.4, 199.8],
+    [-189.0, -354.5, 199.9],
+    [-223.2, -333.7, 199.9],
+    [-258.3, -314.7, 199.9],
+    [-293.5, -295.7, 199.9],
+    [-328.7, -276.6, 200.0],
+    [-363.9, -257.6, 200.0],
+    [-399.1, -238.6, 200.0],
+    [-434.0, -219.0, 200.0],
+    [-468.6, -199.0, 200.1],
+    [-503.2, -178.9, 200.1],
+    [-537.8, -158.8, 200.2],
+    [-572.4, -138.7, 200.2],
+    [-607.0, -118.6, 200.3],
+    [-641.6, -98.6, 200.3],
+    [-676.1, -78.5, 200.4],
+    [-710.7, -58.4, 200.4],
+    [-745.3, -38.3, 200.5],
+    [-779.9, -18.2, 200.5],
+    [-814.5, 1.8, 200.6],
+    [-849.1, 21.9, 200.6],
+    [-883.7, 42.0, 200.7],
+    [-918.3, 62.1, 200.7],
+    [-952.9, 82.2, 200.8],
+    [-987.5, 102.2, 200.8],
+    [-1022.1, 122.3, 200.9],
+    [-1056.7, 142.4, 200.9],
+    [-1091.3, 162.4, 201.0],
+    [-1126.4, 181.6, 201.0],
+    [-1161.5, 200.8, 201.1],
+    [-1196.6, 219.9, 201.2],
+    [-1231.8, 239.1, 201.2],
+    [-1266.9, 258.3, 201.3],
+    [-1302.0, 277.4, 201.3],
+    [-1336.8, 297.1, 201.4],
+    [-1371.3, 317.3, 201.4],
+    [-1405.8, 337.5, 201.5],
+    [-1440.4, 357.7, 201.6],
+    [-1474.9, 377.9, 201.6],
+    [-1510.0, 397.0, 201.7],
+    [-1545.6, 415.2, 201.7],
+    [-1581.3, 433.4, 201.8],
+    [-1616.9, 451.6, 201.9],
+    [-1652.5, 469.8, 201.9],
+    [-1688.1, 487.9, 202.0],
+    [-1723.8, 506.1, 202.0],
+    [-1759.4, 524.3, 202.1],
+    [-1795.0, 542.5, 202.2],
+    [-1830.7, 560.7, 202.2],
+    [-1865.5, 577.4, 202.3]
+   ]
+  }
+ ],
+ "walls": [
+  {
+   "id": "enceinte_xiiie",
+   "name": "Enceinte de Rouen (XIIe-XIIIe s.) et mur des quais",
+   "points": [
+    [-870, 150],
+    [-881, 197],
+    [-833, 259],
+    [-740, 347],
+    [-693, 416],
+    [-616, 554],
+    [-559, 658],
+    [-545, 690],
+    [-430, 718],
+    [-297, 738],
+    [-62, 776],
+    [116, 774],
+    [187, 760],
+    [310, 808],
+    [402, 848],
+    [455, 870],
+    [520, 640],
+    [540, 335],
+    [495, 128],
+    [490, 40],
+    [476, -180],
+    [484, -424],
+    [390, -458],
+    [300, -440],
+    [150, -365],
+    [0, -300],
+    [-134, -238],
+    [-245, -186],
+    [-420, -100],
+    [-490, -45],
+    [-640, 20],
+    [-785, 95]
+   ],
+   "closed": true,
+   "height_m": 10.0,
+   "thickness_m": 2.6,
+   "tower_spacing_m": 70.0,
+   "tower_radius_m": 5.0,
+   "tower_height_m": 15.0,
+   "ditch_m": 18.0,
+   "gates": [
+    {
+     "name": "Porte Cauchoise",
+     "at": [-545, 690],
+     "kind": "gate",
+     "height_m": 18
+    },
+    {
+     "name": "Porte Bouvreuil",
+     "at": [-297, 738],
+     "kind": "gate",
+     "height_m": 17
+    },
+    {
+     "name": "Porte Beauvoisine",
+     "at": [455, 870],
+     "kind": "gate",
+     "height_m": 18
+    },
+    {
+     "name": "Porte Saint-Vivien",
+     "at": [495, 128],
+     "kind": "gate",
+     "height_m": 15
+    },
+    {
+     "name": "Porte de Martainville (première)",
+     "at": [476, -180],
+     "kind": "gate",
+     "height_m": 15
+    },
+    {
+     "name": "Porte du Grand-Pont",
+     "at": [-245, -186],
+     "kind": "gate",
+     "height_m": 16
+    },
+    {
+     "name": "Porte du Bac",
+     "at": [-134, -238],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte de la Vicomté",
+     "at": [-490, -45],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte Guillaume-Lion",
+     "at": [300, -440],
+     "kind": "water_gate",
+     "height_m": 12
+    }
+   ],
+   "until_year": 1345,
+   "note": "État d'avant l'accrue orientale de 1346 (Tanguy : murs nord et est englobant l'abbaye Saint-Ouen et le quartier Saint-Maclou ; les quartiers de l'est, de part et d'autre du Robec, ne sont enclos qu'à l'injonction de Philippe VI). Ouest, nord et front de Seine comme l'enceinte suivante. Front est hypothétique : vestige du mur dans l'ancien jardin de Saint-Ouen (jardin de l'Hôtel-de-Ville, vers la rue de l'Abbé-de-l'Épée), puis rupture rue des Faulx / rue Saint-Vivien et rue du Ruissel, jusqu'à la Seine à l'est de la rue du Rempart-Martainville. Noms et positions des deux portes est restitués (une « porte Saint-Vivien » n'est citée que par une source secondaire). Saint-Vivien, Saint-Nicaise et Martainville sont hors les murs (Wikipédia dit Saint-Vivien paroisse intra-muros dès 1230 : non recoupé, contradictoire)."
+  },
+  {
+   "id": "enceinte",
+   "name": "Enceinte de Rouen après l'accrue orientale (1346-début XVe s.) et mur des quais",
+   "points": [
+    [-870, 150],
+    [-881, 197],
+    [-833, 259],
+    [-740, 347],
+    [-693, 416],
+    [-616, 554],
+    [-559, 658],
+    [-545, 690],
+    [-430, 718],
+    [-297, 738],
+    [-62, 776],
+    [116, 774],
+    [187, 760],
+    [310, 808],
+    [402, 848],
+    [455, 870],
+    [610, 768],
+    [815, 654],
+    [945, 564],
+    [930, 420],
+    [915, 300],
+    [900, 125],
+    [870, 0],
+    [830, -120],
+    [780, -250],
+    [735, -345],
+    [593, -395],
+    [484, -424],
+    [390, -458],
+    [300, -440],
+    [150, -365],
+    [0, -300],
+    [-134, -238],
+    [-245, -186],
+    [-420, -100],
+    [-490, -45],
+    [-640, 20],
+    [-785, 95]
+   ],
+   "closed": true,
+   "height_m": 10.0,
+   "thickness_m": 2.6,
+   "tower_spacing_m": 70.0,
+   "tower_radius_m": 5.0,
+   "tower_height_m": 15.0,
+   "ditch_m": 18.0,
+   "gates": [
+    {
+     "name": "Porte Cauchoise",
+     "at": [-545, 690],
+     "kind": "gate",
+     "height_m": 18
+    },
+    {
+     "name": "Porte Bouvreuil",
+     "at": [-297, 738],
+     "kind": "gate",
+     "height_m": 17
+    },
+    {
+     "name": "Porte Beauvoisine",
+     "at": [455, 870],
+     "kind": "gate",
+     "height_m": 18
+    },
+    {
+     "name": "Porte Saint-Hilaire",
+     "at": [900, 125],
+     "kind": "gate",
+     "height_m": 17
+    },
+    {
+     "name": "Porte Martainville",
+     "at": [735, -345],
+     "kind": "gate",
+     "height_m": 18
+    },
+    {
+     "name": "Porte du Grand-Pont",
+     "at": [-245, -186],
+     "kind": "gate",
+     "height_m": 16
+    },
+    {
+     "name": "Porte du Bac",
+     "at": [-134, -238],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte de la Vicomté",
+     "at": [-490, -45],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte Guillaume-Lion",
+     "at": [300, -440],
+     "kind": "water_gate",
+     "height_m": 12
+    }
+   ],
+   "note": "Tracé des boulevards du XVIIIe s. bâtis sur l'enceinte arasée (OSM) ; front de Seine le long des quais actuels, décalé vers la ville. L'accrue orientale (Saint-Nicaise, Saint-Vivien, Martainville, portes Saint-Hilaire et Martainville) est décidée en 1346 par Philippe VI et achevée au début du XVe s. (Follain ; Tanguy ; fouille Inrap 2021 de la porte Saint-Hilaire, état du XIVe s.) : absente en 1340 (voir « enceinte_xiiie »). Angle nord-est et porte Saint-Hilaire approchés.",
+   "from_year": 1346
+  }
+ ],
+ "streets": [
+  {
+   "id": "osm_1367162434",
+   "name": "Rue Beauvoisine",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [315.1, 671.2],
+    [236.6, 553.0]
+   ]
+  },
+  {
+   "id": "osm_1435381476",
+   "name": "Rue Beauvoisine",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [236.6, 553.0],
+    [212.6, 498.7]
+   ]
+  },
+  {
+   "id": "osm_1505060449",
+   "name": "Rue Beauvoisine",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [439.0, 813.2],
+    [462.1, 836.7]
+   ]
+  },
+  {
+   "id": "osm_181162643",
+   "name": "Rue Beauvoisine",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [78.4, 304.8],
+    [137.1, 401.7]
+   ]
+  },
+  {
+   "id": "osm_25850267",
+   "name": "Rue Beauvoisine",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [212.6, 498.7],
+    [196.2, 471.8],
+    [156.5, 432.0],
+    [137.1, 401.7]
+   ]
+  },
+  {
+   "id": "osm_665263398",
+   "name": "Rue Beauvoisine",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [315.1, 671.2],
+    [353.3, 722.2],
+    [397.3, 771.7],
+    [439.0, 813.2]
+   ]
+  },
+  {
+   "id": "osm_25492618",
+   "name": "Rue Bouvreuil",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [16.1, 565.8],
+    [21.0, 565.5],
+    [52.0, 599.6],
+    [90.4, 651.8]
+   ]
+  },
+  {
+   "id": "osm_29470831",
+   "name": "Rue Bouvreuil",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [90.4, 651.8],
+    [85.6, 676.5],
+    [87.0, 702.9],
+    [115.9, 776.7]
+   ]
+  },
+  {
+   "id": "osm_25182668",
+   "name": "Rue Cauchoise",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-530.6, 673.7],
+    [-452.9, 458.8]
+   ]
+  },
+  {
+   "id": "osm_31281941",
+   "name": "Rue Damiette",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [221.7, -52.4],
+    [228.6, -30.2],
+    [241.5, -8.1],
+    [280.6, 44.9],
+    [289.1, 64.4],
+    [285.3, 66.5]
+   ]
+  },
+  {
+   "id": "osm_225773079",
+   "name": "Rue Eau de Robec",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [662.2, 74.3],
+    [685.1, 86.1],
+    [698.5, 88.9],
+    [777.3, 82.2],
+    [826.3, 81.5]
+   ]
+  },
+  {
+   "id": "osm_25850124",
+   "name": "Rue Eau de Robec",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [1290.9, -18.1],
+    [1256.9, -7.0],
+    [1221.7, 8.7],
+    [1116.4, 18.4],
+    [1058.4, 32.3],
+    [1020.2, 45.5],
+    [967.7, 53.4],
+    [931.8, 63.0],
+    [917.7, 63.4],
+    [908.8, 58.7],
+    [906.8, 46.6]
+   ]
+  },
+  {
+   "id": "osm_31737063",
+   "name": "Rue Eau de Robec",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [649.3, 49.3],
+    [662.2, 74.3]
+   ]
+  },
+  {
+   "id": "osm_39289327",
+   "name": "Rue Eau de Robec",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [311.0, 111.2],
+    [345.0, 102.2],
+    [396.4, 93.9],
+    [409.0, 89.8],
+    [480.2, 79.3],
+    [520.9, 79.2],
+    [583.1, 57.0]
+   ]
+  },
+  {
+   "id": "osm_442729613",
+   "name": "Rue Eau de Robec",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [826.3, 81.5],
+    [893.8, 75.6],
+    [904.7, 68.2],
+    [908.8, 58.7]
+   ]
+  },
+  {
+   "id": "osm_25212732",
+   "name": "Rue Ganterie",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [78.4, 304.8],
+    [-13.7, 363.8],
+    [-127.1, 425.4]
+   ]
+  },
+  {
+   "id": "osm_82794360",
+   "name": "Rue Ganterie",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-178.7, 452.2],
+    [-127.1, 425.4]
+   ]
+  },
+  {
+   "id": "osm_192748231",
+   "name": "Rue Grand Pont",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-208.8, -134.7],
+    [-234.2, -180.9]
+   ]
+  },
+  {
+   "id": "osm_31713441",
+   "name": "Rue Grand Pont",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-106.3, 13.1],
+    [-122.3, -0.9]
+   ]
+  },
+  {
+   "id": "osm_38286102",
+   "name": "Rue Grand Pont",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-158.3, -52.5],
+    [-208.8, -134.7]
+   ]
+  },
+  {
+   "id": "osm_666292773",
+   "name": "Rue Grand Pont",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-127.0, 2.0],
+    [-116.1, 16.2],
+    [-94.6, 25.8]
+   ]
+  },
+  {
+   "id": "osm_868245333",
+   "name": "Rue Grand Pont",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-122.3, -0.9],
+    [-155.2, -46.8]
+   ]
+  },
+  {
+   "id": "osm_1111517592",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [494.2, -190.9],
+    [458.0, -168.9]
+   ]
+  },
+  {
+   "id": "osm_1385138473",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [389.0, -127.1],
+    [322.2, -86.9]
+   ]
+  },
+  {
+   "id": "osm_1472227841",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [458.0, -168.9],
+    [428.0, -150.7]
+   ]
+  },
+  {
+   "id": "osm_1546087321",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [300.4, -73.3],
+    [221.7, -52.4]
+   ]
+  },
+  {
+   "id": "osm_195644004",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [543.8, -221.0],
+    [494.2, -190.9]
+   ]
+  },
+  {
+   "id": "osm_226433878",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [701.0, -320.9],
+    [693.8, -309.3],
+    [666.8, -292.2]
+   ]
+  },
+  {
+   "id": "osm_251229401",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [322.2, -86.9],
+    [313.8, -82.1],
+    [306.2, -82.4]
+   ]
+  },
+  {
+   "id": "osm_251229403",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [428.0, -150.7],
+    [389.0, -127.1]
+   ]
+  },
+  {
+   "id": "osm_25850134",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [715.0, -350.5],
+    [704.5, -329.9]
+   ]
+  },
+  {
+   "id": "osm_26531363",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [309.0, -81.7],
+    [307.8, -75.6],
+    [300.4, -73.3]
+   ]
+  },
+  {
+   "id": "osm_40165754",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [626.2, -271.2],
+    [543.8, -221.0]
+   ]
+  },
+  {
+   "id": "osm_601110108",
+   "name": "Rue Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [666.8, -292.2],
+    [626.2, -271.2]
+   ]
+  },
+  {
+   "id": "osm_38328202",
+   "name": "Rue Saint-Gervais",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-536.7, 701.5],
+    [-549.5, 725.4]
+   ]
+  },
+  {
+   "id": "osm_601063358",
+   "name": "Rue Saint-Gervais",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-549.5, 725.4],
+    [-559.2, 747.2]
+   ]
+  },
+  {
+   "id": "osm_601063359",
+   "name": "Rue Saint-Gervais",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-572.0, 767.0],
+    [-619.9, 852.8],
+    [-642.3, 950.8],
+    [-664.4, 995.6]
+   ]
+  },
+  {
+   "id": "osm_601063361",
+   "name": "Rue Saint-Gervais",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-559.2, 747.2],
+    [-568.8, 761.1]
+   ]
+  },
+  {
+   "id": "osm_246432354",
+   "name": "Rue Saint-Hilaire",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [851.9, 136.5],
+    [885.6, 135.2],
+    [1057.8, 101.0],
+    [1277.4, 61.1],
+    [1291.6, 56.6]
+   ]
+  },
+  {
+   "id": "osm_25184295",
+   "name": "Rue Saint-Romain",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [170.8, -43.1],
+    [100.6, 1.5],
+    [30.2, 65.7],
+    [16.5, 74.6],
+    [-16.0, 89.2]
+   ]
+  },
+  {
+   "id": "osm_148631333",
+   "name": "Rue Saint-Sever",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-386.5, -434.1],
+    [-477.0, -583.9]
+   ]
+  },
+  {
+   "id": "osm_38286101",
+   "name": "Rue Saint-Sever",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-482.5, -592.8],
+    [-500.7, -622.4]
+   ]
+  },
+  {
+   "id": "osm_82635052",
+   "name": "Rue Saint-Sever",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-500.7, -622.4],
+    [-562.2, -680.5],
+    [-571.6, -693.3]
+   ]
+  },
+  {
+   "id": "osm_1296645442",
+   "name": "Rue Saint-Vivien",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [618.0, 138.9],
+    [632.0, 138.3]
+   ]
+  },
+  {
+   "id": "osm_205388241",
+   "name": "Rue Saint-Vivien",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [491.8, 127.2],
+    [581.3, 134.0],
+    [602.0, 138.0]
+   ]
+  },
+  {
+   "id": "osm_76848943",
+   "name": "Rue Saint-Vivien",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [632.0, 138.3],
+    [741.5, 129.4],
+    [839.6, 135.9]
+   ]
+  },
+  {
+   "id": "osm_188885308",
+   "name": "Rue aux Juifs",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-93.4, 189.0],
+    [-22.3, 144.0]
+   ]
+  },
+  {
+   "id": "osm_286614542",
+   "name": "Rue aux Juifs",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-214.3, 256.0],
+    [-93.4, 189.0]
+   ]
+  },
+  {
+   "id": "osm_25492621",
+   "name": "Rue de l'Hôpital",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [278.1, 212.2],
+    [248.8, 227.7],
+    [158.5, 265.7],
+    [86.3, 303.6],
+    [78.4, 304.8]
+   ]
+  },
+  {
+   "id": "osm_1479504099",
+   "name": "Rue de la Vicomte",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-461.9, 126.2],
+    [-471.0, 115.8]
+   ]
+  },
+  {
+   "id": "osm_25781039",
+   "name": "Rue de la Vicomte",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-356.2, 272.0],
+    [-377.8, 252.5],
+    [-387.3, 238.4],
+    [-409.6, 182.2]
+   ]
+  },
+  {
+   "id": "osm_647366750",
+   "name": "Rue de la Vicomte",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-401.0, 204.5],
+    [-416.4, 224.4]
+   ]
+  },
+  {
+   "id": "osm_83253496",
+   "name": "Rue de la Vicomte",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-413.2, 176.9],
+    [-420.1, 174.6],
+    [-461.9, 126.2]
+   ]
+  },
+  {
+   "id": "osm_181162654",
+   "name": "Rue des Carmes",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [12.1, 199.5],
+    [78.4, 304.8]
+   ]
+  },
+  {
+   "id": "osm_25156080",
+   "name": "Rue des Carmes",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-62.2, 80.6],
+    [12.1, 199.5]
+   ]
+  },
+  {
+   "id": "osm_1111517587",
+   "name": "Rue du Faubourg Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [906.8, -454.5],
+    [956.9, -489.8]
+   ]
+  },
+  {
+   "id": "osm_1156356924",
+   "name": "Rue du Faubourg Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [753.2, -336.9],
+    [762.4, -347.4],
+    [771.8, -353.6],
+    [774.8, -352.4]
+   ]
+  },
+  {
+   "id": "osm_1156356925",
+   "name": "Rue du Faubourg Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [774.8, -352.4],
+    [774.4, -349.4],
+    [763.0, -340.6],
+    [759.3, -334.7]
+   ]
+  },
+  {
+   "id": "osm_31737685",
+   "name": "Rue du Faubourg Martainville",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [774.8, -352.4],
+    [875.0, -419.1],
+    [906.8, -454.5]
+   ]
+  },
+  {
+   "id": "osm_1443043076",
+   "name": "Rue du Gros-Horloge",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-247.5, 180.3],
+    [-295.9, 219.0]
+   ]
+  },
+  {
+   "id": "osm_1447164386",
+   "name": "Rue du Gros-Horloge",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-307.1, 228.3],
+    [-328.8, 246.0],
+    [-403.7, 318.9]
+   ]
+  },
+  {
+   "id": "osm_25127481",
+   "name": "Rue du Gros-Horloge",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-295.9, 219.0],
+    [-307.1, 228.3]
+   ]
+  },
+  {
+   "id": "osm_459559882",
+   "name": "Rue du Gros-Horloge",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-73.1, 74.3],
+    [-137.3, 114.2],
+    [-206.7, 153.4],
+    [-244.2, 178.0]
+   ]
+  },
+  {
+   "id": "osm_25127583",
+   "name": "Rue Écuyère",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-319.8, 314.1],
+    [-290.8, 360.6]
+   ]
+  },
+  {
+   "id": "osm_38286100",
+   "name": "Rue Écuyère",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-319.8, 314.1],
+    [-356.2, 272.0]
+   ]
+  },
+  {
+   "id": "osm_79095775",
+   "name": "Rue Écuyère",
+   "rank": "main",
+   "width_m": 8.0,
+   "origin": "osm",
+   "points": [
+    [-290.8, 360.6],
+    [-231.5, 473.7]
+   ]
+  },
+  {
+   "id": "osm_31785753",
+   "name": "Allée Daniel Lavallée",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1164.2, 183.2],
+    [1166.9, 195.9],
+    [1176.2, 194.5],
+    [1178.7, 213.9],
+    [1187.5, 236.9]
+   ]
+  },
+  {
+   "id": "osm_457539686",
+   "name": "Allée Daniel Lavallée",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1160.6, 165.6],
+    [1118.2, 174.4]
+   ]
+  },
+  {
+   "id": "osm_527746586",
+   "name": "Allée Daniel Lavallée",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1145.7, 85.7],
+    [1160.6, 165.6]
+   ]
+  },
+  {
+   "id": "osm_211666725",
+   "name": "Allée Pillore",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [854.4, -91.1],
+    [799.4, -95.3],
+    [802.3, -146.8]
+   ]
+  },
+  {
+   "id": "osm_783889375",
+   "name": "Allée Pillore",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [754.6, -144.6],
+    [772.2, -150.6],
+    [799.4, -150.4],
+    [802.3, -146.8]
+   ]
+  },
+  {
+   "id": "osm_555958075",
+   "name": "Avenue Aristide Briand",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [374.3, -480.4],
+    [357.6, -468.9]
+   ]
+  },
+  {
+   "id": "osm_37350925",
+   "name": "Cavée Saint-Gervais",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-679.2, 1067.0],
+    [-690.8, 1049.0]
+   ]
+  },
+  {
+   "id": "osm_37350926",
+   "name": "Cavée Saint-Gervais",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-673.2, 1137.2],
+    [-679.2, 1067.0]
+   ]
+  },
+  {
+   "id": "osm_37350927",
+   "name": "Cavée Saint-Gervais",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-679.2, 1033.5],
+    [-679.2, 1067.0]
+   ]
+  },
+  {
+   "id": "osm_297770291",
+   "name": "Cour Derocque",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1040.8, -79.7],
+    [1046.6, -82.0],
+    [1052.5, -80.1],
+    [1055.9, -75.0],
+    [1054.0, -66.6],
+    [1045.9, -63.3],
+    [1040.5, -65.7],
+    [1037.6, -74.3],
+    [1040.8, -79.7]
+   ]
+  },
+  {
+   "id": "osm_223347506",
+   "name": "Cour d'Honneur",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [902.1, -41.4],
+    [942.0, -39.2],
+    [943.7, -61.7],
+    [901.3, -64.1],
+    [902.1, -41.4]
+   ]
+  },
+  {
+   "id": "osm_223347504",
+   "name": "Cour de Germont",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [879.4, -39.9],
+    [902.1, -41.4]
+   ]
+  },
+  {
+   "id": "osm_319630500",
+   "name": "Cour de Germont",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [853.8, -77.9],
+    [852.0, -39.0],
+    [879.4, -39.9]
+   ]
+  },
+  {
+   "id": "osm_134952171",
+   "name": "Cour de la Communauté",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [881.6, -143.6],
+    [878.4, -103.7],
+    [862.8, -104.7],
+    [865.6, -142.3],
+    [867.8, -144.3],
+    [881.6, -143.6]
+   ]
+  },
+  {
+   "id": "osm_211666746",
+   "name": "Cour de la Communauté",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [862.8, -104.7],
+    [856.4, -100.1],
+    [854.4, -91.1]
+   ]
+  },
+  {
+   "id": "osm_1531451563",
+   "name": "Cours Clemenceau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-424.6, -629.1],
+    [-400.2, -644.2]
+   ]
+  },
+  {
+   "id": "osm_155271808",
+   "name": "Cours Clemenceau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-484.2, -580.5],
+    [-594.5, -516.0]
+   ]
+  },
+  {
+   "id": "osm_191797718",
+   "name": "Cours Clemenceau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-482.5, -592.8],
+    [-424.6, -629.1]
+   ]
+  },
+  {
+   "id": "osm_25156153",
+   "name": "Cours Clemenceau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-601.2, -521.5],
+    [-488.9, -588.5]
+   ]
+  },
+  {
+   "id": "osm_32007981",
+   "name": "Cours Clemenceau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-373.7, -718.0],
+    [-380.9, -704.8],
+    [-403.7, -681.1],
+    [-500.7, -622.4]
+   ]
+  },
+  {
+   "id": "osm_39344878",
+   "name": "Cours Clemenceau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-627.7, -543.4],
+    [-590.9, -565.9]
+   ]
+  },
+  {
+   "id": "osm_82629991",
+   "name": "Cours Clemenceau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-590.9, -565.9],
+    [-500.7, -622.4]
+   ]
+  },
+  {
+   "id": "osm_188541033",
+   "name": "Esplanade Flaubert",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1103.9, -148.7],
+    [1105.7, -170.4],
+    [1116.8, -201.2]
+   ]
+  },
+  {
+   "id": "osm_134952164",
+   "name": "Esplanade de l'Hôtel Dieu",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [896.3, -144.7],
+    [897.9, -180.4]
+   ]
+  },
+  {
+   "id": "osm_284244390",
+   "name": "Esplanade de l'Hôtel Dieu",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [897.9, -180.4],
+    [906.5, -180.0],
+    [904.9, -144.3]
+   ]
+  },
+  {
+   "id": "osm_43979527",
+   "name": "Impasse Adrien Auzout",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [474.4, 777.6],
+    [493.1, 765.4],
+    [533.6, 750.8]
+   ]
+  },
+  {
+   "id": "osm_31580845",
+   "name": "Impasse Caron",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [590.9, 502.1],
+    [602.0, 524.5]
+   ]
+  },
+  {
+   "id": "osm_76580003",
+   "name": "Impasse Giffard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-587.8, 1062.8],
+    [-601.8, 1064.4]
+   ]
+  },
+  {
+   "id": "osm_31992700",
+   "name": "Impasse Saint-Maur",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-285.4, 933.9],
+    [-304.6, 932.3],
+    [-371.3, 946.1]
+   ]
+  },
+  {
+   "id": "osm_30796788",
+   "name": "Impasse de Carville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-911.8, 668.1],
+    [-888.0, 646.8]
+   ]
+  },
+  {
+   "id": "osm_43979512",
+   "name": "Impasse de Flandre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [697.7, 668.1],
+    [681.5, 633.3],
+    [662.1, 570.3]
+   ]
+  },
+  {
+   "id": "osm_25184766",
+   "name": "Impasse de la Tour d'Argent",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-510.4, 617.5],
+    [-534.4, 606.0],
+    [-556.9, 590.9],
+    [-554.8, 585.8]
+   ]
+  },
+  {
+   "id": "osm_81356631",
+   "name": "Impasse des Arquebusiers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1264.5, 237.5],
+    [1285.5, 251.3]
+   ]
+  },
+  {
+   "id": "osm_43979509",
+   "name": "Impasse du Clos des Marqueurs",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [802.9, 488.3],
+    [807.9, 525.2],
+    [816.5, 560.7]
+   ]
+  },
+  {
+   "id": "osm_290055270",
+   "name": "Passage Saint-Amand",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [158.9, 107.6],
+    [172.1, 100.1]
+   ]
+  },
+  {
+   "id": "osm_290055271",
+   "name": "Passage Saint-Amand",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [177.7, 96.8],
+    [193.9, 88.2]
+   ]
+  },
+  {
+   "id": "osm_39289323",
+   "name": "Passage des Anciens Moulins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [196.1, -41.4],
+    [217.7, 13.4],
+    [227.4, 27.1]
+   ]
+  },
+  {
+   "id": "osm_52407071",
+   "name": "Passage du Bon Pasteur",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [957.3, 275.1],
+    [979.7, 263.3],
+    [994.2, 268.4],
+    [1018.5, 257.8]
+   ]
+  },
+  {
+   "id": "osm_562171413",
+   "name": "Passage du Bon Pasteur",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [924.0, 292.4],
+    [953.2, 277.2]
+   ]
+  },
+  {
+   "id": "osm_51754254",
+   "name": "Petite Rue des Carmélites",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [337.1, 700.7],
+    [358.5, 686.2]
+   ]
+  },
+  {
+   "id": "osm_39289329",
+   "name": "Petite Rue du Père Adam",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [232.6, 49.0],
+    [218.7, 30.3]
+   ]
+  },
+  {
+   "id": "osm_25849658",
+   "name": "Place Alain",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [420.1, 529.8],
+    [442.4, 520.4]
+   ]
+  },
+  {
+   "id": "osm_446919644",
+   "name": "Place Barthélémy",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [178.0, -47.2],
+    [196.7, -58.8],
+    [217.8, -54.7]
+   ]
+  },
+  {
+   "id": "osm_446919645",
+   "name": "Place Barthélémy",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [196.7, -58.8],
+    [207.5, -82.1]
+   ]
+  },
+  {
+   "id": "osm_165592929",
+   "name": "Place Beauvoisine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [454.7, 872.5],
+    [462.1, 836.7]
+   ]
+  },
+  {
+   "id": "osm_184467918",
+   "name": "Place Beauvoisine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [454.7, 872.5],
+    [467.5, 868.7],
+    [500.4, 850.6]
+   ]
+  },
+  {
+   "id": "osm_25306839",
+   "name": "Place Beauvoisine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [453.6, 886.1],
+    [454.7, 872.5]
+   ]
+  },
+  {
+   "id": "osm_616125226",
+   "name": "Place Beauvoisine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [483.3, 874.2],
+    [466.2, 883.6],
+    [453.6, 886.1]
+   ]
+  },
+  {
+   "id": "osm_65367410",
+   "name": "Place Beauvoisine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [508.3, 860.0],
+    [483.3, 874.2]
+   ]
+  },
+  {
+   "id": "osm_695686042",
+   "name": "Place Beauvoisine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [508.3, 860.0],
+    [500.4, 850.6]
+   ]
+  },
+  {
+   "id": "osm_723103413",
+   "name": "Place Beauvoisine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [500.4, 850.6],
+    [472.3, 842.1],
+    [462.1, 836.7]
+   ]
+  },
+  {
+   "id": "osm_29470844",
+   "name": "Place Bernard Tissot",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-13.3, 924.4],
+    [2.3, 922.4],
+    [39.6, 911.9],
+    [48.1, 902.1],
+    [48.4, 888.7]
+   ]
+  },
+  {
+   "id": "osm_692997016",
+   "name": "Place Bernard Tissot",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [48.4, 888.7],
+    [60.9, 898.6],
+    [83.3, 895.1]
+   ]
+  },
+  {
+   "id": "osm_692997018",
+   "name": "Place Bernard Tissot",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [48.4, 888.7],
+    [34.4, 842.1],
+    [23.1, 823.9]
+   ]
+  },
+  {
+   "id": "osm_166603395",
+   "name": "Place Henri IV",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-665.2, 184.3],
+    [-678.0, 170.7]
+   ]
+  },
+  {
+   "id": "osm_790180743",
+   "name": "Place Henri IV",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-678.0, 170.7],
+    [-653.5, 153.0],
+    [-647.0, 141.9]
+   ]
+  },
+  {
+   "id": "osm_790180744",
+   "name": "Place Henri IV",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-676.6, 204.2],
+    [-665.2, 184.3]
+   ]
+  },
+  {
+   "id": "osm_790180745",
+   "name": "Place Henri IV",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-665.2, 184.3],
+    [-643.6, 211.5]
+   ]
+  },
+  {
+   "id": "osm_167458462",
+   "name": "Place Jacques Lelieur",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-243.9, 6.6],
+    [-209.0, -17.3]
+   ]
+  },
+  {
+   "id": "osm_167458471",
+   "name": "Place Jacques Lelieur",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-241.8, 5.1],
+    [-257.6, -17.9]
+   ]
+  },
+  {
+   "id": "osm_25262559",
+   "name": "Place Jean-Baptiste de la Salle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-664.4, 995.6],
+    [-679.2, 1033.5]
+   ]
+  },
+  {
+   "id": "osm_408944352",
+   "name": "Place Jean-Baptiste de la Salle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-679.2, 1033.5],
+    [-690.8, 1049.0]
+   ]
+  },
+  {
+   "id": "osm_44029194",
+   "name": "Place Jean-Baptiste de la Salle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-690.8, 1049.0],
+    [-704.8, 1016.8],
+    [-710.7, 1008.5],
+    [-674.0, 993.2],
+    [-664.4, 995.6]
+   ]
+  },
+  {
+   "id": "osm_813578563",
+   "name": "Place Juliette Billard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [500.9, 645.2],
+    [511.0, 640.4],
+    [517.1, 653.3]
+   ]
+  },
+  {
+   "id": "osm_25184185",
+   "name": "Place Martin Luther King",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-475.7, 240.5],
+    [-484.7, 252.5],
+    [-521.4, 270.5],
+    [-534.1, 269.3]
+   ]
+  },
+  {
+   "id": "osm_31787079",
+   "name": "Place Martin Luther King",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-534.1, 269.3],
+    [-529.0, 264.4],
+    [-489.3, 243.2],
+    [-475.7, 240.5],
+    [-477.1, 234.4]
+   ]
+  },
+  {
+   "id": "osm_31787080",
+   "name": "Place Martin Luther King",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-534.1, 269.3],
+    [-543.3, 264.5],
+    [-548.9, 257.3]
+   ]
+  },
+  {
+   "id": "osm_304200566",
+   "name": "Place Pilavoine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1023.2, 143.2],
+    [1029.3, 141.2],
+    [1040.9, 174.6],
+    [1024.5, 180.8],
+    [1019.7, 176.9],
+    [1009.5, 148.0],
+    [1023.2, 143.2]
+   ]
+  },
+  {
+   "id": "osm_31785756",
+   "name": "Place Pilavoine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [993.6, 186.0],
+    [1019.7, 176.9]
+   ]
+  },
+  {
+   "id": "osm_31785757",
+   "name": "Place Pilavoine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1023.2, 143.2],
+    [1014.1, 109.7]
+   ]
+  },
+  {
+   "id": "osm_25850266",
+   "name": "Place Restout",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [75.4, 539.2],
+    [18.2, 565.3]
+   ]
+  },
+  {
+   "id": "osm_31270235",
+   "name": "Place Saint-Godard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [133.9, 533.5],
+    [84.9, 538.7]
+   ]
+  },
+  {
+   "id": "osm_110521128",
+   "name": "Place Saint-Marc",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [386.9, -297.6],
+    [417.6, -313.7],
+    [428.6, -311.3],
+    [438.8, -293.7]
+   ]
+  },
+  {
+   "id": "osm_110521130",
+   "name": "Place Saint-Marc",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [377.7, -245.7],
+    [442.2, -282.9]
+   ]
+  },
+  {
+   "id": "osm_110521132",
+   "name": "Place Saint-Marc",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [356.4, -281.4],
+    [386.9, -297.6]
+   ]
+  },
+  {
+   "id": "osm_110521135",
+   "name": "Place Saint-Marc",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [444.0, -279.5],
+    [494.2, -190.9]
+   ]
+  },
+  {
+   "id": "osm_136540066",
+   "name": "Place Saint-Marc",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [368.6, -257.7],
+    [356.4, -281.4]
+   ]
+  },
+  {
+   "id": "osm_25850145",
+   "name": "Place Saint-Marc",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [428.0, -150.7],
+    [377.7, -245.7]
+   ]
+  },
+  {
+   "id": "osm_1253191010",
+   "name": "Place Saint-Vivien",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [609.4, 127.8],
+    [618.0, 138.9]
+   ]
+  },
+  {
+   "id": "osm_1253191011",
+   "name": "Place Saint-Vivien",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [609.4, 127.8],
+    [607.2, 134.3],
+    [602.0, 138.0]
+   ]
+  },
+  {
+   "id": "osm_188542103",
+   "name": "Place Saint-Vivien",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [649.3, 49.3],
+    [615.0, 63.0],
+    [602.6, 65.2]
+   ]
+  },
+  {
+   "id": "osm_31737064",
+   "name": "Place Saint-Vivien",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [602.0, 138.0],
+    [594.1, 124.8],
+    [587.6, 64.8]
+   ]
+  },
+  {
+   "id": "osm_31737065",
+   "name": "Place Saint-Vivien",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [602.6, 65.2],
+    [609.4, 127.8]
+   ]
+  },
+  {
+   "id": "osm_76848931",
+   "name": "Place Saint-Vivien",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [587.6, 64.8],
+    [602.6, 65.2]
+   ]
+  },
+  {
+   "id": "osm_758682751",
+   "name": "Place de l'Aître Saint-Maclou",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [306.2, -82.4],
+    [287.8, -99.2],
+    [287.1, -104.9],
+    [290.9, -116.8]
+   ]
+  },
+  {
+   "id": "osm_38253673",
+   "name": "Place de l'Église Saint-Gervais",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-745.4, 1103.6],
+    [-751.8, 1112.6],
+    [-789.4, 1135.0]
+   ]
+  },
+  {
+   "id": "osm_25912420",
+   "name": "Place de la Basse Vieille Tour",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [15.5, -272.5],
+    [5.5, -268.0],
+    [-67.9, -231.9],
+    [-64.5, -242.2],
+    [-23.4, -262.7],
+    [2.9, -275.3],
+    [15.5, -272.5]
+   ]
+  },
+  {
+   "id": "osm_26209686",
+   "name": "Place de la Basse Vieille Tour",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [15.5, -272.5],
+    [54.8, -244.4]
+   ]
+  },
+  {
+   "id": "osm_31713552",
+   "name": "Place de la Calende",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-2.2, -42.4],
+    [-7.9, -96.4]
+   ]
+  },
+  {
+   "id": "osm_1443469555",
+   "name": "Place de la Cathédrale",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-62.2, 80.6],
+    [-33.1, 62.6]
+   ]
+  },
+  {
+   "id": "osm_31713576",
+   "name": "Place de la Cathédrale",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-87.4, 17.9],
+    [-114.9, 0.6]
+   ]
+  },
+  {
+   "id": "osm_446919500",
+   "name": "Place de la Cathédrale",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-67.9, 70.9],
+    [-94.6, 25.8]
+   ]
+  },
+  {
+   "id": "osm_53819716",
+   "name": "Place de la Cathédrale",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-103.8, 7.2],
+    [-74.3, -10.7]
+   ]
+  },
+  {
+   "id": "osm_668723030",
+   "name": "Place de la Cathédrale",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-94.6, 25.8],
+    [-87.4, 17.9],
+    [-63.8, 5.2],
+    [-66.3, -9.5]
+   ]
+  },
+  {
+   "id": "osm_246432355",
+   "name": "Place de la Croix de Pierre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [846.6, 153.5],
+    [841.8, 147.9],
+    [839.6, 135.9]
+   ]
+  },
+  {
+   "id": "osm_246432356",
+   "name": "Place de la Croix de Pierre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [851.9, 136.5],
+    [846.6, 153.5]
+   ]
+  },
+  {
+   "id": "osm_26209956",
+   "name": "Place de la Croix de Pierre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [839.6, 135.9],
+    [851.9, 136.5]
+   ]
+  },
+  {
+   "id": "osm_1444262483",
+   "name": "Place de la Haute Vieille Tour",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [33.3, -196.6],
+    [21.4, -223.2]
+   ]
+  },
+  {
+   "id": "osm_167319373",
+   "name": "Place de la Haute Vieille Tour",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [21.4, -223.2],
+    [57.5, -242.3]
+   ]
+  },
+  {
+   "id": "osm_210833599",
+   "name": "Place de la Haute Vieille Tour",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-52.1, -200.0],
+    [-36.4, -207.5]
+   ]
+  },
+  {
+   "id": "osm_26209687",
+   "name": "Place de la Haute Vieille Tour",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [54.8, -244.4],
+    [57.5, -242.3],
+    [80.8, -251.8]
+   ]
+  },
+  {
+   "id": "osm_31269698",
+   "name": "Place de la Haute Vieille Tour",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-36.4, -207.5],
+    [-10.6, -153.6]
+   ]
+  },
+  {
+   "id": "osm_1312871530",
+   "name": "Place de la Madeleine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-1001.0, 656.0],
+    [-972.3, 691.2]
+   ]
+  },
+  {
+   "id": "osm_293439302",
+   "name": "Place de la Madeleine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-1023.4, 664.8],
+    [-1007.2, 653.1],
+    [-1001.0, 656.0]
+   ]
+  },
+  {
+   "id": "osm_647366747",
+   "name": "Place de la Pucelle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-415.6, 313.9],
+    [-451.9, 242.7]
+   ]
+  },
+  {
+   "id": "osm_647366749",
+   "name": "Place de la Pucelle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-428.3, 234.6],
+    [-417.7, 256.8],
+    [-434.7, 276.7]
+   ]
+  },
+  {
+   "id": "osm_668261658",
+   "name": "Place de la Pucelle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-416.4, 224.4],
+    [-425.5, 233.5],
+    [-457.5, 243.8]
+   ]
+  },
+  {
+   "id": "osm_1189113258",
+   "name": "Place de la Rougemare",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [339.5, 479.0],
+    [360.1, 461.3]
+   ]
+  },
+  {
+   "id": "osm_1380958685",
+   "name": "Place de la Rougemare",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [236.6, 553.0],
+    [339.5, 479.0]
+   ]
+  },
+  {
+   "id": "osm_250434872",
+   "name": "Place de la Rougemare",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [325.1, 515.5],
+    [277.9, 549.4]
+   ]
+  },
+  {
+   "id": "osm_599951819",
+   "name": "Place de la Rougemare",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [369.1, 484.2],
+    [325.1, 515.5]
+   ]
+  },
+  {
+   "id": "osm_599951820",
+   "name": "Place de la Rougemare",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [355.2, 465.2],
+    [369.1, 484.2]
+   ]
+  },
+  {
+   "id": "osm_181255614",
+   "name": "Place de la République",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [57.1, -332.2],
+    [68.1, -306.3]
+   ]
+  },
+  {
+   "id": "osm_206566230",
+   "name": "Place des Carmes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [146.8, 238.9],
+    [124.8, 193.6]
+   ]
+  },
+  {
+   "id": "osm_31281933",
+   "name": "Place des Carmes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [40.1, 244.6],
+    [98.5, 209.0]
+   ]
+  },
+  {
+   "id": "osm_69687289",
+   "name": "Place des Carmes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [124.8, 193.6],
+    [98.5, 209.0]
+   ]
+  },
+  {
+   "id": "osm_31737191",
+   "name": "Place du 39e Régiment d'Infanterie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [611.8, -41.1],
+    [603.8, -87.7],
+    [605.9, -96.8]
+   ]
+  },
+  {
+   "id": "osm_31737193",
+   "name": "Place du 39e Régiment d'Infanterie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [547.3, -5.6],
+    [611.8, -41.1]
+   ]
+  },
+  {
+   "id": "osm_1385044356",
+   "name": "Place du Docteur Alfred Cerné",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [90.4, 651.8],
+    [121.0, 645.7]
+   ]
+  },
+  {
+   "id": "osm_25492619",
+   "name": "Place du Docteur Alfred Cerné",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [77.9, 655.2],
+    [90.4, 651.8]
+   ]
+  },
+  {
+   "id": "osm_643439141",
+   "name": "Place du Gaillardbois",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-91.4, -180.4],
+    [-52.1, -200.0]
+   ]
+  },
+  {
+   "id": "osm_949829875",
+   "name": "Place du Gaillardbois",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-67.9, -231.9],
+    [-115.8, -208.6]
+   ]
+  },
+  {
+   "id": "osm_226433881",
+   "name": "Place du Lieutenant Aubert",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [285.3, 66.5],
+    [299.4, 90.0]
+   ]
+  },
+  {
+   "id": "osm_790186456",
+   "name": "Place du Lieutenant Aubert",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [299.4, 90.0],
+    [311.0, 111.2]
+   ]
+  },
+  {
+   "id": "osm_226325251",
+   "name": "Place du Vieux Marché",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-360.7, 394.1],
+    [-444.4, 441.9],
+    [-460.0, 461.3],
+    [-465.3, 464.7]
+   ]
+  },
+  {
+   "id": "osm_226325252",
+   "name": "Place du Vieux Marché",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-477.1, 399.7],
+    [-468.7, 401.1],
+    [-446.3, 424.1],
+    [-440.9, 425.3],
+    [-431.1, 422.9],
+    [-365.7, 387.6]
+   ]
+  },
+  {
+   "id": "osm_25184451",
+   "name": "Place du Vieux Marché",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-376.0, 345.6],
+    [-383.8, 351.6],
+    [-384.1, 362.4],
+    [-360.7, 394.1]
+   ]
+  },
+  {
+   "id": "osm_668723045",
+   "name": "Place du Vieux Marché",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-412.8, 325.8],
+    [-444.0, 341.7],
+    [-462.2, 345.2],
+    [-520.1, 368.6]
+   ]
+  },
+  {
+   "id": "osm_668723046",
+   "name": "Place du Vieux Marché",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-412.8, 325.8],
+    [-415.6, 313.9]
+   ]
+  },
+  {
+   "id": "osm_668723047",
+   "name": "Place du Vieux Marché",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-399.0, 342.4],
+    [-412.8, 325.8]
+   ]
+  },
+  {
+   "id": "osm_79099919",
+   "name": "Place du Vieux Marché",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-383.8, 351.6],
+    [-399.0, 342.4]
+   ]
+  },
+  {
+   "id": "osm_79099928",
+   "name": "Place du Vieux Marché",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-501.2, 403.8],
+    [-507.8, 364.7]
+   ]
+  },
+  {
+   "id": "osm_103264004",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-895.9, 200.9],
+    [-940.5, 241.5]
+   ]
+  },
+  {
+   "id": "osm_167920445",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-996.8, 299.3],
+    [-1007.2, 308.8]
+   ]
+  },
+  {
+   "id": "osm_189216027",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-942.7, 253.0],
+    [-986.9, 294.2]
+   ]
+  },
+  {
+   "id": "osm_31270014",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-930.9, 199.1],
+    [-908.5, 186.9],
+    [-894.9, 188.0]
+   ]
+  },
+  {
+   "id": "osm_319623121",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-988.8, 242.5],
+    [-936.7, 202.8]
+   ]
+  },
+  {
+   "id": "osm_319623123",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-1003.9, 252.8],
+    [-988.8, 242.5]
+   ]
+  },
+  {
+   "id": "osm_319623125",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-900.7, 171.5],
+    [-890.9, 163.7]
+   ]
+  },
+  {
+   "id": "osm_44468929",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-902.8, 216.3],
+    [-942.7, 253.0]
+   ]
+  },
+  {
+   "id": "osm_61459853",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-940.5, 241.5],
+    [-991.3, 288.5],
+    [-996.8, 299.3]
+   ]
+  },
+  {
+   "id": "osm_851516433",
+   "name": "Quai Gaston Boulet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-894.9, 188.0],
+    [-881.3, 197.0]
+   ]
+  },
+  {
+   "id": "osm_119302783",
+   "name": "Rampe Saint-Gervais",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-681.0, 1138.9],
+    [-683.4, 1121.8],
+    [-687.1, 1112.7],
+    [-689.2, 1082.0]
+   ]
+  },
+  {
+   "id": "osm_31268886",
+   "name": "Rampe Saint-Gervais",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-663.0, 1134.9],
+    [-667.0, 1042.5]
+   ]
+  },
+  {
+   "id": "osm_1076439189",
+   "name": "Route de Lyons-la-Forêt",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1059.6, -371.1],
+    [1075.4, -380.4]
+   ]
+  },
+  {
+   "id": "osm_1079205433",
+   "name": "Route de Lyons-la-Forêt",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [949.4, -304.4],
+    [936.5, -291.3],
+    [932.7, -282.8]
+   ]
+  },
+  {
+   "id": "osm_1079205434",
+   "name": "Route de Lyons-la-Forêt",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [949.4, -304.4],
+    [1050.3, -365.5]
+   ]
+  },
+  {
+   "id": "osm_661689477",
+   "name": "Route de Lyons-la-Forêt",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [923.8, -285.3],
+    [934.1, -299.6],
+    [949.4, -304.4]
+   ]
+  },
+  {
+   "id": "osm_31540807",
+   "name": "Route de Neufchâtel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [453.6, 886.1],
+    [398.1, 1184.4]
+   ]
+  },
+  {
+   "id": "osm_69744255",
+   "name": "Rue Abbé de l'Épée",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [539.7, 335.5],
+    [519.3, 287.7],
+    [512.2, 265.6]
+   ]
+  },
+  {
+   "id": "osm_31268888",
+   "name": "Rue Achille Flaubert",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-897.7, 973.1],
+    [-937.8, 965.7]
+   ]
+  },
+  {
+   "id": "osm_43834856",
+   "name": "Rue Adolphe Cheruel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [439.0, 813.2],
+    [402.8, 847.2],
+    [401.7, 851.3]
+   ]
+  },
+  {
+   "id": "osm_25492616",
+   "name": "Rue Alain Blanchard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-80.8, 765.8],
+    [-70.3, 703.0],
+    [-66.5, 694.1]
+   ]
+  },
+  {
+   "id": "osm_25850268",
+   "name": "Rue Alain Blanchard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-51.1, 692.5],
+    [-59.6, 696.1],
+    [-66.5, 694.1]
+   ]
+  },
+  {
+   "id": "osm_83806251",
+   "name": "Rue Alain Blanchard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-66.5, 694.1],
+    [-68.0, 685.8],
+    [-58.6, 678.7]
+   ]
+  },
+  {
+   "id": "osm_154164727",
+   "name": "Rue Albert Glatigny",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-652.8, -646.7],
+    [-703.6, -605.9]
+   ]
+  },
+  {
+   "id": "osm_31582337",
+   "name": "Rue Amable Floquet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [641.8, 399.3],
+    [591.4, 420.1]
+   ]
+  },
+  {
+   "id": "osm_293439299",
+   "name": "Rue Auguste Houzeau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [197.4, -204.7],
+    [180.8, -275.4],
+    [181.6, -279.3]
+   ]
+  },
+  {
+   "id": "osm_31903466",
+   "name": "Rue Beaulieu",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [514.8, 1121.6],
+    [519.7, 1132.8]
+   ]
+  },
+  {
+   "id": "osm_1435381478",
+   "name": "Rue Beffroy",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [214.9, 502.6],
+    [145.0, 538.4]
+   ]
+  },
+  {
+   "id": "osm_1435381480",
+   "name": "Rue Beffroy",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [145.0, 538.4],
+    [107.3, 560.3]
+   ]
+  },
+  {
+   "id": "osm_28997206",
+   "name": "Rue Beffroy",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [107.3, 560.3],
+    [55.3, 603.5]
+   ]
+  },
+  {
+   "id": "osm_176867906",
+   "name": "Rue Bouquet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-117.2, 916.5],
+    [-132.3, 981.0]
+   ]
+  },
+  {
+   "id": "osm_25306838",
+   "name": "Rue Bouquet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-89.0, 796.1],
+    [-83.3, 777.0]
+   ]
+  },
+  {
+   "id": "osm_25639423",
+   "name": "Rue Bouquet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-89.0, 796.1],
+    [-117.2, 916.5]
+   ]
+  },
+  {
+   "id": "osm_1443469552",
+   "name": "Rue Bourg l'Abbé",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [433.4, 405.3],
+    [382.9, 443.5]
+   ]
+  },
+  {
+   "id": "osm_169422357",
+   "name": "Rue Bourg l'Abbé",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [539.7, 335.5],
+    [477.8, 371.7],
+    [433.4, 405.3]
+   ]
+  },
+  {
+   "id": "osm_30808766",
+   "name": "Rue Bourg l'Abbé",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [382.9, 443.5],
+    [365.0, 457.6]
+   ]
+  },
+  {
+   "id": "osm_41588840",
+   "name": "Rue Bras de Fer",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [447.4, 885.5],
+    [340.2, 944.6]
+   ]
+  },
+  {
+   "id": "osm_31541506",
+   "name": "Rue Camille Pissaro",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-858.4, 1129.6],
+    [-866.0, 1085.9]
+   ]
+  },
+  {
+   "id": "osm_38253661",
+   "name": "Rue Camille Pissaro",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-866.0, 1085.9],
+    [-814.6, 1066.4]
+   ]
+  },
+  {
+   "id": "osm_31785752",
+   "name": "Rue Cantelles",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1094.9, 241.1],
+    [1107.9, 270.7]
+   ]
+  },
+  {
+   "id": "osm_25849661",
+   "name": "Rue Caron",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [645.1, 483.9],
+    [624.0, 491.8]
+   ]
+  },
+  {
+   "id": "osm_667133790",
+   "name": "Rue Caron",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [548.6, 524.2],
+    [621.0, 486.4]
+   ]
+  },
+  {
+   "id": "osm_44001221",
+   "name": "Rue Chantereine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1221.7, 8.7],
+    [1223.2, 70.1]
+   ]
+  },
+  {
+   "id": "osm_1457396395",
+   "name": "Rue Charles Lenepveu",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [137.3, 542.5],
+    [123.9, 506.6]
+   ]
+  },
+  {
+   "id": "osm_188973381",
+   "name": "Rue Charles Lenepveu",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [123.9, 506.6],
+    [110.7, 473.4],
+    [82.5, 424.9]
+   ]
+  },
+  {
+   "id": "osm_1553290755",
+   "name": "Rue Chasselièvre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-795.9, 1088.3],
+    [-815.9, 1098.1]
+   ]
+  },
+  {
+   "id": "osm_1553290759",
+   "name": "Rue Chasselièvre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-815.9, 1098.1],
+    [-878.2, 1144.4]
+   ]
+  },
+  {
+   "id": "osm_25262560",
+   "name": "Rue Chasselièvre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-690.8, 1049.0],
+    [-795.9, 1088.3]
+   ]
+  },
+  {
+   "id": "osm_1317984015",
+   "name": "Rue Claude Groulard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-789.4, 1135.0],
+    [-792.4, 1106.9]
+   ]
+  },
+  {
+   "id": "osm_25336386",
+   "name": "Rue Claude Groulard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-787.8, 1162.1],
+    [-789.4, 1135.0]
+   ]
+  },
+  {
+   "id": "osm_31541482",
+   "name": "Rue Claude Groulard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-762.1, 1076.1],
+    [-792.4, 1106.9]
+   ]
+  },
+  {
+   "id": "osm_76499618",
+   "name": "Rue Claude Groulard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-792.4, 1106.9],
+    [-795.9, 1088.3]
+   ]
+  },
+  {
+   "id": "osm_25849662",
+   "name": "Rue Coignebert",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [621.0, 486.4],
+    [551.4, 329.6]
+   ]
+  },
+  {
+   "id": "osm_882225288",
+   "name": "Rue Coignebert",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [624.0, 491.8],
+    [628.3, 503.6]
+   ]
+  },
+  {
+   "id": "osm_25639418",
+   "name": "Rue Crevier",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-593.6, 807.1],
+    [-587.0, 845.7],
+    [-577.0, 878.4],
+    [-553.8, 926.0]
+   ]
+  },
+  {
+   "id": "osm_53590613",
+   "name": "Rue Croix Verte",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [267.9, 177.8],
+    [276.8, 177.4],
+    [283.3, 181.1],
+    [300.0, 202.5]
+   ]
+  },
+  {
+   "id": "osm_28469737",
+   "name": "Rue Daliphard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [955.1, 419.5],
+    [845.0, 472.9]
+   ]
+  },
+  {
+   "id": "osm_31581070",
+   "name": "Rue De France",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [768.9, 510.7],
+    [710.7, 530.8],
+    [695.8, 541.4]
+   ]
+  },
+  {
+   "id": "osm_863554013",
+   "name": "Rue Deshays",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [74.8, 482.3],
+    [112.1, 476.7]
+   ]
+  },
+  {
+   "id": "osm_44453498",
+   "name": "Rue Dinanderie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-231.5, 473.7],
+    [-194.8, 543.0]
+   ]
+  },
+  {
+   "id": "osm_31540664",
+   "name": "Rue Dulong",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [455.8, 612.9],
+    [315.1, 671.2]
+   ]
+  },
+  {
+   "id": "osm_43872037",
+   "name": "Rue Dulong",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [481.0, 602.7],
+    [455.8, 612.9]
+   ]
+  },
+  {
+   "id": "osm_25567542",
+   "name": "Rue Eugène Boudin",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-93.4, 189.0],
+    [-64.5, 241.0]
+   ]
+  },
+  {
+   "id": "osm_1385138474",
+   "name": "Rue Eugène Dutuit",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [265.9, -103.4],
+    [207.5, -88.3]
+   ]
+  },
+  {
+   "id": "osm_25850139",
+   "name": "Rue Eugène Dutuit",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [287.4, -100.7],
+    [275.7, -105.4],
+    [265.9, -103.4]
+   ]
+  },
+  {
+   "id": "osm_1480096864",
+   "name": "Rue Flahaut",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-955.0, 439.1],
+    [-906.0, 407.9]
+   ]
+  },
+  {
+   "id": "osm_69946805",
+   "name": "Rue Flahaut",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-1006.2, 472.0],
+    [-955.0, 439.1]
+   ]
+  },
+  {
+   "id": "osm_31795611",
+   "name": "Rue François Arago",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-749.7, -718.7],
+    [-673.9, -670.1],
+    [-647.2, -640.4],
+    [-570.4, -538.7]
+   ]
+  },
+  {
+   "id": "osm_25155749",
+   "name": "Rue Georges Lanfry",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-33.1, 62.6],
+    [-16.0, 89.2]
+   ]
+  },
+  {
+   "id": "osm_238993499",
+   "name": "Rue Georges d'Amboise",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-969.8, 418.4],
+    [-848.6, 589.4]
+   ]
+  },
+  {
+   "id": "osm_25215309",
+   "name": "Rue Georges d'Amboise",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-1009.7, 362.8],
+    [-969.8, 418.4]
+   ]
+  },
+  {
+   "id": "osm_25127542",
+   "name": "Rue Guillaume le Conquérant",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-352.9, 394.0],
+    [-240.1, 335.0]
+   ]
+  },
+  {
+   "id": "osm_31268891",
+   "name": "Rue Guy de Maupassant",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-514.0, 931.2],
+    [-388.2, 879.4],
+    [-281.0, 843.0]
+   ]
+  },
+  {
+   "id": "osm_25336387",
+   "name": "Rue Henry Barbet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-807.6, 1092.4],
+    [-807.8, 1085.7],
+    [-826.3, 1039.1]
+   ]
+  },
+  {
+   "id": "osm_31268889",
+   "name": "Rue Henry Barbet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-826.3, 1039.1],
+    [-846.3, 1022.5],
+    [-871.4, 990.3],
+    [-892.2, 973.4],
+    [-897.7, 973.1]
+   ]
+  },
+  {
+   "id": "osm_31920799",
+   "name": "Rue Herbière",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-473.5, 235.7],
+    [-469.4, 235.2],
+    [-454.6, 221.4],
+    [-489.7, 178.4]
+   ]
+  },
+  {
+   "id": "osm_25850265",
+   "name": "Rue Jacques Villon",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [37.3, 443.8],
+    [51.3, 453.0],
+    [60.5, 470.8],
+    [70.4, 483.0],
+    [78.3, 503.0],
+    [78.4, 535.6]
+   ]
+  },
+  {
+   "id": "osm_25262561",
+   "name": "Rue Jean Revel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-710.7, 1008.5],
+    [-714.8, 1002.9],
+    [-756.9, 858.7]
+   ]
+  },
+  {
+   "id": "osm_25850125",
+   "name": "Rue Lamauve",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [906.8, 46.6],
+    [903.7, -2.0],
+    [901.2, -10.2]
+   ]
+  },
+  {
+   "id": "osm_81356629",
+   "name": "Rue Lamauve",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [893.8, 75.6],
+    [901.2, -10.2]
+   ]
+  },
+  {
+   "id": "osm_31268887",
+   "name": "Rue Legendre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-667.0, 1042.5],
+    [-582.7, 1035.2]
+   ]
+  },
+  {
+   "id": "osm_31785749",
+   "name": "Rue Legouy",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [962.2, 120.1],
+    [989.2, 171.7],
+    [1035.7, 301.6]
+   ]
+  },
+  {
+   "id": "osm_39185020",
+   "name": "Rue Lepecq de la Clôture",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [325.4, 1054.4],
+    [194.7, 1099.0]
+   ]
+  },
+  {
+   "id": "osm_25262551",
+   "name": "Rue Louis Auber",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-735.2, 933.9],
+    [-668.7, 908.2],
+    [-633.9, 913.2]
+   ]
+  },
+  {
+   "id": "osm_31737888",
+   "name": "Rue Louis Brune",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [259.6, -218.7],
+    [197.4, -204.7]
+   ]
+  },
+  {
+   "id": "osm_39185019",
+   "name": "Rue Louis Malliot",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [287.5, 1140.5],
+    [300.0, 1116.2],
+    [336.2, 1028.9],
+    [359.9, 994.8]
+   ]
+  },
+  {
+   "id": "osm_126638522",
+   "name": "Rue Lémery",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-407.2, 674.0],
+    [-413.9, 713.4]
+   ]
+  },
+  {
+   "id": "osm_31268892",
+   "name": "Rue Lézurier de la Martel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-423.4, 893.8],
+    [-457.6, 730.6]
+   ]
+  },
+  {
+   "id": "osm_225773080",
+   "name": "Rue Macé",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1132.2, 88.0],
+    [1121.5, 32.8]
+   ]
+  },
+  {
+   "id": "osm_175223271",
+   "name": "Rue Maladrerie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-13.3, 924.4],
+    [-22.2, 939.5],
+    [-25.1, 968.5],
+    [-30.2, 987.7],
+    [-33.3, 996.0],
+    [-43.7, 1009.2]
+   ]
+  },
+  {
+   "id": "osm_25850140",
+   "name": "Rue Malpalu",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [199.6, -87.1],
+    [179.3, -112.0],
+    [164.5, -138.6]
+   ]
+  },
+  {
+   "id": "osm_166065743",
+   "name": "Rue Marin Le Pigny",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [676.7, -275.0],
+    [687.5, -256.3],
+    [708.3, -234.1],
+    [745.4, -181.2]
+   ]
+  },
+  {
+   "id": "osm_31585035",
+   "name": "Rue Massacre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-256.0, 186.4],
+    [-214.3, 256.0]
+   ]
+  },
+  {
+   "id": "osm_1443469554",
+   "name": "Rue Molière",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [290.9, -116.8],
+    [268.3, -190.9]
+   ]
+  },
+  {
+   "id": "osm_546142282",
+   "name": "Rue Molière",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [268.3, -190.9],
+    [241.4, -281.9]
+   ]
+  },
+  {
+   "id": "osm_28997207",
+   "name": "Rue Morand",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [55.3, 603.5],
+    [52.9, 608.2],
+    [-44.5, 689.2],
+    [-51.1, 692.5]
+   ]
+  },
+  {
+   "id": "osm_25336388",
+   "name": "Rue Nicolas Mesnager",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-826.3, 1039.1],
+    [-710.7, 1008.5]
+   ]
+  },
+  {
+   "id": "osm_31580783",
+   "name": "Rue Nicolas Poussin",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [744.0, 675.8],
+    [671.0, 474.5]
+   ]
+  },
+  {
+   "id": "osm_25184951",
+   "name": "Rue Nicole Oresme",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-375.9, 147.0],
+    [-387.4, 123.4],
+    [-359.6, 107.6]
+   ]
+  },
+  {
+   "id": "osm_169421488",
+   "name": "Rue Orbe",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [732.4, 232.7],
+    [650.6, 284.6],
+    [539.7, 335.5]
+   ]
+  },
+  {
+   "id": "osm_31540808",
+   "name": "Rue Orbe",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [846.6, 153.5],
+    [734.9, 234.2]
+   ]
+  },
+  {
+   "id": "osm_31786022",
+   "name": "Rue Paul Duboc",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [300.0, 1116.2],
+    [261.9, 1130.3]
+   ]
+  },
+  {
+   "id": "osm_25567622",
+   "name": "Rue Percière",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-201.9, 315.6],
+    [-127.1, 425.4]
+   ]
+  },
+  {
+   "id": "osm_31584169",
+   "name": "Rue Petit de Julleville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [52.8, -113.3],
+    [74.9, -60.1]
+   ]
+  },
+  {
+   "id": "osm_37997143",
+   "name": "Rue Petit de Julleville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [39.2, -149.3],
+    [52.8, -113.3]
+   ]
+  },
+  {
+   "id": "osm_30808857",
+   "name": "Rue Philippe Auguste",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [25.9, 697.5],
+    [-13.5, 663.6]
+   ]
+  },
+  {
+   "id": "osm_43979511",
+   "name": "Rue Pitry",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [695.8, 541.4],
+    [662.1, 570.3]
+   ]
+  },
+  {
+   "id": "osm_31540810",
+   "name": "Rue Poitron",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [944.0, 330.8],
+    [830.6, 382.8]
+   ]
+  },
+  {
+   "id": "osm_195644001",
+   "name": "Rue Pouchet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-13.3, 924.4],
+    [-23.8, 921.0],
+    [-45.9, 918.9],
+    [-117.2, 916.5]
+   ]
+  },
+  {
+   "id": "osm_25639422",
+   "name": "Rue Pouchet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-117.2, 916.5],
+    [-123.4, 914.0],
+    [-283.9, 913.1]
+   ]
+  },
+  {
+   "id": "osm_1111718031",
+   "name": "Rue Racine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-716.6, 373.4],
+    [-704.7, 365.8]
+   ]
+  },
+  {
+   "id": "osm_235935113",
+   "name": "Rue Racine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-657.7, 311.2],
+    [-604.3, 257.8]
+   ]
+  },
+  {
+   "id": "osm_25111462",
+   "name": "Rue Racine",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-704.7, 365.8],
+    [-682.5, 345.2],
+    [-667.9, 320.8],
+    [-657.7, 311.2]
+   ]
+  },
+  {
+   "id": "osm_31281938",
+   "name": "Rue Richard Lallemant",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [267.9, 177.8],
+    [254.4, 177.0],
+    [224.6, 132.3]
+   ]
+  },
+  {
+   "id": "osm_25127524",
+   "name": "Rue Rollon",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-267.0, 285.1],
+    [-376.0, 345.6]
+   ]
+  },
+  {
+   "id": "osm_31281937",
+   "name": "Rue Saint-Amand",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [142.3, 82.1],
+    [164.3, 115.9],
+    [190.4, 122.1],
+    [220.9, 134.5]
+   ]
+  },
+  {
+   "id": "osm_1317559071",
+   "name": "Rue Saint-André",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-572.0, 767.0],
+    [-544.4, 786.3]
+   ]
+  },
+  {
+   "id": "osm_25306837",
+   "name": "Rue Saint-André",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-544.4, 786.3],
+    [-500.8, 813.8],
+    [-468.5, 819.5],
+    [-377.7, 792.9],
+    [-276.3, 766.8]
+   ]
+  },
+  {
+   "id": "osm_167319372",
+   "name": "Rue Saint-Denis",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-8.8, -147.3],
+    [32.1, -164.6]
+   ]
+  },
+  {
+   "id": "osm_25567539",
+   "name": "Rue Saint-Denis",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [106.3, -192.3],
+    [32.1, -164.6]
+   ]
+  },
+  {
+   "id": "osm_25183193",
+   "name": "Rue Saint-Jacques",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-763.2, 325.1],
+    [-701.6, 254.8],
+    [-676.6, 204.2]
+   ]
+  },
+  {
+   "id": "osm_25492623",
+   "name": "Rue Saint-Lô",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [12.1, 199.5],
+    [-206.5, 318.1]
+   ]
+  },
+  {
+   "id": "osm_193169333",
+   "name": "Rue Saint-Maur",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-288.2, 960.7],
+    [-276.3, 766.8]
+   ]
+  },
+  {
+   "id": "osm_31541107",
+   "name": "Rue Saint-Nicaise",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [601.3, 306.2],
+    [675.5, 472.6]
+   ]
+  },
+  {
+   "id": "osm_181162648",
+   "name": "Rue Saint-Nicolas",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [65.0, 132.8],
+    [142.3, 82.1]
+   ]
+  },
+  {
+   "id": "osm_246137570",
+   "name": "Rue Saint-Nicolas",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [142.3, 82.1],
+    [206.2, 37.6]
+   ]
+  },
+  {
+   "id": "osm_31281934",
+   "name": "Rue Saint-Nicolas",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-6.2, 169.1],
+    [57.4, 134.3]
+   ]
+  },
+  {
+   "id": "osm_79095767",
+   "name": "Rue Saint-Nicolas",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [206.2, 37.6],
+    [227.4, 27.1]
+   ]
+  },
+  {
+   "id": "osm_1443469550",
+   "name": "Rue Saint-Patrice",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-401.4, 644.2],
+    [-411.1, 632.6]
+   ]
+  },
+  {
+   "id": "osm_25492617",
+   "name": "Rue Saint-Patrice",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-122.7, 616.2],
+    [-186.3, 654.9],
+    [-214.1, 662.8],
+    [-268.9, 666.0],
+    [-291.4, 662.0],
+    [-316.3, 650.6]
+   ]
+  },
+  {
+   "id": "osm_401243261",
+   "name": "Rue Saint-Patrice",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-316.3, 650.6],
+    [-367.2, 640.7],
+    [-401.4, 644.2]
+   ]
+  },
+  {
+   "id": "osm_647699057",
+   "name": "Rue Saint-Patrice",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-96.8, 606.6],
+    [-122.7, 616.2]
+   ]
+  },
+  {
+   "id": "osm_1558934327",
+   "name": "Rue Saint-Éloi",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-512.3, 196.7],
+    [-524.1, 201.8],
+    [-551.6, 195.3]
+   ]
+  },
+  {
+   "id": "osm_25184153",
+   "name": "Rue Saint-Éloi",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-473.5, 235.7],
+    [-480.2, 231.9],
+    [-512.3, 196.7]
+   ]
+  },
+  {
+   "id": "osm_53746423",
+   "name": "Rue Saint-Éloi",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-547.8, 178.3],
+    [-557.2, 172.8],
+    [-597.5, 100.1]
+   ]
+  },
+  {
+   "id": "osm_67427654",
+   "name": "Rue Saint-Éloi",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-597.5, 100.1],
+    [-638.1, 22.9]
+   ]
+  },
+  {
+   "id": "osm_25912417",
+   "name": "Rue Saint-Étienne des Tonneliers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-315.7, -63.4],
+    [-365.2, -38.1]
+   ]
+  },
+  {
+   "id": "osm_25912418",
+   "name": "Rue Saint-Étienne des Tonneliers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-307.1, -80.7],
+    [-208.8, -134.7]
+   ]
+  },
+  {
+   "id": "osm_31785750",
+   "name": "Rue Sainte-Claire",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1071.6, 98.5],
+    [1091.7, 180.8]
+   ]
+  },
+  {
+   "id": "osm_457550975",
+   "name": "Rue Sainte-Claire",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1091.7, 180.8],
+    [1101.2, 217.5]
+   ]
+  },
+  {
+   "id": "osm_31270238",
+   "name": "Rue Sainte-Croix des Pelletiers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-303.8, 499.7],
+    [-313.8, 471.9],
+    [-352.9, 394.0]
+   ]
+  },
+  {
+   "id": "osm_81356627",
+   "name": "Rue Sainte-Geneviève du Mont",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1035.7, 301.6],
+    [1019.5, 302.9],
+    [1004.6, 310.1]
+   ]
+  },
+  {
+   "id": "osm_26682845",
+   "name": "Rue Sainte-Marie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [488.7, 689.3],
+    [499.2, 699.3],
+    [610.5, 768.1]
+   ]
+  },
+  {
+   "id": "osm_25183079",
+   "name": "Rue Samuel Bochard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-577.6, 288.1],
+    [-543.3, 264.5]
+   ]
+  },
+  {
+   "id": "osm_53590623",
+   "name": "Rue Socrate",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-64.5, 241.0],
+    [-44.1, 307.5],
+    [-30.9, 332.6]
+   ]
+  },
+  {
+   "id": "osm_54072696",
+   "name": "Rue Socrate",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-13.7, 363.8],
+    [-30.9, 332.6]
+   ]
+  },
+  {
+   "id": "osm_24634379",
+   "name": "Rue Stanislas Girardin",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-578.8, 621.1],
+    [-952.3, 922.2]
+   ]
+  },
+  {
+   "id": "osm_26531686",
+   "name": "Rue Thomas Corneille",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-572.7, 428.7],
+    [-533.8, 395.1]
+   ]
+  },
+  {
+   "id": "osm_31585036",
+   "name": "Rue Thouret",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-206.7, 153.4],
+    [-163.3, 227.7]
+   ]
+  },
+  {
+   "id": "osm_181835036",
+   "name": "Rue Verte",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-13.3, 924.4],
+    [-16.8, 916.3],
+    [-4.9, 881.2],
+    [23.1, 823.9]
+   ]
+  },
+  {
+   "id": "osm_73013352",
+   "name": "Rue Verte",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-5.5, 1004.5],
+    [-5.8, 960.0],
+    [-8.8, 934.2]
+   ]
+  },
+  {
+   "id": "osm_31584224",
+   "name": "Rue Victor Hugo",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [308.8, -288.7],
+    [428.6, -42.8]
+   ]
+  },
+  {
+   "id": "osm_707586582",
+   "name": "Rue Victor Hugo",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [428.6, -42.8],
+    [449.1, -1.8]
+   ]
+  },
+  {
+   "id": "osm_1479504098",
+   "name": "Rue aux Ours",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-413.2, 176.9],
+    [-394.4, 162.0]
+   ]
+  },
+  {
+   "id": "osm_25183118",
+   "name": "Rue aux Ours",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-394.4, 162.0],
+    [-375.9, 147.0],
+    [-347.4, 130.7]
+   ]
+  },
+  {
+   "id": "osm_25781040",
+   "name": "Rue aux Ours",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-347.4, 130.7],
+    [-295.8, 101.5],
+    [-241.7, 74.8],
+    [-178.2, 30.7]
+   ]
+  },
+  {
+   "id": "osm_638238168",
+   "name": "Rue aux Ours",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-178.2, 30.7],
+    [-127.0, 2.0]
+   ]
+  },
+  {
+   "id": "osm_1126453093",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [875.9, -263.4],
+    [874.7, -253.1],
+    [827.4, -224.8]
+   ]
+  },
+  {
+   "id": "osm_1126453094",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [764.1, -194.6],
+    [824.2, -231.6]
+   ]
+  },
+  {
+   "id": "osm_1454967266",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [318.1, 77.2],
+    [299.4, 90.0]
+   ]
+  },
+  {
+   "id": "osm_1482625407",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [824.2, -231.6],
+    [875.9, -263.4]
+   ]
+  },
+  {
+   "id": "osm_1482625408",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [827.4, -224.8],
+    [767.8, -189.3],
+    [761.2, -190.2]
+   ]
+  },
+  {
+   "id": "osm_1553290753",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [523.6, -47.0],
+    [456.0, -6.0]
+   ]
+  },
+  {
+   "id": "osm_181162651",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [299.4, 90.0],
+    [243.1, 121.5]
+   ]
+  },
+  {
+   "id": "osm_195644002",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [605.9, -96.8],
+    [523.6, -47.0]
+   ]
+  },
+  {
+   "id": "osm_25850136",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [456.0, -6.0],
+    [318.1, 77.2]
+   ]
+  },
+  {
+   "id": "osm_601110109",
+   "name": "Rue d'Amiens",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [745.4, -181.2],
+    [605.9, -96.8]
+   ]
+  },
+  {
+   "id": "osm_65367407",
+   "name": "Rue d'Ernemont",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [508.3, 860.0],
+    [511.1, 869.6],
+    [526.0, 890.6],
+    [614.8, 1000.2]
+   ]
+  },
+  {
+   "id": "osm_25182911",
+   "name": "Rue d'Harcourt",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-678.0, 170.7],
+    [-745.3, 84.6]
+   ]
+  },
+  {
+   "id": "osm_220880483",
+   "name": "Rue d'Écosse",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [167.0, 673.0],
+    [227.8, 632.5],
+    [268.3, 602.1]
+   ]
+  },
+  {
+   "id": "osm_30808878",
+   "name": "Rue d'Écosse",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [167.0, 673.0],
+    [133.0, 696.8]
+   ]
+  },
+  {
+   "id": "osm_1496114598",
+   "name": "Rue de Bihorel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [638.7, 835.3],
+    [614.3, 810.2]
+   ]
+  },
+  {
+   "id": "osm_31992696",
+   "name": "Rue de Blainville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-287.9, 958.1],
+    [-129.0, 967.1]
+   ]
+  },
+  {
+   "id": "osm_31014142",
+   "name": "Rue de Carville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-888.0, 646.8],
+    [-794.7, 560.7]
+   ]
+  },
+  {
+   "id": "osm_25850142",
+   "name": "Rue de Cideville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [216.1, -164.5],
+    [197.4, -204.7]
+   ]
+  },
+  {
+   "id": "osm_25127666",
+   "name": "Rue de Florence",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-465.3, 464.7],
+    [-502.9, 419.0]
+   ]
+  },
+  {
+   "id": "osm_114930801",
+   "name": "Rue de Fontenay",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [483.2, -320.1],
+    [471.1, -342.5]
+   ]
+  },
+  {
+   "id": "osm_134952150",
+   "name": "Rue de Fontenay",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [498.3, -417.4],
+    [471.1, -342.5]
+   ]
+  },
+  {
+   "id": "osm_134952151",
+   "name": "Rue de Fontenay",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [471.1, -342.5],
+    [466.1, -351.8],
+    [466.6, -356.4],
+    [487.1, -418.3]
+   ]
+  },
+  {
+   "id": "osm_1111718030",
+   "name": "Rue de Fontenelle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-657.7, 311.2],
+    [-701.6, 254.8]
+   ]
+  },
+  {
+   "id": "osm_28997282",
+   "name": "Rue de Fontenelle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-411.1, 632.6],
+    [-476.7, 523.9],
+    [-530.7, 479.0],
+    [-550.3, 456.9]
+   ]
+  },
+  {
+   "id": "osm_367506036",
+   "name": "Rue de Fontenelle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-589.4, 407.5],
+    [-657.7, 311.2]
+   ]
+  },
+  {
+   "id": "osm_367506037",
+   "name": "Rue de Fontenelle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-550.3, 456.9],
+    [-589.4, 407.5]
+   ]
+  },
+  {
+   "id": "osm_61459866",
+   "name": "Rue de Fontenelle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-802.4, 131.0],
+    [-701.6, 254.8]
+   ]
+  },
+  {
+   "id": "osm_25850126",
+   "name": "Rue de Germont",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [901.2, -10.2],
+    [897.7, -16.1],
+    [891.3, -17.0],
+    [799.1, -5.0]
+   ]
+  },
+  {
+   "id": "osm_25849659",
+   "name": "Rue de Joyeuse",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [484.1, 678.6],
+    [549.9, 630.7],
+    [586.7, 609.0],
+    [631.4, 588.0],
+    [662.1, 570.3]
+   ]
+  },
+  {
+   "id": "osm_25111423",
+   "name": "Rue de Le Nostre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-716.6, 373.4],
+    [-973.6, 520.4]
+   ]
+  },
+  {
+   "id": "osm_37350930",
+   "name": "Rue de Le Nostre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-973.6, 520.4],
+    [-1018.0, 545.1]
+   ]
+  },
+  {
+   "id": "osm_25129987",
+   "name": "Rue de Lecat",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-734.3, 837.5],
+    [-813.0, 740.8]
+   ]
+  },
+  {
+   "id": "osm_31586205",
+   "name": "Rue de Lecat",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-813.0, 740.8],
+    [-847.2, 697.9]
+   ]
+  },
+  {
+   "id": "osm_37350929",
+   "name": "Rue de Lecat",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-847.2, 697.9],
+    [-888.0, 646.8]
+   ]
+  },
+  {
+   "id": "osm_78074621",
+   "name": "Rue de Lecat",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-888.0, 646.8],
+    [-900.2, 631.5]
+   ]
+  },
+  {
+   "id": "osm_78074629",
+   "name": "Rue de Lecat",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-900.2, 631.5],
+    [-1014.1, 460.2]
+   ]
+  },
+  {
+   "id": "osm_777100920",
+   "name": "Rue de Lémery",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-407.2, 674.0],
+    [-401.4, 644.2]
+   ]
+  },
+  {
+   "id": "osm_1443469553",
+   "name": "Rue de Maulévrier",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [442.4, 520.4],
+    [425.9, 475.0]
+   ]
+  },
+  {
+   "id": "osm_192748232",
+   "name": "Rue de Maulévrier",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [442.4, 520.4],
+    [507.7, 659.6]
+   ]
+  },
+  {
+   "id": "osm_43872036",
+   "name": "Rue de Maulévrier",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [425.9, 475.0],
+    [401.2, 429.7]
+   ]
+  },
+  {
+   "id": "osm_30808688",
+   "name": "Rue de Montbret",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [345.2, 431.5],
+    [271.8, 496.6],
+    [225.5, 525.6]
+   ]
+  },
+  {
+   "id": "osm_286589122",
+   "name": "Rue de Québec",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [77.6, -310.4],
+    [112.0, -325.2],
+    [134.3, -274.3]
+   ]
+  },
+  {
+   "id": "osm_29470837",
+   "name": "Rue de l'Abbé Cochet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-191.3, 656.9],
+    [-183.8, 680.1],
+    [-170.2, 746.2]
+   ]
+  },
+  {
+   "id": "osm_30808879",
+   "name": "Rue de l'Ancien Rempart Bouvreuil",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [121.0, 645.7],
+    [167.0, 673.0]
+   ]
+  },
+  {
+   "id": "osm_31585152",
+   "name": "Rue de l'Ancienne Prison",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-403.6, 418.1],
+    [-347.0, 522.2]
+   ]
+  },
+  {
+   "id": "osm_31785843",
+   "name": "Rue de l'Avalasse",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [409.2, 1122.1],
+    [340.2, 944.6]
+   ]
+  },
+  {
+   "id": "osm_43834852",
+   "name": "Rue de l'Avalasse",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [340.2, 944.6],
+    [303.3, 866.1],
+    [280.7, 835.3],
+    [186.9, 759.9]
+   ]
+  },
+  {
+   "id": "osm_31582449",
+   "name": "Rue de l'Aître Saint-Nicaise",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [674.8, 336.4],
+    [622.7, 357.5]
+   ]
+  },
+  {
+   "id": "osm_31582189",
+   "name": "Rue de l'Enfer",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [655.9, 429.9],
+    [631.5, 441.6]
+   ]
+  },
+  {
+   "id": "osm_32008510",
+   "name": "Rue de l'École",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [32.6, 333.3],
+    [50.3, 378.5],
+    [82.5, 424.9]
+   ]
+  },
+  {
+   "id": "osm_25567544",
+   "name": "Rue de l'Écureuil",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-13.7, 363.8],
+    [38.0, 436.0]
+   ]
+  },
+  {
+   "id": "osm_25567545",
+   "name": "Rue de l'Écureuil",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [35.3, 444.7],
+    [-1.6, 391.5]
+   ]
+  },
+  {
+   "id": "osm_25567546",
+   "name": "Rue de l'Écureuil",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [25.3, 430.4],
+    [20.0, 432.1],
+    [-23.5, 368.7]
+   ]
+  },
+  {
+   "id": "osm_25567540",
+   "name": "Rue de l'Épicerie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-8.0, -105.4],
+    [-8.8, -147.3]
+   ]
+  },
+  {
+   "id": "osm_31541106",
+   "name": "Rue de la Cage",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [742.0, 446.8],
+    [766.2, 501.6],
+    [803.1, 635.4]
+   ]
+  },
+  {
+   "id": "osm_84424316",
+   "name": "Rue de la Chaîne",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [124.8, 193.6],
+    [132.2, 185.9],
+    [193.3, 150.6]
+   ]
+  },
+  {
+   "id": "osm_952978777",
+   "name": "Rue de la Chaîne",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [193.3, 150.6],
+    [243.1, 121.5]
+   ]
+  },
+  {
+   "id": "osm_30808690",
+   "name": "Rue de la Cigogne",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [215.4, 369.4],
+    [266.1, 446.6]
+   ]
+  },
+  {
+   "id": "osm_31785751",
+   "name": "Rue de la Cigogne du Mont",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1023.2, 270.7],
+    [1094.9, 241.1],
+    [1121.4, 234.0]
+   ]
+  },
+  {
+   "id": "osm_31281935",
+   "name": "Rue de la Croix de Fer",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [98.5, 209.0],
+    [72.1, 163.4],
+    [71.1, 145.4],
+    [65.0, 132.8]
+   ]
+  },
+  {
+   "id": "osm_31281939",
+   "name": "Rue de la Croix de Fer",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [57.4, 134.3],
+    [16.5, 74.6]
+   ]
+  },
+  {
+   "id": "osm_69742416",
+   "name": "Rue de la Foulerie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [563.2, 65.4],
+    [564.0, 71.6],
+    [561.3, 73.1],
+    [568.4, 133.1]
+   ]
+  },
+  {
+   "id": "osm_29470829",
+   "name": "Rue de la Glacière",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [90.4, 651.8],
+    [133.0, 696.8],
+    [186.9, 759.9]
+   ]
+  },
+  {
+   "id": "osm_69742371",
+   "name": "Rue de la Grande Mesure",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [371.1, 45.6],
+    [351.3, 11.6],
+    [352.3, 8.4]
+   ]
+  },
+  {
+   "id": "osm_1496293176",
+   "name": "Rue de la Pie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-520.1, 368.6],
+    [-542.7, 380.4]
+   ]
+  },
+  {
+   "id": "osm_25781038",
+   "name": "Rue de la Pie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-589.4, 407.5],
+    [-542.7, 380.4]
+   ]
+  },
+  {
+   "id": "osm_25184653",
+   "name": "Rue de la Porte aux Rats",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-358.5, 529.7],
+    [-342.0, 602.2]
+   ]
+  },
+  {
+   "id": "osm_25492622",
+   "name": "Rue de la Poterne",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-97.7, 408.5],
+    [-122.6, 358.6],
+    [-166.5, 296.3]
+   ]
+  },
+  {
+   "id": "osm_31580512",
+   "name": "Rue de la Roche",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [675.5, 472.6],
+    [645.1, 483.9]
+   ]
+  },
+  {
+   "id": "osm_31580602",
+   "name": "Rue de la Roche",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [675.5, 472.6],
+    [742.0, 446.8]
+   ]
+  },
+  {
+   "id": "osm_31541112",
+   "name": "Rue de la Rochefoucauld",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [146.8, 879.5],
+    [83.3, 895.1]
+   ]
+  },
+  {
+   "id": "osm_31785678",
+   "name": "Rue de la Rose",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1235.7, 215.3],
+    [1204.2, 73.7]
+   ]
+  },
+  {
+   "id": "osm_43979483",
+   "name": "Rue de la Savonnerie",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-208.8, -134.7],
+    [-103.3, -184.2]
+   ]
+  },
+  {
+   "id": "osm_1445729177",
+   "name": "Rue de la Seille",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [266.1, 446.6],
+    [280.5, 437.6],
+    [322.1, 403.4]
+   ]
+  },
+  {
+   "id": "osm_30808689",
+   "name": "Rue de la Seille",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [200.3, 477.5],
+    [266.1, 446.6]
+   ]
+  },
+  {
+   "id": "osm_25212665",
+   "name": "Rue de la Tour de Beurre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-189.6, -216.7],
+    [-159.2, -158.2],
+    [-106.2, -73.4]
+   ]
+  },
+  {
+   "id": "osm_53819710",
+   "name": "Rue de la Tour de Beurre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-106.2, -73.4],
+    [-99.6, -66.5],
+    [-70.3, -14.5]
+   ]
+  },
+  {
+   "id": "osm_192748233",
+   "name": "Rue des Arpents",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [292.5, -323.8],
+    [308.8, -288.7]
+   ]
+  },
+  {
+   "id": "osm_31737889",
+   "name": "Rue des Arpents",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [248.0, -419.4],
+    [292.5, -323.8]
+   ]
+  },
+  {
+   "id": "osm_201480404",
+   "name": "Rue des Arsins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [158.5, 265.7],
+    [146.8, 238.9]
+   ]
+  },
+  {
+   "id": "osm_25551386",
+   "name": "Rue des Arsins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [202.7, 374.6],
+    [181.7, 310.7],
+    [158.5, 265.7]
+   ]
+  },
+  {
+   "id": "osm_110521127",
+   "name": "Rue des Augustins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [308.8, -288.7],
+    [356.4, -281.4]
+   ]
+  },
+  {
+   "id": "osm_181162653",
+   "name": "Rue des Augustins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [93.7, -256.4],
+    [134.3, -274.3]
+   ]
+  },
+  {
+   "id": "osm_451204532",
+   "name": "Rue des Augustins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [181.6, -279.3],
+    [241.4, -281.9],
+    [308.8, -288.7]
+   ]
+  },
+  {
+   "id": "osm_643434841",
+   "name": "Rue des Augustins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [134.3, -274.3],
+    [139.0, -276.4],
+    [181.6, -279.3]
+   ]
+  },
+  {
+   "id": "osm_25567623",
+   "name": "Rue des Basnages",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-127.1, 425.4],
+    [-81.6, 493.8]
+   ]
+  },
+  {
+   "id": "osm_210833603",
+   "name": "Rue des Bonnetiers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [74.9, -60.1],
+    [58.6, -53.2]
+   ]
+  },
+  {
+   "id": "osm_300103921",
+   "name": "Rue des Bonnetiers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [87.3, -66.3],
+    [148.1, -94.4]
+   ]
+  },
+  {
+   "id": "osm_300103922",
+   "name": "Rue des Bonnetiers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [58.6, -53.2],
+    [26.8, -45.1],
+    [-2.2, -42.4]
+   ]
+  },
+  {
+   "id": "osm_188973383",
+   "name": "Rue des Bons Enfants",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-358.5, 529.7],
+    [-413.1, 563.0]
+   ]
+  },
+  {
+   "id": "osm_201480405",
+   "name": "Rue des Bons Enfants",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-413.1, 563.0],
+    [-442.2, 583.1]
+   ]
+  },
+  {
+   "id": "osm_24634375",
+   "name": "Rue des Bons Enfants",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-178.7, 452.2],
+    [-303.8, 499.7],
+    [-358.5, 529.7]
+   ]
+  },
+  {
+   "id": "osm_25184780",
+   "name": "Rue des Bons Enfants",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-442.2, 583.1],
+    [-472.7, 606.5],
+    [-501.9, 623.6],
+    [-517.1, 635.4]
+   ]
+  },
+  {
+   "id": "osm_26542702",
+   "name": "Rue des Boucheries Saint-Ouen",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [311.0, 111.2],
+    [339.9, 168.9]
+   ]
+  },
+  {
+   "id": "osm_31585252",
+   "name": "Rue des Béguines",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-413.1, 563.0],
+    [-422.3, 543.0],
+    [-433.9, 526.4],
+    [-463.3, 500.5]
+   ]
+  },
+  {
+   "id": "osm_189745462",
+   "name": "Rue des Capucins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [943.5, 320.5],
+    [924.0, 292.4],
+    [846.6, 153.5]
+   ]
+  },
+  {
+   "id": "osm_250434865",
+   "name": "Rue des Carmélites",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [275.8, 546.0],
+    [265.9, 531.1]
+   ]
+  },
+  {
+   "id": "osm_250434868",
+   "name": "Rue des Carmélites",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [351.7, 656.0],
+    [277.9, 549.4]
+   ]
+  },
+  {
+   "id": "osm_31540667",
+   "name": "Rue des Carmélites",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [370.1, 682.1],
+    [351.7, 656.0]
+   ]
+  },
+  {
+   "id": "osm_25184461",
+   "name": "Rue des Champs Maillets",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-304.1, 588.5],
+    [-298.6, 545.4],
+    [-303.9, 521.5],
+    [-311.7, 504.2]
+   ]
+  },
+  {
+   "id": "osm_44029159",
+   "name": "Rue des Champs Maillets",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-316.3, 650.6],
+    [-307.2, 589.8]
+   ]
+  },
+  {
+   "id": "osm_25183272",
+   "name": "Rue des Charrettes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-597.5, 100.1],
+    [-491.3, 41.5]
+   ]
+  },
+  {
+   "id": "osm_31786381",
+   "name": "Rue des Charrettes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-647.0, 141.9],
+    [-633.1, 124.1],
+    [-597.5, 100.1]
+   ]
+  },
+  {
+   "id": "osm_31920027",
+   "name": "Rue des Charrettes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-491.3, 41.5],
+    [-457.5, 103.7]
+   ]
+  },
+  {
+   "id": "osm_44001219",
+   "name": "Rue des Célestins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1044.7, 37.0],
+    [1057.8, 101.0]
+   ]
+  },
+  {
+   "id": "osm_25849660",
+   "name": "Rue des Deux Anges",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [662.1, 570.3],
+    [661.4, 535.7],
+    [645.1, 483.9]
+   ]
+  },
+  {
+   "id": "osm_226433882",
+   "name": "Rue des Faulx",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [339.9, 168.9],
+    [360.9, 153.9],
+    [401.1, 136.0],
+    [416.6, 132.7],
+    [491.8, 127.2]
+   ]
+  },
+  {
+   "id": "osm_25262558",
+   "name": "Rue des Forgettes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-838.6, 1029.8],
+    [-913.1, 1039.6]
+   ]
+  },
+  {
+   "id": "osm_181162655",
+   "name": "Rue des Fossés Louis VIII",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [64.2, 283.5],
+    [139.8, 240.4],
+    [146.8, 238.9]
+   ]
+  },
+  {
+   "id": "osm_181162656",
+   "name": "Rue des Fossés Louis VIII",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [146.8, 238.9],
+    [214.9, 202.9],
+    [241.8, 192.8],
+    [267.9, 177.8]
+   ]
+  },
+  {
+   "id": "osm_30808933",
+   "name": "Rue des Fossés Louis VIII",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-109.7, 382.8],
+    [64.2, 283.5]
+   ]
+  },
+  {
+   "id": "osm_25850143",
+   "name": "Rue des Maillots-Sarrazin",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [181.6, -279.3],
+    [172.5, -335.1],
+    [154.7, -377.0]
+   ]
+  },
+  {
+   "id": "osm_31541108",
+   "name": "Rue des Minimes",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [586.7, 609.0],
+    [508.7, 432.5],
+    [477.8, 371.7]
+   ]
+  },
+  {
+   "id": "osm_81356628",
+   "name": "Rue des Pénitents",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1121.4, 234.0],
+    [1132.1, 259.9]
+   ]
+  },
+  {
+   "id": "osm_31541105",
+   "name": "Rue des Requis",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [650.6, 284.6],
+    [724.9, 452.9]
+   ]
+  },
+  {
+   "id": "osm_31585034",
+   "name": "Rue des Vergetiers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-267.5, 170.5],
+    [-256.0, 186.4]
+   ]
+  },
+  {
+   "id": "osm_645946560",
+   "name": "Rue des Vergetiers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-267.5, 170.5],
+    [-308.4, 109.1]
+   ]
+  },
+  {
+   "id": "osm_1317075170",
+   "name": "Rue du Bac",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-115.8, -208.6],
+    [-103.3, -184.2]
+   ]
+  },
+  {
+   "id": "osm_1317075171",
+   "name": "Rue du Bac",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-103.3, -184.2],
+    [-98.0, -170.4],
+    [-53.8, -88.6]
+   ]
+  },
+  {
+   "id": "osm_192748236",
+   "name": "Rue du Bac",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-115.8, -208.6],
+    [-134.1, -244.8]
+   ]
+  },
+  {
+   "id": "osm_146518590",
+   "name": "Rue du Bailliage",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-66.3, 595.4],
+    [16.1, 565.8]
+   ]
+  },
+  {
+   "id": "osm_25850285",
+   "name": "Rue du Bailliage",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-96.8, 606.6],
+    [-66.3, 595.4]
+   ]
+  },
+  {
+   "id": "osm_25567541",
+   "name": "Rue du Bec",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-137.3, 114.2],
+    [-93.4, 189.0]
+   ]
+  },
+  {
+   "id": "osm_84170467",
+   "name": "Rue du Cercle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-465.3, 464.7],
+    [-508.7, 498.6]
+   ]
+  },
+  {
+   "id": "osm_31737691",
+   "name": "Rue du Champ de Mars",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [736.0, -351.2],
+    [737.2, -360.4],
+    [722.8, -387.4]
+   ]
+  },
+  {
+   "id": "osm_181835045",
+   "name": "Rue du Champ des Oiseaux",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [146.8, 879.5],
+    [170.3, 954.1]
+   ]
+  },
+  {
+   "id": "osm_24634374",
+   "name": "Rue du Champ des Oiseaux",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [115.9, 776.7],
+    [146.8, 879.5]
+   ]
+  },
+  {
+   "id": "osm_43834849",
+   "name": "Rue du Champ des Oiseaux",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [180.1, 1006.8],
+    [184.6, 1038.5],
+    [187.9, 1045.6],
+    [195.5, 1104.0]
+   ]
+  },
+  {
+   "id": "osm_31785936",
+   "name": "Rue du Champ du Pardon",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [400.0, 1174.7],
+    [534.0, 1112.7]
+   ]
+  },
+  {
+   "id": "osm_290055278",
+   "name": "Rue du Change",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-70.3, -14.5],
+    [-66.3, -9.5],
+    [-15.6, -39.4],
+    [-5.4, -41.6]
+   ]
+  },
+  {
+   "id": "osm_286583728",
+   "name": "Rue du Chemin Neuf",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [867.1, -504.6],
+    [904.5, -482.3],
+    [906.0, -477.3],
+    [904.0, -463.4],
+    [906.8, -454.5]
+   ]
+  },
+  {
+   "id": "osm_43979510",
+   "name": "Rue du Clos des Marqueurs",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [845.0, 472.9],
+    [766.2, 501.6]
+   ]
+  },
+  {
+   "id": "osm_44105657",
+   "name": "Rue du Colonel Trupel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [793.5, 132.2],
+    [813.7, 177.3]
+   ]
+  },
+  {
+   "id": "osm_235935116",
+   "name": "Rue du Contrat Social",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-1016.9, 728.4],
+    [-972.3, 691.2]
+   ]
+  },
+  {
+   "id": "osm_37350928",
+   "name": "Rue du Contrat Social",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-900.2, 631.5],
+    [-675.0, 447.7]
+   ]
+  },
+  {
+   "id": "osm_41781125",
+   "name": "Rue du Contrat Social",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-972.3, 691.2],
+    [-900.2, 631.5]
+   ]
+  },
+  {
+   "id": "osm_293439306",
+   "name": "Rue du Cordier",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [121.0, 645.7],
+    [236.6, 553.0]
+   ]
+  },
+  {
+   "id": "osm_28997205",
+   "name": "Rue du Donjon",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-8.4, 771.3],
+    [13.9, 726.5],
+    [28.5, 691.2],
+    [77.9, 655.2]
+   ]
+  },
+  {
+   "id": "osm_29469680",
+   "name": "Rue du Fardeau",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-304.6, 49.6],
+    [-243.9, 6.6]
+   ]
+  },
+  {
+   "id": "osm_25126830",
+   "name": "Rue du Lieu de Santé",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-813.0, 740.8],
+    [-776.5, 684.4],
+    [-766.1, 673.6],
+    [-731.7, 647.2]
+   ]
+  },
+  {
+   "id": "osm_30796789",
+   "name": "Rue du Lieu de Santé",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-601.3, 580.4],
+    [-732.9, 645.4]
+   ]
+  },
+  {
+   "id": "osm_31785680",
+   "name": "Rue du Mont",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1035.7, 301.6],
+    [1232.2, 218.5],
+    [1235.7, 215.3]
+   ]
+  },
+  {
+   "id": "osm_29470835",
+   "name": "Rue du Moulinet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-122.7, 616.2],
+    [-99.8, 658.2],
+    [-80.7, 684.6],
+    [-66.5, 694.1]
+   ]
+  },
+  {
+   "id": "osm_225493381",
+   "name": "Rue du Pas du Gaud",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1022.4, 59.3],
+    [1028.3, 106.8]
+   ]
+  },
+  {
+   "id": "osm_1443469551",
+   "name": "Rue du Petit Porche",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [322.1, 403.4],
+    [314.8, 389.3],
+    [317.1, 376.1]
+   ]
+  },
+  {
+   "id": "osm_25492620",
+   "name": "Rue du Petit Porche",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [365.0, 457.6],
+    [322.1, 403.4]
+   ]
+  },
+  {
+   "id": "osm_25183471",
+   "name": "Rue du Petit Salut",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-94.6, 25.8],
+    [-152.8, 69.1]
+   ]
+  },
+  {
+   "id": "osm_189745465",
+   "name": "Rue du Pont Dame Renaude",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [893.8, 75.6],
+    [902.7, 131.6]
+   ]
+  },
+  {
+   "id": "osm_69742392",
+   "name": "Rue du Pont de l'Arquet",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [495.5, 78.4],
+    [491.8, 127.2]
+   ]
+  },
+  {
+   "id": "osm_1512749933",
+   "name": "Rue du Professeur Stewart",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1054.1, -379.8],
+    [1038.1, -397.7],
+    [1022.1, -407.8]
+   ]
+  },
+  {
+   "id": "osm_31737689",
+   "name": "Rue du Professeur Stewart",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [943.6, -436.3],
+    [926.5, -445.5],
+    [915.2, -461.3]
+   ]
+  },
+  {
+   "id": "osm_472992969",
+   "name": "Rue du Professeur Stewart",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1022.1, -407.8],
+    [943.6, -436.3]
+   ]
+  },
+  {
+   "id": "osm_31281940",
+   "name": "Rue du Père Adam",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [215.0, 57.5],
+    [241.3, 44.3],
+    [281.5, 68.7],
+    [285.3, 66.5]
+   ]
+  },
+  {
+   "id": "osm_136541243",
+   "name": "Rue du Rempart Martainville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [364.0, -339.6],
+    [402.4, -340.7]
+   ]
+  },
+  {
+   "id": "osm_31737890",
+   "name": "Rue du Rempart Martainville",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [292.5, -323.8],
+    [349.0, -341.1],
+    [364.0, -339.6]
+   ]
+  },
+  {
+   "id": "osm_1480096869",
+   "name": "Rue du Renard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-897.7, 973.1],
+    [-821.8, 918.9],
+    [-812.4, 907.7],
+    [-756.9, 858.7]
+   ]
+  },
+  {
+   "id": "osm_367506026",
+   "name": "Rue du Renard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-928.0, 995.2],
+    [-897.7, 973.1]
+   ]
+  },
+  {
+   "id": "osm_38328198",
+   "name": "Rue du Renard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-576.3, 740.0],
+    [-559.2, 747.2]
+   ]
+  },
+  {
+   "id": "osm_639105508",
+   "name": "Rue du Renard",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-756.9, 858.7],
+    [-648.4, 764.5],
+    [-599.2, 743.7],
+    [-576.3, 740.0]
+   ]
+  },
+  {
+   "id": "osm_31267911",
+   "name": "Rue du Roi",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-639.1, 939.3],
+    [-557.6, 919.3]
+   ]
+  },
+  {
+   "id": "osm_39289326",
+   "name": "Rue du Rosier",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [356.1, 19.0],
+    [288.2, 61.5]
+   ]
+  },
+  {
+   "id": "osm_251229411",
+   "name": "Rue du Ruissel",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [492.9, 38.9],
+    [492.2, 78.3]
+   ]
+  },
+  {
+   "id": "osm_29470834",
+   "name": "Rue du Sacre",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-168.4, 531.5],
+    [-122.7, 616.2]
+   ]
+  },
+  {
+   "id": "osm_31585039",
+   "name": "Rue du Tambour",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-280.6, 206.7],
+    [-243.7, 272.2]
+   ]
+  },
+  {
+   "id": "osm_250434869",
+   "name": "Rue du Vert Buisson",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [325.1, 515.5],
+    [314.3, 497.6]
+   ]
+  },
+  {
+   "id": "osm_31540665",
+   "name": "Rue du Vert Buisson",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [395.6, 637.9],
+    [325.1, 515.5]
+   ]
+  },
+  {
+   "id": "osm_166603396",
+   "name": "Rue du Vieux Palais",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-643.6, 211.5],
+    [-604.3, 257.8]
+   ]
+  },
+  {
+   "id": "osm_53844148",
+   "name": "Rue du Vieux Palais",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-511.5, 359.1],
+    [-604.3, 257.8]
+   ]
+  },
+  {
+   "id": "osm_25850127",
+   "name": "Rue Édouard Adam",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [839.6, 135.9],
+    [826.3, 81.5]
+   ]
+  },
+  {
+   "id": "osm_442729614",
+   "name": "Rue Édouard Adam",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [775.0, -79.7],
+    [799.1, -5.0]
+   ]
+  },
+  {
+   "id": "osm_442729619",
+   "name": "Rue Édouard Adam",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [799.1, -5.0],
+    [826.3, 81.5]
+   ]
+  },
+  {
+   "id": "osm_31585038",
+   "name": "Rue Émile Verhaeren",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-236.2, 219.6],
+    [-186.4, 188.1]
+   ]
+  },
+  {
+   "id": "osm_25567624",
+   "name": "Rue Étoupée",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-260.7, 570.2],
+    [-265.1, 539.1],
+    [-277.5, 490.0]
+   ]
+  },
+  {
+   "id": "osm_82794359",
+   "name": "Rue Étoupée",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [-260.7, 570.2],
+    [-268.9, 666.0]
+   ]
+  },
+  {
+   "id": "osm_134952177",
+   "name": "Voie Charles Nicolle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1119.9, -209.2],
+    [1126.0, -224.4]
+   ]
+  },
+  {
+   "id": "osm_134952180",
+   "name": "Voie Charles Nicolle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1130.6, -277.9],
+    [1132.5, -224.9]
+   ]
+  },
+  {
+   "id": "osm_284245141",
+   "name": "Voie Charles Nicolle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1123.7, -277.2],
+    [1121.0, -316.1]
+   ]
+  },
+  {
+   "id": "osm_297770293",
+   "name": "Voie Charles Nicolle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1132.5, -224.9],
+    [1133.5, -211.9]
+   ]
+  },
+  {
+   "id": "osm_297770295",
+   "name": "Voie Charles Nicolle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1126.0, -224.4],
+    [1123.7, -277.2]
+   ]
+  },
+  {
+   "id": "osm_43979499",
+   "name": "Voie Charles Nicolle",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1127.7, -315.8],
+    [1130.6, -277.9]
+   ]
+  },
+  {
+   "id": "osm_134952174",
+   "name": "Voie Derocque",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1056.8, -113.5],
+    [979.5, -117.6]
+   ]
+  },
+  {
+   "id": "osm_134952179",
+   "name": "Voie de l'Avenir",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [979.5, -117.6],
+    [980.3, -133.5]
+   ]
+  },
+  {
+   "id": "osm_280119837",
+   "name": "Voie de l'Avenir",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [980.3, -133.5],
+    [984.1, -183.0],
+    [1003.8, -182.7],
+    [1035.5, -197.7],
+    [1097.7, -173.6]
+   ]
+  },
+  {
+   "id": "osm_134952178",
+   "name": "Voie des Capucins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [901.2, -10.2],
+    [929.1, -2.5],
+    [962.9, -0.6],
+    [967.3, 2.8]
+   ]
+  },
+  {
+   "id": "osm_165070757",
+   "name": "Voie des Capucins",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [967.3, 2.8],
+    [969.8, -118.3]
+   ]
+  },
+  {
+   "id": "osm_225773085",
+   "name": "Voie des Marronniers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [979.5, -117.6],
+    [944.7, -121.5],
+    [924.0, -139.9]
+   ]
+  },
+  {
+   "id": "osm_284244389",
+   "name": "Voie des Marronniers",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [924.0, -139.9],
+    [940.3, -142.9],
+    [958.5, -142.9],
+    [970.6, -139.5],
+    [980.3, -133.5]
+   ]
+  },
+  {
+   "id": "osm_319630489",
+   "name": "Voie du Colombier",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1202.1, -92.6],
+    [1219.5, -84.9],
+    [1222.8, -80.1],
+    [1217.9, -16.0],
+    [1212.9, -11.5],
+    [1183.8, -4.2],
+    [1155.4, -4.8]
+   ]
+  },
+  {
+   "id": "osm_319630490",
+   "name": "Voie du Colombier",
+   "rank": "secondary",
+   "width_m": 5.0,
+   "origin": "osm",
+   "points": [
+    [1197.3, -141.3],
+    [1193.7, -97.3]
+   ]
+  }
+ ],
+ "quays": [
+  {
+   "id": "quais",
+   "name": "Quais de Seine (rive droite)",
+   "kind": "stone",
+   "width_m": 16.0,
+   "points": [
+    [-860, 110],
+    [-785, 70],
+    [-640, -5],
+    [-490, -70],
+    [-420, -122],
+    [-245, -206],
+    [-134, -258],
+    [0, -320],
+    [150, -385],
+    [300, -460],
+    [385, -478]
+   ]
+  }
+ ],
+ "bridges": [
+  {
+   "id": "pont_mathilde",
+   "name": "Pont de pierre, dit pont Mathilde (vers 1160)",
+   "from": [-245, -200],
+   "to": [-386, -432],
+   "width_m": 10.0,
+   "deck_m": 8.0,
+   "material": "stone",
+   "arches": 13,
+   "houses": true,
+   "house_span": [0.12, 0.45],
+   "gatehouses_at": [0.08, 0.93],
+   "mills_at": [0.6],
+   "note": "Pont de l'Impératrice Mathilde, bâti entre 1151 et 1167 (Inventaire, POP IA00021781), piles démolies en 1659-1661 ; relie la rue Grand-Pont à la rue Saint-Sever (axes OSM). 13 arches selon plusieurs auteurs, 12 selon Tanguy (incertain) ; tête sud défendue par la Barbacane. Maisons et moulin sur le pont attestés à la fin du Moyen Âge (Le Lieur), leur étendue en 1340 est une restitution."
+  }
+ ],
+ "monuments": [
+  {
+   "id": "cathedrale",
+   "name": "Cathédrale Notre-Dame",
+   "model": "gothic_cathedral",
+   "at": [1, 0],
+   "angle_deg": -34,
+   "clear_m": 14,
+   "certainty": "attested",
+   "params": {
+    "length_m": 144,
+    "width_m": 33,
+    "nave_width_m": 11,
+    "vault_m": 28,
+    "ridge_m": 38,
+    "aisle_m": 12,
+    "transept_m": 58,
+    "transept_width_m": 13,
+    "transept_at": 0.52,
+    "apse": "round",
+    "chapels": true,
+    "west_towers": [
+     {
+      "side": "north",
+      "size": 13,
+      "height": 58,
+      "top": "pyramid",
+      "spire_m": 10
+     }
+    ],
+    "crossing": {
+     "size": 14,
+     "height": 51,
+     "spire_m": 45
+    }
+   },
+   "description": "Nef et chœur gothiques (XIIIe s.), chapelle de la Vierge commencée en 1302 ; 144 m hors œuvre (136,86 m dans œuvre), nef voûtée à 28 m. Tour Saint-Romain (XIIe s., étage supérieur 1468-1478 : plus basse en 1340, hauteur restituée), tour-lanterne (51 m sous voûte) et flèche de bois brûlée le 5 octobre 1514 (hauteur restituée). Façade occidentale reprise à partir de 1370. Tour de Beurre : 1485-1506, absente."
+  },
+  {
+   "id": "saint_ouen_choeur",
+   "name": "Abbatiale Saint-Ouen (chœur gothique)",
+   "model": "gothic_cathedral",
+   "at": [422, 201],
+   "angle_deg": -13,
+   "clear_m": 10,
+   "certainty": "attested",
+   "params": {
+    "length_m": 60,
+    "width_m": 31,
+    "nave_width_m": 11,
+    "vault_m": 33,
+    "ridge_m": 42,
+    "aisle_m": 14,
+    "apse": "round",
+    "chapels": true,
+    "open_west": true
+   },
+   "description": "Chœur gothique commencé en 1318 sous l'abbé Jean Roussel dit Marc d'Argent, achevé vers 1339 ; transept et nef gothiques seulement au XVe s. (nef achevée en 1537). Voûtes à 33 m."
+  },
+  {
+   "id": "saint_ouen_nef",
+   "name": "Abbatiale Saint-Ouen (nef romane)",
+   "model": "church",
+   "at": [352, 217],
+   "angle_deg": -13,
+   "clear_m": 8,
+   "certainty": "probable",
+   "params": {
+    "length_m": 80,
+    "width_m": 24,
+    "height_m": 17,
+    "tower": {
+     "at": "west",
+     "size": 10,
+     "height": 34,
+     "spire_m": 10
+    },
+    "apse": "flat"
+   },
+   "description": "Nef de l'abbatiale romane (chantier de 1062, consacrée en 1126, incendies de 1136 et 1248), encore debout en 1340 ; les fouilles de 1885 lui donnent des dimensions comparables à l'édifice gothique. Gabarit restitué."
+  },
+  {
+   "id": "saint_ouen_cloitre",
+   "name": "Cloître et bâtiments conventuels de Saint-Ouen",
+   "model": "enclosure",
+   "at": [380, 262],
+   "angle_deg": -13,
+   "certainty": "probable",
+   "params": {
+    "length_m": 70,
+    "width_m": 45,
+    "height_m": 9,
+    "ranges": true
+   }
+  },
+  {
+   "id": "saint_maclou",
+   "name": "Église Saint-Maclou (église antérieure)",
+   "model": "church",
+   "at": [242, -76],
+   "angle_deg": -11,
+   "clear_m": 8,
+   "certainty": "probable",
+   "params": {
+    "length_m": 45,
+    "width_m": 20,
+    "height_m": 15,
+    "tower": {
+     "at": "crossing",
+     "size": 8,
+     "height": 32,
+     "spire_m": 14
+    },
+    "apse": "flat"
+   },
+   "description": "L'église gothique actuelle date de 1437-1517 ; en 1340, une église plus modeste au même endroit (gabarit restitué)."
+  },
+  {
+   "id": "chateau",
+   "name": "Château de Philippe Auguste (Bouvreuil)",
+   "model": "castle",
+   "at": [-30, 640],
+   "angle_deg": -8,
+   "clear_m": 12,
+   "certainty": "attested",
+   "params": {
+    "ring": [
+     [-95, -60],
+     [-40, -85],
+     [45, -85],
+     [95, -50],
+     [95, 40],
+     [60, 80],
+     [-40, 85],
+     [-95, 45]
+    ],
+    "height_m": 12,
+    "thickness_m": 3.0,
+    "tower_radius_m": 6.5,
+    "tower_height_m": 20,
+    "keep": {
+     "at": [65, 68],
+     "radius_m": 7.0,
+     "height_m": 35
+    },
+    "halls": [
+     [-20, 10, 50, 13, 12, 0],
+     [30, -40, 34, 11, 10, 90]
+    ],
+    "ditch_m": 16
+   },
+   "description": "Bâti de 1204 à 1210 après la conquête, sur l'amphithéâtre gallo-romain : enceinte polygonale (≈ 90 × 90 m selon Wikipédia) à dix tours dont trois demi-tours, fossé sec de 15 m, grande basse-cour ; l'anneau restitué englobe la basse-cour (emprise non vérifiée). Donjon = tour Jeanne-d'Arc (OSM), ≈ 14 m de diamètre et ≈ 35 m de haut ; tour de la Pucelle (OSM) sur le front nord."
+  },
+  {
+   "id": "halles",
+   "name": "Halles de la Vieille-Tour",
+   "model": "hall",
+   "at": [5, -205],
+   "angle_deg": -25,
+   "clear_m": 6,
+   "certainty": "probable",
+   "params": {
+    "length_m": 70,
+    "width_m": 22,
+    "height_m": 13
+   },
+   "description": "Halles bâties vers 1259 sous Louis IX sur le site du palais ducal rasé en 1204 (Vieille-Tour), au confluent du Robec et de la Seine : halles aux toiles, aux grains et aux draps ; marché attesté en 1262. Un seul volume restitué."
+  },
+  {
+   "id": "beffroi_communal",
+   "name": "Beffroi communal (détruit en 1382)",
+   "model": "belfry",
+   "at": [-250, 175],
+   "angle_deg": 73,
+   "clear_m": 4,
+   "until_year": 1382,
+   "certainty": "probable",
+   "params": {
+    "size": 10,
+    "height": 30,
+    "top": "pyramid"
+   },
+   "description": "Beffroi primitif de la commune, démoli en 1382 après la Harelle ; le beffroi actuel est « reconstruit sur les vestiges de l'édifice primitif » (Inventaire, POP IA00021886) : même emplacement. Gabarit restitué."
+  },
+  {
+   "id": "gros_horloge",
+   "name": "Beffroi du Gros-Horloge",
+   "model": "belfry",
+   "at": [-250, 175],
+   "angle_deg": 73,
+   "clear_m": 4,
+   "from_year": 1389,
+   "certainty": "attested",
+   "params": {
+    "size": 12,
+    "height": 38,
+    "top": "pyramid"
+   },
+   "description": "Beffroi reconstruit de 1389 à 1398 par Jean de Bayeux, horloge du même temps (Jourdain Delestre, Jean de Felains) ; couvert d'une flèche jusqu'au dôme de 1711 ; arcade du cadran 1527-1529."
+  },
+  {
+   "id": "palais_archeveque",
+   "name": "Palais de l'archevêque",
+   "model": "royal_palace",
+   "at": [80, -55],
+   "angle_deg": -34,
+   "clear_m": 6,
+   "certainty": "probable",
+   "params": {
+    "length_m": 40,
+    "width_m": 13,
+    "height_m": 12,
+    "ranges": [
+     [0, -18, 30, 9, 9, 90]
+    ]
+   }
+  },
+  {
+   "id": "saint_vivien",
+   "name": "Église Saint-Vivien",
+   "model": "church",
+   "at": [649, 108],
+   "angle_deg": -44,
+   "clear_m": 6,
+   "certainty": "attested",
+   "params": {
+    "length_m": 40,
+    "width_m": 18,
+    "height_m": 13,
+    "tower": {
+     "at": "west",
+     "size": 7,
+     "height": 26
+    }
+   },
+   "description": "Chapelle du début du XIIIe s. (patronage de Saint-Ouen), église reconstruite à partir de 1338 et consacrée en 1358 ; hors les murs avant l'accrue de 1346 (hypothèse de cette restitution)."
+  },
+  {
+   "id": "saint_godard",
+   "name": "Église Saint-Godard",
+   "model": "church",
+   "at": [98, 518],
+   "angle_deg": -7,
+   "clear_m": 6,
+   "certainty": "attested",
+   "params": {
+    "length_m": 40,
+    "width_m": 18,
+    "height_m": 13,
+    "tower": {
+     "at": "west",
+     "size": 7,
+     "height": 26
+    }
+   }
+  },
+  {
+   "id": "saint_patrice",
+   "name": "Église Saint-Patrice",
+   "model": "church",
+   "at": [-164, 663],
+   "angle_deg": -32,
+   "clear_m": 6,
+   "certainty": "attested",
+   "params": {
+    "length_m": 34,
+    "width_m": 16,
+    "height_m": 12
+   }
+  },
+  {
+   "id": "saint_laurent",
+   "name": "Église Saint-Laurent",
+   "model": "church",
+   "at": [83, 465],
+   "angle_deg": -8,
+   "clear_m": 6,
+   "certainty": "probable",
+   "params": {
+    "length_m": 36,
+    "width_m": 16,
+    "height_m": 12,
+    "tower": {
+     "at": "west",
+     "size": 7,
+     "height": 28
+    }
+   }
+  },
+  {
+   "id": "saint_lo",
+   "name": "Prieuré Saint-Lô",
+   "model": "church",
+   "at": [-51, 244],
+   "angle_deg": -9,
+   "clear_m": 6,
+   "certainty": "attested",
+   "params": {
+    "length_m": 38,
+    "width_m": 15,
+    "height_m": 13
+   }
+  },
+  {
+   "id": "saint_nicolas",
+   "name": "Église Saint-Nicolas",
+   "model": "church",
+   "at": [75, 152],
+   "angle_deg": -10,
+   "clear_m": 5,
+   "certainty": "probable",
+   "params": {
+    "length_m": 28,
+    "width_m": 12,
+    "height_m": 11
+   }
+  },
+  {
+   "id": "saint_sauveur",
+   "name": "Église Saint-Sauveur (Vieux-Marché)",
+   "model": "church",
+   "at": [-468, 361],
+   "angle_deg": -22,
+   "clear_m": 5,
+   "certainty": "attested",
+   "params": {
+    "length_m": 32,
+    "width_m": 14,
+    "height_m": 11,
+    "tower": {
+     "at": "west",
+     "size": 6,
+     "height": 22
+    }
+   }
+  },
+  {
+   "id": "saint_vincent",
+   "name": "Église Saint-Vincent",
+   "model": "church",
+   "at": [-427, 59],
+   "angle_deg": -40,
+   "clear_m": 6,
+   "certainty": "attested",
+   "params": {
+    "length_m": 38,
+    "width_m": 16,
+    "height_m": 13,
+    "tower": {
+     "at": "west",
+     "size": 7,
+     "height": 26
+    }
+   }
+  },
+  {
+   "id": "saint_pierre_du_chatel",
+   "name": "Église Saint-Pierre-du-Châtel",
+   "model": "church",
+   "at": [-306, 73],
+   "angle_deg": -9,
+   "clear_m": 5,
+   "certainty": "attested",
+   "params": {
+    "length_m": 27,
+    "width_m": 14,
+    "height_m": 11
+   }
+  },
+  {
+   "id": "saint_eloi",
+   "name": "Église Saint-Éloi",
+   "model": "church",
+   "at": [-527, 241],
+   "angle_deg": -31,
+   "clear_m": 5,
+   "certainty": "attested",
+   "params": {
+    "length_m": 36,
+    "width_m": 16,
+    "height_m": 12
+   }
+  },
+  {
+   "id": "saint_vigor",
+   "name": "Église Saint-Vigor",
+   "model": "church",
+   "at": [-438, 550],
+   "angle_deg": -34,
+   "clear_m": 5,
+   "certainty": "probable",
+   "params": {
+    "length_m": 26,
+    "width_m": 12,
+    "height_m": 10
+   }
+  },
+  {
+   "id": "saint_amand",
+   "name": "Abbaye Saint-Amand",
+   "model": "abbey",
+   "at": [215, 120],
+   "angle_deg": -10,
+   "clear_m": 6,
+   "certainty": "probable",
+   "params": {
+    "length_m": 42,
+    "width_m": 16,
+    "height_m": 13,
+    "cloister": {
+     "side": "north",
+     "size": 30
+    }
+   }
+  },
+  {
+   "id": "saint_nicaise",
+   "name": "Église Saint-Nicaise",
+   "model": "church",
+   "at": [690, 380],
+   "angle_deg": -20,
+   "clear_m": 5,
+   "certainty": "probable",
+   "params": {
+    "length_m": 30,
+    "width_m": 13,
+    "height_m": 11
+   }
+  },
+  {
+   "id": "saint_hilaire",
+   "name": "Église Saint-Hilaire (faubourg)",
+   "model": "church",
+   "at": [1633, 20],
+   "angle_deg": -14,
+   "clear_m": 5,
+   "certainty": "probable",
+   "params": {
+    "length_m": 30,
+    "width_m": 13,
+    "height_m": 11
+   }
+  },
+  {
+   "id": "saint_sever",
+   "name": "Église Saint-Sever (faubourg)",
+   "model": "church",
+   "at": [-796, -1007],
+   "angle_deg": 64,
+   "clear_m": 6,
+   "certainty": "probable",
+   "params": {
+    "length_m": 34,
+    "width_m": 14,
+    "height_m": 12,
+    "tower": {
+     "at": "west",
+     "size": 7,
+     "height": 24
+    }
+   }
+  },
+  {
+   "id": "clos_des_galees",
+   "name": "Clos des Galées (arsenal royal)",
+   "model": "enclosure",
+   "at": [-640, -520],
+   "angle_deg": 25,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 180,
+    "width_m": 110,
+    "height_m": 7,
+    "ranges": true
+   },
+   "description": "Arsenal et chantier naval créé par Philippe le Bel (premiers documents en 1293 ; fondation souvent datée de 1294) sur la rive gauche, en aval du pont ; clos de palissades, fossés et tourelles, bassin, halles de construction. Détruit en 1418 à l'approche des Anglais. Position et emprise restituées (Tanguy le place plus à l'est et plus loin de la rive, relié à la Seine par un canal).",
+   "until_year": 1418
+  },
+  {
+   "id": "clos_des_galees_1451",
+   "name": "Clos des Galées (rebâti)",
+   "model": "enclosure",
+   "at": [-640, -520],
+   "angle_deg": 25,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 180,
+    "width_m": 110,
+    "height_m": 7,
+    "ranges": true
+   },
+   "description": "Clos des Galées rebâti en 1451 après la reconquête ; même emprise restituée.",
+   "from_year": 1451
+  },
+  {
+   "id": "sainte_catherine",
+   "name": "Abbaye de la Sainte-Trinité-du-Mont (Sainte-Catherine)",
+   "model": "abbey",
+   "at": [1159, -954],
+   "angle_deg": 0,
+   "clear_m": 10,
+   "certainty": "probable",
+   "params": {
+    "length_m": 60,
+    "width_m": 22,
+    "height_m": 16,
+    "cloister": {
+     "side": "south",
+     "size": 40
+    }
+   },
+   "description": "Abbaye de la Trinité-du-Mont fondée en 1030 par Goscelin d'Arques, dite Sainte-Catherine d'après sa relique ; fortifiée, détruite en 1597 après les sièges d'Henri IV (vestiges : OSM).",
+   "until_year": 1597
+  }
+ ],
+ "districts": [
+  {
+   "id": "ville_close",
+   "name": "La ville close",
+   "zone": "intra",
+   "density": 0.92,
+   "polygon": [
+    [-870, 150],
+    [-881, 197],
+    [-833, 259],
+    [-740, 347],
+    [-693, 416],
+    [-616, 554],
+    [-559, 658],
+    [-545, 690],
+    [-430, 718],
+    [-297, 738],
+    [-62, 776],
+    [116, 774],
+    [187, 760],
+    [310, 808],
+    [402, 848],
+    [455, 870],
+    [610, 768],
+    [815, 654],
+    [945, 564],
+    [930, 420],
+    [915, 300],
+    [900, 125],
+    [870, 0],
+    [830, -120],
+    [780, -250],
+    [735, -345],
+    [593, -395],
+    [484, -424],
+    [390, -458],
+    [300, -440],
+    [150, -365],
+    [0, -300],
+    [-134, -238],
+    [-245, -186],
+    [-420, -100],
+    [-490, -45],
+    [-640, 20],
+    [-785, 95]
+   ],
+   "houses": {
+    "townhouse": 0.55,
+    "timber": 0.33,
+    "stonehouse": 0.12
+   },
+   "roofs": {
+    "Slate": 0.55,
+    "Tile": 0.3,
+    "TileOld": 0.15
+   }
+  },
+  {
+   "id": "faubourg_cauchoise",
+   "name": "Faubourgs Cauchoise et Saint-Gervais",
+   "zone": "faubourg",
+   "density": 0.35,
+   "polygon": [
+    [-881, 197],
+    [-980, 260],
+    [-1000, 700],
+    [-850, 1150],
+    [-620, 1100],
+    [-545, 690],
+    [-559, 658],
+    [-616, 554],
+    [-693, 416],
+    [-740, 347],
+    [-833, 259]
+   ]
+  },
+  {
+   "id": "faubourg_beauvoisine",
+   "name": "Faubourgs Bouvreuil et Beauvoisine",
+   "zone": "faubourg",
+   "density": 0.3,
+   "polygon": [
+    [-545, 690],
+    [-560, 900],
+    [-100, 960],
+    [455, 1180],
+    [620, 950],
+    [610, 768],
+    [455, 870],
+    [402, 848],
+    [310, 808],
+    [187, 760],
+    [116, 774],
+    [-62, 776],
+    [-297, 738],
+    [-430, 718]
+   ]
+  },
+  {
+   "id": "faubourg_martainville",
+   "name": "Faubourgs Martainville et Saint-Hilaire",
+   "zone": "faubourg",
+   "density": 0.3,
+   "polygon": [
+    [735, -345],
+    [780, -250],
+    [830, -120],
+    [870, 0],
+    [900, 125],
+    [915, 300],
+    [1150, 260],
+    [1700, 120],
+    [1700, -60],
+    [1100, -300],
+    [950, -520],
+    [760, -420]
+   ]
+  },
+  {
+   "id": "saint_sever",
+   "name": "Faubourg Saint-Sever",
+   "zone": "faubourg",
+   "density": 0.28,
+   "polygon": [
+    [-330, -440],
+    [-420, -420],
+    [-560, -520],
+    [-900, -800],
+    [-900, -1100],
+    [-640, -1120],
+    [-420, -760],
+    [-300, -520]
+   ]
+  }
+ ],
+ "open_spaces": [
+  {
+   "id": "vieux_marche",
+   "name": "Vieux-Marché",
+   "kind": "market",
+   "polygon": [
+    [-510, 330],
+    [-420, 305],
+    [-370, 330],
+    [-360, 430],
+    [-440, 460],
+    [-505, 430]
+   ]
+  },
+  {
+   "id": "parvis",
+   "name": "Parvis de la cathédrale",
+   "kind": "parvis",
+   "polygon": [
+    [-110, -15],
+    [-65, -40],
+    [-40, 10],
+    [-60, 70],
+    [-100, 60]
+   ]
+  },
+  {
+   "id": "calende",
+   "name": "Place de la Calende",
+   "kind": "square",
+   "polygon": [
+    [-40, -95],
+    [10, -110],
+    [25, -70],
+    [-20, -50]
+   ]
+  },
+  {
+   "id": "aitre_saint_maclou",
+   "name": "Aître Saint-Maclou",
+   "kind": "cemetery",
+   "from_year": 1348,
+   "polygon": [
+    [330, -60],
+    [385, -45],
+    [378, -15],
+    [323, -30]
+   ]
+  },
+  {
+   "id": "jardins_saint_ouen",
+   "name": "Jardins et prés de l'abbaye Saint-Ouen",
+   "kind": "garden",
+   "polygon": [
+    [420, 250],
+    [560, 230],
+    [600, 330],
+    [520, 400],
+    [430, 350]
+   ]
+  },
+  {
+   "id": "champ_saint_marc",
+   "name": "Clos Saint-Marc",
+   "kind": "meadow",
+   "polygon": [
+    [360, -200],
+    [470, -170],
+    [480, -280],
+    [380, -300]
+   ]
+  },
+  {
+   "id": "place_saint_amand",
+   "name": "Cour de l'abbaye Saint-Amand",
+   "kind": "cloister",
+   "polygon": [
+    [180, 145],
+    [230, 140],
+    [235, 170],
+    [185, 175]
+   ]
+  },
+  {
+   "id": "rougemare",
+   "name": "Place de la Rougemare",
+   "kind": "square",
+   "polygon": [
+    [270, 470],
+    [350, 460],
+    [355, 520],
+    [280, 535]
+   ]
+  }
+ ],
+ "render": {
+  "fade_valley": [0.35, 0.65]
+ }
+}

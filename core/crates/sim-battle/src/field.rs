@@ -761,6 +761,15 @@ impl Battlefield {
         (0.0..=self.width).contains(&x) && (0.0..=self.depth).contains(&z)
     }
 
+    /// `(x, z)` brought at least `margin` metres inside the field (AI
+    /// orders: a move outside the field is refused).
+    pub fn clamp_inside(&self, x: f64, z: f64, margin: f64) -> (f64, f64) {
+        (
+            x.clamp(margin, self.width - margin),
+            z.clamp(margin, self.depth - margin),
+        )
+    }
+
     /// `true` when the ground between the two points rises above the line of
     /// sight (eyes 2 m above the ground).
     pub fn blocks_sight(&self, from: (f64, f64), to: (f64, f64)) -> bool {

@@ -6,11 +6,19 @@ Une carte de campagne au tour par saison sur l'Europe réelle, puis des bataille
 temps réel avec pause, dans l'esprit de *Total War*. Incarnez la France des Valois, l'Angleterre des
 Plantagenêts ou la Bourgogne, et menez un siècle de guerre, de diplomatie, de dynasties et de crises.
 
-![Bataille](docs/img/godot-battle.png)
+![Mêlée de chevaliers autour des étendards de France et d'Angleterre](docs/img/readme/bataille.jpg)
 
-| Carte de campagne | Siège | Codex historique |
-|---|---|---|
-| ![Campagne](docs/img/godot-campaign-models.png) | ![Siège](docs/img/godot-siege.png) | ![Codex](docs/img/codex-window.png) |
+| Paris en 1337 sur la carte de campagne | Londres et la Tamise |
+|---|---|
+| ![Paris : la Cité, Notre-Dame et la Seine](docs/img/readme/paris.jpg) | ![Londres au bord de la Tamise](docs/img/readme/londres.jpg) |
+
+| Carte de campagne | Bataille de Poitiers (1356) |
+|---|---|
+| ![Carte de campagne : provinces, armées et relief](docs/img/readme/campagne.jpg) | ![Bataille de Poitiers en temps réel](docs/img/readme/bataille_poitiers.jpg) |
+
+![Écran d'accueil : Notre-Dame au crépuscule](docs/img/readme/menu.jpg)
+
+*Captures en jeu. Pour les refaire : `godot --path game --resolution 1920x1080 --script res://tests/readme_shots.gd -- --out=<dossier>`.*
 
 ## Fonctionnalités
 
@@ -48,8 +56,8 @@ jamais dans le code.
 
 ## Compiler et lancer
 
-Plateforme prise en charge pour l'instant : **macOS Apple Silicon** (la GDExtension n'est déclarée que
-pour macOS ; les portages Linux et Windows sont bienvenus).
+Plateformes prises en charge : **macOS Apple Silicon** et **Windows 10/11 x86_64** (ADR 0087). Linux
+n'est pas encore déclaré, mais un portage suivrait le même schéma et serait le bienvenu.
 
 Prérequis : [Rust](https://rustup.rs) stable, [Godot 4.7](https://godotengine.org),
 [uv](https://docs.astral.sh/uv/) (outils Python, facultatif pour jouer).
@@ -64,6 +72,33 @@ godot --path game                           # lancer le jeu
 
 Application autonome : `tools/export_macos.sh` produit `export/Cent Ans.app` (modèles d'export
 Godot 4.7 requis).
+
+### Windows
+
+**Jouer** : décompresser `Cent Ans Windows.zip` et lancer `Cent Ans.exe`. Il faut une carte graphique
+compatible Vulkan ou Direct3D 12, mais aucune installation supplémentaire (la bibliothèque C de
+Microsoft est intégrée à `cent_ans.release.dll`). En cas de problème, `Cent Ans.console.exe` lance le jeu
+en gardant son journal affiché.
+
+**Compiler sous Windows** (Git Bash, avec [Rust](https://rustup.rs) et Visual Studio Build Tools) :
+
+```sh
+core/build-windows.sh                       # compile cent_ans.dll et la copie dans game/bin/
+godot --headless --path game --import       # une fois après le clone
+godot --path game
+```
+
+**Préparer la version Windows depuis un Mac** (compilation croisée avec
+[cargo-xwin](https://github.com/rust-cross/cargo-xwin), détails dans `docs/tools.md`) :
+
+```sh
+rustup target add x86_64-pc-windows-msvc
+brew install llvm lld && cargo install --locked cargo-xwin
+tools/export_windows.sh                     # export/windows/ et export/Cent Ans Windows.zip
+```
+
+Le workflow GitHub Actions `windows` compile la DLL et lance le test de fumée sur une vraie machine
+Windows (`gh workflow run windows.yml`).
 
 ## Tests
 
