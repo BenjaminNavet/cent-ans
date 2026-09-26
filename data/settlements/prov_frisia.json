@@ -103,7 +103,7 @@
       "bld_parish_church",
       "bld_windmill"
     ],
-    "port": false,
+    "port": true,
     "description": "Bourg frison né de la fusion de plusieurs terpen autour de trois places, en pleine croissance mais sans charte de ville en 1337.",
     "sources": [
       "Leeuwarden"
@@ -129,7 +129,7 @@
       "bld_market",
       "bld_parish_church"
     ],
-    "port": false,
+    "port": true,
     "description": "Ville fortifiée du nord de la Frise (droits urbains dès 1298), lieu de martyre attribué à saint Boniface (754).",
     "sources": [
       "Dokkum"
@@ -180,7 +180,7 @@
     "buildings": [
       "bld_market"
     ],
-    "port": false,
+    "port": true,
     "description": "Petite ville du Fivelingo (Ommelanden de Groningue) ayant obtenu droits de marché et de tonlieu en 1327.",
     "sources": [
       "Appingedam"
