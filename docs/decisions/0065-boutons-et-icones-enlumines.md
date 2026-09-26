@@ -83,10 +83,12 @@ plat au milieu d'une liste de miniatures. » Les icônes d'entité restaient des
    CLI : `cent-ans assets entity-icons` (`--dry-run`, `--only`, `--limit`, `--build-only`,
    `--envelope`), planche `docs/img/da5b/planche_miniatures.png` (32/64/128 px).
 5. **Rendu** : `IconLibrary` lit `entity/index.json` en premier — priorité miniature d'entité >
-   encre > SVG ; `is_entity(id)` ; une miniature n'est jamais teintée. Marqueurs de bataille et
-   cartes d'unité : tous passent par la miniature de catégorie (`unit_category_<rendu>`), un seul
-   registre ; la miniature couvre la plaque (elle porte son cadre) au lieu d'être posée sur le
-   parchemin.
+   encre > SVG ; `is_entity(id)` ; une miniature n'est jamais teintée ; `decorate_button` passe
+   `expand_icon` pour qu'une miniature 128 px ne gonfle pas la taille minimale du bouton.
+   Marqueurs de bataille et cartes d'unité du bandeau : miniature de catégorie
+   (`unit_category_<rendu>`, un seul registre, plus de mélange encre/SVG) ; cartes du bilan :
+   miniature du type d'unité. La miniature couvre la plaque (elle porte son cadre) au lieu d'être
+   posée sur une pastille de parchemin.
 
 Conséquences : les SVG d'entité ne servent plus que de repli (identifiant sans miniature) ;
 `CREDITS.md` inchangé tant qu'ils restent dans le dépôt. Les traits s'affichent toujours par
