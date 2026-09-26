@@ -53,6 +53,7 @@ pub mod field;
 pub mod fire;
 pub mod formation_ai;
 pub mod historical;
+pub mod horse_wait;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;

@@ -963,10 +963,7 @@ def build_cavalry():
 
     mount = cav.Mount()
     PROBE["rig"] = probe_rig(mount.rarm, "R:")
-    # FG4 note: stirrups 6 cm wider than the Quaternius mount (thicker legs, broader barrel);
-    # in production this means re-baking the cavalry bone texture (same bones, same clips).
-    for side, sx in (("L", 1), ("R", -1)):
-        mount.stirrups[side] = mount.seat + Vector((0.36 * sx, -0.08, -0.84))
+    # Stirrups 6 cm wider: now in ``battle_skinned_cavalry.Mount`` (FG4).
     horse = fh.build_horse(mount)
     fh.horse_materials(horse)
     _arm, rider = build_infantry(arm=mount.rarm, mounted=True, budget=RIDER_BUDGET)

@@ -43,6 +43,11 @@ rand = "0.8"
 rand_chacha = "0.3"
 thiserror = "2"
 
+# ADR 0084: parallel agent sessions each leave their own incremental cache
+# (29 GB of target/debug/incremental on 2026-09-26); rebuild from scratch instead.
+[profile.dev]
+incremental = false
+
 # PNG decoding (4096x4096 16-bit heightmap) must stay well under 500 ms even in
 # debug builds: optimise only the decoding crates, never our own code.
 # Lot M2: the data crate walks 4096² rasters (province ids, land mask) once
