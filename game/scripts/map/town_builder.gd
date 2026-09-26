@@ -386,12 +386,13 @@ func _apply_range(g: GeometryInstance3D, lod: String) -> void:
 func refresh_aabbs(vertical_scale: float) -> void:
 	var k := vertical_scale * meters_per_unit
 	var up := 1.0 + MapData.relief_gain_for_scale(vertical_scale)  # ZG8 : y ≤ s·(1 + g)·h
+	var down := 1.0 - MapData.relief_squash_max_for_scale(vertical_scale)  # SZ1 : y ≥ s·(1 − c·k)·h
 	for entry in geometry:
 		var g: GeometryInstance3D = entry[0]
 		if not is_instance_valid(g):
 			continue
 		var rect: Rect2 = entry[4]
-		var y0 := float(entry[1]) * k - 5.0
+		var y0 := float(entry[1]) * k * (down if float(entry[1]) > 0.0 else 1.0) - 5.0
 		var y1 := float(entry[2]) * k * (up if float(entry[2]) > 0.0 else 1.0) + float(entry[3])
 		g.custom_aabb = AABB(Vector3(rect.position.x, y0, rect.position.y), Vector3(rect.size.x, y1 - y0, rect.size.y))
 
@@ -402,7 +403,7 @@ func _register(g: GeometryInstance3D, lod: String, base_min: float, base_max: fl
 	_apply_range(g, lod)
 	geometry.append([g, base_min, base_max, top, rect])
 	var k := MapData.vertical_scale() * meters_per_unit
-	var y0 := base_min * k - 5.0
+	var y0 := base_min * k * ((1.0 - MapData.relief_squash_max_for_scale(MapData.vertical_scale())) if base_min > 0.0 else 1.0) - 5.0
 	var y1 := base_max * k * ((1.0 + MapData.relief_gain()) if base_max > 0.0 else 1.0) + top
 	g.custom_aabb = AABB(Vector3(rect.position.x, y0, rect.position.y), Vector3(rect.size.x, y1 - y0, rect.size.y))
 	root.add_child(g)

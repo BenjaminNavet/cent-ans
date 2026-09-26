@@ -32,6 +32,7 @@ func _run() -> void:
 	if native != null:
 		var floor_grid := MapData.relief_floor_grid()
 		native.call("set_floor", floor_grid["data"], floor_grid["side"].x, floor_grid["side"].y, floor_grid["cell"])
+		native.call("set_relief_fields", floor_grid["base"], floor_grid["squash"])
 	for p: Vector2 in POINTS:
 		var index := terrain.chunk_index_at(p.x, p.y)
 		var job := VegetationTileJob.new()
