@@ -49,9 +49,27 @@ partagé : `/Users/jean_hubert/dev/game_project/core/target`.
 `lto = "thin"`, `codegen-units = 1`, `debug = "line-tables-only"` en release ;
 `godot-bridge` en opt-level 2 en dev ; `build.sh` respecte `CARGO_TARGET_DIR`.
 
+## Suite (clôture du lot)
+- ADR 0079 rédigé (`docs/decisions/0079-profil-de-build-rust.md`).
+- `cargo fmt --all` (aucun changement), `cargo clippy --all-targets -- -D warnings`
+  (propre), `cargo test` : vert (une première tentative avait 8 échecs
+  `real_data.rs`/`E0063 TileRequest.detail` à cause du `CARGO_TARGET_DIR` partagé entre
+  agents concurrents — chemins `CARGO_MANIFEST_DIR` d'un autre worktree
+  (`/Users/jean_hubert/dev/gp-dc1`) et métadonnées de crate désynchronisées ; un second
+  essai isolé, sans autre agent visiblement actif au même instant, est passé propre).
+  **Réserve** : le partage de `CARGO_TARGET_DIR` entre worktrees concurrents peut
+  produire des échecs transitoires (fingerprints/rlib désynchronisés) ; toujours relancer
+  une fois avant de conclure à une régression.
+- `main` (locale, `89bc960a`) fusionnée sans conflit.
+- Smoke Godot (`res://tests/smoke.gd`) et bancs `pb1_turns.gd`/`battle_scene.gd
+  --benchmark` **non exécutés** : ce worktree n'a pas de cache d'import Godot
+  (`game/.godot/` absent), un premier import aurait dépassé le budget de temps du lot
+  (consigne orchestrateur : rapport sous 30 min). Point ouvert pour la suite/l'intégration.
+
 ## Prochaine étape
-- Si temps disponible : relancer `pb1_turns.gd` et le banc bataille (dylib debug
-  avant/après opt-level 2) après avoir résolu l'erreur `parchment_theme.tres` (probable
-  besoin d'un `godot --headless --path game --import` dans ce worktree).
-- ADR 0079 à rédiger avec ces chiffres.
-- fmt/clippy/test, smoke Godot, merge main, commit final.
+- Un agent d'intégration (ou l'orchestrateur) doit lancer `godot --headless --path game
+  --import` une fois dans le worktree d'intégration, puis `res://tests/smoke.gd`,
+  `pb1_turns.gd` et le banc bataille `--benchmark` avant/après ce lot pour confirmer le
+  gain attendu du pont (`godot-bridge` opt-level 2) sur la fin de tour et les FPS de
+  bataille.
+- Lot clos côté Rust (profil de build, ADR, fmt/clippy/test verts, main fusionné).
