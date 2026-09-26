@@ -35,14 +35,88 @@ static var _corpse_shader: Shader = null
 
 
 static func corpse_shader() -> Shader:
+	# FG3 : avec les figurines fines, les cadavres gardent les cartes cuites (même variante,
+	# uniformes `fine_*` à leur valeur neutre pour une figurine sans atlas).
+	if fine_enabled() and fine_maps_ready():
+		return _variant(["BV2_CORPSE", "FG3_BAKED"])
 	if _corpse_shader == null:
-		var code := SHADER.code
-		var cut := code.find("
-", code.find("shader_type"))
-		_corpse_shader = Shader.new()
-		_corpse_shader.code = code.substr(0, cut + 1) + "#define BV2_CORPSE
-" + code.substr(cut + 1)
+		_corpse_shader = _variant(["BV2_CORPSE"])
 	return _corpse_shader
+
+
+static var _variants: Dictionary = {}
+
+
+## Variante du shader skinné avec les `defines` en tête (après `shader_type`).
+static func _variant(defines: Array) -> Shader:
+	var key := ",".join(defines)
+	if _variants.has(key):
+		return _variants[key]
+	var code := SHADER.code
+	var cut := code.find("\n", code.find("shader_type"))
+	var head := ""
+	for d in defines:
+		head += "#define %s\n" % d
+	var shader := Shader.new()
+	shader.code = code.substr(0, cut + 1) + head + code.substr(cut + 1)
+	_variants[key] = shader
+	return shader
+
+
+## Lot FG3 : cartes cuites des figurines fines (`assets/models/battle_fine/textures/`).
+## `lod0` / `lod1` : atlas par figurine (Texture2DArray, couche = `atlas_layer` du manifeste ;
+## RG normale de forme, B occlusion, A masque selon la matière) ; `detail` : tuiles partagées
+## par matière (Texture2DArray) ; `horse` : pelage CC0 réduit (normale, relief, occlusion).
+const FINE_TEX_DIR := FINE_DIR + "textures/"
+const FINE_MAPS := {
+	"lod0": "fine_atlas_lod0.png",
+	"lod1": "fine_atlas_lod1.png",
+	"detail": "fine_detail.png",
+	"horse": "fine_horse.png",
+}
+static var _fine_maps: Dictionary = {}
+static var _fine_maps_loaded := false
+
+
+static func fine_maps() -> Dictionary:
+	if not _fine_maps_loaded:
+		_fine_maps_loaded = true
+		# `--no-fg3` : figurines fines sans cartes cuites (mesures A/B).
+		if OS.get_cmdline_user_args().has("--no-fg3"):
+			return _fine_maps
+		for key in FINE_MAPS:
+			var path: String = FINE_TEX_DIR + str(FINE_MAPS[key])
+			if ResourceLoader.exists(path):
+				_fine_maps[key] = load(path)
+		if _fine_maps.size() < FINE_MAPS.size():
+			if fine_enabled():
+				push_warning("BattleSkinned: cartes FG3 incomplètes dans %s" % FINE_TEX_DIR)
+			_fine_maps = {}
+	return _fine_maps
+
+
+static func fine_maps_ready() -> bool:
+	return not fine_maps().is_empty()
+
+
+## FG3 : bascule le matériau d'une figurine fine cuite sur la variante `FG3_BAKED` et pose
+## ses cartes. Sans effet pour les autres figurines (rendu par défaut inchangé).
+static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) -> void:
+	var fig := figure(kind, variant)
+	if not fig.has("atlas_layer") or not fine_maps_ready():
+		return
+	# Matériaux d'un autre shader qui lisent la texture d'os (drapeau porté d'EP5, etc.) :
+	# garder leur shader, sans cartes.
+	if mat.shader != SHADER and not _variants.values().has(mat.shader):
+		return
+	var corpse := mat.shader != null and mat.shader.code.contains("#define BV2_CORPSE")
+	mat.shader = _variant(["BV2_CORPSE", "FG3_BAKED"] if corpse else ["FG3_BAKED"])
+	var maps := fine_maps()
+	mat.set_shader_parameter("fine_atlas0", maps["lod0"])
+	mat.set_shader_parameter("fine_atlas1", maps["lod1"])
+	mat.set_shader_parameter("fine_detail", maps["detail"])
+	mat.set_shader_parameter("fine_horse", maps["horse"])
+	mat.set_shader_parameter("fine_layer", int(fig["atlas_layer"]))
 
 
 static func manifest() -> Dictionary:
@@ -131,17 +205,21 @@ static func mesh(kind: String, variant: int, level: int) -> ArrayMesh:
 
 
 ## Maillage binaire `CAM1` (zlib) : positions, normales, couleurs (rgb + code), UV, os, poids,
-## masques de variante, indices.
+## masques de variante, indices. `CAM2` (lot FG3) : en plus, après les masques, l'UV d'atlas
+## empaquetée des cartes cuites (u, v sur 11 bits, source sur 2 bits).
 static func _load_mesh(path: String, large: bool) -> ArrayMesh:
 	var bytes := FileAccess.get_file_as_bytes(path)
-	if bytes.size() < 16 or bytes.slice(0, 4).get_string_from_ascii() != "CAM1":
+	var magic := bytes.slice(0, 4).get_string_from_ascii() if bytes.size() >= 16 else ""
+	if magic != "CAM1" and magic != "CAM2":
 		push_warning("BattleSkinned: bad mesh file %s" % path)
 		return null
+	# FG3 : `CAM2` = `CAM1` + une UV d'atlas empaquetée par sommet (UV2.y, cf. le shader).
+	var stride := 22 if magic == "CAM2" else 21
 	var n := bytes.decode_u32(4)
 	var m := bytes.decode_u32(8)
 	var raw := bytes.slice(16).decompress(bytes.decode_u32(12), FileAccess.COMPRESSION_DEFLATE)
-	var floats := raw.slice(0, n * 21 * 4).to_float32_array()
-	var indices := raw.slice(n * 21 * 4, n * 21 * 4 + m * 4).to_int32_array()
+	var floats := raw.slice(0, n * stride * 4).to_float32_array()
+	var indices := raw.slice(n * stride * 4, n * stride * 4 + m * 4).to_int32_array()
 	var verts := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var colors := PackedColorArray()
@@ -158,13 +236,14 @@ static func _load_mesh(path: String, large: bool) -> ArrayMesh:
 	var o_b := n * 12
 	var o_w := n * 16
 	var o_m := n * 20
+	var o_a := n * 21
 	for i in n:
 		verts[i] = Vector3(floats[i * 3], floats[i * 3 + 1], floats[i * 3 + 2])
 		normals[i] = Vector3(floats[o_n + i * 3], floats[o_n + i * 3 + 1], floats[o_n + i * 3 + 2])
 		# Couleurs stockées en 8 bits : le code matière passe en alpha / 16.
 		colors[i] = Color(floats[o_c + i * 4], floats[o_c + i * 4 + 1], floats[o_c + i * 4 + 2], floats[o_c + i * 4 + 3] / 16.0)
 		uvs[i] = Vector2(floats[o_uv + i * 2], floats[o_uv + i * 2 + 1])
-		uv2[i] = Vector2(floats[o_m + i], 0.0)
+		uv2[i] = Vector2(floats[o_m + i], floats[o_a + i] if stride == 22 else 0.0)
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = verts
@@ -226,6 +305,7 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 	mat.set_shader_parameter("variant_count", int(figure(kind, variant).get("variants", 1)))
 	mat.set_shader_parameter("size_jitter", 0.0 if kind == "cavalry" else 0.05)
 	mat.set_shader_parameter("sever_bones", sever_table(kind, variant))
+	_setup_fine_maps(mat, kind, variant)
 
 
 ## Configuration d'animation {set: [clips], mode, speed, cycle} d'un régiment dans l'état
