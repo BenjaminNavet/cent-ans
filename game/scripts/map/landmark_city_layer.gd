@@ -34,6 +34,10 @@ var stats: Dictionary = {}
 var _cities: Dictionary = {}  # settlement id → ville v2
 var _anchor: Dictionary = {}  # id → Vector2 (unités)
 var _extent: Dictionary = {}  # id → rayon (unités)
+## VH7 : villes sans maquette L1/L2 (Orléans) : colonie ordinaire en vue stratégique ; la ville
+## 1:1 remplace la ville ZG6 et ne s'affiche qu'à partir du même poids vallée
+## (`TownRenderProfile.min_valley_weight`), quand les maquettes des colonies sont masquées.
+var _maquette: Dictionary = {}  # id → bool
 var _ids_by_chunk: Dictionary = {}
 var _entries: Dictionary = {}  # id → {plan, builder, pending, dirty_ms}
 var _jobs: Dictionary = {}  # id → [task, kind]
@@ -62,6 +66,7 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 		_cities[sid] = city
 		_anchor[sid] = LandmarkV2Library.anchor_units(city)
 		_extent[sid] = LandmarkV2Library.extent_units(city)
+		_maquette[sid] = city.has("landmark") and not LandmarkLibrary.for_settlement(sid).is_empty()
 		if terrain != null and terrain.chunk_px > 0:
 			_register_chunks(sid)
 	if terrain != null:
@@ -130,7 +135,16 @@ func city_ids() -> Array:
 
 ## Vrai si la ville 1:1 de la colonie `id` est construite et affichée.
 func is_shown(id: String) -> bool:
-	return _entries.has(id) and (_entries[id] as Dictionary).get("builder") != null and visible
+	return _entries.has(id) and (_entries[id] as Dictionary).get("builder") != null and visible and _city_visible(id)
+
+
+## Vrai si la colonie `id` a une maquette L1/L2 (fondu) ; faux : colonie ordinaire (VH7).
+func has_maquette(id: String) -> bool:
+	return bool(_maquette.get(id, false))
+
+
+func _city_visible(id: String) -> bool:
+	return has_maquette(id) or _valley >= profile.min_valley_weight
 
 
 func plan_of(id: String) -> Dictionary:
@@ -190,6 +204,20 @@ func update_view(rig_distance: float) -> void:
 	_stream(rig_distance)
 	_step_builders(int(profile.build_budget_ms * 1000.0))
 	_check_reground()
+	_apply_city_visibility()
+
+
+## VH7 : villes sans maquette masquées tant que le palier vallée n'a pas atteint celui des villes ZG6.
+func _apply_city_visibility() -> void:
+	for id in _entries:
+		if has_maquette(id):
+			continue
+		var b: TownBuilder = (_entries[id] as Dictionary).get("builder")
+		var show := _city_visible(id)
+		if b != null and b.root.visible != show:
+			b.root.visible = show
+			version += 1
+			cities_changed.emit()
 
 
 func _camera_ground() -> Vector2:
@@ -311,7 +339,7 @@ func _step_builders(budget_usec: int) -> void:
 			var previous: TownBuilder = entry.get("builder")
 			if previous != null:
 				previous.free_nodes()
-			b.root.visible = true
+			b.root.visible = _city_visible(id)
 			entry["builder"] = b
 			entry["pending"] = null
 			stats["build_task_max_ms"] = b.task_max_usec / 1000.0

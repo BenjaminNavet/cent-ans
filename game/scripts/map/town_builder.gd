@@ -973,9 +973,14 @@ func _build_monuments() -> void:
 		var blen := float(bridge["length"])
 		add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(blen, 1.6, float(bridge["width"]))), center), deck - 1.5)
 		var piers := maxi(1, int(blen / 15.0))
+		var spread := 0.8
+		# VH7 : nombre d'arches du fichier v2 (piles entre les arches, sur toute la traversée).
+		if int(bridge.get("arches", 0)) > 1:
+			piers = int(bridge["arches"]) - 1
+			spread = 0.92
 		for k in piers:
 			var t := (float(k) + 0.5) / piers - 0.5
-			var pc := center + Vector3(bd.x, 0, bd.y) * (t * blen * 0.8)
+			var pc := center + Vector3(bd.x, 0, bd.y) * (t * blen * spread)
 			add_box.call("Ashlar", Transform3D(basis_x(bd, Vector3(3.5, maxf(deck - water + 1.0, 2.0), float(bridge["width"]) + 1.0)), pc), water - 1.5)
 		var bb: Array = boxes["Ashlar"]
 		_multimesh(box_mesh("Ashlar"), bb[0], bb[1], bb[2], box_mat, "all", 12.0).name = "Bridge"
