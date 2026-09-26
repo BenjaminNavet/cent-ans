@@ -2,7 +2,8 @@
 
 Branche `feat/sz4-objets-echelle` (worktree d'agent, depuis `main` 7e1ac032). Liens symboliques non
 versionnés `data/map/pyramid`, `tools/geo/raw` → dépôt principal. Dylib copiée de
-`/Users/jean_hubert/dev/game_project/game/bin/` (aucun changement Rust prévu). Rendu seulement.
+`/Users/jean_hubert/dev/game_project/game/bin/` (aucun changement Rust). Rendu seulement.
+Doc : `docs/godot-map.md` § « Objets à l'échelle aux paliers intermédiaires (lot SZ4) ».
 
 ## Diagnostic (captures `docs/img/sz4/avant_*`)
 - S4 : tailles de carte (1 unité ≈ 719 m) : moulin `WINDMILL_SCALE` 4,6 → corps de 2,3 km ;
@@ -11,24 +12,32 @@ versionnés `data/map/pyramid`, `tools/geo/raw` → dépôt principal. Dylib cop
   Moulins, fumées, hameaux : pleine taille jusqu'au palier site, puis masqués d'un coup.
 - S5 : à d = 6 (~4 km), Amiens ZG6 est bien construite, mais les maisons (blocs HLOD) sont
   sous-pixel : on ne voit que le sol de terre battue (couche « Rubble ») au bord net, d'où le disque
-  brun. Ce n'est pas un défaut de chargement (la racine n'apparaît qu'une fois tout construit).
+  brun. Ce n'est pas un défaut de chargement (la racine n'apparaît qu'une fois tout construit), ni le
+  seuil d'activation : l'abaisser ferait apparaître le disque plus tôt.
 
-## Plan
-1. `MapPropScale` (`game/scripts/map/map_prop_scale.gd`, `resources/map_prop_scale.tres`) :
-   échelle 1 au-delà de `shrink_start` (28), taille réelle en deçà de `shrink_end` (5), fondu
-   `smoothstep` en log de distance ; rapports taille réelle / taille carte par famille.
-2. Arbres : `campaign_prop_scale` = `tree_scale(d)` (remplace `ZoomTiers.prop_scale`).
-3. Fumées : échelle par matériau dans `life_smoke.gdshader` (hauteur de levée encodée dans la
-   colonne z de la base d'instance, origine au sol) ; plus masquées au palier site.
-4. Moulins, hameaux : réécriture des instances quand l'échelle varie de plus de `rewrite_step`.
-5. S5 : sol des villes ZG6 vu de loin : îlots bâtis teintés « masse de toits » selon la distance
-   caméra (imposteur des maisons sous-pixel), bord fondu vers le vert des jardins.
-6. Captures après, tests (sz4, zg6_towns, smoke, zg4_camera), doc `godot-map.md`.
+## État : terminé (à fusionner)
+- [x] `MapPropScale` (`game/scripts/map/map_prop_scale.gd`, `resources/map_prop_scale.tres`) :
+  1 au-delà de 28 unités, taille réelle sous 5 (arbres : 3), `smoothstep` en log de distance.
+  `ZoomTiers.prop_scale*` retirés (remplacés).
+- [x] Arbres (`campaign_prop_scale`), panaches (`life_smoke.gdshader` : `prop_scale`, levée dans la
+  colonne z de la base), moulins et hameaux (réécriture par pas de 4 %, sol mis en cache) ;
+  plus de masquage au palier site pour ces objets (taille réelle).
+- [x] S5 : sol bâti des villes ZG6 teinté « masse de toits » de loin (`town_building.gdshader`,
+  `roofscape_*` dans `town_render.tres`).
+- [x] Captures avant/après `docs/img/sz4/` (Crécy, Paris, Val de Loire, Amiens × vallée, comté,
+  stratégique ; zooms Amiens d = 6 et 3). Vue stratégique : identique.
+- [x] Tests : `sz4_prop_scale_test` (courbe, carte headless près de Crécy, coûts), zg6_towns,
+  zg4_camera, cv1_campaign_life, settlements_render, zg7a, zg8_relief, smoke : OK.
 
-## État
-- [x] Squelette (ressource, test, script de captures, captures avant)
-- [ ] 2-5
-- [ ] 6
+## Limites / suites
+- Les maquettes des colonies (palier comté, jusqu'à d ≈ 8) restent à la loupe, puis cèdent la place
+  aux villes 1:1 (ZG6) : saut de taille inchangé, hors lot. Entre d = 28 et 8, un moulin ou un hameau
+  rétrécit donc à côté d'une maquette de village encore géante.
+- Forêts au palier vallée : arbres à taille réelle, le semis (dimensionné pour des arbres de 1 km)
+  est clairsemé ; la forêt se lit surtout par la teinte du terrain.
+- Navires, bateaux et oiseaux (`LifeAmbient`) : non traités (masqués au palier site seulement).
+- Amiens à 4 km reste une tache nette (enceinte), mais de toits et non plus de terre battue.
+- Moulins et panaches de colonie gardent leurs positions de carte (autour du rayon de la maquette).
 
 ## Prochaine étape
-Brancher `MapPropScale` sur les arbres, fumées, moulins et hameaux.
+Fusion par l'orchestrateur.

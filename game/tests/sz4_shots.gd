@@ -48,7 +48,8 @@ func _init() -> void:
 	await process_frame
 	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
 	root.add_child(map)
-	for i in 5:
+	# Intro du premier tour (interface, conseils) passée avant la première capture.
+	for i in 180:
 		await process_frame
 	if not map.get("load_ok"):
 		push_error("sz4 shots: campaign map failed to load")
@@ -96,6 +97,11 @@ func _init() -> void:
 				terrain.material.set_shader_parameter("fog_enabled", false)
 				for i in 2:
 					await process_frame
+			# L'interface peut se réafficher (premier tour, conseils) : masquée de nouveau.
+			for layer in root.find_children("*", "CanvasLayer", true, false):
+				(layer as CanvasLayer).visible = false
+			for i in 2:
+				await process_frame
 			var image := root.get_viewport().get_texture().get_image()
 			if image.get_width() > 960 and not full:
 				image.resize(960, roundi(image.get_height() * 960.0 / image.get_width()), Image.INTERPOLATE_LANCZOS)
