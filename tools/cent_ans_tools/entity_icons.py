@@ -281,9 +281,7 @@ def frame_layers(frame: dict, size: int) -> tuple[Image.Image, Image.Image]:
         ((frame["ink_px"] + frame["gold_px"]) * unit, azure),
         ((frame["ink_px"] + frame["gold_px"] + frame["azure_px"]) * unit, ink),
     ]
-    window_inset = (
-        frame["ink_px"] * 2 + frame["gold_px"] + frame["azure_px"]
-    ) * unit
+    window_inset = (frame["ink_px"] * 2 + frame["gold_px"] + frame["azure_px"]) * unit
     # Burnished gold: light towards the top-left, dark towards the bottom-right.
     ramp = np.add.outer(np.arange(big), np.arange(big)).astype(np.float32) / (
         2 * (big - 1)
@@ -313,11 +311,15 @@ def finish_picture(picture: Image.Image, side: int, style: dict) -> Image.Image:
     picture = ImageEnhance.Contrast(picture).enhance(style.get("contrast", 1.0))
     picture = ImageEnhance.Color(picture).enhance(style.get("saturation", 1.0))
     return picture.filter(
-        ImageFilter.UnsharpMask(radius=1.2, percent=style.get("sharpen", 0), threshold=2)
+        ImageFilter.UnsharpMask(
+            radius=1.2, percent=style.get("sharpen", 0), threshold=2
+        )
     )
 
 
-def compose(picture: Image.Image, catalog: dict, size: int | None = None) -> Image.Image:
+def compose(
+    picture: Image.Image, catalog: dict, size: int | None = None
+) -> Image.Image:
     """Framed miniature: painting under the window, then the common frame around it."""
     size = size or catalog["size"]
     frame = catalog["frame"]
