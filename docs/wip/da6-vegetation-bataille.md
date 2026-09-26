@@ -11,17 +11,17 @@ Suivi DA : `docs/wip/da-direction-artistique.md`. Rendu seulement (aucun Rust pr
 
 ## Plan
 - [x] Squelette : drapeau `BattleTerrain.da6` (`--no-da6`), wip, captures avant.
-- [ ] Lisières douces : déformation (bruit) des bords de parcelles procédurales et du décor EP6,
+- [x] Lisières douces : déformation (bruit) des bords de parcelles procédurales et du décor EP6,
   rampe plus large, touffes mêlées au bord (tirage par touffe) — `battle_common.gdshaderinc`,
   `battle_ground.gdshader`, `battle_grass.gdshader`, `_stamp_decor`.
-- [ ] Touffes en volume : 4 cartes cintrées et évasées, normales arrondies, pied assombri,
+- [x] Touffes en volume : 4 cartes cintrées et évasées, normales arrondies, pied assombri,
   cartes vues par la tranche effacées ; nouvelle texture de touffe (pied resserré) ; variation
   de hauteur et de teinte.
-- [ ] Arbres : `battle_trees.gd` (`BattleTrees`), feuillus ramifiés procéduraux par essence
+- [x] Arbres : `battle_trees.gd` (`BattleTrees`), feuillus ramifiés procéduraux par essence
   (chêne, hêtre, frêne, peuplier noir, saule têtard au bord de l'eau, fruitier, buisson), LOD1
   issu du même squelette, hiver = branches nues (chêne : feuilles sèches marcescentes).
-- [ ] Imposteurs d'arbres au-delà de 300 m (atlas cuit au lancement, comme ADR 0024).
-- [ ] Sol de près : couche de détail (luminance) fondue avec la distance.
+- [x] Imposteurs d'arbres au-delà de 300 m (atlas cuit au lancement, comme ADR 0024).
+- [x] Sol de près : couche de détail (luminance) fondue avec la distance.
 - [ ] Saturation ≤ 35 % (mesure sur captures), saisons (hiver, automne).
 - [ ] Banc A/B `game/tests/da6_perf.gd` (un seul processus, alternance), budget ≤ 5 %.
 - [ ] Captures après `docs/img/da6/`, ADR, docs.
@@ -31,5 +31,11 @@ Suivi DA : `docs/wip/da-direction-artistique.md`. Rendu seulement (aucun Rust pr
   captures avant (`avant_closeup`, `avant_foot` — plan de mur, cadrage EP5 —, `avant_haute`,
   `avant_hiver`, `avant_automne`).
 
+- 26/09 ~02 h 30 : herbe, lisières, sol, arbres (`battle_trees.gd`), imposteurs, désaturation
+  (0,66 ; automne 0,55) commités. Banc A/B en un processus : `--bench-ab=da6,no-da6` (moyenne
+  `ab_mean` en plus de la médiane : sous Metal la médiane colle aux paliers d'affichage).
+  Premières mesures : plaine +0 %, bocage gros plan +5 % avant allègement des buissons, ~+1 %
+  après (machine bruitée). Planche des essences : `game/tests/da6_trees_shot.gd`.
+
 ## Prochaine étape
-Lisières douces + touffes (shaders), puis arbres.
+Captures après (dont un bois proche), banc final (plaine, bocage, épique), ADR, CREDITS/SOURCE.
