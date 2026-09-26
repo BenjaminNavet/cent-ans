@@ -15,9 +15,9 @@
   },
   "garrison_upkeep_percent": {
     "city": 50,
-    "town": 15,
-    "castle": 25,
-    "abbey": 10,
+    "town": 8,
+    "castle": 15,
+    "abbey": 5,
     "village": 0
   },
   "full_province_bonus": {
@@ -48,9 +48,9 @@
   },
   "building_upkeep_percent": {
     "city": 100,
-    "town": 40,
-    "castle": 50,
-    "abbey": 25,
-    "village": 50
+    "town": 25,
+    "castle": 30,
+    "abbey": 12,
+    "village": 10
   }
 }

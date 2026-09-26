@@ -230,8 +230,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Petite ville et prévôté royale sur le plateau santerrois.",
@@ -256,8 +255,7 @@
     "owner": null,
     "fortification_level": 0,
     "buildings": [
-      "bld_parish_church",
-      "bld_market"
+      "bld_parish_church"
     ],
     "port": false,
     "description": "Bourg marchand du Santerre, étape sur la route de Paris à Arras.",

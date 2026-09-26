@@ -88,9 +88,31 @@ rules.json ; codex (mouvement, saisons, déroute, agents) ; tests `campaign.rs`,
 - `docs/design/2026-09-24-mouvement-libre.md` cite 210 km / × 140 km : spec datée, laissée telle quelle.
 
 ## DC3 — équilibrage de la carte densifiée (worktree `../gp-dc3`, branche `feat/densite-dc3`)
-État : mesures de référence en cours (main / DC1 / DC3 sur les mêmes graines ; binaires de sondes
-construits depuis des worktrees détachés `../gp-dc3-main` et `../gp-dc3-dc1`, à supprimer à la fin).
-`century_probe` compte désormais les cités prises, les provinces conquises en entier (durée depuis la
-première place prise) et, pour les révoltes, dévastation moyenne, provinces occupées et
-mécontentement > 60.
-Prochaine étape : réglages d'entretien (garrison/building_upkeep_percent) puis conquête.
+État : économie réglée (entretien), tests verts (546), conquête et perf en cours.
+Méthode : sondes construites depuis des worktrees détachés `../gp-dc3-main` (main 89bc960a) et
+`../gp-dc3-dc1` (c3e5f17d, DC1 seul : 570 places + pas de 70 km), mêmes graines ; à supprimer à la fin.
+`century_probe` compte désormais : cités prises, provinces conquises en entier (durée depuis la
+première place prise), dévastation, provinces occupées, mécontentement > 60, issues des replis ;
+`REVOLT_TRACE=1` liste révoltes et provinces à plus de 70 de mécontentement.
+
+### Économie d'ouverture (tour 0, toutes factions, `start_economy_probe`)
+| | revenu | armée+garnisons | bâtiments | net |
+|---|---|---|---|---|
+| main | 143 662 | 69 909 | 22 707 | −9 261 |
+| DC3 brut (1 192 places) | 143 199 | 80 133 | 27 621 | −25 288 |
+| DC3 réglé | 143 199 | 69 706 | 22 081 | −9 321 |
+Angleterre net 1 448 (main) → −1 657 (brut : elle ne lève plus d'armée, 1 unité de campagne au tour 15)
+→ 1 374 (réglé). France 4 153 → −310 → 3 657.
+Réglage (data/settlements/rules.json) : part de la couronne réduite pour que le total des places
+secondaires reste celui d'avant la densification — garrison_upkeep_percent ville 15→8, château 25→15,
+abbaye 10→5 ; building_upkeep_percent ville 40→25, château 50→30, abbaye 25→12, village 50→10.
+Garnisons de départ inchangées.
+
+### Données corrigées
+19 nouveaux villages (DC2a) avaient un `bld_market` interdit aux villages, České Budějovice un
+`bld_counting_house` sans foire (test eq2_balance) : retirés.
+Tests adaptés : c6_agents (le héraut se recrute dans une cité ; les nouvelles abbayes passaient
+avant), m2 `the_loser_falls_back_on_the_grid` (le point vide a changé : rayon neutre élargi dans le
+cas du mur).
+
+Prochaine étape : conquête (cités prises −33 % vs main), refuge neutre, perf `turn_perf`.

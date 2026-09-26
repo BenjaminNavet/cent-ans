@@ -154,8 +154,7 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_market",
-      "bld_counting_house"
+      "bld_market"
     ],
     "port": false,
     "description": "Ville royale fondée en 1265 sur la route de l'argent vers l'Autriche, en Bohême du Sud.",

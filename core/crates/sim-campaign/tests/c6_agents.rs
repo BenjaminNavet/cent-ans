@@ -124,18 +124,27 @@ fn place(
     at: &SettlementId,
 ) -> AgentId {
     state.factions.get_mut(faction).unwrap().treasury += 10_000;
+    // DC3: a city with a religious building first (every kind enlists there; the
+    // densified map puts abbeys before those cities, and a herald only enlists in a city),
+    // else an abbey.
+    let religious_city = |s: &sim_campaign::SettlementState| {
+        s.kind == SettlementKind::City
+            && s.buildings.iter().any(|b| {
+                data.buildings
+                    .get(b)
+                    .is_some_and(|d| d.category == BuildingCategory::Religious)
+            })
+    };
     let own = state
         .settlements
         .iter()
-        .find(|(_, s)| {
-            &s.controller == faction && s.kind == SettlementKind::Abbey
-                || &s.controller == faction
-                    && s.kind == SettlementKind::City
-                    && s.buildings.iter().any(|b| {
-                        data.buildings
-                            .get(b)
-                            .is_some_and(|d| d.category == BuildingCategory::Religious)
-                    })
+        .filter(|(_, s)| &s.controller == faction)
+        .find(|(_, s)| religious_city(s))
+        .or_else(|| {
+            state
+                .settlements
+                .iter()
+                .find(|(_, s)| &s.controller == faction && s.kind == SettlementKind::Abbey)
         })
         .map(|(id, _)| id.clone())
         .expect("a place to recruit");
