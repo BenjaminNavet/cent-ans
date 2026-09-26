@@ -357,8 +357,8 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 		var meshes := _meshes(detailed)
 		for kind in mmis.size():
 			var mmi: MultiMeshInstance3D = mmis[kind]
-			if mmi != null:
-				mmi.multimesh.mesh = meshes[kind]
+			if mmi != null and mmi.multimesh.mesh != meshes[kind]:
+				mmi.multimesh = _with_mesh(mmi.multimesh, meshes[kind], _tiles[entry["tile"]]["buffers"][entry["slot0"] + kind])
 	# Ombres portées des tuiles proches seulement (au loin elles ne se voient plus) et seulement
 	# au zoom global le plus rapproché (`shadow_camera_distance`) : au zoom moyen, des ombres
 	# d'arbres individuelles ne se distinguent déjà plus mais coûtent toujours plein tarif côté
@@ -376,6 +376,21 @@ func _apply_lod(entry: Dictionary, d: float, fade_start: float, fade_end: float,
 		if mmi != null:
 			var multimesh: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
 			multimesh.visible_instance_count = ceili(multimesh.instance_count * fraction)
+
+
+## SZ6 : même MultiMesh avec un autre maillage. Changer `MultiMesh.mesh` après `buffer` fait
+## relire le tampon au GPU par le serveur de rendu pour recalculer la boîte englobante (image
+## bloquée jusqu'à 70 ms en zoomant) : on recrée le MultiMesh depuis la copie processeur du tampon
+## (`buffers` de la tuile, tenue à jour par les recalages), boîte calculée sur le processeur.
+static func _with_mesh(old: MultiMesh, mesh: Mesh, buffer: PackedFloat32Array) -> MultiMesh:
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = old.transform_format
+	multimesh.use_custom_data = old.use_custom_data
+	multimesh.mesh = mesh
+	multimesh.instance_count = old.instance_count
+	multimesh.buffer = buffer
+	multimesh.visible_instance_count = old.visible_instance_count
+	return multimesh
 
 
 ## Un maillage par essence (ordre de `VegetationTileJob.Kind`) ; lot V4 : chêne, hêtre et
@@ -625,7 +640,7 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 			slots.append(mmi)
 		node.add_child(part_node)
 		var cell := Vector2(part_index % VegetationTileJob.PARTS_SIDE, part_index / VegetationTileJob.PARTS_SIDE)
-		parts.append({"node": part_node, "mmis": mmis, "rect": Rect2(Vector2(job.origin_px) + cell * part_px, Vector2(part_px, part_px))})
+		parts.append({"node": part_node, "mmis": mmis, "tile": index, "slot0": part_index * VegetationTileJob.KIND_COUNT, "rect":Rect2(Vector2(job.origin_px) + cell * part_px, Vector2(part_px, part_px))})
 	add_child(node)
 	_generation += 1
 	# Tampons CPU gardés pour le recalage (lot C7b) : 64 octets par instance.

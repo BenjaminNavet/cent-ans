@@ -371,6 +371,74 @@ Sources et licences des paliers :
 
 Mentions complètes et textes d'attribution : `CREDITS.md` (section « Données géographiques »).
 
+## Hébergement du paquet « Cent Ans relief » (lot SZ7, ADR 0077)
+
+Le cache du relief fin n'est hébergé nulle part par défaut : un joueur qui reçoit le jeu sans lui
+doit soit le recalculer (`geo relief-all`, plusieurs heures, ≈ 20 Go de bruts), soit récupérer un
+paquet déjà cuit publié en Releases GitHub d'un dépôt de données séparé (`cent-ans-relief`,
+ADR 0077). L'outillage ci-dessous prépare et installe ce paquet ; **publier le dépôt et y envoyer
+les parts reste un geste réservé au joueur** (voir plus bas).
+
+```sh
+uv run --project tools cent-ans geo relief-pack --out dist/relief   # empaquette (local, sans réseau)
+uv run --project tools cent-ans geo relief-fetch --from-dir dist/relief   # installe depuis des parts locales
+uv run --project tools cent-ans geo relief-fetch                    # télécharge depuis data/map/relief_hosting.json
+```
+
+- **`relief-pack`** (`cent_ans_tools.geo.relief_pack`) archive `data/map/pyramid/` (E1-E7,
+  `hydro_fine/`, `roads_fine/`) en `.tar` **non compressé**, en flux (aucune copie intégrale en
+  mémoire), découpé en parts strictement sous 1,9 Gio (marge sous la limite de 2 Gio d'un fichier
+  de Release GitHub). Vérifie la place disque libre avant d'écrire (marge ×1,1 sur la taille
+  estimée) et écrit par défaut dans le dossier `--out` donné par l'appelant (le disque du dépôt
+  est presque plein : ne jamais empaqueter sans indiquer une destination avec assez de place, et
+  **ne pas lancer sur le vrai cache** depuis un poste dont le disque est déjà serré). Écrit un
+  `manifest.json` (version, parts, taille et SHA-256 de chaque part et du flux global, crédits
+  copiés depuis `CREDITS.md`, section « Données géographiques »).
+  - **Compression** : testée (zstd niveau 19) sur un échantillon synthétique représentatif (PNG
+    16 bits façon tuile de relief, blob façon tuile CAFV) — gain ≈ 0 % : les PNG sont déjà
+    compressés (DEFLATE) et les tuiles binaires n'ont pas de redondance qu'un second passage
+    récupère. Décision : pas de compression (l'ADR 0077 le prévoyait déjà).
+  - **Version du paquet** : dérivée automatiquement de la cuisson de la pyramide. `relief-pack`
+    compare l'empreinte courante (`bake_versions` de `relief_pyramid.json` — lot SZ2,
+    `bake_stamp.py` — plus `generated_at` de `rivers_fine.json` et `fine_anchors.json`, qui n'ont
+    pas encore leur propre version de cuisson) à celle enregistrée dans
+    `data/map/relief_hosting.json` (`bake.signature`) ; si elle a changé, `version` est
+    incrémentée et le fichier réécrit. Une recuisson de la pyramide (SZ2, un futur SZ-suite pour
+    hydro/anchors) se répercute donc sans geste manuel, hormis republier.
+- **`relief-fetch`** (`cent_ans_tools.geo.relief_fetch`) télécharge chaque part avec reprise HTTP
+  (`Range`, stdlib `urllib`, aucune dépendance ajoutée), vérifie son SHA-256, puis extrait le flux
+  tar reconstitué (parts concaténées à la volée, jamais matérialisées en un seul fichier) de façon
+  atomique : le nouveau `pyramid/` remplace l'ancien par un renommage, jamais de dossier à moitié
+  écrit visible. `--from-dir` installe depuis des parts locales (clé USB, tests, dépôt de données
+  cloné à part) sans réseau. Destination : `--dest`, sinon `CENT_ANS_RELIEF_DIR`, sinon `data/map`
+  (le paquet s'installe alors directement dans `data/map/pyramid`, comme si `geo relief-all`
+  l'avait cuit). Termine par `geo relief-all --check` quand la destination contient les
+  manifestes versionnés (dépôt de développement).
+- `ReliefCacheStatus.FETCH_COMMAND` (jeu, `game/scripts/map/relief_cache_status.gd`) : l'avis
+  « relief rapproché limité/incomplet » propose `relief-fetch` en premier (plus rapide), avec
+  `relief-all` en repli si aucun hébergement n'existe encore.
+
+### Publier le paquet (geste du joueur)
+
+Aucune commande de ce lot n'envoie quoi que ce soit sur le réseau. Publier le paquet préparé par
+`relief-pack` est un choix du joueur, sous son propre compte GitHub :
+
+```sh
+# une seule fois : créer le dépôt de données public (séparé du dépôt du jeu, qui reste privé)
+gh repo create BenjaminNavet/cent-ans-relief --public --description "Cache de relief fin du jeu Cent Ans (ADR 0077)"
+
+# à chaque nouvelle version (après uv run --project tools cent-ans geo relief-pack --out dist/relief)
+gh release create v<N> dist/relief/*.part*.tar dist/relief/manifest.json \
+  --repo BenjaminNavet/cent-ans-relief \
+  --title "Cent Ans relief vN" \
+  --notes "Cache de relief fin (pyramide + fleuves et routes fins). Installer avec : uv run --project tools cent-ans geo relief-fetch"
+```
+
+`<N>` est la `version` écrite dans `data/map/relief_hosting.json` (et dans `manifest.json` du
+paquet) après le dernier `relief-pack`. `base_url` de `relief_hosting.json` pointe déjà vers
+`https://github.com/BenjaminNavet/cent-ans-relief/releases/download/v{version}/` : aucune autre
+donnée à changer une fois le dépôt créé et la Release publiée.
+
 ## Relief palier 3 : zones de détail E5-E7 (lot ZG3, ADR 0036)
 
 ```sh

@@ -675,6 +675,7 @@ func _upload(key: int, job: PageJob) -> bool:
 
 func _note_step(step: String, usec: int) -> void:
 	_step_ms_max[step] = maxf(float(_step_ms_max[step]), usec / 1000.0)
+	PerfProbe.add("qt/" + step, usec)  # SZ6
 
 
 ## Morceaux E0 (index ligne × 16 + colonne) touchés par un rectangle carte.
