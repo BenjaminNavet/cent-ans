@@ -42,7 +42,14 @@ from PIL import Image
 from rasterio.enums import Resampling
 from scipy import ndimage
 
-from cent_ans_tools.geo import copernicus, download, relief, relief_shade, terrain
+from cent_ans_tools.geo import (
+    bake_stamp,
+    copernicus,
+    download,
+    relief,
+    relief_shade,
+    terrain,
+)
 from cent_ans_tools.geo.project import MapGrid
 
 REPO_DIR = download.TOOLS_DIR.parent
@@ -79,6 +86,12 @@ CORE_EXCLUDE: tuple[tuple[str, tuple[float, float, float, float]], ...] = (
 TIER2_MARGIN_PX = 128
 COAST_FADE_PX = 2
 GLO90_RES_DEG = 1.0 / 1200.0
+#: Bump when the E1-E4 bake changes (stamped in ``pyramid/bake.json``, expected by
+#: the manifest's ``bake_versions``, see :mod:`bake_stamp`): a stale tier is
+#: rebaked by ``geo pyramid`` / ``geo relief-all`` without ``--force``.
+#: 2 (SZ2): valley floors not dug (:func:`relief_shade.valley_floor`).
+BAKE_VERSION = 2
+TIER_NAMES = {TIER1_LEVELS: "tier1", TIER2_LEVELS: "tier2"}
 
 
 @dataclass(frozen=True)
@@ -401,6 +414,21 @@ def cache_footprint(map_dir: Path) -> dict:
     }
 
 
+def set_manifest_bake_versions(map_dir: Path, versions: dict[str, int]) -> None:
+    """Merge ``versions`` into the manifest's top-level ``bake_versions`` line."""
+    path = map_dir / MANIFEST
+    text = path.read_text(encoding="utf-8")
+    current = json.loads(text).get(bake_stamp.MANIFEST_KEY) or {}
+    merged = {**current, **versions}
+    if merged == current:
+        return
+    lines = text.split("\n")
+    _set_top_level_line(lines, bake_stamp.MANIFEST_KEY, dict(sorted(merged.items())))
+    text = "\n".join(lines)
+    json.loads(text)
+    path.write_text(text, encoding="utf-8")
+
+
 def refresh_manifest(
     map_dir: Path, levels: Iterable[int], overrides: dict[int, dict] | None = None
 ) -> None:
@@ -440,14 +468,19 @@ def boost_base(merged_m: np.ndarray, meters_per_px: float) -> np.ndarray:
 
 
 def boost_with_base(height_m: np.ndarray, base_m: np.ndarray) -> np.ndarray:
-    """ADR 0019 render boost of ``height_m`` given its blurred base (no land test)."""
+    """ADR 0019 render boost of ``height_m`` given its blurred base.
+
+    No land test beyond :func:`relief_shade.floor_valleys` (valley floors of
+    land above ``MIN_LAND_M`` are not dug, SZ2): the coast is applied after.
+    """
     local = np.clip(
         height_m - base_m, -relief_shade.BOOST_LIMIT_M, relief_shade.BOOST_LIMIT_M
     )
     fade_lo, fade_hi = relief_shade.BOOST_FADE_M
     t = np.clip((base_m - fade_lo) / (fade_hi - fade_lo), 0.0, 1.0)
     fade = 1.0 - t * t * (3.0 - 2.0 * t)
-    return (height_m + relief_shade.BOOST_GAIN * local * fade).astype(np.float32)
+    boosted = height_m + relief_shade.BOOST_GAIN * local * fade
+    return relief_shade.floor_valleys(boosted, height_m)
 
 
 def bbox_mask_e0(
@@ -692,6 +725,10 @@ def build(
 ) -> PyramidResult:
     """Bake the requested levels (resuming: tiles on disk are kept unless ``force``).
 
+    A whole tier whose cache stamp is not the current :data:`BAKE_VERSION` is
+    rebaked as with ``force``, and an interrupted forced bake resumes: only
+    tiles older than its start are rebaked (:mod:`bake_stamp`).
+
     Args:
         levels: Levels among 1-4.
         force: Rewrite existing tiles.
@@ -704,26 +741,31 @@ def build(
     paths = prepare_work(map_dir)
     written: list[tuple[int, int]] = []
     skipped = 0
+    pyramid_dir = map_dir / PYRAMID_DIR_NAME
     tier1 = tuple(level for level in levels if level in TIER1_LEVELS)
     if tier1:
-        jobs, skip = _tier1_jobs(map_dir, tier1, force)
+        since = _begin_tier(pyramid_dir, TIER1_LEVELS, tier1, force)
+        jobs, skip = _tier1_jobs(map_dir, tier1, since)
         skipped += skip
         written += _run_units(
             tier1_unit, jobs[:limit], paths, map_dir, workers, "E1-E2"
         )
         refresh_manifest(map_dir, tier1)
+        _finish_tier(map_dir, TIER1_LEVELS, tier1, since, limit, len(jobs))
     tier2 = tuple(level for level in levels if level in TIER2_LEVELS)
     if tier2:
         from cent_ans_tools.geo import surface
 
         surface.prepare_sources(CORE_BBOX)
         paths = {**paths, **surface.prepare_reservoirs(map_dir, force)}
-        jobs, skip = _tier2_jobs(map_dir, tier2, force)
+        since = _begin_tier(pyramid_dir, TIER2_LEVELS, tier2, force)
+        jobs, skip = _tier2_jobs(map_dir, tier2, since)
         skipped += skip
         written += _run_units(
             surface.tier2_unit, jobs[:limit], paths, map_dir, workers, "E3-E4"
         )
         refresh_manifest(map_dir, tier2, {level: TIER2_MANIFEST for level in tier2})
+        _finish_tier(map_dir, TIER2_LEVELS, tier2, since, limit, len(jobs))
     per_level: dict[int, int] = {}
     for level, _ in written:
         per_level[level] = per_level.get(level, 0) + 1
@@ -736,8 +778,41 @@ def build(
     )
 
 
+def _begin_tier(
+    pyramid_dir: Path,
+    tier_levels: tuple[int, ...],
+    levels: tuple[int, ...],
+    force: bool,
+) -> float | None:
+    """Rebake threshold of a tier (see :func:`bake_stamp.begin`).
+
+    Only a bake of the whole tier (both its levels) is stamped; a partial one
+    (``--levels 3``) keeps the plain "missing tiles" rule, or rewrites all with
+    ``force``.
+    """
+    if levels != tier_levels:
+        return time.time() if force else None
+    return bake_stamp.begin(pyramid_dir, TIER_NAMES[tier_levels], BAKE_VERSION, force)
+
+
+def _finish_tier(
+    map_dir: Path,
+    tier_levels: tuple[int, ...],
+    levels: tuple[int, ...],
+    since: float | None,
+    limit: int | None,
+    jobs: int,
+) -> None:
+    """Stamp a whole tier as baked by :data:`BAKE_VERSION` once every job ran."""
+    if levels != tier_levels or (limit is not None and limit < jobs):
+        return
+    name = TIER_NAMES[tier_levels]
+    bake_stamp.finish(map_dir / PYRAMID_DIR_NAME, name, BAKE_VERSION, since)
+    set_manifest_bake_versions(map_dir, {name: BAKE_VERSION})
+
+
 def _tier1_jobs(
-    map_dir: Path, levels: tuple[int, ...], force: bool
+    map_dir: Path, levels: tuple[int, ...], since: float | None
 ) -> tuple[list, int]:
     """One job per E1 tile holding land of the fine bbox; done ones skipped."""
     e1 = candidate_tiles(map_dir, 1, copernicus.FINE_BBOX)
@@ -747,13 +822,11 @@ def _tier1_jobs(
         key = TileKey(1, col, row)
         children = [(c.col, c.row) for c in key.children() if (c.col, c.row) in e2]
         todo = []
-        if 1 in levels and (force or not tile_path(map_dir, key).exists()):
+        if 1 in levels and bake_stamp.needs_rebake(tile_path(map_dir, key), since):
             todo.append(1)
-        if 2 in levels and (
-            force
-            or any(
-                not tile_path(map_dir, TileKey(2, c, r)).exists() for c, r in children
-            )
+        if 2 in levels and any(
+            bake_stamp.needs_rebake(tile_path(map_dir, TileKey(2, c, r)), since)
+            for c, r in children
         ):
             todo.append(2)
         if todo:
@@ -764,7 +837,7 @@ def _tier1_jobs(
 
 
 def _tier2_jobs(
-    map_dir: Path, levels: tuple[int, ...], force: bool
+    map_dir: Path, levels: tuple[int, ...], since: float | None
 ) -> tuple[list, int]:
     """One job per E2 footprint holding land of the core bbox; done ones skipped."""
     exclude = [box for _, box in CORE_EXCLUDE]
@@ -783,12 +856,9 @@ def _tier2_jobs(
         ]
         todo = []
         for level, tiles in ((3, e3_children), (4, e4_children)):
-            if level in levels and (
-                force
-                or any(
-                    not tile_path(map_dir, TileKey(level, c, r)).exists()
-                    for c, r in tiles
-                )
+            if level in levels and any(
+                bake_stamp.needs_rebake(tile_path(map_dir, TileKey(level, c, r)), since)
+                for c, r in tiles
             ):
                 todo.append(level)
         if todo:

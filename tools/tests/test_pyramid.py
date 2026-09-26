@@ -119,7 +119,13 @@ def test_manifest_inserts_missing_level_and_cache_line(tmp_path: Path) -> None:
     """A missing level is inserted in order; ``cache`` is one line, then replaced."""
     path = tmp_path / "relief_pyramid.json"
     path.write_text(MANIFEST_SAMPLE, encoding="utf-8")
-    new = {"level": 3, "meters_per_px": 44.936, "tier": 2, "source": "GLO-30", "tiles_rle": []}
+    new = {
+        "level": 3,
+        "meters_per_px": 44.936,
+        "tier": 2,
+        "source": "GLO-30",
+        "tiles_rle": [],
+    }
     cache = {"generated_at": "x", "total_bytes": 1, "tile_count": 1}
     pyramid.update_manifest_levels(path, {3: new}, cache)
     text = path.read_text(encoding="utf-8")
@@ -149,10 +155,10 @@ def test_committed_manifest_keeps_one_line_per_level() -> None:
 
 
 def test_boost_commutes_with_the_mean_below_the_clamp() -> None:
-    """Without clamping, the 2 x 2 mean of boosted children is the boosted parent."""
+    """Without clamping nor valley floor, mean of boosted children = boosted parent."""
     rng = np.random.default_rng(3)
-    children = rng.normal(200.0, 30.0, (64, 64)).astype(np.float32)
-    base = np.full_like(children, 200.0)
+    children = rng.uniform(185.0, 260.0, (64, 64)).astype(np.float32)
+    base = np.full_like(children, 180.0)
     boosted_mean = relief_shade.block_mean(pyramid.boost_with_base(children, base), 2)
     mean_boosted = pyramid.boost_with_base(
         relief_shade.block_mean(children, 2), relief_shade.block_mean(base, 2)
@@ -167,7 +173,9 @@ def test_boost_matches_relief_shade_formula() -> None:
     land = np.ones(heights.shape, dtype=bool)
     reference = relief_shade.boost_relief(heights, land, 359.488)
     base = pyramid.boost_base(heights, 359.488)
-    np.testing.assert_allclose(pyramid.boost_with_base(heights, base), reference, atol=1e-3)
+    np.testing.assert_allclose(
+        pyramid.boost_with_base(heights, base), reference, atol=1e-3
+    )
 
 
 def test_apply_coast_and_fade() -> None:
@@ -199,7 +207,9 @@ def test_canopy_is_removed_under_trees() -> None:
     trees[40:120, 40:120] = 1.0
     dsm = ground + surface.CANOPY_OFFSET_M * trees
     corrected = surface.remove_canopy(dsm, trees)
-    np.testing.assert_allclose(corrected[50:110, 50:110], ground[50:110, 50:110], atol=0.05)
+    np.testing.assert_allclose(
+        corrected[50:110, 50:110], ground[50:110, 50:110], atol=0.05
+    )
     np.testing.assert_allclose(corrected[:20, :20], ground[:20, :20], atol=0.05)
 
 
@@ -266,7 +276,9 @@ def test_reservoirs_match_schema_and_core() -> None:
     schema = json.loads(
         (DATA / "schemas" / "modern_reservoirs.schema.json").read_text(encoding="utf-8")
     )
-    document = json.loads((MAP_DIR / "modern_reservoirs.json").read_text(encoding="utf-8"))
+    document = json.loads(
+        (MAP_DIR / "modern_reservoirs.json").read_text(encoding="utf-8")
+    )
     Draft202012Validator.check_schema(schema)
     errors = list(Draft202012Validator(schema).iter_errors(document))
     assert not errors, [error.message for error in errors]
@@ -297,7 +309,9 @@ def test_e1_mean_matches_e0() -> None:
     diffs = []
     for col, row in _cached(1)[::7]:
         key = pyramid.TileKey(1, col, row)
-        child = terrain.uint16_to_height(terrain.read_png16(pyramid.tile_path(MAP_DIR, key)))
+        child = terrain.uint16_to_height(
+            terrain.read_png16(pyramid.tile_path(MAP_DIR, key))
+        )
         e0_path = MAP_DIR / "height" / f"h_{col // 2}_{row // 2}.png"
         parent = terrain.uint16_to_height(terrain.read_png16(e0_path))
         dy, dx = row % 2, col % 2
@@ -319,7 +333,9 @@ def test_e2_mean_is_e1() -> None:
         parent_path = pyramid.tile_path(MAP_DIR, key.parent())
         if not parent_path.exists():
             continue
-        child = terrain.uint16_to_height(terrain.read_png16(pyramid.tile_path(MAP_DIR, key)))
+        child = terrain.uint16_to_height(
+            terrain.read_png16(pyramid.tile_path(MAP_DIR, key))
+        )
         parent = terrain.uint16_to_height(terrain.read_png16(parent_path))
         dy, dx = row % 2, col % 2
         parent = parent[dy * 256 : (dy + 1) * 256, dx * 256 : (dx + 1) * 256]

@@ -334,6 +334,29 @@ bruts déjà téléchargés ne le sont jamais une seconde fois.
   versionnés de `data/map/`), réseau pour les téléchargements.
 - **Worktrees d'agents** : ne jamais recuire ; lier `data/map/pyramid` et `tools/geo/raw` au
   dépôt principal (liens symboliques).
+
+### Versions de cuisson (lot SZ2)
+
+Le manifeste versionné `relief_pyramid.json` porte `bake_versions` (`tier1`, `tier2` :
+`pyramid.BAKE_VERSION` ; `tier3` : `detail_dem.BAKE_VERSION`) ; le cache porte les siennes dans
+`pyramid/bake.json` (version, début, cuisson finie ; module `geo/bake_stamp.py`). Un palier cuit
+par une autre version (ou jamais estampillé : caches d'avant SZ2) est **périmé** : `relief-all
+--check` le signale (code 1) et `relief-all` le recuit, avec tout l'aval, sans `--force`. Une
+cuisson périmée ou forcée note son heure de début : interrompue, elle reprend en ne recuisant que
+les tuiles plus anciennes. `detail_dem.BAKE_VERSION` entre aussi dans la clé des recalages de
+`hydro-fine`.
+
+### Fonds de vallée non creusés (lot SZ2)
+
+Le rehaussement de rendu (ADR 0019 : `h + 0,8 · clamp(h − flou σ 5 km, ±120 m)`) creusait les
+vallées encaissées de 0,8 × (base − fond), la base σ 5 km contenant les plateaux voisins : Seine
+à 0,5 m de Paris à Rouen (plancher de côte), Loire à 15 m à Amboise, et chaque étage autrement
+(bases et résolutions différentes), d'où la Loire fine d'Orléans sous ses berges E7. La terre
+rehaussée ne descend plus sous `relief_shade.valley_floor(h) = max(0,5 ; 0,85 h ; h − 2 m)`
+(monotone en `h` : pas de gradins), à E0 (`heightmap_render.png`, `height/`, `relief_shade.png`)
+comme à E1-E7. Collines et coteaux restent rehaussés ; l'exagération ZG8 (au-dessus du fond de
+vallée, à l'exécution) fait le reste. Paramètres dans `map.json` (`render_heightmap.boost`).
+
 - **Jeu exporté** : `tools/export_macos.sh` copie le cache avec les données (voir l'addendum ZG7b
   de l'ADR 0036 et `docs/godot-map.md`, « Vue d'ensemble ZG »).
 
@@ -347,6 +370,74 @@ Sources et licences des paliers :
 | Fleuves fins | BD TOPAGE® 2025 (IGN, OFB ; SANDRE), OS Open Rivers, EU-Hydro v1.3 (AEE, Copernicus), Natural Earth | Licence Ouverte Etalab 2.0, « Source : BD TOPAGE® – IGN, OFB » ; OGL v3, « Contains OS data © Crown copyright and database right 2026. » ; politique de données Copernicus, « © European Union, Copernicus Land Monitoring Service 2020, European Environment Agency (EEA). » ; domaine public |
 
 Mentions complètes et textes d'attribution : `CREDITS.md` (section « Données géographiques »).
+
+## Hébergement du paquet « Cent Ans relief » (lot SZ7, ADR 0077)
+
+Le cache du relief fin n'est hébergé nulle part par défaut : un joueur qui reçoit le jeu sans lui
+doit soit le recalculer (`geo relief-all`, plusieurs heures, ≈ 20 Go de bruts), soit récupérer un
+paquet déjà cuit publié en Releases GitHub d'un dépôt de données séparé (`cent-ans-relief`,
+ADR 0077). L'outillage ci-dessous prépare et installe ce paquet ; **publier le dépôt et y envoyer
+les parts reste un geste réservé au joueur** (voir plus bas).
+
+```sh
+uv run --project tools cent-ans geo relief-pack --out dist/relief   # empaquette (local, sans réseau)
+uv run --project tools cent-ans geo relief-fetch --from-dir dist/relief   # installe depuis des parts locales
+uv run --project tools cent-ans geo relief-fetch                    # télécharge depuis data/map/relief_hosting.json
+```
+
+- **`relief-pack`** (`cent_ans_tools.geo.relief_pack`) archive `data/map/pyramid/` (E1-E7,
+  `hydro_fine/`, `roads_fine/`) en `.tar` **non compressé**, en flux (aucune copie intégrale en
+  mémoire), découpé en parts strictement sous 1,9 Gio (marge sous la limite de 2 Gio d'un fichier
+  de Release GitHub). Vérifie la place disque libre avant d'écrire (marge ×1,1 sur la taille
+  estimée) et écrit par défaut dans le dossier `--out` donné par l'appelant (le disque du dépôt
+  est presque plein : ne jamais empaqueter sans indiquer une destination avec assez de place, et
+  **ne pas lancer sur le vrai cache** depuis un poste dont le disque est déjà serré). Écrit un
+  `manifest.json` (version, parts, taille et SHA-256 de chaque part et du flux global, crédits
+  copiés depuis `CREDITS.md`, section « Données géographiques »).
+  - **Compression** : testée (zstd niveau 19) sur un échantillon synthétique représentatif (PNG
+    16 bits façon tuile de relief, blob façon tuile CAFV) — gain ≈ 0 % : les PNG sont déjà
+    compressés (DEFLATE) et les tuiles binaires n'ont pas de redondance qu'un second passage
+    récupère. Décision : pas de compression (l'ADR 0077 le prévoyait déjà).
+  - **Version du paquet** : dérivée automatiquement de la cuisson de la pyramide. `relief-pack`
+    compare l'empreinte courante (`bake_versions` de `relief_pyramid.json` — lot SZ2,
+    `bake_stamp.py` — plus `generated_at` de `rivers_fine.json` et `fine_anchors.json`, qui n'ont
+    pas encore leur propre version de cuisson) à celle enregistrée dans
+    `data/map/relief_hosting.json` (`bake.signature`) ; si elle a changé, `version` est
+    incrémentée et le fichier réécrit. Une recuisson de la pyramide (SZ2, un futur SZ-suite pour
+    hydro/anchors) se répercute donc sans geste manuel, hormis republier.
+- **`relief-fetch`** (`cent_ans_tools.geo.relief_fetch`) télécharge chaque part avec reprise HTTP
+  (`Range`, stdlib `urllib`, aucune dépendance ajoutée), vérifie son SHA-256, puis extrait le flux
+  tar reconstitué (parts concaténées à la volée, jamais matérialisées en un seul fichier) de façon
+  atomique : le nouveau `pyramid/` remplace l'ancien par un renommage, jamais de dossier à moitié
+  écrit visible. `--from-dir` installe depuis des parts locales (clé USB, tests, dépôt de données
+  cloné à part) sans réseau. Destination : `--dest`, sinon `CENT_ANS_RELIEF_DIR`, sinon `data/map`
+  (le paquet s'installe alors directement dans `data/map/pyramid`, comme si `geo relief-all`
+  l'avait cuit). Termine par `geo relief-all --check` quand la destination contient les
+  manifestes versionnés (dépôt de développement).
+- `ReliefCacheStatus.FETCH_COMMAND` (jeu, `game/scripts/map/relief_cache_status.gd`) : l'avis
+  « relief rapproché limité/incomplet » propose `relief-fetch` en premier (plus rapide), avec
+  `relief-all` en repli si aucun hébergement n'existe encore.
+
+### Publier le paquet (geste du joueur)
+
+Aucune commande de ce lot n'envoie quoi que ce soit sur le réseau. Publier le paquet préparé par
+`relief-pack` est un choix du joueur, sous son propre compte GitHub :
+
+```sh
+# une seule fois : créer le dépôt de données public (séparé du dépôt du jeu, qui reste privé)
+gh repo create BenjaminNavet/cent-ans-relief --public --description "Cache de relief fin du jeu Cent Ans (ADR 0077)"
+
+# à chaque nouvelle version (après uv run --project tools cent-ans geo relief-pack --out dist/relief)
+gh release create v<N> dist/relief/*.part*.tar dist/relief/manifest.json \
+  --repo BenjaminNavet/cent-ans-relief \
+  --title "Cent Ans relief vN" \
+  --notes "Cache de relief fin (pyramide + fleuves et routes fins). Installer avec : uv run --project tools cent-ans geo relief-fetch"
+```
+
+`<N>` est la `version` écrite dans `data/map/relief_hosting.json` (et dans `manifest.json` du
+paquet) après le dernier `relief-pack`. `base_url` de `relief_hosting.json` pointe déjà vers
+`https://github.com/BenjaminNavet/cent-ans-relief/releases/download/v{version}/` : aucune autre
+donnée à changer une fois le dépôt créé et la Release publiée.
 
 ## Relief palier 3 : zones de détail E5-E7 (lot ZG3, ADR 0036)
 
@@ -400,7 +491,8 @@ par `geo pyramid`, restent identiques octet pour octet).
   sous `MIN_LAND_M` (0,5 m), comme `relief_shade.enforce_coast` pour E0-E4 (correctif ZG3b,
   `docs/wip/zg3-palier3.md`) : sans ce plancher, une base régionale plus haute que la source
   fine (collines à quelques km, ancienne fuite GLO-90 dans les petites emprises E6-E7) pouvait
-  faire passer de la terre réelle sous le niveau de la mer.
+  faire passer de la terre réelle sous le niveau de la mer. Depuis SZ2, ce plancher est celui de
+  tous les étages (voir « Fonds de vallée non creusés »).
 
 ## Pyramide de relief, paliers 1-2 (lot ZG1, ADR 0036)
 
