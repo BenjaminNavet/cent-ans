@@ -205,7 +205,7 @@ Produit depuis le Mac le dossier `export/windows/` (Windows x86_64) et son archi
 (`core/build-windows.sh --release`, `cargo xwin`, cible `x86_64-pc-windows-msvc`), puis export
 Godot avec le préréglage « Windows Desktop ». Le dossier obtenu contient `Cent Ans.exe`,
 `Cent Ans.console.exe` (garde une console ouverte avec le journal), `Cent Ans.pck` et
-`cent_ans.dll`. Le script y copie ensuite `data/` avec `cent-ans export-data --dir` et
+`cent_ans.release.dll`. Le script y copie ensuite `data/` avec `cent-ans export-data --dir` et
 `CREDITS.md`. `CENT_ANS_EXPORT_RELIEF` fonctionne comme pour macOS : avec `external`, le dossier
 `Cent Ans relief/` est placé à côté de l'exe. `CENT_ANS_NO_ZIP=1` saute l'archive.
 
