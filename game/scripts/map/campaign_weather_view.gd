@@ -205,6 +205,10 @@ func _make_particles(snow: bool) -> GPUParticles3D:
 	return particles
 
 
+## SZ5 (défaut ZG7c S7) : taille des gouttes, boîte d'émission, vitesse et densité en fonction
+## continue de la distance caméra (`PrecipitationProfile`, `res://resources/precipitation.tres`),
+## ancrées sur une échelle réaliste (mètres) au palier site et raccordées sans saut à l'ancien
+## comportement (déjà validé) en vue vallée / lointaine. Voir l'en-tête de la ressource.
 func _update_particles(focus: Vector3, distance: float) -> void:
 	var near := distance < particles_far
 	var rain := near and (_focus_kind == "rain" or _focus_kind == "storm")
@@ -217,24 +221,30 @@ func _update_particles(focus: Vector3, distance: float) -> void:
 		particles.visible = on or particles.emitting
 	if not (rain or snow):
 		return
-	# Boîte d'émission et vitesse proportionnelles au zoom (même densité apparente).
-	var k := distance / 100.0
-	var height := distance * 0.35
+	var profile := PrecipitationProfile.load_default()
+	if _map_data != null:
+		profile.meters_per_unit = _map_data.meters_per_px
+	var height := profile.height(distance)
 	for particles: GPUParticles3D in [_rain, _snow]:
 		particles.global_position = focus + Vector3(0.0, height, 0.0)
-	if absf(k - _particle_scale) / maxf(_particle_scale, 0.01) > 0.08:
-		_particle_scale = k
+	if absf(distance - _particle_scale) / maxf(_particle_scale, 0.01) > 0.08:
+		_particle_scale = distance
 		for particles: GPUParticles3D in [_rain, _snow]:
-			var process := particles.process_material as ShaderMaterial
-			process.set_shader_parameter("emission_box_extents", Vector3(80.0 * k, 8.0 * k, 80.0 * k))
 			var is_snow := particles == _snow
-			process.set_shader_parameter("velocity_min", (8.0 if is_snow else 60.0) * k)
-			process.set_shader_parameter("velocity_max", (12.0 if is_snow else 75.0) * k)
-			process.set_shader_parameter("sway", 3.0 * k if is_snow else 0.0)
+			var process := particles.process_material as ShaderMaterial
+			var extents := profile.box_extents(distance)
+			process.set_shader_parameter("emission_box_extents", Vector3(extents.x, extents.y, extents.x))
+			var v := profile.speed(distance, is_snow)
+			process.set_shader_parameter("velocity_min", v.x)
+			process.set_shader_parameter("velocity_max", v.y)
+			process.set_shader_parameter("sway", profile.sway(distance) if is_snow else 0.0)
+			particles.amount_ratio = profile.amount_ratio(distance)
 			var quad := particles.draw_pass_1 as QuadMesh
-			# ZG4 : plancher 0,3 seulement au-dessus de la vue comté ; en vues vallée / site, taille
-			# proportionnelle (sinon des traits de pluie de 200 m voilent tout l'écran).
-			quad.size = (Vector2(0.18, 0.18) if is_snow else Vector2(0.035, 1.1)) * maxf(k, minf(0.3, k * 1.36))
+			if is_snow:
+				var side := profile.snow_size(distance)
+				quad.size = Vector2(side, side)
+			else:
+				quad.size = profile.rain_size(distance)
 
 
 func _update_lightning(delta: float, distance: float) -> void:

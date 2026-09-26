@@ -33,6 +33,8 @@ static var _materials: Dictionary = {}  # clé → ShaderMaterial
 static var _lod_materials: Array[ShaderMaterial] = []
 static var _lod_camera := Vector3(INF, INF, INF)
 static var _lod_range := -1.0
+## SZ4 : réglages du sol « masse de toits » (`TownRenderProfile.roofscape_*`), posés par `TownLayer`.
+static var _roofscape: Dictionary = {}
 
 var plan: Dictionary
 var root: Node3D
@@ -108,8 +110,9 @@ static func kit_mesh(model_name: String) -> Mesh:
 
 ## Matériau atlas des villes : `base_source` 0 (instances) ou 1 (sommets), UV en boîte, levée,
 ## `lod_mode` (ZG7a : 0 toujours, 1 maisons détaillées de près, 2 blocs au-delà).
-static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters_per_unit: float = 719.0, lod_mode: int = 0) -> ShaderMaterial:
-	var key := "%d|%s|%.2f|%.1f|%d" % [base_source, box_uv, lift_m, meters_per_unit, lod_mode]
+## `roofscape` (SZ4) : sol bâti teinté en masse de toits de loin (`set_roofscape`).
+static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters_per_unit: float = 719.0, lod_mode: int = 0, roofscape: bool = false) -> ShaderMaterial:
+	var key := "%d|%s|%.2f|%.1f|%d|%s" % [base_source, box_uv, lift_m, meters_per_unit, lod_mode, roofscape]
 	if _materials.has(key):
 		return _materials[key]
 	var mat := ShaderMaterial.new()
@@ -123,6 +126,8 @@ static func material(base_source: int, box_uv: bool, lift_m: float = 0.0, meters
 	mat.set_shader_parameter("lift_m", lift_m)
 	mat.set_shader_parameter("meters_per_unit", meters_per_unit)
 	mat.set_shader_parameter("lod_mode", lod_mode)
+	if roofscape:
+		_apply_roofscape(mat)
 	if lod_mode > 0:
 		_lod_materials.append(mat)
 		if _lod_range > 0.0:
@@ -143,6 +148,23 @@ static func set_lod_view(camera_world: Vector3, detail_range: float) -> void:
 	for mat in _lod_materials:
 		mat.set_shader_parameter("lod_camera", camera_world)
 		mat.set_shader_parameter("lod_range", detail_range)
+
+
+## SZ4 : réglages du sol « masse de toits » (clés `near`, `far`, `strength`, `cell_m`, `gain`),
+## appliqués aux matériaux de sol existants et futurs.
+static func set_roofscape(settings: Dictionary) -> void:
+	_roofscape = settings
+	for key: String in _materials:
+		if key.ends_with("|true"):
+			_apply_roofscape(_materials[key])
+
+
+static func _apply_roofscape(mat: ShaderMaterial) -> void:
+	mat.set_shader_parameter("roofscape", float(_roofscape.get("strength", 0.0)))
+	mat.set_shader_parameter("roofscape_near", float(_roofscape.get("near", 1.2)))
+	mat.set_shader_parameter("roofscape_far", float(_roofscape.get("far", 3.5)))
+	mat.set_shader_parameter("roofscape_cell_m", float(_roofscape.get("cell_m", 9.0)))
+	mat.set_shader_parameter("roofscape_gain", float(_roofscape.get("gain", 1.0)))
 
 
 static func clear_cache() -> void:
@@ -276,7 +298,7 @@ func _init(p_plan: Dictionary, anchor: Vector2, p_meters_per_unit: float, parent
 	var prepared: Dictionary = plan["prepared"]
 	var strips: Array = prepared["ground"]
 	for k in strips.size():
-		_tasks.append(_draped_node.bind("Ground_%d" % k, strips[k], 0.7, 2.0, false))
+		_tasks.append(_draped_node.bind("Ground_%d" % k, strips[k], 0.7, 2.0, false, true))
 	var groups: Array = prepared["streets"]
 	for k in groups.size():
 		_tasks.append(_draped_node.bind("Streets_%d" % k, groups[k], 0.9, 2.0, false))
@@ -506,7 +528,7 @@ func _build_blocks() -> void:
 
 
 ## Nœud d'un maillage drapé préparé (`prepare`).
-func _draped_node(node_name: String, prepared: Dictionary, lift_m: float, top: float, shadows: bool) -> void:
+func _draped_node(node_name: String, prepared: Dictionary, lift_m: float, top: float, shadows: bool, roofscape: bool = false) -> void:
 	if prepared.is_empty():
 		return
 	var mesh := ArrayMesh.new()
@@ -514,7 +536,7 @@ func _draped_node(node_name: String, prepared: Dictionary, lift_m: float, top: f
 	var mi := MeshInstance3D.new()
 	mi.name = node_name
 	mi.mesh = mesh
-	mi.material_override = material(1, false, lift_m, meters_per_unit)
+	mi.material_override = material(1, false, lift_m, meters_per_unit, 0, roofscape)
 	_register(mi, "all", float(prepared["lo"]), float(prepared["hi"]), top, prepared["rect"])
 	if not shadows:
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -608,7 +630,7 @@ static func _ground_arrays(plan: Dictionary, built: PackedFloat32Array, row0: in
 				st.set_color(colors[k])
 				st.set_normal(Vector3.UP)
 				st.set_uv(p)
-				st.set_uv2(Vector2(h[k], 0.0))
+				st.set_uv2(Vector2(h[k], built[k]))  # SZ4 : part bâtie (sol « masse de toits »)
 				st.add_vertex(Vector3(p.x, 0.0, p.y))
 				used = true
 	if not used:
