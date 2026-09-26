@@ -922,9 +922,9 @@ et `game/resources/zoom_tiers.tres` (paliers vallée / site).
 Voir le tableau des paliers (lot C6). `ZoomTiers.valley_weight` / `site_weight` sont cumulatifs (1 à ce palier
 et en deçà), `border_alpha` / `fog_alpha` pilotent `province_border_alpha`, `realm_border_alpha`,
 `fog_veil_amount` et `fog_cloud_amount` du matériau de terrain (valeurs par défaut du shader × facteur),
-`prop_scale` le paramètre global `campaign_prop_scale` (arbres de `foliage.gdshaderinc` : 1 au-dessus de
-22 unités, `(d / 22)^0,8` en deçà, au moins 0,04 ; remis à 1 en quittant la carte car les batailles
-partagent ce shader). Marqueurs d'armée : échelle proportionnelle à la distance sous 12 unités
+le paramètre global `campaign_prop_scale` l'échelle des arbres de `foliage.gdshaderinc` (depuis SZ4 :
+`MapPropScale.tree_scale`, voir « Objets à l'échelle aux paliers intermédiaires » ; remis à 1 en quittant
+la carte car les batailles partagent ce shader). Marqueurs d'armée : échelle proportionnelle à la distance sous 12 unités
 (`ArmyMarkers.CLOSE_KNEE_DISTANCE`), plaques au-delà de 40 × la distance masquées sous 12. Pluie et neige
 (`CampaignWeatherView`) : taille des gouttes proportionnelle à la distance sous 22. Atmosphère
 (`CampaignAtmosphere`) sous 30 unités (pleinement sous 6) : brouillard de profondeur au moins de 18 à 240
@@ -1442,6 +1442,46 @@ inconnues du camp joué paraissent beiges de près). Captures et défauts laiss�
 ![Crécy au palier site](img/zg7c/crecy_site.jpg)
 ![Suite S1 : murs pyrénéens au palier vallée](img/zg7c/pyrenees_vallee.jpg)
 ![Suite S3 : Rouen au palier site (VH4)](img/zg7c/rouen_seine_site.jpg)
+
+## Objets à l'échelle aux paliers intermédiaires (lot SZ4, suites ZG7c S4 et S5)
+
+**Accessoires de carte.** Arbres, moulins, hameaux et panaches de fumée sont dessinés à l'échelle de
+la carte (1 unité ≈ 719 m : arbre ~1 km, corps de moulin 2,3 km, hameau ~1,4 km, panache de
+cheminée 1 × 3 km) : lisibles en vue stratégique, absurdes au palier vallée. `MapPropScale`
+(`scripts/map/map_prop_scale.gd`, réglages `resources/map_prop_scale.tres`) donne leur échelle selon
+la distance du rig : 1 au-delà de `shrink_start` (28 unités, rien ne change en vue stratégique ni en
+haut du palier comté), taille réelle (`*_ratio` = taille réelle / taille carte) en deçà de
+`shrink_end` (5 ; `tree_shrink_end` = 3 pour les arbres, dont le semis est clairsemé), `smoothstep`
+sur le logarithme de la distance entre les deux : aucune marche visible pendant un zoom.
+- arbres : paramètre global `campaign_prop_scale` (remplace `ZoomTiers.prop_scale`) ;
+- panaches (`life_smoke.gdshader`) : paramètre `prop_scale` des deux matériaux ; l'origine des
+  instances est au sol et la levée (sommet de la maquette, toit du hameau) est dans la colonne z de la
+  base (`MODEL_MATRIX[2].y`), mise à l'échelle avec la largeur et la hauteur ; opacité des cheminées
+  × `chimney_real_alpha` à taille réelle ;
+- moulins (`LifeEffects`) et hameaux (`SettlementLayer`) : instances réécrites quand l'échelle varie
+  de plus de `rewrite_step` (4 %), depuis des données gardées à la construction (sol du moulin ; sol
+  au centre et point bas de l'emprise de carte du hameau, interpolés selon l'échelle) : ≈ 0,3-0,7 ms
+  pour ~500 moulins ou ~400 hameaux chargés, sans relire le relief ;
+- moulins, fumées et hameaux ne sont plus masqués au palier site (ils y sont à leur taille réelle).
+
+**Villes ZG6 vues de loin.** À 4 km, les maisons (blocs du HLOD) sont sous-pixel : on ne voyait que
+le sol de terre battue, un disque brun. Le sol bâti (`TownBuilder` : part bâtie dans `UV2.y`,
+matériau `roofscape`) prend de loin la couleur moyenne (dernier mip) d'une couche de toit de l'atlas,
+tirée par cellule de 9 m avec ruelles sombres, en fondu selon la distance caméra (`town_render.tres` :
+`roofscape_near` 1,2 → `roofscape_far` 3,5 unités, `roofscape_strength`, `roofscape_gain`) : la ville
+se lit comme une masse de toits, et redevient sol sous les maisons détaillées.
+
+Captures `docs/img/sz4/` (`avant_*` / `apres_*`, paliers vallée d = 6, comté d = 14, stratégique
+d = 60 ; `*_amiens_zoom_*` : Amiens à d = 6 et 3, pleine résolution recadrée) :
+`godot --path game --script res://tests/sz4_shots.gd -- --out=<dossier> --map-weather=clear
+[--tiers=vallee:6,comte:14] [--full] [--settle-towns]`. Test : `tests/sz4_prop_scale_test.gd`.
+
+![Crécy au palier vallée, avant : moulin et fumées géants](img/sz4/avant_crecy_vallee.jpg)
+![Crécy au palier vallée, après](img/sz4/apres_crecy_vallee.jpg)
+![Val de Loire au palier vallée, avant : hameau géant](img/sz4/avant_val_de_loire_vallee.jpg)
+![Val de Loire au palier vallée, après](img/sz4/apres_val_de_loire_vallee.jpg)
+![Amiens à 4 km, avant : disque de terre battue](img/sz4/avant_amiens_zoom_d6.jpg)
+![Amiens à 4 km, après : masse de toits](img/sz4/apres_amiens_zoom_d6.jpg)
 
 ## Villes emblématiques à l'échelle 1:1 (lots VH0/VH4, ADR 0078)
 
