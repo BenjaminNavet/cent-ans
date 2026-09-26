@@ -564,7 +564,12 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 				imp.multimesh.instance_count = mm.instance_count
 			imp.multimesh.buffer = padded
 	if fine:
-		_update_fine_near(id, kind, instance, padded, n if instance.visible else 0, FINE_DETAIL_DISTANCE * lod_k)
+		# Régiment dont aucun soldat ne peut être dans le rayon (centre moins demi-diagonale) :
+		# pas de parcours du tampon.
+		var fine_r := FINE_DETAIL_DISTANCE * lod_k
+		var half := 0.5 * Vector2(float(unit.get("width", 0.0)), float(unit.get("depth", 0.0))).length() + 4.0
+		var reach := instance.visible and distance - half < fine_r + 1.0
+		_update_fine_near(id, kind, instance, padded, n if reach else 0, fine_r)
 	mm.visible_instance_count = n
 	lod_mm.visible_instance_count = n
 	if imp != null:
