@@ -14,7 +14,7 @@ extends SceneTree
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const DEFAULT_VIEWS: Array[float] = [1400.0, 550.0, 250.0, 120.0]
-const VIEW_NAMES := {1400: "europe", 550: "region", 250: "comte", 120: "pres"}
+const VIEW_NAMES := {1400: "europe", 550: "region", 250: "comte", 120: "pres", 20: "rapproche", 12: "vallee-haut"}
 const SAMPLE_FRAMES := 90
 const SETTLE_TIMEOUT_MS := 20000
 const DECLUTTER_RUNS := 20
@@ -109,6 +109,7 @@ func _run() -> void:
 			layer.pick_screen_scored(Vector2(800.0 + k, 450.0))
 		stats["pick_us"] = (Time.get_ticks_usec() - t0) / DECLUTTER_RUNS
 		stats.merge(_screen_stats(layer, map.camera))
+		stats["models_shown"] = _shown_models(layer)  # DC6c : à l'échelle affichée de cette vue
 		overlaps_total += int(stats["label_overlaps"])
 		var view_name: String = VIEW_NAMES.get(int(d), str(int(d)))
 		per_view[view_name] = stats
@@ -223,6 +224,41 @@ func _model_overlaps(layer: SettlementLayer) -> Dictionary:
 			var fit: Variant = layer.get("_fit_scale")  # absent avant DC4 (mesures « avant »)
 			shrunk += 1 if fit != null and float(fit[i]) < 0.999 else 0
 	return {"overlapping_pairs": pairs, "worst_ratio": snappedf(worst, 0.01), "examples": examples, "absorbed": hidden, "shrunk": shrunk}
+
+
+## DC6c : maquettes à l'échelle affichée de la vue courante (réduction DC4 × échelle SZ4b) :
+## masquées, réduites, paires affichées qui se recouvrent à plus de 20 % du plus petit rayon.
+func _shown_models(layer: SettlementLayer) -> Dictionary:
+	var count := layer.data.settlements.size()
+	var dc6c := layer.has_method("shown_radius")
+	var radius := PackedFloat32Array()
+	radius.resize(count)
+	var hidden := 0
+	var shrunk := 0
+	for i in count:
+		var holder: Node3D = layer._models[i]
+		if holder == null:
+			continue
+		if layer._is_landmark(i):
+			radius[i] = layer.model_radius(i)
+			continue
+		if not holder.visible:
+			hidden += 1
+			continue
+		radius[i] = layer.call("shown_radius", i) if dc6c else layer.model_radius(i) * layer.model_scale(i)
+		var fit: float = layer.call("shown_fit", i) if dc6c else float(layer._fit_scale[i])
+		shrunk += 1 if fit < 0.999 else 0
+	var pairs := 0
+	for i in count:
+		if radius[i] <= 0.0:
+			continue
+		for j in range(i + 1, count):
+			if radius[j] <= 0.0:
+				continue
+			var overlap := radius[i] + radius[j] - layer.model_px(i).distance_to(layer.model_px(j))
+			if overlap > 0.2 * minf(radius[i], radius[j]):
+				pairs += 1
+	return {"hidden": hidden, "shrunk": shrunk, "overlapping_pairs": pairs}
 
 
 ## Maquette affichée (générique ou ville emblématique) pour la colonie `i`.

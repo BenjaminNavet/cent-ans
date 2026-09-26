@@ -15,7 +15,8 @@ extends Node3D
 ## `--bench-timeout=<s>` (défaut 120) ; `--bench-at=<s>` avance d'abord la bataille,
 ## `--bench-repeat=<n>` répète la fenêtre de mesure, T8), `--autoplay` (IA des deux camps),
 ## `--siege` (démo autonome : assaut français de la Guyenne, bataille de siège M8),
-## `--closeup` (capture : caméra rapprochée sur la mêlée), `--weather=<clear|fog|rain|snow>`
+## `--closeup` (capture : caméra rapprochée sur la mêlée, à `--closeup-distance=<m>`, 26 par
+## défaut ; avec `--benchmark` : banc rapproché, FG5), `--weather=<clear|fog|rain|snow>`
 ## (rendu seulement : force l'aspect de la météo, la simulation garde la sienne),
 ## `--camera=x,z,distance,lacet` (capture : position de caméra imposée), `--deploy-shot` (avec
 ## `--screenshot=` : capture de la phase de déploiement, F5c), `--result-shot` (avec
@@ -162,6 +163,7 @@ var _bench_ab_ms: Dictionary = {}
 var _pad_units: int = 0
 var _scale_tier: String = ""  # EP1 : palier d'échelle forcé (`--scale=`), sinon selon l'effectif
 var _closeup: bool = false
+var _closeup_distance: float = 26.0  # FG5 : `--closeup-distance=<m>` (captures du LOD0 par soldat)
 var _shot_at: float = -1.0  # B4 : `--shot-at=<s>`
 var _standard_side: String = ""  # DA1b : `--standard-side=` (camp cadré par `--standard-shot`)
 var _standard_shot: String = ""  # EP5 : `--standard-shot=<foot|mounted|line|fallen|captured>`
@@ -1274,6 +1276,7 @@ func _bench_finish() -> void:
 		"quality": RenderQuality.current(),
 		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
 		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+		"lod_counts": soldiers.call("lod_counts"),  # FG5 : régiments par LOD, soldats en LOD0 fin
 		"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"missiles_launched": effects.launched if effects != null else 0,
 		"wall_s": _bench_wall_elapsed_s(),
@@ -2057,6 +2060,8 @@ func _parse_cmdline() -> void:
 			_blood_override = ["off", "moderate", "full"].find(value) if not value.is_valid_int() else clampi(int(value), 0, 2)
 		elif arg == "--closeup":
 			_closeup = true
+		elif arg.begins_with("--closeup-distance="):
+			_closeup_distance = float(arg.trim_prefix("--closeup-distance="))
 		elif arg.begins_with("--weather="):
 			_weather_override = arg.trim_prefix("--weather=")
 		elif arg.begins_with("--hour="):
@@ -2184,7 +2189,7 @@ func _stage_screenshot() -> void:
 			n += 1
 	if _closeup:
 		var shot := _closeup_shot(units)
-		camera_rig.look_at_point(shot["focus"], 26.0, float(shot["yaw"]))
+		camera_rig.look_at_point(shot["focus"], _closeup_distance, float(shot["yaw"]))
 	elif n > 0:
 		focus /= n
 		camera_rig.look_at_point(focus + Vector3(0, 0, -25 if player_side == "attacker" else 25), 120.0, (PI if player_side == "attacker" else 0.0) + 0.5)
@@ -2428,6 +2433,27 @@ func _standard_shot_score(unit: Dictionary) -> int:
 
 ## Capture : `--camera=x,z,distance,lacet_en_degrés` place la caméra (réglage du rendu).
 func _apply_camera_override() -> void:
+	# FG5 : `--benchmark --closeup` : banc rapproché (caméra de la capture `--closeup`, 26 m de la
+	# mêlée) où les figurines passent par leurs LOD0 et LOD1.
+	if _benchmark and _closeup and _camera_override == "":
+		# Régiment du joueur le plus proche de l'ennemi (pas de mêlée garantie à `--bench-at`).
+		var best := INF
+		var focus := Vector3.ZERO
+		var yaw := 0.0
+		for unit in units:
+			if str(unit["side"]) != player_side or not bool(unit["present"]):
+				continue
+			for other in units:
+				if str(other["side"]) == player_side or not bool(other["present"]):
+					continue
+				var a := Vector2(float(unit["x"]), float(unit["z"]))
+				var b := Vector2(float(other["x"]), float(other["z"]))
+				if a.distance_to(b) < best:
+					best = a.distance_to(b)
+					focus = Vector3(a.x, 0.0, a.y)
+					yaw = atan2(a.x - b.x, a.y - b.y) + 1.05
+		camera_rig.look_at_point(focus, 26.0, yaw)
+		return
 	if _camera_override == "":
 		return
 	var parts := _camera_override.split(",")

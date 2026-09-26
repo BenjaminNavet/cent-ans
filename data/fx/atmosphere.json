@@ -1,5 +1,5 @@
 {
-  "description": "Ciels HDRI et étalonnage (lot V3, A1-05). Purement visuel. skies : panoramas Poly Haven (CC0) avec la position de leur soleil (tools/cent_ans_tools/hdri_sun.py) et leur luminance moyenne ; battle : par météo de la simulation, ciel par saison, exposition visée, teinte, étalonnage ; campaign : par saison ; seasons : étalonnage de saison commun (appliqué avant celui de la météo). Un étalonnage devient une LUT 3D (lift/gamma/gain, température, contraste, saturation, virage des ombres et des hautes lumières).",
+  "description": "Ciels HDRI et étalonnage (lot V3, A1-05). Purement visuel. skies : panoramas Poly Haven (CC0) avec la position de leur soleil (tools/cent_ans_tools/hdri_sun.py) et leur luminance moyenne ; battle : par météo de la simulation, ciel par saison, exposition visée, teinte, étalonnage ; campaign : par saison ; seasons : étalonnage de saison commun (appliqué avant celui de la météo) ; battle_seasons (DA7b) : en bataille, étalonnage de saison propre (remplace celui de seasons) et part de saturation gardée par le sol et l'herbe (decor_saturation, bible § 3.3 : la saison déplace la teinte, pas la saturation). Un étalonnage devient une LUT 3D (lift/gamma/gain, température, contraste, saturation, saturation des ombres, virage des ombres et des hautes lumières).",
   "lut_size": 24,
   "skies": {
     "clear_midday": {
@@ -44,6 +44,21 @@
     "summer": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03},
     "autumn": {"temperature": 0.34, "saturation": 1.02, "gain": [1.03, 1.0, 0.92], "highlights": [1.03, 0.99, 0.9]},
     "winter": {"temperature": -0.5, "saturation": 0.72, "lift": [0.0, 0.006, 0.02], "highlights": [0.97, 1.0, 1.04]}
+  },
+  "battle_seasons": {
+    "spring": {
+      "decor_saturation": 0.6,
+      "grade": {"temperature": -0.05, "tint": -0.03, "saturation": 1.0, "shadow_saturation": 0.7, "gain": [0.99, 1.01, 1.0]}
+    },
+    "summer": {
+      "decor_saturation": 0.6,
+      "grade": {"temperature": 0.18, "saturation": 1.04, "contrast": 1.03, "shadow_saturation": 0.7}
+    },
+    "autumn": {
+      "decor_saturation": 0.5,
+      "grade": {"temperature": 0.22, "saturation": 0.92, "shadow_saturation": 0.5, "gain": [1.03, 1.0, 0.94], "highlights": [1.03, 0.99, 0.92]}
+    },
+    "winter": {"decor_saturation": 0.6}
   },
   "battle": {
     "clear": {
