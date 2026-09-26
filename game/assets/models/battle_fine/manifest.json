@@ -1,6 +1,7 @@
 {
  "figures": {
   "archer_0": {
+   "atlas_layer": 3,
    "fine": true,
    "lods": [
     "archer_0_lod0.mesh.bin",
@@ -18,6 +19,7 @@
    "variants": 3
   },
   "archer_1": {
+   "atlas_layer": 4,
    "fine": true,
    "lods": [
     "archer_1_lod0.mesh.bin",
@@ -35,6 +37,7 @@
    "variants": 2
   },
   "archer_2": {
+   "atlas_layer": 8,
    "fine": true,
    "lods": [
     "archer_2_lod0.mesh.bin",
@@ -52,6 +55,7 @@
    "variants": 2
   },
   "archer_3": {
+   "atlas_layer": 15,
    "fine": true,
    "lods": [
     "archer_3_lod0.mesh.bin",
@@ -69,6 +73,7 @@
    "variants": 2
   },
   "archer_4": {
+   "atlas_layer": 16,
    "fine": true,
    "lods": [
     "archer_4_lod0.mesh.bin",
@@ -86,6 +91,7 @@
    "variants": 2
   },
   "archer_5": {
+   "atlas_layer": 17,
    "fine": true,
    "lods": [
     "archer_5_lod0.mesh.bin",
@@ -103,6 +109,7 @@
    "variants": 2
   },
   "cavalry_0": {
+   "atlas_layer": 5,
    "fine": true,
    "lods": [
     "cavalry_0_lod0.mesh.bin",
@@ -120,6 +127,7 @@
    "variants": 2
   },
   "cavalry_1": {
+   "atlas_layer": 6,
    "fine": true,
    "lods": [
     "cavalry_1_lod0.mesh.bin",
@@ -137,6 +145,7 @@
    "variants": 2
   },
   "cavalry_2": {
+   "atlas_layer": 7,
    "fine": true,
    "lods": [
     "cavalry_2_lod0.mesh.bin",
@@ -154,6 +163,7 @@
    "variants": 2
   },
   "cavalry_3": {
+   "atlas_layer": 18,
    "fine": true,
    "lods": [
     "cavalry_3_lod0.mesh.bin",
@@ -171,6 +181,7 @@
    "variants": 2
   },
   "cavalry_4": {
+   "atlas_layer": 19,
    "fine": true,
    "lods": [
     "cavalry_4_lod0.mesh.bin",
@@ -188,6 +199,7 @@
    "variants": 2
   },
   "cavalry_5": {
+   "atlas_layer": 20,
    "fine": true,
    "lods": [
     "cavalry_5_lod0.mesh.bin",
@@ -205,6 +217,7 @@
    "variants": 2
   },
   "cavalry_6": {
+   "atlas_layer": 21,
    "fine": true,
    "lods": [
     "cavalry_6_lod0.mesh.bin",
@@ -222,6 +235,7 @@
    "variants": 2
   },
   "crew_0": {
+   "atlas_layer": 22,
    "fine": true,
    "lods": [
     "crew_0_lod0.mesh.bin",
@@ -239,6 +253,7 @@
    "variants": 3
   },
   "crew_1": {
+   "atlas_layer": 23,
    "fine": true,
    "lods": [
     "crew_1_lod0.mesh.bin",
@@ -256,6 +271,7 @@
    "variants": 2
   },
   "infantry_0": {
+   "atlas_layer": 0,
    "fine": true,
    "lods": [
     "infantry_0_lod0.mesh.bin",
@@ -266,13 +282,14 @@
    "rig": "human",
    "style": "sword",
    "tris": [
-    11844,
-    1948,
-    333
+    11843,
+    1950,
+    334
    ],
    "variants": 2
   },
   "infantry_1": {
+   "atlas_layer": 1,
    "fine": true,
    "lods": [
     "infantry_1_lod0.mesh.bin",
@@ -290,6 +307,7 @@
    "variants": 3
   },
   "infantry_2": {
+   "atlas_layer": 2,
    "fine": true,
    "lods": [
     "infantry_2_lod0.mesh.bin",
@@ -307,6 +325,7 @@
    "variants": 4
   },
   "infantry_3": {
+   "atlas_layer": 9,
    "fine": true,
    "lods": [
     "infantry_3_lod0.mesh.bin",
@@ -324,6 +343,7 @@
    "variants": 3
   },
   "infantry_4": {
+   "atlas_layer": 10,
    "fine": true,
    "lods": [
     "infantry_4_lod0.mesh.bin",
@@ -341,6 +361,7 @@
    "variants": 3
   },
   "infantry_5": {
+   "atlas_layer": 11,
    "fine": true,
    "lods": [
     "infantry_5_lod0.mesh.bin",
@@ -358,6 +379,7 @@
    "variants": 2
   },
   "infantry_6": {
+   "atlas_layer": 12,
    "fine": true,
    "lods": [
     "infantry_6_lod0.mesh.bin",
@@ -375,6 +397,7 @@
    "variants": 2
   },
   "infantry_7": {
+   "atlas_layer": 13,
    "fine": true,
    "lods": [
     "infantry_7_lod0.mesh.bin",
@@ -385,13 +408,14 @@
    "rig": "human",
    "style": "militia",
    "tris": [
-    11809,
+    11808,
     1932,
-    329
+    331
    ],
    "variants": 2
   },
   "infantry_8": {
+   "atlas_layer": 14,
    "fine": true,
    "lods": [
     "infantry_8_lod0.mesh.bin",
@@ -409,6 +433,7 @@
    "variants": 3
   },
   "musician_0": {
+   "atlas_layer": 26,
    "fine": true,
    "lods": [
     "musician_0_lod0.mesh.bin",
@@ -426,6 +451,7 @@
    "variants": 2
   },
   "musician_1": {
+   "atlas_layer": 27,
    "fine": true,
    "lods": [
     "musician_1_lod0.mesh.bin",
@@ -443,6 +469,7 @@
    "variants": 2
   },
   "standard_0": {
+   "atlas_layer": 24,
    "fine": true,
    "lods": [
     "standard_0_lod0.mesh.bin",
@@ -470,6 +497,7 @@
    "variants": 2
   },
   "standard_1": {
+   "atlas_layer": 25,
    "fine": true,
    "lods": [
     "standard_1_lod0.mesh.bin",

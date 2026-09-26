@@ -4,7 +4,7 @@
  "name": "Rouen",
  "settlement": "set_rouen",
  "landmark": "rouen",
- "period": "vers 1340 (avant la peste de 1348, le beffroi de 1389 et la tour de Beurre)",
+ "period": "vers 1340 (avant l'accrue orientale de 1346, la peste de 1348, le beffroi de 1389 et la tour de Beurre)",
  "year": 1340,
  "seed": 1340076,
  "crs": "EPSG:3035",
@@ -55,6 +55,49 @@
    "license": "Projet (faits recoupés : Le Lieur, Braun et Hogenberg, OSM)",
    "extracted": false,
    "use": "Dates : chœur de Saint-Ouen 1318-1339, beffroi 1389, tour de Beurre 1485-1506 ; gabarit de la cathédrale (137 m)."
+  },
+  {
+   "title": "Beffroi dit Gros Horloge (notice IA00021886)",
+   "author": "Inventaire général du patrimoine culturel, région Normandie (POP, Mérimée)",
+   "url": "https://pop.culture.gouv.fr/notice/merimee/IA00021886",
+   "license": "Licence Ouverte (notice POP) ; faits seulement",
+   "extracted": false,
+   "use": "Beffroi primitif démoli en 1382 (Harelle), reconstruit sur ses vestiges de 1389 à 1398 ; flèche primitive remplacée par le dôme en 1711."
+  },
+  {
+   "title": "Pont de l'Impératrice Mathilde (notice IA00021781)",
+   "author": "Inventaire général du patrimoine culturel, région Normandie (POP, Mérimée)",
+   "url": "https://pop.culture.gouv.fr/notice/merimee/IA00021781",
+   "license": "Licence Ouverte (notice POP) ; faits seulement",
+   "extracted": false,
+   "use": "Dates du pont de pierre (1151-1167) ; démolition des piles 1659-1661."
+  },
+  {
+   "title": "Rouen ville forte (Fortifs/XIIe.htm, XIVe.htm, Portes.htm) ; Ponts/Mathilde.htm",
+   "author": "Jacques Tanguy (rouen-histoire.fr)",
+   "date": "2006-2007",
+   "url": "https://rouen-histoire.fr/Fortifs/index.htm",
+   "license": "Tous droits réservés ; faits seulement",
+   "extracted": false,
+   "use": "Enceinte des XIIe-XIIIe s. englobant Saint-Ouen et le quartier Saint-Maclou ; accrue orientale de part et d'autre du Robec sous Philippe VI ; 5 portes vers la campagne en 1525 ; pont Mathilde et Barbacane."
+  },
+  {
+   "title": "La dernière enceinte de Rouen : un patrimoine à redécouvrir",
+   "author": "Érik Follain (Patrimoine normand)",
+   "date": "2006, mis à jour 2026",
+   "url": "https://patrimoinenormand.com/article-148959-fortifications-rouen.html",
+   "license": "Tous droits réservés ; faits seulement",
+   "extracted": false,
+   "use": "Dernière enceinte entreprise à partir de 1346, achevée au début du XVe s."
+  },
+  {
+   "title": "Château de Rouen ; Abbatiale Saint-Ouen ; Cathédrale Notre-Dame de Rouen ; Clos aux galées ; Aître Saint-Maclou (articles)",
+   "author": "Wikipédia (contributeurs), recoupés avec les notices POP",
+   "date": "2026",
+   "url": "https://fr.wikipedia.org/wiki/Ch%C3%A2teau_de_Rouen",
+   "license": "CC BY-SA 4.0 ; faits seulement",
+   "extracted": false,
+   "use": "Château 1204-1210 (enceinte ≈ 90 × 90 m, donjon ≈ 14 m de diamètre, ≈ 35 m) ; Saint-Ouen 1318-1339 ; cathédrale 144 m hors œuvre ; clos des galées 1293-1418, rebâti en 1451 ; aître : première mention 1362."
   }
  ],
  "plan": {
@@ -313,8 +356,111 @@
  ],
  "walls": [
   {
+   "id": "enceinte_xiiie",
+   "name": "Enceinte de Rouen (XIIe-XIIIe s.) et mur des quais",
+   "points": [
+    [-870, 150],
+    [-881, 197],
+    [-833, 259],
+    [-740, 347],
+    [-693, 416],
+    [-616, 554],
+    [-559, 658],
+    [-545, 690],
+    [-430, 718],
+    [-297, 738],
+    [-62, 776],
+    [116, 774],
+    [187, 760],
+    [310, 808],
+    [402, 848],
+    [455, 870],
+    [520, 640],
+    [540, 335],
+    [495, 128],
+    [490, 40],
+    [476, -180],
+    [484, -424],
+    [390, -458],
+    [300, -440],
+    [150, -365],
+    [0, -300],
+    [-134, -238],
+    [-245, -186],
+    [-420, -100],
+    [-490, -45],
+    [-640, 20],
+    [-785, 95]
+   ],
+   "closed": true,
+   "height_m": 10.0,
+   "thickness_m": 2.6,
+   "tower_spacing_m": 70.0,
+   "tower_radius_m": 5.0,
+   "tower_height_m": 15.0,
+   "ditch_m": 18.0,
+   "gates": [
+    {
+     "name": "Porte Cauchoise",
+     "at": [-545, 690],
+     "kind": "gate",
+     "height_m": 18
+    },
+    {
+     "name": "Porte Bouvreuil",
+     "at": [-297, 738],
+     "kind": "gate",
+     "height_m": 17
+    },
+    {
+     "name": "Porte Beauvoisine",
+     "at": [455, 870],
+     "kind": "gate",
+     "height_m": 18
+    },
+    {
+     "name": "Porte Saint-Vivien",
+     "at": [495, 128],
+     "kind": "gate",
+     "height_m": 15
+    },
+    {
+     "name": "Porte de Martainville (première)",
+     "at": [476, -180],
+     "kind": "gate",
+     "height_m": 15
+    },
+    {
+     "name": "Porte du Grand-Pont",
+     "at": [-245, -186],
+     "kind": "gate",
+     "height_m": 16
+    },
+    {
+     "name": "Porte du Bac",
+     "at": [-134, -238],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte de la Vicomté",
+     "at": [-490, -45],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte Guillaume-Lion",
+     "at": [300, -440],
+     "kind": "water_gate",
+     "height_m": 12
+    }
+   ],
+   "until_year": 1345,
+   "note": "État d'avant l'accrue orientale de 1346 (Tanguy : murs nord et est englobant l'abbaye Saint-Ouen et le quartier Saint-Maclou ; les quartiers de l'est, de part et d'autre du Robec, ne sont enclos qu'à l'injonction de Philippe VI). Ouest, nord et front de Seine comme l'enceinte suivante. Front est hypothétique : vestige du mur dans l'ancien jardin de Saint-Ouen (jardin de l'Hôtel-de-Ville, vers la rue de l'Abbé-de-l'Épée), puis rupture rue des Faulx / rue Saint-Vivien et rue du Ruissel, jusqu'à la Seine à l'est de la rue du Rempart-Martainville. Noms et positions des deux portes est restitués (une « porte Saint-Vivien » n'est citée que par une source secondaire). Saint-Vivien, Saint-Nicaise et Martainville sont hors les murs (Wikipédia dit Saint-Vivien paroisse intra-muros dès 1230 : non recoupé, contradictoire)."
+  },
+  {
    "id": "enceinte",
-   "name": "Enceinte de Rouen (XIIIe-XIVe s.) et mur des quais",
+   "name": "Enceinte de Rouen après l'accrue orientale (1346-début XVe s.) et mur des quais",
    "points": [
     [-870, 150],
     [-881, 197],
@@ -418,7 +564,8 @@
      "height_m": 12
     }
    ],
-   "note": "Tracé des boulevards du XVIIIe s. bâtis sur l'enceinte arasée (OSM) ; front de Seine le long des quais actuels, décalé vers la ville ; angle nord-est et porte Saint-Hilaire approchés ; l'enclos oriental (Martainville) est tenu pour fermé en 1340 comme dans la maquette L1 (probable, à vérifier)."
+   "note": "Tracé des boulevards du XVIIIe s. bâtis sur l'enceinte arasée (OSM) ; front de Seine le long des quais actuels, décalé vers la ville. L'accrue orientale (Saint-Nicaise, Saint-Vivien, Martainville, portes Saint-Hilaire et Martainville) est décidée en 1346 par Philippe VI et achevée au début du XVe s. (Follain ; Tanguy ; fouille Inrap 2021 de la porte Saint-Hilaire, état du XIVe s.) : absente en 1340 (voir « enceinte_xiiie »). Angle nord-est et porte Saint-Hilaire approchés.",
+   "from_year": 1346
   }
  ],
  "streets": [
@@ -6771,7 +6918,7 @@
    "house_span": [0.12, 0.45],
    "gatehouses_at": [0.08, 0.93],
    "mills_at": [0.6],
-   "note": "Relie la rue Grand-Pont à la rue Saint-Sever (axes OSM) ; maisons et moulin sur le pont attestés à la fin du Moyen Âge (Le Lieur), leur étendue en 1340 est une restitution."
+   "note": "Pont de l'Impératrice Mathilde, bâti entre 1151 et 1167 (Inventaire, POP IA00021781), piles démolies en 1659-1661 ; relie la rue Grand-Pont à la rue Saint-Sever (axes OSM). 13 arches selon plusieurs auteurs, 12 selon Tanguy (incertain) ; tête sud défendue par la Barbacane. Maisons et moulin sur le pont attestés à la fin du Moyen Âge (Le Lieur), leur étendue en 1340 est une restitution."
   }
  ],
  "monuments": [
@@ -6784,7 +6931,7 @@
    "clear_m": 14,
    "certainty": "attested",
    "params": {
-    "length_m": 137,
+    "length_m": 144,
     "width_m": 33,
     "nave_width_m": 11,
     "vault_m": 28,
@@ -6810,7 +6957,7 @@
      "spire_m": 45
     }
    },
-   "description": "Nef et chœur gothiques (XIIIe s.), tour Saint-Romain (XIIe s., étage supérieur 1468-1477 : plus basse en 1340), tour-lanterne et flèche de bois (brûlée en 1514). Tour de Beurre : 1485-1506, absente."
+   "description": "Nef et chœur gothiques (XIIIe s.), chapelle de la Vierge commencée en 1302 ; 144 m hors œuvre (136,86 m dans œuvre), nef voûtée à 28 m. Tour Saint-Romain (XIIe s., étage supérieur 1468-1478 : plus basse en 1340, hauteur restituée), tour-lanterne (51 m sous voûte) et flèche de bois brûlée le 5 octobre 1514 (hauteur restituée). Façade occidentale reprise à partir de 1370. Tour de Beurre : 1485-1506, absente."
   },
   {
    "id": "saint_ouen_choeur",
@@ -6831,7 +6978,7 @@
     "chapels": true,
     "open_west": true
    },
-   "description": "Chœur reconstruit de 1318 à 1339 ; transept et nef gothiques seulement au XVe s."
+   "description": "Chœur gothique commencé en 1318 sous l'abbé Jean Roussel dit Marc d'Argent, achevé vers 1339 ; transept et nef gothiques seulement au XVe s. (nef achevée en 1537). Voûtes à 33 m."
   },
   {
    "id": "saint_ouen_nef",
@@ -6853,7 +7000,7 @@
     },
     "apse": "flat"
    },
-   "description": "Nef romane de l'abbatiale du XIe s., encore debout en 1340 (restitution de gabarit)."
+   "description": "Nef de l'abbatiale romane (chantier de 1062, consacrée en 1126, incendies de 1136 et 1248), encore debout en 1340 ; les fouilles de 1885 lui donnent des dimensions comparables à l'édifice gothique. Gabarit restitué."
   },
   {
    "id": "saint_ouen_cloitre",
@@ -6889,7 +7036,7 @@
     },
     "apse": "flat"
    },
-   "description": "L'église gothique actuelle date de 1437-1517 ; en 1340, une église plus modeste au même endroit."
+   "description": "L'église gothique actuelle date de 1437-1517 ; en 1340, une église plus modeste au même endroit (gabarit restitué)."
   },
   {
    "id": "chateau",
@@ -6915,9 +7062,9 @@
     "tower_radius_m": 6.5,
     "tower_height_m": 20,
     "keep": {
-     "at": [75, 60],
-     "radius_m": 7.5,
-     "height_m": 30
+     "at": [65, 68],
+     "radius_m": 7.0,
+     "height_m": 35
     },
     "halls": [
      [-20, 10, 50, 13, 12, 0],
@@ -6925,7 +7072,7 @@
     ],
     "ditch_m": 16
    },
-   "description": "Bâti après la conquête de 1204 ; donjon = tour Jeanne-d'Arc (OSM : 45, 697), tour de la Pucelle au nord."
+   "description": "Bâti de 1204 à 1210 après la conquête, sur l'amphithéâtre gallo-romain : enceinte polygonale (≈ 90 × 90 m selon Wikipédia) à dix tours dont trois demi-tours, fossé sec de 15 m, grande basse-cour ; l'anneau restitué englobe la basse-cour (emprise non vérifiée). Donjon = tour Jeanne-d'Arc (OSM), ≈ 14 m de diamètre et ≈ 35 m de haut ; tour de la Pucelle (OSM) sur le front nord."
   },
   {
    "id": "halles",
@@ -6940,7 +7087,7 @@
     "width_m": 22,
     "height_m": 13
    },
-   "description": "Halles bâties sur le site de l'ancien château ducal (Vieille-Tour), au bord de la Seine."
+   "description": "Halles bâties vers 1259 sous Louis IX sur le site du palais ducal rasé en 1204 (Vieille-Tour), au confluent du Robec et de la Seine : halles aux toiles, aux grains et aux draps ; marché attesté en 1262. Un seul volume restitué."
   },
   {
    "id": "beffroi_communal",
@@ -6950,13 +7097,13 @@
    "angle_deg": 73,
    "clear_m": 4,
    "until_year": 1382,
-   "certainty": "hypothetical",
+   "certainty": "probable",
    "params": {
     "size": 10,
     "height": 30,
     "top": "pyramid"
    },
-   "description": "Beffroi de la commune, rasé après la Harelle (1382) ; le beffroi actuel du Gros-Horloge date de 1389. Gabarit restitué."
+   "description": "Beffroi primitif de la commune, démoli en 1382 après la Harelle ; le beffroi actuel est « reconstruit sur les vestiges de l'édifice primitif » (Inventaire, POP IA00021886) : même emplacement. Gabarit restitué."
   },
   {
    "id": "gros_horloge",
@@ -6970,8 +7117,9 @@
    "params": {
     "size": 12,
     "height": 38,
-    "top": "lantern"
-   }
+    "top": "pyramid"
+   },
+   "description": "Beffroi reconstruit de 1389 à 1398 par Jean de Bayeux, horloge du même temps (Jourdain Delestre, Jean de Felains) ; couvert d'une flèche jusqu'au dôme de 1711 ; arcade du cadran 1527-1529."
   },
   {
    "id": "palais_archeveque",
@@ -7007,7 +7155,8 @@
      "size": 7,
      "height": 26
     }
-   }
+   },
+   "description": "Chapelle du début du XIIIe s. (patronage de Saint-Ouen), église reconstruite à partir de 1338 et consacrée en 1358 ; hors les murs avant l'accrue de 1346 (hypothèse de cette restitution)."
   },
   {
    "id": "saint_godard",
@@ -7236,18 +7385,35 @@
   },
   {
    "id": "clos_des_galees",
-   "name": "Clos des Galées (arsenal royal, 1294)",
+   "name": "Clos des Galées (arsenal royal)",
    "model": "enclosure",
    "at": [-640, -520],
    "angle_deg": 25,
-   "certainty": "probable",
+   "certainty": "hypothetical",
    "params": {
     "length_m": 180,
     "width_m": 110,
     "height_m": 7,
     "ranges": true
    },
-   "description": "Chantier naval royal fondé par Philippe le Bel en 1294 sur la rive gauche ; emprise restituée."
+   "description": "Arsenal et chantier naval créé par Philippe le Bel (premiers documents en 1293 ; fondation souvent datée de 1294) sur la rive gauche, en aval du pont ; clos de palissades, fossés et tourelles, bassin, halles de construction. Détruit en 1418 à l'approche des Anglais. Position et emprise restituées (Tanguy le place plus à l'est et plus loin de la rive, relié à la Seine par un canal).",
+   "until_year": 1418
+  },
+  {
+   "id": "clos_des_galees_1451",
+   "name": "Clos des Galées (rebâti)",
+   "model": "enclosure",
+   "at": [-640, -520],
+   "angle_deg": 25,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 180,
+    "width_m": 110,
+    "height_m": 7,
+    "ranges": true
+   },
+   "description": "Clos des Galées rebâti en 1451 après la reconquête ; même emprise restituée.",
+   "from_year": 1451
   },
   {
    "id": "sainte_catherine",
@@ -7266,7 +7432,8 @@
      "size": 40
     }
    },
-   "description": "Abbaye fondée en 1030 au sommet de la côte Sainte-Catherine (vestiges : OSM)."
+   "description": "Abbaye de la Trinité-du-Mont fondée en 1030 par Goscelin d'Arques, dite Sainte-Catherine d'après sa relique ; fortifiée, détruite en 1597 après les sièges d'Henri IV (vestiges : OSM).",
+   "until_year": 1597
   }
  ],
  "districts": [
