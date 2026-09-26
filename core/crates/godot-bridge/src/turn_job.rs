@@ -30,6 +30,27 @@ pub(crate) fn resolve_turn(state: &mut CampaignState, data: &GameData) -> Vec<Ga
     state.end_turn_with(data, ai::plan_turn)
 }
 
+/// The player waits for this thread: on macOS a new thread gets the default
+/// quality of service and may be scheduled on the efficiency cores (the end
+/// of turn then took 3 to 8 times longer in the A/B runs); it asks for
+/// `QOS_CLASS_USER_INITIATED`.
+#[cfg(target_os = "macos")]
+fn raise_thread_priority() {
+    /// `QOS_CLASS_USER_INITIATED` from `<sys/qos.h>`.
+    const QOS_CLASS_USER_INITIATED: u32 = 0x19;
+    extern "C" {
+        fn pthread_set_qos_class_self_np(qos_class: u32, relative_priority: i32) -> i32;
+    }
+    // SAFETY: libSystem call on the current thread, no pointer involved; a
+    // failure only leaves the default quality of service.
+    unsafe {
+        pthread_set_qos_class_self_np(QOS_CLASS_USER_INITIATED, 0);
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn raise_thread_priority() {}
+
 /// An end of turn running on its own thread.
 pub(crate) struct TurnJob {
     handle: Option<JoinHandle<TurnOutcome>>,
@@ -42,6 +63,7 @@ impl TurnJob {
             .name("cent-ans-end-turn".to_owned())
             .stack_size(WORKER_STACK_BYTES)
             .spawn(move || {
+                raise_thread_priority();
                 let events = resolve_turn(&mut state, &data);
                 (state, events)
             })?;
