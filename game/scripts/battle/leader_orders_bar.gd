@@ -105,9 +105,12 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 	button.add_child(inner)
 	var icon_node: Control
 	var icon_path := ICON_DIR + str(order.get("icon", "")) + ".png"
-	if str(order.get("icon", "")) != "" and ResourceLoader.exists(icon_path):
+	# DA5 : icône d'ordre de la famille à l'encre (`order_<icon>`), sinon PNG dédié, sinon glyphe.
+	var ink_icon := HudStyle.icon("order_" + str(order.get("icon", "")))
+	if ink_icon != null or (str(order.get("icon", "")) != "" and ResourceLoader.exists(icon_path)):
 		var tex := TextureRect.new()
-		tex.texture = load(icon_path)
+		tex.texture = ink_icon if ink_icon != null else load(icon_path)
+		tex.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		tex.custom_minimum_size = Vector2(0, 28)
