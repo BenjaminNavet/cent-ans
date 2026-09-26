@@ -280,29 +280,22 @@ impl<'a> Context<'a> {
     }
 }
 
-/// EQ5: seasonal charges the treasury pays besides the army, buildings and
-/// administration: tributes of a lost war (a Granada paying England, Scotland
-/// and Holstein went bankrupt for decades, its budget blind to them), ransom
-/// installments (yearly, spread over the seasons), agents and the diets of
-/// the provinces (« Table », last season's bill).
+/// EQ5: seasonal charges the treasury pays whatever it holds, besides the
+/// army, buildings and administration: tributes of a lost war (a Granada
+/// paying England, Scotland and Holstein went bankrupt for decades, its
+/// budget blind to them) and agents. Ransom installments and the diets
+/// (« Table ») are left out: they are only paid when the treasury can.
 fn commitments(state: &CampaignState, faction: &FactionId) -> i64 {
-    let Some(me) = state.factions.get(faction) else {
-        return 0;
-    };
-    let tributes: i64 = me.ledger.tributes.iter().map(|t| t.per_season).sum();
-    let ransoms: i64 = me
-        .ransom_debts
-        .iter()
-        .map(|d| d.installment.min(d.remaining))
-        .sum::<i64>()
-        / i64::from(sim_campaign::state::TURNS_PER_YEAR);
+    let tributes: i64 = state.factions.get(faction).map_or(0, |me| {
+        me.ledger.tributes.iter().map(|t| t.per_season).sum()
+    });
     let agents = state
         .agents
         .upkeep_last_turn
         .get(faction)
         .copied()
         .unwrap_or(0);
-    tributes + ransoms + agents + me.table_upkeep_last_turn
+    tributes + agents
 }
 
 /// Orders of `faction` for this turn.
