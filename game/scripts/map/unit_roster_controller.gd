@@ -22,6 +22,7 @@ var _scroll: ScrollContainer
 var _expanded := {"armies": true, "agents": true}
 var _rows: Dictionary = {}  # "army:<id>" / "agent:<id>" → Button
 var _shown_selection := ""
+var _placed_top := -1.0
 
 
 func setup(campaign_map: Node) -> void:
@@ -67,6 +68,8 @@ func _build_panel() -> void:
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(_list)
 	panel.hide()
+	# Le conseiller (VO1) s'efface tant que la liste est ouverte : même coin de l'écran.
+	panel.add_to_group(PanelStack.BLOCKING_GROUP)
 	map.ui.add_child(panel)
 
 
@@ -128,6 +131,10 @@ func _add_row(entry: Dictionary) -> void:
 	row.name = str(entry["key"]).replace(":", "_")
 	row.toggle_mode = true
 	row.focus_mode = Control.FOCUS_NONE
+	row.add_theme_stylebox_override("normal", HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.PARCHMENT_DARK))
+	row.add_theme_stylebox_override("hover", HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.GOLD))
+	row.add_theme_stylebox_override("pressed", HudStyle.card_box(HudStyle.GOLD_PALE, HudStyle.WAX, 2))
+	row.add_theme_stylebox_override("hover_pressed", HudStyle.card_box(HudStyle.GOLD_PALE, HudStyle.WAX, 2))
 	row.tooltip_text = str(entry["tooltip"])
 	row.custom_minimum_size = Vector2(PANEL_WIDTH - 24.0, 0)
 	var margin := MarginContainer.new()
@@ -321,6 +328,8 @@ func row_count() -> int:
 func _process(_delta: float) -> void:
 	if is_open():
 		_update_selection()
+		if not is_equal_approx(_top(), _placed_top):
+			_layout()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -329,12 +338,23 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## Haut de la liste : sous la barre, et sous la carte « que faire maintenant » (UX2) si elle
+## est affichée (même coin).
+func _top() -> float:
+	var top: float = (map.ui.get_node("TopBar") as Control).size.y + 8.0
+	var hint: Control = map.next_hint.card if map.next_hint != null else null
+	if hint != null and hint.visible:
+		top = maxf(top, hint.position.y + hint.size.y + 8.0)
+	return top
+
+
 ## Haut gauche, sous la barre ; la hauteur s'arrête au-dessus du journal.
 func _layout() -> void:
 	if not is_open():
 		return
 	var view := panel.get_viewport_rect().size
-	var top: float = (map.ui.get_node("TopBar") as Control).size.y + 8.0
+	var top := _top()
+	_placed_top = top
 	var bottom := view.y * 0.62
 	var event_log: Control = map.ui.event_log
 	if event_log != null and event_log.visible:
