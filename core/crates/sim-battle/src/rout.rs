@@ -79,6 +79,11 @@ impl RoutRules {
     pub fn bundled() -> &'static RoutRules {
         static RULES: OnceLock<RoutRules> = OnceLock::new();
         RULES.get_or_init(|| {
+            // TEMP EP10 tuning: remove before merge.
+            if let Ok(path) = std::env::var("EP10_RULES") {
+                let text = std::fs::read_to_string(path).unwrap();
+                return serde_json::from_str(&text).unwrap();
+            }
             serde_json::from_str(BUNDLED).expect("data/rules/battle_rout.json is valid")
         })
     }

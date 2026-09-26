@@ -19,9 +19,17 @@ Avant EP10 — régiments qui cèdent par contagion en 120 s (sur 7), course lat
 
 ## État
 - [x] Squelette : `data/rules/battle_rout.json`, schéma, pytest, test de reproduction.
-- [ ] `sim-battle/src/rout.rs` (RoutRules, poids de contagion, direction de fuite) branché dans `sim.rs`.
-- [ ] Mesures avant (binaires copiés dans le scratchpad, en cours) / après.
-- [ ] ADR 0067, epic.md.
+- [x] `sim-battle/src/rout.rs` (RoutRules, poids de contagion, direction de fuite) branché dans `sim.rs`
+  (sièges : règle inchangée). Sonde : 0 régiment ne cède à moral 27-40 (7 à moral 24).
+- [x] Mesures avant (main 2ecdd019) : EP7 Crécy 16/20, Azincourt 15/20, Poitiers 14/20 ; ep9b 7/10 ;
+  SG4 plat pieux 3/7, plat sans 7/3, crête pieux 6/4, crête sans 1/9, générée 2/8 et 6/4, ep1 6/4.
+- [ ] Réglage : première version (15/50/0,15) → EP7 6, 10, 9 /20 (hors fourchettes), ep9b 9/10 (hors 3-7).
+  Fuite seule (contagion ancienne) : EP7 19, 17, 15 ; ep9b 9/10. Variantes en cours.
+- [ ] ADR 0067, epic.md, b6.
+
+**Temporaire, à retirer avant la fin** : `EP10_RULES` (rout.rs, `bundled`) et `EP10_OLD_FLIGHT`
+(sim.rs, `flight_direction`) servent au réglage.
 
 ## Prochaine étape
-Implémenter `rout.rs`, brancher, relancer la sonde puis les mesures après.
+Choisir les réglages (scripts `variant.sh` dans le scratchpad), retirer les crochets temporaires,
+recalculer b6 si nécessaire, ADR.

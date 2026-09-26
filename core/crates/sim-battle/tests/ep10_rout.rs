@@ -160,6 +160,119 @@ fn probe() {
     }
 }
 
+/// The symmetric epic battle of `ep9b_duel` (60 regiments of 120 men a
+/// side, flat bare ground, no stakes, both AIs).
+fn symmetric_battle(seed: u64) -> BattleSim {
+    const KINDS: [&str; 5] = [
+        "unit_men_at_arms_foot",
+        "unit_longbowmen",
+        "unit_knights",
+        "unit_urban_militia",
+        "unit_crossbowmen",
+    ];
+    let data = data();
+    let army: Vec<&str> = (0..60).map(|i| KINDS[i % KINDS.len()]).collect();
+    let mut setup = setup(units(&data, &army), units(&data, &army), None);
+    setup.village = Some(false);
+    for unit in setup
+        .attacker
+        .units
+        .iter_mut()
+        .chain(setup.defender.units.iter_mut())
+    {
+        unit.soldiers = 120;
+        unit.max_soldiers = 120;
+        unit.abilities.retain(|a| *a != data_model::Ability::Stakes);
+    }
+    let mut sim = BattleSim::new(setup, seed).unwrap();
+    sim.set_weather(sim_battle::Weather::Clear);
+    sim.set_ai(SideId::Attacker, true);
+    sim.set_ai(SideId::Defender, true);
+    let field = sim.field_mut();
+    field.forests.clear();
+    field.forest_parts.clear();
+    field.mud.clear();
+    field.mud_parts.clear();
+    field.pools.clear();
+    field.obstacles.clear();
+    field.river = None;
+    field.bridges.clear();
+    for h in field.heights.iter_mut() {
+        *h = 0.0;
+    }
+    sim
+}
+
+/// Probe (ignored): routs, rallies and regiments gone from the field per
+/// side in the symmetric epic battle (`EP10_SEEDS=1..11`).
+#[test]
+#[ignore = "probe"]
+fn probe_symmetric() {
+    let seeds: Vec<u64> = std::env::var("EP10_SEEDS")
+        .ok()
+        .and_then(|s| {
+            let (a, b) = s.split_once("..")?;
+            Some((a.parse().ok()?..b.parse().ok()?).collect())
+        })
+        .unwrap_or_else(|| (1..11).collect());
+    for seed in seeds {
+        let mut sim = symmetric_battle(seed);
+        let mut routs = [0usize; 2];
+        let mut was = vec![false; sim.units().len()];
+        let mut first_rout = [f64::NAN; 2];
+        while !sim.is_finished() && sim.elapsed() < 1800.0 {
+            sim.step();
+            for (i, u) in sim.units().iter().enumerate() {
+                let r = u.state == UnitState::Routing;
+                if r && !was[i] {
+                    if std::env::var("EP10_TRACE").is_ok() && sim.elapsed() < 300.0 {
+                        println!(
+                            "  {:.1} {:?} {} #{} at ({:.0},{:.0}) hp {:.0}",
+                            sim.elapsed(),
+                            u.side,
+                            u.unit_type,
+                            u.id,
+                            u.x,
+                            u.z,
+                            u.hp
+                        );
+                    }
+                    routs[u.side.index()] += 1;
+                    if first_rout[u.side.index()].is_nan() {
+                        first_rout[u.side.index()] = sim.elapsed();
+                    }
+                }
+                was[i] = r;
+            }
+        }
+        let count = |side: SideId, pred: &dyn Fn(&sim_battle::Unit) -> bool| {
+            sim.units()
+                .iter()
+                .filter(|u| u.side == side && !u.synthetic && pred(u))
+                .count()
+        };
+        let rallies = |side: SideId| {
+            sim.events()
+                .iter()
+                .filter(|e| e.side == Some(side) && e.text_fr.contains("se rallient"))
+                .count()
+        };
+        println!(
+            "seed {seed:2}: {:?} at {:.0} s | att routs {} (first {:.0} s) rallies {} gone {} | def routs {} (first {:.0} s) rallies {} gone {}",
+            sim.winner(),
+            sim.elapsed(),
+            routs[0],
+            first_rout[0],
+            rallies(SideId::Attacker),
+            count(SideId::Attacker, &|u| u.left_field),
+            routs[1],
+            first_rout[1],
+            rallies(SideId::Defender),
+            count(SideId::Defender, &|u| u.left_field),
+        );
+    }
+}
+
 /// The SG5 case: before EP10 the whole shaken line (morale 30) gave way
 /// behind its routed wing, 7 regiments out of 7, the fugitive running 113 m
 /// along the line. Now the wing runs to the rear and the line holds.

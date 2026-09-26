@@ -1852,7 +1852,7 @@ impl BattleSim {
     fn flight_direction(&self, i: usize) -> (f64, f64) {
         let unit = &self.units[i];
         let rear = Self::rear_of(unit.side);
-        if self.siege.is_some() {
+        if self.siege.is_some() || std::env::var("EP10_OLD_FLIGHT").is_ok() {
             let (mut fx, mut fz) = rear;
             if let Some((j, d)) = self.nearest_enemy(i, false) {
                 if d > 1e-6 {
