@@ -334,6 +334,29 @@ bruts déjà téléchargés ne le sont jamais une seconde fois.
   versionnés de `data/map/`), réseau pour les téléchargements.
 - **Worktrees d'agents** : ne jamais recuire ; lier `data/map/pyramid` et `tools/geo/raw` au
   dépôt principal (liens symboliques).
+
+### Versions de cuisson (lot SZ2)
+
+Le manifeste versionné `relief_pyramid.json` porte `bake_versions` (`tier1`, `tier2` :
+`pyramid.BAKE_VERSION` ; `tier3` : `detail_dem.BAKE_VERSION`) ; le cache porte les siennes dans
+`pyramid/bake.json` (version, début, cuisson finie ; module `geo/bake_stamp.py`). Un palier cuit
+par une autre version (ou jamais estampillé : caches d'avant SZ2) est **périmé** : `relief-all
+--check` le signale (code 1) et `relief-all` le recuit, avec tout l'aval, sans `--force`. Une
+cuisson périmée ou forcée note son heure de début : interrompue, elle reprend en ne recuisant que
+les tuiles plus anciennes. `detail_dem.BAKE_VERSION` entre aussi dans la clé des recalages de
+`hydro-fine`.
+
+### Fonds de vallée non creusés (lot SZ2)
+
+Le rehaussement de rendu (ADR 0019 : `h + 0,8 · clamp(h − flou σ 5 km, ±120 m)`) creusait les
+vallées encaissées de 0,8 × (base − fond), la base σ 5 km contenant les plateaux voisins : Seine
+à 0,5 m de Paris à Rouen (plancher de côte), Loire à 15 m à Amboise, et chaque étage autrement
+(bases et résolutions différentes), d'où la Loire fine d'Orléans sous ses berges E7. La terre
+rehaussée ne descend plus sous `relief_shade.valley_floor(h) = max(0,5 ; 0,85 h ; h − 2 m)`
+(monotone en `h` : pas de gradins), à E0 (`heightmap_render.png`, `height/`, `relief_shade.png`)
+comme à E1-E7. Collines et coteaux restent rehaussés ; l'exagération ZG8 (au-dessus du fond de
+vallée, à l'exécution) fait le reste. Paramètres dans `map.json` (`render_heightmap.boost`).
+
 - **Jeu exporté** : `tools/export_macos.sh` copie le cache avec les données (voir l'addendum ZG7b
   de l'ADR 0036 et `docs/godot-map.md`, « Vue d'ensemble ZG »).
 
@@ -400,7 +423,8 @@ par `geo pyramid`, restent identiques octet pour octet).
   sous `MIN_LAND_M` (0,5 m), comme `relief_shade.enforce_coast` pour E0-E4 (correctif ZG3b,
   `docs/wip/zg3-palier3.md`) : sans ce plancher, une base régionale plus haute que la source
   fine (collines à quelques km, ancienne fuite GLO-90 dans les petites emprises E6-E7) pouvait
-  faire passer de la terre réelle sous le niveau de la mer.
+  faire passer de la terre réelle sous le niveau de la mer. Depuis SZ2, ce plancher est celui de
+  tous les étages (voir « Fonds de vallée non creusés »).
 
 ## Pyramide de relief, paliers 1-2 (lot ZG1, ADR 0036)
 

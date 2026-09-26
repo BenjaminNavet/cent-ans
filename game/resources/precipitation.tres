@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="PrecipitationProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/map/precipitation_profile.gd" id="1_precip"]
+
+[resource]
+script = ExtResource("1_precip")
+enabled = true
+near_distance = 1.8
+far_distance = 30.0
+meters_per_unit = 719.0
+rain_width_m_at_near = 0.35
+rain_length_m_at_near = 2.5
+rain_width_far_ratio = 0.00035
+rain_length_far_ratio = 0.011
+snow_size_m_at_near = 0.2
+snow_size_far_ratio = 0.0018
+box_horizontal_m_at_near = 40.0
+box_horizontal_far_ratio = 0.8
+box_vertical_m_at_near = 8.0
+box_vertical_far_ratio = 0.08
+height_m_at_near = 25.0
+height_far_ratio = 0.35
+rain_speed_ms_at_near = Vector2(6.0, 9.0)
+rain_speed_far_ratio = Vector2(0.6, 0.75)
+snow_speed_ms_at_near = Vector2(0.8, 1.4)
+snow_speed_far_ratio = Vector2(0.08, 0.12)
+snow_sway_ms_at_near = 0.3
+snow_sway_far_ratio = 0.03
+amount_ratio_near = 1.0
+amount_ratio_far = 0.6
