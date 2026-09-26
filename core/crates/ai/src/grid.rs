@@ -62,11 +62,28 @@ pub struct GridPlanner<'a> {
     /// AI may cross without right of passage: reached at a higher route
     /// cost (`AiGrid::trespass_route_factor`).
     crossable: BTreeSet<SettlementId>,
+    /// EQ5: may this faction's AI cross the lands of each realm at peace
+    /// without right of passage (`passage::ai_may_trespass`)?
+    may_cross: RefCell<BTreeMap<FactionId, bool>>,
+    /// EQ5: lands a road of the settlement graph runs through besides those
+    /// of its two ends (sampled on the straight line, like the grid march):
+    /// closed ones (owners) and whether it crosses lands open by temper.
+    roads: RefCell<BTreeMap<(SettlementId, SettlementId), Rc<RoadLands>>>,
     /// Route tables by (start, budget, cap, avoided enemy armies).
     tables: RefCell<BTreeMap<TableKey, Rc<Table>>>,
 }
 
 /// (start, budget, cap, avoided enemy armies, homeward).
+/// EQ5: foreign lands a road crosses on the way (see `GridPlanner::roads`).
+#[derive(Default)]
+struct RoadLands {
+    closed: Vec<FactionId>,
+    open: bool,
+}
+
+/// Sampling step (map pixels) of a road's straight line.
+const ROAD_SAMPLE_PX: f32 = 8.0;
+
 type TableKey = (SettlementId, u32, u32, Vec<usize>, bool);
 
 fn distance(a: [f32; 2], b: [f32; 2]) -> f32 {
@@ -149,8 +166,66 @@ impl<'a> GridPlanner<'a> {
             stops,
             forbidden,
             crossable,
+            may_cross: RefCell::new(crossing),
+            roads: RefCell::new(BTreeMap::new()),
             tables: RefCell::new(BTreeMap::new()),
         }
+    }
+
+    /// EQ5: may this faction's AI cross `owner`'s lands without passage?
+    fn may_cross(&self, owner: &FactionId) -> bool {
+        *self
+            .may_cross
+            .borrow_mut()
+            .entry(owner.clone())
+            .or_insert_with(|| passage::ai_may_trespass(self.state, self.data, self.faction, owner))
+    }
+
+    /// EQ5: the foreign lands the road `from` → `to` runs through between
+    /// its ends: a road between two open places may still clip a closed
+    /// province (the Po valley roads through the Veronese).
+    fn road_lands(&self, from: &SettlementId, to: &SettlementId) -> Rc<RoadLands> {
+        let key = (from.clone(), to.clone());
+        if let Some(road) = self.roads.borrow().get(&key) {
+            return Rc::clone(road);
+        }
+        let mut road = RoadLands::default();
+        if let (Some(a), Some(b)) = (
+            self.data.settlement_point(from),
+            self.data.settlement_point(to),
+        ) {
+            let ends = [
+                self.state.settlement_province(from),
+                self.state.settlement_province(to),
+            ];
+            let length = ((b[0] - a[0]).powi(2) + (b[1] - a[1]).powi(2)).sqrt();
+            let steps = (length / ROAD_SAMPLE_PX).ceil().max(1.0) as usize;
+            let mut seen: BTreeSet<&data_model::ProvinceId> = BTreeSet::new();
+            for i in 1..steps {
+                let t = i as f32 / steps as f32;
+                let Some(province) = self
+                    .data
+                    .province_at_point(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+                else {
+                    continue;
+                };
+                if ends.contains(&Some(province)) || !seen.insert(province) {
+                    continue;
+                }
+                let Some(owner) = passage::trespassed_owner(self.state, self.faction, province)
+                else {
+                    continue;
+                };
+                if self.may_cross(&owner) {
+                    road.open = true;
+                } else if !road.closed.contains(&owner) {
+                    road.closed.push(owner);
+                }
+            }
+        }
+        let road = Rc::new(road);
+        self.roads.borrow_mut().insert(key, Rc::clone(&road));
+        road
     }
 
     /// Indices of the enemy armies an army of `power` keeps away from.
@@ -236,8 +311,12 @@ impl<'a> GridPlanner<'a> {
                 {
                     continue;
                 }
+                let road = self.road_lands(&current, &next);
+                if !homeward && road.closed.iter().any(|owner| Some(owner) != way_out) {
+                    continue;
+                }
                 let mut step = edge.min(cap.max(1));
-                if self.crossable.contains(&next) {
+                if self.crossable.contains(&next) || road.open {
                     step = (f64::from(step) * self.rules.trespass_route_factor).round() as u32;
                 }
                 let total = cost + step;
