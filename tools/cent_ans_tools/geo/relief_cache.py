@@ -16,8 +16,11 @@ order, each step resuming from what is already on disk:
 4. ``geo hydro-fine`` (fine rivers snapped on the finest relief);
 5. ``geo anchors-fine`` (settlements, bridges and draped roads).
 
-A later step runs whenever an earlier one wrote tiles (it reads them). ``--check``
-only lists what is missing (exit code 1 if anything is).
+A later step runs whenever an earlier one wrote tiles (it reads them). A tier
+baked by an older version of the code (stamp ``pyramid/bake.json`` older than the
+manifest's ``bake_versions``, :mod:`bake_stamp`) is stale and rebaked like a
+missing one. ``--check`` only lists what is missing or stale (exit code 1 if
+anything is).
 """
 
 from __future__ import annotations
@@ -27,7 +30,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from cent_ans_tools.geo import download
+from cent_ans_tools.geo import bake_stamp, download
 
 MAP_DIR = download.TOOLS_DIR.parent / "data" / "map"
 RAW_DIR = download.RAW_DIR
@@ -89,12 +92,16 @@ class CacheReport:
     levels: dict[int, LayerStatus]
     fine: dict[str, LayerStatus]
     raw_present: dict[str, bool]
+    #: Tiers baked by an older bake version (``tier1`` … ``tier3``).
+    stale: list[str] = field(default_factory=list)
 
     @property
     def complete(self) -> bool:
-        """Every level and fine layer is complete."""
-        return all(s.complete for s in self.levels.values()) and all(
-            s.complete for s in self.fine.values()
+        """Every level and fine layer is complete and no tier is stale."""
+        return (
+            all(s.complete for s in self.levels.values())
+            and all(s.complete for s in self.fine.values())
+            and not self.stale
         )
 
     @property
@@ -108,7 +115,9 @@ class CacheReport:
         """Steps whose own output is incomplete (before propagating dependencies)."""
         wanted = []
         for step, levels in (("tier1", TIER1), ("tier2", TIER2), ("tier3", TIER3)):
-            if any(not self.levels[level].complete for level in levels):
+            if step in self.stale or any(
+                not self.levels[level].complete for level in levels
+            ):
                 wanted.append(step)
         if not self.fine["rivers"].complete:
             wanted.append("hydro")
@@ -143,6 +152,12 @@ class CacheReport:
         raw = ", ".join(
             f"{name} {'oui' if ok else 'non'}" for name, ok in self.raw_present.items()
         )
+        if self.stale:
+            names = ", ".join(self.stale)
+            out.append(
+                f"  Cuisson périmée (version du code plus récente) : {names} — "
+                "relancer « geo relief-all »"
+            )
         out.append(f"Bruts dans tools/geo/raw : {raw}")
         out.append(f"Total en cache : {self.total_bytes / 1e9:.2f} Go")
         return out
@@ -237,7 +252,11 @@ def check(map_dir: Path = MAP_DIR, raw_dir: Path = RAW_DIR) -> CacheReport:
         for step in RAW_INPUTS.values()
         for name in step
     }
-    return CacheReport(map_dir, pyramid_dir, levels, fine, raw_present)
+    expected = manifest.get(bake_stamp.MANIFEST_KEY) or {}
+    stale = bake_stamp.stale_tiers(
+        pyramid_dir, {str(k): int(v) for k, v in expected.items()}
+    )
+    return CacheReport(map_dir, pyramid_dir, levels, fine, raw_present, stale)
 
 
 # ----------------------------------------------------------------------- rebuild
