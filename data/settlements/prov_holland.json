@@ -121,8 +121,8 @@
       "local_language": "moyen néerlandais"
     },
     "lonlat": [
-      4.5192,
-      52.2311
+      4.5246,
+      52.2562
     ],
     "weight": 8,
     "owner": null,
@@ -131,7 +131,7 @@
       "bld_castle"
     ],
     "port": false,
-    "description": "Château comtal de Hollande dans les dunes près de Leyde.",
+    "description": "Château comtal de Hollande dans les dunes près de Leyde. (Position calée sur la terre ferme de la grille de navigation : le site réel, à 4.5192°E/52.2311°N, se trouve aujourd'hui sur un îlot du Teylingerplas, un lac né du creusement de la tourbe bien après 1337.)",
     "sources": [
       "Château de Teylingen"
     ]
