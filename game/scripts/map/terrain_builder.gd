@@ -645,6 +645,7 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 	var t0 := Time.get_ticks_usec()
 	quadtree.update_view(camera)
 	build_stats["qt_update_ms_max"] = maxf(float(build_stats.get("qt_update_ms_max", 0.0)), (Time.get_ticks_usec() - t0) / 1000.0)
+	var tp := PerfProbe.lap("lod/quadtree", t0)  # SZ6
 	var wanted_fine := _wanted_fine(camera_distance, view_center, fine_distance)
 	_last_wanted_fine = wanted_fine
 	var half := chunk_px * 0.5
@@ -659,8 +660,11 @@ func _update_lod_quadtree(camera_position: Vector3, camera_distance: float, view
 			var t_emit := Time.get_ticks_usec()
 			chunk_surface_changed.emit(i)
 			_note_emit(t_emit, 1)
+	tp = PerfProbe.lap("lod/level_emits", tp)
 	_flush_surface_dirty(false)
+	tp = PerfProbe.lap("lod/surface_flush", tp)
 	_flush_rescale(view_center)
+	PerfProbe.lap("lod/rescale_flush", tp)
 
 
 func _on_quadtree_surface_changed(rect: Rect2) -> void:

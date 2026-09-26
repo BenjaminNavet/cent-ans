@@ -1080,36 +1080,48 @@ func _process(_delta: float) -> void:
 	var distance := camera_rig.distance
 	var fine_distance := zoom_tiers.fine_terrain_distance if zoom_tiers != null else 0.0
 	var t0 := Time.get_ticks_usec()
+	var tp := t0  # SZ6 : minuteries `PerfProbe` (banc `--bench-probe`)
 	if dynamic_exaggeration and terrain.quadtree != null and camera_rig.profile != null:  # ZG4
 		terrain.set_vertical_scale(camera_rig.profile.quantized_scale(distance, MapData.vertical_scale()))
+	tp = PerfProbe.lap("map.vertical_scale", tp)
 	terrain.update_lod(camera.global_position, distance, camera_rig.focus, fine_distance)
+	tp = PerfProbe.lap("map.update_lod", tp)
 	cities.update_visibility(distance)
 	var t1 := Time.get_ticks_usec()
+	tp = PerfProbe.lap("map.cities", tp)
 	if zoom_tiers != null:  # C6 : paliers de zoom
 		cities.set_tier_alpha(zoom_tiers.far_weight(distance) * (1.0 - smoothstep(0.0, 0.5, strategic.weight_at(distance))))  # CM2
 		settlement_layer.update_view(distance)
+		tp = PerfProbe.lap("map.settlements", tp)
 		# ZG4 : rubans des routes (≈ 200 m de large) et ponts à l'échelle de la carte effacés au
 		# palier « site » (routes drapées à leur vraie largeur : lot ZG5b).
 		var site_hide := 1.0 - zoom_tiers.site_weight(distance)
 		roads.update_view(zoom_tiers.medium_weight(distance), zoom_tiers.near_weight(distance) * site_hide)
+		tp = PerfProbe.lap("map.roads", tp)
 		if rivers.crossings != null:
 			# ZG5b : avec le réseau fin, les ponts passent à leurs ancrages et à l'échelle réelle.
 			rivers.crossings.visible = site_hide > 0.5 or rivers.fine != null
 		trade_layer.set_close_hidden(zoom_tiers.valley_weight(distance) > 0.5)
 		_apply_close_tiers(distance)
+		tp = PerfProbe.lap("map.close_tiers", tp)
 	if life != null:  # CV1
 		life.update_view(distance)
+	tp = PerfProbe.lap("map.life", tp)
 	strategic.update_view(distance)  # CM2
 	if faction_borders != null:  # FR1 : après CM2 (shader du terrain substitué au parchemin)
 		faction_borders.update_view(distance)
+	tp = PerfProbe.lap("map.strategic_borders", tp)
 	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
+	tp = PerfProbe.lap("map.weather", tp)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
 	_update_fps_probe()
 	rivers.update_visibility(camera_rig.distance)
+	tp = PerfProbe.lap("map.rivers", tp)
 	path_preview.update_view(camera_rig.distance)  # ZG7a : ruban fin aux paliers proches
 	armies.update_scale(camera_rig.distance)
 	_update_trade_hover()  # C5
+	tp = PerfProbe.lap("map.misc", tp)
 	if _screenshot_countdown > 0:
 		# C6 : la capture attend le relief fin et les rubans / hameaux des tuiles proches.
 		if _screenshot_countdown == 3 and not terrain.fine_ready():
