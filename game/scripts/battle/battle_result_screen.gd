@@ -12,6 +12,7 @@ extends Control
 ## Le verdict n'est qu'un libellé d'après les proportions de pertes (seuils d'affichage).
 
 signal return_pressed
+signal replay_pressed  # EP13 : revoir la bataille (rejeu)
 
 const INK := BattleUiKit.INK
 const MUTED := Color(0.42, 0.33, 0.22)
@@ -35,6 +36,7 @@ const CARD_SIZE := Vector2(54, 80)
 var title_label: Label
 var subtitle_label: Label
 var return_button: Button
+var replay_button: Button  # EP13 : caché tant que la scène n'offre pas de rejeu
 var mentions_box: VBoxContainer
 var aftermath_box: HBoxContainer
 var hero_label: Label
@@ -201,6 +203,17 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	BattleUiKit.button_font(return_button, 19)
 	return_button.pressed.connect(func() -> void: return_pressed.emit())
 	footer.add_child(return_button)
+	# EP13 : revoir la bataille entière (rejeu), montré par la scène quand il est enregistré.
+	footer.add_theme_constant_override("separation", 16)
+	replay_button = Button.new()
+	replay_button.name = "Replay"
+	replay_button.text = "Revoir la bataille"
+	replay_button.tooltip_text = "Rejouer toute la bataille : lecture, pause, vitesse, saut dans le temps, caméra libre"
+	replay_button.custom_minimum_size = Vector2(240, 44)
+	BattleUiKit.button_font(replay_button, 19)
+	replay_button.visible = false
+	replay_button.pressed.connect(func() -> void: replay_pressed.emit())
+	footer.add_child(replay_button)
 	_layout()
 	visible = true
 
