@@ -19,6 +19,8 @@ const DENSIFY_M := 10.0
 const GROUND_STEP_M := 12.0
 const WALL_STEP_M := 8.0
 const GATE_GAP_M := 7.0
+## Case de l'index des segments d'eau (VH7 : la Loire fine d'Orléans est en plusieurs bras larges).
+const WATER_CELL_M := 100.0
 
 ## Paramètres par défaut du parcellaire (remplacés par la section `plan` de la ville).
 const DEFAULT_PLAN := {
@@ -114,6 +116,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 			TownPlan.street_bases(water_street, heights)
 			(out["streets"] as Array).append(water_street)
 	out["waters"] = waters
+	var water_index := _index_waters(waters)
 	# 2. Monuments (emprise réservée avant tout le reste).
 	for m in city.get("monuments", []):
 		if LandmarkV2Library.present(m, year):
@@ -121,7 +124,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 	# 3. Murailles, tours, portes.
 	for wall in city.get("walls", []):
 		if LandmarkV2Library.present(wall, year):
-			_add_wall(wall, occ, heights, out)
+			_add_wall(wall, occ, heights, out, year)
 	# 4. Pont(s).
 	for b in city.get("bridges", []):
 		if LandmarkV2Library.present(b, year):
@@ -159,7 +162,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 	# 8. Parcelles en lanières le long des rues.
 	for s in ranked:
 		_line_parcels(s["points"], float(s["width"]), s["rank"] == "main", districts, occ, heights, rng, plan, out)
-	out["ground"] = _ground_grid(districts, waters, heights, out["houses"])
+	out["ground"] = _ground_grid(districts, waters, heights, out["houses"], water_index)
 	out["stats"] = {"houses": (out["houses"]["x"] as PackedFloat32Array).size(), "streets": (out["streets"] as Array).size(), "monuments": (out["v2_monuments"] as Array).size(), "towers": (out["towers"] as Array).size(), "usec": Time.get_ticks_usec() - t0}
 	return out
 
@@ -215,7 +218,7 @@ static func _add_monument(m: Dictionary, occ: TownPlan.Occupancy, heights: TownP
 # --- Murailles ------------------------------------------------------------------------------
 
 
-static func _add_wall(wall: Dictionary, occ: TownPlan.Occupancy, heights: TownPlan.Heights, out: Dictionary) -> void:
+static func _add_wall(wall: Dictionary, occ: TownPlan.Occupancy, heights: TownPlan.Heights, out: Dictionary, year: int = 1340) -> void:
 	var pts := LandmarkV2Library.local_line(wall["points"])
 	var closed := bool(wall.get("closed", false))
 	if closed:
@@ -224,6 +227,9 @@ static func _add_wall(wall: Dictionary, occ: TownPlan.Occupancy, heights: TownPl
 	var gates: Array[Vector2] = []
 	var gate_meta: Array = []
 	for g in wall.get("gates", []):
+		# Porte datée (VH6 : Moorgate, 1415) : mur continu avant son ouverture.
+		if not LandmarkV2Library.present(g, year):
+			continue
 		gates.append(LandmarkV2Library.local(g["at"]))
 		gate_meta.append(g)
 	var normals := PackedVector2Array()
@@ -295,14 +301,27 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 	var length := a.distance_to(c)
 	var width := float(b["width_m"])
 	var mid := (a + c) * 0.5
-	var bank := minf(heights.height_m(a.x, a.y), heights.height_m(c.x, c.y))
-	var water := heights.height_m(mid.x, mid.y)
-	for k in 5:
-		water = minf(water, heights.height_m(lerpf(a.x, c.x, 0.3 + 0.1 * k), lerpf(a.y, c.y, 0.3 + 0.1 * k)))
-	var deck := maxf(bank, water + float(b.get("deck_m", 7.0)))
-	out["bridge"] = {"x": mid.x, "y": mid.y, "yaw": atan2(d.y, d.x), "length": length + 8.0, "width": width, "deck": deck, "water": water, "arches": int(b.get("arches", maxi(1, int(length / 18.0))))}
+	out["bridge"] = {
+		"x": mid.x, "y": mid.y, "yaw": atan2(d.y, d.x), "length": length + 8.0, "width": width,
+		"arches": int(b.get("arches", maxi(1, int(length / 18.0)))),
+		# VH6 : piles épaisses et avant-becs, rampes d'accès jusqu'aux rives basses, niveaux
+		# recalculés quand des pages de relief plus fines arrivent (`reground`).
+		"pier_m": float(b.get("pier_m", 3.5)), "starling_m": float(b.get("starling_m", 0.0)),
+		"a": a, "c": c, "deck_m": float(b.get("deck_m", 7.0)),
+	}
+	_bridge_levels(out["bridge"], heights)
+	var deck := float(out["bridge"]["deck"])
+	var water := float(out["bridge"]["water"])
 	occ.segment(a - d * 10.0, c + d * 10.0, width * 0.5 + 1.0)
 	var n := Vector2(-d.y, d.x)
+	# Travées sans maisons (VH6) : pont-levis (deux côtés), chapelle (son côté). [début, fin, côté]
+	var gaps: Array = []
+	if b.has("drawbridge_at"):
+		gaps.append([float(b["drawbridge_at"]) * length - 9.0, float(b["drawbridge_at"]) * length + 9.0, 0.0])
+	var chapel_side := -1.0 if str(b.get("chapel_side", "right")) == "left" else 1.0
+	if b.has("chapel_at"):
+		gaps.append([float(b["chapel_at"]) * length - 12.0, float(b["chapel_at"]) * length + 12.0, chapel_side])
+		_add_bridge_chapel(b, a + d * float(b["chapel_at"]) * length, n * chapel_side, width, deck, water, out)
 	# Maisons du pont : façade sur le tablier, en encorbellement au-dessus de l'eau.
 	if bool(b.get("houses", false)):
 		var span: Array = b.get("house_span", [0.15, 0.85])
@@ -312,6 +331,12 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 		while s < float(span[1]) * length:
 			var front := rng.randf_range(5.0, 7.0)
 			for side: float in [-1.0, 1.0]:
+				var gap := false
+				for g: Array in gaps:
+					if s + front > float(g[0]) and s < float(g[1]) and (float(g[2]) == 0.0 or float(g[2]) == side):
+						gap = true
+				if gap:
+					continue
 				var nn := n * side
 				var hd := rng.randf_range(6.0, 8.0)
 				var center := a + d * (s + front * 0.5) + nn * (width * 0.5 + hd * 0.5)
@@ -329,6 +354,40 @@ static func _add_bridge(b: Dictionary, occ: TownPlan.Occupancy, heights: TownPla
 	for f in b.get("gatehouses_at", []):
 		var p := a + d * float(f) * length
 		(out["gates"] as Array).append({"x": p.x, "y": p.y, "yaw": atan2(d.y, d.x), "base": deck - 0.5, "height": 13.0, "palisade": false, "fixed": true})
+
+
+## Niveaux du pont (m) : eau sous le tablier (point le plus bas du milieu), rives aux deux bouts,
+## tablier = max(rive la plus basse, eau + `deck_m`).
+static func _bridge_levels(bridge: Dictionary, heights: TownPlan.Heights) -> void:
+	var a: Vector2 = bridge["a"]
+	var c: Vector2 = bridge["c"]
+	var mid := (a + c) * 0.5
+	var bank_from := heights.height_m(a.x, a.y)
+	var bank_to := heights.height_m(c.x, c.y)
+	var water := heights.height_m(mid.x, mid.y)
+	for k in 5:
+		water = minf(water, heights.height_m(lerpf(a.x, c.x, 0.3 + 0.1 * k), lerpf(a.y, c.y, 0.3 + 0.1 * k)))
+	bridge["water"] = water
+	bridge["bank_from"] = bank_from
+	bridge["bank_to"] = bank_to
+	bridge["deck"] = maxf(minf(bank_from, bank_to), water + float(bridge["deck_m"]))
+
+
+## Chapelle de pont (VH6 : Saint-Thomas de London Bridge) : sur une pile, côté `side`, axe
+## perpendiculaire au pont (chœur vers l'extérieur), crypte au niveau de la pile et chapelle au
+## niveau du tablier. Base fixe (au-dessus de l'eau), pas recalée sur le relief.
+static func _add_bridge_chapel(b: Dictionary, at_deck: Vector2, side: Vector2, width: float, deck: float, water: float, out: Dictionary) -> void:
+	var length := float(b.get("chapel_length_m", 18.0))
+	var chapel_w := float(b.get("chapel_width_m", 9.0))
+	var center := at_deck + side * (width * 0.5 + length * 0.5 - 1.0)
+	var yaw := atan2(side.y, side.x)
+	var base := water + 0.5
+	var m := {"id": str(b.get("id", "bridge")) + "_chapel", "model": "church", "params": {"length_m": length, "width_m": chapel_w, "height_m": deck - base + 8.0, "apse": "flat"}}
+	var built := LandmarkMonuments.build(m)
+	(out["v2_monuments"] as Array).append({
+		"id": m["id"], "model": "church", "x": center.x, "y": center.y, "yaw": yaw,
+		"length": length, "depth": chapel_w, "base": base, "arrays": built["arrays"], "top": float(built["top"]), "fixed": true,
+	})
 
 
 # --- Places et espaces libres ---------------------------------------------------------------
@@ -437,7 +496,7 @@ static func _line_parcels(pts: PackedVector2Array, width: float, main: bool, dis
 ## Sol des quartiers (cours, jardins, terre battue) : grille drapée carrée couvrant les
 ## quartiers, sommets dans un quartier et hors de l'eau ; `edge` : 1 en ville close, 0,4 aux
 ## faubourgs (teinte des cours plus verte).
-static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.Heights, houses: Dictionary) -> Dictionary:
+static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.Heights, houses: Dictionary, water_index: Dictionary = {}) -> Dictionary:
 	# Faubourgs : sol de la ville seulement autour des maisons (cases de 30 m), les champs du
 	# parcellaire ZG5b restent visibles entre les rues.
 	var near := {}
@@ -460,7 +519,7 @@ static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.
 		for i in n:
 			var p := origin + Vector2(i, j) * step
 			var di := districts.at(p)
-			if di < 0 or _in_water(p, waters):
+			if di < 0 or _in_water(p, waters, water_index):
 				continue
 			if str(districts.polys[di]["zone"]) == "faubourg" and not near.has(Vector2i(floori(p.x / 30.0), floori(p.y / 30.0))):
 				continue
@@ -471,7 +530,33 @@ static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.
 	return {"origin": origin, "step": step, "n": n, "inside": mask, "heights": h, "edge": edge, "radii": PackedFloat32Array([side, side, side, side])}
 
 
-static func _in_water(p: Vector2, waters: Array) -> bool:
+## Segments d'eau par case de `WATER_CELL_M` : {Vector2i(case) → [Vector2i(eau, segment)…]}.
+static func _index_waters(waters: Array) -> Dictionary:
+	var cells := {}
+	for wi in waters.size():
+		var line: PackedVector2Array = waters[wi]["line"]
+		var ws: PackedFloat32Array = waters[wi]["widths"]
+		for i in line.size() - 1:
+			var r := maxf(ws[i], ws[i + 1]) * 0.5
+			var lo := line[i].min(line[i + 1]) - Vector2(r, r)
+			var hi := line[i].max(line[i + 1]) + Vector2(r, r)
+			for cy in range(floori(lo.y / WATER_CELL_M), floori(hi.y / WATER_CELL_M) + 1):
+				for cx in range(floori(lo.x / WATER_CELL_M), floori(hi.x / WATER_CELL_M) + 1):
+					var key := Vector2i(cx, cy)
+					if not cells.has(key):
+						cells[key] = []
+					(cells[key] as Array).append(Vector2i(wi, i))
+	return cells
+
+
+static func _in_water(p: Vector2, waters: Array, index: Dictionary = {}) -> bool:
+	if not index.is_empty():
+		for ref: Vector2i in index.get(Vector2i(floori(p.x / WATER_CELL_M), floori(p.y / WATER_CELL_M)), []):
+			var wl: PackedVector2Array = waters[ref.x]["line"]
+			var wws: PackedFloat32Array = waters[ref.x]["widths"]
+			if Geometry2D.get_closest_point_to_segment(p, wl[ref.y], wl[ref.y + 1]).distance_to(p) < wws[ref.y] * 0.5:
+				return true
+		return false
 	for w in waters:
 		var line: PackedVector2Array = w["line"]
 		var ws: PackedFloat32Array = w["widths"]
@@ -491,11 +576,26 @@ static func reground(plan: Dictionary, heights: TownPlan.Heights) -> void:
 	var xs: PackedFloat32Array = houses["x"]
 	var bases: PackedFloat32Array = houses["base"]
 	var fixed: Dictionary = plan.get("fixed_bases", {})
+	# Pont (VH6) : niveaux recalculés ; maisons, portes et chapelle du pont suivent le tablier.
+	var bridge: Dictionary = plan.get("bridge", {})
+	var d_deck := 0.0
+	var d_water := 0.0
+	if bridge.has("a"):
+		var old_deck := float(bridge["deck"])
+		var old_water := float(bridge["water"])
+		_bridge_levels(bridge, heights)
+		d_deck = float(bridge["deck"]) - old_deck
+		d_water = float(bridge["water"]) - old_water
 	for i in xs.size():
 		if not fixed.has(i):
 			bases[i] = TownPlan.footprint_base(heights, Vector2(xs[i], houses["y"][i]), houses["yaw"][i], houses["front"][i], houses["depth"][i])
+		else:
+			bases[i] += d_deck
 	houses["base"] = bases
 	for m in plan["v2_monuments"]:
+		if bool(m.get("fixed", false)):
+			m["base"] = float(m["base"]) + d_water
+			continue
 		m["base"] = TownPlan.footprint_base(heights, Vector2(m["x"], m["y"]), m["yaw"], m["length"], m["depth"])
 	for s in plan["streets"]:
 		TownPlan.street_bases(s, heights)
@@ -510,6 +610,8 @@ static func reground(plan: Dictionary, heights: TownPlan.Heights) -> void:
 	for gate in plan["gates"]:
 		if not bool(gate.get("fixed", false)):
 			gate["base"] = TownPlan.footprint_base(heights, Vector2(gate["x"], gate["y"]), gate["yaw"], 12.0, 11.0)
+		else:
+			gate["base"] = float(gate["base"]) + d_deck
 	var trees: PackedVector3Array = plan["trees"]
 	for i in trees.size():
 		trees[i].z = heights.height_m(trees[i].x, trees[i].y)

@@ -90,10 +90,11 @@ vec3 qt_vertex(vec3 v) {
 	float lod_coarse = max(log2(2.0 * s) - 1.0, 0.0);
 	vec2 p = qt_node.xy + g * s;
 	float hc0 = qt_height_m(p, qt_coarse, qt_coarse_nbr, qt_coarse_diag, lod_coarse);
-	// PB2 : fond de vallée (ZG8) lu une fois ; réutilisé avec `hc0` quand le sommet ne glisse pas
-	// (hors morphing ou sommet pair : pm == p), soit la plupart des sommets, dans toutes les passes.
-	float floor_p = campaign_relief_gain != 0.0 ? campaign_floor_m(p) : 0.0;
-	float h0 = campaign_display_height_at_floor(hc0, floor_p);
+	// PB2 : champs du relief (ZG8 fond, SZ1 base et écrasement) lus une fois ; réutilisés avec `hc0`
+	// quand le sommet ne glisse pas (hors morphing ou sommet pair : pm == p), soit la plupart des
+	// sommets, dans toutes les passes.
+	vec3 fields_p = campaign_relief_fields(p);
+	float h0 = campaign_display_height_at_fields(hc0, fields_p);
 	float dist = distance(qt_camera, vec3(p.x, h0, p.y));
 	float k = clamp((dist - qt_morph.x) * qt_morph.y, 0.0, 1.0);
 	vec2 gm = g - fract(g * 0.5) * 2.0 * k;
@@ -103,7 +104,7 @@ vec3 qt_vertex(vec3 v) {
 	float hf = qt_fine.x >= 0.0 && qt_fine.x == qt_coarse.x ? hc
 		: qt_height_m(pm, qt_fine, qt_fine_nbr, qt_fine_diag, lod_fine);
 	float hm = mix(hc, hf, qt_morph.z * (1.0 - k));
-	float h = still ? campaign_display_height_at_floor(hm, floor_p) : campaign_display_height(hm, pm);  // ZG8 : relief exagéré
+	float h = still ? campaign_display_height_at_fields(hm, fields_p) : campaign_display_height(hm, pm);  // ZG8 : relief exagéré
 	if (v.y < -0.5) {
 		h -= qt_morph.w;
 	}

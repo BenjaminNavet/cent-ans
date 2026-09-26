@@ -291,11 +291,12 @@ func _y_bounds(n: int, c: int, r: int) -> Vector2:
 	return _to_world_bounds(result)
 
 
-## Bornes en mètres → hauteurs affichées (ZG8 : s·h ≤ y ≤ s·(1 + g)·h pour h ≥ 0).
+## Bornes en mètres → hauteurs affichées (ZG8, SZ1 : s·(1 − c·k)·h ≤ y ≤ s·(1 + g)·h pour h ≥ 0).
 static func _to_world_bounds(bounds_m: Vector2) -> Vector2:
 	var vs := MapData.vertical_scale()
 	var up := 1.0 + MapData.relief_gain()
-	return Vector2(bounds_m.x * vs, bounds_m.y * vs * (up if bounds_m.y > 0.0 else 1.0))
+	var down := 1.0 - MapData.relief_squash_max_for_scale(vs)
+	return Vector2(bounds_m.x * vs * (down if bounds_m.x > 0.0 else 1.0), bounds_m.y * vs * (up if bounds_m.y > 0.0 else 1.0))
 
 
 func _box_in_sphere(bmin: Vector3, bmax: Vector3, radius: float) -> bool:
@@ -477,9 +478,11 @@ func on_vertical_scale_changed(old_scale: float, new_scale: float) -> void:
 	var ratio := new_scale / maxf(old_scale, 1e-9)
 	# ZG8 : le gain local suit l'échelle ; le haut positif de la boîte suit s·(1 + g).
 	var ratio_up := ratio * (1.0 + MapData.relief_gain_for_scale(new_scale)) / (1.0 + MapData.relief_gain_for_scale(old_scale))
+	# SZ1 : le bas positif suit s·(1 − c·k).
+	var ratio_down := ratio * (1.0 - MapData.relief_squash_max_for_scale(new_scale)) / (1.0 - MapData.relief_squash_max_for_scale(old_scale))
 	for slot: MeshInstance3D in _slots.values():
 		var box := slot.custom_aabb
-		var lo := box.position.y * ratio
+		var lo := box.position.y * (ratio_down if box.position.y > 0.0 else ratio)
 		var hi := box.end.y * (ratio_up if box.end.y > 0.0 else ratio)
 		# Jupe (constante, non proportionnelle) : marge de sécurité en plus.
 		var margin := absf(hi - lo) * 0.02 + 0.05
