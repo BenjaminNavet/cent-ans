@@ -430,6 +430,9 @@ impl CampaignSim {
     /// Applies a `NavalBattleSim.get_outcome()` → `{ok, error, events}`.
     #[func]
     fn resolve_naval_battle(&mut self, index: i64, outcome: VarDictionary) -> VarDictionary {
+        if self.refuse_while_turn_pending("resolve_naval_battle") {
+            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+        }
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return result_dict(Err("aucune campagne en cours".to_owned()));
         };
@@ -453,6 +456,9 @@ impl CampaignSim {
     /// Auto-resolves pending naval battle `index` → `{ok, error, events}`.
     #[func]
     fn auto_resolve_naval_battle(&mut self, index: i64) -> VarDictionary {
+        if self.refuse_while_turn_pending("auto_resolve_naval_battle") {
+            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+        }
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return result_dict(Err("aucune campagne en cours".to_owned()));
         };
@@ -469,6 +475,9 @@ impl CampaignSim {
     /// The intercepted fleet puts back into port → `{ok, error, events}`.
     #[func]
     fn withdraw_naval_battle(&mut self, index: i64) -> VarDictionary {
+        if self.refuse_while_turn_pending("withdraw_naval_battle") {
+            return result_dict(Err(crate::campaign_sim_turn::TURN_PENDING_FR.to_owned()));
+        }
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return result_dict(Err("aucune campagne en cours".to_owned()));
         };
@@ -511,6 +520,9 @@ impl CampaignSim {
     /// to `to_port`; returns the index of the pending naval battle or -1.
     #[func]
     fn debug_stage_naval(&mut self, army: GString, to_port: GString, interceptor: GString) -> i64 {
+        if self.refuse_while_turn_pending("debug_stage_naval") {
+            return -1;
+        }
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return -1;
         };
