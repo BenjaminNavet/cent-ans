@@ -31,7 +31,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 | DC2c | Colonies îles Britanniques (Angleterre cible 10 ; Galles, Irlande, Écosse 7) | 1 | à lancer |
 | DC2d | Colonies Pays-Bas (11), Empire rhénan (9), reste de l'Empire et Scandinavie (7) | 1 | à lancer |
 | DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | fait |
-| DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | après DC1 + DC2 |
+| DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | fait (feat/densite-dc3, à fusionner) |
 | DC4 | Affichage : niveaux de détail des marqueurs, désencombrement des étiquettes (O(n²)), maquettes proches, captures | 2 | lancé (../gp-dc4) |
 | DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | |
 
@@ -88,9 +88,9 @@ rules.json ; codex (mouvement, saisons, déroute, agents) ; tests `campaign.rs`,
 - `docs/design/2026-09-24-mouvement-libre.md` cite 210 km / × 140 km : spec datée, laissée telle quelle.
 
 ## DC3 — équilibrage de la carte densifiée (worktree `../gp-dc3`, branche `feat/densite-dc3`)
-État : économie réglée (entretien), tests verts (546), conquête et perf en cours.
-Méthode : sondes construites depuis des worktrees détachés `../gp-dc3-main` (main 89bc960a) et
-`../gp-dc3-dc1` (c3e5f17d, DC1 seul : 570 places + pas de 70 km), mêmes graines ; à supprimer à la fin.
+État : **fait** (voir « Reprise » plus bas), à fusionner dans `feat/densite` puis `main` (DC5).
+Méthode : sondes construites depuis des worktrees détachés `../gp-dc3-main` (main) et
+`../gp-dc3-dc1` (c3e5f17d, DC1 seul : 570 places + pas de 70 km), mêmes graines ; supprimés.
 `century_probe` compte désormais : cités prises, provinces conquises en entier (durée depuis la
 première place prise), dévastation, provinces occupées, mécontentement > 60, issues des replis ;
 `REVOLT_TRACE=1` liste révoltes et provinces à plus de 70 de mécontentement.
@@ -121,39 +121,65 @@ une seule réserve de ressources par tour (`recruitable_with_supply`, `buildable
 optimisation de fin de tour ; tests sim-campaign + ai et clippy verts, **pas encore mesurée**
 (`turn_perf`). L'agent préparait des « variantes de partage de la réserve » (non commencées).
 
-### Reprise (agent DC3 n° 2, 26/09)
-- Target cargo privé `gp-dc3/core/target` ; tests refaits : fmt, clippy, 546 tests verts.
-- `turn_perf 50 3 1` remesuré machine au repos : DC1 moy 3,09 ms, p99 15,4 ; DC3 brut moy 5,22, p99 22,7
-  (+48 %) → optimisé (vitesse de chantier calculée une fois par place, `nearest_settlement` en
-  parcours fusionné, subsides : revenus pesés en dernier) : moy 3,79, p99 17,7 (+15 %). Résultats
-  de `century_probe` identiques (graine 1), 83 → 23 s.
+### Reprise (agent DC3 n° 2, 26/09) — lot terminé
+État : fait. `main` (35783bcf, PB3 compris) fusionné (da2125c7) ; fmt, clippy -D warnings, 877 tests
+Rust (espace de travail entier), pytest colonies/graphe/codex, dylib + import + smoke.gd verts.
+Target cargo privé `gp-dc3/core/target` (les mesures d'avant la pause venaient du target partagé).
+ADR 0082 : addendum DC3.
 
-- Conquête : la baisse des cités prises vient de DC1 (pas de la densité) : main 10,3/déc., DC1 4,9,
-  DC3 5,5 (graines 1-6). Surtout l'Angleterre en France (29 cités prises → 6). Cause : horizon IA de
-  5 pas = 350 km au lieu de 700. `PLANNING_RANGE` 5 → 10 : sur 12 graines cités 9,25 → 7,75 (−16 %),
-  provinces entières 3,75 → 3,58, durée 5,0 → 4,9 tours, sièges réussis 46 %. Test m3 Douvres : la
-  guerre écossaise retirée (l'horizon atteint Édimbourg menacé).
-- Perf (IA) : revenus calculés une fois par tour d'IA (Context), gouverneur une fois par province,
-  revenus paresseux (rançons, ordres de chevalerie), sites de recrutement sans place libre sautés,
-  GridPlanner : propriétaire traversé par province. Résultats de sonde identiques.
+Réglages changés :
+- IA : `PLANNING_RANGE` 5 → 10 pas (700 km comme avant DC1). La baisse des cités prises venait de
+  DC1, pas de la densité (graines 1-6 : main 10,3/déc., DC1 4,9, DC3 5,5), surtout l'Angleterre en
+  France (29 cités prises → 6 : elle ne voyait plus que la côte). Test m3 « Douvres » : seule la
+  guerre franco-anglaise est gardée (l'horizon atteint Édimbourg, menacé par les Écossais).
+- Effets de province : `province_effect_percent` (rules.json + schéma ; `province_building_effects`,
+  `province_capacity`) : bâtiments des places secondaires à 50 %. Cause des révoltes disparues :
+  DC1 raccourcit les occupations, puis la densité double l'apaisement des églises et abbayes
+  (−10 → −21 en moyenne) et l'IA garde l'impôt haut (28 → 37 % des tours). « Une fois par sorte »
+  essayé et écarté (biens des marchés divisés par deux, 16 % d'hommes en moins). Codex ordre public.
+- Hameaux : `MIN_SETTLEMENT_DISTANCE_KM` 3 → 5 ; `geo hamlets` (2 999, aucun à moins de 5 km sauf 1
+  à la limite) puis `geo anchors-fine` (le fichier de la branche n'ancrait que 569 colonies, écrasé
+  par une fusion de main : 1 192 maintenant).
+- Gardé : refuge neutre 1 pas (2 pas essayé : replis neutres 0,1 → 0,2, dispersions 1,25 → 1,1,
+  sans effet mesurable).
+- Perf de l'IA : vitesse de chantier une fois par place et `recruitable/buildable_with_supply`
+  (faits aussi par PB3f dans main : version de main gardée), `nearest_settlement` en parcours
+  fusionné, revenu brut une fois par tour d'IA, gouverneur une fois par province dans
+  `faction_income_effective`, revenus paresseux (subsides, rançons, ordres de chevalerie).
+  Résultats de sonde identiques avant/après.
+- Sonde `century_probe` : `CAPTURE_TRACE=1`, `ARMY_TRACE=<faction>`, impôt haut, hommes en campagne,
+  reprises aux rebelles.
 
-- Révoltes (cause trouvée) : DC1 les divise par ~3 (occupations plus courtes : 0,8 → 0,3 % des
-  provinces-tours) et la densité achève : les effets de province somment les bâtiments de toutes les
-  places (+268 églises paroissiales, +102 abbayes) → apaisement moyen −10 → −21, biens, santé et
-  place pour croître en hausse ; l'IA garde l'impôt haut (28 → 37 % des tours). Règle ajoutée
-  (`province_effect_percent`, rules.json + schéma + `province_building_effects`/`province_capacity`) :
-  bâtiments des places secondaires à 50 % sur la province. Essai « une fois par sorte » écarté :
-  il divise les biens de moitié (marchés) et l'IA lève 16 % d'hommes de moins que main.
-  Sur 12 graines : révoltes 5,7 → 5,0, mécontentement > 60 7,2 → 7,2, impôt haut 28,5 → 30,1,
-  hommes 27,0 k → 26,6 k, cités 9,25 → 7,64, provinces 3,75 → 3,28, durée 5,0 → 5,2.
-- Refuge neutre 1 → 2 pas essayé (12 graines) : sans effet mesurable (replis neutres 0,1 → 0,2,
-  dispersions 1,25 → 1,1 ; main 0,5 / 0,6) : la densité fournit déjà des refuges. Gardé à 1.
+### Mesures finales (`century_probe 120`, graines 1-12, même code que main)
+| | main 35783bcf | DC1 c3e5f17d | DC3 final |
+|---|---|---|---|
+| Guerre FR-EN (% des tours) | 64,0 | 61,3 | 62,9 |
+| Cités prises / décennie | 9,25 | 5,53 | 7,19 (−22 %) |
+| Provinces conquises en entier / déc. | 3,75 | 2,58 | 3,14 (−16 %) |
+| Durée d'une conquête (tours) | 5,03 | 4,21 | 4,88 (−3 %) |
+| Sièges engagés / réussis | 82 / 46 % | 71 / 26 % | 58 / 50 % |
+| Provinces occupées (% prov.-tours) | 0,82 | 0,42 | 0,48 |
+| Mécontentement > 60 (‰ prov.-tours) | 7,2 | 5,6 | 6,8 |
+| Révoltes / 200 tours | 5,7 | 2,5 | 3,2 |
+| Impôt haut (% fac.-tours) / hommes en campagne | 28,5 / 27,0 k | — | 30,2 / 26,6 k |
+| Banqueroutes / fac. / déc. | 0,07 | 0,05 | 0,06 |
+| Replis neutres / débandades / dispersions | 0,5 / 0,75 / 0,6 | 0 / 1,4 / 4,0 | 0,1 / 0,75 / 1,25 |
 
-Reste à faire en DC3 :
-1. Mesurer `turn_perf 50 3 1` (branche vs DC1 : moyenne 5,86 ms, p99 63,8 ms).
-2. Conquête : cités prises −33 % vs main ; cible ±25 % (OFFENSIVE_RANGE / PLANNING_RANGE,
-   priorité IA aux cités, garnisons des nouvelles places).
-3. Refuge neutre : neutral_radius_steps 1 → 2 ? (débandades loin de chez soi).
-4. Révoltes quasi nulles (9,4 → 0,6 / 200 tours) : cause à trouver (`REVOLT_TRACE=1 century_probe`).
-5. 109 hameaux sur l'emprise d'une colonie (masqués au rendu par DC4) : `geo hamlets` à revoir.
-6. Supprimer les worktrees de sonde `../gp-dc3-main` et `../gp-dc3-dc1`.
+DC1 est l'ancien code (avant la revue de code et PB3) : comparer DC3 à main.
+
+`turn_perf 50 3 1` (release, 3 passes alternées, charge machine ~12) :
+| | moyenne | p95 | p99 | max |
+|---|---|---|---|---|
+| DC1 | 2,94 ms | 10,2 | 14,9 | 20,7 |
+| main (570 places, PB3) | 1,57 ms | 5,0 | 8,2 | 13,1 |
+| DC3 final (1 192 places, PB3) | 2,66 ms | 9,6 | 15,2 (+2 % vs DC1) | 21,9 |
+
+### Points ouverts
+- Révoltes 3,2 contre 5,7 dans main : le mécontentement élevé est revenu (6,8 ‰ contre 7,2) mais les
+  occupations restent plus courtes (0,48 % contre 0,82) : effet du pas de 70 km, pas de la densité.
+- Sièges engagés −30 % mais mieux réussis (50 % contre 46 %) : les cités tombent à −22 %.
+- Recherche : `research_points_per_turn` somme les bâtiments de toutes les places possédées
+  (+102 abbayes à 0,25) : non mesuré.
+- Hérésie : le compte des bâtiments religieux de la province n'est pas pondéré.
+- IA vs main : +70 % de temps moyen (plus de places, horizon doublé), sous la cible de 50 ms.
+- Rendu des hameaux (5 km) non revérifié dans Godot (`dc4_density_probe.gd`, fenêtré).
