@@ -10,7 +10,7 @@
     },
     "pressure": {
       "type": "object",
-      "description": "Pression d'un régiment = poids par homme × racine du nombre de rangs × fraîcheur × moral × charge × formation. L'écart relatif des deux pressions fixe la vitesse de recul du plus faible.",
+      "description": "Pression d'un régiment = poids par homme × savoir-faire × racine du nombre de rangs × fraîcheur × moral × charge × formation. L'écart relatif des deux pressions fixe la vitesse de recul du plus faible.",
       "properties": {
         "max_speed_mps": {
           "type": "number",
@@ -41,6 +41,18 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Poids ajouté par point d'armure."
+        },
+        "melee_base": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Facteur de savoir-faire au corps à corps : melee_base + mêlée × melee_per_point."
+        },
+        "melee_per_point": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.1,
+          "description": "Facteur ajouté par point de mêlée (des hommes rompus au combat poussent mieux)."
         },
         "rank_cap": {
           "type": "integer",
@@ -97,6 +109,8 @@
         "full_speed_share",
         "mounted_weight",
         "armor_weight_per_point",
+        "melee_base",
+        "melee_per_point",
         "rank_cap",
         "min_freshness",
         "fatigue_scale",
