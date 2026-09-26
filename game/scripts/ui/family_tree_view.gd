@@ -352,7 +352,10 @@ func draw_links(canvas: Control) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
+	if event is InputEventMagnifyGesture:
+		set_zoom(zoom * (event as InputEventMagnifyGesture).factor)
+		accept_event()
+	elif event is InputEventMouseButton:
 		var button := event as InputEventMouseButton
 		if button.ctrl_pressed and button.pressed and button.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 			set_zoom(zoom * (1.1 if button.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.1))

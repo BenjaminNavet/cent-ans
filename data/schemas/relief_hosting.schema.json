@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/relief_hosting.schema.json",
+  "title": "Hébergement du paquet « Cent Ans relief »",
+  "description": "Fichier data/map/relief_hosting.json (lot SZ7, ADR 0077) : où télécharger le cache du relief fin (data/map/pyramid/, ~2,8 Go, hors git) quand il n'est pas recalculé sur place. `version` dérive de la cuisson de la pyramide : `bake_versions` du manifeste (relief_pyramid.json, lot SZ2, bake_stamp.py) pour les étages 1-7, plus `generated_at` des fleuves et routes fins (rivers_fine.json, fine_anchors.json, qui n'ont pas encore leur propre `bake_versions`). `cent-ans geo relief-pack` incrémente `version` automatiquement si cette empreinte (`bake.signature`) a changé depuis le dernier paquet publié. `base_url` contient le gabarit `{version}`. Lu par `cent_ans_tools.geo.relief_fetch`. Rendu/outillage seulement, aucune règle de jeu.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "package_name": { "type": "string", "minLength": 1 },
+    "base_url": {
+      "type": "string",
+      "description": "URL de base des Releases GitHub du dépôt de données, avec le gabarit {version} (ex. .../download/v{version}/).",
+      "pattern": "\\{version\\}"
+    },
+    "version": { "type": "integer", "minimum": 1 },
+    "manifest_name": { "type": "string", "minLength": 1, "description": "Nom du fichier manifeste dans chaque version publiée." },
+    "bake": {
+      "type": "object",
+      "description": "Empreinte de la cuisson correspondant à `version` (remplie par `relief-pack`).",
+      "properties": {
+        "pyramid_bake_versions": {
+          "type": "object",
+          "description": "Copie de `relief_pyramid.json`.`bake_versions` (tier1-3, lot SZ2) au moment du paquet.",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "rivers_generated_at": { "type": ["string", "null"] },
+        "roads_generated_at": { "type": ["string", "null"] },
+        "signature": { "type": ["string", "null"], "description": "SHA-256 de {pyramid_bake_versions, rivers_generated_at, roads_generated_at} (JSON canonique)." }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["package_name", "base_url", "version", "manifest_name"],
+  "additionalProperties": false
+}

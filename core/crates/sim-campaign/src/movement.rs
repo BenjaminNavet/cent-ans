@@ -165,6 +165,7 @@ pub fn path_to(
 /// and pays in men and morale for the disembarkation.
 pub(crate) fn land_on_hostile_shore(
     state: &mut CampaignState,
+    data: &GameData,
     army_id: &ArmyId,
     province: Option<&ProvinceId>,
     events: &mut Vec<GameEvent>,
@@ -175,6 +176,7 @@ pub(crate) fn land_on_hostile_shore(
     } else {
         LANDING_LOSS_PERCENT
     };
+    let name = state.army_name(data, army_id);
     let Some(army) = state.armies.get_mut(army_id) else {
         return;
     };
@@ -191,7 +193,7 @@ pub(crate) fn land_on_hostile_shore(
     let faction = army.faction.clone();
     let mut event = GameEvent::new(
         EventKind::Attrition,
-        format!("Débarquement en terre hostile : l'armée {army_id} perd {lost} hommes."),
+        format!("Débarquement en terre hostile : {name} perd {lost} hommes."),
     )
     .army(army_id)
     .faction(&faction);
@@ -932,7 +934,8 @@ fn retreat_beaten_army(
                 data,
                 army_id,
                 format!(
-                    "L'armée {army_id}, coupée de ses places, recule et perd {lost} traînards."
+                    "{}, coupé de ses places, recule et perd {lost} traînards.",
+                    crate::events::capitalize(&state.army_name(data, army_id))
                 ),
                 events,
             );
@@ -956,7 +959,8 @@ fn retreat_beaten_army(
                         data,
                         army_id,
                         format!(
-                            "Débandade : l'armée {army_id}, coupée de ses places, perd {lost} hommes avant de se rallier."
+                            "Débandade : {}, coupé de ses places, perd {lost} hommes avant de se rallier.",
+                            state.army_name(data, army_id)
                         ),
                         events,
                     );
@@ -1046,13 +1050,14 @@ fn disperse_army(
     };
     let faction = army.faction.clone();
     let province = state.army_province(data, army);
+    let name = state.army_name(data, army_id);
     if let Some(general) = army.general.clone() {
         state.detach_general(&general);
     }
     state.armies.remove(army_id);
     let mut event = GameEvent::new(
         EventKind::ArmyDestroyed,
-        format!("Débandade : l'armée {army_id}, coupée de ses places, se disperse."),
+        format!("Débandade : {name}, coupé de ses places, se disperse."),
     )
     .army(army_id)
     .faction(&faction);
@@ -1103,7 +1108,10 @@ pub(crate) fn apply_outcome(
         events.push(
             GameEvent::new(
                 EventKind::Medicine,
-                format!("{tended} blessés soignés rejoignent les rangs de l'armée {army_id}."),
+                format!(
+                    "{tended} blessés soignés rejoignent les rangs de {}.",
+                    state.army_name(data, army_id)
+                ),
             )
             .province(&location)
             .army(army_id)
@@ -1132,18 +1140,16 @@ pub(crate) fn apply_outcome(
         }
     }
     if destroyed {
+        let name = crate::events::capitalize(&state.army_name(data, army_id));
         if let Some(general) = &general {
             state.detach_general(general);
         }
         state.armies.remove(army_id);
         events.push(
-            GameEvent::new(
-                EventKind::ArmyDestroyed,
-                format!("L'armée {army_id} est anéantie."),
-            )
-            .province(&location)
-            .army(army_id)
-            .faction(&faction),
+            GameEvent::new(EventKind::ArmyDestroyed, format!("{name} est anéanti."))
+                .province(&location)
+                .army(army_id)
+                .faction(&faction),
         );
     }
 }

@@ -75,10 +75,12 @@ func setup(checked: ReliefCacheStatus) -> void:
 	box.add_child(body)
 	if exported:
 		return
+	# SZ7 (ADR 0077) : `relief-fetch` (paquet déjà cuit, plus rapide) proposé en premier ;
+	# `relief-all` (recalcul, plusieurs heures) reste la solution de repli sans hébergement.
 	var row := HBoxContainer.new()
 	box.add_child(row)
 	command_field = LineEdit.new()
-	command_field.text = ReliefCacheStatus.REGEN_COMMAND
+	command_field.text = ReliefCacheStatus.FETCH_COMMAND
 	command_field.editable = false
 	command_field.selecting_enabled = true
 	command_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -91,8 +93,14 @@ func setup(checked: ReliefCacheStatus) -> void:
 	var copy := Button.new()
 	copy.text = "Copier"
 	copy.tooltip_text = "Copier la commande dans le presse-papiers"
-	copy.pressed.connect(func() -> void: DisplayServer.clipboard_set(ReliefCacheStatus.REGEN_COMMAND))
+	copy.pressed.connect(func() -> void: DisplayServer.clipboard_set(ReliefCacheStatus.FETCH_COMMAND))
 	row.add_child(copy)
+	var fallback := Label.new()
+	fallback.text = "Sans hébergement disponible : %s" % ReliefCacheStatus.REGEN_COMMAND
+	fallback.add_theme_font_size_override("font_size", 12)
+	fallback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	fallback.custom_minimum_size = Vector2(WIDTH - 32.0, 0.0)
+	box.add_child(fallback)
 
 
 func dismiss() -> void:

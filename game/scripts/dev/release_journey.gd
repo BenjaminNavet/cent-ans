@@ -351,6 +351,14 @@ var _no_cast: Array[Node] = []
 
 func _apply_config(map: Node, config: String) -> void:
 	RenderQuality.override_level = config if config in ["low", "medium", "ultra"] else ""
+	# PB3b : `metalfx_s:<échelle>`, `metalfx_t:<échelle>`, `bilinear:<échelle>` (`scale75` :
+	# bilinéaire 0,75) ; `off` ailleurs (référence : définition native, MSAA du préréglage).
+	if config == "scale75":
+		RenderQuality.upscale_override = "bilinear:0.75"
+	elif config.begins_with("metalfx_s:") or config.begins_with("metalfx_t:") or config.begins_with("bilinear:"):
+		RenderQuality.upscale_override = config
+	else:
+		RenderQuality.upscale_override = "off"
 	RenderQuality.reapply(get_tree())
 	for node in _hidden:
 		if is_instance_valid(node):
@@ -373,7 +381,6 @@ func _apply_config(map: Node, config: String) -> void:
 		if not attributes.has_meta("rl1_dof"):
 			attributes.set_meta("rl1_dof", attributes.dof_blur_far_enabled)
 		attributes.dof_blur_far_enabled = bool(attributes.get_meta("rl1_dof")) and config != "no_dof"
-	get_tree().root.scaling_3d_scale = 0.75 if config == "scale75" else 1.0
 	var terrain: Node = map.get("terrain")
 	if terrain != null:
 		terrain.set("fine_enabled", config != "no_fine")

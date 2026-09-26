@@ -10,6 +10,9 @@ extends Node
 var map: Node = null  # CampaignMap
 var panel: DiplomacyPanel
 var button: Button
+## Q5 : propositions déjà présentées au joueur (id → true). Le panneau ne s'ouvre seul que pour
+## une offre nouvelle ; les suivantes restent signalées par la pastille « Diplomatie ».
+var _seen_offers: Dictionary = {}
 
 
 func setup(campaign_map: Node) -> void:
@@ -70,7 +73,13 @@ func after_end_turn() -> void:
 	if not available():
 		return
 	var offers: Array = map.sim.call("get_offers")
-	if not offers.is_empty():
+	var fresh := 0
+	for offer in offers:
+		var offer_id := int(offer.get("id", -1))
+		if not _seen_offers.has(offer_id):
+			_seen_offers[offer_id] = true
+			fresh += 1
+	if fresh > 0:
 		open_panel()
 		map.ui.show_toast("%s en attente." % FrText.count(offers.size(), "proposition diplomatique", "propositions diplomatiques"))
 
