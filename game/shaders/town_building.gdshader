@@ -34,11 +34,20 @@ uniform float lift_m = 0.0;
 uniform int lod_mode = 0;
 uniform vec3 lod_camera = vec3(0.0, 1e6, 0.0);
 uniform float lod_range = 1.6;
+// Lot SZ4 : sol bâti vu de loin (maisons sous-pixel) teinté par la couleur moyenne (dernier niveau
+// de mip) d'une couche de toit de l'atlas, tirée par cellule de `roofscape_cell_m` ; part bâtie
+// dans `UV2.y` ; fondu selon la distance caméra (unités) de `roofscape_near` à `roofscape_far`.
+uniform float roofscape = 0.0;
+uniform float roofscape_near = 1.2;
+uniform float roofscape_far = 3.5;
+uniform float roofscape_cell_m = 9.0;
+uniform float roofscape_gain = 1.0;
 
 varying flat int layer;
 varying float tint_shift;
 varying vec3 world_m;
 varying vec3 world_n;
+varying float v_built;
 
 void vertex() {
 	layer = clamp(int(COLOR.a * 16.0), 0, 15);
@@ -62,6 +71,13 @@ void vertex() {
 	}
 	world_m = VERTEX * meters_per_unit;
 	world_n = NORMAL;
+	v_built = UV2.y;
+}
+
+float roof_hash(vec2 p) {
+	p = fract(p * vec2(127.1, 311.7));
+	p += dot(p, p + 19.19);
+	return fract(p.x * p.y);
 }
 
 void fragment() {
@@ -80,6 +96,26 @@ void fragment() {
 	if (snow > 0.0 && layer >= roof_first && layer <= roof_last) {
 		albedo = mix(albedo, vec3(0.9, 0.92, 0.97) * (0.85 + 0.15 * base.r), snow);
 	}
+	float roughness = tint.a;
+	if (roofscape > 0.0 && v_built > 0.0) {
+		float far_w = smoothstep(roofscape_near, roofscape_far, distance(world_m / meters_per_unit, CAMERA_POSITION_WORLD));
+		float w = clamp(v_built * 1.6, 0.0, 1.0) * far_w * roofscape;
+		if (w > 0.0) {
+			float h = roof_hash(floor(world_m.xz / roofscape_cell_m));
+			int roof = roof_first + int(floor(h * float(roof_last - roof_first + 1)));
+			roof = clamp(roof, roof_first, roof_last);
+			vec3 mean = textureLod(albedo_array, vec3(0.5, 0.5, float(roof)), 12.0).rgb * layer_tint[roof].rgb;
+			// Ruelles et cours entre les toits : bord sombre de chaque cellule.
+			vec2 f = abs(fract(world_m.xz / roofscape_cell_m) - 0.5) * 2.0;
+			float gap = smoothstep(0.72, 0.95, max(f.x, f.y));
+			mean *= roofscape_gain * mix(0.8, 1.15, fract(h * 7.31)) * mix(1.0, 0.55, gap);
+			if (snow > 0.0) {
+				mean = mix(mean, vec3(0.9, 0.92, 0.97), snow);
+			}
+			albedo = mix(albedo, mean, w);
+			roughness = mix(roughness, layer_tint[roof].a, w);
+		}
+	}
 	ALBEDO = albedo;
-	ROUGHNESS = tint.a;
+	ROUGHNESS = roughness;
 }

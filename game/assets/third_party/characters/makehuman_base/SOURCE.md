@@ -12,5 +12,7 @@
   2020 »). La licence GPL du code de MPFB ne s'étend pas aux personnages produits
   (FAQ MakeHuman : les sorties et les assets système sont CC0).
 - **Licence du dérivé** : CC0 1.0.
+- **Lot FG1** : 8 visages en clés de forme `face_0`-`face_7` (âge et cibles de détail MPFB,
+  liste `FACES` du script) ; lus par `battle_fine_figures.py`.
 - **Réglages** : homme ~25 ans, musculature 0,68, poids 0,55, proportions 0,65, taille 0,55,
   90 % européen ; détails du visage légers (nez busqué, pommettes, menton) listés dans le script.
