@@ -24,7 +24,9 @@ dans `docs/landmarks-v2.md` (à lire en premier pour VH5-VH8).
 - [x] Rouen vers 1340 (`data/landmarks_v2/rouen.json`) : 706 rues OSM, enceinte 9 portes /
       65 tours, pont Mathilde habité, 26 monuments datés, 5 quartiers, 8 espaces libres
 - [x] Plan, gabarits, couche, fondu, plancher caméra levé
-- [x] Captures `docs/img/vh4/` ; mesure i/s (machine chargée : Rouen 27-28 i/s, Amiens 23-25)
+- [x] Fusion de `main` (SZ2 : pyramide rebasculée, SZ4, SZ5) ; `geo landmarks` relancé (inchangé)
+- [x] Captures `docs/img/vh4/` (après SZ2) ; mesure i/s (machine chargée ≈ 110) : Rouen 55-56 i/s,
+      Amiens 46-60 i/s dans la même session
 - [x] Tests : `vh4_landmarks_test`, `zg4_camera_test`, `zg6_towns_test`, `smoke` OK ;
       pytest `test_landmarks_v2.py` (+ `test_landmarks`, `test_detail_dem`) OK
 - [x] Docs `docs/landmarks-v2.md`, `docs/godot-map.md`
@@ -36,7 +38,9 @@ dans `docs/landmarks-v2.md` (à lire en premier pour VH5-VH8).
 - Arbres des jardins non dessinés ; couvertures (`roofs`) non rendues ; parcellaire généré.
 - Plan en ≈ 2-4 s dans un fil de travail (GDScript) : à optimiser si Paris (3-4 fois plus grand)
   est trop lent (grille d'occupation, tests de quartier).
-- 60 i/s à remesurer sur machine au repos.
+- 60 i/s à confirmer sur machine au repos.
+- Au palier site, la Seine s'affiche en lit sableux sans nappe d'eau (état de la carte fine après
+  SZ2, hors lot) ; une grève verte sépare le mur de rive du lit (couloir interdit = largeur fine).
 
 ## Prochaine étape
 Fusion par l'orchestrateur ; puis VH5 (Paris), VH6 (Londres), VH7 (Orléans) sur ce format.
