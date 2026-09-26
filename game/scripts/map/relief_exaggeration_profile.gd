@@ -50,7 +50,7 @@ extends Resource
 @export var mountain_squash_far: float = 0.0
 @export var mountain_squash_full_exaggeration: float = 3.5
 ## Borne du facteur d'écrasement (garde l'inverse bien conditionné).
-@export var mountain_squash_max: float = 0.85
+@export var mountain_squash_max: float = 0.55
 
 ## Falaises : pentes du relief exagéré localement (pente vraie × (1 + gain), m/m) où la roche
 ## remplace progressivement la couverture du sol (terrain.gdshader).
