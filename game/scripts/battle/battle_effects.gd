@@ -67,6 +67,7 @@ var launched: int = 0
 
 var _height_at: Callable
 var _water_at: Callable
+var _wet_cache: Dictionary = {}  # PB3c : unit id -> [position, cap, profondeur, étendue mouillée]
 var _rng := RandomNumberGenerator.new()
 var _arrows: MultiMesh
 var _arrow_trails: MultiMesh
@@ -223,7 +224,7 @@ func update(units: Array, soldiers: BattleSoldiers, now: float, dt: float, camer
 		# B7 : la troupe est dans l'eau dès qu'une partie de son emprise y est (pas seulement son
 		# centre : la rivière fait ~18 m, un régiment 8 à 15 m de profondeur) ; les éclaboussures
 		# ne couvrent que cette partie, à la surface de l'eau.
-		var wet_span := _wet_span(unit, pos)
+		var wet_span := _wet_span_cached(id, unit, pos)
 		if wet_span.y > wet_span.x:
 			entry["span"] = wet_span
 			entry["strength"] = maxf(strength, 0.6 if mounted else 0.4)
@@ -521,6 +522,19 @@ func _wet_span(unit: Dictionary, pos: Vector3) -> Vector2:
 		return Vector2(1, 0)
 	var step := half * 0.5
 	return Vector2(maxf(lo - step * 0.5, -half), minf(hi + step * 0.5, half))
+
+
+## PB3c : `_wet_span` relu seulement quand le régiment a bougé (position, cap, profondeur) : la
+## simulation n'avance que par pas de 0,1 s, les images intermédiaires reprennent le résultat.
+func _wet_span_cached(id: int, unit: Dictionary, pos: Vector3) -> Vector2:
+	var facing := float(unit.get("facing", 0.0))
+	var depth := float(unit.get("depth", 6.0))
+	var cached: Array = _wet_cache.get(id, [])
+	if not cached.is_empty() and cached[0] == pos and float(cached[1]) == facing and float(cached[2]) == depth:
+		return cached[3]
+	var span := _wet_span(unit, pos)
+	_wet_cache[id] = [pos, facing, depth, span]
+	return span
 
 
 static func _forward(unit: Dictionary) -> Vector3:
