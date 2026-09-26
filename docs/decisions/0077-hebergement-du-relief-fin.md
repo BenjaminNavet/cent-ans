@@ -46,3 +46,17 @@ pas une constante. Si une boutique est choisie plus tard, D pourra doubler C san
   joueur : ils restent à faire par lui ou avec son accord explicite (`gh release create`,
   commande consignée dans `docs/geo.md`). Coût : 0 $.
 - Toute recuisson de la pyramide (par exemple SZ2) incrémente la version du paquet.
+
+### Addendum SZ7 (26/09) : version du paquet, compression
+
+- **Version** : `relief-pack` dérive `data/map/relief_hosting.json`.`version` de l'empreinte de
+  cuisson (`relief_pyramid.json`.`bake_versions`, écrite par le lot SZ2 / `bake_stamp.py`, plus
+  `generated_at` des fleuves et routes fins qui n'ont pas encore leur propre version de cuisson) :
+  si cette empreinte a changé depuis le dernier paquet, `version` est incrémentée et la nouvelle
+  empreinte enregistrée. Pas de geste manuel à part republier.
+- **Compression** : testée (zstd -19) sur un échantillon synthétique représentatif (PNG 16 bits,
+  blob binaire façon tuile CAFV) — gain ≈ 0 %, confirmant le choix de l'archive `.tar` non
+  compressée déjà pris ci-dessus.
+- **Parts** : découpage du flux tar brut (indépendant des limites de membre), pas d'archive
+  intermédiaire complète sur le disque ni en mémoire, ni côté empaquetage ni côté installation
+  (parts chaînées et extraites à la volée).
