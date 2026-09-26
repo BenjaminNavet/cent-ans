@@ -37,9 +37,9 @@ const FADE_SECONDS := 1.5
 ## Effet par type d'événement du journal, par priorité décroissante.
 const EVENT_SFX := [
 	["battle", "sword_clash"],
-	["siege", "war_horn"],
+	["siege_started", "war_horn"],
 	["war_declared", "war_horn"],
-	["province_taken", "fanfare"],
+	["province_captured", "fanfare"],
 	["peace_signed", "fanfare"],
 	["death", "choir"],
 	["succession", "choir"],
