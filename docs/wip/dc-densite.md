@@ -36,7 +36,7 @@ ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul loc
 Lancer la vague 1 (DC1 + DC2a-e, 6 agents).
 
 ## DC1 — mouvement ralenti (worktree `../gp-dc1`, branche `feat/densite-dc1`)
-État : fait, à fusionner. `points_per_step` 140 → 70 (rules.json + défaut Rust) ; description de
+État : fait, `main` fusionné (2d33df5a), fmt + clippy + 546 tests (data-model, sim-campaign, ai) verts, pytest codex et colonies verts. À fusionner dans `feat/densite`. `points_per_step` 140 → 70 (rules.json + défaut Rust) ; description de
 rules.json ; codex (mouvement, saisons, déroute, agents) ; tests `campaign.rs`, `m2_free_movement.rs`,
 `m4_path_plan.rs`, `c7a_retreat.rs`. Aucun code de règle changé : tout suit `points_per_step`.
 - Saison : 105 km de plaine (70 en hiver), 140 sur route ; repli ami 140 km, refuge neutre 70 km ;
