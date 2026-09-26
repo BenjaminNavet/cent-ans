@@ -146,6 +146,13 @@ func _refresh_growth(sim: Object) -> void:
 		return
 	var t0 := Time.get_ticks_msec()
 	var can_detail := sim.has_method("settlement_detail")
+	# PB3d : bâtiments, fortification et rang de cité de toutes les colonies en un appel groupé
+	# (au lieu d'un `settlement_detail` complet — revenus, panneaux — par colonie).
+	var live: Dictionary = sim.call("get_settlements_live") if sim.has_method("get_settlements_live") else {}
+	var live_index: Dictionary = {}
+	var live_ids: PackedStringArray = live.get("id", PackedStringArray())
+	for k in live_ids.size():
+		live_index[live_ids[k]] = k
 	var replaced := 0
 	var counts := [0, 0, 0, 0]
 	for i in _settlements.data.settlements.size():
@@ -154,7 +161,12 @@ func _refresh_growth(sim: Object) -> void:
 		if kind != "village" and kind != "town" and kind != "city":
 			continue
 		var id := str(entry["id"])
-		var detail: Dictionary = sim.call("settlement_detail", id) if can_detail else {}
+		var detail: Dictionary = {}
+		if live_index.has(id):
+			var k: int = live_index[id]
+			detail = {"buildings": Array(live["buildings"][k]), "fortification_level": int(live["fortification_level"][k]), "is_city": live["is_city"][k] != 0}
+		elif can_detail:
+			detail = sim.call("settlement_detail", id)
 		var population := float(province_states.get(str(entry["province"]), {}).get("population", 0.0))
 		var level := SettlementGrowth.level_of(entry, detail, population)
 		if level < 0:

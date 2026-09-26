@@ -38,7 +38,7 @@ func _run() -> void:
 			for key in et:
 				if int(et[key]) > 2000:
 					parts[key] = int(et[key]) / 1000
-		print("PB1_TURN %d total %.1f ms worst frame %.1f ms %s" % [turn, total, timing["worst_frame_ms"], parts])
+		print("PB1_TURN %d total %.1f ms worst frame %.1f ms %s %s" % [turn, total, timing["worst_frame_ms"], parts, map.get("last_end_turn_stats")])
 		for i in 5:
 			await process_frame
 		# Fenêtres ouvertes par la fin de tour (rapport, batailles) : fermées pour enchaîner.

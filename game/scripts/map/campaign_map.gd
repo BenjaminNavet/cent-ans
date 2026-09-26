@@ -108,6 +108,10 @@ var end_turn_running: bool = false
 var turn_wait: TurnWaitIndicator = null
 ## PB3d : fins de tour résolues et rafraîchies (bancs `pb1_turns.gd`, parcours RL1).
 var end_turns_refreshed: int = 0
+## PB3d : durées (ms) de la dernière fin de tour : lancement du fil (clone de l'état), attente,
+## installation + journal, `refresh_all`.
+var last_end_turn_stats: Dictionary = {}
+var _construction_ids := PackedStringArray()  # PB3d : chantiers marqués au dernier rafraîchissement
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -977,10 +981,19 @@ func _trade_route_tooltip(route: Dictionary) -> String:
 func _refresh_construction_markers() -> void:
 	if not _city_available():
 		return
-	var ids := PackedStringArray()
-	for index in range(1, map_data.province_count + 1):
-		ids.append(str(map_data.get_province(index).get("id", "")))
-	construction_markers.refresh(ids, _is_under_construction, _construction_marker_position)
+	# PB3d : chantiers lus dans l'instantané groupé ; marqueurs refaits seulement s'ils changent.
+	var snapshot := ProvinceSnapshot.of(sim, map_data)
+	var building := PackedStringArray()
+	for i in snapshot.ids.size():
+		if snapshot.constructing.size() == snapshot.ids.size():
+			if snapshot.constructing[i] != 0:
+				building.append(snapshot.ids[i])
+		elif _is_under_construction(snapshot.ids[i]):
+			building.append(snapshot.ids[i])
+	if building == _construction_ids and construction_markers.marker_count() == building.size():
+		return
+	_construction_ids = building
+	construction_markers.refresh(building, func(_id: String) -> bool: return true, _construction_marker_position)
 
 
 func _is_under_construction(province_id: String) -> bool:
@@ -1033,7 +1046,9 @@ func _on_end_turn(threaded: bool = false) -> void:
 	if audio != null:
 		audio.on_turn_events(events)
 	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
+	var t_refresh := Time.get_ticks_usec()
 	refresh_all()
+	last_end_turn_stats["refresh_ms"] = (Time.get_ticks_usec() - t_refresh) / 1000.0
 	end_turns_refreshed += 1
 	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
 		await ai_replay.play()
@@ -1058,8 +1073,13 @@ func _on_end_turn(threaded: bool = false) -> void:
 ## pont le permet ; synchrone sinon (simulation factice, pont ancien). Renvoie les événements du
 ## tour, ou `null` si la fin de tour a été abandonnée (chargement d'une partie pendant le calcul).
 func _resolve_end_turn(threaded: bool) -> Variant:
+	last_end_turn_stats = {}
+	var t0 := Time.get_ticks_usec()
 	if not threaded or not sim.has_method("begin_end_turn") or not bool(sim.call("begin_end_turn")):
-		return sim.call("end_turn")
+		var sync_events: Variant = sim.call("end_turn")
+		last_end_turn_stats["sync_ms"] = (Time.get_ticks_usec() - t0) / 1000.0
+		return sync_events
+	last_end_turn_stats["begin_ms"] = (Time.get_ticks_usec() - t0) / 1000.0
 	end_turn_running = true
 	ui.set_end_turn_enabled(false)
 	if turn_wait == null:
@@ -1073,7 +1093,11 @@ func _resolve_end_turn(threaded: bool) -> Variant:
 		if not is_instance_valid(turn_sim) or not bool(turn_sim.call("is_end_turn_pending")):
 			events = turn_sim.call("poll_end_turn") if is_instance_valid(turn_sim) else null
 			break
+		var t_poll := Time.get_ticks_usec()
 		events = turn_sim.call("poll_end_turn")
+		if events != null:
+			last_end_turn_stats["install_ms"] = (Time.get_ticks_usec() - t_poll) / 1000.0
+	last_end_turn_stats["wait_ms"] = (Time.get_ticks_usec() - t0) / 1000.0
 	end_turn_running = false
 	if is_instance_valid(turn_wait):
 		turn_wait.end()
