@@ -265,6 +265,10 @@ pub struct BattleSim {
     /// PB3c: bumped by every change of the battle outside a simulation step
     /// (orders, deployment, new battle, replay jump): invalidates `poses`.
     pose_epoch: u64,
+    /// PB3e (ADR 0090): the next step computed on a worker thread, when
+    /// `set_step_thread(true)` (the battle scene; tests stay synchronous).
+    step_thread: bool,
+    steps: crate::battle_step_job::StepPipeline,
     base: Base<RefCounted>,
 }
 
@@ -281,6 +285,10 @@ struct PoseCache {
     raw: Vec<Option<Vec<f32>>>,
     /// Unit id -> the buffer handed out (poses zero-padded to the capacity).
     padded: Vec<PackedFloat32Array>,
+    /// PB3e: unit id -> serial of `padded[id]` (changes whenever it is
+    /// rebuilt): the renderer skips re-sending an unchanged buffer.
+    versions: Vec<i64>,
+    serial: i64,
 }
 
 /// Appends the `MultiMesh` transform (12 floats, rotation about Y) of a pose.
@@ -322,6 +330,8 @@ impl IRefCounted for BattleSim {
             poses: PoseCache::default(),
             units_cache: None,
             pose_epoch: 0,
+            step_thread: false,
+            steps: Default::default(),
             base,
         }
     }
@@ -332,6 +342,8 @@ impl BattleSim {
     /// poses must be rebuilt.
     pub(crate) fn touch_poses(&mut self) {
         self.pose_epoch = self.pose_epoch.wrapping_add(1);
+        // PB3e: a step computed ahead from the state of before is useless.
+        self.steps.clear();
     }
 }
 
@@ -509,12 +521,43 @@ impl BattleSim {
         };
         // EP13: a replay advances by its recorded inputs.
         if let Some(player) = &mut self.player {
+            self.steps.clear();
             player.advance(sim, dt);
             return;
         }
-        sim.tick(dt);
+        if self.step_thread {
+            self.steps.tick(sim, dt, self.pose_epoch);
+        } else {
+            sim.tick(dt);
+        }
         if let Some(recorder) = &mut self.recorder {
             recorder.observe(sim);
+        }
+    }
+
+    /// PB3e (ADR 0090): computes the next fixed step on a worker thread
+    /// while the frames show the current one (same battle, bit for bit, as
+    /// the synchronous mode kept by default for tests and headless runs).
+    #[func]
+    fn set_step_thread(&mut self, enabled: bool) {
+        self.step_thread = enabled;
+        if !enabled {
+            self.steps.clear();
+        }
+    }
+
+    #[func]
+    fn get_step_thread(&self) -> bool {
+        self.step_thread
+    }
+
+    /// PB3e measures: `{adopted, in_place}` steps since the battle began
+    /// (adopted: computed ahead on the worker thread).
+    #[func]
+    fn get_step_stats(&self) -> VarDictionary {
+        vdict! {
+            "adopted" => self.steps.adopted as i64,
+            "in_place" => self.steps.in_place as i64,
         }
     }
 
@@ -898,7 +941,8 @@ impl BattleSim {
     /// `get_soldier_buffer`), `buffers[id]` zero-padded to
     /// `max(counts[id], capacities[id])` figures. Poses are rebuilt only after
     /// a simulation step or a change of the battle; in between the same
-    /// buffers come back (copy-on-write).
+    /// buffers come back (copy-on-write). PB3e: a third element `versions:
+    /// PackedInt64Array` numbers each buffer; it changes when the buffer does.
     #[func]
     fn get_soldier_buffers(&mut self, capacities: PackedInt32Array) -> VarArray {
         let Some(sim) = &self.sim else {
@@ -914,7 +958,10 @@ impl BattleSim {
             cache.key = Some(key);
             cache.raw.resize(units.len(), None);
             cache.padded.resize(units.len(), PackedFloat32Array::new());
+            cache.versions.resize(units.len(), -1);
         }
+        let mut versions = PackedInt64Array::new();
+        versions.resize(units.len());
         let mut counts = PackedInt32Array::new();
         counts.resize(units.len());
         let mut buffers = VarArray::new();
@@ -935,16 +982,23 @@ impl BattleSim {
                 }
                 cache.padded[id] = padded_buffer(&raw, capacity);
                 cache.raw[id] = Some(raw);
+                cache.serial += 1;
+                cache.versions[id] = cache.serial;
             }
             let raw = cache.raw[id].as_deref().unwrap_or_default();
             let len = raw.len().max(capacity * 12);
             if cache.padded[id].len() != len {
                 cache.padded[id] = padded_buffer(raw, capacity);
+                cache.serial += 1;
+                cache.versions[id] = cache.serial;
             }
+            versions[id] = cache.versions[id];
             counts[id] = (raw.len() / 12) as i32;
             buffers.push(&cache.padded[id].to_variant());
         }
-        pair(&counts, &buffers)
+        let mut out = pair(&counts, &buffers);
+        out.push(&versions.to_variant());
+        out
     }
 
     /// `{width, depth, resolution, nx, nz, heights, forests[{x, z, radius}],

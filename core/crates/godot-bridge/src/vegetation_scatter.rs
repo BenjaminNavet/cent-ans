@@ -13,8 +13,11 @@ use std::time::Instant;
 
 use godot::classes::RefCounted;
 use godot::prelude::*;
+
+use crate::relief_lod_bridge::ReliefLod;
 use vegetation::{
-    reground, scatter_tile, Ground, MapRasters, ReliefFloor, TileRequest, TileResult, PAGE_PX,
+    reground, scatter_tile, DetailArea, Ground, MapRasters, ReliefFloor, TileRequest, TileResult,
+    PAGE_PX,
 };
 
 struct Job {
@@ -76,12 +79,23 @@ fn ground_of(grid: &VarDictionary) -> Ground {
         .get("qt_pages")
         .and_then(|v| v.try_to::<VarDictionary>().ok())
     {
+        // Lot PB3g: pages already held by the quadtree's native store are shared, not copied
+        // (a snapshot holds up to 256 pages of 512 KB).
+        let store = grid
+            .get("qt_store")
+            .and_then(|v| v.try_to::<Gd<ReliefLod>>().ok());
+        let store = store.as_ref().map(|s| s.bind());
         let pages = pages
             .iter_shared()
             .filter_map(|(key, bytes)| {
                 let key = key.try_to::<i64>().ok()?;
+                if let Some(shared) = store.as_ref().and_then(|s| s.page_bytes(key)) {
+                    if shared.len() >= PAGE_PX * PAGE_PX * 2 {
+                        return Some((key, shared));
+                    }
+                }
                 let bytes = bytes.try_to::<PackedByteArray>().ok()?;
-                (bytes.len() >= PAGE_PX * PAGE_PX * 2).then(|| (key, bytes.to_vec()))
+                (bytes.len() >= PAGE_PX * PAGE_PX * 2).then(|| (key, Arc::new(bytes.to_vec())))
             })
             .collect();
         return Ground::Pages {
@@ -103,6 +117,35 @@ fn ground_of(grid: &VarDictionary) -> Ground {
         },
         _ => Ground::None,
     }
+}
+
+/// Lot SZ4b: optional dense-forest cell of a request (`detail_rect` Rect2, `keep`, `parts_side`,
+/// `corridors` PackedFloat32Array of `x0, y0, x1, y1, half_width` segments kept free of trees).
+fn detail_of(params: &VarDictionary) -> Option<DetailArea> {
+    let rect = params.get("detail_rect")?.try_to::<Rect2>().ok()?;
+    Some(DetailArea {
+        rect: (
+            rect.position.x as f64,
+            rect.position.y as f64,
+            (rect.position.x + rect.size.x) as f64,
+            (rect.position.y + rect.size.y) as f64,
+        ),
+        keep: float_of(params, "keep", 1.0),
+        parts_side: int_of(params, "parts_side", 4).max(1) as usize,
+        corridors: params
+            .get("corridors")
+            .and_then(|v| v.try_to::<PackedFloat32Array>().ok())
+            .map(|values| {
+                values
+                    .as_slice()
+                    .as_chunks::<5>()
+                    .0
+                    .iter()
+                    .map(|c| c.map(|v| v as f64))
+                    .collect()
+            })
+            .unwrap_or_default(),
+    })
 }
 
 #[godot_api]
@@ -264,6 +307,7 @@ impl VegetationScatter {
             side,
             exclusions,
             ground,
+            detail: detail_of(&params),
         };
         self.send(Job {
             id,
@@ -311,6 +355,7 @@ impl VegetationScatter {
             side: 0,
             exclusions: Vec::new(),
             ground: ground_of(&ground_grid),
+            detail: None,
         };
         self.send(Job {
             id,

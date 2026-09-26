@@ -34,6 +34,8 @@ var _h: int = 0
 var _timer: float = 0.0
 var _dirty: bool = false
 var _last: Dictionary = {}  # id -> position (x, z) au dernier passage
+## PB3e : empreintes tamponnées en Rust (`StampMap`) ; `--no-pb3e` : boucles GDScript d'avant.
+var _map: RefCounted = null
 
 
 ## `field` : largeur et profondeur du champ (EP1), 1200 × 800 par défaut.
@@ -43,6 +45,10 @@ func setup(field: Vector2 = Vector2(1200.0, 800.0)) -> void:
 	_w = int(RECT.size.x / TEXEL)
 	_h = int(RECT.size.y / TEXEL)
 	_bytes.resize(_w * _h * 2)
+	_map = null
+	if ClassDB.class_exists(&"StampMap") and not OS.get_cmdline_user_args().has("--no-pb3e"):
+		_map = ClassDB.instantiate(&"StampMap")
+		_map.call("setup", _w, _h, 2, RECT.position, TEXEL)
 	_image = Image.create_from_data(_w, _h, false, Image.FORMAT_RG8, _bytes)
 	texture = ImageTexture.create_from_image(_image)
 	enabled = true
@@ -101,6 +107,9 @@ func on_corpse(pos: Vector3, kind: String, blood: float) -> void:
 
 ## Envoie la carte au GPU si elle a changé.
 func flush() -> void:
+	if _map != null:
+		_map.call("upload", _image, texture)
+		return
 	if not _dirty:
 		return
 	_dirty = false
@@ -110,12 +119,16 @@ func flush() -> void:
 
 ## Herbe couchée (0-1) en un point (tests, captures).
 func flatten_at(x: float, z: float) -> float:
+	if _map != null:
+		return float(_map.call("sample", x, z, 0))
 	var i := _index(x, z)
 	return 0.0 if i < 0 else float(_bytes[i]) / 255.0
 
 
 ## Sang sur l'herbe (0-1) en un point.
 func blood_at(x: float, z: float) -> float:
+	if _map != null:
+		return float(_map.call("sample", x, z, 1))
 	var i := _index(x, z)
 	return 0.0 if i < 0 else float(_bytes[i + 1]) / 255.0
 
@@ -133,6 +146,9 @@ func _index(x: float, z: float) -> int:
 ## Rectangle orienté (`half` demi-côtés, x le long du front) : ajoute `add_r` / `add_g`,
 ## R plafonné à `cap_r`.
 func _stamp_box(center: Vector2, facing: float, half: Vector2, add_r: int, add_g: int, cap_r: int) -> void:
+	if _map != null:
+		_map.call("stamp_box", center, facing, half, add_r, add_g, cap_r)
+		return
 	var axis_x := Vector2(cos(facing), -sin(facing))
 	var axis_z := Vector2(sin(facing), cos(facing))
 	var reach := half.length()
@@ -159,6 +175,9 @@ func _stamp_box(center: Vector2, facing: float, half: Vector2, add_r: int, add_g
 
 ## Disque à bord adouci : R et G montent vers `r_value` / `g_value` (jamais ne baissent).
 func _stamp_disc(center: Vector2, radius: float, r_value: int, g_value: int) -> void:
+	if _map != null:
+		_map.call("stamp_disc", center, radius, r_value, g_value)
+		return
 	var c := (center - RECT.position) / TEXEL
 	var rr := radius / TEXEL + 1.0
 	for iz in range(maxi(int(c.y - rr), 0), mini(int(c.y + rr) + 1, _h)):

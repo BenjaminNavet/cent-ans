@@ -22,7 +22,7 @@ const PLACES := [
 	["massif_central", Vector2(2233.0, 2405.0), false],
 	["crecy", Vector2(2191.5, 1706.0), false],
 	["falaises_normandes", Vector2(2018.0, 1772.0), false],
-	["paris", Vector2(2213.2, 1923.9), false],
+	["paris", Vector2(2213.2, 1923.9), true],  # ville 1:1 (VH5) : relief à l'échelle vraie
 	["rouen_seine", Vector2(2097.0, 1819.4), true],  # ville 1:1 (VH4) : coteaux à l'échelle vraie
 	["val_de_loire", Vector2(2052.0, 2127.3), false],
 ]
