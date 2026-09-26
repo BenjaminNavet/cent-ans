@@ -25,7 +25,7 @@ toute production. Budget : 0 $ prévu (sources CC0, cuisson Blender) ; toute gé
 | FG1 | Corps humain en production : rigs `human` et cavalier (`R:`) aux bras allongés (texture d'os recuite, mêmes clips), 6-8 visages, chaîne LOD, sortie CAM1 lisible par le shader actuel, derrière un drapeau | FG0 | fait, fusionné (4522c2ad) |
 | FG2 | Équipement fin : mailles, plates, casques, armes, surcots avec plis, par recette (28 recettes) ; allonge du tir à l'arc | FG1 | lancé 26/09 |
 | FG3 | Matières cuites : atlas normal + ORM + masque de livrée, intégration shader skinné | FG1, **après DA1** (même shader) | à faire |
-| FG4 | Cheval en production : poids des jambes (galop), étriers élargis, chanfrein, harnachement, caparaçon, chaîne LOD | FG0 | lancé 26/09 |
+| FG4 | Cheval en production : poids des jambes (galop), étriers élargis, chanfrein, harnachement, caparaçon, chaîne LOD | FG0 | fait, fusionné (0a53488e) |
 | FG5 | Performance A/B (`--units=50`, Ultra), captures, ADR (relève le plafond de triangles de la bible § 6) | FG1-FG4 | à faire |
 
 Coordination : DA1 (armoiries sur les figurines, en pause dans une autre session) touche le même
@@ -58,3 +58,9 @@ Disque : 95 % plein le 25/09 (49 Go libres) ; un seul worktree par lot, supprim�
   LOD0, ×3,5 au LOD1) → FG5 : LOD0 relayé plus tôt, LOD1 plus léger. Montés : cheval Quaternius en
   attendant FG4 (raccord dans `FineMount`, `battle_fine.py`). Arc : allonge 0,55 m au lieu de 0,68.
   FG2 lancé (équipement), sans toucher cheval/harnachement (FG4).
+- 26/09 : FG4 fusionné (0a53488e). Cheval CC0 relevé articulation par articulation (`OGA_JOINTS`),
+  galop propre ; destrier / roncin / genet ; selle, bride, chanfrein, flançois, caparaçon ; robes par
+  teinte du shader × `fg_shade`. `STIRRUP_HALF_WIDTH` 0,36 m aussi dans le rendu par défaut (un peu
+  d'air botte/flanc sur le cheval Quaternius, accepté : remplacé en FG5). Monté LOD0 14-18 k.
+  FG2 devra fusionner main et relancer `battle_fine.py -- figures` pour les 8 montés ;
+  `battle_skinned.export_mesh` lit `fg_shade` (conflit possible).
