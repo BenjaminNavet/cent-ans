@@ -3,7 +3,7 @@
 #   1. release build of the Rust GDExtension cross-compiled to cent_ans.dll
 #      (core/build-windows.sh --release),
 #   2. Godot export with the "Windows Desktop" preset (game/export_presets.cfg):
-#      Cent Ans.exe + Cent Ans.pck + cent_ans.dll (+ Cent Ans.console.exe, which keeps a
+#      Cent Ans.exe + Cent Ans.pck + cent_ans.release.dll (+ Cent Ans.console.exe, which keeps a
 #      console open with the game log, for bug reports),
 #   3. copy of data/ next to the exe (read by MapPaths), relief cache placed according to
 #      CENT_ANS_EXPORT_RELIEF as in tools/export_macos.sh ("bundle", "external", "none"),

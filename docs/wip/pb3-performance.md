@@ -45,6 +45,7 @@ Suite de PB1 (`pb1-benchmark-perf.md`) et PB2 (`pb2-vegetation-shader.md`).
 - 26/09 ~09:45 : `main` recompilé (dylibs debug + release avec PB3a-d, smoke OK) après nettoyage de
   la crate `vegetation` contaminée dans `core/target` partagé (champ `detail` d'un worktree SZ).
 - 26/09 : **PAUSE demandée par le joueur** pendant la vague 2 ; agents priés de commiter leur wip.
+- 26/09 : **REPRISE** demandée par le joueur ; PB3e, PB3f, PB3g relancés dans leurs worktrees.
 
 ## Reprise (vague 2 en pause)
 | Lot | Worktree | Branche (dernier commit) | État à la pause |

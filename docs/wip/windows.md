@@ -1,4 +1,4 @@
-# Portage Windows (WIN) — EN PAUSE (2026-09-26)
+# Portage Windows (WIN) — TERMINÉ le 2026-09-26 (ADR 0087)
 
 Objectif : le jeu se lance et s'exporte sous Windows x86_64.
 
@@ -27,21 +27,13 @@ Objectif : le jeu se lance et s'exporte sous Windows x86_64.
   Windows 4.7.2 (`windows_*.exe`) dans `~/Library/Application Support/Godot/export_templates/4.7.2.stable/`.
 
 ## Reste à faire
-1. **CI** : branche `windows/port` poussée sur origin (2509864b), mais **aucun run n'est
-   apparu** (`gh run list --branch windows/port` vide, le workflow n'est pas sur la branche par
-   défaut d'origin). Vérifier que GitHub Actions est activé sur le dépôt, sinon pousser main
-   (qui contient le workflow) ou lancer `gh workflow run windows.yml --ref windows/port`.
-   Corriger ce qui casse (chemins, fins de ligne, smoke). Dépôt privé : minutes Windows ×2 sur
-   le quota gratuit (0 $ attendu, noter dans docs/budget.md sinon).
-2. **Export réel** : `CENT_ANS_EXPORT_RELIEF=none tools/export_windows.sh` (release ≈ 10 min
-   de LTO), vérifier que `export/windows/` contient exe, pck, `cent_ans.dll`, `data/`.
-   Si l'export Godot refuse une option du préréglage, l'ouvrir une fois dans l'éditeur
-   (Projet → Exporter) pour qu'il réécrive les clés de 4.7.2.
-3. Idéalement : une partie d'essai sur un vrai PC (GPU Vulkan/D3D12, perfs non mesurées).
-4. ADR `docs/decisions/0087-portage-windows.md` (numéro à vérifier : dernier = 0086).
-5. **README** (demandé par le joueur) : section « Windows » — prérequis, `core/build-windows.sh`,
-   `tools/export_windows.sh`, lancement. Attention : README.md avait des modifications non
-   commitées d'une autre session ; n'ajouter que la section.
-6. `docs/tools.md` : section « Export Windows » à côté de « Export macOS ».
-7. Fusion finale : tout est déjà dans main (commits `wip:` b9175b41 → 2509864b) ; supprimer
-   la branche `windows/port` (locale + distante) une fois la CI verte.
+- [x] 1. CI : run 36228061477 vert sous Windows (21 min, vraie sim Rust).
+- [x] 2. Export réel OK (`export/windows/`, 845 Mo sans relief : exe 104 Mo, pck 576 Mo — tous les
+  assets importés, pas propre à Windows —, dll 18 Mo, data 147 Mo, console.exe).
+- [ ] 3. Partie d'essai sur un vrai PC (joueur) : seul point non vérifié (rendu Vulkan/D3D12, perfs).
+  Non testé non plus : l'exe exporté lui-même (la CI teste la DLL debug dans l'éditeur).
+- [x] 4. ADR 0087 (b0b4807c).
+- [x] 5. README (99bb1f53, seulement la section ; Remerciements d'une autre session non touché).
+- [x] 6. docs/tools.md « Export Windows ».
+- [x] 7. Branche `windows/port` supprimée (locale + distante). Pour relancer la CI : pousser une
+  branche `windows/…` ou, une fois main poussée, `gh workflow run windows.yml`.
