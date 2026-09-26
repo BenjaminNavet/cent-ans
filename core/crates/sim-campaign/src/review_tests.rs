@@ -88,3 +88,24 @@ fn general_captured_in_assault_has_a_captor() {
     assert!(c.captive);
     assert_eq!(c.captor.as_ref(), Some(&controller));
 }
+
+/// Fix 2: a besieged garrison cannot form an army (it would lift the siege).
+#[test]
+fn besieged_garrison_cannot_create_an_army() {
+    let data = data();
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 1).unwrap();
+    let army = led_army(&state, "fac_france");
+    let guyenne = city(&state, "prov_guyenne");
+    besiege(&mut state, &data, &army, &guyenne);
+    let controller = state.settlements[&guyenne].controller.clone();
+    assert!(!state.settlements[&guyenne].garrison.is_empty());
+    let order = crate::orders::Order::CreateArmy {
+        settlement: crate::orders::Place::Settlement(guyenne.clone()),
+        units_from_garrison: vec![0],
+        general: None,
+    };
+    assert_eq!(
+        state.apply_order(&data, &controller, order),
+        Err(crate::orders::OrderError::SettlementBesieged)
+    );
+}
