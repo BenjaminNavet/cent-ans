@@ -88,6 +88,7 @@ var roads: RoadRenderer = null
 var life: CampaignLife = null  # CV1 : saisons, terroirs, croissance des colonies, vie ambiante
 var strategic: StrategicView = null  # CM2 : vue stratégique parchemin au zoom maximal
 var weather_view: CampaignWeatherView = null  # CM2 : météo de campagne (cœur, ADR 0027)
+var faction_borders: FactionBorders = null  # FR1 : frontières de faction lumineuses (ADR 0070)
 ## ZG4 : exagération verticale dynamique (faux : `--static-exaggeration`, captures « avant »).
 var dynamic_exaggeration: bool = true
 var _fps_probe_frames: int = -1
@@ -184,6 +185,10 @@ func _ready() -> void:
 	map_modes.name = "MapModeController"
 	add_child(map_modes)
 	map_modes.setup(self)
+	faction_borders = FactionBorders.new()  # FR1
+	faction_borders.name = "FactionBorders"
+	add_child(faction_borders)
+	faction_borders.setup(self)
 	sieges = SiegeController.new()
 	add_child(sieges)
 	sieges.setup(self)
@@ -346,6 +351,8 @@ func refresh_all() -> void:
 	if sim == null:
 		return
 	_refresh_owner_colors()
+	if faction_borders != null:  # FR1
+		faction_borders.refresh()
 	if minimap_ctl != null:  # C1 : brouillard avant les marqueurs d'armée
 		minimap_ctl.refresh_fog()
 	armies.refresh(sim, SimFacade.faction_color, player_faction)
@@ -1084,6 +1091,8 @@ func _process(_delta: float) -> void:
 	if life != null:  # CV1
 		life.update_view(distance)
 	strategic.update_view(distance)  # CM2
+	if faction_borders != null:  # FR1 : après CM2 (shader du terrain substitué au parchemin)
+		faction_borders.update_view(distance)
 	weather_view.update_view(camera_rig.focus, distance, strategic.weight)
 	if _fps_probe_frames > 0:
 		_fps_probe_map_us += Vector2(t1 - t0, Time.get_ticks_usec() - t1)
