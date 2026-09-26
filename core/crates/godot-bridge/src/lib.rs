@@ -15,6 +15,7 @@ mod battle_replay;
 mod battle_sim;
 mod campaign_sim;
 mod campaign_sim_agents;
+mod campaign_sim_ai_replay;
 mod campaign_sim_difficulty;
 mod campaign_sim_diplomacy;
 mod campaign_sim_dp2;
