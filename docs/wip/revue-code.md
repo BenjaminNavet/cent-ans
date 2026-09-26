@@ -33,7 +33,7 @@ Branche `fix/code-review`, scope `core/crates/sim-battle` seulement. Tests de r�
 Build : profil cargo isolé `review` (voir « Points ouverts ») dans le dossier target partagé.
 Référence d'équilibre avant correctifs (sondages ignorés) : ep7 `survey_all` Crécy 25/30,
 Azincourt 28/30, Poitiers 20/30 ; ep9b `survey` attaquant 4/10.
-Prochaine étape : constat 7.
+Prochaine étape : rapport, isoler l'effet d'équilibre des n° 1-2.
 
 | n° | statut | commit | note |
 |----|--------|--------|------|
@@ -42,7 +42,8 @@ Prochaine étape : constat 7.
 | 3 | corrigé | 2ed1b26a | en siège, `Withdraw` suit `grid_route` (A* rues/brèches) ; pas `route()` : sa branche échelles renvoie la ligne droite pour un assaillant, or on ne grimpe pas en se retirant. Sur le chemin de ronde : inchangé (tout droit vers l'intérieur). Hors siège : inchangé. |
 | 4 | corrigé | a7013d12 | `Battlefield::clamp_inside` + `ai::FIELD_MARGIN` (10 m, comme `View::move_to`) : dégagement sur pieux et retrait des saignés (`react`), repli des tireurs (~1799, non cité mais même défaut), second flanc de `coordinate_flanks`. Effet : ces ordres, auparavant refusés près du bord, s'exécutent. |
 | 5 | corrigé | a2e13448 | `primary_opponent` ignore les contacts morts depuis le calcul des contacts (tirs, feu, huile) ; le coup va à un ennemi vivant au contact au lieu d'être perdu. |
-| 6 | corrigé | (ce commit) | perf, comportement identique : libellés de déroute/ralliement formatés après la boucle pour les seuls régiments concernés ; `standard_rules` en `Arc` (clone = compteur) ; `faction_name` du camp cloné seulement à l'alarme ou au pillage. Pas de nouveau test (messages couverts par battle.rs, ep10_rout.rs). |
+| 6 | corrigé | a6a3785f | perf, comportement identique : libellés de déroute/ralliement formatés après la boucle pour les seuls régiments concernés ; `standard_rules` en `Arc` (clone = compteur) ; `faction_name` du camp cloné seulement à l'alarme ou au pillage. Pas de nouveau test (messages couverts par battle.rs, ep10_rout.rs). |
+| 7 | corrigé (partiel) | (ce commit) | `ObstacleCache` (sim/pathing.rs) : verdict libre/bloqué de chaque cellule gardé entre les A*, par camp, rempli paresseusement (pas de précalcul complet : un incendie qui change la signature coûterait sinon une grille entière d'un coup), invalidé par la signature des chemins et par `siege_mut`/`set_scenario`. Le mémo local de `search` disparaît. Non fait (comportement modifié) : réutiliser l'A* quand le but bouge peu, string pulling moins fréquent. Gain non chiffré proprement (machine chargée ; siege/f5/sg1 pas plus lents). |
 
 ## Corrections tools
 

@@ -253,3 +253,33 @@ fn no_blow_wasted_on_a_regiment_shot_dead_this_step() {
         "the fresh regiment takes the blow"
     );
 }
+
+/// The siege pathing keeps its obstacle cells between searches: the same
+/// way twice, and a new one once a wall comes down.
+#[test]
+fn siege_pathing_cache_follows_the_walls() {
+    let data = data();
+    let attacker = common::units(&data, &["unit_men_at_arms_foot"]);
+    let defender = common::units(&data, &["unit_urban_militia"]);
+    let siege = sim_battle::SiegeSetup {
+        fortification: 2,
+        breach: 0,
+    };
+    let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 11).unwrap();
+    lab(&mut sim);
+    let works = sim.siege().unwrap().clone();
+    let side = sim_battle::SideId::Attacker;
+    let (gx, gz) = works.pieces[works.gate].midpoint();
+    let from = (gx, gz - 80.0);
+    let to = works.center;
+    let first = sim.siege_route(side, from, to);
+    assert_eq!(first, sim.siege_route(side, from, to));
+    let breach = *works.front_walls().last().unwrap();
+    sim.siege_mut().unwrap().pieces[breach].hp = 0.0;
+    let opened = sim.siege_route(side, from, to);
+    assert!(opened.is_some(), "a way through the breach");
+    assert_ne!(first, opened);
+    let mut fresh = BattleSim::new(sim.setup().clone(), 11).unwrap();
+    fresh.siege_mut().unwrap().pieces[breach].hp = 0.0;
+    assert_eq!(opened, fresh.siege_route(side, from, to));
+}
