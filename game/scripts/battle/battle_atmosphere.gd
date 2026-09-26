@@ -183,6 +183,13 @@ static func _setup_sun(sun: DirectionalLight3D, p: Dictionary) -> void:
 
 
 ## Pluie (traits rapides) ou neige (flocons lents qui dérivent) autour de la caméra.
+## EP7 : une averse sous un ciel qui n'est pas celui de la pluie (carte historique : le ciel est
+## celui de la fin de la bataille) ; le nœud `Precipitation` de la caméra est retiré quand elle cesse.
+static func add_shower(camera: Camera3D) -> void:
+	if camera != null and camera.get_node_or_null("Precipitation") == null:
+		_add_precipitation(camera, true)
+
+
 static func _add_precipitation(camera: Camera3D, rain: bool) -> void:
 	if camera == null:
 		return
