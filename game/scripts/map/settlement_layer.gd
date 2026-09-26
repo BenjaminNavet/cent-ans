@@ -389,8 +389,8 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	label.fixed_size = true
 	label.pixel_size = 0.0011
 	label.no_depth_test = true
-	label.render_priority = 3
-	label.outline_render_priority = 2
+	label.render_priority = 4  # DC4 : texte et contour au-dessus des marqueurs (2)
+	label.outline_render_priority = 3
 	label.visible = false
 	var px: Vector2 = entry["px"]
 	label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y), px.y)
