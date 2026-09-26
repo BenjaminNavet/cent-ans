@@ -1171,8 +1171,8 @@ impl CampaignState {
             let between =
                 (&s.owner == a && &s.controller == b) || (&s.owner == b && &s.controller == a);
             if between {
-                s.controller = s.owner.clone();
-                s.siege = None;
+                let owner = s.owner.clone();
+                s.hand_over(&owner);
             }
             if s.siege.as_ref().is_some_and(|siege| {
                 (&siege.attacker == a && &s.controller == b)

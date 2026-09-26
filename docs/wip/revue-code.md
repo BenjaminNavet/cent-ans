@@ -23,6 +23,7 @@ Prochaine étape : constats 2 à 18 dans l'ordre (voir liste de la tranche 1-2).
 | 2 | corrigé | `order_create_army` refuse une place assiégée (`OrderError::SettlementBesieged`, comme `GarrisonUnits`). |
 | 3 | corrigé | `siege_leader` : le siège reste à l'assiégeant présent, sinon passe à un allié avec brèche et vivres ; `begin_siege` ne remplace plus le siège d'un allié. |
 | 4 | corrigé | repli `Fallback` : une armée vidée par `decimate` est dispersée (`disperse_army`), comme en débandade. |
+| 5 | corrigé | `SettlementState::hand_over` (fin du siège, file de recrutement et chantier perdus, sans remboursement) utilisé par `capture`, `cede_province`, la révolte (la garnison mutinée reste aux rebelles, inchangé) et la restitution des places occupées à la paix (`diplomacy`). |
 | 6 | corrigé | la sortie affronte toute la coalition assiégeante (`settlement_coalition`, forces sommées) ; le siège n'est levé que s'il ne reste aucun assiégeant. |
 
 ## Corrections tools
