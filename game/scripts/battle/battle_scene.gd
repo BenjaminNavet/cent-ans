@@ -144,6 +144,8 @@ var _bench_cpu_ms: float = 0.0
 var _bench_process_ms: Array = []
 var _bench_soldiers_ms: Array = []
 var _bench_soldiers_last_ms: float = 0.0
+var _bench_tick_ms: Array = []  # PB3c : durée de `BattleSim.tick` (pas de simulation) par image
+var _bench_tick_last_ms: float = 0.0
 ## Compteur d'images mesurées (GPU/CPU/A-B) qui ne repart pas à zéro entre répétitions
 ## (`--bench-repeat=`), contrairement à `_bench_frames` (fenêtre de mesure courante).
 var _bench_measured: int = 0
@@ -1083,8 +1085,10 @@ func _process(delta: float) -> void:
 	# EP8 : ralenti du plan cinématique (temps de bataille et animations).
 	var slow := staging.time_scale() if staging != null else 1.0
 	var running: bool = not paused and not battle.call("is_finished")
+	var tick_start := Time.get_ticks_usec()
 	if running:
 		battle.call("tick", delta * speed * slow)
+	_bench_tick_last_ms = float(Time.get_ticks_usec() - tick_start) / 1000.0
 	_refresh_view(false, delta * slow)
 	if music != null:
 		music.update(delta, units)
@@ -1162,6 +1166,7 @@ func _run_benchmark_frame(delta: float) -> void:
 		_bench_cpu_ms += RenderingServer.viewport_get_measured_render_time_cpu(viewport_rid)
 		_bench_process_ms.append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
 		_bench_soldiers_ms.append(_bench_soldiers_last_ms)
+		_bench_tick_ms.append(_bench_tick_last_ms)
 		_bench_gpu_samples += 1
 		# DA6 : sous Metal le temps GPU mesuré vaut 0 : durée de l'image à la place (vsync coupée).
 		_bench_ab_step(gpu_ms if gpu_ms > 0.0 else delta * 1000.0)
@@ -1215,6 +1220,7 @@ func _bench_finish() -> void:
 		"cpu_ms": _bench_cpu_ms / maxf(_bench_gpu_samples, 1),
 		"process_ms_median": _median(_bench_process_ms),
 		"soldiers_ms_median": _median(_bench_soldiers_ms),
+		"tick_ms_median": _median(_bench_tick_ms),
 		"quality": RenderQuality.current(),
 		# PF1 : géométrie de la dernière image mesurée (compare les préréglages).
 		"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
