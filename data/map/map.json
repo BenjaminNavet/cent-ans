@@ -80,7 +80,9 @@
       "fade_m": [
         600.0,
         1600.0
-      ]
+      ],
+      "valley_keep": 0.85,
+      "valley_dig_max_m": 2.0
     }
   },
   "relief_shade": {

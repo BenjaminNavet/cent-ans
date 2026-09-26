@@ -64,6 +64,7 @@ func setup(p_map: MapData, p_terrain: TerrainBuilder, p_tiers: ZoomTiers, settle
 	terrain = p_terrain
 	tiers = p_tiers if p_tiers != null else ZoomTiers.new()
 	profile = TownRenderProfile.load_default()
+	TownBuilder.set_roofscape({"near": profile.roofscape_near, "far": profile.roofscape_far, "strength": profile.roofscape_strength, "cell_m": profile.roofscape_cell_m, "gain": profile.roofscape_gain})
 	TownBuilder.manifest()  # chargé ici : les fils de travail le lisent (`TownBuilder.prepare`)
 	data = p_data if p_data != null else TownData.load_from(MAP_PATHS.default_data_dir().path_join("map"))
 	_ids.clear()
