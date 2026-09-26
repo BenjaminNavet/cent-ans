@@ -85,11 +85,12 @@ def main():
         for lv, n in sorted(meta["lods"].items())
     ]
     rows = [
-        ("montures et robes", types[:4]),
-        ("", types[4:8]),
-        ("tête, bride", [(os.path.join(src, f"head_{fig}.png"), "")] + lods),
+        ("montures et robes" if k == 0 else "", types[k : k + 4])
+        for k in range(0, len(types), 4)
     ]
-    rows = [r for r in rows if r[1]]
+    rows.append(
+        ("tête, bride ; LOD", [(os.path.join(src, f"head_{fig}.png"), "")] + lods)
+    )
     _sheet(
         "FG4 — montures, robes et niveaux de détail",
         "Destrier caparaçonné (chevaliers, gendarmes, étendard), roncin sans barde "
