@@ -101,30 +101,54 @@ impl MapRasters {
     }
 }
 
-/// Valley floor of the local relief exaggeration (lot ZG8, `MapData.relief_floor_at`): metres,
-/// bilinear between cell centres, edges replicated.
+/// Relief fields of the displayed height (`MapData.relief_fields_at`), bilinear between cell
+/// centres, edges replicated: valley floor of the local relief exaggeration (lot ZG8, metres),
+/// uncapped base and mountain squash factor k (lot SZ1). Empty `base` / `squash`: base = floor,
+/// k = 0.
 #[derive(Default)]
 pub struct ReliefFloor {
     pub data: Vec<f32>,
+    pub base: Vec<f32>,
+    pub squash: Vec<f32>,
     pub side: (usize, usize),
     pub cell: f64,
 }
 
 impl ReliefFloor {
-    fn at(&self, x: f64, z: f64) -> f64 {
+    /// (floor, base, k) at the map point (x, z).
+    fn fields_at(&self, x: f64, z: f64) -> (f64, f64, f64) {
         let (sx, sz) = self.side;
         if self.data.is_empty() || sx < 2 || sz < 2 {
-            return 0.0;
+            return (0.0, 0.0, 0.0);
         }
-        let half = 0.5 * (self.cell - 1.0);
-        let fx = ((x - half) / self.cell).clamp(0.0, sx as f64 - 1.0);
-        let fz = ((z - half) / self.cell).clamp(0.0, sz as f64 - 1.0);
+        let floor = Self::bilinear(&self.data, self.side, self.cell, x, z);
+        let base = if self.base.len() == self.data.len() {
+            Self::bilinear(&self.base, self.side, self.cell, x, z)
+        } else {
+            floor
+        };
+        let squash = if self.squash.len() == self.data.len() {
+            Self::bilinear(&self.squash, self.side, self.cell, x, z)
+        } else {
+            0.0
+        };
+        (floor, base, squash)
+    }
+
+    fn bilinear(d: &[f32], side: (usize, usize), cell: f64, x: f64, z: f64) -> f64 {
+        let (sx, sz) = side;
+        let (fx, fz) = {
+            let half = 0.5 * (cell - 1.0);
+            (
+                ((x - half) / cell).clamp(0.0, sx as f64 - 1.0),
+                ((z - half) / cell).clamp(0.0, sz as f64 - 1.0),
+            )
+        };
         let i = (fx as usize).min(sx - 2);
         let j = (fz as usize).min(sz - 2);
         let tx = fx - i as f64;
         let tz = fz - j as f64;
         let o = j * sx + i;
-        let d = &self.data;
         let top = lerp(d[o] as f64, d[o + 1] as f64, tx);
         let bottom = lerp(d[o + sx] as f64, d[o + sx + 1] as f64, tx);
         lerp(top, bottom, tz)
@@ -159,8 +183,10 @@ pub struct TileRequest {
     pub coarse_step: f64,
     pub tree_scale: f64,
     pub vertical_scale: f64,
-    /// Local relief gain (`MapData.relief_gain`, lot ZG8) and its valley floor.
+    /// Local relief gain (`MapData.relief_gain`, lot ZG8), mountain squash weight
+    /// (`MapData.relief_squash`, lot SZ1) and their relief fields.
     pub relief_gain: f64,
+    pub relief_squash: f64,
     pub floor: std::sync::Arc<ReliefFloor>,
     /// Coarse grids, `side × side`: forest, crops, conifer, beech, hedge, grove, region.
     pub coarse: [Vec<f32>; 7],
@@ -309,12 +335,16 @@ fn page_bilinear(bytes: &[u8], fx: f64, fy: f64, h_min: f64, h_range: f64) -> f6
 }
 
 impl TileRequest {
-    /// `MapData.display_height` (lot ZG8): s·(h + g·max(h − floor, 0)).
+    /// `MapData.display_height` (lots ZG8, SZ1):
+    /// s·(h − c·k·max(h − base, 0) + g·max(h − floor, 0)).
     fn display_height(&self, h_m: f64, x: f64, z: f64) -> f64 {
-        if self.relief_gain == 0.0 {
+        if self.relief_gain == 0.0 && self.relief_squash == 0.0 {
             return h_m * self.vertical_scale;
         }
-        self.vertical_scale * (h_m + self.relief_gain * (h_m - self.floor.at(x, z)).max(0.0))
+        let (floor, base, k) = self.floor.fields_at(x, z);
+        self.vertical_scale
+            * (h_m - self.relief_squash * k * (h_m - base).max(0.0)
+                + self.relief_gain * (h_m - floor).max(0.0))
     }
 
     /// `MapData.height_world_at` (displayed height of the 4096 heightmap).
@@ -826,6 +856,7 @@ mod tests {
             tree_scale: 1.0,
             vertical_scale: 0.01,
             relief_gain: 0.0,
+            relief_squash: 0.0,
             floor: Default::default(),
             coarse: [
                 vec![forest; n],
@@ -937,6 +968,7 @@ mod tests {
             data: vec![(h_m - 100.0) as f32; 4],
             side: (2, 2),
             cell: 64.0,
+            ..Default::default()
         });
         let lifted = 0.01 * (h_m + 2.0 * 100.0);
         assert!((req.height_world_at(&map, 10.0, 10.0) - lifted).abs() < 1e-6);
@@ -944,6 +976,29 @@ mod tests {
         let buffer = result.buffers.iter().find(|b| !b.is_empty()).unwrap();
         let height = (buffer[1].powi(2) + buffer[5].powi(2) + buffer[9].powi(2)).sqrt() as f64;
         assert!((buffer[7] as f64 - (lifted - 0.08 * height)).abs() < 1e-4);
+    }
+
+    #[test]
+    fn mountain_squash_lowers_ground_above_the_base() {
+        let map = flat_map(40000);
+        let h_m = map.height_m_at(10.0, 10.0);
+        let mut req = request(1.0, 0.0, 0.0, 1.0);
+        req.relief_gain = 0.5;
+        req.relief_squash = 0.8;
+        req.floor = std::sync::Arc::new(ReliefFloor {
+            data: vec![(h_m - 100.0) as f32; 4],
+            base: vec![(h_m - 1000.0) as f32; 4],
+            squash: vec![0.5; 4],
+            side: (2, 2),
+            cell: 64.0,
+        });
+        // s·(h − c·k·(h − base) + g·(h − floor)), same as `MapData.display_height_fields`.
+        let expected = 0.01 * (h_m - 0.8 * 0.5 * 1000.0 + 0.5 * 100.0);
+        assert!((req.height_world_at(&map, 10.0, 10.0) - expected).abs() < 1e-6);
+        // Below the base: unchanged.
+        assert!(
+            (req.display_height(h_m - 2000.0, 10.0, 10.0) - 0.01 * (h_m - 2000.0)).abs() < 1e-9
+        );
     }
 
     #[test]

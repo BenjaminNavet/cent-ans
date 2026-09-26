@@ -20,10 +20,10 @@ Fond, base et k dans une seule texture RGBF (`campaign_relief_floor`) et la gril
 ## État
 - [x] Captures « avant » (`docs/img/sz1/avant_*`)
 - [x] Squelette : réglages dans `ReliefExaggerationProfile` / `relief_exaggeration.tres`
-- [ ] ReliefFloor : champs base + k ; MapData : formule, inverse, poids publié
-- [ ] Shaders : `campaign_relief.gdshaderinc`, `relief_quadtree.gdshaderinc`
-- [ ] Rust vegetation + pont ; job d'arbres
-- [ ] Bornes AABB (quadtree, villes)
+- [x] ReliefFloor : champs base + k ; MapData : formule, inverse, poids publié
+- [x] Shaders : `campaign_relief.gdshaderinc`, `relief_quadtree.gdshaderinc`
+- [x] Rust vegetation + pont ; job d'arbres
+- [x] Bornes AABB (quadtree, villes)
 - [ ] Caméra au-dessus des crêtes voisines
 - [ ] Test `sz1_mountain_test.gd` ; zg4/zg8/smoke ; cargo
 - [ ] Captures après + itération
