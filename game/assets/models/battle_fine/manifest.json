@@ -1,0 +1,934 @@
+{
+ "figures": {
+  "archer_0": {
+   "fine": true,
+   "lods": [
+    "archer_0_lod0.mesh.bin",
+    "archer_0_lod1.mesh.bin",
+    "archer_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "bow",
+   "tris": [
+    10926,
+    1964,
+    338
+   ],
+   "variants": 3
+  },
+  "archer_1": {
+   "fine": true,
+   "lods": [
+    "archer_1_lod0.mesh.bin",
+    "archer_1_lod1.mesh.bin",
+    "archer_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crossbow",
+   "tris": [
+    10210,
+    1968,
+    335
+   ],
+   "variants": 2
+  },
+  "archer_2": {
+   "fine": true,
+   "lods": [
+    "archer_2_lod0.mesh.bin",
+    "archer_2_lod1.mesh.bin",
+    "archer_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crossbow",
+   "tris": [
+    11422,
+    1957,
+    332
+   ],
+   "variants": 2
+  },
+  "archer_3": {
+   "fine": true,
+   "lods": [
+    "archer_3_lod0.mesh.bin",
+    "archer_3_lod1.mesh.bin",
+    "archer_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "bow",
+   "tris": [
+    9776,
+    1958,
+    339
+   ],
+   "variants": 2
+  },
+  "archer_4": {
+   "fine": true,
+   "lods": [
+    "archer_4_lod0.mesh.bin",
+    "archer_4_lod1.mesh.bin",
+    "archer_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crossbow",
+   "tris": [
+    11859,
+    1943,
+    332
+   ],
+   "variants": 2
+  },
+  "archer_5": {
+   "fine": true,
+   "lods": [
+    "archer_5_lod0.mesh.bin",
+    "archer_5_lod1.mesh.bin",
+    "archer_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crossbow",
+   "tris": [
+    9471,
+    1913,
+    339
+   ],
+   "variants": 2
+  },
+  "cavalry_0": {
+   "fine": true,
+   "lods": [
+    "cavalry_0_lod0.mesh.bin",
+    "cavalry_0_lod1.mesh.bin",
+    "cavalry_0_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    16865,
+    2827,
+    631
+   ],
+   "variants": 2
+  },
+  "cavalry_1": {
+   "fine": true,
+   "lods": [
+    "cavalry_1_lod0.mesh.bin",
+    "cavalry_1_lod1.mesh.bin",
+    "cavalry_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    16269,
+    2749,
+    599
+   ],
+   "variants": 2
+  },
+  "cavalry_2": {
+   "fine": true,
+   "lods": [
+    "cavalry_2_lod0.mesh.bin",
+    "cavalry_2_lod1.mesh.bin",
+    "cavalry_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "horse_bow",
+   "tris": [
+    15501,
+    2753,
+    602
+   ],
+   "variants": 2
+  },
+  "cavalry_3": {
+   "fine": true,
+   "lods": [
+    "cavalry_3_lod0.mesh.bin",
+    "cavalry_3_lod1.mesh.bin",
+    "cavalry_3_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    17414,
+    2933,
+    650
+   ],
+   "variants": 2
+  },
+  "cavalry_4": {
+   "fine": true,
+   "lods": [
+    "cavalry_4_lod0.mesh.bin",
+    "cavalry_4_lod1.mesh.bin",
+    "cavalry_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    15557,
+    2752,
+    606
+   ],
+   "variants": 2
+  },
+  "cavalry_5": {
+   "fine": true,
+   "lods": [
+    "cavalry_5_lod0.mesh.bin",
+    "cavalry_5_lod1.mesh.bin",
+    "cavalry_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "horse_javelin",
+   "tris": [
+    15783,
+    2754,
+    600
+   ],
+   "variants": 2
+  },
+  "cavalry_6": {
+   "fine": true,
+   "lods": [
+    "cavalry_6_lod0.mesh.bin",
+    "cavalry_6_lod1.mesh.bin",
+    "cavalry_6_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "cavalry",
+   "style": "lance",
+   "tris": [
+    15193,
+    2759,
+    603
+   ],
+   "variants": 2
+  },
+  "crew_0": {
+   "fine": true,
+   "lods": [
+    "crew_0_lod0.mesh.bin",
+    "crew_0_lod1.mesh.bin",
+    "crew_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crew",
+   "tris": [
+    9794,
+    1784,
+    320
+   ],
+   "variants": 3
+  },
+  "crew_1": {
+   "fine": true,
+   "lods": [
+    "crew_1_lod0.mesh.bin",
+    "crew_1_lod1.mesh.bin",
+    "crew_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "crew",
+   "tris": [
+    9380,
+    1816,
+    345
+   ],
+   "variants": 2
+  },
+  "infantry_0": {
+   "fine": true,
+   "lods": [
+    "infantry_0_lod0.mesh.bin",
+    "infantry_0_lod1.mesh.bin",
+    "infantry_0_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "human",
+   "style": "sword",
+   "tris": [
+    11844,
+    1948,
+    333
+   ],
+   "variants": 2
+  },
+  "infantry_1": {
+   "fine": true,
+   "lods": [
+    "infantry_1_lod0.mesh.bin",
+    "infantry_1_lod1.mesh.bin",
+    "infantry_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "pike",
+   "tris": [
+    11069,
+    1963,
+    332
+   ],
+   "variants": 3
+  },
+  "infantry_2": {
+   "fine": true,
+   "lods": [
+    "infantry_2_lod0.mesh.bin",
+    "infantry_2_lod1.mesh.bin",
+    "infantry_2_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    11859,
+    1945,
+    325
+   ],
+   "variants": 4
+  },
+  "infantry_3": {
+   "fine": true,
+   "lods": [
+    "infantry_3_lod0.mesh.bin",
+    "infantry_3_lod1.mesh.bin",
+    "infantry_3_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    9862,
+    1810,
+    335
+   ],
+   "variants": 3
+  },
+  "infantry_4": {
+   "fine": true,
+   "lods": [
+    "infantry_4_lod0.mesh.bin",
+    "infantry_4_lod1.mesh.bin",
+    "infantry_4_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "pike",
+   "tris": [
+    11859,
+    1950,
+    330
+   ],
+   "variants": 3
+  },
+  "infantry_5": {
+   "fine": true,
+   "lods": [
+    "infantry_5_lod0.mesh.bin",
+    "infantry_5_lod1.mesh.bin",
+    "infantry_5_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    11131,
+    1958,
+    334
+   ],
+   "variants": 2
+  },
+  "infantry_6": {
+   "fine": true,
+   "lods": [
+    "infantry_6_lod0.mesh.bin",
+    "infantry_6_lod1.mesh.bin",
+    "infantry_6_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    11828,
+    1950,
+    335
+   ],
+   "variants": 2
+  },
+  "infantry_7": {
+   "fine": true,
+   "lods": [
+    "infantry_7_lod0.mesh.bin",
+    "infantry_7_lod1.mesh.bin",
+    "infantry_7_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "rig": "human",
+   "style": "militia",
+   "tris": [
+    11809,
+    1932,
+    329
+   ],
+   "variants": 2
+  },
+  "infantry_8": {
+   "fine": true,
+   "lods": [
+    "infantry_8_lod0.mesh.bin",
+    "infantry_8_lod1.mesh.bin",
+    "infantry_8_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "sword",
+   "tris": [
+    11816,
+    1941,
+    331
+   ],
+   "variants": 3
+  },
+  "musician_0": {
+   "fine": true,
+   "lods": [
+    "musician_0_lod0.mesh.bin",
+    "musician_0_lod1.mesh.bin",
+    "musician_0_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "drum",
+   "tris": [
+    10967,
+    1965,
+    337
+   ],
+   "variants": 2
+  },
+  "musician_1": {
+   "fine": true,
+   "lods": [
+    "musician_1_lod0.mesh.bin",
+    "musician_1_lod1.mesh.bin",
+    "musician_1_lod2.mesh.bin"
+   ],
+   "noble": false,
+   "rig": "human",
+   "style": "horn",
+   "tris": [
+    10151,
+    1949,
+    340
+   ],
+   "variants": 2
+  },
+  "standard_0": {
+   "fine": true,
+   "lods": [
+    "standard_0_lod0.mesh.bin",
+    "standard_0_lod1.mesh.bin",
+    "standard_0_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "pole_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pole_top": [
+    -0.27986,
+    0.83122,
+    2.76621
+   ],
+   "rig": "human",
+   "style": "standard",
+   "tris": [
+    11872,
+    1953,
+    339
+   ],
+   "variants": 2
+  },
+  "standard_1": {
+   "fine": true,
+   "lods": [
+    "standard_1_lod0.mesh.bin",
+    "standard_1_lod1.mesh.bin",
+    "standard_1_lod2.mesh.bin"
+   ],
+   "noble": true,
+   "pole_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pole_top": [
+    -0.2803,
+    1.61739,
+    3.07225
+   ],
+   "rig": "cavalry",
+   "style": "standard_mounted",
+   "tris": [
+    16911,
+    2841,
+    639
+   ],
+   "variants": 2
+  }
+ },
+ "rigs": {
+  "cavalry": {
+   "bones": [
+    "Back",
+    "Torso",
+    "Torso2",
+    "Torso3",
+    "Neck1",
+    "Neck2",
+    "Neck3",
+    "Head",
+    "Ear1.L",
+    "Ear2.L",
+    "Ear3.L",
+    "Ear4.L",
+    "Ear1.R",
+    "Ear2.R",
+    "Ear3.R",
+    "Ear4.R",
+    "FrontShoulder.L",
+    "FrontUpperLeg.L",
+    "FrontLowerLeg.L",
+    "FrontShoulder.R",
+    "FrontUpperLeg.R",
+    "FrontLowerLeg.R",
+    "BackShoulder.L",
+    "BackLeg.L",
+    "BackUpperLeg.L",
+    "BackLowerLeg.L",
+    "BackShoulder.R",
+    "BackLeg.R",
+    "BackUpperLeg.R",
+    "BackLowerLeg.R",
+    "Tail1",
+    "Tail2",
+    "Tail3",
+    "Tail4",
+    "Tail5",
+    "Tail6",
+    "Tail7",
+    "IKBackLeg.L",
+    "FFB.L",
+    "IKFrontLeg.L",
+    "FF.L",
+    "IKBackLeg.R",
+    "FFB.R",
+    "IKFrontLeg.R",
+    "FF.R",
+    "R:Root",
+    "R:Body",
+    "R:Hips",
+    "R:Abdomen",
+    "R:Torso",
+    "R:Chest",
+    "R:Neck",
+    "R:Head",
+    "R:Shoulder.L",
+    "R:UpperArm.L",
+    "R:LowerArm.L",
+    "R:Wrist.L",
+    "R:Shoulder.R",
+    "R:UpperArm.R",
+    "R:LowerArm.R",
+    "R:Wrist.R",
+    "R:UpperLeg.L",
+    "R:LowerLeg.L",
+    "R:Foot.L",
+    "R:UpperLeg.R",
+    "R:LowerLeg.R",
+    "R:Foot.R",
+    "R:Prop",
+    "R:Nock",
+    "R:Arrow"
+   ],
+   "clips": {
+    "c_bow_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 168
+    },
+    "c_bow_shoot": {
+     "frames": 60,
+     "loop": false,
+     "start": 278
+    },
+    "c_bow_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 249
+    },
+    "c_charge": {
+     "frames": 15,
+     "loop": true,
+     "start": 125
+    },
+    "c_death": {
+     "frames": 30,
+     "loop": false,
+     "start": 478
+    },
+    "c_death_m": {
+     "frames": 30,
+     "loop": false,
+     "start": 508
+    },
+    "c_fall": {
+     "frames": 30,
+     "loop": false,
+     "start": 538
+    },
+    "c_gallop": {
+     "frames": 15,
+     "loop": true,
+     "start": 110
+    },
+    "c_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 0
+    },
+    "c_javelin_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 338
+    },
+    "c_javelin_throw": {
+     "frames": 30,
+     "loop": false,
+     "start": 448
+    },
+    "c_javelin_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 419
+    },
+    "c_std_death": {
+     "frames": 30,
+     "loop": false,
+     "start": 751
+    },
+    "c_std_gallop": {
+     "frames": 15,
+     "loop": true,
+     "start": 678
+    },
+    "c_std_idle": {
+     "frames": 81,
+     "loop": true,
+     "start": 568
+    },
+    "c_std_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 649
+    },
+    "c_std_wave": {
+     "frames": 58,
+     "loop": true,
+     "start": 693
+    },
+    "c_thrust": {
+     "frames": 28,
+     "loop": false,
+     "start": 140
+    },
+    "c_walk": {
+     "frames": 29,
+     "loop": true,
+     "start": 81
+    }
+   },
+   "fps": 24,
+   "texture": "cavalry.bones.bin"
+  },
+  "human": {
+   "bones": [
+    "Root",
+    "Body",
+    "Hips",
+    "Abdomen",
+    "Torso",
+    "Chest",
+    "Neck",
+    "Head",
+    "Shoulder.L",
+    "UpperArm.L",
+    "LowerArm.L",
+    "Wrist.L",
+    "Shoulder.R",
+    "UpperArm.R",
+    "LowerArm.R",
+    "Wrist.R",
+    "UpperLeg.L",
+    "LowerLeg.L",
+    "Foot.L",
+    "UpperLeg.R",
+    "LowerLeg.R",
+    "Foot.R",
+    "Prop",
+    "Nock",
+    "Arrow"
+   ],
+   "clips": {
+    "bow_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 603
+    },
+    "bow_shoot": {
+     "frames": 60,
+     "loop": false,
+     "start": 543
+    },
+    "bow_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 644
+    },
+    "climb": {
+     "frames": 24,
+     "loop": true,
+     "start": 871
+    },
+    "crank": {
+     "frames": 32,
+     "loop": true,
+     "start": 1336
+    },
+    "crawl": {
+     "frames": 168,
+     "loop": false,
+     "start": 1525
+    },
+    "death": {
+     "frames": 26,
+     "loop": false,
+     "start": 195
+    },
+    "death_back": {
+     "frames": 26,
+     "loop": false,
+     "start": 277
+    },
+    "death_knees": {
+     "frames": 30,
+     "loop": false,
+     "start": 247
+    },
+    "death_m": {
+     "frames": 26,
+     "loop": false,
+     "start": 221
+    },
+    "drum_beat": {
+     "frames": 24,
+     "loop": true,
+     "start": 1154
+    },
+    "drum_idle": {
+     "frames": 48,
+     "loop": true,
+     "start": 1073
+    },
+    "drum_march": {
+     "frames": 33,
+     "loop": true,
+     "start": 1121
+    },
+    "flee": {
+     "frames": 60,
+     "loop": true,
+     "start": 1981
+    },
+    "flee_m": {
+     "frames": 60,
+     "loop": true,
+     "start": 2041
+    },
+    "guard": {
+     "frames": 41,
+     "loop": true,
+     "start": 41
+    },
+    "haul": {
+     "frames": 36,
+     "loop": true,
+     "start": 1368
+    },
+    "hit": {
+     "frames": 14,
+     "loop": false,
+     "start": 181
+    },
+    "horn_blow": {
+     "frames": 84,
+     "loop": true,
+     "start": 1252
+    },
+    "horn_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 1178
+    },
+    "horn_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 1219
+    },
+    "idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 0
+    },
+    "knockdown": {
+     "frames": 64,
+     "loop": false,
+     "start": 303
+    },
+    "load": {
+     "frames": 48,
+     "loop": true,
+     "start": 1404
+    },
+    "pike_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 367
+    },
+    "pike_level": {
+     "frames": 41,
+     "loop": true,
+     "start": 441
+    },
+    "pike_level_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 482
+    },
+    "pike_thrust": {
+     "frames": 28,
+     "loop": false,
+     "start": 515
+    },
+    "pike_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 408
+    },
+    "push": {
+     "frames": 33,
+     "loop": true,
+     "start": 1492
+    },
+    "run": {
+     "frames": 20,
+     "loop": true,
+     "start": 115
+    },
+    "slash": {
+     "frames": 25,
+     "loop": false,
+     "start": 135
+    },
+    "std_death": {
+     "frames": 26,
+     "loop": false,
+     "start": 1047
+    },
+    "std_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 895
+    },
+    "std_run": {
+     "frames": 20,
+     "loop": true,
+     "start": 969
+    },
+    "std_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 936
+    },
+    "std_wave": {
+     "frames": 58,
+     "loop": true,
+     "start": 989
+    },
+    "swab": {
+     "frames": 40,
+     "loop": true,
+     "start": 1452
+    },
+    "thrust": {
+     "frames": 21,
+     "loop": false,
+     "start": 160
+    },
+    "walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 82
+    },
+    "wounded_kneel": {
+     "frames": 144,
+     "loop": false,
+     "start": 1837
+    },
+    "wounded_sit": {
+     "frames": 144,
+     "loop": false,
+     "start": 1693
+    },
+    "xbow_idle": {
+     "frames": 41,
+     "loop": true,
+     "start": 797
+    },
+    "xbow_shoot": {
+     "frames": 120,
+     "loop": false,
+     "start": 677
+    },
+    "xbow_walk": {
+     "frames": 33,
+     "loop": true,
+     "start": 838
+    }
+   },
+   "fps": 24,
+   "texture": "human.bones.bin"
+  }
+ },
+ "source": "tools/blender_scripts/battle_fine.py (MakeHuman CC0 + Quaternius CC0, see SOURCE.md)"
+}

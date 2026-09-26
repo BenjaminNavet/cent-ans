@@ -4,9 +4,11 @@ import json
 from decimal import Decimal
 from pathlib import Path
 
+import pytest
 from jsonschema import Draft202012Validator
 
 from cent_ans_tools import voice_tts
+from cent_ans_tools.budget import BudgetLedger
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 FILES = {
@@ -131,3 +133,84 @@ def test_clip_checks_reject_improvised_speech() -> None:
     low, high = voice_tts.plausible_seconds(text)
     assert low < 1.25 < high
     assert not low <= 10.8 <= high
+
+
+def test_main_records_real_spend_including_rejected_clips(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, budget_file: Path
+) -> None:
+    """A rejected (billed but unusable) clip is still recorded in docs/budget.md.
+
+    Regression for the bug where only the manifest's recomputed total was checked
+    against ``--cap`` and nothing was ever written to the budget ledger, so a billed
+    refusal's cost silently vanished.
+    """
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(voice_tts, "VOICE_DIR", tmp_path / "voice")
+    monkeypatch.setattr(voice_tts, "MANIFEST", tmp_path / "manifest.json")
+
+    job_ok = voice_tts.Job("barks", "ok", "Texte correct", "voice_a", "instr")
+    job_bad = voice_tts.Job("barks", "bad", "Texte refusé", "voice_a", "instr")
+    monkeypatch.setattr(voice_tts, "all_jobs", lambda: [job_ok, job_bad])
+
+    def fake_openrouter_checked(job, _api_key, _attempts):
+        if job.path == "bad":
+            raise voice_tts.RejectedClip("rejected", Decimal("0.02"))
+        return Path("dummy.wav"), Decimal("0.01"), job.text
+
+    monkeypatch.setattr(voice_tts, "openrouter_checked", fake_openrouter_checked)
+    monkeypatch.setattr(voice_tts, "encode", lambda _raw, _job: 1.0)
+
+    result = voice_tts.main(["--cap", "1", "--budget-path", str(budget_file)])
+    assert result == 0
+    ledger = BudgetLedger(budget_file)
+    # 0.01 $ for the accepted clip + 0.02 $ billed on the rejected one, not lost.
+    assert ledger.entries[-1].actual == Decimal("0.03")
+
+
+def test_main_recheck_keeps_forgotten_cost_in_the_recorded_spend(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, budget_file: Path
+) -> None:
+    """Recheck's ``forget()`` drops a bad manifest entry.
+
+    Its past cost must still be counted, not simply disappear once the entry is
+    removed.
+    """
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    voice_dir = tmp_path / "voice"
+    manifest_path = tmp_path / "manifest.json"
+    monkeypatch.setattr(voice_tts, "VOICE_DIR", voice_dir)
+    monkeypatch.setattr(voice_tts, "MANIFEST", manifest_path)
+    monkeypatch.setattr(voice_tts, "CACHE_DIR", tmp_path / "cache")
+
+    job = voice_tts.Job("barks", "redo", "Texte à refaire", "voice_a", "instr")
+    monkeypatch.setattr(voice_tts, "all_jobs", lambda: [job])
+
+    # A previous run produced a clip whose transcript now fails the check.
+    voice_dir.mkdir(parents=True)
+    job.output.write_bytes(b"old-clip")
+    voice_tts.save_manifest(
+        {
+            f"{job.path}.ogg": {
+                "text": job.text,
+                "voice": job.voice,
+                "model": voice_tts.OPENROUTER_MODEL,
+                "transcript": "grognement",  # a bad transcript: fails the check
+                "seconds": 1.0,
+                "cost_usd": 0.05,
+            }
+        }
+    )
+
+    def fake_openrouter_checked(_job, _api_key, _attempts):
+        return Path("dummy.wav"), Decimal("0.01"), job.text
+
+    monkeypatch.setattr(voice_tts, "openrouter_checked", fake_openrouter_checked)
+    monkeypatch.setattr(voice_tts, "encode", lambda _raw, _job: 1.0)
+
+    result = voice_tts.main(
+        ["--recheck", "--cap", "1", "--budget-path", str(budget_file)]
+    )
+    assert result == 0
+    ledger = BudgetLedger(budget_file)
+    # 0.05 $ already spent on the forgotten clip + 0.01 $ for its redo.
+    assert ledger.entries[-1].actual == Decimal("0.06")

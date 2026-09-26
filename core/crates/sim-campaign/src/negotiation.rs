@@ -429,10 +429,8 @@ pub fn check_treaty(
     }
     let at_war = state.is_at_war(proposer, recipient);
     let ends_war = articles.iter().any(Article::ends_war);
-    let mut seen = BTreeSet::new();
-    for article in articles {
-        let key = serde_json::to_string(article).unwrap_or_default();
-        if !seen.insert(key) {
+    for (i, article) in articles.iter().enumerate() {
+        if articles[..i].contains(article) {
             return Err(DiplomacyError::Refused("article en double".to_owned()));
         }
         let giver = article.giver().map(|g| party_id(g, proposer, recipient));
@@ -482,6 +480,18 @@ pub fn check_treaty(
                 };
                 if !own(character, proposer) || !own(spouse, recipient) {
                     return Err(DiplomacyError::Refused("époux invalides".to_owned()));
+                }
+                // Checked here so that the treaty never applies by halves.
+                crate::dynasty::check_marriage(state, character, spouse)
+                    .map_err(|e| DiplomacyError::Refused(e.to_string()))?;
+                let wed_twice = articles[..i].iter().any(|other| {
+                    matches!(other, Article::Marriage { character: c, spouse: s }
+                        if [c, s].iter().any(|x| *x == character || *x == spouse))
+                });
+                if wed_twice {
+                    return Err(DiplomacyError::Refused(
+                        "un même époux dans deux mariages".to_owned(),
+                    ));
                 }
             }
             Article::Tribute {
@@ -1411,10 +1421,12 @@ pub fn apply_treaty(
             }
             Article::CedeSettlement { settlement, .. } => {
                 let to = taker.expect("taker");
+                // As `cede_province`: the giver's garrison, recruits and
+                // building site do not pass to the taker.
                 if let Some(s) = state.settlements.get_mut(settlement) {
                     s.owner = to.clone();
-                    s.controller = to;
-                    s.siege = None;
+                    s.hand_over(&to);
+                    s.garrison.clear();
                 }
             }
             Article::ReleaseCaptive { character, .. } => {
@@ -1426,6 +1438,8 @@ pub fn apply_treaty(
                     c.captive = true;
                     c.captor = Some(holder.clone());
                     c.governor_of = None;
+                    // ADR 0025 § 6: held for the whole term, not for sale.
+                    c.ransom_terms = Some(crate::ransom::RansomTerms::Hold);
                 }
                 let until_turn = state.turn + HOSTAGE_TURNS;
                 state
@@ -1539,8 +1553,17 @@ pub(crate) fn resolve_negotiation(
             .filter(|h| at_war.contains(&h.from))
             .cloned()
             .collect();
+        // The broken word (`HOSTAGE_BETRAYAL_REASON`) weighs on the giver
+        // only when it declared the war (`declare_war`).
         for pledge in betrayed {
-            state.add_modifier(id, &pledge.from, -20, HOSTAGE_BETRAYAL_REASON, 60);
+            // Hostages of an enemy become plain prisoners (ransom rules).
+            if let Some(c) = state
+                .characters
+                .get_mut(&pledge.character)
+                .filter(|c| c.captor.as_ref() == Some(id))
+            {
+                c.ransom_terms = None;
+            }
         }
         let f = state.factions.get_mut(id).expect("listed");
         f.ledger.trade_agreements.retain(|o| !at_war.contains(o));
@@ -1553,6 +1576,17 @@ pub(crate) fn resolve_negotiation(
     // Tributes.
     let turn = state.turn;
     for id in &ids {
+        // A vanished faction pays nothing more.
+        if !state.factions[id].alive {
+            state
+                .factions
+                .get_mut(id)
+                .expect("listed")
+                .ledger
+                .tributes
+                .clear();
+            continue;
+        }
         let dues: Vec<TributeDue> = state.factions[id].ledger.tributes.clone();
         for due in &dues {
             if !state.factions.get(&due.to).is_some_and(|f| f.alive) {
@@ -1759,11 +1793,12 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
                 .map(|p| (!goals.contains(p), p.clone()))
                 .collect();
             // The war goals themselves, even unheld: a clear victory buys
-            // the lands it was fought for (Brétigny).
+            // the lands it was fought for (Brétigny); they come before the
+            // other provinces held (ADR 0025 § 5).
             for goal in &goals {
                 if state.province_owner(goal) == Some(enemy) && !held.iter().any(|(_, p)| p == goal)
                 {
-                    held.push((true, goal.clone()));
+                    held.push((false, goal.clone()));
                 }
             }
             held.sort();
@@ -1792,7 +1827,7 @@ pub fn plan_peace(state: &CampaignState, data: &GameData, faction: &FactionId) -
         }
         // Only a beaten or exhausted crown buys its peace (lands, gold,
         // tribute); otherwise the war goes on until one side prevails.
-        let beaten = score < 2 * diplomacy::SURRENDER_WAR_SCORE
+        let beaten = score <= 2 * diplomacy::SURRENDER_WAR_SCORE
             || me.ledger.weariness >= rules.sue_weariness
             || cornered;
         if beaten {
