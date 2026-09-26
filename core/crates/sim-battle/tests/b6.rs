@@ -181,7 +181,7 @@ fn demo_contact_stays_near_seventy_seconds() {
 /// line breaks at 245 s. Over seeds 0-63 the French win 34/64 instead of
 /// 29/64 (`ep10_rout::probe_small_battle`). Seed 11: same end, one English
 /// regiment keeps 10 more men.
-/// EP11 (ADR 0070, continuous push of the lines in melee): digests
+/// EP11 (ADR 0073, continuous push of the lines in melee): digests
 /// recomputed. Seed 3 goes back to the English (158 s instead of 245 s),
 /// as before EP10; seed 11: same winner, 160 s instead of 186 s. Over seeds 0-63 the French win 25/64 instead of 34/64
 /// (`ep10_rout::probe_small_battle`).

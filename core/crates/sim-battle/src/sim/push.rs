@@ -1,4 +1,4 @@
-//! EP11 (ADR 0070): continuous push of the lines in melee, resolved once per
+//! EP11 (ADR 0073): continuous push of the lines in melee, resolved once per
 //! tick just before the melee blows (rules and geometry in
 //! [`crate::push`]).
 //!
