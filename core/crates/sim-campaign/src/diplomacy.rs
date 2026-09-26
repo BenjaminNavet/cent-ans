@@ -2150,13 +2150,16 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
         let pretender = me.claims.iter().any(|c| c.kind == ClaimKind::Throne);
         me.ledger.weariness > if pretender { most + 20 } else { most }
     };
-    let ready = turn >= 4
-        && rested
+    let able = turn >= 4
         && !weary
         && (war_ready(state, faction) || crate::negotiation::pretender_ready(state, data, faction));
+    let ready = able && rested;
+    // EQ6: the rest after another declaration does not hold back the war
+    // for the main crown claimed.
+    let main_first = data.ai_diplomacy.war.main_claim_first;
     let mut declared = false;
-    if ready && (turn + slot).is_multiple_of(2) {
-        if let Some(target) = war_target(state, data, faction, aggression) {
+    if able && (rested || main_first) && (turn + slot).is_multiple_of(2) {
+        if let Some(target) = war_target(state, data, faction, aggression, rested) {
             orders.push(Order::DeclareWar { target });
             declared = true;
         }
@@ -2282,14 +2285,43 @@ fn peace_terms(
     None
 }
 
+/// EQ6: the main crown `faction` claims: the living realm with the most
+/// provinces among those whose throne it claims (England: France, not a
+/// small Italian lordship inherited through a marriage).
+pub fn main_claim(state: &CampaignState, faction: &FactionId) -> Option<FactionId> {
+    let me = state.factions.get(faction)?;
+    let thrones: BTreeSet<&FactionId> = me
+        .claims
+        .iter()
+        .filter(|c| c.kind == ClaimKind::Throne)
+        .filter_map(|c| c.faction.as_ref())
+        .filter(|f| *f != faction && state.factions.get(*f).is_some_and(|s| s.alive))
+        .collect();
+    thrones
+        .into_iter()
+        .map(|f| {
+            let size = state
+                .provinces
+                .keys()
+                .filter(|p| state.province_owner(p) == Some(f))
+                .count();
+            (size, f)
+        })
+        .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(a.1)))
+        .map(|(_, f)| f.clone())
+}
+
 /// The war `faction` declares this turn, if any: a pretender presses its
 /// claim even against a stronger crown when it has allies or a bridgehead;
 /// aggressive realms fall on weaker rivals they hold a casus belli against.
+/// When `faction` is not `rested` (it declared another war lately), only
+/// its main claim is considered (EQ6, `war.main_claim_first`).
 fn war_target(
     state: &CampaignState,
     data: &GameData,
     faction: &FactionId,
     aggression: i32,
+    rested: bool,
 ) -> Option<FactionId> {
     let my_power = state.coalition_power(faction);
     let rules = &data.ai_diplomacy.war;
@@ -2315,6 +2347,11 @@ fn war_target(
         .allies
         .iter()
         .any(|a| state.factions.get(a).is_some_and(|f| f.alive));
+    let main = if rules.main_claim_first || rules.claim_war_ignores_difficulty {
+        main_claim(state, faction)
+    } else {
+        None
+    };
     state
         .factions
         .iter()
@@ -2326,12 +2363,32 @@ fn war_target(
                 && !state.is_allied(faction, id)
                 && !state.is_at_war(faction, id)
                 && !state.has_truce(faction, id)
+                && (rested || main.as_ref() == Some(*id))
         })
         .filter_map(|(id, _)| {
             let stakes = claim_stakes(state, faction, id);
+            let is_main = main.as_ref() == Some(id);
+            // EQ6: the main claim war does not depend on the difficulty.
+            let neutral = is_main && rules.claim_war_ignores_difficulty;
             // DF1: a harder campaign lowers the odds an AI wants before
             // falling on the player.
-            let demand = state.difficulty_war_ratio_factor(data, id);
+            let demand = if neutral {
+                1.0
+            } else {
+                state.difficulty_war_ratio_factor(data, id)
+            };
+            let attitude = state.attitude(data, faction, id).0
+                - if neutral {
+                    state.difficulty_attitude(data, faction, id)
+                } else {
+                    0
+                };
+            // EQ6: the main crown outranks every lesser claim.
+            let main_bonus = if is_main && rules.main_claim_first {
+                CLAIM_WAR_PRIORITY
+            } else {
+                0.0
+            };
             if stakes.any() && aggression >= PRETENDER_AGGRESSION {
                 let ratio = my_power / state.faction_power(id).max(1.0);
                 let supported = has_allies || state.are_neighbors(data, faction, id);
@@ -2342,9 +2399,9 @@ fn war_target(
                         rules.pretender_ratio_alone
                     };
                 let weight = if stakes.throne { 3.0 } else { 0.0 } + stakes.provinces as f64;
-                return (ratio >= needed && state.attitude(data, faction, id).0 < 20)
+                return (ratio >= needed && attitude < 20)
                     // A claim outranks any opportunistic war.
-                    .then(|| (id.clone(), CLAIM_WAR_PRIORITY + weight + ratio));
+                    .then(|| (id.clone(), CLAIM_WAR_PRIORITY + main_bonus + weight + ratio));
             }
             if aggression >= OPPORTUNIST_AGGRESSION
                 && state.casus_belli(data, faction, id).is_some()

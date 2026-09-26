@@ -8,7 +8,9 @@
   "war": {
     "front_share": 0.5,
     "pretender_ratio": 0.5,
-    "pretender_ratio_alone": 0.8
+    "pretender_ratio_alone": 0.8,
+    "main_claim_first": true,
+    "claim_war_ignores_difficulty": true
   },
   "join_war": {
     "ratio": 0.6,

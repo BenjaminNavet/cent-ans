@@ -125,13 +125,17 @@ fn war_blockers(
 ) -> Vec<&'static str> {
     use sim_campaign::diplomacy::{PRETENDER_AGGRESSION, WAR_REST_TURNS};
     let me = &state.factions[england];
+    let war_rules = &data.ai_diplomacy.war;
+    let is_main = sim_campaign::diplomacy::main_claim(state, england).as_ref() == Some(france);
+    let neutral = is_main && war_rules.claim_war_ignores_difficulty;
     let mut out = Vec::new();
     if state.has_truce(england, france) {
         out.push("truce");
     }
-    if me
-        .last_war_declared
-        .is_some_and(|t| t + WAR_REST_TURNS > state.turn)
+    if !(is_main && war_rules.main_claim_first)
+        && me
+            .last_war_declared
+            .is_some_and(|t| t + WAR_REST_TURNS > state.turn)
     {
         out.push("rest");
     }
@@ -180,7 +184,12 @@ fn war_blockers(
         .any(|a| state.factions.get(a).is_some_and(|f| f.alive));
     let supported = has_allies || state.are_neighbors(data, england, france);
     let rules = &data.ai_diplomacy.war;
-    let needed = state.difficulty_war_ratio_factor(data, france)
+    let demand = if neutral {
+        1.0
+    } else {
+        state.difficulty_war_ratio_factor(data, france)
+    };
+    let needed = demand
         * if supported {
             rules.pretender_ratio
         } else {
@@ -191,7 +200,12 @@ fn war_blockers(
         out.push("ratio");
     }
     let attitude = state.attitude(data, england, france);
-    if attitude.0 >= 20 {
+    let offset = if neutral {
+        state.difficulty_attitude(data, england, france)
+    } else {
+        0
+    };
+    if attitude.0 - offset >= 20 {
         out.push("attitude");
     }
     // `WAR_TRACE=1`: England's reasons and gates every 5 years of peace.
