@@ -104,6 +104,10 @@ func _run() -> void:
 		for k in DECLUTTER_RUNS:
 			layer.declutter()
 		stats["declutter_us"] = (Time.get_ticks_usec() - t0) / DECLUTTER_RUNS
+		t0 = Time.get_ticks_usec()
+		for k in DECLUTTER_RUNS:
+			layer.pick_screen_scored(Vector2(800.0 + k, 450.0))
+		stats["pick_us"] = (Time.get_ticks_usec() - t0) / DECLUTTER_RUNS
 		stats.merge(_screen_stats(layer, map.camera))
 		overlaps_total += int(stats["label_overlaps"])
 		var view_name: String = VIEW_NAMES.get(int(d), str(int(d)))
@@ -216,7 +220,8 @@ func _model_overlaps(layer: SettlementLayer) -> Dictionary:
 		var holder: Node3D = layer._models[i]
 		if holder != null and not layer._is_landmark(i):
 			hidden += 0 if holder.visible else 1
-			shrunk += 1 if layer._fit_scale[i] < 0.999 else 0
+			var fit: Variant = layer.get("_fit_scale")  # absent avant DC4 (mesures « avant »)
+			shrunk += 1 if fit != null and float(fit[i]) < 0.999 else 0
 	return {"overlapping_pairs": pairs, "worst_ratio": snappedf(worst, 0.01), "examples": examples, "absorbed": hidden, "shrunk": shrunk}
 
 
@@ -275,7 +280,22 @@ func _valley_sweep(layer: SettlementLayer, rig: CampaignCamera, data: MapData, c
 		if layer.towns != null:
 			max_loaded = maxi(max_loaded, int(layer.towns.stats.get("loaded", 0)))
 	times.sort()
+	# Coût CPU du tri des villes (streaming, finages) sur le fil principal, toutes les 10 images.
+	var stream_us := 0
+	var finage_us := 0
+	if layer.towns != null:
+		var t0 := Time.get_ticks_usec()
+		for k in 10:
+			layer.towns._stream(VALLEY_DISTANCE, center + Vector2(k, 0.0))
+		stream_us = (Time.get_ticks_usec() - t0) / 10
+		t0 = Time.get_ticks_usec()
+		for k in 10:
+			layer.towns._finage_key = ""
+			layer.towns._push_finage(center + Vector2(k, 0.0))
+		finage_us = (Time.get_ticks_usec() - t0) / 10
 	var result := {
+		"stream_us": stream_us,
+		"finage_us": finage_us,
 		"distance": rig.distance,
 		"active": layer.towns != null and layer.towns.active,
 		"median_ms": snappedf(times[times.size() / 2], 0.01),

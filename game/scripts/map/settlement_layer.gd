@@ -52,6 +52,8 @@ var markers: SettlementMarkers
 var _marker_rank: PackedInt32Array = PackedInt32Array()
 var _marker_size: PackedFloat32Array = PackedFloat32Array()
 var _marker_until: PackedFloat32Array = PackedFloat32Array()
+## DC4 : position monde de chaque marqueur (picking sans relire le relief).
+var _marker_world: PackedVector3Array = PackedVector3Array()
 ## Écu affiché par colonie (faction), pour ne réécrire que ce qui change.
 var _marker_holder: PackedStringArray = PackedStringArray()
 var _icon_distance := -1.0
@@ -410,6 +412,7 @@ func _build_icons() -> void:
 	_marker_rank.resize(count)
 	_marker_size.resize(count)
 	_marker_until.resize(count)
+	_marker_world.resize(count)
 	_marker_holder.resize(count)
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
@@ -430,7 +433,8 @@ func _build_icons() -> void:
 		_marker_holder[i] = ""
 		var cell := markers.cell_of(markers.pictogram_for(kind, rank))
 		var k := _icon_instance(i)
-		multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)))
+		_marker_world[i] = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+		multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, _marker_world[i]))
 		multimesh.set_instance_color(k, Color(-1.0, 1.0 if bool(entry.get("port", false)) else 0.0, 0.0, 1.0))
 		multimesh.set_instance_custom_data(k, Color(cell, 0.0, _marker_size[i], _marker_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
@@ -619,7 +623,7 @@ func _update_label_heights() -> void:
 			label.offset = Vector2.ZERO
 		else:
 			# Palier moyen : au-dessus de l'icône (décalage en pixels écran).
-			label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+			label.position = _marker_world[i] if i < _marker_world.size() else Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
 			label.offset = Vector2(0.0, marker_size(i) * (0.5 + ICON_CENTER_LIFT) + label.font_size * 0.4)
 
 
@@ -847,22 +851,26 @@ func pick_screen_scored(screen_position: Vector2) -> Dictionary:
 	var icons := _weights.x < 0.65
 	var best := ""
 	var best_score := INF
+	var right := camera.global_transform.basis.x
+	var eye := camera.global_position
+	var model_range_sq := tiers.model_range * tiers.model_range
 	for i in data.settlements.size():
-		var px: Vector2 = data.settlements[i]["px"]
 		if near and _models[i] != null and (_models[i] as Node3D).visible:  # DC4 : pas les absorbées
 			var holder: Node3D = _models[i]
+			if eye.distance_squared_to(holder.position) > model_range_sq:
+				continue  # maquette hors de sa portée de visibilité
 			var center := Vector3(holder.position.x, _model_base_y(i) + _model_top[i] * 0.4, holder.position.z)
 			if camera.is_position_behind(center):
 				continue
 			var screen_center := camera.unproject_position(center)
-			var edge := camera.unproject_position(center + camera.global_transform.basis.x * _model_radius[i])
+			var edge := camera.unproject_position(center + right * _model_radius[i])
 			var radius_px := maxf(screen_center.distance_to(edge), 8.0)
 			var d := screen_center.distance_to(screen_position)
 			if d < radius_px and d / radius_px < best_score:
 				best_score = d / radius_px
 				best = str(data.settlements[i]["id"])
-		elif icons and marker_visible(i):
-			var world := Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+		elif icons and _camera_distance < _marker_until[i]:
+			var world := _marker_world[i]
 			if camera.is_position_behind(world):
 				continue
 			var size := marker_size(i)
