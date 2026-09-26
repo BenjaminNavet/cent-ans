@@ -61,6 +61,7 @@ BUDGET = {
     "belt": (0, 60, 0),
     "scabbard": (0, 40, 12),
     "tabard": (500, 110, 16),
+    "plates": (1500, 220, 0),
 }
 # Pieces dropped at a level of detail (budget 0 there, but kept whole at LOD0).
 DROPPED = {"hair": (2,), "beard": (2,), "belt": (2,)}
@@ -425,26 +426,37 @@ def dress(outfit, recipe, body, lm, level, rider):
     if outfit == "harness":
         coat = colour(recipe, "King_Body:Metal", (eq.C_LIVERY, (0.85, 0.85, 0.85)))
         mail = colour(recipe, "King_Body:Blue", (eq.C_MAIL, eq.MAIL))
+        if mail[0] == eq.C_MAIL:
+            mail = (eq.C_MAIL, gear.MAIL)  # FG2: lighter mail (the shader darkens it)
         legs = colour(recipe, "King_Legs:Metal", (eq.C_PLATE, eq.STEEL))
         feet = colour(recipe, "King_Feet:Metal", (eq.C_PLATE, eq.STEEL))
         belt_c = colour(recipe, "King_Body:Beige", (eq.C_LEATHER, eq.LEATHER))
         hauberk = torso_shell(body, lm, "hauberk", mat(mail), thigh, 0.022, relax=40)
         out.append((hauberk, "torso"))
         top = lm.knee_z + (lm.bone["UpperLeg.L"].z - lm.knee_z) * 0.7
-        out.append((legs_shell(body, lm, "chausses", mat(legs), top), "legs"))
+        # FG2: mail chausses under the leg plates (the plates are separate pieces).
+        chausses = (eq.C_MAIL, gear.MAIL) if level < 2 else legs
+        out.append((legs_shell(body, lm, "chausses", mat(chausses), top), "legs"))
         shod = feet
         bvh = torso_bvh(hauberk)
         if coat[0] in (eq.C_LIVERY, eq.C_ARMS):
             top_coat, skirt_obj = fe.surcoat(body, lm, hauberk, bvh)
             recolour(top_coat, coat)
             recolour(skirt_obj, coat)
+            if level == 0:
+                gear.hem(top_coat, 0.004)
+                gear.hem(skirt_obj, 0.005)
             out += [(top_coat, "coat"), (skirt_obj, "skirt")]
         else:
             # White harness: breastplate and fauld over the mail, no coat.
             plate = torso_shell(
                 hauberk, lm, "cuirass", mat(coat), lm.waist_z - 0.12, 0.012, False, 20
             )
+            if level == 0:
+                gear.hem(plate, 0.004)
             out.append((plate, "coat"))
+        if level == 0:
+            gear.hem(hauberk, 0.006)
         for obj in fe.belt(lm, bvh):
             recolour_first(obj, belt_c)
             out.append((obj, "belt"))
@@ -489,7 +501,11 @@ def dress(outfit, recipe, body, lm, level, rider):
             sleeves_in(tunic, mat(sleeves))
         out.append((tunic, "torso"))
         bvh = torso_bvh(tunic)
-        out.append((skirt(lm, bvh, mat(coat), "tunic_skirt", lm.knee_z + hem), "skirt"))
+        tunic_skirt = skirt(lm, bvh, mat(coat), "tunic_skirt", lm.knee_z + hem)
+        if level == 0:
+            gear.hem(tunic, 0.005)
+            gear.hem(tunic_skirt, 0.005)
+        out.append((tunic_skirt, "skirt"))
         if hose[0] == eq.C_SKIN:
             bare |= LEGS | {"Foot.L", "Foot.R"}
         else:
@@ -699,6 +715,86 @@ def fine_tabard(garments, lm, length=0.34, colour=(1.0, 1.0, 1.0)):
     return out
 
 
+# FG2: pieces that cover the garments under them (their hidden faces are deleted).
+COVERS = (
+    "jack",
+    "brigandine",
+    "tabard",
+    "aventail",
+    "bevor",
+    "limb_plates",
+    "surcoat",
+    "cuirass",
+    "hauberk",
+    "tunic",
+)
+
+
+def hide_covered(garments, equipment, variants):
+    """Delete the garment faces covered in every variant by another piece (FG2)."""
+    pieces = [(o, 0) for o, _r in garments] + [
+        (o, m) for o, m, _k in equipment if o.name.startswith(COVERS)
+    ]
+    trees = {
+        o.name: gear.world_tree(o) for o, _m in pieces if o.name.startswith(COVERS)
+    }
+
+    def outers(inner, v, only=COVERS):
+        return [
+            trees[o.name]
+            for o, m in pieces
+            if o is not inner
+            and o.name in trees
+            and o.name.startswith(only)
+            and covers(m, v)
+        ]
+
+    removed = 0
+    for inner, _role in garments:
+        if inner.name.startswith("belt"):
+            continue
+        groups = [outers(inner, v) for v in range(variants)]
+        removed += gear.cull_hidden(inner, groups)
+    for obj, mask, _k in equipment:
+        if not obj.name.startswith(COVERS):
+            continue
+        groups = [
+            outers(obj, v, ("tabard", "limb_plates"))
+            for v in range(variants)
+            if covers(mask, v)
+        ]
+        removed += gear.cull_hidden(obj, groups)
+    print(f"HIDDEN faces removed: {removed}")
+
+
+# Triangle caps of a figure per level of detail (FG2 brief: on foot LOD0 12 k, LOD1
+# 2 000, LOD2 350); riders (the horse is FG4's) get a rider share.
+TRI_CAP = (11900, 1980, 345)
+RIDER_CAP = (9000, 1500, 250)
+# Decimation weight per piece: the faces keep more than the rest.
+CUT_WEIGHT = {"head": 0.35, "hair": 0.6, "beard": 0.6}
+
+
+def fit_budget(objs, level, mounted):
+    """Decimate the pieces proportionally until the figure fits its cap (FG2)."""
+    cap = (RIDER_CAP if mounted else TRI_CAP)[level]
+    for _round in range(4):
+        tris = {o.name: fp._tris(o) for o in objs}
+        excess = sum(tris.values()) - cap
+        if excess <= 0:
+            return
+        weights = {
+            o.name: CUT_WEIGHT.get(o.name.split("_")[0], 1.0) * tris[o.name]
+            for o in objs
+            if tris[o.name] > 24
+        }
+        wsum = sum(weights.values()) or 1.0
+        for o in objs:
+            if o.name in weights:
+                cut = excess * 1.05 * weights[o.name] / wsum
+                decimate(o, max(12, int(tris[o.name] - cut)))
+
+
 def build_figure(fig_name, level):
     """Fine figure `fig_name` at `level`; returns (armature, objects, recipe)."""
     import battle_fine as bf
@@ -742,6 +838,17 @@ def build_figure(fig_name, level):
     bvhs = [torso_bvh(o) for o, role in garments if role in ("torso", "coat", "skirt")]
     ctx = eq.Context(arm, level, bs.material, bs.bone_world)
     kit_gear = gear.Gear(ctx, lm, bvhs, fig_name, mounted)
+    kit_gear.body = body
+    kit_gear.garments = garments
+    era = gear.HARNESS_ERA.get(fig_name)
+    if outfit == "harness" and era and level < 2:
+        # FG2: arm and leg plates over the mail, in the harness colour of the recipe.
+        plate_c = colour(recipe, "King_Legs:Metal", (eq.C_PLATE, eq.STEEL))[1]
+        for obj in gear.limb_harness(kit_gear, body, era, plate_c):
+            parent_keep(obj, arm)
+            garments.append((obj, "plates"))
+        if era == "late":
+            gloves = (eq.C_PLATE, plate_c)  # plate gauntlets
     equipment = []
     for item in recipe.get("equipment", []):
         name, mask = item[0], item[1]
@@ -815,6 +922,8 @@ def build_figure(fig_name, level):
         straw = colour(recipe, "Farmer_Head:Beige", (eq.C_CLOTH, figures.STRAW))
         band = colour(recipe, "Farmer_Head:Red", (eq.C_CLOTH, (0.25, 0.05, 0.03)))
         extra.append((straw_hat(lm, straw, band), masks["Farmer_Head"], "hat"))
+    # FG2: faces of the garments hidden under other pieces (jack, plates, tabard...).
+    hide_covered(garments, equipment, variants)
     # Body without the head (separate) nor the faces under the garments.
     trim(body, bare - {"Head"})
     out = []
@@ -862,6 +971,7 @@ def build_figure(fig_name, level):
         decimate(obj, target)
         bs.set_face_mask(obj, mask)
         out.append(obj)
+    fit_budget(out, level, mounted)
     if mounted:
         for obj in out:
             cav._rename_groups(obj, "R:")
