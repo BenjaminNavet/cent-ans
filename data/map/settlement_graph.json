@@ -709,6 +709,13 @@
   },
   {
    "from": "set_aigues_mortes",
+   "to": "set_mauguio",
+   "cost": 15.86,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_aigues_mortes",
    "to": "set_pezenas",
    "cost": 63.25,
    "road": false,
@@ -1438,8 +1445,8 @@
   {
    "from": "set_altdorf_uri",
    "to": "set_schloss_tirol",
-   "cost": 193.01,
-   "road": true,
+   "cost": 384.68,
+   "road": false,
    "sea": false
   },
   {
@@ -1675,9 +1682,9 @@
   },
   {
    "from": "set_amiens",
-   "to": "set_saint_valery_sur_somme",
-   "cost": 31.36,
-   "road": true,
+   "to": "set_neufchatel_en_bray",
+   "cost": 64.35,
+   "road": false,
    "sea": false
   },
   {
@@ -1711,7 +1718,7 @@
   {
    "from": "set_amsterdam",
    "to": "set_teylingen",
-   "cost": 58.71,
+   "cost": 57.33,
    "road": false,
    "sea": false
   },
@@ -3083,7 +3090,14 @@
   {
    "from": "set_avigliana",
    "to": "set_sant_antonio_di_ranverso",
-   "cost": 4.62,
+   "cost": 1.98,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_avigliana",
+   "to": "set_turin",
+   "cost": 11.49,
    "road": true,
    "sea": false
   },
@@ -5246,8 +5260,8 @@
   {
    "from": "set_bolzano",
    "to": "set_schloss_tirol",
-   "cost": 25.18,
-   "road": true,
+   "cost": 54.16,
+   "road": false,
    "sea": false
   },
   {
@@ -6931,6 +6945,13 @@
    "sea": false
   },
   {
+   "from": "set_cashel",
+   "to": "set_waterford",
+   "cost": 60.5,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_castelnau_bretenoux",
    "to": "set_figeac",
    "cost": 31.88,
@@ -6956,27 +6977,6 @@
    "to": "set_tulle",
    "cost": 42.23,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_castelnau_le_lez",
-   "to": "set_castries",
-   "cost": 5.15,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_castelnau_le_lez",
-   "to": "set_lattes",
-   "cost": 5.76,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_castelnau_le_lez",
-   "to": "set_montpellier",
-   "cost": 1.0,
-   "road": true,
    "sea": false
   },
   {
@@ -7037,16 +7037,9 @@
   },
   {
    "from": "set_castries",
-   "to": "set_lattes",
-   "cost": 13.76,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_castries",
-   "to": "set_maguelone",
-   "cost": 17.33,
-   "road": false,
+   "to": "set_mauguio",
+   "cost": 3.27,
+   "road": true,
    "sea": false
   },
   {
@@ -8388,6 +8381,13 @@
   },
   {
    "from": "set_clonmel",
+   "to": "set_waterford",
+   "cost": 41.58,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_clonmel",
    "to": "set_youghal",
    "cost": 46.08,
    "road": false,
@@ -8648,7 +8648,7 @@
   {
    "from": "set_como",
    "to": "set_schloss_tirol",
-   "cost": 279.36,
+   "cost": 280.44,
    "road": false,
    "sea": false
   },
@@ -9536,13 +9536,6 @@
   },
   {
    "from": "set_den_haag",
-   "to": "set_haarlem",
-   "cost": 81.91,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_den_haag",
    "to": "set_leiden",
    "cost": 16.12,
    "road": true,
@@ -9551,7 +9544,7 @@
   {
    "from": "set_den_haag",
    "to": "set_teylingen",
-   "cost": 46.71,
+   "cost": 49.77,
    "road": false,
    "sea": false
   },
@@ -9655,17 +9648,17 @@
   },
   {
    "from": "set_dieppe",
-   "to": "set_jumieges",
-   "cost": 30.92,
+   "to": "set_doullens",
+   "cost": 47.16,
    "road": true,
    "sea": false
   },
   {
    "from": "set_dieppe",
-   "to": "set_le_crotoy",
-   "cost": 153.84,
-   "road": false,
-   "sea": true
+   "to": "set_jumieges",
+   "cost": 30.92,
+   "road": true,
+   "sea": false
   },
   {
    "from": "set_dieppe",
@@ -9684,9 +9677,9 @@
   {
    "from": "set_dieppe",
    "to": "set_saint_valery_sur_somme",
-   "cost": 14.78,
-   "road": true,
-   "sea": false
+   "cost": 149.32,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_diest",
@@ -10152,6 +10145,13 @@
   },
   {
    "from": "set_dordrecht",
+   "to": "set_tiel",
+   "cost": 77.34,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dordrecht",
    "to": "set_zierikzee",
    "cost": 112.79,
    "road": false,
@@ -10291,13 +10291,6 @@
    "sea": false
   },
   {
-   "from": "set_doullens",
-   "to": "set_saint_valery_sur_somme",
-   "cost": 65.25,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_dover",
    "to": "set_new_romney",
    "cost": 30.25,
@@ -10392,6 +10385,13 @@
    "from": "set_dublin",
    "to": "set_kildare",
    "cost": 48.19,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dublin",
+   "to": "set_kilkenny",
+   "cost": 102.04,
    "road": false,
    "sea": false
   },
@@ -10777,6 +10777,13 @@
    "from": "set_egmond",
    "to": "set_stavoren",
    "cost": 110.5,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_egmond",
+   "to": "set_teylingen",
+   "cost": 84.49,
    "road": false,
    "sea": false
   },
@@ -12279,13 +12286,6 @@
    "sea": false
   },
   {
-   "from": "set_geldern",
-   "to": "set_nijmegen",
-   "cost": 48.61,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_genes",
    "to": "set_pavia",
    "cost": 132.05,
@@ -12415,6 +12415,13 @@
    "from": "set_girona",
    "to": "set_vic",
    "cost": 23.84,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gisors",
+   "to": "set_montdidier",
+   "cost": 35.18,
    "road": true,
    "sea": false
   },
@@ -12658,6 +12665,13 @@
   },
   {
    "from": "set_gouda",
+   "to": "set_marienweerd",
+   "cost": 74.47,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gouda",
    "to": "set_montfoort",
    "cost": 40.1,
    "road": false,
@@ -12666,14 +12680,7 @@
   {
    "from": "set_gouda",
    "to": "set_teylingen",
-   "cost": 54.98,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_gouda",
-   "to": "set_tiel",
-   "cost": 76.99,
+   "cost": 59.93,
    "road": false,
    "sea": false
   },
@@ -13001,8 +13008,8 @@
   },
   {
    "from": "set_guerande",
-   "to": "set_vannes",
-   "cost": 44.36,
+   "to": "set_suscinio",
+   "cost": 32.23,
    "road": false,
    "sea": false
   },
@@ -13051,7 +13058,7 @@
   {
    "from": "set_haarlem",
    "to": "set_teylingen",
-   "cost": 36.19,
+   "cost": 32.31,
    "road": false,
    "sea": false
   },
@@ -13358,9 +13365,9 @@
   },
   {
    "from": "set_hennebont",
-   "to": "set_suscinio",
-   "cost": 34.74,
-   "road": false,
+   "to": "set_vannes",
+   "cost": 21.41,
+   "road": true,
    "sea": false
   },
   {
@@ -13599,13 +13606,6 @@
    "to": "set_oristano",
    "cost": 65.85,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_ijsselstein",
-   "to": "set_marienweerd",
-   "cost": 41.93,
-   "road": false,
    "sea": false
   },
   {
@@ -14218,23 +14218,9 @@
    "sea": false
   },
   {
-   "from": "set_kildare",
-   "to": "set_waterford",
-   "cost": 87.16,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_kilkenny",
    "to": "set_trim",
    "cost": 105.28,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kilkenny",
-   "to": "set_waterford",
-   "cost": 41.55,
    "road": false,
    "sea": false
   },
@@ -14940,6 +14926,13 @@
   },
   {
    "from": "set_lattes",
+   "to": "set_mauguio",
+   "cost": 9.21,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lattes",
    "to": "set_montpellier",
    "cost": 5.92,
    "road": false,
@@ -15052,15 +15045,15 @@
   },
   {
    "from": "set_le_crotoy",
-   "to": "set_rambures",
-   "cost": 22.89,
+   "to": "set_rue",
+   "cost": 3.45,
    "road": false,
    "sea": false
   },
   {
    "from": "set_le_crotoy",
-   "to": "set_rue",
-   "cost": 3.45,
+   "to": "set_saint_valery_sur_somme",
+   "cost": 6.24,
    "road": false,
    "sea": false
   },
@@ -15158,7 +15151,7 @@
   {
    "from": "set_leiden",
    "to": "set_teylingen",
-   "cost": 17.12,
+   "cost": 21.69,
    "road": false,
    "sea": false
   },
@@ -16088,6 +16081,13 @@
   },
   {
    "from": "set_maguelone",
+   "to": "set_mauguio",
+   "cost": 12.5,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_maguelone",
    "to": "set_montpellier",
    "cost": 8.34,
    "road": false,
@@ -16326,22 +16326,22 @@
   },
   {
    "from": "set_marienweerd",
-   "to": "set_rhenen",
-   "cost": 23.93,
+   "to": "set_tiel",
+   "cost": 4.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_marienweerd",
-   "to": "set_tiel",
-   "cost": 15.11,
+   "to": "set_wageningen",
+   "cost": 17.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_marienweerd",
    "to": "set_wijk_bij_duurstede",
-   "cost": 3.09,
+   "cost": 5.76,
    "road": true,
    "sea": false
   },
@@ -16419,6 +16419,13 @@
    "from": "set_marseille",
    "to": "set_toulon",
    "cost": 48.49,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_mauguio",
+   "to": "set_montpellier",
+   "cost": 10.64,
    "road": false,
    "sea": false
   },
@@ -17922,6 +17929,13 @@
   },
   {
    "from": "set_noyelles_sur_mer",
+   "to": "set_saint_valery_sur_somme",
+   "cost": 6.18,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_noyelles_sur_mer",
    "to": "set_vironchaux",
    "cost": 7.83,
    "road": false,
@@ -18371,7 +18385,7 @@
   {
    "from": "set_padova",
    "to": "set_schloss_tirol",
-   "cost": 151.68,
+   "cost": 153.77,
    "road": true,
    "sea": false
   },
@@ -18601,8 +18615,8 @@
   },
   {
    "from": "set_pavia",
-   "to": "set_sant_antonio_di_ranverso",
-   "cost": 65.09,
+   "to": "set_savigliano",
+   "cost": 66.35,
    "road": true,
    "sea": false
   },
@@ -18749,7 +18763,7 @@
   {
    "from": "set_pinerolo",
    "to": "set_sant_antonio_di_ranverso",
-   "cost": 12.65,
+   "cost": 11.21,
    "road": true,
    "sea": false
   },
@@ -19197,8 +19211,8 @@
   {
    "from": "set_rambures",
    "to": "set_saint_valery_sur_somme",
-   "cost": 8.86,
-   "road": true,
+   "cost": 17.03,
+   "road": false,
    "sea": false
   },
   {
@@ -19227,6 +19241,13 @@
    "to": "set_rennes",
    "cost": 29.91,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_redon",
+   "to": "set_suscinio",
+   "cost": 52.14,
+   "road": false,
    "sea": false
   },
   {
@@ -19275,13 +19296,6 @@
    "from": "set_revigny_sur_ornain",
    "to": "set_sainte_menehould",
    "cost": 29.06,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_rhenen",
-   "to": "set_wageningen",
-   "cost": 22.18,
    "road": false,
    "sea": false
   },
@@ -19590,13 +19604,6 @@
    "from": "set_sacra_di_san_michele",
    "to": "set_saint_jean_de_maurienne",
    "cost": 60.79,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_sacra_di_san_michele",
-   "to": "set_sant_antonio_di_ranverso",
-   "cost": 6.97,
    "road": true,
    "sea": false
   },
@@ -19918,7 +19925,7 @@
   {
    "from": "set_sant_antonio_di_ranverso",
    "to": "set_turin",
-   "cost": 6.88,
+   "cost": 9.61,
    "road": true,
    "sea": false
   },
@@ -20009,14 +20016,14 @@
   {
    "from": "set_schloss_tirol",
    "to": "set_stams",
-   "cost": 135.72,
+   "cost": 131.47,
    "road": false,
    "sea": false
   },
   {
    "from": "set_schloss_tirol",
    "to": "set_sterzing",
-   "cost": 65.68,
+   "cost": 63.16,
    "road": false,
    "sea": false
   },
@@ -20436,7 +20443,7 @@
   {
    "from": "set_suscinio",
    "to": "set_vannes",
-   "cost": 11.98,
+   "cost": 15.5,
    "road": false,
    "sea": false
   },
@@ -20837,6 +20844,13 @@
    "to": "set_zoutleeuw",
    "cost": 17.43,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_waterford",
+   "to": "set_youghal",
+   "cost": 31.22,
+   "road": true,
    "sea": false
   },
   {
