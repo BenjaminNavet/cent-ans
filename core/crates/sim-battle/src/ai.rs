@@ -98,6 +98,9 @@ pub const SHOOTER_SAFETY: f64 = 70.0;
 /// R4: shooters behind a hedge, a ditch or in a village fall back when enemy
 /// foot comes this close.
 pub const COVER_SAFETY: f64 = 20.0;
+/// Distance kept from the field's edges by the AI's moves (a move outside
+/// the field is refused).
+pub(crate) const FIELD_MARGIN: f64 = 10.0;
 /// Enemy shooters farther than this from their own melee troops are
 /// "isolated" (a cavalry target).
 pub const ISOLATION_DISTANCE: f64 = 80.0;
@@ -359,10 +362,7 @@ impl<'a> View<'a> {
             return;
         }
         let field = self.sim.field();
-        let (x, z) = (
-            x.clamp(10.0, field.width - 10.0),
-            z.clamp(10.0, field.depth - 10.0),
-        );
+        let (x, z) = field.clamp_inside(x, z, FIELD_MARGIN);
         let z = dry_z(field, x, z, u.z, self.forward);
         let far = match u.destination {
             Some((dx, dz)) => (dx - x).powi(2) + (dz - z).powi(2) > 36.0,
@@ -1796,10 +1796,14 @@ fn plan_shooter(
             let rear = (line_z * view.forward).min(anchor.1 * view.forward) * view.forward;
             let behind = (unit.x, rear - view.forward * 45.0);
             if (unit.z - behind.1) * view.forward > 8.0 || view.engaged(i) {
+                let (x, z) = view
+                    .sim
+                    .field()
+                    .clamp_inside(behind.0, behind.1, FIELD_MARGIN);
                 view.commands.push(Command::Move {
                     units: vec![unit.id],
-                    x: behind.0,
-                    z: behind.1,
+                    x,
+                    z,
                     run: true,
                     facing: Some(facing),
                 });
@@ -2241,6 +2245,7 @@ fn plan_horse(
 /// regiments.
 fn react(view: &mut View, roles: &Roles) {
     let units = view.units;
+    let field = view.sim.field();
     let own = view.own.clone();
     for i in own {
         let u = &units[i];
@@ -2256,10 +2261,11 @@ fn react(view: &mut View, roles: &Roles) {
                     t.state == UnitState::Routing && stakes_in_path(units, (u.x, u.z), t)
                 });
         if rout_into_stakes {
+            let (x, z) = field.clamp_inside(u.x, u.z - view.forward * 60.0, FIELD_MARGIN);
             view.commands.push(Command::Move {
                 units: vec![u.id],
-                x: u.x,
-                z: u.z - view.forward * 60.0,
+                x,
+                z,
                 run: true,
                 facing: None,
             });
@@ -2271,10 +2277,11 @@ fn react(view: &mut View, roles: &Roles) {
             && roles.reserve.is_some_and(|r| r != i)
             && !u.is_general
         {
+            let (x, z) = field.clamp_inside(u.x, u.z - view.forward * 70.0, FIELD_MARGIN);
             view.commands.push(Command::Move {
                 units: vec![u.id],
-                x: u.x,
-                z: u.z - view.forward * 70.0,
+                x,
+                z,
                 run: true,
                 facing: None,
             });
