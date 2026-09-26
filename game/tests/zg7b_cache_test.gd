@@ -146,7 +146,7 @@ func _run() -> void:
 	_check(ui.get_child_count() == 1, "notice added once")
 	var notice := ui.get_child(0) as ReliefCacheNotice
 	if _check(notice != null, "child is a ReliefCacheNotice"):
-		_check(notice.command_field != null and notice.command_field.text == ReliefCacheStatus.REGEN_COMMAND, "notice shows the regeneration command")
+		_check(notice.command_field != null and notice.command_field.text == ReliefCacheStatus.FETCH_COMMAND, "notice shows the fetch command first (SZ7, ADR 0077)")
 		_check(notice.mouse_filter == Control.MOUSE_FILTER_STOP and notice.anchor_left == 0.5, "notice: top-centred panel, clicks kept to itself")
 	ReliefCacheNotice.report(ui, map_dir, map_dir)
 	_check(ui.get_child_count() == 1, "second report in the same session: no second notice")
