@@ -257,7 +257,7 @@ func _test_orleans() -> void:
 	_check(_gate_names(p1429).has("Porte Bannier") and _gate_names(p1429).has("Porte Renart"), "1429: accrue gates")
 	_check(ids_1340.has("saint_aignan") and ids_1340.has("saint_euverte"), "1340: churches outside the walls")
 	_check(not ids_1429.has("saint_euverte") and not ids_1429.has("saint_aignan_1420") and not ids_1429.has("saint_laurent"), "1429: churches outside the walls razed")
-	_check(ids_1429.has("tourelles") and ids_1429.has("boulevard_tourelles") and not ids_1340.has("boulevard_tourelles"), "Tourelles and boulevard (1404+)")
+	_check(ids_1429.has("tourelles") and ids_1429.has("boulevard_tourelles") and not ids_1340.has("boulevard_tourelles"), "Tourelles and boulevard (1417+)")
 	var chevet: Dictionary = ids_1340.get("sainte_croix_chevet", {})
 	_check(not chevet.is_empty() and float(chevet["length"]) < 70.0, "Sainte-Croix: chevet only")
 	var boulevard: Dictionary = ids_1429.get("boulevard_tourelles", {})
