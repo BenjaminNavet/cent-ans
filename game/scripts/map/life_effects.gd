@@ -171,6 +171,7 @@ func _rebuild_key(province_states: Dictionary) -> String:
 
 ## Moulins à vent sur la couronne de champs des colonies ; ailes arrêtées en pays dévasté.
 func _build_windmills(province_states: Dictionary) -> void:
+	_points_version += 1
 	_windmill_points.clear()
 	var data := _layer.data
 	for i in data.settlements.size():
@@ -285,6 +286,7 @@ func _update_overlays() -> void:
 
 
 func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: float) -> void:
+	_points_version += 1
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
 	quad.center_offset = Vector3(0.0, 0.5, 0.0)
@@ -310,21 +312,23 @@ func _ground(point: Array) -> Vector3:
 
 
 ## PB1 : seuls les points des tuiles dont la surface a changé (`_reground_chunks`) sont recalés :
-## la hauteur d'un point ne dépend que de sa tuile.
+## la hauteur d'un point ne dépend que de sa tuile. SZ6 : points indexés par tuile (plus de
+## parcours de tous les points à chaque recalage), tampon lu et écrit seulement si un point bouge.
 func _reground() -> void:
 	var changed := _reground_chunks
 	_reground_chunks = {}
 	if _windmill_bodies.multimesh != null and _windmill_sails.multimesh != null:
-		for n in _windmill_points.size():
-			if not _point_changed(_windmill_points[n], changed):
-				continue
+		for n: int in _changed_points("windmills", _windmill_points, changed):
 			var xforms := _windmill_transforms(_windmill_points[n])
 			_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
 			_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
-	for pair in [[_chimneys, _chimney_points], [_fires, _fire_points]]:
-		var mmi: MultiMeshInstance3D = pair[0]
-		var points: Array = pair[1]
+	for triple in [[_chimneys, _chimney_points, "chimneys"], [_fires, _fire_points, "fires"]]:
+		var mmi: MultiMeshInstance3D = triple[0]
+		var points: Array = triple[1]
 		if mmi.multimesh == null:
+			continue
+		var todo := _changed_points(triple[2], points, changed)
+		if todo.is_empty():
 			continue
 		# Tampon complet lu et écrit une fois (12 flottants de transformation + 4 de données
 		# personnalisées par instance ; hauteur de l'origine au rang 7) plutôt que deux appels au
@@ -333,27 +337,43 @@ func _reground() -> void:
 		var stride := 16
 		if buffer.size() != points.size() * stride:
 			# Rendu factice (headless) : pas de tampon lisible, repli point par point.
-			for n in points.size():
-				if _point_changed(points[n], changed):
-					var xform := mmi.multimesh.get_instance_transform(n)
-					xform.origin = _ground(points[n])
-					mmi.multimesh.set_instance_transform(n, xform)
+			for n: int in todo:
+				var xform := mmi.multimesh.get_instance_transform(n)
+				xform.origin = _ground(points[n])
+				mmi.multimesh.set_instance_transform(n, xform)
 			continue
-		var touched := false
-		for n in points.size():
-			if not _point_changed(points[n], changed):
-				continue
+		for n: int in todo:
 			buffer[n * stride + 7] = _ground(points[n]).y
-			touched = true
-		if touched:
-			mmi.multimesh.buffer = buffer
+		mmi.multimesh.buffer = buffer
 
 
-func _point_changed(point: Array, changed: Dictionary) -> bool:
+## SZ6 : index par tuile des points (`_windmill_points`, `_chimney_points`, `_fire_points`),
+## refait quand les listes sont reconstruites (`_points_version`).
+var _points_version := 0
+var _points_by_chunk: Dictionary = {}
+
+
+## Indices croissants des points de `points` situés dans une tuile de `changed` (tous sans terrain).
+func _changed_points(list_name: String, points: Array, changed: Dictionary) -> Array:
 	if _terrain == null:
-		return true
-	var px: Vector2 = point[0]
-	return changed.has(_terrain.chunk_index_at(px.x, px.y))
+		return range(points.size())
+	var cached: Dictionary = _points_by_chunk.get(list_name, {})
+	if int(cached.get("version", -1)) != _points_version or int(cached.get("size", -1)) != points.size():
+		var index_of: Dictionary = {}
+		for n in points.size():
+			var px: Vector2 = points[n][0]
+			var index := _terrain.chunk_index_at(px.x, px.y)
+			if not index_of.has(index):
+				index_of[index] = []
+			(index_of[index] as Array).append(n)
+		cached = {"version": _points_version, "size": points.size(), "by_chunk": index_of}
+		_points_by_chunk[list_name] = cached
+	var by_chunk: Dictionary = cached["by_chunk"]
+	var result: Array = []
+	for index: int in changed:
+		result.append_array(by_chunk.get(index, []))
+	result.sort()
+	return result
 
 
 func _on_surface_changed(index: int) -> void:
