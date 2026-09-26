@@ -157,6 +157,10 @@ impl ReliefFloor {
     }
 }
 
+/// Bytes of a quadtree page, shared with the page store of `ReliefLod` (lot PB3g: no copy per
+/// request).
+pub type PageBytes = std::sync::Arc<Vec<u8>>;
+
 /// Displayed ground under the trees (`TerrainBuilder.surface_grid`).
 pub enum Ground {
     /// Heightmap only.
@@ -169,7 +173,7 @@ pub enum Ground {
     },
     /// Quadtree snapshot: loaded pages (key → little-endian 16-bit samples).
     Pages {
-        pages: std::collections::HashMap<i64, Vec<u8>>,
+        pages: std::collections::HashMap<i64, PageBytes>,
         max_level: i64,
         h_min: f64,
         h_range: f64,
@@ -399,7 +403,7 @@ impl TileRequest {
     /// `ReliefQuadtree.sample_pages`: finest loaded page covering (x, y).
     fn sample_pages(
         &self,
-        pages: &std::collections::HashMap<i64, Vec<u8>>,
+        pages: &std::collections::HashMap<i64, PageBytes>,
         top_level: i64,
         h_min: f64,
         h_range: f64,
@@ -1036,7 +1040,7 @@ mod tests {
             page.extend_from_slice(&65535u16.to_le_bytes());
         }
         let mut pages = std::collections::HashMap::new();
-        pages.insert(0i64, page);
+        pages.insert(0i64, std::sync::Arc::new(page));
         req.ground = Ground::Pages {
             pages,
             max_level: 3,
