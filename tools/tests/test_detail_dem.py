@@ -11,7 +11,13 @@ import rasterio
 import shapely
 from rasterio.transform import Affine
 
-from cent_ans_tools.geo import anachronisms, detail_dem, detail_sources, terrain
+from cent_ans_tools.geo import (
+    anachronisms,
+    detail_dem,
+    detail_sources,
+    relief_shade,
+    terrain,
+)
 from cent_ans_tools.geo.detail_dem import PyramidGrid, Zone
 
 DATA = Path(__file__).resolve().parents[2] / "data"
@@ -206,19 +212,20 @@ def test_apply_boost_never_sinks_land_below_sea_level() -> None:
 
 
 def test_apply_boost_keeps_low_banks_above_the_water() -> None:
-    """ZG7a: London's low banks (2-5 m ODN) keep most of their height.
+    """ZG7a/SZ2: London's low banks (2-5 m ODN) keep most of their height.
 
-    Before, the flat 0.5 m floor put Southwark, Lambeth and Westminster level
-    with the Thames. The floor is monotone and only acts below LOW_LAND_CAP_M.
+    Before ZG7a the flat 0.5 m floor put Southwark, Lambeth and Westminster level
+    with the Thames. The floor (shared with E0-E4 since SZ2) is monotone.
     """
     base = np.full((1, 4), 23.0, dtype=np.float32)
-    height = np.array([[2.0, 3.5, 5.0, 12.0]], dtype=np.float32)
+    height = np.array([[2.0, 3.5, 5.0, 20.0]], dtype=np.float32)
     boosted = detail_dem.apply_boost(height, base)[0]
-    assert boosted[0] == pytest.approx(2.0 * detail_dem.LOW_LAND_KEEP)
+    keep = relief_shade.VALLEY_KEEP
+    assert boosted[0] == pytest.approx(2.0 * keep)
     assert boosted[1] >= 2.9 and boosted[2] >= 4.2
-    assert boosted[3] == pytest.approx(detail_dem.LOW_LAND_CAP_M)
+    assert boosted[3] == pytest.approx(20.0 - relief_shade.VALLEY_DIG_MAX_M)
     assert all(boosted[i] <= boosted[i + 1] for i in range(3))
-    # Land the boost leaves above the cap is untouched by the floor.
+    # Land the boost raises is untouched by the floor.
     hills = detail_dem.apply_boost(np.full((1, 1), 80.0, np.float32), base[:, :1])
     assert hills[0, 0] == pytest.approx(80.0 + 0.8 * 57.0)
 

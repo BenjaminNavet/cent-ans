@@ -27,6 +27,16 @@
         "tile_count": { "type": "integer", "minimum": 0 }
       },
       "additionalProperties": false
+    },
+    "bake_versions": {
+      "type": "object",
+      "description": "Versions de cuisson attendues par palier (lot SZ2) ; le cache porte les siennes dans pyramid/bake.json. Un palier cuit par une version différente est périmé : `geo relief-all` le recuit.",
+      "properties": {
+        "tier1": { "type": "integer", "minimum": 1 },
+        "tier2": { "type": "integer", "minimum": 1 },
+        "tier3": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
     }
   },
   "required": ["version", "tile_px", "root_tile_units", "height_min_m", "height_range_m", "dir", "pattern", "levels"],
