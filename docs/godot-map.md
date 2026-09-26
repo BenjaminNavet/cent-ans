@@ -679,7 +679,8 @@ local ZG8 plafonné à 350 m, cache absent ou partiel signalé et toléré tuile
 - haute montagne au palier vallée : l'exagération ZG4 (×3,4 à d = 6) fait encore des murs dans les
   vallées pyrénéennes et galloises ; à rendre fonction de l'amplitude locale du relief ;
 - fonds de vallée E1-E4 plaqués à 0,5 m près des plateaux (Seine de Paris à Rouen, Loire en
-  Touraine) : recuisson E0-E4 avec le plancher monotone du palier 3, plusieurs heures ;
+  Touraine), d'où une Loire fine ≈ 5 m sous les berges E7 d'Orléans : recuisson E0-E4 avec le plancher
+  monotone du palier 3 (plusieurs heures), puis `geo hydro-fine` ;
 - villes emblématiques au palier site (maquettes à la loupe sur relief 1:1, plancher caméra 2,6) :
   lot VH4 ;
 - objets à l'échelle de la carte au palier vallée (moulins, hameaux, fumées, arbres près de la
@@ -1418,8 +1419,9 @@ Alpes. Même formule partout (le fond publié est lu par les shaders, `MapData` 
 **Niveaux d'eau.** `hydro_fine.water_level` borne le fond des lignes à 0 m avant l'ajustement
 monotone (la bathymétrie des zones E5-E7 tirait la Tamise à −7,8 m à Londres, la Garonne à −15,8 m à
 Bordeaux) ; clé du cache de recalage liée à `detail_dem.BAKE_VERSION` (`SNAP_VERSION` 4 : les
-recalages dataient d'avant ZG3b, la Loire passait 10 m sous le relief d'Orléans). Palier 3 : les
-34 zones recuites avec le plancher monotone v4.
+recalages dataient d'avant ZG3b : la Loire passait 10 m sous le relief d'Orléans, encore ≈ 5 m après
+recalage, car l'ajustement monotone la mêle aux biefs E4 d'amont abaissés, voir les limites). Tamise à
+Londres : 1,9 m. Palier 3 : les 34 zones recuites avec le plancher monotone v4.
 
 **Banc.** `process_ms` du banc `--bench-map` est chronométré du début de l'itération (nœud
 `MapBenchFrameStart`, priorité minimale, physique comprise) jusqu'au banc (priorité maximale), au lieu
