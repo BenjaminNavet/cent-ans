@@ -545,105 +545,108 @@ void fragment() {
 		roughness = 0.6;
 	}
 #ifdef FG3_BAKED
-	// Lot FG3 : cartes cuites (LOD0/LOD1 des figurines fines). Dérivées prises hors des
-	// branches (contrôle de flux uniforme), lectures en textureGrad.
-	vec3 fg_dp1 = dFdx(VERTEX);
-	vec3 fg_dp2 = dFdy(VERTEX);
-	vec2 fg_da1 = dFdx(v_atlas);
-	vec2 fg_da2 = dFdy(v_atlas);
-	vec2 fg_dq1 = dFdx(q);
-	vec2 fg_dq2 = dFdy(q);
+	// Lot FG3 : cartes cuites (LOD0/LOD1 des figurines fines ; LOD2 : v_src = 0, rien de
+	// plus). v_src est constant sur tout un maillage LOD0/LOD1 (1, 3 ou 2 pour le cheval, tous
+	// non nuls) : les dérivées restent en flux uniforme ; lectures en textureGrad.
 	float fg_ao = 1.0;
-	if (v_src != 0 && dist < fine_distance) {
-		vec4 at;
-		if (v_src == 2) {
-			at = textureGrad(fine_horse, v_atlas, fg_da1, fg_da2);
-		} else if (v_src == 1) {
-			at = textureGrad(fine_atlas0, vec3(v_atlas, float(fine_layer)), fg_da1, fg_da2);
-		} else {
-			at = textureGrad(fine_atlas1, vec3(v_atlas, float(fine_layer)), fg_da1, fg_da2);
-		}
-		// Le v de la carte descend : le repère prend -v.
-		vec3 n = fg3_perturb(NORMAL, fg_dp1, fg_dp2, vec2(fg_da1.x, -fg_da1.y), vec2(fg_da2.x, -fg_da2.y), at.rg * 2.0 - 1.0);
-		float mask = at.a;
-		if (v_src == 2) {
-			// Cheval : relief de la robe (passe-haut de la couleur CC0) et occlusion fine.
-			albedo *= mix(0.6, 1.4, at.b);
-			fg_ao = at.a;
-			mask = 1.0;
-		} else {
-			fg_ao = at.b;
-		}
-		int tl = -1;
-		float amt = 0.0;
-		float relief = 0.5;
-		vec3 skin_tone = vec3(0.50, 0.33, 0.24) * FG3_SKIN[int(h6 * 5.99)];
-		if (code == C_MAIL) {
-			tl = FG3_TILE_MAIL;
-			amt = 1.0;
-			relief = 0.0; // albédo refait ci-dessous
-		} else if (code == C_PLATE) {
-			// Martelage : fort sur les casques (masque), léger sur les autres plates.
-			tl = FG3_TILE_HAMMERED;
-			amt = mix(0.12, 0.45, mask);
-			relief = 0.06;
-		} else if (code == C_TRIM) {
-			tl = FG3_TILE_HAMMERED;
-			amt = 0.2;
-			relief = 0.06;
-		} else if (code == C_LIVERY || code == C_ARMS || code == C_CLOTH) {
-			tl = FG3_TILE_WEAVE;
-			amt = 0.55;
-			relief = 0.25;
-		} else if (code == C_QUILT) {
-			tl = FG3_TILE_FELT;
-			amt = 0.7;
-			relief = 0.35;
-		} else if (code == C_LEATHER) {
-			tl = FG3_TILE_LEATHER;
-			amt = 0.8;
-			relief = 0.45;
-		} else if (code == C_WOOD) {
-			tl = FG3_TILE_WOOD;
-			amt = 0.45;
-			relief = 0.22;
-		} else if (code == C_SKIN) {
-			tl = FG3_TILE_SKIN;
-			amt = 0.35;
-			relief = 0.12;
-			// Teints variés ; le masque assombrit sourcils et barbe naissante vers le poil.
-			albedo = v_color * FG3_SKIN[int(h6 * 5.99)] * mix(0.94, 1.06, v_var.z);
-			albedo = mix(FG3_HAIR[int(h5 * 6.99)] * 1.4, albedo, mix(0.35, 1.0, mask));
-		} else if (code == C_HAIR || code == C_COAT) {
-			tl = FG3_TILE_HAIR;
-			amt = code == C_HAIR ? 0.9 : 0.45;
-			relief = code == C_HAIR ? 0.0 : 0.3;
-		}
-		if (tl >= 0) {
-			float size = FG3_TILE_SIZE[tl];
-			vec4 d = textureGrad(fine_detail, vec3(vec2(q.x, -q.y) / size, float(tl)), vec2(fg_dq1.x, -fg_dq1.y) / size, vec2(fg_dq2.x, -fg_dq2.y) / size);
-			n = fg3_perturb(n, fg_dp1, fg_dp2, fg_dq1, fg_dq2, (d.rg * 2.0 - 1.0) * amt);
-			albedo *= 1.0 + relief * (d.b * 2.0 - 1.0);
-			if (code == C_MAIL) {
-				// Mailles lisibles sans être noires : anneaux clairs, creux sombres, moins
-				// métalliques que l'acier plein (pas de reflet du ciel dans la maille serrée).
-				albedo = v_color * mix(0.85, 1.1, v_var.z) * mix(0.38, 1.15, d.b);
-				metallic = 0.6;
-				roughness = mix(0.7, 0.32, d.a);
-				fg_ao = mix(0.55, 1.0, fg_ao);
-			} else if (code == C_HAIR) {
-				// Barbes et cheveux : couleur plus claire et variée ; la densité (masque) fond
-				// les bords et la bouche dans la peau, les mèches cassent la lisière.
-				vec3 hair = FG3_HAIR[int(h6 * 6.99)] * (v_color.r > 0.2 ? 1.2 : 1.0);
-				float cover = smoothstep(0.25, 0.75, mask * (0.55 + 0.9 * d.b));
-				albedo = mix(skin_tone, hair * mix(0.75, 1.2, d.b), cover);
-				roughness = mix(0.6, 0.75, cover);
+	if (v_src != 0) {
+		vec3 fg_dp1 = dFdx(VERTEX);
+		vec3 fg_dp2 = dFdy(VERTEX);
+		vec2 fg_da1 = dFdx(v_atlas);
+		vec2 fg_da2 = dFdy(v_atlas);
+		vec2 fg_dq1 = dFdx(q);
+		vec2 fg_dq2 = dFdy(q);
+		if (dist < fine_distance) {
+			vec4 at;
+			if (v_src == 2) {
+				at = textureGrad(fine_horse, v_atlas, fg_da1, fg_da2);
+			} else if (v_src == 1) {
+				at = textureGrad(fine_atlas0, vec3(v_atlas, float(fine_layer)), fg_da1, fg_da2);
 			} else {
-				roughness = mix(roughness, roughness * (0.6 + 0.8 * d.a), min(amt, 1.0));
+				at = textureGrad(fine_atlas1, vec3(v_atlas, float(fine_layer)), fg_da1, fg_da2);
 			}
+			// Le v de la carte descend : le repère prend -v.
+			vec3 n = fg3_perturb(NORMAL, fg_dp1, fg_dp2, vec2(fg_da1.x, -fg_da1.y), vec2(fg_da2.x, -fg_da2.y), at.rg * 2.0 - 1.0);
+			float mask = at.a;
+			if (v_src == 2) {
+				// Cheval : relief de la robe (passe-haut de la couleur CC0) et occlusion fine.
+				albedo *= mix(0.6, 1.4, at.b);
+				fg_ao = at.a;
+				mask = 1.0;
+			} else {
+				fg_ao = at.b;
+			}
+			int tl = -1;
+			float amt = 0.0;
+			float relief = 0.5;
+			vec3 skin_tone = vec3(0.50, 0.33, 0.24) * FG3_SKIN[int(h6 * 5.99)];
+			if (code == C_MAIL) {
+				tl = FG3_TILE_MAIL;
+				amt = 1.0;
+				relief = 0.0; // albédo refait ci-dessous
+			} else if (code == C_PLATE) {
+				// Martelage : fort sur les casques (masque), léger sur les autres plates.
+				tl = FG3_TILE_HAMMERED;
+				amt = mix(0.12, 0.45, mask);
+				relief = 0.06;
+			} else if (code == C_TRIM) {
+				tl = FG3_TILE_HAMMERED;
+				amt = 0.2;
+				relief = 0.06;
+			} else if (code == C_LIVERY || code == C_ARMS || code == C_CLOTH) {
+				tl = FG3_TILE_WEAVE;
+				amt = 0.55;
+				relief = 0.25;
+			} else if (code == C_QUILT) {
+				tl = FG3_TILE_FELT;
+				amt = 0.7;
+				relief = 0.35;
+			} else if (code == C_LEATHER) {
+				tl = FG3_TILE_LEATHER;
+				amt = 0.8;
+				relief = 0.45;
+			} else if (code == C_WOOD) {
+				tl = FG3_TILE_WOOD;
+				amt = 0.45;
+				relief = 0.22;
+			} else if (code == C_SKIN) {
+				tl = FG3_TILE_SKIN;
+				amt = 0.35;
+				relief = 0.12;
+				// Teints variés ; le masque assombrit sourcils et barbe naissante vers le poil.
+				albedo = v_color * FG3_SKIN[int(h6 * 5.99)] * mix(0.94, 1.06, v_var.z);
+				albedo = mix(FG3_HAIR[int(h5 * 6.99)] * 1.4, albedo, mix(0.35, 1.0, mask));
+			} else if (code == C_HAIR || code == C_COAT) {
+				tl = FG3_TILE_HAIR;
+				amt = code == C_HAIR ? 0.9 : 0.45;
+				relief = code == C_HAIR ? 0.0 : 0.3;
+			}
+			if (tl >= 0) {
+				float size = FG3_TILE_SIZE[tl];
+				vec4 d = textureGrad(fine_detail, vec3(vec2(q.x, -q.y) / size, float(tl)), vec2(fg_dq1.x, -fg_dq1.y) / size, vec2(fg_dq2.x, -fg_dq2.y) / size);
+				n = fg3_perturb(n, fg_dp1, fg_dp2, fg_dq1, fg_dq2, (d.rg * 2.0 - 1.0) * amt);
+				albedo *= 1.0 + relief * (d.b * 2.0 - 1.0);
+				if (code == C_MAIL) {
+					// Mailles lisibles sans être noires : anneaux clairs, creux sombres, moins
+					// métalliques que l'acier plein (pas de reflet du ciel dans la maille serrée).
+					albedo = v_color * mix(0.85, 1.1, v_var.z) * mix(0.38, 1.15, d.b);
+					metallic = 0.6;
+					roughness = mix(0.7, 0.32, d.a);
+					fg_ao = mix(0.55, 1.0, fg_ao);
+				} else if (code == C_HAIR) {
+					// Barbes et cheveux : couleur plus claire et variée ; la densité (masque) fond
+					// les bords et la bouche dans la peau, les mèches cassent la lisière.
+					vec3 hair = FG3_HAIR[int(h6 * 6.99)] * (v_color.r > 0.2 ? 1.2 : 1.0);
+					float cover = smoothstep(0.25, 0.75, mask * (0.55 + 0.9 * d.b));
+					albedo = mix(skin_tone, hair * mix(0.75, 1.2, d.b), cover);
+					roughness = mix(0.6, 0.75, cover);
+				} else {
+					roughness = mix(roughness, roughness * (0.6 + 0.8 * d.a), min(amt, 1.0));
+				}
+			}
+			albedo *= mix(1.0, fg_ao, 0.55);
+			NORMAL = n;
 		}
-		albedo *= mix(1.0, fg_ao, 0.55);
-		NORMAL = n;
 	}
 	AO = fg_ao;
 #endif
