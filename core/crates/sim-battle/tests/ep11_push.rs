@@ -341,3 +341,70 @@ fn probe() {
         run_steady(&mut sim, 5.0);
     }
 }
+
+/// Probe (ignored): a historical map (`EP11_MAP`, `EP11_SEED`; `EP11_OFF=1`
+/// without push): every 30 s, the regiments in melee with their push state.
+#[test]
+#[ignore = "probe"]
+fn probe_historical() {
+    let id = std::env::var("EP11_MAP").unwrap_or_else(|_| "azincourt".to_owned());
+    let seed = std::env::var("EP11_SEED")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(2);
+    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../data/battle_maps")
+        .join(format!("{id}.json"));
+    let map =
+        sim_battle::HistoricalMap::from_json(&std::fs::read_to_string(path).unwrap()).unwrap();
+    let data = data();
+    let setup = map
+        .battle_setup(
+            &data.unit_types,
+            data.battle_orders.values().cloned().collect(),
+            Some(data.battle_standard_rules.clone()),
+            None,
+        )
+        .unwrap();
+    let mut sim = map.start(setup, seed).unwrap();
+    if std::env::var("EP11_OFF").is_ok() {
+        let mut rules = sim.push_rules().clone();
+        rules.pressure.max_speed_mps = 0.0;
+        rules.wrap.flank_damage_bonus = 0.0;
+        sim.set_push_rules(rules);
+    }
+    let every: f64 = std::env::var("EP11_EVERY")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(30.0);
+    while !sim.is_finished() && sim.elapsed() < 2400.0 {
+        run(&mut sim, every);
+        println!(
+            "t={:.0} str {} / {}",
+            sim.elapsed(),
+            sim.strength(SideId::Attacker),
+            sim.strength(SideId::Defender)
+        );
+        for u in sim.units().iter().filter(|u| u.state == UnitState::Melee) {
+            println!(
+                "   {} {:>2} {:<24} hp {:>5.0} mor {:>3.0} ({:>4.0},{:>4.0}) spd {:>5.2} lost {:>5.1} comp {:.2} wrap {:.2}/{:.2} of {:?}",
+                u.side.key(),
+                u.id,
+                u.unit_type,
+                u.hp,
+                u.morale,
+                u.x,
+                u.z,
+                u.push.speed,
+                u.push.ground_lost,
+                u.push.compression,
+                u.push.wrap[0],
+                u.push.wrap[1],
+                u.push.wrap_of
+            );
+        }
+    }
+    for e in sim.events() {
+        println!("{:5.0} {}", e.time, e.text_fr);
+    }
+}

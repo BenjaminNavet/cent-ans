@@ -2,7 +2,7 @@
   "description": "Poussée continue des lignes en mêlée (lot EP11, ADR 0070). Deux régiments au contact se poussent : le plus lourd, le plus profond, le plus frais ou celui qui charge fait reculer l'autre de quelques mètres par dizaine de secondes, et le suit. Un régiment poussé contre un obstacle (mur, maison, eau profonde, bord du champ, régiment ami) ne recule pas : il se comprime, se bat plus mal et souffre davantage. Les files d'un régiment plus large que son adversaire s'enroulent autour de ses flancs. Le front se bombe (celui qui pousse) ou se creuse (celui qui recule). Batailles rangées seulement.",
   "pressure": {
     "max_speed_mps": 0.45,
-    "dead_band": 0.08,
+    "dead_band": 0.12,
     "full_speed_share": 0.45,
     "mounted_weight": 2.2,
     "armor_weight_per_point": 0.01,
@@ -10,12 +10,13 @@
     "melee_per_point": 0.01,
     "rank_cap": 8,
     "min_freshness": 0.4,
-    "fatigue_scale": 150,
+    "fatigue_scale": 300,
     "charge_factor": 1.0,
     "square_factor": 1.6,
-    "stakes_factor": 1.5,
+    "stakes_factor": 10,
     "pikes_against_horse_factor": 2.5,
-    "follow_share": 1.0
+    "follow_share": 1.0,
+    "recoil_morale_per_second": 0.5
   },
   "compression": {
     "gain_per_second": 0.25,

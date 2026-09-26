@@ -3,12 +3,15 @@
 //! `data/schemas/battle_push_rules.schema.json`); the per-tick resolution is
 //! in `sim/push.rs`. Field battles only: sieges keep their fixed melee.
 //!
-//! - **Pressure.** Each regiment in contact leans on its opponent with a
-//!   pressure ([`PressureRules::pressure`]): weight per man (armour, horse)
-//!   × skill (melee) × √ranks (capped) × freshness × morale × charge impetus × formation.
-//!   The relative gap `(Pa − Pb)/(Pa + Pb)` sets the recoil speed of the
-//!   weaker ([`PressureRules::recoil_speed`]): nothing inside a dead band,
-//!   then up to a few metres per ten seconds; the winner follows.
+//! - **Pressure.** Each regiment in contact drives its opponent with a
+//!   pressure ([`PressureRules::drive`]): weight per man (armour, horse)
+//!   × skill (melee) × √ranks (capped) × freshness × morale × charge impetus
+//!   (× pikes against riders). It resists with the same pressure raised by
+//!   a square or planted stakes ([`PressureRules::resistance`]): they hold,
+//!   they do not drive. The relative gap `(D − R)/(D + R)` sets the recoil
+//!   speed of the weaker ([`PressureRules::recoil_speed`]): nothing inside a
+//!   dead band, then up to a few metres per ten seconds; the winner follows
+//!   (archers stay by their stakes).
 //! - **Compression.** A pushed regiment that cannot give ground (wall,
 //!   house, deep water, field edge, a friendly regiment close behind)
 //!   compresses ([`PushShape::compression`], 0-1): it strikes less, takes
@@ -71,6 +74,8 @@ pub struct PressureRules {
     pub pikes_against_horse_factor: f64,
     /// Share of the opponent's recoil the pusher follows.
     pub follow_share: f64,
+    /// Morale lost per second by a regiment giving ground at full speed.
+    pub recoil_morale_per_second: f64,
 }
 
 /// A pushed regiment that cannot give ground.
@@ -157,6 +162,10 @@ impl PushRules {
     pub fn bundled() -> &'static PushRules {
         static RULES: OnceLock<PushRules> = OnceLock::new();
         RULES.get_or_init(|| {
+            if let Ok(path) = std::env::var("EP11_RULES_PROBE") {
+                let text = std::fs::read_to_string(path).expect("probe rules");
+                return serde_json::from_str(&text).expect("probe rules valid");
+            }
             serde_json::from_str(BUNDLED).expect("data/rules/battle_push.json is valid")
         })
     }
@@ -176,8 +185,9 @@ impl PushRules {
 }
 
 impl PressureRules {
-    /// Push of `unit` against `opponent` (arbitrary units; only ratios count).
-    pub fn pressure(&self, unit: &Unit, opponent: &Unit) -> f64 {
+    /// Weight of the push of `unit` against `opponent` (arbitrary units;
+    /// only ratios count), before the defensive factors.
+    pub fn drive(&self, unit: &Unit, opponent: &Unit) -> f64 {
         let mut weight = 1.0 + f64::from(unit.stats.armor) * self.armor_weight_per_point;
         if unit.mounted {
             weight *= self.mounted_weight;
@@ -192,14 +202,22 @@ impl PressureRules {
             let charge = f64::from(unit.stats.charge.unwrap_or(20));
             pressure *= 1.0 + charge / 100.0 * self.charge_factor;
         }
+        if opponent.mounted && unit.has(Ability::PikeSquare) {
+            pressure *= self.pikes_against_horse_factor;
+        }
+        pressure
+    }
+
+    /// How hard `unit` holds its ground against `opponent`: its
+    /// [`Self::drive`], raised by a square or planted stakes (they hold,
+    /// they do not drive the enemy back).
+    pub fn resistance(&self, unit: &Unit, opponent: &Unit) -> f64 {
+        let mut pressure = self.drive(unit, opponent);
         if unit.formation == Formation::Square {
             pressure *= self.square_factor;
         }
         if unit.stakes_planted {
             pressure *= self.stakes_factor;
-        }
-        if opponent.mounted && unit.has(Ability::PikeSquare) {
-            pressure *= self.pikes_against_horse_factor;
         }
         pressure
     }
