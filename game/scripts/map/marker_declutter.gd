@@ -34,12 +34,9 @@ func placed_rects() -> Array[Rect2]:
 
 ## Vrai si `rect` recouvre un rectangle posé (hors ceux du propriétaire `ignore_owner`).
 func overlaps(rect: Rect2, ignore_owner: int = -1) -> bool:
-	var seen := {}
+	# Un rectangle sur plusieurs cases peut être testé deux fois : sans effet sur le résultat.
 	for key in _keys(rect):
 		for index: int in _grid.get(key, _EMPTY):
-			if seen.has(index):
-				continue
-			seen[index] = true
 			if _owners[index] != ignore_owner and _rects[index].intersects(rect):
 				return true
 	return false

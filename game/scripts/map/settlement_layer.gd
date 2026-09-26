@@ -10,8 +10,11 @@ extends Node3D
 ##   exacte du terrain affiché et recalées quand une tuile change de niveau ; hameaux en
 ##   `MultiMesh` par tuile (orientation et variante déterministes, brûlés selon la dévastation de
 ##   la province) ; noms de toutes les colonies.
-## Étiquettes : masquage des chevauchements par priorité (cité > ville > château > abbaye >
-## village). Picking écran : `pick_screen` → id, `select` → surbrillance + signal.
+## Dé-encombrement écran (lot DA7d, ADR 0066) : marqueurs et noms posés par priorité (rang puis
+## poids, `MarkerDeclutter`) ; ceux qui recouvrent un rectangle déjà posé cèdent la place (fondu
+## du shader), sauf la capitale du joueur, la colonie sélectionnée et celle survolée. Recalcul
+## seulement quand la caméra bouge nettement (paramètres dans `settlement_markers.json`).
+## Picking écran : `pick_screen` → id, `select` → surbrillance + signal.
 
 signal settlement_selected(id: String)
 
@@ -26,6 +29,8 @@ const BURN_THRESHOLD := 10.0
 ## Partage de l'écart entre deux maquettes voisines (voir `_fit_models`).
 const FIT_WEIGHT := {"city": 3.0, "town": 2.0, "castle": 1.5, "abbey": 1.3, "village": 1.0}
 const MIN_FIT_SCALE := 0.55
+## Distance de retrait du marqueur de la colonie sélectionnée (toujours affiché, DA7d).
+const SELECTED_UNTIL := 100000.0
 
 @export var tiers: ZoomTiers
 ## Échelle globale des marqueurs (tailles par rang dans `data/map/settlement_markers.json`).
@@ -51,6 +56,26 @@ var _marker_size: PackedFloat32Array = PackedFloat32Array()
 var _marker_until: PackedFloat32Array = PackedFloat32Array()
 ## Écu affiché par colonie (faction), pour ne réécrire que ce qui change.
 var _marker_holder: PackedStringArray = PackedStringArray()
+## Lot DA7d : état de dé-encombrement par colonie (1 = marqueur affiché, 0 = cède la place),
+## ordre de priorité fixe (rang puis poids), épinglés et dernier état de caméra calculé.
+var _marker_shown: PackedByteArray = PackedByteArray()
+var _priority_order: PackedInt32Array = PackedInt32Array()
+var _placer := MarkerDeclutter.new()
+var _capital_index := -1
+var _hovered_index := -1
+var _selected_index := -1
+## Largeur estimée (px, sans marge) du nom de chaque colonie (longueur du texte × police).
+var _label_width: PackedFloat32Array = PackedFloat32Array()
+var _declutter_force := true
+var _declutter_camera: Array = []
+var _declutter_fade_until := -1.0
+var _max_marker_px := 64.0
+## Ancre monde de chaque marqueur (celle du `MultiMesh`) et centre écran au dernier recalcul
+## (survol sans reprojection).
+var _marker_world: PackedVector3Array = PackedVector3Array()
+var _marker_screen: PackedVector2Array = PackedVector2Array()
+## Durée (ms) du dernier recalcul complet (`declutter`).
+var last_declutter_ms := 0.0
 var _icon_distance := -1.0
 var _labels: Array[Label3D] = []
 var _models: Array = []  # par colonie : Node3D ou null
@@ -111,6 +136,7 @@ func setup(map: MapData, terrain_builder: TerrainBuilder, settlement_data: Settl
 	data = settlement_data
 	tiers = zoom_tiers if zoom_tiers != null else ZoomTiers.new()
 	_labels.clear()
+	_label_width.clear()
 	_models.clear()
 	_settlements_by_chunk.clear()
 	_hamlets_by_chunk.clear()
@@ -396,6 +422,7 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	label.position = Vector3(px.x, map_data.surface_world_at(px.x, px.y), px.y)
 	_labels_root.add_child(label)
 	_labels.append(label)
+	_label_width.append(label.text.length() * label.font_size * 0.5)
 
 
 ## Instance du `MultiMesh` d'une colonie : ordre inverse de la priorité, pour que les lieux de
@@ -411,6 +438,11 @@ func _build_icons() -> void:
 	_marker_size.resize(count)
 	_marker_until.resize(count)
 	_marker_holder.resize(count)
+	_marker_shown.resize(count)
+	_marker_shown.fill(1)
+	_marker_world.resize(count)
+	_marker_screen.resize(count)
+	_marker_screen.fill(Vector2(-1.0e6, -1.0e6))
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
 	var multimesh := MultiMesh.new()
@@ -430,8 +462,10 @@ func _build_icons() -> void:
 		_marker_holder[i] = ""
 		var cell := markers.cell_of(markers.pictogram_for(kind, rank))
 		var k := _icon_instance(i)
-		multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)))
-		multimesh.set_instance_color(k, Color(-1.0, 1.0 if bool(entry.get("port", false)) else 0.0, 0.0, 1.0))
+		_marker_world[i] = Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+		multimesh.set_instance_transform(k, Transform3D(Basis.IDENTITY, _marker_world[i]))
+		# DA7d : b = affiché (1) / cède la place (0), a = instant du dernier changement (fondu).
+		multimesh.set_instance_color(k, Color(-1.0, 1.0 if bool(entry.get("port", false)) else 0.0, 1.0, -1.0e4))
 		multimesh.set_instance_custom_data(k, Color(cell, 0.0, _marker_size[i], _marker_until[i] / 100.0))
 	_icon_material = ShaderMaterial.new()
 	_icon_material.shader = preload("res://shaders/settlement_icon.gdshader")
@@ -442,6 +476,10 @@ func _build_icons() -> void:
 	_icon_material.set_shader_parameter("badge_place", markers.placement("badge"))
 	_icon_material.set_shader_parameter("fade_distance", markers.fade_distance())
 	_icon_material.set_shader_parameter("size_scale", icon_size_scale)
+	_icon_material.set_shader_parameter("declutter_fade", float(markers.declutter_value("fade_seconds", 0.25)))
+	_icon_material.set_shader_parameter("hidden_alpha", float(markers.declutter_value("hidden_alpha", 0.0)))
+	declutter_interval = float(markers.declutter_value("interval_seconds", declutter_interval))
+	_build_priority_order()
 	_icon_material.render_priority = 2
 	_icons = MultiMeshInstance3D.new()
 	_icons.name = "Icons"
@@ -488,9 +526,43 @@ func marker_size(i: int) -> float:
 	return _marker_size[i] * icon_size_scale if i >= 0 and i < _marker_size.size() else 24.0
 
 
-## Vrai si le marqueur de la colonie `i` est affiché à la distance caméra courante.
+## Vrai si le marqueur de la colonie `i` est affiché à la distance caméra courante (palier de
+## rang et dé-encombrement écran DA7d).
 func marker_visible(i: int) -> bool:
-	return i >= 0 and i < _marker_until.size() and _camera_distance < _marker_until[i] and _weights.x < 0.65
+	return marker_in_tier(i) and _marker_shown[i] == 1
+
+
+## Vrai si le rang du marqueur `i` l'affiche à la distance caméra courante (avant dé-encombrement).
+## La colonie sélectionnée reste affichée à toute distance.
+func marker_in_tier(i: int) -> bool:
+	return i >= 0 and i < _marker_until.size() and _camera_distance < _marker_until_of(i) and _weights.x < 0.65
+
+
+func _marker_until_of(i: int) -> float:
+	return SELECTED_UNTIL if _is_selected(i) else _marker_until[i]
+
+
+func _is_selected(i: int) -> bool:
+	return i == _selected_index
+
+
+## Lot DA7d : ordre de priorité fixe des colonies (rang décroissant, puis poids, puis ordre des
+## données : cité > ville > château > abbaye > village).
+func _build_priority_order() -> void:
+	var order: Array = range(data.settlements.size())
+	var weights := PackedFloat32Array()
+	weights.resize(order.size())
+	_max_marker_px = 16.0
+	for i in order.size():
+		weights[i] = float(data.settlements[i].get("weight", 0))
+		_max_marker_px = maxf(_max_marker_px, marker_size(i))
+	order.sort_custom(func(a: int, b: int) -> bool:
+		if _marker_rank[a] != _marker_rank[b]:
+			return _marker_rank[a] > _marker_rank[b]
+		if weights[a] != weights[b]:
+			return weights[a] > weights[b]
+		return a < b)
+	_priority_order = PackedInt32Array(order)
 
 
 func _build_selection_ring() -> void:
@@ -529,6 +601,7 @@ func refresh(sim: Object, color_of: Callable) -> void:
 			if landmark_cities != null:
 				landmark_cities.set_year(year)
 	_refresh_shields()
+	_refresh_capital(sim)
 	for i in data.settlements.size():
 		var entry: Dictionary = data.settlements[i]
 		var controller := str(entry["controller"])
@@ -567,6 +640,28 @@ func refresh(sim: Object, color_of: Callable) -> void:
 					break
 
 
+## Lot DA7d : colonie de la capitale du joueur (la plus prioritaire de la province capitale).
+func _refresh_capital(sim: Object) -> void:
+	var index := -1
+	var facade := get_node_or_null("/root/SimFacade") if is_inside_tree() else null
+	if sim != null and facade != null and sim.has_method("get_player_faction"):
+		var info: Variant = facade.call("faction_info", str(sim.call("get_player_faction")))
+		var province := str((info as Dictionary).get("capital", "")) if info is Dictionary else ""
+		if province != "":
+			for i in _priority_order:
+				if str(data.settlements[i].get("province", "")) == province:
+					index = i
+					break
+	if index != _capital_index:
+		_capital_index = index
+		_declutter_force = true
+
+
+## Index de la colonie de la capitale du joueur (-1 si inconnue).
+func capital_index() -> int:
+	return _capital_index
+
+
 # --- Mise à jour par image -----------------------------------------------------------
 
 
@@ -599,6 +694,7 @@ func update_view(camera_distance: float) -> void:
 		if label_state != _label_state:
 			_update_label_heights()
 		_declutter_timer = 0.0
+		_declutter_force = true
 	if MapData.vertical_scale() != _label_scale:
 		_labels_dirty = false
 		_update_label_heights()  # ZG4 : toutes les étiquettes du palier moyen suivent l'échelle
@@ -623,7 +719,10 @@ func update_view(camera_distance: float) -> void:
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
 	if _declutter_timer <= 0.0:
 		_declutter_timer = declutter_interval
-		declutter()
+		# DA7d : recalcul seulement si la caméra a bougé nettement (ou épinglés, palier changés).
+		if _declutter_force or _camera_moved():
+			declutter()
+	_update_declutter_fade()
 
 
 func _on_chunk_surface_changed(index: int) -> void:
@@ -688,50 +787,164 @@ func _label_alpha(kind: String) -> float:
 			return _weights.x
 
 
-## Masque les étiquettes qui en chevauchent une plus prioritaire (colonies déjà triées).
+## Lot DA7d : dé-encombrement écran. Marqueurs puis noms, colonie par colonie dans l'ordre de
+## priorité (épinglés d'abord) ; un marqueur qui recouvre un rectangle posé cède la place (son nom
+## aussi), un nom qui recouvre un rectangle posé est masqué. Grille spatiale (`MarkerDeclutter`).
 func declutter() -> void:
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
-	if camera == null:
+	if camera == null or data == null or _priority_order.is_empty():
 		return
+	var t0 := Time.get_ticks_usec()
+	_declutter_force = false
+	_declutter_camera = _camera_state(camera)
 	var screen := get_viewport().get_visible_rect()
-	var placed: Array[Rect2] = []
+	var spill := float(markers.declutter_value("label_screen_margin", 0.2))
+	var label_screen := screen.grow_individual(screen.size.x * spill, screen.size.y * spill, screen.size.x * spill, screen.size.y * spill)
+	var marker_margin := float(markers.declutter_value("marker_margin_px", 2.0))
+	var label_margin := float(markers.declutter_value("label_margin_px", declutter_margin))
+	var icons_on := _icons != null and _icons.visible and _weights.x < 0.65
+	_placer.reset(_max_marker_px * icon_size_scale + marker_margin * 2.0)
+	var pins := _pinned_indices()
+	var box_fraction := markers.marker_box()
 	# ZG4 : paliers vallée / site (vue rasante) : seulement les colonies proches, l'horizon ne se
 	# couvre pas de noms.
 	var close_w := tiers.valley_weight(_camera_distance) if tiers != null else 0.0
 	var label_range := tiers.close_label_range_factor * _camera_distance if tiers != null else INF
-	for i in _labels.size():
+	var alpha_by_kind := {}
+	for kind in KIND_INDEX:
+		alpha_by_kind[kind] = _label_alpha(kind)
+	var sequence := PackedInt32Array(pins)
+	for i in _priority_order:
+		if not pins.has(i):
+			sequence.append(i)
+	for i in sequence:
+		var has_marker := icons_on and marker_in_tier(i)
+		var shown := true
+		if has_marker and not camera.is_position_behind(_marker_world[i]):
+			var marker_rect := _marker_rect(i, camera, marker_margin, box_fraction)
+			shown = _placer.try_place(marker_rect, i, pins.has(i))
+			_marker_screen[i] = marker_rect.get_center() if shown else Vector2(-1.0e6, -1.0e6)
+		else:
+			_marker_screen[i] = Vector2(-1.0e6, -1.0e6)
+		_set_marker_shown(i, shown)
 		var label := _labels[i]
-		var alpha := _label_alpha(str(data.settlements[i]["kind"]))
-		if close_w > 0.5 and camera.global_position.distance_to(label.global_position) > label_range:
-			alpha = 0.0
-		if alpha < 0.02 or camera.is_position_behind(label.global_position):
+		var alpha: float = alpha_by_kind.get(data.settlements[i]["kind"], _weights.x)
+		if not shown or alpha < 0.02:
 			label.visible = false
 			continue
-		var rect := _label_rect(label, camera, declutter_margin)
-		if not screen.intersects(rect):
+		var label_at := label.global_position
+		if (close_w > 0.5 and camera.global_position.distance_to(label_at) > label_range) or camera.is_position_behind(label_at):
 			label.visible = false
 			continue
-		var free := true
-		for other in placed:
-			if other.intersects(rect):
-				free = false
-				break
+		var rect := _label_rect_at(camera.unproject_position(label_at) - Vector2(0.0, label.offset.y), _label_width[i], label.font_size, label_margin)
+		if not label_screen.intersects(rect):
+			label.visible = false
+			continue
+		var free := _placer.try_place(rect, i)
 		label.visible = free
 		if free:
-			placed.append(rect)
 			var modulate := label_color
 			modulate.a = alpha
 			label.modulate = modulate
 			var outline := label_outline
 			outline.a = alpha
 			label.outline_modulate = outline
+	last_declutter_ms = float(Time.get_ticks_usec() - t0) / 1000.0
+
+
+## Lot DA7d : colonies toujours affichées : sélection, survol, capitale du joueur (dans cet ordre).
+func _pinned_indices() -> PackedInt32Array:
+	var pins := PackedInt32Array()
+	if bool(markers.declutter_value("pin_selected", true)) and selected_id != "":
+		pins.append(int(data.index_by_id.get(selected_id, -1)))
+	_hovered_index = -1
+	if bool(markers.declutter_value("pin_hovered", true)) and _weights.x < 0.65 and is_inside_tree():
+		# Survol : le marqueur affiché sous la souris (centres écran du recalcul précédent) reste
+		# affiché pendant le zoom à la molette.
+		var mouse := get_viewport().get_mouse_position()
+		var best := INF
+		for i in _marker_screen.size():
+			var d := _marker_screen[i].distance_squared_to(mouse)
+			var radius := marker_size(i) * PICK_ICON_FRACTION
+			if d < radius * radius and d < best:
+				best = d
+				_hovered_index = i
+		if _hovered_index >= 0 and not pins.has(_hovered_index):
+			pins.append(_hovered_index)
+	if bool(markers.declutter_value("pin_player_capital", true)) and _capital_index >= 0 and not pins.has(_capital_index):
+		pins.append(_capital_index)
+	var result := PackedInt32Array()
+	for i in pins:
+		if i >= 0 and i < data.settlements.size():
+			result.append(i)
+	return result
+
+
+## Lot DA7d : bascule l'état affiché / cédé d'un marqueur (fondu côté shader, sans CPU par image).
+func _set_marker_shown(i: int, shown: bool) -> void:
+	var value := 1 if shown else 0
+	if _marker_shown[i] == value:
+		return
+	_marker_shown[i] = value
+	if _icons == null:
+		return
+	var k := _icon_instance(i)
+	var color := _icons.multimesh.get_instance_color(k)
+	color.b = float(value)
+	color.a = _declutter_clock()
+	_icons.multimesh.set_instance_color(k, color)
+	_declutter_fade_until = _declutter_clock() + float(markers.declutter_value("fade_seconds", 0.25)) + 0.05
+
+
+## Horloge du fondu (s), ramenée sous 10 h pour garder la précision d'un flottant 32 bits.
+static func _declutter_clock() -> float:
+	return float(Time.get_ticks_msec() % 36000000) / 1000.0
+
+
+## Horloge du fondu transmise au shader tant qu'un fondu est en cours (puis une dernière fois).
+func _update_declutter_fade() -> void:
+	if _declutter_fade_until < 0.0 or _icon_material == null:
+		return
+	var now := _declutter_clock()
+	_icon_material.set_shader_parameter("declutter_now", now)
+	if now > _declutter_fade_until:
+		_declutter_fade_until = -1.0
+
+
+## État de caméra comparé entre deux recalculs : position, axe de visée, distance, écran.
+func _camera_state(camera: Camera3D) -> Array:
+	return [camera.global_position, -camera.global_transform.basis.z, _camera_distance, get_viewport().get_visible_rect().size]
+
+
+## Vrai si la caméra a bougé nettement depuis le dernier recalcul (seuils des données).
+func _camera_moved() -> bool:
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if camera == null or markers == null:
+		return false
+	if _declutter_camera.size() < 4:
+		return true
+	var previous_distance: float = _declutter_camera[2]
+	var distance_ratio := absf(_camera_distance - previous_distance) / maxf(previous_distance, 1e-3)
+	if distance_ratio > float(markers.declutter_value("recompute_distance_ratio", 0.015)):
+		return true
+	var moved := camera.global_position.distance_to(_declutter_camera[0])
+	if moved > float(markers.declutter_value("recompute_move_fraction", 0.01)) * maxf(_camera_distance, 1e-3):
+		return true
+	var axis: Vector3 = _declutter_camera[1]
+	if rad_to_deg(axis.angle_to(-camera.global_transform.basis.z)) > float(markers.declutter_value("recompute_turn_degrees", 0.5)):
+		return true
+	return get_viewport().get_visible_rect().size != _declutter_camera[3]
 
 
 ## Rectangle écran estimé d'une étiquette (taille de police et longueur du texte).
 static func _label_rect(label: Label3D, camera: Camera3D, margin: float) -> Rect2:
 	var center := camera.unproject_position(label.global_position) - Vector2(0.0, label.offset.y)
-	var width := label.text.length() * label.font_size * 0.5 + margin * 2.0
-	var height := label.font_size * 1.05 + margin * 2.0
+	return _label_rect_at(center, label.text.length() * label.font_size * 0.5, label.font_size, margin)
+
+
+static func _label_rect_at(center: Vector2, text_width: float, font_size: int, margin: float) -> Rect2:
+	var width := text_width + margin * 2.0
+	var height := font_size * 1.05 + margin * 2.0
 	return Rect2(center - Vector2(width, height) * 0.5, Vector2(width, height))
 
 
@@ -748,12 +961,10 @@ func screen_label_rects(camera: Camera3D) -> Array[Rect2]:
 
 
 ## Lot DA7d : rectangle écran de l'emprise opaque du marqueur `i` (marge `margin` en px).
-func _marker_rect(i: int, camera: Camera3D, margin: float) -> Rect2:
-	var px: Vector2 = data.settlements[i]["px"]
-	var world := Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+func _marker_rect(i: int, camera: Camera3D, margin: float, box_fraction: Vector2 = Vector2(0.8, 0.8)) -> Rect2:
 	var size := marker_size(i)
-	var center := camera.unproject_position(world) - Vector2(0.0, size * ICON_CENTER_LIFT)
-	var box := (markers.marker_box() if markers != null else Vector2(0.8, 0.8)) * size + Vector2(margin, margin) * 2.0
+	var center := camera.unproject_position(_marker_world[i]) - Vector2(0.0, size * ICON_CENTER_LIFT)
+	var box := box_fraction * size + Vector2(margin, margin) * 2.0
 	return Rect2(center - box * 0.5, box)
 
 
@@ -770,9 +981,8 @@ func screen_occupancy(camera: Camera3D) -> Dictionary:
 	var icons_on := _icons != null and _icons.visible
 	for i in data.settlements.size():
 		if icons_on and marker_visible(i):
-			var px: Vector2 = data.settlements[i]["px"]
-			if not camera.is_position_behind(Vector3(px.x, map_data.surface_world_at(px.x, px.y), px.y)):
-				var rect := _marker_rect(i, camera, 0.0)
+			if not camera.is_position_behind(_marker_world[i]):
+				var rect := _marker_rect(i, camera, 0.0, markers.marker_box())
 				if screen.intersects(rect):
 					rects.append(rect)
 					owners.append(i)
@@ -1007,12 +1217,16 @@ func select(id: String) -> void:
 		var old := _icon_instance(data.index_by_id[selected_id])
 		var custom := _icons.multimesh.get_instance_custom_data(old)
 		custom.g = 0.0
+		custom.a = _marker_until[data.index_by_id[selected_id]] / 100.0
 		_icons.multimesh.set_instance_custom_data(old, custom)
 	selected_id = id if data.index_by_id.has(id) else ""
+	_selected_index = int(data.index_by_id.get(selected_id, -1))
+	_declutter_force = true  # DA7d : la sélection est épinglée
 	if selected_id != "":
 		var index: int = data.index_by_id[selected_id]
 		var custom_new := _icons.multimesh.get_instance_custom_data(_icon_instance(index))
 		custom_new.g = 1.0
+		custom_new.a = SELECTED_UNTIL / 100.0  # DA7d : la sélection reste affichée à toute distance
 		_icons.multimesh.set_instance_custom_data(_icon_instance(index), custom_new)
 		var entry: Dictionary = data.settlements[index]
 		print("SettlementLayer: selected %s (%s, %s, controller %s)" % [selected_id, entry["name"], entry["kind"], entry["controller"]])
