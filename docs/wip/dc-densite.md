@@ -304,17 +304,87 @@ da3_markers, cv1_campaign_life, sz4_prop_scale, sz4b_colonies_forests, dc6c_fit_
   à mi-zoom réapparaissent d'un coup (pas de fondu).
 
 ## DC6b — sommes non pondérées et révoltes (worktree `../gp-dc6b`, branche `feat/dc6-b`)
-État : en cours. Référence d'avant densification : worktree détaché `../gp-dc6b-ref` sur
-**9c107692** (dernier `main` avant la fusion DC : même code que 35783bcf de DC3 + DA2 ;
-89bc960a, proposé, précède PB3 et la revue de code, donc un autre code d'IA). Sonde :
-`DC6_TRACE=1 century_probe` (points de recherche par faction aux tours 1/40/120/200, hérésie
-de chaque tour).
-- Recherche : pondérée par un réglage dédié `research_percent` (rules.json, 70 % hors cité) ;
-  50 % (= `province_effect_percent`) essayé : −6 % au tour 1 mais −16 % au tour 40 (France −21 %).
-- Hérésie : compte des bâtiments religieux pondéré par `province_effect_percent` (50 %)
-  (`religion::weighted_religious_buildings`) : province-tours hérétiques 17,7 → 9,7 (DC) → 17,3.
-- Recherche à 70 % remesurée : +5 % au tour 1, −6 % au tour 40 (France +7/−4, Angleterre 0/−4).
-- Révoltes : l'explication DC3 ne tient pas (occupations plus longues, pas plus courtes ; la baisse
-  porte sur les provinces non occupées, surtout Luxembourg, Alentejo, Savoie ; garnison par province
-  690 → 1 032 hommes). Variantes `garrison_relief_per_100_men` / `_max` (population.json) : très
-  bruitées sur 12 graines ; relance sur 24 graines (13-24) en cours.
+État : **fait**, `main` fusionné (395371d3), fmt + clippy -D warnings + 880 tests Rust (espace de
+travail) + pytest codex/colonies/schémas verts. ADR 0082 : addendum DC6b.
+
+Méthode : référence d'avant densification = worktree détaché `../gp-dc6b-ref` sur **9c107692**
+(dernier `main` avant la fusion DC : code de 35783bcf, celui des mesures DC3, + DA2 ; 89bc960a,
+proposé, précède PB3 et la revue de code, donc une autre IA), target privé, supprimé depuis.
+Sonde `century_probe` : `DC6_TRACE=1` (lignes `DC6R` recherche par faction aux tours 1/40/120/200,
+`DC6H` hérésie par tour, `DC6V` chaque révolte avec occupation/garnison, `DC6P` provinces > 60 et
+> 75, garnison moyenne, provinces occupées) ; `CENT_ANS_DATA_DIR` joue une copie des données
+(variantes de réglage sans rebuild).
+
+Réglages :
+- **Recherche** : `research_percent` (rules.json + schéma `settlement_rules`, 70 % hors cité),
+  lu par `research_points_per_turn`. 50 % (= `province_effect_percent`) essayé et écarté.
+- **Hérésie** : `religion::weighted_religious_buildings`, compte des bâtiments religieux pondéré par
+  `province_effect_percent` (50 % hors cité). Compte brut moyen par province 3,0 → 6,4 (DC) ;
+  pondéré 3,7.
+- **Révoltes** : aucun changement (voir plus bas).
+- Codex : `cdx_jeu_technologies` (recherche des places secondaires à 70 %), `cdx_abbaye`
+  (recherche 70 %, demi-point contre l'hérésie hors cité).
+- Tests : `dc6b_weighted_sums.rs` (3), `m6` adapté (somme pondérée, scriptorium ajouté à une cité).
+
+### Recherche (points par faction, moyenne de 28 factions, graines 1-24)
+| | avant DC (9c107692) | main (DC3) | 50 % | **70 % (retenu)** |
+|---|---|---|---|---|
+| Tour 1 : toutes / France / Angleterre | 14,5 / 40 / 37 | 17,1 (+18 %) / 54 / 46 | 13,6 (−6 %) / 35 / 31 | **15,2 (+5 %) / 43 / 37** |
+| Tour 40 : toutes / France / Angleterre | 21,0 / 52,1 / 42,3 | 23,7 (+13 %) / 66,4 / 50,8 | 17,7 (−16 %) / 41,3 / 33,7 | **19,9 (−5 %) / 50,0 / 40,6** |
+(50 % : graines 1-12 seulement.) Écarts par faction au tour 40 : Empire +19 % (beaucoup de villes
+à foire et de guildes), Castille −16 %, les autres à ±10 %.
+
+### Hérésie (graines 1-6 ; Lollards 1381, Hussites 1419 ; 340 à 464 tours)
+| | avant DC | main (DC3) | pondérée 50 % |
+|---|---|---|---|
+| Province-tours hérétiques / graine | 17,7 | 9,7 (−45 %) | 17,3 (−2 %) |
+| Somme des hérésies / graine | 91 | 36 | 82 (−10 %) |
+| Hérésie maximale | 7-9 | 5 | 7-8 |
+Dans les trois cas l'hérésie ne dépasse jamais 10 et ne se propage pas (seuil de diffusion jamais
+atteint) : elle s'éteint en 3 à 5 saisons. Préexistant, hors du périmètre DC.
+
+### Révoltes et équilibre (`century_probe 120`, graines 1-24)
+| | avant DC | main (DC3) | DC6b final |
+|---|---|---|---|
+| Révoltes / 200 tours | 5,62 | 2,57 | **4,38** |
+| dont en province occupée (nombre, 24 graines) | 35 / 81 | 22 / 37 | 26 / 63 |
+| Provinces occupées (moy. / tour) ; durée moy. d'une occupation (tours) | 1,02 ; 10,7 | 0,66 ; 9,7 | 0,79 ; 12,0 |
+| Garnison moyenne par province (hommes) | 690 | 1 029 | 1 033 |
+| Guerre FR-EN (% des tours) | 64,0 | 60,0 | 58,4 (−3 %) |
+| Cités prises / décennie | — | 7,22 | 6,85 (−5 %) |
+| Hommes en campagne (moy. / tour) | — | 26 442 | 25 912 (−2 %) |
+| Banqueroutes / fac. / déc. | 0,08 | 0,09 | 0,13 (+44 %) |
+| Impôt haut (% fac.-tours) | — | 29,9 | 29,6 |
+Sur les 12 premières graines, main et DC6b font tous deux 3,06 révoltes : l'écart DC6b/main vient
+des graines 13-24 (2,08 → 5,7), bruit ou effet indirect de la recherche plus lente (techniques
+d'ordre public plus tardives). Le compte de révoltes (~40 à 80 événements sur 24 graines, concentrés
+sur 3-4 provinces : Luxembourg, Boulonnais, Ponthieu, Alentejo) est très bruité : sur 12 graines,
+la sonde d'avant DC donne 5,7 (1-12) et 5,6 (1-24), main 3,1 puis 2,6.
+
+Explication DC3 vérifiée : **elle ne tient pas telle quelle**. Les occupations ne sont pas plus
+courtes mais plus rares (1,02 → 0,66-0,79 province occupée par tour) et plus longues ; la baisse porte
+autant sur les provinces non occupées (Luxembourg 13 révoltes → 5, Alentejo 4 → 0, Savoie 3 → 0),
+où la garnison, sommée sur toutes les places (+50 % d'hommes : châteaux ajoutés), apaise davantage
+(Luxembourg : 480 → 1 055 hommes à la révolte, 4,8 → 10 points d'apaisement).
+Variantes essayées (`data/rules/population.json`, sans code) — aucune retenue :
+| `garrison_relief_per_100_men` / `_max` | révoltes (graines) | cités prises / déc. | guerre FR-EN |
+|---|---|---|---|
+| 1,0 / 10 (retenu) | 3,06 (1-12) ; 4,38 (1-24) | 6,92 ; 6,85 | 58,9 ; 58,4 |
+| 0,7 / 10 | 4,17 (1-12) ; 3,61 (1-24) | 6,30 ; 6,71 | 61,5 ; 58,5 |
+| 0,6 / 10 | 4,17 (1-12) | 7,11 | 57,7 |
+| 0,5 / 10 | 2,92 (1-12) | 7,83 | 67,2 |
+| 0,7 / 7 | 4,58 (1-12) | 6,08 (−19 %) | 56,8 |
+Moins d'apaisement par la garnison ne fait pas monter les révoltes de façon mesurable (0,5 en donne
+moins que 1,0) : le levier n'est pas démontré, rien n'est forcé.
+
+### Points ouverts
+- Banqueroutes 0,09 → 0,13 : surtout l'Écosse (9 graines sur 24, jusqu'à 12,7 / déc.) ; la France
+  en fait deux (1,0 / déc.). Recherche de l'Écosse inchangée (8 points) : probablement du bruit, à
+  surveiller.
+- Autres sommes non pondérées sur toutes les places : résistance à la peste
+  (`medicine::plague_resistance` via `province_buildings`), faveur pontificale (+2 par bâtiment
+  religieux, plafond 20 : saturée), garnison qui apaise (`province_garrison_strength`), revenu
+  estimé par l'IA (`province_income`), évaluation des bâtiments par l'IA (recherche et apaisement
+  au plein poids).
+- Révoltes : si l'on veut 5+, piste de code plutôt que de données : pondérer la garnison apaisante
+  par `province_effect_percent` ou ne compter que la cité (à mesurer sur 24 graines au moins).
