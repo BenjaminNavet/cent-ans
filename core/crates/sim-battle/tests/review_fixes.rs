@@ -161,3 +161,55 @@ fn withdrawal_from_the_town_goes_through_the_breach() {
     let u = &sim.units()[0];
     assert!(left, "stuck at ({:.0}, {:.0})", u.x, u.z);
 }
+
+/// The AI pulls a bled regiment out of a melee fought near its own edge
+/// with a move kept on the field (it used to be refused as outside).
+#[test]
+fn ai_pull_out_stays_on_the_field() {
+    let data = data();
+    let foot = || unit(&data, "unit_men_at_arms_foot");
+    let mut sim = lab_sim(
+        vec![foot(), foot(), foot(), foot(), foot()],
+        vec![unit(&data, "unit_urban_militia")],
+    );
+    sim.field_mut().forests.clear();
+    sim.field_mut().forest_parts.clear();
+    // Unit 0 fights near the attacker's edge; unit 4 is the reserve.
+    place(&mut sim, 0, 600.0, 30.0, 0.0);
+    place(&mut sim, 1, 300.0, 60.0, 0.0);
+    place(&mut sim, 2, 400.0, 60.0, 0.0);
+    place(&mut sim, 3, 800.0, 60.0, 0.0);
+    place(&mut sim, 4, 900.0, 20.0, 0.0);
+    place(&mut sim, 5, 600.0, 80.0, std::f64::consts::PI);
+    sim.apply_command(
+        Command::Attack {
+            units: vec![5],
+            target: 0,
+            run: false,
+        },
+        None,
+    )
+    .unwrap();
+    for _ in 0..600 {
+        sim.step();
+        if sim.units()[0].state == UnitState::Melee {
+            break;
+        }
+    }
+    assert_eq!(sim.units()[0].state, UnitState::Melee, "contact reached");
+    let soldiers = f64::from(sim.units()[0].initial_soldiers);
+    sim.units_mut()[0].morale = 25.0;
+    sim.units_mut()[0].hp = soldiers * 0.4;
+    let commands = sim_battle::ai::plan(&sim, sim_battle::SideId::Attacker);
+    let moves: Vec<(f64, f64)> = commands
+        .iter()
+        .filter_map(|c| match c {
+            Command::Move { units, x, z, .. } if units.contains(&0) => Some((*x, *z)),
+            _ => None,
+        })
+        .collect();
+    assert!(!moves.is_empty(), "the bled regiment is pulled out");
+    for (x, z) in moves {
+        assert!(sim.field().inside(x, z), "({x:.0}, {z:.0}) off the field");
+    }
+}
