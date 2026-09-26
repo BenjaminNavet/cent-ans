@@ -197,32 +197,19 @@ func _record(unit: Dictionary) -> Dictionary:
 
 
 ## Couches des deux porte-étendards d'un régiment. DA1b : le général porte la bannière de sa
-## maison, le second porte-étendard celle de l'armée (bannière royale, saint Georges) ; si
-## l'étendard du chef est une étoffe spéciale (oriflamme du roi en personne), la bannière de la
-## maison passe au second. Les unités nobles de la retenue (`house_arms.unit_types`) portent les
+## maison ; son second porte-étendard garde l'étendard de l'armée (bannière royale, saint
+## Georges, oriflamme du roi en personne). « Pas de quartier » remplace toujours la première
+## (`layer_no_quarter`). Les unités nobles de la retenue (`house_arms.unit_types`) portent les
 ## armes de la maison du général ; le commun garde celles de la faction.
 func _bearer_layers(unit: Dictionary, faction: String, house: String) -> Array:
 	var kind := _kind_of(unit, faction, false)
 	var second := str(_fx.get("second_bearer_kind", "pennon"))
-	if house == "":
-		return [_layer_for_kind(unit, faction, kind), _layer_for_kind(unit, faction, second)]
-	if bool(unit.get("is_general", false)):
+	if house != "" and bool(unit.get("is_general", false)):
 		var house_kind := str((_fx.get("house_arms", {}) as Dictionary).get("general_kind", "royal"))
-		if _is_house_cloth(kind):
-			return [_layer_for_kind(unit, faction, house_kind, house), _layer_for_kind(unit, faction, kind)]
-		return [_layer_for_kind(unit, faction, kind), _layer_for_kind(unit, faction, house_kind, house)]
-	if is_house_retinue(unit):
+		return [_layer_for_kind(unit, faction, house_kind, house), _layer_for_kind(unit, faction, kind)]
+	if house != "" and is_house_retinue(unit):
 		return [_layer_for_kind(unit, faction, kind, house), _layer_for_kind(unit, faction, second)]
 	return [_layer_for_kind(unit, faction, kind), _layer_for_kind(unit, faction, second)]
-
-
-## Genre d'étendard qu'une bannière de maison peut remplacer (étoffe peinte de faction), par
-## opposition aux étoffes spéciales (oriflamme, dragon).
-func _is_house_cloth(kind: String) -> bool:
-	var entry: Dictionary = (_fx.get("kinds", {}) as Dictionary).get(kind, {})
-	if kind == "st_george":
-		return true
-	return str(entry.get("cloth", "pennon")) in ["pennon", "banner", "standard"]
 
 
 ## Unité noble de la retenue du général (DA1b) : ses étendards portent les armes de sa maison.
