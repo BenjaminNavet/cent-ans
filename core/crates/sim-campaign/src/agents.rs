@@ -1714,12 +1714,26 @@ fn ai_emissary(
     agent: &Agent,
 ) -> Vec<Order> {
     let odds = |action| state.agent_action_odds(data, id, action, None, None).ok();
-    // 1. Buy back a captive.
+    // 1. Buy back a captive: only one held for money that the treasury can
+    // pay for (else steps 2 and 3, rather than waiting at his captor's).
+    let treasury = state.factions.get(faction).map_or(0, |f| f.treasury);
+    let action_cost = rules(data)
+        .actions
+        .get(&AgentActionKind::Ransom)
+        .map_or(0, |r| i64::from(r.cost));
+    let action_cost = crate::coinage::priced(state, faction, action_cost);
     let captor = state
         .characters
-        .values()
-        .find(|c| c.alive && c.captive && &c.faction == faction && c.captor.is_some())
-        .and_then(|c| c.captor.clone());
+        .iter()
+        .find(|(cid, c)| {
+            c.alive
+                && c.captive
+                && &c.faction == faction
+                && c.captor.is_some()
+                && herald_may_ransom(state, cid)
+                && ransom_price(state, data, cid, agent.level) + action_cost <= treasury
+        })
+        .and_then(|(_, c)| c.captor.clone());
     if let Some(captor) = captor {
         if odds(AgentActionKind::Ransom).is_some() {
             return act_or_walk(
