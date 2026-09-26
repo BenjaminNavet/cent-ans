@@ -17,6 +17,16 @@ extends Resource
 @export var unload_factor: float = 1.3
 ## Actif sous ce poids du palier vallée (`ZoomTiers.valley_weight`) : au-dessus, maquettes.
 @export var min_valley_weight: float = 0.5
+## Lot SZ4 : vu de loin, le sol bâti prend la teinte moyenne des toits du kit (imposteur des
+## maisons devenues sous-pixel ; sans lui, une ville vue à 4 km n'était qu'un disque de terre
+## battue). Fondu selon la distance caméra → sol (unités) de `roofscape_near` à `roofscape_far` ;
+## `roofscape_strength` : part maximale ; `roofscape_cell_m` : taille d'un « toit » (variation de
+## couche et de teinte) ; `roofscape_gain` : luminosité des toits moyens.
+@export var roofscape_near: float = 1.2
+@export var roofscape_far: float = 3.5
+@export var roofscape_strength: float = 0.85
+@export var roofscape_cell_m: float = 9.0
+@export var roofscape_gain: float = 1.0
 ## Plans calculés en parallèle (fils de travail) et budget de construction par image (ms).
 @export var max_plan_jobs: int = 2
 @export var build_budget_ms: float = 3.0
