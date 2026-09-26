@@ -22,7 +22,7 @@ Le développement se fait sur un Mac. Il n'y a aucune machine Windows sous la ma
 - **CRT statique** (`core/.cargo/config.toml` : `+crt-static`). La DLL n'importe que des DLL
   système : les joueurs n'ont pas à installer le redistribuable Visual C++.
 - **Disposition de l'export Windows** : un dossier plat qui contient `Cent Ans.exe`,
-  `Cent Ans.pck` (non intégré), `cent_ans.dll`, `data/`, et éventuellement
+  `Cent Ans.pck` (non intégré), `cent_ans.release.dll`, `data/`, et éventuellement
   `Cent Ans relief/`. `MapPaths` cherche `data/` à côté de l'exécutable après
   l'emplacement macOS (`../Resources/data`). `cent-ans export-data --dir` place les données.
 - **Préréglage « Windows Desktop »** avec `application/modify_resources=false`. L'icône et

@@ -77,7 +77,7 @@ Godot 4.7 requis).
 
 **Jouer** : décompresser `Cent Ans Windows.zip` et lancer `Cent Ans.exe`. Il faut une carte graphique
 compatible Vulkan ou Direct3D 12, mais aucune installation supplémentaire (la bibliothèque C de
-Microsoft est intégrée à `cent_ans.dll`). En cas de problème, `Cent Ans.console.exe` lance le jeu
+Microsoft est intégrée à `cent_ans.release.dll`). En cas de problème, `Cent Ans.console.exe` lance le jeu
 en gardant son journal affiché.
 
 **Compiler sous Windows** (Git Bash, avec [Rust](https://rustup.rs) et Visual Studio Build Tools) :
