@@ -117,6 +117,19 @@ def _extract_image(payload: dict[str, Any]) -> bytes:
     raise RuntimeError("Aucune image base64 dans la réponse OpenRouter")
 
 
+class ImageExtractionError(RuntimeError):
+    """Raised when a billed OpenRouter response has no image (e.g. a refusal).
+
+    ``cost`` carries ``usage.cost`` read from that same response, if any, so
+    callers can still record the spend even though no image was produced.
+    """
+
+    def __init__(self, message: str, cost: Decimal | None):
+        """Wrap ``message`` and keep the already-billed ``cost``, if known."""
+        super().__init__(message)
+        self.cost = cost
+
+
 def request_image(
     model: str,
     prompt: str,
@@ -163,8 +176,13 @@ def request_image(
     finally:
         if own_client:
             client.close()
-    cost = (payload.get("usage") or {}).get("cost")
-    return _extract_image(payload), (Decimal(str(cost)) if cost is not None else None)
+    cost_raw = (payload.get("usage") or {}).get("cost")
+    cost = Decimal(str(cost_raw)) if cost_raw is not None else None
+    try:
+        image = _extract_image(payload)
+    except RuntimeError as exc:
+        raise ImageExtractionError(str(exc), cost) from exc
+    return image, cost
 
 
 def generate_image(
@@ -187,16 +205,24 @@ def generate_image(
             f"Estimation {estimated} $ + cumul {budget.total(budget_path)} $ dépasse le plafond"
         )
 
-    image, actual_raw = request_image(model, prompt, client)
-    actual = to_money(actual_raw) if actual_raw is not None else estimated
-    budget.add_entry(
-        date.today().isoformat(),
-        SERVICE_NAME,
-        subject or f"image {model}",
-        estimated,
-        actual,
-        path=budget_path,
-    )
+    spent: Decimal | None = None
+    try:
+        image, actual_raw = request_image(model, prompt, client)
+        spent = to_money(actual_raw) if actual_raw is not None else estimated
+    except ImageExtractionError as exc:
+        if exc.cost is not None:
+            spent = to_money(exc.cost)
+        raise
+    finally:
+        if spent is not None and spent > 0:
+            budget.add_entry(
+                date.today().isoformat(),
+                SERVICE_NAME,
+                subject or f"image {model}",
+                estimated,
+                spent,
+                path=budget_path,
+            )
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

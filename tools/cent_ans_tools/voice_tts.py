@@ -36,8 +36,12 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
+
+from cent_ans_tools import budget
+from cent_ans_tools.budget import DEFAULT_BUDGET_PATH, to_money
 
 REPO_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_DIR / "data"
@@ -521,8 +525,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--cap", type=Decimal, default=DEFAULT_CAP, help="cost ceiling ($)"
     )
+    parser.add_argument(
+        "--budget-path",
+        type=Path,
+        default=DEFAULT_BUDGET_PATH,
+        help="docs/budget.md ledger checked and recorded against",
+    )
     args = parser.parse_args(argv)
 
+    # Real cumulative spend of this whole invocation: money already spent on clips
+    # ``--recheck`` is about to redo (``forgotten``, no longer in the manifest once
+    # ``forget()`` drops them) plus every attempt made below, successful or rejected
+    # (``run_cost``, via :class:`RejectedClip`'s billed-but-unusable cost). Neither
+    # figure is retrievable from the manifest afterwards, so both are tracked here and
+    # recorded to ``docs/budget.md`` in the ``finally`` block, not just on success.
+    forgotten = Decimal(0)
     if args.recheck:
         # Redo generated clips whose recorded transcript fails today's checks.
         manifest = load_manifest()
@@ -531,6 +548,7 @@ def main(argv: list[str] | None = None) -> int:
             if entry and not transcript_matches(job.text, entry.get("transcript", "")):
                 print(f"recheck: redo {job.path} (said {entry.get('transcript')!r})")
                 if not args.dry_run:
+                    forgotten += Decimal(str(entry.get("cost_usd", 0)))
                     forget(job)
     jobs = pending(all_jobs())
     if args.only:
@@ -552,47 +570,65 @@ def main(argv: list[str] | None = None) -> int:
     if not api_key:
         print(f"{key_name} missing", file=sys.stderr)
         return 2
-    if spent + estimate > args.cap:
+    if spent + forgotten + estimate > args.cap:
         print(
-            f"refused: {spent:.3f} + {estimate:.3f} $ would exceed the cap of {args.cap} $"
+            f"refused: {spent:.3f} + {forgotten:.3f} + {estimate:.3f} $ would exceed "
+            f"the cap of {args.cap} $"
         )
         return 3
+    if not budget.check(to_money(forgotten + estimate), args.budget_path):
+        print("refused: le plafond global de docs/budget.md serait dépassé")
+        return 3
     run_cost = Decimal(0)
-    for index, job in enumerate(jobs, 1):
-        if spent + run_cost + job.estimated_cost() > args.cap:
-            print(f"stopped before the cap ({args.cap} $)")
-            break
-        model = OPENROUTER_MODEL if args.backend == "openrouter" else MODEL
-        try:
-            if args.backend == "openrouter":
-                raw, cost, said = openrouter_checked(job, api_key, args.attempts)
-            else:
-                raw = synthesise(job, api_key)
-                # Billed audio is the raw answer, silences included.
-                cost = cost_for(duration(raw), job.text, job.instructions)
-                said = job.text
-        except RuntimeError as error:  # refused key, quota, invalid voice...
-            print(f"API error, stopping: {error}", file=sys.stderr)
-            print(f"this run: {run_cost:.3f} $ before the error")
-            return 4
-        except RejectedClip as error:  # implausible clip twice: skipped, not saved
-            print(f"skipped: {error}", file=sys.stderr)
-            run_cost += error.cost
-            continue
-        seconds = encode(raw, job)
-        run_cost += cost
-        manifest[f"{job.path}.ogg"] = {
-            "text": job.text,
-            "voice": job.voice,
-            "model": model,
-            "transcript": said,
-            "seconds": round(seconds, 2),
-            "cost_usd": float(round(cost, 5)),
-        }
-        save_manifest(manifest)
-        print(f"[{index}/{len(jobs)}] {job.path} {seconds:.1f} s  {cost:.4f} $")
-    print(f"this run: {run_cost:.3f} $ (estimated beforehand {estimate:.3f} $)")
-    return 0
+    result = 0
+    try:
+        for index, job in enumerate(jobs, 1):
+            if spent + forgotten + run_cost + job.estimated_cost() > args.cap:
+                print(f"stopped before the cap ({args.cap} $)")
+                break
+            model = OPENROUTER_MODEL if args.backend == "openrouter" else MODEL
+            try:
+                if args.backend == "openrouter":
+                    raw, cost, said = openrouter_checked(job, api_key, args.attempts)
+                else:
+                    raw = synthesise(job, api_key)
+                    # Billed audio is the raw answer, silences included.
+                    cost = cost_for(duration(raw), job.text, job.instructions)
+                    said = job.text
+            except RuntimeError as error:  # refused key, quota, invalid voice...
+                print(f"API error, stopping: {error}", file=sys.stderr)
+                result = 4
+                break
+            except RejectedClip as error:  # implausible clip twice: skipped, not saved
+                print(f"skipped: {error}", file=sys.stderr)
+                run_cost += error.cost
+                continue
+            seconds = encode(raw, job)
+            run_cost += cost
+            manifest[f"{job.path}.ogg"] = {
+                "text": job.text,
+                "voice": job.voice,
+                "model": model,
+                "transcript": said,
+                "seconds": round(seconds, 2),
+                "cost_usd": float(round(cost, 5)),
+            }
+            save_manifest(manifest)
+            print(f"[{index}/{len(jobs)}] {job.path} {seconds:.1f} s  {cost:.4f} $")
+        print(f"this run: {run_cost:.3f} $ (estimated beforehand {estimate:.3f} $)")
+    finally:
+        total_spent = to_money(forgotten + run_cost)
+        if total_spent > 0:
+            service = "OpenRouter" if args.backend == "openrouter" else "OpenAI"
+            budget.add_entry(
+                date.today().isoformat(),
+                service,
+                f"VO1 : synthèse voix ({len(jobs)} clips en attente)",
+                to_money(estimate),
+                total_spent,
+                path=args.budget_path,
+            )
+    return result
 
 
 if __name__ == "__main__":

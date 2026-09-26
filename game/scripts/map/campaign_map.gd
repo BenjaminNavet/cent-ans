@@ -1030,7 +1030,10 @@ func _on_end_turn() -> void:
 	Advisor.on_turn_events(events, player_faction, int(sim.call("get_turn")))  # VO1 : conseiller
 	refresh_all()
 	if ai_replay != null:  # CT1 : marches de l'IA rejouées, puis diplomatie, victoire, rapport
+		var sim_before: Object = sim
 		await ai_replay.play()
+		if sim != sim_before:  # une autre partie a été chargée entre-temps : ces événements sont périmés
+			return
 	if diplomacy != null:
 		diplomacy.after_end_turn()
 	if victory != null:
@@ -1051,16 +1054,26 @@ func _on_end_turn() -> void:
 # --- Sauvegarde ----------------------------------------------------------------------
 
 
+## Vrai si la dernière demande de sauvegarde a écrit l'état (lu par `FlowController`).
+var last_save_ok := false
+
+
 func _on_save(save_name: String) -> void:
+	last_save_ok = false
 	if sim == null:
 		return
-	if SimFacade.save_game(save_name):
+	# Fiche `.meta.json` écrite seulement si l'état l'a été (la vignette suit dans FlowController).
+	last_save_ok = SaveSlots.save(save_name)
+	if last_save_ok:
 		ui.show_toast("Partie sauvegardée : %s" % save_name)
 	else:
 		ui.show_toast("Échec de la sauvegarde.", true)
 
 
 func _on_load(path: String) -> void:
+	if ai_replay != null and ai_replay.playing:  # la fin de tour en cours vise la partie actuelle
+		ui.show_toast("Attendez la fin des mouvements adverses (Espace pour passer).", true)
+		return
 	if not SimFacade.load_game(path):
 		ui.show_toast("Impossible de charger cette sauvegarde.", true)
 		return
