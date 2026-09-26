@@ -140,7 +140,7 @@ pa_right, pa_right_gates = chain(
         ("wall", 1020),
         ("gate", "Poterne Nicolas-Huidelon", "postern", (1022,)),
         ("wall", 1025),
-        ("gate", "Porte du Temple (porte de Braque)", "gate", (199, 1023)),
+        ("gate", "Porte du Temple (Sainte-Avoie)", "gate", (199, 1023)),
         ("wall", 1029),
         ("gate", "Poterne du Chaume", "postern", (207, 1027)),
         ("wall", 1033),
@@ -149,7 +149,7 @@ pa_right, pa_right_gates = chain(
         ("wall", 1037),
         ("wall", 1038),
         ("wall", 1039),
-        ("gate", "Porte Baudoyer (Saint-Antoine)", "gate", (206, 980)),
+        ("gate", "Porte Saint-Antoine (dite Baudet ou Baudoyer)", "gate", (206, 980)),
         ("wall", 982),
         ("gate", "Archet Saint-Paul", "postern", (979, 984)),
         ("wall", 989),
@@ -166,13 +166,18 @@ pa_left, pa_left_gates = chain(
         ("wall", 790),
         ("wall", 791),
         ("wall", 727),
-        ("gate", "Porte de Buci", "gate", (784, 785)),
+        ("gate", "Porte Saint-Germain (porte de Buci en 1352)", "gate", (784, 785)),
         ("wall", 730),
-        ("gate", "Porte Saint-Germain (des Cordeliers)", "gate", (725, 729)),
+        ("gate", "Porte des Cordeliers", "gate", (725, 729)),
         ("wall", 722),
         ("wall", 723),
         ("wall", 724),
-        ("gate", "Porte Saint-Michel (d'Enfer)", "gate", (950, 951)),
+        (
+            "gate",
+            "Porte d'Enfer ou Gibard (porte Saint-Michel en 1394)",
+            "gate",
+            (950, 951),
+        ),
         ("wall", 761),
         ("wall", 747),
         ("gate", "Porte Saint-Jacques", "gate", (759, 854)),
@@ -226,7 +231,7 @@ walls = [
         "tower_height_m": 15.0,
         "ditch_m": 0.0,
         "gates": pa_right_gates,
-        "note": "Tracé, portes et poternes : ALPAGE, Paris en 1380 (P. Rouet), couche des usages du sol (murs, portes, tours). Du Louvre (tour du Coin) à la Seine en amont (tour Barbeau). Sans fossé en 1340 : les fossés sont creusés en 1356-1358 (Étienne Marcel). Tours : ≈ 15 m, espacées d'≈ 60 m (77 tours pour 5 100 m).",
+        "note": "Tracé, portes et poternes : ALPAGE, Paris en 1380 (P. Rouet), couche des usages du sol (murs, portes, tours). Du Louvre (tour du Coin) à la Seine en amont (tour Barbeau). Sans fossé en 1340 : l'enceinte en était dépourvue à l'origine (D. Hayot, Paris en 1200, 2018) ; fossés creusés à partir de 1356 (Étienne Marcel). Tours : ≈ 15 m, espacées d'≈ 60 m (77 tours pour 5 100 m). Noms des portes en 1340 (ALPAGE donne ceux de 1380) : porte Saint-Honoré, dite aux Aveugles en 1380 (ALPAGE) ; porte du Temple ou Sainte-Avoie (la « porte de Braque » est la poterne du Chaume, d'après la chapelle d'Arnoul de Braque, 1348) ; porte Saint-Antoine, dite Baudet ou Baudoyer, démolie en 1382.",
     },
     {
         "id": "philippe_auguste_gauche",
@@ -240,7 +245,7 @@ walls = [
         "tower_height_m": 15.0,
         "ditch_m": 0.0,
         "gates": pa_left_gates,
-        "note": "Tracé et portes : ALPAGE (1380). De la tour de Nesle au château de la Tournelle. Fossés de 1356-1358 non représentés en 1340.",
+        "note": "Tracé et portes : ALPAGE (1380). De la tour de Nesle au château de la Tournelle. Fossés de 1356-1358 non représentés en 1340. Noms de 1340 : la porte Saint-Germain devient porte de Buci en 1352 (bail de Simon de Buci, 1350) ; la porte des Cordeliers (percée en 1240) prend ensuite le nom de porte Saint-Germain ; la porte d'Enfer ou Gibard devient porte Saint-Michel en 1394 (D. Hayot, Paris en 1200, 2018 ; Wikipédia, Enceinte de Philippe Auguste).",
     },
     {
         "id": "charles_v_levee",
@@ -256,7 +261,7 @@ walls = [
         "from_year": 1356,
         "until_year": 1364,
         "gates": [dict(g, height_m=10) for g in cv_gates],
-        "note": "Tracé ALPAGE (1380). Fossés et levée de terre entrepris sous Étienne Marcel (1356-1358) ; gabarit restitué (hypothèse).",
+        "note": "Tracé ALPAGE (1380). Fossés et rempart de terre entrepris sous Étienne Marcel (1356-1358), sans doute palissadés ; la nature exacte de l'ouvrage est mal connue (P. Van Ossel, CRAI 1992) : gabarit restitué (hypothèse).",
     },
     {
         "id": "charles_v",
@@ -271,7 +276,7 @@ walls = [
         "ditch_m": 28.0,
         "from_year": 1365,
         "gates": [dict(g, height_m=18) for g in cv_gates],
-        "note": "Tracé ALPAGE (1380), de la tour de Bois (Seine en aval) à la tour de Billy puis le long de la Seine jusqu'à la tour Barbeau. Maçonnerie de 1365 à ≈ 1383 : la date d'apparition retenue (1365) est celle du début des travaux ; gabarits de tours et de fossés restitués.",
+        "note": "Tracé ALPAGE (1380), de la tour de Bois (Seine en aval) à la tour de Billy puis le long de la Seine jusqu'à la tour Barbeau. Travaux repris par Charles V à partir de 1365 (P. Van Ossel, « Nouvelles données sur l'enceinte de Charles V », CRAI 1992), achevés vers 1383 pour l'essentiel, vers 1420 en entier : la date d'apparition retenue (1365) est celle du début des travaux ; gabarits de tours et de fossés restitués.",
     },
 ]
 
@@ -650,7 +655,7 @@ monuments.append(
             ],
             "crossing": {"size": 6, "height": 45, "spire_m": 33},
         },
-        "description": "Chantier de 1163 ; chœur 1163-1182, nef 1182-1190, façade 1190-1225 ; tours de 69 m ; chapelles et derniers travaux vers 1345. Flèche de la croisée posée vers 1250 (hauteur restituée, ≈ 78 m). Emprise : ALPAGE (128 m).",
+        "description": "Chantier de 1163 ; chœur 1163-1182, nef 1182-1190, façade 1190-1225 ; tours de 69 m. En 1340, chantier de Jean Ravy (1318-1344) : chapelles du chevet, arcs-boutants du chœur, clôture du chœur (achevée par Jean le Bouteiller en 1351). Flèche de la croisée du XIIIe s. (vers 1250 selon D. Sandron ; bois des années 1290 d'après la dendrochronologie) : ≈ 78 m du sol selon J. du Breul (1612), 83 m selon D. Sandron. Emprise : ALPAGE (128 m).",
     }
 )
 church(
@@ -763,15 +768,15 @@ monuments.append(
         "at": rnd(centroid(59, 590)),
         "angle_deg": axis(59, False)[1],
         "clear_m": 3,
-        "certainty": "attested",
+        "certainty": "probable",
         "params": {
             "ring": [[-10, -12], [10, -12], [10, 12], [-10, 12]],
-            "height_m": 13,
+            "height_m": 16,
             "thickness_m": 2.5,
             "tower_radius_m": 4,
             "tower_height_m": 18,
         },
-        "description": "Porte fortifiée de la tête sud du Petit-Pont (vers 1130 ; reconstruit après la crue de 1296).",
+        "description": "Porte fortifiée de la tête sud du Petit-Pont, rebâtie par Philippe Auguste en 1205-1212 (murs de 1,95 m, 15,7 m de haut : D. Hayot, Paris en 1200, 2018) ; renversée avec le Petit-Pont par la crue du 20 décembre 1296 et reconstruite en 1369 (Hugues Aubriot) : état en 1340 mal connu, gabarit de 1212 restitué.",
     }
 )
 boxy("fort_l_eveque", "For-l'Évêque", 460, "royal_palace", params={"height_m": 14})
@@ -825,7 +830,7 @@ monuments.append(
                 [0, -26, 66, 11, 18, 0],
             ],
         },
-        "description": "Résidence aménagée par Raymond du Temple pour Charles V (1364-1380) : logis surélevés, grand escalier ; gabarit restitué.",
+        "description": "Résidence aménagée par Raymond du Temple, maître des œuvres à partir du 22 avril 1364, pour Charles V (1364-1380) : logis surélevés, grande vis ; gabarit restitué (M. Whiteley, « Le Louvre de Charles V », Revue de l'Art, 1992).",
     }
 )
 tower(
@@ -866,7 +871,7 @@ monuments.append(
             "tower_height_m": 24,
             "ditch_m": 25,
         },
-        "description": "Commencée en 1370, achevée vers 1382 ; huit tours de 24 m. Absente en 1340.",
+        "description": "Première pierre le 22 avril 1370 (Hugues Aubriot), achevée vers 1383 ; huit tours de 24 m. Absente en 1340.",
     }
 )
 # Halles.
@@ -912,7 +917,7 @@ monuments.append(
         "clear_m": 3,
         "certainty": "probable",
         "params": {"size": 20, "height": 50, "top": "pyramid"},
-        "description": "Donjon carré à quatre tourelles (XIIIe s., datation débattue : avant 1310) ; hauteur restituée.",
+        "description": "Donjon carré d'≈ 15 m de côté flanqué de quatre tourelles, ≈ 50 m de haut ; construit au XIIIe s. (datation débattue : entre le frère Hubert, mort en 1222, et Jean de Tour, mort vers 1310 ; vers 1240-1270 selon d'autres auteurs) : présent en 1340.",
     }
 )
 tower(
@@ -1014,8 +1019,7 @@ church(
     width=20,
     height=17,
     apse="flat",
-    cert="probable",
-    desc="Abbaye de chanoines réguliers fondée au début du XIIe s. (1113 selon la tradition, à vérifier) ; église romane avant la reconstruction du XVIe s. Emprise ALPAGE.",
+    desc="Abbaye de chanoines réguliers : ermitage de Guillaume de Champeaux (1108), érigé en abbaye par Louis VI en 1113 (IRHT, Bibale : Abbaye Saint-Victor, Paris, 1113-1790) ; église romane avant la reconstruction du XVIe s. Emprise ALPAGE.",
 )
 boxy(
     "saint_victor_couvent",
@@ -1160,13 +1164,21 @@ CH = [
         909,
         {
             "cert": "hypothetical",
-            "desc": "Église commencée en 1338, jamais achevée : gabarit incertain en 1340.",
+            "desc": "Première pierre le 24 mai 1338 (Benoît XII, ancien élève du collège) ; église jamais achevée : en 1340 le chantier commence à peine, gabarit hypothétique.",
         },
     ),
     ("mathurins", "Les Mathurins", 777, {"cert": "probable"}),
     ("blancs_manteaux", "Église des Blancs-Manteaux", 1550, {}),
     ("billettes", "Chapelle des Billettes", 1555, {}),
-    ("filles_dieu", "Chapelle des Filles-Dieu", 403, {}),
+    (
+        "filles_dieu",
+        "Chapelle des Filles-Dieu",
+        403,
+        {
+            "from_year": 1360,
+            "desc": "Couvent fondé en 1226 hors les murs ; replié en 1360 rue Saint-Denis, à l'intérieur de l'enceinte de Charles V, sur l'emprise ALPAGE de 1380 : absent de ce site en 1340.",
+        },
+    ),
     ("sainte_catherine_du_val", "Sainte-Catherine-du-Val-des-Écoliers", 1047, {}),
     ("beguinage", "Chapelle du béguinage", 991, {}),
     ("chartreux", "Chapelle des Chartreux (Vauvert)", 1191, {}),
@@ -1206,7 +1218,14 @@ CH = [
         1557,
         {"from_year": 1361},
     ),
-    ("sainte_agnes", "Sainte-Agnès", 8, {"cert": "probable"}),
+    (
+        "sainte_agnes",
+        "Saint-Eustache (ancienne chapelle Sainte-Agnès)",
+        8,
+        {
+            "desc": "Chapelle Sainte-Agnès érigée en paroisse Saint-Eustache dès 1223 (ALPAGE la nomme encore Sainte-Agnès) ; église antérieure à la reconstruction de 1532-1637."
+        },
+    ),
     (
         "saint_sepulcre",
         "Saint-Sépulcre",
@@ -1345,7 +1364,8 @@ bridges = [
         "houses": True,
         "house_span": [0.05, 0.95],
         "gatehouses_at": [],
-        "note": "Tracé ALPAGE (1380), de la rue de la Barillerie au Grand Châtelet ; changeurs et orfèvres dans les maisons des deux côtés. Pont de bois reconstruit après les crues de 1280 et 1296 : matériau et gabarit en 1340 incertains (les 106 × 27 m souvent cités sont ceux du pont Notre-Dame de 1413).",
+        "note": "Tracé ALPAGE (1380), de la rue de la Barillerie au Grand Châtelet ; changeurs et orfèvres dans les maisons des deux côtés. Le Grand-Pont s'effondre le 20 décembre 1296 ; il est remplacé en amont par le pont aux Changeurs, au roi, et en aval par le pont aux Meuniers (C. Brut, « Le pont parisien de Charles le Chauve », Bulletin monumental, 2017). Pont de bois (il brûle en 1621) ; largeur de 1340 inconnue, 10 m restitués (les 106 × 27 m souvent cités sont ceux du pont Notre-Dame de 1413).",
+        "certainty": "probable",
     },
     {
         "id": "pont_aux_meuniers",
@@ -1358,7 +1378,7 @@ bridges = [
         "arches": 8,
         "houses": False,
         "mills_at": [0.3, 0.5, 0.7],
-        "note": "Pont de moulins en aval du Grand-Pont (tracé ALPAGE) ; nombre de moulins restitué.",
+        "note": "Passerelle des moulins du chapitre de Notre-Dame, bâtie en aval après l'effondrement du Grand-Pont (1296) (C. Brut, Bulletin monumental, 2017) ; tracé ALPAGE ; jusqu'à 13 moulins plus tard, nombre de 1340 restitué.",
         "certainty": "probable",
     },
     {
@@ -1372,7 +1392,7 @@ bridges = [
         "arches": 3,
         "houses": True,
         "house_span": [0.1, 0.9],
-        "note": "Pont de pierre de Maurice de Sully (1186), ≈ 40 m, bordé de maisons ; relie la Cité au Petit Châtelet. Tracé ALPAGE.",
+        "note": "Pont de pierre de Maurice de Sully (1186), ≈ 40 m, bordé de maisons ; relie la Cité au Petit Châtelet. Renversé par la crue du 20 décembre 1296 puis rebâti : état exact en 1340 non documenté. Tracé ALPAGE.",
     },
     {
         "id": "planches_de_mibray",
@@ -1384,7 +1404,8 @@ bridges = [
         "material": "wood",
         "arches": 10,
         "houses": False,
-        "note": "Passerelle de bois de la Cité vers la Grève, à l'emplacement du futur pont Notre-Dame (1413) ; tracé ALPAGE, état en 1340 probable.",
+        "note": "Passage de planches sur les anciennes piles, dans l'axe antique, à l'emplacement du futur pont Notre-Dame (1413) : « les Planches-de-Mibray » en 1313 ; tenu jusqu'aux crues de 1406 (C. Brut, Bulletin monumental, 2017 ; F. et L. Lazare). Tracé ALPAGE ; gabarit restitué.",
+        "certainty": "probable",
     },
     {
         "id": "pont_saint_michel",
@@ -1398,11 +1419,11 @@ bridges = [
         "houses": True,
         "house_span": [0.1, 0.9],
         "from_year": 1378,
-        "note": "Construit en 1378-1379 : absent en 1340.",
+        "note": "Décidé en 1353, construit à partir de 1378-1379 par Hugues Aubriot, achevé en 1387 : absent en 1340.",
     },
     {
         "id": "pont_de_la_tournelle",
-        "name": "Pont de la Tournelle (bois)",
+        "name": "Pont de Fust de l'île Notre-Dame (futur pont de la Tournelle)",
         "from": [356, -337],
         "to": [414, -253],
         "width_m": 5.0,
@@ -1411,7 +1432,7 @@ bridges = [
         "arches": 6,
         "houses": False,
         "from_year": 1370,
-        "note": "Pont de bois vers l'île Notre-Dame lié à l'enceinte de Charles V (vers 1370) ; absent en 1340.",
+        "note": "Premier pont de bois entre l'île Notre-Dame et la rive gauche, construit en 1369-1370 (AFGC, Pont de la Tournelle) ; absent en 1340.",
     },
 ]
 voies = {
@@ -1574,6 +1595,15 @@ city = {
             "license": "Faits (Wikipédia CC BY-SA, AFGC, France Pittoresque) recoupés dans docs/research/vh-sources.md",
             "extracted": False,
             "use": "Dates et gabarits : enceintes (1190-1215 ; Charles V 1356-1383), Notre-Dame (tours de 69 m, flèche vers 1250), Sainte-Chapelle (1248), tour de l'Horloge (1350-1353), Louvre (Grosse Tour de 15 m), Petit-Pont (1186), pont Saint-Michel (1378), Bastille (1370).",
+        },
+        {
+            "title": "Relecture historique de Paris vers 1340",
+            "author": "Projet Cent Ans (C. Brut 2017 ; P. Van Ossel 1992 ; M. Whiteley 1992 ; D. Hayot 2018 ; IRHT Bibale ; AFGC)",
+            "date": "2026",
+            "url": "https://www.persee.fr/doc/bulmo_0007-473x_2017_num_175_2_13052",
+            "license": "Faits seulement, recoupés dans docs/histoire/relecture-vh-paris.md",
+            "extracted": False,
+            "use": "Ponts de 1340 (pont aux Changeurs et pont aux Meuniers après 1296, Planches de Mibray), noms des portes en 1340, Petit Châtelet, Saint-Eustache, Filles-Dieu (1360), Notre-Dame (chantier Ravy, flèche), Temple, Saint-Victor (1113), Bernardins (1338).",
         },
     ],
     "plan": {
