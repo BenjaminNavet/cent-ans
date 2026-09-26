@@ -10,7 +10,9 @@ extends SceneTree
 ##  3. `TownBuilder` : construction complète (nœuds de maisons par cellule d'îlots, enceinte
 ##     polygonale, monuments) ;
 ##  4. `LandmarkCityLayer` : chargement autour de Rouen, fondu de la maquette ;
-##  5. plancher de caméra ZG4b levé au-dessus d'une ville v2.
+##  5. plancher de caméra ZG4b levé au-dessus d'une ville v2 ;
+##  6. VH5 : Paris vers 1340 (enceintes de Philippe Auguste, Charles V datée, parcelles ALPAGE,
+##     ponts habités, monuments datés), temps de plan.
 ## Usage : godot --headless --path game --script res://tests/vh4_landmarks_test.gd
 
 var _failures := 0
@@ -27,6 +29,7 @@ func _init() -> void:
 	await _test_builder(plan)
 	await _test_layer()
 	_test_camera_floor()
+	_test_paris()
 	print("vh4_landmarks_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -168,3 +171,45 @@ func _test_camera_floor() -> void:
 	var zones := PackedVector3Array([Vector3(100, 100, 6)])
 	_check(profile.landmark_floor(Vector2(100, 100), zones) > 2.0, "ZG4b floor kept for v1 landmarks")
 	_check(profile.landmark_floor(Vector2(100, 100), PackedVector3Array()) == 0.0, "no floor without zone (v2 city)")
+
+
+func _test_paris() -> void:
+	var city := LandmarkV2Library.for_settlement("set_paris")
+	if not _check(not city.is_empty(), "Paris v2 loaded"):
+		return
+	var anchor := LandmarkV2Library.anchor_units(city)
+	var v1 := LandmarkLibrary.for_settlement("set_paris")
+	var px: Array = v1.get("anchor", {}).get("px", [0, 0])
+	var mpu := LandmarkV2Library.meters_per_unit()
+	_check(anchor.distance_to(Vector2(float(px[0]), float(px[1]))) * mpu < 300.0, "Paris origin near the L1 anchor (%.0f m)" % (anchor.distance_to(Vector2(float(px[0]), float(px[1]))) * mpu))
+	var t0 := Time.get_ticks_msec()
+	var plan := LandmarkPlan.generate(city, 1340, _heights())
+	var plan_ms := Time.get_ticks_msec() - t0
+	var houses: Dictionary = plan["houses"]
+	var n: int = (houses["x"] as PackedFloat32Array).size()
+	print("vh5: Paris plan %d ms %s" % [plan_ms, JSON.stringify(plan["stats"])])
+	_check(n > 8000, "Paris houses %d" % n)
+	_check((city.get("parcels", []) as Array).size() > 2000, "ALPAGE parcels imported")
+	var fixed: Dictionary = plan["fixed_bases"]
+	_check(fixed.size() >= 40, "houses on the Grand-Pont and Petit-Pont: %d" % fixed.size())
+	var wet := 0
+	for i in n:
+		if not fixed.has(i) and LandmarkPlan._in_water(Vector2(houses["x"][i], houses["y"][i]), plan["waters"], plan["water_index"]):
+			wet += 1
+	_check(wet == 0, "Paris houses in the Seine: %d" % wet)
+	_check((plan["wall_rings"] as Array).size() == 2, "1340: Philippe Auguste walls only (%d rings)" % (plan["wall_rings"] as Array).size())
+	_check((plan["gates"] as Array).size() >= 20, "Paris gates %d" % (plan["gates"] as Array).size())
+	var ids := {}
+	for m in plan["v2_monuments"]:
+		ids[m["id"]] = m
+	for id in ["notre_dame", "sainte_chapelle", "palais_grand_salle", "louvre", "grand_chatelet", "petit_chatelet", "temple_enclos", "saint_germain_des_pres", "sainte_genevieve", "saint_victor", "hotel_dieu"]:
+		_check(ids.has(id), "1340 monument %s" % id)
+	_check(ids.has("notre_dame") and float(ids["notre_dame"]["length"]) >= 125.0 and float(ids["notre_dame"]["top"]) > 68.0, "Notre-Dame at real size")
+	for id in ["tour_horloge", "bastille", "louvre_charles_v", "celestins"]:
+		_check(not ids.has(id), "1340: no %s" % id)
+	var later := LandmarkPlan.generate(city, 1375, _heights())
+	var later_ids := {}
+	for m in later["v2_monuments"]:
+		later_ids[m["id"]] = true
+	_check(later_ids.has("tour_horloge") and later_ids.has("bastille") and later_ids.has("louvre_charles_v") and not later_ids.has("louvre"), "1375: Horloge, Bastille, Louvre of Charles V")
+	_check((later["wall_rings"] as Array).size() == 3, "1375: Charles V wall (%d rings)" % (later["wall_rings"] as Array).size())

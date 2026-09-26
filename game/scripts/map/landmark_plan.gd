@@ -19,6 +19,7 @@ const DENSIFY_M := 10.0
 const GROUND_STEP_M := 12.0
 const WALL_STEP_M := 8.0
 const GATE_GAP_M := 7.0
+const WATER_CELL_M := 40.0
 
 ## Paramètres par défaut du parcellaire (remplacés par la section `plan` de la ville).
 const DEFAULT_PLAN := {
@@ -35,20 +36,46 @@ const DEFAULT_PLAN := {
 }
 
 
-## Quartiers (polygones locaux) : accès par point.
+## Quartiers (polygones locaux) : accès par point. Index en grille (`build_index`) : chaque case
+## liste les quartiers dont le rectangle la recoupe, testés dans l'ordre (le premier l'emporte,
+## même résultat que le parcours complet) ; Paris compte des dizaines de quartiers (VH5).
 class Districts:
 	extends RefCounted
 
+	const INDEX_CELL_M := 50.0
+
 	var polys: Array = []  # {poly: PackedVector2Array, rect: Rect2, zone, density, houses}
+	var _index: Dictionary = {}  # Vector2i → PackedInt32Array
 
 	func add(poly: PackedVector2Array, zone: String, density: float, houses: Dictionary) -> void:
 		var rect := Rect2(poly[0], Vector2.ZERO)
 		for q in poly:
 			rect = rect.expand(q)
 		polys.append({"poly": poly, "rect": rect, "zone": zone, "density": density, "houses": houses})
+		_index.clear()
+
+	func build_index() -> void:
+		_index.clear()
+		for i in polys.size():
+			var r: Rect2 = polys[i]["rect"]
+			for cy in range(floori(r.position.y / INDEX_CELL_M), floori(r.end.y / INDEX_CELL_M) + 1):
+				for cx in range(floori(r.position.x / INDEX_CELL_M), floori(r.end.x / INDEX_CELL_M) + 1):
+					var key := Vector2i(cx, cy)
+					var list: PackedInt32Array = _index.get(key, PackedInt32Array())
+					list.append(i)
+					_index[key] = list
 
 	## Indice du premier quartier qui contient `p`, -1 sinon.
 	func at(p: Vector2) -> int:
+		if not _index.is_empty():
+			var list: Variant = _index.get(Vector2i(floori(p.x / INDEX_CELL_M), floori(p.y / INDEX_CELL_M)))
+			if list == null:
+				return -1
+			for i: int in list as PackedInt32Array:
+				var d: Dictionary = polys[i]
+				if (d["rect"] as Rect2).has_point(p) and Geometry2D.is_point_in_polygon(p, d["poly"]):
+					return i
+			return -1
 		for i in polys.size():
 			var d: Dictionary = polys[i]
 			if (d["rect"] as Rect2).has_point(p) and Geometry2D.is_point_in_polygon(p, d["poly"]):
@@ -95,6 +122,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 	for d in city.get("districts", []):
 		if LandmarkV2Library.present(d, year):
 			districts.add(LandmarkV2Library.local_line(d["polygon"]), str(d["zone"]), float(d.get("density", 0.9)), d.get("houses", {}))
+	districts.build_index()
 	out["districts"] = districts
 	var widths: Dictionary = plan["street_width_m"]
 	# 1. Eau : couloirs interdits (fleuve de la carte fine), ruisseaux dessinés.
@@ -156,10 +184,15 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 		(out["streets"] as Array).append(street)
 		ranked.append(street)
 	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return _rank_order(a["rank"]) < _rank_order(b["rank"]))
-	# 8. Parcelles en lanières le long des rues.
+	# 8. Parcellaire importé (Paris : parcelles Vasserot d'ALPAGE, VH5), puis parcelles en
+	# lanières tirées le long des rues pour les façades restées libres.
+	var imported: Array = city.get("parcels", [])
+	if not imported.is_empty():
+		_imported_parcels(imported, districts, occ, heights, rng, plan, out)
 	for s in ranked:
 		_line_parcels(s["points"], float(s["width"]), s["rank"] == "main", districts, occ, heights, rng, plan, out)
-	out["ground"] = _ground_grid(districts, waters, heights, out["houses"])
+	out["water_index"] = _water_index(waters)
+	out["ground"] = _ground_grid(districts, waters, heights, out["houses"], out["water_index"])
 	out["stats"] = {"houses": (out["houses"]["x"] as PackedFloat32Array).size(), "streets": (out["streets"] as Array).size(), "monuments": (out["v2_monuments"] as Array).size(), "towers": (out["towers"] as Array).size(), "usec": Time.get_ticks_usec() - t0}
 	return out
 
@@ -431,13 +464,51 @@ static func _line_parcels(pts: PackedVector2Array, width: float, main: bool, dis
 			carry = s - seg_len
 
 
+## Parcellaire importé (section `parcels` : [dE, dN, angle°, façade, profondeur], milieu de la
+## façade sur rue et normale vers l'intérieur de la parcelle). Une façade longue est partagée en
+## plusieurs maisons (≤ 11 m) ; la parcelle doit être libre (monuments, murailles, rues, eau), sa
+## profondeur est réduite sinon ; densité et mélange de maisons du quartier.
+static func _imported_parcels(items: Array, districts: Districts, occ: TownPlan.Occupancy, heights: TownPlan.Heights, rng: RandomNumberGenerator, plan: Dictionary, out: Dictionary) -> void:
+	var houses: Dictionary = out["houses"]
+	var mixes: Dictionary = plan["house_kinds"]
+	for item: Array in items:
+		var p := LandmarkV2Library.local([item[0], item[1]])
+		var yaw := LandmarkV2Library.yaw_of(float(item[2]))
+		var n := Vector2(cos(yaw), sin(yaw))
+		var t := Vector2(-n.y, n.x)
+		var di := districts.at(p + n * 3.0)
+		if di < 0:
+			continue
+		var dist: Dictionary = districts.polys[di]
+		var faubourg := str(dist["zone"]) == "faubourg"
+		var zone := TownPlan.ZONE_FAUBOURG if faubourg else TownPlan.ZONE_INTRA
+		var mix: Dictionary = dist["houses"] if not (dist["houses"] as Dictionary).is_empty() else mixes.get("faubourg" if faubourg else "intra", {"townhouse": 1.0})
+		var front_total := float(item[3])
+		var depth := float(item[4])
+		var k := maxi(1, ceili(front_total / 11.0))
+		var front := front_total / k
+		for j in k:
+			if rng.randf() > float(dist["density"]):
+				continue
+			var center_along := p + t * (-front_total * 0.5 + front * (j + 0.5))
+			for factor: float in [1.0, 0.6, 0.4]:
+				var d := maxf(depth * factor, 6.0)
+				var test_center := center_along + n * (1.5 + (d - 1.5) * 0.5)
+				if occ.rect(test_center, t, maxf(front * 0.5 - 0.8, 0.5), maxf((d - 1.5) * 0.5 - 0.8, 0.5), true):
+					occ.rect(center_along + n * (d * 0.5), t, maxf(front * 0.5 - 0.3, 0.5), d * 0.5, false)
+					TownPlan._add_house(center_along, n, 0.0, front, d, zone, rng, {"intra": mix, "faubourg": mix}, heights, houses, out)
+					break
+				if d <= 6.0:
+					break
+
+
 # --- Sol ------------------------------------------------------------------------------------
 
 
 ## Sol des quartiers (cours, jardins, terre battue) : grille drapée carrée couvrant les
 ## quartiers, sommets dans un quartier et hors de l'eau ; `edge` : 1 en ville close, 0,4 aux
 ## faubourgs (teinte des cours plus verte).
-static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.Heights, houses: Dictionary) -> Dictionary:
+static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.Heights, houses: Dictionary, water_index: Dictionary = {}) -> Dictionary:
 	# Faubourgs : sol de la ville seulement autour des maisons (cases de 30 m), les champs du
 	# parcellaire ZG5b restent visibles entre les rues.
 	var near := {}
@@ -460,7 +531,7 @@ static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.
 		for i in n:
 			var p := origin + Vector2(i, j) * step
 			var di := districts.at(p)
-			if di < 0 or _in_water(p, waters):
+			if di < 0 or _in_water(p, waters, water_index):
 				continue
 			if str(districts.polys[di]["zone"]) == "faubourg" and not near.has(Vector2i(floori(p.x / 30.0), floori(p.y / 30.0))):
 				continue
@@ -471,7 +542,23 @@ static func _ground_grid(districts: Districts, waters: Array, heights: TownPlan.
 	return {"origin": origin, "step": step, "n": n, "inside": mask, "heights": h, "edge": edge, "radii": PackedFloat32Array([side, side, side, side])}
 
 
-static func _in_water(p: Vector2, waters: Array) -> bool:
+## Vrai si `p` est dans le lit d'un cours d'eau (demi-largeur). `index` (`_water_index`) : ne
+## teste que les segments proches (même résultat).
+static func _in_water(p: Vector2, waters: Array, index: Dictionary = {}) -> bool:
+	if not index.is_empty():
+		var list: Variant = index.get(Vector2i(floori(p.x / WATER_CELL_M), floori(p.y / WATER_CELL_M)))
+		if list == null:
+			return false
+		var ids: PackedInt32Array = list
+		for k in range(0, ids.size(), 2):
+			var w: Dictionary = waters[ids[k]]
+			var i := ids[k + 1]
+			var line: PackedVector2Array = w["line"]
+			var ws: PackedFloat32Array = w["widths"]
+			var q := Geometry2D.get_closest_point_to_segment(p, line[i], line[i + 1])
+			if q.distance_to(p) < ws[i] * 0.5:
+				return true
+		return false
 	for w in waters:
 		var line: PackedVector2Array = w["line"]
 		var ws: PackedFloat32Array = w["widths"]
@@ -480,6 +567,25 @@ static func _in_water(p: Vector2, waters: Array) -> bool:
 			if q.distance_to(p) < ws[i] * 0.5:
 				return true
 	return false
+
+
+## Index en grille des segments d'eau : case → paires (cours d'eau, segment) dont la boîte,
+## élargie de la demi-largeur, recoupe la case.
+static func _water_index(waters: Array) -> Dictionary:
+	var index := {}
+	for wi in waters.size():
+		var line: PackedVector2Array = waters[wi]["line"]
+		var ws: PackedFloat32Array = waters[wi]["widths"]
+		for i in line.size() - 1:
+			var r := Rect2(line[i], Vector2.ZERO).expand(line[i + 1]).grow(ws[i] * 0.5 + 1.0)
+			for cy in range(floori(r.position.y / WATER_CELL_M), floori(r.end.y / WATER_CELL_M) + 1):
+				for cx in range(floori(r.position.x / WATER_CELL_M), floori(r.end.x / WATER_CELL_M) + 1):
+					var key := Vector2i(cx, cy)
+					var list: PackedInt32Array = index.get(key, PackedInt32Array())
+					list.append(wi)
+					list.append(i)
+					index[key] = list
+	return index
 
 
 # --- Hauteurs -------------------------------------------------------------------------------
