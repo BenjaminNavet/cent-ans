@@ -128,6 +128,15 @@ optimisation de fin de tour ; tests sim-campaign + ai et clippy verts, **pas enc
   parcours fusionné, subsides : revenus pesés en dernier) : moy 3,79, p99 17,7 (+15 %). Résultats
   de `century_probe` identiques (graine 1), 83 → 23 s.
 
+- Conquête : la baisse des cités prises vient de DC1 (pas de la densité) : main 10,3/déc., DC1 4,9,
+  DC3 5,5 (graines 1-6). Surtout l'Angleterre en France (29 cités prises → 6). Cause : horizon IA de
+  5 pas = 350 km au lieu de 700. `PLANNING_RANGE` 5 → 10 : sur 12 graines cités 9,25 → 7,75 (−16 %),
+  provinces entières 3,75 → 3,58, durée 5,0 → 4,9 tours, sièges réussis 46 %. Test m3 Douvres : la
+  guerre écossaise retirée (l'horizon atteint Édimbourg menacé).
+- Perf (IA) : revenus calculés une fois par tour d'IA (Context), gouverneur une fois par province,
+  revenus paresseux (rançons, ordres de chevalerie), sites de recrutement sans place libre sautés,
+  GridPlanner : propriétaire traversé par province. Résultats de sonde identiques.
+
 Reste à faire en DC3 :
 1. Mesurer `turn_perf 50 3 1` (branche vs DC1 : moyenne 5,86 ms, p99 63,8 ms).
 2. Conquête : cités prises −33 % vs main ; cible ±25 % (OFFENSIVE_RANGE / PLANNING_RANGE,

@@ -131,6 +131,8 @@ struct Eq4 {
     trespass_grievances: u32,
     /// DC3: province cities taken by a crown (rebels excluded).
     city_captures: u32,
+    /// DC3: city captures taken back from the rebels.
+    city_from_rebels: u32,
     /// DC3: provinces whose every settlement came to be held by one crown that did not hold
     /// them all before, and the turns since that crown's first foothold there.
     provinces_completed: u32,
@@ -255,10 +257,24 @@ fn track_eq4(state: &CampaignState, eq4: &mut Eq4, before: &Snapshot) {
         if sim_campaign::population::weighted_unrest(&province.population) > 60.0 {
             eq4.hot_turns += 1;
         }
-        if old_controllers.get(&province.city) != Some(&city.controller)
-            && city.controller.as_str() != "fac_rebels"
-        {
+        let previous = old_controllers.get(&province.city);
+        if previous != Some(&city.controller) && city.controller.as_str() != "fac_rebels" {
             eq4.city_captures += 1;
+            // DC3: `CAPTURE_TRACE=1` lists the city captures.
+            if std::env::var("CAPTURE_TRACE").is_ok() {
+                println!(
+                    "  CAPTURE t{} {} {} <- {} owner {}",
+                    state.turn,
+                    province_id.as_str(),
+                    city.controller.as_str(),
+                    previous.map_or("?", |f| f.as_str()),
+                    city.owner.as_str(),
+                );
+            }
+            // Retaken from the rebels: a consequence of the revolts, not of the war.
+            if previous.is_some_and(|f| f.as_str() == "fac_rebels") {
+                eq4.city_from_rebels += 1;
+            }
         }
         let places: Vec<&SettlementId> = state
             .settlements
@@ -718,6 +734,33 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         if trespass_trace {
             trace_trespass(&state, data);
         }
+        // DC3: `ARMY_TRACE=fac_england` prints that faction's armies every 4 turns.
+        if let Ok(who) = std::env::var("ARMY_TRACE") {
+            if state.turn.is_multiple_of(4) {
+                for (aid, army) in state
+                    .armies
+                    .iter()
+                    .filter(|(_, a)| a.faction.as_str() == who)
+                {
+                    let men: u32 = army.units.iter().map(|u| u.strength).sum();
+                    println!(
+                        "  ARMY [{seed}] t{} {} {} men {} units {} at {} owner {}",
+                        state.turn,
+                        aid.as_str(),
+                        state.date_label(),
+                        men,
+                        army.units.len(),
+                        state
+                            .army_province(data, army)
+                            .map_or("-".into(), |p| p.as_str().to_string()),
+                        state
+                            .army_province(data, army)
+                            .and_then(|p| state.province_controller(&p).cloned())
+                            .map_or("-".into(), |f| f.as_str().to_string()),
+                    );
+                }
+            }
+        }
         // DC3: `REVOLT_TRACE=1` also lists the provinces above 70 of weighted unrest.
         if std::env::var("REVOLT_TRACE").is_ok() {
             for (pid, p) in &state.provinces {
@@ -1085,6 +1128,9 @@ fn print_eq4(reports: &[Report]) {
         }),
         ("DC3 cités prises / déc.", |r| {
             f64::from(r.eq4.city_captures) * 40.0 / f64::from(r.turns)
+        }),
+        ("DC3 dont reprises aux rebelles / déc.", |r| {
+            f64::from(r.eq4.city_from_rebels) * 40.0 / f64::from(r.turns)
         }),
         ("DC3 provinces conquises en entier / déc.", |r| {
             f64::from(r.eq4.provinces_completed) * 40.0 / f64::from(r.turns)

@@ -95,11 +95,19 @@ impl<'a> GridPlanner<'a> {
         let rules = &data.ai_grid;
         let px_per_km = sim_campaign::march::px_per_km(data);
         let avoid_px = rules.avoid_radius_km as f32 * px_per_km;
-        let points: Vec<(SettlementId, [f32; 2])> = data
-            .settlements
-            .keys()
-            .filter_map(|id| Some((id.clone(), data.settlement_point(id)?)))
-            .collect();
+        // DC3: positions read in one walk (`settlement_px` is sorted like `settlements`).
+        let points: Vec<(SettlementId, [f32; 2])> =
+            if data.settlements.keys().eq(data.settlement_px.keys()) {
+                data.settlement_px
+                    .iter()
+                    .map(|(id, p)| (id.clone(), *p))
+                    .collect()
+            } else {
+                data.settlements
+                    .keys()
+                    .filter_map(|id| Some((id.clone(), data.settlement_point(id)?)))
+                    .collect()
+            };
         let mut crossing: BTreeMap<FactionId, bool> = BTreeMap::new();
         let mut may_cross = |owner: &FactionId| {
             *crossing
@@ -108,14 +116,18 @@ impl<'a> GridPlanner<'a> {
         };
         let mut forbidden: BTreeMap<SettlementId, FactionId> = BTreeMap::new();
         let mut crossable: BTreeSet<SettlementId> = BTreeSet::new();
-        for (id, _) in state
+        // DC3: the owner whose lands are trespassed is a property of the province
+        // (~10 places each); looked up once per province.
+        let mut trespassed: BTreeMap<&data_model::ProvinceId, Option<FactionId>> = BTreeMap::new();
+        for (id, settlement) in state
             .settlements
             .iter()
             .filter(|(_, s)| &s.controller != faction)
         {
-            let Some(owner) = state
-                .settlement_province(id)
-                .and_then(|p| passage::trespassed_owner(state, faction, p))
+            let Some(owner) = trespassed
+                .entry(&settlement.province)
+                .or_insert_with(|| passage::trespassed_owner(state, faction, &settlement.province))
+                .clone()
             else {
                 continue;
             };
