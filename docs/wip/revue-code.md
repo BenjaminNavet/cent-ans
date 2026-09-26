@@ -100,3 +100,4 @@ Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_n
 - Piège build : le dossier target partagé entre worktrees réutilise l'artefact `vegetation` d'une autre branche (sz1 : `relief_squash`) ; `touch core/crates/vegetation/src/*.rs` force la recompilation.
 | 14 | corrigé | `ai_emissary` étape 1 : ne vise qu'un captif rachetable (conditions « argent ») dont le prix + coût de l'action tient dans le trésor ; sinon étapes 2 et 3. Pas de test dédié (IA d'agent, couverte par c6_agents). |
 | 11 | corrigé | malus « otages abandonnés » déplacé dans `declare_war` : seulement si le donneur déclare la guerre au détenteur. Un donneur entraîné par un appel aux armes n'est pas puni (conservateur). |
+| 12 | corrigé | `resolve_negotiation` : le registre de tributs d'une faction morte est vidé, elle ne paie plus. |

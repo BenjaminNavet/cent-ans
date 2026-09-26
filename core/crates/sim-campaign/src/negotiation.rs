@@ -1551,6 +1551,17 @@ pub(crate) fn resolve_negotiation(
     // Tributes.
     let turn = state.turn;
     for id in &ids {
+        // A vanished faction pays nothing more.
+        if !state.factions[id].alive {
+            state
+                .factions
+                .get_mut(id)
+                .expect("listed")
+                .ledger
+                .tributes
+                .clear();
+            continue;
+        }
         let dues: Vec<TributeDue> = state.factions[id].ledger.tributes.clone();
         for due in &dues {
             if !state.factions.get(&due.to).is_some_and(|f| f.alive) {
