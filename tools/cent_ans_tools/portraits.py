@@ -52,6 +52,9 @@ PORTRAIT_SIZE = 256
 MAX_TOKENS = 4096
 START_YEAR = 1337
 
+# Attempts per image before skipping it (refusals, text-only answers, timeouts).
+MAX_ATTEMPTS = 3
+
 STYLE = (
     "Style: 14th-century French Gothic manuscript illumination (enluminure gothique "
     "française du XIVe siècle). Three-quarter bust portrait, flat gilded gold and "
@@ -242,6 +245,8 @@ def generate(
     """
     unit = max(price_per_image(model, client), KNOWN_PRICES.get(model, Decimal("0")))
     written: list[Path] = []
+    failed: list[tuple[PortraitJob, str]] = []
+    last_error: Exception | None = None
     spent = Decimal("0")
     estimated = Decimal("0")
     try:
@@ -259,15 +264,25 @@ def generate(
                 if job.reference is not None
                 else {}
             )
-            estimated += unit
-            try:
-                image, cost = openrouter.request_image(
-                    model, job.prompt, client, max_tokens=MAX_TOKENS, **extra
-                )
-            except openrouter.ImageExtractionError as exc:
-                if exc.cost is not None:
-                    spent += exc.cost
-                raise
+            image = None
+            for _attempt in range(MAX_ATTEMPTS):
+                estimated += unit
+                try:
+                    image, cost = openrouter.request_image(
+                        model, job.prompt, client, max_tokens=MAX_TOKENS, **extra
+                    )
+                except openrouter.ImageExtractionError as exc:
+                    # A refused or text-only answer may be billed: record its real cost.
+                    spent += exc.cost if exc.cost is not None else unit
+                    last_error = exc
+                    continue
+                except httpx.HTTPError as exc:
+                    last_error = exc
+                    continue
+                break
+            if image is None:
+                failed.append((job, str(last_error)))
+                continue
             spent += cost if cost is not None else unit
             job.out_path.parent.mkdir(parents=True, exist_ok=True)
             job.out_path.write_bytes(convert(image))
@@ -284,4 +299,6 @@ def generate(
                 spent.quantize(Decimal("0.01"), rounding=ROUND_UP),
                 path=budget_path,
             )
+    for job, error in failed:
+        print(f"Échec après {MAX_ATTEMPTS} essais : {job.out_path.name} ({error})")
     return BatchResult(written, estimated, spent)

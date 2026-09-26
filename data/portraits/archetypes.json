@@ -112,11 +112,11 @@
     ]
   },
   "cells": [
-    {"rank": "child", "sexes": ["male", "female"], "bands": ["child"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 2},
+    {"rank": "child", "sexes": ["male", "female"], "bands": ["child"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 3},
     {"rank": "sovereign", "sexes": ["male", "female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
-    {"rank": "noble", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 2},
-    {"rank": "noble", "sexes": ["female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
-    {"rank": "knight", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 2},
+    {"rank": "noble", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 4},
+    {"rank": "noble", "sexes": ["female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 3},
+    {"rank": "knight", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 4},
     {"rank": "prelate", "sexes": ["male"], "bands": ["adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
     {"rank": "prelate", "sexes": ["female"], "bands": ["adult", "old"], "cultures": ["any"], "faces": 1},
     {"rank": "burgher", "sexes": ["male"], "bands": ["adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},

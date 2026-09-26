@@ -60,6 +60,11 @@ func _init() -> void:
 	for _i in 10:
 		await process_frame
 	print("da2 tree: %d nodes, %d generations" % [court.family_tree.node_count(), court.family_tree.generation_count()])
+	if OS.get_cmdline_user_args().has("--debug-nodes"):
+		for node in court.family_tree.find_children("Node_*", "", true, false):
+			var entry: Dictionary = node.get("entry")
+			if not bool(node.get("_is_portrait")):
+				print("da2 no portrait: ", entry, " -> ", LivingPortrait.resolve(entry, LivingPortrait.context_for(entry)))
 	_save(out_dir.path_join("%s-arbre.png" % tag))
 	if store != null:
 		store.call("reset_discoveries")
