@@ -121,6 +121,12 @@ var decor_render := true
 ## `--no-da6` rend l'ancienne végétation (banc A/B, captures « avant »).
 var da6 := true
 var tree_view: BattleTrees = null
+
+
+## DA6 (bible § 3.3) : part de saturation gardée par le sol et l'herbe ; l'automne (lumière déjà
+## dorée) est désaturé davantage : la saison déplace la teinte, pas la saturation.
+func decor_saturation() -> float:
+	return 0.55 if site_render and season_key == "autumn" else 0.66
 var _decor_clear: Array = []  # [centre: Vector2, demi-tailles: Vector2, lacet] (arbres écartés)
 var _coast: Dictionary = {}
 var _pools: Array = []
@@ -933,6 +939,7 @@ func _build_material(weather: String) -> void:
 	var calm := Vector4(150.0, 60.0, 1050.0, 740.0)
 	ground_material.set_shader_parameter("calm_rect", calm)
 	ground_material.set_shader_parameter("da6_on", 1.0 if da6 else 0.0)
+	ground_material.set_shader_parameter("decor_saturation", decor_saturation())
 	if decor_on:
 		ground_material.set_shader_parameter("decor_fields", decor_fields)
 		ground_material.set_shader_parameter("decor_on", 1.0)

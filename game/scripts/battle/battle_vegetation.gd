@@ -35,6 +35,7 @@ func build(terrain: BattleTerrain, weather: String) -> void:
 		mat.set_shader_parameter("grass_texture", GRASS_TEXTURE_DA6 if da6 else GRASS_TEXTURE)
 		if da6:
 			mat.set_shader_parameter("da6_on", 1.0)
+			mat.set_shader_parameter("decor_saturation", terrain.decor_saturation())
 			mat.set_shader_parameter("tex_lum", GRASS_TEX_LUM_DA6)
 		mat.set_shader_parameter("height_map", terrain.height_texture)
 		var hr := terrain.SPLAT_RECT

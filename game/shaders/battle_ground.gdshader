@@ -53,7 +53,7 @@ uniform float outcrops : hint_range(0.0, 1.0) = 0.0;
 uniform float detail_bump = 0.7;
 // DA6 : lisières douces des parcelles et détail du sol de près (`--no-da6` : 0).
 uniform float da6_on = 0.0;
-uniform float decor_saturation = 0.75; // DA6 : part de la saturation gardée (bible § 3.3)
+uniform float decor_saturation = 0.66; // DA6 : part de la saturation gardée (bible § 3.3)
 uniform float detail_near = 45.0; // distance (m) sous laquelle le détail est plein
 
 varying vec3 world_pos;
