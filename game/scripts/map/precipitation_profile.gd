@@ -12,17 +12,16 @@ extends Resource
 ## `ZoomTiers.site_threshold`, ≈ 1,3 km de terrain visible), elle produisait des stries **réelles**
 ## de plusieurs mètres à plusieurs dizaines de mètres (« bâtonnets géants »).
 ##
-## Cette ressource ancre la taille des gouttes sur une valeur réaliste (mètres) à `near_distance`
-## (palier site) et raccorde en douceur (interpolation lisse en logarithme de la distance) avec la
-## formule d'origine à `far_distance` (déjà validée en vue vallée / lointaine, ZG7c) : au-delà de
-## `far_distance`, le comportement reste **strictement identique** à l'ancien (`far_*_ratio`,
-## repris des anciennes constantes). En deçà de `near_distance`, le ratio (taille par unité de
-## distance) est maintenu constant : la taille continue de décroître avec la distance (jamais de
+## Cette ressource ancre la taille des gouttes sur une valeur réaliste (mètres, convertie en unités
+## monde via `meters_per_unit`) à `near_distance` (palier site) et la raccorde à la formule
+## d'origine à `far_distance` (déjà validée en vue vallée / lointaine, ZG7c) par une interpolation
+## en loi de puissance (linéaire en `log(valeur)` vs `log(distance)`) : la valeur croît en continu,
+## sans jamais dépasser l'une ou l'autre des deux valeurs d'ancrage entre les deux distances (donc
+## pas de « rebond » ni de géant local). Au-delà de `far_distance`, le comportement reste
+## **strictement identique** à l'ancien (`far_*_ratio`, repris des anciennes constantes, proportion
+## constante à la distance). En deçà de `near_distance`, le ratio (taille / distance) est maintenu
+## constant à sa valeur d'ancrage : la taille continue de décroître avec la distance (jamais de
 ## palier plat), donc rien de figé ni de disproportionné tout au fond d'un canyon.
-##
-## `valeur(distance) = distance × ratio(distance)`, `ratio` interpolé (linéaire en `log(distance)`,
-## continu, sans saut) entre `near_*_ratio` (dérivé de `*_m_at_near / near_distance`) à
-## `near_distance` et `far_*_ratio` à `far_distance`.
 
 @export var enabled: bool = true
 
@@ -32,37 +31,46 @@ extends Resource
 ## Distance caméra au-delà de laquelle le comportement d'origine (ZG7c) reprend exactement (ancien
 ## palier « plat » de la formule remplacée, vue vallée / lointaine déjà validée).
 @export var far_distance: float = 30.0
+## Mètres réels par unité monde (`MapData.meters_per_px`, ≈ 719) ; passé par l'appelant à chaque
+## image (dépend de la carte chargée), valeur par défaut si absent.
+@export var meters_per_unit: float = 719.0
 
 ## Pluie : largeur / longueur réelles (m) de la strie au palier site.
-@export var rain_width_m_at_near: float = 0.06
-@export var rain_length_m_at_near: float = 0.4
+@export var rain_width_m_at_near: float = 0.05
+@export var rain_length_m_at_near: float = 0.35
 ## Pluie : ratio (taille / distance) en vue lointaine, repris de l'ancienne formule
 ## (`0,035 / 100` et `1,1 / 100`).
 @export var rain_width_far_ratio: float = 0.00035
 @export var rain_length_far_ratio: float = 0.011
 
 ## Neige : côté réel (m) du flocon au palier site, puis ratio lointain (ancien `0,18 / 100`).
-@export var snow_size_m_at_near: float = 0.03
+@export var snow_size_m_at_near: float = 0.025
 @export var snow_size_far_ratio: float = 0.0018
 
-## Boîte d'émission (horizontale / verticale) : ratio (rayon / distance) au palier site et en vue
-## lointaine (ancien `80 / 100` et `8 / 100`). Resserrée de près pour ne pas faire tomber de gouttes
-## à distance de la caméra elle-même.
-@export var box_horizontal_near_ratio: float = 0.22
+## Boîte d'émission (horizontale / verticale) : réelle (m) au palier site, ratio (rayon / distance)
+## en vue lointaine (ancien `80 / 100` et `8 / 100`). De près, une boîte de quelques dizaines de
+## mètres suffit à couvrir le champ visuel sans faire tomber de gouttes à distance de la caméra.
+@export var box_horizontal_m_at_near: float = 40.0
 @export var box_horizontal_far_ratio: float = 0.8
-@export var box_vertical_near_ratio: float = 0.05
+@export var box_vertical_m_at_near: float = 8.0
 @export var box_vertical_far_ratio: float = 0.08
 
-## Vitesse de chute (ratio vitesse / distance) : ancien `60 / 100` à `75 / 100` (pluie),
-## `8 / 100` à `12 / 100` (neige) en vue lointaine ; de près, vitesse plus faible en valeur relative
-## (mêmes ordres de grandeur réels : la pluie tombe à la même vitesse quel que soit le zoom, mais la
-## scène étant compressée à distance courte, un ratio plus faible évite des gouttes qui traversent
-## la boîte en une fraction de seconde).
-@export var rain_speed_near_ratio: Vector2 = Vector2(0.35, 0.45)
+## Hauteur (m réels au palier site, ratio × distance en vue lointaine, ancien `0,35`) du centre de
+## la boîte au-dessus du point visé. De près, centrée juste au-dessus du sol (dans le champ visible
+## de la caméra rapprochée) ; l'ancienne valeur (`0,35 × distance`) plaçait la pluie très haut dans
+## le ciel une fois la boîte réduite à une échelle réaliste (invisible depuis le palier site).
+@export var height_m_at_near: float = 25.0
+@export var height_far_ratio: float = 0.35
+
+## Vitesse de chute : réelle (m/s) au palier site (vitesse physique de la pluie / neige, quel que
+## soit le zoom), ratio (vitesse / distance) en vue lointaine (ancien `60/100`-`75/100` pluie,
+## `8/100`-`12/100` neige : la scène y est fortement compressée, la vitesse y suit la distance pour
+## rester lisible).
+@export var rain_speed_ms_at_near: Vector2 = Vector2(6.0, 9.0)
 @export var rain_speed_far_ratio: Vector2 = Vector2(0.6, 0.75)
-@export var snow_speed_near_ratio: Vector2 = Vector2(0.05, 0.08)
+@export var snow_speed_ms_at_near: Vector2 = Vector2(0.8, 1.4)
 @export var snow_speed_far_ratio: Vector2 = Vector2(0.08, 0.12)
-@export var snow_sway_near_ratio: float = 0.015
+@export var snow_sway_ms_at_near: float = 0.3
 @export var snow_sway_far_ratio: float = 0.03
 
 ## Fraction de `amount` réellement émise (`GPUParticles3D.amount_ratio`, sans redémarrage du
@@ -91,54 +99,77 @@ static func set_default(profile: PrecipitationProfile) -> void:
 	_default = profile
 
 
-## Interpolation lisse (continue, monotone) du ratio en logarithme de la distance : `near_ratio`
-## constant sous `near_distance`, `far_ratio` constant au-delà de `far_distance`, transition
-## `smoothstep` entre les deux (jamais de saut ni de palier intermédiaire artificiel).
-func _blend(distance: float, near_ratio: float, far_ratio: float) -> float:
-	var lo := log(maxf(near_distance, 1e-4))
-	var hi := log(maxf(far_distance, near_distance * 1.01))
-	var t := smoothstep(lo, hi, log(maxf(distance, 1e-4)))
-	return lerpf(near_ratio, far_ratio, t)
+## Valeur (unités monde) à la distance caméra donnée, ancrée sur `near_value` (unités monde) à
+## `near_distance` et sur `far_ratio × far_distance` à `far_distance`. Sous `near_distance` : ratio
+## constant (`near_value / near_distance`), la valeur continue de décroître avec la distance.
+## Entre les deux : loi de puissance (linéaire en logarithme des deux axes), donc monotone et bornée
+## par les deux ancrages, sans jamais les dépasser. Au-delà de `far_distance` : ratio constant
+## `far_ratio` (comportement d'origine, inchangé).
+func _value(distance: float, near_value: float, far_ratio: float) -> float:
+	var d1 := maxf(near_distance, 1e-4)
+	var d2 := maxf(far_distance, d1 * 1.01)
+	var d := maxf(distance, 1e-4)
+	var far_value := far_ratio * d2
+	if d <= d1:
+		return near_value * (d / d1)
+	if d >= d2:
+		return far_ratio * d
+	var t := (log(d) - log(d1)) / (log(d2) - log(d1))
+	var lo := maxf(near_value, 1e-9)
+	var hi := maxf(far_value, 1e-9)
+	return lo * pow(hi / lo, t)
 
 
-func _blend_vec(distance: float, near_ratio: Vector2, far_ratio: Vector2) -> Vector2:
-	return Vector2(_blend(distance, near_ratio.x, far_ratio.x), _blend(distance, near_ratio.y, far_ratio.y))
+func _value_vec(distance: float, near_value: Vector2, far_ratio: Vector2) -> Vector2:
+	return Vector2(_value(distance, near_value.x, far_ratio.x), _value(distance, near_value.y, far_ratio.y))
 
 
 ## Taille (unités monde) d'une strie de pluie (largeur, longueur) à la distance caméra donnée.
 func rain_size(distance: float) -> Vector2:
-	var near_width := rain_width_m_at_near / maxf(near_distance, 1e-4)
-	var near_length := rain_length_m_at_near / maxf(near_distance, 1e-4)
-	var width := distance * _blend(distance, near_width, rain_width_far_ratio)
-	var length := distance * _blend(distance, near_length, rain_length_far_ratio)
+	var mpu := maxf(meters_per_unit, 1e-3)
+	var width := _value(distance, rain_width_m_at_near / mpu, rain_width_far_ratio)
+	var length := _value(distance, rain_length_m_at_near / mpu, rain_length_far_ratio)
 	return Vector2(width, length)
 
 
 ## Côté (unités monde) d'un flocon de neige à la distance caméra donnée.
 func snow_size(distance: float) -> float:
-	var near_ratio := snow_size_m_at_near / maxf(near_distance, 1e-4)
-	return distance * _blend(distance, near_ratio, snow_size_far_ratio)
+	var mpu := maxf(meters_per_unit, 1e-3)
+	return _value(distance, snow_size_m_at_near / mpu, snow_size_far_ratio)
 
 
 ## Demi-étendue de la boîte d'émission (horizontale, verticale) à la distance caméra donnée.
 func box_extents(distance: float) -> Vector2:
-	var horizontal := distance * _blend(distance, box_horizontal_near_ratio, box_horizontal_far_ratio)
-	var vertical := distance * _blend(distance, box_vertical_near_ratio, box_vertical_far_ratio)
+	var mpu := maxf(meters_per_unit, 1e-3)
+	var horizontal := _value(distance, box_horizontal_m_at_near / mpu, box_horizontal_far_ratio)
+	var vertical := _value(distance, box_vertical_m_at_near / mpu, box_vertical_far_ratio)
 	return Vector2(horizontal, vertical)
 
 
-## Vitesse de chute (min, max) à la distance caméra donnée.
+## Hauteur (unités monde) du centre de la boîte d'émission au-dessus du point visé.
+func height(distance: float) -> float:
+	var mpu := maxf(meters_per_unit, 1e-3)
+	return _value(distance, height_m_at_near / mpu, height_far_ratio)
+
+
+## Vitesse de chute (min, max, unités monde / s) à la distance caméra donnée.
 func speed(distance: float, snow: bool) -> Vector2:
+	var mpu := maxf(meters_per_unit, 1e-3)
 	if snow:
-		return distance * _blend_vec(distance, snow_speed_near_ratio, snow_speed_far_ratio)
-	return distance * _blend_vec(distance, rain_speed_near_ratio, rain_speed_far_ratio)
+		return _value_vec(distance, snow_speed_ms_at_near / mpu, snow_speed_far_ratio)
+	return _value_vec(distance, rain_speed_ms_at_near / mpu, rain_speed_far_ratio)
 
 
 ## Amplitude de l'ondulation de la neige à la distance caméra donnée.
 func sway(distance: float) -> float:
-	return distance * _blend(distance, snow_sway_near_ratio, snow_sway_far_ratio)
+	var mpu := maxf(meters_per_unit, 1e-3)
+	return _value(distance, snow_sway_ms_at_near / mpu, snow_sway_far_ratio)
 
 
-## Fraction de particules actives (`amount_ratio`) à la distance caméra donnée.
+## Fraction de particules actives (`amount_ratio`) à la distance caméra donnée : interpolation
+## simple (linéaire en logarithme de la distance), pas de conversion physique nécessaire.
 func amount_ratio(distance: float) -> float:
-	return _blend(distance, amount_ratio_near, amount_ratio_far)
+	var lo := log(maxf(near_distance, 1e-4))
+	var hi := log(maxf(far_distance, near_distance * 1.01))
+	var t := smoothstep(lo, hi, log(maxf(distance, 1e-4)))
+	return lerpf(amount_ratio_near, amount_ratio_far, t)
