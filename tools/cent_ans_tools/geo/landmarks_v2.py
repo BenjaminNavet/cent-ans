@@ -389,6 +389,18 @@ def build(
                 s for s in city["streets"] if s["origin"] != "osm"
             ] + generated
             n_streets += len(generated)
+        if "alpage" in city:
+            # Paris (VH5): streets of 1380 and Vasserot parcels from ALPAGE (ODbL).
+            from cent_ans_tools.geo import alpage
+
+            generated = alpage.alpage_streets(city)
+            city["streets"] = [
+                s for s in city["streets"] if s["origin"] != "alpage"
+            ] + generated
+            n_streets += len(generated)
+            if "parcels" in city["alpage"]:
+                city["parcels"] = alpage.alpage_parcels(city, city["streets"])
+                log(f"{city['id']} : {len(city['parcels'])} parcelles ALPAGE")
         waters = fine_waters(city, map_dir)
         if waters:
             city["waters"] = [
