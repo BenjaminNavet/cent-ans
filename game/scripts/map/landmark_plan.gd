@@ -125,9 +125,20 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 	districts.build_index()
 	out["districts"] = districts
 	var widths: Dictionary = plan["street_width_m"]
-	# 1. Eau : couloirs interdits (fleuve de la carte fine), ruisseaux dessinés.
+	# 1. Eau : couloirs interdits (fleuve de la carte fine), ruisseaux dessinés ; lits en
+	# polygone (Paris : Seine de 1380 d'ALPAGE, îles en trous) interdits en entier.
 	var waters: Array = []
 	for w in city.get("waters", []):
+		if w.has("polygon"):
+			var rings: Array = [LandmarkV2Library.local_line(w["polygon"])]
+			for hole in w.get("holes", []):
+				rings.append(LandmarkV2Library.local_line(hole))
+			var rect := Rect2(rings[0][0], Vector2.ZERO)
+			for q in rings[0]:
+				rect = rect.expand(q)
+			waters.append({"rings": rings, "rect": rect})
+			_fill_rings(occ, rings, rect)
+			continue
 		var line := PackedVector2Array()
 		var ws := PackedFloat32Array()
 		for q in w["points"]:
@@ -142,10 +153,13 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 			TownPlan.street_bases(water_street, heights)
 			(out["streets"] as Array).append(water_street)
 	out["waters"] = waters
+	var marks := {}
+	marks["water"] = Time.get_ticks_usec() - t0
 	# 2. Monuments (emprise réservée avant tout le reste).
 	for m in city.get("monuments", []):
 		if LandmarkV2Library.present(m, year):
 			_add_monument(m, occ, heights, out)
+	marks["monuments"] = Time.get_ticks_usec() - t0
 	# 3. Murailles, tours, portes.
 	for wall in city.get("walls", []):
 		if LandmarkV2Library.present(wall, year):
@@ -167,6 +181,7 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 	for s in city.get("open_spaces", []):
 		if LandmarkV2Library.present(s, year):
 			_add_open_space(s, occ, heights, rng, out)
+	marks["walls_spaces"] = Time.get_ticks_usec() - t0
 	# 7. Rues réelles.
 	var ranked: Array = []
 	for s in city.get("streets", []):
@@ -184,16 +199,19 @@ static func generate(city: Dictionary, year: int, heights: TownPlan.Heights) -> 
 		(out["streets"] as Array).append(street)
 		ranked.append(street)
 	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return _rank_order(a["rank"]) < _rank_order(b["rank"]))
+	marks["streets"] = Time.get_ticks_usec() - t0
 	# 8. Parcellaire importé (Paris : parcelles Vasserot d'ALPAGE, VH5), puis parcelles en
 	# lanières tirées le long des rues pour les façades restées libres.
 	var imported: Array = city.get("parcels", [])
 	if not imported.is_empty():
 		_imported_parcels(imported, districts, occ, heights, rng, plan, out)
+		marks["imported"] = Time.get_ticks_usec() - t0
 	for s in ranked:
 		_line_parcels(s["points"], float(s["width"]), s["rank"] == "main", districts, occ, heights, rng, plan, out)
+	marks["parcels"] = Time.get_ticks_usec() - t0
 	out["water_index"] = _water_index(waters)
 	out["ground"] = _ground_grid(districts, waters, heights, out["houses"], out["water_index"])
-	out["stats"] = {"houses": (out["houses"]["x"] as PackedFloat32Array).size(), "streets": (out["streets"] as Array).size(), "monuments": (out["v2_monuments"] as Array).size(), "towers": (out["towers"] as Array).size(), "usec": Time.get_ticks_usec() - t0}
+	out["stats"] = {"houses": (out["houses"]["x"] as PackedFloat32Array).size(), "streets": (out["streets"] as Array).size(), "monuments": (out["v2_monuments"] as Array).size(), "towers": (out["towers"] as Array).size(), "usec": Time.get_ticks_usec() - t0, "marks_usec": marks}
 	return out
 
 
@@ -553,6 +571,12 @@ static func _in_water(p: Vector2, waters: Array, index: Dictionary = {}) -> bool
 		for k in range(0, ids.size(), 2):
 			var w: Dictionary = waters[ids[k]]
 			var i := ids[k + 1]
+			if i == -2:
+				return true
+			if i < 0:
+				if _in_rings(p, w):
+					return true
+				continue
 			var line: PackedVector2Array = w["line"]
 			var ws: PackedFloat32Array = w["widths"]
 			var q := Geometry2D.get_closest_point_to_segment(p, line[i], line[i + 1])
@@ -560,6 +584,10 @@ static func _in_water(p: Vector2, waters: Array, index: Dictionary = {}) -> bool
 				return true
 		return false
 	for w in waters:
+		if w.has("rings"):
+			if _in_rings(p, w):
+				return true
+			continue
 		var line: PackedVector2Array = w["line"]
 		var ws: PackedFloat32Array = w["widths"]
 		for i in line.size() - 1:
@@ -569,11 +597,70 @@ static func _in_water(p: Vector2, waters: Array, index: Dictionary = {}) -> bool
 	return false
 
 
+## Lit en polygone : dans l'anneau extérieur et hors des îles (règle pair-impair).
+static func _in_rings(p: Vector2, w: Dictionary) -> bool:
+	if not (w["rect"] as Rect2).has_point(p):
+		return false
+	var inside := false
+	for ring: PackedVector2Array in w["rings"]:
+		if Geometry2D.is_point_in_polygon(p, ring):
+			inside = not inside
+	return inside
+
+
+## Marque les cases d'occupation dans des anneaux (pair-impair : les trous restent libres),
+## par balayage de lignes.
+static func _fill_rings(occ: TownPlan.Occupancy, rings: Array, rect: Rect2) -> void:
+	var step := TownPlan.CELL_M
+	var y := rect.position.y + step * 0.5
+	while y < rect.end.y:
+		var xs := PackedFloat32Array()
+		for ring: PackedVector2Array in rings:
+			var n := ring.size()
+			for i in n:
+				var a := ring[i]
+				var b := ring[(i + 1) % n]
+				if (a.y <= y) != (b.y <= y):
+					xs.append(a.x + (y - a.y) / (b.y - a.y) * (b.x - a.x))
+		xs.sort()
+		for k in range(0, xs.size() - 1, 2):
+			var x := xs[k] + step * 0.5
+			while x < xs[k + 1]:
+				occ.mark(Vector2(x, y))
+				x += step
+		y += step
+
+
 ## Index en grille des segments d'eau : case → paires (cours d'eau, segment) dont la boîte,
 ## élargie de la demi-largeur, recoupe la case.
 static func _water_index(waters: Array) -> Dictionary:
 	var index := {}
 	for wi in waters.size():
+		if waters[wi].has("rings"):
+			# Cases traversées par une rive : test exact (-1) ; cases entièrement dans le lit : -2.
+			var edge_cells := {}
+			for ring: PackedVector2Array in waters[wi]["rings"]:
+				for i in ring.size():
+					var a := ring[i]
+					var b := ring[(i + 1) % ring.size()]
+					var steps := maxi(1, ceili(a.distance_to(b) / (WATER_CELL_M * 0.25)))
+					for k in steps + 1:
+						var q := a.lerp(b, float(k) / steps)
+						edge_cells[Vector2i(floori(q.x / WATER_CELL_M), floori(q.y / WATER_CELL_M))] = true
+			var rr: Rect2 = waters[wi]["rect"]
+			for cy in range(floori(rr.position.y / WATER_CELL_M), floori(rr.end.y / WATER_CELL_M) + 1):
+				for cx in range(floori(rr.position.x / WATER_CELL_M), floori(rr.end.x / WATER_CELL_M) + 1):
+					var key := Vector2i(cx, cy)
+					var code := -1
+					if not edge_cells.has(key):
+						if not _in_rings(Vector2(cx + 0.5, cy + 0.5) * WATER_CELL_M, waters[wi]):
+							continue
+						code = -2
+					var list: PackedInt32Array = index.get(key, PackedInt32Array())
+					list.append(wi)
+					list.append(code)
+					index[key] = list
+			continue
 		var line: PackedVector2Array = waters[wi]["line"]
 		var ws: PackedFloat32Array = waters[wi]["widths"]
 		for i in line.size() - 1:
