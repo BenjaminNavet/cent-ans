@@ -147,3 +147,4 @@ Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_n
 | 17 | corrigé | `research_points_per_turn` compte les bâtiments des places tenues (`controller`), comme les taxes et l'entretien. |
 | 18b | corrigé | `resolve_economy` et `faction_economy` passent le revenu déjà calculé à `administration_upkeep_for` (un seul `faction_income_effective` au lieu de deux). |
 | 18c | écarté | cache de `shortest_path` des routes commerciales : le chemin ne dépend que de `GameData`, mais un cache global (clé route) serait faux entre plusieurs `GameData` (tests qui en chargent/modifient) et un cache dans `CampaignState` casserait `PartialEq`/sérialisation ; ni simple ni sûr. À faire plutôt en précalculant les chemins au chargement de `data.trade` (data-model). |
+| 5b | corrigé | article `CedeSettlement` : passation par `hand_over` et garnison vidée, comme `cede_province` (le preneur ne reçoit plus la garnison, les recrues ni le chantier du donneur). |
