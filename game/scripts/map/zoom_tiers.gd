@@ -47,11 +47,8 @@ enum Tier { NEAR, MEDIUM, FAR, VALLEY, SITE }
 ## Portée des étiquettes de colonies aux paliers vallée / site, en multiples de la distance caméra
 ## (en vue rasante, l'horizon ne se couvre pas de noms).
 @export var close_label_range_factor: float = 40.0
-## Échelle des arbres (paramètre global `campaign_prop_scale`) sous `prop_scale_distance` :
-## (distance / prop_scale_distance)^`prop_scale_exponent`, au moins `prop_scale_min`.
-@export var prop_scale_distance: float = 22.0
-@export var prop_scale_exponent: float = 0.8
-@export var prop_scale_min: float = 0.04
+## Échelle des arbres et autres accessoires de carte : lot SZ4, `MapPropScale`
+## (`res://resources/map_prop_scale.tres`).
 
 
 ## Palier dominant pour une distance caméra.
@@ -95,13 +92,6 @@ func border_alpha(distance: float) -> float:
 ## Lot ZG4 : opacité du voile du brouillard de guerre (même principe).
 func fog_alpha(distance: float) -> float:
 	return lerpf(1.0, lerpf(0.7, site_fog_alpha, site_weight(distance)), valley_weight(distance))
-
-
-## Lot ZG4 : échelle des accessoires surdimensionnés (arbres) pour une distance caméra.
-func prop_scale(distance: float) -> float:
-	if distance >= prop_scale_distance:
-		return 1.0
-	return maxf(pow(maxf(distance, 1e-3) / prop_scale_distance, prop_scale_exponent), prop_scale_min)
 
 
 ## Opacité [0, 1] du palier « moyen » (complément des deux autres).

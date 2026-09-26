@@ -11,6 +11,11 @@ uniform vec3 dark_smoke : source_color = vec3(0.10, 0.09, 0.085);
 uniform vec3 ember : source_color = vec3(1.0, 0.45, 0.12);
 // Fondu global (palier de zoom), piloté par le script.
 uniform float fade = 1.0;
+// Lot SZ4 : échelle du panache (1 au loin, taille réelle au palier vallée, `MapPropScale`),
+// pilotée par le script. L'origine de l'instance est au sol ; la levée au-dessus du sol (sommet de
+// la maquette, toit du hameau) est dans la colonne z de la base (`MODEL_MATRIX[2].y`) et suit
+// l'échelle, comme la largeur et la hauteur.
+uniform float prop_scale = 1.0;
 // Lumière ambiante approximative (unshaded) : teinte chaude de la carte.
 uniform vec3 sun_tint = vec3(1.0, 0.96, 0.9);
 
@@ -34,8 +39,9 @@ void vertex() {
 	v_custom = INSTANCE_CUSTOM;
 	v_uv = vec2(VERTEX.x + 0.5, VERTEX.y);
 	vec3 origin = MODEL_MATRIX[3].xyz;
-	float sx = length(MODEL_MATRIX[0].xyz);
-	float sy = length(MODEL_MATRIX[1].xyz);
+	float sx = length(MODEL_MATRIX[0].xyz) * prop_scale;
+	float sy = length(MODEL_MATRIX[1].xyz) * prop_scale;
+	origin.y += MODEL_MATRIX[2].y * prop_scale;
 	// Face à la caméra : axe x de la caméra, axe « haut » entre la verticale et le haut de
 	// l'écran (vu de dessus, le panache reste un ruban large, pas un trait).
 	vec3 right = INV_VIEW_MATRIX[0].xyz;
