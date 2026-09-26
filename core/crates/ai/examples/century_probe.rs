@@ -772,6 +772,18 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 side(&england, &france),
                 side(&france, &england)
             );
+            let white = [sim_campaign::negotiation::Article::Peace];
+            for (from, to) in [(&england, &france), (&france, &england)] {
+                let verdict =
+                    sim_campaign::negotiation::evaluate_treaty(&state, data, from, to, &white);
+                println!(
+                    "      white peace {} -> {}: chance {} {:?}",
+                    from.as_str(),
+                    to.as_str(),
+                    verdict.chance,
+                    verdict.reasons()
+                );
+            }
         }
         if at_war {
             report.war_turns += 1;

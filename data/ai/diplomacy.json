@@ -52,9 +52,9 @@
     "sue_weariness": 70,
     "min_war_turns": 20,
     "truce_binds_allies": true,
-    "long_war_years": 10,
-    "long_war_points_per_year": 3,
-    "long_war_max_points": 30
+    "long_war_years": 8,
+    "long_war_points_per_year": 8,
+    "long_war_max_points": 100
   },
   "passage": {
     "enabled": true,
