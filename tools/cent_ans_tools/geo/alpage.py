@@ -147,7 +147,9 @@ def alpage_streets(city: dict, raw_dir: Path = RAW_ALPAGE_DIR) -> list[dict]:
     excluded = set(recipe.get("exclude", []))
     excluded_ids = set(recipe.get("exclude_ids", []))
     main_extra = set(recipe.get("main", []))
-    lane_words = tuple(recipe.get("lane_words", ["Ruelle", "Cul", "Impasse", "Passage"]))
+    lane_words = tuple(
+        recipe.get("lane_words", ["Ruelle", "Cul", "Impasse", "Passage"])
+    )
     tolerance = float(recipe.get("simplify_m", 1.0))
     area = _district_area(city).buffer(25.0)
     streets = []
@@ -163,7 +165,9 @@ def alpage_streets(city: dict, raw_dir: Path = RAW_ALPAGE_DIR) -> list[dict]:
             rank = "main"
         elif not name or name.startswith(lane_words):
             rank = "lane"
-        width = float(widths.get(rank, {"main": 8.0, "secondary": 5.0, "lane": 3.0}[rank]))
+        width = float(
+            widths.get(rank, {"main": 8.0, "secondary": 5.0, "lane": 3.0}[rank])
+        )
         local = to_local(item["geom"], origin)
         parts = [p for line in _lines(local) for p in _lines(line.intersection(area))]
         for k, part in enumerate(parts):
@@ -177,17 +181,31 @@ def alpage_streets(city: dict, raw_dir: Path = RAW_ALPAGE_DIR) -> list[dict]:
                     "rank": rank,
                     "width_m": width,
                     "origin": "alpage",
-                    "points": [[round(float(x), 1), round(float(y), 1)] for x, y in coords],
+                    "points": [
+                        [round(float(x), 1), round(float(y), 1)] for x, y in coords
+                    ],
                 }
             )
-    streets.sort(key=lambda s: ({"main": 0, "secondary": 1, "lane": 2}[s["rank"]], s["name"], s["id"]))
+    streets.sort(
+        key=lambda s: (
+            {"main": 0, "secondary": 1, "lane": 2}[s["rank"]],
+            s["name"],
+            s["id"],
+        )
+    )
     return streets
 
 
 # --- Parcels ----------------------------------------------------------------------------------
 
 
-def _frontage(poly: Polygon, street_tree: STRtree, street_lines: list, street_half: list, reach: float):  # noqa: ANN001, ANN202
+def _frontage(
+    poly: Polygon,
+    street_tree: STRtree,
+    street_lines: list,
+    street_half: list,
+    reach: float,
+):  # noqa: ANN001, ANN202
     """Best street frontage of a parcel: (midpoint, inward normal, length, depth) or None."""
     ring = np.asarray(poly.exterior.coords)[:-1]
     n = len(ring)
@@ -233,7 +251,9 @@ def _frontage(poly: Polygon, street_tree: STRtree, street_lines: list, street_ha
     return best
 
 
-def alpage_parcels(city: dict, streets: list[dict], raw_dir: Path = RAW_ALPAGE_DIR) -> list[list[float]]:
+def alpage_parcels(
+    city: dict, streets: list[dict], raw_dir: Path = RAW_ALPAGE_DIR
+) -> list[list[float]]:
     """Vasserot parcels kept as 1340 strips: ``[dE, dN, angle_deg, front_m, depth_m]``."""
     recipe = city["alpage"]["parcels"]
     origin = city["origin_3035"]
