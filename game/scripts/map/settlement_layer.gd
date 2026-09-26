@@ -747,6 +747,46 @@ func screen_label_rects(camera: Camera3D) -> Array[Rect2]:
 	return rects
 
 
+## Lot DA7d : rectangle écran de l'emprise opaque du marqueur `i` (marge `margin` en px).
+func _marker_rect(i: int, camera: Camera3D, margin: float) -> Rect2:
+	var px: Vector2 = data.settlements[i]["px"]
+	var world := Vector3(px.x, map_data.surface_world_at(px.x, px.y) + 0.5, px.y)
+	var size := marker_size(i)
+	var center := camera.unproject_position(world) - Vector2(0.0, size * ICON_CENTER_LIFT)
+	var box := (markers.marker_box() if markers != null else Vector2(0.8, 0.8)) * size + Vector2(margin, margin) * 2.0
+	return Rect2(center - box * 0.5, box)
+
+
+## Lot DA7d (mesures, tests) : rectangles écran (sans marge) des marqueurs et des noms affichés
+## dans l'écran : {rects, owners (index de colonie), markers, labels}.
+func screen_occupancy(camera: Camera3D) -> Dictionary:
+	var rects: Array[Rect2] = []
+	var owners := PackedInt32Array()
+	var marker_count := 0
+	var label_count := 0
+	if camera == null or data == null:
+		return {"rects": rects, "owners": owners, "markers": 0, "labels": 0}
+	var screen := camera.get_viewport().get_visible_rect()
+	var icons_on := _icons != null and _icons.visible
+	for i in data.settlements.size():
+		if icons_on and marker_visible(i):
+			var px: Vector2 = data.settlements[i]["px"]
+			if not camera.is_position_behind(Vector3(px.x, map_data.surface_world_at(px.x, px.y), px.y)):
+				var rect := _marker_rect(i, camera, 0.0)
+				if screen.intersects(rect):
+					rects.append(rect)
+					owners.append(i)
+					marker_count += 1
+		var label := _labels[i]
+		if label.visible and label.modulate.a > 0.02 and not camera.is_position_behind(label.global_position):
+			var lrect := _label_rect(label, camera, 0.0)
+			if screen.intersects(lrect):
+				rects.append(lrect)
+				owners.append(i)
+				label_count += 1
+	return {"rects": rects, "owners": owners, "markers": marker_count, "labels": label_count}
+
+
 func visible_label_count() -> int:
 	var count := 0
 	for label in _labels:
