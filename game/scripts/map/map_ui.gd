@@ -838,16 +838,22 @@ var _turn_banner_title: Label
 var _turn_banner_detail: Label
 var _turn_banner_tween: Tween
 const TURN_BANNER_HOLD := 1.1
+## Fin de tour demandée, pas encore émise (deux déclenchements rapprochés = une seule saison).
+var _end_turn_pending := false
 
 
 ## Cloche ou Entrée : bandeau des autres factions, une image pour l'afficher, puis la fin de tour.
 func request_end_turn() -> void:
+	if _end_turn_pending:
+		return
 	if end_turn_gate.is_valid() and not bool(end_turn_gate.call()):
 		end_turn_pressed.emit()
 		return
+	_end_turn_pending = true
 	show_turn_banner()
 	await get_tree().process_frame
 	await get_tree().process_frame
+	_end_turn_pending = false
 	end_turn_pressed.emit()
 	finish_turn_banner()
 
