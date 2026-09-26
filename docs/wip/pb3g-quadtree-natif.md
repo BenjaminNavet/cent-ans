@@ -17,8 +17,24 @@ Cible Cargo PRIVÉE : `<worktree>/core/target` (à supprimer à la fin, pas avan
 - Tests : smoke, zg2, zg4, zg5b, zg6, zg7a, zg8, sz4, sz5, sz6 OK. `sz1_mountain_test` échoue
   (Paris ×0,50) **aussi en repli GDScript** : sans lien avec PB3g (données/relief de `main`).
 - ADR 0092 écrit.
-- En cours : mesures A/B (`--bench-map --bench-probe`, natif N / repli G alternés, script
-  scratchpad `ab_bench.sh`).
+- Point 3 (partiel) : hameaux — hauteurs en un appel groupé (`TerrainBuilder.surface_heights_at`
+  → `ReliefQuadtree.surface_heights_at` → `ReliefLod.heights_m`, même bilinéaire) et tampon
+  `MultiMesh.buffer` écrit en une fois (`SettlementLayer.hamlet_buffer`).
+  `TownLayer` et `NextHintController` non traités.
+
+## Mesures
+`--bench-map --bench-probe` (fenêtré, dylib dev, natif N / repli `--no-native-quadtree` G
+alternés, 3 passes chacun, charge 9-15 ; médianes ; passe N2 perturbée par une compilation) :
+
+| | p50 | p99 | pire | > 50 ms | descente p99 | descente scripts p99 | `qt/select` max | `qt/apply` max | `lod/quadtree` max |
+|---|---|---|---|---|---|---|---|---|---|
+| G | 17,9 | 38,4 | 59,2 | 3 | 39,9 | 31,0 | 14,9 | 7,0 | 24,4 |
+| N | 14,9 | 34,5 | 46,6 | 0 | 25,3 | 15,0 | 0,22 | 0,89 | 9,4 |
+
+`request_reground` (tuile de Paris, 103 pages) : 4,7 ms (copie) → 0,04 ms (pages partagées),
+test headless hors charge ; en jeu la copie montait à ~70 ms (SZ6).
+Reste dans `lod/quadtree` : `qt/collect` (téléversements + écouteurs de `surface_changed`,
+≤ 9 ms).
 
 ## Prochaine étape
 1. Mesures A/B (bench-map/probe, pb1_bench), médianes de 3 ; consigner ici et dans l'ADR.
