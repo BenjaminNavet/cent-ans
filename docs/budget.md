@@ -77,3 +77,12 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 | 2026-09-26 | OpenRouter | DA2 : portraits vivants (archétypes et variantes âgées) (141 × openai/gpt-5-image-mini) | 6,47 $ | 6,33 $ | 14,29 $ |
 | 2026-09-26 | OpenRouter | DA2 : portraits vivants (archétypes et variantes âgées) (80 × openai/gpt-5-image-mini) | 3,69 $ | 3,59 $ | 17,88 $ |
 | 2026-09-26 | OpenRouter | DA7c : icônes de trait à l'encre (59 × openai/gpt-5-image-mini) | 2,69 $ | 2,68 $ | 20,56 $ |
+
+## Polish PO (27/09) — 0 $ prévu, enveloppe ≤ 3 $ (ADR 0097)
+
+LUT procédurales existantes, textures et sons CC0. L'enveloppe ne sert que si des cadres
+d'interface doivent être régénérés dans le registre enluminure.
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul PO |
+|---|---|---|---|---|---|
+| 2026-09-27 | — | PO0 : planche « avant », gabarit, squelette (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |

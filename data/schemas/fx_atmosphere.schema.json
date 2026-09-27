@@ -117,6 +117,22 @@
       },
       "required": ["grade_strength", "seasons"],
       "additionalProperties": false
+    },
+    "time_of_day": {
+      "type": "object",
+      "description": "Chantier PO (ADR 0097, bible DA § 12.6) : préréglages d'heure du jour (soleil et étalonnage). La bataille tire l'heure de sa graine (rendu seulement). Optionnel jusqu'aux lots PO3/PO4.",
+      "propertyNames": { "enum": ["morning", "midday", "evening"] },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "sun_elevation": { "type": "number", "minimum": 0, "maximum": 90, "description": "Degrés au-dessus de l'horizon." },
+          "sun_azimuth": { "type": "number", "minimum": 0, "maximum": 360, "description": "Degrés depuis le nord, sens horaire." },
+          "sun_color": { "$ref": "#/$defs/rgb" },
+          "sun_energy": { "type": "number", "minimum": 0, "maximum": 4 },
+          "grade": { "$ref": "#/$defs/grade" }
+        },
+        "required": ["sun_elevation", "sun_azimuth", "sun_color"]
+      }
     }
   },
   "required": ["lut_size", "skies", "seasons", "battle", "campaign"],
