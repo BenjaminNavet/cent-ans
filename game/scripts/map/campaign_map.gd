@@ -328,7 +328,7 @@ func _connect_ui() -> void:
 		if flow != null:
 			flow.request_exit("main_menu")
 		else:
-			get_tree().change_scene_to_file(START_MENU_SCENE))
+			SceneFader.go(START_MENU_SCENE))
 	ui.quit_requested.connect(func() -> void:
 		if flow != null:
 			flow.request_exit("quit")
