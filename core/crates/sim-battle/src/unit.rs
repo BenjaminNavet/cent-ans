@@ -1,9 +1,12 @@
 //! Battle regiments: state, formation geometry and soldier positions.
 
+use std::collections::VecDeque;
+
 use data_model::{Ability, Missile, UnitCategory, UnitStats};
 use serde::{Deserialize, Serialize};
 
 use crate::impact::LossCause;
+use crate::queue::QueuedOrder;
 use crate::rng::jitter;
 use crate::setup::{SideId, UnitSetup};
 
@@ -261,6 +264,10 @@ pub struct Unit {
     /// EP11: push state and shape of the front in melee.
     #[serde(default)]
     pub push: crate::push::PushShape,
+    /// CB-M3: orders waiting behind the current one (Shift + right click),
+    /// at most `QueueRules::max_queued_orders`.
+    #[serde(default, skip_serializing_if = "VecDeque::is_empty")]
+    pub order_queue: VecDeque<QueuedOrder>,
 }
 
 /// `missile_timer` of a regiment never shot at.
@@ -337,6 +344,7 @@ impl Unit {
             standard: StandardState::Carried,
             seen_at: unseen(),
             push: Default::default(),
+            order_queue: VecDeque::new(),
         }
     }
 

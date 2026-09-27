@@ -12,7 +12,7 @@ use sim_battle::{Advantage, Compare, CompareSide, PreviewError, SideId};
 use crate::battle_sim::BattleSim;
 
 /// French reason of a refused preview (tooltip of the `forbidden` cursor).
-fn reason_fr(error: PreviewError) -> &'static str {
+pub(crate) fn reason_fr(error: PreviewError) -> &'static str {
     match error {
         PreviewError::UnknownUnit | PreviewError::Unavailable => "Ce régiment ne répond plus",
         PreviewError::OutsideField => "Hors du champ de bataille",
@@ -61,7 +61,7 @@ fn compare_dict(compare: &Compare) -> VarDictionary {
 
 impl BattleSim {
     /// `from` then every waypoint, at the height one walks at.
-    fn path_points(&self, from: (f64, f64), path: &[(f64, f64)]) -> PackedVector3Array {
+    pub(crate) fn path_points(&self, from: (f64, f64), path: &[(f64, f64)]) -> PackedVector3Array {
         let Some(sim) = &self.sim else {
             return PackedVector3Array::new();
         };
@@ -73,7 +73,7 @@ impl BattleSim {
     }
 
     /// The ids of a `PackedInt32Array` (negative ones skipped).
-    fn ids_of(array: &PackedInt32Array) -> Vec<u32> {
+    pub(crate) fn ids_of(array: &PackedInt32Array) -> Vec<u32> {
         array
             .as_slice()
             .iter()
