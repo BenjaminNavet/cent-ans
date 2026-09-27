@@ -63,7 +63,7 @@ Coller ce prompt :
 - [ ] Fusion de PO1
 - [x] Fusion de PO3 (a8777b7f, avant PO1 : aucun fichier d'UI commun)
 - [ ] Fusion de PO4 (étape 6 faite ou reportée : …)
-- [ ] Fusion de PO5
+- [x] Fusion de PO5 (925d5ae0 ; `SceneFader` en façade statique, pas d'autoload)
 - [ ] Tous les tests PO actifs, pytest, `smoke.gd`, bancs PB1 carte et bataille dans ±5 %
 - [ ] Planche `docs/img/po/apres/` + `docs/img/po/planche_avant_apres.jpg`
 - [ ] **Jugement du joueur** (une seule fois) → corrections en PO6b si besoin
@@ -146,3 +146,4 @@ Diagnostic de départ (spec § 1), puis vue par vue :
 - 27/09 : PO0 fini (c6cc7cf1), branche `feat/po-polish` créée (eb6a8a23). Vague 1 en deux temps (4 agents d'autres chantiers actifs : AN1a, AN1b, PR1, CB-M2) : PO2 et PO3 lancés ; PO4, PO1 (après la fusion de PO2), puis PO5 à mesure que des places se libèrent. **Prochaine étape : attendre PO2/PO3, fusionner PO2, lancer PO4 et PO1.**
 - 27/09 : PO2 rendu et fusionné dans `feat/po-polish` (a7133864) ; `main` (AN1a/AN1b) fusionné dans `feat/po-polish` (143b3ced), smoke vert. Restes PO2 confiés à PO1 (tailles figées des `.tscn` carte et province). 162 surcharges de taille hors tranche → phase 2. Worktree de fusion de l'orchestrateur : `scratchpad/po-merge` (branche `feat/po-polish`). AN1 clos : PO1, PO4, PO5 lancés. **Prochaine étape : fusionner PO1 → PO3 → PO4 → PO5 à leur retour.**
 - 27/09 : PO3 fusionné dans `feat/po-polish` (a8777b7f). Verts : smoke, po_grade (campagne), C3, da7d, pytest 787. `sz4b_colonies_forests_test` échouait déjà avant PO3. À faire en PO6 : **banc PB1 carte à remesurer sur machine calme** (mesures PO3 bruitées, vue 150 à +5 %) ; saturation ramenée à ≤ 35 % (carte un peu plus terne : à soumettre au joueur en C5).
+- 27/09 : PO5 fusionné dans `feat/po-polish` (925d5ae0). Verts : smoke, po5_motion, zg4_camera, trackpad_zoom, po_grade, po_ui, pytest 789. Restes : pas de voile à l'entrée en bataille (l'écran de chargement fait la transition) ; minicarte de bataille en coupe franche. PO1 prévenu : bandeau U5 sans la date (cartouche de saison PO5). En cours : PO1, PO4.
