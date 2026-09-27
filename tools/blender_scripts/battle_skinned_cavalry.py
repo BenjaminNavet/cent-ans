@@ -153,6 +153,11 @@ def clip_specs():
         ("c_std_gallop", "Gallop", "Idle", poses.ride_std_gallop, False, None),
         ("c_std_wave", "Idle_2", "Idle", poses.ride_std_wave, False, 58),
         ("c_std_death", "Death", "Death", poses.ride_std_death, False, 30),
+        # Lot AN1b: horse rearing before pikes, stumbling at the charge, mounted victory
+        # (the rider poses carry a `horse` override run before the rider is seated).
+        ("c_rear", "Idle", "Idle", poses.ride_rear, False, 32),
+        ("c_stumble", "Gallop", "Idle", poses.ride_stumble, False, 90),
+        ("c_victory", "Idle_2", "Idle", poses.ride_victory, False, None),
     ]
 
 
@@ -189,6 +194,9 @@ def bake_cavalry_rig():
                 )
             )
             poses.reset_state()
+            horse_pose = getattr(pose, "horse", None)
+            if horse_pose is not None:
+                horse_pose(mount.harm, t)
             mount.seat_rider()
             pose(mount.rarm, t)
             bpy.context.view_layer.update()
@@ -211,6 +219,7 @@ def bake_cavalry_rig():
                 "c_std_walk",
                 "c_std_gallop",
                 "c_std_wave",
+                "c_victory",
             ),
         )
     rig.write()
@@ -322,7 +331,8 @@ BARD_STEEL = (0.62, 0.63, 0.66)
 def _conformal_plate(mount, ctx, name, bones, keep, offset, bind):
     """Steel bard shaped on the horse: copies of the (decimated) horse faces dominated by
     `bones` for which `keep(centre, normal)` holds, pushed out by `offset` along the
-    vertex normals and weighted like the horse vertices they come from."""
+    vertex normals and weighted like the horse vertices they come from.
+    """
     bm = bmesh.new()
     weights = []
     for m in mount.hmeshes:
@@ -382,8 +392,10 @@ def chanfron(mount, ctx):
     def keep(c, n):
         # Front and top of the face, not the jaw nor the nostrils.
         return (
-            n.z > 0.25 or n.y < -0.5
-        ) and c.z > low + (top - low) * 0.35 and c.y > y_front + 0.04
+            (n.z > 0.25 or n.y < -0.5)
+            and c.z > low + (top - low) * 0.35
+            and c.y > y_front + 0.04
+        )
 
     return _conformal_plate(mount, ctx, "chanfron", {"Head"}, keep, 0.012, "Head")
 

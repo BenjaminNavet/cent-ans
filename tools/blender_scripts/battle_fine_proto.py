@@ -886,6 +886,9 @@ def pose_cavalry(mount, clip, frac):
     )
     bpy.context.scene.frame_set(f)
     poses.reset_state()
+    horse_pose = getattr(pose, "horse", None)
+    if horse_pose is not None:
+        horse_pose(mount.harm, i / max(count - 1, 1))
     mount.seat_rider()
     pose(mount.rarm, i / max(count - 1, 1))
     mount.harm.animation_data.action = None

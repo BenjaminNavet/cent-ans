@@ -218,6 +218,9 @@ func _decorate_top_bar() -> void:
 	var units := _add_action_button("UnitsButton", "⚔", "Unités", "map_toggle_units",
 		"[b]Mes unités[/b]\nListe de vos armées et agents, avec leur portée restante ; un clic y mène.", tech_button.get_index() + 4)
 	_register_top_label(units, "Unités", "" if _apply_top_medallion(units, "hud_army") else "⚔")
+	var holdings := _add_action_button("HoldingsButton", "⛫", "Colonies", "map_toggle_holdings",
+		"[b]Colonies[/b]\nRevenus, chantiers et menaces de vos colonies, par province ; un clic y mène.", tech_button.get_index() + 5)
+	_register_top_label(holdings, "Colonies", "" if _apply_top_medallion(holdings, "hud_settlement") else "⛫")
 	if _apply_top_medallion(menu_button, "hud_menu"):
 		menu_button.add_theme_font_size_override("font_size", TOP_LABEL_FONT)
 	get_viewport().size_changed.connect(queue_fit_top_bar)
@@ -1328,7 +1331,7 @@ func press_action(action: String) -> void:
 ## Taille du texte des boutons libellés de la barre.
 const TOP_LABEL_FONT := 15
 ## Ordre de repli en icône seule quand la place manque (le premier se replie d'abord).
-const TOP_COLLAPSE_ORDER := ["Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
+const TOP_COLLAPSE_ORDER := ["Colonies", "Unités", "Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
 ## Marge laissée à droite de la barre (bord, respiration).
 const TOP_BAR_SLACK := 4.0
 
