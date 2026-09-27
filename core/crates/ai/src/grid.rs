@@ -153,6 +153,9 @@ impl<'a> GridPlanner<'a> {
             .armies
             .iter()
             .filter(|(_, a)| state.is_at_war(faction, &a.faction))
+            // CV3-6: an army hidden in ambush is neither attacked nor
+            // avoided: the AI does not know it is there.
+            .filter(|(_, a)| !sim_campaign::posture::is_hidden_from(state, data, a, faction))
             .collect();
         let read = mode.map(&hostile, |(id, a)| {
             let point = state.army_point(data, a);
@@ -486,6 +489,21 @@ impl<'a> GridPlanner<'a> {
         target: &SettlementId,
         table: &Table,
     ) -> Vec<Order> {
+        let cap = self.state.army_movement_allowance(self.data, army);
+        self.march_orders_with_cap(army_id, army, anchor, target, table, cap)
+    }
+
+    /// [`GridPlanner::march_orders`] with the allowance `cap` (CV3-6: a
+    /// forced march walks further).
+    pub fn march_orders_with_cap(
+        &self,
+        army_id: &ArmyId,
+        army: &Army,
+        anchor: &SettlementId,
+        target: &SettlementId,
+        table: &Table,
+        cap: u32,
+    ) -> Vec<Order> {
         if army.is_at(target) {
             return Vec::new();
         }
@@ -496,7 +514,6 @@ impl<'a> GridPlanner<'a> {
             // The target is the anchor itself (an army in the field nearby).
             return vec![Order::move_to(army_id.clone(), target.clone())];
         }
-        let cap = self.state.army_movement_allowance(self.data, army);
         let mut orders = Vec::new();
         let mut previous = anchor.clone();
         for node in path {

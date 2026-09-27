@@ -54,6 +54,7 @@ pub mod fire;
 pub mod formation_ai;
 pub mod historical;
 pub mod horse_wait;
+pub mod hover;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
@@ -63,6 +64,7 @@ pub mod opening;
 pub mod orders;
 pub mod outcome;
 pub mod position;
+pub mod preview;
 pub mod props;
 pub mod push;
 pub mod relief;
@@ -95,6 +97,7 @@ pub use field::{
 };
 pub use fire::{Blaze, FireRules, FireState};
 pub use historical::HistoricalMap;
+pub use hover::{Advantage, Compare, CompareSide, HoverContext, HoverKind, HoverRules};
 pub use hydro::{
     Bank, BankKind, Bridge, Crossing, Road, RoadKind, Stream, StreamKind, Water, WaterRules,
     WatersideSpot,
@@ -103,6 +106,7 @@ pub use impact::{ImpactEvent, ImpactKind, LossCause};
 pub use opening::OpeningRules;
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
+pub use preview::{PreviewError, PreviewLeg};
 pub use push::{PushRules, PushShape};
 pub use relief::ReliefStyle;
 pub use replay::{

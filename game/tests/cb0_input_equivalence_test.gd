@@ -41,6 +41,10 @@ func _run() -> void:
 	var record := OS.get_cmdline_user_args().has("--record")
 	root.size = Vector2i(1440, 900)  # headless : la fenêtre par défaut est minuscule (64x64)
 	_scene = (load("res://scenes/battle/battle.tscn") as PackedScene).instantiate()
+	# Script de scène non compilé (classe non importée) : une erreur d'appel interromprait _run()
+	# sans compter d'échec, et le test sortirait « OK ».
+	if not _check(_scene.has_method("issue"), "battle scene script failed to load (run godot --import?)"):
+		return
 	_scene.autoplay = true  # F5c : saute le déploiement (comme la démo autonome, les captures).
 	_scene.log_orders_for_test = true
 	root.add_child(_scene)

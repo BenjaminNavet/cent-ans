@@ -12,7 +12,7 @@ ADR réservée : `docs/decisions/0094-postures-embuscade.md`. Captures : `docs/i
 | CV3-2 | Ouverture d'embuscade dans sim-battle + libellés Godot | 2 | fusionné d508bd30 (palissade/badge à juger à l'œil) | `cv3-2-embuscade.md` |
 | CV3-4 | UI campagne (boutons de posture, rencontres, bandeau de résultat) | 2 | fusionné db642720 (vérifié après CB0 : smoke, cv3_4_ui, cb0 verts) | `cv3-4-ui.md` |
 | CV3-5 | Zone atteignable deux tons + lord à l'échelle TW | 2 | fusionné 0765207a | `cv3-5-zone-lord.md` |
-| CV3-6 | IA postures/rencontres, équilibrage, sondes EQ6 | 3 | lancé | `cv3-6-ia-equilibrage.md` |
+| CV3-6 | IA postures/rencontres, équilibrage, sondes EQ6 | 3 | fusionné ebf9ed6f (bande EQ6 tenue ; très difficile 4/5 graines) | `cv3-6-ia-equilibrage.md` |
 
 ## Choix tranchés
 - Couvert d'une case : `CoverMap` (data-model) depuis `forest_kind.png` + `wetlands.json`, repli `Terrain` de province.
@@ -22,7 +22,11 @@ ADR réservée : `docs/decisions/0094-postures-embuscade.md`. Captures : `docs/i
 - Classification des résultats branchée dans `apply_battle_result` (point commun auto/3D).
 
 ## Prochaine étape
-Attendre CV3-4, fusionner, puis vague 3 (CV3-6 IA + équilibrage). CB (autre session) attendait la fusion de CV3-2 : faite.
-
-## Note PO (27/09, ADR 0097)
-Tout nouveau panneau rejoint une zone de l'autoload `UiLayout` (`game/scripts/ui/ui_layout.gd`) au lieu d'une position absolue : `UiLayout.claim(UiLayout.Zone.SIDE_PANEL, panneau)` pour un panneau latéral (un seul occupant), `Zone.MODAL` pour un choix bloquant, `UiLayout.toast()` pour un avis. Gabarit : bible DA § 12. Le lot PO1 implémente `UiLayout` et migre la tranche verticale (dont la fenêtre de rencontre, l'avis de résultat et le badge de posture de CV3-4).
+Chantier terminé (7 lots dans main, worktrees supprimés). Reste : **une** partie pilote du joueur.
+Critères : en 20 tours, au moins 1 embuscade, 2 rencontres et 3 classes de résultat.
+Points ouverts à regarder pendant la partie :
+- lettrine « Île-de-France » (non reproduite) ;
+- rendu de la palissade et du badge « Embuscade ! » ;
+- transparence des armées embusquées (dépend du shader des figurines) ;
+- embuscades IA rares (1-2 / 20 tours), camp retranché rare, « à la Pyrrhus » absente en auto-résolution ;
+- très difficile : 4/5 graines dans la bande (5/5 avant).
