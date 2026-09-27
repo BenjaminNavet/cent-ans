@@ -910,6 +910,11 @@ pub struct CampaignState {
     /// older saves, which load as `normal`; no change of [`STATE_VERSION`]).
     #[serde(default)]
     pub difficulty: crate::difficulty::Difficulty,
+    /// Lot CV3-3: map encounter sites, player encounters awaiting a choice,
+    /// encounter battles in progress (absent from older saves; no change of
+    /// [`STATE_VERSION`]).
+    #[serde(default)]
+    pub encounters: crate::encounter::EncounterState,
     /// Lot M3: the AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -960,6 +965,7 @@ impl CampaignState {
             agents: crate::agents::AgentsState::default(),
             naval: crate::naval::NavalState::default(),
             difficulty: crate::difficulty::Difficulty::Normal,
+            encounters: crate::encounter::EncounterState::default(),
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
             last_battle_outcome: None,

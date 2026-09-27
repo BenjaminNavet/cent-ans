@@ -1,0 +1,111 @@
+{
+  "id": "enc_village_protection",
+  "title": "Un village demande protection",
+  "text": "Les gens d'un village sont venus au-devant de l'ost, le curé en tête : des pillards ont brûlé leurs granges la semaine passée et reviendront. Ils supplient qu'on les en délivre ou qu'on leur laisse de quoi passer la saison.",
+  "spawn": {
+    "war": "war",
+    "regions": [
+      "france_nord",
+      "france_centre",
+      "france_ouest",
+      "france_est",
+      "aquitaine",
+      "languedoc",
+      "pays_bas",
+      "angleterre_nord",
+      "ecosse"
+    ],
+    "weight": 12,
+    "lifetime": [
+      1,
+      3
+    ]
+  },
+  "options": [
+    {
+      "label": "Traquer les pillards",
+      "outcome": {
+        "type": "battle",
+        "units": [
+          {
+            "unit_type": "unit_men_at_arms_foot",
+            "count": 1
+          },
+          {
+            "unit_type": "unit_mounted_sergeants",
+            "count": 1
+          }
+        ],
+        "on_win": {
+          "text": "Les pillards sont pendus aux arbres du chemin ; le village bénit son libérateur.",
+          "effects": [
+            {
+              "type": "prestige",
+              "amount": 5
+            },
+            {
+              "type": "unrest",
+              "amount": -10
+            }
+          ],
+          "army_effects": [
+            {
+              "effect": "army_morale",
+              "value": 5
+            }
+          ]
+        },
+        "on_loss": {
+          "text": "Les pillards échappent à l'ost et reviennent brûler le village.",
+          "effects": [
+            {
+              "type": "unrest",
+              "amount": 10
+            },
+            {
+              "type": "devastation",
+              "amount": 5
+            }
+          ]
+        }
+      },
+      "ai_weight": 2
+    },
+    {
+      "label": "Leur laisser du grain",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -8
+        },
+        {
+          "type": "piety",
+          "amount": 2
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -15
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "label": "Passer son chemin",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 5
+        }
+      ],
+      "ai_weight": 1,
+      "default": true
+    }
+  ],
+  "sources": [
+    "Nicholas Wright, Knights and Peasants: The Hundred Years War in the French Countryside, Woodbridge, Boydell, 1998",
+    "Heinrich Denifle, La Désolation des églises, monastères et hôpitaux en France pendant la guerre de Cent Ans, Paris, 1897-1899",
+    "Jean Froissart, Chroniques, livre I"
+  ]
+}

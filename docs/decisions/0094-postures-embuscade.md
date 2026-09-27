@@ -53,3 +53,24 @@ que le core n'a pas de biome par case.
   d'environ une demi-seconde, seulement si une posture ou une embuscade est interrogée.
 - Le placement en colonne et le déploiement sur les flancs restent au lot CV3-2 ; l'IA des postures
   au lot CV3-6 (l'IA actuelle n'en prend aucune).
+
+## Suite CV3-2 (2026-09-27) : l'ouverture dans la bataille 3D
+
+- Règles dans `data/rules/battle_opening.json` (schéma `battle_opening_rules.schema.json`,
+  `sim_battle::OpeningRules`) ; placement dans `sim-battle/src/sim/opening.rs`, appelé après le
+  déploiement par défaut, sans tirage aléatoire : un rejeu (format 1 inchangé) reconstruit la même
+  ouverture depuis setup + graine.
+- Embuscade : la victime en `Formation::Column` sur la plus longue route du champ (sinon l'axe
+  long), avant-garde (cavalerie légère, premier tiers de l'infanterie) → bataille (cavalerie lourde,
+  général, infanterie, tireurs, engins) → arrière-garde (dernier tiers de l'infanterie), tournée
+  vers le bout de route opposé à son bord. Zones de l'embusqué : bandes alignées sur les axes de la
+  carte, parallèles à l'axe dominant de la colonne, à `near_m`–`far_m` ; un ou deux flancs selon un
+  score de couvert (forêt, haies/clôtures). `DeploymentZone` reste un rectangle aligné :
+  `deployment_zones(side)` liste les zones, `deployment_zone(side)` rend la première.
+- Pas de phase de déploiement pour la colonne ni pour un camp en marche forcée
+  (`can_deploy`) ; `begin_deployment` rend `false` si c'est le camp du joueur, et l'IA ne
+  redéploie ni eux ni l'embusqué.
+- Camp retranché : `ObstacleKind::Palisade` (obstacle linéaire existant du site B5, donc déjà
+  exporté au pont et pris en compte par les couverts, charges brisées et l'IA B6) posé devant la
+  ligne ; ralentit (facteurs en données) et divise les pertes en mêlée du défenseur juste derrière.
+  Pieux plantés d'office pour les unités `Stakes`.

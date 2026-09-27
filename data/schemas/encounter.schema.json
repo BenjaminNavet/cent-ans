@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/encounter.schema.json",
+  "title": "Rencontre sur la carte de campagne",
+  "description": "Point d'intérêt qui apparaît sur la carte (data/encounters/, lot CV3-3, spec docs/design/2026-09-27-campagne-vivante.md § 2). Conditions et effets : ceux des événements de chronique (event.schema.json), évalués pour la faction de l'armée et la province du site ; effets sur l'armée : army_morale, supply, army_experience.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^enc_[a-z0-9_]+$" },
+    "title": { "type": "string", "minLength": 1, "description": "Titre (français)." },
+    "text": { "type": "string", "minLength": 1, "description": "Texte d'époque (français)." },
+    "spawn": { "$ref": "#/$defs/spawn" },
+    "options": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/option" }
+    },
+    "sources": { "$ref": "common.schema.json#/$defs/sources" }
+  },
+  "required": ["id", "title", "text", "spawn", "options", "sources"],
+  "additionalProperties": false,
+  "$defs": {
+    "season": { "type": "string", "enum": ["spring", "summer", "autumn", "winter"] },
+    "terrain": { "type": "string", "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] },
+    "spawn": {
+      "type": "object",
+      "properties": {
+        "from_year": { "type": "integer", "description": "Première année d'apparition (incluse)." },
+        "to_year": { "type": "integer", "description": "Dernière année d'apparition (incluse)." },
+        "seasons": { "type": "array", "items": { "$ref": "#/$defs/season" }, "uniqueItems": true, "description": "Saisons possibles (vide : toutes)." },
+        "terrains": { "type": "array", "items": { "$ref": "#/$defs/terrain" }, "uniqueItems": true, "description": "Terrains de la province (vide : tous)." },
+        "regions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "description": "Régions de province (champ region ; union avec provinces)." },
+        "provinces": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/province_id" }, "uniqueItems": true },
+        "war": { "type": "string", "enum": ["any", "war", "peace"], "default": "any", "description": "État de guerre de la faction qui contrôle la province (rebelles exclus)." },
+        "conditions": { "type": "array", "items": { "$ref": "event.schema.json#/$defs/condition" }, "description": "Conditions de chronique, pour la province et sa faction." },
+        "weight": { "type": "integer", "minimum": 0, "default": 10 },
+        "lifetime": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Durée de vie en saisons, tirée dans [min, max]."
+        }
+      },
+      "required": ["lifetime"],
+      "additionalProperties": false
+    },
+    "army_effect": {
+      "type": "object",
+      "properties": {
+        "effect": { "type": "string", "enum": ["army_morale", "supply", "army_experience"] },
+        "value": { "type": "number" },
+        "mode": { "type": "string", "enum": ["add", "percent"], "default": "add" }
+      },
+      "required": ["effect", "value"],
+      "additionalProperties": false
+    },
+    "units": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "unit_type": { "$ref": "common.schema.json#/$defs/unit_type_id" },
+          "count": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["unit_type", "count"],
+        "additionalProperties": false
+      }
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "description": "Ligne de chronique (français)." },
+        "effects": { "type": "array", "items": { "$ref": "event.schema.json#/$defs/effect" } },
+        "army_effects": { "type": "array", "items": { "$ref": "#/$defs/army_effect" } }
+      },
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        {
+          "properties": {
+            "type": { "const": "battle" },
+            "units": { "$ref": "#/$defs/units" },
+            "on_win": { "$ref": "#/$defs/result" },
+            "on_loss": { "$ref": "#/$defs/result" }
+          },
+          "required": ["units"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "type": { "const": "join" },
+            "units": { "$ref": "#/$defs/units" }
+          },
+          "required": ["units"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "option": {
+      "type": "object",
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "conditions": { "type": "array", "items": { "$ref": "event.schema.json#/$defs/condition" } },
+        "effects": { "type": "array", "items": { "$ref": "event.schema.json#/$defs/effect" } },
+        "army_effects": { "type": "array", "items": { "$ref": "#/$defs/army_effect" } },
+        "outcome": { "$ref": "#/$defs/outcome" },
+        "ai_weight": { "type": "integer", "minimum": 0, "default": 1 },
+        "default": { "type": "boolean", "description": "Option prise si le joueur ne répond pas (au plus une ; sinon la première)." }
+      },
+      "required": ["label"],
+      "additionalProperties": false
+    }
+  }
+}

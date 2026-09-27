@@ -1,0 +1,75 @@
+{
+  "id": "enc_heraut_tournoi",
+  "title": "Le héraut d'un tournoi",
+  "text": "Un héraut aux armes d'un grand seigneur crie par les chemins une joute à outrance et à plaisance : trois chevaliers tiendront le pas trente jours durant contre tout venant. Les jeunes bacheliers de l'ost brûlent d'y courir.",
+  "spawn": {
+    "seasons": [
+      "spring",
+      "summer"
+    ],
+    "war": "peace",
+    "weight": 8,
+    "lifetime": [
+      1,
+      2
+    ]
+  },
+  "options": [
+    {
+      "label": "Envoyer les meilleurs jouter",
+      "conditions": [
+        {
+          "type": "treasury_above",
+          "amount": 400
+        }
+      ],
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -400
+        },
+        {
+          "type": "prestige",
+          "amount": 10
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "army_morale",
+          "value": 5
+        },
+        {
+          "effect": "army_experience",
+          "value": 1
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "label": "Assister aux joutes",
+      "effects": [
+        {
+          "type": "prestige",
+          "amount": 3
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -5
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "label": "Décliner l'invitation",
+      "ai_weight": 1,
+      "default": true
+    }
+  ],
+  "sources": [
+    "Juliet Barker, The Tournament in England, 1100-1400, Woodbridge, Boydell, 1986",
+    "Jean Froissart, Chroniques, livre IV (joutes de Saint-Inglevert, 1390)",
+    "Joutes de Saint-Inglevert"
+  ]
+}

@@ -21,6 +21,7 @@ mod campaign_sim_difficulty;
 mod campaign_sim_diplomacy;
 mod campaign_sim_dp2;
 mod campaign_sim_edicts;
+mod campaign_sim_encounters;
 mod campaign_sim_events;
 mod campaign_sim_family;
 mod campaign_sim_h5h6;

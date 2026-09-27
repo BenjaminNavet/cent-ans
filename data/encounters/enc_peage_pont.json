@@ -1,0 +1,106 @@
+{
+  "id": "enc_peage_pont",
+  "title": "Le péage du pont",
+  "text": "Le seigneur du lieu a barré le pont d'une chaîne. Ses sergents réclament le péage coutumier sur chaque cheval, chaque charrette et chaque homme d'armes qui passe.",
+  "spawn": {
+    "terrains": [
+      "plains",
+      "hills",
+      "bocage"
+    ],
+    "regions": [
+      "france_nord",
+      "france_centre",
+      "france_ouest",
+      "france_est",
+      "aquitaine",
+      "languedoc",
+      "pays_bas",
+      "empire_rhin"
+    ],
+    "weight": 10,
+    "lifetime": [
+      2,
+      4
+    ]
+  },
+  "options": [
+    {
+      "label": "Acquitter le péage",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -250
+        }
+      ],
+      "ai_weight": 3,
+      "default": true
+    },
+    {
+      "label": "Forcer le passage",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 5
+        }
+      ],
+      "outcome": {
+        "type": "battle",
+        "units": [
+          {
+            "unit_type": "unit_crossbowmen",
+            "count": 1
+          },
+          {
+            "unit_type": "unit_men_at_arms_foot",
+            "count": 1
+          }
+        ],
+        "on_win": {
+          "text": "La chaîne est rompue ; le tronc du péage change de mains.",
+          "effects": [
+            {
+              "type": "treasury",
+              "amount": 250
+            },
+            {
+              "type": "prestige",
+              "amount": 2
+            }
+          ]
+        },
+        "on_loss": {
+          "text": "Les sergents tiennent le pont ; l'ost doit rebrousser chemin.",
+          "effects": [
+            {
+              "type": "prestige",
+              "amount": -5
+            }
+          ],
+          "army_effects": [
+            {
+              "effect": "army_morale",
+              "value": -5
+            }
+          ]
+        }
+      },
+      "ai_weight": 1
+    },
+    {
+      "label": "Chercher un autre passage",
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -10
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Philippe Contamine, Guerre, État et société à la fin du Moyen Âge, Paris-La Haye, Mouton, 1972",
+    "Jean Favier, Dictionnaire de la France médiévale, Paris, Fayard, 1993 (article « Péage »)",
+    "Péage"
+  ]
+}

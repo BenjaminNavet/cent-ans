@@ -505,6 +505,8 @@ fn march(
             }
         }
     }
+    // CV3-3: a march ending near an encounter site triggers it.
+    crate::encounter::on_march_end(state, data, army_id, events);
     let planned_path = state
         .armies
         .get(army_id)

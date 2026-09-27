@@ -5,6 +5,8 @@ extends MeshInstance3D
 ## (`reachable_bubble.gdshader`). Rendu seulement : le masque vient de
 ## `CampaignSim.get_reachable_area` (une case de la grille de navigation par texel, recadré
 ## sur la bulle) ; le maillage est une grille posée sur le relief couvrant ce cadre.
+## Lot CV3-5 : deux tons, ce tour (canal R, vif) et tour suivant (canal B, plus pâle) ; la
+## bulle est suspendue (masquée) pendant la fin de tour et le rejeu des marches de l'IA.
 
 const SHADER := preload("res://shaders/reachable_bubble.gdshader")
 ## Pas de la grille du maillage (pixels carte), borné pour rester sous ~100 × 100 quads.
@@ -15,7 +17,10 @@ const LIFT := 0.35
 var map_data: MapData
 var _material: ShaderMaterial
 var _cells := 0
+var _next_cells := 0
 var _rect := Rect2()
+## Lot CV3-5 : masquée sans être oubliée (fin de tour, rejeu IA).
+var _suspended := false
 
 
 func setup(data: MapData) -> void:
@@ -29,11 +34,13 @@ func setup(data: MapData) -> void:
 	visible = false
 
 
-## `area` : dictionnaire de `get_reachable_area` ({image, origin, size, cells, ...}).
+## `area` : dictionnaire de `get_reachable_area` ({image, origin, size, cells, next_cells,
+## ...}).
 func show_area(area: Dictionary) -> void:
 	var image: Image = area.get("image")
 	_cells = int(area.get("cells", 0))
-	if image == null or _cells <= 1 or map_data == null:
+	_next_cells = int(area.get("next_cells", 0))
+	if image == null or _cells + _next_cells <= 1 or map_data == null:
 		hide_bubble()
 		return
 	var origin: Vector2 = area.get("origin", Vector2.ZERO)
@@ -45,19 +52,39 @@ func show_area(area: Dictionary) -> void:
 	_material.set_shader_parameter("origin", origin)
 	_material.set_shader_parameter("extent", extent)
 	_material.set_shader_parameter("texel", Vector2(1.0 / image.get_width(), 1.0 / image.get_height()))
+	# Ancien pont (masque RG8) : pas de canal B, pas de second anneau.
+	_material.set_shader_parameter("show_next", image.get_format() == Image.FORMAT_RGB8 and _next_cells > 0)
 	mesh = _build_mesh(_rect)
-	visible = true
+	visible = not _suspended
 
 
 func hide_bubble() -> void:
 	_cells = 0
+	_next_cells = 0
 	_rect = Rect2()
 	visible = false
 
 
-## Nombre de cases de la bulle affichée (0 si masquée).
+## Lot CV3-5 : suspend l'affichage (fin de tour, rejeu IA) sans oublier la bulle.
+func set_suspended(value: bool) -> void:
+	if value == _suspended:
+		return
+	_suspended = value
+	visible = not value and _rect.has_area()
+
+
+func is_suspended() -> bool:
+	return _suspended
+
+
+## Nombre de cases de la bulle affichée pour ce tour (0 si masquée).
 func cell_count() -> int:
 	return _cells if visible else 0
+
+
+## Lot CV3-5 : nombre de cases atteignables au seul tour suivant (0 si masquée).
+func next_cell_count() -> int:
+	return _next_cells if visible else 0
 
 
 ## Cadre carte (pixels) couvert par la bulle affichée.

@@ -131,6 +131,10 @@ pub enum ObstacleKind {
     Fence,
     /// Drainage ditch: slows everyone, breaks charges.
     Ditch,
+    /// CV3-2: low palisade of an entrenched camp: slows everyone badly,
+    /// breaks charges, covers against missiles and shelters the defenders
+    /// behind it in melee (`data/rules/battle_opening.json`).
+    Palisade,
 }
 
 impl ObstacleKind {
@@ -139,6 +143,7 @@ impl ObstacleKind {
             ObstacleKind::Hedge => "hedge",
             ObstacleKind::Fence => "fence",
             ObstacleKind::Ditch => "ditch",
+            ObstacleKind::Palisade => "palisade",
         }
     }
 
@@ -151,17 +156,30 @@ impl ObstacleKind {
             (ObstacleKind::Fence, true) => 0.6,
             (ObstacleKind::Ditch, false) => 0.6,
             (ObstacleKind::Ditch, true) => 0.4,
+            (ObstacleKind::Palisade, false) => {
+                crate::opening::OpeningRules::bundled()
+                    .palisade
+                    .foot_crossing_factor
+            }
+            (ObstacleKind::Palisade, true) => {
+                crate::opening::OpeningRules::bundled()
+                    .palisade
+                    .horse_crossing_factor
+            }
         }
     }
 
     /// Missiles crossing it lose part of their effect on a unit behind.
     pub fn gives_cover(self) -> bool {
-        self == ObstacleKind::Hedge
+        matches!(self, ObstacleKind::Hedge | ObstacleKind::Palisade)
     }
 
     /// A cavalry charge across it loses its impact.
     pub fn breaks_charge(self) -> bool {
-        matches!(self, ObstacleKind::Hedge | ObstacleKind::Ditch)
+        matches!(
+            self,
+            ObstacleKind::Hedge | ObstacleKind::Ditch | ObstacleKind::Palisade
+        )
     }
 }
 

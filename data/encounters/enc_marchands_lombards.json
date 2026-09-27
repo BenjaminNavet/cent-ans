@@ -1,0 +1,72 @@
+{
+  "id": "enc_marchands_lombards",
+  "title": "Des marchands lombards",
+  "text": "Un convoi de marchands lombards, facteurs d'une compagnie d'Asti ou de Florence, suit la route avec draps, épices et lettres de change. Ils offrent de vendre des vivres à l'ost, ou de prêter à bon intérêt.",
+  "spawn": {
+    "regions": [
+      "france_nord",
+      "france_est",
+      "france_centre",
+      "languedoc",
+      "pays_bas",
+      "provence_alpes"
+    ],
+    "weight": 10,
+    "lifetime": [
+      1,
+      3
+    ]
+  },
+  "options": [
+    {
+      "label": "Acheter des vivres",
+      "conditions": [
+        {
+          "type": "treasury_above",
+          "amount": 400
+        }
+      ],
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -400
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": 25
+        }
+      ],
+      "ai_weight": 3
+    },
+    {
+      "label": "Emprunter à usure",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": 1200
+        },
+        {
+          "type": "piety",
+          "amount": -3
+        },
+        {
+          "type": "prestige",
+          "amount": -2
+        }
+      ],
+      "ai_weight": 1
+    },
+    {
+      "label": "Les laisser passer",
+      "ai_weight": 1,
+      "default": true
+    }
+  ],
+  "sources": [
+    "Armando Sapori, Le Marchand italien au Moyen Âge, Paris, Armand Colin, 1952",
+    "Jean Favier, De l'or et des épices. Naissance de l'homme d'affaires au Moyen Âge, Paris, Fayard, 1987",
+    "Lombard (banquier)"
+  ]
+}

@@ -17,6 +17,7 @@ pub mod diet;
 pub mod difficulty;
 pub mod economy_rules;
 pub mod edict;
+pub mod encounter;
 pub mod event;
 pub mod faction;
 pub mod landmark;
