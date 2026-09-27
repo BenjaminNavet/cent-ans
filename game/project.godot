@@ -28,6 +28,7 @@ Settings="*res://scripts/ui/settings.gd"
 CodexStore="*res://scripts/codex/codex_store.gd"
 CodexBubbles="*res://scripts/codex/codex_bubbles.gd"
 UiLayout="*res://scripts/ui/ui_layout.gd"
+SceneFader="*res://scripts/ui/scene_fader.gd"
 
 [display]
 
