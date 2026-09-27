@@ -467,6 +467,10 @@ pub enum OrderError {
     NoConstruction,
     #[error("la colonie est assiégée")]
     SettlementBesieged,
+    #[error("posture impossible : {0}")]
+    StanceRefused(String),
+    #[error("interdit en marche forcée : {0}")]
+    ForcedMarchForbids(&'static str),
     #[error("garnison complète : {cap} unités au plus dans ce type de colonie")]
     GarrisonFull { cap: usize },
     #[error(transparent)]
@@ -655,8 +659,8 @@ impl CampaignState {
                 self.order_disband(faction, army.as_ref(), settlement.as_ref(), unit_index)
             }
             Order::SetStance { army, stance } => {
-                self.own_army_mut(faction, &army)?.stance = stance;
-                Ok(())
+                self.own_army_mut(faction, &army)?;
+                crate::posture::set_stance(self, data, &army, stance)
             }
             Order::AssignGeneral { army, character } => {
                 self.order_assign_general(data, faction, &army, &character)

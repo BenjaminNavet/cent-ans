@@ -75,6 +75,7 @@ pub(crate) fn defer_player_battle(
     data: &GameData,
     attacker_id: &ArmyId,
     defender_id: &ArmyId,
+    opening: sim_battle::BattleOpening,
     events: &mut Vec<GameEvent>,
 ) -> bool {
     if !state.interactive_battles {
@@ -153,7 +154,7 @@ pub(crate) fn defer_player_battle(
         location,
         province,
         siege: false,
-        opening: Default::default(),
+        opening,
     });
     true
 }
@@ -173,7 +174,14 @@ pub(crate) fn auto_resolve_all_pending(
             continue;
         }
         if is_live(state, &request) {
-            movement::auto_fight(state, data, &request.attacker, &request.defender, events);
+            movement::auto_fight_with_opening(
+                state,
+                data,
+                &request.attacker,
+                &request.defender,
+                request.opening,
+                events,
+            );
         }
     }
 }
@@ -272,6 +280,9 @@ pub(crate) fn side_setup(
                     unit.experience,
                 );
                 setup.max_soldiers = unit.max_strength.max(unit.strength);
+                // CV3: morale modifiers of the army (battle outcomes).
+                setup.morale =
+                    (i32::from(setup.morale) + army.morale_modifier()).clamp(0, 100) as u8;
                 // G1: technology bonuses of the army's faction, per category
                 // (same source as the auto-resolver's `side_from_army`), plus
                 // the levying province's buildings (armoury, butts).
@@ -332,15 +343,22 @@ pub(crate) fn side_setup(
                 == Some(character),
         })
     });
+    // CV3: stances reach the 3D battle (forced march: tired, no free
+    // deployment; entrenched: works ready).
+    let forced_march = army.stance == crate::state::Stance::ForcedMarch;
     SideSetup {
         faction: army.faction.to_string(),
         faction_name: faction_name(data, &army.faction),
         army: id.to_string(),
         units,
         general,
-        forced_march: false,
-        entrenched: false,
-        start_fatigue: 0.0,
+        forced_march,
+        entrenched: army.stance == crate::state::Stance::Entrenched,
+        start_fatigue: if forced_march {
+            data.posture_rules.forced_march.start_fatigue
+        } else {
+            0.0
+        },
     }
 }
 
@@ -534,7 +552,7 @@ impl CampaignState {
             orders: data.battle_orders.values().cloned().collect(),
             standards: Some(data.battle_standard_rules.clone()),
             decor_plan: None,
-            opening: Default::default(),
+            opening: request.opening,
         };
         self.apply_difficulty_setup(data, &mut setup);
         Ok(setup)
@@ -1012,11 +1030,12 @@ impl CampaignState {
             return Ok(events);
         }
         let mut events = Vec::new();
-        movement::auto_fight(
+        movement::auto_fight_with_opening(
             self,
             data,
             &request.attacker,
             &request.defender,
+            request.opening,
             &mut events,
         );
 

@@ -178,7 +178,19 @@ impl CampaignState {
     /// Movement points (grid costs) `army` receives at the start of a turn:
     /// its C7a allowance in kilometres of plain, converted to grid costs
     /// (10 per plain cell of about 1.44 km).
+    ///
+    /// CV3: plus the forced march bonus when the army is in forced march.
     pub fn army_grid_allowance(&self, data: &GameData, army: &Army) -> u32 {
+        crate::posture::with_stance_bonus(
+            data,
+            army.stance,
+            self.army_base_grid_allowance(data, army),
+        )
+    }
+
+    /// [`CampaignState::army_grid_allowance`] without the stance bonus: the
+    /// full movement of a fresh turn in `Normal` stance.
+    pub fn army_base_grid_allowance(&self, data: &GameData, army: &Army) -> u32 {
         km_to_grid_points(data, f64::from(self.army_movement_allowance(data, army)))
     }
 
@@ -459,6 +471,16 @@ fn march(
     };
     let walk = simulate(state, data, army_id, waypoints, goal, None, None)?;
     apply_walk(state, data, army_id, &walk, waypoints, destination);
+    // CV3: the zone of control of an army in ambush springs it.
+    if let StopReason::EnemyZoneOfControl { army: enemy } = &walk.stop {
+        if state
+            .armies
+            .get(enemy)
+            .is_some_and(|a| a.stance == Stance::Ambush)
+        {
+            crate::posture::spring_ambush(state, data, enemy, army_id, events);
+        }
+    }
     let grid = data.navgrid();
     let mut walked: Vec<[f32; 2]> = walk.cells.iter().map(|c| c.center(grid)).collect();
     let mut stop = walk.stop.clone();
@@ -591,6 +613,10 @@ impl CampaignState {
             if !self.settlements.contains_key(id) {
                 return Err(OrderError::UnknownSettlement(id.clone()));
             }
+            // CV3: a forced march does not enter a hostile place.
+            if self.is_hostile_settlement(&entry.faction, id) {
+                crate::posture::check_forced_march(entry, "entrer dans une place ennemie")?;
+            }
             if entry.is_at(id) {
                 return Ok(MoveReport {
                     army: army.clone(),
@@ -610,6 +636,8 @@ impl CampaignState {
         let path = self
             .find_path(data, army, point)
             .ok_or(OrderError::NoPath)?;
+        // CV3: marching off leaves the ambush and the entrenched camp.
+        crate::posture::leave_static_stance(self, army);
         march(self, data, army, &path.waypoints, &target, events).ok_or(OrderError::NoPath)
     }
 
@@ -632,6 +660,7 @@ impl CampaignState {
         if !self.is_at_war(&entry.faction, &enemy.faction) {
             return Err(OrderError::NotAtWar);
         }
+        crate::posture::check_forced_march(entry, "attaquer")?;
         if entry.movement_left == 0 {
             return Err(OrderError::NoMovementLeft);
         }
@@ -670,6 +699,8 @@ impl CampaignState {
             a.movement_left = 0;
             a.clear_plan();
         }
+        // CV3: attacking leaves the ambush (no ambush opening) and the camp.
+        crate::posture::leave_static_stance(self, army);
         crate::movement::fight(self, data, army, target, events);
         Ok(MoveReport {
             army: army.clone(),
@@ -711,6 +742,7 @@ impl CampaignState {
             a.movement_left = 0;
             a.clear_plan();
         }
+        crate::posture::leave_static_stance(self, army);
         // Lot NV1: an enemy squadron may bar the way.
         match crate::naval::intercept(self, data, army, &from, to_port, events) {
             crate::naval::Crossing::Clear | crate::naval::Crossing::Fought(true) => {}

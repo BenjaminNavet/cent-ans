@@ -25,6 +25,7 @@ use crate::navigation::{self, Cell};
 use crate::research;
 use crate::skills;
 use crate::state::{Army, ArmyId, ArmyPosition, CampaignState};
+use sim_battle::{BattleOpening, SideId};
 
 /// Province steps of a port-to-port crossing (v1 value; the fallback graph
 /// reads `MovementRules::sea_crossing_steps`).
@@ -329,7 +330,9 @@ pub fn side_from_army(state: &CampaignState, data: &GameData, army: &Army) -> Si
             .collect(),
         general_command,
         supply: army.supply,
-        general_morale_bonus: general_effects.army_morale.apply(0.0),
+        // CV3: plus the army's morale modifiers (battle outcomes).
+        general_morale_bonus: general_effects.army_morale.apply(0.0)
+            + f64::from(army.morale_modifier()),
         general_charge_percent: general_effects.battle_charge.apply(0.0),
         general_ranged_percent: general_effects.battle_ranged.apply(0.0),
         general_defense_percent: general_effects.battle_defense.apply(0.0),
@@ -348,16 +351,42 @@ pub(crate) fn fight(
     defender_id: &ArmyId,
     events: &mut Vec<GameEvent>,
 ) {
+    fight_with_opening(
+        state,
+        data,
+        attacker_id,
+        defender_id,
+        BattleOpening::Standard,
+        events,
+    );
+}
+
+/// [`fight`] with a given opening (CV3: a sprung ambush).
+pub(crate) fn fight_with_opening(
+    state: &mut CampaignState,
+    data: &GameData,
+    attacker_id: &ArmyId,
+    defender_id: &ArmyId,
+    opening: BattleOpening,
+    events: &mut Vec<GameEvent>,
+) {
     for id in [attacker_id, defender_id] {
         if let Some(army) = state.armies.get_mut(id) {
             army.movement_left = 0;
             army.clear_plan();
         }
     }
-    if crate::battle_request::defer_player_battle(state, data, attacker_id, defender_id, events) {
+    if crate::battle_request::defer_player_battle(
+        state,
+        data,
+        attacker_id,
+        defender_id,
+        opening,
+        events,
+    ) {
         return;
     }
-    auto_fight(state, data, attacker_id, defender_id, events);
+    auto_fight_with_opening(state, data, attacker_id, defender_id, opening, events);
 }
 
 /// Armies fighting on `lead`'s side (F1): `lead` first, then every other
@@ -504,11 +533,14 @@ pub(crate) fn coalition_side(state: &CampaignState, data: &GameData, ids: &[Army
 
 /// Auto-resolves a field battle between two armies within reach of each
 /// other; the allied armies nearby join either side (F1).
-pub(crate) fn auto_fight(
+/// CV3: `opening` (an ambush: the ambusher of a sprung
+/// ambush charges harder); an entrenched side defends better.
+pub(crate) fn auto_fight_with_opening(
     state: &mut CampaignState,
     data: &GameData,
     attacker_id: &ArmyId,
     defender_id: &ArmyId,
+    opening: BattleOpening,
     events: &mut Vec<GameEvent>,
 ) {
     let (Some(attacker), Some(defender)) =
@@ -533,6 +565,16 @@ pub(crate) fn auto_fight(
     let defenders = battle_coalition(state, data, defender_id, &attacker.faction);
     let mut attacker_side = coalition_side(state, data, &attackers);
     let mut defender_side = coalition_side(state, data, &defenders);
+    // CV3: stances (entrenched camp) and the ambush opening.
+    for (side, lead, id) in [
+        (&mut attacker_side, attacker, SideId::Attacker),
+        (&mut defender_side, defender, SideId::Defender),
+    ] {
+        let ambusher = opening.ambush_victim() == Some(id.other());
+        let (charge, defense) = crate::posture::auto_resolve_bonus(data, Some(lead), ambusher);
+        side.general_charge_percent += charge;
+        side.general_defense_percent += defense;
+    }
     // DF1: the AI's morale against the player follows the difficulty.
     state.apply_difficulty_morale(
         data,

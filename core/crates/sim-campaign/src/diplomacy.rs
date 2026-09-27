@@ -967,7 +967,7 @@ impl CampaignState {
         Ok(())
     }
 
-    fn change_ruler_prestige(&mut self, faction: &FactionId, delta: i32) {
+    pub(crate) fn change_ruler_prestige(&mut self, faction: &FactionId, delta: i32) {
         if let Some(ruler) = self.factions.get(faction).and_then(|f| f.ruler.clone()) {
             if let Some(c) = self.characters.get_mut(&ruler) {
                 c.prestige += delta;

@@ -110,9 +110,13 @@ pub struct Vision {
 impl Vision {
     /// `true` when `army` is shown to the faction: its own and lenders'
     /// armies always, the others when their point is seen.
+    ///
+    /// CV3: an army in ambush stays hidden unless an army or a spy of the
+    /// faction (or of an ally) is close ([`crate::posture::is_hidden_from`]).
     pub fn sees_army(&self, state: &CampaignState, data: &GameData, army: &Army) -> bool {
         self.lenders.contains(&army.faction)
-            || self.mask.sees_point(data, state.army_point(data, army))
+            || (self.mask.sees_point(data, state.army_point(data, army))
+                && !crate::posture::is_hidden_from(state, data, army, &self.faction))
     }
 }
 
