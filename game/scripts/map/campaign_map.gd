@@ -76,6 +76,8 @@ var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
+var encounters: EncounterController = null  # CV3-4 : sites et fenêtre des rencontres
+var outcome_notice: OutcomeNotice = null  # CV3-4 : classe du résultat d'une bataille automatique
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
 var flow: FlowController = null  # F3 : pause, réglages, sauvegardes, rapport, alertes
 var tutorial: TutorialController = null  # F8 : tutoriel, encyclopédie (K)
@@ -213,6 +215,12 @@ func _ready() -> void:
 	chronicle = ChronicleController.new()
 	add_child(chronicle)
 	chronicle.setup(self)
+	encounters = EncounterController.new()  # CV3-4
+	add_child(encounters)
+	encounters.setup(self)
+	outcome_notice = OutcomeNotice.new()
+	add_child(outcome_notice)
+	outcome_notice.setup(self)
 	_setup_campaign()
 	victory.setup(self)
 	help = HelpController.new()
@@ -432,6 +440,10 @@ func refresh_all() -> void:
 		flow.refresh()
 	if hud != null:  # F10b
 		hud.refresh()
+	if encounters != null:  # CV3-4 : sites, puis fenêtre si une rencontre attend
+		encounters.refresh()
+	if outcome_notice != null:  # CV3-4 : classe d'une bataille résolue sans la 3D
+		outcome_notice.check()
 
 
 func _city_available() -> bool:
@@ -1800,6 +1812,8 @@ func _on_battle_fight(index: int, seed: int) -> void:
 
 func _on_battle_returned(result: Dictionary, battle: Node) -> void:
 	battle.queue_free()
+	if outcome_notice != null:  # CV3-4 : bandeau déjà vu sur l'écran de fin
+		outcome_notice.mark_seen()
 	_set_campaign_active(true)
 	if result.get("ok", false):
 		var events: Array = result.get("events", [])
