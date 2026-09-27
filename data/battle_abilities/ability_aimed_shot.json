@@ -1,0 +1,27 @@
+{
+  "id": "ability_aimed_shot",
+  "kind": "aimed_shot",
+  "rank": 1,
+  "name": "Tir tendu",
+  "description": "Quand l'ennemi approche, les archers cessent de tirer en cloche et visent à plat, au plus près : portée réduite, tir bien plus précis, surtout contre les chevaux et les hommes mal protégés, sans percer pour autant le bon harnois. À [[cdx_poitiers|Poitiers]], le comte d'Oxford mène ses archers sur le flanc pour tirer dans l'arrière-train des chevaux bardés (Geoffrey le Baker) : le tir de flanc reste le vrai multiplicateur.",
+  "icon": "aimed_shot",
+  "eligible": {
+    "unit_types": ["unit_longbowmen", "unit_francs_archers", "unit_mounted_archers"],
+    "mounted": false
+  },
+  "cooldown": 45.0,
+  "duration": 30.0,
+  "conditions": ["not_engaged", "ammo_gt_0"],
+  "effects": {
+    "range_factor": 0.55,
+    "accuracy_factor": 1.35,
+    "vs_mounted_factor": 1.3,
+    "reload_factor": 1.1
+  },
+  "journal": "Les {unit} tirent tendu, au plus près.",
+  "ai": {
+    "enemy_within": 110.0,
+    "mounted_enemy": true
+  },
+  "sources": ["Geoffrey le Baker, Chronicon (Poitiers)", "Strickland et Hardy, The Great Warbow (2005)", "Rogers, « The Efficacy of the English Longbow » (1998)"]
+}

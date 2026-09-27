@@ -293,6 +293,13 @@ pub struct Unit {
     pub melee_mode: bool,
     #[serde(default, skip_serializing_if = "is_false")]
     pub breach: bool,
+    /// CB4 (`crate::abilities`): the active ability in use, cooldowns, and
+    /// why the last one ended. Left out of the JSON when empty.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::abilities::UnitAbilities::is_empty"
+    )]
+    pub ability_state: crate::abilities::UnitAbilities,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -383,6 +390,7 @@ impl Unit {
             skirmish: setup.abilities.contains(&Ability::Skirmish),
             melee_mode: false,
             breach: false,
+            ability_state: Default::default(),
         }
     }
 

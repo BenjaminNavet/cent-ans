@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_ability.schema.json",
+  "title": "Capacité active d'unité",
+  "description": "Capacité qu'un régiment emploie en bataille (lot CB4 : tir tendu, pavois, ralliement à la bannière, rangs serrés, piques plantées) : unités concernées, recharge, durée, conditions, effets et règle d'IA (data/battle_abilities/). Relecture historique : docs/research/cb4-capacites.md. Les règles sont dans core/crates/sim-battle/src/abilities.rs.",
+  "type": "object",
+  "$defs": {
+    "ability": {
+      "type": "string",
+      "enum": ["stakes", "shield_wall", "pike_square", "volley", "skirmish", "dismount", "charge_lance", "pavise", "wall_breach", "wall_assault", "rain_penalty"]
+    },
+    "condition": {
+      "type": "string",
+      "enum": ["stationary", "not_engaged", "ammo_gt_0"],
+      "description": "stationary : l'emploi arrête le régiment et tout mouvement y met fin ; not_engaged : hors mêlée ; ammo_gt_0 : il reste des traits."
+    },
+    "factor": { "type": "number", "minimum": 0, "maximum": 5 }
+  },
+  "properties": {
+    "id": { "type": "string", "pattern": "^ability_[a-z0-9_]+$" },
+    "kind": {
+      "type": "string",
+      "enum": ["aimed_shot", "pavise", "banner_rally", "close_ranks", "planted_pikes"],
+      "description": "Règle appliquée par la simulation."
+    },
+    "rank": { "type": "integer", "minimum": 0, "maximum": 255, "description": "Ordre des boutons de la carte d'unité et d'Alt+1…4." },
+    "name": { "type": "string", "description": "Nom en français." },
+    "description": { "type": "string", "description": "Description en français avec la référence historique (liens [[cdx_…]] permis)." },
+    "icon": { "type": "string", "description": "Nom d'icône facultatif (glyphe dessiné en code en attendant l'icône DA5)." },
+    "eligible": {
+      "type": "object",
+      "description": "Régiments qui ont la capacité : un type listé, ou une capacité passive listée, ou (dismounted) tout régiment démonté ; puis aucune capacité exclue et le filtre monté/à pied.",
+      "properties": {
+        "unit_types": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" },
+          "uniqueItems": true
+        },
+        "abilities": { "type": "array", "items": { "$ref": "#/$defs/ability" }, "uniqueItems": true },
+        "dismounted": { "type": "boolean" },
+        "exclude_abilities": { "type": "array", "items": { "$ref": "#/$defs/ability" }, "uniqueItems": true },
+        "mounted": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "cooldown": { "type": "number", "minimum": 0, "description": "Recharge en secondes simulées, comptée depuis la fin de l'effet." },
+    "duration": { "type": "number", "minimum": 0, "description": "Durée en secondes (0 : jusqu'à ce qu'une condition tombe ou que le joueur la lève)." },
+    "setup_time": { "type": "number", "minimum": 0, "description": "Délai de pose avant que l'effet compte (pavois, piques)." },
+    "conditions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/condition" },
+      "uniqueItems": true,
+      "description": "Conditions tenues pendant tout l'effet : la capacité s'arrête quand l'une tombe."
+    },
+    "start_conditions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/condition" },
+      "uniqueItems": true,
+      "description": "Conditions vérifiées seulement à l'emploi."
+    },
+    "effects": {
+      "type": "object",
+      "description": "Multiplicateurs (1 = neutre) et bonus (0 = neutre).",
+      "properties": {
+        "range_factor": { "$ref": "#/$defs/factor", "description": "Portée de tir." },
+        "accuracy_factor": { "$ref": "#/$defs/factor", "description": "Précision des volées." },
+        "vs_mounted_factor": { "$ref": "#/$defs/factor", "description": "Pertes infligées par le trait aux cavaliers." },
+        "reload_factor": { "$ref": "#/$defs/factor", "description": "Temps de rechargement." },
+        "missile_taken_factor": { "$ref": "#/$defs/factor", "description": "Pertes subies par le trait (de face seulement avec frontal_only)." },
+        "frontal_only": { "type": "boolean", "description": "La protection (trait, charge) ne vaut que de face." },
+        "speed_factor": { "$ref": "#/$defs/factor", "description": "Vitesse (pas de course en dessous de 1)." },
+        "melee_taken_front_factor": { "$ref": "#/$defs/factor", "description": "Pertes subies en mêlée de face." },
+        "melee_taken_flank_factor": { "$ref": "#/$defs/factor", "description": "Pertes subies en mêlée de flanc ou de dos." },
+        "charge_taken_factor": { "$ref": "#/$defs/factor", "description": "Hommes renversés et cohésion perdue sous une charge." },
+        "horse_taken_front_factor": { "$ref": "#/$defs/factor", "description": "Pertes subies des cavaliers de face." },
+        "vs_horse_front_factor": { "$ref": "#/$defs/factor", "description": "Pertes infligées aux cavaliers de face." },
+        "stops_charge": { "type": "boolean", "description": "Une charge de cavalerie de face se brise (comme sur les piques)." },
+        "melee_fatigue_factor": { "$ref": "#/$defs/factor", "description": "Fatigue en mêlée." },
+        "morale_bonus": { "type": "number", "minimum": 0, "maximum": 50, "description": "Moral regagné d'un coup." },
+        "morale_recovery": { "type": "number", "minimum": 0, "maximum": 10, "description": "Moral regagné par seconde hors contact (jusqu'au plafond du régiment)." }
+      },
+      "additionalProperties": false
+    },
+    "journal": { "type": "string", "description": "Ligne du journal ; joker {unit}." },
+    "ai": {
+      "type": "object",
+      "description": "Quand l'IA tactique emploie la capacité (une règle simple par type, sim-battle/src/ai_abilities.rs).",
+      "properties": {
+        "enemy_within": { "type": "number", "exclusiveMinimum": 0, "description": "Un ennemi à moins de tant de mètres." },
+        "mounted_enemy": { "type": "boolean", "description": "Seulement contre un ennemi monté." },
+        "in_front": { "type": "boolean", "description": "L'ennemi est devant le régiment." },
+        "under_fire_within": { "type": "number", "exclusiveMinimum": 0, "description": "Pertes par le trait depuis moins de tant de secondes." },
+        "morale_below": { "type": "number", "minimum": 0, "maximum": 100 },
+        "no_enemy_within": { "type": "number", "exclusiveMinimum": 0, "description": "Aucun ennemi à moins de tant de mètres." },
+        "when_defensive": { "type": "boolean", "description": "Seulement pour un camp sur la défensive." },
+        "in_sieges": { "type": "boolean", "description": "Aussi en bataille de siège (sinon en rase campagne seulement)." }
+      },
+      "additionalProperties": false
+    },
+    "sources": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["id", "kind", "name", "description", "eligible", "cooldown", "journal"],
+  "additionalProperties": false
+}

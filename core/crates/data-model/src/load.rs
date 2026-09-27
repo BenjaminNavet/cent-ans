@@ -11,6 +11,7 @@ use crate::entities::agent::AgentRules;
 use crate::entities::ai_alignment::AiAlignment;
 use crate::entities::ai_diplomacy::AiDiplomacy;
 use crate::entities::ai_grid::AiGrid;
+use crate::entities::battle_ability::BattleAbility;
 use crate::entities::battle_order::BattleOrder;
 use crate::entities::building::Building;
 use crate::entities::character::Character;
@@ -54,6 +55,8 @@ pub mod folders {
     pub const EVENTS: &str = "events";
     /// Leader's battle orders (F10b); optional folder.
     pub const BATTLE_ORDERS: &str = "battle_orders";
+    /// Regiments' active abilities in battle (CB4); optional folder.
+    pub const BATTLE_ABILITIES: &str = "battle_abilities";
     /// Province diets (H3 « La Table »); optional folder.
     pub const DIETS: &str = "diets";
     /// Regional edicts (lot C4); optional folder.
@@ -242,6 +245,9 @@ pub struct GameData {
     pub events: BTreeMap<EventId, Event>,
     /// Leader's battle orders, empty when `data/battle_orders/` is absent.
     pub battle_orders: BTreeMap<String, BattleOrder>,
+    /// Regiments' active abilities (CB4), empty when `data/battle_abilities/`
+    /// is absent.
+    pub battle_abilities: BTreeMap<String, BattleAbility>,
     /// Province diets (H3), empty when `data/diets/` is absent.
     pub diets: BTreeMap<DietId, Diet>,
     /// Regional edicts (lot C4), empty when `data/edicts/` is absent.
@@ -357,6 +363,7 @@ impl GameData {
             names: load_entities(&root.join(folders::NAMES), |n: &NameList| &n.id)?,
             events: BTreeMap::new(),
             battle_orders: BTreeMap::new(),
+            battle_abilities: BTreeMap::new(),
             diets: BTreeMap::new(),
             edicts: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
@@ -399,6 +406,10 @@ impl GameData {
         let orders_dir = root.join(folders::BATTLE_ORDERS);
         if orders_dir.is_dir() {
             data.battle_orders = load_entities(&orders_dir, |o: &BattleOrder| &o.id)?;
+        }
+        let abilities_dir = root.join(folders::BATTLE_ABILITIES);
+        if abilities_dir.is_dir() {
+            data.battle_abilities = load_entities(&abilities_dir, |a: &BattleAbility| &a.id)?;
         }
         let diets_dir = root.join(folders::DIETS);
         if diets_dir.is_dir() {

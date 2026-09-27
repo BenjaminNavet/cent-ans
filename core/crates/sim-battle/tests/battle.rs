@@ -47,6 +47,7 @@ fn setup(attacker: Vec<UnitSetup>, defender: Vec<UnitSetup>) -> BattleSetup {
         siege: None,
         siege_layout: None,
         orders: Vec::new(),
+        abilities: Vec::new(),
         standards: None,
         decor_plan: None,
         opening: Default::default(),

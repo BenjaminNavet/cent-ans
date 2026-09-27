@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use data_model::load::load_entities;
-use data_model::{BattleOrder, BattleStandardRules, UnitType, UnitTypeId};
+use data_model::{BattleAbility, BattleOrder, BattleStandardRules, UnitType, UnitTypeId};
 use godot::prelude::*;
 use sim_battle::{BattleSetup, HistoricalMap, SideId};
 
@@ -76,11 +76,13 @@ pub(crate) fn campaign_site(data_dir: &Path, setup: &BattleSetup, year: i32) -> 
         .cloned()
 }
 
-/// Unit types, leader's orders and standards rules of a data folder.
+/// Unit types, leader's orders, standards rules and (CB4) regiments'
+/// abilities of a data folder.
 pub(crate) type BattleData = (
     std::collections::BTreeMap<UnitTypeId, UnitType>,
     Vec<BattleOrder>,
     Option<BattleStandardRules>,
+    Vec<BattleAbility>,
 );
 
 /// Unit types, leader's orders and standards of `data_dir` (a historical
@@ -95,7 +97,13 @@ pub(crate) fn battle_data(data_dir: &Path) -> Result<BattleData, String> {
     let standards = std::fs::read_to_string(data_dir.join("rules/battle_standards.json"))
         .ok()
         .and_then(|t| serde_json::from_str::<BattleStandardRules>(&t).ok());
-    Ok((units, orders, standards))
+    let abilities: Vec<BattleAbility> =
+        load_entities(&data_dir.join("battle_abilities"), |a: &BattleAbility| {
+            &a.id
+        })
+        .map(|m| m.into_values().collect())
+        .unwrap_or_default();
+    Ok((units, orders, standards, abilities))
 }
 
 /// The menu line of a map.
@@ -186,9 +194,10 @@ impl BattleSim {
                 .find(|(m, _)| m.id == id)
                 .map(|(m, _)| m.clone())
                 .ok_or_else(|| format!("unknown historical map {id}"))?;
-            let (units, orders, standards) = battle_data(&dir)?;
+            let (units, orders, standards, abilities) = battle_data(&dir)?;
             let side = SideId::parse(&player_side.to_string());
-            let setup = map.battle_setup(&units, orders, standards, side)?;
+            let mut setup = map.battle_setup(&units, orders, standards, side)?;
+            setup.abilities = abilities;
             // EP13: built through the replay start, recorded.
             let start = sim_battle::ReplayStart::historical(setup, seed as u64, map.clone());
             let sim = start.build()?;

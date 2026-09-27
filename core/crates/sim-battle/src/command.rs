@@ -104,6 +104,14 @@ pub enum Command {
         mode: UnitMode,
         enabled: bool,
     },
+    /// CB4: an active ability of the regiments (`data/battle_abilities/`),
+    /// used by those of `units` that have it; a second use by regiments
+    /// that all have it on lifts it. Additive: replays recorded before CB4
+    /// read unchanged.
+    UseAbility {
+        units: Vec<u32>,
+        ability: String,
+    },
 }
 
 fn default_true() -> bool {
@@ -126,7 +134,8 @@ impl Command {
             | Command::TargetWall { units, .. }
             | Command::Burn { units, .. }
             | Command::LeaderOrder { units, .. }
-            | Command::SetMode { units, .. } => units,
+            | Command::SetMode { units, .. }
+            | Command::UseAbility { units, .. } => units,
         }
     }
 }
@@ -188,6 +197,14 @@ pub enum CommandError {
         unit: u32,
         mode: UnitMode,
     },
+    /// CB4: no ability of that id in the battle's catalogue.
+    UnknownAbility(String),
+    /// CB4: none of the regiments could use the ability (`ability` is its
+    /// French name).
+    AbilityUnavailable {
+        ability: String,
+        reason: String,
+    },
 }
 
 impl std::fmt::Display for CommandError {
@@ -247,6 +264,10 @@ impl std::fmt::Display for CommandError {
                     "l'unité {unit} ne peut pas passer en mode {}",
                     mode.label_fr()
                 )
+            }
+            CommandError::UnknownAbility(id) => write!(f, "capacité inconnue : {id}"),
+            CommandError::AbilityUnavailable { ability, reason } => {
+                write!(f, "« {ability} » impossible : {reason}")
             }
             CommandError::OutsideZone(id) => {
                 write!(

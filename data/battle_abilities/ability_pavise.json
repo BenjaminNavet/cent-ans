@@ -1,0 +1,25 @@
+{
+  "id": "ability_pavise",
+  "kind": "pavise",
+  "rank": 1,
+  "name": "Dresser les pavois",
+  "description": "Les valets plantent les grands pavois devant les [[cdx_arbalete|arbalétriers]], qui retendent et tirent à couvert. Il faut quelques secondes pour les dresser, et ils ne couvrent que de face : de flanc ou de dos, rien. Les pavois sont levés au premier mouvement. À [[cdx_crecy|Crécy]], les Génois durent combattre sans leurs pavois restés aux bagages, et furent décimés.",
+  "icon": "pavise",
+  "eligible": {
+    "abilities": ["pavise"]
+  },
+  "cooldown": 10.0,
+  "duration": 0.0,
+  "setup_time": 4.0,
+  "conditions": ["stationary"],
+  "effects": {
+    "missile_taken_factor": 0.35,
+    "frontal_only": true
+  },
+  "journal": "Les {unit} dressent leurs pavois.",
+  "ai": {
+    "under_fire_within": 6.0,
+    "in_sieges": true
+  },
+  "sources": ["Pavois", "Arbalétriers génois", "Serdon, Armes du diable (2005)"]
+}
