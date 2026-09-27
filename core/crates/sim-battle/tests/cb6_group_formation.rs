@@ -44,19 +44,10 @@ fn mixed_setup() -> BattleSetup {
 /// A big army whose rows wrap (wider than the field).
 fn big_setup() -> BattleSetup {
     let data = data();
-    let mut french: Vec<&str> = Vec::new();
-    for _ in 0..18 {
-        french.push("unit_men_at_arms_foot");
-    }
-    for _ in 0..10 {
-        french.push("unit_crossbowmen");
-    }
-    for _ in 0..9 {
-        french.push("unit_knights");
-    }
-    for _ in 0..3 {
-        french.push("unit_trebuchet");
-    }
+    let mut french: Vec<&str> = vec!["unit_men_at_arms_foot"; 18];
+    french.extend(["unit_crossbowmen"; 10]);
+    french.extend(["unit_knights"; 9]);
+    french.extend(["unit_trebuchet"; 3]);
     let english = ["unit_longbowmen", "unit_men_at_arms_foot", "unit_knights"];
     let mut battle = setup(units(&data, &french), units(&data, &english), None);
     battle.village = Some(false);
@@ -67,7 +58,12 @@ fn big_setup() -> BattleSetup {
 fn shooters_setup() -> BattleSetup {
     let data = data();
     let a = ["unit_crossbowmen", "unit_knights", "unit_longbowmen"];
-    let d = ["unit_longbowmen", "unit_longbowmen", "unit_knights", "unit_knights"];
+    let d = [
+        "unit_longbowmen",
+        "unit_longbowmen",
+        "unit_knights",
+        "unit_knights",
+    ];
     let mut battle = setup(units(&data, &a), units(&data, &d), None);
     battle.village = Some(false);
     battle
