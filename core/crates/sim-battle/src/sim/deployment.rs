@@ -138,7 +138,7 @@ impl BattleSim {
 
     /// Valid deployment point for `side`: in the zone and, in a siege, on
     /// the right side of the walls and clear of them.
-    fn deployable(&self, side: SideId, x: f64, z: f64) -> bool {
+    pub(crate) fn deployable(&self, side: SideId, x: f64, z: f64) -> bool {
         if !x.is_finite()
             || !z.is_finite()
             || !self
