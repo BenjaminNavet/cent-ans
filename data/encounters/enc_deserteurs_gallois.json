@@ -1,0 +1,103 @@
+{
+  "id": "enc_deserteurs_gallois",
+  "title": "Des déserteurs gallois",
+  "text": "Une poignée de lanciers et d'archers gallois ont quitté l'ost de leur capitaine, faute de gages. Ils vivent de maraude et se disent prêts à suivre qui les nourrira.",
+  "spawn": {
+    "from_year": 1337,
+    "to_year": 1420,
+    "war": "war",
+    "regions": [
+      "france_nord",
+      "france_ouest",
+      "aquitaine",
+      "galles"
+    ],
+    "weight": 8,
+    "lifetime": [
+      1,
+      2
+    ]
+  },
+  "options": [
+    {
+      "label": "Les enrôler",
+      "conditions": [
+        {
+          "type": "treasury_above",
+          "amount": 300
+        }
+      ],
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -300
+        }
+      ],
+      "outcome": {
+        "type": "join",
+        "units": [
+          {
+            "unit_type": "unit_welsh_spearmen",
+            "count": 1
+          },
+          {
+            "unit_type": "unit_longbowmen",
+            "count": 1
+          }
+        ]
+      },
+      "ai_weight": 3
+    },
+    {
+      "label": "Les pourchasser",
+      "outcome": {
+        "type": "battle",
+        "units": [
+          {
+            "unit_type": "unit_welsh_spearmen",
+            "count": 2
+          }
+        ],
+        "on_win": {
+          "text": "Les maraudeurs gallois sont pris ou dispersés.",
+          "effects": [
+            {
+              "type": "prestige",
+              "amount": 3
+            },
+            {
+              "type": "unrest",
+              "amount": -5
+            }
+          ]
+        },
+        "on_loss": {
+          "text": "Les Gallois se dérobent dans les haies après avoir malmené l'avant-garde.",
+          "army_effects": [
+            {
+              "effect": "army_morale",
+              "value": -5
+            }
+          ]
+        }
+      },
+      "ai_weight": 1
+    },
+    {
+      "label": "Les laisser aller",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": 3
+        }
+      ],
+      "ai_weight": 1,
+      "default": true
+    }
+  ],
+  "sources": [
+    "Adam Chapman, Welsh Soldiers in the Later Middle Ages, 1282-1422, Woodbridge, Boydell, 2015",
+    "A. D. Carr, « Welshmen and the Hundred Years' War », Welsh History Review, 4, 1968",
+    "Andrew Ayton, Knights and Warhorses: Military Service and the English Aristocracy under Edward III, Woodbridge, Boydell, 1994"
+  ]
+}

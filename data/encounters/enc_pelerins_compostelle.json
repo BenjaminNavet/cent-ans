@@ -1,0 +1,69 @@
+{
+  "id": "enc_pelerins_compostelle",
+  "title": "Pèlerins de Saint-Jacques",
+  "text": "Une troupe de pèlerins, coquille au chapeau et bourdon en main, chemine vers Compostelle. La guerre rend les routes peu sûres : ils demandent escorte jusqu'au prochain hospice.",
+  "spawn": {
+    "seasons": [
+      "spring",
+      "summer"
+    ],
+    "regions": [
+      "aquitaine",
+      "languedoc",
+      "france_ouest",
+      "france_centre",
+      "iberie_nord"
+    ],
+    "weight": 10,
+    "lifetime": [
+      1,
+      2
+    ]
+  },
+  "options": [
+    {
+      "label": "Les escorter jusqu'à l'hospice",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 4
+        },
+        {
+          "type": "prestige",
+          "amount": 2
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "label": "Leur faire l'aumône",
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -150
+        },
+        {
+          "type": "piety",
+          "amount": 2
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "label": "Poursuivre la marche",
+      "ai_weight": 1,
+      "default": true
+    }
+  ],
+  "sources": [
+    "Liber Sancti Jacobi (Codex Calixtinus), livre V : Guide du pèlerin",
+    "Jeanne Vielliard (éd.), Le Guide du pèlerin de Saint-Jacques-de-Compostelle, Mâcon, 1938",
+    "Chemins de Compostelle"
+  ]
+}

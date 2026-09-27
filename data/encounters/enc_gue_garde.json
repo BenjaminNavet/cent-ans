@@ -1,0 +1,115 @@
+{
+  "id": "enc_gue_garde",
+  "title": "Le gué gardé",
+  "text": "Le seul gué praticable est tenu par des arbalétriers retranchés derrière des pieux. Un valet de ferme promet, contre une récompense, de montrer à marée basse un autre passage, comme ce Gobin Agache qui guida le roi d'Angleterre à Blanchetaque.",
+  "spawn": {
+    "war": "war",
+    "terrains": [
+      "plains",
+      "marsh",
+      "bocage",
+      "hills"
+    ],
+    "regions": [
+      "france_nord",
+      "france_centre",
+      "france_ouest",
+      "pays_bas",
+      "aquitaine"
+    ],
+    "weight": 10,
+    "lifetime": [
+      1,
+      3
+    ]
+  },
+  "options": [
+    {
+      "label": "Forcer le gué",
+      "outcome": {
+        "type": "battle",
+        "units": [
+          {
+            "unit_type": "unit_crossbowmen",
+            "count": 2
+          },
+          {
+            "unit_type": "unit_men_at_arms_foot",
+            "count": 1
+          }
+        ],
+        "on_win": {
+          "text": "Le gué est emporté de haute lutte.",
+          "effects": [
+            {
+              "type": "prestige",
+              "amount": 5
+            }
+          ],
+          "army_effects": [
+            {
+              "effect": "army_experience",
+              "value": 1
+            },
+            {
+              "effect": "army_morale",
+              "value": 5
+            }
+          ]
+        },
+        "on_loss": {
+          "text": "L'ost est rejeté dans la rivière et doit chercher un autre passage.",
+          "army_effects": [
+            {
+              "effect": "army_morale",
+              "value": -10
+            }
+          ]
+        }
+      },
+      "ai_weight": 2
+    },
+    {
+      "label": "Payer le guide",
+      "conditions": [
+        {
+          "type": "treasury_above",
+          "amount": 150
+        }
+      ],
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -150
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "label": "Remonter la rivière",
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -10
+        },
+        {
+          "effect": "army_morale",
+          "value": -3
+        }
+      ],
+      "ai_weight": 1,
+      "default": true
+    }
+  ],
+  "sources": [
+    "Jean Froissart, Chroniques, livre I (passage de la Somme à Blanchetaque, 1346)",
+    "Jonathan Sumption, The Hundred Years War I: Trial by Battle, Londres, Faber, 1990",
+    "Bataille de Blanchetaque"
+  ]
+}

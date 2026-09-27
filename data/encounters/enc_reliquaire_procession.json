@@ -1,0 +1,100 @@
+{
+  "id": "enc_reliquaire_procession",
+  "title": "Le reliquaire en procession",
+  "text": "Les chanoines promènent la châsse du saint patron à travers les paroisses pour détourner la guerre et la peste. La procession barre la route ; le clergé attend que les gens d'armes se découvrent et fassent offrande.",
+  "spawn": {
+    "seasons": [
+      "spring",
+      "summer",
+      "autumn"
+    ],
+    "regions": [
+      "france_nord",
+      "france_centre",
+      "france_ouest",
+      "france_est",
+      "aquitaine",
+      "languedoc",
+      "pays_bas"
+    ],
+    "weight": 8,
+    "lifetime": [
+      1,
+      2
+    ]
+  },
+  "options": [
+    {
+      "label": "Faire offrande à la châsse",
+      "conditions": [
+        {
+          "type": "treasury_above",
+          "amount": 200
+        }
+      ],
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -200
+        },
+        {
+          "type": "piety",
+          "amount": 5
+        },
+        {
+          "type": "unrest",
+          "amount": -5
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "army_morale",
+          "value": 3
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "label": "Suivre la procession un jour",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": 3
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -5
+        }
+      ],
+      "ai_weight": 2,
+      "default": true
+    },
+    {
+      "label": "Réquisitionner les chariots",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": -6
+        },
+        {
+          "type": "unrest",
+          "amount": 10
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": 15
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "André Vauchez, La Sainteté en Occident aux derniers siècles du Moyen Âge, Rome, École française de Rome, 1981",
+    "Jacques Chiffoleau, La Comptabilité de l'au-delà. Les hommes, la mort et la religion dans la région d'Avignon (vers 1320-vers 1480), Rome, 1980",
+    "Procession"
+  ]
+}
