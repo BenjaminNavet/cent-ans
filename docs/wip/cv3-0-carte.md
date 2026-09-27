@@ -20,7 +20,9 @@ de campagne relevés sur les captures »).
    (largeur 0.35->0.28 m, longueur 2.5->1.3 m), `campaign_weather_view.gd` couleur plus
    discrète et moins opaque (0.62/0.67/0.76, alpha 0.24, était 0.72/0.76/0.82/0.38),
    particles_far 320->220 (moins souvent visible de près).
-5. Relief peu lisible Paris-Orléans — à faire
+5. Relief peu lisible Paris-Orléans — fait : `relief_exaggeration.tres` gain_far 0.3->0.42
+   (l'écrasement des montagnes, indépendant, absorbe l'effet sur les Alpes),
+   `terrain.gdshader` shading_relief 1.8->2.1.
 6. Chemin de déplacement peu contrasté — à faire
 7. Étiquettes qui se chevauchent — à faire
 8. « Aucune recherche » deux fois — à faire
