@@ -30,7 +30,7 @@
 
 use std::collections::BTreeMap;
 
-use data_model::{AbilityCondition, AbilityKind, BattleAbility, BattleAbilityEffects};
+use data_model::{Ability, AbilityCondition, AbilityKind, BattleAbility, BattleAbilityEffects};
 use serde::{Deserialize, Serialize};
 
 use crate::command::CommandError;
@@ -163,6 +163,73 @@ impl BattleSim {
         let active = unit.ability_state.active.as_ref()?;
         let ability = self.find_ability(&active.id)?;
         (self.elapsed() - active.since + 1e-9 >= ability.setup_time).then_some(&ability.effects)
+    }
+
+    /// Multiplier of the missile casualties `target` takes from a volley
+    /// coming from `angle` (0 front, 1 flank, 2 rear): its pavises (the
+    /// ability once planted and from the front; else the passive cover of a
+    /// pavise regiment that does not march, 0.6; or the leader's order of
+    /// older replays), and the dense mass of the close ranks.
+    pub(crate) fn missile_cover(&self, target: &Unit, angle: u8) -> f64 {
+        let passive = if target.has(Ability::Pavise) && target.state != UnitState::Marching {
+            0.6
+        } else {
+            1.0
+        };
+        let effects = self.ability_effects(target);
+        if target.ability_state.active_kind() == Some(AbilityKind::Pavise) {
+            return match effects {
+                Some(e) if covers(e, angle) => e.missile_taken_factor,
+                _ => passive,
+            };
+        }
+        let ability = effects
+            .filter(|e| covers(e, angle))
+            .map_or(1.0, |e| e.missile_taken_factor);
+        target.pavise.unwrap_or(passive) * ability
+    }
+
+    /// CB4: multiplier of the melee casualties `defender` takes from
+    /// `attacker` striking from `angle` (close ranks, planted pikes), and of
+    /// those `attacker` deals (planted pikes against horsemen in front).
+    pub(crate) fn ability_melee_factor(&self, attacker: &Unit, defender: &Unit, angle: u8) -> f64 {
+        let mut factor = 1.0;
+        if let Some(e) = self.ability_effects(defender) {
+            factor *= if angle == 0 {
+                e.melee_taken_front_factor
+            } else {
+                e.melee_taken_flank_factor
+            };
+            if angle == 0 && attacker.is_cavalry() {
+                factor *= e.horse_taken_front_factor;
+            }
+        }
+        if let Some(e) = self.ability_effects(attacker) {
+            if defender.is_cavalry()
+                && e.vs_horse_front_factor != 1.0
+                && crate::sim::attack_angle(attacker, defender.x, defender.z) == 0
+            {
+                factor *= e.vs_horse_front_factor;
+            }
+        }
+        factor
+    }
+
+    /// CB4: does a charge of `attacker` from `angle` break on the planted
+    /// pikes of `defender`?
+    pub(crate) fn ability_stops_charge(&self, attacker: &Unit, defender: &Unit, angle: u8) -> bool {
+        attacker.is_cavalry()
+            && attacker.mounted
+            && self
+                .ability_effects(defender)
+                .is_some_and(|e| e.stops_charge && covers(e, angle))
+    }
+
+    /// CB4: multiplier of the men a charge knocks down and of the cohesion
+    /// lost by `defender` (close ranks).
+    pub(crate) fn ability_charge_taken(&self, defender: &Unit) -> f64 {
+        self.ability_effects(defender)
+            .map_or(1.0, |e| e.charge_taken_factor)
     }
 
     /// Why `unit` cannot use `ability` now (`None`: it can, or it can lift

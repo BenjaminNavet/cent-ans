@@ -79,6 +79,9 @@ use data_model::{Ability, BattleOrder, BattleOrderKind, BattleOrderScope, UnitCa
 #[path = "ai_modes.rs"]
 mod modes;
 
+#[path = "ai_abilities.rs"]
+mod abilities;
+
 use crate::command::Command;
 use crate::crest::CrestDefenceRules;
 use crate::horse_wait::HorseWaitRules;
@@ -482,6 +485,8 @@ pub fn plan(sim: &BattleSim, side: SideId) -> Vec<Command> {
     }
     if sim.siege().is_some() {
         plan_orders(&mut view, side == SideId::Defender);
+        // CB4: the abilities allowed in sieges (the pavises).
+        abilities::plan_abilities(&mut view, side == SideId::Defender, true);
     }
     view.commands
 }
@@ -1573,6 +1578,8 @@ fn plan_field(view: &mut View) {
     plan_orders(view, defensive);
     // CB2: guard for a defensive line, skirmish for light shooters.
     modes::plan_modes(view, &roles, defensive);
+    // CB4: one simple rule per active ability.
+    abilities::plan_abilities(view, defensive, false);
 }
 
 /// R2b: a defender this much higher than the enemy (mean ground under the

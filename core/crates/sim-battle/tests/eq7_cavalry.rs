@@ -25,6 +25,8 @@ fn small_mixed_battle(seed: u64) -> BattleSim {
     ];
     let mut battle = setup(units(&data, &french), units(&data, &english), None);
     battle.village = Some(false);
+    // CB4: the regiments' abilities, as in the game.
+    battle.abilities = data.battle_abilities.values().cloned().collect();
     let mut sim = BattleSim::new(battle, seed).unwrap();
     sim.set_ai(SideId::Attacker, true);
     sim.set_ai(SideId::Defender, true);

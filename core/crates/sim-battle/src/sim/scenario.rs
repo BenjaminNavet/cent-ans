@@ -309,6 +309,19 @@ impl BattleSim {
                     units: kept,
                 })
             }
+            // CB4: held and assaulting regiments keep to the script, as
+            // under the leader's orders (the Genoese of Crécy never raised
+            // their pavises by the order either).
+            Command::UseAbility { units, ability } => {
+                let kept: Vec<u32> = units
+                    .into_iter()
+                    .filter(|&id| allowed(id, None, 0.0))
+                    .collect();
+                (!kept.is_empty()).then_some(Command::UseAbility {
+                    units: kept,
+                    ability,
+                })
+            }
             Command::Halt { units } => {
                 let kept: Vec<u32> = units
                     .into_iter()
