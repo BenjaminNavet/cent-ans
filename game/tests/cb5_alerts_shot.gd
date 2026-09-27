@@ -3,19 +3,23 @@ extends SceneTree
 ## CB5 : sonde texte de la colonne d'alertes (pas d'image, règle CLAUDE.md sur les captures).
 ## Vérifie, sur la démo autonome de bataille (`battle.tscn`), que la colonne (haut à gauche) ne
 ## chevauche ni le journal (`BattleLog`, haut à droite), ni le bandeau du bas (`BottomBand` :
-## sceau du chef, cartes, ordres). Le panneau de comparaison au survol (CB-M4) n'est pas encore
-## fusionné dans cette branche : non vérifié ici, à refaire une fois CB-M4 dans `main`.
+## sceau du chef, cartes, ordres), ni les « Ordres du chef », le panneau de comparaison (CB-M4,
+## forcé visible) et le sélecteur de formations (CB6).
 ##
-## Usage (probe seulement, pas d'image) :
+## Usage :
 ##   godot --headless --path game --script res://tests/cb5_alerts_shot.gd -- --probe
+##   godot --path game --resolution 1600x900 --script res://tests/cb5_alerts_shot.gd -- --out=<png>
 
 func _init() -> void:
 	var probe := false
+	var out := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg == "--probe":
 			probe = true
-	if not probe:
-		print("cb5_alerts_shot: usage -- --probe (sonde texte seulement, pas d'image)")
+		elif arg.begins_with("--out="):
+			out = arg.trim_prefix("--out=")
+	if not probe and out == "":
+		print("cb5_alerts_shot: usage -- --probe | --out=<png>")
 		quit(1)
 		return
 	await process_frame
@@ -47,19 +51,38 @@ func _init() -> void:
 		"column_rect": [column_rect.position.x, column_rect.position.y, column_rect.size.x, column_rect.size.y],
 		"rows_shown": hud.alerts_column._box.get_child_count(),
 	}
-	var journal: Control = hud.root.get_node_or_null("BattleLog")
-	if journal != null:
-		var jr := journal.get_global_rect()
-		report["journal_rect"] = [jr.position.x, jr.position.y, jr.size.x, jr.size.y]
-		report["overlaps_journal"] = column_rect.intersects(jr)
-	var bottom: Control = hud.root.get_node_or_null("BottomBand")
-	if bottom != null:
-		var br := bottom.get_global_rect()
-		report["bottom_band_rect"] = [br.position.x, br.position.y, br.size.x, br.size.y]
-		report["overlaps_bottom_band"] = column_rect.intersects(br)
+	# Panneau de comparaison CB-M4 forcé visible, avec des valeurs factices, pour mesurer son rectangle.
+	if scene.compare_panel != null:
+		scene.compare_panel.show_compare({"ours": {"soldiers": 120, "melee": 8.0}, "theirs": {"soldiers": 80, "melee": 14.0}, "advantages": {"soldiers": "ours", "melee": "theirs"}, "lines": ["soldiers", "melee"]}, "Archers", "Hommes d'armes")
+	for _i in 2:
+		await process_frame
+	var others := {
+		"journal": hud.root.get_node_or_null("BattleLog"),
+		"bottom_band": hud.root.get_node_or_null("BottomBand"),
+		"leader_orders": scene._leader_bar.panel if scene._leader_bar != null else null,
+		"compare_panel": scene.compare_panel,
+		"formation_picker": scene.formation_picker,
+	}
+	var overlaps: Array = []
+	for key in others:
+		var other: Control = others[key]
+		if other == null or not other.is_visible_in_tree():
+			report[key] = "absent"
+			continue
+		var r := other.get_global_rect()
+		report[key] = [r.position.x, r.position.y, r.size.x, r.size.y]
+		if column_rect.intersects(r):
+			overlaps.append(key)
+	report["overlaps"] = overlaps
 	report["rows_capped_at_5"] = hud.alerts_column._box.get_child_count() <= 5
-	report["note"] = "CB-M4 hover comparison panel not merged in this branch: not checked here."
 	print("CB5_ALERTS_PROBE:" + JSON.stringify(report))
-	var ok: bool = not bool(report.get("overlaps_journal", false)) and not bool(report.get("overlaps_bottom_band", false)) and bool(report["rows_capped_at_5"])
+	var ok: bool = overlaps.is_empty() and bool(report["rows_capped_at_5"])
+	if out != "":
+		await RenderingServer.frame_post_draw
+		var image := root.get_texture().get_image()
+		if image.get_width() > 1600:
+			image.resize(1600, int(image.get_height() * 1600.0 / image.get_width()), Image.INTERPOLATE_LANCZOS)
+		image.save_png(out)
+		print("CB5_ALERTS_SHOT %s (%s)" % [out, "OK" if ok else "FAIL"])
 	scene.queue_free()
 	quit(0 if ok else 1)
