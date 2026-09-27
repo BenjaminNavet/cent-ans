@@ -29,6 +29,7 @@ const _OUT_OF_LOT_SCENE_LABELS := ["FactionLabel", "TreasuryLabel", "IncomeLabel
 	"NameLabel", "GarrisonHeader"]
 
 var _failures := 0
+var _layout_failures := 0
 ## Tailles vues (valeur → nombre d'occurrences), toutes vues confondues, pour le message final.
 var _sizes: Dictionary = {}
 
@@ -36,7 +37,7 @@ var _sizes: Dictionary = {}
 func _init() -> void:
 	await process_frame
 	await _run()
-	print("po_ui_test C1/C2: désactivé (PO1)")
+	print("po_ui_test UiLayout: %s" % ("OK" if _layout_failures == 0 else "%d failure(s)" % _layout_failures))
 	if _failures == 0:
 		var values := _sizes.keys()
 		values.sort()
@@ -71,6 +72,7 @@ func _collect_font_sizes(node: Node) -> void:
 
 
 func _run() -> void:
+	await _check_ui_layout()
 	await _check_start_menu()
 	await _check_campaign_map()
 	_check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
@@ -153,4 +155,80 @@ func _check_campaign_map() -> void:
 		_collect_font_sizes(map.flow.season_report)
 
 	map.queue_free()
+	await process_frame
+
+
+# --- UiLayout (lot PO1) ----------------------------------------------------------------
+
+
+func _check_layout(condition: bool, message: String) -> bool:
+	if not condition:
+		_layout_failures += 1
+	return _check(condition, "UiLayout: " + message)
+
+
+## Zones, exclusivité du panneau latéral, voile modal, pile d'avis.
+func _check_ui_layout() -> void:
+	var layout: Node = root.get_node("/root/UiLayout")
+	var host := CanvasLayer.new()
+	host.name = "LayoutTestHost"
+	root.add_child(host)
+	layout.attach_host(host)
+	await process_frame
+	var view: Vector2 = root.get_visible_rect().size
+	# Rectangles : proportions de l'écran, zones du bord de l'écran sans chevauchement.
+	var top: Rect2 = layout.zone_rect(layout.Zone.TOP_BAR)
+	_check_layout(top.is_equal_approx(Rect2(0, 0, view.x, view.y * 0.05)), "TOP_BAR rect %s" % top)
+	var zone_node: Control = layout.zone_node(layout.Zone.SIDE_PANEL)
+	_check_layout(zone_node.get_global_rect().is_equal_approx(layout.zone_rect(layout.Zone.SIDE_PANEL)),
+		"SIDE_PANEL node %s vs rect %s" % [zone_node.get_global_rect(), layout.zone_rect(layout.Zone.SIDE_PANEL)])
+	# La zone ne grandit pas avec un occupant trop grand.
+	var big := PanelContainer.new()
+	big.custom_minimum_size = Vector2(3000, 3000)
+	layout.claim(layout.Zone.SIDE_PANEL, big)
+	await process_frame
+	_check_layout(zone_node.get_global_rect().is_equal_approx(layout.zone_rect(layout.Zone.SIDE_PANEL)),
+		"SIDE_PANEL must not grow with its occupant")
+	_check_layout(zone_node.clip_contents, "zones clip their occupants")
+	# Exclusivité : ouvrir un second panneau ferme le premier, même par `show()`.
+	var changes: Array = []
+	var on_change := func(control: Control) -> void: changes.append(control)
+	layout.side_panel_changed.connect(on_change)
+	var second := PanelContainer.new()
+	layout.claim(layout.Zone.SIDE_PANEL, second)
+	_check_layout(not big.visible and second.visible, "claiming a side panel closes the previous one")
+	big.show()
+	_check_layout(big.visible and not second.visible, "showing a side panel closes the other occupant")
+	_check_layout(layout.visible_occupants(layout.Zone.SIDE_PANEL).size() == 1, "a single side panel")
+	_check_layout(changes.size() >= 2 and changes[-1] == big, "side_panel_changed emitted (%d)" % changes.size())
+	layout.side_panel_changed.disconnect(on_change)
+	# Modale : voile et blocage.
+	var modal := PanelContainer.new()
+	layout.claim(layout.Zone.MODAL, modal)
+	var dim: Control = host.get_node("UiModalDim")
+	_check_layout(dim.visible and dim.mouse_filter == Control.MOUSE_FILTER_STOP, "modal dims and blocks")
+	_check_layout(is_equal_approx((dim as ColorRect).color.a, 0.45), "modal dim is 45 %")
+	modal.hide()
+	_check_layout(not dim.visible, "dim disappears with the modal")
+	# Avis : 3 visibles au plus, « + N », clic et délai.
+	for i in 5:
+		layout.toast("Avis %d" % i, "", 0.05)
+	var shown := 0
+	for entry in layout.toasts():
+		if entry.visible:
+			shown += 1
+	_check_layout(shown == 3 and layout.folded_toasts() == 2, "3 toasts visible, 2 folded (%d / %d)" % [shown, layout.folded_toasts()])
+	await create_timer(0.2).timeout
+	_check_layout(layout.toasts().is_empty(), "toasts vanish after their delay")
+	var clicked: Control = layout.toast("Cliquer", "", 0.0)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	clicked.gui_input.emit(click)
+	_check_layout(layout.toasts().is_empty(), "a click closes a toast")
+	# Libération.
+	layout.release(second)
+	_check_layout(second.get_parent() == null and not layout.occupants(layout.Zone.SIDE_PANEL).has(second), "release")
+	second.free()
+	host.queue_free()
 	await process_frame
