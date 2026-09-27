@@ -100,13 +100,13 @@ func _ready() -> void:
 	header.add_child(spacer)
 	_split_button = RichButton.new()
 	_split_button.text = "Séparer"
-	_split_button.add_theme_font_size_override("font_size", 13)
+	UiType.apply(_split_button, UiType.CAPTION)
 	_split_button.tooltip_text = "Maj ou Ctrl + clic pour choisir les régiments à détacher"
 	_split_button.pressed.connect(_on_split_pressed)
 	header.add_child(_split_button)
 	_garrison_button = RichButton.new()
 	_garrison_button.text = "Garnison"
-	_garrison_button.add_theme_font_size_override("font_size", 13)
+	UiType.apply(_garrison_button, UiType.CAPTION)
 	_garrison_button.pressed.connect(_on_garrison_pressed)
 	header.add_child(_garrison_button)
 
