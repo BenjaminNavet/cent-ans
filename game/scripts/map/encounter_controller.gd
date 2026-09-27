@@ -79,7 +79,10 @@ func setup(campaign_map: Node) -> void:
 	add_child(_layer)
 	window = EncounterWindow.new()
 	window.hide()
-	map.ui.add_child(window)
+	# PO1 (bible DA § 12.1) : choix bloquant → zone `MODAL` de `UiLayout` (fond assombri, entrées
+	# bloquées derrière), puis inscrit dans la pile (Échap) : après le reparentage, qui désinscrit.
+	UiZones.put(UiZones.Zone.MODAL, window)
+	map.ui.register_panel(window, PanelStack.Kind.CENTRAL)
 	window.encounter_option_chosen.connect(_on_option_chosen)
 	window.closed.connect(_on_window_closed)
 

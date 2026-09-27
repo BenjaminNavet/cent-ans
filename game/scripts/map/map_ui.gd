@@ -438,7 +438,7 @@ func set_hover_trade(text: String) -> void:
 func show_toast(text: String, is_error: bool = false) -> void:
 	toast.text = text
 	toast.hide()
-	var entry: Control = UiLayout.toast(text)
+	var entry: Control = UiZones.layout().toast(text)
 	var label := entry.find_child("Text", true, false) as Label
 	if label != null and is_error:
 		label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10))
@@ -693,7 +693,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 		general_picker.theme = event_log.theme
 		general_picker.add_theme_stylebox_override("panel", HudStyle.panel_box(10))
 		# PO1 : dans la zone de sélection (bas), à la place du bandeau ; la liste défile.
-		UiLayout.claim(UiLayout.Zone.BOTTOM_SELECTION, general_picker)
+		UiZones.put(UiZones.Zone.BOTTOM_SELECTION, general_picker)
 		register_panel(general_picker, PanelStack.Kind.CENTRAL)
 		general_picker.visibility_changed.connect(func() -> void:
 			if not general_picker.visible and current_army_id != "":
@@ -973,16 +973,16 @@ func _setup_hud() -> void:
 ## contre le bord gauche de la minicarte (la zone `MINIMAP`, 0,18 × 0,28, ne peut porter les
 ## deux : écart consigné dans `docs/wip/po1-layout.md`).
 func _setup_zones() -> void:
-	UiLayout.attach_host(self)
+	UiZones.layout().attach_host(self)
 	for control: Control in [general_seal, army_strip, army_actions]:
-		UiLayout.claim(UiLayout.Zone.BOTTOM_SELECTION, control)
-	UiLayout.claim(UiLayout.Zone.SIDE_PANEL, province_panel)
-	UiLayout.claim(UiLayout.Zone.SIDE_PANEL, news_letters)
+		UiZones.put(UiZones.Zone.BOTTOM_SELECTION, control)
+	UiZones.put(UiZones.Zone.SIDE_PANEL, province_panel)
+	UiZones.put(UiZones.Zone.SIDE_PANEL, news_letters)
 	news_letters.size_flags_horizontal = Control.SIZE_SHRINK_END
-	UiLayout.claim(UiLayout.Zone.TOASTS, event_log)
-	UiLayout.claim(UiLayout.Zone.TOASTS, turn_banner)
+	UiZones.put(UiZones.Zone.TOASTS, event_log)
+	UiZones.put(UiZones.Zone.TOASTS, turn_banner)
 	event_log.visibility_changed.connect(queue_layout)
-	UiLayout.side_panel_changed.connect(func(_control: Control) -> void: queue_layout())
+	UiZones.layout().side_panel_changed.connect(func(_control: Control) -> void: queue_layout())
 
 
 # --- Pile des panneaux (audit A3, lot U1) ------------------------------------------------
@@ -1099,11 +1099,11 @@ func queue_layout() -> void:
 func layout_hud() -> void:
 	_layout_queued = false
 	var view := get_viewport().get_visible_rect().size
-	var top: float = UiLayout.zone_rect(UiLayout.Zone.TOP_BAR).end.y
-	var bottom := UiLayout.zone_rect(UiLayout.Zone.BOTTOM_SELECTION)
+	var top: float = UiZones.rect(UiZones.Zone.TOP_BAR).end.y
+	var bottom := UiZones.rect(UiZones.Zone.BOTTOM_SELECTION)
 	var zone_size := bottom.size
 	# Minicarte d'abord : la cloche se range juste à sa gauche, calée en bas.
-	var mini_zone := UiLayout.zone_rect(UiLayout.Zone.MINIMAP)
+	var mini_zone := UiZones.rect(UiZones.Zone.MINIMAP)
 	var mini_left := mini_zone.end.x
 	if minimap != null:
 		if minimap.has_method("fit_to"):
@@ -1155,12 +1155,12 @@ func layout_hud() -> void:
 			wide_panel_open = true
 	if minimap != null:
 		minimap.visible = not _covers(mini_zone)
-	var side := UiLayout.zone_rect(UiLayout.Zone.SIDE_PANEL)
+	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL)
 	docked_right_x = side.end.x
 	# Lettres : occupant « de repos » du panneau latéral, visibles quand rien d'autre n'y est.
 	news_letters.fit_height(side.size.y)
 	var side_busy := false
-	for control in UiLayout.visible_occupants(UiLayout.Zone.SIDE_PANEL):
+	for control in UiZones.layout().visible_occupants(UiZones.Zone.SIDE_PANEL):
 		if control != news_letters:
 			side_busy = true
 	var letters_visible := not (side_busy or wide_panel_open)
@@ -1203,7 +1203,7 @@ func dock_right_panel(panel: Control) -> void:
 	if docked_panels.has(panel):
 		return
 	docked_panels.append(panel)
-	UiLayout.claim(UiLayout.Zone.SIDE_PANEL, panel)
+	UiZones.put(UiZones.Zone.SIDE_PANEL, panel)
 	panels.register(panel, PanelStack.Kind.DOCKED)
 	panel.visibility_changed.connect(queue_layout)
 	queue_layout()

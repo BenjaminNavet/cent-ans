@@ -32,7 +32,7 @@ func setup(campaign_map: Node) -> void:
 	settings = get_node_or_null("/root/Settings")
 	card = NextHintCard.new()
 	# PO1 : la carte « que faire maintenant » est un occupant de la zone `TOASTS`.
-	UiLayout.claim(UiLayout.Zone.TOASTS, card)
+	UiZones.put(UiZones.Zone.TOASTS, card)
 	card.activated.connect(activate)
 	card.dismissed.connect(dismiss)
 	enabled = not TutorialController.capture_mode()

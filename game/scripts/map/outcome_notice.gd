@@ -27,7 +27,7 @@ func setup(campaign_map: Node) -> void:
 	band.name = "OutcomeNoticeBand"
 	band.hide()
 	# PO1 : avis de résultat dans la zone `TOASTS` (haut gauche) plutôt qu'au centre de l'écran.
-	UiLayout.claim(UiLayout.Zone.TOASTS, band)
+	UiZones.put(UiZones.Zone.TOASTS, band)
 
 
 func available() -> bool:

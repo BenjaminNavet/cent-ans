@@ -71,7 +71,7 @@ func _build_panel() -> void:
 	# Le conseiller (VO1) s'efface tant que la liste est ouverte : même coin de l'écran.
 	panel.add_to_group(PanelStack.BLOCKING_GROUP)
 	# PO1 : registre dans la zone `SIDE_PANEL` (ouvrir la province ou la chronique le ferme).
-	UiLayout.claim(UiLayout.Zone.SIDE_PANEL, panel)
+	UiZones.put(UiZones.Zone.SIDE_PANEL, panel)
 
 
 func toggle() -> void:
@@ -343,7 +343,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## PO1 : hauteur de la zone `SIDE_PANEL` (repère de mise à jour de `_layout`).
 func _top() -> float:
-	return UiLayout.zone_rect(UiLayout.Zone.SIDE_PANEL).size.y
+	return UiZones.rect(UiZones.Zone.SIDE_PANEL).size.y
 
 
 ## PO1 : la liste remplit la zone `SIDE_PANEL` (placée par `UiLayout`) ; elle défile au-delà.

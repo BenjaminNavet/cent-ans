@@ -252,7 +252,7 @@ func _build(data: Dictionary) -> void:
 	# PO1 (bible DA § 12.1) : la bulle suit la zone `TOASTS` de `UiLayout` (haut gauche, sous la
 	# barre) — même largeur, bas calé sur le bas de la zone, elle grandit vers le haut. Elle reste
 	# dans la couche du conseiller (il survit aux changements de scène) : ancres seulement.
-	var zone: Rect2 = UiLayout.ZONE_RECTS[UiLayout.Zone.TOASTS]
+	var zone: Rect2 = UiZones.ZONE_RECTS[UiZones.Zone.TOASTS]
 	_panel.anchor_left = zone.position.x
 	_panel.anchor_right = zone.end.x
 	_panel.anchor_top = zone.end.y
