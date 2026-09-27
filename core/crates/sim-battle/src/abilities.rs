@@ -170,7 +170,7 @@ impl BattleSim {
     /// ability once planted and from the front; else the passive cover of a
     /// pavise regiment that does not march, 0.6; or the leader's order of
     /// older replays), and the dense mass of the close ranks.
-    pub(crate) fn missile_cover(&self, target: &Unit, angle: u8) -> f64 {
+    pub fn missile_cover(&self, target: &Unit, angle: u8) -> f64 {
         let passive = if target.has(Ability::Pavise) && target.state != UnitState::Marching {
             0.6
         } else {
@@ -192,7 +192,7 @@ impl BattleSim {
     /// CB4: multiplier of the melee casualties `defender` takes from
     /// `attacker` striking from `angle` (close ranks, planted pikes), and of
     /// those `attacker` deals (planted pikes against horsemen in front).
-    pub(crate) fn ability_melee_factor(&self, attacker: &Unit, defender: &Unit, angle: u8) -> f64 {
+    pub fn ability_melee_factor(&self, attacker: &Unit, defender: &Unit, angle: u8) -> f64 {
         let mut factor = 1.0;
         if let Some(e) = self.ability_effects(defender) {
             factor *= if angle == 0 {
@@ -217,7 +217,7 @@ impl BattleSim {
 
     /// CB4: does a charge of `attacker` from `angle` break on the planted
     /// pikes of `defender`?
-    pub(crate) fn ability_stops_charge(&self, attacker: &Unit, defender: &Unit, angle: u8) -> bool {
+    pub fn ability_stops_charge(&self, attacker: &Unit, defender: &Unit, angle: u8) -> bool {
         attacker.is_cavalry()
             && attacker.mounted
             && self
@@ -227,7 +227,7 @@ impl BattleSim {
 
     /// CB4: multiplier of the men a charge knocks down and of the cohesion
     /// lost by `defender` (close ranks).
-    pub(crate) fn ability_charge_taken(&self, defender: &Unit) -> f64 {
+    pub fn ability_charge_taken(&self, defender: &Unit) -> f64 {
         self.ability_effects(defender)
             .map_or(1.0, |e| e.charge_taken_factor)
     }

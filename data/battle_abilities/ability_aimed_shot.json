@@ -22,7 +22,7 @@
   "ai": {
     "enemy_within": 110.0,
     "mounted_enemy": true,
-    "flank_shot": true
+    "when_attacking": true
   },
   "sources": ["Geoffrey le Baker, Chronicon (Poitiers)", "Strickland et Hardy, The Great Warbow (2005)", "Rogers, « The Efficacy of the English Longbow » (1998)"]
 }

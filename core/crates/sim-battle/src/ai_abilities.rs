@@ -38,7 +38,7 @@ fn wants(view: &View, i: usize, ability: &BattleAbility, defensive: bool) -> boo
     let Some(ai) = &ability.ai else {
         return false;
     };
-    if ai.when_defensive && !defensive {
+    if (ai.when_defensive && !defensive) || (ai.when_attacking && defensive) {
         return false;
     }
     let u = &view.units[i];
@@ -49,7 +49,6 @@ fn wants(view: &View, i: usize, ability: &BattleAbility, defensive: bool) -> boo
         view.nearest_enemy(i, |e| {
             (!mounted || e.mounted)
                 && (!front || attack_angle(u, e.x, e.z) == 0)
-                && (!ai.flank_shot || attack_angle(e, u.x, u.z) != 0)
                 && (ability.kind != AbilityKind::CloseRanks
                     || (!e.can_shoot() || e.ammo == 0) && e.category != UnitCategory::Siege)
         })

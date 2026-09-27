@@ -89,11 +89,11 @@
         "enemy_within": { "type": "number", "exclusiveMinimum": 0, "description": "Un ennemi à moins de tant de mètres." },
         "mounted_enemy": { "type": "boolean", "description": "Seulement contre un ennemi monté." },
         "in_front": { "type": "boolean", "description": "L'ennemi est devant le régiment." },
-        "flank_shot": { "type": "boolean", "description": "Le régiment prendrait l'ennemi de flanc ou de dos." },
         "under_fire_within": { "type": "number", "exclusiveMinimum": 0, "description": "Pertes par le trait depuis moins de tant de secondes." },
         "morale_below": { "type": "number", "minimum": 0, "maximum": 100 },
         "no_enemy_within": { "type": "number", "exclusiveMinimum": 0, "description": "Aucun ennemi à moins de tant de mètres." },
         "when_defensive": { "type": "boolean", "description": "Seulement pour un camp sur la défensive." },
+        "when_attacking": { "type": "boolean", "description": "Seulement pour un camp à l'attaque." },
         "in_sieges": { "type": "boolean", "description": "Aussi en bataille de siège (sinon en rase campagne seulement)." }
       },
       "additionalProperties": false

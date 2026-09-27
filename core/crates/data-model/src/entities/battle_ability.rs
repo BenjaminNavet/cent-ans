@@ -174,9 +174,6 @@ pub struct BattleAbilityAi {
     /// The enemy stands in front of the regiment.
     #[serde(default, skip_serializing_if = "is_false")]
     pub in_front: bool,
-    /// The regiment would strike the enemy on its flank or in its rear.
-    #[serde(default, skip_serializing_if = "is_false")]
-    pub flank_shot: bool,
     /// The regiment took missile casualties within this many seconds.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub under_fire_within: Option<f64>,
@@ -189,6 +186,9 @@ pub struct BattleAbilityAi {
     /// Only for a side on the defensive.
     #[serde(default, skip_serializing_if = "is_false")]
     pub when_defensive: bool,
+    /// Only for a side on the attack.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub when_attacking: bool,
     /// Also in siege battles (field battles only otherwise).
     #[serde(default, skip_serializing_if = "is_false")]
     pub in_sieges: bool,
