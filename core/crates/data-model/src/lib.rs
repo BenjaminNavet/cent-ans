@@ -34,7 +34,9 @@ pub use entities::ai_diplomacy::{
     WarPlanningRules,
 };
 pub use entities::ai_doctrine::{AiDoctrines, Doctrine};
-pub use entities::ai_grid::AiGrid;
+pub use entities::ai_grid::{
+    AiAmbush, AiEncounters, AiEntrenched, AiForcedMarch, AiGrid, AiPostures,
+};
 pub use entities::auto_resolve::{
     AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
 };

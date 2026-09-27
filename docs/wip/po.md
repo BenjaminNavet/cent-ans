@@ -53,13 +53,13 @@ Coller ce prompt :
 
 ### Vague 1 (agents en worktree, branches issues de `feat/po-polish`)
 - [x] PO2 lancé (27/09 ~21 h, Sonnet) — branche `feat/po2-typo` — worktree : agent `.claude/worktrees/agent-…` (voir `git worktree list`)
-- [ ] PO1 lancé — branche `feat/po1-layout` — worktree : …
+- [x] PO1 lancé (27/09 ~22 h) — branche `feat/po1-layout` — worktree : agent (voir `git worktree list`)
 - [x] PO3 lancé (27/09 ~21 h) — branche `feat/po3-map` — worktree : agent (voir `git worktree list`)
-- [ ] PO4 lancé — branche `feat/po4-battle` — worktree : …
-- [ ] PO5 lancé — branche `feat/po5-motion` — worktree : …
+- [x] PO4 lancé (27/09 ~22 h, étape 6 autorisée : CB-M1 fusionné) — branche `feat/po4-battle`
+- [x] PO5 lancé (27/09 ~22 h) — branche `feat/po5-motion`
 
 ### PO6 — Intégration (orchestrateur)
-- [ ] Fusion de PO2 dans `feat/po-polish` (tests OK)
+- [x] Fusion de PO2 dans `feat/po-polish` (tests OK : smoke, C3 = [14, 17, 20, 26])
 - [ ] Fusion de PO1
 - [ ] Fusion de PO3
 - [ ] Fusion de PO4 (étape 6 faite ou reportée : …)
@@ -144,3 +144,4 @@ Diagnostic de départ (spec § 1), puis vue par vue :
 - 27/09 : PO0 commencé ; planche « avant » (10 vues JPEG, `po_shot.gd` pilote les options de capture des scènes) et inventaire faits. Constat : CB-M1 et CV3-4 sont fusionnés ; 4 agents d'autres chantiers tournent (AN1a, AN1b, PR1, CB-M2), donc 2 lots PO à la fois au plus.
 - 27/09 : PO0 fondations : bible § 12 (zones en parts d'écran, échelle Title 26 / Heading 20 / Body 17 / Caption 14 px à 900 px de référence, soit ×1,2 à 1080p — ancrée sur la taille par défaut du thème, 17), ADR 0097, squelette (`UiLayout`, `Settings.is_dev()` + `--dev`, tests PO désactivés, `time_of_day` au schéma, budget). Smoke vert.
 - 27/09 : PO0 fini (c6cc7cf1), branche `feat/po-polish` créée (eb6a8a23). Vague 1 en deux temps (4 agents d'autres chantiers actifs : AN1a, AN1b, PR1, CB-M2) : PO2 et PO3 lancés ; PO4, PO1 (après la fusion de PO2), puis PO5 à mesure que des places se libèrent. **Prochaine étape : attendre PO2/PO3, fusionner PO2, lancer PO4 et PO1.**
+- 27/09 : PO2 rendu et fusionné dans `feat/po-polish` (a7133864) ; `main` (AN1a/AN1b) fusionné dans `feat/po-polish` (143b3ced), smoke vert. Restes PO2 confiés à PO1 (tailles figées des `.tscn` carte et province). 162 surcharges de taille hors tranche → phase 2. Worktree de fusion de l'orchestrateur : `scratchpad/po-merge` (branche `feat/po-polish`). AN1 clos : PO1, PO4, PO5 lancés. **Prochaine étape : fusionner PO1 → PO3 → PO4 → PO5 à leur retour.**
