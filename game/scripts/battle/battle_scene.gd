@@ -281,6 +281,7 @@ func _ready() -> void:
 	hud.card_double_clicked.connect(_on_card_double_clicked)
 	hud.card_hovered.connect(func(id: int) -> void: card_hover = id)  # CB-M2 : contour au survol
 	hud.command_pressed.connect(input._on_command)
+	hud.ability_pressed.connect(input.use_card_ability)  # CB4 : bouton de capacité d'une carte
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
 	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
@@ -697,6 +698,9 @@ func _build_scene() -> bool:
 		hud.set_opening(battle.call("get_opening"), player_side)  # CV3-2
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
+	# CB4 : textes des capacités pour les infobulles des boutons de carte.
+	if battle.has_method("get_ability_catalog"):
+		hud.ability_catalog = battle.call("get_ability_catalog")
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
 	camera_rig.bounds = Rect2(-150, -150, terrain.FIELD_W + 300.0, terrain.FIELD_D + 300.0)  # EP1
 	# EP1 : recul maximal selon la largeur du champ (900 m au standard, 1350 m à 2400 m).

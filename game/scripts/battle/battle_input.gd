@@ -49,6 +49,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if scene.formation_picker != null and BattleFormationPicker.shortcut_index(key) > 0:
 			scene.formation_picker.select_index(BattleFormationPicker.shortcut_index(key))
 			return
+		# CB4 : Alt/Option+1…4 = capacité n° n de la sélection (avant les groupes de sélection).
+		var slot := BattleHotkeys.ability_slot(key)
+		if slot > 0:
+			use_ability_slot(slot)
+			return
 		# F5b : chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
 		if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
 			handle_group_key(int(key.physical_keycode - KEY_0), key.ctrl_pressed or key.meta_pressed)
@@ -430,6 +435,49 @@ static func mode_command(units: Array, ids: Array, mode: String) -> Dictionary:
 	if able.is_empty():
 		return {}
 	return {"type": "set_mode", "units": able, "mode": mode, "enabled": enable}
+
+
+## CB4 : Alt+`slot` : la capacité n° `slot` de la première unité sélectionnée qui en a autant,
+## employée (ou levée) par toutes les unités sélectionnées qui l'ont ; message sinon. Rien
+## pendant un rejeu.
+func use_ability_slot(slot: int) -> void:
+	if scene.replay_mode:
+		return
+	var command := ability_command(scene.units, _available_selection(), slot)
+	if command.is_empty():
+		scene.hud.show_toast("Aucune unité sélectionnée n'a de capacité en Alt+%d." % slot)
+		return
+	command_requested.emit(command)
+
+
+## CB4 : bouton de capacité d'une carte : cette unité seule.
+func use_card_ability(unit_id: int, ability: String) -> void:
+	if scene.replay_mode:
+		return
+	command_requested.emit({"type": "use_ability", "units": [unit_id], "ability": ability})
+
+
+## CB4 : l'ordre `use_ability` d'Alt+`slot` pour les unités `ids` (dans l'ordre de la sélection ;
+## fonction pure, testée) : la capacité n° `slot` de la première qui en a autant, pour toutes
+## celles de `ids` qui l'ont ; vide si aucune.
+static func ability_command(units: Array, ids: Array, slot: int) -> Dictionary:
+	var by_id := {}
+	for unit in units:
+		by_id[int(unit["id"])] = unit
+	var ability := ""
+	for id in ids:
+		var abilities := Array((by_id.get(int(id), {}) as Dictionary).get("abilities", []))
+		if abilities.size() >= slot:
+			ability = str((abilities[slot - 1] as Dictionary).get("id", ""))
+			break
+	if ability == "":
+		return {}
+	var having: Array[int] = []
+	for id in ids:
+		var abilities := Array((by_id.get(int(id), {}) as Dictionary).get("abilities", []))
+		if BattleAbilityIcons.slot_of(abilities, ability) > 0:
+			having.append(int(id))
+	return {"type": "use_ability", "units": having, "ability": ability}
 
 
 func _available_selection() -> Array[int]:
