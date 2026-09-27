@@ -45,8 +45,25 @@ Cible cargo privée : `core/target-cb5`.
 - Rejeu EP13 : `alerts`/`alerts_read` ne sont pas dans `state_digest` (comme `events`) — flux de
   sortie pur, aucun impact sur le déterminisme. À vérifier par un test.
 
-## Prochaine étape
-Cœur terminé et vert (`cargo test -p sim-battle`, `b6`, `ep13_replay` release inclus). Reste :
-pont `godot-bridge` (`get_alerts`, constantes `cb5_alert_duration_s`/`cb5_alert_merge_window_s`
-dans `get_rule_constants`), puis Godot (`battle_alerts_column.gd`, ping minicarte, cris,
-branchement scène/HUD, tests + probe).
+## État final
+Lot CB5 complet sur cette branche : cœur, pont, données, Godot, tous les tests demandés qui
+existent dans cette branche sont verts (voir rapport final de l'agent). `cargo fmt`,
+`cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (136 groupes,
+0 échec), `uv run --project tools pytest` (791 passed, 2 skipped pré-existants), `smoke.gd`,
+`cb0_input_equivalence_test`, `cb_m1_outline_test`, `cb5_alerts_test`, `cb5_alerts_shot --probe`
+tous OK (exit 0, aucune `SCRIPT ERROR`).
+
+`cb1_drag_formation_test`, `cb_m2_path_hover_test`, `cb_m3_queue_test`,
+`cb_m4_range_compare_test` : **absents de cette branche** (CB-M2/CB-M3/CB-M4/CB1 pas encore
+fusionnés dans `main`, malgré `docs/wip/cb.md`) — impossible à exécuter ici, pas une régression
+de CB5. Le panneau de comparaison au survol (CB-M4) n'a donc pas pu être vérifié contre le
+chevauchement de la colonne d'alertes ; à refaire une fois CB-M4 fusionné (le probe script laisse
+une note explicite à cet effet).
+
+Touches ajoutées : aucune (pas de remappage, CB2 s'en charge). Fichiers `battle_hud.gd` /
+`battle_scene.gd` : ajouts minimes et localisés (une constante, un champ, un appel de
+construction, un branchement de signal, une ligne dans la boucle HUD) pour limiter les conflits
+avec CB2/CB3/CB6 qui travaillent en parallèle sur ces mêmes fichiers.
+
+Je n'ai pas mis à jour `docs/wip/cb.md` (fichier d'orchestration partagé, modifié par les autres
+lots en parallèle) : à faire par la session d'orchestration lors de la fusion.
