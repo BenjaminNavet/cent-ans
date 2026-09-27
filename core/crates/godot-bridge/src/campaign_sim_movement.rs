@@ -18,6 +18,33 @@ const MASK_MARGIN: u32 = 2;
 
 #[godot_api(secondary)]
 impl CampaignSim {
+    /// CV3: every army stance (`normal`, `raid`, `siege`, `ambush`,
+    /// `forced_march`, `entrenched`) → `""` when `army_id` may take it now,
+    /// else the French reason of the refusal (tooltip). Empty dictionary for
+    /// an unknown army. The order itself stays `set_stance`.
+    #[func]
+    fn get_stance_options(&self, army_id: GString) -> VarDictionary {
+        let mut dict = VarDictionary::new();
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return dict;
+        };
+        let Some(army) = ArmyId::parse(&army_id.to_string()) else {
+            return dict;
+        };
+        if state.army(&army).is_none() {
+            return dict;
+        }
+        for (stance, check) in sim_campaign::posture::stance_options(state, data, &army) {
+            let reason = match check {
+                Ok(()) => String::new(),
+                Err(sim_campaign::OrderError::StanceRefused(reason)) => reason,
+                Err(error) => error.to_string(),
+            };
+            dict.set(stance.key(), reason.as_str());
+        }
+        dict
+    }
+
     /// Cells the army can reach this turn, as a mask cropped to their
     /// bounding box: `{image, origin, size, cell_px, cells, budget}`.
     /// `image` is an RG8 image of one texel per grid cell: R = 255 inside

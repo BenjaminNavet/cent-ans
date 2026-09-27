@@ -416,7 +416,7 @@ pub(crate) fn start_of_turn(state: &mut CampaignState) {
 }
 
 /// Supply loss of an entrenched army: `loss` minus the saving.
-pub(crate) fn entrenched_loss(data: &GameData, army: &Army, loss: u8) -> u8 {
+pub fn entrenched_loss(data: &GameData, army: &Army, loss: u8) -> u8 {
     if army.stance != Stance::Entrenched {
         return loss;
     }
@@ -429,11 +429,7 @@ pub(crate) fn entrenched_loss(data: &GameData, army: &Army, loss: u8) -> u8 {
 /// Auto-resolve bonuses of a side led by `lead` (`BattleCharge`,
 /// `BattleDefense` percents): the entrenched camp defends better; the
 /// ambusher of a sprung ambush charges harder.
-pub(crate) fn auto_resolve_bonus(
-    data: &GameData,
-    lead: Option<&Army>,
-    ambusher: bool,
-) -> (f64, f64) {
+pub fn auto_resolve_bonus(data: &GameData, lead: Option<&Army>, ambusher: bool) -> (f64, f64) {
     let rules = rules(data);
     let charge = if ambusher {
         rules.ambush.auto_attack_percent
