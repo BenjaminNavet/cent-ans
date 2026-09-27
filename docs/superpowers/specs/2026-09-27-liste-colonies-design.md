@@ -90,7 +90,7 @@ Panneau construit en code, sur le modèle de `UnitRosterController` (sections re
 
 ## 3. Documentation
 
-- `manuel.md` : une section « Liste des colonies (B) ».
+- `docs/manuel.md` : une section « Liste des colonies (B) ».
 - `docs/wip/colonies-liste.md` : état et prochaine étape, mis à jour à chaque commit `wip:`.
 - Pas d'ADR : cette fonction ne change pas l'architecture.
 
