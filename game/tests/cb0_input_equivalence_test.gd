@@ -9,6 +9,8 @@ extends SceneTree
 ##
 ## Ce test verrouille le comportement d'avant l'extraction des entrées vers `battle_input.gd`
 ## (CB0) : il doit rester vert, sans modifier le golden, une fois l'extraction faite.
+## Seule retouche voulue depuis : CB1 ajoute au glisser-droit (commande 1) la clé `width`
+## (longueur du glisser = largeur du front).
 ##
 ## Usage :
 ##   godot --headless --path game --script res://tests/cb0_input_equivalence_test.gd

@@ -101,6 +101,9 @@ fn ai_changes_formation() {
         run: false,
         facing: None,
         queue: false,
+        width: None,
+        match_speed: false,
+        group_tag: None,
     };
     sim.issue_command(far).unwrap();
     place(&mut sim, 2, 1100.0, 400.0, 0.0);
@@ -221,6 +224,9 @@ fn siege_pathing_uses_breach() {
         run: true,
         facing: None,
         queue: false,
+        width: None,
+        match_speed: false,
+        group_tag: None,
     };
     sim.issue_command(order).unwrap();
     let mut arrived = false;

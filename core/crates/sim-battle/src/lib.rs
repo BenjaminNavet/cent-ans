@@ -52,6 +52,7 @@ pub mod duel;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
+pub mod formation_width;
 pub mod historical;
 pub mod horse_wait;
 pub mod hover;
@@ -97,6 +98,7 @@ pub use field::{
     FIELD_WIDTH, GRID_RESOLUTION,
 };
 pub use fire::{Blaze, FireRules, FireState};
+pub use formation_width::{split_widths, FormationWidthRules, RankBounds};
 pub use historical::HistoricalMap;
 pub use hover::{
     Advantage, Compare, CompareSide, HoverContext, HoverKind, HoverRules, RangeArcRules,

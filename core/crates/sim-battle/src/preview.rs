@@ -43,6 +43,10 @@ pub struct PreviewLeg {
     pub from: (f64, f64),
     /// Waypoints, the destination last; `Err` when unreachable.
     pub path: Result<Vec<(f64, f64)>, PreviewError>,
+    /// CB1: frontage and depth (metres) of the regiment on arrival (its
+    /// Line for a dragged width, else its present formation); `None` for
+    /// the single path of a large selection.
+    pub extent: Option<(f64, f64)>,
 }
 
 impl BattleSim {
@@ -68,7 +72,23 @@ impl BattleSim {
         z: f64,
         facing: Option<f64>,
     ) -> Vec<PreviewLeg> {
-        self.preview_group_with(units, x, z, facing, false)
+        self.preview_group_with(units, x, z, facing, None, false)
+    }
+
+    /// CB1: [`Self::preview_group`] (or, `queued`,
+    /// [`Self::preview_group_queued`]) of a dragged `Move` `width` metres
+    /// wide: the places of the regiments in their new frontages, each leg
+    /// with the frontage and depth taken on arrival.
+    pub fn preview_group_width(
+        &self,
+        units: &[u32],
+        x: f64,
+        z: f64,
+        facing: Option<f64>,
+        width: Option<f64>,
+        queued: bool,
+    ) -> Vec<PreviewLeg> {
+        self.preview_group_with(units, x, z, facing, width, queued)
     }
 
     /// CB-M3: the way regiment `unit` would walk to (x, z) starting from
@@ -103,7 +123,7 @@ impl BattleSim {
         z: f64,
         facing: Option<f64>,
     ) -> Vec<PreviewLeg> {
-        self.preview_group_with(units, x, z, facing, true)
+        self.preview_group_with(units, x, z, facing, None, true)
     }
 
     fn preview_group_with(
@@ -112,6 +132,7 @@ impl BattleSim {
         x: f64,
         z: f64,
         facing: Option<f64>,
+        width: Option<f64>,
         queued: bool,
     ) -> Vec<PreviewLeg> {
         let ids: Vec<u32> = units
@@ -149,21 +170,28 @@ impl BattleSim {
                 unit: None,
                 from,
                 path,
+                extent: None,
             }];
         }
-        let destinations = self.group_destinations_from(&ids, &anchors, x, z, facing);
+        let widths = self.move_widths(&ids, width);
+        let frontages = self.move_frontages(&ids, widths.as_deref());
+        let destinations =
+            self.group_destinations_with(&ids, &anchors, x, z, facing, frontages.as_deref());
         ids.iter()
+            .enumerate()
             .zip(anchors.iter().zip(destinations))
-            .map(|(&id, (&from, to))| {
+            .map(|((k, &id), (&from, to))| {
                 let path = if inside {
                     self.preview_to(id as usize, from, to)
                 } else {
                     Err(PreviewError::OutsideField)
                 };
+                let share = widths.as_ref().map(|w| w[k]);
                 PreviewLeg {
                     unit: Some(id),
                     from,
                     path,
+                    extent: Some(self.units()[id as usize].extent_for_width(share)),
                 }
             })
             .collect()

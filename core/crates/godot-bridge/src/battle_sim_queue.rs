@@ -8,7 +8,6 @@ use godot::prelude::*;
 use sim_battle::{QueuedOrder, Unit};
 
 use crate::battle_sim::BattleSim;
-use crate::battle_sim_preview::reason_fr;
 
 /// `get_units()[i].queue`: the regiment's orders waiting behind the current
 /// one, in order, each `{x, z}` (where it goes: an attack's target where it
@@ -72,27 +71,14 @@ impl BattleSim {
         x: f64,
         z: f64,
         facing: f64,
+        #[opt(default = 0.0)] width: f64,
     ) -> VarArray {
         let Some(sim) = &self.sim else {
             return VarArray::new();
         };
         let ids = Self::ids_of(&unit_ids);
         let facing = facing.is_finite().then_some(facing);
-        sim.preview_group_queued(&ids, x, z, facing)
-            .iter()
-            .map(|leg| {
-                let (path, reason) = match &leg.path {
-                    Ok(path) => (self.path_points(leg.from, path), ""),
-                    Err(e) => (PackedVector3Array::new(), reason_fr(*e)),
-                };
-                let mut dict = vdict! {
-                    "unit" => leg.unit.map_or(-1, i64::from),
-                    "ok" => leg.path.is_ok(),
-                    "reason" => reason,
-                };
-                dict.set("path", &path);
-                dict.to_variant()
-            })
-            .collect()
+        let legs = sim.preview_group_width(&ids, x, z, facing, Self::drag_width(width), true);
+        self.legs_array(&legs)
     }
 }

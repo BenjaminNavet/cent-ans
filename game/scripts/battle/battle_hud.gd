@@ -25,8 +25,8 @@ const SPEED_TOOLTIPS := ["Pause (Espace)", "Vitesse ×1 (+ / −)", "Vitesse ×2
 const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 • Espace : pause (ordres possibles en pause) · + / − : vitesse ×1, ×2, ×4 (boutons en bas à droite).
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner · double clic sur une carte : centrer la caméra dessus.
-• Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne.
-• Ctrl+1..9 : enregistrer la sélection en groupe · 1..9 : rappeler le groupe (deux fois : centrer la caméra).
+• Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne, sa longueur donne la largeur du front.
+• Ctrl+1..9 : enregistrer la sélection en groupe · 1..9 : rappeler le groupe (deux fois : centrer la caméra) · Ctrl+G : verrouiller le groupe (il garde sa forme et l'allure du plus lent).
 • F : formation · G : tir à volonté · H : halte · {orders} : ordres du chef · Échap : désélectionner.
 • Bannières au-dessus des troupes : clic = sélection, clic droit sur l'ennemi = attaque · U : masquer / afficher.
 • Caméra : {camera}, molette, {rotate}, bouton du milieu ; clic sur la minicarte : y aller.
@@ -661,6 +661,8 @@ func log_line_count() -> int:
 func update_cards(units: Array, side: String, selected: Array) -> void:
 	if _card_names.is_empty():
 		_card_names = distinct_names(units, side)
+	# CB1 : une unité en déroute ou hors du champ quitte son groupe verrouillé.
+	groups.prune_locks(units)
 	for unit in units:
 		if str(unit["side"]) != side:
 			continue
@@ -670,6 +672,7 @@ func update_cards(units: Array, side: String, selected: Array) -> void:
 		var card: UnitCard = _cards[id]
 		card.refresh(unit, selected.has(id))
 		card.set_groups(groups.numbers_of(id))
+		card.set_locked(groups.is_locked(id))
 		if bool(unit["is_general"]):
 			var changed := _leader_unit.is_empty() or int(_leader_unit["morale"]) != int(unit["morale"]) or bool(_leader_unit["present"]) != bool(unit["present"])
 			_leader_unit = unit

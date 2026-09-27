@@ -77,6 +77,20 @@ impl BattleSim {
         z: f64,
         facing: Option<f64>,
     ) -> Result<(), CommandError> {
+        self.deploy_unit_width(id, x, z, facing, None)
+    }
+
+    /// CB1: [`Self::deploy_unit`] with the frontage of a right-drag: the
+    /// regiment forms a Line `width` metres wide (ranks within
+    /// `data/rules/formation_width.json`; unchanged without width).
+    pub fn deploy_unit_width(
+        &mut self,
+        id: u32,
+        x: f64,
+        z: f64,
+        facing: Option<f64>,
+        width: Option<f64>,
+    ) -> Result<(), CommandError> {
         if !self.deploying {
             return Err(CommandError::NotDeploying);
         }
@@ -102,6 +116,7 @@ impl BattleSim {
         unit.destination = None;
         unit.target = None;
         unit.on_wall = false;
+        unit.set_width(width);
         Ok(())
     }
 
