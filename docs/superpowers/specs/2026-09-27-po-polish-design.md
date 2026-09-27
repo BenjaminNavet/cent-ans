@@ -46,7 +46,7 @@ gabarit du § 4 de façon mécanique.
 | C1 | Aucun texte technique visible (commande, chemin, identifiant brut) hors `dev_mode` | test headless qui parcourt les `Label`/`RichTextLabel` visibles de la tranche et refuse `uv run`, `res://`, `user://`, `--`, les chemins de fichier et les mots en snake_case (identifiants bruts) |
 | C2 | Disposition fixe : au plus un panneau `side_panel` ouvert ; aucun panneau ne chevauche `top_bar`, `bottom_selection`, `minimap` | test headless de rectangles sur la tranche, à 1280×720 et 1920×1080 |
 | C3 | Échelle typographique : 4 tailles, 14 px minimum à 1080p | test du thème et des surcharges de taille dans les scripts de la tranche |
-| C4 | Étalonnage : une LUT et une heure du jour par contexte, réglées dans `data/fx/atmosphere.json` | test de schéma + test que chaque contexte de la tranche résout une LUT existante |
+| C4 | Étalonnage : une heure du jour et un étalonnage par contexte, réglés dans `data/fx/atmosphere.json`, sans valeur de soleil codée en dur | test de schéma + test que chaque contexte de la tranche (carte × saison, bataille × météo × heure) résout un préréglage complet |
 | C5 | Jugement visuel | planche avant/après (8-10 vues) jugée une seule fois par le joueur à la fin de la vague 1 |
 
 Les performances ne régressent pas : le banc PB1 (`docs/wip/pb1-benchmark-perf.md`) reste dans
@@ -57,7 +57,7 @@ Les performances ne régressent pas : le banc PB1 (`docs/wip/pb1-benchmark-perf.
 1. **Planche « avant »** : captures headless de la tranche dans `docs/img/po/avant/` (script
    `game/tests/po_shot.gd`, 1280×720) et inventaire des défauts par écran dans `docs/wip/po.md`.
 2. **Gabarit de style** : nouvelle section « § 12 Gabarit d'interface et d'étalonnage » de la
-   bible DA (`docs/design/2026-09-25-bible-da.md`), figée par l'ADR 0096 :
+   bible DA (`docs/design/2026-09-25-bible-da.md`), figée par l'ADR 0097 (0096 est pris par AN1) :
    - **Zones d'écran** : `top_bar`, `bottom_selection`, `minimap`, `side_panel` (une seule
      occupante, l'ouverture d'une autre ferme la précédente), `toasts` (conseils, annonces,
      notices : pile en haut à droite, effacement automatique), `modal` (choix bloquants seulement,
@@ -66,9 +66,11 @@ Les performances ne régressent pas : le banc PB1 (`docs/wip/pb1-benchmark-perf.
      l'ADR, `caption` ≥ 14 px à 1080p), exposées comme variations de type du thème
      `game/scenes/ui/parchment_theme.tres`.
    - **Espacements** : grille de 8 px (4 / 8 / 16 / 24), constantes de thème.
-   - **Étalonnage** : LUT 3D (PNG 32³ en bande horizontale) dans `game/assets/lut/`, choisie par
-     contexte (`campaign/<saison>`, `battle/<heure>/<météo>`) dans `data/fx/atmosphere.json`,
-     schéma dans `data/schemas/`.
+   - **Étalonnage** : on réutilise la LUT 3D procédurale existante (`AtmosphereLibrary.grade_lut`,
+     blocs `grades` de `data/fx/atmosphere.json`). On ajoute la clé `time_of_day` (préréglages
+     `morning`, `midday`, `evening` : élévation, azimut et couleur du soleil, étalonnage) dans
+     `atmosphere.json` et son schéma. Les préréglages de soleil codés en dur dans
+     `battle_atmosphere.gd` (l. 19-40) y sont déplacés.
 3. **Squelette** commité avant la vague : autoload `UiLayout` (API publique, corps vides),
    drapeau `dev_mode` (réglage + argument `--dev`), tests PO désactivés, `docs/wip/po.md`.
 
@@ -81,7 +83,7 @@ Les performances ne régressent pas : le banc PB1 (`docs/wip/pb1-benchmark-perf.
 | **PO1** | Disposition fixe | `UiLayout` : `claim(zone, control)`, `release(control)`, signal `side_panel_changed`. Migration des panneaux de la tranche : barre du haut, bande d'armée (`army_strip`), province (`province_panel`), fin de tour (`end_turn_cluster`), conseiller et journal passés en toasts, lettres (`news_letters`), minicarte. `relief_cache_status` et tout message d'outil ne s'affichent qu'en `dev_mode`. Tests C1 et C2. | PO0 |
 | **PO2** | Typographie et finition UI | Variations de type et constantes d'espacement appliquées au thème ; suppression des tailles en dur dans les scripts de la tranche ; états survol / pressé / désactivé / focus ; fondu d'ouverture et de fermeture ≈ 120 ms (`Tween`) ; sons de clic et d'ouverture (CC0, `game/assets/third_party/`). Test C3. | PO0 ; fusion avant PO1 si conflit de thème |
 | **PO3** | Carte de campagne | Soleil rasant doré par saison (`campaign_atmosphere.gd`) ; LUT campagne ; perspective aérienne teintée (bleu-or, pas gris) ; forêts : variation de teinte, d'échelle et de densité, lisières plus basses ; étiquettes de villes dans le registre manuscrit (encre sur fond clair sans pastille, graisse selon le rang, bible § 4). Respecte la saturation ≤ 35 % (DA7b, `tools` `scene_saturation.py`). | PO0 |
-| **PO4** | Bataille | Préréglages d'heure (`matin`, `soir`, `couvert`) : soleil bas, ombres longues, LUT ; texture de détail proche du sol (CC0 Poly Haven) ; herbe en touffes avec variation plutôt qu'en taches ; léger désordre visuel des rangs (décalage de rendu seul, déterministe par graine d'unité, core inchangé) ; arbres lointains : vérifier que DA6 couvre l'horizon, sinon imposteurs à feuillage. **Le style du marqueur de sélection attend CB-M1** (voir § 6). | PO0 |
+| **PO4** | Bataille | Préréglages d'heure (`matin`, `soir`, `couvert`) : soleil bas, ombres longues, LUT ; texture de détail proche du sol (CC0 Poly Haven) ; herbe en touffes avec variation plutôt qu'en taches ; léger désordre visuel des rangs (décalage de position au rendu seul, déterministe par graine d'unité, core inchangé ; les animations et tissus relèvent d'AN1) ; arbres lointains : vérifier que DA6 couvre l'horizon, sinon imposteurs à feuillage. **Le style du marqueur de sélection attend CB-M1** (voir § 6). | PO0 |
 | **PO5** | Mouvement et transitions | Caméra carte et bataille : inertie, amorti, zoom lissé ; transitions fondu/volet carte ↔ chargement ↔ bataille ↔ résultat ; transition de fin de tour (fondu du sceau, changement de saison) ; retour visuel de clic (onde d'encre à l'ordre de déplacement sur la carte). Marqueurs d'ordre en bataille : style seulement, après CB-M1. | PO0 ; coordonné avec CB |
 
 Tous les lots : `smoke.gd` passe, captures produites par script (`*_shot.gd`), pas d'outil de
@@ -97,6 +99,9 @@ capture ni d'éditeur pour les agents (règle CLAUDE.md), commits `wip:` toutes 
 
 ## 6. Coordination
 
+- **AN1/PR1** (`docs/wip/an1-animation-vivante.md`) possèdent le shader des soldats (sommets), les
+  clips, les étendards et la retexture des accessoires. PO4 n'y touche pas.
+
 - **CB-M1** (contrôles de bataille, `docs/wip/cb.md`) possède la sélection et les ordres en
   bataille. Le cadre de sélection jaune et les marqueurs d'ordre sont restylés par PO4/PO5
   **après** la fusion de CB-M1, en ne touchant qu'au matériau et à la couleur.
@@ -108,7 +113,7 @@ capture ni d'éditeur pour les agents (règle CLAUDE.md), commits `wip:` toutes 
 
 ## 7. Budget
 
-0 $ prévu : LUT procédurales (outil Python dans `tools/`), textures CC0, sons CC0. Enveloppe de
+0 $ prévu : LUT procédurales existantes, textures CC0, sons CC0. Enveloppe de
 sécurité ≤ 3 $ (section « Polish » de `docs/budget.md`) si des cadres d'interface doivent être
 régénérés dans le registre enluminure.
 

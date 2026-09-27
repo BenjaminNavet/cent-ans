@@ -115,6 +115,7 @@ var end_turns_refreshed: int = 0
 var last_end_turn_stats: Dictionary = {}
 var _construction_ids := PackedStringArray()  # PB3d : chantiers marqués au dernier rafraîchissement
 var units_ctl: UnitRosterController = null  # liste « Mes unités » (U) : armées et agents
+var holdings_ctl: HoldingsController = null  # liste « Colonies » (B) : revenus, chantiers, menaces
 
 var _screenshot_path: String = ""
 var _screenshot_countdown: int = -1
@@ -191,6 +192,9 @@ func _ready() -> void:
 	units_ctl = UnitRosterController.new()  # après M4 et C6 : lit leurs états
 	add_child(units_ctl)
 	units_ctl.setup(self)
+	holdings_ctl = HoldingsController.new()  # lot HL2, après C5 : lit `settlement_detail`/HL1
+	add_child(holdings_ctl)
+	holdings_ctl.setup(self)
 	minimap_ctl = MinimapController.new()  # C1
 	minimap_ctl.name = "MinimapController"
 	add_child(minimap_ctl)
@@ -408,6 +412,8 @@ func refresh_all() -> void:
 		agents_ctl.refresh()
 	if units_ctl != null:  # liste « Mes unités »
 		units_ctl.refresh()
+	if holdings_ctl != null:  # liste « Colonies » (HL2)
+		holdings_ctl.refresh()
 	_refresh_trade_layer()  # C5 : routes commerciales
 	if map_modes != null:  # MF1 : repeint par-dessus les couleurs politiques
 		map_modes.refresh()
