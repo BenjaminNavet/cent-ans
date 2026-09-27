@@ -54,6 +54,7 @@ fn outcome(units: usize, general_captured: bool) -> SideOutcome {
         morale_delta: 0,
         routed: false,
         general_captured,
+        general_killed: false,
     }
 }
 

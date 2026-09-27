@@ -622,6 +622,7 @@ pub(crate) fn split_outcome(
                     morale_delta: outcome.morale_delta,
                     routed: outcome.routed,
                     general_captured: outcome.general_captured && commander.as_ref() == Some(id),
+                    general_killed: outcome.general_killed && commander.as_ref() == Some(id),
                 },
             ))
         })
@@ -732,6 +733,41 @@ pub(crate) fn apply_battle_result(
     };
     state.record_battle(winner, loser, loser_losses > 2 * winner_losses.max(1));
 
+    // CV3: nuanced outcome (heroic, decisive, Pyrrhic, disaster...).
+    let tally = |ids: &[ArmyId], outcome: &crate::battle_auto::SideOutcome| {
+        crate::battle_outcome::SideTally {
+            strength: ids
+                .iter()
+                .filter_map(|id| strength_before.get(id))
+                .sum::<u32>(),
+            losses: outcome.total_losses,
+            general_lost: outcome.general_captured || outcome.general_killed,
+        }
+    };
+    let place = crate::march::nearest_settlement(data, battlefield).map_or_else(
+        || province_name.clone(),
+        |s| crate::siege::settlement_name(data, &s),
+    );
+    let (attacker_xp, defender_xp) = crate::battle_outcome::apply(
+        state,
+        data,
+        &province_id,
+        &place,
+        &crate::battle_outcome::OutcomeSide {
+            faction: &attacker_faction,
+            armies: attackers,
+            tally: tally(attackers, &result.attacker),
+            won: result.winner == Winner::Attacker,
+        },
+        &crate::battle_outcome::OutcomeSide {
+            faction: &defender_faction,
+            armies: defenders,
+            tally: tally(defenders, &result.defender),
+            won: result.winner == Winner::Defender,
+        },
+        events,
+    );
+
     // Spec § 2: XP, `trait_veteran`, wounded and death chance for both
     // commanding generals (only if they weren't captured, which already
     // removed them from command).
@@ -742,6 +778,7 @@ pub(crate) fn apply_battle_result(
                 data,
                 general,
                 result.winner == Winner::Attacker,
+                attacker_xp,
                 events,
             );
         }
@@ -753,6 +790,7 @@ pub(crate) fn apply_battle_result(
                 data,
                 general,
                 result.winner == Winner::Defender,
+                defender_xp,
                 events,
             );
         }

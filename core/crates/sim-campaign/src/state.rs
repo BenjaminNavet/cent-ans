@@ -918,6 +918,10 @@ pub struct CampaignState {
     /// replay on the map (off unless the interface turns it on); never saved.
     #[serde(skip)]
     pub(crate) ai_replay: crate::ai_replay::AiReplayLog,
+    /// CV3: classification of the last field battle (heroic, disaster...)
+    /// for the UI; absent from older saves.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_battle_outcome: Option<crate::battle_outcome::BattleOutcomeReport>,
 }
 
 impl CampaignState {
@@ -958,6 +962,7 @@ impl CampaignState {
             difficulty: crate::difficulty::Difficulty::Normal,
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
+            last_battle_outcome: None,
         }
     }
 
