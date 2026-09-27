@@ -12,14 +12,17 @@ Branche : `feat/cb0-battle-input`. Plan : `docs/superpowers/plans/2026-09-27-con
       Piège rencontré : la fenêtre headless par défaut est 64×64 (`root.size` doit être forcé,
       comme les autres tests de capture) et la caméra doit cadrer tout le champ (pas seulement le
       camp du joueur) pour que la cible ennemie de l'étape 7 soit à l'écran.
-- [ ] Extraction vers `battle_input.gd` (déjà écrite en local, pas encore commitée/branchée),
-      test toujours vert, golden inchangé.
+- [x] Extraction vers `battle_input.gd` : nœud enfant créé en `_ready`, signaux connectés,
+      `_unhandled_input`/`_finish_left`/`_finish_right`/`handle_group_key`/`_on_command`/
+      `_next_formation`/`_available_selection`/état glisser+double clic/`_deploy_selection`
+      déplacés. Délégations fines gardées sur la scène (`issue`, `handle_group_key`) pour
+      `smoke.gd`. Test d'équivalence vert sans toucher au golden.
 - [ ] Sélection rapide (Ctrl/Cmd+A, double clic gauche même type, double clic carte même type +
       recentrage).
-- [ ] `smoke.gd` et le test d'équivalence passent tous les deux.
+- [ ] `smoke.gd` (en cours de vérification) et le test d'équivalence passent tous les deux.
 
 ## Prochaine étape
 
-Brancher `battle_input.gd` dans `battle_scene.gd` (nœud enfant créé en `_ready`, signaux
-connectés, fonctions déplacées), vérifier que le test d'équivalence reste vert sans toucher au
-golden, commit `refactor:` séparé.
+Ajouter la sélection rapide dans `battle_input.gd` (Ctrl/Cmd+A, double clic gauche 350 ms même
+`type`, `card_double_clicked` même type + recentrage sur `_on_card_double_clicked`), avec des
+assertions ajoutées au test d'équivalence sans réécrire le golden existant. Commit `feat:` séparé.
