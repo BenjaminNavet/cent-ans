@@ -19,8 +19,9 @@ ADR : `docs/decisions/0096-animation-vivante.md` § B (décision, coût, limites
 - Test : `game/tests/an1b_clips_test.gd` (+ `-- --coarse-figures`).
 
 ## Tests
-an1b_clips_test (fin, grossier), bv3_check, fg3_maps_test, ep13_replay_test OK ; smoke : voir
-dernier commit.
+Après fusion de `main` (6a2f9dc7) : an1b_clips_test (fin et `--coarse-figures`), bv3_check,
+fg3_maps_test, ep13_replay_test, smoke OK.
 
 ## Prochaine étape
-Fusionner `main`, retester, rendre la main (pas de fusion dans `main`).
+Lot terminé, prêt à fusionner par l'orchestrateur. Suites possibles : voir ADR 0096 § B
+« Limites » (kit grossier non recuit, pas de fondu entre clips d'un cycle de mêlée).
