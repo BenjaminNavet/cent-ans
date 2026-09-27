@@ -140,6 +140,7 @@ func setup(data: MapData) -> void:
 	var cached := _textures_for(data)
 	crop = cached["crop"]
 	_view.custom_minimum_size = cached["view_size"]
+	_natural_view = cached["view_size"]
 	_material.set_shader_parameter("province_ids", cached["ids"])
 	_material.set_shader_parameter("relief", cached["relief"])
 	_view.texture = cached["relief"]
@@ -312,6 +313,43 @@ func army_dot_count() -> int:
 
 func visible_province_count() -> int:
 	return _visible_count
+
+
+## PO1 : taille de la carte réduite à l'affichage d'origine (`setup`), avant `fit_to`.
+var _natural_view := Vector2.ZERO
+
+
+## PO1 (bible DA § 12.1) : ajuste la minicarte à la zone `MINIMAP` (`room`, pixels) — la carte
+## réduite garde ses proportions et rétrécit si besoin ; la rangée des modes passe en icônes
+## seules (infobulles gardées) quand leurs libellés ne tiennent pas. Jamais plus grande que
+## l'affichage d'origine.
+func fit_to(room: Vector2) -> void:
+	if _natural_view == Vector2.ZERO:
+		_natural_view = _view.custom_minimum_size
+	if _natural_view.x <= 0.0 or _natural_view.y <= 0.0:
+		return
+	var frame := get_theme_stylebox("panel").get_minimum_size() if has_theme_stylebox("panel") else Vector2.ZERO
+	_set_mode_labels(true)
+	if _modes_row.get_combined_minimum_size().x + frame.x > room.x:
+		_set_mode_labels(false)
+	var row_height := _modes_row.get_combined_minimum_size().y + 4.0
+	var free := Vector2(room.x - frame.x, room.y - frame.y - row_height)
+	var ratio := minf(1.0, minf(free.x / _natural_view.x, free.y / _natural_view.y))
+	var target := (_natural_view * maxf(ratio, 0.2)).floor()
+	if not _view.custom_minimum_size.is_equal_approx(target):
+		_view.custom_minimum_size = target
+		_overlay.queue_redraw()
+
+
+## Libellés des boutons de la rangée des modes (`false` : icônes seules, s'ils en ont une).
+func _set_mode_labels(labelled: bool) -> void:
+	for child in _modes_row.get_children():
+		var button := child as Button
+		if button == null or button.icon == null:
+			continue
+		if not button.has_meta(&"po1_label"):
+			button.set_meta(&"po1_label", button.text)
+		button.text = str(button.get_meta(&"po1_label")) if labelled else ""
 
 
 ## Rectangle de la carte réduite dans le repère de la minicarte (tests, placement).

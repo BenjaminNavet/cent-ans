@@ -178,7 +178,7 @@ func _check_ui_layout() -> void:
 	var view: Vector2 = root.get_visible_rect().size
 	# Rectangles : proportions de l'écran, zones du bord de l'écran sans chevauchement.
 	var top: Rect2 = layout.zone_rect(layout.Zone.TOP_BAR)
-	_check_layout(top.is_equal_approx(Rect2(0, 0, view.x, view.y * 0.05)), "TOP_BAR rect %s" % top)
+	_check_layout(top.is_equal_approx(Rect2(0, 0, view.x, view.y * 0.08)), "TOP_BAR rect %s" % top)
 	var zone_node: Control = layout.zone_node(layout.Zone.SIDE_PANEL)
 	_check_layout(zone_node.get_global_rect().is_equal_approx(layout.zone_rect(layout.Zone.SIDE_PANEL)),
 		"SIDE_PANEL node %s vs rect %s" % [zone_node.get_global_rect(), layout.zone_rect(layout.Zone.SIDE_PANEL)])

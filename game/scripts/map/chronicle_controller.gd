@@ -20,12 +20,16 @@ func setup(campaign_map: Node) -> void:
 	window = (load(WINDOW_SCENE) as PackedScene).instantiate()
 	window.name = "ChronicleWindow"
 	window.hide()
-	map.ui.add_child(window)
+	# PO1 : fenêtre de la chronique dans la zone `SIDE_PANEL` (un seul panneau à la fois), puis
+	# inscrite dans la pile (Échap, exclusivité avec les grands panneaux) — dans cet ordre : un
+	# reparentage après inscription la désinscrirait.
+	UiLayout.claim(UiLayout.Zone.SIDE_PANEL, window)
+	map.ui.register_panel(window, PanelStack.Kind.CENTRAL)
 	window.option_chosen.connect(_on_option_chosen)
 	var court_button: Button = map.ui.court_button
 	button = Button.new()
 	button.text = "Chronique"
-	button.add_theme_font_size_override("font_size", 18)
+	UiType.apply(button, UiType.BODY)
 	button.tooltip_text = "Événements en attente de décision"
 	court_button.get_parent().add_child(button)
 	court_button.get_parent().move_child(button, court_button.get_index())
