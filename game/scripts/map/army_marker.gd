@@ -88,10 +88,14 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 		remove_child(previous)
 		previous.queue_free()
 	if ArmyFigures.enabled():
-		figures = ArmyFigures.build(army, color, _heraldry(faction_id), id)
+		figures = ArmyFigures.build(army, color, _heraldry(faction_id), id, player)
 		add_child(figures)
 		banner.visible = false
 		face(Vector2(1.0, 0.45).normalized())
+		# Lot CV3-5 : en embuscade, l'étendard du propriétaire s'estompe avec ses figurines.
+		var fade := figures.ghost_transparency()
+		for part: GeometryInstance3D in [pole, $Finial, flag]:
+			part.transparency = fade
 	else:
 		figures = null
 		ModelLibrary.dress_army_marker(self, army, color)
@@ -222,6 +226,8 @@ func set_walking(value: bool) -> void:
 func set_view(camera_distance: float, weight: float) -> void:
 	if figures != null:
 		figures.set_view(camera_distance, weight)
+		if figures.is_lord():  # CV3-5 : la hampe suit la main du général (fondu au loin)
+			_follow_bearer()
 
 
 ## Point écran de référence pour le picking (milieu de l'étendard).

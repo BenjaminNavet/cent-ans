@@ -341,6 +341,13 @@ func _run_campaign_loop() -> void:
 	if not _check(not reachable.is_empty(), "reachable provinces should not be empty for %s" % army_ids[0]):
 		map.queue_free()
 		return
+	if map.movement_ctl != null and map.movement_ctl.active():
+		# Lot CV3-5 : zone atteignable à deux niveaux (ce tour / tour suivant), lue dans les données.
+		var zone: Dictionary = map.sim.call("get_reachable_area", army_ids[0])
+		_check(int(zone.get("cells", 0)) > 1 and int(zone.get("next_cells", 0)) > 0,
+				"CV3-5: reachable area should have two rings, got %d + %d cells" % [int(zone.get("cells", 0)), int(zone.get("next_cells", 0))])
+		_check(int(zone.get("next_budget", 0)) > 0 and (zone.get("image") as Image).get_format() == Image.FORMAT_RGB8, "CV3-5: RGB8 two-ring mask with the next turn's budget")
+		_check(map.movement_ctl.bubble.cell_count() > 1 and map.movement_ctl.bubble.next_cell_count() > 0, "CV3-5: the bubble shows both rings")
 	var target: String = str(reachable.keys()[0])
 	# Aperçu de chemin au survol de la cible.
 	var target_index: int = map.map_data.index_of_id(target)
@@ -1630,7 +1637,23 @@ func _run_assets() -> void:
 			"units": [{"unit_type": "unit_knights", "strength": 600}, {"unit_type": "unit_longbowmen", "strength": 900}]}
 		var cv2_figures := ArmyFigures.build(cv2_army, Color(0.2, 0.3, 0.8), null, "cv2")
 		root.add_child(cv2_figures)
-		_check(cv2_figures.figure_count() == 2 + 4, "CV2: 1 500 men → leader + bearer + 4 escort, got %d" % cv2_figures.figure_count())
+		# Lot CV3-5 : le général agrandi porte l'étendard (plus de porte-étendard à pied).
+		var cv3_lord := cv2_figures.is_lord()
+		_check(cv3_lord == (float(ArmyFigures.map_settings().get("army_figure_scale", 1.0)) > 1.001), "CV3-5: lord mode follows map.army_figure_scale")
+		var cv2_expected := (1 if cv3_lord else 2) + 4
+		_check(cv2_figures.figure_count() == cv2_expected, "CV2: 1 500 men → leader (+ bearer) + 4 escort, got %d" % cv2_figures.figure_count())
+		if cv3_lord:
+			cv2_figures.set_view(100.0, 1.0)
+			var cv3_hand := cv2_figures.bearer_anchor()
+			_check(cv3_hand.y > 3.0, "CV3-5: the standard is held high by the mounted lord, got %.2f" % cv3_hand.y)
+			cv2_figures.set_view(900.0, 0.0)
+			_check(cv2_figures.bearer_anchor().length() < 0.01, "CV3-5: far away the standard is back at the marker's foot")
+			var cv3_ambush := ArmyFigures.build({"faction": "fac_france", "stance": "ambush", "units": [{"unit_type": "unit_knights", "strength": 400}]}, Color(0.2, 0.3, 0.8), null, "cv3a", true)
+			_check(cv3_ambush.ghost and cv3_ambush.ghost_transparency() > 0.0, "CV3-5: own ambush drawn semi-transparent")
+			var cv3_foe := ArmyFigures.build({"faction": "fac_england", "stance": "ambush", "units": [{"unit_type": "unit_knights", "strength": 400}]}, Color(0.8, 0.1, 0.1), null, "cv3b", false)
+			_check(not cv3_foe.ghost, "CV3-5: a spotted enemy ambush stays opaque")
+			cv3_ambush.free()
+			cv3_foe.free()
 		_check(cv2_figures.get_node_or_null("Bivouac") != null, "CV2: idle army in the field should camp")
 		cv2_figures.set_walking(true)
 		cv2_figures.set_view(100.0, 1.0)
