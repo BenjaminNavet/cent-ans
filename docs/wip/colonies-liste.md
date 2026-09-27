@@ -11,9 +11,13 @@ Note : le champ `is_upgrade` de la spec § 1 (SettlementRow) n'est pas dupliqué
 hors de `options_available[].is_upgrade` — `upgrade_available` suffit (voir
 rapport final).
 
-Prochaine étape : écrire le pont `godot-bridge/src/campaign_sim_holdings.rs`
-(`get_holdings_overview`), puis vérifier (`cargo fmt`, `clippy -D warnings`,
-`cargo test`, `core/build.sh`, `smoke.gd`) avant le commit final `HL1: ...`.
+État : pont `godot-bridge/src/campaign_sim_holdings.rs` (`get_holdings_overview`)
+écrit et compile.
+
+Prochaine étape : vérifications complètes (`cargo fmt`, `clippy -D warnings`,
+`cargo test` workspace, `core/build.sh`, `godot --headless --path game --import`
+puis `smoke.gd`) avant le commit final `HL1: ...`. Fin de lot L1 ; L2 (panneau
+Godot) reste à faire sur une autre branche/worktree.
 
 Cible cargo privée à ce worktree :
 `CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/.claude/worktrees/agent-a22cda46a4d584987/core/target`.
