@@ -98,10 +98,17 @@ impl CampaignState {
 
         let mut this_turn: Vec<(Cell, u32)> = Vec::new();
         let first_stop = stops(&holding(start_point));
-        bounded_dijkstra_from(grid, &[start], budget, &blocker, &first_stop, |cell, cost| {
-            this_turn.push((cell, cost));
-            false
-        });
+        bounded_dijkstra_from(
+            grid,
+            &[start],
+            budget,
+            &blocker,
+            &first_stop,
+            |cell, cost| {
+                this_turn.push((cell, cost));
+                false
+            },
+        );
         this_turn.sort_unstable();
 
         // Starts of the second turn, grouped by the enemies they ignore.
