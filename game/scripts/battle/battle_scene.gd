@@ -612,7 +612,10 @@ func _build_scene() -> bool:
 			landmark_town = LandmarkSiegeTown.create(battle.call("get_siege_landmark"), func(x: float, z: float) -> float: return terrain.height_at(x, z))
 			if landmark_town != null:
 				add_child(landmark_town)
-	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key)
+	# PO4 : heure de rendu (phase du cœur, sinon graine) ; EP8 anime la lumière si l'heure avance.
+	var tod: Dictionary = battle.call("get_time_of_day") if battle.has_method("get_time_of_day") else {}
+	var time_key := BattleAtmosphere.time_key_for(tod, battle_seed, weather_key)
+	BattleAtmosphere.apply(world_env, sun, weather_key, camera_rig.camera, terrain.season_key, time_key, not tod.is_empty() and not _ep8_disabled.has("daytime"))
 	if _sim_weather == "rain" and weather_key != "rain":
 		BattleAtmosphere.add_shower(camera_rig.camera)  # EP7 : averse qui cessera
 	if terrain.horizon != null:

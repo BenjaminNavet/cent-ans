@@ -11,51 +11,122 @@ extends RefCounted
 
 const SKY_SHADER := preload("res://shaders/battle_sky.gdshader")
 
-## Préréglages : ciel (zénith, horizon, nuages), soleil (énergie, couleur, élévation), brouillard.
+## Préréglages : ciel (zénith, horizon, nuages), brouillard. Le soleil (élévation, lacet, couleur,
+## énergie) vient de l'heure du jour (PO4, bloc `time_of_day` de `data/fx/atmosphere.json`, bible
+## DA § 12.6), pondérée par la météo (`battle.<météo>.sun_*_scale`, `sun_tint`).
 const PRESETS := {
 	"clear": {
 		"zenith": Color(0.2, 0.38, 0.68), "horizon": Color(0.7, 0.78, 0.86), "coverage": 0.38,
 		"cloud_light": Color(1.0, 0.98, 0.94), "cloud_shadow": Color(0.56, 0.61, 0.7),
-		"sun": 1.75, "sun_color": Color(1.0, 0.94, 0.84), "elevation": 34.0, "sky_energy": 1.0,
+		"sky_energy": 1.0,
 		"fog": 0.00032, "fog_color": Color(0.7, 0.76, 0.84), "aerial": 0.65, "ambient": 1.0,
 		"saturation": 1.08, "contrast": 1.06,
 	},
 	"fog": {
 		"zenith": Color(0.62, 0.65, 0.68), "horizon": Color(0.78, 0.8, 0.8), "coverage": 0.92,
 		"cloud_light": Color(0.86, 0.87, 0.87), "cloud_shadow": Color(0.66, 0.68, 0.7),
-		"sun": 0.5, "sun_color": Color(1.0, 0.97, 0.92), "elevation": 26.0, "sky_energy": 0.9,
+		"sky_energy": 0.9,
 		"fog": 0.0036, "fog_color": Color(0.74, 0.76, 0.77), "aerial": 0.0, "ambient": 1.1,
 		"saturation": 0.85, "contrast": 1.0,
 	},
 	"rain": {
 		"zenith": Color(0.42, 0.45, 0.5), "horizon": Color(0.6, 0.63, 0.66), "coverage": 0.97,
 		"cloud_light": Color(0.62, 0.64, 0.67), "cloud_shadow": Color(0.36, 0.38, 0.42),
-		"sun": 0.55, "sun_color": Color(0.9, 0.93, 1.0), "elevation": 40.0, "sky_energy": 1.0,
+		"sky_energy": 1.0,
 		"fog": 0.0014, "fog_color": Color(0.52, 0.55, 0.59), "aerial": 0.2, "ambient": 1.15,
 		"saturation": 0.8, "contrast": 1.04,
 	},
 	"snow": {
 		"zenith": Color(0.58, 0.63, 0.7), "horizon": Color(0.8, 0.83, 0.87), "coverage": 0.88,
 		"cloud_light": Color(0.92, 0.93, 0.95), "cloud_shadow": Color(0.66, 0.69, 0.74),
-		"sun": 0.6, "sun_color": Color(0.95, 0.96, 1.0), "elevation": 22.0, "sky_energy": 0.95,
+		"sky_energy": 0.95,
 		"fog": 0.0017, "fog_color": Color(0.8, 0.83, 0.87), "aerial": 0.2, "ambient": 1.05,
 		"saturation": 0.9, "contrast": 1.02,
 	},
 }
 
 
-## Soleil plafonné (ombres longues lisibles, faces éclairées vues depuis la caméra par défaut).
-const MAX_SUN_ELEVATION := 36.0
 const HDRI_AMBIENT_BOOST := 1.35
+## PO4 : heures du jour (clés de `time_of_day`), dans l'ordre du tirage sur la graine.
+const TIME_KEYS: Array[String] = ["morning", "midday", "evening"]
+const DEFAULT_TIME := "midday"
 
 ## Densité du brouillard volumétrique par temps (actif selon le niveau de `RenderQuality`).
 const VOLUMETRIC_DENSITY := {"clear": 0.0012, "fog": 0.004, "rain": 0.0035, "snow": 0.004}
 
 
+## PO4 : préréglage d'heure `time_key` (`time_of_day.<clé>`), {} si absent.
+static func time_preset(time_key: String) -> Dictionary:
+	var presets: Dictionary = AtmosphereLibrary.data().get("time_of_day", {})
+	return presets.get(time_key, presets.get(DEFAULT_TIME, {}))
+
+
+## PO4 : heure de rendu d'une bataille. Avec l'heure du cœur (`BattleSim.get_time_of_day()`, EP8) :
+## le préréglage dont `phases` contient la phase courante (aucune règle nouvelle, le rendu suit le
+## cœur). Sans elle : tirage de rendu déterministe sur la graine, `midday` exclu par temps couvert.
+static func time_key_for(tod: Dictionary, seed: int, weather: String) -> String:
+	var presets: Dictionary = AtmosphereLibrary.data().get("time_of_day", {})
+	var phase := str(tod.get("key", ""))
+	if phase != "":
+		for time_key in TIME_KEYS:
+			if phase in ((presets.get(time_key, {}) as Dictionary).get("phases", []) as Array):
+				return time_key
+		return DEFAULT_TIME
+	var keys: Array[String] = []
+	for time_key in TIME_KEYS:
+		if presets.has(time_key) and (weather == "clear" or time_key != "midday"):
+			keys.append(time_key)
+	if keys.is_empty():
+		return DEFAULT_TIME
+	return keys[posmod(hash(seed), keys.size())]
+
+
+## PO4 : réglages de ciel et d'étalonnage pour la météo, la saison et l'heure : ceux de
+## `AtmosphereLibrary.battle_look`, avec le ciel propre à l'heure (`time_of_day.<clé>.sky`) et son
+## étalonnage ajouté après ceux de la saison et de la météo.
+static func resolve_look(weather: String, season: String, time_key: String) -> Dictionary:
+	var look := AtmosphereLibrary.battle_look(weather, season)
+	if look.is_empty():
+		return look
+	var preset := time_preset(time_key)
+	var skies: Dictionary = preset.get("sky", {})
+	if skies.has(weather):
+		var sky_id := str((skies[weather] as Dictionary).get(AtmosphereLibrary.normalize_season(season), look["sky_id"]))
+		if not AtmosphereLibrary.sky_info(sky_id).is_empty():
+			look["sky_id"] = sky_id
+			look["sky"] = AtmosphereLibrary.sky_info(sky_id)
+	var grades: Array = (look.get("grades", []) as Array).duplicate()
+	grades.append(preset.get("grade", {}))
+	look["grades"] = grades
+	return look
+
+
+## PO4 : soleil de l'heure pour la météo : {elevation, yaw, energy, color}. `look` (resolve_look)
+## abaisse l'élévation au soleil peint d'un ciel HDRI ensoleillé.
+static func sun_for(weather: String, time_key: String, look: Dictionary = {}) -> Dictionary:
+	var preset := time_preset(time_key)
+	var battle: Dictionary = AtmosphereLibrary.data().get("battle", {})
+	var w: Dictionary = battle.get(weather, battle.get("clear", {}))
+	var elevation := float(preset.get("sun_elevation", 36.0)) * float(w.get("sun_elevation_scale", 1.0))
+	if not look.is_empty():
+		elevation = minf(AtmosphereLibrary.sun_elevation(look, elevation), elevation)
+	var color := AtmosphereLibrary._rgb(preset.get("sun_color", [1, 1, 1])) * AtmosphereLibrary._rgb(w.get("sun_tint", [1, 1, 1]))
+	return {
+		"elevation": elevation,
+		"yaw": float(preset.get("sun_azimuth", 218.0)),
+		"energy": float(preset.get("sun_energy", 1.75)) * float(w.get("sun_energy_scale", 1.0)),
+		"color": color,
+	}
+
+
 ## Applique le préréglage `key` ; `camera` reçoit les précipitations éventuelles ; `season`
-## (spring, summer, autumn, winter) choisit le ciel HDRI et l'étalonnage de saison.
-static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: String, camera: Camera3D, season: String = "summer") -> void:
+## (spring, summer, autumn, winter) choisit le ciel HDRI et l'étalonnage de saison. PO4 :
+## `time_key` (morning, midday, evening) donne l'étalonnage de l'heure ; son soleil et son ciel
+## aussi, sauf si `animated_daylight` (EP8 : `BattleTimeOfDay` fait alors avancer la lumière depuis
+## celle de midi, sa base neutre, selon l'heure du cœur).
+static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: String, camera: Camera3D, season: String = "summer", time_key: String = DEFAULT_TIME, animated_daylight: bool = false) -> void:
 	var p: Dictionary = (PRESETS.get(key, PRESETS["clear"]) as Dictionary).duplicate()
+	var light_key := DEFAULT_TIME if animated_daylight else time_key
 	# La ressource de la scène est partagée entre instances : on travaille sur une copie.
 	var env: Environment = world_env.environment.duplicate() as Environment
 	world_env.environment = env
@@ -106,13 +177,17 @@ static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: Str
 	env.adjustment_contrast = p["contrast"]
 	env.adjustment_saturation = p["saturation"]
 	# V3 : ciel HDRI et étalonnage (LUT) ; contraste et saturation passent dans la LUT.
-	var look := AtmosphereLibrary.battle_look(key, season)
+	var look := resolve_look(key, season, light_key)
+	if not look.is_empty() and light_key != time_key:
+		var grades: Array = look["grades"]
+		grades[grades.size() - 1] = time_preset(time_key).get("grade", {})
+	var sun_look := {}
 	if not look.is_empty():
 		AtmosphereLibrary.apply_to_environment(env, look, p["fog_color"], (p["horizon"] as Color).darkened(0.45))
 		if (env.sky.sky_material as ShaderMaterial).shader != SKY_SHADER:
 			env.adjustment_contrast = 1.0
 			env.adjustment_saturation = 1.0
-			p["elevation"] = minf(AtmosphereLibrary.sun_elevation(look, float(p["elevation"])), MAX_SUN_ELEVATION)
+			sun_look = look
 			# Le ciel HDRI est plus sombre et plus bleu côté opposé au soleil que le ciel
 			# procédural : une part d'ambiance neutre (couleur du brouillard) éclaire les faces à
 			# l'ombre sans les bleuir.
@@ -120,7 +195,7 @@ static func apply(world_env: WorldEnvironment, sun: DirectionalLight3D, key: Str
 			env.ambient_light_color = (p["fog_color"] as Color).lightened(0.15)
 			env.ambient_light_energy = float(p["ambient"]) * HDRI_AMBIENT_BOOST
 	_setup_volumetric_fog(env, key, p)
-	_setup_sun(sun, p)
+	_setup_sun(sun, sun_for(key, light_key, sun_look))
 	RenderQuality.register(world_env, sun, "battle", key)
 	match key:
 		"rain":
@@ -163,11 +238,11 @@ static func add_ground_mist(parent: Node3D, key: String, center: Vector3, size: 
 	parent.add_child(volume)
 
 
-## Soleil : élévation du préréglage, venant du sud-ouest ; ombres en 4 cascades.
-static func _setup_sun(sun: DirectionalLight3D, p: Dictionary) -> void:
-	sun.rotation = Vector3(deg_to_rad(-float(p["elevation"])), deg_to_rad(-142.0), 0.0)
-	sun.light_energy = p["sun"]
-	sun.light_color = p["sun_color"]
+## Soleil de l'heure (`sun_for`) ; ombres en 4 cascades.
+static func _setup_sun(sun: DirectionalLight3D, s: Dictionary) -> void:
+	sun.rotation = Vector3(deg_to_rad(-float(s["elevation"])), deg_to_rad(float(s["yaw"])), 0.0)
+	sun.light_energy = s["energy"]
+	sun.light_color = s["color"]
 	sun.shadow_enabled = true
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	sun.directional_shadow_max_distance = 420.0
@@ -178,7 +253,7 @@ static func _setup_sun(sun: DirectionalLight3D, p: Dictionary) -> void:
 	sun.directional_shadow_fade_start = 0.85
 	sun.shadow_bias = 0.03
 	sun.shadow_normal_bias = 1.4
-	sun.shadow_opacity = 1.0 if float(p["sun"]) > 1.0 else 0.6
+	sun.shadow_opacity = 1.0 if float(s["energy"]) > 1.0 else 0.6
 	sun.light_angular_distance = 0.0
 
 
