@@ -299,17 +299,13 @@ void pose_rows(int clip, float t, ivec4 idx, vec4 w, bool smooth_frames, out vec
 // AN1a : poids (0-1, 1 au bord libre) et pièce souple d'un sommet ; -1 : pièce rigide.
 float sm_weight(int code, ivec4 idx, vec4 w, vec3 rest, float tint, out int part) {
 	part = -1;
+	// Calculs vectoriels (quatre os d'un coup) : le sommet reste l'étape la plus chargée.
 	if (code == C_LIVERY || code == C_CLOTH || code == C_QUILT) {
 		// Bas du vêtement : part des os des jambes (0 à la taille, ~0,85 à l'ourlet) ; les chausses
 		// (étoffe entièrement sur les jambes) restent rigides. Au LOD2, l'ourlet du surcot est
 		// entièrement sur les jambes : gardé pour la livrée et le gambison.
-		float legs = 0.0;
-		for (int k = 0; k < 4; k++) {
-			int b = pick(idx, k);
-			if (b >= sm_leg_bones.x && b <= sm_leg_bones.y) {
-				legs += pickf(w, k);
-			}
-		}
+		vec4 on = vec4(greaterThanEqual(idx, ivec4(sm_leg_bones.x))) * vec4(lessThanEqual(idx, ivec4(sm_leg_bones.y)));
+		float legs = dot(w, on);
 		part = 0;
 		float hose = code == C_CLOTH ? smoothstep(0.93, 0.99, legs) : 0.0;
 		return smoothstep(0.02, 0.85, legs) * (1.0 - hose);
@@ -318,24 +314,19 @@ float sm_weight(int code, ivec4 idx, vec4 w, vec3 rest, float tint, out int part
 		return 0.0;
 	}
 	if (code == C_ARMS) {
-		// Caparaçon : pièce armoriée portée par les os du cheval.
-		if (part_weight(0, idx, w) > 0.5) {
+		// Caparaçon : pièce armoriée portée par les os du cheval (0 .. sever_bones[0].y).
+		if (dot(w, vec4(lessThanEqual(idx, ivec4(sever_bones[0].y)))) > 0.5) {
 			part = 1;
 			float k = 1.0 - smoothstep(sm_cap_band.x, sm_cap_band.y, rest.y);
 			return k * k;
 		}
 	} else if (code == C_COAT) {
-		float tail = 0.0;
-		float rank = 0.0;
-		for (int k = 0; k < 4; k++) {
-			int b = pick(idx, k);
-			if (b >= sm_tail_bones.x && b <= sm_tail_bones.y) {
-				tail += pickf(w, k);
-				rank += pickf(w, k) * float(b - sm_tail_bones.x);
-			}
-		}
+		vec4 on = vec4(greaterThanEqual(idx, ivec4(sm_tail_bones.x))) * vec4(lessThanEqual(idx, ivec4(sm_tail_bones.y)));
+		vec4 wt = w * on;
+		float tail = wt.x + wt.y + wt.z + wt.w;
 		if (tail > 0.5) {
 			part = 3;
+			float rank = dot(wt, vec4(idx - ivec4(sm_tail_bones.x)));
 			float span = max(float(sm_tail_bones.y - sm_tail_bones.x), 1.0);
 			return 0.25 + 0.75 * clamp(rank / (tail * span), 0.0, 1.0);
 		}
@@ -352,14 +343,14 @@ float sm_weight(int code, ivec4 idx, vec4 w, vec3 rest, float tint, out int part
 // restent plaquées (pas de pénétration dans les jambes ou les flancs).
 vec3 sm_offset(int part, float wt, vec3 rest, vec3 n, vec3 wind_local, float time, vec4 h) {
 	vec4 a = sm_amp[part];
-	float gust = sin(time * 0.7 + h.x * 6.283) * 0.5 + sin(time * 1.9 + h.z * 6.283) * 0.25;
+	float gust = sin(time * 0.9 + h.x * 6.283) * 0.6;
 	float ws = clamp(wind_strength + wind_gust * gust, 0.0, 1.5) * sm_wind_scale;
 	float sp = clamp(move_speed / max(sm_speed_ref, 0.01), 0.0, 1.5);
 	vec3 push = vec3(0.0, 0.0, -a.x * sp) + wind_local * (a.y * ws);
 	float plen = length(push);
 	vec3 pdir = plen > 1e-4 ? push / plen : vec3(0.0, 0.0, -1.0);
 	float phase = time * 6.283 * a.w * (0.8 + 0.5 * sp) + dot(rest, vec3(4.1, 5.3, 3.7)) + h.y * 6.283;
-	float flut = sin(phase) * 0.65 + sin(phase * 2.3 + 1.7) * 0.35;
+	float flut = sin(phase + 0.6 * sin(phase * 2.3 + 1.7)); // onde irrégulière, deux sinus
 	float energy = clamp(0.25 + sp + ws, 0.0, 1.5);
 	vec3 off;
 	if (part <= 1) {
@@ -370,7 +361,7 @@ vec3 sm_offset(int part, float wt, vec3 rest, vec3 n, vec3 wind_local, float tim
 		off.y += sm_lift[part] * plen * face;
 	} else {
 		// Crins : poussée pleine, flottement latéral.
-		vec3 side = normalize(cross(vec3(0.0, 1.0, 0.0), pdir) + vec3(1e-4, 0.0, 0.0));
+		vec3 side = vec3(pdir.z, 0.0, -pdir.x); // cross(haut, pdir), pdir horizontal
 		off = pdir * plen + side * (flut * a.z * energy);
 		off.y += sm_lift[part] * plen;
 	}
@@ -438,7 +429,7 @@ void vertex() {
 				wl.y = 0.0;
 				float wlen = length(wl);
 				wl = wlen > 1e-4 ? wl / wlen : vec3(0.0);
-				v += sm_offset(part, wt, VERTEX, normalize(n), wl, TIME, h);
+				v += sm_offset(part, wt, VERTEX, n, wl, TIME, h);
 			}
 		}
 		v *= mix(1.0 - size_jitter, 1.0 + size_jitter, h.y);
