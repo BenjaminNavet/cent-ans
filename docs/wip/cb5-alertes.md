@@ -9,11 +9,13 @@ Cible cargo privée : `core/target-cb5`.
       chargée depuis `data/rules/battle_alerts.json`), module déclaré dans `lib.rs`.
 - [x] `data/rules/battle_alerts.json` + `data/schemas/battle_alerts_rules.schema.json` +
       `tools/tests/test_battle_alerts_schema.py`.
-- [ ] Champ `alerts`/`alerts_read` sur `BattleSim`, méthode `alert()`, `take_new_alerts()`.
-- [ ] Émission aux points du plan : déroute, général tué/capturé, flanc (front montant),
-      renforts, munitions, mur/porte rompus (point unique : `record_siege_transitions`).
+- [x] Champ `alerts`/`alerts_read` sur `BattleSim`, méthode `alert()`, `take_new_alerts()`.
+- [x] Émission aux points du plan : déroute, général tué/capturé, flanc (front montant, via
+      `flanked_alerted: Vec<bool>` car `Unit.flanked` est remis à 0 à chaque tick), renforts,
+      munitions, mur/porte rompus (point unique : `record_siege_transitions`).
 - [ ] Pont `godot-bridge` : `get_alerts()`.
-- [ ] `core/crates/sim-battle/tests/cb5_alerts.rs`.
+- [x] `core/crates/sim-battle/tests/cb5_alerts.rs` (8 tests, tous verts : un par type + digest
+      + rejeu inchangés).
 - [ ] `game/scripts/battle/battle_alerts_column.gd` + branchement scène/HUD.
 - [ ] `battle_minimap.gd` : repère pulsé au clic.
 - [ ] Cris `BattleAudio.play_event`.
@@ -31,5 +33,7 @@ Cible cargo privée : `core/target-cb5`.
   sortie pur, aucun impact sur le déterminisme. À vérifier par un test.
 
 ## Prochaine étape
-Câbler les points d'émission dans `sim.rs` / `sim/reinforcements.rs` / `sim/siege_assault.rs`,
-puis les tests core, puis le pont, puis Godot.
+Cœur terminé et vert (`cargo test -p sim-battle`, `b6`, `ep13_replay` release inclus). Reste :
+pont `godot-bridge` (`get_alerts`, constantes `cb5_alert_duration_s`/`cb5_alert_merge_window_s`
+dans `get_rule_constants`), puis Godot (`battle_alerts_column.gd`, ping minicarte, cris,
+branchement scène/HUD, tests + probe).

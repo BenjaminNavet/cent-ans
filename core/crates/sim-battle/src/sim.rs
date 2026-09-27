@@ -2408,7 +2408,13 @@ impl BattleSim {
             let side = self.units[i].side;
             self.log(text, Some(side));
             let (x, z, id) = (self.units[i].x, self.units[i].z, self.units[i].id);
-            self.alert(crate::alerts::AlertKind::AmmoOut, x, z, Some(side), Some(id));
+            self.alert(
+                crate::alerts::AlertKind::AmmoOut,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
             if self.units[i].state == UnitState::Shooting {
                 self.units[i].state = UnitState::Idle;
             }
@@ -2708,7 +2714,13 @@ impl BattleSim {
             self.units[striker].kills += blow * dealt_ratio[victim];
         }
         for (x, z, side, id) in newly_flanked {
-            self.alert(crate::alerts::AlertKind::Flanked, x, z, Some(side), Some(id));
+            self.alert(
+                crate::alerts::AlertKind::Flanked,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
         }
     }
 
