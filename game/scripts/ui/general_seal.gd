@@ -153,7 +153,17 @@ func _refresh() -> void:
 		var moves := int(army.get("movement_points", 0))
 		_add_status("movement", str(moves), "Mouvement restant : %s" % FrText.count(moves, "point"))
 	tooltip_text = _tooltip_text()
+	_fit_plate.call_deferred()
 	queue_redraw()
+
+
+## Lot CV3-4 : le sceau s'agrandit pour contenir le cartouche (rangée des postures comprise).
+func _fit_plate() -> void:
+	if _plate == null:
+		return
+	var needed := maxf(SEAL_RADIUS * 2.0 + 24.0, _plate.position.y + _plate.get_combined_minimum_size().y + 2.0)
+	if not is_equal_approx(custom_minimum_size.y, needed):
+		custom_minimum_size.y = needed
 
 
 func _add_status(glyph: String, text: String, tip: String, color: Color = HudStyle.INK) -> HBoxContainer:

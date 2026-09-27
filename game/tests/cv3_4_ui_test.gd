@@ -60,7 +60,7 @@ func _run() -> void:
 	if not _check(army_id != "", "France has no army"):
 		map.queue_free()
 		return
-	_test_stances(map, sim, army_id)
+	await _test_stances(map, sim, army_id)
 	await process_frame
 	await _test_outcomes(map, sim)
 	# L'armée de la bataille d'essai a pu périr : une armée du joueur encore debout.
@@ -84,6 +84,14 @@ func _test_stances(map: Node, sim: Object, army_id: String) -> void:
 	if not _check(bar != null and bar.visible, "the stance bar should show for a player army"):
 		return
 	_check(bar.get_child_count() == 6, "six stance buttons, got %d" % bar.get_child_count())
+	await process_frame
+	await process_frame
+	var plate: Control = seal.get("_plate")
+	_check(bar.get_combined_minimum_size().x <= GeneralSeal.PLATE_WIDTH,
+		"the stance row should fit the seal plate (%.0f > %.0f)" % [bar.get_combined_minimum_size().x, GeneralSeal.PLATE_WIDTH])
+	_check(plate.position.y + plate.size.y <= seal.size.y + 2.0, "the seal should contain its plate (%.0f > %.0f)" % [plate.position.y + plate.size.y, seal.size.y])
+	# Le bandeau d'ost commence 16 px à droite du sceau : la rangée ne doit pas élargir le cartouche.
+	_check(plate.position.x + plate.size.x <= seal.size.x + 16.0, "the plate should stay left of the army strip (%.0f > %.0f)" % [plate.position.x + plate.size.x, seal.size.x + 16.0])
 	var options: Dictionary = sim.call("get_stance_options", army_id)
 	_check(options.size() == 6, "get_stance_options should list six stances: %s" % [options])
 	var current := str(sim.call("get_army", army_id).get("stance", "normal"))
