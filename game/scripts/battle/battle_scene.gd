@@ -75,6 +75,10 @@ var speed: float = 1.0
 var autoplay: bool = false
 var padded: bool = false
 var finished_shown: bool = false
+## AN1b : secondes d'acclamation du vainqueur montrées avant l'écran de fin (0 sans affichage,
+## en banc d'essai) ; `_end_wait` les compte.
+const VICTORY_HOLD := 3.0
+var _end_wait: float = 0.0
 var resolved: bool = false
 var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
@@ -116,7 +120,9 @@ var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
 var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
 var result_screen: BattleResultScreen = null  # B2 : écran de fin
 var _result_shot: bool = false
-var _rings: Dictionary = {}  # id -> MeshInstance3D
+## CB-M1 : contours de formation (décales), remplacent l'anneau jaune de sélection.
+var outlines: BattleFormationOutline = null
+var _hovered_ids: Array[int] = []  # régiments survolés (terrain, repère), réutilisé
 var _drag_rect: ColorRect  # CB0 : rectangle de sélection, lu et positionné par `input`
 var _hud_timer: float = 0.0
 var _screenshot_path: String = ""
@@ -621,6 +627,9 @@ func _build_scene() -> bool:
 	_build_soldier_layers()
 	for unit in units:
 		_make_banner(unit)
+	outlines = BattleFormationOutline.new()
+	add_child(outlines)
+	outlines.setup(side_colors, player_side)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	if not historical.is_empty():
@@ -1025,16 +1034,6 @@ func _make_banner(unit: Dictionary) -> void:
 	flag.position = Vector3(0.03, BANNER_HEIGHT - 0.05, 0)
 	node.add_child(flag)
 	_banners[id] = {"node": node, "flag_mat": flag_mat, "routing": false}
-	var ring := MeshInstance3D.new()
-	var ring_mat := StandardMaterial3D.new()
-	ring_mat.albedo_color = Color(1.0, 0.85, 0.2)
-	ring_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	ring_mat.no_depth_test = true
-	ring_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	ring.material_override = ring_mat
-	ring.visible = false
-	add_child(ring)
-	_rings[id] = ring
 
 
 ## Étoffe d'un drapeau de régiment : bannière peinte de la faction (`heraldry/banners/`,
@@ -1142,7 +1141,9 @@ func _process(delta: float) -> void:
 	if replay_mode:
 		_update_replay()  # EP13 : pas d'écran de fin pendant un rejeu
 	elif battle.call("is_finished") and not finished_shown:
-		_show_end()
+		_end_wait += delta
+		if _end_wait >= _victory_hold():
+			_show_end()
 	if _benchmark:
 		_run_benchmark_frame(delta)
 		if _bench_measured > 10 and battle != null:
@@ -1446,9 +1447,18 @@ func _fast_forward(seconds: float) -> void:
 
 func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	units = battle.call("get_units")
-	var running: bool = not paused and not battle.call("is_finished")
+	var finished: bool = battle.call("is_finished")
+	var running: bool = not paused and not finished
+	# AN1b : une fois la bataille finie, le camp vainqueur acclame (son horloge d'animation
+	# continue ; les autres régiments restent figés, cf. BattleSoldiers.victor_side).
+	if finished and soldiers.victor_side == "":
+		var winner := str((battle.call("get_outcome") as Dictionary).get("winner", ""))
+		soldiers.victor_side = winner if winner != "" else "-"
+	elif not finished:
+		soldiers.victor_side = ""
+	var anim_dt := delta * speed if running else (delta if finished and not paused else 0.0)
 	var soldiers_start := Time.get_ticks_usec()
-	soldiers.update(battle, units, delta * speed if running else 0.0, selected)
+	soldiers.update(battle, units, anim_dt, selected)
 	_bench_soldiers_last_ms = float(Time.get_ticks_usec() - soldiers_start) / 1000.0
 	_update_effects(delta * speed if running else 0.0)
 	if siege_view != null:
@@ -1465,8 +1475,6 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		var node: Node3D = banner["node"]
 		var present: bool = unit["present"]
 		node.visible = present
-		var ring: MeshInstance3D = _rings[id]
-		ring.visible = present and selected.has(id)
 		if not present:
 			continue
 		var pos := Vector3(float(unit["x"]), float(unit["y"]), float(unit["z"]))
@@ -1482,13 +1490,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		if routing != bool(banner["routing"]):
 			banner["routing"] = routing
 			(banner["flag_mat"] as ShaderMaterial).set_shader_parameter("routing", routing)
-		if ring.visible:
-			ring.position = pos + Vector3(0, 0.6, 0)
-			ring.rotation = Vector3(0, float(unit["facing"]), 0)
-			var size := Vector2(float(unit["width"]) + 3.0, float(unit["depth"]) + 3.0)
-			if not ring.has_meta("size") or (ring.get_meta("size") as Vector2).distance_to(size) > 0.5:
-				ring.set_meta("size", size)
-				ring.mesh = BattleMeshes.outline(size.x, size.y, 0.45)
+	_update_outlines()
 	if standards != null:
 		standards.update(units, soldiers, _camera_position())
 	_update_markers(banner_scale)
@@ -1533,6 +1535,20 @@ static func siege_status(siege: Dictionary) -> String:
 	return text
 
 
+## CB-M1 : contours de formation. Survol = troupe sous la souris sur le terrain (`world_hover`,
+## tenu par `BattleInput`) ou repère B2 survolé (tous les régiments d'un groupe B7).
+func _update_outlines() -> void:
+	if outlines == null:
+		return
+	_hovered_ids.clear()
+	if markers != null:
+		if markers.world_hover >= 0:
+			_hovered_ids.append(markers.world_hover)
+		if markers.hovered >= 0:
+			_hovered_ids.append_array(markers.marker_members(markers.hovered))
+	outlines.update(units, selected, _hovered_ids)
+
+
 ## B2 : repères 2D au-dessus des troupes, sous les panneaux du HUD (premier enfant de sa racine).
 func _build_markers() -> void:
 	markers = BattleUnitMarkers.new()
@@ -1575,6 +1591,13 @@ func _on_marker_right_clicked(unit_id: int) -> void:
 
 func _banner_scale() -> float:
 	return clampf(camera_rig.distance * 0.014, 0.8, 9.0)
+
+
+## AN1b : durée d'acclamation avant l'écran de fin (aucune sans affichage ni en banc d'essai).
+func _victory_hold() -> float:
+	if _benchmark or DisplayServer.get_name() == "headless":
+		return 0.0
+	return VICTORY_HOLD
 
 
 ## B2 / T2 : écran de fin mis en scène (verdict, écus, pertes par régiment, mentions).

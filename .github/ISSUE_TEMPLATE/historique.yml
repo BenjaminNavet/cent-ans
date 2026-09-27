@@ -1,0 +1,24 @@
+name: Correction historique
+description: Une date, un lieu, un personnage, une unité ou un fait inexact
+labels: [histoire]
+body:
+  - type: textarea
+    id: inexactitude
+    attributes:
+      label: Ce qui est inexact
+      description: Où dans le jeu (écran, province, personnage, fichier de data/) ?
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Correction proposée
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: Ouvrages, articles ou sources primaires (auteur, titre, page).
+    validations:
+      required: true

@@ -1091,26 +1091,3 @@ static func tri(st: SurfaceTool, p0: Vector3, p1: Vector3, p2: Vector3, normal: 
 		st.set_color(color)
 		st.set_normal(normal)
 		st.add_vertex(v)
-
-
-## Contour rectangulaire `width` × `depth` (épaisseur `t` en mètres) posé à plat, centré,
-## pour l'anneau de sélection d'un régiment.
-static func outline(width: float, depth: float, t: float) -> ArrayMesh:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var hw := width * 0.5
-	var hd := depth * 0.5
-	var quads := [
-		Rect2(-hw, -hd, width, t), Rect2(-hw, hd - t, width, t),
-		Rect2(-hw, -hd, t, depth), Rect2(hw - t, -hd, t, depth),
-	]
-	for q in quads:
-		var r: Rect2 = q
-		var a := Vector3(r.position.x, 0, r.position.y)
-		var b := Vector3(r.end.x, 0, r.position.y)
-		var c := Vector3(r.end.x, 0, r.end.y)
-		var d := Vector3(r.position.x, 0, r.end.y)
-		for v in [a, b, c, a, c, d]:
-			st.set_normal(Vector3.UP)
-			st.add_vertex(v)
-	return st.commit()

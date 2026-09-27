@@ -16,13 +16,15 @@ const DIR := "res://assets/models/battle_skinned/"
 const FINE_DIR := "res://assets/models/battle_fine/"
 const FINE_RIG_PREFIX := "fine_"
 const SHADER := preload("res://shaders/battle_soldier_skinned.gdshader")
-const MAX_CLIPS := 48
+const MAX_CLIPS := 64  # AN1b : 48 -> 64 (clips[] des shaders)
 ## Modes du shader.
 const M_LOOP := 0
 const M_CYCLE := 1
 const M_VOLLEY := 2
 const M_CUSTOM := 3
 const M_SPLIT := 4  # SG1 : escalade (premiers soldats sur les échelles, le reste au pied du mur)
+## AN1b : taille maximale d'un jeu de clips (deux indices par composante de `clip_set`).
+const MAX_SET := 8
 
 static var _manifest: Dictionary = {}
 static var _loaded: bool = false
@@ -318,7 +320,9 @@ static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> v
 
 ## Configuration d'animation {set: [clips], mode, speed, cycle} d'un régiment dans l'état
 ## `state` (clé de la simulation : idle, marching, charging, melee, shooting, routing,
-## climbing ; `running` = marche au pas de course).
+## climbing ; `running` = marche au pas de course ; états de rendu : brace, victory,
+## melee_pikes). AN1b : les clips absents du rig (kit grossier antérieur) sont écartés du jeu ;
+## jeu vide -> `fallback`, sinon le jeu `idle`.
 static func state_config(kind: String, variant: int, state: String, running: bool) -> Dictionary:
 	var key := state
 	if state == "marching" and running:
@@ -331,16 +335,32 @@ static func state_config(kind: String, variant: int, state: String, running: boo
 		key = "idle"
 	var entry: Dictionary = sets[key]
 	var rig_entry := rig(kind, variant)
-	var names: Array = entry["set"]
+	var names := _present(rig_entry, entry["set"])
 	# EP12 : jeu de repli quand le manifeste n'a pas encore les clips (kit antérieur).
-	if entry.has("fallback") and not rig_entry.get("clips", {}).has(str(names[0])):
+	if entry.has("fallback") and (names.is_empty() or str(names[0]) != str((entry["set"] as Array)[0])):
 		names = entry["fallback"]
+	if names.is_empty():
+		entry = sets["idle"]
+		names = _present(rig_entry, entry["set"])
+	if names.is_empty():
+		names = [str((entry["set"] as Array)[0])]
 	var ids: Array[int] = []
 	for c in names:
 		ids.append(clip_index(rig_entry, str(c)))
 	var config := {"key": cache_key, "names": names, "set": ids, "mode": int(entry.get("mode", M_LOOP)), "speed": float(entry.get("speed", 1.0)), "cycle": float(entry.get("cycle", 1.5)), "release": float(entry.get("release", 1.0))}
 	_configs[cache_key] = config
 	return config
+
+
+## Clips de `names` présents dans le rig (ordre et doublons gardés : les doublons pèsent dans
+## le tirage), au plus `MAX_SET`.
+static func _present(rig_entry: Dictionary, names: Array) -> Array:
+	var clips: Dictionary = rig_entry.get("clips", {})
+	var out: Array = []
+	for c in names:
+		if clips.has(str(c)) and out.size() < MAX_SET:
+			out.append(str(c))
+	return out
 
 
 ## Clips de mort (mode CUSTOM des cadavres, INSTANCE_CUSTOM.y = indice dans ce jeu).
@@ -553,20 +573,30 @@ static func sever_table(kind: String, variant: int) -> Array[Vector4i]:
 		table[int(entry[0])] = Vector4i(lo, hi, extra, -1)
 	return table
 
-## Jeux de clips par style et par état.
+## AN1b : charge des lanciers en cycles de six foulées de galop (90 images, 3,75 s) : un cycle
+## sur huit est un trébuchement (`c_stumble`, même galop avant et après) ; sans ce clip (kit
+## grossier), le jeu se réduit à `c_charge` et le galop reste continu d'un cycle à l'autre.
+const CAVALRY_CHARGE := {"set": ["c_charge", "c_charge", "c_charge", "c_charge", "c_charge", "c_charge", "c_charge", "c_stumble"], "mode": M_CYCLE, "cycle": 3.75}
+
+## Jeux de clips par style et par état (au plus `MAX_SET` clips ; un clip répété pèse plus
+## dans le tirage). AN1b : variantes d'attente, parade, coup par-dessus, impacts, victoire
+## (`victory`, camp vainqueur en fin de bataille), cabrage devant les piques (`melee_pikes`),
+## trébuchement en charge (`charging` des cavaliers en cycles de six foulées).
 const STYLES := {
 	"sword": {
-		"idle": {"set": ["guard", "idle"]},
+		"idle": {"set": ["guard", "idle", "guard", "idle_look", "idle_lean", "idle_helm"]},
 		"marching": {"set": ["walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"], "speed": 1.05},
-		"melee": {"set": ["slash", "thrust", "hit", "guard"], "mode": M_CYCLE, "cycle": 1.3},
+		"melee": {"set": ["slash", "thrust", "overhead", "parry", "hit", "hit_b", "hit_c", "guard"], "mode": M_CYCLE, "cycle": 1.3},
+		"victory": {"set": ["victory", "victory_b"]},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.1, "fallback": ["run"]},
 		"climbing": {"set": ["climb", "guard", "idle"], "mode": M_SPLIT},
 	},
 	# Lot BV2 : lance, vouge et fourche tenues à deux mains (os `Prop`), comme une pique courte.
 	"militia": {
-		"idle": {"set": ["pike_idle"]},
+		"idle": {"set": ["pike_idle", "pike_idle", "pike_look"]},
+		"victory": {"set": ["victory_pike"]},
 		"marching": {"set": ["pike_walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
@@ -576,7 +606,8 @@ const STYLES := {
 		"climbing": {"set": ["climb", "idle", "guard"], "mode": M_SPLIT},
 	},
 	"pike": {
-		"idle": {"set": ["pike_idle"]},
+		"idle": {"set": ["pike_idle", "pike_idle", "pike_look"]},
+		"victory": {"set": ["victory_pike"]},
 		"marching": {"set": ["pike_walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["pike_level_walk"], "speed": 1.3},
@@ -587,30 +618,34 @@ const STYLES := {
 		"climbing": {"set": ["climb", "pike_idle"], "mode": M_SPLIT},
 	},
 	"bow": {
-		"idle": {"set": ["bow_idle", "idle"]},
+		"idle": {"set": ["bow_idle", "idle", "bow_look", "idle_look"]},
 		"marching": {"set": ["walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
-		"melee": {"set": ["slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.5},
+		"melee": {"set": ["slash", "thrust", "parry", "hit", "hit_b", "guard"], "mode": M_CYCLE, "cycle": 1.5},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
+		"victory": {"set": ["victory", "victory_b"]},
 	},
 	"crossbow": {
-		"idle": {"set": ["xbow_idle"]},
+		"idle": {"set": ["xbow_idle", "xbow_idle", "xbow_look"]},
 		"marching": {"set": ["walk"]},
 		"running": {"set": ["run"]},
 		"charging": {"set": ["run"]},
 		"shooting": {"set": ["xbow_shoot"], "mode": M_VOLLEY, "release": 0.3},
-		"melee": {"set": ["slash", "thrust", "guard"], "mode": M_CYCLE, "cycle": 1.5},
+		"melee": {"set": ["slash", "thrust", "parry", "hit", "hit_c", "guard"], "mode": M_CYCLE, "cycle": 1.5},
 		"routing": {"set": ["flee", "flee_m"], "speed": 1.15, "fallback": ["run"]},
+		"victory": {"set": ["victory"]},
 	},
 	"lance": {
 		"idle": {"set": ["c_idle"]},
 		"marching": {"set": ["c_walk"]},
 		"running": {"set": ["c_gallop"]},
-		"charging": {"set": ["c_charge"]},
+		"charging": CAVALRY_CHARGE,
 		"melee": {"set": ["c_thrust", "c_thrust", "c_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"melee_pikes": {"set": ["c_rear", "c_thrust", "c_rear", "c_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"routing": {"set": ["c_gallop"]},
+		"victory": {"set": ["c_victory"]},
 	},
 	"horse_bow": {
 		"idle": {"set": ["c_bow_idle"]},
@@ -619,7 +654,9 @@ const STYLES := {
 		"charging": {"set": ["c_gallop"]},
 		"shooting": {"set": ["c_bow_shoot"], "mode": M_VOLLEY, "release": 1.55},
 		"melee": {"set": ["c_thrust", "c_bow_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"melee_pikes": {"set": ["c_rear", "c_bow_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"routing": {"set": ["c_gallop"]},
+		"victory": {"set": ["c_victory"]},
 	},
 	## UR2 : jinetes (javelot au lieu de l'arc, cavalerie légère skirmish).
 	"horse_javelin": {
@@ -629,7 +666,9 @@ const STYLES := {
 		"charging": {"set": ["c_gallop"]},
 		"shooting": {"set": ["c_javelin_throw"], "mode": M_VOLLEY, "release": 0.69},
 		"melee": {"set": ["c_thrust", "c_javelin_idle"], "mode": M_CYCLE, "cycle": 1.4},
+		"melee_pikes": {"set": ["c_rear", "c_javelin_idle"], "mode": M_CYCLE, "cycle": 1.4},
 		"routing": {"set": ["c_gallop"]},
+		"victory": {"set": ["c_victory"]},
 	},
 }
 
@@ -655,8 +694,10 @@ static func apply_config(mat: ShaderMaterial, config: Dictionary, anim_time: flo
 	mat.set_meta("v2_config", config)
 
 
+## Jeu de clips en `ivec4` : emplacement i dans la composante i % 4, octet i / 4 (AN1b, jusqu'à
+## 8 clips ; identique à un indice par composante jusqu'à 4).
 static func _ivec(ids: Array) -> Vector4i:
 	var v := Vector4i.ZERO
-	for i in mini(ids.size(), 4):
-		v[i] = int(ids[i])
+	for i in mini(ids.size(), MAX_SET):
+		v[i & 3] = v[i & 3] | ((int(ids[i]) & 255) << ((i >> 2) * 8))
 	return v
