@@ -531,7 +531,12 @@ impl BattleSim {
         Ok(sim)
     }
 
+    /// Initial field deployment: each side in « Ligne de bataille » (CB6,
+    /// `data/rules/group_formations.json`), rows centred on the field with
+    /// +x as the lateral axis on both sides (the placement before CB6).
     fn deploy(&mut self) {
+        let rules = crate::group_formation::GroupFormationRules::bundled();
+        let preset = rules.battle_line();
         for side in SideId::BOTH {
             let (line_z, facing, back) = match side {
                 SideId::Attacker => (self.field.attacker_line_z(), 0.0, -1.0),
@@ -540,33 +545,31 @@ impl BattleSim {
             let ids: Vec<usize> = (0..self.units.len())
                 .filter(|&i| self.units[i].side == side && !self.units[i].reserve)
                 .collect();
-            let of = |cat: &dyn Fn(&Unit) -> bool| -> Vec<usize> {
-                ids.iter()
-                    .copied()
-                    .filter(|&i| cat(&self.units[i]))
-                    .collect()
-            };
-            let infantry = of(&|u| u.category == UnitCategory::Infantry);
-            let foot_ranged = of(&|u| u.category == UnitCategory::Ranged && !u.mounted);
-            let cavalry = of(&|u| {
-                u.category == UnitCategory::Cavalry
-                    || (u.mounted && u.category == UnitCategory::Ranged)
-            });
-            let siege = of(&|u| u.category == UnitCategory::Siege);
-            for &i in &ids {
-                self.units[i].facing = facing;
+            let frame = crate::group_formation::Frame::with_axes(
+                self.field.size.center_x(),
+                line_z,
+                (1.0, 0.0),
+                (0.0, -back),
+                facing,
+            );
+            let placed = crate::group_formation::layout(
+                rules,
+                preset,
+                &self.units,
+                &ids,
+                frame,
+                crate::group_formation::LayoutOptions {
+                    field_width: self.field.width,
+                    separate_general: false,
+                    wings: crate::group_formation::WingFill::Alternate,
+                },
+            );
+            for p in placed {
+                let unit = &mut self.units[p.index];
+                unit.x = p.x;
+                unit.z = p.z;
+                unit.facing = p.facing;
             }
-            let front_row = if infantry.is_empty() {
-                &foot_ranged
-            } else {
-                &infantry
-            };
-            let front_width = self.place_row(front_row, line_z, back);
-            if !infantry.is_empty() {
-                self.place_row(&foot_ranged, line_z + back * 45.0, back);
-            }
-            self.place_wings(&cavalry, front_width, line_z + back * 15.0);
-            self.place_row(&siege, line_z + back * 95.0, back);
         }
     }
 

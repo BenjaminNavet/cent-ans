@@ -45,6 +45,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key := event as InputEventKey
+		# CB6 : Alt+Maj+1…6 = préréglage de formation de groupe (avant les groupes de sélection).
+		if scene.formation_picker != null and BattleFormationPicker.shortcut_index(key) > 0:
+			scene.formation_picker.select_index(BattleFormationPicker.shortcut_index(key))
+			return
 		# F5b : chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
 		if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
 			handle_group_key(int(key.physical_keycode - KEY_0), key.ctrl_pressed or key.meta_pressed)
@@ -184,6 +188,9 @@ func _finish_right(position: Vector2, queued: bool = false) -> void:
 	if scene.selected.is_empty() or scene.replay_mode:  # EP13 : aucun ordre pendant un rejeu
 		return
 	if scene.deployment != null and scene.deployment.active:
+		if _formation_active():
+			scene.formation_picker.deploy_click(_right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position, press.distance_to(position) > 20.0)
+			return
 		_deploy_selection(press, position)
 		return
 	if queued and BattlePathPreview.queue_full(scene.units, scene.selected):
@@ -192,6 +199,11 @@ func _finish_right(position: Vector2, queued: bool = false) -> void:
 	var now := Time.get_ticks_msec()
 	var double_click := now - _last_right_click_ms < DOUBLE_CLICK_MS
 	_last_right_click_ms = now
+	if _formation_active() and scene.pick_unit(position, scene.enemy_side) < 0:
+		# CB6 : préréglage actif = places de la formation de groupe, puis groupe verrouillé.
+		for command in scene.formation_picker.battle_orders(scene.selected, _right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position, press.distance_to(position) > 20.0, double_click, queued):
+			command_requested.emit(command)
+		return
 	var lock := _selected_lock()
 	if press.distance_to(position) > 20.0:
 		# Glisser-droit : ligne de p0 à p1, front tourné à l'opposé de la caméra ; CB1 : la longueur
@@ -221,6 +233,11 @@ func _finish_right(position: Vector2, queued: bool = false) -> void:
 	if not _path_allowed(point, NAN, queued):
 		return
 	command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": point.x, "z": point.z, "run": double_click}, queued))
+
+
+## CB6 : un préréglage de formation de groupe est actif.
+func _formation_active() -> bool:
+	return scene.formation_picker != null and scene.formation_picker.is_active()
 
 
 ## CB1 : étiquette du groupe verrouillé qui forme toute la sélection (0 : aucun).
@@ -290,6 +307,10 @@ func _preview_right(position: Vector2, final: bool, queued: bool = false) -> voi
 	var preview: BattlePathPreview = scene.path_preview
 	if preview == null or scene.selected.is_empty() or scene.replay_mode:
 		return
+	if scene.deployment != null and scene.deployment.active and _formation_active():
+		# CB6 : la proposition de formation suit le clic droit maintenu.
+		scene.formation_picker.deploy_preview(_right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position, _right_press.x >= 0.0 and _right_press.distance_to(position) > 20.0)
+		return
 	if scene.deployment != null and scene.deployment.active:
 		# CB1 : fantômes du glisser-droit en déploiement (places et largeurs de `place`).
 		if _right_press.x >= 0.0 and _right_press.distance_to(position) > 20.0:
@@ -299,6 +320,9 @@ func _preview_right(position: Vector2, final: bool, queued: bool = false) -> voi
 		return
 	if scene.pick_unit(position, scene.enemy_side) >= 0:
 		preview.clear_live()
+		return
+	if _formation_active():
+		scene.formation_picker.preview(scene.selected, _right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position, _right_press.x >= 0.0 and _right_press.distance_to(position) > 20.0, queued, final)
 		return
 	var point := scene.ground_point(position)
 	var facing := NAN

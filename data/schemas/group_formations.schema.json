@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/group_formations.schema.json",
+  "title": "Formations de groupe",
+  "description": "Fichier data/rules/group_formations.json (lot CB6, ADR 0095) : préréglages de placement d'un groupe ou d'une armée (attaque, défense, marche). Lu par sim-battle (GroupFormationRules).",
+  "type": "object",
+  "$defs": {
+    "role": {
+      "type": "string",
+      "enum": ["infantry", "foot_ranged", "cavalry", "siege", "general"]
+    },
+    "place": {
+      "type": "object",
+      "description": "Place d'un rôle dans un préréglage en blocs.",
+      "properties": {
+        "row": {
+          "type": "string",
+          "enum": ["front", "line", "behind", "reserve"],
+          "description": "Rang du rôle (devant la ligne, sur la ligne, derrière, en réserve) ; descriptif, cohérent avec depth_m."
+        },
+        "lateral": {
+          "type": "string",
+          "enum": ["center", "wings", "flank", "spread"],
+          "description": "center : rang centré ; wings : deux ailes de part et d'autre du front ; flank : un seul flanc (droit) ; spread : rang centré étiré sur la largeur du front."
+        },
+        "depth_m": {
+          "type": "number",
+          "minimum": -400,
+          "maximum": 200,
+          "description": "Profondeur (m) par rapport à la ligne du rôle de front, positive vers l'ennemi."
+        },
+        "gap_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Intervalle (m) entre deux régiments du rôle (unit_gap_m par défaut)."
+        },
+        "wing_offset_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300,
+          "description": "Ailes et flanc : écart (m) entre le bord du front et le premier régiment."
+        },
+        "turn_in_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Ailes : régiments tournés vers l'intérieur de cet angle (degrés)."
+        },
+        "files": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "description": "Largeur en files (CB1 line_files) ; sans elle la formation reste celle du régiment."
+        },
+        "echelons": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Nombre de lignes successives entre lesquelles le rôle est réparti (le reste va d'abord à la ligne du milieu)."
+        },
+        "echelon_step_m": {
+          "type": "number",
+          "minimum": -300,
+          "maximum": 0,
+          "description": "Écart (m) entre deux lignes successives (négatif : vers l'arrière)."
+        }
+      },
+      "required": ["row", "lateral", "depth_m"],
+      "additionalProperties": false
+    },
+    "segment": {
+      "type": "object",
+      "description": "Tronçon de colonne de marche, de la tête vers la queue.",
+      "properties": {
+        "role": { "$ref": "#/$defs/role" },
+        "filter": {
+          "type": "string",
+          "enum": ["all", "light", "heavy"],
+          "description": "Montés : light = tireurs montés (éclaireurs), heavy = les autres."
+        },
+        "part": {
+          "type": "string",
+          "enum": ["all", "first_half", "second_half"],
+          "description": "Première ou seconde moitié des régiments du rôle (avant-garde, arrière-garde)."
+        }
+      },
+      "required": ["role"],
+      "additionalProperties": false
+    },
+    "preset": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "name_fr": { "type": "string", "minLength": 1 },
+        "description_fr": { "type": "string", "minLength": 1 },
+        "stance": { "type": "string", "enum": ["attack", "defense", "march"] },
+        "layout": { "type": "string", "enum": ["blocks", "column"] },
+        "front_roles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/role" },
+          "minItems": 1,
+          "description": "Blocs : le premier rôle non vide tient la ligne (profondeur 0, centre)."
+        },
+        "roles": {
+          "type": "object",
+          "properties": {
+            "infantry": { "$ref": "#/$defs/place" },
+            "foot_ranged": { "$ref": "#/$defs/place" },
+            "cavalry": { "$ref": "#/$defs/place" },
+            "siege": { "$ref": "#/$defs/place" },
+            "general": { "$ref": "#/$defs/place" }
+          },
+          "required": ["infantry", "foot_ranged", "cavalry", "siege", "general"],
+          "additionalProperties": false
+        },
+        "column_gap_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Colonne : intervalle (m) entre deux régiments."
+        },
+        "column_files": {
+          "type": "object",
+          "description": "Colonne : largeur en files par rôle.",
+          "additionalProperties": { "type": "integer", "minimum": 1, "maximum": 50 },
+          "propertyNames": { "$ref": "#/$defs/role" }
+        },
+        "column": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/segment" },
+          "minItems": 1
+        }
+      },
+      "required": ["id", "name_fr", "description_fr", "stance", "layout"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "layout": { "const": "blocks" } } },
+          "then": { "required": ["front_roles", "roles"] }
+        },
+        {
+          "if": { "properties": { "layout": { "const": "column" } } },
+          "then": { "required": ["column", "column_gap_m"] }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "unit_gap_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 60,
+      "description": "Intervalle (m) par défaut entre deux régiments d'un rang."
+    },
+    "wrap_depth_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Rang trop large pour le champ : les régiments en trop forment un rang de plus, tant de mètres en arrière."
+    },
+    "row_margin_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 300,
+      "description": "Marge (m) laissée de chaque côté du champ par un rang."
+    },
+    "wing_clamp_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 300,
+      "description": "Distance (m) au bord du champ en deçà de laquelle une aile ne va pas."
+    },
+    "general_min_group": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "description": "Le régiment du chef prend la place « general » dès que le groupe compte au moins tant de régiments."
+    },
+    "presets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/preset" },
+      "minItems": 1,
+      "maxItems": 9
+    }
+  },
+  "required": ["unit_gap_m", "wrap_depth_m", "row_margin_m", "wing_clamp_m", "general_min_group", "presets"],
+  "additionalProperties": false
+}
