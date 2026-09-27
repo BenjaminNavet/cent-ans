@@ -66,18 +66,22 @@ func _check_state_table() -> void:
 
 
 func _check_textures() -> void:
-	var wide := BattleFormationOutline.texture_key(63.0, 9.0, false)
-	_check(wide.y == 0 and wide.z == 0 and BattleFormationOutline.RATIOS[wide.x] in [6.0, 8.0], "wide key %s" % wide)
-	var column := BattleFormationOutline.texture_key(8.0, 40.0, true)
-	_check(column.y == 1 and column.z == 1 and BattleFormationOutline.RATIOS[column.x] in [4.0, 6.0], "column key %s" % column)
-	_check(BattleFormationOutline.texture_key(10.0, 10.0, false).x == 0, "square key")
-	_check(BattleFormationOutline.texture_key(1000.0, 1.0, false).x == BattleFormationOutline.RATIOS.size() - 1, "ratio clamped to the largest bucket")
-	var size := Vector2i(192, 96)
+	# Taille arrondie au pas de 2 m supérieur, bornée.
+	_check(BattleFormationOutline.texture_key(63.0, 9.0, false) == Vector3i(32, 5, 0), "wide key")
+	_check(BattleFormationOutline.texture_key(8.0, 40.0, true) == Vector3i(4, 20, 1), "column key")
+	_check(BattleFormationOutline.texture_key(0.2, 5000.0, false) == Vector3i(1, 150, 0), "key clamped")
+	var ppm := BattleFormationOutline.PX_PER_M
+	var size := Vector2i(30 * ppm, 10 * ppm)
 	var solid := BattleFormationOutline.outline_image(size, false)
 	var dashed := BattleFormationOutline.outline_image(size, true)
 	_check(solid.get_size() == size and dashed.get_size() == size, "image size")
-	_check(solid.get_pixel(0, 0).a > 0.9 and solid.get_pixel(96, 48).a < 0.1, "solid: frame opaque, centre clear")
-	var step := BattleFormationOutline.DASH_PX + 2
+	var line := int(BattleFormationOutline.LINE_M * ppm)
+	_check(solid.get_pixel(0, 0).a > 0.9 and solid.get_pixel(line - 1, size.y / 2).a > 0.9, "solid: frame opaque over the line width")
+	_check(solid.get_pixel(line + 1, size.y / 2).a < 0.1, "solid: clear just inside the line")
+	# Émission ajoutée sans l'alpha par Godot : le fond transparent par défaut doit être noir.
+	var centre := solid.get_pixel(size.x / 2, size.y / 2)
+	_check(centre.a < 0.01 and centre.r < 0.01 and centre.g < 0.01 and centre.b < 0.01, "default background is transparent black")
+	var step := int(BattleFormationOutline.DASH_M * ppm) + 2
 	_check(dashed.get_pixel(1, 1).a > 0.9 and dashed.get_pixel(step, 1).a < 0.1, "dashed: gap after the first dash")
 	_check(solid.get_pixel(step, 1).a > 0.9, "solid: no gap")
 
@@ -120,7 +124,9 @@ func _check_integration() -> void:
 	_check(decal.visible and outlines.state_of(own) == S.SELECTED, "selected decal visible and solid")
 	_check(decal.size.y == BattleFormationOutline.HEIGHT, "decal height covers the relief")
 	var unit := _unit(own)
-	_check(absf(decal.size.x - (float(unit["width"]) + BattleFormationOutline.MARGIN)) < 0.3, "decal width follows the front")
+	var front := float(unit["width"]) + BattleFormationOutline.MARGIN
+	_check(decal.size.x >= front and decal.size.x < front + BattleFormationOutline.SIZE_STEP, "decal width follows the front (2 m step)")
+	_check(decal.texture_emission != decal.texture_albedo, "separate emission texture (black background)")
 	_check(absf(decal.position.x - float(unit["x"])) < 0.01 and absf(decal.position.z - float(unit["z"])) < 0.01, "decal follows the regiment")
 	_check(absf(decal.rotation.y - float(unit["facing"])) < 0.001, "decal follows the facing")
 	_check(not outlines.decal_of(foe).visible, "idle enemy has no outline")
