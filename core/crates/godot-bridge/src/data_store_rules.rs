@@ -33,6 +33,11 @@ impl GameDataStore {
             "hover_preview_max_paths",
             f64::from(preview.max_individual_paths),
         );
+        // CB-M3: queued orders per regiment (`data/rules/battle_queue.json`).
+        dict.set(
+            "battle_queue_max",
+            f64::from(sim_battle::QueueRules::bundled().max_queued_orders),
+        );
         dict
     }
 }
