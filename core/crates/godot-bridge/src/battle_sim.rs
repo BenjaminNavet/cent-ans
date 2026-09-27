@@ -1592,6 +1592,32 @@ impl BattleSim {
             })
             .collect()
     }
+
+    /// CB5: typed alerts `[{kind, time, x, z, side, unit}]` added since the
+    /// last call. `kind` is one of `rout`, `general_down`, `flanked`,
+    /// `reinforcements`, `ammo_out`, `wall_breached`, `gate_destroyed`.
+    /// `side` is `""` and `unit` is `-1` for a wall/gate piece. Output only:
+    /// reading it never changes the simulation.
+    #[func]
+    fn get_alerts(&mut self) -> VarArray {
+        let Some(sim) = &mut self.sim else {
+            return VarArray::new();
+        };
+        sim.take_new_alerts()
+            .iter()
+            .map(|alert| {
+                vdict! {
+                    "kind" => alert.kind.key(),
+                    "time" => alert.time,
+                    "x" => alert.x,
+                    "z" => alert.z,
+                    "side" => alert.side.map_or("", |s| s.key()),
+                    "unit" => alert.unit.map_or(-1, |u| u as i64),
+                }
+                .to_variant()
+            })
+            .collect()
+    }
 }
 
 /// CV3: the last battle classification as a dictionary (see

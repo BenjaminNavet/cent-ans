@@ -25,6 +25,14 @@ impl GameDataStore {
             "breach_open_threshold",
             f64::from(sim_battle::siege::BREACH_ONE_GAP),
         );
+        // CB5: the alert column's on-screen duration and merge window, so
+        // `battle_alerts_column.gd` quotes `data/rules/battle_alerts.json`
+        // instead of copying its numbers.
+        let alerts = sim_battle::alerts::AlertRules::bundled();
+        dict.set("cb5_alert_duration_s", alerts.duration_s);
+        dict.set("cb5_alert_merge_window_s", alerts.merge_window_s);
+        dict.set("cb5_alert_merge_radius_m", alerts.merge_radius_m);
+        dict.set("cb5_alert_max_shown", f64::from(alerts.max_shown));
         dict
     }
 }
