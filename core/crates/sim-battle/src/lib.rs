@@ -53,6 +53,7 @@ pub mod field;
 pub mod fire;
 pub mod formation_ai;
 pub mod formation_width;
+pub mod group_formation;
 pub mod historical;
 pub mod horse_wait;
 pub mod hover;
@@ -99,6 +100,7 @@ pub use field::{
 };
 pub use fire::{Blaze, FireRules, FireState};
 pub use formation_width::{split_widths, FormationWidthRules, RankBounds};
+pub use group_formation::{FormationSlot, GroupFormationRules, Preset, Role, Stance};
 pub use historical::HistoricalMap;
 pub use hover::{
     Advantage, Compare, CompareSide, HoverContext, HoverKind, HoverRules, RangeArcRules,

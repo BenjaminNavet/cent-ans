@@ -8,10 +8,10 @@ Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cb6`.
 ## État
 - [x] Données : `data/rules/group_formations.json` (6 préréglages) + schéma + `tools/tests/test_group_formations_schema.py`.
 - [x] Golden de non-régression : `core/crates/sim-battle/tests/fixtures/cb6_deploy_golden.json` (écrit sur le code d'avant CB6).
-- [ ] Cœur : `sim-battle/src/group_formation.rs`, `deploy()` et `ai_deploy` via « Ligne de bataille ».
+- [x] Cœur : `sim-battle/src/group_formation.rs` (`layout`, `BattleSim::formation_slots`), `deploy()` et `ai_deploy` via « Ligne de bataille » (golden identique au bit près).
 - [ ] Pont : `formation_presets()`, `formation_slots(...)`.
 - [ ] Godot : sélecteur, raccourcis, déploiement, bataille.
 - [ ] Tests Godot + script de capture.
 
 ## Prochaine étape
-Implémenter `group_formation.rs` et brancher `deploy()`.
+Tests cœur par préréglage, puis pont.
