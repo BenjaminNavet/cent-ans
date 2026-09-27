@@ -25,6 +25,7 @@ mod campaign_sim_encounters;
 mod campaign_sim_events;
 mod campaign_sim_family;
 mod campaign_sim_h5h6;
+mod campaign_sim_holdings;
 mod campaign_sim_map_lens;
 mod campaign_sim_movement;
 mod campaign_sim_provinces;
