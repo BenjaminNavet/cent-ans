@@ -11,8 +11,8 @@ Plan : `docs/superpowers/plans/2026-09-27-po-polish.md` § PO4. Bible DA § 12.6
   `sun_elevation_scale`, `sun_tint` (reproduisent les anciennes valeurs à midi).
   `po_grade_test.gd` partie bataille active (48 contextes). `tools/tests/test_time_of_day_presets.py`.
 - [x] 2. Sol : Grass Path 2 (Poly Haven CC0, 2k, 5,3 Mo) dans `battle_ground.gdshader` (`near_detail_*`, < 32 m, lié à DA6).
-- [ ] 3. Herbe en touffes.
-- [ ] 4. Rangs : décalage de rendu ±0,15 m, ±4°.
+- [x] 3. Herbe en touffes : plaques ~25 m avec trouées, bouquets ~2 m, hauteur et teinte par bouquet (`battle_grass.gdshader`, DA6 seulement).
+- [x] 4. Rangs : `BattleSoldiers.loosen` (±0,15 m, ±4°, stable par régiment et rang, < 160 m, tampon en cache par version PB3e ; `--no-loose-ranks`). Coût : proc_step +0,15 ms à 1 156 soldats. ep13_replay OK.
 - [ ] 5. Horizon : arbres « sucette ».
 - [ ] 6. Contours de formation : liseré or pâle.
 - [ ] 7. smoke, banc PB1, captures.
@@ -38,4 +38,4 @@ Avant : large 11,34 / 11,28 / 9,67 (médiane 11,28) ; rapproché 11,48 / 11,43 /
 
 ## Prochaine étape
 
-Étape 3 (herbe en touffes). Machine chargée (GPU partagé) : le banc final doit alterner avant/après dans le même créneau.
+Étape 5 (horizon, arbres sucette). Machine chargée (GPU partagé) : le banc final doit alterner avant/après dans le même créneau.
