@@ -44,6 +44,8 @@ impl CampaignState {
 
         // 1. The player's turn is over. His battles still pending are
         // auto-resolved first (M7).
+        // CV3-3: encounters left unanswered take their default option.
+        crate::encounter::resolve_unanswered(self, data, &mut events);
         battle_request::auto_resolve_all_pending(self, data, &mut events);
         crate::naval::auto_resolve_all_pending(self, data, &mut events);
 
@@ -179,6 +181,8 @@ impl CampaignState {
                 army.movement_left = points;
             }
         }
+        // CV3-3: encounter sites expire, new ones appear.
+        crate::encounter::start_season(self, data, events);
         // The player's multi-turn marches resume at the start of
         // his turn.
         let player = self.player_faction.clone();

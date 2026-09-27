@@ -49,6 +49,7 @@ pub mod dynasty;
 pub mod economy;
 pub mod economy_balance;
 pub mod edicts;
+pub mod encounter;
 pub mod events;
 pub mod frontier;
 pub mod map_lens;
@@ -109,6 +110,10 @@ pub use dynasty::{
     MARRIAGE_MIN_AGE,
 };
 pub use economy::{FactionEconomy, TaxRate};
+pub use encounter::{
+    EncounterBattle, EncounterError, EncounterOptionView, EncounterSite, EncounterSiteView,
+    EncounterState, PendingEncounter, PendingEncounterView,
+};
 pub use events::{EventKind, GameEvent};
 pub use frontier::GarrisonRole;
 pub use march::{MoveReport, StopReason};
