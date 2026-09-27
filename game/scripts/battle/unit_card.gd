@@ -7,13 +7,19 @@ extends RichPanel
 ## moral / fatigue / munitions, état en pastille, étoile du général, numéros de groupe. Le nom,
 ## la formation et le détail chiffré passent dans l'infobulle riche (RichTooltip).
 ## Aucune règle : la carte n'affiche que le dictionnaire de `BattleSim.get_units()`.
+## CB4 : sous la vignette, 1 à 3 boutons de capacité (`abilities` de l'unité), avec cadran de
+## recharge, grisés avec la raison dans l'infobulle quand une condition manque.
 
 signal clicked(unit_id: int, additive: bool)
 ## B3 / T6 : double-clic = centrer la caméra sur ce régiment (comme TW).
 signal double_clicked(unit_id: int)
+## CB4 : bouton de capacité cliqué (emploi, ou levée si elle est active).
+signal ability_pressed(unit_id: int, ability_id: String)
 
 const WIDTH := 64.0
-const HEIGHT := 94.0
+## CB4 : 94 px de vignette + une rangée de boutons de capacité.
+const HEIGHT := 112.0
+const ABILITY_SIZE := 17.0
 const ILLUSTRATIONS_DIR := "res://assets/illustrations/"
 const INK := Color(0.22, 0.14, 0.07)
 const BORDER := Color(0.42, 0.29, 0.16)
@@ -39,6 +45,12 @@ var _groups: String = ""
 ## CB1 : membre d'un groupe verrouillé (cadenas dessiné en code faute d'icône DA5).
 var locked: bool = false
 var _tooltip_key: String = ""
+## CB4 : textes des capacités (`BattleSim.get_ability_catalog()`), donnés par le bandeau.
+var ability_catalog: Dictionary = {}
+var ability_row: HBoxContainer
+var _ability_buttons: Array[Button] = []
+var _ability_states: Array = []
+var _ability_keys: PackedStringArray = []
 
 
 ## Nom découpé en `max_lines` lignes de `width` px au plus, uniquement entre deux mots ; ce qui
@@ -104,12 +116,25 @@ func setup(unit: Dictionary, icon_library: Node, faction: String = "", color: Co
 		var icon_id: String = category if icon_library.call("has_icon", category) else unit_type
 		class_icon = icon_library.call("get_icon", icon_id, "unit")
 		class_icon_is_miniature = icon_library.has_method("is_entity") and bool(icon_library.call("is_entity", icon_id, "unit"))
+	var column := VBoxContainer.new()
+	column.name = "Column"
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_theme_constant_override("separation", 1)
+	add_child(column)
 	art = Control.new()
 	art.name = "Art"
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	art.clip_contents = true
+	art.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	art.draw.connect(_draw_art)
-	add_child(art)
+	column.add_child(art)
+	ability_row = HBoxContainer.new()
+	ability_row.name = "Abilities"
+	ability_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ability_row.custom_minimum_size = Vector2(0, ABILITY_SIZE)
+	ability_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	ability_row.add_theme_constant_override("separation", 3)
+	column.add_child(ability_row)
 	gui_input.connect(_on_gui_input)
 
 
@@ -152,6 +177,60 @@ func refresh(unit: Dictionary, is_selected: bool) -> void:
 	style.set_border_width_all(3 if is_selected else 2)
 	art.queue_redraw()
 	_refresh_tooltip(unit)
+	_refresh_abilities(Array(unit.get("abilities", [])))
+
+
+## CB4 : boutons de capacité (créés au besoin : un chevalier démonté gagne « Serrer les rangs »),
+## redessinés et leur infobulle refaite quand leur état change.
+func _refresh_abilities(states: Array) -> void:
+	var ids: PackedStringArray = []
+	for state in states:
+		ids.append(str((state as Dictionary).get("id", "")))
+	if ids != _ability_keys:
+		_ability_keys = ids
+		for button in _ability_buttons:
+			button.queue_free()
+		_ability_buttons.clear()
+		_ability_states = []
+		for i in ids.size():
+			_ability_buttons.append(_make_ability_button(i))
+	for i in states.size():
+		var state: Dictionary = states[i]
+		var previous: Dictionary = _ability_states[i] if i < _ability_states.size() else {}
+		if state == previous:
+			continue
+		var button := _ability_buttons[i]
+		var entry: Dictionary = ability_catalog.get(str(state["id"]), {"id": state["id"], "name": state["id"]})
+		button.disabled = not bool(state.get("available", false))
+		button.set_meta("kind", str(state.get("kind", "")))
+		button.set_meta("state", state)
+		button.tooltip_text = BattleAbilityIcons.tip(entry, state, i + 1)
+		button.queue_redraw()
+	_ability_states = states.duplicate(true)
+
+
+func _make_ability_button(index: int) -> Button:
+	var button := RichButton.new()
+	button.name = "Ability%d" % (index + 1)
+	button.flat = true
+	button.focus_mode = Control.FOCUS_NONE
+	button.custom_minimum_size = Vector2(ABILITY_SIZE, ABILITY_SIZE)
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.draw.connect(func() -> void:
+		BattleAbilityIcons.draw_button(button, Rect2(Vector2.ZERO, button.size), str(button.get_meta("kind", "")),
+			button.get_meta("state", {}), button.is_hovered()))
+	button.pressed.connect(func() -> void:
+		if index < _ability_keys.size():
+			ability_pressed.emit(unit_id, _ability_keys[index]))
+	button.mouse_entered.connect(button.queue_redraw)
+	button.mouse_exited.connect(button.queue_redraw)
+	ability_row.add_child(button)
+	return button
+
+
+## CB4 : boutons de capacité de la carte (tests, capture).
+func ability_buttons() -> Array[Button]:
+	return _ability_buttons
 
 
 ## État court de la carte (hors du champ, réserve, anéantie, sinon libellé de la simulation).

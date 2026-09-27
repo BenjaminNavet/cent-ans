@@ -1218,7 +1218,16 @@ func _run_battle() -> void:
 	_check(not refused.get("ok", true), "battle: commanding an enemy unit should be refused")
 	# F10b : ordres du chef (catalogue de data/battle_orders, cri de guerre propre à la faction).
 	var orders: Array = battle.call("get_leader_orders", "attacker")
-	_check(orders.size() == 5, "battle: expected 5 leader's orders, got %d" % orders.size())
+	# CB4 : quatre ordres, le pavois est devenu une capacité des arbalétriers.
+	_check(orders.size() == 4, "battle: expected 4 leader's orders, got %d" % orders.size())
+	# CB4 : capacités actives (catalogue de data/battle_abilities, état dans get_units).
+	var catalog: Dictionary = battle.call("get_ability_catalog")
+	_check(catalog.size() == 5, "battle: expected 5 abilities, got %d" % catalog.size())
+	var with_abilities := 0
+	for unit: Dictionary in units:
+		_check(unit.has("abilities"), "battle: get_units entry without abilities")
+		with_abilities += 1 if not (unit.get("abilities", []) as Array).is_empty() else 0
+	_check(with_abilities > 0, "battle: no regiment has an ability")
 	if not orders.is_empty():
 		_check(str(orders[0]["label"]) == "Montjoie ! Saint-Denis !", "battle: French war cry label is %s" % orders[0]["label"])
 		var cry: Dictionary = battle.call("issue_command", {"type": "leader_order", "order": "order_war_cry", "units": []})

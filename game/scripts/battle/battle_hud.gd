@@ -17,6 +17,7 @@ signal speed_pressed(index: int)  # -1 : pause, 0..3 : index dans BattleScene.SP
 signal minimap_clicked(world: Vector2)
 signal leader_clicked(double: bool)  # UB1 : sceau du chef (clic : sélection, double : caméra)
 signal ui_feedback(kind: String)  # UB1 : sons d'interface (« card », « alert », « cancel »)
+signal ability_pressed(unit_id: int, ability_id: String)  # CB4 : bouton de capacité d'une carte
 
 const UNIT_CARD := preload("res://scripts/battle/unit_card.gd")
 const MINIMAP := preload("res://scripts/battle/battle_minimap.gd")
@@ -38,8 +39,9 @@ const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const INK := Color(0.22, 0.14, 0.07)
 const MAX_LOG := 8
 ## UB1 / U9 : hauteur du bandeau du bas (cartes de 94 px + libellé de « bataille » + marges),
-## lue aussi par la barre des ordres du chef.
-const BAND_HEIGHT := 128.0
+## lue aussi par la barre des ordres du chef. CB4 : + la rangée des boutons de capacité (cartes
+## de 112 px).
+const BAND_HEIGHT := 140.0
 const SEAL_SIZE := 112.0
 ## Deux entrées de même texte à moins de GROUP_SECONDS s'agrègent en « (×2) » (audit A3 B4).
 const GROUP_SECONDS := 8.0
@@ -76,6 +78,8 @@ var _cards: Dictionary = {}  # unit id -> UnitCard
 var _balance: Array = [1, 1]
 var _colors: Array = [Color.RED, Color.BLUE]
 var player_faction: String = ""  # B2 : blason des vignettes
+## CB4 : textes des capacités (`BattleSim.get_ability_catalog()`), posés par la scène.
+var ability_catalog: Dictionary = {}
 var _log_entries: Array[Dictionary] = []  # {time, text, count}, le plus récent en tête
 var log_expanded := true
 var log_toggle: Button
@@ -803,6 +807,10 @@ func _make_card(unit: Dictionary) -> UnitCard:
 	var card: UnitCard = UNIT_CARD.new()
 	(column.get_node("Cards") as HBoxContainer).add_child(card)
 	card.setup(unit, get_node_or_null("/root/IconLibrary"), player_faction, _colors[0])
+	card.ability_catalog = ability_catalog
+	card.ability_pressed.connect(func(id: int, ability: String) -> void:
+		ui_feedback.emit("card")
+		ability_pressed.emit(id, ability))
 	if _card_names.has(int(unit["id"])):
 		card.unit_name = str(_card_names[int(unit["id"])]) + (" ★" if card.is_general else "")
 	card.clicked.connect(func(id: int, additive: bool) -> void:

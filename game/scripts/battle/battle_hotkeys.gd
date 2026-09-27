@@ -37,8 +37,8 @@ const BINDINGS := [
 	{"group": "modes", "action": "skirmish", "key": KEY_K, "dispatch": true, "help": "escarmouche : les tireurs reculent devant la mêlée"},
 	{"group": "modes", "action": "melee", "key": KEY_M, "dispatch": true, "help": "mêlée : les tireurs engagent au lieu de tirer"},
 	{"group": "modes", "action": "breach", "label": "bouton", "help": "battre en brèche : les engins de siège ne tirent que sur les murs et les portes"},
-	# Capacités (CB4, après CB2).
-	{"group": "abilities", "action": "abilities", "label": "Alt+1…4", "lot": "CB4", "pending": true, "help": "capacités des unités sélectionnées"},
+	# Capacités (CB4) : aiguillées par `ability_slot` dans `battle_input.gd` (touches physiques).
+	{"group": "abilities", "action": "abilities", "label": "Alt+1…4", "lot": "CB4", "help": "capacités des unités sélectionnées (tir tendu, pavois, bannière, rangs serrés, piques plantées ; boutons sous les cartes)"},
 	# Sélection et groupes.
 	{"group": "selection", "action": "select_all", "key": KEY_A, "mods": "ctrl", "help": "sélectionner toutes ses unités"},
 	{"group": "selection", "action": "groups", "label": "Ctrl+1…9 / 1…9", "help": "enregistrer / rappeler un groupe (deux fois : centrer la caméra)"},
@@ -66,6 +66,16 @@ static func action_for(key: InputEventKey) -> String:
 		if code == int(row["key"]) and str(row.get("mods", "")) == mods:
 			return str(row["action"])
 	return ""
+
+
+## CB4 : emplacement de capacité (1…4) d'un appui Alt/Option + chiffre de la rangée (touche
+## physique, AZERTY compris), 0 sinon.
+static func ability_slot(key: InputEventKey) -> int:
+	if mods_of(key) != "alt":
+		return 0
+	if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_4:
+		return int(key.physical_keycode - KEY_0)
+	return 0
 
 
 ## Modificateurs d'un appui : "", "ctrl", "alt", "shift", "alt_shift" (autres : "other").
