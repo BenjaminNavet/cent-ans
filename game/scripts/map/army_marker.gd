@@ -88,14 +88,10 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 		remove_child(previous)
 		previous.queue_free()
 	if ArmyFigures.enabled():
-		figures = ArmyFigures.build(army, color, _heraldry(faction_id), id, player)
+		figures = ArmyFigures.build(army, color, _heraldry(faction_id), id)
 		add_child(figures)
 		banner.visible = false
 		face(Vector2(1.0, 0.45).normalized())
-		# Lot CV3-5 : en embuscade, l'étendard du propriétaire s'estompe avec ses figurines.
-		var fade := figures.ghost_transparency()
-		for part: GeometryInstance3D in [pole, $Finial, flag]:
-			part.transparency = fade
 	else:
 		figures = null
 		ModelLibrary.dress_army_marker(self, army, color)

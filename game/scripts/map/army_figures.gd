@@ -14,8 +14,7 @@ extends Node3D
 ## Lot CV3-5 : « lord » à l'échelle de la grande stratégie. Le général à cheval est agrandi
 ## (`map.army_figure_scale`, `data/ui/campaign_map.json`) et porte lui-même l'étendard de l'ost
 ## (plus de porte-étendard à pied) ; l'escorte reste derrière lui. Au palier « loin », il se fond
-## comme le reste dans l'étendard et la plaque (retour au marqueur). En embuscade, les figurines
-## du propriétaire sont semi-transparentes (`map.ambush_owner_transparency`).
+## comme le reste dans l'étendard et la plaque (retour au marqueur).
 
 ## Hauteur d'homme ≈ 1,8 m (maillages V2) → ≈ 4,7 unités du repère du marqueur (hampe 8,4).
 const FIGURE_SCALE := 2.3
@@ -74,8 +73,6 @@ var _color: Color = Color.WHITE
 var _heraldry: Texture2D
 ## Lot CV3-5 : agrandissement du général porte-étendard (1 = pas de lord : porte-étendard à pied).
 var lord_scale: float = 1.0
-## Lot CV3-5 : figurines semi-transparentes (embuscade vue par son propriétaire).
-var ghost: bool = false
 
 static var _map_settings: Dictionary = {}
 
@@ -98,7 +95,7 @@ static func clear_cache() -> void:
 ## Lot CV3-5 : réglages de rendu `map` de `data/ui/campaign_map.json` (repli : pas de lord).
 static func map_settings() -> Dictionary:
 	if _map_settings.is_empty():
-		var fallback := {"army_figure_scale": 1.0, "ambush_owner_transparency": 0.0}
+		var fallback := {"army_figure_scale": 1.0}
 		_map_settings = fallback.duplicate()
 		var path := _data_dir().path_join(CAMPAIGN_MAP_DATA)
 		if not FileAccess.file_exists(path):
@@ -120,16 +117,13 @@ static func _data_dir() -> String:
 	return MAP_PATHS_SCRIPT.project_root().path_join("data")
 
 
-## Construit la représentation d'une armée (`army` = dictionnaire du pont). `owner_view` :
-## l'armée appartient au joueur (lot CV3-5 : embuscade semi-transparente pour lui seul).
-static func build(army: Dictionary, color: Color, heraldry: Texture2D, seed_text: String, owner_view: bool = false) -> ArmyFigures:
+## Construit la représentation d'une armée (`army` = dictionnaire du pont).
+static func build(army: Dictionary, color: Color, heraldry: Texture2D, seed_text: String) -> ArmyFigures:
 	var figures := ArmyFigures.new()
 	figures.name = ModelLibrary.MODEL_NODE
 	figures._color = color
 	figures._heraldry = heraldry
-	var settings := map_settings()
-	figures.lord_scale = maxf(float(settings.get("army_figure_scale", 1.0)), 1.0)
-	figures.ghost = owner_view and str(army.get("stance", "")) == "ambush"
+	figures.lord_scale = maxf(float(map_settings().get("army_figure_scale", 1.0)), 1.0)  # CV3-5
 	figures._anim_time = float(absi(hash(seed_text)) % 1000) * 0.013
 	for unit in army.get("units", []):
 		figures.men += int(unit.get("strength", 0))
@@ -250,8 +244,6 @@ func _build_troop(army: Dictionary) -> void:
 		instance.layers = 2
 		var material := _make_material(figure_kind, variant)
 		instance.material_override = material
-		if ghost:
-			instance.transparency = ghost_transparency()
 		troop.add_child(instance)
 		_groups[key] = {"mm": instance, "kind": figure_kind, "variant": variant, "material": material}
 
@@ -265,10 +257,6 @@ func is_lord() -> bool:
 func lord_slot() -> Vector2:
 	return LEADER_SLOT + Vector2(LORD_ADVANCE * (lord_scale - 1.0), 0.0)
 
-
-## Lot CV3-5 : transparence des figurines en embuscade (0 si opaques).
-func ghost_transparency() -> float:
-	return clampf(float(map_settings().get("ambush_owner_transparency", 0.0)), 0.0, 0.9) if ghost else 0.0
 
 
 static func _add_slot(slots: Dictionary, figure_kind: String, variant: int, slot: Vector2, yaw: float, size: float = 1.0) -> void:

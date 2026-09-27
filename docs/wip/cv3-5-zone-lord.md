@@ -24,16 +24,16 @@ Orchestration : `docs/wip/cv3-campagne-vivante.md`.
   lu par `ArmyFigures.map_settings()`. Général agrandi et avancé (`LORD_ADVANCE`), porte-étendard
   à pied supprimé, hampe dans la main (`LORD_HAND`), ramenée au pied du marqueur avec le fondu
   des figurines au palier loin (`ArmyMarker.set_view` → `_follow_bearer`).
-- Embuscade du joueur : `GeometryInstance3D.transparency` (`map.ambush_owner_transparency`) sur
-  figurines, hampe, fleuron et drapeau. Icône de posture sur l'étendard : laissée à CV3-4 (pas
-  d'icône d'encre embuscade / marche forcée / camp retranché à ce jour).
+- Point 4 (icône de posture sur l'étendard, embuscade semi-transparente) : confié à CV3-4 par
+  l'orchestrateur, non fait ici. Piste : `GeometryInstance3D.transparency` sur les
+  `MultiMeshInstance3D` de `ArmyFigures` (le shader skinné n'écrit pas ALPHA).
 
 ## État
 - [x] Core `reach.rs` + `bounded_dijkstra_from`.
 - [x] Tests Rust `tests/cv3_reach.rs` (4).
 - [x] Pont RGB8 + champs.
 - [x] Shader/bulle à deux tons, masquée en fin de tour et rejeu IA.
-- [x] Lord TW + embuscade semi-transparente ; smoke (données de zone, lord, fantôme).
+- [x] Lord TW ; smoke (données de zone à deux niveaux, lord, LOD).
 - [ ] Vérifs : cargo test complet, pytest, import Godot, smoke.
 - [ ] Captures `docs/img/cv3/zone-*.png` (script `game/tests/cv3_zone_shot.gd`).
 
