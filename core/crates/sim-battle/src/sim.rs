@@ -123,6 +123,14 @@ pub struct BattleSim {
     general_captured: [bool; 2],
     events: Vec<BattleEvent>,
     events_read: usize,
+    /// CB5: typed alerts emitted alongside the journal. Output only: not
+    /// part of [`crate::replay::state_digest`], see `alerts.rs`.
+    alerts: Vec<crate::alerts::BattleAlert>,
+    alerts_read: usize,
+    /// CB5: whether a `Flanked` alert already fired for this unit's current
+    /// spell of being flanked (`Unit::flanked` itself is cleared every tick
+    /// by [`BattleSim::step`], so the rising edge needs its own memory).
+    flanked_alerted: Vec<bool>,
     /// Volleys resolved since the renderer last read them (BV1).
     shots: std::collections::VecDeque<ShotEvent>,
     charge_announced: Vec<bool>,
@@ -457,6 +465,9 @@ impl BattleSim {
             general_captured: [false; 2],
             events: Vec::new(),
             events_read: 0,
+            alerts: Vec::new(),
+            alerts_read: 0,
+            flanked_alerted: vec![false; count],
             shots: std::collections::VecDeque::new(),
             charge_announced: vec![false; count],
             impacts: std::collections::VecDeque::new(),
@@ -965,6 +976,35 @@ impl BattleSim {
         let new = self.events[self.events_read..].to_vec();
         self.events_read = self.events.len();
         new
+    }
+
+    /// CB5: typed alerts added since the previous call. Output only: see
+    /// `alerts.rs`.
+    pub fn take_new_alerts(&mut self) -> Vec<crate::alerts::BattleAlert> {
+        let new = self.alerts[self.alerts_read..].to_vec();
+        self.alerts_read = self.alerts.len();
+        new
+    }
+
+    /// Records a CB5 alert at the current simulated time. Called at the
+    /// same points as the matching `log()`; never reads or changes
+    /// simulated state.
+    pub(crate) fn alert(
+        &mut self,
+        kind: crate::alerts::AlertKind,
+        x: f64,
+        z: f64,
+        side: Option<SideId>,
+        unit: Option<u32>,
+    ) {
+        self.alerts.push(crate::alerts::BattleAlert {
+            kind,
+            time: self.elapsed,
+            x,
+            z,
+            side,
+            unit,
+        });
     }
 
     /// Effective shooting range of `unit` (weather, time of day, height
@@ -2457,6 +2497,14 @@ impl BattleSim {
             let text = format!("Les {} sont à court de {missiles}.", self.unit_label(i));
             let side = self.units[i].side;
             self.log(text, Some(side));
+            let (x, z, id) = (self.units[i].x, self.units[i].z, self.units[i].id);
+            self.alert(
+                crate::alerts::AlertKind::AmmoOut,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
             if self.units[i].state == UnitState::Shooting {
                 self.units[i].state = UnitState::Idle;
             }
@@ -2652,6 +2700,10 @@ impl BattleSim {
         let n = self.units.len();
         let mut damage = vec![0.0; n];
         let mut flanked = vec![0u8; n];
+        // CB5: rising edge of `flanked` (0 -> non-zero), collected here and
+        // turned into alerts once the loop below has released its `&mut`
+        // borrow of `self.units`.
+        let mut newly_flanked: Vec<(f64, f64, SideId, u32)> = Vec::new();
         // BV2: heaviest blow per defender this tick (cause of its deaths).
         let mut heaviest: Vec<Option<(f64, usize)>> = vec![None; n];
         // UB1: (striker, victim, damage) to credit the kills once capped.
@@ -2706,6 +2758,14 @@ impl BattleSim {
                     unit.knocked = 0.0;
                 }
             }
+            if flanked[i] != 0 {
+                if !self.flanked_alerted[i] {
+                    self.flanked_alerted[i] = true;
+                    newly_flanked.push((unit.x, unit.z, unit.side, unit.id));
+                }
+            } else {
+                self.flanked_alerted[i] = false;
+            }
             unit.flanked = flanked[i];
             if damage[i] <= 0.0 || !unit.present() {
                 continue;
@@ -2732,6 +2792,15 @@ impl BattleSim {
         for (striker, victim, blow) in credit {
             self.units[striker].kills += blow * dealt_ratio[victim];
         }
+        for (x, z, side, id) in newly_flanked {
+            self.alert(
+                crate::alerts::AlertKind::Flanked,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
+        }
     }
 
     fn unit_destroyed(&mut self, i: usize) {
@@ -2754,6 +2823,20 @@ impl BattleSim {
             .as_ref()
             .map_or_else(|| "Le général".to_owned(), |g| g.name.clone());
         self.log(format!("{name} est tombé au combat !"), Some(side));
+        let general_pos = self
+            .units
+            .iter()
+            .find(|u| u.side == side && u.is_general)
+            .map(|u| (u.x, u.z, u.id));
+        if let Some((x, z, id)) = general_pos {
+            self.alert(
+                crate::alerts::AlertKind::GeneralDown,
+                x,
+                z,
+                Some(side),
+                Some(id),
+            );
+        }
         for unit in self.units.iter_mut().filter(|u| u.side == side) {
             unit.morale -= 25.0;
         }
@@ -2916,6 +2999,10 @@ impl BattleSim {
             let text = format!("Les {} {what}", self.unit_label(i));
             let side = self.units[i].side;
             self.log(text, Some(side));
+            if what == "sont en déroute !" {
+                let (x, z, id) = (self.units[i].x, self.units[i].z, self.units[i].id);
+                self.alert(crate::alerts::AlertKind::Rout, x, z, Some(side), Some(id));
+            }
         }
     }
 
@@ -2964,6 +3051,7 @@ impl BattleSim {
         let loser = winner.other();
         if self.general_alive[loser.index()] {
             if let Some(unit) = self.units.iter().find(|u| u.side == loser && u.is_general) {
+                let (gx, gz, gid) = (unit.x, unit.z, unit.id);
                 let caught = if unit.left_field {
                     unit.state == UnitState::Routing && !unit.withdrawing
                 } else {
@@ -2983,6 +3071,13 @@ impl BattleSim {
                         .as_ref()
                         .map_or_else(|| "Le général".to_owned(), |g| g.name.clone());
                     self.log(format!("{name} est fait prisonnier."), Some(loser));
+                    self.alert(
+                        crate::alerts::AlertKind::GeneralDown,
+                        gx,
+                        gz,
+                        Some(loser),
+                        Some(gid),
+                    );
                 }
             }
         }

@@ -21,6 +21,7 @@ signal ui_feedback(kind: String)  # UB1 : sons d'interface (« card », « alert
 const UNIT_CARD := preload("res://scripts/battle/unit_card.gd")
 const MINIMAP := preload("res://scripts/battle/battle_minimap.gd")
 const ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
+const ALERTS_COLUMN := preload("res://scripts/battle/battle_alerts_column.gd")  # CB5
 ## CB3 : ralenti ×0,5 ajouté en tête (`BattleScene.SPEEDS`).
 const SPEED_TOOLTIPS := ["Pause (Espace)", "Ralenti ×0,5 (+ / −)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
 const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
@@ -66,6 +67,7 @@ var help_panel: PanelContainer  # aide F1 (remplace la ligne d'aide permanente)
 var siege_panel: PanelContainer
 var siege_label: Label
 var minimap: BattleMinimap
+var alerts_column: BattleAlertsColumn  # CB5
 var groups := BattleGroups.new()
 var _speed_buttons: Array[Button] = []
 var _battle_columns: Dictionary = {}  # "vanguard"/"main"/"rear" -> VBoxContainer
@@ -95,6 +97,7 @@ func _ready() -> void:
 	_build_top_bar()
 	_build_log()
 	_build_bottom()
+	_build_alerts()  # CB5
 	# UB1 / U13 : sons d'interface (bus Interface d'AU1).
 	ui_feedback.connect(func(kind: String) -> void:
 		if kind == "card" or kind == "alert":
@@ -209,6 +212,13 @@ func toggle_log() -> void:
 func _update_log_toggle() -> void:
 	if log_toggle != null:
 		log_toggle.text = "▾ replier" if log_expanded else "▸ déplier"
+
+
+## CB5 : colonne d'alertes en haut à gauche (le journal est en haut à droite, `_build_log`) ;
+## sa hauteur suit son contenu (au plus 5 lignes), bien au-dessus du bandeau du bas.
+func _build_alerts() -> void:
+	alerts_column = ALERTS_COLUMN.new()
+	root.add_child(alerts_column)
 
 
 func _build_bottom() -> void:
