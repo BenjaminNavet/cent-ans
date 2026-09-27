@@ -227,6 +227,24 @@ technologies : il coûte des livres mais améliore santé et contentement, avec 
 l'hiver. La branche de technologies **Médecine**, le jardin des simples et l'apothicairerie renforcent la
 résistance à la peste et la guérison des blessés.
 
+### Liste des colonies (touche B)
+
+La touche **B** (ou le bouton « Colonies » de la barre du haut) ouvre un accès rapide façon
+Total War à toutes vos colonies, dans le même coin que « Mes unités » (ouvrir l'une ferme
+l'autre). Le trésor et le revenu net du dernier tour sont rappelés en tête, avec trois filtres
+exclusifs — colonies **libres** (sans chantier), colonies avec une **construction ou promotion**
+possible (▲), colonies **en danger** (⚠) — et un tri des provinces par revenu, nom ou ordre
+public.
+
+Les provinces se déplient sous forme de lignes : nom, revenu, chantiers en cours sur le total de
+colonies (⚒), jauge d'agitation et, si une révolte a commencé, le nombre de saisons restantes. Le
+bouton « ⌖ » centre la caméra sur la province et ouvre son panneau. Sous chaque province
+dépliée, une ligne par colonie donne son revenu, son chantier en cours (ou « libre »), le badge
+▲ (plein si une promotion est possible, en contour pour une construction neuve), sa garnison et,
+le cas échéant, un siège ou la mention « occupée ». Cliquer une colonie y porte la caméra et
+ouvre son propre panneau — aucune construction ni aucun recrutement ne se fait depuis cette
+liste. Les infobulles détaillent les constructions possibles (▲) et les raisons du danger (⚠).
+
 ## 6. Armées, ravitaillement, chevauchées
 
 - **Recruter** dans le panneau d'une colonie que vous contrôlez, puis **former une armée** ; la levée prend
