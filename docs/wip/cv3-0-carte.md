@@ -40,7 +40,23 @@ de campagne relevés sur les captures »).
    (`bottom_reserved_px`, posée par `map_ui.gd::layout_hud` via `update_bottom_reserve` =
    `end_turn_cluster.bell_height()` + marge, même calcul que `_dock_panel`) ; recalcule aussi
    au resize du viewport (`size_changed`), pas seulement à l'ouverture/au contenu.
-10. Lettrine qui ne réserve pas sa place — à faire
+10. Lettrine qui ne réserve pas sa place — fait (partiellement, voir note) :
+    - « iplomatie » : bug réel et distinct, confirmé — `diplomacy_panel.gd` avait un ancien
+      `DropCap` local (pré-kit UI1) avec le titre tronqué EN DUR (`"iplomatie"`, le "D" retiré
+      à la main pour lui faire de la place) au lieu d'utiliser `Lettrine.attach`. Remplacé par
+      le kit partagé, texte complet "Diplomatie", classe `DropCap` supprimée.
+    - « Île-de-France » : investigation approfondie (3 sondes headless : label isolé, puis dans
+      un HBoxContainer répliquant exactement `province_panel.tscn` avec bouton × sibling) —
+      **aucun bug reproduit** : `_has_initial()` vrai, taille réservée correcte, aucun
+      chevauchement, dans toutes les configurations testées. Nettoyage fait dans le kit
+      (`lettrine.gd`) : retrait d'une marge de stylebox redondante posée sur le label invisible
+      (`_ready()`), qui faisait doublon avec `custom_minimum_size` et perturbait mesurablement
+      le calcul de hauteur minimale propre du label (mesuré : -8 px avec la marge posée, sans
+      changer le rendu visible puisque le label est transparent). Tests ajoutés dans
+      `ui1_lettrine_test.gd` (titres accentués/à trait d'union, garde anti-régression sur
+      "iplomatie"). **Point ouvert** : si le défaut "Île-de-France" persiste visuellement,
+      il ne vient pas du kit Lettrine dans les configurations testées ; à vérifier par capture
+      (session principale) — peut-être un autre panneau ou police non couverte par ces sondes.
 
 ## Prochaine étape
 Traiter les points dans l'ordre, un commit `wip:` par point (ou groupe de points proches),

@@ -30,8 +30,64 @@ func _run() -> void:
 	title.text = "« entre guillemets »"
 	await process_frame
 	_check(not lettrine.call("_has_initial"), "pas d'initiale sur un titre non alphabétique")
+	panel.queue_free()
+	await process_frame
+	await _check_accented_titles()
+	await _check_diplomacy_panel()
 	print("ui1_lettrine_test: %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(0 if _failures == 0 else 1)
+
+
+## CV3-0 (#10) : un titre à initiale accentuée (« Île-de-France ») doit réserver la même place
+## qu'un titre ordinaire, dans une mise en page réaliste (HBoxContainer + bouton, comme
+## `province_panel.tscn`) : pas de recouvrement du texte par le champ de la lettrine.
+func _check_accented_titles() -> void:
+	for text in ["Île-de-France", "Éperon", "Diplomatie"]:
+		var box := HBoxContainer.new()
+		root.add_child(box)
+		var label := Label.new()
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.add_theme_font_size_override("font_size", 24)
+		label.text = text
+		box.add_child(label)
+		var close := Button.new()
+		close.text = "×"
+		box.add_child(close)
+		var lettrine := Lettrine.attach(label)
+		for f in 3:
+			await process_frame
+		_check(bool(lettrine.call("_has_initial")), "initiale détectée sur « %s »" % text)
+		var rest_width: float = float(label.size.x) - (float(lettrine.get("_box")) + 1.0)
+		_check(rest_width > 0.0, "place réservée pour la lettrine de « %s » (largeur label %s)" % [text, label.size.x])
+		box.queue_free()
+		await process_frame
+
+
+## CV3-0 (#10) : le titre de l'écran de diplomatie n'est plus tronqué à la main (« iplomatie »,
+## l'ancien `DropCap` local) et passe par le kit partagé comme les autres panneaux.
+func _check_diplomacy_panel() -> void:
+	var panel: Control = DiplomacyPanel.new()
+	root.add_child(panel)
+	for f in 3:
+		await process_frame
+	var found := false
+	for label in _all_labels(panel):
+		if label.text == "Diplomatie":
+			found = true
+			_check(label.get_node_or_null("Lettrine") != null, "lettrine posée sur le titre « Diplomatie »")
+		_check(label.text != "iplomatie", "le titre ne doit plus être tronqué à la main")
+	_check(found, "le titre « Diplomatie » (texte complet) est présent")
+	panel.queue_free()
+	await process_frame
+
+
+func _all_labels(node: Node) -> Array[Label]:
+	var result: Array[Label] = []
+	if node is Label:
+		result.append(node)
+	for child in node.get_children():
+		result.append_array(_all_labels(child))
+	return result
 
 
 func _check(condition: bool, message: String) -> void:
