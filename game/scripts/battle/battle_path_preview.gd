@@ -86,6 +86,7 @@ func compute(ids: Array, units: Array, point: Vector3, facing: float, now_s: flo
 	_last_time = now_s
 	live_active = true
 	legs = battle.call("preview_paths", PackedInt32Array(ids), point.x, point.z, facing) if battle != null else []
+	_hide_orders()
 	_draw_live(units, point, facing)
 	return legs
 
@@ -106,6 +107,14 @@ func refusal() -> String:
 	return ""
 
 
+func _hide_orders() -> void:
+	_orders_key = ""  # redessin dès la fin de l'aperçu
+	(_orders_mesh.mesh as ImmediateMesh).clear_surfaces()
+	_orders_mesh.visible = false
+	for ghost in _order_ghosts:
+		ghost.visible = false
+
+
 func clear_live() -> void:
 	live_active = false
 	legs = []
@@ -118,7 +127,11 @@ func clear_live() -> void:
 
 
 ## Trajets, fantômes et flèches d'attaque des ordres en cours des régiments `selected`.
+## Masqués pendant l'aperçu en direct : l'ordre préparé remplace l'ordre en cours.
 func update_orders(units: Array, selected: Array, now_s: float) -> void:
+	if live_active:
+		_hide_orders()
+		return
 	var key := str(selected)
 	if key == _orders_key and now_s - _orders_time < ORDER_REFRESH_S:
 		return
