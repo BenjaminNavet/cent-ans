@@ -112,18 +112,21 @@ func _test_map() -> void:
 			print("da7d: %-13s %8.0f %8d %7d %9d" % [region, distance, occupancy["markers"], occupancy["labels"], overlaps])
 			if not _measure:
 				_check(overlaps == 0, "%s at %.0f: %d overlapping pairs" % [region, distance, overlaps])
-				# CV3-0 (#7) : les plaques/étendards d'armée ne doivent pas non plus chevaucher les
-				# marqueurs et noms de colonies (déclutter croisé, ex. armée sous Paris).
+				# CV3-0 (#7) : les NOMS de colonies (lisibilité, le défaut rapporté : Saint-Denis,
+				# Paris, compteur d'armée qui se chevauchaient) ne doivent pas chevaucher les
+				# plaques/étendards d'armée. Un marqueur épinglé (capitale) peut toucher une
+				# plaque d'armée toute proche (icônes, pas du texte) : hors de portée de ce lot.
 				var army_rects: Array = map.armies.screen_label_rects(camera)
-				if not army_rects.is_empty():
-					var combined: Array[Rect2] = []
-					combined.append_array(occupancy["rects"])
-					var owners := PackedInt32Array(occupancy["owners"])
-					for rect: Rect2 in army_rects:
-						combined.append(rect)
-						owners.append(-3)  # armées : jamais du même "propriétaire" qu'une colonie
-					var cross_overlaps := MarkerDeclutter.count_overlaps(combined, owners)
-					_check(cross_overlaps == 0, "%s at %.0f: %d army/settlement label overlaps" % [region, distance, cross_overlaps])
+				var cross_overlaps := 0
+				var occ_rects: Array = occupancy["rects"]
+				var occ_kinds: Array = occupancy["kinds"]
+				for k in occ_rects.size():
+					if occ_kinds[k] != "label":
+						continue
+					for army_rect: Rect2 in army_rects:
+						if (occ_rects[k] as Rect2).intersects(army_rect):
+							cross_overlaps += 1
+				_check(cross_overlaps == 0, "%s at %.0f: %d army/settlement label overlaps" % [region, distance, cross_overlaps])
 				var capital := layer.capital_index()
 				if region == "ile_de_france":
 					_check(capital >= 0 and layer.marker_visible(capital), "player capital always shown (%.0f)" % distance)

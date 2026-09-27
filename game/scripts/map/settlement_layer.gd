@@ -1176,13 +1176,16 @@ func _marker_rect(i: int, camera: Camera3D, margin: float, box_fraction: Vector2
 
 ## Lot DA7d (mesures, tests) : rectangles écran (sans marge) des marqueurs et des noms affichés
 ## dans l'écran : {rects, owners (index de colonie), markers, labels}.
+## `kinds` (parallèle à `rects`/`owners`) : "marker" ou "label", pour filtrer par type (CV3-0 #7 :
+## un marqueur de capitale épinglé peut toucher une plaque d'armée, un nom de colonie non).
 func screen_occupancy(camera: Camera3D) -> Dictionary:
 	var rects: Array[Rect2] = []
 	var owners := PackedInt32Array()
+	var kinds: Array[String] = []
 	var marker_count := 0
 	var label_count := 0
 	if camera == null or data == null:
-		return {"rects": rects, "owners": owners, "markers": 0, "labels": 0}
+		return {"rects": rects, "owners": owners, "kinds": kinds, "markers": 0, "labels": 0}
 	var screen := camera.get_viewport().get_visible_rect()
 	var icons_on := _icons != null and _icons.visible
 	for i in data.settlements.size():
@@ -1192,6 +1195,7 @@ func screen_occupancy(camera: Camera3D) -> Dictionary:
 				if screen.intersects(rect):
 					rects.append(rect)
 					owners.append(i)
+					kinds.append("marker")
 					marker_count += 1
 		var label := _labels[i]
 		if label.visible and label.modulate.a > 0.02 and not camera.is_position_behind(label.global_position):
@@ -1199,8 +1203,9 @@ func screen_occupancy(camera: Camera3D) -> Dictionary:
 			if screen.intersects(lrect):
 				rects.append(lrect)
 				owners.append(i)
+				kinds.append("label")
 				label_count += 1
-	return {"rects": rects, "owners": owners, "markers": marker_count, "labels": label_count}
+	return {"rects": rects, "owners": owners, "kinds": kinds, "markers": marker_count, "labels": label_count}
 
 
 func visible_label_count() -> int:
