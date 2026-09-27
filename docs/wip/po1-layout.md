@@ -33,5 +33,17 @@ Plan : `docs/superpowers/plans/2026-09-27-po-polish.md` § PO1. Bible DA § 12.1
 - Hors liste du lot, touchés a minima : `chronicle_window.gd` (centrage dans le parent),
   `army_movement_controller.gd` (déclaration de guerre → `MODAL`), `zg7b_cache_test.gd`, `smoke.gd`.
 
+- Écran de fin de bataille (`BattleResultScreen`) non migré en `MODAL` : écran plein avec son
+  voile et son enluminure AR1 (fond plein écran) ; le forcer dans la boîte 0,6 × 0,76 couperait
+  l'enluminure. À refaire en phase 2 si voulu.
+- Battle : `UiZones.attach_host(root)` ; les hôtes s'empilent (la bataille se pose sur la carte,
+  la carte redevient l'hôte à sa sortie).
+
+## Vérifications (fin de lot)
+`po_ui_test` (UiLayout, C1, C2, C3), `smoke`, `unit_roster_test`, `cv3_4_ui_test`,
+`ui_panel_stack_test`, `hud_components_test`, `ux2_test`, `ub1_ui_test`, `zg7b_cache_test` : OK.
+`ux1_test` : erreur de compilation préexistante (`map_mode_controller.gd`, `SimFacade`).
+Captures `docs/img/po/po1/` (vues 1, 3-8).
+
 ## Prochaine étape
-Captures po_shot (1,3-8) et smoke complet, puis commit final PO1.
+Lot terminé ; relecture visuelle des captures par l'orchestrateur.
