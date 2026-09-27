@@ -43,8 +43,8 @@ Coller ce prompt :
 ## Liste à cocher
 
 ### PO0 — Fondations (orchestrateur, dans `main`)
-- [ ] `game/tests/po_shot.gd` + planche `docs/img/po/avant/` (10 vues) — commit `wip: PO0 before board`
-- [ ] Inventaire des défauts par vue (section ci-dessous), chaque défaut rattaché à un lot
+- [x] `game/tests/po_shot.gd` + planche `docs/img/po/avant/` (10 vues) — commit `wip: PO0 before board`
+- [x] Inventaire des défauts par vue (section ci-dessous), chaque défaut rattaché à un lot
 - [ ] Bible DA § 12 « Gabarit d'interface et d'étalonnage »
 - [ ] `docs/decisions/0097-gabarit-interface-et-etalonnage.md`
 - [ ] Squelette : autoload `UiLayout`, `Settings.is_dev()` + `--dev`, `po_ui_test.gd` et `po_grade_test.gd` désactivés, `time_of_day` dans le schéma d'`atmosphere.json`, section « Polish » de `docs/budget.md`
@@ -104,9 +104,9 @@ Spécifique à chaque lot :
 | PO4 | session | « Interdits : shader des soldats et clips (AN1), accessoires (PR1), sélection et ordres (CB). Le décalage des rangs est un décalage de rendu, sans aucun effet sur l'état du core. L'étape 6 n'est faite que si `docs/wip/cb.md` indique CB-M1 fusionné ; sinon, la noter comme reportée. Banc PB1 bataille ≤ +5 %. » |
 | PO5 | session | « Lis `docs/wip/cb.md` : si CB-M1 n'est pas fusionné et modifie `battle_camera.gd`, ne fais que la caméra de campagne. Paramètres de caméra dans `data/ui/camera_feel.json` avec un schéma, jamais en dur. » |
 
-## Inventaire des défauts (à remplir en PO0)
+## Inventaire des défauts (PO0, planche `docs/img/po/avant/`, 1280×720)
 
-Diagnostic de départ (spec § 1), à compléter vue par vue :
+Diagnostic de départ (spec § 1), puis vue par vue :
 
 | Vue | Défaut | Lot |
 |---|---|---|
@@ -114,11 +114,31 @@ Diagnostic de départ (spec § 1), à compléter vue par vue :
 | carte + UI | message technique « Relief rapproché limité… `uv run`… » affiché au joueur | PO1 |
 | carte | vert plat, brume grise, forêts en boules identiques, pastilles blanches des étiquettes | PO3 |
 | bataille | lumière de midi dure, herbe en taches, sol en basse résolution, rangs raides | PO4 |
-| bataille | cadre de sélection jaune vif | PO4 étape 6 (après CB-M1) |
+| bataille | cadre de sélection jaune vif (CB-M1 l'a remplacé par des contours ; style à reprendre) | PO4 étape 6 |
 | bataille | arbres « sucette » à l'horizon | PO4 étape 5 |
+| 01 titre | colonne de boutons coupée en bas à 720 px (« Crédits », « Quitter » hors écran) | PO1 |
+| 01 titre | libellés du menu sans état de survol marqué, légende du plan minuscule | PO2 |
+| 02 faction | textes des cartes et des forces/faiblesses sous 12 px ; boutons de difficulté plats | PO2 |
+| 02 faction | titre « Choisissez votre couronne » collé au bord, sans marge de grille | PO2 |
+| 03 carte large | barre du haut : texte minuscule, icônes et chiffres serrés, sans hiérarchie | PO1, PO2 |
+| 03 carte large | minicarte ≈ 1/4 de la hauteur, boutons de filtres collés dessous | PO1 |
+| 03 carte large | conseil (haut gauche), journal (bas gauche) et cloche (bas droite) flottent chacun dans leur coin | PO1 (toasts) |
+| 03 carte large | étiquettes de villes en pastilles, vert plat, lumière neutre | PO3 |
+| 04 régionale | panneau de province haut de 90 % de l'écran, collé à la minicarte, texte 11-12 px | PO1, PO2 |
+| 05 armée | libellé du chemin (« ce point : 4 tours… ») flotte au milieu du bas et chevauche le journal | PO1 |
+| 05 armée | carte du général et bande d'armée se chevauchent avec le journal | PO1 |
+| 06 fin de tour | bandeau « Tour des autres factions » posé sur le panneau de province (deux panneaux à droite) | PO1, PO5 |
+| 07 rencontre | fenêtre de choix sans fond assombri, recouvre la minicarte ; bande d'armée visible dessous | PO1 (modal) |
+| 08 déploiement | six panneaux flottants (en-tête, journal, bandeau, alerte rouge, ordres, cartes) | PO1 |
+| 08 déploiement | sol plat et uniforme, lumière de midi, pas d'ombres portées lisibles | PO4 |
+| 09 mêlée | journal de bataille en grand panneau haut droite, texte serré | PO1, PO2 |
+| 09 mêlée | champ vert uniforme, rangs en blocs rigides, horizon sans profondeur | PO4 |
+| 10 résultat | page dense, petites tailles, tableaux sans respiration | PO2 (phase 2 pour le détail) |
+| toutes | aucune transition : les écrans apparaissent d'un coup | PO5 |
 
 ## Journal
 
 - 27/09 : brainstorming terminé ; spec validée par le joueur.
 - 27/09 : spec corrigée (LUT procédurale existante réutilisée, ADR 0097 car 0096 = AN1, AN1/PR1 exclus de PO4) ; plan écrit et validé.
 - 27/09 : fichier de reprise rédigé. **Prochaine étape : PO0, première case.** Rien n'est lancé, aucun worktree PO.
+- 27/09 : PO0 commencé ; planche « avant » (10 vues JPEG, `po_shot.gd` pilote les options de capture des scènes) et inventaire faits. Constat : CB-M1 et CV3-4 sont fusionnés ; 4 agents d'autres chantiers tournent (AN1a, AN1b, PR1, CB-M2), donc 2 lots PO à la fois au plus.
