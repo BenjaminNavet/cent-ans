@@ -459,6 +459,10 @@ func _process(delta: float) -> void:
 		return
 	for army_id in _animations.keys():
 		_step_animation(army_id, delta)
+	# Lot CV3-5 : pas de zone atteignable pendant la fin de tour ni le rejeu des marches IA.
+	if bubble != null:
+		var replay: Variant = map.get("ai_replay")
+		bubble.set_suspended(map.get("end_turn_running") == true or (replay != null and replay.get("playing") == true))
 	# Lot AT1 : pas d'épées sur l'interface, ni hors de la carte (bataille, menus).
 	if AttackCursor.is_shown() and (not map.visible or not active() or get_viewport().gui_get_hovered_control() != null):
 		AttackCursor.show_attack(false)
