@@ -36,6 +36,8 @@ var is_general: bool = false
 var _unit: Dictionary = {}
 var _selected: bool = false
 var _groups: String = ""
+## CB1 : membre d'un groupe verrouillé (cadenas dessiné en code faute d'icône DA5).
+var locked: bool = false
 var _tooltip_key: String = ""
 
 
@@ -130,6 +132,14 @@ func set_groups(numbers: Array[int]) -> void:
 		art.queue_redraw()
 
 
+## CB1 : cadenas du groupe verrouillé.
+func set_locked(value: bool) -> void:
+	if value != locked:
+		locked = value
+		art.queue_redraw()
+		_tooltip_key = ""
+
+
 func has_illustration() -> bool:
 	return illustration != null
 
@@ -187,6 +197,8 @@ func _draw_art() -> void:
 	if _groups != "":
 		art.draw_string_outline(font, Vector2(3, 34), _groups, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color(0.1, 0.06, 0.03))
 		art.draw_string(font, Vector2(3, 34), _groups, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1, 0.82, 0.3))
+	if locked:
+		draw_padlock(art, Vector2(9, 46 if _groups != "" else 33), 1.0)
 	# Bas : dégradé sombre, effectif en gros, barres fines.
 	var shade_top := size.y - 34.0
 	art.draw_polygon(PackedVector2Array([Vector2(0, shade_top), Vector2(size.x, shade_top), Vector2(size.x, size.y), Vector2(0, size.y)]),
@@ -228,6 +240,19 @@ func _draw_star(center: Vector2, radius: float) -> void:
 	art.draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
 
 
+## CB1 : cadenas (anse et corps) centré en `center`, à l'échelle `k` ; glyphe provisoire en
+## attendant une icône DA5, comme les curseurs de CB-M2.
+static func draw_padlock(canvas: CanvasItem, center: Vector2, k: float) -> void:
+	var dark := Color(0.1, 0.06, 0.03)
+	var gold := Color(1, 0.82, 0.3)
+	var body := Rect2(center + Vector2(-5.5, -1.5) * k, Vector2(11, 8.5) * k)
+	canvas.draw_arc(center + Vector2(0, -2) * k, 3.6 * k, PI, TAU, 10, dark, 3.4 * k)
+	canvas.draw_arc(center + Vector2(0, -2) * k, 3.6 * k, PI, TAU, 10, gold, 1.6 * k)
+	canvas.draw_rect(body.grow(1.2 * k), dark)
+	canvas.draw_rect(body, gold)
+	canvas.draw_circle(center + Vector2(0, 2.2) * k, 1.3 * k, dark)
+
+
 ## Croix de Saint-André discrète sur une unité anéantie ou sortie du champ.
 func _draw_cross(size: Vector2) -> void:
 	var color := Color(0.1, 0.06, 0.04, 0.8)
@@ -246,6 +271,8 @@ func _refresh_tooltip(unit: Dictionary) -> void:
 	detail += "\nFormation : %s" % formation_label(str(unit["formation"]))
 	if _groups != "":
 		detail += "\nGroupe(s) : %s" % _groups
+	if locked:
+		detail += "\nGroupe verrouillé : se déplace d'un bloc (Ctrl+G : déverrouiller)"
 	if detail == _tooltip_key:
 		return
 	_tooltip_key = detail

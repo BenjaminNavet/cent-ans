@@ -49,6 +49,9 @@ fn followed(sim: &mut BattleSim, id: u32, to: P, seconds: f64) -> Walk {
             run: false,
             facing: None,
             queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         },
         None,
     )
@@ -324,6 +327,9 @@ fn previews_leave_the_battle_untouched() {
             run: false,
             facing: None,
             queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         })
         .unwrap();
         run(sim, 5.0);
@@ -345,6 +351,9 @@ fn previews_leave_the_battle_untouched() {
             run: false,
             facing: None,
             queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         })
         .unwrap();
         run(sim, 60.0);

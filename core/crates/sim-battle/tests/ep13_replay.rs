@@ -67,6 +67,7 @@ fn record_demo(seed: u64) -> (BattleSim, BattleReplay) {
             x: first.x + 15.0,
             z: first.z,
             facing: None,
+            width: None,
         },
     );
     drive(&mut sim, &mut recorder, ReplayAction::StartBattle);
@@ -90,6 +91,9 @@ fn record_demo(seed: u64) -> (BattleSim, BattleReplay) {
                 run: false,
                 facing: None,
                 queue: false,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             },
         },
     );

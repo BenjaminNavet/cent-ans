@@ -268,6 +268,21 @@ pub struct Unit {
     /// at most `QueueRules::max_queued_orders`.
     #[serde(default, skip_serializing_if = "VecDeque::is_empty")]
     pub order_queue: VecDeque<QueuedOrder>,
+    /// CB1: files of the Line set by a right-drag (`formation_width`),
+    /// `None` for the default depth of the Line.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub line_files: Option<u32>,
+    /// CB1: tag of the grouped order the regiment walks under (a locked
+    /// group, or one drag); with `match_speed`, the group keeps the pace
+    /// of its slowest regiment.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_tag: Option<u32>,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub match_speed: bool,
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 /// `missile_timer` of a regiment never shot at.
@@ -345,6 +360,9 @@ impl Unit {
             seen_at: unseen(),
             push: Default::default(),
             order_queue: VecDeque::new(),
+            line_files: None,
+            group_tag: None,
+            match_speed: false,
         }
     }
 
@@ -472,6 +490,10 @@ impl Unit {
     pub fn ranks_files(&self, n: u32) -> (u32, u32) {
         let n = n.max(1);
         match self.formation {
+            Formation::Line if self.line_files.is_some() => {
+                let bounds = crate::formation_width::FormationWidthRules::bundled().bounds(self);
+                crate::formation_width::line_shape(n, self.line_files.unwrap_or(1), bounds)
+            }
             Formation::Line => {
                 let ranks = if self.category == UnitCategory::Siege {
                     1

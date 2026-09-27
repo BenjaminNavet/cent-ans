@@ -180,6 +180,9 @@ fn ladders_are_raised_then_the_wall_walk_is_gained() {
         run: false,
         facing: None,
         queue: false,
+        width: None,
+        match_speed: false,
+        group_tag: None,
     })
     .unwrap();
     // Halfway up: climbers on the ladders, a few men already on top.
@@ -264,6 +267,9 @@ fn a_siege_tower_docks_and_lowers_its_bridge() {
         run: false,
         facing: None,
         queue: false,
+        width: None,
+        match_speed: false,
+        group_tag: None,
     })
     .unwrap();
     run(&mut sim, 120.0);

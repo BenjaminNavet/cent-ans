@@ -746,9 +746,18 @@ impl BattleSim {
     }
 
     /// Places regiment `id` at (x, z); `facing` in radians, NaN keeps the
-    /// current facing. → `{ok, error}` (French error).
+    /// current facing; CB1 `width` (metres, optional, ≤ 0 for none): the
+    /// frontage of a right-drag, the regiment forming a Line that wide.
+    /// → `{ok, error}` (French error).
     #[func]
-    fn deploy_unit(&mut self, id: i64, x: f64, z: f64, facing: f64) -> VarDictionary {
+    fn deploy_unit(
+        &mut self,
+        id: i64,
+        x: f64,
+        z: f64,
+        facing: f64,
+        #[opt(default = 0.0)] width: f64,
+    ) -> VarDictionary {
         self.touch_poses();
         if self.player.is_some() {
             return result_dict(Err(REPLAY_REFUSAL.to_owned()));
@@ -757,6 +766,7 @@ impl BattleSim {
             return result_dict(Err("aucune bataille en cours".to_owned()));
         };
         let facing = facing.is_finite().then_some(facing);
+        let width = (width.is_finite() && width > 0.0).then_some(width);
         let result = u32::try_from(id)
             .map_err(|_| format!("unité inconnue : {id}"))
             .and_then(|id| {
@@ -768,9 +778,10 @@ impl BattleSim {
                         x,
                         z,
                         facing,
+                        width,
                     },
                 );
-                sim.deploy_unit(id, x, z, facing)
+                sim.deploy_unit_width(id, x, z, facing, width)
                     .map_err(|e| sim.error_text(&e))
             });
         result_dict(result)
@@ -889,6 +900,11 @@ impl BattleSim {
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
                 }
+                // CB1: files of a dragged Line (-1: default depth), and the
+                // tag of the grouped order it walks under (-1: none).
+                dict.set("line_files", unit.line_files.map_or(-1, i64::from));
+                dict.set("group_tag", unit.group_tag.map_or(-1, i64::from));
+                dict.set("match_speed", unit.match_speed);
                 // CB-M3: orders waiting behind the current one.
                 dict.set("queue", &crate::battle_sim_queue::queue_array(sim, unit));
                 // EP11: push of the lines in melee (m/s, > 0 driving the enemy

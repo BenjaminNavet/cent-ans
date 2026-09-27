@@ -249,6 +249,9 @@ impl BattleSim {
                 run,
                 facing,
                 queue,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             } => {
                 let kept: Vec<u32> = units
                     .into_iter()
@@ -261,6 +264,9 @@ impl BattleSim {
                     run,
                     facing,
                     queue,
+                    width: None,
+                    match_speed: false,
+                    group_tag: None,
                 })
             }
             Command::Attack {
@@ -422,6 +428,9 @@ impl BattleSim {
                             run: false,
                             facing: Some(unit.facing),
                             queue: false,
+                            width: None,
+                            match_speed: false,
+                            group_tag: None,
                         },
                     ));
                 }
@@ -474,6 +483,9 @@ impl BattleSim {
                         run: false,
                         facing: Some(post.facing),
                         queue: false,
+                        width: None,
+                        match_speed: false,
+                        group_tag: None,
                     },
                 ));
             }

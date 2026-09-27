@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/formation_width_rules.schema.json",
+  "title": "Largeur de formation au glisser",
+  "description": "Fichier data/rules/formation_width.json (lot CB1, ADR 0095) : bornes du nombre de rangs d'un régiment en Ligne dont la largeur est fixée au glisser, par classe de troupe, et intervalle entre régiments d'une ligne de groupe. Lu par sim-battle (FormationWidthRules).",
+  "type": "object",
+  "$defs": {
+    "bounds": {
+      "type": "object",
+      "properties": {
+        "min_ranks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32,
+          "description": "Rangs au moins : un glisser plus large est ramené à cette profondeur."
+        },
+        "max_ranks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64,
+          "description": "Rangs au plus : un glisser plus étroit est ramené à cette profondeur."
+        }
+      },
+      "required": ["min_ranks", "max_ranks"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "group_gap_m": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 50,
+      "description": "Intervalle (m) entre deux régiments d'une ligne de groupe au glisser : retranché de la largeur du glisser avant la répartition au prorata des effectifs."
+    },
+    "classes": {
+      "type": "object",
+      "properties": {
+        "pikemen": { "$ref": "#/$defs/bounds" },
+        "infantry": { "$ref": "#/$defs/bounds" },
+        "ranged": { "$ref": "#/$defs/bounds" },
+        "cavalry": { "$ref": "#/$defs/bounds" },
+        "siege": { "$ref": "#/$defs/bounds" }
+      },
+      "required": ["pikemen", "infantry", "ranged", "cavalry", "siege"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["group_gap_m", "classes"],
+  "additionalProperties": false
+}

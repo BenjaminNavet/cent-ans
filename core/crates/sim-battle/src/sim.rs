@@ -23,6 +23,7 @@ mod siege_extra;
 mod standards;
 mod time_of_day;
 mod water;
+mod width;
 
 pub use camp::CampState;
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
@@ -30,6 +31,7 @@ pub use opening::AmbushLayout;
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
 pub use siege_assault::Ladder;
+pub use width::{MoveShape, AUTO_GROUP_TAG};
 
 use data_model::{Ability, UnitCategory, UnitStats};
 
@@ -47,6 +49,7 @@ use crate::setup::{BattleSetup, SideId, UnitSetup};
 use crate::shot::{MissileKind, ShotCover, ShotEvent, MAX_PENDING_SHOTS};
 use crate::siege::{self, PieceKind, SiegeWorks};
 use crate::unit::{Formation, Unit, UnitFate, UnitState};
+use width::move_group_tag;
 
 /// Fixed simulation step, in seconds.
 pub const DT: f64 = 0.1;
@@ -1052,6 +1055,9 @@ impl BattleSim {
                 run,
                 facing,
                 queue,
+                width,
+                match_speed,
+                group_tag,
             } => {
                 if !self.field.inside(x, z) {
                     return Err(CommandError::OutsideField);
@@ -1072,12 +1078,29 @@ impl BattleSim {
                         .map(|&id| (self.units[id as usize].x, self.units[id as usize].z))
                         .collect()
                 };
-                let destinations = self.group_destinations_from(&units, &anchors, x, z, facing);
-                for (id, (dx, dz)) in units.iter().zip(destinations) {
+                // CB1: each regiment's share of a dragged width, and the
+                // frontage it will take (ranks within their bounds).
+                let widths = self.move_widths(&units, width);
+                let frontages = self.move_frontages(&units, widths.as_deref());
+                let destinations = self.group_destinations_with(
+                    &units,
+                    &anchors,
+                    x,
+                    z,
+                    facing,
+                    frontages.as_deref(),
+                );
+                let group_tag = move_group_tag(&units, match_speed, group_tag);
+                for (k, (id, (dx, dz))) in units.iter().zip(destinations).enumerate() {
                     let destination = (
                         dx.clamp(5.0, self.field.width - 5.0),
                         dz.clamp(5.0, self.field.depth - 5.0),
                     );
+                    let shape = MoveShape {
+                        width: widths.as_ref().map(|w| w[k]),
+                        match_speed,
+                        group_tag,
+                    };
                     let index = *id as usize;
                     if queue && self.units[index].busy() {
                         self.units[index].order_queue.push_back(QueuedOrder::Move {
@@ -1085,11 +1108,14 @@ impl BattleSim {
                             z: destination.1,
                             facing,
                             run,
+                            width: shape.width,
+                            match_speed,
+                            group_tag,
                         });
                         continue;
                     }
                     self.units[index].order_queue.clear();
-                    self.start_move(index, destination, facing, run);
+                    self.start_move(index, destination, facing, run, shape);
                 }
             }
             Command::Attack {
@@ -1130,6 +1156,8 @@ impl BattleSim {
                 for &id in &units {
                     let unit = &mut self.units[id as usize];
                     unit.order_queue.clear();
+                    unit.match_speed = false;
+                    unit.group_tag = None;
                     unit.target = None;
                     unit.destination = None;
                     unit.destination_facing = None;
@@ -1161,7 +1189,9 @@ impl BattleSim {
                     }
                 }
                 for &id in &units {
+                    // CB1: a formation order drops a dragged width.
                     self.units[id as usize].formation = kind;
+                    self.units[id as usize].line_files = None;
                 }
             }
             Command::FireAtWill { units, enabled } => {
@@ -1239,13 +1269,16 @@ impl BattleSim {
     /// (where they are, or CB-M3 where their queued orders leave them):
     /// along a line perpendicular to `facing` when given (ordered by
     /// lateral position), else keeping the offsets to the group's centroid.
-    pub(crate) fn group_destinations_from(
+    /// CB1: `frontages` (metres, one per regiment) replace the present
+    /// frontages of a dragged group.
+    pub(crate) fn group_destinations_with(
         &self,
         ids: &[u32],
         anchors: &[(f64, f64)],
         x: f64,
         z: f64,
         facing: Option<f64>,
+        frontages: Option<&[f64]>,
     ) -> Vec<(f64, f64)> {
         let n = ids.len() as f64;
         let (cx, cz) = anchors
@@ -1264,10 +1297,13 @@ impl BattleSim {
                     .map(|(k, &(ax, az))| (k, (ax - cx) * right.0 + (az - cz) * right.1))
                     .collect();
                 order.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
-                let widths: Vec<f64> = ids
-                    .iter()
-                    .map(|id| self.units[*id as usize].extent().0 + 10.0)
-                    .collect();
+                let widths: Vec<f64> = match frontages {
+                    Some(frontages) => frontages.iter().map(|w| w + 10.0).collect(),
+                    None => ids
+                        .iter()
+                        .map(|id| self.units[*id as usize].extent().0 + 10.0)
+                        .collect(),
+                };
                 let total: f64 = widths.iter().sum();
                 let mut result = vec![(x, z); ids.len()];
                 let mut offset = -total * 0.5;
@@ -1446,7 +1482,13 @@ impl BattleSim {
         } else {
             1.0 + (-grade).min(0.1)
         };
-        speed * (1.0 - unit.fatigue / 200.0)
+        let speed = speed * (1.0 - unit.fatigue / 200.0);
+        // CB1: a `match_speed` group keeps the pace of its slowest regiment.
+        if unit.match_speed {
+            speed * self.group_pace_factor(unit)
+        } else {
+            speed
+        }
     }
 
     fn turn_rate(unit: &Unit) -> f64 {

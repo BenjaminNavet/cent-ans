@@ -108,6 +108,9 @@ fn same_setup_and_commands_give_the_same_battle() {
                     run: false,
                     facing: Some(0.0),
                     queue: false,
+                    width: None,
+                    match_speed: false,
+                    group_tag: None,
                 })
                 .unwrap();
             }
@@ -306,6 +309,9 @@ fn running_tires_and_rest_recovers() {
             run: run_flag,
             facing: None,
             queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         })
         .unwrap();
         run(&mut sim, 60.0);
@@ -527,7 +533,10 @@ fn commands_are_validated() {
             z: 5.0,
             run: false,
             facing: None,
-            queue: false
+            queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         }),
         Err(CommandError::OutsideField)
     );

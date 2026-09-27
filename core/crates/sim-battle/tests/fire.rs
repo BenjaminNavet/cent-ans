@@ -190,6 +190,9 @@ fn a_burnt_house_can_be_crossed() {
             run: false,
             facing: None,
             queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         })
         .unwrap();
         let mut closest = f64::INFINITY;

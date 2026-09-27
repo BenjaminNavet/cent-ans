@@ -2,7 +2,7 @@
 //! the room left in a regiment's queue, where the queue leaves it, and the
 //! next order taken when the current one ends.
 
-use super::{stop_climbing, BattleSim};
+use super::{stop_climbing, BattleSim, MoveShape};
 use crate::command::CommandError;
 use crate::queue::{QueueRules, QueuedOrder};
 use crate::unit::{Unit, UnitState};
@@ -24,8 +24,13 @@ impl BattleSim {
         destination: (f64, f64),
         facing: Option<f64>,
         run: bool,
+        shape: MoveShape,
     ) {
         let unit = &mut self.units[index];
+        // CB1: the Line a drag asked for, and the pace of the group.
+        unit.set_width(shape.width);
+        unit.match_speed = shape.match_speed;
+        unit.group_tag = shape.group_tag;
         unit.destination = Some(destination);
         unit.destination_facing = facing;
         unit.target = None;
@@ -54,6 +59,8 @@ impl BattleSim {
             unit.pavise = None;
         }
         unit.target = Some(target);
+        unit.match_speed = false;
+        unit.group_tag = None;
         unit.destination = None;
         unit.destination_facing = None;
         unit.running = run;
@@ -100,8 +107,21 @@ impl BattleSim {
     pub(super) fn next_queued(&mut self, index: usize) -> bool {
         while let Some(order) = self.units[index].order_queue.pop_front() {
             match order {
-                QueuedOrder::Move { x, z, facing, run } => {
-                    self.start_move(index, (x, z), facing, run);
+                QueuedOrder::Move {
+                    x,
+                    z,
+                    facing,
+                    run,
+                    width,
+                    match_speed,
+                    group_tag,
+                } => {
+                    let shape = MoveShape {
+                        width,
+                        match_speed,
+                        group_tag,
+                    };
+                    self.start_move(index, (x, z), facing, run, shape);
                     return true;
                 }
                 QueuedOrder::Attack { target, run } => {
