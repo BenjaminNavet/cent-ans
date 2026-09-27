@@ -12,8 +12,8 @@ import terrain
 
 HERE = Path(__file__).resolve().parent
 GAME_ASSETS = "game/assets"
-ASSET_FILES = {
-    "ground": "tools/proto_moteur/assets/ground.glb",
+# Game models converted to plain PBR glTF by materialize.py (see build_assets.sh).
+SOURCE_FILES = {
     "infantry_0": f"{GAME_ASSETS}/models/battle/infantry_0.glb",
     "infantry_1": f"{GAME_ASSETS}/models/battle/infantry_1.glb",
     "infantry_2": f"{GAME_ASSETS}/models/battle/infantry_2.glb",
@@ -24,6 +24,7 @@ ASSET_FILES = {
     "fir_tree_01": f"{GAME_ASSETS}/third_party/vegetation/fir_tree_01/fir_tree_01.glb",
     "grass_medium_01": f"{GAME_ASSETS}/third_party/vegetation/grass_medium_01/grass_medium_01.glb",
 }
+ASSET_FILES = {name: f"tools/proto_moteur/assets/{name}.glb" for name in ["ground", *SOURCE_FILES]}
 GRASS_NODES = [f"grass_medium_01_geonodes_{kind}_LOD2" for kind in ("large_a", "large_b", "mid_a", "mid_b", "tall_a", "tall_b")]
 FIR_NODES = [f"fir_tree_01_{variant}_LOD2" for variant in "abc"]
 
@@ -40,7 +41,7 @@ def build() -> dict:
     for rank in range(2):
         for file in range(6):
             x = -2.75 + file * 1.1 + rng.uniform(-0.08, 0.08)
-            placements.append(place(f"infantry_{(file + rank) % 3}", x, -1.0 - rank * 1.3, 180 + rng.uniform(-6, 6)))
+            placements.append(place(f"infantry_{(file + rank) % 3}", x, -1.0 - rank * 1.3, rng.uniform(-6, 6)))
     placements += [
         place("wall_run_0", -3.0, -9.0, 4),
         place("wall_run_0", 6.9, -8.4, 8),
@@ -70,5 +71,6 @@ def build() -> dict:
 
 
 if __name__ == "__main__":
+    (HERE / "sources.txt").write_text("".join(f"{name} {path}\n" for name, path in SOURCE_FILES.items()))
     (HERE / "scene.json").write_text(json.dumps(build(), indent=1))
     print("PROTO scene.json written")

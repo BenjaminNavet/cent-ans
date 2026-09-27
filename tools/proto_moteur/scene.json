@@ -1,15 +1,15 @@
 {
  "assets": {
   "ground": "tools/proto_moteur/assets/ground.glb",
-  "infantry_0": "game/assets/models/battle/infantry_0.glb",
-  "infantry_1": "game/assets/models/battle/infantry_1.glb",
-  "infantry_2": "game/assets/models/battle/infantry_2.glb",
-  "wall_run_0": "game/assets/models/buildings/wall_run_0.glb",
-  "barn_0": "game/assets/models/buildings/barn_0.glb",
-  "haystack_0": "game/assets/models/buildings/haystack_0.glb",
-  "cart_0": "game/assets/models/buildings/cart_0.glb",
-  "fir_tree_01": "game/assets/third_party/vegetation/fir_tree_01/fir_tree_01.glb",
-  "grass_medium_01": "game/assets/third_party/vegetation/grass_medium_01/grass_medium_01.glb"
+  "infantry_0": "tools/proto_moteur/assets/infantry_0.glb",
+  "infantry_1": "tools/proto_moteur/assets/infantry_1.glb",
+  "infantry_2": "tools/proto_moteur/assets/infantry_2.glb",
+  "wall_run_0": "tools/proto_moteur/assets/wall_run_0.glb",
+  "barn_0": "tools/proto_moteur/assets/barn_0.glb",
+  "haystack_0": "tools/proto_moteur/assets/haystack_0.glb",
+  "cart_0": "tools/proto_moteur/assets/cart_0.glb",
+  "fir_tree_01": "tools/proto_moteur/assets/fir_tree_01.glb",
+  "grass_medium_01": "tools/proto_moteur/assets/grass_medium_01.glb"
  },
  "placements": [
   {
@@ -31,7 +31,7 @@
     0.027,
     -1.0
    ],
-   "yaw": 182.1,
+   "yaw": 2.1,
    "scale": 1.0
   },
   {
@@ -42,7 +42,7 @@
     0.125,
     -1.0
    ],
-   "yaw": 174.8,
+   "yaw": -5.2,
    "scale": 1.0
   },
   {
@@ -53,7 +53,7 @@
     0.215,
     -1.0
    ],
-   "yaw": 178.8,
+   "yaw": -1.2,
    "scale": 1.0
   },
   {
@@ -64,7 +64,7 @@
     0.307,
     -1.0
    ],
-   "yaw": 182.8,
+   "yaw": 2.8,
    "scale": 1.0
   },
   {
@@ -75,7 +75,7 @@
     0.388,
     -1.0
    ],
-   "yaw": 177.9,
+   "yaw": -2.1,
    "scale": 1.0
   },
   {
@@ -86,7 +86,7 @@
     0.452,
     -1.0
    ],
-   "yaw": 179.0,
+   "yaw": -1.0,
    "scale": 1.0
   },
   {
@@ -97,7 +97,7 @@
     0.077,
     -2.3
    ],
-   "yaw": 174.4,
+   "yaw": -5.6,
    "scale": 1.0
   },
   {
@@ -108,7 +108,7 @@
     0.171,
     -2.3
    ],
-   "yaw": 180.2,
+   "yaw": 0.2,
    "scale": 1.0
   },
   {
@@ -119,7 +119,7 @@
     0.264,
     -2.3
    ],
-   "yaw": 175.7,
+   "yaw": -4.3,
    "scale": 1.0
   },
   {
@@ -130,7 +130,7 @@
     0.35,
     -2.3
    ],
-   "yaw": 175.1,
+   "yaw": -4.9,
    "scale": 1.0
   },
   {
@@ -141,7 +141,7 @@
     0.421,
     -2.3
    ],
-   "yaw": 180.3,
+   "yaw": 0.3,
    "scale": 1.0
   },
   {
@@ -152,7 +152,7 @@
     0.465,
     -2.3
    ],
-   "yaw": 181.5,
+   "yaw": 1.5,
    "scale": 1.0
   },
   {
