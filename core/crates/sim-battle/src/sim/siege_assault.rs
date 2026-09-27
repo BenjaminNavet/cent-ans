@@ -443,6 +443,8 @@ impl BattleSim {
         let now_intact: Vec<bool> = works.pieces.iter().map(|p| p.intact()).collect();
         let now_docked: Vec<Option<u32>> = works.pieces.iter().map(|p| p.docked_tower).collect();
         let kinds: Vec<PieceKind> = works.pieces.iter().map(|p| p.kind).collect();
+        // CB5: midpoints captured now, while `works` still borrows `self.siege`.
+        let midpoints: Vec<(f64, f64)> = works.pieces.iter().map(|p| p.midpoint()).collect();
         if !self.assault.primed {
             self.assault.primed = true;
             self.assault.intact = now_intact;
@@ -450,12 +452,21 @@ impl BattleSim {
             return;
         }
         let mut new = Vec::new();
+        // CB5: wall/gate alerts, the single point that catches all three
+        // causes (ram, siege engines, fire) since it watches the piece's
+        // intact -> broken edge rather than any one breaking blow.
+        let mut breaches: Vec<(crate::alerts::AlertKind, f64, f64)> = Vec::new();
         for p in 0..now_intact.len() {
             if self.assault.intact[p] && !now_intact[p] {
                 new.push(match kinds[p] {
                     PieceKind::Gate => SiegeFxKind::GateBroken { piece: p },
                     PieceKind::Wall => SiegeFxKind::WallBreached { piece: p },
                 });
+                let kind = match kinds[p] {
+                    PieceKind::Gate => crate::alerts::AlertKind::GateDestroyed,
+                    PieceKind::Wall => crate::alerts::AlertKind::WallBreached,
+                };
+                breaches.push((kind, midpoints[p].0, midpoints[p].1));
             }
             let (before, after) = (self.assault.docked[p], now_docked[p]);
             if before != after {
@@ -474,6 +485,9 @@ impl BattleSim {
         self.assault.docked = now_docked;
         for kind in new {
             self.push_fx(kind);
+        }
+        for (kind, x, z) in breaches {
+            self.alert(kind, x, z, None, None);
         }
         if gate_fell && !self.assault.fell_back && self.ai_enabled[SideId::Defender.index()] {
             self.assault.fell_back = true;

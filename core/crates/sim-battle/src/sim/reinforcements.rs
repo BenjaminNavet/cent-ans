@@ -102,5 +102,13 @@ impl BattleSim {
             format!("Renforts : les {label} entrent sur le champ de bataille."),
             Some(side),
         );
+        let id = self.units[i].id;
+        self.alert(
+            crate::alerts::AlertKind::Reinforcements,
+            x,
+            z,
+            Some(side),
+            Some(id),
+        );
     }
 }
