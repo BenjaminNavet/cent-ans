@@ -17,6 +17,8 @@ use std::sync::OnceLock;
 
 use serde::{Deserialize, Serialize};
 
+use crate::field::Battlefield;
+
 /// Marching column of the ambushed side.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -96,6 +98,57 @@ impl OpeningRules {
             serde_json::from_str(BUNDLED).expect("data/rules/battle_opening.json is valid")
         })
     }
+}
+
+/// Length of a polyline.
+pub fn polyline_length(points: &[(f64, f64)]) -> f64 {
+    points
+        .windows(2)
+        .map(|w| (w[1].0 - w[0].0).hypot(w[1].1 - w[0].1))
+        .sum()
+}
+
+/// The longest run of consecutive points of `points` inside `[lo, hi]²`
+/// (one rectangle per axis).
+fn longest_inside(points: &[(f64, f64)], lo: (f64, f64), hi: (f64, f64)) -> Vec<(f64, f64)> {
+    let inside = |p: &(f64, f64)| p.0 >= lo.0 && p.0 <= hi.0 && p.1 >= lo.1 && p.1 <= hi.1;
+    let mut best: Vec<(f64, f64)> = Vec::new();
+    let mut run: Vec<(f64, f64)> = Vec::new();
+    for p in points.iter().chain(std::iter::once(&(f64::NAN, f64::NAN))) {
+        if inside(p) {
+            run.push(*p);
+        } else {
+            if polyline_length(&run) > polyline_length(&best) {
+                best = std::mem::take(&mut run);
+            }
+            run.clear();
+        }
+    }
+    best
+}
+
+/// Centre line of an ambushed column on `field`: the longest road inside
+/// the field (margins of `column.edge_margin_m`), else the long axis of the
+/// map. `(path, on_road)`.
+pub fn column_path(field: &Battlefield, rules: &OpeningRules) -> (Vec<(f64, f64)>, bool) {
+    let m = rules.column.edge_margin_m;
+    let (w, d) = (field.width, field.depth);
+    let (lo, hi) = ((m, m), (w - m, d - m));
+    let best = field
+        .roads
+        .iter()
+        .map(|r| longest_inside(&r.points, lo, hi))
+        .filter(|p| p.len() >= 2)
+        .max_by(|a, b| polyline_length(a).total_cmp(&polyline_length(b)));
+    if let Some(path) = best.filter(|p| polyline_length(p) >= rules.column.min_road_length_m) {
+        return (path, true);
+    }
+    let path = if w >= d {
+        vec![(m, d * 0.5), (w - m, d * 0.5)]
+    } else {
+        vec![(w * 0.5, m), (w * 0.5, d - m)]
+    };
+    (path, false)
 }
 
 #[cfg(test)]

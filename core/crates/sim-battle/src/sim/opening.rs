@@ -20,7 +20,7 @@ use data_model::{Ability, UnitCategory};
 use serde::{Deserialize, Serialize};
 
 use super::{angle_to, of_faction, BattleSim, DeploymentZone, STAKES_DELAY};
-use crate::opening::OpeningRules;
+use crate::opening::{column_path, polyline_length, OpeningRules};
 use crate::setup::SideId;
 use crate::site::{Obstacle, ObstacleKind};
 use crate::unit::{Formation, Unit};
@@ -48,14 +48,6 @@ enum MarchRole {
     Rearguard,
 }
 
-/// Length of a polyline.
-fn polyline_length(points: &[(f64, f64)]) -> f64 {
-    points
-        .windows(2)
-        .map(|w| (w[1].0 - w[0].0).hypot(w[1].1 - w[0].1))
-        .sum()
-}
-
 /// Point and unit tangent at arc length `s` along `points` (extrapolated
 /// past both ends along the end segments).
 fn point_at(points: &[(f64, f64)], s: f64) -> ((f64, f64), (f64, f64)) {
@@ -75,25 +67,6 @@ fn point_at(points: &[(f64, f64)], s: f64) -> ((f64, f64), (f64, f64)) {
         rest -= len;
     }
     (points[0], (0.0, 1.0))
-}
-
-/// The longest run of consecutive points of `points` inside `[lo, hi]²`
-/// (one rectangle per axis).
-fn longest_inside(points: &[(f64, f64)], lo: (f64, f64), hi: (f64, f64)) -> Vec<(f64, f64)> {
-    let inside = |p: &(f64, f64)| p.0 >= lo.0 && p.0 <= hi.0 && p.1 >= lo.1 && p.1 <= hi.1;
-    let mut best: Vec<(f64, f64)> = Vec::new();
-    let mut run: Vec<(f64, f64)> = Vec::new();
-    for p in points.iter().chain(std::iter::once(&(f64::NAN, f64::NAN))) {
-        if inside(p) {
-            run.push(*p);
-        } else {
-            if polyline_length(&run) > polyline_length(&best) {
-                best = std::mem::take(&mut run);
-            }
-            run.clear();
-        }
-    }
-    best
 }
 
 impl BattleSim {
@@ -241,34 +214,10 @@ impl BattleSim {
         order
     }
 
-    /// Centre line of the column: the longest road inside the field, else
-    /// the long axis of the map. `(path, on_road)`.
-    fn column_path(&self, rules: &OpeningRules) -> (Vec<(f64, f64)>, bool) {
-        let m = rules.column.edge_margin_m;
-        let (w, d) = (self.field.width, self.field.depth);
-        let (lo, hi) = ((m, m), (w - m, d - m));
-        let best = self
-            .field
-            .roads
-            .iter()
-            .map(|r| longest_inside(&r.points, lo, hi))
-            .filter(|p| p.len() >= 2)
-            .max_by(|a, b| polyline_length(a).total_cmp(&polyline_length(b)));
-        if let Some(path) = best.filter(|p| polyline_length(p) >= rules.column.min_road_length_m) {
-            return (path, true);
-        }
-        let path = if w >= d {
-            vec![(m, d * 0.5), (w - m, d * 0.5)]
-        } else {
-            vec![(w * 0.5, m), (w * 0.5, d - m)]
-        };
-        (path, false)
-    }
-
     /// Lays the victim out in marching column and the ambusher on the flanks.
     fn lay_ambush(&mut self, victim: SideId) {
         let rules = OpeningRules::bundled();
-        let (mut path, on_road) = self.column_path(rules);
+        let (mut path, on_road) = column_path(&self.field, rules);
         // March away from the victim's own edge: the vanguard (head) at the
         // end of the path nearer the enemy's side.
         let home_z = match victim {
