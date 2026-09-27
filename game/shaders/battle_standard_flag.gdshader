@@ -13,7 +13,7 @@ render_mode cull_disabled, diffuse_burley;
 
 uniform sampler2D bone_tex : filter_nearest, repeat_disable;
 uniform float bone_fps = 24.0;
-uniform vec4 clips[48];
+uniform vec4 clips[64];
 uniform ivec4 clip_set = ivec4(0);
 uniform int clip_set_size = 1;
 uniform float anim_time = 0.0;
@@ -32,6 +32,14 @@ uniform float far_scale = 2.2;
 uniform float far_from = 140.0;
 uniform float far_to = 600.0;
 uniform vec3 livery : source_color = vec3(0.5);
+// Lot AN1a (ADR 0096, `data/fx/atmosphere.json` `secondary_motion.flag`) : amplitude relative et
+// vitesse de l'onde (vent nul → fort), ondulation le long de la hampe, vent apparent ajouté par
+// l'allure du porteur (par clip du jeu : arrêt, marche, course, sonnerie), échelle du vent.
+uniform vec2 flag_amp = vec2(0.08, 0.3);
+uniform vec2 flag_wave_speed = vec2(2.5, 7.5);
+uniform float flag_ripple = 0.0;
+uniform vec4 flag_gait_wind = vec4(0.0);
+uniform float flag_wind_scale = 1.0;
 
 varying float v_fold;
 varying float v_far;
@@ -76,9 +84,12 @@ void vertex() {
 	float phase = fract(inst.w) * 40.0;
 	vec3 top = pole_top;
 	vec3 axis = pole_axis;
+	float gait = 0.0;
 	if (skinned) {
 		int n = max(clip_set_size, 1);
-		int clip = pick(clip_set, int(mod(inst.y, float(n))));
+		int slot = int(mod(inst.y, float(n)));
+		gait = slot == 0 ? flag_gait_wind.x : (slot == 1 ? flag_gait_wind.y : (slot == 2 ? flag_gait_wind.z : flag_gait_wind.w));
+		int clip = pick(clip_set, slot);
 		int r0;
 		int r1;
 		float f;
@@ -93,6 +104,15 @@ void vertex() {
 	// Vent dans le repère de la figurine (rotation pure : transposée = inverse).
 	mat3 rot = mat3(MODEL_MATRIX);
 	vec3 wind_local = transpose(rot) * vec3(wind_dir.x, 0.0, wind_dir.y);
+	float wscale = length(wind_local);
+	wind_local = wscale > 1e-4 ? wind_local / wscale : vec3(1.0, 0.0, 0.0);
+	// AN1a : vent apparent = vent + allure du porteur (l'étoffe traîne vers l'arrière, -Z).
+	float base = clamp(wind_strength * flag_wind_scale, 0.0, 1.0);
+	vec3 apparent = wind_local * base + vec3(0.0, 0.0, -gait);
+	float app_len = length(apparent);
+	if (app_len > 1e-3) {
+		wind_local = apparent / app_len;
+	}
 	vec3 fly = wind_local - axis * dot(wind_local, axis);
 	if (length(fly) < 0.05) {
 		fly = cross(axis, vec3(0.0, 0.0, 1.0));
@@ -101,7 +121,7 @@ void vertex() {
 	float u = UV.x;
 	float v = UV.y;
 	float gust = sin(TIME * 0.7 + phase * 0.37) * 0.5 + sin(TIME * 1.9 + phase) * 0.25;
-	float s = clamp(wind_strength + wind_gust * gust, 0.0, 1.0);
+	float s = clamp(max(app_len, base) + wind_gust * gust, 0.0, 1.0);
 	float dist = length((MODELVIEW_MATRIX * vec4(top, 1.0)).xyz);
 	v_far = smoothstep(far_from, far_to, dist);
 	float k = 1.0 + (far_scale - 1.0) * v_far;
@@ -113,9 +133,12 @@ void vertex() {
 		s = 0.04;
 		anchor = top - axis * 1.1;
 	}
-	float t = TIME * mix(2.5, 7.5, s) + phase;
-	float amp = mix(0.08, 0.3, s);
-	float wave = sin(u * 7.0 - t) * amp + sin(u * 13.0 - t * 1.7 + 1.3) * amp * 0.27;
+	float t = TIME * mix(flag_wave_speed.x, flag_wave_speed.y, s) + phase;
+	float amp = mix(flag_amp.x, flag_amp.y, s);
+	// Onde le long du battant, plus une ondulation le long de la hampe (AN1a) qui croît vers
+	// le bord libre.
+	float ripple = sin(v * 5.0 + u * 3.0 - t * 1.3 + 0.7) * amp * flag_ripple * u;
+	float wave = sin(u * 7.0 - t) * amp + sin(u * 13.0 - t * 1.7 + 1.3) * amp * 0.27 + ripple;
 	vec3 side = normalize(cross(axis, fly));
 	vec3 pos;
 	if (state > 2.5) {

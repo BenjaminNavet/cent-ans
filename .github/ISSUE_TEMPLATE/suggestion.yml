@@ -1,0 +1,18 @@
+name: Proposer une idée
+description: Nouvelle fonctionnalité, amélioration de gameplay ou d'interface
+labels: [enhancement]
+body:
+  - type: textarea
+    id: probleme
+    attributes:
+      label: Besoin ou problème
+      description: Qu'est-ce qui manque ou gêne en jouant ?
+    validations:
+      required: true
+  - type: textarea
+    id: proposition
+    attributes:
+      label: Proposition
+      description: Comment cela pourrait-il fonctionner ? Un jeu de référence le fait-il bien ?
+    validations:
+      required: true
