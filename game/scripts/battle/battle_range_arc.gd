@@ -122,7 +122,7 @@ func _build(mesh: ImmediateMesh, unit: Dictionary, is_selected: bool) -> void:
 	# Bords du secteur, depuis l'avant du régiment.
 	if half < PI - 0.01:
 		var start := minf(float(unit.get("depth", 0.0)) * 0.5, r * 0.5)
-		for side_sign in [-1.0, 1.0]:
+		for side_sign: float in [-1.0, 1.0]:
 			var angle := facing + side_sign * half
 			var across := Vector2(cos(angle), -sin(angle)) * (EDGE_WIDTH * 0.5)
 			var steps := maxi(1, int(ceil((r - start) / EDGE_STEP_M)))
@@ -137,6 +137,6 @@ func _build(mesh: ImmediateMesh, unit: Dictionary, is_selected: bool) -> void:
 
 
 func _quad(mesh: ImmediateMesh, a: Vector3, b: Vector3, c: Vector3, d: Vector3, color: Color) -> void:
-	for p in [a, b, c, a, c, d]:
+	for p: Vector3 in [a, b, c, a, c, d]:
 		mesh.surface_set_color(color)
 		mesh.surface_add_vertex(p)
