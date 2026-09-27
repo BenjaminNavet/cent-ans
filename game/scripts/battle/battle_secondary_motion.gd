@@ -27,8 +27,9 @@ static func settings() -> Dictionary:
 	return AtmosphereLibrary.data().get("secondary_motion", {})
 
 
+## Éteint par les données (`enabled`) ou par `--no-an1a` (banc A/B).
 static func enabled() -> bool:
-	return bool(settings().get("enabled", false))
+	return bool(settings().get("enabled", false)) and not OS.get_cmdline_user_args().has("--no-an1a")
 
 
 static func set_wind(wind: Dictionary) -> void:
@@ -58,7 +59,7 @@ static func bone_range(bones: Array, names: Array, prefix: String) -> Vector2i:
 ## `BattleSkinned.setup_material`, qui pose `sever_bones` : os du cheval).
 static func setup_material(mat: ShaderMaterial, kind: String, variant: int) -> void:
 	var cfg := settings()
-	if cfg.is_empty() or not bool(cfg.get("enabled", false)):
+	if not enabled():
 		mat.set_shader_parameter("sm_enabled", false)
 		return
 	var bones: Array = BattleSkinned.rig(kind, variant).get("bones", [])
@@ -102,7 +103,7 @@ static func apply_wind(mat: ShaderMaterial) -> void:
 ## l'allure du porteur.
 static func setup_flag(mat: ShaderMaterial) -> void:
 	var flag: Dictionary = settings().get("flag", {})
-	if flag.is_empty():
+	if flag.is_empty() or not enabled():
 		return
 	mat.set_shader_parameter("flag_amp", Vector2(float(flag["amp_min"]), float(flag["amp_max"])))
 	mat.set_shader_parameter("flag_wave_speed", Vector2(float(flag["wave_speed_min"]), float(flag["wave_speed_max"])))
