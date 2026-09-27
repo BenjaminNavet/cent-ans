@@ -22,6 +22,14 @@ const _TEXT_CLASSES := ["Label", "RichTextLabel", "Button", "CheckBox", "CheckBu
 	"LinkButton", "MenuButton", "OptionButton", "LineEdit"]
 var _failures := 0
 var _layout_failures := 0
+var _c1_failures := 0
+var _c1_texts := 0
+var _c2_failures := 0
+var _c2_checks := 0
+## C1 : motifs d'un texte d'outil (bible DA § 12.5).
+var _tool_patterns: Array[RegEx] = []
+## C2 : résolutions de fenêtre contrôlées.
+const C2_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1920, 1080)]
 ## Tailles vues (valeur → nombre d'occurrences), toutes vues confondues, pour le message final.
 var _sizes: Dictionary = {}
 
@@ -30,12 +38,14 @@ func _init() -> void:
 	await process_frame
 	await _run()
 	print("po_ui_test UiLayout: %s" % ("OK" if _layout_failures == 0 else "%d failure(s)" % _layout_failures))
-	if _failures == 0:
+	print("po_ui_test C1: %s (%d textes lus)" % ["OK" if _c1_failures == 0 else "%d failure(s)" % _c1_failures, _c1_texts])
+	print("po_ui_test C2: %s (%d contrôles)" % ["OK" if _c2_failures == 0 else "%d failure(s)" % _c2_failures, _c2_checks])
+	if _failures - _layout_failures - _c1_failures - _c2_failures == 0:
 		var values := _sizes.keys()
 		values.sort()
 		print("po_ui_test C3: OK (tailles vues : %s)" % str(values))
 	else:
-		print("po_ui_test C3: %d failure(s)" % _failures)
+		print("po_ui_test C3: %d failure(s)" % (_failures - _layout_failures - _c1_failures - _c2_failures))
 	quit(1 if _failures > 0 else 0)
 
 
@@ -64,9 +74,15 @@ func _collect_font_sizes(node: Node) -> void:
 
 
 func _run() -> void:
+	for pattern in ["uv run", "res://", "user://", "(^|\\s)--[a-z]", "[\\w-]+/[\\w./-]+\\.(json|gd|tscn|png|bin|ogg|md)\\b",
+			"\\b[a-z]+(_[a-z0-9]+)+\\b"]:
+		var regex := RegEx.new()
+		regex.compile(pattern)
+		_tool_patterns.append(regex)
 	await _check_ui_layout()
 	await _check_start_menu()
 	await _check_campaign_map()
+	await _check_campaign_layout()
 	_check(_sizes.is_empty() or _sizes.keys().min() >= MIN_SIZE,
 		"C3: aucune taille sous %d px (base 900 px) — vues : %s" % [MIN_SIZE, str(_sizes)])
 	_check(_sizes.size() <= MAX_DISTINCT_SIZES,
@@ -82,9 +98,18 @@ func _check_start_menu() -> void:
 	root.add_child(menu)
 	await process_frame
 	_collect_font_sizes(menu)
+	_collect_tool_texts(menu)
+	# C2 : la colonne du menu tient à l'écran (« Crédits », « Quitter » coupés avant PO1).
+	for resolution in C2_RESOLUTIONS:
+		if not await _resize(resolution):
+			continue
+		var view: Vector2 = root.get_visible_rect().size
+		var quit_rect: Rect2 = (menu.get("quit_button") as Control).get_global_rect()
+		_check_c2(quit_rect.end.y <= view.y, "start menu at %s: « Quitter » ends at %.0f, screen %.0f" % [resolution, quit_rect.end.y, view.y])
 	menu.show_faction_select(true)
 	await process_frame
 	_collect_font_sizes(menu.faction_select)
+	_collect_tool_texts(menu.faction_select)
 	menu.queue_free()
 	await process_frame
 
@@ -138,6 +163,7 @@ func _check_campaign_map() -> void:
 		map.select_army(str(army_ids[0]))
 		await process_frame
 		_collect_font_sizes(map.ui.army_strip)
+		_collect_tool_texts(map.ui)
 
 	# Fin de tour : cloche puis rapport de saison.
 	map._on_end_turn()
@@ -224,3 +250,128 @@ func _check_ui_layout() -> void:
 	second.free()
 	host.queue_free()
 	await process_frame
+
+
+# --- C1 : textes d'outil (lot PO1) -----------------------------------------------------
+
+
+## Parcourt les `Label` / `RichTextLabel` / boutons visibles sous `node` : aucun motif d'outil.
+func _collect_tool_texts(node: Node) -> void:
+	if node is CanvasItem and not (node as CanvasItem).is_visible_in_tree():
+		return
+	var text := ""
+	if node is RichTextLabel:
+		text = (node as RichTextLabel).get_parsed_text()
+	elif node is Label:
+		text = (node as Label).text
+	elif node is Button:
+		text = (node as Button).text
+	if text.strip_edges() != "":
+		_c1_texts += 1
+		for regex in _tool_patterns:
+			var found := regex.search(text)
+			if found != null:
+				_c1_failures += 1
+				_check(false, "C1: tool text « %s » in %s: %s" % [found.get_string(), node.get_path(), text.substr(0, 120)])
+				break
+	for child in node.get_children():
+		_collect_tool_texts(child)
+
+
+# --- C2 : disposition fixe (lot PO1) ---------------------------------------------------
+
+
+func _check_c2(condition: bool, message: String) -> bool:
+	_c2_checks += 1
+	if not condition:
+		_c2_failures += 1
+	return _check(condition, "C2: " + message)
+
+
+## Fenêtre à `resolution` (faux si l'environnement refuse le redimensionnement).
+func _resize(resolution: Vector2i) -> bool:
+	root.size = resolution
+	await process_frame
+	await process_frame
+	if root.size != resolution:
+		print("po_ui_test C2: window cannot be resized here (%s)" % root.size)
+		return false
+	return true
+
+
+## Rectangles de la carte de campagne à 1280×720 et 1920×1080 ; un seul panneau latéral après
+## l'ouverture successive de la province, de la chronique et du registre.
+func _check_campaign_layout() -> void:
+	var layout: Node = root.get_node("/root/UiLayout")
+	var facade: Node = root.get_node("/root/SimFacade")
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
+	root.add_child(map)
+	await process_frame
+	await process_frame
+	if not _check(map.get("load_ok") and map.get("sim") != null, "C2: campaign map failed to start"):
+		map.queue_free()
+		return
+	var initial: Vector2i = root.size
+	var army_ids: PackedStringArray = map.player_army_ids()
+	if not army_ids.is_empty():
+		map.select_army(str(army_ids[0]))
+	var edge_zones := [layout.Zone.TOP_BAR, layout.Zone.BOTTOM_SELECTION, layout.Zone.MINIMAP,
+		layout.Zone.SIDE_PANEL, layout.Zone.TOASTS]
+	for resolution in C2_RESOLUTIONS:
+		if not await _resize(resolution):
+			continue
+		map.ui.layout_hud()
+		await process_frame
+		# Zones du bord de l'écran : sans chevauchement deux à deux.
+		for i in edge_zones.size():
+			for j in range(i + 1, edge_zones.size()):
+				var a: Rect2 = layout.zone_rect(edge_zones[i])
+				var b: Rect2 = layout.zone_rect(edge_zones[j])
+				_check_c2(not a.intersects(b), "%s: zones %d and %d overlap (%s / %s)" % [resolution, edge_zones[i], edge_zones[j], a, b])
+		var top: Rect2 = layout.zone_rect(layout.Zone.TOP_BAR)
+		var side: Rect2 = layout.zone_rect(layout.Zone.SIDE_PANEL)
+		var toasts: Rect2 = layout.zone_rect(layout.Zone.TOASTS)
+		var mini: Rect2 = layout.zone_rect(layout.Zone.MINIMAP)
+		var bar: Rect2 = (map.ui.get_node("TopBar") as Control).get_global_rect()
+		_check_c2(bar.end.y <= top.end.y + 0.5, "%s: top bar %s taller than TOP_BAR %s" % [resolution, bar, top])
+		# HUD non coupé (barre, sceau, bandeau, cloche, minicarte) : jamais sur le panneau latéral
+		# ni sur les avis.
+		var hud := {"top bar": bar, "seal": map.ui.general_seal.get_global_rect(),
+			"army strip": map.ui.army_strip.get_global_rect(), "bell": map.ui.end_turn_cluster.get_global_rect()}
+		if map.ui.minimap != null and map.ui.minimap.visible:
+			var mini_rect: Rect2 = map.ui.minimap.get_global_rect()
+			hud["minimap"] = mini_rect
+			_check_c2(mini.encloses(mini_rect.grow(-0.5)), "%s: minimap %s outside its zone %s" % [resolution, mini_rect, mini])
+			_check_c2(not mini_rect.intersects(hud["bell"]), "%s: bell over the minimap" % resolution)
+		for key in hud:
+			var rect: Rect2 = hud[key]
+			if rect.size == Vector2.ZERO:
+				continue
+			_check_c2(not rect.grow(-0.5).intersects(side), "%s: %s %s over SIDE_PANEL %s" % [resolution, key, rect, side])
+			_check_c2(not rect.grow(-0.5).intersects(toasts), "%s: %s %s over TOASTS %s" % [resolution, key, rect, toasts])
+	# Un seul occupant du panneau latéral : province, chronique, registre, puis province.
+	map.picker.call("select_index", PICK_PROVINCE_INDEX)
+	await process_frame
+	_check_side_single(layout, map.ui.province_panel, "province")
+	map.chronicle.window.show()
+	await process_frame
+	_check_side_single(layout, map.chronicle.window, "chronicle")
+	map.units_ctl.toggle()
+	await process_frame
+	_check_side_single(layout, map.units_ctl.panel, "roster")
+	map.picker.call("select_index", PICK_PROVINCE_INDEX + 1)
+	await process_frame
+	_check_side_single(layout, map.ui.province_panel, "province again")
+	root.size = initial
+	await process_frame
+	map.queue_free()
+	await process_frame
+
+
+func _check_side_single(layout: Node, expected: Control, label: String) -> void:
+	var shown: Array = layout.visible_occupants(layout.Zone.SIDE_PANEL)
+	_check_c2(shown.size() == 1 and shown[0] == expected,
+		"after opening the %s: side panel occupants %s" % [label, shown.map(func(c: Control) -> String: return str(c.name))])
