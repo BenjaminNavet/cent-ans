@@ -109,5 +109,84 @@
     "sources": [
       "Abbaye de Corvey"
     ]
+  },
+  {
+    "id": "set_paderborn",
+    "province": "prov_westphalia",
+    "kind": "town",
+    "name": {
+      "display": "Paderborn",
+      "local": "Paderborne",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      8.7548,
+      51.7189
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Cité épiscopale westphalienne aux sources de la Pader, résidence de l'évêque-prince de Paderborn.",
+    "sources": [
+      "Paderborn",
+      "Principauté épiscopale de Paderborn"
+    ]
+  },
+  {
+    "id": "set_osnabruck",
+    "province": "prov_westphalia",
+    "kind": "town",
+    "name": {
+      "display": "Osnabrück",
+      "local": "Osenbrugge",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      8.047,
+      52.2799
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Cité épiscopale sur la Hase, fondée selon la tradition par Charlemagne, membre de la Hanse.",
+    "sources": [
+      "Osnabrück",
+      "Principauté épiscopale d'Osnabrück"
+    ]
+  },
+  {
+    "id": "set_werl",
+    "province": "prov_westphalia",
+    "kind": "village",
+    "name": {
+      "display": "Werl",
+      "local": "Werle",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      7.9106,
+      51.5556
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg westphalien connu pour ses sources salées exploitées depuis l'époque carolingienne.",
+    "sources": [
+      "Werl"
+    ]
   }
 ]

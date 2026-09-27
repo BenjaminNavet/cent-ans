@@ -40,8 +40,8 @@
       "local_language": "moyen haut-allemand"
     },
     "lonlat": [
-      11.15,
-      46.6753
+      11.1448,
+      46.6941
     ],
     "weight": 15,
     "owner": null,
@@ -80,6 +80,82 @@
     "description": "Bourgade marchande au carrefour des routes alpines vers le Brenner.",
     "sources": [
       "Bolzano"
+    ]
+  },
+  {
+    "id": "set_hall_in_tirol",
+    "province": "prov_tirol",
+    "kind": "town",
+    "name": {
+      "display": "Hall",
+      "local": "Hall",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.5075,
+      47.2822
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville minière du sel comtal sur l'Inn, dont l'exploitation débute au tournant du XIVe siècle, en amont d'Innsbruck.",
+    "sources": [
+      "Hall in Tirol"
+    ]
+  },
+  {
+    "id": "set_sterzing",
+    "province": "prov_tirol",
+    "kind": "town",
+    "name": {
+      "display": "Sterzing",
+      "local": "Sterzing",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.4342,
+      46.8963
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg marchand sur la route du col du Brenner, sous la juridiction de l'évêché de Brixen.",
+    "sources": [
+      "Sterzing"
+    ]
+  },
+  {
+    "id": "set_stams",
+    "province": "prov_tirol",
+    "kind": "abbey",
+    "name": {
+      "display": "Stams",
+      "local": "Stams",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.9219,
+      47.2661
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1273 par les comtes de Tyrol, dans la vallée de l'Inn, nécropole des comtes.",
+    "sources": [
+      "Stams"
     ]
   }
 ]

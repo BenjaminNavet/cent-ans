@@ -112,5 +112,111 @@
       "Calatrava la Nueva",
       "Ordre de Calatrava"
     ]
+  },
+  {
+    "id": "set_talavera_de_la_reina",
+    "province": "prov_toledo",
+    "kind": "town",
+    "name": {
+      "display": "Talavera de la Reina",
+      "local": "Talavera",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.8302,
+      39.9634
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande close sur le Tage, dépendant de l'archevêché de Tolède.",
+    "sources": [
+      "Talavera de la Reina"
+    ]
+  },
+  {
+    "id": "set_alcala_de_henares",
+    "province": "prov_toledo",
+    "kind": "town",
+    "name": {
+      "display": "Alcalá de Henares",
+      "local": "Alcalá de Henares",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.3639,
+      40.4818
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Seigneurie et résidence des archevêques de Tolède, dotée d'un studium generale par Sanche IV en 1293.",
+    "sources": [
+      "Alcalá de Henares",
+      "Université d'Alcalá"
+    ]
+  },
+  {
+    "id": "set_ocana",
+    "province": "prov_toledo",
+    "kind": "village",
+    "name": {
+      "display": "Ocaña",
+      "local": "Ocaña",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.5108,
+      39.9556
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de la Manche tolédane, commanderie de l'ordre de Santiago.",
+    "sources": [
+      "Ocaña (Espagne)",
+      "Ordre de Santiago"
+    ]
+  },
+  {
+    "id": "set_almagro",
+    "province": "prov_toledo",
+    "kind": "village",
+    "name": {
+      "display": "Almagro",
+      "local": "Almagro",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -3.7288,
+      38.8672
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg du Campo de Calatrava, lieu de résidence des maîtres de l'ordre de Calatrava.",
+    "sources": [
+      "Almagro (Espagne)",
+      "Ordre de Calatrava"
+    ]
   }
 ]

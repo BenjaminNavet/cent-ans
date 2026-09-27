@@ -68,6 +68,14 @@ extends Resource
 ## fraction `occlusion_min_t` de la distance, en partant du point visé).
 @export var occlusion_samples: int = 6
 @export var occlusion_min_t: float = 0.25
+## Lot SZ1 : crêtes voisines. La caméra reste au-dessus du sol affiché sur un cercle de rayon
+## `crest_radius_factor` × distance autour d'elle (`crest_samples` points, plus garde au sol) :
+## en montagne elle monte au-dessus des crêtes au lieu de rester au fond du canyon. Même cercle
+## autour du point visé, hauteur pondérée par `crest_focus_weight` (0 : ignoré, 1 : la caméra
+## domine aussi les crêtes derrière le point visé). 0 point : coupé.
+@export var crest_samples: int = 8
+@export var crest_radius_factor: float = 0.5
+@export var crest_focus_weight: float = 1.0
 
 
 ## Réglages par défaut (`res://resources/close_camera.tres`), ou une instance neuve si absente.

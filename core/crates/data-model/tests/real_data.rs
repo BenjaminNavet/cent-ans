@@ -286,7 +286,10 @@ fn every_province_has_exactly_one_city() {
     for id in data.provinces.keys() {
         let settlements = data.province_settlements(id);
         assert!(!settlements.is_empty(), "{id} has no settlement");
-        assert!(settlements.len() <= 6, "{id} has too many settlements");
+        assert!(
+            settlements.len() <= data_model::settlement_load::MAX_SETTLEMENTS_PER_PROVINCE,
+            "{id} has too many settlements"
+        );
         let cities = settlements
             .iter()
             .filter(|s| s.kind == data_model::SettlementKind::City)

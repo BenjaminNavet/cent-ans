@@ -144,5 +144,82 @@
     "sources": [
       "Abbaye de Praglia"
     ]
+  },
+  {
+    "id": "set_mestre",
+    "province": "prov_venezia",
+    "kind": "village",
+    "name": {
+      "display": "Mestre",
+      "local": "Mestre",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      12.2424,
+      45.4903
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de la terre ferme, tête de pont de Venise vers le continent.",
+    "sources": [
+      "Mestre"
+    ]
+  },
+  {
+    "id": "set_este",
+    "province": "prov_venezia",
+    "kind": "town",
+    "name": {
+      "display": "Este",
+      "local": "Este",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.6553,
+      45.2314
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville berceau de la maison d'Este, sous la seigneurie padouane de Carrare depuis 1337.",
+    "sources": [
+      "Este (Italie)",
+      "Maison d'Este"
+    ]
+  },
+  {
+    "id": "set_monselice",
+    "province": "prov_venezia",
+    "kind": "village",
+    "name": {
+      "display": "Monselice",
+      "local": "Monsełexe",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.7561,
+      45.2354
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié au pied de sa rocca, sur la route entre Padoue et Este.",
+    "sources": [
+      "Monselice"
+    ]
   }
 ]

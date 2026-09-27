@@ -108,5 +108,82 @@
     "sources": [
       "Bad Segeberg"
     ]
+  },
+  {
+    "id": "set_itzehoe",
+    "province": "prov_holstein",
+    "kind": "town",
+    "name": {
+      "display": "Itzehoe",
+      "local": "Itzehowe",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      9.5142,
+      53.9214
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne résidence comtale sur la Stör, l'une des plus vieilles villes du Holstein (droits urbains dès 1238).",
+    "sources": [
+      "Itzehoe"
+    ]
+  },
+  {
+    "id": "set_oldesloe",
+    "province": "prov_holstein",
+    "kind": "town",
+    "name": {
+      "display": "Bad Oldesloe",
+      "local": "Oldeslo",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      10.3733,
+      53.8103
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du sel sur la Trave et la Beste, étape clé de la route commerciale reliant Lübeck à Hambourg.",
+    "sources": [
+      "Bad Oldesloe"
+    ]
+  },
+  {
+    "id": "set_reinbek",
+    "province": "prov_holstein",
+    "kind": "abbey",
+    "name": {
+      "display": "Reinbek",
+      "local": "Reynbeke",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      10.2494,
+      53.5217
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1229 près de Hambourg, sur la Bille.",
+    "sources": [
+      "Abbaye de Reinbek"
+    ]
   }
 ]

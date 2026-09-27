@@ -109,5 +109,82 @@
     "sources": [
       "Andechs"
     ]
+  },
+  {
+    "id": "set_toelz",
+    "province": "prov_oberbayern",
+    "kind": "village",
+    "name": {
+      "display": "Tölz",
+      "local": "Tölz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.5567,
+      47.7608
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg sur l'Isar, port de flottage du bois et du sel entre le Tyrol et Munich (le préfixe « Bad » n'apparaît qu'en 1899).",
+    "sources": [
+      "Bad Tölz"
+    ]
+  },
+  {
+    "id": "set_wasserburg",
+    "province": "prov_oberbayern",
+    "kind": "town",
+    "name": {
+      "display": "Wasserburg am Inn",
+      "local": "Wazzerburch",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      12.2214,
+      48.0524
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville marchande wittelsbachoise enserrée dans un méandre de l'Inn, étape du commerce du sel entre Reichenhall et le Danube.",
+    "sources": [
+      "Wasserburg am Inn"
+    ]
+  },
+  {
+    "id": "set_burghausen",
+    "province": "prov_oberbayern",
+    "kind": "castle",
+    "name": {
+      "display": "Burghausen",
+      "local": "Purchusen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      12.8303,
+      48.1652
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Immense forteresse wittelsbachoise dominant la Salzach, résidence secondaire des ducs de Basse-Bavière et verrou vers Salzbourg.",
+    "sources": [
+      "Château de Burghausen"
+    ]
   }
 ]

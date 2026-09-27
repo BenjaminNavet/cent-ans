@@ -93,3 +93,34 @@ plat au milieu d'une liste de miniatures. » Les icônes d'entité restaient des
 Conséquences : les SVG d'entité ne servent plus que de repli (identifiant sans miniature) ;
 `CREDITS.md` inchangé tant qu'ils restent dans le dépôt. Les traits s'affichent toujours par
 catégorie (icônes à l'encre) : des miniatures par trait (59) sont un lot possible.
+
+## DA7c — une icône à l'encre par trait de personnage (2026-09-26)
+
+Bible § 8. Les 59 traits (`data/traits/`) n'avaient pas d'icône propre : les quatre points
+d'affichage (infobulle riche, fiche de personnage, encyclopédie liste et fiche) montraient tous
+l'icône générique de catégorie (`trait_category_<personality|martial|governance|physical|
+acquired>`, 5 icônes DA5).
+
+1. **Même catalogue, même outil, un groupe de plus.** `data/ui/icons_ink.json["icons"]` gagne
+   59 entrées `"group": "trait"` (ajouté à l'énumération de `data/schemas/icons_ink.schema.json`) :
+   un prompt visuel par trait (anglais, sans texte, même bloc de style DA5), `id == targets[0] ==`
+   l'identifiant du trait (`trait_admiral`…), pour que `IconLibrary.get_icon(trait.id)` prenne
+   l'icône directement, avec repli sur l'icône de catégorie générique si elle manque
+   (`IconLibrary.resolve`, inchangé).
+2. **`cent-ans assets ink-icons` réutilisé, pas de nouvel outil**, étendu pour porter plusieurs
+   lots indépendants sur le même catalogue : `Entry.group`, filtre `group=` sur `entries()`/
+   `plan()`, `lot_spent(ledger, prefix=)` (défaut `"DA5 :"`, rétro-compatible). La commande CLI
+   gagne `--group`, `--subject`, `--budget-cap` pour que DA7c ait sa propre ligne de grand livre
+   et sa propre enveloppe (4 $) sans toucher au plafond DA5 déjà quasi épuisé (4,84 $ sur 5 $) :
+   ```
+   cent-ans assets ink-icons --group trait \
+     --subject "DA7c : icônes de trait à l'encre" --budget-cap 4.0 --dry-run
+   ```
+3. **Rendu** : les quatre sites (`RichTooltip.trait_tip`, `CharacterSheet._fill_traits`,
+   `Encyclopedia._entry_icon`, `Encyclopedia._trait_fiche`) passent l'identifiant du trait plutôt
+   que `"trait_category_" + category` à `IconLibrary`.
+
+Coût réel consigné dans `docs/budget.md` (lignes « DA7c »). Conséquences : les traits d'un même
+personnage se distinguent désormais d'un coup d'œil (fiche, infobulle, cour, encyclopédie) ; un
+trait ajouté plus tard sans image générée retombe sur l'icône de sa catégorie, jamais une icône
+manquante.

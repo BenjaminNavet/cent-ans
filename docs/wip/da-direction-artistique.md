@@ -97,3 +97,56 @@ vignes : déjà faits en BV1 ou en cours dans EP6) ; « beauté de la carte » (
   après conflit : **7,96 $**. Smoke + pytest 681 OK. Reste du chantier : **DA2** (141 portraits,
   ≈ 6,4 $, génération à lancer par le joueur) ; suites listées plus haut (Ars nova réelle,
   saturation automne, traits sans miniature, chevauchements de marqueurs).
+- 26/09 matin : **DA2 — génération faite** par l'orchestrateur à la demande du joueur (« ne valide
+  plus par moi ») : 141 portraits, 0 échec, **6,33 $** (retries par image ajoutés à
+  `portraits.generate`). Banque complète : 122 archétypes + 25 variantes âgées. Budget DA
+  recalculé après conflit : **14,29 $** (14 lignes, aucune dédoublonnée).
+  Fusion de DA2 dans `feat/da-direction-artistique` (conflits DA1/DA2 résolus : portrait vivant
+  → armes de la maison → faction → initiales ; cadre DA2 avec armes de maison ; fiche de
+  personnage : déclaration `house` rétablie, écu toujours affiché). Test DA2 adapté à la banque
+  complète. Correctifs après captures : miroir des visages types selon l'id (anti-clones),
+  vignettes de cour 64 px. Dernier commit `b8cc931f`, **pas encore dans main**.
+- **PAUSE (26/09 matin)**, reprise dans une autre session. Prochaines étapes :
+  1. Défaut ouvert : dans l'arbre familial (1367, `docs/img/da2/apres-arbre.png`), **Mahaut de
+     Valois (22 ans) et Gille de Valois (17 ans) n'ont que l'écu**. Le code de l'arbre est bon
+     (`LivingPortrait.texture_for`) ; soupçon : champ manquant dans le nœud d'arbre (`sex`,
+     `age`/`birth_year`, `faction`) ou rang résolu vers une case sans image. Diagnostic :
+     script qui déroule 120 tours puis affiche `LivingPortrait.resolve(n, context_for(n))` pour
+     ces nœuds (lent sur la machine partagée : > 10 min).
+  2. L'arbre n'applique pas le miroir anti-clones (il dessine `_texture` directement).
+  3. Relancer smoke + `da2_living_portrait_test.gd` + pytest, recapturer (`da2_screenshot.gd`),
+     puis fusionner main dans la branche, reconstruire la dylib (`CARGO_TARGET_DIR` partagé),
+     et **ff main**.
+  4. Nettoyer les worktrees d'agents fusionnés (DA2 : `.claude/worktrees/agent-ade9b18af852c5bfe`).
+- 26/09 après-midi : **reprise et fin de DA2.** Fusion de main (357 commits ; conflit
+  `portraits.generate` : nouvelles tentatives par image + coût réel des refus facturés de main,
+  test adapté). Défaut « Mahaut/Gille sans visage » : import Godot incomplet, disparu après
+  réimport. Nouveau défaut corrigé : **clones de fratrie** → miroir partagé (`LivingPortrait.mirrored`,
+  bit de `fnv1a`) dans le cadre et l'arbre, et **80 visages de plus** pour les cases peuplées
+  (nobles/chevaliers hommes 4, nobles femmes 3, enfants 3 ; **3,59 $**). Banque : 202 archétypes
+  + 25 variantes âgées. Budget DA : **17,88 $**. Smoke + test DA2 OK. Note : `da2_screenshot.gd
+  --out=` est relatif au dossier `game/` (utiliser le défaut).
+- 26/09 soir : **vague DA7** lancée (4 agents en worktree, fusion via `feat/da-direction-artistique`
+  puis ff main) : **DA7a** vrais enregistrements libres d'Ars nova (0 $, `docs/wip/da7a-ars-nova.md`),
+  **DA7b** saturation automne/bocage ≤ 35 % (0 $, `docs/wip/da7b-saturation.md`), **DA7c** icônes
+  de traits (≤ 4 $, `docs/wip/da7c-icones-traits.md`), **DA7d** chevauchements de marqueurs de
+  ville (0 $, `docs/wip/da7d-chevauchements.md`). Chaque lot complète l'ADR DA existant
+  (0060, 0067, 0065, 0066).
+- 26/09 soir : **DA7b fusionné** (main `1f723a84`, ADR 0067 § DA7b) : automne 44,7 → 32,7 %, bocage
+  haies 39,1 → 33,7 %, toutes les vues ≤ 35 % ; `battle_seasons` + `shadow_saturation` dans
+  `data/fx/atmosphere.json`, outil `scene_saturation.py`. DA7d fini (664 → 0 chevauchements)
+  mais en conflit avec le dé-encombrement de noms DC4 dans `settlement_layer.gd` : renvoyé à
+  l'agent pour unifier les deux avant fusion.
+- 26/09 soir : **DA7d fusionné** (main `d8946f7f`, ADR 0066 § DA7d) : un seul dé-encombrement
+  (marqueurs + noms, par priorité) remplace le masquage de noms DC4, dont il reprend la mesure du
+  texte ; 0 chevauchement aux 12 vues, ~2,2 ms. Reste : 21 hameaux sur une ville (sonde DC4).
+- 26/09 soir : **DA7a fusionné** (main `45dac842`, ADR 0060 § DA7a) : 10 enregistrements réels
+  (bande du Studio der frühen Musik, Stockholm 1963, domaine public ; codex de Faenza CC BY 4.0)
+  en tête des playlists France/Italie/Bourgogne/Angleterre, MIDI en repli. Pas de vrai Machaut/
+  Landini/Solage libre trouvé. **À écouter** : attribution titre ↔ plage de la bande 1963 faite
+  sans écoute humaine ; piste Landini possible dans la bande d'orgue Arnér 1966 (Commons, PD).
+- 26/09 soir : **DA7c fusionné** (main `7d76e7a3`, ADR 0065 § DA7c) : 59 icônes à l'encre, une
+  par trait (fiche, infobulle, encyclopédie), 2,68 $ ; budget DA **20,56 $**. **Vague DA7
+  terminée** (DA7a-d dans main). Note : après la fusion de DC6b, la dylib doit être
+  reconstruite (`research_percent` inconnu sinon). Suites : écoute de la bande 1963 (titres),
+  Landini dans la bande Arnér 1966, 21 hameaux sur une ville (DC4), marge bocage printemps 33,7 %.

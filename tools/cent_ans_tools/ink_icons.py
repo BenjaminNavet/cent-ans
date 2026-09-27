@@ -43,6 +43,9 @@ RAW_DIR = REPO_DIR / "tools" / "da5_raw"
 ICONS_OUT_DIR = REPO_DIR / "game" / "assets" / "icons" / "ink"
 MEDALLIONS_OUT_DIR = REPO_DIR / "game" / "assets" / "ui" / "medallions"
 BUDGET_SUBJECT = "DA5 : icônes d'action à l'encre et boutons-médaillons"
+# DA7c : icônes de trait, entries of the same catalogue (group "trait"), own ledger prefix
+# and envelope so they never eat into DA5's own (already spent) 5 $ cap.
+BUDGET_SUBJECT_TRAITS = "DA7c : icônes de trait à l'encre"
 
 # HudStyle.INK (Color(0.22, 0.14, 0.07)) in 8 bits: the colour baked into the icons.
 INK_RGB = (56, 36, 18)
@@ -67,6 +70,7 @@ class Entry:
     subject: str
     targets: tuple[str, ...]
     source: str | None = None
+    group: str | None = None
 
     @property
     def raw_path(self) -> Path:
@@ -85,13 +89,17 @@ def load_catalog(path: Path = CATALOG_PATH) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def entries(catalog: dict, kind: str | None = None) -> list[Entry]:
-    """Icons then medallions of the catalogue (optionally one ``kind`` only)."""
+def entries(
+    catalog: dict, kind: str | None = None, group: str | None = None
+) -> list[Entry]:
+    """Icons then medallions of the catalogue (optionally one ``kind``/``group`` only)."""
     result = []
     for key, entry_kind in (("icons", "icon"), ("medallions", "medallion")):
         if kind not in (None, entry_kind):
             continue
         for item in catalog[key]:
+            if group is not None and item.get("group") != group:
+                continue
             result.append(
                 Entry(
                     kind=entry_kind,
@@ -100,6 +108,7 @@ def entries(catalog: dict, kind: str | None = None) -> list[Entry]:
                     subject=item["subject"],
                     targets=tuple(item["targets"]),
                     source=item.get("source"),
+                    group=item.get("group"),
                 )
             )
     return result
@@ -121,16 +130,18 @@ def plan(
     catalog: dict,
     *,
     kind: str | None = None,
+    group: str | None = None,
     only: Iterable[str] | None = None,
     limit: int | None = None,
 ) -> list[PortraitJob]:
     """Paid jobs still to run: entries without a raw file and without a validated source.
 
     ``only`` selects ids (``icon:<id>``/``medallion:<id>`` or a bare id matching both).
+    ``group`` restricts the catalogue entries considered (e.g. ``"trait"``, DA7c).
     """
     wanted = set(only or [])
     jobs: list[PortraitJob] = []
-    for entry in entries(catalog, kind):
+    for entry in entries(catalog, kind, group):
         if entry.source is not None or entry.raw_path.exists():
             continue
         if wanted and not ({entry.id, f"{entry.kind}:{entry.id}"} & wanted):
@@ -390,10 +401,14 @@ def contact_sheet(
     return out_path
 
 
-def lot_spent(ledger) -> Decimal:  # noqa: ANN001
-    """Real spend already recorded for the DA5 lot (rows whose subject starts with ``DA5``)."""
+def lot_spent(ledger, prefix: str = "DA5 :") -> Decimal:  # noqa: ANN001
+    """Real spend already recorded for one lot (rows whose subject starts with ``prefix``).
+
+    Defaults to the DA5 lot; DA7c (trait icons, same tool and catalogue, own envelope and
+    ledger subject) passes ``prefix="DA7c :"``.
+    """
     return sum(
-        (entry.actual for entry in ledger.entries if entry.subject.startswith("DA5 :")),
+        (entry.actual for entry in ledger.entries if entry.subject.startswith(prefix)),
         Decimal("0.00"),
     )
 

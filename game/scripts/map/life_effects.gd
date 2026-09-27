@@ -34,7 +34,9 @@ var _chimneys: MultiMeshInstance3D
 var _fires: MultiMeshInstance3D
 var _chimney_material: ShaderMaterial
 var _fire_material: ShaderMaterial
-## Points des panaches : [Vector2 px, hauteur au-dessus du sol, graine].
+## Points des panaches : [Vector2 px (courant), hauteur au-dessus du sol, graine, colonie (-1 :
+## hameau), décalage au centre à l'échelle de la carte, sol à la pose de carte, sol à la pose réelle]
+## (lot SZ4b : les points d'une colonie suivent l'échelle de sa maquette, `_settlement_pose`).
 var _chimney_points: Array = []
 var _fire_points: Array = []
 var _reground_timer := -1.0
@@ -42,8 +44,8 @@ var _reground_chunks: Dictionary = {}
 var _last_rebuild_key := ""
 var _windmill_bodies: MultiMeshInstance3D
 var _windmill_sails: MultiMeshInstance3D
-## Moulins : [Vector2 px, lacet, graine, tourne (bool), hauteur du sol (SZ4 : gardée pour les
-## réécritures d'échelle, recalée avec la surface)].
+## Moulins : [Vector2 px (courant), lacet, graine, tourne (bool), hauteur du sol courante (SZ4),
+## colonie, décalage à l'échelle de la carte, sol à la pose de carte, sol à la pose réelle (SZ4b)].
 var _windmill_points: Array = []
 var _overlay: ShaderMaterial
 var _overlay_snowy := false
@@ -55,6 +57,9 @@ var _snow := 0.0
 ## SZ4 : échelles appliquées (moulins : instances réécrites ; fumées : paramètre du matériau).
 var _windmill_scale := 1.0
 var _smoke_scales := Vector2(-1.0, -1.0)
+## SZ4b : échelle de référence des maquettes appliquée aux positions (pas de `rewrite_step`).
+var _settlement_ref := 1.0
+var _camera_distance := 1000.0
 
 
 func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
@@ -120,22 +125,24 @@ func rebuild(province_states: Dictionary) -> void:
 		for k in int(CHIMNEYS.get(kind, 1)):
 			var angle := float((seed_value / (k + 3)) % 628) / 100.0
 			var r := radius * float((seed_value / (k + 7)) % 100) / 100.0
-			_chimney_points.append([px + Vector2(cos(angle), sin(angle)) * r, top, float((seed_value / (k + 11)) % 1000) / 1000.0])
+			_chimney_points.append(_settlement_point(i, Vector2(cos(angle), sin(angle)) * r, top, float((seed_value / (k + 11)) % 1000) / 1000.0))
 		# Ville assiégée : incendies dans les faubourgs.
 		if bool(state.get("siege", false)) and (kind == "city" or kind == "town"):
 			for k in 3:
 				var angle_f := float((seed_value / (k + 5)) % 628) / 100.0
-				_fire_points.append([px + Vector2(cos(angle_f), sin(angle_f)) * _layer.model_radius(i) * 0.9, 0.2, float(k) / 3.0])
+				_fire_points.append(_settlement_point(i, Vector2(cos(angle_f), sin(angle_f)) * _layer.model_radius(i) * 0.9, 0.2, float(k) / 3.0))
 	for h in data.hamlets.size():
 		var hamlet: Dictionary = data.hamlets[h]
 		var hpx: Vector2 = hamlet["px"]
 		var hseed := absi((str(hamlet["name"]) + str(hpx)).hash())
+		hpx = _layer.hamlet_px(h)  # SZ4b : pose de rendu du hameau (ancrage fin ZG5b)
 		var devastation := float(province_states.get(str(hamlet["province"]), {}).get("devastation", 0.0))
 		if _layer.hamlet_burned(h):
 			if devastation >= FIRE_MIN_DEVASTATION and hseed % 3 == 0:
-				_fire_points.append([hpx, 0.1, float(hseed % 1000) / 1000.0])
+				_fire_points.append(_fixed_point(hpx, 0.1, float(hseed % 1000) / 1000.0))
 		elif hseed % 2 == 0:
-			_chimney_points.append([hpx, 0.35, float(hseed % 1000) / 1000.0])
+			_chimney_points.append(_fixed_point(hpx, 0.35, float(hseed % 1000) / 1000.0))
+	_settlement_ref = _reference_scale()
 	_fill(_chimneys, _chimney_points, CHIMNEY_SIZE, 0.0)
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
 	_build_windmills(province_states)
@@ -183,14 +190,14 @@ func _build_windmills(province_states: Dictionary) -> void:
 	for i in data.settlements.size():
 		var entry: Dictionary = data.settlements[i]
 		var count := int(WINDMILLS.get(str(entry["kind"]), 0))
-		var px: Vector2 = entry["px"]
 		var seed_value := absi((str(entry["id"]) + "mill").hash())
 		var devastation := float(province_states.get(str(entry["province"]), {}).get("devastation", 0.0))
 		for k in count:
 			var angle := float((seed_value / (k + 2)) % 628) / 100.0
 			var distance := _layer.model_radius(i) * (1.35 + float((seed_value / (k + 5)) % 60) / 100.0)
-			var mill_px := px + Vector2(cos(angle), sin(angle)) * distance
-			_windmill_points.append([mill_px, float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0, devastation < RUIN_MIN_DEVASTATION, _surface_y(mill_px)])
+			var pose := _settlement_point(i, Vector2(cos(angle), sin(angle)) * distance, 0.0, 0.0)
+			_windmill_points.append([pose[0], float((seed_value / (k + 9)) % 628) / 100.0, float(seed_value % 1000) / 1000.0,
+				devastation < RUIN_MIN_DEVASTATION, _pose_y(pose), i, pose[4], pose[5], pose[6]])
 	var body_mesh := _first_mesh("settlements/windmill_body")
 	var sails_mesh := _first_mesh("settlements/windmill_sails")
 	if body_mesh == null or sails_mesh == null:
@@ -216,6 +223,48 @@ func _build_windmills(province_states: Dictionary) -> void:
 
 func _surface_y(px: Vector2) -> float:
 	return _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
+
+
+## SZ4b : point lié à la colonie `i` : décalage `offset` (échelle de la carte) autour de la maquette
+## ancrée, mis à l'échelle de la maquette ; sol gardé aux deux poses extrêmes.
+func _settlement_point(i: int, offset: Vector2, lift: float, seed_value: float) -> Array:
+	var center := _layer.model_px(i)
+	var ratio := _layer.model_scale_at(i, 0.0)
+	var point := [center, lift, seed_value, i, offset, _surface_y(center + offset), _surface_y(center + offset * ratio)]
+	_settlement_pose(point)
+	return point
+
+
+## Point fixe (hameau) au format des points de colonie.
+func _fixed_point(px: Vector2, lift: float, seed_value: float) -> Array:
+	var y := _surface_y(px)
+	return [px, lift, seed_value, -1, Vector2.ZERO, y, y]
+
+
+## SZ4b : position courante (px) d'un point de colonie à l'échelle de sa maquette.
+func _settlement_pose(point: Array) -> void:
+	var i: int = point[3]
+	if i < 0:
+		return
+	var s := _layer.model_scale_at(i, _camera_distance)
+	point[0] = _layer.model_px(i) + (point[4] as Vector2) * s
+
+
+## SZ4b : sol courant d'un point (interpolé entre la pose réelle et la pose de carte).
+func _pose_y(point: Array) -> float:
+	var i: int = point[3]
+	if i < 0:
+		return point[5]
+	var s := _layer.model_scale_at(i, _camera_distance)
+	var ratio := _layer.model_scale_at(i, 0.0)
+	var along := clampf((s - ratio) / maxf(1.0 - ratio, 1e-4), 0.0, 1.0)
+	return lerpf(float(point[6]), float(point[5]), along)
+
+
+## SZ4b : exagération commune à la distance courante (réécriture des positions par pas).
+func _reference_scale() -> float:
+	var props := MapPropScale.shared()
+	return props.exaggeration(_camera_distance)  # exagération commune (lot SZ4b)
 
 
 func _windmill_transforms(point: Array) -> Array:
@@ -258,7 +307,7 @@ func _apply_ruins(province_states: Dictionary) -> void:
 			_ruin[i] = amount
 			if kind == "village":
 				# Village en ruine : fumée d'incendie au-dessus.
-				_fire_points.append([entry["px"], 0.3, float(i % 97) / 97.0])
+				_fire_points.append(_settlement_point(i, Vector2.ZERO, 0.3, float(i % 97) / 97.0))
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
 	_update_overlays()
 
@@ -312,16 +361,29 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 		var s := 0.8 + 0.4 * seed_value
 		# SZ4 : origine au sol, levée dans la colonne z (lue et mise à l'échelle par le shader).
 		var basis := Basis(Vector3(size.x * s, 0.0, 0.0), Vector3(0.0, size.y * s, 0.0), Vector3(0.0, float(point[1]), 1.0))
-		multimesh.set_instance_transform(n, Transform3D(basis, _ground(point)))
+		multimesh.set_instance_transform(n, Transform3D(basis, _origin(point)))
 		multimesh.set_instance_custom_data(n, Color(seed_value, darkness, 0.75 + 0.25 * fposmod(seed_value * 7.0, 1.0), fposmod(seed_value * 13.0, 1.0)))
 	mmi.multimesh = multimesh
 
 
-## Pied d'un panache (au sol ; la levée `point[1]` est portée par la base d'instance, SZ4).
-func _ground(point: Array) -> Vector3:
+## Pied d'un panache (au sol ; la levée `point[1]` est portée par la base d'instance, SZ4) ;
+## SZ4b : à la pose courante de sa colonie.
+func _origin(point: Array) -> Vector3:
 	var px: Vector2 = point[0]
-	var y := _terrain.surface_height_at(px.x, px.y) if _terrain != null else 0.0
-	return Vector3(px.x, y, px.y)
+	return Vector3(px.x, _pose_y(point), px.y)
+
+
+## Relit le sol des deux poses d'un point (surface affichée changée).
+func _reground_point(point: Array) -> void:
+	var i: int = point[3]
+	if i < 0:
+		point[5] = _surface_y(point[0])
+		point[6] = point[5]
+		return
+	var center := _layer.model_px(i)
+	var offset: Vector2 = point[4]
+	point[5] = _surface_y(center + offset)
+	point[6] = _surface_y(center + offset * _layer.model_scale_at(i, 0.0))
 
 
 ## PB1 : seuls les points des tuiles dont la surface a changé (`_reground_chunks`) sont recalés :
@@ -332,7 +394,7 @@ func _reground() -> void:
 	_reground_chunks = {}
 	if _windmill_bodies.multimesh != null and _windmill_sails.multimesh != null:
 		for n: int in _changed_points("windmills", _windmill_points, changed):
-			_windmill_points[n][4] = _surface_y(_windmill_points[n][0])
+			_reground_windmill(_windmill_points[n])
 			var xforms := _windmill_transforms(_windmill_points[n])
 			_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
 			_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
@@ -352,12 +414,14 @@ func _reground() -> void:
 		if buffer.size() != points.size() * stride:
 			# Rendu factice (headless) : pas de tampon lisible, repli point par point.
 			for n: int in todo:
+				_reground_point(points[n])
 				var xform := mmi.multimesh.get_instance_transform(n)
-				xform.origin = _ground(points[n])
+				xform.origin = _origin(points[n])
 				mmi.multimesh.set_instance_transform(n, xform)
 			continue
 		for n: int in todo:
-			buffer[n * stride + 7] = _ground(points[n]).y
+			_reground_point(points[n])
+			buffer[n * stride + 7] = _pose_y(points[n])
 		mmi.multimesh.buffer = buffer
 
 
@@ -375,7 +439,7 @@ func _changed_points(list_name: String, points: Array, changed: Dictionary) -> A
 	if int(cached.get("version", -1)) != _points_version or int(cached.get("size", -1)) != points.size():
 		var index_of: Dictionary = {}
 		for n in points.size():
-			var px: Vector2 = points[n][0]
+			var px := _anchor_of(points[n])
 			var index := _terrain.chunk_index_at(px.x, px.y)
 			if not index_of.has(index):
 				index_of[index] = []
@@ -388,6 +452,31 @@ func _changed_points(list_name: String, points: Array, changed: Dictionary) -> A
 		result.append_array(by_chunk.get(index, []))
 	result.sort()
 	return result
+
+
+## SZ4b : point de rattachement d'un point à la tuile (centre de la colonie, fixe quand l'échelle
+## de la maquette varie ; sinon le point lui-même).
+func _anchor_of(point: Array) -> Vector2:
+	var i := -1
+	if point.size() >= 9:
+		i = point[5]  # moulin : colonie au rang 5
+	elif point.size() >= 7:
+		i = point[3]  # panache
+	return _layer.model_px(i) if i >= 0 else point[0]
+
+
+## SZ4b : moulin au format des points de colonie (px, -, -, colonie, décalage, sols).
+static func _mill_pose(point: Array) -> Array:
+	return [point[0], 0.0, 0.0, point[5], point[6], point[7], point[8]]
+
+
+## Moulin : sol des deux poses relu, sol courant recalculé.
+func _reground_windmill(point: Array) -> void:
+	var pose := _mill_pose(point)
+	_reground_point(pose)
+	point[7] = pose[5]
+	point[8] = pose[6]
+	point[4] = _pose_y(pose)
 
 
 func _on_surface_changed(index: int) -> void:
@@ -411,8 +500,15 @@ func _apply_prop_scale(camera_distance: float) -> void:
 		_smoke_scales = smoke
 		_chimney_material.set_shader_parameter("prop_scale", smoke.x)
 		_fire_material.set_shader_parameter("prop_scale", smoke.y)
+	_camera_distance = camera_distance
 	var mill := props.windmill_scale(camera_distance)
-	if props.needs_rewrite(_windmill_scale, mill):
+	var reference := _reference_scale()
+	var moved := props.needs_rewrite(_settlement_ref, reference)
+	if moved:
+		# SZ4b : moulins et panaches suivent l'échelle de la maquette de leur colonie.
+		_settlement_ref = reference
+		_rewrite_smoke_positions()
+	if moved or props.needs_rewrite(_windmill_scale, mill):
 		_windmill_scale = mill
 		_rewrite_windmills()
 
@@ -423,9 +519,45 @@ func _rewrite_windmills() -> void:
 	if _windmill_bodies.multimesh.instance_count != _windmill_points.size():
 		return
 	for n in _windmill_points.size():
-		var xforms := _windmill_transforms(_windmill_points[n])
+		var point: Array = _windmill_points[n]
+		var pose := _mill_pose(point)
+		_settlement_pose(pose)
+		point[0] = pose[0]
+		point[4] = _pose_y(pose)
+		var xforms := _windmill_transforms(point)
 		_windmill_bodies.multimesh.set_instance_transform(n, xforms[0])
 		_windmill_sails.multimesh.set_instance_transform(n, xforms[1])
+
+
+## SZ4b : origines des panaches des colonies à l'échelle courante de leur maquette (tampon complet
+## lu et écrit une fois ; repli point par point sans tampon lisible, rendu factice).
+func _rewrite_smoke_positions() -> void:
+	for pair in [[_chimneys, _chimney_points], [_fires, _fire_points]]:
+		var mmi: MultiMeshInstance3D = pair[0]
+		var points: Array = pair[1]
+		if mmi.multimesh == null or mmi.multimesh.instance_count != points.size():
+			continue
+		var buffer := mmi.multimesh.buffer
+		var stride := 16
+		var readable := buffer.size() == points.size() * stride
+		var touched := false
+		for n in points.size():
+			var point: Array = points[n]
+			if int(point[3]) < 0:
+				continue
+			_settlement_pose(point)
+			var origin := _origin(point)
+			if readable:
+				buffer[n * stride + 3] = origin.x
+				buffer[n * stride + 7] = origin.y
+				buffer[n * stride + 11] = origin.z
+				touched = true
+			else:
+				var xform := mmi.multimesh.get_instance_transform(n)
+				xform.origin = origin
+				mmi.multimesh.set_instance_transform(n, xform)
+		if touched:
+			mmi.multimesh.buffer = buffer
 
 
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:

@@ -54,5 +54,47 @@
     "port": false,
     "description": "Abbaye cistercienne fondée en 1148 près de Gordes.",
     "sources": ["Abbaye de Sénanque"]
+  },
+  {
+    "id": "set_vaison_la_romaine",
+    "province": "prov_comtat_venaissin",
+    "kind": "town",
+    "name": { "display": "Vaison-la-Romaine", "local": "Vasion", "local_language": "occitan" },
+    "lonlat": [5.0730, 44.2394],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": ["bld_market", "bld_collegiate_church"],
+    "port": false,
+    "description": "Cité épiscopale au nord du Comtat Venaissin, bâtie au pied de son château comtal sur les ruines antiques de Vasio.",
+    "sources": ["Vaison-la-Romaine", "Diocèse de Vaison"]
+  },
+  {
+    "id": "set_pernes_les_fontaines",
+    "province": "prov_comtat_venaissin",
+    "kind": "village",
+    "name": { "display": "Pernes-les-Fontaines", "local": "Pèrnas", "local_language": "occitan" },
+    "lonlat": [5.0611, 43.9995],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_parish_church", "bld_water_mill"],
+    "port": false,
+    "description": "Capitale du Comtat Venaissin jusqu'en 1320, date à laquelle le recteur pontifical s'établit à Carpentras.",
+    "sources": ["Pernes-les-Fontaines"]
+  },
+  {
+    "id": "set_isle_sur_la_sorgue",
+    "province": "prov_comtat_venaissin",
+    "kind": "village",
+    "name": { "display": "L'Isle-sur-la-Sorgue", "local": "La Isla", "local_language": "occitan" },
+    "lonlat": [5.0511, 43.9186],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": ["bld_water_mill"],
+    "port": false,
+    "description": "Bourg bâti sur les bras de la Sorgue, vivant de la pêche et de ses moulins à roues à aubes.",
+    "sources": ["L'Isle-sur-la-Sorgue"]
   }
 ]

@@ -110,5 +110,83 @@
     "sources": [
       "Château d'Almodóvar del Río"
     ]
+  },
+  {
+    "id": "set_baena",
+    "province": "prov_cordoba",
+    "kind": "town",
+    "name": {
+      "display": "Baena",
+      "local": "Baena",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.3222,
+      37.6144
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville close perchée, reconquise vers 1240, place de la frontière cordouane face à Grenade.",
+    "sources": [
+      "Baena"
+    ]
+  },
+  {
+    "id": "set_lucena",
+    "province": "prov_cordoba",
+    "kind": "town",
+    "name": {
+      "display": "Lucena",
+      "local": "Lucena",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.4958,
+      37.4083
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne ville juive d'al-Andalus, castillane depuis 1240.",
+    "sources": [
+      "Lucena (Espagne)"
+    ]
+  },
+  {
+    "id": "set_montilla",
+    "province": "prov_cordoba",
+    "kind": "village",
+    "name": {
+      "display": "Montilla",
+      "local": "Montilla",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -4.6383,
+      37.5864
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole de la campagne cordouane, au pied de son château.",
+    "sources": [
+      "Montilla"
+    ]
   }
 ]

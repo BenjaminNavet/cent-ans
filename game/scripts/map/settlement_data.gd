@@ -16,7 +16,7 @@ const KINDS: Array[String] = ["city", "town", "castle", "abbey", "village"]
 ## Priorité d'étiquette (plus petit = prioritaire) : cité > ville > autres.
 const LABEL_PRIORITY := {"city": 0, "town": 1, "castle": 2, "abbey": 3, "village": 4}
 
-## Colonies triées par priorité puis id : {id, province, kind, name, px: Vector2, controller,
+## Colonies triées par priorité, poids décroissant puis id : {id, province, kind, name, px: Vector2, controller,
 ## owner, fortification_level, port, weight}.
 var settlements: Array[Dictionary] = []
 var index_by_id: Dictionary = {}
@@ -90,7 +90,13 @@ func _load_settlements(data_dir: String, map_dir: String) -> void:
 	settlements.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var pa: int = LABEL_PRIORITY.get(a["kind"], 9)
 		var pb: int = LABEL_PRIORITY.get(b["kind"], 9)
-		return pa < pb if pa != pb else str(a["id"]) < str(b["id"]))
+		if pa != pb:
+			return pa < pb
+		# DC4 : à type égal, la place la plus importante d'abord (étiquette gardée au
+		# désencombrement, marqueur dessiné par-dessus).
+		if int(a["weight"]) != int(b["weight"]):
+			return int(a["weight"]) > int(b["weight"])
+		return str(a["id"]) < str(b["id"]))
 	for i in settlements.size():
 		index_by_id[settlements[i]["id"]] = i
 
@@ -154,7 +160,11 @@ func edge_path(from_id: String, to_id: String) -> PackedVector2Array:
 ## Contrôleur et propriétaire courants depuis la simulation (`CampaignSim.settlements()`).
 ## Renvoie vrai si au moins une colonie a changé.
 func apply_live(sim: Object) -> bool:
-	if sim == null or not sim.has_method("settlements"):
+	if sim == null:
+		return false
+	if sim.has_method("get_settlements_live"):  # PB3d : tableaux groupés, sans dictionnaire par lieu
+		return _apply_live_packed(sim.call("get_settlements_live"))
+	if not sim.has_method("settlements"):
 		return false
 	var changed := false
 	for live in sim.call("settlements"):
@@ -171,6 +181,27 @@ func apply_live(sim: Object) -> bool:
 				changed = true
 		if live.has("name"):
 			entry["name"] = str(live["name"])
+	return changed
+
+
+func _apply_live_packed(live: Dictionary) -> bool:
+	var live_ids: PackedStringArray = live.get("id", PackedStringArray())
+	var controllers: PackedStringArray = live.get("controller", PackedStringArray())
+	var owners: PackedStringArray = live.get("owner", PackedStringArray())
+	var names: PackedStringArray = live.get("name", PackedStringArray())
+	var changed := false
+	for i in live_ids.size():
+		var index: int = index_by_id.get(live_ids[i], -1)
+		if index < 0:
+			continue
+		var entry: Dictionary = settlements[index]
+		if controllers[i] != entry["controller"]:
+			entry["controller"] = controllers[i]
+			changed = true
+		if owners[i] != entry["owner"]:
+			entry["owner"] = owners[i]
+			changed = true
+		entry["name"] = names[i]
 	return changed
 
 

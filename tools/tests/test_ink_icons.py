@@ -123,3 +123,46 @@ def test_lot_spent_counts_da5_rows_only(tmp_path) -> None:
         encoding="utf-8",
     )
     assert ink_icons.lot_spent(BudgetLedger(path)) == Decimal("0.18")
+
+
+def test_lot_spent_with_a_different_prefix(tmp_path) -> None:
+    """A second lot (DA7c) reusing the tool is counted under its own prefix, not DA5's."""
+    path = tmp_path / "budget.md"
+    path.write_text(
+        "# Budget\n\n| Date | Service | Objet | Coût estimé | Coût réel | Cumul |\n|---|---|---|---|---|---|\n"
+        "| 2026-09-26 | OpenRouter | DA5 : icônes | 0,20 $ | 0,18 $ | 0,18 $ |\n"
+        "| 2026-09-26 | OpenRouter | DA7c : icônes de trait à l'encre | 2,70 $ | 2,68 $ | 2,86 $ |\n",
+        encoding="utf-8",
+    )
+    ledger = BudgetLedger(path)
+    assert ink_icons.lot_spent(ledger) == Decimal("0.18")
+    assert ink_icons.lot_spent(ledger, prefix="DA7c :") == Decimal("2.68")
+
+
+def test_group_filters_plan_and_entries() -> None:
+    """``group`` restricts the catalogue to one family of entries (DA7c: traits)."""
+    catalog = _catalog()
+    trait_entries = ink_icons.entries(catalog, group="trait")
+    assert trait_entries
+    assert all(entry.group == "trait" for entry in trait_entries)
+    assert all(entry.kind == "icon" for entry in trait_entries)
+    trait_ids = {entry.id for entry in trait_entries}
+    all_ids = {entry.id for entry in ink_icons.entries(catalog)}
+    assert trait_ids <= all_ids
+    jobs = ink_icons.plan(catalog, group="trait")
+    assert {job.character_id for job in jobs} <= {
+        f"icon:{entry.id}" for entry in trait_entries
+    }
+
+
+def test_every_trait_has_an_ink_icon_entry() -> None:
+    """DA7c: each trait of ``data/traits`` has its own catalogue entry and target."""
+    catalog = _catalog()
+    trait_dir = ROOT / "data" / "traits"
+    trait_ids = {path.stem for path in trait_dir.glob("*.json")}
+    assert trait_ids  # sanity: the traits themselves are found
+    covered = {item["id"] for item in catalog["icons"] if item.get("group") == "trait"}
+    assert trait_ids <= covered, trait_ids - covered
+    for item in catalog["icons"]:
+        if item.get("group") == "trait":
+            assert item["targets"] == [item["id"]]

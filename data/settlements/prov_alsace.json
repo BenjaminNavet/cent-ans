@@ -136,5 +136,109 @@
     "sources": [
       "Abbaye de Marmoutier (Bas-Rhin)"
     ]
+  },
+  {
+    "id": "set_barr",
+    "province": "prov_alsace",
+    "kind": "village",
+    "name": {
+      "display": "Barr",
+      "local": "Barre",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.4522,
+      48.4106
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_vineyard_press",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg viticole du pied des Vosges, sous la suzeraineté de l'évêque de Strasbourg.",
+    "sources": [
+      "Barr"
+    ]
+  },
+  {
+    "id": "set_munster_alsace",
+    "province": "prov_alsace",
+    "kind": "village",
+    "name": {
+      "display": "Munster",
+      "local": "Munstirre",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.1394,
+      48.0392
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg de la vallée vosgienne né autour de l'abbaye Saint-Grégoire, doté de franchises de marché dès le XIIIe siècle.",
+    "sources": [
+      "Munster (Haut-Rhin)"
+    ]
+  },
+  {
+    "id": "set_selestat",
+    "province": "prov_alsace",
+    "kind": "town",
+    "name": {
+      "display": "Sélestat",
+      "local": "Schletstat",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.4514,
+      48.2603
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville libre d'empire fortifiée sur l'Ill, future tête de la Décapole alsacienne.",
+    "sources": [
+      "Sélestat"
+    ]
+  },
+  {
+    "id": "set_andlau",
+    "province": "prov_alsace",
+    "kind": "abbey",
+    "name": {
+      "display": "Andlau",
+      "local": "Andela",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.4092,
+      48.3418
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye impériale de chanoinesses nobles fondée en 880 par l'impératrice Richarde.",
+    "sources": [
+      "Abbaye d'Andlau"
+    ]
   }
 ]

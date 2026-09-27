@@ -70,15 +70,16 @@ func _raise(faction: String, level: Interest) -> void:
 
 func _scan_neighbors(sim: Object, map_data: MapData) -> void:
 	var own: Array = []
+	var snapshot := ProvinceSnapshot.of(sim, map_data)  # PB3d : un appel groupé
 	for index in range(1, map_data.province_count + 1):
 		var province := map_data.get_province(index)
 		var id := str(province.get("id", ""))
 		if id == "":
 			continue
-		var state: Dictionary = sim.call("get_province_state", id)
-		var owner := str(state.get("owner", ""))
+		var known := snapshot.has(index - 1)
+		var owner := snapshot.owner[index - 1] if known else ""
 		owners[id] = owner
-		if owner == player or str(state.get("controller", "")) == player:
+		if owner == player or (known and snapshot.controller[index - 1] == player):
 			own.append(province)
 	for province in own:
 		near_provinces[str(province.get("id", ""))] = true

@@ -109,5 +109,80 @@
     "sources": [
       "Château de Dunbar"
     ]
+  },
+  {
+    "id": "set_haddington",
+    "province": "prov_lothian",
+    "kind": "town",
+    "name": {
+      "display": "Haddington",
+      "local": "Hadingtoun",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -2.7761,
+      55.9581
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg royal et marché de l'East Lothian, sur la Tyne.",
+    "sources": [
+      "Haddington"
+    ]
+  },
+  {
+    "id": "set_linlithgow",
+    "province": "prov_lothian",
+    "kind": "town",
+    "name": {
+      "display": "Linlithgow",
+      "local": "Linlithquo",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.6178,
+      55.9781
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg royal du West Lothian, doté d'un palais royal au bord du loch.",
+    "sources": [
+      "Linlithgow"
+    ]
+  },
+  {
+    "id": "set_newbattle",
+    "province": "prov_lothian",
+    "kind": "abbey",
+    "name": {
+      "display": "Newbattle",
+      "local": "Neubotle",
+      "local_language": "scots"
+    },
+    "lonlat": [
+      -3.0733,
+      55.8631
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne de Newbattle, près de Dalkeith.",
+    "sources": [
+      "Newbattle Abbey"
+    ]
   }
 ]

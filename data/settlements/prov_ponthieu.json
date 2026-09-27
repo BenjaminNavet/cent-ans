@@ -3,56 +3,264 @@
     "id": "set_abbeville",
     "province": "prov_ponthieu",
     "kind": "city",
-    "name": { "display": "Abbeville", "local": "Abbeville", "local_language": "ancien français" },
-    "lonlat": [1.8365, 50.1054],
+    "name": {
+      "display": "Abbeville",
+      "local": "Abbeville",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.8365,
+      50.1054
+    ],
     "weight": 32,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_port", "bld_weaving_workshop", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_weaving_workshop",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": true,
     "description": "Capitale du comté de Ponthieu, hérité par Édouard III d'Angleterre de sa grand-mère Éléonore de Castille.",
-    "sources": ["Abbeville", "Comté de Ponthieu"]
+    "sources": [
+      "Abbeville",
+      "Comté de Ponthieu"
+    ]
   },
   {
     "id": "set_le_crotoy",
     "province": "prov_ponthieu",
     "kind": "town",
-    "name": { "display": "Le Crotoy", "local": "Le Crotoy", "local_language": "ancien français" },
-    "lonlat": [1.6167, 50.2167],
+    "name": {
+      "display": "Le Crotoy",
+      "local": "Le Crotoy",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6167,
+      50.2167
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_port", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
     "port": true,
     "description": "Port fortifié sur la baie de Somme, face à Saint-Valery.",
-    "sources": ["Le Crotoy"]
+    "sources": [
+      "Le Crotoy"
+    ]
+  },
+  {
+    "id": "set_saint_valery_sur_somme",
+    "province": "prov_ponthieu",
+    "kind": "town",
+    "name": {
+      "display": "Saint-Valery-sur-Somme",
+      "local": "Saint Valeri",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6333,
+      50.1833
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port à l'embouchure de la Somme, ancien point d'embarquement de Guillaume le Conquérant, dans le comté de Ponthieu.",
+    "sources": [
+      "Saint-Valery-sur-Somme"
+    ]
   },
   {
     "id": "set_rue",
     "province": "prov_ponthieu",
     "kind": "town",
-    "name": { "display": "Rue", "local": "Rue", "local_language": "ancien français" },
-    "lonlat": [1.6667, 50.2667],
+    "name": {
+      "display": "Rue",
+      "local": "Rue",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6667,
+      50.2667
+    ],
     "weight": 9,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Petite ville chartée proche de la baie de Somme, étape de pèlerinage.",
-    "sources": ["Rue (Somme)"]
+    "sources": [
+      "Rue (Somme)"
+    ]
   },
   {
     "id": "set_crecy_en_ponthieu",
     "province": "prov_ponthieu",
     "kind": "village",
-    "name": { "display": "Crécy-en-Ponthieu", "local": "Crécy", "local_language": "ancien français" },
-    "lonlat": [1.8867, 50.2500],
+    "name": {
+      "display": "Crécy-en-Ponthieu",
+      "local": "Crécy",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.8867,
+      50.25
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_windmill"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_windmill"
+    ],
     "port": false,
     "description": "Bourg agricole en lisière de la forêt de Crécy, sur le plateau du Ponthieu.",
-    "sources": ["Crécy-en-Ponthieu"]
+    "sources": [
+      "Crécy-en-Ponthieu"
+    ]
+  },
+  {
+    "id": "set_saint_riquier",
+    "province": "prov_ponthieu",
+    "kind": "abbey",
+    "name": {
+      "display": "Saint-Riquier",
+      "local": "Saint Riquier",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.9436,
+      50.1936
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grande abbaye carolingienne de Centula, foyer intellectuel du Ponthieu.",
+    "sources": [
+      "Abbaye de Saint-Riquier"
+    ]
+  },
+  {
+    "id": "set_rambures",
+    "province": "prov_ponthieu",
+    "kind": "village",
+    "name": {
+      "display": "Rambures",
+      "local": "Rambures",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6969,
+      50.0356
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg du Vimeu ponthevin autour d'un manoir fortifié des sires de Rambures.",
+    "sources": [
+      "Rambures"
+    ]
+  },
+  {
+    "id": "set_auxi_le_chateau",
+    "province": "prov_ponthieu",
+    "kind": "village",
+    "name": {
+      "display": "Auxi-le-Château",
+      "local": "Auxi",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.1131,
+      50.2331
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié sur l'Authie, ancien chef-lieu de châtellenie.",
+    "sources": [
+      "Auxi-le-Château"
+    ]
+  },
+  {
+    "id": "set_noyelles_sur_mer",
+    "province": "prov_ponthieu",
+    "kind": "village",
+    "name": {
+      "display": "Noyelles-sur-Mer",
+      "local": "Noielles",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.7194,
+      50.19
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg au bord de la baie de Somme, halte de pèlerinage vers le Mont-Saint-Michel.",
+    "sources": [
+      "Noyelles-sur-Mer"
+    ]
+  },
+  {
+    "id": "set_vironchaux",
+    "province": "prov_ponthieu",
+    "kind": "village",
+    "name": {
+      "display": "Vironchaux",
+      "local": "Vironchaux",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.7325,
+      50.2597
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg forestier du Marquenterre, près de la forêt de Crécy.",
+    "sources": [
+      "Vironchaux"
+    ]
   }
 ]

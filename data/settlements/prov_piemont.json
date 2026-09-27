@@ -94,8 +94,8 @@
       "local_language": "piémontais"
     },
     "lonlat": [
-      7.5124,
-      45.0733
+      7.4439,
+      45.0715
     ],
     "weight": 15,
     "owner": null,
@@ -108,6 +108,112 @@
     "description": "Précepterie-hôpital de l'ordre des Antonins sur la route de la via Francigena vers la France.",
     "sources": [
       "Précepterie de Sant'Antonio di Ranverso"
+    ]
+  },
+  {
+    "id": "set_chieri",
+    "province": "prov_piemont",
+    "kind": "town",
+    "name": {
+      "display": "Chieri",
+      "local": "Chieri",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.8123,
+      45.0219
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Riche commune drapière du Piémont, indépendante jusqu'à sa soumission à la Savoie en 1347.",
+    "sources": [
+      "Chieri"
+    ]
+  },
+  {
+    "id": "set_savigliano",
+    "province": "prov_piemont",
+    "kind": "village",
+    "name": {
+      "display": "Savigliano",
+      "local": "Savijan",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.6572,
+      44.648
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg de marché de la plaine de Coni, soumis aux princes de Savoie-Achaïe au début du XIVe siècle.",
+    "sources": [
+      "Savigliano",
+      "Savoie-Achaïe"
+    ]
+  },
+  {
+    "id": "set_avigliana",
+    "province": "prov_piemont",
+    "kind": "village",
+    "name": {
+      "display": "Avigliana",
+      "local": "Vijan-a",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.3968,
+      45.0837
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg au pied du château comtal de Savoie, verrou de la vallée de Suse.",
+    "sources": [
+      "Avigliana"
+    ]
+  },
+  {
+    "id": "set_sacra_di_san_michele",
+    "province": "prov_piemont",
+    "kind": "abbey",
+    "name": {
+      "display": "Sacra di San Michele",
+      "local": "Sacra ëd San Michel",
+      "local_language": "piémontais"
+    },
+    "lonlat": [
+      7.3396,
+      45.0973
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fortifiée dominant la vallée de Suse depuis le XIe siècle.",
+    "sources": [
+      "Sacra di San Michele"
     ]
   }
 ]

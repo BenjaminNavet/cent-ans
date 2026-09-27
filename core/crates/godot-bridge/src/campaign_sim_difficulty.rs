@@ -14,6 +14,9 @@ impl CampaignSim {
     /// id, before a campaign exists, or once the first turn has been played.
     #[func]
     fn set_difficulty(&mut self, id: GString) -> bool {
+        if self.refuse_while_turn_pending("set_difficulty") {
+            return false;
+        }
         let Some(level) = Difficulty::from_id(&id.to_string()) else {
             godot_error!("CampaignSim.set_difficulty: unknown level {id}");
             return false;

@@ -105,6 +105,21 @@ page par page (domaine public, CC0, CC BY ou CC BY-SA — jamais NC ni ND).
 Sources détaillées (URL, licence exacte, traitement) :
 `game/assets/third_party/music/wikimedia/SOURCE.md`.
 
+### Ars nova et Trecento — vrais enregistrements, Wikimedia Commons (DA7a)
+
+Interprétations réelles (pas de MIDI), placées en tête des playlists France, Italie, Bourgogne,
+Angleterre, cour et menu ; les réalisations MIDI de DA4 restent en repli.
+
+- Studio der frühen Musik (Andrea von Ramm, Nigel Rogers, Sterling Jones, Thomas Binkley),
+  concert du 23 octobre 1963 au Musikhistoriska museet de Stockholm, bande numérisée par
+  Musikverket / Svenskt visarkiv — **domaine public** : Jacopo da Bologna, « Fenice fu » ;
+  Saltarello anonyme italien (XIVe s.) ; « Onques ne fut » ; « Souvent souspire » ; Pierrekin de
+  la Coupele, « Chancon fas non pas villaine » ; « Hé Robinet » ; Gilles Binchois et Guillaume
+  Dufay, « Adieu m'amour » ; « Bryd one brere ».
+- « Bel fiore dança » (codex de Faenza) — Francesco Ariis, clavier, **CC BY 4.0**.
+
+Sources détaillées (URL, extrait, licence) : `game/assets/third_party/music/ars_nova/SOURCE.md`.
+
 ### Couches instrumentales de bataille — Freesound, CC0 1.0 (DA4)
 
 Musique de bataille en couches superposables (tambour, trompette droite, bourdon de cornemuse) au
@@ -270,6 +285,14 @@ reproduites telles quelles (entre guillemets).
   d'[OpenStreetMap](https://www.openstreetmap.org/copyright), base de données sous licence
   ODbL 1.0. Les plans anciens (Le Lieur, Braun et Hogenberg, plans Gallica, carte d'Agas) ne
   servent qu'au contrôle humain et ne sont ni extraits ni redistribués.
+- **Paris vers 1340 à l'échelle 1:1** (`data/landmarks_v2/paris.json`, lot VH5) : réseau des
+  rues, enceintes, portes, emprises des monuments, îlots, îles et lit de la Seine d'après « Paris
+  en 1380 » ; gabarit des parcelles d'après les données Vasserot version 1. © ALPAGE :
+  P. Rouet (Paris en 1380), A.-L. Bethe (données Vasserot) ; Arch. nat. F31 73-96 – Arch. Paris
+  © ALPAGE. Base de données sous licence
+  [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/), https://alpage.huma-num.fr/gis-data/
+  (consortium ALPAGE : LAMOP-Paris 1, LIENSs, ArScAn, L3i ; dir. H. Noizet). Les données
+  dérivées (`paris.json`) restent sous ODbL.
 - **Réseau hydrographique fin (lot ZG5a, ADR 0036)** — tracés recalés sur la pyramide de relief,
   canaux postérieurs à 1340 retirés :
   - France : BD TOPAGE® 2025, tronçons hydrographiques (IGN, OFB, agences de l'eau ; diffusion

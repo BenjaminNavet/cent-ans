@@ -140,6 +140,8 @@ pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
     };
     values.insert("march_km_season", season_km(Season::Summer));
     values.insert("march_km_winter", season_km(Season::Winter));
+    // DC3: one step of the settlement graph (agents, retreat radii), in km.
+    values.insert("step_km", movement::points_per_step(data).round());
     values.insert("zoc_radius_km", data.free_movement_rules().zoc_radius_km);
     values.insert(
         "landing_loss_percent",

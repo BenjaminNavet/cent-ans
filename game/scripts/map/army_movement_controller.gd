@@ -9,6 +9,10 @@ extends Node
 ##   `ArmyMovementPath`), qui suit le curseur ;
 ## - clic droit : sur le sol → `move_army_to` ; sur une armée ennemie → `attack_army` ; sur
 ##   une colonie → `move_army_to_settlement` (marche, siège ou stationnement) ;
+## - attaque (lot AT1) : curseur « épées croisées » (`AttackCursor`) sur une armée ou une place
+##   attaquable ; sur une place ennemie, l'arrivée ce tour enchaîne l'assaut (dialogue
+##   d'avant-bataille de siège : assaut, résolution automatique ou maintien du siège) ; contre
+##   une faction en paix, une confirmation (`WarDeclarationDialog`) déclare d'abord la guerre ;
 ## - animation de l'armée le long du trajet parcouru (`walked`) ;
 ## - cercle de zone de contrôle au survol d'une armée ennemie.
 ## Remplace les anneaux et l'aperçu sur le graphe des colonies de C5 (le panneau de colonie
@@ -49,6 +53,11 @@ var _last_hover_ms := 0
 var _last_hover_key := ""
 var _last_distance := -1.0
 var _zoc_army := ""
+## Lot AT1 : confirmation de la déclaration de guerre, attaque en attente de cette réponse
+## ({army, target}) et relations du joueur (faction → {status, name}, `get_diplomacy`).
+var war_dialog: WarDeclarationDialog = null
+var _pending_attack: Dictionary = {}
+var _relations: Dictionary = {}
 
 
 func setup(campaign_map: Node) -> void:
@@ -70,6 +79,10 @@ func setup(campaign_map: Node) -> void:
 	zoc_ring.lower_fade = 0.2
 	zoc_ring.visible = false
 	map.add_child(zoc_ring)
+	war_dialog = WarDeclarationDialog.new()
+	war_dialog.confirmed.connect(_on_war_confirmed)
+	war_dialog.cancelled.connect(func() -> void: _pending_attack = {})
+	map.ui.add_child(war_dialog)
 	if map.picker != null:
 		# Prioritaire sur l'intercepteur C5 (colonies), qu'il remplace quand il est actif.
 		var previous: Callable = map.picker.right_click_interceptor
@@ -106,6 +119,8 @@ func on_army_selected(army_id: String, army: Dictionary, is_player: bool) -> boo
 	hover_target = {}
 	preview = {}
 	_last_hover_key = ""
+	_relations.clear()
+	AttackCursor.show_attack(false)
 	if not available():
 		return false
 	map.terrain.set_reachable(PackedInt32Array(), PackedInt32Array())
@@ -123,6 +138,7 @@ func on_army_deselected() -> void:
 	hover_target = {}
 	preview = {}
 	_last_hover_key = ""
+	AttackCursor.show_attack(false)
 	if bubble != null:
 		bubble.hide_bubble()
 	if path_line != null:
@@ -179,6 +195,42 @@ func is_enemy_faction(faction: String) -> bool:
 	return (summary.get("at_war_with", PackedStringArray()) as PackedStringArray).has(faction)
 
 
+## Faction qui tient la cible : celle de l'armée, ou le contrôleur de la place ("" pour le sol).
+func target_faction(target: Dictionary) -> String:
+	match str(target.get("kind", "")):
+		"army":
+			return str(target.get("faction", ""))
+		"settlement":
+			if map.settlement_data != null:
+				return str(map.settlement_data.get_settlement(str(target["id"])).get("controller", ""))
+	return ""
+
+
+## Lot AT1 : relation du joueur avec `faction` pour un ordre d'attaque : "war" (attaque
+## directe), "peace" (paix ou trêve : attaque après déclaration de guerre), "friend" (soi,
+## allié, vassal, suzerain, faction inconnue : pas d'attaque).
+func relation_to(faction: String) -> String:
+	if faction == "" or faction == map.player_faction:
+		return "friend"
+	if is_enemy_faction(faction):
+		return "war"
+	var status := str(_relation_entry(faction).get("status", ""))
+	return "peace" if status in ["peace", "truce"] else "friend"
+
+
+func _relation_entry(faction: String) -> Dictionary:
+	if _relations.is_empty() and map.sim.has_method("get_diplomacy"):
+		for entry in map.sim.call("get_diplomacy", map.player_faction):
+			_relations[str(entry.get("id", ""))] = {"status": str(entry.get("status", "")), "name": str(entry.get("name", ""))}
+	return _relations.get(faction, {})
+
+
+## Vrai si un clic droit sur `target` serait une attaque (avec ou sans déclaration de guerre).
+func is_attack_target(target: Dictionary) -> bool:
+	var kind := str(target.get("kind", ""))
+	return (kind == "army" or kind == "settlement") and relation_to(target_faction(target)) in ["war", "peace"]
+
+
 # --- Ordres ---------------------------------------------------------------------------------
 
 
@@ -189,11 +241,41 @@ func try_right_click(screen_position: Vector2) -> bool:
 	var target := pick_target(screen_position)
 	if target.is_empty():
 		return false
-	var report := order_target(map.selected_army, target)
+	if is_attack_target(target) and relation_to(target_faction(target)) == "peace":
+		ask_war(map.selected_army, target)
+		return true
+	_execute(map.selected_army, target)
+	return true
+
+
+func _execute(army_id: String, target: Dictionary) -> void:
+	var report := order_target(army_id, target)
 	UiSounds.play_order_result(report)  # UB1 / U13
 	if not report.get("ok", false):
 		map.ui.show_toast(str(report.get("error", "Ordre refusé")), true)
-	return true
+
+
+## Lot AT1 : attaque d'une cible en paix : confirmation, puis déclaration de guerre et attaque.
+func ask_war(army_id: String, target: Dictionary) -> void:
+	var faction := target_faction(target)
+	_pending_attack = {"army": army_id, "target": target, "faction": faction}
+	var faction_name := str(_relation_entry(faction).get("name", faction))
+	war_dialog.ask(map.sim, faction, faction_name, _target_label(target))
+
+
+func _on_war_confirmed() -> void:
+	var pending := _pending_attack
+	_pending_attack = {}
+	if pending.is_empty():
+		return
+	var result: Dictionary = map.sim.call("submit_order", {"type": "declare_war", "target": pending["faction"]})
+	_relations.clear()
+	if not result.get("ok", false):
+		map.ui.show_toast(str(result.get("error", "Déclaration de guerre impossible")), true)
+		return
+	map.ui.show_toast("La guerre est déclarée.")
+	map.refresh_all()
+	_execute(str(pending["army"]), pending["target"])
 
 
 ## Ordre adapté à la cible : attaque d'une armée ennemie, marche vers une colonie ou un point.
@@ -204,6 +286,8 @@ func order_target(army_id: String, target: Dictionary) -> Dictionary:
 				return order_attack(army_id, str(target["id"]))
 			return order_move_point(army_id, target["point"])
 		"settlement":
+			if relation_to(target_faction(target)) == "war":
+				return order_attack_settlement(army_id, str(target["id"]))
 			var report := order_move_settlement(army_id, str(target["id"]))
 			if report.get("ok", false):
 				return report
@@ -229,6 +313,43 @@ func order_move_settlement(army_id: String, settlement_id: String) -> Dictionary
 
 func order_attack(army_id: String, target_army: String) -> Dictionary:
 	return _run(army_id, map.sim.call("attack_army", army_id, target_army))
+
+
+## Lot AT1 : attaque d'une place ennemie. L'armée qui l'assiège déjà donne l'assaut ; sinon
+## elle marche, et si elle met le siège dès ce tour, l'assaut suit aussitôt (le dialogue
+## d'avant-bataille permet encore de « Maintenir le siège »). Une armée ennemie postée dans
+## la place et qui arrête la marche aux portes est attaquée.
+func order_attack_settlement(army_id: String, settlement_id: String) -> Dictionary:
+	var army: Dictionary = map.sim.call("get_army", army_id)
+	if str(army.get("settlement", "")) == settlement_id:
+		return order_assault(army_id)
+	var report := order_move_settlement(army_id, settlement_id)
+	if not report.get("ok", false):
+		return report
+	match str(report.get("stop", "")):
+		"siege_started":
+			if str(report.get("settlement", "")) == settlement_id:
+				var assault := order_assault(army_id)
+				return assault if assault.get("ok", false) else report
+		"enemy_zone_of_control":
+			var defender := str(report.get("stop_army", ""))
+			if defender != "" and str(map.sim.call("get_army", defender).get("settlement", "")) == settlement_id:
+				var attack := order_attack(army_id, defender)
+				return attack if attack.get("ok", false) else report
+	return report
+
+
+## Assaut de la place assiégée par `army_id` (comme « Donner l'assaut », `SiegeController`).
+func order_assault(army_id: String) -> Dictionary:
+	var result: Dictionary = map.sim.call("submit_order", {"type": "assault", "army": army_id})
+	if not result.get("ok", false):
+		return result
+	map.refresh_all()
+	var pending: Array = map.sim.call("get_pending_events")
+	map.ui.show_toast(str(pending[-1].get("text_fr", "L'assaut est donné.")) if not pending.is_empty() else "L'assaut est donné.")
+	if map.has_method("_offer_pending_battles"):
+		map.call("_offer_pending_battles")
+	return result
 
 
 func order_embark(army_id: String, port: String) -> Dictionary:
@@ -338,6 +459,9 @@ func _process(delta: float) -> void:
 		return
 	for army_id in _animations.keys():
 		_step_animation(army_id, delta)
+	# Lot AT1 : pas d'épées sur l'interface, ni hors de la carte (bataille, menus).
+	if AttackCursor.is_shown() and (not map.visible or not active() or get_viewport().gui_get_hovered_control() != null):
+		AttackCursor.show_attack(false)
 	var distance: float = map.camera_rig.distance
 	if not is_equal_approx(distance, _last_distance):
 		_last_distance = distance
@@ -362,7 +486,9 @@ func hover(screen_position: Vector2) -> void:
 		zoc_army = str(target["id"])
 	show_zoc(zoc_army)
 	if not active():
+		AttackCursor.show_attack(false)
 		return
+	AttackCursor.show_attack(is_attack_target(target) and get_viewport().gui_get_hovered_control() == null)
 	preview_target(target)
 
 
@@ -390,11 +516,21 @@ func preview_target(target: Dictionary) -> void:
 	path_line.show_plan(preview["points"], int(preview["stop_index"]), preview["turn_ends"], map.camera_rig.distance, warning != "")
 	var turns := int(preview.get("turns", 1))
 	var when := "ce tour" if bool(preview.get("reachable_this_turn", false)) else "%d tours" % turns
-	var action := "clic droit pour attaquer" if str(target["kind"]) == "army" and is_enemy_faction(str(target.get("faction", ""))) else "clic droit pour partir"
+	var action := attack_hint(target)
 	var text := "→ %s : %s, coût %d — %s" % [_target_label(target), when, int(preview.get("cost", 0)), action]
 	if warning != "":
 		text += "\n⚠ %s." % warning
 	_set_hover_text(text)
+
+
+## Consigne du survol : attaque, assaut (avec déclaration de guerre s'il le faut) ou marche.
+func attack_hint(target: Dictionary) -> String:
+	if not is_attack_target(target):
+		return "clic droit pour partir"
+	var hint := "clic droit pour donner l'assaut" if str(target["kind"]) == "settlement" else "clic droit pour attaquer"
+	if relation_to(target_faction(target)) == "peace":
+		hint += " (déclare la guerre)"
+	return hint
 
 
 func _clear_preview() -> void:
@@ -451,6 +587,10 @@ func _update_zoc_ring() -> void:
 	zoc_ring.size = Vector3(radius * 2.0, 80.0, radius * 2.0)
 	zoc_ring.position = Vector3(point.x, y, point.y)
 	zoc_ring.visible = true
+
+
+func _exit_tree() -> void:
+	AttackCursor.show_attack(false)
 
 
 # --- Capture (`--stage=movement`) -----------------------------------------------------------

@@ -282,6 +282,23 @@ impl CampaignState {
         let Some(state) = self.settlements.get(settlement) else {
             return 0.0;
         };
+        let mut extra = self.governor_effects(data, &state.province);
+        extra.merge(tech);
+        self.settlement_tax_with(data, settlement, tax_rate, &extra)
+    }
+
+    /// [`CampaignState::settlement_tax`] with the governor and technology effects of the
+    /// settlement's province already merged in `extra` (lot DC3: computed once per province).
+    fn settlement_tax_with(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        tax_rate: TaxRate,
+        extra: &EffectTotals,
+    ) -> f64 {
+        let Some(state) = self.settlements.get(settlement) else {
+            return 0.0;
+        };
         let Some(province) = self.provinces.get(&state.province) else {
             return 0.0;
         };
@@ -293,9 +310,7 @@ impl CampaignState {
         if settlement != &province.city {
             buildings.extend(state.buildings.iter().cloned());
         }
-        let mut extra = self.governor_effects(data, &state.province);
-        extra.merge(tech);
-        province_income_with(data, province, &buildings, tax_rate, &extra)
+        province_income_with(data, province, &buildings, tax_rate, extra)
             * crate::settlements::weight_share(data, settlement)
     }
 
@@ -431,10 +446,19 @@ impl CampaignState {
             .provinces
             .keys()
             .map(|id| {
-                let tax: f64 = self
+                // DC3: provinces where the faction collects nothing are skipped, and the
+                // governor's effects are merged once per province.
+                let mut held = self
                     .settlements_of(id)
                     .filter(|(_, s)| &s.controller == faction && s.siege.is_none())
-                    .map(|(sid, _)| self.settlement_tax(data, sid, tax_rate, &tech))
+                    .peekable();
+                if held.peek().is_none() {
+                    return 0;
+                }
+                let mut extra = self.governor_effects(data, id);
+                extra.merge(&tech);
+                let tax: f64 = held
+                    .map(|(sid, _)| self.settlement_tax_with(data, sid, tax_rate, &extra))
                     .sum();
                 (tax * self.full_province_income_factor(data, id, faction)).round() as i64
             })
@@ -456,7 +480,12 @@ impl CampaignState {
 
     /// [`Self::faction_administration_upkeep`] for an `income` already
     /// computed (`faction_income_effective`, without seigniorage).
-    fn administration_upkeep_for(&self, data: &GameData, faction: &FactionId, income: i64) -> i64 {
+    pub fn administration_upkeep_for(
+        &self,
+        data: &GameData,
+        faction: &FactionId,
+        income: i64,
+    ) -> i64 {
         let rules = &data.economy_rules;
         let provinces = self.controlled_provinces(faction).len();
         let share = (income as f64 * rules.administration_rate(provinces)).round() as i64;

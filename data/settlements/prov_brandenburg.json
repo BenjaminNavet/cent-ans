@@ -110,5 +110,83 @@
     "sources": [
       "Stralsund"
     ]
+  },
+  {
+    "id": "set_rostock",
+    "province": "prov_brandenburg",
+    "kind": "town",
+    "name": {
+      "display": "Rostock",
+      "local": "Rozstok",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      12.1449,
+      54.0887
+    ],
+    "weight": 16,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grand port hanséatique du Mecklembourg, l'une des « villes vendes » avec Lübeck, Wismar et Stralsund.",
+    "sources": [
+      "Rostock"
+    ]
+  },
+  {
+    "id": "set_wismar",
+    "province": "prov_brandenburg",
+    "kind": "town",
+    "name": {
+      "display": "Wismar",
+      "local": "Wismer",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      11.461,
+      53.8912
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port hanséatique du Mecklembourg sur la Baltique, membre des « villes vendes ».",
+    "sources": [
+      "Wismar"
+    ]
+  },
+  {
+    "id": "set_brandenburg_havel",
+    "province": "prov_brandenburg",
+    "kind": "village",
+    "name": {
+      "display": "Brandebourg-sur-la-Havel",
+      "local": "Brandenborch",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      12.5561,
+      52.4125
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Ancienne place forte slave puis siège épiscopal et margravial qui donne son nom à la marche, éclipsée par Berlin depuis le XIVe siècle.",
+    "sources": [
+      "Brandebourg-sur-la-Havel"
+    ]
   }
 ]

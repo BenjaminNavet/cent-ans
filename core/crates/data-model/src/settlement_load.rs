@@ -20,7 +20,7 @@ use crate::load::{folders, list_json_files, read_json, DataError, GameData, Warn
 /// Settlements a province file may hold (spec § 3.1: 3 to 6; 1 is the
 /// generated fallback, tolerated in files too while research is under way).
 pub const MIN_SETTLEMENTS_PER_PROVINCE: usize = 1;
-pub const MAX_SETTLEMENTS_PER_PROVINCE: usize = 6;
+pub const MAX_SETTLEMENTS_PER_PROVINCE: usize = 16;
 
 impl GameData {
     /// The province's `city` (always present after [`GameData::load`] for a
@@ -245,7 +245,7 @@ impl GameData {
         }
     }
 
-    /// 1-6 settlements and exactly one city per province.
+    /// 1-16 settlements and exactly one city per province.
     fn check_settlement_counts(&self, warnings: &mut Vec<Warning>) {
         for (province, ids) in &self.settlements_by_province {
             let count = ids.len();

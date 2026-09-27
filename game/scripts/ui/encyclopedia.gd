@@ -327,7 +327,8 @@ func _entry_icon(tab_id: String, entry_id: String, definition: Dictionary) -> Te
 		return null
 	match tab_id:
 		"traits":
-			return library.call("get_icon", "trait_category_" + str(definition.get("category", "")), "trait")
+			# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
+			return library.call("get_icon", entry_id, "trait")
 		"skills":
 			return library.call("get_icon", "branch_" + str(definition.get("branch", "")), "branch")
 		"factions":
@@ -878,7 +879,8 @@ static func _trait_fiche(entry_id: String, definition: Dictionary) -> String:
 	var category := str(definition.get("category", ""))
 	var opposites: Array = definition.get("opposites", [])
 	return _join([
-		_heading("trait_category_" + category, name_of(entry_id), "Trait " + str(RichTooltip.TRAIT_CATEGORY_LABELS.get(category, category)), "trait"),
+		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
+		_heading(entry_id, name_of(entry_id), "Trait " + str(RichTooltip.TRAIT_CATEGORY_LABELS.get(category, category)), "trait"),
 		_description(definition), _section("Effets", _effects(definition.get("effects", []))),
 		_section("Incompatible avec", _links(opposites)),
 	])
@@ -1099,7 +1101,10 @@ static func _agent_fiche(definition: Dictionary) -> String:
 		", ".join(places),
 		" (avec un bâtiment religieux, ou une abbaye)" if bool(definition.get("requires_religious_building", false)) else "",
 	]
-	var moves := "%d pas par saison (un de moins l'hiver) sur le graphe des colonies ; ni les places ennemies ni les armées ne l'arrêtent." % int(definition.get("movement_steps", 3))
+	var steps := int(definition.get("movement_steps", 3))
+	var step_km := RuleValues.value("step_km")
+	var reach := "" if is_nan(step_km) else " (%s km)" % RuleValues.number(steps * step_km)
+	var moves := "%d pas par saison%s, un de moins l'hiver, sur le graphe des colonies ; ni les places ennemies ni les armées ne l'arrêtent." % [steps, reach]
 	if int(definition.get("vision_range", 0)) > 0:
 		moves += " Voit à %d pas autour de lui (brouillard)." % int(definition.get("vision_range", 0))
 	var lines := PackedStringArray()

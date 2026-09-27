@@ -301,8 +301,13 @@ def geo_battle_site(
 
 @app.command("export-data")
 def export_data_command(
-    app_path: str = typer.Option(
-        ..., "--app", help="Application exportée (…/Cent Ans.app)"
+    app_path: str | None = typer.Option(
+        None, "--app", help="Application exportée macOS (…/Cent Ans.app)"
+    ),
+    folder_path: str | None = typer.Option(
+        None,
+        "--dir",
+        help="Dossier de l'export Windows (celui de Cent Ans.exe, ADR 0087)",
     ),
     relief: str = typer.Option(
         "bundle",
@@ -310,12 +315,18 @@ def export_data_command(
         help="Cache du relief fin : bundle (dans l'app), external (dossier « Cent Ans relief » à côté), none",
     ),
 ) -> None:
-    """Copie data/ et le cache de relief dans un export (tools/export_macos.sh, lot ZG7b)."""
+    """Copie data/ et le cache de relief dans un export (tools/export_macos.sh, export_windows.sh)."""
     from pathlib import Path
 
     from cent_ans_tools import export_data
 
-    result = export_data.stage(Path(app_path) / "Contents" / "Resources", relief)
+    if (app_path is None) == (folder_path is None):
+        raise typer.BadParameter("indiquer soit --app (macOS), soit --dir (Windows)")
+    if app_path is not None:
+        result = export_data.stage(Path(app_path) / "Contents" / "Resources", relief)
+    else:
+        folder = Path(folder_path)
+        result = export_data.stage(folder, relief, external_parent=folder)
     console.print(f"data/ : {result.data_bytes / 1e6:.0f} Mo → {result.data_dir}")
     if result.relief_dir is not None:
         console.print(
@@ -815,10 +826,30 @@ def assets_ink_icons(
         False, "--build-only", help="Aucune génération : dérive les PNG des sources"
     ),
     envelope: float | None = typer.Option(
-        None, "--envelope", help="Enveloppe (défaut : reste du plafond du lot DA5)"
+        None, "--envelope", help="Enveloppe (défaut : reste du plafond du lot)"
+    ),
+    group: str | None = typer.Option(
+        None,
+        "--group",
+        help='Ne traite que les entrées de ce groupe du catalogue (ex. "trait", DA7c)',
+    ),
+    subject: str | None = typer.Option(
+        None,
+        "--subject",
+        help="Préfixe de ligne du grand livre et de plafond (défaut : le lot DA5)",
+    ),
+    budget_cap: float | None = typer.Option(
+        None,
+        "--budget-cap",
+        help="Plafond du lot en dollars (défaut : budget_cap_usd du catalogue, lot DA5)",
     ),
 ) -> None:
-    """DA5 : icônes d'action à l'encre et boutons-médaillons (une image par icône)."""
+    """DA5 : icônes d'action à l'encre et boutons-médaillons (une image par icône).
+
+    Le même catalogue et le même outil couvrent d'autres lots (DA7c : icônes de trait,
+    groupe ``trait``) via ``--group``/``--subject``/``--budget-cap``, avec leur propre
+    enveloppe et leur propre ligne de grand livre plutôt que le plafond DA5 déjà dépensé.
+    """
     from decimal import Decimal
 
     from cent_ans_tools import ink_icons
@@ -826,33 +857,43 @@ def assets_ink_icons(
 
     catalog = ink_icons.load_catalog()
     model = catalog["model"]
+    subject_line = subject or ink_icons.BUDGET_SUBJECT
+    prefix = subject_line.split(" :")[0] + " :"
+    lot_label = prefix.rstrip(" :")
     if not build_only:
-        spent = ink_icons.lot_spent(BudgetLedger())
-        remaining = Decimal(str(catalog["budget_cap_usd"])) - spent
+        cap = (
+            Decimal(str(budget_cap))
+            if budget_cap is not None
+            else Decimal(str(catalog["budget_cap_usd"]))
+        )
+        spent = ink_icons.lot_spent(BudgetLedger(), prefix)
+        remaining = cap - spent
         if envelope is not None:
             remaining = min(remaining, Decimal(str(envelope)))
         console.print(
-            f"Lot DA5 : {spent:.2f} $ déjà dépensés, enveloppe {remaining:.2f} $"
+            f"Lot {lot_label} : {spent:.2f} $ déjà dépensés, enveloppe {remaining:.2f} $"
         )
         kinds = ["icon", "medallion"] if kind == "all" else [kind]
         for current in kinds:
-            jobs = ink_icons.plan(catalog, kind=current, only=only or None, limit=limit)
+            jobs = ink_icons.plan(
+                catalog, kind=current, group=group, only=only or None, limit=limit
+            )
             convert = (
                 ink_icons.to_raw_icon
                 if current == "icon"
                 else ink_icons.to_raw_medallion
             )
-            before = ink_icons.lot_spent(BudgetLedger())
+            before = ink_icons.lot_spent(BudgetLedger(), prefix)
             _run_art_batch(
                 jobs,
                 model,
                 float(remaining),
                 dry_run,
                 f"image(s) ({current})",
-                ink_icons.BUDGET_SUBJECT,
+                subject_line,
                 convert,
             )
-            remaining -= ink_icons.lot_spent(BudgetLedger()) - before
+            remaining -= ink_icons.lot_spent(BudgetLedger(), prefix) - before
         if dry_run:
             return
     report = ink_icons.build(catalog)

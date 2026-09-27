@@ -166,5 +166,32 @@
     "sources": [
       "Abbaye du Mont-Cassin"
     ]
+  },
+  {
+    "id": "set_benevento",
+    "province": "prov_napoli",
+    "kind": "town",
+    "name": {
+      "display": "Bénévent",
+      "local": "Beneviento",
+      "local_language": "napolitain"
+    },
+    "lonlat": [
+      14.7822,
+      41.1298
+    ],
+    "weight": 10,
+    "owner": "fac_papacy",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Enclave pontificale au cœur du royaume angevin de Naples depuis 1077, gouvernée par un recteur au nom du pape.",
+    "sources": [
+      "Bénévent",
+      "Duché de Bénévent"
+    ]
   }
 ]

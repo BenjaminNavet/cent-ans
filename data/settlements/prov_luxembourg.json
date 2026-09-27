@@ -80,5 +80,134 @@
     "sources": [
       "Château de Vianden"
     ]
+  },
+  {
+    "id": "set_bastogne",
+    "province": "prov_luxembourg",
+    "kind": "town",
+    "name": {
+      "display": "Bastogne",
+      "local": "Basteneche",
+      "local_language": "wallon"
+    },
+    "lonlat": [
+      5.7167,
+      50.0036
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg marchand fortifié de l'Ardenne occidentale, doté d'une charte de franchise en 1332.",
+    "sources": [
+      "Bastogne"
+    ]
+  },
+  {
+    "id": "set_diekirch",
+    "province": "prov_luxembourg",
+    "kind": "village",
+    "name": {
+      "display": "Diekirch",
+      "local": "Dickirch",
+      "local_language": "luxembourgeois"
+    },
+    "lonlat": [
+      6.1602,
+      49.8679
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Petit bourg sur la Sûre, doté de privilèges urbains par la comtesse Ermesinde en 1266.",
+    "sources": [
+      "Diekirch"
+    ]
+  },
+  {
+    "id": "set_grevenmacher",
+    "province": "prov_luxembourg",
+    "kind": "village",
+    "name": {
+      "display": "Grevenmacher",
+      "local": "Greven-Macheren",
+      "local_language": "luxembourgeois"
+    },
+    "lonlat": [
+      6.4406,
+      49.6797
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Village viticole sur la Moselle, au pied de coteaux réputés depuis l'époque romaine.",
+    "sources": [
+      "Grevenmacher"
+    ]
+  },
+  {
+    "id": "set_marienthal_lux",
+    "province": "prov_luxembourg",
+    "kind": "abbey",
+    "name": {
+      "display": "Marienthal",
+      "local": "Marienthal",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.0994,
+      49.7481
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Prieuré cistercien de moniales fondé en 1224 près de Mersch, dans la vallée de l'Alzette.",
+    "sources": [
+      "Abbaye de Marienthal (Luxembourg)"
+    ]
+  },
+  {
+    "id": "set_bourscheid",
+    "province": "prov_luxembourg",
+    "kind": "castle",
+    "name": {
+      "display": "Bourscheid",
+      "local": "Bùurschent",
+      "local_language": "luxembourgeois"
+    },
+    "lonlat": [
+      6.0219,
+      49.8177
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Vaste château fort dominant la vallée de la Sûre, l'un des plus étendus du comté.",
+    "sources": [
+      "Château de Bourscheid"
+    ]
   }
 ]

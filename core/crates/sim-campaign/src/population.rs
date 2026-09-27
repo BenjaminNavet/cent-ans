@@ -3,7 +3,7 @@
 
 use data_model::{FactionId, GameData, PopulationClass, ProvinceId, SocialClass};
 
-use crate::buildings::{capacity, EffectTotals};
+use crate::buildings::EffectTotals;
 use crate::events::{EventKind, GameEvent};
 use crate::state::CampaignState;
 
@@ -213,7 +213,7 @@ pub(crate) fn resolve_population(
     let winter = state.season == crate::state::Season::Winter;
     let ids: Vec<ProvinceId> = state.provinces.keys().cloned().collect();
     for id in ids {
-        let (controller, owner, devastation, disorder, buildings, garrison_strength) = {
+        let (controller, owner, devastation, disorder, garrison_strength) = {
             let p = &state.provinces[&id];
             let Some(city) = state.settlements.get(&p.city) else {
                 continue;
@@ -223,7 +223,6 @@ pub(crate) fn resolve_population(
                 city.owner.clone(),
                 p.devastation,
                 p.unrest,
-                state.province_buildings(&id),
                 state.province_garrison_strength(&id),
             )
         };
@@ -255,7 +254,7 @@ pub(crate) fn resolve_population(
         // DF1: the player's provinces are calmer (easy) or quicker to
         // grumble (hard).
         effects.unrest.flat += state.difficulty_unrest(data, &controller);
-        let cap = capacity(data, &id, &buildings);
+        let cap = state.province_capacity(data, &id);
         // H3: the province's diet, possibly aimed at one class.
         let class_effects: Vec<EffectTotals> = SocialClass::ALL
             .iter()

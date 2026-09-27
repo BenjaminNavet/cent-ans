@@ -81,5 +81,133 @@
     "sources": [
       "Abbaye de Floreffe"
     ]
+  },
+  {
+    "id": "set_walcourt",
+    "province": "prov_namur",
+    "kind": "town",
+    "name": {
+      "display": "Walcourt",
+      "local": "Walcourt",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.4331,
+      50.2517
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié et lieu de pèlerinage marial réputé (basilique Notre-Dame de Walcourt), aux confins sud du comté.",
+    "sources": [
+      "Walcourt"
+    ]
+  },
+  {
+    "id": "set_mettet",
+    "province": "prov_namur",
+    "kind": "village",
+    "name": {
+      "display": "Mettet",
+      "local": "Mettet",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.6558,
+      50.3106
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Village agricole de l'Entre-Sambre-et-Meuse, terre du comté de Namur.",
+    "sources": [
+      "Mettet"
+    ]
+  },
+  {
+    "id": "set_florennes",
+    "province": "prov_namur",
+    "kind": "village",
+    "name": {
+      "display": "Florennes",
+      "local": "Florennes",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.6083,
+      50.25
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Village doté d'un prieuré dépendant de l'abbaye de Waulsort, dans l'Entre-Sambre-et-Meuse.",
+    "sources": [
+      "Florennes"
+    ]
+  },
+  {
+    "id": "set_jardinet",
+    "province": "prov_namur",
+    "kind": "abbey",
+    "name": {
+      "display": "Le Jardinet",
+      "local": "Le Jardinet",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.4192,
+      50.1975
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1216 près de Cerfontaine, aux confins méridionaux du comté.",
+    "sources": [
+      "Abbaye du Jardinet"
+    ]
+  },
+  {
+    "id": "set_poilvache",
+    "province": "prov_namur",
+    "kind": "castle",
+    "name": {
+      "display": "Poilvache",
+      "local": "Poilvache",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.8686,
+      50.3086
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse comtale perchée au-dessus de la Meuse près de Houx, verrou défensif face au pays de Liège.",
+    "sources": [
+      "Château de Poilvache"
+    ]
   }
 ]

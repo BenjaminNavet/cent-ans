@@ -108,5 +108,160 @@
     "sources": [
       "Château de Franchimont"
     ]
+  },
+  {
+    "id": "set_waremme",
+    "province": "prov_liege",
+    "kind": "village",
+    "name": {
+      "display": "Waremme",
+      "local": "Waremme",
+      "local_language": "wallon"
+    },
+    "lonlat": [
+      5.2564,
+      50.6942
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_windmill"
+    ],
+    "port": false,
+    "description": "Bourg de marché du grenier à céréales de la Hesbaye liégeoise.",
+    "sources": [
+      "Waremme"
+    ]
+  },
+  {
+    "id": "set_val_saint_lambert",
+    "province": "prov_liege",
+    "kind": "abbey",
+    "name": {
+      "display": "Val-Saint-Lambert",
+      "local": "Val Saint-Lambert",
+      "local_language": "wallon"
+    },
+    "lonlat": [
+      5.5378,
+      50.6003
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée en 1202 sur la Meuse en aval de Liège.",
+    "sources": [
+      "Abbaye du Val-Saint-Lambert"
+    ]
+  },
+  {
+    "id": "set_tongres",
+    "province": "prov_liege",
+    "kind": "town",
+    "name": {
+      "display": "Tongres",
+      "local": "Tongeren",
+      "local_language": "moyen néerlandais"
+    },
+    "lonlat": [
+      5.4644,
+      50.7806
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Plus ancienne ville des Pays-Bas, d'origine romaine, « bonne ville » thioise de la principauté de Liège, enceinte du XIIIe siècle.",
+    "sources": [
+      "Tongres"
+    ]
+  },
+  {
+    "id": "set_vise",
+    "province": "prov_liege",
+    "kind": "town",
+    "name": {
+      "display": "Visé",
+      "local": "Visé",
+      "local_language": "wallon"
+    },
+    "lonlat": [
+      5.6992,
+      50.7372
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "« Bonne ville » de la principauté sur la Meuse, en aval de Liège, siège d'un chapitre collégial.",
+    "sources": [
+      "Visé"
+    ]
+  },
+  {
+    "id": "set_amay",
+    "province": "prov_liege",
+    "kind": "village",
+    "name": {
+      "display": "Amay",
+      "local": "Amay",
+      "local_language": "wallon"
+    },
+    "lonlat": [
+      5.3181,
+      50.5497
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg mosan entre Huy et Liège, autour de la collégiale Sainte-Ode, sur des coteaux alors plantés de vigne.",
+    "sources": [
+      "Amay",
+      "Collégiale Saint-Georges-et-Sainte-Ode d'Amay"
+    ]
+  },
+  {
+    "id": "set_verviers",
+    "province": "prov_liege",
+    "kind": "village",
+    "name": {
+      "display": "Verviers",
+      "local": "Verviers",
+      "local_language": "wallon"
+    },
+    "lonlat": [
+      5.8628,
+      50.5914
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Village du ban de Verviers, dans le marquisat liégeois de Franchimont, dont les moulins tirent parti de la Vesdre.",
+    "sources": [
+      "Verviers"
+    ]
   }
 ]

@@ -49,15 +49,22 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
     let data = data();
     let state = france(&data, 1);
     let france_id = fac("fac_france");
+    // DC6b: a secondary place's libraries weigh its kind's `research_percent`.
     let buildings: f64 = state
         .settlements
         .values()
-        .filter(|s| s.owner == france_id)
-        .flat_map(|s| s.buildings.iter())
-        .filter_map(|b| data.buildings.get(b))
-        .flat_map(|b| b.effects.iter())
-        .filter(|e| e.effect == EffectKind::ResearchPoints)
-        .map(|e| e.value)
+        .filter(|s| s.controller == france_id)
+        .map(|s| {
+            let weight =
+                f64::from(sim_campaign::buildings::research_percent(&data, s.kind)) / 100.0;
+            s.buildings
+                .iter()
+                .filter_map(|b| data.buildings.get(b))
+                .flat_map(|b| b.effects.iter())
+                .filter(|e| e.effect == EffectKind::ResearchPoints)
+                .map(|e| e.value * weight)
+                .sum::<f64>()
+        })
         .sum();
     let techs: f64 = state.factions[&france_id]
         .technologies
@@ -77,7 +84,7 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
     );
     assert!(state.research_points_per_turn(&data, &france_id) > BASE_RESEARCH_POINTS);
 
-    // A new research building raises the rate.
+    // A new research building in a city raises the rate by its full value.
     let mut state = state;
     let before = state.research_points_per_turn(&data, &france_id);
     let settlement = state
@@ -85,6 +92,7 @@ fn research_points_are_base_plus_buildings_plus_half_governance() {
         .iter()
         .find(|(_, s)| {
             s.owner == france_id
+                && s.kind == data_model::SettlementKind::City
                 && !s
                     .buildings
                     .contains(&data_model::BuildingId::new("bld_scriptorium").unwrap())

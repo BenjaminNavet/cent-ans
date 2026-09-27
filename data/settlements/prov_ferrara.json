@@ -104,10 +104,116 @@
       "bld_abbey",
       "bld_scriptorium"
     ],
-    "port": false,
-    "description": "Grande abbaye bénédictine du delta du Pô, où travailla le théoricien musical Guy d'Arezzo.",
+    "port": true,
+    "description": "Grande abbaye bénédictine du delta du Pô, entourée d'eau et desservie par le Po di Volano jusqu'à l'Adriatique, où travailla le théoricien musical Guy d'Arezzo.",
     "sources": [
       "Abbaye de Pomposa"
+    ]
+  },
+  {
+    "id": "set_bondeno",
+    "province": "prov_ferrara",
+    "kind": "village",
+    "name": {
+      "display": "Bondeno",
+      "local": "Bondgen",
+      "local_language": "émilien"
+    },
+    "lonlat": [
+      11.4132,
+      44.8877
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg agricole du contado ferrarais, au confluent du Panaro et du Pô.",
+    "sources": [
+      "Bondeno"
+    ]
+  },
+  {
+    "id": "set_rovigo",
+    "province": "prov_ferrara",
+    "kind": "town",
+    "name": {
+      "display": "Rovigo",
+      "local": "Rovigo",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.7902,
+      45.0698
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Chef-lieu de la Polésine, tenu par la maison d'Este jusqu'à sa cession à Venise par la paix de Bagnolo (1484).",
+    "sources": [
+      "Rovigo",
+      "Polésine"
+    ]
+  },
+  {
+    "id": "set_lendinara",
+    "province": "prov_ferrara",
+    "kind": "village",
+    "name": {
+      "display": "Lendinara",
+      "local": "Lendinara",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.5982,
+      45.0852
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg de la Polésine sur l'Adigetto, dans la seigneurie des Este.",
+    "sources": [
+      "Lendinara"
+    ]
+  },
+  {
+    "id": "set_vangadizza",
+    "province": "prov_ferrara",
+    "kind": "abbey",
+    "name": {
+      "display": "La Vangadizza",
+      "local": "Santa Maria de la Vangadizza",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      11.4948,
+      45.0966
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye camaldule de Badia Polesine, sur l'Adige, protégée et dotée par la maison d'Este.",
+    "sources": [
+      "Badia Polesine",
+      "Abbaye de la Vangadizza"
     ]
   }
 ]

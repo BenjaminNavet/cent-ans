@@ -3,70 +3,337 @@
     "id": "set_orleans",
     "province": "prov_orleanais",
     "kind": "city",
-    "name": { "display": "Orléans", "local": "Orliens", "local_language": "ancien français" },
-    "lonlat": [1.9039, 47.9029],
+    "name": {
+      "display": "Orléans",
+      "local": "Orliens",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.9039,
+      47.9029
+    ],
     "weight": 38,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_water_mill", "bld_vineyard_press", "bld_cathedral", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_water_mill",
+      "bld_vineyard_press",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Grande ville de la Loire, domaine royal, carrefour commercial entre le Nord et le Midi.",
-    "sources": ["Orléans"]
+    "sources": [
+      "Orléans"
+    ]
   },
   {
     "id": "set_blois",
     "province": "prov_orleanais",
     "kind": "town",
-    "name": { "display": "Blois", "local": "Bloys", "local_language": "ancien français" },
-    "lonlat": [1.3358, 47.5861],
+    "name": {
+      "display": "Blois",
+      "local": "Bloys",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.3358,
+      47.5861
+    ],
     "weight": 16,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_stone_walls"],
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
     "port": false,
     "description": "Capitale du comté de Blois tenu par Guy Ier de Châtillon, père de Charles de Blois.",
-    "sources": ["Blois", "Comté de Blois"]
+    "sources": [
+      "Blois",
+      "Comté de Blois"
+    ]
   },
   {
     "id": "set_sully_sur_loire",
     "province": "prov_orleanais",
     "kind": "castle",
-    "name": { "display": "Sully-sur-Loire", "local": "Sully", "local_language": "ancien français" },
-    "lonlat": [2.3733, 47.7658],
+    "name": {
+      "display": "Sully-sur-Loire",
+      "local": "Sully",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3733,
+      47.7658
+    ],
     "weight": 12,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Château fort sur la Loire, verrouillant un passage vers la Sologne.",
-    "sources": ["Château de Sully-sur-Loire"]
+    "sources": [
+      "Château de Sully-sur-Loire"
+    ]
   },
   {
     "id": "set_fleury",
     "province": "prov_orleanais",
     "kind": "abbey",
-    "name": { "display": "Saint-Benoît-sur-Loire", "local": "Fleury", "local_language": "ancien français" },
-    "lonlat": [2.3097, 47.7967],
+    "name": {
+      "display": "Saint-Benoît-sur-Loire",
+      "local": "Fleury",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.3097,
+      47.7967
+    ],
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Abbaye de Fleury, dépositaire des reliques de saint Benoît, l'un des grands foyers intellectuels du royaume.",
-    "sources": ["Abbaye de Fleury"]
+    "sources": [
+      "Abbaye de Fleury"
+    ]
   },
   {
     "id": "set_clery_saint_andre",
     "province": "prov_orleanais",
     "kind": "village",
-    "name": { "display": "Cléry-Saint-André", "local": "Clery", "local_language": "ancien français" },
-    "lonlat": [1.7500, 47.8167],
+    "name": {
+      "display": "Cléry-Saint-André",
+      "local": "Clery",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.75,
+      47.8167
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church"],
+    "buildings": [
+      "bld_parish_church"
+    ],
     "port": false,
     "description": "Bourg de pèlerinage marial en Sologne, non fortifié.",
-    "sources": ["Cléry-Saint-André"]
+    "sources": [
+      "Cléry-Saint-André"
+    ]
+  },
+  {
+    "id": "set_vendome",
+    "province": "prov_orleanais",
+    "kind": "town",
+    "name": {
+      "display": "Vendôme",
+      "local": "Vendosme",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.0664,
+      47.793
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville close sur le Loir, chef-lieu de comté.",
+    "sources": [
+      "Vendôme"
+    ]
+  },
+  {
+    "id": "set_montargis",
+    "province": "prov_orleanais",
+    "kind": "town",
+    "name": {
+      "display": "Montargis",
+      "local": "Montargis",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.7386,
+      48.0
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville-château au confluent de canaux et rivières du Gâtinais.",
+    "sources": [
+      "Montargis"
+    ]
+  },
+  {
+    "id": "set_micy",
+    "province": "prov_orleanais",
+    "kind": "abbey",
+    "name": {
+      "display": "Micy",
+      "local": "Micy",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.8578,
+      47.8944
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Ancienne abbaye Saint-Mesmin fondée au VIe siècle, près d'Orléans.",
+    "sources": [
+      "Abbaye de Micy"
+    ]
+  },
+  {
+    "id": "set_pithiviers",
+    "province": "prov_orleanais",
+    "kind": "village",
+    "name": {
+      "display": "Pithiviers",
+      "local": "Pithiviers",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.2531,
+      48.1722
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg marchand du Gâtinais, réputé pour son safran.",
+    "sources": [
+      "Pithiviers"
+    ]
+  },
+  {
+    "id": "set_beaugency",
+    "province": "prov_orleanais",
+    "kind": "village",
+    "name": {
+      "display": "Beaugency",
+      "local": "Belgencé",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6281,
+      47.7811
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié sur la Loire, verrouillant un pont ancien.",
+    "sources": [
+      "Beaugency"
+    ]
+  },
+  {
+    "id": "set_gien",
+    "province": "prov_orleanais",
+    "kind": "village",
+    "name": {
+      "display": "Gien",
+      "local": "Gien",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.6367,
+      47.6939
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-château sur la Loire, à la frontière du Berry.",
+    "sources": [
+      "Gien"
+    ]
+  },
+  {
+    "id": "set_chateauneuf_sur_loire",
+    "province": "prov_orleanais",
+    "kind": "village",
+    "name": {
+      "display": "Châteauneuf-sur-Loire",
+      "local": "Chastelneuf",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.2181,
+      47.8622
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg avec résidence seigneuriale sur la Loire, en aval d'Orléans.",
+    "sources": [
+      "Châteauneuf-sur-Loire"
+    ]
+  },
+  {
+    "id": "set_meung_sur_loire",
+    "province": "prov_orleanais",
+    "kind": "village",
+    "name": {
+      "display": "Meung-sur-Loire",
+      "local": "Meun",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.6989,
+      47.8281
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg épiscopal sur la Loire, siège d'un château des évêques d'Orléans.",
+    "sources": [
+      "Meung-sur-Loire"
+    ]
   }
 ]
