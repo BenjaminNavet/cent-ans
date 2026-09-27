@@ -67,14 +67,15 @@ func setup(colors: Dictionary, p_player_side: String) -> void:
 
 ## `anchors` : id -> position écran du haut de la troupe (absent = hors champ de la caméra).
 ## `camera_distance` (B7) : au-delà de `CLUSTER_ON`, les repères proches se regroupent.
-func update(units: Array, anchors: Dictionary, selected: Array, camera_distance: float = 0.0) -> void:
+## `force_clustered` (CB3, vue tactique) : pastilles regroupées quelle que soit la distance.
+func update(units: Array, anchors: Dictionary, selected: Array, camera_distance: float = 0.0, force_clustered: bool = false) -> void:
 	_selected = selected
 	_placed.clear()
 	_key_of.clear()
 	_order.clear()
 	if not visible:
 		return
-	clustered = camera_distance > (CLUSTER_OFF if clustered else CLUSTER_ON)
+	clustered = true if force_clustered else camera_distance > (CLUSTER_OFF if clustered else CLUSTER_ON)
 	var entries: Array = []
 	for unit in units:
 		var id := int(unit["id"])

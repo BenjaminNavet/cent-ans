@@ -17,6 +17,7 @@ signal speed_step(delta: int)
 signal help_toggled
 signal markers_toggled
 signal screenshot_requested
+signal tactical_view_toggled  # CB3 : touche Tab
 
 const DOUBLE_CLICK_MS := 350
 
@@ -78,9 +79,16 @@ func _unhandled_input(event: InputEvent) -> void:
 				_on_command("halt")
 			KEY_C:
 				scene._toggle_camera_follow()
+			KEY_TAB:
+				# CB3 : vue tactique (caméra du dessus, ennemis non repérés masqués).
+				tactical_view_toggled.emit()
 			KEY_ESCAPE:
-				scene.selected.clear()
-				selection_changed.emit(scene.selected)
+				# CB3 : Échap sort d'abord de la vue tactique si elle est ouverte.
+				if scene.tactical_view != null and scene.tactical_view.active:
+					scene.tactical_view.exit()
+				else:
+					scene.selected.clear()
+					selection_changed.emit(scene.selected)
 			KEY_F12:
 				screenshot_requested.emit()
 	elif event is InputEventMouseButton:

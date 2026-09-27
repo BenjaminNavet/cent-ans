@@ -2246,6 +2246,30 @@ impl BattleSim {
         }
     }
 
+    /// CB3: does any present, standing regiment of `side` see `target`? Reuses the missile-arc
+    /// spotter range (`data/rules/missile_arc.json`, `spotter_range_m`, already the distance at
+    /// which a friend directs an indirect volley) and the forest/wall/line-of-sight checks of
+    /// [`Self::visible`]. Purely derived from the current state (not a field of [`Unit`]): it
+    /// never enters `state_digest` or the replay format. Feeds the tactical view's fog of war
+    /// (`spotted` in `get_units`); the normal view is unaffected.
+    pub fn spotted_by(&self, target: &Unit, side: SideId) -> bool {
+        if target.side == side {
+            return true;
+        }
+        let rules = crate::missile_arc::MissileArcRules::bundled();
+        let reach = rules.spotter_range_m * self.range_factor();
+        self.units.iter().any(|u| {
+            u.side == side
+                && u.present()
+                && !u.synthetic
+                && u.state != UnitState::Routing
+                && {
+                    let dist = (u.x - target.x).hypot(u.z - target.z);
+                    dist <= reach && self.visible(u, target, dist)
+                }
+        })
+    }
+
     pub(crate) fn visible(&self, shooter: &Unit, target: &Unit, dist: f64) -> bool {
         if self.field.in_forest(target.x, target.z) && dist > 60.0 {
             return false;

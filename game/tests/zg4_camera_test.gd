@@ -11,6 +11,8 @@ extends SceneTree
 ##  5. `TerrainBuilder.set_vertical_scale` sur une pyramide factice : paramètre global, surface
 ##     proportionnelle, recalages étalés puis terminés, `rescaling_vertical` pendant l'émission ;
 ##     repli sans pyramide : échelle fixe.
+##  6. CB3 : `BattleCamera` — inclinaison manuelle (bouton du milieu) bornée 5°-85°, suspend la
+##     courbe automatique tant qu'elle est active, `look_at_point` (recentrage) la reprend.
 ## Usage : godot --headless --path game --script res://tests/zg4_camera_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -23,6 +25,7 @@ func _init() -> void:
 	await process_frame
 	_test_profile()
 	_test_min_distance()
+	_test_battle_camera_manual_pitch()
 	await _test_camera()
 	_test_tiers()
 	await _test_rescale()
@@ -295,3 +298,42 @@ func _test_rescale() -> void:
 	_check(not fallback.set_vertical_scale(target) and is_equal_approx(MapData.vertical_scale(), MapData.HEIGHT_SCALE), "no dynamic scale without pyramid")
 	world.queue_free()
 	await process_frame
+
+
+## CB3 : inclinaison manuelle (bouton du milieu) de `BattleCamera` — bornée 5°-85°, suspend la
+## courbe automatique jusqu'au prochain recentrage (`look_at_point`).
+func _test_battle_camera_manual_pitch() -> void:
+	var cam := BattleCamera.new()
+	var camera := Camera3D.new()
+	camera.name = "Camera3D"
+	cam.add_child(camera)
+	root.add_child(cam)
+	cam.height_at = func(_x: float, _z: float) -> float: return 0.0
+	cam.target = Vector3(100.0, 0.0, 100.0)
+	cam.distance = 220.0
+	cam.yaw = 0.0
+	cam._apply()
+	_check(not cam.manual_pitch, "manual pitch starts off (automatic curve)")
+	var auto_pitch: float = cam._last_pitch_deg
+	# Bornes : une valeur hors bornes est ramenée à la borne (comme une largeur de formation, CB1).
+	cam.manual_pitch = true
+	cam.manual_pitch_deg = 200.0
+	cam._apply()
+	_check(is_equal_approx(cam._last_pitch_deg, BattleCamera.MANUAL_PITCH_MAX_DEG), "clamped to the high bound, got %f" % cam._last_pitch_deg)
+	cam.manual_pitch_deg = -50.0
+	cam._apply()
+	_check(is_equal_approx(cam._last_pitch_deg, BattleCamera.MANUAL_PITCH_MIN_DEG), "clamped to the low bound, got %f" % cam._last_pitch_deg)
+	# Suspension : tant que `manual_pitch` est vrai, changer la distance ne change pas l'inclinaison.
+	cam.manual_pitch_deg = 40.0
+	cam._apply()
+	var manual_at_close: float = cam._last_pitch_deg
+	cam.distance = 900.0
+	cam._apply()
+	_check(is_equal_approx(cam._last_pitch_deg, manual_at_close), "manual pitch must stay fixed while suspended, got %f vs %f" % [cam._last_pitch_deg, manual_at_close])
+	# Reprise : `look_at_point` (recentrage, C ou double appui de groupe côté scène) rend la main
+	# à la courbe automatique.
+	cam.look_at_point(Vector3(50.0, 0.0, 50.0), 220.0, 0.5)
+	_check(not cam.manual_pitch, "look_at_point must resume the automatic pitch")
+	cam._apply()
+	_check(absf(cam._last_pitch_deg - auto_pitch) < 1e-6, "resumed pitch should match the automatic curve at the same distance, got %f vs %f" % [cam._last_pitch_deg, auto_pitch])
+	cam.queue_free()
