@@ -140,18 +140,13 @@ contiennent les consignes et notes de travail des agents.
 
 ## Remerciements
 
-Cent Ans n'existerait pas sans les jeux qui l'ont inspiré. Merci à leurs équipes pour des années
-de parties mémorables :
+Cent Ans n'existerait pas sans les jeux qui l'ont inspiré. Merci à leurs équipes pour leur travail :
 
 - **[Total War](https://www.totalwar.com/)** (Creative Assembly) : l'alliance d'une carte de campagne et
   de batailles en temps réel où l'on voit chaque régiment se battre.
 - **[Crusader Kings](https://www.paradoxinteractive.com/games/crusader-kings-iii/about)** (Paradox
   Interactive) : les dynasties, les personnages et les intrigues qui donnent vie au Moyen Âge.
-- **[Civilization](https://civilization.2k.com/)** (Firaxis Games) : le plaisir du « encore un tour »
-  et la façon de rendre l'histoire accessible à tous.
 
-Si vous aimez Cent Ans, jouez à leurs jeux : ce sont des chefs-d'œuvre du genre, et ils vont bien
-plus loin que ce projet amateur.
 
 ## Licence
 
