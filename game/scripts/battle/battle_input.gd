@@ -84,13 +84,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			if button.pressed:
 				_right_press = button.position
 				_right_press_ground = scene.ground_point(button.position)
+				_preview_right(button.position, false)
 			else:
 				_finish_right(button.position)
+				if scene.path_preview != null:
+					scene.path_preview.clear_live()
 	elif event is InputEventMouseMotion and _left_press.x < 0.0 and scene.markers != null:
 		# B2 : survol d'une troupe sur le terrain = repère mis en évidence.
 		var hover_at := (event as InputEventMouseMotion).position
 		var hover := scene.pick_unit(hover_at, scene.player_side)
 		scene.markers.world_hover = hover if hover >= 0 else scene.pick_unit(hover_at, scene.enemy_side)
+		# CB-M2 : curseur contextuel (recalculé une fois par image au plus) ; aperçu du trajet
+		# pendant le clic droit maintenu.
+		scene.note_mouse(hover_at)
+		if _right_press.x >= 0.0:
+			_preview_right(hover_at, false)
 	elif event is InputEventMouseMotion and _left_press.x >= 0.0:
 		var motion := event as InputEventMouseMotion
 		var rect := Rect2(_left_press, motion.position - _left_press).abs()
@@ -173,6 +181,8 @@ func _finish_right(position: Vector2) -> void:
 		var cam := scene.camera_rig.camera.global_position
 		if normal.dot(Vector2(mid.x - cam.x, mid.z - cam.z)) < 0.0:
 			normal = -normal
+		if not _path_allowed(mid, atan2(normal.x, normal.y)):
+			return
 		command_requested.emit({"type": "move", "units": scene.selected.duplicate(), "x": mid.x, "z": mid.z, "run": double_click, "facing": atan2(normal.x, normal.y)})
 		return
 	var enemy := scene.pick_unit(position, scene.enemy_side)
@@ -180,7 +190,52 @@ func _finish_right(position: Vector2) -> void:
 		command_requested.emit({"type": "attack", "units": scene.selected.duplicate(), "target": enemy, "run": true})
 		return
 	var point := scene.ground_point(position)
+	if not _path_allowed(point, NAN):
+		return
 	command_requested.emit({"type": "move", "units": scene.selected.duplicate(), "x": point.x, "z": point.z, "run": double_click})
+
+
+## CB-M2 : point visé et orientation d'un clic droit (ou glisser-droit) en cours, comme
+## `_finish_right` les enverra ; aperçu du trajet étranglé (`final` : sans étranglement).
+## Rien sur un ennemi (attaque : la cible bouge), en déploiement ni pendant un rejeu.
+func _preview_right(position: Vector2, final: bool) -> void:
+	var preview: BattlePathPreview = scene.path_preview
+	if preview == null or scene.selected.is_empty() or scene.replay_mode:
+		return
+	if (scene.deployment != null and scene.deployment.active) or scene.pick_unit(position, scene.enemy_side) >= 0:
+		preview.clear_live()
+		return
+	var point := scene.ground_point(position)
+	var facing := NAN
+	if _right_press.x >= 0.0 and _right_press.distance_to(position) > 20.0:
+		var p0 := _right_press_ground
+		var dir := Vector2(point.x - p0.x, point.z - p0.z)
+		if dir.length() >= 2.0:
+			var normal := Vector2(-dir.y, dir.x).normalized()
+			var mid := (p0 + point) * 0.5
+			var cam := scene.camera_rig.camera.global_position
+			if normal.dot(Vector2(mid.x - cam.x, mid.z - cam.z)) < 0.0:
+				normal = -normal
+			point = mid
+			facing = atan2(normal.x, normal.y)
+	var now := Time.get_ticks_msec() / 1000.0
+	if final:
+		preview.compute(scene.selected, scene.units, point, facing, now)
+	else:
+		preview.request(scene.selected, scene.units, point, facing, now)
+
+
+## CB-M2 : l'ordre de déplacement vers `point` n'est envoyé que si au moins un régiment y a un
+## chemin (verdict du cœur, `preview_paths`) ; sinon message et rien d'envoyé.
+func _path_allowed(point: Vector3, facing: float) -> bool:
+	var preview: BattlePathPreview = scene.path_preview
+	if preview == null or scene.battle == null:
+		return true
+	preview.compute(scene.selected, scene.units, point, facing, Time.get_ticks_msec() / 1000.0)
+	if preview.reachable():
+		return true
+	scene.hud.show_toast("Ordre impossible : %s." % preview.refusal().to_lower())
+	return false
 
 
 func _on_command(command: String) -> void:
