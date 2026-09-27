@@ -28,9 +28,21 @@ pub enum QueuedOrder {
         facing: Option<f64>,
         #[serde(default)]
         run: bool,
+        /// CB1: frontage of this regiment on arrival (its share of the
+        /// drag), applied when the order starts.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<f64>,
+        #[serde(default, skip_serializing_if = "is_false")]
+        match_speed: bool,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        group_tag: Option<u32>,
     },
     /// Close with (or shoot at) regiment `target`.
     Attack { target: u32, run: bool },
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 /// `data/rules/battle_queue.json`.

@@ -25,6 +25,21 @@ pub enum Command {
         /// replays recorded before CB read and write the same.
         #[serde(default, skip_serializing_if = "is_false")]
         queue: bool,
+        /// CB1: frontage in metres set by a right-drag (the whole line for
+        /// a group, shared in proportion to strength): the regiments form a
+        /// Line that wide, ranks within `data/rules/formation_width.json`.
+        /// `None` (a plain click) leaves the formation as it is. Left out
+        /// of the JSON when unset, like `queue`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        width: Option<f64>,
+        /// CB1: the regiments of the order (or of `group_tag`) walk at the
+        /// pace of the slowest of them.
+        #[serde(default, skip_serializing_if = "is_false")]
+        match_speed: bool,
+        /// CB1: tag shared by the individual moves of a locked group (for
+        /// `match_speed`); without it, the order's own regiments.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        group_tag: Option<u32>,
     },
     /// Close with (or shoot at) an enemy regiment.
     Attack {

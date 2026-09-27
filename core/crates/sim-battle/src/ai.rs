@@ -377,6 +377,9 @@ impl<'a> View<'a> {
                 run,
                 facing,
                 queue: false,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             });
         }
     }
@@ -1810,6 +1813,9 @@ fn plan_shooter(
                     run: true,
                     facing: Some(facing),
                     queue: false,
+                    width: None,
+                    match_speed: false,
+                    group_tag: None,
                 });
             }
             return;
@@ -2319,6 +2325,9 @@ fn react(view: &mut View, roles: &Roles) {
                 run: true,
                 facing: None,
                 queue: false,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             });
             continue;
         }
@@ -2336,6 +2345,9 @@ fn react(view: &mut View, roles: &Roles) {
                 run: true,
                 facing: None,
                 queue: false,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             });
             continue;
         }
