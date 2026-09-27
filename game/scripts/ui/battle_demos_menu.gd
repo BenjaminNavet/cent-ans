@@ -174,5 +174,5 @@ func start(id: String) -> void:
 			var audio := get_node_or_null("/root/AudioDirector")
 			if audio != null and audio.has_method("stop_all"):
 				audio.call("stop_all")
-			get_tree().change_scene_to_file(BATTLE_SCENE)
+			SceneFader.go(BATTLE_SCENE)
 			return

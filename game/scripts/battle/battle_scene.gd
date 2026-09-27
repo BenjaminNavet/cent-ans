@@ -430,8 +430,8 @@ func _replay_failed() -> void:
 	var dialog := AcceptDialog.new()
 	dialog.title = "Rejeu"
 	dialog.dialog_text = "Ce rejeu ne peut être revu : %s." % replay_error
-	dialog.confirmed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/start_menu.tscn"))
-	dialog.canceled.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/start_menu.tscn"))
+	dialog.confirmed.connect(func() -> void: SceneFader.go("res://scenes/start_menu.tscn"))
+	dialog.canceled.connect(func() -> void: SceneFader.go("res://scenes/start_menu.tscn"))
 	hud.add_child(dialog)
 	dialog.popup_centered()
 
@@ -1658,9 +1658,14 @@ func _on_return() -> void:
 	var result := _resolution
 	if _audio_director != null:  # B3 : la carte retrouve sa musique de contexte
 		_audio_director.call("refresh_context")
+	if not standalone:
+		# PO5 : retour vers la carte (pas de changement de scène) sous le voile noir parchemin.
+		await SceneFader.cover()
 	returned.emit(result)
+	if not standalone:
+		SceneFader.reveal()
 	if standalone:
-		get_tree().change_scene_to_file("res://scenes/start_menu.tscn")
+		SceneFader.go("res://scenes/start_menu.tscn")
 
 
 # --- Entrées --------------------------------------------------------------------------
