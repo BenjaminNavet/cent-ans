@@ -8,6 +8,7 @@ use godot::classes::image::Format;
 use godot::classes::Image;
 use godot::prelude::*;
 use serde_json::Value;
+use sim_campaign::navigation::Cell;
 use sim_campaign::{ArmyId, CampaignState, MoveReport, Order, OrderOutcome};
 
 use crate::campaign_sim::{events_array, CampaignSim};
@@ -15,6 +16,8 @@ use crate::convert::variant_to_json;
 
 /// Empty cells kept around the bubble in the mask (smooth contour).
 const MASK_MARGIN: u32 = 2;
+/// Bytes per texel of the reachable mask (RGB8).
+const MASK_STRIDE: usize = 3;
 
 #[godot_api(secondary)]
 impl CampaignSim {
@@ -45,12 +48,17 @@ impl CampaignSim {
         dict
     }
 
-    /// Cells the army can reach this turn, as a mask cropped to their
-    /// bounding box: `{image, origin, size, cell_px, cells, budget}`.
-    /// `image` is an RG8 image of one texel per grid cell: R = 255 inside
-    /// the bubble, G = cost / budget × 255. `origin` and `size` are the map
-    /// pixels covered (top-left corner, extent). Empty dictionary when the
-    /// army is unknown.
+    /// Cells the army can reach this turn and, lot CV3-5, by the end of the
+    /// next one, as a mask cropped to their bounding box: `{image, origin,
+    /// size, cell_px, cells, budget, next_cells, next_budget}`. `image` is an
+    /// RGB8 image of one texel per grid cell: R = 255 inside this turn's
+    /// area, G = cost / budget × 255, B = 255 inside the two-turn area (this
+    /// turn's included). `origin` and `size` are the map pixels covered
+    /// (top-left corner, extent). `cells` counts this turn's cells,
+    /// `next_cells` the cells reached next turn only; `next_budget` is the
+    /// full movement of a fresh turn. Costs and zones of control are those
+    /// of the real march (`CampaignState::reachable_cells`). Empty dictionary
+    /// when the army is unknown.
     #[func]
     fn get_reachable_area(&self, army_id: GString) -> VarDictionary {
         let (Some(state), Some(data)) = (&self.state, &self.data) else {
@@ -63,7 +71,7 @@ impl CampaignSim {
             return VarDictionary::new();
         };
         let grid = data.navgrid();
-        let area = state.reachable_area(data, &army);
+        let area = state.reachable_cells(data, &army);
         let start = state.army_cell(data, entry);
         let (mut x0, mut y0, mut x1, mut y1) = (
             u32::from(start.x),
@@ -71,7 +79,12 @@ impl CampaignSim {
             u32::from(start.x),
             u32::from(start.y),
         );
-        for (cell, _) in &area {
+        for cell in area
+            .this_turn
+            .iter()
+            .map(|(c, _)| c)
+            .chain(area.next_turn.iter())
+        {
             x0 = x0.min(u32::from(cell.x));
             y0 = y0.min(u32::from(cell.y));
             x1 = x1.max(u32::from(cell.x));
@@ -83,18 +96,25 @@ impl CampaignSim {
         let y1 = (y1 + MASK_MARGIN).min(grid.height.saturating_sub(1));
         let width = x1 - x0 + 1;
         let height = y1 - y0 + 1;
-        let budget = entry.movement_left.max(1);
-        let mut bytes = vec![0u8; (width * height * 2) as usize];
-        for (cell, cost) in &area {
-            let index =
-                (((u32::from(cell.y) - y0) * width + (u32::from(cell.x) - x0)) * 2) as usize;
+        let budget = area.budget.max(1);
+        let texel = |cell: &Cell| {
+            ((u32::from(cell.y) - y0) * width + (u32::from(cell.x) - x0)) as usize * MASK_STRIDE
+        };
+        let mut bytes = vec![0u8; (width * height) as usize * MASK_STRIDE];
+        for (cell, cost) in &area.this_turn {
+            let index = texel(cell);
             bytes[index] = 255;
             bytes[index + 1] = ((u64::from(*cost) * 255) / u64::from(budget)).min(255) as u8;
+            bytes[index + 2] = 255;
         }
-        close_thin_gaps(&mut bytes, width as usize, height as usize);
+        for cell in &area.next_turn {
+            bytes[texel(cell) + 2] = 255;
+        }
+        close_thin_gaps(&mut bytes, width as usize, height as usize, 0, Some(1));
+        close_thin_gaps(&mut bytes, width as usize, height as usize, 2, None);
         let packed = PackedByteArray::from(bytes.as_slice());
         let Some(image) =
-            Image::create_from_data(width as i32, height as i32, false, Format::RG8, &packed)
+            Image::create_from_data(width as i32, height as i32, false, Format::RGB8, &packed)
         else {
             return VarDictionary::new();
         };
@@ -104,8 +124,10 @@ impl CampaignSim {
             "origin" => Vector2::new(x0 as f32 * scale, y0 as f32 * scale),
             "size" => Vector2::new(width as f32 * scale, height as f32 * scale),
             "cell_px" => scale,
-            "cells" => area.len() as i64,
-            "budget" => i64::from(entry.movement_left),
+            "cells" => area.this_turn.len() as i64,
+            "budget" => i64::from(area.budget),
+            "next_cells" => area.next_turn.len() as i64,
+            "next_budget" => i64::from(area.next_budget),
         }
     }
 
@@ -284,10 +306,20 @@ impl CampaignSim {
 /// Display only: fills the gaps of at most `THIN_GAP` cells between two
 /// reachable cells of a row or a column (rivers crossed by a bridge further
 /// on), so that the bubble reads as one area instead of being striped by
-/// every river. `bytes` is the RG8 mask of `get_reachable_area`.
-fn close_thin_gaps(bytes: &mut [u8], width: usize, height: usize) {
+/// every river. `bytes` is the RGB8 mask of `get_reachable_area`; a texel
+/// is inside when its `channel` is 255, and a filled one takes the smaller
+/// `cost_channel` value of its two neighbours.
+fn close_thin_gaps(
+    bytes: &mut [u8],
+    width: usize,
+    height: usize,
+    channel: usize,
+    cost_channel: Option<usize>,
+) {
     const THIN_GAP: usize = 2;
-    let inside = |bytes: &[u8], x: usize, y: usize| bytes[(y * width + x) * 2] == 255;
+    let at = |x: usize, y: usize| (y * width + x) * MASK_STRIDE;
+    let inside = |bytes: &[u8], x: usize, y: usize| bytes[at(x, y) + channel] == 255;
+    let cost = |bytes: &[u8], x: usize, y: usize| cost_channel.map_or(0, |c| bytes[at(x, y) + c]);
     let mut fills: Vec<(usize, u8)> = Vec::new();
     for y in 0..height {
         for x in 0..width {
@@ -311,21 +343,22 @@ fn close_thin_gaps(bytes: &mut [u8], width: usize, height: usize) {
                             continue;
                         }
                         if inside(bytes, bx, by) && inside(bytes, ax, ay) {
-                            let cost = bytes[(by * width + bx) * 2 + 1]
-                                .max(bytes[(ay * width + ax) * 2 + 1]);
-                            best = Some(best.map_or(cost, |b| b.min(cost)));
+                            let c = cost(bytes, bx, by).max(cost(bytes, ax, ay));
+                            best = Some(best.map_or(c, |b| b.min(c)));
                         }
                     }
                 }
             }
-            if let Some(cost) = best {
-                fills.push(((y * width + x) * 2, cost));
+            if let Some(c) = best {
+                fills.push((at(x, y), c));
             }
         }
     }
-    for (index, cost) in fills {
-        bytes[index] = 255;
-        bytes[index + 1] = cost;
+    for (index, c) in fills {
+        bytes[index + channel] = 255;
+        if let Some(cost_channel) = cost_channel {
+            bytes[index + cost_channel] = c;
+        }
     }
 }
 
