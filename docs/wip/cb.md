@@ -7,8 +7,8 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | Lot | Contenu | Vague | État | Note wip |
 |---|---|---|---|---|
 | CB0 | Extraction des entrées (`battle_input.gd`) + sélection rapide | 1 | **fusionné 09-27** (+ correctif caméra : Ctrl/Cmd+lettre ne bouge plus la vue) | `cb0-entrees.md` |
-| CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | en cours (agent, branche `feat/cb-m1-outline`) | |
-| CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | attente CB-M1 (CV3-2 fusionné) | |
+| CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | **fusionné 09-27** (trait 1 m, émission sur fond noir ; lisibilité à juger en jeu) | |
+| CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | à lancer (session principale, cœur) | |
 | CB-M3 | Ordres en file (Maj + clic droit) | 2 | attente | |
 | CB-M4 | Portée au sol, comparaison au survol | 2 | attente | |
 | CB1 | Formation au glisser, verrouillage de groupe | 3 | attente CB-M | |
@@ -24,5 +24,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 - Icônes (≈ 40, ≈ 2 $) via le pipeline DA5 ; consigner dans `docs/budget.md`.
 
 ## Prochaine étape
-CB-M1 (session principale, lot CB-M) : contours de formation en décales. Piège CB0 : fenêtre headless
-64×64 par défaut, forcer `root.size` dans les tests qui cliquent à l'écran.
+CB-M2 (cœur : `plan_route`, `preview_path`, `hover_context` ; pont ; curseurs). Pièges : décale Godot 4 =
+l'émission ignore l'alpha de l'albédo (fond d'émission noir) ; fenêtre headless 64×64 (forcer
+`root.size`). Survol par la carte du HUD non branché (pas de signal) : à faire avec `hover_context`.
+Sonde texte des décales : `cbm_outline_shot.gd --probe` + `cbm_outline_probe.py`.
