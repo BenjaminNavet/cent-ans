@@ -301,7 +301,8 @@ float sm_weight(int code, ivec4 idx, vec4 w, vec3 rest, float tint, out int part
 	part = -1;
 	if (code == C_LIVERY || code == C_CLOTH || code == C_QUILT) {
 		// Bas du vêtement : part des os des jambes (0 à la taille, ~0,85 à l'ourlet) ; les chausses
-		// (entièrement sur les jambes) restent rigides.
+		// (étoffe entièrement sur les jambes) restent rigides. Au LOD2, l'ourlet du surcot est
+		// entièrement sur les jambes : gardé pour la livrée et le gambison.
 		float legs = 0.0;
 		for (int k = 0; k < 4; k++) {
 			int b = pick(idx, k);
@@ -310,7 +311,8 @@ float sm_weight(int code, ivec4 idx, vec4 w, vec3 rest, float tint, out int part
 			}
 		}
 		part = 0;
-		return smoothstep(0.02, 0.85, legs) * (1.0 - smoothstep(0.93, 0.99, legs));
+		float hose = code == C_CLOTH ? smoothstep(0.93, 0.99, legs) : 0.0;
+		return smoothstep(0.02, 0.85, legs) * (1.0 - hose);
 	}
 	if (sm_tail_bones.y < 0) {
 		return 0.0;
