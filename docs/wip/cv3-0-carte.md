@@ -58,6 +58,17 @@ de campagne relevés sur les captures »).
       il ne vient pas du kit Lettrine dans les configurations testées ; à vérifier par capture
       (session principale) — peut-être un autre panneau ou police non couverte par ces sondes.
 
-## Prochaine étape
-Traiter les points dans l'ordre, un commit `wip:` par point (ou groupe de points proches),
-captures avant/après dans `docs/img/cv3/` pour les points 1-7.
+## Vérifications
+- `smoke.gd`, `zg4_camera_test.gd`, `cm2_parchment_weather_test.gd`, `da7d_overlap_test.gd`,
+  `ui1_lettrine_test.gd`, `ux2_test.gd` : tous OK en headless.
+- Captures (règle CLAUDE.md "contexte = quota" : générées par script headless, non ouvertes
+  par ce sous-agent) : `game/tests/cv3_0_shots.gd` (fenêtre réelle, 640 px), sorties dans
+  `docs/img/cv3/carte-01-vue-large-paris-brouillard-nuages.png`,
+  `carte-04-pluie-rapprochee.png`, `carte-05-relief-regional-paris-orleans.png`,
+  `carte-06-07-chemin-et-etiquettes.png`. Pas de version "avant" (aurait exigé de défaire les
+  commits) : les diffs de ce lot documentent le changement, capture "après" seulement.
+
+## Terminé
+Les 10 points sont traités. Détail par point ci-dessus. Point ouvert : #10 "Île-de-France" —
+aucun bug reproduit dans le kit Lettrine malgré une recherche approfondie (voir note du point
+10) ; à confirmer par capture visuelle si le défaut persiste réellement.
