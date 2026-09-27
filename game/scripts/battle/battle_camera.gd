@@ -70,19 +70,27 @@ func stop_follow() -> void:
 	follow_id = -1
 
 
+## Lettre de caméra tenue, sauf avec Ctrl/Cmd : ces combinaisons sont des raccourcis
+## (CB0 : Ctrl/Cmd+A = tout sélectionner), pas un déplacement.
+func _key_held(physical: Key) -> bool:
+	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_META):
+		return false
+	return Input.is_physical_key_pressed(physical)
+
+
 func is_following() -> bool:
 	return follow_id >= 0
 
 
 func _process(delta: float) -> void:
 	var move := Vector2.ZERO
-	if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP):
+	if _key_held(KEY_W) or Input.is_physical_key_pressed(KEY_UP):
 		move.y -= 1.0
-	if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN):
+	if _key_held(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN):
 		move.y += 1.0
-	if Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT):
+	if _key_held(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT):
 		move.x -= 1.0
-	if Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT):
+	if _key_held(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT):
 		move.x += 1.0
 	if edge_pan_enabled and DisplayServer.get_name() != "headless":
 		var mouse := get_viewport().get_mouse_position()
@@ -96,9 +104,9 @@ func _process(delta: float) -> void:
 				move.y -= 1.0
 			elif mouse.y > size.y - edge_margin:
 				move.y += 1.0
-	if Input.is_physical_key_pressed(KEY_Q):
+	if _key_held(KEY_Q):
 		yaw += rotate_speed * delta
-	if Input.is_physical_key_pressed(KEY_E):
+	if _key_held(KEY_E):
 		yaw -= rotate_speed * delta
 	if move != Vector2.ZERO:
 		if follow_id >= 0:
