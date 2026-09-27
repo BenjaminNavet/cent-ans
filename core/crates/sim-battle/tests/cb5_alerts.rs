@@ -309,6 +309,10 @@ fn replay_commands_are_unaffected_by_new_alert_fields() {
         z: 300.0,
         facing: None,
         run: false,
+        queue: false,
+        width: None,
+        match_speed: false,
+        group_tag: None,
     })
     .unwrap();
     for _ in 0..200 {
