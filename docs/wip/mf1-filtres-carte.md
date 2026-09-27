@@ -17,3 +17,10 @@ Terminé le 25/09/2026 (ADR 0048). Branche `feat/map-modes`.
 - Richesse = impôt de base, sans taux d'imposition ni bâtiments.
 - Ravitaillement sans l'effet du général (compétence Supply) ni des colonies amies isolées.
 - Pas de raccourci pour richesse, population, loyauté, ravitaillement, revendications (menu F).
+
+## Note de fusion (25/09)
+- UX1 (légende de la carte) rebranchée sur `MapModeController` ; `MapLegend.set_mode` compare le
+  mode normalisé (sinon reconstruction à chaque image sur un filtre sans section).
+- `tests/smoke.gd` s'arrête dans `_run_campaign_loop` sur « Message queue out of memory »
+  (`Control::_update_minimum_size`), **y compris sans `MapModeController`** : régression antérieure
+  venue de `main` (probablement UI1, métriques de police / thème enluminé), à traiter par ce lot.

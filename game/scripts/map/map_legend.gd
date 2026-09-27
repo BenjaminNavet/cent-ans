@@ -121,8 +121,11 @@ func build(map_mode: String, legend_context: Dictionary) -> void:
 
 ## Change de mode de carte (reconstruit seulement si le mode change).
 func set_mode(map_mode: String) -> void:
-	if map_mode != mode:
-		build(map_mode, context)
+	# Un filtre MF1 sans section (richesse, ravitaillement…) retombe sur « political » : comparer
+	# le mode normalisé, sinon la légende se reconstruit à chaque image.
+	var target := map_mode if MODES.has(map_mode) else "political"
+	if target != mode:
+		build(target, context)
 
 
 ## Nombre d'entrées affichées (tests).
