@@ -532,3 +532,16 @@ func _plate_before(a: Dictionary, b: Dictionary) -> bool:
 ## Lot UX1 : décalage écran appliqué à la plaque d'une armée (Vector2.ZERO = à sa place).
 func plate_offset(army_id: String) -> Vector2:
 	return _plate_offsets.get(army_id, Vector2.ZERO)
+
+
+## CV3-0 (#7) : rectangles écran des plaques d'armée actuellement affichées (position finale,
+## après placement de ce lot). Utilisé par `SettlementLayer` pour que ses marqueurs et noms de
+## colonies (Saint-Denis, Paris...) s'écartent des plaques, au lieu de se chevaucher au pied de
+## l'armée. Même forme que `label_obstacles` (`func(camera) -> Array[Rect2]`), `camera` ignoré.
+func screen_label_rects(_camera: Camera3D = null) -> Array:
+	var rects: Array = []
+	for id in _plates:
+		var plate: PanelContainer = _plates[id]
+		if plate.visible:
+			rects.append(Rect2(plate.position, plate.size))
+	return rects

@@ -101,6 +101,9 @@ func _test_map() -> void:
 			map.camera_rig.snap()
 			for f in 4:
 				await process_frame
+			for f2 in 2:  # UX1 : les plaques d'armée se replacent avec un léger retard.
+				map.armies._update_plates()
+				await process_frame
 			layer.declutter()
 			var occupancy := layer.screen_occupancy(camera)
 			# Toutes les paires, y compris un marqueur et son propre nom.
@@ -109,6 +112,18 @@ func _test_map() -> void:
 			print("da7d: %-13s %8.0f %8d %7d %9d" % [region, distance, occupancy["markers"], occupancy["labels"], overlaps])
 			if not _measure:
 				_check(overlaps == 0, "%s at %.0f: %d overlapping pairs" % [region, distance, overlaps])
+				# CV3-0 (#7) : les plaques/étendards d'armée ne doivent pas non plus chevaucher les
+				# marqueurs et noms de colonies (déclutter croisé, ex. armée sous Paris).
+				var army_rects: Array = map.armies.screen_label_rects(camera)
+				if not army_rects.is_empty():
+					var combined: Array[Rect2] = []
+					combined.append_array(occupancy["rects"])
+					var owners := PackedInt32Array(occupancy["owners"])
+					for rect: Rect2 in army_rects:
+						combined.append(rect)
+						owners.append(-3)  # armées : jamais du même "propriétaire" qu'une colonie
+					var cross_overlaps := MarkerDeclutter.count_overlaps(combined, owners)
+					_check(cross_overlaps == 0, "%s at %.0f: %d army/settlement label overlaps" % [region, distance, cross_overlaps])
 				var capital := layer.capital_index()
 				if region == "ile_de_france":
 					_check(capital >= 0 and layer.marker_visible(capital), "player capital always shown (%.0f)" % distance)

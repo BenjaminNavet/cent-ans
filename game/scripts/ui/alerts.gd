@@ -73,20 +73,8 @@ static func collect(map: Node, last_events: Array) -> Array:
 			"text": "Trésor endetté : %s" % Money.amount(int(summary.get("treasury", 0))),
 			"tooltip": "En dette, les troupes perdent du moral : licenciez ou relevez l'impôt.",
 		})
-	if sim.has_method("get_research") and sim.has_method("get_tech_tree"):
-		var research: Dictionary = sim.call("get_research", player)
-		if research.is_empty() or str(research.get("technology", "")) == "":
-			var available := false
-			for node in sim.call("get_tech_tree", player):
-				if str(node.get("state", "")) == "available":
-					available = true
-					break
-			if available:
-				result.append({
-					"id": "research", "kind": "research_idle", "severity": "warning",
-					"text": "Aucune recherche en cours",
-					"tooltip": "Ouvrir les technologies (T).",
-				})
+	# CV3-0 (#8) : alerte "research_idle" retirée, doublon de la barre du haut (`HudController.
+	# set_research_progress` affiche déjà « Aucune recherche » en permanence quand c'est le cas).
 	if sim.has_method("get_offers"):  # Q5 : offres en attente, sans rouvrir la diplomatie à chaque tour
 		var offers: Array = sim.call("get_offers")
 		if not offers.is_empty():
