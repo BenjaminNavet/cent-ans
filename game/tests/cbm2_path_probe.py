@@ -25,7 +25,11 @@ def _zone(first: Image.Image, second: Image.Image, points: list) -> dict:
         diffs.append(sum(abs(p - q) for p, q in zip(a, b, strict=True)) / 3.0)
     mean = sum(diffs) / len(diffs) if diffs else 0.0
     tinted = sum(1 for d in diffs if d > THRESHOLD) / len(diffs) if diffs else 0.0
-    return {"points": len(diffs), "mean_diff": round(mean, 1), "tinted": round(tinted, 2)}
+    return {
+        "points": len(diffs),
+        "mean_diff": round(mean, 1),
+        "tinted": round(tinted, 2),
+    }
 
 
 def measure(folder: Path) -> dict:
