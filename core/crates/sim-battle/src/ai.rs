@@ -76,6 +76,9 @@
 
 use data_model::{Ability, BattleOrder, BattleOrderKind, BattleOrderScope, UnitCategory};
 
+#[path = "ai_modes.rs"]
+mod modes;
+
 use crate::command::Command;
 use crate::crest::CrestDefenceRules;
 use crate::horse_wait::HorseWaitRules;
@@ -1568,6 +1571,8 @@ fn plan_field(view: &mut View) {
 
     react(view, &roles);
     plan_orders(view, defensive);
+    // CB2: guard for a defensive line, skirmish for light shooters.
+    modes::plan_modes(view, &roles, defensive);
 }
 
 /// R2b: a defender this much higher than the enemy (mean ground under the

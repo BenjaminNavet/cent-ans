@@ -914,6 +914,8 @@ impl BattleSim {
                 dict.set("match_speed", unit.match_speed);
                 // CB-M3: orders waiting behind the current one.
                 dict.set("queue", &crate::battle_sim_queue::queue_array(sim, unit));
+                // CB2: modes on, modes available, states for the badges.
+                crate::battle_sim_modes::add_mode_fields(sim, unit, &mut dict);
                 // EP11: push of the lines in melee (m/s, > 0 driving the enemy
                 // back, < 0 giving ground), compression (0-1), ground given (m).
                 dict.set("push_speed", unit.push.speed);

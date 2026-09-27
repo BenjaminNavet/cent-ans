@@ -279,6 +279,20 @@ pub struct Unit {
     pub group_tag: Option<u32>,
     #[serde(default, skip_serializing_if = "is_false")]
     pub match_speed: bool,
+    /// CB2 (`crate::modes`): persistent run, guard, skirmish, melee (shooters
+    /// close in) and breach (engines batter walls only). Left out of the JSON
+    /// when off. `skirmish` starts on for regiments with the `skirmish`
+    /// ability.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub mode_run: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub guard: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub skirmish: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub melee_mode: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub breach: bool,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -363,6 +377,12 @@ impl Unit {
             line_files: None,
             group_tag: None,
             match_speed: false,
+            mode_run: false,
+            guard: false,
+            // CB2: the shot on the move of the ability goes with the mode.
+            skirmish: setup.abilities.contains(&Ability::Skirmish),
+            melee_mode: false,
+            breach: false,
         }
     }
 
