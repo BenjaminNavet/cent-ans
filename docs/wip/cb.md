@@ -16,7 +16,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | **fusionné 09-28** (`spotted` = fonction pure, portée `missile_arc.spotter_range_m` 350 m ; assombrissement par calque HUD) | `cb3-camera-vue-tactique.md` |
 | CB5 | Alertes typées, colonne, minicarte, cris | 4 | **fusionné 09-28** (parti d'un main ancien : test cœur remis à jour à la fusion ; cris doublés possibles avec `_detect_events`, amortis par cooldown) | `cb5-alertes.md` |
 | CB6 | Formations de groupe (6 préréglages, placement proposé) — demande du joueur 09-27 | 4 | **fusionné 09-28** (Ligne de bataille = placement d'avant au bit près ; sélecteur toujours affiché en bataille, à rendre repliable) | `cb6-formations-groupe.md` |
-| CB4 | Capacités actives (5 retenues après relecture historique) | 5 | **en cours** (agent, `feat/cb4-abilities`) | `cb4-capacites.md` |
+| CB4 | Capacités actives (5 retenues après relecture historique) | 5 | **fusionné 09-28** (pavois = capacité, ordre de chef retiré, règle gardée pour les anciens rejeux ; IA du tir tendu seulement à l'attaque ; marges Crécy 16→18, Poitiers 14→16, Azincourt 18, EQ7 15 ; carte 112 px, bandeau 140 px ; « Pas de quartier » passe de N à B) | `cb4-capacites.md` |
 
 ## Coordination
 - Icônes : les agents de la vague 4 dessinent des glyphes en code ; la session principale génère toutes les icônes DA5 (curseurs, cadenas, modes, états, alertes, capacités) en une fois après CB4 (≈ 2 $, `docs/budget.md`).
@@ -30,10 +30,11 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 - Icônes (≈ 40, ≈ 2 $) via le pipeline DA5 ; consigner dans `docs/budget.md`.
 
 ## Prochaine étape
-CB4 (capacités actives, décisions historiques au plan : Tir tendu, Dresser les pavois, Se rallier à la
-bannière, Serrer les rangs, Piques plantées ; « Battre en brèche » déjà fait en mode CB2). Raccourcis
-Alt+1…4 déjà réservés dans `BattleHotkeys.BINDINGS` (`pending: true` à lever). Puis : icônes DA5 en une
-fois (curseurs, cadenas, modes `battle_mode_<mode>`, états, alertes, capacités ; ≈ 2 $), ADR 0095
-finalisée (addenda CB-M2…CB6), partie pilote du joueur.
+Tous les lots de code CB sont dans main. Reste : (1) icônes DA5 en une fois — 6 curseurs, cadenas, modes
+(`battle_mode_<mode>`), pastilles d'état, 7 alertes, 5 capacités ; retirer `order_pavise` de
+`icons_ink.json` ; plafond 3 $, `docs/budget.md` ; remplacer les glyphes dessinés en code ;
+(2) ADR 0095 finalisée (addenda CB-M2…CB6, CB4 : filtre de scénario, IA du tir tendu) ;
+(3) partie pilote du joueur.
 Suites notées : sélecteur de formations repliable ; cris d'alerte doublés possibles ; bornes de rangs CB1
-sans relecture historique ; bulle d'aide CB6 qui masque les archers avancés sur un cadrage haut.
+sans relecture historique ; bulle d'aide CB6 qui masque les archers avancés sur un cadrage haut ; Crécy à
+18/20 (bande 14-19) après CB4 : peu de marge haute.
