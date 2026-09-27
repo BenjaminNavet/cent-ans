@@ -164,6 +164,11 @@ Le texte de la licence (`OFL.txt`) accompagne chaque police.
   assemblées en atlas avec des couches procédurales (pans de bois, plomb, vitrail, vieillissement) :
   `game/assets/textures/landmarks/` (lot L3, détail dans son `SOURCE.md`).
 
+### Détail proche du sol de bataille — CC0 1.0
+
+- **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Grass Path 2 (Rob Tuytel), 2k,
+  albédo et normale sans retouche (lot PO4, `game/assets/textures/battle/near_detail/`).
+
 ### Textures du terrain de campagne — CC0 1.0
 
 - **Poly Haven** ([polyhaven.com](https://polyhaven.com)) : Aerial Grass Rock, Aerial Mud 1,
