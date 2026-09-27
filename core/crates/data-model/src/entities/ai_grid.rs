@@ -92,6 +92,11 @@ pub struct AiAmbush {
     pub route_turns: f64,
     /// Enemy armies considered: within this distance (km) of the army.
     pub watch_radius_km: f64,
+    /// The provinces the faction occupies (controls without owning them)
+    /// count as its lands; otherwise only those it owns (the defender's
+    /// ambush).
+    #[serde(default)]
+    pub occupied_lands: bool,
 }
 
 impl Default for AiAmbush {
@@ -104,6 +109,7 @@ impl Default for AiAmbush {
             route_zoc_share: 0.75,
             route_turns: 1.0,
             watch_radius_km: 80.0,
+            occupied_lands: false,
         }
     }
 }
