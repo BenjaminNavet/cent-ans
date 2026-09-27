@@ -7,7 +7,7 @@ Plan : `docs/superpowers/plans/2026-09-27-po-polish.md` § PO1. Bible DA § 12.1
 - [x] 2. Migration carte de campagne (TOP_BAR, BOTTOM_SELECTION, MINIMAP, SIDE_PANEL, TOASTS, MODAL)
 - [x] 3. Textes d'outil en mode dev seulement (avis de cache du relief)
 - [ ] 4. Bataille : cartes d'unités → BOTTOM_SELECTION, fin de bataille → MODAL, journal → TOASTS
-- [ ] 5. C1/C2 actifs ; menu titre à 720 px ; tailles figées des `.tscn` → `UiType`
+- [x] 5. C1/C2 actifs ; menu titre à 720 px ; tailles figées des `.tscn` → `UiType`
 
 ## Conception
 - `ui_layout.gd` porte `class_name UiZones` : les scripts à `class_name` sont compilés avant les
@@ -34,4 +34,4 @@ Plan : `docs/superpowers/plans/2026-09-27-po-polish.md` § PO1. Bible DA § 12.1
   `army_movement_controller.gd` (déclaration de guerre → `MODAL`), `zg7b_cache_test.gd`, `smoke.gd`.
 
 ## Prochaine étape
-Tailles `.tscn` → `UiType`, C1/C2, menu titre, bataille.
+Bataille (cartes d’unités, fin de bataille, journal), puis captures po_shot et smoke.
