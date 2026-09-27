@@ -31,7 +31,9 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 ## des nuées.
 @export var cloud_wide: Vector2 = Vector2(650.0, 1400.0)
 @export var cloud_wide_cut_max: float = 0.5
-@export var particles_far: float = 320.0
+## CV3-0 (#4) : 320 -> 220, la pluie de près (aiguilles trop marquées) ne s'affichait pas
+## assez rarement.
+@export var particles_far: float = 220.0
 ## Durée (s) du lever du brouillard matinal après le début d'un tour.
 @export var fog_lift_seconds: float = 40.0
 
@@ -209,7 +211,9 @@ func _make_particles(snow: bool) -> GPUParticles3D:
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED if snow else BaseMaterial3D.BILLBOARD_FIXED_Y
 	material.billboard_keep_scale = true
-	material.albedo_color = Color(0.95, 0.96, 1.0, 0.85) if snow else Color(0.72, 0.76, 0.82, 0.38)
+	# CV3-0 (#4) : pluie moins blanche et plus discrète (était 0.72, 0.76, 0.82, 0.38 -> lisait
+	# comme de longues aiguilles blanches).
+	material.albedo_color = Color(0.95, 0.96, 1.0, 0.85) if snow else Color(0.62, 0.67, 0.76, 0.24)
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	quad.material = material
 	particles.draw_pass_1 = quad
