@@ -2259,14 +2259,10 @@ impl BattleSim {
         let rules = crate::missile_arc::MissileArcRules::bundled();
         let reach = rules.spotter_range_m * self.range_factor();
         self.units.iter().any(|u| {
-            u.side == side
-                && u.present()
-                && !u.synthetic
-                && u.state != UnitState::Routing
-                && {
-                    let dist = (u.x - target.x).hypot(u.z - target.z);
-                    dist <= reach && self.visible(u, target, dist)
-                }
+            u.side == side && u.present() && !u.synthetic && u.state != UnitState::Routing && {
+                let dist = (u.x - target.x).hypot(u.z - target.z);
+                dist <= reach && self.visible(u, target, dist)
+            }
         })
     }
 

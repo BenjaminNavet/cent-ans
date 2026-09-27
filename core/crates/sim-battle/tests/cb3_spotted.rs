@@ -44,7 +44,13 @@ fn a_far_enemy_beyond_the_spotter_range_is_not_spotted() {
     lab(&mut sim);
     let reach = MissileArcRules::bundled().spotter_range_m;
     place(&mut sim, 0, 600.0, 200.0, 0.0);
-    place(&mut sim, 1, 600.0, 200.0 + reach + 50.0, std::f64::consts::PI);
+    place(
+        &mut sim,
+        1,
+        600.0,
+        200.0 + reach + 50.0,
+        std::f64::consts::PI,
+    );
     let target = sim.units()[1].clone();
     assert!(!sim.spotted_by(&target, SideId::Attacker));
 }

@@ -81,21 +81,22 @@ func exit() -> void:
 func _show_overlay() -> void:
 	if scene == null or scene.hud == null or scene.hud.root == null:
 		return
-	if _overlay == null:
-		_overlay = ColorRect.new()
-		_overlay.name = "TacticalOverlay"
-		_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_overlay.color = OVERLAY_COLOR
-		_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	if _overlay.get_parent() == null:
-		scene.hud.root.add_child(_overlay)
+	_overlay = ColorRect.new()
+	_overlay.name = "TacticalOverlay"
+	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_overlay.color = OVERLAY_COLOR
+	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scene.hud.root.add_child(_overlay)
 	# Sous tout le reste du HUD (cartes, journal, minicarte…) : seul le champ 3D est assombri.
 	scene.hud.root.move_child(_overlay, 0)
 
 
+## Un `Node` retiré de l'arbre n'est pas libéré tout seul : `queue_free` (pas seulement
+## `remove_child`), et un nœud neuf est recréé à la prochaine entrée.
 func _hide_overlay() -> void:
-	if _overlay != null and _overlay.get_parent() != null:
-		_overlay.get_parent().remove_child(_overlay)
+	if _overlay != null and is_instance_valid(_overlay):
+		_overlay.queue_free()
+	_overlay = null
 
 
 ## Régiments à montrer en vue tactique (repères) : les siens toujours, les ennemis seulement
