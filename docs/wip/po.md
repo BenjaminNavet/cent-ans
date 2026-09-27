@@ -62,10 +62,10 @@ Coller ce prompt :
 - [x] Fusion de PO2 dans `feat/po-polish` (tests OK : smoke, C3 = [14, 17, 20, 26])
 - [x] Fusion de PO1 (738f9fee ; bible § 12.1 mise aux mesures)
 - [x] Fusion de PO3 (a8777b7f, avant PO1 : aucun fichier d'UI commun)
-- [ ] Fusion de PO4 (étape 6 faite ou reportée : …)
+- [x] Fusion de PO4 (019bcf45 ; étape 6 faite en couleur seule, dégradé au sol impossible avec `cb_m1_outline_test`)
 - [x] Fusion de PO5 (925d5ae0 ; `SceneFader` en façade statique, pas d'autoload)
-- [ ] Tous les tests PO actifs, pytest, `smoke.gd`, bancs PB1 carte et bataille dans ±5 %
-- [ ] Planche `docs/img/po/apres/` + `docs/img/po/planche_avant_apres.jpg`
+- [x] Tous les tests PO actifs, pytest, `smoke.gd`, bancs PB1 carte et bataille dans ±5 %
+- [x] Planche `docs/img/po/apres/` + `docs/img/po/planche_avant_apres.jpg` (34cce6df, sur `feat/po-polish`)
 - [ ] **Jugement du joueur** (une seule fois) → corrections en PO6b si besoin
 - [ ] ff de `feat/po-polish` vers `main`, worktrees et branches supprimés, `docs/manuel.md` (section « Interface »), mémoire mise à jour
 
@@ -148,3 +148,6 @@ Diagnostic de départ (spec § 1), puis vue par vue :
 - 27/09 : PO3 fusionné dans `feat/po-polish` (a8777b7f). Verts : smoke, po_grade (campagne), C3, da7d, pytest 787. `sz4b_colonies_forests_test` échouait déjà avant PO3. À faire en PO6 : **banc PB1 carte à remesurer sur machine calme** (mesures PO3 bruitées, vue 150 à +5 %) ; saturation ramenée à ≤ 35 % (carte un peu plus terne : à soumettre au joueur en C5).
 - 27/09 : PO5 fusionné dans `feat/po-polish` (925d5ae0). Verts : smoke, po5_motion, zg4_camera, trackpad_zoom, po_grade, po_ui, pytest 789. Restes : pas de voile à l'entrée en bataille (l'écran de chargement fait la transition) ; minicarte de bataille en coupe franche. PO1 prévenu : bandeau U5 sans la date (cartouche de saison PO5). En cours : PO1, PO4.
 - 27/09 : PO1 fusionné dans `feat/po-polish` (738f9fee). Verts : po_ui (UiLayout, C1 128 textes, C2 52 contrôles, C3), smoke et 15 tests UI/caméra/CB. Écarts acceptés et reportés dans la bible § 12.1 : TOP_BAR 0,08 ; cloche hors zone ; fins de bataille/partie en écrans pleins. Restes : bande d'ost dépasse de 10 px à 720p (phase 2 ou PO6b). En cours : PO4.
+- 27/09 : PO4 fusionné (019bcf45) ; heure de bataille = phase EP8 du cœur (tirage sur la graine seulement sans heure du cœur), pas de retouche des arbres lointains (DA6 couvre). `main` (CB-M2) refusionné ; **piège** : recopier `game/bin/libcent_ans.debug.dylib` de main après une fusion qui change le core (sinon `new_campaign failed` partout).
+- 27/09 : PO6. Tous verts sur `feat/po-polish` : 16 tests Godot (smoke, po_ui C1/C2/C3, po_grade C4 48 contextes + 4 saisons, CB, caméras, UI), pytest 793. Banc PB1 carte en A/B alterné **avec le cache de relief relié** (sans lui, le worktree tombe hors quadtree et la comparaison est fausse) : balayage 38,8/38,7 ms (main) contre 38,8/35,8 (PO), chargement 7,05/6,86 s contre 6,97/6,92 s ; vues isolées trop bruitées. Bataille : A/B de PO4, +0,5 % large, −1,8 % rapprochée. Planche avant/après faite. **Prochaine étape : jugement du joueur (C5) sur `docs/img/po/planche_avant_apres.jpg`, puis PO6b éventuel et ff vers main.**
+  Mon avis pour C5 : UI de campagne nettement mieux rangée ; bataille encore chargée (en-tête, bandeau, journal) et changement de lumière peu visible au déploiement → candidats PO6b.
