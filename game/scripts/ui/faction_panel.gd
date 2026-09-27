@@ -297,6 +297,9 @@ static func _charge(value: int) -> String:
 ## H11 : le contenu (scène `VBox`) passe dans un défilement vertical borné à la hauteur de
 ## l'écran, les sections Monnaie et Ordre allongeant le panneau.
 var _scroll: ScrollContainer
+## CV3-0 (#9) : réserve en bas d'écran (HUD bas : cloche de fin de saison, sceau...) posée par
+## `MapUI.layout_hud` (`update_bottom_reserve`) ; 24 par défaut si personne ne la pose (tests).
+var bottom_reserved_px: float = 24.0
 
 
 func _wrap_in_scroll() -> void:
@@ -308,13 +311,30 @@ func _wrap_in_scroll() -> void:
 	_scroll.add_child(body)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	visibility_changed.connect(_fit_height)
+	# CV3-0 (#9) : le panneau débordait de l'écran après un redimensionnement de la fenêtre
+	# (la hauteur n'était recalculée qu'à l'ouverture / au rafraîchissement du contenu).
+	get_viewport().size_changed.connect(_fit_height)
+
+
+## CV3-0 (#9) : posé par `MapUI` à chaque `layout_hud` (résultat de `EndTurnCluster.bell_height`,
+## qui grandit avec les alertes) ; recalcule aussitôt si le panneau est ouvert.
+func update_bottom_reserve(px: float) -> void:
+	if is_equal_approx(bottom_reserved_px, px):
+		return
+	bottom_reserved_px = px
+	_fit_height()
 
 
 func _fit_height() -> void:
 	if _scroll == null or not visible:
 		return
 	var body: Control = _scroll.get_child(0)
-	var limit := get_viewport_rect().size.y - position.y - 24.0
+	# CV3-0 (#9) : les marges du stylebox (haut + bas du cadre parchemin) s'ajoutent à la
+	# hauteur du défilement pour former la hauteur totale du panneau ; il faut les soustraire
+	# de la place disponible, sans quoi le panneau déborde d'autant sous l'écran.
+	var style := get_theme_stylebox("panel")
+	var chrome := (style.get_margin(SIDE_TOP) + style.get_margin(SIDE_BOTTOM)) if style != null else 0.0
+	var limit := maxf(get_viewport_rect().size.y - global_position.y - chrome - bottom_reserved_px, 40.0)
 	_scroll.custom_minimum_size = Vector2(body.get_combined_minimum_size().x, minf(body.get_combined_minimum_size().y, limit))
 	reset_size()
 
