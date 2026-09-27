@@ -152,11 +152,14 @@ func _section(text: String) -> Label:
 func _build_header() -> Control:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 12)
-	header.add_child(DropCap.new())
 	var titles := VBoxContainer.new()
 	titles.add_theme_constant_override("separation", 0)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var title := HudStyle.label("iplomatie", 30, HudStyle.INK)
+	# CV3-0 (#10) : lettrine du kit partagé (UI1, `Lettrine.attach`) au lieu de l'ancien
+	# `DropCap` local, qui figeait le titre affiché à "iplomatie" (le "D" retiré à la main pour
+	# lui faire de la place) au lieu de réserver la place comme le fait le kit.
+	var title := HudStyle.label("Diplomatie", 30, HudStyle.INK)
+	Lettrine.attach(title)
 	titles.add_child(title)
 	_religion_label = HudStyle.label("", HudStyle.FONT_BODY, HudStyle.INK_SOFT)
 	titles.add_child(_religion_label)
@@ -1217,25 +1220,6 @@ func stage_counter_example() -> void:
 
 func _filter_history_to_selected() -> bool:
 	return true
-
-
-## Lettrine enluminée « D » : champ d'azur, filets et lettre d'or (dessinée, sans image).
-class DropCap:
-	extends Control
-
-	func _init() -> void:
-		custom_minimum_size = Vector2(52, 52)
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	func _draw() -> void:
-		var box := Rect2(Vector2.ZERO, size)
-		draw_rect(Rect2(box.position + Vector2(3, 3), box.size), HudStyle.SHADOW)
-		draw_rect(box, Color(0.16, 0.24, 0.52))
-		draw_rect(box, HudStyle.GOLD, false, 2.0)
-		draw_rect(box.grow(-4.0), Color(HudStyle.GOLD, 0.7), false, 1.0)
-		var font := get_theme_default_font()
-		var text_size := font.get_string_size("D", HORIZONTAL_ALIGNMENT_LEFT, -1, 40)
-		draw_string(font, Vector2((size.x - text_size.x) * 0.5, size.y * 0.5 + text_size.y * 0.32), "D", HORIZONTAL_ALIGNMENT_LEFT, -1, 40, HudStyle.GOLD_PALE)
 
 
 ## Jauge verticale d'attitude : trait médian, remplissage vert vers le haut, rouge vers le bas.

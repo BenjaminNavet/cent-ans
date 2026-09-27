@@ -44,9 +44,10 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_label.self_modulate = Color(1, 1, 1, 0)
-	var margin := StyleBoxEmpty.new()
-	margin.content_margin_left = _box + GAP
-	_label.add_theme_stylebox_override("normal", margin)
+	# CV3-0 (#10) : l'ancienne marge posée sur le style "normal" du label (invisible, donc sans
+	# effet visuel) faisait doublon avec `custom_minimum_size` ci-dessous et perturbait le calcul
+	# de hauteur minimale propre du label (mesuré : -8 px de haut avec la marge posée). Seul
+	# `custom_minimum_size`, recalculé par `_sync`, réserve la place de la lettrine.
 	_sync()
 
 
