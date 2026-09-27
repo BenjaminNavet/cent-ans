@@ -691,6 +691,8 @@ func _build_scene() -> bool:
 	hud.add_events(battle.call("get_events"))
 	_leader_bar = LEADER_ORDERS_BAR.new(self)
 	add_child(_leader_bar)
+	if compare_panel != null:
+		compare_panel.above = _leader_bar.panel
 	music = BATTLE_MUSIC.new()
 	music.name = "Music"
 	add_child(music)

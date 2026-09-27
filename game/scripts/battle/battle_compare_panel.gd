@@ -36,6 +36,8 @@ var _title_theirs: Label
 var _cells: Dictionary = {}  # ligne -> [Label nôtre, Label sienne]
 var _key := ""
 var _last_call := -1.0
+## Panneau à ne pas recouvrir (barre « Ordres du chef ») : on se pose juste au-dessus.
+var above: Control = null
 
 
 func _init() -> void:
@@ -126,6 +128,15 @@ func refresh(battle: Object, units: Array, selected: Array, hovered: Array, play
 		return
 	show_compare(hover["compare"], _name_of(units, int(selected[0])), _name_of(units, foe))
 	enemy = foe
+	_stay_above()
+
+
+func _stay_above() -> void:
+	if above == null or not above.is_visible_in_tree():
+		offset_bottom = -BattleHud.BAND_HEIGHT - 16
+		return
+	var view_height := get_viewport_rect().size.y
+	offset_bottom = -(view_height - above.get_global_rect().position.y) - 8
 
 
 ## Affiche le dictionnaire `compare` du cœur ; vide : ferme.
