@@ -20,14 +20,6 @@ const MAX_DISTINCT_SIZES := 4
 ## Classes dont le texte compte pour C3 (les autres — Panel, TextureRect… — n'affichent rien).
 const _TEXT_CLASSES := ["Label", "RichTextLabel", "Button", "CheckBox", "CheckButton",
 	"LinkButton", "MenuButton", "OptionButton", "LineEdit"]
-## Étiquettes posées dans une `.tscn` (`campaign_map.tscn` : barre du haut ; `province_panel.tscn` :
-## titre et en-tête de garnison) avec une taille figée dans la scène — ces scènes ne sont pas
-## dans la liste de fichiers du lot PO2 (qui ne touche que les scripts `.gd`). Restent hors norme
-## (18/15/12/24 px) jusqu'à leur migration par PO1 (`TOP_BAR`, `SIDE_PANEL`) ou en phase 2.
-## Voir `docs/wip/po2-typo.md`.
-const _OUT_OF_LOT_SCENE_LABELS := ["FactionLabel", "TreasuryLabel", "IncomeLabel", "ResearchLabel",
-	"NameLabel", "GarrisonHeader"]
-
 var _failures := 0
 var _layout_failures := 0
 ## Tailles vues (valeur → nombre d'occurrences), toutes vues confondues, pour le message final.
@@ -61,7 +53,7 @@ func _check(condition: bool, message: String) -> bool:
 func _collect_font_sizes(node: Node) -> void:
 	if node is Control and (node as Control).is_visible_in_tree():
 		var control := node as Control
-		if str(control.name).ends_with("List") or str(control.name) in _OUT_OF_LOT_SCENE_LABELS:
+		if str(control.name).ends_with("List"):
 			return
 		if control.get_class() in _TEXT_CLASSES:
 			var key := "normal_font_size" if control is RichTextLabel else "font_size"

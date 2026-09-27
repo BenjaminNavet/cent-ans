@@ -901,7 +901,8 @@ func show_turn_banner() -> void:
 func finish_turn_banner() -> void:
 	if turn_banner == null or not turn_banner.visible:
 		return
-	_turn_banner_title.text = date_label.text.get_slice(" — ", 0)
+	# PO1 : plus de date ici — le cartouche de saison (`SeasonBanner`, PO5) l'annonce.
+	_turn_banner_title.text = "Tour des autres factions"
 	_turn_banner_detail.text = "Les autres factions ont joué : à vous."
 	_place_turn_banner()
 	if _turn_banner_tween != null:
