@@ -28,11 +28,10 @@ const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 • Espace : pause (ordres possibles en pause) · + / − : vitesse ×1, ×2, ×4 (boutons en bas à droite).
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner · double clic sur une carte : centrer la caméra dessus.
 • Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne, sa longueur donne la largeur du front.
-• Ctrl+1..9 : enregistrer la sélection en groupe · 1..9 : rappeler le groupe (deux fois : centrer la caméra) · Ctrl+G : verrouiller le groupe (il garde sa forme et l'allure du plus lent).
-• F : formation · G : tir à volonté · H : halte · {orders} : ordres du chef · Échap : désélectionner.
-• Bannières au-dessus des troupes : clic = sélection, clic droit sur l'ennemi = attaque · U : masquer / afficher.
+• Bannières au-dessus des troupes : clic = sélection, clic droit sur l'ennemi = attaque ; pastilles : déroute, hésite, sous le feu, charge, mode.
 • Caméra : {camera}, molette, {rotate}, bouton du milieu ; clic sur la minicarte : y aller.
-• C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; {camera} ou glisser libèrent la caméra."""
+• C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; {camera} ou glisser libèrent la caméra.
+{keys}"""
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const INK := Color(0.22, 0.14, 0.07)
@@ -43,11 +42,12 @@ const BAND_HEIGHT := 128.0
 const SEAL_SIZE := 112.0
 ## Deux entrées de même texte à moins de GROUP_SECONDS s'agrègent en « (×2) » (audit A3 B4).
 const GROUP_SECONDS := 8.0
+## Boutons d'ordres : [commande, nom, infobulle] ; le raccourci vient de `BattleHotkeys` (CB2).
 const COMMANDS := [
-	["formation", "Formation", "F", "Changer de formation (ligne, colonne, schiltron, coin)"],
-	["fire_at_will", "Tir à volonté", "G", "Tir à volonté ou tir retenu"],
-	["halt", "Halte", "H", "Arrêter la sélection sur place"],
-	["withdraw", "Retraite", "", "Faire quitter le champ aux régiments choisis"],
+	["formation", "Formation", "Changer de formation (ligne, colonne, schiltron, coin)"],
+	["fire_at_will", "Tir à volonté", "Tir à volonté ou tir retenu"],
+	["halt", "Halte", "Arrêter la sélection sur place"],
+	["withdraw", "Retraite", "Faire quitter le champ aux régiments choisis"],
 ]
 const CATEGORY_ICON := {"infantry": "⚔", "archer": "➶", "cavalry": "♞", "siege": "⚙", "tower": "♜", "ram": "⚒"}
 
@@ -86,6 +86,9 @@ var _leader_unit: Dictionary = {}  # son régiment (get_units)
 var _leader_portrait: Texture2D = null
 var _leader_arms: Texture2D = null
 var _card_names: Dictionary = {}  # unit id -> nom distinctif (« Chevaliers II »)
+## CB2 : boutons de mode (mode -> Button) et leur état pour la sélection {on, able}.
+var _mode_buttons: Dictionary = {}
+var _mode_state: Dictionary = {}
 
 
 func _ready() -> void:
@@ -264,20 +267,22 @@ func _build_bottom() -> void:
 	outer.add_child(commands)
 	var buttons := GridContainer.new()
 	buttons.name = "Commands"
-	buttons.columns = 2
+	buttons.columns = 5  # CB2 : ordres puis modes, sur deux rangées
 	buttons.add_theme_constant_override("h_separation", 4)
 	buttons.add_theme_constant_override("v_separation", 4)
 	commands.add_child(buttons)
 	for entry in COMMANDS:
 		var button := RichButton.new()  # B1 : infobulle riche auto-liée (T : bulle du Codex)
 		button.name = "Command_%s" % entry[0]
-		button.custom_minimum_size = Vector2(52, 38)
+		button.custom_minimum_size = Vector2(46, 38)
 		button.focus_mode = Control.FOCUS_NONE
-		var key_hint := " (%s)" % entry[2] if str(entry[2]) != "" else ""
-		button.tooltip_text = "[b]%s[/b]%s\n%s" % [entry[1], key_hint, entry[3]]
-		button.draw.connect(_draw_command_icon.bind(button, str(entry[0]), str(entry[2])))
+		var key := BattleHotkeys.key_label(str(entry[0]))
+		var key_hint := " (%s)" % key if key != "" else ""
+		button.tooltip_text = "[b]%s[/b]%s\n%s" % [entry[1], key_hint, entry[2]]
+		button.draw.connect(_draw_command_icon.bind(button, str(entry[0]), key))
 		button.pressed.connect(func() -> void: command_pressed.emit(str(entry[0])))
 		buttons.add_child(button)
+	_build_mode_buttons(buttons)
 	withdraw_all_button = RichButton.new()
 	withdraw_all_button.name = "WithdrawAll"
 	withdraw_all_button.text = "Retraite générale"
@@ -599,6 +604,8 @@ func _build_help() -> void:
 	# Touches physiques affichées selon la disposition du clavier (AZERTY : Z Q S D, A / E).
 	var label := func(keycode: Key) -> String: return ORDERS_BAR.physical_label(keycode)
 	text.text = CodexText.format(HELP_TEXT.format({
+		# CB2 : raccourcis tirés de la table unique `BattleHotkeys`.
+		"keys": BattleHotkeys.help_bbcode({"orders": ORDERS_BAR.hotkey_labels()}),
 		"orders": ORDERS_BAR.hotkey_labels(),
 		"camera": " ".join([label.call(KEY_W), label.call(KEY_A), label.call(KEY_S), label.call(KEY_D)]),
 		"rotate": "%s / %s" % [label.call(KEY_Q), label.call(KEY_E)],
@@ -694,6 +701,72 @@ func update_cards(units: Array, side: String, selected: Array) -> void:
 			if changed:
 				_refresh_leader_tooltip()
 				leader_seal.queue_redraw()
+	update_mode_buttons(units, selected)
+
+
+## CB2 : un bouton par mode d'unité (après les ordres), glyphe dessiné en code, raccourci de
+## `BattleHotkeys`, infobulle chiffrée par RuleValues ; bascule le mode sur la sélection.
+func _build_mode_buttons(grid: GridContainer) -> void:
+	for entry in BattleModeIcons.MODES:
+		var mode := str(entry["mode"])
+		var button := RichButton.new()
+		button.name = "Mode_%s" % mode
+		button.custom_minimum_size = Vector2(46, 38)
+		button.focus_mode = Control.FOCUS_NONE
+		var key := BattleHotkeys.key_label(mode)
+		if key.length() > 3:  # « bouton » : pas de touche
+			key = ""
+		var key_hint := " (%s)" % key if key != "" else ""
+		button.tooltip_text = "[b]%s[/b]%s\n%s" % [str(entry["label"]), key_hint, BattleModeIcons.tip_of(mode)]
+		button.draw.connect(_draw_mode_button.bind(button, mode, key))
+		button.pressed.connect(func() -> void: command_pressed.emit(mode))
+		grid.add_child(button)
+		_mode_buttons[mode] = button
+
+
+## CB2 : état des boutons de mode pour la sélection : actif (fond doré) si toutes les unités
+## qui peuvent le prendre l'ont, grisé si aucune ne le peut.
+func update_mode_buttons(units: Array, selected: Array) -> void:
+	var state := mode_button_state(units, selected)
+	if state == _mode_state:
+		return
+	_mode_state = state
+	for mode in _mode_buttons:
+		var button: Button = _mode_buttons[mode]
+		button.disabled = not bool(state[mode]["able"])
+		button.queue_redraw()
+
+
+## CB2 : {mode: {on, able}} des modes pour les unités `selected` (fonction pure, testée).
+static func mode_button_state(units: Array, selected: Array) -> Dictionary:
+	var out := {}
+	for entry in BattleModeIcons.MODES:
+		var mode := str(entry["mode"])
+		var able := 0
+		var on := 0
+		for unit in units:
+			if not selected.has(int(unit["id"])) or not Array(unit.get("modes", [])).has(mode):
+				continue
+			able += 1
+			if bool(unit.get(str(entry["field"]), false)):
+				on += 1
+		out[mode] = {"able": able > 0, "on": able > 0 and on == able}
+	return out
+
+
+func _draw_mode_button(button: Button, mode: String, key: String) -> void:
+	var state: Dictionary = _mode_state.get(mode, {"on": false, "able": false})
+	var c := button.size * 0.5 + Vector2(2, 2)
+	if bool(state["on"]):
+		button.draw_rect(Rect2(Vector2(3, 3), button.size - Vector2(6, 6)), Color(HudStyle.GOLD, 0.45))
+	var ink := INK
+	if button.disabled:
+		ink = Color(HudStyle.INK_FADED, 0.55)
+	elif button.is_hovered():
+		ink = HudStyle.GOLD.darkened(0.3)
+	BattleModeIcons.draw_mode(button, mode, c, 1.15, ink)
+	if key != "":
+		button.draw_string(get_font_for(button), Vector2(4, 12), key, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, BattleUiKit.INK_FADED)
 
 
 ## Noms distinctifs des régiments homonymes d'un camp : « Chevaliers I », « Chevaliers II »…

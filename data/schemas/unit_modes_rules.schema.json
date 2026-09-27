@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/unit_modes_rules.schema.json",
+  "title": "Modes d'unité en bataille",
+  "description": "Fichier data/rules/unit_modes.json (lot CB2, ADR 0095) : chiffres des modes d'unité (course, garde, escarmouche, mêlée, battre en brèche), seuils des pastilles d'état et règle d'IA défensive. Lu par sim-battle (UnitModeRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "run": {
+      "type": "object",
+      "description": "Course persistante (R) : tout déplacement se fait au pas de course.",
+      "properties": {
+        "speed_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2,
+          "description": "Multiplicateur de la vitesse de course quand elle vient du mode (1 : comme le double clic droit)."
+        },
+        "fatigue_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 3,
+          "description": "Multiplicateur de la fatigue gagnée en courant sous le mode (1 : comme le double clic droit)."
+        }
+      },
+      "required": ["speed_multiplier", "fatigue_multiplier"],
+      "additionalProperties": false
+    },
+    "skirmish": {
+      "type": "object",
+      "description": "Escarmouche (K) : les tireurs reculent devant une troupe de mêlée qui approche.",
+      "properties": {
+        "trigger_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 300,
+          "description": "Distance (m) à laquelle une troupe ennemie qui approche déclenche le recul."
+        },
+        "retreat_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 300,
+          "description": "Longueur (m) d'un bond de recul, à l'opposé de la menace."
+        },
+        "min_retreat_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Recul plus court que ceci (bord du champ) : l'unité reste sur place."
+        },
+        "approach_cos": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Une troupe en marche « approche » quand le cosinus entre son front et la direction de l'unité dépasse ce seuil (ou qu'elle la vise)."
+        }
+      },
+      "required": ["trigger_m", "retreat_m", "min_retreat_m", "approach_cos"],
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "object",
+      "description": "Seuils des pastilles d'état calculées par le cœur.",
+      "properties": {
+        "under_fire_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "description": "« Sous le feu » : pertes par projectiles il y a moins de ce nombre de secondes."
+        },
+        "wavering_morale": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "« Hésite » : moral sous ce seuil (sur 100), sans être en déroute."
+        }
+      },
+      "required": ["under_fire_seconds", "wavering_morale"],
+      "additionalProperties": false
+    },
+    "breach": {
+      "type": "object",
+      "description": "Battre en brèche (engins de siège) : tir concentré sur les murs et les portes, aucun tir sur les hommes.",
+      "properties": {
+        "reload_multiplier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Multiplicateur du temps de recharge d'un tir sur un mur (visée, recalage)."
+        },
+        "wall_damage_multiplier": {
+          "type": "object",
+          "description": "Multiplicateur des dégâts aux murs et aux portes : « default », puis par type d'unité (le mangonneau, engin léger, en tire moins).",
+          "properties": {
+            "default": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          "patternProperties": {
+            "^unit_[a-z0-9_]+$": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          "required": ["default"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["reload_multiplier", "wall_damage_multiplier"],
+      "additionalProperties": false
+    },
+    "ai": {
+      "type": "object",
+      "description": "Règle d'IA : en posture défensive, les tireurs légers passent en escarmouche et la ligne en garde.",
+      "properties": {
+        "light_shooter_max_armor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Tireur « léger » : armure au plus égale, sans pieux ni pavois."
+        }
+      },
+      "required": ["light_shooter_max_armor"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["run", "skirmish", "status", "breach", "ai"],
+  "additionalProperties": false
+}

@@ -368,20 +368,37 @@ func _draw_star(center: Vector2, radius: float) -> void:
 	draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
 
 
-## Pastilles d'état d'une unité : déroute, tir, charge ou mêlée (une seule), puis épuisement.
+## CB2 : au plus trois pastilles par unité.
+const MAX_BADGES := 3
+
+
+## Pastilles d'état d'une unité, au plus `MAX_BADGES`, par priorité (CB2) : déroute > hésite >
+## sous le feu > charge > mêlée > mode (le premier mode actif) > tir > épuisement. Les états
+## `wavering`, `under_fire`, `charging`, `engaged` sont calculés par le cœur (seuils dans
+## `data/rules/unit_modes.json`) ; repli sur `state` si le dictionnaire ne les porte pas.
 static func state_badges(unit: Dictionary) -> Array[String]:
 	var badges: Array[String] = []
 	var state := str(unit["state"])
 	if state == "routing":
 		badges.append("rout")
-	elif state == "shooting":
-		badges.append("shoot")
-	elif state == "charging" or (bool(unit.get("running", false)) and int(unit.get("target", -1)) >= 0):
-		badges.append("charge")
-	elif state == "melee":
-		badges.append("melee")
+	else:
+		if bool(unit.get("wavering", false)):
+			badges.append("wavering")
+		if bool(unit.get("under_fire", false)):
+			badges.append("under_fire")
+		if bool(unit.get("charging", state == "charging")) or (bool(unit.get("running", false)) and int(unit.get("target", -1)) >= 0 and state != "melee" and state != "shooting"):
+			badges.append("charge")
+		elif bool(unit.get("engaged", state == "melee")):
+			badges.append("melee")
+		var modes := BattleModeIcons.active_modes(unit)
+		if not modes.is_empty():
+			badges.append("mode_" + modes[0])
+		if state == "shooting":
+			badges.append("shoot")
 	if is_exhausted(unit):
 		badges.append("tired")
+	while badges.size() > MAX_BADGES:
+		badges.pop_back()
 	return badges
 
 
@@ -398,9 +415,18 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 	var bg := PARCHMENT
 	if kind == "rout":
 		bg = ROUT_RED if blink else Color(0.55, 0.08, 0.05)
+	elif kind == "wavering":  # CB2 : ambre, clignotant
+		bg = Color(0.95, 0.68, 0.12) if blink else Color(0.8, 0.5, 0.08)
+	elif kind == "under_fire":
+		bg = Color(0.93, 0.83, 0.6)
 	canvas.draw_circle(c, 6.5, bg)
 	canvas.draw_arc(c, 6.5, 0, TAU, 16, INK, 1.0)
 	var ink := INK if kind != "rout" else Color.WHITE
+	# CB2 : modes (glyphes réduits) et nouveaux états, dessinés par `BattleModeIcons`.
+	if kind.begins_with("mode_"):
+		BattleModeIcons.draw_mode(canvas, kind.trim_prefix("mode_"), c, 0.62, ink)
+	elif kind == "wavering" or kind == "under_fire":
+		BattleModeIcons.draw_state(canvas, kind, c, ink)
 	match kind:
 		"shoot":  # flèche en diagonale
 			canvas.draw_line(c + Vector2(-3.5, 3.5), c + Vector2(3.5, -3.5), ink, 1.5)
