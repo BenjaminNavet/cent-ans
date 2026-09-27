@@ -11,7 +11,61 @@
     "avoid_ratio": { "type": "number", "exclusiveMinimum": 0, "description": "Une armée ennemie plus puissante que ce multiple de la puissance de l'armée est évitée : sa zone de contrôle sort de l'itinéraire." },
     "avoid_radius_km": { "type": "number", "minimum": 0, "description": "Les colonies à moins de cette distance (km) d'une armée évitée sont écartées de l'itinéraire (zone de contrôle et marge)." },
     "max_legs_per_turn": { "type": "integer", "minimum": 1, "description": "Nombre maximal d'étapes du graphe des colonies qu'une armée reçoit l'ordre de parcourir en un tour (un ordre MoveArmy par étape)." },
-    "trespass_route_factor": { "type": "number", "minimum": 1, "description": "Lot EQ5 : multiplicateur du coût des routes qui entrent dans les terres qu'une IA peut traverser sans droit de passage (en guerre, selon son tempérament) : les armées les contournent quand une route à elles ou chez l'ennemi n'est guère plus longue. 1 : sans effet (défaut)." }
+    "trespass_route_factor": { "type": "number", "minimum": 1, "description": "Lot EQ5 : multiplicateur du coût des routes qui entrent dans les terres qu'une IA peut traverser sans droit de passage (en guerre, selon son tempérament) : les armées les contournent quand une route à elles ou chez l'ennemi n'est guère plus longue. 1 : sans effet (défaut)." },
+    "postures": {
+      "type": "object",
+      "description": "Lot CV3-6 : quand l'IA prend les postures d'embuscade, de marche forcée et de camp retranché (spec 2026-09-27-campagne-vivante § 5). Sans cette section, l'IA n'en prend aucune.",
+      "properties": {
+        "ambush": {
+          "type": "object",
+          "description": "Une armée plus faible qu'une armée ennemie en marche vers ses terres s'embusque sur une case couverte à portée de la route prévisible de cette armée.",
+          "properties": {
+            "weight_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (pour mille) qu'une armée en situation s'embusque, pour une agressivité de 50. 0 : jamais." },
+            "weight_per_aggression": { "type": "number", "description": "Variation de cette chance (pour mille) par point d'agressivité au-dessus de 50 (négatif : les royaumes prudents s'embusquent davantage, les audacieux livrent bataille)." },
+            "max_power_ratio": { "type": "number", "exclusiveMinimum": 0, "description": "L'armée ne s'embusque que si sa puissance est inférieure à cette part de celle de l'armée ennemie." },
+            "min_power_ratio": { "type": "number", "minimum": 0, "description": "… et au moins égale à cette part (une poignée d'hommes ne tend pas d'embuscade)." },
+            "route_zoc_share": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "La case d'embuscade est à moins de cette part du rayon de zone de contrôle de la route prévisible de l'ennemi." },
+            "route_turns": { "type": "number", "exclusiveMinimum": 0, "description": "Portion de route surveillée : ce que l'ennemi parcourt en ce nombre de tours pleins." },
+            "watch_radius_km": { "type": "number", "exclusiveMinimum": 0, "description": "Armées ennemies considérées : à moins de cette distance (km) de l'armée." }
+          },
+          "required": ["weight_permille", "weight_per_aggression", "max_power_ratio", "min_power_ratio", "route_zoc_share", "route_turns", "watch_radius_km"],
+          "additionalProperties": false
+        },
+        "forced_march": {
+          "type": "object",
+          "description": "Marche forcée pour secourir une place assiégée ou rejoindre un siège hors de portée normale mais à portée avec le bonus ; jamais pour finir près d'une armée ennemie plus forte.",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "reach_margin": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Part du mouvement de marche forcée que peut coûter l'itinéraire (table du graphe des colonies, marche réelle sur la grille)." },
+            "danger_radius_km": { "type": "number", "minimum": 0, "description": "Les armées ennemies à moins de cette distance (km) de la cible comptent comme l'y attendant." },
+            "danger_ratio": { "type": "number", "exclusiveMinimum": 0, "description": "Pas de marche forcée si la puissance ennemie qui attend dépasse celle de l'armée multipliée par ce rapport." }
+          },
+          "required": ["enabled", "reach_margin", "danger_radius_km", "danger_ratio"],
+          "additionalProperties": false
+        },
+        "entrenched": {
+          "type": "object",
+          "description": "Camp retranché d'une armée immobile, en infériorité sur une frontière menacée, hors place forte.",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "inferiority_ratio": { "type": "number", "exclusiveMinimum": 0, "description": "L'armée se retranche quand la puissance ennemie autour de sa province dépasse la sienne multipliée par ce rapport." }
+          },
+          "required": ["enabled", "inferiority_ratio"],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "encounters": {
+      "type": "object",
+      "description": "Lot CV3-6 : détour d'une armée de l'IA sans objectif urgent vers un site de rencontre qu'elle atteint ce tour.",
+      "properties": {
+        "detour_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (pour mille) du détour, par armée et par tour. 0 : jamais." },
+        "sight_km": { "type": "number", "exclusiveMinimum": 0, "description": "Sites considérés : à moins de cette distance (km) de l'armée (ce qu'elle voit)." }
+      },
+      "required": ["detour_permille", "sight_km"],
+      "additionalProperties": false
+    }
   },
   "required": ["attack_ratio", "attack_reach_share", "avoid_ratio", "avoid_radius_km", "max_legs_per_turn"],
   "additionalProperties": false
