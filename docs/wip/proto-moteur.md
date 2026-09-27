@@ -26,7 +26,8 @@ Python Remote Execution).
 ## Pipeline
 `./build_assets.sh` → `python3 sync_godot_assets.py` → `godot --headless --path godot --import` →
 `godot --path godot --script res://proto_shot.gd -- $PWD/out/godot.png`.
-Unreal (éditeur ouvert sur `~/dev/cent_ans_ue_proto`) : `python3 ue_exec.py ue/ue_import.py`,
+Unreal : copier `tools/proto_moteur/ue/project/` vers `~/dev/cent_ans_ue_proto/` (projet supprimé
+le 27/09 après la décision ADR 0093), ouvrir l'éditeur dessus, puis `python3 ue_exec.py ue/ue_import.py`,
 `ue/ue_scene.py`, `ue/ue_capture_setup.py`, `ue/ue_capture_save.py`, puis `exr_to_png.py` (Blender).
 
 ## Verdict
