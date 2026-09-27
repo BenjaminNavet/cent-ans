@@ -137,8 +137,10 @@ func _play_sequence() -> void:
 	OS.delay_msec(400)
 	_right_click(enemy_screen)  # 7. Clic droit sur un ennemi.
 	OS.delay_msec(400)
-	_key(KEY_F)  # 8-11. F / G / H / C.
-	_key(KEY_G)
+	# 8-11. Formation / tir à volonté / H / C. CB2 : touches remappées (formation F -> T, tir à
+	# volonté G -> F, G = garde) ; mêmes ordres, golden inchangé.
+	_key(KEY_T)
+	_key(KEY_F)
 	_key(KEY_H)
 	_key(KEY_C)
 	_key(KEY_ESCAPE)  # 12-15. Échap / Espace / + / -.
