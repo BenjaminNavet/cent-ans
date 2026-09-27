@@ -59,3 +59,6 @@ session principale. Worktrees supprimés. Aucune dépense cloud.
 - Le conseil du tutoriel (en haut à gauche) chevauche le haut du panneau au
   premier tour.
 - Playtest du joueur.
+
+## Note PO (27/09, ADR 0097)
+Tout nouveau panneau rejoint une zone de l'autoload `UiLayout` (`game/scripts/ui/ui_layout.gd`) au lieu d'une position absolue : `UiLayout.claim(UiLayout.Zone.SIDE_PANEL, panneau)` pour un panneau latéral (un seul occupant), `Zone.MODAL` pour un choix bloquant, `UiLayout.toast()` pour un avis. Gabarit : bible DA § 12. Le lot PO1 implémente `UiLayout` et migre la tranche verticale (dont la fenêtre de rencontre, l'avis de résultat et le badge de posture de CV3-4).
