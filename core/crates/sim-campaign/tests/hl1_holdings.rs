@@ -32,7 +32,10 @@ fn french_settlement(state: &CampaignState, kind: SettlementKind) -> SettlementI
 }
 
 /// The row of `id` in the overview of `faction`.
-fn row<'a>(rows: &'a [sim_campaign::holdings::ProvinceRow], id: &SettlementId) -> &'a SettlementRow {
+fn row<'a>(
+    rows: &'a [sim_campaign::holdings::ProvinceRow],
+    id: &SettlementId,
+) -> &'a SettlementRow {
     rows.iter()
         .flat_map(|p| &p.settlements)
         .find(|s| &s.id == id)
@@ -56,7 +59,9 @@ fn idle_settlement_with_enough_treasury_can_upgrade() {
     let settlement = state
         .settlements
         .iter()
-        .filter(|(_, s)| s.owner == france() && s.controller == france() && s.construction.is_none())
+        .filter(|(_, s)| {
+            s.owner == france() && s.controller == france() && s.construction.is_none()
+        })
         .map(|(id, _)| id.clone())
         .find(|id| {
             let live = &state.settlements[id];
