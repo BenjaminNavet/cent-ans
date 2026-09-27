@@ -24,3 +24,10 @@ Branchements faits (campaign_map.gd, project.godot, map_ui.gd, shortcut_sheet.gd
 panneau (§ 2 de la spec), puis les tests et la capture.
 exclusion mutuelle avec `UnitRosterController`). Prochaine étape : le panneau
 lui-même (§ 2 de la spec), puis les tests et la capture.
+
+Panneau implémenté (`holdings_controller.gd` complet : en-tête trésor/revenu,
+filtres exclusifs, tri, provinces repliables, lignes de colonie, infobulles).
+`smoke.gd` vert après correction : bouton « Colonies » ajouté à
+`TOP_COLLAPSE_ORDER` (glyphe ⛫), et « Unités » y a été ajouté aussi (déjà
+limite avant, un bouton de plus suffisait à dépasser la largeur à 1280×720).
+Prochaine étape : activer `holdings_test.gd`, puis la capture.
