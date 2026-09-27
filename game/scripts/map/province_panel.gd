@@ -249,7 +249,7 @@ func _make_gauge(value: float, invert: bool, label_text: String, key: String = "
 		caption.add_child(IconLibrary.make_rect("gauge_" + key, 12.0))
 	var caption_label := Label.new()
 	caption_label.text = label_text
-	caption_label.add_theme_font_size_override("font_size", 10)
+	UiType.apply(caption_label, UiType.CAPTION)
 	caption.add_child(caption_label)
 	box.add_child(caption)
 	var track := ColorRect.new()
@@ -266,7 +266,7 @@ func _make_gauge(value: float, invert: bool, label_text: String, key: String = "
 	box.add_child(track)
 	var value_label := Label.new()
 	value_label.text = "%d" % int(round(value))
-	value_label.add_theme_font_size_override("font_size", 10)
+	UiType.apply(value_label, UiType.CAPTION)
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(value_label)
 	return holder

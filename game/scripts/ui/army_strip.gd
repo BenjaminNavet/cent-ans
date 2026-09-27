@@ -80,18 +80,18 @@ func _ready() -> void:
 	header.custom_minimum_size = Vector2(HEADER_WIDTH, 0)
 	header.add_theme_constant_override("separation", 2)
 	row.add_child(header)
-	_title_label = HudStyle.label("", HudStyle.FONT_SMALL, HudStyle.RUBRIC)
+	_title_label = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.RUBRIC)
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_title_label.custom_minimum_size = Vector2(HEADER_WIDTH, 0)
 	header.add_child(_title_label)
-	_count_label = HudStyle.label("", 22, HudStyle.INK)
+	_count_label = HudStyle.label("", UiType.size(UiType.HEADING), HudStyle.INK)
 	_count_label.set_script(RichLabel)  # B1 : infobulle riche auto-liée (T : bulle du Codex)
 	_count_label.tooltip_text = "Régiments sous contrat d'endenture / capacité du chef"
 	_count_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header.add_child(_count_label)
-	_men_label = HudStyle.label("", HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+	_men_label = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
 	header.add_child(_men_label)
-	_upkeep_label = HudStyle.label("", HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+	_upkeep_label = HudStyle.label("", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT)
 	_upkeep_label.set_script(RichLabel)
 	_upkeep_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	header.add_child(_upkeep_label)
@@ -100,13 +100,13 @@ func _ready() -> void:
 	header.add_child(spacer)
 	_split_button = RichButton.new()
 	_split_button.text = "Séparer"
-	_split_button.add_theme_font_size_override("font_size", 13)
+	UiType.apply(_split_button, UiType.CAPTION)
 	_split_button.tooltip_text = "Maj ou Ctrl + clic pour choisir les régiments à détacher"
 	_split_button.pressed.connect(_on_split_pressed)
 	header.add_child(_split_button)
 	_garrison_button = RichButton.new()
 	_garrison_button.text = "Garnison"
-	_garrison_button.add_theme_font_size_override("font_size", 13)
+	UiType.apply(_garrison_button, UiType.CAPTION)
 	_garrison_button.pressed.connect(_on_garrison_pressed)
 	header.add_child(_garrison_button)
 
@@ -362,22 +362,22 @@ func tooltip_for(unit: Dictionary) -> String:
 	return "\n".join(lines)
 
 
-## Nom adapté à une carte de `width` px : taille 12 à 10 jusqu'à ce que chaque mot tienne ;
-## sinon les mots trop longs sont abrégés proprement (« Arbalét. »). Renvoie `{text, font_size}`.
+## Nom adapté à une carte de `width` px, à la taille `Caption` (bible DA § 12.2 : rien en
+## dessous) ; les mots trop longs sont abrégés proprement (« Arbalét. »). Renvoie `{text, font_size}`.
 static func fit_name(name: String, font: Font, width: float) -> Dictionary:
 	var words := name.split(" ", false)
-	for font_size in [12, 11, 10]:
-		var fits := true
-		for word in words:
-			if font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > width:
-				fits = false
-				break
-		if fits:
-			return {"text": name, "font_size": font_size}
+	var font_size := UiType.size(UiType.CAPTION)
+	var fits := true
+	for word in words:
+		if font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > width:
+			fits = false
+			break
+	if fits:
+		return {"text": name, "font_size": font_size}
 	var parts := PackedStringArray()
 	for word in words:
-		parts.append(abbreviate(word, font, width, 10))
-	return {"text": " ".join(parts), "font_size": 10}
+		parts.append(abbreviate(word, font, width, font_size))
+	return {"text": " ".join(parts), "font_size": font_size}
 
 
 ## Abrège `word` à la plus longue racine qui tient (au moins 3 lettres) suivie d'un point,

@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/illumination/button_hover.png" id="ui_button_hover"]
 [ext_resource type="Texture2D" path="res://assets/ui/illumination/button_pressed.png" id="ui_button_pressed"]
 [ext_resource type="Texture2D" path="res://assets/ui/illumination/button_disabled.png" id="ui_button_disabled"]
+[ext_resource type="FontFile" path="res://assets/third_party/fonts/im_fell_english/IMFeENrm28P.ttf" id="6_im_fell"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus"]
 draw_center = false
@@ -64,6 +65,10 @@ base_font = ExtResource("2_garamond_italic")
 variation_opentype = {
 2003265652: 650
 }
+
+[sub_resource type="FontVariation" id="FontVariation_title"]
+fallbacks = Array[Font]([ExtResource("3_noto_currency"), ExtResource("4_noto_symbols"), ExtResource("5_noto_symbols2")])
+base_font = ExtResource("6_im_fell")
 
 [sub_resource type="StyleBoxTexture" id="SBT_panel"]
 content_margin_left = 18.0
@@ -367,3 +372,23 @@ TabBar/styles/tab_unselected = SubResource("SBT_tab_unselected")
 TabBar/styles/tab_hovered = SubResource("SBT_tab_selected")
 TabBar/colors/font_selected_color = Color(0.15, 0.09, 0.04, 1)
 TabBar/colors/font_unselected_color = Color(0.40, 0.32, 0.22, 1)
+Title/base_type = &"Label"
+Title/fonts/font = SubResource("FontVariation_title")
+Title/font_sizes/font_size = 26
+Title/colors/font_color = Color(0.20, 0.13, 0.07, 1)
+Heading/base_type = &"Label"
+Heading/fonts/font = SubResource("FontVariation_title")
+Heading/font_sizes/font_size = 20
+Heading/colors/font_color = Color(0.20, 0.13, 0.07, 1)
+Body/base_type = &"Label"
+Body/fonts/font = SubResource("FontVariation_body")
+Body/font_sizes/font_size = 17
+Body/colors/font_color = Color(0.22, 0.14, 0.07, 1)
+Caption/base_type = &"Label"
+Caption/fonts/font = SubResource("FontVariation_body")
+Caption/font_sizes/font_size = 14
+Caption/colors/font_color = Color(0.40, 0.32, 0.22, 1)
+Spacing/constants/space_xs = 4
+Spacing/constants/space_s = 8
+Spacing/constants/space_m = 16
+Spacing/constants/space_l = 24
