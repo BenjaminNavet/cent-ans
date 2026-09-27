@@ -15,3 +15,5 @@ projet pour les dérivés de `sfx/`. WAV mono 16 bits, 44,1 kHz.
 | `ui/build.wav` | Construction : deux coups de maillet sur le bois | `battle/ram_hit_1.ogg` | battering-ram hit pitched up (×1.9) to a mallet, twice, 0.6 s |
 | `ui/army_select.wav` | Sélection d'une armée : piétinement de la troupe | `battle/march_bed.ogg` | one second of marching feet, fade-in and fade-out |
 | `ui/card.wav` | Clic sur une carte d'unité : tintement de métal | `battle/sword_clash_1.ogg` | attack of a sword clash, high-passed at 900 Hz, 0.14 s |
+| `ui/click.wav` | PO2 — clic générique du thème (bouton, onglet) | `sfx/ui_click.ogg` | the project's own click effect (sfx/, already used by AudioDirector), light fade-out |
+| `ui/open.wav` | PO2 — ouverture d'un panneau (UiMotion.fade_in) | `sfx/page_turn.ogg` | the project's own page-turn effect (sfx/, already used by AudioDirector), trimmed and faded |
