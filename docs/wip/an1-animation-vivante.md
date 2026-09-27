@@ -27,4 +27,4 @@ après copie des dylibs. Au plus 3 captures par lot.
 
 ## Journal
 - 27/09 : fichier créé, vague unique lancée (AN1a, AN1b, PR1).
-- 27/09 : **AN1b fusionné** en ff (038ad974) : 16 clips (victoire ×4, attentes ×6, parade, taille par-dessus, impacts ×2, cheval cabré/trébuche), `clips[64]`, jeux à 8 clips. Smoke + `an1b_clips_test` OK sur main. À valider par le joueur : écran de fin retardé de 3 s (`VICTORY_HOLD`) pour voir l'acclamation. Restes : `docs/wip/an1b-clips.md`. AN1a (partie A de l'ADR 0096) doit fusionner main : conflit attendu sur l'en-tête du shader et l'ADR.
+- 27/09 : **AN1b fusionné** en ff (038ad974) : 16 clips (victoire ×4, attentes ×6, parade, taille par-dessus, impacts ×2, cheval cabré/trébuche), `clips[64]`, jeux à 8 clips. Smoke + `an1b_clips_test` OK sur main. Écran de fin retardé de 3 s (`VICTORY_HOLD`) pour voir l'acclamation : **validé par le joueur**. Restes : `docs/wip/an1b-clips.md`. AN1a (partie A de l'ADR 0096) doit fusionner main : conflit attendu sur l'en-tête du shader et l'ADR.
