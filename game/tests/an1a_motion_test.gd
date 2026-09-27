@@ -115,7 +115,8 @@ func _check_mesh(kind: String, variant: int, level: int) -> void:
 					if b >= legs.x and b <= legs.y:
 						on_legs += weights[i * 4 + k]
 				part = 0
-				wt = smoothstep(0.02, 0.85, on_legs) * (1.0 - smoothstep(0.93, 0.99, on_legs))
+				var hose := smoothstep(0.93, 0.99, on_legs) if code == C_CLOTH else 0.0
+				wt = smoothstep(0.02, 0.85, on_legs) * (1.0 - hose)
 			elif tail_bones.y >= 0 and code == C_ARMS:
 				var horse := 0.0
 				for k in 4:
