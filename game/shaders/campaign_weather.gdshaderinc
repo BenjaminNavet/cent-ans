@@ -18,6 +18,10 @@ uniform float weather_edge_px = 30.0;
 // Q3) ; l'atmosphère de près (ZG4) donne déjà le voile en profondeur.
 uniform float weather_mist_near = 0.2;
 uniform float weather_mist_near_footprint = 0.06;
+// CV3-0 (#3) : en vue large, seules les zones de forte intensité (ou l'orage, toujours couvert)
+// gardent des nuées ; posé par CampaignWeatherView selon la distance caméra (0 de près, jusqu'à
+// ~0.5 de loin — la pluie/neige légère (k proche de 0.45) disparaît, la forte (k proche de 1) reste).
+uniform float weather_wide_intensity_cut = 0.0;
 
 float wx_hash(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -60,7 +64,10 @@ vec4 wx_sample(vec2 p) {
 // Densité des nuées [0, 1] : masses qui défilent avec le vent dans les zones de pluie, d'orage
 // et de neige ; `w` = wx_sample(p).
 float wx_cloud(vec2 p, vec4 w) {
-	float wet = max(max(w.r, w.g), w.a);
+	// CV3-0 (#3) : l'orage (w.a) reste toujours couvert ; pluie/neige (w.r, w.g) sont réduites de
+	// `weather_wide_intensity_cut` en vue large, si bien que seule une forte intensité y survit.
+	float rainsnow = max(0.0, max(w.r, w.g) - weather_wide_intensity_cut);
+	float wet = max(rainsnow, w.a);
 	if (wet <= 0.0) {
 		return 0.0;
 	}

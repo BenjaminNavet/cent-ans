@@ -22,7 +22,15 @@ const KINDS := ["clear", "fog", "rain", "snow", "storm"]
 ## Q5 : à (90, 200) et 0,8, les nuées couvraient l'Île-de-France dès la vue de départ ; elles
 ## n'apparaissent plus qu'en vue stratégique lointaine, et laissent voir la carte dessous.
 @export var cloud_near: Vector2 = Vector2(260.0, 520.0)
-@export var cloud_max_alpha: float = 0.6
+## CV3-0 (#3) : 0.6 -> 0.45, les nuées de près restaient déjà rares (`cloud_near`), c'est la
+## densité en vue large (au-delà de `cloud_wide.y`, cf. `weather_wide_intensity_cut`) qui rendait
+## presque chaque province couverte.
+@export var cloud_max_alpha: float = 0.45
+## CV3-0 (#3) : bande (distance caméra) sur laquelle la coupure d'intensité passe de 0 à
+## `cloud_wide_cut_max` — au-delà, seules les zones de forte pluie/neige (ou l'orage) gardent
+## des nuées.
+@export var cloud_wide: Vector2 = Vector2(650.0, 1400.0)
+@export var cloud_wide_cut_max: float = 0.5
 @export var particles_far: float = 320.0
 ## Durée (s) du lever du brouillard matinal après le début d'un tour.
 @export var fog_lift_seconds: float = 40.0
@@ -105,6 +113,10 @@ func update_view(focus: Vector3, distance: float, parchment: float) -> void:
 	var cloud_alpha := smoothstep(cloud_near.x, cloud_near.y, distance) * cloud_max_alpha * (1.0 - parchment)
 	_cloud_material.set_shader_parameter("cloud_alpha", cloud_alpha)
 	_clouds.visible = cloud_alpha > 0.01
+	var wide_cut := smoothstep(cloud_wide.x, cloud_wide.y, distance) * cloud_wide_cut_max
+	_cloud_material.set_shader_parameter("weather_wide_intensity_cut", wide_cut)
+	if _terrain != null and _terrain.material != null:
+		_terrain.material.set_shader_parameter("weather_wide_intensity_cut", wide_cut)
 	_focus_kind = weather_at(Vector2(focus.x, focus.z))
 	_update_particles(focus, distance)
 	_update_lightning(delta, distance)

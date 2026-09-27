@@ -52,11 +52,11 @@ func _check_decor(map_data: MapData) -> void:
 func _check_weight() -> void:
 	var view := StrategicView.new()
 	var previous := -1.0
-	for d in [22.0, 500.0, 1000.0, 1100.0, 1250.0, 1400.0, 1500.0]:
+	for d in [22.0, 500.0, 1000.0, 1800.0, 2100.0, 2400.0, 2600.0]:
 		var w := view.weight_at(d)
 		_check(w >= previous and w >= 0.0 and w <= 1.0, "parchment weight must grow with distance (%s at %s)" % [w, d])
 		previous = w
-	_check(view.weight_at(600.0) == 0.0 and view.weight_at(1500.0) == 1.0, "3D map below the band, parchment at max zoom")
+	_check(view.weight_at(600.0) == 0.0 and view.weight_at(2600.0) == 1.0, "3D map below the band, parchment at max zoom")
 	view.free()
 
 
