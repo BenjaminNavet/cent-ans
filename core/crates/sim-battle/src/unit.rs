@@ -374,6 +374,11 @@ impl Unit {
         self.category == UnitCategory::Cavalry
     }
 
+    /// Charge bonus in percent (20 when the type gives none).
+    pub fn charge_points(&self) -> f64 {
+        f64::from(self.stats.charge.unwrap_or(20))
+    }
+
     pub fn can_shoot(&self) -> bool {
         self.stats.ranged > 0 && self.stats.range > 0
     }

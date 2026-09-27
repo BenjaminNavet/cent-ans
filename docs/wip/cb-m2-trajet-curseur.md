@@ -14,7 +14,7 @@ Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm2`.
 - [x] `preview.rs` : `preview_path`, `preview_group` (places du `Move` de groupe, barycentre
       au-delà de 6), `PreviewError`.
 - [x] Tests `tests/cb_preview.rs` : ligne droite, pont, gué, siège, eau profonde, hachage d'état.
-- [ ] `hover.rs` : `hover_context` + `Compare` (squelette seulement).
+- [x] `hover.rs` : `hover_context` (table de la spec), `Compare` (9 lignes, avantage net) ; facteurs `horse_against_foot`, `pikes_against_horse`, `Unit::charge_points` extraits de `melee_damage` (mêmes opérations).
 - [ ] Pont `battle_sim.rs` : `preview_path`, `preview_paths`, `hover_context` ; constantes
       `data_store_rules.rs`.
 - [ ] Godot : `battle_path_preview.gd`, `battle_cursor.gd`, survol carte HUD → contour,
@@ -33,4 +33,4 @@ Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm2`.
 
 ## Prochaine étape
 
-`hover.rs` (table des contextes, `Compare`), puis le pont.
+Pont (`battle_sim.rs`, `data_store_rules.rs`), puis Godot.
