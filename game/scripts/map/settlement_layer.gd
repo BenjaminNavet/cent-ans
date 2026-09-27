@@ -55,6 +55,9 @@ var terrain: TerrainBuilder
 var data: SettlementData
 var selected_id: String = ""
 var stats: Dictionary = {}
+## CV3-0 (#7) : rectangles écran réservés (plaques/étendards d'armée) que le déclutter des
+## colonies doit éviter ; posé par `CampaignMap` (`ArmyMarkers.screen_label_rects`).
+var label_obstacles: Callable = Callable()
 
 var _icons: MultiMeshInstance3D
 var _icon_material: ShaderMaterial
@@ -967,6 +970,12 @@ func declutter() -> void:
 	var label_margin := float(markers.declutter_value("label_margin_px", declutter_margin))
 	var icons_on := _icons != null and _icons.visible and _weights.x < 0.65
 	_placer.reset(_max_marker_px * icon_size_scale + marker_margin * 2.0)
+	# CV3-0 (#7) : les plaques/étendards d'armée sont réservés avant les colonies (déjà placés,
+	# stables d'une frame à l'autre) ; un marqueur ou un nom de colonie qui les recouvre cède
+	# la place, au lieu de se superposer (étiquettes qui se chevauchaient au pied de l'armée).
+	if label_obstacles.is_valid():
+		for rect: Rect2 in label_obstacles.call(camera):
+			_placer.try_place(rect, -2, true)
 	var pins := _pinned_indices()
 	var box_fraction := markers.marker_box()
 	# ZG4 : paliers vallée / site (vue rasante) : seulement les colonies proches, l'horizon ne se

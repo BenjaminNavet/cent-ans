@@ -279,6 +279,9 @@ func _setup_settlements() -> void:
 	armies.landmark_zones = camera_rig.close_zones  # Q2 : l'ost devant les murs
 	armies.label_obstacles = func(view_camera: Camera3D) -> Array:  # UX1 : plaques hors des noms
 		return settlement_layer.screen_label_rects(view_camera) + cities.screen_label_rects(view_camera)
+	# CV3-0 (#7) : réciproque — les colonies évitent à leur tour les plaques/étendards d'armée.
+	settlement_layer.label_obstacles = func(view_camera: Camera3D) -> Array:
+		return armies.screen_label_rects(view_camera)
 	var vegetation := get_node_or_null("Vegetation")
 	if vegetation != null:
 		vegetation.set("extra_exclusions", settlement_layer.vegetation_exclusions())

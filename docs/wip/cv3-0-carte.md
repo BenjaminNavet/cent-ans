@@ -26,8 +26,15 @@ de campagne relevés sur les captures »).
 6. Chemin de déplacement peu contrasté — fait : `terrain_line.gdshader` liseré sombre optionnel
    (`casing_width`/`casing_color`, 0 par défaut = fleuves/côte inchangés), activé dans
    `army_movement_path.gd` (0.32, presque noir) ; largeur mini 0.3->0.55.
-7. Étiquettes qui se chevauchent — à faire
-8. « Aucune recherche » deux fois — à faire
+7. Étiquettes qui se chevauchent — fait : `army_markers.gd` expose `screen_label_rects()`
+   (plaques d'armée affichées), `settlement_layer.gd` réserve ces rectangles dans son
+   `_placer` avant de placer marqueurs/noms de colonies (`label_obstacles`, câblé dans
+   `campaign_map.gd`). Test croisé ajouté dans `da7d_overlap_test.gd` (armée/colonie, 0
+   chevauchement).
+8. « Aucune recherche » deux fois — fait : alerte `research_idle` retirée de
+   `alerts.gd` (la barre du haut, `HudController.set_research_progress`, l'affiche déjà en
+   permanence). `next_hint.gd` / `end_turn_cluster.gd` gardent le type au cas où (inoffensif,
+   plus jamais émis par `collect`).
 9. Panneau de faction plus haut que l'écran — à faire
 10. Lettrine qui ne réserve pas sa place — à faire
 
