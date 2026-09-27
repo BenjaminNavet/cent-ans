@@ -66,7 +66,7 @@ func _check_hotkeys() -> void:
 	var help := BattleHotkeys.help_bbcode({"orders": "Z X V B N"})
 	for needle in ["[b]F[/b] tir à volonté", "[b]T[/b] changer de formation", "[b]K[/b] escarmouche", "[b]Ctrl+G[/b]", "Alt+Maj+1…6", "Z X V B N", "Tab"]:
 		_check(help.contains(needle), "help mentions %s" % needle)
-	_check(not help.contains("Alt+1…4"), "CB4 abilities stay out of the help until merged")
+	_check(help.contains("Alt+1…4"), "CB4 abilities in the help once merged")
 
 
 func _check_pure() -> void:
