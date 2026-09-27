@@ -1741,6 +1741,7 @@ func _on_leader_clicked(double: bool) -> void:
 
 ## B3 / T6 : double-clic sur une carte d'unité = centrer la caméra sur ce régiment (comme TW).
 func _on_card_double_clicked(unit_id: int) -> void:
+	input.select_same_type_of(unit_id)  # CB0 : sélection rapide, même `type`
 	for unit in units:
 		if int(unit["id"]) == unit_id and bool(unit["present"]):
 			camera_rig.look_at_point(Vector3(float(unit["x"]), 0.0, float(unit["z"])), camera_rig.distance, camera_rig.yaw)
