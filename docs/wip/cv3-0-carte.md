@@ -35,7 +35,11 @@ de campagne relevés sur les captures »).
    `alerts.gd` (la barre du haut, `HudController.set_research_progress`, l'affiche déjà en
    permanence). `next_hint.gd` / `end_turn_cluster.gd` gardent le type au cas où (inoffensif,
    plus jamais émis par `collect`).
-9. Panneau de faction plus haut que l'écran — à faire
+9. Panneau de faction plus haut que l'écran — fait : `faction_panel.gd` `_fit_height` soustrait
+   les marges du stylebox (`get_theme_stylebox("panel")`) et une réserve HUD bas
+   (`bottom_reserved_px`, posée par `map_ui.gd::layout_hud` via `update_bottom_reserve` =
+   `end_turn_cluster.bell_height()` + marge, même calcul que `_dock_panel`) ; recalcule aussi
+   au resize du viewport (`size_changed`), pas seulement à l'ouverture/au contenu.
 10. Lettrine qui ne réserve pas sa place — à faire
 
 ## Prochaine étape

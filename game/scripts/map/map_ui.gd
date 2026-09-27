@@ -1079,6 +1079,9 @@ func layout_hud() -> void:
 	var top: float = ($TopBar as Control).size.y + 8.0
 	end_turn_cluster.size = end_turn_cluster.get_combined_minimum_size()
 	end_turn_cluster.position = view - end_turn_cluster.size - Vector2(HUD_MARGIN, HUD_MARGIN) * 0.5
+	# CV3-0 (#9) : le panneau de faction s'arrête au-dessus de la cloche, comme les panneaux
+	# de province / colonie (`_dock_panel`) ; sinon il déborde sous l'écran.
+	faction_panel.update_bottom_reserve(end_turn_cluster.bell_height() + HUD_MARGIN * 0.5)
 	general_seal.size = general_seal.get_combined_minimum_size()
 	general_seal.position = Vector2(HUD_MARGIN, view.y - general_seal.size.y - HUD_MARGIN)
 	var left := general_seal.position.x + general_seal.size.x + 16.0
