@@ -327,6 +327,12 @@ func place_marker(army_id: String, point: Vector2, heading: Vector2 = Vector2.ZE
 		marker.face(heading.normalized())
 
 
+## Lot CV3-4 : point du monde au sol d'un point carte (pixels, convention de `position` des
+## armées) — sites de rencontre posés comme les armées.
+func world_at_pixel(p: Vector2) -> Vector3:
+	return to_global(Vector3(p.x, _ground(p), p.y))
+
+
 ## Hauteur du sol au point carte `p` (surface affichée si disponible).
 func _ground(p: Vector2) -> float:
 	if ground_height.is_valid():

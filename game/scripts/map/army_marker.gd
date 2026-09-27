@@ -101,6 +101,8 @@ func setup(id: String, army: Dictionary, color: Color, player: bool) -> void:
 		$Finial.visible = false
 		flag.position = Vector3(0.1, 11.0 if standard_mode == 2 else 9.6, 0.0)
 	_update_ring()
+	# Lot CV3-4 : pastille de posture sur la hampe, fantôme en embuscade (armée du joueur).
+	StanceBadge.apply(self, str(army.get("stance", "normal")), player)
 
 
 ## Étendard d'une armée : {texture, mode} (modes de `map_banner.gdshader`). Ordre de recherche :
