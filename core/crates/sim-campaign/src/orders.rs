@@ -354,6 +354,13 @@ pub enum Order {
     BreakTradeAgreement {
         target: FactionId,
     },
+    // ----- CV3-3: map encounters (`encounter.rs`) ----------------------------
+    /// Answers the encounter `site` met by `army` with option `option`.
+    ChooseEncounterOption {
+        army: ArmyId,
+        site: u32,
+        option: usize,
+    },
 }
 
 impl Order {
@@ -501,6 +508,8 @@ pub enum OrderError {
     Chivalry(#[from] crate::chivalry::ChivalryError),
     #[error(transparent)]
     Agent(#[from] crate::agents::AgentError),
+    #[error(transparent)]
+    Encounter(#[from] crate::encounter::EncounterError),
 }
 
 /// G1: recruitments every settlement can queue per turn before buildings.
@@ -606,6 +615,17 @@ impl CampaignState {
             Order::Embark { army, to_port } => self
                 .order_embark(data, faction, &army, &to_port, &mut events)
                 .map(|()| OrderOutcome::Done),
+            Order::ChooseEncounterOption { army, site, option } => crate::encounter::choose_option(
+                self,
+                data,
+                faction,
+                &army,
+                site,
+                option,
+                &mut events,
+            )
+            .map_err(OrderError::from)
+            .map(|()| OrderOutcome::Done),
             other => self
                 .apply_simple_order(data, faction, other)
                 .map(|()| OrderOutcome::Done),
@@ -621,7 +641,10 @@ impl CampaignState {
         order: Order,
     ) -> Result<(), OrderError> {
         match order {
-            Order::MoveArmy { .. } | Order::Attack { .. } | Order::Embark { .. } => {
+            Order::MoveArmy { .. }
+            | Order::Attack { .. }
+            | Order::Embark { .. }
+            | Order::ChooseEncounterOption { .. } => {
                 unreachable!("handled by apply_order_outcome")
             }
             Order::Recruit {

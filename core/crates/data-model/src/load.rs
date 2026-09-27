@@ -62,6 +62,10 @@ pub mod folders {
     pub const CHIVALRIC_ORDERS: &str = "chivalric_orders";
     /// Landmark cities (lots L1-L3); optional folder.
     pub const LANDMARKS: &str = "landmarks";
+    /// Map encounters (lot CV3-3); optional folder.
+    pub const ENCOUNTERS: &str = "encounters";
+    /// Tuning of the map encounters (lot CV3-3), inside `rules/`; optional.
+    pub const ENCOUNTER_RULES: &str = "encounters.json";
     /// Settlements, one file per province (lot C1); optional folder.
     pub const SETTLEMENTS: &str = "settlements";
     /// Tuning of the settlement rules, inside `settlements/`; optional.
@@ -247,6 +251,11 @@ pub struct GameData {
     /// Landmark cities (L3: siege battles in the historical plan), empty
     /// when `data/landmarks/` is absent.
     pub landmarks: BTreeMap<String, crate::entities::landmark::Landmark>,
+    /// Map encounters (lot CV3-3), empty when `data/encounters/` is absent.
+    pub encounters: BTreeMap<crate::ids::EncounterId, crate::entities::encounter::Encounter>,
+    /// `data/rules/encounters.json` (lot CV3-3);
+    /// [`crate::EncounterRules::default`] when absent.
+    pub encounter_rules: crate::entities::encounter::EncounterRules,
     /// `data/map/map.json`, absent until the geo pipeline has run.
     pub map: Option<MapMeta>,
     /// `data/map/provinces.geojson`, empty until the geo pipeline has run.
@@ -352,6 +361,8 @@ impl GameData {
             edicts: BTreeMap::new(),
             chivalric_orders: BTreeMap::new(),
             landmarks: BTreeMap::new(),
+            encounters: BTreeMap::new(),
+            encounter_rules: Default::default(),
             map: None,
             province_geometry: BTreeMap::new(),
             settlements: BTreeMap::new(),
@@ -404,6 +415,14 @@ impl GameData {
         let landmarks_dir = root.join(folders::LANDMARKS);
         if landmarks_dir.is_dir() {
             data.landmarks = load_entities(&landmarks_dir, |l: &crate::Landmark| &l.id)?;
+        }
+        let encounters_dir = root.join(folders::ENCOUNTERS);
+        if encounters_dir.is_dir() {
+            data.encounters = load_entities(&encounters_dir, |e: &crate::Encounter| &e.id)?;
+        }
+        let encounter_rules_path = root.join(folders::RULES).join(folders::ENCOUNTER_RULES);
+        if encounter_rules_path.is_file() {
+            data.encounter_rules = read_json(&encounter_rules_path)?;
         }
         let alignment_path = root.join(folders::AI).join(folders::AI_ALIGNMENT);
         if alignment_path.is_file() {
