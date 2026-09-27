@@ -1,0 +1,39 @@
+{
+  "description": "Postures d'armée de la campagne (lot CV3-1, spec docs/design/2026-09-27-campagne-vivante.md § 1) : embuscade, marche forcée, camp retranché. Chances en fraction (0-1), pourcentages en points, distances en km. Les classes de couvert d'une case viennent de la couverture forestière (forest_cover.json) et de wetlands.png, le bocage du terrain de la province.",
+  "ambush": {
+    "min_movement_left_percent": 25.0,
+    "detect_radius_army_km": 3.0,
+    "detect_radius_spy_km": 8.0,
+    "base_chance": 0.55,
+    "per_skill": 0.03,
+    "scout_malus": 0.4,
+    "scout_unit_types": [
+      "unit_hobelars",
+      "unit_jinetes",
+      "unit_mounted_archers",
+      "unit_mounted_sergeants"
+    ],
+    "chance_min": 0.1,
+    "chance_max": 0.9,
+    "terrain_bonus": {
+      "forest": 0.1,
+      "bocage": 0.05,
+      "marsh": 0.05
+    },
+    "auto_attack_percent": 25.0
+  },
+  "forced_march": {
+    "movement_bonus_percent": 50.0,
+    "supply_cost": 10,
+    "start_fatigue": 60.0,
+    "ambush_bonus": 0.1
+  },
+  "entrenched": {
+    "auto_defense_percent": 15.0,
+    "supply_saving_percent": 30.0
+  },
+  "cover": {
+    "forest_threshold": 0.5,
+    "wetland_threshold": 0.4
+  }
+}

@@ -8,6 +8,7 @@
 //! Entry point: [`GameData::load`].
 
 pub mod common;
+pub mod cover;
 pub mod entities;
 mod event_check;
 pub mod ids;
@@ -21,6 +22,7 @@ pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
     Sources, UncertainInteger, UnitCategory,
 };
+pub use cover::{CoverClass, CoverMap};
 pub use entities::agent::{
     AgentActionKind, AgentActionRules, AgentEffects, AgentKind, AgentRules, AgentTypeRules,
 };
@@ -39,6 +41,9 @@ pub use entities::auto_resolve::{
 pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
     BattleOrderScope,
+};
+pub use entities::battle_outcome::{
+    BattleOutcomeClass, BattleOutcomeRules, OutcomeConsequence, OutcomeThresholds,
 };
 pub use entities::battle_standards::BattleStandardRules;
 pub use entities::building::{Building, BuildingCategory};
@@ -69,6 +74,9 @@ pub use entities::naval::{
     Propulsion, ShipClass,
 };
 pub use entities::population_rules::PopulationRules;
+pub use entities::posture::{
+    AmbushRules, CoverRules, EntrenchedRules, ForcedMarchRules, PostureRules,
+};
 pub use entities::province::{
     CapitalCity, Climate, Population, PopulationClass, PopulationClasses, Province, ProvinceGeo,
     Terrain,

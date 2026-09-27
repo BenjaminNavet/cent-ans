@@ -476,6 +476,7 @@ fn storm(state: &mut CampaignState, data: &GameData, army: &ArmyId, events: &mut
                 location: settlement.clone(),
                 province: province.clone(),
                 siege: true,
+                opening: Default::default(),
             });
             events.push(
                 GameEvent::new(

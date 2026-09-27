@@ -152,6 +152,57 @@ pub enum Stance {
     Raid,
     /// Besiege the enemy settlement the army stands on.
     Siege,
+    /// CV3: hidden in cover, springs on an enemy march entering its zone of
+    /// control (`crate::posture`).
+    Ambush,
+    /// CV3: extra movement this turn, tired troops; back to `Normal` at the
+    /// start of the next turn.
+    ForcedMarch,
+    /// CV3: fortified camp: better defence, less supply used.
+    Entrenched,
+}
+
+impl Stance {
+    pub const ALL: [Stance; 6] = [
+        Stance::Normal,
+        Stance::Raid,
+        Stance::Siege,
+        Stance::Ambush,
+        Stance::ForcedMarch,
+        Stance::Entrenched,
+    ];
+
+    /// The `snake_case` key used in saves, orders and by the bridge.
+    pub fn key(self) -> &'static str {
+        match self {
+            Stance::Normal => "normal",
+            Stance::Raid => "raid",
+            Stance::Siege => "siege",
+            Stance::Ambush => "ambush",
+            Stance::ForcedMarch => "forced_march",
+            Stance::Entrenched => "entrenched",
+        }
+    }
+
+    /// French label ("Embuscade").
+    pub fn label_fr(self) -> &'static str {
+        match self {
+            Stance::Normal => "En marche",
+            Stance::Raid => "Chevauchée",
+            Stance::Siege => "Siège",
+            Stance::Ambush => "Embuscade",
+            Stance::ForcedMarch => "Marche forcée",
+            Stance::Entrenched => "Camp retranché",
+        }
+    }
+}
+
+/// CV3: a temporary morale modifier of an army (battle outcome), in points
+/// of the 0-100 morale, for `turns` more turns.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MoraleModifier {
+    pub value: i8,
+    pub turns: u8,
 }
 
 /// A regiment of a given type.
@@ -242,6 +293,10 @@ pub struct Army {
     /// Destination of `planned_path` (a settlement is entered on arrival).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub destination: Option<MoveTarget>,
+    /// CV3: temporary morale modifiers (battle outcomes), counted down at
+    /// the end of each turn.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub morale_modifiers: Vec<MoraleModifier>,
 }
 
 impl Army {
@@ -257,6 +312,7 @@ impl Army {
             stance: Stance::Normal,
             planned_path: Vec::new(),
             destination: None,
+            morale_modifiers: Vec::new(),
         }
     }
 
@@ -275,6 +331,15 @@ impl Army {
     /// `true` when the army is stationed in `settlement`.
     pub fn is_at(&self, settlement: &SettlementId) -> bool {
         self.settlement() == Some(settlement)
+    }
+
+    /// CV3: sum of the active morale modifiers (points of 0-100 morale).
+    pub fn morale_modifier(&self) -> i32 {
+        self.morale_modifiers
+            .iter()
+            .filter(|m| m.turns > 0)
+            .map(|m| i32::from(m.value))
+            .sum()
     }
 
     /// Forgets the rest of a multi-turn march.
@@ -761,6 +826,12 @@ pub struct BattleRequest {
     /// garrison (`defender` then repeats the attacker's id).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub siege: bool,
+    /// CV3: ambush opening (`victim` is the attacker or the defender).
+    #[serde(
+        default,
+        skip_serializing_if = "sim_battle::BattleOpening::is_standard"
+    )]
+    pub opening: sim_battle::BattleOpening,
 }
 
 /// Aggregated view of a faction for the UI.

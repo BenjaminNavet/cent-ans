@@ -18,6 +18,9 @@ fn side(units: Vec<UnitSetup>) -> SideSetup {
         army: String::new(),
         units,
         general: None,
+        forced_march: false,
+        entrenched: false,
+        start_fatigue: 0.0,
     }
 }
 
@@ -88,6 +91,7 @@ fn main() {
                 orders: Vec::new(),
                 standards: None,
                 decor_plan: None,
+                opening: Default::default(),
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
             // S2: `FIRE=off` disables the siege fires, `WEATHER=clear|rain|fog|snow`
@@ -193,6 +197,7 @@ fn main() {
                 orders: Vec::new(),
                 standards: None,
                 decor_plan: None,
+                opening: Default::default(),
             };
             let mut sim = BattleSim::new(setup, seed).unwrap();
             let start = std::time::Instant::now();
@@ -245,6 +250,7 @@ fn main() {
         orders: Vec::new(),
         standards: None,
         decor_plan: None,
+        opening: Default::default(),
     };
     let mut sim = BattleSim::new(setup, 7).unwrap();
     sim.set_ai(SideId::Attacker, false);

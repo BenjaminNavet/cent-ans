@@ -155,6 +155,53 @@ pub struct SideSetup {
     pub units: Vec<UnitSetup>,
     #[serde(default)]
     pub general: Option<GeneralSetup>,
+    /// CV3: the army was in forced march (campaign stance) when the battle
+    /// began: no free deployment phase (automatic placement).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub forced_march: bool,
+    /// CV3: the army was entrenched (campaign stance): stakes and a low
+    /// palisade are ready at the start of the battle.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub entrenched: bool,
+    /// CV3: fatigue (0-100 gauge of `Unit::fatigue`) every regiment starts
+    /// the battle with (`postures.json` `forced_march.start_fatigue` for a
+    /// side in forced march, 0 otherwise).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub start_fatigue: f64,
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
+}
+
+fn is_zero(value: &f64) -> bool {
+    *value == 0.0
+}
+
+/// CV3: how the battle opens (spec campagne vivante § 1.3).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "kind")]
+pub enum BattleOpening {
+    /// Both sides deploy as usual.
+    #[default]
+    Standard,
+    /// The `victim` side is caught in marching column along the road, with
+    /// no deployment phase; the other side deploys on the flanks.
+    Ambush { victim: SideId },
+}
+
+impl BattleOpening {
+    pub fn is_standard(&self) -> bool {
+        matches!(self, BattleOpening::Standard)
+    }
+
+    /// The ambushed side, if any.
+    pub fn ambush_victim(&self) -> Option<SideId> {
+        match self {
+            BattleOpening::Standard => None,
+            BattleOpening::Ambush { victim } => Some(*victim),
+        }
+    }
 }
 
 /// Siege battle parameters (M8 § 2): the defender holds a walled town.
@@ -213,6 +260,10 @@ pub struct BattleSetup {
     /// procedural one.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub decor_plan: Option<crate::decor::DecorPlan>,
+    /// CV3: ambush or standard opening (`Standard` for old battles and
+    /// replays).
+    #[serde(default, skip_serializing_if = "BattleOpening::is_standard")]
+    pub opening: BattleOpening,
 }
 
 impl BattleSetup {

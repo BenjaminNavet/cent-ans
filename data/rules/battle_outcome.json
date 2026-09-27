@@ -1,0 +1,20 @@
+{
+  "description": "Résultats nuancés des batailles (lot CV3-1, spec docs/design/2026-09-27-campagne-vivante.md § 3). Classes testées dans l'ordre : héroïque, décisive, à la Pyrrhus, victoire ; défaite honorable, désastre, défaite. Parts (0-1) de l'effectif engagé. Conséquences par classe : multiplicateur d'expérience du général, prestige du souverain, modificateur de moral des armées survivantes (points) pendant morale_turns tours.",
+  "thresholds": {
+    "heroic_max_strength_ratio": 0.667,
+    "decisive_enemy_losses_min": 0.7,
+    "decisive_own_losses_max": 0.25,
+    "pyrrhic_own_losses_min": 0.5,
+    "honourable_inflicted_ratio_min": 1.0,
+    "disaster_own_losses_min": 0.7
+  },
+  "classes": {
+    "heroic": { "label": "Victoire héroïque", "xp_multiplier": 2.0, "prestige": 15, "morale": 10, "morale_turns": 3 },
+    "decisive": { "label": "Victoire décisive", "xp_multiplier": 1.5, "prestige": 10, "morale": 8, "morale_turns": 2 },
+    "pyrrhic": { "label": "Victoire à la Pyrrhus", "xp_multiplier": 1.0, "prestige": 2, "morale": -5, "morale_turns": 2 },
+    "victory": { "label": "Victoire", "xp_multiplier": 1.0, "prestige": 5, "morale": 3, "morale_turns": 1 },
+    "honourable_defeat": { "label": "Défaite honorable", "xp_multiplier": 1.0, "prestige": 0, "morale": 0, "morale_turns": 0 },
+    "disaster": { "label": "Désastre", "xp_multiplier": 0.5, "prestige": -10, "morale": -10, "morale_turns": 3 },
+    "defeat": { "label": "Défaite", "xp_multiplier": 1.0, "prestige": -3, "morale": -5, "morale_turns": 1 }
+  }
+}

@@ -97,6 +97,10 @@ pub mod folders {
     pub const AGENT_RULES: &str = "agents.json";
     /// Regimental standards in battle (lot EP5), inside `rules/`; optional.
     pub const BATTLE_STANDARD_RULES: &str = "battle_standards.json";
+    /// Army stances (lot CV3-1), inside `rules/`; optional.
+    pub const POSTURE_RULES: &str = "postures.json";
+    /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
+    pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
     /// Trade hubs and routes (lot C5); optional folder.
     pub const ECONOMY: &str = "economy";
     /// Trade catalogue, inside `economy/`; optional.
@@ -294,6 +298,15 @@ pub struct GameData {
     /// `data/rules/battle_standards.json` (lot EP5, regimental standards);
     /// [`crate::BattleStandardRules::default`] when absent.
     pub battle_standard_rules: crate::entities::battle_standards::BattleStandardRules,
+    /// `data/rules/postures.json` (lot CV3-1, army stances);
+    /// [`crate::PostureRules::default`] when absent.
+    pub posture_rules: crate::entities::posture::PostureRules,
+    /// `data/rules/battle_outcome.json` (lot CV3-1, nuanced outcomes);
+    /// [`crate::BattleOutcomeRules::default`] when absent.
+    pub battle_outcome_rules: crate::entities::battle_outcome::BattleOutcomeRules,
+    /// Forest and wetland cover of the grid cells (lot CV3-1), decoded on
+    /// first use; see [`GameData::cover_map`].
+    pub cover: crate::cover::CoverHandle,
     /// Movement graph over the settlements (lot C4): `settlement_graph`, or
     /// the fallback graph when it is empty; see [`GameData::build_movement_graph`].
     pub movement_graph: crate::movement_graph::MovementGraph,
@@ -358,6 +371,9 @@ impl GameData {
             retinue: None,
             agent_rules: None,
             battle_standard_rules: Default::default(),
+            posture_rules: Default::default(),
+            battle_outcome_rules: Default::default(),
+            cover: Default::default(),
             movement_graph: Default::default(),
             trade: None,
             free_movement: None,
@@ -445,6 +461,16 @@ impl GameData {
         if standards_path.is_file() {
             data.battle_standard_rules = read_json(&standards_path)?;
         }
+        let postures_path = root.join(folders::RULES).join(folders::POSTURE_RULES);
+        if postures_path.is_file() {
+            data.posture_rules = read_json(&postures_path)?;
+        }
+        let outcome_path = root
+            .join(folders::RULES)
+            .join(folders::BATTLE_OUTCOME_RULES);
+        if outcome_path.is_file() {
+            data.battle_outcome_rules = read_json(&outcome_path)?;
+        }
         let trade_path = root.join(folders::ECONOMY).join(folders::TRADE);
         if trade_path.is_file() {
             data.trade = Some(read_json(&trade_path)?);
@@ -461,6 +487,7 @@ impl GameData {
             &root.join(folders::MAP).join(folders::SETTLEMENT_PX),
         );
         data.prepare_rasters(&root.join(folders::MAP));
+        data.prepare_cover(&root.join(folders::MAP));
         data.validate_references(&mut warnings)?;
         crate::event_check::validate_events(&data, &mut warnings)?;
         Ok((data, warnings))

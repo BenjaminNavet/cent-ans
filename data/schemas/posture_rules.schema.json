@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/posture_rules.schema.json",
+  "title": "Règles des postures d'armée",
+  "description": "Fichier data/rules/postures.json (lot CV3-1) : embuscade, marche forcée, camp retranché et classes de couvert. Voir docs/design/2026-09-27-campagne-vivante.md § 1.",
+  "type": "object",
+  "$defs": {
+    "share": { "type": "number", "minimum": 0, "maximum": 1 },
+    "percent": { "type": "number", "minimum": 0, "maximum": 500 }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "ambush": {
+      "type": "object",
+      "properties": {
+        "min_movement_left_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "Part du mouvement du tour qu'il doit rester pour s'embusquer." },
+        "detect_radius_army_km": { "type": "number", "minimum": 0, "description": "Une armée ennemie plus proche voit l'embuscade." },
+        "detect_radius_spy_km": { "type": "number", "minimum": 0, "description": "Un espion ennemi plus proche (depuis sa colonie) voit l'embuscade." },
+        "base_chance": { "$ref": "#/$defs/share" },
+        "per_skill": { "type": "number", "minimum": 0, "maximum": 0.2, "description": "Chance ajoutée par point de compétence d'embuscade du général (max du Commandement et de l'intrigue)." },
+        "scout_malus": { "$ref": "#/$defs/share", "description": "Retiré × part d'éclaireurs (cavalerie légère) de la victime." },
+        "scout_unit_types": { "type": "array", "items": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" }, "uniqueItems": true },
+        "chance_min": { "$ref": "#/$defs/share" },
+        "chance_max": { "$ref": "#/$defs/share" },
+        "terrain_bonus": {
+          "type": "object",
+          "propertyNames": { "enum": ["open", "forest", "bocage", "marsh"] },
+          "additionalProperties": { "type": "number", "minimum": -1, "maximum": 1 }
+        },
+        "auto_attack_percent": { "$ref": "#/$defs/percent", "description": "Bonus BattleCharge de l'embusqué en résolution automatique." }
+      },
+      "required": ["min_movement_left_percent", "detect_radius_army_km", "detect_radius_spy_km", "base_chance", "per_skill", "scout_malus", "scout_unit_types", "chance_min", "chance_max", "terrain_bonus", "auto_attack_percent"],
+      "additionalProperties": false
+    },
+    "forced_march": {
+      "type": "object",
+      "properties": {
+        "movement_bonus_percent": { "$ref": "#/$defs/percent" },
+        "supply_cost": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Ravitaillement perdu en fin de tour." },
+        "start_fatigue": { "type": "number", "minimum": 0, "maximum": 100, "description": "Fatigue (jauge 0-100 de sim-battle) des régiments au début d'une bataille." },
+        "ambush_bonus": { "$ref": "#/$defs/share", "description": "Ajouté à la chance d'embuscade contre une armée en marche forcée." }
+      },
+      "required": ["movement_bonus_percent", "supply_cost", "start_fatigue", "ambush_bonus"],
+      "additionalProperties": false
+    },
+    "entrenched": {
+      "type": "object",
+      "properties": {
+        "auto_defense_percent": { "$ref": "#/$defs/percent", "description": "Bonus BattleDefense en résolution automatique." },
+        "supply_saving_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "Part de la perte de ravitaillement économisée." }
+      },
+      "required": ["auto_defense_percent", "supply_saving_percent"],
+      "additionalProperties": false
+    },
+    "cover": {
+      "type": "object",
+      "properties": {
+        "forest_threshold": { "$ref": "#/$defs/share" },
+        "wetland_threshold": { "$ref": "#/$defs/share" }
+      },
+      "required": ["forest_threshold", "wetland_threshold"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["ambush", "forced_march", "entrenched", "cover"],
+  "additionalProperties": false
+}

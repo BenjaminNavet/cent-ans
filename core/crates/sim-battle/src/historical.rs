@@ -464,6 +464,9 @@ impl HistoricalMap {
                 army: army.army.clone(),
                 units,
                 general,
+                forced_march: false,
+                entrenched: false,
+                start_fatigue: 0.0,
             })
         };
         Ok(BattleSetup {
@@ -482,6 +485,7 @@ impl HistoricalMap {
             orders,
             standards,
             decor_plan: None,
+            opening: Default::default(),
         })
     }
 

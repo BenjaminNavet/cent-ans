@@ -135,6 +135,7 @@ impl CampaignState {
             province: crate::siege::province_of(self, &place),
             location: place,
             siege: true,
+            opening: Default::default(),
         };
         self.forecast_request(data, &request)
             .map(|f| f.attacker_win_chance)
