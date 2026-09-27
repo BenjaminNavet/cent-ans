@@ -8,7 +8,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 |---|---|---|---|---|
 | CB0 | Extraction des entrées (`battle_input.gd`) + sélection rapide | 1 | **fusionné 09-27** (+ correctif caméra : Ctrl/Cmd+lettre ne bouge plus la vue) | `cb0-entrees.md` |
 | CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | **fusionné 09-27** (trait 1 m, émission sur fond noir ; lisibilité à juger en jeu) | |
-| CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | à lancer (session principale, cœur) | |
+| CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | en cours (agent, branche `feat/cb-m2-path-hover`) | |
 | CB-M3 | Ordres en file (Maj + clic droit) | 2 | attente | |
 | CB-M4 | Portée au sol, comparaison au survol | 2 | attente | |
 | CB1 | Formation au glisser, verrouillage de groupe | 3 | attente CB-M | |
@@ -18,6 +18,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 | |
 
 ## Coordination
+- Budget de captures relevé à **10 par lot** par le joueur (09-27), lues par la session principale seulement.
 - CV3-2 fusionné dans main (09-27) : CB-M2 n'attend plus que CB-M1.
 - CV3-6 (sondes d'équilibrage) : pas de batailles de référence CB2/CB4 en même temps.
 - Fusion vague 4 : CB3, puis CB5, puis CB2 (remappage des touches et aide F1 en dernier).
