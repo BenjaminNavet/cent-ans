@@ -1,0 +1,42 @@
+name: Signaler un bogue
+description: Un plantage, un comportement incorrect ou un problème d'affichage
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Que s'est-il passé ? Qu'attendiez-vous ?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Nouvelle partie avec la France, difficulté normale
+        2. Tour 12, attaquer Calais
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: plateforme
+    attributes:
+      label: Plateforme
+      options:
+        - macOS (Apple Silicon)
+        - Windows 10/11
+        - Linux
+        - Autre
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version ou commit
+      placeholder: "ex. d23c4507"
+  - type: textarea
+    id: journaux
+    attributes:
+      label: Journaux, captures, sauvegarde
+      description: Glissez-déposez une capture ou une sauvegarde ; collez la sortie console utile.

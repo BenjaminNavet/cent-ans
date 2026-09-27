@@ -660,6 +660,11 @@
      "loop": true,
      "start": 419
     },
+    "c_rear": {
+     "frames": 32,
+     "loop": false,
+     "start": 781
+    },
     "c_std_death": {
      "frames": 30,
      "loop": false,
@@ -685,10 +690,20 @@
      "loop": true,
      "start": 693
     },
+    "c_stumble": {
+     "frames": 90,
+     "loop": false,
+     "start": 813
+    },
     "c_thrust": {
      "frames": 28,
      "loop": false,
      "start": 140
+    },
+    "c_victory": {
+     "frames": 81,
+     "loop": true,
+     "start": 903
     },
     "c_walk": {
      "frames": 29,
@@ -732,6 +747,11 @@
      "frames": 41,
      "loop": true,
      "start": 603
+    },
+    "bow_look": {
+     "frames": 82,
+     "loop": true,
+     "start": 2593
     },
     "bow_shoot": {
      "frames": 60,
@@ -818,6 +838,16 @@
      "loop": false,
      "start": 181
     },
+    "hit_b": {
+     "frames": 14,
+     "loop": false,
+     "start": 2809
+    },
+    "hit_c": {
+     "frames": 20,
+     "loop": false,
+     "start": 2823
+    },
     "horn_blow": {
      "frames": 84,
      "loop": true,
@@ -838,6 +868,21 @@
      "loop": true,
      "start": 0
     },
+    "idle_helm": {
+     "frames": 82,
+     "loop": true,
+     "start": 2429
+    },
+    "idle_lean": {
+     "frames": 82,
+     "loop": true,
+     "start": 2347
+    },
+    "idle_look": {
+     "frames": 82,
+     "loop": true,
+     "start": 2265
+    },
     "knockdown": {
      "frames": 64,
      "loop": false,
@@ -847,6 +892,16 @@
      "frames": 48,
      "loop": true,
      "start": 1404
+    },
+    "overhead": {
+     "frames": 28,
+     "loop": false,
+     "start": 2781
+    },
+    "parry": {
+     "frames": 24,
+     "loop": false,
+     "start": 2757
     },
     "pike_idle": {
      "frames": 41,
@@ -862,6 +917,11 @@
      "frames": 33,
      "loop": true,
      "start": 482
+    },
+    "pike_look": {
+     "frames": 82,
+     "loop": true,
+     "start": 2511
     },
     "pike_thrust": {
      "frames": 28,
@@ -923,6 +983,21 @@
      "loop": false,
      "start": 160
     },
+    "victory": {
+     "frames": 41,
+     "loop": true,
+     "start": 2101
+    },
+    "victory_b": {
+     "frames": 82,
+     "loop": true,
+     "start": 2142
+    },
+    "victory_pike": {
+     "frames": 41,
+     "loop": true,
+     "start": 2224
+    },
     "walk": {
      "frames": 33,
      "loop": true,
@@ -942,6 +1017,11 @@
      "frames": 41,
      "loop": true,
      "start": 797
+    },
+    "xbow_look": {
+     "frames": 82,
+     "loop": true,
+     "start": 2675
     },
     "xbow_shoot": {
      "frames": 120,

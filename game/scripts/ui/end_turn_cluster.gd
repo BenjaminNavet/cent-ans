@@ -438,7 +438,7 @@ class AlertBadge:
 		var lines := for_text.split("\n")
 		for i in lines.size():
 			var color := HudStyle.RUBRIC if i == 0 else (HudStyle.INK_FADED if i == lines.size() - 1 else HudStyle.INK)
-			box.add_child(HudStyle.label(lines[i], HudStyle.FONT_BODY, color))
+			box.add_child(HudStyle.label(lines[i], UiType.size(UiType.CAPTION), color))
 		return panel
 
 	func _draw() -> void:

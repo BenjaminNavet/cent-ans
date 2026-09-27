@@ -82,7 +82,7 @@ func _build() -> void:
 	box.add_child(header)
 	name_label = Label.new()
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_label.add_theme_font_size_override("font_size", 24)
+	UiType.apply(name_label, UiType.HEADING)
 	name_label.text = "Colonie"
 	header.add_child(name_label)
 	var close_button := Button.new()
@@ -154,7 +154,7 @@ func _tab_box(title: String) -> VBoxContainer:
 func _header(parent: Container, text: String) -> Label:
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", 16)
+	UiType.apply(label, UiType.HEADING)
 	parent.add_child(label)
 	return label
 
@@ -182,7 +182,7 @@ func _build_garrison_tab() -> void:
 	actions.add_child(create_army_button)
 	queue_label = Label.new()
 	queue_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	queue_label.add_theme_font_size_override("font_size", 13)
+	UiType.apply(queue_label, UiType.BODY)
 	inner.add_child(queue_label)
 	recruit_panel = VBoxContainer.new()
 	recruit_panel.visible = false

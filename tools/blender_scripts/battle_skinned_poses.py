@@ -1279,3 +1279,380 @@ def flee(arm, t):
 
 
 flee.frames = 60  # three `Run` strides (2.5 s): the glance comes once per loop
+
+
+# --- Lot AN1b: victory, idle variants, parry, overhead cut, impacts, horse rear/stumble ---
+#
+# Loops on `Idle` (41 source frames) last 41 or 82 frames so that the source loops with the
+# clip; their overrides are periodic in `t` (same value at t = 0 and t = 1). Non-looped combat
+# clips fade their overrides out before the end, back to the guard.
+
+X_AXIS = Vector((1, 0, 0))
+Z_AXIS = Vector((0, 0, 1))
+
+
+def _env(t, a, b, c, d):
+    """Rises over [a, b], falls over [c, d] (smoothstep both ways)."""
+    return smooth(a, b, t) * (1.0 - smooth(c, d, t))
+
+
+def _arm_to(arm, side, target, pole_offset):
+    """Two-bone IK of an arm onto `target`, elbow towards shoulder + `pole_offset`."""
+    ik2(
+        arm,
+        f"UpperArm.{side}",
+        f"LowerArm.{side}",
+        f"Wrist.{side}",
+        target,
+        pos(arm, f"UpperArm.{side}") + pole_offset,
+    )
+
+
+def _held_prop(arm):
+    """Right-hand prop where the wrist carries it (no override)."""
+    return world(arm, "Wrist.R") @ REST["Wrist.R"].inverted() @ REST["prop"]
+
+
+def _sword_at(arm, grip, axis, up, weight=1.0, left=None):
+    """Right fist (and the left one `left` m towards the pommel) on a prop at `grip`.
+
+    `weight` blends from the prop carried by the wrist (0) to the given one (1).
+    """
+    target = prop_matrix(grip, axis, up)
+    prop = _held_prop(arm).lerp(target, weight) if weight < 0.999 else target
+    STATE["prop"] = prop
+    hand_to_prop(
+        arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + Vector((-0.5, 0.3, -0.4))
+    )
+    fist_on_prop(arm, prop)
+    if left is not None:
+        wrist_l = pos(arm, "Wrist.L")
+        on_grip = prop @ Vector((0, left, 0))
+        on_grip += (prop.to_3x3() @ Vector((1, 0, 0))).normalized() * 0.075
+        _arm_to(arm, "L", wrist_l.lerp(on_grip, weight), Vector((0.5, 0.2, -0.5)))
+    return prop
+
+
+def _pump(t, beats):
+    """0 -> 1 -> 0 `beats` times over the clip (periodic)."""
+    return 0.5 - 0.5 * math.cos(2.0 * math.pi * beats * t)
+
+
+def _cheer_left(arm, pump):
+    """Left fist punched up into the air (the shield or bow goes up with it)."""
+    shoulder = pos(arm, "UpperArm.L")
+    _arm_to(
+        arm,
+        "L",
+        shoulder + Vector((0.22, -0.12, 0.42 + 0.1 * pump)),
+        Vector((0.7, 0.3, -0.1)),
+    )
+
+
+def victory(arm, t):
+    """Victory (loop): weapon thrust up at arm's length twice, left fist raised, cheering."""
+    pump = _pump(t, 2)
+    _crouch(arm, 0.02 + 0.04 * pump)
+    rotate_about(arm, "Abdomen", X_AXIS, -0.1 - 0.04 * pump)
+    rotate_about(arm, "Neck", X_AXIS, -0.3)
+    shoulder = pos(arm, "UpperArm.R")
+    grip = shoulder + Vector((-0.1, -0.1, 0.5 + 0.14 * pump))
+    _sword_at(arm, grip, Vector((-0.08, -0.25, 1.0)), Vector((0, -1, 0)))
+    _cheer_left(arm, 1.0 - pump)
+
+
+victory.frames = 41  # 1.7 s, one `Idle` loop
+
+
+def victory_b(arm, t):
+    """Victory (loop): weapon brandished overhead from side to side, left fist on the hip."""
+    s = math.sin(2.0 * math.pi * 2.0 * t)
+    rotate_about(arm, "Torso", Z_AXIS, 0.16 * s)
+    rotate_about(arm, "Neck", X_AXIS, -0.22)
+    rotate_about(arm, "Neck", Z_AXIS, 0.2 * s)
+    head = pos(arm, "Head")
+    grip = head + Vector((-0.18 + 0.12 * s, -0.12, 0.34 + 0.05 * abs(s)))
+    _sword_at(arm, grip, Vector((0.6 * s, -0.2, 1.0)), Vector((0, -1, 0)))
+    hips = pos(arm, "Body")
+    _arm_to(arm, "L", hips + Vector((0.24, 0.02, 0.08)), Vector((0.6, 0.4, 0.0)))
+
+
+victory_b.frames = 82  # 3.4 s, two `Idle` loops
+
+
+def victory_pike(arm, t):
+    """Victory with a polearm (loop): the pike raised and grounded again, left fist up."""
+    pump = _pump(t, 2)
+    rotate_about(arm, "Neck", X_AXIS, -0.28)
+    foot = pos(arm, "Foot.R")
+    butt = Vector((foot.x - 0.12, foot.y - 0.18, 0.35 * pump))
+    prop = prop_matrix(
+        butt + Vector((0, 0, 1.45)), Vector((0.03, -0.08, 1.0)), Vector((0, -1, 0))
+    )
+    STATE["prop"] = prop
+    hand_to_prop(
+        arm, "R", prop, 0.0, pos(arm, "UpperArm.R") + Vector((-0.4, 0.3, -0.4))
+    )
+    fist_on_prop(arm, prop)
+    _cheer_left(arm, 1.0 - pump)
+
+
+victory_pike.frames = 41
+
+
+def _look_around(arm, t):
+    """Head (and a little of the torso) turned left, then right, then back."""
+    yaw = 0.75 * _env(t, 0.08, 0.22, 0.38, 0.52) - 0.65 * _env(t, 0.56, 0.7, 0.84, 0.97)
+    rotate_about(arm, "Torso", Z_AXIS, 0.25 * yaw)
+    rotate_about(arm, "Neck", Z_AXIS, 0.75 * yaw)
+    rotate_about(arm, "Neck", X_AXIS, -0.08 * abs(yaw))
+
+
+def idle_look(arm, t):
+    """Idle variant (loop): looks around, left then right."""
+    _look_around(arm, t)
+
+
+idle_look.frames = 82
+
+
+def pike_look(arm, t):
+    """Idle variant with a pike upright (loop): looks around."""
+    _look_around(arm, t)
+    _pike_upright(arm)
+
+
+pike_look.frames = 82
+
+
+def bow_look(arm, t):
+    """Idle variant with the longbow held low (loop): looks around."""
+    _look_around(arm, t)
+    _bow_arm(arm, 0.0)
+
+
+bow_look.frames = 82
+
+
+def xbow_look(arm, t):
+    """Idle variant with the crossbow held low (loop): looks around."""
+    _look_around(arm, t)
+    _crossbow_aim(arm, 0.0)
+
+
+xbow_look.frames = 82
+
+
+def idle_lean(arm, t):
+    """Idle variant (loop): leaning on the weapon, point on the ground, hands on the pommel."""
+    sway = math.sin(2.0 * math.pi * t)
+    translate(arm, "Body", Vector((0.025 * sway, 0.0, 0.0)))
+    rotate_about(arm, "Abdomen", X_AXIS, 0.14)
+    rotate_about(arm, "Neck", X_AXIS, 0.12 + 0.04 * sway)
+    hips = pos(arm, "Body")
+    grip = Vector((hips.x - 0.02, hips.y - 0.34, 0.9))
+    _sword_at(arm, grip, Vector((0.0, -0.06, -1.0)), Vector((0, -1, 0)), left=-0.08)
+
+
+idle_lean.frames = 82
+
+
+def idle_helm(arm, t):
+    """Idle variant (loop): the left hand goes up to the helmet and sets it straight."""
+    up = _env(t, 0.12, 0.3, 0.62, 0.8)
+    wiggle = 0.03 * math.sin(2.0 * math.pi * 5.0 * t) * _env(t, 0.3, 0.36, 0.56, 0.62)
+    rotate_about(arm, "Neck", Z_AXIS, 0.15 * up)
+    rotate_about(arm, "Neck", X_AXIS, 0.1 * up)
+    head = pos(arm, "Head")
+    # Elbow well out to the side: the forearm (and a strapped shield) stays beside the head.
+    helm = head + Vector((0.16, 0.0 + wiggle, 0.1 + wiggle))
+    _arm_to(arm, "L", pos(arm, "Wrist.L").lerp(helm, up), Vector((0.8, 0.3, 0.0)))
+
+
+idle_helm.frames = 82
+
+
+def parry(arm, t):
+    """Parry (melee): shield (left arm) thrown up before the face, crouched, then guard."""
+    w = _env(t, 0.0, 0.2, 0.55, 0.95)
+    _crouch(arm, 0.07 * w)
+    rotate_about(arm, "Torso", Z_AXIS, -0.3 * w)
+    rotate_about(arm, "Abdomen", X_AXIS, 0.1 * w)
+    rotate_about(arm, "Neck", X_AXIS, 0.15 * w)
+    chest = pos(arm, "Chest")
+    block = chest + Vector((0.05, -0.36, 0.26))
+    _arm_to(arm, "L", pos(arm, "Wrist.L").lerp(block, w), Vector((0.6, -0.1, -0.5)))
+
+
+parry.frames = 24  # 1 s (melee cycle 1.3 s)
+
+
+def overhead(arm, t):
+    """Two-handed overhead cut: wound up behind the head, brought down, back to the guard."""
+    raise_t = smooth(0.0, 0.34, t)
+    cut = smooth(0.38, 0.56, t)
+    w = raise_t * (1.0 - smooth(0.66, 1.0, t))
+    rotate_about(arm, "Abdomen", X_AXIS, -0.12 * raise_t * (1 - cut) + 0.32 * cut * w)
+    _crouch(arm, 0.1 * cut * w)
+    head = pos(arm, "Head")
+    chest = pos(arm, "Chest")
+    wound = head + Vector((-0.1, 0.1, 0.22))
+    struck = chest + Vector((-0.02, -0.5, -0.36))
+    grip = wound.lerp(struck, cut) + Vector((0, -0.28, 0.12)) * math.sin(math.pi * cut)
+    axis = Vector((0.08, 0.55, 0.8)).lerp(Vector((0.04, -0.85, -0.5)), cut)
+    up = Vector((0.0, -axis.z, axis.y))
+    _sword_at(arm, grip, axis.normalized(), up.normalized(), weight=w, left=-0.1)
+
+
+overhead.frames = 28  # 1.17 s
+
+
+def hit_stagger(arm, t):
+    """Impact variant: rocked back a step, head snapped back, arms flung, then guard."""
+    w = _env(t, 0.0, 0.14, 0.45, 1.0)
+    translate(arm, "Root", Vector((0.0, 0.16 * w, 0.0)))
+    rotate_about(arm, "Abdomen", X_AXIS, -0.3 * w)
+    rotate_about(arm, "Torso", Z_AXIS, 0.22 * w)
+    rotate_about(arm, "Neck", X_AXIS, -0.35 * w)
+    for side, sx in (("L", 1.0), ("R", -1.0)):
+        rotate_about(arm, f"UpperArm.{side}", Vector((0, 1, 0)), -0.35 * sx * w)
+
+
+hit_stagger.frames = 20
+
+
+# Horse: the cavalry baker runs `pose.horse(harm, t)` before seating the rider. The hooves
+# hang from the root (IK bones of the Quaternius horse): once the legs have moved they are
+# carried along with their lower leg.
+
+HORSE_LEGS = {
+    "FL": (("FrontUpperLeg.L", "FrontLowerLeg.L"), "IKFrontLeg.L"),
+    "FR": (("FrontUpperLeg.R", "FrontLowerLeg.R"), "IKFrontLeg.R"),
+    "BL": (("BackLeg.L", "BackUpperLeg.L", "BackLowerLeg.L"), "IKBackLeg.L"),
+    "BR": (("BackLeg.R", "BackUpperLeg.R", "BackLowerLeg.R"), "IKBackLeg.R"),
+}
+
+
+def _horse_capture(harm):
+    """World matrices of each lower leg and hoof before the overrides."""
+    return {
+        k: (world(harm, chain[-1]).copy(), world(harm, hoof).copy())
+        for k, (chain, hoof) in HORSE_LEGS.items()
+    }
+
+
+def _hoof_at(harm, key, before):
+    """Where the hoof of leg `key` is carried by its lower leg now."""
+    lower_b, hoof_b = before[key]
+    chain = HORSE_LEGS[key][0]
+    return world(harm, chain[-1]) @ lower_b.inverted() @ hoof_b
+
+
+def _horse_feet(harm, before):
+    """Hooves moved with their lower legs."""
+    for key, (_chain, hoof) in HORSE_LEGS.items():
+        set_world(harm, hoof, _hoof_at(harm, key, before))
+
+
+def _plant(harm, key, before, target, iterations=10):
+    """Leg `key` bent (sagittal CCD) so that its hoof reaches `target`."""
+    chain = HORSE_LEGS[key][0]
+    for _ in range(iterations):
+        for bone in reversed(chain):
+            end = _hoof_at(harm, key, before).to_translation()
+            pivot = pos(harm, bone)
+            a = end - pivot
+            b = target - pivot
+            angle = math.atan2(b.z, b.y) - math.atan2(a.z, a.y)
+            angle = (angle + math.pi) % (2.0 * math.pi) - math.pi
+            rotate_about(harm, bone, X_AXIS, max(-0.4, min(0.4, angle)), pivot)
+
+
+def _rear_env(t):
+    return _env(t, 0.0, 0.34, 0.64, 0.97)
+
+
+def horse_rear(harm, t):
+    """Horse rearing (pikes in its face): up on the hind legs, forelegs pawing the air."""
+    up = _rear_env(t)
+    if up < 1e-3:
+        return
+    before = _horse_capture(harm)
+    planted = {k: before[k][1].to_translation() for k in ("BL", "BR")}
+    hip = (pos(harm, "BackLeg.L") + pos(harm, "BackLeg.R")) / 2
+    rotate_about(harm, "Body", X_AXIS, -0.82 * up, hip)
+    translate(harm, "Body", Vector((0.0, 0.06, -0.16)) * up)
+    for key in ("BL", "BR"):
+        _plant(harm, key, before, planted[key])
+    for side, phase in (("L", 0.0), ("R", 0.5)):
+        paw = math.sin(2.0 * math.pi * (2.5 * t + phase))
+        rotate_about(harm, f"FrontUpperLeg.{side}", X_AXIS, (-0.7 - 0.25 * paw) * up)
+        rotate_about(harm, f"FrontLowerLeg.{side}", X_AXIS, (1.4 + 0.3 * paw) * up)
+    rotate_about(harm, "Neck1", X_AXIS, 0.4 * up)
+    rotate_about(harm, "Head", X_AXIS, 0.25 * up)
+    _horse_feet(harm, before)
+
+
+def _stumble_env(t):
+    return _env(t, 0.34, 0.42, 0.5, 0.66)
+
+
+def horse_stumble(harm, t):
+    """Horse stumbling at the gallop: forelegs buckle, nose down, then it recovers."""
+    s = _stumble_env(t)
+    if s < 1e-3:
+        return
+    before = _horse_capture(harm)
+    hip = (pos(harm, "BackLeg.L") + pos(harm, "BackLeg.R")) / 2
+    rotate_about(harm, "Body", X_AXIS, 0.22 * s, hip)
+    translate(harm, "Body", Vector((0.0, -0.08, -0.12)) * s)
+    for side, lag in (("L", 0.0), ("R", 0.25)):
+        k = s * (1.0 - lag * (1.0 - s))
+        rotate_about(harm, f"FrontUpperLeg.{side}", X_AXIS, -0.45 * k)
+        rotate_about(harm, f"FrontLowerLeg.{side}", X_AXIS, 1.7 * k)
+    rotate_about(harm, "Neck1", X_AXIS, 0.55 * s)
+    _horse_feet(harm, before)
+
+
+def ride_rear(arm, t):
+    """Rider of a rearing horse: thrown forwards onto the neck, reins short, lance up."""
+    up = _rear_env(t)
+    m = _mount()
+    _ride_legs(arm)
+    _lean(arm, 0.75 * up)
+    _reins(arm)
+    butt = _hp(m.stirrups["R"] + Vector((-0.08, -0.05, 0.2)))
+    axis = _hv(Vector((-0.05, -0.18, 1.0))).lerp(
+        Vector((-0.05, -0.35, 1.0)).normalized(), up
+    )
+    axis.normalize()
+    _lance_at(arm, butt + axis * 1.1, axis, _hv(Vector((0, -1, 0))))
+
+
+ride_rear.horse = horse_rear
+ride_rear.frames = 32  # 1.33 s: fits the cavalry melee cycle (1.4 s)
+
+
+def ride_stumble(arm, t):
+    """Rider of a stumbling horse: lance couched, pitched forwards, back in the saddle."""
+    s = _stumble_env(t)
+    _ride_legs(arm)
+    _lean(arm, 0.35 + 0.35 * s)
+    _reins(arm)
+    grip = pos(arm, "Chest") + _hv(Vector((-0.2, -0.18, -0.2 - 0.1 * s)))
+    _lance_at(arm, grip, _hv(Vector((0.22, -1.0, -0.04 - 0.3 * s))))
+
+
+ride_stumble.horse = horse_stumble
+ride_stumble.frames = 90  # six `Gallop` strides (3.75 s)
+
+
+def ride_victory(arm, t):
+    """Mounted victory (loop): lance or javelin raised high and shaken, reins in the left."""
+    pump = _pump(t, 3)
+    _ride_legs(arm)
+    _lean(arm, -0.06)
+    _reins(arm)
+    rotate_about(arm, "Neck", _hv(X_AXIS), -0.25)
+    grip = pos(arm, "UpperArm.R") + _hv(Vector((-0.1, -0.08, 0.42 + 0.14 * pump)))
+    _lance_at(arm, grip, _hv(Vector((-0.1, -0.3, 1.0))), _hv(Vector((0, -1, 0))))
