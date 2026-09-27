@@ -75,6 +75,9 @@ const DEFAULTS := {
 	"voice/advisor": true,
 	"voice/barks": true,
 	"voice/advisor_seen": "",
+	# PO (ADR 0097) : mode développeur, textes d'outil visibles (relief incomplet, commandes).
+	# Aussi vrai avec l'argument `--dev` (voir `is_dev`), sans être enregistré.
+	"dev/mode": false,
 }
 
 ## Choix proposés par le menu (texte d'interface, pas des données de jeu).
@@ -121,6 +124,12 @@ func _ready() -> void:
 	get_tree().root.size_changed.connect(_apply_ui_scale)
 	get_tree().node_added.connect(_on_node_added)
 	RenderQuality.apply_global(get_tree().root)
+
+
+## PO (ADR 0097, bible DA § 12.5) : vrai en mode développeur (réglage `dev/mode` ou `-- --dev`).
+## Hors mode dev, aucun texte d'outil (commande, chemin, identifiant brut) n'est affiché.
+func is_dev() -> bool:
+	return bool(get_value("dev/mode")) or OS.get_cmdline_user_args().has("--dev")
 
 
 ## Smoke test : valeurs par défaut, fichier dédié (le fichier du joueur n'est pas touché).

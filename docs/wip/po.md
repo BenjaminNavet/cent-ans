@@ -45,10 +45,10 @@ Coller ce prompt :
 ### PO0 — Fondations (orchestrateur, dans `main`)
 - [x] `game/tests/po_shot.gd` + planche `docs/img/po/avant/` (10 vues) — commit `wip: PO0 before board`
 - [x] Inventaire des défauts par vue (section ci-dessous), chaque défaut rattaché à un lot
-- [ ] Bible DA § 12 « Gabarit d'interface et d'étalonnage »
-- [ ] `docs/decisions/0097-gabarit-interface-et-etalonnage.md`
-- [ ] Squelette : autoload `UiLayout`, `Settings.is_dev()` + `--dev`, `po_ui_test.gd` et `po_grade_test.gd` désactivés, `time_of_day` dans le schéma d'`atmosphere.json`, section « Polish » de `docs/budget.md`
-- [ ] `smoke.gd` OK — commit `PO0: foundations (bible §12, ADR 0097, UiLayout skeleton)`
+- [x] Bible DA § 12 « Gabarit d'interface et d'étalonnage »
+- [x] `docs/decisions/0097-gabarit-interface-et-etalonnage.md`
+- [x] Squelette : autoload `UiLayout`, `Settings.is_dev()` + `--dev`, `po_ui_test.gd` et `po_grade_test.gd` désactivés, `time_of_day` dans le schéma d'`atmosphere.json`, section « Polish » de `docs/budget.md`
+- [x] `smoke.gd` OK — commit `PO0: foundations (bible §12, ADR 0097, UiLayout skeleton)`
 - [ ] `git branch feat/po-polish main` ; note `UiLayout` dans les wip HL et CV3
 
 ### Vague 1 (agents en worktree, branches issues de `feat/po-polish`)
@@ -142,3 +142,4 @@ Diagnostic de départ (spec § 1), puis vue par vue :
 - 27/09 : spec corrigée (LUT procédurale existante réutilisée, ADR 0097 car 0096 = AN1, AN1/PR1 exclus de PO4) ; plan écrit et validé.
 - 27/09 : fichier de reprise rédigé. **Prochaine étape : PO0, première case.** Rien n'est lancé, aucun worktree PO.
 - 27/09 : PO0 commencé ; planche « avant » (10 vues JPEG, `po_shot.gd` pilote les options de capture des scènes) et inventaire faits. Constat : CB-M1 et CV3-4 sont fusionnés ; 4 agents d'autres chantiers tournent (AN1a, AN1b, PR1, CB-M2), donc 2 lots PO à la fois au plus.
+- 27/09 : PO0 fondations : bible § 12 (zones en parts d'écran, échelle Title 26 / Heading 20 / Body 17 / Caption 14 px à 900 px de référence, soit ×1,2 à 1080p — ancrée sur la taille par défaut du thème, 17), ADR 0097, squelette (`UiLayout`, `Settings.is_dev()` + `--dev`, tests PO désactivés, `time_of_day` au schéma, budget). Smoke vert.
