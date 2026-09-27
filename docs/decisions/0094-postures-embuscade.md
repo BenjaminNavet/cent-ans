@@ -92,3 +92,8 @@ que le core n'a pas de biome par case.
 - Poids : tirages purs de la graine, du tour et de l'armée (`alignment::campaign_roll`), sans
   toucher au RNG de campagne ; le poids d'embuscade dépend de l'agressivité de la faction
   (`weight_per_aggression` négatif : les prudents s'embusquent davantage).
+- Portée retenue après les sondes : l'embuscade défend les terres **possédées** (`occupied_lands`
+  faux : pas d'embuscade de l'occupant contre les armées de secours), les détours vers les
+  rencontres n'ont lieu qu'en paix (`detour_at_war` faux). Bande EQ6 tenue à chaque niveau
+  (facile 5/5, normale 10/10, difficile 10/10, très difficile 4/5) ; mesures dans
+  `docs/wip/cv3-6-ia-equilibrage.md`.
