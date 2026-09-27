@@ -15,6 +15,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB2 | Modes d'unité, icônes d'état, remappage des touches | 4 | attente CB1 | |
 | CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | attente CB1 | |
 | CB5 | Alertes typées, colonne, minicarte, cris | 4 | attente CB1 | |
+| CB6 | Formations de groupe (attaque/défense, placement proposé) — demande du joueur 09-27 | 4 | attente CB1 | |
 | CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 | |
 
 ## Coordination
@@ -23,7 +24,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 - Budget de captures relevé à **10 par lot** par le joueur (09-27), lues par la session principale seulement.
 - CV3-2 fusionné dans main (09-27) : CB-M2 n'attend plus que CB-M1.
 - CV3-6 (sondes d'équilibrage) : pas de batailles de référence CB2/CB4 en même temps.
-- Fusion vague 4 : CB3, puis CB5, puis CB2 (remappage des touches et aide F1 en dernier).
+- Fusion vague 4 : CB3, puis CB5, puis CB6, puis CB2 (remappage des touches et aide F1 en dernier).
 - Icônes (≈ 40, ≈ 2 $) via le pipeline DA5 ; consigner dans `docs/budget.md`.
 
 ## Prochaine étape
