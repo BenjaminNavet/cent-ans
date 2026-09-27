@@ -1,0 +1,26 @@
+{
+  "id": "cdx_jeu_rencontres",
+  "title": "Les rencontres en chemin",
+  "category": "mecanique",
+  "aliases": [
+    "rencontre",
+    "rencontres",
+    "site de rencontre"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Sur les routes de la guerre, une armée croise marchands, pèlerins, routiers, déserteurs ou villageois : chaque rencontre offre un choix, une occasion ou un péril.",
+  "body": "Une armée en campagne n'est jamais seule sur les chemins. Des marchands italiens suivent les osts pour prêter, vendre et racheter le butin ; des pèlerins gagnent Saint-Jacques-de-Compostelle ou Rome malgré la guerre ; des hérauts courent les pays pour crier les tournois. Surtout, après la paix de [[cdx_bretigny|Brétigny]] (1360), les [[cdx_grandes_compagnies|Grandes Compagnies]] de soldats licenciés vivent sur le pays, rançonnent les villages et se louent au plus offrant ; un demi-siècle plus tard, les [[cdx_ecorcheurs|écorcheurs]] reprennent le même métier. Un capitaine qui les croise peut les combattre, les acheter ou les enrôler.",
+  "gameplay": "Au début de chaque saison, des sites de rencontre apparaissent sur la carte, loin des colonies et les uns des autres ; ils disparaissent au bout de quelques saisons. Un site que vos armées voient porte un médaillon au rouleau de parchemin ; la bulle au survol donne son titre, sa province et le temps qui lui reste.\n\nAvec une de vos armées sélectionnée, un clic sur le site l'y fait marcher. Une marche qui s'achève près du site ouvre la fenêtre de la rencontre, au gabarit de la [[cdx_jeu_chronique|chronique]] : chaque option dit ses effets ; une option impossible (trésor insuffisant, armée trop petite…) est grisée avec sa raison. Sans réponse, l'option par défaut s'applique à la fin du tour. Certaines options mènent à une bataille contre une troupe hostile, d'autres ajoutent des régiments à l'armée.\n\nLes armées de l'IA rencontrent aussi ces sites et choisissent aussitôt.",
+  "see_also": [
+    "cdx_jeu_chronique",
+    "cdx_jeu_postures",
+    "cdx_grandes_compagnies",
+    "cdx_routiers_des_compagnies",
+    "cdx_ecorcheurs"
+  ],
+  "sources": [
+    "Grandes compagnies",
+    "Écorcheurs",
+    "Traité de Brétigny"
+  ]
+}
