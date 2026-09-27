@@ -28,7 +28,11 @@ Cible cargo privée : `core/target-cb5`.
 - [x] `game/tests/cb5_alerts_test.gd` : OK, exit 0, aucune SCRIPT ERROR (fusion, zone différente,
       hors fenêtre, borne 5 + priorité, expiration, clic → signal `pinged`, intégration
       `battle.tscn` : colonne dans `hud.root`, `get_alerts()` répond, clic → caméra + minicarte).
-- [ ] `game/tests/cb5_alerts_shot.gd` (probe overlap, pas encore écrit).
+- [x] `game/tests/cb5_alerts_shot.gd --probe` : OK, exit 0, pas de SCRIPT ERROR ; colonne
+      `[8,8,244×207]`, journal `[1240,70,366×101]`, bandeau du bas `[8,766,1584×128]`, aucun
+      chevauchement, 5 lignes affichées (borne respectée). Panneau de comparaison CB-M4 non
+      fusionné dans cette branche : pas vérifié, à refaire après sa fusion (cf. note dans le
+      script et le rapport final).
 
 ## Décisions
 - Mur/porte rompus : un seul point d'émission, `record_siege_transitions` (sim/siege_assault.rs),
