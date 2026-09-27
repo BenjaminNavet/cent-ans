@@ -1,0 +1,7 @@
+{
+  "description": "Lot CV3-5 — réglages de rendu de la carte de campagne. map.army_figure_scale : agrandissement du général (figurine fine FG) qui porte l'étendard de l'ost, à la manière d'un « lord » de grande stratégie, aux paliers près et régional ; au palier lointain, retour à l'étendard et à la plaque d'effectif. map.ambush_owner_transparency : transparence des figurines d'une armée en embuscade vue par son propriétaire. Aucune règle de jeu.",
+  "map": {
+    "army_figure_scale": 1.8,
+    "ambush_owner_transparency": 0.55
+  }
+}

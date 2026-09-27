@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "campaign_map_ui.schema.json",
+  "title": "Rendu de la carte de campagne (CV3-5)",
+  "description": "Réglages purement visuels de la carte de campagne, lus par game/scripts/map/army_figures.gd. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["map"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {"type": "string"},
+    "map": {
+      "type": "object",
+      "required": ["army_figure_scale", "ambush_owner_transparency"],
+      "additionalProperties": false,
+      "properties": {
+        "army_figure_scale": {
+          "description": "Échelle du général à cheval (porteur de l'étendard de l'ost) par rapport aux autres figurines de l'armée ; 1 = même taille que l'escorte.",
+          "type": "number", "minimum": 1, "maximum": 4
+        },
+        "ambush_owner_transparency": {
+          "description": "Transparence (0 opaque, 1 invisible) des figurines et de l'étendard d'une armée en embuscade, pour son propriétaire.",
+          "type": "number", "minimum": 0, "maximum": 0.9
+        }
+      }
+    }
+  }
+}

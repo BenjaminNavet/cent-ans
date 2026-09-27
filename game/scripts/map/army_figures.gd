@@ -10,6 +10,12 @@ extends Node3D
 ## de la faction, `campaign_sail.gdshader`) qui tanguent. Au loin (palier « loin » de
 ## `ZoomTiers`), les figurines se fondent dans l'étendard et la plaque d'effectif.
 ## Rendu seulement : lit le dictionnaire `get_army` du pont, aucune règle.
+##
+## Lot CV3-5 : « lord » à l'échelle de la grande stratégie. Le général à cheval est agrandi
+## (`map.army_figure_scale`, `data/ui/campaign_map.json`) et porte lui-même l'étendard de l'ost
+## (plus de porte-étendard à pied) ; l'escorte reste derrière lui. Au palier « loin », il se fond
+## comme le reste dans l'étendard et la plaque (retour au marqueur). En embuscade, les figurines
+## du propriétaire sont semi-transparentes (`map.ambush_owner_transparency`).
 
 ## Hauteur d'homme ≈ 1,8 m (maillages V2) → ≈ 4,7 unités du repère du marqueur (hampe 8,4).
 const FIGURE_SCALE := 2.3
@@ -25,6 +31,13 @@ const LEADER_SLOT := Vector2(1.5, 0.2)
 const BEARER_SLOT := Vector2(0.1, -1.4)
 ## Pied de la hampe dans le repère du porte-étendard (main droite, un peu en avant).
 const POLE_IN_HAND := Vector2(0.35, 0.55)
+## Lot CV3-5 : main droite du cavalier (repère du général à l'échelle 1 : en avant, à droite,
+## hauteur de la main au-dessus du sol) ; recul du général par unité d'agrandissement (sa monture
+## grandit vers l'avant, pas sur l'escorte).
+const LORD_HAND := Vector3(0.4, 3.8, 0.7)
+const LORD_ADVANCE := 2.6
+const CAMPAIGN_MAP_DATA := "ui/campaign_map.json"
+const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
 const ESCORT_ROWS_X := [-1.4, -3.0]
 const ESCORT_FILE_Z := [-1.3, 0.0, 1.3]
 ## Pied de la hampe de poupe (`campaign_fleet.py`, STERN_STAFF), repère du navire.
@@ -59,6 +72,12 @@ var _level: int = -1
 var _weight: float = 1.0
 var _color: Color = Color.WHITE
 var _heraldry: Texture2D
+## Lot CV3-5 : agrandissement du général porte-étendard (1 = pas de lord : porte-étendard à pied).
+var lord_scale: float = 1.0
+## Lot CV3-5 : figurines semi-transparentes (embuscade vue par son propriétaire).
+var ghost: bool = false
+
+static var _map_settings: Dictionary = {}
 
 static var _sail_meshes: Dictionary = {}  # "modèle|couleur" → Mesh aux voiles teintes
 
@@ -73,14 +92,44 @@ static func enabled() -> bool:
 
 static func clear_cache() -> void:
 	_sail_meshes.clear()
+	_map_settings.clear()
 
 
-## Construit la représentation d'une armée (`army` = dictionnaire du pont).
-static func build(army: Dictionary, color: Color, heraldry: Texture2D, seed_text: String) -> ArmyFigures:
+## Lot CV3-5 : réglages de rendu `map` de `data/ui/campaign_map.json` (repli : pas de lord).
+static func map_settings() -> Dictionary:
+	if _map_settings.is_empty():
+		var fallback := {"army_figure_scale": 1.0, "ambush_owner_transparency": 0.0}
+		_map_settings = fallback.duplicate()
+		var path := _data_dir().path_join(CAMPAIGN_MAP_DATA)
+		if not FileAccess.file_exists(path):
+			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(CAMPAIGN_MAP_DATA)
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		if parsed is Dictionary and parsed.get("map") is Dictionary:
+			_map_settings.merge(parsed["map"], true)
+		else:
+			push_warning("ArmyFigures: %s missing or invalid" % path)
+	return _map_settings
+
+
+static func _data_dir() -> String:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null and tree.root != null:
+		var map_paths := tree.root.get_node_or_null("MapPaths")
+		if map_paths != null:
+			return str(map_paths.get("data_dir"))
+	return MAP_PATHS_SCRIPT.project_root().path_join("data")
+
+
+## Construit la représentation d'une armée (`army` = dictionnaire du pont). `owner_view` :
+## l'armée appartient au joueur (lot CV3-5 : embuscade semi-transparente pour lui seul).
+static func build(army: Dictionary, color: Color, heraldry: Texture2D, seed_text: String, owner_view: bool = false) -> ArmyFigures:
 	var figures := ArmyFigures.new()
 	figures.name = ModelLibrary.MODEL_NODE
 	figures._color = color
 	figures._heraldry = heraldry
+	var settings := map_settings()
+	figures.lord_scale = maxf(float(settings.get("army_figure_scale", 1.0)), 1.0)
+	figures.ghost = owner_view and str(army.get("stance", "")) == "ambush"
 	figures._anim_time = float(absi(hash(seed_text)) % 1000) * 0.013
 	for unit in army.get("units", []):
 		figures.men += int(unit.get("strength", 0))
@@ -162,8 +211,12 @@ static func escort_roster(army: Dictionary) -> Array:
 
 func _build_troop(army: Dictionary) -> void:
 	var slots: Dictionary = {}  # "kind_variant" → Array[Transform3D]
-	_add_slot(slots, "cavalry", 0, LEADER_SLOT, 0.0)
-	_add_slot(slots, "infantry", 0, BEARER_SLOT, 0.0)
+	if is_lord():
+		# Lot CV3-5 : le général agrandi porte l'étendard ; pas de porte-étendard à pied.
+		_add_slot(slots, "cavalry", 0, lord_slot(), 0.0, lord_scale)
+	else:
+		_add_slot(slots, "cavalry", 0, LEADER_SLOT, 0.0)
+		_add_slot(slots, "infantry", 0, BEARER_SLOT, 0.0)
 	var roster := escort_roster(army)
 	for i in roster.size():
 		var row := i / ESCORT_FILE_Z.size()
@@ -197,16 +250,33 @@ func _build_troop(army: Dictionary) -> void:
 		instance.layers = 2
 		var material := _make_material(figure_kind, variant)
 		instance.material_override = material
+		if ghost:
+			instance.transparency = ghost_transparency()
 		troop.add_child(instance)
 		_groups[key] = {"mm": instance, "kind": figure_kind, "variant": variant, "material": material}
 
 
-static func _add_slot(slots: Dictionary, figure_kind: String, variant: int, slot: Vector2, yaw: float) -> void:
+## Lot CV3-5 : vrai quand le général agrandi porte l'étendard (réglage > 1).
+func is_lord() -> bool:
+	return lord_scale > 1.001
+
+
+## Lot CV3-5 : place du général agrandi (avancé pour que sa monture ne couvre pas l'escorte).
+func lord_slot() -> Vector2:
+	return LEADER_SLOT + Vector2(LORD_ADVANCE * (lord_scale - 1.0), 0.0)
+
+
+## Lot CV3-5 : transparence des figurines en embuscade (0 si opaques).
+func ghost_transparency() -> float:
+	return clampf(float(map_settings().get("ambush_owner_transparency", 0.0)), 0.0, 0.9) if ghost else 0.0
+
+
+static func _add_slot(slots: Dictionary, figure_kind: String, variant: int, slot: Vector2, yaw: float, size: float = 1.0) -> void:
 	var key := "%s_%d" % [figure_kind, variant]
 	if not slots.has(key):
 		slots[key] = []
 	# Figurines V2 : regard +Z ; le groupe regarde +X (rotation d'un quart de tour).
-	var basis := Basis(Vector3.UP, PI * 0.5 + yaw).scaled(Vector3.ONE * FIGURE_SCALE)
+	var basis := Basis(Vector3.UP, PI * 0.5 + yaw).scaled(Vector3.ONE * FIGURE_SCALE * size)
 	(slots[key] as Array).append(Transform3D(basis, Vector3(slot.x, 0.0, slot.y)))
 
 
@@ -252,6 +322,12 @@ func bearer_anchor() -> Vector3:
 	if kind == "fleet":
 		# Hampe enfoncée dans le château de poupe (étendard au-dessus du mât, lisible).
 		return Basis(Vector3.UP, rotation.y) * (STERN_STAFF * SHIP_SCALE) - Vector3(0.0, 3.0, 0.0)
+	if is_lord():
+		# Lot CV3-5 : dans la main du général ; suit le fondu des figurines (au loin, la hampe
+		# redescend au pied du marqueur).
+		var slot := lord_slot()
+		var hand := Vector3(slot.x + LORD_HAND.x * lord_scale, LORD_HAND.y * lord_scale, slot.y + LORD_HAND.z * lord_scale)
+		return Basis(Vector3.UP, rotation.y) * (hand * clampf(_weight, 0.0, 1.0))
 	var local := Vector3(BEARER_SLOT.x + POLE_IN_HAND.x, 0.0, BEARER_SLOT.y + POLE_IN_HAND.y)
 	return Basis(Vector3.UP, rotation.y) * local
 
