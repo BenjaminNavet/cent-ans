@@ -61,7 +61,8 @@
       "description": "Lot CV3-6 : détour d'une armée de l'IA sans objectif urgent vers un site de rencontre qu'elle atteint ce tour.",
       "properties": {
         "detour_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance (pour mille) du détour, par armée et par tour. 0 : jamais." },
-        "sight_km": { "type": "number", "exclusiveMinimum": 0, "description": "Sites considérés : à moins de cette distance (km) de l'armée (ce qu'elle voit)." }
+        "sight_km": { "type": "number", "exclusiveMinimum": 0, "description": "Sites considérés : à moins de cette distance (km) de l'armée (ce qu'elle voit)." },
+        "detour_at_war": { "type": "boolean", "description": "Les armées d'un royaume en guerre font aussi des détours (sans armée ennemie autour de leur province) ; sinon seulement en paix. Défaut : faux." }
       },
       "required": ["detour_permille", "sight_km"],
       "additionalProperties": false

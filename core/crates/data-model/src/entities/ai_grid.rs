@@ -168,6 +168,10 @@ pub struct AiEncounters {
     /// Sites considered: within this distance (km) of the army (what it
     /// sees).
     pub sight_km: f64,
+    /// Armies of a realm at war also make detours (when no hostile army
+    /// threatens their province); otherwise only at peace.
+    #[serde(default)]
+    pub detour_at_war: bool,
 }
 
 impl Default for AiEncounters {
@@ -175,6 +179,7 @@ impl Default for AiEncounters {
         Self {
             detour_permille: 0,
             sight_km: 30.0,
+            detour_at_war: false,
         }
     }
 }
