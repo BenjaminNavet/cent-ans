@@ -119,6 +119,7 @@ pub struct HoverRules {
     pub pick: PickRules,
     pub compare: CompareRules,
     pub preview: PreviewRules,
+    pub range_arc: RangeArcRules,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -148,6 +149,23 @@ pub struct PreviewRules {
     pub max_recomputes_per_s: f64,
     /// Beyond this many selected regiments, one path from the centre.
     pub max_individual_paths: u32,
+}
+
+/// CB-M4: the shooting range drawn on the ground.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RangeArcRules {
+    /// Half-angle of the sector drawn ahead of a shooter (degrees). The
+    /// core does not restrict the angle of fire (a shooter turns to its
+    /// target); this is the sector covered without turning.
+    pub fire_half_angle_deg: f64,
+}
+
+impl RangeArcRules {
+    /// [`Self::fire_half_angle_deg`] in radians.
+    pub fn fire_half_angle(&self) -> f64 {
+        self.fire_half_angle_deg.to_radians()
+    }
 }
 
 const BUNDLED: &str = include_str!("../../../../data/rules/battle_hover.json");
@@ -304,6 +322,20 @@ impl BattleSim {
         let deep =
             field.water_kind(x, z).is_some_and(Water::deep) && field.bridge_at(x, z).is_none();
         deep && chosen.all(BattleSim::stopped_by_deep_water)
+    }
+
+    /// CB-M4: the range drawn around `unit` on the ground — its effective
+    /// range against ground at its own feet (weather, time of day, the
+    /// height it stands at: a wall walk or a hilltop reaches farther), 0
+    /// for a regiment that cannot shoot or has no missiles left. Same
+    /// figure as the comparison's `range` line against a target level with
+    /// the shooter.
+    pub fn ground_range(&self, unit: &Unit) -> f64 {
+        if unit.can_shoot() && unit.ammo > 0 {
+            self.effective_range(unit, unit.x, unit.z)
+        } else {
+            0.0
+        }
     }
 
     /// CB-M2: face-to-face figures of `ours` and `theirs`.

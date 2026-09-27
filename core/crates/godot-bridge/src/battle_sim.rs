@@ -881,6 +881,10 @@ impl BattleSim {
                     "loss_cause" => unit.loss_cause.key(),
                     "loss_by" => unit.loss_by.map_or(-1, i64::from),
                     "knocked" => if unit.knocked_timer > 0.0 { unit.knocked } else { 0.0 },
+                    // CB-M4: range drawn on the ground (0 without missiles) and the
+                    // half-angle of the drawn sector (radians, `battle_hover.json`).
+                    "effective_range" => sim.ground_range(unit),
+                    "fire_arc" => sim_battle::HoverRules::bundled().range_arc.fire_half_angle(),
                 };
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
