@@ -11,29 +11,36 @@ extends Node3D
 ##
 ## Rendu seulement : la scène fournit `get_units()`, la sélection et les régiments survolés.
 ## Coût par image : aucune allocation ; une décale cachée n'est pas touchée, une décale visible ne
-## change de texture ou de couleur que si son état ou ses proportions changent.
+## change de texture ou de couleur que si son état ou sa taille (arrondie) changent.
+##
+## Piège (corrigé) : l'émission d'une décale Godot s'ajoute sans tenir compte de l'alpha de
+## l'albédo ; le fond transparent de la texture doit donc être NOIR (0, 0, 0, 0), sinon tout le
+## rectangle émet la couleur de `modulate` (rectangle plein au lieu d'un cadre).
 
 enum State { NONE, SELECTED, HOVERED, ENEMY_HOVERED, ENEMY_TARGETED }
 
-const ENEMY_RED := Color(0.86, 0.12, 0.08)
+const ENEMY_RED := Color(0.9, 0.12, 0.08)
 const MARGIN := 3.0  # m ajoutés au front et à la profondeur (comme l'ancien anneau)
 const HEIGHT := 30.0  # m : hauteur de projection, couvre le relief sous la formation
-## Textures : le petit côté fait `SHORT_PX` pixels, le grand `SHORT_PX × rapport` ; un jeu de
-## rapports fixes (des deux sens) borne le nombre de textures, générées une fois à la demande.
-const SHORT_PX := 96
-const LINE_PX := 4
-const DASH_PX := 14
-const GAP_PX := 10
-const RATIOS: Array[float] = [1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0]
+## Textures à échelle fixe : `PX_PER_M` pixels par mètre, taille de décale arrondie au pas
+## `SIZE_STEP` (m) ; le trait fait donc `LINE_M` mètres quelle que soit la formation.
+const PX_PER_M := 6
+const SIZE_STEP := 2.0
+const MAX_SIZE := 300.0  # m : borne de la texture (1800 px)
+const LINE_M := 1.0
+const DASH_M := 4.0
+const GAP_M := 2.5
 const PULSE_HZ := 1.1
-const PULSE_MIN := 0.3  # opacité au creux du pulsé
+const PULSE_MIN := 0.35  # opacité au creux du pulsé
+const EMISSION := 0.9  # le trait reste lisible dans l'ombre et au crépuscule
 
-## Textures partagées par toutes les scènes : Vector3i(indice du rapport, vertical, pointillé).
+## Textures partagées par toutes les scènes : Vector3i(pas en largeur, pas en profondeur,
+## pointillé) -> [albédo, émission], générées une fois à la demande.
 static var _textures: Dictionary = {}
 
 var _side_colors: Dictionary = {}
 var _player_side := "attacker"
-## id -> Decal ; id -> [état, clé de texture, x, z, facing, largeur, profondeur, y].
+## id -> Decal ; id -> [état, clé de texture, x, z, facing, y].
 var _decals: Dictionary = {}
 var _entries: Dictionary = {}
 var _targets: Array[int] = []  # cibles des unités sélectionnées (réutilisé à chaque image)
@@ -94,28 +101,21 @@ func update(units: Array, selected: Array, hovered: Array) -> void:
 		var z := float(unit["z"])
 		var y := float(unit["y"])
 		var facing := float(unit["facing"])
-		var width := float(unit["width"]) + MARGIN
-		var depth := float(unit["depth"]) + MARGIN
-		if not decal.visible or x != float(entry[2]) or z != float(entry[3]) or y != float(entry[7]):
+		if not decal.visible or x != float(entry[2]) or z != float(entry[3]) or y != float(entry[5]):
 			decal.position = Vector3(x, y, z)
 			entry[2] = x
 			entry[3] = z
-			entry[7] = y
+			entry[5] = y
 		if not decal.visible or facing != float(entry[4]):
 			decal.rotation = Vector3(0, facing, 0)
 			entry[4] = facing
-		var resized := absf(width - float(entry[5])) > 0.25 or absf(depth - float(entry[6])) > 0.25
-		if resized:
-			decal.size = Vector3(width, HEIGHT, depth)
-			entry[5] = width
-			entry[6] = depth
-		if state_changed or resized:
-			var key := texture_key(width, depth, state == State.ENEMY_HOVERED)
-			if key != entry[1]:
-				entry[1] = key
-				var texture := _texture(key)
-				decal.texture_albedo = texture
-				decal.texture_emission = texture
+		var key := texture_key(float(unit["width"]) + MARGIN, float(unit["depth"]) + MARGIN, state == State.ENEMY_HOVERED)
+		if key != entry[1]:
+			entry[1] = key
+			decal.size = Vector3(key.x * SIZE_STEP, HEIGHT, key.y * SIZE_STEP)
+			var pair := _texture_pair(key)
+			decal.texture_albedo = pair[0]
+			decal.texture_emission = pair[1]
 		if state_changed:
 			decal.modulate = _color(state, str(unit["side"]))
 		decal.visible = true
@@ -157,13 +157,13 @@ func _make_decal(id: int) -> Decal:
 	decal.visible = false
 	decal.size = Vector3(1, HEIGHT, 1)
 	decal.albedo_mix = 1.0
-	decal.emission_energy = 0.8
+	decal.emission_energy = EMISSION
 	decal.upper_fade = 0.05
 	decal.lower_fade = 0.05
 	decal.normal_fade = 0.0
 	add_child(decal)
 	_decals[id] = decal
-	_entries[id] = [State.NONE, Vector3i(-1, -1, -1), 0.0, 0.0, 0.0, -1.0, -1.0, 0.0]
+	_entries[id] = [State.NONE, Vector3i(-1, -1, -1), 0.0, 0.0, 0.0, 0.0]
 	return decal
 
 
@@ -171,62 +171,66 @@ func _color(state: int, side: String) -> Color:
 	var livery: Color = _side_colors.get(side, Color(0.9, 0.8, 0.3))
 	match state:
 		State.SELECTED:
-			return Color(livery, 1.0)
+			# Couleur du camp, éclaircie : une livrée sombre (bleu de France) disparaît sur l'herbe.
+			return Color(livery.lerp(Color.WHITE, 0.3), 1.0)
 		State.HOVERED:
-			return Color(livery.lerp(Color.WHITE, 0.6), 0.6)
+			return Color(livery.lerp(Color.WHITE, 0.65), 0.7)
 		State.ENEMY_HOVERED:
-			return Color(ENEMY_RED, 0.9)
+			return Color(ENEMY_RED, 0.95)
 		State.ENEMY_TARGETED:
 			return Color(ENEMY_RED, 1.0)
 	return Color.TRANSPARENT
 
 
-## Clé de la texture pour une décale `width` × `depth` : rapport le plus proche (échelle
-## logarithmique), sens (grand côté en largeur ou en profondeur), trait pointillé ou plein.
+## Clé de texture d'une décale `width` × `depth` (m, marge comprise) : taille arrondie au pas
+## `SIZE_STEP` supérieur (bornée à `MAX_SIZE`), trait pointillé ou plein.
 static func texture_key(width: float, depth: float, dashed: bool) -> Vector3i:
-	var vertical := depth > width
-	var ratio := maxf(width, depth) / maxf(minf(width, depth), 0.01)
-	var best := 0
-	for i in RATIOS.size():
-		if absf(log(RATIOS[i]) - log(ratio)) < absf(log(RATIOS[best]) - log(ratio)):
-			best = i
-	return Vector3i(best, 1 if vertical else 0, 1 if dashed else 0)
+	var steps_x := clampi(ceili(width / SIZE_STEP), 1, int(MAX_SIZE / SIZE_STEP))
+	var steps_z := clampi(ceili(depth / SIZE_STEP), 1, int(MAX_SIZE / SIZE_STEP))
+	return Vector3i(steps_x, steps_z, 1 if dashed else 0)
 
 
-static func _texture(key: Vector3i) -> ImageTexture:
+## [albédo, émission] : même cadre ; fond transparent blanc pour l'albédo (les mipmaps ne
+## foncent pas le trait au loin), noir pour l'émission (ajoutée sans l'alpha, voir en tête).
+static func _texture_pair(key: Vector3i) -> Array:
 	if _textures.has(key):
 		return _textures[key]
-	var long_px := int(round(SHORT_PX * RATIOS[key.x]))
-	var size := Vector2i(SHORT_PX, long_px) if key.y == 1 else Vector2i(long_px, SHORT_PX)
-	var texture := ImageTexture.create_from_image(outline_image(size, key.z == 1))
-	_textures[key] = texture
-	return texture
+	var px := int(SIZE_STEP) * PX_PER_M
+	var size := Vector2i(key.x * px, key.y * px)
+	var pair := [
+		ImageTexture.create_from_image(outline_image(size, key.z == 1, Color(1, 1, 1, 0))),
+		ImageTexture.create_from_image(outline_image(size, key.z == 1, Color(0, 0, 0, 0))),
+	]
+	_textures[key] = pair
+	return pair
 
 
-## Image du contour (blanc opaque sur fond transparent, teintée par `modulate`) : cadre de
-## `LINE_PX` pixels, plein ou en tirets de `DASH_PX` séparés de `GAP_PX`.
-static func outline_image(size: Vector2i, dashed: bool) -> Image:
+## Image du contour à `PX_PER_M` px/m : cadre blanc opaque de `LINE_M` m (teinté par
+## `modulate`), plein ou en tirets, sur le fond transparent `background`.
+static func outline_image(size: Vector2i, dashed: bool, background: Color = Color(0, 0, 0, 0)) -> Image:
 	var image := Image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
-	image.fill(Color(1, 1, 1, 0))
+	image.fill(background)
 	var white := Color(1, 1, 1, 1)
+	var line := int(LINE_M * PX_PER_M)
 	if not dashed:
-		image.fill_rect(Rect2i(0, 0, size.x, LINE_PX), white)
-		image.fill_rect(Rect2i(0, size.y - LINE_PX, size.x, LINE_PX), white)
-		image.fill_rect(Rect2i(0, 0, LINE_PX, size.y), white)
-		image.fill_rect(Rect2i(size.x - LINE_PX, 0, LINE_PX, size.y), white)
+		image.fill_rect(Rect2i(0, 0, size.x, line), white)
+		image.fill_rect(Rect2i(0, size.y - line, size.x, line), white)
+		image.fill_rect(Rect2i(0, 0, line, size.y), white)
+		image.fill_rect(Rect2i(size.x - line, 0, line, size.y), white)
 	else:
-		var period := DASH_PX + GAP_PX
+		var dash := int(DASH_M * PX_PER_M)
+		var period := dash + int(GAP_M * PX_PER_M)
 		var x := 0
 		while x < size.x:
-			var run := mini(DASH_PX, size.x - x)
-			image.fill_rect(Rect2i(x, 0, run, LINE_PX), white)
-			image.fill_rect(Rect2i(x, size.y - LINE_PX, run, LINE_PX), white)
+			var run := mini(dash, size.x - x)
+			image.fill_rect(Rect2i(x, 0, run, line), white)
+			image.fill_rect(Rect2i(x, size.y - line, run, line), white)
 			x += period
 		var z := 0
 		while z < size.y:
-			var run := mini(DASH_PX, size.y - z)
-			image.fill_rect(Rect2i(0, z, LINE_PX, run), white)
-			image.fill_rect(Rect2i(size.x - LINE_PX, z, LINE_PX, run), white)
+			var run := mini(dash, size.y - z)
+			image.fill_rect(Rect2i(0, z, line, run), white)
+			image.fill_rect(Rect2i(size.x - line, z, line, run), white)
 			z += period
 	image.generate_mipmaps()
 	return image
