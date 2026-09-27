@@ -16,7 +16,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | **fusionné 09-28** (`spotted` = fonction pure, portée `missile_arc.spotter_range_m` 350 m ; assombrissement par calque HUD) | `cb3-camera-vue-tactique.md` |
 | CB5 | Alertes typées, colonne, minicarte, cris | 4 | **fusionné 09-28** (parti d'un main ancien : test cœur remis à jour à la fusion ; cris doublés possibles avec `_detect_events`, amortis par cooldown) | `cb5-alertes.md` |
 | CB6 | Formations de groupe (6 préréglages, placement proposé) — demande du joueur 09-27 | 4 | **fusionné 09-28** (Ligne de bataille = placement d'avant au bit près ; sélecteur toujours affiché en bataille, à rendre repliable) | `cb6-formations-groupe.md` |
-| CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 (relecture historique **faite**) | |
+| CB4 | Capacités actives (5 retenues après relecture historique) | 5 | **en cours** (agent, `feat/cb4-abilities`) | `cb4-capacites.md` |
 
 ## Coordination
 - Icônes : les agents de la vague 4 dessinent des glyphes en code ; la session principale génère toutes les icônes DA5 (curseurs, cadenas, modes, états, alertes, capacités) en une fois après CB4 (≈ 2 $, `docs/budget.md`).
