@@ -8,6 +8,8 @@ signal clicked(world: Vector2)
 
 const SIZE := Vector2(168, 104)
 const INK := Color(0.22, 0.14, 0.07)
+## CB5 : durée du repère pulsé (secondes), un peu plus court que la colonne d'alertes.
+const PING_SECONDS := 2.5
 
 var field_size: Vector2 = Vector2(1200, 800)
 var side_colors: Dictionary = {}
@@ -15,6 +17,8 @@ var _terrain: Dictionary = {}
 var _relief: ImageTexture = null
 var _dots: Array = []  # [Vector2 monde, Color]
 var _frame := PackedVector2Array()  # cadre de la caméra au sol (monde x, z)
+var _ping_world: Vector2 = Vector2.ZERO  # CB5 : lieu d'une alerte cliquée
+var _ping_time: float = -1.0  # < 0 : pas de repère actif
 
 
 func _init() -> void:
@@ -22,6 +26,7 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true  # bois et boues débordant du champ
 	tooltip_text = "Minicarte : cliquer pour y porter la caméra"
+	set_process(false)  # CB5 : seulement pendant un repère pulsé
 
 
 ## `terrain` : dictionnaire de `BattleSim.get_terrain()` ; `colors` : camp → couleur.
@@ -61,6 +66,26 @@ func update(units: Array, frame: PackedVector2Array) -> void:
 
 func dot_count() -> int:
 	return _dots.size()
+
+
+## CB5 : fait pulser un repère à `world` (monde x/z) pendant `PING_SECONDS`, lancé par un clic
+## sur une alerte de `BattleAlertsColumn`.
+func ping(world: Vector2) -> void:
+	_ping_world = world
+	_ping_time = 0.0
+	set_process(true)
+	queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if _ping_time < 0.0:
+		set_process(false)
+		return
+	_ping_time += delta
+	if _ping_time >= PING_SECONDS:
+		_ping_time = -1.0
+		set_process(false)
+	queue_redraw()
 
 
 ## Retournée de 180° quand le joueur regarde vers +z (attaquant) : son camp reste en bas.
@@ -156,6 +181,11 @@ func _draw() -> void:
 			outline.append(to_map(point))
 		outline.append(outline[0])
 		draw_polyline(outline, Color(1, 0.97, 0.85), 1.5)
+	if _ping_time >= 0.0:
+		# CB5 : anneau qui grandit et s'efface (clic sur une alerte de la colonne).
+		var t := _ping_time / PING_SECONDS
+		var center := to_map(_ping_world)
+		draw_arc(center, lerpf(2.0, 14.0, t), 0.0, TAU, 24, Color(1.0, 0.85, 0.3, 1.0 - t), 2.5)
 	draw_rect(rect, INK, false, 1.5)
 
 
