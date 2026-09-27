@@ -127,6 +127,8 @@ impl CampaignState {
         crate::chivalry::resolve_chivalry(self, data, events);
         research::resolve_research(self, data, events);
         economy::resolve_attrition(self, data, events);
+        // CV3: forced marches pay their supply, morale modifiers wear off.
+        crate::posture::end_of_turn(self, data);
         economy::resolve_decay(self, data);
         // NV1: blockades, sea control, shipyards.
         crate::naval::resolve_season(self, data, events);
@@ -165,6 +167,8 @@ impl CampaignState {
         // 11. New season (step 4 of § 3.4): movement points are refilled,
         // then the player plays.
         self.advance_date();
+        // CV3: forced marches end before the movement points are refilled.
+        crate::posture::start_of_turn(self);
         let allowances: Vec<(crate::state::ArmyId, u32)> = self
             .armies
             .iter()

@@ -821,7 +821,9 @@ pub(crate) fn resolve_attrition(
             army.supply = army.supply.saturating_add(change.unsigned_abs()).min(100);
             continue;
         }
-        army.supply = army.supply.saturating_sub(change.unsigned_abs());
+        // CV3: an entrenched camp saves part of the loss.
+        let loss = crate::posture::entrenched_loss(data, army, change.unsigned_abs());
+        army.supply = army.supply.saturating_sub(loss);
         if army.supply == 0 {
             let mut lost = 0;
             let starvation = data.economy_rules.starvation_loss_percent;
