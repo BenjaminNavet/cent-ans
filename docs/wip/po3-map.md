@@ -5,7 +5,7 @@ Références : bible DA § 12.6, ADR 0097.
 
 ## État
 - [x] Squelette : `game/tests/po3_shot.gd`, ce fichier.
-- [ ] 1. Lumière : soleil rasant par saison dans `atmosphere.json` (`campaign.seasons.<s>`), brume bleu-or, étalonnage en S.
+- [x] 1. Lumière : soleil rasant par saison dans `atmosphere.json` (`campaign.seasons.<s>`), brume bleu-or, étalonnage en S.
 - [ ] 2. Forêts : teinte 3 tons + échelle ±25 % (shader), lisières basses et clairsemées (masque de couverture).
 - [ ] 3. Étiquettes : encre + halo léger, taille/graisse par rang (20/17/14 px, PO2 : `UiType`).
 - [ ] 4. `po_grade_test.gd` partie campagne ; `smoke.gd` ; `da7d_overlap_test.gd` ; banc PB1.
@@ -15,4 +15,4 @@ Références : bible DA § 12.6, ADR 0097.
 - Avant : à mesurer.
 
 ## Prochaine étape
-Lumière (étape 1).
+Mesurer la saturation (DA7b) de la lumière, puis forêts (étape 2).
