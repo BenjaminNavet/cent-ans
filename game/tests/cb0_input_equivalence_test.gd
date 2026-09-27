@@ -53,6 +53,7 @@ func _run() -> void:
 	_scene.issued_log.clear()
 	await _play_sequence()
 	var actual: Array = _scene.issued_log
+	await _check_quick_select()  # CB0 étape 4 : n'affecte pas `issued_log` (déjà capturé ci-dessus)
 	if record:
 		var file := FileAccess.open(GOLDEN_PATH, FileAccess.WRITE)
 		file.store_string(JSON.stringify(actual, "\t"))
@@ -147,6 +148,52 @@ func _play_sequence() -> void:
 	OS.delay_msec(700)
 	_key(KEY_1)
 	await process_frame
+
+
+## CB0 étape 4 (sélection rapide) : assertions directes, sans toucher au golden ci-dessus.
+##  - Ctrl/Cmd+A = toutes les troupes du joueur présentes, hors déroute ;
+##  - double clic gauche (350 ms) sur une troupe au sol = même `type` ;
+##  - double clic sur une carte (`_on_card_double_clicked`) = même `type` et recentrage caméra.
+func _check_quick_select() -> void:
+	_scene.selected.clear()
+	_key(KEY_A, true)
+	var units: Array = _scene.battle.call("get_units")
+	var expected_all: Array[int] = []
+	for unit in units:
+		if str(unit["side"]) == _scene.player_side and bool(unit["present"]) and str(unit["state"]) != "routing":
+			expected_all.append(int(unit["id"]))
+	_check(_ids_match(_scene.selected, expected_all), "Ctrl+A: got %s, expected %s" % [_scene.selected, expected_all])
+
+	_scene.selected.clear()
+	var mine: Array = units.filter(func(u: Dictionary) -> bool: return str(u["side"]) == _scene.player_side and bool(u["present"]))
+	if not _check(mine.size() >= 1, "no player regiment for the quick-select check"):
+		return
+	var target: Dictionary = mine[0]
+	var kind := str(target["type"])
+	var expected_same_type: Array[int] = []
+	for unit in mine:
+		if str(unit["type"]) == kind:
+			expected_same_type.append(int(unit["id"]))
+	var s: Vector2 = _scene._unit_screen(target)
+	_left_click(s, false)  # simple clic : sélection normale
+	_left_click(s, false)  # aussitôt après : double clic, même type
+	_check(_ids_match(_scene.selected, expected_same_type), "double left click on a %s: got %s, expected %s" % [kind, _scene.selected, expected_same_type])
+
+	_scene.selected.clear()
+	_scene.camera_rig.look_at_point(Vector3.ZERO, 750.0, 0.0)  # loin de la cible : le recentrage doit bouger la caméra
+	_scene._on_card_double_clicked(int(target["id"]))
+	_check(_ids_match(_scene.selected, expected_same_type), "card double click on a %s: got %s, expected %s" % [kind, _scene.selected, expected_same_type])
+	var recentered: float = _scene.camera_rig.target.distance_to(Vector3(float(target["x"]), 0.0, float(target["z"])))
+	_check(recentered < 5.0, "card double click should recenter the camera on the regiment (off by %.1f m)" % recentered)
+
+
+func _ids_match(actual: Array, expected: Array[int]) -> bool:
+	if actual.size() != expected.size():
+		return false
+	for id in expected:
+		if not actual.has(id):
+			return false
+	return true
 
 
 func _left_click(pos: Vector2, shift: bool) -> void:

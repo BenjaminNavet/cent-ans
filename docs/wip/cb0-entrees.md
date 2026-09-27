@@ -17,12 +17,14 @@ Branche : `feat/cb0-battle-input`. Plan : `docs/superpowers/plans/2026-09-27-con
       `_next_formation`/`_available_selection`/état glisser+double clic/`_deploy_selection`
       déplacés. Délégations fines gardées sur la scène (`issue`, `handle_group_key`) pour
       `smoke.gd`. Test d'équivalence vert sans toucher au golden.
-- [ ] Sélection rapide (Ctrl/Cmd+A, double clic gauche même type, double clic carte même type +
-      recentrage).
-- [ ] `smoke.gd` (en cours de vérification) et le test d'équivalence passent tous les deux.
+- [x] Sélection rapide dans `battle_input.gd` : Ctrl/Cmd+A (troupes du joueur présentes, hors
+      déroute), double clic gauche 350 ms sur une troupe = même `type`, `_on_card_double_clicked`
+      (scène, inchangé par ailleurs) délègue à `select_same_type_of` puis recentre comme avant.
+      Assertions ajoutées à `cb0_input_equivalence_test.gd` (`_check_quick_select`), golden de
+      l'étape 2 non modifié.
+- [x] `smoke.gd` et le test d'équivalence passent tous les deux (CB0 terminé).
 
-## Prochaine étape
+## Terminé
 
-Ajouter la sélection rapide dans `battle_input.gd` (Ctrl/Cmd+A, double clic gauche 350 ms même
-`type`, `card_double_clicked` même type + recentrage sur `_on_card_double_clicked`), avec des
-assertions ajoutées au test d'équivalence sans réécrire le golden existant. Commit `feat:` séparé.
+CB0 est fait : squelette, golden, extraction, sélection rapide, `smoke.gd` vert. Rien à reprendre
+ici ; prochain lot du plan (CB-M1) part de zéro dans son propre worktree/branche.

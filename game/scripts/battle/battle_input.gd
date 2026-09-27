@@ -28,6 +28,9 @@ var _right_press: Vector2 = Vector2(-1, -1)
 var _right_press_ground: Vector3 = Vector3.ZERO
 var _last_right_click_ms: int = -10000
 var _last_group_ms: int = -10000
+## CB0 (sélection rapide) : double clic gauche (350 ms) sur une même troupe.
+var _last_left_click_ms: int = -10000
+var _last_left_click_unit: int = -1
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -53,6 +56,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				help_toggled.emit()
 			KEY_U:
 				markers_toggled.emit()
+			KEY_A:
+				# CB0 : sélection rapide, Ctrl/Cmd+A = toutes les troupes du joueur présentes.
+				if key.ctrl_pressed or key.meta_pressed:
+					_select_all_player_units()
 			KEY_F:
 				_on_command("formation")
 			KEY_G:
@@ -129,7 +136,14 @@ func _finish_left(position: Vector2, additive: bool) -> void:
 	else:
 		var picked := scene.pick_unit(position, scene.player_side)
 		if picked >= 0:
-			if additive and scene.selected.has(picked):
+			# CB0 : sélection rapide, double clic gauche (350 ms) sur une troupe = même type.
+			var now := Time.get_ticks_msec()
+			var double_click := picked == _last_left_click_unit and now - _last_left_click_ms < DOUBLE_CLICK_MS
+			_last_left_click_ms = now
+			_last_left_click_unit = picked
+			if double_click:
+				select_same_type_of(picked)
+			elif additive and scene.selected.has(picked):
 				scene.selected.erase(picked)
 			elif not scene.selected.has(picked):
 				scene.selected.append(picked)
@@ -232,3 +246,31 @@ func _deploy_selection(press: Vector2, release: Vector2) -> void:
 	var p0 := _right_press_ground if press.x >= 0.0 and press.distance_to(release) > 20.0 else p1
 	scene.deployment.place(scene.selected.duplicate(), p0, p1, scene.camera_rig.camera.global_position)
 	scene._refresh_view(true)
+
+
+## CB0 : Ctrl/Cmd+A = toutes les troupes du joueur présentes, hors déroute.
+func _select_all_player_units() -> void:
+	var ids: Array[int] = []
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side and bool(unit["present"]) and str(unit["state"]) != "routing":
+			ids.append(int(unit["id"]))
+	scene.selected = ids
+	selection_changed.emit(scene.selected)
+
+
+## CB0 : double clic (gauche sur le terrain, ou carte via `BattleScene._on_card_double_clicked`)
+## = même `type` parmi les troupes présentes du joueur.
+func select_same_type_of(unit_id: int) -> void:
+	var kind := ""
+	for unit in scene.units:
+		if int(unit["id"]) == unit_id:
+			kind = str(unit["type"])
+			break
+	if kind == "":
+		return
+	var ids: Array[int] = []
+	for unit in scene.units:
+		if str(unit["side"]) == scene.player_side and bool(unit["present"]) and str(unit["type"]) == kind:
+			ids.append(int(unit["id"]))
+	scene.selected = ids
+	selection_changed.emit(scene.selected)
