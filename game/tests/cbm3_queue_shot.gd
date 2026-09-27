@@ -41,15 +41,16 @@ func _init() -> void:
 		return
 	var id := int(own["id"])
 	scene.selected.assign([id])
-	# Un ordre de marche puis trois ordres en file, en zigzag devant la troupe (vers l'ennemi).
+	# Un ordre de marche puis trois ordres en file, en zigzag devant la troupe (vers l'ennemi),
+	# en deçà de la rivière de la bataille de démonstration (aucun segment inaccessible).
 	var own_pos := Vector2(float(own["x"]), float(own["z"]))
 	var forward := Vector2(0, 1) if str(own["side"]) == "attacker" else Vector2(0, -1)
 	var side := Vector2(-forward.y, forward.x)
 	var points: Array[Vector2] = [
-		own_pos + forward * 45.0 + side * 25.0,
-		own_pos + forward * 85.0 - side * 20.0,
-		own_pos + forward * 120.0 + side * 35.0,
-		own_pos + forward * 150.0 - side * 10.0,
+		own_pos + forward * 35.0 + side * 30.0,
+		own_pos + forward * 55.0 - side * 25.0,
+		own_pos + forward * 70.0 + side * 30.0,
+		own_pos + forward * 80.0 - side * 30.0,
 	]
 	for k in points.size():
 		var command := {"type": "move", "units": [id], "x": points[k].x, "z": points[k].y, "run": false}
@@ -64,9 +65,14 @@ func _init() -> void:
 	preview.update_orders(scene.units, scene.selected, 0.0)
 	var queue: Array = scene.battle.call("get_units")[id].get("queue", [])
 	var numbers := preview.waypoint_numbers()
+	# Longueur de chaque segment rendu par le cœur (0 = inaccessible, tracé rouge).
+	var legs: Array = []
+	for k in range(1, points.size()):
+		var leg: PackedVector3Array = scene.battle.call("preview_path_from", id, points[k - 1].x, points[k - 1].y, points[k].x, points[k].y)
+		legs.append(leg.size())
 	var ok: bool = queue.size() == 3 and numbers == ["1", "2", "3", "4"] and preview.orders_mesh().visible and preview.ghost_count() >= 1
 	# Cadrage : derrière la troupe, le zigzag entier dans le champ.
-	var middle := own_pos + forward * 80.0
+	var middle := own_pos + forward * 55.0
 	scene.camera_rig.edge_pan_enabled = false
 	scene.camera_rig.look_at_point(Vector3(middle.x, 0, middle.y), 260.0, atan2(-forward.x, -forward.y))
 	for _i in 30:
@@ -83,8 +89,8 @@ func _init() -> void:
 			screens.append([label.text, int(at.x), int(at.y)])
 			if Rect2(Vector2.ZERO, camera.get_viewport().get_visible_rect().size).has_point(at) and not camera.is_position_behind(label.global_position):
 				inside += 1
-	ok = ok and inside == numbers.size()
-	print("CBM3_QUEUE_PROBE queue=%d numbers=%s on_screen=%d ghosts=%d labels=%s %s" % [queue.size(), numbers, inside, preview.ghost_count(), screens, "OK" if ok else "FAIL"])
+	ok = ok and inside == numbers.size() and not legs.has(0)
+	print("CBM3_QUEUE_PROBE queue=%d numbers=%s on_screen=%d ghosts=%d legs=%s labels=%s %s" % [queue.size(), numbers, inside, preview.ghost_count(), legs, screens, "OK" if ok else "FAIL"])
 	if probe or out == "":
 		quit(0 if ok else 1)
 		return
