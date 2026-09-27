@@ -1713,7 +1713,7 @@ func _on_input_selection_changed(ids: Array) -> void:
 
 
 func _on_input_camera_focus(point: Vector3) -> void:
-	camera_rig.look_at_point(point, camera_rig.distance, camera_rig.yaw)
+	camera_rig.glide_to(point, camera_rig.distance, camera_rig.yaw)  # PO5 : glissement 0,4 s
 
 
 func _on_input_markers_toggled() -> void:
@@ -1777,7 +1777,7 @@ func _on_card_double_clicked(unit_id: int) -> void:
 	input.select_same_type_of(unit_id)  # CB0 : sélection rapide, même `type`
 	for unit in units:
 		if int(unit["id"]) == unit_id and bool(unit["present"]):
-			camera_rig.look_at_point(Vector3(float(unit["x"]), 0.0, float(unit["z"])), camera_rig.distance, camera_rig.yaw)
+			camera_rig.glide_to(Vector3(float(unit["x"]), 0.0, float(unit["z"])), camera_rig.distance, camera_rig.yaw)  # PO5
 			return
 
 
