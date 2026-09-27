@@ -10,9 +10,15 @@ extends Node3D
 ## B3 / T6 : suivi de régiment — `follow_unit(id, position_of)` verrouille `target` sur la
 ## position (fournie par une Callable, pour ne pas dépendre de `BattleScene`) du régiment ou du
 ## général, avec un lissage exponentiel (`FOLLOW_LERP`) ; la distance et l'inclinaison restent
-## celles choisies par le joueur (zoom conservé). Bouton du milieu = orbite (lacet) pendant le
-## suivi au lieu de panoramiquer. Toute action manuelle (W A S D / bords d'écran, `look_at_point`
-## appelé par un clic minicarte ou un rappel de groupe) rend la main à la caméra libre.
+## celles choisies par le joueur (zoom conservé). Toute action manuelle (W A S D / bords d'écran,
+## `look_at_point` appelé par un clic minicarte ou un rappel de groupe) rend la main à la caméra
+## libre.
+##
+## CB3 : bouton du milieu maintenu = glisser horizontal fait tourner (lacet), glisser vertical
+## incline (`manual_pitch_deg`, borné 5°-85°) ; pendant un suivi, il orbite seulement (lacet).
+## Maj + bouton du milieu = panoramique (ancien comportement par défaut). Une inclinaison
+## manuelle suspend la courbe d'inclinaison automatique de `_apply` (`manual_pitch`) jusqu'au
+## prochain recentrage (`look_at_point`, `follow_unit`).
 
 @export var min_distance: float = 12.0
 @export var max_distance: float = 900.0
@@ -31,6 +37,10 @@ const GROUND_CLEARANCE_NEAR := 1.6
 const GROUND_CLEARANCE_FAR := 4.0
 const CLOSE_RANGE := 80.0
 const ORBIT_MOUSE_SPEED := 0.006
+## CB3 : bornes et vitesse de l'inclinaison manuelle (degrés par pixel glissé, bouton du milieu).
+const MANUAL_PITCH_MIN_DEG := 5.0
+const MANUAL_PITCH_MAX_DEG := 85.0
+const MANUAL_PITCH_DRAG_SPEED := 0.15
 
 var target: Vector3 = Vector3(600, 0, 200)
 var yaw: float = 0.0
@@ -39,11 +49,20 @@ var edge_pan_enabled: bool = true
 var bounds: Rect2 = Rect2(-200, -200, 1600, 1200)
 var height_at: Callable = func(_x: float, _z: float) -> float: return 0.0
 
+## CB3 : inclinaison manuelle (bouton du milieu, glisser vertical) : suspend la courbe
+## automatique tant que `manual_pitch` est vrai ; `look_at_point` et `follow_unit` la remettent
+## à zéro (recentrage).
+var manual_pitch: bool = false
+var manual_pitch_deg: float = 0.0
+
 var follow_id: int = -1
 var follow_position_of: Callable = Callable()
 
 var _target_distance: float = 220.0
 var _dragging: bool = false
+## CB3 : dernière inclinaison réellement appliquée (auto ou manuelle), point de départ d'une
+## nouvelle inclinaison manuelle pour éviter un saut au premier pixel glissé.
+var _last_pitch_deg: float = PITCH_NEAR_DEG
 
 @onready var camera: Camera3D = $Camera3D
 
@@ -56,6 +75,7 @@ func look_at_point(point: Vector3, p_distance: float, p_yaw: float) -> void:
 	distance = p_distance
 	_target_distance = p_distance
 	yaw = p_yaw
+	manual_pitch = false  # CB3 : un recentrage rend la main à l'inclinaison automatique.
 	_apply()
 
 
@@ -64,6 +84,7 @@ func look_at_point(point: Vector3, p_distance: float, p_yaw: float) -> void:
 func follow_unit(id: int, position_of: Callable) -> void:
 	follow_id = id
 	follow_position_of = position_of
+	manual_pitch = false  # CB3 : recentrage.
 
 
 func stop_follow() -> void:
@@ -142,6 +163,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_zoom_by(1.14)
 		elif button.button_index == MOUSE_BUTTON_MIDDLE:
 			_dragging = button.pressed
+			# CB3 : un glisser de rotation/inclinaison part de l'inclinaison déjà affichée (pas
+			# de saut) ; Maj ou un suivi en cours restent le panoramique / l'orbite d'avant.
+			if button.pressed and follow_id < 0 and not button.shift_pressed:
+				manual_pitch_deg = _last_pitch_deg
 	elif event is InputEventPanGesture:
 		# Pad macOS : glissement vertical à deux doigts = molette continue.
 		_zoom_by(exp(0.13 * (event as InputEventPanGesture).delta.y))
@@ -151,9 +176,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion and _dragging:
 		var motion := event as InputEventMouseMotion
 		if follow_id >= 0:
-			yaw += -motion.relative.x * ORBIT_MOUSE_SPEED
+			yaw += -motion.relative.x * ORBIT_MOUSE_SPEED  # suivi : orbite (lacet) seulement
+		elif motion.shift_pressed:
+			_pan(-motion.relative * distance * 0.0022)  # CB3 : Maj + bouton du milieu = panoramique
 		else:
-			_pan(-motion.relative * distance * 0.0022)
+			# CB3 : bouton du milieu seul = rotation (lacet) + inclinaison (tangage), bornée.
+			yaw += -motion.relative.x * ORBIT_MOUSE_SPEED
+			manual_pitch = true
+			manual_pitch_deg = clampf(
+				manual_pitch_deg - motion.relative.y * MANUAL_PITCH_DRAG_SPEED,
+				MANUAL_PITCH_MIN_DEG,
+				MANUAL_PITCH_MAX_DEG
+			)
 
 
 func _zoom_by(factor: float) -> void:
@@ -162,8 +196,15 @@ func _zoom_by(factor: float) -> void:
 
 func _apply() -> void:
 	target.y = height_at.call(target.x, target.z)
-	var t := clampf((distance - min_distance) / (max_distance - min_distance), 0.0, 1.0)
-	var pitch := deg_to_rad(lerpf(PITCH_NEAR_DEG, PITCH_FAR_DEG, pow(t, PITCH_CURVE)))
+	var pitch_deg: float
+	if manual_pitch:
+		# CB3 : inclinaison manuelle (bouton du milieu) : suspend la courbe automatique.
+		pitch_deg = clampf(manual_pitch_deg, MANUAL_PITCH_MIN_DEG, MANUAL_PITCH_MAX_DEG)
+	else:
+		var t := clampf((distance - min_distance) / (max_distance - min_distance), 0.0, 1.0)
+		pitch_deg = lerpf(PITCH_NEAR_DEG, PITCH_FAR_DEG, pow(t, PITCH_CURVE))
+	_last_pitch_deg = pitch_deg
+	var pitch := deg_to_rad(pitch_deg)
 	# 0 au zoom maximal, 1 à partir de CLOSE_RANGE : visée et garde au sol s'y ajustent.
 	var close := smoothstep(min_distance, CLOSE_RANGE, distance)
 	var aim := target + Vector3.UP * lerpf(AIM_HEIGHT_NEAR, 0.0, close)
