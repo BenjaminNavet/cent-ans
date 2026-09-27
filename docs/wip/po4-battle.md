@@ -10,7 +10,7 @@ Plan : `docs/superpowers/plans/2026-09-27-po-polish.md` § PO4. Bible DA § 12.6
   soleil dans `PRESETS`) ; facteurs par météo `battle.<météo>.sun_energy_scale`,
   `sun_elevation_scale`, `sun_tint` (reproduisent les anciennes valeurs à midi).
   `po_grade_test.gd` partie bataille active (48 contextes). `tools/tests/test_time_of_day_presets.py`.
-- [ ] 2. Sol : texture de détail proche (Poly Haven CC0 2K).
+- [x] 2. Sol : Grass Path 2 (Poly Haven CC0, 2k, 5,3 Mo) dans `battle_ground.gdshader` (`near_detail_*`, < 32 m, lié à DA6).
 - [ ] 3. Herbe en touffes.
 - [ ] 4. Rangs : décalage de rendu ±0,15 m, ±4°.
 - [ ] 5. Horizon : arbres « sucette ».
@@ -38,4 +38,4 @@ Avant : large 11,34 / 11,28 / 9,67 (médiane 11,28) ; rapproché 11,48 / 11,43 /
 
 ## Prochaine étape
 
-Étape 2 (texture de détail du sol).
+Étape 3 (herbe en touffes). Machine chargée (GPU partagé) : le banc final doit alterner avant/après dans le même créneau.

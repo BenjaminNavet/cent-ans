@@ -69,6 +69,9 @@ const GROUND_SHADER := preload("res://shaders/battle_ground.gdshader")
 const WATER_SHADER := preload("res://shaders/battle_water.gdshader")
 const ALBEDO_ARRAY := preload("res://assets/textures/battle/ground_albedo_array.jpg")
 const NORMAL_ARRAY := preload("res://assets/textures/battle/ground_normal_array.jpg")
+## PO4 : détail proche du sol (Poly Haven CC0, `near_detail/SOURCE.md`), avec DA6.
+const NEAR_DETAIL_ALBEDO := preload("res://assets/textures/battle/near_detail/grass_path_2_diff_2k.jpg")
+const NEAR_DETAIL_NORMAL := preload("res://assets/textures/battle/near_detail/grass_path_2_nor_gl_2k.jpg")
 
 var terrain: Dictionary = {}
 var weather_key: String = "clear"
@@ -997,6 +1000,9 @@ func _build_material(weather: String) -> void:
 	var calm := Vector4(150.0, 60.0, 1050.0, 740.0)
 	ground_material.set_shader_parameter("calm_rect", calm)
 	ground_material.set_shader_parameter("da6_on", 1.0 if da6 else 0.0)
+	ground_material.set_shader_parameter("near_detail_albedo", NEAR_DETAIL_ALBEDO)
+	ground_material.set_shader_parameter("near_detail_normal", NEAR_DETAIL_NORMAL)
+	ground_material.set_shader_parameter("near_detail_on", 1.0 if da6 else 0.0)
 	ground_material.set_shader_parameter("decor_saturation", decor_saturation())
 	if decor_on:
 		ground_material.set_shader_parameter("decor_fields", decor_fields)
@@ -1725,6 +1731,7 @@ func set_da6_view(on: bool) -> void:
 	vegetation.visible = on
 	_old_vegetation.visible = not on
 	ground_material.set_shader_parameter("da6_on", 1.0 if on else 0.0)
+	ground_material.set_shader_parameter("near_detail_on", 1.0 if on else 0.0)
 
 
 ## DA6 : essences des feuillus (chêne, hêtre, frêne ; saule et peuplier près de l'eau), tuiles par
