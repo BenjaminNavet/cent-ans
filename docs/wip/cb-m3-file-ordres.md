@@ -39,6 +39,13 @@ Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm3`.
       capture `game/tests/cbm3_queue_shot.gd` (`--probe` texte : 3 ordres en file, numéros 1-4
       à l'écran, OK).
 
+## Vérifications (09-27)
+
+`cargo fmt`, `cargo clippy --workspace --all-targets -D warnings` propres ; `cargo test --workspace`
+991 réussis, 0 échec ; `ep13_replay` en release 8/8 ; pytest 793 réussis ; Godot `smoke.gd`,
+`cb_m3_queue_test.gd`, `cb_m2_path_hover_test.gd`, `cb0_input_equivalence_test.gd`,
+`cbm3_queue_shot.gd --probe` : code 0, aucune « SCRIPT ERROR ».
+
 ## Capture à produire (session principale)
 
 `godot --path game --resolution 1600x900 --script res://tests/cbm3_queue_shot.gd -- --out=docs/img/cb/cbm3-queue.png`
