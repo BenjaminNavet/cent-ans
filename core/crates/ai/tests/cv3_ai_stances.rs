@@ -641,11 +641,13 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // Every behaviour at certainty: the most orders to check.
     let mut data = real_data();
     enable_ai_stances(&mut data);
-    let log = campaign_stance_orders(&data, 7, 12);
-    eprintln!("CV3-6 checked orders: {}", log.len());
-    for l in &log {
-        eprintln!("{l:?}");
-    }
+    let log = campaign_stance_orders(&data, 7, 60);
+    // 15 years of war: the AI lies in wait at least once (8 orders with
+    // the tuning of 2026-09-27).
+    assert!(
+        log.iter().any(|(_, order, _)| order.contains("Ambush")),
+        "{log:?}"
+    );
     let refused: Vec<&(u32, String, bool)> = log.iter().filter(|(_, _, ok)| !ok).collect();
     assert!(refused.is_empty(), "refused: {refused:?}");
 }
@@ -675,8 +677,7 @@ fn the_stance_ai_is_deterministic() {
     // Two campaign runs from the same seed take the same stances.
     let mut real = real_data();
     enable_ai_stances(&mut real);
-    assert_eq!(
-        campaign_stance_orders(&real, 11, 6),
-        campaign_stance_orders(&real, 11, 6)
-    );
+    let first = campaign_stance_orders(&real, 7, 24);
+    assert!(!first.is_empty(), "an ambush by turn 21 (seed 7)");
+    assert_eq!(first, campaign_stance_orders(&real, 7, 24));
 }

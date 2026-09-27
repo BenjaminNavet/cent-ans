@@ -1,9 +1,34 @@
 {
-  "description": "Réglages des armées de l'IA sur la grille de navigation (lot M3, spec 2026-09-24-mouvement-libre § 4) : attaque d'une armée ennemie dans la bulle, évitement des zones de contrôle d'armées plus fortes, étapes de marche par tour.",
+  "description": "Réglages des armées de l'IA sur la grille de navigation (lot M3, spec 2026-09-24-mouvement-libre § 4) : attaque d'une armée ennemie dans la bulle, évitement des zones de contrôle d'armées plus fortes, étapes de marche par tour. Lot CV3-6 (spec 2026-09-27-campagne-vivante § 5) : postures prises par l'IA (embuscade, marche forcée, camp retranché) et détours vers les rencontres.",
   "attack_ratio": 1.5,
   "attack_reach_share": 0.8,
   "avoid_ratio": 1.0,
   "avoid_radius_km": 12,
   "max_legs_per_turn": 6,
-  "trespass_route_factor": 2.0
+  "trespass_route_factor": 2.0,
+  "postures": {
+    "ambush": {
+      "weight_permille": 800,
+      "weight_per_aggression": -10,
+      "max_power_ratio": 1.0,
+      "min_power_ratio": 0.25,
+      "route_zoc_share": 0.9,
+      "route_turns": 2.0,
+      "watch_radius_km": 150
+    },
+    "forced_march": {
+      "enabled": true,
+      "reach_margin": 0.9,
+      "danger_radius_km": 12,
+      "danger_ratio": 1.0
+    },
+    "entrenched": {
+      "enabled": true,
+      "inferiority_ratio": 1.0
+    }
+  },
+  "encounters": {
+    "detour_permille": 300,
+    "sight_km": 30
+  }
 }
