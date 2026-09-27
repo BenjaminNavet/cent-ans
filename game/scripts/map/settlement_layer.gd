@@ -22,11 +22,8 @@ const KIND_INDEX := {"city": 0, "town": 1, "castle": 2, "abbey": 3, "village": 4
 ## Lot PO3 (bible DA § 4, § 12.2) : noms dans le registre manuscrit — EB Garamond, graisse et taille
 ## selon le rang (cité `Heading`, ville `Body`, bourg `Caption`), encre sombre sur un halo de
 ## parchemin léger (plus de pastille claire).
-# PO2 : remplacer par UiType (variations Heading / Body / Caption du thème).
-const LABEL_HEADING_PX := 20
-const LABEL_BODY_PX := 17
-const LABEL_CAPTION_PX := 14
-const LABEL_FONT := {"city": LABEL_HEADING_PX, "town": LABEL_BODY_PX, "castle": LABEL_CAPTION_PX, "abbey": LABEL_CAPTION_PX, "village": LABEL_CAPTION_PX}
+## Tailles de base de `UiType` (PO2) : Label3D n'a pas de variation de type de thème.
+const LABEL_TYPE := {"city": UiType.HEADING, "town": UiType.BODY, "castle": UiType.CAPTION, "abbey": UiType.CAPTION, "village": UiType.CAPTION}
 const LABEL_WEIGHT := {"city": 700, "town": 600, "castle": 500, "abbey": 500, "village": 500}
 const LABEL_FONT_PATH := "res://assets/third_party/fonts/eb_garamond/EBGaramond-VariableFont_wght.ttf"
 ## Halo : contour fin (px de police) et part d'opacité du halo.
@@ -581,7 +578,7 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	var kind := str(entry["kind"])
 	label.name = "Label_%d" % i
 	label.text = str(entry["name"])
-	label.font_size = LABEL_FONT.get(kind, LABEL_CAPTION_PX)
+	label.font_size = UiType.size(str(LABEL_TYPE.get(kind, UiType.CAPTION)))
 	label.font = _label_font(int(LABEL_WEIGHT.get(kind, 500)))
 	label.outline_size = LABEL_OUTLINE_PX
 	label.modulate = label_color
