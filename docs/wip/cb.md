@@ -12,13 +12,14 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB-M3 | Ordres en file (Maj + clic droit) | 2 | **fusionné 09-27** (borne 8 dans `battle_queue.json` ; `preview_path_from` ajouté plutôt que changer `preview_path` ; attaque en file close sur cible en fuite seulement si une file attend ; ordre suivant après rupture du contact) | `cb-m3-file-ordres.md` |
 | CB-M4 | Portée au sol, comparaison au survol | 2 | **fusionné 09-27** (fusionné avant CB-M3 ; demi-angle de tir = dessin seulement, 60° en données ; panneau posé au-dessus des « Ordres du chef ») | `cb-m4-portee-comparaison.md` |
 | CB1 | Formation au glisser, verrouillage de groupe | 3 | **fusionné 09-27** (répartition des largeurs dans le cœur, `group_gap_m` 10 m ; largeur = passage en Ligne ; `match_speed` = allure en terrain ouvert du plus lent ; bornes de rangs en premières valeurs, sans relecture historique ; cadenas = glyphe en code) | `cb1-formation-glisser.md` |
-| CB2 | Modes d'unité, icônes d'état, remappage des touches | 4 | attente CB1 | |
-| CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | attente CB1 | |
-| CB5 | Alertes typées, colonne, minicarte, cris | 4 | attente CB1 | |
-| CB6 | Formations de groupe (attaque/défense, placement proposé) — demande du joueur 09-27 | 4 | attente CB1 | |
+| CB2 | Modes d'unité (+ « Battre en brèche »), icônes d'état, remappage des touches | 4 | **en cours** (agent, `feat/cb2-modes`, fusion en dernier) | `cb2-modes.md` |
+| CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | **en cours** (agent Sonnet, `feat/cb3-camera-tactical`, fusion en premier) | `cb3-camera-vue-tactique.md` |
+| CB5 | Alertes typées, colonne, minicarte, cris | 4 | **en cours** (agent Sonnet, `feat/cb5-alerts`) | `cb5-alertes.md` |
+| CB6 | Formations de groupe (6 préréglages, placement proposé) — demande du joueur 09-27 | 4 | **en cours** (agent, `feat/cb6-group-formations`) | `cb6-formations-groupe.md` |
 | CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 (relecture historique **faite**) | |
 
 ## Coordination
+- Icônes : les agents de la vague 4 dessinent des glyphes en code ; la session principale génère toutes les icônes DA5 (curseurs, cadenas, modes, états, alertes, capacités) en une fois après CB4 (≈ 2 $, `docs/budget.md`).
 - Relecture historique CB4 et CB6 faite (09-27, `docs/research/cb4-capacites.md`, `cb6-formations.md`) ; décisions de jeu tranchées par la session principale (joueur : pas de question) et inscrites au plan : noms changés, « Battre en brèche » en mode CB2, 6 préréglages CB6, pieux hors CB.
 - 09-27 : le joueur accepte les limites de CB-M2 et autorise l'enchaînement des lots sans nouvelle question.
 - CB-M3 et CB-M4 lancés en parallèle (fichiers presque disjoints ; conflit attendu seulement dans `get_units`).
