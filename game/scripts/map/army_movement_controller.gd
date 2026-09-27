@@ -82,7 +82,7 @@ func setup(campaign_map: Node) -> void:
 	war_dialog = WarDeclarationDialog.new()
 	war_dialog.confirmed.connect(_on_war_confirmed)
 	war_dialog.cancelled.connect(func() -> void: _pending_attack = {})
-	map.ui.add_child(war_dialog)
+	UiZones.put(UiZones.Zone.MODAL, war_dialog)  # PO1 : fond assombri, entrées bloquées
 	if map.picker != null:
 		# Prioritaire sur l'intercepteur C5 (colonies), qu'il remplace quand il est actif.
 		var previous: Callable = map.picker.right_click_interceptor

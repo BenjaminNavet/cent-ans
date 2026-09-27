@@ -40,7 +40,7 @@ func setup(campaign_map: Node) -> void:
 	minimap = CampaignMinimap.new()
 	# PO1 (bible DA § 12.1) : zone `MINIMAP`, en bas à droite (étage HUD : sous tous les panneaux,
 	# elle ne masque jamais leur bouton ×) ; `MapUI.layout_hud` l'ajuste à la zone.
-	UiLayout.claim(UiLayout.Zone.MINIMAP, minimap)
+	UiZones.put(UiZones.Zone.MINIMAP, minimap)
 	ui.set("minimap", minimap)
 	minimap.setup(map.get("map_data"))
 	minimap.clicked.connect(center_camera_on)
@@ -109,8 +109,8 @@ func legend_context() -> Dictionary:
 ## PO1 : la légende s'ouvre dans la colonne du panneau latéral, bas calé au-dessus de la
 ## minicarte (elle se referme d'elle-même quand un panneau s'y ouvre, voir `setup`).
 func _place_legend() -> void:
-	var side := UiLayout.zone_rect(UiLayout.Zone.SIDE_PANEL)
-	var mini := UiLayout.zone_rect(UiLayout.Zone.MINIMAP)
+	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL)
+	var mini := UiZones.rect(UiZones.Zone.MINIMAP)
 	legend.set_max_height(side.size.y)
 	legend.size = legend.get_combined_minimum_size()
 	legend.position = Vector2(mini.end.x - legend.size.x, maxf(side.position.y, mini.position.y - legend.size.y - 8.0))

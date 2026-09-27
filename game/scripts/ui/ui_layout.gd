@@ -1,6 +1,7 @@
+class_name UiZones
 extends Node
 
-## Chantier PO (ADR 0097, bible DA § 12.1) : autoload `UiLayout`, zones d'écran fixes. Chaque
+## Chantier PO (ADR 0097, bible DA § 12.1) : autoload `UiLayout` (classe `UiZones`), zones d'écran fixes. Chaque
 ## panneau réclame une zone au lieu de se placer en coordonnées absolues ; les rectangles sont
 ## fixés par des ancres en proportion de l'écran et ne dépendent jamais de la taille minimale des
 ## enfants (boucles de mise en page vues en UI1).
@@ -62,6 +63,31 @@ var _default_layer: CanvasLayer = null
 var _occupants: Dictionary = {}
 ## Contrôles suivant une zone sans reparentage (`anchor_to`).
 var _anchored: Dictionary = {}
+
+
+## L'autoload `UiLayout` (les scripts à `class_name` sont compilés avant les autoloads : ils
+## passent par `UiZones.layout()`, `UiZones.put(…)`, `UiZones.rect(…)` et `UiZones.Zone`).
+static func layout() -> UiZones:
+	var tree := Engine.get_main_loop() as SceneTree
+	return tree.root.get_node_or_null("UiLayout") as UiZones if tree != null else null
+
+
+## Raccourci de `layout().claim(zone, control, at_end)` (sans effet sans l'autoload).
+static func put(zone: Zone, control: Control, at_end: bool = false) -> void:
+	var node := layout()
+	if node != null:
+		node.claim(zone, control, at_end)
+
+
+## Raccourci de `layout().zone_rect(zone)` ; sans l'autoload, proportions de la fenêtre.
+static func rect(zone: Zone) -> Rect2:
+	var node := layout()
+	if node != null:
+		return node.zone_rect(zone)
+	var tree := Engine.get_main_loop() as SceneTree
+	var view := tree.root.get_visible_rect().size if tree != null else Vector2(1440, 900)
+	var part: Rect2 = ZONE_RECTS[zone]
+	return Rect2(part.position * view, part.size * view)
 
 
 ## Donne à `host` (un `CanvasLayer` ou un `Control` plein écran) les six zones ; il devient l'hôte

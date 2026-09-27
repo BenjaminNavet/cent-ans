@@ -23,7 +23,7 @@ func setup(campaign_map: Node) -> void:
 	# PO1 : fenêtre de la chronique dans la zone `SIDE_PANEL` (un seul panneau à la fois), puis
 	# inscrite dans la pile (Échap, exclusivité avec les grands panneaux) — dans cet ordre : un
 	# reparentage après inscription la désinscrirait.
-	UiLayout.claim(UiLayout.Zone.SIDE_PANEL, window)
+	UiZones.put(UiZones.Zone.SIDE_PANEL, window)
 	map.ui.register_panel(window, PanelStack.Kind.CENTRAL)
 	window.option_chosen.connect(_on_option_chosen)
 	var court_button: Button = map.ui.court_button
