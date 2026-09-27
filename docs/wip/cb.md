@@ -10,7 +10,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | **fusionné 09-27** (trait 1 m, émission sur fond noir ; lisibilité à juger en jeu) | |
 | CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | **fusionné 09-27** (aperçu = ordre exact en ligne droite/pont, ≤ 3 m au gué, ≤ 13 m en siège ; aperçu au clic droit maintenu) | `cb-m2-trajet-curseur.md` |
 | CB-M3 | Ordres en file (Maj + clic droit) | 2 | **en cours** (agent, `feat/cb-m3-queue`) | `cb-m3-file-ordres.md` |
-| CB-M4 | Portée au sol, comparaison au survol | 2 | **en cours** en parallèle de CB-M3 (agent, `feat/cb-m4-range-compare`) | `cb-m4-portee-comparaison.md` |
+| CB-M4 | Portée au sol, comparaison au survol | 2 | **fusionné 09-27** (fusionné avant CB-M3 ; demi-angle de tir = dessin seulement, 60° en données ; panneau posé au-dessus des « Ordres du chef ») | `cb-m4-portee-comparaison.md` |
 | CB1 | Formation au glisser, verrouillage de groupe | 3 | attente CB-M | |
 | CB2 | Modes d'unité, icônes d'état, remappage des touches | 4 | attente CB1 | |
 | CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | attente CB1 | |
