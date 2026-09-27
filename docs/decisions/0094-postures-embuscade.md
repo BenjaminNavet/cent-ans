@@ -74,3 +74,21 @@ que le core n'a pas de biome par case.
   exporté au pont et pris en compte par les couverts, charges brisées et l'IA B6) posé devant la
   ligne ; ralentit (facteurs en données) et divise les pertes en mêlée du défenseur juste derrière.
   Pieux plantés d'office pour les unités `Stakes`.
+
+## Suite CV3-6 (2026-09-27) : l'IA des postures et des rencontres
+
+- L'IA stratégique (`ai/src/campaign.rs`, `plan_armies`) consulte `ai/src/stances.rs` ; réglages
+  dans les sections `postures` et `encounters` de `data/ai/grid.json` (réglages des armées de
+  l'IA), absents = aucune posture CV3 (comportement antérieur).
+- « Route prévisible » d'une armée ennemie = son point puis les coins de `planned_path` (marche de
+  plusieurs tours), coupée à `route_turns` tours pleins ; elle menace nos terres si un point
+  échantillonné tombe dans une province que nous possédons ou contrôlons. Une armée sans marche de
+  plusieurs tours n'a pas de route prévisible.
+- Aucun ordre refusé : l'IA vérifie la posture par `posture::validate_stance_change` et la marche
+  vers la case d'embuscade ou le site par `CampaignState::preview_march_to_point` (même
+  `march::simulate` que la vraie marche, zones de contrôle comprises).
+- Équité : `GridPlanner` ne voit pas les armées cachées en embuscade (`is_hidden_from`) ; les
+  menaces retenues pour s'embusquer excluent aussi les ennemis cachés.
+- Poids : tirages purs de la graine, du tour et de l'armée (`alignment::campaign_roll`), sans
+  toucher au RNG de campagne ; le poids d'embuscade dépend de l'agressivité de la faction
+  (`weight_per_aggression` négatif : les prudents s'embusquent davantage).
