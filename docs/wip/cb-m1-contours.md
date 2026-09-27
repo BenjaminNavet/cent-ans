@@ -7,11 +7,11 @@ Branche : `feat/cb-m1-outline`. Plan : `docs/superpowers/plans/2026-09-27-contro
 ## État
 
 - [x] Squelette `game/scripts/battle/battle_formation_outline.gd` (API publique, vide).
-- [ ] Implémentation (textures, décales, états, pulsé).
-- [ ] Branchement dans `battle_scene.gd`, suppression de `_rings` et de `BattleMeshes.outline`.
-- [ ] Test `game/tests/cb_m1_outline_test.gd`.
+- [x] Implémentation (textures par rapport d'aspect, décales, états, pulsé) — non testée.
+- [x] Branchement dans `battle_scene.gd` (`outlines`, `_update_outlines`), `_rings` et `BattleMeshes.outline` supprimés.
+- [x] Test `game/tests/cb_m1_outline_test.gd` écrit, pas encore lancé (dylib en construction).
 - [ ] Capture `game/tests/cbm_outline_shot.gd`.
 
 ## Prochaine étape
 
-Implémenter `outline_state` et la génération des textures.
+Lancer le test (build `CARGO_TARGET_DIR=<worktree>/core/target-cbm1 ./core/build.sh`, import), corriger, puis capture.
