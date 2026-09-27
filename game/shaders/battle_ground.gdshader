@@ -55,6 +55,15 @@ uniform float detail_bump = 0.7;
 uniform float da6_on = 0.0;
 uniform float decor_saturation = 0.6; // DA6 : part de la saturation gardée (bible § 3.3)
 uniform float detail_near = 45.0; // distance (m) sous laquelle le détail est plein
+// PO4 : texture de détail proche (Poly Haven CC0, terre et herbe rase, `near_detail/SOURCE.md`),
+// relue à l'échelle réelle sous la caméra rapprochée : sa luminance relative module l'albédo, sa
+// normale s'ajoute ; fondue avec la distance (au-delà de `near_detail_dist`, aucun échantillon).
+uniform sampler2D near_detail_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D near_detail_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float near_detail_on = 0.0;
+uniform float near_detail_size = 1.4; // m par tuile
+uniform float near_detail_dist = 32.0;
+uniform float near_detail_strength = 0.6;
 
 varying vec3 world_pos;
 varying vec3 world_normal;
@@ -255,6 +264,21 @@ void fragment() {
 		vec3 n_near = nrm * 2.0 - 1.0;
 		n_near.xy += (dn.xy * 2.0 - 1.0) * near_k * 0.6;
 		nrm = normalize(n_near) * 0.5 + 0.5;
+	}
+	// PO4 : détail proche réel (grain de terre, brins ras) sur l'herbe, les prés, la terre et la
+	// boue ; pas sur la roche ni la neige. Lecture tournée (axes du champ).
+	float nd_k = near_detail_on * (1.0 - smoothstep(near_detail_dist * 0.45, near_detail_dist, view_dist));
+	nd_k *= clamp(1.0 - w[int(L_ROCK)] - w[int(L_SNOW)] - w[int(L_PEBBLES)] * 0.5, 0.0, 1.0);
+	if (nd_k > 0.01) {
+		vec2 nuv = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * p / near_detail_size + vec2(0.37, 0.11);
+		vec3 ncol = texture(near_detail_albedo, nuv).rgb;
+		float nref = dot(textureLod(near_detail_albedo, nuv, 10.0).rgb, vec3(0.3, 0.59, 0.11));
+		float nl = dot(ncol, vec3(0.3, 0.59, 0.11)) / max(nref, 0.02);
+		albedo *= mix(1.0, clamp(nl, 0.45, 1.6), nd_k * near_detail_strength);
+		vec3 nn = texture(near_detail_normal, nuv).rgb;
+		vec3 n_nd = nrm * 2.0 - 1.0;
+		n_nd.xy += (nn.xy * 2.0 - 1.0) * nd_k * 0.8;
+		nrm = normalize(n_nd) * 0.5 + 0.5;
 	}
 	// Sillons des labours.
 	if (w_plough > 0.0) {

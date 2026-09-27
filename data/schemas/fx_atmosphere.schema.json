@@ -94,6 +94,9 @@
         "type": "object",
         "properties": {
           "sky": { "$ref": "#/$defs/season_map" },
+          "sun_energy_scale": { "type": "number", "minimum": 0, "maximum": 2, "description": "PO4 : facteur sur l'énergie du soleil de l'heure (time_of_day)." },
+          "sun_elevation_scale": { "type": "number", "minimum": 0, "maximum": 2, "description": "PO4 : facteur sur l'élévation du soleil de l'heure." },
+          "sun_tint": { "$ref": "#/$defs/rgb", "description": "PO4 : facteur sur la couleur du soleil de l'heure." },
           "grade": { "$ref": "#/$defs/grade" }
         },
         "required": ["sky", "sky_luminance", "grade"]
@@ -172,18 +175,26 @@
     },
     "time_of_day": {
       "type": "object",
-      "description": "Chantier PO (ADR 0097, bible DA § 12.6) : préréglages d'heure du jour (soleil et étalonnage). La bataille tire l'heure de sa graine (rendu seulement). Optionnel jusqu'aux lots PO3/PO4.",
+      "description": "Chantier PO (ADR 0097, bible DA § 12.6) : préréglages d'heure du jour (soleil, ciel et étalonnage). Bataille (PO4) : la phase de départ donnée par le cœur (EP8, `phases`) choisit le préréglage ; sans heure du cœur, tirage de rendu déterministe sur la graine (`midday` exclu par temps couvert). Rendu seulement.",
       "propertyNames": { "enum": ["morning", "midday", "evening"] },
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "sun_elevation": { "type": "number", "minimum": 0, "maximum": 90, "description": "Degrés au-dessus de l'horizon." },
-          "sun_azimuth": { "type": "number", "minimum": 0, "maximum": 360, "description": "Degrés depuis le nord, sens horaire." },
+          "phases": { "type": "array", "items": { "type": "string", "enum": ["dawn", "morning", "midday", "afternoon", "dusk", "night"] }, "description": "Phases du jour du cœur (data/rules/battle_time_of_day.json) rendues par ce préréglage." },
+          "sun_elevation": { "type": "number", "minimum": 0, "maximum": 90, "description": "Degrés au-dessus de l'horizon (temps clair ; multiplié par sun_elevation_scale de la météo)." },
+          "sun_azimuth": { "type": "number", "minimum": 0, "maximum": 360, "description": "Lacet du soleil en degrés (rotation Y de la lumière, même repère que sun_yaw_deg d'EP8 : 218 = sud-ouest du champ)." },
           "sun_color": { "$ref": "#/$defs/rgb" },
-          "sun_energy": { "type": "number", "minimum": 0, "maximum": 4 },
-          "grade": { "$ref": "#/$defs/grade" }
+          "sun_energy": { "type": "number", "minimum": 0, "maximum": 4, "description": "Énergie par temps clair (multipliée par sun_energy_scale de la météo)." },
+          "sky": {
+            "type": "object",
+            "description": "Ciel HDRI propre à l'heure, par météo (remplace battle.<météo>.sky) : un panorama dont le soleil peint est proche de l'élévation voulue.",
+            "propertyNames": { "enum": ["clear", "fog", "rain", "snow"] },
+            "additionalProperties": { "$ref": "#/$defs/season_map" }
+          },
+          "grade": { "$ref": "#/$defs/grade", "description": "Étalonnage de l'heure, appliqué après ceux de la saison et de la météo." }
         },
-        "required": ["sun_elevation", "sun_azimuth", "sun_color"]
+        "required": ["phases", "sun_elevation", "sun_azimuth", "sun_color", "sun_energy", "grade"],
+        "additionalProperties": false
       }
     }
   },
