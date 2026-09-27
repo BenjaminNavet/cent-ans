@@ -33,7 +33,8 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 20
 text = "Province"
 
 [node name="CloseButton" type="Button" parent="VBox/Header"]
@@ -131,7 +132,8 @@ text = "Identifiant"
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 14
 text = "—"
 
 [node name="GovernorRow" type="HBoxContainer" parent="VBox"]
@@ -174,7 +176,8 @@ theme_override_constants/separation = 6
 [node name="GarrisonHeader" type="Label" parent="VBox/Tabs/Garnison/GarrisonBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 20
 text = "Garnison"
 
 [node name="GarrisonList" type="VBoxContainer" parent="VBox/Tabs/Garnison/GarrisonBox"]
@@ -210,7 +213,8 @@ layout_mode = 2
 
 [node name="RecruitHeader" type="Label" parent="VBox/Tabs/Garnison/GarrisonBox/RecruitPanel"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 20
 text = "Recrutement — coût / entretien par saison"
 
 [node name="RecruitList" type="VBoxContainer" parent="VBox/Tabs/Garnison/GarrisonBox/RecruitPanel"]
@@ -232,7 +236,8 @@ theme_override_constants/separation = 8
 
 [node name="ResourcesHeader" type="Label" parent="VBox/Tabs/Ville/VilleBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Ressources"
 
 [node name="ResourcesList" type="HFlowContainer" parent="VBox/Tabs/Ville/VilleBox"]
@@ -243,7 +248,8 @@ theme_override_constants/v_separation = 4
 
 [node name="ClassesHeader" type="Label" parent="VBox/Tabs/Ville/VilleBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Population"
 
 [node name="ClassesList" type="VBoxContainer" parent="VBox/Tabs/Ville/VilleBox"]
@@ -253,7 +259,8 @@ theme_override_constants/separation = 3
 
 [node name="BuildingsHeader" type="Label" parent="VBox/Tabs/Ville/VilleBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Bâtiments"
 
 [node name="BuildingsList" type="VBoxContainer" parent="VBox/Tabs/Ville/VilleBox"]
@@ -269,7 +276,8 @@ theme_override_constants/separation = 2
 
 [node name="ConstructionHeader" type="Label" parent="VBox/Tabs/Ville/VilleBox/ConstructionBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Construction en cours"
 
 [node name="ConstructionRow" type="HBoxContainer" parent="VBox/Tabs/Ville/VilleBox/ConstructionBox"]
@@ -288,7 +296,8 @@ text = "Annuler"
 
 [node name="BuildableHeader" type="Label" parent="VBox/Tabs/Ville/VilleBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Constructible"
 
 [node name="BuildableList" type="VBoxContainer" parent="VBox/Tabs/Ville/VilleBox"]
