@@ -1,6 +1,6 @@
 # ADR 0085 — La guerre de Cent Ans à tous les niveaux de difficulté (lot EQ6)
 
-Date : 2026-09-26. Statut : accepté. Complète l'ADR 0054 (EQ3) et l'ADR 0037 (DF1).
+Date : 2026-09-26, complété le 2026-09-27 (règles 5 et 6). Statut : accepté. Complète l'ADR 0054 (EQ3) et l'ADR 0037 (DF1).
 
 ## Contexte
 
@@ -65,27 +65,47 @@ comportement antérieur ; schéma `ai_diplomacy.schema.json`).
    version sans cette restriction faisait disparaître l'Écosse (facile, 1396 et 1436) : entrée
    en guerre à l'appel de la France, acculée, elle ne traitait plus.
 
+5. `war.claim_war_ignores_kinship` (ajouté le 2026-09-27) : pour la guerre de prétention
+   principale, les raisons d'attitude dues à la parenté (« Mariage entre nos maisons »,
+   « Liens matrimoniaux », « Même maison régnante » ; `CampaignState::kinship_attitude`) ne
+   comptent pas dans le seuil d'attitude (20) de `war_target` : la prétention naît de cette
+   parenté (Édouard III, petit-fils de Philippe IV par sa mère), elle ne la retient pas. Après
+   la fusion de main, une graine en normale restait en paix 70 ans : dix mariages entre les
+   deux maisons (+15 chacun, cumulables) portaient l'attitude anglaise à 100.
+6. `join_war.weary_stay_out` (ajouté le 2026-09-27) : un royaume trop las pour déclarer
+   lui-même une guerre (`negotiation.max_weariness_to_declare`, +20 pour un prétendant ;
+   `diplomacy::weariness_to_declare`) ne répond plus à l'appel aux armes d'un allié, comme un
+   royaume ruiné : l'alliance est rompue (`answers_call_to_arms`). En très difficile,
+   l'Angleterre, en paix avec la France mais à 90-100 de fatigue, répondait à chaque appel du
+   Portugal contre la Castille et de l'Empire contre la Bohême ; ces guerres d'appoint au score
+   nul l'empêchaient pendant des décennies de reprendre la guerre de France.
+
 Aucune donnée de difficulté (`data/rules/difficulty.json`) n'est changée.
 
 ## Conséquences
 
 Mesures détaillées et graine par graine : `docs/wip/eq6-guerre-toutes-difficultes.md`.
+Mesure finale après la fusion de main du 2026-09-27 (`century_probe` 464 tours, mêmes graines
+qu'EQ4/EQ5) :
 
-| Niveau | Guerre FR-EN avant | après | Trêves / siècle |
-|---|---|---|---|
-| Facile (5) | 48 % [32-70], 1/5 | **63 % [50-70], 4/5** | 6,4 → 11,6 |
-| Normale (10) | 62 % [42-75], 8/10 | **69 % [60-72], 10/10** | 11,1 → 12,7 |
-| Difficile (10) | 56 % [39-65], 5/10 | **60 % [45-72], 8/10** | 13,0 → 16,2 |
-| Très difficile (5) | 50 % [41-60], 1/5 | **59 % [52-67], 4/5** | 15,4 → 15,6 |
+| Niveau | Guerre FR-EN avant EQ6 | après (règles 1-6) | Trêves / siècle | 1re faction fin (max) |
+|---|---|---|---|---|
+| Facile (5) | 48 % [32-70], 1/5 | **71 % [66-74], 5/5** | 11,4 | 27 % |
+| Normale (10) | 62 % [42-75], 8/10 | **69 % [59-77], 8/10** | 12,7 | 29 % |
+| Difficile (10) | 56 % [39-65], 5/10 | **66 % [59-75], 10/10** | 14,5 | 30 % |
+| Très difficile (5) | 50 % [41-60], 1/5 | **65 % [58-71], 5/5** | 15,8 | 31 % |
 
-- Plus longue guerre : 9-14 ans à tous les niveaux (72 ans en facile avant).
-- Banqueroutes 0,02-0,06 / faction / décennie ; 1re faction en fin de partie ≤ 34 % ; les quatre
-  majeures vivent en 1400 à tous les niveaux ; la France n'est plus éliminée en très difficile.
-- `balance_probe` 16 × 200 (normale) : révoltes 3,9 → 6,5 par partie (dans 4-10) ; impôt Haut
-  30-32 → 34-37 % (cible < 40, à surveiller).
-- Empreintes et tests existants inchangés (les réglages sont neutres sans le fichier et les
-  tests de déterminisme ne passent pas par ces branches) ; 4 tests dans
-  `sim-campaign/tests/eq6_main_claim.rs`.
+- Sans les règles 5 et 6, main fusionné donnait : normale 65 % [31-78] 8/10, très difficile
+  57 % [50-65] 3/5.
+- Plus longue guerre : 6-15 ans. Banqueroutes 0,03-0,09 / faction / décennie ; les quatre
+  majeures vivent en 1400 à tous les niveaux ; aucune faction éliminée.
+- `balance_probe` 16 × 200 (normale) : guerre FR-EN 69-72 %, impôt Haut 29-34 % (< 40),
+  banqueroutes 0,05, milice 28 %. Révoltes 2,7 par partie, sous la bande 4-10 (EQ1) : elles
+  étaient déjà à 3,6 après la fusion de main sans les règles 5-6 (dette du lot DC) ; la
+  règle 6, en retirant des guerres d'appoint, retire aussi des occupations, où éclate la
+  moitié des révoltes.
+- 6 tests dans `sim-campaign/tests/eq6_main_claim.rs` ; réglages neutres sans le fichier.
 - Limites : la sonde joue la France par l'IA avec les handicaps du joueur ; en très difficile
-  l'Angleterre domine encore le royaume 58-81 % du siècle. Les critères sont atteints de
-  justesse en facile et très difficile (4/5) ; l'écart entre graines reste large.
+  l'Angleterre domine le royaume 47-76 % du siècle. En normale deux graines dépassent 75 % de
+  peu (75,4 et 76,7 %). Le bonus de mariage (et d'ambassade) s'empile sans plafond : la
+  règle 5 ne le neutralise que pour la guerre de prétention.
