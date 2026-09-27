@@ -23,7 +23,9 @@ de campagne relevés sur les captures »).
 5. Relief peu lisible Paris-Orléans — fait : `relief_exaggeration.tres` gain_far 0.3->0.42
    (l'écrasement des montagnes, indépendant, absorbe l'effet sur les Alpes),
    `terrain.gdshader` shading_relief 1.8->2.1.
-6. Chemin de déplacement peu contrasté — à faire
+6. Chemin de déplacement peu contrasté — fait : `terrain_line.gdshader` liseré sombre optionnel
+   (`casing_width`/`casing_color`, 0 par défaut = fleuves/côte inchangés), activé dans
+   `army_movement_path.gd` (0.32, presque noir) ; largeur mini 0.3->0.55.
 7. Étiquettes qui se chevauchent — à faire
 8. « Aucune recherche » deux fois — à faire
 9. Panneau de faction plus haut que l'écran — à faire

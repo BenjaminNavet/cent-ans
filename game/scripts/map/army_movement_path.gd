@@ -62,6 +62,9 @@ func _line_instance(node_name: String, color: Color, min_px: float, priority: in
 	var material := PolylineMesh.line_material(color, min_px, priority)
 	material.set_shader_parameter("thin_fade", 0.0)
 	material.set_shader_parameter("center_highlight", 0.25)
+	# CV3-0 (#6) : liseré sombre pour rester lisible sur tout type de terrain.
+	material.set_shader_parameter("casing_width", 0.32)
+	material.set_shader_parameter("casing_color", Color(0.05, 0.04, 0.03, 0.88))
 	instance.material_override = material
 	add_child(instance)
 	return instance
@@ -79,7 +82,8 @@ func show_plan(points: PackedVector2Array, stop_index: int, turn_ends: PackedInt
 	_points = points
 	_stop_index = clampi(stop_index, 0, points.size() - 1)
 	_turn_ends = turn_ends
-	var width := clampf(camera_distance * 0.004, 0.3, 6.0)
+	# CV3-0 (#6) : largeur minimale relevée (0.3 -> 0.55) pour que le liseré sombre reste visible.
+	var width := clampf(camera_distance * 0.004, 0.55, 6.0)
 	var now_part := _subdivide(points.slice(0, _stop_index + 1))
 	var later_part := _subdivide(points.slice(_stop_index))
 	_now.mesh = PolylineMesh.build_screen_lines([now_part], [width], map_data, LIFT) if now_part.size() >= 2 else null

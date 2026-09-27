@@ -12,6 +12,10 @@ uniform float min_px = 1.2;
 uniform float thin_fade = 0.7;
 // Assombrissement / éclaircissement au centre du trait (reflet de l'eau).
 uniform float center_highlight = 0.12;
+// CV3-0 (#6) : liseré sombre sur le bord du trait (contraste sur tout type de terrain), en
+// fraction de la demi-largeur ; 0 = désactivé (fleuves, côte : inchangés).
+uniform vec4 casing_color : source_color = vec4(0.0, 0.0, 0.0, 0.9);
+uniform float casing_width = 0.0;
 
 varying float v_alpha;
 varying float v_side;
@@ -30,6 +34,11 @@ void vertex() {
 void fragment() {
 	float edge = abs(v_side);
 	float soft = 1.0 - smoothstep(0.55, 1.0, edge);
-	ALBEDO = color.rgb * (1.0 + center_highlight * (1.0 - edge));
+	vec3 albedo = color.rgb * (1.0 + center_highlight * (1.0 - edge));
+	if (casing_width > 0.0) {
+		float band = smoothstep(1.0 - casing_width - 0.08, 1.0 - casing_width, edge);
+		albedo = mix(albedo, casing_color.rgb, band * casing_color.a);
+	}
+	ALBEDO = albedo;
 	ALPHA = color.a * v_alpha * soft;
 }
