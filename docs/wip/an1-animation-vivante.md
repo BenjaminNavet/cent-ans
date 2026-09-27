@@ -18,7 +18,7 @@ Bible : `docs/design/2026-09-25-bible-da.md` (§ 6, § 10 dette n° 7). ADR rés
 | Lot | Objet | Propriétaire des fichiers | Agent | État |
 |---|---|---|---|---|
 | AN1a | Mouvement secondaire en shader (surcots, caparaçons, bannières, crins), vent d'`atmosphere.json` | `battle_soldier_skinned.gdshader` (partie sommets), shaders d'étendards | cent-ans-dev (worktree) | lancé |
-| AN1b | Nouveaux clips : victoire, 2-3 attentes, parade, coup par-dessus, cheval cabré/trébuche, impacts variés ; branchement dans les jeux de clips | `battle_skinned.py`, `battle_fine.py`, textures d'os, sélection des clips en GDScript | cent-ans-dev (worktree) | lancé |
+| AN1b | Nouveaux clips : victoire, 2-3 attentes, parade, coup par-dessus, cheval cabré/trébuche, impacts variés ; branchement dans les jeux de clips | `battle_skinned.py`, `battle_fine.py`, textures d'os, sélection des clips en GDScript | cent-ans-dev (worktree) | **fusionné** (038ad974) |
 | PR1 | Retexture PBR (Poly Haven CC0) des accessoires Quaternius à aplats | `game/assets/models/**` props, `third_party/**/SOURCE.md`, `CREDITS.md` | cent-ans-dev Sonnet (worktree) | lancé |
 
 Règles : chaque agent fusionne `main` dans sa branche avant de rendre la main, n'écrit jamais
@@ -27,3 +27,4 @@ après copie des dylibs. Au plus 3 captures par lot.
 
 ## Journal
 - 27/09 : fichier créé, vague unique lancée (AN1a, AN1b, PR1).
+- 27/09 : **AN1b fusionné** en ff (038ad974) : 16 clips (victoire ×4, attentes ×6, parade, taille par-dessus, impacts ×2, cheval cabré/trébuche), `clips[64]`, jeux à 8 clips. Smoke + `an1b_clips_test` OK sur main. À valider par le joueur : écran de fin retardé de 3 s (`VICTORY_HOLD`) pour voir l'acclamation. Restes : `docs/wip/an1b-clips.md`. AN1a (partie A de l'ADR 0096) doit fusionner main : conflit attendu sur l'en-tête du shader et l'ADR.
