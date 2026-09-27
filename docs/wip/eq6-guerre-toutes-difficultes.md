@@ -84,9 +84,16 @@ lots) et tient les critères de guerre plus juste : v9 retenu.
 - Chaos entre graines toujours large ; en normale, graines 5 et 8 à 75,4 et 76,7 % (hors bande
   par le haut, de peu) : la guerre est désormais plutôt trop présente que trop rare.
 
-### Vérifications (reprise)
+### Vérifications finales (2026-09-27, après fusion + v9)
 
-Voir la section « Vérifications finales » en fin de reprise.
+- `cargo fmt --all --check` : OK.
+- `cargo clippy --workspace --all-targets -- -D warnings` : OK.
+- `cargo test --workspace` : OK (aucun échec ; `eq6_main_claim` 6/6).
+- `core/build.sh` : OK ; `godot --headless --path game --import` : OK ;
+  `smoke.gd` : « smoke OK » (sortie 0 ; seuls des avertissements de fixtures manquantes).
+- `uv run --project tools pytest` : 775 passés, 2 ignorés.
+- `balance_probe campaign 200` (normale), lots 1-8 et 9-16 : voir tableau ci-dessus.
+- Combat tactique non touché (seules la diplomatie de l'IA et la sonde changent).
 
 ## État antérieur (2026-09-26) : EN PAUSE (session suspendue par le joueur, 2026-09-26) — pas prêt à fusionner
 
