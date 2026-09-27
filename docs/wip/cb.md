@@ -12,10 +12,10 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB-M3 | Ordres en file (Maj + clic droit) | 2 | **fusionné 09-27** (borne 8 dans `battle_queue.json` ; `preview_path_from` ajouté plutôt que changer `preview_path` ; attaque en file close sur cible en fuite seulement si une file attend ; ordre suivant après rupture du contact) | `cb-m3-file-ordres.md` |
 | CB-M4 | Portée au sol, comparaison au survol | 2 | **fusionné 09-27** (fusionné avant CB-M3 ; demi-angle de tir = dessin seulement, 60° en données ; panneau posé au-dessus des « Ordres du chef ») | `cb-m4-portee-comparaison.md` |
 | CB1 | Formation au glisser, verrouillage de groupe | 3 | **fusionné 09-27** (répartition des largeurs dans le cœur, `group_gap_m` 10 m ; largeur = passage en Ligne ; `match_speed` = allure en terrain ouvert du plus lent ; bornes de rangs en premières valeurs, sans relecture historique ; cadenas = glyphe en code) | `cb1-formation-glisser.md` |
-| CB2 | Modes d'unité (+ « Battre en brèche »), icônes d'état, remappage des touches | 4 | **en cours** (agent, `feat/cb2-modes`, fusion en dernier) | `cb2-modes.md` |
-| CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | **en cours** (agent Sonnet, `feat/cb3-camera-tactical`, fusion en premier) | `cb3-camera-vue-tactique.md` |
-| CB5 | Alertes typées, colonne, minicarte, cris | 4 | **en cours** (agent Sonnet, `feat/cb5-alerts`) | `cb5-alertes.md` |
-| CB6 | Formations de groupe (6 préréglages, placement proposé) — demande du joueur 09-27 | 4 | **en cours** (agent, `feat/cb6-group-formations`) | `cb6-formations-groupe.md` |
+| CB2 | Modes d'unité (+ « Battre en brèche »), icônes d'état, remappage des touches | 4 | **fusionné 09-28** (table unique `battle_hotkeys.gd` ; drapeaux de mode hors empreinte, leurs effets y sont ; IA : garde seulement en attente ; marges EP7/EQ7 inchangées 16/18/14, 15/16) | `cb2-modes.md` |
+| CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | **fusionné 09-28** (`spotted` = fonction pure, portée `missile_arc.spotter_range_m` 350 m ; assombrissement par calque HUD) | `cb3-camera-vue-tactique.md` |
+| CB5 | Alertes typées, colonne, minicarte, cris | 4 | **fusionné 09-28** (parti d'un main ancien : test cœur remis à jour à la fusion ; cris doublés possibles avec `_detect_events`, amortis par cooldown) | `cb5-alertes.md` |
+| CB6 | Formations de groupe (6 préréglages, placement proposé) — demande du joueur 09-27 | 4 | **fusionné 09-28** (Ligne de bataille = placement d'avant au bit près ; sélecteur toujours affiché en bataille, à rendre repliable) | `cb6-formations-groupe.md` |
 | CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 (relecture historique **faite**) | |
 
 ## Coordination
@@ -30,12 +30,10 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 - Icônes (≈ 40, ≈ 2 $) via le pipeline DA5 ; consigner dans `docs/budget.md`.
 
 ## Prochaine étape
-Vague 4 : CB2 (modes + « Battre en brèche », icônes d'état, remappage), CB3 (ralenti, caméra, vue tactique,
-`spotted`), CB5 (alertes typées, colonne, minicarte, cris), CB6 (formations de groupe, 6 préréglages,
-`docs/research/cb6-formations.md`) en parallèle ; fusion CB3, CB5, CB6, CB2. Puis CB4 (décisions
-historiques au plan). Acquis CB1 : `Command::Move{width, match_speed, group_tag}` (omis à la valeur par
-défaut), `formation_extent(id, width)` au pont, `FormationDrag` (Godot), verrou `battle_groups.gd`.
-Rejeu : `replay_sample.json` diverge déjà (règles changées depuis EP13, attendu : EP13 signale la
-divergence) ; seule la lecture est testée. ADR 0095 : addenda CB-M2/M3/M4/CB1 à la finalisation.
-Pièges : scripts de capture via `scene.issue` → points sur la terre ferme ; panneaux bas-gauche au-dessus
-des « Ordres du chef ».
+CB4 (capacités actives, décisions historiques au plan : Tir tendu, Dresser les pavois, Se rallier à la
+bannière, Serrer les rangs, Piques plantées ; « Battre en brèche » déjà fait en mode CB2). Raccourcis
+Alt+1…4 déjà réservés dans `BattleHotkeys.BINDINGS` (`pending: true` à lever). Puis : icônes DA5 en une
+fois (curseurs, cadenas, modes `battle_mode_<mode>`, états, alertes, capacités ; ≈ 2 $), ADR 0095
+finalisée (addenda CB-M2…CB6), partie pilote du joueur.
+Suites notées : sélecteur de formations repliable ; cris d'alerte doublés possibles ; bornes de rangs CB1
+sans relecture historique ; bulle d'aide CB6 qui masque les archers avancés sur un cadrage haut.
