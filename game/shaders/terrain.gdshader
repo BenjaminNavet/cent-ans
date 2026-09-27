@@ -118,7 +118,9 @@ uniform float track_width = 0.10;
 uniform float snow_line_m = 2750.0;
 uniform float rock_line_m = 1700.0;
 // Exagération de l'ombrage par rapport à la géométrie (lisibilité du relief).
-uniform float shading_relief = 1.8;
+// CV3-0 (#5) : 1.8 -> 2.1, la plaine entre Paris et Orléans restait peu lisible en vue régionale
+// (l'écrasement des montagnes, indépendant, reste inchangé).
+uniform float shading_relief = 2.1;
 // ZG8 : roche sur les pentes raides du relief EXAGÉRÉ localement (pente affichée ramenée à l'échelle
 // ×1 : pente vraie × (1 + gain local)), m/m ; 0 / 0 : désactivé (posés par TerrainBuilder).
 uniform float cliff_slope_start = 0.0;
