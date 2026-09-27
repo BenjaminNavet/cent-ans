@@ -7,7 +7,7 @@ plan `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`). Rôles du je
 ## Vocabulaire de l'époque
 
 - Une armée se range en **« batailles »** (*acies*, *battles*) : d'ordinaire trois, **avant-garde**
-  (ou « avant-garde »/« première bataille »), **bataille** (celle du roi ou du chef) et
+  (ou « première bataille »), **bataille** (celle du roi ou du chef) et
   **arrière-garde**, parfois une quatrième ou des **ailes** montées. C'est la même division qu'en
   marche. Contamine, *La Guerre au Moyen Âge* (1980) ; Verbruggen, *The Art of Warfare in Western
   Europe* (2e éd., 1997).
