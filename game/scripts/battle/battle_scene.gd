@@ -126,6 +126,9 @@ var _hovered_ids: Array[int] = []  # régiments survolés (terrain, repère), r�
 ## CB-M2 : aperçu du trajet, curseur contextuel, carte du HUD survolée (-1 : aucune).
 var path_preview: BattlePathPreview = null
 var cursor: BattleCursor = null
+## CB-M4 : portée au sol des tireurs sélectionnés ou survolés, comparaison au survol d'un ennemi.
+var range_arc: BattleRangeArc = null
+var compare_panel: BattleComparePanel = null
 var card_hover := -1
 ## Dernier `hover_context` du cœur et nombre d'appels (tests : au plus un par image).
 var last_hover: Dictionary = {}
@@ -645,6 +648,11 @@ func _build_scene() -> bool:
 	add_child(path_preview)
 	path_preview.setup(battle, func(x: float, z: float) -> float: return terrain.height_at(x, z), side_colors.get(player_side, Color(0.9, 0.8, 0.3)))
 	cursor = BattleCursor.new()
+	range_arc = BattleRangeArc.new()
+	add_child(range_arc)
+	range_arc.setup(battle, side_colors, player_side)
+	compare_panel = BattleComparePanel.new()
+	hud.root.add_child(compare_panel)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	if not historical.is_empty():
@@ -683,6 +691,8 @@ func _build_scene() -> bool:
 	hud.add_events(battle.call("get_events"))
 	_leader_bar = LEADER_ORDERS_BAR.new(self)
 	add_child(_leader_bar)
+	if compare_panel != null:
+		compare_panel.above = _leader_bar.panel
 	music = BATTLE_MUSIC.new()
 	music.name = "Music"
 	add_child(music)
@@ -1567,6 +1577,9 @@ func _update_outlines() -> void:
 	if card_hover >= 0:
 		_hovered_ids.append(card_hover)
 	outlines.update(units, selected, _hovered_ids)
+	if range_arc != null:
+		range_arc.update(units, selected, _hovered_ids)
+		compare_panel.refresh(null if replay_mode else battle, units, selected, _hovered_ids, player_side, Time.get_ticks_msec() / 1000.0)
 
 
 ## B2 : repères 2D au-dessus des troupes, sous les panneaux du HUD (premier enfant de sa racine).
