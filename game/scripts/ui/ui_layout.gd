@@ -32,12 +32,15 @@ signal side_panel_changed(control: Control)
 enum Zone { TOP_BAR, BOTTOM_SELECTION, MINIMAP, SIDE_PANEL, TOASTS, MODAL }
 
 ## Rectangles des zones en part de l'écran (x, y, largeur, hauteur), bible DA § 12.1.
+## Écart PO1 : la barre du haut mesure 64 px (hauteur logique 800 px à 1280×720, échelle
+## d'interface bornée à 0,9) ; `TOP_BAR` passe de 0,05 à 0,08 et `SIDE_PANEL` / `TOASTS`
+## commencent à 0,09 au lieu de 0,06 / 0,07 (mêmes bords bas).
 const ZONE_RECTS := {
-	Zone.TOP_BAR: Rect2(0.0, 0.0, 1.0, 0.05),
+	Zone.TOP_BAR: Rect2(0.0, 0.0, 1.0, 0.08),
 	Zone.BOTTOM_SELECTION: Rect2(0.01, 0.80, 0.80, 0.20),
 	Zone.MINIMAP: Rect2(0.82, 0.72, 0.18, 0.28),
-	Zone.SIDE_PANEL: Rect2(0.70, 0.06, 0.30, 0.64),
-	Zone.TOASTS: Rect2(0.01, 0.07, 0.26, 0.50),
+	Zone.SIDE_PANEL: Rect2(0.70, 0.09, 0.30, 0.61),
+	Zone.TOASTS: Rect2(0.01, 0.09, 0.26, 0.48),
 	Zone.MODAL: Rect2(0.2, 0.12, 0.6, 0.76),
 }
 const TOAST_SECONDS := 6.0
@@ -48,6 +51,7 @@ const MODAL_DIM := Color(0.0, 0.0, 0.0, 0.45)
 const DEFAULT_LAYER := 60
 const ZONE_META := &"ui_layout_zone"
 const _TOAST_META := &"ui_layout_toast"
+const _WRAPPER_META := &"ui_layout_wrapper"
 
 ## Hôte courant : `{node, zones: {Zone: Control}, dim: ColorRect, stack: VBoxContainer,
 ## toasts: VBoxContainer, spacer: Control, more: Label}`.
@@ -93,6 +97,8 @@ func claim(zone: Zone, control: Control, at_end: bool = false) -> void:
 		return
 	_ensure_host()
 	var parent := _parent_for(zone, at_end)
+	if zone == Zone.SIDE_PANEL:
+		parent = _side_wrapper(control, parent)
 	if control.get_parent() != parent:
 		if control.get_parent() == null:
 			parent.add_child(control)
@@ -112,17 +118,20 @@ func claim(zone: Zone, control: Control, at_end: bool = false) -> void:
 		_occupants[zone] = list
 		control.visibility_changed.connect(_on_occupant_visibility.bind(control))
 		control.tree_exiting.connect(_forget.bind(control), CONNECT_ONE_SHOT)
-	if zone == Zone.SIDE_PANEL or zone == Zone.MODAL:
-		_fill(control)
-	if zone == Zone.SIDE_PANEL and control.visible:
-		_close_other_side_panels(control)
-		side_panel_changed.emit(control)
+	if zone == Zone.SIDE_PANEL:
+		control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		control.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		(parent as CanvasItem).visible = control.visible
+		if control.visible:
+			_close_other_side_panels(control)
+			side_panel_changed.emit(control)
 	if zone == Zone.MODAL:
+		_center(control)
 		_update_dim()
 
 
 ## Retire `control` de sa zone (sans le libérer) : il sort de l'arbre si son parent est le
-## conteneur de la zone.
+## conteneur de la zone (ou l'enveloppe défilante du panneau latéral, alors libérée).
 func release(control: Control) -> void:
 	if control == null:
 		return
@@ -130,7 +139,10 @@ func release(control: Control) -> void:
 	if control.tree_exiting.is_connected(_forget.bind(control)):
 		control.tree_exiting.disconnect(_forget.bind(control))
 	var parent := control.get_parent()
-	if parent != null and _is_zone_container(parent):
+	if parent != null and parent.has_meta(_WRAPPER_META):
+		parent.remove_child(control)
+		parent.queue_free()
+	elif parent != null and _is_zone_container(parent):
 		parent.remove_child(control)
 	_update_dim()
 
@@ -283,7 +295,7 @@ func _build_host(host: Node) -> Dictionary:
 		var node := Control.new()
 		node.name = "UiZone_" + str(Zone.keys()[zone])
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		node.clip_contents = zone != Zone.MODAL
+		node.clip_contents = zone in [Zone.MINIMAP, Zone.SIDE_PANEL, Zone.TOASTS]
 		var part: Rect2 = ZONE_RECTS[zone]
 		node.anchor_left = part.position.x
 		node.anchor_top = part.position.y
@@ -355,10 +367,27 @@ func _is_zone_container(node: Node) -> bool:
 	return (_host["zones"] as Dictionary).values().has(node) or node == _host.get("stack")
 
 
-func _fill(control: Control) -> void:
-	control.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+## Panneau latéral : chaque occupant est posé dans une enveloppe défilante qui remplit la zone
+## (un panneau plus haut que la zone défile au lieu de déborder sur la minicarte).
+func _side_wrapper(control: Control, zone_node: Control) -> Control:
+	var current := control.get_parent()
+	if current != null and current.has_meta(_WRAPPER_META) and current.get_parent() == zone_node:
+		return current
+	var wrapper := ScrollContainer.new()
+	wrapper.name = str(control.name) + "Scroll"
+	wrapper.set_meta(_WRAPPER_META, true)
+	wrapper.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	wrapper.follow_focus = true
+	wrapper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	zone_node.add_child(wrapper)
+	return wrapper
+
+
+## Fenêtre modale centrée dans sa zone, à sa taille (la zone, elle, ne bouge pas).
+func _center(control: Control) -> void:
+	control.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 	control.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	control.grow_vertical = Control.GROW_DIRECTION_END
+	control.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 
 func _forget(control: Control) -> void:
@@ -370,6 +399,10 @@ func _forget(control: Control) -> void:
 		if control.has_meta(ZONE_META):
 			control.remove_meta(ZONE_META)
 	_anchored.erase(control)
+	if is_instance_valid(control):
+		var parent := control.get_parent()
+		if parent != null and parent.has_meta(_WRAPPER_META) and not parent.is_queued_for_deletion():
+			parent.queue_free.call_deferred()
 	_update_dim.call_deferred()
 
 
@@ -377,19 +410,20 @@ func _on_occupant_visibility(control: Control) -> void:
 	if not is_instance_valid(control) or not control.has_meta(ZONE_META):
 		return
 	var zone: int = control.get_meta(ZONE_META)
-	if zone == Zone.SIDE_PANEL and control.visible:
-		# Un panneau refermé par `fade_out` garde son alpha nul et son glissement : on les
-		# rétablit à la réouverture.
-		control.modulate.a = 1.0
-		_fill(control)
-		_close_other_side_panels(control)
-		side_panel_changed.emit(control)
-	elif zone == Zone.SIDE_PANEL and visible_occupants(Zone.SIDE_PANEL).is_empty():
-		side_panel_changed.emit(null)
+	if zone == Zone.SIDE_PANEL:
+		var wrapper := control.get_parent()
+		if wrapper != null and wrapper.has_meta(_WRAPPER_META):
+			(wrapper as CanvasItem).visible = control.visible
+		if control.visible:
+			# Un panneau refermé par `fade_out` garde son alpha nul : on le rétablit.
+			control.modulate.a = 1.0
+			_close_other_side_panels(control)
+			side_panel_changed.emit(control)
+		elif visible_occupants(Zone.SIDE_PANEL).is_empty():
+			side_panel_changed.emit(null)
 	if zone == Zone.MODAL:
 		if control.visible:
 			control.modulate.a = 1.0
-			_fill(control)
 		_update_dim()
 	if zone == Zone.TOASTS and control.visible:
 		control.modulate.a = 1.0

@@ -31,8 +31,8 @@ func setup(campaign_map: Node) -> void:
 	map = campaign_map
 	settings = get_node_or_null("/root/Settings")
 	card = NextHintCard.new()
-	var ui: Node = map.get("ui")
-	ui.add_child(card)
+	# PO1 : la carte « que faire maintenant » est un occupant de la zone `TOASTS`.
+	UiLayout.claim(UiLayout.Zone.TOASTS, card)
 	card.activated.connect(activate)
 	card.dismissed.connect(dismiss)
 	enabled = not TutorialController.capture_mode()
@@ -91,12 +91,9 @@ func covered() -> bool:
 	return ui.turn_banner != null and ui.turn_banner.visible
 
 
-## Haut gauche, sous la barre (la minicarte et les lettres occupent la droite).
+## PO1 : placée par la pile de la zone `TOASTS` (haut gauche, sous la barre).
 func _place() -> void:
-	var ui: MapUI = map.get("ui")
-	var top: float = (ui.get_node("TopBar") as Control).size.y + 8.0
 	card.reset_size()
-	card.position = Vector2(MapUI.HUD_MARGIN, top)
 
 
 # --- État ------------------------------------------------------------------------------
