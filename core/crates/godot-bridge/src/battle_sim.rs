@@ -1540,6 +1540,29 @@ impl BattleSim {
     }
 }
 
+/// CV3: the last battle classification as a dictionary (see
+/// `CampaignSim.get_last_battle_outcome`).
+fn battle_outcome_dict(state: &sim_campaign::CampaignState) -> VarDictionary {
+    let Some(report) = &state.last_battle_outcome else {
+        return VarDictionary::new();
+    };
+    let mut dict = vdict! {
+        "turn" => i64::from(report.turn),
+        "province" => report.province.as_str(),
+        "attacker_faction" => report.attacker_faction.as_str(),
+        "defender_faction" => report.defender_faction.as_str(),
+        "attacker_class" => report.attacker.key.as_str(),
+        "attacker_label" => report.attacker.label.as_str(),
+        "defender_class" => report.defender.key.as_str(),
+        "defender_label" => report.defender.label.as_str(),
+    };
+    if let Some(view) = report.class_of(&state.player_faction) {
+        dict.set("player_class", view.key.as_str());
+        dict.set("player_label", view.label.as_str());
+    }
+    dict
+}
+
 #[godot_api(secondary)]
 impl CampaignSim {
     /// `[{index, attacker, defender, province, province_name, attacker_name,
@@ -1691,6 +1714,7 @@ impl CampaignSim {
         let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
             return result_dict(Err("aucune campagne en cours".to_owned()));
         };
+        let before = state.last_battle_outcome.clone();
         let result = from_dict::<BattleOutcome>(&outcome)
             .map_err(|e| format!("résultat invalide : {e}"))
             .and_then(|outcome| {
@@ -1702,10 +1726,26 @@ impl CampaignSim {
             Ok(events) => {
                 let mut dict = result_dict(Ok(()));
                 dict.set("events", &events_array(&events));
+                // CV3: class of the result (heroic, disaster...).
+                if state.last_battle_outcome != before {
+                    dict.set("outcome", &battle_outcome_dict(state));
+                }
                 dict
             }
             Err(error) => result_dict(Err(error)),
         }
+    }
+
+    /// CV3: class of the last field battle (auto-resolved or 3D) →
+    /// `{turn, province, attacker_faction, defender_faction, attacker_class,
+    /// attacker_label, defender_class, defender_label[, player_class,
+    /// player_label]}`; classes: `heroic`, `decisive`, `pyrrhic`, `victory`,
+    /// `honourable_defeat`, `disaster`, `defeat`. Empty before any battle.
+    #[func]
+    fn get_last_battle_outcome(&self) -> VarDictionary {
+        self.state
+            .as_ref()
+            .map_or_else(VarDictionary::new, battle_outcome_dict)
     }
 
     /// Auto-resolves pending battle `index` now; returns its events.

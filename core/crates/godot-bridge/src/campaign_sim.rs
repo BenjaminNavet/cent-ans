@@ -770,12 +770,7 @@ fn army_dict(state: &CampaignState, data: &GameData, army: &Army) -> VarDictiona
 }
 
 fn stance_key(stance: sim_campaign::Stance) -> &'static str {
-    match stance {
-        sim_campaign::Stance::Normal => "normal",
-        sim_campaign::Stance::Raid => "raid",
-        sim_campaign::Stance::Siege => "siege",
-        other => other.key(),
-    }
+    stance.key()
 }
 
 fn tax_rate_key(rate: TaxRate) -> &'static str {
