@@ -28,7 +28,8 @@ Retrouver la grammaire de contrôle d'un Total War :
 - une formation réglable au glisser ;
 - des modes d'unité ;
 - une caméra inclinable et une vue tactique ;
-- des capacités actives sobres et historiques.
+- des capacités actives sobres et historiques ;
+- des ordres en file, la portée affichée, une comparaison au survol, des alertes.
 
 Non-objectifs :
 - changer le modèle de mêlée ;
@@ -47,6 +48,7 @@ Règle projet : toute règle vit dans `core/`, `game/` ne fait que le rendu et l
 | CB2 | états de mode, effets, usage par l'IA | touches, icônes | `rules/unit_modes.json` |
 | CB3 | — | caméra, vue tactique | — |
 | CB4 | moteur de capacités, usage par l'IA | boutons de carte, recharge | `battle_abilities/*.json` + schéma |
+| CB5 | émission des événements d'alerte | colonne d'alertes, minicarte, cris | `rules/battle_alerts.json` |
 
 Une ADR (numéro libre suivant, 0095 à ce jour) consigne trois choix : le nouveau schéma de touches, les deux requêtes du pont en lecture seule, et la séparation entre ordres de chef (armée) et capacités (unité).
 
