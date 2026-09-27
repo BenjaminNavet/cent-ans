@@ -132,18 +132,17 @@ func _test_order_ripple() -> void:
 
 
 func _test_scene_fader() -> void:
-	var fader: Node = root.get_node_or_null("SceneFader")
-	if not _check(fader != null, "SceneFader autoload missing"):
-		return
-	fader.call("cover")
-	_check(bool(fader.call("is_covered")), "cover should veil the view (instant in headless)")
-	fader.call("reveal")
-	_check(not bool(fader.call("is_covered")), "reveal should lift the veil")
-	var error: Variant = await fader.call("go", START_MENU)
+	SceneFader.cover()
+	_check(SceneFader.is_covered(), "cover should veil the view (instant in headless)")
+	SceneFader.reveal()
+	_check(not SceneFader.is_covered(), "reveal should lift the veil")
+	var error: Error = await SceneFader.go(START_MENU)
 	_check(error == OK, "SceneFader.go should accept the scene change (%s)" % error)
-	_check(str(fader.get("last_path")) == START_MENU, "SceneFader.go should remember the requested scene")
+	var fader := SceneFader.instance()
+	_check(fader.last_path == START_MENU, "SceneFader.go should remember the requested scene")
 	for _i in 3:
 		await process_frame
 	var scene := current_scene
 	_check(scene != null and scene.scene_file_path == START_MENU, "SceneFader.go should end on %s (got %s)" % [START_MENU, scene.scene_file_path if scene != null else "null"])
-	_check(not bool(fader.get("busy")), "SceneFader should not stay busy in headless")
+	_check(not fader.busy, "SceneFader should not stay busy in headless")
+	_check(fader.get_parent() == root, "the fader layer should outlive scene changes (child of root)")
