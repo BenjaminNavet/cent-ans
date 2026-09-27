@@ -134,7 +134,12 @@ func compute_places(places: Array, units: Array, now_s: float, queued: bool = fa
 			else:
 				path = battle.call("preview_path", id, float(place["x"]), float(place["z"]))
 		var ok := path.size() >= 2
-		legs.append({"unit": id, "ok": ok, "path": path, "reason": "" if ok else "Aucun chemin jusque-là", "facing": float(place["facing"])})
+		var leg := {"unit": id, "ok": ok, "path": path, "reason": "" if ok else "Aucun chemin jusque-là", "facing": float(place["facing"])}
+		if float(place.get("width", 0.0)) > 0.0:
+			# CB6 : taille d'arrivée d'une place de formation de groupe (fantôme).
+			leg["width"] = float(place["width"])
+			leg["depth"] = float(place.get("depth", 0.0))
+		legs.append(leg)
 	_hide_orders()
 	_draw_live(units, point, facing)
 	return legs

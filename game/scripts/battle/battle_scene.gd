@@ -130,6 +130,8 @@ var cursor: BattleCursor = null
 ## CB-M4 : portée au sol des tireurs sélectionnés ou survolés, comparaison au survol d'un ennemi.
 var range_arc: BattleRangeArc = null
 var compare_panel: BattleComparePanel = null
+## CB6 : sélecteur de formation de groupe (bas droite, au-dessus du bandeau des cartes).
+var formation_picker: BattleFormationPicker = null
 var card_hover := -1
 ## CB-M3 : infobulle « file d'ordres pleine » (Maj tenue).
 var queue_tip: BattleQueueTip = null
@@ -664,6 +666,9 @@ func _build_scene() -> bool:
 	range_arc.setup(battle, side_colors, player_side)
 	compare_panel = BattleComparePanel.new()
 	hud.root.add_child(compare_panel)
+	formation_picker = BattleFormationPicker.new()
+	hud.root.add_child(formation_picker)
+	formation_picker.setup(self)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	if not historical.is_empty():
