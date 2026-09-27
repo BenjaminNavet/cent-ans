@@ -153,6 +153,7 @@ pub(crate) fn defer_player_battle(
         location,
         province,
         siege: false,
+        opening: Default::default(),
     });
     true
 }
@@ -337,6 +338,9 @@ pub(crate) fn side_setup(
         army: id.to_string(),
         units,
         general,
+        forced_march: false,
+        entrenched: false,
+        start_fatigue: 0.0,
     }
 }
 
@@ -530,6 +534,7 @@ impl CampaignState {
             orders: data.battle_orders.values().cloned().collect(),
             standards: Some(data.battle_standard_rules.clone()),
             decor_plan: None,
+            opening: Default::default(),
         };
         self.apply_difficulty_setup(data, &mut setup);
         Ok(setup)
@@ -798,6 +803,7 @@ impl CampaignState {
             orders: data.battle_orders.values().cloned().collect(),
             standards: Some(data.battle_standard_rules.clone()),
             decor_plan: None,
+            opening: Default::default(),
         };
         self.apply_difficulty_setup(data, &mut setup);
         setup
@@ -939,6 +945,7 @@ impl CampaignState {
             location: city,
             province: province.clone(),
             siege: true,
+            opening: Default::default(),
         });
         index
     }
@@ -979,6 +986,7 @@ impl CampaignState {
             location,
             province,
             siege: false,
+            opening: Default::default(),
         });
         Ok(index)
     }

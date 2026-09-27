@@ -774,6 +774,7 @@ fn stance_key(stance: sim_campaign::Stance) -> &'static str {
         sim_campaign::Stance::Normal => "normal",
         sim_campaign::Stance::Raid => "raid",
         sim_campaign::Stance::Siege => "siege",
+        other => other.key(),
     }
 }
 

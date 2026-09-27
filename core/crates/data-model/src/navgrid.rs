@@ -432,9 +432,9 @@ pub fn open_settlement_cells(grid: &mut NavGrid, settlements: &[[f32; 2]]) {
     }
 }
 
-type Decoded = (Vec<u8>, u32, u32);
+pub(crate) type Decoded = (Vec<u8>, u32, u32);
 
-fn decode(path: &Path, color: png::ColorType) -> Result<Decoded, String> {
+pub(crate) fn decode(path: &Path, color: png::ColorType) -> Result<Decoded, String> {
     let file = File::open(path).map_err(|e| e.to_string())?;
     let mut decoder = png::Decoder::new(BufReader::new(file));
     decoder.set_transformations(png::Transformations::IDENTITY);

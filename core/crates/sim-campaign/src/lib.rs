@@ -36,6 +36,7 @@ pub mod ai_minimal;
 pub mod ai_replay;
 pub mod battle_auto;
 pub mod battle_forecast;
+pub mod battle_outcome;
 pub mod battle_request;
 pub mod buildings;
 pub mod characters;
@@ -61,6 +62,7 @@ pub mod orders;
 pub mod passage;
 pub mod path_plan;
 pub mod population;
+pub mod posture;
 pub mod ransom;
 pub mod religion;
 pub mod research;
@@ -123,7 +125,7 @@ pub use save::{CampaignError, FREE_MOVEMENT_STATE_VERSION, SETTLEMENTS_STATE_VER
 pub use skills::LearnSkillError;
 pub use state::{
     Army, ArmyId, ArmyPosition, BattleRequest, CampaignState, CharacterState, Construction,
-    FactionState, FactionSummary, MoveTarget, ProvinceState, QueuedRecruit, Season,
+    FactionState, FactionSummary, MoraleModifier, MoveTarget, ProvinceState, QueuedRecruit, Season,
     SettlementState, SiegeState, Stance, Unit, MAX_MOVEMENT_POINTS, START_YEAR, STATE_VERSION,
     TURNS_PER_YEAR,
 };

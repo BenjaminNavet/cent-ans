@@ -972,6 +972,9 @@ fn battle_side(data: &GameData, name: &str, comp: &[(String, usize)]) -> SideSet
             })
             .collect(),
         general: None,
+        forced_march: false,
+        entrenched: false,
+        start_fatigue: 0.0,
     }
 }
 
@@ -1000,6 +1003,7 @@ fn run_3d(data: &GameData, scenario: &Scenario, runs: u32) -> Reference3d {
             orders: Vec::new(),
             standards: None,
             decor_plan: None,
+            opening: Default::default(),
         };
         let mut sim = BattleSim::new(setup, seed).expect("battle setup");
         let mut steps = 0;

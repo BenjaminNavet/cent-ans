@@ -29,6 +29,9 @@ pub fn side(name: &str, units: Vec<UnitSetup>) -> SideSetup {
         army: String::new(),
         units,
         general: None,
+        forced_march: false,
+        entrenched: false,
+        start_fatigue: 0.0,
     }
 }
 
@@ -53,6 +56,7 @@ pub fn setup(
         orders: Vec::new(),
         standards: None,
         decor_plan: None,
+        opening: Default::default(),
     }
 }
 

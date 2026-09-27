@@ -306,3 +306,37 @@ fn every_province_has_exactly_one_city() {
             .sum::<usize>()
     );
 }
+
+/// Lot CV3-1: `data/rules/postures.json` is read and mirrored by the default.
+#[test]
+fn posture_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.posture_rules.clone();
+    assert!(from_file.description.is_some(), "postures.json not read");
+    from_file.description = None;
+    assert_eq!(from_file, data_model::PostureRules::default());
+}
+
+/// Lot CV3-1: `data/rules/battle_outcome.json` is read and mirrored by the default.
+#[test]
+fn battle_outcome_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.battle_outcome_rules.clone();
+    assert!(
+        from_file.description.is_some(),
+        "battle_outcome.json not read"
+    );
+    from_file.description = None;
+    assert_eq!(from_file, data_model::BattleOutcomeRules::default());
+}
+
+/// Lot CV3-1: the cover map is decoded from the real rasters and finds
+/// forests and wetlands somewhere.
+#[test]
+fn cover_map_reads_the_rasters() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let map = data.cover_map().expect("cover rasters");
+    assert_eq!(map.width, data.navgrid().width);
+    assert!(map.forest.iter().any(|v| *v > 200), "no forest cell");
+    assert!(map.wetland.iter().any(|v| *v > 100), "no wetland cell");
+}

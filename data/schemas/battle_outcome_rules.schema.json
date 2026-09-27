@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_outcome_rules.schema.json",
+  "title": "Résultats nuancés des batailles",
+  "description": "Fichier data/rules/battle_outcome.json (lot CV3-1) : seuils de classification (héroïque, décisive, à la Pyrrhus, victoire, défaite honorable, désastre, défaite) et conséquences de chaque classe. Voir docs/design/2026-09-27-campagne-vivante.md § 3.",
+  "type": "object",
+  "$defs": {
+    "share": { "type": "number", "minimum": 0, "maximum": 1 },
+    "consequence": {
+      "type": "object",
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "xp_multiplier": { "type": "number", "minimum": 0, "maximum": 5 },
+        "prestige": { "type": "integer", "minimum": -100, "maximum": 100 },
+        "morale": { "type": "integer", "minimum": -50, "maximum": 50 },
+        "morale_turns": { "type": "integer", "minimum": 0, "maximum": 20 }
+      },
+      "required": ["label", "xp_multiplier", "prestige", "morale", "morale_turns"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "description": { "type": "string" },
+    "thresholds": {
+      "type": "object",
+      "properties": {
+        "heroic_max_strength_ratio": { "type": "number", "minimum": 0, "maximum": 1, "description": "Effectif propre / effectif ennemi au plus (1:1,5 → 0,667)." },
+        "decisive_enemy_losses_min": { "$ref": "#/$defs/share" },
+        "decisive_own_losses_max": { "$ref": "#/$defs/share" },
+        "pyrrhic_own_losses_min": { "$ref": "#/$defs/share" },
+        "honourable_inflicted_ratio_min": { "type": "number", "minimum": 0, "description": "Pertes infligées / pertes subies au moins." },
+        "disaster_own_losses_min": { "$ref": "#/$defs/share" }
+      },
+      "required": ["heroic_max_strength_ratio", "decisive_enemy_losses_min", "decisive_own_losses_max", "pyrrhic_own_losses_min", "honourable_inflicted_ratio_min", "disaster_own_losses_min"],
+      "additionalProperties": false
+    },
+    "classes": {
+      "type": "object",
+      "properties": {
+        "heroic": { "$ref": "#/$defs/consequence" },
+        "decisive": { "$ref": "#/$defs/consequence" },
+        "pyrrhic": { "$ref": "#/$defs/consequence" },
+        "victory": { "$ref": "#/$defs/consequence" },
+        "honourable_defeat": { "$ref": "#/$defs/consequence" },
+        "disaster": { "$ref": "#/$defs/consequence" },
+        "defeat": { "$ref": "#/$defs/consequence" }
+      },
+      "required": ["heroic", "decisive", "pyrrhic", "victory", "honourable_defeat", "disaster", "defeat"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["thresholds", "classes"],
+  "additionalProperties": false
+}
