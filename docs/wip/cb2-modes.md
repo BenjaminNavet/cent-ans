@@ -4,7 +4,7 @@ Branche : `feat/cb2-modes` (depuis `main` 220a1e9f). Plan :
 `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md` (section CB2). Fusion **en dernier** de
 la vague 4 (après CB3, CB5, CB6). Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cb2`.
 
-## État : terminé, vérifications finales en cours
+## État : terminé, en attente de capture et de fusion (en dernier)
 
 - [x] Données : `data/rules/unit_modes.json` (course, escarmouche, seuils d'état, brèche, IA) +
       schéma `unit_modes_rules.schema.json` + `tools/tests/test_unit_modes_schema.py`.
@@ -93,6 +93,16 @@ de ligne `dispatch: true`.
 `godot --path game --resolution 1600x900 --script res://tests/cb2_modes_shot.gd -- --out=docs/img/cb/cb2-modes.png`
 (non exécutée ici, non relue).
 
+## Vérifications (09-28)
+
+`cargo fmt`, `cargo clippy --workspace --all-targets -D warnings` propres ; `cargo test --workspace`
+1028 réussis, 0 échec ; release `ep13_replay` 8/8, `b6` 12/12, `ep7_historical` 8/8, `eq7_cavalry`
+1/1 ; pytest 801 réussis ; Godot `cb2_modes_test`, `cb0_input_equivalence_test`,
+`cb_m1_outline_test`, `cb_m2_path_hover_test`, `cb_m3_queue_test`, `cb_m4_range_compare_test`,
+`cb1_drag_formation_test`, `smoke.gd`, `cb2_modes_shot.gd --probe` : code 0, aucune « SCRIPT ERROR ».
+
 ## Prochaine étape
 
-Vérifications finales (workspace, release, Godot), commit final.
+Relecture de la capture, fusion après CB3, CB5, CB6 (intégrer leurs touches à la table) ; icônes
+DA5 des modes et états ; addendum ADR 0095 (table des raccourcis, drapeaux hors empreinte, IA en
+garde à l'attente).
