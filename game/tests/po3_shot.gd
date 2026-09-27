@@ -40,7 +40,8 @@ func _init() -> void:
 			var focus := "--focus=%d,%d,%d" % [int(PARIS.x), int(PARIS.y), int(entry[1])]
 			var args := PackedStringArray([
 				"--path", ProjectSettings.globalize_path("res://"), "--resolution", RESOLUTION, MAP,
-				"--", focus, "--season=" + season, "--screenshot=" + png,
+				# `--focus` après `--screenshot` : la mise en scène de capture recadre sinon la caméra.
+				"--", "--stage=map", "--season=" + season, "--screenshot=" + png, focus,
 			])
 			var started := Time.get_ticks_msec()
 			var output := []
