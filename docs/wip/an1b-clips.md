@@ -1,27 +1,26 @@
 # AN1b — nouveaux clips cuits (victoire, attentes, parade, coup par-dessus, cheval, impacts)
 
 Branche `feat/an1b-clips` (worktree agent). Orchestration : `docs/wip/an1-animation-vivante.md`.
-ADR : `docs/decisions/0096-animation-vivante.md` § B.
+ADR : `docs/decisions/0096-animation-vivante.md` § B (décision, coût, limites).
 
-## Plan
-1. Poses procédurales (clés calculées, comme les clips existants) dans
-   `tools/blender_scripts/battle_skinned_poses.py` ; ajout en fin de `human_clip_specs` et de
-   `battle_skinned_cavalry.clip_specs` (les lignes existantes gardent leur place).
-2. Cheval : attribut facultatif `pose.horse(harm, t)` appliqué avant d'asseoir le cavalier
-   (cabrage, trébuchement).
-3. Shader : `clips[64]` (au lieu de 48) et jeux jusqu'à 8 clips (deux indices par composante
-   d'`ivec4`, octet haut = emplacements 4-7 ; identique à l'ancien codage jusqu'à 4).
-4. GDScript : jeux de clips enrichis (`STYLES`), état de rendu `victory` (camp vainqueur, fin de
-   bataille), `melee_pikes` (cavaliers au contact de piques), clips absents filtrés (kit grossier).
-5. Validation : rendus workbench sur le corps fin, puis cuisson `rigs` (textures d'os seules).
+## Fait
+- Poses calculées dans `tools/blender_scripts/battle_skinned_poses.py` (section AN1b) ;
+  13 clips humains et 3 clips cheval ajoutés en fin de listes (`battle_skinned.py`,
+  `battle_skinned_cavalry.py`) ; surcharge cheval `pose.horse` (aussi dans
+  `battle_fine_proto.pose_cavalry`).
+- Textures d'os fines recuites (`blender -b --factory-startup --python
+  tools/blender_scripts/battle_fine.py -- rigs`, 9 s) ; anciens clips identiques.
+  Note : l'étape `bake` (45 min) ne recuit que maillages et cartes, pas les textures d'os :
+  inutile ici.
+- Shader : `clips[64]`, jeux de 8 (`pick_clip`) ; `battle_standard_flag.gdshader` : `clips[64]`.
+- GDScript : `STYLES` enrichi, `_present` (clips absents écartés), `victor_side`,
+  `melee_pikes`, cycle de charge avec trébuchement, écran de fin après 3 s d'acclamation.
+- Planche : `docs/img/an1/an1b_clips.png` (`an1b_render.py` + `an1b_planche.py`).
+- Test : `game/tests/an1b_clips_test.gd` (+ `-- --coarse-figures`).
 
-## État
-- [ ] squelette
-- [ ] poses humaines
-- [ ] poses cheval
-- [ ] shader + GDScript
-- [ ] planche de contrôle
-- [ ] cuisson + tests
+## Tests
+an1b_clips_test (fin, grossier), bv3_check, fg3_maps_test, ep13_replay_test OK ; smoke : voir
+dernier commit.
 
 ## Prochaine étape
-Écrire les poses humaines.
+Fusionner `main`, retester, rendre la main (pas de fusion dans `main`).
