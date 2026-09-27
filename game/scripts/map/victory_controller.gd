@@ -113,7 +113,7 @@ func setup(campaign_map: Node) -> void:
 	buttons.add_child(keep)
 	var menu := Button.new()
 	menu.text = "Menu principal"
-	menu.pressed.connect(func() -> void: map.get_tree().change_scene_to_file(map.START_MENU_SCENE))
+	menu.pressed.connect(func() -> void: SceneFader.go(map.START_MENU_SCENE))
 	buttons.add_child(menu)
 	end_box.add_child(buttons)
 	map.ui.add_child(end_dialog)

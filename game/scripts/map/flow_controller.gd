@@ -181,7 +181,7 @@ func toggle_pause() -> void:
 
 func go_to_main_menu() -> void:
 	get_tree().paused = false
-	get_tree().change_scene_to_file(START_MENU_SCENE)
+	SceneFader.go(START_MENU_SCENE)
 
 
 func _default_save_name() -> String:

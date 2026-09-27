@@ -253,6 +253,17 @@ func _execute(army_id: String, target: Dictionary) -> void:
 	UiSounds.play_order_result(report)  # UB1 / U13
 	if not report.get("ok", false):
 		map.ui.show_toast(str(report.get("error", "Ordre refusé")), true)
+	else:
+		_ripple_at(target)
+
+
+## PO5 : onde d'encre au point visé par un ordre accepté (rendu seulement).
+func _ripple_at(target: Dictionary) -> void:
+	var point: Variant = target.get("point")
+	if not point is Vector2 or map.map_data == null:
+		return
+	var at := point as Vector2
+	OrderRipple.spawn(map.ui, map.camera, Vector3(at.x, map.map_data.surface_world_at(at.x, at.y), at.y))
 
 
 ## Lot AT1 : attaque d'une cible en paix : confirmation, puis déclaration de guerre et attaque.

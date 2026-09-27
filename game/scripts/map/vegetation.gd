@@ -144,6 +144,7 @@ func build(data: MapData) -> void:
 	stats["source"] = mask.source
 	_material = ShaderMaterial.new()
 	_material.shader = FOLIAGE_SHADER
+	_bind_forest_cover(data)
 	_season = -1
 	_exclusions.clear()
 	# Sans colonies (C6), clairière autour de chaque capitale de province.
@@ -156,6 +157,23 @@ func build(data: MapData) -> void:
 		forest_detail = ForestDetail.new()
 		add_child(forest_detail)
 		forest_detail.setup(self, terrain)
+
+
+## Lot PO3 : couverture forestière réduite (1024 px) pour les lisières du feuillage
+## (`foliage.gdshaderinc` : arbres plus bas et clairsemés sur la rampe de la couverture).
+func _bind_forest_cover(data: MapData) -> void:
+	var image := mask.forest_cover_image(1024)
+	_material.set_shader_parameter("has_forest_cover", image != null)
+	if image == null:
+		return
+	var params := mask.forest_cover_params()
+	var channel := Vector4.ZERO
+	channel[int(params["channel"])] = 1.0
+	_material.set_shader_parameter("forest_cover", ImageTexture.create_from_image(image))
+	_material.set_shader_parameter("cover_map_size", Vector2(data.size))
+	_material.set_shader_parameter("cover_channel", channel)
+	_material.set_shader_parameter("cover_low", float(params["low"]))
+	_material.set_shader_parameter("cover_high", float(params["high"]))
 
 
 ## Lot PB2 : pool natif de semis, partageant la heightmap et le lit des fleuves de `data`.

@@ -430,8 +430,8 @@ func _replay_failed() -> void:
 	var dialog := AcceptDialog.new()
 	dialog.title = "Rejeu"
 	dialog.dialog_text = "Ce rejeu ne peut être revu : %s." % replay_error
-	dialog.confirmed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/start_menu.tscn"))
-	dialog.canceled.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/start_menu.tscn"))
+	dialog.confirmed.connect(func() -> void: SceneFader.go("res://scenes/start_menu.tscn"))
+	dialog.canceled.connect(func() -> void: SceneFader.go("res://scenes/start_menu.tscn"))
 	hud.add_child(dialog)
 	dialog.popup_centered()
 
@@ -1661,9 +1661,14 @@ func _on_return() -> void:
 	var result := _resolution
 	if _audio_director != null:  # B3 : la carte retrouve sa musique de contexte
 		_audio_director.call("refresh_context")
+	if not standalone:
+		# PO5 : retour vers la carte (pas de changement de scène) sous le voile noir parchemin.
+		await SceneFader.cover()
 	returned.emit(result)
+	if not standalone:
+		SceneFader.reveal()
 	if standalone:
-		get_tree().change_scene_to_file("res://scenes/start_menu.tscn")
+		SceneFader.go("res://scenes/start_menu.tscn")
 
 
 # --- Entrées --------------------------------------------------------------------------
@@ -1711,7 +1716,7 @@ func _on_input_selection_changed(ids: Array) -> void:
 
 
 func _on_input_camera_focus(point: Vector3) -> void:
-	camera_rig.look_at_point(point, camera_rig.distance, camera_rig.yaw)
+	camera_rig.glide_to(point, camera_rig.distance, camera_rig.yaw)  # PO5 : glissement 0,4 s
 
 
 func _on_input_markers_toggled() -> void:
@@ -1775,7 +1780,7 @@ func _on_card_double_clicked(unit_id: int) -> void:
 	input.select_same_type_of(unit_id)  # CB0 : sélection rapide, même `type`
 	for unit in units:
 		if int(unit["id"]) == unit_id and bool(unit["present"]):
-			camera_rig.look_at_point(Vector3(float(unit["x"]), 0.0, float(unit["z"])), camera_rig.distance, camera_rig.yaw)
+			camera_rig.glide_to(Vector3(float(unit["x"]), 0.0, float(unit["z"])), camera_rig.distance, camera_rig.yaw)  # PO5
 			return
 
 
