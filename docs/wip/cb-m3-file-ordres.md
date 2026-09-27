@@ -14,11 +14,11 @@ Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm3`.
       `queue_anchor`, `next_queued`) ; `CommandError::QueueFull` ; dépilage dans
       `resolve_movement` ; vidage (ordre sans file, halte, retraite, muraille, déroute, décision,
       pavois, ralliement, scénario) ; `state_digest` (file hachée seulement si non vide).
-- [ ] Tests `sim-battle/tests/cb_queue.rs`.
-- [ ] `preview_path_from` (cœur + pont), `get_units.queue`, `RuleValues` `battle_queue_max`.
+- [x] Tests `sim-battle/tests/cb_queue.rs` (12 tests, verts).
+- [x] `preview_path_from` + `preview_group_queued` (cœur), pont `battle_sim_queue.rs` (`preview_path_from`, `preview_paths_queued`, `get_units.queue`), RuleValues `battle_queue_max`.
 - [ ] Godot : Maj + clic droit, points numérotés, file pleine.
 - [ ] Tests Godot + sonde de capture.
 
 ## Prochaine étape
 
-Écrire `cb_queue.rs`, puis le pont.
+Godot : `battle_input.gd` (Maj + clic droit), `battle_path_preview.gd` (file numérotée), infobulle file pleine.

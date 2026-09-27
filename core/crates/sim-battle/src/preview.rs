@@ -68,6 +68,52 @@ impl BattleSim {
         z: f64,
         facing: Option<f64>,
     ) -> Vec<PreviewLeg> {
+        self.preview_group_with(units, x, z, facing, false)
+    }
+
+    /// CB-M3: the way regiment `unit` would walk to (x, z) starting from
+    /// `from` (the last point of its queue) instead of where it stands;
+    /// `None` is [`Self::preview_path`]. The same `plan_route` as the order
+    /// once the queue reaches it (clamped into the field alike).
+    pub fn preview_path_from(
+        &self,
+        unit: u32,
+        from: Option<(f64, f64)>,
+        x: f64,
+        z: f64,
+    ) -> Result<Vec<(f64, f64)>, PreviewError> {
+        let Some(from) = from else {
+            return self.preview_path(unit, x, z);
+        };
+        let index = self.preview_index(unit)?;
+        if !(x.is_finite() && z.is_finite() && self.field().inside(x, z)) {
+            return Err(PreviewError::OutsideField);
+        }
+        self.preview_to(index, from, (x, z))
+    }
+
+    /// CB-M3: [`Self::preview_group`] for a queued `Move` (Shift held): each
+    /// path starts where the regiment's queue leaves it
+    /// ([`BattleSim::queue_anchor`]), and the group is spread around those
+    /// points, as the queued order does.
+    pub fn preview_group_queued(
+        &self,
+        units: &[u32],
+        x: f64,
+        z: f64,
+        facing: Option<f64>,
+    ) -> Vec<PreviewLeg> {
+        self.preview_group_with(units, x, z, facing, true)
+    }
+
+    fn preview_group_with(
+        &self,
+        units: &[u32],
+        x: f64,
+        z: f64,
+        facing: Option<f64>,
+        queued: bool,
+    ) -> Vec<PreviewLeg> {
         let ids: Vec<u32> = units
             .iter()
             .copied()
@@ -77,13 +123,23 @@ impl BattleSim {
             return Vec::new();
         };
         let inside = x.is_finite() && z.is_finite() && self.field().inside(x, z);
+        let anchors: Vec<(f64, f64)> = ids
+            .iter()
+            .map(|&id| {
+                if queued {
+                    self.queue_anchor(id as usize)
+                } else {
+                    let u = &self.units()[id as usize];
+                    (u.x, u.z)
+                }
+            })
+            .collect();
         let limit = HoverRules::bundled().preview.max_individual_paths as usize;
         if ids.len() > limit {
             let n = ids.len() as f64;
-            let from = ids.iter().fold((0.0, 0.0), |(sx, sz), &id| {
-                let u = &self.units()[id as usize];
-                (sx + u.x / n, sz + u.z / n)
-            });
+            let from = anchors
+                .iter()
+                .fold((0.0, 0.0), |(sx, sz), &(ax, az)| (sx + ax / n, sz + az / n));
             let path = if inside {
                 self.preview_to(first as usize, from, (x, z))
             } else {
@@ -95,12 +151,10 @@ impl BattleSim {
                 path,
             }];
         }
-        let destinations = self.group_destinations(&ids, x, z, facing);
+        let destinations = self.group_destinations_from(&ids, &anchors, x, z, facing);
         ids.iter()
-            .zip(destinations)
-            .map(|(&id, to)| {
-                let u = &self.units()[id as usize];
-                let from = (u.x, u.z);
+            .zip(anchors.iter().zip(destinations))
+            .map(|(&id, (&from, to))| {
                 let path = if inside {
                     self.preview_to(id as usize, from, to)
                 } else {

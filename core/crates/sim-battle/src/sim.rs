@@ -1235,25 +1235,10 @@ impl BattleSim {
         Ok(())
     }
 
-    /// Destinations of a group move: along a line perpendicular to `facing`
-    /// when given (ordered by current lateral position), else keeping the
-    /// offsets to the group's centroid.
-    pub(crate) fn group_destinations(
-        &self,
-        ids: &[u32],
-        x: f64,
-        z: f64,
-        facing: Option<f64>,
-    ) -> Vec<(f64, f64)> {
-        let anchors: Vec<(f64, f64)> = ids
-            .iter()
-            .map(|id| (self.units[*id as usize].x, self.units[*id as usize].z))
-            .collect();
-        self.group_destinations_from(ids, &anchors, x, z, facing)
-    }
-
-    /// [`Self::group_destinations`] with the regiments standing at
-    /// `anchors` (CB-M3: where their queued orders leave them).
+    /// Destinations of a group move for regiments standing at `anchors`
+    /// (where they are, or CB-M3 where their queued orders leave them):
+    /// along a line perpendicular to `facing` when given (ordered by
+    /// lateral position), else keeping the offsets to the group's centroid.
     pub(crate) fn group_destinations_from(
         &self,
         ids: &[u32],
