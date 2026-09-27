@@ -13,8 +13,14 @@ Plan : `docs/superpowers/plans/2026-09-27-po-polish.md` § PO4. Bible DA § 12.6
 - [x] 2. Sol : Grass Path 2 (Poly Haven CC0, 2k, 5,3 Mo) dans `battle_ground.gdshader` (`near_detail_*`, < 32 m, lié à DA6).
 - [x] 3. Herbe en touffes : plaques ~25 m avec trouées, bouquets ~2 m, hauteur et teinte par bouquet (`battle_grass.gdshader`, DA6 seulement).
 - [x] 4. Rangs : `BattleSoldiers.loosen` (±0,15 m, ±4°, stable par régiment et rang, < 160 m, tampon en cache par version PB3e ; `--no-loose-ranks`). Coût : proc_step +0,15 ms à 1 156 soldats. ep13_replay OK.
-- [ ] 5. Horizon : arbres « sucette ».
-- [ ] 6. Contours de formation : liseré or pâle.
+- [x] 5. Horizon : vérifié à la lecture du code, DA6 couvre (anneau lointain = imposteurs cuits
+  depuis les arbres ramifiés, `battle_trees.gd` ; horizon EP2 = relief teinté, pas d'arbres) ; les
+  houppiers « sucette » (`BattleMeshes.tree`) ne restent qu'avec `--no-da6` et dans le décor 3D du
+  menu (hors lot). Rien changé ; jugement visuel sur la capture `03-melee` (orchestrateur).
+- [x] 6. Contours de formation (CB-M1 fusionné, CB-M2 n'a pas touché le fichier) : or pâle
+  teinté à 20 % de la livrée, survol or plus clair, rouge garance, trait 0,5 m, émission 0,7.
+  Dégradé au sol non fait : `cb_m1_outline_test` exige un fond transparent juste à l'intérieur du
+  trait (alpha < 0,1) ; à reprendre avec CB si voulu. `cb_m1_outline_test` OK.
 - [ ] 7. smoke, banc PB1, captures.
 
 ## Écart à la spec (étape 1)
@@ -38,4 +44,4 @@ Avant : large 11,34 / 11,28 / 9,67 (médiane 11,28) ; rapproché 11,48 / 11,43 /
 
 ## Prochaine étape
 
-Étape 5 (horizon, arbres sucette). Machine chargée (GPU partagé) : le banc final doit alterner avant/après dans le même créneau.
+Étape 7 (smoke, banc PB1 alterné, captures). Machine chargée (GPU partagé) : le banc final doit alterner avant/après dans le même créneau.
