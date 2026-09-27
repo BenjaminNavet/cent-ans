@@ -9,8 +9,8 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB0 | Extraction des entrées (`battle_input.gd`) + sélection rapide | 1 | **fusionné 09-27** (+ correctif caméra : Ctrl/Cmd+lettre ne bouge plus la vue) | `cb0-entrees.md` |
 | CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | **fusionné 09-27** (trait 1 m, émission sur fond noir ; lisibilité à juger en jeu) | |
 | CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | **fusionné 09-27** (aperçu = ordre exact en ligne droite/pont, ≤ 3 m au gué, ≤ 13 m en siège ; aperçu au clic droit maintenu) | `cb-m2-trajet-curseur.md` |
-| CB-M3 | Ordres en file (Maj + clic droit) | 2 | attente | |
-| CB-M4 | Portée au sol, comparaison au survol | 2 | attente | |
+| CB-M3 | Ordres en file (Maj + clic droit) | 2 | **en cours** (agent, `feat/cb-m3-queue`) | `cb-m3-file-ordres.md` |
+| CB-M4 | Portée au sol, comparaison au survol | 2 | **en cours** en parallèle de CB-M3 (agent, `feat/cb-m4-range-compare`) | `cb-m4-portee-comparaison.md` |
 | CB1 | Formation au glisser, verrouillage de groupe | 3 | attente CB-M | |
 | CB2 | Modes d'unité, icônes d'état, remappage des touches | 4 | attente CB1 | |
 | CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | attente CB1 | |
@@ -18,6 +18,8 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 | |
 
 ## Coordination
+- 09-27 : le joueur accepte les limites de CB-M2 et autorise l'enchaînement des lots sans nouvelle question.
+- CB-M3 et CB-M4 lancés en parallèle (fichiers presque disjoints ; conflit attendu seulement dans `get_units`).
 - Budget de captures relevé à **10 par lot** par le joueur (09-27), lues par la session principale seulement.
 - CV3-2 fusionné dans main (09-27) : CB-M2 n'attend plus que CB-M1.
 - CV3-6 (sondes d'équilibrage) : pas de batailles de référence CB2/CB4 en même temps.
