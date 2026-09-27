@@ -1422,6 +1422,12 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
     let largest = armies.first().map(|(id, p)| (id.clone(), *p));
     let mut defended: BTreeSet<SettlementId> = BTreeSet::new();
     let mut targeted: BTreeSet<SettlementId> = BTreeSet::new();
+    // CV3-6: a siege of ours or against us in progress (no encounter detours).
+    let realm_besieged = state.settlements.values().any(|s| {
+        s.siege
+            .as_ref()
+            .is_some_and(|siege| &s.controller == ctx.faction || &siege.attacker == ctx.faction)
+    });
 
     // Armies whose units are already being dismissed this turn keep their
     // unit indices untouched.
@@ -1524,9 +1530,31 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         // good. The strategic orders below still follow: they fail harmlessly
         // once the battle has spent the army's movement, and apply when the
         // attack was refused (target out of reach).
+        // CV3-6: an army in ambush waits while its prey still comes and it
+        // is not discovered; it does not attack by itself.
+        if army.stance == Stance::Ambush {
+            if crate::stances::keep_ambush(state, data, ctx.faction, army_id) {
+                continue;
+            }
+            orders.push(Order::SetStance {
+                army: army_id.clone(),
+                stance: Stance::Normal,
+            });
+        }
+        let mut attacked = false;
         if !broken && !besieging {
             if let Some(order) = ctx.grid.attack_order(army_id) {
                 orders.push(order);
+                attacked = true;
+            }
+        }
+        // CV3-6: lie in wait for a stronger enemy marching on our lands.
+        if choice.is_none() && !broken && !besieging && !attacked && ctx.at_war() {
+            if let Some(ambush) =
+                crate::stances::ambush_orders(state, data, ctx.faction, army_id, ctx.aggression)
+            {
+                orders.extend(ambush);
+                continue;
             }
         }
 
@@ -1735,6 +1763,48 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 .map(|(id, _)| (Objective::Regroup, id.clone()));
         }
 
+        // CV3-6: outnumbered in the field on a threatened border, with no
+        // shelter within this turn's reach: an entrenched camp.
+        let sheltered = choice.as_ref().is_some_and(|(objective, target)| {
+            !matches!(objective, Objective::Regroup | Objective::Retreat)
+                || table.get(target).is_some_and(|r| r.cost <= cap)
+        });
+        if !sheltered && !besieging && !attacked {
+            let threat = here.as_ref().map_or(0.0, |p| ctx.threat(p));
+            if crate::stances::should_entrench(state, data, ctx.faction, army_id, threat) {
+                if army.stance != Stance::Entrenched {
+                    orders.push(Order::SetStance {
+                        army: army_id.clone(),
+                        stance: Stance::Entrenched,
+                    });
+                }
+                continue;
+            }
+        }
+
+        // CV3-6: with nothing urgent (no threat here, no siege of ours or
+        // against us), a short detour to an encounter site.
+        let idle = choice
+            .as_ref()
+            .is_none_or(|(objective, _)| *objective == Objective::Regroup);
+        if idle && !besieging && !attacked && !realm_besieged {
+            let quiet = !ctx.at_war() || here.as_ref().is_none_or(|p| ctx.threat(p) <= 0.0);
+            if quiet {
+                if let Some(order) =
+                    crate::stances::encounter_detour(state, data, ctx.faction, army_id)
+                {
+                    if army.stance != Stance::Normal {
+                        orders.push(Order::SetStance {
+                            army: army_id.clone(),
+                            stance: Stance::Normal,
+                        });
+                    }
+                    orders.push(order);
+                    continue;
+                }
+            }
+        }
+
         let Some((objective, target)) = choice else {
             // Idle: normal stance at home.
             if army.stance != Stance::Normal
@@ -1757,6 +1827,28 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
                 targeted.insert(target.clone());
             }
             _ => {}
+        }
+        // CV3-6: a forced march to relieve a besieged place or join a siege
+        // just beyond normal reach.
+        if matches!(objective, Objective::Defend | Objective::Siege) && !attacked {
+            if let Some(cost) = table.get(&target).map(|r| r.cost) {
+                let forced = crate::stances::forced_march_orders(
+                    state,
+                    data,
+                    ctx.faction,
+                    army_id,
+                    &target,
+                    (cost, cap),
+                    |c| {
+                        ctx.grid
+                            .march_orders_with_cap(army_id, army, &anchor, &target, &table, c)
+                    },
+                );
+                if let Some(forced) = forced {
+                    orders.extend(forced);
+                    continue;
+                }
+            }
         }
         let stance = match objective {
             Objective::Siege => Stance::Siege,
