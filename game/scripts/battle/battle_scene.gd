@@ -214,6 +214,11 @@ var replay_error: String = ""
 var replay_saved_path: String = ""  # fichier écrit à la fin de la bataille (vide : non enregistré)
 var _replay_path: String = ""
 var _leader_bar: CanvasLayer = null
+## CB0 : dictionnaires passés à `issue()`, pour le test d'équivalence des entrées
+## (`cb0_input_equivalence_test.gd`). Rempli seulement si `log_orders_for_test` est vrai (mis par
+## le test) ou sous la fonctionnalité moteur « test ».
+var issued_log: Array = []
+var log_orders_for_test: bool = false
 
 @onready var terrain: BattleTerrain = $Terrain
 @onready var camera_rig: BattleCamera = $CameraRig
@@ -1797,6 +1802,8 @@ func _finish_right(position: Vector2) -> void:
 
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
 func issue(command: Dictionary) -> Dictionary:
+	if log_orders_for_test or OS.has_feature("test"):
+		issued_log.append(command.duplicate(true))
 	if replay_mode:
 		return {"ok": false, "error": "rejeu"}  # EP13 : on regarde, on ne commande pas
 	var result: Dictionary = battle.call("issue_command", command)

@@ -1,0 +1,146 @@
+[
+	{
+		"run": false,
+		"type": "move",
+		"units": [
+			0,
+			1,
+			3,
+			4,
+			5,
+			6,
+			2
+		],
+		"x": 18.0643920898438,
+		"z": 5.0
+	},
+	{
+		"facing": 3.13889795382159,
+		"run": false,
+		"type": "move",
+		"units": [
+			0,
+			1,
+			3,
+			4,
+			5,
+			6,
+			2
+		],
+		"x": 646.602416992188,
+		"z": 400.125518798828
+	},
+	{
+		"run": false,
+		"type": "move",
+		"units": [
+			0,
+			1,
+			3,
+			4,
+			5,
+			6,
+			2
+		],
+		"x": 600.0,
+		"z": 399.999938964844
+	},
+	{
+		"run": true,
+		"type": "move",
+		"units": [
+			0,
+			1,
+			3,
+			4,
+			5,
+			6,
+			2
+		],
+		"x": 600.0,
+		"z": 399.999938964844
+	},
+	{
+		"run": true,
+		"target": 8,
+		"type": "attack",
+		"units": [
+			0,
+			1,
+			3,
+			4,
+			5,
+			6,
+			2
+		]
+	},
+	{
+		"kind": "wedge",
+		"type": "formation",
+		"units": [
+			0
+		]
+	},
+	{
+		"kind": "wedge",
+		"type": "formation",
+		"units": [
+			1
+		]
+	},
+	{
+		"kind": "wedge",
+		"type": "formation",
+		"units": [
+			2
+		]
+	},
+	{
+		"kind": "column",
+		"type": "formation",
+		"units": [
+			3
+		]
+	},
+	{
+		"kind": "column",
+		"type": "formation",
+		"units": [
+			4
+		]
+	},
+	{
+		"kind": "column",
+		"type": "formation",
+		"units": [
+			5
+		]
+	},
+	{
+		"kind": "column",
+		"type": "formation",
+		"units": [
+			6
+		]
+	},
+	{
+		"enabled": false,
+		"type": "fire_at_will",
+		"units": [
+			5,
+			6
+		]
+	},
+	{
+		"type": "halt",
+		"units": [
+			0,
+			1,
+			2,
+			3,
+			4,
+			5,
+			6
+		]
+	}
+]
