@@ -166,7 +166,9 @@ mod tests {
     #[test]
     fn bundled_rules_parse() {
         let rules = UnitModeRules::bundled();
-        assert!(rules.breach.wall_damage("unit_mangonel") < rules.breach.wall_damage("unit_trebuchet"));
+        assert!(
+            rules.breach.wall_damage("unit_mangonel") < rules.breach.wall_damage("unit_trebuchet")
+        );
         assert_eq!(
             rules.breach.wall_damage("unit_bombard"),
             rules.breach.wall_damage_multiplier["default"]

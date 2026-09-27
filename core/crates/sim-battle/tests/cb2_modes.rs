@@ -103,7 +103,10 @@ fn set_mode_reads_and_writes_its_json() {
     .unwrap();
     assert_eq!(command, set_mode(vec![1, 2], UnitMode::Skirmish, true));
     let json = serde_json::to_string(&set_mode(vec![0], UnitMode::Breach, false)).unwrap();
-    assert!(json.contains("\"set_mode\"") && json.contains("\"breach\""), "{json}");
+    assert!(
+        json.contains("\"set_mode\"") && json.contains("\"breach\""),
+        "{json}"
+    );
 }
 
 #[test]
@@ -192,7 +195,8 @@ fn the_run_mode_runs_every_move_and_the_move_under_way() {
         .apply_command(set_mode(vec![0], UnitMode::Run, true), None)
         .unwrap();
     for sim in [&mut walk, &mut run_mode] {
-        sim.apply_command(go(vec![0], (300.0, 600.0)), None).unwrap();
+        sim.apply_command(go(vec![0], (300.0, 600.0)), None)
+            .unwrap();
         run(sim, 10.0);
     }
     assert!(run_mode.units()[0].running && !walk.units()[0].running);
@@ -251,7 +255,8 @@ fn guard_holds_once_a_melee_breaks() {
         // In melee last step, the opponent now pulling out, 60 m away.
         sim.units_mut()[0].state = UnitState::Melee;
         place(sim, 5, 300.0, 360.0, std::f64::consts::PI);
-        sim.apply_command(go(vec![5], (300.0, 700.0)), None).unwrap();
+        sim.apply_command(go(vec![5], (300.0, 700.0)), None)
+            .unwrap();
         sim.units_mut()[5].disengaging = true;
         sim.step();
     }
@@ -290,7 +295,9 @@ fn skirmishers_step_back_from_melee_troops_closing_in() {
         back.units()[3].z
     );
     // Facing the threat on arrival.
-    let facing = back.units()[3].destination_facing.unwrap_or(back.units()[3].facing);
+    let facing = back.units()[3]
+        .destination_facing
+        .unwrap_or(back.units()[3].facing);
     assert!(facing.cos() > 0.9, "facing {facing}");
 }
 
@@ -300,7 +307,8 @@ fn skirmishers_hold_against_shooters_and_distant_troops() {
     sim.apply_command(set_mode(vec![3], UnitMode::Skirmish, true), None)
         .unwrap();
     // The militia marches past, 300 m away.
-    sim.apply_command(go(vec![4], (1000.0, 600.0)), None).unwrap();
+    sim.apply_command(go(vec![4], (1000.0, 600.0)), None)
+        .unwrap();
     run(&mut sim, 6.0);
     assert!((sim.units()[3].z - 300.0).abs() < 1.0);
 }
@@ -314,7 +322,10 @@ fn the_skirmish_ability_starts_the_mode_and_its_shot_on_the_move() {
     assert!(!sim.units()[1].skirmish && !sim.units()[1].shoots_on_move());
     sim.apply_command(set_mode(vec![2], UnitMode::Skirmish, false), None)
         .unwrap();
-    assert!(!sim.units()[2].shoots_on_move(), "the shot goes with the mode");
+    assert!(
+        !sim.units()[2].shoots_on_move(),
+        "the shot goes with the mode"
+    );
     // Longbowmen in skirmish still do not shoot on the move (no ability).
     sim.apply_command(set_mode(vec![1], UnitMode::Skirmish, true), None)
         .unwrap();
@@ -349,11 +360,7 @@ fn melee_mode_sends_shooters_into_contact() {
 
 // ----- breach -------------------------------------------------------------
 
-const BESIEGERS: [&str; 3] = [
-    "unit_men_at_arms_foot",
-    "unit_trebuchet",
-    "unit_mangonel",
-];
+const BESIEGERS: [&str; 3] = ["unit_men_at_arms_foot", "unit_trebuchet", "unit_mangonel"];
 
 fn siege_sim(data: &GameData, breach: bool) -> (BattleSim, usize) {
     let battle = setup(
@@ -406,10 +413,13 @@ fn battered(data: &GameData, id: u32, breach: bool, seconds: f64) -> f64 {
         sim.apply_command(set_mode(vec![other], UnitMode::Breach, false), None)
             .unwrap();
     }
-    sim.apply_command(Command::TargetWall {
-        units: vec![id],
-        piece,
-    }, None)
+    sim.apply_command(
+        Command::TargetWall {
+            units: vec![id],
+            piece,
+        },
+        None,
+    )
     .unwrap();
     let before = sim.siege().unwrap().pieces[piece].hp;
     run(&mut sim, seconds);
@@ -431,7 +441,10 @@ fn breach_batters_walls_harder_the_mangonel_less_so() {
         "trebuchet {trebuchet:.0} -> {trebuchet_breach:.0}, mangonel {mangonel:.0} -> {mangonel_breach:.0}"
     );
     assert!(heavy > 1.1, "trebuchet ×{heavy:.2}");
-    assert!(light > 1.0 && light < heavy, "mangonel ×{light:.2} < ×{heavy:.2}");
+    assert!(
+        light > 1.0 && light < heavy,
+        "mangonel ×{light:.2} < ×{heavy:.2}"
+    );
 }
 
 /// Shots of the trebuchet (1) over a minute, 450 m out from the walls
@@ -465,7 +478,10 @@ fn breach_is_for_siege_engines_and_never_shoots_men() {
     assert!(sim.units()[1].breach && sim.units()[2].breach);
     // At will, the engine shoots the men in range; battering, never.
     assert!(!engine_shots_at_men(false).is_empty(), "shoots men at will");
-    assert!(engine_shots_at_men(true).is_empty(), "battering: walls only");
+    assert!(
+        engine_shots_at_men(true).is_empty(),
+        "battering: walls only"
+    );
     // An attack order is the player's call: it ends the mode.
     sim.apply_command(attack(vec![1], 3), None).unwrap();
     assert!(!sim.units()[1].breach);
@@ -491,7 +507,10 @@ fn the_core_computes_the_display_states() {
     u.state = UnitState::Routing;
     u.missile_timer = rules.under_fire_seconds * 2.0;
     let status = sim.unit_status(&sim.units()[0]);
-    assert!(!status.wavering && !status.under_fire, "a rout is not a waver");
+    assert!(
+        !status.wavering && !status.under_fire,
+        "a rout is not a waver"
+    );
 }
 
 // ----- replay ------------------------------------------------------------
@@ -570,7 +589,8 @@ fn the_digest_sees_what_modes_do_not_the_flags() {
     assert_eq!(state_digest(&one), state_digest(&two));
     // What it does shows: the run mode runs the same move.
     for sim in [&mut one, &mut two] {
-        sim.apply_command(go(vec![0], (300.0, 600.0)), None).unwrap();
+        sim.apply_command(go(vec![0], (300.0, 600.0)), None)
+            .unwrap();
         run(sim, 2.0);
     }
     assert_ne!(state_digest(&one), state_digest(&two), "the run counts");
@@ -638,8 +658,11 @@ fn the_defensive_ai_guards_its_line_and_skirmishes_its_light_shooters() {
         .iter()
         .find(|&&id| sim.units()[id as usize].can_shoot())
         .unwrap();
-    sim.apply_command(set_mode(vec![horse_archers], UnitMode::Skirmish, false), None)
-        .unwrap();
+    sim.apply_command(
+        set_mode(vec![horse_archers], UnitMode::Skirmish, false),
+        None,
+    )
+    .unwrap();
     run(&mut sim, 5.0);
     for &id in &english {
         let u = &sim.units()[id as usize];
@@ -666,8 +689,8 @@ fn historical_start(id: &str, seed: u64) -> BattleSim {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../../../data/battle_maps")
         .join(format!("{id}.json"));
-    let map = sim_battle::HistoricalMap::from_json(&std::fs::read_to_string(path).unwrap())
-        .unwrap();
+    let map =
+        sim_battle::HistoricalMap::from_json(&std::fs::read_to_string(path).unwrap()).unwrap();
     let setup = map
         .battle_setup(
             &data.unit_types,

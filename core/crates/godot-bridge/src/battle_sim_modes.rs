@@ -11,11 +11,7 @@ use sim_battle::Unit;
 /// `melee_mode`, `breach` (modes on), `modes` (keys of the modes the
 /// regiment may take), and the states computed by the core: `charging`,
 /// `under_fire`, `engaged`, `wavering`.
-pub(crate) fn add_mode_fields(
-    sim: &sim_battle::BattleSim,
-    unit: &Unit,
-    dict: &mut VarDictionary,
-) {
+pub(crate) fn add_mode_fields(sim: &sim_battle::BattleSim, unit: &Unit, dict: &mut VarDictionary) {
     dict.set("mode_run", unit.mode_run);
     dict.set("guard", unit.guard);
     dict.set("skirmish", unit.skirmish);
