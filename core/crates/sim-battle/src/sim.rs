@@ -9,6 +9,7 @@ mod decision;
 mod deployment;
 mod fire;
 mod indirect;
+mod modes;
 mod obstacles;
 mod opening;
 mod pathing;
@@ -1006,7 +1007,7 @@ impl BattleSim {
         }
         let setup_order = matches!(
             command,
-            Command::Formation { .. } | Command::FireAtWill { .. }
+            Command::Formation { .. } | Command::FireAtWill { .. } | Command::SetMode { .. }
         );
         if self.deploying && !setup_order {
             return Err(CommandError::Deploying);
@@ -1260,6 +1261,11 @@ impl BattleSim {
                 }
             }
             Command::Burn { units, house, gate } => self.command_burn(&units, house, gate)?,
+            Command::SetMode {
+                units,
+                mode,
+                enabled,
+            } => self.set_mode(&units, mode, enabled)?,
             Command::LeaderOrder { .. } => unreachable!("handled above"),
         }
         Ok(())
@@ -1351,6 +1357,7 @@ impl BattleSim {
             }
         }
         let contacts = self.contacts();
+        self.resolve_skirmish(&contacts);
         self.resolve_movement(&contacts);
         self.separate_friends();
         self.resolve_water();
@@ -1448,6 +1455,8 @@ impl BattleSim {
             } else {
                 2.0
             };
+            // CB2: a run under the run mode (1 in the bundled data).
+            speed *= unit.run_mode_speed();
         }
         speed *= match unit.formation {
             Formation::Column => 1.15,
@@ -1828,7 +1837,8 @@ impl BattleSim {
                 // so does a target in flight (the next order starts).
                 let fleeing = self.units[t].state == UnitState::Routing
                     && !self.units[i].order_queue.is_empty();
-                if !self.units[t].present() || fleeing {
+                // CB2: a regiment on guard does not pursue.
+                if !self.units[t].present() || fleeing || self.guard_releases(i, t, in_contact) {
                     self.units[i].target = None;
                     self.units[i].state = UnitState::Idle;
                     self.next_queued(i);
@@ -1839,7 +1849,7 @@ impl BattleSim {
                 let dist = ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt();
                 // A target hidden (forest, walls, crest) is closed in on,
                 // not waited for within range.
-                if unit.can_shoot()
+                if unit.shoots()
                     && unit.ammo > 0
                     && dist <= self.effective_range(unit, tx, tz)
                     && self.visible(unit, &self.units[t], dist)
@@ -1861,7 +1871,7 @@ impl BattleSim {
                     continue;
                 }
                 let charge_distance = if unit.is_cavalry() { 120.0 } else { 40.0 };
-                let charging = unit.running && dist < charge_distance && !unit.can_shoot();
+                let charging = unit.running && dist < charge_distance && !unit.shoots();
                 if charging && self.units[i].state != UnitState::Charging {
                     self.units[i].state = UnitState::Charging;
                     if self.units[i].is_cavalry() && !self.charge_announced[i] {
@@ -2213,7 +2223,7 @@ impl BattleSim {
         for i in 0..self.units.len() {
             let unit = &self.units[i];
             if !unit.present()
-                || !unit.can_shoot()
+                || !unit.shoots()
                 || unit.ammo == 0
                 || !contacts[i].is_empty()
                 || matches!(
@@ -2225,7 +2235,7 @@ impl BattleSim {
                 continue;
             }
             let moving = unit.state == UnitState::Marching;
-            if moving && !unit.has(Ability::Skirmish) {
+            if moving && !unit.shoots_on_move() {
                 continue;
             }
             if self.units[i].reload > 0.0 {
@@ -2234,6 +2244,10 @@ impl BattleSim {
             }
             if let Some(piece) = self.pick_wall_target(i) {
                 self.fire_at_wall(i, piece);
+                continue;
+            }
+            // CB2: an engine battering walls never shoots men.
+            if self.units[i].breach {
                 continue;
             }
             let Some(target) = self.pick_shooting_target(i) else {
@@ -2450,7 +2464,7 @@ impl BattleSim {
     fn pick_wall_target(&self, i: usize) -> Option<usize> {
         let works = self.siege.as_ref()?;
         let unit = &self.units[i];
-        if !unit.wall_breaker() || unit.target.is_some() {
+        if !unit.wall_breaker() || (unit.target.is_some() && !unit.breach) {
             return None;
         }
         let range = f64::from(unit.stats.range) * self.range_factor();
@@ -2462,6 +2476,9 @@ impl BattleSim {
         };
         if let Some(p) = unit.wall_target.filter(|&p| in_range(p)) {
             return Some(p);
+        }
+        if unit.breach {
+            return self.breach_piece(i, range);
         }
         if !unit.fire_at_will {
             return None;
@@ -2484,7 +2501,9 @@ impl BattleSim {
             * siege::SiegeWorkRules::bundled()
                 .engine
                 .wall_damage_per_siege_attack
-            * crew;
+            * crew
+            // CB2: battering in breach (1 otherwise).
+            * unit.breach_wall_damage();
         let heading = {
             let (mx, mz) = self.siege.as_ref().expect("siege").pieces[piece].midpoint();
             angle_to(mx - unit.x, mz - unit.z)
@@ -2505,7 +2524,7 @@ impl BattleSim {
         };
         self.record_shot(shot);
         let shooter = &mut self.units[i];
-        shooter.reload = crate::shot::ENGINE_RELOAD;
+        shooter.reload = crate::shot::ENGINE_RELOAD * shooter.breach_reload();
         shooter.ammo = shooter.ammo.saturating_sub(1);
         shooter.facing = turn_towards(shooter.facing, heading, 0.5);
         if shooter.state != UnitState::Marching {
@@ -2855,6 +2874,8 @@ impl BattleSim {
                 UnitState::Routing => 0.3,
             };
             if rate > 0.0 {
+                // CB2: a run under the run mode (1 in the bundled data).
+                rate *= unit.run_mode_fatigue();
                 if self.weather == Weather::Snow {
                     rate *= 1.3;
                 }

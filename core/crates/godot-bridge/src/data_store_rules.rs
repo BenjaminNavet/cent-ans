@@ -38,6 +38,28 @@ impl GameDataStore {
             "battle_queue_max",
             f64::from(sim_battle::QueueRules::bundled().max_queued_orders),
         );
+        // CB2: unit modes (`data/rules/unit_modes.json`), quoted by the
+        // tooltips of the mode buttons and the help.
+        let modes = sim_battle::UnitModeRules::bundled();
+        dict.set("unit_modes_skirmish_trigger_m", modes.skirmish.trigger_m);
+        dict.set("unit_modes_skirmish_retreat_m", modes.skirmish.retreat_m);
+        dict.set(
+            "unit_modes_breach_damage_percent",
+            (modes.breach.wall_damage("default") - 1.0) * 100.0,
+        );
+        dict.set(
+            "unit_modes_breach_mangonel_percent",
+            (modes.breach.wall_damage("unit_mangonel") - 1.0) * 100.0,
+        );
+        dict.set(
+            "unit_modes_breach_reload_percent",
+            (modes.breach.reload_multiplier - 1.0) * 100.0,
+        );
+        dict.set("unit_modes_wavering_morale", modes.status.wavering_morale);
+        dict.set(
+            "unit_modes_under_fire_seconds",
+            modes.status.under_fire_seconds,
+        );
         dict
     }
 }

@@ -34,7 +34,8 @@ impl BattleSim {
         unit.destination = Some(destination);
         unit.destination_facing = facing;
         unit.target = None;
-        unit.running = run;
+        // CB2: the run mode runs every move.
+        unit.running = run || unit.mode_run;
         unit.withdrawing = false;
         unit.pavise = None;
         stop_climbing(unit);
@@ -50,7 +51,7 @@ impl BattleSim {
     pub(super) fn start_attack(&mut self, index: usize, target: u32, run: bool) {
         let (tx, tz) = (self.units[target as usize].x, self.units[target as usize].z);
         let unit = &self.units[index];
-        let in_range = unit.can_shoot()
+        let in_range = unit.shoots()
             && unit.ammo > 0
             && ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt()
                 <= self.effective_range(unit, tx, tz);
@@ -63,7 +64,7 @@ impl BattleSim {
         unit.group_tag = None;
         unit.destination = None;
         unit.destination_facing = None;
-        unit.running = run;
+        unit.running = run || unit.mode_run;
         unit.withdrawing = false;
         unit.disengaging = false;
         stop_climbing(unit);

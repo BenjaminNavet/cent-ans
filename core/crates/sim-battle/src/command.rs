@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::modes::UnitMode;
 use crate::setup::SideId;
 use crate::unit::Formation;
 
@@ -95,6 +96,14 @@ pub enum Command {
         #[serde(default)]
         units: Vec<u32>,
     },
+    /// CB2: turn a persistent mode of the regiments on or off (run, guard,
+    /// skirmish, melee, breach; see [`crate::modes`]). A new variant: replays
+    /// recorded before CB2 read the same.
+    SetMode {
+        units: Vec<u32>,
+        mode: UnitMode,
+        enabled: bool,
+    },
 }
 
 fn default_true() -> bool {
@@ -116,7 +125,8 @@ impl Command {
             | Command::Withdraw { units }
             | Command::TargetWall { units, .. }
             | Command::Burn { units, .. }
-            | Command::LeaderOrder { units, .. } => units,
+            | Command::LeaderOrder { units, .. }
+            | Command::SetMode { units, .. } => units,
         }
     }
 }
@@ -172,6 +182,12 @@ pub enum CommandError {
         unit: u32,
         max: u32,
     },
+    /// CB2: regiment `unit` cannot take `mode` (no missiles, not an engine,
+    /// not a siege...).
+    ModeUnavailable {
+        unit: u32,
+        mode: UnitMode,
+    },
 }
 
 impl std::fmt::Display for CommandError {
@@ -223,6 +239,13 @@ impl std::fmt::Display for CommandError {
                 write!(
                     f,
                     "file d'ordres pleine : l'unité {unit} a déjà {max} ordres en attente"
+                )
+            }
+            CommandError::ModeUnavailable { unit, mode } => {
+                write!(
+                    f,
+                    "l'unité {unit} ne peut pas passer en mode {}",
+                    mode.label_fr()
                 )
             }
             CommandError::OutsideZone(id) => {

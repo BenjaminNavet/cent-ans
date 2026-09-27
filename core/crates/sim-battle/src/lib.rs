@@ -60,6 +60,7 @@ pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
 pub mod missile_morale;
+pub mod modes;
 pub mod naval;
 pub mod opening;
 pub mod orders;
@@ -108,6 +109,7 @@ pub use hydro::{
     WatersideSpot,
 };
 pub use impact::{ImpactEvent, ImpactKind, LossCause};
+pub use modes::{UnitMode, UnitModeRules, UnitStatus};
 pub use opening::OpeningRules;
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
