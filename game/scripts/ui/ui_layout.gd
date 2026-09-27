@@ -59,8 +59,13 @@ const _WRAPPER_META := &"ui_layout_wrapper"
 var _host: Dictionary = {}
 var _default_host: Dictionary = {}
 var _default_layer: CanvasLayer = null
-## Occupants par zone (`Zone` → `Array[Control]`), hôte courant.
+## Occupants par zone (`Zone` → `Array[Control]`), hôte courant (`_host["occupants"]`).
 var _occupants: Dictionary = {}
+## Hôtes posés, du plus ancien au plus récent (la bataille se pose sur la carte, qui reste
+## chargée) : à la sortie d'un hôte, le précédent redevient courant.
+var _hosts: Array = []
+## Hôte (dictionnaire) de chaque occupant.
+var _owner: Dictionary = {}
 ## Contrôles suivant une zone sans reparentage (`anchor_to`).
 var _anchored: Dictionary = {}
 
@@ -98,8 +103,15 @@ func attach_host(host: Node) -> void:
 		return
 	if not _host.is_empty() and _host.get("node") == host:
 		return
-	_host = _build_host(host)
-	_occupants = {}
+	for entry in _hosts:
+		if entry.get("node") == host:
+			_hosts.erase(entry)
+			_hosts.append(entry)
+			_use(entry)
+			return
+	var built := _build_host(host)
+	_hosts.append(built)
+	_use(built)
 	if not host.tree_exiting.is_connected(_on_host_exiting.bind(host)):
 		host.tree_exiting.connect(_on_host_exiting.bind(host), CONNECT_ONE_SHOT)
 
@@ -142,6 +154,7 @@ func claim(zone: Zone, control: Control, at_end: bool = false) -> void:
 	if not list.has(control):
 		list.append(control)
 		_occupants[zone] = list
+		_owner[control] = _host
 		control.visibility_changed.connect(_on_occupant_visibility.bind(control))
 		control.tree_exiting.connect(_forget.bind(control), CONNECT_ONE_SHOT)
 	if zone == Zone.SIDE_PANEL:
@@ -299,14 +312,23 @@ func anchor_to(control: Control, zone: Zone, inset: float = 0.0) -> void:
 func _ensure_host() -> void:
 	if not _host.is_empty() and is_instance_valid(_host.get("node")):
 		return
+	for i in range(_hosts.size() - 1, -1, -1):
+		if is_instance_valid(_hosts[i].get("node")) and (_hosts[i]["node"] as Node).is_inside_tree():
+			_use(_hosts[i])
+			return
 	if _default_host.is_empty() or not is_instance_valid(_default_host.get("node")):
 		_default_layer = CanvasLayer.new()
 		_default_layer.name = "UiLayoutLayer"
 		_default_layer.layer = DEFAULT_LAYER
 		add_child(_default_layer)
 		_default_host = _build_host(_default_layer)
-	_host = _default_host
-	_occupants = {}
+	_use(_default_host)
+
+
+## Rend `entry` (dictionnaire d'hôte) courant.
+func _use(entry: Dictionary) -> void:
+	_host = entry
+	_occupants = entry.get("occupants", {}) if not entry.is_empty() else {}
 
 
 func _build_host(host: Node) -> Dictionary:
@@ -371,13 +393,15 @@ func _build_host(host: Node) -> Dictionary:
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	stack.add_child(spacer)
 	return {"node": host, "zones": zones, "dim": dim, "stack": stack, "toasts": toasts_box,
-		"spacer": spacer, "more": more}
+		"spacer": spacer, "more": more, "occupants": {}}
 
 
 func _on_host_exiting(host: Node) -> void:
+	for entry in _hosts.duplicate():
+		if entry.get("node") == host:
+			_hosts.erase(entry)
 	if _host.get("node") == host:
-		_host = {}
-		_occupants = {}
+		_use({})
 
 
 func _parent_for(zone: Zone, _at_end: bool) -> Control:
@@ -417,8 +441,11 @@ func _center(control: Control) -> void:
 
 
 func _forget(control: Control) -> void:
-	for zone in _occupants.keys():
-		(_occupants[zone] as Array).erase(control)
+	var entry: Dictionary = _owner.get(control, _host)
+	_owner.erase(control)
+	var lists: Dictionary = entry.get("occupants", {})
+	for zone in lists.keys():
+		(lists[zone] as Array).erase(control)
 	if is_instance_valid(control):
 		if control.visibility_changed.is_connected(_on_occupant_visibility.bind(control)):
 			control.visibility_changed.disconnect(_on_occupant_visibility.bind(control))
@@ -435,6 +462,14 @@ func _forget(control: Control) -> void:
 func _on_occupant_visibility(control: Control) -> void:
 	if not is_instance_valid(control) or not control.has_meta(ZONE_META):
 		return
+	# Règles appliquées dans l'hôte de l'occupant (la carte, sous une bataille, reste un hôte).
+	var current := _host
+	_use(_owner.get(control, _host))
+	_apply_visibility(control)
+	_use(current)
+
+
+func _apply_visibility(control: Control) -> void:
 	var zone: int = control.get_meta(ZONE_META)
 	if zone == Zone.SIDE_PANEL:
 		var wrapper := control.get_parent()
