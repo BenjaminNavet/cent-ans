@@ -216,7 +216,7 @@ func _build_main_column() -> void:
 
 	new_game_button = _menu_button(column, "Nouvelle partie", func() -> void: show_faction_select())
 	continue_button = _menu_button(column, "Continuer", _on_continue)
-	_continue_detail = FrontEndStyle.label("", 16, Color(0.85, 0.78, 0.62), FrontEndStyle.body_italic(), 4)
+	_continue_detail = FrontEndStyle.label("", UiType.size(UiType.BODY), Color(0.85, 0.78, 0.62), FrontEndStyle.body_italic(), 4)
 	var detail_margin := MarginContainer.new()
 	detail_margin.add_theme_constant_override("margin_left", 25)
 	detail_margin.add_theme_constant_override("margin_top", -8)
@@ -232,14 +232,14 @@ func _build_main_column() -> void:
 	credits_button = _menu_button(column, "Crédits", open_credits)
 	quit_button = _menu_button(column, "Quitter", func() -> void: get_tree().quit())
 
-	status_label = FrontEndStyle.label("", 15, Color(1.0, 0.75, 0.6), FrontEndStyle.body_italic(), 4)
+	status_label = FrontEndStyle.label("", UiType.size(UiType.CAPTION), Color(1.0, 0.75, 0.6), FrontEndStyle.body_italic(), 4)
 	column.add_child(status_label)
 
 
 func _menu_button(parent: Control, text: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
-	FrontEndStyle.style_menu_button(button)
+	FrontEndStyle.style_menu_button(button, UiType.size(UiType.TITLE))
 	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	button.custom_minimum_size = Vector2(360, 0)
 	button.pressed.connect(action)
@@ -248,7 +248,7 @@ func _menu_button(parent: Control, text: String, action: Callable) -> Button:
 
 
 func _build_caption() -> void:
-	_caption = FrontEndStyle.label("", 18, Color(0.92, 0.86, 0.72), FrontEndStyle.title_italic(), 5)
+	_caption = FrontEndStyle.label("", UiType.size(UiType.HEADING), Color(0.92, 0.86, 0.72), FrontEndStyle.title_italic(), 5)
 	_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_caption.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	_caption.offset_left = -620

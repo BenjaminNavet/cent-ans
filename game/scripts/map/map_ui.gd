@@ -222,7 +222,7 @@ func _decorate_top_bar() -> void:
 		"[b]Colonies[/b]\nRevenus, chantiers et menaces de vos colonies, par province ; un clic y mène.", tech_button.get_index() + 5)
 	_register_top_label(holdings, "Colonies", "" if _apply_top_medallion(holdings, "hud_settlement") else "⛫")
 	if _apply_top_medallion(menu_button, "hud_menu"):
-		menu_button.add_theme_font_size_override("font_size", TOP_LABEL_FONT)
+		UiType.apply(menu_button, UiType.CAPTION)
 	get_viewport().size_changed.connect(queue_fit_top_bar)
 	($TopBar as Control).resized.connect(queue_fit_top_bar)
 	var settings := get_node_or_null("/root/Settings")
@@ -1234,7 +1234,7 @@ func _add_codex_button() -> void:
 	if IconLibrary.has_icon("hud_codex"):
 		_decorate_button(button, "hud_codex")
 	button.text = "Codex"
-	button.add_theme_font_size_override("font_size", 17)
+	UiType.apply(button, UiType.BODY)
 	button.tooltip_text = "[b]Codex[/b]\nL'histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
 	_add_keycap(button, "codex_open")
 	_register_top_label(button, "Codex")
@@ -1259,7 +1259,7 @@ func _add_keycap(button: Button, action: String) -> void:
 	var cap := Label.new()
 	cap.name = "Keycap"
 	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cap.add_theme_font_size_override("font_size", 11)
+	UiType.apply(cap, UiType.CAPTION)
 	cap.add_theme_color_override("font_color", HudStyle.INK)
 	var box := HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.INK_SOFT)
 	box.content_margin_left = 3
@@ -1306,7 +1306,7 @@ func _add_action_button(node_name: String, glyph: String, text: String, action: 
 	button.name = node_name
 	button.focus_mode = Control.FOCUS_NONE
 	button.text = glyph if text == "" else "%s %s" % [glyph, text]
-	button.add_theme_font_size_override("font_size", 17)
+	UiType.apply(button, UiType.BODY)
 	button.custom_minimum_size = Vector2(TOP_ICON_SIZE + 22.0, 0)
 	button.set_script(RichButton)
 	button.tooltip_text = tooltip
@@ -1328,8 +1328,6 @@ func press_action(action: String) -> void:
 
 # --- UX2 : libellés de la barre du haut (audit A3, C9) ------------------------------------
 
-## Taille du texte des boutons libellés de la barre.
-const TOP_LABEL_FONT := 15
 ## Ordre de repli en icône seule quand la place manque (le premier se replie d'abord).
 const TOP_COLLAPSE_ORDER := ["Colonies", "Unités", "Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
 ## Marge laissée à droite de la barre (bord, respiration).
@@ -1348,7 +1346,7 @@ func _register_top_label(button: Button, label: String, glyph: String = "") -> v
 	for entry in _top_labels:
 		if entry["button"] == button:
 			return
-	button.add_theme_font_size_override("font_size", TOP_LABEL_FONT)
+	UiType.apply(button, UiType.CAPTION)
 	button.set_meta("top_label", label)
 	var entry := {"button": button, "label": label, "glyph": glyph, "labelled": true}
 	_top_labels.append(entry)

@@ -109,7 +109,7 @@ func _build() -> void:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 24)
 	column.add_child(header)
-	var heading := FrontEndStyle.label("Choisissez votre couronne", 44, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 8)
+	var heading := FrontEndStyle.label("Choisissez votre couronne", UiType.size(UiType.TITLE), Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 8)
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(heading)
 	header.add_child(_build_start_dates())
@@ -151,7 +151,7 @@ func _build_start_dates() -> Control:
 		first = false
 		button.text = "%s %d — %s" % [str(info.get("season", "")).capitalize(), int(info.get("year", 1337)), str(info.get("title", ""))]
 		button.tooltip_text = str(info.get("text", ""))
-		FrontEndStyle.style_action_button(button, false, 20)
+		FrontEndStyle.style_action_button(button, false, UiType.size(UiType.HEADING))
 		var id := str(info.get("id", ""))
 		button.pressed.connect(func() -> void: selected_start = id)
 		row.add_child(button)
@@ -236,10 +236,10 @@ func _build_card(entry: Dictionary) -> Control:
 	names.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	title_row.add_child(names)
 	var name_text := str(info.get("name", faction_id)) if not info.is_empty() else faction_id
-	var name_label := FrontEndStyle.label(name_text, 25, FrontEndStyle.INK, FrontEndStyle.title_font())
+	var name_label := FrontEndStyle.label(name_text, UiType.size(UiType.HEADING), FrontEndStyle.INK, FrontEndStyle.title_font())
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	names.add_child(name_label)
-	var tagline := FrontEndStyle.label(str(entry.get("tagline", "")), 16, FrontEndStyle.GULES, FrontEndStyle.body_italic())
+	var tagline := FrontEndStyle.label(str(entry.get("tagline", "")), UiType.size(UiType.BODY), FrontEndStyle.GULES, FrontEndStyle.body_italic())
 	tagline.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	names.add_child(tagline)
 
@@ -287,15 +287,15 @@ func _ruler_row(ruler_id: String) -> Control:
 	texts.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(texts)
-	var caption := FrontEndStyle.label("Souverain", 13, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic())
+	var caption := FrontEndStyle.label("Souverain", UiType.size(UiType.CAPTION), FrontEndStyle.FADED_INK, FrontEndStyle.body_italic())
 	texts.add_child(caption)
 	var name := str(character.get("name", ruler_id.trim_prefix("chr_").capitalize()))
-	var ruler_label := FrontEndStyle.label(name, 19, FrontEndStyle.INK, FrontEndStyle.title_font())
+	var ruler_label := FrontEndStyle.label(name, UiType.size(UiType.HEADING), FrontEndStyle.INK, FrontEndStyle.title_font())
 	ruler_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texts.add_child(ruler_label)
 	var titles: Array = Array(character.get("titles", PackedStringArray()))
 	if not titles.is_empty():
-		var title_label := FrontEndStyle.label(str(titles[0]), 14, FrontEndStyle.FADED_INK)
+		var title_label := FrontEndStyle.label(str(titles[0]), UiType.size(UiType.CAPTION), FrontEndStyle.FADED_INK)
 		texts.add_child(title_label)
 	for child in texts.get_children():
 		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -319,7 +319,7 @@ func _difficulty_row(level: int) -> Control:
 	row.add_theme_constant_override("separation", 6)
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.tooltip_text = "Défi de la situation historique de cette couronne en 1337 (indicatif).\nLe niveau de difficulté de la campagne se choisit sous la fiche."
-	row.add_child(FrontEndStyle.label("Défi de la faction :", 15, FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
+	row.add_child(FrontEndStyle.label("Défi de la faction :", UiType.size(UiType.CAPTION), FrontEndStyle.FADED_INK, FrontEndStyle.body_italic()))
 	var pips := HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 4)
 	pips.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -332,7 +332,7 @@ func _difficulty_row(level: int) -> Control:
 		pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		pips.add_child(pip)
 	row.add_child(pips)
-	row.add_child(FrontEndStyle.label(FrontEndData.difficulty_label(level), 16, FrontEndStyle.GULES, FrontEndStyle.title_font()))
+	row.add_child(FrontEndStyle.label(FrontEndData.difficulty_label(level), UiType.size(UiType.BODY), FrontEndStyle.GULES, FrontEndStyle.title_font()))
 	for child in row.get_children():
 		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return row
@@ -352,21 +352,21 @@ func _build_detail() -> Control:
 	left.size_flags_stretch_ratio = 1.6
 	left.add_theme_constant_override("separation", 6)
 	row.add_child(left)
-	_detail_title = FrontEndStyle.label("", 26, FrontEndStyle.INK, FrontEndStyle.title_font())
+	_detail_title = FrontEndStyle.label("", UiType.size(UiType.TITLE), FrontEndStyle.INK, FrontEndStyle.title_font())
 	left.add_child(_detail_title)
 	_detail_intro = RichTextLabel.new()
 	_detail_intro.fit_content = true
 	_detail_intro.scroll_active = false
 	_detail_intro.bbcode_enabled = true
 	_detail_intro.add_theme_font_override("normal_font", FrontEndStyle.body_font())
-	_detail_intro.add_theme_font_size_override("normal_font_size", 18)
+	UiType.apply(_detail_intro, UiType.BODY)
 	_detail_intro.add_theme_color_override("default_color", FrontEndStyle.INK)
 	left.add_child(_detail_intro)
 	# BP1 : mots du Codex cliquables (bulles imbriquées) dans la description de la faction.
 	var bubbles := get_node_or_null("/root/CodexBubbles")
 	if bubbles != null:
 		bubbles.call("attach", _detail_intro)
-	_detail_objectives = FrontEndStyle.label("", 16, FrontEndStyle.GULES, FrontEndStyle.body_italic())
+	_detail_objectives = FrontEndStyle.label("", UiType.size(UiType.BODY), FrontEndStyle.GULES, FrontEndStyle.body_italic())
 	_detail_objectives.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	left.add_child(_detail_objectives)
 
@@ -381,7 +381,7 @@ func _list_column(parent: Control, heading: String, color: Color) -> VBoxContain
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.add_theme_constant_override("separation", 6)
 	parent.add_child(column)
-	column.add_child(FrontEndStyle.label(heading, 22, color, FrontEndStyle.title_font()))
+	column.add_child(FrontEndStyle.label(heading, UiType.size(UiType.HEADING), color, FrontEndStyle.title_font()))
 	var items := VBoxContainer.new()
 	items.add_theme_constant_override("separation", 6)
 	column.add_child(items)
@@ -398,7 +398,7 @@ func _build_difficulty_selector() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	bar.add_child(row)
-	var heading := FrontEndStyle.label("Difficulté de la campagne", 20, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 4)
+	var heading := FrontEndStyle.label("Difficulté de la campagne", UiType.size(UiType.HEADING), Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 4)
 	heading.tooltip_text = "Figée pour toute la partie : revenus et entretien de l'IA, vos revenus, l'agitation de vos provinces, l'hostilité de l'IA et le moral de ses armées contre vous."
 	heading.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_child(heading)
@@ -423,7 +423,7 @@ func _build_difficulty_selector() -> Control:
 		button.pressed.connect(func() -> void: select_difficulty(id))
 		row.add_child(button)
 		_difficulty_buttons[id] = button
-	_difficulty_description = FrontEndStyle.label("", 15, Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
+	_difficulty_description = FrontEndStyle.label("", UiType.size(UiType.BODY), Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
 	_difficulty_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_difficulty_description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_difficulty_description.custom_minimum_size = Vector2(260, 0)
@@ -456,7 +456,7 @@ func select_difficulty(id: String) -> void:
 	for key in _difficulty_buttons:
 		var button: Button = _difficulty_buttons[key]
 		button.set_pressed_no_signal(key == id)
-		FrontEndStyle.style_action_button(button, key == id, 18)
+		FrontEndStyle.style_action_button(button, key == id, UiType.size(UiType.HEADING))
 	if _difficulty_description != null:
 		_difficulty_description.text = str((_difficulty_levels[id] as Dictionary).get("description", ""))
 
@@ -473,20 +473,20 @@ func _build_actions() -> Control:
 	bar.add_child(row)
 	back_button = Button.new()
 	back_button.text = "Retour"
-	FrontEndStyle.style_action_button(back_button, false)
+	FrontEndStyle.style_action_button(back_button, false, UiType.size(UiType.HEADING))
 	back_button.pressed.connect(func() -> void: back_requested.emit())
 	row.add_child(back_button)
 
 	var advanced := Button.new()
 	advanced.text = "Options avancées"
 	advanced.toggle_mode = true
-	FrontEndStyle.style_action_button(advanced, false, 18)
+	FrontEndStyle.style_action_button(advanced, false, UiType.size(UiType.HEADING))
 	row.add_child(advanced)
 	var seed_row := HBoxContainer.new()
 	seed_row.add_theme_constant_override("separation", 8)
 	seed_row.visible = false
 	_advanced_box = seed_row
-	var seed_label := FrontEndStyle.label("Graine aléatoire", 17, Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
+	var seed_label := FrontEndStyle.label("Graine aléatoire", UiType.size(UiType.BODY), Color(0.93, 0.88, 0.76), FrontEndStyle.body_italic())
 	seed_label.tooltip_text = "Même graine, même tirage des événements et des batailles : utile pour rejouer une partie."
 	seed_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	seed_row.add_child(seed_label)
@@ -503,7 +503,7 @@ func _build_actions() -> Control:
 	row.add_child(spacer)
 	start_button = Button.new()
 	start_button.text = "Commencer"
-	FrontEndStyle.style_action_button(start_button, true, 26)
+	FrontEndStyle.style_action_button(start_button, true, UiType.size(UiType.TITLE))
 	start_button.pressed.connect(_on_start)
 	row.add_child(start_button)
 	return bar
@@ -547,10 +547,10 @@ func _fill_list(items: VBoxContainer, lines: Array, bullet: String) -> void:
 	for line in lines:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
-		var mark := FrontEndStyle.label(bullet, 16, color)
+		var mark := FrontEndStyle.label(bullet, UiType.size(UiType.BODY), color)
 		mark.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		row.add_child(mark)
-		var text := FrontEndStyle.label(str(line), 17, FrontEndStyle.INK)
+		var text := FrontEndStyle.label(str(line), UiType.size(UiType.BODY), FrontEndStyle.INK)
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(text)
