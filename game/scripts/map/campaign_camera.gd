@@ -10,6 +10,12 @@ extends Node3D
 ## (`CloseCameraProfile`, ≈ 5 unités sur E2, 1,5 sur E4, 0,3 dans les zones E5-E7), adoucie dans
 ## l'espace ; tangage de plus en plus rasant sous 22 unités ; point visé posé sur le sol
 ## (`ground_height`) ; caméra jamais sous le relief ; plans `near` / `far` suivant la distance.
+##
+## Chantier PO5 (ADR 0097) : ressenti lu dans `data/ui/camera_feel.json` (`CameraFeel`) —
+## inertie du déplacement (vitesse qui monte vers celle demandée puis décroît en exponentielle
+## au relâchement, glisser au bouton du milieu compris), zoom lissé vers `target_distance`, et
+## glissement de focus de `focus_glide_s` (0,4 s, courbe douce) au lieu d'un saut pour
+## `look_at_point`. `snap()` applique tout de suite les cibles (tests, captures).
 
 ## Lot C6 : vue « comté » (≈ 40 km, ~55 unités à l'écran) au zoom maximal.
 @export var min_distance: float = 22.0
@@ -26,7 +32,6 @@ extends Node3D
 @export var zoom_step: float = 0.15
 @export var edge_pan_enabled: bool = true
 @export var edge_margin_px: float = 14.0
-@export var damping: float = 10.0
 ## Lot L1 : zoom plus proche au-dessus des villes emblématiques (Paris) ; `close_zones` liste
 ## leurs cercles (x, z, rayon) en unités carte, fournis par `SettlementLayer.landmark_zones`.
 @export var close_min_distance: float = 7.0
@@ -55,6 +60,18 @@ var target_yaw: float = 0.0
 var bounds: Rect2 = Rect2(0, 0, 4096, 4096)
 
 var _dragging := false
+## PO5 : vitesse de déplacement dans le plan de la carte (unités/s), inertie comprise.
+var pan_velocity: Vector3 = Vector3.ZERO
+## PO5 : glissement de focus en cours (`look_at_point`) : départ, durée, temps écoulé.
+var _glide_active := false
+var _glide_from_focus := Vector3.ZERO
+var _glide_from_distance := 0.0
+var _glide_distance := false
+var _glide_duration := 0.0
+var _glide_elapsed := 0.0
+## PO5 : déplacement du glisser accumulé depuis la dernière image, et vitesse estimée.
+var _drag_accum := Vector3.ZERO
+var _drag_velocity := Vector3.ZERO
 
 @onready var camera: Camera3D = $Camera3D
 
@@ -73,6 +90,8 @@ func snap() -> void:
 	focus = target_focus
 	distance = target_distance
 	yaw = target_yaw
+	_glide_active = false
+	pan_velocity = Vector3.ZERO
 	_snapping = true
 	_apply_transform()
 	_snapping = false
@@ -82,8 +101,23 @@ func look_at_point(point: Vector3, new_distance: float = -1.0) -> void:
 	target_focus = point
 	if new_distance > 0.0:
 		target_distance = clampf(new_distance, min_distance_at(point), max_distance)
-	if Accessibility.reduce_motion():  # U12 : coupe franche au lieu d'un travelling
+	var glide := CameraFeel.get_value("campaign", "focus_glide_s")
+	if Accessibility.reduce_motion() or glide <= 0.0:  # U12 : coupe franche au lieu d'un travelling
 		snap()
+		return
+	# PO5 : glissement de durée fixe (pas de saut, pas de longue traîne exponentielle).
+	_glide_active = true
+	_glide_from_focus = focus
+	_glide_from_distance = distance
+	_glide_distance = new_distance > 0.0
+	_glide_duration = glide
+	_glide_elapsed = 0.0
+	pan_velocity = Vector3.ZERO
+
+
+## Vrai pendant un glissement de focus (`look_at_point`).
+func is_gliding() -> bool:
+	return _glide_active
 
 
 ## Distance minimale au-dessus d'un point : plus courte dans une ville emblématique (L1) et,
@@ -123,6 +157,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
 			_zoom_by(1.0 + zoom_step)
 		elif mb.button_index == MOUSE_BUTTON_MIDDLE:
+			if _dragging and not mb.pressed:
+				# PO5 : la carte file encore un peu au relâchement du glisser.
+				pan_velocity = _drag_velocity * CameraFeel.get_value("campaign", "drag_release_inertia")
+			elif mb.pressed:
+				pan_velocity = Vector3.ZERO
+				_drag_accum = Vector3.ZERO
+				_drag_velocity = Vector3.ZERO
 			_dragging = mb.pressed
 	elif event is InputEventPanGesture:
 		# Pad macOS : glissement vertical à deux doigts = molette continue.
@@ -134,7 +175,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		var motion := event as InputEventMouseMotion
 		var viewport_height := float(get_viewport().get_visible_rect().size.y)
 		var units_per_px := distance * 1.6 / maxf(viewport_height, 1.0)
+		var before := target_focus
 		_pan(Vector2(-motion.relative.x, -motion.relative.y) * units_per_px)
+		_drag_accum += target_focus - before
 
 
 func _zoom_by(factor: float) -> void:
@@ -147,28 +190,76 @@ func _process(delta: float) -> void:
 	pan.y += Input.get_action_strength("map_pan_down") - Input.get_action_strength("map_pan_up")
 	if edge_pan_enabled:
 		pan += _edge_pan_vector()
-	if pan != Vector2.ZERO:
-		_pan(pan.normalized() * pan_speed * distance * delta)
+	_update_pan_velocity(pan, delta)
 	var rotate := Input.get_action_strength("map_rotate_right") - Input.get_action_strength("map_rotate_left")
 	target_yaw += deg_to_rad(rotate_speed_deg) * rotate * delta
 	if not close_zones.is_empty() or relief != null:
 		target_distance = maxf(target_distance, min_distance_at(target_focus))
 	_ground_target()
 
-	var t := 1.0 - exp(-damping * delta)
-	focus = focus.lerp(target_focus, t)
-	distance = lerpf(distance, target_distance, t)
-	yaw = lerp_angle(yaw, target_yaw, t)
+	var zoom_t := 1.0 - exp(-CameraFeel.get_value("campaign", "zoom_damping") * delta)
+	var yaw_t := 1.0 - exp(-CameraFeel.get_value("campaign", "rotate_damping") * delta)
+	if _glide_active:
+		_glide_elapsed += delta
+		var k := clampf(_glide_elapsed / maxf(_glide_duration, 1e-4), 0.0, 1.0)
+		var eased := k * k * (3.0 - 2.0 * k)
+		focus = _glide_from_focus.lerp(target_focus, eased)
+		distance = lerpf(_glide_from_distance, target_distance, eased) if _glide_distance else lerpf(distance, target_distance, zoom_t)
+		if k >= 1.0:
+			_glide_active = false
+	else:
+		var follow_t := 1.0 - exp(-CameraFeel.get_value("campaign", "follow_damping") * delta)
+		focus = focus.lerp(target_focus, follow_t)
+		distance = lerpf(distance, target_distance, zoom_t)
+	yaw = lerp_angle(yaw, target_yaw, yaw_t)
 	_apply_transform()
+
+
+## PO5 : inertie. La vitesse monte vers celle demandée (clavier, bords d'écran) puis décroît en
+## exponentielle une fois la commande relâchée ; un déplacement annule le glissement de focus.
+func _update_pan_velocity(pan: Vector2, delta: float) -> void:
+	if _dragging:
+		if delta > 0.0:
+			_drag_velocity = _drag_velocity.lerp(_drag_accum / delta, 0.5)
+		_drag_accum = Vector3.ZERO
+		_glide_active = false
+		return
+	if pan != Vector2.ZERO:
+		_glide_active = false
+		var wanted := _plane_vector(pan.normalized() * pan_speed * distance)
+		pan_velocity = pan_velocity.lerp(wanted, 1.0 - exp(-CameraFeel.get_value("campaign", "pan_accel") * delta))
+	else:
+		pan_velocity *= exp(-CameraFeel.get_value("campaign", "pan_friction") * delta)
+		if pan_velocity.length() < distance * 0.002:
+			pan_velocity = Vector3.ZERO
+	if pan_velocity != Vector3.ZERO:
+		if pan == Vector2.ZERO:
+			_glide_active = false
+		_move_target(pan_velocity * delta)
 
 
 ## Déplacement dans le plan de la carte, relatif à l'orientation de la caméra.
 func _pan(screen_delta: Vector2) -> void:
+	_move_target(_plane_vector(screen_delta))
+
+
+## Vecteur écran (x vers la droite, y vers le bas) → vecteur au sol selon le lacet.
+func _plane_vector(screen_delta: Vector2) -> Vector3:
 	var right := Vector3(cos(yaw), 0.0, -sin(yaw))
 	var forward := Vector3(-sin(yaw), 0.0, -cos(yaw))
-	target_focus += right * screen_delta.x - forward * screen_delta.y
-	target_focus.x = clampf(target_focus.x, bounds.position.x, bounds.end.x)
-	target_focus.z = clampf(target_focus.z, bounds.position.y, bounds.end.y)
+	return right * screen_delta.x - forward * screen_delta.y
+
+
+func _move_target(offset: Vector3) -> void:
+	target_focus += offset
+	var clamped_x := clampf(target_focus.x, bounds.position.x, bounds.end.x)
+	var clamped_z := clampf(target_focus.z, bounds.position.y, bounds.end.y)
+	if clamped_x != target_focus.x:
+		pan_velocity.x = 0.0
+	if clamped_z != target_focus.z:
+		pan_velocity.z = 0.0
+	target_focus.x = clamped_x
+	target_focus.z = clamped_z
 
 
 func _edge_pan_vector() -> Vector2:

@@ -13,6 +13,12 @@ extends Node3D
 ## celles choisies par le joueur (zoom conservé). Bouton du milieu = orbite (lacet) pendant le
 ## suivi au lieu de panoramiquer. Toute action manuelle (W A S D / bords d'écran, `look_at_point`
 ## appelé par un clic minicarte ou un rappel de groupe) rend la main à la caméra libre.
+##
+## Chantier PO5 (ADR 0097) : zoom lissé au taux `battle.zoom_damping` de
+## `data/ui/camera_feel.json` ; `glide_to` (clic minicarte, rappel de groupe, double clic sur une
+## carte) glisse en `focus_glide_s` (0,4 s) au lieu de sauter. `look_at_point` reste une coupe
+## franche (plans de caméra scriptés : harangue, étendard, gros plans, captures). Glissement
+## instantané en headless (sauf `glide_in_headless`) et avec « Réduire les animations ».
 
 @export var min_distance: float = 12.0
 @export var max_distance: float = 900.0
@@ -44,6 +50,17 @@ var follow_position_of: Callable = Callable()
 
 var _target_distance: float = 220.0
 var _dragging: bool = false
+## PO5 : glissement en cours (`glide_to`) : départ, arrivée, durée, temps écoulé.
+var _glide_active := false
+var _glide_from := Vector3.ZERO
+var _glide_to := Vector3.ZERO
+var _glide_from_yaw := 0.0
+var _glide_to_yaw := 0.0
+var _glide_from_distance := 0.0
+var _glide_duration := 0.0
+var _glide_elapsed := 0.0
+## Tests : anime le glissement même en headless.
+var glide_in_headless := false
 
 @onready var camera: Camera3D = $Camera3D
 
@@ -52,11 +69,45 @@ var _dragging: bool = false
 ## caméra libre (annule un suivi éventuel).
 func look_at_point(point: Vector3, p_distance: float, p_yaw: float) -> void:
 	stop_follow()
+	_glide_active = false
 	target = point
 	distance = p_distance
 	_target_distance = p_distance
 	yaw = p_yaw
 	_apply()
+
+
+## PO5 : même cadrage que `look_at_point`, atteint par un glissement de `focus_glide_s`.
+func glide_to(point: Vector3, p_distance: float, p_yaw: float) -> void:
+	var duration := CameraFeel.get_value("battle", "focus_glide_s")
+	var headless := DisplayServer.get_name() == "headless" and not glide_in_headless
+	if duration <= 0.0 or headless or Accessibility.reduce_motion():
+		look_at_point(point, p_distance, p_yaw)
+		return
+	stop_follow()
+	_glide_active = true
+	_glide_from = target
+	_glide_to = point
+	_glide_from_yaw = yaw
+	_glide_to_yaw = p_yaw
+	_glide_from_distance = distance
+	_target_distance = clampf(p_distance, min_distance, max_distance)
+	_glide_duration = duration
+	_glide_elapsed = 0.0
+
+
+## Termine tout de suite un glissement en cours (tests, captures).
+func snap() -> void:
+	if _glide_active:
+		_glide_active = false
+		target = _glide_to
+		yaw = _glide_to_yaw
+	distance = _target_distance
+	_apply()
+
+
+func is_gliding() -> bool:
+	return _glide_active
 
 
 ## Verrouille la caméra sur le régiment `id` ; `position_of` rend sa position (Vector3) ou `null`
@@ -111,6 +162,7 @@ func _process(delta: float) -> void:
 	if move != Vector2.ZERO:
 		if follow_id >= 0:
 			stop_follow()
+		_glide_active = false
 		_pan(move.normalized() * distance * pan_speed * delta)
 	if follow_id >= 0:
 		var point: Variant = follow_position_of.call(follow_id) if follow_position_of.is_valid() else null
@@ -120,7 +172,17 @@ func _process(delta: float) -> void:
 			target = target.lerp(point as Vector3, clampf(delta * FOLLOW_LERP, 0.0, 1.0))
 			target.x = clampf(target.x, bounds.position.x, bounds.end.x)
 			target.z = clampf(target.z, bounds.position.y, bounds.end.y)
-	distance = lerpf(distance, _target_distance, clampf(delta * 10.0, 0.0, 1.0))
+	if _glide_active:
+		_glide_elapsed += delta
+		var k := clampf(_glide_elapsed / maxf(_glide_duration, 1e-4), 0.0, 1.0)
+		var eased := k * k * (3.0 - 2.0 * k)
+		target = _glide_from.lerp(_glide_to, eased)
+		yaw = lerp_angle(_glide_from_yaw, _glide_to_yaw, eased)
+		distance = lerpf(_glide_from_distance, _target_distance, eased)
+		if k >= 1.0:
+			_glide_active = false
+	else:
+		distance = lerpf(distance, _target_distance, 1.0 - exp(-CameraFeel.get_value("battle", "zoom_damping") * delta))
 	_apply()
 
 
@@ -150,6 +212,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_zoom_by(1.0 / maxf((event as InputEventMagnifyGesture).factor, 0.01))
 	elif event is InputEventMouseMotion and _dragging:
 		var motion := event as InputEventMouseMotion
+		_glide_active = false
 		if follow_id >= 0:
 			yaw += -motion.relative.x * ORBIT_MOUSE_SPEED
 		else:
