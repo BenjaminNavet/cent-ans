@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_hover_rules.schema.json",
+  "title": "Aperçu du trajet et curseur contextuel de bataille",
+  "description": "Fichier data/rules/battle_hover.json (lot CB-M2, ADR 0095) : saisie sous le curseur, seuil d'avantage net de la comparaison au survol, cadence de l'aperçu du trajet. Lu par sim-battle (HoverRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "pick": {
+      "type": "object",
+      "description": "Saisie sous le curseur.",
+      "properties": {
+        "unit_margin_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Marge ajoutée autour du rectangle d'un régiment (front × profondeur, orienté par son cap) pour le saisir (mètres)."
+        },
+        "piece_margin_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Marge ajoutée à la demi-épaisseur de la muraille pour saisir un pan de mur, une tour ou la porte (mètres)."
+        }
+      },
+      "required": ["unit_margin_m", "piece_margin_m"],
+      "additionalProperties": false
+    },
+    "compare": {
+      "type": "object",
+      "description": "Comparaison face à face au survol d'un ennemi : une ligne est un avantage net quand l'écart dépasse à la fois la part net_advantage_ratio de la plus grande valeur et l'écart absolu net_advantage_min.",
+      "properties": {
+        "net_advantage_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Écart relatif minimal (part de la plus grande des deux valeurs)."
+        },
+        "net_advantage_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Écart absolu minimal (dans l'unité de la ligne)."
+        }
+      },
+      "required": ["net_advantage_ratio", "net_advantage_min"],
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": "object",
+      "description": "Aperçu du trajet avant le clic.",
+      "properties": {
+        "recompute_distance_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Le trajet n'est recalculé que si le point visé a bougé de plus que cette distance (mètres)."
+        },
+        "max_recomputes_per_s": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 60,
+          "description": "Recalculs du trajet par seconde au plus."
+        },
+        "max_individual_paths": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40,
+          "description": "Au-delà de ce nombre d'unités sélectionnées, un seul trajet est tracé, depuis le centre du groupe."
+        }
+      },
+      "required": ["recompute_distance_m", "max_recomputes_per_s", "max_individual_paths"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["pick", "compare", "preview"],
+  "additionalProperties": false
+}
