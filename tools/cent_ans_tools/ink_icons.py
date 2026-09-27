@@ -42,6 +42,7 @@ CATALOG_PATH = REPO_DIR / "data" / "ui" / "icons_ink.json"
 RAW_DIR = REPO_DIR / "tools" / "da5_raw"
 ICONS_OUT_DIR = REPO_DIR / "game" / "assets" / "icons" / "ink"
 MEDALLIONS_OUT_DIR = REPO_DIR / "game" / "assets" / "ui" / "medallions"
+CURSORS_OUT_DIR = REPO_DIR / "game" / "assets" / "ui" / "cursors"
 BUDGET_SUBJECT = "DA5 : icônes d'action à l'encre et boutons-médaillons"
 # DA7c : icônes de trait, entries of the same catalogue (group "trait"), own ledger prefix
 # and envelope so they never eat into DA5's own (already spent) 5 $ cap.
@@ -56,6 +57,12 @@ RAW_MEDALLION_SIZE = 768
 TARGET_STROKE_PX = 5.0
 # Alpha below this share of full ink is parchment texture, not a stroke.
 ALPHA_FLOOR = 0.18
+# CB battle cursors: 32 px, hotspot at the centre (``BattleCursor``), drawing tinted and
+# ringed with dark ink so that it reads on grass as on mud.
+CURSOR_SIZE = 32
+CURSOR_INNER = 26
+CURSOR_INK_RGB = (31, 15, 8)
+CURSOR_BAR_RGB = (204, 26, 20)
 # Medallion flood fill tolerance (per channel sum distance to the corner colour).
 FLOOD_THRESHOLD = 60
 
@@ -304,6 +311,90 @@ def process_medallion(raw: Image.Image, size: int = 256) -> Image.Image:
     return square.resize((size, size), Image.Resampling.LANCZOS)
 
 
+# --- CB cursors: derived from the ink icons (free) ---------------------------------------
+
+
+def _hex_rgb(value: str) -> tuple[int, int, int]:
+    return tuple(int(value[i : i + 2], 16) for i in (1, 3, 5))  # type: ignore[return-value]
+
+
+def process_cursor(
+    icon: Image.Image | None, fill: str, barred: bool, size: int = CURSOR_SIZE
+) -> Image.Image:
+    """32 px cursor: icon strokes thickened and tinted ``fill``, 1 px dark ink ring around.
+
+    ``barred`` adds a red diagonal bar (top-left to bottom-right); without an icon the bar
+    comes with a red circle (``forbidden``). The hotspot is the centre (``BattleCursor``).
+    """
+    core = np.zeros((size, size), dtype=np.float32)
+    if icon is not None:
+        inner = icon.getchannel("A").resize(
+            (CURSOR_INNER, CURSOR_INNER), Image.Resampling.LANCZOS
+        )
+        # Strokes are ~1 px at this size: thicken by one pixel so the tint shows.
+        inner = inner.filter(ImageFilter.MaxFilter(3))
+        offset = (size - CURSOR_INNER) // 2
+        core[offset : offset + CURSOR_INNER, offset : offset + CURSOR_INNER] = (
+            np.asarray(inner, dtype=np.float32) / 255.0
+        )
+        core = np.where(core < 0.1, 0.0, core)  # resampling ripples, not ink
+    bar = np.zeros_like(core)
+    if barred:
+        ys, xs = np.mgrid[0:size, 0:size].astype(np.float32)
+        centre = size * 0.5 - 0.5
+        px, py = xs - centre, ys - centre
+        dist = np.hypot(px, py)
+        radius = size * 0.5 - 3.0
+        along = np.abs(px - py) / np.sqrt(2.0)
+        bar = np.clip(2.7 - along, 0.0, 1.0) * np.clip(radius + 1.5 - dist, 0.0, 1.0)
+        if icon is None:
+            bar = np.maximum(bar, np.clip(2.7 - np.abs(dist - radius), 0.0, 1.0))
+    shape = np.maximum(core, bar)
+    outline = (
+        np.asarray(
+            Image.fromarray((shape * 255).astype(np.uint8)).filter(
+                ImageFilter.MaxFilter(3)
+            ),
+            dtype=np.float32,
+        )
+        / 255.0
+    )
+    ink = np.array(CURSOR_INK_RGB, dtype=np.float32)
+    tint = np.array(_hex_rgb(fill), dtype=np.float32)
+    red = np.array(CURSOR_BAR_RGB, dtype=np.float32)
+    rgb = ink + (tint - ink) * core[..., None]
+    rgb = rgb + (red - rgb) * bar[..., None]
+    rgba = np.dstack([np.clip(rgb, 0, 255), outline * 255.0]).astype(np.uint8)
+    return Image.fromarray(rgba, "RGBA")
+
+
+def build_cursors(catalog: dict) -> tuple[list[str], list[str]]:
+    """Writes ``game/assets/ui/cursors/<id>.png`` from the built ink icons.
+
+    Returns ``(written ids, missing ids)``; a cursor whose icon is not built yet is skipped
+    (``BattleCursor`` then draws its code placeholder).
+    """
+    written: list[str] = []
+    missing: list[str] = []
+    icons_by_id = {entry.id: entry for entry in entries(catalog, "icon")}
+    for cursor in catalog.get("cursors", []):
+        icon_id = cursor.get("icon")
+        icon = None
+        if icon_id is not None:
+            entry = icons_by_id.get(icon_id)
+            if entry is None or not entry.out_path.exists():
+                missing.append(f"cursor:{cursor['id']}")
+                continue
+            icon = Image.open(entry.out_path).convert("RGBA")
+        image = process_cursor(icon, cursor["fill"], bool(cursor["barred"]))
+        CURSORS_OUT_DIR.mkdir(parents=True, exist_ok=True)
+        out_path = CURSORS_OUT_DIR / f"{cursor['id']}.png"
+        image.save(out_path, optimize=True)
+        ensure_cursor_import_settings(out_path)
+        written.append(cursor["id"])
+    return written, missing
+
+
 # --- Build ---------------------------------------------------------------------------
 
 
@@ -318,10 +409,15 @@ def source_image(entry: Entry) -> Image.Image | None:
 def build(catalog: dict | None = None) -> dict[str, list[str]]:
     """Writes the game assets and both ``index.json`` from the raw sources (free).
 
-    Returns ``{"icons": [...], "medallions": [...], "missing": [...]}`` (ids).
+    Returns ``{"icons": [...], "medallions": [...], "cursors": [...], "missing": [...]}``.
     """
     catalog = catalog or load_catalog()
-    report: dict[str, list[str]] = {"icons": [], "medallions": [], "missing": []}
+    report: dict[str, list[str]] = {
+        "icons": [],
+        "medallions": [],
+        "cursors": [],
+        "missing": [],
+    }
     indexes: dict[str, dict] = {"icon": {}, "medallion": {}}
     widths: dict[str, float] = {}
     for entry in entries(catalog):
@@ -348,6 +444,8 @@ def build(catalog: dict | None = None) -> dict[str, list[str]]:
         {"color": "#" + "".join(f"{c:02x}" for c in INK_RGB), "stroke_px": widths},
     )
     _write_index(MEDALLIONS_OUT_DIR, indexes["medallion"], {})
+    report["cursors"], missing_cursors = build_cursors(catalog)
+    report["missing"].extend(missing_cursors)
     return report
 
 
@@ -425,6 +523,29 @@ compress/mode=0
 mipmaps/generate=true
 process/fix_alpha_border=true
 """
+
+
+# Cursors are read back as an Image (``Input.set_custom_mouse_cursor``): lossless, no mipmaps.
+CURSOR_IMPORT_TEMPLATE = """[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+
+[params]
+
+compress/mode=0
+mipmaps/generate=false
+process/fix_alpha_border=true
+"""
+
+
+def ensure_cursor_import_settings(png_path: Path) -> bool:
+    """Creates ``<png>.import`` for a cursor (lossless, no mipmaps) if missing."""
+    import_path = png_path.with_name(png_path.name + ".import")
+    if import_path.exists():
+        return False
+    import_path.write_text(CURSOR_IMPORT_TEMPLATE, encoding="utf-8")
+    return True
 
 
 def ensure_import_settings(png_path: Path) -> bool:
