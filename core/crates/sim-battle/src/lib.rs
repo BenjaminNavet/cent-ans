@@ -43,6 +43,7 @@
 //!   `data/battle_orders/` carried by [`BattleSetup::orders`].
 
 pub mod ai;
+pub mod alerts;
 pub mod command;
 pub mod crest;
 pub mod decision;
