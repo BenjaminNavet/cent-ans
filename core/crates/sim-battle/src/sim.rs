@@ -1309,6 +1309,7 @@ impl BattleSim {
                 mode,
                 enabled,
             } => self.set_mode(&units, mode, enabled)?,
+            Command::UseAbility { units, ability } => self.use_ability(&units, &ability)?,
             Command::LeaderOrder { .. } => unreachable!("handled above"),
         }
         Ok(())
@@ -1417,6 +1418,7 @@ impl BattleSim {
         self.resolve_camps();
         self.resolve_morale_and_fatigue(&contacts);
         self.tick_orders(DT);
+        self.tick_abilities();
         self.elapsed += DT;
         self.ticks += 1;
         self.release_reserves();

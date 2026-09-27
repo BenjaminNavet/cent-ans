@@ -89,8 +89,8 @@
     },
     "entity": {
       "type": "string",
-      "description": "Entité de jeu liée (personnage, événement, technologie, bâtiment, unité, province, faction, régime, ressource, édit, ordre de bataille, navire). Le titre de l'infobulle riche de cette entité devient un lien vers la fiche.",
-      "pattern": "^(chr|evt|tech|bld|unit|prov|fac|diet|res|edict|order|ship)_[a-z0-9_]+$"
+      "description": "Entité de jeu liée (personnage, événement, technologie, bâtiment, unité, province, faction, régime, ressource, édit, ordre de bataille, capacité de bataille, navire). Le titre de l'infobulle riche de cette entité devient un lien vers la fiche.",
+      "pattern": "^(chr|evt|tech|bld|unit|prov|fac|diet|res|edict|order|ability|ship)_[a-z0-9_]+$"
     },
     "see_also": {
       "type": "array",

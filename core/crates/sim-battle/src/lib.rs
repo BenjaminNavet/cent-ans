@@ -42,6 +42,7 @@
 //!   cry, no quarter, dismount, pavises, rally, from the catalogue of
 //!   `data/battle_orders/` carried by [`BattleSetup::orders`].
 
+pub mod abilities;
 pub mod ai;
 pub mod alerts;
 pub mod command;
@@ -89,6 +90,7 @@ pub mod time_of_day;
 pub mod town;
 pub mod unit;
 
+pub use abilities::{AbilityView, ActiveAbility, EndedAbility, UnitAbilities};
 pub use command::{Command, CommandError};
 pub use decision::{BattleEnd, DecisionRules};
 pub use decor::{
