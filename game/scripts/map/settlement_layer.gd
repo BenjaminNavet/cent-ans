@@ -19,7 +19,19 @@ extends Node3D
 signal settlement_selected(id: String)
 
 const KIND_INDEX := {"city": 0, "town": 1, "castle": 2, "abbey": 3, "village": 4}
-const LABEL_FONT := {"city": 22, "town": 18, "castle": 16, "abbey": 16, "village": 15}
+## Lot PO3 (bible DA § 4, § 12.2) : noms dans le registre manuscrit — EB Garamond, graisse et taille
+## selon le rang (cité `Heading`, ville `Body`, bourg `Caption`), encre sombre sur un halo de
+## parchemin léger (plus de pastille claire).
+# PO2 : remplacer par UiType (variations Heading / Body / Caption du thème).
+const LABEL_HEADING_PX := 20
+const LABEL_BODY_PX := 17
+const LABEL_CAPTION_PX := 14
+const LABEL_FONT := {"city": LABEL_HEADING_PX, "town": LABEL_BODY_PX, "castle": LABEL_CAPTION_PX, "abbey": LABEL_CAPTION_PX, "village": LABEL_CAPTION_PX}
+const LABEL_WEIGHT := {"city": 700, "town": 600, "castle": 500, "abbey": 500, "village": 500}
+const LABEL_FONT_PATH := "res://assets/third_party/fonts/eb_garamond/EBGaramond-VariableFont_wght.ttf"
+## Halo : contour fin (px de police) et part d'opacité du halo.
+const LABEL_OUTLINE_PX := 4
+const LABEL_HALO_ALPHA := 0.6
 ## Rayon de picking d'un marqueur, en fraction de sa taille écran.
 const PICK_ICON_FRACTION := 0.45
 ## Hauteur du centre du marqueur au-dessus du lieu, en fraction de sa taille (cf. shader).
@@ -44,8 +56,8 @@ const ABSORB_OVERLAP := 0.2
 @export var tiers: ZoomTiers
 ## Échelle globale des marqueurs (tailles par rang dans `data/map/settlement_markers.json`).
 @export var icon_size_scale: float = 1.0
-@export var label_color: Color = Color(0.16, 0.10, 0.05)
-@export var label_outline: Color = Color(0.95, 0.90, 0.78)
+@export var label_color: Color = Color(0.13, 0.085, 0.045)
+@export var label_outline: Color = Color(0.93, 0.87, 0.72)
 @export var declutter_interval: float = 0.15
 @export var declutter_margin: float = 3.0
 @export var max_hamlet_builds_per_frame: int = 4
@@ -569,10 +581,11 @@ func _build_label(i: int, entry: Dictionary) -> void:
 	var kind := str(entry["kind"])
 	label.name = "Label_%d" % i
 	label.text = str(entry["name"])
-	label.font_size = LABEL_FONT.get(kind, 15)
-	label.outline_size = 7
+	label.font_size = LABEL_FONT.get(kind, LABEL_CAPTION_PX)
+	label.font = _label_font(int(LABEL_WEIGHT.get(kind, 500)))
+	label.outline_size = LABEL_OUTLINE_PX
 	label.modulate = label_color
-	label.outline_modulate = label_outline
+	label.outline_modulate = _halo(1.0)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.fixed_size = true
 	label.pixel_size = 0.0011
@@ -1026,9 +1039,31 @@ func _show_label(i: int, shown: bool, alpha: float) -> void:
 	var modulate := label_color
 	modulate.a = alpha
 	label.modulate = modulate
+	label.outline_modulate = _halo(alpha)
+
+
+## PO3 : couleur du halo de parchemin pour une opacité d'étiquette `alpha`.
+func _halo(alpha: float) -> Color:
 	var outline := label_outline
-	outline.a = alpha
-	label.outline_modulate = outline
+	outline.a = alpha * LABEL_HALO_ALPHA
+	return outline
+
+
+static var _label_fonts: Dictionary = {}
+
+
+## PO3 : EB Garamond à la graisse `weight` (axe variable `wght`), partagée ; null si la police manque.
+static func _label_font(weight: int) -> Font:
+	if _label_fonts.has(weight):
+		return _label_fonts[weight]
+	var font: Font = null
+	if ResourceLoader.exists(LABEL_FONT_PATH):
+		var variation := FontVariation.new()
+		variation.base_font = load(LABEL_FONT_PATH) as Font
+		variation.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): weight}
+		font = variation
+	_label_fonts[weight] = font
+	return font
 
 
 ## DA7d : décalage du nom `i` au-dessus de son marqueur (px du `Label3D`) : haut de l'emprise du
