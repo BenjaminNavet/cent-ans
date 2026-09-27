@@ -298,7 +298,7 @@ donc le rejeu EP13 n'est pas touché.
 
 *Godot* :
 - barre de groupe (à côté du verrou de CB1) : sélecteur de préréglage, séparé en « Attaque » et
-  « Défense », infobulle `description_fr` ; raccourci Alt+1…5 (ajouté au remappage de CB2) ;
+  « Défense », infobulle `description_fr` ; raccourci Alt+Maj+1…5 (Alt+1…4 est pris par les capacités de CB4 ; ajouté au remappage de CB2) ;
 - en déploiement : bouton « Placer en formation » qui applique le préréglage à toute l'armée ou à la
   sélection, avec fantômes (décales CB-M1) avant validation ;
 - en bataille : préréglage actif + clic droit (ou glisser-droit pour l'orientation) = fantômes des
@@ -311,7 +311,7 @@ effectif et ordre gauche-droite stables, zone de déploiement respectée, pas d'
 capture `cb6_formation_shot.gd` (déploiement en Herse).
 
 *Ordonnancement* : après CB1 (largeur, verrou, `group_tag`), en vague 4 avec CB2, CB3 et CB5
-(4 agents). Fusion : CB3, CB5, CB6, puis CB2 (qui intègre les raccourcis Alt+1…5 à l'aide F1).
+(4 agents). Fusion : CB3, CB5, CB6, puis CB2 (qui intègre les raccourcis Alt+Maj+1…5 à l’aide F1).
 
 ## Ordre d'exécution
 

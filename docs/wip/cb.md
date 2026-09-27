@@ -11,7 +11,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | **fusionné 09-27** (aperçu = ordre exact en ligne droite/pont, ≤ 3 m au gué, ≤ 13 m en siège ; aperçu au clic droit maintenu) | `cb-m2-trajet-curseur.md` |
 | CB-M3 | Ordres en file (Maj + clic droit) | 2 | **fusionné 09-27** (borne 8 dans `battle_queue.json` ; `preview_path_from` ajouté plutôt que changer `preview_path` ; attaque en file close sur cible en fuite seulement si une file attend ; ordre suivant après rupture du contact) | `cb-m3-file-ordres.md` |
 | CB-M4 | Portée au sol, comparaison au survol | 2 | **fusionné 09-27** (fusionné avant CB-M3 ; demi-angle de tir = dessin seulement, 60° en données ; panneau posé au-dessus des « Ordres du chef ») | `cb-m4-portee-comparaison.md` |
-| CB1 | Formation au glisser, verrouillage de groupe | 3 | attente CB-M | |
+| CB1 | Formation au glisser, verrouillage de groupe | 3 | **en cours** (agent, `feat/cb1-drag-formation`) | `cb1-formation-glisser.md` |
 | CB2 | Modes d'unité, icônes d'état, remappage des touches | 4 | attente CB1 | |
 | CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | attente CB1 | |
 | CB5 | Alertes typées, colonne, minicarte, cris | 4 | attente CB1 | |
@@ -19,6 +19,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 | |
 
 ## Coordination
+- Relecture historique CB4 (capacités) et CB6 (formations de groupe) lancée pendant CB1 (docs seulement).
 - 09-27 : le joueur accepte les limites de CB-M2 et autorise l'enchaînement des lots sans nouvelle question.
 - CB-M3 et CB-M4 lancés en parallèle (fichiers presque disjoints ; conflit attendu seulement dans `get_units`).
 - Budget de captures relevé à **10 par lot** par le joueur (09-27), lues par la session principale seulement.
