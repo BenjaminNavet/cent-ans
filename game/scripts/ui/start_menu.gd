@@ -88,7 +88,7 @@ func _ready() -> void:
 	for arg in args:
 		# NV1 : `-- --naval-scenario=sluys` lance directement une bataille navale historique.
 		if arg.begins_with("--naval-scenario="):
-			SceneFader.go.call_deferred("res://scenes/naval/naval_battle.tscn")
+			(func() -> void: SceneFader.go("res://scenes/naval/naval_battle.tscn")).call_deferred()
 			return
 		if arg.begins_with("--autostart"):
 			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
