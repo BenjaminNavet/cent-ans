@@ -10,13 +10,15 @@
     "pretender_ratio": 0.5,
     "pretender_ratio_alone": 0.8,
     "main_claim_first": true,
-    "claim_war_ignores_difficulty": true
+    "claim_war_ignores_difficulty": true,
+    "claim_war_ignores_kinship": true
   },
   "join_war": {
     "ratio": 0.6,
     "min_attitude": 10,
     "min_ally_power_ratio": 1.0,
-    "border_only_claim_wars": true
+    "border_only_claim_wars": true,
+    "weary_stay_out": true
   },
   "peace": {
     "keep_capital": true,
