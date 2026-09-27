@@ -1464,8 +1464,9 @@ def idle_helm(arm, t):
     rotate_about(arm, "Neck", Z_AXIS, 0.15 * up)
     rotate_about(arm, "Neck", X_AXIS, 0.1 * up)
     head = pos(arm, "Head")
-    helm = head + Vector((0.13, -0.03 + wiggle, 0.12 + wiggle))
-    _arm_to(arm, "L", pos(arm, "Wrist.L").lerp(helm, up), Vector((0.6, 0.1, -0.2)))
+    # Elbow well out to the side: the forearm (and a strapped shield) stays beside the head.
+    helm = head + Vector((0.16, 0.0 + wiggle, 0.1 + wiggle))
+    _arm_to(arm, "L", pos(arm, "Wrist.L").lerp(helm, up), Vector((0.8, 0.3, 0.0)))
 
 
 idle_helm.frames = 82

@@ -75,6 +75,10 @@ var speed: float = 1.0
 var autoplay: bool = false
 var padded: bool = false
 var finished_shown: bool = false
+## AN1b : secondes d'acclamation du vainqueur montrées avant l'écran de fin (0 sans affichage,
+## en banc d'essai) ; `_end_wait` les compte.
+const VICTORY_HOLD := 3.0
+var _end_wait: float = 0.0
 var resolved: bool = false
 var _returned: bool = false  # UB1 : « Retour à la campagne » déjà émis
 var standalone: bool = false
@@ -1140,7 +1144,9 @@ func _process(delta: float) -> void:
 	if replay_mode:
 		_update_replay()  # EP13 : pas d'écran de fin pendant un rejeu
 	elif battle.call("is_finished") and not finished_shown:
-		_show_end()
+		_end_wait += delta
+		if _end_wait >= _victory_hold():
+			_show_end()
 	if _benchmark:
 		_run_benchmark_frame(delta)
 		if _bench_measured > 10 and battle != null:
@@ -1444,9 +1450,18 @@ func _fast_forward(seconds: float) -> void:
 
 func _refresh_view(force: bool, delta: float = 0.0) -> void:
 	units = battle.call("get_units")
-	var running: bool = not paused and not battle.call("is_finished")
+	var finished: bool = battle.call("is_finished")
+	var running: bool = not paused and not finished
+	# AN1b : une fois la bataille finie, le camp vainqueur acclame (son horloge d'animation
+	# continue ; les autres régiments restent figés, cf. BattleSoldiers.victor_side).
+	if finished and soldiers.victor_side == "":
+		var winner := str((battle.call("get_outcome") as Dictionary).get("winner", ""))
+		soldiers.victor_side = winner if winner != "" else "-"
+	elif not finished:
+		soldiers.victor_side = ""
+	var anim_dt := delta * speed if running else (delta if finished and not paused else 0.0)
 	var soldiers_start := Time.get_ticks_usec()
-	soldiers.update(battle, units, delta * speed if running else 0.0, selected)
+	soldiers.update(battle, units, anim_dt, selected)
 	_bench_soldiers_last_ms = float(Time.get_ticks_usec() - soldiers_start) / 1000.0
 	_update_effects(delta * speed if running else 0.0)
 	if siege_view != null:
@@ -1573,6 +1588,13 @@ func _on_marker_right_clicked(unit_id: int) -> void:
 
 func _banner_scale() -> float:
 	return clampf(camera_rig.distance * 0.014, 0.8, 9.0)
+
+
+## AN1b : durée d'acclamation avant l'écran de fin (aucune sans affichage ni en banc d'essai).
+func _victory_hold() -> float:
+	if _benchmark or DisplayServer.get_name() == "headless":
+		return 0.0
+	return VICTORY_HOLD
 
 
 ## B2 / T2 : écran de fin mis en scène (verdict, écus, pertes par régiment, mentions).
