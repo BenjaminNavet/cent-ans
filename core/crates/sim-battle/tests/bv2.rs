@@ -31,6 +31,7 @@ fn charge(
         units: vec![0],
         target: 1,
         run: true,
+        queue: false,
     })
     .unwrap();
     let mut impacts = Vec::new();

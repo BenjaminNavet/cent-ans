@@ -1,0 +1,4 @@
+{
+  "description": "Ordres en file de bataille (lot CB-M3, ADR 0095) : Maj + clic droit ajoute un déplacement ou une attaque à la suite des ordres d'un régiment. Lu par sim-battle (QueueRules) ; la borne est citée à l'interface par RuleValues (battle_queue_max).",
+  "max_queued_orders": 8
+}

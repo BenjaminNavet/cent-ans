@@ -24,6 +24,7 @@ use serde::{Deserialize, Serialize};
 use crate::command::Command;
 use crate::historical::HistoricalMap;
 use crate::outcome::BattleOutcome;
+use crate::queue::QueuedOrder;
 use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId};
 use crate::sim::{BattleSim, DT};
@@ -373,6 +374,27 @@ pub fn state_digest(sim: &BattleSim) -> u64 {
         hash.u64(u64::from(unit.ammo));
         hash.u64(u64::from(unit.left_field));
         hash.bytes(format!("{:?}", unit.state).as_bytes());
+        // CB-M3: queued orders, only when there are some (the digests of
+        // replays recorded before CB are unchanged).
+        if !unit.order_queue.is_empty() {
+            hash.u64(unit.order_queue.len() as u64);
+            for order in &unit.order_queue {
+                match order {
+                    QueuedOrder::Move { x, z, facing, run } => {
+                        hash.u64(1);
+                        hash.u64(x.to_bits());
+                        hash.u64(z.to_bits());
+                        hash.u64(facing.map_or(u64::MAX, f64::to_bits));
+                        hash.u64(u64::from(*run));
+                    }
+                    QueuedOrder::Attack { target, run } => {
+                        hash.u64(2);
+                        hash.u64(u64::from(*target));
+                        hash.u64(u64::from(*run));
+                    }
+                }
+            }
+        }
     }
     hash.0
 }

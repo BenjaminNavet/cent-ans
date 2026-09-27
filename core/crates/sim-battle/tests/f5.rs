@@ -42,6 +42,7 @@ fn a_charge_passes_through_friends() {
         units: vec![1],
         target: 2,
         run: true,
+        queue: false,
     };
     sim.issue_command(command).unwrap();
     // R2: the militia may break before the minute is out (relief of the
@@ -75,6 +76,7 @@ fn ai_changes_formation() {
         units: vec![0],
         target: 2,
         run: true,
+        queue: false,
     };
     sim.issue_command(charge).unwrap();
     place(&mut sim, 0, 800.0, 300.0, 0.0);
@@ -98,6 +100,7 @@ fn ai_changes_formation() {
         z: 750.0,
         run: false,
         facing: None,
+        queue: false,
     };
     sim.issue_command(far).unwrap();
     place(&mut sim, 2, 1100.0, 400.0, 0.0);
@@ -217,6 +220,7 @@ fn siege_pathing_uses_breach() {
         z: cz,
         run: true,
         facing: None,
+        queue: false,
     };
     sim.issue_command(order).unwrap();
     let mut arrived = false;
