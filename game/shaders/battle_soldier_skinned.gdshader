@@ -122,6 +122,29 @@ const int CODE_UNARMED = 8;
 uniform float far_start = 70.0;
 uniform float far_boost = 0.35;
 
+// Lot AN1a (ADR 0096) : mouvement secondaire (bas des surcots et jaques, caparaçons, crinières,
+// queues), ajouté après le skinning, dans le repère posé de la figurine (+Z = avant). Poids par
+// sommet sans donnée cuite : part des os des jambes (étoffes), hauteur de repos (caparaçon),
+// rang dans la chaîne `Tail1-7` (queue), teinte exacte des crins (crinière). Moteurs : vitesse
+// du régiment, vent de la bataille et rafales. Uniformes posés par BattleSecondaryMotion
+// (`data/fx/atmosphere.json`, `secondary_motion`) ; éteint par défaut.
+uniform bool sm_enabled = false;
+uniform float sm_distance = 160.0;
+uniform float move_speed = 0.0;
+uniform float sm_speed_ref = 5.0;
+uniform float sm_wind_scale = 1.0;
+uniform vec2 wind_dir = vec2(1.0, 0.0);
+uniform float wind_strength = 0.5;
+uniform float wind_gust = 0.2;
+// Par pièce (0 étoffe, 1 caparaçon, 2 crinière, 3 queue) : recul (m, à la vitesse de
+// référence), vent (m, force 1), flottement (m), fréquence (Hz) ; évasement par pièce.
+uniform vec4 sm_amp[4];
+uniform vec4 sm_lift = vec4(0.0);
+uniform vec2 sm_cap_band = vec2(0.48, 1.45);
+uniform ivec2 sm_leg_bones = ivec2(-1, -2);
+uniform ivec2 sm_tail_bones = ivec2(-1, -2);
+uniform float sm_mane_tint = 0.3294;
+
 #ifdef FG3_BAKED
 // Atlas des figurines fines (couche = figurine) : RG normale de forme (espace tangent de l'UV
 // d'atlas), B occlusion cuite, A masque selon la matière (barbe/cheveux : densité ; peau :
@@ -273,6 +296,85 @@ void pose_rows(int clip, float t, ivec4 idx, vec4 w, bool smooth_frames, out vec
 	c = c0;
 }
 
+// AN1a : poids (0-1, 1 au bord libre) et pièce souple d'un sommet ; -1 : pièce rigide.
+float sm_weight(int code, ivec4 idx, vec4 w, vec3 rest, float tint, out int part) {
+	part = -1;
+	if (code == C_LIVERY || code == C_CLOTH || code == C_QUILT) {
+		// Bas du vêtement : part des os des jambes (0 à la taille, ~0,85 à l'ourlet) ; les chausses
+		// (entièrement sur les jambes) restent rigides.
+		float legs = 0.0;
+		for (int k = 0; k < 4; k++) {
+			int b = pick(idx, k);
+			if (b >= sm_leg_bones.x && b <= sm_leg_bones.y) {
+				legs += pickf(w, k);
+			}
+		}
+		part = 0;
+		return smoothstep(0.02, 0.85, legs) * (1.0 - smoothstep(0.93, 0.99, legs));
+	}
+	if (sm_tail_bones.y < 0) {
+		return 0.0;
+	}
+	if (code == C_ARMS) {
+		// Caparaçon : pièce armoriée portée par les os du cheval.
+		if (part_weight(0, idx, w) > 0.5) {
+			part = 1;
+			float k = 1.0 - smoothstep(sm_cap_band.x, sm_cap_band.y, rest.y);
+			return k * k;
+		}
+	} else if (code == C_COAT) {
+		float tail = 0.0;
+		float rank = 0.0;
+		for (int k = 0; k < 4; k++) {
+			int b = pick(idx, k);
+			if (b >= sm_tail_bones.x && b <= sm_tail_bones.y) {
+				tail += pickf(w, k);
+				rank += pickf(w, k) * float(b - sm_tail_bones.x);
+			}
+		}
+		if (tail > 0.5) {
+			part = 3;
+			float span = max(float(sm_tail_bones.y - sm_tail_bones.x), 1.0);
+			return 0.25 + 0.75 * clamp(rank / (tail * span), 0.0, 1.0);
+		}
+		if (abs(tint - sm_mane_tint) < 0.002) {
+			part = 2;
+			return 1.0;
+		}
+	}
+	return 0.0;
+}
+
+// AN1a : déplacement (repère posé) d'une pièce souple : recul dû à la marche (-Z), poussée du
+// vent, flottement ; les faces tournées vers la poussée s'évasent, celles qui lui font face
+// restent plaquées (pas de pénétration dans les jambes ou les flancs).
+vec3 sm_offset(int part, float wt, vec3 rest, vec3 n, vec3 wind_local, float time, vec4 h) {
+	vec4 a = sm_amp[part];
+	float gust = sin(time * 0.7 + h.x * 6.283) * 0.5 + sin(time * 1.9 + h.z * 6.283) * 0.25;
+	float ws = clamp(wind_strength + wind_gust * gust, 0.0, 1.5) * sm_wind_scale;
+	float sp = clamp(move_speed / max(sm_speed_ref, 0.01), 0.0, 1.5);
+	vec3 push = vec3(0.0, 0.0, -a.x * sp) + wind_local * (a.y * ws);
+	float plen = length(push);
+	vec3 pdir = plen > 1e-4 ? push / plen : vec3(0.0, 0.0, -1.0);
+	float phase = time * 6.283 * a.w * (0.8 + 0.5 * sp) + dot(rest, vec3(4.1, 5.3, 3.7)) + h.y * 6.283;
+	float flut = sin(phase) * 0.65 + sin(phase * 2.3 + 1.7) * 0.35;
+	float energy = clamp(0.25 + sp + ws, 0.0, 1.5);
+	vec3 off;
+	if (part <= 1) {
+		// Étoffe, caparaçon : poussée selon l'orientation de la face, gonflement le long de la normale.
+		float face = clamp(dot(n, pdir) * 0.5 + 0.5, 0.0, 1.0);
+		face *= face;
+		off = pdir * (plen * face) + n * (flut * a.z * energy * mix(0.4, 1.0, face));
+		off.y += sm_lift[part] * plen * face;
+	} else {
+		// Crins : poussée pleine, flottement latéral.
+		vec3 side = normalize(cross(vec3(0.0, 1.0, 0.0), pdir) + vec3(1e-4, 0.0, 0.0));
+		off = pdir * plen + side * (flut * a.z * energy);
+		off.y += sm_lift[part] * plen;
+	}
+	return off * wt;
+}
+
 void vertex() {
 	float inst_dist = length((MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz);
 	if (inst_dist < lod_band.x || inst_dist >= lod_band.y) {
@@ -323,6 +425,20 @@ void vertex() {
 		vec4 p = vec4(VERTEX, 1.0);
 		vec3 v = vec3(dot(a, p), dot(b, p), dot(c, p));
 		vec3 n = vec3(dot(a.xyz, NORMAL), dot(b.xyz, NORMAL), dot(c.xyz, NORMAL));
+		if (sm_enabled && inst_dist < sm_distance) {
+			// AN1a : mouvement secondaire (éteint sur les couches de poses figées : cadavres, renversés).
+			int part;
+			float wt = sm_weight(int(COLOR.a * 16.0 + 0.5), idx, w, VERTEX, COLOR.r, part);
+			if (part >= 0 && wt > 0.001) {
+				wt *= 1.0 - smoothstep(sm_distance * 0.7, sm_distance, inst_dist);
+				// Vent dans le repère de la figurine (instance : rotation et échelle uniforme).
+				vec3 wl = transpose(mat3(MODEL_MATRIX)) * vec3(wind_dir.x, 0.0, wind_dir.y);
+				wl.y = 0.0;
+				float wlen = length(wl);
+				wl = wlen > 1e-4 ? wl / wlen : vec3(0.0);
+				v += sm_offset(part, wt, VERTEX, normalize(n), wl, TIME, h);
+			}
+		}
 		v *= mix(1.0 - size_jitter, 1.0 + size_jitter, h.y);
 		float own_blood = 0.0;
 		v_stump = 0.0;
