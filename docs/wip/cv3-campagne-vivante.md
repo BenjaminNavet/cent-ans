@@ -6,7 +6,7 @@ ADR réservée : `docs/decisions/0094-postures-embuscade.md`. Captures : `docs/i
 ## Lots
 | Lot | Contenu | Vague | État | Note wip |
 |---|---|---|---|---|
-| CV3-0 | 10 défauts de la carte de campagne (annexe A de la spec) | 1 | lancé | `cv3-0-carte.md` |
+| CV3-0 | 10 défauts de la carte de campagne (annexe A de la spec) | 1 | fusionné c4c86f66 (Île-de-France non reproduit, à revoir en partie pilote) | `cv3-0-carte.md` |
 | CV3-1 | Postures (embuscade, marche forcée, camp retranché) + résultats nuancés (core) | 1 | fusionné 5096da0b | `cv3-1-postures.md` |
 | CV3-3 | Moteur des rencontres + schéma + ~12 rencontres sourcées | 1 | lancé | `cv3-3-rencontres.md` |
 | CV3-2 | Ouverture d'embuscade dans sim-battle + libellés Godot | 2 | lancé | `cv3-2-embuscade.md` |
