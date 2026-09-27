@@ -7,7 +7,9 @@ mod common;
 
 use common::*;
 use sim_battle::replay::state_digest;
-use sim_battle::{BattleSim, Command, HoverKind, PreviewError, SideId, SiegeSetup, Water, DT};
+use sim_battle::{
+    Advantage, BattleSim, Command, HoverKind, PreviewError, SideId, SiegeSetup, Water, DT,
+};
 
 type P = (f64, f64);
 
@@ -351,10 +353,216 @@ fn previews_leave_the_battle_untouched() {
     );
 }
 
+/// A siege with shooters, foot, horse and an engine on the attacking side.
+fn hover_siege() -> BattleSim {
+    let data = data();
+    let attacker = units(
+        &data,
+        &[
+            "unit_longbowmen",
+            "unit_men_at_arms_foot",
+            "unit_knights",
+            "unit_trebuchet",
+        ],
+    );
+    let defender = units(&data, &["unit_urban_militia", "unit_crossbowmen"]);
+    let siege = SiegeSetup {
+        fortification: 2,
+        breach: 0,
+    };
+    let mut sim = BattleSim::new(setup(attacker, defender, Some(siege)), 5).unwrap();
+    lab(&mut sim);
+    sim
+}
+
+fn id_of(sim: &BattleSim, unit_type: &str) -> u32 {
+    sim.units()
+        .iter()
+        .find(|u| u.unit_type == unit_type)
+        .unwrap_or_else(|| panic!("no {unit_type}"))
+        .id
+}
+
+/// A spot of open ground `d` metres out from the middle of a front wall.
+fn outside(sim: &BattleSim, piece: usize, d: f64) -> P {
+    let p = &sim.siege().unwrap().pieces[piece];
+    let (mx, mz) = p.midpoint();
+    let (nx, nz) = p.outward();
+    (mx + nx * d, mz + nz * d)
+}
+
 #[test]
-#[ignore = "CB-M2: hover table, filled in the next step"]
-fn hover_context_table() {
-    let sim = siege_lab(11);
-    let h = sim.hover_context(0.0, 0.0, &[], SideId::Attacker);
-    assert_eq!(h.context, HoverKind::None);
+fn hover_context_follows_the_table() {
+    let mut sim = hover_siege();
+    let bows = id_of(&sim, "unit_longbowmen");
+    let foot = id_of(&sim, "unit_men_at_arms_foot");
+    let horse = id_of(&sim, "unit_knights");
+    let engine = id_of(&sim, "unit_trebuchet");
+    let militia = id_of(&sim, "unit_urban_militia");
+    let xbows = id_of(&sim, "unit_crossbowmen");
+    let works = sim.siege().unwrap().clone();
+    let wall = *works
+        .front_walls()
+        .iter()
+        .find(|&&p| p != works.gate)
+        .unwrap();
+    let a = SideId::Attacker;
+    // Shooters out in the field, the militia before them, within bowshot.
+    let (bx, bz) = outside(&sim, wall, 120.0);
+    place(&mut sim, bows, bx, bz, 0.0);
+    place(&mut sim, militia, bx, bz + 60.0, 0.0);
+    // The crossbowmen inside the walls, behind the wall piece.
+    let (ix, iz) = outside(&sim, wall, -20.0);
+    place(&mut sim, xbows, ix, iz, 0.0);
+    // Down from the wall walk (the garrison starts on it, seen from afar).
+    sim.units_mut()[xbows as usize].on_wall = false;
+    let far = sim.units()[bows as usize].clone();
+    let range = sim.effective_range(&far, ix, iz);
+    assert!(
+        (ix - bx).hypot(iz - bz) < range,
+        "the crossbowmen within bowshot"
+    );
+
+    // Nothing selected: none, but the regiment under the cursor is named.
+    let h = sim.hover_context(bx, bz + 60.0, &[], a);
+    assert_eq!((h.context, h.target), (HoverKind::None, Some(militia)));
+    // A friend: none.
+    let h = sim.hover_context(bx, bz, &[foot], a);
+    assert_eq!((h.context, h.target), (HoverKind::None, Some(bows)));
+    // Shooters at an enemy in range and in sight: ranged, with the comparison.
+    let h = sim.hover_context(bx, bz + 60.0, &[bows], a);
+    assert_eq!(h.context, HoverKind::Ranged);
+    assert!(h.compare.is_some());
+    // Behind an intact wall: no line of sight.
+    let h = sim.hover_context(ix, iz, &[bows], a);
+    assert_eq!(
+        (h.context, h.target),
+        (HoverKind::RangedBlocked, Some(xbows))
+    );
+    // Out of range.
+    place(&mut sim, militia, bx, bz + range + 80.0, 0.0);
+    let h = sim.hover_context(bx, bz + range + 80.0, &[bows], a);
+    assert_eq!(h.context, HoverKind::RangedBlocked);
+    // Foot at an enemy: melee; no comparison with two regiments selected.
+    let h = sim.hover_context(bx, bz + range + 80.0, &[foot, bows], a);
+    assert_eq!(h.context, HoverKind::Melee);
+    assert!(h.compare.is_none());
+    // The gate and the walls: ladders and engines lay siege; shooters with
+    // arrows left (no ladders) fight at the gate. (Knights dismount for a
+    // siege assault: they climb.)
+    let (gx, gz) = works.pieces[works.gate].midpoint();
+    let h = sim.hover_context(gx, gz, &[foot], a);
+    assert_eq!((h.context, h.piece), (HoverKind::Siege, Some(works.gate)));
+    let h = sim.hover_context(gx, gz, &[bows], a);
+    assert_eq!(h.context, HoverKind::Melee);
+    let (wx, wz) = works.pieces[wall].midpoint();
+    let h = sim.hover_context(wx, wz, &[engine], a);
+    assert_eq!((h.context, h.piece), (HoverKind::Siege, Some(wall)));
+    let h = sim.hover_context(wx, wz, &[bows], a);
+    assert_eq!(h.context, HoverKind::Melee);
+    let h = sim.hover_context(wx, wz, &[horse], a);
+    assert_eq!(h.context, HoverKind::Siege, "dismounted knights climb");
+    // Open ground: move; a house, off the field: forbidden.
+    let (ox, oz) = outside(&sim, wall, 250.0);
+    assert_eq!(
+        sim.hover_context(ox, oz, &[foot], a).context,
+        HoverKind::Move
+    );
+    let house = works.houses.iter().find(|h| h.standing()).unwrap();
+    assert_eq!(
+        sim.hover_context(house.x, house.z, &[foot], a).context,
+        HoverKind::Forbidden
+    );
+    assert_eq!(
+        sim.hover_context(-10.0, 50.0, &[foot], a).context,
+        HoverKind::Forbidden
+    );
+}
+
+#[test]
+fn hover_context_in_deployment_and_deep_water() {
+    let data = data();
+    let mut battle = setup(
+        units(&data, &["unit_knights", "unit_men_at_arms_foot"]),
+        units(&data, &["unit_urban_militia"]),
+        None,
+    );
+    battle.river = true;
+    battle.player_side = Some(SideId::Attacker);
+    let (seed, bx) = bridged_seed();
+    let mut sim = BattleSim::new(battle, seed).unwrap();
+    // Deep water off the bridge: horse cannot go, foot may swim.
+    let r = sim.field().river.clone().unwrap();
+    let (x, z) = (bx - 150.0, r.center_z(bx - 150.0));
+    let a = SideId::Attacker;
+    assert_eq!(
+        sim.hover_context(x, z, &[0], a).context,
+        HoverKind::Forbidden
+    );
+    assert_eq!(sim.hover_context(x, z, &[0, 1], a).context, HoverKind::Move);
+    assert!(sim.begin_deployment());
+    let zone = sim.deployment_zone(a);
+    let inside = ((zone.x0 + zone.x1) * 0.5, (zone.z0 + zone.z1) * 0.5);
+    assert_eq!(
+        sim.hover_context(inside.0, inside.1, &[0], a).context,
+        HoverKind::Move
+    );
+    assert_eq!(
+        sim.hover_context(inside.0, zone.z1 + 100.0, &[0], a)
+            .context,
+        HoverKind::Forbidden
+    );
+    assert_eq!(
+        sim.preview_path(0, inside.0, zone.z1 + 100.0),
+        Err(PreviewError::OutsideZone)
+    );
+}
+
+#[test]
+fn comparison_figures_and_net_advantages() {
+    let data = data();
+    let mut sim = BattleSim::new(
+        setup(
+            units(&data, &["unit_flemish_pikemen"]),
+            units(&data, &["unit_knights"]),
+            None,
+        ),
+        2,
+    )
+    .unwrap();
+    lab(&mut sim);
+    place(&mut sim, 0, 500.0, 400.0, 0.0);
+    place(&mut sim, 1, 500.0, 480.0, std::f64::consts::PI);
+    let (kx, kz) = (sim.units()[1].x, sim.units()[1].z);
+    let h = sim.hover_context(kx, kz, &[0], SideId::Attacker);
+    assert_eq!(h.context, HoverKind::Melee);
+    let c = h.compare.expect("one regiment selected");
+    let pikes = &sim.units()[0];
+    let knights = &sim.units()[1];
+    assert_eq!(c.ours.unit, 0);
+    assert_eq!(c.theirs.unit, 1);
+    assert_eq!(c.ours.soldiers, pikes.soldiers());
+    assert_eq!(c.ours.melee, f64::from(pikes.stats.melee));
+    assert_eq!(c.theirs.defense, f64::from(knights.stats.armor));
+    assert_eq!(c.theirs.charge, knights.charge_points());
+    assert_eq!((c.ours.ranged, c.ours.range), (0.0, 0.0));
+    // Pikes strike horse 80 % harder; horse strikes pikes 30 % softer.
+    assert!((c.ours.bonus_vs - 180.0).abs() < 1e-9);
+    assert!((c.theirs.bonus_vs - 70.0).abs() < 1e-9);
+    let line = |name: &str| {
+        c.advantages
+            .iter()
+            .find(|(n, _)| n == name)
+            .map(|(_, a)| *a)
+            .unwrap()
+    };
+    assert_eq!(line("bonus_vs"), Advantage::Ours);
+    assert_eq!(line("range"), Advantage::Even);
+    assert_eq!(c.advantages.len(), 9);
+    // Fatigue: the lower is the better.
+    sim.units_mut()[0].fatigue = 60.0;
+    let h = sim.hover_context(kx, kz, &[0], SideId::Attacker);
+    let c = h.compare.unwrap();
+    let fatigue = c.advantages.iter().find(|(n, _)| n == "fatigue").unwrap().1;
+    assert_eq!(fatigue, Advantage::Theirs);
 }

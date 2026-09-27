@@ -264,6 +264,34 @@ pub fn of_faction(name: &str) -> String {
 }
 
 /// Relative position of an attacker around a defender: 0 front, 1 flank, 2 rear.
+/// Multiplier of a horseman's blows at foot in a square or with pikes
+/// (1 otherwise).
+pub(crate) fn horse_against_foot(attacker: &Unit, defender: &Unit) -> f64 {
+    if !attacker.is_cavalry() {
+        return 1.0;
+    }
+    if defender.formation == Formation::Square {
+        if defender.has(Ability::PikeSquare) {
+            0.25
+        } else {
+            0.4
+        }
+    } else if defender.has(Ability::PikeSquare) {
+        0.7
+    } else {
+        1.0
+    }
+}
+
+/// Multiplier of pikemen's blows at horsemen (1 otherwise).
+pub(crate) fn pikes_against_horse(attacker: &Unit, defender: &Unit) -> f64 {
+    if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
+        1.8
+    } else {
+        1.0
+    }
+}
+
 pub(crate) fn attack_angle(defender: &Unit, attacker_x: f64, attacker_z: f64) -> u8 {
     if defender.formation == Formation::Square {
         return 0;
@@ -2472,7 +2500,7 @@ impl BattleSim {
             // EP6: walls, hedges and houses of the decor shelter the defender.
             / self.field.decor_defense(defender.x, defender.z);
         if attacker.charge_timer > 0.0 {
-            let charge = f64::from(attacker.stats.charge.unwrap_or(20));
+            let charge = attacker.charge_points();
             let lance = if attacker.has(Ability::ChargeLance) {
                 1.5
             } else {
@@ -2496,20 +2524,9 @@ impl BattleSim {
         if defender.state == UnitState::Routing {
             damage *= 1.5;
         }
-        if attacker.is_cavalry() {
-            if defender.formation == Formation::Square {
-                damage *= if defender.has(Ability::PikeSquare) {
-                    0.25
-                } else {
-                    0.4
-                };
-            } else if defender.has(Ability::PikeSquare) {
-                damage *= 0.7;
-            }
-        }
-        if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
-            damage *= 1.8;
-        }
+        // Matchup of the types (CB-M2: also quoted by the hover comparison).
+        damage *= horse_against_foot(attacker, defender);
+        damage *= pikes_against_horse(attacker, defender);
         // Siege: ladders are a poor place to fight from.
         if self.on_ladders(attacker) {
             damage *= 0.3;
