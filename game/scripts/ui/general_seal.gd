@@ -13,15 +13,16 @@ extends Control
 
 ## Demande d'ouvrir la fiche du personnage.
 signal general_requested(character_id: String)
-## Posture choisie dans le menu de la posture (armée du joueur seulement, `can_change_stance`).
+## Posture choisie dans la rangée de boutons (armée du joueur seulement, `can_change_stance`).
 signal stance_selected(stance: String)
 
 const SEAL_RADIUS := 58.0
 const PLATE_WIDTH := 212.0
-const STANCES := ["normal", "raid", "siege"]
-const STANCE_LABELS := {"normal": "Normale", "raid": "Chevauchée", "siege": "Siège"}
+## Lot CV3-4 : postures proposées, dans l'ordre des boutons (`StanceBar`).
+const STANCES := StanceBar.STANCES
 
-## Vrai pour une armée du joueur : la posture devient un menu (clic) qui émet `stance_selected`.
+## Vrai pour une armée du joueur : une rangée de boutons de posture (`StanceBar`, lot CV3-4)
+## émet `stance_selected` ; `army.stance_options` (`get_stance_options`) grise les refus.
 @export var can_change_stance: bool = true
 
 var character: Dictionary = {}
@@ -36,6 +37,8 @@ var _name_label: Label
 var _title_label: Label
 var _skills_label: Label
 var _status_row: HBoxContainer
+## Lot CV3-4 : boutons de posture (armée du joueur).
+var stance_bar: StanceBar
 
 
 func _ready() -> void:
@@ -80,6 +83,9 @@ func _ready() -> void:
 	_status_row.add_theme_constant_override("separation", 10)
 	_status_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(_status_row)
+	stance_bar = StanceBar.new()
+	stance_bar.stance_selected.connect(func(stance: String) -> void: stance_selected.emit(stance))
+	box.add_child(stance_bar)
 	_refresh()
 
 
@@ -135,14 +141,13 @@ func _refresh() -> void:
 	_skills_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	for child in _status_row.get_children():
 		child.queue_free()
+	stance_bar.visible = not army.is_empty() and can_change_stance
 	if not army.is_empty():
 		var stance := str(army.get("stance", "normal"))
-		var stance_item := _add_status("stance_" + stance, str(STANCE_LABELS.get(stance, stance)), "Posture")
 		if can_change_stance:
-			stance_item.tooltip_text = "Posture : clic pour changer (Normale, Chevauchée, Siège)"
-			stance_item.mouse_filter = Control.MOUSE_FILTER_STOP
-			stance_item.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-			stance_item.gui_input.connect(_on_stance_input.bind(stance_item))
+			stance_bar.set_state(stance, army.get("stance_options", {}))
+		else:
+			_add_status("stance_" + stance, StanceBar.stance_name(stance), "Posture")
 		var supply := int(army.get("supply", 0))
 		_add_status("supply", "%d %%" % supply, "Ravitaillement", HudStyle.gauge_color(supply / 100.0))
 		var moves := int(army.get("movement_points", 0))
@@ -165,21 +170,6 @@ func _add_status(glyph: String, text: String, tip: String, color: Color = HudSty
 	item.tooltip_text = tip
 	_status_row.add_child(item)
 	return item
-
-
-func _on_stance_input(event: InputEvent, item: Control) -> void:
-	var click := event as InputEventMouseButton
-	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
-		return
-	item.accept_event()
-	var menu := PopupMenu.new()
-	for stance in STANCES:
-		menu.add_radio_check_item(str(STANCE_LABELS[stance]))
-		menu.set_item_checked(menu.item_count - 1, stance == str(army.get("stance", "normal")))
-	menu.id_pressed.connect(func(id: int) -> void: stance_selected.emit(STANCES[id]))
-	menu.popup_hide.connect(menu.queue_free)
-	add_child(menu)
-	menu.popup(Rect2i(Vector2i(item.get_screen_position() + Vector2(0, item.size.y + 2)), Vector2i.ZERO))
 
 
 func _tooltip_text() -> String:

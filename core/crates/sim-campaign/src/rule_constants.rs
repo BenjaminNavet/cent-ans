@@ -178,6 +178,34 @@ pub fn rule_constants(data: &GameData) -> BTreeMap<&'static str, f64> {
         "upkeep_months_per_season",
         economy::UPKEEP_MONTHS_PER_SEASON as f64,
     );
+
+    // Army stances (`data/rules/postures.json`, lot CV3-4 tooltips).
+    let postures = &data.posture_rules;
+    values.insert(
+        "ambush_min_movement_percent",
+        postures.ambush.min_movement_left_percent,
+    );
+    values.insert(
+        "ambush_detect_radius_km",
+        postures.ambush.detect_radius_army_km,
+    );
+    values.insert("ambush_detect_spy_km", postures.ambush.detect_radius_spy_km);
+    values.insert(
+        "forced_march_bonus_percent",
+        postures.forced_march.movement_bonus_percent,
+    );
+    values.insert(
+        "forced_march_supply_cost",
+        f64::from(postures.forced_march.supply_cost),
+    );
+    values.insert(
+        "entrenched_defense_percent",
+        postures.entrenched.auto_defense_percent,
+    );
+    values.insert(
+        "entrenched_supply_saving_percent",
+        postures.entrenched.supply_saving_percent,
+    );
     values
 }
 

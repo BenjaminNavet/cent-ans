@@ -1594,6 +1594,7 @@ func _show_end() -> void:
 	var aftermath := {}
 	if bool(_resolution.get("ok", false)):
 		aftermath = BattleAftermath.diff(before, BattleAftermath.snapshot(campaign_sim, str(side_setup.get("army", "")), general_id))
+		aftermath["campaign_outcome"] = _resolution.get("outcome", {})  # CV3-4 : classe du résultat
 	# A toast shown in the last seconds (garrison sortie) was drawn over the result table (Q3).
 	if hud.toast_label != null:
 		hud.toast_label.get_parent().visible = false

@@ -48,6 +48,9 @@ var _banner_color := GREEN
 var _tables: Dictionary = {}  # side -> GridContainer
 var _row_count: int = 0
 var _sides: Dictionary = {}
+## CV3-4 : bandeau de classe du cœur (« Victoire héroïque »…) et sa classe vue par le joueur.
+var outcome_band: OutcomeBand
+var _class_outcome: Dictionary = {}
 
 
 ## Libellé du verdict pour le camp du joueur d'après les proportions de pertes des deux camps.
@@ -146,6 +149,7 @@ func show_result(battle_title: String, player_side: String, sides: Dictionary, u
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	panel.add_child(box)
+	_class_outcome = OutcomeBand.pick(aftermath.get("campaign_outcome", {}), player_side)  # CV3-4
 	box.add_child(_build_banner(big_title, battle_title, outcome, sides, winner, player_side, enemy_side, won, own_ratio, enemy_ratio))
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -251,6 +255,10 @@ func _build_banner(big_title: String, battle_title: String, outcome: Dictionary,
 	subtitle_label.add_theme_constant_override("outline_size", 5)
 	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	center.add_child(subtitle_label)
+	if str(_class_outcome.get("label", "")) != "":  # CV3-4 : classe du résultat (cœur)
+		outcome_band = OutcomeBand.create(str(_class_outcome["class"]), str(_class_outcome["label"]), 20)
+		outcome_band.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		center.add_child(outcome_band)
 	row.add_child(_shield(sides[enemy_side], winner == enemy_side))
 	return banner
 

@@ -600,3 +600,23 @@ fn every_encounter_references_existing_data() {
     }
     let _ = ArmyPosition::field([0.0, 0.0]);
 }
+
+#[test]
+fn a_staged_site_is_seen_and_met_like_a_spawned_one() {
+    // CV3-4: `debug_put_encounter_site` (UI tests and screenshots).
+    let data = data();
+    let mut state = start(&data, "fac_france", 7);
+    let army = army_of(&state, "fac_france");
+    let target = nearby_target(&state, &data, &army);
+    assert!(state
+        .debug_put_encounter_site(&data, &enc("enc_no_such"), target)
+        .is_none());
+    let site = state
+        .debug_put_encounter_site(&data, &enc("enc_marchands_lombards"), target)
+        .expect("site placed");
+    let views = state.encounter_site_views(&data, &fac("fac_france"));
+    assert!(views.iter().any(|v| v.id == site), "the player sees it");
+    march_to(&mut state, &data, "fac_france", &army, target);
+    assert_eq!(state.encounters.pending.len(), 1);
+    assert_eq!(state.encounters.pending[0].site, site);
+}

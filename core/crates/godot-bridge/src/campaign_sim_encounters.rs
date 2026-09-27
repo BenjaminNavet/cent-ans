@@ -2,6 +2,7 @@
 //! `docs/design/2026-09-27-campagne-vivante.md` § 2), in a secondary
 //! `#[godot_api]` block. Read-only views plus the choice; the UI is lot CV3-4.
 
+use data_model::EncounterId;
 use godot::prelude::*;
 use sim_campaign::{ArmyId, Order};
 
@@ -102,5 +103,23 @@ impl CampaignSim {
             option: option.max(0) as usize,
         };
         order_result(state.submit_order(data, order).map_err(|e| e.to_string()))
+    }
+
+    /// Staging (UI tests, screenshots): puts a site of `encounter` at the map
+    /// point (`x`, `y`) in pixels; returns its id, -1 if refused.
+    #[func]
+    fn debug_place_encounter(&mut self, encounter: GString, x: f64, y: f64) -> i64 {
+        if self.refuse_while_turn_pending("debug_place_encounter") {
+            return -1;
+        }
+        let (Some(state), Some(data)) = (&mut self.state, &self.data) else {
+            return -1;
+        };
+        let Ok(id) = EncounterId::new(encounter.to_string()) else {
+            return -1;
+        };
+        state
+            .debug_put_encounter_site(data, &id, [x as f32, y as f32])
+            .map_or(-1, i64::from)
     }
 }
