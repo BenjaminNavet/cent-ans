@@ -88,7 +88,7 @@
       "stance": "march",
       "layout": "column",
       "column_gap_m": 15,
-      "column_files": { "infantry": 6, "foot_ranged": 6, "cavalry": 4 },
+      "column_files": { "infantry": 6, "foot_ranged": 6, "cavalry": 4, "general": 4 },
       "column": [
         { "role": "cavalry", "filter": "light" },
         { "role": "infantry", "part": "first_half" },
