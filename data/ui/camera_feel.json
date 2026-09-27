@@ -1,0 +1,22 @@
+{
+  "description": "Chantier PO5 (ADR 0097) — ressenti des caméras de campagne et de bataille : inertie du déplacement, zoom lissé vers une cible, glissement de focus (clic minicarte, liste d'unités, rappel). Taux en 1/s d'une décroissance exponentielle (1 - exp(-taux × dt)) ; durées en secondes. Rendu seulement, aucune règle de jeu. Le bloc reduce_motion remplace les valeurs quand « Réduire les animations » est actif.",
+  "campaign": {
+    "pan_accel": 14.0,
+    "pan_friction": 5.5,
+    "follow_damping": 12.0,
+    "zoom_damping": 9.0,
+    "rotate_damping": 10.0,
+    "focus_glide_s": 0.4,
+    "drag_release_inertia": 0.6
+  },
+  "battle": {
+    "zoom_damping": 9.0,
+    "focus_glide_s": 0.4
+  },
+  "reduce_motion": {
+    "pan_friction": 40.0,
+    "zoom_damping": 30.0,
+    "focus_glide_s": 0.0,
+    "drag_release_inertia": 0.0
+  }
+}
