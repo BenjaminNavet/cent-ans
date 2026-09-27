@@ -13,27 +13,43 @@ livrés et vérifiés, fusionné dans `main` (8c926169).
 de `options_available[].is_upgrade` — `upgrade_available` couvre le besoin de
 l'IU.
 
-## Lot L2 — Panneau Godot (`feat/holdings-ui`)
+## Lot L2 — Panneau Godot (`feat/holdings-ui`) — TERMINÉ (2026-09-27)
 
-État : squelette commité (`HoldingsController` avec l'API publique en `pass`/
-valeurs par défaut, `holdings_test.gd` désactivé). Touche retenue : **B**
-(`physical_keycode` 66, libre — vérifié dans `project.godot`).
+Touche retenue : **B** (`physical_keycode` 66, libre — vérifié dans
+`project.godot` avant implémentation).
 
-Branchements faits (campaign_map.gd, project.godot, map_ui.gd, shortcut_sheet.gd,
-`shortcut_sheet.gd`, exclusion mutuelle avec `UnitRosterController`), puis le
-panneau (§ 2 de la spec), puis les tests et la capture.
-exclusion mutuelle avec `UnitRosterController`). Prochaine étape : le panneau
-lui-même (§ 2 de la spec), puis les tests et la capture.
+Livré :
+- `game/scripts/map/holdings_controller.gd` (`HoldingsController`) : panneau en
+  code façon « Mes unités », en-tête trésor/revenu net, filtres exclusifs
+  (Tout / ⚒ libre / ▲ / ⚠), tri des provinces (revenu/nom/agitation),
+  provinces repliables avec bouton « ⌖ », lignes de colonie avec chantier,
+  garnison, badge de promotion et danger, infobulles (options de construction,
+  raisons du danger en français).
+- Branchements : `campaign_map.gd` (`holdings_ctl`, refresh dans
+  `refresh_all`), `project.godot` (action `map_toggle_holdings`, touche B),
+  `map_ui.gd` (bouton « Colonies », glyphe ⛫), `shortcut_sheet.gd` (entrée
+  fiche des raccourcis), exclusion mutuelle avec `UnitRosterController`
+  (une ligne dans chaque `toggle()`).
+- `game/tests/holdings_test.gd` : ouverture par B, comptage des provinces vs
+  aperçu, 3 filtres vs `count_idle`/`count_upgrade`/`count_endangered`, clic
+  sur une colonie ouvre son panneau, exclusion mutuelle avec « Mes unités ».
+  Vert.
+- `game/tests/holdings_shot.gd` : capture de contrôle, écrit
+  `docs/img/holdings.png` (non lue par cet agent, à juger par la session
+  principale).
+- `docs/manuel.md` : section « Liste des colonies (touche B) » (fin de la
+  section 5).
 
-Panneau implémenté (`holdings_controller.gd` complet : en-tête trésor/revenu,
-filtres exclusifs, tri, provinces repliables, lignes de colonie, infobulles).
-`smoke.gd` vert après correction : bouton « Colonies » ajouté à
-`TOP_COLLAPSE_ORDER` (glyphe ⛫), et « Unités » y a été ajouté aussi (déjà
-limite avant, un bouton de plus suffisait à dépasser la largeur à 1280×720).
-Prochaine étape : activer `holdings_test.gd`, puis la capture.
+Écart par rapport à la spec : l'ajout du bouton « Colonies » a fait déborder
+la barre du haut à 1280×720 (`smoke.gd` : « top bar wider than the screen »).
+Corrigé en ajoutant « Colonies » **et** « Unités » à `TOP_COLLAPSE_ORDER`
+(`map_ui.gd`) — « Unités » n'y était pas encore, la barre était déjà à la
+limite avant ce lot. Pas d'autre écart connu.
 
-`holdings_test.gd` activé et vert (ouverture par B, comptage des provinces,
-3 filtres vs `count_idle`/`count_upgrade`/`count_endangered`, clic ouvre le
-panneau de colonie, exclusion mutuelle avec « Mes unités »).
-`unit_roster_test.gd` et `smoke.gd` toujours verts.
-Prochaine étape : capture `docs/img/holdings.png`, section manuel, commit final.
+Vérifications finales : `holdings_test.gd`, `unit_roster_test.gd`, `smoke.gd`
+verts (`core/build.sh` + `godot --headless --path game --import` faits au
+préalable, cible cargo privée à ce worktree). Aucun changement Rust dans ce
+lot (fmt/clippy/test déjà vérifiés par L1).
+
+Prochaine étape : fusion dans `main` (faite par la session de coordination),
+suppression du worktree.
