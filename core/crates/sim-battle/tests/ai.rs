@@ -84,6 +84,7 @@ fn archers_withdraw_when_engaged() {
         units: vec![2],
         target: 1,
         run: true,
+        queue: false,
     })
     .unwrap();
     let mut fell_back = false;

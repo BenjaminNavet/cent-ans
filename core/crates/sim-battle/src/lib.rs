@@ -67,6 +67,7 @@ pub mod position;
 pub mod preview;
 pub mod props;
 pub mod push;
+pub mod queue;
 pub mod relief;
 pub mod relief_ai;
 pub mod replay;
@@ -108,6 +109,7 @@ pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
 pub use preview::{PreviewError, PreviewLeg};
 pub use push::{PushRules, PushShape};
+pub use queue::{QueueRules, QueuedOrder};
 pub use relief::ReliefStyle;
 pub use replay::{
     BattleReplay, Divergence, ReplayAction, ReplayError, ReplayPlayer, ReplayRecorder, ReplayRules,

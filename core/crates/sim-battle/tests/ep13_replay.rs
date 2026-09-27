@@ -89,6 +89,7 @@ fn record_demo(seed: u64) -> (BattleSim, BattleReplay) {
                 z: (z + first.z) / 2.0,
                 run: false,
                 facing: None,
+                queue: false,
             },
         },
     );
@@ -107,6 +108,7 @@ fn record_demo(seed: u64) -> (BattleSim, BattleReplay) {
                 units: ours[..ours.len() / 2].to_vec(),
                 target,
                 run: true,
+                queue: false,
             },
         },
     );
@@ -128,6 +130,7 @@ fn record_demo(seed: u64) -> (BattleSim, BattleReplay) {
                 units: vec![ours[0]],
                 target: ours[1],
                 run: true,
+                queue: false,
             },
         },
     );

@@ -263,6 +263,7 @@ impl BattleSim {
                     unit.state = UnitState::Routing;
                     unit.morale = unit.morale.min(super::ROUT_MORALE - 1.0);
                     unit.target = None;
+                    unit.order_queue.clear();
                     unit.destination = None;
                     unit.stakes_planted = false;
                     unit.pavise = None;
@@ -271,6 +272,7 @@ impl BattleSim {
                 BattleEnd::Refused | BattleEnd::Lull => {
                     unit.withdrawing = true;
                     unit.target = None;
+                    unit.order_queue.clear();
                     unit.pavise = None;
                 }
                 _ => {}

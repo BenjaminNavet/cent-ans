@@ -14,6 +14,7 @@ mod opening;
 mod pathing;
 mod pipeline;
 mod push;
+mod queue;
 mod reinforcements;
 mod scenario;
 mod separation;
@@ -39,6 +40,7 @@ use crate::field::{Battlefield, Weather};
 use crate::impact::{self, ImpactEvent, ImpactKind, LossCause, MAX_PENDING_IMPACTS};
 use crate::orders::OrderUses;
 use crate::outcome::{BattleEvent, BattleOutcome, SideResult};
+use crate::queue::QueuedOrder;
 use crate::rng::BattleRng;
 use crate::scale::BattleScale;
 use crate::setup::{BattleSetup, SideId, UnitSetup};
@@ -1049,30 +1051,53 @@ impl BattleSim {
                 z,
                 run,
                 facing,
+                queue,
             } => {
                 if !self.field.inside(x, z) {
                     return Err(CommandError::OutsideField);
                 }
-                let destinations = self.group_destinations(&units, x, z, facing);
+                if queue {
+                    self.check_queue_room(&units)?;
+                }
+                // CB-M3: a queued move spreads the group around where each
+                // regiment will stand once its queue is done.
+                let anchors: Vec<(f64, f64)> = if queue {
+                    units
+                        .iter()
+                        .map(|&id| self.queue_anchor(id as usize))
+                        .collect()
+                } else {
+                    units
+                        .iter()
+                        .map(|&id| (self.units[id as usize].x, self.units[id as usize].z))
+                        .collect()
+                };
+                let destinations = self.group_destinations_from(&units, &anchors, x, z, facing);
                 for (id, (dx, dz)) in units.iter().zip(destinations) {
-                    let unit = &mut self.units[*id as usize];
-                    unit.destination = Some((
+                    let destination = (
                         dx.clamp(5.0, self.field.width - 5.0),
                         dz.clamp(5.0, self.field.depth - 5.0),
-                    ));
-                    unit.destination_facing = facing;
-                    unit.target = None;
-                    unit.running = run;
-                    unit.withdrawing = false;
-                    unit.pavise = None;
-                    stop_climbing(unit);
-                    unit.disengaging = unit.state == UnitState::Melee;
-                    if unit.state != UnitState::Melee {
-                        unit.state = UnitState::Marching;
+                    );
+                    let index = *id as usize;
+                    if queue && self.units[index].busy() {
+                        self.units[index].order_queue.push_back(QueuedOrder::Move {
+                            x: destination.0,
+                            z: destination.1,
+                            facing,
+                            run,
+                        });
+                        continue;
                     }
+                    self.units[index].order_queue.clear();
+                    self.start_move(index, destination, facing, run);
                 }
             }
-            Command::Attack { units, target, run } => {
+            Command::Attack {
+                units,
+                target,
+                run,
+                queue,
+            } => {
                 let target_unit = self
                     .units
                     .get(target as usize)
@@ -1086,30 +1111,25 @@ impl BattleSim {
                         return Err(CommandError::FriendlyTarget(target));
                     }
                 }
-                let (tx, tz) = (self.units[target as usize].x, self.units[target as usize].z);
+                if queue {
+                    self.check_queue_room(&units)?;
+                }
                 for &id in &units {
-                    // Pavises stay up while the target is within bowshot.
-                    let unit = &self.units[id as usize];
-                    let in_range = unit.can_shoot()
-                        && unit.ammo > 0
-                        && ((tx - unit.x).powi(2) + (tz - unit.z).powi(2)).sqrt()
-                            <= self.effective_range(unit, tx, tz);
-                    let unit = &mut self.units[id as usize];
-                    if !in_range {
-                        unit.pavise = None;
+                    let index = id as usize;
+                    if queue && self.units[index].busy() {
+                        self.units[index]
+                            .order_queue
+                            .push_back(QueuedOrder::Attack { target, run });
+                        continue;
                     }
-                    unit.target = Some(target);
-                    unit.destination = None;
-                    unit.destination_facing = None;
-                    unit.running = run;
-                    unit.withdrawing = false;
-                    unit.disengaging = false;
-                    stop_climbing(unit);
+                    self.units[index].order_queue.clear();
+                    self.start_attack(index, target, run);
                 }
             }
             Command::Halt { units } => {
                 for &id in &units {
                     let unit = &mut self.units[id as usize];
+                    unit.order_queue.clear();
                     unit.target = None;
                     unit.destination = None;
                     unit.destination_facing = None;
@@ -1163,6 +1183,7 @@ impl BattleSim {
                         SideId::Defender => depth + 50.0,
                     };
                     unit.withdrawing = true;
+                    unit.order_queue.clear();
                     unit.pavise = None;
                     stop_climbing(unit);
                     unit.target = None;
@@ -1205,6 +1226,7 @@ impl BattleSim {
                     let unit = &mut self.units[id as usize];
                     unit.wall_target = Some(piece);
                     unit.target = None;
+                    unit.order_queue.clear();
                 }
             }
             Command::Burn { units, house, gate } => self.command_burn(&units, house, gate)?,
@@ -1223,28 +1245,38 @@ impl BattleSim {
         z: f64,
         facing: Option<f64>,
     ) -> Vec<(f64, f64)> {
+        let anchors: Vec<(f64, f64)> = ids
+            .iter()
+            .map(|id| (self.units[*id as usize].x, self.units[*id as usize].z))
+            .collect();
+        self.group_destinations_from(ids, &anchors, x, z, facing)
+    }
+
+    /// [`Self::group_destinations`] with the regiments standing at
+    /// `anchors` (CB-M3: where their queued orders leave them).
+    pub(crate) fn group_destinations_from(
+        &self,
+        ids: &[u32],
+        anchors: &[(f64, f64)],
+        x: f64,
+        z: f64,
+        facing: Option<f64>,
+    ) -> Vec<(f64, f64)> {
         let n = ids.len() as f64;
-        let (cx, cz) = ids.iter().fold((0.0, 0.0), |(sx, sz), id| {
-            let u = &self.units[*id as usize];
-            (sx + u.x / n, sz + u.z / n)
-        });
+        let (cx, cz) = anchors
+            .iter()
+            .fold((0.0, 0.0), |(sx, sz), &(ax, az)| (sx + ax / n, sz + az / n));
         match facing {
-            None => ids
+            None => anchors
                 .iter()
-                .map(|id| {
-                    let u = &self.units[*id as usize];
-                    (x + u.x - cx, z + u.z - cz)
-                })
+                .map(|&(ax, az)| (x + ax - cx, z + az - cz))
                 .collect(),
             Some(angle) => {
                 let right = (angle.cos(), -angle.sin());
-                let mut order: Vec<(usize, f64)> = ids
+                let mut order: Vec<(usize, f64)> = anchors
                     .iter()
                     .enumerate()
-                    .map(|(k, id)| {
-                        let u = &self.units[*id as usize];
-                        (k, (u.x - cx) * right.0 + (u.z - cz) * right.1)
-                    })
+                    .map(|(k, &(ax, az))| (k, (ax - cx) * right.0 + (az - cz) * right.1))
                     .collect();
                 order.sort_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
                 let widths: Vec<f64> = ids
@@ -1765,9 +1797,14 @@ impl BattleSim {
             }
             if let Some(target) = self.units[i].target {
                 let t = target as usize;
-                if !self.units[t].present() {
+                // CB-M3: a target gone ends the attack; with orders queued,
+                // so does a target in flight (the next order starts).
+                let fleeing = self.units[t].state == UnitState::Routing
+                    && !self.units[i].order_queue.is_empty();
+                if !self.units[t].present() || fleeing {
                     self.units[i].target = None;
                     self.units[i].state = UnitState::Idle;
+                    self.next_queued(i);
                     continue;
                 }
                 let (tx, tz) = (self.units[t].x, self.units[t].z);
@@ -1831,11 +1868,17 @@ impl BattleSim {
                     if let Some(facing) = unit.destination_facing.take() {
                         unit.facing = facing;
                     }
+                    self.next_queued(i);
                 } else if !self.units[i].disengaging {
                     // Out of contact after breaking off a melee: marching
                     // again (still `Melee` while pulling out under blows).
                     self.units[i].state = UnitState::Marching;
                 }
+                continue;
+            }
+            // CB-M3: an order cut short (a melee halts the march) leaves
+            // the queue: the next order starts.
+            if !self.units[i].order_queue.is_empty() && self.next_queued(i) {
                 continue;
             }
             // Standing still: idle (shooting is decided later).
@@ -2799,6 +2842,7 @@ impl BattleSim {
                 unit.state = UnitState::Routing;
                 unit.target = None;
                 unit.destination = None;
+                unit.order_queue.clear();
                 unit.stakes_planted = false;
                 unit.pavise = None;
                 unit.charge_timer = 0.0;

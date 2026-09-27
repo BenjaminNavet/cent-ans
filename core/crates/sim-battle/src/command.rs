@@ -20,6 +20,11 @@ pub enum Command {
         run: bool,
         #[serde(default)]
         facing: Option<f64>,
+        /// CB-M3: after the regiments' current orders (Shift + right click)
+        /// instead of replacing them. Left out of the JSON when false, so
+        /// replays recorded before CB read and write the same.
+        #[serde(default, skip_serializing_if = "is_false")]
+        queue: bool,
     },
     /// Close with (or shoot at) an enemy regiment.
     Attack {
@@ -27,6 +32,9 @@ pub enum Command {
         target: u32,
         #[serde(default = "default_true")]
         run: bool,
+        /// CB-M3: after the regiments' current orders (see `Move::queue`).
+        #[serde(default, skip_serializing_if = "is_false")]
+        queue: bool,
     },
     /// Stop where they stand.
     Halt {
@@ -76,6 +84,10 @@ pub enum Command {
 
 fn default_true() -> bool {
     true
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 impl Command {
@@ -140,6 +152,11 @@ pub enum CommandError {
     NothingToBurn,
     /// `burn`: no regiment of the order stands close enough.
     TooFarToBurn(u32),
+    /// CB-M3: regiment `unit` already has `max` orders waiting.
+    QueueFull {
+        unit: u32,
+        max: u32,
+    },
 }
 
 impl std::fmt::Display for CommandError {
@@ -186,6 +203,12 @@ impl std::fmt::Display for CommandError {
             }
             CommandError::TooFarToBurn(id) => {
                 write!(f, "l'unité {id} est trop loin pour y mettre le feu")
+            }
+            CommandError::QueueFull { unit, max } => {
+                write!(
+                    f,
+                    "file d'ordres pleine : l'unité {unit} a déjà {max} ordres en attente"
+                )
             }
             CommandError::OutsideZone(id) => {
                 write!(
