@@ -51,6 +51,13 @@ const BUDGET_NEAR := 450.0
 const BUDGET_FAR := 800.0
 ## EP1 : au-delà de `THIN_DISTANCE` mètres, imposteurs à demi-densité (`thin_out` du shader).
 const THIN_DISTANCE := 700.0
+## PO4 : rangs moins tirés au cordeau. Décalage d'affichage de chaque figurine (±`LOOSE_OFFSET_M`
+## en x et z, ±`LOOSE_YAW_DEG` de lacet), stable par (régiment, rang dans le tampon), appliqué au
+## seul tampon du `MultiMesh` : l'état du cœur n'en sait rien. Régiments à moins de
+## `LOOSE_DISTANCE` m seulement (au-delà l'écart ne se voit plus). `--no-loose-ranks` : coupé.
+const LOOSE_OFFSET_M := 0.15
+const LOOSE_YAW_DEG := 4.0
+const LOOSE_DISTANCE := 160.0
 
 ## unit id -> MultiMeshInstance3D (exposé à la scène : `_mm` du test de fumée).
 var layers: Dictionary = {}
@@ -85,6 +92,9 @@ var _buffer_version: int = -1  # version Rust du tampon du régiment en cours (-
 var _buffer_sent: Dictionary = {}  # id d'instance du MultiMesh -> version × 2^20 + instance_count
 var _reserved_out: Dictionary = {}  # id -> [version, places, n, tampon masqué, version dérivée]
 var _derived_serial: int = 1 << 40  # versions dérivées, disjointes de celles de Rust
+var loose_ranks_enabled: bool = not OS.get_cmdline_user_args().has("--no-loose-ranks")
+var _loose_table: Dictionary = {}  # id -> PackedFloat32Array (dx, dz, cos, sin) par rang
+var _loose_out: Dictionary = {}  # id -> [version, n, tampon décalé, version dérivée]
 ## PB3c : derniers uniformes envoyés par matériau (instance id -> {nom: valeur}) : un paramètre
 ## inchangé n'est plus renvoyé (matériau non resali, pas d'appel au serveur de rendu).
 var _sent: Dictionary = {}
@@ -564,6 +574,20 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var distance := _camera_pos.distance_to(Vector3(float(unit["x"]), float(unit.get("y", 0.0)), float(unit["z"])))
 	# PF1 : distances de LOD, d'ombre et d'imposteurs selon le préréglage de qualité.
 	var lod_k := RenderQuality.battle_lod_scale
+	if loose_ranks_enabled and n > 0 and distance < LOOSE_DISTANCE * lod_k:
+		# PO4 : même tampon (même version) → même résultat, repris sans recalcul.
+		var loose: Variant = _loose_out.get(id) if version >= 0 else null
+		if loose != null and int(loose[0]) == version and int(loose[1]) == n:
+			slice = loose[2]
+			version = int(loose[3])
+		else:
+			slice = loosen(id, slice, n)
+			if version >= 0:
+				_derived_serial += 1
+				_loose_out[id] = [version, n, slice, _derived_serial]
+				version = _derived_serial
+			else:
+				_loose_out.erase(id)
 	var near := distance < LOD_DISTANCE * lod_k
 	var shadow := cast_shadows and distance < SHADOW_DISTANCE * lod_k
 	var skinned := _skinned.has(id)
@@ -829,6 +853,48 @@ func figure_count(id: int) -> int:
 
 
 ## EP5 : masque (échelle nulle) les figurines remplacées par un porte-étendard ou un musicien.
+## PO4 : copie de `slice` dont les `n` premières figurines sont décalées (position et lacet) selon
+## la table stable du régiment `id` ; rendu seulement (`_previous` garde les vraies places).
+func loosen(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
+	var table: PackedFloat32Array = _loose_table.get(id, PackedFloat32Array())
+	if table.size() < n * 4:
+		var rng := RandomNumberGenerator.new()
+		var start := table.size() / 4
+		var grown := maxi(n, start * 2)
+		table.resize(grown * 4)
+		for i in range(start, grown):
+			# Graine propre à (régiment, rang) : la table ne dépend pas de l'ordre de croissance.
+			rng.seed = hash(Vector2i(id, i))
+			var yaw := deg_to_rad(rng.randf_range(-LOOSE_YAW_DEG, LOOSE_YAW_DEG))
+			table[i * 4] = rng.randf_range(-LOOSE_OFFSET_M, LOOSE_OFFSET_M)
+			table[i * 4 + 1] = rng.randf_range(-LOOSE_OFFSET_M, LOOSE_OFFSET_M)
+			table[i * 4 + 2] = cos(yaw)
+			table[i * 4 + 3] = sin(yaw)
+		_loose_table[id] = table
+	var out := slice.duplicate()
+	for i in n:
+		var o := i * 12
+		var t := i * 4
+		var c := table[t + 2]
+		var s := table[t + 3]
+		# Base × rotation autour de Y (lacet local de la figurine), ligne par ligne.
+		var a := out[o]
+		var b := out[o + 2]
+		out[o] = a * c - b * s
+		out[o + 2] = a * s + b * c
+		a = out[o + 4]
+		b = out[o + 6]
+		out[o + 4] = a * c - b * s
+		out[o + 6] = a * s + b * c
+		a = out[o + 8]
+		b = out[o + 10]
+		out[o + 8] = a * c - b * s
+		out[o + 10] = a * s + b * c
+		out[o + 3] += table[t]
+		out[o + 11] += table[t + 1]
+	return out
+
+
 func _hide_reserved(slots: PackedInt32Array, slice: PackedFloat32Array, n: int) -> PackedFloat32Array:
 	# Copie : `_previous` (même tableau) garde les vraies places (`figure_at`).
 	var out := slice.duplicate()
