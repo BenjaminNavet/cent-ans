@@ -27,7 +27,7 @@ Orchestration : `docs/wip/cv3-campagne-vivante.md`. ADR : `docs/decisions/0094-p
 - [x] Résultats nuancés branchés dans `apply_battle_result` (XP, prestige, moral, chronique).
 - [x] Pont : `get_stance_options`, `get_last_battle_outcome`.
 - [x] Tests `cv3_postures.rs` (15), `cv3_outcomes.rs` (11), ancienne sauvegarde.
-- [ ] Vérification finale : suite complète, pytest, smoke Godot.
+- [x] Vérification finale : cargo fmt/clippy/test (workspace), pytest (780 ok), smoke Godot OK.
 
 ## Choix
 - Couvert : forêt = raster de `forest_cover.json` (`splat.png` canal B), pas `forest_kind.png`
@@ -39,4 +39,4 @@ Orchestration : `docs/wip/cv3-campagne-vivante.md`. ADR : `docs/decisions/0094-p
   victoire existant du général.
 
 ## Prochaine étape
-Suite complète + smoke Godot, puis commit final « CV3-1: … ».
+Lot terminé. Suite : CV3-2 (placement en colonne), CV3-4 (UI), CV3-5, CV3-6 (IA des postures).
