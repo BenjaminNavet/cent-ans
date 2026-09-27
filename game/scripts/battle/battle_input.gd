@@ -36,6 +36,12 @@ var _last_left_click_unit: int = -1
 func _unhandled_input(event: InputEvent) -> void:
 	if scene.battle == null:
 		return
+	if event is InputEventKey and (event as InputEventKey).keycode == KEY_SHIFT and not event.echo:
+		# CB-M3 : Maj pressée ou relâchée = ordre en file ou non : curseur et aperçu à revoir.
+		scene.note_mouse(scene.get_viewport().get_mouse_position())
+		if _right_press.x >= 0.0:
+			_preview_right(scene.get_viewport().get_mouse_position(), false, event.pressed)
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key := event as InputEventKey
 		# F5b : chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
@@ -84,9 +90,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			if button.pressed:
 				_right_press = button.position
 				_right_press_ground = scene.ground_point(button.position)
-				_preview_right(button.position, false)
+				_preview_right(button.position, false, button.shift_pressed)
 			else:
-				_finish_right(button.position)
+				_finish_right(button.position, button.shift_pressed)
 				if scene.path_preview != null:
 					scene.path_preview.clear_live()
 	elif event is InputEventMouseMotion and _left_press.x < 0.0 and scene.markers != null:
@@ -98,7 +104,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# pendant le clic droit maintenu.
 		scene.note_mouse(hover_at)
 		if _right_press.x >= 0.0:
-			_preview_right(hover_at, false)
+			_preview_right(hover_at, false, (event as InputEventMouseMotion).shift_pressed)
 	elif event is InputEventMouseMotion and _left_press.x >= 0.0:
 		var motion := event as InputEventMouseMotion
 		var rect := Rect2(_left_press, motion.position - _left_press).abs()
@@ -158,13 +164,18 @@ func _finish_left(position: Vector2, additive: bool) -> void:
 	selection_changed.emit(scene.selected)
 
 
-func _finish_right(position: Vector2) -> void:
+## `queued` (Maj, CB-M3) : l'ordre s'ajoute à la file des régiments au lieu de remplacer l'ordre
+## en cours (`queue: true`) ; file pleine : rien n'est envoyé, message.
+func _finish_right(position: Vector2, queued: bool = false) -> void:
 	var press := _right_press
 	_right_press = Vector2(-1, -1)
 	if scene.selected.is_empty() or scene.replay_mode:  # EP13 : aucun ordre pendant un rejeu
 		return
 	if scene.deployment != null and scene.deployment.active:
 		_deploy_selection(press, position)
+		return
+	if queued and BattlePathPreview.queue_full(scene.units, scene.selected):
+		scene.hud.show_toast(queue_full_text())
 		return
 	var now := Time.get_ticks_msec()
 	var double_click := now - _last_right_click_ms < DOUBLE_CLICK_MS
@@ -181,24 +192,36 @@ func _finish_right(position: Vector2) -> void:
 		var cam := scene.camera_rig.camera.global_position
 		if normal.dot(Vector2(mid.x - cam.x, mid.z - cam.z)) < 0.0:
 			normal = -normal
-		if not _path_allowed(mid, atan2(normal.x, normal.y)):
+		if not _path_allowed(mid, atan2(normal.x, normal.y), queued):
 			return
-		command_requested.emit({"type": "move", "units": scene.selected.duplicate(), "x": mid.x, "z": mid.z, "run": double_click, "facing": atan2(normal.x, normal.y)})
+		command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": mid.x, "z": mid.z, "run": double_click, "facing": atan2(normal.x, normal.y)}, queued))
 		return
 	var enemy := scene.pick_unit(position, scene.enemy_side)
 	if enemy >= 0:
-		command_requested.emit({"type": "attack", "units": scene.selected.duplicate(), "target": enemy, "run": true})
+		command_requested.emit(_queued({"type": "attack", "units": scene.selected.duplicate(), "target": enemy, "run": true}, queued))
 		return
 	var point := scene.ground_point(position)
-	if not _path_allowed(point, NAN):
+	if not _path_allowed(point, NAN, queued):
 		return
-	command_requested.emit({"type": "move", "units": scene.selected.duplicate(), "x": point.x, "z": point.z, "run": double_click})
+	command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": point.x, "z": point.z, "run": double_click}, queued))
+
+
+## CB-M3 : `queue: true` seulement pour un ordre en file (les ordres simples restent identiques).
+func _queued(command: Dictionary, queued: bool) -> Dictionary:
+	if queued:
+		command["queue"] = true
+	return command
+
+
+## CB-M3 : texte de la file pleine (borne lue dans `data/rules/battle_queue.json` par RuleValues).
+static func queue_full_text() -> String:
+	return "File d'ordres pleine : %d ordres en attente au plus par régiment." % int(RuleValues.value("battle_queue_max", 8.0))
 
 
 ## CB-M2 : point visé et orientation d'un clic droit (ou glisser-droit) en cours, comme
 ## `_finish_right` les enverra ; aperçu du trajet étranglé (`final` : sans étranglement).
 ## Rien sur un ennemi (attaque : la cible bouge), en déploiement ni pendant un rejeu.
-func _preview_right(position: Vector2, final: bool) -> void:
+func _preview_right(position: Vector2, final: bool, queued: bool = false) -> void:
 	var preview: BattlePathPreview = scene.path_preview
 	if preview == null or scene.selected.is_empty() or scene.replay_mode:
 		return
@@ -220,18 +243,18 @@ func _preview_right(position: Vector2, final: bool) -> void:
 			facing = atan2(normal.x, normal.y)
 	var now := Time.get_ticks_msec() / 1000.0
 	if final:
-		preview.compute(scene.selected, scene.units, point, facing, now)
+		preview.compute(scene.selected, scene.units, point, facing, now, queued)
 	else:
-		preview.request(scene.selected, scene.units, point, facing, now)
+		preview.request(scene.selected, scene.units, point, facing, now, queued)
 
 
 ## CB-M2 : l'ordre de déplacement vers `point` n'est envoyé que si au moins un régiment y a un
 ## chemin (verdict du cœur, `preview_paths`) ; sinon message et rien d'envoyé.
-func _path_allowed(point: Vector3, facing: float) -> bool:
+func _path_allowed(point: Vector3, facing: float, queued: bool = false) -> bool:
 	var preview: BattlePathPreview = scene.path_preview
 	if preview == null or scene.battle == null:
 		return true
-	preview.compute(scene.selected, scene.units, point, facing, Time.get_ticks_msec() / 1000.0)
+	preview.compute(scene.selected, scene.units, point, facing, Time.get_ticks_msec() / 1000.0, queued)
 	if preview.reachable():
 		return true
 	scene.hud.show_toast("Ordre impossible : %s." % preview.refusal().to_lower())
