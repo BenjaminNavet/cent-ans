@@ -88,7 +88,7 @@ func _ready() -> void:
 	for arg in args:
 		# NV1 : `-- --naval-scenario=sluys` lance directement une bataille navale historique.
 		if arg.begins_with("--naval-scenario="):
-			get_tree().change_scene_to_file.call_deferred("res://scenes/naval/naval_battle.tscn")
+			(func() -> void: SceneFader.go("res://scenes/naval/naval_battle.tscn")).call_deferred()
 			return
 		if arg.begins_with("--autostart"):
 			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
@@ -420,7 +420,7 @@ func _autostart() -> void:
 		facade.set("pending_seed", faction_select.seed_value())
 		facade.set("pending_difficulty", faction_select.selected_difficulty)  # DF1
 		facade.set("pending_load_path", "")
-	get_tree().change_scene_to_file(CAMPAIGN_SCENE)
+	SceneFader.go(CAMPAIGN_SCENE)
 
 
 func _on_continue() -> void:

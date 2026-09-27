@@ -175,6 +175,25 @@ func has_forest_cover() -> bool:
 	return not _cover_bytes.is_empty()
 
 
+## Lot PO3 : raster de couverture forestière réduit à `max_side` px au plus (moyenne par mipmaps),
+## pour les lisières du shader de feuillage ; null sans couverture. Canal et seuils :
+## `forest_cover_params`.
+func forest_cover_image(max_side: int = 1024) -> Image:
+	if _cover_bytes.is_empty():
+		return null
+	var image := Image.create_from_data(_cover_size.x, _cover_size.y, false, Image.FORMAT_RGBA8, _cover_bytes)
+	var side := maxi(_cover_size.x, _cover_size.y)
+	if side > max_side:
+		var k := float(max_side) / float(side)
+		image.resize(maxi(int(_cover_size.x * k), 1), maxi(int(_cover_size.y * k), 1), Image.INTERPOLATE_TRILINEAR)
+	return image
+
+
+## Lot PO3 : {channel: 0-3, low, high} de la couverture (densité = smoothstep(low, high, canal)).
+func forest_cover_params() -> Dictionary:
+	return {"channel": _cover_channel, "low": _cover_low, "high": _cover_high}
+
+
 func _load_province_terrains() -> void:
 	_terrain_by_index.resize(map_data.province_count + 1)
 	_hedge_terrain.resize(map_data.province_count + 1)
