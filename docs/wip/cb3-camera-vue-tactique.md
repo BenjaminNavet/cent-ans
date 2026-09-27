@@ -29,8 +29,23 @@ communes, CB3). Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-
       `look_at_point`), `cb3_tactical_view_test.gd` (fonction pure `filter_spotted` + intégration
       Tab/Tab, Échap, restauration caméra, masquage des repères si le champ le permet).
 - [x] Capture `cb3_tactical_shot.gd` (support `--out` et `--probe`, seul `--probe` exécuté ici).
-- [ ] Vérifications finales (fmt/clippy/test, pytest, smoke, tests CB, release ep7/eq7 si besoin) —
-      en cours.
+- [x] Vérifications finales : `cargo fmt --all`, `cargo clippy --workspace --all-targets -D
+      warnings`, `cargo test --workspace` (tout vert), release `ep13_replay` (8/8, 2 ignorés),
+      `b6` (12/12, 4 ignorés), `ep7_historical` (8/8) et `eq7_cavalry` (1/1) — marges inchangées ;
+      `uv run --project tools pytest` (797 passés, 2 ignorés) ; `godot --headless --script
+      tests/smoke.gd` (OK, avertissements de pyramide de relief manquante préexistants, sans
+      rapport avec CB3) ; `zg4_camera_test.gd`, `cb3_tactical_view_test.gd`,
+      `cb0_input_equivalence_test.gd`, `cb_m1_outline_test.gd`, `cb_m2_path_hover_test.gd`,
+      `cb_m3_queue_test.gd`, `cb_m4_range_compare_test.gd`, `cb1_drag_formation_test.gd`,
+      `ep8b_clock_test.gd` : tous OK, code 0, aucune erreur de script. Capture
+      `cb3_tactical_shot.gd --probe` exécutée une fois (texte seulement) : inclinaison 85°,
+      distance 900 (bornée à `max_distance`), pastilles regroupées, 0 ennemi masqué dans cette
+      bataille de démo (aucun ennemi hors de la portée de repérage par défaut).
+- [x] Correction en cours de route : le calque de la vue tactique doit être libéré (`queue_free`),
+      pas seulement détaché (`remove_child`) — sinon fuite d'un `ColorRect` par entrée/sortie
+      (repéré par les avertissements « RID leaked » de `cb3_tactical_view_test.gd`).
+
+## Lot terminé — prêt pour fusion (en premier, vague 4)
 
 ## Décisions / écarts
 
@@ -53,7 +68,7 @@ communes, CB3). Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-
 
 ## Prochaine étape
 
-Vérifications finales complètes (`cargo fmt`, `clippy --workspace --all-targets -D warnings`,
-`cargo test --workspace`, `ep13_replay`/`b6` en release, `pytest`, `smoke.gd`, tous les tests
-Godot CB listés dans la tâche), puis `godot --headless --path game --import` si pas déjà fait
-après ce lot, puis commit final.
+Rien côté CB3 : lot terminé, à fusionner en premier (`docs/wip/cb.md`, vague 4 : CB3, puis CB5,
+puis CB6, puis CB2). Après la fusion : réimporter Godot dans le worktree de fusion, puis mettre à
+jour `docs/wip/cb.md`. Pour CB2 (aide F1 / `HELP_TEXT`) : voir la section « Touches nouvelles »
+ci-dessus.
