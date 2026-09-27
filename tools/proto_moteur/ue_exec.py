@@ -17,7 +17,9 @@ def main() -> int:
     parser.add_argument("script")
     parser.add_argument("--timeout", type=float, default=30.0)
     args = parser.parse_args()
-    remote = remote_execution.RemoteExecution()
+    config = remote_execution.RemoteExecutionConfig()
+    config.multicast_bind_address = "0.0.0.0"  # macOS drops multicast on sockets bound to 127.0.0.1
+    remote = remote_execution.RemoteExecution(config)
     remote.start()
     try:
         deadline = time.time() + args.timeout

@@ -69,8 +69,9 @@ func _add_sun_and_sky(world: Node3D, sun_spec: Dictionary, fog_spec: Dictionary)
 	sun.light_volumetric_fog_energy = 1.5
 
 	var sky_material := PhysicalSkyMaterial.new()
-	sky_material.turbidity = 6.0
-	sky_material.energy_multiplier = 1.0
+	sky_material.turbidity = 8.0
+	sky_material.mie_coefficient = 0.008
+	sky_material.energy_multiplier = 6.0
 	var sky := Sky.new()
 	sky.sky_material = sky_material
 	var env := Environment.new()
@@ -79,7 +80,7 @@ func _add_sun_and_sky(world: Node3D, sun_spec: Dictionary, fog_spec: Dictionary)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_AGX
-	env.tonemap_exposure = 1.0
+	env.tonemap_exposure = 1.1
 	env.sdfgi_enabled = true
 	env.sdfgi_use_occlusion = true
 	env.sdfgi_cascades = 6

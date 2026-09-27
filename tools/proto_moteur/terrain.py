@@ -2,8 +2,8 @@
 
 import math
 
-SIZE_M = 80.0
-RESOLUTION = 200
+SIZE_M = 240.0
+RESOLUTION = 400
 UV_TILE_M = 3.0
 
 
