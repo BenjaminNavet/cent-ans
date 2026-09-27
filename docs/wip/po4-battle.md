@@ -21,7 +21,10 @@ Plan : `docs/superpowers/plans/2026-09-27-po-polish.md` § PO4. Bible DA § 12.6
   teinté à 20 % de la livrée, survol or plus clair, rouge garance, trait 0,5 m, émission 0,7.
   Dégradé au sol non fait : `cb_m1_outline_test` exige un fond transparent juste à l'intérieur du
   trait (alpha < 0,1) ; à reprendre avec CB si voulu. `cb_m1_outline_test` OK.
-- [ ] 7. smoke, banc PB1, captures.
+- [x] 7. `feat/po-polish` fusionnée (conflit `po_grade_test.gd` résolu : parties campagne et
+  bataille actives) ; smoke, po_grade, ep13_replay, cb_m1_outline, ep8_staging, pytest
+  (atmosphère) OK ; banc PB1 dans ±5 % ; captures `docs/img/po/po4/` (matin, soir, mêlée), non
+  regardées par l'agent.
 
 ## Écart à la spec (étape 1)
 
@@ -54,4 +57,5 @@ Mesure A/B alternée (même créneau ; A = fichiers de `feat/po-polish`, B = bra
 
 ## Prochaine étape
 
-Étape 7 (smoke, banc PB1 alterné, captures). Machine chargée (GPU partagé) : le banc final doit alterner avant/après dans le même créneau.
+Lot terminé : fusion par l'orchestrateur, jugement des captures (arbres de l'horizon sur
+`03-melee`, étalonnage matin/soir). Dégradé au sol des contours : à voir avec CB.
