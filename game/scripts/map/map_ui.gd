@@ -954,6 +954,7 @@ func _setup_hud() -> void:
 	event_log.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	set_log_expanded(false)
 	army_strip.minimum_size_changed.connect(queue_layout)
+	general_seal.minimum_size_changed.connect(queue_layout)  # CV3-4 : rangée des postures
 	end_turn_cluster.minimum_size_changed.connect(queue_layout)  # U5 : colonne de pastilles
 	news_letters.resized.connect(queue_layout)
 	event_log.minimum_size_changed.connect(queue_layout)

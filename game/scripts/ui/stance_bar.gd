@@ -13,7 +13,7 @@ signal stance_selected(stance: String)
 
 ## Ordre d'affichage des clés d'ordre `set_stance` du cœur.
 const STANCES := ["normal", "raid", "siege", "ambush", "forced_march", "entrenched"]
-const BUTTON_SIZE := Vector2(30, 28)
+const BUTTON_SIZE := Vector2(28, 26)
 const ICON_SIZE := 20
 
 var current: String = "normal"
@@ -31,6 +31,7 @@ func _ready() -> void:
 		button.toggle_mode = true
 		button.focus_mode = Control.FOCUS_NONE
 		button.custom_minimum_size = BUTTON_SIZE
+		_style(button)
 		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		button.set_meta("stance", stance)
 		var library := RichTooltip.icons()
@@ -41,6 +42,27 @@ func _ready() -> void:
 		add_child(button)
 		_buttons[stance] = button
 	_apply()
+
+
+## Boutons compacts (la rangée tient dans le cartouche du sceau) : fond parchemin, posture
+## en cours sur fond plus sombre cerclé d'or.
+static func _style(button: Button) -> void:
+	var states := {
+		"normal": [Color(0, 0, 0, 0), Color(0, 0, 0, 0)],
+		"hover": [Color(HudStyle.PARCHMENT_LIGHT, 0.9), HudStyle.GOLD_PALE],
+		"pressed": [Color(HudStyle.PARCHMENT_DARK, 0.9), HudStyle.GOLD],
+		"hover_pressed": [Color(HudStyle.PARCHMENT_DARK, 0.9), HudStyle.GOLD],
+		"disabled": [Color(0, 0, 0, 0), Color(0, 0, 0, 0)],
+		"focus": [Color(0, 0, 0, 0), Color(0, 0, 0, 0)],
+	}
+	for state: String in states:
+		var box := StyleBoxFlat.new()
+		box.bg_color = states[state][0]
+		box.border_color = states[state][1]
+		box.set_border_width_all(1)
+		box.set_corner_radius_all(3)
+		box.set_content_margin_all(3)
+		button.add_theme_stylebox_override(state, box)
 
 
 ## Identifiant d'icône (et de bulle) d'une posture.
