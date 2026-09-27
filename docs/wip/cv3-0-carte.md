@@ -16,7 +16,10 @@ de campagne relevés sur les captures »).
    (`weather_wide_intensity_cut`, campaign_weather.gdshaderinc + campaign_weather_view.gd),
    cloud_max_alpha 0.6->0.45. L'orage reste toujours couvert (n'est pas coupé), pluie/neige
    légère disparaît en vue large.
-4. Pluie en aiguilles blanches — à faire
+4. Pluie en aiguilles blanches — fait : `precipitation.tres` gouttes plus courtes/fines
+   (largeur 0.35->0.28 m, longueur 2.5->1.3 m), `campaign_weather_view.gd` couleur plus
+   discrète et moins opaque (0.62/0.67/0.76, alpha 0.24, était 0.72/0.76/0.82/0.38),
+   particles_far 320->220 (moins souvent visible de près).
 5. Relief peu lisible Paris-Orléans — à faire
 6. Chemin de déplacement peu contrasté — à faire
 7. Étiquettes qui se chevauchent — à faire
