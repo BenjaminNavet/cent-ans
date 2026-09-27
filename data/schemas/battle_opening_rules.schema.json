@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_opening_rules.schema.json",
+  "title": "Ouverture de bataille (postures)",
+  "description": "Fichier data/rules/battle_opening.json (lot CV3-2, ADR 0094) : colonne de marche de la victime d'une embuscade, zone de déploiement de l'embusqué sur les flancs, palissade du camp retranché. Lu par sim-battle (OpeningRules).",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "column": {
+      "type": "object",
+      "description": "Colonne de marche de la victime.",
+      "properties": {
+        "gap_m": { "type": "number", "minimum": 0, "maximum": 50, "description": "Intervalle entre deux régiments de la colonne (mètres)." },
+        "edge_margin_m": { "type": "number", "minimum": 0, "maximum": 300, "description": "Distance minimale entre la colonne et le bord du champ (mètres)." },
+        "min_road_length_m": { "type": "number", "minimum": 0, "maximum": 5000, "description": "Longueur minimale d'une route (dans le champ) pour y placer la colonne ; sinon l'axe long de la carte." }
+      },
+      "required": ["gap_m", "edge_margin_m", "min_road_length_m"],
+      "additionalProperties": false
+    },
+    "flank": {
+      "type": "object",
+      "description": "Zone de déploiement de l'embusqué, parallèle à la colonne.",
+      "properties": {
+        "near_m": { "type": "number", "minimum": 10, "maximum": 400, "description": "Bord de la zone le plus proche de l'axe de la colonne (mètres)." },
+        "far_m": { "type": "number", "minimum": 20, "maximum": 800, "description": "Bord de la zone le plus éloigné de l'axe de la colonne (mètres)." },
+        "extra_length_m": { "type": "number", "minimum": 0, "maximum": 400, "description": "La zone dépasse la colonne de cette longueur à chaque bout (mètres)." },
+        "sample_step_m": { "type": "number", "minimum": 5, "maximum": 100, "description": "Pas d'échantillonnage du couvert (forêt, haies) d'un flanc (mètres)." },
+        "forest_weight": { "type": "number", "minimum": 0, "maximum": 10, "description": "Poids d'un point en forêt dans le score de couvert d'un flanc." },
+        "hedge_weight": { "type": "number", "minimum": 0, "maximum": 10, "description": "Poids d'un point près d'une haie ou d'une clôture dans le score de couvert." },
+        "hedge_reach_m": { "type": "number", "minimum": 0, "maximum": 100, "description": "Un point à moins de cette distance d'une haie compte comme couvert (mètres)." },
+        "second_flank_ratio": { "type": "number", "minimum": 0, "maximum": 1, "description": "Le second flanc est ouvert si son score atteint cette part du meilleur (à score nul, les deux flancs)." },
+        "unit_gap_m": { "type": "number", "minimum": 0, "maximum": 60, "description": "Intervalle entre deux régiments embusqués placés d'office (mètres)." }
+      },
+      "required": ["near_m", "far_m", "extra_length_m", "sample_step_m", "forest_weight", "hedge_weight", "hedge_reach_m", "second_flank_ratio", "unit_gap_m"],
+      "additionalProperties": false
+    },
+    "palisade": {
+      "type": "object",
+      "description": "Palissade basse du camp retranché.",
+      "properties": {
+        "distance_m": { "type": "number", "minimum": 2, "maximum": 80, "description": "Distance entre le front du camp et la palissade (mètres)." },
+        "margin_m": { "type": "number", "minimum": 0, "maximum": 100, "description": "La palissade dépasse la ligne de cette longueur à chaque bout (mètres)." },
+        "segment_m": { "type": "number", "minimum": 2, "maximum": 50, "description": "Longueur d'un tronçon de palissade (mètres)." },
+        "foot_crossing_factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Multiplicateur de vitesse d'un fantassin qui franchit la palissade." },
+        "horse_crossing_factor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Multiplicateur de vitesse d'un cavalier qui franchit la palissade." },
+        "melee_defense": { "type": "number", "minimum": 1, "maximum": 3, "description": "Diviseur des pertes en mêlée d'un régiment derrière la palissade attaqué par-dessus." },
+        "reach_m": { "type": "number", "minimum": 1, "maximum": 40, "description": "Le défenseur doit être à moins de cette distance de la palissade pour en profiter (mètres)." }
+      },
+      "required": ["distance_m", "margin_m", "segment_m", "foot_crossing_factor", "horse_crossing_factor", "melee_defense", "reach_m"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["column", "flank", "palisade"],
+  "additionalProperties": false
+}
