@@ -120,7 +120,9 @@ var _banners: Dictionary = {}  # id -> {node, flag_mat, routing}
 var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D)
 var result_screen: BattleResultScreen = null  # B2 : écran de fin
 var _result_shot: bool = false
-var _rings: Dictionary = {}  # id -> MeshInstance3D
+## CB-M1 : contours de formation (décales), remplacent l'anneau jaune de sélection.
+var outlines: BattleFormationOutline = null
+var _hovered_ids: Array[int] = []  # régiments survolés (terrain, repère), réutilisé
 var _drag_rect: ColorRect  # CB0 : rectangle de sélection, lu et positionné par `input`
 var _hud_timer: float = 0.0
 var _screenshot_path: String = ""
@@ -625,6 +627,9 @@ func _build_scene() -> bool:
 	_build_soldier_layers()
 	for unit in units:
 		_make_banner(unit)
+	outlines = BattleFormationOutline.new()
+	add_child(outlines)
+	outlines.setup(side_colors, player_side)
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	if not historical.is_empty():
@@ -1027,16 +1032,6 @@ func _make_banner(unit: Dictionary) -> void:
 	flag.position = Vector3(0.03, BANNER_HEIGHT - 0.05, 0)
 	node.add_child(flag)
 	_banners[id] = {"node": node, "flag_mat": flag_mat, "routing": false}
-	var ring := MeshInstance3D.new()
-	var ring_mat := StandardMaterial3D.new()
-	ring_mat.albedo_color = Color(1.0, 0.85, 0.2)
-	ring_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	ring_mat.no_depth_test = true
-	ring_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	ring.material_override = ring_mat
-	ring.visible = false
-	add_child(ring)
-	_rings[id] = ring
 
 
 ## Étoffe d'un drapeau de régiment : bannière peinte de la faction (`heraldry/banners/`,
@@ -1478,8 +1473,6 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		var node: Node3D = banner["node"]
 		var present: bool = unit["present"]
 		node.visible = present
-		var ring: MeshInstance3D = _rings[id]
-		ring.visible = present and selected.has(id)
 		if not present:
 			continue
 		var pos := Vector3(float(unit["x"]), float(unit["y"]), float(unit["z"]))
@@ -1495,13 +1488,7 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		if routing != bool(banner["routing"]):
 			banner["routing"] = routing
 			(banner["flag_mat"] as ShaderMaterial).set_shader_parameter("routing", routing)
-		if ring.visible:
-			ring.position = pos + Vector3(0, 0.6, 0)
-			ring.rotation = Vector3(0, float(unit["facing"]), 0)
-			var size := Vector2(float(unit["width"]) + 3.0, float(unit["depth"]) + 3.0)
-			if not ring.has_meta("size") or (ring.get_meta("size") as Vector2).distance_to(size) > 0.5:
-				ring.set_meta("size", size)
-				ring.mesh = BattleMeshes.outline(size.x, size.y, 0.45)
+	_update_outlines()
 	if standards != null:
 		standards.update(units, soldiers, _camera_position())
 	_update_markers(banner_scale)
@@ -1544,6 +1531,20 @@ static func siege_status(siege: Dictionary) -> String:
 	if bool(siege.get("sortie", false)):
 		text += " · sortie de la garnison !"
 	return text
+
+
+## CB-M1 : contours de formation. Survol = troupe sous la souris sur le terrain (`world_hover`,
+## tenu par `BattleInput`) ou repère B2 survolé (tous les régiments d'un groupe B7).
+func _update_outlines() -> void:
+	if outlines == null:
+		return
+	_hovered_ids.clear()
+	if markers != null:
+		if markers.world_hover >= 0:
+			_hovered_ids.append(markers.world_hover)
+		if markers.hovered >= 0:
+			_hovered_ids.append_array(markers.marker_members(markers.hovered))
+	outlines.update(units, selected, _hovered_ids)
 
 
 ## B2 : repères 2D au-dessus des troupes, sous les panneaux du HUD (premier enfant de sa racine).
