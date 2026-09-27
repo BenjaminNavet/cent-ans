@@ -12,6 +12,7 @@ use std::collections::BinaryHeap;
 use super::BattleSim;
 use crate::setup::SideId;
 use crate::siege::{PieceKind, SiegeWorks};
+use crate::unit::UnitState;
 
 /// Grid cell size, in metres.
 pub const CELL: f64 = 4.0;
@@ -272,12 +273,26 @@ impl BattleSim {
     pub(super) fn grid_route(&self, index: usize, tx: f64, tz: f64) -> Option<(f64, f64)> {
         let works = self.siege.as_ref()?;
         let unit = &self.units[index];
-        let from = (unit.x, unit.z);
-        if segment_clear(works, from, (tx, tz)) {
-            return Some((tx, tz));
+        self.grid_step(works, index, (unit.x, unit.z), (tx, tz))
+    }
+
+    /// First waypoint of regiment `index` from `from` towards `to` on the
+    /// siege grid: straight when in plain sight, else along its A* path
+    /// (cached per regiment, recomputed when the goal cell or the walls
+    /// change); `None` when the streets give no way.
+    fn grid_step(
+        &self,
+        works: &SiegeWorks,
+        index: usize,
+        from: (f64, f64),
+        to: (f64, f64),
+    ) -> Option<(f64, f64)> {
+        if segment_clear(works, from, to) {
+            return Some(to);
         }
+        let unit = &self.units[index];
         let grid = self.grid(works, unit.side);
-        let goal = grid.cell(tx, tz);
+        let goal = grid.cell(to.0, to.1);
         let signature = path_signature(works);
         let mut cache = self.path_cache.borrow_mut();
         if cache.len() < self.units.len() {
@@ -299,25 +314,210 @@ impl BattleSim {
         }
         self.give_back(grid, unit.side);
         let path = &cache[index].as_ref()?.waypoints;
-        if path.is_empty() {
-            return None;
+        match leg_on_path(works, unit.on_wall, from, path) {
+            Leg::Via(p) => Some(p),
+            Leg::NoWay => None,
         }
-        // A way exists but we are pressed against a jamb or a wall face:
-        // step back off it first.
-        if let Some((p, d)) = works.nearest_intact(from.0, from.1) {
-            if d < works.band() + 0.5 && !unit.on_wall {
-                let (px, pz) = works.pieces[p].closest_point(from.0, from.1);
-                let k = (works.band() + 3.0) / d.max(0.1);
-                return Some((px + (from.0 - px) * k, pz + (from.1 - pz) * k));
+    }
+
+    /// Climbers go straight at the wall (ladders) when it bars the way from
+    /// `from` and no opening is near enough to be worth the detour.
+    fn climbs_straight(
+        &self,
+        works: &SiegeWorks,
+        index: usize,
+        from: (f64, f64),
+        to: (f64, f64),
+    ) -> bool {
+        let unit = &self.units[index];
+        let climber = unit.side == SideId::Attacker && unit.can_climb();
+        if !climber || !works.path_blocked(from, to) {
+            return false;
+        }
+        let Some(opening) = works.best_opening(from, to) else {
+            return true;
+        };
+        let dist =
+            |a: (f64, f64), b: (f64, f64)| ((a.0 - b.0).powi(2) + (a.1 - b.1).powi(2)).sqrt();
+        let mid = works.pieces[opening].midpoint();
+        let detour = dist(from, mid) + dist(mid, to);
+        detour > dist(from, to) * 1.6 + 40.0
+    }
+
+    /// Regiments that ignore the walls and the streets: on the wall walk
+    /// (outside a sortie) or routing.
+    fn walks_straight_in_siege(&self, works: &SiegeWorks, index: usize) -> bool {
+        let unit = &self.units[index];
+        let sallying = works.sortie && unit.side == SideId::Defender;
+        (unit.on_wall && !sallying) || unit.state == UnitState::Routing
+    }
+
+    /// Where `index` should head to reach (tx, tz): straight, or through the
+    /// best opening in the walls when an intact wall is in the way (climbers
+    /// keep going straight unless the detour is short); across the river by
+    /// a bridge or a ford in the field (EP3). The first waypoint of
+    /// [`Self::plan_route`], computed alone (no chain, no allocation).
+    pub(super) fn route(&self, index: usize, tx: f64, tz: f64) -> (f64, f64) {
+        let unit = &self.units[index];
+        let (from, to) = ((unit.x, unit.z), (tx, tz));
+        let Some(works) = &self.siege else {
+            // EP3: across the river by a bridge or a ford.
+            return self.water_step(unit, from, to).unwrap_or(to);
+        };
+        if self.walks_straight_in_siege(works, index)
+            || self.climbs_straight(works, index, from, to)
+        {
+            return to;
+        }
+        // F5a: A* through breaches, gate and streets (houses are obstacles).
+        self.grid_step(works, index, from, to).unwrap_or(to)
+    }
+
+    /// CB-M2 (tests, probes): the waypoint regiment `id` heads for this tick
+    /// towards its target or destination (what [`Self::route`] gives the
+    /// step); `None` without either. The path cache is written only when
+    /// the step itself would write it (a new goal).
+    pub fn heading_of(&self, id: u32) -> Option<(f64, f64)> {
+        let index = id as usize;
+        let unit = self.units.get(index)?;
+        let (tx, tz) = match unit.target {
+            Some(t) => {
+                let t = self.units.get(t as usize)?;
+                (t.x, t.z)
+            }
+            None => unit.destination?,
+        };
+        Some(self.route(index, tx, tz))
+    }
+
+    /// CB-M2: the whole way regiment `index` would walk from `from` to `to`,
+    /// the destination last: the chain of the waypoints [`Self::route`]
+    /// heads for one after the other (same decisions, taken from each
+    /// waypoint in turn; in a siege along the same A* path, read from the
+    /// regiment's cache when it is still valid). `None` when the
+    /// destination cannot be reached (deep water without a crossing for
+    /// horsemen and engines, no way through the streets); the order then
+    /// falls back to a straight line as before. Read-only: the path cache is
+    /// neither read for another start than the regiment's nor written.
+    pub(crate) fn plan_route(
+        &self,
+        index: usize,
+        from: (f64, f64),
+        to: (f64, f64),
+    ) -> Option<Vec<(f64, f64)>> {
+        let unit = &self.units[index];
+        let mut legs = Vec::new();
+        let Some(works) = &self.siege else {
+            let mut p = from;
+            for _ in 0..MAX_LEGS {
+                let next = self.water_step(unit, p, to)?;
+                legs.push(next);
+                if next == to {
+                    return Some(legs);
+                }
+                if next == p {
+                    break;
+                }
+                p = next;
+            }
+            legs.push(to);
+            return Some(legs);
+        };
+        if self.walks_straight_in_siege(works, index) {
+            return Some(vec![to]);
+        }
+        let own_start = from == (unit.x, unit.z);
+        let mut path: Option<Vec<(f64, f64)>> = None;
+        let mut p = from;
+        for leg in 0..MAX_LEGS {
+            if self.climbs_straight(works, index, p, to) || segment_clear(works, p, to) {
+                legs.push(to);
+                return Some(legs);
+            }
+            let path = path.get_or_insert_with(|| self.grid_path(works, index, p, to, own_start));
+            match leg_on_path(works, unit.on_wall, p, path) {
+                Leg::NoWay if leg == 0 => return None,
+                Leg::Via(next) if next != p => {
+                    legs.push(next);
+                    p = next;
+                }
+                _ => break,
             }
         }
-        let d2 = |p: (f64, f64)| (p.0 - from.0).powi(2) + (p.1 - from.1).powi(2);
-        let nearest = (0..path.len()).min_by(|&a, &b| d2(path[a]).total_cmp(&d2(path[b])))?;
-        // String pulling: the farthest waypoint in plain sight.
-        let last = path.len() - 1;
-        let far = (nearest + 1..=last.min(nearest + 12))
-            .rev()
-            .find(|&k| segment_clear(works, from, path[k]));
-        Some(path[far.unwrap_or((nearest + 1).min(last))])
+        legs.push(to);
+        Some(legs)
     }
+
+    /// The A* path of regiment `index` towards `to`: its cached one when
+    /// still valid for this goal and these walls (and `use_cache`), else
+    /// searched from `from`. Never written to the cache.
+    fn grid_path(
+        &self,
+        works: &SiegeWorks,
+        index: usize,
+        from: (f64, f64),
+        to: (f64, f64),
+        use_cache: bool,
+    ) -> Vec<(f64, f64)> {
+        let side = self.units[index].side;
+        let grid = self.grid(works, side);
+        let goal = grid.cell(to.0, to.1);
+        let signature = path_signature(works);
+        let cached = use_cache
+            .then(|| {
+                self.path_cache
+                    .borrow()
+                    .get(index)
+                    .and_then(|c| c.as_ref())
+                    .filter(|c| c.goal == goal && c.signature == signature)
+                    .map(|c| c.waypoints.clone())
+            })
+            .flatten();
+        let path = cached.unwrap_or_else(|| {
+            grid.search(grid.cell(from.0, from.1), goal)
+                .map(|cells| cells.into_iter().map(|c| grid.centre(c)).collect())
+                .unwrap_or_default()
+        });
+        self.give_back(grid, side);
+        path
+    }
+}
+
+/// Most waypoints of a planned route (the chain then heads straight for
+/// the destination).
+const MAX_LEGS: usize = 64;
+
+/// Next leg along an A* path.
+enum Leg {
+    Via((f64, f64)),
+    NoWay,
+}
+
+/// The waypoint a regiment at `from` heads for along `path` (cell centres)
+/// when the destination is not in plain sight: off the wall face first when
+/// pressed against it, else the farthest waypoint in plain sight (string
+/// pulling).
+fn leg_on_path(works: &SiegeWorks, on_wall: bool, from: (f64, f64), path: &[(f64, f64)]) -> Leg {
+    if path.is_empty() {
+        return Leg::NoWay;
+    }
+    // A way exists but we are pressed against a jamb or a wall face:
+    // step back off it first.
+    if let Some((p, d)) = works.nearest_intact(from.0, from.1) {
+        if d < works.band() + 0.5 && !on_wall {
+            let (px, pz) = works.pieces[p].closest_point(from.0, from.1);
+            let k = (works.band() + 3.0) / d.max(0.1);
+            return Leg::Via((px + (from.0 - px) * k, pz + (from.1 - pz) * k));
+        }
+    }
+    let d2 = |p: (f64, f64)| (p.0 - from.0).powi(2) + (p.1 - from.1).powi(2);
+    let Some(nearest) = (0..path.len()).min_by(|&a, &b| d2(path[a]).total_cmp(&d2(path[b]))) else {
+        return Leg::NoWay;
+    };
+    // String pulling: the farthest waypoint in plain sight.
+    let last = path.len() - 1;
+    let far = (nearest + 1..=last.min(nearest + 12))
+        .rev()
+        .find(|&k| segment_clear(works, from, path[k]));
+    Leg::Via(path[far.unwrap_or((nearest + 1).min(last))])
 }
