@@ -376,6 +376,7 @@ impl<'a> View<'a> {
                 z,
                 run,
                 facing,
+                queue: false,
             });
         }
     }
@@ -390,6 +391,7 @@ impl<'a> View<'a> {
                 units: vec![u.id],
                 target: self.units[j].id,
                 run,
+                queue: false,
             });
         }
     }
@@ -1807,6 +1809,7 @@ fn plan_shooter(
                     z,
                     run: true,
                     facing: Some(facing),
+                    queue: false,
                 });
             }
             return;
@@ -2209,6 +2212,7 @@ fn plan_horse(
                     units: vec![unit.id],
                     target: e.id,
                     run: true,
+                    queue: false,
                 });
             }
             return;
@@ -2314,6 +2318,7 @@ fn react(view: &mut View, roles: &Roles) {
                 z,
                 run: true,
                 facing: None,
+                queue: false,
             });
             continue;
         }
@@ -2330,6 +2335,7 @@ fn react(view: &mut View, roles: &Roles) {
                 z,
                 run: true,
                 facing: None,
+                queue: false,
             });
             continue;
         }
@@ -2345,6 +2351,7 @@ fn react(view: &mut View, roles: &Roles) {
                         units: vec![u.id],
                         target: units[j].id,
                         run: false,
+                        queue: false,
                     });
                 }
             }

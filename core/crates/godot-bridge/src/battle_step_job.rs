@@ -144,11 +144,13 @@ mod tests {
                 z: 20.0,
                 run: false,
                 facing: None,
+                queue: false,
             }],
             250 => vec![Command::Attack {
                 units: ours.clone(),
                 target: theirs[0],
                 run: true,
+                queue: false,
             }],
             251 => vec![Command::Halt {
                 units: ours[..1].to_vec(),

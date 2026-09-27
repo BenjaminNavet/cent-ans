@@ -456,6 +456,7 @@ fn decor_areas_give_cover_slow_and_defend() {
                 units: vec![0],
                 target: 1,
                 run: false,
+                queue: false,
             },
             None,
         )

@@ -310,6 +310,7 @@ impl BattleSim {
                     let unit = &mut self.units_mut()[i];
                     unit.pavise = Some(factor);
                     unit.destination = None;
+                    unit.order_queue.clear();
                     unit.destination_facing = None;
                     unit.running = false;
                     if unit.state == UnitState::Marching {
@@ -339,6 +340,7 @@ impl BattleSim {
                         let unit = &mut self.units_mut()[i];
                         unit.state = UnitState::Rallied;
                         unit.rally_timer = RALLY_PAUSE;
+                        unit.order_queue.clear();
                         unit.morale = unit.morale.max(effects.rally_morale);
                         unit.target = None;
                         unit.destination = None;

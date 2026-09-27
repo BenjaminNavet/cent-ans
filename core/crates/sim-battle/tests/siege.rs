@@ -116,6 +116,7 @@ fn walls_stop_regiments_until_a_breach_opens() {
         z: cz,
         run: true,
         facing: None,
+        queue: false,
     })
     .unwrap();
     run(&mut sim, 150.0);
@@ -146,6 +147,7 @@ fn walls_stop_regiments_until_a_breach_opens() {
         z: cz,
         run: true,
         facing: None,
+        queue: false,
     })
     .unwrap();
     run(&mut sim, 200.0);
@@ -198,6 +200,7 @@ fn infantry_climbs_with_ladders_and_a_siege_tower_is_faster() {
             z: mz - nz * 30.0,
             run: false,
             facing: None,
+            queue: false,
         })
         .unwrap();
         let mut started = None;
@@ -239,6 +242,7 @@ fn the_ram_breaks_the_gate() {
         z: mz + nz * (works.band() + 1.0),
         run: false,
         facing: None,
+        queue: false,
     })
     .unwrap();
     run(&mut sim, 400.0);

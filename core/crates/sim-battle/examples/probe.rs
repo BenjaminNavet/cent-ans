@@ -287,6 +287,7 @@ fn main() {
             units: vec![0],
             target: 1,
             run: true,
+            queue: false,
         })
         .unwrap();
     }

@@ -889,6 +889,8 @@ impl BattleSim {
                 if let Some((x, z)) = unit.destination {
                     dict.set("destination", Vector2::new(x as f32, z as f32));
                 }
+                // CB-M3: orders waiting behind the current one.
+                dict.set("queue", &crate::battle_sim_queue::queue_array(sim, unit));
                 // EP11: push of the lines in melee (m/s, > 0 driving the enemy
                 // back, < 0 giving ground), compression (0-1), ground given (m).
                 dict.set("push_speed", unit.push.speed);

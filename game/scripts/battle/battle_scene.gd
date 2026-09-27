@@ -130,6 +130,8 @@ var cursor: BattleCursor = null
 var range_arc: BattleRangeArc = null
 var compare_panel: BattleComparePanel = null
 var card_hover := -1
+## CB-M3 : infobulle « file d'ordres pleine » (Maj tenue).
+var queue_tip: BattleQueueTip = null
 ## Dernier `hover_context` du cœur et nombre d'appels (tests : au plus un par image).
 var last_hover: Dictionary = {}
 var hover_calls := 0
@@ -1806,7 +1808,24 @@ func _update_hover_cursor() -> void:
 	var context := str(last_hover.get("context", "none"))
 	if path_preview != null and path_preview.live_active and not path_preview.reachable():
 		context = "forbidden"  # destination sans chemin : l'ordre ne partira pas
+	# CB-M3 : Maj tenue et file pleine : l'ordre en file serait refusé.
+	var full := Input.is_key_pressed(KEY_SHIFT) and not selected.is_empty() and BattlePathPreview.queue_full(units, selected)
+	if full:
+		context = "forbidden"
+	_show_queue_tip(full)
 	cursor.apply(context)
+
+
+func _show_queue_tip(full: bool) -> void:
+	if not full:
+		if queue_tip != null:
+			queue_tip.hide_tip()
+		return
+	if queue_tip == null and hud != null:
+		queue_tip = BattleQueueTip.new()
+		hud.root.add_child(queue_tip)
+	if queue_tip != null:
+		queue_tip.show_at(_hover_mouse, BattleInput.queue_full_text())
 
 
 func issue(command: Dictionary) -> Dictionary:
