@@ -53,6 +53,8 @@ var title_label: Label
 var clock_label: Label
 var weather_label: Label
 var site_label: Label  # B6 : « Sol sec · été · village · haies »
+## CV3-2 : badge d'ouverture (« Embuscade ! », « Camp retranché »…), caché en bataille normale.
+var opening_badge: Label
 var _active_speed: int = 0  # -1 : pause
 var balance_bar: Control
 var balance_label: Label
@@ -118,6 +120,12 @@ func _build_top_bar() -> void:
 	panel.add_child(box)
 	title_label = _label("Bataille", 20)
 	box.add_child(title_label)
+	opening_badge = _label("", 16)
+	opening_badge.name = "OpeningBadge"
+	opening_badge.add_theme_color_override("font_color", Color(0.62, 0.08, 0.06))
+	opening_badge.mouse_filter = Control.MOUSE_FILTER_STOP
+	opening_badge.visible = false
+	box.add_child(opening_badge)
 	clock_label = _label("00:00")
 	box.add_child(clock_label)
 	# Météo et, dessous, le site en une ligne compacte (B6).
@@ -512,6 +520,28 @@ func set_title(text: String, weather: String, colors: Array) -> void:
 	title_label.text = text
 	weather_label.text = weather
 	_colors = colors
+
+
+## CV3-2 : badge d'ouverture depuis `BattleSim.get_opening()` : « Embuscade ! » quand la
+## bataille s'ouvre en embuscade, puis « Marche forcée » / « Camp retranché » des camps concernés.
+func set_opening(opening: Dictionary, player_side: String) -> void:
+	var parts := PackedStringArray()
+	var tips := PackedStringArray()
+	if str(opening.get("kind", "standard")) == "ambush":
+		parts.append("Embuscade !")
+		var victim := str(opening.get("victim", ""))
+		tips.append("Vous êtes surpris en colonne de marche : aucun déploiement." if victim == player_side else "L'ennemi est surpris en colonne de marche : frappez ses flancs.")
+	for side in ["attacker", "defender"]:
+		var own := side == player_side
+		if bool(opening.get("%s_forced_march" % side, false)):
+			parts.append("Marche forcée")
+			tips.append(("Votre ost" if own else "L'ennemi") + " arrive fourbu de marche forcée.")
+		if bool(opening.get("%s_entrenched" % side, false)):
+			parts.append("Camp retranché")
+			tips.append(("Votre ost" if own else "L'ennemi") + " tient un camp retranché : pieux et palissade.")
+	opening_badge.text = " · ".join(parts)
+	opening_badge.tooltip_text = "\n".join(tips)
+	opening_badge.visible = not parts.is_empty()
 
 
 ## B6 : le site de la bataille (sol, saison, village, haies, côte), vide pour le masquer.

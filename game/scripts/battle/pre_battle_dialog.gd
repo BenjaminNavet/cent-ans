@@ -237,6 +237,10 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 	var enemy_side := "defender" if player_side == "attacker" else "attacker"
 	var place := str(battle.get("settlement_name", "")) if siege else str(battle.get("province_name", ""))
 	title_label.text = ("Assaut de %s" if siege else "Bataille en vue : %s") % place
+	# CV3-2 : ouverture en embuscade (titre) ; la victime est surprise en colonne de marche.
+	var ambush_victim := ambush_victim_of(setup)
+	if ambush_victim != "":
+		title_label.text = "Embuscade ! %s" % place
 	var season := str(SEASON_FR.get(str(setup.get("season", "")), ""))
 	var sub := "%s contre %s" % [str(battle.get("attacker_name", "")), str(battle.get("defender_name", ""))]
 	if siege:
@@ -246,6 +250,9 @@ func show_battle(sim: Object, p_battle: Dictionary) -> void:
 		sub += " · %s" % str(battle.get("province_name", ""))
 	if season != "":
 		sub += " · %s" % season
+	if ambush_victim != "":
+		var caught := "Votre ost est surpris" if ambush_victim == player_side else "L'ennemi est surpris"
+		sub = "%s en colonne de marche · %s" % [caught, sub]
 	subtitle_label.text = sub
 	# AR1 : enluminure du contexte (siège ou bataille rangée), repli sur l'ancienne miniature.
 	_banner_texture = ArtPlates.texture(ArtPlates.random_loading_screen("siege" if siege else "battle"))
@@ -477,8 +484,36 @@ func _fill_conditions(siege: bool) -> void:
 		mods.append(str(entry))
 	if siege and mods.is_empty():
 		mods.append("Brèche ouverte ou tours de siège : les murailles ne gênent plus l'assaut")
+	for line in opening_notes(setup, battle):
+		mods.append(line)
 	modifiers_label.text = " · ".join(mods)
 	modifiers_label.visible = not mods.is_empty()
+
+
+## CV3-2 : camp surpris en colonne (`attacker`/`defender`) si la bataille s'ouvre en embuscade,
+## sinon "". Lit `opening` du setup (`{kind: "ambush", victim}`), absent pour une bataille normale.
+static func ambush_victim_of(p_setup: Dictionary) -> String:
+	var opening: Variant = p_setup.get("opening", {})
+	if opening is Dictionary and str((opening as Dictionary).get("kind", "")) == "ambush":
+		return str((opening as Dictionary).get("victim", "defender"))
+	return ""
+
+
+## CV3-2 : mentions des postures de campagne (embuscade, marche forcée, camp retranché) pour la
+## ligne des modificateurs ; `p_battle` donne les noms des camps.
+static func opening_notes(p_setup: Dictionary, p_battle: Dictionary) -> PackedStringArray:
+	var notes := PackedStringArray()
+	var victim := ambush_victim_of(p_setup)
+	if victim != "":
+		notes.append("Embuscade ! %s en colonne de marche, sans déploiement ; l'embusqué se range sur ses flancs" % str(p_battle.get("%s_name" % victim, "la victime")))
+	for side in ["attacker", "defender"]:
+		var side_setup: Dictionary = p_setup.get(side, {})
+		var side_name := str(p_battle.get("%s_name" % side, side))
+		if bool(side_setup.get("forced_march", false)):
+			notes.append("Marche forcée (%s) : troupes fatiguées, placement sans déploiement" % side_name)
+		if bool(side_setup.get("entrenched", false)):
+			notes.append("Camp retranché (%s) : pieux plantés et palissade devant la ligne" % side_name)
+	return notes
 
 
 ## « 3 × Chevaliers, 2 × Archers… » depuis les régiments du setup.
