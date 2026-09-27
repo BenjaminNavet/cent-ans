@@ -222,6 +222,7 @@ func _draw_art() -> void:
 	var blink := fmod(Time.get_ticks_msec() / 1000.0, 0.6) < 0.3
 	for i in badges.size():
 		BattleUnitMarkers.draw_badge(art, badges[i], Vector2(size.x - 19, 19 + i * 18), blink, 1.3)
+	draw_modes(art, BattleModeIcons.active_modes(_unit), Vector2(size.x - 8, bar_y_top(size, bars.size()) - 9))
 	if not bool(_unit["present"]) or bool(_unit["left_field"]):
 		art.draw_rect(body, Color(0.25, 0.22, 0.2, 0.65))
 		_draw_cross(size)
@@ -253,6 +254,21 @@ static func draw_padlock(canvas: CanvasItem, center: Vector2, k: float) -> void:
 	canvas.draw_circle(center + Vector2(0, 2.2) * k, 1.3 * k, dark)
 
 
+## Haut des barres fines du bas de la carte (`bars` barres).
+static func bar_y_top(size: Vector2, bars: int) -> float:
+	return size.y - 2.0 - bars * (BAR_H + 1.0)
+
+
+## CB2 : modes actifs en petits glyphes sur pastille claire, de droite à gauche depuis `right`
+## (centre du premier) ; glyphes provisoires en attendant les icônes DA5.
+static func draw_modes(canvas: CanvasItem, modes: Array[String], right: Vector2) -> void:
+	for i in modes.size():
+		var c := right - Vector2(i * 13.0, 0)
+		canvas.draw_circle(c, 6.0, Color(0.95, 0.9, 0.78, 0.92))
+		canvas.draw_arc(c, 6.0, 0, TAU, 14, Color(0.1, 0.06, 0.03), 1.0)
+		BattleModeIcons.draw_mode(canvas, modes[i], c, 0.55)
+
+
 ## Croix de Saint-André discrète sur une unité anéantie ou sortie du champ.
 func _draw_cross(size: Vector2) -> void:
 	var color := Color(0.1, 0.06, 0.04, 0.8)
@@ -269,6 +285,12 @@ func _refresh_tooltip(unit: Dictionary) -> void:
 	if bool(unit["can_shoot"]):
 		detail += "\nMunitions : %d / %d%s" % [int(unit["ammo"]), int(unit["max_ammo"]), "" if bool(unit["fire_at_will"]) else " (tir retenu)"]
 	detail += "\nFormation : %s" % formation_label(str(unit["formation"]))
+	var modes := BattleModeIcons.active_modes(unit)
+	if not modes.is_empty():
+		var names: PackedStringArray = []
+		for mode in modes:
+			names.append(BattleModeIcons.label_of(mode).to_lower())
+		detail += "\nModes : %s" % ", ".join(names)
 	if _groups != "":
 		detail += "\nGroupe(s) : %s" % _groups
 	if locked:

@@ -35,17 +35,6 @@ impl Unit {
         }
     }
 
-    /// CB2: the modes set away from their default (the regiment's own
-    /// `skirmish` ability turns skirmish on by default); the replay digest
-    /// only reads these, so digests of battles without modes are unchanged.
-    pub fn modes_changed(&self) -> bool {
-        self.mode_run
-            || self.guard
-            || self.melee_mode
-            || self.breach
-            || self.skirmish != self.has(Ability::Skirmish)
-    }
-
     /// CB2: multiplier of the speed of a run under the run mode.
     pub fn run_mode_speed(&self) -> f64 {
         if self.mode_run && self.running {
@@ -167,13 +156,15 @@ impl BattleSim {
     }
 
     /// CB2, guard: regiment `i` attacking `t` gives up instead of pursuing
-    /// when the target flees, or when the melee with it has broken (it held
-    /// the contact and does not follow). The caller ends the attack.
+    /// when the target flees, or pulls out of the melee or off the field (it
+    /// held the contact and does not follow). Out of contact only: a push
+    /// that parts the lines for a moment is no break. The caller ends the
+    /// attack.
     pub(super) fn guard_releases(&self, i: usize, t: usize, in_contact: bool) -> bool {
-        let unit = &self.units[i];
-        unit.guard
-            && (self.units[t].state == UnitState::Routing
-                || (unit.state == UnitState::Melee && !in_contact))
+        let target = &self.units[t];
+        self.units[i].guard
+            && !in_contact
+            && (target.state == UnitState::Routing || target.disengaging || target.withdrawing)
     }
 
     /// CB2, skirmish: shooters in skirmish mode, standing (or shooting)

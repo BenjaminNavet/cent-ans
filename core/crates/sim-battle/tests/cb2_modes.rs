@@ -248,9 +248,11 @@ fn guard_holds_once_a_melee_breaks() {
                 .unwrap();
         }
         sim.apply_command(attack(vec![0], 5), None).unwrap();
-        // In melee last step, the opponent now 60 m away (pulled out).
+        // In melee last step, the opponent now pulling out, 60 m away.
         sim.units_mut()[0].state = UnitState::Melee;
         place(sim, 5, 300.0, 360.0, std::f64::consts::PI);
+        sim.apply_command(go(vec![5], (300.0, 700.0)), None).unwrap();
+        sim.units_mut()[5].disengaging = true;
         sim.step();
     }
     assert_eq!(sims[0].units()[0].target, Some(5), "follows without guard");
@@ -260,16 +262,16 @@ fn guard_holds_once_a_melee_breaks() {
 
 // ----- skirmish ----------------------------------------------------------
 
-/// Crossbowmen (3) with militia (4) marching at them from 80 m.
+/// Crossbowmen (3) with militia (4) marching at them from 70 m, for 16 s.
 fn threatened(skirmish: bool) -> BattleSim {
     let mut sim = lab_sim(6);
-    place(&mut sim, 4, 750.0, 380.0, std::f64::consts::PI);
+    place(&mut sim, 4, 750.0, 370.0, std::f64::consts::PI);
     if skirmish {
         sim.apply_command(set_mode(vec![3], UnitMode::Skirmish, true), None)
             .unwrap();
     }
     sim.apply_command(attack(vec![4], 3), None).unwrap();
-    run(&mut sim, 8.0);
+    run(&mut sim, 16.0);
     sim
 }
 
@@ -417,7 +419,7 @@ fn battered(data: &GameData, id: u32, breach: bool, seconds: f64) -> f64 {
 #[test]
 fn breach_batters_walls_harder_the_mangonel_less_so() {
     let data = data();
-    let seconds = 130.0;
+    let seconds = 300.0;
     let trebuchet = battered(&data, 1, false, seconds);
     let trebuchet_breach = battered(&data, 1, true, seconds);
     let mangonel = battered(&data, 2, false, seconds);
@@ -425,26 +427,49 @@ fn breach_batters_walls_harder_the_mangonel_less_so() {
     assert!(trebuchet > 0.0 && mangonel > 0.0);
     let heavy = trebuchet_breach / trebuchet;
     let light = mangonel_breach / mangonel;
+    println!(
+        "trebuchet {trebuchet:.0} -> {trebuchet_breach:.0}, mangonel {mangonel:.0} -> {mangonel_breach:.0}"
+    );
     assert!(heavy > 1.1, "trebuchet ×{heavy:.2}");
     assert!(light > 1.0 && light < heavy, "mangonel ×{light:.2} < ×{heavy:.2}");
+}
+
+/// Shots of the trebuchet (1) over a minute, 450 m out from the walls
+/// (none in range) with a garrison regiment (3) 150 m in front of it.
+fn engine_shots_at_men(breach: bool) -> Vec<sim_battle::ShotEvent> {
+    let data = data();
+    let (mut sim, piece) = siege_sim(&data, breach);
+    let works = sim.siege().unwrap().clone();
+    let (mx, mz) = works.pieces[piece].midpoint();
+    let (nx, nz) = works.pieces[piece].outward();
+    let (ex, ez) = (mx + nx * 450.0, mz + nz * 450.0);
+    place(&mut sim, 1, ex, ez, (-nx).atan2(-nz));
+    place(&mut sim, 2, ex + 600.0, ez, 0.0);
+    place(&mut sim, 3, ex - nx * 150.0, ez - nz * 150.0, 0.0);
+    sim.take_shots();
+    run(&mut sim, 60.0);
+    sim.take_shots()
+        .into_iter()
+        .filter(|s| s.shooter == 1)
+        .collect()
 }
 
 #[test]
 fn breach_is_for_siege_engines_and_never_shoots_men() {
     let data = data();
     let (mut sim, _) = siege_sim(&data, true);
-    // Not for the foot.
+    // Not for the foot, nor outside a siege (see above).
     assert!(sim
         .apply_command(set_mode(vec![0], UnitMode::Breach, true), None)
         .is_err());
-    // An attack order does not turn the engines on the garrison.
+    assert!(sim.units()[1].breach && sim.units()[2].breach);
+    // At will, the engine shoots the men in range; battering, never.
+    assert!(!engine_shots_at_men(false).is_empty(), "shoots men at will");
+    assert!(engine_shots_at_men(true).is_empty(), "battering: walls only");
+    // An attack order is the player's call: it ends the mode.
     sim.apply_command(attack(vec![1], 3), None).unwrap();
-    sim.take_shots();
-    run(&mut sim, 60.0);
-    let shots = sim.take_shots();
-    let engine: Vec<_> = shots.iter().filter(|s| s.shooter == 1).collect();
-    assert!(!engine.is_empty(), "the trebuchet shoots");
-    assert!(engine.iter().all(|s| s.target.is_none()), "walls only");
+    assert!(!sim.units()[1].breach);
+    assert_eq!(sim.units()[1].target, Some(3));
 }
 
 // ----- states ------------------------------------------------------------
@@ -532,19 +557,25 @@ fn a_replay_with_modes_replays_exactly() {
 }
 
 #[test]
-fn the_digest_sees_modes_only_when_set() {
+fn the_digest_sees_what_modes_do_not_the_flags() {
     let mut one = lab_sim(11);
-    let two = lab_sim(11);
+    let mut two = lab_sim(11);
     assert_eq!(state_digest(&one), state_digest(&two));
-    // The horse archers' default skirmish is no change.
-    one.apply_command(set_mode(vec![2], UnitMode::Skirmish, true), None)
-        .unwrap();
-    assert_eq!(state_digest(&one), state_digest(&two));
+    // A flag alone changes nothing of the battle: same digest (replays
+    // recorded before CB2, whose AI now guards its line, still match).
     one.apply_command(set_mode(vec![0], UnitMode::Guard, true), None)
         .unwrap();
-    assert_ne!(state_digest(&one), state_digest(&two), "the mode counts");
+    one.apply_command(set_mode(vec![0], UnitMode::Run, true), None)
+        .unwrap();
+    assert_eq!(state_digest(&one), state_digest(&two));
+    // What it does shows: the run mode runs the same move.
+    for sim in [&mut one, &mut two] {
+        sim.apply_command(go(vec![0], (300.0, 600.0)), None).unwrap();
+        run(sim, 2.0);
+    }
+    assert_ne!(state_digest(&one), state_digest(&two), "the run counts");
     // Unit JSON: modes left out when off.
-    let json = serde_json::to_string(&two.units()[0]).unwrap();
+    let json = serde_json::to_string(&lab_sim(11).units()[0]).unwrap();
     for key in ["mode_run", "guard", "skirmish", "melee_mode", "breach"] {
         assert!(!json.contains(&format!("\"{key}\"")), "{key} in {json}");
     }

@@ -394,20 +394,12 @@ pub fn state_digest(sim: &BattleSim) -> u64 {
             hash.u64(u64::from(unit.match_speed));
             hash.u64(unit.group_tag.map_or(u64::MAX, u64::from));
         }
-        // CB2: modes, only when set away from their default (the digests of
-        // replays without modes are unchanged).
-        if unit.modes_changed() {
-            hash.u64(0x4d44);
-            for on in [
-                unit.mode_run,
-                unit.guard,
-                unit.skirmish,
-                unit.melee_mode,
-                unit.breach,
-            ] {
-                hash.u64(u64::from(on));
-            }
-        }
+        // CB2: the mode flags are not hashed. They follow from recorded
+        // commands and the deterministic AI, and what they change (pace,
+        // pursuit, step back, shots) shows in the positions, soldiers and
+        // states above; hashing the flags would report replays recorded
+        // before CB2 as diverging (the defensive AI now puts its line on
+        // guard) while the battle they show has not changed.
         // CB-M3: queued orders, only when there are some (the digests of
         // replays recorded before CB are unchanged).
         if !unit.order_queue.is_empty() {
