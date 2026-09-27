@@ -715,7 +715,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 	general_picker.add_child(box)
 	var header := HBoxContainer.new()
 	box.add_child(header)
-	var heading := HudStyle.label(title, HudStyle.FONT_TITLE + 1, HudStyle.RUBRIC)
+	var heading := HudStyle.label(title, UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(heading)
 	var close := Button.new()
@@ -741,7 +741,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 				general_requested.emit(character_id, army_id))
 		box.add_child(button)
 	if not any_free:
-		box.add_child(HudStyle.label("Aucun personnage disponible sur place : amenez-en un jusqu'à l'armée.", HudStyle.FONT_BODY, HudStyle.INK_SOFT))
+		box.add_child(HudStyle.label("Aucun personnage disponible sur place : amenez-en un jusqu'à l'armée.", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT))
 	var court := Button.new()
 	court.text = "Toute la Cour…"
 	court.pressed.connect(func() -> void:
@@ -877,10 +877,10 @@ func _setup_turn_banner() -> void:
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	turn_banner.add_child(column)
-	_turn_banner_title = HudStyle.label("Tour des autres factions", 22, HudStyle.RUBRIC)
+	_turn_banner_title = HudStyle.label("Tour des autres factions", UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	_turn_banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(_turn_banner_title)
-	_turn_banner_detail = HudStyle.label("", HudStyle.FONT_BODY + 2, HudStyle.INK_SOFT)
+	_turn_banner_detail = HudStyle.label("", UiType.size(UiType.BODY), HudStyle.INK_SOFT)
 	_turn_banner_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(_turn_banner_detail)
 	add_child(turn_banner)
