@@ -95,6 +95,9 @@ func show_army(army_id: String, army: Dictionary, is_player: bool) -> void:
 	if not is_player and general_name != "":
 		title += " (%s)" % faction_name
 	var garrison := garrison_availability(army, is_player)
+	if is_player and sim.has_method("get_stance_options"):  # CV3-4 : refus des postures (cœur)
+		army = army.duplicate()
+		army["stance_options"] = sim.call("get_stance_options", army_id)
 	ui.show_army(army_id, army, character, faction, is_player, title, army_status(army, is_player),
 		is_player and split_supported(), bool(garrison["can_garrison"]), str(garrison["reason"]))
 

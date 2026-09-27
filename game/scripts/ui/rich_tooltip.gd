@@ -109,6 +109,14 @@ const HUD_TEXTS := {
 	"hud_season_summer": ["Été", ""],
 	"hud_season_autumn": ["Automne", ""],
 	"hud_season_winter": ["Hiver", ""],
+	# CV3-4 : postures d'armée (boutons du sceau) et sites de rencontre.
+	"hud_stance_normal": ["Posture normale", "Marche et combat ordinaires, sans bonus ni malus."],
+	"hud_stance_raid": ["Chevauchée", "L'armée pille le pays ennemi qu'elle traverse : butin pour le trésor, dévastation et colère chez l'adversaire."],
+	"hud_stance_siege": ["Siège", "L'armée investit la place ennemie devant laquelle elle se tient."],
+	"hud_stance_ambush": ["Embuscade", "L'armée se cache dans le couvert (forêt, bocage, marais) et surprend l'ennemi qui passe à portée. Il faut garder {rule.ambush_min_movement_percent} % du mouvement du tour ; une armée ennemie à moins de {rule.ambush_detect_radius_km} km, ou un espion à moins de {rule.ambush_detect_spy_km} km, l'évente."],
+	"hud_stance_forced_march": ["Marche forcée", "+{rule.forced_march_bonus_percent} % de mouvement ce tour, {rule.forced_march_supply_cost} points de ravitaillement perdus ; les troupes arrivent fatiguées à la bataille et tombent plus aisément dans une embuscade. Exige le mouvement plein ; dure un tour."],
+	"hud_stance_entrenched": ["Camp retranché", "Fossé et palissade : +{rule.entrenched_defense_percent} % en défense en résolution automatique, {rule.entrenched_supply_saving_percent} % de pertes de ravitaillement en moins. Exige le mouvement plein, hors des colonies."],
+	"hud_encounter": ["Rencontre", "Une occasion ou un péril sur la route. Menez une armée sur le site pour choisir que faire ; il disparaît à son expiration."],
 }
 const SEASON_WORDS := {"printemps": "spring", "été": "summer", "ete": "summer", "automne": "autumn", "hiver": "winter"}
 
