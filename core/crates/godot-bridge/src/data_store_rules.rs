@@ -25,6 +25,14 @@ impl GameDataStore {
             "breach_open_threshold",
             f64::from(sim_battle::siege::BREACH_ONE_GAP),
         );
+        // CB-M2: path preview cadence (`data/rules/battle_hover.json`).
+        let preview = &sim_battle::HoverRules::bundled().preview;
+        dict.set("hover_preview_recompute_m", preview.recompute_distance_m);
+        dict.set("hover_preview_max_per_s", preview.max_recomputes_per_s);
+        dict.set(
+            "hover_preview_max_paths",
+            f64::from(preview.max_individual_paths),
+        );
         dict
     }
 }
