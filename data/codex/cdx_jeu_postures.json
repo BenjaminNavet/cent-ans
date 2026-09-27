@@ -1,0 +1,29 @@
+{
+  "id": "cdx_jeu_postures",
+  "title": "Les postures d'armée",
+  "category": "mecanique",
+  "aliases": [
+    "posture d'armée",
+    "postures",
+    "embuscade",
+    "marche forcée",
+    "camp retranché"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Une armée en campagne adopte une posture : marche normale, chevauchée, siège, embuscade, marche forcée ou camp retranché. Chacune change ce qu'elle fait de la saison.",
+  "body": "Une armée du XIVe siècle ne fait pas que marcher et combattre. Elle pille, elle assiège, elle se cache, elle force l'allure ou elle se retranche, et les chroniqueurs racontent autant ces manières de tenir la campagne que les batailles rangées.\n\nL'embuscade est l'arme des capitaines de la petite guerre. [[cdx_du_guesclin|Bertrand du Guesclin]] doit une bonne part de sa réputation aux surprises, aux coups de main et aux places prises par ruse, plutôt qu'aux grandes batailles qu'il perd à Auray et à Nájera. La marche forcée est une nécessité autant qu'un choix : en 1415, [[cdx_henri_v|Henri V]] mène son armée d'Harfleur vers Calais à marches pressées, affamée et malade ; dix-sept jours après le départ, les Français la rattrapent à [[cdx_azincourt|Azincourt]]. Le camp retranché, enfin, est la réponse des armées inférieures en nombre : à [[cdx_poitiers|Poitiers]] en 1356, le Prince noir attend derrière les haies et les fossés du terrain, et ses archers se couvrent de [[cdx_jeu_pieux|pieux]] à Azincourt.",
+  "gameplay": "La posture se choisit sur le sceau du chef, par une rangée de boutons ; un bouton grisé donne en bulle la raison du refus.\n\nNormale : marche et combat ordinaires. [[cdx_chevauchee|Chevauchée]] : pillage du pays ennemi traversé. Siège : investit la place ennemie où l'armée se tient.\n\nEmbuscade : l'armée se cache dans le couvert (forêt, bocage, marais), hors des colonies, en gardant au moins le quart de son mouvement ; elle surprend l'armée ennemie qui entre dans sa [[cdx_zone_controle|zone de contrôle]]. La réussite dépend du général, du couvert et des éclaireurs de la victime (cavalerie légère) ; une armée ennemie trop proche, ou un espion, l'évente. L'ennemi ne la voit pas sur la carte ; son propriétaire la voit en transparence. Une embuscade réussie s'ouvre en bataille, la victime en colonne de marche.\n\nMarche forcée : la moitié de mouvement en plus pour ce tour, du ravitaillement perdu, des troupes [[cdx_jeu_fatigue|fatiguées]] au début de la bataille et plus exposées aux embuscades ; il faut le mouvement plein, et la posture retombe à la normale au tour suivant.\n\nCamp retranché : meilleure défense en résolution automatique et moins de ravitaillement perdu ; il faut le mouvement plein, hors des colonies.",
+  "see_also": [
+    "cdx_jeu_mouvement",
+    "cdx_zone_controle",
+    "cdx_jeu_vision",
+    "cdx_jeu_fatigue",
+    "cdx_chevauchee",
+    "cdx_jeu_resolution_auto"
+  ],
+  "sources": [
+    "Bertrand Du Guesclin",
+    "Bataille d'Azincourt",
+    "Bataille de Poitiers (1356)"
+  ]
+}
