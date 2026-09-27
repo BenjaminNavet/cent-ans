@@ -32,6 +32,25 @@ uniform vec3 winter_bare = vec3(0.105, 0.090, 0.082);
 // Altitude monde (unités) au-dessus de laquelle les conifères sont poudrés de neige en hiver.
 uniform float winter_snow_y = 4.0;
 
+// Lot PO3 : variété des massifs (pas de nouvel asset). Teinte : trois tons (sombre, moyen, doré)
+// choisis par un bruit de basse fréquence sur la position (peuplements de ~`tone_period` unités),
+// un peu de jitter par arbre. Échelle : ±`scale_jitter` par arbre (graine). Lisières : sur la rampe
+// de la couverture forestière (`forest_cover`, splat réduit, `Vegetation.build`), arbres plus bas
+// (`edge_height`) et clairsemés (`edge_thin` de la rangée retirée) ; arbres des champs (couverture
+// nulle) et cœur des massifs inchangés. Haies (essence 3) exclues.
+uniform vec3 tone_dark = vec3(0.84, 0.9, 0.86);
+uniform vec3 tone_warm = vec3(1.1, 1.06, 0.84);
+uniform float tone_period = 22.0;
+uniform float scale_jitter = 0.25;
+uniform sampler2D forest_cover : filter_linear, repeat_disable, hint_default_black;
+uniform bool has_forest_cover = false;
+uniform vec2 cover_map_size = vec2(4096.0, 4096.0);
+uniform vec4 cover_channel = vec4(0.0, 0.0, 1.0, 0.0);
+uniform float cover_low = 0.35;
+uniform float cover_high = 0.65;
+uniform float edge_height = 0.62;
+uniform float edge_thin = 0.45;
+
 varying float v_ao;
 varying vec3 v_tint;
 varying vec3 v_local;
@@ -45,6 +64,17 @@ float hash3(vec3 p) {
 	p = fract(p * 0.3183099 + 0.1);
 	p *= 17.0;
 	return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+float value_noise_2d(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	float a = hash3(vec3(i, 7.0));
+	float b = hash3(vec3(i + vec2(1.0, 0.0), 7.0));
+	float c = hash3(vec3(i + vec2(0.0, 1.0), 7.0));
+	float d = hash3(vec3(i + vec2(1.0, 1.0), 7.0));
+	return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
 float value_noise(vec3 p) {
@@ -80,13 +110,28 @@ void vertex() {
 	v_local = VERTEX * 9.0 + vec3(seed * 17.0);
 	VERTEX.x += sway * weight;
 	VERTEX.z += sway * 0.6 * weight;
-	VERTEX *= keep * campaign_prop_scale;
+	// PO3 : échelle par arbre et lisières (haies exclues).
+	vec3 variety = vec3(1.0);
+	vec3 tone = vec3(1.0);
+	if (UV.x < 2.5) {
+		variety *= 1.0 + scale_jitter * (2.0 * fract(seed * 53.17) - 1.0);
+		if (has_forest_cover) {
+			float cover = dot(textureLod(forest_cover, origin.xz / cover_map_size, 0.0), cover_channel);
+			float d = smoothstep(cover_low, cover_high, cover);
+			float edge = smoothstep(0.02, 0.2, d) * (1.0 - smoothstep(0.55, 0.9, d));
+			variety *= vec3(mix(1.0, 0.85, edge), mix(1.0, edge_height, edge), mix(1.0, 0.85, edge));
+			variety *= step(edge * edge_thin, fract(seed * 91.7));
+		}
+		float n = value_noise_2d(origin.xz / tone_period) + 0.18 * (fract(seed * 13.1) - 0.5);
+		tone = n < 0.5 ? mix(tone_dark, vec3(1.0), smoothstep(0.3, 0.45, n)) : mix(vec3(1.0), tone_warm, smoothstep(0.55, 0.7, n));
+	}
+	VERTEX *= keep * campaign_prop_scale * variety;
 	// Lot SZ4b : le pied de l'instance est enfoncé de GROUND_SINK × sa hauteur de carte
 	// (`VegetationTileJob.GROUND_SINK`, crate `vegetation`) ; réduit avec l'arbre, sinon un arbre à
 	// taille réelle reste enterré sous 80 m de sol (forêts invisibles au palier vallée).
 	VERTEX.y += FOLIAGE_GROUND_SINK * (1.0 - campaign_prop_scale);
 	v_ao = mix(0.55, 1.0, COLOR.a);
-	v_tint = INSTANCE_CUSTOM.rgb;
+	v_tint = INSTANCE_CUSTOM.rgb * tone;
 }
 
 void fragment() {
