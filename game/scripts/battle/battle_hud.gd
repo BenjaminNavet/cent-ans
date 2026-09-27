@@ -90,6 +90,11 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.theme = load(THEME_PATH)
 	add_child(root)
+	# PO1 (bible DA § 12.1) : les zones fixes de `UiLayout` vivent sous `root` (thème parchemin) ;
+	# à la fin de la bataille, la carte de campagne redevient l'hôte.
+	var layout := UiZones.layout()
+	if layout != null:
+		layout.attach_host(root)
 	_build_top_bar()
 	_build_log()
 	_build_bottom()
@@ -173,13 +178,16 @@ func _draw_balance() -> void:
 func _build_log() -> void:
 	var panel := PanelContainer.new()
 	panel.name = "BattleLog"
-	panel.anchor_left = 1.0
-	panel.anchor_right = 1.0
-	panel.offset_left = -360
-	panel.offset_right = -12
-	panel.offset_top = 70
 	panel.mouse_filter = Control.MOUSE_FILTER_PASS
-	root.add_child(panel)
+	# PO1 : journal de bataille dans la zone `TOASTS` (haut gauche, repliable par J).
+	UiZones.put(UiZones.Zone.TOASTS, panel)
+	if panel.get_parent() == null:
+		panel.anchor_left = 1.0
+		panel.anchor_right = 1.0
+		panel.offset_left = -360
+		panel.offset_right = -12
+		panel.offset_top = 70
+		root.add_child(panel)
 	log_box = VBoxContainer.new()
 	log_box.add_theme_constant_override("separation", 1)
 	panel.add_child(log_box)
@@ -218,7 +226,11 @@ func _build_bottom() -> void:
 	panel.offset_top = -BAND_HEIGHT - 6
 	panel.offset_bottom = -6
 	panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(6))
-	root.add_child(panel)
+	# PO1 : bandeau (sceau, cartes, ordres) dans la zone `BOTTOM_SELECTION` ; ses ancres « bas,
+	# pleine largeur » s'entendent alors dans la zone (0,80 de l'écran).
+	UiZones.put(UiZones.Zone.BOTTOM_SELECTION, panel)
+	if panel.get_parent() == null:
+		root.add_child(panel)
 	var outer := HBoxContainer.new()
 	outer.add_theme_constant_override("separation", 8)
 	panel.add_child(outer)
@@ -283,8 +295,24 @@ func _build_bottom() -> void:
 	withdraw_all_button.add_theme_stylebox_override("pressed", wax_hover)
 	withdraw_all_button.pressed.connect(ask_withdraw_all)
 	commands.add_child(withdraw_all_button)
-	outer.add_child(VSeparator.new())
-	outer.add_child(_build_corner())
+	# PO1 : minicarte et vitesses dans la zone `MINIMAP` (bas droite), calées dans son coin.
+	var corner_panel := PanelContainer.new()
+	corner_panel.name = "MapCorner"
+	corner_panel.add_theme_stylebox_override("panel", BattleUiKit.page_box(6))
+	corner_panel.add_child(_build_corner())
+	UiZones.put(UiZones.Zone.MINIMAP, corner_panel)
+	if corner_panel.get_parent() == null:
+		root.add_child(corner_panel)
+	corner_panel.anchor_left = 1.0
+	corner_panel.anchor_top = 1.0
+	corner_panel.anchor_right = 1.0
+	corner_panel.anchor_bottom = 1.0
+	corner_panel.offset_left = 0.0
+	corner_panel.offset_top = 0.0
+	corner_panel.offset_right = -8.0
+	corner_panel.offset_bottom = -6.0
+	corner_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	corner_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_build_help()
 	_build_confirm()
 
