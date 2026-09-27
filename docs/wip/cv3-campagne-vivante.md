@@ -1,7 +1,7 @@
 # CV3 — Campagne vivante (orchestration)
 
 Spec : `docs/design/2026-09-27-campagne-vivante.md`. Plan détaillé : voir la section « Lots » ci-dessous.
-ADR réservée : `docs/decisions/0093-postures-embuscade.md`. Captures : `docs/img/cv3/`.
+ADR réservée : `docs/decisions/0094-postures-embuscade.md`. Captures : `docs/img/cv3/`.
 
 ## Lots
 | Lot | Contenu | Vague | État | Note wip |
