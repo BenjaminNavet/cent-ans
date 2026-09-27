@@ -15,14 +15,27 @@ Orchestration : `docs/wip/cv3-campagne-vivante.md`.
   zone « tour suivant », tour 1 compris), cadre couvrant les deux anneaux ; nouveaux champs
   `next_cells` (cases du seul 2e anneau) et `next_budget`.
 
+## Rendu
+- `reachable_bubble.gdshader` : canal R = ce tour (voile parchemin, liseré doré, ombre d'encre),
+  canal B = tour suivant (voile pâle, liseré fin estompé, sans ombre), `show_next`.
+- `ArmyMovementBubble.set_suspended` : masquée pendant `end_turn_running` et `ai_replay.playing`
+  (piloté par `ArmyMovementController._process`) ; `next_cell_count()`.
+- Lord : `data/ui/campaign_map.json` `map.army_figure_scale` (schéma `campaign_map_ui.schema.json`),
+  lu par `ArmyFigures.map_settings()`. Général agrandi et avancé (`LORD_ADVANCE`), porte-étendard
+  à pied supprimé, hampe dans la main (`LORD_HAND`), ramenée au pied du marqueur avec le fondu
+  des figurines au palier loin (`ArmyMarker.set_view` → `_follow_bearer`).
+- Embuscade du joueur : `GeometryInstance3D.transparency` (`map.ambush_owner_transparency`) sur
+  figurines, hampe, fleuron et drapeau. Icône de posture sur l'étendard : laissée à CV3-4 (pas
+  d'icône d'encre embuscade / marche forcée / camp retranché à ce jour).
+
 ## État
-- [x] Core `reach.rs` + `bounded_dijkstra_from` (compile).
-- [ ] Tests Rust (`tests/cv3_reach.rs`).
-- [ ] Pont RGB8 + champs.
-- [ ] Shader/bulle à deux tons, masquée en fin de tour et rejeu IA.
-- [ ] Lord TW (`data/ui/campaign_map.json` `map.army_figure_scale`).
-- [ ] Embuscade semi-transparente pour le propriétaire (icône de posture → CV3-4).
-- [ ] Captures `docs/img/cv3/zone-*.png`.
+- [x] Core `reach.rs` + `bounded_dijkstra_from`.
+- [x] Tests Rust `tests/cv3_reach.rs` (4).
+- [x] Pont RGB8 + champs.
+- [x] Shader/bulle à deux tons, masquée en fin de tour et rejeu IA.
+- [x] Lord TW + embuscade semi-transparente ; smoke (données de zone, lord, fantôme).
+- [ ] Vérifs : cargo test complet, pytest, import Godot, smoke.
+- [ ] Captures `docs/img/cv3/zone-*.png` (script `game/tests/cv3_zone_shot.gd`).
 
 ## Prochaine étape
-Tests Rust du second anneau.
+Vérifications puis captures.
