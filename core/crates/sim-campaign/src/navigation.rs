@@ -532,12 +532,29 @@ pub fn bounded_dijkstra<B: Blocker + ?Sized>(
     start: Cell,
     budget: u32,
     blocked: &B,
+    visit: impl FnMut(Cell, u32) -> bool,
+) -> Option<(Cell, u32)> {
+    bounded_dijkstra_from(grid, &[start], budget, blocked, &|_| false, visit)
+}
+
+/// [`bounded_dijkstra`] from several `starts` (all at cost 0), where the
+/// `stop` cells are entered but not left (a march ends on entering an
+/// enemy zone of control, CV3-5). A start is always left, even when `stop`
+/// holds on it. Starts outside the grid are ignored.
+pub fn bounded_dijkstra_from<B: Blocker + ?Sized>(
+    grid: &NavGrid,
+    starts: &[Cell],
+    budget: u32,
+    blocked: &B,
+    stop: &dyn Fn(Cell) -> bool,
     mut visit: impl FnMut(Cell, u32) -> bool,
 ) -> Option<(Cell, u32)> {
-    let s = start.xy();
+    if starts.is_empty() {
+        return None;
+    }
+    let points: Vec<(i64, i64)> = starts.iter().map(|s| s.xy()).collect();
     let margin = i64::from(budget / u32::from(grid.min_cost.max(1))) + 1;
-    let window = Window::around(grid, &[s], margin);
-    let start_local = window.local(s.0, s.1)?;
+    let window = Window::around(grid, &points, margin);
     let costs = grid.costs.as_slice();
     let (width, height) = (i64::from(grid.width), i64::from(grid.height));
     SCRATCH.with(|scratch| {
@@ -551,8 +568,18 @@ pub fn bounded_dijkstra<B: Blocker + ?Sized>(
         settled.clear();
         settled.resize(window.len(), 0);
         let mut heap: BinaryHeap<Reverse<(u32, u32)>> = BinaryHeap::new();
-        best[start_local] = 0;
-        heap.push(Reverse((0, start_local as u32)));
+        for &(x, y) in &points {
+            if x >= width || y >= height {
+                continue;
+            }
+            let Some(local) = window.local(x, y) else {
+                continue;
+            };
+            if best[local] != 0 {
+                best[local] = 0;
+                heap.push(Reverse((0, local as u32)));
+            }
+        }
         while let Some(Reverse((g, local))) = heap.pop() {
             let local = local as usize;
             if g > best[local] || settled[local] != 0 {
@@ -565,6 +592,10 @@ pub fn bounded_dijkstra<B: Blocker + ?Sized>(
             let cell = Cell::new(x as u32, y as u32);
             if visit(cell, g) {
                 return Some((cell, g));
+            }
+            // Only the starts have cost 0 (every step costs at least 1).
+            if g > 0 && stop(cell) {
+                continue;
             }
             for (dx, dy) in NEIGHBOURS {
                 let (nlx, nly) = (lx + dx, ly + dy);
