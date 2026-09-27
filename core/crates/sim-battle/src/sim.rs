@@ -1014,7 +1014,9 @@ impl BattleSim {
         let height_gain = (self.standing_height(unit, unit.x, unit.z)
             - self.field.height(target_x, target_z))
         .max(0.0);
-        f64::from(unit.stats.range) * self.range_factor() * (1.0 + height_gain / 100.0)
+        // CB4: the aimed shot shortens the range.
+        let ability = self.ability_effects(unit).map_or(1.0, |e| e.range_factor);
+        f64::from(unit.stats.range) * self.range_factor() * (1.0 + height_gain / 100.0) * ability
     }
 
     pub(crate) fn log(&mut self, text_fr: String, side: Option<SideId>) {
@@ -1537,6 +1539,8 @@ impl BattleSim {
             1.0 + (-grade).min(0.1)
         };
         let speed = speed * (1.0 - unit.fatigue / 200.0);
+        // CB4: close ranks walk slower.
+        let speed = speed * self.ability_effects(unit).map_or(1.0, |e| e.speed_factor);
         // CB1: a `match_speed` group keeps the pace of its slowest regiment.
         if unit.match_speed {
             speed * self.group_pace_factor(unit)
@@ -2115,8 +2119,11 @@ impl BattleSim {
             });
             return;
         }
-        // BV2: levelled pikes stop the horses and unhorse the first riders.
-        if impact::pikes_stop(&self.units[i], &self.units[p], angle) {
+        // BV2: levelled pikes stop the horses and unhorse the first riders
+        // (CB4: also pikes planted against a frontal charge).
+        if impact::pikes_stop(&self.units[i], &self.units[p], angle)
+            || self.ability_stops_charge(&self.units[i], &self.units[p], angle)
+        {
             let defender_id = self.units[p].id;
             let unit = &mut self.units[i];
             let loss = unit.hp * impact::PIKE_STOP_LOSS;
@@ -2186,8 +2193,10 @@ impl BattleSim {
         }
         self.units[i].charge_timer = CHARGE_IMPACT;
         // Loss of cohesion: the shock of the horses (B-rules, unchanged).
+        // CB4: close ranks take the shock better.
+        let braced = self.ability_charge_taken(&self.units[p]);
         let cohesion = if cavalry && self.units[p].formation != Formation::Square {
-            impact::shock_morale(angle)
+            impact::shock_morale(angle) * braced
         } else {
             0.0
         };
@@ -2195,7 +2204,12 @@ impl BattleSim {
         // BV2: the horses knock men down; they stop fighting until they are
         // back on their feet.
         let knocked = if cavalry && self.units[i].mounted {
-            impact::knocked_count(&self.units[i], &self.units[p], angle)
+            let count = impact::knocked_count(&self.units[i], &self.units[p], angle);
+            if braced == 1.0 {
+                count
+            } else {
+                (f64::from(count) * braced).round() as u32
+            }
         } else {
             0
         };
@@ -2397,9 +2411,17 @@ impl BattleSim {
         if shooter.on_wall {
             accuracy *= 1.25;
         }
+        // CB4: the aimed shot aims better, above all at horses.
+        let shooter_ability = self.ability_effects(shooter);
+        if let Some(e) = shooter_ability {
+            accuracy *= e.accuracy_factor;
+        }
         let mut kills = shots * accuracy * f64::from(shooter.stats.ranged) / 100.0
             * armor_factor(self.defense_points(target))
             * RANGED_RATE;
+        if let Some(e) = shooter_ability.filter(|_| target.mounted) {
+            kills *= e.vs_mounted_factor;
+        }
         if self.field.in_forest(target.x, target.z) {
             kills *= 0.5;
         }
@@ -2415,11 +2437,7 @@ impl BattleSim {
                 kills *= crate::site::HEDGE_COVER;
             }
         }
-        if let Some(factor) = target.pavise {
-            kills *= factor;
-        } else if target.has(Ability::Pavise) && target.state != UnitState::Marching {
-            kills *= 0.6;
-        }
+        kills *= self.missile_cover(target, attack_angle(target, shooter.x, shooter.z));
         if target.formation == Formation::Square {
             kills *= 1.2;
         }
@@ -2443,7 +2461,7 @@ impl BattleSim {
         });
         let indirect = mode.is_some_and(|m| m.indirect());
         let aim = (target.x, target.z);
-        let reload = shooter.reload_period();
+        let reload = shooter.reload_period() * shooter_ability.map_or(1.0, |e| e.reload_factor);
         let heading = angle_to(target.x - shooter.x, target.z - shooter.z);
         let kills = kills.min(self.units[t].hp);
         let cover = if target.on_wall {
@@ -2678,11 +2696,14 @@ impl BattleSim {
                 .map_or(0.0, |g| g.charge_percent);
             damage *= 1.0 + charge / 100.0 * lance * wedge * (1.0 + general / 100.0);
         }
-        damage *= match attack_angle(defender, attacker.x, attacker.z) {
+        let angle = attack_angle(defender, attacker.x, attacker.z);
+        damage *= match angle {
             0 => 1.0,
             1 => 1.5,
             _ => 2.0,
         };
+        // CB4: close ranks, planted pikes.
+        damage *= self.ability_melee_factor(attacker, defender, angle);
         if defender.state == UnitState::Routing {
             damage *= 1.5;
         }

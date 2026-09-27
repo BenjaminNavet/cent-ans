@@ -691,7 +691,7 @@ fn historical_start(id: &str, seed: u64) -> BattleSim {
         .join(format!("{id}.json"));
     let map =
         sim_battle::HistoricalMap::from_json(&std::fs::read_to_string(path).unwrap()).unwrap();
-    let setup = map
+    let mut setup = map
         .battle_setup(
             &data.unit_types,
             data.battle_orders.values().cloned().collect(),
@@ -699,6 +699,8 @@ fn historical_start(id: &str, seed: u64) -> BattleSim {
             None,
         )
         .unwrap();
+    // CB4: the regiments' abilities, as in the game.
+    setup.abilities = data.battle_abilities.values().cloned().collect();
     map.start(setup, seed).unwrap()
 }
 
@@ -752,6 +754,7 @@ fn reference_margins() {
                 None,
             );
             battle.village = Some(false);
+            battle.abilities = data.battle_abilities.values().cloned().collect();
             let mut sim = BattleSim::new(battle, seed).unwrap();
             sim.set_ai(SideId::Attacker, true);
             sim.set_ai(SideId::Defender, true);
