@@ -97,6 +97,8 @@ struct Report {
     refused: u32,
     /// EQ4: combined balance measures.
     eq4: Eq4,
+    /// CV3-6: living-campaign measures.
+    cv3: Cv3,
     /// EQ6: peace turns per England war blocker (`BLOCKERS`).
     blockers: Vec<u32>,
     /// EQ6: France-England wars opened by England / by France.
@@ -232,6 +234,99 @@ fn war_blockers(
         out.push("free");
     }
     out
+}
+
+/// CV3-6: living-campaign measures of one campaign (`CV3_STATS=1`).
+#[derive(Default)]
+struct Cv3 {
+    /// Stance orders issued by the planners (every faction, France included).
+    ambush_orders: u32,
+    forced_march_orders: u32,
+    entrenched_orders: u32,
+    /// Ambushes sprung / discovered (every faction).
+    ambush_sprung: u32,
+    ambush_failed: u32,
+    /// Encounters resolved (an option applied) and sites that appeared.
+    encounters: u32,
+    /// Battles (one « Bataille de … » line each).
+    battles: u32,
+    /// Outcome classes of both sides, by `BattleOutcomeClass::ALL` index
+    /// (victory / defeat for the battles without an outcome line).
+    classes: [u32; 7],
+}
+
+impl Cv3 {
+    fn orders(&mut self, orders: &[sim_campaign::Order]) {
+        for order in orders {
+            if let sim_campaign::Order::SetStance { stance, .. } = order {
+                match stance {
+                    sim_campaign::Stance::Ambush => self.ambush_orders += 1,
+                    sim_campaign::Stance::ForcedMarch => self.forced_march_orders += 1,
+                    sim_campaign::Stance::Entrenched => self.entrenched_orders += 1,
+                    _ => {}
+                }
+            }
+        }
+    }
+
+    fn events(&mut self, data: &GameData, events: &[sim_campaign::GameEvent]) {
+        use data_model::BattleOutcomeClass as C;
+        let rules = &data.battle_outcome_rules;
+        let labels: Vec<(usize, String)> = C::ALL
+            .iter()
+            .enumerate()
+            .map(|(i, c)| (i, rules.consequence(*c).label))
+            .collect();
+        let index = |c: C| C::ALL.iter().position(|x| *x == c).unwrap_or(0);
+        let mut pending_default = 0u32;
+        for event in events {
+            let text = &event.text_fr;
+            if event.kind == EventKind::Battle {
+                if text.starts_with("Embuscade !") {
+                    self.ambush_sprung += 1;
+                } else if text.starts_with("Embuscade éventée") {
+                    self.ambush_failed += 1;
+                } else if text.starts_with("Bataille ") && text.contains(". Vainqueur : ") {
+                    self.battles += 1;
+                    pending_default += 1;
+                } else if let Some((winner, loser)) = text.split_once(" ; ") {
+                    let won = labels
+                        .iter()
+                        .filter(|(_, l)| winner.starts_with(l.as_str()))
+                        .max_by_key(|(_, l)| l.len());
+                    let lost = labels
+                        .iter()
+                        .filter(|(_, l)| {
+                            let lower = lowercase_first(l);
+                            loser.starts_with(lower.as_str())
+                        })
+                        .max_by_key(|(_, l)| l.len());
+                    if let (Some((w, _)), Some((l, _))) = (won, lost) {
+                        self.classes[*w] += 1;
+                        self.classes[*l] += 1;
+                        pending_default = pending_default.saturating_sub(1);
+                    }
+                }
+            } else if event.kind == EventKind::Chronicle
+                && data
+                    .encounters
+                    .values()
+                    .any(|e| text.starts_with(&format!("{} — ", e.title)))
+            {
+                self.encounters += 1;
+            }
+        }
+        self.classes[index(C::Victory)] += pending_default;
+        self.classes[index(C::Defeat)] += pending_default;
+    }
+}
+
+fn lowercase_first(text: &str) -> String {
+    let mut chars = text.chars();
+    match chars.next() {
+        Some(first) => first.to_lowercase().chain(chars).collect(),
+        None => String::new(),
+    }
 }
 
 /// EQ4: combined balance measures of one campaign.
@@ -751,7 +846,9 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 },
             );
         }
-        for order in ai::plan_turn(&state, data, &france) {
+        let france_orders = ai::plan_turn(&state, data, &france);
+        report.cv3.orders(&france_orders);
+        for order in france_orders {
             let text = debug_army
                 .as_ref()
                 .map(|army| (army.clone(), format!("{order:?}")))
@@ -787,8 +884,19 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 orders
             })
         } else {
-            state.end_turn_with(data, ai::plan_turn)
+            let counted = std::cell::RefCell::new(Cv3::default());
+            let events = state.end_turn_with(data, |s, d, f| {
+                let orders = ai::plan_turn(s, d, f);
+                counted.borrow_mut().orders(&orders);
+                orders
+            });
+            let counted = counted.into_inner();
+            report.cv3.ambush_orders += counted.ambush_orders;
+            report.cv3.forced_march_orders += counted.forced_march_orders;
+            report.cv3.entrenched_orders += counted.entrenched_orders;
+            events
         };
+        report.cv3.events(data, &events);
         if let Some(traced) = &econ_trace {
             let residual = |f: &FactionId| {
                 let now = &state.factions[f];
@@ -1370,6 +1478,9 @@ fn main() {
     print_summary(&reports, decades);
     print_eq4(&reports);
     print_eq6(&reports);
+    if std::env::var("CV3_STATS").is_ok() {
+        print_cv3(&reports);
+    }
 }
 
 /// EQ6: who opens the France-England wars and what keeps England at peace.
@@ -1409,6 +1520,71 @@ fn siege_success(r: &Report) -> f64 {
 
 /// One EQ4 measure of a campaign.
 type Measure = fn(&Report) -> f64;
+
+/// CV3-6 (`CV3_STATS=1`): stances, ambushes, encounters and outcome classes
+/// per campaign, with the rates per 20 turns (the pilot game of spec § 0).
+fn print_cv3(reports: &[Report]) {
+    use data_model::BattleOutcomeClass as C;
+    println!(
+        "\nCV3 — campagne vivante ({}) :",
+        std::env::var("DIFFICULTY").unwrap_or_else(|_| "normal".to_owned())
+    );
+    let keys: Vec<&str> = C::ALL.iter().map(|c| c.key()).collect();
+    println!(
+        "| graine | guerre FR-EN | révoltes | embuscades (ordres / réussies / éventées) | marches forcées | camps retranchés | rencontres | batailles | classes ({}) |",
+        keys.join(" / ")
+    );
+    println!("|---|---|---|---|---|---|---|---|---|");
+    for r in reports {
+        let c = &r.cv3;
+        let classes: Vec<String> = c.classes.iter().map(|n| n.to_string()).collect();
+        println!(
+            "| {} | {:.0} % | {} | {} / {} / {} | {} | {} | {} | {} | {} |",
+            r.seed,
+            100.0 * f64::from(r.war_turns) / f64::from(r.turns),
+            r.eq4.revolts,
+            c.ambush_orders,
+            c.ambush_sprung,
+            c.ambush_failed,
+            c.forced_march_orders,
+            c.entrenched_orders,
+            c.encounters,
+            c.battles,
+            classes.join(" / "),
+        );
+    }
+    let per20 = |f: fn(&Cv3) -> u32| -> f64 {
+        let turns: u32 = reports.iter().map(|r| r.turns).sum();
+        let total: u32 = reports.iter().map(|r| f(&r.cv3)).sum();
+        20.0 * f64::from(total) / f64::from(turns.max(1))
+    };
+    println!(
+        "  Par 20 tours (toutes factions) : embuscades {:.2} ordres, {:.2} réussies, {:.2} éventées ; marches forcées {:.2} ; camps retranchés {:.2} ; rencontres {:.2} ; batailles {:.1}",
+        per20(|c| c.ambush_orders),
+        per20(|c| c.ambush_sprung),
+        per20(|c| c.ambush_failed),
+        per20(|c| c.forced_march_orders),
+        per20(|c| c.entrenched_orders),
+        per20(|c| c.encounters),
+        per20(|c| c.battles),
+    );
+    let mut totals = [0u32; 7];
+    for r in reports {
+        for (t, n) in totals.iter_mut().zip(r.cv3.classes) {
+            *t += n;
+        }
+    }
+    let sum: u32 = totals.iter().sum::<u32>().max(1);
+    let shares: Vec<String> = keys
+        .iter()
+        .zip(totals)
+        .map(|(k, n)| format!("{k} {:.1} %", 100.0 * f64::from(n) / f64::from(sum)))
+        .collect();
+    println!("  Classes de résultat (camps) : {}", shares.join(", "));
+    let revolts: Vec<f64> = reports.iter().map(|r| f64::from(r.eq4.revolts)).collect();
+    let (mean, min, max) = spread(&revolts);
+    println!("  Révoltes / partie : moy. {mean:.1} [{min:.0}-{max:.0}]");
+}
 
 /// EQ4: the combined balance table, one row per seed and the means.
 fn print_eq4(reports: &[Report]) {

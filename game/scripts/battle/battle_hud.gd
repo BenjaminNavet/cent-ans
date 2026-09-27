@@ -11,6 +11,7 @@ extends CanvasLayer
 
 signal card_clicked(unit_id: int, additive: bool)
 signal card_double_clicked(unit_id: int)  # B3 / T6 : centrer la caméra sur ce régiment
+signal card_hovered(unit_id: int)  # CB-M2 : carte survolée (-1 : plus aucune), contour pâle
 signal command_pressed(command: String)
 signal speed_pressed(index: int)  # -1 : pause, 0..2 : index dans BattleScene.SPEEDS
 signal minimap_clicked(world: Vector2)
@@ -744,6 +745,9 @@ func _make_card(unit: Dictionary) -> UnitCard:
 		ui_feedback.emit("card")
 		card_clicked.emit(id, additive))
 	card.double_clicked.connect(func(id: int) -> void: card_double_clicked.emit(id))
+	var hovered_id := int(unit["id"])
+	card.mouse_entered.connect(func() -> void: card_hovered.emit(hovered_id))
+	card.mouse_exited.connect(func() -> void: card_hovered.emit(-1))
 	return card
 
 
