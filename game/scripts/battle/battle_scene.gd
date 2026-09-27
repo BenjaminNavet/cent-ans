@@ -48,7 +48,6 @@ const KINDS := ["infantry", "archer", "cavalry", "siege"]
 const SPEEDS := [1.0, 2.0, 4.0]
 ## EP13 : vitesses du rejeu (barre de rejeu, + / −).
 const REPLAY_SPEEDS := [1.0, 2.0, 4.0, 8.0]
-const DOUBLE_CLICK_MS := 350
 const PICK_RADIUS_PX := 26.0
 const BANNER_HEIGHT := 7.0
 const BANNER_SHADER := preload("res://shaders/battle_banner.gdshader")
@@ -118,11 +117,7 @@ var markers: BattleUnitMarkers = null  # B2 : bannières flottantes (repères 2D
 var result_screen: BattleResultScreen = null  # B2 : écran de fin
 var _result_shot: bool = false
 var _rings: Dictionary = {}  # id -> MeshInstance3D
-var _left_press: Vector2 = Vector2(-1, -1)
-var _right_press: Vector2 = Vector2(-1, -1)
-var _right_press_ground: Vector3 = Vector3.ZERO
-var _last_right_click_ms: int = -10000
-var _drag_rect: ColorRect
+var _drag_rect: ColorRect  # CB0 : rectangle de sélection, lu et positionné par `input`
 var _hud_timer: float = 0.0
 var _screenshot_path: String = ""
 var _benchmark: bool = false
@@ -172,7 +167,6 @@ var _ep12_focus: Variant = null  # EP12 : point cadré (blessé) ou id du régim
 var _ep12_ticks: int = -1
 var _weather_override: String = ""
 var _camera_override: String = ""
-var _last_group_ms: int = -10000
 var deployment: DeploymentController = null  # F5c : phase de déploiement du joueur
 var _deploy_shot: bool = false
 ## Q4 : `--open-shot` capture la vue d'ouverture (caméra de `_frame_camera`), sans rien jouer.
@@ -225,6 +219,8 @@ var log_orders_for_test: bool = false
 @onready var hud: BattleHud = $HUD
 @onready var world_env: WorldEnvironment = $WorldEnvironment
 @onready var sun: DirectionalLight3D = $Sun
+## CB0 : entrées (clics, glisser, touches, groupes), nœud enfant créé au premier `_ready`.
+var input: BattleInput = null
 
 
 ## À appeler avant `add_child` quand la bataille vient de la campagne.
@@ -236,9 +232,22 @@ func configure(p_campaign_sim: Object, index: int, seed: int) -> void:
 
 func _ready() -> void:
 	_parse_cmdline()
+	# CB0 : nœud d'entrées, connecté aux appels encore portés par la scène (ordres, rendu, pont).
+	input = BattleInput.new()
+	input.name = "BattleInput"
+	input.scene = self
+	add_child(input)
+	input.command_requested.connect(_on_input_command)
+	input.selection_changed.connect(_on_input_selection_changed)
+	input.camera_focus_requested.connect(_on_input_camera_focus)
+	input.pause_toggled.connect(_toggle_pause)
+	input.speed_step.connect(_on_speed_step)
+	input.help_toggled.connect(hud.toggle_help)
+	input.markers_toggled.connect(_on_input_markers_toggled)
+	input.screenshot_requested.connect(_on_input_screenshot_requested)
 	hud.card_clicked.connect(_on_card_clicked)
 	hud.card_double_clicked.connect(_on_card_double_clicked)
-	hud.command_pressed.connect(_on_command)
+	hud.command_pressed.connect(input._on_command)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
 	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
@@ -1629,72 +1638,10 @@ func _on_return() -> void:
 # --- Entrées --------------------------------------------------------------------------
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if battle == null:
-		return
-	if event is InputEventKey and event.pressed and not event.echo:
-		var key := event as InputEventKey
-		# F5b : chiffres de la rangée (touche physique, AZERTY compris) = groupes de sélection.
-		if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
-			handle_group_key(int(key.physical_keycode - KEY_0), key.ctrl_pressed or key.meta_pressed)
-			return
-		match event.keycode:
-			KEY_ENTER, KEY_KP_ENTER:
-				if deployment != null:
-					deployment.finish()
-			KEY_SPACE:
-				_toggle_pause()
-			KEY_PLUS, KEY_EQUAL, KEY_KP_ADD:
-				if replay_mode:
-					replay_set_speed(REPLAY_SPEEDS[mini(REPLAY_SPEEDS.find(speed) + 1, REPLAY_SPEEDS.size() - 1)])
-				else:
-					_on_speed_pressed(mini(SPEEDS.find(speed) + 1, SPEEDS.size() - 1))
-			KEY_MINUS, KEY_KP_SUBTRACT:
-				if replay_mode:
-					replay_set_speed(REPLAY_SPEEDS[maxi(REPLAY_SPEEDS.find(speed) - 1, 0)])
-				else:
-					_on_speed_pressed(maxi(SPEEDS.find(speed) - 1, 0))
-			KEY_F1:
-				hud.toggle_help()
-			KEY_U:
-				if markers != null:
-					markers.toggle()
-			KEY_F:
-				_on_command("formation")
-			KEY_G:
-				_on_command("fire_at_will")
-			KEY_H:
-				_on_command("halt")
-			KEY_C:
-				_toggle_camera_follow()
-			KEY_ESCAPE:
-				selected.clear()
-			KEY_F12:
-				_take_screenshot(ProjectSettings.globalize_path("res://").path_join("../docs/img/godot-battle-%d.png" % Time.get_unix_time_from_system()).simplify_path(), false)
-	elif event is InputEventMouseButton:
-		var button := event as InputEventMouseButton
-		if button.button_index == MOUSE_BUTTON_LEFT:
-			if button.pressed:
-				_left_press = button.position
-			else:
-				_finish_left(button.position, button.shift_pressed)
-		elif button.button_index == MOUSE_BUTTON_RIGHT:
-			if button.pressed:
-				_right_press = button.position
-				_right_press_ground = ground_point(button.position)
-			else:
-				_finish_right(button.position)
-	elif event is InputEventMouseMotion and _left_press.x < 0.0 and markers != null:
-		# B2 : survol d'une troupe sur le terrain = repère mis en évidence.
-		var hover_at := (event as InputEventMouseMotion).position
-		var hover := pick_unit(hover_at, player_side)
-		markers.world_hover = hover if hover >= 0 else pick_unit(hover_at, enemy_side)
-	elif event is InputEventMouseMotion and _left_press.x >= 0.0:
-		var motion := event as InputEventMouseMotion
-		var rect := Rect2(_left_press, motion.position - _left_press).abs()
-		_drag_rect.visible = rect.size.length() > 8.0
-		_drag_rect.position = rect.position
-		_drag_rect.size = rect.size
+## CB0 : entrées déplacées vers `input` (`BattleInput`). Délégations fines gardées ici pour
+## `game/tests/smoke.gd` (`scene.handle_group_key`, `scene.issue`).
+func handle_group_key(number: int, save: bool) -> void:
+	input.handle_group_key(number, save)
 
 
 func _toggle_pause() -> void:
@@ -1711,24 +1658,38 @@ func _on_speed_pressed(index: int) -> void:
 	hud.set_clock(float(battle.call("get_elapsed")), speed, paused)
 
 
-## Ctrl+n (Cmd+n sous macOS) : enregistre la sélection ; n : la rappelle, et un second appui
-## rapide centre la caméra sur le groupe.
-func handle_group_key(number: int, save: bool) -> void:
-	if save:
-		hud.groups.save(number, selected)
-		return
-	var ids := hud.groups.recall(number, units)
-	if ids.is_empty():
-		return
-	var again := selected == ids and Time.get_ticks_msec() - _last_group_ms < 600
-	_last_group_ms = Time.get_ticks_msec()
+## `BattleInput.speed_step` (touches + / −) : +1/-1 cran de vitesse, rejeu ou partie normale.
+func _on_speed_step(delta: int) -> void:
+	if replay_mode:
+		if delta > 0:
+			replay_set_speed(REPLAY_SPEEDS[mini(REPLAY_SPEEDS.find(speed) + 1, REPLAY_SPEEDS.size() - 1)])
+		else:
+			replay_set_speed(REPLAY_SPEEDS[maxi(REPLAY_SPEEDS.find(speed) - 1, 0)])
+	elif delta > 0:
+		_on_speed_pressed(mini(SPEEDS.find(speed) + 1, SPEEDS.size() - 1))
+	else:
+		_on_speed_pressed(maxi(SPEEDS.find(speed) - 1, 0))
+
+
+func _on_input_command(command: Dictionary) -> void:
+	issue(command)
+
+
+func _on_input_selection_changed(ids: Array) -> void:
 	selected = ids
-	if again:
-		var center := Vector3.ZERO
-		for unit in units:
-			if ids.has(int(unit["id"])):
-				center += Vector3(float(unit["x"]), 0, float(unit["z"]))
-		camera_rig.look_at_point(center / ids.size(), camera_rig.distance, camera_rig.yaw)
+
+
+func _on_input_camera_focus(point: Vector3) -> void:
+	camera_rig.look_at_point(point, camera_rig.distance, camera_rig.yaw)
+
+
+func _on_input_markers_toggled() -> void:
+	if markers != null:
+		markers.toggle()
+
+
+func _on_input_screenshot_requested() -> void:
+	_take_screenshot(ProjectSettings.globalize_path("res://").path_join("../docs/img/godot-battle-%d.png" % Time.get_unix_time_from_system()).simplify_path(), false)
 
 
 ## Cadre de la caméra au sol (x, z) : les quatre coins de l'écran projetés sur le terrain.
@@ -1743,61 +1704,6 @@ func camera_frame() -> PackedVector2Array:
 
 func _on_minimap_clicked(world: Vector2) -> void:
 	camera_rig.look_at_point(Vector3(world.x, 0, world.y), camera_rig.distance, camera_rig.yaw)
-
-
-func _finish_left(position: Vector2, additive: bool) -> void:
-	var rect := Rect2(_left_press, position - _left_press).abs()
-	_left_press = Vector2(-1, -1)
-	_drag_rect.visible = false
-	if not additive:
-		selected.clear()
-	if rect.size.length() > 8.0:
-		for unit in units:
-			if str(unit["side"]) != player_side or not bool(unit["present"]):
-				continue
-			var screen := _unit_screen(unit)
-			if screen.x > -1e5 and rect.has_point(screen) and not selected.has(int(unit["id"])):
-				selected.append(int(unit["id"]))
-		return
-	var picked := pick_unit(position, player_side)
-	if picked >= 0:
-		if additive and selected.has(picked):
-			selected.erase(picked)
-		elif not selected.has(picked):
-			selected.append(picked)
-
-
-func _finish_right(position: Vector2) -> void:
-	var press := _right_press
-	_right_press = Vector2(-1, -1)
-	if selected.is_empty() or replay_mode:  # EP13 : aucun ordre pendant un rejeu
-		return
-	if deployment != null and deployment.active:
-		_deploy_selection(press, position)
-		return
-	var now := Time.get_ticks_msec()
-	var double_click := now - _last_right_click_ms < DOUBLE_CLICK_MS
-	_last_right_click_ms = now
-	if press.distance_to(position) > 20.0:
-		# Glisser-droit : ligne de p0 à p1, front tourné à l'opposé de la caméra.
-		var p0 := _right_press_ground
-		var p1 := ground_point(position)
-		var dir := Vector2(p1.x - p0.x, p1.z - p0.z)
-		if dir.length() < 2.0:
-			return
-		var normal := Vector2(-dir.y, dir.x).normalized()
-		var mid := (p0 + p1) * 0.5
-		var cam := camera_rig.camera.global_position
-		if normal.dot(Vector2(mid.x - cam.x, mid.z - cam.z)) < 0.0:
-			normal = -normal
-		issue({"type": "move", "units": selected.duplicate(), "x": mid.x, "z": mid.z, "run": double_click, "facing": atan2(normal.x, normal.y)})
-		return
-	var enemy := pick_unit(position, enemy_side)
-	if enemy >= 0:
-		issue({"type": "attack", "units": selected.duplicate(), "target": enemy, "run": true})
-		return
-	var point := ground_point(position)
-	issue({"type": "move", "units": selected.duplicate(), "x": point.x, "z": point.z, "run": double_click})
 
 
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
@@ -1869,64 +1775,6 @@ func _unit_world_position(id: int) -> Variant:
 		if int(unit["id"]) == id and bool(unit["present"]):
 			return Vector3(float(unit["x"]), 0.0, float(unit["z"]))
 	return null
-
-
-func _on_command(command: String) -> void:
-	match command:
-		"pause":
-			_toggle_pause()
-			return
-		"withdraw_all":
-			var all: Array[int] = []
-			for unit in units:
-				if str(unit["side"]) == player_side and bool(unit["present"]) and str(unit["state"]) != "routing" and not bool(unit["withdrawing"]):
-					all.append(int(unit["id"]))
-			if not all.is_empty():
-				issue({"type": "withdraw", "units": all})
-			return
-	var ids := _available_selection()
-	if ids.is_empty():
-		return
-	match command:
-		"halt":
-			issue({"type": "halt", "units": ids})
-		"withdraw":
-			issue({"type": "withdraw", "units": ids})
-		"fire_at_will":
-			var shooters: Array[int] = []
-			var enable := false
-			for unit in units:
-				if ids.has(int(unit["id"])) and bool(unit["can_shoot"]):
-					shooters.append(int(unit["id"]))
-					enable = enable or not bool(unit["fire_at_will"])
-			if not shooters.is_empty():
-				issue({"type": "fire_at_will", "units": shooters, "enabled": enable})
-		"formation":
-			for unit in units:
-				if ids.has(int(unit["id"])):
-					issue({"type": "formation", "units": [int(unit["id"])], "kind": _next_formation(unit)})
-
-
-func _available_selection() -> Array[int]:
-	var ids: Array[int] = []
-	for unit in units:
-		if selected.has(int(unit["id"])) and bool(unit["present"]) and str(unit["state"]) != "routing":
-			ids.append(int(unit["id"]))
-	return ids
-
-
-## Formation suivante autorisée pour la famille de l'unité.
-func _next_formation(unit: Dictionary) -> String:
-	var cycle: Array = ["line", "column"]
-	match str(unit["category"]):
-		"infantry":
-			cycle = ["line", "column", "square"]
-		"cavalry":
-			cycle = ["line", "wedge", "column"]
-		"siege":
-			cycle = ["line"]
-	var current := cycle.find(str(unit["formation"]))
-	return cycle[(current + 1) % cycle.size()]
 
 
 # --- Picking --------------------------------------------------------------------------
@@ -2514,13 +2362,6 @@ func _open_deployment() -> void:
 	if not deployment.open(self):
 		deployment.queue_free()
 		deployment = null
-
-
-func _deploy_selection(press: Vector2, release: Vector2) -> void:
-	var p1 := ground_point(release)
-	var p0 := _right_press_ground if press.x >= 0.0 and press.distance_to(release) > 20.0 else p1
-	deployment.place(selected.duplicate(), p0, p1, camera_rig.camera.global_position)
-	_refresh_view(true)
 
 
 ## Sortie de la garnison (F5a) : message éphémère une fois, et mention dans la ligne du siège.
