@@ -47,7 +47,7 @@ const BINDINGS := [
 	{"group": "selection", "action": "deselect", "key": KEY_ESCAPE, "help": "désélectionner"},
 	# Temps, caméra et affichage.
 	{"group": "view", "action": "pause", "key": KEY_SPACE, "help": "pause (ordres possibles en pause)"},
-	{"group": "view", "action": "speed", "label": "+ / −", "help": "vitesse de la bataille"},
+	{"group": "view", "action": "speed", "label": "+ / −", "help": "vitesse de la bataille (×0,5 à ×4)"},
 	{"group": "view", "action": "tactical_view", "key": KEY_TAB, "lot": "CB3", "help": "vue tactique"},
 	{"group": "view", "action": "follow", "key": KEY_C, "help": "suivre la sélection (ou le général)"},
 	{"group": "view", "action": "markers", "key": KEY_U, "help": "masquer / afficher les bannières"},

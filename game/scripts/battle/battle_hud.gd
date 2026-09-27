@@ -25,11 +25,12 @@ const ALERTS_COLUMN := preload("res://scripts/battle/battle_alerts_column.gd")  
 ## CB3 : ralenti ×0,5 ajouté en tête (`BattleScene.SPEEDS`).
 const SPEED_TOOLTIPS := ["Pause (Espace)", "Ralenti ×0,5 (+ / −)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
 const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
-• Espace : pause (ordres possibles en pause) · + / − : vitesse ×1, ×2, ×4 (boutons en bas à droite).
+• Espace : pause (ordres possibles en pause) · + / − : vitesse ×0,5, ×1, ×2, ×4 (boutons en bas à droite).
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner · double clic sur une carte : centrer la caméra dessus.
 • Clic droit : déplacer ou attaquer · double clic droit : au pas de course · glisser-droit : orienter la ligne, sa longueur donne la largeur du front.
 • Bannières au-dessus des troupes : clic = sélection, clic droit sur l'ennemi = attaque ; pastilles : déroute, hésite, sous le feu, charge, mode.
-• Caméra : {camera}, molette, {rotate}, bouton du milieu ; clic sur la minicarte : y aller.
+• Caméra : {camera}, molette, {rotate} ; bouton du milieu : rotation et inclinaison, Maj + bouton du milieu : déplacer la vue ; clic sur la minicarte : y aller.
+• Alertes (colonne en haut à gauche) : déroute, général tombé, flanc, renforts, munitions, mur ou porte ; clic : y aller.
 • C : verrouille la caméra sur la sélection (ou le général) ; suivi doux, bouton du milieu = orbite ; {camera} ou glisser libèrent la caméra.
 {keys}"""
 
