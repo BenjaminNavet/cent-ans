@@ -51,5 +51,11 @@ verts (`core/build.sh` + `godot --headless --path game --import` faits au
 préalable, cible cargo privée à ce worktree). Aucun changement Rust dans ce
 lot (fmt/clippy/test déjà vérifiés par L1).
 
-Prochaine étape : fusion dans `main` (faite par la session de coordination),
-suppression du worktree.
+Fusionné dans `main` (bc53e337) après rebase ; tests Godot relancés après
+rebase (holdings, unit_roster, smoke : verts). Capture jugée lisible par la
+session principale. Worktrees supprimés. Aucune dépense cloud.
+
+## Suites possibles
+- Le conseil du tutoriel (en haut à gauche) chevauche le haut du panneau au
+  premier tour.
+- Playtest du joueur.
