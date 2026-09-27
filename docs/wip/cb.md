@@ -9,7 +9,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB0 | Extraction des entrées (`battle_input.gd`) + sélection rapide | 1 | **fusionné 09-27** (+ correctif caméra : Ctrl/Cmd+lettre ne bouge plus la vue) | `cb0-entrees.md` |
 | CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | **fusionné 09-27** (trait 1 m, émission sur fond noir ; lisibilité à juger en jeu) | |
 | CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | **fusionné 09-27** (aperçu = ordre exact en ligne droite/pont, ≤ 3 m au gué, ≤ 13 m en siège ; aperçu au clic droit maintenu) | `cb-m2-trajet-curseur.md` |
-| CB-M3 | Ordres en file (Maj + clic droit) | 2 | **en cours** (agent, `feat/cb-m3-queue`) | `cb-m3-file-ordres.md` |
+| CB-M3 | Ordres en file (Maj + clic droit) | 2 | **fusionné 09-27** (borne 8 dans `battle_queue.json` ; `preview_path_from` ajouté plutôt que changer `preview_path` ; attaque en file close sur cible en fuite seulement si une file attend ; ordre suivant après rupture du contact) | `cb-m3-file-ordres.md` |
 | CB-M4 | Portée au sol, comparaison au survol | 2 | **fusionné 09-27** (fusionné avant CB-M3 ; demi-angle de tir = dessin seulement, 60° en données ; panneau posé au-dessus des « Ordres du chef ») | `cb-m4-portee-comparaison.md` |
 | CB1 | Formation au glisser, verrouillage de groupe | 3 | attente CB-M | |
 | CB2 | Modes d'unité, icônes d'état, remappage des touches | 4 | attente CB1 | |
@@ -28,10 +28,11 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 - Icônes (≈ 40, ≈ 2 $) via le pipeline DA5 ; consigner dans `docs/budget.md`.
 
 ## Prochaine étape
-CB-M3 (ordres en file, Maj + clic droit). S'appuyer sur `BattlePathPreview.update_orders` (trajets
-des ordres en cours, masqués pendant l'aperçu en direct) pour afficher la file. Pièges : décale Godot 4 =
-l'émission ignore l'alpha de l'albédo (fond d'émission noir) ; fenêtre headless 64×64 (forcer
-`root.size`) ; capture non headless = Retina 2992 px, réduire à 1600 avant commit ; nouvelles
-classes GDScript = `godot --import` avant les tests. Sondes texte : `cbm_outline_shot.gd --probe`,
-`cbm2_path_shot.gd --probe`. Curseurs : 6 PNG 32 px à produire (DA5) dans `game/assets/ui/cursors/`,
-substituts en code d'ici là. Comparaison calculée par `hover_context`, panneau = CB-M4.
+CB1 (formation au glisser, verrouillage de groupe, `line_files`, `match_speed`, `group_tag`), puis vague 4
+(CB2, CB3, CB5, CB6). Acquis à réutiliser : `preview_group`/`preview_group_queued` (fantômes de groupe),
+`BattlePathPreview.update_orders` (file numérotée, masquée pendant l'aperçu), Maj + glisser-droit envoie
+déjà `queue: true` (CB1 y ajoute la largeur). ADR 0095 : addenda CB-M2 (invariant aperçu), CB-M3 (fichier
+`battle_queue.json`, fin d'attaque sur cible en fuite avec file seulement), CB-M4 (demi-angle de tir =
+dessin seulement) à écrire à la finalisation. Pièges : les scripts de capture qui passent par
+`scene.issue` contournent `_path_allowed` — poser leurs points sur la terre ferme (sonde `legs=`) ;
+panneaux bas-gauche : se poser au-dessus des « Ordres du chef » (`compare_panel.above`).
