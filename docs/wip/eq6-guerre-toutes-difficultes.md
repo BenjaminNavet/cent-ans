@@ -6,19 +6,89 @@ Décision du joueur (2026-09-26) : la cible « France et Angleterre en guerre 55
 vaut à tous les niveaux, pas seulement en Normale. La difficulté change la dureté de la guerre
 pour le joueur, pas le fait qu'elle ait lieu.
 
-## Reprise 2026-09-27 (en cours)
+## État : TERMINÉ (reprise 2026-09-27) — prêt pour la fusion ff dans main
 
-- main fusionné (372 commits, sans conflit). Mesure après fusion (binaire `cp_m3`) :
-  facile 62 % [55-73] 4/5, 11,4 trêves ; normale 65 % [31-78] 8/10 (graine 10 à 31 %,
-  bloquée par l'attitude : « Mariage entre nos maisons » +15 empilé jusqu'à 10 fois, « Même
-  maison régnante ») ; difficile 65 % [59-69] 10/10, 14,0 trêves, 1re faction max 35 % ;
-  très difficile 57 % [50-65] **3/5** (graines 1-2 : Angleterre à 90-100 de fatigue en paix
-  avec la France, car elle répond sans cesse aux appels du Portugal contre la Castille et de
-  l'Empire contre la Bohême).
-- Essai v9 en cours : `war.claim_war_ignores_kinship` et `join_war.weary_stay_out`.
-- Prochaine étape : mesurer v9 aux quatre niveaux, puis vérifications complètes.
+### Reprise 2026-09-27
 
-## État antérieur : EN PAUSE (session suspendue par le joueur, 2026-09-26) — pas prêt à fusionner
+- main fusionné (372 commits, sans conflit ; commit de fusion après 96accf8f).
+- **Mesure après fusion, sans nouvelle règle** (`century_probe` 464 tours, binaire `cp_m3`) :
+  facile 62 % [55-73] 4/5 ; normale 65 % [31-78] 8/10 ; difficile 65 % [59-69] 10/10 (le
+  problème d'avant la fusion a disparu) ; très difficile 57 % [50-65] **3/5** ✗.
+- **Diagnostic** (tableau « EQ6 » + `WAR_TRACE=1`, qui affiche désormais les autres guerres de
+  l'Angleterre, les déclarations qui la concernent et les paix blanches évaluées) :
+  - normale graine 10 (31 %) : l'obstacle « attitude » bloque 293 tours de paix sur 321.
+    L'attitude anglaise envers la France monte à 100 : « Mariage entre nos maisons » (+15,
+    80 tours) empilé jusqu'à 10 fois, « Liens matrimoniaux » +15, « Même maison régnante » +20.
+  - très difficile graines 1-2 (50-52 %) : l'obstacle « weary » bloque ~165 tours de paix.
+    En paix avec la France, l'Angleterre reste à 90-100 de fatigue : trop lasse pour déclarer
+    elle-même, elle répond pourtant à chaque appel aux armes du Portugal contre la Castille et
+    de l'Empire contre la Bohême (graine 1 : t99, 147, 173, 197, 227, 253, 275…). Ces guerres
+    d'appoint, au score nul, l'entretiennent dans la fatigue pendant des décennies.
+- **Deux règles génériques** (réglages de `data/ai/diplomacy.json`, défaut faux = avant) :
+  - `war.claim_war_ignores_kinship` : pour la guerre de prétention principale, les raisons de
+    parenté (mariages, liens matrimoniaux, même maison) sortent de l'attitude qui la décide :
+    la prétention naît de cette parenté (Édouard III, petit-fils de Philippe IV par sa mère).
+  - `join_war.weary_stay_out` : un royaume trop las pour déclarer lui-même une guerre
+    (`max_weariness_to_declare`, +20 pour un prétendant) ne répond plus à l'appel aux armes,
+    comme un royaume ruiné (trésor < 0) : l'alliance est rompue.
+- Aucun changement des données de difficulté ni du combat tactique.
+
+### Tableau final (v9, `century_probe` 464 tours, mêmes graines)
+
+| Niveau | Guerre FR-EN moy. [min-max] | Graines dans la bande | Trêves / siècle moy. [max] | 1re faction fin moy. [max] | Banqueroutes | Majeures 1400 | Angl. domine le royaume |
+|---|---|---|---|---|---|---|---|
+| Facile (5) | 71 % [66-74] | **5/5** | 11,4 [12] | 24 % [27] | 0,09 | 5/5 | 0 % |
+| Normale (10) | 69 % [59-77] | **8/10** (75,4 et 76,7 %, juste au-dessus) | 12,7 [14] | 22 % [29] | 0,05 | 10/10 | 0-25 % |
+| Difficile (10) | 66 % [59-75] | **10/10** | 14,5 [17] | 24 % [30] | 0,04 | 10/10 | 0-74 % |
+| Très difficile (5) | 65 % [58-71] | **5/5** | 15,8 [17] | 28 % [31] | 0,03 | 5/5 | 47-76 % |
+
+Graines : facile 72 73 74 66 72 ; normale 59 69 73 72 75 70 70 77 61 66 ; difficile 60 66 69 61
+75 63 68 68 66 59 ; très difficile 58 62 64 69 71. Aucune faction éliminée.
+
+`balance_probe campaign` 200 tours (normale), lots 1-8 / 9-16 :
+
+| Mesure | Après fusion, sans règle | v9 (retenu) | Cible |
+|---|---|---|---|
+| Guerre FR-EN | 72 / 70 % | 69 / 72 % | 55-75 % |
+| Révoltes / partie (hors rebelles) | 4,0 / 3,1 (3,6) | 3,2 / 2,2 (2,7) | 4-10 |
+| Banqueroutes / fac. / déc. | 0,05 / 0,05 | 0,05 / 0,05 | < 0,5 |
+| Impôt Haut | 32 / 34 % | 29 / 34 % | < 40 % |
+| Milice | 27,8 / 28,2 % | 28,2 / 28,5 % | < 40 % |
+
+### Essais de la reprise
+
+| Essai | Facile (5) | Normale (10) | Difficile (10) | Très difficile (5) | Révoltes balance |
+|---|---|---|---|---|---|
+| m3 : main fusionné, règles v8 | 62 % [55-73], 4/5, 11,4 | 65 % [31-78], 8/10, 11,6 | 65 % [59-69], 10/10, 14,0 | 57 % [50-65], 3/5, 15,4 | 4,0 / 3,1 |
+| parenté seule | — | — | — | — | 4,0 / 3,2 |
+| fatigue seule (seuil de déclaration) | — | — | — | — | 3,2 / 2,6 |
+| **v9 (retenu)** : parenté + fatigue (seuil de déclaration) | 71 % [66-74], 5/5, 11,4 | 69 % [59-77], 8/10, 12,7 | 66 % [59-75], 10/10, 14,5 | 65 % [58-71], 5/5, 15,8 | 3,2 / 2,2 |
+| v10 : parenté + fatigue au seuil `sue_weariness` (70) | 72 % [65-78], 4/5, 11,6 | 70 % [61-76], 8/10, 13,3 | 67 % [58-71], 10/10, 14,4 (1re faction 39 %) | 62 % [51-71], 4/5, 15,4 | 2,4 / 3,9 |
+
+v10 ne relève pas les révoltes de façon mesurable (3,2 contre 2,7 : dans le bruit, ±0,8 entre
+lots) et tient les critères de guerre plus juste : v9 retenu.
+
+### Points ouverts
+
+- **Révoltes `balance_probe` sous la bande 4-10** : 3,6 déjà après la fusion de main, sans
+  règle EQ6 (dette connue du lot DC, `docs/wip/dc-densite.md` : 3,2 contre 5,7 avant DC) ;
+  2,7 avec v9. La règle de fatigue retire des guerres d'appoint, donc des provinces occupées
+  (la moitié des révoltes éclatent en province occupée). Relever les révoltes relève de l'ordre
+  public (lot DC/EQ1 : pondérer la garnison qui apaise), hors du périmètre d'EQ6.
+- Très difficile : l'Angleterre domine le royaume 47-76 % du siècle (la France de la sonde est
+  une IA avec les handicaps du joueur) ; trêves 15,8 en moyenne, 17 sur deux graines.
+- Le bonus « Mariage entre nos maisons » s'empile sans plafond (jusqu'à +150) ; les
+  ambassades de héraut aussi (6 à la fois vues en trace). EQ6 le neutralise pour la guerre de
+  prétention seulement ; un plafond général par motif changerait toute la diplomatie : à
+  traiter à part si besoin.
+- Chaos entre graines toujours large ; en normale, graines 5 et 8 à 75,4 et 76,7 % (hors bande
+  par le haut, de peu) : la guerre est désormais plutôt trop présente que trop rare.
+
+### Vérifications (reprise)
+
+Voir la section « Vérifications finales » en fin de reprise.
+
+## État antérieur (2026-09-26) : EN PAUSE (session suspendue par le joueur, 2026-09-26) — pas prêt à fusionner
 
 ### Où l'on en est (lire d'abord)
 
@@ -230,4 +300,4 @@ target/release/examples/balance_probe campaign 200 9 10 11 12 13 14 15 16
 ```
 
 ## Prochaine étape
-Fusion dans main par le coordinateur.
+Fusion ff dans main par le coordinateur (branche `feat/eq6-war-all-difficulties`).
