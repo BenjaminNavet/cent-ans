@@ -1782,13 +1782,16 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             }
         }
 
-        // CV3-6: with nothing urgent (no threat here, no siege of ours or
-        // against us), a short detour to an encounter site.
+        // CV3-6: with nothing urgent (at peace, or at war when the tuning
+        // allows it with no threat here; no siege of ours or against us), a
+        // short detour to an encounter site.
         let idle = choice
             .as_ref()
             .is_none_or(|(objective, _)| *objective == Objective::Regroup);
         if idle && !besieging && !attacked && !realm_besieged {
-            let quiet = !ctx.at_war() || here.as_ref().is_none_or(|p| ctx.threat(p) <= 0.0);
+            let quiet = !ctx.at_war()
+                || (data.ai_grid.encounters.detour_at_war
+                    && here.as_ref().is_none_or(|p| ctx.threat(p) <= 0.0));
             if quiet {
                 if let Some(order) =
                     crate::stances::encounter_detour(state, data, ctx.faction, army_id)

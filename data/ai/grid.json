@@ -29,6 +29,7 @@
   },
   "encounters": {
     "detour_permille": 300,
-    "sight_km": 30
+    "sight_km": 30,
+    "detour_at_war": false
   }
 }
