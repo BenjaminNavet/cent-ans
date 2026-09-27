@@ -1,0 +1,5 @@
+assets/
+godot/assets/
+godot/.godot/
+out/
+__pycache__/
