@@ -16,10 +16,10 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | CB3 | Ralenti, caméra (rotation/inclinaison), vue tactique, `spotted` | 4 | attente CB1 | |
 | CB5 | Alertes typées, colonne, minicarte, cris | 4 | attente CB1 | |
 | CB6 | Formations de groupe (attaque/défense, placement proposé) — demande du joueur 09-27 | 4 | attente CB1 | |
-| CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 | |
+| CB4 | Capacités actives (relecture historique d'abord) | 5 | attente CB2 (relecture historique **faite**) | |
 
 ## Coordination
-- Relecture historique CB4 (capacités) et CB6 (formations de groupe) lancée pendant CB1 (docs seulement).
+- Relecture historique CB4 et CB6 faite (09-27, `docs/research/cb4-capacites.md`, `cb6-formations.md`) ; décisions de jeu tranchées par la session principale (joueur : pas de question) et inscrites au plan : noms changés, « Battre en brèche » en mode CB2, 6 préréglages CB6, pieux hors CB.
 - 09-27 : le joueur accepte les limites de CB-M2 et autorise l'enchaînement des lots sans nouvelle question.
 - CB-M3 et CB-M4 lancés en parallèle (fichiers presque disjoints ; conflit attendu seulement dans `get_units`).
 - Budget de captures relevé à **10 par lot** par le joueur (09-27), lues par la session principale seulement.
