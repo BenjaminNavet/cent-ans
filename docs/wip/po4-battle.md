@@ -42,6 +42,16 @@ l'horloge du HUD. Donc :
 
 Avant : large 11,34 / 11,28 / 9,67 (médiane 11,28) ; rapproché 11,48 / 11,43 / 11,60 (médiane 11,48).
 
+Mesure A/B alternée (même créneau ; A = fichiers de `feat/po-polish`, B = branche,
+`bench_ab.sh` dans le bloc-notes de session), après fusion de `feat/po-polish` :
+- 1er passage (machine chargée) : large A 10,85 / 9,01 / 11,68, B 11,68 / 12,50 / 11,72 → +8 %
+  en médiane ; cause probable : 3 bruits par sommet d'herbe (même les touffes absentes).
+- Correctif : bruits de densité sautés hors du disque, bruit de bouquet seulement si la touffe
+  passe le premier tirage.
+- 2e passage : large A 11,75 / 11,46 / 11,57 (méd. 11,57), B 11,63 / 11,66 / 11,48 (méd. 11,63,
+  +0,5 %) ; rapproché A 11,50 / 11,73 / 11,73 (méd. 11,73), B 11,52 / 11,39 / 11,71 (méd. 11,52,
+  −1,8 %). Dans la marge de ±5 %.
+
 ## Prochaine étape
 
 Étape 7 (smoke, banc PB1 alterné, captures). Machine chargée (GPU partagé) : le banc final doit alterner avant/après dans le même créneau.
