@@ -129,7 +129,7 @@ uniform float far_boost = 0.35;
 // du régiment, vent de la bataille et rafales. Uniformes posés par BattleSecondaryMotion
 // (`data/fx/atmosphere.json`, `secondary_motion`) ; éteint par défaut.
 uniform bool sm_enabled = false;
-uniform float sm_distance = 160.0;
+uniform float sm_distance = 100.0;
 uniform float move_speed = 0.0;
 uniform float sm_speed_ref = 5.0;
 uniform float sm_wind_scale = 1.0;

@@ -86,7 +86,7 @@ static func apply_settings(mat: ShaderMaterial, cfg: Dictionary) -> void:
 	mat.set_shader_parameter("sm_amp", amps)
 	mat.set_shader_parameter("sm_lift", lift)
 	mat.set_shader_parameter("sm_cap_band", Vector2(float(cap.get("hem_y_m", 0.48)), float(cap.get("top_y_m", 1.45))))
-	mat.set_shader_parameter("sm_distance", float(cfg.get("max_distance_m", 160.0)))
+	mat.set_shader_parameter("sm_distance", float(cfg.get("max_distance_m", 100.0)))
 	mat.set_shader_parameter("sm_speed_ref", float(cfg.get("speed_ref_m_s", 5.0)))
 	mat.set_shader_parameter("sm_wind_scale", float(cfg.get("wind_scale", 1.0)))
 	mat.set_shader_parameter("sm_mane_tint", MANE_TINT)

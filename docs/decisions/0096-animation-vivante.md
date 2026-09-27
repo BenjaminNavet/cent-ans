@@ -33,7 +33,7 @@ recuisson** des figurines.
   jeu : arrêt, marche, course, sonnerie → l'étoffe traîne vers l'arrière quand il court).
 - **Données** : `data/fx/atmosphere.json` `secondary_motion` (schéma
   `fx_atmosphere.schema.json`) : amplitudes par pièce (recul, vent, flottement, fréquence,
-  évasement), échelle du vent, distance maximale (160 m, fondu dès 70 %), vitesse de
+  évasement), échelle du vent, distance maximale (100 m, fondu dès 70 %), vitesse de
   référence. Uniformes posés par `game/scripts/battle/battle_secondary_motion.gd`.
 - **Portée** : LOD0/LOD1/LOD2 fins et figurines Quaternius (`--coarse-figures`, mêmes rigs et
   codes) ; figurines rigides `--legacy-figures` inchangées (autre shader) ; éteint sur les
@@ -49,7 +49,10 @@ recuisson** des figurines.
   de soldats.
 
 ### Conséquences
-- Coût GPU mesuré au banc FG5 (voir `docs/wip/an1a-mouvement-secondaire.md`).
+- Coût GPU au banc FG5 (Ultra, passes alternées avec `--no-an1a`) : standard non mesurable
+  (-1 % en médiane), rapproché +1 % en médiane (+2,7 % au minimum). La première version
+  (boucles par os, 160 m) coûtait +10 % en rapproché : poids vectorisés, portée ramenée à
+  100 m (au-delà, 1 px ≈ 8 cm). Détail : `docs/wip/an1a-mouvement-secondaire.md`.
 - ~7 sommets du corps du cheval fin partagent la teinte des crins et bougent avec la crinière
   (quelques millimètres) : invisible ; à retirer si une recuisson ajoute un vrai masque.
 - Le mouvement utilise `TIME` (comme les drapeaux) : il continue pendant la pause.
