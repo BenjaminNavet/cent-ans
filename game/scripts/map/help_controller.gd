@@ -18,7 +18,7 @@ const HELP_TEXT := """[b]La campagne[/b]
 [b]Batailles[/b]
 • Espace : pause (ordres possibles en pause). + / − ou boutons en bas à droite : vitesse ×1 / ×2 / ×4. Ctrl+1…9 : enregistrer un groupe, 1…9 : le rappeler (deux fois : centrer).
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter). Clic droit : déplacer ou attaquer ; double clic droit : au pas de course ; glisser-droit : orienter la ligne.
-• F : formation, G : tir à volonté, H : halte. Ordres du chef : Z X V B N (W X V B N en AZERTY). C : suivre la sélection. U : bannières. F1 : aide de bataille. La pluie gêne les archers, les flancs et les arrières sont vulnérables, le moral s'effondre sans général.
+• F : tir à volonté, T : formation, H : halte ; modes R (course), G (garde), K (escarmouche), M (mêlée des tireurs). Ordres du chef : Z X V B N (W X V B N en AZERTY). C : suivre la sélection. U : bannières. F1 : aide de bataille. La pluie gêne les archers, les flancs et les arrières sont vulnérables, le moral s'effondre sans général.
 
 [b]Personnages, diplomatie, religion[/b]
 • Les personnages gagnent de l'expérience et des points de compétence (arbre à trois branches), se marient, ont des enfants, meurent : la succession suit la loi du royaume.

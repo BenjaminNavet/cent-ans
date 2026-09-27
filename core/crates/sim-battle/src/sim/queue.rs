@@ -60,6 +60,9 @@ impl BattleSim {
             unit.pavise = None;
         }
         unit.target = Some(target);
+        // CB2: an attack order is the player's call on men: it ends the
+        // engines' battering.
+        unit.breach = false;
         unit.match_speed = false;
         unit.group_tag = None;
         unit.destination = None;

@@ -48,6 +48,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
 			handle_group_key(int(key.physical_keycode - KEY_0), key.ctrl_pressed or key.meta_pressed)
 			return
+		# CB2 : table unique des raccourcis (`BattleHotkeys`) : ordres, modes, verrou de groupe.
+		var action := BattleHotkeys.action_for(key)
+		if action != "":
+			handle_action(action)
+			return
 		match event.keycode:
 			KEY_ENTER, KEY_KP_ENTER:
 				if scene.deployment != null:
@@ -66,14 +71,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				# CB0 : sélection rapide, Ctrl/Cmd+A = toutes les troupes du joueur présentes.
 				if key.ctrl_pressed or key.meta_pressed:
 					_select_all_player_units()
-			KEY_F:
-				_on_command("formation")
-			KEY_G:
-				# CB1 : Ctrl/Cmd+G = verrouiller / déverrouiller le groupe ; G seul = tir à volonté.
-				if key.ctrl_pressed or key.meta_pressed:
-					toggle_lock()
-				else:
-					_on_command("fire_at_will")
 			KEY_H:
 				_on_command("halt")
 			KEY_C:
@@ -362,6 +359,45 @@ func _on_command(command: String) -> void:
 			for unit in scene.units:
 				if ids.has(int(unit["id"])):
 					command_requested.emit({"type": "formation", "units": [int(unit["id"])], "kind": _next_formation(unit)})
+		"run", "guard", "skirmish", "melee", "breach":
+			_toggle_mode(command, ids)
+
+
+## CB2 : action d'une ligne `dispatch` de `BattleHotkeys` (touche pressée).
+func handle_action(action: String) -> void:
+	if action == "lock_group":
+		toggle_lock()
+		return
+	_on_command(action)
+
+
+## CB2 : ordre `set_mode` qui bascule `mode` sur les régiments de `ids` qui peuvent le prendre
+## (`modes` de `get_units`, verdict du cœur) : activé si l'un d'eux ne l'a pas, sinon désactivé ;
+## message si aucun ne le peut. Rien pendant un rejeu.
+func _toggle_mode(mode: String, ids: Array[int]) -> void:
+	if scene.replay_mode:
+		return
+	var command := mode_command(scene.units, ids, mode)
+	if command.is_empty():
+		scene.hud.show_toast("Aucune unité sélectionnée ne peut passer en mode %s." % BattleModeIcons.label_of(mode).to_lower())
+		return
+	command_requested.emit(command)
+
+
+## CB2 : l'ordre `set_mode` de `mode` pour `ids` (fonction pure, testée) ; vide si aucun régiment
+## de `ids` ne peut prendre le mode.
+static func mode_command(units: Array, ids: Array, mode: String) -> Dictionary:
+	var able: Array[int] = []
+	var enable := false
+	var field := BattleModeIcons.field_of(mode)
+	for unit in units:
+		if not ids.has(int(unit["id"])) or not Array(unit.get("modes", [])).has(mode):
+			continue
+		able.append(int(unit["id"]))
+		enable = enable or not bool(unit.get(field, false))
+	if able.is_empty():
+		return {}
+	return {"type": "set_mode", "units": able, "mode": mode, "enabled": enable}
 
 
 func _available_selection() -> Array[int]:
