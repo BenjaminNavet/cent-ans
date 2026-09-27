@@ -10,14 +10,27 @@ communes, CB3). Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-
       `manual_pitch_deg`, bornes 5°-85°, `MANUAL_PITCH_DRAG_SPEED`) ; Maj + bouton du milieu =
       panoramique (ancien comportement) ; suivi de régiment inchangé (orbite lacet seul) ;
       `look_at_point` et `follow_unit` remettent `manual_pitch` à zéro (recentrage).
-- [ ] Vitesse ×0,5 (`SPEEDS`, `battle_hud.gd` boutons/tooltips/icônes).
-- [ ] Cœur : champ dérivé `spotted` (`BattleSim::spotted_by`, réutilise `visible()` +
-      `missile_arc.spotter_range_m`), test `cb3_spotted.rs`, exposition dans `get_units`.
-- [ ] `battle_tactical_view.gd` (Tab) : caméra du dessus, overlay d'assombrissement (pas de
-      shader touché), pastilles B7 forcées, ennemis non `spotted` masqués, restauration.
-- [ ] Tests Godot : `zg4_camera_test.gd` étendu, `cb3_tactical_view_test.gd`.
-- [ ] Capture `cb3_tactical_shot.gd --probe`.
-- [ ] Vérifications finales (fmt/clippy/test, pytest, smoke, tests CB, release ep7/eq7 si besoin).
+- [x] Vitesse ×0,5 (`SPEEDS` dans `battle_scene.gd` ; boutons/tooltips/icônes dans `battle_hud.gd`
+      — `SPEED_TOOLTIPS`, boucle `_build_corner`, `_draw_speed_icon` avec un demi-triangle pour
+      ×0,5). `HELP_TEXT` **non touché** (CB2 le réécrit).
+- [x] Cœur : champ dérivé `BattleSim::spotted_by(target, side)` (`sim.rs`, réutilise `visible()` +
+      `missile_arc.spotter_range_m` = 350 m, pas de nouveau fichier de données), test
+      `cb3_spotted.rs` (5 tests, dont un qui vérifie l'absence d'effet sur `state_digest`).
+      Exposé dans `get_units` (`godot-bridge/src/battle_sim.rs`) sous `spotted` (vrai si pas de
+      `player_side`, càd bataille spectée).
+- [x] `battle_tactical_view.gd` (Tab) : caméra du dessus (`manual_pitch_deg = 85°`, cadrée sur
+      `terrain.field_center()`/`FIELD_W`/`FIELD_D`), calque `ColorRect` semi-transparent inséré en
+      premier enfant de `hud.root` (assombrit tout sauf le HUD, pas de shader touché), pastilles
+      B7 forcées (`BattleUnitMarkers.update(force_clustered)`), ennemis non `spotted` retirés
+      (`filter_spotted`, fonction pure). Tab bascule (`battle_input.gd`), Échap sort d'abord de la
+      vue tactique si active (sinon comportement existant). Contraintes de déploiement : aucun
+      changement nécessaire (elles vivent dans `DeploymentController`, indépendant de la caméra).
+- [x] Tests Godot : `zg4_camera_test.gd` étendu (bornes 5°-85°, suspension/reprise via
+      `look_at_point`), `cb3_tactical_view_test.gd` (fonction pure `filter_spotted` + intégration
+      Tab/Tab, Échap, restauration caméra, masquage des repères si le champ le permet).
+- [x] Capture `cb3_tactical_shot.gd` (support `--out` et `--probe`, seul `--probe` exécuté ici).
+- [ ] Vérifications finales (fmt/clippy/test, pytest, smoke, tests CB, release ep7/eq7 si besoin) —
+      en cours.
 
 ## Décisions / écarts
 
@@ -40,7 +53,7 @@ communes, CB3). Spec : `docs/superpowers/specs/2026-09-27-controles-bataille-tw-
 
 ## Prochaine étape
 
-Ajouter `spotted_by` au cœur + test `cb3_spotted.rs`, puis exposer `spotted` dans `get_units`
-(`godot-bridge/src/battle_sim.rs`). Puis `battle_tactical_view.gd` et son branchement (Tab dans
-`battle_input.gd`, nœud créé dans `battle_scene.gd::_ready`). Puis vitesse ×0,5. Puis tests Godot
-et capture.
+Vérifications finales complètes (`cargo fmt`, `clippy --workspace --all-targets -D warnings`,
+`cargo test --workspace`, `ep13_replay`/`b6` en release, `pytest`, `smoke.gd`, tous les tests
+Godot CB listés dans la tâche), puis `godot --headless --path game --import` si pas déjà fait
+après ce lot, puis commit final.

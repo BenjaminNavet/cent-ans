@@ -13,7 +13,7 @@ signal card_clicked(unit_id: int, additive: bool)
 signal card_double_clicked(unit_id: int)  # B3 / T6 : centrer la caméra sur ce régiment
 signal card_hovered(unit_id: int)  # CB-M2 : carte survolée (-1 : plus aucune), contour pâle
 signal command_pressed(command: String)
-signal speed_pressed(index: int)  # -1 : pause, 0..2 : index dans BattleScene.SPEEDS
+signal speed_pressed(index: int)  # -1 : pause, 0..3 : index dans BattleScene.SPEEDS
 signal minimap_clicked(world: Vector2)
 signal leader_clicked(double: bool)  # UB1 : sceau du chef (clic : sélection, double : caméra)
 signal ui_feedback(kind: String)  # UB1 : sons d'interface (« card », « alert », « cancel »)
@@ -21,7 +21,8 @@ signal ui_feedback(kind: String)  # UB1 : sons d'interface (« card », « alert
 const UNIT_CARD := preload("res://scripts/battle/unit_card.gd")
 const MINIMAP := preload("res://scripts/battle/battle_minimap.gd")
 const ORDERS_BAR := preload("res://scripts/battle/leader_orders_bar.gd")
-const SPEED_TOOLTIPS := ["Pause (Espace)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
+## CB3 : ralenti ×0,5 ajouté en tête (`BattleScene.SPEEDS`).
+const SPEED_TOOLTIPS := ["Pause (Espace)", "Ralenti ×0,5 (+ / −)", "Vitesse ×1 (+ / −)", "Vitesse ×2 (+ / −)", "Vitesse ×4 (+ / −)"]
 const HELP_TEXT := """[b]Bataille — commandes[/b] (F1 : fermer)
 • Espace : pause (ordres possibles en pause) · + / − : vitesse ×1, ×2, ×4 (boutons en bas à droite).
 • Clic gauche : sélection (glisser : rectangle, Maj : ajouter) · clic sur une carte : sélectionner · double clic sur une carte : centrer la caméra dessus.
@@ -469,7 +470,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 ## Coin bas droit : minicarte, et à sa droite la colonne des boutons-icônes de vitesse (pause,
-## ×1, ×2, ×4), pour tenir dans le bandeau compact.
+## ×0,5, ×1, ×2, ×4 — CB3), pour tenir dans le bandeau compact.
 func _build_corner() -> HBoxContainer:
 	var corner := HBoxContainer.new()
 	corner.add_theme_constant_override("separation", 4)
@@ -482,7 +483,7 @@ func _build_corner() -> HBoxContainer:
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 3)
 	corner.add_child(row)
-	for index in range(-1, 3):
+	for index in range(-1, 4):  # CB3 : pause, ×0,5, ×1, ×2, ×4
 		var button := Button.new()
 		button.name = "Speed%d" % index
 		button.custom_minimum_size = Vector2(38, 24)
@@ -496,7 +497,8 @@ func _build_corner() -> HBoxContainer:
 	return corner
 
 
-## Pictogramme dessiné (pas de glyphe de police) : deux barres pour la pause, 1 à 3 triangles.
+## Pictogramme dessiné (pas de glyphe de police) : deux barres pour la pause, un demi-triangle
+## pour le ralenti ×0,5 (CB3), puis 1 à 3 triangles pleins pour ×1, ×2, ×4.
 func _draw_speed_icon(button: Button, index: int) -> void:
 	var active := index == _active_speed
 	var color := Color(0.6, 0.1, 0.08) if active and index < 0 else (Color(0.55, 0.35, 0.02) if active else INK)
@@ -507,7 +509,10 @@ func _draw_speed_icon(button: Button, index: int) -> void:
 		button.draw_rect(Rect2(center + Vector2(-6, -6), Vector2(4, 12)), color)
 		button.draw_rect(Rect2(center + Vector2(2, -6), Vector2(4, 12)), color)
 		return
-	var count := index + 1
+	if index == 0:
+		button.draw_colored_polygon(PackedVector2Array([Vector2(center.x - 4.5, center.y - 6), Vector2(center.x, center.y), Vector2(center.x - 4.5, center.y + 6)]), color)
+		return
+	var count := index
 	var left := center.x - count * 4.5
 	for i in count:
 		var x := left + i * 9.0

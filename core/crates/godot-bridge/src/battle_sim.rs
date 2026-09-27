@@ -864,6 +864,13 @@ impl BattleSim {
                     "width" => width,
                     "depth" => depth,
                     "is_general" => unit.is_general,
+                    // CB3: fog of war for the tactical view (Tab) — purely derived, not part of
+                    // the core state (`state_digest`/replay): own side always spotted; no player
+                    // side set (spectated battle) shows everyone, as the normal view already does.
+                    "spotted" => sim
+                        .setup()
+                        .player_side
+                        .is_none_or(|side| sim.spotted_by(unit, side)),
                     "present" => unit.present(),
                     "reserve" => unit.reserve,
                     "left_field" => unit.left_field,

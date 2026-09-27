@@ -45,7 +45,8 @@ signal returned(result: Dictionary)
 ## T8 : images mesurées par répétition du banc d'essai (`--benchmark`).
 const BENCH_FRAMES := 600
 const KINDS := ["infantry", "archer", "cavalry", "siege"]
-const SPEEDS := [1.0, 2.0, 4.0]
+## CB3 : ralenti ×0,5 ajouté (le − descend jusque-là) ; index par défaut sur ×1 (`speed = 1.0`).
+const SPEEDS := [0.5, 1.0, 2.0, 4.0]
 ## EP13 : vitesses du rejeu (barre de rejeu, + / −).
 const REPLAY_SPEEDS := [1.0, 2.0, 4.0, 8.0]
 const PICK_RADIUS_PX := 26.0
@@ -242,6 +243,8 @@ var log_orders_for_test: bool = false
 @onready var sun: DirectionalLight3D = $Sun
 ## CB0 : entrées (clics, glisser, touches, groupes), nœud enfant créé au premier `_ready`.
 var input: BattleInput = null
+## CB3 : vue tactique (Tab), nœud enfant créé au premier `_ready` comme `input`.
+var tactical_view: BattleTacticalView = null
 
 
 ## À appeler avant `add_child` quand la bataille vient de la campagne.
@@ -266,6 +269,12 @@ func _ready() -> void:
 	input.help_toggled.connect(hud.toggle_help)
 	input.markers_toggled.connect(_on_input_markers_toggled)
 	input.screenshot_requested.connect(_on_input_screenshot_requested)
+	input.tactical_view_toggled.connect(_on_input_tactical_view_toggled)
+	# CB3 : vue tactique (Tab).
+	tactical_view = BattleTacticalView.new()
+	tactical_view.name = "BattleTacticalView"
+	tactical_view.scene = self
+	add_child(tactical_view)
 	hud.card_clicked.connect(_on_card_clicked)
 	hud.card_double_clicked.connect(_on_card_double_clicked)
 	hud.card_hovered.connect(func(id: int) -> void: card_hover = id)  # CB-M2 : contour au survol
@@ -1595,14 +1604,18 @@ func _build_markers() -> void:
 
 
 ## Ancre écran de chaque repère : au-dessus du drapeau 3D du régiment.
+## CB3 : en vue tactique, les ennemis non `spotted` sont retirés et les pastilles sont forcées
+## (regroupées, comme la vue très lointaine B7).
 func _update_markers(banner_scale: float) -> void:
 	if markers == null:
 		return
+	var tactical := tactical_view != null and tactical_view.active
+	var shown: Array = BattleTacticalView.filter_spotted(units, player_side) if tactical else units
 	var anchors := {}
 	if markers.visible:
 		var camera := camera_rig.camera
 		var screen := get_viewport().get_visible_rect().grow(60.0)
-		for unit in units:
+		for unit in shown:
 			if not bool(unit["present"]):
 				continue
 			var top := Vector3(float(unit["x"]), float(unit["y"]) + (BANNER_HEIGHT + 0.6) * banner_scale, float(unit["z"]))
@@ -1611,7 +1624,7 @@ func _update_markers(banner_scale: float) -> void:
 			var point := camera.unproject_position(top)
 			if screen.has_point(point):
 				anchors[int(unit["id"])] = point
-	markers.update(units, anchors, selected, camera_rig.distance)
+	markers.update(shown, anchors, selected, camera_rig.distance, tactical)
 
 
 ## Clic droit sur le repère d'un ennemi : la sélection l'attaque (au pas de course).
@@ -1750,6 +1763,12 @@ func _on_input_camera_focus(point: Vector3) -> void:
 func _on_input_markers_toggled() -> void:
 	if markers != null:
 		markers.toggle()
+
+
+## CB3 : touche Tab.
+func _on_input_tactical_view_toggled() -> void:
+	if tactical_view != null:
+		tactical_view.toggle()
 
 
 func _on_input_screenshot_requested() -> void:
