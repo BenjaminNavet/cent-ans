@@ -119,6 +119,10 @@ var _charge_mass: Dictionary = {}  # unit id -> poids de la dernière charge
 var _melee_time: Dictionary = {}  # unit id -> secondes de mêlée cumulées
 var _speed: Dictionary = {}  # unit id -> vitesse au sol lissée (m/s)
 var _braced: Dictionary = {}  # unit id -> true : piques abaissées devant une charge
+## AN1b : camp vainqueur une fois la bataille finie ("" avant ; posé par la scène). Ses
+## régiments jouent `victory` ; les autres gardent leur dernière pose (horloge figée).
+var victor_side: String = ""
+var _pike_units: Dictionary = {}  # unit id -> true si armes d'hast (cabrage des chevaux)
 var _frame_dt: float = 0.0
 var _audio: Script = null
 ## Lot EP12 (ADR 0070) : blessés au sol et fuyards désarmés. `--no-ep12` après `--` : rendu
@@ -622,8 +626,11 @@ func _update_unit(unit: Dictionary, id: int, kind: String, slice: PackedFloat32A
 	var state := str(unit.get("state", ""))
 	var config: Dictionary = {}
 	if skinned:
-		var shown_state := "brace" if _braced.has(id) and ["idle", "marching", "rallied"].has(state) else state
+		var shown_state := _shown_state(unit, id, kind, state)
 		config = BattleSkinned.state_config(kind, BattleMeshes.variant_of(str(unit.get("type", ""))), shown_state, bool(unit.get("running", false)))
+		if victor_side != "" and shown_state != "victory":
+			# AN1b : l'horloge des autres régiments reste figée après la fin (comme avant).
+			_lag[id] = float(_lag.get(id, 0.0)) + _frame_dt
 		# Lot BV2 : cadence de marche calée sur la vitesse réelle du régiment (pieds qui ne
 		# glissent plus) — l'horloge du régiment avance plus ou moins vite, sans saut de phase.
 		var cadence := _cadence(id, config) if bv2_enabled else 1.0
@@ -1325,6 +1332,34 @@ func _hide_knocked(id: int, slice: PackedFloat32Array, n: int) -> PackedFloat32A
 	return out
 
 
+## AN1b : état montré (rendu seulement, aucune règle) : piques abaissées devant une charge
+## (BV2), victoire du camp vainqueur une fois la bataille finie, chevaux qui se cabrent au contact
+## d'un régiment d'armes d'hast (`melee_pikes`).
+func _shown_state(unit: Dictionary, id: int, kind: String, state: String) -> String:
+	if victor_side != "":
+		if str(unit.get("side", "")) == victor_side and state != "routing" and state != "climbing":
+			return "victory"
+		return state
+	if _braced.has(id) and ["idle", "marching", "rallied"].has(state):
+		return "brace"
+	if kind == "cavalry" and state == "melee" and _is_pike_unit(int(unit.get("target", -1))):
+		return "melee_pikes"
+	return state
+
+
+## Régiment d'armes d'hast (style `pike` ou `militia` de sa figurine), mis en cache.
+func _is_pike_unit(uid: int) -> bool:
+	if uid < 0:
+		return false
+	if not _pike_units.has(uid):
+		var info: Dictionary = _unit_info.get(uid, {})
+		var pike := false
+		if not info.is_empty() and str(info["kind"]) == "infantry":
+			pike = ["pike", "militia"].has(BattleSkinned.style_of("infantry", int(info["variant"])))
+		_pike_units[uid] = pike
+	return bool(_pike_units[uid])
+
+
 ## Piquiers et miliciens qui abaissent leurs armes d'hast devant une charge de cavalerie
 ## ennemie à moins de 90 m (rendu seulement, lot BV2).
 func _find_braced(units: Array) -> void:
@@ -1344,7 +1379,9 @@ func _find_braced(units: Array) -> void:
 ## Facteur de cadence d'un régiment en marche : vitesse lissée / vitesse nominale du clip de
 ## locomotion (`cadence` de battle_gore.json, m/s à la vitesse 1) ; 1 hors locomotion.
 func _cadence(id: int, config: Dictionary) -> float:
-	if int(config.get("mode", 0)) != BattleSkinned.M_LOOP:
+	# AN1b : la charge des lanciers est un cycle (trébuchement) dont le premier clip est le galop.
+	var mode := int(config.get("mode", 0))
+	if mode != BattleSkinned.M_LOOP and not (mode == BattleSkinned.M_CYCLE and str(config.get("key", "")).ends_with("/charging")):
 		return 1.0
 	var names: Array = config.get("names", [])
 	var table: Dictionary = _gore.get("cadence", {})
