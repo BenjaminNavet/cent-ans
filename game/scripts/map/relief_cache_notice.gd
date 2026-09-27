@@ -6,6 +6,9 @@ extends PanelContainer
 ## l'écran de campagne, sous la barre supérieure. Il ne capte que les clics sur lui-même, donne la
 ## commande de régénération (sélectionnable, bouton « Copier ») et se ferme d'un clic.
 ## Rendu seulement.
+## PO1 (bible DA § 12.5) : texte d'outil (commande `uv run`…) — l'avis ne s'affiche qu'en mode
+## développeur (`Settings.is_dev()`, `-- --dev`) ; sinon le cache incomplet ne donne que les
+## lignes `push_warning` du journal Godot.
 
 const THEME_PATH := "res://scenes/ui/parchment_theme.tres"
 const WIDTH := 560.0
@@ -32,13 +35,20 @@ static func report(parent: Node, map_dir: String, relief_root: String) -> Relief
 		push_warning("ReliefCache: close zoom limited; regenerate with `%s` (docs/geo.md)" % ReliefCacheStatus.REGEN_COMMAND)
 	else:
 		print(checked.summary())
-	if checked.needs_notice() and not shown_this_session and parent != null:
+	if checked.needs_notice() and not shown_this_session and parent != null and dev_mode():
 		shown_this_session = true
 		var notice := ReliefCacheNotice.new()
 		notice.name = "ReliefCacheNotice"
 		notice.setup(checked)
 		parent.add_child(notice)
 	return checked
+
+
+## PO1 : vrai en mode développeur (autoload `Settings` absent : faux).
+static func dev_mode() -> bool:
+	var tree := Engine.get_main_loop() as SceneTree
+	var settings: Node = tree.root.get_node_or_null("Settings") if tree != null else null
+	return settings != null and bool(settings.call("is_dev"))
 
 
 func setup(checked: ReliefCacheStatus) -> void:
