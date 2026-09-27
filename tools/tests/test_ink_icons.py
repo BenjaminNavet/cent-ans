@@ -68,7 +68,14 @@ def test_plan_skips_sources_existing_raws_and_filters(tmp_path, monkeypatch) -> 
     keys = {job.character_id for job in jobs}
     assert f"icon:{first.id}" not in keys
     assert "medallion:end_turn" not in keys  # validated bell, reused
-    assert len(jobs) == len(catalog["icons"]) - 1 + len(catalog["medallions"]) - 1
+    # Entries drawn from a validated source (bell medallion, CV3-4 reused drawings).
+    sourced = sum(
+        1
+        for key in ("icons", "medallions")
+        for item in catalog[key]
+        if item.get("source")
+    )
+    assert len(jobs) == len(catalog["icons"]) + len(catalog["medallions"]) - 1 - sourced
     only = ink_icons.plan(catalog, only=["medallion:diplomacy", "halt"])
     assert {job.character_id for job in only} == {"medallion:diplomacy", "icon:halt"}
     assert len(ink_icons.plan(catalog, kind="icon", limit=3)) == 3
