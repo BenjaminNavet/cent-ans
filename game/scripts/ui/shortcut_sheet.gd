@@ -31,7 +31,8 @@ const CAMPAIGN_SECTIONS := [
 	{"title": "Fenêtres", "actions": [
 		["map_toggle_court", "Cour et personnages"], ["map_toggle_tech", "Technologies"],
 		["map_toggle_diplomacy", "Diplomatie et religion"], ["map_toggle_objectives", "Objectifs"],
-		["map_toggle_agents", "Agents"], ["map_toggle_units", "Mes unités (armées et agents)"], ["codex_open", "Codex (histoire et règles)"],
+		["map_toggle_agents", "Agents"], ["map_toggle_units", "Mes unités (armées et agents)"],
+		["map_toggle_holdings", "Colonies (revenus, chantiers, menaces)"], ["codex_open", "Codex (histoire et règles)"],
 		["encyclopedia_open", "Codex, onglet Règles"], ["help_open", "Aide et raccourcis"]]},
 	{"title": "Filtres de carte", "actions": [
 		["map_filters_menu", "Menu des filtres (richesse, population, loyauté, ravitaillement…)"],

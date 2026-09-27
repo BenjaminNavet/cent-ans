@@ -19,6 +19,8 @@ l'IU.
 valeurs par défaut, `holdings_test.gd` désactivé). Touche retenue : **B**
 (`physical_keycode` 66, libre — vérifié dans `project.godot`).
 
-Prochaine étape : branchements (`campaign_map.gd`, `project.godot`, `map_ui.gd`,
+Branchements faits (campaign_map.gd, project.godot, map_ui.gd, shortcut_sheet.gd,
 `shortcut_sheet.gd`, exclusion mutuelle avec `UnitRosterController`), puis le
 panneau (§ 2 de la spec), puis les tests et la capture.
+exclusion mutuelle avec `UnitRosterController`). Prochaine étape : le panneau
+lui-même (§ 2 de la spec), puis les tests et la capture.
