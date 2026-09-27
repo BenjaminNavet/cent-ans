@@ -103,6 +103,9 @@ func _draw() -> void:
 		elif kind == "fence":
 			color = Color(0.5, 0.4, 0.28, 0.9)
 			width = 1.0
+		elif kind == "palisade":  # CV3-2 : camp retranché
+			color = Color(0.42, 0.27, 0.12, 1.0)
+			width = 2.5
 		draw_line(to_map(obstacle["a"]), to_map(obstacle["b"]), color, width)
 	# B8 : village (emprise + maisons).
 	var village: Dictionary = _terrain.get("village", {})

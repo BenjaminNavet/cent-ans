@@ -683,13 +683,66 @@ impl BattleSim {
         self.sim.as_ref().is_some_and(|sim| sim.is_deploying())
     }
 
-    /// `{x0, z0, x1, z1}` rectangle of `side` (field metres); empty if unknown.
+    /// `{x0, z0, x1, z1}` rectangle of `side` (field metres); empty if unknown
+    /// or when the side has no deployment phase (CV3-2: caught in column,
+    /// forced march). An ambusher may have a second zone: see
+    /// [`Self::get_deployment_zones`].
     #[func]
     fn get_deployment_zone(&self, side: GString) -> VarDictionary {
         match (&self.sim, parse_side(&side)) {
-            (Some(sim), Some(side)) => to_dict(&sim.deployment_zone(side)),
+            (Some(sim), Some(side)) if sim.can_deploy(side) => to_dict(&sim.deployment_zone(side)),
             _ => VarDictionary::new(),
         }
+    }
+
+    /// CV3-2: every `{x0, z0, x1, z1}` deployment zone of `side` (the one or
+    /// two flanks of an ambusher; none for a side that cannot deploy).
+    #[func]
+    fn get_deployment_zones(&self, side: GString) -> VarArray {
+        match (&self.sim, parse_side(&side)) {
+            (Some(sim), Some(side)) => sim
+                .deployment_zones(side)
+                .iter()
+                .map(|z| to_dict(z).to_variant())
+                .collect(),
+            _ => VarArray::new(),
+        }
+    }
+
+    /// CV3-2: how the battle opened. `{kind: standard|ambush, victim:
+    /// attacker|defender|"", on_road, path: PackedVector2Array (column centre
+    /// line, head last), attacker_forced_march, defender_forced_march,
+    /// attacker_entrenched, defender_entrenched, attacker_can_deploy,
+    /// defender_can_deploy}`; empty before `setup`.
+    #[func]
+    fn get_opening(&self) -> VarDictionary {
+        let Some(sim) = &self.sim else {
+            return VarDictionary::new();
+        };
+        let setup = sim.setup();
+        let layout = sim.ambush_layout();
+        let path: PackedVector2Array = layout
+            .map(|l| {
+                l.path
+                    .iter()
+                    .map(|p| Vector2::new(p.0 as f32, p.1 as f32))
+                    .collect()
+            })
+            .unwrap_or_default();
+        let mut dict = vdict! {
+            "kind" => if setup.opening.is_standard() { "standard" } else { "ambush" },
+            "victim" => setup.opening.ambush_victim().map_or("", |s| s.key()),
+            "on_road" => layout.is_some_and(|l| l.on_road),
+            "path" => &path,
+        };
+        for side in sim_battle::SideId::BOTH {
+            let key = side.key();
+            let s = setup.side(side);
+            dict.set(format!("{key}_forced_march").as_str(), s.forced_march);
+            dict.set(format!("{key}_entrenched").as_str(), s.entrenched);
+            dict.set(format!("{key}_can_deploy").as_str(), sim.can_deploy(side));
+        }
+        dict
     }
 
     /// Places regiment `id` at (x, z); `facing` in radians, NaN keeps the
@@ -1006,7 +1059,8 @@ impl BattleSim {
     /// siege?{...}}` (siege geometry: see [`Self::get_siege`]). B5 (campaign site):
     /// `terrain` (province terrain key), `season`, `ground` (`dry|muddy|snowy`),
     /// `ground_label`, `site_label` (B6), `woodland` (0-1), `pools[{x, z, radius}]`,
-    /// `obstacles[{a: Vector2, b: Vector2, kind: hedge|fence|ditch}]`,
+    /// `obstacles[{a: Vector2, b: Vector2, kind: hedge|fence|ditch|palisade}]`
+    /// (CV3-2: `palisade` = entrenched camp),
     /// `coast?{flank: west|east, shore_x, beach}`,
     /// `village?{x, z, radius, farm, houses[{x, z, length, width, yaw, kind}],
     /// props[{kind, x, z, yaw, length, depth, house}]}` (BR3).

@@ -56,6 +56,10 @@ pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
 pub use entities::difficulty::{DifficultyLevelData, DifficultyModifiers, DifficultyRules};
 pub use entities::economy_rules::EconomyRules;
 pub use entities::edict::Edict;
+pub use entities::encounter::{
+    Encounter, EncounterOption, EncounterOutcome, EncounterResult, EncounterRules, EncounterSpawn,
+    EncounterUnits, SpawnWar, ARMY_EFFECT_KINDS,
+};
 pub use entities::event::{
     CharacterRef, Condition, Event, EventCategory, EventDate, EventEffect, EventOption, EventScope,
     EventSeason, EventTrigger, ProvinceRef,
@@ -97,9 +101,9 @@ pub use entities::trade::{TradeCatalog, TradeHub, TradeRouteDef};
 pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
 pub use ids::{
-    BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId, EventId,
-    FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId, SettlementId, ShipClassId,
-    SkillId, TechnologyId, TraitId, UnitTypeId,
+    BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId,
+    EncounterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId,
+    SettlementId, ShipClassId, SkillId, TechnologyId, TraitId, UnitTypeId,
 };
 pub use load::{upgrade_regressions, DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};

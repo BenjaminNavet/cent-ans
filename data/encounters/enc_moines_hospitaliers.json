@@ -1,0 +1,72 @@
+{
+  "id": "enc_moines_hospitaliers",
+  "title": "Les moines hospitaliers",
+  "text": "Les frères d'une maison d'Antonins tiennent un hôpital au bord du chemin, où l'on soigne le mal des ardents et les blessés. Le commandeur offre de recevoir les malades de l'ost, moyennant aumône.",
+  "spawn": {
+    "regions": [
+      "provence_alpes",
+      "france_est",
+      "france_centre",
+      "languedoc",
+      "aquitaine"
+    ],
+    "weight": 8,
+    "lifetime": [
+      2,
+      4
+    ]
+  },
+  "options": [
+    {
+      "label": "Confier les malades aux frères",
+      "conditions": [
+        {
+          "type": "treasury_above",
+          "amount": 250
+        }
+      ],
+      "effects": [
+        {
+          "type": "treasury",
+          "amount": -250
+        },
+        {
+          "type": "piety",
+          "amount": 2
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "army_morale",
+          "value": 8
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "label": "Demander du pain et du vin",
+      "effects": [
+        {
+          "type": "piety",
+          "amount": -2
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": 10
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "label": "Remercier et repartir",
+      "ai_weight": 1,
+      "default": true
+    }
+  ],
+  "sources": [
+    "Adalbert Mischlewski, Un ordre hospitalier au Moyen Âge : les chanoines réguliers de Saint-Antoine-en-Viennois, Grenoble, PUG, 1995",
+    "Ordre de Saint-Antoine"
+  ]
+}

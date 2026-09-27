@@ -222,6 +222,8 @@ func set_walking(value: bool) -> void:
 func set_view(camera_distance: float, weight: float) -> void:
 	if figures != null:
 		figures.set_view(camera_distance, weight)
+		if figures.is_lord():  # CV3-5 : la hampe suit la main du général (fondu au loin)
+			_follow_bearer()
 
 
 ## Point écran de référence pour le picking (milieu de l'étendard).

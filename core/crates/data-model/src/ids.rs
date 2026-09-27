@@ -185,6 +185,11 @@ define_id!(
     EdictId,
     "edict_"
 );
+define_id!(
+    /// Identifier of a map encounter (`enc_grandes_compagnies`), lot CV3-3.
+    EncounterId,
+    "enc_"
+);
 
 #[cfg(test)]
 mod tests {

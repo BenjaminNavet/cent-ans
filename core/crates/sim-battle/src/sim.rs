@@ -10,6 +10,7 @@ mod deployment;
 mod fire;
 mod indirect;
 mod obstacles;
+mod opening;
 mod pathing;
 mod pipeline;
 mod push;
@@ -24,6 +25,7 @@ mod water;
 
 pub use camp::CampState;
 pub use deployment::{DeploymentZone, SIEGE_STANDOFF, ZONE_DEPTH};
+pub use opening::AmbushLayout;
 pub use reinforcements::MAX_ON_FIELD;
 pub use separation::FRIEND_GAP;
 pub use siege_assault::Ladder;
@@ -180,6 +182,8 @@ pub struct BattleSim {
     end: Option<crate::decision::BattleEnd>,
     /// EP7: scenario of a historical battle (waves, posts, weather).
     scenario: Option<Box<scenario::Scenario>>,
+    /// CV3-2: layout of an ambush opening (derived from setup and field).
+    ambush: Option<opening::AmbushLayout>,
 }
 
 /// The battering ram every besieging army brings to a siege battle
@@ -452,12 +456,14 @@ impl BattleSim {
             clock: Default::default(),
             end: None,
             scenario: None,
+            ambush: None,
         };
         sim.hold_reserves();
         if sim.siege.is_some() {
             sim.deploy_siege();
         } else {
             sim.deploy();
+            sim.apply_opening();
         }
         let text = match sim.weather {
             Weather::Clear => "Le ciel est dégagé sur le champ de bataille.".to_owned(),
@@ -466,6 +472,7 @@ impl BattleSim {
             Weather::Snow => "La neige tombe sur le champ de bataille.".to_owned(),
         };
         sim.log(text, None);
+        sim.log_opening();
         if let Some(works) = &sim.siege {
             let open = works.openings().len();
             let text = if open > 0 {
@@ -2556,6 +2563,8 @@ impl BattleSim {
         if matches!(attacker.standard, crate::unit::StandardState::Fallen { .. }) {
             damage *= self.standard_rules.fallen_melee_factor;
         }
+        // CV3-2: the palisade of an entrenched camp shelters its defenders.
+        damage /= self.palisade_defense(attacker, defender);
         // EP11: compression and wrapping files (`sim/push.rs`).
         damage * self.push_melee_factor(attacker, defender)
     }

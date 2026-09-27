@@ -341,6 +341,13 @@ func _run_campaign_loop() -> void:
 	if not _check(not reachable.is_empty(), "reachable provinces should not be empty for %s" % army_ids[0]):
 		map.queue_free()
 		return
+	if map.movement_ctl != null and map.movement_ctl.active():
+		# Lot CV3-5 : zone atteignable à deux niveaux (ce tour / tour suivant), lue dans les données.
+		var zone: Dictionary = map.sim.call("get_reachable_area", army_ids[0])
+		_check(int(zone.get("cells", 0)) > 1 and int(zone.get("next_cells", 0)) > 0,
+				"CV3-5: reachable area should have two rings, got %d + %d cells" % [int(zone.get("cells", 0)), int(zone.get("next_cells", 0))])
+		_check(int(zone.get("next_budget", 0)) > 0 and (zone.get("image") as Image).get_format() == Image.FORMAT_RGB8, "CV3-5: RGB8 two-ring mask with the next turn's budget")
+		_check(map.movement_ctl.bubble.cell_count() > 1 and map.movement_ctl.bubble.next_cell_count() > 0, "CV3-5: the bubble shows both rings")
 	var target: String = str(reachable.keys()[0])
 	# Aperçu de chemin au survol de la cible.
 	var target_index: int = map.map_data.index_of_id(target)
@@ -1243,6 +1250,7 @@ func _run_battle() -> void:
 		var idle_outcome: Dictionary = idle.call("get_outcome")
 		_check(str(idle_outcome.get("end", "")) in ["rout", "broken", "refused", "lull"], "battle: no-order battle end is %s" % idle_outcome.get("end", "?"))
 		print("smoke battle without orders: over at %d s, %s, winner %s" % [int(idle.call("get_elapsed")), idle_outcome.get("end", "?"), idle_outcome.get("winner", "?")])
+	await _check_ambush_opening_cv3(setup, pending[0])
 
 	# Boucle complète par la carte de campagne (vraies données).
 	facade.set_data_dir(data_dir)
@@ -1630,7 +1638,17 @@ func _run_assets() -> void:
 			"units": [{"unit_type": "unit_knights", "strength": 600}, {"unit_type": "unit_longbowmen", "strength": 900}]}
 		var cv2_figures := ArmyFigures.build(cv2_army, Color(0.2, 0.3, 0.8), null, "cv2")
 		root.add_child(cv2_figures)
-		_check(cv2_figures.figure_count() == 2 + 4, "CV2: 1 500 men → leader + bearer + 4 escort, got %d" % cv2_figures.figure_count())
+		# Lot CV3-5 : le général agrandi porte l'étendard (plus de porte-étendard à pied).
+		var cv3_lord := cv2_figures.is_lord()
+		_check(cv3_lord == (float(ArmyFigures.map_settings().get("army_figure_scale", 1.0)) > 1.001), "CV3-5: lord mode follows map.army_figure_scale")
+		var cv2_expected := (1 if cv3_lord else 2) + 4
+		_check(cv2_figures.figure_count() == cv2_expected, "CV2: 1 500 men → leader (+ bearer) + 4 escort, got %d" % cv2_figures.figure_count())
+		if cv3_lord:
+			cv2_figures.set_view(100.0, 1.0)
+			var cv3_hand := cv2_figures.bearer_anchor()
+			_check(cv3_hand.y > 3.0, "CV3-5: the standard is held high by the mounted lord, got %.2f" % cv3_hand.y)
+			cv2_figures.set_view(900.0, 0.0)
+			_check(cv2_figures.bearer_anchor().length() < 0.01, "CV3-5: far away the standard is back at the marker's foot")
 		_check(cv2_figures.get_node_or_null("Bivouac") != null, "CV2: idle army in the field should camp")
 		cv2_figures.set_walking(true)
 		cv2_figures.set_view(100.0, 1.0)
@@ -2495,6 +2513,74 @@ func _run_tutorial() -> void:
 
 
 # --- F5c : déploiement et maisons de siège dans la scène ------------------------------
+
+
+## CV3-2 : campagne factice qui ne sert que le setup d'une bataille (dialogue d'avant-bataille).
+class _SetupOnlyCampaign extends RefCounted:
+	var battle_setup: Dictionary = {}
+
+	func get_battle_setup(_index: int) -> Dictionary:
+		return battle_setup
+
+
+## CV3-2 : le setup de campagne passé en embuscade (le défenseur surpris en colonne) puis en camp
+## retranché : BattleSim (ouverture, zones, colonne, journal, palissade) et dialogue d'avant-bataille
+## (titre « Embuscade ! », mentions des postures).
+func _check_ambush_opening_cv3(base_setup: Dictionary, pending_battle: Dictionary) -> void:
+	var ambush: Dictionary = base_setup.duplicate(true)
+	ambush["opening"] = {"kind": "ambush", "victim": "defender"}
+	var seed := int(pending_battle["seed"])
+	var battle: Object = ClassDB.instantiate("BattleSim")
+	if not _check(battle.call("setup", ambush, seed), "ambush: BattleSim.setup refused the ambush setup"):
+		return
+	var opening: Dictionary = battle.call("get_opening")
+	_check(str(opening.get("kind", "")) == "ambush" and str(opening.get("victim", "")) == "defender", "ambush: get_opening is %s" % opening)
+	_check(not bool(opening.get("defender_can_deploy", true)) and bool(opening.get("attacker_can_deploy", false)), "ambush: only the ambusher deploys")
+	_check((battle.call("get_deployment_zone", "defender") as Dictionary).is_empty(), "ambush: the column has a deployment zone")
+	var zones: Array = battle.call("get_deployment_zones", "attacker")
+	_check(zones.size() in [1, 2], "ambush: ambusher zones %d" % zones.size())
+	var column := 0
+	var victims := 0
+	for unit in battle.call("get_units"):
+		if str(unit["side"]) == "defender" and bool(unit.get("present", true)):
+			victims += 1
+			if str(unit.get("formation", "")) == "column":
+				column += 1
+	_check(victims > 0 and column == victims, "ambush: %d of %d victim regiments in column" % [column, victims])
+	var journal := false
+	for event in battle.call("get_events"):
+		if str(event.get("text_fr", "")).begins_with("Embuscade !"):
+			journal = true
+	_check(journal, "ambush: no « Embuscade ! » journal line")
+	var entrenched: Dictionary = base_setup.duplicate(true)
+	(entrenched["defender"] as Dictionary)["entrenched"] = true
+	var camp: Object = ClassDB.instantiate("BattleSim")
+	if _check(camp.call("setup", entrenched, seed), "entrenched: BattleSim.setup refused"):
+		var palisades := 0
+		for o in (camp.call("get_terrain") as Dictionary).get("obstacles", []):
+			if str(o["kind"]) == "palisade":
+				palisades += 1
+		_check(palisades > 0, "entrenched: no palisade in get_terrain")
+	# Dialogue d'avant-bataille sur ce setup (campagne factice).
+	var fake := _SetupOnlyCampaign.new()
+	fake.battle_setup = ambush
+	var dialog: PreBattleDialog = (load("res://scenes/battle/pre_battle_dialog.tscn") as PackedScene).instantiate()
+	root.add_child(dialog)
+	await process_frame
+	var entry := pending_battle.duplicate()
+	entry["player_side"] = "attacker"
+	dialog.show_battle(fake, entry)
+	_check(str(dialog.title_label.text).begins_with("Embuscade !"), "ambush: dialog title « %s »" % dialog.title_label.text)
+	_check(str(dialog.subtitle_label.text).contains("colonne de marche"), "ambush: dialog subtitle « %s »" % dialog.subtitle_label.text)
+	_check(str(dialog.modifiers_label.text).contains("Embuscade !"), "ambush: dialog modifiers « %s »" % dialog.modifiers_label.text)
+	fake.battle_setup = entrenched
+	dialog.show_battle(fake, entry)
+	_check(not str(dialog.title_label.text).begins_with("Embuscade"), "entrenched: dialog title « %s »" % dialog.title_label.text)
+	_check(str(dialog.modifiers_label.text).contains("Camp retranché"), "entrenched: dialog modifiers « %s »" % dialog.modifiers_label.text)
+	dialog.queue_free()
+	await process_frame
+	if _failures == 0:
+		print("smoke OK: ambush opening (%d victim regiments in column, %d flank zone(s)), entrenched camp, dialog « Embuscade ! »" % [victims, zones.size()])
 
 
 ## Phase de déploiement ouverte par une bataille du joueur : temps gelé, zone dessinée, un

@@ -810,6 +810,8 @@ pub(crate) fn apply_battle_result(
         };
         retreat_beaten_army(state, data, loser_id, battlefield, losses_percent, events);
     }
+    // CV3-3: consequences of an encounter battle.
+    crate::encounter::after_battle(state, data, attackers, defenders, result.winner, events);
 }
 
 /// How a beaten army leaves the battlefield (lot C7a rule on the grid, spec

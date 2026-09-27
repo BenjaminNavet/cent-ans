@@ -1,0 +1,69 @@
+{
+  "id": "enc_loups_hiver",
+  "title": "Les loups de l'hiver",
+  "text": "Le froid a chassé les loups des bois. La nuit, ils rôdent autour du camp, égorgent les chevaux au piquet et emportent les traînards ; les paysans parlent d'une bande menée par un vieux loup à la queue coupée.",
+  "spawn": {
+    "seasons": [
+      "winter"
+    ],
+    "terrains": [
+      "forest",
+      "mountains",
+      "hills",
+      "bocage",
+      "heath"
+    ],
+    "weight": 10,
+    "lifetime": [
+      1,
+      1
+    ]
+  },
+  "options": [
+    {
+      "label": "Organiser une battue",
+      "effects": [
+        {
+          "type": "unrest",
+          "amount": -3
+        }
+      ],
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -5
+        },
+        {
+          "effect": "army_morale",
+          "value": 5
+        }
+      ],
+      "ai_weight": 2
+    },
+    {
+      "label": "Doubler les gardes et les feux",
+      "army_effects": [
+        {
+          "effect": "supply",
+          "value": -10
+        }
+      ],
+      "ai_weight": 2,
+      "default": true
+    },
+    {
+      "label": "Lever le camp sans attendre",
+      "army_effects": [
+        {
+          "effect": "army_morale",
+          "value": -8
+        }
+      ],
+      "ai_weight": 1
+    }
+  ],
+  "sources": [
+    "Journal d'un bourgeois de Paris (1405-1449), éd. Colette Beaune, Paris, Le Livre de poche, 1990 (le loup Courtaut, 1439)",
+    "Robert Delort, Les animaux ont une histoire, Paris, Seuil, 1984"
+  ]
+}

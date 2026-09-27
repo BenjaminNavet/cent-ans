@@ -6,7 +6,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 ## Lots
 | Lot | Contenu | Vague | État | Note wip |
 |---|---|---|---|---|
-| CB0 | Extraction des entrées (`battle_input.gd`) + sélection rapide | 1 | à lancer | `cb0-entrees.md` |
+| CB0 | Extraction des entrées (`battle_input.gd`) + sélection rapide | 1 | en cours (agent Sonnet, branche `feat/cb0-battle-input`, lancé 09-27) | `cb0-entrees.md` |
 | CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | attente CB0 | |
 | CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | attente CB-M1 + fusion CV3-2 | |
 | CB-M3 | Ordres en file (Maj + clic droit) | 2 | attente | |
