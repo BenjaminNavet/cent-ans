@@ -819,6 +819,8 @@ func _build_soldier_layers(kept_impostors: BattleImpostors = null) -> void:
 		var general: Variant = (setup[side] as Dictionary).get("general", null)
 		houses[side] = str((general as Dictionary).get("house", "")) if general is Dictionary else ""
 	_side_houses = houses
+	# AN1a : vent de la bataille (le même que celui des drapeaux) pour le mouvement secondaire.
+	BattleSecondaryMotion.set_wind(BattleStandards.wind_for(_weather_key, battle_seed))
 	soldiers.setup(units, side_colors, factions, houses)
 	_mm = soldiers.layers
 	_setup_standards()
