@@ -52,6 +52,7 @@ pub mod edicts;
 pub mod encounter;
 pub mod events;
 pub mod frontier;
+pub mod holdings;
 pub mod map_lens;
 pub mod march;
 pub mod medicine;
