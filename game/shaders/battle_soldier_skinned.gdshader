@@ -4,7 +4,7 @@
 // dans une texture d'os (`bone_tex` : trois texels RGBA32F = lignes d'une matrice 3×4 par os,
 // une ligne de texture par image, 24 i/s). Rendu par MultiMesh : aucun squelette côté moteur.
 //
-// Choix du clip : l'état du régiment fixe un jeu de clips (`clip_set`, jusqu'à 4) et un mode
+// Choix du clip : l'état du régiment fixe un jeu de clips (`clip_set`, jusqu'à 8) et un mode
 // (`clip_mode`) ; chaque soldat en tire un au sort (hachage de INSTANCE_ID, stable tant que
 // son rang dans la formation l'est) avec sa phase propre. Mode 3 (cadavres, renversés, poses
 // figées) : INSTANCE_CUSTOM = (instant de la chute, clip dans le jeu, vitesse de projection en
@@ -46,7 +46,7 @@ const int M_SPLIT = 4;
 uniform sampler2D bone_tex : filter_nearest, repeat_disable;
 uniform float bone_fps = 24.0;
 // Table des clips du rig : (ligne de départ, images, boucle 0/1, 0).
-uniform vec4 clips[48];
+uniform vec4 clips[64];
 
 uniform float anim_time = 0.0;
 uniform ivec4 clip_set = ivec4(0);
@@ -177,6 +177,12 @@ int pick(ivec4 s, int i) {
 	return i == 0 ? s.x : (i == 1 ? s.y : (i == 2 ? s.z : s.w));
 }
 
+// AN1b : jeu de clips jusqu'à 8 (emplacement i : composante i % 4, octet i / 4 ; identique à
+// l'ancien codage d'un indice par composante jusqu'à 4 clips).
+int pick_clip(ivec4 s, int i) {
+	return (pick(s, i & 3) >> ((i >> 2) * 8)) & 255;
+}
+
 float pickf(vec4 s, int i) {
 	return i == 0 ? s.x : (i == 1 ? s.y : (i == 2 ? s.z : s.w));
 }
@@ -214,21 +220,21 @@ float part_weight(int part, ivec4 idx, vec4 w) {
 void choose(int mode, ivec4 set, int size, float speed, vec4 h, vec4 custom, float id, out int clip, out float t) {
 	int n = max(size, 1);
 	if (mode == M_SPLIT) {
-		clip = id < float(split_count) || n < 2 ? set.x : pick(set, 1 + min(int(h.x * float(n - 1)), n - 2));
+		clip = id < float(split_count) || n < 2 ? pick_clip(set, 0) : pick_clip(set, 1 + min(int(h.x * float(n - 1)), n - 2));
 		t = anim_time * speed * mix(0.93, 1.07, h.y) + h.z * 11.0;
 	} else if (mode == M_CUSTOM) {
-		clip = pick(set, int(mod(custom.y, float(n))));
+		clip = pick_clip(set, int(mod(custom.y, float(n))));
 		t = anim_time - custom.x;
 	} else if (mode == M_CYCLE) {
 		float local = anim_time * mix(0.9, 1.1, h.y) + h.z * cycle_len;
 		float cyc = floor(local / cycle_len);
-		clip = pick(set, min(int(hash1(h.x * 91.7 + cyc * 13.1) * float(n)), n - 1));
+		clip = pick_clip(set, min(int(hash1(h.x * 91.7 + cyc * 13.1) * float(n)), n - 1));
 		t = mod(local, cycle_len);
 	} else if (mode == M_VOLLEY) {
-		clip = pick(set, min(int(h.x * float(n)), n - 1));
+		clip = pick_clip(set, min(int(h.x * float(n)), n - 1));
 		t = mod(anim_time - volley_time + release_at + (h.z - 0.5) * 0.4, max(reload_time, 0.5));
 	} else {
-		clip = pick(set, min(int(h.x * float(n)), n - 1));
+		clip = pick_clip(set, min(int(h.x * float(n)), n - 1));
 		t = anim_time * speed * mix(0.93, 1.07, h.y) + h.z * 11.0;
 	}
 }
