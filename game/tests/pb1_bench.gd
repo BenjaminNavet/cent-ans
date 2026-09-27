@@ -5,11 +5,11 @@ extends SceneTree
 ## par vue (médiane de plusieurs échantillons espacés), puis un zoom animé France → Paris → France
 ## (médiane, p95 et pire image : à-coups de chargement des tuiles). Temps GPU seulement avec
 ## `--rendering-driver vulkan` (Metal ne les mesure pas).
-## Usage : godot --path game --script res://tests/pb1_bench.gd [-- --views=1500,491,150,40]
+## Usage : godot --path game --script res://tests/pb1_bench.gd [-- --views=2600,1250,491,150,40]
 ## Sortie : une ligne `PB1_JSON {...}`.
 
 const PARIS := Vector2(2213, 1924)
-const DEFAULT_VIEWS: Array[float] = [1500.0, 1250.0, 491.0, 150.0, 40.0]
+const DEFAULT_VIEWS: Array[float] = [2600.0, 1250.0, 491.0, 150.0, 40.0]
 const SAMPLES := 3
 const SAMPLE_FRAMES := 90
 const SETTLE_TIMEOUT_MS := 20000
@@ -83,7 +83,7 @@ func _run() -> void:
 		per_view[str(int(d))] = best
 	_result["views"] = per_view
 	# Zoom animé (molette continue) : France entière → Paris au plus près → France entière.
-	rig.look_at_point(Vector3(PARIS.x, surface_y, PARIS.y), 1500.0)
+	rig.look_at_point(Vector3(PARIS.x, surface_y, PARIS.y), 2600.0)
 	rig.snap()
 	await _settle(settled)
 	var frame_times: Array[float] = []
@@ -91,7 +91,7 @@ func _run() -> void:
 	for i in SWEEP_FRAMES:
 		var t := float(i) / float(SWEEP_FRAMES - 1)
 		var phase := 1.0 - absf(2.0 * t - 1.0)  # 0 → 1 → 0
-		rig.target_distance = exp(lerpf(log(1500.0), log(30.0), phase))
+		rig.target_distance = exp(lerpf(log(2600.0), log(30.0), phase))
 		await process_frame
 		var now := Time.get_ticks_usec()
 		frame_times.append((now - last) / 1000.0)

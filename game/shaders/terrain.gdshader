@@ -38,10 +38,11 @@ uniform vec3 path_color : source_color = vec3(1.0, 0.55, 0.15);
 // fondu sur la frontière entre province vue et province voilée.
 uniform sampler2D fog_mask : filter_nearest, repeat_disable, hint_default_white;
 uniform bool fog_enabled = false;
-uniform vec3 fog_veil : source_color = vec3(0.80, 0.78, 0.72);
-uniform float fog_desaturation = 0.85;
-uniform float fog_veil_amount = 0.42;
-uniform float fog_cloud_amount = 0.40;
+// CV3-0 (#2) : voile éclairci (était 0.80/0.78/0.72, assombrissait trop l'Angleterre en vue large).
+uniform vec3 fog_veil : source_color = vec3(0.90, 0.88, 0.82);
+uniform float fog_desaturation = 0.78;
+uniform float fog_veil_amount = 0.36;
+uniform float fog_cloud_amount = 0.32;
 uniform float fog_cloud_scale = 0.045;    // par pixel carte (≈ 22 px de période)
 uniform vec2 fog_cloud_wind = vec2(0.020, 0.008);
 uniform float fog_feather_px = 3.0;       // fondu de bord, pixels carte
@@ -658,7 +659,8 @@ void fragment() {
 			float cloud = fbm(q + TIME * fog_cloud_wind) * 0.65 + fbm(q * 2.3 - TIME * fog_cloud_wind * 1.7) * 0.35;
 			cloud = smoothstep(0.38, 0.72, cloud);
 			vec3 mist = pow(fog_veil, vec3(2.2));
-			vec3 fogged = mix(desat * 1.15 + mist * 0.04, mist * 0.68, fog_veil_amount + cloud * fog_cloud_amount);
+			// CV3-0 (#2) : 0.68 -> 0.86, le voile reste lisible sans virer sombre.
+			vec3 fogged = mix(desat * 1.15 + mist * 0.04, mist * 0.86, fog_veil_amount + cloud * fog_cloud_amount);
 			col = mix(col, fogged, fog);
 		}
 	}

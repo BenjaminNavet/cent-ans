@@ -39,7 +39,7 @@ func _check(condition: bool, message: String) -> bool:
 
 func _test_profile() -> void:
 	var profile := CloseCameraProfile.load_default()
-	_check(absf(profile.exaggeration_at(1500.0) - profile.exaggeration_far) < 1e-4, "far exaggeration")
+	_check(absf(profile.exaggeration_at(2600.0) - profile.exaggeration_far) < 1e-4, "far exaggeration")
 	# ZG8 : plancher relevé par le relief exagéré (`near_exaggeration`, ZG4 si désactivé).
 	_check(absf(profile.exaggeration_at(0.3) - profile.near_exaggeration()) < 1e-4, "near exaggeration")
 	_check(absf(profile.vertical_scale_at(200.0) - MapData.HEIGHT_SCALE) < 1e-9, "strategic scale = HEIGHT_SCALE")

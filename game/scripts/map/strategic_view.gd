@@ -10,8 +10,10 @@ extends Node
 ## Options (après `--`) : `--no-parchment` (A/B), `--parchment=<0..1>` (poids imposé).
 
 ## Bande de fondu (distance caméra) : carte 3D en deçà de `start`, parchemin au-delà de `end`.
-@export var start_distance: float = 1180.0
-@export var end_distance: float = 1440.0
+## CV3-0 (#1) : mis à l'échelle après le passage de max_distance à 2600 (était 1180 / 1440
+## pour un max de 1500, ratio ~0,79 / 0,96 conservé).
+@export var start_distance: float = 2050.0
+@export var end_distance: float = 2500.0
 ## Au-delà de ce poids, les marqueurs 3D d'armée cèdent la place aux jetons.
 @export var marker_cutoff: float = 0.6
 

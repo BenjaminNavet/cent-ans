@@ -7,7 +7,7 @@ extends SceneTree
 ## Usage : godot --path game --script res://tests/v4_map_bench.gd
 
 const VIEWS := [
-	["large (France)", Vector2(2213, 1924), 1500.0],
+	["large (France)", Vector2(2213, 1924), 2600.0],
 	["très proche (Paris)", Vector2(2213, 1924), 22.0],
 	["forêt (Orléanais)", Vector2(2185, 2040), 90.0],
 	["Loire (Orléans)", Vector2(2152, 2066), 40.0],

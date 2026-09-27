@@ -13,12 +13,14 @@ extends Node3D
 
 ## Lot C6 : vue « comté » (≈ 40 km, ~55 unités à l'écran) au zoom maximal.
 @export var min_distance: float = 22.0
-@export var max_distance: float = 1500.0
+## CV3-0 (#1) : 1500 -> 2600 (était trop court pour cadrer la France entière depuis Paris,
+## le Midi restait hors champ ; 1 unité ≈ 719 m, Paris-Marseille ≈ 918 unités).
+@export var max_distance: float = 2600.0
 @export var pitch_near_deg: float = 30.0
 @export var pitch_far_deg: float = 70.0
 ## Distance à laquelle le tangage atteint `pitch_far_deg` (bornée par max_distance,
 ## réglée sur la taille de carte dans `setup`).
-@export var pitch_far_distance: float = 1500.0
+@export var pitch_far_distance: float = 2600.0
 @export var pan_speed: float = 1.2         # unités/s par unité de distance
 @export var rotate_speed_deg: float = 90.0
 @export var zoom_step: float = 0.15
