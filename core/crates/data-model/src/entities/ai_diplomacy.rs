@@ -41,6 +41,13 @@ pub struct WarPlanningRules {
     /// still weighs on every other war, on peace and on battles.
     #[serde(default)]
     pub claim_war_ignores_difficulty: bool,
+    /// EQ6: kinship does not hold a pretender back from its main claim
+    /// war: marriages between the two houses and a shared ruling house
+    /// leave out of the attitude that decides it, since the claim itself
+    /// comes from that kinship (Edward III, grandson of Philip IV through
+    /// his mother). `false`: kinship counts as for any war (pre-EQ6).
+    #[serde(default)]
+    pub claim_war_ignores_kinship: bool,
 }
 
 /// When a faction joins an ally's war (co-belligerence).
@@ -59,6 +66,12 @@ pub struct JoinWarRules {
     /// a war of claims (one side claims the other's throne or provinces);
     /// otherwise we need a claim of our own.
     pub border_only_claim_wars: bool,
+    /// EQ6: a realm too weary to declare a war of its own
+    /// (`negotiation.max_weariness_to_declare`, raised by 20 for a
+    /// pretender) no more answers a call to arms, as a ruined one: the
+    /// alliance breaks. `false`: weariness does not matter (pre-EQ6).
+    #[serde(default)]
+    pub weary_stay_out: bool,
 }
 
 /// Peace terms the AI asks or offers.
@@ -113,12 +126,14 @@ impl Default for AiDiplomacy {
                 pretender_ratio_alone: 0.8,
                 main_claim_first: false,
                 claim_war_ignores_difficulty: false,
+                claim_war_ignores_kinship: false,
             },
             join_war: JoinWarRules {
                 ratio: 0.6,
                 min_attitude: 10,
                 min_ally_power_ratio: 0.0,
                 border_only_claim_wars: false,
+                weary_stay_out: false,
             },
             peace: PeaceRules {
                 keep_capital: false,

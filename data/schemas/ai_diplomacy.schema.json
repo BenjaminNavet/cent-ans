@@ -25,7 +25,8 @@
         "pretender_ratio": { "type": "number", "minimum": 0, "description": "Rapport de puissance de coalition qu'un prétendant allié ou frontalier de sa cible doit atteindre." },
         "pretender_ratio_alone": { "type": "number", "minimum": 0, "description": "Même rapport, sans allié ni frontière." },
         "main_claim_first": { "type": "boolean", "description": "EQ6 (ADR 0085) : la guerre pour la couronne principale revendiquée (le plus grand royaume dont on revendique le trône) passe avant toute autre prétention, et le repos qui suit une autre déclaration ne la retarde pas. Faux par défaut (comportement antérieur)." },
-        "claim_war_ignores_difficulty": { "type": "boolean", "description": "EQ6 (ADR 0085) : le niveau de difficulté (attitude et rapport de forces envers le joueur) ne décide pas si le prétendant presse sa revendication principale. Faux par défaut." }
+        "claim_war_ignores_difficulty": { "type": "boolean", "description": "EQ6 (ADR 0085) : le niveau de difficulté (attitude et rapport de forces envers le joueur) ne décide pas si le prétendant presse sa revendication principale. Faux par défaut." },
+        "claim_war_ignores_kinship": { "type": "boolean", "description": "EQ6 (ADR 0085) : les liens de parenté (mariages entre les deux maisons, même maison régnante) ne retiennent pas le prétendant de sa guerre de prétention principale, puisque la prétention naît de cette parenté (Édouard III, petit-fils de Philippe IV par sa mère). Faux par défaut." }
       },
       "required": ["front_share", "pretender_ratio", "pretender_ratio_alone"],
       "additionalProperties": false
@@ -37,7 +38,8 @@
         "ratio": { "type": "number", "minimum": 0, "description": "Rapport de puissance de coalition exigé contre l'ennemi de l'allié." },
         "min_attitude": { "type": "integer", "description": "Attitude envers l'allié au-dessus de laquelle on le suit." },
         "min_ally_power_ratio": { "type": "number", "minimum": 0, "description": "Puissance minimale de l'allié, en multiple de la nôtre : un prince moindre suit une grande couronne, pas l'inverse." },
-        "border_only_claim_wars": { "type": "boolean", "description": "Une frontière avec l'ennemi ne suffit que si la guerre de l'allié est une guerre de prétentions ; sinon il faut une prétention propre." }
+        "border_only_claim_wars": { "type": "boolean", "description": "Une frontière avec l'ennemi ne suffit que si la guerre de l'allié est une guerre de prétentions ; sinon il faut une prétention propre." },
+        "weary_stay_out": { "type": "boolean", "description": "EQ6 (ADR 0085) : un royaume trop las pour déclarer lui-même une guerre (negotiation.max_weariness_to_declare, +20 pour un prétendant) ne répond plus à l'appel aux armes, comme un royaume ruiné : l'alliance est rompue. Faux par défaut." }
       },
       "required": ["ratio", "min_attitude", "min_ally_power_ratio", "border_only_claim_wars"],
       "additionalProperties": false

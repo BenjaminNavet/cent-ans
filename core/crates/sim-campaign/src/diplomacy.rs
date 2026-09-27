@@ -26,6 +26,14 @@ pub const AGGRESSION_REASON: &str = "Agression sans motif";
 pub const AT_WAR_REASON: &str = "En guerre";
 /// Attitude reason of the campaign difficulty (lot DF1), AI towards the player.
 pub const DIFFICULTY_REASON: &str = "Niveau de difficulté";
+/// Opinion reason of a marriage between two ruling houses.
+pub const MARRIAGE_REASON: &str = "Mariage entre nos maisons";
+/// Attitude reason of rulers bound by marriage.
+pub const MARRIAGE_TIE_REASON: &str = "Liens matrimoniaux";
+/// Attitude reason of rulers of the same house.
+pub const SAME_HOUSE_REASON: &str = "Même maison régnante";
+/// Attitude reasons owed to kinship (EQ6, `war.claim_war_ignores_kinship`).
+pub const KINSHIP_REASONS: [&str; 3] = [MARRIAGE_REASON, MARRIAGE_TIE_REASON, SAME_HOUSE_REASON];
 /// Reason of the opinion modifier a gift leaves with its recipient.
 pub const GIFT_REASON: &str = "Présents diplomatiques";
 /// Truce obtained through papal mediation (2 years).
@@ -438,11 +446,11 @@ impl CampaignState {
             RelationKind::Peace => {}
         }
         if self.marriage_tie(a, b) {
-            add("Liens matrimoniaux", 15);
+            add(MARRIAGE_TIE_REASON, 15);
         }
         if let (Some(ha), Some(hb)) = (self.ruler_house(a), self.ruler_house(b)) {
             if ha == hb {
-                add("Même maison régnante", 20);
+                add(SAME_HOUSE_REASON, 20);
             }
         }
         match religion::faith_relation(self, data, a, b) {
@@ -493,6 +501,18 @@ impl CampaignState {
         }
         let total: i32 = reasons.iter().map(|(_, v)| v).sum();
         (total.clamp(-100, 100), reasons)
+    }
+
+    /// Part of the attitude of `a` towards `b` owed to kinship: marriage
+    /// ties, a shared ruling house and the goodwill of marriages between
+    /// the two houses (EQ6, `war.claim_war_ignores_kinship`).
+    pub fn kinship_attitude(&self, data: &GameData, a: &FactionId, b: &FactionId) -> i32 {
+        self.attitude(data, a, b)
+            .1
+            .iter()
+            .filter(|(reason, _)| KINSHIP_REASONS.contains(&reason.as_str()))
+            .map(|(_, value)| value)
+            .sum()
     }
 
     /// Adds an opinion modifier held by `holder` about `with`.
@@ -1278,8 +1298,8 @@ impl CampaignState {
             Proposal::Marriage { character, spouse } => {
                 crate::dynasty::propose_marriage(self, data, character, spouse)
                     .map_err(|e| DiplomacyError::Refused(e.to_string()))?;
-                self.add_modifier(proposer, recipient, 15, "Mariage entre nos maisons", 80);
-                self.add_modifier(recipient, proposer, 15, "Mariage entre nos maisons", 80);
+                self.add_modifier(proposer, recipient, 15, MARRIAGE_REASON, 80);
+                self.add_modifier(recipient, proposer, 15, MARRIAGE_REASON, 80);
                 let text = format!(
                     "Mariage de {} et de {}.",
                     self.character_name(data, character),
@@ -2078,6 +2098,18 @@ fn alliance_count(state: &CampaignState, faction: &FactionId) -> usize {
     })
 }
 
+/// Weariness above which `faction` declares no war of its own (DP1: a
+/// pretender to a throne waits less).
+pub fn weariness_to_declare(data: &GameData, faction: &crate::state::FactionState) -> u32 {
+    let most = data.ai_diplomacy.negotiation.max_weariness_to_declare;
+    let pretender = faction.claims.iter().any(|c| c.kind == ClaimKind::Throne);
+    if pretender {
+        most + 20
+    } else {
+        most
+    }
+}
+
 /// Would `ally` answer the call to arms of `defender` attacked by
 /// `aggressor` (M5 § 2.3, F4)? Vassals follow a loyal tie, overlords
 /// protect their vassals, other allies march unless they resent the
@@ -2106,7 +2138,11 @@ pub fn answers_call_to_arms(
         return true;
     }
     let attitude = state.attitude(data, ally, defender).0;
-    let crippled = ally_state.treasury < 0;
+    // EQ6: an exhausted realm stays out, as a ruined one.
+    let exhausted = data.ai_diplomacy.join_war.weary_stay_out
+        && data.ai_diplomacy.negotiation.enabled
+        && ally_state.ledger.weariness > weariness_to_declare(data, ally_state);
+    let crippled = ally_state.treasury < 0 || exhausted;
     let grudge = rivals(state, ally).contains(aggressor);
     !crippled && (attitude > 0 || (grudge && attitude > -20))
 }
@@ -2158,11 +2194,7 @@ pub fn plan_diplomacy(state: &CampaignState, data: &GameData, faction: &FactionI
         .last_war_declared
         .is_none_or(|t| t + WAR_REST_TURNS <= turn);
     // DP1: a weary realm opens no new front; a pretender waits less.
-    let weary = treaties && {
-        let most = data.ai_diplomacy.negotiation.max_weariness_to_declare;
-        let pretender = me.claims.iter().any(|c| c.kind == ClaimKind::Throne);
-        me.ledger.weariness > if pretender { most + 20 } else { most }
-    };
+    let weary = treaties && me.ledger.weariness > weariness_to_declare(data, me);
     let able = turn >= 4
         && !weary
         && (war_ready(state, faction) || crate::negotiation::pretender_ready(state, data, faction));
@@ -2393,6 +2425,12 @@ fn war_target(
             let attitude = state.attitude(data, faction, id).0
                 - if neutral {
                     state.difficulty_attitude(data, faction, id)
+                } else {
+                    0
+                }
+                // EQ6: kinship is the ground of the claim, not a restraint.
+                - if is_main && rules.claim_war_ignores_kinship {
+                    state.kinship_attitude(data, faction, id)
                 } else {
                     0
                 };

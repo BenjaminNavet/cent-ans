@@ -204,6 +204,10 @@ fn war_blockers(
         state.difficulty_attitude(data, england, france)
     } else {
         0
+    } + if is_main && war_rules.claim_war_ignores_kinship {
+        state.kinship_attitude(data, england, france)
+    } else {
+        0
     };
     if attitude.0 - offset >= 20 {
         out.push("attitude");
@@ -211,13 +215,17 @@ fn war_blockers(
     // `WAR_TRACE=1`: England's reasons and gates every 5 years of peace.
     if std::env::var("WAR_TRACE").is_ok() && state.turn.is_multiple_of(20) {
         println!(
-            "  t{} {} ratio {ratio:.2} (needed {needed:.2}) weariness {} treasury {} upkeep {} attitude {:?} blockers {out:?}",
+            "  t{} {} ratio {ratio:.2} (needed {needed:.2}) weariness {} treasury {} upkeep {} attitude {:?} blockers {out:?} wars {:?}",
             state.turn,
             state.date_label(),
             me.ledger.weariness,
             me.treasury,
             me.upkeep_last_turn,
             attitude,
+            me.at_war_with
+                .iter()
+                .map(|e| format!("{e} score {}", state.war_score(data, england, e)))
+                .collect::<Vec<_>>(),
         );
     }
     if out.is_empty() {
@@ -1061,6 +1069,29 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 report.truces += 1;
             }
             war_run = 0;
+            // Other wars of England at peace with France (what tires it).
+            if war_trace && state.turn.is_multiple_of(20) {
+                let white = [sim_campaign::negotiation::Article::Peace];
+                for enemy in state.factions[&england].at_war_with.clone() {
+                    let since = state.factions[&england]
+                        .war_started
+                        .get(&enemy)
+                        .copied()
+                        .unwrap_or(0);
+                    for (from, to) in [(&england, &enemy), (&enemy, &england)] {
+                        let verdict = sim_campaign::negotiation::evaluate_treaty(
+                            &state, data, from, to, &white,
+                        );
+                        println!(
+                            "      other war since t{since}: white peace {} -> {}: chance {} {:?}",
+                            from.as_str(),
+                            to.as_str(),
+                            verdict.chance,
+                            verdict.reasons()
+                        );
+                    }
+                }
+            }
             if state.factions[&england].alive && state.factions[&france].alive {
                 for blocker in war_blockers(&state, data, &england, &france) {
                     let index = BLOCKERS
@@ -1069,6 +1100,13 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                         .expect("blocker");
                     report.blockers[index] += 1;
                 }
+            }
+        }
+        if war_trace {
+            for e in events.iter().filter(|e| {
+                matches!(e.kind, EventKind::WarDeclared) && e.text_fr.contains("Angleterre")
+            }) {
+                println!("    t{} {}", state.turn, e.text_fr);
             }
         }
         if at_war && !was_at_war {

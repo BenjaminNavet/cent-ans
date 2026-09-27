@@ -6,7 +6,19 @@ Décision du joueur (2026-09-26) : la cible « France et Angleterre en guerre 55
 vaut à tous les niveaux, pas seulement en Normale. La difficulté change la dureté de la guerre
 pour le joueur, pas le fait qu'elle ait lieu.
 
-## État : EN PAUSE (session suspendue par le joueur, 2026-09-26) — pas prêt à fusionner
+## Reprise 2026-09-27 (en cours)
+
+- main fusionné (372 commits, sans conflit). Mesure après fusion (binaire `cp_m3`) :
+  facile 62 % [55-73] 4/5, 11,4 trêves ; normale 65 % [31-78] 8/10 (graine 10 à 31 %,
+  bloquée par l'attitude : « Mariage entre nos maisons » +15 empilé jusqu'à 10 fois, « Même
+  maison régnante ») ; difficile 65 % [59-69] 10/10, 14,0 trêves, 1re faction max 35 % ;
+  très difficile 57 % [50-65] **3/5** (graines 1-2 : Angleterre à 90-100 de fatigue en paix
+  avec la France, car elle répond sans cesse aux appels du Portugal contre la Castille et de
+  l'Empire contre la Bohême).
+- Essai v9 en cours : `war.claim_war_ignores_kinship` et `join_war.weary_stay_out`.
+- Prochaine étape : mesurer v9 aux quatre niveaux, puis vérifications complètes.
+
+## État antérieur : EN PAUSE (session suspendue par le joueur, 2026-09-26) — pas prêt à fusionner
 
 ### Où l'on en est (lire d'abord)
 
