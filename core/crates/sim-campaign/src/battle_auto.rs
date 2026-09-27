@@ -210,6 +210,10 @@ pub struct SideOutcome {
     /// Average morale fell below the rout threshold.
     pub routed: bool,
     pub general_captured: bool,
+    /// CV3: the commanding general fell (3D battle); counts as a lost
+    /// general for the outcome class.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub general_killed: bool,
 }
 
 /// Result of [`resolve_auto`]; the caller decides where the loser retreats.
@@ -962,6 +966,7 @@ pub fn resolve_with(
             morale_delta,
             routed,
             general_captured,
+            general_killed: false,
         }
     };
     let attacker_outcome = outcome(attacker, defender, attacker_power, a_losses, won_a);

@@ -426,6 +426,7 @@ fn side_outcome(
         morale_delta: result.morale_delta.clamp(-100, 100),
         routed: result.routed,
         general_captured: result.general_captured && !result.general_killed,
+        general_killed: result.general_killed,
     })
 }
 
@@ -626,6 +627,7 @@ impl CampaignState {
             let slain = no_quarter && side == loser_side && result.general_captured;
             if slain {
                 side_outcome.general_captured = false;
+                side_outcome.general_killed = true;
             }
             if result.general_killed || slain {
                 fallen.extend(army.general.clone());

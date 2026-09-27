@@ -166,7 +166,14 @@ fn veteran_trait_after_five_battles() {
     let mut events = Vec::new();
     for battle in 1..=5 {
         assert!(!state.character(&general).unwrap().traits.contains(&veteran));
-        sim_campaign::dynasty::on_battle_resolved(&mut state, &data, &general, true, &mut events);
+        sim_campaign::dynasty::on_battle_resolved(
+            &mut state,
+            &data,
+            &general,
+            true,
+            1.0,
+            &mut events,
+        );
         assert_eq!(state.character(&general).unwrap().battles_fought, battle);
     }
     let c = state.character(&general).unwrap();

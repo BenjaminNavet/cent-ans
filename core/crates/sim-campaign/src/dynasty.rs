@@ -267,13 +267,16 @@ pub fn on_battle_resolved(
     data: &GameData,
     general: &CharacterId,
     won: bool,
+    xp_multiplier: f64,
     events: &mut Vec<GameEvent>,
 ) {
-    let xp = if won {
+    let base_xp = if won {
         skills::BATTLE_VICTORY_XP
     } else {
         skills::BATTLE_XP
     };
+    // CV3: the outcome class scales the experience (heroic × 2...).
+    let xp = (f64::from(base_xp) * xp_multiplier.max(0.0)).round() as u32;
     skills::grant_experience(state, general, xp);
     if won {
         let c = state.characters.get_mut(general).expect("exists");
