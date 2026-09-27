@@ -133,10 +133,14 @@ func _run() -> void:
 	_check(status.incomplete_fine_layers() == ["rivers"], "incomplete fine layers = [rivers] (got %s)" % [status.incomplete_fine_layers()])
 	_check(status.notice_text().contains("fleuves fins"), "PARTIAL text names the fine rivers")
 
-	# 2. Avis une seule fois par session.
+	# 2. Avis une seule fois par session — en mode développeur seulement (PO1, bible DA § 12.5).
 	var ui := CanvasLayer.new()
 	root.add_child(ui)
 	ReliefCacheNotice.shown_this_session = false
+	var settings: Node = root.get_node("/root/Settings")
+	settings.call("use_test_file")
+	_check(ReliefCacheNotice.report(ui, map_dir, map_dir) != null and ui.get_child_count() == 0, "no notice outside dev mode")
+	settings.call("set_value", "dev/mode", true, false)
 	var empty_dir := base.path_join("empty")
 	DirAccess.make_dir_recursive_absolute(empty_dir)
 	_check(ReliefCacheNotice.report(ui, empty_dir, empty_dir).state == ReliefCacheStatus.State.DISABLED, "report: DISABLED without manifest")
