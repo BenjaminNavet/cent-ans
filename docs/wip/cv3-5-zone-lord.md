@@ -34,8 +34,9 @@ Orchestration : `docs/wip/cv3-campagne-vivante.md`.
 - [x] Pont RGB8 + champs.
 - [x] Shader/bulle à deux tons, masquée en fin de tour et rejeu IA.
 - [x] Lord TW ; smoke (données de zone à deux niveaux, lord, LOD).
-- [ ] Vérifs : cargo test complet, pytest, import Godot, smoke.
-- [ ] Captures `docs/img/cv3/zone-*.png` (script `game/tests/cv3_zone_shot.gd`).
+- [x] Vérifs : cargo fmt/clippy/test (0 échec), pytest (782 ok), import Godot, smoke OK.
+- [x] Captures `docs/img/cv3/zone-regionale.png`, `zone-lord.png` (`game/tests/cv3_zone_shot.gd`, avec affichage).
 
 ## Prochaine étape
-Vérifications puis captures.
+Lot terminé. Suites : icône de posture et embuscade semi-transparente (CV3-4) ; réglage fin
+de `army_figure_scale` / `LORD_HAND` après playtest.

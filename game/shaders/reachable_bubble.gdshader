@@ -19,9 +19,9 @@ uniform vec4 shadow_color : source_color = vec4(0.16, 0.09, 0.03, 0.55);
 uniform float edge_px = 1.6;
 // Lot CV3-5 : anneau du tour suivant.
 uniform bool show_next = true;
-uniform vec4 next_fill_color : source_color = vec4(0.93, 0.90, 0.80, 0.07);
-uniform vec4 next_edge_color : source_color = vec4(0.95, 0.90, 0.74, 0.55);
-uniform float next_edge_px = 1.1;
+uniform vec4 next_fill_color : source_color = vec4(0.90, 0.88, 0.80, 0.13);
+uniform vec4 next_edge_color : source_color = vec4(0.96, 0.92, 0.78, 0.85);
+uniform float next_edge_px = 1.4;
 // Décalage vers la caméra (fraction de la distance) : évite que le relief ne perce la bulle.
 uniform float depth_pull = 0.004;
 
