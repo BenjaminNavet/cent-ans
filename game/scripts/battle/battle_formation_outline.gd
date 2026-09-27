@@ -3,7 +3,7 @@ extends Node3D
 
 ## CB-M1 : contour de formation projeté sur le relief, un `Decal` par régiment (remplace l'anneau
 ## jaune de sélection). États (spec CB-M, « Contour de formation ») :
-## - Sélectionnée : trait plein, couleur du camp ;
+## - Sélectionnée : trait plein, or pâle teinté du camp (PO4) ;
 ## - Survolée : trait pâle ;
 ## - Ennemie survolée : rouge, trait pointillé ;
 ## - Ennemie ciblée (cible `target` d'une unité sélectionnée) : rouge pulsé ;
@@ -19,7 +19,11 @@ extends Node3D
 
 enum State { NONE, SELECTED, HOVERED, ENEMY_HOVERED, ENEMY_TARGETED }
 
-const ENEMY_RED := Color(0.9, 0.12, 0.08)
+## PO4 (bible DA, ADR 0097) : liseré or pâle mince, jamais de jaune pur ; rouge garance pour
+## l'ennemi. La livrée du camp ne teinte plus que légèrement l'or (`LIVERY_TINT`).
+const ENEMY_RED := Color(0.8, 0.16, 0.11)
+const PALE_GOLD := Color(0.93, 0.84, 0.6)
+const LIVERY_TINT := 0.2
 const MARGIN := 3.0  # m ajoutés au front et à la profondeur (comme l'ancien anneau)
 const HEIGHT := 30.0  # m : hauteur de projection, couvre le relief sous la formation
 ## Textures à échelle fixe : `PX_PER_M` pixels par mètre, taille de décale arrondie au pas
@@ -27,12 +31,12 @@ const HEIGHT := 30.0  # m : hauteur de projection, couvre le relief sous la form
 const PX_PER_M := 6
 const SIZE_STEP := 2.0
 const MAX_SIZE := 300.0  # m : borne de la texture (1800 px)
-const LINE_M := 1.0
+const LINE_M := 0.5
 const DASH_M := 4.0
 const GAP_M := 2.5
 const PULSE_HZ := 1.1
 const PULSE_MIN := 0.35  # opacité au creux du pulsé
-const EMISSION := 0.9  # le trait reste lisible dans l'ombre et au crépuscule
+const EMISSION := 0.7  # le trait reste lisible dans l'ombre et au crépuscule
 
 ## Textures partagées par toutes les scènes : Vector3i(pas en largeur, pas en profondeur,
 ## pointillé) -> [albédo, émission], générées une fois à la demande.
@@ -171,10 +175,10 @@ func _color(state: int, side: String) -> Color:
 	var livery: Color = _side_colors.get(side, Color(0.9, 0.8, 0.3))
 	match state:
 		State.SELECTED:
-			# Couleur du camp, éclaircie : une livrée sombre (bleu de France) disparaît sur l'herbe.
-			return Color(livery.lerp(Color.WHITE, 0.3), 1.0)
+			# PO4 : or pâle à peine teinté de la livrée (une livrée sombre disparaît sur l'herbe).
+			return Color(PALE_GOLD.lerp(livery, LIVERY_TINT), 1.0)
 		State.HOVERED:
-			return Color(livery.lerp(Color.WHITE, 0.65), 0.7)
+			return Color(PALE_GOLD.lerp(Color.WHITE, 0.4), 0.6)
 		State.ENEMY_HOVERED:
 			return Color(ENEMY_RED, 0.95)
 		State.ENEMY_TARGETED:
