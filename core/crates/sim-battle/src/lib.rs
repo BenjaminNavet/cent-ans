@@ -97,7 +97,9 @@ pub use field::{
 };
 pub use fire::{Blaze, FireRules, FireState};
 pub use historical::HistoricalMap;
-pub use hover::{Advantage, Compare, CompareSide, HoverContext, HoverKind, HoverRules};
+pub use hover::{
+    Advantage, Compare, CompareSide, HoverContext, HoverKind, HoverRules, RangeArcRules,
+};
 pub use hydro::{
     Bank, BankKind, Bridge, Crossing, Road, RoadKind, Stream, StreamKind, Water, WaterRules,
     WatersideSpot,
