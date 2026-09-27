@@ -124,9 +124,15 @@
             "type": "object",
             "properties": {
               "sky": { "type": "string" },
-              "fog_color": { "$ref": "#/$defs/rgb" }
+              "fog_color": { "$ref": "#/$defs/rgb" },
+              "fog_sun_scatter": { "type": "number", "minimum": 0, "maximum": 1, "description": "PO3 : diffusion du brouillard vers le soleil (perspective aérienne dorée côté soleil, bleutée ailleurs)." },
+              "sun_elevation": { "type": "number", "minimum": 5, "maximum": 60, "description": "PO3 (bible DA § 12.6) : hauteur du soleil de la carte, degrés (rasant de fin d'après-midi : 18-28)." },
+              "sun_azimuth": { "type": "number", "minimum": 0, "maximum": 360, "description": "PO3 : azimut d'où vient la lumière, degrés depuis le nord, sens horaire (ouest-sud-ouest ≈ 247)." },
+              "sun_color": { "$ref": "#/$defs/rgb" },
+              "sun_energy": { "type": "number", "minimum": 0, "maximum": 4 },
+              "grade": { "$ref": "#/$defs/grade", "description": "PO3 : étalonnage propre à la carte, appliqué après celui de la saison (courbe en S douce)." }
             },
-            "required": ["sky", "sky_luminance"]
+            "required": ["sky", "sky_luminance", "sun_elevation", "sun_azimuth", "sun_color"]
           }
         }
       },
