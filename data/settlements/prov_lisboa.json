@@ -111,5 +111,109 @@
     "sources": [
       "Monastère d'Alcobaça"
     ]
+  },
+  {
+    "id": "set_sintra",
+    "province": "prov_lisboa",
+    "kind": "town",
+    "name": {
+      "display": "Sintra",
+      "local": "Sintra",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -9.3899,
+      38.7975
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg royal dominé par le château maure repris en 1147, résidence occasionnelle des rois portugais.",
+    "sources": [
+      "Sintra",
+      "Château maure de Sintra"
+    ]
+  },
+  {
+    "id": "set_obidos",
+    "province": "prov_lisboa",
+    "kind": "town",
+    "name": {
+      "display": "Óbidos",
+      "local": "Obidos",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -9.1571,
+      39.3603
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville close offerte en douaire aux reines de Portugal depuis 1282 (« vila das rainhas »).",
+    "sources": [
+      "Óbidos"
+    ]
+  },
+  {
+    "id": "set_torres_vedras",
+    "province": "prov_lisboa",
+    "kind": "town",
+    "name": {
+      "display": "Torres Vedras",
+      "local": "Torres Vedras",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -9.26,
+      39.0917
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié doté d'un foral dès le XIIIe siècle, dominant la vallée du Sizandro.",
+    "sources": [
+      "Torres Vedras"
+    ]
+  },
+  {
+    "id": "set_cascais",
+    "province": "prov_lisboa",
+    "kind": "village",
+    "name": {
+      "display": "Cascais",
+      "local": "Cascais",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -9.4215,
+      38.6979
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Bourg de pêcheurs à l'embouchure du Tage, mentionné dès le XIIe siècle.",
+    "sources": [
+      "Cascais"
+    ]
   }
 ]

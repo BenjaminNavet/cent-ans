@@ -112,5 +112,109 @@
       "Faro",
       "Algarve"
     ]
+  },
+  {
+    "id": "set_estremoz",
+    "province": "prov_alentejo",
+    "kind": "town",
+    "name": {
+      "display": "Estremoz",
+      "local": "Estremoz",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -7.5945,
+      38.8398
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville royale fortifiée où mourut la reine Isabelle d'Aragon (« Rainha Santa ») en 1336, réputée pour son marbre.",
+    "sources": [
+      "Estremoz",
+      "Isabelle d'Aragon (reine du Portugal)"
+    ]
+  },
+  {
+    "id": "set_portalegre",
+    "province": "prov_alentejo",
+    "kind": "town",
+    "name": {
+      "display": "Portalegre",
+      "local": "Portalegre",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -7.431,
+      39.2925
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville de frontière chartrée par Afonso III en 1259 pour repeupler la marche face à la Castille.",
+    "sources": [
+      "Portalegre"
+    ]
+  },
+  {
+    "id": "set_arraiolos",
+    "province": "prov_alentejo",
+    "kind": "village",
+    "name": {
+      "display": "Arraiolos",
+      "local": "Arraiolos",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -7.9917,
+      38.7168
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg fortifié doté d'un foral en 1290, dominé par son château.",
+    "sources": [
+      "Arraiolos"
+    ]
+  },
+  {
+    "id": "set_sao_bento_de_castris",
+    "province": "prov_alentejo",
+    "kind": "abbey",
+    "name": {
+      "display": "São Bento de Cástris",
+      "local": "São Bento de Cástris",
+      "local_language": "portugais"
+    },
+    "lonlat": [
+      -7.939,
+      38.601
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère cistercien féminin fondé vers 1274 près d'Évora.",
+    "sources": [
+      "Mosteiro de São Bento de Cástris"
+    ]
   }
 ]

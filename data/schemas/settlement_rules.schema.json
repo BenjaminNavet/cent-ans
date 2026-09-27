@@ -166,6 +166,42 @@
         "minimum": 0
       }
     },
+    "province_effect_percent": {
+      "type": "object",
+      "description": "Poids, en pour cent, des bâtiments d'une colonie dans les effets sur toute sa province (ordre public, santé, biens, ravitaillement, place pour croître), selon le type de colonie (lot DC3, ADR 0082). Un type absent pèse 100 %.",
+      "propertyNames": {
+        "enum": [
+          "city",
+          "town",
+          "castle",
+          "abbey",
+          "village"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      }
+    },
+    "research_percent": {
+      "type": "object",
+      "description": "Poids, en pour cent, des bâtiments d'une colonie dans les points de recherche de la faction qui la tient, selon le type de colonie (lot DC6b, ADR 0082). Un type absent pèse 100 %.",
+      "propertyNames": {
+        "enum": [
+          "city",
+          "town",
+          "castle",
+          "abbey",
+          "village"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      }
+    },
     "building_upkeep_percent": {
       "type": "object",
       "description": "Part de l'entretien des bâtiments d'une colonie payée par son contrôleur, en pour cent, selon le type de colonie (lot C7a). Un type absent paie 100 %.",

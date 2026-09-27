@@ -136,5 +136,110 @@
     "sources": [
       "Abbaye de Brauweiler"
     ]
+  },
+  {
+    "id": "set_zuelpich",
+    "province": "prov_cologne",
+    "kind": "village",
+    "name": {
+      "display": "Zülpich",
+      "local": "Tzulpich",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.6503,
+      50.6875
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg d'origine romaine de l'Eifel, sous la juridiction de l'archevêché de Cologne.",
+    "sources": [
+      "Zülpich"
+    ]
+  },
+  {
+    "id": "set_bergheim",
+    "province": "prov_cologne",
+    "kind": "village",
+    "name": {
+      "display": "Bergheim",
+      "local": "Berchheim",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.6414,
+      50.9599
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_windmill"
+    ],
+    "port": false,
+    "description": "Bourg de l'électorat de Cologne doté de droits de marché depuis 1276.",
+    "sources": [
+      "Bergheim"
+    ]
+  },
+  {
+    "id": "set_juelich",
+    "province": "prov_cologne",
+    "kind": "town",
+    "name": {
+      "display": "Juliers",
+      "local": "Gulche",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      6.3597,
+      50.9219
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville siège du comté de Juliers, élevé en marquisat en 1336 pour Guillaume, allié d'Édouard III.",
+    "sources": [
+      "Duché de Juliers",
+      "Juliers"
+    ]
+  },
+  {
+    "id": "set_siegburg",
+    "province": "prov_cologne",
+    "kind": "abbey",
+    "name": {
+      "display": "Siegburg",
+      "local": "Sigeberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      7.2069,
+      50.7975
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine du Michelsberg, fondée en 1064, foyer de la réforme monastique rhénane.",
+    "sources": [
+      "Abbaye de Siegburg"
+    ]
   }
 ]

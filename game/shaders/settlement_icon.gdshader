@@ -10,6 +10,9 @@ render_mode unshaded, blend_mix, cull_disabled, depth_draw_never, depth_test_dis
 // Dé-encombrement sans CPU par image : INSTANCE_CUSTOM.a = distance caméra (÷ 100) jusqu'à
 // laquelle le lieu reste affiché ; fondu sur `fade_distance`, quad replié au-delà.
 // INSTANCE_CUSTOM.g = surbrillance (sélection).
+// Lot DA7d : dé-encombrement écran (calculé côté CPU seulement quand la caméra bouge nettement) :
+// COLOR.b = 1 affiché / 0 cède la place, COLOR.a = instant de la bascule ; fondu sur
+// `declutter_fade` secondes jusqu'à `hidden_alpha` (horloge `declutter_now`).
 
 uniform sampler2D atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D shields : source_color, filter_linear_mipmap, repeat_disable;
@@ -24,6 +27,9 @@ uniform float alpha = 1.0;
 uniform float camera_distance = 0.0;
 uniform float fade_distance = 60.0;
 uniform vec3 highlight_color : source_color = vec3(0.949, 0.761, 0.188);
+uniform float declutter_now = 0.0;
+uniform float declutter_fade = 0.25;
+uniform float hidden_alpha = 0.0;
 
 varying float v_cell;
 varying float v_shield;
@@ -39,6 +45,9 @@ void vertex() {
 	v_port = COLOR.g;
 	float until = INSTANCE_CUSTOM.a * 100.0;
 	v_alpha = alpha * (1.0 - smoothstep(until - fade_distance, until, camera_distance));
+	float switched = clamp((declutter_now - COLOR.a) / max(declutter_fade, 1e-3), 0.0, 1.0);
+	float shown = mix(1.0 - COLOR.b, COLOR.b, switched);
+	v_alpha *= mix(hidden_alpha, 1.0, shown);
 	float size = INSTANCE_CUSTOM.b * size_scale * (v_highlight > 0.5 ? 1.18 : 1.0);
 	vec4 center_view = MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0);
 	float dist = max(-center_view.z, 0.01);

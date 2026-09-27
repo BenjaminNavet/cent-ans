@@ -61,4 +61,55 @@ de 5 % tenu. Saturation moyenne (zone 3D sous l'horizon) : gros plan 38 → 29 %
 - Autre copie de formules : lisières identiques dans le sol et l'herbe (`bt_field_info_soft`).
 - `BattleMeshes.tree` reste pour `--no-da6` et le décor 3D du menu.
 - Couleur d'automne encore > 35 % : elle vient surtout de la lumière et du brouillard dorés
-  (`BattleAtmosphere`), hors de ce lot.
+  (`BattleAtmosphere`), hors de ce lot. Résolu par DA7b (ci-dessous).
+
+## DA7b — Saturation en automne et en bocage (2026-09-26)
+
+**Constat.** Mesure reprise dans `tools/cent_ans_tools/scene_saturation.py` (zone et vues de
+DA6, plus la teinte moyenne des pixels colorés). Sur main, automne 44,7 %, bois 37,0 %, et le
+bocage ne dépasse plus qu'en vues qui montrent les haies (39,1 %) ou d'en haut (36,1 %) : le
+gros plan `--terrain=bocage --closeup` de DA6 cadre désormais un champ ouvert (29,1 %).
+Causes : l'étalonnage de saison d'automne (température +0,34, bleus coupés) teinte toute l'image
+d'orangé, et les tons sombres (ombres des haies, labours, sous-bois) où la saturation HSV
+(max − min rapporté à un max faible) gonfle. Le soleil, le brouillard (`BattleAtmosphere`) et
+l'heure (`battle_time_of_day`) ne dépendent pas de la saison ; seul le ciel HDRI d'automne
+(`autumn_clear`) dore l'ambiance, laissé tel quel (il porte la teinte de la saison).
+
+**Décision** (données seulement, `data/fx/atmosphere.json`, schéma à jour) :
+1. Nouveau paramètre d'étalonnage `shadow_saturation` (LUT, `AtmosphereLibrary._grade`) :
+   saturation gardée par les tons sombres, pleine au noir, sans effet au-delà de la luminance 0,5.
+2. Nouveau bloc `battle_seasons` : étalonnage de saison propre aux batailles (remplace celui de
+   `seasons`, que la campagne garde inchangé) et `decor_saturation` par saison (auparavant codé
+   en dur dans `BattleTerrain.decor_saturation()`, valeurs DA6 conservées : 0,6, automne 0,5).
+   - printemps, été : étalonnage commun + `shadow_saturation` 0,7 ;
+   - automne : température 0,34 → 0,22, saturation 1,02 → 0,92, `shadow_saturation` 0,5, gain et
+     hautes lumières toujours chauds (la teinte roux-doré reste : 39° → 38° en gros plan) ;
+   - hiver : inchangé (déjà gris-blanc, 15 %).
+
+**Mesures** (1600 × 900, `scene_saturation capture`, captures `docs/img/da7b/avant_*`/`apres_*`) :
+
+| Vue | avant | après | teinte avant → après |
+|---|---|---|---|
+| gros plan (`closeup`) | 29,5 % | 27,5 % | 49° → 49° |
+| étendard à pied (`foot`, cadre un mur de pont) | 27,0 % | 25,6 % | 36° → 36° |
+| vue haute | 33,7 % | 29,4 % | 47° → 47° |
+| ligne | 26,9 % | 25,9 % | 46° → 46° |
+| hiver | 15,2 % | 15,3 % | 50° → 51° |
+| **automne** | **44,7 %** | **32,7 %** | 39° → 38° |
+| bocage (gros plan DA6) | 29,1 % | 27,7 % | 49° → 49° |
+| bois | 37,0 % | 32,3 % | 60° → 60° |
+| bois en hiver | 22,1 % | 21,5 % | 61° → 61° |
+| **bocage, haies** (nouvelle vue) | **39,1 %** | **33,7 %** | 55° → 55° |
+| bocage, vue haute (nouvelle) | 36,1 % | 31,3 % | 50° → 50° |
+| automne, vue haute (nouvelle) | 43,4 % | 28,1 % | 36° → 34° |
+| automne en bocage (nouvelle) | 49,7 % | 32,4 % | 40° → 39° |
+
+Toutes les vues ≤ 35 % ; la teinte ne bouge pas (± 2°).
+
+**Conséquences.**
+- L'étalonnage s'applique à toute l'image 3D : figurines et étendards dans l'ombre sont un peu
+  moins saturés (l'interface, en `CanvasLayer`, n'y passe pas).
+- Le cadrage `--standard-shot=foot` varie d'un lancement à l'autre (cavaliers ou mur de pont) :
+  comparer des captures du même cadrage.
+- Marge faible sur les haies du bocage au printemps (33,7 %) : une nouvelle essence plus verte ou
+  des haies plus denses la consommeraient.

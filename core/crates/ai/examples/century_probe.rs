@@ -22,7 +22,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::Instant;
 
-use data_model::{CharacterId, FactionId, GameData, SettlementId};
+use data_model::{CharacterId, FactionId, GameData, ProvinceId, SettlementId};
 use sim_campaign::{CampaignState, EventKind};
 
 /// First turn of 1350 (the treasury rule applies from then on).
@@ -253,6 +253,33 @@ struct Eq4 {
     trespass_seasons: u32,
     /// DP2: casus belli won by a trespass.
     trespass_grievances: u32,
+    /// DC3: province cities taken by a crown (rebels excluded).
+    city_captures: u32,
+    /// DC3: city captures taken back from the rebels.
+    city_from_rebels: u32,
+    /// DC3: provinces whose every settlement came to be held by one crown that did not hold
+    /// them all before, and the turns since that crown's first foothold there.
+    provinces_completed: u32,
+    conquest_turns: u32,
+    /// DC3: (province, crown) -> turn that crown took its first place in a province where
+    /// it held none.
+    footholds: BTreeMap<(ProvinceId, FactionId), u32>,
+    /// DC3 (revolts): devastation summed over provinces and turns, province-turns occupied
+    /// (controller != owner) and province-turns above 60 of weighted unrest.
+    devastation_sum: u64,
+    occupied_turns: u32,
+    hot_turns: u32,
+    /// DC3: faction-turns (living factions) at high tax, and all faction-turns.
+    high_tax_turns: u32,
+    faction_turns: u32,
+    /// DC3: men under arms (field armies) summed over turns, all factions.
+    men_sum: u64,
+    /// DC3: province-turns counted in the three sums above.
+    province_turns: u32,
+    /// DC3: beaten armies that fell back to a neutral refuge, routed and rallied, dispersed.
+    retreat_fallback: u32,
+    retreat_rout: u32,
+    retreat_dispersed: u32,
 }
 
 /// Faction controlling the most provinces and its share.
@@ -344,6 +371,85 @@ fn track_eq4(state: &CampaignState, eq4: &mut Eq4, before: &Snapshot) {
             && old_sieges.get(id) != Some(&s.controller)
         {
             eq4.direct_captures += 1;
+        }
+    }
+    for f in state.factions.values().filter(|f| f.alive) {
+        eq4.faction_turns += 1;
+        if f.tax_rate == sim_campaign::TaxRate::High {
+            eq4.high_tax_turns += 1;
+        }
+    }
+    eq4.men_sum += state
+        .armies
+        .values()
+        .flat_map(|a| a.units.iter())
+        .map(|u| u64::from(u.strength))
+        .sum::<u64>();
+    // DC3: city captures, footholds and completed conquests.
+    for (province_id, province) in &state.provinces {
+        let Some(city) = state.settlements.get(&province.city) else {
+            continue;
+        };
+        eq4.province_turns += 1;
+        eq4.devastation_sum += u64::from(province.devastation);
+        if city.controller != city.owner {
+            eq4.occupied_turns += 1;
+        }
+        if sim_campaign::population::weighted_unrest(&province.population) > 60.0 {
+            eq4.hot_turns += 1;
+        }
+        let previous = old_controllers.get(&province.city);
+        if previous != Some(&city.controller) && city.controller.as_str() != "fac_rebels" {
+            eq4.city_captures += 1;
+            // DC3: `CAPTURE_TRACE=1` lists the city captures.
+            if std::env::var("CAPTURE_TRACE").is_ok() {
+                println!(
+                    "  CAPTURE t{} {} {} <- {} owner {}",
+                    state.turn,
+                    province_id.as_str(),
+                    city.controller.as_str(),
+                    previous.map_or("?", |f| f.as_str()),
+                    city.owner.as_str(),
+                );
+            }
+            // Retaken from the rebels: a consequence of the revolts, not of the war.
+            if previous.is_some_and(|f| f.as_str() == "fac_rebels") {
+                eq4.city_from_rebels += 1;
+            }
+        }
+        let places: Vec<&SettlementId> = state
+            .settlements
+            .iter()
+            .filter(|(_, s)| &s.province == province_id)
+            .map(|(id, _)| id)
+            .collect();
+        let holders: BTreeSet<&FactionId> = places
+            .iter()
+            .map(|id| &state.settlements[*id].controller)
+            .collect();
+        eq4.footholds
+            .retain(|(p, f), _| p != province_id || holders.contains(f));
+        for holder in &holders {
+            let newly = !places
+                .iter()
+                .any(|id| old_controllers.get(*id) == Some(*holder));
+            if newly && holder.as_str() != "fac_rebels" {
+                eq4.footholds
+                    .entry((province_id.clone(), (*holder).clone()))
+                    .or_insert(state.turn);
+            }
+        }
+        if holders.len() == 1 {
+            let holder = *holders.iter().next().expect("one");
+            let was_whole = places
+                .iter()
+                .all(|id| old_controllers.get(*id) == Some(holder));
+            if !was_whole && holder.as_str() != "fac_rebels" {
+                if let Some(start) = eq4.footholds.remove(&(province_id.clone(), holder.clone())) {
+                    eq4.provinces_completed += 1;
+                    eq4.conquest_turns += state.turn.saturating_sub(start);
+                }
+            }
         }
     }
     let (access, trespass) = passage(state);
@@ -713,8 +819,37 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
                 EventKind::ProvinceCaptured => report.captures += 1,
                 EventKind::Revolt if !event.text_fr.contains("passe aux mains") => {
                     report.eq4.revolts += 1;
+                    // DC3: `REVOLT_TRACE=1` prints each revolt and the province's state.
+                    if std::env::var("REVOLT_TRACE").is_ok() {
+                        if let Some(p) =
+                            event.province.as_ref().and_then(|p| state.provinces.get(p))
+                        {
+                            let city = &state.settlements[&p.city];
+                            println!(
+                                "  [{seed}] {:>16} {} ctrl {} owner {} dev {} disorder {} garrison {} places {}",
+                                state.date_label(),
+                                event.text_fr,
+                                city.controller.as_str(),
+                                city.owner.as_str(),
+                                p.devastation,
+                                p.unrest,
+                                state.province_garrison_strength(event.province.as_ref().expect("province")),
+                                state.settlements.values().filter(|s| s.province == city.province).count(),
+                            );
+                        }
+                    }
                 }
                 EventKind::SiegeStarted => report.eq4.sieges_started += 1,
+                // DC3: outcomes of a beaten army's retreat (a friendly retreat has no event).
+                EventKind::Attrition if event.text_fr.contains("recule et perd") => {
+                    report.eq4.retreat_fallback += 1;
+                }
+                EventKind::Attrition if event.text_fr.contains("avant de se rallier") => {
+                    report.eq4.retreat_rout += 1;
+                }
+                EventKind::ArmyDestroyed if event.text_fr.contains("se disperse") => {
+                    report.eq4.retreat_dispersed += 1;
+                }
                 EventKind::FactionDestroyed => report.destroyed += 1,
                 EventKind::WarDeclared if event.text_fr.contains("répond à l'appel") => {
                     report.calls_honoured += 1;
@@ -741,6 +876,135 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         }
         if trespass_trace {
             trace_trespass(&state, data);
+        }
+        // DC3: `ARMY_TRACE=fac_england` prints that faction's armies every 4 turns.
+        if let Ok(who) = std::env::var("ARMY_TRACE") {
+            if state.turn.is_multiple_of(4) {
+                for (aid, army) in state
+                    .armies
+                    .iter()
+                    .filter(|(_, a)| a.faction.as_str() == who)
+                {
+                    let men: u32 = army.units.iter().map(|u| u.strength).sum();
+                    println!(
+                        "  ARMY [{seed}] t{} {} {} men {} units {} at {} owner {}",
+                        state.turn,
+                        aid.as_str(),
+                        state.date_label(),
+                        men,
+                        army.units.len(),
+                        state
+                            .army_province(data, army)
+                            .map_or("-".into(), |p| p.as_str().to_string()),
+                        state
+                            .army_province(data, army)
+                            .and_then(|p| state.province_controller(&p).cloned())
+                            .map_or("-".into(), |f| f.as_str().to_string()),
+                    );
+                }
+            }
+        }
+        // DC3: `REVOLT_TRACE=1` also lists the provinces above 70 of weighted unrest.
+        if std::env::var("REVOLT_TRACE").is_ok() {
+            for (pid, p) in &state.provinces {
+                let w = sim_campaign::population::weighted_unrest(&p.population);
+                if w > 70.0 {
+                    let c = &state.settlements[&p.city];
+                    let pe = &p.population.peasants;
+                    println!(
+                        "  [{seed}] {:>16} HOT {} {w:.0} ctrl {} owner {} tax {:?} peasants u{} h{} g{} w{} dev {} dis {} gar {} rs {}",
+                        state.date_label(),
+                        pid.as_str(),
+                        c.controller.as_str(),
+                        c.owner.as_str(),
+                        state.factions.get(&c.controller).map(|f| f.tax_rate),
+                        pe.unrest,
+                        pe.health,
+                        pe.goods_satisfaction,
+                        pe.wealth,
+                        p.devastation,
+                        p.unrest,
+                        state.province_garrison_strength(pid),
+                        p.revolt_seasons,
+                    );
+                }
+            }
+        }
+        // DC6b: `DC6_TRACE=1` prints research points per faction (turns 1, 40, 120)
+        // and the heresy of every province each turn.
+        if std::env::var("DC6_TRACE").is_ok() {
+            if [1, 40, 120, 200].contains(&state.turn) {
+                for fid in state.factions.keys().filter(|f| f.as_str() != "fac_rebels") {
+                    if state.factions[fid].alive {
+                        println!(
+                            "DC6R {seed} {} {} {}",
+                            state.turn,
+                            fid.as_str(),
+                            state.research_points_per_turn(data, fid)
+                        );
+                    }
+                }
+            }
+            let heretic: Vec<u8> = state
+                .provinces
+                .values()
+                .filter(|p| p.heresy_religion.is_some())
+                .map(|p| p.heresy)
+                .collect();
+            let sum: u32 = state.provinces.values().map(|p| u32::from(p.heresy)).sum();
+            println!(
+                "DC6H {seed} {} {} {} {} {}",
+                state.turn,
+                heretic.len(),
+                sum,
+                state.provinces.len(),
+                heretic.iter().max().copied().unwrap_or(0)
+            );
+        }
+        // DC6b: `DC6_TRACE=1` also follows revolts, occupations and unrest.
+        if std::env::var("DC6_TRACE").is_ok() {
+            for event in events.iter().filter(|e| {
+                matches!(e.kind, EventKind::Revolt) && !e.text_fr.contains("passe aux mains")
+            }) {
+                if let Some(pid) = event.province.as_ref() {
+                    let p = &state.provinces[pid];
+                    let c = &state.settlements[&p.city];
+                    println!(
+                        "DC6V {seed} {} {} {} {} {} {}",
+                        state.turn,
+                        pid.as_str(),
+                        u8::from(c.controller != c.owner),
+                        state.province_garrison_strength(pid),
+                        p.devastation,
+                        p.unrest
+                    );
+                }
+            }
+            let mut occupied = Vec::new();
+            let (mut hot60, mut hot75, mut gar, mut w_sum) = (0, 0, 0u64, 0.0);
+            for (pid, p) in &state.provinces {
+                let c = &state.settlements[&p.city];
+                if c.controller != c.owner {
+                    occupied.push(pid.as_str().to_owned());
+                }
+                let w = sim_campaign::population::weighted_unrest(&p.population);
+                w_sum += w;
+                if w > 60.0 {
+                    hot60 += 1;
+                }
+                if w > 75.0 {
+                    hot75 += 1;
+                }
+                gar += u64::from(state.province_garrison_strength(pid));
+            }
+            let n = state.provinces.len().max(1);
+            println!(
+                "DC6P {seed} {} {hot60} {hot75} {} {:.1} {}",
+                state.turn,
+                gar / n as u64,
+                w_sum / n as f64,
+                occupied.join(",")
+            );
         }
         track_eq4(&state, &mut report.eq4, &eq4_before);
         eq4_before = snapshot(&state);
@@ -932,7 +1196,11 @@ fn main() {
         seeds = vec![1, 2, 3, 4, 5];
     }
     let verbose = std::env::var("VERBOSE").is_ok();
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data");
+    // DC6b: `CENT_ANS_DATA_DIR` plays another copy of the data (variants of a rule).
+    let root = std::env::var("CENT_ANS_DATA_DIR").map_or_else(
+        |_| Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../data"),
+        std::path::PathBuf::from,
+    );
     let (data, _) = GameData::load(&root).expect("data");
     // Seeds run in parallel (each campaign is deterministic on its own).
     let reports: Vec<Report> = std::thread::scope(|scope| {
@@ -1162,6 +1430,42 @@ fn print_eq4(reports: &[Report]) {
         ("Saisons d'intrusion", |r| f64::from(r.eq4.trespass_seasons)),
         ("Casus belli d'intrusion", |r| {
             f64::from(r.eq4.trespass_grievances)
+        }),
+        ("DC3 cités prises / déc.", |r| {
+            f64::from(r.eq4.city_captures) * 40.0 / f64::from(r.turns)
+        }),
+        ("DC3 impôt haut (% fac.-tours)", |r| {
+            100.0 * f64::from(r.eq4.high_tax_turns) / f64::from(r.eq4.faction_turns.max(1))
+        }),
+        ("DC3 hommes en campagne (moy. / tour)", |r| {
+            r.eq4.men_sum as f64 / f64::from(r.turns.max(1))
+        }),
+        ("DC3 dont reprises aux rebelles / déc.", |r| {
+            f64::from(r.eq4.city_from_rebels) * 40.0 / f64::from(r.turns)
+        }),
+        ("DC3 provinces conquises en entier / déc.", |r| {
+            f64::from(r.eq4.provinces_completed) * 40.0 / f64::from(r.turns)
+        }),
+        ("DC3 dévastation moy. (par province)", |r| {
+            r.eq4.devastation_sum as f64 / f64::from(r.eq4.province_turns.max(1))
+        }),
+        ("DC3 provinces occupées (% prov.-tours)", |r| {
+            100.0 * f64::from(r.eq4.occupied_turns) / f64::from(r.eq4.province_turns.max(1))
+        }),
+        ("DC3 mécontentement > 60 (‰ prov.-tours)", |r| {
+            1000.0 * f64::from(r.eq4.hot_turns) / f64::from(r.eq4.province_turns.max(1))
+        }),
+        ("DC3 replis vers un refuge neutre", |r| {
+            f64::from(r.eq4.retreat_fallback)
+        }),
+        ("DC3 débandades ralliées", |r| {
+            f64::from(r.eq4.retreat_rout)
+        }),
+        ("DC3 armées dispersées", |r| {
+            f64::from(r.eq4.retreat_dispersed)
+        }),
+        ("DC3 durée moy. d'une conquête (tours)", |r| {
+            f64::from(r.eq4.conquest_turns) / f64::from(r.eq4.provinces_completed.max(1))
         }),
     ];
     println!("Moyennes EQ4 :");

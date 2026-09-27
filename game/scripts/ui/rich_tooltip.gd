@@ -656,7 +656,9 @@ static func trait_tip(entry: Dictionary) -> String:
 	var definition := GameCatalog.trait_definition(id)
 	var category: String = str(entry.get("category", definition.get("category", "")))
 	var name: String = str(entry.get("name", GameCatalog.display_name(id)))
-	var lines: Array = ["%s [b]%s[/b]  [color=%s][i]%s[/i][/color]" % [icon_bbcode("trait_category_" + category, 28, "trait"), name, MUTED, TRAIT_CATEGORY_LABELS.get(category, category)]]
+	# DA7c : icône propre au trait (`data/ui/icons_ink.json`, groupe "trait") ; repli sur
+	# l'icône de catégorie générique si ce trait n'en a pas (`IconLibrary.resolve`).
+	var lines: Array = ["%s [b]%s[/b]  [color=%s][i]%s[/i][/color]" % [icon_bbcode(id, 28, "trait"), name, MUTED, TRAIT_CATEGORY_LABELS.get(category, category)]]
 	lines.append(_effects_block(definition.get("effects", [])))
 	var opposites := PackedStringArray()
 	for opposite in definition.get("opposites", entry.get("opposites", [])):

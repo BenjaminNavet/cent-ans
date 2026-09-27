@@ -80,5 +80,105 @@
     "sources": [
       "Sligo"
     ]
+  },
+  {
+    "id": "set_downpatrick",
+    "province": "prov_ulster",
+    "kind": "abbey",
+    "name": {
+      "display": "Downpatrick",
+      "local": "Dún Pádraig",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -5.7156,
+      54.3306
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Ville monastique liée à saint Patrick, siège épiscopal du Down.",
+    "sources": [
+      "Downpatrick"
+    ]
+  },
+  {
+    "id": "set_armagh",
+    "province": "prov_ulster",
+    "kind": "town",
+    "name": {
+      "display": "Armagh",
+      "local": "Ard Mhacha",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -6.65,
+      54.35
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Siège primatial d'Irlande, cité monastique fondée par saint Patrick.",
+    "sources": [
+      "Armagh"
+    ]
+  },
+  {
+    "id": "set_coleraine",
+    "province": "prov_ulster",
+    "kind": "village",
+    "name": {
+      "display": "Coleraine",
+      "local": "Cúil Raithin",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -6.6667,
+      55.1333
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg sur la Bann, dans le nord de l'Ulster.",
+    "sources": [
+      "Coleraine"
+    ]
+  },
+  {
+    "id": "set_dundalk",
+    "province": "prov_ulster",
+    "kind": "town",
+    "name": {
+      "display": "Dundalk",
+      "local": "Dún Dealgan",
+      "local_language": "anglo-normand"
+    },
+    "lonlat": [
+      -6.4056,
+      54.0
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville anglo-normande fortifiée à la frontière du Pale, sur la côte est.",
+    "sources": [
+      "Dundalk"
+    ]
   }
 ]

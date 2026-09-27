@@ -414,14 +414,15 @@ fn movement_spans_turns_and_reachable_is_bounded() {
     let mut state = france(&data, 1);
     let army = main_army(&state, "fac_france");
     let allowance = state.army(&army).unwrap().movement_left;
-    // Lot C7a: 3 steps of 140 km times the season scale (0.5) in spring,
-    // converted to grid costs (lot M2: 10 per plain cell of ~1.44 km).
-    assert_eq!(state.season_movement_points(&data), 210);
+    // Lot C7a: 3 steps of 70 km (lot DC1, ADR 0082) times the season scale
+    // (0.5) in spring, converted to grid costs (lot M2: 10 per plain cell of
+    // ~1.44 km).
+    assert_eq!(state.season_movement_points(&data), 105);
     assert_eq!(
         allowance,
-        sim_campaign::march::km_to_grid_points(&data, 210.0)
+        sim_campaign::march::km_to_grid_points(&data, 105.0)
     );
-    assert!((1400..=1500).contains(&allowance), "{allowance}");
+    assert!((700..=760).contains(&allowance), "{allowance}");
     let reachable = state.reachable(&data, &army);
     assert!(reachable.contains_key(&set("set_saint_denis")));
     assert!(reachable

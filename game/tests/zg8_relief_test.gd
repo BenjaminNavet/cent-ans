@@ -129,7 +129,8 @@ func _test_gpu_twin() -> void:
 	_check(worst < 1e-3, "GPU floor sampling differs from MapData.relief_floor_at by %f m" % worst)
 	# Formule du .gdshaderinc identique au double GDScript.
 	var inc := FileAccess.get_file_as_string("res://shaders/campaign_relief.gdshaderinc")
-	_check(inc.contains("return campaign_vertical_scale * (h_m + campaign_relief_gain * max(h_m - campaign_floor_m(xz), 0.0));"), "shader formula changed: update MapData.display_height too")
+	# SZ1 : formule complète (écrasement des montagnes) vérifiée par `sz1_mountain_test.gd`.
+	_check(inc.contains("+ campaign_relief_gain * (1.0 - k) * max(h_m - fields.x, 0.0));"), "shader formula changed: update MapData.display_height too")
 	_check(inc.contains("vec2(campaign_relief_floor_info.y)) / cell"), "shader floor sampling changed: update MapData.relief_floor_at too")
 	# Aucun shader de la carte ne pose des mètres sans la fonction commune.
 	for file in DirAccess.get_files_at("res://shaders"):
@@ -163,7 +164,7 @@ func _test_real_map() -> void:
 	var best_h := -INF
 	for j in 41:
 		for i in 41:
-			var p := Vector2(1835.0 + i, 2814.0 + j)
+			var p := Vector2(1835.5 + i, 2814.5 + j)  # centres des pixels (SZ2b, ADR 0086)
 			var h := map_data.height_m_at(p.x, p.y)
 			if h > best_h:
 				best_h = h

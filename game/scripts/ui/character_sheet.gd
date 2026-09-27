@@ -174,12 +174,12 @@ func show_character(character: Dictionary, skill_tree: Array, learnable: Array, 
 
 	var faction: String = str(character.get("faction", ""))
 	swatch.color = SimFacade.faction_color(faction)
-	# M10 assets : portrait peint (ou blason de faction) à la place du carré de couleur.
 	var house := str(character.get("house", ""))
-	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE, house):
+	# DA2 : portrait vivant (ou armes) à la place du carré de couleur ; l'écu est posé ci-dessous.
+	if PortraitLoader.overlay_portrait(swatch, character_id, faction, PORTRAIT_SIZE, character, false):
 		swatch.color = Color(0, 0, 0, 0)
 	# C3, DA1 : écu de la maison (à défaut de la faction) en bas à droite du portrait peint.
-	_heraldry.texture = PortraitLoader.house_heraldry_texture(house, faction) if PortraitLoader.has_portrait(character_id) else null
+	_heraldry.texture = PortraitLoader.house_heraldry_texture(house, faction)
 	var arms_tip := HouseArms.tooltip(house)
 	_heraldry.tooltip_text = arms_tip if arms_tip != "" else ("Écu : %s" % SimFacade.faction_short_name(faction) if faction != "" else "")
 	swatch.move_child(_heraldry, -1)
@@ -483,7 +483,9 @@ func _fill_traits(traits: Array) -> void:
 		return
 	for trait_entry in traits:
 		var category: String = str(trait_entry.get("category", ""))
-		var chip := IconChip.create("trait_category_" + category, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, 13, "trait")
+		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
+		var trait_id: String = str(trait_entry.get("id", ""))
+		var chip := IconChip.create(trait_id, str(trait_entry.get("name", trait_entry.get("id", "?"))), RichTooltip.trait_tip(trait_entry), 22.0, 13, "trait")
 		var color: Color = TRAIT_COLORS.get(category, HudStyle.INK_SOFT)
 		var pill := _pill(chip, color.lerp(HudStyle.PARCHMENT_LIGHT, 0.68), HudStyle.INK)
 		((pill.get_theme_stylebox("panel") as StyleBoxFlat)).border_color = color

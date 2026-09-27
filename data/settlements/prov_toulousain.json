@@ -162,5 +162,185 @@
       "Auch",
       "Comté d'Armagnac"
     ]
+  },
+  {
+    "id": "set_rieux_volvestre",
+    "province": "prov_toulousain",
+    "kind": "town",
+    "name": {
+      "display": "Rieux-Volvestre",
+      "local": "Rius",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.1167,
+      43.2667
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Cité érigée en siège épiscopal en 1317 au confluent de la Garonne et de l'Arize, en Volvestre.",
+    "sources": [
+      "Rieux-Volvestre",
+      "Diocèse de Rieux"
+    ]
+  },
+  {
+    "id": "set_grenade_garonne",
+    "province": "prov_toulousain",
+    "kind": "town",
+    "name": {
+      "display": "Grenade",
+      "local": "Grenada",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.2833,
+      43.7667
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bastide fondée en 1290 par l'abbaye de Grandselve sur la Garonne, au nord de Toulouse.",
+    "sources": [
+      "Grenade (Haute-Garonne)"
+    ]
+  },
+  {
+    "id": "set_boulbonne",
+    "province": "prov_toulousain",
+    "kind": "abbey",
+    "name": {
+      "display": "Boulbonne",
+      "local": "Bolbona",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.696,
+      43.294
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne du Lauragais, fondée au XIIe siècle, nécropole de la maison de Foix-Comminges.",
+    "sources": [
+      "Abbaye de Boulbonne"
+    ]
+  },
+  {
+    "id": "set_villefranche_de_lauragais",
+    "province": "prov_toulousain",
+    "kind": "village",
+    "name": {
+      "display": "Villefranche-de-Lauragais",
+      "local": "Vilafranca de Lauragués",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.7167,
+      43.4167
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bastide fondée en 1252 dans le Lauragais, sur la route de Toulouse à Carcassonne.",
+    "sources": [
+      "Villefranche-de-Lauragais"
+    ]
+  },
+  {
+    "id": "set_fronton",
+    "province": "prov_toulousain",
+    "kind": "village",
+    "name": {
+      "display": "Fronton",
+      "local": "Fronton",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.3931,
+      43.8375
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
+    "port": false,
+    "description": "Bourg viticole au nord de Toulouse, sur les coteaux dominant la Garonne.",
+    "sources": [
+      "Fronton (Haute-Garonne)"
+    ]
+  },
+  {
+    "id": "set_gimont",
+    "province": "prov_toulousain",
+    "kind": "village",
+    "name": {
+      "display": "Gimont",
+      "local": "Gimont",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.8667,
+      43.6333
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bastide fondée en 1266 par les moines de l'abbaye de Planselve, en Gascogne toulousaine.",
+    "sources": [
+      "Gimont"
+    ]
+  },
+  {
+    "id": "set_isle_jourdain",
+    "province": "prov_toulousain",
+    "kind": "village",
+    "name": {
+      "display": "L'Isle-Jourdain",
+      "local": "L'Isla Jordan",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.0833,
+      43.6167
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg marchand sur la Save, siège de la vicomté de L'Isle-Jourdain.",
+    "sources": [
+      "L'Isle-Jourdain (Gers)"
+    ]
   }
 ]

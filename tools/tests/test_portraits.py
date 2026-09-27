@@ -11,7 +11,7 @@ import pytest
 from PIL import Image
 from typer.testing import CliRunner
 
-from cent_ans_tools import cli, openrouter, portraits
+from cent_ans_tools import cli, portraits
 from cent_ans_tools.budget import BudgetExceeded, BudgetLedger
 
 MODELS_PAYLOAD = {
@@ -152,7 +152,7 @@ def test_generate_refuses_beyond_global_cap(
 def test_generate_records_billed_refusal(
     budget_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A billed refusal (no image) still records its cost, even with no file written."""
+    """Billed refusals are retried, each attempt recorded, then the image is skipped."""
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
     calls: list[str] = []
     jobs = portraits.plan(out_dir=tmp_path, limit=1)
@@ -169,15 +169,13 @@ def test_generate_records_billed_refusal(
             },
         )
 
-    with (
-        httpx.Client(transport=httpx.MockTransport(handler)) as client,
-        pytest.raises(openrouter.ImageExtractionError),
-    ):
-        portraits.generate(
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        result = portraits.generate(
             jobs, "vendor/imager", budget_path=budget_file, client=client
         )
+    assert result.written == []
     ledger = BudgetLedger(budget_file)
-    assert ledger.entries[-1].actual == Decimal("0.04")
+    assert ledger.entries[-1].actual == Decimal("0.04") * portraits.MAX_ATTEMPTS
 
 
 def test_dry_run_makes_no_network_call(

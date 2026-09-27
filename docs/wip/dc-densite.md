@@ -1,0 +1,498 @@
+# DC — Carte plus dense et plus lente
+
+Demande du joueur (2026-09-26) : « la carte est trop petite / les armées vont trop vite », « plus de
+villes pour une région donnée » ; accord sur B + C, « tu fais le plan ET les modifications ».
+ADR 0082. Orchestrateur : session DC. Coût cloud : 0 $ (recherche et calcul locaux).
+
+## Conventions
+- Branche d'intégration `feat/densite` (worktree `../gp-densite`). Un worktree par lot :
+  `../gp-dc1`, `../gp-dc2a`… créés par l'orchestrateur depuis `feat/densite`.
+- Lots DC2 : **données seulement**, pas de build Rust ni Godot. Contrôle :
+  `uv run --project tools python -m cent_ans_tools.geo.settlement_check <prov…>` et
+  `uv run --project tools pytest tools/tests/test_settlements_schema.py`.
+- Lot DC1 : `CARGO_TARGET_DIR=/Users/jean_hubert/dev/game_project/core/target` (disque ~29 Go libres).
+- Commits `-- chemins` explicites, `wip:` ≤ 15 min ; fusion par l'orchestrateur.
+- Coordination : la revue de code (`../gp-review`) et PB3d touchent `sim-campaign` (orders,
+  movement, fin de tour) : fusionner `main` avant de rendre.
+
+## Lots
+| Lot | Contenu | Vague | État |
+|---|---|---|---|
+| DC0 | Squelette : ADR 0082, ce plan, plafond 6 → 16 (schéma, chargeur Rust, tests), outil `geo/settlement_check.py` | 0 | fait |
+| DC1 | Mouvement : `points_per_step` 140 → 70 (rules.json + défaut Rust), vérifier traversées, horizon IA, agents, repli ; tests ; textes du codex et description de rules.json ; sondes `march_range_probe`, `turn_perf` | 1 | fait, fusionné |
+| DC2a | Colonies France nord, ouest, centre (19 prov., cible 12) | 1 | fait, fusionné |
+| DC2b | Colonies Aquitaine, Languedoc, France est, Provence-Alpes (22 prov., cible 11) | 1 | fait, fusionné |
+| DC2c | Colonies îles Britanniques (Angleterre cible 10 ; Galles, Irlande, Écosse 7) | 1 | fait, fusionné |
+| DC2d | Colonies Pays-Bas (11), Empire rhénan (9), reste de l'Empire et Scandinavie (7) | 1 | fait, fusionné |
+| DC2e | Colonies Ibérie et Italie (cible 7-8) | 1 | fait, fusionné |
+| DC3 | Régénération (`geo settlements`, `hamlets`, `anchors-fine`, `towns`), rangs de marqueurs, équilibrage économie/garnisons/entretien (Angleterre doit lever), IA et `turn_perf`, sim de 20 ans | 2 | fait, fusionné |
+| DC4 | Affichage : niveaux de détail des marqueurs, désencombrement des étiquettes (O(n²)), maquettes proches, captures | 2 | fait, fusionné |
+| DC5 | Recette (orchestrateur) : build, smoke, cargo test, pytest, ff dans `main` | 3 | fait |
+
+## Journal
+- 26/09 : plan, squelette DC0 (6f74c214) ; vague 1 lancée (DC1 opus, DC2a-e sonnet, worktrees ../gp-dc1, ../gp-dc2a-e).
+- 26/09 : DC2c : 105 colonies ajoutées (îles Britanniques ; village 43, abbey 27, town 18, castle 17). Fusionné.
+- 26/09 : DC2d : 139 colonies ajoutées (village 52, town 55, abbey 24, castle 8) dans les 33
+  provinces Pays-Bas/Empire/Scandinavie ; `settlement_check` et `pytest test_settlements_schema.py`
+  passent (134 passed, aucun id en double, aucune paire <3 km introduite).
+- 26/09 : DC2a : 128 colonies ajoutées (31 town, 15 castle, 15 abbey, 67 village) sur 19 provinces de
+  France nord/ouest/centre ; `settlement_check` et `test_settlements_schema.py` passent.
+- 26/09 : DC2e : 118 colonies ajoutées (52 town, 44 village, 12 abbey, 10 castle) sur 34 provinces
+  d'Ibérie et d'Italie (Portugal, Aragon, Ibérie nord/centre/sud, Italie nord/centre/sud) ; Mallorca et
+  Roussillon déjà à leur cible n'ont reçu aucun ajout côté Roussillon (7/7), 3 côté Mallorca (6/6).
+  `settlement_check` et `pytest tools/tests/test_settlements_schema.py` verts sur les 35 provinces.
+- 26/09 : DC2 fusionné : 1 192 colonies (city 132, town 407, village 291, abbey 189, castle 173). Régénéré : graphe (2 987 arêtes), positions, fine_anchors, hameaux, towns_1340 (1 185). À surveiller DC3 : +66 châteaux (entretien) ; côte est du Sussex dans le polygone du Kent. DC4 lancé.
+
+- 26/09 : DC1 fusionné (main inclus, fine_anchors/towns régénérés sur le nouveau relief, 159aff80) ; DC3 lancé ; DC4 fusionné (848fff43 : 0 chevauchement d'étiquettes, désencombrement en grille, captures docs/img/dc4/).
+
+## DC5 — recette (26/09, worktree `../gp-densite`)
+État : recette verte sur `feat/densite` (4bc56f38 + ce commit) ; reste le ff dans `main` (orchestrateur)
+puis la suppression des worktrees `../gp-densite`, `../gp-dc3`.
+- Fusion `feat/densite-dc3` (5d44a9d5) : `settlement_layer.gd` combine DC4 et SZ4b. Les échelles se
+  composent : la réduction DC4 porte sur la maquette enfant (`model.scale *= fit`, `_model_radius` =
+  rayon d'origine × fit), l'échelle SZ4b sur le porteur (`holder.scale = model_scale(i)`) ; rayon
+  affiché = rayon d'origine × fit × `model_scale(i)`. Le clic garde le filtre DC4 (portée de
+  maquette, absorbées ignorées) et multiplie rayon/hauteur par `model_scale(i)`. `_real_ratio` =
+  rayon réel / rayon après fit : de près la maquette converge vers l'emprise réelle quel que soit fit.
+  `fine_anchors.json` de DC3 (1 192 colonies), `towns_1340.json` régénéré (1 185 villes).
+- `data/map/navgrid.png` était périmé (test_navgrid) : `geo navgrid` relancé (96d628ba).
+- `main` fusionné (4bc56f38, DA2 : aucun changement Rust ni carte).
+- Résultats (target privé `gp-densite/core/target`) : fmt, clippy -D warnings, 877 tests Rust (espace
+  de travail) ; dylib copiée, aucun avertissement « expected 1-6 » ; import Godot ; smoke,
+  settlements_render (1 192 colonies, 2 999 hameaux), da3_markers, cv1_campaign_life, sz4_prop_scale,
+  sz4b_colonies_forests, da2_living_portrait : OK ; pytest 764 passed ; ruff : 10 erreurs
+  préexistantes dans `tools/blender_scripts/` (identiques dans main).
+- Points ouverts : `geo navgrid` signale 5 nouvelles « îles sans port » (Hollande/Frise : Delft,
+  Den Haag, Egmond, Haarlem, Leiden ; Appingedam ; Dokkum ; Gouda ; Leeuwarden — Pomposa et Teylingen
+  l'étaient déjà dans main) : places sans accès terrestre ni port sur la grille, à corriger (port ou
+  passage) ; `_absorb` et `_fit_model` raisonnent sur la taille de carte (échelle 1), pas sur la
+  taille réduite de près (masquage un peu conservateur au palier vallée).
+
+## État final (26/09)
+Chantier terminé et fusionné dans `main` (ff a661314f). Correctif après recette : Haarlem, Gouda,
+Dokkum, Leeuwarden et Appingedam deviennent des ports (sinon îles sans accès sur la navgrid).
+Worktrees et branches supprimés. Dylib du checkout principal reconstruite, smoke vert.
+
+## DC6 — suites (lancé 26/09, accord du joueur « ok pour la suite »)
+| Lot | Contenu | Worktree | État |
+|---|---|---|---|
+| DC6a | Données : Pomposa et Teylingen accessibles ; audit des ~40 colonies recalées (coordonnées fausses vs frontière approximative) ; erreurs signalées par DC2 (Ranverso, Schloss Tirol, Skanör, Marienweerd, Bergerac, paires < 3 km) | ../gp-dc6a (feat/dc6-a) | fait, dans main |
+| DC6b | Équilibrage : recherche des abbayes et bâtiments religieux contre l'hérésie pondérés comme province_effect_percent ; révoltes (3,2 vs 5,7) | ../gp-dc6b (feat/dc6-b) | fait, dans main |
+| DC6c | Affichage : masquage/réduction des maquettes voisines à l'échelle réelle en vue rapprochée | ../gp-dc6c (feat/dc6-c) | fait, dans main |
+Frontière Sussex/Kent (polygones de provinces) : hors DC6, changement de géométrie lourd.
+
+DC6 fusionné dans main le 26/09 (DC6c 7368e5a7, DC6a a8abf59e, DC6b e3de9330) ; dylib du checkout principal reconstruite, smoke vert.
+Restes DC6b : révoltes 4,4 / 200 tours (5,6 avant DC) — relever demanderait de pondérer la garnison qui apaise (code) ;
+banqueroutes 0,09 → 0,13 (Écosse surtout, France 2) à surveiller ; sommes non pondérées : peste, faveur pontificale,
+garnison qui apaise, estimations de l'IA.
+
+## Suites possibles
+- Pomposa et Teylingen : îles sans port sur la navgrid (déjà dans main avant DC).
+- Masquage de près des maquettes voisines calculé à l'échelle de carte (un peu trop large).
+- Points de recherche des +102 abbayes et compte des bâtiments religieux contre l'hérésie non pondérés.
+- Révoltes 3,2 / 200 tours contre 5,7 avant (occupations plus courtes avec le pas de 70 km).
+- ~40 colonies recalées dans leur province (frontières approximatives, ex. côte est du Sussex dans le Kent).
+
+## DC1 — mouvement ralenti (worktree `../gp-dc1`, branche `feat/densite-dc1`)
+État : fait, `main` fusionné (2d33df5a), fmt + clippy + 546 tests (data-model, sim-campaign, ai) verts, pytest codex et colonies verts. À fusionner dans `feat/densite`. `points_per_step` 140 → 70 (rules.json + défaut Rust) ; description de
+rules.json ; codex (mouvement, saisons, déroute, agents) ; tests `campaign.rs`, `m2_free_movement.rs`,
+`m4_path_plan.rs`, `c7a_retreat.rs`. Aucun code de règle changé : tout suit `points_per_step`.
+- Saison : 105 km de plaine (70 en hiver), 140 sur route ; repli ami 140 km, refuge neutre 70 km ;
+  agents 4 pas = 280 km (210 pour le prédicateur). ZdC 8, engagement 5, vision 30/20, recul 15 : inchangés.
+- Traversées : `Embark` coûte toujours la saison entière (inchangé) ; pour l'IA/les agents l'arête
+  maritime vaut 2 × 70 = 140, plafonnée à l'allocation (105) : toujours 1 tour. Sonde jetable
+  (armées ayant franchi une arête maritime, 120 tours, graines 1-3) : avant Angleterre 7/10/10 ;
+  après Angleterre 12/7/12 (+ Castille 1, Flandre 2). Pas de blocage.
+- IA : `PLANNING_RANGE` 5 pas et `OFFENSIVE_RANGE` 4 pas suivent (même nombre de saisons, rayon
+  géographique divisé par deux : 350 km). Aucun littéral 140/210/280 de campagne dans `core/crates`
+  hors tests (les autres sont des mètres de bataille).
+### Sondes (avant 140 → après 70)
+- `march_range_probe` (Paris, tours été/hiver) : allocation 1460 → 730 pts (210 → 105 km).
+  Orléans 1/1 → 1/2, Reims 1/1 → 2/2, Rouen 1/1 → 2/2, Calais 2/2 → 3/4, Tours 1/2 → 2/3,
+  Dijon 2/2 → 3/4, Poitiers 2/2 → 3/4, Lyon 3/4 → 5/7, Bordeaux 3/4 → 5/7, Toulouse 3/5 → 6/9,
+  Bayonne 4/5 → 7/10.
+- `turn_perf 50 3 1` : moyenne 9,30 → 5,86 ms, p95 42,6 → 23,3, p99 105,9 → 63,8, max 271 → 256 ms.
+- `century_probe 120 1 2 3` (30 ans) : guerre FR-EN 66 → 65 % ; batailles FR/EN par décennie
+  19,0/39,7/20,0 → 16,7/17,3/23,0 ; prises 72/93/100 → 82/59/63 ; sièges engagés 101 → 71 (−30 %),
+  réussis 36 → 25 % ; prises directes 96 → 98 ; révoltes /200 t. 9,4 → 0,6 ; banqueroutes 0,06 → 0,03 ;
+  saisons d'intrusion 54 → 76. IA un peu moins offensive (sièges), pas passive.
+### Points ouverts pour DC3
+- Moins de sièges engagés et réussis (armées de secours/renforts plus lentes) : revoir
+  `OFFENSIVE_RANGE`/`PLANNING_RANGE` et la durée des sièges une fois les colonies densifiées.
+- Refuge neutre à 70 km : une armée anglaise battue en pleine France se débande plus souvent
+  (les tests M2/C7a forcent l'ancien rayon de 140 km). Avec ~1 200 places, à revoir (garder 1 pas
+  ou passer `neutral_radius_steps` à 2).
+- Révoltes quasi nulles sur 30 ans (9,4 → 0,6) : à expliquer (armées de répression plus proches ?
+  moins de dévastation ?).
+- `game/scripts/ui/encyclopedia.gd` (agents) écrit « %d pas par saison » : pas de km, inchangé.
+- `docs/design/2026-09-24-mouvement-libre.md` cite 210 km / × 140 km : spec datée, laissée telle quelle.
+
+## DC4 — Affichage (worktree ../gp-dc4, branche feat/densite-dc4)
+État : terminé, `feat/densite` et `main` fusionnés (smoke, settlements_render, da3, cv1 verts ; sonde
+rejouée : 0 chevauchement de noms ni de maquettes, 8 maquettes masquées, 109 hameaux non posés
+après les ancrages fins de `main`). Prêt pour fusion dans `feat/densite`.
+- Sonde `game/tests/dc4_density_probe.gd` (fenêtrée ; `--center=2310.3,1657.9` = Lille, zone la
+  plus dense : 14 places à moins de 40 unités ; `CENT_ANS_DATA_DIR` pour rejouer 570 places).
+- Rangs (`settlement_markers.json`, règles dérivées des données, les listes d'ids restent en tête) :
+  château rang 2 = fortification ≥ 3 ET poids ≥ 10 (les petits châteaux ajoutés restent rang 1) ;
+  ville rang 2 aussi si fortification ≥ 2 ET poids ≥ 25. Vue Europe 68 places (inchangé), région
+  264 (570 places : 245 ; 1 192 sans DC4 : 276), comté tout (1 192).
+- Désencombrement des noms : grille spatiale (`LabelPlacer.SpatialGrid`), rectangles mesurés avec
+  la police (l'ancienne estimation sous-évaluait la largeur : il y avait de vrais chevauchements),
+  tri cité > ville > château > abbaye > village puis poids décroissant (`SettlementData`), aucun
+  calcul au palier Europe ; noms dessinés au-dessus des marqueurs (priorité 4/3 contre 2).
+- Maquettes : `_fit_model` répétable (taille d'origine gardée), aux positions de rendu (ancrages
+  fins), ville emblématique non réduite (la voisine prend l'écart), plancher 0,55 → 0,4, maquette
+  de faubourg masquée (`_absorb` : Saint-Maximin sous Trèves, Marmoutier sous Tours…) ; CV1 remet
+  la maquette de croissance à pleine taille (réduction faite par `replace_model`, avant elle
+  empilait une réduction périmée).
+- Hameaux : non posés dans l'emprise d'une maquette de colonie (`on_settlement_model`, 60 cas).
+- Picking : positions des marqueurs en cache, maquettes hors portée ignorées.
+- ZG6 : choix des 16 finages par insertion au lieu d'un tri complet des 1 185 villes.
+
+Mesures (1600×900, build debug ; temps d'image non comparables : charge machine 120-180 due aux
+autres agents) :
+
+| | 570, avant | 1 192, avant | 1 192, après |
+|---|---|---|---|
+| Noms qui se chevauchent (comté / près) | 4 / 6 | 7 / 13 | 0 / 0 |
+| `declutter()` Europe / région / comté / près (µs) | 246 / 344 / 457 / 498 | 541 / 612 / 906 / 1 253 | 76 / 458 / 700 / 942 |
+| Picking au comté (µs) | — | 4 091 | 230 |
+| Marqueurs à l'écran Europe / région / comté | 37 / 72 / 95 | 37 / 81 / 218 | 37 / 78 / 218 |
+| Maquettes voisines qui se recouvrent (> 20 %) | 14 | 34 | 0 (7 masquées, 174 réduites) |
+| Hameaux dans l'emprise d'une colonie | 31 | 63 | 60, non posés |
+| ZG6 : villes 1:1 chargées au max / tri streaming (µs, toutes les 10 images) | 1 / 811 | 5 / 1 946 | 5 / 617 |
+
+Captures : `docs/img/dc4/` (avant570-comte, avant1192-comte, apres-comte, apres-region,
+apres-europe).
+Points ouverts : au comté, 35 paires de marqueurs se recouvrent à plus de moitié sur 218 (villages
+serrés autour de Lille) — pas de désencombrement écran des marqueurs (le cahier veut tout au comté) ;
+temps d'image à remesurer sur machine calme (`pb1_bench.gd`).
+Build : `CARGO_TARGET_DIR` partagé entre worktrees : les rlib des crates du dépôt ont le même nom
+d'un worktree à l'autre et cargo les croit à jour (mtime) même construites depuis un autre
+worktree (constaté : dylib avec plafond 6 au lieu de 16, 126 avertissements « expected 1-6 »).
+Parade : `find core/crates -name '*.rs' -exec touch {} +` avant `cargo build`, copier aussitôt.
+
+## DC3 — équilibrage de la carte densifiée (worktree `../gp-dc3`, branche `feat/densite-dc3`)
+État : **fait** (voir « Reprise » plus bas), à fusionner dans `feat/densite` puis `main` (DC5).
+Méthode : sondes construites depuis des worktrees détachés `../gp-dc3-main` (main) et
+`../gp-dc3-dc1` (c3e5f17d, DC1 seul : 570 places + pas de 70 km), mêmes graines ; supprimés.
+`century_probe` compte désormais : cités prises, provinces conquises en entier (durée depuis la
+première place prise), dévastation, provinces occupées, mécontentement > 60, issues des replis ;
+`REVOLT_TRACE=1` liste révoltes et provinces à plus de 70 de mécontentement.
+
+### Économie d'ouverture (tour 0, toutes factions, `start_economy_probe`)
+| | revenu | armée+garnisons | bâtiments | net |
+|---|---|---|---|---|
+| main | 143 662 | 69 909 | 22 707 | −9 261 |
+| DC3 brut (1 192 places) | 143 199 | 80 133 | 27 621 | −25 288 |
+| DC3 réglé | 143 199 | 69 706 | 22 081 | −9 321 |
+Angleterre net 1 448 (main) → −1 657 (brut : elle ne lève plus d'armée, 1 unité de campagne au tour 15)
+→ 1 374 (réglé). France 4 153 → −310 → 3 657.
+Réglage (data/settlements/rules.json) : part de la couronne réduite pour que le total des places
+secondaires reste celui d'avant la densification — garrison_upkeep_percent ville 15→8, château 25→15,
+abbaye 10→5 ; building_upkeep_percent ville 40→25, château 50→30, abbaye 25→12, village 50→10.
+Garnisons de départ inchangées.
+
+### Données corrigées
+19 nouveaux villages (DC2a) avaient un `bld_market` interdit aux villages, České Budějovice un
+`bld_counting_house` sans foire (test eq2_balance) : retirés.
+Tests adaptés : c6_agents (le héraut se recrute dans une cité ; les nouvelles abbayes passaient
+avant), m2 `the_loser_falls_back_on_the_grid` (le point vide a changé : rayon neutre élargi dans le
+cas du mur).
+
+### Pause (26/09, demande du joueur)
+Agent DC3 arrêté en cours de lot. Dernier travail commité : l'IA évalue recrutement et chantiers sur
+une seule réserve de ressources par tour (`recruitable_with_supply`, `buildable_with_supply`) —
+optimisation de fin de tour ; tests sim-campaign + ai et clippy verts, **pas encore mesurée**
+(`turn_perf`). L'agent préparait des « variantes de partage de la réserve » (non commencées).
+
+### Reprise (agent DC3 n° 2, 26/09) — lot terminé
+État : fait. `main` (35783bcf, PB3 compris) fusionné (da2125c7) ; fmt, clippy -D warnings, 877 tests
+Rust (espace de travail entier), pytest colonies/graphe/codex, dylib + import + smoke.gd verts.
+Target cargo privé `gp-dc3/core/target` (les mesures d'avant la pause venaient du target partagé).
+ADR 0082 : addendum DC3.
+
+Réglages changés :
+- IA : `PLANNING_RANGE` 5 → 10 pas (700 km comme avant DC1). La baisse des cités prises venait de
+  DC1, pas de la densité (graines 1-6 : main 10,3/déc., DC1 4,9, DC3 5,5), surtout l'Angleterre en
+  France (29 cités prises → 6 : elle ne voyait plus que la côte). Test m3 « Douvres » : seule la
+  guerre franco-anglaise est gardée (l'horizon atteint Édimbourg, menacé par les Écossais).
+- Effets de province : `province_effect_percent` (rules.json + schéma ; `province_building_effects`,
+  `province_capacity`) : bâtiments des places secondaires à 50 %. Cause des révoltes disparues :
+  DC1 raccourcit les occupations, puis la densité double l'apaisement des églises et abbayes
+  (−10 → −21 en moyenne) et l'IA garde l'impôt haut (28 → 37 % des tours). « Une fois par sorte »
+  essayé et écarté (biens des marchés divisés par deux, 16 % d'hommes en moins). Codex ordre public.
+- Hameaux : `MIN_SETTLEMENT_DISTANCE_KM` 3 → 5 ; `geo hamlets` (2 999, aucun à moins de 5 km sauf 1
+  à la limite) puis `geo anchors-fine` (le fichier de la branche n'ancrait que 569 colonies, écrasé
+  par une fusion de main : 1 192 maintenant).
+- Gardé : refuge neutre 1 pas (2 pas essayé : replis neutres 0,1 → 0,2, dispersions 1,25 → 1,1,
+  sans effet mesurable).
+- Perf de l'IA : vitesse de chantier une fois par place et `recruitable/buildable_with_supply`
+  (faits aussi par PB3f dans main : version de main gardée), `nearest_settlement` en parcours
+  fusionné, revenu brut une fois par tour d'IA, gouverneur une fois par province dans
+  `faction_income_effective`, revenus paresseux (subsides, rançons, ordres de chevalerie).
+  Résultats de sonde identiques avant/après.
+- Sonde `century_probe` : `CAPTURE_TRACE=1`, `ARMY_TRACE=<faction>`, impôt haut, hommes en campagne,
+  reprises aux rebelles.
+
+### Mesures finales (`century_probe 120`, graines 1-12, même code que main)
+| | main 35783bcf | DC1 c3e5f17d | DC3 final |
+|---|---|---|---|
+| Guerre FR-EN (% des tours) | 64,0 | 61,3 | 62,9 |
+| Cités prises / décennie | 9,25 | 5,53 | 7,19 (−22 %) |
+| Provinces conquises en entier / déc. | 3,75 | 2,58 | 3,14 (−16 %) |
+| Durée d'une conquête (tours) | 5,03 | 4,21 | 4,88 (−3 %) |
+| Sièges engagés / réussis | 82 / 46 % | 71 / 26 % | 58 / 50 % |
+| Provinces occupées (% prov.-tours) | 0,82 | 0,42 | 0,48 |
+| Mécontentement > 60 (‰ prov.-tours) | 7,2 | 5,6 | 6,8 |
+| Révoltes / 200 tours | 5,7 | 2,5 | 3,2 |
+| Impôt haut (% fac.-tours) / hommes en campagne | 28,5 / 27,0 k | — | 30,2 / 26,6 k |
+| Banqueroutes / fac. / déc. | 0,07 | 0,05 | 0,06 |
+| Replis neutres / débandades / dispersions | 0,5 / 0,75 / 0,6 | 0 / 1,4 / 4,0 | 0,1 / 0,75 / 1,25 |
+
+DC1 est l'ancien code (avant la revue de code et PB3) : comparer DC3 à main.
+
+`turn_perf 50 3 1` (release, 3 passes alternées, charge machine ~12) :
+| | moyenne | p95 | p99 | max |
+|---|---|---|---|---|
+| DC1 | 2,94 ms | 10,2 | 14,9 | 20,7 |
+| main (570 places, PB3) | 1,57 ms | 5,0 | 8,2 | 13,1 |
+| DC3 final (1 192 places, PB3) | 2,66 ms | 9,6 | 15,2 (+2 % vs DC1) | 21,9 |
+
+### Points ouverts
+- Révoltes 3,2 contre 5,7 dans main : le mécontentement élevé est revenu (6,8 ‰ contre 7,2) mais les
+  occupations restent plus courtes (0,48 % contre 0,82) : effet du pas de 70 km, pas de la densité.
+- Sièges engagés −30 % mais mieux réussis (50 % contre 46 %) : les cités tombent à −22 %.
+- Recherche : `research_points_per_turn` somme les bâtiments de toutes les places possédées
+  (+102 abbayes à 0,25) : non mesuré.
+- Hérésie : le compte des bâtiments religieux de la province n'est pas pondéré.
+- IA vs main : +70 % de temps moyen (plus de places, horizon doublé), sous la cible de 50 ms.
+- Rendu des hameaux (5 km) non revérifié dans Godot (`dc4_density_probe.gd`, fenêtré).
+
+## DC6a — suites du chantier (worktree `../gp-dc6a`, branche `feat/dc6-a`)
+État : **fait**, lot de données seul. `geo navgrid` sans « île sans port » ni colonie isolée ;
+`geo settlements` sans blocage (`! il faut exactement une city`, IDS EN DOUBLE, sources/description
+manquantes) ; pytest `test_settlements_schema` / `test_settlement_graph` / `test_navgrid` verts
+(174 tests). Régénéré : `geo settlements`, `geo anchors-fine`, `geo towns`, `geo navgrid`.
+
+### 1. Îles sans port
+- `set_pomposa` (prov_ferrara) : `port: true`. L'abbaye était entourée d'eau et desservie par le Po
+  di Volano jusqu'à l'Adriatique (port historique réel, confirmé par recherche).
+- `set_teylingen` (prov_holland) : coordonnées vérifiées (52.2311°N 4.5192°E, source « Teylingen
+  Castle »), mais ce point tombe aujourd'hui sur un îlot du Teylingerplas — un lac né du creusement
+  de tourbe bien après 1337, absent en réalité à l'époque du jeu, que la grille de navigation
+  (calée sur un relief moderne) rend à tort insulaire. Faute de pouvoir corriger le relief (hors
+  lot), le point a été calé sur la case de terre franchissable la plus proche (52.2562°N 4.5246°E,
+  ~2,9 km, toujours dans les dunes près de Leyde) ; l'écart et sa cause sont notés dans la
+  description plutôt que masqués par un `port: true` indu (un château terrien n'est pas un port
+  maritime).
+
+### 2. Colonies « hors province » (settlement_check, 84 entrées)
+Toutes les coordonnées ont été vérifiées contre des sources réelles ; aucune n'était fausse en soi.
+La plupart tombent hors du polygone de province du jeu parce que le lieu est authentiquement en
+zone frontalière (le raster de province est grossier) ou parce que sa position est côtière/insulaire
+et que le raster n'y porte aucune étiquette (Corse, Sardaigne, Baléares, Venise, côtes bretonne et
+irlandaise, etc.) — ces cas sont laissés tels quels, le jeu les recale automatiquement. Seuls les cas
+où le lieu appartient réellement, historiquement, à une AUTRE province du jeu ont été déplacés.
+
+| Colonie | Résultat | Raison |
+|---|---|---|
+| `set_waterford` | **déplacée** prov_dublin → prov_munster | Waterford est une cité historique du Munster (l'une des villes royales du Munster avec Cork/Limerick), pas du Leinster/Dublin. |
+| `set_saint_valery_sur_somme` | **déplacée** prov_picardie → prov_ponthieu | Port historique du comté de Ponthieu (point d'embarquement de Guillaume le Conquérant), déjà voisine de set_le_crotoy/set_rue dans ce fichier. |
+| `set_marienweerd` | **déplacée** prov_utrecht → prov_gueldre | L'abbaye de Mariënweerd est près de Beesd, en Betuwe gueldroise, pas dans l'évêché d'Utrecht (vérifié par recherche). |
+| `set_suscinio` | **déplacée** prov_bretagne_ouest → prov_bretagne | Château de la presqu'île de Rhuys (Morbihan), à 15 km de Vannes (déjà dans prov_bretagne) ; prov_bretagne_ouest ne couvre que le Finistère (Quimper/Brest), à plus de 100 km. |
+| `set_castelnau_le_lez` | **remplacée** par `set_mauguio` (Mauguio/Melgueil, comté historique réuni à Montpellier, ~11 km à l'est) | Village trop proche de Montpellier (2 km) et de faible importance ; Mauguio est mieux attesté et à bonne distance. |
+| `set_elvas`, `set_portalegre` (Alentejo) | laissées | Frontière portugaise/Extremadura réelle, à quelques km ; lieux authentiquement portugais. |
+| `set_cognac`, `set_aubeterre` (Angoumois) | laissées | Frontière Angoumois/Saintonge/Périgord historiquement floue à cet endroit précis. |
+| `set_fontevraud` (Anjou) | laissée | Abbaye à la limite Anjou/Poitou (Loire). |
+| `set_teruel` (Aragon) | laissée | Teruel est aragonais (royaume d'Aragon), pas valencien ; frontière de jeu trop au nord. |
+| `set_vaucouleurs` (Bar) | laissée | Prévôté française enclavée à la limite Bar/Lorraine. |
+| `set_interlaken` (Berne) | laissée | Oberland bernois à la limite de la province Waldstätten. |
+| `set_culan`, `set_noirlac` (Berry) | laissées | Limite Berry/Bourbonnais (Cher). |
+| `set_san_sebastian` (Biscaye) | laissée | Le polygone « Gascogne » du jeu déborde sur la côte basque espagnole ; San Sébastien reste basque/castillan. |
+| `set_ceske_budejovice` (Bohême) | laissée | À ~30 km de la frontière autrichienne. |
+| `set_gannat` (Bourbonnais) | laissée | Limite Bourbonnais/Auvergne. |
+| `set_shertogenbosch` (Brabant) | laissée | Une des quatre bonnes villes de Brabant (voir §3) ; polygone Hollande déborde au sud. |
+| `set_rostock`, `set_wismar` (prov_brandenburg) | laissées | Le fichier regroupe Brandebourg + Poméranie + Mecklembourg (pas de province dédiée) ; limite avec Holstein. |
+| `set_peyrepertuse` (Carcassonne) | laissée | Forteresse frontière historique face à l'Aragon/Roussillon (Corbières). |
+| `set_senanque` (Comtat Venaissin) | laissée | Limite Comtat/Provence (Vaucluse). |
+| `set_vienne` (Dauphiné) | laissée | Vienne, sur le Rhône, à la limite Dauphiné/Lyonnais. |
+| `set_plymouth` (Devon) | laissée | À la limite Devon/Cornouailles (Tamar). |
+| `set_mantova`, `set_modena` (Ferrare) | laissées | Mantoue (Gonzague) et Modène (Este depuis 1336) sont des seigneuries propres, groupées avec Ferrare faute de provinces dédiées ; Modène est bien este depuis 1336, pas bolonaise. |
+| `set_stirling`, `set_dunfermline` (Fife) | laissées | Pas de province « Stirlingshire » dans le jeu ; Fife regroupe le centre-est écossais. |
+| `set_douai` (Flandre wallonne) | laissée | Limite avec l'Artois. |
+| `set_salamanca` (León) | laissée | Salamanque appartient traditionnellement au León, à la limite avec la Vieille-Castille. |
+| `set_verdun` (Lorraine) | laissée | Un des Trois-Évêchés, à la limite Lorraine/Barrois. |
+| `set_luneburg` (Basse-Saxe) | laissée | Limite avec le Holstein. |
+| `set_echternach`, `set_grevenmacher` (Luxembourg) | laissées | Limite avec l'électorat de Trèves (Moselle). |
+| `set_eivissa` (Majorque) | laissée | Île sans étiquette raster ; Ibiza appartenait bien au royaume de Majorque. |
+| `set_colchester` (Middlesex) | laissée | Le fichier « Middlesex » regroupe en fait tout le grand Londres/Essex (contient déjà Maldon, Barking, en Essex) : regroupement volontaire, pas une erreur. |
+| `set_chivasso` (Montferrat) | laissée | Cité des Paléologue de Montferrat, enclavée en Piémont. |
+| `set_valmagne` (Montpellier) | laissée | Abbaye à l'ouest de Montpellier, artefact de raster (polygone Beaucaire à l'est). |
+| `set_walcourt`, `set_jardinet` (Namur) | laissées | Limite Namur/Hainaut. |
+| `set_tudela` (Navarre) | laissée | Limite avec l'Aragon (vallée de l'Èbre). |
+| `set_auxerre` (Nivernais) | laissée | Limite avec la Champagne. |
+| `set_tarascon`, `set_les_baux` (Provence) | laissées | Rive provençale du Rhône, face à Beaucaire (royaume de France). |
+| `set_figeac` (Quercy) | laissée | Limite avec le Rouergue. |
+| `set_la_rochelle` (Saintonge) | laissée | Limite avec le Poitou ; La Rochelle est traditionnellement rattachée à l'Aunis/Saintonge. |
+| `set_ecija` (Séville) | laissée | Limite avec Cordoue. |
+| `set_hastings`, `set_winchelsea`, `set_rye`, `set_battle` (Sussex) | laissées | Cinque Ports/Ancient Towns du Sussex oriental, à la limite du Kent ; lieux authentiquement sussexois malgré le nom de la confédération. |
+| `set_calatrava_la_nueva` (Tolède) | laissée | Ordre de Calatrava sous juridiction de Tolède, à la limite avec Cordoue/Andalousie. |
+| `set_chinon` (Touraine) | laissée | Château royal tourangeau au tripoint Touraine/Anjou/Poitou. |
+| `set_koblenz`, `set_ehrenbreitstein` (Trèves) | laissées | Résidence secondaire et forteresse de l'électorat de Trèves (confluent Rhin/Moselle), à la limite de Mayence. |
+| `set_rhenen` (Utrecht) | laissée | Limite Nedersticht/Gueldre. |
+| `set_alicante` (Valence) | laissée | Limite avec Murcie. |
+| `set_morella` (Valence) | laissée | Limite avec l'Aragon (Maestrat). |
+| `set_feltre` (Vérone) | laissée | Territoire disputé Vérone/Padoue/Venise en 1337. |
+| `set_corvey` (Westphalie) | laissée | Abbaye à la limite Westphalie/Basse-Saxe (Weser). |
+| autres (~25) | laissées | Points côtiers/insulaires (Corse, Sardaigne, Baléares, Venise/Chioggia, côtes irlandaise et écossaise, Ponthieu/Poitou/Danemark littoraux) sans étiquette de province sur le raster à cet endroit précis ; recalés automatiquement par le jeu, non déplacés. |
+
+### 3. Corrections signalées par DC2
+- `set_sant_antonio_di_ranverso` (prov_piemont) : coordonnées corrigées 7.5124/45.0733 (Rivoli) →
+  7.4439/45.0715 (Buttigliera Alta, position donnée par le lot).
+- `set_schloss_tirol` (prov_tirol) : coordonnées corrigées 11.15/46.6753 → 11.1448/46.6941 (site
+  réel du château, vérifié 46°41′38,9″N 11°8′41,3″E) ; l'ancienne position était ~2,4 km au sud.
+- `set_skanor` (prov_gotaland) : reclassée `village` (poids 15, hors fourchette 2-5) → `town` (poids
+  15, cohérent avec la fourchette des villes 7-35) ; ajouté `bld_market`. Justifié par son rôle
+  exceptionnel de plus grande foire au hareng de la Baltique (jusqu'à 70 000 marchands hanséates
+  l'été), malgré une population permanente modeste.
+- `set_bergerac` (prov_perigord) : `owner` `fac_england` → `null` (la province est `fac_france` ;
+  la description indique déjà Bergerac tenue par le parti français jusqu'à sa prise par Henri de
+  Grosmont le 26 août 1345) ; retiré le correctif « Liberté de jeu » de la description, devenue
+  cohérente avec l'histoire.
+- Description Bruxelles/Bois-le-Duc (« quatre bonnes villes ») : `set_louvain` citait à tort Malines
+  comme une des quatre bonnes villes du Brabant (Malines était une seigneurie distincte en 1337,
+  disputée entre Flandre et Brabant) ; corrigée pour nommer les quatre réelles (Louvain, Bruxelles,
+  Anvers, Bois-le-Duc) et préciser le statut à part de Malines.
+- Paires < 3 km : `set_tours`/`set_marmoutier_tours`, `set_winchelsea`/`set_rye`,
+  `set_treves`/`set_st_maximin_trier`, `set_koblenz`/`set_ehrenbreitstein` **gardées** (distinctes et
+  importantes historiquement : abbaye royale, Cinque Ports jumeaux, abbaye d'immédiateté impériale,
+  forteresse électorale en vis-à-vis). `set_montpellier`/`set_castelnau_le_lez` **remplacée** (voir
+  §2, `set_mauguio`).
+
+### Prochaine étape
+Lot terminé ; fusionner `feat/dc6-a` dans `feat/densite` (ou `main` selon l'état de l'intégration)
+quand l'orchestrateur DC le décide. Aucun suivi ouvert côté données.
+## DC6c — réduction et masquage des maquettes à l'échelle effective (worktree `../gp-dc6c`, branche `feat/dc6-c`)
+État : **fait**, `main` fusionné (696713bc), prêt pour ff. Tests verts : smoke, settlements_render,
+da3_markers, cv1_campaign_life, sz4_prop_scale, sz4b_colonies_forests, dc6c_fit_scale (nouveau).
+- `SettlementFit` (`game/scripts/map/settlement_fit.gd`, fonctions pures) : la place laissée par
+  les voisines (`_room`, part de l'écart au prorata des poids, ou écart − rayon d'une ville
+  emblématique) ne dépend pas des rayons ; la réduction est recalculée sur le rayon rétréci par
+  SZ4b : rayon affiché = rayon d'origine × sigma × `fit_factor(room, rayon d'origine × sigma)`.
+  `_model_radius` garde le rayon réduit à la taille de carte (hameaux, végétation, effets CV1 :
+  inchangés) ; l'échelle du porteur `_model_scale` = `zoom_scale(...)` (1 au loin, ≤ 1) porte
+  la différence, donc picking, anneau et hauteurs d'étiquettes suivent sans changement.
+- Masquage : paires candidates (rayons de carte, sur-ensemble valable à toute échelle : 21 paires)
+  calculées une fois (ancrages fins, `replace_model` CV1 : paires de la maquette seulement),
+  masquage réévalué à chaque pas d'échelle SZ4b (`rewrite_step`), 0,13 ms. Nouvelle règle
+  `ABSORB_OVERLAP` : masquée aussi si le recouvrement dépasse 20 % du plus petit rayon (réduction
+  bloquée au plancher : Marmoutier sous Tours restait à 0,71 contre 0,51 de place à d = 14).
+- **Régression trouvée dans `main`** : `_update_model_visibility` (villes 1:1, SZ4b) remettait
+  `visible = true` sur toutes les maquettes, annulant le masquage DC4 dès la première mise à jour
+  des villes : dans `main`, 0 maquette masquée et 7 paires qui se recouvrent en vue comté
+  (Trèves/Saint-Maximin, Tours/Marmoutier, Le Mans/Épau…). Corrigé : `_apply_model_visibility`
+  combine masquage et ville 1:1.
+- Sonde `dc4_density_probe.gd` : statistiques de maquettes par vue (`models_shown` : masquées,
+  réduites, paires affichées > 20 %), vues 20 (`rapproche`) et 12 (`vallee-haut`) nommées.
+  Lille (`--center=2310.3,1657.9`, vues 1400,550,250,120,20,12, `--no-valley`) :
+
+| | main | DC6c |
+| Europe / région / comté / 120 / 20 : masquées, réduites, paires > 20 % | 0, 173, 7 | 7, 166, 0 |
+| Distance 12 : masquées, réduites, paires > 20 % | 0, 173, 2 | 1, 7, 0 |
+| Noms qui se chevauchent (toutes vues) | 0 | 0 |
+
+  Test headless (toute la carte) : masquées/réduites 7/166 de 1000 à 20, 4/35 à 14, 0/2 à 10, 0/1 à
+  7 ; 0 paire > 20 % à toutes les distances ; vue stratégique : échelle 1 pour toutes les maquettes.
+- Captures `docs/img/dc6c/` (960 px) : `lille-*` et `lemans-*` (L'Épau), `avant`/`apres`, `comte`
+  (250 : marqueurs, identiques) et `pres` (distance 12 : L'Épau de nouveau affichée à côté du Mans).
+- Points ouverts : coût de `_place_model` pour 1 192 maquettes par pas d'échelle ~3,5 ms en debug
+  sous charge (préexistant, SZ4b ; le masquage n'ajoute que 0,13 ms) ; les maquettes masquées
+  à mi-zoom réapparaissent d'un coup (pas de fondu).
+
+## DC6b — sommes non pondérées et révoltes (worktree `../gp-dc6b`, branche `feat/dc6-b`)
+État : **fait**, `main` fusionné (395371d3), fmt + clippy -D warnings + 880 tests Rust (espace de
+travail) + pytest codex/colonies/schémas verts. ADR 0082 : addendum DC6b.
+
+Méthode : référence d'avant densification = worktree détaché `../gp-dc6b-ref` sur **9c107692**
+(dernier `main` avant la fusion DC : code de 35783bcf, celui des mesures DC3, + DA2 ; 89bc960a,
+proposé, précède PB3 et la revue de code, donc une autre IA), target privé, supprimé depuis.
+Sonde `century_probe` : `DC6_TRACE=1` (lignes `DC6R` recherche par faction aux tours 1/40/120/200,
+`DC6H` hérésie par tour, `DC6V` chaque révolte avec occupation/garnison, `DC6P` provinces > 60 et
+> 75, garnison moyenne, provinces occupées) ; `CENT_ANS_DATA_DIR` joue une copie des données
+(variantes de réglage sans rebuild).
+
+Réglages :
+- **Recherche** : `research_percent` (rules.json + schéma `settlement_rules`, 70 % hors cité),
+  lu par `research_points_per_turn`. 50 % (= `province_effect_percent`) essayé et écarté.
+- **Hérésie** : `religion::weighted_religious_buildings`, compte des bâtiments religieux pondéré par
+  `province_effect_percent` (50 % hors cité). Compte brut moyen par province 3,0 → 6,4 (DC) ;
+  pondéré 3,7.
+- **Révoltes** : aucun changement (voir plus bas).
+- Codex : `cdx_jeu_technologies` (recherche des places secondaires à 70 %), `cdx_abbaye`
+  (recherche 70 %, demi-point contre l'hérésie hors cité).
+- Tests : `dc6b_weighted_sums.rs` (3), `m6` adapté (somme pondérée, scriptorium ajouté à une cité).
+
+### Recherche (points par faction, moyenne de 28 factions, graines 1-24)
+| | avant DC (9c107692) | main (DC3) | 50 % | **70 % (retenu)** |
+|---|---|---|---|---|
+| Tour 1 : toutes / France / Angleterre | 14,5 / 40 / 37 | 17,1 (+18 %) / 54 / 46 | 13,6 (−6 %) / 35 / 31 | **15,2 (+5 %) / 43 / 37** |
+| Tour 40 : toutes / France / Angleterre | 21,0 / 52,1 / 42,3 | 23,7 (+13 %) / 66,4 / 50,8 | 17,7 (−16 %) / 41,3 / 33,7 | **19,9 (−5 %) / 50,0 / 40,6** |
+(50 % : graines 1-12 seulement.) Écarts par faction au tour 40 : Empire +19 % (beaucoup de villes
+à foire et de guildes), Castille −16 %, les autres à ±10 %.
+
+### Hérésie (graines 1-6 ; Lollards 1381, Hussites 1419 ; 340 à 464 tours)
+| | avant DC | main (DC3) | pondérée 50 % |
+|---|---|---|---|
+| Province-tours hérétiques / graine | 17,7 | 9,7 (−45 %) | 17,3 (−2 %) |
+| Somme des hérésies / graine | 91 | 36 | 82 (−10 %) |
+| Hérésie maximale | 7-9 | 5 | 7-8 |
+Dans les trois cas l'hérésie ne dépasse jamais 10 et ne se propage pas (seuil de diffusion jamais
+atteint) : elle s'éteint en 3 à 5 saisons. Préexistant, hors du périmètre DC.
+
+### Révoltes et équilibre (`century_probe 120`, graines 1-24)
+| | avant DC | main (DC3) | DC6b final |
+|---|---|---|---|
+| Révoltes / 200 tours | 5,62 | 2,57 | **4,38** |
+| dont en province occupée (nombre, 24 graines) | 35 / 81 | 22 / 37 | 26 / 63 |
+| Provinces occupées (moy. / tour) ; durée moy. d'une occupation (tours) | 1,02 ; 10,7 | 0,66 ; 9,7 | 0,79 ; 12,0 |
+| Garnison moyenne par province (hommes) | 690 | 1 029 | 1 033 |
+| Guerre FR-EN (% des tours) | 64,0 | 60,0 | 58,4 (−3 %) |
+| Cités prises / décennie | — | 7,22 | 6,85 (−5 %) |
+| Hommes en campagne (moy. / tour) | — | 26 442 | 25 912 (−2 %) |
+| Banqueroutes / fac. / déc. | 0,08 | 0,09 | 0,13 (+44 %) |
+| Impôt haut (% fac.-tours) | — | 29,9 | 29,6 |
+Sur les 12 premières graines, main et DC6b font tous deux 3,06 révoltes : l'écart DC6b/main vient
+des graines 13-24 (2,08 → 5,7), bruit ou effet indirect de la recherche plus lente (techniques
+d'ordre public plus tardives). Le compte de révoltes (~40 à 80 événements sur 24 graines, concentrés
+sur 3-4 provinces : Luxembourg, Boulonnais, Ponthieu, Alentejo) est très bruité : sur 12 graines,
+la sonde d'avant DC donne 5,7 (1-12) et 5,6 (1-24), main 3,1 puis 2,6.
+
+Explication DC3 vérifiée : **elle ne tient pas telle quelle**. Les occupations ne sont pas plus
+courtes mais plus rares (1,02 → 0,66-0,79 province occupée par tour) et plus longues ; la baisse porte
+autant sur les provinces non occupées (Luxembourg 13 révoltes → 5, Alentejo 4 → 0, Savoie 3 → 0),
+où la garnison, sommée sur toutes les places (+50 % d'hommes : châteaux ajoutés), apaise davantage
+(Luxembourg : 480 → 1 055 hommes à la révolte, 4,8 → 10 points d'apaisement).
+Variantes essayées (`data/rules/population.json`, sans code) — aucune retenue :
+| `garrison_relief_per_100_men` / `_max` | révoltes (graines) | cités prises / déc. | guerre FR-EN |
+|---|---|---|---|
+| 1,0 / 10 (retenu) | 3,06 (1-12) ; 4,38 (1-24) | 6,92 ; 6,85 | 58,9 ; 58,4 |
+| 0,7 / 10 | 4,17 (1-12) ; 3,61 (1-24) | 6,30 ; 6,71 | 61,5 ; 58,5 |
+| 0,6 / 10 | 4,17 (1-12) | 7,11 | 57,7 |
+| 0,5 / 10 | 2,92 (1-12) | 7,83 | 67,2 |
+| 0,7 / 7 | 4,58 (1-12) | 6,08 (−19 %) | 56,8 |
+Moins d'apaisement par la garnison ne fait pas monter les révoltes de façon mesurable (0,5 en donne
+moins que 1,0) : le levier n'est pas démontré, rien n'est forcé.
+
+### Points ouverts
+- Banqueroutes 0,09 → 0,13 : surtout l'Écosse (9 graines sur 24, jusqu'à 12,7 / déc.) ; la France
+  en fait deux (1,0 / déc.). Recherche de l'Écosse inchangée (8 points) : probablement du bruit, à
+  surveiller.
+- Autres sommes non pondérées sur toutes les places : résistance à la peste
+  (`medicine::plague_resistance` via `province_buildings`), faveur pontificale (+2 par bâtiment
+  religieux, plafond 20 : saturée), garnison qui apaise (`province_garrison_strength`), revenu
+  estimé par l'IA (`province_income`), évaluation des bâtiments par l'IA (recherche et apaisement
+  au plein poids).
+- Révoltes : si l'on veut 5+, piste de code plutôt que de données : pondérer la garnison apaisante
+  par `province_effect_percent` ou ne compter que la cité (à mesurer sur 24 graines au moins).

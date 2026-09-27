@@ -110,5 +110,81 @@
     "sources": [
       "Abbaye de Zbraslav"
     ]
+  },
+  {
+    "id": "set_plzen",
+    "province": "prov_bohemia",
+    "kind": "town",
+    "name": {
+      "display": "Plzeň",
+      "local": "Pilsna",
+      "local_language": "vieux tchèque"
+    },
+    "lonlat": [
+      13.3776,
+      49.7384
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville royale fondée en 1295 par Venceslas II à un carrefour de routes commerciales de Bohême occidentale.",
+    "sources": [
+      "Plzeň"
+    ]
+  },
+  {
+    "id": "set_ceske_budejovice",
+    "province": "prov_bohemia",
+    "kind": "town",
+    "name": {
+      "display": "České Budějovice",
+      "local": "Budějovice",
+      "local_language": "vieux tchèque"
+    },
+    "lonlat": [
+      14.4747,
+      48.9744
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville royale fondée en 1265 sur la route de l'argent vers l'Autriche, en Bohême du Sud.",
+    "sources": [
+      "České Budějovice"
+    ]
+  },
+  {
+    "id": "set_hradec_kralove",
+    "province": "prov_bohemia",
+    "kind": "village",
+    "name": {
+      "display": "Hradec Králové",
+      "local": "Hradec",
+      "local_language": "vieux tchèque"
+    },
+    "lonlat": [
+      15.8327,
+      50.2092
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ville de douaire des reines de Bohême, en Bohême orientale sur l'Elbe.",
+    "sources": [
+      "Hradec Králové"
+    ]
   }
 ]

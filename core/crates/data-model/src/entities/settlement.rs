@@ -186,6 +186,15 @@ pub struct SettlementRules {
     /// pay in full.
     #[serde(default)]
     pub building_upkeep_percent: BTreeMap<SettlementKind, i64>,
+    /// Weight, in per cent, of a settlement's buildings in the effects on its whole
+    /// province (population, supply, growth room), by settlement kind (lot DC3,
+    /// ADR 0082); kinds left out weigh in full.
+    #[serde(default)]
+    pub province_effect_percent: BTreeMap<SettlementKind, u32>,
+    /// Weight, in per cent, of a settlement's buildings in its controller's research
+    /// points, by settlement kind (lot DC6b, ADR 0082); kinds left out weigh in full.
+    #[serde(default)]
+    pub research_percent: BTreeMap<SettlementKind, u32>,
     /// Most units an army can leave as a settlement's garrison, by kind
     /// (lot C7a, `Order::GarrisonUnits`); kinds left out have no cap.
     #[serde(default)]
@@ -247,8 +256,9 @@ impl Default for RetreatRules {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MovementRules {
-    /// Movement points worth one v1 province step (mean distance between
-    /// the cities of neighbouring provinces).
+    /// Movement points worth one v1 province step. C4 set it to the mean
+    /// distance between the cities of neighbouring provinces (140 km); lot
+    /// DC1 (ADR 0082) halves it to 70 km to slow the campaign down.
     pub points_per_step: f64,
     /// Cost of a port-to-port crossing in steps (fallback graph).
     pub sea_crossing_steps: f64,
@@ -281,7 +291,7 @@ fn baked_road_factor() -> f64 {
 impl Default for MovementRules {
     fn default() -> Self {
         MovementRules {
-            points_per_step: 140.0,
+            points_per_step: 70.0,
             sea_crossing_steps: 2.0,
             fallback_links_per_neighbor: 2,
             season_scale: 1.0,

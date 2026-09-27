@@ -139,6 +139,12 @@ def _slug(name: str) -> str:
     return "_".join(p for p in "".join(out).split("_") if p)
 
 
+# Named alleys and courts (footways, service ways) kept as lanes when the recipe sets ``alleys``
+# (VH6: the City of London keeps its medieval alleys as footways).
+ALLEY_NAME = re.compile(r"\b(Alley|Court|Passage|Yard|Churchyard|Row)$")
+ALLEY_HIGHWAYS = ("footway", "service", "steps", "pedestrian")
+
+
 def osm_streets(city: dict, osm: dict) -> list[dict]:
     """Streets of the recipe, clipped to the districts, as v2 ``streets`` entries."""
     recipe = city["osm_streets"]
@@ -156,7 +162,14 @@ def osm_streets(city: dict, osm: dict) -> list[dict]:
         if element.get("type") != "way":
             continue
         tags = element.get("tags", {})
-        if tags.get("highway") not in highways or tags.get("area") == "yes":
+        alley = (
+            bool(recipe.get("alleys", False))
+            and tags.get("highway") in ALLEY_HIGHWAYS
+            and bool(ALLEY_NAME.search(tags.get("name", "")))
+        )
+        if (tags.get("highway") not in highways and not alley) or tags.get(
+            "area"
+        ) == "yes":
             continue
         if (
             tags.get("tunnel") in ("yes", "building_passage")
@@ -177,7 +190,7 @@ def osm_streets(city: dict, osm: dict) -> list[dict]:
         rank = (
             "main"
             if name in main
-            else ("lane" if (name in lanes or not name) else "secondary")
+            else ("lane" if (name in lanes or not name or alley) else "secondary")
         )
         width = float(
             widths.get(rank, {"main": 8.0, "secondary": 5.0, "lane": 3.0}[rank])
@@ -344,7 +357,7 @@ class LandmarksResult:
     def summary(self) -> str:
         """One-line French summary."""
         return (
-            f"villes 1:1 : {', '.join(self.cities) or 'aucune'} ; {self.streets} rues OSM, "
+            f"villes 1:1 : {', '.join(self.cities) or 'aucune'} ; {self.streets} rues générées (OSM, ALPAGE), "
             f"{self.waters} cours d'eau fins ({self.seconds:.1f} s)"
         )
 
@@ -389,8 +402,27 @@ def build(
                 s for s in city["streets"] if s["origin"] != "osm"
             ] + generated
             n_streets += len(generated)
-        waters = fine_waters(city, map_dir)
-        if waters:
+        if "alpage" in city:
+            # Paris (VH5): streets of 1380 and Vasserot parcels from ALPAGE (ODbL).
+            from cent_ans_tools.geo import alpage
+
+            generated = alpage.alpage_streets(city)
+            city["streets"] = [
+                s for s in city["streets"] if s["origin"] != "alpage"
+            ] + generated
+            n_streets += len(generated)
+            if "parcels" in city["alpage"]:
+                city["parcels"] = alpage.alpage_parcels(city, city["streets"])
+                log(f"{city['id']} : {len(city['parcels'])} parcelles ALPAGE")
+        # ``fine_rivers: []`` (Paris): the fine river is not used, its section is dropped.
+        waters = (
+            fine_waters(city, map_dir) if city.get("fine_rivers", ["Seine"]) else []
+        )
+        if not city.get("fine_rivers", ["Seine"]):
+            city["waters"] = [
+                w for w in city.get("waters", []) if w["origin"] != "rivers_fine"
+            ]
+        elif waters:
             city["waters"] = [
                 w for w in city.get("waters", []) if w["origin"] != "rivers_fine"
             ] + waters

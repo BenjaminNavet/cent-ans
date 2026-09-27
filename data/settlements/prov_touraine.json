@@ -3,70 +3,285 @@
     "id": "set_tours",
     "province": "prov_touraine",
     "kind": "city",
-    "name": { "display": "Tours", "local": "Tors", "local_language": "ancien français" },
-    "lonlat": [0.6848, 47.3941],
+    "name": {
+      "display": "Tours",
+      "local": "Tors",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.6848,
+      47.3941
+    ],
     "weight": 35,
     "owner": null,
     "fortification_level": 2,
-    "buildings": ["bld_market", "bld_parish_church", "bld_windmill", "bld_vineyard_press", "bld_stone_walls", "bld_muster_field"],
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_vineyard_press",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
     "port": false,
     "description": "Ville de Saint-Martin, grand lieu de pèlerinage et domaine royal depuis 1204.",
-    "sources": ["Tours"]
+    "sources": [
+      "Tours"
+    ]
   },
   {
     "id": "set_loches",
     "province": "prov_touraine",
     "kind": "castle",
-    "name": { "display": "Loches", "local": "Loches", "local_language": "ancien français" },
-    "lonlat": [1.0122, 47.1264],
+    "name": {
+      "display": "Loches",
+      "local": "Loches",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.0122,
+      47.1264
+    ],
     "weight": 16,
     "owner": null,
     "fortification_level": 4,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse royale au donjon du XIe siècle dominant l'Indre, l'une des plus puissantes du royaume.",
-    "sources": ["Château de Loches"]
+    "sources": [
+      "Château de Loches"
+    ]
   },
   {
     "id": "set_chinon",
     "province": "prov_touraine",
     "kind": "castle",
-    "name": { "display": "Chinon", "local": "Chinon", "local_language": "ancien français" },
-    "lonlat": [0.2425, 47.1667],
+    "name": {
+      "display": "Chinon",
+      "local": "Chinon",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.2425,
+      47.1667
+    ],
     "weight": 14,
     "owner": null,
     "fortification_level": 3,
-    "buildings": ["bld_castle"],
+    "buildings": [
+      "bld_castle"
+    ],
     "port": false,
     "description": "Forteresse plantagenêt sur la Vienne, réunie au domaine royal en 1205, ville marchande à ses pieds.",
-    "sources": ["Château de Chinon"]
+    "sources": [
+      "Château de Chinon"
+    ]
   },
   {
     "id": "set_marmoutier_tours",
     "province": "prov_touraine",
     "kind": "abbey",
-    "name": { "display": "Marmoutier", "local": "Marmoustier", "local_language": "ancien français" },
-    "lonlat": [0.6975, 47.4064],
+    "name": {
+      "display": "Marmoutier",
+      "local": "Marmoustier",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.6975,
+      47.4064
+    ],
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": ["bld_abbey", "bld_scriptorium"],
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
     "port": false,
     "description": "Abbaye fondée par saint Martin, sur la rive droite de la Loire face à Tours.",
-    "sources": ["Abbaye de Marmoutier (Indre-et-Loire)"]
+    "sources": [
+      "Abbaye de Marmoutier (Indre-et-Loire)"
+    ]
   },
   {
     "id": "set_vouvray",
     "province": "prov_touraine",
     "kind": "village",
-    "name": { "display": "Vouvray", "local": "Vouvray", "local_language": "ancien français" },
-    "lonlat": [0.8000, 47.4167],
+    "name": {
+      "display": "Vouvray",
+      "local": "Vouvray",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.8,
+      47.4167
+    ],
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": ["bld_parish_church", "bld_vineyard_press"],
+    "buildings": [
+      "bld_parish_church",
+      "bld_vineyard_press"
+    ],
     "port": false,
     "description": "Village viticole des coteaux de la Loire, non fortifié.",
-    "sources": ["Vouvray"]
+    "sources": [
+      "Vouvray"
+    ]
+  },
+  {
+    "id": "set_amboise",
+    "province": "prov_touraine",
+    "kind": "town",
+    "name": {
+      "display": "Amboise",
+      "local": "Amboise",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.9833,
+      47.4139
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville-château sur la Loire, entre Tours et Blois.",
+    "sources": [
+      "Amboise"
+    ]
+  },
+  {
+    "id": "set_langeais",
+    "province": "prov_touraine",
+    "kind": "town",
+    "name": {
+      "display": "Langeais",
+      "local": "Langeais",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.4025,
+      47.3269
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville fortifiée sur la Loire, autour d'un donjon du Xe siècle.",
+    "sources": [
+      "Langeais"
+    ]
+  },
+  {
+    "id": "set_villeloin",
+    "province": "prov_touraine",
+    "kind": "abbey",
+    "name": {
+      "display": "Villeloin",
+      "local": "Villeloin",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.1861,
+      47.1189
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine de l'est de la Touraine, sur l'Indrois.",
+    "sources": [
+      "Abbaye de Villeloin"
+    ]
+  },
+  {
+    "id": "set_sainte_maure_de_touraine",
+    "province": "prov_touraine",
+    "kind": "village",
+    "name": {
+      "display": "Sainte-Maure-de-Touraine",
+      "local": "Sainte Maure",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.6167,
+      47.1167
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-château entre Loire et Vienne, sur la route de Poitiers.",
+    "sources": [
+      "Sainte-Maure-de-Touraine"
+    ]
+  },
+  {
+    "id": "set_montresor",
+    "province": "prov_touraine",
+    "kind": "village",
+    "name": {
+      "display": "Montrésor",
+      "local": "Montrésor",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.1667,
+      47.15
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-château de la vallée de l'Indrois.",
+    "sources": [
+      "Montrésor"
+    ]
+  },
+  {
+    "id": "set_blere",
+    "province": "prov_touraine",
+    "kind": "village",
+    "name": {
+      "display": "Bléré",
+      "local": "Bléré",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.9917,
+      47.3286
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg marchand sur le Cher, en aval de Chenonceau.",
+    "sources": [
+      "Bléré"
+    ]
   }
 ]

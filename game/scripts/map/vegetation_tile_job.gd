@@ -90,6 +90,7 @@ func native_params() -> Dictionary:
 		"tile_index": tile_index, "origin_x": float(origin_px.x), "origin_y": float(origin_px.y),
 		"size_px": float(size_px), "spacing": spacing, "coarse_step": float(coarse_step),
 		"tree_scale": tree_scale, "vertical_scale": MapData.vertical_scale(), "relief_gain": MapData.relief_gain(),
+		"relief_squash": MapData.relief_squash(),
 		"side": _side,
 		"coarse": [_forest, _crops, _conifer, _beech, _hedge, _grove, _region],
 		"exclusions": exclusions, "ground_grid": ground_grid,
@@ -103,6 +104,17 @@ func apply_native(result: Dictionary) -> void:
 		buffers.append(buffer)
 	counts = result["counts"]
 	build_ms += float(result["ms"])
+
+
+## Lot SZ4b : grilles grossières gardées pour la forêt dense (`ForestDetail`), {} si absentes.
+func coarse_params() -> Dictionary:
+	if _side < 2:
+		return {}
+	return {
+		"origin_x": float(origin_px.x), "origin_y": float(origin_px.y), "size_px": float(size_px),
+		"coarse_step": float(coarse_step), "side": _side,
+		"coarse": [_forest, _crops, _conifer, _beech, _hedge, _grove, _region],
+	}
 
 
 func instance_total() -> int:

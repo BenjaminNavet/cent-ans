@@ -444,6 +444,11 @@ pub fn capacity(data: &GameData, province: &ProvinceId, buildings: &[BuildingId]
         .filter(|b| b.category == data_model::BuildingCategory::Production)
         .map(|b| u64::from(b.tier))
         .sum();
+    capacity_with_tiers_percent(data, province, bonus_tiers * 100)
+}
+
+/// [`capacity`] for production tiers counted in hundredths (lot DC3: weighed tiers).
+fn capacity_with_tiers_percent(data: &GameData, province: &ProvinceId, tiers_percent: u64) -> u64 {
     // The 1337 population is the reference: a province can grow ~25 % above
     // it before crowding hurts health, plus 10 % per production tier.
     let base = data
@@ -451,7 +456,25 @@ pub fn capacity(data: &GameData, province: &ProvinceId, buildings: &[BuildingId]
         .get(province)
         .map_or(BASE_CAPACITY, |p| p.population.classes.total())
         .max(BASE_CAPACITY);
-    base * (125 + 10 * bonus_tiers) / 100
+    base * (12_500 + 10 * tiers_percent) / 10_000
+}
+
+/// Weight, in per cent, of the buildings of a settlement of `kind` in the effects on
+/// its whole province (lot DC3, `rules.json` `province_effect_percent`; 100 when absent).
+pub fn province_effect_percent(data: &GameData, kind: data_model::SettlementKind) -> u32 {
+    data.settlement_rules
+        .as_ref()
+        .and_then(|rules| rules.province_effect_percent.get(&kind).copied())
+        .unwrap_or(100)
+}
+
+/// Weight, in per cent, of the buildings of a settlement of `kind` in its controller's
+/// research points (lot DC6b, `rules.json` `research_percent`; 100 when absent).
+pub fn research_percent(data: &GameData, kind: data_model::SettlementKind) -> u32 {
+    data.settlement_rules
+        .as_ref()
+        .and_then(|rules| rules.research_percent.get(&kind).copied())
+        .unwrap_or(100)
 }
 
 /// Total upkeep of the completed buildings of a province (spec § 1.2).
@@ -538,10 +561,61 @@ impl CampaignState {
     /// its governor's trait/skill effects and its active regional edict
     /// (spec § 2, lot C4).
     pub fn province_effects(&self, data: &GameData, province: &ProvinceId) -> EffectTotals {
-        let mut totals = effects_of(data, &self.province_buildings(province));
+        let mut totals = self.province_building_effects(data, province);
         totals.merge(&self.governor_effects(data, province));
         totals.merge(&crate::edicts::edict_effects(self, data, province));
         totals
+    }
+
+    /// Effects of the buildings of every settlement of `province` on the whole province,
+    /// each settlement's weighing its kind's `province_effect_percent` (lot DC3, ADR 0082:
+    /// the secondary places count for half, so that twice as many of them do not double
+    /// the appeasement of their churches and abbeys).
+    pub fn province_building_effects(
+        &self,
+        data: &GameData,
+        province: &ProvinceId,
+    ) -> EffectTotals {
+        let mut totals = EffectTotals::default();
+        for (_, settlement) in self.settlements_of(province) {
+            let percent = province_effect_percent(data, settlement.kind);
+            for building in settlement
+                .buildings
+                .iter()
+                .filter_map(|id| data.buildings.get(id))
+            {
+                for effect in &building.effects {
+                    if percent == 100 {
+                        totals.add_effect(effect);
+                    } else {
+                        let mut weighed = effect.clone();
+                        weighed.value = effect.value * f64::from(percent) / 100.0;
+                        totals.add_effect(&weighed);
+                    }
+                }
+            }
+        }
+        totals
+    }
+
+    /// Population capacity of `province` ([`capacity`]), its places' production
+    /// buildings weighing their kind's `province_effect_percent` (lot DC3).
+    pub fn province_capacity(&self, data: &GameData, province: &ProvinceId) -> u64 {
+        // Production tiers in hundredths, so that full weights give exactly `capacity`.
+        let tiers_percent: u64 = self
+            .settlements_of(province)
+            .map(|(_, settlement)| {
+                let percent = u64::from(province_effect_percent(data, settlement.kind));
+                settlement
+                    .buildings
+                    .iter()
+                    .filter_map(|id| data.buildings.get(id))
+                    .filter(|b| b.category == data_model::BuildingCategory::Production)
+                    .map(|b| u64::from(b.tier) * percent)
+                    .sum::<u64>()
+            })
+            .sum();
+        capacity_with_tiers_percent(data, province, tiers_percent)
     }
 
     /// Sum of the building effects of `settlement`, plus the trait/skill
@@ -621,25 +695,42 @@ impl CampaignState {
         let Some(state) = self.settlements.get(settlement) else {
             return Vec::new();
         };
+        let supply = self.free_supply(data, &state.controller);
+        self.buildable_with_supply(data, settlement, &supply)
+    }
+
+    /// [`CampaignState::buildable`] with the controller's
+    /// [`CampaignState::free_supply`] already computed (PB3f: the AI values
+    /// every settlement of a realm against the same supply).
+    pub fn buildable_with_supply(
+        &self,
+        data: &GameData,
+        settlement: &SettlementId,
+        supply: &BTreeMap<ResourceId, u32>,
+    ) -> Vec<BuildOption> {
+        let Some(state) = self.settlements.get(settlement) else {
+            return Vec::new();
+        };
         let Some(province_data) = data.provinces.get(&state.province) else {
             return Vec::new();
         };
         let Some(faction) = self.factions.get(&state.controller) else {
             return Vec::new();
         };
-        let supply = self.free_supply(data, &state.controller);
+        // PB3f: the settlement's construction speed, once for all buildings.
+        let speed_percent = self.construction_speed_percent(data, settlement);
         data.buildings
             .values()
             .filter(|building| building.allowed_in(state.kind))
             .map(|building| {
-                let draw = resource_draw(data, &supply, &building.cost.resources);
+                let draw = resource_draw(data, supply, &building.cost.resources);
                 let priced = |livres: i64| crate::coinage::priced(self, &state.controller, livres);
                 let cost = priced(i64::from(building.cost.money) + draw.import_cost);
                 let mut option = BuildOption {
                     building: building.id.clone(),
                     name: building.name.display.clone(),
                     cost: cost as u32,
-                    turns: self.build_time(data, settlement, building.build_time_turns),
+                    turns: build_time_at(speed_percent, building.build_time_turns),
                     available: true,
                     reason: None,
                     import_cost: priced(draw.import_cost) as u32,
@@ -726,11 +817,10 @@ impl CampaignState {
     /// (B7b): `base × 100 / (100 + speed %)`, rounded, at least one turn
     /// (+15 % turns 4 into 3, +50 % turns 8 into 5).
     pub fn build_time(&self, data: &GameData, settlement: &SettlementId, base_turns: u32) -> u32 {
-        let percent = self
-            .construction_speed_percent(data, settlement)
-            .clamp(-50.0, MAX_CONSTRUCTION_SPEED_PERCENT);
-        let turns = (f64::from(base_turns) * 100.0 / (100.0 + percent)).round();
-        (turns as u32).max(1)
+        build_time_at(
+            self.construction_speed_percent(data, settlement),
+            base_turns,
+        )
     }
 
     /// Build options of the city of `province` (v1 signature).
@@ -836,7 +926,7 @@ impl CampaignState {
             buildings: city.buildings.clone(),
             construction: city.construction.clone(),
             fortification_level: self.fortification_level(data, &state.city),
-            capacity: capacity(data, id, &self.province_buildings(id)),
+            capacity: self.province_capacity(data, id),
             buildable: self.buildable(data, &state.city),
             resources: province_data.resources.clone(),
             effects: self.province_effects(data, id),
@@ -915,4 +1005,12 @@ pub(crate) fn goods_map(
         }
     }
     goods
+}
+
+/// [`CampaignState::build_time`] for a construction speed already computed
+/// (`construction_speed_percent`, before clamping).
+fn build_time_at(speed_percent: f64, base_turns: u32) -> u32 {
+    let percent = speed_percent.clamp(-50.0, MAX_CONSTRUCTION_SPEED_PERCENT);
+    let turns = (f64::from(base_turns) * 100.0 / (100.0 + percent)).round();
+    (turns as u32).max(1)
 }

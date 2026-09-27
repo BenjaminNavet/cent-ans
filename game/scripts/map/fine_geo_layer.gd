@@ -65,6 +65,11 @@ var _scale := -1.0
 var _zone := Vector4(0.0, 0.0, -1.0, 0.0)
 var _towns := PackedVector3Array()
 var _zones := PackedVector3Array()
+## SZ2b : zones personnalisées des villes 1:1 (VH) et ids de leurs colonies.
+var _open_zones := PackedVector3Array()
+var _open_zone_cities: Array[PackedStringArray] = []
+var _cover_open := -1.0
+var _zone_open := -1.0
 var _bridges_fine := false
 var _update_us_total := 0
 var _update_us_max := 0
@@ -97,11 +102,22 @@ func setup(rivers_renderer: RiversRenderer, settlement_layer: SettlementLayer) -
 		return false
 	enabled = true
 	carver = FineBedCarver.new(store, map_data.meters_per_px, terrain.pyramid.height_min_m, terrain.pyramid.height_range_m)
-	carver.covers = PackedVector4Array(rivers.covers)
+	# SZ2b : le lit est creusé aussi sous les emprises des colonies (au palier près, les
+	# maquettes cèdent la place aux villes 1:1 de ZG6, dont le couloir de fleuve attend l'eau) ;
+	# les rubans y sont effacés tant que les maquettes sont affichées (`cover_open`).
+	carver.covers = PackedVector4Array()
 	terrain.quadtree.page_filter = carver
 	for zone in rivers.zones:
 		var c: Vector2 = zone["px"]
-		_zones.append(Vector3(c.x, c.y, float(zone["radius_px"])))
+		var circle := Vector3(c.x, c.y, float(zone["radius_px"]))
+		var cities := _landmark_cities_in(circle)
+		if not cities.is_empty():
+			# SZ2b : ville 1:1 (VH, ADR 0078) : le fleuve fin y est l'eau affichée (son plan
+			# ne dessine que les couloirs), lit creusé, rubans au fondu de la maquette L1/L2.
+			_open_zones.append(circle)
+			_open_zone_cities.append(cities)
+			continue
+		_zones.append(circle)
 		# ZG7a : pas de lit creusé dans les zones personnalisées (villes emblématiques) : les
 		# rubans n'y sont pas dessinés, le lit restait une tranchée vide (Tamise à -7,8 m sous
 		# des rives à 2-4 m à Londres). Contrat de `river_styles.json` : le rendu générique
@@ -218,8 +234,41 @@ func update_view(camera_distance: float) -> void:
 		if wanted:
 			entry["used"] = _frame
 	_switch_bridges(weight >= bridge_switch_weight)
+	_update_open()
 	_evict()
 	_note_update(t0)
+
+
+## SZ2b : ouverture de l'eau dans les emprises (villes 1:1 de ZG6 actives : maquettes masquées)
+## et dans les zones des villes 1:1 VH (complément de l'opacité de leur maquette).
+func _update_open() -> void:
+	var cover_open := 1.0 if settlements != null and settlements.towns != null and settlements.towns.active else 0.0
+	var zone_open := 0.0
+	var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
+	if lc != null:
+		for ids in _open_zone_cities:
+			for id in ids:
+				zone_open = maxf(zone_open, 1.0 - lc.fade(id))
+	if cover_open != _cover_open:
+		_cover_open = cover_open
+		river_material.set_shader_parameter("cover_open", cover_open)
+		_show_gates()
+	if absf(zone_open - _zone_open) > 0.004:
+		_zone_open = zone_open
+		river_material.set_shader_parameter("zone_open", zone_open)
+
+
+## Colonies (ids) dont la ville 1:1 (VH) est dans le cercle.
+func _landmark_cities_in(circle: Vector3) -> PackedStringArray:
+	var ids := PackedStringArray()
+	var lc: LandmarkCityLayer = settlements.landmark_cities if settlements != null else null
+	if lc == null or not lc.is_enabled():
+		return ids
+	for id: String in lc.city_ids():
+		var z := lc.zone_of(id)
+		if Vector2(z.x, z.y).distance_to(Vector2(circle.x, circle.y)) < circle.z:
+			ids.append(id)
+	return ids
 
 
 func _note_update(t0: int) -> void:
@@ -328,6 +377,9 @@ func _start_job(key: int) -> void:
 	for z in _zones:
 		if rect.grow(z.z).has_point(Vector2(z.x, z.y)):
 			job.zones.append(z)
+	for z in _open_zones:
+		if rect.grow(z.z).has_point(Vector2(z.x, z.y)):
+			job.open_zones.append(z)
 	for t in _towns:
 		if rect.grow(t.z).has_point(Vector2(t.x, t.y)):
 			job.towns.append(t)
@@ -479,7 +531,7 @@ func _build_gates(entry: Dictionary, gates: Array[Dictionary]) -> void:
 		instance.set_meta("deck_scale", BridgeMeshes.fine_deck_scale(str(gate["structure"]), mesh_width, map_data.meters_per_px, RiverCrossings.FINE_SCALE))
 		instance.visibility_range_end = RiverCrossings.VISIBILITY_RANGE
 		(entry["node"] as Node3D).add_child(instance)
-		instance.visible = _bridges_fine
+		instance.visible = _bridges_fine and _cover_open < 0.5
 		nodes.append(instance)
 		_ground_gate(instance)
 	entry["gates"] = nodes
@@ -509,9 +561,15 @@ func _switch_bridges(fine: bool) -> void:
 	if rivers.crossings != null:
 		rivers.crossings.set_fine_mode(fine)
 		rivers.crossings.set_gates_hidden(fine)
+	_show_gates()
+
+
+## Ponts-portes : au palier près, tant que les maquettes (et donc leurs murs) sont affichées.
+func _show_gates() -> void:
+	var shown := _bridges_fine and _cover_open < 0.5
 	for entry: Dictionary in _built.values():
 		for node: Node3D in entry["gates"]:
-			node.visible = fine
+			node.visible = shown
 
 
 # --- Captures, tests, mesures -----------------------------------------------------------

@@ -38,8 +38,6 @@ var _camera_distance := 0.0
 var _refreshed_once := false
 ## Empreinte des états utilisés par le masque (reconstruit seulement s'il change).
 var _terroir_key: String = ""
-## Facteur de réduction `_fit_models` d'origine par colonie (gardé au remplacement).
-var _fit: Dictionary = {}
 var _turn_key: String = ""
 var _off: Dictionary = {}
 
@@ -123,16 +121,18 @@ func _read_provinces(sim: Object) -> void:
 		ids[str(entry["province"])] = true
 	for hamlet in _settlements.data.hamlets:
 		ids[str(hamlet["province"])] = true
-	var can_read := sim.has_method("get_province_state")
+	# PB3d : instantané groupé (partagé avec les autres calques du même rafraîchissement).
+	var snapshot := ProvinceSnapshot.of(sim, _map_data) if _map_data != null else ProvinceSnapshot.read(sim, PackedStringArray(ids.keys()))
 	for province_id in ids:
-		var state: Dictionary = sim.call("get_province_state", province_id) if can_read else {}
-		var devastation := float(state.get("devastation", 0.0))
+		var i := snapshot.index_of(str(province_id))
+		var known := snapshot.has(i)
+		var devastation := float(snapshot.devastation[i]) if known else 0.0
 		if forced_devastation.has(province_id):
 			devastation = float(forced_devastation[province_id])
 		province_states[province_id] = {
 			"devastation": devastation,
-			"population": float(state.get("population_total", TerroirMask.REFERENCE_POPULATION)),
-			"siege": state.has("siege"),
+			"population": float(snapshot.population_total[i]) if known else TerroirMask.REFERENCE_POPULATION,
+			"siege": known and snapshot.besieged[i] != 0,
 		}
 
 
@@ -144,6 +144,13 @@ func _refresh_growth(sim: Object) -> void:
 		return
 	var t0 := Time.get_ticks_msec()
 	var can_detail := sim.has_method("settlement_detail")
+	# PB3d : bâtiments, fortification et rang de cité de toutes les colonies en un appel groupé
+	# (au lieu d'un `settlement_detail` complet — revenus, panneaux — par colonie).
+	var live: Dictionary = sim.call("get_settlements_live") if sim.has_method("get_settlements_live") else {}
+	var live_index: Dictionary = {}
+	var live_ids: PackedStringArray = live.get("id", PackedStringArray())
+	for k in live_ids.size():
+		live_index[live_ids[k]] = k
 	var replaced := 0
 	var counts := [0, 0, 0, 0]
 	for i in _settlements.data.settlements.size():
@@ -152,7 +159,12 @@ func _refresh_growth(sim: Object) -> void:
 		if kind != "village" and kind != "town" and kind != "city":
 			continue
 		var id := str(entry["id"])
-		var detail: Dictionary = sim.call("settlement_detail", id) if can_detail else {}
+		var detail: Dictionary = {}
+		if live_index.has(id):
+			var k: int = live_index[id]
+			detail = {"buildings": Array(live["buildings"][k]), "fortification_level": int(live["fortification_level"][k]), "is_city": live["is_city"][k] != 0}
+		elif can_detail:
+			detail = sim.call("settlement_detail", id)
 		var population := float(province_states.get(str(entry["province"]), {}).get("population", 0.0))
 		var level := SettlementGrowth.level_of(entry, detail, population)
 		if level < 0:
@@ -168,14 +180,10 @@ func _refresh_growth(sim: Object) -> void:
 		var holder := _settlements.model_holder(i)
 		if holder == null:
 			continue
-		if not _fit.has(id):
-			var old := holder.get_child(0) as Node3D if holder.get_child_count() > 0 else null
-			var base_scale: float = ModelLibrary.SETTLEMENT_SCALE.get(kind, 1.0)
-			_fit[id] = clampf(old.scale.x / base_scale, 0.3, 1.0) if old != null else 1.0
 		var model := SettlementGrowth.build_model(level, absi(id.hash()) / 7, castle)
 		if model == null:
 			continue
-		model.scale = Vector3.ONE * float(_fit[id])
+		# DC4 : maquette à pleine taille ; `replace_model` applique la réduction des voisines.
 		_settlements.replace_model(i, model)
 		replaced += 1
 	stats["growth_ms"] = Time.get_ticks_msec() - t0

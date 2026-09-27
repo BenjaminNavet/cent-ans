@@ -53,6 +53,8 @@ const FOLIAGE_WINTER_SHADER := preload("res://shaders/foliage_winter.gdshader")
 ## Lot PB2 : semis natif (`VegetationScatter`, Rust) quand l'extension l'expose ; sinon tout le
 ## semis tourne en GDScript dans le `WorkerThreadPool`.
 @export var use_native_scatter: bool = true
+## Lot SZ4b : forêt dense autour du point visé (`ForestDetail`, semis natif requis).
+@export var use_forest_detail: bool = true
 @export var max_cached_tiles: int = 64
 @export var cast_shadows: bool = true
 ## Au-delà de cette distance caméra (zoom global, pas la distance d'une tuile), plus aucune
@@ -71,6 +73,8 @@ var quality_shadow_distance: float = -1.0
 
 var map_data: MapData
 var mask: VegetationMask
+## Lot SZ4b : forêts denses autour du point visé aux paliers vallée et site (semis natif requis).
+var forest_detail: ForestDetail
 ## Terrain affiché (lot C7b) : null → arbres sur la heightmap 4096 bilinéaire, sans recalage.
 var terrain: TerrainBuilder
 ## Lot C6 : cercles d'exclusion supplémentaires (colonies, hameaux) : Vector3(x, y, rayon) px carte.
@@ -120,6 +124,8 @@ func _ready() -> void:
 			_log_bursts = true
 		elif arg == "--no-native-vegetation":  # PB2 : comparaisons avec le semis GDScript
 			use_native_scatter = false
+		elif arg == "--no-forest-detail":  # SZ4b : captures « avant », mesures A/B
+			use_forest_detail = false
 
 
 
@@ -146,6 +152,10 @@ func build(data: MapData) -> void:
 		if capital.x >= 0.0:
 			_exclusions.append(Vector3(capital.x, capital.y, 11.0))
 	_exclusions.append_array(extra_exclusions)
+	if _native != null and use_forest_detail:
+		forest_detail = ForestDetail.new()
+		add_child(forest_detail)
+		forest_detail.setup(self, terrain)
 
 
 ## Lot PB2 : pool natif de semis, partageant la heightmap et le lit des fleuves de `data`.
@@ -170,6 +180,10 @@ static func _make_native(data: MapData) -> Object:
 
 func clear() -> void:
 	_wait_all_jobs()
+	if forest_detail != null:
+		forest_detail.clear()
+		forest_detail.queue_free()
+		forest_detail = null
 	for entry in _tiles.values():
 		(entry["node"] as Node).queue_free()
 	_tiles.clear()
@@ -187,7 +201,60 @@ func instance_count() -> int:
 
 
 func pending_jobs() -> int:
-	return _jobs.size()
+	return _jobs.size() + (forest_detail.pending() if forest_detail != null else 0)
+
+
+# --- Lot SZ4b : accès pour la couche de forêt dense (`ForestDetail`) -----------------------
+
+
+func has_native() -> bool:
+	return _native != null
+
+
+func foliage_material() -> ShaderMaterial:
+	return _material
+
+
+## Grilles grossières d'une tuile semée (paramètres de `VegetationScatter.request` sans le semis
+## lui-même), {} si la tuile n'est pas construite.
+func tile_coarse(index: int) -> Dictionary:
+	var entry: Dictionary = _tiles.get(index, {})
+	return entry.get("coarse", {})
+
+
+func exclusions_for(rect: Rect2) -> PackedVector3Array:
+	return _exclusions_for(rect)
+
+
+## Requête de semis native (identifiant, -1 si refusée).
+func native_submit(params: Dictionary) -> int:
+	if _native == null:
+		return -1
+	_sync_native_floor()
+	_native_serial += 1
+	return _native_serial if _native.call("request", _native_serial, params) else -1
+
+
+## Requête de recalage native (identifiant, -1 si refusée).
+func native_submit_reground(buffers: Array, grid: Dictionary, origin: Vector2) -> int:
+	if _native == null:
+		return -1
+	_sync_native_floor()
+	_native_serial += 1
+	var untyped: Array = []
+	untyped.assign(buffers)
+	if _native.call("request_reground", _native_serial, untyped, grid, origin, MapData.vertical_scale(), MapData.relief_gain(), MapData.relief_squash()):
+		return _native_serial
+	return -1
+
+
+## Relève les résultats natifs jusqu'à ce que la forêt dense n'attende plus rien (captures).
+func poll_native_blocking() -> void:
+	var guard := 0
+	while forest_detail != null and forest_detail.pending() > 0 and guard < 20000:
+		guard += 1
+		OS.delay_usec(200)
+		_poll_native()
 
 
 func _process(_delta: float) -> void:
@@ -200,6 +267,11 @@ func _process(_delta: float) -> void:
 		return
 	var distance: float = _rig.get("distance") if _rig != null else camera.global_position.y
 	update_view(camera.global_position, distance)
+	if forest_detail != null:
+		var focus: Variant = _rig.get("focus") if _rig != null else null
+		var at := Vector2(focus.x, focus.z) if focus is Vector3 else Vector2(camera.global_position.x, camera.global_position.z)
+		var shadow_limit := shadow_camera_distance if quality_shadow_distance < 0.0 else quality_shadow_distance
+		forest_detail.update_view(at, distance, cast_shadows and distance < shadow_limit)
 	if _frame % 30 == 1:
 		_update_season()
 
@@ -451,6 +523,8 @@ func _sync_native_floor() -> void:
 	_native_floor_version = grid["version"]
 	var side: Vector2i = grid["side"]
 	_native.call("set_floor", grid["data"], side.x, side.y, grid["cell"])
+	# SZ1 : base et écrasement des montagnes (même grille).
+	_native.call("set_relief_fields", grid["base"], grid["squash"])
 
 
 ## Lot PB2 : grille grossière prête → semis natif (conversion des données sur le fil principal).
@@ -472,10 +546,13 @@ func _submit_native(index: int, item: Dictionary) -> void:
 ## Installe les tuiles semées par le pool natif ; les résultats périmés (tuile vidée par
 ## `clear` entre-temps) sont ignorés.
 func _poll_native() -> void:
-	if _native == null or (_native_ids.is_empty() and _native_ground_ids.is_empty()):
+	if _native == null or (_native_ids.is_empty() and _native_ground_ids.is_empty() and (forest_detail == null or forest_detail.pending() == 0)):
 		return
 	for result: Dictionary in _native.call("poll", 64):
 		var id: int = result["id"]
+		if forest_detail != null and forest_detail.owns(id):
+			forest_detail.on_result(result)  # SZ4b : cellule de forêt dense
+			continue
 		if _native_ground_ids.has(id):
 			var ground_index: int = _native_ground_ids[id]
 			_native_ground_ids.erase(id)
@@ -546,7 +623,7 @@ func _start_ground_jobs() -> void:
 			_native_serial += 1
 			var untyped: Array = []  # le pont Rust attend un Array non typé
 			untyped.assign(job.buffers)
-			if _native.call("request_reground", _native_serial, untyped, job.grid, job.origin, MapData.vertical_scale(), MapData.relief_gain()):
+			if _native.call("request_reground", _native_serial, untyped, job.grid, job.origin, MapData.vertical_scale(), MapData.relief_gain(), MapData.relief_squash()):
 				_native_ground_ids[_native_serial] = index
 				_ground_jobs[index] = {"native": _native_serial, "job": job}
 				continue
@@ -642,7 +719,8 @@ func _install_tile(index: int, job: VegetationTileJob, level: int = -1) -> void:
 	add_child(node)
 	_generation += 1
 	# Tampons CPU gardés pour le recalage (lot C7b) : 64 octets par instance.
-	_tiles[index] = {"node": node, "parts": parts, "counts": job.counts, "last_seen": _frame, "buffers": job.buffers, "slots": slots, "generation": _generation, "level": level}
+	_tiles[index] = {"node": node, "parts": parts, "counts": job.counts, "last_seen": _frame, "buffers": job.buffers, "slots": slots, "generation": _generation, "level": level,
+		"coarse": job.coarse_params()}
 	if terrain != null and terrain.chunk_level(index) != level:
 		_ground_dirty[index] = true
 	stats["tiles"] = _tiles.size()

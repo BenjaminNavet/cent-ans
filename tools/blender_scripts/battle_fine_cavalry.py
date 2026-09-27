@@ -71,11 +71,11 @@ HORSE_OF = {
 }
 
 # Triangles per horse piece and level (cards are doubled afterwards: no alpha, back faces
-# culled). Horse alone: LOD0 ~5.7 k, LOD1 ~1.1 k, LOD2 < 300.
+# culled). Horse alone: LOD0 ~5.7 k, LOD1 ~0.8 k, LOD2 ~200 (FG5: LOD1 and LOD2 lighter).
 HORSE_LOD = [
     {"horse_body": 3700, "horse_mane": 600, "horse_tail": 350, "eyes": True},
-    {"horse_body": 850, "horse_mane": 90, "horse_tail": 50, "eyes": False},
-    {"horse_body": 235, "horse_mane": 16, "horse_tail": 10, "eyes": False},
+    {"horse_body": 600, "horse_mane": 60, "horse_tail": 36, "eyes": False},
+    {"horse_body": 170, "horse_mane": 12, "horse_tail": 8, "eyes": False},
 ]
 CARDS = ("horse_mane", "horse_tail")
 
@@ -369,7 +369,8 @@ def strap(body, name, plane_co, plane_no, width, filt, material, lift=0.006):
     bm.free()
     for f in out.faces:
         c = f.calc_center_median()
-        # Outward: away from the nearest body point.
+        # Outward: away from the nearest body point (FG3: normal computed first).
+        f.normal_update()
         if f.normal.dot(c - _nearest(body, c)) < 0:
             f.normal_flip()
     obj = eq.to_object(name, out, [material])
@@ -674,6 +675,7 @@ def caparison(body, mount, level, hem=0.48):
     )
     for f in bm.faces:
         c = f.calc_center_median()
+        f.normal_update()  # FG3: new faces carry no normal until updated
         if f.normal.dot(c - Vector((0, c.y, 1.0))) < 0:
             f.normal_flip()
     uv = bm.loops.layers.uv.new("UVMap")

@@ -32,9 +32,10 @@
     {"ids": ["set_bordeaux", "set_rouen", "set_lyon", "set_toulouse", "set_montpellier", "set_orleans", "set_tours", "set_poitiers", "set_lille", "set_arras", "set_caen", "set_york", "set_bristol", "set_norwich", "set_dublin", "set_cologne", "set_saragosse", "set_seville", "set_burgos", "set_cordoue", "set_valence", "set_rome", "set_palerme", "set_nuremberg", "set_lubeck", "set_mayence", "set_liege", "set_utrecht", "set_bayonne", "set_limoges", "set_amiens", "set_bourges", "set_strasbourg"], "rank": 3},
     {"kind": "castle", "min_fortification": 4, "rank": 3},
     {"kind": "city", "rank": 2},
-    {"kind": "castle", "min_fortification": 3, "rank": 2},
+    {"kind": "castle", "min_fortification": 3, "min_weight": 10, "rank": 2},
     {"kind": "town", "min_fortification": 3, "rank": 2},
     {"kind": "town", "min_weight": 30, "rank": 2},
+    {"kind": "town", "min_fortification": 2, "min_weight": 25, "rank": 2},
     {"kind": "abbey", "min_fortification": 2, "rank": 2},
     {"kind": "abbey", "min_weight": 15, "rank": 2}
   ],
@@ -47,6 +48,22 @@
     {"tier": "Europe", "max_distance": 100000, "min_rank": {"city": 3, "castle": 3}}
   ],
   "fade_distance": 60,
+  "declutter": {
+    "description": "Lot DA7d : dé-encombrement écran par priorité (ADR 0066). Les lieux sont posés par ordre de rang puis de poids ; un marqueur (ou un nom) qui recouvre un rectangle déjà posé est masqué. La capitale du joueur, le lieu sélectionné et le lieu survolé passent toujours. Recalcul seulement quand la caméra bouge nettement.",
+    "marker_box": [0.8, 0.94],
+    "marker_margin_px": 2,
+    "label_margin_px": 3,
+    "hidden_alpha": 0.0,
+    "fade_seconds": 0.25,
+    "interval_seconds": 0.15,
+    "recompute_move_fraction": 0.01,
+    "recompute_distance_ratio": 0.015,
+    "recompute_turn_degrees": 0.5,
+    "label_screen_margin": 0.2,
+    "pin_player_capital": true,
+    "pin_selected": true,
+    "pin_hovered": true
+  },
   "shield": {"center": [0.79, 0.24], "half_size": 0.22},
   "badge": {"center": [0.18, 0.2], "half_size": 0.18}
 }

@@ -1,6 +1,7 @@
 {
  "figures": {
   "archer_0": {
+   "atlas_layer": 3,
    "fine": true,
    "lods": [
     "archer_0_lod0.mesh.bin",
@@ -12,12 +13,13 @@
    "style": "bow",
    "tris": [
     10926,
-    1964,
-    338
+    1304,
+    244
    ],
    "variants": 3
   },
   "archer_1": {
+   "atlas_layer": 4,
    "fine": true,
    "lods": [
     "archer_1_lod0.mesh.bin",
@@ -29,12 +31,13 @@
    "style": "crossbow",
    "tris": [
     10210,
-    1968,
-    335
+    1307,
+    243
    ],
    "variants": 2
   },
   "archer_2": {
+   "atlas_layer": 8,
    "fine": true,
    "lods": [
     "archer_2_lod0.mesh.bin",
@@ -46,12 +49,13 @@
    "style": "crossbow",
    "tris": [
     11422,
-    1957,
-    332
+    1288,
+    246
    ],
    "variants": 2
   },
   "archer_3": {
+   "atlas_layer": 15,
    "fine": true,
    "lods": [
     "archer_3_lod0.mesh.bin",
@@ -63,12 +67,13 @@
    "style": "bow",
    "tris": [
     9776,
-    1958,
-    339
+    1307,
+    249
    ],
    "variants": 2
   },
   "archer_4": {
+   "atlas_layer": 16,
    "fine": true,
    "lods": [
     "archer_4_lod0.mesh.bin",
@@ -80,12 +85,13 @@
    "style": "crossbow",
    "tris": [
     11859,
-    1943,
-    332
+    1283,
+    243
    ],
    "variants": 2
   },
   "archer_5": {
+   "atlas_layer": 17,
    "fine": true,
    "lods": [
     "archer_5_lod0.mesh.bin",
@@ -97,12 +103,13 @@
    "style": "crossbow",
    "tris": [
     9471,
-    1913,
-    339
+    1311,
+    252
    ],
    "variants": 2
   },
   "cavalry_0": {
+   "atlas_layer": 5,
    "fine": true,
    "lods": [
     "cavalry_0_lod0.mesh.bin",
@@ -114,12 +121,13 @@
    "style": "lance",
    "tris": [
     16865,
-    2827,
-    631
+    1985,
+    534
    ],
    "variants": 2
   },
   "cavalry_1": {
+   "atlas_layer": 6,
    "fine": true,
    "lods": [
     "cavalry_1_lod0.mesh.bin",
@@ -131,12 +139,13 @@
    "style": "lance",
    "tris": [
     16269,
-    2749,
-    599
+    1886,
+    453
    ],
    "variants": 2
   },
   "cavalry_2": {
+   "atlas_layer": 7,
    "fine": true,
    "lods": [
     "cavalry_2_lod0.mesh.bin",
@@ -148,12 +157,13 @@
    "style": "horse_bow",
    "tris": [
     15501,
-    2753,
-    602
+    1890,
+    452
    ],
    "variants": 2
   },
   "cavalry_3": {
+   "atlas_layer": 18,
    "fine": true,
    "lods": [
     "cavalry_3_lod0.mesh.bin",
@@ -165,12 +175,13 @@
    "style": "lance",
    "tris": [
     17414,
-    2933,
-    650
+    2055,
+    513
    ],
    "variants": 2
   },
   "cavalry_4": {
+   "atlas_layer": 19,
    "fine": true,
    "lods": [
     "cavalry_4_lod0.mesh.bin",
@@ -182,12 +193,13 @@
    "style": "lance",
    "tris": [
     15557,
-    2752,
-    606
+    1885,
+    452
    ],
    "variants": 2
   },
   "cavalry_5": {
+   "atlas_layer": 20,
    "fine": true,
    "lods": [
     "cavalry_5_lod0.mesh.bin",
@@ -199,12 +211,13 @@
    "style": "horse_javelin",
    "tris": [
     15783,
-    2754,
-    600
+    1885,
+    446
    ],
    "variants": 2
   },
   "cavalry_6": {
+   "atlas_layer": 21,
    "fine": true,
    "lods": [
     "cavalry_6_lod0.mesh.bin",
@@ -216,12 +229,13 @@
    "style": "lance",
    "tris": [
     15193,
-    2759,
-    603
+    1887,
+    452
    ],
    "variants": 2
   },
   "crew_0": {
+   "atlas_layer": 22,
    "fine": true,
    "lods": [
     "crew_0_lod0.mesh.bin",
@@ -233,12 +247,13 @@
    "style": "crew",
    "tris": [
     9794,
-    1784,
-    320
+    1318,
+    251
    ],
    "variants": 3
   },
   "crew_1": {
+   "atlas_layer": 23,
    "fine": true,
    "lods": [
     "crew_1_lod0.mesh.bin",
@@ -250,12 +265,13 @@
    "style": "crew",
    "tris": [
     9380,
-    1816,
-    345
+    1315,
+    250
    ],
    "variants": 2
   },
   "infantry_0": {
+   "atlas_layer": 0,
    "fine": true,
    "lods": [
     "infantry_0_lod0.mesh.bin",
@@ -266,13 +282,14 @@
    "rig": "human",
    "style": "sword",
    "tris": [
-    11844,
-    1948,
-    333
+    11843,
+    1290,
+    244
    ],
    "variants": 2
   },
   "infantry_1": {
+   "atlas_layer": 1,
    "fine": true,
    "lods": [
     "infantry_1_lod0.mesh.bin",
@@ -284,12 +301,13 @@
    "style": "pike",
    "tris": [
     11069,
-    1963,
-    332
+    1301,
+    242
    ],
    "variants": 3
   },
   "infantry_2": {
+   "atlas_layer": 2,
    "fine": true,
    "lods": [
     "infantry_2_lod0.mesh.bin",
@@ -301,12 +319,13 @@
    "style": "militia",
    "tris": [
     11859,
-    1945,
-    325
+    1281,
+    235
    ],
    "variants": 4
   },
   "infantry_3": {
+   "atlas_layer": 9,
    "fine": true,
    "lods": [
     "infantry_3_lod0.mesh.bin",
@@ -318,12 +337,13 @@
    "style": "militia",
    "tris": [
     9862,
-    1810,
-    335
+    1319,
+    248
    ],
    "variants": 3
   },
   "infantry_4": {
+   "atlas_layer": 10,
    "fine": true,
    "lods": [
     "infantry_4_lod0.mesh.bin",
@@ -335,12 +355,13 @@
    "style": "pike",
    "tris": [
     11859,
-    1950,
-    330
+    1287,
+    241
    ],
    "variants": 3
   },
   "infantry_5": {
+   "atlas_layer": 11,
    "fine": true,
    "lods": [
     "infantry_5_lod0.mesh.bin",
@@ -352,12 +373,13 @@
    "style": "militia",
    "tris": [
     11131,
-    1958,
-    334
+    1295,
+    247
    ],
    "variants": 2
   },
   "infantry_6": {
+   "atlas_layer": 12,
    "fine": true,
    "lods": [
     "infantry_6_lod0.mesh.bin",
@@ -369,12 +391,13 @@
    "style": "militia",
    "tris": [
     11828,
-    1950,
-    335
+    1294,
+    245
    ],
    "variants": 2
   },
   "infantry_7": {
+   "atlas_layer": 13,
    "fine": true,
    "lods": [
     "infantry_7_lod0.mesh.bin",
@@ -385,13 +408,14 @@
    "rig": "human",
    "style": "militia",
    "tris": [
-    11809,
-    1932,
-    329
+    11808,
+    1273,
+    244
    ],
    "variants": 2
   },
   "infantry_8": {
+   "atlas_layer": 14,
    "fine": true,
    "lods": [
     "infantry_8_lod0.mesh.bin",
@@ -403,12 +427,13 @@
    "style": "sword",
    "tris": [
     11816,
-    1941,
-    331
+    1282,
+    244
    ],
    "variants": 3
   },
   "musician_0": {
+   "atlas_layer": 26,
    "fine": true,
    "lods": [
     "musician_0_lod0.mesh.bin",
@@ -420,12 +445,13 @@
    "style": "drum",
    "tris": [
     10967,
-    1965,
-    337
+    1299,
+    247
    ],
    "variants": 2
   },
   "musician_1": {
+   "atlas_layer": 27,
    "fine": true,
    "lods": [
     "musician_1_lod0.mesh.bin",
@@ -437,12 +463,13 @@
    "style": "horn",
    "tris": [
     10151,
-    1949,
-    340
+    1310,
+    250
    ],
    "variants": 2
   },
   "standard_0": {
+   "atlas_layer": 24,
    "fine": true,
    "lods": [
     "standard_0_lod0.mesh.bin",
@@ -464,12 +491,13 @@
    "style": "standard",
    "tris": [
     11872,
-    1953,
-    339
+    1290,
+    247
    ],
    "variants": 2
   },
   "standard_1": {
+   "atlas_layer": 25,
    "fine": true,
    "lods": [
     "standard_1_lod0.mesh.bin",
@@ -491,8 +519,8 @@
    "style": "standard_mounted",
    "tris": [
     16911,
-    2841,
-    639
+    1999,
+    504
    ],
    "variants": 2
   }

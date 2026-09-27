@@ -60,33 +60,6 @@
     ]
   },
   {
-    "id": "set_waterford",
-    "province": "prov_dublin",
-    "kind": "town",
-    "name": {
-      "display": "Waterford",
-      "local": "Waterford",
-      "local_language": "moyen anglais"
-    },
-    "lonlat": [
-      -7.1101,
-      52.2593
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 3,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Ancien port viking (Veðrafjǫrðr) devenu cité royale fidèle à la couronne ; sa devise « Urbs Intacta » ne lui sera donnée qu'en 1487.",
-    "sources": [
-      "Waterford"
-    ]
-  },
-  {
     "id": "set_mellifont",
     "province": "prov_dublin",
     "kind": "abbey",
@@ -110,6 +83,81 @@
     "description": "Première abbaye cistercienne d'Irlande, fondée en 1142.",
     "sources": [
       "Abbaye de Mellifont"
+    ]
+  },
+  {
+    "id": "set_kilkenny",
+    "province": "prov_dublin",
+    "kind": "town",
+    "name": {
+      "display": "Kilkenny",
+      "local": "Cill Chainnigh",
+      "local_language": "anglo-normand"
+    },
+    "lonlat": [
+      -7.25,
+      52.6541
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville marchande et siège du parlement d'Irlande, sur la Nore.",
+    "sources": [
+      "Kilkenny"
+    ]
+  },
+  {
+    "id": "set_kildare",
+    "province": "prov_dublin",
+    "kind": "abbey",
+    "name": {
+      "display": "Kildare",
+      "local": "Cill Dara",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -6.9111,
+      53.1589
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye et ville épiscopale du Kildare, associée au culte de sainte Brigide.",
+    "sources": [
+      "Kildare"
+    ]
+  },
+  {
+    "id": "set_trim",
+    "province": "prov_dublin",
+    "kind": "castle",
+    "name": {
+      "display": "Trim",
+      "local": "Baile Átha Troim",
+      "local_language": "anglo-normand"
+    },
+    "lonlat": [
+      -6.7911,
+      53.5556
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Le plus grand château anglo-normand d'Irlande, sur la Boyne.",
+    "sources": [
+      "Château de Trim"
     ]
   }
 ]

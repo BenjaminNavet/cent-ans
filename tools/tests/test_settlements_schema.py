@@ -21,7 +21,7 @@ SETTLEMENTS = DATA / "settlements"
 RULES_FILE = "rules.json"
 
 MIN_PER_FILE = 3
-MAX_PER_FILE = 6
+MAX_PER_FILE = 16
 # The map square is wider than the requested lon/lat extent (docs/geo.md),
 # so bounds are checked in map pixels, not degrees.
 GRID = default_grid()

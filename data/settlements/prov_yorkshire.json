@@ -138,5 +138,207 @@
     "sources": [
       "Château de Pontefract"
     ]
+  },
+  {
+    "id": "set_beverley",
+    "province": "prov_yorkshire",
+    "kind": "town",
+    "name": {
+      "display": "Beverley",
+      "local": "Beverlee",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -0.4262,
+      53.8447
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville collégiale et marché de la plaine de Holderness, célèbre pour son droit d'asile.",
+    "sources": [
+      "Beverley"
+    ]
+  },
+  {
+    "id": "set_ripon",
+    "province": "prov_yorkshire",
+    "kind": "town",
+    "name": {
+      "display": "Ripon",
+      "local": "Ripoun",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.5238,
+      54.1367
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville cathédrale et marché du Yorkshire du Nord.",
+    "sources": [
+      "Ripon"
+    ]
+  },
+  {
+    "id": "set_fountains",
+    "province": "prov_yorkshire",
+    "kind": "abbey",
+    "name": {
+      "display": "Fountains",
+      "local": "Funteyns",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.5814,
+      54.1086
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne de Fountains, l'une des plus riches d'Angleterre.",
+    "sources": [
+      "Abbaye de Fountains"
+    ]
+  },
+  {
+    "id": "set_richmond",
+    "province": "prov_yorkshire",
+    "kind": "castle",
+    "name": {
+      "display": "Richmond",
+      "local": "Richemund",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.7376,
+      54.4034
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château normand dominant la vallée de la Swale, dans le Yorkshire du Nord.",
+    "sources": [
+      "Château de Richmond"
+    ]
+  },
+  {
+    "id": "set_doncaster",
+    "province": "prov_yorkshire",
+    "kind": "village",
+    "name": {
+      "display": "Doncaster",
+      "local": "Donecastre",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.1288,
+      53.5228
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg sur la route du Grand Nord, au bord de la Don.",
+    "sources": [
+      "Doncaster"
+    ]
+  },
+  {
+    "id": "set_wakefield",
+    "province": "prov_yorkshire",
+    "kind": "village",
+    "name": {
+      "display": "Wakefield",
+      "local": "Wakefeld",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4977,
+      53.6833
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Bourg-marché du West Riding, sur la Calder.",
+    "sources": [
+      "Wakefield"
+    ]
+  },
+  {
+    "id": "set_selby",
+    "province": "prov_yorkshire",
+    "kind": "abbey",
+    "name": {
+      "display": "Selby",
+      "local": "Selebi",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.0658,
+      53.7833
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine de Selby, fondée en 1069 sur l'Ouse.",
+    "sources": [
+      "Abbaye de Selby"
+    ]
+  },
+  {
+    "id": "set_knaresborough",
+    "province": "prov_yorkshire",
+    "kind": "castle",
+    "name": {
+      "display": "Knaresborough",
+      "local": "Cnaresburgh",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -1.4703,
+      54.0075
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château royal surplombant la Nidd, dans le Yorkshire du Nord.",
+    "sources": [
+      "Château de Knaresborough"
+    ]
   }
 ]
