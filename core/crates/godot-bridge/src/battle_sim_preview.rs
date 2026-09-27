@@ -72,12 +72,12 @@ impl BattleSim {
             .collect()
     }
 
-    /// The ids of a GDScript array of ints (others skipped).
-    fn ids_of(array: &VarArray) -> Vec<u32> {
+    /// The ids of a `PackedInt32Array` (negative ones skipped).
+    fn ids_of(array: &PackedInt32Array) -> Vec<u32> {
         array
-            .iter_shared()
-            .filter_map(|v| v.try_to::<i64>().ok())
-            .filter_map(|id| u32::try_from(id).ok())
+            .as_slice()
+            .iter()
+            .filter_map(|&id| u32::try_from(id).ok())
             .collect()
     }
 }
@@ -110,7 +110,7 @@ impl BattleSim {
     /// a single entry from the group's centre with `unit` = -1. `reason` is
     /// the French cause of an empty path.
     #[func]
-    fn preview_paths(&self, unit_ids: VarArray, x: f64, z: f64, facing: f64) -> VarArray {
+    fn preview_paths(&self, unit_ids: PackedInt32Array, x: f64, z: f64, facing: f64) -> VarArray {
         let Some(sim) = &self.sim else {
             return VarArray::new();
         };
@@ -145,7 +145,7 @@ impl BattleSim {
     /// fatigue, bonus_vs}`. Cheap (no path search): the interface calls it
     /// as the mouse moves.
     #[func]
-    fn hover_context(&self, x: f64, z: f64, selected_ids: VarArray) -> VarDictionary {
+    fn hover_context(&self, x: f64, z: f64, selected_ids: PackedInt32Array) -> VarDictionary {
         let Some(sim) = &self.sim else {
             return vdict! { "context" => "none", "target" => -1, "piece" => -1 };
         };

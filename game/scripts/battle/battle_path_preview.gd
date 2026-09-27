@@ -85,7 +85,7 @@ func compute(ids: Array, units: Array, point: Vector3, facing: float, now_s: flo
 	_last_facing = facing
 	_last_time = now_s
 	live_active = true
-	legs = battle.call("preview_paths", ids, point.x, point.z, facing) if battle != null else []
+	legs = battle.call("preview_paths", PackedInt32Array(ids), point.x, point.z, facing) if battle != null else []
 	_draw_live(units, point, facing)
 	return legs
 

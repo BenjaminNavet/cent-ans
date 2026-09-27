@@ -17,8 +17,8 @@ Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm2`.
 - [x] `hover.rs` : `hover_context` (table de la spec), `Compare` (9 lignes, avantage net) ; facteurs `horse_against_foot`, `pikes_against_horse`, `Unit::charge_points` extraits de `melee_damage` (mêmes opérations).
 - [x] Pont `battle_sim_preview.rs` : `preview_path`, `preview_paths`, `hover_context` ; constantes
       `data_store_rules.rs`.
-- [ ] Godot : `battle_path_preview.gd`, `battle_cursor.gd`, survol carte HUD → contour,
-      test `cb_m2_path_hover_test.gd`, capture `cbm2_path_shot.gd` + sonde.
+- [x] Godot : `battle_path_preview.gd`, `battle_cursor.gd`, survol carte HUD → contour (signal `card_hovered`),
+      test `cb_m2_path_hover_test.gd` (vert). Reste : capture `cbm2_path_shot.gd` + sonde.
 
 ## Invariant aperçu = ordre (mesuré)
 
@@ -33,4 +33,4 @@ Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm2`.
 
 ## Prochaine étape
 
-Pont (`battle_sim.rs`, `data_store_rules.rs`), puis Godot.
+Capture `cbm2_path_shot.gd` + sonde, puis vérifications complètes (cargo, pytest, godot).

@@ -1701,6 +1701,7 @@ func _on_input_command(command: Dictionary) -> void:
 
 func _on_input_selection_changed(ids: Array) -> void:
 	selected = ids
+	_hover_dirty = true  # CB-M2 : le curseur dépend de la sélection
 
 
 func _on_input_camera_focus(point: Vector3) -> void:
@@ -1761,11 +1762,10 @@ func _update_hover_cursor() -> void:
 	else:
 		point = ground_point(_hover_mouse)
 	var key := "%d,%d,%d,%s" % [floori(point.x / 2.0), floori(point.z / 2.0), target, str(selected)]
-	if key == _hover_key and not (path_preview != null and path_preview.live_active):
-		return
-	_hover_key = key
-	hover_calls += 1
-	last_hover = battle.call("hover_context", point.x, point.z, selected)
+	if key != _hover_key:
+		_hover_key = key
+		hover_calls += 1
+		last_hover = battle.call("hover_context", point.x, point.z, PackedInt32Array(selected))
 	var context := str(last_hover.get("context", "none"))
 	if path_preview != null and path_preview.live_active and not path_preview.reachable():
 		context = "forbidden"  # destination sans chemin : l'ordre ne partira pas
