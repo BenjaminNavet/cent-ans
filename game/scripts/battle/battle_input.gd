@@ -69,7 +69,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_F:
 				_on_command("formation")
 			KEY_G:
-				_on_command("fire_at_will")
+				# CB1 : Ctrl/Cmd+G = verrouiller / déverrouiller le groupe ; G seul = tir à volonté.
+				if key.ctrl_pressed or key.meta_pressed:
+					toggle_lock()
+				else:
+					_on_command("fire_at_will")
 			KEY_H:
 				_on_command("halt")
 			KEY_C:
@@ -180,30 +184,83 @@ func _finish_right(position: Vector2, queued: bool = false) -> void:
 	var now := Time.get_ticks_msec()
 	var double_click := now - _last_right_click_ms < DOUBLE_CLICK_MS
 	_last_right_click_ms = now
+	var lock := _selected_lock()
 	if press.distance_to(position) > 20.0:
-		# Glisser-droit : ligne de p0 à p1, front tourné à l'opposé de la caméra.
-		var p0 := _right_press_ground
-		var p1 := scene.ground_point(position)
-		var dir := Vector2(p1.x - p0.x, p1.z - p0.z)
-		if dir.length() < 2.0:
+		# Glisser-droit : ligne de p0 à p1, front tourné à l'opposé de la caméra ; CB1 : la longueur
+		# du glisser donne la largeur du front (répartie au prorata des effectifs par le cœur), sauf
+		# pour un groupe verrouillé, tourné et déplacé d'un bloc.
+		var line := FormationDrag.drag_line(_right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position)
+		if not bool(line["ok"]):
 			return
-		var normal := Vector2(-dir.y, dir.x).normalized()
-		var mid := (p0 + p1) * 0.5
-		var cam := scene.camera_rig.camera.global_position
-		if normal.dot(Vector2(mid.x - cam.x, mid.z - cam.z)) < 0.0:
-			normal = -normal
-		if not _path_allowed(mid, atan2(normal.x, normal.y), queued):
+		var mid: Vector3 = line["mid"]
+		var facing := float(line["facing"])
+		if lock != 0:
+			_issue_locked(lock, mid, facing, double_click, queued)
 			return
-		command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": mid.x, "z": mid.z, "run": double_click, "facing": atan2(normal.x, normal.y)}, queued))
+		var width := float(line["width"])
+		if not _path_allowed(mid, facing, queued, width):
+			return
+		command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": mid.x, "z": mid.z, "run": double_click, "facing": facing, "width": width}, queued))
 		return
 	var enemy := scene.pick_unit(position, scene.enemy_side)
 	if enemy >= 0:
 		command_requested.emit(_queued({"type": "attack", "units": scene.selected.duplicate(), "target": enemy, "run": true}, queued))
 		return
 	var point := scene.ground_point(position)
+	if lock != 0:
+		_issue_locked(lock, point, NAN, double_click, queued)
+		return
 	if not _path_allowed(point, NAN, queued):
 		return
 	command_requested.emit(_queued({"type": "move", "units": scene.selected.duplicate(), "x": point.x, "z": point.z, "run": double_click}, queued))
+
+
+## CB1 : étiquette du groupe verrouillé qui forme toute la sélection (0 : aucun).
+func _selected_lock() -> int:
+	if scene.hud == null or scene.hud.groups == null:
+		return 0
+	return scene.hud.groups.locked_group_for(scene.selected)
+
+
+## CB1 : ordres `move` individuels d'un groupe verrouillé déplacé en `point` et tourné vers
+## `facing` (NaN : orientation du verrouillage), à l'allure du plus lent et sous l'étiquette du
+## groupe ; rien d'envoyé si aucun régiment n'a de chemin.
+func _issue_locked(tag: int, point: Vector3, facing: float, run: bool, queued: bool) -> void:
+	var places: Array = scene.hud.groups.lock_places(tag, Vector2(point.x, point.z), facing)
+	if places.is_empty():
+		return
+	var preview: BattlePathPreview = scene.path_preview
+	if preview != null and scene.battle != null:
+		preview.compute_places(places, scene.units, Time.get_ticks_msec() / 1000.0, queued)
+		if not preview.reachable():
+			scene.hud.show_toast("Ordre impossible : %s." % preview.refusal().to_lower())
+			return
+	for command in locked_orders(places, tag, run, queued):
+		command_requested.emit(command)
+
+
+## CB1 : les ordres d'un groupe verrouillé pour ses `places` ({id, x, z, facing}) : un `move`
+## par régiment, `match_speed` et `group_tag` communs (fonction pure, testée).
+static func locked_orders(places: Array, tag: int, run: bool, queued: bool) -> Array:
+	var out: Array = []
+	for place in places:
+		var command := {"type": "move", "units": [int(place["id"])], "x": float(place["x"]), "z": float(place["z"]), "run": run, "facing": float(place["facing"]), "match_speed": true, "group_tag": tag}
+		if queued:
+			command["queue"] = true
+		out.append(command)
+	return out
+
+
+## CB1 : Ctrl/Cmd+G — verrouille la sélection en groupe (ou la déverrouille) ; message court.
+func toggle_lock() -> void:
+	if scene.hud == null or scene.selected.is_empty():
+		return
+	var tag: int = scene.hud.groups.toggle_lock(scene.selected, scene.units)
+	if tag != 0:
+		scene.hud.show_toast("Groupe verrouillé : il se déplace d'un bloc, à l'allure du plus lent (Ctrl+G : déverrouiller).")
+	else:
+		scene.hud.show_toast("Groupe déverrouillé.")
+	scene.hud.update_cards(scene.units, scene.player_side, scene.selected)
 
 
 ## CB-M3 : `queue: true` seulement pour un ordre en file (les ordres simples restent identiques).
@@ -225,36 +282,46 @@ func _preview_right(position: Vector2, final: bool, queued: bool = false) -> voi
 	var preview: BattlePathPreview = scene.path_preview
 	if preview == null or scene.selected.is_empty() or scene.replay_mode:
 		return
-	if (scene.deployment != null and scene.deployment.active) or scene.pick_unit(position, scene.enemy_side) >= 0:
+	if scene.deployment != null and scene.deployment.active:
+		# CB1 : fantômes du glisser-droit en déploiement (places et largeurs de `place`).
+		if _right_press.x >= 0.0 and _right_press.distance_to(position) > 20.0:
+			preview.show_ghosts(scene.deployment.plan(scene.selected, _right_press_ground, scene.ground_point(position), scene.camera_rig.camera.global_position), scene.units)
+		else:
+			preview.clear_live()
+		return
+	if scene.pick_unit(position, scene.enemy_side) >= 0:
 		preview.clear_live()
 		return
 	var point := scene.ground_point(position)
 	var facing := NAN
+	var width := 0.0
 	if _right_press.x >= 0.0 and _right_press.distance_to(position) > 20.0:
-		var p0 := _right_press_ground
-		var dir := Vector2(point.x - p0.x, point.z - p0.z)
-		if dir.length() >= 2.0:
-			var normal := Vector2(-dir.y, dir.x).normalized()
-			var mid := (p0 + point) * 0.5
-			var cam := scene.camera_rig.camera.global_position
-			if normal.dot(Vector2(mid.x - cam.x, mid.z - cam.z)) < 0.0:
-				normal = -normal
-			point = mid
-			facing = atan2(normal.x, normal.y)
+		var line := FormationDrag.drag_line(_right_press_ground, point, scene.camera_rig.camera.global_position)
+		if bool(line["ok"]):
+			point = line["mid"]
+			facing = float(line["facing"])
+			width = float(line["width"])
 	var now := Time.get_ticks_msec() / 1000.0
+	# CB1 : groupe verrouillé : fantômes à ses places rigides (pas de largeur).
+	var lock := _selected_lock()
+	if lock != 0:
+		var places: Array = scene.hud.groups.lock_places(lock, Vector2(point.x, point.z), facing)
+		if final or preview.should_recompute(point, facing, now, queued):
+			preview.compute_places(places, scene.units, now, queued, point, facing)
+		return
 	if final:
-		preview.compute(scene.selected, scene.units, point, facing, now, queued)
+		preview.compute(scene.selected, scene.units, point, facing, now, queued, width)
 	else:
-		preview.request(scene.selected, scene.units, point, facing, now, queued)
+		preview.request(scene.selected, scene.units, point, facing, now, queued, width)
 
 
 ## CB-M2 : l'ordre de déplacement vers `point` n'est envoyé que si au moins un régiment y a un
 ## chemin (verdict du cœur, `preview_paths`) ; sinon message et rien d'envoyé.
-func _path_allowed(point: Vector3, facing: float, queued: bool = false) -> bool:
+func _path_allowed(point: Vector3, facing: float, queued: bool = false, width: float = 0.0) -> bool:
 	var preview: BattlePathPreview = scene.path_preview
 	if preview == null or scene.battle == null:
 		return true
-	preview.compute(scene.selected, scene.units, point, facing, Time.get_ticks_msec() / 1000.0, queued)
+	preview.compute(scene.selected, scene.units, point, facing, Time.get_ticks_msec() / 1000.0, queued, width)
 	if preview.reachable():
 		return true
 	scene.hud.show_toast("Ordre impossible : %s." % preview.refusal().to_lower())

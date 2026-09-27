@@ -18,6 +18,9 @@ extends Node3D
 ##   dernier point (`preview_path_from`), flèche rouge pour une attaque en file, points de passage
 ##   numérotés au sol, fantôme au dernier point. Avec Maj, l'aperçu en direct part du dernier
 ##   point de la file (`preview_paths_queued`).
+## - CB1 : glisser-droit = largeur du front : le cœur renvoie pour chaque régiment la largeur et
+##   la profondeur prises à l'arrivée (fantôme à cette taille) ; groupe verrouillé : trajets vers
+##   ses places rigides (`compute_places`) ; déploiement : fantômes seuls (`show_ghosts`).
 
 const LIFT := 0.6  # m au-dessus du sol
 const DASH := 3.0  # m
@@ -43,6 +46,7 @@ var live_active := false
 
 var _last_point := Vector3(INF, INF, INF)
 var _last_facing := NAN
+var _last_width := 0.0
 var _last_time := -INF
 var _live_mesh: MeshInstance3D
 var _orders_mesh: MeshInstance3D
@@ -69,39 +73,103 @@ func setup(p_battle: Object, height_at: Callable, color: Color) -> void:
 
 ## Étranglement : vrai si le point visé a assez bougé (ou si l'orientation a changé) et que
 ## l'intervalle minimal est écoulé depuis le dernier calcul.
-func should_recompute(point: Vector3, facing: float, now_s: float, queued: bool = false) -> bool:
+func should_recompute(point: Vector3, facing: float, now_s: float, queued: bool = false, width: float = 0.0) -> bool:
 	if queued != live_queued and live_active:
 		return true  # Maj pressée ou relâchée : l'aperçu change de départ
 	if now_s - _last_time < min_interval:
 		return false
 	var moved := Vector2(point.x - _last_point.x, point.z - _last_point.z).length() > recompute_distance
 	var turned := is_finite(facing) != is_finite(_last_facing) or (is_finite(facing) and absf(angle_difference(facing, _last_facing)) > 0.05)
-	return moved or turned or not live_active
+	# CB1 : la largeur du glisser change la forme d'arrivée.
+	var widened := absf(width - _last_width) > 1.0
+	return moved or turned or widened or not live_active
 
 
 ## Aperçu en direct vers `point` (orientation `facing`, NaN sinon) pour `ids` ; recalculé seulement
 ## si l'étranglement le permet. Renvoie vrai si le cœur a été interrogé.
-func request(ids: Array, units: Array, point: Vector3, facing: float, now_s: float, queued: bool = false) -> bool:
-	if not should_recompute(point, facing, now_s, queued):
+func request(ids: Array, units: Array, point: Vector3, facing: float, now_s: float, queued: bool = false, width: float = 0.0) -> bool:
+	if not should_recompute(point, facing, now_s, queued, width):
 		return false
-	compute(ids, units, point, facing, now_s, queued)
+	compute(ids, units, point, facing, now_s, queued, width)
 	return true
 
 
 ## Interroge le cœur sans étranglement (lâcher du clic : l'ordre suit ce verdict). `queued` (Maj) :
 ## chaque trajet part du dernier point de la file du régiment (CB-M3).
-func compute(ids: Array, units: Array, point: Vector3, facing: float, now_s: float, queued: bool = false) -> Array:
+## CB1 : `width` (> 0) = largeur du glisser-droit (répartie par le cœur).
+func compute(ids: Array, units: Array, point: Vector3, facing: float, now_s: float, queued: bool = false, width: float = 0.0) -> Array:
 	recompute_count += 1
 	_last_point = point
 	_last_facing = facing
+	_last_width = width
 	_last_time = now_s
 	live_active = true
 	live_queued = queued
 	var query := "preview_paths_queued" if queued else "preview_paths"
-	legs = battle.call(query, PackedInt32Array(ids), point.x, point.z, facing) if battle != null else []
+	legs = battle.call(query, PackedInt32Array(ids), point.x, point.z, facing, width) if battle != null else []
 	_hide_orders()
 	_draw_live(units, point, facing)
 	return legs
+
+
+## CB1 : aperçu d'un groupe verrouillé : un trajet par régiment vers sa place rigide `places`
+## ({id, x, z, facing}), depuis sa position ou, `queued`, depuis la fin de sa file. `point` et
+## `facing` servent à l'étranglement (centre et orientation du groupe).
+func compute_places(places: Array, units: Array, now_s: float, queued: bool = false, point: Vector3 = Vector3.ZERO, facing: float = NAN) -> Array:
+	recompute_count += 1
+	_last_point = point
+	_last_facing = facing
+	_last_width = 0.0
+	_last_time = now_s
+	live_active = true
+	live_queued = queued
+	legs = []
+	for place in places:
+		var id := int(place["id"])
+		var path := PackedVector3Array()
+		if battle != null:
+			var from := queue_end(_find(units, id)) if queued else Vector2(INF, INF)
+			if is_finite(from.x):
+				path = battle.call("preview_path_from", id, from.x, from.y, float(place["x"]), float(place["z"]))
+			else:
+				path = battle.call("preview_path", id, float(place["x"]), float(place["z"]))
+		var ok := path.size() >= 2
+		legs.append({"unit": id, "ok": ok, "path": path, "reason": "" if ok else "Aucun chemin jusque-là", "facing": float(place["facing"])})
+	_hide_orders()
+	_draw_live(units, point, facing)
+	return legs
+
+
+## CB-M3 / CB1 : point où la file d'ordres d'une unité la laisse (dernier point de la file, sinon
+## sa destination) ; (INF, INF) sans ordre en cours.
+static func queue_end(unit: Dictionary) -> Vector2:
+	var queue: Array = unit.get("queue", [])
+	for k in range(queue.size() - 1, -1, -1):
+		if not (queue[k] as Dictionary).has("target"):
+			return Vector2(float(queue[k]["x"]), float(queue[k]["z"]))
+	if unit.has("destination"):
+		return unit["destination"]
+	return Vector2(INF, INF)
+
+
+## CB1 : fantômes seuls (déploiement : les régiments sont posés, pas menés) aux places `places`
+## ({id, x, z, facing, width, depth}).
+func show_ghosts(places: Array, units: Array) -> void:
+	live_active = true
+	legs = []
+	(_live_mesh.mesh as ImmediateMesh).clear_surfaces()
+	_live_mesh.visible = false
+	var used := 0
+	for place in places:
+		var unit := _find(units, int(place["id"]))
+		if unit.is_empty():
+			continue
+		var at := Vector3(float(place["x"]), float(unit["y"]), float(place["z"]))
+		at.y = _ground(at.x, at.z, at.y) - LIFT
+		_ghost(_live_ghosts, used, unit, at, float(place["facing"]), _color, Vector2(float(place.get("width", 0.0)), float(place.get("depth", 0.0))))
+		used += 1
+	for k in range(used, _live_ghosts.size()):
+		_live_ghosts[k].visible = false
 
 
 ## Vrai si au moins un régiment a un chemin (sinon l'ordre n'est pas envoyé).
@@ -134,6 +202,7 @@ func clear_live() -> void:
 	live_active = false
 	live_queued = false
 	legs = []
+	_last_width = 0.0
 	_last_point = Vector3(INF, INF, INF)
 	_last_time = -INF
 	(_live_mesh.mesh as ImmediateMesh).clear_surfaces()
@@ -298,6 +367,15 @@ static func queue_full(units: Array, selected: Array) -> bool:
 	return false
 
 
+## CB1 : tailles (largeur, profondeur) des fantômes visibles de l'aperçu en direct (tests, sonde).
+func live_ghost_sizes() -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for ghost in _live_ghosts:
+		if ghost.visible:
+			out.append(Vector2(ghost.size.x, ghost.size.z))
+	return out
+
+
 ## Nombre de fantômes visibles (tests).
 func ghost_count() -> int:
 	var n := 0
@@ -331,7 +409,10 @@ func _draw_live(units: Array, point: Vector3, facing: float) -> void:
 			continue
 		_dashes(mesh, path, _color, false)
 		if not unit.is_empty():
-			_ghost(_live_ghosts, used, unit, path[path.size() - 1], _end_facing(path, facing), _color)
+			# CB1 : taille d'arrivée (largeur du glisser) et orientation propre d'un groupe verrouillé.
+			var size := Vector2(float(leg.get("width", 0.0)), float(leg.get("depth", 0.0)))
+			var end_facing := float(leg["facing"]) if leg.has("facing") else facing
+			_ghost(_live_ghosts, used, unit, path[path.size() - 1], _end_facing(path, end_facing), _color, size)
 			used += 1
 	# Au moins un triangle dégénéré : une surface vide est refusée par Godot.
 	for _i in 3:
@@ -406,7 +487,8 @@ func _ground(x: float, z: float, path_y: float) -> float:
 	return maxf(ground, path_y) + LIFT
 
 
-func _ghost(pool: Array[Decal], index: int, unit: Dictionary, at: Vector3, facing: float, color: Color) -> void:
+## `size` (largeur, profondeur ; CB1) : taille d'arrivée, sinon celle de l'unité.
+func _ghost(pool: Array[Decal], index: int, unit: Dictionary, at: Vector3, facing: float, color: Color, size: Vector2 = Vector2.ZERO) -> void:
 	while pool.size() <= index:
 		var decal := Decal.new()
 		decal.name = "Ghost%d" % pool.size()
@@ -418,7 +500,9 @@ func _ghost(pool: Array[Decal], index: int, unit: Dictionary, at: Vector3, facin
 		add_child(decal)
 		pool.append(decal)
 	var ghost := pool[index]
-	var key := BattleFormationOutline.texture_key(float(unit["width"]) + BattleFormationOutline.MARGIN, float(unit["depth"]) + BattleFormationOutline.MARGIN, false)
+	var w := size.x if size.x > 0.0 else float(unit["width"])
+	var d := size.y if size.y > 0.0 else float(unit["depth"])
+	var key := BattleFormationOutline.texture_key(w + BattleFormationOutline.MARGIN, d + BattleFormationOutline.MARGIN, false)
 	var pair := BattleFormationOutline._texture_pair(key)
 	ghost.texture_albedo = pair[0]
 	ghost.texture_emission = pair[1]
