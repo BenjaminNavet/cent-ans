@@ -26,7 +26,8 @@
             "min_power_ratio": { "type": "number", "minimum": 0, "description": "… et au moins égale à cette part (une poignée d'hommes ne tend pas d'embuscade)." },
             "route_zoc_share": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "La case d'embuscade est à moins de cette part du rayon de zone de contrôle de la route prévisible de l'ennemi." },
             "route_turns": { "type": "number", "exclusiveMinimum": 0, "description": "Portion de route surveillée : ce que l'ennemi parcourt en ce nombre de tours pleins." },
-            "watch_radius_km": { "type": "number", "exclusiveMinimum": 0, "description": "Armées ennemies considérées : à moins de cette distance (km) de l'armée." }
+            "watch_radius_km": { "type": "number", "exclusiveMinimum": 0, "description": "Armées ennemies considérées : à moins de cette distance (km) de l'armée." },
+            "occupied_lands": { "type": "boolean", "description": "Les provinces occupées (tenues sans être possédées) comptent comme les terres de la faction ; sinon seulement celles qu'elle possède (l'embuscade du défenseur). Défaut : faux." }
           },
           "required": ["weight_permille", "weight_per_aggression", "max_power_ratio", "min_power_ratio", "route_zoc_share", "route_turns", "watch_radius_km"],
           "additionalProperties": false

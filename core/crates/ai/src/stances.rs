@@ -124,7 +124,7 @@ fn points_km(data: &GameData, points: u32) -> f64 {
 
 /// The foreseeable route of `enemy` (its point, then the corners of its
 /// multi-turn march) over `route_turns` full turns, when it marches on the
-/// lands of `faction`.
+/// lands of `faction` (owned; also occupied ones with `occupied_lands`).
 fn threatening_route(
     state: &CampaignState,
     data: &GameData,
@@ -153,7 +153,11 @@ fn threatening_route(
                 w[0][0] + t * (w[1][0] - w[0][0]),
                 w[0][1] + t * (w[1][1] - w[0][1]),
             ];
-            point_province(state, data, p).is_some_and(|p| is_own_land(state, faction, &p))
+            point_province(state, data, p).is_some_and(|p| {
+                state.province_owner(&p) == Some(faction)
+                    || (data.ai_grid.postures.ambush.occupied_lands
+                        && state.province_controller(&p) == Some(faction))
+            })
         })
     });
     crosses.then_some(route)

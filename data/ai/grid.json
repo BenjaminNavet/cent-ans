@@ -14,7 +14,8 @@
       "min_power_ratio": 0.25,
       "route_zoc_share": 0.9,
       "route_turns": 2.0,
-      "watch_radius_km": 150
+      "watch_radius_km": 150,
+      "occupied_lands": false
     },
     "forced_march": {
       "enabled": true,
