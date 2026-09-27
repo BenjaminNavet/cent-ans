@@ -77,6 +77,8 @@ func toggle() -> void:
 	if panel.visible:
 		panel.hide()
 		return
+	if map.holdings_ctl != null and map.holdings_ctl.is_open():  # HL2 : un seul panneau à la fois
+		map.holdings_ctl.toggle()
 	panel.show()
 	refresh()
 
