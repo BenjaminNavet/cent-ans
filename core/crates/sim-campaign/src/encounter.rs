@@ -763,7 +763,6 @@ fn describe_option(
     lines.join("\n")
 }
 
-#[allow(clippy::too_many_arguments)]
 fn apply_result_effects(
     state: &mut CampaignState,
     data: &GameData,
