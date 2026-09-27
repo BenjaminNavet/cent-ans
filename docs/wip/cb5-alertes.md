@@ -13,13 +13,22 @@ Cible cargo privée : `core/target-cb5`.
 - [x] Émission aux points du plan : déroute, général tué/capturé, flanc (front montant, via
       `flanked_alerted: Vec<bool>` car `Unit.flanked` est remis à 0 à chaque tick), renforts,
       munitions, mur/porte rompus (point unique : `record_siege_transitions`).
-- [ ] Pont `godot-bridge` : `get_alerts()`.
+- [x] Pont `godot-bridge` : `get_alerts()` + constantes `cb5_alert_*` (`RuleValues`).
 - [x] `core/crates/sim-battle/tests/cb5_alerts.rs` (8 tests, tous verts : un par type + digest
       + rejeu inchangés).
-- [ ] `game/scripts/battle/battle_alerts_column.gd` + branchement scène/HUD.
-- [ ] `battle_minimap.gd` : repère pulsé au clic.
-- [ ] Cris `BattleAudio.play_event`.
-- [ ] `game/tests/cb5_alerts_test.gd`, `game/tests/cb5_alerts_shot.gd` (probe seulement).
+- [x] `game/scripts/battle/battle_alerts_column.gd` (colonne, fusion, borne 5, glyphes dessinés
+      en code) + branchement `battle_hud.gd` (`_build_alerts`) / `battle_scene.gd`
+      (`get_alerts` dans la boucle HUD, `_on_alert_pinged`, audio branché après `battle_audio`).
+- [x] `battle_minimap.gd` : `ping(world)` + repère pulsé (anneau, `_process` seulement pendant
+      le pulsé).
+- [x] Cris `BattleAudio.play_event` : seulement rout/general_down (les autres types n'ont pas de
+      cri dans la spec) ; `_detect_events` de `battle_audio.gd` joue déjà ces deux mêmes sons sur
+      transition d'état, donc un doublon éventuel est amorti par le cooldown/max_instances de
+      l'événement (pas de garde explicite anti-doublon — limite connue, notée ici).
+- [x] `game/tests/cb5_alerts_test.gd` : OK, exit 0, aucune SCRIPT ERROR (fusion, zone différente,
+      hors fenêtre, borne 5 + priorité, expiration, clic → signal `pinged`, intégration
+      `battle.tscn` : colonne dans `hud.root`, `get_alerts()` répond, clic → caméra + minicarte).
+- [ ] `game/tests/cb5_alerts_shot.gd` (probe overlap, pas encore écrit).
 
 ## Décisions
 - Mur/porte rompus : un seul point d'émission, `record_siege_transitions` (sim/siege_assault.rs),

@@ -257,6 +257,7 @@ func _ready() -> void:
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
 	hud.leader_clicked.connect(_on_leader_clicked)  # UB1 : sceau du chef
+	hud.alerts_column.pinged.connect(_on_alert_pinged)  # CB5
 	_drag_rect = ColorRect.new()
 	_drag_rect.color = Color(0.95, 0.8, 0.3, 0.18)
 	_drag_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -675,6 +676,7 @@ func _build_scene() -> bool:
 	battle_audio = BattleAudio.new()
 	add_child(battle_audio)
 	battle_audio.setup(_weather_key, camera_rig.camera)
+	hud.alerts_column.battle_audio = battle_audio  # CB5 : cris (déroute, général tombé)
 	voices = BattleVoices.new()  # VO1
 	add_child(voices)
 	voices.setup(self)
@@ -1505,6 +1507,9 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 		var events: Array = battle.call("get_events")
 		if not events.is_empty():
 			hud.add_events(events)
+		var alerts: Array = battle.call("get_alerts")  # CB5
+		if not alerts.is_empty():
+			hud.alerts_column.push_alerts(alerts)
 
 
 ## Ligne d'état du siège pour le HUD : murailles, brèches, porte, tenue de la place.
@@ -1730,6 +1735,12 @@ func camera_frame() -> PackedVector2Array:
 
 func _on_minimap_clicked(world: Vector2) -> void:
 	camera_rig.look_at_point(Vector3(world.x, 0, world.y), camera_rig.distance, camera_rig.yaw)
+
+
+## CB5 : clic sur une alerte de la colonne = caméra sur le lieu + repère pulsé sur la minicarte.
+func _on_alert_pinged(x: float, z: float) -> void:
+	camera_rig.look_at_point(Vector3(x, 0, z), camera_rig.distance, camera_rig.yaw)
+	hud.minimap.ping(Vector2(x, z))
 
 
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.

@@ -33,6 +33,20 @@ impl GameDataStore {
         dict.set("cb5_alert_merge_window_s", alerts.merge_window_s);
         dict.set("cb5_alert_merge_radius_m", alerts.merge_radius_m);
         dict.set("cb5_alert_max_shown", f64::from(alerts.max_shown));
+        for kind in [
+            sim_battle::alerts::AlertKind::Rout,
+            sim_battle::alerts::AlertKind::GeneralDown,
+            sim_battle::alerts::AlertKind::Flanked,
+            sim_battle::alerts::AlertKind::Reinforcements,
+            sim_battle::alerts::AlertKind::AmmoOut,
+            sim_battle::alerts::AlertKind::WallBreached,
+            sim_battle::alerts::AlertKind::GateDestroyed,
+        ] {
+            dict.set(
+                format!("cb5_alert_importance_{}", kind.key()),
+                f64::from(alerts.importance(kind)),
+            );
+        }
         dict
     }
 }
