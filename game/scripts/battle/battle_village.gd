@@ -28,6 +28,7 @@ func build(terrain: BattleTerrain, data: Dictionary, weather: String) -> void:
 	if not village.is_empty():
 		_build_houses(village)
 	_build_fences(data.get("obstacles", []))
+	_build_palisades(data.get("obstacles", []))
 	_build_pools(data.get("pools", []), weather)
 	_build_reeds(data)
 	if data.has("coast"):
@@ -311,6 +312,43 @@ func _build_fences(obstacles: Array) -> void:
 	mi.mesh = st.commit()
 	mi.material_override = _mat("wattle")
 	mi.visibility_range_end = 900.0
+	add_child(mi)
+
+
+## CV3-2 : palissade basse d'un camp retranché (`kind == "palisade"`) : pieux de 1,7 m serrés
+## tous les 0,45 m, un peu penchés vers l'ennemi, liés par deux traverses ; un seul maillage.
+func _build_palisades(obstacles: Array) -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var count := 0
+	for o in obstacles:
+		if str(o["kind"]) != "palisade":
+			continue
+		var a: Vector2 = o["a"]
+		var b: Vector2 = o["b"]
+		var length := a.distance_to(b)
+		if length < 0.1:
+			continue
+		var dir := (b - a) / length
+		var yaw := -atan2(dir.y, dir.x)
+		var steps := maxi(int(length / 0.45), 1)
+		for k in steps + 1:
+			var p := a.lerp(b, float(k) / float(steps))
+			var y := _terrain.height_at(p.x, p.y)
+			_add_box(st, Vector3(p.x, y + 0.8, p.y), Vector3(0.16, 1.7, 0.16), yaw)
+		var m := a.lerp(b, 0.5)
+		var ym := _terrain.height_at(m.x, m.y)
+		for h in [0.5, 1.2]:
+			_add_box(st, Vector3(m.x, ym + h, m.y), Vector3(length, 0.1, 0.1), yaw)
+		count += 1
+	if count == 0:
+		return
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Palisades"
+	mi.mesh = st.commit()
+	mi.material_override = _mat("beam")
+	mi.visibility_range_end = 1200.0
 	add_child(mi)
 
 

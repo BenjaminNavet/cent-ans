@@ -13,6 +13,8 @@ var scene: Node = null  # BattleScene
 var active: bool = false
 var zone: Dictionary = {}
 var zone_view: DeploymentZone = null
+## CV3-2 : zones supplémentaires (second flanc d'une embuscade), dessinées comme la première.
+var extra_views: Array[DeploymentZone] = []
 var banner: PanelContainer = null
 
 
@@ -26,7 +28,16 @@ func open(p_scene: Node) -> bool:
 	zone_view = DeploymentZone.new()
 	zone_view.name = "DeploymentZone"
 	scene.add_child(zone_view)
-	zone_view.build(zone, func(x: float, z: float) -> float: return scene.terrain.height_at(x, z))
+	var height_at := func(x: float, z: float) -> float: return scene.terrain.height_at(x, z)
+	zone_view.build(zone, height_at)
+	# CV3-2 : l'embusqué peut avoir deux zones, une sur chaque flanc de la colonne ennemie.
+	var zones: Array = scene.battle.call("get_deployment_zones", scene.player_side) if scene.battle.has_method("get_deployment_zones") else []
+	for k in range(1, zones.size()):
+		var view := DeploymentZone.new()
+		view.name = "DeploymentZone%d" % (k + 1)
+		scene.add_child(view)
+		view.build(zones[k], height_at)
+		extra_views.append(view)
 	_build_banner()
 	return true
 
@@ -41,6 +52,9 @@ func finish() -> bool:
 		return false
 	active = false
 	zone_view.queue_free()
+	for view in extra_views:
+		view.queue_free()
+	extra_views.clear()
 	banner.queue_free()
 	scene.hud.add_events([{"time": 0.0, "text_fr": "La bataille commence."}])
 	return true

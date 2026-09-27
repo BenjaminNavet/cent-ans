@@ -630,6 +630,8 @@ func _build_scene() -> bool:
 	_weather_text = weather_label
 	hud.set_title(title, weather_label, [side_colors[player_side], side_colors[enemy_side]])
 	hud.set_site(str(terrain_data.get("site_label", "")))
+	if battle.has_method("get_opening"):
+		hud.set_opening(battle.call("get_opening"), player_side)  # CV3-2
 	hud.player_faction = str((setup[player_side] as Dictionary).get("faction", ""))
 	hud.set_leader((setup[player_side] as Dictionary).get("general", null), hud.player_faction)
 	camera_rig.height_at = func(x: float, z: float) -> float: return terrain.world_height(x, z)
