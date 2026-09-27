@@ -363,6 +363,20 @@ def human_clip_specs():
         ("wounded_kneel", "Idle", False, poses.wounded_kneel, False),
         ("flee", "Run", True, poses.flee, False),
         ("flee_m", "Run", True, poses.flee, True),
+        # Lot AN1b: victory, idle variants, parry, overhead cut and impact variants.
+        ("victory", "Idle", True, poses.victory, False),
+        ("victory_b", "Idle", True, poses.victory_b, False),
+        ("victory_pike", "Idle", True, poses.victory_pike, False),
+        ("idle_look", "Idle", True, poses.idle_look, False),
+        ("idle_lean", "Idle", True, poses.idle_lean, False),
+        ("idle_helm", "Idle", True, poses.idle_helm, False),
+        ("pike_look", "Idle", True, poses.pike_look, False),
+        ("bow_look", "Idle", True, poses.bow_look, False),
+        ("xbow_look", "Idle", True, poses.xbow_look, False),
+        ("parry", "Idle_Sword", False, poses.parry, False),
+        ("overhead", "Idle_Sword", False, poses.overhead, False),
+        ("hit_b", "HitRecieve_2", False, None, False),
+        ("hit_c", "Idle_Sword", False, poses.hit_stagger, False),
     ]
 
 
