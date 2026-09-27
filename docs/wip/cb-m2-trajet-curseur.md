@@ -15,7 +15,7 @@ Cible cargo privée : `CARGO_TARGET_DIR=<worktree>/core/target-cbm2`.
       au-delà de 6), `PreviewError`.
 - [x] Tests `tests/cb_preview.rs` : ligne droite, pont, gué, siège, eau profonde, hachage d'état.
 - [x] `hover.rs` : `hover_context` (table de la spec), `Compare` (9 lignes, avantage net) ; facteurs `horse_against_foot`, `pikes_against_horse`, `Unit::charge_points` extraits de `melee_damage` (mêmes opérations).
-- [ ] Pont `battle_sim.rs` : `preview_path`, `preview_paths`, `hover_context` ; constantes
+- [x] Pont `battle_sim_preview.rs` : `preview_path`, `preview_paths`, `hover_context` ; constantes
       `data_store_rules.rs`.
 - [ ] Godot : `battle_path_preview.gd`, `battle_cursor.gd`, survol carte HUD → contour,
       test `cb_m2_path_hover_test.gd`, capture `cbm2_path_shot.gd` + sonde.
