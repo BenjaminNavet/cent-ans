@@ -145,6 +145,9 @@ mod tests {
                 run: false,
                 facing: None,
                 queue: false,
+                width: None,
+                match_speed: false,
+                group_tag: None,
             }],
             250 => vec![Command::Attack {
                 units: ours.clone(),

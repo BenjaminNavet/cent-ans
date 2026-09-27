@@ -350,6 +350,9 @@ fn pavises_cut_missile_casualties_until_the_next_move() {
             run: false,
             facing: None,
             queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         },
         None,
     )

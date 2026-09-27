@@ -46,6 +46,9 @@ fn disengaged_regiment_marches_again() {
         run: true,
         facing: None,
         queue: false,
+        width: None,
+        match_speed: false,
+        group_tag: None,
     })
     .unwrap();
     // The enemy falls back out of reach: the regiment is free.

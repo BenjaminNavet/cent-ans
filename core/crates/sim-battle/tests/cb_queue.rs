@@ -23,6 +23,9 @@ fn go(units: Vec<u32>, to: P, queue: bool) -> Command {
         run: false,
         facing: None,
         queue,
+        width: None,
+        match_speed: false,
+        group_tag: None,
     }
 }
 
