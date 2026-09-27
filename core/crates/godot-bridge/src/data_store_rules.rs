@@ -82,6 +82,9 @@ impl GameDataStore {
             "unit_modes_under_fire_seconds",
             modes.status.under_fire_seconds,
         );
+        // CB4: regiments' abilities (`data/battle_abilities/`), quoted by the
+        // tooltips of the ability buttons.
+        crate::battle_sim_abilities::rule_constants(data, &mut dict);
         dict
     }
 }
