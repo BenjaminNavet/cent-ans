@@ -7,7 +7,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 | Lot | Contenu | Vague | État | Note wip |
 |---|---|---|---|---|
 | CB0 | Extraction des entrées (`battle_input.gd`) + sélection rapide | 1 | **fusionné 09-27** (+ correctif caméra : Ctrl/Cmd+lettre ne bouge plus la vue) | `cb0-entrees.md` |
-| CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | à lancer | |
+| CB-M1 | Contours de formation (décales), anneau jaune supprimé | 2 | en cours (agent, branche `feat/cb-m1-outline`) | |
 | CB-M2 | `preview_path`, `hover_context`, trajets, curseurs | 2 | attente CB-M1 (CV3-2 fusionné) | |
 | CB-M3 | Ordres en file (Maj + clic droit) | 2 | attente | |
 | CB-M4 | Portée au sol, comparaison au survol | 2 | attente | |
