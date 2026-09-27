@@ -31,3 +31,9 @@ filtres exclusifs, tri, provinces repliables, lignes de colonie, infobulles).
 `TOP_COLLAPSE_ORDER` (glyphe ⛫), et « Unités » y a été ajouté aussi (déjà
 limite avant, un bouton de plus suffisait à dépasser la largeur à 1280×720).
 Prochaine étape : activer `holdings_test.gd`, puis la capture.
+
+`holdings_test.gd` activé et vert (ouverture par B, comptage des provinces,
+3 filtres vs `count_idle`/`count_upgrade`/`count_endangered`, clic ouvre le
+panneau de colonie, exclusion mutuelle avec « Mes unités »).
+`unit_roster_test.gd` et `smoke.gd` toujours verts.
+Prochaine étape : capture `docs/img/holdings.png`, section manuel, commit final.
