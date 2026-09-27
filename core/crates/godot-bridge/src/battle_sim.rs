@@ -641,6 +641,34 @@ impl BattleSim {
             .collect()
     }
 
+    /// CB4: uses (or lifts, when all of them use it) ability `ability` on
+    /// those of `units` that have it: `{ok, error}` like `issue_command`
+    /// (recorded for the replay the same way).
+    #[func]
+    fn use_ability(&mut self, units: PackedInt32Array, ability: GString) -> VarDictionary {
+        let ids: VarArray = units
+            .as_slice()
+            .iter()
+            .map(|&id| i64::from(id).to_variant())
+            .collect();
+        let mut command = VarDictionary::new();
+        command.set("type", "use_ability");
+        command.set("units", &ids);
+        command.set("ability", &ability);
+        self.issue_command(command)
+    }
+
+    /// CB4: `{id: {id, kind, rank, name, description, icon}}` of the
+    /// battle's ability catalogue (texts of the tooltips; the state of each
+    /// regiment's abilities is in `get_units`).
+    #[func]
+    fn get_ability_catalog(&self) -> VarDictionary {
+        self.sim
+            .as_ref()
+            .map(crate::battle_sim_abilities::catalog_dict)
+            .unwrap_or_default()
+    }
+
     /// Did `side` give the "no quarter" order?
     #[func]
     fn get_no_quarter(&self, side: GString) -> bool {
@@ -916,6 +944,8 @@ impl BattleSim {
                 dict.set("queue", &crate::battle_sim_queue::queue_array(sim, unit));
                 // CB2: modes on, modes available, states for the badges.
                 crate::battle_sim_modes::add_mode_fields(sim, unit, &mut dict);
+                // CB4: the regiment's abilities (buttons of its card).
+                crate::battle_sim_abilities::add_ability_fields(sim, unit, &mut dict);
                 // EP11: push of the lines in melee (m/s, > 0 driving the enemy
                 // back, < 0 giving ground), compression (0-1), ground given (m).
                 dict.set("push_speed", unit.push.speed);

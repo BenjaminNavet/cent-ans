@@ -13,6 +13,7 @@ use godot::prelude::*;
 
 mod battle_replay;
 mod battle_sim;
+mod battle_sim_abilities;
 mod battle_sim_formation;
 mod battle_sim_modes;
 mod battle_sim_preview;
