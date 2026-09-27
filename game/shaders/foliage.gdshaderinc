@@ -39,7 +39,7 @@ uniform float winter_snow_y = 4.0;
 // (`edge_height`) et clairsemés (`edge_thin` de la rangée retirée) ; arbres des champs (couverture
 // nulle) et cœur des massifs inchangés. Haies (essence 3) exclues.
 uniform vec3 tone_dark = vec3(0.84, 0.9, 0.86);
-uniform vec3 tone_warm = vec3(1.1, 1.06, 0.84);
+uniform vec3 tone_warm = vec3(1.07, 1.04, 0.9);
 uniform float tone_period = 22.0;
 uniform float scale_jitter = 0.25;
 uniform sampler2D forest_cover : filter_linear, repeat_disable, hint_default_black;
