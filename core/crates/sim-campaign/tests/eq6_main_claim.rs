@@ -2,13 +2,18 @@
 //! first (`war.main_claim_first`) and does not depend on the difficulty
 //! level (`war.claim_war_ignores_difficulty`): England presses its claim on
 //! France whatever other wars it declared lately and whatever goodwill the
-//! "easy" level lends it towards the player.
+//! "easy" level lends it towards the player. Kinship does not hold the
+//! pretender back (`war.claim_war_ignores_kinship`), and a realm too weary
+//! to declare a war stays out of its allies' wars (`join_war.weary_stay_out`).
 
 use std::path::PathBuf;
 
 use data_model::{ClaimKind, FactionId, GameData};
 use sim_campaign::difficulty::Difficulty;
-use sim_campaign::diplomacy::{is_cornered, main_claim, plan_diplomacy, Claim, OpinionModifier};
+use sim_campaign::diplomacy::{
+    answers_call_to_arms, is_cornered, main_claim, plan_diplomacy, Claim, OpinionModifier,
+    MARRIAGE_REASON,
+};
 use sim_campaign::negotiation::plan_peace;
 use sim_campaign::{CampaignState, Order};
 
@@ -189,4 +194,67 @@ fn a_cornered_crown_fights_before_it_sues() {
     assert!(plan_peace(&fresh, &data, &france).is_some());
     // Once beaten, it treats as before.
     assert_eq!(plan_peace(&beaten, &data, &france), beaten_offer);
+}
+
+#[test]
+fn marriages_do_not_stop_the_claim_war() {
+    let base = data();
+    let mut data = switches(&base, true);
+    data.ai_diplomacy.war.claim_war_ignores_kinship = true;
+    let mut old = data.clone();
+    old.ai_diplomacy.war.claim_war_ignores_kinship = false;
+    let mut state = campaign(&data, Difficulty::Normal);
+    let england = fac("fac_england");
+    let france = fac("fac_france");
+    // Three marriages between the two houses: +45.
+    let turn = state.turn;
+    for _ in 0..3 {
+        state
+            .factions
+            .get_mut(&england)
+            .unwrap()
+            .modifiers
+            .push(OpinionModifier {
+                with: france.clone(),
+                value: 15,
+                reason_fr: MARRIAGE_REASON.to_owned(),
+                expires_turn: turn + 80,
+            });
+    }
+    assert!(state.attitude(&data, &england, &france).0 >= 20);
+    assert!(state.kinship_attitude(&data, &england, &france) >= 45);
+    assert_eq!(declares(&state, &data), Some(france.clone()));
+    assert_ne!(declares(&state, &old), Some(france));
+}
+
+#[test]
+fn an_exhausted_realm_stays_out_of_its_allys_war() {
+    let mut data = data();
+    data.ai_diplomacy.join_war.weary_stay_out = true;
+    let mut state = CampaignState::new_1337(&data, fac("fac_france"), 11).expect("1337 start");
+    state.chronicle.disabled = true;
+    let (england, portugal, castile) =
+        (fac("fac_england"), fac("fac_portugal"), fac("fac_castile"));
+    let turn = state.turn;
+    let me = state.factions.get_mut(&england).unwrap();
+    me.treasury = 100_000;
+    me.ledger.weariness = 0;
+    me.modifiers.push(OpinionModifier {
+        with: portugal.clone(),
+        value: 60,
+        reason_fr: "Ambassade d'un héraut".to_owned(),
+        expires_turn: turn + 40,
+    });
+    assert!(answers_call_to_arms(
+        &state, &data, &england, &portugal, &castile
+    ));
+    state.factions.get_mut(&england).unwrap().ledger.weariness = 100;
+    assert!(!answers_call_to_arms(
+        &state, &data, &england, &portugal, &castile
+    ));
+    // Before EQ6 weariness did not matter.
+    data.ai_diplomacy.join_war.weary_stay_out = false;
+    assert!(answers_call_to_arms(
+        &state, &data, &england, &portugal, &castile
+    ));
 }
