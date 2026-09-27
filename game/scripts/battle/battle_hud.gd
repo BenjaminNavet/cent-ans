@@ -532,7 +532,7 @@ func set_opening(opening: Dictionary, player_side: String) -> void:
 		var victim := str(opening.get("victim", ""))
 		tips.append("Vous êtes surpris en colonne de marche : aucun déploiement." if victim == player_side else "L'ennemi est surpris en colonne de marche : frappez ses flancs.")
 	for side in ["attacker", "defender"]:
-		var own := side == player_side
+		var own: bool = side == player_side
 		if bool(opening.get("%s_forced_march" % side, false)):
 			parts.append("Marche forcée")
 			tips.append(("Votre ost" if own else "L'ennemi") + " arrive fourbu de marche forcée.")
