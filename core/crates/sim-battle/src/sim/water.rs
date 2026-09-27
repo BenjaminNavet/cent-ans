@@ -81,25 +81,42 @@ impl BattleSim {
     /// best crossing; foot soldiers swim only when the way round is much
     /// longer. A regiment on a bridge or in a ford first reaches the far
     /// bank.
-    pub(super) fn water_route(&self, index: usize, tx: f64, tz: f64) -> (f64, f64) {
+    ///
+    /// CB-M2: the step of `unit` standing at `from` (the regiment itself for
+    /// the order, a waypoint of the chain for the preview); `None` when the
+    /// destination cannot be reached (horsemen and engines facing deep water
+    /// with no crossing, or a destination in deep water off a bridge): the
+    /// order then heads straight at it, as before.
+    pub(super) fn water_step(
+        &self,
+        unit: &Unit,
+        from: (f64, f64),
+        to: (f64, f64),
+    ) -> Option<(f64, f64)> {
+        let (tx, tz) = to;
         let Some(river) = &self.field.river else {
-            return (tx, tz);
+            return Some(to);
         };
-        let unit = &self.units[index];
-        let from = (unit.x, unit.z);
         let here = self.field.water_kind(from.0, from.1);
         if here.is_some_and(Water::deep) {
             // Already swimming (or fleeing across): carry on.
-            return (tx, tz);
+            return Some(to);
+        }
+        let stopped = Self::stopped_by_deep_water(unit);
+        if stopped
+            && self.field.water_kind(tx, tz).is_some_and(Water::deep)
+            && self.field.bridge_at(tx, tz).is_none()
+        {
+            return None;
         }
         let north_to = river.north_of(tx, tz);
         // Close combat: straight at the enemy.
-        if dist(from, (tx, tz)) < CLOSE_QUARTERS {
-            return (tx, tz);
+        if dist(from, to) < CLOSE_QUARTERS {
+            return Some(to);
         }
         // A target in the river or on a bridge is met where it stands.
         if river.in_water(tx, tz) || self.field.bridge_at(tx, tz).is_some() {
-            return (tx, tz);
+            return Some(to);
         }
         // On a bridge of the river: to the end on the target's side first.
         if let Some(b) = self.field.bridge_at(from.0, from.1) {
@@ -107,7 +124,7 @@ impl BattleSim {
                 let [a, e] = b.ends();
                 let end = if (e.1 > a.1) == north_to { e } else { a };
                 if dist(from, end) > 1.0 && dist(from, (tx, tz)) > 1.0 {
-                    return end;
+                    return Some(end);
                 }
             }
         }
@@ -117,17 +134,16 @@ impl BattleSim {
             let half = river.width_at(from.0) * 0.5 + 3.0;
             let bank = (from.0, if north_to { c + half } else { c - half });
             if river.north_of(from.0, from.1) != north_to || (from.1 - c).abs() < half - 3.0 {
-                return bank;
+                return Some(bank);
             }
         }
         if river.north_of(from.0, from.1) == north_to {
-            return (tx, tz);
+            return Some(to);
         }
-        let Some(meet) = self.river_meeting(from, (tx, tz)) else {
-            return (tx, tz);
+        let Some(meet) = self.river_meeting(from, to) else {
+            return Some(to);
         };
         let north_from = !north_to;
-        let to = (tx, tz);
         let best = self
             .crossings()
             .iter()
@@ -138,7 +154,7 @@ impl BattleSim {
             })
             .min_by(|a, b| a.2.total_cmp(&b.2));
         let Some((near, far, cost)) = best else {
-            return (tx, tz);
+            return (!stopped).then_some(to);
         };
         // Swimming: the width of the water at the swimmer's pace, and the
         // danger.
@@ -146,14 +162,14 @@ impl BattleSim {
         let swim = dist(from, to)
             + river.width_at(meet.0) * (1.0 / rules.movement.deep_foot.max(0.05) - 1.0)
             + SWIM_PENALTY;
-        if !Self::stopped_by_deep_water(unit) && swim < cost {
-            return (tx, tz);
+        if !stopped && swim < cost {
+            return Some(to);
         }
-        if dist(from, near) > AT_CROSSING {
+        Some(if dist(from, near) > AT_CROSSING {
             near
         } else {
             far
-        }
+        })
     }
 
     /// EP3: melee multiplier of `attacker`'s blows at `defender` from water

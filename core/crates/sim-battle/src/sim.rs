@@ -264,6 +264,34 @@ pub fn of_faction(name: &str) -> String {
 }
 
 /// Relative position of an attacker around a defender: 0 front, 1 flank, 2 rear.
+/// Multiplier of a horseman's blows at foot in a square or with pikes
+/// (1 otherwise).
+pub(crate) fn horse_against_foot(attacker: &Unit, defender: &Unit) -> f64 {
+    if !attacker.is_cavalry() {
+        return 1.0;
+    }
+    if defender.formation == Formation::Square {
+        if defender.has(Ability::PikeSquare) {
+            0.25
+        } else {
+            0.4
+        }
+    } else if defender.has(Ability::PikeSquare) {
+        0.7
+    } else {
+        1.0
+    }
+}
+
+/// Multiplier of pikemen's blows at horsemen (1 otherwise).
+pub(crate) fn pikes_against_horse(attacker: &Unit, defender: &Unit) -> f64 {
+    if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
+        1.8
+    } else {
+        1.0
+    }
+}
+
 pub(crate) fn attack_angle(defender: &Unit, attacker_x: f64, attacker_z: f64) -> u8 {
     if defender.formation == Formation::Square {
         return 0;
@@ -1188,7 +1216,7 @@ impl BattleSim {
     /// Destinations of a group move: along a line perpendicular to `facing`
     /// when given (ordered by current lateral position), else keeping the
     /// offsets to the group's centroid.
-    fn group_destinations(
+    pub(crate) fn group_destinations(
         &self,
         ids: &[u32],
         x: f64,
@@ -1496,37 +1524,6 @@ impl BattleSim {
             }
         }
         None
-    }
-
-    /// Where `index` should head to reach (tx, tz): straight, or through the
-    /// best opening in the walls when an intact wall is in the way (climbers
-    /// keep going straight unless the detour is short).
-    fn route(&self, index: usize, tx: f64, tz: f64) -> (f64, f64) {
-        let Some(works) = &self.siege else {
-            // EP3: across the river by a bridge or a ford.
-            return self.water_route(index, tx, tz);
-        };
-        let unit = &self.units[index];
-        let sallying = works.sortie && unit.side == SideId::Defender;
-        if (unit.on_wall && !sallying) || unit.state == UnitState::Routing {
-            return (tx, tz);
-        }
-        let from = (unit.x, unit.z);
-        let climber = unit.side == SideId::Attacker && unit.can_climb();
-        if climber && works.path_blocked(from, (tx, tz)) {
-            let Some(opening) = works.best_opening(from, (tx, tz)) else {
-                return (tx, tz);
-            };
-            let dist =
-                |a: (f64, f64), b: (f64, f64)| ((a.0 - b.0).powi(2) + (a.1 - b.1).powi(2)).sqrt();
-            let mid = works.pieces[opening].midpoint();
-            let detour = dist(from, mid) + dist(mid, (tx, tz));
-            if detour > dist(from, (tx, tz)) * 1.6 + 40.0 {
-                return (tx, tz);
-            }
-        }
-        // F5a: A* through breaches, gate and streets (houses are obstacles).
-        self.grid_route(index, tx, tz).unwrap_or((tx, tz))
     }
 
     /// A regiment stopped by an intact wall: foot soldiers of the attacker
@@ -2135,7 +2132,7 @@ impl BattleSim {
         }
     }
 
-    fn defense_points(&self, unit: &Unit) -> f64 {
+    pub(crate) fn defense_points(&self, unit: &Unit) -> f64 {
         f64::from(unit.stats.armor)
             + self
                 .general_bonus(unit.side)
@@ -2179,7 +2176,7 @@ impl BattleSim {
         }
     }
 
-    fn visible(&self, shooter: &Unit, target: &Unit, dist: f64) -> bool {
+    pub(crate) fn visible(&self, shooter: &Unit, target: &Unit, dist: f64) -> bool {
         if self.field.in_forest(target.x, target.z) && dist > 60.0 {
             return false;
         }
@@ -2503,7 +2500,7 @@ impl BattleSim {
             // EP6: walls, hedges and houses of the decor shelter the defender.
             / self.field.decor_defense(defender.x, defender.z);
         if attacker.charge_timer > 0.0 {
-            let charge = f64::from(attacker.stats.charge.unwrap_or(20));
+            let charge = attacker.charge_points();
             let lance = if attacker.has(Ability::ChargeLance) {
                 1.5
             } else {
@@ -2527,20 +2524,9 @@ impl BattleSim {
         if defender.state == UnitState::Routing {
             damage *= 1.5;
         }
-        if attacker.is_cavalry() {
-            if defender.formation == Formation::Square {
-                damage *= if defender.has(Ability::PikeSquare) {
-                    0.25
-                } else {
-                    0.4
-                };
-            } else if defender.has(Ability::PikeSquare) {
-                damage *= 0.7;
-            }
-        }
-        if defender.is_cavalry() && attacker.has(Ability::PikeSquare) {
-            damage *= 1.8;
-        }
+        // Matchup of the types (CB-M2: also quoted by the hover comparison).
+        damage *= horse_against_foot(attacker, defender);
+        damage *= pikes_against_horse(attacker, defender);
         // Siege: ladders are a poor place to fight from.
         if self.on_ladders(attacker) {
             damage *= 0.3;

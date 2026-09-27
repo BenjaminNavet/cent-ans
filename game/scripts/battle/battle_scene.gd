@@ -123,6 +123,16 @@ var _result_shot: bool = false
 ## CB-M1 : contours de formation (décales), remplacent l'anneau jaune de sélection.
 var outlines: BattleFormationOutline = null
 var _hovered_ids: Array[int] = []  # régiments survolés (terrain, repère), réutilisé
+## CB-M2 : aperçu du trajet, curseur contextuel, carte du HUD survolée (-1 : aucune).
+var path_preview: BattlePathPreview = null
+var cursor: BattleCursor = null
+var card_hover := -1
+## Dernier `hover_context` du cœur et nombre d'appels (tests : au plus un par image).
+var last_hover: Dictionary = {}
+var hover_calls := 0
+var _hover_mouse := Vector2(-1, -1)
+var _hover_dirty := false
+var _hover_key := ""
 var _drag_rect: ColorRect  # CB0 : rectangle de sélection, lu et positionné par `input`
 var _hud_timer: float = 0.0
 var _screenshot_path: String = ""
@@ -253,6 +263,7 @@ func _ready() -> void:
 	input.screenshot_requested.connect(_on_input_screenshot_requested)
 	hud.card_clicked.connect(_on_card_clicked)
 	hud.card_double_clicked.connect(_on_card_double_clicked)
+	hud.card_hovered.connect(func(id: int) -> void: card_hover = id)  # CB-M2 : contour au survol
 	hud.command_pressed.connect(input._on_command)
 	hud.speed_pressed.connect(_on_speed_pressed)
 	hud.minimap_clicked.connect(_on_minimap_clicked)
@@ -630,6 +641,10 @@ func _build_scene() -> bool:
 	outlines = BattleFormationOutline.new()
 	add_child(outlines)
 	outlines.setup(side_colors, player_side)
+	path_preview = BattlePathPreview.new()
+	add_child(path_preview)
+	path_preview.setup(battle, func(x: float, z: float) -> float: return terrain.height_at(x, z), side_colors.get(player_side, Color(0.9, 0.8, 0.3)))
+	cursor = BattleCursor.new()
 	_build_markers()
 	var title := ("Assaut %s" if siege_view != null else "Bataille %s") % BattleScene.de(str(setup.get("province_name", "")))
 	if not historical.is_empty():
@@ -1131,6 +1146,7 @@ func _process(delta: float) -> void:
 		battle.call("tick", delta * speed * slow)
 	_bench_tick_last_ms = float(Time.get_ticks_usec() - tick_start) / 1000.0
 	_refresh_view(false, delta * slow)
+	_update_hover_cursor()
 	if music != null:
 		music.update(delta, units)
 	if staging != null:
@@ -1491,6 +1507,8 @@ func _refresh_view(force: bool, delta: float = 0.0) -> void:
 			banner["routing"] = routing
 			(banner["flag_mat"] as ShaderMaterial).set_shader_parameter("routing", routing)
 	_update_outlines()
+	if path_preview != null:
+		path_preview.update_orders(units, selected, Time.get_ticks_msec() / 1000.0)
 	if standards != null:
 		standards.update(units, soldiers, _camera_position())
 	_update_markers(banner_scale)
@@ -1546,6 +1564,8 @@ func _update_outlines() -> void:
 			_hovered_ids.append(markers.world_hover)
 		if markers.hovered >= 0:
 			_hovered_ids.append_array(markers.marker_members(markers.hovered))
+	if card_hover >= 0:
+		_hovered_ids.append(card_hover)
 	outlines.update(units, selected, _hovered_ids)
 
 
@@ -1705,6 +1725,7 @@ func _on_input_command(command: Dictionary) -> void:
 
 func _on_input_selection_changed(ids: Array) -> void:
 	selected = ids
+	_hover_dirty = true  # CB-M2 : le curseur dépend de la sélection
 
 
 func _on_input_camera_focus(point: Vector3) -> void:
@@ -1735,6 +1756,46 @@ func _on_minimap_clicked(world: Vector2) -> void:
 
 
 ## Envoie une commande à la simulation ; les refus s'affichent au journal.
+func _exit_tree() -> void:
+	if cursor != null:
+		cursor.reset()  # CB-M2 : rendre la flèche du système hors de la bataille
+
+
+## CB-M2 : position de la souris notée par `BattleInput` ; le curseur est recalculé au plus une
+## fois par image, et seulement si la case de 2 m visée, le régiment survolé ou la sélection
+## changent.
+func note_mouse(position: Vector2) -> void:
+	_hover_mouse = position
+	_hover_dirty = true
+
+
+func _update_hover_cursor() -> void:
+	if cursor == null or not _hover_dirty or _hover_mouse.x < 0.0:
+		return
+	_hover_dirty = false
+	if replay_mode:
+		cursor.apply("none")
+		return
+	var target: int = markers.world_hover if markers != null else -1
+	var point := Vector3.ZERO
+	if target >= 0:
+		for unit in units:
+			if int(unit["id"]) == target:
+				point = Vector3(float(unit["x"]), 0.0, float(unit["z"]))
+				break
+	else:
+		point = ground_point(_hover_mouse)
+	var key := "%d,%d,%d,%s" % [floori(point.x / 2.0), floori(point.z / 2.0), target, str(selected)]
+	if key != _hover_key:
+		_hover_key = key
+		hover_calls += 1
+		last_hover = battle.call("hover_context", point.x, point.z, PackedInt32Array(selected))
+	var context := str(last_hover.get("context", "none"))
+	if path_preview != null and path_preview.live_active and not path_preview.reachable():
+		context = "forbidden"  # destination sans chemin : l'ordre ne partira pas
+	cursor.apply(context)
+
+
 func issue(command: Dictionary) -> Dictionary:
 	if log_orders_for_test or OS.has_feature("test"):
 		issued_log.append(command.duplicate(true))
