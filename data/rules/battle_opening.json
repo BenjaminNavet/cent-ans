@@ -1,0 +1,28 @@
+{
+  "description": "Ouverture d'une bataille 3D selon la posture de campagne (lot CV3-2, spec campagne vivante § 1.3, ADR 0094). Embuscade : la victime est surprise en colonne de marche le long de la route la plus longue du champ (à défaut l'axe long de la carte), sans phase de déploiement ; l'embusqué se déploie sur un ou deux flancs de la colonne, de préférence le long des lisières et des haies. Marche forcée : placement automatique sans phase de déploiement. Camp retranché : pieux plantés dès le départ et palissade basse devant la ligne.",
+  "column": {
+    "gap_m": 8,
+    "edge_margin_m": 40,
+    "min_road_length_m": 250
+  },
+  "flank": {
+    "near_m": 70,
+    "far_m": 190,
+    "extra_length_m": 60,
+    "sample_step_m": 20,
+    "forest_weight": 1.0,
+    "hedge_weight": 1.5,
+    "hedge_reach_m": 25,
+    "second_flank_ratio": 0.6,
+    "unit_gap_m": 12
+  },
+  "palisade": {
+    "distance_m": 14,
+    "margin_m": 10,
+    "segment_m": 12,
+    "foot_crossing_factor": 0.4,
+    "horse_crossing_factor": 0.2,
+    "melee_defense": 1.35,
+    "reach_m": 10
+  }
+}

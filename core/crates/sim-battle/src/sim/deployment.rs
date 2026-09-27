@@ -47,10 +47,18 @@ impl BattleSim {
         if self.ticks > 0 || self.finished {
             return false;
         }
+        // CV3-2: a player caught in column or in forced march has no
+        // deployment phase.
+        if self.setup.player_side.is_some_and(|s| !self.can_deploy(s)) {
+            return false;
+        }
         if !self.deploying {
             self.deploying = true;
             for side in SideId::BOTH {
-                if self.ai_enabled[side.index()] {
+                // CV3-2: the column and the forced march keep their automatic
+                // placement; the ambusher already stands on the flanks.
+                let ambusher = self.ambush.as_ref().is_some_and(|l| l.victim != side);
+                if self.ai_enabled[side.index()] && self.can_deploy(side) && !ambusher {
                     self.ai_deploy(side);
                 }
             }
@@ -131,7 +139,13 @@ impl BattleSim {
     /// Valid deployment point for `side`: in the zone and, in a siege, on
     /// the right side of the walls and clear of them.
     fn deployable(&self, side: SideId, x: f64, z: f64) -> bool {
-        if !x.is_finite() || !z.is_finite() || !self.deployment_zone(side).contains(x, z) {
+        if !x.is_finite()
+            || !z.is_finite()
+            || !self
+                .deployment_zones(side)
+                .iter()
+                .any(|zone| zone.contains(x, z))
+        {
             return false;
         }
         let Some(works) = &self.siege else {
@@ -161,7 +175,8 @@ impl BattleSim {
                 .map(crate::ai::unit_power)
                 .sum()
         };
-        let weaker = power(side) < 0.85 * power(side.other());
+        // CV3-2: an entrenched camp keeps its line behind its palisade.
+        let weaker = power(side) < 0.85 * power(side.other()) && !self.setup.side(side).entrenched;
         if self.siege.is_none() && weaker {
             let (cx, cz) = self.centroid(&own);
             let mut best = (0.0, self.field.height(cx, cz));
@@ -210,8 +225,18 @@ impl BattleSim {
         self.deploying
     }
 
-    /// The deployment zone of `side`.
+    /// The deployment zone of `side` (CV3-2: the first flank of an
+    /// ambusher; [`BattleSim::deployment_zones`] lists them all, and none for
+    /// a side that cannot deploy).
     pub fn deployment_zone(&self, side: SideId) -> DeploymentZone {
+        match &self.ambush {
+            Some(layout) if layout.victim != side && !layout.zones.is_empty() => layout.zones[0],
+            _ => self.standard_zone(side),
+        }
+    }
+
+    /// The usual rectangle of `side` (own edge, or the siege bands).
+    pub(super) fn standard_zone(&self, side: SideId) -> DeploymentZone {
         let (w, d) = (self.field.width, self.field.depth);
         let margin = 20.0;
         if let Some(works) = &self.siege {

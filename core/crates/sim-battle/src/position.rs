@@ -90,6 +90,7 @@ pub fn obstacle_weight(kind: ObstacleKind) -> f64 {
         ObstacleKind::Hedge => 1.0,
         ObstacleKind::Ditch => 0.8,
         ObstacleKind::Fence => 0.45,
+        ObstacleKind::Palisade => 1.0,
     }
 }
 

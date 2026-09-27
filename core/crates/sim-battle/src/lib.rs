@@ -59,6 +59,7 @@ pub mod impact;
 pub mod missile_arc;
 pub mod missile_morale;
 pub mod naval;
+pub mod opening;
 pub mod orders;
 pub mod outcome;
 pub mod position;
@@ -99,6 +100,7 @@ pub use hydro::{
     WatersideSpot,
 };
 pub use impact::{ImpactEvent, ImpactKind, LossCause};
+pub use opening::OpeningRules;
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
 pub use push::{PushRules, PushShape};
@@ -118,8 +120,8 @@ pub use siege::{PieceKind, SiegeWorkRules, SiegeWorks, Tower, WallPiece};
 pub use siege_fx::{SiegeFx, SiegeFxKind};
 pub use siege_layout::{LayoutError, LayoutGate, SiegeLandmark, SiegeLayout};
 pub use sim::{
-    BattleSim, CampState, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT, FRIEND_GAP,
-    MAX_DURATION, MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,
+    AmbushLayout, BattleSim, CampState, DeploymentZone, Ladder, SetupError, AI_PERIOD, DT,
+    FRIEND_GAP, MAX_DURATION, MAX_ON_FIELD, SIEGE_STANDOFF, ZONE_DEPTH,
 };
 pub use site::{
     Coast, FieldSite, Flank, Ground, House, HouseKind, Obstacle, ObstacleKind, Village,

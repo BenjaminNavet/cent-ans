@@ -656,6 +656,7 @@ impl Battlefield {
             (ObstacleKind::Hedge, "haies"),
             (ObstacleKind::Ditch, "fossés"),
             (ObstacleKind::Fence, "clôtures"),
+            (ObstacleKind::Palisade, "palissade"),
         ] {
             if self.obstacles.iter().any(|o| o.kind == kind) {
                 parts.push(label.to_owned());
