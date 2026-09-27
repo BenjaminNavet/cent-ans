@@ -61,42 +61,17 @@ func finish() -> bool:
 
 
 ## Clic droit (`p0 == p1`) : la sélection se range autour du point, orientation gardée ;
-## glisser-droit : répartie sur la ligne p0 → p1, front tourné à l'opposé de la caméra.
+## glisser-droit : répartie sur la ligne p0 → p1, front tourné à l'opposé de la caméra ; CB1 : la
+## longueur du glisser donne la largeur totale du front, partagée au prorata des effectifs
+## (`FormationDrag.split_widths`), les régiments rangés dans leur ordre gauche-droite le long du
+## glisser ; chacun prend la largeur retenue par le cœur (rangs bornés, `formation_extent`).
 ## Renvoie le nombre de régiments placés (les refus s'affichent en toast).
 func place(ids: Array, p0: Vector3, p1: Vector3, camera_pos: Vector3) -> int:
 	if not active or ids.is_empty():
 		return 0
-	var dir := Vector2(p1.x - p0.x, p1.z - p0.z)
-	var facing := NAN
-	var along := Vector2.ZERO
-	var widths: Array[float] = []
-	var total := 0.0
-	for id in ids:
-		var unit := _unit(int(id))
-		widths.append(float(unit.get("width", 30.0)))
-		total += widths[-1] + UNIT_GAP
-	total -= UNIT_GAP
-	if dir.length() >= 2.0:
-		var normal := Vector2(-dir.y, dir.x).normalized()
-		var mid := (p0 + p1) * 0.5
-		if normal.dot(Vector2(mid.x - camera_pos.x, mid.z - camera_pos.z)) < 0.0:
-			normal = -normal
-		facing = atan2(normal.x, normal.y)
-		along = dir.normalized()
-		total = maxf(total, dir.length())
-	else:
-		var first := _unit(int(ids[0]))
-		var f := float(first.get("facing", 0.0))
-		along = Vector2(cos(f), -sin(f))  # perpendiculaire au front (facing = atan2(dx, dz))
-	var center := Vector2((p0.x + p1.x) * 0.5, (p0.z + p1.z) * 0.5)
-	var spare := (total - _sum(widths) - UNIT_GAP * (ids.size() - 1)) / maxf(ids.size() - 1, 1)
-	var cursor := -total * 0.5
 	var placed := 0
-	for i in ids.size():
-		var offset := cursor + widths[i] * 0.5
-		var target := center + along * offset
-		cursor += widths[i] + UNIT_GAP + maxf(spare, 0.0)
-		var result: Dictionary = scene.battle.call("deploy_unit", int(ids[i]), target.x, target.y, facing)
+	for spot in plan(ids, p0, p1, camera_pos):
+		var result: Dictionary = scene.battle.call("deploy_unit", int(spot["id"]), float(spot["x"]), float(spot["z"]), float(spot["facing"]), float(spot["share"]))
 		if bool(result.get("ok", false)):
 			placed += 1
 		else:
@@ -104,18 +79,66 @@ func place(ids: Array, p0: Vector3, p1: Vector3, camera_pos: Vector3) -> int:
 	return placed
 
 
+## Places que `place` donnerait : [{id, x, z, facing, share, width, depth}] (`facing` NaN : gardée ;
+## `share` : largeur demandée au cœur, 0 sans glisser ; `width`/`depth` : taille retenue).
+## Sert aussi aux fantômes du glisser en direct.
+func plan(ids: Array, p0: Vector3, p1: Vector3, camera_pos: Vector3) -> Array:
+	var out: Array = []
+	if ids.is_empty():
+		return out
+	var line := FormationDrag.drag_line(p0, p1, camera_pos)
+	var dragged := bool(line["ok"])
+	var facing := float(line["facing"]) if dragged else NAN
+	var along := Vector2.ZERO
+	var order: Array = ids.duplicate()
+	var shares: Array[float] = []
+	if dragged:
+		along = Vector2(p1.x - p0.x, p1.z - p0.z).normalized()
+		# Ordre gauche-droite courant, projeté sur l'axe du glisser.
+		var keyed: Array = []
+		for k in ids.size():
+			var unit := _unit(int(ids[k]))
+			keyed.append([Vector2(float(unit.get("x", 0.0)), float(unit.get("z", 0.0))).dot(along), k])
+		keyed.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]))
+		order = []
+		var counts: Array = []
+		for entry in keyed:
+			var id := int(ids[int(entry[1])])
+			order.append(id)
+			counts.append(int(_unit(id).get("soldiers", 1)))
+		shares = FormationDrag.split_widths(counts, float(line["width"]), UNIT_GAP)
+	else:
+		var first := _unit(int(ids[0]))
+		var f := float(first.get("facing", 0.0))
+		along = Vector2(cos(f), -sin(f))  # perpendiculaire au front (facing = atan2(dx, dz))
+	var sizes: Array[Vector2] = []
+	var total := 0.0
+	for k in order.size():
+		var unit := _unit(int(order[k]))
+		var size := Vector2(float(unit.get("width", 30.0)), float(unit.get("depth", 6.0)))
+		if dragged and scene.battle.has_method("formation_extent"):
+			size = scene.battle.call("formation_extent", int(order[k]), shares[k])
+		sizes.append(size)
+		total += size.x + UNIT_GAP
+	total -= UNIT_GAP
+	var center := Vector2((p0.x + p1.x) * 0.5, (p0.z + p1.z) * 0.5)
+	var cursor := -total * 0.5
+	for k in order.size():
+		var offset := cursor + sizes[k].x * 0.5
+		var target := center + along * offset
+		cursor += sizes[k].x + UNIT_GAP
+		out.append({"id": int(order[k]), "x": target.x, "z": target.y, "facing": facing if dragged else float(_unit(int(order[k])).get("facing", 0.0)), "share": shares[k] if dragged else 0.0, "width": sizes[k].x, "depth": sizes[k].y})
+	if not dragged:
+		for spot in out:
+			spot["facing"] = NAN
+	return out
+
+
 func _unit(id: int) -> Dictionary:
 	for unit in scene.units:
 		if int(unit["id"]) == id:
 			return unit
 	return {}
-
-
-static func _sum(values: Array[float]) -> float:
-	var total := 0.0
-	for v in values:
-		total += v
-	return total
 
 
 func _build_banner() -> void:
