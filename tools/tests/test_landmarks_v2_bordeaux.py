@@ -39,6 +39,16 @@ def test_enceintes_1340(city: dict) -> None:
     assert {"Porte Saint-Germain", "Porte Dijeaux", "Porte Saint-Julien"} <= gates
     assert "Porte du Caillau" in gates
     assert "Porte Cailhau" not in gates  # porte actuelle : 1493-1496
+    # Relecture 2026-09-28 : porte Saint-Symphorien au milieu de la rue des Remparts (Drouyn).
+    assert "Porte Saint-Symphorien" in gates
+    # À l'ouest, le mur du XIVe s. double le mur antique à 20-35 m (rue des Remparts entre les deux).
+    west = [p for p in land["points"] if 0 <= p[1] <= 350]
+    castrum_x = {106: -66, 300: -85}
+    for y, cx in castrum_x.items():
+        near = min(west, key=lambda p, y=y: abs(p[1] - y))
+        assert 15 < cx - near[0] < 40, (y, near)
+    # Côté sud-ouest : mur au sud de la rue de la Miséricorde, pas sur la rue Henri-IV.
+    assert [108, -612] in land["points"]
     # Castrum : 725 x 450 m (Drouyn), 740 x 480 m (Wikipédia).
     xs = [p[0] for p in walls["castrum"]["points"]]
     ys = [p[1] for p in walls["castrum"]["points"]]
