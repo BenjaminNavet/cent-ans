@@ -79,6 +79,13 @@ var _map_caption: Label
 var _head: VBoxContainer
 var _tab_buttons: Array[Button] = []
 var _pages: Array[Control] = []
+## Q6 : boutons du traité (« Que faudrait-il ? », « Effacer », « Proposer le traité »), posés
+## sous les pages et non dans la page défilante : toujours visibles sur l'onglet Négociation.
+var _treaty_buttons: HBoxContainer
+## Q6 : taille visée par `_fit_to_viewport` (le panneau ne doit pas la dépasser).
+var _target_size := Vector2.ZERO
+var _fit_queued := false
+var _fitting := false
 var _clauses: HFlowContainer
 var _offer_list: VBoxContainer
 var _demand_list: VBoxContainer
@@ -116,6 +123,9 @@ func _ready() -> void:
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 14)
 	root.add_child(body)
+	# Q6 : un contenu qui grandit après l'ajustement (avis reçus, fiche) faisait déborder le
+	# panneau sous l'écran, la carte gardant sa taille : on la réduit de l'excédent.
+	resized.connect(_queue_fit_minimap)
 	body.add_child(_build_faction_column())
 	body.add_child(_build_map_column())
 	body.add_child(_build_detail_column())
@@ -134,7 +144,8 @@ func _fit_to_viewport() -> void:
 	var view := get_viewport_rect().size
 	var top: float = UiZones.rect(UiZones.Zone.TOP_BAR).end.y
 	global_position = Vector2(6, top)
-	size = Vector2(view.x - 12.0, view.y - top - 4.0)
+	_target_size = Vector2(view.x - 12.0, view.y - top - 4.0)
+	size = _target_size
 	_refit_minimap_later()
 
 
@@ -322,6 +333,7 @@ func _build_detail_column() -> Control:
 	stack.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(stack)
 	var negotiation := _scroll_page(_build_negotiation())
+	column.add_child(_treaty_buttons)
 	var war := VBoxContainer.new()
 	war.add_theme_constant_override("separation", 6)
 	_war_page = war
@@ -428,7 +440,7 @@ func _build_negotiation() -> Control:
 	send.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	send.pressed.connect(_send_treaty)
 	buttons.add_child(send)
-	page.add_child(buttons)
+	_treaty_buttons = buttons  # Q6 : hors de la page défilante (voir `_build_detail_column`)
 	page.add_child(_rule())
 	page.add_child(_label("Actions unilatérales", UiType.HEADING, HudStyle.INK))
 	_actions = HFlowContainer.new()
@@ -703,8 +715,20 @@ func _ensure_minimap() -> void:
 	_refit_minimap_later()
 
 
+## Q6 : ajustement différé (une fois par image) quand le panneau change de taille ; appelé
+## directement depuis `resized`, il se relançait lui-même en rendant sa taille au panneau.
+func _queue_fit_minimap() -> void:
+	if _fit_queued or _fitting:
+		return
+	_fit_queued = true
+	(func() -> void:
+		_fit_queued = false
+		if is_inside_tree():
+			_fit_minimap()).call_deferred()
+
+
 func _fit_minimap() -> void:
-	if _minimap == null:
+	if _minimap == null or _fitting:
 		return
 	var holder := _minimap.get_parent() as Control
 	var view := _minimap.find_child("MapView", true, false) as Control
@@ -714,14 +738,23 @@ func _fit_minimap() -> void:
 	# Habillage réel de la minicarte (cadre, boutons) autour de la vue, plus un jeu de 4 px :
 	# une marge fixe plus petite que le cadre ferait grandir le conteneur à chaque `resized`.
 	var chrome := _minimap.get_combined_minimum_size() - view.get_combined_minimum_size() + Vector2(4.0, 4.0)
-	var width := maxf(holder.size.x - chrome.x, MAP_MIN_WIDTH)
+	# Q6 : place prise au-delà de la taille visée (le panneau a grandi avec son contenu).
+	var excess := Vector2.ZERO
+	if _target_size != Vector2.ZERO:
+		excess = (size - _target_size).max(Vector2.ZERO)
+	var room := holder.size - chrome - excess
+	var width := maxf(room.x, MAP_MIN_WIDTH)
 	var height := width * aspect
-	if height > holder.size.y - chrome.y:
-		height = maxf(holder.size.y - chrome.y, MAP_MIN_HEIGHT)
+	if height > room.y:
+		height = maxf(room.y, MAP_MIN_HEIGHT)
 		width = height / aspect
 	var fitted := Vector2(width, height).floor()
 	if fitted != view.custom_minimum_size:
 		view.custom_minimum_size = fitted
+	if excess != Vector2.ZERO:
+		_fitting = true
+		size = _target_size  # rendu à la taille visée (bornée par la nouvelle taille minimale)
+		_fitting = false
 	_minimap.tooltip_text = ""
 
 
@@ -815,6 +848,8 @@ func _show_tab(index: int) -> void:
 	_tab = index
 	for i in _pages.size():
 		_pages[i].visible = i == index
+	if _treaty_buttons != null:
+		_treaty_buttons.visible = index == TAB_NEGOTIATION
 	for i in _tab_buttons.size():
 		_tab_buttons[i].set_pressed_no_signal(i == index)
 
