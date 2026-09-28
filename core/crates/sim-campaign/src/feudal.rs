@@ -21,6 +21,7 @@ mod inherit;
 mod objectives;
 mod policy;
 mod transfer;
+mod view;
 
 pub use acts::{revolt, switch_allegiance};
 pub use felony::{
@@ -34,6 +35,10 @@ pub use policy::{
 };
 pub use transfer::{
     conquer_title, grant_title, on_faction_destroyed, vacate_title, Grantee, TitleDemandOutcome,
+};
+pub use view::{
+    faction_sheet, feudal_map, homage_candidates, obligations, province_breadcrumb, vassal_status,
+    FactionSheet, FeudalCell, ObjectiveView, Obligations, ProtectionDue, TitleLink, VassalStatus,
 };
 
 /// Guard against malformed hierarchies (the data allows three levels).
