@@ -91,6 +91,6 @@ d'interface doivent être régénérés dans le registre enluminure.
 
 ## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
 
-| Date | Lot | Dépense | Cumul FE |
-|---|---|---|---|
-| 2026-09-28 | F0 (titres, migration) | 0 $ | 0 $ |
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul FE |
+|---|---|---|---|---|---|
+| 2026-09-28 | — | F0 : titres, migration (aucun appel payant) | 0,00 $ | 0,00 $ | 0,00 $ |
