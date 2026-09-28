@@ -18,6 +18,11 @@ var population_total := PackedInt64Array()
 var besieged := PackedByteArray()
 ## Chantier en cours dans la cité ; vide sans l'appel groupé (lire alors `get_province_city`).
 var constructing := PackedByteArray()
+## Lot RS-L : détail du siège (vide/0 si `besieged` est faux), mêmes champs que le dict `siege` de
+## `get_province_state`. Évite à `alerts.gd` une relecture par province assiégée.
+var siege_attacker := PackedStringArray()
+var siege_supplies := PackedInt32Array()
+var siege_turns_elapsed := PackedInt32Array()
 var _index_of: Dictionary = {}  # id → index raster - 1
 
 static var _cached: ProvinceSnapshot = null
@@ -75,6 +80,9 @@ static func read(sim: Object, province_ids: PackedStringArray) -> ProvinceSnapsh
 		snap.population_total = data.get("population_total", PackedInt64Array())
 		snap.besieged = data.get("besieged", PackedByteArray())
 		snap.constructing = data.get("constructing", PackedByteArray())
+		snap.siege_attacker = data.get("siege_attacker", PackedStringArray())
+		snap.siege_supplies = data.get("siege_supplies", PackedInt32Array())
+		snap.siege_turns_elapsed = data.get("siege_turns_elapsed", PackedInt32Array())
 		if snap.known.size() == count:
 			return snap
 	snap.known.resize(count)
@@ -83,10 +91,15 @@ static func read(sim: Object, province_ids: PackedStringArray) -> ProvinceSnapsh
 	snap.devastation.resize(count)
 	snap.population_total.resize(count)
 	snap.besieged.resize(count)
+	snap.siege_attacker.resize(count)
+	snap.siege_supplies.resize(count)
+	snap.siege_turns_elapsed.resize(count)
 	snap.known.fill(0)
 	snap.devastation.fill(0)
 	snap.population_total.fill(0)
 	snap.besieged.fill(0)
+	snap.siege_supplies.fill(0)
+	snap.siege_turns_elapsed.fill(0)
 	if sim == null or not sim.has_method("get_province_state"):
 		return snap
 	for i in count:
@@ -98,7 +111,12 @@ static func read(sim: Object, province_ids: PackedStringArray) -> ProvinceSnapsh
 		snap.controller[i] = str(state.get("controller", ""))
 		snap.devastation[i] = int(state.get("devastation", 0))
 		snap.population_total[i] = int(state.get("population_total", 0))
-		snap.besieged[i] = 1 if state.has("siege") else 0
+		var siege: Dictionary = state.get("siege", {})
+		snap.besieged[i] = 1 if not siege.is_empty() else 0
+		if not siege.is_empty():
+			snap.siege_attacker[i] = str(siege.get("attacker", ""))
+			snap.siege_supplies[i] = int(siege.get("supplies", 0))
+			snap.siege_turns_elapsed[i] = int(siege.get("turns_elapsed", 0))
 	return snap
 
 
