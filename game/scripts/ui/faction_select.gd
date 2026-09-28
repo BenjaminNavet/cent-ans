@@ -185,6 +185,17 @@ func _build_map_tab() -> Control:
 	return page
 
 
+## FE6 (captures) : onglet de la carte, `faction_id` choisi et sa fiche de survol affichée.
+func stage_map(faction_id: String) -> void:
+	if start_tabs == null or map_picker == null:
+		return
+	start_tabs.current_tab = 1
+	select(faction_id)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	map_picker._hover(faction_id, map_picker.faction_center(faction_id))
+
+
 func _apply_map_filters() -> void:
 	map_picker.set_filters(str(kingdom_filter.get_item_metadata(kingdom_filter.selected)), str(rank_filter.get_item_metadata(rank_filter.selected)))
 

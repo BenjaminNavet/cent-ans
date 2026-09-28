@@ -1538,6 +1538,8 @@ func _parse_cmdline() -> void:
 					movement_ctl.stage_trespass_screenshot()
 				"agents", "agents_registry":  # C6 agents
 					agents_ctl.stage_screenshot(_screenshot_stage == "agents_registry")
+				"feudal_tree", "feudal_map", "feudal_war":  # FE6 : arbre, filtre, escalade
+					feudal.stage_screenshot(_screenshot_stage)
 				_:
 					_stage_screenshot()
 		elif arg.begins_with("--focus="):
