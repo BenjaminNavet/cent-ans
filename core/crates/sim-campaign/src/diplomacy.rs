@@ -117,7 +117,9 @@ pub enum Proposal {
     /// FE (§ 4.3): the proposer, a direct vassal of the recipient, is
     /// attacked by `aggressor` and calls for protection. Accept: intervene;
     /// refuse or let expire: shirk. Only sent to the player.
-    Protection { aggressor: FactionId },
+    Protection {
+        aggressor: FactionId,
+    },
     /// FE (§ 4.3.5): private war of `attacker` against `target`, both
     /// direct vassals of the recipient. Accept: impose peace; refuse or let
     /// expire: let be; `arbitrate` also takes a side. Only sent to the player.
