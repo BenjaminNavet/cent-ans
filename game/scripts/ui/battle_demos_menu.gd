@@ -1,11 +1,15 @@
 class_name BattleDemosMenu
-extends Control
+extends PanelContainer
 
 ## SG2 — « Batailles de démonstration » du menu principal : liste `data/ui/battle_demos.json`
 ## (bataille rangée, assauts de Guyenne, de Paris, d'Avignon et de Bruges dans le plan de la
 ## ville). Un clic lance la scène de bataille autonome avec les options de la démo
 ## (`BattleScene.demo_args`) ; la fin de la bataille ramène au menu. Échap ou « Fermer » :
 ## signal `closed`.
+## Lot P2e (ADR 0097, bible DA § 12.1) : la fenêtre rejoint la zone `MODAL` de `UiLayout`
+## (voile assombri et blocage des entrées fournis par la zone, plus de veil ni de
+## `CenterContainer` propres) ; tailles de texte par `UiType`, ouverture et fermeture par
+## `UiMotion`.
 
 signal closed
 signal demo_started(id: String)
@@ -82,30 +86,20 @@ static func args_for(demo: Dictionary) -> PackedStringArray:
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	custom_minimum_size = Vector2(680, 0)
 	demos = load_demos()
-	var veil := ColorRect.new()
-	veil.color = Color(0.05, 0.03, 0.01, 0.45)
-	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(veil)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(680, 0)
-	center.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
+	add_child(box)
 	var title := Label.new()
 	title.text = "Batailles de démonstration"
-	title.add_theme_font_size_override("font_size", 26)
+	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
 	var hint := Label.new()
 	hint.text = "Hors campagne : le résultat n'est pas conservé."
-	hint.add_theme_font_size_override("font_size", 15)
+	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.7)
 	box.add_child(hint)
 	# EP8 : heure de la bataille (lumière ; aube et crépuscule raccourcissent la portée des tireurs).
@@ -138,7 +132,7 @@ func _ready() -> void:
 		detail.text = str(entry.get("detail", ""))
 		detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		detail.custom_minimum_size = Vector2(640, 0)
-		detail.add_theme_font_size_override("font_size", 14)
+		UiType.apply(detail, UiType.CAPTION)
 		detail.modulate = Color(1, 1, 1, 0.75)
 		box.add_child(detail)
 		buttons[str(entry["id"])] = button
@@ -152,6 +146,8 @@ func _ready() -> void:
 	row.add_child(close_button)
 	if not buttons.is_empty():
 		(buttons.values()[0] as Button).grab_focus.call_deferred()
+	UiZones.put(UiZones.Zone.MODAL, self)
+	UiMotion.fade_in(self)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -162,7 +158,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func close() -> void:
 	closed.emit()
-	queue_free()
+	UiMotion.fade_out(self, UiMotion.DURATION, true)
 
 
 ## Lance la démo `id` : options transmises à la scène de bataille, puis changement de scène.
