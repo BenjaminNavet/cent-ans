@@ -39,11 +39,11 @@ Fichiers : `material_gen.py`, `data/art/materials.yaml`,
 2. [x] Sonde : 2 matières (laine, mailles) → planche ; jugement en session principale (1 capture).
        Sonde faite (0,08 $) : `docs/research/ga1_probe_sheet.png` ; validée (raccords invisibles) ; corrections : mailles moins rugueuses,
        laine feutrée irrégulière (height_strength −30 %), police accentuée de la planche.
-3. [ ] Lot : 12 matières (laine, lin, futaine, gambison, mailles, cuir, plates, bois, peau,
+3. [x] Lot : 12 matières (laine, lin, futaine, gambison, mailles, cuir, plates, bois, peau,
        cheveux, robe claire, robe foncée), 512², budget consigné.
-4. [ ] Nouveau `fine_detail_albedo` (Texture2DArray, centré en luminance moyenne 0,5) multiplié
+4. [x] Nouveau `fine_detail_albedo` (Texture2DArray, centré en luminance moyenne 0,5) multiplié
        à la couleur de sommet ; tuiles RG/B/A remplacées ; même `FG3_TILE_SIZE`. Drapeau `--no-ga1`.
-5. [ ] Tests : mémoire (modèle `fg3_maps_test.gd`, ajout ≤ 4 Mo), smoke ; A/B `--closeup`
+5. [x] Tests : mémoire (modèle `fg3_maps_test.gd`, ajout ≤ 4 Mo), smoke ; A/B `--closeup`
        et standard (≤ +5 %). ADR 0104. Commit.
 
 ### GA2 — Sol de bataille (CC0, 0 $, agent `cent-ans-mech`)
@@ -100,3 +100,9 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
   du shader, testé), génération en cours vers le scratch ; shader (`ga1_detail`, `fine_detail_albedo`),
   chargement (`--no-ga1`), test `ga1_maps_test.gd`. Suite : assembler les tableaux
   (`material_gen.build_fine_arrays`), import Godot, tests, A/B, ADR 0104.
+- 28/09 : GA1 fait (branche `feat/ga1`, non fusionnée) : 12 matières (0,59 $ au total, dont un
+  appel coupé facturé), `fine_detail_ga1.png` + `fine_detail_albedo.png` (ajout 2,33 Mo), shader
+  `ga1_detail`, `--no-ga1`, `ga1_maps_test.gd` OK (et `-- --no-ga1`), fg3_maps OK, smoke OK ;
+  A/B dans le bruit (≤ +5 %) ; ADR 0104. Planche des 12 : `docs/research/ga1_sheet.png` à juger
+  (jugement en jeu : session principale). `main` a bougé (`tools/cent_ans_tools/cli.py`) : conflit
+  possible, simple, à la fusion ; le shader n'a pas bougé sur `main`.
