@@ -101,7 +101,14 @@ func fire_scale(distance: float) -> float:
 
 ## Échelle d'une maquette de colonie dont la taille réelle vaut `ratio` × sa taille de carte.
 func settlement_scale(ratio: float, distance: float) -> float:
-	return scale_for(clampf(ratio, settlement_ratio_min, settlement_ratio_max), distance)
+	return settlement_scale_with(ratio, exaggeration(distance))
+
+
+## RS-K2 : `settlement_scale` pour une exagération `exaggeration(distance)` déjà calculée (une
+## fois par pas de zoom pour les ~1 200 colonies).
+func settlement_scale_with(ratio: float, exaggeration_value: float) -> float:
+	var r := clampf(clampf(ratio, settlement_ratio_min, settlement_ratio_max), 1e-4, 1.0)
+	return minf(1.0, r * exaggeration_value)
 
 
 ## Vrai si l'échelle `now` s'écarte assez de `applied` pour réécrire des instances.
