@@ -108,6 +108,9 @@ pub mod folders {
     pub const POSTURE_RULES: &str = "postures.json";
     /// Fate of captured places (lot TW2-T1), inside `rules/`; optional.
     pub const CAPTURE_RULES: &str = "capture.json";
+    /// Army replenishment and recruitment pools (lot TW2-T2), inside
+    /// `rules/`; optional.
+    pub const REPLENISHMENT_RULES: &str = "replenishment.json";
     /// Nuanced battle outcomes (lot CV3-1), inside `rules/`; optional.
     pub const BATTLE_OUTCOME_RULES: &str = "battle_outcome.json";
     /// Trade hubs and routes (lot C5); optional folder.
@@ -321,6 +324,9 @@ pub struct GameData {
     /// `data/rules/capture.json` (lot TW2-T1, fate of captured places);
     /// [`crate::CaptureRules::default`] when absent.
     pub capture_rules: crate::entities::capture::CaptureRules,
+    /// `data/rules/replenishment.json` (lot TW2-T2, army replenishment and
+    /// recruitment pools); the bundled file when absent.
+    pub replenishment_rules: crate::entities::replenishment::ReplenishmentRules,
     /// `data/rules/battle_outcome.json` (lot CV3-1, nuanced outcomes);
     /// [`crate::BattleOutcomeRules::default`] when absent.
     pub battle_outcome_rules: crate::entities::battle_outcome::BattleOutcomeRules,
@@ -396,6 +402,7 @@ impl GameData {
             battle_standard_rules: Default::default(),
             posture_rules: Default::default(),
             capture_rules: Default::default(),
+            replenishment_rules: Default::default(),
             battle_outcome_rules: Default::default(),
             cover: Default::default(),
             movement_graph: Default::default(),
@@ -504,6 +511,10 @@ impl GameData {
         let capture_path = root.join(folders::RULES).join(folders::CAPTURE_RULES);
         if capture_path.is_file() {
             data.capture_rules = read_json(&capture_path)?;
+        }
+        let replenishment_path = root.join(folders::RULES).join(folders::REPLENISHMENT_RULES);
+        if replenishment_path.is_file() {
+            data.replenishment_rules = read_json(&replenishment_path)?;
         }
         let outcome_path = root
             .join(folders::RULES)

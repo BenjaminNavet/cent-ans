@@ -68,7 +68,9 @@ pub mod population;
 pub mod posture;
 pub mod ransom;
 pub mod reach;
+pub mod recruit_pool;
 pub mod religion;
+pub mod replenish;
 pub mod research;
 pub mod retinue;
 pub mod rng;
@@ -131,6 +133,8 @@ pub use orders::{
 };
 pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
+pub use recruit_pool::PoolView;
+pub use replenish::{FactorKind, ReplenishFactor, ReplenishPreview, Territory};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
 pub use save::{CampaignError, FREE_MOVEMENT_STATE_VERSION, SETTLEMENTS_STATE_VERSION};

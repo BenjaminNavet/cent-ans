@@ -67,9 +67,24 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		button.tooltip_text = RichTooltip.unit(unit_type, row)
 		button.pressed.connect(func() -> void: on_recruit.call(unit_type))
 		line.add_child(button)
-		if not available:
-			line.add_child(reason_label(str(row.get("reason", "Indisponible"))))
+		var reason := str(row.get("reason", "Indisponible"))
+		if not available and not reason.begins_with("réserve"):
+			line.add_child(reason_label(reason))
+		# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
+		if row.has("pool_label"):
+			line.add_child(pool_label(row))
 		list.add_child(line)
+
+
+## TW2-T2 : réserve de l'unité dans la colonie (`pool_label` du cœur), en rubrique si épuisée.
+static func pool_label(row: Dictionary) -> Label:
+	var label := reason_label(str(row.get("pool_label", "")))
+	label.name = "PoolLabel"
+	if int(row.get("pool_available", 0)) > 0:
+		label.add_theme_color_override("font_color", HudStyle.INK_SOFT)
+	label.tooltip_text = "Réserve de recrutement : %d au plus, se remplit à chaque saison" % int(row.get("pool_cap", 0))
+	label.mouse_filter = Control.MOUSE_FILTER_PASS
+	return label
 
 
 ## Bâtiments construits (`{id, name, upkeep, …}`).
