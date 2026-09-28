@@ -10,7 +10,9 @@
     "blazon": "D'or à la bande de gueules chargée de trois alérions d'argent.",
     "description": "Armes historiques des ducs de Lorraine, alérions (petits aiglons sans bec ni pattes) associés par la légende à la bataille de Bouvines.",
     "primary_color": "#F2C230",
-    "secondary_color": "#C8102E"
+    "secondary_color": "#8B1A2B",
+    "uncertain": true,
+    "note": "Icône simplifiée : les trois alérions d'argent brochant sur la bande ne sont pas rendus par le générateur (charge non supportée) ; nuance de gueules de la bande légèrement distinguée de celle du Bade pour éviter un icône identique. Le blason textuel ci-dessus reste la description héraldique de référence."
   },
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [

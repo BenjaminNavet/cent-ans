@@ -378,6 +378,86 @@ def _draw_ladder(draw: ImageDraw.ImageDraw, color: Color, rungs: int = 4) -> Non
         draw.rectangle(_px([(0.34, y0), (0.66, y0 + 0.05)]), fill=color)
 
 
+def _draw_wheel(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """A cartwheel with six spokes (FE4b: Mainzer Rad)."""
+    cx, cy, radius, inner = 0.5, 0.47, 0.32, 0.06
+    width = int(0.05 * CANVAS)
+    draw.ellipse(
+        _px([(cx - radius, cy - radius), (cx + radius, cy + radius)]),
+        outline=color,
+        width=width,
+    )
+    draw.ellipse(_px([(cx - inner, cy - inner), (cx + inner, cy + inner)]), fill=color)
+    for angle in range(0, 360, 60):
+        rad = math.radians(angle)
+        start = (cx + inner * math.cos(rad), cy + inner * math.sin(rad))
+        end = (cx + radius * math.cos(rad), cy + radius * math.sin(rad))
+        draw.line(_px([start, end]), fill=color, width=width)
+
+
+def _draw_column(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """A single standing column (FE4b: perron/colonne of Liège)."""
+    draw.rectangle(_px([(0.42, 0.08), (0.58, 0.84)]), fill=color)
+    draw.rectangle(_px([(0.3, 0.02), (0.7, 0.1)]), fill=color)
+    draw.rectangle(_px([(0.3, 0.82), (0.7, 0.9)]), fill=color)
+
+
+def _draw_escutcheon_single(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """One inescutcheon at fess point (FE4b: Clèves, singular, unlike Portugal's five)."""
+    small = [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.1), (0.0, 0.5), (-0.5, 0.1)]
+    draw.polygon(_transform(small, 0.5, 0.47, 0.34), fill=color)
+
+
+def _draw_chevrons(draw: ImageDraw.ImageDraw, color: Color, count: int) -> None:
+    """Stacked chevrons (FE4b: la Marck)."""
+    for index in range(count):
+        y0 = 0.14 + index * 0.24
+        draw.polygon(
+            _px(
+                [
+                    (0.1, y0 + 0.2),
+                    (0.5, y0),
+                    (0.9, y0 + 0.2),
+                    (0.9, y0 + 0.34),
+                    (0.5, y0 + 0.14),
+                    (0.1, y0 + 0.34),
+                ]
+            ),
+            fill=color,
+        )
+
+
+def _draw_antlers(draw: ImageDraw.ImageDraw, color: Color, count: int = 3) -> None:
+    """Stacked stylised antlers (FE4b: Wurtemberg, bois de cerf)."""
+    width = int(0.035 * CANVAS)
+    for index in range(count):
+        cx, cy = 0.5, 0.16 + index * 0.28
+        for side in (-1, 1):
+            draw.line(
+                _px([(cx, cy + 0.1), (cx + side * 0.18, cy - 0.08)]),
+                fill=color,
+                width=width,
+            )
+            draw.line(
+                _px([(cx + side * 0.09, cy - 0.02), (cx + side * 0.26, cy - 0.18)]),
+                fill=color,
+                width=int(width * 0.7),
+            )
+
+
+def _draw_buffalo_head(draw: ImageDraw.ImageDraw, color: Color) -> None:
+    """A stylised buffalo head (FE4b: Mecklembourg, tête de buffle)."""
+    cx, cy = 0.5, 0.5
+    draw.ellipse(_px([(cx - 0.22, cy - 0.2), (cx + 0.22, cy + 0.24)]), fill=color)
+    width = int(0.045 * CANVAS)
+    draw.line(
+        _px([(cx - 0.2, cy - 0.1), (cx - 0.4, cy - 0.32)]), fill=color, width=width
+    )
+    draw.line(
+        _px([(cx + 0.2, cy - 0.1), (cx + 0.4, cy - 0.32)]), fill=color, width=width
+    )
+
+
 def _draw_label(draw: ImageDraw.ImageDraw, color: Color) -> None:
     draw.rectangle(_px([(0.12, 0.1), (0.88, 0.16)]), fill=color)
     for cx in (0.26, 0.5, 0.74):
@@ -727,6 +807,18 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
         _draw_keys(draw, TINCTURES["argent"], TINCTURES["or"])
     elif blazon.has("ecussons"):
         _draw_escutcheons(draw, TINCTURES["azur"])
+    elif blazon.has("ecusson"):
+        _draw_escutcheon_single(draw, charge)
+    elif blazon.has("roue"):
+        _draw_wheel(draw, charge)
+    elif blazon.has("colonne"):
+        _draw_column(draw, charge)
+    elif blazon.has("chevron"):
+        _draw_chevrons(draw, charge, blazon.count(3))
+    elif blazon.has("bois de cerf"):
+        _draw_antlers(draw, charge, blazon.count(3))
+    elif blazon.has("tete de buffle"):
+        _draw_buffalo_head(draw, charge)
     elif blazon.has("guivre"):
         paints = charge_paints("guivre", charge, blazon.text, blazon.field)
         paint_charge(image, "guivre", [(0.5, 0.47)], 0.8, paints)
