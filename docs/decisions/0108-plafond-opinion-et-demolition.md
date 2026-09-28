@@ -37,7 +37,10 @@ Suivi : `docs/wip/rs-c-diplo.md`. Numéro pris après 0107 (0104-0106 réservés
    évite de bâtir et raser en alternance.
 
 ## Conséquences
-- Mesures avant/après : voir `docs/wip/rs-c-diplo.md`.
+- Mesures avant/après (`docs/wip/rs-c-diplo.md`) : banqueroutes / faction / décennie
+  0,114 → 0,084 (facile), 0,077 → 0,047 (normale), 0,059 → 0,039 (difficile), 0,044 → 0,052
+  (très difficile, bruit) ; guerre FR-EN moyenne 57 à 70 % selon le niveau (critère 55-75 % tenu) ;
+  révoltes 5,4 à 9,0 par 200 tours (bande 4-10).
 - Le joueur a la commande au pont ; un bouton « Raser » dans l'onglet de la colonie reste à faire.
 - Un nouveau motif plafonnable demande une entrée d'`OpinionMotive` et son libellé dans
   `diplomacy::opinion_motive`.
