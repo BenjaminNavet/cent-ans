@@ -487,6 +487,7 @@ impl CampaignState {
         match religion::faith_relation(self, data, a, b) {
             religion::FaithRelation::Same => add("Même foi", 10),
             religion::FaithRelation::RivalObedience => add("Obédience rivale", -20),
+            religion::FaithRelation::Kindred => add("Schismatiques", -25),
             religion::FaithRelation::Different => add("Religion différente", -40),
         }
         if religion::is_excommunicated(self, b) && religion::is_catholic(self, data, a) {

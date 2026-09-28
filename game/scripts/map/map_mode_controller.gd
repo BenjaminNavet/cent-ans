@@ -34,6 +34,15 @@ const RELATION_COLORS := {
 const RELIGION_AVIGNON := Color(0.25, 0.35, 0.70)
 const RELIGION_ROME := Color(0.80, 0.65, 0.20)
 const RELIGION_OTHER := Color(0.45, 0.45, 0.45)
+## OM3 (ADR 0116) : grandes fois de l'Est, chacune sa teinte (les autres restent en gris).
+const RELIGION_ORTHODOX := Color(0.62, 0.22, 0.38)
+const RELIGION_ISLAM := Color(0.15, 0.50, 0.50)
+const RELIGION_PAGAN := Color(0.55, 0.40, 0.22)
+const RELIGION_ARMENIAN := Color(0.80, 0.42, 0.18)
+const RELIGION_FAITHS := {
+	"rel_orthodox": RELIGION_ORTHODOX, "rel_islam": RELIGION_ISLAM,
+	"rel_pagan": RELIGION_PAGAN, "rel_armenian": RELIGION_ARMENIAN,
+}
 const HERESY := Color(0.20, 0.65, 0.25)
 ## Rampes séquentielles (faible → fort), lisibles sur le parchemin.
 const GOOD := Color(0.20, 0.55, 0.20)
@@ -335,7 +344,7 @@ func _religion_colors(ids: PackedStringArray) -> PackedColorArray:
 		if religion == "rel_catholic_rome":
 			base = RELIGION_ROME
 		elif religion != "rel_catholic":
-			base = RELIGION_OTHER
+			base = RELIGION_FAITHS.get(religion, RELIGION_OTHER)
 		var heresy := float(info.get("heresy", 0)) / 100.0
 		_religions[id] = info
 		colors.append(base.lerp(HERESY, clampf(heresy * 1.5, 0.0, 1.0)))
@@ -515,7 +524,7 @@ func _legend_entries() -> Variant:
 				return stance_entries
 			return [["self", "Nous"], ["war", "Guerre"], ["truce", "Trêve"], ["alliance", "Alliés"], ["vassal", "Vassaux"], ["peace", "Neutres"]]
 		"religion":
-			return [[RELIGION_AVIGNON, "Obédience d'Avignon"], [RELIGION_ROME, "Obédience de Rome"], [HERESY, "Hérésie"], [RELIGION_OTHER, "Autre foi"]]
+			return [[RELIGION_AVIGNON, "Obédience d'Avignon"], [RELIGION_ROME, "Obédience de Rome"], [HERESY, "Hérésie"], [RELIGION_ORTHODOX, "Orthodoxie"], [RELIGION_ARMENIAN, "Église arménienne"], [RELIGION_ISLAM, "Islam"], [RELIGION_PAGAN, "Paganisme"], [RELIGION_OTHER, "Autre foi"]]
 		"unrest":
 			return {"from": GOOD, "to": BAD, "low": "Calme", "high": "Révolte proche"}
 		"wealth":

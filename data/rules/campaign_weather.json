@@ -27,6 +27,18 @@
       "summer": { "clear": 55, "fog": 10, "rain": 17, "snow": 3, "storm": 15 },
       "autumn": { "clear": 38, "fog": 20, "rain": 22, "snow": 17, "storm": 3 },
       "winter": { "clear": 30, "fog": 15, "rain": 5, "snow": 50, "storm": 0 }
+    },
+    "arid": {
+      "spring": { "clear": 85, "fog": 2, "rain": 6, "snow": 0, "storm": 7 },
+      "summer": { "clear": 92, "fog": 0, "rain": 1, "snow": 0, "storm": 7 },
+      "autumn": { "clear": 84, "fog": 3, "rain": 8, "snow": 0, "storm": 5 },
+      "winter": { "clear": 72, "fog": 6, "rain": 18, "snow": 1, "storm": 3 }
+    },
+    "steppe": {
+      "spring": { "clear": 60, "fog": 6, "rain": 22, "snow": 4, "storm": 8 },
+      "summer": { "clear": 76, "fog": 2, "rain": 8, "snow": 0, "storm": 14 },
+      "autumn": { "clear": 55, "fog": 14, "rain": 20, "snow": 6, "storm": 5 },
+      "winter": { "clear": 38, "fog": 14, "rain": 6, "snow": 36, "storm": 6 }
     }
   }
 }

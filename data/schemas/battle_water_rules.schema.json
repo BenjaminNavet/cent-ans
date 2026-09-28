@@ -38,9 +38,11 @@
             "forest": { "$ref": "#/$defs/span" },
             "hills": { "$ref": "#/$defs/span" },
             "mountains": { "$ref": "#/$defs/span" },
-            "marsh": { "$ref": "#/$defs/span" }
+            "marsh": { "$ref": "#/$defs/span" },
+            "steppe": { "$ref": "#/$defs/span" },
+            "desert": { "$ref": "#/$defs/span" }
           },
-          "required": ["plains", "heath", "bocage", "forest", "hills", "mountains", "marsh"],
+          "required": ["plains", "heath", "bocage", "forest", "hills", "mountains", "marsh", "steppe", "desert"],
           "additionalProperties": false
         },
         "width_variation": { "type": "number", "minimum": 0, "maximum": 0.6, "description": "Variation relative de la largeur le long du cours (rétrécissements, élargissements)." },

@@ -198,6 +198,8 @@ fn terrain_label_fr(terrain: data_model::Terrain) -> &'static str {
         T::Marsh => "marais",
         T::Heath => "lande",
         T::Bocage => "bocage",
+        T::Steppe => "steppe",
+        T::Desert => "désert",
     }
 }
 

@@ -47,9 +47,11 @@
         "oceanic": { "$ref": "#/$defs/seasonal" },
         "continental": { "$ref": "#/$defs/seasonal" },
         "mediterranean": { "$ref": "#/$defs/seasonal" },
-        "mountain": { "$ref": "#/$defs/seasonal" }
+        "mountain": { "$ref": "#/$defs/seasonal" },
+        "arid": { "$ref": "#/$defs/seasonal" },
+        "steppe": { "$ref": "#/$defs/seasonal" }
       },
-      "required": ["oceanic", "continental", "mediterranean", "mountain"],
+      "required": ["oceanic", "continental", "mediterranean", "mountain", "arid", "steppe"],
       "additionalProperties": false
     }
   },

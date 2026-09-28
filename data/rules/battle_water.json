@@ -8,7 +8,7 @@
       "forest": [10, 22],
       "hills": [10, 20],
       "mountains": [10, 16],
-      "marsh": [18, 40]
+      "marsh": [18, 40], "steppe": [16, 40], "desert": [10, 30]
     },
     "width_variation": 0.3,
     "ford_half_width_m": [18, 36],
