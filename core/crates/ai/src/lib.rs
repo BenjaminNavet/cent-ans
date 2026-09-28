@@ -15,6 +15,7 @@ mod mercenaries;
 pub mod parallel;
 pub mod stances;
 pub mod support;
+pub mod traditions;
 
 pub use campaign::{plan_turn, plan_turn_sequential};
 pub use sim_campaign::ai_minimal::plan_turn as plan_turn_minimal;
