@@ -78,3 +78,28 @@ simplifiés pour le rendu de faction uniquement (`fac_mantua`, `fac_montferrat`,
 `fac_siena`, `fac_bologna`, `fac_urbino`, `fac_rimini`, `fac_pavia`), avec note dans leur
 `heraldry.description` ; les blasons historiques complets restent dans les titres et
 `data/heraldry/houses.json`. 49/49 écus de faction désormais distincts.
+
+## État final
+
+- `uv run --project tools pytest -q` : 936 passed, 2 skipped (préexistants, sans rapport).
+- `cd core && cargo test --no-fail-fast` (CARGO_TARGET_DIR dédié) : tout au vert (35 binaires de
+  test), après correction des fixtures `campaign.rs` (factions 36→49, provinces 141→153,
+  armées 35→48) et d'un bâtiment mal placé (`set_montalcino` : `bld_vineyard_press` retiré, non
+  autorisé sur un `castle`).
+- `cargo fmt --all -- --check` et `cargo clippy --all-targets -- -D warnings` : verts (aucun code
+  Rust de règle modifié, seuls les compteurs de test).
+
+## Récapitulatif final
+
+- 15 provinces à géométrie propre créées (Mantoue, Saluces, Pise, Sienne, Lucques, Pérouse, Urbin,
+  Rimini, Padoue, Parme, Pavie, Tarente) + 2 provinces déjà existantes réduites/scindées à cette
+  occasion (Ferrare, Bologne, déjà présentes dans `main` avec des colonies « graines » anticipant
+  ce lot) ; Montferrat et Sicile réassignées à une faction propre sans changement de géométrie.
+  Total carte : 153 provinces (141 → 153).
+- 13 nouvelles factions jouables : Mantoue (Gonzague), Ferrare (Este), Montferrat (Paléologue),
+  Saluces, Pise, Sienne, Bologne (commune libre), Pérouse, Urbin (Montefeltro), Rimini (Malatesta),
+  Sicile/Trinacrie (branche cadette aragonaise), Tarente (apanage angevin), Pavie (commune
+  gibeline Beccaria, découverte en cours de lot — non milanaise en 1337).
+- 16 nouveaux titres, 11 nouveaux personnages (souverains, héritiers, une régente, un notable),
+  11 nouvelles maisons héraldiques, 13 cartes front-end, 13 factions ajoutées au bucket portraits
+  « italy_empire ».
