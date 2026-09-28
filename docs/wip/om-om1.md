@@ -24,7 +24,7 @@ Carte actuelle 4096² : comportement identique.
 - [x] GDScript relief_pyramid / relief_quadtree / terrain_builder (chunks_x × chunks_y) / caméra /
       shaders (défauts neutres) / landmark_v2 / life_ambient / cache status / schéma pyramide
 - [x] tests : `om1_wide_world_test.gd`, rs_k / zg4 / po5 lisent la taille
-- [ ] vérif : cargo test complet, build.sh, import, smoke, tests Godot touchés
+- [x] vérif : cargo test (160 ok), build.sh, import, smoke, om1_wide_world, rs_k, zg4, po5, pb3g, zg2, zg7b, zg7c, sz6, zg8, da7d, pb1 : OK
 
 ## Mémoire graphique estimée (textures de base, RGB8 promu RGBA8)
 4096² (16,8 Mpx) ≈ 0,53 Go ; 7168 × 6144 (44,0 Mpx) ≈ 1,38 Go. Dont relief_shade (LA8, 2 px/unité,
@@ -32,4 +32,4 @@ mipmaps) 179 → 470 Mo ; province_ids, border_dist, wetlands, splat (4 o) 67 �
 heightmap R16 + mipmaps 45 → 117 Mo ; coast_dist, river_bed (L8) 17 → 44 Mo.
 
 ## Prochaine étape
-Vérifications finales puis rapport.
+Terminé ; reste l’intégration avec OM2 (vraies données 7168 × 6144).
