@@ -68,7 +68,7 @@
     "owner": null,
     "fortification_level": 1,
     "buildings": [
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Cité épiscopale et son chapitre cathédral, dans la mouvance du comté d'Alençon.",
