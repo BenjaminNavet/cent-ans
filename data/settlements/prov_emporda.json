@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_castello_dempuries",
+    "province": "prov_emporda",
+    "kind": "castle",
+    "name": {
+      "display": "Castelló d'Empúries",
+      "local": "Castelló d'Empúries",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      3.0725,
+      42.2564
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Capitale historique du comté d'Empúries.",
+    "sources": [
+      "Castelló d'Empúries",
+      "Comté d'Empúries"
+    ]
+  },
+  {
+    "id": "set_figueres",
+    "province": "prov_emporda",
+    "kind": "town",
+    "name": {
+      "display": "Figueres",
+      "local": "Figueres",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      2.9622,
+      42.2662
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg marchand de l'Empordà.",
+    "sources": [
+      "Figueres"
+    ]
+  },
+  {
+    "id": "set_roses",
+    "province": "prov_emporda",
+    "kind": "town",
+    "name": {
+      "display": "Roses",
+      "local": "Roses",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      3.176,
+      42.2621
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de pêche antique (Rhode) sur le golfe de Roses.",
+    "sources": [
+      "Roses (Catalogne)"
+    ]
+  }
+]

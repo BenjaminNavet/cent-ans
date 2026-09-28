@@ -1,104 +1,91 @@
 {
-  "id": "prov_roussillon",
+  "id": "prov_cerdagne",
   "name": {
-    "display": "Roussillon et Cerdagne",
-    "local": "Rosselló",
+    "display": "Cerdagne",
+    "local": "Cerdanya",
     "local_language": "catalan"
   },
   "region": "aragon",
-  "terrain": "hills",
-  "climate": "mediterranean",
+  "terrain": "mountains",
+  "climate": "continental",
   "neighbors": [],
+  "coastal": false,
   "rivers": [
-    "Têt",
-    "Tech",
-    "Agly"
-  ],
-  "coastal": true,
-  "ports": [
-    "Collioure"
-  ],
-  "sea_zones": [
-    "sea_mediterranean"
+    "Sègre"
   ],
   "resources": [
-    "res_cloth",
-    "res_wine",
+    "res_wool",
+    "res_wood",
     "res_iron"
   ],
   "capital_city": {
     "name": {
-      "display": "Perpignan",
-      "local": "Perpinyà",
+      "display": "Puigcerdà",
+      "local": "Puigcerdà",
       "local_language": "catalan"
     },
-    "lat": 42.6887,
-    "lon": 2.8954
+    "lat": 42.4326,
+    "lon": 1.9287
   },
   "geo": {
     "capital_lonlat": [
-      2.8954,
-      42.6887
+      1.9287,
+      42.4326
     ],
     "seed_lonlat": [
-      2.5,
-      42.55
+      2.1,
+      42.5
     ],
-    "voronoi_weight": 0.7
+    "voronoi_weight": 0.4
   },
   "owner": "fac_majorca",
   "culture": "cul_catalan",
   "religion": "rel_catholic",
   "population": {
-    "uncertain": true,
-    "note": "Perpignan compte environ 12 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 70741,
+        "count": 28000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 16200,
+        "count": 3200,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2250,
+        "count": 900,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 809,
+        "count": 350,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       }
-    }
+    },
+    "uncertain": true,
+    "note": "Vallée pyrénéenne peu peuplée, transhumance ovine."
   },
   "buildings": [
     "bld_market",
-    "bld_parish_church",
-    "bld_water_mill",
-    "bld_port",
-    "bld_vineyard_press",
-    "bld_weaving_workshop",
-    "bld_stone_walls",
+    "bld_castle",
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 2500,
-  "description": "Comtés de Roussillon et de Cerdagne, terres continentales du royaume de Majorque (Jacques III) ; Perpignan, sa capitale drapière. Réunis à l'Aragon en 1344.",
+  "base_supply": 900,
+  "description": "Comté de Cerdagne, tenu par les rois de Majorque avec le Roussillon depuis le traité de Corbeil (1258) et le partage de 1276 ; abbaye de Saint-Michel-de-Cuxa au pied du massif du Canigou.",
   "sources": [
+    "Comté de Cerdagne",
     "Royaume de Majorque",
-    "Comté de Roussillon",
-    "Perpignan"
+    "Puigcerdà"
   ]
 }

@@ -1,0 +1,39 @@
+{
+  "id": "chr_arnau_roger_ii_de_pallars",
+  "name": {
+    "display": "Arnau Roger II de Pallars Sobirà",
+    "local": "Arnau Roger II de Pallars",
+    "local_language": "catalan"
+  },
+  "sex": "male",
+  "house": "Pallars-Mataplana",
+  "faction": "fac_pallars",
+  "role": "ruler",
+  "birth": {
+    "value": "1299"
+  },
+  "death": {
+    "value": "1343"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Pallars Sobirà"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_childless"
+  ],
+  "piety": 50,
+  "starting_location": "prov_pallars",
+  "status": "at_court",
+  "description": "Comte de Pallars Sobirà depuis 1330, trois fois marié (Alamande de Foix, Urraque d'Entença, Éléonore de Comminges) sans descendance ; à sa mort en 1343 le comté ira à son frère Ramon Roger II.",
+  "sources": [
+    "Arnau Roger II de Pallars Sobirà"
+  ]
+}

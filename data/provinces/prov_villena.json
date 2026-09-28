@@ -1,0 +1,90 @@
+{
+  "id": "prov_villena",
+  "name": {
+    "display": "Villena",
+    "local": "Villena",
+    "local_language": "castillan"
+  },
+  "region": "iberie_sud",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Vinalopó"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Villena",
+      "local": "Villena",
+      "local_language": "castillan"
+    },
+    "lat": 38.6333,
+    "lon": -0.8667
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.8667,
+      38.6333
+    ],
+    "seed_lonlat": [
+      -1.0,
+      38.75
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_villena",
+  "culture": "cul_castilian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 32000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1100,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 420,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Marches de Castille conquises sur Murcie/Valence au XIIIe s., population estimée par comparaison avec Murcie voisine."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1000,
+  "description": "Terre de Villena, constituée en seigneurie quasi souveraine par don Juan Manuel, neveu d'Alphonse X, auteur du Conde Lucanor et l'un des plus puissants nobles de Castille.",
+  "sources": [
+    "Juan Manuel, prince de Villena",
+    "Seigneurie de Villena"
+  ]
+}

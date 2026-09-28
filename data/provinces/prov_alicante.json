@@ -1,104 +1,100 @@
 {
-  "id": "prov_roussillon",
+  "id": "prov_alicante",
   "name": {
-    "display": "Roussillon et Cerdagne",
-    "local": "Rosselló",
+    "display": "Alicante",
+    "local": "Alacant",
     "local_language": "catalan"
   },
   "region": "aragon",
-  "terrain": "hills",
+  "terrain": "plains",
   "climate": "mediterranean",
   "neighbors": [],
-  "rivers": [
-    "Têt",
-    "Tech",
-    "Agly"
-  ],
   "coastal": true,
   "ports": [
-    "Collioure"
+    "Alicante",
+    "Elche"
   ],
   "sea_zones": [
     "sea_mediterranean"
   ],
+  "rivers": [
+    "Vinalopó",
+    "Segura"
+  ],
   "resources": [
-    "res_cloth",
+    "res_wheat",
     "res_wine",
-    "res_iron"
+    "res_fish"
   ],
   "capital_city": {
     "name": {
-      "display": "Perpignan",
-      "local": "Perpinyà",
+      "display": "Alicante",
+      "local": "Alacant",
       "local_language": "catalan"
     },
-    "lat": 42.6887,
-    "lon": 2.8954
+    "lat": 38.3452,
+    "lon": -0.481
   },
   "geo": {
     "capital_lonlat": [
-      2.8954,
-      42.6887
+      -0.481,
+      38.3452
     ],
     "seed_lonlat": [
-      2.5,
-      42.55
+      -0.65,
+      38.2
     ],
-    "voronoi_weight": 0.7
+    "voronoi_weight": 0.55
   },
-  "owner": "fac_majorca",
+  "owner": "fac_aragon",
   "culture": "cul_catalan",
   "religion": "rel_catholic",
   "population": {
-    "uncertain": true,
-    "note": "Perpignan compte environ 12 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 70741,
+        "count": 24000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 16200,
+        "count": 4200,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 2250,
+        "count": 900,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 809,
+        "count": 350,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       }
-    }
+    },
+    "uncertain": true,
+    "note": "Ancienne gouvernance d'Oriola, rattachée au royaume de Valence après la sentence arbitrale de Torrellas (1304) qui la retire au royaume de Murcie castillan."
   },
   "buildings": [
     "bld_market",
-    "bld_parish_church",
-    "bld_water_mill",
     "bld_port",
-    "bld_vineyard_press",
-    "bld_weaving_workshop",
-    "bld_stone_walls",
+    "bld_castle",
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 2500,
-  "description": "Comtés de Roussillon et de Cerdagne, terres continentales du royaume de Majorque (Jacques III) ; Perpignan, sa capitale drapière. Réunis à l'Aragon en 1344.",
+  "base_supply": 900,
+  "description": "Sud du royaume de Valence, autour d'Alicante, Elche et Orihuela ; frontière contestée avec la Castille jusqu'à la sentence de Torrellas (1304).",
   "sources": [
-    "Royaume de Majorque",
-    "Comté de Roussillon",
-    "Perpignan"
+    "Royaume de Valence",
+    "Alicante",
+    "Sentence arbitrale de Torrellas"
   ]
 }

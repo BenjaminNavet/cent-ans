@@ -1,0 +1,30 @@
+{
+  "id": "tit_valencia",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Valence",
+    "local": "Regne de València",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules, au chef échiqueté d'or et d'azur.",
+    "description": "Armes de la ville et du royaume de Valence, concédées par Jacques Ier le Conquérant.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "de_jure_provinces": [
+    "prov_valencia",
+    "prov_alicante"
+  ],
+  "holder_1337": {
+    "faction": "fac_aragon",
+    "sources": [
+      "Kingdom of Valencia",
+      "Pierre IV d'Aragon"
+    ]
+  },
+  "description": "Royaume conquis par Jacques Ier (1238), tenu directement par le roi d'Aragon ; ses Corts et ses fueros propres en font un royaume à part entière au sein de la couronne, non une simple province.",
+  "sources": [
+    "Kingdom of Valencia"
+  ]
+}

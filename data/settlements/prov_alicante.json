@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_alicante",
+    "province": "prov_alicante",
+    "kind": "town",
+    "name": {
+      "display": "Alicante",
+      "local": "Alacant",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.481,
+      38.3452
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Port principal du sud du royaume de Valence.",
+    "sources": [
+      "Alicante"
+    ]
+  },
+  {
+    "id": "set_elche",
+    "province": "prov_alicante",
+    "kind": "castle",
+    "name": {
+      "display": "Elche",
+      "local": "Elx",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.6971,
+      38.2622
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville fortifiée du Vinalopó, palmeraie héritée d'al-Andalus.",
+    "sources": [
+      "Elche"
+    ]
+  },
+  {
+    "id": "set_orihuela",
+    "province": "prov_alicante",
+    "kind": "town",
+    "name": {
+      "display": "Orihuela",
+      "local": "Oriola",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      -0.9453,
+      38.0847
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de la « Governació d'Oriola », frontière avec Murcie.",
+    "sources": [
+      "Orihuela"
+    ]
+  }
+]

@@ -1,0 +1,90 @@
+{
+  "id": "prov_ribagorca",
+  "name": {
+    "display": "Ribagorce",
+    "local": "Ribagorça",
+    "local_language": "catalan"
+  },
+  "region": "aragon",
+  "terrain": "mountains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Ésera"
+  ],
+  "resources": [
+    "res_wool",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Benabarre",
+      "local": "Benavarri",
+      "local_language": "catalan"
+    },
+    "lat": 42.1067,
+    "lon": 0.4772
+  },
+  "geo": {
+    "capital_lonlat": [
+      0.4772,
+      42.1067
+    ],
+    "seed_lonlat": [
+      0.35,
+      42.2
+    ],
+    "voronoi_weight": 0.35
+  },
+  "owner": "fac_ribagorca",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 17000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1700,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 320,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Comté pyrénéen à cheval sur l'Aragon et la Catalogne ; ancien siège épiscopal de Roda de Isábena."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 700,
+  "description": "Comté de Ribagorce, tenu en 1337 par l'infant Pierre d'Aragon, oncle de Pierre IV, avec le comté d'Empúries.",
+  "sources": [
+    "Comté de Ribagorce",
+    "Pierre d'Aragon, comte de Ribagorce et d'Empúries"
+  ]
+}

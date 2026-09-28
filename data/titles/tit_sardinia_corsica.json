@@ -1,0 +1,29 @@
+{
+  "id": "tit_sardinia_corsica",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Sardaigne et de Corse",
+    "local": "Regne de Sardenya i Còrsega",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix de gueules, cantonnée de quatre têtes de Maure de sable bandées d'argent.",
+    "description": "Les « quatre Maures » (quattro mori), symbole traditionnel de la Sardaigne et de la Corse.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_provinces": [
+    "prov_sardegna"
+  ],
+  "holder_1337": {
+    "faction": "fac_aragon",
+    "sources": [
+      "Kingdom of Sardinia",
+      "Kingdom of Aragon"
+    ]
+  },
+  "description": "Titre concédé par le pape Boniface VIII en 1297 ; conquête toujours en cours en 1337 face aux Doria et Malaspina génois et au Giudicato d'Arborea, qui ne reconnaît qu'une suzeraineté nominale.",
+  "sources": [
+    "Kingdom of Sardinia"
+  ]
+}
