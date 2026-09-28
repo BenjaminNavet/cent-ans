@@ -72,6 +72,10 @@ var _offers_box: VBoxContainer
 var _list: VBoxContainer
 var _minimap: CampaignMinimap
 var _map_hint: Label
+## Lot DZ : la carte montre les relations de la faction choisie (vrai) ou les nôtres.
+var _map_their_view := true
+var _map_view_toggle: CheckButton
+var _map_caption: Label
 var _head: VBoxContainer
 var _tab_buttons: Array[Button] = []
 var _pages: Array[Control] = []
@@ -248,6 +252,23 @@ func _build_map_column() -> Control:
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.add_theme_constant_override("separation", 6)
 	column.add_child(_section("Carte des relations"))
+	var view_row := HBoxContainer.new()  # DZ
+	view_row.add_theme_constant_override("separation", 8)
+	_map_caption = _label("", UiType.BODY, HudStyle.INK)
+	_map_caption.name = "MapViewCaption"
+	_map_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	view_row.add_child(_map_caption)
+	_map_view_toggle = CheckButton.new()
+	_map_view_toggle.name = "MapViewToggle"
+	_map_view_toggle.text = "Vue de la faction choisie"
+	_map_view_toggle.button_pressed = _map_their_view
+	_map_view_toggle.focus_mode = Control.FOCUS_NONE
+	_map_view_toggle.tooltip_text = "Coché : la carte montre les ennemis (rouge), neutres et alliés de la faction choisie. Décoché : vos propres relations."
+	_map_view_toggle.toggled.connect(func(on: bool) -> void:
+		_map_their_view = on
+		_render_map())
+	view_row.add_child(_map_view_toggle)
+	column.add_child(view_row)
 	var holder := CenterContainer.new()
 	holder.name = "MapHolder"
 	holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -716,12 +737,15 @@ func _render_map() -> void:
 	var snapshot := ProvinceSnapshot.of(sim, map_data)
 	# DP2 : mêmes couleurs que le mode « Diplomatie » de la carte et de la minicarte.
 	if DiplomaticStances.available(sim):
-		var stances := DiplomaticStances.stances(sim, ids)
+		# DZ : vue de la faction choisie (ses ennemis en rouge, ses terres en blanc).
+		var viewer := map_viewer()
+		_update_map_caption(viewer)
+		var stances := DiplomaticStances.stances(sim, ids, viewer)
 		var stance_colors := PackedColorArray()
 		for index in ids.size():
 			var key := stances[index] if index < stances.size() else ""
 			var stance_color := DiplomaticStances.color_of(key)
-			if key != "" and key != "self" and _selected != "" and _controller_of(snapshot, index) == _selected:
+			if viewer == "" and key != "" and key != "self" and _selected != "" and _controller_of(snapshot, index) == _selected:
 				stance_color = stance_color.lightened(0.3)
 			stance_colors.append(stance_color)
 		_minimap.set_province_colors(stance_colors)
@@ -745,6 +769,23 @@ func _render_map() -> void:
 			color = color.lightened(0.22)
 		colors.append(color)
 	_minimap.set_province_colors(colors)
+
+
+## DZ : faction dont la carte montre les relations ("" : le joueur).
+func map_viewer() -> String:
+	if not _map_their_view or _selected == "" or _selected == player_faction:
+		return ""
+	if sim == null or not sim.has_method("get_province_stances_for"):
+		return ""
+	return _selected
+
+
+func _update_map_caption(viewer: String) -> void:
+	if _map_caption == null:
+		return
+	_map_caption.text = "Relations de %s" % SimFacade.faction_short_name(viewer) if viewer != "" else "Vos relations"
+	if _map_view_toggle != null:
+		_map_view_toggle.visible = sim != null and sim.has_method("get_province_stances_for")
 
 
 ## Contrôleur de la province d'index `index` dans l'instantané groupé (RS-E : `ProvinceSnapshot`,
