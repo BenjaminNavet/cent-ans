@@ -1,0 +1,27 @@
+{
+  "id": "cdx_hafsides",
+  "title": "Le sultanat hafside de Tunis",
+  "category": "lieu",
+  "aliases": [
+    "Hafsides",
+    "sultanat hafside",
+    "Tunis hafside",
+    "Ifriqiya"
+  ],
+  "era": {
+    "from": "1229",
+    "to": "1574"
+  },
+  "summary": "Dynastie de Tunis, les Hafsides tiennent l'Ifriqiya et vivent du commerce avec Gênes, Pise, Venise et l'Aragon. Ils sont menacés en 1337 par l'expansion mérinide.",
+  "body": "Les Hafsides se sont émancipés des Almohades en 1229 et règnent depuis Tunis sur l'Ifriqiya. Leur sultan Abou Bakr II gouverne en 1337 un pays riche de ses ports et de ses foires, où les marchands italiens et catalans ont leurs fondouks.\n\nLa rivalité avec les Mérinides de Fès menace le royaume. Abou l-Hasan prend Tlemcen en mai 1337, ce qui met les Mérinides aux portes de l'Ifriqiya ; il entrera à Tunis en 1347, avant d'être battu à Kairouan en 1348.",
+  "entity": "fac_hafsids",
+  "see_also": [
+    "cdx_marinides",
+    "cdx_abu_al_hasan_ali"
+  ],
+  "sources": [
+    "Hafsides",
+    "Abu Yahya Abu Bakr II",
+    "Ifriqiya"
+  ]
+}

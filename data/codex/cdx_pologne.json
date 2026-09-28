@@ -1,0 +1,30 @@
+{
+  "id": "cdx_pologne",
+  "title": "Le royaume de Pologne de Casimir III",
+  "category": "lieu",
+  "aliases": [
+    "Pologne",
+    "royaume de Pologne",
+    "Casimir III",
+    "Cracovie",
+    "Kazimierz III"
+  ],
+  "era": {
+    "from": "1320",
+    "to": "1370"
+  },
+  "summary": "Réunifiée et couronnée en 1320 par Ladislas le Bref, la Pologne est en 1337 un royaume encore fragile : elle a perdu la Silésie et la Poméranie orientale, et fait face à l'Ordre teutonique.",
+  "body": "Morcelée en duchés depuis 1138, la Pologne se réunifie autour de Ladislas Ier le Bref, qui est couronné roi à Cracovie en 1320. Son fils Casimir III lui succède en 1333. Il hérite de guerres avec l'Ordre teutonique, qui tient la Poméranie orientale depuis 1308-1309 et occupe la Cuiavie, et avec la Bohême, dont les rois se disent aussi souverains des duchés de Silésie.\n\nEn 1335, à Visegrád, Casimir renonce à la Silésie au profit de Jean de Luxembourg, en échange de la reconnaissance de son titre royal. Il s'appuie sur son alliance avec Charles Robert de Hongrie, son beau-frère, et se tourne vers l'est, vers les principautés ruthènes de Galicie-Volhynie. Il fera de ce royaume, par ses forteresses et ses lois, un État durable.",
+  "entity": "fac_poland",
+  "see_also": [
+    "cdx_ordre_teutonique",
+    "cdx_hongrie_angevine",
+    "cdx_jean_de_luxembourg",
+    "cdx_lituanie"
+  ],
+  "sources": [
+    "Casimir III le Grand",
+    "Royaume de Pologne (1320-1385)",
+    "Congrès de Visegrád (1335)"
+  ]
+}
