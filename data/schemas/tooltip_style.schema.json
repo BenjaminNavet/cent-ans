@@ -38,6 +38,12 @@
       "type": "object",
       "propertyNames": {"$ref": "#/$defs/kind"},
       "additionalProperties": {"type": "array", "maxItems": 2, "items": {"type": "string"}}
+    },
+    "lower_is_better": {
+      "description": "Clés d'effet dont une hausse est défavorable (couleur rouge) : sens d'affichage seulement.",
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
     }
   }
 }
