@@ -39,6 +39,7 @@ pub mod battle_forecast;
 pub mod battle_outcome;
 pub mod battle_request;
 pub mod buildings;
+pub mod capture;
 pub mod characters;
 pub mod chivalry;
 pub mod chronicle;
@@ -97,6 +98,10 @@ pub use battle_auto::{
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
 pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
+pub use capture::{
+    CaptureDecisionView, CaptureEffects, CaptureError, CaptureOptionView, CaptureOutcome,
+    CaptureState, PendingCapture,
+};
 pub use chivalry::{ChivalryError, OrderState};
 pub use chronicle::{
     ChronicleError, ChronicleState, Decision, DecisionOptionView, DecisionView, EventContext,
@@ -140,5 +145,7 @@ pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};
 pub use weather::{MapWeather, ProvinceWeather};
 
+#[cfg(test)]
+mod capture_tests;
 #[cfg(test)]
 mod review_tests;

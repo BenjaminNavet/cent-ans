@@ -56,6 +56,9 @@ pub use entities::building::{Building, BuildingCategory};
 pub use entities::campaign_weather::{
     CampaignWeatherChances, CampaignWeatherRules, ClimateWeather, SeasonalWeather,
 };
+pub use entities::capture::{
+    CaptureAiRules, CaptureRules, OccupyRules, OutcomeRules, OutcomeScores, RazeRules,
+};
 pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Skills, Title};
 pub use entities::chivalric_order::ChivalricOrder;
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};

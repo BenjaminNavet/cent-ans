@@ -46,6 +46,8 @@ impl CampaignState {
         // auto-resolved first (M7).
         // CV3-3: encounters left unanswered take their default option.
         crate::encounter::resolve_unanswered(self, data, &mut events);
+        // TW2-T1: captures left unanswered stay simply occupied.
+        crate::capture::resolve_unanswered(self);
         battle_request::auto_resolve_all_pending(self, data, &mut events);
         crate::naval::auto_resolve_all_pending(self, data, &mut events);
 
