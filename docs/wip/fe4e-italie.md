@@ -43,3 +43,27 @@ héraldique des maisons, cartes front-end, portraits, régénération géo.
   Papauté/Empire avant ce lot) : retirés de ces listes, redondants avec les nouveaux titres
   `tit_bologna`/`tit_ferrara`/`tit_montferrat` qui les portent désormais comme domaine propre
   (règle « province dans exactement un titre »).
+
+## Correction majeure (settlements)
+
+En générant les colonies, j'ai découvert que plusieurs provinces existaient déjà dans `main` avec
+des colonies « graines » anticipant explicitement ce lot (mêmes id `set_*`, même coordonnées,
+descriptions déjà sourcées) : `prov_ancona` (Pérouse, Urbino, Assise, Gubbio en ville/châteaux),
+`prov_milano` (Pavie), `prov_firenze` (Pise, Sienne, Lucques), `prov_venezia` (Padoue, Praglia,
+Monselice). Repris ces entrées authentiques (au lieu de mes inventions) pour les colonies capitales
+des nouvelles provinces, retirées des fichiers parents, poids/population des provinces parentes
+réduits en conséquence (même méthode que pour Ferrare/Bologne).
+
+Découverte cruciale : la fiche `set_pavia` authentique précise que Pavie reste une commune gibeline
+dominée par la faction Beccaria et « ne tombera aux mains des Visconti qu'en 1359 » — Pavie n'est
+donc PAS milanaise en 1337. Corrigé : `fac_pavia` créée (13e nouvelle faction jouable, république
+gibeline indépendante, sans suzerain), `tit_pavia` et `prov_pavia.owner` passés de `fac_milan` à
+`fac_pavia`.
+
+De même, `set_urbino` authentique dit les Montefeltro « gibelins souvent en lutte contre le pouvoir
+pontifical » depuis 1234 : `tit_urbino` corrigé en titre souverain (pas de `de_jure_liege` vers
+`tit_papacy`), relation Urbin-Papauté passée de vassal/incertain à guerre.
+
+Total révisé : 15 nouvelles provinces à géométrie propre (+ Montferrat et Sicile réassignées),
+13 nouvelles factions jouables (Mantoue, Ferrare, Montferrat, Saluces, Pise, Sienne, Bologne,
+Pérouse, Urbin, Rimini, Sicile, Tarente, Pavie).

@@ -63,36 +63,6 @@
     ]
   },
   {
-    "id": "set_padova",
-    "province": "prov_venezia",
-    "kind": "town",
-    "name": {
-      "display": "Padoue",
-      "local": "Padoa",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      11.8768,
-      45.4064
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
-      "bld_university",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Seigneurie de Marsilio da Carrara, restaurée le 3 août 1337 avec l'appui de Venise et Florence après la domination scaligère ; université fondée en 1222.",
-    "sources": [
-      "Padoue",
-      "Marsilio da Carrara",
-      "Guerre scaligère"
-    ]
-  },
-  {
     "id": "set_chioggia",
     "province": "prov_venezia",
     "kind": "town",
@@ -117,32 +87,6 @@
     "description": "Port de pêche et de sel au sud de la lagune de Venise.",
     "sources": [
       "Chioggia"
-    ]
-  },
-  {
-    "id": "set_praglia",
-    "province": "prov_venezia",
-    "kind": "abbey",
-    "name": {
-      "display": "Praglia",
-      "local": "Praja",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      11.7315,
-      45.3287
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye bénédictine fondée vers 1080 près de Padoue.",
-    "sources": [
-      "Abbaye de Praglia"
     ]
   },
   {
@@ -195,31 +139,6 @@
     "sources": [
       "Este (Italie)",
       "Maison d'Este"
-    ]
-  },
-  {
-    "id": "set_monselice",
-    "province": "prov_venezia",
-    "kind": "village",
-    "name": {
-      "display": "Monselice",
-      "local": "Monsełexe",
-      "local_language": "vénitien"
-    },
-    "lonlat": [
-      11.7561,
-      45.2354
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg fortifié au pied de sa rocca, sur la route entre Padoue et Este.",
-    "sources": [
-      "Monselice"
     ]
   }
 ]

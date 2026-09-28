@@ -12,15 +12,14 @@
     "primary_color": "#F2C230",
     "secondary_color": "#111111"
   },
-  "de_jure_liege": "tit_papacy",
   "de_jure_provinces": [
     "prov_urbino"
   ],
   "holder_1337": {
     "faction": "fac_urbino",
-    "uncertain": true,
     "sources": [
-      "Urbin",
+      "Urbino",
+      "Montefeltro",
       "Maison de Montefeltro"
     ]
   },

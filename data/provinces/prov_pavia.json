@@ -38,7 +38,7 @@
     ],
     "voronoi_weight": 0.4
   },
-  "owner": "fac_milan",
+  "owner": "fac_pavia",
   "culture": "cul_lombard",
   "religion": "rel_catholic",
   "population": {
@@ -83,9 +83,9 @@
   ],
   "fortification_level": 3,
   "base_supply": 3800,
-  "description": "Ancienne capitale du royaume lombard, prise par Matteo Ier Visconti en 1315 et intégrée à la seigneurie de Milan ; université fondée dans le sillage des écoles épiscopales médiévales.",
+  "description": "Ancienne capitale du royaume lombard, commune gibeline dominée par la faction Beccaria ; en lutte constante avec les Guelfes Langosco, elle résiste aux visées milanaises et ne tombera aux mains des Visconti qu'en 1359.",
   "sources": [
     "Pavie",
-    "Matteo Ier Visconti"
+    "Beccaria (famille)"
   ]
 }
