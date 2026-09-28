@@ -238,6 +238,9 @@ pub struct TerrainProfiles {
     pub hills: String,
     pub mountains: String,
     pub marsh: String,
+    /// OM3 (ADR 0116): Pontic steppe and desert fields.
+    pub steppe: String,
+    pub desert: String,
 }
 
 impl TerrainProfiles {
@@ -250,6 +253,8 @@ impl TerrainProfiles {
             Terrain::Hills => &self.hills,
             Terrain::Mountains => &self.mountains,
             Terrain::Marsh => &self.marsh,
+            Terrain::Steppe => &self.steppe,
+            Terrain::Desert => &self.desert,
         }
     }
 }

@@ -53,6 +53,9 @@ pub struct RiverWidths {
     pub hills: Span,
     pub mountains: Span,
     pub marsh: Span,
+    /// OM3 (ADR 0116).
+    pub steppe: Span,
+    pub desert: Span,
 }
 
 impl RiverWidths {
@@ -65,6 +68,8 @@ impl RiverWidths {
             Terrain::Hills => self.hills,
             Terrain::Mountains => self.mountains,
             Terrain::Marsh => self.marsh,
+            Terrain::Steppe => self.steppe,
+            Terrain::Desert => self.desert,
         }
     }
 }
