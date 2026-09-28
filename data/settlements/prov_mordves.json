@@ -1,0 +1,73 @@
+[
+  {
+    "id": "set_mokhcha",
+    "province": "prov_mordves",
+    "kind": "city",
+    "name": {
+      "display": "Mokhcha (Moukcha)",
+      "local": "Мохша",
+      "local_language": "mordve (moksha, erzya)"
+    },
+    "lonlat": [
+      44.15,
+      53.6
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de l'ulus de Mokhcha (Moukchi), centre de la Horde chez les Mordves (localisation approximative).",
+    "sources": [
+      "Ulus de Mokhcha"
+    ]
+  },
+  {
+    "id": "set_ardatov",
+    "province": "prov_mordves",
+    "kind": "village",
+    "name": {
+      "display": "Ardatov",
+      "local": "Ардатов",
+      "local_language": "mordve (moksha, erzya)"
+    },
+    "lonlat": [
+      46.2,
+      54.85
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourgade erzya (localisation approximative).",
+    "sources": [
+      "Mordves"
+    ]
+  },
+  {
+    "id": "set_pourgaz",
+    "province": "prov_mordves",
+    "kind": "village",
+    "name": {
+      "display": "Pourgasova volost",
+      "local": "Пургасова волость",
+      "local_language": "mordve (moksha, erzya)"
+    },
+    "lonlat": [
+      44.0,
+      55.2
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Domaine de la lignée du prince erzya Pourgaz (localisation approximative, incertain).",
+    "sources": [
+      "Pourgaz"
+    ]
+  }
+]

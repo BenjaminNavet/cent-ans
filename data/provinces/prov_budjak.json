@@ -1,0 +1,98 @@
+{
+  "id": "prov_budjak",
+  "name": {
+    "display": "Boudjak",
+    "local": "Буджак",
+    "local_language": "tatar kiptchak"
+  },
+  "region": "horde",
+  "terrain": "steppe",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Dniestr",
+    "Danube",
+    "Prout"
+  ],
+  "ports": [
+    "Akkerman (Maurocastro)",
+    "Kilia (Licostomo)"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_salt",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Akkerman (Maurocastro)",
+      "local": "Aqkerman",
+      "local_language": "tatar kiptchak"
+    },
+    "lat": 46.19,
+    "lon": 30.34
+  },
+  "geo": {
+    "capital_lonlat": [
+      30.34,
+      46.19
+    ],
+    "seed_lonlat": [
+      29.4,
+      46.3
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_golden_horde",
+  "culture": "cul_kipchak",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 47500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 1000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 500,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1100,
+  "description": "Steppe du Boudjak entre Danube, Prout et Dniestr, prolongement occidental de la Horde d'Or (le voïvodat de Moldavie n'existe pas encore) ; Akkerman (Maurocastro) et Kilia voient passer les galères génoises.",
+  "sources": [
+    "Boudjak",
+    "Bessarabie"
+  ]
+}

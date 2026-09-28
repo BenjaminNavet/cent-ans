@@ -1,0 +1,52 @@
+{
+  "id": "fac_mordva",
+  "name": {
+    "display": "Principautés des Mordves",
+    "local": "Мордовская земля",
+    "local_language": "mordve"
+  },
+  "short_name": "Mordves",
+  "adjective": "mordve",
+  "government": "lordship",
+  "playable": true,
+  "capital": "prov_mordves",
+  "capital_city": "Mokhcha (Moukcha)",
+  "religion": "rel_pagan",
+  "culture": "cul_mordvin",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_mordva",
+  "heraldry": {
+    "blazon": "De sinople à la roue d'or.",
+    "description": "Blason de convention pour les Mordves.",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Pas d'héraldique attestée."
+  },
+  "titles": [
+    "Chef des Mordves"
+  ],
+  "treasury": 2500,
+  "prestige": 15,
+  "starting_technologies": [
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 45,
+    "trade": 35,
+    "piety": 55
+  },
+  "description": "Peuples finno-ougriens (Moksha et Erzya) païens entre l'Oka et la Soura, soumis à la Horde ; leur ancien chef Pourgaz s'était opposé aux Russes au XIIIe siècle ; les chefs de 1337 ne sont pas connus.",
+  "sources": [
+    "Mordves",
+    "Pourgaz"
+  ]
+}

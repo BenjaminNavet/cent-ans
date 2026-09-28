@@ -1,0 +1,95 @@
+{
+  "id": "prov_kouban",
+  "name": {
+    "display": "Kouban",
+    "local": "Кубань",
+    "local_language": "tatar kiptchak"
+  },
+  "region": "horde",
+  "terrain": "steppe",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Kouban"
+  ],
+  "ports": [
+    "Matrega (Taman)"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Matrega (Taman)",
+      "local": "Matarcha",
+      "local_language": "tatar kiptchak"
+    },
+    "lat": 45.22,
+    "lon": 36.72
+  },
+  "geo": {
+    "capital_lonlat": [
+      36.72,
+      45.22
+    ],
+    "seed_lonlat": [
+      39.6,
+      45.4
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_golden_horde",
+  "culture": "cul_kipchak",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 42750,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 900,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 450,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1100,
+  "description": "Steppe du Kouban et péninsule de Taman, marches de la Horde face aux Tcherkesses (Circassiens) et aux Alains du Caucase ; port de Matrega sur le détroit de Kertch.",
+  "sources": [
+    "Kouban",
+    "Taman"
+  ]
+}

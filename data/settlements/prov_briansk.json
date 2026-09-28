@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_briansk",
+    "province": "prov_briansk",
+    "kind": "city",
+    "name": {
+      "display": "Briansk",
+      "local": "Брянск",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      34.36,
+      53.25
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Place forte des forêts de la Desna.",
+    "sources": [
+      "Briansk"
+    ]
+  },
+  {
+    "id": "set_karatchev",
+    "province": "prov_briansk",
+    "kind": "town",
+    "name": {
+      "display": "Karatchev",
+      "local": "Карачев",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      34.98,
+      53.13
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de l'apanage de Karatchev.",
+    "sources": [
+      "Karatchev"
+    ]
+  },
+  {
+    "id": "set_troubtchevsk",
+    "province": "prov_briansk",
+    "kind": "town",
+    "name": {
+      "display": "Troubtchevsk",
+      "local": "Трубчевск",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      33.77,
+      52.58
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Desna moyenne (Troubetsk).",
+    "sources": [
+      "Troubtchevsk"
+    ]
+  }
+]

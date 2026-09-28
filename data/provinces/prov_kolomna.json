@@ -1,0 +1,90 @@
+{
+  "id": "prov_kolomna",
+  "name": {
+    "display": "Kolomna",
+    "local": "Коломна",
+    "local_language": "russe"
+  },
+  "region": "rus_centre",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Oka",
+    "Moskova"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kolomna",
+      "local": "Коломна",
+      "local_language": "russe"
+    },
+    "lat": 55.08,
+    "lon": 38.85
+  },
+  "geo": {
+    "capital_lonlat": [
+      38.85,
+      55.08
+    ],
+    "seed_lonlat": [
+      38.4,
+      55.0
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_moscow",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 62300,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2100,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1400,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Kolomna, prise à Riazan par Daniel de Moscou en 1301 : clef de l'Oka et verrou de la frontière riazanaise ; Serpoukhov complète la ligne de défense vers la steppe.",
+  "sources": [
+    "Kolomna",
+    "Serpoukhov"
+  ]
+}

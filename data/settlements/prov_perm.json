@@ -1,0 +1,73 @@
+[
+  {
+    "id": "set_tcherdyn",
+    "province": "prov_perm",
+    "kind": "city",
+    "name": {
+      "display": "Tcherdyn",
+      "local": "Чёрдынь",
+      "local_language": "komi (zyriane)"
+    },
+    "lonlat": [
+      56.49,
+      60.4
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Chef-lieu de la Perm de la Kama (attestation écrite tardive, XVe siècle ; site plus ancien).",
+    "sources": [
+      "Tcherdyn"
+    ]
+  },
+  {
+    "id": "set_oust_vym",
+    "province": "prov_perm",
+    "kind": "village",
+    "name": {
+      "display": "Oust-Vym",
+      "local": "Усть-Вым",
+      "local_language": "komi (zyriane)"
+    },
+    "lonlat": [
+      53.7,
+      62.2
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la Vym, centre des Permiens de la Vytchegda (emplacement approximatif).",
+    "sources": [
+      "Grand Perm"
+    ]
+  },
+  {
+    "id": "set_iskor",
+    "province": "prov_perm",
+    "kind": "village",
+    "name": {
+      "display": "Iskor",
+      "local": "Искор",
+      "local_language": "komi (zyriane)"
+    },
+    "lonlat": [
+      56.6,
+      60.55
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourgade fortifiée permienne de la haute Kama (emplacement approximatif).",
+    "sources": [
+      "Grand Perm"
+    ]
+  }
+]

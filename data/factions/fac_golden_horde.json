@@ -1,0 +1,108 @@
+{
+  "id": "fac_golden_horde",
+  "name": {
+    "display": "Horde d'Or (ulus de Djötchi)",
+    "local": "Ulugh Ulus",
+    "local_language": "kiptchak"
+  },
+  "short_name": "Horde d'Or",
+  "adjective": "de la Horde",
+  "government": "empire",
+  "playable": true,
+  "ruler": "chr_ozbeg",
+  "heir": "chr_tini_beg",
+  "capital": "prov_saray",
+  "capital_city": "Saraï",
+  "religion": "rel_islam",
+  "culture": "cul_kipchak",
+  "succession_law": "elective",
+  "primary_title": "tit_golden_horde",
+  "heraldry": {
+    "blazon": "De gueules à la lune d'or.",
+    "description": "Couleurs dynastiques des Djötchides (rouge et or) ; le croissant rappelle l'islam d'Özbeg. La tamga de la maison de Djötchi (trident) n'est pas rendue.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Les Mongols de la Horde n'ont pas d'héraldique ; blason de convention."
+  },
+  "titles": [
+    "Khan de la Horde d'Or",
+    "Souverain des Kiptchaks",
+    "Suzerain de la Rus'"
+  ],
+  "treasury": 40000,
+  "prestige": 85,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_royal_taxation",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Les Génois de Caffa tiennent leur comptoir par concession du khan ; conflit de Caffa en 1307-1308, paix depuis."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "peace",
+      "note": "Comptoir vénitien de Tana concédé par Özbeg en 1332-1333."
+    },
+    {
+      "faction": "fac_novgorod",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_moscow",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_tver",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_ryazan",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_suzdal",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_smolensk",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_briansk",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_haute_oka",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_mordva",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_bashkir",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_theodoro",
+      "status": "overlord"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 60,
+    "trade": 55,
+    "piety": 70
+  },
+  "description": "Empire nomade et marchand des steppes, du Danube à l'Oural, converti à l'islam sunnite sous Özbeg (1313-1341) ; suzerain de tous les princes russes, dont il perçoit le tribut (« vyhod ») et confirme les yarlyks. Sa capitale, Saraï, est l'une des plus grandes villes du monde.",
+  "sources": [
+    "Horde d'Or",
+    "Özbeg",
+    "Saraï (Horde d'Or)"
+  ]
+}

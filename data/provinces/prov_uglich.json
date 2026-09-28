@@ -1,0 +1,89 @@
+{
+  "id": "prov_uglich",
+  "name": {
+    "display": "Ouglitch",
+    "local": "Углич",
+    "local_language": "russe"
+  },
+  "region": "rus_centre",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Volga"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Ouglitch",
+      "local": "Углич",
+      "local_language": "russe"
+    },
+    "lat": 57.53,
+    "lon": 38.33
+  },
+  "geo": {
+    "capital_lonlat": [
+      38.33,
+      57.53
+    ],
+    "seed_lonlat": [
+      38.1,
+      57.6
+    ],
+    "voronoi_weight": 0.7
+  },
+  "owner": "fac_moscow",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 44500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 3000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1000,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_palisade"
+  ],
+  "fortification_level": 1,
+  "base_supply": 1000,
+  "description": "Ouglitch, sur la haute Volga, acquis par Ivan Kalita (v. 1328-1331, statut incertain) ; place de transit du sel et du grain.",
+  "sources": [
+    "Ouglitch",
+    "Ivan Ier de Moscou"
+  ]
+}

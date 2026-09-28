@@ -52,6 +52,11 @@
     {
       "faction": "fac_empire",
       "status": "vassal"
+    },
+    {
+      "faction": "fac_golden_horde",
+      "status": "peace",
+      "note": "Caffa et Cerco sont tenus par concession du khan Özbeg ; paix commerciale."
     }
   ],
   "ai_personality": {

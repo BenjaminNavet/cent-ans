@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_kostroma",
+    "province": "prov_kostroma",
+    "kind": "city",
+    "name": {
+      "display": "Kostroma",
+      "local": "Кострома",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      40.93,
+      57.77
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de la Volga, apanage des grands-princes de Vladimir.",
+    "sources": [
+      "Kostroma"
+    ]
+  },
+  {
+    "id": "set_galitch",
+    "province": "prov_kostroma",
+    "kind": "town",
+    "name": {
+      "display": "Galitch",
+      "local": "Галич",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      42.37,
+      58.38
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Galitch-Mersky, ville du lac de Galitch (rattachée à Moscou en 1330-1340, date incertaine).",
+    "sources": [
+      "Galitch (Russie)"
+    ]
+  },
+  {
+    "id": "set_ipatiev",
+    "province": "prov_kostroma",
+    "kind": "abbey",
+    "name": {
+      "display": "Monastère Ipatiev",
+      "local": "Ипатьевский монастырь",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      40.94,
+      57.77
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère fondé vers 1330 sur la Kostroma.",
+    "sources": [
+      "Monastère Ipatiev"
+    ]
+  }
+]

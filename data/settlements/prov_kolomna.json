@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_kolomna",
+    "province": "prov_kolomna",
+    "kind": "city",
+    "name": {
+      "display": "Kolomna",
+      "local": "Коломна",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      38.85,
+      55.08
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de l'Oka, conquise sur Riazan en 1301.",
+    "sources": [
+      "Kolomna"
+    ]
+  },
+  {
+    "id": "set_serpoukhov",
+    "province": "prov_kolomna",
+    "kind": "town",
+    "name": {
+      "display": "Serpoukhov",
+      "local": "Серпухов",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      37.41,
+      54.92
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Place forte de l'Oka du sud (apanage à partir de 1341).",
+    "sources": [
+      "Serpoukhov"
+    ]
+  },
+  {
+    "id": "set_kachira",
+    "province": "prov_kolomna",
+    "kind": "village",
+    "name": {
+      "display": "Kachira",
+      "local": "Кашира",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      38.15,
+      54.85
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de l'Oka (fondation de date incertaine).",
+    "sources": [
+      "Kachira"
+    ]
+  }
+]

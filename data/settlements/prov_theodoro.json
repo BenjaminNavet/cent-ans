@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_mangoup",
+    "province": "prov_theodoro",
+    "kind": "city",
+    "name": {
+      "display": "Mangoup",
+      "local": "Μαγκούπ",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      33.8,
+      44.6
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville-forteresse sur un plateau, capitale de Théodoro.",
+    "sources": [
+      "Mangoup"
+    ]
+  },
+  {
+    "id": "set_kalamita",
+    "province": "prov_theodoro",
+    "kind": "castle",
+    "name": {
+      "display": "Kalamita (Inkerman)",
+      "local": "Καλαμίτα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      33.6,
+      44.61
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse de la Tchernaïa, port de Théodoro (statut en 1337 incertain).",
+    "sources": [
+      "Inkerman"
+    ]
+  },
+  {
+    "id": "set_kyrk_or",
+    "province": "prov_theodoro",
+    "kind": "village",
+    "name": {
+      "display": "Skhary",
+      "local": "Σχάρι",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      33.95,
+      44.55
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourgade montagnarde de Gothie (emplacement approximatif, incertain).",
+    "sources": [
+      "Théodoro"
+    ]
+  }
+]
