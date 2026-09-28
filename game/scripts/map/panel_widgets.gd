@@ -120,7 +120,7 @@ static func _raze_button(building_id: String, preview: Dictionary, on_raze: Call
 	var button := Button.new()
 	button.name = "RazeButton"
 	button.text = "Raser"
-	IconLibrary.decorate_button(button, "act_cancel_build", int(ROW_ICON))
+	IconLibrary.decorate_button(button, "act_raze", int(ROW_ICON))
 	var can_demolish: bool = bool(preview.get("can_demolish", false))
 	button.disabled = not can_demolish
 	var refund := int(preview.get("refund", 0))
