@@ -118,6 +118,8 @@ pub struct CampaignSim {
 #[godot_api]
 impl IRefCounted for CampaignSim {
     fn init(base: Base<RefCounted>) -> Self {
+        // FE5 (ADR 0110): the feudal decisions and their preview use the AI's scores.
+        ai::feudal::install();
         CampaignSim {
             data: None,
             state: None,

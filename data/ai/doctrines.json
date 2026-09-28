@@ -137,5 +137,13 @@
         "unit_routiers": 5
       }
     }
+  },
+  "rank_strategies": {
+    "county": {
+      "id": "survival_first",
+      "description": "Survie d'abord (lot FE5) : un comté ne déclare la guerre que s'il pèse, avec ses alliés, nettement plus que la cible, ses alliés et les suzerains qui viendraient la protéger ; menacé par un voisin bien plus fort, un comté souverain cherche un protecteur (hommage à un seigneur ami).",
+      "min_war_power_ratio": 1.5,
+      "seek_protection_power_ratio": 3.0
+    }
   }
 }
