@@ -15,6 +15,14 @@ vers `main`. ADR réservés : **0100** (lot B ; 0098 pris par FE), **0099** (lot
 
 - P2c **fusionné** (67171a61) : smoke, `p2c_ui_test`, `po_ui_test` verts.
 - B : agent de reprise dans son worktree (century_probe 4 niveaux, 2 × 75), puis intégration.
+- **B fusionné** (ADR 0100 acceptée ; century_probe 4 niveaux dans la bande, voir `rs-b-order.md`).
+  Conflit sémantique B × TW2 (`capture.rs` appelait `province_income` sans règles) : main ne compilait
+  plus, corrigé 38954b4f.
+- **P2g fusionné** (48f1a5f8) : Tech/Cour/Fiche/Diplo/SaveLoadDialog en zone `MODAL` ; le voile couvre
+  la barre du haut (bible § 12.1). Incident : `q3_playtest.gd` lancé par l'agent a réécrit le
+  `settings.cfg` du joueur (`advisor_seen` vidé).
+- En cours : **C** (`feat/rs-c-diplo`, plafond par motif, démolition IA), **L** (`feat/rs-l-alerts`,
+  champ de siège au pont pour `alerts.gd`). P2d attend TW2 T4 (UI de capture).
 - Vague 3 lancée : **P2g** (`feat/p2g-layout`, Tech/Diplo/Cour/Fiche/SaveLoadDialog dans `UiLayout`),
   **K perf** (`feat/rs-k-perf`, `TownLayer` ~10 ms, `qt/collect`). `alerts.gd` (champ de siège au pont)
   attend TW2 SB (même zone) ; C après B ; P2d après TW2 SB ; P2f en dernier.
