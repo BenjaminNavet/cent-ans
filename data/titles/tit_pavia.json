@@ -1,0 +1,39 @@
+{
+  "id": "tit_pavia",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Pavie",
+    "local": "Signoria di Pavia",
+    "local_language": "lombard"
+  },
+  "de_jure_provinces": [
+    "prov_pavia"
+  ],
+  "holder_1337": {
+    "faction": "fac_pavia",
+    "uncertain": true,
+    "sources": [
+      "Pavie",
+      "Beccaria (famille)"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_pavia_hold",
+      "title": "Garder la commune",
+      "description": "Pavie doit rester libre.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_pavia"
+      }
+    },
+    {
+      "id": "obj_pavia_independence",
+      "title": "Résister à Milan",
+      "description": "Demeurer libre face aux visées milanaises (Pavie tombera aux Visconti en 1359).",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ]
+}

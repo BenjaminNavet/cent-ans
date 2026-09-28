@@ -1,0 +1,58 @@
+{
+  "id": "fac_pisa",
+  "name": {
+    "display": "République de Pise",
+    "local": "Repubblica di Pisa",
+    "local_language": "toscan"
+  },
+  "short_name": "Pise",
+  "adjective": "pisan",
+  "government": "republic",
+  "playable": true,
+  "capital": "prov_pisa",
+  "capital_city": "Pise",
+  "religion": "rel_catholic",
+  "culture": "cul_tuscan",
+  "succession_law": "elective",
+  "primary_title": "tit_pisa",
+  "heraldry": {
+    "blazon": "D'azur à la croix alésée d'argent.",
+    "description": "Croix couronnée alésée pour distinguer visuellement Pise de la Savoie (mêmes tinctures que la croix pisane traditionnelle, rendues par un tracé différent).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "République de Pise"
+  ],
+  "treasury": 14000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_genoa",
+      "status": "truce",
+      "note": "Rivalité maritime séculaire, décisive depuis la défaite de la Meloria (1284)."
+    },
+    {
+      "faction": "fac_florence",
+      "status": "peace",
+      "note": "Statut incertain en 1337 ; pas de guerre ouverte connue."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 45,
+    "trade": 70,
+    "piety": 40
+  },
+  "description": "République gibeline sur l'Arno, affaiblie depuis la mort de Castruccio Castracani en 1328 ; gouvernée par ses Anciens, sans capitaine du peuple stable.",
+  "sources": [
+    "République de Pise",
+    "Castruccio Castracani"
+  ]
+}

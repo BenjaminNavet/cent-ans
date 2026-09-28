@@ -1,0 +1,47 @@
+{
+  "id": "tit_urbino",
+  "rank": "county",
+  "name": {
+    "display": "Comté d'Urbin",
+    "local": "Contea di Urbino",
+    "local_language": "marchigian"
+  },
+  "heraldry": {
+    "blazon": "D'or à l'aigle de sable.",
+    "description": "Aigle noire sur or, motif attribué aux Montefeltro au XIVe siècle ; les armes exactes de cette période restent incertaines (le blason ducal fixé au XVe siècle ne s'applique pas encore).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "de_jure_provinces": [
+    "prov_urbino"
+  ],
+  "holder_1337": {
+    "faction": "fac_urbino",
+    "sources": [
+      "Urbino",
+      "Montefeltro",
+      "Maison de Montefeltro"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_urbino_hold",
+      "title": "Garder le comté",
+      "description": "Les Montefeltro doivent conserver Urbin.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_urbino"
+      }
+    },
+    {
+      "id": "obj_urbino_rimini",
+      "title": "Abaisser Rimini",
+      "description": "Soumettre les rivaux guelfes Malatesta de Rimini.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_rimini"
+      }
+    }
+  ]
+}

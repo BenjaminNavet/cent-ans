@@ -1,0 +1,46 @@
+{
+  "id": "tit_mantova",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Mantoue",
+    "local": "Signoria di Mantova",
+    "local_language": "lombard"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix pattée de gueules.",
+    "description": "Armes primitives de la maison Gonzague, avant les augmentations impériales postérieures.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_mantova"
+  ],
+  "holder_1337": {
+    "faction": "fac_mantua",
+    "sources": [
+      "Mantoue",
+      "Louis Ier Gonzague"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_mantua_hold",
+      "title": "Garder la seigneurie",
+      "description": "Les Gonzague doivent conserver Mantoue.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_mantova"
+      }
+    },
+    {
+      "id": "obj_mantua_independence",
+      "title": "S'affranchir de l'Empire",
+      "description": "Mettre fin au vicariat impérial et régner en toute souveraineté.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "chr_luigi_i_gonzaga",
+  "name": {
+    "display": "Louis Ier Gonzague",
+    "local": "Luigi Gonzaga",
+    "local_language": "italien"
+  },
+  "sex": "male",
+  "house": "Gonzaga",
+  "faction": "fac_mantua",
+  "role": "ruler",
+  "birth": {
+    "value": "1268"
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_cunning"
+  ],
+  "piety": 40,
+  "starting_location": "prov_mantova",
+  "status": "at_court",
+  "description": "Capitaine du peuple qui a renversé les Bonacolsi en 1328 avec l'appui de Cangrande della Scala ; acquiert le vicariat impérial en 1329. Gouverne encore à 69 ans, associant déjà son fils Guido au pouvoir.",
+  "sources": [
+    "Louis Ier Gonzague",
+    "Mantoue"
+  ],
+  "titles": [
+    {
+      "title": "Seigneur de Mantoue",
+      "from": {
+        "value": "1328-08-16"
+      }
+    },
+    {
+      "title": "Vicaire impérial",
+      "from": {
+        "value": "1329"
+      }
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "id": "prov_mantova",
+  "name": {
+    "display": "Mantoue",
+    "local": "Mantova",
+    "local_language": "lombard"
+  },
+  "region": "italie_nord",
+  "terrain": "marsh",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Mincio"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Mantoue",
+      "local": "Mantova",
+      "local_language": "lombard"
+    },
+    "lat": 45.1564,
+    "lon": 10.7982
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.7982,
+      45.1564
+    ],
+    "seed_lonlat": [
+      10.85,
+      45.1
+    ],
+    "voronoi_weight": 0.55
+  },
+  "owner": "fac_mantua",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 70000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ville-lacs sur le Mincio ; population estimée par comparaison avec les cités lombardes voisines de taille comparable."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_water_mill",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4200,
+  "description": "Seigneurie des Gonzague, qui ont renversé les Bonacolsi en 1328 ; la ville, ceinte de lacs artificiels sur le Mincio, tient un vicariat impérial depuis 1329.",
+  "sources": [
+    "Mantoue",
+    "Louis Ier Gonzague"
+  ]
+}

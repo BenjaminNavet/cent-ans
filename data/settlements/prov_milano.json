@@ -34,33 +34,6 @@
     ]
   },
   {
-    "id": "set_pavia",
-    "province": "prov_milano",
-    "kind": "town",
-    "name": {
-      "display": "Pavie",
-      "local": "Pavia",
-      "local_language": "lombard"
-    },
-    "lonlat": [
-      9.1582,
-      45.1847
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Ancienne capitale du royaume lombard, commune gibeline dominée par les Beccaria ; elle ne tombera aux mains des Visconti qu'en 1359.",
-    "sources": [
-      "Pavie"
-    ]
-  },
-  {
     "id": "set_como",
     "province": "prov_milano",
     "kind": "town",
