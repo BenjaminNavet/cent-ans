@@ -10,10 +10,25 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use data_model::{FactionId, GameData, ProvinceId, TitleId};
+use data_model::{CharacterId, FactionId, GameData, ProvinceId, TitleId};
 use serde::{Deserialize, Serialize};
 
 use crate::state::CampaignState;
+
+mod felony;
+mod inherit;
+mod objectives;
+mod transfer;
+
+pub use felony::{
+    has_forfeiture, on_host_refused, on_revolt, open_felony_towards, settle_forfeitures,
+};
+pub(crate) use inherit::{contested_succession, inherit_titles_on_extinction};
+pub(crate) use objectives::resolve_feudal;
+pub use objectives::{generic_victory, objective_status, GenericVictory};
+pub use transfer::{
+    conquer_title, grant_title, on_faction_destroyed, vacate_title, Grantee, TitleDemandOutcome,
+};
 
 /// Guard against malformed hierarchies (the data allows three levels).
 const MAX_DEPTH: usize = 4;
@@ -30,25 +45,92 @@ pub struct FeudalState {
     /// Open felony cases (§ 4.4), filled from F2/F3.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub felonies: Vec<FelonyCase>,
+    /// Forfeitures declared and not yet settled by a peace (§ 4.4, F3).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub forfeitures: Vec<Forfeiture>,
+    /// Contested successions arbitrated so far (§ 4.5, F3), newest last.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub disputes: Vec<SuccessionDispute>,
+    /// Crown above each faction's primary title in 1337: the factions that
+    /// started as vassals, and the crown of their generic victory (§ 4.8).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub start_crowns: BTreeMap<FactionId, TitleId>,
+    /// Consecutive turns towards the generic victories (§ 4.8, F3).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub streaks: BTreeMap<FactionId, VictoryStreaks>,
+    /// Historical objectives already announced as met (id per faction).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub objectives_met: BTreeMap<FactionId, BTreeSet<String>>,
 }
 
 impl FeudalState {
     /// The spring 1337 holdings of `data`.
     pub fn from_data(data: &GameData) -> Self {
+        let primary: BTreeMap<FactionId, TitleId> = data
+            .factions
+            .iter()
+            .filter_map(|(id, f)| f.primary_title.clone().map(|t| (id.clone(), t)))
+            .collect();
+        let start_crowns = primary
+            .iter()
+            .filter_map(|(faction, title)| {
+                let crown = objectives::crown_above(data, title)?;
+                (crown != *title).then(|| (faction.clone(), crown))
+            })
+            .collect();
         FeudalState {
             holders: data
                 .titles
                 .iter()
                 .map(|(id, title)| (id.clone(), title.holder_1337.faction.clone()))
                 .collect(),
-            primary: data
-                .factions
-                .iter()
-                .filter_map(|(id, f)| f.primary_title.clone().map(|t| (id.clone(), t)))
-                .collect(),
+            primary,
             felonies: Vec::new(),
+            forfeitures: Vec::new(),
+            disputes: Vec::new(),
+            start_crowns,
+            streaks: BTreeMap::new(),
+            objectives_met: BTreeMap::new(),
         }
     }
+}
+
+/// A forfeiture declared by `liege` against `vassal` (§ 4.4): the war runs
+/// against the felon alone; at the peace, `titles` go to the liege if it won.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Forfeiture {
+    pub liege: FactionId,
+    pub vassal: FactionId,
+    pub titles: Vec<TitleId>,
+    pub declared_turn: u32,
+}
+
+/// A contested succession arbitrated by the suzerain (§ 4.5).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SuccessionDispute {
+    /// Faction whose ruler died.
+    pub faction: FactionId,
+    /// Its primary title, the prize.
+    pub title: TitleId,
+    pub claimants: Vec<CharacterId>,
+    /// Suzerain who judged (holder of the title above).
+    pub arbiter: FactionId,
+    pub winner: CharacterId,
+    /// Faction that took up the loser's cause and went to war, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sponsor: Option<FactionId>,
+    pub turn: u32,
+}
+
+/// Consecutive turns spent on each generic victory path (§ 4.8).
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct VictoryStreaks {
+    /// Turns without a suzerain.
+    #[serde(default)]
+    pub independent: u32,
+    /// Turns as the most powerful direct vassal of the crown's holder.
+    #[serde(default)]
+    pub first_vassal: u32,
 }
 
 /// Why a felony case was opened (§ 4.4).
@@ -77,6 +159,18 @@ pub enum FeudalError {
     NoFelonyCase(FactionId),
     #[error("titre inconnu {0}")]
     UnknownTitle(TitleId),
+    #[error("faction inconnue ou disparue {0}")]
+    DeadFaction(FactionId),
+    #[error("{0} ne détient pas le titre {1}")]
+    NotHolder(FactionId, TitleId),
+    #[error("{0} ne tient aucun titre de {1}")]
+    NotVassal(FactionId, FactionId),
+    #[error("personnage inconnu, mort ou déjà souverain : {0}")]
+    InvalidGrantee(CharacterId),
+    #[error("guerre impossible : {0}")]
+    War(String),
+    #[error("on ne concède pas son titre principal {0}")]
+    PrimaryTitle(TitleId),
 }
 
 /// Estimated answer of a suzerain called to war (§ 4.3, F2).
@@ -134,14 +228,17 @@ pub fn titles_of(state: &CampaignState, faction: &FactionId) -> Vec<TitleId> {
 }
 
 /// Direct suzerain of `faction` (§ 3.3): holder of the first title above
-/// its primary title that it does not hold itself; `None` when sovereign.
+/// its primary title that it does not hold itself; `None` when sovereign,
+/// or when that title is vacant (§ 4.7: the vassals of a vacant title are
+/// independent, the maxim forbids reaching past it).
 pub fn liege_of(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<FactionId> {
     let mut title = state.feudal.primary.get(faction)?;
     for _ in 0..MAX_DEPTH {
         title = data.titles.get(title)?.de_jure_liege.as_ref()?;
         match holder_of(state, title) {
             Some(holder) if holder != faction => return Some(holder.clone()),
-            _ => {}
+            Some(_) => {}
+            None => return None,
         }
     }
     None
@@ -253,43 +350,55 @@ pub fn war_escalation_preview(
     Vec::new()
 }
 
-/// Opens a felony case of `vassal` against its direct suzerain (§ 4.4).
-/// Filled by F3.
+/// Opens a felony case of `vassal` against its direct suzerain (§ 4.4):
+/// refused host, alliance with the suzerain's enemy or revolt. The case
+/// stays open `feudal_rules.felony_window_turns` turns; `None` when the
+/// vassal has no suzerain. See [`open_felony_towards`] for a title vassal
+/// (England towards France through Guyenne).
 pub fn open_felony(
-    _state: &mut CampaignState,
-    _data: &GameData,
-    _vassal: &FactionId,
-    _reason: FelonyReason,
+    state: &mut CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+    reason: FelonyReason,
 ) -> Option<FelonyCase> {
-    None
+    let liege = liege_of(state, data, vassal)?;
+    open_felony_towards(state, data, vassal, &liege, reason)
 }
 
-/// `liege` declares forfeiture against `vassal` (§ 4.4). Filled by F3.
+/// `liege` declares forfeiture against `vassal` (§ 4.4): needs an open
+/// felony case; a casus belli against the felon alone. The titles `vassal`
+/// holds of `liege` go to `liege` at the peace if it wins
+/// ([`settle_forfeitures`]).
 pub fn declare_commise(
-    _state: &mut CampaignState,
-    _data: &GameData,
-    _liege: &FactionId,
+    state: &mut CampaignState,
+    data: &GameData,
+    liege: &FactionId,
     vassal: &FactionId,
 ) -> Result<(), FeudalError> {
-    Err(FeudalError::NoFelonyCase(vassal.clone()))
+    felony::declare_commise(state, data, liege, vassal)
 }
 
-/// Gives `title` to `to` (§ 4.5-4.7). F0 only moves the holding; unions,
-/// new and vanished factions, vacant liege titles come with F3.
+/// Gives `title` to `to` (§ 4.5-4.7): the title's own provinces owned by
+/// the former holder follow it; `to` takes it as primary title if it is its
+/// highest; a former holder left without any title vanishes into `to`
+/// (personal union, forfeiture of a last fief). Events go to the journal of
+/// the next turn.
 pub fn transfer_title(
     state: &mut CampaignState,
     data: &GameData,
     title: &TitleId,
     to: &FactionId,
 ) -> Result<(), FeudalError> {
-    if !data.titles.contains_key(title) {
-        return Err(FeudalError::UnknownTitle(title.clone()));
+    let mut events = Vec::new();
+    transfer::transfer(state, data, title, to, &mut events)?;
+    for event in events {
+        state.push_order_event(event);
     }
-    state.feudal.holders.insert(title.clone(), to.clone());
     Ok(())
 }
 
-/// Historical objectives of every faction (§ 4.8). Filled by F3.
-pub fn evaluate_objectives(_state: &CampaignState, _data: &GameData) -> Vec<ObjectiveProgress> {
-    Vec::new()
+/// Historical objectives of every living faction whose primary title has
+/// some (§ 4.8), evaluated against the current state.
+pub fn evaluate_objectives(state: &CampaignState, data: &GameData) -> Vec<ObjectiveProgress> {
+    objectives::evaluate_objectives(state, data)
 }

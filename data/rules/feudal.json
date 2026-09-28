@@ -22,5 +22,12 @@
     "peer_forfeiture": -10,
     "liege_defeat": -5,
     "rival_claimant": -15
+  },
+  "forfeiture_win_war_score": 10,
+  "title_loss_penalty": 30,
+  "arbitration": {
+    "family_tie": 20,
+    "law_heir": 10,
+    "designated_heir": 5
   }
 }

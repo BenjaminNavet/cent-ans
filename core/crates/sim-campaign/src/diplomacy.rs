@@ -340,6 +340,9 @@ impl CampaignState {
     /// The casus belli `a` holds against `b`, if any (French label).
     pub fn casus_belli(&self, data: &GameData, a: &FactionId, b: &FactionId) -> Option<String> {
         let fa = self.factions.get(a)?;
+        if crate::feudal::has_forfeiture(self, a, b) {
+            return Some("commise".to_owned()); // FE (F3)
+        }
         for claim in &fa.claims {
             match claim.kind {
                 ClaimKind::Throne if claim.faction.as_ref() == Some(b) => {
@@ -1144,6 +1147,7 @@ impl CampaignState {
         tribute: i64,
         truce_turns: u32,
     ) {
+        self.settle_forfeitures_at_peace(data, a, b); // FE (F3), before war scores clear
         let until = self.turn + truce_turns;
         for (x, y) in [(a, b), (b, a)] {
             let f = self.factions.get_mut(x).expect("exists");
@@ -1810,6 +1814,7 @@ pub(crate) fn resolve_diplomacy(
         {
             state.cut_vassal_tie(&vassal, &suzerain);
             state.start_war(&vassal, &suzerain);
+            crate::feudal::on_revolt(state, data, &vassal, &suzerain); // FE (F3)
             events.push(
                 GameEvent::new(
                     EventKind::VassalRebellion,
