@@ -42,9 +42,7 @@
     "weight": 10,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Port de la Vistule où transitent les grains vers Gdańsk, sous château royal.",
     "sources": [
@@ -67,9 +65,7 @@
     "weight": 8,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Ancien chef-lieu de châtellenie de la terre de Lublin, bourg de marché au sud de la ville.",
     "sources": [

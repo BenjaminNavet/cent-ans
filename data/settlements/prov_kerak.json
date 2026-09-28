@@ -66,9 +66,7 @@
     "weight": 3,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_port"
-    ],
+    "buildings": [],
     "port": true,
     "description": "Petit port de la mer Rouge, sur la route du hajj.",
     "sources": [

@@ -67,9 +67,7 @@
     "weight": 6,
     "owner": null,
     "fortification_level": 0,
-    "buildings": [
-      "bld_market"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Poste de douane sur l'Olt, sur la route des marchands de Brașov (première mention 1368, à préciser).",
     "sources": [

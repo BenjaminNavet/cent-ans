@@ -51,7 +51,7 @@
       "bld_market",
       "bld_port",
       "bld_stone_walls",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": true,
     "sea_zone": "sea_aegean",

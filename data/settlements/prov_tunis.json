@@ -23,7 +23,8 @@
       "bld_muster_field",
       "bld_port",
       "bld_weaving_workshop",
-      "bld_university"
+      "bld_university",
+      "bld_collegiate_church"
     ],
     "port": true,
     "description": "Capitale hafside, grande mosquée al-Zaytuna et fondouks des marchands italiens et catalans.",

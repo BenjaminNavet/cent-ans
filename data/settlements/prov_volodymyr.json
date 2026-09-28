@@ -44,7 +44,7 @@
     "fortification_level": 2,
     "buildings": [
       "bld_castle",
-      "bld_cathedral"
+      "bld_collegiate_church"
     ],
     "port": false,
     "description": "Ville de fondation de Daniel de Galicie, évêché orthodoxe.",

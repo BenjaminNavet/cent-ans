@@ -71,7 +71,6 @@
     "owner": null,
     "fortification_level": 3,
     "buildings": [
-      "bld_market",
       "bld_castle",
       "bld_muster_field"
     ],
