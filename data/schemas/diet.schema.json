@@ -32,7 +32,7 @@
         "terrains": {
           "type": "array",
           "description": "Terrains admis (vide : tous).",
-          "items": { "type": "string", "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage"] },
+          "items": { "type": "string", "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"] },
           "uniqueItems": true
         }
       },

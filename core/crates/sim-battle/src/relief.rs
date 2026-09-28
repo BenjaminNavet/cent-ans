@@ -88,7 +88,8 @@ impl ReliefStyle {
             defender_rise: 0.0,
         };
         match terrain {
-            Terrain::Plains => base,
+            // OM3 (ADR 0116): steppe and desert reuse the plains relief.
+            Terrain::Plains | Terrain::Steppe | Terrain::Desert => base,
             Terrain::Heath => ReliefStyle {
                 macro_amp: 4.5,
                 macro_wavelength: 600.0,

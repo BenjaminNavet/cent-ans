@@ -8,7 +8,9 @@
     "forest": "plaine",
     "hills": "coteaux",
     "mountains": "montagne",
-    "marsh": "marais"
+    "marsh": "marais",
+    "steppe": "steppe",
+    "desert": "desert"
   },
   "profiles": {
     "plaine": {
@@ -179,6 +181,40 @@
       "orchards": [0, 1],
       "ploughland": [1, 2],
       "meadows": [3, 5],
+      "hedgerows": false
+    },
+    "steppe": {
+      "label": "Steppe (pâtures ouvertes, rares villages)",
+      "provinces": [],
+      "hamlets": [0, 1],
+      "farmsteads": [0, 2],
+      "street_share": 0.2,
+      "stone_share": 0.1,
+      "windmill_chance": 0.05,
+      "watermill_chance": 0.3,
+      "manor_chance": 0.05,
+      "moat_chance": 0.0,
+      "vineyards": [0, 0],
+      "orchards": [0, 0],
+      "ploughland": [0, 2],
+      "meadows": [3, 5],
+      "hedgerows": false
+    },
+    "desert": {
+      "label": "Désert (oasis et hameaux de pierre)",
+      "provinces": [],
+      "hamlets": [0, 1],
+      "farmsteads": [0, 1],
+      "street_share": 0.5,
+      "stone_share": 0.9,
+      "windmill_chance": 0.0,
+      "watermill_chance": 0.1,
+      "manor_chance": 0.05,
+      "moat_chance": 0.0,
+      "vineyards": [0, 0],
+      "orchards": [0, 1],
+      "ploughland": [0, 1],
+      "meadows": [0, 1],
       "hedgerows": false
     }
   },

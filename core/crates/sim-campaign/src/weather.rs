@@ -150,6 +150,8 @@ pub fn chances_for(
         Climate::Continental => &rules.climates.continental,
         Climate::Mediterranean => &rules.climates.mediterranean,
         Climate::Mountain => &rules.climates.mountain,
+        Climate::Arid => &rules.climates.arid,
+        Climate::Steppe => &rules.climates.steppe,
     };
     match season {
         Season::Spring => seasonal.spring,
