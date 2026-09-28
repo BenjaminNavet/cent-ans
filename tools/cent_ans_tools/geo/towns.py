@@ -470,6 +470,31 @@ def monuments(
     return out
 
 
+#: A river at least this many times wider than the nearest watercourse takes its place
+#: (RS-G: Tours kept a 15 m brook between the town and the Loire, 400 m wide, whose banks
+#: then got faubourg houses).
+MAJOR_RIVER_RATIO = 4.0
+
+
+def pick_river_feature(candidates: dict[int, tuple[float, float]]) -> int | None:
+    """River feature of a town: the nearest, unless a much wider one is also in reach.
+
+    Args:
+        candidates: feature index -> (distance to the town centre in m, median width in m)
+            for every fine river feature within the search radius.
+
+    Returns:
+        The chosen feature index, or ``None`` without candidates.
+    """
+    if not candidates:
+        return None
+    nearest = min(candidates, key=lambda f: (candidates[f][0], f))
+    widest = max(candidates, key=lambda f: (candidates[f][1], -candidates[f][0], -f))
+    if candidates[widest][1] >= MAJOR_RIVER_RATIO * candidates[nearest][1]:
+        return widest
+    return nearest
+
+
 def river_reach(
     points: np.ndarray, widths: np.ndarray, radius: float, spacing: float = 30.0
 ) -> dict | None:
@@ -725,18 +750,29 @@ def build(
         search = max(guess_r * rules["site"]["river_search_factor"], 400.0)
         river = None
         if rivers is not None:
-            pts, wid = [], []
+            candidates: dict[int, list] = {}
             for tile in rivers.tiles_around(centre_m.reshape(1, 2), search):
-                sel = tile["tree"].query_ball_point(centre_m, search)
-                if sel:
-                    nearest = tile["tree"].query(centre_m)[1]
-                    feature = tile["feature"][nearest]
-                    sel = [i for i in sel if tile["feature"][i] == feature]
-                    local = tile["points"][sel] - centre_m
-                    pts.append(np.column_stack([local[:, 0], -local[:, 1]]))
-                    wid.append(tile["width"][sel])
-            if pts:
-                river = river_reach(np.concatenate(pts), np.concatenate(wid), search)
+                for i in tile["tree"].query_ball_point(centre_m, search):
+                    candidates.setdefault(int(tile["feature"][i]), []).append(
+                        (tile["points"][i], float(tile["width"][i]))
+                    )
+            feature = pick_river_feature(
+                {
+                    f: (
+                        float(min(np.hypot(*(p - centre_m)) for p, _ in items)),
+                        float(np.median([w for _, w in items])),
+                    )
+                    for f, items in candidates.items()
+                }
+            )
+            if feature is not None:
+                items = candidates[feature]
+                local = np.array([p for p, _ in items]) - centre_m
+                river = river_reach(
+                    np.column_stack([local[:, 0], -local[:, 1]]),
+                    np.array([w for _, w in items]),
+                    search,
+                )
         bridge = None
         if len(crossing_px):
             d = np.hypot(*(crossing_px - centre_units).T) * mpp
