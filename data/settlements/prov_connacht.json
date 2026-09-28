@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_roscommon",
+    "province": "prov_connacht",
+    "kind": "city",
+    "name": {
+      "display": "Roscommon",
+      "local": "Ros Comáin",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -8.1928,
+      53.6358
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Couvent dominicain fondé par Felim Ó Conchobhair en 1253 ; principal centre politique du royaume.",
+    "sources": [
+      "Roscommon"
+    ]
+  },
+  {
+    "id": "set_galway",
+    "province": "prov_connacht",
+    "kind": "town",
+    "name": {
+      "display": "Galway",
+      "local": "Gaillimh",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -9.0568,
+      53.2707
+    ],
+    "weight": 9,
+    "owner": "fac_england",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Bourg chartré fondé par Richard de Burgh, enclave anglo-normande sur la côte du Connacht.",
+    "sources": [
+      "Galway (ville)"
+    ]
+  },
+  {
+    "id": "set_rathcroghan",
+    "province": "prov_connacht",
+    "kind": "village",
+    "name": {
+      "display": "Rathcroghan",
+      "local": "Ráth Cruachan",
+      "local_language": "gaélique irlandais"
+    },
+    "lonlat": [
+      -8.263,
+      53.767
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Site royal cérémoniel où sont traditionnellement inaugurés les rois de Connacht.",
+    "sources": [
+      "Rathcroghan"
+    ]
+  }
+]

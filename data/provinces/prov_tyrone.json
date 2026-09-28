@@ -1,0 +1,92 @@
+{
+  "name": {
+    "display": "Tyrone",
+    "local": "Tír Eoghain",
+    "local_language": "gaélique irlandais"
+  },
+  "region": "irlande",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Blackwater"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wool",
+    "res_wood",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Dungannon",
+      "local": "Dún Geanainn",
+      "local_language": "gaélique irlandais"
+    },
+    "lat": 54.501,
+    "lon": -6.768
+  },
+  "geo": {
+    "capital_lonlat": [
+      -6.768,
+      54.501
+    ],
+    "seed_lonlat": [
+      -7.0,
+      54.55
+    ],
+    "voronoi_weight": 0.55
+  },
+  "owner": "fac_tyrone",
+  "culture": "cul_irish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 48000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1500,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1300,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 550,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Royaume gaélique de Tír Eoghain, jamais soumis à la féodalité anglo-normande ; population estimée."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 2000,
+  "description": "Royaume gaélique de Tír Eoghain, tenu par les Ó Néill ; les rois sont inaugurés sur le Leac na Rí de Tullyhogue, près de Dungannon.",
+  "sources": [
+    "Henry Ó Néill",
+    "Royaume de Tír Eoghain",
+    "Tullyhogue"
+  ],
+  "id": "prov_tyrone"
+}

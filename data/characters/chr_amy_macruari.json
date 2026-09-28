@@ -1,0 +1,37 @@
+{
+  "name": {
+    "display": "Amy MacRuairi",
+    "local": "Aime NicRuairidh",
+    "local_language": "gaélique écossais"
+  },
+  "sex": "female",
+  "house": "MacRuairi",
+  "faction": "fac_isles",
+  "role": "consort",
+  "birth": {
+    "value": "1310",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [],
+  "skills": {
+    "command": 0,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [],
+  "piety": 50,
+  "family": {
+    "spouses": [
+      "chr_john_of_islay"
+    ]
+  },
+  "starting_location": "prov_isles",
+  "status": "at_court",
+  "description": "Héritière des MacRuairi de Garmoran et des îles du Nord (Uist, Eigg, Rùm) ; son mariage avec Jean d'Islay en 1337 unit les deux principales maisons des Hébrides. Il la répudiera vers 1350 pour épouser Marguerite Stewart.",
+  "sources": [
+    "Jean d'Islay, seigneur des Îles",
+    "Amy MacRuairi"
+  ],
+  "id": "chr_amy_macruari"
+}

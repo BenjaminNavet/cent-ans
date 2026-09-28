@@ -7,8 +7,8 @@
   },
   "sex": "male",
   "house": "Lancastre",
-  "faction": "fac_england",
-  "role": "commander",
+  "faction": "fac_lancaster",
+  "role": "heir",
   "birth": {
     "value": "1310",
     "uncertain": true,
@@ -56,5 +56,8 @@
   "description": "Meilleur capitaine anglais de la première phase (Bergerac et Auberoche en 1345, voir la [[cdx_campagne_de_gascogne_1345|campagne de Gascogne]]) ; auteur du « Livre de seyntz medicines ».",
   "sources": [
     "Henri de Grosmont"
-  ]
+  ],
+  "family": {
+    "father": "chr_henry_iii_de_lancastre"
+  }
 }

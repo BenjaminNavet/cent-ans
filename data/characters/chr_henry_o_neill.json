@@ -1,0 +1,46 @@
+{
+  "name": {
+    "display": "Henry Ó Néill",
+    "local": "Anraí Ó Néill",
+    "local_language": "gaélique irlandais"
+  },
+  "sex": "male",
+  "house": "Ó Néill",
+  "faction": "fac_tyrone",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1347",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Tír Eoghain",
+      "from": {
+        "value": "1325"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_cautious"
+  ],
+  "piety": 45,
+  "starting_location": "prov_tyrone",
+  "status": "at_court",
+  "description": "Succède à son parent Donnell Ó Néill en 1325 ; négocie la paix avec les MacMahon d'Oriel et les Maguire de Fermanagh en 1337. Sa royauté sera contestée puis renversée en 1345 par le justicier anglais Ralph de Ufford, au profit d'Aodh Reamhar Ó Néill.",
+  "sources": [
+    "Henry Ó Néill",
+    "Royaume de Tír Eoghain"
+  ],
+  "id": "chr_henry_o_neill"
+}

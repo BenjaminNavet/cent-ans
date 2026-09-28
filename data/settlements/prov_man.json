@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_castletown",
+    "province": "prov_man",
+    "kind": "city",
+    "name": {
+      "display": "Castletown",
+      "local": "Castletown",
+      "local_language": "mannois"
+    },
+    "lonlat": [
+      -4.658,
+      54.073
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château Rushen, siège des anciens rois de Mann, tenu en 1337 par Guillaume de Montaigu, comte de Salisbury.",
+    "sources": [
+      "Château Rushen"
+    ]
+  },
+  {
+    "id": "set_peel",
+    "province": "prov_man",
+    "kind": "castle",
+    "name": {
+      "display": "Peel",
+      "local": "Purt nyn Inshey",
+      "local_language": "mannois"
+    },
+    "lonlat": [
+      -4.7,
+      54.224
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de Peel, sur l'îlot de Saint Patrick.",
+    "sources": [
+      "Château de Peel"
+    ]
+  },
+  {
+    "id": "set_douglas",
+    "province": "prov_man",
+    "kind": "village",
+    "name": {
+      "display": "Douglas",
+      "local": "Doolish",
+      "local_language": "mannois"
+    },
+    "lonlat": [
+      -4.481,
+      54.15
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": true,
+    "description": "Petit port de pêche sur la côte est de l'île.",
+    "sources": [
+      "Douglas (Île de Man)"
+    ]
+  }
+]

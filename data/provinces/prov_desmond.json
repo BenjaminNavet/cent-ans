@@ -1,0 +1,94 @@
+{
+  "name": {
+    "display": "Desmond",
+    "local": "Deasmhumhain",
+    "local_language": "irlandais moyen"
+  },
+  "region": "irlande",
+  "terrain": "mountains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Shannon",
+    "Lee"
+  ],
+  "coastal": true,
+  "resources": [
+    "res_wool",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Shanid",
+      "local": "Sean Aid",
+      "local_language": "irlandais moyen"
+    },
+    "lat": 52.567,
+    "lon": -9.207
+  },
+  "geo": {
+    "capital_lonlat": [
+      -9.207,
+      52.567
+    ],
+    "seed_lonlat": [
+      -9.2,
+      52.1
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_desmond",
+  "culture": "cul_irish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 58000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1600,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 580,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Comté palatin de Kerry et seigneurie de Desmond, fief des FitzGerald ; population estimée par comparaison avec Munster voisin."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2500,
+  "description": "Comté de Desmond (Cork et Kerry), fief des FitzGerald érigé en comté palatin en 1329 ; château de Shanid, berceau de la maison, cri de guerre « Shanid Abú ».",
+  "sources": [
+    "Maurice FitzGerald, 1er comte de Desmond",
+    "Comté de Desmond",
+    "Château de Shanid"
+  ],
+  "id": "prov_desmond"
+}

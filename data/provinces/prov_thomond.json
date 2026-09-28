@@ -1,0 +1,93 @@
+{
+  "name": {
+    "display": "Thomond",
+    "local": "Tuadhmhumhain",
+    "local_language": "gaélique irlandais"
+  },
+  "region": "irlande",
+  "terrain": "hills",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Shannon",
+    "Fergus"
+  ],
+  "coastal": true,
+  "resources": [
+    "res_wool",
+    "res_fish",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Ennis",
+      "local": "Inis",
+      "local_language": "gaélique irlandais"
+    },
+    "lat": 52.845,
+    "lon": -8.986
+  },
+  "geo": {
+    "capital_lonlat": [
+      -8.986,
+      52.845
+    ],
+    "seed_lonlat": [
+      -8.98,
+      52.85
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_thomond",
+  "culture": "cul_irish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 40000,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2500,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1100,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 420,
+        "unrest": 20,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Royaume gaélique de Thomond, repris aux Anglo-Normands après la bataille de Dysert O'Dea (1318) ; population estimée."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1900,
+  "description": "Royaume gaélique de Thomond (Clare), tenu par les Ó Briain depuis la victoire de Dysert O'Dea (1318) qui chassa les colons anglo-normands de Bunratty.",
+  "sources": [
+    "Muircheartach Ó Briain",
+    "Bataille de Dysert O'Dea",
+    "Ennis"
+  ],
+  "id": "prov_thomond"
+}

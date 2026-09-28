@@ -1,0 +1,59 @@
+{
+  "name": {
+    "display": "Royaume de Connacht",
+    "local": "Ríoghacht Chonnacht",
+    "local_language": "gaélique irlandais"
+  },
+  "short_name": "Connacht",
+  "adjective": "connacien",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_toirdelbach_o_conchobair",
+  "capital": "prov_connacht",
+  "capital_city": "Roscommon",
+  "religion": "rel_catholic",
+  "culture": "cul_irish",
+  "succession_law": "elective",
+  "primary_title": "tit_connacht",
+  "heraldry": {
+    "blazon": "De sinople au lion rampant à la queue fourchée, couronné d'or.",
+    "description": "Blason attesté tardivement, utilisé par convention.",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F2C230"
+  },
+  "titles": [
+    "Roi de Connacht"
+  ],
+  "treasury": 2500,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "peace",
+      "note": "Galway, enclave anglo-normande des de Burgh, reste hors du royaume."
+    },
+    {
+      "faction": "fac_tyrone",
+      "status": "peace"
+    },
+    {
+      "faction": "fac_thomond",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 45,
+    "trade": 35,
+    "piety": 55
+  },
+  "description": "Toirdelbach Ó Conchobair règne sur Connacht depuis 1324 (déposé en 1342 par Mac Diarmata et les de Burgh). Descendant des deux derniers grands rois d'Irlande, Toirdelbach Mór et Ruaidrí, il tient un royaume morcelé entre plusieurs branches rivales de sa dynastie.",
+  "sources": [
+    "Toirdelbach Ó Conchobair",
+    "Royaume de Connacht"
+  ],
+  "id": "fac_connacht"
+}
