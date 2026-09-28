@@ -11,6 +11,23 @@ Lire ce fichier, `git worktree list`, `git branch --list 'feat/rs-*'`. Chaque lo
 `docs/wip/rs-<lot>.md`. Fusion : worktree `../gp-rs-merge` (branche `integration/rs`), puis ff-only
 vers `main`. ADR réservés : **0100** (lot B ; 0098 pris par FE), **0099** (lot F). GA réserve 0104-0106.
 
+## TERMINÉ (28/09 soir)
+
+Tous les lots RS sont dans `main` (dernier : f93c2359). Dernière vague : **P2f** (74 tailles en dur → `UiType` ;
+bannière de fin 40 px gardée), **P2d** (sort de la ville prise en `MODAL`, corps défilant ; avant-bataille et
+naval en `UiType`), **N** (bouton « Raser » + `settlement_demolition_preview` au pont, confirmation modale,
+infobulle IB `raze_building`). Conflits : P2d × P2f (`chronicle_window.gd`), P2f × IB2 (3 fichiers :
+infobulle IB + taille `UiType`), N × règle IB2 (plus de `tooltip_text` littéral).
+Worktree `../gp-rs-merge` et branche `integration/rs` supprimés.
+
+Suites possibles (non lancées) :
+- `PreBattleDialog._layout()` : déborde à 1280×640 avec les grosses armées de début (défaut préexistant, domaine CB ;
+  colonnes de régiments à rendre défilantes) — voir `docs/wip/p2d-sieges.md`.
+- Icône dédiée « Raser » (reprend `act_cancel_build`).
+- Écrans de siège en bataille (`battle_siege.gd`, points de capture) après TW2 T4.
+- Pics carte restants ~8 ms (`settle/labels`, `settle/declutter`), `docs/wip/rs-k2-perf.md`.
+- FE F8 : ost d'Empire sans distance, banqueroutes ×20 ; remonter le plancher c7a (ADR 0113) si l'ost est restreint.
+
 ## Reprise (28/09 ~15 h)
 
 - P2c **fusionné** (67171a61) : smoke, `p2c_ui_test`, `po_ui_test` verts.
