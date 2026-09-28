@@ -56,10 +56,10 @@ qu'elle soit dans la région, sans délai, plus chers à l'achat et à l'entreti
    surprime. Le test pytest impose qu'une bande offre toute unité `mercenary` et que chaque bande
    reste dans la période de son unité.
 7. **IA** (`ai/src/mercenaries.rs`, appelée après l'économie et avant les marches) : engage si
-   **riche** (trésor restant après les ordres du tour ≥ max(4 000 £, 3 saisons de revenu brut))
-   et si une armée est **menacée** (puissance ennemie à son ancrage ou une arête plus loin ≥ 80 %
-   de la sienne) ; meilleure puissance par livre d'abord, jusqu'à 120 % de la menace, en gardant
-   2 saisons de revenu, dans les limites et les réserves (comptées pour ne pas émettre d'ordre
+   **riche** (trésor restant après les ordres du tour ≥ max(4 000 £, 150 % d'une saison de revenu
+   brut)) et si une armée est **menacée** (puissance ennemie à son ancrage ou une arête plus loin
+   ≥ 80 % de la sienne) ; meilleure puissance par livre d'abord, jusqu'à 120 % de la menace, en
+   gardant 75 % d'une saison de revenu, dans les limites et les réserves (comptées pour ne pas émettre d'ordre
    refusé). Une IA endettée licencie d'abord les unités les plus chères (`disband_for_debt`,
    inchangé) : les compagnies partent les premières.
 8. **Pont et UI** : `get_mercenaries(army)` → `{region, region_name, hires_left, blocked,
@@ -70,7 +70,25 @@ qu'elle soit dans la région, sans délai, plus chers à l'achat et à l'entreti
 
 ## Effet sur l'IA (sonde `ai/examples/t3_mercenary_probe.rs`, IA partout)
 
-(voir tableau ci-dessous, rempli par la sonde)
+20 tours, `off` = aucune bande (règles d'avant T3 pour l'IA, qui ne levait pas de mercenaires en
+ville dans ces parties). Départ 1337, ou calendrier avancé à 1360 (Grandes Compagnies).
+Hommes en armées de campagne (moyenne des 21 relevés) et trésor de la France au tour 20 :
+
+| Graine, départ | Compagnies engagées | France off → on | Angleterre off → on | Trésor France off → on |
+|---|---|---|---|---|
+| 7, 1337 | 7 (FRA 4, ENG 3) | 1 806 → 1 898 | 1 548 → 1 544 | 38 846 → 37 441 |
+| 11, 1337 | 6 (FRA 6) | 1 753 → 1 978 | 1 436 → 1 486 | 36 558 → 27 571 |
+| 23, 1337 | 12 (FRA 7, ENG 1, Flandre 4) | 1 860 → 2 227 | 1 615 → 1 516 | 45 388 → 35 726 |
+| 7, 1360 | 9 (FRA 7, ENG 2) | 1 782 → 1 963 | 1 444 → 1 354 | 28 371 → 9 492 |
+| 11, 1360 | 8 (FRA 8) | 1 868 → 1 962 | 1 421 → 1 353 | 30 570 → 17 022 |
+| 23, 1360 | 17 (FRA 6, Flandre 10, ENG 1) | 1 939 → 1 825 | 1 639 → 1 401 | 39 566 → 28 046 |
+
+Six à dix-sept compagnies en cinq ans, surtout pour la France (la plus riche) ; surprime payée
+par la France 9 000 à 17 500 livres sur la période ; **aucun impayé**, aucune banqueroute nouvelle.
+Réglage retenu après balayage (graine 7) : le seuil « riche » borne l'IA, pas la menace (80 % ou
+60 % donnent les mêmes engagements) ; à 100 % d'une saison de revenu, 12 compagnies et 3 impayés
+dès 1337 : trop ; à 150 %, 7-9 compagnies sans impayé (valeurs du fichier). Les trésors de l'IA
+tournent autour d'une à deux saisons de revenu : l'ancien seuil de 3 saisons n'était jamais atteint.
 
 ## Conséquences
 
