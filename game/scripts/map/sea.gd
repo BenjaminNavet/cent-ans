@@ -33,6 +33,7 @@ func setup(map_size: Vector2i) -> void:
 		if terrain.coast_texture() != null:
 			material.set_shader_parameter("coast_dist", terrain.coast_texture())
 			material.set_shader_parameter("has_coast_dist", true)
+	CampaignTextures.apply_water(material)  # GA4 : normales animées, couleur de profondeur
 	material_override = material
 	# Fond opaque sous l'eau transparente : masque le bord de la carte et l'arrière-plan.
 	var floor_instance := MeshInstance3D.new()
