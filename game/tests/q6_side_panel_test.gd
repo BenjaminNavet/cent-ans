@@ -86,6 +86,7 @@ func _test_edict_button(label: String) -> void:
 			panel.tabs.current_tab = tab
 	await _wait(10)
 	var choose: Button = section.get("choose_button")
+	await _check_fits_zone(panel, label)
 	if _check(choose != null and choose.is_visible_in_tree(), "%s: « Changer d'édit » not visible" % label):
 		await _check_reachable(choose, "%s, edicts" % label)
 	panel.hide()
@@ -93,12 +94,19 @@ func _test_edict_button(label: String) -> void:
 
 
 func _test_recruit_button(label: String) -> void:
+	# Ouvert depuis le panneau de province (qui se referme en fondu) : la colonie doit rester
+	# visible une fois le fondu fini (chaque occupant a sa propre enveloppe défilante).
+	map.flow.focus_province(_capital())
+	await _wait(10)
 	var state: Dictionary = map.sim.call("get_province_state", _capital())
 	map.settlements_ctl.open_settlement(str(state.get("city", "")), false)
 	await _wait(20)
+	await create_timer(0.8).timeout
+	await _wait(4)
 	var panel: Control = map.settlements_ctl.panel
 	if not _check(panel != null and panel.is_visible_in_tree(), "%s: settlement panel not open" % label):
 		return
+	await _check_fits_zone(panel, label)
 	var recruit: Button = panel.get("recruit_button")
 	if _check(recruit != null and recruit.is_visible_in_tree(), "%s: « Recruter » not visible" % label):
 		await _check_reachable(recruit, "%s, recruit" % label)
@@ -131,3 +139,20 @@ func _check_reachable(button: Button, label: String) -> void:
 	var hovered := root.gui_get_hovered_control()
 	var ok := hovered != null and (hovered == button or button.is_ancestor_of(hovered))
 	_check(ok, "%s: « %s » center %s covered by %s" % [label, button.text, rect.get_center(), hovered.get_path() if hovered != null else "nothing"])
+
+
+
+## Chaque onglet du panneau (et son enveloppe défilante) tient dans la largeur de la zone : un
+## contenu plus large passe sous le bord droit de l'écran, barre de défilement comprise.
+func _check_fits_zone(panel: Control, label: String) -> void:
+	var tabs: TabContainer = panel.get("tabs")
+	var current := tabs.current_tab
+	var zone := UiZones.rect(UiZones.Zone.SIDE_PANEL)
+	for tab in tabs.get_tab_count():
+		tabs.current_tab = tab
+		await _wait(3)
+		var wrapper := panel.get_parent() as Control
+		var width := wrapper.get_combined_minimum_size().x
+		_check(width <= zone.size.x + 0.5, "%s: %s tab « %s » needs %.0f px, side zone is %.0f px" % [label, panel.name, tabs.get_tab_title(tab), width, zone.size.x])
+	tabs.current_tab = current
+	await _wait(3)

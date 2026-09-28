@@ -293,6 +293,35 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 	if not player_owner:
 		PanelWidgets.placeholder(buildable_list, "Colonie hors de votre contrôle.")
 	show()
+	queue_fit_height()
+
+
+## Q6 : hauteur de conception des onglets ; ils rétrécissent si la zone `SIDE_PANEL` manque.
+const TABS_HEIGHT := 360.0
+var _fit_queued := false
+
+
+func _enter_tree() -> void:
+	if not get_viewport().size_changed.is_connected(queue_fit_height):
+		get_viewport().size_changed.connect(queue_fit_height)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
+		queue_fit_height()
+
+
+## Q6 : le panneau tient dans la zone `SIDE_PANEL` (voir `PanelWidgets.fit_tabs_to_side_zone`).
+func queue_fit_height() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	_fit_height.call_deferred()
+
+
+func _fit_height() -> void:
+	_fit_queued = false
+	PanelWidgets.fit_tabs_to_side_zone(self, tabs, TABS_HEIGHT)
 
 
 func show_recruit() -> void:
