@@ -19,8 +19,9 @@ var _dir := ""
 
 
 func _init() -> void:
+	await process_frame
 	_dir = OS.get_user_data_dir().path_join("om1_wide_world")
-	_run()
+	await _run()
 	print("om1_wide_world_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -36,7 +37,7 @@ func _run() -> void:
 	_test_chunk_grid()
 	var pyramid := _test_pyramid()
 	if pyramid != null:
-		_test_quadtree(pyramid)
+		await _test_quadtree(pyramid)
 	_test_camera()
 
 
@@ -93,6 +94,7 @@ func _test_quadtree(pyramid: ReliefPyramid) -> void:
 	camera.fov = 60.0
 	camera.far = 200000.0
 	root.add_child(camera)
+	await process_frame
 	# Vue lointaine au zénith : toutes les racines, aucune subdivision.
 	camera.look_at_from_position(Vector3(3584.0, 60000.0, 3072.0), Vector3(3584.0, 0.0, 3072.1))
 	qt.max_vertex_px = 1000.0
