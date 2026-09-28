@@ -3,7 +3,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::common::{HistoricalDate, LocalizedName, Percent, Sources};
-use crate::ids::{CharacterId, CultureId, FactionId, ProvinceId, ReligionId, TechnologyId};
+use crate::ids::{
+    CharacterId, CultureId, FactionId, ProvinceId, ReligionId, TechnologyId, TitleId,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -177,6 +179,10 @@ pub struct Faction {
     /// Faction this one is a vassal of at campaign start.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub suzerain: Option<FactionId>,
+    /// Main title of the faction (lot FE, ADR 0098): its rank and *de jure*
+    /// liege place the faction in the feudal tree.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub primary_title: Option<TitleId>,
     pub heraldry: Heraldry,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub titles: Vec<String>,

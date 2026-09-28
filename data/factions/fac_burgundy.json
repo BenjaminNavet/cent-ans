@@ -17,6 +17,7 @@
   "culture": "cul_french",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_france",
+  "primary_title": "tit_burgundy",
   "heraldry": {
     "blazon": "Bandé d'or et d'azur de six pièces, à la bordure de gueules.",
     "description": "Bourgogne ancien : bandes obliques or et bleu, bordure rouge. Armes des ducs capétiens jusqu'à Philippe de Rouvres (1361).",

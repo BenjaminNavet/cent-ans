@@ -1,0 +1,22 @@
+{
+  "id": "tit_artois",
+  "rank": "county",
+  "name": {
+    "display": "Artois",
+    "local": "Artois",
+    "local_language": "ancien français"
+  },
+  "de_jure_liege": "tit_burgundy",
+  "de_jure_provinces": [
+    "prov_artois"
+  ],
+  "holder_1337": {
+    "faction": "fac_burgundy",
+    "sources": [
+      "Comté d'Artois",
+      "Robert III d'Artois",
+      "Arras"
+    ]
+  },
+  "description": "Tenu en 1337 par chr_jeanne_iii_de_bourgogne (apanage ou fief)."
+}

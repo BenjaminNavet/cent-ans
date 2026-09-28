@@ -6,6 +6,7 @@
   "$defs": {
     "faction_id": { "type": "string", "pattern": "^fac_[a-z0-9_]+$" },
     "province_id": { "type": "string", "pattern": "^prov_[a-z0-9_]+$" },
+    "title_id": { "type": "string", "pattern": "^tit_[a-z0-9_]+$" },
     "settlement_id": { "type": "string", "pattern": "^set_[a-z0-9_]+$" },
     "unit_type_id": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" },
     "building_id": { "type": "string", "pattern": "^bld_[a-z0-9_]+$" },

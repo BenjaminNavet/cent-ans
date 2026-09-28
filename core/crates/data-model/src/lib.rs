@@ -17,6 +17,7 @@ pub mod map;
 pub mod movement_graph;
 pub mod navgrid;
 pub mod settlement_load;
+pub mod title_check;
 
 pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
@@ -74,6 +75,7 @@ pub use entities::faction::{
     AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
     ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
+pub use entities::feudal_rules::{FeudalRules, LoyaltyWeights};
 pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
 };
@@ -90,6 +92,9 @@ pub use entities::posture::{
 pub use entities::province::{
     CapitalCity, Climate, Population, PopulationClass, PopulationClasses, Province, ProvinceGeo,
     Terrain,
+};
+pub use entities::title::{
+    FeudalTitle, TitleHolder, TitleObjective, TitleObjectiveCondition, TitleRank,
 };
 pub use entities::r#trait::{Trait, TraitCategory};
 pub use entities::religion::{Religion, ReligionKind};
@@ -109,7 +114,7 @@ pub use entities::vision::VisionRules;
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId,
     EncounterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId,
-    SettlementId, ShipClassId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    SettlementId, ShipClassId, SkillId, TechnologyId, TitleId, TraitId, UnitTypeId,
 };
 pub use load::{upgrade_regressions, DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};
