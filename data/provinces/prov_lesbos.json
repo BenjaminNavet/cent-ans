@@ -1,0 +1,96 @@
+{
+  "id": "prov_lesbos",
+  "name": {
+    "display": "Lesbos",
+    "local": "Λέσβος",
+    "local_language": "grec"
+  },
+  "region": "egee",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Mytilène",
+    "Molyvos",
+    "Érésos"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wine",
+    "res_salt",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Mytilène",
+      "local": "Μυτιλήνη",
+      "local_language": "grec"
+    },
+    "lat": 39.11,
+    "lon": 26.555
+  },
+  "geo": {
+    "capital_lonlat": [
+      26.555,
+      39.11
+    ],
+    "seed_lonlat": [
+      26.3,
+      39.2
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6000,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1200,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 400,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Île de l'Égée orientale, byzantine, exposée aux raids des émirats turcs de Karasi et d'Aydın ; les Gattilusio la recevront en 1355.",
+  "sources": [
+    "Lesbos",
+    "Mytilène"
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "id": "prov_tarnovo",
+  "name": {
+    "display": "Tarnovo",
+    "local": "Търново",
+    "local_language": "bulgare"
+  },
+  "region": "balkans",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Yantra",
+    "Osam"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Tarnovo",
+      "local": "Търново",
+      "local_language": "bulgare"
+    },
+    "lat": 43.086,
+    "lon": 25.657
+  },
+  "geo": {
+    "capital_lonlat": [
+      25.657,
+      43.086
+    ],
+    "seed_lonlat": [
+      25.6,
+      43.2
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_bulgaria",
+  "culture": "cul_bulgarian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 154000,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 12600,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 4400,
+        "unrest": 5,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1500,
+        "unrest": 5,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_stone_walls",
+    "bld_fair",
+    "bld_scriptorium"
+  ],
+  "fortification_level": 4,
+  "base_supply": 5100,
+  "description": "Cœur du second empire bulgare : Tarnovo sur la Yantra et ses collines fortifiées (Tsarevets), centre de la culture bulgare et de l'hésychasme.",
+  "sources": [
+    "Veliko Tarnovo",
+    "Tsarevets",
+    "Ivan Alexandre de Bulgarie"
+  ]
+}

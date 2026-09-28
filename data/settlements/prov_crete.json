@@ -1,0 +1,117 @@
+[
+  {
+    "id": "set_candia",
+    "province": "prov_crete",
+    "kind": "city",
+    "name": {
+      "display": "Candie",
+      "local": "Candia",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      25.144,
+      35.339
+    ],
+    "weight": 50,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_fair",
+      "bld_guild_hall",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Capitale du duché, port et arsenal vénitien.",
+    "sources": [
+      "Héraklion"
+    ]
+  },
+  {
+    "id": "set_canea",
+    "province": "prov_crete",
+    "kind": "town",
+    "name": {
+      "display": "La Canée",
+      "local": "Χανιά",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      24.02,
+      35.51
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Ville de la côte occidentale.",
+    "sources": [
+      "La Canée"
+    ]
+  },
+  {
+    "id": "set_rethymno",
+    "province": "prov_crete",
+    "kind": "town",
+    "name": {
+      "display": "Rethymno",
+      "local": "Ρέθυμνο",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      24.48,
+      35.37
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Port et forteresse.",
+    "sources": [
+      "Rethymnon"
+    ]
+  },
+  {
+    "id": "set_sitia",
+    "province": "prov_crete",
+    "kind": "town",
+    "name": {
+      "display": "Sitia",
+      "local": "Σητεία",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      26.1,
+      35.2
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Port oriental de Crète.",
+    "sources": [
+      "Sitia"
+    ]
+  }
+]

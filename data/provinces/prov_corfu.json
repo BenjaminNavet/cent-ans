@@ -1,0 +1,97 @@
+{
+  "id": "prov_corfu",
+  "name": {
+    "display": "Corfou",
+    "local": "Κέρκυρα",
+    "local_language": "grec"
+  },
+  "region": "grece",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Corfou",
+    "Cassiopé"
+  ],
+  "sea_zones": [
+    "sea_ionian",
+    "sea_adriatic"
+  ],
+  "resources": [
+    "res_wine",
+    "res_salt",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Corfou",
+      "local": "Κέρκυρα",
+      "local_language": "grec"
+    },
+    "lat": 39.62,
+    "lon": 19.92
+  },
+  "geo": {
+    "capital_lonlat": [
+      19.92,
+      39.62
+    ],
+    "seed_lonlat": [
+      19.9,
+      39.6
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_taranto",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 35000,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5000,
+        "unrest": 20,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1200,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 400,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 4,
+  "base_supply": 1200,
+  "description": "Île angevine depuis 1267, clé de l'Adriatique méridionale : la maison d'Anjou-Tarente en tient le fief ; forteresses d'Angelokastro et Cassiopé.",
+  "sources": [
+    "Corfou",
+    "Angelokastro"
+  ]
+}

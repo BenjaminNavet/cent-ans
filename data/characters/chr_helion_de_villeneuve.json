@@ -1,0 +1,44 @@
+{
+  "id": "chr_helion_de_villeneuve",
+  "name": {
+    "display": "Hélion de Villeneuve"
+  },
+  "sex": "male",
+  "house": "Villeneuve",
+  "faction": "fac_hospitallers",
+  "role": "ruler",
+  "birth": {
+    "value": "1270",
+    "uncertain": true,
+    "note": "Naissance vers 1270."
+  },
+  "death": {
+    "value": "1346-05-27"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Grand Maître de l'Hôpital",
+      "from": {
+        "value": "1319"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_crusader",
+    "trait_resolute"
+  ],
+  "piety": 85,
+  "starting_location": "prov_rhodes",
+  "status": "at_court",
+  "description": "Grand maître depuis 1319, il consolide Rhodes, guerroie les Turcs d'Aydın et participe à la ligue de 1334 ; il mourra en 1346.",
+  "sources": [
+    "Hélion de Villeneuve"
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "id": "prov_philippopolis",
+  "name": {
+    "display": "Philippopolis",
+    "local": "Пловдив",
+    "local_language": "bulgare"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Maritza"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Philippopolis",
+      "local": "Пловдив",
+      "local_language": "bulgare"
+    },
+    "lat": 42.15,
+    "lon": 24.75
+  },
+  "geo": {
+    "capital_lonlat": [
+      24.75,
+      42.15
+    ],
+    "seed_lonlat": [
+      24.75,
+      42.2
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_bulgaria",
+  "culture": "cul_bulgarian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 133000,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9900,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2600,
+        "unrest": 7,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1050,
+        "unrest": 7,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4400,
+  "description": "Plaine de la haute Maritza : Philippopolis (Plovdiv) et les Rhodopes bulgares avec Stenimachos et le monastère de Batchkovo.",
+  "sources": [
+    "Plovdiv",
+    "Asenovgrad",
+    "Monastère de Bachkovo"
+  ]
+}

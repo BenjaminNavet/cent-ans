@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_chios",
+    "province": "prov_chios",
+    "kind": "city",
+    "name": {
+      "display": "Chios",
+      "local": "Χίος",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      26.137,
+      38.37
+    ],
+    "weight": 50,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Port et château, capitale de l'île.",
+    "sources": [
+      "Chios"
+    ]
+  },
+  {
+    "id": "set_nea_moni",
+    "province": "prov_chios",
+    "kind": "abbey",
+    "name": {
+      "display": "Néa Moni",
+      "local": "Νέα Μονή",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      26.05,
+      38.39
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Grand monastère du XIe siècle aux mosaïques célèbres.",
+    "sources": [
+      "Nea Moni"
+    ]
+  },
+  {
+    "id": "set_volissos",
+    "province": "prov_chios",
+    "kind": "castle",
+    "name": {
+      "display": "Volissos",
+      "local": "Βολισσός",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      25.9,
+      38.53
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château du nord de l'île.",
+    "sources": [
+      "Volissos"
+    ]
+  }
+]

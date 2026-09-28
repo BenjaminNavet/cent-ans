@@ -1,0 +1,106 @@
+[
+  {
+    "id": "set_ras",
+    "province": "prov_raska",
+    "kind": "city",
+    "name": {
+      "display": "Ras",
+      "local": "Рас",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      20.419,
+      43.115
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de la Rascie (Stari Ras), forteresse de l'Ibar.",
+    "sources": [
+      "Stari Ras"
+    ]
+  },
+  {
+    "id": "set_studenica",
+    "province": "prov_raska",
+    "kind": "abbey",
+    "name": {
+      "display": "Studenica",
+      "local": "Студеница",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      20.534,
+      43.487
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère de saint Syméon, mausolée des Nemanjić (1190).",
+    "sources": [
+      "Monastère de Studenica"
+    ]
+  },
+  {
+    "id": "set_zica",
+    "province": "prov_raska",
+    "kind": "abbey",
+    "name": {
+      "display": "Žiča",
+      "local": "Жича",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      20.644,
+      43.687
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Monastère du couronnement des rois serbes.",
+    "sources": [
+      "Monastère de Žiča"
+    ]
+  },
+  {
+    "id": "set_novi_pazar",
+    "province": "prov_raska",
+    "kind": "town",
+    "name": {
+      "display": "Novi Pazar",
+      "local": "Нови Пазар",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      20.512,
+      43.14
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Marché de l'Ibar.",
+    "sources": [
+      "Novi Pazar"
+    ]
+  }
+]

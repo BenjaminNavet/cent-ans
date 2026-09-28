@@ -1,0 +1,142 @@
+[
+  {
+    "id": "set_nicosia",
+    "province": "prov_cyprus",
+    "kind": "city",
+    "name": {
+      "display": "Nicosie",
+      "local": "Λευκωσία",
+      "local_language": "français"
+    },
+    "lonlat": [
+      33.382,
+      35.175
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair",
+      "bld_guild_hall"
+    ],
+    "port": false,
+    "description": "Capitale du royaume, siège de l'archevêque latin.",
+    "sources": [
+      "Nicosie"
+    ]
+  },
+  {
+    "id": "set_famagusta",
+    "province": "prov_cyprus",
+    "kind": "town",
+    "name": {
+      "display": "Famagouste",
+      "local": "Αμμόχωστος",
+      "local_language": "français"
+    },
+    "lonlat": [
+      33.942,
+      35.125
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_cathedral",
+      "bld_counting_house",
+      "bld_guild_hall"
+    ],
+    "port": true,
+    "description": "Principal port du royaume et entrepôt du Levant, riche entre toutes.",
+    "sources": [
+      "Famagouste"
+    ]
+  },
+  {
+    "id": "set_limassol",
+    "province": "prov_cyprus",
+    "kind": "town",
+    "name": {
+      "display": "Limassol",
+      "local": "Λεμεσός",
+      "local_language": "français"
+    },
+    "lonlat": [
+      33.043,
+      34.68
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "description": "Port du sud, siège des Hospitaliers avant 1310.",
+    "sources": [
+      "Limassol"
+    ]
+  },
+  {
+    "id": "set_kyrenia",
+    "province": "prov_cyprus",
+    "kind": "castle",
+    "name": {
+      "display": "Kyrénia",
+      "local": "Κερύνεια",
+      "local_language": "français"
+    },
+    "lonlat": [
+      33.32,
+      35.34
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Château de la côte nord.",
+    "sources": [
+      "Kyrenia"
+    ]
+  },
+  {
+    "id": "set_bellapais",
+    "province": "prov_cyprus",
+    "kind": "abbey",
+    "name": {
+      "display": "Bellapais",
+      "local": "Μπελλαπάις",
+      "local_language": "français"
+    },
+    "lonlat": [
+      33.355,
+      35.305
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Abbaye prémontrée de la cordillère nord.",
+    "sources": [
+      "Abbaye de Bellapais"
+    ]
+  }
+]

@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_rhaidestos",
+    "province": "prov_thrace",
+    "kind": "city",
+    "name": {
+      "display": "Rhaidestos",
+      "local": "Ῥαιδεστός",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      27.511,
+      40.9781
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Grand port céréalier de la Propontide (Rodosto).",
+    "sources": [
+      "Tekirdağ"
+    ]
+  },
+  {
+    "id": "set_selymbria",
+    "province": "prov_thrace",
+    "kind": "town",
+    "name": {
+      "display": "Sélymbrie",
+      "local": "Σηλυβρία",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      28.2464,
+      41.0736
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "description": "Cité fortifiée sur la route de Constantinople.",
+    "sources": [
+      "Silivri"
+    ]
+  },
+  {
+    "id": "set_tzouroulon",
+    "province": "prov_thrace",
+    "kind": "castle",
+    "name": {
+      "display": "Tzouroulon",
+      "local": "Τζουρουλόν",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      27.8,
+      41.16
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse du nœud routier de Thrace orientale (Çorlu).",
+    "sources": [
+      "Çorlu"
+    ]
+  }
+]

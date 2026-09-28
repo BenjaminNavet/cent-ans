@@ -1,0 +1,71 @@
+{
+  "id": "tit_serbia",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Serbie",
+    "local": "Краљевина Србија",
+    "local_language": "serbe"
+  },
+  "heraldry": {
+    "blazon": "De gueules à l'aigle bicéphale d'argent.",
+    "description": "Aigle bicéphale blanc sur champ rouge, emblème des Nemanjić emprunté à Byzance (attesté surtout après 1346).",
+    "primary_color": "#9E1B25",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Le blason serbe est surtout attesté au XVe siècle."
+  },
+  "de_jure_provinces": [
+    "prov_raska",
+    "prov_zeta",
+    "prov_kosovo",
+    "prov_nis"
+  ],
+  "holder_1337": {
+    "faction": "fac_serbia",
+    "sources": [
+      "Royaume de Serbie médiéval",
+      "Étienne Dušan"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_serbia_hold",
+      "title": "Garder la couronne",
+      "description": "Étienne Dušan doit conserver le royaume de Serbie.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_serbia"
+      }
+    },
+    {
+      "id": "obj_serbia_macedonia",
+      "title": "Toute la Macédoine",
+      "description": "Prendre Serrès, Thessalonique et Bérée à Byzance.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_serres",
+          "prov_thessalonica",
+          "prov_veroia"
+        ]
+      }
+    },
+    {
+      "id": "obj_serbia_empire",
+      "title": "Rêve d'empire",
+      "description": "Contrôler Constantinople.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_constantinople"
+        ]
+      }
+    }
+  ],
+  "description": "Royaume de Serbie, agrandi sous Milutin, Stefan Dečanski et Dušan.",
+  "sources": [
+    "Royaume de Serbie médiéval",
+    "Étienne Dušan"
+  ]
+}

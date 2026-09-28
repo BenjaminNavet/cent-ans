@@ -1,0 +1,77 @@
+{
+  "id": "fac_bulgaria",
+  "name": {
+    "display": "Empire bulgare",
+    "local": "Царство Българско",
+    "local_language": "bulgare"
+  },
+  "short_name": "Bulgarie",
+  "adjective": "bulgare",
+  "government": "empire",
+  "playable": true,
+  "ruler": "chr_ivan_alexander",
+  "heir": "chr_mihail_asen_iv",
+  "capital": "prov_tarnovo",
+  "capital_city": "Tarnovo",
+  "religion": "rel_orthodox",
+  "culture": "cul_bulgarian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_bulgaria",
+  "heraldry": {
+    "blazon": "De gueules au lion d'or couronné.",
+    "description": "Lion d'or sur champ rouge, attribué à l'empire de Tarnovo dans les armoriaux occidentaux.",
+    "primary_color": "#A31621",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Attribution d'armoriaux tardifs ; les sceaux d'Ivan Alexandre montrent surtout le tsar en majesté."
+  },
+  "titles": [
+    "Tsar des Bulgares et des Grecs"
+  ],
+  "treasury": 9000,
+  "prestige": 50,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_serbia",
+      "status": "alliance",
+      "note": "Alliance dynastique de 1332 (mariage de Dušan et d'Hélène).",
+      "since": {
+        "value": "1332"
+      }
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Paix qui suit la défaite de Rusokastro (1332) ; Byzance tient Anchialos."
+    },
+    {
+      "faction": "fac_vidin",
+      "status": "overlord",
+      "note": "Belaur tient Vidin comme vassal, avec la turbulence habituelle."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_anchialos",
+      "note": "Côte pontique aux mains des Byzantins."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 65,
+    "trade": 50,
+    "piety": 75
+  },
+  "description": "Ivan Alexandre règne depuis 1331 sur l'empire bulgare, restauré après la défaite de Velbazhd (1330) ; il doit contenir la Serbie sans perdre Byzance de vue, et une culture hésychaste fleurit à Tarnovo.",
+  "sources": [
+    "Ivan Alexander of Bulgaria",
+    "Second Bulgarian Empire"
+  ]
+}

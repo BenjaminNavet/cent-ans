@@ -1,0 +1,59 @@
+{
+  "id": "tit_cyprus",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Chypre",
+    "local": "Βασίλειο τῆς Κύπρου",
+    "local_language": "français"
+  },
+  "heraldry": {
+    "blazon": "Burelé d'argent et d'azur au lion de gueules couronné d'or.",
+    "description": "Armes des Lusignan, rois de Chypre.",
+    "primary_color": "#2A5DA8",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_provinces": [
+    "prov_cyprus"
+  ],
+  "holder_1337": {
+    "faction": "fac_cyprus",
+    "sources": [
+      "Royaume de Chypre",
+      "Hugues IV de Chypre"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_cyprus_hold",
+      "title": "Garder le royaume",
+      "description": "Hugues IV doit conserver Chypre.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_cyprus"
+      }
+    },
+    {
+      "id": "obj_cyprus_rhodes",
+      "title": "Concilier les Hospitaliers",
+      "description": "Tenir Rhodes ou la soumettre comme vassale.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_hospitallers"
+      }
+    },
+    {
+      "id": "obj_cyprus_indep",
+      "title": "Un roi libre",
+      "description": "Rester indépendant.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Royaume des Lusignan, héritier des États latins du Levant.",
+  "sources": [
+    "Royaume de Chypre",
+    "Hugues IV de Chypre"
+  ]
+}

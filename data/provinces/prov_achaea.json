@@ -1,0 +1,100 @@
+{
+  "id": "prov_achaea",
+  "name": {
+    "display": "Principauté d'Achaïe",
+    "local": "Ἀχαΐα",
+    "local_language": "grec"
+  },
+  "region": "grece",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Pénée (Élide)",
+    "Alphée"
+  ],
+  "ports": [
+    "Clermont (Chlemoutsi)",
+    "Patras"
+  ],
+  "sea_zones": [
+    "sea_ionian"
+  ],
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Andravida",
+      "local": "Ἀνδραβίδα",
+      "local_language": "grec"
+    },
+    "lat": 37.91,
+    "lon": 21.28
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.28,
+      37.91
+    ],
+    "seed_lonlat": [
+      21.65,
+      37.9
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_taranto",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 133000,
+        "unrest": 22,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 8100,
+        "unrest": 22,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 3200,
+        "unrest": 17,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1200,
+        "unrest": 17,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 4400,
+  "description": "Principauté franque de Morée, réduite au nord-ouest du Péloponnèse (Andravida, Clarence, Patras) ; Catherine de Valois-Courtenay en est la princesse titulaire, sous tutelle angevine. Élites latines, peuple grec.",
+  "sources": [
+    "Principauté d'Achaïe",
+    "Catherine II de Courtenay"
+  ]
+}

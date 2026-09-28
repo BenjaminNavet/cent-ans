@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_visoko",
+    "province": "prov_bosnia",
+    "kind": "city",
+    "name": {
+      "display": "Visoko",
+      "local": "Високо",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      18.178,
+      43.988
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Résidence des bans à Sutjeska et Visoko, bourg fortifié de la Bosna.",
+    "sources": [
+      "Visoko"
+    ]
+  },
+  {
+    "id": "set_bobovac",
+    "province": "prov_bosnia",
+    "kind": "castle",
+    "name": {
+      "display": "Bobovac",
+      "local": "Бобовац",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      18.27,
+      44.12
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse et nécropole royale des Kotromanić.",
+    "sources": [
+      "Bobovac"
+    ]
+  },
+  {
+    "id": "set_vrhbosna",
+    "province": "prov_bosnia",
+    "kind": "town",
+    "name": {
+      "display": "Vrhbosna",
+      "local": "Врхбосна",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      18.413,
+      43.856
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_fair",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de la haute Bosna, futur Sarajevo.",
+    "sources": [
+      "Sarajevo"
+    ]
+  }
+]

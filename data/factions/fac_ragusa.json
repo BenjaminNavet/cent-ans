@@ -1,0 +1,67 @@
+{
+  "id": "fac_ragusa",
+  "name": {
+    "display": "République de Raguse",
+    "local": "Respublica Ragusina",
+    "local_language": "italien"
+  },
+  "short_name": "Raguse",
+  "adjective": "raguséen",
+  "government": "republic",
+  "playable": true,
+  "capital": "prov_ragusa",
+  "capital_city": "Raguse",
+  "religion": "rel_catholic",
+  "culture": "cul_dalmatian",
+  "succession_law": "elective",
+  "suzerain": "fac_venice",
+  "primary_title": "tit_ragusa",
+  "heraldry": {
+    "blazon": "Bandé d'or et de gueules.",
+    "description": "Armes de la commune de Raguse : bandes d'or et de gueules (usage ancien, la bande d'azur est postérieure).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Armoiries anciennes de Raguse, reconstitution."
+  },
+  "titles": [
+    "Recteur de Raguse"
+  ],
+  "treasury": 12000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_double_entry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_venice",
+      "status": "vassal",
+      "note": "Suzeraineté vénitienne depuis 1205 : tribut, recteur vénitien, protection de la flotte."
+    },
+    {
+      "faction": "fac_serbia",
+      "status": "peace",
+      "note": "Marchands de Ragusan en Serbie (mines de Novo Brdo)."
+    },
+    {
+      "faction": "fac_bosnia",
+      "status": "peace",
+      "note": "Hum voisin ; conflits sur Ston et Pelješac."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 15,
+    "diplomacy": 75,
+    "trade": 90,
+    "piety": 55
+  },
+  "description": "Cité patricienne de l'Adriatique, prospère par le sel de Ston et le commerce des Balkans. Vénitienne pour la forme, elle cultive déjà l'art de jouer les puissances l'une contre l'autre.",
+  "sources": [
+    "Republic of Ragusa",
+    "Ston"
+  ]
+}

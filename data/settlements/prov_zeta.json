@@ -1,0 +1,111 @@
+[
+  {
+    "id": "set_skadar",
+    "province": "prov_zeta",
+    "kind": "city",
+    "name": {
+      "display": "Scutari",
+      "local": "Скадар",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      19.49,
+      42.068
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Forteresse de Rozafa et cité du lac.",
+    "sources": [
+      "Shkodër"
+    ]
+  },
+  {
+    "id": "set_kotor",
+    "province": "prov_zeta",
+    "kind": "town",
+    "name": {
+      "display": "Cattaro",
+      "local": "Котор",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      18.771,
+      42.4247
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "description": "Cité maritime latine, sous protection serbe.",
+    "sources": [
+      "Kotor"
+    ]
+  },
+  {
+    "id": "set_bar",
+    "province": "prov_zeta",
+    "kind": "town",
+    "name": {
+      "display": "Antivari",
+      "local": "Бар",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      19.09,
+      42.09
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "description": "Siège de l'archevêché catholique de Dioclée.",
+    "sources": [
+      "Bar (Monténégro)"
+    ]
+  },
+  {
+    "id": "set_ulcinj",
+    "province": "prov_zeta",
+    "kind": "town",
+    "name": {
+      "display": "Dulcigno",
+      "local": "Улцињ",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      19.2,
+      41.93
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port réputé pour ses corsaires.",
+    "sources": [
+      "Ulcinj"
+    ]
+  }
+]
