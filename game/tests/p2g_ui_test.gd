@@ -4,7 +4,7 @@ extends SceneTree
 ## `SaveLoadDialog` (carte et menu d'accueil) rejoignent la zone `MODAL` de `UiLayout`.
 ## Même méthode que `p2b_ui_test.gd` / `p2c_ui_test.gd` :
 ## - C1 : aucun texte d'outil visible hors mode dev.
-## - C2 : chaque fenêtre est un occupant visible de `UiZones.Zone.MODAL` (voile allumé), reste
+## - C2 : chaque fenêtre est un occupant visible de `layout.Zone.MODAL` (voile allumé), reste
 ##   inscrite dans la pile de la carte (Échap la ferme) et tient dans l'écran à 1280×720,
 ##   1280×640 et 1920×1080 ; les grandes fenêtres restent sous la barre du haut ; la fiche se
 ##   range à droite de la Cour ; le voile s'éteint à la fermeture.
@@ -15,6 +15,9 @@ const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 const START_MENU := "res://scenes/start_menu.tscn"
 const MIN_SIZE := 14
 const MAX_DISTINCT_SIZES := 4
+## `CharacterSheet.SCREEN_MARGIN`. Les scripts d'interface ne sont pas nommés ici (types `Node`) :
+## ils dépendent d'autoloads absents à la compilation d'un script `--script`.
+const SHEET_MARGIN := 16.0
 const C2_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1280, 640), Vector2i(1920, 1080)]
 const _TEXT_CLASSES := ["Label", "RichTextLabel", "Button", "CheckBox", "CheckButton",
 	"LinkButton", "MenuButton", "OptionButton", "LineEdit"]
@@ -44,6 +47,9 @@ func _init() -> void:
 		regex.compile(pattern)
 		_tool_patterns.append(regex)
 	var initial: Vector2i = root.size
+	# La fenêtre headless démarre à 64×64 : le jeu, lui, s'ouvre au moins en 1280×720.
+	root.size = Vector2i(1280, 720)
+	await process_frame
 	await _check_campaign()
 	root.size = initial
 	await process_frame
@@ -95,7 +101,7 @@ func _check_campaign() -> void:
 	if not _check(map.get("load_ok") and map.get("sim") != null, "campaign map with the real simulation failed to start"):
 		map.queue_free()
 		return
-	var layout: UiZones = root.get_node("/root/UiLayout")
+	var layout: Node = root.get_node("/root/UiLayout")
 	var ui: Node = map.ui
 
 	# Techniques.
@@ -132,12 +138,12 @@ func _check_campaign() -> void:
 			for resolution in C2_RESOLUTIONS:
 				if not await _resize(map, resolution):
 					continue
-				var view := Vector2(resolution)
+				var view: Vector2 = root.get_visible_rect().size
 				var sheet_rect := sheet.get_global_rect()
 				var court_rect := court.get_global_rect()
-				_check_c2(is_equal_approx(court_rect.position.x, CharacterSheet.SCREEN_MARGIN),
+				_check_c2(is_equal_approx(court_rect.position.x, SHEET_MARGIN),
 					"%s: the court should stay on the left edge (%s)" % [resolution, court_rect])
-				_check_c2(absf(sheet_rect.end.x - (view.x - CharacterSheet.SCREEN_MARGIN)) < 1.0,
+				_check_c2(absf(sheet_rect.end.x - (view.x - SHEET_MARGIN)) < 1.0,
 					"%s: the sheet should stay on the right edge (%s)" % [resolution, sheet_rect])
 				_check_c2(sheet_rect.position.x >= court_rect.end.x - 0.5,
 					"%s: the sheet %s should sit beside the court %s" % [resolution, sheet_rect, court_rect])
@@ -166,31 +172,31 @@ func _check_campaign() -> void:
 ## `panel` : occupant visible de la zone `MODAL`, voile allumé, inscrit dans la pile de la carte,
 ## opaque (fondu `UiMotion` terminé) et dans l'écran à chaque résolution ; `below_top_bar` : sous
 ## la barre du haut (grandes fenêtres, `map_ui._keep_on_screen`).
-func _check_window(map: Node3D, layout: UiZones, panel: Control, label: String, below_top_bar: bool) -> void:
+func _check_window(map: Node3D, layout: Node, panel: Control, label: String, below_top_bar: bool) -> void:
 	if not _check_c2(panel.visible, "%s should be open" % label):
 		return
-	_check_c2(layout.visible_occupants(UiZones.Zone.MODAL).has(panel), "%s should be a visible UiZones.MODAL occupant" % label)
+	_check_c2(layout.visible_occupants(layout.Zone.MODAL).has(panel), "%s should be a visible UiZones.MODAL occupant" % label)
 	_check_c2(layout.modal_open(), "%s: the modal veil should be on" % label)
 	_check_c2(map.ui.panels.is_registered(panel), "%s should stay registered in the panel stack" % label)
 	_check_c2(is_equal_approx(panel.modulate.a, 1.0), "%s should be opaque once open (UiMotion), alpha %.2f" % [label, panel.modulate.a])
 	for resolution in C2_RESOLUTIONS:
 		if not await _resize(map, resolution):
 			continue
-		var view := Vector2(resolution)
+		var view: Vector2 = root.get_visible_rect().size
 		var rect := panel.get_global_rect()
 		_check_c2(rect.position.x >= -0.5 and rect.position.y >= -0.5 and rect.end.x <= view.x + 0.5 and rect.end.y <= view.y + 0.5,
 			"%s at %s: %s overflows the screen %s" % [label, resolution, rect, view])
 		if below_top_bar:
-			var top: float = UiZones.rect(UiZones.Zone.TOP_BAR).end.y
+			var top: float = layout.zone_rect(layout.Zone.TOP_BAR).end.y
 			_check_c2(rect.position.y >= top - 0.5, "%s at %s: %s over the top bar (%.0f)" % [label, resolution, rect, top])
 		_collect_font_sizes(panel)
 		_collect_tool_texts(panel)
 
 
-func _check_closed(layout: UiZones, panel: Control, label: String) -> void:
+func _check_closed(layout: Node, panel: Control, label: String) -> void:
 	_check_c2(not panel.visible, "%s should close" % label)
 	_check_c2(not layout.modal_open(), "%s: the modal veil should be off once closed (%s)" % [label,
-		layout.visible_occupants(UiZones.Zone.MODAL).map(func(c: Control) -> String: return str(c.name))])
+		layout.visible_occupants(layout.Zone.MODAL).map(func(c: Control) -> String: return str(c.name))])
 
 
 func _resize(map: Node3D, resolution: Vector2i) -> bool:
@@ -218,7 +224,7 @@ func _check_start_menu() -> void:
 	var menu: Control = (load(START_MENU) as PackedScene).instantiate()
 	root.add_child(menu)
 	await _settle()
-	var layout: UiZones = root.get_node("/root/UiLayout")
+	var layout: Node = root.get_node("/root/UiLayout")
 	var dialog: Control = menu.get("save_load_dialog")
 	if not _check(dialog != null, "start menu without SaveLoadDialog"):
 		menu.queue_free()
@@ -226,12 +232,12 @@ func _check_start_menu() -> void:
 	dialog.call("open_load")
 	await _settle()
 	if _check_c2(dialog.visible, "the start menu load dialog should open"):
-		_check_c2(layout.visible_occupants(UiZones.Zone.MODAL).has(dialog), "start menu SaveLoadDialog should be a visible UiZones.MODAL occupant")
+		_check_c2(layout.visible_occupants(layout.Zone.MODAL).has(dialog), "start menu SaveLoadDialog should be a visible UiZones.MODAL occupant")
 		_check_c2(layout.modal_open(), "start menu SaveLoadDialog: the modal veil should be on")
 		for resolution in C2_RESOLUTIONS:
 			if not await _resize(null, resolution):
 				continue
-			var view := Vector2(resolution)
+			var view: Vector2 = root.get_visible_rect().size
 			var rect := dialog.get_global_rect()
 			_check_c2(rect.position.x >= -0.5 and rect.position.y >= -0.5 and rect.end.x <= view.x + 0.5 and rect.end.y <= view.y + 0.5,
 				"start menu SaveLoadDialog at %s: %s overflows the screen %s" % [resolution, rect, view])
