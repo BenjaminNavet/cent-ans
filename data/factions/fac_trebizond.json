@@ -1,0 +1,66 @@
+{
+  "id": "fac_trebizond",
+  "name": {
+    "display": "Empire de Trébizonde",
+    "local": "Βασιλεία τῆς Τραπεζοῦντος",
+    "local_language": "grec pontique"
+  },
+  "short_name": "Trébizonde",
+  "adjective": "trapézontin",
+  "government": "empire",
+  "playable": true,
+  "ruler": "chr_basile_trebizonde",
+  "capital": "prov_trebizond",
+  "capital_city": "Trébizonde",
+  "religion": "rel_orthodox",
+  "culture": "cul_greek",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_trebizond",
+  "heraldry": {
+    "blazon": "D'or à l'aigle de sable.",
+    "description": "Aigle impérial des Grands Comnènes ; couleurs de convention.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2A2A2A",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Basileus et Autocrator des Romains",
+    "Grand Comnène"
+  ],
+  "treasury": 18000,
+  "prestige": 60,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_letters_of_credit",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Les Génois tiennent le Léontokastron de Trébizonde depuis 1306."
+    },
+    {
+      "faction": "fac_eretna",
+      "status": "peace",
+      "note": "Voisin méridional, hostile."
+    },
+    {
+      "faction": "fac_georgia",
+      "status": "peace",
+      "note": "Voisin oriental, orthodoxe."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 65,
+    "trade": 75,
+    "piety": 80
+  },
+  "description": "État byzantin d'Anatolie pontique, dernier héritier de l'Empire des Comnènes ; Basile (1332-1340) règne sur une côte riche, mais son épouse Irène Paléologue va l'empoisonner en 1340.",
+  "sources": [
+    "Empire of Trebizond",
+    "Basil of Trebizond"
+  ]
+}

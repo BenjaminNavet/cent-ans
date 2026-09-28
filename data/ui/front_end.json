@@ -1293,6 +1293,336 @@
         "Isolée diplomatiquement"
       ],
       "difficulty": 3
+    },
+    {
+      "id": "fac_ottoman",
+      "tagline": "L'épée de la marche s'aiguise",
+      "intro": "Orhan n'est encore qu'un bey de frontière, mais Bursa est prise, Nicée tombe, Nicomédie est en vue. Les gazis affluent : à toi de faire de ce petit beylik le prochain empire d'Orient.",
+      "strengths": [
+        "Gazis fanatiques et mobiles",
+        "Butin de Bithynie",
+        "Voisin byzantin divisé"
+      ],
+      "weaknesses": [
+        "Territoire étroit",
+        "Beyliks voisins jaloux",
+        "Trésor modeste"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_karasi",
+      "tagline": "Les gazis de la Propontide",
+      "intro": "Ta flotte ravage la Thrace byzantine, mais Orhan grandit à l'est. Sauras-tu unir Balıkesir avant qu'il ne t'avale ?",
+      "strengths": [
+        "Flotte et corsaires",
+        "Position sur les Détroits"
+      ],
+      "weaknesses": [
+        "Un seul territoire",
+        "Voisin ottoman ambitieux"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_saruhan",
+      "tagline": "La plaine du Gediz",
+      "intro": "Ton beylik est riche en blé et en vin, mais coincé entre Aydın, Germiyan et Karasi. Sais-tu jouer des alliances ?",
+      "strengths": [
+        "Plaine fertile",
+        "Port de Foça"
+      ],
+      "weaknesses": [
+        "Territoire réduit",
+        "Voisins puissants"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_aydin",
+      "tagline": "Umur Bey, le maître de l'Égée",
+      "intro": "Ta flotte de corsaires hante les îles grecques ; les Latins de Chypre, Rhodes et Venise forment une ligue contre toi. Il te faut des ports et de l'audace.",
+      "strengths": [
+        "Flotte de corsaires",
+        "Ports de l'Égée",
+        "Butin des îles"
+      ],
+      "weaknesses": [
+        "Ligue latine hostile",
+        "Frères rivaux"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_mentese",
+      "tagline": "Les marins de Carie",
+      "intro": "Tes ports regardent Rhodes des Hospitaliers ; l'Égée est ton champ de chasse, mais la mer se partage à plusieurs.",
+      "strengths": [
+        "Côte découpée",
+        "Corsaires expérimentés"
+      ],
+      "weaknesses": [
+        "Rhodes hostile",
+        "Terre peu étendue"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_germiyan",
+      "tagline": "Le plateau des grands beys",
+      "intro": "Vaste, riche en fer et en laine, ton beylik domine ses voisins. Reste à empêcher ses vassaux de se rebeller.",
+      "strengths": [
+        "Territoire étendu",
+        "Mines de fer"
+      ],
+      "weaknesses": [
+        "Frontières ouvertes",
+        "Voisins ambitieux"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_hamid",
+      "tagline": "Le beylik des lacs",
+      "intro": "Petit, entouré de voisins puissants, tu dois jouer d'alliances pour survivre.",
+      "strengths": [
+        "Forteresses lacustres"
+      ],
+      "weaknesses": [
+        "Territoire minuscule",
+        "Voisins voraces"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_teke",
+      "tagline": "Le port d'Antalya",
+      "intro": "Ton port commerce avec Chypre et Venise ; les montagnes te protègent, la mer t'expose.",
+      "strengths": [
+        "Grand port",
+        "Montagnes défensives"
+      ],
+      "weaknesses": [
+        "Un seul territoire",
+        "Voisins ambitieux"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_esrefid",
+      "tagline": "La principauté du lac",
+      "intro": "Ta terre est petite mais belle ; Karaman et Hamid convoitent tes rives.",
+      "strengths": [
+        "Rives fertiles"
+      ],
+      "weaknesses": [
+        "Trop petit",
+        "Voisins voraces"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_karaman",
+      "tagline": "L'héritier des Seldjoukides",
+      "intro": "Tes ancêtres ont sauvé Konya de l'Ilkhan ; tu veux relever le sultanat de Roum, mais Eretna et les Mamelouks guettent.",
+      "strengths": [
+        "Montagnes défensives",
+        "Prétention seldjoukide"
+      ],
+      "weaknesses": [
+        "Voisins nombreux",
+        "Terre pauvre"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_eretna",
+      "tagline": "L'héritier des Ilkhans",
+      "intro": "L'Ilkhanat est mort, l'Anatolie orientale est à prendre. Eretna dispose d'un pays immense mais fragile ; à toi de le souder.",
+      "strengths": [
+        "Vaste territoire",
+        "Administration ilkhanide héritée"
+      ],
+      "weaknesses": [
+        "Frontières sans défense",
+        "Loyautés fragiles"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_candar",
+      "tagline": "Le beylik de la mer Noire",
+      "intro": "Kastamonu fournit fer et bois, Sinope commerce avec Caffa et Trébizonde. À toi de garder la mer et les monts.",
+      "strengths": [
+        "Arsenal de Sinope",
+        "Mines de fer",
+        "Commerce pontique"
+      ],
+      "weaknesses": [
+        "Voisins nombreux",
+        "Peu de terres arables"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_trebizond",
+      "tagline": "Le dernier Comnène",
+      "intro": "Sur le rivage sud de la mer Noire, l'empire des Grands Comnènes vit du commerce de la soie. Les Turcs pressent, les Génois pèsent ; ton prestige est plus grand que ta puissance.",
+      "strengths": [
+        "Grand port marchand",
+        "Prestige impérial",
+        "Montagnes défensives"
+      ],
+      "weaknesses": [
+        "Petit territoire",
+        "Turcs hostiles",
+        "Noblesse indocile"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_cilicia",
+      "tagline": "Le dernier royaume arménien",
+      "intro": "Entre Mamelouks et Turkmènes, ton royaume de Cilicie ne tient que par ses forteresses et ses alliances latines. L'invasion mamelouke de 1337 va tout précipiter.",
+      "strengths": [
+        "Forteresses de montagne",
+        "Ports actifs",
+        "Liens avec les Latins"
+      ],
+      "weaknesses": [
+        "Pression mamelouke",
+        "Petit territoire",
+        "Barons turbulents"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_dulkadir",
+      "tagline": "Les turkmènes du Taurus",
+      "intro": "Petits, mais tenant un défilé, tu joues sur les rivalités entre Mamelouks, Arméniens et Karaman.",
+      "strengths": [
+        "Marche naturelle",
+        "Cavalerie turkmène"
+      ],
+      "weaknesses": [
+        "Très petit",
+        "Vassal du Caire"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_georgia",
+      "tagline": "Georges le Brillant",
+      "intro": "Ton royaume renaît des cendres de l'Ilkhanat : reprends les marches, garde tes vassaux et fais de Tbilissi la capitale du Caucase avant que les Turkmènes et les Mongols reviennent.",
+      "strengths": [
+        "Royaume uni",
+        "Forteresses de montagne",
+        "Prestige orthodoxe"
+      ],
+      "weaknesses": [
+        "Vassaux indociles",
+        "Ennemis de tous côtés",
+        "Pays de montagne pauvre"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_samtskhe",
+      "tagline": "Les atabegs de Samtskhé",
+      "intro": "Puissants et fiers, vous reconnaissez la couronne mais gardez vos montagnes.",
+      "strengths": [
+        "Forteresses rupestres",
+        "Cavalerie de montagne"
+      ],
+      "weaknesses": [
+        "Vassal de Tbilissi",
+        "Terre pauvre"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_circassia",
+      "tagline": "Les princes des montagnes",
+      "intro": "Guerriers et marchands d'esclaves, vous tenez la côte et la haute Kouban ; les Génois vous achètent des captifs.",
+      "strengths": [
+        "Cavalerie légère",
+        "Côte de la mer Noire"
+      ],
+      "weaknesses": [
+        "Pas d'unité politique",
+        "Tributaire de la Horde"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_alania",
+      "tagline": "Les derniers Alains",
+      "intro": "Vous tenez les vallées du Caucase central : chrétiens dans un pays de païens et de musulmans.",
+      "strengths": [
+        "Vallées défendables"
+      ],
+      "weaknesses": [
+        "Petit et pauvre",
+        "Tributaire de la Horde"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_jalayirids",
+      "tagline": "Les héritiers de Hülegü",
+      "intro": "L'Ilkhanat a disparu ; tes marches de l'ouest gardent Mossoul, mais le vrai pouvoir est à Bagdad, hors de ta vue.",
+      "strengths": [
+        "Héritage ilkhanide",
+        "Cavalerie mongole"
+      ],
+      "weaknesses": [
+        "Trône hors carte",
+        "Voisins hostiles"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_artuqids",
+      "tagline": "La forteresse de Mardin",
+      "intro": "Ton nid d'aigle a résisté aux Mongols ; à toi de rester à l'abri des Mamelouks et des Turkmènes.",
+      "strengths": [
+        "Forteresse imprenable"
+      ],
+      "weaknesses": [
+        "Petit",
+        "Vassal du Caire"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_mamluks",
+      "tagline": "Le sultan du Caire",
+      "intro": "Le plus riche État de la Méditerranée orientale est à toi : blé du Nil, épices de l'océan Indien, mamelouks fidèles. Mais la succession est un jeu de couteaux.",
+      "strengths": [
+        "Trésor du commerce des épices",
+        "Armée mamelouke d'élite",
+        "Égypte fertile et Syrie riche"
+      ],
+      "weaknesses": [
+        "Succession violente",
+        "Émirs ambitieux",
+        "Vaste frontière"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_hama",
+      "tagline": "Le dernier Ayyoubide",
+      "intro": "Ta lignée a fondé le sultanat ; tu tiens Hama sur l'Oronte par la bienveillance du sultan du Caire.",
+      "strengths": [
+        "Terre fertile",
+        "Culture savante"
+      ],
+      "weaknesses": [
+        "Minuscule",
+        "Vassal du Caire"
+      ],
+      "difficulty": 3
     }
   ],
   "difficulty_labels": [

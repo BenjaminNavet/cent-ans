@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_akhaltsikhe",
+    "province": "prov_samtskhe",
+    "kind": "city",
+    "name": {
+      "display": "Akhaltsikhé",
+      "local": "ახალციხე",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      43.0,
+      41.64
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des atabegs de Samtskhé.",
+    "sources": [
+      "Samtskhe-Saatabago"
+    ]
+  },
+  {
+    "id": "set_vardzia",
+    "province": "prov_samtskhe",
+    "kind": "abbey",
+    "name": {
+      "display": "Vardzia",
+      "local": "ვარძია",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      43.28,
+      41.38
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère rupestre du XIIe siècle.",
+    "sources": [
+      "Samtskhe-Saatabago"
+    ]
+  },
+  {
+    "id": "set_artaani",
+    "province": "prov_samtskhe",
+    "kind": "castle",
+    "name": {
+      "display": "Artaani (Ardahan)",
+      "local": "არტაანი",
+      "local_language": "géorgien"
+    },
+    "lonlat": [
+      42.7,
+      41.11
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de la frontière turque.",
+    "sources": [
+      "Samtskhe-Saatabago"
+    ]
+  }
+]

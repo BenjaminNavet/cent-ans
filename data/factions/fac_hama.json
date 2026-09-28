@@ -1,0 +1,57 @@
+{
+  "id": "fac_hama",
+  "name": {
+    "display": "Émirat de Hama",
+    "local": "إمارة حماة",
+    "local_language": "arabe"
+  },
+  "short_name": "Hama",
+  "adjective": "de Hama",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_al_afdal_muhammad",
+  "capital": "prov_hama",
+  "capital_city": "Hama (Hamat)",
+  "religion": "rel_islam",
+  "culture": "cul_arabic",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_mamluks",
+  "primary_title": "tit_hama",
+  "heraldry": {
+    "blazon": "D'or à la fasce d'azur.",
+    "description": "Couleurs ayyoubides ; blason de jeu.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2B4A9E",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Émir de Hama"
+  ],
+  "treasury": 7000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_windmills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_mamluks",
+      "status": "vassal",
+      "note": "Vassal du sultan qui l'a fait émir en 1310 et lui retirera la ville vers 1341."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 60,
+    "trade": 55,
+    "piety": 70
+  },
+  "description": "Dernière lignée ayyoubide, vassale du Caire ; Abu l'Fida est mort en 1331 et a laissé Hama à son fils al-Afdal Muhammad.",
+  "sources": [
+    "Hama",
+    "Abu al-Fida",
+    "Ayyubid dynasty"
+  ]
+}

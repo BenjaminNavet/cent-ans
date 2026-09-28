@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_izmit",
+    "province": "prov_kocaeli",
+    "kind": "city",
+    "name": {
+      "display": "Nicomédie (İzmit)",
+      "local": "İzmit",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      29.92,
+      40.77
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Nicomédie, ancienne capitale de Dioclétien, au fond du golfe d'Astakos ; conquise par Orhan en 1337 (incertain).",
+    "sources": [
+      "Nicomedia"
+    ]
+  },
+  {
+    "id": "set_gebze",
+    "province": "prov_kocaeli",
+    "kind": "town",
+    "name": {
+      "display": "Gebze (Dakibyza)",
+      "local": "Gebze",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      29.43,
+      40.8
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg de la route de Constantinople ; tombeau d'Hannibal selon la tradition.",
+    "sources": [
+      "Nicomedia"
+    ]
+  },
+  {
+    "id": "set_karamursel",
+    "province": "prov_kocaeli",
+    "kind": "village",
+    "name": {
+      "display": "Karamürsel"
+    },
+    "lonlat": [
+      29.62,
+      40.69
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Village côtier du golfe.",
+    "sources": [
+      "Nicomedia"
+    ]
+  }
+]

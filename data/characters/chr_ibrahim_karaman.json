@@ -1,0 +1,46 @@
+{
+  "id": "chr_ibrahim_karaman",
+  "name": {
+    "display": "Badreddin Ibrahim Bey",
+    "local": "Bedreddin İbrahim",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Karamanoğulları",
+  "faction": "fac_karaman",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1349"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Karaman",
+      "from": {
+        "value": "1333"
+      },
+      "note": "Règne jusqu'en 1349."
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_resolute"
+  ],
+  "piety": 55,
+  "starting_location": "prov_karaman",
+  "status": "at_court",
+  "description": "Bey de Karaman qui affronte Eretna et les Mamelouks ; naissance approximative.",
+  "sources": [
+    "Karamanids"
+  ]
+}

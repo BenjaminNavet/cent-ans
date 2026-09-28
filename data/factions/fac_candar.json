@@ -1,0 +1,54 @@
+{
+  "id": "fac_candar",
+  "name": {
+    "display": "Beylik de Candar",
+    "local": "Candaroğulları (Isfendiyarids)",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Candar",
+  "adjective": "de Candar",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_suleyman_candar",
+  "capital": "prov_kastamonu",
+  "capital_city": "Kastamonu",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_candar",
+  "heraldry": {
+    "blazon": "De gueules au sautoir d'argent.",
+    "description": "Couleurs de convention des Candar.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Bey de Kastamonu et Sinope"
+  ],
+  "treasury": 10000,
+  "prestige": 48,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_letters_of_credit"
+  ],
+  "relations": [
+    {
+      "faction": "fac_genoa",
+      "status": "peace",
+      "note": "Commerce de la mer Noire."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 55,
+    "trade": 70,
+    "piety": 55
+  },
+  "description": "Beylik du Pont occidental (Süleyman Paşa, 1309-1339) qui tient Kastamonu et le grand port de Sinope depuis 1322 ; fer, cuivre et bois.",
+  "sources": [
+    "Candar dynasty"
+  ]
+}

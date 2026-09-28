@@ -1,0 +1,40 @@
+{
+  "id": "chr_suleyman_pasha",
+  "name": {
+    "display": "Süleyman Paşa"
+  },
+  "sex": "male",
+  "house": "Osmanoğulları",
+  "faction": "fac_ottoman",
+  "role": "heir",
+  "birth": {
+    "value": "1316",
+    "uncertain": true,
+    "note": "Date approximative ou discutée.",
+    "place": "Bursa"
+  },
+  "death": {
+    "value": "1357",
+    "place": "Bolayır"
+  },
+  "historical": true,
+  "skills": {
+    "command": 7,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_brave",
+    "trait_cavalry_commander"
+  ],
+  "piety": 55,
+  "family": {
+    "father": "chr_orhan"
+  },
+  "starting_location": "prov_bursa",
+  "status": "at_court",
+  "description": "Fils aîné d'Orhan, futur conquérant de Gallipoli (1354).",
+  "sources": [
+    "Süleyman Pasha (son of Orhan)"
+  ]
+}

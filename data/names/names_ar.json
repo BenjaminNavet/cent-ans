@@ -2,7 +2,8 @@
   "id": "names_ar",
   "language": "arabe andalou",
   "cultures": [
-    "cul_andalusi"
+    "cul_andalusi",
+    "cul_arabic"
   ],
   "male_first_names": [
     "Muhammad",

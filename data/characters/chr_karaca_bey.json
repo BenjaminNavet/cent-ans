@@ -1,0 +1,47 @@
+{
+  "id": "chr_karaca_bey",
+  "name": {
+    "display": "Zeyneddin Karaca Bey",
+    "local": "Zeyneddin Karaca",
+    "local_language": "turc ottoman"
+  },
+  "sex": "male",
+  "house": "Dulkadiroğulları",
+  "faction": "fac_dulkadir",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1353"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Bey de Dulkadir",
+      "from": {
+        "value": "1337"
+      },
+      "note": "Fondation de la principauté (date discutée, 1337 ou 1348)."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_ambitious"
+  ],
+  "piety": 50,
+  "starting_location": "prov_elbistan",
+  "status": "at_court",
+  "description": "Chef turkmène de la tribu de Dulkadir, fondateur de la principauté ; naissance approximative.",
+  "sources": [
+    "Dulkadir",
+    "Karaca Bey"
+  ]
+}

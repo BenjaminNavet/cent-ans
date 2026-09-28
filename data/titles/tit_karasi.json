@@ -1,0 +1,40 @@
+{
+  "id": "tit_karasi",
+  "rank": "duchy",
+  "name": {
+    "display": "Beylik de Karasi",
+    "local": "Karesi Beyliği",
+    "local_language": "turc ottoman"
+  },
+  "heraldry": {
+    "blazon": "D'azur à l'étoile d'or.",
+    "description": "Couleurs de convention des Karasi.",
+    "primary_color": "#2B4A9E",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_provinces": [
+    "prov_karasi"
+  ],
+  "holder_1337": {
+    "faction": "fac_karasi",
+    "sources": [
+      "Karasids"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_karasi_independent",
+      "title": "Rester libre",
+      "description": "Ne pas être vassalisé par les Ottomans.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Beylik de Mysie, fondé vers 1296 par Karasi Bey, dont les gazis ont déjà traversé l'Hellespont ; le bey en exercice en 1337 n'est pas identifié avec certitude, faute de source sûre.",
+  "sources": [
+    "Karasids"
+  ]
+}
