@@ -1,4 +1,4 @@
-# 0108 — Plafond d'opinion par motif et ordre de démolition (lot RS-C)
+# 0111 — Plafond d'opinion par motif et ordre de démolition (lot RS-C)
 
 Date : 2026-09-28. Statut : accepté.
 Suivi : `docs/wip/rs-c-diplo.md`. Numéro pris après 0107 (0104-0106 réservés au lot GA).
