@@ -16,8 +16,8 @@
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_rimini",
   "heraldry": {
-    "blazon": "Fuselé d'argent et de gueules.",
-    "description": "Blason attribué aux Malatesta, incertain avant le XVe siècle.",
+    "blazon": "De gueules à la bande d'argent.",
+    "description": "Approximation du fuselé traditionnel des Malatesta (le moteur de rendu simplifié des factions ne trace pas de fuselé) ; blason incertain, voir le titre.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B0182B"
   },

@@ -16,8 +16,8 @@
   "succession_law": "elective",
   "primary_title": "tit_siena",
   "heraldry": {
-    "blazon": "Parti d'argent et de sable (la balzana).",
-    "description": "La balzana, emblème communal de Sienne.",
+    "blazon": "De sable à la fasce d'argent.",
+    "description": "Approximation de la balzana (parti d'argent et de sable) : le moteur de rendu simplifié des factions ne trace pas de parti, remplacé par une fasce. Balzana exacte décrite dans le titre.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#111111"
   },
