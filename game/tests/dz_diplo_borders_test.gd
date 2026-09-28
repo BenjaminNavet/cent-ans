@@ -64,7 +64,7 @@ func _run() -> void:
 		map.queue_free()
 		return
 	var borders: FactionBorders = map.faction_borders
-	var modes: MapModeController = map.map_modes
+	var modes: Object = map.map_modes
 	var heraldic_france := _palette_color(borders, "fac_france")
 
 	# 1. Mode Diplomatie : palette de positions vue de la France.
@@ -90,14 +90,14 @@ func _run() -> void:
 	var of_england: Dictionary = sim.call("get_faction_stances_for", "fac_england")
 	var france_seen := str(of_england.get("fac_france", ""))
 	_check(_same(_palette_color(borders, "fac_france"), DiplomaticStances.COLORS[france_seen]), "France borders should show England's stance '%s'" % france_seen)
-	_check(modes.hover_text(GUYENNE) == "terres de %s" % SimFacade.faction_short_name("fac_england"), "hover: %s" % modes.hover_text(GUYENNE))
-	var legend := modes.legend()
+	_check(modes.hover_text(GUYENNE) == "terres de %s" % facade.call("faction_short_name", "fac_england"), "hover: %s" % modes.hover_text(GUYENNE))
+	var legend: Node = modes.legend()
 	_check(legend != null and _legend_text(legend).contains("relations de"), "legend title should name the observed faction")
 
 	# 3. Clic sur Paris : retour au joueur ; sortie du mode : héraldique.
 	map._on_province_selected(map.map_data.index_of_id(PARIS))
 	_check(modes.focus_faction == "", "clicking our lands should return to the player's view")
-	modes.set_mode(MapModeController.POLITICAL)
+	modes.set_mode("political")
 	_check(not borders.color_override_active(), "leaving diplomacy should restore heraldic borders")
 	_check(_same(_palette_color(borders, "fac_france"), heraldic_france), "France heraldic colour should be back")
 
