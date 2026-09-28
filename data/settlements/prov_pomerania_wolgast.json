@@ -106,5 +106,28 @@
     "sources": [
       "Bergen auf Rügen"
     ]
+  },
+  {
+    "id": "set_altefahr",
+    "province": "prov_pomerania_wolgast",
+    "kind": "village",
+    "name": {
+      "display": "Altefähr",
+      "local": "Oldenvere",
+      "local_language": "moyen bas allemand"
+    },
+    "lonlat": [
+      13.16,
+      54.34
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": true,
+    "description": "Bac de Rügen sur le Strelasund, face à Stralsund (passage attesté au XIIIe siècle).",
+    "sources": [
+      "Altefähr"
+    ]
   }
 ]
