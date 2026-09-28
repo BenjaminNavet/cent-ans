@@ -111,6 +111,10 @@ func _ready() -> void:
 		elif arg == "--menu-stage=faction":
 			show_faction_select(true)
 			staged = true
+		elif arg == "--menu-stage=faction_map":  # FE6 : choix de faction sur la carte, fiche au survol
+			show_faction_select(true)
+			faction_select.stage_map("fac_foix_bearn")
+			staged = true
 		elif arg == "--menu-stage=demos":
 			open_demos()
 			staged = true

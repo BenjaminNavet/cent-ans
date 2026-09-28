@@ -273,9 +273,14 @@ func _run_start_menu() -> void:
 	var menu: Control = scene.instantiate()
 	root.add_child(menu)
 	await process_frame
-	# FE : une carte par faction présentée dans data/ui/front_end.json (plus seulement les trois couronnes).
-	var presented := FrontEndData.factions().size()
+	# FE6 : une carte par départ recommandé (jouable) ; toutes les factions présentées sur la carte.
+	var presented := FrontEndData.recommended().size()
 	_check(presented >= 3 and menu.card_count() == presented, "start menu should show %d faction cards, got %d" % [presented, menu.card_count()])
+	var map_picker: Variant = menu.faction_select.get("map_picker") if menu.faction_select != null else null
+	_check(map_picker != null, "faction select should carry the faction map")
+	if map_picker != null and facade.store_loaded():
+		_check((map_picker.get("sheets") as Dictionary).size() == FrontEndData.factions().size(),
+			"faction map should present every playable faction (%d)" % FrontEndData.factions().size())
 	_check(menu.selected_faction == "fac_france", "default faction should be fac_france")
 	_check(menu.start_button.text.begins_with("Commencer"), "start button label")
 	# MM1 : choix de faction, prologue et textes d'accueil (data/ui/front_end.json).
@@ -330,6 +335,8 @@ func _run_campaign_loop() -> void:
 	_check(map.player_faction == "fac_france", "player faction should be fac_france, got %s" % map.player_faction)
 	_check(map.armies.army_count() > 0, "no army markers on the map")
 	_check(map.ui.faction_label.text != "" and map.ui.faction_label.text != "Cent Ans", "top bar faction label not set")
+
+	_run_feudal(map)  # FE6 : arbre féodal et filtre « Féodalité »
 
 	var army_ids: PackedStringArray = map.player_army_ids()
 	if not _check(not army_ids.is_empty(), "player has no army"):
@@ -400,6 +407,27 @@ func _run_campaign_loop() -> void:
 		print("smoke OK: campaign loop (%s), %d turns, saved and reloaded at %s" % ["real" if facade.is_real else "mock", turn, date_loaded])
 	map.queue_free()
 	await process_frame
+
+
+## FE6 : l'arbre féodal s'ouvre sur la France (Bourgogne parmi ses vassaux), le filtre
+## « Féodalité » peint la carte ; détails dans `tests/fe_ui_test.gd`.
+func _run_feudal(map: Node) -> void:
+	var feudal: Node = map.get("feudal")
+	if feudal == null or not bool(feudal.call("available")):
+		print("smoke feudal: skipped (simulation without get_feudal_tree)")
+		return
+	feudal.call("open_for", "")
+	_check(feudal.get("panel").visible, "feudal tree panel should open")
+	_check(feudal.call("tree_item", "fac_france") != null and feudal.call("tree_item", "fac_burgundy") != null,
+		"feudal tree should list France and Burgundy")
+	feudal.get("panel").hide()
+	var modes: Node = map.get("map_modes")
+	modes.call("set_mode", "feudal")
+	_check(str(modes.get("mode")) == "feudal" and not (modes.get("feudal_lens").get("cells") as Dictionary).is_empty(),
+		"feudal map filter should colour the provinces")
+	modes.call("set_mode", "political")
+	if _failures == 0:
+		print("smoke OK: feudal tree and map filter")
 
 
 ## C6 : agents de campagne sur la vraie simulation (voir l'en-tête, étape 17).

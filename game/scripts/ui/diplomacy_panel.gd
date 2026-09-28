@@ -17,6 +17,8 @@ extends PanelContainer
 
 signal order_requested(order: Dictionary, success_text: String)
 signal offer_answered(offer_id: int, accept: bool)
+## FE6 : verdict sur une guerre privée entre deux vassaux (« impose_peace », « take_side », « let_be »).
+signal arbitration_requested(offer_id: int, verdict: String, side: String)
 signal closed
 
 const STATUS_LABELS := {
@@ -517,6 +519,10 @@ func _render_offers() -> void:
 	if offers.is_empty():
 		return
 	_offers_box.add_child(_section("Propositions reçues"))
+	var feudal := {}  # FE6 : appels féodaux (protection, arbitrage) par id d'offre
+	if sim.has_method("get_feudal_offers"):
+		for call in sim.call("get_feudal_offers"):
+			feudal[int(call.get("id", -1))] = call
 	for offer in offers:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 6)
@@ -531,12 +537,22 @@ func _render_offers() -> void:
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(text)
 		var offer_id := int(offer["id"])
+		var kind := str(offer.get("kind", ""))
 		var yes := Button.new()
-		yes.text = "Accepter"
+		yes.text = {"protection": "Intervenir", "arbitration": "Imposer la paix"}.get(kind, "Accepter")
 		yes.pressed.connect(func() -> void: offer_answered.emit(offer_id, true))
 		row.add_child(yes)
+		if kind == "arbitration" and feudal.has(offer_id):
+			var call: Dictionary = feudal[offer_id]
+			for side in [["attacker", "attacker_name"], ["target", "target_name"]]:
+				var side_id := str(call.get(side[0], ""))
+				var take := Button.new()
+				take.text = "Soutenir %s" % str(call.get(side[1], side_id))
+				take.tooltip_text = "Prendre le parti de %s : guerre contre l'autre vassal." % str(call.get(side[1], side_id))
+				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
+				row.add_child(take)
 		var no := Button.new()
-		no.text = "Refuser"
+		no.text = {"protection": "Se dérober", "arbitration": "Laisser faire"}.get(kind, "Refuser")
 		no.pressed.connect(func() -> void: offer_answered.emit(offer_id, false))
 		row.add_child(no)
 		_offers_box.add_child(row)
@@ -1183,6 +1199,11 @@ func _show_consequences(order: Dictionary, unilateral: bool) -> void:
 		var reason_text := CodexText.format(str(reason["text"]), true)
 		parts.append(("[color=%s]%+d[/color] %s" % ["#2a6a2a" if v >= 0 else "#8b1a1a", v, reason_text]) if v != 0 else reason_text)
 	_unilateral_hint.text = text + " · ".join(parts)
+	if type == "declare_war":  # FE6 : chaîne d'escalade avant la déclaration
+		var player := str(sim.call("get_player_faction")) if sim.has_method("get_player_faction") else ""
+		var chain := EscalationPreview.bbcode(sim, player, str(order.get("target", "")))
+		if chain != "":
+			_unilateral_hint.text += "\n" + chain
 
 
 # ----- guerre et traités --------------------------------------------------------------------------

@@ -14,6 +14,8 @@ signal court_requested
 ## Lot C5 : clic sur une colonie de l'onglet « Colonies ».
 signal settlement_requested(settlement_id: String)
 signal closed
+## FE6 : clic sur un maillon du fil d'Ariane féodal (détenteur du titre).
+signal breadcrumb_clicked(faction_id: String)
 
 const TERRAIN_LABELS := {
 	"plains": "Plaines", "hills": "Collines", "mountains": "Montagnes",
@@ -75,6 +77,8 @@ var edict_section: EdictSection  # lot C4
 var settlements_list: VBoxContainer
 var settlement_rows_provider: Callable = Callable()
 var _label_of: Callable = Callable()
+## FE6 : fil d'Ariane des titres (« Royaume de France › Duché de Bourgogne › Comté de Charolais »).
+var breadcrumb: HFlowContainer
 
 
 func _ready() -> void:
@@ -116,6 +120,10 @@ func _ready() -> void:
 	city_box.move_child(edict_rule, 1)
 	edict_section.visibility_changed.connect(func() -> void: edict_rule.visible = edict_section.visible)
 	_build_settlements_tab()  # C5
+	breadcrumb = HFlowContainer.new()  # FE6
+	breadcrumb.name = "FeudalBreadcrumb"
+	breadcrumb.add_theme_constant_override("h_separation", 2)
+	name_label.add_sibling(breadcrumb)
 
 
 ## `province` : entrée MapData fusionnée avec `GameDataStore.get_province` (display_name,
@@ -167,6 +175,7 @@ func show_province(province: Dictionary, state: Dictionary = {}, recruitable: Ar
 	edict_section.show_for(province_id, is_player_owner and not state.is_empty())  # lot C4
 	_label_of = label_of
 	_fill_settlements()  # C5
+	_fill_breadcrumb()  # FE6
 	show()
 
 
@@ -395,3 +404,32 @@ static func _thousands(value: int) -> String:
 		out = " " + text.substr(text.length() - 3) + out
 		text = text.substr(0, text.length() - 3)
 	return ("-" if value < 0 else "") + text + out
+
+
+## FE6 : titres de la province, du royaume au comté, chacun cliquable (ouvre l'arbre féodal sur
+## son détenteur). Lu dans `CampaignSim.get_province_breadcrumb`.
+func _fill_breadcrumb() -> void:
+	for child in breadcrumb.get_children():
+		breadcrumb.remove_child(child)
+		child.queue_free()
+	var facade := get_node_or_null("/root/SimFacade")
+	var sim: Object = facade.get("sim") if facade != null else null
+	var links: Array = sim.call("get_province_breadcrumb", province_id) if sim != null and sim.has_method("get_province_breadcrumb") else []
+	breadcrumb.visible = not links.is_empty()
+	for index in links.size():
+		var link: Dictionary = links[index]
+		if index > 0:
+			var sep := Label.new()
+			sep.text = "›"
+			sep.add_theme_color_override("font_color", HudStyle.INK_FADED)
+			breadcrumb.add_child(sep)
+		var crumb := LinkButton.new()
+		crumb.name = "Crumb%d" % index
+		crumb.text = str(link.get("title_name", ""))
+		crumb.underline = LinkButton.UNDERLINE_MODE_ON_HOVER
+		crumb.add_theme_color_override("font_color", HudStyle.RUBRIC)
+		var holder := str(link.get("holder", ""))
+		var holder_name := str(link.get("holder_name", ""))
+		crumb.tooltip_text = "Tenu par %s — ouvrir l'arbre féodal" % holder_name if holder != "" else "Titre vacant"
+		crumb.pressed.connect(func() -> void: breadcrumb_clicked.emit(holder))
+		breadcrumb.add_child(crumb)
