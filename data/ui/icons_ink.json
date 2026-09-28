@@ -2,6 +2,7 @@
   "version": 1,
   "model": "openai/gpt-5-image-mini",
   "budget_cap_usd": 5.0,
+  "budget_session": "Direction artistique",
   "icon_style": {
     "size": 128,
     "reference": "docs/img/da5/reference_icone.png",
