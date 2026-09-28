@@ -1,10 +1,14 @@
 class_name SettingsMenu
-extends Control
+extends PanelContainer
 
 ## F3 — fenêtre des réglages (menu de départ, menu pause, menu de la carte) : quatre onglets
 ## (Affichage, Carte, Partie, Son) liés à l'autoload `Settings`, qui persiste chaque
 ## changement dans `user://settings.cfg` et l'applique aussitôt. Échap ou « Fermer » :
 ## signal `closed` (la fenêtre se libère).
+## Lot P2e (ADR 0097, bible DA § 12.1) : rejoint la zone `MODAL` de `UiLayout` dans `_ready`
+## (plus de veil ni de `CenterContainer` propres) — vaut pour ses deux points d'ouverture
+## (`pause_menu.gd`, `flow_controller.gd`, ce dernier hors lot) puisque le rattachement se fait
+## ici, une seule fois. Tailles par `UiType` ; ouverture et fermeture par `UiMotion`.
 
 signal closed
 
@@ -15,32 +19,24 @@ var _controls: Dictionary = {}  # clé → contrôle
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	custom_minimum_size = Vector2(700, 500)
 	settings = get_node_or_null("/root/Settings")
 	_build()
+	UiZones.put(UiZones.Zone.MODAL, self)
+	UiMotion.fade_in(self)
 
 
-## Contenu de la fenêtre (voile, onglets, boutons) ; reconstruit sur place par `_on_reset`.
+## Contenu de la fenêtre (onglets, boutons) ; reconstruit sur place par `_on_reset`.
 func _build() -> void:
-	var veil := ColorRect.new()
-	veil.color = Color(0.05, 0.03, 0.01, 0.45)
-	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(veil)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(700, 500)
-	center.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
-	panel.add_child(box)
+	add_child(box)
 	var title := Label.new()
 	title.text = "Réglages"
-	title.add_theme_font_size_override("font_size", 26)
+	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
 	if settings == null:
 		var missing := Label.new()
@@ -84,7 +80,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func close() -> void:
 	closed.emit()
-	queue_free()
+	UiMotion.fade_out(self, UiMotion.DURATION, true)
 
 
 func _tab(tabs: TabContainer, label: String) -> GridContainer:
@@ -282,12 +278,12 @@ func _fill_shortcuts(sheet: GridContainer) -> void:
 		for line in section["lines"]:
 			var keys := Label.new()
 			keys.text = str(line[0])
-			keys.add_theme_font_size_override("font_size", 15)
+			UiType.apply(keys, UiType.CAPTION)
 			keys.custom_minimum_size = Vector2(90, 0)
 			sheet.add_child(keys)
 			var what := Label.new()
 			what.text = str(line[1])
-			what.add_theme_font_size_override("font_size", 15)
+			UiType.apply(what, UiType.CAPTION)
 			sheet.add_child(what)
 
 
