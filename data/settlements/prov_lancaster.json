@@ -1,29 +1,184 @@
 [
   {
-    "id": "set_lancaster_town",
+    "id": "set_lancastre",
     "province": "prov_lancaster",
     "kind": "city",
     "name": {
-      "display": "Lancaster",
-      "local": "Lancaster",
+      "display": "Lancastre",
+      "local": "Lancastre",
       "local_language": "moyen anglais"
     },
     "lonlat": [
-      -2.801,
-      54.047
+      -2.8007,
+      54.0466
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church",
+      "bld_windmill",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_muster_field",
+      "bld_archery_butts"
+    ],
+    "port": false,
+    "description": "Comté de Lancastre (Henri de Lancastre, père d'Henri de Grosmont ; palatinat en 1351) et comté palatin de Chester (domaine du prince). Sel de Cheshire, archers du Cheshire, Chester, port vers l'Irlande.",
+    "sources": [
+      "Comté de Lancastre",
+      "Cheshire",
+      "Henri de Lancastre (1281-1345)"
+    ]
+  },
+  {
+    "id": "set_liverpool",
+    "province": "prov_lancaster",
+    "kind": "village",
+    "name": {
+      "display": "Liverpool",
+      "local": "Liuerpul",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.9916,
+      53.4084
     ],
     "weight": 10,
     "owner": null,
-    "fortification_level": 3,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": true,
+    "description": "Petit port franc sur la Mersey, encore modeste au XIVe siècle.",
+    "sources": [
+      "Liverpool"
+    ]
+  },
+  {
+    "id": "set_furness",
+    "province": "prov_lancaster",
+    "kind": "abbey",
+    "name": {
+      "display": "Furness",
+      "local": "Fournais",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -3.2119,
+      54.1281
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
     "buildings": [
-      "bld_castle",
-      "bld_stone_walls",
-      "bld_market"
+      "bld_abbey",
+      "bld_scriptorium"
     ],
     "port": false,
-    "description": "Château de Lancaster, chef-lieu du comté, tenu par Henri, 3e comte de Lancastre.",
+    "description": "Grande abbaye cistercienne du Lancashire, proche de la frontière écossaise.",
     "sources": [
-      "Château de Lancaster"
+      "Abbaye de Furness"
+    ]
+  },
+  {
+    "id": "set_whalley",
+    "province": "prov_lancaster",
+    "kind": "abbey",
+    "name": {
+      "display": "Whalley",
+      "local": "Whalleye",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.4067,
+      53.8236
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne de Whalley, fondée en 1296 par transfert de Stanlow.",
+    "sources": [
+      "Abbaye de Whalley"
+    ]
+  },
+  {
+    "id": "set_kirkham",
+    "province": "prov_lancaster",
+    "kind": "village",
+    "name": {
+      "display": "Kirkham",
+      "local": "Kirkham",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.8667,
+      53.7833
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du Fylde, entre Preston et la mer.",
+    "sources": [
+      "Kirkham, Lancashire"
+    ]
+  },
+  {
+    "id": "set_wigan",
+    "province": "prov_lancaster",
+    "kind": "village",
+    "name": {
+      "display": "Wigan",
+      "local": "Wigan",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.6318,
+      53.545
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg minier et marchand du sud du Lancashire.",
+    "sources": [
+      "Wigan"
+    ]
+  },
+  {
+    "id": "set_ormskirk",
+    "province": "prov_lancaster",
+    "kind": "village",
+    "name": {
+      "display": "Ormskirk",
+      "local": "Ormeskirke",
+      "local_language": "moyen anglais"
+    },
+    "lonlat": [
+      -2.8867,
+      53.5697
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg-marché du West Lancashire, près de la côte.",
+    "sources": [
+      "Ormskirk"
     ]
   },
   {
