@@ -96,6 +96,19 @@ class Blazon:
             return TINCTURES[match.group(1)]
         return None
 
+    def tincture_near(self, word: str) -> Color | None:
+        """Tincture named after ``word``, allowing qualifiers in between.
+
+        ``la main dextre coupée de gueules`` -> red; ``la nef (lymphad) d'argent``
+        -> silver.
+        """
+        match = re.search(
+            rf"{_normalize(word)}\w*.{{0,40}}?(?:d'|de\s+)(\w+)", self.text
+        )
+        if match and match.group(1) in TINCTURES:
+            return TINCTURES[match.group(1)]
+        return None
+
 
 def parse_blazon(blazon: str, primary: str, secondary: str) -> Blazon:
     """Read the field tincture from the first words, charges default to ``secondary``."""
@@ -1002,7 +1015,7 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
         checky = checky_pattern(TINCTURES["or"], TINCTURES["gueules"], 0.12)
         _draw_cauldrons(image, checky, blazon.count(2))
     elif blazon.has("clef"):
-        _draw_key_single(draw, charge)
+        _draw_key_single(draw, blazon.tincture_near("clef") or charge)
     elif blazon.has("ecussons"):
         _draw_escutcheons(draw, TINCTURES["azur"])
     elif blazon.has("ecusson"):
@@ -1018,15 +1031,17 @@ def _draw_charges(image: Image.Image, blazon: Blazon) -> None:
     elif blazon.has("tete de buffle"):
         _draw_buffalo_head(draw, charge)
     elif blazon.has("main"):
-        _draw_hand(draw, charge)
+        _draw_hand(draw, blazon.tincture_near("main") or charge)
     elif blazon.has("nef"):
-        _draw_ship(draw, charge)
+        _draw_ship(draw, blazon.tincture_near("nef") or charge)
     elif blazon.has("lune"):
-        _draw_crescent(image, charge)
+        _draw_crescent(image, blazon.tincture_near("lune") or charge)
     elif blazon.has("bœuf"):
-        _draw_ox(draw, charge)
+        _draw_ox(draw, blazon.tincture_near("bœuf") or charge)
     elif blazon.has("chef"):
-        _draw_chief(draw, charge, denched=blazon.has("denche"))
+        _draw_chief(
+            draw, blazon.tincture_near("chef") or charge, denched=blazon.has("denche")
+        )
     elif blazon.has("guivre"):
         paints = charge_paints("guivre", charge, blazon.text, blazon.field)
         paint_charge(image, "guivre", [(0.5, 0.47)], 0.8, paints)
