@@ -1,28 +1,5 @@
 [
   {
-    "id": "set_zella",
-    "province": "prov_syrte",
-    "kind": "village",
-    "name": {
-      "display": "Zella",
-      "local": "Zallā",
-      "local_language": "arabe"
-    },
-    "lonlat": [
-      17.5833,
-      28.55
-    ],
-    "weight": 3,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [],
-    "port": false,
-    "description": "Oasis saharienne de la piste de Syrte au Fezzan (à préciser).",
-    "sources": [
-      "Zella (Libye)"
-    ]
-  },
-  {
     "id": "set_syrte",
     "province": "prov_syrte",
     "kind": "city",
@@ -72,6 +49,29 @@
     "description": "Oasis de dattiers au sud de Misrata.",
     "sources": [
       "Tawergha"
+    ]
+  },
+  {
+    "id": "set_madinat_sultan",
+    "province": "prov_syrte",
+    "kind": "village",
+    "name": {
+      "display": "Madinat Sultan (Surt médiévale)",
+      "local": "Madīnat Sulṭān",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      16.97,
+      31.12
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ruines et puits de Surt, étape médiévale de la route côtière de Tripoli à Barqa, déclinante au XIVe siècle (incertain).",
+    "sources": [
+      "Surt"
     ]
   }
 ]

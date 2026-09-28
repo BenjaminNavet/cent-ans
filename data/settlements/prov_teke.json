@@ -48,5 +48,30 @@
     "sources": [
       "Teke"
     ]
+  },
+  {
+    "id": "set_elmali",
+    "province": "prov_teke",
+    "kind": "town",
+    "name": {
+      "display": "Elmalı",
+      "local": "Elmalı",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      29.92,
+      36.74
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg des hautes terres de Lycie tenu par les Tekeoğulları, sur la route d'Antalya à la côte lycienne.",
+    "sources": [
+      "Elmalı"
+    ]
   }
 ]
