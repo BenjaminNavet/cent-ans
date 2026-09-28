@@ -441,6 +441,214 @@
         "Peu de places fortes face à un rival soutenu par l'Angleterre"
       ],
       "difficulty": 3
+    },
+    {
+      "id": "fac_mantua",
+      "tagline": "La ville-lacs des Gonzague",
+      "intro": "Louis Ier Gonzague a renversé les Bonacolsi en 1328 et acheté le vicariat impérial. Mantoue, ceinte de lacs artificiels sur le Mincio, doit défendre sa jeune seigneurie contre Vérone et affirmer son rang parmi les puissances lombardes.",
+      "strengths": [
+        "Ville-lacs quasi imprenable",
+        "Vicariat impérial reconnu",
+        "Alliée de la ligue anti-scaligère"
+      ],
+      "weaknesses": [
+        "Territoire réduit à une seule province",
+        "Coincée entre Milan et Vérone",
+        "Trésor modeste"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_ferrara",
+      "tagline": "Le marquisat du delta du Pô",
+      "intro": "Les Este gouvernent Ferrare à trois frères depuis 1332, vicaires du pape sur les valli de pêche du Pô. Entre suzeraineté pontificale et ambitions propres, le marquisat doit consolider son autorité sur l'Émilie.",
+      "strengths": [
+        "Vicariat pontifical protecteur",
+        "Delta fertile et pêcheries",
+        "Dynastie stable et reconnue"
+      ],
+      "weaknesses": [
+        "Pouvoir partagé entre trois frères",
+        "Petit territoire",
+        "Voisins puissants (Venise, Bologne)"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_montferrat",
+      "tagline": "Le marquisat byzantin des Alpes",
+      "intro": "Descendants de l'empereur Andronic II Paléologue, les marquis de Montferrat tiennent depuis 1306 un marquisat alpin tenu directement de l'Empire, entre Savoie et Milan.",
+      "strengths": [
+        "Vicariat impérial direct",
+        "Position stratégique sur les cols alpins",
+        "Prestige de la dynastie byzantine"
+      ],
+      "weaknesses": [
+        "Petit territoire montagnard",
+        "Rivalité avec la Savoie",
+        "Voisin de la puissante Milan"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_saluzzo",
+      "tagline": "Le marquisat des chevaliers errants",
+      "intro": "Thomas II, marquis de Saluces depuis 1296, règne en alleu sur les sources du Pô, composant son grand poème allégorique Le Chevalier errant tout en défendant son indépendance face à ses puissants voisins.",
+      "strengths": [
+        "Fief alleutier, sans suzerain direct",
+        "Cols alpins stratégiques",
+        "Marquis chevronné et lettré"
+      ],
+      "weaknesses": [
+        "Très petit territoire",
+        "Pris en étau entre Savoie et Montferrat",
+        "Faible trésor"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_pisa",
+      "tagline": "La rivale déclinante de Gênes",
+      "intro": "Encore indépendante malgré son déclin depuis la défaite de la Meloria (1284) et la mort de Castruccio Castracani (1328), Pise cherche à retrouver son rang de grande puissance maritime toscane.",
+      "strengths": [
+        "Port et marine expérimentée",
+        "République gibeline unie contre Florence",
+        "Position commerciale en Méditerranée"
+      ],
+      "weaknesses": [
+        "Puissance maritime déclinante",
+        "Rivalité ouverte avec Gênes",
+        "Encerclée par Florence et Sienne"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_siena",
+      "tagline": "La rivale bancaire de Florence",
+      "intro": "Gouvernée par le Governo dei Nove depuis 1287, Sienne est à l'apogée de sa prospérité bancaire et achève la Torre del Mangia, tout en rivalisant sans relâche avec Florence pour la suprématie toscane.",
+      "strengths": [
+        "Prospérité bancaire et commerciale",
+        "Gouvernement communal stable (Neuf)",
+        "Fortifications solides"
+      ],
+      "weaknesses": [
+        "Rivalité permanente avec Florence",
+        "Pas d'accès à la mer",
+        "Territoire agricole limité"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_bologna",
+      "tagline": "La commune universitaire libre",
+      "intro": "Bologne a chassé le légat pontifical en 1334 et se gouverne depuis en proie aux querelles de factions ; le juriste Taddeo Pepoli s'y impose peu à peu comme arbitre, avant de s'emparer du pouvoir en août 1337.",
+      "strengths": [
+        "Université de droit prestigieuse",
+        "Cité riche et peuplée",
+        "Libre de tutelle pontificale directe"
+      ],
+      "weaknesses": [
+        "Instabilité politique interne",
+        "Sans suzerain protecteur",
+        "Cible probable d'une reprise en main pontificale"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_perugia",
+      "tagline": "La commune griffonne d'Ombrie",
+      "intro": "Fortement fortifiée, fidèle alliée guelfe de Florence, Pérouse gouverne l'Ombrie en fait sinon en droit, malgré la suzeraineté pontificale théorique sur l'État de l'Église.",
+      "strengths": [
+        "Fortifications puissantes",
+        "Alliance solide avec Florence",
+        "Autonomie de fait"
+      ],
+      "weaknesses": [
+        "Petit territoire intérieur",
+        "Suzeraineté pontificale contestable à tout moment",
+        "Peu de débouchés commerciaux"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_urbino",
+      "tagline": "Les aigles gibelins des Marches",
+      "intro": "Maîtres d'Urbin depuis 1234, les Montefeltro, gibelins intransigeants, tiennent tête à la papauté et rivalisent avec les guelfes Malatesta de Rimini pour la Romagne méridionale.",
+      "strengths": [
+        "Forteresse imprenable de San Leo",
+        "Tradition militaire gibeline",
+        "Terrain montagneux défensif"
+      ],
+      "weaknesses": [
+        "Petit territoire pauvre",
+        "En guerre latente avec la Papauté",
+        "Rivalité constante avec Rimini"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_rimini",
+      "tagline": "Les guelfes du littoral adriatique",
+      "intro": "Vicaires pontificaux de Romagne, les frères Ferrantino et Malatesta « Guastafamiglia » gouvernent Rimini, port adriatique guelfe rival des gibelins Montefeltro d'Urbin.",
+      "strengths": [
+        "Port adriatique actif",
+        "Vicariat pontifical reconnu",
+        "Coseigneurie expérimentée"
+      ],
+      "weaknesses": [
+        "Rivalité constante avec Urbin",
+        "Territoire côtier exposé",
+        "Dépendance à la protection pontificale"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_sicily",
+      "tagline": "Le royaume né des Vêpres",
+      "intro": "Issu des Vêpres siciliennes (1282), le royaume aragonais de Trinacrie, que le pape ne reconnaît pas, doit défendre son indépendance face aux Angevins de Naples et composer avec la mort prochaine du vieux roi Frédéric III.",
+      "strengths": [
+        "Île fortifiée, difficile à envahir",
+        "Marine et ports actifs",
+        "Alliance dynastique avec l'Aragon continental"
+      ],
+      "weaknesses": [
+        "Excommunié, sans reconnaissance pontificale",
+        "Rivalité ouverte avec Naples",
+        "Succession imminente (mort du roi en 1337)"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_taranto",
+      "tagline": "L'apanage du jeune prince et de l'impératrice",
+      "intro": "Le jeune Robert de Tarente, onze ans, règne sous la régence de sa mère Catherine de Valois-Courtenay, impératrice titulaire de Constantinople, qui rêve de faire valoir les droits angevins sur l'Achaïe et l'Épire.",
+      "strengths": [
+        "Régente habile et ambitieuse",
+        "Apanage riche des Pouilles",
+        "Alliance protectrice avec Naples"
+      ],
+      "weaknesses": [
+        "Prince mineur, régence fragile",
+        "Petites forces militaires",
+        "Prétentions lointaines difficiles à faire valoir"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_pavia",
+      "tagline": "L'ancienne capitale lombarde, libre encore",
+      "intro": "Ancienne capitale du royaume lombard, Pavie résiste depuis des décennies aux visées de sa puissante voisine milanaise, déchirée entre les factions gibelines Beccaria et guelfes Langosco.",
+      "strengths": [
+        "Prestige de l'ancienne capitale lombarde",
+        "Position sur la route Milan-Gênes",
+        "Farouche tradition d'indépendance"
+      ],
+      "weaknesses": [
+        "Voisine directe de la puissante Milan viscontienne",
+        "Factions internes instables",
+        "Isolée diplomatiquement"
+      ],
+      "difficulty": 3
     }
   ],
   "difficulty_labels": [
