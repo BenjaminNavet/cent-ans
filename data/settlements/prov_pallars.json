@@ -2,7 +2,7 @@
   {
     "id": "set_sort",
     "province": "prov_pallars",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Sort",
       "local": "Sort",

@@ -2,7 +2,7 @@
   {
     "id": "set_benabarre",
     "province": "prov_ribagorca",
-    "kind": "castle",
+    "kind": "city",
     "name": {
       "display": "Benabarre",
       "local": "Benavarri",

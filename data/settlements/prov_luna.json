@@ -2,7 +2,7 @@
   {
     "id": "set_luna",
     "province": "prov_luna",
-    "kind": "castle",
+    "kind": "city",
     "name": {
       "display": "Luna",
       "local": "Luna",

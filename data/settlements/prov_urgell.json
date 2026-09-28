@@ -2,7 +2,7 @@
   {
     "id": "set_balaguer",
     "province": "prov_urgell",
-    "kind": "castle",
+    "kind": "city",
     "name": {
       "display": "Balaguer",
       "local": "Balaguer",
