@@ -106,7 +106,7 @@ func _build() -> void:
 	province_button.name = "ProvinceButton"
 	province_button.flat = true
 	province_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	province_button.tooltip_text = "Ouvrir le panneau de la province"
+	RichTooltip.attach_plain(province_button, "province_panel_open")
 	province_button.pressed.connect(func() -> void: province_requested.emit(province_id))
 	grid.add_child(province_button)
 	owner_value = _grid_row(grid, "Propriétaire")

@@ -150,7 +150,7 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 		lent_text.text = CodexText.format(RuleValues.format(LENT_TEXT))
 	choose_button.visible = player_owned
 	choose_button.disabled = changed
-	choose_button.tooltip_text = "Un seul changement par province et par tour." if changed else "Choisir la table de la province (effet à la fin du tour)."
+	RichTooltip.attach_plain(choose_button, "choose_diet", {"body": "Un seul changement par province et par tour." if changed else "Choisir la table de la province (effet à la fin du tour)."})
 	if not player_owned:
 		options_box.hide()
 	_fill_options(changed)

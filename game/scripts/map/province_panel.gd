@@ -368,7 +368,7 @@ func _make_settlement_row(row: Dictionary) -> Control:
 	if not siege.is_empty():
 		text += " — assiégée par %s (%s)" % [_faction_label(str(siege.get("attacker", "")), "", _label_of), FrText.count(int(siege.get("turns_left", 0)), "tour")]
 	button.text = text
-	button.tooltip_text = "Ouvrir le panneau de la colonie et centrer la carte"
+	RichTooltip.attach_plain(button, "colony_focus_open")
 	button.pressed.connect(func() -> void: settlement_requested.emit(settlement_id))
 	return button
 

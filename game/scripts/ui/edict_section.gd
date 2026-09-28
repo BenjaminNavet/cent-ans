@@ -126,7 +126,7 @@ func show_for(province: String, player_owned: bool, sim: Object = null) -> void:
 	description_label.text = CodexText.format("[i]%s[/i]" % str(current.get("description", ""))) if not current.is_empty() else ""
 	description_label.visible = description_label.text != ""
 	choose_button.visible = player_owned
-	choose_button.tooltip_text = "Choisir l'édit de la province (délai avant effet selon l'édit)."
+	RichTooltip.attach_plain(choose_button, "choose_edict")
 	if not player_owned:
 		options_box.hide()
 	_fill_options()

@@ -272,9 +272,9 @@ class Letter:
 			body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			body.custom_minimum_size = title.custom_minimum_size
 			column.add_child(body)
-		tooltip_text = "Clic : lire · clic droit : écarter" if not expanded else "Clic : replier · clic droit : écarter"
-		if str(item.get("interest", "")) != "":  # U5 : pourquoi cette nouvelle est retenue
-			tooltip_text = "%s\n%s" % [str(item["interest"]), tooltip_text]
+		var actions_hint := "Clic : lire · clic droit : écarter" if not expanded else "Clic : replier · clic droit : écarter"
+		var interest := str(item.get("interest", ""))  # U5 : pourquoi cette nouvelle est retenue
+		RichTooltip.attach_plain(self, "news_card_actions", {"title": interest if interest != "" else "Actions", "body": actions_hint})
 		mouse_entered.connect(func() -> void:
 			_hover = true
 			queue_redraw())

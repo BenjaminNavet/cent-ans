@@ -126,7 +126,7 @@ func _add_battle(box: VBoxContainer, entry: Dictionary) -> void:
 		button.name = "Battle_%s_%s" % [id, side if side != "" else "watch"]
 		if side == "":
 			button.text = "Regarder"
-			button.tooltip_text = "Les deux armées sont menées par l'IA."
+			RichTooltip.attach_plain(button, "historical_battle_ai_both")
 		else:
 			var army: Dictionary = entry.get(side, {})
 			button.text = "Mener %s" % _the_army(str(army.get("faction_name", side)))
