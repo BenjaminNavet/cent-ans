@@ -4,7 +4,10 @@ extends SceneTree
 ## (démos, batailles historiques, rejeux, réglages, pause, crédits, sauvegarder/charger).
 ## - C1 : aucun texte d'outil visible (chemin, option `--…`, identifiant brut en snake_case).
 ## - C2 (adapté aux fenêtres modales) : chaque menu migré rejoint effectivement la zone `MODAL`
-##   de `UiLayout` (le rectangle du menu tient dans celui de la zone).
+##   de `UiLayout` (occupant visible de la zone — au lieu d'un test de rectangle : la fenêtre
+##   headless est fixée à 64×64 dans ce script, `po_ui_test.gd -- --resolution=1280x720` en
+##   sous-processus est la seule façon d'obtenir une vraie taille, hors de portée d'un test
+##   direct).
 ## - C3 : aucune taille de police sous `Caption` (14 px de base), 4 tailles au plus.
 ##
 ## Écrit pour réutiliser les aides de `po_ui_test.gd` (`_collect_font_sizes`,
@@ -43,7 +46,7 @@ func _init() -> void:
 	await _run()
 	var sizes := _sizes.keys()
 	sizes.sort()
-	var c3_ok := (_sizes.is_empty() or sizes.min() >= MIN_SIZE) and _sizes.size() <= MAX_DISTINCT_SIZES
+	var c3_ok: bool = (_sizes.is_empty() or int(sizes.min()) >= MIN_SIZE) and _sizes.size() <= MAX_DISTINCT_SIZES
 	print("p2e_ui_test C1: %s (%d textes lus)" % ["OK" if _c1_failures == 0 else "%d failure(s)" % _c1_failures, _c1_texts])
 	print("p2e_ui_test C2 (zone MODAL): %s (%d contrôles)" % ["OK" if _modal_failures == 0 else "%d failure(s)" % _modal_failures, _modal_checks])
 	print("p2e_ui_test C3: %s (tailles vues : %s)" % ["OK" if c3_ok else "FAIL", str(sizes)])
@@ -128,7 +131,9 @@ func _check_save_dialog() -> void:
 	await process_frame
 
 
-## C2 adapté : `control` (visible) tient dans le rectangle de la zone `MODAL`.
+## C2 adapté : `control` est un occupant visible de la zone `MODAL` (topologie plutôt que
+## géométrie — la fenêtre headless de ce script ne peut pas être mise à une taille réelle, voir
+## la note en tête de fichier).
 func _check_in_modal(control: Control, label: String) -> void:
 	_modal_checks += 1
 	if control == null or not is_instance_valid(control):
@@ -140,12 +145,11 @@ func _check_in_modal(control: Control, label: String) -> void:
 		_modal_failures += 1
 		push_error("p2e_ui_test: autoload UiLayout absent")
 		return
-	var modal: Rect2 = layout.zone_rect(layout.Zone.MODAL)
-	var rect: Rect2 = control.get_global_rect()
-	var ok := control.visible and modal.grow(4.0).encloses(rect)
-	if not ok:
+	var zoned: bool = control.has_meta(&"ui_layout_zone") and int(control.get_meta(&"ui_layout_zone")) == int(layout.Zone.MODAL)
+	var listed: bool = layout.visible_occupants(layout.Zone.MODAL).has(control)
+	if not (control.visible and zoned and listed):
 		_modal_failures += 1
-		push_error("p2e_ui_test: %s %s hors de la zone MODAL %s" % [label, rect, modal])
+		push_error("p2e_ui_test: %s pas un occupant visible de MODAL (zoned=%s, listed=%s, visible=%s)" % [label, zoned, listed, control.visible])
 
 
 ## Reprise de `po_ui_test._collect_font_sizes` (mêmes classes de texte, même exclusion des listes
