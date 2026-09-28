@@ -42,7 +42,22 @@ Le trésor de la France revient dans la bande avec les nouveaux seuils de révol
 l'IA (bâtiments des places secondaires estimés à leur vrai poids) baisse les sièges de 10 % ;
 plancher recalibré 1,5 → 1,4 (ADR 0100), les autres bornes inchangées.
 
+## Century_probe 464 tours (binaire d'avant la fusion de main, données retenues)
+| Niveau | Guerre FR-EN moy. [min-max] | Graines 55-75 | Trêves | Révoltes / 200 t. | Banqueroutes | 1re faction fin |
+|---|---|---|---|---|---|---|
+| Facile (5) | 69 % [61-76] | 4/5 | 11,0 | 5,5 | 0,06 | 22 % |
+| Normale (10) | 73 % [67-78] | 6/10 | 13,0 | 7,3 | 0,04 | 22 % |
+| Difficile (10) | en cours | | | | | |
+| Très difficile (5) | en cours | | | | | |
+Référence normale sans RS-B (binaire `cp_base`, révoltes 3 × 75) en cours pour isoler l'effet.
+
+## Tests après fusion de main
+- `cargo fmt`, `clippy -D warnings`, `cargo test --workspace` : 1 082 passés, 0 échec.
+- `cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses` : la graine 7 (60 tours) ne
+  donnait plus d'embuscade avec la pondération de l'IA (2 ordres surveillés) ; passée à la graine 4
+  (12 ordres, 5 embuscades, 0 refus).
+- pytest : 832 passés, 1 échec préexistant hors lot (`test_budget.py`, grand livre, lot RS-H).
+
 ## Prochaine étape
-Retenu : `revolt_seasons` 2, `revolt_unrest_threshold` 74. En cours : `century_probe` 4 niveaux
-(`out/final` du scratchpad ; facile fait : 69 % [61-76], 4/5, révoltes 5,5 / 200 t.). Puis fusion de
-main, tests complets, suppression de `core/target-rs-b`.
+Fin des sondes century (difficile, très difficile, référence normale), puis compléter l'ADR 0100 et
+supprimer `core/target-rs-b`.
