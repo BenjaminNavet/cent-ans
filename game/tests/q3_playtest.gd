@@ -127,8 +127,8 @@ func _run() -> void:
 
 
 func _treasury() -> String:
-	var info: Dictionary = root.get_node("SimFacade").faction_info(map.player_faction)
-	return str(info.get("treasury", "?"))
+	var summary: Dictionary = map.sim.call("get_faction_summary", map.player_faction)
+	return str(summary.get("treasury", "?"))
 
 
 func _advisor_said() -> String:
