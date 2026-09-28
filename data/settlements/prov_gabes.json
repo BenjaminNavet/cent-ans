@@ -50,7 +50,7 @@
       "bld_castle",
       "bld_muster_field"
     ],
-    "port": false,
+    "port": true,
     "description": "Bordj al-Qashtil, fort aragonais de 1289 ; l'île, insurgée contre la Sicile en 1335, est reprise par les Hafsides.",
     "sources": [
       "Conquête hafside de Djerba",

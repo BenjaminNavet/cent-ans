@@ -57,6 +57,11 @@ class BuildResult:
     navgrid: navgrid.NavgridResult | None = None
 
 
+#: A pixel of the open Atlantic (Bay of Biscay): seed of the ocean for
+#: :func:`terrain.lift_inland_depressions`.
+OCEAN_SEED_LONLAT = (-8.0, 45.0)
+
+
 def map_metadata(grid: MapGrid, etopo_tiles: list[str]) -> dict:
     """The ``map.json`` contract plus provenance fields."""
     return {
@@ -175,8 +180,6 @@ def build(
         return gpd.read_file(shapefiles[layer])
 
     height_m = terrain.build_heightmap(grid, tile_paths)
-    heightmap_path = map_dir / "heightmap.png"
-    terrain.write_png16(terrain.height_to_uint16(height_m), heightmap_path)
 
     lakes = gpd.GeoDataFrame(
         pd.concat([read("lakes"), read("lakes_europe")], ignore_index=True),
@@ -185,6 +188,14 @@ def build(
     land_mask = terrain.build_land_mask(grid, read("land"), lakes)
     land_mask_path = map_dir / "land_mask.png"
     terrain.write_png8(land_mask, land_mask_path)
+
+    # Caspian depression and Jordan rift: land below 0 m cut off from the ocean.
+    ocean_col, ocean_row = grid.lonlat_to_pixel(*OCEAN_SEED_LONLAT)
+    height_m, _ = terrain.lift_inland_depressions(
+        height_m, land_mask > 0, (int(ocean_row), int(ocean_col))
+    )
+    heightmap_path = map_dir / "heightmap.png"
+    terrain.write_png16(terrain.height_to_uint16(height_m), heightmap_path)
 
     rivers = vectors.prepare_rivers(read("rivers"), read("rivers_europe"), grid)
     rivers_path = map_dir / "rivers.geojson"

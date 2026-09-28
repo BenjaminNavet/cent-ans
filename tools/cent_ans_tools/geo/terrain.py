@@ -24,6 +24,10 @@ from cent_ans_tools.geo.project import CRS_GEO, CRS_MAP, MapGrid
 
 HEIGHT_MIN_M = -200.0
 HEIGHT_MAX_M = 4800.0
+#: Floor of land lifted out of an inland depression (same as ``relief_shade.MIN_LAND_M``).
+DEPRESSION_FLOOR_M = 0.5
+#: Height span the lifted depression keeps (floor to floor + span), metres.
+DEPRESSION_SPAN_M = 0.5
 UINT16_MAX = 65535
 
 
@@ -91,6 +95,46 @@ def build_heightmap(grid: MapGrid, tile_paths: Iterable[Path]) -> np.ndarray:
         resampling=Resampling.average,
     )
     return np.nan_to_num(destination, nan=0.0)
+
+
+def lift_inland_depressions(
+    height_m: np.ndarray, land: np.ndarray, ocean_seed: tuple[int, int]
+) -> tuple[np.ndarray, int]:
+    """Lift land below sea level that the ocean does not reach (Caspian, Jordan, Qattara).
+
+    The game draws water wherever the height is at or below 0 m (sea plane at Y = 0,
+    ``relief_shade.upsample_sign``, navgrid). Land of the Caspian depression (−28 m) or
+    of the Jordan rift would be drawn as sea. The ocean is the 8-connected component of
+    ``water | height <= 0`` that holds ``ocean_seed`` (row, col): low land connected to
+    it (Low Countries) keeps its legacy behaviour. Every other land pixel at or below
+    0 m is mapped linearly, per component, from ``[min, 0]`` to
+    ``[DEPRESSION_FLOOR_M, DEPRESSION_FLOOR_M + DEPRESSION_SPAN_M]`` (continuous at the rim;
+    the depressions become flat, which they almost are at 719 m per pixel). Lakes inside
+    (``land`` false) stay below 0 m.
+
+    Returns:
+        The lifted heights and the number of lifted pixels.
+    """
+    from scipy import ndimage
+
+    low = (~land) | (height_m <= 0.0)
+    labels, _ = ndimage.label(low, structure=np.ones((3, 3), dtype=bool))
+    ocean = labels[ocean_seed]
+    lifted = land & (height_m <= 0.0) & (labels != ocean)
+    if not lifted.any():
+        return height_m, 0
+    out = height_m.astype(np.float32, copy=True)
+    parts, count = ndimage.label(lifted, structure=np.ones((3, 3), dtype=bool))
+    minima = ndimage.minimum(height_m, parts, index=np.arange(1, count + 1))
+    floor = np.concatenate(
+        [[0.0], np.minimum(np.asarray(minima, dtype=np.float32), -1e-3)]
+    )
+    depth = floor[parts[lifted]]
+    t = 1.0 - np.clip(
+        height_m[lifted] / depth, 0.0, 1.0
+    )  # 0 at the bottom, 1 at the rim
+    out[lifted] = DEPRESSION_FLOOR_M + DEPRESSION_SPAN_M * t
+    return out, int(lifted.sum())
 
 
 def build_land_mask(

@@ -76,7 +76,7 @@
       "bld_castle",
       "bld_muster_field"
     ],
-    "port": false,
+    "port": true,
     "description": "Château de Gozo (Rabat), refuge de l'île.",
     "sources": [
       "Gozo"
