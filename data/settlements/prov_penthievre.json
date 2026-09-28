@@ -24,5 +24,56 @@
     "sources": [
       "Comté de Penthièvre"
     ]
+  },
+  {
+    "id": "set_saint_brieuc",
+    "province": "prov_penthievre",
+    "kind": "town",
+    "name": {
+      "display": "Saint-Brieuc",
+      "local": "Sant-Brieg",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -2.7833,
+      48.5139
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": true,
+    "sea_zone": "sea_channel",
+    "description": "Cité épiscopale et port sur la Manche, principal débouché maritime du comté.",
+    "sources": [
+      "Saint-Brieuc"
+    ]
+  },
+  {
+    "id": "set_moncontour",
+    "province": "prov_penthievre",
+    "kind": "castle",
+    "name": {
+      "display": "Moncontour",
+      "local": "Monkontour",
+      "local_language": "breton"
+    },
+    "lonlat": [
+      -2.6167,
+      48.3486
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château gardant l'accès méridional du comté vers la Bretagne ducale.",
+    "sources": [
+      "Moncontour (Côtes-d'Armor)"
+    ]
   }
 ]

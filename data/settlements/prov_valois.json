@@ -23,5 +23,53 @@
     "sources": [
       "Comté de Valois"
     ]
+  },
+  {
+    "id": "set_senlis",
+    "province": "prov_valois",
+    "kind": "town",
+    "name": {
+      "display": "Senlis",
+      "local": "Senlis",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.5858,
+      49.2064
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne cité royale carolingienne, dans la mouvance du comté de Valois.",
+    "sources": [
+      "Senlis"
+    ]
+  },
+  {
+    "id": "set_villers_cotterets",
+    "province": "prov_valois",
+    "kind": "village",
+    "name": {
+      "display": "Villers-Cotterêts",
+      "local": "Villers-Costerés",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      3.0881,
+      49.2503
+    ],
+    "weight": 2,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg forestier au cœur du massif de Retz, terre de chasse des comtes de Valois.",
+    "sources": [
+      "Villers-Cotterêts"
+    ]
   }
 ]

@@ -25,5 +25,55 @@
       "Évreux",
       "Comté d'Évreux"
     ]
+  },
+  {
+    "id": "set_conches",
+    "province": "prov_evreux",
+    "kind": "castle",
+    "name": {
+      "display": "Conches-en-Ouche",
+      "local": "Conches",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      0.9167,
+      48.9622
+    ],
+    "weight": 5,
+    "owner": "fac_navarre",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château sur l'Ouche, place forte occidentale du comté d'Évreux.",
+    "sources": [
+      "Conches-en-Ouche"
+    ]
+  },
+  {
+    "id": "set_nonancourt",
+    "province": "prov_evreux",
+    "kind": "town",
+    "name": {
+      "display": "Nonancourt",
+      "local": "Nonancourt",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      1.1928,
+      48.7736
+    ],
+    "weight": 4,
+    "owner": "fac_navarre",
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville close sur l'Avre, verrou méridional du comté vers le domaine royal.",
+    "sources": [
+      "Nonancourt"
+    ]
   }
 ]
