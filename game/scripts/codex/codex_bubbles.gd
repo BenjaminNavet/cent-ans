@@ -17,6 +17,19 @@ extends CanvasLayer
 ## ancêtres, détacher une bulle détache ses descendantes, de sorte que la chaîne reste entière.
 ## Chaque bulle ouverte marque sa fiche découverte. La fenêtre Codex (touche K, `codex_open`)
 ## vit sur un calque juste en dessous. Présentation pure : aucune règle de jeu.
+##
+## IB3 (ADR 0109, spec IB § 3.2) : chaîne à **Alt maintenu** (`tooltip_explore`, Alt seul — Alt+Maj
+## des formations est ignoré) :
+##  - Alt enfoncé au-dessus d'une infobulle (native visible ou contrôle survolé qui en a une), d'un
+##    mot-lien en attente ou d'une bulle non épinglée → bulle verrouillée « par la chaîne », sur place ;
+##  - Alt maintenu : survol d'un mot-lien d'une bulle → fille après `chain.hover_delay_s`, déjà
+##    verrouillée ; un autre mot de la même bulle remplace la branche issue du précédent ; le mot
+##    source reste surligné dans la parente tant que sa fille est ouverte ;
+##  - Alt relâché : hors de toute bulle, les bulles verrouillées par la chaîne se ferment après
+##    `chain.close_grace_s` (celles épinglées au clic droit ou par T restent).
+## Délais, grâce et taille de la pile : bloc `chain` de `data/ui/tooltip_style.json` (constantes
+## ci-dessous en repli). Bulle verrouillée : version détaillée `TooltipView.build(spec, true)` quand
+## `RichTooltip.spec_for` existe (IB1), BBCode sinon.
 
 signal bubble_opened(id: String)
 signal entry_requested(id: String)
@@ -30,6 +43,17 @@ const MOUSE_OFFSET := Vector2(14, 18)
 const MARGIN := 8.0
 const INK := Color(0.22, 0.14, 0.07)
 const MUTED := "#6b5a40"
+## IB3 : réglages de la chaîne (`chain` de `data/ui/tooltip_style.json`), lus via `MapPaths`.
+const STYLE_FILE := "ui/tooltip_style.json"
+const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
+const CHAIN_FALLBACK := {
+	"hover_delay_s": 0.12, "idle_hover_delay_s": HOVER_DELAY, "close_grace_s": CLOSE_GRACE,
+	"max_bubbles": MAX_BUBBLES,
+}
+## Fond du mot-lien source d'une fille ouverte par la chaîne.
+const SOURCE_HIGHLIGHT := "#e8cf8a"
+
+static var _chain_cache: Dictionary = {}
 
 ## Pile des bulles ouvertes (de la plus ancienne à la plus récente).
 var bubbles: Array[PanelContainer] = []
@@ -43,6 +67,10 @@ var _window: Control
 ## Contrôle survolé et durée du survol (T n'épingle une infobulle simple qu'une fois affichée).
 var _hovered_control: Control = null
 var _hovered_time := 0.0
+## IB3 : Alt (`tooltip_explore`) maintenu seul.
+var _explore_held := false
+## Étiquettes de bulles dont le surlignage de mot source est à recalculer (hors survol d'un lien).
+var _highlight_dirty: Array[RichTextLabel] = []
 
 
 func _ready() -> void:
@@ -63,22 +91,29 @@ func attach(label: RichTextLabel) -> void:
 
 ## Ouvre la bulle de la fiche `id` à `at` (position de la souris si négative), au-dessus de la
 ## bulle d'index `parent_index` (-1 : nouvelle pile ; les bulles non épinglées au-dessus se
-## ferment). Renvoie la bulle, ou null si la fiche n'existe pas.
-func open(id: String, at: Vector2 = Vector2(-1, -1), parent_index: int = -1, pinned: bool = false) -> PanelContainer:
+## ferment). `chain` (IB3) : bulle verrouillée par la chaîne à Alt ; les bulles verrouillées par
+## la chaîne au-dessus de la parente sont aussi remplacées. Renvoie la bulle, ou null si la fiche
+## n'existe pas.
+func open(id: String, at: Vector2 = Vector2(-1, -1), parent_index: int = -1, pinned: bool = false, chain: bool = false) -> PanelContainer:
 	var codex := CodexText.store()
 	if codex == null or not bool(codex.call("has_entry", id)):
 		return null
-	_trim_above(parent_index)
 	var parent: PanelContainer = bubbles[parent_index] if parent_index >= 0 and parent_index < bubbles.size() else null
 	var existing := _child_of(parent, id)
-	if existing != null:
+	if existing == null or not chain:
+		_trim_above(parent_index, chain)
+	if existing != null and is_instance_valid(existing) and bubbles.has(existing):
 		if pinned:
 			set_pinned(existing, true)
+		elif chain:
+			chain_lock(existing)
 		return existing
 	var bubble := _make_bubble(id, _entry_bbcode(id), false, parent)
 	_push(bubble, at)
 	if pinned:
 		set_pinned(bubble, true)
+	elif chain:
+		chain_lock(bubble)
 	codex.call("discover", id)
 	bubble_opened.emit(id)
 	return bubble
@@ -91,6 +126,87 @@ func open_text(bbcode: String, at: Vector2 = Vector2(-1, -1), entry_id: String =
 	bubble.set_meta("free_text", true)
 	_push(bubble, at)
 	return bubble
+
+
+## IB3 : bulle épinglée au contenu déjà construit (version détaillée `TooltipView.build(spec,
+## true)`) ; ses `RichTextLabel` sont branchés sur les bulles.
+func open_view(view: Control, at: Vector2 = Vector2(-1, -1), entry_id: String = "") -> PanelContainer:
+	var bubble := _make_bubble(entry_id, "", true, null, view)
+	bubble.set_meta("free_text", true)
+	_push(bubble, at)
+	return bubble
+
+
+## IB3 : Alt (`tooltip_explore`) enfoncé seul. Verrouille par la chaîne, par priorité : la fille
+## en attente de survol (ouverte aussitôt), la bulle non épinglée sous la souris, l'infobulle
+## native visible, l'infobulle du contrôle survolé. True si quelque chose a été verrouillé.
+func explore_lock() -> bool:
+	_drop_freed_sources()
+	if _pending_id != "":
+		var id := _pending_id
+		var source := _pending_source
+		_pending_id = ""
+		_pending_source = null
+		var child := open(id, -Vector2.ONE, _index_of_source(source), false, true)
+		if child != null:
+			_mark_source(child, source, id)
+			return true
+	var under := _bubble_under_mouse()
+	if under != null:
+		if not under.get_meta("pinned", false):
+			chain_lock(under)
+			return true
+		return false
+	var count := bubbles.size()
+	if pin_native_tooltip() or pin_hovered_tooltip():
+		if bubbles.size() > count:
+			_apply_pinned(bubbles[-1], true, true)
+		return true
+	return false
+
+
+## IB3 : verrouille `bubble` (et ses ancêtres non épinglées) « par la chaîne » : elles se ferment
+## après la grâce une fois Alt relâché et la souris hors des bulles.
+func chain_lock(bubble: PanelContainer) -> void:
+	var ancestor := parent_of(bubble)
+	if ancestor != null and not ancestor.get_meta("pinned", false):
+		chain_lock(ancestor)
+	if not bubble.get_meta("pinned", false) or bubble.get_meta("chain_locked", false):
+		_apply_pinned(bubble, true, true)
+
+
+## IB3 : true tant qu'Alt (`tooltip_explore`) est maintenu seul.
+func explore_held() -> bool:
+	return _explore_held
+
+
+## IB3 : réglage `key` du bloc `chain` de `data/ui/tooltip_style.json` (repli : constantes).
+static func chain_setting(key: String) -> float:
+	if _chain_cache.is_empty():
+		_chain_cache = CHAIN_FALLBACK.duplicate()
+		var path := _data_dir().path_join(STYLE_FILE)
+		if not FileAccess.file_exists(path):
+			path = MAP_PATHS_SCRIPT.project_root().path_join("data").path_join(STYLE_FILE)
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+		if parsed is Dictionary and (parsed as Dictionary).get("chain") is Dictionary:
+			_chain_cache.merge(parsed["chain"], true)
+		else:
+			push_warning("CodexBubbles : %s illisible, réglages de chaîne de repli." % STYLE_FILE)
+	return float(_chain_cache.get(key, CHAIN_FALLBACK.get(key, 0.0)))
+
+
+## Relit `tooltip_style.json` au prochain accès (tests).
+static func reload_chain_settings() -> void:
+	_chain_cache = {}
+
+
+static func _data_dir() -> String:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null and tree.root != null:
+		var map_paths := tree.root.get_node_or_null("MapPaths")
+		if map_paths != null:
+			return str(map_paths.get("data_dir"))
+	return MAP_PATHS_SCRIPT.project_root().path_join("data")
 
 
 ## Touche T : verrouille la bulle ou l'infobulle visible la plus récente. Renvoie true si
@@ -114,7 +230,7 @@ func pin_top_bubble() -> bool:
 		if open(id, -Vector2.ONE, _index_of_source(source), true) != null:
 			return true
 	for index in range(bubbles.size() - 1, -1, -1):
-		if not bubbles[index].get_meta("pinned", false):
+		if not bubbles[index].get_meta("pinned", false) or bubbles[index].get_meta("chain_locked", false):
 			set_pinned(bubbles[index], true)
 			return true
 	return false
@@ -130,7 +246,13 @@ func pin_native_tooltip() -> bool:
 	if not window.is_embedded():
 		at -= Vector2(get_tree().root.position)
 	window.hide()
-	open_text(RichTooltip.last_bbcode, at, RichTooltip.title_entry(RichTooltip.last_bbcode))
+	var entry := RichTooltip.title_entry(RichTooltip.last_bbcode)
+	var hovered := get_viewport().gui_get_hovered_control()
+	var view := _detailed_view(_tooltip_at(hovered, hovered.get_local_mouse_position()) if hovered != null else "")
+	if view != null:
+		open_view(view, at, entry)
+	else:
+		open_text(RichTooltip.last_bbcode, at, entry)
 	return true
 
 
@@ -147,6 +269,22 @@ func pin_hovered_tooltip() -> bool:
 func pin_control_tooltip(control: Control, local_pos: Vector2 = Vector2.ZERO) -> bool:
 	if control == null or _index_of_source(control) >= 0 or control is PanelContainer and bubbles.has(control as PanelContainer):
 		return false
+	var text := _tooltip_at(control, local_pos)
+	if text.strip_edges() == "":
+		return false
+	var at := _hide_native_tooltips()
+	var formatted := CodexText.format(text, true)
+	var view := _detailed_view(text)
+	if view != null:
+		open_view(view, at, RichTooltip.title_entry(formatted))
+	else:
+		open_text(formatted, at, RichTooltip.title_entry(formatted))
+	return true
+
+
+## Texte d'infobulle de `control` au point `local_pos`, en remontant aux parents comme Godot tant
+## que le contrôle laisse passer la souris.
+func _tooltip_at(control: Control, local_pos: Vector2) -> String:
 	var text := ""
 	var current := control
 	var pos := local_pos
@@ -156,12 +294,32 @@ func pin_control_tooltip(control: Control, local_pos: Vector2 = Vector2.ZERO) ->
 			break
 		pos = current.get_transform() * pos
 		current = current.get_parent() as Control
+	return text
+
+
+## IB3 : version détaillée d'une infobulle (`TooltipView.build(RichTooltip.spec_for(text),
+## true)`) quand IB1 fournit `RichTooltip.spec_for` ; null sinon (repli BBCode).
+func _detailed_view(text: String) -> Control:
 	if text.strip_edges() == "":
+		return null
+	var rich: Script = RichTooltip
+	var view_script: Script = TooltipView
+	if not _script_has(rich, "spec_for") or not _script_has(view_script, "build"):
+		return null
+	var spec: Variant = rich.call("spec_for", text)
+	if not spec is Dictionary or (spec as Dictionary).is_empty():
+		return null
+	var view: Variant = view_script.call("build", spec, true)
+	return view as Control if view is Control else null
+
+
+static func _script_has(script: Script, method: String) -> bool:
+	if script == null:
 		return false
-	var at := _hide_native_tooltips()
-	var formatted := CodexText.format(text, true)
-	open_text(formatted, at, RichTooltip.title_entry(formatted))
-	return true
+	for info: Dictionary in script.get_script_method_list():
+		if str(info.get("name", "")) == method:
+			return true
+	return false
 
 
 ## Bulle parente de `bubble` (null pour une racine).
@@ -199,7 +357,7 @@ func top_id() -> String:
 func set_pinned(bubble: PanelContainer, pinned: bool) -> void:
 	if pinned:
 		var ancestor := parent_of(bubble)
-		if ancestor != null and not ancestor.get_meta("pinned", false):
+		if ancestor != null and (not ancestor.get_meta("pinned", false) or ancestor.get_meta("chain_locked", false)):
 			set_pinned(ancestor, true)
 	else:
 		for child in bubbles.duplicate():
@@ -208,14 +366,17 @@ func set_pinned(bubble: PanelContainer, pinned: bool) -> void:
 	_apply_pinned(bubble, pinned)
 
 
-func _apply_pinned(bubble: PanelContainer, pinned: bool) -> void:
+## `chain` (IB3) : verrouillée par la chaîne à Alt (fermée à la grâce, Alt relâché), et non
+## épinglée durablement (clic droit, T).
+func _apply_pinned(bubble: PanelContainer, pinned: bool, chain: bool = false) -> void:
 	bubble.set_meta("pinned", pinned)
+	bubble.set_meta("chain_locked", pinned and chain)
 	# Épinglée : page à bande d'or (lot UI1) plutôt que simple note marginale.
 	var style: StyleBox = HudStyle.panel_box(10) if pinned else RichTooltip.panel_style()
 	bubble.add_theme_stylebox_override("panel", style)
 	var footer := bubble.find_child("Footer", true, false) as Label
 	if footer != null:
-		footer.text = _footer_text(str(bubble.get_meta("codex_id", "")), pinned)
+		footer.text = _footer_text(str(bubble.get_meta("codex_id", "")), pinned, pinned and chain)
 
 
 # --- Fenêtre Codex ---------------------------------------------------------------------------
@@ -262,6 +423,11 @@ func toggle_window() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.is_action("tooltip_explore"):
+		_on_explore_key(event as InputEventKey)
+		return
+	if event is InputEventKey and event.pressed and _explore_held and (event as InputEventKey).shift_pressed:
+		_explore_held = false  # Alt+Maj+1…6 : formations (`battle_formation_picker.gd`), pas la chaîne
 	if event.is_action_pressed("codex_pin_tooltip") and pin_current():
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_cancel"):
@@ -273,6 +439,29 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.pressed:
 		_on_mouse_pressed(event as InputEventMouseButton)
+
+
+## IB3 : Alt seul enfoncé → chaîne active et verrouillage de l'infobulle survolée ; relâché →
+## la grâce des bulles verrouillées par la chaîne commence hors des bulles. Alt avec Maj, Ctrl ou
+## Cmd (formations Alt+Maj+1…6) : ignoré.
+func _on_explore_key(event: InputEventKey) -> void:
+	if not event.pressed:
+		_explore_held = false
+		_outside_time = 0.0
+		return
+	if event.echo:
+		return
+	if event.shift_pressed or event.ctrl_pressed or event.meta_pressed:
+		_explore_held = false
+		return
+	_explore_held = true
+	if explore_lock():
+		get_viewport().set_input_as_handled()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_explore_held = false  # Alt relâché hors de la fenêtre : pas d'événement de relâche
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -289,7 +478,8 @@ func _on_mouse_pressed(event: InputEventMouseButton) -> void:
 			open(_hover_id, -Vector2.ONE, _index_of_source(_hover_source), true)
 			get_viewport().set_input_as_handled()
 		elif under != null:
-			set_pinned(under, not under.get_meta("pinned", false))
+			# IB3 : une bulle verrouillée par la chaîne devient épinglée durablement.
+			set_pinned(under, not under.get_meta("pinned", false) or under.get_meta("chain_locked", false))
 			get_viewport().set_input_as_handled()
 	elif event.button_index == MOUSE_BUTTON_LEFT and under != null and _hover_id == "":
 		var id := str(under.get_meta("codex_id", ""))
@@ -349,25 +539,107 @@ func _process(delta: float) -> void:
 		_hovered_time += delta
 	if _pending_id != "":
 		_pending_time += delta
-		if _pending_time >= HOVER_DELAY:
+		var chain := _explore_held and _index_of_source(_pending_source) >= 0
+		if _pending_time >= chain_setting("hover_delay_s" if chain else "idle_hover_delay_s"):
 			var id := _pending_id
+			var source := _pending_source
 			_pending_id = ""
-			open(id, -Vector2.ONE, _index_of_source(_pending_source))
-	var has_unpinned := false
+			var child := open(id, -Vector2.ONE, _index_of_source(source), false, chain)
+			if chain and child != null:
+				_mark_source(child, source, id)
+	_refresh_highlights()
+	var has_closable := false
 	for bubble in bubbles:
-		if not bubble.get_meta("pinned", false):
-			has_unpinned = true
+		if _closable(bubble):
+			has_closable = true
 			break
-	if not has_unpinned:
+	if not has_closable:
 		_outside_time = 0.0
 		return
 	if _hover_id != "" or _bubble_under_mouse() != null:
 		_outside_time = 0.0
 	else:
 		_outside_time += delta
-		if _outside_time >= CLOSE_GRACE:
+		if _outside_time >= chain_setting("close_grace_s"):
 			_outside_time = 0.0
-			close_unpinned()
+			for bubble in bubbles.duplicate():
+				if is_instance_valid(bubble) and bubbles.has(bubble) and _closable(bubble):
+					_remove(bubble)
+
+
+## Bulle refermée à la grâce : non épinglée, ou verrouillée par la chaîne une fois Alt relâché.
+func _closable(bubble: PanelContainer) -> bool:
+	if not bubble.get_meta("pinned", false):
+		return true
+	return bubble.get_meta("chain_locked", false) and not _explore_held
+
+
+# --- Surlignage du mot source (IB3) ----------------------------------------------------------
+
+
+## Retient sur `child` le mot-lien source (`id` dans l'étiquette `source` d'une bulle parente) ;
+## il reste surligné tant que `child` est ouverte.
+func _mark_source(child: PanelContainer, source: Control, id: String) -> void:
+	var label := source as RichTextLabel
+	if label == null or not is_instance_valid(label) or _index_of_source(label) < 0:
+		return
+	child.set_meta("source_label", label)
+	child.set_meta("source_meta", CodexText.META_PREFIX + id)
+	_queue_highlight(label)
+
+
+func _queue_highlight(label: RichTextLabel) -> void:
+	if label != null and is_instance_valid(label) and not _highlight_dirty.has(label):
+		_highlight_dirty.append(label)
+
+
+## Réécrit le BBCode des étiquettes à jour de surlignage. Attendue tant qu'un lien de l'étiquette
+## est survolé (réécrire le texte sous un lien survolé fausserait `meta_hover_*`).
+func _refresh_highlights() -> void:
+	for label in _highlight_dirty.duplicate():
+		if not is_instance_valid(label):
+			_highlight_dirty.erase(label)
+			continue
+		if label == _hover_source:
+			continue
+		_highlight_dirty.erase(label)
+		apply_source_highlight(label)
+
+
+## Surligne dans `label` les mots-liens dont une bulle fille est ouverte (IB3).
+func apply_source_highlight(label: RichTextLabel) -> void:
+	var base := str(label.get_meta("base_text", label.text))
+	var metas := PackedStringArray()
+	for bubble in bubbles:
+		if is_instance_valid(bubble) and not bubble.is_queued_for_deletion() and bubble.has_meta("source_label") and bubble.get_meta("source_label") == label:
+			metas.append(str(bubble.get_meta("source_meta", "")))
+	var text := base
+	for meta in metas:
+		text = highlight_links(text, meta, SOURCE_HIGHLIGHT)
+	if metas.is_empty():
+		label.remove_meta("base_text")
+	else:
+		label.set_meta("base_text", base)
+	if label.text != text:
+		label.text = text
+
+
+## `bbcode` avec un fond `color` sous chaque lien `[url=meta]…[/url]`.
+static func highlight_links(bbcode: String, meta: String, color: String) -> String:
+	var open_tag := "[url=%s]" % meta
+	var result := ""
+	var from := 0
+	while true:
+		var start := bbcode.find(open_tag, from)
+		if start < 0:
+			break
+		var inner := start + open_tag.length()
+		var end := bbcode.find("[/url]", inner)
+		if end < 0:
+			break
+		result += bbcode.substr(from, inner - from) + "[bgcolor=%s]" % color + bbcode.substr(inner, end - inner) + "[/bgcolor]"
+		from = end
+	return result + bbcode.substr(from)
 
 
 # --- Construction et placement ---------------------------------------------------------------
@@ -405,15 +677,22 @@ static func first_sentence(text: String) -> String:
 	return text
 
 
-func _footer_text(id: String, pinned: bool) -> String:
+func _footer_text(id: String, pinned: bool, chain: bool = false) -> String:
 	var parts := PackedStringArray()
 	if id != "":
 		parts.append("Clic : lire la fiche")
-	parts.append("Clic droit : détacher" if pinned else "T : maintenir ouverte")
+	if chain:
+		parts.append("Clic droit : épingler")
+	elif pinned:
+		parts.append("Clic droit : détacher")
+	else:
+		parts.append("T : maintenir ouverte")
+		parts.append("Alt : explorer")
 	return " · ".join(parts)
 
 
-func _make_bubble(id: String, bbcode: String, pinned: bool, parent: PanelContainer = null) -> PanelContainer:
+## `view` (IB3) : contenu déjà construit (version détaillée) à la place du texte BBCode.
+func _make_bubble(id: String, bbcode: String, pinned: bool, parent: PanelContainer = null, view: Control = null) -> PanelContainer:
 	var bubble := PanelContainer.new()
 	bubble.name = "Bubble"
 	bubble.theme = load(RichTooltip.THEME_PATH)
@@ -425,6 +704,36 @@ func _make_bubble(id: String, bbcode: String, pinned: bool, parent: PanelContain
 	box.add_theme_constant_override("separation", 4)
 	box.mouse_filter = Control.MOUSE_FILTER_PASS
 	bubble.add_child(box)
+	if view != null:
+		_adopt_view(box, view)
+	else:
+		_add_text_label(box, bbcode)
+	var footer := Label.new()
+	footer.name = "Footer"
+	UiType.apply(footer, UiType.CAPTION)
+	footer.add_theme_color_override("font_color", Color(MUTED))
+	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	box.add_child(footer)
+	_apply_pinned(bubble, pinned)
+	return bubble
+
+
+## IB3 : place la vue détaillée dans la bulle, sans son cadre ni son pied (la bulle a les siens) ;
+## ses textes sont branchés sur les bulles (chaîne depuis leurs mots-liens).
+func _adopt_view(box: VBoxContainer, view: Control) -> void:
+	if view is PanelContainer:
+		view.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	for node in view.find_children("Footer", "", true, false):
+		node.get_parent().remove_child(node)
+		node.queue_free()
+	view.mouse_filter = Control.MOUSE_FILTER_PASS
+	box.add_child(view)
+	for node in view.find_children("*", "RichTextLabel", true, false):
+		(node as RichTextLabel).mouse_filter = Control.MOUSE_FILTER_PASS
+		attach(node as RichTextLabel)
+
+
+func _add_text_label(box: VBoxContainer, bbcode: String) -> void:
 	var label := RichTextLabel.new()
 	label.name = "Text"
 	label.bbcode_enabled = true
@@ -440,15 +749,7 @@ func _make_bubble(id: String, bbcode: String, pinned: bool, parent: PanelContain
 	label.add_theme_font_size_override("bold_font_size", UiType.size(UiType.CAPTION))
 	label.text = bbcode
 	box.add_child(label)
-	var footer := Label.new()
-	footer.name = "Footer"
-	UiType.apply(footer, UiType.CAPTION)
-	footer.add_theme_color_override("font_color", Color(MUTED))
-	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	box.add_child(footer)
 	attach(label)
-	_apply_pinned(bubble, pinned)
-	return bubble
 
 
 func _push(bubble: PanelContainer, at: Vector2) -> void:
@@ -458,7 +759,7 @@ func _push(bubble: PanelContainer, at: Vector2) -> void:
 	bubble.position = at
 	add_child(bubble)
 	bubbles.append(bubble)
-	while bubbles.size() > MAX_BUBBLES:
+	while bubbles.size() > maxi(1, int(chain_setting("max_bubbles"))):
 		_remove(bubbles[0])
 	_outside_time = 0.0
 	bubble.resized.connect(_clamp.bind(bubble))
@@ -479,16 +780,24 @@ func _clamp(bubble: PanelContainer) -> void:
 	bubble.position = pos.floor()
 
 
-func _trim_above(parent_index: int) -> void:
+## Ferme les bulles non épinglées au-dessus de `parent_index` ; `chain` (IB3) : aussi celles
+## verrouillées par la chaîne (remplacement de branche).
+func _trim_above(parent_index: int, chain: bool = false) -> void:
 	for index in range(bubbles.size() - 1, parent_index, -1):
-		if not bubbles[index].get_meta("pinned", false):
-			_remove(bubbles[index])
+		if index >= bubbles.size():
+			continue
+		var bubble := bubbles[index]
+		if not bubble.get_meta("pinned", false) or chain and bubble.get_meta("chain_locked", false):
+			_remove(bubble)
 
 
 ## Retire `bubble` ; ses filles restantes (épinglées) sont rattachées à sa propre parente.
 func _remove(bubble: PanelContainer) -> void:
 	var grandparent := parent_of(bubble)
 	bubbles.erase(bubble)
+	var source: Variant = bubble.get_meta("source_label") if bubble.has_meta("source_label") else null
+	if source is RichTextLabel and is_instance_valid(source):
+		_queue_highlight(source)
 	for child in bubbles:
 		if child.has_meta("parent") and child.get_meta("parent") == bubble:
 			if grandparent != null:
