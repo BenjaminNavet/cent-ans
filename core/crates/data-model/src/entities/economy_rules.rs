@@ -166,8 +166,37 @@ pub struct EconomyRules {
     /// ... up to this ceiling (percent).
     #[serde(default = "default_garrison_reinforce_max_percent")]
     pub garrison_reinforce_max_percent: u32,
+    /// RS-C: share (percent) of a building's money cost refunded when it is
+    /// demolished (`Order::Demolish`).
+    #[serde(default = "default_demolition_refund_percent")]
+    pub demolition_refund_percent: u32,
+    /// RS-C: when the AI demolishes buildings it can no longer afford.
+    #[serde(default)]
+    pub ai_demolition: AiDemolition,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+}
+
+/// RS-C: the AI demolishes buildings after `deficit_seasons` seasons in a row
+/// in deficit, while their upkeep (those that do not pay for themselves)
+/// exceeds `max_upkeep_percent` of its gross income, at most
+/// `max_per_turn` a season.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AiDemolition {
+    pub deficit_seasons: u32,
+    pub max_upkeep_percent: i64,
+    pub max_per_turn: usize,
+}
+
+impl Default for AiDemolition {
+    fn default() -> Self {
+        AiDemolition {
+            deficit_seasons: 4,
+            max_upkeep_percent: 40,
+            max_per_turn: 1,
+        }
+    }
 }
 
 fn default_administration_base() -> f64 {
@@ -236,11 +265,16 @@ impl Default for EconomyRules {
             garrison_relief_max_percent: default_garrison_relief_max_percent(),
             garrison_reinforce_percent_per_point: default_garrison_reinforce_percent_per_point(),
             garrison_reinforce_max_percent: default_garrison_reinforce_max_percent(),
+            demolition_refund_percent: default_demolition_refund_percent(),
+            ai_demolition: AiDemolition::default(),
             description: None,
         }
     }
 }
 
+fn default_demolition_refund_percent() -> u32 {
+    10
+}
 fn default_resource_import_multiplier() -> u32 {
     100
 }

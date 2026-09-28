@@ -96,6 +96,15 @@ fn economy_rules_match_their_default() {
 }
 
 #[test]
+fn diplomacy_rules_match_their_default() {
+    let (data, _) = GameData::load(&data_root()).expect("data");
+    let mut from_file = data.diplomacy_rules.clone();
+    assert!(from_file.description.is_some(), "diplomacy.json not read");
+    from_file.description = None;
+    assert_eq!(from_file, data_model::DiplomacyRules::default());
+}
+
+#[test]
 fn real_data_loads_without_errors() {
     let (data, warnings) = GameData::load(&data_root()).expect("data/ must load");
 

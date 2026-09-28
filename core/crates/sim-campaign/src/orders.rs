@@ -171,6 +171,13 @@ pub enum Order {
         #[serde(alias = "province")]
         settlement: Place,
     },
+    /// RS-C: razes the completed `building` of `settlement`, refunding
+    /// `economy.json` `demolition_refund_percent` of its money cost.
+    Demolish {
+        #[serde(alias = "province")]
+        settlement: Place,
+        building: BuildingId,
+    },
     /// Sets the faction's tax bracket (spec § 1.4).
     SetTaxRate {
         rate: TaxRate,
@@ -396,6 +403,13 @@ pub enum Order {
         #[serde(alias = "unit_type")]
         unit: UnitTypeId,
     },
+    // ----- TW2-T5: army traditions (`traditions.rs`) -------------------------
+    /// `army` takes `tradition` (an id of `data/rules/army_traditions.json`)
+    /// for a rank it has reached.
+    ChooseArmyTradition {
+        army: ArmyId,
+        tradition: String,
+    },
 }
 
 impl Order {
@@ -507,6 +521,8 @@ pub enum OrderError {
     BuildUnavailable(String),
     #[error("aucune construction en cours dans cette colonie")]
     NoConstruction,
+    #[error("démolition impossible : {0}")]
+    DemolitionRefused(String),
     #[error("la colonie est assiégée")]
     SettlementBesieged,
     #[error("posture impossible : {0}")]
@@ -549,6 +565,8 @@ pub enum OrderError {
     Encounter(#[from] crate::encounter::EncounterError),
     #[error(transparent)]
     Capture(#[from] crate::capture::CaptureError),
+    #[error(transparent)]
+    Tradition(#[from] crate::traditions::TraditionError),
     #[error("la place est en ruine : ni recrutement ni chantier")]
     SettlementRuined,
     #[error("engagement impossible : {0}")]
@@ -751,6 +769,13 @@ impl CampaignState {
                 let settlement = self.resolve_place(&settlement)?;
                 self.order_cancel_build(data, faction, &settlement)
             }
+            Order::Demolish {
+                settlement,
+                building,
+            } => {
+                let settlement = self.resolve_place(&settlement)?;
+                crate::buildings::demolish(self, data, faction, &settlement, &building)
+            }
             Order::SetTaxRate { rate } => {
                 self.factions
                     .get_mut(faction)
@@ -888,6 +913,9 @@ impl CampaignState {
             }
             Order::HireMercenary { army, unit } => {
                 self.order_hire_mercenary(data, faction, &army, &unit)
+            }
+            Order::ChooseArmyTradition { army, tradition } => {
+                self.choose_army_tradition(data, faction, &army, &tradition)
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
@@ -1515,6 +1543,8 @@ impl CampaignState {
                 units,
                 planned_path: Vec::new(),
                 destination: None,
+                // TW2-T5: a detachment starts without traditions.
+                traditions: Default::default(),
                 ..template
             },
         );
