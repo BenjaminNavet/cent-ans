@@ -39,6 +39,7 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 			check.button_pressed = true
 			check.set_script(RichButton)
 			check.theme_type_variation = &"CheckBox"
+			narrow_button(check)
 			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
 			RichTooltip.set_tooltip(check, "unit", unit_type, unit)  # IB1 : infobulle en sections
 			list.add_child(check)
@@ -62,6 +63,7 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 			button.text += " (dont import %s)" % Money.amount(int(row["import_cost"]))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		narrow_button(button)
 		var available: bool = bool(row.get("available", false))
 		button.disabled = not available
 		var unit_type: String = str(row.get("unit_type", ""))
@@ -71,10 +73,10 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		line.add_child(button)
 		var reason := str(row.get("reason", "Indisponible"))
 		if not available and not reason.begins_with("réserve"):
-			line.add_child(reason_label(reason))
+			line.add_child(side_note(reason_label(reason)))
 		# TW2-T2 : réserve de recrutement de la colonie (« 2 disponibles, +1 dans 2 saisons »).
 		if row.has("pool_label"):
-			line.add_child(pool_label(row))
+			line.add_child(side_note(pool_label(row)))
 		list.add_child(line)
 
 
@@ -173,6 +175,7 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		button.text = "%s — %s / %s" % [str(row.get("name", row.get("building", "?"))), Money.amount(int(row.get("cost", 0))), FrText.count(int(row.get("turns", 1)), "tour")]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		narrow_button(button)
 		var available: bool = bool(row.get("available", false))
 		button.disabled = not available
 		var building_id: String = str(row.get("building", ""))
@@ -180,12 +183,12 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		button.pressed.connect(func() -> void: on_build.call(building_id))
 		line.add_child(button)
 		if not available:
-			line.add_child(reason_label(str(row.get("reason", "Indisponible"))))
+			line.add_child(side_note(reason_label(str(row.get("reason", "Indisponible")))))
 		# SV3 : surcoût d'import (B7c) déjà visible dans la bulle ; rappel court sur la ligne
 		# pour ne pas avoir à ouvrir la bulle pour le repérer.
 		var import_cost := int(row.get("import_cost", 0))
 		if import_cost > 0:
-			line.add_child(import_cost_label(import_cost))
+			line.add_child(side_note(import_cost_label(import_cost)))
 		RichTooltip.set_tooltip(button, "building", building_id, row)  # IB1 : infobulle en sections
 		list.add_child(line)
 
@@ -196,6 +199,24 @@ static func import_cost_label(import_cost: int) -> Label:
 	label.text = "Dont import : %s" % Money.amount(import_cost)
 	label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	label.add_theme_color_override("font_color", Color(RichTooltip.RED))
+	return label
+
+
+## Q6 : bouton de ligne d'une liste du panneau latéral ; son libellé se coupe (points de
+## suspension, texte entier dans la bulle) au lieu d'élargir le panneau au-delà de sa zone
+## (`SIDE_PANEL`, 384 px en vue 1280×720), où le reste du panneau passait hors de l'écran.
+static func narrow_button(button: Button) -> Button:
+	button.clip_text = true
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	return button
+
+
+## Q6 : note à droite d'un bouton de ligne (raison, import, réserve) : elle passe à la ligne
+## dans le tiers de la largeur au lieu d'élargir la ligne.
+static func side_note(label: Label) -> Label:
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.size_flags_stretch_ratio = 0.5
 	return label
 
 

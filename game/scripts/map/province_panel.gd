@@ -221,8 +221,10 @@ func _fill_classes(classes: Dictionary) -> void:
 
 
 func _make_class_row(class_id: String, data: Dictionary) -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
+	# Q6 : ligne à retour (jauges sous le nom quand la zone `SIDE_PANEL` est étroite) ; une
+	# ligne fixe de 420 px élargissait le panneau hors de l'écran en vue 1280×720.
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 8)
 	var name_chip := IconChip.create("class_" + class_id, str(CLASS_LABELS.get(class_id, class_id)), RichTooltip.population_class(class_id, data), ROW_ICON, 14)
 	name_chip.custom_minimum_size = Vector2(104, 0)
 	row.add_child(name_chip)
