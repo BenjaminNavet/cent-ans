@@ -244,9 +244,7 @@ def weighted_cost_voronoi(
             c1 = min(cols, int(sources[:, 1].max()) + reach + 1)
         mcp = MCP_Geometric(costs[r0:r1, c0:c1], fully_connected=True)
         cost, _ = mcp.find_costs(
-            [(int(row) - r0, int(col) - c0) for row, col in sources],
-            max_cumulative_cost=max_cost,
-        )
+            [(int(row) - r0, int(col) - c0) for row, col in sources])
         if max_cost is not None:
             cost[cost > max_cost] = np.inf
         scaled = cost / weight
@@ -296,9 +294,7 @@ def land_within_reach(
         return np.zeros_like(land)
     snapped, _ = snap_to_mask(sources, land)
     mcp = MCP_Geometric(np.where(land, 1.0, np.inf), fully_connected=True)
-    distance, _ = mcp.find_costs(
-        [(int(r), int(c)) for r, c in snapped], max_cumulative_cost=max_distance_px
-    )
+    distance, _ = mcp.find_costs([(int(r), int(c)) for r, c in snapped])
     return land & (distance <= max_distance_px)
 
 

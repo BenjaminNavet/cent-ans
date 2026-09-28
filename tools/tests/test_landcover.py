@@ -7,7 +7,7 @@ import numpy as np
 from jsonschema import Draft202012Validator
 
 from cent_ans_tools.geo import copernicus, kk10, landcover, relief_shade
-from cent_ans_tools.geo.project import MapGrid
+from cent_ans_tools.geo.project import MapGrid, default_grid
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 
@@ -80,7 +80,7 @@ def test_shade_encoding_is_neutral_at_128() -> None:
 
 def test_ellipse_signed_distance_is_positive_inside() -> None:
     """The centre of an ellipse is inside (positive), a far pixel outside (negative)."""
-    grid = MapGrid((2169486.0, 1327858.0, 5114414.0, 4272786.0), 4096)
+    grid = default_grid()
     area = {"ellipse": {"center": [2.18, 47.98], "radii_km": [30, 10], "angle_deg": 0}}
     dist, window = landcover.area_signed_distance(area, grid)
     cx, cy = grid.lonlat_to_pixel(2.18, 47.98)
@@ -145,3 +145,15 @@ def test_curated_files_match_their_schemas() -> None:
         assert not errors, errors[:3]
         ids = [area["id"] for area in document["areas"]]
         assert len(ids) == len(set(ids))
+
+
+def test_dryness_clears_steppes_and_deserts_but_not_the_west() -> None:
+    """OM2 fallback land cover: steppe and arid belts lose their potential forest."""
+    lon = np.array([2.35, 40.0, 44.0, 33.5, 31.0, 41.5], dtype=np.float32)
+    lat = np.array([48.86, 48.0, 57.0, 39.0, 29.0, 43.0], dtype=np.float32)
+    height = np.array([50.0, 100.0, 150.0, 1000.0, 50.0, 1800.0], dtype=np.float32)
+    dry = landcover.dryness(lon, lat, height, None)
+    paris, don_steppe, kostroma, anatolia, egypt, caucasus = dry
+    assert paris == 0.0 and kostroma == 0.0
+    assert don_steppe > 0.8 and anatolia > 0.8 and egypt > 0.9
+    assert caucasus < 0.1  # montagnes boisées
