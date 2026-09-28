@@ -67,3 +67,14 @@ pontifical » depuis 1234 : `tit_urbino` corrigé en titre souverain (pas de `de
 Total révisé : 15 nouvelles provinces à géométrie propre (+ Montferrat et Sicile réassignées),
 13 nouvelles factions jouables (Mantoue, Ferrare, Montferrat, Saluces, Pise, Sienne, Bologne,
 Pérouse, Urbin, Rimini, Sicile, Tarente, Pavie).
+
+## Correction héraldique
+
+`test_shields_are_distinct_and_masked` a révélé que 7 des blasons choisis rendaient des pixels
+identiques à d'autres factions : le moteur de rendu des écus de faction (`heraldry.build`,
+grammaire simplifiée `_draw_charges`) ne trace pas `chef`, `parti`, `fuselé`, `couleuvre` ni la
+nuance `pattée` d'une croix (contrairement à la grammaire v2 utilisée pour `houses.json`). Blasons
+simplifiés pour le rendu de faction uniquement (`fac_mantua`, `fac_montferrat`, `fac_pisa`,
+`fac_siena`, `fac_bologna`, `fac_urbino`, `fac_rimini`, `fac_pavia`), avec note dans leur
+`heraldry.description` ; les blasons historiques complets restent dans les titres et
+`data/heraldry/houses.json`. 49/49 écus de faction désormais distincts.

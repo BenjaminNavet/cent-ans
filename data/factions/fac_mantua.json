@@ -16,8 +16,8 @@
   "succession_law": "male_preference_primogeniture",
   "primary_title": "tit_mantova",
   "heraldry": {
-    "blazon": "D'argent à la croix pattée de gueules.",
-    "description": "Armes primitives de la maison Gonzague.",
+    "blazon": "D'or au lion de gueules.",
+    "description": "Simplification du blason (le moteur de rendu ne trace pas la croix pattée) ; armes complètes conservées dans data/heraldry/houses.json et le titre.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#B0182B"
   },

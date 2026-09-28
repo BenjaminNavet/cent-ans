@@ -16,8 +16,8 @@
   "succession_law": "elective",
   "primary_title": "tit_pavia",
   "heraldry": {
-    "blazon": "D'argent à la couleuvre d'azur couronnée d'or (armes disputées avec Milan).",
-    "description": "Emblème traditionnel de l'ancienne capitale lombarde, proche de celui des Visconti qui convoitent la ville ; blason incertain pour cette période, faute de sceau communal conservé.",
+    "blazon": "D'or au lion d'azur.",
+    "description": "Simplification (le moteur de rendu ne trace pas la couleuvre) ; blason incertain, faction gibeline dominante à Pavie plutôt qu'armes familiales attestées.",
     "primary_color": "#F5F1E6",
     "secondary_color": "#1F3A93"
   },
