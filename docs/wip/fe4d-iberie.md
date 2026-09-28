@@ -54,10 +54,51 @@ assise territoriale 1337 floue), ordre de Santiago (domaine trop dispersé pour 
   fiches), portraits (bucket « iberia » complété)
 - [x] Pipeline géo régénéré (voir commandes dans le rapport final)
 - [x] `uv run --project tools pytest -q` : 906 passed, 2 skipped
-- [ ] `cargo test` (en cours, `core/target-fe4d`)
+- [x] `cargo fmt --all` propre, `cargo clippy --all-targets -- -D warnings` : 0 warning
+- [x] `cargo test --no-fail-fast` : tout vert sauf `f7_events::montereau_leads_to_the_alliance_then_troyes`
+  (voir « Test non corrigé » ci-dessous)
+
+## État final : TERMINÉ (voir rapport de fin de lot)
 
 ## Écarts notables
 - `chr_jacques_iii_de_majorque` existait déjà, rattaché à `fac_aragon` avec un commentaire
   explicite « faute de faction Majorque distincte, liberté du jeu ». Ce lot renverse ce choix
   documenté et lui donne sa propre faction (conforme au mandat qui cite Majorque comme
   candidat) — codex mis à jour en conséquence.
+- `fac_aragon` n'avait plus aucun personnage hors le roi après le transfert de Jacques III de
+  Majorque vers sa propre faction, ce qui faisait échouer deux tests de prise d'otage
+  (`aragonese_hostage` cherche un courtisan aragonais vivant hors du souverain). Ajout de
+  `chr_ramon_berenguer_de_prades`, fils cadet de Jacques II, oncle de Pierre IV, réellement sans
+  domaine propre en 1337 (il recevra Prades en 1341) — personnage sourcé, pas d'invention.
+- `chr_jaume_i_durgell` utilisait un champ `family.spouse` (chaîne libre) au lieu de
+  `family.spouses` (liste d'identifiants de personnages) ; le schéma JSON ne l'a pas détecté
+  (seul `cargo test`, via le chargeur Rust strict, l'a trouvé — même angle mort que documenté
+  dans FE4a pour `title.schema.json`). Retiré (le mariage reste mentionné en description).
+- Compteurs figés mis à jour dans `core/crates/sim-campaign/tests/campaign.rs`
+  (`new_1337_matches_game_data`) : factions 36→44, provinces 141→151, armées 35→43.
+- `tit_majorca`, `tit_valencia`, `tit_catalonia`, `tit_sardinia_corsica`, `tit_galicia`,
+  `tit_leon` sont des royaumes « en titre » ; comme `title.schema.json` ne modélise que 3 rangs
+  (kingdom > duchy > county) et interdit un lige de rang égal, ces titres n'ont PAS de
+  `de_jure_liege` (contrairement à `tit_catalonia`, rang `duchy`, qui en a un). `fac_majorca`
+  n'a donc pas de champ `suzerain` : indépendance de fait assumée mécaniquement, cohérente avec
+  son objectif `be_independent`.
+- 6 colonies neuves avaient un bâtiment interdit pour leur genre (règle « une ville ne porte pas
+  de bld_cathedral » généralisée : village n'autorise ni `bld_stone_walls` ni `bld_castle`, abbaye
+  n'autorise pas `bld_castle`) : bâtiments retirés ou genre corrigé (`set_almansa`→castle,
+  `set_covarrubias`→town) ; trouvé uniquement par `cargo test` (`eq2_balance`), pas par les
+  schémas JSON.
+- Blasons : `fac_majorca` (mêmes pals qu'Aragon) et `fac_calatrava` (même croix que Gênes)
+  rendaient un écu identique à une autre faction ; brisure de jeu ajoutée (bordure de sable pour
+  Majorque, croix alésée pour Calatrava), signalée `uncertain` avec note.
+
+## Test non corrigé (signalé, non affaibli)
+
+`f7_events.rs::montereau_leads_to_the_alliance_then_troyes` échoue : après 3 tours de guerre
+France-Angleterre à partir de 1419 (graine 4), seul `evt_montereau` s'est déclenché à l'été 1420,
+pas `evt_alliance_anglo_bourguignonne` ni `evt_troyes` dans la fenêtre de tours du test. Sans
+rapport de contenu avec l'Ibérie ; probablement sensible à la graine comme `cv3_ai_stances`
+(observé en échec transitoire lors d'une exécution précédente, avant de repasser au vert) : plus
+de factions IA (+8) et de personnages changent l'ordre de consommation du flux aléatoire par
+tour. Je n'ai pas touché à `f7_events.rs` ni à la logique de déclenchement (hors mandat F4d,
+règles dans `core/`) ; à signaler à F0/F3 si la sensibilité aux graines persiste après
+l'intégration des autres lots FE4.
