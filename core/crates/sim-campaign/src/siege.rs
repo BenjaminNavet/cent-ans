@@ -919,7 +919,8 @@ pub(crate) fn resolve_raids(
         }
         let general = state.armies[&army_id].general.clone();
         let province = state.provinces.get_mut(&province_id).expect("exists");
-        let loot = (province_income(province) * RAID_LOOT_SHARE).round() as i64;
+        let loot =
+            (province_income(&data.economy_rules, province) * RAID_LOOT_SHARE).round() as i64;
         province.devastation = province
             .devastation
             .saturating_add(RAID_DEVASTATION)

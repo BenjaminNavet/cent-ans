@@ -242,9 +242,11 @@ fn valid_orders_apply_immediately() {
         .iter()
         .find(|o| o.unit_type == unit("unit_genoese_crossbowmen"))
         .unwrap();
+    // TW2-T3 (ADR 0103): Genoese companies are hired by an army from the
+    // regional reserve, never levied in a town.
     assert!(
-        genoese.available,
-        "France may hire Genoese: {:?}",
+        !genoese.available,
+        "towns no longer levy Genoese: {:?}",
         genoese.reason
     );
 

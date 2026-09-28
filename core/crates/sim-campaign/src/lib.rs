@@ -58,6 +58,7 @@ pub mod holdings;
 pub mod map_lens;
 pub mod march;
 pub mod medicine;
+pub mod mercenaries;
 pub mod movement;
 pub mod naval;
 pub mod navigation;
@@ -127,6 +128,7 @@ pub use encounter::{
 pub use events::{EventKind, GameEvent};
 pub use frontier::GarrisonRole;
 pub use march::{MoveReport, StopReason};
+pub use mercenaries::{MercenaryMarket, MercenaryOption, MercenaryState};
 pub use navigation::{Cell, GridPath};
 pub use orders::{
     MoveOrderTarget, Order, OrderError, OrderOutcome, Place, RecruitOption, RecruitPrice,

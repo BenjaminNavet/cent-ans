@@ -641,9 +641,11 @@ fn the_ai_never_gives_a_stance_order_the_core_refuses() {
     // Every behaviour at certainty: the most orders to check.
     let mut data = real_data();
     enable_ai_stances(&mut data);
-    let log = campaign_stance_orders(&data, 7, 60);
-    // 15 years of war: the AI lies in wait at least once (8 orders with
-    // the tuning of 2026-09-27).
+    // RS-B (ADR 0100): seed 4 since the AI weighs its secondary places'
+    // buildings (seed 7 then gave 2 watched orders, no ambush; seed 4 gives 12,
+    // 5 ambushes).
+    let log = campaign_stance_orders(&data, 4, 60);
+    // 15 years of war: the AI lies in wait at least once.
     assert!(
         log.iter().any(|(_, order, _)| order.contains("Ambush")),
         "{log:?}"

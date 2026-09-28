@@ -1116,6 +1116,12 @@
       "source": "lorc/cannon",
       "author": "Lorc"
     },
+    "unit_brabancons": {
+      "file": "lorc-halberd.svg",
+      "category": "unit",
+      "source": "lorc/halberd",
+      "author": "Lorc"
+    },
     "unit_breton_knights": {
       "file": "lorc-crested-helmet.svg",
       "category": "unit",
@@ -1282,6 +1288,12 @@
       "file": "lorc-broadsword.svg",
       "category": "unit",
       "source": "lorc/broadsword",
+      "author": "Lorc"
+    },
+    "unit_scots_archers": {
+      "file": "lorc-arrows-shield.svg",
+      "category": "unit",
+      "source": "lorc/arrows-shield",
       "author": "Lorc"
     },
     "unit_scottish_spearmen": {
