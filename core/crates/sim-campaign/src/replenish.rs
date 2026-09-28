@@ -347,7 +347,7 @@ fn stance_label_fr(stance: Stance) -> &'static str {
 }
 
 /// Marks `army_id` as having fought this turn (no replenishment this season).
-pub(crate) fn mark_fought(state: &mut CampaignState, army_id: &ArmyId) {
+pub fn mark_fought(state: &mut CampaignState, army_id: &ArmyId) {
     let turn = state.turn;
     if let Some(army) = state.armies.get_mut(army_id) {
         army.fought_turn = Some(turn);
@@ -357,7 +357,7 @@ pub(crate) fn mark_fought(state: &mut CampaignState, army_id: &ArmyId) {
 /// End of the season: every army replenishes and pays for it, in id order
 /// (the treasury of a faction serves its armies one after the other). The
 /// player gets one summary line in the season report.
-pub(crate) fn resolve_replenishment(
+pub fn resolve_replenishment(
     state: &mut CampaignState,
     data: &GameData,
     events: &mut Vec<GameEvent>,

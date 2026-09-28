@@ -164,7 +164,7 @@ impl CampaignState {
 
 /// New season: every reserve below its cap refills by its rate; a full
 /// reserve leaves the map. A besieged settlement does not refill.
-pub(crate) fn resolve_recruit_pools(state: &mut CampaignState, data: &GameData) {
+pub fn resolve_recruit_pools(state: &mut CampaignState, data: &GameData) {
     let updates: Vec<(SettlementId, Vec<(UnitTypeId, Option<u32>)>)> = state
         .settlements
         .iter()
