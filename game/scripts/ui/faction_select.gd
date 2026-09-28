@@ -45,6 +45,8 @@ var start_tabs: TabContainer = null
 var map_picker: FactionMapPicker = null
 var kingdom_filter: OptionButton = null
 var rank_filter: OptionButton = null
+var _faction_list: VBoxContainer = null
+var _faction_buttons: Dictionary = {}  # faction_id → Button
 const RANK_FILTERS := [["", "Tous les rangs"], ["kingdom", "Royaumes"], ["duchy", "Duchés"], ["county", "Comtés"]]
 
 
@@ -147,7 +149,8 @@ func _build() -> void:
 	column.add_child(_build_actions())
 
 
-## FE6 : onglet « Toutes les factions » : filtres (royaume, rang) et carte cliquable de 1337.
+## FE6 : onglet « Toutes les factions » : filtres (royaume, rang), carte cliquable de 1337 à ses
+## proportions et, à côté, la liste des factions filtrées groupées par royaume.
 func _build_map_tab() -> Control:
 	var page := VBoxContainer.new()
 	page.name = "Toutes les factions"
@@ -156,24 +159,42 @@ func _build_map_tab() -> Control:
 	filters.add_theme_constant_override("separation", 10)
 	page.add_child(filters)
 	map_picker = FactionMapPicker.new()
-	map_picker.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	map_picker.faction_chosen.connect(select)
-	filters.add_child(FrontEndStyle.label("Royaume", UiType.size(UiType.BODY), Color(0.97, 0.92, 0.80)))
+	filters.add_child(FrontEndStyle.label("Royaume", UiType.size(UiType.BODY), FrontEndStyle.INK))
 	kingdom_filter = OptionButton.new()
 	kingdom_filter.name = "KingdomFilter"
 	filters.add_child(kingdom_filter)
-	filters.add_child(FrontEndStyle.label("Rang", UiType.size(UiType.BODY), Color(0.97, 0.92, 0.80)))
+	filters.add_child(FrontEndStyle.label("Rang", UiType.size(UiType.BODY), FrontEndStyle.INK))
 	rank_filter = OptionButton.new()
 	rank_filter.name = "RankFilter"
 	for entry in RANK_FILTERS:
 		rank_filter.add_item(str(entry[1]))
 		rank_filter.set_item_metadata(rank_filter.item_count - 1, str(entry[0]))
 	filters.add_child(rank_filter)
-	var hint := FrontEndStyle.label("Survolez une terre pour la fiche de son seigneur, cliquez pour le choisir.", UiType.size(UiType.CAPTION), Color(0.85, 0.80, 0.68))
+	var hint := FrontEndStyle.label("Survolez une terre pour la fiche de son seigneur, cliquez pour le choisir.", UiType.size(UiType.CAPTION), Color(0.40, 0.32, 0.22))
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hint.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	filters.add_child(hint)
-	page.add_child(map_picker)
+	var body := HBoxContainer.new()
+	body.name = "MapBody"
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 10)
+	page.add_child(body)
+	map_picker.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_child(map_picker)
+	var list_scroll := ScrollContainer.new()
+	list_scroll.name = "FactionListScroll"
+	list_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	body.add_child(list_scroll)
+	_faction_list = VBoxContainer.new()
+	_faction_list.name = "FactionList"
+	_faction_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_faction_list.add_theme_constant_override("separation", 4)
+	list_scroll.add_child(_faction_list)
+	# La carte prend la largeur de ses proportions à la hauteur disponible ; la liste, le reste.
+	body.resized.connect(func() -> void: _fit_map_width(body))
 	map_picker.load_data()
 	kingdom_filter.add_item("Tous les royaumes")
 	kingdom_filter.set_item_metadata(0, "")
@@ -182,7 +203,61 @@ func _build_map_tab() -> Control:
 		kingdom_filter.set_item_metadata(kingdom_filter.item_count - 1, str(kingdom[0]))
 	kingdom_filter.item_selected.connect(func(_i: int) -> void: _apply_map_filters())
 	rank_filter.item_selected.connect(func(_i: int) -> void: _apply_map_filters())
+	_rebuild_faction_list()
 	return page
+
+
+func _fit_map_width(body: Control) -> void:
+	var aspect := map_picker.aspect_ratio()
+	var width := clampf(body.size.y * aspect, 280.0, body.size.x * 0.62)
+	if absf(map_picker.custom_minimum_size.x - width) > 1.0:
+		map_picker.custom_minimum_size = Vector2(width, 0)
+
+
+## Liste des factions qui passent les filtres, groupées par royaume ; survol = surbrillance sur
+## la carte, clic = choix (comme sur la carte).
+func _rebuild_faction_list() -> void:
+	if _faction_list == null:
+		return
+	for child in _faction_list.get_children():
+		child.queue_free()
+	_faction_buttons.clear()
+	var groups := {}
+	var order: Array = []
+	for id in map_picker.visible_factions():
+		var sheet: Dictionary = map_picker.sheets[id]
+		var kingdom_name := str(sheet.get("kingdom_name", ""))
+		if not groups.has(kingdom_name):
+			groups[kingdom_name] = []
+			order.append(kingdom_name)
+		(groups[kingdom_name] as Array).append(id)
+	# Les grands royaumes (le plus de factions) d'abord, puis par nom.
+	order.sort_custom(func(a: String, b: String) -> bool:
+		var count_a := (groups[a] as Array).size()
+		var count_b := (groups[b] as Array).size()
+		return count_a > count_b if count_a != count_b else a < b)
+	for kingdom_name in order:
+		var header := FrontEndStyle.label(str(kingdom_name), UiType.size(UiType.BODY), FrontEndStyle.GULES, FrontEndStyle.title_font())
+		_faction_list.add_child(header)
+		var flow := HFlowContainer.new()
+		flow.add_theme_constant_override("h_separation", 6)
+		flow.add_theme_constant_override("v_separation", 4)
+		_faction_list.add_child(flow)
+		for id in groups[kingdom_name]:
+			var button := Button.new()
+			button.name = "Faction_%s" % id
+			button.text = str((map_picker.sheets[id] as Dictionary).get("name", id))
+			button.toggle_mode = true
+			button.button_pressed = id == selected_faction
+			button.focus_mode = Control.FOCUS_NONE
+			UiType.apply(button, UiType.CAPTION)
+			button.pressed.connect(func() -> void: select(id))
+			button.mouse_entered.connect(func() -> void: map_picker.highlight(id))
+			button.mouse_exited.connect(func() -> void: map_picker.highlight(""))
+			flow.add_child(button)
+			_faction_buttons[id] = button
+	if order.is_empty():
+		_faction_list.add_child(FrontEndStyle.label("Aucune faction ne correspond à ces filtres.", UiType.size(UiType.CAPTION), FrontEndStyle.INK))
 
 
 ## FE6 (captures) : onglet de la carte, `faction_id` choisi et sa fiche de survol affichée.
@@ -198,6 +273,7 @@ func stage_map(faction_id: String) -> void:
 
 func _apply_map_filters() -> void:
 	map_picker.set_filters(str(kingdom_filter.get_item_metadata(kingdom_filter.selected)), str(rank_filter.get_item_metadata(rank_filter.selected)))
+	_rebuild_faction_list()
 
 
 func _build_start_dates() -> Control:
@@ -587,6 +663,8 @@ func select(faction_id: String) -> void:
 		panel.modulate = Color.WHITE if id == faction_id else Color(0.82, 0.8, 0.76)
 	if map_picker != null:
 		map_picker.select(faction_id)
+	for id in _faction_buttons:
+		(_faction_buttons[id] as Button).set_pressed_no_signal(id == faction_id)
 	var facade := _facade()
 	var short_name := str(facade.call("faction_short_name", faction_id)) if facade != null else faction_id
 	start_button.text = "Commencer — %s" % short_name
