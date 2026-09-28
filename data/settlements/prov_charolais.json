@@ -24,5 +24,55 @@
     "sources": [
       "Comté de Charolais"
     ]
+  },
+  {
+    "id": "set_paray_le_monial",
+    "province": "prov_charolais",
+    "kind": "abbey",
+    "name": {
+      "display": "Paray-le-Monial",
+      "local": "Paray-le-Monial",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.1211,
+      46.4494
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Prieuré clunisien fondé au Xe siècle, dépendance majeure de l'ordre de Cluny en Charolais.",
+    "sources": [
+      "Paray-le-Monial"
+    ]
+  },
+  {
+    "id": "set_la_clayette",
+    "province": "prov_charolais",
+    "kind": "castle",
+    "name": {
+      "display": "La Clayette",
+      "local": "La Clayette",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      4.3167,
+      46.35
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de moyenne noblesse gardant l'accès méridional du comté vers le Brionnais.",
+    "sources": [
+      "La Clayette"
+    ]
   }
 ]
