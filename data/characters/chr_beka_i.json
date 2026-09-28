@@ -1,0 +1,46 @@
+{
+  "id": "chr_beka_i",
+  "name": {
+    "display": "Beka Ier Djakéli",
+    "local": "ბექა I ჯაყელი",
+    "local_language": "géorgien"
+  },
+  "sex": "male",
+  "house": "Djakéli",
+  "faction": "fac_samtskhe",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1361"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Atabeg de Samtskhé",
+      "from": {
+        "value": "1334"
+      },
+      "note": "Règne jusqu'en 1361."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_stubborn",
+    "trait_pious"
+  ],
+  "piety": 60,
+  "starting_location": "prov_samtskhe",
+  "status": "at_court",
+  "description": "Atabeg de Samtskhé, connu par son sceau ; naissance approximative.",
+  "sources": [
+    "Beka I Jaqeli"
+  ]
+}

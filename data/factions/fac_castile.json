@@ -60,6 +60,11 @@
     {
       "faction": "fac_navarre",
       "status": "peace"
+    },
+    {
+      "faction": "fac_marinids",
+      "status": "war",
+      "note": "Guerre du Détroit : siège de Gibraltar (1333), campagne du Salado (1340)."
     }
   ],
   "ai_personality": {

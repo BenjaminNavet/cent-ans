@@ -1,0 +1,99 @@
+{
+  "id": "prov_thrace",
+  "name": {
+    "display": "Thrace maritime",
+    "local": "Θρᾴκη",
+    "local_language": "grec"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Ergène"
+  ],
+  "ports": [
+    "Rhaidestos",
+    "Sélymbrie"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Rhaidestos",
+      "local": "Ῥαιδεστός",
+      "local_language": "grec"
+    },
+    "lat": 40.9781,
+    "lon": 27.511
+  },
+  "geo": {
+    "capital_lonlat": [
+      27.511,
+      40.9781
+    ],
+    "seed_lonlat": [
+      27.6,
+      41.1
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 182000,
+        "unrest": 14,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 10800,
+        "unrest": 14,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 3600,
+        "unrest": 9,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 9,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 6100,
+  "description": "Arrière-pays de Constantinople sur la Propontide (Rhaidestos, Sélymbrie, Héraclée) : greniers de la capitale, ravagés par les raids turcs et les guerres civiles.",
+  "sources": [
+    "Thrace",
+    "Tekirdağ",
+    "Silivri"
+  ]
+}

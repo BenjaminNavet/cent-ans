@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_taroudant",
+    "province": "prov_sous",
+    "kind": "city",
+    "name": {
+      "display": "Taroudant",
+      "local": "Tarūdānt",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -8.8761,
+      30.4703
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale du Sous, ville de canne à sucre et d'artisanat.",
+    "sources": [
+      "Taroudant"
+    ]
+  },
+  {
+    "id": "set_massa",
+    "province": "prov_sous",
+    "kind": "village",
+    "name": {
+      "display": "Massa",
+      "local": "Māssa",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -9.6683,
+      30.0517
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ribat sur l'Atlantique, sanctuaire de l'Anti-Atlas.",
+    "sources": [
+      "Massa (Maroc)"
+    ]
+  },
+  {
+    "id": "set_agadir_irir",
+    "province": "prov_sous",
+    "kind": "town",
+    "name": {
+      "display": "Agadir Igourramen",
+      "local": "Agādīr Īghurramān",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -9.6,
+      30.4278
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Petit port et grenier fortifié sur l'Atlantique, prédécesseur d'Agadir.",
+    "sources": [
+      "Agadir"
+    ]
+  }
+]

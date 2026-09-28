@@ -1,0 +1,95 @@
+{
+  "id": "prov_thessaly",
+  "name": {
+    "display": "Thessalie",
+    "local": "Θεσσαλία",
+    "local_language": "grec"
+  },
+  "region": "grece",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Pénée"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Trikala",
+      "local": "Τρίκαλα",
+      "local_language": "grec"
+    },
+    "lat": 39.5555,
+    "lon": 21.7679
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.7679,
+      39.5555
+    ],
+    "seed_lonlat": [
+      22.1,
+      39.6
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 210000,
+        "unrest": 16,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9000,
+        "unrest": 16,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 3600,
+        "unrest": 11,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1350,
+        "unrest": 11,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 7000,
+  "description": "Grenier de la Grèce, repris à ses derniers seigneurs en 1333 par Andronic III après la mort d'Étienne Gabrielopoulos. Frontière avec le duché de Néopatras.",
+  "sources": [
+    "Thessalie",
+    "Trikala",
+    "Larissa"
+  ]
+}

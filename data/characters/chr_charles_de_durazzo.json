@@ -1,0 +1,45 @@
+{
+  "id": "chr_charles_de_durazzo",
+  "name": {
+    "display": "Charles de Durazzo",
+    "local": "Carlo d'Angiò-Durazzo",
+    "local_language": "latin"
+  },
+  "sex": "male",
+  "house": "Anjou-Durazzo",
+  "faction": "fac_durazzo",
+  "role": "ruler",
+  "birth": {
+    "value": "1323"
+  },
+  "death": {
+    "value": "1348-01-23"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Durazzo",
+      "from": {
+        "value": "1336"
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 2,
+    "court": 3
+  },
+  "traits": [
+    "trait_ambitious"
+  ],
+  "piety": 45,
+  "family": {
+    "mother": "chr_agnes_de_perigord"
+  },
+  "starting_location": "prov_durazzo",
+  "status": "minor",
+  "description": "Fils de Jean de Gravina ; duc de Durazzo enfant, il épousera une nièce de Jeanne Ire de Naples (1343) et sera exécuté à Aversa (1348).",
+  "sources": [
+    "Charles, Duke of Durazzo"
+  ]
+}

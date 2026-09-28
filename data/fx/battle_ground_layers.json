@@ -13,5 +13,9 @@
     {"id": "trodden_grass", "poly_haven_id": "grassy_cobblestone", "tile_size_m": 4.5, "role": "trodden_grass"},
     {"id": "stubble", "poly_haven_id": "withered_grass", "tile_size_m": 5.0, "role": "stubble"},
     {"id": "fresh_plough", "poly_haven_id": "farm_furrows", "tile_size_m": 4.0, "role": "fresh_plough"}
-  ]
+  ],
+  "terrain_tints": {
+    "steppe": [1.02, 0.94, 0.72],
+    "desert": [1.18, 0.98, 0.66]
+  }
 }

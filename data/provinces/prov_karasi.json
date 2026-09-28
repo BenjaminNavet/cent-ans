@@ -1,0 +1,96 @@
+{
+  "id": "prov_karasi",
+  "name": {
+    "display": "Karasi (Balıkesir)",
+    "local": "Karesi",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Simav (Susurluk)"
+  ],
+  "ports": [
+    "Edremit"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Balıkesir"
+    },
+    "lat": 39.65,
+    "lon": 27.89
+  },
+  "geo": {
+    "capital_lonlat": [
+      27.89,
+      39.65
+    ],
+    "seed_lonlat": [
+      27.7,
+      39.6
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_karasi",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 40000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1200,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 480,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1200,
+  "description": "Beylik turc de Mysie, sur les rives de la Propontide et de l'Égée, dont les flottes ravagent la Thrace ; les Ottomans l'annexeront vers 1345.",
+  "sources": [
+    "Karasids",
+    "Balıkesir",
+    "Bergama"
+  ]
+}

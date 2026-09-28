@@ -1,0 +1,27 @@
+{
+  "id": "cdx_hongrie_angevine",
+  "title": "La Hongrie de Charles Robert",
+  "category": "lieu",
+  "aliases": [
+    "Hongrie",
+    "royaume de Hongrie",
+    "Charles Robert",
+    "Visegrád"
+  ],
+  "era": {
+    "from": "1308",
+    "to": "1342"
+  },
+  "summary": "Sous Charles Ier Robert, de la maison d'Anjou-Naples, la Hongrie sort de l'anarchie des oligarques. Riche de ses mines d'or, elle bat un florin d'or et s'impose comme puissance d'Europe centrale.",
+  "body": "Charles Ier, dit Charles Robert, petit-fils de Charles II d'Anjou-Naples, est couronné roi de Hongrie en 1308, puis définitivement en 1310. Il lui faut vingt ans pour soumettre les grands barons, dont Mathieu Csák. Il réorganise les finances : les mines d'or de Kremnica (Körmöcbánya) permettent de frapper dès 1325 un florin d'or hongrois sur le modèle florentin.\n\nEn 1330, il essuie une défaite en Valachie, face à Basarab Ier, à Posada. En 1335, il réunit à Visegrád les rois de Bohême et de Pologne, et négocie avec eux les routes du commerce.",
+  "entity": "fac_hungary",
+  "see_also": [
+    "cdx_pologne",
+    "cdx_jean_de_luxembourg"
+  ],
+  "sources": [
+    "Charles Ier de Hongrie",
+    "Royaume de Hongrie",
+    "Congrès de Visegrád (1335)"
+  ]
+}

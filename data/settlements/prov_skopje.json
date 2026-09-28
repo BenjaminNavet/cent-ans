@@ -1,0 +1,108 @@
+[
+  {
+    "id": "set_skopje",
+    "province": "prov_skopje",
+    "kind": "city",
+    "name": {
+      "display": "Skopje",
+      "local": "Скопље",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.432,
+      41.9981
+    ],
+    "weight": 50,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_fair",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Ville royale et siège du roi Étienne Dušan.",
+    "sources": [
+      "Skopje"
+    ]
+  },
+  {
+    "id": "set_matka",
+    "province": "prov_skopje",
+    "kind": "abbey",
+    "name": {
+      "display": "Matka",
+      "local": "Матка",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      21.296,
+      41.953
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère de la vallée de la Treska.",
+    "sources": [
+      "Matka (Skopje)"
+    ]
+  },
+  {
+    "id": "set_tetovo",
+    "province": "prov_skopje",
+    "kind": "town",
+    "name": {
+      "display": "Polog (Tetovo)",
+      "local": "Полог",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      20.97,
+      42.01
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Plaine du Polog.",
+    "sources": [
+      "Tetovo"
+    ]
+  },
+  {
+    "id": "set_kratovo",
+    "province": "prov_skopje",
+    "kind": "town",
+    "name": {
+      "display": "Kratovo",
+      "local": "Кратово",
+      "local_language": "serbe"
+    },
+    "lonlat": [
+      22.18,
+      42.08
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Mines de plomb et d'argent.",
+    "sources": [
+      "Kratovo"
+    ]
+  }
+]

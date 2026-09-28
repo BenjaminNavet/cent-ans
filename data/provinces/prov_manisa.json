@@ -1,0 +1,97 @@
+{
+  "id": "prov_manisa",
+  "name": {
+    "display": "Saruhan (Manisa)",
+    "local": "Saruhan",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Gediz"
+  ],
+  "ports": [
+    "Foça"
+  ],
+  "sea_zones": [
+    "sea_aegean"
+  ],
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Manisa (Magnésie du Sipyle)",
+      "local": "Manisa",
+      "local_language": "turc ottoman"
+    },
+    "lat": 38.61,
+    "lon": 27.43
+  },
+  "geo": {
+    "capital_lonlat": [
+      27.43,
+      38.61
+    ],
+    "seed_lonlat": [
+      27.6,
+      38.75
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_saruhan",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1400,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 540,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1300,
+  "description": "Beylik de Saruhan, maître de la riche plaine du Gediz (Hermos) et de Phocée.",
+  "sources": [
+    "Saruhanids",
+    "Manisa"
+  ]
+}

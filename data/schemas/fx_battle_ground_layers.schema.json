@@ -7,6 +7,17 @@
   "required": ["layers"],
   "additionalProperties": false,
   "properties": {
+    "terrain_tints": {
+      "type": "object",
+      "description": "Lot OM3 (ADR 0116) : multiplicateur RVB de la teinte de l'herbe par terrain de province. La steppe et le désert réutilisent le sol de plaine avec cette teinte tant qu'ils n'ont pas de décor dédié ; un terrain absent garde la teinte de saison.",
+      "propertyNames": {"enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"]},
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {"type": "number", "minimum": 0, "maximum": 2}
+      }
+    },
     "layers": {
       "type": "array",
       "minItems": 1,

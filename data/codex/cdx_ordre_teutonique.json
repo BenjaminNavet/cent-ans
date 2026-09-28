@@ -1,0 +1,29 @@
+{
+  "id": "cdx_ordre_teutonique",
+  "title": "L'Ordre teutonique en Prusse",
+  "category": "institution",
+  "aliases": [
+    "Ordre teutonique",
+    "chevaliers teutoniques",
+    "Teutoniques",
+    "Marienbourg",
+    "Malbork"
+  ],
+  "era": {
+    "from": "1198",
+    "to": "1525"
+  },
+  "summary": "Ordre de moines-soldats fondé en Terre sainte, l'Ordre teutonique s'est constitué au XIIIe siècle un État en Prusse, avec Marienbourg pour capitale. Il fait la guerre aux païens de Lituanie, mais aussi aux rois catholiques de Pologne.",
+  "body": "Chassé de Terre sainte, l'Ordre a transféré sa direction à Venise, puis en 1309 à Marienbourg, en Prusse. Il y a conquis le pays païen des Prussiens, puis la Poméranie orientale (1308-1309), aux dépens de la Pologne. Dietrich von Altenburg, grand maître de 1335 à 1341, dirige un État de villes hanséatiques, de forteresses de brique et de commanderies, colonisé par des paysans allemands.\n\nChaque hiver et chaque été, les chevaliers partent en expédition (« Reisen ») contre la Lituanie, avec l'appui de croisés venus de toute l'Europe, dont les chevaliers français et anglais. La branche livonienne de l'Ordre tient de son côté la côte de la Baltique orientale.",
+  "entity": "fac_teutonic",
+  "see_also": [
+    "cdx_lituanie",
+    "cdx_pologne",
+    "cdx_hanse"
+  ],
+  "sources": [
+    "Ordre Teutonique",
+    "Marienbourg",
+    "Croisades baltes"
+  ]
+}

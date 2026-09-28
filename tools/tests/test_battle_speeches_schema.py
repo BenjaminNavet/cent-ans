@@ -6,7 +6,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 DATA = Path(__file__).resolve().parents[2] / "data"
-BATTLE_TERRAINS = {"plains", "heath", "bocage", "forest", "hills", "mountains", "marsh"}
+BATTLE_TERRAINS = {"plains", "heath", "bocage", "forest", "hills", "mountains", "marsh", "steppe", "desert"}
 
 
 def _load(relative: str) -> dict:

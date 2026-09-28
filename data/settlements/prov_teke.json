@@ -1,0 +1,52 @@
+[
+  {
+    "id": "set_antalya",
+    "province": "prov_teke",
+    "kind": "city",
+    "name": {
+      "display": "Antalya (Attaleia)",
+      "local": "Antalya",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      30.71,
+      36.89
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Grand port de la côte de Pamphylie, capitale du beylik.",
+    "sources": [
+      "Teke"
+    ]
+  },
+  {
+    "id": "set_korkuteli",
+    "province": "prov_teke",
+    "kind": "town",
+    "name": {
+      "display": "Korkuteli"
+    },
+    "lonlat": [
+      30.2,
+      37.07
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Résidence d'été des beys de Teke.",
+    "sources": [
+      "Teke"
+    ]
+  }
+]

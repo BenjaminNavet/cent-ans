@@ -1,0 +1,47 @@
+[
+  {
+    "id": "set_beysehir",
+    "province": "prov_beysehir",
+    "kind": "city",
+    "name": {
+      "display": "Beyşehir"
+    },
+    "lonlat": [
+      31.73,
+      37.68
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des Eşrefoğulları, mosquée d'Eşrefoğlu.",
+    "sources": [
+      "Eshrefids"
+    ]
+  },
+  {
+    "id": "set_seydisehir",
+    "province": "prov_beysehir",
+    "kind": "village",
+    "name": {
+      "display": "Seydişehir"
+    },
+    "lonlat": [
+      31.85,
+      37.42
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg des monts du Taurus occidental.",
+    "sources": [
+      "Eshrefids"
+    ]
+  }
+]

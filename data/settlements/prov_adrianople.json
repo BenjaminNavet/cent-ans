@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_adrianople",
+    "province": "prov_adrianople",
+    "kind": "city",
+    "name": {
+      "display": "Andrinople",
+      "local": "Ἀδριανούπολις",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      26.5557,
+      41.6771
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Deuxième ville de l'Empire, verrou de la Maritza.",
+    "sources": [
+      "Edirne"
+    ]
+  },
+  {
+    "id": "set_didymoteichon",
+    "province": "prov_adrianople",
+    "kind": "castle",
+    "name": {
+      "display": "Didymotique",
+      "local": "Διδυμότειχον",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      26.4977,
+      41.3496
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse natale de Cantacuzène et d'Andronic ; résidence impériale.",
+    "sources": [
+      "Didymoteicho"
+    ]
+  },
+  {
+    "id": "set_bizye",
+    "province": "prov_adrianople",
+    "kind": "town",
+    "name": {
+      "display": "Bizyè",
+      "local": "Βιζύη",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      27.77,
+      41.57
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Ancienne métropole ecclésiastique de Thrace (Vize).",
+    "sources": [
+      "Vize"
+    ]
+  }
+]

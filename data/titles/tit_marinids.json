@@ -1,0 +1,69 @@
+{
+  "id": "tit_marinids",
+  "rank": "kingdom",
+  "name": {
+    "display": "Sultanat mérinide",
+    "local": "Sulṭānat Banī Marīn",
+    "local_language": "arabe maghrébin"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la bordure de sable.",
+    "description": "Bannière blanche des Mérinides (Banu Marin) ; l'étendard blanc est attesté par les chroniqueurs, sans meuble héraldique. Bordure de sable ajoutée pour la distinction visuelle en jeu.",
+    "primary_color": "#F2EFE6",
+    "secondary_color": "#2F6B3A",
+    "uncertain": true,
+    "note": "Champ blanc attesté ; bordure de sable : brisure de jeu, non attestée."
+  },
+  "de_jure_provinces": [
+    "prov_fes",
+    "prov_meknes",
+    "prov_taza",
+    "prov_tanger",
+    "prov_rabat_sale",
+    "prov_doukkala",
+    "prov_tadla",
+    "prov_marrakech",
+    "prov_sous",
+    "prov_sijilmassa",
+    "prov_tlemcen",
+    "prov_oranie",
+    "prov_alger",
+    "prov_algeciras"
+  ],
+  "holder_1337": {
+    "faction": "fac_marinids",
+    "sources": [
+      "Marinides",
+      "Abu al-Hasan Ali ibn Othman"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_marinids_hold",
+      "title": "Garder le sultanat",
+      "description": "Le sultan doit conserver le sultanat mérinide.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_marinids"
+      }
+    },
+    {
+      "id": "obj_marinids_maghreb",
+      "title": "Réunifier le Maghreb",
+      "description": "Tenir Fès, Tlemcen et Tunis pour restaurer l'empire almohade.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_fes",
+          "prov_tlemcen",
+          "prov_tunis"
+        ]
+      }
+    }
+  ],
+  "description": "Sultanat des Banu Marin, dynastie zénète issue du Maroc oriental, maître de Fès depuis 1248-1269 ; Abu l-Hasan Ali (1331-1351) atteint le sommet de sa puissance.",
+  "sources": [
+    "Marinides",
+    "Abu al-Hasan Ali ibn Othman"
+  ]
+}

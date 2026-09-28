@@ -1,0 +1,52 @@
+{
+  "id": "tit_rhodes",
+  "rank": "county",
+  "name": {
+    "display": "Ordre de Saint-Jean à Rhodes",
+    "local": "Ordo Sancti Ioannis",
+    "local_language": "latin"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix d'argent, au chef d'azur.",
+    "description": "Croix blanche sur fond rouge, armes de l'Ordre de Saint-Jean, avec un chef d'azur ajouté pour distinguer le Couvent de Rhodes.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Le chef d'azur est une brisure de jeu ; l'Ordre portait la croix blanche sur gueules."
+  },
+  "de_jure_provinces": [
+    "prov_rhodes"
+  ],
+  "holder_1337": {
+    "faction": "fac_hospitallers",
+    "sources": [
+      "Ordre de Saint-Jean de Jérusalem",
+      "Hélion de Villeneuve"
+    ]
+  },
+  "succession_law": "elective",
+  "objectives": [
+    {
+      "id": "obj_rhodes_hold",
+      "title": "Garder Rhodes",
+      "description": "Le Grand Maître doit garder l'île.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_rhodes"
+      }
+    },
+    {
+      "id": "obj_rhodes_indep",
+      "title": "Sans seigneur",
+      "description": "Rester indépendant de tout roi.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "État souverain de l'Ordre de l'Hôpital à Rhodes ; rang « comté » du schéma.",
+  "sources": [
+    "Ordre de Saint-Jean de Jérusalem",
+    "Hélion de Villeneuve"
+  ]
+}

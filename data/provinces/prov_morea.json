@@ -1,0 +1,99 @@
+{
+  "id": "prov_morea",
+  "name": {
+    "display": "Morée byzantine",
+    "local": "Μορέας",
+    "local_language": "grec"
+  },
+  "region": "grece",
+  "terrain": "mountains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Eurotas"
+  ],
+  "ports": [
+    "Monemvasie"
+  ],
+  "sea_zones": [
+    "sea_aegean",
+    "sea_ionian"
+  ],
+  "resources": [
+    "res_wine",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Mistra",
+      "local": "Μυστράς",
+      "local_language": "grec"
+    },
+    "lat": 37.074,
+    "lon": 22.374
+  },
+  "geo": {
+    "capital_lonlat": [
+      22.374,
+      37.074
+    ],
+    "seed_lonlat": [
+      22.5,
+      37.1
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 192500,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9000,
+        "unrest": 15,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 5000,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1350,
+        "unrest": 10,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 3,
+  "base_supply": 6400,
+  "description": "Le sud-est du Péloponnèse reconquis sur les Francs (Mistra, Monemvasie, Maïna), gouverné par Andronic Asen. Il deviendra le despotat de Morée en 1349.",
+  "sources": [
+    "Despotat de Morée",
+    "Mistra",
+    "Monemvasia"
+  ]
+}

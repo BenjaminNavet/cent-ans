@@ -17,7 +17,7 @@ signal withdraw_requested(index: int)
 const INK := BattleUiKit.INK
 const TERRAIN_FR := {
 	"plains": "plaines", "hills": "collines", "mountains": "montagnes", "forest": "forêt",
-	"marsh": "marais", "heath": "lande", "bocage": "bocage",
+	"marsh": "marais", "heath": "lande", "bocage": "bocage", "steppe": "steppe", "desert": "désert",
 }
 const SEASON_FR := {"spring": "printemps", "summer": "été", "autumn": "automne", "winter": "hiver"}
 const BANNER_FIELD := "res://assets/events/evt_crecy.jpg"

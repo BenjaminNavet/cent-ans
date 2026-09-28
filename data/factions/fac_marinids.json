@@ -1,0 +1,74 @@
+{
+  "id": "fac_marinids",
+  "name": {
+    "display": "Sultanat mérinide",
+    "local": "Sulṭānat Banī Marīn",
+    "local_language": "arabe maghrébin"
+  },
+  "short_name": "Mérinides",
+  "adjective": "mérinide",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_abu_l_hasan_ali",
+  "capital": "prov_fes",
+  "capital_city": "Fès",
+  "religion": "rel_islam",
+  "culture": "cul_maghrebi",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_marinids",
+  "heraldry": {
+    "blazon": "De gueules au chef d'or.",
+    "description": "Bannière blanche des Mérinides (Banu Marin) ; l'étendard blanc est attesté par les chroniqueurs, sans meuble héraldique. Bordure de sable ajoutée pour la distinction visuelle en jeu.",
+    "primary_color": "#A01E1E",
+    "secondary_color": "#2F6B3A",
+    "uncertain": true,
+    "note": "Champ blanc attesté ; bordure de sable : brisure de jeu, non attestée."
+  },
+  "titles": [
+    "Sultan du Maghreb",
+    "Commandeur des croyants (prétention)"
+  ],
+  "treasury": 30000,
+  "prestige": 65,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_urban_sanitation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_granada",
+      "status": "alliance",
+      "note": "Alliance de fait contre la Castille (Gibraltar, 1333) ; méfiance depuis les rivalités de Ceuta (à préciser)."
+    },
+    {
+      "faction": "fac_castile",
+      "status": "truce",
+      "note": "Trêve après la reprise de Gibraltar (1333) ; la guerre reprendra en 1339 et mènera au Salado."
+    },
+    {
+      "faction": "fac_hafsids",
+      "status": "marriage_tie",
+      "note": "Abu l-Hasan a épousé une fille d'Abu Bakr II (à préciser) ; le Maghreb central reste en jeu entre les deux."
+    },
+    {
+      "faction": "fac_aragon",
+      "status": "peace",
+      "note": "Traités de commerce et de rachat des captifs avec Barcelone."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 70,
+    "diplomacy": 45,
+    "trade": 55,
+    "piety": 70
+  },
+  "description": "Sultanat de la dynastie des Banu Marin, maître de Fès et du Maroc atlantique, qui vient de prendre Tlemcen (1er mai 1337) et met fin au royaume zayyanide ; Abu l-Hasan Ali rêve de restaurer l'empire almohade et se prépare à la guerre du détroit puis à la conquête de l'Ifriqiya.",
+  "sources": [
+    "Marinides",
+    "Abu al-Hasan Ali ibn Othman",
+    "Siège de Tlemcen (1335-1337)"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "chr_nikephoros_ii_orsini",
+  "name": {
+    "display": "Nicéphore II Orsini",
+    "local": "Νικηφόρος Β΄ Ὀρσίνι",
+    "local_language": "grec"
+  },
+  "sex": "male",
+  "house": "Orsini d'Épire",
+  "faction": "fac_epirus",
+  "role": "ruler",
+  "birth": {
+    "value": "1328",
+    "uncertain": true,
+    "note": "Naissance vers 1328."
+  },
+  "death": {
+    "value": "1359"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Despote d'Épire",
+      "from": {
+        "value": "1335"
+      }
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 1,
+    "court": 2
+  },
+  "traits": [
+    "trait_puppet"
+  ],
+  "piety": 50,
+  "family": {
+    "mother": "chr_anna_palaiologina_epirus"
+  },
+  "starting_location": "prov_epirus",
+  "status": "minor",
+  "description": "Fils de Jean II Orsini et d'Anne Paléologine ; despote enfant, il sera conduit à Constantinople en 1338 et se révoltera plus tard.",
+  "sources": [
+    "Nikephoros II Orsini"
+  ]
+}

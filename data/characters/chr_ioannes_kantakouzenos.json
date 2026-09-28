@@ -1,0 +1,46 @@
+{
+  "id": "chr_ioannes_kantakouzenos",
+  "name": {
+    "display": "Jean Cantacuzène",
+    "local": "Ἰωάννης Καντακουζηνός",
+    "local_language": "grec"
+  },
+  "sex": "male",
+  "house": "Cantacuzène",
+  "faction": "fac_byzantium",
+  "role": "commander",
+  "birth": {
+    "value": "1292",
+    "uncertain": true,
+    "note": "Naissance vers 1292."
+  },
+  "death": {
+    "value": "1383-06-15"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Grand Domestique",
+      "from": {
+        "value": "1328"
+      }
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 8,
+    "court": 6
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_ambitious",
+    "trait_scholar"
+  ],
+  "piety": 60,
+  "starting_location": "prov_adrianople",
+  "status": "at_court",
+  "description": "Grand domestique et ami d'enfance d'Andronic III, véritable maître de la politique et de l'armée ; il deviendra empereur en 1347.",
+  "sources": [
+    "John VI Kantakouzenos"
+  ]
+}

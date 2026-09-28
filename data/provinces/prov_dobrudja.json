@@ -1,0 +1,100 @@
+{
+  "id": "prov_dobrudja",
+  "name": {
+    "display": "Dobroudja",
+    "local": "Добруджа",
+    "local_language": "bulgare"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Danube"
+  ],
+  "ports": [
+    "Kaliakra",
+    "Karvouna",
+    "Pangalia"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Drăstăr (Silistra)",
+      "local": "Дръстър",
+      "local_language": "bulgare"
+    },
+    "lat": 44.12,
+    "lon": 27.26
+  },
+  "geo": {
+    "capital_lonlat": [
+      27.26,
+      44.12
+    ],
+    "seed_lonlat": [
+      27.9,
+      43.85
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_bulgaria",
+  "culture": "cul_bulgarian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 14,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9000,
+        "unrest": 14,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 2000,
+        "unrest": 9,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 9,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3500,
+  "description": "Plateau entre Danube et mer Noire : Drăstăr (Silistra), Karvouna, Mangalia ; région semi-autonome sous influence tatare et génoise.",
+  "sources": [
+    "Dobroudja",
+    "Silistra",
+    "Kaliakra"
+  ]
+}

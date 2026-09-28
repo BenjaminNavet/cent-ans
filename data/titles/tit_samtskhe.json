@@ -1,0 +1,52 @@
+{
+  "id": "tit_samtskhe",
+  "rank": "duchy",
+  "name": {
+    "display": "Principauté de Samtskhé",
+    "local": "სამცხე-საათაბაგო",
+    "local_language": "géorgien"
+  },
+  "heraldry": {
+    "blazon": "D'azur à la croix d'or.",
+    "description": "Croix des Djakéli ; couleurs de convention.",
+    "primary_color": "#2B4A9E",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_georgia",
+  "de_jure_provinces": [
+    "prov_samtskhe"
+  ],
+  "holder_1337": {
+    "faction": "fac_samtskhe",
+    "sources": [
+      "Samtskhe-Saatabago",
+      "Beka I Jaqeli"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_samtskhe_hold",
+      "title": "Atabeg de Samtskhé",
+      "description": "Conserver la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_samtskhe"
+      }
+    },
+    {
+      "id": "obj_samtskhe_free",
+      "title": "Sans maître",
+      "description": "Devenir indépendant de la couronne.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Principauté des Djakéli (Jaqeli), atabegs de Samtskhé, au sud-ouest du royaume ; Beka Ier (Beka Mandaturtukhutsesi) règne depuis 1334.",
+  "sources": [
+    "Samtskhe-Saatabago",
+    "Beka I Jaqeli"
+  ]
+}

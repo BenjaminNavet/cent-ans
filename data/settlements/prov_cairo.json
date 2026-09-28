@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_cairo",
+    "province": "prov_cairo",
+    "kind": "city",
+    "name": {
+      "display": "Le Caire (al-Qahira)",
+      "local": "القاهرة",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      31.25,
+      30.05
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Cité des sultans, sous la Citadelle.",
+    "sources": [
+      "Cairo"
+    ]
+  },
+  {
+    "id": "set_fustat",
+    "province": "prov_cairo",
+    "kind": "town",
+    "name": {
+      "display": "Fustat (Vieux-Caire)",
+      "local": "الفسطاط",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      31.23,
+      30.0
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Faubourg commerçant sur le Nil.",
+    "sources": [
+      "Cairo"
+    ]
+  },
+  {
+    "id": "set_giza",
+    "province": "prov_cairo",
+    "kind": "town",
+    "name": {
+      "display": "Gizeh",
+      "local": "الجيزة",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      31.21,
+      30.01
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Rive occidentale du Nil, près des pyramides.",
+    "sources": [
+      "Cairo"
+    ]
+  }
+]

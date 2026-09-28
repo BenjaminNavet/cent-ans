@@ -1,0 +1,49 @@
+{
+  "id": "chr_abu_l_hasan_ali",
+  "name": {
+    "display": "Abu l-Hasan Ali, sultan mérinide",
+    "local": "Abū al-Ḥasan ʿAlī ibn ʿUthmān",
+    "local_language": "arabe maghrébin"
+  },
+  "sex": "male",
+  "house": "Mérinides",
+  "faction": "fac_marinids",
+  "role": "ruler",
+  "birth": {
+    "value": "1297",
+    "place": "Fès",
+    "note": "Année de naissance approximative (vers 1297)."
+  },
+  "death": {
+    "value": "1351-05-24",
+    "note": "Mort dans le Haut Atlas, en fuite après ses défaites."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Sultan du Maghreb"
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_pious",
+    "trait_builder"
+  ],
+  "piety": 70,
+  "family": {
+    "children": [
+      "chr_abu_inan_faris"
+    ]
+  },
+  "starting_location": "prov_fes",
+  "status": "at_court",
+  "description": "Sultan depuis 1331, vainqueur à Gibraltar (1333) et à Tlemcen (1er mai 1337) ; il vise l'empire almohade tout entier et sera défait au Salado (1340) puis à Kairouan (1348).",
+  "sources": [
+    "Abu al-Hasan Ali ibn Othman"
+  ]
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_biskra",
+    "province": "prov_zab",
+    "kind": "city",
+    "name": {
+      "display": "Biskra",
+      "local": "Biskra",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      5.7333,
+      34.85
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Capitale des Ziban, oasis de dattiers.",
+    "sources": [
+      "Biskra"
+    ]
+  },
+  {
+    "id": "set_tolga",
+    "province": "prov_zab",
+    "kind": "town",
+    "name": {
+      "display": "Tolga",
+      "local": "Ṭulqa",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      5.3833,
+      34.7167
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Oasis fortifiée des Ziban.",
+    "sources": [
+      "Tolga"
+    ]
+  },
+  {
+    "id": "set_msila",
+    "province": "prov_zab",
+    "kind": "town",
+    "name": {
+      "display": "M'Sila",
+      "local": "Al-Masīla",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      4.5411,
+      35.7058
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville du Hodna, fondée par les Fatimides (Muhammadiya).",
+    "sources": [
+      "M'Sila"
+    ]
+  }
+]

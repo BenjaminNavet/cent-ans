@@ -1,0 +1,23 @@
+{
+  "id": "tit_crete",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Candie",
+    "local": "Ducato di Candia",
+    "local_language": "vénitien"
+  },
+  "de_jure_liege": "tit_venice",
+  "de_jure_provinces": [
+    "prov_crete"
+  ],
+  "holder_1337": {
+    "faction": "fac_venice",
+    "sources": [
+      "Royaume de Candie"
+    ]
+  },
+  "description": "Royaume de Candie, colonie de Venise.",
+  "sources": [
+    "Royaume de Candie"
+  ]
+}

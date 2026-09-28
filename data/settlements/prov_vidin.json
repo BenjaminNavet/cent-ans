@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_vidin",
+    "province": "prov_vidin",
+    "kind": "city",
+    "name": {
+      "display": "Vidin",
+      "local": "Видин",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      22.879,
+      43.99
+    ],
+    "weight": 55,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_port"
+    ],
+    "port": false,
+    "description": "Forteresse de Baba Vida, capitale du despotat.",
+    "sources": [
+      "Vidin"
+    ]
+  },
+  {
+    "id": "set_belogradchik",
+    "province": "prov_vidin",
+    "kind": "castle",
+    "name": {
+      "display": "Belogradchik",
+      "local": "Белоградчик",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      22.68,
+      43.62
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de rochers au sud-ouest.",
+    "sources": [
+      "Belogradchik Fortress"
+    ]
+  },
+  {
+    "id": "set_lom",
+    "province": "prov_vidin",
+    "kind": "town",
+    "name": {
+      "display": "Lom",
+      "local": "Лом",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      23.24,
+      43.82
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Port danubien.",
+    "sources": [
+      "Lom"
+    ]
+  }
+]

@@ -2008,6 +2008,624 @@
         "Dépendante de la Horde"
       ],
       "difficulty": 3
+    },
+    {
+      "id": "fac_ottoman",
+      "tagline": "L'épée de la marche s'aiguise",
+      "intro": "Orhan n'est encore qu'un bey de frontière, mais Bursa est prise, Nicée tombe, Nicomédie est en vue. Les gazis affluent : à toi de faire de ce petit beylik le prochain empire d'Orient.",
+      "strengths": [
+        "Gazis fanatiques et mobiles",
+        "Butin de Bithynie",
+        "Voisin byzantin divisé"
+      ],
+      "weaknesses": [
+        "Territoire étroit",
+        "Beyliks voisins jaloux",
+        "Trésor modeste"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_karasi",
+      "tagline": "Les gazis de la Propontide",
+      "intro": "Ta flotte ravage la Thrace byzantine, mais Orhan grandit à l'est. Sauras-tu unir Balıkesir avant qu'il ne t'avale ?",
+      "strengths": [
+        "Flotte et corsaires",
+        "Position sur les Détroits"
+      ],
+      "weaknesses": [
+        "Un seul territoire",
+        "Voisin ottoman ambitieux"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_saruhan",
+      "tagline": "La plaine du Gediz",
+      "intro": "Ton beylik est riche en blé et en vin, mais coincé entre Aydın, Germiyan et Karasi. Sais-tu jouer des alliances ?",
+      "strengths": [
+        "Plaine fertile",
+        "Port de Foça"
+      ],
+      "weaknesses": [
+        "Territoire réduit",
+        "Voisins puissants"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_aydin",
+      "tagline": "Umur Bey, le maître de l'Égée",
+      "intro": "Ta flotte de corsaires hante les îles grecques ; les Latins de Chypre, Rhodes et Venise forment une ligue contre toi. Il te faut des ports et de l'audace.",
+      "strengths": [
+        "Flotte de corsaires",
+        "Ports de l'Égée",
+        "Butin des îles"
+      ],
+      "weaknesses": [
+        "Ligue latine hostile",
+        "Frères rivaux"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_mentese",
+      "tagline": "Les marins de Carie",
+      "intro": "Tes ports regardent Rhodes des Hospitaliers ; l'Égée est ton champ de chasse, mais la mer se partage à plusieurs.",
+      "strengths": [
+        "Côte découpée",
+        "Corsaires expérimentés"
+      ],
+      "weaknesses": [
+        "Rhodes hostile",
+        "Terre peu étendue"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_germiyan",
+      "tagline": "Le plateau des grands beys",
+      "intro": "Vaste, riche en fer et en laine, ton beylik domine ses voisins. Reste à empêcher ses vassaux de se rebeller.",
+      "strengths": [
+        "Territoire étendu",
+        "Mines de fer"
+      ],
+      "weaknesses": [
+        "Frontières ouvertes",
+        "Voisins ambitieux"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_hamid",
+      "tagline": "Le beylik des lacs",
+      "intro": "Petit, entouré de voisins puissants, tu dois jouer d'alliances pour survivre.",
+      "strengths": [
+        "Forteresses lacustres"
+      ],
+      "weaknesses": [
+        "Territoire minuscule",
+        "Voisins voraces"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_teke",
+      "tagline": "Le port d'Antalya",
+      "intro": "Ton port commerce avec Chypre et Venise ; les montagnes te protègent, la mer t'expose.",
+      "strengths": [
+        "Grand port",
+        "Montagnes défensives"
+      ],
+      "weaknesses": [
+        "Un seul territoire",
+        "Voisins ambitieux"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_esrefid",
+      "tagline": "La principauté du lac",
+      "intro": "Ta terre est petite mais belle ; Karaman et Hamid convoitent tes rives.",
+      "strengths": [
+        "Rives fertiles"
+      ],
+      "weaknesses": [
+        "Trop petit",
+        "Voisins voraces"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_karaman",
+      "tagline": "L'héritier des Seldjoukides",
+      "intro": "Tes ancêtres ont sauvé Konya de l'Ilkhan ; tu veux relever le sultanat de Roum, mais Eretna et les Mamelouks guettent.",
+      "strengths": [
+        "Montagnes défensives",
+        "Prétention seldjoukide"
+      ],
+      "weaknesses": [
+        "Voisins nombreux",
+        "Terre pauvre"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_eretna",
+      "tagline": "L'héritier des Ilkhans",
+      "intro": "L'Ilkhanat est mort, l'Anatolie orientale est à prendre. Eretna dispose d'un pays immense mais fragile ; à toi de le souder.",
+      "strengths": [
+        "Vaste territoire",
+        "Administration ilkhanide héritée"
+      ],
+      "weaknesses": [
+        "Frontières sans défense",
+        "Loyautés fragiles"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_candar",
+      "tagline": "Le beylik de la mer Noire",
+      "intro": "Kastamonu fournit fer et bois, Sinope commerce avec Caffa et Trébizonde. À toi de garder la mer et les monts.",
+      "strengths": [
+        "Arsenal de Sinope",
+        "Mines de fer",
+        "Commerce pontique"
+      ],
+      "weaknesses": [
+        "Voisins nombreux",
+        "Peu de terres arables"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_trebizond",
+      "tagline": "Le dernier Comnène",
+      "intro": "Sur le rivage sud de la mer Noire, l'empire des Grands Comnènes vit du commerce de la soie. Les Turcs pressent, les Génois pèsent ; ton prestige est plus grand que ta puissance.",
+      "strengths": [
+        "Grand port marchand",
+        "Prestige impérial",
+        "Montagnes défensives"
+      ],
+      "weaknesses": [
+        "Petit territoire",
+        "Turcs hostiles",
+        "Noblesse indocile"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_cilicia",
+      "tagline": "Le dernier royaume arménien",
+      "intro": "Entre Mamelouks et Turkmènes, ton royaume de Cilicie ne tient que par ses forteresses et ses alliances latines. L'invasion mamelouke de 1337 va tout précipiter.",
+      "strengths": [
+        "Forteresses de montagne",
+        "Ports actifs",
+        "Liens avec les Latins"
+      ],
+      "weaknesses": [
+        "Pression mamelouke",
+        "Petit territoire",
+        "Barons turbulents"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_dulkadir",
+      "tagline": "Les turkmènes du Taurus",
+      "intro": "Petits, mais tenant un défilé, tu joues sur les rivalités entre Mamelouks, Arméniens et Karaman.",
+      "strengths": [
+        "Marche naturelle",
+        "Cavalerie turkmène"
+      ],
+      "weaknesses": [
+        "Très petit",
+        "Vassal du Caire"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_georgia",
+      "tagline": "Georges le Brillant",
+      "intro": "Ton royaume renaît des cendres de l'Ilkhanat : reprends les marches, garde tes vassaux et fais de Tbilissi la capitale du Caucase avant que les Turkmènes et les Mongols reviennent.",
+      "strengths": [
+        "Royaume uni",
+        "Forteresses de montagne",
+        "Prestige orthodoxe"
+      ],
+      "weaknesses": [
+        "Vassaux indociles",
+        "Ennemis de tous côtés",
+        "Pays de montagne pauvre"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_samtskhe",
+      "tagline": "Les atabegs de Samtskhé",
+      "intro": "Puissants et fiers, vous reconnaissez la couronne mais gardez vos montagnes.",
+      "strengths": [
+        "Forteresses rupestres",
+        "Cavalerie de montagne"
+      ],
+      "weaknesses": [
+        "Vassal de Tbilissi",
+        "Terre pauvre"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_circassia",
+      "tagline": "Les princes des montagnes",
+      "intro": "Guerriers et marchands d'esclaves, vous tenez la côte et la haute Kouban ; les Génois vous achètent des captifs.",
+      "strengths": [
+        "Cavalerie légère",
+        "Côte de la mer Noire"
+      ],
+      "weaknesses": [
+        "Pas d'unité politique",
+        "Tributaire de la Horde"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_alania",
+      "tagline": "Les derniers Alains",
+      "intro": "Vous tenez les vallées du Caucase central : chrétiens dans un pays de païens et de musulmans.",
+      "strengths": [
+        "Vallées défendables"
+      ],
+      "weaknesses": [
+        "Petit et pauvre",
+        "Tributaire de la Horde"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_jalayirids",
+      "tagline": "Les héritiers de Hülegü",
+      "intro": "L'Ilkhanat a disparu ; tes marches de l'ouest gardent Mossoul, mais le vrai pouvoir est à Bagdad, hors de ta vue.",
+      "strengths": [
+        "Héritage ilkhanide",
+        "Cavalerie mongole"
+      ],
+      "weaknesses": [
+        "Trône hors carte",
+        "Voisins hostiles"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_artuqids",
+      "tagline": "La forteresse de Mardin",
+      "intro": "Ton nid d'aigle a résisté aux Mongols ; à toi de rester à l'abri des Mamelouks et des Turkmènes.",
+      "strengths": [
+        "Forteresse imprenable"
+      ],
+      "weaknesses": [
+        "Petit",
+        "Vassal du Caire"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_mamluks",
+      "tagline": "Le sultan du Caire",
+      "intro": "Le plus riche État de la Méditerranée orientale est à toi : blé du Nil, épices de l'océan Indien, mamelouks fidèles. Mais la succession est un jeu de couteaux.",
+      "strengths": [
+        "Trésor du commerce des épices",
+        "Armée mamelouke d'élite",
+        "Égypte fertile et Syrie riche"
+      ],
+      "weaknesses": [
+        "Succession violente",
+        "Émirs ambitieux",
+        "Vaste frontière"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_hama",
+      "tagline": "Le dernier Ayyoubide",
+      "intro": "Ta lignée a fondé le sultanat ; tu tiens Hama sur l'Oronte par la bienveillance du sultan du Caire.",
+      "strengths": [
+        "Terre fertile",
+        "Culture savante"
+      ],
+      "weaknesses": [
+        "Minuscule",
+        "Vassal du Caire"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_byzantium",
+      "tagline": "Les derniers Romains",
+      "intro": "Andronic III règne sur ce qui reste de l'Empire : une Constantinople à demi vide, la Thrace, la Macédoine, la Thessalie reprise en 1333 et la Morée. La Serbie de Dušan et les émirats turcs guettent. Reprenez l'Épire, contenez les Slaves et sauvez, ou relevez, l'Empire des Romains.",
+      "strengths": [
+        "Prestige impérial et la plus grande capitale du monde chrétien",
+        "Cantacuzène, un grand capitaine et diplomate",
+        "Ports et flotte commerciale sur trois mers"
+      ],
+      "weaknesses": [
+        "Trésor épuisé, armée de mercenaires",
+        "Voisins ambitieux : Serbie, Bulgarie, Turcs",
+        "Guerres civiles latentes autour du trône"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_epirus",
+      "tagline": "Un despotat orphelin",
+      "intro": "Nicéphore II, un enfant, règne sur Arta et Janina sous la régence d'Anne Paléologine, pendant que l'empereur Andronic III approche. Trouvez des alliés en Albanie et en Morée latine, ou négociez au mieux votre soumission.",
+      "strengths": [
+        "Terres de montagne faciles à défendre",
+        "Régente rusée et bien informée",
+        "Voisins latins et albanais à courtiser"
+      ],
+      "weaknesses": [
+        "Enfant sur le trône, régente contestée",
+        "Byzance à vos portes",
+        "Trésor et armée minuscules"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_serbia",
+      "tagline": "Le roi conquérant",
+      "intro": "Étienne Dušan est roi depuis 1331, vainqueur des Byzantins en Macédoine. La Serbie est au sommet de sa force : mines d'argent, armée de chevaliers et de mercenaires, alliance bulgare. Prenez Serrès, Thessalonique, Constantinople, et coiffez la couronne impériale.",
+      "strengths": [
+        "Armée nombreuse et mines d'argent de Novo Brdo",
+        "Alliance avec la Bulgarie",
+        "Roi guerrier au prestige montant"
+      ],
+      "weaknesses": [
+        "Noblesse serbe turbulente",
+        "Peu de ports, pas de flotte",
+        "Hongrie et Bosnie sur les flancs"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_bulgaria",
+      "tagline": "L'empire de Tarnovo",
+      "intro": "Ivan Alexandre a rétabli la paix après Velbazhd et Rusokastro. La Bulgarie est riche de ses terres à blé et de sa culture hésychaste, mais Serbes et Byzantins la guettent. Faites de Tarnovo le foyer d'un empire balkanique, et tenez Vidin en laisse.",
+      "strengths": [
+        "Blé, vin et mines des Balkans",
+        "Alliance de famille avec la Serbie",
+        "Capitale fortifiée de Tarnovo"
+      ],
+      "weaknesses": [
+        "Vidin quasi indépendant",
+        "Défaites récentes contre Byzance",
+        "Peu de flotte"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_vidin",
+      "tagline": "Le despote du Danube",
+      "intro": "Belaur tient Vidin et ses forteresses du Danube en vassal du tsar. À vous de servir ou de trahir : jouez entre Tarnovo, la Hongrie et la Serbie, ou hissez Vidin au rang de royaume.",
+      "strengths": [
+        "Forteresse de Baba Vida",
+        "Commerce danubien",
+        "Voisins divisés"
+      ],
+      "weaknesses": [
+        "Une seule province",
+        "Tarnovo veut vous soumettre",
+        "Hongrie catholique au nord"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_bosnia",
+      "tagline": "Un ban entre les grandes puissances",
+      "intro": "Étienne II Kotromanić, ban depuis 1322, a pris le Hum en 1326. Entre Hongrie, Serbie et Venise, il veut faire de la Bosnie un royaume et atteindre la mer par Raguse.",
+      "strengths": [
+        "Mines de fer et d'argent",
+        "Terres de montagne défendables",
+        "Rival de la Serbie, allié possible de la Hongrie"
+      ],
+      "weaknesses": [
+        "Pays pauvre et divisé par les hérésies",
+        "Aucun port sûr",
+        "Voisins puissants"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_ragusa",
+      "tagline": "La cité marchande de l'Adriatique",
+      "intro": "Raguse est une cité patricienne sous suzeraineté vénitienne. Le sel de Ston, les marchands des Balkans et une flotte agile vous font riche : jouez la diplomatie, achetez la liberté et étendez votre contado.",
+      "strengths": [
+        "Trésor et commerce florissants",
+        "Position clé entre Balkans et Adriatique",
+        "Diplomatie à l'italienne"
+      ],
+      "weaknesses": [
+        "Une seule province minuscule",
+        "Suzeraineté de Venise",
+        "Armée réduite à la milice et aux mercenaires"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_durazzo",
+      "tagline": "L'Albanie angevine",
+      "intro": "Le jeune duc Charles de Durazzo règne sous la régence d'Agnès de Périgord sur les restes du royaume d'Albanie. Défendez Durazzo contre Byzance, la Serbie et les clans albanais, ou cherchez l'appui de Naples.",
+      "strengths": [
+        "Port et via Egnatia",
+        "Appui de la maison d'Anjou",
+        "Prestige du titre royal"
+      ],
+      "weaknesses": [
+        "Enfant sur le trône",
+        "Voisins dévorants",
+        "Seigneuries albanaises remuantes"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_athens",
+      "tagline": "Le duché catalan",
+      "intro": "Guillaume II tient sur le papier Athènes et Néopatras, héritage de la Compagnie catalane ; le vicaire Nicolas Lanza gouverne. Défendez la frontière de Thessalie, ménagez Venise et cherchez l'appui de la Sicile et de l'Aragon.",
+      "strengths": [
+        "Chevalerie catalane redoutée",
+        "Lien avec la Sicile et l'Aragon",
+        "Acropole d'Athènes et forteresses"
+      ],
+      "weaknesses": [
+        "Isolé loin de la Sicile",
+        "Population grecque hostile",
+        "Byzance et Venise à la frontière"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_archipelago",
+      "tagline": "Les îles de Sanudo",
+      "intro": "Nicolas Sanudo gouverne Naxos et les Cyclades : commerce, corsaires turcs, protection de Venise. Défendez vos îles, commerçez avec tous et jouez des rivalités.",
+      "strengths": [
+        "Commerce actif",
+        "Flotte de galères",
+        "Sanudo, diplomate expérimenté"
+      ],
+      "weaknesses": [
+        "Îles dispersées sans profondeur",
+        "Piraterie turque",
+        "Peu d'hommes d'armes"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_hospitallers",
+      "tagline": "L'Ordre à Rhodes",
+      "intro": "Hélion de Villeneuve gouverne Rhodes, couvent-forteresse et base navale. Vos galères menacent les Turcs d'Aydın, votre armée de chevaliers-moines est d'élite. Pas de terres, mais un statut unique.",
+      "strengths": [
+        "Chevaliers-moines redoutables",
+        "Flotte et forteresses maritimes",
+        "Trésor et prestige spirituel"
+      ],
+      "weaknesses": [
+        "Une seule île",
+        "Aucun héritier : Grand Maître élu",
+        "Dépend de l'Occident pour ses recrues"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_cyprus",
+      "tagline": "Le royaume des Lusignan",
+      "intro": "Hugues IV règne sur Chypre, riche de Famagouste et du commerce du Levant. Le royaume latin le plus oriental doit tenir face aux Turcs, aux Mamelouks et aux Génois, et attirer les croisés.",
+      "strengths": [
+        "Trésor et commerce du Levant",
+        "Île forteresse",
+        "Alliances latines"
+      ],
+      "weaknesses": [
+        "Peuple grec orthodoxe",
+        "Armée modeste",
+        "Dépend de la flotte vénitienne"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_marinids",
+      "tagline": "Le sultan de Fès, maître du détroit",
+      "intro": "Abu l-Hasan Ali vient de prendre Tlemcen et rêve de refaire l'empire almohade ; ses armées franchiront bientôt le détroit, mais Castille et Grenade veillent, et l'Ifriqiya hafside attend.",
+      "strengths": [
+        "Sultanat riche, or des caravanes de Sijilmassa",
+        "Cavalerie zénète nombreuse",
+        "Bases dans le détroit (Ceuta, Algésiras, Gibraltar)"
+      ],
+      "weaknesses": [
+        "Conquêtes récentes : Tlemcen et l'Oranie se révoltent",
+        "Fronts multiples : Castille, Hafsides, tribus",
+        "Confédérations tribales indociles"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_hafsids",
+      "tagline": "Les corsaires de Tunis",
+      "intro": "Le sultan Abu Bakr II a réunifié l'Ifriqiya, mais Bougie et Constantine s'agitent, les Banu Makki et Ibn Thabit servent d'autres maîtres, et le Mérinide de Tlemcen attend son heure.",
+      "strengths": [
+        "Port riche et corsaires de Tunis",
+        "Fondouks marchands italiens et catalans",
+        "Terres céréalières de l'Ifriqiya"
+      ],
+      "weaknesses": [
+        "Vassaux quasi indépendants (Gabès, Tripoli)",
+        "Face à un voisin mérinide plus puissant",
+        "Tribus arabes des steppes"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_makki",
+      "tagline": "L'émirat des oasis de Gabès",
+      "intro": "Les Banu Makki tiennent Gabès et Djerba depuis 1282 sous suzeraineté hafside ; leur pouvoir grandit avec l'affaiblissement de Tunis.",
+      "strengths": [
+        "Route des caravanes du Sud",
+        "Île de Djerba, port de course",
+        "Éloignement de Tunis"
+      ],
+      "weaknesses": [
+        "Territoire minuscule",
+        "Voisins puissants : Hafsides et Tripoli",
+        "Armées réduites"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_tripoli",
+      "tagline": "La cité marchande de Tripoli",
+      "intro": "Muhammad ibn Thabit tient Tripoli au nom des Hafsides mais gouverne en maître, entre marchands génois et tribus du Djebel.",
+      "strengths": [
+        "Port de la route de Sicile",
+        "Quasi-indépendance",
+        "Marchés du Fezzan"
+      ],
+      "weaknesses": [
+        "Ressources terrestres faibles",
+        "Djebel Nefousa indocile",
+        "Convoitée par Génois et Hafsides"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_barqa",
+      "tagline": "Les tribus de Cyrénaïque",
+      "intro": "Les Banu Sulaym et leurs clientèles tiennent le Djebel Akhdar et les pistes de Barqa ; le sultan du Caire n'y est qu'un nom.",
+      "strengths": [
+        "Cavalerie bédouine mobile",
+        "Immensités désertiques : refuge et attrition adverse",
+        "Suzeraineté lointaine et nominale"
+      ],
+      "weaknesses": [
+        "Très peu de villes et de revenus",
+        "Aucune tradition de grande armée",
+        "Pas de sultanat à soi"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_arborea",
+      "tagline": "Le judicat de la Sardaigne libre",
+      "intro": "Pierre III d'Arborée est l'allié de l'Aragon ; son frère Mariano IV prépare déjà le réveil sarde. À vous d'unifier l'île.",
+      "strengths": [
+        "Allié de l'Aragon, protégé de la couronne",
+        "Judicat au sol fertile",
+        "Tradition d'indépendance sarde"
+      ],
+      "weaknesses": [
+        "Petit territoire",
+        "Aragonais sur la côte",
+        "Génois Doria au nord"
+      ],
+      "difficulty": 3
     }
   ],
   "difficulty_labels": [

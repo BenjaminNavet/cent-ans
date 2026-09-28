@@ -1,0 +1,74 @@
+{
+  "id": "tit_byzantium",
+  "rank": "kingdom",
+  "name": {
+    "display": "Empire byzantin",
+    "local": "Βασιλεία Ῥωμαίων",
+    "local_language": "grec"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
+    "description": "Croix aux quatre briquets (les quatre B), emblème des Paléologues dans les armoriaux occidentaux ; l'aigle bicéphale reste l'emblème impérial.",
+    "primary_color": "#A81C22",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Emblème tardif et occidental : la forme exacte en 1337 est discutée."
+  },
+  "de_jure_provinces": [
+    "prov_constantinople",
+    "prov_thrace",
+    "prov_adrianople",
+    "prov_anchialos",
+    "prov_rhodope",
+    "prov_berat"
+  ],
+  "holder_1337": {
+    "faction": "fac_byzantium",
+    "sources": [
+      "Empire byzantin",
+      "Andronic III Paléologue"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_byz_hold",
+      "title": "Garder la Ville",
+      "description": "Andronic III doit garder Constantinople et l'Empire.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_byzantium"
+      }
+    },
+    {
+      "id": "obj_byz_epirus",
+      "title": "Reprendre l'Épire",
+      "description": "Annexer le despotat d'Épire (Arta, Janina) et remonter jusqu'à l'Adriatique.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_epirus",
+          "prov_thessaly",
+          "prov_thessalonica"
+        ]
+      }
+    },
+    {
+      "id": "obj_byz_morea",
+      "title": "Restaurer la Morée",
+      "description": "Contrôler toute la Morée, y compris la principauté latine d'Achaïe.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_morea",
+          "prov_achaea"
+        ]
+      }
+    }
+  ],
+  "description": "L'Empire romain d'Orient, ou plutôt ce qu'il en reste : Thrace, Macédoine, Thessalie, Morée et îles, sous Andronic III. Rang « royaume » du schéma.",
+  "sources": [
+    "Empire byzantin",
+    "Andronic III Paléologue"
+  ]
+}

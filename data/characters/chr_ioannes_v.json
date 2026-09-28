@@ -1,0 +1,43 @@
+{
+  "id": "chr_ioannes_v",
+  "name": {
+    "display": "Jean V Paléologue",
+    "local": "Ἰωάννης Ε΄ Παλαιολόγος",
+    "local_language": "grec"
+  },
+  "sex": "male",
+  "house": "Paléologue de Byzance",
+  "faction": "fac_byzantium",
+  "role": "heir",
+  "birth": {
+    "value": "1332-06-18"
+  },
+  "death": {
+    "value": "1391-02-16"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Héritier de l'Empire"
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 4,
+    "court": 5
+  },
+  "traits": [
+    "trait_cautious"
+  ],
+  "piety": 55,
+  "family": {
+    "father": "chr_andronikos_iii",
+    "mother": "chr_anna_of_savoy"
+  },
+  "starting_location": "prov_constantinople",
+  "status": "minor",
+  "description": "Fils unique d'Andronic III, à cinq ans ; monté sur le trône à neuf ans, il subira Cantacuzène et les Turcs.",
+  "sources": [
+    "John V Palaiologos"
+  ]
+}

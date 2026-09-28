@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_taza",
+    "province": "prov_taza",
+    "kind": "city",
+    "name": {
+      "display": "Taza",
+      "local": "Tāzā",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -4.01,
+      34.21
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse-porte de l'est du Maroc ; grande mosquée almohade.",
+    "sources": [
+      "Taza"
+    ]
+  },
+  {
+    "id": "set_guercif",
+    "province": "prov_taza",
+    "kind": "village",
+    "name": {
+      "display": "Guercif",
+      "local": "Gargīf",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -3.3547,
+      34.2278
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Étape de la Moulouya sur la piste de Fès à Tlemcen.",
+    "sources": [
+      "Guercif"
+    ]
+  },
+  {
+    "id": "set_debdou",
+    "province": "prov_taza",
+    "kind": "castle",
+    "name": {
+      "display": "Debdou",
+      "local": "Dabdū",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -3.0428,
+      33.9861
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Citadelle de montagne, place forte des Beni Marin dans le haut Moulouya.",
+    "sources": [
+      "Debdou"
+    ]
+  }
+]

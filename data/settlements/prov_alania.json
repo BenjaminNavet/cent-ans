@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_alagir",
+    "province": "prov_alania",
+    "kind": "city",
+    "name": {
+      "display": "Alagir",
+      "local": "Ælægir",
+      "local_language": "alan (ossète)"
+    },
+    "lonlat": [
+      44.2,
+      43.04
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Vallée de l'Ardon ; emplacement de repli approximatif.",
+    "sources": [
+      "Alania"
+    ]
+  },
+  {
+    "id": "set_dargavs",
+    "province": "prov_alania",
+    "kind": "village",
+    "name": {
+      "display": "Dargavs",
+      "local": "Dærgævs",
+      "local_language": "alan (ossète)"
+    },
+    "lonlat": [
+      44.5,
+      42.85
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Nécropole et tours de guet.",
+    "sources": [
+      "Alania"
+    ]
+  },
+  {
+    "id": "set_nuzal",
+    "province": "prov_alania",
+    "kind": "abbey",
+    "name": {
+      "display": "Nuzal",
+      "local": "Нузал",
+      "local_language": "alan (ossète)"
+    },
+    "lonlat": [
+      44.05,
+      42.85
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Chapelle alanique du XIIe siècle.",
+    "sources": [
+      "Alania"
+    ]
+  }
+]

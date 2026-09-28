@@ -1,0 +1,68 @@
+{
+  "id": "fac_durazzo",
+  "name": {
+    "display": "Duché de Durazzo (royaume d'Albanie)",
+    "local": "Ducato di Durazzo",
+    "local_language": "latin"
+  },
+  "short_name": "Durazzo",
+  "adjective": "albanais angevin",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_charles_de_durazzo",
+  "capital": "prov_durazzo",
+  "capital_city": "Durazzo",
+  "religion": "rel_catholic",
+  "culture": "cul_albanian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_naples",
+  "primary_title": "tit_durazzo",
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules et au lambel d'argent.",
+    "description": "Armes d'Anjou-Sicile brisées d'une bordure et d'un lambel, comme les branches angevines de Durazzo et de Gravina.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#B0182B",
+    "uncertain": true,
+    "note": "Brisure de jeu : la distinction exacte entre les branches cadettes angevines est incertaine."
+  },
+  "titles": [
+    "Duc de Durazzo",
+    "Roi d'Albanie (titre)"
+  ],
+  "treasury": 4000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_naples",
+      "status": "vassal",
+      "note": "Fief de la maison d'Anjou-Naples, tenu par la branche de Durazzo-Gravina."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Andronic III convoite Durazzo (ancienne place byzantine)."
+    },
+    {
+      "faction": "fac_serbia",
+      "status": "peace",
+      "note": "Frontière nord : Alessio et Scutari sont serbes."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 60
+  },
+  "description": "Reste du royaume d'Albanie fondé par Charles d'Anjou en 1272 ; Durazzo, Kruja et Alessio, avec une frontière minée de seigneuries albanaises. Le jeune Charles règne sous la régence de sa mère Agnès de Périgord.",
+  "sources": [
+    "Kingdom of Albania (medieval)",
+    "Charles, Duke of Durazzo"
+  ]
+}

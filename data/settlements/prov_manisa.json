@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_manisa",
+    "province": "prov_manisa",
+    "kind": "city",
+    "name": {
+      "display": "Manisa (Magnésie du Sipyle)",
+      "local": "Manisa",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.43,
+      38.61
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du beylik de Saruhan.",
+    "sources": [
+      "Saruhanids"
+    ]
+  },
+  {
+    "id": "set_akhisar",
+    "province": "prov_manisa",
+    "kind": "town",
+    "name": {
+      "display": "Akhisar (Thyatire)",
+      "local": "Akhisar",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      27.84,
+      38.92
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg de la plaine de l'Hermos.",
+    "sources": [
+      "Saruhanids"
+    ]
+  },
+  {
+    "id": "set_foca",
+    "province": "prov_manisa",
+    "kind": "town",
+    "name": {
+      "display": "Foça (Phocée)",
+      "local": "Foça",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      26.76,
+      38.67
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de l'alun, jadis génois, aujourd'hui dans l'orbite de Saruhan.",
+    "sources": [
+      "Saruhanids"
+    ]
+  }
+]

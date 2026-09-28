@@ -414,6 +414,9 @@ impl Battlefield {
             Terrain::Hills => (7, 22.0, 3, 0),
             Terrain::Mountains => (8, 45.0, 3, 0),
             Terrain::Marsh => (3, 2.0, 1, 8),
+            // OM3: plains ground, open and treeless; low dunes in the desert.
+            Terrain::Steppe => (3, 4.0, 0, 0),
+            Terrain::Desert => (4, 6.0, 0, 0),
         };
         // EP1: as many hills, woods and mud per hectare on a larger field.
         let per_area = |count: usize| (count as f64 * size.area_ratio()).round() as usize;

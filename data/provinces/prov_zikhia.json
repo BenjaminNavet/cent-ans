@@ -1,0 +1,98 @@
+{
+  "id": "prov_zikhia",
+  "name": {
+    "display": "Zikhia (côte tcherkesse)",
+    "local": "Zychia",
+    "local_language": "adyguéen"
+  },
+  "region": "caucase",
+  "terrain": "forest",
+  "climate": "oceanic",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Kouban"
+  ],
+  "ports": [
+    "Nikopsis",
+    "Vati"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Nikopsis (Zikhia)",
+      "local": "Nikopsis",
+      "local_language": "adyguéen"
+    },
+    "lat": 44.1,
+    "lon": 39.07
+  },
+  "geo": {
+    "capital_lonlat": [
+      39.07,
+      44.1
+    ],
+    "seed_lonlat": [
+      39.6,
+      44.3
+    ],
+    "voronoi_weight": 1.8
+  },
+  "owner": "fac_circassia",
+  "culture": "cul_circassian",
+  "religion": "rel_pagan",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 22000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 700,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 260,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu ; aucun recensement ; sites approximatifs."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 1,
+  "base_supply": 700,
+  "description": "Pays des Adyghés (Circassiens) entre le Kouban et la côte de Zikhia, aux mains de princes libres sous suzeraineté lâche de la Horde ; comptoirs génois de la côte.",
+  "sources": [
+    "Circassia",
+    "Zichia"
+  ]
+}

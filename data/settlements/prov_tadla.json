@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_kasba_tadla",
+    "province": "prov_tadla",
+    "kind": "city",
+    "name": {
+      "display": "Kasba Tadla",
+      "local": "Qaṣbat Tādlā",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -6.2833,
+      32.6
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_castle",
+      "bld_water_mill",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Kasbah du Tadla, dressée sur l'Oum Errabia ; poste avancé mérinide entre Fès et Marrakech.",
+    "sources": [
+      "Kasba Tadla"
+    ]
+  },
+  {
+    "id": "set_beni_mellal",
+    "province": "prov_tadla",
+    "kind": "town",
+    "name": {
+      "display": "Béni Mellal",
+      "local": "Banī Mallāl",
+      "local_language": "arabe maghrébin"
+    },
+    "lonlat": [
+      -6.3498,
+      32.3394
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Bourg de source au pied de l'Atlas, kasbah de Ras el Aïn.",
+    "sources": [
+      "Béni Mellal"
+    ]
+  },
+  {
+    "id": "set_ouaouizeght",
+    "province": "prov_tadla",
+    "kind": "village",
+    "name": {
+      "display": "Ouaouizeght",
+      "local": "Wāwīzaght",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -6.3,
+      32.15
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg berbère au pied de l'Atlas, sur la route de Marrakech (à préciser).",
+    "sources": [
+      "Ouaouizeght"
+    ]
+  }
+]
