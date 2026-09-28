@@ -222,3 +222,4 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
   ces cadrages (sol plus varié, teinte carte) ; le détail GA1 des figurines ne se lit pas à la
   distance de la vue « gros-plan ». Reste : A/B perf machine calme, jugement du joueur, fusion.
   Points ouverts : câblage `TimberFrame` (réexport Blender + choix régions), GA3 reporté.
+- 28/09 : **Fusion vers main demandée par le joueur, en cours (arrêt de session).** `main` fusionné dans `feat/ga` (d4cb31d7, conflit `budget.md` résolu : section GA puis FE). Reste : `CARGO_TARGET_DIR=$PWD/core/target core/build.sh` (core a bougé sur main), import, tests Godot (smoke, ga1/2/4/5, fg3) + pytest, puis dans le checkout principal `git merge --ff-only feat/ga` (refusionner main si elle a encore bougé), supprimer `../game_project-ga` et `feat/ga`. A/B perf machine calme toujours à faire.
