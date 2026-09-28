@@ -494,6 +494,12 @@ fn plan_turn_in(
     orders.extend(plans.agents);
     plan_economy(&ctx, &mut orders);
     plan_characters(&ctx, &mut orders);
+    // TW2-T5: ranks of the armies spent on traditions.
+    orders.extend(crate::traditions::plan_traditions(
+        ctx.state,
+        ctx.data,
+        ctx.faction,
+    ));
     plan_armies(&ctx, &mut orders);
     orders
 }

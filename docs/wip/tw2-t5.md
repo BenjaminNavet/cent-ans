@@ -11,6 +11,8 @@ Branche `feat/tw2-t5` (worktree `../gp-tw2-t5`, base `integration/tw2`). Spec :
 
 - [x] Accroches : xp (bataille de campagne, 3D, assaut, sortie), mouvement, reconstitution + dilution (et garnisons), siège, moral/tir (auto + 3D) ; tests Rust `tw2_t5_traditions.rs` verts.
 
+- [x] IA : `ai/src/traditions.rs` (doctrine de tir, hommes manquants, siège, branche entamée), branché dans `plan_turn` ; test `ai/tests/tw2_t5_traditions_ai.rs`.
+
 ## Prochaine étape
 
-- IA (`ai/src/traditions.rs`), pont, UI, test headless, ADR 0109.
+- Pont, UI, test headless, ADR 0109.
