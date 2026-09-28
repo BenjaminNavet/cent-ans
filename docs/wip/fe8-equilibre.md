@@ -40,5 +40,25 @@ d'opulence (20 % au-delà de 6 saisons de revenu) le ronge en 7 tours, l'IA dép
 (agents, recherche, édits, recrues de garnison) puis l'entretien de la garnison (≈ 50-100) dépasse
 le revenu (≈ 70) : trésor négatif en continu.
 
+## Référence 464 tours (1337-1453), graines 1-10, main 639b7e49
+| graine | commise Guyenne | commises / exécutées | félonies | ost impérial (c. France) | Italiens c. France t ≤ 50 | recettes France t ≤ 50 | banqueroutes petites fac. | banqueroutes 28 fac. d'avant FE |
+|---|---|---|---|---|---|---|---|---|
+| 1 | - | 0 / 0 | 113 | 89 (67) | 130 | 1 556 656 | 7,31 | 0,15 |
+| 2 | - | 0 / 0 | 83 | 58 (58) | 70 | 1 558 020 | 7,17 | 0,04 |
+| 3 | - | 4 / 0 | 186 | 141 (104) | 65 | 1 675 165 | 7,16 | 0,10 |
+| 4 | - | 2 / 1 | 126 | 103 (67) | 66 | 1 706 216 | 6,97 | 0,16 |
+| 5 | - | 1 / 1 | 131 | 192 (82) | 112 | 1 429 725 | 7,27 | 0,09 |
+| 6 | - | 3 / 1 | 104 | 93 (66) | 66 | 1 510 560 | 7,71 | 0,11 |
+| 7 | - | 3 / 1 | 119 | 111 (52) | 64 | 1 551 034 | 7,22 | 0,05 |
+| 8 | - | 4 / 0 | 162 | 158 (71) | 79 | 1 802 172 | 7,62 | 0,10 |
+| 9 | - | 4 / 0 | 170 | 58 (49) | 63 | 1 601 573 | 7,50 | 0,09 |
+| 10 | - | 4 / 1 | 151 | 102 (95) | 84 | 1 599 416 | 7,25 | 0,06 |
+
+Synthèse : guerre FR-EN 65 % [56-72], 10/10 dans 55-75 % ; trêves 12,2 / siècle ; révoltes 14,3 / 200 t.
+[9,1-21,1] ; banqueroutes toutes factions 6,28 / fac. / déc. [5,98-6,62] ; 4 majeures en vie en
+1400 : 10/10 ; Empire allié à un vassal direct 464/464 tours (alliance d'état initial).
+
 ## Prochaine étape
-Référence 464 tours × 10 graines en cours ; puis règle de l'ost effectif.
+Ost effectif + lien féodal sans alliance + félonie de 1337 codés (ADR 0114) ; mesure 50 tours :
+ost impérial c. France 13-15 (au lieu de 34-67), Italiens 27-43 (65-130), recettes France +5 %,
+mais commise de Guyenne toujours absente : calibrer `commise.min_power_ratio`.
