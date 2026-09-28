@@ -101,7 +101,7 @@ fn new_1337_matches_game_data() {
         .provinces
         .keys()
         .all(|p| !state.city_state(p).unwrap().garrison.is_empty()));
-    assert_eq!(state.armies().len(), 35, "one main army per faction");
+    assert_eq!(state.armies().len(), 60, "one main army per faction");
 }
 
 #[test]
