@@ -1,0 +1,29 @@
+{
+  "id": "tit_papacy",
+  "rank": "kingdom",
+  "name": {
+    "display": "Papauté d'Avignon",
+    "local": "Sancta Sedes",
+    "local_language": "latin"
+  },
+  "heraldry": {
+    "blazon": "De gueules aux deux clefs d'argent et d'or passées en sautoir, liées d'azur, surmontées de la tiare.",
+    "description": "Clefs de saint Pierre sous la tiare ; Benoît XII portait pour armes personnelles celles des Fournier.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_provinces": [
+    "prov_ancona",
+    "prov_bologna",
+    "prov_comtat_venaissin",
+    "prov_ferrara",
+    "prov_lazio"
+  ],
+  "holder_1337": {
+    "faction": "fac_papacy",
+    "sources": [
+      "Benoît XII",
+      "Papauté d'Avignon"
+    ]
+  }
+}

@@ -59,6 +59,17 @@
       ]
     },
     {
+      "id": "borders",
+      "title": "Frontières et territoires occupés",
+      "entries": [
+        {
+          "sample": {"type": "occupation", "owner_color": "#8a1f1f", "occupier_color": "#1f4a8a"},
+          "label": "Territoire occupé",
+          "text": "Le liseré épais suit la frontière d'un royaume, un trait fin sépare ses provinces (rehaussés aux vôtres). Des hachures aux couleurs de l'occupant courent le long de la frontière d'une province tenue par un ennemi (place prise, siège levé) tant qu'elle reste comptée à son royaume d'origine, faute de paix qui la cède. Ces frontières ne sont dessinées que sur la terre ferme ; la mer n'en porte pas."
+        }
+      ]
+    },
+    {
       "id": "fog",
       "title": "Brouillard de guerre",
       "entries": [

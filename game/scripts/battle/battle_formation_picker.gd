@@ -28,6 +28,12 @@ var active_id := ""
 var pending: Array = []
 var place_button: Button
 var cancel_button: Button
+const TITLE := "Formations de groupe"
+## RS-F : sélecteur replié (seul l'en-tête reste) ; retenu toute la bataille (le nœud vit avec
+## la scène de bataille).
+var collapsed := false
+var header: Button
+var body: VBoxContainer
 
 var scene: Node = null  # BattleScene
 var _buttons: Dictionary = {}  # id -> Button
@@ -54,14 +60,27 @@ func _build() -> void:
 	offset_right = -12
 	offset_bottom = -BattleHud.BAND_HEIGHT - 16
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	add_child(box)
-	var title := Label.new()
-	title.text = "Formations de groupe"
-	title.add_theme_font_size_override("font_size", 14)
-	title.add_theme_color_override("font_color", INK)
-	box.add_child(title)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 4)
+	add_child(outer)
+	# RS-F : en-tête cliquable qui replie le sélecteur (état gardé toute la bataille).
+	header = Button.new()
+	header.name = "Header"
+	header.flat = true
+	header.focus_mode = Control.FOCUS_NONE
+	header.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	header.add_theme_font_size_override("font_size", 14)
+	header.add_theme_color_override("font_color", INK)
+	header.add_theme_color_override("font_hover_color", INK)
+	header.add_theme_color_override("font_pressed_color", INK)
+	header.tooltip_text = "Replier ou déplier le sélecteur (les raccourcis Alt+Maj+1…6 restent actifs)."
+	header.pressed.connect(toggle_collapsed)
+	outer.add_child(header)
+	body = VBoxContainer.new()
+	body.name = "Body"
+	body.add_theme_constant_override("separation", 4)
+	outer.add_child(body)
+	var box := body
 	for stance in STANCES:
 		var row := HBoxContainer.new()
 		row.name = "Row_%s" % stance
@@ -108,6 +127,33 @@ func _build() -> void:
 	cancel_button.pressed.connect(cancel)
 	actions.add_child(cancel_button)
 	_update_buttons()
+	set_collapsed(collapsed)
+
+
+## RS-F : replie (seul l'en-tête reste) ou déplie le sélecteur. Le préréglage actif et ses
+## raccourcis restent en vigueur une fois replié.
+func set_collapsed(value: bool) -> void:
+	collapsed = value
+	if body != null:
+		body.visible = not collapsed
+	_update_header()
+	# Le conteneur reprend la taille de son contenu : rectangle nul au coin d'ancrage (bas droite),
+	# la taille minimale le fait grandir vers la gauche et le haut (`GROW_DIRECTION_BEGIN`).
+	offset_left = offset_right
+	offset_top = offset_bottom
+
+
+func toggle_collapsed() -> void:
+	set_collapsed(not collapsed)
+
+
+## En-tête : flèche d'état, titre et, replié, le préréglage actif.
+func _update_header() -> void:
+	if header == null:
+		return
+	header.text = ("▸ " if collapsed else "▾ ") + TITLE
+	if collapsed and active_id != "":
+		header.text += " : " + name_of(active_id)
 
 
 ## Infobulle d'un préréglage : nom, description historique, raccourci.
@@ -171,6 +217,7 @@ func _update_buttons() -> void:
 		place_button.disabled = active_id == ""
 		place_button.text = "Valider la formation" if not pending.is_empty() else "Placer en formation"
 		cancel_button.visible = deploying and not pending.is_empty()
+	_update_header()
 
 
 func _deploying() -> bool:

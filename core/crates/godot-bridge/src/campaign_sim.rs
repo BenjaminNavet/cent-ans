@@ -25,6 +25,20 @@ use crate::convert::variant_to_json;
 type CachedData = Option<(PathBuf, Arc<GameData>, Arc<[String]>)>;
 static SHARED_DATA: OnceLock<Mutex<CachedData>> = OnceLock::new();
 
+/// RS-F (ADR 0099): battle rules read from `data_dir` at load time rather
+/// than compiled in, for the battles built from now on. Siege fire
+/// (`rules/siege_fire.json`): an unreadable file is reported and the bundled
+/// rules stay in force.
+pub(crate) fn install_battle_rules(data_dir: &Path) {
+    match sim_battle::FireRules::load(data_dir) {
+        Ok(rules) => sim_battle::FireRules::install(Some(rules)),
+        Err(error) => {
+            godot_error!("règles d'incendie : {error} (règles intégrées gardées)");
+            sim_battle::FireRules::install(None);
+        }
+    }
+}
+
 /// Game data of `data_dir` with the warnings of its load: the cached copy
 /// when it comes from the same folder, else loaded from disk (the cache is
 /// then replaced; a failed load leaves it untouched). The warnings are
@@ -40,6 +54,7 @@ pub(crate) fn load_shared_data(data_dir: &Path) -> Result<(Arc<GameData>, Arc<[S
         }
     }
     let (data, warnings) = GameData::load(data_dir).map_err(|error| error.to_string())?;
+    install_battle_rules(data_dir);
     let warnings: Arc<[String]> = warnings.iter().map(ToString::to_string).collect();
     for warning in warnings.iter() {
         godot_warn!("game data: {warning}");

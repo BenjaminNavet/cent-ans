@@ -29,6 +29,10 @@
       "$ref": "common.schema.json#/$defs/faction_id",
       "description": "Faction dont celle-ci est vassale (hommage lige) au départ."
     },
+    "primary_title": {
+      "$ref": "common.schema.json#/$defs/title_id",
+      "description": "Titre principal (lot FE, ADR 0098) : son rang et son suzerain de jure placent la faction dans l'arbre féodal."
+    },
     "heraldry": {
       "type": "object",
       "properties": {

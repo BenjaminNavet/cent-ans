@@ -111,3 +111,11 @@ GA4 ≤ 2 $, GA5 ≤ 1 $, GA2 0 $ (CC0).
 | 2026-09-28 | OpenRouter | GA1 : matière coat_dark (openai/gpt-5-image-mini) | 0,02 $ | 0,04 $ | 0,52 $ |
 | 2026-09-28 | OpenRouter | GA1 : rapprochement du solde (appel coat_light coupé en cours de réponse, arrondis) | 0,00 $ | 0,07 $ | 0,59 $ |
 | 2026-09-28 | Poly Haven | GA5 : bâtiments en 2k (10 identifiants existants, téléchargement direct, CC0) + torchis/colombage procédural (composite local, pas d'appel IA) | 0,00 $ | 0,00 $ | 0,59 $ |
+
+## Féodalité FE (28/09) — plafond propre de 15 $ (portraits F7 seulement, ADR 0098)
+
+Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul FE |
+|---|---|---|---|---|---|
+| 2026-09-28 | — | F0 (titres, migration) | 0,00 $ | 0,00 $ | 0,00 $ |

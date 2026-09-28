@@ -43,8 +43,6 @@
     "voronoi_weight": 1.3
   },
   "owner": "fac_milan",
-  "overlord": "fac_empire",
-  "holder": "chr_azzone_visconti",
   "culture": "cul_lombard",
   "religion": "rel_catholic",
   "population": {

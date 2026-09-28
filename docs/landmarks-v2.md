@@ -122,7 +122,7 @@ l'origine, les enceintes, portes, quais, ponts, monuments, quartiers et places, 
 | `landmark_plan.gd` | plan pur (fil de travail), sortie au format `TownPlan` : couloirs d'eau, monuments réservés, enceintes polygonales (normales vers l'extérieur, fossé, tours, portes), pont (tablier au-dessus de l'eau du relief, maisons du pont), quais, places, rues réelles, **parcelles en lanières** le long de chaque rue dans son quartier (façade et profondeur tirées, maison sur rue, cour ou jardin, annexe au fond), sol des quartiers (faubourgs : seulement près des maisons) |
 | `landmark_monuments.gd` | gabarits réels (tableaux de maillage préparés dans le fil du plan, couches de l'atlas BR1) |
 | `landmark_city_layer.gd` | streaming (même profil que ZG6, `town_render.tres`), construction par étapes, recalage des hauteurs quand des pages plus fines arrivent, fondu de la maquette, `set_year` |
-| `town_builder.gd` (ZG6, étendu) | construit le plan : maisons du kit bas détail BR1 de près et blocs au-delà (HLOD par maison dans le shader), nœuds par cellule d'îlots de `detail_cell_m`, `wall_rings` (enceintes quelconques avec parapet), monuments v2 (`_build_extra`), rues pavées et ruisseaux |
+| `town_builder.gd` (ZG6, étendu) | construit le plan : maisons du kit bas détail BR1 de près et blocs au-delà (HLOD par maison dans le shader), nœuds par cellule d'îlots de `detail_cell_m`, `wall_rings` (enceintes quelconques avec parapet), monuments v2 fusionnés par cellule de 600 m (`_extra_meshes`, `merge_monuments` : un maillage par cellule, base, ancrage et teinte de chaque monument dans `CUSTOM0`, `base_source` 2 de `town_building.gdshader` ; RS-G, Paris ≈ 110 monuments), rues pavées et ruisseaux |
 
 Hauteurs : mètres non exagérés, posés par `town_building.gdshader` à la hauteur affichée ZG8
 (`campaign_display_height`), la même que le terrain. Sans pyramide, la couche reste inactive
@@ -236,6 +236,29 @@ Moteur (rétrocompatible, Rouen inchangé) : index en grille des quartiers et de
 touche un monument ou une muraille), minutage par étape (`stats.marks_usec`). Plan de Paris :
 ≈ 2-5 s dans le fil de travail selon la charge (Rouen : ≈ 2-3 s), ≈ 8 800 maisons, 110 monuments.
 Captures : `godot --path game --script res://tests/vh4_shots.gd -- --city=paris --out=<dossier>`.
+
+## Bordeaux, Avignon, Calais, Bruges (VH8, lot RS-G)
+
+Mêmes règles que Rouen ; chaque fichier liste ses sources, et les manques sont écrits dans les
+`note` et `description` (éléments `hypothetical`). Suivis : `docs/wip/rs-g-<ville>.md` ; relectures
+historiennes : `docs/histoire/relecture-vh-<ville>.md`. Tests : `tools/tests/test_landmarks_v2_<ville>.py`
+et `_test_vh8` dans `res://tests/vh4_landmarks_test.gd` (plan, portes, eau, monuments fusionnés).
+
+- **Bordeaux** : troisième enceinte (1302-1327) en deux polylignes ouvertes (front de terre avec
+  fossé, mur de Garonne sans fossé), castrum et deuxième enceinte intérieurs ; Garonne fine,
+  Peugue et Devèze à la main ; Pey-Berland à partir de 1440, Saint-Michel ancienne jusqu'en 1429.
+- **Avignon** : enceinte du XIIIe s. ouverte, remparts d'Innocent VI et d'Urbain V à partir de 1357,
+  pont Saint-Bénézet en deux entrées `bridges` (pont coudé), palais Vieux 1335 / Neuf 1342, fort
+  Saint-André 1362 ; bras de Villeneuve (OSM) et Sorgue dessinée.
+- **Calais** : enceinte de Hurepel (1228), havre en polygone `hand` (trait de côte de 1340 non
+  sourcé : restitution minimale), Notre-Dame en trois phases, Rysbank ; trame OSM de la
+  reconstruction, peu sûre.
+- **Bruges** : levée de 1297 démantelée en 1328 (portes basses en 1340, portes de pierre datées
+  1361-1401), beffroi en trois états, Waterhalle, reien d'après OSM dessinées (`fine_rivers: []`).
+
+Manques de format relevés (contournés) : pas de `certainty` ni de `note` sur les portes, pas de
+levée de terre linéaire, pas de pont coudé, eaux non datées, polygones d'eau non dessinés par le
+moteur (l'eau affichée reste celle de la carte fine).
 
 ## Limites connues (VH4)
 

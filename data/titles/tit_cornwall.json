@@ -1,0 +1,22 @@
+{
+  "id": "tit_cornwall",
+  "rank": "duchy",
+  "name": {
+    "display": "Cornouailles",
+    "local": "Kernow",
+    "local_language": "cornique"
+  },
+  "de_jure_liege": "tit_england",
+  "de_jure_provinces": [
+    "prov_cornwall"
+  ],
+  "holder_1337": {
+    "faction": "fac_england",
+    "sources": [
+      "Duché de Cornouailles",
+      "Édouard de Woodstock",
+      "Cornouailles"
+    ]
+  },
+  "description": "Tenu en 1337 par chr_edward_of_woodstock (apanage ou fief)."
+}

@@ -20,11 +20,11 @@ use data_model::UnitCategory;
 
 use super::{BattleSim, DT};
 use crate::command::CommandError;
-use crate::fire::{Blaze, FireRules};
+use crate::fire::{Blaze, BurnChoice, FireRules};
 use crate::rng::BattleRng;
 use crate::setup::SideId;
 use crate::siege::{House, SiegeWorks};
-use crate::unit::Unit;
+use crate::unit::{Unit, UnitState};
 
 /// Salt of the fire's random stream.
 const FIRE_SALT: u64 = 0x0F1E_5EED_0000_5202;
@@ -41,10 +41,11 @@ pub(crate) struct FireSystem {
 }
 
 impl FireSystem {
-    /// The bundled rules for a siege battle, none for a field battle.
+    /// The current rules ([`FireRules::current`]: the data folder's once
+    /// loaded) for a siege battle, none for a field battle.
     pub(crate) fn new(seed: u64, siege: bool) -> Self {
         FireSystem {
-            rules: siege.then(|| Arc::new(FireRules::bundled().clone())),
+            rules: siege.then(FireRules::current),
             rng: BattleRng::from_seed(seed ^ FIRE_SALT),
             started: false,
             announced: false,
@@ -458,6 +459,78 @@ impl BattleSim {
 
     // ----- the `burn` command -------------------------------------------------
 
+    /// RS-F: the target the « Incendier » order would give `units` of
+    /// `side` (every regiment of the side when empty): the nearest house or
+    /// gate that is not on fire and within reach of one of them, by the very
+    /// test of the `burn` command. Draws nothing; the error says why the
+    /// order is impossible.
+    pub fn burn_choice(&self, side: SideId, units: &[u32]) -> Result<BurnChoice, CommandError> {
+        if self.finished {
+            return Err(CommandError::Finished);
+        }
+        if self.deploying {
+            return Err(CommandError::Deploying);
+        }
+        let (Some(rules), Some(works)) = (self.fire_rules(), self.siege.as_ref()) else {
+            return Err(CommandError::NotASiege);
+        };
+        let ready =
+            |unit: &&Unit| unit.side == side && unit.present() && unit.state != UnitState::Routing;
+        let candidates: Vec<&Unit> = if units.is_empty() {
+            self.units.iter().filter(ready).collect()
+        } else {
+            units
+                .iter()
+                .filter_map(|&id| self.units.get(id as usize))
+                .filter(ready)
+                .collect()
+        };
+        if candidates.is_empty() {
+            return Err(CommandError::NoUnits);
+        }
+        let mut fuels: Vec<Fuel> = works
+            .houses
+            .iter()
+            .enumerate()
+            .filter(|(_, h)| h.fire == Blaze::default())
+            .map(|(i, _)| Fuel::House(i))
+            .collect();
+        if works.pieces[works.gate].intact() && works.gate_fire == Blaze::default() {
+            fuels.push(Fuel::Gate);
+        }
+        if fuels.is_empty() {
+            return Err(CommandError::NothingLeftToBurn);
+        }
+        let mut best: Option<BurnChoice> = None;
+        for &fuel in &fuels {
+            for unit in &candidates {
+                let Some(distance) = torch_distance(works, rules, unit, fuel) else {
+                    continue;
+                };
+                if best.is_some_and(|b| b.distance_m <= distance) {
+                    continue;
+                }
+                best = Some(match fuel {
+                    Fuel::House(i) => BurnChoice {
+                        unit: unit.id,
+                        house: Some(i),
+                        gate: false,
+                        suburb: works.houses[i].suburb,
+                        distance_m: distance,
+                    },
+                    Fuel::Gate => BurnChoice {
+                        unit: unit.id,
+                        house: None,
+                        gate: true,
+                        suburb: false,
+                        distance_m: distance,
+                    },
+                });
+            }
+        }
+        best.ok_or(CommandError::NothingInReach)
+    }
+
     /// `burn`: a regiment close enough puts a torch to house `house` (or the
     /// gate); the garrison reaches its suburbs from anywhere.
     pub(super) fn command_burn(
@@ -488,24 +561,10 @@ impl BattleSim {
             }
             _ => return Err(CommandError::NothingToBurn),
         };
-        let reach = rules.torch.reach_m;
-        let in_reach = |unit: &Unit| -> bool {
-            if unit.synthetic || unit.category == UnitCategory::Siege {
-                return false;
-            }
-            match fuel {
-                Fuel::House(i) => {
-                    let h = &works.houses[i];
-                    (h.suburb && unit.side == SideId::Defender)
-                        || unit.distance_to_rect(h.x, h.z) - h.radius <= reach
-                }
-                Fuel::Gate => {
-                    let (cx, cz) = works.pieces[works.gate].closest_point(unit.x, unit.z);
-                    unit.distance_to_rect(cx, cz) <= reach + works.band()
-                }
-            }
-        };
-        let Some(&id) = units.iter().find(|&&id| in_reach(&self.units[id as usize])) else {
+        let Some(&id) = units
+            .iter()
+            .find(|&&id| torch_distance(works, &rules, &self.units[id as usize], fuel).is_some())
+        else {
             return Err(CommandError::TooFarToBurn(units[0]));
         };
         let chance = rules.torch.chance * rules.weather(self.weather).ignition;
@@ -530,6 +589,29 @@ impl BattleSim {
             );
         }
         Ok(())
+    }
+}
+
+/// Distance (metres, ≥ 0) from `unit` to `fuel` when it can put a torch to
+/// it, `None` when out of reach: engines and synthetic units never can; the
+/// garrison reaches its suburbs from anywhere.
+fn torch_distance(works: &SiegeWorks, rules: &FireRules, unit: &Unit, fuel: Fuel) -> Option<f64> {
+    if unit.synthetic || unit.category == UnitCategory::Siege {
+        return None;
+    }
+    let reach = rules.torch.reach_m;
+    match fuel {
+        Fuel::House(i) => {
+            let h = &works.houses[i];
+            let distance = unit.distance_to_rect(h.x, h.z) - h.radius;
+            ((h.suburb && unit.side == SideId::Defender) || distance <= reach)
+                .then_some(distance.max(0.0))
+        }
+        Fuel::Gate => {
+            let (cx, cz) = works.pieces[works.gate].closest_point(unit.x, unit.z);
+            let distance = unit.distance_to_rect(cx, cz);
+            (distance <= reach + works.band()).then_some(distance.max(0.0))
+        }
     }
 }
 
