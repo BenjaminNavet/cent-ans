@@ -38,12 +38,14 @@ theme_override_constants/separation = 0
 [node name="NameLabel" type="Label" parent="VBox/Header/NameBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"Title"
 theme_override_font_sizes/font_size = 26
 text = "Personnage"
 
 [node name="SubtitleLabel" type="Label" parent="VBox/Header/NameBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"Caption"
 theme_override_font_sizes/font_size = 14
 text = "—"
 
@@ -56,6 +58,7 @@ text = "×"
 [node name="RoleLabel" type="Label" parent="VBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"Caption"
 theme_override_font_sizes/font_size = 14
 text = "Statut actuel : à la cour"
 
@@ -87,7 +90,8 @@ color = Color(0.4, 0.4, 0.4, 1)
 unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 3
-theme_override_font_sizes/font_size = 13
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 text = ""
 
@@ -149,7 +153,8 @@ text = "0"
 
 [node name="FamilyHeader" type="Label" parent="VBox/Body/Left"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Famille"
 
 [node name="FamilyList" type="VBoxContainer" parent="VBox/Body/Left"]
@@ -159,7 +164,8 @@ theme_override_constants/separation = 0
 
 [node name="ActionsHeader" type="Label" parent="VBox/Body/Left"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Actions"
 
 [node name="Actions" type="VBoxContainer" parent="VBox/Body/Left"]
@@ -194,6 +200,7 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"Caption"
 theme_override_font_sizes/font_size = 14
 text = "Choisir…"
 
@@ -221,7 +228,8 @@ theme_override_constants/separation = 10
 
 [node name="TraitsHeader" type="Label" parent="VBox/Body/Scroll/Content"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Traits"
 
 [node name="TraitsList" type="HFlowContainer" parent="VBox/Body/Scroll/Content"]
@@ -237,12 +245,14 @@ theme_override_constants/separation = 10
 [node name="SkillTreeTitle" type="Label" parent="VBox/Body/Scroll/Content/SkillTreeHeader"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Arbre de compétences"
 
 [node name="SkillPointsLabel" type="Label" parent="VBox/Body/Scroll/Content/SkillTreeHeader"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"Caption"
 theme_override_font_sizes/font_size = 14
 text = ""
 

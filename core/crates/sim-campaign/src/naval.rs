@@ -693,7 +693,7 @@ fn transport_side(
 /// Ships of its own fleet `faction` lost (sunk or taken) in a battle: in
 /// each class, the first ships of the setup up to its fleet's count are its
 /// own, the rest hired cogs (see `transport_side`) that are not its to lose.
-fn own_ships_lost(
+pub(crate) fn own_ships_lost(
     state: &CampaignState,
     faction: &FactionId,
     side: &NavalSideSetup,

@@ -1,11 +1,14 @@
 class_name ReplaysMenu
-extends Control
+extends PanelContainer
 
 ## EP13 — « Rejeux » du menu principal : les dernières batailles livrées, enregistrées à leur fin
 ## par le cœur (`BattleSim.save_replay`, dossier utilisateur `user://replays`, les N dernières
 ## gardées selon `data/rules/battle_replay.json`). Pour chacune : titre, armées, vainqueur, durée,
 ## date ; « Revoir » lance la scène de bataille en rejeu (`--replay=<fichier>`). Un rejeu d'un
 ## autre format de fichier est montré mais ne peut être revu. Échap ou « Fermer » : `closed`.
+## Lot P2e (ADR 0097, bible DA § 12.1) : zone `MODAL` de `UiLayout` (plus de veil ni de
+## `CenterContainer` propres) ; tailles de texte par `UiType`, ouverture et fermeture par
+## `UiMotion`.
 
 signal closed
 signal replay_started(path: String)
@@ -77,37 +80,27 @@ static func args_for(path: String) -> PackedStringArray:
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	custom_minimum_size = Vector2(780, 0)
 	replays = load_replays()
-	var veil := ColorRect.new()
-	veil.color = Color(0.05, 0.03, 0.01, 0.5)
-	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(veil)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(780, 0)
-	center.add_child(panel)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(760, 520)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panel.add_child(scroll)
+	add_child(scroll)
 	var box := VBoxContainer.new()
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation", 8)
 	scroll.add_child(box)
 	var title := Label.new()
 	title.text = "Rejeux"
-	title.add_theme_font_size_override("font_size", 26)
+	UiType.apply(title, UiType.TITLE)
 	box.add_child(title)
 	var hint := Label.new()
 	hint.text = "Revoyez les dernières batailles livrées, du premier trait à la déroute : lecture, pause, vitesse jusqu'à ×8, saut dans le temps, caméra libre. On regarde, on ne commande pas."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(720, 0)
-	hint.add_theme_font_size_override("font_size", 15)
+	UiType.apply(hint, UiType.CAPTION)
 	hint.modulate = Color(1, 1, 1, 0.75)
 	box.add_child(hint)
 	if replays.is_empty():
@@ -130,6 +123,8 @@ func _ready() -> void:
 		(buttons.values()[0] as Button).grab_focus.call_deferred()
 	else:
 		close_button.grab_focus.call_deferred()
+	UiZones.put(UiZones.Zone.MODAL, self)
+	UiMotion.fade_in(self)
 
 
 func _add_replay(box: VBoxContainer, entry: Dictionary) -> void:
@@ -143,13 +138,13 @@ func _add_replay(box: VBoxContainer, entry: Dictionary) -> void:
 	line.add_child(texts)
 	var name := Label.new()
 	name.text = str(entry.get("title", "")) if str(entry.get("title", "")) != "" else "Bataille"
-	name.add_theme_font_size_override("font_size", 20)
+	UiType.apply(name, UiType.HEADING)
 	texts.add_child(name)
 	var detail := Label.new()
 	detail.text = summary(entry)
 	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail.custom_minimum_size = Vector2(560, 0)
-	detail.add_theme_font_size_override("font_size", 14)
+	UiType.apply(detail, UiType.CAPTION)
 	detail.modulate = Color(1, 1, 1, 0.8)
 	texts.add_child(detail)
 	var button := Button.new()
@@ -173,7 +168,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func close() -> void:
 	closed.emit()
-	queue_free()
+	UiMotion.fade_out(self, UiMotion.DURATION, true)
 
 
 ## Lance la scène de bataille en rejeu du fichier `path`.

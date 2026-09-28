@@ -32,7 +32,7 @@ Plan : `docs/superpowers/plans/2026-09-27-controles-bataille-tw.md`. ADR réserv
 ## Prochaine étape
 **Chantier CB terminé côté code (09-28, main 135a7b36)** : tous les lots, icônes DA5 (25 clés + 6 curseurs,
 0,73 $, cumul DA 21,29 $, `docs/wip/cb-icones.md`), ADR 0095 acceptée. Reste : partie pilote du joueur.
-Suites notées : sélecteur de formations repliable ; cris d'alerte parfois doublés ; bornes de rangs CB1
+Suites notées : sélecteur de formations repliable (fait par RS-F, en-tête cliquable) ; cris d'alerte parfois doublés ; bornes de rangs CB1
 sans relecture historique ; bulle d'aide CB6 qui masque les archers avancés sur un cadrage haut ; Crécy à
 18/20 (bande 14-19) après CB4 ; trait de `cb_planted_pikes` plus épais que la famille ; l'outil
 `ink-icons` écrit sa ligne de grand livre dans la DERNIÈRE section de `docs/budget.md` (ici « Polish PO »)

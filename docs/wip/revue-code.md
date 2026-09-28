@@ -9,13 +9,13 @@ trouvé par le smoke et corrigé.
 Suites possibles (non faites) :
 - Pont : lectures groupées get_province_controllers / get_devastation (diplomacy_panel, alerts, settlement_layer).
 - Pont get_siege_state / get_soldier_buffers groupés : repris par PB3c.
-- trade.rs : précalculer les chemins des routes au chargement de data.trade.
-- sim-battle : `disengaging` retombe au 1er pas hors contact (décrochage en bord de mêlée) ; pavois attend une cible cachée.
+- [x] trade.rs : précalculer les chemins des routes au chargement de data.trade — fait (RS-D, `feat/rs-d-trade`, voir 18c).
+- sim-battle : `disengaging` retombe au 1er pas hors contact (décrochage en bord de mêlée) ; pavois face à une cible cachée — **corrigé par RS-J** (28/09) : pavois baissés, le régiment avance jusqu'à voir la cible ; tests `review_fixes::pavised_crossbowmen_close_in_on_a_hidden_target` et `..._hold_and_shoot_a_visible_target`.
 - Mock : événements "appointment", "skill_learned" absents d'EventKind (mais traités par `map_ui.gd`,
   laissés). RS-H (28/09) : "movement" (armée qui campe, pas de rôle de jeu, aucun script n'en
   dépendait) retiré du mock ; ce sont désormais les deux seuls types restants à écarter du core.
-- Tests manquants : campagne n° 4, 13, 14, 15.
-- Relancer la sonde release ai `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` (une instabilité vue pendant la correction).
+- [x] Tests manquants : campagne n° 4, 13, 14, 15 — faits (RS-D, `review_tests.rs` : `an_army_emptied_by_its_fallback_is_dispersed`, `the_winner_demands_its_unheld_war_goals_first`, `a_crown_beaten_at_minus_fifty_sues_for_peace`, `a_poor_herald_does_not_wait_for_a_ransom`, `hired_cogs_lost_at_sea_are_not_the_fleets`) ; chacun échoue quand on retire le correctif.
+- [x] Relancer la sonde release ai `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` — relancée (RS-D, 28/09, `main` c0be4da7 + RS-D) : ÉCHEC sur la seule borne de trésor moyen de la France, 38 297 < 40 000 (bande 40 000-160 000) ; toutes les assertions par graine passent (survie, aucune banqueroute, Δ provinces ≤ 5, batailles). Résultat identique au livre près avec l'ancienne recherche de chemins (cache désactivé) : dérive préexistante, sans lien avec RS-D. À recaler (borne ou économie) avec RS-B (ordre public / `economy.json`), qui touche ces valeurs.
 - Leçon outillage : un CARGO_TARGET_DIR partagé entre worktrees mélange les artefacts des crates du workspace ;
   utiliser un profil dédié (`--config 'profile.X.inherits="dev"' --profile X`).
 Tranches :
@@ -55,7 +55,7 @@ Prochaine étape : intégration (ff dans main) par le coordinateur.
 | 1 | corrigé | `movement::assign_captor` extrait ; appelé après un assaut (assaillant pris → défenseur) et une sortie (assiégeant pris → garnison) ; le gouverneur à la tête d'une garnison pris (`general_captured` du côté garnison) passe par `chronicle::capture_character`. |
 | 2 | corrigé | `order_create_army` refuse une place assiégée (`OrderError::SettlementBesieged`, comme `GarrisonUnits`). |
 | 3 | corrigé | `siege_leader` : le siège reste à l'assiégeant présent, sinon passe à un allié avec brèche et vivres ; `begin_siege` ne remplace plus le siège d'un allié. |
-| 4 | corrigé | repli `Fallback` : une armée vidée par `decimate` est dispersée (`disperse_army`), comme en débandade. |
+| 4 | corrigé | repli `Fallback` : une armée vidée par `decimate` est dispersée (`disperse_army`), comme en débandade. Test (RS-D) : `an_army_emptied_by_its_fallback_is_dispersed`. |
 | 5 | corrigé | `SettlementState::hand_over` (fin du siège, file de recrutement et chantier perdus, sans remboursement) utilisé par `capture`, `cede_province`, la révolte (la garnison mutinée reste aux rebelles, inchangé) et la restitution des places occupées à la paix (`diplomacy`). |
 | 6 | corrigé | la sortie affronte toute la coalition assiégeante (`settlement_coalition`, forces sommées) ; le siège n'est levé que s'il ne reste aucun assiégeant. |
 
@@ -106,8 +106,7 @@ Points ouverts :
   régiment peut retoucher l'ennemi et `enter_melee` annule alors la destination (vu en test :
   le décrochage en arrière d'une mêlée à la limite du contact échoue). Défaut préexistant, non
   corrigé (règle de mêlée, équilibre).
-- n° 2 : les pavois attendent encore, à portée, une cible cachée (branche `pavise`), sans
-  s'approcher.
+- ~~n° 2~~ : pavois face à une cible cachée — corrigé par RS-J (28/09).
 
 ## Corrections tools
 
@@ -168,16 +167,16 @@ Signatures ajoutées (aucune signature existante changée) : `NewsLetters.push_n
 - 4 corrigé (97ba80f7) : `maps_in` rend un `Arc<[MapEntry]>` partagé ; `#[func]` inchangées.
 - 5 écarté : `Ground::Pages` est un `HashMap<i64, Vec<u8>>` du crate `vegetation` (hors périmètre) ; et une clé de page n'est pas immuable si la pyramide change (autre carte), un cache par clé seule serait faux.
 - Piège build : le dossier target partagé entre worktrees réutilise l'artefact `vegetation` d'une autre branche (sz1 : `relief_squash`) ; `touch core/crates/vegetation/src/*.rs` force la recompilation.
-| 14 | corrigé | `ai_emissary` étape 1 : ne vise qu'un captif rachetable (conditions « argent ») dont le prix + coût de l'action tient dans le trésor ; sinon étapes 2 et 3. Pas de test dédié (IA d'agent, couverte par c6_agents). |
+| 14 | corrigé | `ai_emissary` étape 1 : ne vise qu'un captif rachetable (conditions « argent ») dont le prix + coût de l'action tient dans le trésor ; sinon étapes 2 et 3. Test (RS-D) : `a_poor_herald_does_not_wait_for_a_ransom`. |
 | 11 | corrigé | malus « otages abandonnés » déplacé dans `declare_war` : seulement si le donneur déclare la guerre au détenteur. Un donneur entraîné par un appel aux armes n'est pas puni (conservateur). |
 | 12 | corrigé | `resolve_negotiation` : le registre de tributs d'une faction morte est vidé, elle ne paie plus. |
-| 13 | corrigé | `plan_peace` : buts de guerre non tenus ajoutés avec la clé `false` (avant les provinces hors but) ; `score <= 2 * SURRENDER_WAR_SCORE` (ADR 0025 § 5, « score ≤ -50 »). Pas de test dédié. |
+| 13 | corrigé | `plan_peace` : buts de guerre non tenus ajoutés avec la clé `false` (avant les provinces hors but) ; `score <= 2 * SURRENDER_WAR_SCORE` (ADR 0025 § 5, « score ≤ -50 »). Tests (RS-D) : `the_winner_demands_its_unheld_war_goals_first`, `a_crown_beaten_at_minus_fifty_sues_for_peace`. |
 | 9 | corrigé | naissance : l'enfant prend la faction du père, sauf si la mère est souveraine ou héritière de sa faction (maison du père inchangée, lieu de naissance = celui de la mère). |
 | 10 | corrigé | `dynasty::check_marriage` (validation pure) extraite de `propose_marriage` ; appelée dans `check_treaty` (plus un même époux dans deux mariages refusé), donc `apply_treaty` n'applique plus la paix avant d'échouer ; `evaluate(Proposal::Marriage)` n'appelle plus `state.clone()`. |
 | 18a | corrigé | `check_treaty` : doublons détectés par `articles[..i].contains(a)` au lieu de `serde_json::to_string` (même commit que 10). |
-| 15 | corrigé | `naval::own_ships_lost` : par classe, seuls les premiers navires du dispositif jusqu'à l'effectif de la flotte sont propres ; les cogues louées perdues ne sont plus retirées de la flotte. Pas de test dédié (dispositif naval lourd à construire ; nv1/nv2 verts). |
+| 15 | corrigé | `naval::own_ships_lost` : par classe, seuls les premiers navires du dispositif jusqu'à l'effectif de la flotte sont propres ; les cogues louées perdues ne sont plus retirées de la flotte. Test (RS-D) : `hired_cogs_lost_at_sea_are_not_the_fleets` (`own_ships_lost` passé `pub(crate)`). |
 | 16 | corrigé | blocus : un `BTreeSet` des provinces déjà comptées, un port bordant deux mers ennemies ne paie qu'un péage. |
 | 17 | corrigé | `research_points_per_turn` compte les bâtiments des places tenues (`controller`), comme les taxes et l'entretien. |
 | 18b | corrigé | `resolve_economy` et `faction_economy` passent le revenu déjà calculé à `administration_upkeep_for` (un seul `faction_income_effective` au lieu de deux). |
-| 18c | écarté | cache de `shortest_path` des routes commerciales : le chemin ne dépend que de `GameData`, mais un cache global (clé route) serait faux entre plusieurs `GameData` (tests qui en chargent/modifient) et un cache dans `CampaignState` casserait `PartialEq`/sérialisation ; ni simple ni sûr. À faire plutôt en précalculant les chemins au chargement de `data.trade` (data-model). |
+| 18c | corrigé (RS-D) | d'abord écarté (cache global ou dans `CampaignState` ni simple ni sûr). Fait en précalculant au chargement : `data-model/src/trade_paths.rs`, `GameData::trade_paths` rempli par `build_trade_paths` à la fin de `build_movement_graph` (chargement et toute reconstruction du graphe), lu par `GameData::trade_path` (recherche de secours pour une paire inconnue). Résultat identique : `precomputed_trade_paths_match_the_old_search` compare route par route à l'ancienne recherche recopiée, et `trade_routes` avec/sans cache. Gain (release, `trade_paths_timing`, 200 appels, départ 1337) : `trade_routes` 28,3 ms → 0,73 ms par appel (×39) ; précalcul unique 8,9 ms au chargement. |
 | 5b | corrigé | article `CedeSettlement` : passation par `hand_over` et garnison vidée, comme `cede_province` (le preneur ne reçoit plus la garnison, les recrues ni le chantier du donneur). |

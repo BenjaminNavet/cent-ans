@@ -110,6 +110,11 @@ func _ready() -> void:
 	body.add_child(_build_faction_column())
 	body.add_child(_build_map_column())
 	body.add_child(_build_detail_column())
+	# PO phase 2 (P2b, ADR 0097) : fenêtre centrale plein écran — voir `docs/wip/p2b-tech-diplo.md`
+	# « Point ouvert » : ne rejoint volontairement pas de zone `UiLayout` (`SIDE_PANEL` est trop
+	# étroit ; `MODAL` reparente hors de `map_ui`, ce qui casse `_keep_on_screen`/`PanelStack`
+	# côté `map_ui.gd`, hors lot — régressions constatées sur `smoke.gd`). Migré : tailles
+	# (`UiType`) et animations d'ouverture/fermeture (`UiMotion`).
 	_fit_to_viewport()
 
 
@@ -144,9 +149,20 @@ func _rule() -> Control:
 
 
 func _section(text: String) -> Label:
-	var label := HudStyle.label(text, 17, HudStyle.RUBRIC)
+	var label := _label(text, UiType.HEADING, HudStyle.RUBRIC)
 	label.add_theme_constant_override("outline_size", 0)
 	return label
+
+
+## PO phase 2 (P2b, ADR 0097) : remplace les anciennes tailles ad hoc (`HudStyle.FONT_SMALL` /
+## `FONT_BODY` / `FONT_TITLE` et quelques valeurs littérales) par une variation `UiType` — les
+## quatre tailles de la bible DA § 12.2, jamais moins de `Caption`. `HudStyle.label` reste le
+## constructeur (police, couleur), `UiType.apply` pose ensuite la taille et la variation de type
+## du thème.
+static func _label(text: String, variation: String, color: Color = HudStyle.INK) -> Label:
+	var node := HudStyle.label(text, UiType.size(variation), color)
+	UiType.apply(node, variation)
+	return node
 
 
 func _build_header() -> Control:
@@ -158,10 +174,11 @@ func _build_header() -> Control:
 	# CV3-0 (#10) : lettrine du kit partagé (UI1, `Lettrine.attach`) au lieu de l'ancien
 	# `DropCap` local, qui figeait le titre affiché à "iplomatie" (le "D" retiré à la main pour
 	# lui faire de la place) au lieu de réserver la place comme le fait le kit.
-	var title := HudStyle.label("Diplomatie", 30, HudStyle.INK)
+	var title := HudStyle.label("Diplomatie", UiType.size(UiType.TITLE), HudStyle.INK)
+	UiType.apply(title, UiType.TITLE)
 	Lettrine.attach(title)
 	titles.add_child(title)
-	_religion_label = HudStyle.label("", HudStyle.FONT_BODY, HudStyle.INK_SOFT)
+	_religion_label = _label("", UiType.BODY, HudStyle.INK_SOFT)
 	titles.add_child(_religion_label)
 	header.add_child(titles)
 	var donate := Button.new()
@@ -177,7 +194,7 @@ func _build_header() -> Control:
 	close.custom_minimum_size = Vector2(36, 36)
 	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(func() -> void:
-		hide()
+		UiMotion.fade_out(self)  # PO phase 2 (P2b) : fermeture animée (`UiMotion`)
 		closed.emit())
 	header.add_child(close)
 	return header
@@ -217,8 +234,8 @@ func _build_map_column() -> Control:
 	holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	holder.resized.connect(_fit_minimap)
 	column.add_child(holder)
-	column.add_child(DiplomaticStances.legend(HudStyle.FONT_SMALL))  # DP2
-	_map_hint = HudStyle.label("Cliquez une province pour traiter avec son seigneur. Les terres voilées sont hors de vue de vos agents et de vos armées.", HudStyle.FONT_SMALL, HudStyle.INK_FADED)
+	column.add_child(DiplomaticStances.legend(UiType.CAPTION))  # DP2
+	_map_hint = _label("Cliquez une province pour traiter avec son seigneur. Les terres voilées sont hors de vue de vos agents et de vos armées.", UiType.CAPTION, HudStyle.INK_FADED)
 	_map_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_map_hint)
 	return column
@@ -237,7 +254,7 @@ func _legend() -> Control:
 		swatch.color = MAP_COLORS.get(key, FRIENDLY if key == "friendly" else HOSTILE)
 		chip.add_child(swatch)
 		var symbol := Accessibility.relation_symbol(key) if Accessibility.colorblind() else ""
-		chip.add_child(HudStyle.label(("%s %s" % [symbol, entry[1]]).strip_edges(), HudStyle.FONT_SMALL, HudStyle.INK))
+		chip.add_child(_label(("%s %s" % [symbol, entry[1]]).strip_edges(), UiType.CAPTION, HudStyle.INK))
 		flow.add_child(chip)
 	return flow
 
@@ -291,7 +308,7 @@ func _build_negotiation() -> Control:
 	var page := VBoxContainer.new()
 	page.add_theme_constant_override("separation", 6)
 	var clause_row := HBoxContainer.new()
-	clause_row.add_child(HudStyle.label("Clauses communes", HudStyle.FONT_TITLE, HudStyle.INK))
+	clause_row.add_child(_label("Clauses communes", UiType.HEADING, HudStyle.INK))
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	clause_row.add_child(spacer)
@@ -315,7 +332,7 @@ func _build_negotiation() -> Control:
 	page.add_child(_rule())
 	var chance_row := HBoxContainer.new()
 	chance_row.add_theme_constant_override("separation", 8)
-	_chance_label = HudStyle.label("", HudStyle.FONT_TITLE, HudStyle.INK)
+	_chance_label = _label("", UiType.HEADING, HudStyle.INK)
 	_chance_label.custom_minimum_size = Vector2(250, 0)
 	chance_row.add_child(_chance_label)
 	_chance_bar = ProgressBar.new()
@@ -334,7 +351,7 @@ func _build_negotiation() -> Control:
 	_counter_box = HBoxContainer.new()
 	_counter_box.name = "CounterOffer"
 	_counter_box.add_theme_constant_override("separation", 8)
-	_counter_label = HudStyle.label("", HudStyle.FONT_BODY, HudStyle.INK)
+	_counter_label = _label("", UiType.BODY, HudStyle.INK)
 	_counter_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_counter_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_counter_box.add_child(_counter_label)
@@ -373,7 +390,7 @@ func _build_negotiation() -> Control:
 	buttons.add_child(send)
 	page.add_child(buttons)
 	page.add_child(_rule())
-	page.add_child(HudStyle.label("Actions unilatérales", HudStyle.FONT_TITLE, HudStyle.INK))
+	page.add_child(_label("Actions unilatérales", UiType.HEADING, HudStyle.INK))
 	_actions = HFlowContainer.new()
 	_actions.add_theme_constant_override("h_separation", 6)
 	_actions.add_theme_constant_override("v_separation", 6)
@@ -397,7 +414,7 @@ func _article_column(title: String) -> Array:
 	column.add_theme_constant_override("separation", 4)
 	box.add_child(column)
 	var row := HBoxContainer.new()
-	var label := HudStyle.label(title, HudStyle.FONT_TITLE, HudStyle.RUBRIC)
+	var label := _label(title, UiType.HEADING, HudStyle.RUBRIC)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(label)
 	var menu := _add_menu("+ Ajouter")
@@ -414,7 +431,7 @@ func _add_menu(text: String) -> MenuButton:
 	var menu := MenuButton.new()
 	menu.text = text
 	menu.flat = false
-	menu.add_theme_font_size_override("font_size", HudStyle.FONT_BODY)
+	UiType.apply(menu, UiType.BODY)  # PO phase 2 (P2b) : plus de taille ad hoc, variation UiType
 	menu.about_to_popup.connect(func() -> void: _fill_menu(menu))
 	return menu
 
@@ -425,6 +442,10 @@ func _add_menu(text: String) -> MenuButton:
 func refresh() -> void:
 	if sim == null:
 		return
+	# PO phase 2 (P2b) : `DiplomacyController.open_panel` appelle `refresh()` avant `panel.show()`
+	# — encore invisible ici, c'est donc l'ouverture : fondu d'entrée (`UiMotion`) posé depuis ce
+	# panneau (le contrôleur, hors lot, ne fait alors qu'un `show()` sans effet, déjà visible).
+	var opening := not visible
 	_entries = sim.call("get_diplomacy", player_faction)
 	_entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var rank_a := _status_rank(str(a["status"]))
@@ -439,6 +460,9 @@ func refresh() -> void:
 	_render_list()
 	_render_map()
 	_render_detail()
+	if opening:
+		show()
+		UiMotion.fade_in(self)
 
 
 func select_faction(faction_id: String) -> void:
@@ -485,7 +509,7 @@ func _render_offers() -> void:
 		heraldry.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		heraldry.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		row.add_child(heraldry)
-		var text := HudStyle.label("%s (%s)" % [str(offer["text"]), FrText.count(int(offer["expires_in"]), "tour", "tours")], HudStyle.FONT_BODY, HudStyle.INK)
+		var text := _label("%s (%s)" % [str(offer["text"]), FrText.count(int(offer["expires_in"]), "tour", "tours")], UiType.BODY, HudStyle.INK)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(text)
@@ -549,12 +573,12 @@ func _faction_row(entry: Dictionary) -> Control:
 	names.alignment = BoxContainer.ALIGNMENT_CENTER
 	names.add_theme_constant_override("separation", -2)
 	names.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var name_label := HudStyle.label(str(entry["name"]), 16, HudStyle.INK)
+	var name_label := _label(str(entry["name"]), UiType.BODY, HudStyle.INK)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	names.add_child(name_label)
 	var ruler := str(entry.get("ruler", ""))
 	if ruler != "":
-		var ruler_label := HudStyle.label(ruler, HudStyle.FONT_SMALL, HudStyle.INK_FADED)
+		var ruler_label := _label(ruler, UiType.CAPTION, HudStyle.INK_FADED)
 		ruler_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ruler_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		names.add_child(ruler_label)
@@ -564,11 +588,11 @@ func _faction_row(entry: Dictionary) -> Control:
 	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	right.add_theme_constant_override("separation", 0)
 	var symbol := Accessibility.relation_symbol(status) if Accessibility.colorblind() else ""
-	var status_label := HudStyle.label(("%s %s" % [symbol, STATUS_LABELS.get(status, status)]).strip_edges(), HudStyle.FONT_SMALL, STATUS_COLORS.get(status, HudStyle.INK))
+	var status_label := _label(("%s %s" % [symbol, STATUS_LABELS.get(status, status)]).strip_edges(), UiType.CAPTION, STATUS_COLORS.get(status, HudStyle.INK))
 	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	right.add_child(status_label)
-	var attitude_label := HudStyle.label("%+d" % attitude, HudStyle.FONT_BODY, HudStyle.GOOD if attitude >= 0 else HudStyle.POOR)
+	var attitude_label := _label("%+d" % attitude, UiType.BODY, HudStyle.GOOD if attitude >= 0 else HudStyle.POOR)
 	attitude_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	attitude_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	right.add_child(attitude_label)
@@ -733,11 +757,11 @@ func _render_detail() -> void:
 	var names := VBoxContainer.new()
 	names.add_theme_constant_override("separation", 0)
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	names.add_child(HudStyle.label(str(entry["name"]), 24, HudStyle.INK))
+	names.add_child(_label(str(entry["name"]), UiType.HEADING, HudStyle.INK))
 	var ruler := str(entry.get("ruler", ""))
-	names.add_child(HudStyle.label(ruler if ruler != "" else "Souverain inconnu", HudStyle.FONT_BODY, HudStyle.INK_SOFT))
+	names.add_child(_label(ruler if ruler != "" else "Souverain inconnu", UiType.BODY, HudStyle.INK_SOFT))
 	var line := "%s — attitude %+d" % [STATUS_LABELS.get(status, status), int(entry["attitude"])]
-	names.add_child(HudStyle.label(line, HudStyle.FONT_BODY, STATUS_COLORS.get(status, HudStyle.INK)))
+	names.add_child(_label(line, UiType.BODY, STATUS_COLORS.get(status, HudStyle.INK)))
 	top.add_child(names)
 	_head.add_child(top)
 	var facts := PackedStringArray()
@@ -758,7 +782,7 @@ func _render_detail() -> void:
 		facts.append("Sous notre embargo")
 	if bool(entry.get("embargo_on_us", false)):
 		facts.append("Nous impose un embargo")
-	var facts_label := HudStyle.label(" · ".join(facts), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+	var facts_label := _label(" · ".join(facts), UiType.CAPTION, HudStyle.INK_SOFT)
 	facts_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_head.add_child(facts_label)
 	_render_trade_routes(_head, _selected)
@@ -790,9 +814,9 @@ func _render_draft() -> void:
 		target.add_child(_article_row(index, article, value))
 	for list in [_offer_list, _demand_list]:
 		if list.get_child_count() == 0:
-			list.add_child(HudStyle.label("—", HudStyle.FONT_BODY, HudStyle.INK_FADED))
+			list.add_child(_label("—", UiType.BODY, HudStyle.INK_FADED))
 	if _clauses.get_child_count() == 0:
-		_clauses.add_child(HudStyle.label("Aucune clause commune.", HudStyle.FONT_SMALL, HudStyle.INK_FADED))
+		_clauses.add_child(_label("Aucune clause commune.", UiType.CAPTION, HudStyle.INK_FADED))
 	_render_chance()
 
 
@@ -800,7 +824,7 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 4)
 	var label_text := str(value.get("label", _fallback_label(article)))
-	var label := HudStyle.label(label_text, HudStyle.FONT_BODY, HudStyle.INK)
+	var label := _label(label_text, UiType.BODY, HudStyle.INK)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.custom_minimum_size = Vector2(120, 0)
@@ -814,7 +838,7 @@ func _article_row(index: int, article: Dictionary, value: Dictionary) -> Control
 	row.add_child(label)
 	if not value.is_empty():
 		var points := int(value.get("value", 0))
-		var points_label := HudStyle.label("%+d" % points, HudStyle.FONT_BODY, HudStyle.GOOD if points >= 0 else HudStyle.POOR)
+		var points_label := _label("%+d" % points, UiType.BODY, HudStyle.GOOD if points >= 0 else HudStyle.POOR)
 		points_label.tooltip_text = "Valeur pour eux"
 		points_label.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(points_label)
@@ -1111,7 +1135,7 @@ func _render_trade_routes(parent: Control, id: String) -> void:
 				Money.amount(int(route["total_value"])), ", ".join(goods)])
 	if lines.is_empty():
 		return
-	var label := HudStyle.label("Commerce — " + " · ".join(lines), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+	var label := _label("Commerce — " + " · ".join(lines), UiType.CAPTION, HudStyle.INK_SOFT)
 	label.name = "TradeRoutes"
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(label)
@@ -1150,13 +1174,13 @@ func _render_war(entry: Dictionary) -> void:
 		child.queue_free()
 	var status := str(entry["status"])
 	if str(entry.get("casus_belli", "")) != "":
-		_war_page.add_child(HudStyle.label("Casus belli : %s" % entry["casus_belli"], HudStyle.FONT_BODY, HudStyle.INK))
+		_war_page.add_child(_label("Casus belli : %s" % entry["casus_belli"], UiType.BODY, HudStyle.INK))
 	for claim in entry.get("claims", []):
-		var claim_label := HudStyle.label("Prétention : %s" % claim, HudStyle.FONT_BODY, HudStyle.INK_SOFT)
+		var claim_label := _label("Prétention : %s" % claim, UiType.BODY, HudStyle.INK_SOFT)
 		claim_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_war_page.add_child(claim_label)
 	if status != "war" or not sim.has_method("get_war_summary"):
-		_war_page.add_child(HudStyle.label("Pas de guerre en cours avec cette faction.", HudStyle.FONT_BODY, HudStyle.INK_FADED))
+		_war_page.add_child(_label("Pas de guerre en cours avec cette faction.", UiType.BODY, HudStyle.INK_FADED))
 		return
 	var summary: Dictionary = sim.call("get_war_summary", _selected)
 	var score := int(summary.get("war_score", 0))
@@ -1171,17 +1195,17 @@ func _render_war(entry: Dictionary) -> void:
 	fill.bg_color = HudStyle.GOOD if score >= 0 else HudStyle.POOR
 	bar.add_theme_stylebox_override("fill", fill)
 	_war_page.add_child(bar)
-	_war_page.add_child(HudStyle.label("Batailles, sièges et provinces occupées remplissent le score ; les buts de guerre tenus comptent double. Plus il est haut, plus l'ennemi cédera de terres.", HudStyle.FONT_SMALL, HudStyle.INK_FADED))
+	_war_page.add_child(_label("Batailles, sièges et provinces occupées remplissent le score ; les buts de guerre tenus comptent double. Plus il est haut, plus l'ennemi cédera de terres.", UiType.CAPTION, HudStyle.INK_FADED))
 	(_war_page.get_child(_war_page.get_child_count() - 1) as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_war_page.add_child(HudStyle.label("Fatigue de guerre : nous %d/100, eux %d/100" % [int(summary.get("weariness_ours", 0)), int(summary.get("weariness_theirs", 0))], HudStyle.FONT_BODY, HudStyle.INK))
+	_war_page.add_child(_label("Fatigue de guerre : nous %d/100, eux %d/100" % [int(summary.get("weariness_ours", 0)), int(summary.get("weariness_theirs", 0))], UiType.BODY, HudStyle.INK))
 	for pair in [["Nos buts de guerre", "goals_ours"], ["Leurs buts de guerre", "goals_theirs"]]:
-		_war_page.add_child(HudStyle.label(str(pair[0]), HudStyle.FONT_TITLE, HudStyle.RUBRIC))
+		_war_page.add_child(_label(str(pair[0]), UiType.HEADING, HudStyle.RUBRIC))
 		var goals: Array = summary.get(pair[1], [])
 		if goals.is_empty():
-			_war_page.add_child(HudStyle.label("—", HudStyle.FONT_BODY, HudStyle.INK_FADED))
+			_war_page.add_child(_label("—", UiType.BODY, HudStyle.INK_FADED))
 		for goal in goals:
 			var held := bool(goal.get("held", false))
-			_war_page.add_child(HudStyle.label("%s %s%s" % ["★" if held else "☆", goal["name"], " (tenue)" if held else ""], HudStyle.FONT_BODY, HudStyle.INK))
+			_war_page.add_child(_label("%s %s%s" % ["★" if held else "☆", goal["name"], " (tenue)" if held else ""], UiType.BODY, HudStyle.INK))
 
 
 func _render_history() -> void:
@@ -1195,13 +1219,13 @@ func _render_history() -> void:
 			continue
 		var accepted := bool(record.get("accepted", false))
 		var head := "%s — %s, %s" % [record.get("date", ""), record.get("with_name", ""), "signé" if accepted else "refusé"]
-		_history_page.add_child(HudStyle.label(head, HudStyle.FONT_BODY, HudStyle.INK if accepted else HudStyle.RUBRIC))
-		var body := HudStyle.label(str(record.get("text", "")), HudStyle.FONT_SMALL, HudStyle.INK_SOFT)
+		_history_page.add_child(_label(head, UiType.BODY, HudStyle.INK if accepted else HudStyle.RUBRIC))
+		var body := _label(str(record.get("text", "")), UiType.CAPTION, HudStyle.INK_SOFT)
 		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_history_page.add_child(body)
 		shown += 1
 	if shown == 0:
-		_history_page.add_child(HudStyle.label("Aucun traité avec cette faction.", HudStyle.FONT_BODY, HudStyle.INK_FADED))
+		_history_page.add_child(_label("Aucun traité avec cette faction.", UiType.BODY, HudStyle.INK_FADED))
 
 
 ## Captures et smoke : un brouillon de paix type (province exigée, or offert).
