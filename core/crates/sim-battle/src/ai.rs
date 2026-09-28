@@ -2717,6 +2717,26 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
             let u = &units[i];
             u.able() && !is_shooter(u) && !u.on_wall && works.inside(u.x, u.z)
         });
+    // T4: the melee regiments gather inside before they march on the square
+    // together (no regiment thrown alone at the garrison's last stand).
+    let assault = &crate::capture::CaptureRules::bundled().assault;
+    let melee: Vec<usize> = own
+        .iter()
+        .copied()
+        .filter(|&i| {
+            let u = &units[i];
+            u.able() && !is_shooter(u) && u.category != UnitCategory::Siege
+        })
+        .collect();
+    let melee_in = melee
+        .iter()
+        .filter(|&&i| units[i].on_wall || works.inside(units[i].x, units[i].z))
+        .count();
+    let committed = melee.iter().any(|&i| {
+        dist_to(&units[i], square.0, square.1) < assault.committed_radius_m
+    });
+    let gathered =
+        committed || melee_in as f64 >= assault.gather_share * melee.len() as f64 - 1e-9;
     for &i in &own {
         let unit = &units[i];
         if unit.category == UnitCategory::Siege || !view.free(i) || relief.contains(&i) {
@@ -2726,8 +2746,9 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
             let garrison = view.nearest_enemy(i, |e| {
                 !e.on_wall && e.state != UnitState::Routing && works.inside(e.x, e.z)
             });
+            let range = view.sim.effective_range(unit, square.0, square.1);
             match garrison {
-                Some((j, d)) if d < 200.0 => view.attack(i, j, false),
+                Some((j, d)) if d < range * 0.8 && view.reachable(i, j) => view.attack(i, j, false),
                 _ => view.move_to(i, square.0, square.1, false, None),
             }
             continue;
@@ -2760,7 +2781,21 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
         // (never wait at the ladders); enemies on the way are fought as they
         // come close.
         if unit.on_wall || works.inside(unit.x, unit.z) {
-            view.move_to(i, square.0, square.1, true, None);
+            let stage = (!gathered && !unit.on_wall)
+                .then(|| works.best_opening((unit.x, unit.z), square))
+                .flatten()
+                .map(|p| {
+                    // Clear of the gap, towards the square.
+                    let (mx, mz) = works.pieces[p].midpoint();
+                    let (dx, dz) = (square.0 - mx, square.1 - mz);
+                    let d = dx.hypot(dz).max(1.0);
+                    let k = (35.0 / d).min(0.5);
+                    (mx + dx * k, mz + dz * k)
+                });
+            match stage {
+                Some((x, z)) => view.move_to(i, x, z, false, None),
+                None => view.move_to(i, square.0, square.1, true, None),
+            }
             continue;
         }
         if storm {
