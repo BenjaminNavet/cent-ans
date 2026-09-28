@@ -1,0 +1,357 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/ai_feudal.schema.json",
+  "title": "Poids de l'IA féodale",
+  "description": "Fichier data/ai/feudal.json (lot FE5) : poids des décisions féodales de l'IA (protection, arbitrage, ost, commise, révolte, hommage, concession, titre exigé à la paix).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "protection": {
+      "type": "object",
+      "description": "Suzerain appelé à protéger un vassal attaqué (§ 4.3) : il intervient si le score atteint threshold.",
+      "properties": {
+        "base": {
+          "type": "integer",
+          "description": "Devoir et prestige en jeu."
+        },
+        "power_weight": {
+          "type": "integer",
+          "description": "Points par doublement du rapport de forces (suzerain et vassaux loyaux contre agresseur et alliés)."
+        },
+        "max_power_doublings": {
+          "type": "number",
+          "description": "Plafond de |log2(rapport)|.",
+          "minimum": 0
+        },
+        "attitude_divisor": {
+          "type": "integer",
+          "description": "Attitude envers le vassal, divisée par ce nombre.",
+          "minimum": 1
+        },
+        "loyalty_pivot": {
+          "type": "integer",
+          "description": "Loyauté du vassal au-dessus de ce pivot : pour ; en dessous : contre."
+        },
+        "loyalty_divisor": {
+          "type": "integer",
+          "description": "Écart de loyauté divisé par ce nombre.",
+          "minimum": 1
+        },
+        "empty_treasury": {
+          "type": "integer",
+          "description": "Trésor négatif."
+        },
+        "per_ongoing_war": {
+          "type": "integer",
+          "description": "Par guerre en cours."
+        },
+        "allied_with_aggressor": {
+          "type": "integer",
+          "description": "Allié de l'agresseur."
+        },
+        "aggression_weight": {
+          "type": "integer",
+          "description": "Tempérament : (agressivité − 50) × poids / 50."
+        },
+        "diplomacy_weight": {
+          "type": "integer",
+          "description": "Tempérament : (diplomatie − 50) × poids / 50 (parole tenue)."
+        },
+        "threshold": {
+          "type": "integer",
+          "description": "Seuil d'intervention."
+        },
+        "certainty_margin": {
+          "type": "integer",
+          "description": "Demi-largeur de la bande « incertain » affichée avant une guerre."
+        }
+      },
+      "required": [
+        "base",
+        "power_weight",
+        "max_power_doublings",
+        "attitude_divisor",
+        "loyalty_pivot",
+        "loyalty_divisor",
+        "empty_treasury",
+        "per_ongoing_war",
+        "allied_with_aggressor",
+        "aggression_weight",
+        "diplomacy_weight",
+        "threshold",
+        "certainty_margin"
+      ],
+      "additionalProperties": false
+    },
+    "arbitration": {
+      "type": "object",
+      "description": "Seigneur arbitrant la guerre privée de deux vassaux directs (§ 4.3.5).",
+      "properties": {
+        "take_side_attitude_gap": {
+          "type": "integer",
+          "description": "Écart d'attitude entre les parties pour prendre parti."
+        },
+        "aggression_weight": {
+          "type": "integer",
+          "description": "Tempérament : l'écart diminue de (agressivité − 50) × poids / 50."
+        },
+        "impose_peace_power_ratio": {
+          "type": "number",
+          "description": "Puissance du seigneur sur celle de l'agresseur pour imposer la paix.",
+          "minimum": 0
+        },
+        "max_wars_to_impose": {
+          "type": "integer",
+          "description": "Au-delà de ce nombre de guerres, il laisse faire."
+        }
+      },
+      "required": [
+        "take_side_attitude_gap",
+        "aggression_weight",
+        "impose_peace_power_ratio",
+        "max_wars_to_impose"
+      ],
+      "additionalProperties": false
+    },
+    "host": {
+      "type": "object",
+      "description": "Vassal direct convoqué à l'ost (§ 4.1) : il répond si le score atteint threshold.",
+      "properties": {
+        "loyalty_pivot": {
+          "type": "integer",
+          "description": "Loyauté au-dessus : pour ; en dessous : contre."
+        },
+        "loyalty_weight": {
+          "type": "integer",
+          "description": "Points par point de loyauté."
+        },
+        "fear_power_ratio": {
+          "type": "number",
+          "description": "Suzerain ce nombre de fois plus fort que le vassal : refuser serait une félonie trop risquée.",
+          "minimum": 0
+        },
+        "fear_bonus": {
+          "type": "integer",
+          "description": "Bonus de cette crainte."
+        },
+        "lost_cause_power_ratio": {
+          "type": "number",
+          "description": "Ennemi ce nombre de fois plus fort que le suzerain : cause perdue.",
+          "minimum": 0
+        },
+        "lost_cause": {
+          "type": "integer",
+          "description": "Malus de cause perdue."
+        },
+        "enemy_attitude_divisor": {
+          "type": "integer",
+          "description": "Attitude envers l'ennemi, divisée par ce nombre (retranchée).",
+          "minimum": 1
+        },
+        "allied_with_enemy": {
+          "type": "integer",
+          "description": "Allié de l'ennemi."
+        },
+        "aggression_weight": {
+          "type": "integer",
+          "description": "Tempérament : (agressivité − 50) × poids / 50."
+        },
+        "threshold": {
+          "type": "integer",
+          "description": "Seuil de réponse."
+        }
+      },
+      "required": [
+        "loyalty_pivot",
+        "loyalty_weight",
+        "fear_power_ratio",
+        "fear_bonus",
+        "lost_cause_power_ratio",
+        "lost_cause",
+        "enemy_attitude_divisor",
+        "allied_with_enemy",
+        "aggression_weight",
+        "threshold"
+      ],
+      "additionalProperties": false
+    },
+    "commise": {
+      "type": "object",
+      "description": "Suzerain prononçant la commise sur un cas de félonie ouvert (§ 4.4).",
+      "properties": {
+        "min_power_ratio": {
+          "type": "number",
+          "description": "Puissance du suzerain sur celle du félon, de ses alliés et de ses vassaux directs.",
+          "minimum": 0
+        },
+        "aggression_shift": {
+          "type": "number",
+          "description": "Tempérament : le rapport exigé est divisé par 1 + (agressivité − 50) / 50 × shift.",
+          "minimum": 0
+        },
+        "max_wars": {
+          "type": "integer",
+          "description": "Au-delà de ce nombre de guerres, il attend."
+        },
+        "min_treasury": {
+          "type": "integer",
+          "description": "Trésor minimal."
+        }
+      },
+      "required": [
+        "min_power_ratio",
+        "aggression_shift",
+        "max_wars",
+        "min_treasury"
+      ],
+      "additionalProperties": false
+    },
+    "revolt": {
+      "type": "object",
+      "description": "Vassal IA déloyal (sous rebellion_loyalty) qui se révolte (§ 4.2).",
+      "properties": {
+        "min_power_ratio": {
+          "type": "number",
+          "description": "Puissance du vassal et de ses alliés sur celle du suzerain.",
+          "minimum": 0
+        },
+        "chance_permille": {
+          "type": "integer",
+          "description": "Chance par tour (‰) quand les chances sont réunies.",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "aggression_permille": {
+          "type": "integer",
+          "description": "Tempérament : ‰ ajoutés par point d'agressivité au-dessus de 50."
+        }
+      },
+      "required": [
+        "min_power_ratio",
+        "chance_permille",
+        "aggression_permille"
+      ],
+      "additionalProperties": false
+    },
+    "allegiance": {
+      "type": "object",
+      "description": "Vassal déloyal (sous disloyal_threshold) ou comté souverain menacé qui prête hommage à un autre seigneur (§ 4.2).",
+      "properties": {
+        "min_attitude": {
+          "type": "integer",
+          "description": "Attitude minimale envers le nouveau seigneur."
+        },
+        "min_power_ratio": {
+          "type": "number",
+          "description": "Puissance du nouveau seigneur sur celle du suzerain actuel.",
+          "minimum": 0
+        },
+        "chance_permille": {
+          "type": "integer",
+          "description": "Chance par tour (‰).",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "min_attitude",
+        "min_power_ratio",
+        "chance_permille"
+      ],
+      "additionalProperties": false
+    },
+    "grant": {
+      "type": "object",
+      "description": "Seigneur concédant un titre surnuméraire à un vassal direct loyal (§ 4.4).",
+      "properties": {
+        "max_kept_titles": {
+          "type": "integer",
+          "description": "Titres gardés en plus du titre principal."
+        },
+        "min_vassal_loyalty": {
+          "type": "integer",
+          "description": "Loyauté minimale du vassal récompensé."
+        },
+        "period_turns": {
+          "type": "integer",
+          "description": "Tours entre deux concessions d'un même seigneur.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "max_kept_titles",
+        "min_vassal_loyalty",
+        "period_turns"
+      ],
+      "additionalProperties": false
+    },
+    "demand_title": {
+      "type": "object",
+      "description": "Vainqueur exigeant un titre à la paix (§ 4.6, article demand_title).",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Active la demande."
+        },
+        "min_controlled_percent": {
+          "type": "integer",
+          "description": "Part (%) des provinces propres du titre tenues par le vainqueur."
+        }
+      },
+      "required": [
+        "enabled",
+        "min_controlled_percent"
+      ],
+      "additionalProperties": false
+    },
+    "foreign_alliance": {
+      "type": "object",
+      "description": "Alliance d'un vassal hors de son suzerain (ADR 0110).",
+      "properties": {
+        "allowed": {
+          "type": "boolean",
+          "description": "Un vassal dont le suzerain n'est ni l'ennemi ni l'allié du prétendant peut être courtisé ; s'allier à l'ennemi de son suzerain reste une félonie."
+        }
+      },
+      "required": [
+        "allowed"
+      ],
+      "additionalProperties": false
+    },
+    "light_evaluation": {
+      "type": "object",
+      "description": "Évaluation allégée (spec § 5, repli de performance).",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Active le repli."
+        },
+        "period": {
+          "type": "integer",
+          "description": "Les factions sans armée ni guerre ne planifient leurs décisions féodales qu'un tour sur period.",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "enabled",
+        "period"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "protection",
+    "arbitration",
+    "host",
+    "commise",
+    "revolt",
+    "allegiance",
+    "grant",
+    "demand_title",
+    "foreign_alliance",
+    "light_evaluation"
+  ],
+  "additionalProperties": false
+}
