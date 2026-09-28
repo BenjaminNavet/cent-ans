@@ -23,6 +23,7 @@ func setup(campaign_map: Node) -> void:
 	map.ui.add_child(panel)
 	panel.order_requested.connect(_on_order_requested)
 	panel.offer_answered.connect(_on_offer_answered)
+	panel.arbitration_requested.connect(_on_arbitration_requested)
 	var court_button: Button = map.ui.court_button
 	button = Button.new()
 	button.text = "Diplomatie"
@@ -109,4 +110,14 @@ func _on_offer_answered(offer_id: int, accept: bool) -> void:
 		map.ui.show_toast("Proposition acceptée." if accept else "Proposition repoussée.")
 	else:
 		map.ui.show_toast(str(result.get("error", "Réponse impossible")), true)
+	map.refresh_all()
+
+
+## FE6 : verdict du joueur sur une guerre privée entre deux de ses vassaux.
+func _on_arbitration_requested(offer_id: int, verdict: String, side: String) -> void:
+	var result: Dictionary = map.sim.call("feudal_arbitrate", offer_id, verdict, side)
+	if result.get("ok", false):
+		map.ui.show_toast("Arbitrage rendu.")
+	else:
+		map.ui.show_toast(str(result.get("error", "Arbitrage impossible")), true)
 	map.refresh_all()
