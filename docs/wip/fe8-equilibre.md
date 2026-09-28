@@ -80,8 +80,8 @@ monétaire) ; plancher c7a 15 000 → 20 000 (note à l'ADR 0113).
 ### Avant / après (moyennes, 10 graines)
 | mesure | avant (639b7e49) | après |
 |---|---|---|
-| commise de Guyenne | 0/10 | 10/10, au tour 1 (mai 1337), avant toute autre guerre FR-EN |
-| commises prononcées / exécutées (toutes) | 2,9 / 0,5 | 28,7 / 7,9 |
+| commise de Guyenne | 0/10 | 10/10, au tour 1 (mai 1337) ; la guerre FR-EN est ouverte par les relations du scénario dès le tour 0, la commise lui donne son motif féodal le premier tour |
+| commises prononcées / exécutées (toutes) | 2,5 / 0,5 | 28,7 / 7,9 |
 | ost impérial contre la France (réponses, siècle) | 71 | 16 |
 | Italiens en guerre contre la France (tours × fac., t ≤ 50) | 80 | 30 |
 | Empire allié à un vassal direct (tours) | 464 | 0 |
