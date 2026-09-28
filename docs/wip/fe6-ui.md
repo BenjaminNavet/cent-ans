@@ -15,10 +15,14 @@ Spec FE § 6 (et § 4) ; plan section F6 ; ADR 0098. `CARGO_TARGET_DIR=core/targ
       (obligations, objectifs), fil d'Ariane de la province, panneau « Arbre féodal »
       (`FeudalController`, SIDE_PANEL), guide de 3 étapes (`feudal_tutorial/done`), Codex
       `cdx_vassalite`, choix de faction sur carte (`FactionMapPicker`, onglet du choix de faction).
-- [ ] Tests : `fe_ui_test.gd`, `smoke.gd`, `fe_shot.gd`.
+- [x] Tests : `fe_ui_test.gd` (OK), `smoke.gd` étendu (`_run_feudal`, cartes recommandées, carte
+      des factions ; OK), `fe_shot.gd` (4 vues dans `docs/img/fe6/`, non relues : vérification
+      visuelle par l'orchestrateur).
+- Accès à l'arbre : Menu → « Arbre féodal », bouton « Arbre féodal… » du panneau de faction, fil
+  d'Ariane de la province. Pas de bouton dans la barre du haut : elle déborde en 1280 px (smoke).
 
 ## Prochaine étape
-Tests headless (`fe_ui_test.gd`), smoke, captures `fe_shot.gd`.
+Suite Rust complète (fmt, clippy, test), puis revue et fusion par l'orchestrateur.
 
 ## Points ouverts
 - Bretagne, Flandre, Navarre (départs recommandés de la spec) ne sont pas jouables dans les données
