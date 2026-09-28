@@ -1,0 +1,55 @@
+{
+  "id": "fac_berg",
+  "name": {
+    "display": "Comté de Berg",
+    "local": "Grafschaft Berg",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Berg",
+  "adjective": "bergeois",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_adolf_vii_von_berg",
+  "capital": "prov_berg",
+  "capital_city": "Düsseldorf",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_berg",
+  "heraldry": {
+    "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or, semé de cœurs de gueules.",
+    "description": "Armes historiques des comtes de Berg : lion de gueules semé de petits cœurs sur champ d'argent.",
+    "primary_color": "#E5E5E5",
+    "secondary_color": "#C8102E"
+  },
+  "titles": [
+    "Comte de Berg"
+  ],
+  "treasury": 5500,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Adolphe VII rend hommage à l'empereur pour son comté rhénan."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 50
+  },
+  "description": "Comté de Berg, rive droite du Rhin face à Cologne, tenu par Adolphe VII (1308-1348), qui fait de Düsseldorf sa résidence favorite.",
+  "sources": [
+    "Adolphe VII de Berg",
+    "Comté de Berg",
+    "Düsseldorf"
+  ]
+}

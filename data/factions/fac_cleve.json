@@ -1,0 +1,54 @@
+{
+  "id": "fac_cleve",
+  "name": {
+    "display": "Comté de Clèves",
+    "local": "Grafschaft Kleve",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Clèves",
+  "adjective": "clévois",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_dietrich_ix_von_kleve",
+  "capital": "prov_cleve",
+  "capital_city": "Clèves",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_cleve",
+  "heraldry": {
+    "blazon": "De gueules à l'écusson d'argent.",
+    "description": "Armes historiques des comtes de Clèves : écu d'argent en abîme sur champ de gueules.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#E5E5E5"
+  },
+  "titles": [
+    "Comte de Clèves"
+  ],
+  "treasury": 5000,
+  "prestige": 28,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Comté du Bas-Rhin rendant hommage à l'empereur."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 50,
+    "trade": 50,
+    "piety": 45
+  },
+  "description": "Comté de Clèves, le long du Bas-Rhin à la frontière de la Gueldre, tenu par la maison de Clèves ; numérotation et dates de règne du comte de 1337 incertaines dans les sources consultées.",
+  "sources": [
+    "Dietrich IX de Clèves",
+    "Comté de Clèves"
+  ]
+}

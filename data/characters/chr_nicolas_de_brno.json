@@ -1,0 +1,46 @@
+{
+  "id": "chr_nicolas_de_brno",
+  "name": {
+    "display": "Nicolas de Brno",
+    "local": "Mikuláš z Brna",
+    "local_language": "tchèque"
+  },
+  "sex": "male",
+  "house": "Brno",
+  "faction": "fac_trent",
+  "role": "ruler",
+  "birth": {
+    "value": "1280",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1347",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince-évêque de Trente",
+      "from": {
+        "value": "1338",
+        "uncertain": true
+      },
+      "note": "Titulature attestée surtout à partir de 1338 ; retenu par approximation comme évêque en 1337, prédécesseur incertain faute de source vérifiée à ce budget."
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 65,
+  "starting_location": "prov_trent",
+  "status": "at_court",
+  "description": "Évêque de Trente, moine dominicain d'origine morave. Sa nomination est mieux attestée à partir de 1338 : retenu ici en 1337 par simplification, faute de confirmation précise du titulaire exact à cette date exacte.",
+  "sources": [
+    "Nicolas de Brno"
+  ]
+}

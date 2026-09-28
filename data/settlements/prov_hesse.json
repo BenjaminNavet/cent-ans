@@ -1,0 +1,111 @@
+[
+  {
+    "id": "set_kassel",
+    "province": "prov_hesse",
+    "kind": "city",
+    "name": {
+      "display": "Cassel",
+      "local": "Kassel",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.4797,
+      51.3127
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Résidence des landgraves de Hesse depuis 1277, capitale montante du landgraviat sur la Fulda.",
+    "sources": [
+      "Kassel",
+      "Landgraviat de Hesse"
+    ]
+  },
+  {
+    "id": "set_marburg",
+    "province": "prov_hesse",
+    "kind": "town",
+    "name": {
+      "display": "Marbourg",
+      "local": "Marburg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.7667,
+      50.806
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Ancienne résidence des landgraves (Landgrafenschloss) et commanderie de l'ordre Teutonique fondée en 1234 autour de l'église Sainte-Élisabeth, haut lieu de pèlerinage de Hesse.",
+    "sources": [
+      "Marbourg",
+      "Ordre Teutonique"
+    ]
+  },
+  {
+    "id": "set_giessen",
+    "province": "prov_hesse",
+    "kind": "town",
+    "name": {
+      "display": "Gießen",
+      "local": "Giezen",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      8.6725,
+      50.5842
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville forte du landgraviat de Hesse, fondée autour d'un château fort par les landgraves à la fin du XIIe siècle.",
+    "sources": [
+      "Gießen",
+      "Landgraviat de Hesse"
+    ]
+  },
+  {
+    "id": "set_gudensberg",
+    "province": "prov_hesse",
+    "kind": "castle",
+    "name": {
+      "display": "Gudensberg",
+      "local": "Gudensberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      9.3667,
+      51.1667
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ancien siège des comtes de Hesse, berceau du landgraviat sur le Mons Iovis, à mi-chemin entre Cassel et Marbourg.",
+    "sources": [
+      "Gudensberg"
+    ]
+  }
+]

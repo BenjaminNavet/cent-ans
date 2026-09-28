@@ -1,0 +1,106 @@
+[
+  {
+    "id": "set_bamberg",
+    "province": "prov_bamberg",
+    "kind": "city",
+    "name": {
+      "display": "Bamberg",
+      "local": "Bamberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.888,
+      49.8988
+    ],
+    "weight": 26,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_collegiate_church",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Siège de la principauté épiscopale de Bamberg, fondée par l'empereur Henri II en 1007, sur les sept collines de la Regnitz.",
+    "sources": [
+      "Bamberg",
+      "Évêché de Bamberg"
+    ]
+  },
+  {
+    "id": "set_forchheim",
+    "province": "prov_bamberg",
+    "kind": "town",
+    "name": {
+      "display": "Forchheim",
+      "local": "Vorchheim",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.0592,
+      49.7186
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ancien palais royal carolingien, place forte méridionale de l'évêché de Bamberg face à Nuremberg.",
+    "sources": [
+      "Forchheim"
+    ]
+  },
+  {
+    "id": "set_altenburg_bamberg",
+    "province": "prov_bamberg",
+    "kind": "castle",
+    "name": {
+      "display": "Altenburg",
+      "local": "Altenburc",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      10.8836,
+      49.8814
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château dominant Bamberg, ancienne résidence des évêques avant leur installation dans la ville basse.",
+    "sources": [
+      "Altenburg (Bamberg)"
+    ]
+  },
+  {
+    "id": "set_banz",
+    "province": "prov_bamberg",
+    "kind": "abbey",
+    "name": {
+      "display": "Banz",
+      "local": "Banz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      11.0011,
+      50.0839
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye bénédictine fondée en 1069, dominant la vallée du Main au nord de l'évêché.",
+    "sources": [
+      "Abbaye de Banz"
+    ]
+  }
+]

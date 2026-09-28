@@ -1,9 +1,9 @@
 {
   "id": "prov_lower_saxony",
   "name": {
-    "display": "Basse-Saxe",
-    "local": "Sachsen",
-    "local_language": "moyen haut-allemand"
+    "display": "Archevêché de Brême",
+    "local": "Bremen",
+    "local_language": "moyen bas-allemand"
   },
   "region": "empire_nord",
   "terrain": "plains",
@@ -12,8 +12,7 @@
   "rivers": [
     "Weser",
     "Leine",
-    "Aller",
-    "Elbe"
+    "Aller"
   ],
   "coastal": true,
   "ports": [
@@ -25,59 +24,58 @@
   "resources": [
     "res_wheat",
     "res_wool",
-    "res_salt",
-    "res_wood"
+    "res_salt"
   ],
   "capital_city": {
     "name": {
-      "display": "Brunswick",
-      "local": "Brunswik",
-      "local_language": "moyen haut-allemand"
+      "display": "Brême",
+      "local": "Bremen",
+      "local_language": "moyen bas-allemand"
     },
-    "lat": 52.2689,
-    "lon": 10.5268
+    "lat": 53.0793,
+    "lon": 8.8017
   },
   "geo": {
     "capital_lonlat": [
-      10.5268,
-      52.2689
+      8.8017,
+      53.0793
     ],
     "seed_lonlat": [
-      9.9,
-      52.5
+      8.9,
+      53.1
     ],
-    "voronoi_weight": 1.5
+    "voronoi_weight": 1.0
   },
-  "owner": "fac_empire",
+  "owner": "fac_bremen",
   "culture": "cul_german",
   "religion": "rel_catholic",
   "population": {
     "uncertain": true,
-    "note": "Brunswick compte environ 12 000 habitants, Brême 12 000.",
+    "note": "Brême compte environ 12 000 habitants ; population indépendante de l'ancienne province combinée Brunswick-Brême (léger surcomptage assumé, cf. note FE4a). Hildesheim (évêché) et Goslar (ville libre) restent groupées ici par simplification cartographique.",
     "classes": {
       "peasants": {
-        "count": 351121,
+        "count": 160000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 54600,
+        "count": 22000,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 10500,
+        "count": 5500,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 3779,
+        "count": 1500,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
@@ -87,19 +85,16 @@
   },
   "buildings": [
     "bld_market",
-    "bld_windmill",
     "bld_port",
-    "bld_cathedral",
+    "bld_collegiate_church",
     "bld_stone_walls",
-    "bld_muster_field",
-    "bld_stables"
+    "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 5500,
-  "description": "Duchés de Brunswick-Lunebourg (Welfs), archevêché de Brême, évêché de Hildesheim ; Brunswick et Lunebourg (salines) sont villes hanséatiques.",
+  "base_supply": 3800,
+  "description": "Archevêché de Brême, principauté ecclésiastique tenue par Burchard Grelle ; évêché de Hildesheim et ville libre de Goslar restent regroupés dans cette même province par simplification.",
   "sources": [
-    "Duché de Brunswick-Lunebourg",
     "Brême",
-    "Lunebourg"
+    "Burchard Grelle"
   ]
 }

@@ -1,0 +1,42 @@
+{
+  "id": "chr_dietrich_ix_von_kleve",
+  "name": {
+    "display": "Thierry IX de Clèves",
+    "local": "Dietrich IX. von Kleve",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Clèves",
+  "faction": "fac_cleve",
+  "role": "ruler",
+  "birth": {
+    "value": "1291",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1347",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Clèves"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_cautious"
+  ],
+  "piety": 45,
+  "starting_location": "prov_cleve",
+  "status": "at_court",
+  "description": "Comte de Clèves ; numérotation et dates de règne incertaines dans les sources consultées, qui distinguent mal plusieurs comtes homonymes Thierry (Dietrich) de Clèves au tournant du XIVe siècle. Situé ici vers 1310-1347 par recoupement.",
+  "sources": [
+    "Dietrich IX de Clèves",
+    "Comté de Clèves"
+  ]
+}

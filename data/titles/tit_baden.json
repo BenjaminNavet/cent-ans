@@ -1,0 +1,32 @@
+{
+  "id": "tit_baden",
+  "rank": "county",
+  "name": {
+    "display": "Margraviat de Bade",
+    "local": "Markgrafschaft Baden",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'or à la bande de gueules.",
+    "description": "Armes historiques des margraves de Bade (branche de Zähringen), attestées depuis le XIIIe siècle.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#C8102E"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_baden"
+  ],
+  "holder_1337": {
+    "faction": "fac_baden",
+    "uncertain": true,
+    "sources": [
+      "Margraviat de Bade",
+      "Rodolphe Hesso de Bade"
+    ]
+  },
+  "description": "Margraviat de Bade, réellement partagé en 1337 entre plusieurs branches cousines ; représenté ici par la branche aînée de Baden-Baden pour simplifier l'arbre féodal.",
+  "sources": [
+    "Margraviat de Bade",
+    "Rodolphe Hesso de Bade"
+  ]
+}

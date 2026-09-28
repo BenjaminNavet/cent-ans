@@ -1,0 +1,92 @@
+{
+  "id": "prov_julich",
+  "name": {
+    "display": "Juliers",
+    "local": "Jülich",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "empire_rhin",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Roer",
+    "Rhin"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Jülich",
+      "local": "Gulik",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 50.9231,
+    "lon": 6.3639
+  },
+  "geo": {
+    "capital_lonlat": [
+      6.3639,
+      50.9231
+    ],
+    "seed_lonlat": [
+      6.4,
+      50.9
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_julich",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Petit duché rhénan ; population estimée par comparaison avec des territoires voisins de taille similaire.",
+    "classes": {
+      "peasants": {
+        "count": 58000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1600,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 700,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "Comté de Juliers, élevé en duché par l'empereur Louis IV de Bavière en 1336 pour Guillaume V, pilier rhénan de la coalition anglo-impériale contre la France.",
+  "sources": [
+    "Guillaume Ier de Juliers",
+    "Duché de Juliers"
+  ]
+}

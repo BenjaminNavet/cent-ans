@@ -1,0 +1,54 @@
+{
+  "id": "fac_wurzburg",
+  "name": {
+    "display": "Évêché de Wurtzbourg",
+    "local": "Bistum Würzburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Wurtzbourg",
+  "adjective": "wurtzbourgeois",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_otto_von_wolfskeel",
+  "capital": "prov_franconia",
+  "capital_city": "Wurtzbourg",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_wurzburg",
+  "heraldry": {
+    "blazon": "D'argent à la fasce de gueules (rastel de Franconie).",
+    "description": "« Rastel de Franconie » : armes ducales portées par les princes-évêques de Wurtzbourg en tant que ducs de Franconie.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Prince-évêque de Wurtzbourg",
+    "Duc de Franconie"
+  ],
+  "treasury": 6000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 60,
+    "trade": 55,
+    "piety": 75
+  },
+  "description": "Principauté épiscopale de Wurtzbourg sur le Main ; ses évêques portent depuis 1168 le titre de duc de Franconie et gouvernent un vaste vignoble. Otto von Wolfskeel, évêque de 1333 à 1345.",
+  "sources": [
+    "Otto von Wolfskeel",
+    "Évêché de Wurtzbourg"
+  ]
+}

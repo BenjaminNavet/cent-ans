@@ -1,0 +1,90 @@
+{
+  "id": "prov_cleve",
+  "name": {
+    "display": "Clèves",
+    "local": "Kleve",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "empire_nord",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Rhin"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Clèves",
+      "local": "Kleve",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 51.7876,
+    "lon": 6.1381
+  },
+  "geo": {
+    "capital_lonlat": [
+      6.1381,
+      51.7876
+    ],
+    "seed_lonlat": [
+      6.1,
+      51.8
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_cleve",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Comté du Bas-Rhin frontalier de la Gueldre ; population estimée par comparaison avec des territoires voisins de taille similaire.",
+    "classes": {
+      "peasants": {
+        "count": 55000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 650,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1650,
+  "description": "Comté de Clèves, le long du Bas-Rhin à la frontière de la Gueldre, tenu par la maison de Clèves.",
+  "sources": [
+    "Dietrich IX de Clèves",
+    "Comté de Clèves"
+  ]
+}

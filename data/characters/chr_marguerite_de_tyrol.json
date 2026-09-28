@@ -1,0 +1,49 @@
+{
+  "id": "chr_marguerite_de_tyrol",
+  "name": {
+    "display": "Marguerite de Tyrol",
+    "local": "Margarete von Tirol",
+    "local_language": "moyen haut-allemand"
+  },
+  "epithet": "Maultasch",
+  "sex": "female",
+  "house": "Görz-Tyrol",
+  "faction": "fac_tirol",
+  "role": "consort",
+  "birth": {
+    "value": "1318-09-16"
+  },
+  "death": {
+    "value": "1369-10-03"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comtesse de Tyrol",
+      "from": {
+        "value": "1335"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_cunning"
+  ],
+  "piety": 45,
+  "family": {
+    "spouses": [
+      "chr_jean_henri_de_luxembourg"
+    ]
+  },
+  "starting_location": "prov_tirol",
+  "status": "at_court",
+  "description": "Comtesse de Tyrol en titre depuis 1335, héritière de la maison de Görz-Tyrol ; mariée en 1330 à Jean-Henri de Luxembourg, elle le répudiera en 1341 (hors de la portée de ce lot) pour épouser Louis de Brandebourg, fils de l'empereur.",
+  "sources": [
+    "Marguerite de Tyrol"
+  ]
+}

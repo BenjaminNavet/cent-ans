@@ -1,0 +1,42 @@
+{
+  "id": "tit_berg",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Berg",
+    "local": "Grafschaft Berg",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or, semé de cœurs de gueules.",
+    "description": "Armes historiques des comtes de Berg : lion de gueules semé de petits cœurs (coeurs de nénuphar) sur champ d'argent.",
+    "primary_color": "#E5E5E5",
+    "secondary_color": "#C8102E"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_berg"
+  ],
+  "holder_1337": {
+    "faction": "fac_berg",
+    "sources": [
+      "Adolphe VII de Berg",
+      "Comté de Berg"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_berg_hold",
+      "title": "Garder le comté",
+      "description": "La maison de Berg doit conserver son comté rhénan.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_berg"
+      }
+    }
+  ],
+  "description": "Comté de Berg, rive droite du Rhin face à Cologne, tenu par Adolphe VII (1308-1348).",
+  "sources": [
+    "Adolphe VII de Berg",
+    "Comté de Berg"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "chr_adolf_vii_von_berg",
+  "name": {
+    "display": "Adolphe VII de Berg",
+    "local": "Adolf VII. von Berg",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Berg",
+  "faction": "fac_berg",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1348"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Berg"
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious",
+    "trait_cautious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_berg",
+  "status": "at_court",
+  "description": "Comte de Berg de 1308 à 1348, il fait de Düsseldorf, élevée au rang de ville en 1288, sa résidence principale sur le Rhin.",
+  "sources": [
+    "Adolphe VII de Berg",
+    "Comté de Berg",
+    "Düsseldorf"
+  ]
+}
