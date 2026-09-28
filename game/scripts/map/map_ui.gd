@@ -303,13 +303,13 @@ func set_faction(label: String, color: Color) -> void:
 ## (calculé par `core/`, `net_income`) ; infobulle : rubriques signées du budget et écart « par
 ## rapport à la saison passée » (lot U3). Sans économie, repli sur `income` (revenu brut).
 func set_treasury(treasury: int, income: int, economy: Dictionary = {}) -> void:
-	treasury_label.text = "Trésor : %s" % Money.amount(treasury)
+	_set_top_text(treasury_label, "Trésor : %s" % Money.amount(treasury), Money.amount(treasury))
 	if economy.is_empty():
-		income_label.text = "Revenu : %s" % Money.signed(income)
+		_set_top_text(income_label, "Revenu : %s" % Money.signed(income), Money.signed(income))
 		RichTooltip.attach_plain(income_label, "income_gross_last_turn")
 		return
 	var net := int(economy.get("net_income", 0))
-	income_label.text = "Solde : %s / saison" % Money.signed(net)
+	_set_top_text(income_label, "Solde : %s / saison" % Money.signed(net), Money.signed(net))
 	income_label.add_theme_color_override("font_color", Money.LOSS_COLOR if net < 0 else Money.INK_COLOR)
 	income_label.tooltip_text = budget_tooltip(economy)
 	treasury_label.tooltip_text = RichTooltip.hud("hud_treasury", treasury_tooltip(economy))
@@ -367,7 +367,7 @@ static func _signed(value: int) -> String:
 
 
 func set_date(text: String) -> void:
-	date_label.text = text
+	_set_top_text(date_label, text, text.get_slice(" — ", 0))
 	var season := RichTooltip.season_of(text)
 	if _season_icon != null and season != "":
 		_season_icon.texture = IconLibrary.get_icon("hud_season_" + season)
@@ -1395,6 +1395,12 @@ const TOP_BAR_SLACK := 4.0
 ## Boutons libellés : `{button, label, glyph, labelled}`.
 var _top_labels: Array[Dictionary] = []
 var _fit_queued := false
+## Q6 : barre compacte (écran étroit, grande taille d'interface) : libellés courts du trésor, du
+## solde et de la date (le détail reste en infobulle), nom de faction masqué, recherche étroite.
+var _top_compact := false
+var _top_texts: Dictionary = {}  # Label → [texte complet, texte compact]
+const RESEARCH_WIDTH := 160.0
+const RESEARCH_WIDTH_COMPACT := 90.0
 
 
 ## Inscrit `button` dans la barre adaptative : `label` quand la place le permet, sinon l'icône
@@ -1502,12 +1508,30 @@ func fit_top_bar() -> void:
 	var available := get_viewport().get_visible_rect().size.x
 	for entry in _top_labels:
 		_apply_top_label(entry, true)
+	_set_top_compact(false)
 	for label in TOP_COLLAPSE_ORDER:
 		if _top_bar_width() <= available - TOP_BAR_SLACK:
 			break
 		for entry in _top_labels:
 			if str(entry["label"]) == label:
 				_apply_top_label(entry, false)
+	if _top_bar_width() > available - TOP_BAR_SLACK:
+		_set_top_compact(true)
+
+
+func _set_top_text(label: Label, full: String, compact: String) -> void:
+	_top_texts[label] = [full, compact]
+	label.text = compact if _top_compact else full
+
+
+func _set_top_compact(compact: bool) -> void:
+	_top_compact = compact
+	for label: Label in _top_texts:
+		label.text = str(_top_texts[label][1 if compact else 0])
+	faction_label.visible = not compact
+	research_box.custom_minimum_size.x = RESEARCH_WIDTH_COMPACT if compact else RESEARCH_WIDTH
+	research_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	research_label.clip_text = true
 
 
 ## Largeur minimale de la barre (contenu et marges), calculée sur les enfants visibles.
