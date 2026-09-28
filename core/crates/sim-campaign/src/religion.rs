@@ -27,6 +27,9 @@ pub enum FaithRelation {
     Same,
     /// Two Catholic obediences during the Schism.
     RivalObedience,
+    /// OM3: separated churches (`kindred` in `data/religions`), e.g.
+    /// Orthodox and Catholics: schismatics, not infidels.
+    Kindred,
     Different,
 }
 
@@ -58,15 +61,33 @@ pub fn religions_relation(data: &GameData, a: &ReligionId, b: &ReligionId) -> Fa
     if a == b {
         return FaithRelation::Same;
     }
-    match (orthodox_root(data, a), orthodox_root(data, b)) {
-        (Some(ra), Some(rb)) if ra == rb => FaithRelation::RivalObedience,
-        _ => FaithRelation::Different,
+    let (root_a, root_b) = (orthodox_root(data, a), orthodox_root(data, b));
+    if let (Some(ra), Some(rb)) = (&root_a, &root_b) {
+        if ra == rb {
+            return FaithRelation::RivalObedience;
+        }
+    }
+    let family_a = root_a.unwrap_or_else(|| a.clone());
+    let family_b = root_b.unwrap_or_else(|| b.clone());
+    let lists = |of: &ReligionId, other: &ReligionId| {
+        data.religions
+            .get(of)
+            .is_some_and(|r| r.kindred.contains(other))
+    };
+    if lists(&family_a, &family_b) || lists(&family_b, &family_a) {
+        FaithRelation::Kindred
+    } else {
+        FaithRelation::Different
     }
 }
 
-/// `true` when `a` and `b` belong to the same faith (obediences included).
+/// `true` when `a` and `b` belong to the same faith (obediences included,
+/// kindred churches not).
 pub fn same_faith(data: &GameData, a: &ReligionId, b: &ReligionId) -> bool {
-    religions_relation(data, a, b) != FaithRelation::Different
+    matches!(
+        religions_relation(data, a, b),
+        FaithRelation::Same | FaithRelation::RivalObedience
+    )
 }
 
 pub fn faith_relation(
