@@ -76,6 +76,7 @@ var victory: VictoryController = null  # M10
 var help: HelpController = null  # M10
 var _tech_open: bool = false  # M6
 var chronicle: ChronicleController = null  # M10
+var capture_fate: CaptureController = null  # TW2-T1 : sort de la place prise
 var encounters: EncounterController = null  # CV3-4 : sites et fenêtre des rencontres
 var outcome_notice: OutcomeNotice = null  # CV3-4 : classe du résultat d'une bataille automatique
 var hud: HudController = null  # F10b : bandeau d'ost, sceau, cloche et alertes, lettres
@@ -219,6 +220,9 @@ func _ready() -> void:
 	chronicle = ChronicleController.new()
 	add_child(chronicle)
 	chronicle.setup(self)
+	capture_fate = CaptureController.new()  # TW2-T1
+	add_child(capture_fate)
+	capture_fate.setup(self)
 	encounters = EncounterController.new()  # CV3-4
 	add_child(encounters)
 	encounters.setup(self)
@@ -438,6 +442,8 @@ func refresh_all() -> void:
 		diplomacy.refresh()
 	if chronicle != null:  # M10
 		chronicle.refresh()
+	if capture_fate != null:  # TW2-T1
+		capture_fate.refresh()
 	_refresh_research()  # M6
 	_tech_open = _tech_open and ui.tech_panel_visible()
 	if _tech_open:
@@ -1090,6 +1096,8 @@ func _on_end_turn(threaded: bool = false) -> void:
 		victory.after_end_turn()
 	if chronicle != null:  # M10
 		chronicle.after_end_turn()
+	if capture_fate != null:  # TW2-T1
+		capture_fate.after_end_turn()
 	for event in events:
 		if str(event.get("kind", "")) == "battle" and ui.keeps_news(event):  # U5 : filtre d'intérêt
 			ui.show_toast(str(event.get("text_fr", "Bataille")))

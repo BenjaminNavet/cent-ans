@@ -749,3 +749,25 @@ pub(crate) fn resolve_unanswered(state: &mut CampaignState) {
     let turn = state.turn;
     state.captures.ruins.retain(|_, until| *until > turn);
 }
+
+/// Tests and headless UI checks only: `faction` takes `settlement` at once
+/// through the common capture path (the garrison is dismissed). Refused
+/// when the faction already controls the place.
+pub fn debug_capture(
+    state: &mut CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    faction: &FactionId,
+) -> bool {
+    if state
+        .settlements
+        .get(settlement)
+        .is_none_or(|s| &s.controller == faction)
+    {
+        return false;
+    }
+    let mut events = Vec::new();
+    crate::siege::capture(state, data, settlement, faction, &mut events);
+    state.pending_events.extend(events);
+    true
+}
