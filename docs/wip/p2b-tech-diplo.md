@@ -60,9 +60,22 @@ scènes vers `UiLayout`, `UiType`, `UiMotion` (ADR 0097, bible DA § 12). Branch
   `02-diplomatie.jpg`), même méthode que `po3_shot.gd`/`po4_shot.gd`/`cb2_modes_shot.gd`
   (processus fenêtré, capture manuelle du viewport, pas `--screenshot` : il faut ouvrir l'écran
   avant la capture, ce que l'engine ne permet pas de séquencer).
-- [ ] `godot --headless --path game --import` en cours (machine très chargée, plusieurs agents en
-  parallèle) — puis lancer `p2b_ui_test.gd`, `smoke.gd`, `p2b_shot.gd`, `git merge main`, commit
-  final.
+- [x] Import, `p2b_ui_test.gd` (C1/C2/C3 OK), `smoke.gd` (0 échec) — commit `728c4075`.
+- [x] Captures `docs/img/po/p2b/01-technologies.jpg`, `02-diplomatie.jpg` — commit `87fa56e2`.
+- [x] `git merge main` (`5a2c7e68`, propre, sans conflit) : `main` a avancé jusqu'à `90cc1973`
+  (fusion des titres féodaux TW2/RS après mon point de départ). Réimport fait.
+- [ ] **Bloqué pour la vérification finale, pas pour le code du lot** : après la fusion,
+  `game/bin/libcent_ans.debug.dylib` recopié depuis `/Users/jean_hubert/dev/game_project/game/bin/`
+  (règle du lot) est **périmé par rapport à `main` lui-même** — construit 28/09 01:48, avant le
+  commit de données `data/factions/fac_aragon.json` (28/09 07:20, nouveau champ `primary_title`
+  des titres féodaux). `CampaignSim` refuse ce fichier (« unknown field `primary_title` ») et
+  `SimFacade` retombe en simulation simulée (mock) : `p2b_ui_test.gd` échoue proprement
+  (« technologies/diplomatie indisponibles avec cette simulation », C3 en échec faute de
+  contrôles réels) et `smoke.gd` échouerait de la même façon sur toute branche à jour de `main`
+  en ce moment. **Je n'ai pas recompilé le core moi-même** (règle explicite du brief). Ce n'est
+  pas une régression du lot P2b : le dernier état entièrement vérifié (avant la fusion de `main`)
+  est le commit `87fa56e2` (smoke 0 échec, p2b_ui_test C1/C2/C3 OK). Il faut un
+  `core/build.sh` à jour sur `main` avant de pouvoir revérifier après fusion.
 
 ## Point ouvert à signaler à l'orchestrateur
 
