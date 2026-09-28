@@ -630,6 +630,7 @@ func _build_scene() -> bool:
 	if terrain_data.has("siege"):
 		siege_view = BattleSiege.new()
 		siege_view.name = "Siege"
+		siege_view.side_colors = side_colors  # SB : barres de vie à la couleur des camps
 		add_child(siege_view)
 		siege_view.build(terrain_data["siege"], func(x: float, z: float) -> float: return terrain.height_at(x, z))
 		# L1 : ville emblématique (Paris) en toile de fond derrière la ville assiégée.
