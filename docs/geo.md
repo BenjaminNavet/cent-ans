@@ -44,13 +44,13 @@ La construction complète prend quelques minutes (téléchargement inclus la pre
 ## Projection et convention de pixels
 
 - CRS : **EPSG:3035** (Lambert azimutale équivalente Europe, centre 10° E / 52° N).
-- Emprise géographique demandée : longitude −11° → 16°, latitude 35° → 60°. Projetée, cette
-  emprise fait ≈ 2 464 km de large pour 2 945 km de haut : elle n'est pas carrée. Comme la
-  heightmap est carrée (4096²) avec un seul `meters_per_px`, l'emprise **est élargie
-  symétriquement en X** jusqu'à obtenir un carré (`project.squared_bounds`). L'emprise finale
-  est stockée dans `map.json` (`bounds_projected`, mètres entiers) et couvre un peu plus
-  d'Atlantique et de Germanie que demandé. **C'est l'unique écart au contrat.**
-- Grille : 4096 × 4096 pixels, `meters_per_px` ≈ 719 m (isotrope).
+- Emprise (ADR 0115, lot OM2) : rectangle projeté **fixé explicitement** dans
+  `cent_ans_tools/geo/project.py` (`BOUNDS_PROJECTED`) : x 2 169 486 → 7 323 110 m,
+  y 775 684 → 5 193 076 m, soit 28 × 24 tuiles racines de 256 unités. `extent_lonlat` de
+  `map.json` n'est qu'indicatif (Maroc atlantique → Oural, mer Blanche → delta du Nil). Bord ouest
+  et échelle de l'ancienne carte 4096² (lon −11 → 16°, lat 35 → 60°, élargie en carré) : un ancien
+  pixel `(x, y)` vaut `(x, y + 1280)` (`LEGACY_Y_OFFSET_PX`).
+- Grille : 7168 × 6144 pixels, `meters_per_px` = 718,9765625 m (isotrope).
 - Coordonnées carte : origine au coin **nord-ouest** de `bounds_projected`, X vers l'est,
   Y vers le sud, unité = pixel. Conversion : `px = (x − minx) / mpp`, `py = (maxy − y) / mpp`.
   Le pixel entier `(i, j)` couvre `[i, i+1[ × [j, j+1[`, son centre est `(i + 0,5 ; j + 0,5)`.
@@ -83,8 +83,10 @@ rivières en bleu) pour vérification visuelle.
 3. Commiter `data/map/*` et `docs/img/map-preview.png` ensemble : les provinces en dépendent.
 
 Pour changer l'emprise ou la résolution, modifier les constantes de
-`cent_ans_tools/geo/project.py` (`LON_MIN`… `SIZE_PX`) et la plage d'altitudes dans
-`terrain.py`, puis reconstruire et mettre à jour le contrat de design.
+`cent_ans_tools/geo/project.py` (`BOUNDS_PROJECTED`, `WIDTH_PX`, `HEIGHT_PX`) et la plage
+d'altitudes dans `terrain.py`, puis reconstruire et mettre à jour le contrat de design. Toute
+donnée écrite à la main en pixels carte doit alors être migrée (voir « Emprise
+Oural–Méditerranée »).
 
 ## Provinces (`cent_ans_tools/geo/provinces.py`)
 
@@ -97,7 +99,7 @@ Entrées : `data/map/` (grille, `land_mask.png`, `rivers.geojson`) et, pour chaq
 
 ### Méthode : Voronoï pondéré par distance de coût
 
-1. **Grille de travail 1024²** (blocs de 4 px, terre si ≥ 8 des 16 pixels sont terre). Chaque
+1. **Grille de travail 1792 × 1536** (blocs de 4 px, terre si ≥ 8 des 16 pixels sont terre). Chaque
    province a deux sources : son seed et sa capitale (la capitale appartient par définition à
    sa province ; un seed en mer est ramené sur la terre la plus proche, cas de Gênes).
 2. **Coût par cellule** : terre = 1, cellule traversée par un fleuve majeur (`scalerank ≤ 4`,
@@ -106,18 +108,26 @@ Entrées : `data/map/` (grille, `land_mask.png`, `rivers.geojson`) et, pour chaq
    va à la province minimisant `coût / voronoi_weight`. Les provinces ne sautent donc jamais
    un détroit (Manche, Pyrénées contournées par les cols…) et les fleuves font frontière douce.
    132 propagations sur 1024² ≈ 8 s.
-3. **Retour à 4096²** : suréchantillonnage au plus proche, masquage par `land_mask.png`,
-   puis remplissage des pixels terre sans étiquette (îles sans seed — Man, Wight, Anglesey,
-   Baléares mineures — et pixels perdus par le sous-échantillonnage) par l'étiquette la plus
-   proche (distance euclidienne), **sauf** les masses continentales sans seed de plus de
-   64 000 px (≈ 33 000 km²) qui restent à 0 : c'est l'Afrique du Nord (≈ 600 000 px), qui n'est
-   pas jouable. Lissage des frontières par filtre majoritaire 5 × 5 (la mer est d'abord
-   remplie par le plus proche voisin pour ne pas éroder les côtes, puis remasquée).
-4. **Vectorisation** : `rasterio.features.shapes` (coins de pixels, 4-connexité) → union →
+3. **Terres hors provinces (ADR 0115, lot OM2)** : une cellule de terre dont la distance *par la
+   terre* (Dijkstra 8-connexe) à la graine ou capitale la plus proche dépasse
+   `MAX_SEED_DISTANCE_KM` = 400 km reste à 0 (Sahara, Arabie, steppe kazakhe, Sibérie, et pour
+   l'instant tout l'Est tant que les lots de données n'y ont pas mis de graines). Une petite masse
+   sans graine (île, ≤ `MAX_SEEDLESS_ISLAND_PX` = 64 000 px ≈ 33 000 km²) à moins de 400 km à vol
+   d'oiseau d'une source rejoint la province la plus proche (Man, Wight, Baléares mineures) ; une
+   grande masse sans graine (Islande, Afrique sans graine) reste à 0. Chaque propagation du
+   Voronoï est coupée à 2 × 400 km de coût et calculée sur une fenêtre autour de ses sources :
+   le temps croît avec le nombre de provinces, pas avec leur produit par la surface de la carte.
+4. **Retour à la grille carte** : suréchantillonnage au plus proche, masquage par `land_mask.png`
+   et par les terres atteignables (dilatées d'une cellule pour garder les pixels côtiers),
+   puis remplissage des pixels terre sans étiquette (îlots, pixels perdus par le
+   sous-échantillonnage) par l'étiquette la plus proche (distance euclidienne). Lissage des
+   frontières par filtre majoritaire 5 × 5 (la mer est d'abord remplie par le plus proche voisin
+   pour ne pas éroder les côtes, puis remasquée).
+5. **Vectorisation** : `rasterio.features.shapes` (coins de pixels, 4-connexité) → union →
    `simplify(1,5 px, topologie préservée)` → parties < 30 px² supprimées (au moins une partie
    conservée). Les polygones sont simplifiés indépendamment : de minuscules écarts entre
    voisins sont possibles ; `province_ids.png` reste la référence pour le picking.
-5. **Propriétés** : `centroid` = centroïde de la plus grande partie si elle le contient, sinon
+6. **Propriétés** : `centroid` = centroïde de la plus grande partie si elle le contient, sinon
    `representative_point` ; `capital_px` = projection de `capital_lonlat`, ramenée au pixel le
    plus proche de sa province si elle tombe en mer ou ailleurs (le rapport de construction le
    signale) ; `neighbors` = provinces partageant ≥ 3 paires de pixels adjacents (4-connexité)
@@ -128,7 +138,7 @@ Entrées : `data/map/` (grille, `land_mask.png`, `rivers.geojson`) et, pour chaq
 
 | Fichier | Contenu |
 |---|---|
-| `data/map/province_ids.png` | PNG RGB 4096² : `R = index & 255`, `G = index >> 8`, `B = 0`, 0 = mer ou aucune. |
+| `data/map/province_ids.png` | PNG RGB 7168 × 6144 : `R = index & 255`, `G = index >> 8`, `B = 0`, 0 = mer ou aucune. |
 | `data/map/provinces.geojson` | `FeatureCollection` en coordonnées carte (1 décimale), propriétés `id`, `index`, `name`, `owner`, `centroid`, `capital_px`, `neighbors`, `sea_neighbors`, `area_px`. |
 | `docs/img/provinces-preview.png` | 1024² : remplissage par `heraldry.primary_color` du propriétaire sur ombrage du relief, frontières noires, capitales en points blancs. |
 
