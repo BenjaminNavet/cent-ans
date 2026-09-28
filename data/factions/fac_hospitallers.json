@@ -17,10 +17,12 @@
   "succession_law": "elective",
   "primary_title": "tit_rhodes",
   "heraldry": {
-    "blazon": "De gueules à la croix d'argent.",
-    "description": "Croix blanche sur fond rouge, armes de l'Ordre de Saint-Jean (bannière de guerre).",
+    "blazon": "De gueules à la croix d'argent, au chef d'azur.",
+    "description": "Croix blanche sur fond rouge, armes de l'Ordre de Saint-Jean, avec un chef d'azur ajouté pour distinguer le Couvent de Rhodes.",
     "primary_color": "#B0182B",
-    "secondary_color": "#F5F1E6"
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Le chef d'azur est une brisure de jeu ; l'Ordre portait la croix blanche sur gueules."
   },
   "titles": [
     "Grand Maître de l'Hôpital"
