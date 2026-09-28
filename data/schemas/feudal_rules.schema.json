@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/feudal_rules.schema.json",
+  "title": "Règles féodales",
+  "description": "Fichier data/rules/feudal.json (lot FE, ADR 0098) : tribut, ost, loyauté, révolte, commise et voies de victoire génériques des vassaux.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "vassal_tribute_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Part du revenu versée chaque saison au suzerain direct." },
+    "rebellion_loyalty": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté sous laquelle un vassal peut se révolter." },
+    "call_to_arms_loyalty": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté sous laquelle un vassal ignore l'appel à l'ost." },
+    "rebellion_permille": { "type": "integer", "minimum": 0, "maximum": 1000, "description": "Chance par saison (‰) qu'un vassal déloyal se révolte." },
+    "vassalage_power_ratio": { "type": "number", "minimum": 1, "description": "Rapport de forces minimal pour exiger l'hommage." },
+    "disloyal_threshold": { "$ref": "common.schema.json#/$defs/percent", "description": "Loyauté sous laquelle un vassal peut refuser l'ost, se révolter ou changer d'allégeance (spec § 4.2)." },
+    "felony_window_turns": { "type": "integer", "minimum": 1, "description": "Saisons pendant lesquelles un cas de commise reste ouvert (§ 4.4)." },
+    "independence_turns": { "type": "integer", "minimum": 1, "description": "Saisons d'indépendance tenue pour la victoire générique (§ 4.8)." },
+    "ascension_turns": { "type": "integer", "minimum": 1, "description": "Saisons comme premier vassal du royaume pour la victoire générique (§ 4.8)." },
+    "loyalty": {
+      "type": "object",
+      "description": "Termes de la loyauté cible d'un vassal envers son suzerain direct (§ 4.2).",
+      "properties": {
+        "base": { "type": "integer" },
+        "power_favourable": { "type": "integer" },
+        "power_unfavourable": { "type": "integer" },
+        "excommunicated_liege": { "type": "integer" },
+        "embargo_squeeze": { "type": "integer" },
+        "protection_granted": { "type": "integer" },
+        "protection_refused": { "type": "integer" },
+        "family_tie": { "type": "integer" },
+        "shared_culture": { "type": "integer" },
+        "title_granted": { "type": "integer" },
+        "peer_forfeiture": { "type": "integer" },
+        "liege_defeat": { "type": "integer" },
+        "rival_claimant": { "type": "integer" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -15,6 +15,7 @@
   "religion": "rel_catholic",
   "culture": "cul_catalan",
   "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_aragon",
   "heraldry": {
     "blazon": "D'or à quatre pals de gueules.",
     "description": "Les quatre pals rouges sur or de la maison de Barcelone.",

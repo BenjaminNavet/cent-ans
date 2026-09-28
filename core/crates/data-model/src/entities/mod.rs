@@ -21,6 +21,7 @@ pub mod edict;
 pub mod encounter;
 pub mod event;
 pub mod faction;
+pub mod feudal_rules;
 pub mod landmark;
 pub mod movement;
 pub mod names;
@@ -34,6 +35,7 @@ pub mod retinue;
 pub mod settlement;
 pub mod skill;
 pub mod technology;
+pub mod title;
 pub mod trade;
 #[path = "trait_.rs"]
 pub mod r#trait;
