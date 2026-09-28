@@ -48,7 +48,7 @@ func setup(campaign_map: Node) -> void:
 	var header := HBoxContainer.new()
 	var title := Label.new()
 	title.text = "Aide — Cent Ans"
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
 	# UX2 : le guide pas à pas se relance (ou reprend là où « Plus tard » l'a laissé) d'ici.
@@ -71,8 +71,8 @@ func setup(campaign_map: Node) -> void:
 	text.bbcode_enabled = true
 	text.text = full_text()
 	text.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	text.add_theme_font_size_override("normal_font_size", 15)
-	text.add_theme_font_size_override("bold_font_size", 17)
+	text.add_theme_font_size_override("normal_font_size", UiType.size(UiType.CAPTION))
+	text.add_theme_font_size_override("bold_font_size", UiType.size(UiType.BODY))
 	box.add_child(text)
 	# BP1 : mots du Codex cliquables (bulles imbriquées) dans l'aide.
 	var bubbles := map.get_node_or_null("/root/CodexBubbles")

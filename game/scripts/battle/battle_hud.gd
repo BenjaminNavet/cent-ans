@@ -305,7 +305,7 @@ func _build_bottom() -> void:
 	withdraw_all_button.text = "Retraite générale"
 	withdraw_all_button.focus_mode = Control.FOCUS_NONE
 	withdraw_all_button.tooltip_text = "Sonner la retraite de toute l'armée (confirmation demandée)"
-	withdraw_all_button.add_theme_font_size_override("font_size", 12)
+	withdraw_all_button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	withdraw_all_button.add_theme_color_override("font_color", Color(0.98, 0.92, 0.8))
 	withdraw_all_button.add_theme_color_override("font_hover_color", Color(1, 1, 0.92))
 	var wax := BattleUiKit.parchment_box(4, Color(0.50, 0.10, 0.07), Color(0.30, 0.05, 0.03), 1)

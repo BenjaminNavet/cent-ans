@@ -41,7 +41,7 @@ func _ready() -> void:
 
 	var header := HBoxContainer.new()
 	_kind_label = Label.new()
-	_kind_label.add_theme_font_size_override("font_size", 14)
+	_kind_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	_kind_label.add_theme_color_override("font_color", RUBRIC)
 	_kind_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_kind_label)
@@ -61,7 +61,7 @@ func _ready() -> void:
 	root.add_child(_art)
 
 	_title_label = Label.new()
-	_title_label.add_theme_font_size_override("font_size", 26)
+	_title_label.add_theme_font_size_override("font_size", UiType.size(UiType.TITLE))
 	_title_label.add_theme_color_override("font_color", INK)
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -71,7 +71,7 @@ func _ready() -> void:
 	root.add_child(_title_label)
 
 	_meta_label = Label.new()
-	_meta_label.add_theme_font_size_override("font_size", 14)
+	_meta_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	_meta_label.add_theme_color_override("font_color", FADED_INK)
 	_meta_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(_meta_label)
@@ -82,8 +82,8 @@ func _ready() -> void:
 	_text_label.fit_content = true
 	_text_label.scroll_active = false
 	_text_label.custom_minimum_size = Vector2(580, 0)
-	_text_label.add_theme_font_size_override("normal_font_size", 17)
-	_text_label.add_theme_font_size_override("italics_font_size", 17)
+	_text_label.add_theme_font_size_override("normal_font_size", UiType.size(UiType.BODY))
+	_text_label.add_theme_font_size_override("italics_font_size", UiType.size(UiType.BODY))
 	_text_label.add_theme_color_override("default_color", INK)
 	root.add_child(_text_label)
 	# H2 : mots du Codex cliquables (bulles imbriquées).
@@ -98,7 +98,7 @@ func _ready() -> void:
 
 	var footer := HBoxContainer.new()
 	_queue_label = Label.new()
-	_queue_label.add_theme_font_size_override("font_size", 13)
+	_queue_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	_queue_label.add_theme_color_override("font_color", FADED_INK)
 	_queue_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(_queue_label)
@@ -151,7 +151,7 @@ func _option_row(option: Dictionary) -> Control:
 	row.add_theme_constant_override("separation", 1)
 	var button := Button.new()
 	button.text = str(option.get("text", ""))
-	button.add_theme_font_size_override("font_size", 17)
+	button.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	var effects := str(option.get("effects_text", ""))
 	button.tooltip_text = effects if effects != "" else "Sans effet notable."
@@ -167,7 +167,7 @@ func _option_row(option: Dictionary) -> Control:
 	if effects != "":
 		var summary := Label.new()
 		summary.text = "   " + effects.replace("\n", " · ")
-		summary.add_theme_font_size_override("font_size", 13)
+		summary.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 		summary.add_theme_color_override("font_color", FADED_INK)
 		summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		summary.custom_minimum_size = Vector2(580, 0)
