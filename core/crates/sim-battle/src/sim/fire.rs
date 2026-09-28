@@ -474,9 +474,8 @@ impl BattleSim {
         let (Some(rules), Some(works)) = (self.fire_rules(), self.siege.as_ref()) else {
             return Err(CommandError::NotASiege);
         };
-        let ready = |unit: &&Unit| {
-            unit.side == side && unit.present() && unit.state != UnitState::Routing
-        };
+        let ready =
+            |unit: &&Unit| unit.side == side && unit.present() && unit.state != UnitState::Routing;
         let candidates: Vec<&Unit> = if units.is_empty() {
             self.units.iter().filter(ready).collect()
         } else {

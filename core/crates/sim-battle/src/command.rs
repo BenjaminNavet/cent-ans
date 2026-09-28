@@ -259,7 +259,10 @@ impl std::fmt::Display for CommandError {
                 write!(f, "l'unité {id} est trop loin pour y mettre le feu")
             }
             CommandError::NothingLeftToBurn => {
-                write!(f, "toutes les maisons et la porte brûlent déjà ou sont en ruine")
+                write!(
+                    f,
+                    "toutes les maisons et la porte brûlent déjà ou sont en ruine"
+                )
             }
             CommandError::NothingInReach => {
                 write!(
