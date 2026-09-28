@@ -1,4 +1,4 @@
-//! Army traditions (lot TW2-T5, ADR 0109), mirroring
+//! Army traditions (lot TW2-T5, ADR 0112), mirroring
 //! `data/schemas/army_traditions_rules.schema.json`
 //! (`data/rules/army_traditions.json`). Spec
 //! `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T5.

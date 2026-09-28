@@ -1,4 +1,4 @@
-# 0109 — Traditions d'armée (lot TW2-T5)
+# 0112 — Traditions d'armée (lot TW2-T5)
 
 Date : 2026-09-28. Statut : accepté. Spec : `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T5.
 

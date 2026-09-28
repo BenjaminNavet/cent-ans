@@ -1,4 +1,4 @@
-//! `CampaignSim` army traditions (lot TW2-T5, ADR 0109): the traditions
+//! `CampaignSim` army traditions (lot TW2-T5, ADR 0112): the traditions
 //! panel of an army (experience, rank, choices), the choice order, the
 //! armies of the player with a rank to spend (notification) and a staging
 //! helper for the headless tests.

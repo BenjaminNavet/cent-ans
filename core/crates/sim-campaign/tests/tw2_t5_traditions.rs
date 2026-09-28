@@ -1,4 +1,4 @@
-//! Lot TW2-T5 (ADR 0109): army traditions (spec
+//! Lot TW2-T5 (ADR 0112): army traditions (spec
 //! `docs/design/2026-09-28-tw2-mecaniques-total-war.md` § T5) — experience
 //! of the army from its battles (auto-resolved and 3D), ranks and choices,
 //! effects (movement, replenishment, shooting, siege, morale), kept name and

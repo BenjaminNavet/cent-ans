@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cent-ans.game/schemas/army_traditions_rules.schema.json",
   "title": "Règles des traditions d'armée",
-  "description": "Fichier data/rules/army_traditions.json (lot TW2-T5, ADR 0109). Voir docs/design/2026-09-28-tw2-mecaniques-total-war.md § T5.",
+  "description": "Fichier data/rules/army_traditions.json (lot TW2-T5, ADR 0112). Voir docs/design/2026-09-28-tw2-mecaniques-total-war.md § T5.",
   "type": "object",
   "$defs": {
     "branch": {
