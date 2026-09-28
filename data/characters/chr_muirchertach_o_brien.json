@@ -1,0 +1,45 @@
+{
+  "name": {
+    "display": "Muircheartach Ó Briain",
+    "local": "Muircheartach Ó Briain",
+    "local_language": "gaélique irlandais"
+  },
+  "sex": "male",
+  "house": "Ó Briain",
+  "faction": "fac_thomond",
+  "role": "ruler",
+  "birth": {
+    "value": "1280",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1343",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Thomond",
+      "from": {
+        "value": "1317"
+      }
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_brave"
+  ],
+  "piety": 50,
+  "starting_location": "prov_thomond",
+  "status": "at_court",
+  "description": "Roi de Thomond depuis 1317, il consolide le royaume repris aux colons anglo-normands de Bunratty après la victoire de Dysert O'Dea (1318). Descendant de Brian Boru.",
+  "sources": [
+    "Muircheartach Ó Briain",
+    "Bataille de Dysert O'Dea"
+  ],
+  "id": "chr_muirchertach_o_brien"
+}

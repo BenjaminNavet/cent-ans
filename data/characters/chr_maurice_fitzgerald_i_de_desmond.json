@@ -1,0 +1,53 @@
+{
+  "name": {
+    "display": "Maurice FitzGerald",
+    "local": "Muiris Mac Gearailt",
+    "local_language": "irlandais moyen"
+  },
+  "sex": "male",
+  "house": "FitzGerald",
+  "faction": "fac_desmond",
+  "role": "ruler",
+  "birth": {
+    "value": "1293",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1356-01-25",
+    "place": "Château de Dublin"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "1er comte de Desmond",
+      "from": {
+        "value": "1329-08-27"
+      }
+    },
+    {
+      "title": "Seigneur palatin de Kerry"
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_impulsive"
+  ],
+  "piety": 40,
+  "family": {
+    "children": [
+      "chr_maurice_fitzgerald_ii_de_desmond"
+    ]
+  },
+  "starting_location": "prov_desmond",
+  "status": "at_court",
+  "description": "Dit « Maurice le Grand » (Maurice na hÉireann) ; mène une rébellion armée contre la couronne au début des années 1320, gracié puis créé comte palatin de Kerry en 1329. Brièvement lord justicier d'Irlande.",
+  "sources": [
+    "Maurice FitzGerald, 1er comte de Desmond"
+  ],
+  "id": "chr_maurice_fitzgerald_i_de_desmond"
+}

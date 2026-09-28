@@ -1,0 +1,48 @@
+{
+  "name": {
+    "display": "Maurice FitzGerald",
+    "local": "Muiris Óg Mac Gearailt",
+    "local_language": "irlandais moyen"
+  },
+  "sex": "male",
+  "house": "FitzGerald",
+  "faction": "fac_desmond",
+  "role": "heir",
+  "birth": {
+    "value": "1336",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1358",
+    "note": "Noyé en traversant la mer d'Irlande entre le 20 avril et le 5 juin 1358.",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "2e comte de Desmond",
+      "from": {
+        "value": "1356-01-25"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 3
+  },
+  "traits": [
+    "trait_childless"
+  ],
+  "piety": 45,
+  "family": {
+    "father": "chr_maurice_fitzgerald_i_de_desmond"
+  },
+  "starting_location": "prov_desmond",
+  "status": "unborn",
+  "description": "Fils du 1er comte et de Catherine de Burgh ; à peine né en 1337. Épousera Béatrice de Stafford et mourra sans descendance mâle.",
+  "sources": [
+    "Maurice FitzGerald, 2e comte de Desmond"
+  ],
+  "id": "chr_maurice_fitzgerald_ii_de_desmond"
+}
