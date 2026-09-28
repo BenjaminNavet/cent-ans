@@ -1,0 +1,26 @@
+{
+ "format": 2,
+ "id": "calais",
+ "name": "Calais",
+ "settlement": "set_calais",
+ "landmark": "calais",
+ "period": "vers 1340 (squelette en cours)",
+ "year": 1340,
+ "seed": 1340062,
+ "crs": "EPSG:3035",
+ "origin_3035": [3749783, 3126173],
+ "extent_m": 1500,
+ "sources": [
+  {"title": "OpenStreetMap", "author": "Contributeurs d'OpenStreetMap", "date": "2026-09-28", "url": "https://www.openstreetmap.org/copyright", "license": "ODbL 1.0 (© contributeurs d'OpenStreetMap)", "extracted": true, "use": "Squelette."}
+ ],
+ "fine_rivers": [],
+ "waters": [],
+ "walls": [],
+ "streets": [],
+ "quays": [],
+ "bridges": [],
+ "monuments": [],
+ "districts": [{"id": "ville_close", "name": "La ville close", "zone": "intra", "density": 0.9, "polygon": [[-100, -100], [100, -100], [100, 100]]}],
+ "open_spaces": [],
+ "render": {"fade_valley": [0.35, 0.65]}
+}
