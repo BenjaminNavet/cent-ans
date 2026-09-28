@@ -363,6 +363,7 @@ fn create_faction(
         goods: Default::default(),
         army_upkeep_last_turn: 0,
         building_upkeep_last_turn: 0,
+        deficit_seasons: 0,
         projected_income: 0,
         regency: false,
         embargoes: BTreeSet::new(),
