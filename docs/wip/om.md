@@ -13,3 +13,5 @@ jusqu'au matin (autonomie complète).
 
 ## Reprise
 Lire ce fichier, `git log feat/om`, les notes `docs/wip/om-*.md` des lots.
+- OM1, OM3 fusionnés ; D5 fusionné (48 prov, 23 fac ; 4869e690). P1 (blasons/portraits D1-D3, 5 $) lancé.
+- À faire à la fusion D4 : relations Byzance–Ottomans (guerre), Byzance–Aydın/Saruhan, Hospitaliers–Aydın/Menteşe (guerre), Chypre–Mamelouks, Trébizonde (cul_greek défini par D4) ; D6 : Mérinides–Castille (guerre), Hafsides–Aragon/Sicile.
