@@ -1,0 +1,25 @@
+{
+  "id": "ability_banner_rally",
+  "kind": "banner_rally",
+  "rank": 1,
+  "name": "Se rallier à la bannière",
+  "description": "Après le choc, les cavaliers s'arrêtent et se reforment derrière la bannière de leur capitaine au lieu de poursuivre ou de s'égailler : ils reprennent cœur bien plus vite, mais restent immobiles. Les chroniqueurs louent les capitaines qui « se recueillent » à leur bannière et rechargent ; les charges françaises successives et désordonnées de [[cdx_crecy|Crécy]] montrent le contraire.",
+  "icon": "banner_rally",
+  "eligible": {
+    "unit_types": ["unit_knights", "unit_breton_knights", "unit_ordonnance_gendarmes", "unit_mounted_sergeants"],
+    "mounted": true
+  },
+  "cooldown": 60.0,
+  "duration": 15.0,
+  "conditions": ["stationary", "not_engaged"],
+  "effects": {
+    "morale_bonus": 5.0,
+    "morale_recovery": 1.5
+  },
+  "journal": "Les {unit} se rallient à leur bannière.",
+  "ai": {
+    "morale_below": 45.0,
+    "no_enemy_within": 60.0
+  },
+  "sources": ["Verbruggen, The Art of Warfare in Western Europe (1997)", "Héraut Chandos, La Vie du Prince Noir", "Jean le Bel, Chronique (Crécy)"]
+}

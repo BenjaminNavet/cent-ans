@@ -233,6 +233,7 @@ def generate(
     *,
     envelope: Decimal = DEFAULT_ENVELOPE,
     budget_path: Path | str = DEFAULT_BUDGET_PATH,
+    budget_session: str | None = None,
     client: httpx.Client | None = None,
     subject: str | None = None,
     on_progress: Callable[[PortraitJob, Decimal], None] | None = None,
@@ -242,6 +243,11 @@ def generate(
 
     ``convert`` turns the raw model image into the saved file (portrait crop by
     default; :mod:`cent_ans_tools.event_art` passes its wide miniature crop).
+    ``budget_session`` names the ``docs/budget.md`` heading that funds this batch
+    (see :meth:`cent_ans_tools.budget.BudgetLedger.find_session`); left out, the
+    ledger row goes to the last table in the file, as before. A caller whose
+    envelope is not always the last section (several pipelines share one, and a
+    later, unrelated section can be appended after it) must pass it explicitly.
     """
     unit = max(price_per_image(model, client), KNOWN_PRICES.get(model, Decimal("0")))
     written: list[Path] = []
@@ -298,6 +304,7 @@ def generate(
                 estimated.quantize(Decimal("0.01"), rounding=ROUND_UP),
                 spent.quantize(Decimal("0.01"), rounding=ROUND_UP),
                 path=budget_path,
+                session=budget_session,
             )
     for job, error in failed:
         print(f"Échec après {MAX_ATTEMPTS} essais : {job.out_path.name} ({error})")

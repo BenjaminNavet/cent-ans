@@ -21,14 +21,35 @@ fn general(unit_index: usize, command: u8) -> GeneralSetup {
     }
 }
 
+/// The leader's order « Dresser les pavois » as shipped before CB4 (it
+/// became the crossbowmen's ability `ability_pavise`); the rule stays in the
+/// core for the replays recorded with it, and is still tested here.
+const LEGACY_PAVISE: &str = r#"{
+  "id": "order_pavise",
+  "kind": "pavise",
+  "rank": 4,
+  "name": "Dresser les pavois",
+  "description": "Pavois (ordre d'avant CB4).",
+  "icon": "pavise",
+  "scope": "selected",
+  "requires_general": false,
+  "cooldown": 10.0,
+  "eligible": { "abilities": ["pavise"] },
+  "effects": { "missile_damage_factor": 0.35 },
+  "journal": "Les {unit} dressent leurs pavois.",
+  "ai": { "min_units": 1, "under_fire_within": 6.0 }
+}"#;
+
 /// France (attacker, general on regiment 0) against England, with the order
-/// catalogue.
+/// catalogue (and the legacy pavise order).
 fn order_setup(data: &GameData, attacker: &[&str], defender: &[&str]) -> BattleSetup {
     let mut s = setup(units(data, attacker), units(data, defender), None);
     s.defender.faction = "fac_england".to_owned();
     s.attacker.general = Some(general(0, 6));
     s.defender.general = Some(general(0, 6));
     s.orders = data.battle_orders.values().cloned().collect();
+    s.orders
+        .push(serde_json::from_str(LEGACY_PAVISE).expect("legacy pavise order"));
     s
 }
 
@@ -57,15 +78,16 @@ fn reason(result: Result<(), CommandError>) -> String {
 }
 
 #[test]
-fn catalogue_loads_the_five_orders() {
+fn catalogue_loads_the_four_orders() {
     let data = data();
     let kinds: Vec<BattleOrderKind> = data.battle_orders.values().map(|o| o.kind).collect();
-    assert_eq!(data.battle_orders.len(), 5);
+    // CB4: the pavise is the crossbowmen's ability now.
+    assert_eq!(data.battle_orders.len(), 4);
+    assert!(!kinds.contains(&BattleOrderKind::Pavise));
     for kind in [
         BattleOrderKind::WarCry,
         BattleOrderKind::NoQuarter,
         BattleOrderKind::Dismount,
-        BattleOrderKind::Pavise,
         BattleOrderKind::Rally,
     ] {
         assert!(kinds.contains(&kind), "{kind:?} missing");
@@ -349,6 +371,10 @@ fn pavises_cut_missile_casualties_until_the_next_move() {
             z,
             run: false,
             facing: None,
+            queue: false,
+            width: None,
+            match_speed: false,
+            group_tag: None,
         },
         None,
     )

@@ -67,14 +67,15 @@ func setup(colors: Dictionary, p_player_side: String) -> void:
 
 ## `anchors` : id -> position écran du haut de la troupe (absent = hors champ de la caméra).
 ## `camera_distance` (B7) : au-delà de `CLUSTER_ON`, les repères proches se regroupent.
-func update(units: Array, anchors: Dictionary, selected: Array, camera_distance: float = 0.0) -> void:
+## `force_clustered` (CB3, vue tactique) : pastilles regroupées quelle que soit la distance.
+func update(units: Array, anchors: Dictionary, selected: Array, camera_distance: float = 0.0, force_clustered: bool = false) -> void:
 	_selected = selected
 	_placed.clear()
 	_key_of.clear()
 	_order.clear()
 	if not visible:
 		return
-	clustered = camera_distance > (CLUSTER_OFF if clustered else CLUSTER_ON)
+	clustered = true if force_clustered else camera_distance > (CLUSTER_OFF if clustered else CLUSTER_ON)
 	var entries: Array = []
 	for unit in units:
 		var id := int(unit["id"])
@@ -367,20 +368,37 @@ func _draw_star(center: Vector2, radius: float) -> void:
 	draw_polyline(points + PackedVector2Array([points[0]]), INK, 1.0)
 
 
-## Pastilles d'état d'une unité : déroute, tir, charge ou mêlée (une seule), puis épuisement.
+## CB2 : au plus trois pastilles par unité.
+const MAX_BADGES := 3
+
+
+## Pastilles d'état d'une unité, au plus `MAX_BADGES`, par priorité (CB2) : déroute > hésite >
+## sous le feu > charge > mêlée > mode (le premier mode actif) > tir > épuisement. Les états
+## `wavering`, `under_fire`, `charging`, `engaged` sont calculés par le cœur (seuils dans
+## `data/rules/unit_modes.json`) ; repli sur `state` si le dictionnaire ne les porte pas.
 static func state_badges(unit: Dictionary) -> Array[String]:
 	var badges: Array[String] = []
 	var state := str(unit["state"])
 	if state == "routing":
 		badges.append("rout")
-	elif state == "shooting":
-		badges.append("shoot")
-	elif state == "charging" or (bool(unit.get("running", false)) and int(unit.get("target", -1)) >= 0):
-		badges.append("charge")
-	elif state == "melee":
-		badges.append("melee")
+	else:
+		if bool(unit.get("wavering", false)):
+			badges.append("wavering")
+		if bool(unit.get("under_fire", false)):
+			badges.append("under_fire")
+		if bool(unit.get("charging", state == "charging")) or (bool(unit.get("running", false)) and int(unit.get("target", -1)) >= 0 and state != "melee" and state != "shooting"):
+			badges.append("charge")
+		elif bool(unit.get("engaged", state == "melee")):
+			badges.append("melee")
+		var modes := BattleModeIcons.active_modes(unit)
+		if not modes.is_empty():
+			badges.append("mode_" + modes[0])
+		if state == "shooting":
+			badges.append("shoot")
 	if is_exhausted(unit):
 		badges.append("tired")
+	while badges.size() > MAX_BADGES:
+		badges.pop_back()
 	return badges
 
 
@@ -397,9 +415,28 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 	var bg := PARCHMENT
 	if kind == "rout":
 		bg = ROUT_RED if blink else Color(0.55, 0.08, 0.05)
+	elif kind == "wavering":  # CB2 : ambre, clignotant
+		bg = Color(0.95, 0.68, 0.12) if blink else Color(0.8, 0.5, 0.08)
+	elif kind == "under_fire":
+		bg = Color(0.93, 0.83, 0.6)
 	canvas.draw_circle(c, 6.5, bg)
 	canvas.draw_arc(c, 6.5, 0, TAU, 16, INK, 1.0)
 	var ink := INK if kind != "rout" else Color.WHITE
+	# CB2 : modes (glyphes réduits) et nouveaux états, dessinés par `BattleModeIcons`.
+	if kind.begins_with("mode_"):
+		BattleModeIcons.draw_mode(canvas, kind.trim_prefix("mode_"), c, 0.62, ink)
+	elif kind == "wavering" or kind == "under_fire":
+		BattleModeIcons.draw_state(canvas, kind, c, ink)
+	else:
+		# Lot CB : icône à l'encre DA5 (`battle_state_<kind>`), glyphe dessiné en repli sans PNG.
+		var tint := ink if kind != "tired" else Color(0.2, 0.4, 0.75)
+		if not BattleModeIcons.draw_ink_icon(canvas, "battle_state_" + kind, c, BattleModeIcons.BADGE_ICON_SIDE, tint):
+			_draw_badge_glyph(canvas, kind, c, ink)
+	canvas.draw_set_transform(Vector2.ZERO)
+
+
+## Glyphe de repli d'une pastille (sans icône DA5).
+static func _draw_badge_glyph(canvas: CanvasItem, kind: String, c: Vector2, ink: Color) -> void:
 	match kind:
 		"shoot":  # flèche en diagonale
 			canvas.draw_line(c + Vector2(-3.5, 3.5), c + Vector2(3.5, -3.5), ink, 1.5)
@@ -416,7 +453,6 @@ static func draw_badge(canvas: CanvasItem, kind: String, top_left: Vector2, blin
 		"rout":  # drapeau blanc
 			canvas.draw_line(c + Vector2(-2.5, 4), c + Vector2(-2.5, -4), ink, 1.2)
 			canvas.draw_rect(Rect2(c + Vector2(-2.5, -4), Vector2(6, 4)), ink)
-	canvas.draw_set_transform(Vector2.ZERO)
 
 
 ## B7 : nom d'une troupe seule ; B8 : infobulle détaillée d'un groupe (une ligne par régiment :

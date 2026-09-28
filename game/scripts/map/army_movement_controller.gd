@@ -82,7 +82,7 @@ func setup(campaign_map: Node) -> void:
 	war_dialog = WarDeclarationDialog.new()
 	war_dialog.confirmed.connect(_on_war_confirmed)
 	war_dialog.cancelled.connect(func() -> void: _pending_attack = {})
-	map.ui.add_child(war_dialog)
+	UiZones.put(UiZones.Zone.MODAL, war_dialog)  # PO1 : fond assombri, entrées bloquées
 	if map.picker != null:
 		# Prioritaire sur l'intercepteur C5 (colonies), qu'il remplace quand il est actif.
 		var previous: Callable = map.picker.right_click_interceptor
@@ -253,6 +253,17 @@ func _execute(army_id: String, target: Dictionary) -> void:
 	UiSounds.play_order_result(report)  # UB1 / U13
 	if not report.get("ok", false):
 		map.ui.show_toast(str(report.get("error", "Ordre refusé")), true)
+	else:
+		_ripple_at(target)
+
+
+## PO5 : onde d'encre au point visé par un ordre accepté (rendu seulement).
+func _ripple_at(target: Dictionary) -> void:
+	var point: Variant = target.get("point")
+	if not point is Vector2 or map.map_data == null:
+		return
+	var at := point as Vector2
+	OrderRipple.spawn(map.ui, map.camera, Vector3(at.x, map.map_data.surface_world_at(at.x, at.y), at.y))
 
 
 ## Lot AT1 : attaque d'une cible en paix : confirmation, puis déclaration de guerre et attaque.

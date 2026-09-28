@@ -1,0 +1,21 @@
+{
+  "id": "tit_montpellier",
+  "rank": "duchy",
+  "name": {
+    "display": "Seigneurie de Montpellier",
+    "local": "Montpeslier",
+    "local_language": "occitan"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_montpellier"
+  ],
+  "holder_1337": {
+    "faction": "fac_aragon",
+    "sources": [
+      "Seigneurie de Montpellier",
+      "Royaume de Majorque",
+      "Montpellier"
+    ]
+  }
+}

@@ -311,6 +311,7 @@ fn archers_behind_a_hedge_suffer_less_from_arrows() {
             units: vec![0],
             target: 1,
             run: false,
+            queue: false,
         })
         .unwrap();
         run(&mut sim, 40.0);
@@ -343,6 +344,7 @@ fn a_hedge_breaks_a_cavalry_charge() {
             units: vec![0],
             target: 1,
             run: true,
+            queue: false,
         })
         .unwrap();
         run(&mut sim, 30.0);

@@ -1,0 +1,31 @@
+{
+  "id": "tit_aragon",
+  "rank": "kingdom",
+  "name": {
+    "display": "Couronne d'Aragon",
+    "local": "Corona d'Aragó",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules.",
+    "description": "Les quatre pals rouges sur or de la maison de Barcelone.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_provinces": [
+    "prov_aragon",
+    "prov_barcelona",
+    "prov_mallorca",
+    "prov_roussillon",
+    "prov_sardegna",
+    "prov_sicilia",
+    "prov_valencia"
+  ],
+  "holder_1337": {
+    "faction": "fac_aragon",
+    "sources": [
+      "Pierre IV d'Aragon",
+      "Couronne d'Aragon"
+    ]
+  }
+}

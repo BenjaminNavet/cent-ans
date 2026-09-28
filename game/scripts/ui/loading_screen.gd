@@ -136,8 +136,8 @@ func _build() -> void:
 	titles.add_theme_constant_override("separation", -4)
 	header.add_child(titles)
 	var name := str(facade.call("faction_info", faction_id).get("name", "Cent Ans")) if facade != null and faction_id != "" else "Cent Ans"
-	titles.add_child(FrontEndStyle.label(name, 38, Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 6))
-	titles.add_child(FrontEndStyle.label(subtitle, 19, FrontEndStyle.GOLD, FrontEndStyle.title_italic(), 4))
+	titles.add_child(FrontEndStyle.label(name, UiType.size(UiType.TITLE), Color(0.97, 0.92, 0.80), FrontEndStyle.title_font(), 6))
+	titles.add_child(FrontEndStyle.label(subtitle, UiType.size(UiType.HEADING), FrontEndStyle.GOLD, FrontEndStyle.title_italic(), 4))
 
 	# Corps : miniature encadrée à gauche, citation et conseil à droite.
 	var body := HBoxContainer.new()
@@ -171,13 +171,13 @@ func _build() -> void:
 		var mark := FrontEndStyle.label("«", 64, Color(FrontEndStyle.GOLD, 0.8), FrontEndStyle.title_font())
 		mark.custom_minimum_size = Vector2(0, 40)
 		side.add_child(mark)
-		var quote_label := FrontEndStyle.label(str(quote.get("text", "")), 26, Color(0.95, 0.90, 0.78), FrontEndStyle.title_italic(), 4)
+		var quote_label := FrontEndStyle.label(str(quote.get("text", "")), UiType.size(UiType.TITLE), Color(0.95, 0.90, 0.78), FrontEndStyle.title_italic(), 4)
 		quote_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		side.add_child(quote_label)
 		var source := str(quote.get("author", ""))
 		if str(quote.get("source", "")) != "":
 			source += ", %s" % quote["source"]
-		var attribution := FrontEndStyle.label("— %s (%s)" % [source, quote.get("date", "")], 18, FrontEndStyle.GOLD, FrontEndStyle.body_font(), 3)
+		var attribution := FrontEndStyle.label("— %s (%s)" % [source, quote.get("date", "")], UiType.size(UiType.HEADING), FrontEndStyle.GOLD, FrontEndStyle.body_font(), 3)
 		attribution.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		side.add_child(attribution)
 	var rule := ColorRect.new()
@@ -185,18 +185,18 @@ func _build() -> void:
 	rule.custom_minimum_size = Vector2(0, 1)
 	side.add_child(rule)
 	if tip != "":
-		side.add_child(FrontEndStyle.label("Conseil", 20, FrontEndStyle.GOLD, FrontEndStyle.title_font(), 3))
-		var tip_label := FrontEndStyle.label(tip, 19, Color(0.88, 0.83, 0.72), FrontEndStyle.body_font(), 3)
+		side.add_child(FrontEndStyle.label("Conseil", UiType.size(UiType.HEADING), FrontEndStyle.GOLD, FrontEndStyle.title_font(), 3))
+		var tip_label := FrontEndStyle.label(tip, UiType.size(UiType.HEADING), Color(0.88, 0.83, 0.72), FrontEndStyle.body_font(), 3)
 		tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		side.add_child(tip_label)
 
 	# Pied : étape en cours, pourcentage, barre dorée.
 	var footer := HBoxContainer.new()
 	column.add_child(footer)
-	_step_label = FrontEndStyle.label("", 18, Color(0.88, 0.83, 0.72), FrontEndStyle.body_italic(), 3)
+	_step_label = FrontEndStyle.label("", UiType.size(UiType.HEADING), Color(0.88, 0.83, 0.72), FrontEndStyle.body_italic(), 3)
 	_step_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(_step_label)
-	_percent_label = FrontEndStyle.label("", 18, FrontEndStyle.GOLD, FrontEndStyle.title_font(), 3)
+	_percent_label = FrontEndStyle.label("", UiType.size(UiType.HEADING), FrontEndStyle.GOLD, FrontEndStyle.title_font(), 3)
 	footer.add_child(_percent_label)
 	_bar = ProgressBar.new()
 	_bar.min_value = 0.0

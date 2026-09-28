@@ -17,6 +17,7 @@ pub mod map;
 pub mod movement_graph;
 pub mod navgrid;
 pub mod settlement_load;
+pub mod title_check;
 
 pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
@@ -34,9 +35,15 @@ pub use entities::ai_diplomacy::{
     WarPlanningRules,
 };
 pub use entities::ai_doctrine::{AiDoctrines, Doctrine};
-pub use entities::ai_grid::AiGrid;
+pub use entities::ai_grid::{
+    AiAmbush, AiEncounters, AiEntrenched, AiForcedMarch, AiGrid, AiPostures,
+};
 pub use entities::auto_resolve::{
     AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
+};
+pub use entities::battle_ability::{
+    AbilityCondition, AbilityKind, BattleAbility, BattleAbilityAi, BattleAbilityEffects,
+    BattleAbilityFilter,
 };
 pub use entities::battle_order::{
     BattleOrder, BattleOrderAi, BattleOrderEffects, BattleOrderFilter, BattleOrderKind,
@@ -68,6 +75,7 @@ pub use entities::faction::{
     AiPersonality, ClaimData, ClaimKind, Faction, Government, Heraldry, Objective,
     ObjectiveCondition, Relation, RelationStatus, SuccessionLaw, VictoryConditions,
 };
+pub use entities::feudal_rules::{FeudalRules, LoyaltyWeights};
 pub use entities::landmark::{
     Landmark, LandmarkBattle, LandmarkGate, LandmarkSiege, LandmarkStreet, LandmarkWall,
 };
@@ -97,13 +105,16 @@ pub use entities::settlement::{
 };
 pub use entities::skill::{Skill, SkillBranch};
 pub use entities::technology::{TechBranch, TechUnlocks, Technology};
+pub use entities::title::{
+    FeudalTitle, TitleHolder, TitleObjective, TitleObjectiveCondition, TitleRank,
+};
 pub use entities::trade::{TradeCatalog, TradeHub, TradeRouteDef};
 pub use entities::unit_type::{Ability, Missile, UnitStats, UnitType};
 pub use entities::vision::VisionRules;
 pub use ids::{
     BuildingId, CharacterId, ChivalricOrderId, CompanionId, CultureId, DietId, EdictId,
     EncounterId, EventId, FactionId, NamesId, ProvinceId, ReligionId, ResourceId, SeaZoneId,
-    SettlementId, ShipClassId, SkillId, TechnologyId, TraitId, UnitTypeId,
+    SettlementId, ShipClassId, SkillId, TechnologyId, TitleId, TraitId, UnitTypeId,
 };
 pub use load::{upgrade_regressions, DataError, GameData, ReferenceError, Warning};
 pub use map::{MapMeta, ProvinceGeometry};

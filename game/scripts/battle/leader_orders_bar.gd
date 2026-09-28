@@ -12,8 +12,9 @@ const INK_MUTED := Color(0.42, 0.34, 0.26)
 const REFRESH := 0.2
 ## Raccourcis, dans l'ordre de la barre (touches libres : 1-3 vitesse, F/G/H ordres, Q/E/WASD caméra,
 ## C/M/T carte de campagne). Touches **physiques** (position QWERTY), comme la caméra : en AZERTY
-## la rangée du bas donne W X V B N et ne recoupe jamais Z Q S D (audit A3 B1).
-const HOTKEYS := [KEY_Z, KEY_X, KEY_V, KEY_B, KEY_N]
+## la rangée du bas donne W X V B et ne recoupe jamais Z Q S D (audit A3 B1). CB4 : quatre ordres
+## depuis que le pavois est une capacité des arbalétriers (N libérée).
+const HOTKEYS := [KEY_Z, KEY_X, KEY_V, KEY_B]
 const ICON_DIR := "res://assets/ui/orders/"
 ## Repli quand l'icône PNG n'existe pas : un glyphe par nature d'ordre.
 const GLYPHS := {"war_cry": "✠", "rally": "⚑", "dismount": "♞", "pavise": "▮", "no_quarter": "⚔"}
@@ -171,7 +172,7 @@ static func physical_label(keycode: Key) -> String:
 	return OS.get_keycode_string(label)
 
 
-## Raccourcis des ordres, séparés par des espaces (« W X V B N » en AZERTY).
+## Raccourcis des ordres, séparés par des espaces (« W X V B » en AZERTY).
 static func hotkey_labels() -> String:
 	var labels: PackedStringArray = []
 	for keycode: Key in HOTKEYS:

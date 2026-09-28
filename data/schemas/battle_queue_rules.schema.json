@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/battle_queue_rules.schema.json",
+  "title": "Ordres en file de bataille",
+  "description": "Fichier data/rules/battle_queue.json (lot CB-M3, ADR 0095) : nombre d'ordres qu'un régiment peut garder en attente derrière son ordre en cours. Lu par sim-battle (QueueRules).",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "max_queued_orders": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32,
+      "description": "Ordres en attente au plus par régiment (sans compter l'ordre en cours). Au-delà, l'ordre en file est refusé (« file d'ordres pleine »)."
+    }
+  },
+  "required": ["max_queued_orders"],
+  "additionalProperties": false
+}

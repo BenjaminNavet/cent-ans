@@ -173,3 +173,67 @@ def test_every_trait_has_an_ink_icon_entry() -> None:
     for item in catalog["icons"]:
         if item.get("group") == "trait":
             assert item["targets"] == [item["id"]]
+
+
+def test_cb_cursors_cover_every_hover_context_and_known_icons() -> None:
+    """Lot CB: one cursor per hover context, each derived from a catalogue icon or barred."""
+    catalog = _catalog()
+    icon_ids = {item["id"] for item in catalog["icons"]}
+    cursors = {cursor["id"]: cursor for cursor in catalog["cursors"]}
+    assert set(cursors) == {
+        "move",
+        "melee",
+        "ranged",
+        "ranged_blocked",
+        "siege",
+        "forbidden",
+    }
+    for cursor in cursors.values():
+        if "icon" in cursor:
+            assert cursor["icon"] in icon_ids, cursor
+        else:
+            assert cursor["barred"], cursor
+
+
+def test_cb_battle_keys_are_claimed() -> None:
+    """Lot CB: every key read by the battle scripts has an ink icon entry."""
+    targets = {t for item in _catalog()["icons"] for t in item["targets"]}
+    modes = ["run", "guard", "skirmish", "melee", "breach"]
+    states = ["rout", "wavering", "under_fire", "charge", "melee", "shoot", "tired"]
+    alerts = [
+        "rout",
+        "general_down",
+        "flanked",
+        "reinforcements",
+        "ammo_out",
+        "wall_breached",
+        "gate_destroyed",
+    ]
+    abilities = ["aimed_shot", "pavise", "banner_rally", "close_ranks", "planted_pikes"]
+    expected = (
+        [f"battle_mode_{key}" for key in modes]
+        + [f"battle_state_{key}" for key in states]
+        + [f"battle_alert_{key}" for key in alerts]
+        + [f"battle_ability_{key}" for key in abilities]
+        + ["battle_lock"]
+    )
+    assert not set(expected) - targets
+    assert "order_pavise" not in targets
+
+
+def test_process_cursor_is_32px_ringed_and_centred() -> None:
+    """A derived cursor is 32 px, tinted inside, ringed with ink, barred in red when asked."""
+    icon = Image.new("RGBA", (128, 128), (*ink_icons.INK_RGB, 0))
+    ImageDraw.Draw(icon).ellipse(
+        (34, 34, 94, 94), outline=(*ink_icons.INK_RGB, 255), width=6
+    )
+    cursor = ink_icons.process_cursor(icon, "#cc1a14", False)
+    assert cursor.size == (32, 32)
+    alpha = np.asarray(cursor.getchannel("A"))
+    assert alpha[16, 16] == 0  # hollow centre of the ring
+    assert alpha.max() == 255
+    ys, xs = np.nonzero(alpha > 128)
+    assert abs((xs.min() + xs.max()) / 2 - 15.5) <= 1.0
+    forbidden = np.asarray(ink_icons.process_cursor(None, "#cc1a14", True))
+    assert forbidden[16, 16, 3] == 255 and forbidden[16, 16, 0] > 150  # red bar
+    assert forbidden[16, 3, 3] > 0  # ring

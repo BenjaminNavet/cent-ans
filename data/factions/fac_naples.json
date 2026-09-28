@@ -16,6 +16,7 @@
   "culture": "cul_neapolitan",
   "succession_law": "cognatic_primogeniture",
   "suzerain": "fac_papacy",
+  "primary_title": "tit_naples",
   "heraldry": {
     "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
     "description": "Armes d'Anjou-Sicile : les lis de France brisés du lambel rouge des Angevins de Naples.",

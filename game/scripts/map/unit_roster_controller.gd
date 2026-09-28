@@ -70,7 +70,8 @@ func _build_panel() -> void:
 	panel.hide()
 	# Le conseiller (VO1) s'efface tant que la liste est ouverte : même coin de l'écran.
 	panel.add_to_group(PanelStack.BLOCKING_GROUP)
-	map.ui.add_child(panel)
+	# PO1 : registre dans la zone `SIDE_PANEL` (ouvrir la province ou la chronique le ferme).
+	UiZones.put(UiZones.Zone.SIDE_PANEL, panel)
 
 
 func toggle() -> void:
@@ -340,30 +341,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## Haut de la liste : sous la barre, et sous la carte « que faire maintenant » (UX2) si elle
-## est affichée (même coin).
+## PO1 : hauteur de la zone `SIDE_PANEL` (repère de mise à jour de `_layout`).
 func _top() -> float:
-	var top: float = (map.ui.get_node("TopBar") as Control).size.y + 8.0
-	var hint: Control = map.next_hint.card if map.next_hint != null else null
-	if hint != null and hint.visible:
-		top = maxf(top, hint.position.y + hint.size.y + 8.0)
-	return top
+	return UiZones.rect(UiZones.Zone.SIDE_PANEL).size.y
 
 
-## Haut gauche, sous la barre ; la hauteur s'arrête au-dessus du journal.
+## PO1 : la liste remplit la zone `SIDE_PANEL` (placée par `UiLayout`) ; elle défile au-delà.
 func _layout() -> void:
 	if not is_open():
 		return
-	var view := panel.get_viewport_rect().size
-	var top := _top()
-	_placed_top = top
-	var bottom := view.y * 0.62
-	var event_log: Control = map.ui.event_log
-	if event_log != null and event_log.visible:
-		bottom = minf(bottom, event_log.position.y - 8.0)
-	var header_height := 40.0
+	var room := _top()
+	_placed_top = room
+	var header_height := 48.0
 	var wanted := _list.get_combined_minimum_size().y
-	_scroll.custom_minimum_size = Vector2(PANEL_WIDTH - 20.0, clampf(wanted, 0.0, maxf(MIN_HEIGHT, bottom - top - header_height)))
-	panel.position = Vector2(map.ui.HUD_MARGIN, top)
-	panel.size = Vector2.ZERO
-	panel.call_deferred("reset_size")
+	_scroll.custom_minimum_size = Vector2(PANEL_WIDTH - 20.0, clampf(wanted, 0.0, maxf(MIN_HEIGHT, room - header_height)))
+

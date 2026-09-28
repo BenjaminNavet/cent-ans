@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "camera_feel.schema.json",
+  "title": "Ressenti des caméras (PO5)",
+  "description": "Réglages de mouvement des caméras de campagne et de bataille, lus par game/scripts/ui/camera_feel.gd. Aucune règle de jeu.",
+  "type": "object",
+  "required": ["campaign", "battle", "reduce_motion"],
+  "additionalProperties": false,
+  "$defs": {
+    "rate": {"description": "Taux d'amortissement exponentiel (1/s).", "type": "number", "exclusiveMinimum": 0, "maximum": 200},
+    "glide": {"description": "Durée du glissement de focus (s) ; 0 = coupe franche.", "type": "number", "minimum": 0, "maximum": 2},
+    "inertia": {"description": "Part de la vitesse du glisser (bouton du milieu) gardée au relâchement, 0 à 1.", "type": "number", "minimum": 0, "maximum": 1}
+  },
+  "properties": {
+    "description": {"type": "string"},
+    "campaign": {
+      "type": "object",
+      "required": ["pan_accel", "pan_friction", "follow_damping", "zoom_damping", "rotate_damping", "focus_glide_s", "drag_release_inertia"],
+      "additionalProperties": false,
+      "properties": {
+        "pan_accel": {"$ref": "#/$defs/rate", "description": "Montée de la vitesse de déplacement vers celle demandée (clavier, bords d'écran)."},
+        "pan_friction": {"$ref": "#/$defs/rate", "description": "Freinage de la vitesse une fois la touche relâchée (inertie)."},
+        "follow_damping": {"$ref": "#/$defs/rate", "description": "Poursuite du point visé par la caméra."},
+        "zoom_damping": {"$ref": "#/$defs/rate", "description": "Poursuite de la distance cible (zoom lissé)."},
+        "rotate_damping": {"$ref": "#/$defs/rate", "description": "Poursuite du lacet cible (Q / E)."},
+        "focus_glide_s": {"$ref": "#/$defs/glide"},
+        "drag_release_inertia": {"$ref": "#/$defs/inertia"}
+      }
+    },
+    "battle": {
+      "type": "object",
+      "required": ["zoom_damping", "focus_glide_s"],
+      "additionalProperties": false,
+      "properties": {
+        "zoom_damping": {"$ref": "#/$defs/rate"},
+        "focus_glide_s": {"$ref": "#/$defs/glide"}
+      }
+    },
+    "reduce_motion": {
+      "description": "Valeurs remplaçant celles des deux caméras quand « Réduire les animations » est actif.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pan_friction": {"$ref": "#/$defs/rate"},
+        "zoom_damping": {"$ref": "#/$defs/rate"},
+        "focus_glide_s": {"$ref": "#/$defs/glide"},
+        "drag_release_inertia": {"$ref": "#/$defs/inertia"}
+      }
+    }
+  }
+}

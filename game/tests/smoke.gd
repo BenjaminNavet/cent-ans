@@ -585,10 +585,14 @@ func _run_minimap_fog() -> void:
 	map.ui.layout_hud()
 	await process_frame
 	_check(minimap.visible and minimap.size.x > 100.0 and minimap.size.y > 80.0, "minimap should be visible with a sensible size, got %s" % minimap.size)
-	var mini_rect := Rect2(minimap.position, minimap.size)
-	var bell_rect := Rect2(map.ui.end_turn_cluster.position, map.ui.end_turn_cluster.size)
+	# PO1 : minicarte dans la zone `MINIMAP` de `UiLayout` (bas droite), cloche à sa gauche, lettres
+	# dans la zone `SIDE_PANEL`.
+	var mini_rect := minimap.get_global_rect()
+	var bell_rect: Rect2 = map.ui.end_turn_cluster.get_global_rect()
 	_check(not mini_rect.intersects(bell_rect), "minimap %s overlaps the end-turn cluster %s" % [mini_rect, bell_rect])
-	_check(map.ui.news_letters.position.y >= mini_rect.end.y, "news letters should sit below the minimap")
+	var layout: Node = root.get_node("/root/UiLayout")
+	_check(minimap.get_parent() == layout.zone_node(layout.Zone.MINIMAP), "minimap should sit in the MINIMAP zone")
+	_check(layout.occupants(layout.Zone.SIDE_PANEL).has(map.ui.news_letters), "news letters should sit in the SIDE_PANEL zone")
 	_check(minimap.army_dot_count() > 0, "minimap should show the player's armies")
 	# Clic : la caméra vise le point cliqué (coordonnées carte).
 	var local: Vector2 = minimap.map_rect().size * Vector2(0.25, 0.7)
@@ -1218,7 +1222,16 @@ func _run_battle() -> void:
 	_check(not refused.get("ok", true), "battle: commanding an enemy unit should be refused")
 	# F10b : ordres du chef (catalogue de data/battle_orders, cri de guerre propre à la faction).
 	var orders: Array = battle.call("get_leader_orders", "attacker")
-	_check(orders.size() == 5, "battle: expected 5 leader's orders, got %d" % orders.size())
+	# CB4 : quatre ordres, le pavois est devenu une capacité des arbalétriers.
+	_check(orders.size() == 4, "battle: expected 4 leader's orders, got %d" % orders.size())
+	# CB4 : capacités actives (catalogue de data/battle_abilities, état dans get_units).
+	var catalog: Dictionary = battle.call("get_ability_catalog")
+	_check(catalog.size() == 5, "battle: expected 5 abilities, got %d" % catalog.size())
+	var with_abilities := 0
+	for unit: Dictionary in units:
+		_check(unit.has("abilities"), "battle: get_units entry without abilities")
+		with_abilities += 1 if not (unit.get("abilities", []) as Array).is_empty() else 0
+	_check(with_abilities > 0, "battle: no regiment has an ability")
 	if not orders.is_empty():
 		_check(str(orders[0]["label"]) == "Montjoie ! Saint-Denis !", "battle: French war cry label is %s" % orders[0]["label"])
 		var cry: Dictionary = battle.call("issue_command", {"type": "leader_order", "order": "order_war_cry", "units": []})

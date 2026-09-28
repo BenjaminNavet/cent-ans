@@ -42,7 +42,9 @@
 //!   cry, no quarter, dismount, pavises, rally, from the catalogue of
 //!   `data/battle_orders/` carried by [`BattleSetup::orders`].
 
+pub mod abilities;
 pub mod ai;
+pub mod alerts;
 pub mod command;
 pub mod crest;
 pub mod decision;
@@ -52,19 +54,25 @@ pub mod duel;
 pub mod field;
 pub mod fire;
 pub mod formation_ai;
+pub mod formation_width;
+pub mod group_formation;
 pub mod historical;
 pub mod horse_wait;
+pub mod hover;
 pub mod hydro;
 pub mod impact;
 pub mod missile_arc;
 pub mod missile_morale;
+pub mod modes;
 pub mod naval;
 pub mod opening;
 pub mod orders;
 pub mod outcome;
 pub mod position;
+pub mod preview;
 pub mod props;
 pub mod push;
+pub mod queue;
 pub mod relief;
 pub mod relief_ai;
 pub mod replay;
@@ -82,6 +90,7 @@ pub mod time_of_day;
 pub mod town;
 pub mod unit;
 
+pub use abilities::{AbilityView, ActiveAbility, EndedAbility, UnitAbilities};
 pub use command::{Command, CommandError};
 pub use decision::{BattleEnd, DecisionRules};
 pub use decor::{
@@ -94,16 +103,24 @@ pub use field::{
     FIELD_WIDTH, GRID_RESOLUTION,
 };
 pub use fire::{Blaze, FireRules, FireState};
+pub use formation_width::{split_widths, FormationWidthRules, RankBounds};
+pub use group_formation::{FormationSlot, GroupFormationRules, Preset, Role, Stance};
 pub use historical::HistoricalMap;
+pub use hover::{
+    Advantage, Compare, CompareSide, HoverContext, HoverKind, HoverRules, RangeArcRules,
+};
 pub use hydro::{
     Bank, BankKind, Bridge, Crossing, Road, RoadKind, Stream, StreamKind, Water, WaterRules,
     WatersideSpot,
 };
 pub use impact::{ImpactEvent, ImpactKind, LossCause};
+pub use modes::{UnitMode, UnitModeRules, UnitStatus};
 pub use opening::OpeningRules;
 pub use orders::{OrderUse, OrderView};
 pub use outcome::{BattleEvent, BattleOutcome, SideResult, StandardTrophy};
+pub use preview::{PreviewError, PreviewLeg};
 pub use push::{PushRules, PushShape};
+pub use queue::{QueueRules, QueuedOrder};
 pub use relief::ReliefStyle;
 pub use replay::{
     BattleReplay, Divergence, ReplayAction, ReplayError, ReplayPlayer, ReplayRecorder, ReplayRules,

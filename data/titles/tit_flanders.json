@@ -1,0 +1,28 @@
+{
+  "id": "tit_flanders",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Flandre",
+    "local": "Graafschap Vlaanderen",
+    "local_language": "moyen néerlandais"
+  },
+  "heraldry": {
+    "blazon": "D'or au lion de sable, armé et lampassé de gueules.",
+    "description": "Lion noir rampant sur champ d'or, armes des comtes de Flandre depuis Philippe d'Alsace (vers 1160).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_flandre",
+    "prov_nivernais"
+  ],
+  "holder_1337": {
+    "faction": "fac_flanders",
+    "sources": [
+      "Louis Ier de Flandre",
+      "Jacob van Artevelde",
+      "Comté de Flandre"
+    ]
+  }
+}

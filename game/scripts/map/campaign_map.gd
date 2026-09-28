@@ -328,7 +328,7 @@ func _connect_ui() -> void:
 		if flow != null:
 			flow.request_exit("main_menu")
 		else:
-			get_tree().change_scene_to_file(START_MENU_SCENE))
+			SceneFader.go(START_MENU_SCENE))
 	ui.quit_requested.connect(func() -> void:
 		if flow != null:
 			flow.request_exit("quit")
@@ -422,6 +422,8 @@ func refresh_all() -> void:
 			select_army(selected_army)
 		else:
 			deselect_army()
+	if next_hint != null:  # RS-E : recalculé sur l'événement plutôt que sur une minuterie seule
+		next_hint.refresh()
 	if selected_index > 0:
 		_show_province_panel(selected_index)
 	if ui.faction_panel_visible() and _faction_panel_id != "":
@@ -592,6 +594,8 @@ func select_army(army_id: String) -> void:
 	ui.hide_province()
 	selected_index = 0
 	terrain.set_highlight(hovered_index, 0)
+	if next_hint != null:  # RS-E : la sélection change la couverture du conseil (panneaux ouverts)
+		next_hint.refresh()
 	# Le chemin en cours (ordre déjà donné) est prévisualisé.
 	if free_movement:
 		path_preview.hide_path()
@@ -619,6 +623,8 @@ func deselect_army() -> void:
 		movement_ctl.on_army_deselected()
 	path_preview.hide_path()
 	ui.hide_army()
+	if next_hint != null:  # RS-E : la désélection change la couverture du conseil
+		next_hint.refresh()
 
 
 func _apply_reachable_mask(path_indices: PackedInt32Array) -> void:
@@ -714,8 +720,10 @@ func _on_province_selected(index: int) -> void:
 	terrain.set_highlight(hovered_index, selected_index)
 	if index == 0:
 		ui.hide_province()
-		return
-	_show_province_panel(index)
+	else:
+		_show_province_panel(index)
+	if next_hint != null:  # RS-E : la sélection change la couverture du conseil (panneau de province)
+		next_hint.refresh()
 
 
 func _show_province_panel(index: int) -> void:

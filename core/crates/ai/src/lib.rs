@@ -12,6 +12,7 @@ pub mod diplomacy_eval;
 pub mod doctrine;
 pub mod grid;
 pub mod parallel;
+pub mod stances;
 pub mod support;
 
 pub use campaign::{plan_turn, plan_turn_sequential};

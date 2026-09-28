@@ -2,7 +2,7 @@ class_name TurnWaitIndicator
 extends PanelContainer
 
 ## Lot PB3d : cartouche enluminé affiché pendant que le cœur résout la fin de tour dans son fil
-## (« Les cours d'Europe délibèrent… », sablier qui se retourne). Discret : n'apparaît qu'après
+## (« Les cours d'Europe délibèrent… », sablier qui se retourne ; PO5 : sortie en fondu). Discret : n'apparaît qu'après
 ## un court délai (pas de clignotement pour une fin de tour rapide), en fondu, en haut de l'écran
 ## sous la barre supérieure ; il n'intercepte pas la souris (caméra et survol continuent).
 
@@ -17,6 +17,7 @@ var _elapsed := 0.0
 var _active := false
 var _glass: _Hourglass
 var _label: Label
+var _fade_tween: Tween
 
 
 func _init() -> void:
@@ -39,6 +40,8 @@ func _init() -> void:
 
 ## Début de l'attente (l'indicateur apparaît après `SHOW_DELAY`).
 func begin() -> void:
+	if _fade_tween != null and _fade_tween.is_valid():
+		_fade_tween.kill()
 	_elapsed = 0.0
 	_active = true
 	modulate.a = 0.0
@@ -46,15 +49,23 @@ func begin() -> void:
 	set_process(true)
 
 
-## Fin de l'attente : masqué aussitôt.
+## Fin de l'attente : fondu de sortie (PO5, `FADE`), aussitôt masqué en headless, avec
+## « Réduire les animations » ou s'il n'était pas encore apparu.
 func end() -> void:
 	_active = false
-	visible = false
 	set_process(false)
+	if _fade_tween != null and _fade_tween.is_valid():
+		_fade_tween.kill()
+	if not visible or DisplayServer.get_name() == "headless" or Accessibility.reduce_motion():
+		visible = false
+		return
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(self, "modulate:a", 0.0, FADE * modulate.a)
+	_fade_tween.tween_callback(hide)
 
 
 func is_shown() -> bool:
-	return visible and modulate.a > 0.0
+	return _active and visible and modulate.a > 0.0
 
 
 func _process(delta: float) -> void:

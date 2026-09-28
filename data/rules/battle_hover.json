@@ -1,0 +1,19 @@
+{
+  "description": "Aperçu du trajet et curseur contextuel de bataille (lot CB-M2, ADR 0095). Saisie d'un régiment ou d'un pan de muraille sous le curseur, seuil d'« avantage net » de la comparaison face à face, cadence de recalcul de l'aperçu du trajet, secteur de tir dessiné au sol (lot CB-M4). Lu par sim-battle (HoverRules) ; les valeurs d'aperçu sont citées à l'interface par RuleValues.",
+  "pick": {
+    "unit_margin_m": 2.0,
+    "piece_margin_m": 3.0
+  },
+  "compare": {
+    "net_advantage_ratio": 0.15,
+    "net_advantage_min": 2.0
+  },
+  "preview": {
+    "recompute_distance_m": 5.0,
+    "max_recomputes_per_s": 10.0,
+    "max_individual_paths": 6
+  },
+  "range_arc": {
+    "fire_half_angle_deg": 60.0
+  }
+}

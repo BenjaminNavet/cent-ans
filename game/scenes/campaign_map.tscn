@@ -182,7 +182,8 @@ layout_mode = 2
 mouse_filter = 0
 mouse_default_cursor_shape = 2
 tooltip_text = "Panneau de faction"
-theme_override_font_sizes/font_size = 15
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Cent Ans"
 
 [node name="Sep1" type="VSeparator" parent="UI/TopBar/HBox"]
@@ -191,13 +192,15 @@ layout_mode = 2
 [node name="TreasuryLabel" type="Label" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Trésor : —"
 
 [node name="IncomeLabel" type="Label" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_type_variation = &"Body"
+theme_override_font_sizes/font_size = 17
 text = "Revenu : —"
 
 [node name="DateLabel" type="Label" parent="UI/TopBar/HBox"]
@@ -211,14 +214,14 @@ horizontal_alignment = 1
 [node name="CourtButton" type="Button" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 17
 text = "Cour"
 
 [node name="TechButton" type="Button" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Technologies (T)"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 17
 text = "Technologies"
 
 [node name="TradeButton" type="Button" parent="UI/TopBar/HBox"]
@@ -226,7 +229,7 @@ unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
 tooltip_text = "Routes commerciales (X)"
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 17
 text = "Commerce"
 
 [node name="ResearchBox" type="VBoxContainer" parent="UI/TopBar/HBox"]
@@ -242,7 +245,8 @@ theme_override_constants/separation = 1
 [node name="ResearchLabel" type="Label" parent="UI/TopBar/HBox/ResearchBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"Caption"
+theme_override_font_sizes/font_size = 14
 text = "Aucune recherche"
 text_overrun_behavior = 3
 
@@ -256,7 +260,7 @@ show_percentage = false
 [node name="MenuButton" type="MenuButton" parent="UI/TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 17
 text = "Menu"
 flat = false
 item_count = 5
@@ -330,7 +334,8 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 20
 text = "Journal"
 
 [node name="LogToggle" type="Button" parent="UI/EventLog/VBox/Header"]

@@ -88,7 +88,7 @@ func _ready() -> void:
 	for arg in args:
 		# NV1 : `-- --naval-scenario=sluys` lance directement une bataille navale historique.
 		if arg.begins_with("--naval-scenario="):
-			get_tree().change_scene_to_file.call_deferred("res://scenes/naval/naval_battle.tscn")
+			(func() -> void: SceneFader.go("res://scenes/naval/naval_battle.tscn")).call_deferred()
 			return
 		if arg.begins_with("--autostart"):
 			var faction := arg.trim_prefix("--autostart").trim_prefix("=")
@@ -203,20 +203,22 @@ func _build_main_column() -> void:
 	main_column.anchor_bottom = 1.0
 	main_column.offset_right = 640
 	main_column.add_theme_constant_override("margin_left", 84)
-	main_column.add_theme_constant_override("margin_top", 64)
-	main_column.add_theme_constant_override("margin_bottom", 40)
+	# PO1 : la colonne tient à 1280×720 (hauteur logique 800 px) — « Crédits » et « Quitter »
+	# sortaient de l'écran ; marges et espacements de la grille 4/8/16/24 (bible DA § 12.3).
+	main_column.add_theme_constant_override("margin_top", 24)
+	main_column.add_theme_constant_override("margin_bottom", 24)
 	add_child(main_column)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 6)
+	column.add_theme_constant_override("separation", 4)
 	main_column.add_child(column)
 	column.add_child(IlluminatedTitle.new())
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 44)
+	gap.custom_minimum_size = Vector2(0, 16)
 	column.add_child(gap)
 
 	new_game_button = _menu_button(column, "Nouvelle partie", func() -> void: show_faction_select())
 	continue_button = _menu_button(column, "Continuer", _on_continue)
-	_continue_detail = FrontEndStyle.label("", 16, Color(0.85, 0.78, 0.62), FrontEndStyle.body_italic(), 4)
+	_continue_detail = FrontEndStyle.label("", UiType.size(UiType.BODY), Color(0.85, 0.78, 0.62), FrontEndStyle.body_italic(), 4)
 	var detail_margin := MarginContainer.new()
 	detail_margin.add_theme_constant_override("margin_left", 25)
 	detail_margin.add_theme_constant_override("margin_top", -8)
@@ -232,14 +234,14 @@ func _build_main_column() -> void:
 	credits_button = _menu_button(column, "Crédits", open_credits)
 	quit_button = _menu_button(column, "Quitter", func() -> void: get_tree().quit())
 
-	status_label = FrontEndStyle.label("", 15, Color(1.0, 0.75, 0.6), FrontEndStyle.body_italic(), 4)
+	status_label = FrontEndStyle.label("", UiType.size(UiType.CAPTION), Color(1.0, 0.75, 0.6), FrontEndStyle.body_italic(), 4)
 	column.add_child(status_label)
 
 
 func _menu_button(parent: Control, text: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
-	FrontEndStyle.style_menu_button(button)
+	FrontEndStyle.style_menu_button(button, UiType.size(UiType.TITLE))
 	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	button.custom_minimum_size = Vector2(360, 0)
 	button.pressed.connect(action)
@@ -248,7 +250,7 @@ func _menu_button(parent: Control, text: String, action: Callable) -> Button:
 
 
 func _build_caption() -> void:
-	_caption = FrontEndStyle.label("", 18, Color(0.92, 0.86, 0.72), FrontEndStyle.title_italic(), 5)
+	_caption = FrontEndStyle.label("", UiType.size(UiType.HEADING), Color(0.92, 0.86, 0.72), FrontEndStyle.title_italic(), 5)
 	_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_caption.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	_caption.offset_left = -620
@@ -420,7 +422,7 @@ func _autostart() -> void:
 		facade.set("pending_seed", faction_select.seed_value())
 		facade.set("pending_difficulty", faction_select.selected_difficulty)  # DF1
 		facade.set("pending_load_path", "")
-	get_tree().change_scene_to_file(CAMPAIGN_SCENE)
+	SceneFader.go(CAMPAIGN_SCENE)
 
 
 func _on_continue() -> void:

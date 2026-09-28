@@ -15,6 +15,7 @@
   "religion": "rel_catholic",
   "culture": "cul_occitan",
   "succession_law": "elective",
+  "primary_title": "tit_papacy",
   "heraldry": {
     "blazon": "De gueules aux deux clefs d'argent et d'or passées en sautoir, liées d'azur, surmontées de la tiare.",
     "description": "Clefs de saint Pierre sous la tiare ; Benoît XII portait pour armes personnelles celles des Fournier.",

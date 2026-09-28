@@ -1,9 +1,12 @@
 //! Battle regiments: state, formation geometry and soldier positions.
 
+use std::collections::VecDeque;
+
 use data_model::{Ability, Missile, UnitCategory, UnitStats};
 use serde::{Deserialize, Serialize};
 
 use crate::impact::LossCause;
+use crate::queue::QueuedOrder;
 use crate::rng::jitter;
 use crate::setup::{SideId, UnitSetup};
 
@@ -261,6 +264,46 @@ pub struct Unit {
     /// EP11: push state and shape of the front in melee.
     #[serde(default)]
     pub push: crate::push::PushShape,
+    /// CB-M3: orders waiting behind the current one (Shift + right click),
+    /// at most `QueueRules::max_queued_orders`.
+    #[serde(default, skip_serializing_if = "VecDeque::is_empty")]
+    pub order_queue: VecDeque<QueuedOrder>,
+    /// CB1: files of the Line set by a right-drag (`formation_width`),
+    /// `None` for the default depth of the Line.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub line_files: Option<u32>,
+    /// CB1: tag of the grouped order the regiment walks under (a locked
+    /// group, or one drag); with `match_speed`, the group keeps the pace
+    /// of its slowest regiment.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_tag: Option<u32>,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub match_speed: bool,
+    /// CB2 (`crate::modes`): persistent run, guard, skirmish, melee (shooters
+    /// close in) and breach (engines batter walls only). Left out of the JSON
+    /// when off. `skirmish` starts on for regiments with the `skirmish`
+    /// ability.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub mode_run: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub guard: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub skirmish: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub melee_mode: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub breach: bool,
+    /// CB4 (`crate::abilities`): the active ability in use, cooldowns, and
+    /// why the last one ended. Left out of the JSON when empty.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::abilities::UnitAbilities::is_empty"
+    )]
+    pub ability_state: crate::abilities::UnitAbilities,
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 /// `missile_timer` of a regiment never shot at.
@@ -337,6 +380,17 @@ impl Unit {
             standard: StandardState::Carried,
             seen_at: unseen(),
             push: Default::default(),
+            order_queue: VecDeque::new(),
+            line_files: None,
+            group_tag: None,
+            match_speed: false,
+            mode_run: false,
+            guard: false,
+            // CB2: the shot on the move of the ability goes with the mode.
+            skirmish: setup.abilities.contains(&Ability::Skirmish),
+            melee_mode: false,
+            breach: false,
+            ability_state: Default::default(),
         }
     }
 
@@ -372,6 +426,11 @@ impl Unit {
 
     pub fn is_cavalry(&self) -> bool {
         self.category == UnitCategory::Cavalry
+    }
+
+    /// Charge bonus in percent (20 when the type gives none).
+    pub fn charge_points(&self) -> f64 {
+        f64::from(self.stats.charge.unwrap_or(20))
     }
 
     pub fn can_shoot(&self) -> bool {
@@ -459,6 +518,10 @@ impl Unit {
     pub fn ranks_files(&self, n: u32) -> (u32, u32) {
         let n = n.max(1);
         match self.formation {
+            Formation::Line if self.line_files.is_some() => {
+                let bounds = crate::formation_width::FormationWidthRules::bundled().bounds(self);
+                crate::formation_width::line_shape(n, self.line_files.unwrap_or(1), bounds)
+            }
             Formation::Line => {
                 let ranks = if self.category == UnitCategory::Siege {
                     1

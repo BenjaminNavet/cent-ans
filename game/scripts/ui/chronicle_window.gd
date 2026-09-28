@@ -176,7 +176,12 @@ func _fit() -> void:
 func _center_on_screen() -> void:
 	if not is_inside_tree():
 		return
-	var area := get_viewport_rect().size
+	# PO1 : dans une zone de `UiLayout` — enveloppe défilante du panneau latéral (le conteneur
+	# place la fenêtre) ou zone modale (centrée dans la zone, pas dans l'écran).
+	var parent := get_parent()
+	if parent is Container:
+		return
+	var area := (parent as Control).size if parent is Control else get_viewport_rect().size
 	position = ((area - size) / 2.0).floor()
 
 

@@ -158,6 +158,7 @@ func _ready() -> void:
 	toast.hide()
 	_decorate_top_bar()  # F2
 	_setup_hud()  # F10b : la cloche porte seule le raccourci `campaign_end_turn`
+	_setup_zones()  # PO1 : zones fixes de `UiLayout` (avant la pile : le reparentage désinscrit)
 	_setup_panel_stack()  # U1
 	_apply_access_args()  # U12 : captures
 
@@ -222,7 +223,7 @@ func _decorate_top_bar() -> void:
 		"[b]Colonies[/b]\nRevenus, chantiers et menaces de vos colonies, par province ; un clic y mène.", tech_button.get_index() + 5)
 	_register_top_label(holdings, "Colonies", "" if _apply_top_medallion(holdings, "hud_settlement") else "⛫")
 	if _apply_top_medallion(menu_button, "hud_menu"):
-		menu_button.add_theme_font_size_override("font_size", TOP_LABEL_FONT)
+		UiType.apply(menu_button, UiType.CAPTION)
 	get_viewport().size_changed.connect(queue_fit_top_bar)
 	($TopBar as Control).resized.connect(queue_fit_top_bar)
 	var settings := get_node_or_null("/root/Settings")
@@ -432,29 +433,15 @@ func set_hover_trade(text: String) -> void:
 	_fit_hover_label()
 
 
+## PO1 : avis éphémère dans la zone `TOASTS` de `UiLayout` (6 s, 3 au plus, clic pour fermer).
+## Le libellé `toast` de la scène reste masqué ; il garde le dernier texte (scripts de partie test).
 func show_toast(text: String, is_error: bool = false) -> void:
 	toast.text = text
-	toast.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10) if is_error else Color(0.22, 0.14, 0.07))
-	# Q1 : le bandeau passait sous les panneaux ancrés et le rapport de saison (message invisible).
-	toast.move_to_front()
-	toast.show()
-	_toast_shown_at = Time.get_ticks_msec()
-	_toast_timer = get_tree().create_timer(TOAST_SECONDS)
-	var timer := _toast_timer
-	timer.timeout.connect(func() -> void:
-		if _toast_timer == timer:
-			toast.hide())
-
-
-## Q2 : masque le bandeau quand un panneau ouvert après lui le chevauche.
-func _hide_toast_under_panels() -> void:
-	if not toast.visible or Time.get_ticks_msec() - _toast_shown_at < TOAST_GRACE_MS:
-		return
-	var rect := toast.get_global_rect()
-	for panel in panels.visible_panels():
-		if panel != toast and panel.get_global_rect().intersects(rect):
-			toast.hide()
-			return
+	toast.hide()
+	var entry: Control = UiZones.layout().toast(text)
+	var label := entry.find_child("Text", true, false) as Label
+	if label != null and is_error:
+		label.add_theme_color_override("font_color", Color(0.55, 0.12, 0.10))
 
 
 # --- Journal des événements ------------------------------------------------------------
@@ -705,17 +692,28 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 		general_picker.name = "GeneralPicker"
 		general_picker.theme = event_log.theme
 		general_picker.add_theme_stylebox_override("panel", HudStyle.panel_box(10))
-		add_child(general_picker)
+		# PO1 : dans la zone de sélection (bas), à la place du bandeau ; la liste défile.
+		UiZones.put(UiZones.Zone.BOTTOM_SELECTION, general_picker)
 		register_panel(general_picker, PanelStack.Kind.CENTRAL)
-	for child in general_picker.get_children():
-		general_picker.remove_child(child)
+		general_picker.visibility_changed.connect(func() -> void:
+			if not general_picker.visible and current_army_id != "":
+				army_strip.show()
+			queue_layout())
+		var scroll := ScrollContainer.new()
+		scroll.name = "Scroll"
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		general_picker.add_child(scroll)
+	var scroll_box: ScrollContainer = general_picker.get_node("Scroll")
+	for child in scroll_box.get_children():
+		scroll_box.remove_child(child)
 		child.queue_free()
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
-	general_picker.add_child(box)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll_box.add_child(box)
 	var header := HBoxContainer.new()
 	box.add_child(header)
-	var heading := HudStyle.label(title, HudStyle.FONT_TITLE + 1, HudStyle.RUBRIC)
+	var heading := HudStyle.label(title, UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(heading)
 	var close := Button.new()
@@ -741,7 +739,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 				general_requested.emit(character_id, army_id))
 		box.add_child(button)
 	if not any_free:
-		box.add_child(HudStyle.label("Aucun personnage disponible sur place : amenez-en un jusqu'à l'armée.", HudStyle.FONT_BODY, HudStyle.INK_SOFT))
+		box.add_child(HudStyle.label("Aucun personnage disponible sur place : amenez-en un jusqu'à l'armée.", UiType.size(UiType.CAPTION), HudStyle.INK_SOFT))
 	var court := Button.new()
 	court.text = "Toute la Cour…"
 	court.pressed.connect(func() -> void:
@@ -749,9 +747,7 @@ func show_general_picker(army_id: String, title: String, candidates: Array) -> v
 		court_panel_requested.emit())
 	box.add_child(court)
 	general_picker.show()
-	general_picker.reset_size()
-	var view := get_viewport().get_visible_rect().size
-	general_picker.position = Vector2(HUD_MARGIN, maxf(60.0, view.y - general_seal.size.y - HUD_MARGIN - general_picker.size.y - 8.0))
+	queue_layout()
 
 
 func show_court(rows: Array[Dictionary], faction_label: String, faction_color: Color, preset_filter: int = -1) -> void:
@@ -877,10 +873,10 @@ func _setup_turn_banner() -> void:
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	turn_banner.add_child(column)
-	_turn_banner_title = HudStyle.label("Tour des autres factions", 22, HudStyle.RUBRIC)
+	_turn_banner_title = HudStyle.label("Tour des autres factions", UiType.size(UiType.HEADING), HudStyle.RUBRIC)
 	_turn_banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(_turn_banner_title)
-	_turn_banner_detail = HudStyle.label("", HudStyle.FONT_BODY + 2, HudStyle.INK_SOFT)
+	_turn_banner_detail = HudStyle.label("", UiType.size(UiType.BODY), HudStyle.INK_SOFT)
 	_turn_banner_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(_turn_banner_detail)
 	add_child(turn_banner)
@@ -905,7 +901,8 @@ func show_turn_banner() -> void:
 func finish_turn_banner() -> void:
 	if turn_banner == null or not turn_banner.visible:
 		return
-	_turn_banner_title.text = date_label.text.get_slice(" — ", 0)
+	# PO1 : plus de date ici — le cartouche de saison (`SeasonBanner`, PO5) l'annonce.
+	_turn_banner_title.text = "Tour des autres factions"
 	_turn_banner_detail.text = "Les autres factions ont joué : à vous."
 	_place_turn_banner()
 	if _turn_banner_tween != null:
@@ -919,11 +916,10 @@ func finish_turn_banner() -> void:
 		_turn_banner_tween.tween_callback(turn_banner.hide)
 
 
+## PO1 : le bandeau est un occupant de la zone `TOASTS` (sous la barre, à gauche) ; il ne se
+## pose plus sur le panneau de province.
 func _place_turn_banner() -> void:
-	var view := get_viewport().get_visible_rect().size
 	turn_banner.reset_size()
-	turn_banner.size.x = maxf(turn_banner.get_combined_minimum_size().x, 380.0)
-	turn_banner.position = Vector2((view.x - turn_banner.size.x) * 0.5, ($TopBar as Control).size.y + 48.0)
 
 
 func _setup_hud() -> void:
@@ -968,6 +964,28 @@ func _setup_hud() -> void:
 	queue_layout()
 
 
+# --- Zones fixes (chantier PO, lot PO1) --------------------------------------------------
+
+
+## PO1 (ADR 0097, bible DA § 12.1) : les éléments de la carte rejoignent les zones de `UiLayout`
+## au lieu de positions absolues. La barre du haut reste un enfant direct (chemin `TopBar` lu par
+## d'autres contrôleurs), dans le rectangle `TOP_BAR` ; la cloche aussi (ses pastilles d'alerte
+## débordent vers le haut, elles ne doivent pas être coupées) : `layout_hud` la cale en bas
+## contre le bord gauche de la minicarte (la zone `MINIMAP`, 0,18 × 0,28, ne peut porter les
+## deux : écart consigné dans `docs/wip/po1-layout.md`).
+func _setup_zones() -> void:
+	UiZones.layout().attach_host(self)
+	for control: Control in [general_seal, army_strip, army_actions]:
+		UiZones.put(UiZones.Zone.BOTTOM_SELECTION, control)
+	UiZones.put(UiZones.Zone.SIDE_PANEL, province_panel)
+	UiZones.put(UiZones.Zone.SIDE_PANEL, news_letters)
+	news_letters.size_flags_horizontal = Control.SIZE_SHRINK_END
+	UiZones.put(UiZones.Zone.TOASTS, event_log)
+	UiZones.put(UiZones.Zone.TOASTS, turn_banner)
+	event_log.visibility_changed.connect(queue_layout)
+	UiZones.layout().side_panel_changed.connect(func(_control: Control) -> void: queue_layout())
+
+
 # --- Pile des panneaux (audit A3, lot U1) ------------------------------------------------
 
 
@@ -991,7 +1009,6 @@ func _setup_panel_stack() -> void:
 	child_entered_tree.connect(func(_node: Node) -> void: queue_restack())
 	panels.changed.connect(queue_restack)
 	panels.changed.connect(queue_layout)
-	panels.changed.connect(func() -> void: _hide_toast_under_panels.call_deferred())
 	queue_restack()
 
 
@@ -1074,85 +1091,82 @@ func queue_layout() -> void:
 	layout_hud.call_deferred()
 
 
-## Placement du HUD (guide `docs/design/hud-campagne.md` § 3.1) : sceau en bas à gauche,
-## cloche en bas à droite, bandeau centré entre les deux, journal au-dessus du sceau, lettres
-## sous la barre à droite, panneau de province arrêté au-dessus de la cloche.
+## Placement du HUD dans les zones fixes de `UiLayout` (PO1, bible DA § 12.1) : sceau, bandeau
+## d'ost et actions en bas (`BOTTOM_SELECTION`, coordonnées de la zone), minicarte en bas à
+## droite (`MINIMAP`), cloche calée en bas contre la minicarte, à sa gauche, panneaux de province et de colonie,
+## registre, chronique et lettres à droite (`SIDE_PANEL`, un seul à la fois), journal, bandeau
+## de fin de tour et avis en haut à gauche (`TOASTS`). Aucune place ne dépend de la taille d'un
+## autre panneau.
 func layout_hud() -> void:
 	_layout_queued = false
 	var view := get_viewport().get_visible_rect().size
-	var top: float = ($TopBar as Control).size.y + 8.0
+	var top: float = UiZones.rect(UiZones.Zone.TOP_BAR).end.y
+	var bottom := UiZones.rect(UiZones.Zone.BOTTOM_SELECTION)
+	var zone_size := bottom.size
+	# Minicarte d'abord : la cloche se range juste à sa gauche, calée en bas.
+	var mini_zone := UiZones.rect(UiZones.Zone.MINIMAP)
+	var mini_left := mini_zone.end.x
+	if minimap != null:
+		if minimap.has_method("fit_to"):
+			minimap.call("fit_to", mini_zone.size)
+		minimap.size = minimap.get_combined_minimum_size()
+		minimap.position = mini_zone.size - minimap.size
+		mini_left = mini_zone.end.x - minimap.size.x
 	end_turn_cluster.size = end_turn_cluster.get_combined_minimum_size()
-	end_turn_cluster.position = view - end_turn_cluster.size - Vector2(HUD_MARGIN, HUD_MARGIN) * 0.5
-	# CV3-0 (#9) : le panneau de faction s'arrête au-dessus de la cloche, comme les panneaux
-	# de province / colonie (`_dock_panel`) ; sinon il déborde sous l'écran.
-	faction_panel.update_bottom_reserve(end_turn_cluster.bell_height() + HUD_MARGIN * 0.5)
+	end_turn_cluster.position = Vector2(mini_left - 6.0 - end_turn_cluster.size.x, view.y - end_turn_cluster.size.y)
+	# CV3-0 (#9) : le panneau de faction s'arrête au-dessus de la cloche.
+	faction_panel.update_bottom_reserve(view.y - end_turn_cluster.position.y + HUD_MARGIN * 0.5)
 	general_seal.size = general_seal.get_combined_minimum_size()
-	general_seal.position = Vector2(HUD_MARGIN, view.y - general_seal.size.y - HUD_MARGIN)
-	var left := general_seal.position.x + general_seal.size.x + 16.0
-	var right := end_turn_cluster.position.x + end_turn_cluster.fan_left_edge() - 10.0
-	var gap := right - left
+	general_seal.position = Vector2(0.0, zone_size.y - general_seal.size.y)
+	var left := general_seal.size.x + 8.0 if general_seal.visible else 0.0
+	var right := minf(end_turn_cluster.position.x + end_turn_cluster.fan_left_edge() - 10.0, bottom.end.x) - bottom.position.x
+	var gap := maxf(right - left, 0.0)
+	var picking := general_picker != null and general_picker.visible
+	if picking:
+		army_strip.hide()
+		general_picker.position = Vector2(left, 0.0)
+		general_picker.size = Vector2(minf(460.0, gap), zone_size.y)
 	army_strip.max_width = gap
 	army_strip.size = Vector2.ZERO
-	army_strip.position = Vector2(left + (gap - army_strip.size.x) * 0.5, view.y - army_strip.size.y - HUD_MARGIN * 0.75)
-	# Étiquette de chemin : au-dessus du bandeau, sinon en bas au centre.
-	var label_bottom := army_strip.position.y - 6.0 if army_strip.visible else view.y - HUD_MARGIN
-	hover_label.position.y = label_bottom - hover_label.size.y
+	army_strip.position = Vector2(left + (gap - army_strip.size.x) * 0.5, zone_size.y - army_strip.size.y)
+	# Étiquette de chemin (enfant direct) : au-dessus du bandeau, sinon au-dessus de la zone.
+	var strip_top := bottom.position.y + (army_strip.position.y if army_strip.visible else 0.0)
+	hover_label.position.y = strip_top - 6.0 - hover_label.size.y
 	var actions_visible := false
 	for child in army_actions_box.get_children():
 		if (child as Control).visible:
 			actions_visible = true
 	army_actions.visible = army_strip.visible and actions_visible
 	army_actions.size = Vector2.ZERO
-	army_actions.position = Vector2(army_strip.position.x, label_bottom - hover_label.size.y - army_actions.size.y - 6.0)
-	# Journal : bas gauche, au-dessus du sceau quand il est affiché.
-	var log_bottom := general_seal.position.y - 8.0 if general_seal.visible else view.y - HUD_MARGIN
-	var log_height := event_log.get_combined_minimum_size().y
-	event_log.size = Vector2(LOG_WIDTH, log_height)
-	event_log.position = Vector2(HUD_MARGIN, maxf(top, log_bottom - log_height))
-	# Actions d'armée (siège) : jamais sur le journal ni sur son bouton « Déplier » (audit U1).
-	if army_actions.visible and event_log.visible and event_log.get_rect().intersects(army_actions.get_rect()):
-		army_actions.position.x = event_log.position.x + event_log.size.x + 8.0
+	army_actions.position = Vector2(army_strip.position.x, army_strip.position.y - hover_label.size.y - army_actions.size.y - 12.0)
 	# C7 : la fiche se range à droite de la Cour (repli en une colonne si la place manque) ;
 	# l'arbre de la Cour se rétrécit pour lui laisser au moins sa largeur repliée.
 	if court_panel.visible and character_sheet.visible:
 		court_panel.set_max_right(view.x - CharacterSheet.COMPACT_WIDTH - 2.0 * CharacterSheet.SCREEN_MARGIN)
 	else:
 		court_panel.set_max_right(INF)
-	# Bord droit réel (la liste peut élargir le panneau au-delà de ses marges).
 	character_sheet.fit_beside(court_panel.get_global_rect().end.x if court_panel.visible else 0.0, view.x)
-	# Minicarte (C1) puis lettres : haut droite. La minicarte reste visible sous les panneaux de
-	# province et de colonie (placés à sa gauche, lot C7b) ; les grands panneaux de droite
-	# (faction, fiche de personnage) la masquent, les lettres sont masquées par tout panneau.
-	var docked_open := province_panel.visible
-	for panel in docked_panels:
-		docked_open = docked_open or panel.visible
 	# U1 : panneaux centraux gardés à l'écran (bouton × visible), puis la minicarte se masque
-	# dès qu'un grand panneau la recouvrirait (elle ne passe plus jamais par-dessus).
+	# dès qu'un grand panneau la recouvrirait (elle ne passe jamais par-dessus).
 	var wide_panel_open := false
 	for panel in panels.visible_panels():
 		var kind := panels.kind_of(panel)
-		if kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION:
+		if (kind == PanelStack.Kind.CENTRAL or kind == PanelStack.Kind.COMPANION) and panel.get_parent() == self:
 			_keep_on_screen(panel, top, view)
 			wide_panel_open = true
-	var letters_top := top
-	# Bord droit (distance au bord de l'écran) des panneaux de province et de colonie.
-	var dock_right := HUD_MARGIN
 	if minimap != null:
-		minimap.size = minimap.get_combined_minimum_size()
-		minimap.position = Vector2(view.x - minimap.size.x - HUD_MARGIN, top)
-		minimap.visible = not _covers(minimap.get_global_rect())
-		letters_top = minimap.position.y + minimap.size.y + 10.0
-		if minimap.visible:
-			dock_right = view.x - minimap.position.x + 8.0
-	docked_right_x = view.x - dock_right
-	news_letters.position = Vector2(view.x - NewsLetters.LETTER_WIDTH - HUD_MARGIN, letters_top)
-	# U5 : les lettres s'arrêtent au-dessus des pastilles d'alerte de la cloche.
-	news_letters.fit_height(end_turn_cluster.position.y + end_turn_cluster.stack_top() - 8.0 - letters_top)
-	news_letters.visible = not (docked_open or wide_panel_open)
-	# Panneaux de province et de colonie : de la barre jusqu'au-dessus de la cloche, à gauche de
-	# la minicarte.
-	for panel: Control in [province_panel] + docked_panels:
-		_dock_panel(panel, top, dock_right)
+		minimap.visible = not _covers(mini_zone)
+	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL)
+	docked_right_x = side.end.x
+	# Lettres : occupant « de repos » du panneau latéral, visibles quand rien d'autre n'y est.
+	news_letters.fit_height(side.size.y)
+	var side_busy := false
+	for control in UiZones.layout().visible_occupants(UiZones.Zone.SIDE_PANEL):
+		if control != news_letters:
+			side_busy = true
+	var letters_visible := not (side_busy or wide_panel_open)
+	if news_letters.visible != letters_visible:
+		news_letters.visible = letters_visible
 
 
 ## U1 : vrai si un panneau central ou compagnon ouvert recouvre `rect` (coordonnées écran).
@@ -1184,32 +1198,16 @@ func _keep_on_screen(panel: Control, top: float, view: Vector2) -> void:
 		panel.position += shift
 
 
-## Lot C7b : ancre `panel` (panneau de colonie) comme le panneau de province, à gauche de la
-## minicarte ; replacé à chaque `layout_hud`.
+## Lot C7b, PO1 : `panel` (panneau de colonie) rejoint la zone `SIDE_PANEL`, comme le panneau
+## de province (un seul occupant à la fois).
 func dock_right_panel(panel: Control) -> void:
 	if docked_panels.has(panel):
 		return
 	docked_panels.append(panel)
+	UiZones.put(UiZones.Zone.SIDE_PANEL, panel)
 	panels.register(panel, PanelStack.Kind.DOCKED)
 	panel.visibility_changed.connect(queue_layout)
 	queue_layout()
-
-
-func _dock_panel(panel: Control, top: float, right: float) -> void:
-	var width := maxf(panel.offset_right - panel.offset_left, panel.custom_minimum_size.x)
-	panel.anchor_left = 1.0
-	panel.anchor_right = 1.0
-	panel.anchor_top = 0.0
-	panel.anchor_bottom = 1.0
-	# Contenu plus large que prévu : le panneau s'étend vers la gauche, jamais sur la minicarte.
-	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	# Contenu plus haut que la place : le panneau déborde vers le bas (sur la cloche),
-	# jamais vers le haut (sur la barre supérieure).
-	panel.grow_vertical = Control.GROW_DIRECTION_END
-	panel.offset_right = -right
-	panel.offset_left = -right - width
-	panel.offset_top = top
-	panel.offset_bottom = -(end_turn_cluster.bell_height() + HUD_MARGIN * 0.5)
 
 
 func _fit_hover_label() -> void:
@@ -1234,7 +1232,7 @@ func _add_codex_button() -> void:
 	if IconLibrary.has_icon("hud_codex"):
 		_decorate_button(button, "hud_codex")
 	button.text = "Codex"
-	button.add_theme_font_size_override("font_size", 17)
+	UiType.apply(button, UiType.BODY)
 	button.tooltip_text = "[b]Codex[/b]\nL'histoire et le savoir du temps, et les règles du jeu (onglets Histoire et Règles)."
 	_add_keycap(button, "codex_open")
 	_register_top_label(button, "Codex")
@@ -1259,7 +1257,7 @@ func _add_keycap(button: Button, action: String) -> void:
 	var cap := Label.new()
 	cap.name = "Keycap"
 	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cap.add_theme_font_size_override("font_size", 11)
+	UiType.apply(cap, UiType.CAPTION)
 	cap.add_theme_color_override("font_color", HudStyle.INK)
 	var box := HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.INK_SOFT)
 	box.content_margin_left = 3
@@ -1306,7 +1304,7 @@ func _add_action_button(node_name: String, glyph: String, text: String, action: 
 	button.name = node_name
 	button.focus_mode = Control.FOCUS_NONE
 	button.text = glyph if text == "" else "%s %s" % [glyph, text]
-	button.add_theme_font_size_override("font_size", 17)
+	UiType.apply(button, UiType.BODY)
 	button.custom_minimum_size = Vector2(TOP_ICON_SIZE + 22.0, 0)
 	button.set_script(RichButton)
 	button.tooltip_text = tooltip
@@ -1328,8 +1326,6 @@ func press_action(action: String) -> void:
 
 # --- UX2 : libellés de la barre du haut (audit A3, C9) ------------------------------------
 
-## Taille du texte des boutons libellés de la barre.
-const TOP_LABEL_FONT := 15
 ## Ordre de repli en icône seule quand la place manque (le premier se replie d'abord).
 const TOP_COLLAPSE_ORDER := ["Colonies", "Unités", "Agents", "Objectifs", "Codex", "Techniques", "Cour", "Diplomatie", "Chronique"]
 ## Marge laissée à droite de la barre (bord, respiration).
@@ -1348,7 +1344,7 @@ func _register_top_label(button: Button, label: String, glyph: String = "") -> v
 	for entry in _top_labels:
 		if entry["button"] == button:
 			return
-	button.add_theme_font_size_override("font_size", TOP_LABEL_FONT)
+	UiType.apply(button, UiType.CAPTION)
 	button.set_meta("top_label", label)
 	var entry := {"button": button, "label": label, "glyph": glyph, "labelled": true}
 	_top_labels.append(entry)

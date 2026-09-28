@@ -103,6 +103,20 @@ CLIPS: tuple[Clip, ...] = (
         f"[0:a]{TRIM_START},highpass=f=900,atrim=0:0.14,afade=t=out:st=0.03:d=0.11,volume=0.45[out]",
         "attack of a sword clash, high-passed at 900 Hz, 0.14 s",
     ),
+    Clip(
+        "click",
+        "PO2 — clic générique du thème (bouton, onglet)",
+        ("sfx/ui_click.ogg",),
+        "[0:a]afade=t=out:st=0.04:d=0.02,volume=0.9[out]",
+        "the project's own click effect (sfx/, already used by AudioDirector), light fade-out",
+    ),
+    Clip(
+        "open",
+        "PO2 — ouverture d'un panneau (UiMotion.fade_in)",
+        ("sfx/page_turn.ogg",),
+        f"[0:a]{TRIM_START},atrim=0:0.5,afade=t=out:st=0.3:d=0.2,volume=0.7[out]",
+        "the project's own page-turn effect (sfx/, already used by AudioDirector), trimmed and faded",
+    ),
 )
 
 

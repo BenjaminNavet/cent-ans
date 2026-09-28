@@ -1,0 +1,41 @@
+{
+  "id": "tit_england",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume d'Angleterre",
+    "local": "Kingdom of England",
+    "local_language": "moyen anglais"
+  },
+  "heraldry": {
+    "blazon": "De gueules à trois léopards d'or, armés et lampassés d'azur.",
+    "description": "Trois lions passants gardants (« léopards ») d'or sur champ rouge. Édouard III écartèlera ces armes avec la France ancienne en janvier 1340 en prenant le titre de roi de France.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_provinces": [
+    "prov_deheubarth",
+    "prov_devon",
+    "prov_dublin",
+    "prov_gloucester",
+    "prov_gwynedd",
+    "prov_kent",
+    "prov_middlesex",
+    "prov_munster",
+    "prov_norfolk",
+    "prov_northumberland",
+    "prov_oxford",
+    "prov_sussex",
+    "prov_ulster",
+    "prov_warwick",
+    "prov_wessex",
+    "prov_yorkshire"
+  ],
+  "holder_1337": {
+    "faction": "fac_england",
+    "sources": [
+      "Édouard III",
+      "Guerre de Cent Ans",
+      "Armoiries royales du Royaume-Uni"
+    ]
+  }
+}
