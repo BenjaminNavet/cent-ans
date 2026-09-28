@@ -77,32 +77,5 @@
     "sources": [
       "Wismar"
     ]
-  },
-  {
-    "id": "set_stralsund",
-    "province": "prov_mecklenburg",
-    "kind": "town",
-    "name": {
-      "display": "Stralsund",
-      "local": "Stralessund",
-      "local_language": "moyen haut-allemand"
-    },
-    "lonlat": [
-      13.091,
-      54.3093
-    ],
-    "weight": 18,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Grand port hanséatique de la Baltique, rival de Lübeck pour le commerce du hareng et des céréales. Rattaché ici au Mecklembourg par simplification (en réalité fief des ducs de Poméranie-Rügen, non modélisée séparément).",
-    "sources": [
-      "Stralsund"
-    ]
   }
 ]

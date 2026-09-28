@@ -1,0 +1,100 @@
+{
+  "id": "prov_svealand",
+  "name": {
+    "display": "Svealand et Uppland",
+    "local": "Svealand",
+    "local_language": "vieux suédois"
+  },
+  "region": "scandinavie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Fyris"
+  ],
+  "coastal": true,
+  "ports": [
+    "Stockholm",
+    "Nyköping"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Uppsala",
+      "local": "Uppsala",
+      "local_language": "vieux suédois"
+    },
+    "lat": 59.8586,
+    "lon": 17.6389
+  },
+  "geo": {
+    "capital_lonlat": [
+      17.6389,
+      59.8586
+    ],
+    "seed_lonlat": [
+      17.6,
+      59.75
+    ],
+    "voronoi_weight": 0.95
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_swedish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 140000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1680,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field",
+    "bld_cathedral"
+  ],
+  "fortification_level": 1,
+  "base_supply": 2900,
+  "description": "Cœur ancien du royaume autour du lac Mälar : Uppsala, siège de l'archevêque, Sigtuna, Stockholm (« Stockholm » citée depuis 1252) et les couronnements dans la région de Mora.",
+  "sources": [
+    "Svealand",
+    "Uppsala",
+    "Stockholm",
+    "Uppland"
+  ]
+}

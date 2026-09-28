@@ -1446,6 +1446,127 @@
       "vassal_of": [
         "fac_pavia"
       ]
+    },
+    {
+      "id": "abel",
+      "name": "Abel",
+      "blazon": "D'or à deux léopards d'azur.",
+      "description": "Les ducs de Slesvig de la lignée d'Abel, fils cadet de Valdemar II ; armes du duché.",
+      "source": "fr.wikipedia : Duché de Slesvig, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_schleswig"
+      ],
+      "vassal_of": [
+        "fac_schleswig"
+      ]
+    },
+    {
+      "id": "ordre_teutonique",
+      "name": "Ordre Teutonique",
+      "arms_of": "fac_teutonic",
+      "blazon": "D'argent à la croix de sable.",
+      "description": "Croix noire de l'Ordre, portée par ses grands maîtres.",
+      "source": "fr.wikipedia : Ordre Teutonique, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_teutonic"
+      ],
+      "vassal_of": [
+        "fac_teutonic"
+      ]
+    },
+    {
+      "id": "ordre_livonien",
+      "name": "Ordre Livonien",
+      "arms_of": "fac_livonian_order",
+      "blazon": "D'argent à la croix de sable, à la bordure de gueules.",
+      "description": "Branche livonienne de l'Ordre ; bordure rouge de jeu.",
+      "source": "fr.wikipedia : Ordre Livonien",
+      "certainty": "incertain",
+      "factions": [
+        "fac_livonian_order"
+      ],
+      "vassal_of": [
+        "fac_livonian_order"
+      ]
+    },
+    {
+      "id": "archeveche_de_riga",
+      "name": "Archevêché de Riga",
+      "arms_of": "fac_riga_archbishopric",
+      "blazon": "D'azur à deux clefs d'or en sautoir.",
+      "description": "Clefs de saint Pierre : armes simplifiées de l'archevêché de Riga.",
+      "source": "de.wikipedia : Erzbistum Riga, Wappen",
+      "certainty": "substitution",
+      "factions": [
+        "fac_riga_archbishopric"
+      ],
+      "vassal_of": [
+        "fac_riga_archbishopric"
+      ]
+    },
+    {
+      "id": "eveche_de_dorpat",
+      "name": "Évêché de Dorpat",
+      "arms_of": "fac_dorpat",
+      "blazon": "De sable à deux clefs d'argent en sautoir.",
+      "description": "Armes simplifiées de l'évêché de Dorpat.",
+      "source": "de.wikipedia : Bistum Dorpat, Wappen",
+      "certainty": "substitution",
+      "factions": [
+        "fac_dorpat"
+      ],
+      "vassal_of": [
+        "fac_dorpat"
+      ]
+    },
+    {
+      "id": "eveche_d_osel_wiek",
+      "name": "Évêché d'Ösel-Wiek",
+      "arms_of": "fac_osel_wiek",
+      "blazon": "D'azur à la croix d'argent.",
+      "description": "Armes simplifiées de l'évêché d'Ösel-Wiek.",
+      "source": "de.wikipedia : Bistum Ösel-Wiek, Wappen",
+      "certainty": "substitution",
+      "factions": [
+        "fac_osel_wiek"
+      ],
+      "vassal_of": [
+        "fac_osel_wiek"
+      ]
+    },
+    {
+      "id": "eveche_de_courlande",
+      "name": "Évêché de Courlande",
+      "arms_of": "fac_courland",
+      "blazon": "De sinople à la croix d'argent.",
+      "description": "Armes simplifiées de l'évêché de Courlande.",
+      "source": "de.wikipedia : Bistum Kurland, Wappen",
+      "certainty": "substitution",
+      "factions": [
+        "fac_courland"
+      ],
+      "vassal_of": [
+        "fac_courland"
+      ]
+    },
+    {
+      "id": "greifen",
+      "name": "Greifen",
+      "arms_of": "fac_pomerania_stettin",
+      "blazon": "D'argent au griffon de gueules, à la bordure de sable.",
+      "description": "Le griffon rouge de Poméranie, armes des ducs de la maison des Greifen.",
+      "source": "fr.wikipedia : Maison de Poméranie, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_pomerania_stettin",
+        "fac_pomerania_wolgast"
+      ],
+      "vassal_of": [
+        "fac_pomerania_stettin",
+        "fac_pomerania_wolgast"
+      ]
     }
   ]
 }

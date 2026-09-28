@@ -1,0 +1,104 @@
+[
+  {
+    "id": "set_osterode",
+    "province": "prov_galindia",
+    "kind": "city",
+    "name": {
+      "display": "Osterode",
+      "local": "Osterode",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      19.9667,
+      53.6997
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château de l'Ordre et ville de l'Oberland.",
+    "sources": [
+      "Ostróda"
+    ]
+  },
+  {
+    "id": "set_allenstein",
+    "province": "prov_galindia",
+    "kind": "castle",
+    "name": {
+      "display": "Allenstein",
+      "local": "Allenstein",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      20.4942,
+      53.7784
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château du chapitre de Warmie (bâti dans la décennie 1350), village fortifié.",
+    "sources": [
+      "Olsztyn"
+    ]
+  },
+  {
+    "id": "set_neidenburg",
+    "province": "prov_galindia",
+    "kind": "castle",
+    "name": {
+      "display": "Neidenburg",
+      "local": "Neidenburg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      20.4275,
+      53.3608
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Place frontalière face à la Mazovie.",
+    "sources": [
+      "Nidzica"
+    ]
+  },
+  {
+    "id": "set_soldau",
+    "province": "prov_galindia",
+    "kind": "village",
+    "name": {
+      "display": "Soldau",
+      "local": "Soldau",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      20.1333,
+      53.5667
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de la marche méridionale.",
+    "sources": [
+      "Działdowo"
+    ]
+  }
+]

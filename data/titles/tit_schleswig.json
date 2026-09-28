@@ -1,0 +1,59 @@
+{
+  "id": "tit_schleswig",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché de Slesvig",
+    "local": "Hertugdømmet Slesvig",
+    "local_language": "danois médiéval"
+  },
+  "heraldry": {
+    "blazon": "D'or à deux léopards d'azur.",
+    "description": "Les deux lions bleus de Slesvig, sur or.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "de_jure_liege": "tit_denmark",
+  "de_jure_provinces": [
+    "prov_schleswig"
+  ],
+  "holder_1337": {
+    "faction": "fac_schleswig",
+    "sources": [
+      "Duché de Slesvig",
+      "Valdemar III de Danemark"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_schleswig_hold",
+      "title": "Garder le duché",
+      "description": "Conserver le duché de Slesvig.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_schleswig"
+      }
+    },
+    {
+      "id": "obj_schleswig_indep",
+      "title": "Duc libre",
+      "description": "Ne prêter hommage à aucun régent.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_schleswig_crown",
+      "title": "La couronne de Valdemar III",
+      "description": "Reprendre le trône que le duc a déjà porté.",
+      "condition": {
+        "kind": "hold_crown",
+        "title": "tit_denmark"
+      }
+    }
+  ],
+  "description": "Duché danois (Sønderjylland), fief héréditaire de la lignée d'Abel, entre l'Ejder et la Kongeå.",
+  "sources": [
+    "Duché de Slesvig",
+    "Valdemar III de Danemark"
+  ]
+}

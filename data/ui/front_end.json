@@ -1293,6 +1293,198 @@
         "Isolée diplomatiquement"
       ],
       "difficulty": 3
+    },
+    {
+      "id": "fac_holstein_kiel",
+      "tagline": "Le maître du Danemark oriental",
+      "intro": "Jean III, comte de Kiel, a arbitré la paix de 1332 et tient Sjælland en gage. Sans roi à Copenhague, il peut faire pencher l'équilibre entre son cousin Gérard, le duc de Slesvig et la Suède.",
+      "strengths": [
+        "Sjælland riche en blé et en hareng",
+        "Hanséates de Lübeck pour alliés",
+        "Cousinage avec toute la maison de Holstein"
+      ],
+      "weaknesses": [
+        "Une seule province, à cheval sur les rivalités familiales",
+        "Gérard le Grand plus puissant",
+        "Ne tient l'île qu'en gage"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_schleswig",
+      "tagline": "Le duc qui fut roi",
+      "intro": "Valdemar V a porté la couronne danoise sous le nom de Valdemar III avant d'en être chassé. À vingt-trois ans, il gouverne le Slesvig et regarde vers un trône vacant.",
+      "strengths": [
+        "Un duché défendable entre deux mers",
+        "Un titre royal déjà porté",
+        "Le soutien du Holstein tout proche"
+      ],
+      "weaknesses": [
+        "Une seule province, plate et exposée",
+        "Le Jutland et Rendsbourg pèsent plus",
+        "Peu de trésor"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_danish_estonia",
+      "tagline": "Un duché sans roi",
+      "intro": "Depuis 1332, le roi de Danemark n'est plus là pour protéger Reval. Le capitaine, l'évêque et les vassaux allemands se disputent une province que l'Ordre convoite.",
+      "strengths": [
+        "Reval, port hanséatique riche",
+        "Châteaux nombreux",
+        "Vassaux estoniens nombreux"
+      ],
+      "weaknesses": [
+        "Aucun souverain, aucun renfort",
+        "Ordre Livonien et évêques voisins hostiles",
+        "Population estonienne frondeuse"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_teutonic",
+      "tagline": "Les moines-soldats de la Baltique",
+      "intro": "Dietrich von Altenburg gouverne depuis Marienbourg un État sans égal : forteresses, villes hanséatiques, ports. La croisade contre la Lituanie fournit des chevaliers venus de toute l'Europe ; la Pologne réclame la Pomérélie.",
+      "strengths": [
+        "Le trésor et les forteresses les plus puissants du Nord-Est",
+        "Chevaliers croisés venus de toute l'Europe",
+        "Dantzig, Thorn et Elbing, ports de la Hanse"
+      ],
+      "weaknesses": [
+        "Lituanie et Pologne hostiles",
+        "Livonie éloignée, à demi autonome",
+        "Peu de terres arables à l'est"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_livonian_order",
+      "tagline": "La croix au bord de la Dvina",
+      "intro": "Eberhard von Monheim tient la Livonie et la Courlande de sa forteresse de Wenden, avec pour suzerain lointain le grand maître de Prusse. Autour de lui, les évêques rivalisent d'ambition, et Riga cède à peine.",
+      "strengths": [
+        "Châteaux de pierre en chaîne",
+        "Chevaliers aguerris par les raids",
+        "Soutien du grand maître de Prusse"
+      ],
+      "weaknesses": [
+        "Peu de terres riches",
+        "Évêques et Riga jaloux",
+        "Lituaniens et Russes en marche"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_riga_archbishopric",
+      "tagline": "Le primat sans capitale",
+      "intro": "Friedrich de Pernstein règne en prince d'Empire sur des châteaux dispersés, avec une ville qui lui échappe et un Ordre qui l'écrase. Depuis vingt ans, il défend l'autonomie de l'Église de Livonie.",
+      "strengths": [
+        "Autorité spirituelle sur toute la Livonie",
+        "Châteaux sur la Dvina et la Gauja",
+        "Appui de l'Empereur et du pape"
+      ],
+      "weaknesses": [
+        "Terres éparpillées",
+        "Ordre bien plus fort",
+        "Riga lui échappe"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_riga",
+      "tagline": "La ville hanséatique sous tutelle",
+      "intro": "Riga est la reine de la Dvina, mais l'Ordre l'a domptée en 1330. Marchands et conseil négocient chaque privilège en attendant l'occasion de retrouver leurs libertés.",
+      "strengths": [
+        "Commerce hanséatique florissant",
+        "Murailles solides",
+        "Trésor confortable"
+      ],
+      "weaknesses": [
+        "Aucun arrière-pays",
+        "Château de l'Ordre dans la ville",
+        "Une seule province"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_dorpat",
+      "tagline": "L'évêque de la route de Novgorod",
+      "intro": "Engelbert de Dolen tient Dorpat et ses châteaux entre la Livonie de l'Ordre et la Russie de Pskov. Ses marchands font la richesse de l'évêché, ses châteaux sa survie.",
+      "strengths": [
+        "Ville commerçante",
+        "Châteaux de frontière",
+        "Statut de prince d'Empire"
+      ],
+      "weaknesses": [
+        "Petite armée",
+        "Ordre voisin hostile",
+        "Frontière russe active"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_osel_wiek",
+      "tagline": "L'évêché des îles",
+      "intro": "Jakob II, évêque de la côte et des îles d'Ösel, voit son règne toucher à sa fin. L'évêché survit par ses ports et la faiblesse de ses voisins.",
+      "strengths": [
+        "Ports sur le golfe de Riga",
+        "Îles faciles à défendre",
+        "Prestige épiscopal"
+      ],
+      "weaknesses": [
+        "Peu de terres, peu d'hommes",
+        "Évêque âgé",
+        "Ordre Livonien menaçant"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_courland",
+      "tagline": "Le petit évêché de Pilten",
+      "intro": "L'évêque de Courlande n'a que trois châteaux, encerclés par l'Ordre. Une petite principauté, mais un chapitre qui compte.",
+      "strengths": [
+        "Position côtière",
+        "Chapitre d'élite",
+        "Alliance possible avec l'archevêque"
+      ],
+      "weaknesses": [
+        "Territoire minuscule",
+        "Encerclé par l'Ordre",
+        "Trésor maigre"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_pomerania_stettin",
+      "tagline": "Les Griffons de l'Oder",
+      "intro": "Othon Ier et son fils Barnim tiennent Stettin et l'Oder inférieur. La Marche de Brandebourg veut leur hommage, les Teutoniques et la Pologne pèsent à l'est ; l'empereur pourrait bientôt libérer le duché.",
+      "strengths": [
+        "Stettin, grand port de l'Oder",
+        "Un héritier expérimenté, Barnim",
+        "Rivalité utile des voisins"
+      ],
+      "weaknesses": [
+        "Brandebourg revendique la suzeraineté",
+        "Duché coupé en deux lignes",
+        "Peu de cavalerie lourde"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_pomerania_wolgast",
+      "tagline": "Les jeunes Griffons de Wolgast",
+      "intro": "Les fils de Wartislaw IV sortent de la minorité. Ils tiennent Rügen, Greifswald et le pays de Stolp, mais Stralsund, hanséatique et fière, fait plier ses ducs.",
+      "strengths": [
+        "Villes hanséatiques riches",
+        "Île de Rügen défendable",
+        "Trois frères pour se partager les charges"
+      ],
+      "weaknesses": [
+        "Ducs à peine majeurs",
+        "Territoire divisé en deux morceaux",
+        "Stralsund frondeuse"
+      ],
+      "difficulty": 2
     }
   ],
   "difficulty_labels": [

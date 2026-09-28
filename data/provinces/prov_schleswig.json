@@ -1,0 +1,102 @@
+{
+  "id": "prov_schleswig",
+  "name": {
+    "display": "Duché de Slesvig",
+    "local": "Hertugdømmet Slesvig",
+    "local_language": "danois médiéval"
+  },
+  "region": "scandinavie",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Slien",
+    "Ejder"
+  ],
+  "coastal": true,
+  "ports": [
+    "Flensbourg",
+    "Haderslev",
+    "Slesvig"
+  ],
+  "sea_zones": [
+    "sea_north_sea",
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Slesvig",
+      "local": "Slesvig",
+      "local_language": "danois médiéval"
+    },
+    "lat": 54.5153,
+    "lon": 9.5686
+  },
+  "geo": {
+    "capital_lonlat": [
+      9.5686,
+      54.5153
+    ],
+    "seed_lonlat": [
+      9.6,
+      54.75
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_schleswig",
+  "culture": "cul_danish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 110000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7700,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3300,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1320,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field",
+    "bld_castle"
+  ],
+  "fortification_level": 1,
+  "base_supply": 2200,
+  "description": "Le Sønderjylland, fief danois de la lignée d'Abel, entre l'Ejder et la Kongeå ; le duc Valdemar V y règne depuis 1330 et tient sa terre du roi, dont le trône est vacant.",
+  "sources": [
+    "Duché de Slesvig",
+    "Valdemar III de Danemark",
+    "Interrègne danois (1332-1340)"
+  ]
+}

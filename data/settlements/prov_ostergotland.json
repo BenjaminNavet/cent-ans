@@ -1,0 +1,133 @@
+[
+  {
+    "id": "set_linkoping",
+    "province": "prov_ostergotland",
+    "kind": "city",
+    "name": {
+      "display": "Linköping",
+      "local": "Linköping",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      15.6245,
+      58.4109
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Siège épiscopal, cathédrale romane et gothique en construction.",
+    "sources": [
+      "Linköping"
+    ]
+  },
+  {
+    "id": "set_kalmar",
+    "province": "prov_ostergotland",
+    "kind": "castle",
+    "name": {
+      "display": "Kalmar",
+      "local": "Kalmar",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      16.3616,
+      56.6634
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château et ville portuaire, clef du détroit face à Öland.",
+    "sources": [
+      "Château de Kalmar"
+    ]
+  },
+  {
+    "id": "set_vadstena",
+    "province": "prov_ostergotland",
+    "kind": "abbey",
+    "name": {
+      "display": "Vadstena",
+      "local": "Vadstena",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      14.8878,
+      58.4478
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Château royal sur le Vättern ; le monastère de sainte Brigitte y sera fondé après 1346.",
+    "sources": [
+      "Château de Vadstena"
+    ]
+  },
+  {
+    "id": "set_soderkoping",
+    "province": "prov_ostergotland",
+    "kind": "town",
+    "name": {
+      "display": "Söderköping",
+      "local": "Söderköping",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      16.3,
+      58.4783
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port marchand de la côte d'Östergötland.",
+    "sources": [
+      "Söderköping"
+    ]
+  },
+  {
+    "id": "set_vaxjo",
+    "province": "prov_ostergotland",
+    "kind": "town",
+    "name": {
+      "display": "Växjö",
+      "local": "Växjö",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      14.8059,
+      56.8777
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Siège épiscopal du Småland.",
+    "sources": [
+      "Växjö"
+    ]
+  }
+]

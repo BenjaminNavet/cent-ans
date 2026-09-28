@@ -1,0 +1,104 @@
+[
+  {
+    "id": "set_selanger",
+    "province": "prov_norrland",
+    "kind": "city",
+    "name": {
+      "display": "Selånger",
+      "local": "Selånger",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      17.2843,
+      62.3958
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Marché médiéval de Medelpad, à l'embouchure de la Selångersån.",
+    "sources": [
+      "Selånger"
+    ]
+  },
+  {
+    "id": "set_umea",
+    "province": "prov_norrland",
+    "kind": "village",
+    "name": {
+      "display": "Umeå",
+      "local": "Ume",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      20.263,
+      63.8258
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Paroisse riveraine du Västerbotten, marché de pelleteries.",
+    "sources": [
+      "Umeå"
+    ]
+  },
+  {
+    "id": "set_bergsjo",
+    "province": "prov_norrland",
+    "kind": "village",
+    "name": {
+      "display": "Bergsjö",
+      "local": "Bergsjö",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      17.0333,
+      61.9833
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Paroisse de Hälsingland dans la vallée de la Ljusnan.",
+    "sources": [
+      "Bergsjö"
+    ]
+  },
+  {
+    "id": "set_nordmaling",
+    "province": "prov_norrland",
+    "kind": "village",
+    "name": {
+      "display": "Nordmaling",
+      "local": "Nordmaling",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      19.5,
+      63.5667
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Paroisse de la côte d'Ångermanland.",
+    "sources": [
+      "Nordmaling"
+    ]
+  }
+]
