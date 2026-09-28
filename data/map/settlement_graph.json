@@ -1450,9 +1450,58 @@
    "sea": false
   },
   {
+   "from": "set_altdorf_uri",
+   "to": "set_toelz",
+   "cost": 361.62,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_altenburg_bamberg",
+   "to": "set_altzella",
+   "cost": 218.74,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_altenburg_bamberg",
+   "to": "set_bamberg",
+   "cost": 1.96,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_altenburg_bamberg",
+   "to": "set_ebrach",
+   "cost": 32.14,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_altenburg_bamberg",
+   "to": "set_forchheim",
+   "cost": 19.26,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_altenburg_bamberg",
+   "to": "set_wartburg",
+   "cost": 127.08,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_altzella",
    "to": "set_freiberg",
    "cost": 21.47,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_altzella",
+   "to": "set_furth",
+   "cost": 244.6,
    "road": false,
    "sea": false
   },
@@ -1801,6 +1850,20 @@
   },
   {
    "from": "set_andechs",
+   "to": "set_padova",
+   "cost": 217.66,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_andechs",
+   "to": "set_schwyz",
+   "cost": 163.94,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_andechs",
    "to": "set_toelz",
    "cost": 36.49,
    "road": false,
@@ -1815,6 +1878,13 @@
   },
   {
    "from": "set_andernach",
+   "to": "set_ehrenbreitstein",
+   "cost": 6.58,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_andernach",
    "to": "set_godesburg",
    "cost": 16.42,
    "road": true,
@@ -1822,22 +1892,8 @@
   },
   {
    "from": "set_andernach",
-   "to": "set_koblenz",
-   "cost": 12.24,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_andernach",
    "to": "set_siegburg",
    "cost": 42.49,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_andernach",
-   "to": "set_zuelpich",
-   "cost": 60.08,
    "road": false,
    "sea": false
   },
@@ -2147,6 +2203,13 @@
    "to": "set_groningue",
    "cost": 44.63,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_appingedam",
+   "to": "set_hamm",
+   "cost": 145.23,
+   "road": true,
    "sea": false
   },
   {
@@ -2718,13 +2781,6 @@
   },
   {
    "from": "set_augsbourg",
-   "to": "set_innsbruck",
-   "cost": 96.09,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_augsbourg",
    "to": "set_kaisheim",
    "cost": 21.19,
    "road": true,
@@ -3242,6 +3298,34 @@
    "sea": false
   },
   {
+   "from": "set_baden_baden",
+   "to": "set_ettlingen",
+   "cost": 11.55,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_baden_baden",
+   "to": "set_hohenbaden",
+   "cost": 1.09,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_baden_baden",
+   "to": "set_pforzheim",
+   "cost": 18.07,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_baden_baden",
+   "to": "set_strasbourg",
+   "cost": 21.0,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_baena",
    "to": "set_cordoue",
    "cost": 25.54,
@@ -3348,22 +3432,22 @@
   },
   {
    "from": "set_bamberg",
-   "to": "set_ebrach",
-   "cost": 28.84,
+   "to": "set_banz",
+   "cost": 22.14,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bamberg",
-   "to": "set_kronach",
-   "cost": 49.42,
+   "to": "set_forchheim",
+   "cost": 20.58,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bamberg",
-   "to": "set_nuremberg",
-   "cost": 51.47,
+   "to": "set_freiberg",
+   "cost": 207.85,
    "road": false,
    "sea": false
   },
@@ -3371,6 +3455,13 @@
    "from": "set_bamberg",
    "to": "set_volkach",
    "cost": 47.62,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bamberg",
+   "to": "set_weimar",
+   "cost": 124.21,
    "road": false,
    "sea": false
   },
@@ -3448,6 +3539,27 @@
    "from": "set_bangor",
    "to": "set_harlech",
    "cost": 82.01,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_banz",
+   "to": "set_erfurt",
+   "cost": 99.51,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_banz",
+   "to": "set_forchheim",
+   "cost": 37.38,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_banz",
+   "to": "set_leipzig",
+   "cost": 170.0,
    "road": false,
    "sea": false
   },
@@ -4559,36 +4671,50 @@
   },
   {
    "from": "set_bergheim",
+   "to": "set_dusseldorf",
+   "cost": 15.64,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bergheim",
+   "to": "set_franchimont",
+   "cost": 75.05,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bergheim",
    "to": "set_geldern",
-   "cost": 66.03,
+   "cost": 64.15,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bergheim",
    "to": "set_juelich",
-   "cost": 10.09,
+   "cost": 1.88,
    "road": true,
    "sea": false
   },
   {
    "from": "set_bergheim",
-   "to": "set_vise",
-   "cost": 70.77,
+   "to": "set_julich",
+   "cost": 9.94,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bergheim",
+   "to": "set_shertogenbosch",
+   "cost": 102.75,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bergheim",
-   "to": "set_zoutleeuw",
-   "cost": 54.76,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_bergheim",
-   "to": "set_zuelpich",
-   "cost": 15.14,
+   "to": "set_wesel",
+   "cost": 37.14,
    "road": true,
    "sea": false
   },
@@ -4643,9 +4769,23 @@
   },
   {
    "from": "set_berlin",
+   "to": "set_lund",
+   "cost": 354.68,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_berlin",
    "to": "set_meissen",
    "cost": 75.61,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_berlin",
+   "to": "set_oldesloe",
+   "cost": 248.46,
+   "road": false,
    "sea": false
   },
   {
@@ -4658,7 +4798,7 @@
   {
    "from": "set_berlin",
    "to": "set_stralsund",
-   "cost": 100.13,
+   "cost": 96.47,
    "road": true,
    "sea": false
   },
@@ -4743,6 +4883,13 @@
    "from": "set_bernkastel",
    "to": "set_kaiserslautern",
    "cost": 72.87,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_bernkastel",
+   "to": "set_koblenz",
+   "cost": 57.57,
    "road": false,
    "sea": false
   },
@@ -5167,6 +5314,13 @@
    "sea": false
   },
   {
+   "from": "set_bodenheim",
+   "to": "set_volkach",
+   "cost": 137.39,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_bodmin",
    "to": "set_fowey",
    "cost": 15.78,
@@ -5259,15 +5413,15 @@
   },
   {
    "from": "set_bolzano",
-   "to": "set_feltre",
-   "cost": 96.51,
+   "to": "set_monza",
+   "cost": 285.75,
    "road": false,
    "sea": false
   },
   {
    "from": "set_bolzano",
-   "to": "set_monza",
-   "cost": 285.75,
+   "to": "set_pergine",
+   "cost": 98.01,
    "road": false,
    "sea": false
   },
@@ -5735,16 +5889,23 @@
   },
   {
    "from": "set_brandenburg_havel",
-   "to": "set_spandau",
-   "cost": 23.0,
-   "road": true,
+   "to": "set_reinbek",
+   "cost": 198.17,
+   "road": false,
    "sea": false
   },
   {
    "from": "set_brandenburg_havel",
-   "to": "set_wismar",
-   "cost": 149.75,
+   "to": "set_schwerin",
+   "cost": 156.31,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_brandenburg_havel",
+   "to": "set_spandau",
+   "cost": 23.0,
+   "road": true,
    "sea": false
   },
   {
@@ -5777,9 +5938,30 @@
   },
   {
    "from": "set_brauweiler",
-   "to": "set_zuelpich",
-   "cost": 17.36,
+   "to": "set_hamm",
+   "cost": 103.8,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_brauweiler",
+   "to": "set_juelich",
+   "cost": 8.4,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_brauweiler",
+   "to": "set_kleve",
+   "cost": 51.75,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_brauweiler",
+   "to": "set_lennep",
+   "cost": 25.53,
+   "road": false,
    "sea": false
   },
   {
@@ -5798,8 +5980,8 @@
   },
   {
    "from": "set_bremen",
-   "to": "set_luneburg",
-   "cost": 105.98,
+   "to": "set_stade",
+   "cost": 58.86,
    "road": false,
    "sea": false
   },
@@ -6001,15 +6183,22 @@
   },
   {
    "from": "set_brunswick",
-   "to": "set_goslar",
-   "cost": 41.02,
+   "to": "set_celle",
+   "cost": 49.61,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brunswick",
-   "to": "set_hildesheim",
-   "cost": 20.77,
+   "to": "set_corvey",
+   "cost": 94.33,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_brunswick",
+   "to": "set_kassel",
+   "cost": 64.29,
    "road": true,
    "sea": false
   },
@@ -6023,14 +6212,14 @@
   {
    "from": "set_brunswick",
    "to": "set_luneburg",
-   "cost": 106.88,
+   "cost": 90.28,
    "road": false,
    "sea": false
   },
   {
    "from": "set_brunswick",
-   "to": "set_verden",
-   "cost": 113.94,
+   "to": "set_wartburg",
+   "cost": 145.89,
    "road": false,
    "sea": false
   },
@@ -6101,6 +6290,55 @@
    "from": "set_buckfast",
    "to": "set_totnes",
    "cost": 9.38,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_buonconsiglio",
+   "to": "set_como",
+   "cost": 241.41,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_buonconsiglio",
+   "to": "set_pergine",
+   "cost": 8.86,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_buonconsiglio",
+   "to": "set_schloss_tirol",
+   "cost": 138.62,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_buonconsiglio",
+   "to": "set_trento",
+   "cost": 0.39,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_burg_an_der_wupper",
+   "to": "set_cologne",
+   "cost": 32.31,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_burg_an_der_wupper",
+   "to": "set_dusseldorf",
+   "cost": 10.37,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_burg_an_der_wupper",
+   "to": "set_lennep",
+   "cost": 3.59,
    "road": false,
    "sea": false
   },
@@ -6329,6 +6567,48 @@
    "sea": false
   },
   {
+   "from": "set_cadolzburg",
+   "to": "set_ebrach",
+   "cost": 53.79,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cadolzburg",
+   "to": "set_furth",
+   "cost": 5.75,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cadolzburg",
+   "to": "set_kaisheim",
+   "cost": 78.09,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cadolzburg",
+   "to": "set_kronach",
+   "cost": 71.76,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cadolzburg",
+   "to": "set_landshut",
+   "cost": 134.57,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cadolzburg",
+   "to": "set_nuremberg",
+   "cost": 10.64,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_caen",
    "to": "set_falaise",
    "cost": 17.26,
@@ -6529,6 +6809,34 @@
    "to": "set_tolede",
    "cost": 118.53,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_calcar",
+   "to": "set_doetinchem",
+   "cost": 24.4,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_calcar",
+   "to": "set_juelich",
+   "cost": 46.9,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_calcar",
+   "to": "set_kleve",
+   "cost": 6.06,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_calcar",
+   "to": "set_wesel",
+   "cost": 10.24,
+   "road": true,
    "sea": false
   },
   {
@@ -7130,6 +7438,41 @@
    "from": "set_catania",
    "to": "set_siracusa",
    "cost": 50.76,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_celle",
+   "to": "set_erfurt",
+   "cost": 194.29,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_celle",
+   "to": "set_goslar",
+   "cost": 52.09,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_celle",
+   "to": "set_gudensberg",
+   "cost": 169.36,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_celle",
+   "to": "set_luneburg",
+   "cost": 54.42,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_celle",
+   "to": "set_paderborn",
+   "cost": 135.56,
    "road": false,
    "sea": false
   },
@@ -8501,7 +8844,7 @@
   {
    "from": "set_cochem",
    "to": "set_ehrenbreitstein",
-   "cost": 23.84,
+   "cost": 36.16,
    "road": false,
    "sea": false
   },
@@ -8515,7 +8858,7 @@
   {
    "from": "set_cochem",
    "to": "set_koblenz",
-   "cost": 25.41,
+   "cost": 34.4,
    "road": false,
    "sea": false
   },
@@ -8677,6 +9020,13 @@
    "from": "set_cologne",
    "to": "set_dortmund",
    "cost": 36.57,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cologne",
+   "to": "set_juelich",
+   "cost": 11.79,
    "road": true,
    "sea": false
   },
@@ -9054,28 +9404,35 @@
   {
    "from": "set_corvey",
    "to": "set_hildesheim",
-   "cost": 63.09,
+   "cost": 78.22,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_corvey",
+   "to": "set_kassel",
+   "cost": 51.83,
    "road": false,
    "sea": false
   },
   {
    "from": "set_corvey",
    "to": "set_osnabruck",
-   "cost": 100.45,
+   "cost": 108.91,
    "road": false,
    "sea": false
   },
   {
    "from": "set_corvey",
    "to": "set_paderborn",
-   "cost": 35.57,
+   "cost": 45.6,
    "road": false,
    "sea": false
   },
   {
    "from": "set_corvey",
    "to": "set_soest",
-   "cost": 83.08,
+   "cost": 92.92,
    "road": false,
    "sea": false
   },
@@ -10258,7 +10615,14 @@
   {
    "from": "set_doornenburg",
    "to": "set_geldern",
-   "cost": 48.36,
+   "cost": 50.1,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_doornenburg",
+   "to": "set_kleve",
+   "cost": 16.55,
    "road": false,
    "sea": false
   },
@@ -10348,8 +10712,22 @@
   },
   {
    "from": "set_dortmund",
+   "to": "set_eberbach",
+   "cost": 168.91,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dortmund",
    "to": "set_geldern",
-   "cost": 79.19,
+   "cost": 79.25,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dortmund",
+   "to": "set_hamm",
+   "cost": 30.98,
    "road": false,
    "sea": false
   },
@@ -10781,6 +11159,34 @@
    "sea": false
   },
   {
+   "from": "set_duren",
+   "to": "set_franchimont",
+   "cost": 55.86,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_duren",
+   "to": "set_juelich",
+   "cost": 8.52,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_duren",
+   "to": "set_julich",
+   "cost": 7.84,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_duren",
+   "to": "set_nideggen",
+   "cost": 12.67,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_dursley",
    "to": "set_gloucester",
    "cost": 10.91,
@@ -10802,6 +11208,13 @@
    "sea": false
   },
   {
+   "from": "set_dusseldorf",
+   "to": "set_lennep",
+   "cost": 8.89,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_eberbach",
    "to": "set_ehrenfels",
    "cost": 9.46,
@@ -10818,7 +11231,7 @@
   {
    "from": "set_eberbach",
    "to": "set_koblenz",
-   "cost": 54.66,
+   "cost": 46.73,
    "road": false,
    "sea": false
   },
@@ -10830,30 +11243,23 @@
    "sea": false
   },
   {
-   "from": "set_eberbach",
-   "to": "set_vic_sur_seille",
-   "cost": 89.13,
-   "road": true,
-   "sea": false
-  },
-  {
    "from": "set_ebrach",
-   "to": "set_nuremberg",
-   "cost": 59.84,
+   "to": "set_erfurt",
+   "cost": 136.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ebrach",
    "to": "set_rothenburg",
-   "cost": 56.13,
+   "cost": 52.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ebrach",
    "to": "set_volkach",
-   "cost": 19.72,
+   "cost": 17.08,
    "road": false,
    "sea": false
   },
@@ -10951,21 +11357,21 @@
   {
    "from": "set_ehrenbreitstein",
    "to": "set_ehrenfels",
-   "cost": 25.48,
+   "cost": 25.41,
    "road": true,
    "sea": false
   },
   {
    "from": "set_ehrenbreitstein",
    "to": "set_koblenz",
-   "cost": 3.87,
-   "road": false,
+   "cost": 1.44,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_ehrenbreitstein",
-   "to": "set_zell_mosel",
-   "cost": 33.79,
+   "to": "set_pruem",
+   "cost": 82.01,
    "road": false,
    "sea": false
   },
@@ -10973,13 +11379,6 @@
    "from": "set_ehrenfels",
    "to": "set_ingelheim",
    "cost": 5.21,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_ehrenfels",
-   "to": "set_metz",
-   "cost": 78.59,
    "road": true,
    "sea": false
   },
@@ -11076,13 +11475,6 @@
   },
   {
    "from": "set_emden",
-   "to": "set_hamburg",
-   "cost": 286.26,
-   "road": false,
-   "sea": true
-  },
-  {
-   "from": "set_emden",
    "to": "set_osnabruck",
    "cost": 200.35,
    "road": false,
@@ -11160,29 +11552,15 @@
   },
   {
    "from": "set_erfurt",
-   "to": "set_goslar",
-   "cost": 111.38,
+   "to": "set_wartburg",
+   "cost": 50.22,
    "road": false,
    "sea": false
   },
   {
    "from": "set_erfurt",
-   "to": "set_kronach",
-   "cost": 84.61,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_erfurt",
-   "to": "set_leipzig",
-   "cost": 102.22,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_erfurt",
-   "to": "set_marburg",
-   "cost": 160.38,
+   "to": "set_weimar",
+   "cost": 21.07,
    "road": false,
    "sea": false
   },
@@ -11380,6 +11758,27 @@
    "to": "set_vic_sur_seille",
    "cost": 49.91,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_ettlingen",
+   "to": "set_hohenbaden",
+   "cost": 12.01,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_ettlingen",
+   "to": "set_landau",
+   "cost": 17.96,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_ettlingen",
+   "to": "set_pforzheim",
+   "cost": 10.91,
+   "road": true,
    "sea": false
   },
   {
@@ -11611,6 +12010,13 @@
    "to": "set_sandwich",
    "cost": 15.76,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_feltre",
+   "to": "set_pergine",
+   "cost": 46.88,
+   "road": false,
    "sea": false
   },
   {
@@ -12020,6 +12426,13 @@
    "sea": false
   },
   {
+   "from": "set_forchheim",
+   "to": "set_furth",
+   "cost": 30.69,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_forli",
    "to": "set_ravenna",
    "cost": 25.34,
@@ -12176,8 +12589,15 @@
   {
    "from": "set_frankfurt",
    "to": "set_giessen",
-   "cost": 26.35,
+   "cost": 29.44,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_frankfurt",
+   "to": "set_marienberg",
+   "cost": 95.98,
+   "road": false,
    "sea": false
   },
   {
@@ -12196,9 +12616,9 @@
   },
   {
    "from": "set_frankfurt",
-   "to": "set_wurzburg",
-   "cost": 96.56,
-   "road": false,
+   "to": "set_soest",
+   "cost": 83.75,
+   "road": true,
    "sea": false
   },
   {
@@ -12216,13 +12636,6 @@
    "sea": false
   },
   {
-   "from": "set_frankfurt_oder",
-   "to": "set_stralsund",
-   "cost": 239.39,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_freiberg",
    "to": "set_krivoklat",
    "cost": 104.98,
@@ -12231,9 +12644,9 @@
   },
   {
    "from": "set_freiberg",
-   "to": "set_leipzig",
-   "cost": 41.32,
-   "road": true,
+   "to": "set_kronach",
+   "cost": 166.08,
+   "road": false,
    "sea": false
   },
   {
@@ -12405,6 +12818,34 @@
    "sea": false
   },
   {
+   "from": "set_furth",
+   "to": "set_kronach",
+   "cost": 66.04,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_furth",
+   "to": "set_munich",
+   "cost": 155.48,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_furth",
+   "to": "set_nuremberg",
+   "cost": 6.96,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_furth",
+   "to": "set_rothenburg",
+   "cost": 61.75,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_galway",
    "to": "set_limerick",
    "cost": 87.35,
@@ -12517,6 +12958,13 @@
    "sea": false
   },
   {
+   "from": "set_geldern",
+   "to": "set_wesel",
+   "cost": 19.35,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_genes",
    "to": "set_pavia",
    "cost": 132.05,
@@ -12553,30 +13001,23 @@
   },
   {
    "from": "set_giessen",
-   "to": "set_hildesheim",
-   "cost": 195.59,
+   "to": "set_gudensberg",
+   "cost": 74.64,
    "road": false,
    "sea": false
   },
   {
    "from": "set_giessen",
    "to": "set_marburg",
-   "cost": 25.51,
+   "cost": 18.9,
    "road": false,
    "sea": false
   },
   {
    "from": "set_giessen",
-   "to": "set_mayence",
-   "cost": 71.77,
+   "to": "set_marienberg",
+   "cost": 128.19,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_giessen",
-   "to": "set_werl",
-   "cost": 60.28,
-   "road": true,
    "sea": false
   },
   {
@@ -12847,13 +13288,6 @@
   },
   {
    "from": "set_gorze",
-   "to": "set_ingelheim",
-   "cost": 87.68,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_gorze",
    "to": "set_metz",
    "cost": 5.99,
    "road": true,
@@ -12883,21 +13317,35 @@
   {
    "from": "set_goslar",
    "to": "set_hildesheim",
-   "cost": 42.48,
+   "cost": 7.12,
    "road": false,
    "sea": false
   },
   {
    "from": "set_goslar",
    "to": "set_loccum",
-   "cost": 106.32,
+   "cost": 12.73,
    "road": false,
    "sea": false
   },
   {
    "from": "set_goslar",
-   "to": "set_marburg",
-   "cost": 168.32,
+   "to": "set_paderborn",
+   "cost": 97.47,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_goslar",
+   "to": "set_stade",
+   "cost": 107.19,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_goslar",
+   "to": "set_verden",
+   "cost": 45.52,
    "road": false,
    "sea": false
   },
@@ -13053,13 +13501,6 @@
    "to": "set_melk",
    "cost": 128.39,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_graz",
-   "to": "set_sterzing",
-   "cost": 229.15,
-   "road": true,
    "sea": false
   },
   {
@@ -13238,6 +13679,34 @@
    "sea": false
   },
   {
+   "from": "set_gudensberg",
+   "to": "set_kassel",
+   "cost": 9.04,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gudensberg",
+   "to": "set_marburg",
+   "cost": 58.2,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gudensberg",
+   "to": "set_paderborn",
+   "cost": 74.74,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gudensberg",
+   "to": "set_volkach",
+   "cost": 157.07,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_guerande",
    "to": "set_nantes",
    "cost": 33.61,
@@ -13323,6 +13792,13 @@
   },
   {
    "from": "set_haguenau",
+   "to": "set_hohenbaden",
+   "cost": 15.95,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_haguenau",
    "to": "set_marmoutier",
    "cost": 16.1,
    "road": true,
@@ -13351,13 +13827,6 @@
   },
   {
    "from": "set_hall_in_tirol",
-   "to": "set_ravensburg",
-   "cost": 229.92,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_hall_in_tirol",
    "to": "set_stams",
    "cost": 88.86,
    "road": false,
@@ -13368,13 +13837,6 @@
    "to": "set_sterzing",
    "cost": 43.18,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_hall_in_tirol",
-   "to": "set_steyr",
-   "cost": 352.01,
-   "road": false,
    "sea": false
   },
   {
@@ -13430,6 +13892,48 @@
    "from": "set_hamburg",
    "to": "set_reinbek",
    "cost": 17.27,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_hamburg",
+   "to": "set_stade",
+   "cost": 41.87,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_hamm",
+   "to": "set_munster",
+   "cost": 17.02,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_hamm",
+   "to": "set_osnabruck",
+   "cost": 68.52,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_hamm",
+   "to": "set_paderborn",
+   "cost": 64.55,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_hamm",
+   "to": "set_soest",
+   "cost": 11.53,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_hamm",
+   "to": "set_werl",
+   "cost": 15.13,
    "road": false,
    "sea": false
   },
@@ -13526,9 +14030,23 @@
   },
   {
    "from": "set_heidelberg",
+   "to": "set_marienberg",
+   "cost": 100.41,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_heidelberg",
    "to": "set_speyer",
    "cost": 9.77,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_heidelberg",
+   "to": "set_stuttgart",
+   "cost": 78.69,
+   "road": false,
    "sea": false
   },
   {
@@ -13542,13 +14060,6 @@
    "from": "set_heidelberg",
    "to": "set_worms",
    "cost": 34.27,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_heidelberg",
-   "to": "set_wurzburg",
-   "cost": 101.03,
    "road": false,
    "sea": false
   },
@@ -13695,15 +14206,15 @@
   {
    "from": "set_hildesheim",
    "to": "set_loccum",
-   "cost": 63.97,
+   "cost": 6.37,
    "road": false,
    "sea": false
   },
   {
-   "from": "set_hildesheim",
-   "to": "set_verden",
-   "cost": 98.88,
-   "road": false,
+   "from": "set_hohenbaden",
+   "to": "set_trifels",
+   "cost": 25.3,
+   "road": true,
    "sea": false
   },
   {
@@ -13729,9 +14240,23 @@
   },
   {
    "from": "set_hohenzollern",
+   "to": "set_pforzheim",
+   "cost": 33.13,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_hohenzollern",
    "to": "set_strasbourg",
    "cost": 94.2,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_hohenzollern",
+   "to": "set_tubingen",
+   "cost": 13.31,
+   "road": true,
    "sea": false
   },
   {
@@ -13990,13 +14515,6 @@
    "from": "set_ingelheim",
    "to": "set_zell_mosel",
    "cost": 31.56,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_innsbruck",
-   "to": "set_linz",
-   "cost": 183.71,
    "road": true,
    "sea": false
   },
@@ -14317,23 +14835,37 @@
   },
   {
    "from": "set_juelich",
-   "to": "set_shertogenbosch",
-   "cost": 88.25,
+   "to": "set_vise",
+   "cost": 68.54,
    "road": false,
    "sea": false
   },
   {
    "from": "set_juelich",
-   "to": "set_verviers",
-   "cost": 25.4,
+   "to": "set_zoutleeuw",
+   "cost": 53.98,
    "road": true,
    "sea": false
   },
   {
    "from": "set_juelich",
    "to": "set_zuelpich",
-   "cost": 16.58,
+   "cost": 13.38,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_julich",
+   "to": "set_nideggen",
+   "cost": 25.73,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_julich",
+   "to": "set_vise",
+   "cost": 51.17,
+   "road": false,
    "sea": false
   },
   {
@@ -14380,8 +14912,8 @@
   },
   {
    "from": "set_kaisheim",
-   "to": "set_nuremberg",
-   "cost": 81.17,
+   "to": "set_rothenburg",
+   "cost": 85.47,
    "road": false,
    "sea": false
   },
@@ -14390,6 +14922,20 @@
    "to": "set_ulm",
    "cost": 35.5,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_kassel",
+   "to": "set_marburg",
+   "cost": 75.38,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_kassel",
+   "to": "set_wartburg",
+   "cost": 70.11,
+   "road": false,
    "sea": false
   },
   {
@@ -14596,6 +15142,13 @@
    "sea": false
   },
   {
+   "from": "set_kleve",
+   "to": "set_wesel",
+   "cost": 16.1,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_kloster_limburg",
    "to": "set_neustadt_weinstrasse",
    "cost": 5.85,
@@ -14666,6 +15219,13 @@
    "sea": false
   },
   {
+   "from": "set_koblenz",
+   "to": "set_zell_mosel",
+   "cost": 43.12,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_koge",
    "to": "set_ringsted",
    "cost": 24.85,
@@ -14682,7 +15242,7 @@
   {
    "from": "set_koge",
    "to": "set_stralsund",
-   "cost": 240.48,
+   "cost": 245.56,
    "road": false,
    "sea": true
   },
@@ -14786,13 +15346,6 @@
   },
   {
    "from": "set_krivoklat",
-   "to": "set_nuremberg",
-   "cost": 211.63,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_krivoklat",
    "to": "set_plzen",
    "cost": 48.4,
    "road": false,
@@ -14815,28 +15368,14 @@
   {
    "from": "set_kronach",
    "to": "set_nuremberg",
-   "cost": 89.63,
+   "cost": 64.23,
    "road": false,
    "sea": false
   },
   {
    "from": "set_kronach",
    "to": "set_plzen",
-   "cost": 157.34,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kronach",
-   "to": "set_volkach",
-   "cost": 89.15,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_kronach",
-   "to": "set_wurzburg",
-   "cost": 111.8,
+   "cost": 129.29,
    "road": false,
    "sea": false
   },
@@ -15114,6 +15653,13 @@
    "sea": false
   },
   {
+   "from": "set_landau",
+   "to": "set_wirtemberg",
+   "cost": 97.03,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_landerneau",
    "to": "set_le_faou",
    "cost": 8.2,
@@ -15146,13 +15692,6 @@
    "to": "set_plzen",
    "cost": 80.42,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_landshut",
-   "to": "set_rothenburg",
-   "cost": 171.48,
-   "road": false,
    "sea": false
   },
   {
@@ -15458,8 +15997,15 @@
   },
   {
    "from": "set_leipzig",
-   "to": "set_meissen",
-   "cost": 79.28,
+   "to": "set_nuremberg",
+   "cost": 229.29,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_leipzig",
+   "to": "set_weimar",
+   "cost": 83.29,
    "road": false,
    "sea": false
   },
@@ -16004,6 +16550,13 @@
   },
   {
    "from": "set_lodi",
+   "to": "set_rovereto",
+   "cost": 204.1,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lodi",
    "to": "set_sterzing",
    "cost": 345.98,
    "road": false,
@@ -16144,8 +16697,15 @@
   },
   {
    "from": "set_lubeck",
+   "to": "set_spandau",
+   "cost": 224.04,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lubeck",
    "to": "set_wismar",
-   "cost": 76.07,
+   "cost": 50.96,
    "road": false,
    "sea": false
   },
@@ -16181,6 +16741,13 @@
    "from": "set_lucena",
    "to": "set_montilla",
    "cost": 11.81,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_lucerne",
+   "to": "set_munich",
+   "cost": 205.64,
    "road": true,
    "sea": false
   },
@@ -16250,21 +16817,14 @@
   {
    "from": "set_luneburg",
    "to": "set_reinbek",
-   "cost": 33.95,
+   "cost": 50.42,
    "road": false,
    "sea": false
   },
   {
    "from": "set_luneburg",
-   "to": "set_verden",
-   "cost": 83.03,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_luneburg",
-   "to": "set_wismar",
-   "cost": 107.47,
+   "to": "set_spandau",
+   "cost": 199.21,
    "road": false,
    "sea": false
   },
@@ -16585,8 +17145,8 @@
   },
   {
    "from": "set_marburg",
-   "to": "set_soest",
-   "cost": 96.89,
+   "to": "set_wurzburg",
+   "cost": 140.16,
    "road": false,
    "sea": false
   },
@@ -16636,6 +17196,27 @@
    "from": "set_marennes",
    "to": "set_tonnay_charente",
    "cost": 21.62,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_marienberg",
+   "to": "set_rothenburg",
+   "cost": 47.81,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_marienberg",
+   "to": "set_volkach",
+   "cost": 23.42,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_marienberg",
+   "to": "set_wurzburg",
+   "cost": 0.65,
    "road": false,
    "sea": false
   },
@@ -16777,6 +17358,13 @@
    "to": "set_wigan",
    "cost": 103.54,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_mayence",
+   "to": "set_werl",
+   "cost": 175.75,
+   "road": false,
    "sea": false
   },
   {
@@ -16965,6 +17553,13 @@
    "from": "set_mestre",
    "to": "set_venise",
    "cost": 3.31,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_mestre",
+   "to": "set_wasserburg",
+   "cost": 213.45,
    "road": true,
    "sea": false
   },
@@ -17558,6 +18153,13 @@
   },
   {
    "from": "set_monza",
+   "to": "set_trento",
+   "cost": 230.16,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_monza",
    "to": "set_verone",
    "cost": 67.7,
    "road": true,
@@ -17757,20 +18359,6 @@
    "to": "set_osnabruck",
    "cost": 45.78,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_munster",
-   "to": "set_soest",
-   "cost": 27.28,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_munster",
-   "to": "set_werl",
-   "cost": 24.59,
-   "road": true,
    "sea": false
   },
   {
@@ -18075,6 +18663,20 @@
    "sea": false
   },
   {
+   "from": "set_nideggen",
+   "to": "set_verviers",
+   "cost": 41.56,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_nideggen",
+   "to": "set_zuelpich",
+   "cost": 15.75,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_nijmegen",
    "to": "set_tiel",
    "cost": 29.61,
@@ -18321,8 +18923,8 @@
   },
   {
    "from": "set_nuremberg",
-   "to": "set_rothenburg",
-   "cost": 65.2,
+   "to": "set_volkach",
+   "cost": 76.62,
    "road": false,
    "sea": false
   },
@@ -18372,6 +18974,13 @@
    "from": "set_oldesloe",
    "to": "set_reinbek",
    "cost": 33.13,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_oldesloe",
+   "to": "set_schwerin",
+   "cost": 71.33,
    "road": false,
    "sea": false
   },
@@ -18482,16 +19091,16 @@
   },
   {
    "from": "set_oppenheim",
-   "to": "set_volkach",
-   "cost": 134.38,
-   "road": false,
+   "to": "set_worms",
+   "cost": 12.4,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_oppenheim",
-   "to": "set_worms",
-   "cost": 12.4,
-   "road": true,
+   "to": "set_wurzburg",
+   "cost": 113.48,
+   "road": false,
    "sea": false
   },
   {
@@ -18656,13 +19265,6 @@
    "sea": false
   },
   {
-   "from": "set_osnabruck",
-   "to": "set_soest",
-   "cost": 78.97,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_ostia",
    "to": "set_palestrina",
    "cost": 25.96,
@@ -18730,6 +19332,13 @@
    "to": "set_soest",
    "cost": 47.79,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_padova",
+   "to": "set_pergine",
+   "cost": 88.36,
+   "road": true,
    "sea": false
   },
   {
@@ -19034,6 +19643,13 @@
    "sea": false
   },
   {
+   "from": "set_pergine",
+   "to": "set_trento",
+   "cost": 8.99,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_pernes_les_fontaines",
    "to": "set_senanque",
    "cost": 11.39,
@@ -19093,6 +19709,20 @@
    "from": "set_peyrepertuse",
    "to": "set_puilaurens",
    "cost": 25.36,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_pforzheim",
+   "to": "set_speyer",
+   "cost": 50.98,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_pforzheim",
+   "to": "set_stuttgart",
+   "cost": 37.98,
    "road": false,
    "sea": false
   },
@@ -19458,6 +20088,13 @@
    "to": "set_saint_michel_de_cuxa",
    "cost": 2.13,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_praglia",
+   "to": "set_rovereto",
+   "cost": 164.96,
+   "road": false,
    "sea": false
   },
   {
@@ -19868,22 +20505,36 @@
   },
   {
    "from": "set_rostock",
+   "to": "set_schwerin",
+   "cost": 69.68,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_rostock",
+   "to": "set_spandau",
+   "cost": 186.76,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_rostock",
    "to": "set_stralsund",
-   "cost": 64.42,
+   "cost": 57.57,
    "road": false,
    "sea": false
   },
   {
    "from": "set_rostock",
    "to": "set_vordingborg",
-   "cost": 205.47,
+   "cost": 205.45,
    "road": false,
    "sea": true
   },
   {
    "from": "set_rostock",
    "to": "set_wismar",
-   "cost": 52.41,
+   "cost": 49.94,
    "road": false,
    "sea": false
   },
@@ -19904,28 +20555,21 @@
   {
    "from": "set_rothenburg",
    "to": "set_speyer",
-   "cost": 127.44,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_rothenburg",
-   "to": "set_ulm",
-   "cost": 109.38,
+   "cost": 124.84,
    "road": false,
    "sea": false
   },
   {
    "from": "set_rothenburg",
    "to": "set_volkach",
-   "cost": 54.57,
+   "cost": 53.63,
    "road": false,
    "sea": false
   },
   {
    "from": "set_rothenburg",
    "to": "set_wurzburg",
-   "cost": 49.67,
+   "cost": 47.66,
    "road": false,
    "sea": false
   },
@@ -19934,6 +20578,20 @@
    "to": "set_saint_jean_dangely",
    "cost": 39.99,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_rovereto",
+   "to": "set_schio",
+   "cost": 23.6,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_rovereto",
+   "to": "set_trento",
+   "cost": 20.54,
+   "road": true,
    "sea": false
   },
   {
@@ -20399,6 +21057,20 @@
    "sea": false
   },
   {
+   "from": "set_schwerin",
+   "to": "set_stralsund",
+   "cost": 123.19,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_schwerin",
+   "to": "set_wismar",
+   "cost": 28.59,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_schwyz",
    "to": "set_stams",
    "cost": 348.52,
@@ -20554,10 +21226,10 @@
   },
   {
    "from": "set_skanor",
-   "to": "set_stralsund",
-   "cost": 223.67,
+   "to": "set_spandau",
+   "cost": 321.32,
    "road": false,
-   "sea": true
+   "sea": false
   },
   {
    "from": "set_skanor",
@@ -20631,22 +21303,15 @@
   },
   {
    "from": "set_spandau",
-   "to": "set_stralsund",
-   "cost": 98.83,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_spandau",
-   "to": "set_wismar",
-   "cost": 158.26,
+   "to": "set_zbraslav",
+   "cost": 296.65,
    "road": false,
    "sea": false
   },
   {
-   "from": "set_spandau",
-   "to": "set_zbraslav",
-   "cost": 296.65,
+   "from": "set_speyer",
+   "to": "set_waiblingen",
+   "cost": 84.18,
    "road": false,
    "sea": false
   },
@@ -20707,16 +21372,16 @@
    "sea": false
   },
   {
-   "from": "set_stams",
-   "to": "set_sterzing",
-   "cost": 113.17,
+   "from": "set_stade",
+   "to": "set_verden",
+   "cost": 62.84,
    "road": false,
    "sea": false
   },
   {
    "from": "set_stams",
-   "to": "set_weingarten",
-   "cost": 170.54,
+   "to": "set_sterzing",
+   "cost": 113.17,
    "road": false,
    "sea": false
   },
@@ -20742,13 +21407,6 @@
    "sea": false
   },
   {
-   "from": "set_stavelot",
-   "to": "set_zuelpich",
-   "cost": 60.3,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_stavoren",
    "to": "set_zutphen",
    "cost": 148.39,
@@ -20766,13 +21424,6 @@
    "from": "set_stoneleigh",
    "to": "set_warwick",
    "cost": 10.42,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_stralsund",
-   "to": "set_wismar",
-   "cost": 110.26,
    "road": false,
    "sea": false
   },
@@ -20802,6 +21453,27 @@
    "to": "set_warwick",
    "cost": 13.04,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_stuttgart",
+   "to": "set_tubingen",
+   "cost": 26.82,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_stuttgart",
+   "to": "set_waiblingen",
+   "cost": 5.91,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_stuttgart",
+   "to": "set_wirtemberg",
+   "cost": 2.92,
+   "road": true,
    "sea": false
   },
   {
@@ -20939,6 +21611,13 @@
   },
   {
    "from": "set_toelz",
+   "to": "set_treviso",
+   "cost": 357.56,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_toelz",
    "to": "set_wasserburg",
    "cost": 59.35,
    "road": false,
@@ -21008,6 +21687,13 @@
    "sea": false
   },
   {
+   "from": "set_trento",
+   "to": "set_treviso",
+   "cost": 97.76,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_treves",
    "to": "set_wittlich",
    "cost": 15.77,
@@ -21026,6 +21712,13 @@
    "to": "set_vitry_en_perthois",
    "cost": 30.67,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_tubingen",
+   "to": "set_wirtemberg",
+   "cost": 25.66,
+   "road": false,
    "sea": false
   },
   {
@@ -21141,6 +21834,13 @@
    "sea": false
   },
   {
+   "from": "set_verviers",
+   "to": "set_zuelpich",
+   "cost": 56.7,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_viana",
    "to": "set_vila_do_conde",
    "cost": 38.85,
@@ -21177,8 +21877,8 @@
   },
   {
    "from": "set_volkach",
-   "to": "set_worms",
-   "cost": 136.76,
+   "to": "set_wartburg",
+   "cost": 122.36,
    "road": false,
    "sea": false
   },
@@ -21194,6 +21894,13 @@
    "to": "set_zutphen",
    "cost": 41.25,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_waiblingen",
+   "to": "set_wirtemberg",
+   "cost": 5.97,
+   "road": true,
    "sea": false
   },
   {
@@ -21218,10 +21925,24 @@
    "sea": false
   },
   {
+   "from": "set_wartburg",
+   "to": "set_weimar",
+   "cost": 71.29,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_waterford",
    "to": "set_youghal",
    "cost": 31.22,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_weimar",
+   "to": "set_wurzburg",
+   "cost": 165.34,
+   "road": false,
    "sea": false
   },
   {
@@ -21270,6 +21991,13 @@
    "from": "set_wittlich",
    "to": "set_zell_mosel",
    "cost": 21.13,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_worms",
+   "to": "set_wurzburg",
+   "cost": 114.48,
    "road": false,
    "sea": false
   },
