@@ -321,7 +321,7 @@ func _world(point: Vector2) -> Vector3:
 
 func _follow_distance(rig: CampaignCamera) -> float:
 	var map_data: MapData = map.get("map_data")
-	var span := maxf(map_data.size.x, map_data.size.y) if map_data != null else 4096.0
+	var span := maxf(map_data.size.x, map_data.size.y) if map_data != null else maxf(rig.bounds.size.x, rig.bounds.size.y)
 	return minf(span * float(tuning()["camera_follow_distance_share"]), rig.max_distance)
 
 

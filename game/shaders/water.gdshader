@@ -11,7 +11,7 @@ uniform int height_bpp = 1;
 uniform bool height_little_endian = false;
 uniform float height_min_m = -200.0;
 uniform float height_max_m = 4800.0;
-uniform vec2 map_size = vec2(4096.0, 4096.0);
+uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 uniform bool has_heightmap = false;
 uniform sampler2D coast_dist : filter_linear, repeat_disable, hint_default_black;
 uniform bool has_coast_dist = false;

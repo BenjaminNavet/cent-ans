@@ -3,18 +3,19 @@ extends RefCounted
 
 ## Lots VH0/VH4 (ADR 0078) : villes emblématiques à l'échelle 1:1, format v2 géoréférencé
 ## (`data/landmarks_v2/<id>.json`, schéma `landmark_v2.schema.json`). Lecture et conversions :
-## EPSG:3035 (`origin_3035` + décalages [dE, dN] en mètres) → unités carte (grille 4096 de la
-## carte, +Z vers le sud) et repère local de `TownPlan` / `TownBuilder` (mètres, x vers +X monde,
+## EPSG:3035 (`origin_3035` + décalages [dE, dN] en mètres) → unités carte (grille de
+## `data/map/map.json`, +Z vers le sud) et repère local de `TownPlan` / `TownBuilder` (mètres, x vers +X monde,
 ## y vers +Z monde, soit [dE, -dN]). Rendu seulement.
 
 const MAP_PATHS_SCRIPT := preload("res://scripts/map/map_paths.gd")
-## Bornes EPSG:3035 de la grille de la carte (repli si `data/map/map.json` est illisible).
-const DEFAULT_BOUNDS := [2169486.0, 1327858.0, 5114414.0, 4272786.0]
-const GRID_PX := 4096.0
+## Échelle de repli (ADR 0082, inchangée par ADR 0115) si `data/map/map.json` est illisible ; les
+## bornes n'ont alors pas de repli (villes 1:1 mal placées, avertissement).
+const FALLBACK_METERS_PER_UNIT := 718.9765625
 
 static var _by_settlement: Dictionary = {}
 static var _loaded := false
 static var _bounds: Array = []
+static var _meters_per_unit: float = FALLBACK_METERS_PER_UNIT
 
 
 static func clear_cache() -> void:
@@ -48,8 +49,11 @@ static func _load() -> void:
 		var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(meta_path))
 		if meta is Dictionary and (meta as Dictionary).has("bounds_projected"):
 			_bounds = meta["bounds_projected"]
+			_meters_per_unit = float((meta as Dictionary).get("meters_per_px", FALLBACK_METERS_PER_UNIT))
 	if _bounds.size() != 4:
-		_bounds = DEFAULT_BOUNDS.duplicate()
+		push_warning("LandmarkV2Library: no bounds_projected in %s" % meta_path)
+		_bounds = [0.0, 0.0, 0.0, 0.0]
+		_meters_per_unit = FALLBACK_METERS_PER_UNIT
 
 
 ## Ville v2 d'une colonie, {} sinon.
@@ -73,8 +77,9 @@ static func bounds() -> Array:
 
 ## Mètres par unité carte (≈ 719).
 static func meters_per_unit() -> float:
-	var b := bounds()
-	return (float(b[2]) - float(b[0])) / GRID_PX
+	if not _loaded:
+		_load()
+	return _meters_per_unit
 
 
 ## Origine de la ville en unités carte.

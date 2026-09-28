@@ -42,9 +42,11 @@ fn v3(v: Vector3) -> V3 {
 
 #[godot_api]
 impl ReliefLod {
-    /// Tiles of the pyramid: `tiles[level]` = PackedInt32Array of `row × (16 << level) + col`.
+    /// Tiles of the pyramid over a world of `root_cols` × `root_rows` E0 tiles (map.json
+    /// `size_px` / 256, ADR 0115): `tiles[level]` = PackedInt32Array of
+    /// `row × (root_cols << level) + col`, in world tile coordinates.
     #[func]
-    fn set_pyramid(&mut self, max_level: i64, tiles: VarArray) {
+    fn set_pyramid(&mut self, max_level: i64, tiles: VarArray, root_cols: i64, root_rows: i64) {
         let lists = tiles
             .iter_shared()
             .map(|v| {
@@ -54,10 +56,10 @@ impl ReliefLod {
             })
             .collect();
         self.selector
-            .set_pyramid(Pyramid::new(max_level as i32, lists));
+            .set_pyramid(Pyramid::new(max_level as i32, lists, root_cols, root_rows));
     }
 
-    /// 16 × 16 (min, max) heights in metres per E0 chunk.
+    /// `root_cols` × `root_rows` (min, max) heights in metres per E0 chunk (row-major).
     #[func]
     fn set_bounds(&mut self, bounds: PackedVector2Array) {
         self.selector
@@ -219,12 +221,17 @@ impl ReliefLod {
             .map(|&k| relief_lod::level_of_key(k))
             .max()
             .unwrap_or(-1);
+        let (cols, rows) = self.selector.root_tiles();
+        let (width, height) = (
+            cols as f64 * relief_lod::ROOT_TILE_UNITS,
+            rows as f64 * relief_lod::ROOT_TILE_UNITS,
+        );
         let out: Vec<f64> = points
             .as_slice()
             .iter()
             .map(|p| {
                 let (x, y) = (p.x as f64, p.y as f64);
-                if !(0.0..4096.0).contains(&x) || !(0.0..4096.0).contains(&y) {
+                if !(0.0..width).contains(&x) || !(0.0..height).contains(&y) {
                     return f64::NAN;
                 }
                 for level in (0..=top).rev() {

@@ -12,7 +12,7 @@ uniform int height_bpp = 1;
 uniform bool height_little_endian = false;
 uniform float height_min_m = -200.0;
 uniform float height_max_m = 4800.0;
-uniform vec2 map_size = vec2(4096.0, 4096.0);
+uniform vec2 map_size = vec2(1.0, 1.0);  // taille du monde (map.json size_px), fournie par le script
 uniform float meters_per_px = 719.0;
 
 uniform sampler2D province_ids : filter_nearest, repeat_disable, hint_default_black;
