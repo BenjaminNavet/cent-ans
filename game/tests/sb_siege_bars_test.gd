@@ -79,6 +79,8 @@ func _check_node() -> void:
 	bars.wall_height = 8.0
 	bars.height_at = func(_x: float, _z: float) -> float: return 0.0
 	bars.side_colors = {"attacker": Color(0.1, 0.2, 0.7), "defender": Color(0.7, 0.1, 0.1)}
+	# The headless mouse position is arbitrary: keep it off every bar.
+	bars.mouse_override = Vector2(-1e6, -1e6)
 	holder.add_child(bars)
 	bars.sync(_fake_siege())
 	await process_frame
