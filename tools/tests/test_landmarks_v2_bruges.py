@@ -50,6 +50,9 @@ def test_bruges_vesten_1340() -> None:
     assert first_rebuild("Boeveriepoort") == 1366
     assert first_rebuild("Smedenpoort") == 1367
     assert first_rebuild("Ezelpoort") == 1369
+    # Relecture 2026-09-28 : Ezelpoort sur le bâtiment de 1369 (OSM (-561, 865), dans le fossé).
+    ezel = next(g for g in vesten["gates"] if g["name"].startswith("Ezelpoort"))
+    assert abs(ezel["at"][0] + 561) + abs(ezel["at"][1] - 865) < 40
     assert first_rebuild("Katelijnepoort") == 1401
     # Gentpoort and Kruispoort destroyed by the Ghent militia in 1382, rebuilt from 1401.
     for prefix in ("Gentpoort", "Kruispoort"):
@@ -86,7 +89,9 @@ def test_bruges_monuments_dated() -> None:
     assert monuments["ghyselhuus"]["until_year"] == 1375
     assert monuments["saint_donatien"]["until_year"] == 1799
     assert monuments["saint_sauveur_nef_romane"]["until_year"] == 1358
-    assert monuments["saint_sauveur_nef"]["from_year"] == 1359
+    # Relecture 2026-09-28 : nef gothique du premier quart du XVe s. (Inventaire 29716).
+    assert monuments["saint_sauveur_nef"]["from_year"] == 1425
+    assert wh["params"]["height_m"] == 30  # hauteur estimée (Wikipédia NL)
     assert monuments["poertoren"]["from_year"] == 1398
     assert monuments["poertoren"]["params"]["height"] == 18
     for later in (
