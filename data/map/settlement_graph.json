@@ -268,13 +268,6 @@
   },
   {
    "from": "set_abbaye_de_moirax",
-   "to": "set_aiguillon",
-   "cost": 12.65,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_abbaye_de_moirax",
    "to": "set_astaffort",
    "cost": 10.89,
    "road": false,
@@ -290,7 +283,7 @@
   {
    "from": "set_abbaye_de_moirax",
    "to": "set_serignac_sur_garonne",
-   "cost": 12.56,
+   "cost": 9.7,
    "road": false,
    "sea": false
   },
@@ -346,14 +339,21 @@
   {
    "from": "set_abbaye_de_sept_fons",
    "to": "set_charlieu",
-   "cost": 37.42,
+   "cost": 38.82,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_abbaye_de_sept_fons",
+   "to": "set_charolles",
+   "cost": 37.04,
    "road": false,
    "sea": false
   },
   {
    "from": "set_abbaye_de_sept_fons",
    "to": "set_cluny",
-   "cost": 66.58,
+   "cost": 72.78,
    "road": false,
    "sea": false
   },
@@ -645,6 +645,13 @@
    "sea": false
   },
   {
+   "from": "set_agen",
+   "to": "set_serignac_sur_garonne",
+   "cost": 16.19,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_agrigento",
    "to": "set_enna",
    "cost": 68.65,
@@ -751,15 +758,15 @@
   },
   {
    "from": "set_aiguillon",
-   "to": "set_nerac",
-   "cost": 9.46,
-   "road": true,
+   "to": "set_roquefort_landes",
+   "cost": 60.37,
+   "road": false,
    "sea": false
   },
   {
    "from": "set_aiguillon",
    "to": "set_serignac_sur_garonne",
-   "cost": 10.82,
+   "cost": 11.29,
    "road": true,
    "sea": false
   },
@@ -1073,34 +1080,6 @@
   },
   {
    "from": "set_alencon",
-   "to": "set_ballon",
-   "cost": 29.99,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_alencon",
-   "to": "set_beaumont_sur_sarthe",
-   "cost": 11.65,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_alencon",
-   "to": "set_bernay",
-   "cost": 41.04,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_alencon",
-   "to": "set_evron",
-   "cost": 48.0,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_alencon",
    "to": "set_falaise",
    "cost": 27.91,
    "road": true,
@@ -1111,13 +1090,6 @@
    "to": "set_fresnay_sur_sarthe",
    "cost": 9.07,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_alencon",
-   "to": "set_la_ferte_bernard",
-   "cost": 49.68,
-   "road": false,
    "sea": false
   },
   {
@@ -1607,6 +1579,13 @@
    "from": "set_amboise",
    "to": "set_montresor",
    "cost": 32.54,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_amboise",
+   "to": "set_vendome",
+   "cost": 42.61,
    "road": false,
    "sea": false
   },
@@ -2529,16 +2508,9 @@
   },
   {
    "from": "set_astaffort",
-   "to": "set_nerac",
-   "cost": 26.41,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_astaffort",
-   "to": "set_pau",
-   "cost": 177.79,
-   "road": false,
+   "to": "set_lectoure",
+   "cost": 7.32,
+   "road": true,
    "sea": false
   },
   {
@@ -2551,7 +2523,7 @@
   {
    "from": "set_astaffort",
    "to": "set_serignac_sur_garonne",
-   "cost": 19.49,
+   "cost": 16.69,
    "road": false,
    "sea": false
   },
@@ -2698,35 +2670,28 @@
   {
    "from": "set_auch",
    "to": "set_gimont",
-   "cost": 11.49,
+   "cost": 9.38,
    "road": true,
    "sea": false
   },
   {
    "from": "set_auch",
    "to": "set_grandselve",
-   "cost": 43.34,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_auch",
-   "to": "set_morlaas",
-   "cost": 92.02,
+   "cost": 42.5,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auch",
    "to": "set_rieux_volvestre",
-   "cost": 60.87,
+   "cost": 54.89,
    "road": false,
    "sea": false
   },
   {
    "from": "set_auch",
-   "to": "set_serignac_sur_garonne",
-   "cost": 53.61,
+   "to": "set_tarbes",
+   "cost": 92.77,
    "road": false,
    "sea": false
   },
@@ -2894,7 +2859,7 @@
   {
    "from": "set_autun",
    "to": "set_cluny",
-   "cost": 63.71,
+   "cost": 59.18,
    "road": false,
    "sea": false
   },
@@ -4048,13 +4013,6 @@
   },
   {
    "from": "set_beaugency",
-   "to": "set_blois",
-   "cost": 15.41,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_beaugency",
    "to": "set_clery_saint_andre",
    "cost": 4.96,
    "road": true,
@@ -4062,9 +4020,23 @@
   },
   {
    "from": "set_beaugency",
+   "to": "set_gien",
+   "cost": 76.28,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beaugency",
    "to": "set_meung_sur_loire",
    "cost": 3.71,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_beaugency",
+   "to": "set_sully_sur_loire",
+   "cost": 55.9,
+   "road": false,
    "sea": false
   },
   {
@@ -4077,14 +4049,14 @@
   {
    "from": "set_beaujeu",
    "to": "set_charlieu",
-   "cost": 32.23,
+   "cost": 32.36,
    "road": false,
    "sea": false
   },
   {
    "from": "set_beaujeu",
    "to": "set_cluny",
-   "cost": 30.24,
+   "cost": 39.4,
    "road": false,
    "sea": false
   },
@@ -4188,6 +4160,13 @@
   },
   {
    "from": "set_beaumont_sur_sarthe",
+   "to": "set_la_ferte_bernard",
+   "cost": 39.05,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_beaumont_sur_sarthe",
    "to": "set_le_mans",
    "cost": 12.4,
    "road": true,
@@ -4217,7 +4196,7 @@
   {
    "from": "set_beaune",
    "to": "set_cluny",
-   "cost": 66.59,
+   "cost": 57.65,
    "road": false,
    "sea": false
   },
@@ -4274,13 +4253,6 @@
    "from": "set_bec_hellouin",
    "to": "set_bernay",
    "cost": 9.17,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_bec_hellouin",
-   "to": "set_evreux",
-   "cost": 19.07,
    "road": true,
    "sea": false
   },
@@ -4685,13 +4657,6 @@
   },
   {
    "from": "set_bernay",
-   "to": "set_evreux",
-   "cost": 20.5,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_bernay",
    "to": "set_falaise",
    "cost": 62.19,
    "road": false,
@@ -4702,6 +4667,13 @@
    "to": "set_jumieges",
    "cost": 19.24,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_bernay",
+   "to": "set_louviers",
+   "cost": 44.02,
+   "road": false,
    "sea": false
   },
   {
@@ -5105,20 +5077,6 @@
   },
   {
    "from": "set_blois",
-   "to": "set_clery_saint_andre",
-   "cost": 20.11,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_blois",
-   "to": "set_sully_sur_loire",
-   "cost": 80.39,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_blois",
    "to": "set_vendome",
    "cost": 30.71,
    "road": false,
@@ -5492,6 +5450,13 @@
    "from": "set_boulbonne",
    "to": "set_cardona",
    "cost": 152.99,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_boulbonne",
+   "to": "set_foix",
+   "cost": 55.63,
    "road": false,
    "sea": false
   },
@@ -6687,6 +6652,13 @@
   },
   {
    "from": "set_cardona",
+   "to": "set_foix",
+   "cost": 175.24,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_cardona",
    "to": "set_girona",
    "cost": 95.15,
    "road": false,
@@ -7415,23 +7387,37 @@
   },
   {
    "from": "set_charlieu",
+   "to": "set_charolles",
+   "cost": 32.83,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_charlieu",
    "to": "set_neronde",
-   "cost": 37.26,
+   "cost": 35.11,
    "road": false,
    "sea": false
   },
   {
    "from": "set_charlieu",
    "to": "set_oingt",
-   "cost": 41.51,
+   "cost": 40.23,
    "road": false,
    "sea": false
   },
   {
    "from": "set_charlieu",
    "to": "set_pommiers_en_forez",
-   "cost": 21.76,
+   "cost": 20.7,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_charolles",
+   "to": "set_cluny",
+   "cost": 35.82,
+   "road": false,
    "sea": false
   },
   {
@@ -7562,13 +7548,6 @@
   },
   {
    "from": "set_chateau_gaillard",
-   "to": "set_evreux",
-   "cost": 30.06,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_chateau_gaillard",
    "to": "set_gisors",
    "cost": 13.35,
    "road": true,
@@ -7610,6 +7589,13 @@
    "sea": false
   },
   {
+   "from": "set_chateau_gaillard",
+   "to": "set_verneuil_sur_avre",
+   "cost": 65.66,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_chateau_gontier",
    "to": "set_le_lion_d_angers",
    "cost": 22.21,
@@ -7635,6 +7621,13 @@
    "to": "set_coucy",
    "cost": 26.1,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chateau_thierry",
+   "to": "set_crepy_en_valois",
+   "cost": 42.57,
+   "road": false,
    "sea": false
   },
   {
@@ -8152,6 +8145,13 @@
    "from": "set_cirencester",
    "to": "set_witney",
    "cost": 17.0,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_citeaux",
+   "to": "set_cluny",
+   "cost": 34.1,
    "road": true,
    "sea": false
   },
@@ -8969,6 +8969,13 @@
   },
   {
    "from": "set_coucy",
+   "to": "set_crepy_en_valois",
+   "cost": 22.57,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_coucy",
    "to": "set_ham",
    "cost": 31.76,
    "road": false,
@@ -9139,6 +9146,13 @@
    "from": "set_creon",
    "to": "set_rions",
    "cost": 9.33,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_crepy_en_valois",
+   "to": "set_meaux",
+   "cost": 30.34,
    "road": false,
    "sea": false
   },
@@ -9825,6 +9839,13 @@
    "from": "set_dinan",
    "to": "set_josselin",
    "cost": 66.47,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_dinan",
+   "to": "set_lamballe",
+   "cost": 34.96,
    "road": false,
    "sea": false
   },
@@ -11230,13 +11251,6 @@
   },
   {
    "from": "set_evreux",
-   "to": "set_gisors",
-   "cost": 26.82,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_evreux",
    "to": "set_louviers",
    "cost": 10.61,
    "road": true,
@@ -11251,8 +11265,8 @@
   },
   {
    "from": "set_evreux",
-   "to": "set_verneuil_sur_avre",
-   "cost": 18.02,
+   "to": "set_poissy",
+   "cost": 32.95,
    "road": true,
    "sea": false
   },
@@ -11372,6 +11386,13 @@
    "from": "set_faenza",
    "to": "set_vallombrosa",
    "cost": 67.3,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_falaise",
+   "to": "set_fresnay_sur_sarthe",
+   "cost": 70.13,
    "road": false,
    "sea": false
   },
@@ -11674,6 +11695,13 @@
    "to": "set_walcourt",
    "cost": 3.16,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_foix",
+   "to": "set_limoux",
+   "cost": 76.16,
+   "road": false,
    "sea": false
   },
   {
@@ -12056,6 +12084,13 @@
   },
   {
    "from": "set_fresnay_sur_sarthe",
+   "to": "set_la_ferte_bernard",
+   "cost": 49.25,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fresnay_sur_sarthe",
    "to": "set_sille_le_guillaume",
    "cost": 15.26,
    "road": false,
@@ -12392,15 +12427,15 @@
   },
   {
    "from": "set_gimont",
-   "to": "set_rieux_volvestre",
-   "cost": 45.58,
+   "to": "set_morlaas",
+   "cost": 120.93,
    "road": false,
    "sea": false
   },
   {
    "from": "set_gimont",
-   "to": "set_tarbes",
-   "cost": 116.83,
+   "to": "set_rieux_volvestre",
+   "cost": 45.58,
    "road": false,
    "sea": false
   },
@@ -12430,6 +12465,13 @@
    "to": "set_neufchatel_en_bray",
    "cost": 56.1,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gisors",
+   "to": "set_pithiviers",
+   "cost": 64.17,
+   "road": true,
    "sea": false
   },
   {
@@ -12779,6 +12821,13 @@
    "from": "set_grandselve",
    "to": "set_isle_jourdain",
    "cost": 28.06,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_grandselve",
+   "to": "set_lectoure",
+   "cost": 33.85,
    "road": false,
    "sea": false
   },
@@ -13361,6 +13410,13 @@
    "to": "set_windsor",
    "cost": 20.88,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_hennebont",
+   "to": "set_lamballe",
+   "cost": 46.43,
+   "road": true,
    "sea": false
   },
   {
@@ -15142,6 +15198,20 @@
    "sea": false
   },
   {
+   "from": "set_lectoure",
+   "to": "set_morlaas",
+   "cost": 128.08,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lectoure",
+   "to": "set_villeneuve_de_marsan",
+   "cost": 69.1,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_leeuwarden",
    "to": "set_stavoren",
    "cost": 88.28,
@@ -15800,6 +15870,13 @@
    "sea": false
   },
   {
+   "from": "set_louviers",
+   "to": "set_verneuil_sur_avre",
+   "cost": 28.09,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_lubeck",
    "to": "set_oldesloe",
    "cost": 10.79,
@@ -16364,13 +16441,6 @@
    "to": "set_wilton",
    "cost": 39.1,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_marmande",
-   "to": "set_nerac",
-   "cost": 21.43,
-   "road": true,
    "sea": false
   },
   {
@@ -17257,13 +17327,6 @@
   },
   {
    "from": "set_morlaas",
-   "to": "set_nerac",
-   "cost": 139.58,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_morlaas",
    "to": "set_orthez",
    "cost": 122.47,
    "road": false,
@@ -17580,14 +17643,7 @@
   {
    "from": "set_nerac",
    "to": "set_serignac_sur_garonne",
-   "cost": 6.93,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_nerac",
-   "to": "set_villeneuve_de_marsan",
-   "cost": 52.35,
+   "cost": 9.8,
    "road": false,
    "sea": false
   },
@@ -19483,13 +19539,6 @@
   },
   {
    "from": "set_roquefort_landes",
-   "to": "set_serignac_sur_garonne",
-   "cost": 59.48,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_roquefort_landes",
    "to": "set_villeneuve_de_marsan",
    "cost": 16.63,
    "road": false,
@@ -20099,8 +20148,8 @@
   },
   {
    "from": "set_serignac_sur_garonne",
-   "to": "set_tarbes",
-   "cost": 152.59,
+   "to": "set_villeneuve_de_marsan",
+   "cost": 60.2,
    "road": false,
    "sea": false
   },
@@ -20753,13 +20802,6 @@
    "to": "set_verneuil_sur_avre",
    "cost": 105.57,
    "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_vendome",
-   "to": "set_vouvray",
-   "cost": 23.16,
-   "road": true,
    "sea": false
   },
   {
