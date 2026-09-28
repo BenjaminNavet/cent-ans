@@ -6,7 +6,7 @@ mod common;
 
 use common::*;
 use data_model::GameData;
-use sim_battle::{BattleSim, Command, CommandError, FireState, SideId, SiegeSetup, Weather};
+use sim_battle::{BattleSim, Command, CommandError, SideId, SiegeSetup, Weather};
 
 const BESIEGERS: [&str; 3] = [
     "unit_men_at_arms_foot",
