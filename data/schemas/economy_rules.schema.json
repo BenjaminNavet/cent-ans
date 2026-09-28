@@ -255,6 +255,40 @@
       "minimum": 0,
       "description": "Lot RS-B : plafond de ce renfort (en %).",
       "maximum": 100
+    },
+    "demolition_refund_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Part (en %) du coût en argent d'un bâtiment rendue quand on le rase (lot RS-C)."
+    },
+    "ai_demolition": {
+      "type": "object",
+      "description": "Quand l'IA rase ses bâtiments (lot RS-C).",
+      "properties": {
+        "deficit_seasons": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Saisons de déficit d'affilée avant la première démolition."
+        },
+        "max_upkeep_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "L'IA rase tant que l'entretien de ses bâtiments qui ne se paient pas eux-mêmes dépasse cette part (en %) du revenu brut."
+        },
+        "max_per_turn": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Démolitions au plus par saison."
+        }
+      },
+      "required": [
+        "deficit_seasons",
+        "max_upkeep_percent",
+        "max_per_turn"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

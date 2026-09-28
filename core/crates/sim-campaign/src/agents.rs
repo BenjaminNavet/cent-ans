@@ -1107,7 +1107,8 @@ impl CampaignState {
             AgentActionKind::Parley => {
                 let value = effects.parley_opinion
                     + effects.parley_opinion_per_level * (i32::from(agent.level) - 1);
-                self.add_modifier(
+                self.add_capped_modifier(
+                    data,
                     &plan.target_faction,
                     faction,
                     value,
@@ -1125,7 +1126,8 @@ impl CampaignState {
                 let value = (effects.parley_opinion
                     + effects.parley_opinion_per_level * (i32::from(agent.level) - 1))
                     / 2;
-                self.add_modifier(
+                self.add_capped_modifier(
+                    data,
                     &plan.target_faction,
                     faction,
                     value,

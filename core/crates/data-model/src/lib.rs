@@ -70,7 +70,10 @@ pub use entities::character::{Character, CharacterStatus, Family, Role, Sex, Ski
 pub use entities::chivalric_order::ChivalricOrder;
 pub use entities::diet::{Diet, DietRequirements, LentRule, WinterRule};
 pub use entities::difficulty::{DifficultyLevelData, DifficultyModifiers, DifficultyRules};
-pub use entities::economy_rules::{EconomyRules, TaxBracket, TaxBrackets, TaxPerHead};
+pub use entities::diplomacy_rules::{DiplomacyRules, OpinionMotive};
+pub use entities::economy_rules::{
+    AiDemolition, EconomyRules, TaxBracket, TaxBrackets, TaxPerHead,
+};
 pub use entities::edict::Edict;
 pub use entities::encounter::{
     Encounter, EncounterOption, EncounterOutcome, EncounterResult, EncounterRules, EncounterSpawn,

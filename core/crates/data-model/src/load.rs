@@ -98,6 +98,8 @@ pub mod folders {
     /// Public order tuning (lot E2), inside `rules/`; optional.
     pub const POPULATION_RULES: &str = "population.json";
     pub const ECONOMY_RULES: &str = "economy.json";
+    /// Diplomacy tuning (lot RS-C: opinion caps), inside `rules/`; optional.
+    pub const DIPLOMACY_RULES: &str = "diplomacy.json";
     /// Feudal tuning (lot FE), inside `rules/`; optional.
     pub const FEUDAL_RULES: &str = "feudal.json";
     /// Campaign map weather (lot CM2), inside `rules/`; optional.
@@ -322,6 +324,9 @@ pub struct GameData {
     /// `data/rules/economy.json` (lot EQ1); [`crate::EconomyRules::default`]
     /// when absent.
     pub economy_rules: crate::entities::economy_rules::EconomyRules,
+    /// `data/rules/diplomacy.json` (lot RS-C); [`crate::DiplomacyRules::default`]
+    /// when absent.
+    pub diplomacy_rules: crate::entities::diplomacy_rules::DiplomacyRules,
     /// `data/rules/campaign_weather.json` (lot CM2);
     /// [`crate::CampaignWeatherRules::default`] when absent.
     pub campaign_weather: crate::entities::campaign_weather::CampaignWeatherRules,
@@ -426,6 +431,7 @@ impl GameData {
             auto_resolve: Default::default(),
             population_rules: Default::default(),
             economy_rules: Default::default(),
+            diplomacy_rules: Default::default(),
             campaign_weather: Default::default(),
             difficulty: Default::default(),
             retinue: None,
@@ -526,6 +532,10 @@ impl GameData {
         let economy_path = root.join(folders::RULES).join(folders::ECONOMY_RULES);
         if economy_path.is_file() {
             data.economy_rules = read_json(&economy_path)?;
+        }
+        let diplomacy_rules_path = root.join(folders::RULES).join(folders::DIPLOMACY_RULES);
+        if diplomacy_rules_path.is_file() {
+            data.diplomacy_rules = read_json(&diplomacy_rules_path)?;
         }
         let weather_path = root
             .join(folders::RULES)
