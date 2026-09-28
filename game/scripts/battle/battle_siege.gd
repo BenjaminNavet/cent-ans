@@ -35,6 +35,8 @@ var _kit_batch: BuildingKit.Batch = null  # BR1 : bâtiments du kit (MultiMesh p
 var _kit_sites: Dictionary = {}  # BR1 : indice de maison → [[poignée, ruine, Transform3D], …]
 var _kit_ruins: Dictionary = {}  # indice de maison → true (ruine déjà posée)
 var external_ladders := false  # SG1 : échelles posées contre le mur par `SiegeAssaultFx`
+var side_colors: Dictionary = {}  # SB : couleurs des camps (« attacker »/« defender ») des barres de vie
+var health_bars: SiegeHealthBars = null  # SB : barres de vie flottantes des ouvrages et engins
 
 
 func build(p_siege: Dictionary, p_height_at: Callable) -> void:
@@ -68,6 +70,13 @@ func build(p_siege: Dictionary, p_height_at: Callable) -> void:
 	fire_fx = preload("res://scripts/battle/siege_fire_fx.gd").new()
 	add_child(fire_fx)
 	fire_fx.setup(self, height_at)
+	health_bars = SiegeHealthBars.new()
+	health_bars.wall_height = wall_height
+	health_bars.height_at = height_at
+	for side in side_colors:
+		health_bars.side_colors[side] = side_colors[side]
+	add_child(health_bars)
+	health_bars.sync(siege)
 
 
 static func _material(color: Color, roughness: float = 0.95) -> StandardMaterial3D:
@@ -653,6 +662,8 @@ func update(p_siege: Dictionary, units: Array) -> void:
 	_fx.prime()
 	if fire_fx != null:
 		fire_fx.update(p_siege)
+	if health_bars != null:
+		health_bars.sync(p_siege)
 	_update_machines(units)
 
 
