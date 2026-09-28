@@ -17,17 +17,27 @@ const REFRESH := 0.2
 const HOTKEYS := [KEY_Z, KEY_X, KEY_V, KEY_B]
 const ICON_DIR := "res://assets/ui/orders/"
 ## Repli quand l'icône PNG n'existe pas : un glyphe par nature d'ordre.
-const GLYPHS := {"war_cry": "✠", "rally": "⚑", "dismount": "♞", "pavise": "▮", "no_quarter": "⚔"}
+const GLYPHS := {"war_cry": "✠", "rally": "⚑", "dismount": "♞", "pavise": "▮", "no_quarter": "⚔", "burn": "♨"}
 ## Au-dessus du bandeau compact des cartes d'unités de `battle_hud.gd` (UB1 : `BAND_HEIGHT`) et de sa
 ## ligne d'aide.
 const BOTTOM_MARGIN := BattleHud.BAND_HEIGHT + 16.0
 const BUTTON_SIZE := Vector2(96, 54)
+
+## RS-F : ordre « Incendier » des sièges (S2), en bout de barre. Touche physique I (libre en
+## bataille, « I » en AZERTY aussi). Cible, possibilité et raison d'un refus viennent du cœur
+## (`BattleSim.get_burn_order`) ; le bouton envoie la commande `burn` qu'il propose.
+const BURN_ID := "burn"
+const BURN_HOTKEY := KEY_I
+const BURN_NAME := "Incendier"
+const BURN_DESCRIPTION := "Un régiment porte la torche à la maison ou à la porte la plus proche à sa portée (la garnison atteint ses faubourgs de partout). La pluie et la neige gênent la mise à feu ; le feu gagne ensuite les maisons voisines sous le vent."
 
 var scene: Node = null  # BattleScene
 var panel: PanelContainer
 var row: HBoxContainer
 var _buttons: Dictionary = {}  # order id -> {button, glyph, name, key, shade, timer}
 var _orders: Array = []
+## RS-F : dernier `get_burn_order` ({siege: false} hors siège).
+var burn_order: Dictionary = {}
 var _timer: float = 0.0
 
 
@@ -83,13 +93,49 @@ func refresh() -> void:
 		visible = false
 		return
 	_orders = battle.call("get_leader_orders", _side())
-	visible = not _orders.is_empty() and not bool(battle.call("is_finished"))
+	burn_order = _query_burn(battle)
+	var siege := bool(burn_order.get("siege", false))
+	visible = (not _orders.is_empty() or siege) and not bool(battle.call("is_finished"))
 	for i in _orders.size():
 		var order: Dictionary = _orders[i]
 		var id := str(order["id"])
 		if not _buttons.has(id):
 			_buttons[id] = _make_button(order, i)
 		_update_button(_buttons[id], order)
+	if siege:
+		var burn := burn_view(burn_order)
+		if not _buttons.has(BURN_ID):
+			_buttons[BURN_ID] = _make_button(burn, -1)
+		_update_button(_buttons[BURN_ID], burn)
+	elif _buttons.has(BURN_ID):
+		(_buttons[BURN_ID]["button"] as Control).visible = false
+
+
+## RS-F : l'ordre d'incendie proposé par le cœur pour la sélection (toute l'armée sans sélection).
+func _query_burn(battle: Object) -> Dictionary:
+	if not battle.has_method("get_burn_order"):
+		return {"siege": false}
+	return battle.call("get_burn_order", _side(), PackedInt32Array(_selection()))
+
+
+## Régiments choisis par le joueur (le cœur écarte ceux qui ne peuvent pas obéir).
+func _selection() -> Array:
+	if scene == null:
+		return []
+	var ids = scene.get("selected")
+	return ids if ids is Array else []
+
+
+## RS-F : vue d'ordre (même forme que `get_leader_orders`) du bouton « Incendier ».
+static func burn_view(burn: Dictionary) -> Dictionary:
+	var available := bool(burn.get("available", false))
+	var description := BURN_DESCRIPTION
+	if available:
+		description += "\nCible : %s, à %d m." % [str(burn.get("target", "")), int(round(float(burn.get("distance_m", 0.0))))]
+	return {
+		"id": BURN_ID, "kind": "burn", "icon": "burn", "name": BURN_NAME, "label": BURN_NAME,
+		"description": description, "available": available, "reason": str(burn.get("reason", "")),
+	}
 
 
 func _make_button(order: Dictionary, index: int) -> Dictionary:
@@ -135,7 +181,7 @@ func _make_button(order: Dictionary, index: int) -> Dictionary:
 	inner.add_child(name_label)
 	# Raccourci en haut à gauche, recharge en surimpression.
 	var key := Label.new()
-	key.text = physical_label(HOTKEYS[index]) if index < HOTKEYS.size() else ""
+	key.text = physical_label(BURN_HOTKEY) if index < 0 else (physical_label(HOTKEYS[index]) if index < HOTKEYS.size() else "")
 	key.position = Vector2(5, 1)
 	key.add_theme_font_size_override("font_size", 11)
 	key.add_theme_color_override("font_color", INK_MUTED)
@@ -206,7 +252,28 @@ func _update_button(entry: Dictionary, order: Dictionary) -> void:
 
 
 func _on_pressed(id: String) -> void:
-	give(id)
+	if id == BURN_ID:
+		give_burn()
+	else:
+		give(id)
+
+
+## RS-F : donne l'ordre « Incendier » : la commande `burn` que le cœur propose pour la sélection
+## (régiment porteur de la torche et cible). Impossible : la raison du cœur s'affiche.
+func give_burn() -> Dictionary:
+	var battle := _battle()
+	if battle == null:
+		return {}
+	var burn := _query_burn(battle)
+	var result: Dictionary
+	if bool(burn.get("available", false)):
+		result = scene.call("issue", burn["command"])
+	else:
+		result = {"ok": false, "error": str(burn.get("reason", "incendie impossible"))}
+		if bool(burn.get("siege", false)) and scene.get("hud") != null and scene.hud.has_method("show_toast"):
+			scene.hud.show_toast("Incendier : %s" % result["error"])
+	_timer = 0.0
+	return result
 
 
 ## Donne l'ordre `id` : les ordres « sélection » visent les régiments choisis (tous les régiments
@@ -232,7 +299,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible or _battle() == null:
 		return
 	if event is InputEventKey and event.pressed and not event.echo and not event.ctrl_pressed:
-		var index := HOTKEYS.find((event as InputEventKey).physical_keycode)
+		var physical := (event as InputEventKey).physical_keycode
+		if physical == BURN_HOTKEY and not event.alt_pressed and not event.shift_pressed and bool(burn_order.get("siege", false)):
+			give_burn()
+			get_viewport().set_input_as_handled()
+			return
+		var index := HOTKEYS.find(physical)
 		if index >= 0 and index < _orders.size():
 			give(str(_orders[index]["id"]))
 			get_viewport().set_input_as_handled()
