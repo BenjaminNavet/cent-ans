@@ -38,3 +38,19 @@ Relecture historienne, rapport à l'orchestrateur (attente de la fusion et de la
 - Rattachements incertains : Tchernigov à Briansk, Mourom à Souzdal, Ouglitch/Galitch/Kostroma à Moscou, Vologda à Beloozero.
 - Blasons : tous de convention (`uncertain`, `substitution`) ; les Rus' de 1337 n'ont pas d'armoiries fixées.
 - Ordre de succession de la Horde : `elective` (kurultaï) par défaut, incertain.
+
+## Tests (pytest complet, 2026-09-28)
+977 passed, 44 failed, 3 errors, tous attendus avant régénération géo : 41 `test_settlement_file_is_valid[prov_*]`
+(« off the map » : hors de l'emprise 4096 actuelle), `test_horizon::test_every_province_has_a_tile`,
+3 erreurs de `test_settlement_graph` (graphe non régénéré). Les deux échecs réels (nom de capitale ≠ nom de la cité)
+ont été corrigés (Mokhcha, Oufa).
+
+## Relecture historienne
+- Sûrs : Özbeg (1282-1341, khan 1313), Ivan Kalita (mort le 31 mars 1340), Siméon (1316), Alexandre de Tver (né 7 oct. 1301,
+  exécuté à Saraï en 1339), Vassili Kalika archevêque, concession vénitienne de Tana (1332-33), Caffa génoise depuis 1266.
+- Fragiles : Novgorod-Ivan Kalita « prince jusqu'en 1337 » ; le tribut de Novgorod passe par le grand-prince (d'où le suzerain
+  Horde) ; Smolensk sous suzeraineté de la Horde (1337) plutôt dans l'orbite lituanienne ; Boudjak sans Moldavie ni Valachie ;
+  Caffa/Kertch : Cerco génois attesté mais statut 1337 flou ; Soldaïa génoise seulement en 1365 (laissée à la Horde) ;
+  Théodoro sans prince nommé ; Moscou/Ouglitch/Galitch acquis vers 1328-1340.
+- Anachronismes signalés : Serge de Radonège (monastère vers 1337-1342), Kholmogory (1353), Khlynov (1374), Kalouga (1371),
+  Oufa (1574, donc « site »).
