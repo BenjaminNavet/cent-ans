@@ -129,3 +129,63 @@ propres aux bâtiments, détaillées ici.
    Angleterre que du Midi) recevrait `TimberFrame` à la place de `Plaster`. Décision laissée au
    joueur/lead (voir rapport du lot et `docs/wip/ga.md`, section GA5) ; ni le rendu en jeu ni les
    `.glb` existants ne sont affectés par cette matière tant qu'elle n'est pas câblée.
+
+## GA4 — Terrain de campagne et mer (addendum, 2026-09-28)
+
+### Contexte
+
+Le terrain de campagne (`terrain.gdshader`) mélangeait 7 couches Poly Haven 1k, assemblées à
+l'exécution par `TerrainBuilder` en deux `Texture2DArray` **RGBA8 non compressés** (≈ 74,7 Mo
+avec mipmaps). L'identité des couches était codée en dur deux fois (`MATERIAL_LAYERS` en
+GDScript, `LAYERS` dans `tools/cent_ans_tools/geo/textures.py`). La mer (`water.gdshader`) tirait
+ses vagues d'une houle procédurale (trois évaluations par pixel) et sa couleur de deux paliers.
+
+### Décision
+
+1. **Albédo 2k, normale + rugosité 1k**, mêmes 7 assets Poly Haven, empilés verticalement
+   (`terrain_albedo_array.jpg`, `terrain_normal_array.jpg`) et **importés** en tableau compressé
+   en VRAM (`2d_array_texture`, `slices/vertical=7`), comme le sol de bataille. Mesure
+   (`game/tests/ga4_terrain_test.gd`, format réel DXT1) : **23,3 Mo** (albédo 18,7 + normale
+   4,7) contre 74,7 Mo pour l'ancien chemin — la 2k coûte donc trois fois moins que la 1k non
+   compressée. Normale en 1k (choix GA2) : détail normal discret sur la carte
+   (`detail_normal_strength` 0,55, effacé dès 1,8 pixel carte par pixel écran) ; poids du dépôt
+   ≈ 19 Mo au lieu de 34 Mo.
+2. **Identité des couches en données** : `data/fx/campaign_terrain_textures.json` (schéma
+   `fx_campaign_terrain_textures.schema.json`) : ordre, asset Poly Haven, moyenne linéaire de
+   l'albédo (écrite par `cent-ans geo textures`, le tableau importé ne garde pas ses pixels côté
+   CPU ; le test la recontrôle sur la source). L'ordre reste le contrat d'index fixe du shader
+   (`CampaignTextures.SHADER_LAYER_ORDER`, vérifié au chargement et par pytest) : pas de
+   refonte en index de données de `terrain.gdshader`, partagé avec d'autres chantiers.
+3. **Tuilage** : `tile_screen_px` 72 → 96 (données) : le shader garde une tuile à taille écran
+   constante, la 2k n'apporte de la netteté que si la tuile occupe plus de pixels ; une tuile
+   un tiers plus grande réduit aussi la répétition visible.
+4. **Macro-variation factorisée** dans `game/shaders/ga_macro.gdshaderinc`
+   (`ga_macro_variation`, `ga_depth_color`), partagée par `battle_ground.gdshader` (GA2,
+   résultat identique : `ga_macro_variation(h, 0.5, 1.0, 0.0)`), `terrain.gdshader` et
+   `water.gdshader`. Chaque appelant fournit son bruit : texture en bataille, bruit de valeur
+   procédural sur la carte. Carte : 4 octaves (9, 24, 60, 150 pixels carte ≈ 6 à 110 km),
+   teinte pondérée vers les octaves fines, luminance (± 8 %) vers les larges, mêmes 4
+   échantillons ; appliquée à l'albédo final, donc visible aussi au dézoom où les textures sont
+   coupées.
+5. **Mer** : normale tuilable 1024² **procédurale** (`water_normal.png`, œuvre propre CC0 :
+   somme de trains d'ondes à vecteurs d'onde entiers, raccord exact, vent dominant) — aucune
+   normale d'eau CC0 chez Poly Haven ni ambientCG (recherche du 28/09). Deux couches défilant
+   à vitesses et orientations différentes, mêlées ; estompe au dézoom plus tardive que la houle
+   (les mipmaps lissent). Couleur de profondeur à trois paliers (haut-fond, palier à 25 m, grand
+   fond, décroissance 90 m), mêmes valeurs posées sur la mer peinte de `terrain.gdshader` pour
+   éviter une couture. Tout réglage dans les données.
+6. **`--no-ga4`** : ancien chemin complet (JPEG 1k par couche en RGBA8, houle procédurale, deux
+   paliers, `tile_screen_px` 72, pas de macro-variation GA4). Contrairement à GA2, les anciens
+   fichiers 1k restent, pour un A/B honnête (mémoire et coût d'échantillonnage) ; à supprimer à
+   GA6 si le chemin GA4 est retenu.
+
+### Conséquences
+
+- Mémoire du terrain divisée par 3 (74,7 → 23,3 Mo) malgré la 2k ; chargement attendu plus
+  court (plus d'assemblage d'images ni de génération de mipmaps à l'exécution).
+- Coût shader : terrain + 4 bruits de valeur par pixel ; mer : 2 lectures de texture au lieu de
+  2 évaluations de houle en plus (probablement neutre ou gain). **A/B non mesuré dans le lot**
+  (machine chargée, load average > 120) : banc PB1 carte à passer par la session principale,
+  cache de relief relié, passes alternées avec et sans `--no-ga4`.
+- Changer d'asset : éditer `poly_haven_id` dans les données puis `cent-ans geo textures`
+  (réécrit tableaux, normale d'eau et moyennes).

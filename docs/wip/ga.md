@@ -125,13 +125,23 @@ lead, cf. ci-dessus et ADR 0105 §GA5.
 
 ### GA4 — Campagne (CC0 + IA ponctuelle, ≤ 2 $, agent `cent-ans-dev`, après GA2)
 Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd`,
-`game/shaders/terrain.gdshader`, `game/shaders/water.gdshader`.
-- [ ] Plaines et couches terrain en 2k ; macro-variation (réutiliser GA2).
-- [ ] Eau : normales CC0 animées + couleur de profondeur.
-- [ ] A/B banc carte PB1 (cache de relief relié, cf. PO6). Vignettes IA seulement sur décision.
-- État (worktree `../game_project-ga4`, branche `feat/ga4`) : squelette posé (données
-  `data/fx/campaign_terrain_textures.json` + schéma + pytest). Suite : script de construction
-  (tableaux 2k, moyennes, normale d'eau), câblage `TerrainBuilder`/`sea.gd`, shaders, test mémoire.
+`game/shaders/terrain.gdshader`, `game/shaders/water.gdshader` ; ajoutés :
+`game/scripts/map/campaign_textures.gd`, `game/shaders/ga_macro.gdshaderinc`,
+`data/fx/campaign_terrain_textures.json` (+ schéma, pytest), `game/tests/ga4_terrain_test.gd`.
+- [x] Plaines et couches terrain : albédo 2k / normale 1k (mêmes 7 assets Poly Haven), tableaux
+      importés compressés (DXT1) : **23,3 Mo mesurés** contre 74,7 Mo (ancien RGBA8 1k) ;
+      identité des couches et moyennes en données ; `tile_screen_px` 72 → 96 ; macro-variation
+      factorisée (`ga_macro.gdshaderinc`, GA2 inchangé), 4 octaves 9–150 px carte, teinte +
+      luminance ±8 %.
+- [x] Eau : normale tuilable **procédurale** (aucune normale d'eau CC0 chez Poly Haven ni
+      ambientCG), deux couches défilantes ; couleur de profondeur à trois paliers (mer et mer
+      peinte du terrain). `--no-ga4` = ancien chemin complet (fichiers 1k gardés jusqu'à GA6).
+- [ ] A/B banc carte PB1 (session principale, machine calme) : cache de relief relié via
+      `CENT_ANS_RELIEF_DIR=/Users/jean_hubert/dev/game_project/data/map` (ou lien symbolique
+      `data/map/pyramid` → dépôt principal), passes alternées :
+      `godot --path game --script res://tests/pb1_bench.gd` puis
+      `godot --path game --script res://tests/pb1_bench.gd -- --no-ga4` (×2, ordre inversé).
+      Vignettes IA non faites (sur décision seulement). 0 $ dépensé.
 
 ### GA3 — Décor 3D statique (image-vers-3D, ≤ 8 $)
 1. [ ] Recherche (session principale) : service hébergé TRELLIS payant à l'appel, conditions
@@ -199,3 +209,9 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
   OK, 841 pytest passed/2 skipped, `ruff check --fix`/`format` sur le Python modifié. Pas de
   capture d'écran (asset procédural vérifié par statistiques de pixels). Suite : fusion dans
   `feat/ga` après GA4, puis planche GA6 et jugement du joueur.
+
+- 28/09 : GA4 fait (worktree `../game_project-ga4`, branche `feat/ga4`) : terrain 2k/1k importé
+  (23,3 Mo contre 74,7), données `campaign_terrain_textures.json`, macro-variation partagée
+  `ga_macro.gdshaderinc`, mer à normale procédurale animée + 3 paliers de profondeur, `--no-ga4`,
+  ADR 0105 § GA4 ; `ga4_terrain_test.gd`, smoke (avec et sans `--no-ga4`), pytest ciblé verts.
+  A/B PB1 carte à faire (commande ci-dessus). 0 $.
