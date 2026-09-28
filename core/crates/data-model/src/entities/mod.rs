@@ -6,6 +6,7 @@ pub mod ai_diplomacy;
 pub mod ai_doctrine;
 pub mod ai_feudal;
 pub mod ai_grid;
+pub mod army_traditions;
 pub mod auto_resolve;
 pub mod battle_ability;
 pub mod battle_order;

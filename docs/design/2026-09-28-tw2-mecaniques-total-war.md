@@ -9,7 +9,7 @@ l'UI Godot se contente d'afficher et d'émettre des ordres. Nouveaux champs d'é
 pas de changement de `STATE_VERSION` sauf nécessité (alors ADR). L'IA doit savoir utiliser chaque
 nouvelle mécanique (sinon le joueur seul en profite).
 
-ADR : **0107** (SB), **0101** (T1), **0102** (T2), **0103** (T3), **0108** (T4), **0109** (T5) — renumérotés le 28/09 (0100 pris par RS B, 0104-0106 par GA).
+ADR : **0107** (SB), **0101** (T1), **0102** (T2), **0103** (T3), **0108** (T4), **0112** (T5) — renumérotés le 28/09 (0100 pris par RS B, 0104-0106 par GA).
 (0098/0099 sont réservés par l'orchestration RS, `docs/wip/restes.md`.)
 
 ## SB — Lisibilité et rythme de la destruction en siège (bataille)
