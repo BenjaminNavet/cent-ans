@@ -25,7 +25,7 @@ après les fusions FE/TW2 en cours si possible.
 - [x] IB4 **fusionné** (f679f72f) : liens `ib:`, bulles riches et de règle, placement latéral, fil d'Ariane, réduction ; défauts IB1 corrigés. Ouverts : alignement sur la ligne du mot-clé à juger à l'œil ; ancêtre rouverte ne re-place pas ses descendantes ; ressources/traits/compétences sans `*_spec` (spec simple)
 - [x] IB5 **fusionné** (3e26c0ac) : `preview.rs` (avant → après sur copie d'état), `requirements` [{id, met}] au pont ; jauges à équilibre libellées « équilibre a → b » (`equilibrium_effects` du style). Non couverts : piété, garnison, effets de bataille, croissance, unités
 - [x] IB2 **fusionné** (7ac2f0d4) : 135 littéraux → `attach_plain`/`plain_tooltip_host.gd`, tables → `tooltips.json`, bogue de repli de `RichTooltip.texts()` corrigé. Reste : `RichLabel` (`pre_battle_dialog.gd`) rend encore à plat ; découpage titre/corps à relire
-- [ ] IB6 intégration, planche avant/après (`docs/img/ib/`), jugement du joueur
+- [ ] IB6 intégration faite, planche faite ; **jugement du joueur en attente**
 
 ## Tronc commun des briefs
 
@@ -58,3 +58,4 @@ après les fusions FE/TW2 en cours si possible.
 - 28/09 : IB4 dans `main` (f679f72f), tous verts (smoke, ib_chain, ib_layout, p2c, po_ui, hud_components, pytest). IB2 lancé (mech). En cours : IB5, IB2. **Prochaine étape : fusionner IB5 et IB2, puis IB6 (planche, jugement du joueur, nettoyage `core/target-ib` et `../gp-ib-merge`).**
 - 28/09 : IB5 dans `main` (3e26c0ac) ; cargo test sim-campaign + godot-bridge et 6 tests Godot verts. En cours : IB2.
 - 28/09 : IB2 dans `main` (7ac2f0d4) ; batterie complète verte (smoke, ib_plain/chain/layout, p2c, po_ui, hud_components, pytest 7). Worktree IB2 verrouillé par le processus de l'agent : à supprimer plus tard (`git worktree remove --force` + `git branch -d feat/ib2-migrate worktree-agent-a226bf6f2c9fcce90`). **Prochaine étape : IB6 (planche après régénérée, jugement du joueur), puis nettoyage `core/target-ib`, `../gp-ib-merge`, branche `integration/ib`.**
+- 28/09 : planche `docs/img/ib/apres/` régénérée sur `main` (IB1-IB5 + IB2). Contrôle visuel du bâtiment complet : sections, liens, « équilibre a → b », ✗ prérequis et ⚠ lisibles. Retouches mineures possibles : vedette « +5 Piété » sans icône ; décimales brutes (« 2.1 → 0 ») à arrondir. **En attente : jugement du joueur (IB6).**
