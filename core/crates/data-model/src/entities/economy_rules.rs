@@ -313,7 +313,26 @@ impl Default for EconomyRules {
             garrison_reinforce_max_percent: default_garrison_reinforce_max_percent(),
             demolition_refund_percent: default_demolition_refund_percent(),
             ai_demolition: AiDemolition::default(),
-            terrain_supply: BTreeMap::new(),
+            terrain_supply: [
+                (
+                    Terrain::Steppe,
+                    TerrainSupply {
+                        recovery_percent: 70.0,
+                        loss_percent: 125.0,
+                        summer_loss: 0,
+                    },
+                ),
+                (
+                    Terrain::Desert,
+                    TerrainSupply {
+                        recovery_percent: 35.0,
+                        loss_percent: 175.0,
+                        summer_loss: 15,
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
             description: None,
         }
     }
