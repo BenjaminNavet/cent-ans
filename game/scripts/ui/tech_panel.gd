@@ -23,11 +23,8 @@ const BRANCH_LABELS := {"military": "Militaire", "civil": "Civil", "medicine": "
 
 
 func _ready() -> void:
-	# PO phase 2 (P2b, ADR 0097) : fenêtre centrale plein écran — voir `docs/wip/p2b-tech-diplo.md`
-	# « Point ouvert » : ne rejoint volontairement pas de zone `UiLayout` (`SIDE_PANEL` est trop
-	# étroit ; `MODAL` reparente hors de `map_ui`, ce qui casse `_keep_on_screen`/`PanelStack`
-	# côté `map_ui.gd`, hors lot — régressions constatées sur `smoke.gd`). Migré : tailles
-	# (`UiType`) et animations d'ouverture/fermeture (`UiMotion`).
+	# PO phase 2 (P2b, ADR 0097) : tailles (`UiType`) et ouverture/fermeture (`UiMotion`). P2g :
+	# `map_ui` le réclame dans la zone `MODAL` de `UiLayout` (`claim_modal_panel`).
 	Lettrine.attach(title_label)  # UI1 : titre à lettrine enluminée
 	tabs.set_tab_title(0, BRANCH_LABELS["military"])
 	tabs.set_tab_title(1, BRANCH_LABELS["civil"])

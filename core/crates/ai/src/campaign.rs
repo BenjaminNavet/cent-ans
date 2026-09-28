@@ -240,13 +240,17 @@ impl<'a> Context<'a> {
             .is_some_and(|s| &s.owner == self.faction)
     }
 
+    /// Estimated seasonal tax of `province` at the normal rate, its places'
+    /// buildings weighing their kind's `province_effect_percent` (lot RS-B:
+    /// a market in a village no longer counts as one in the city).
     fn province_income(&self, province: &ProvinceId) -> f64 {
         self.state.provinces.get(province).map_or(0.0, |p| {
-            sim_campaign::economy::province_income_effective(
+            sim_campaign::economy::province_income_with(
                 self.data,
                 p,
-                &self.state.province_buildings(province),
+                &[],
                 TaxRate::Normal,
+                &self.state.province_building_effects(self.data, province),
             )
         })
     }
@@ -592,7 +596,9 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     let levied = me.tax_rate == TaxRate::High;
     let normal_surplus = if levied {
         ctx.surplus()
-            - (ctx.gross_income.max(0) as f64 * (1.0 - 1.0 / TaxRate::High.multiplier())) as i64
+            - (ctx.gross_income.max(0) as f64
+                * (1.0 - 1.0 / TaxRate::High.multiplier(&ctx.data.economy_rules)))
+                as i64
     } else {
         ctx.surplus()
     };
@@ -953,6 +959,14 @@ fn building_value(
         return 0.0;
     };
     let income = ctx.province_income(province);
+    // RS-B: a secondary place's buildings weigh on the whole province and on
+    // research as the rules count them (`province_effect_percent`, `research_percent`).
+    let kind = ctx.state.settlement_kind(settlement);
+    let province_weight = f64::from(sim_campaign::buildings::province_effect_percent(
+        ctx.data, kind,
+    )) / 100.0;
+    let research_weight =
+        f64::from(sim_campaign::buildings::research_percent(ctx.data, kind)) / 100.0;
     let mut value = 0.0;
     for effect in &def.effects {
         let v = effect.value;
@@ -964,10 +978,10 @@ fn building_value(
                     v
                 }
             }
-            EffectKind::Unrest if unrest > 30.0 => -v * income / 50.0,
-            EffectKind::Health if health < 50.0 => v * income / 80.0,
-            EffectKind::Growth | EffectKind::Wealth => v * income / 150.0,
-            EffectKind::ResearchPoints => v * 60.0,
+            EffectKind::Unrest if unrest > 30.0 => -v * province_weight * income / 50.0,
+            EffectKind::Health if health < 50.0 => v * province_weight * income / 80.0,
+            EffectKind::Growth | EffectKind::Wealth => v * province_weight * income / 150.0,
+            EffectKind::ResearchPoints => v * research_weight * 60.0,
             EffectKind::Garrison | EffectKind::FortificationLevel if ctx.is_border(province) => {
                 v * 20.0
             }
