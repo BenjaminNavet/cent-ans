@@ -297,6 +297,10 @@ pub struct Army {
     /// the end of each turn.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub morale_modifiers: Vec<MoraleModifier>,
+    /// TW2-T2: last turn the army fought a battle (no replenishment that
+    /// season, `crate::replenish`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fought_turn: Option<u32>,
 }
 
 impl Army {
@@ -313,6 +317,7 @@ impl Army {
             planned_path: Vec::new(),
             destination: None,
             morale_modifiers: Vec::new(),
+            fought_turn: None,
         }
     }
 
@@ -455,6 +460,10 @@ pub struct SettlementState {
     /// Base fortification level from the data (0 village, 1-4 otherwise).
     #[serde(default)]
     pub fortification_level: u8,
+    /// TW2-T2: recruitment pools not full, in thousandths of a unit
+    /// (`crate::recruit_pool`); a unit type absent is at its cap.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub recruit_pool: BTreeMap<UnitTypeId, u32>,
 }
 
 /// Turn marker of a queue entry loaded from a save written before B7b (a
