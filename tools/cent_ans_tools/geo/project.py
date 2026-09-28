@@ -1,14 +1,15 @@
 """Map grid definition: EPSG:3035 bounds and pixel <-> projected helpers.
 
-Convention (see ``docs/design/m1-campaign-map.md``): the map is a square raster
-of :data:`SIZE_PX` pixels whose origin is the north-west corner of the
-projected bounds, X grows eastwards and Y grows southwards, one unit = one
-pixel. Continuous pixel coordinates place the centre of pixel ``(i, j)`` at
-``(i + 0.5, j + 0.5)``.
+Convention (see ``docs/design/m1-campaign-map.md``): the map is a rectangular
+raster of :data:`WIDTH_PX` x :data:`HEIGHT_PX` pixels whose origin is the
+north-west corner of the projected bounds, X grows eastwards and Y grows
+southwards, one unit = one pixel. Continuous pixel coordinates place the centre
+of pixel ``(i, j)`` at ``(i + 0.5, j + 0.5)``; ``meters_per_px`` is isotropic.
 
-The geographic extent (lon -11..16, lat 35..60) is not square once projected
-(about 2464 km x 2945 km), so the X extent is widened symmetrically to obtain
-square pixels; ``meters_per_px`` is therefore isotropic.
+Extent (ADR 0115, Urals-Mediterranean): the projected bounds are fixed
+explicitly (:data:`BOUNDS_PROJECTED`), 28 x 24 root tiles of 256 units at
+718.9765625 m per unit. The west edge is the one of the former 4096² map, whose
+pixels keep their X and gain 1280 in Y. :data:`EXTENT_LONLAT` is indicative only.
 """
 
 from __future__ import annotations
@@ -21,9 +22,17 @@ from pyproj import Transformer
 
 CRS_MAP = "EPSG:3035"
 CRS_GEO = "EPSG:4326"
-LON_MIN, LON_MAX = -11.0, 16.0
-LAT_MIN, LAT_MAX = 35.0, 60.0
-SIZE_PX = 4096
+#: Indicative geographic extent (lon_min, lat_min, lon_max, lat_max): the map is
+#: defined by :data:`BOUNDS_PROJECTED`, which covers more than this box.
+EXTENT_LONLAT = (-11.0, 28.0, 61.0, 66.0)
+LON_MIN, LAT_MIN, LON_MAX, LAT_MAX = EXTENT_LONLAT
+METERS_PER_PX = 718.9765625
+WIDTH_PX = 7168
+HEIGHT_PX = 6144
+#: EPSG:3035 bounds ``(minx, miny, maxx, maxy)`` in metres (ADR 0115).
+BOUNDS_PROJECTED = (2169486.0, 775684.0, 7323110.0, 5193076.0)
+#: Rows added above the former 4096² map: legacy pixel ``(x, y)`` is ``(x, y + 1280)``.
+LEGACY_Y_OFFSET_PX = 1280
 
 _to_map = Transformer.from_crs(CRS_GEO, CRS_MAP, always_xy=True)
 _to_geo = Transformer.from_crs(CRS_MAP, CRS_GEO, always_xy=True)
@@ -31,20 +40,40 @@ _to_geo = Transformer.from_crs(CRS_MAP, CRS_GEO, always_xy=True)
 
 @dataclass(frozen=True)
 class MapGrid:
-    """Square raster grid over projected bounds.
+    """Raster grid over projected bounds (isotropic pixels).
 
     Attributes:
         bounds: ``(minx, miny, maxx, maxy)`` in EPSG:3035 metres.
-        size_px: Width and height in pixels.
+        width_px: Width in pixels.
+        height_px: Height in pixels (defaults to a square grid).
     """
 
     bounds: tuple[float, float, float, float]
-    size_px: int = SIZE_PX
+    width_px: int = WIDTH_PX
+    height_px: int | None = None
+
+    def __post_init__(self) -> None:
+        """Default a missing height to the width (square grid)."""
+        if self.height_px is None:
+            object.__setattr__(self, "height_px", self.width_px)
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        """Array shape ``(rows, cols)`` = ``(height_px, width_px)``."""
+        return (self.height_px, self.width_px)
 
     @property
     def meters_per_px(self) -> float:
         """Isotropic pixel size in metres."""
-        return (self.bounds[2] - self.bounds[0]) / self.size_px
+        return (self.bounds[2] - self.bounds[0]) / self.width_px
+
+    def scaled(self, factor: float) -> MapGrid:
+        """Same bounds with ``factor`` times as many pixels per side."""
+        return MapGrid(
+            self.bounds,
+            int(round(self.width_px * factor)),
+            int(round(self.height_px * factor)),
+        )
 
     @property
     def transform(self) -> Affine:
@@ -135,26 +164,16 @@ def projected_bounds_of_extent(
     return float(x.min()), float(y.min()), float(x.max()), float(y.max())
 
 
-def squared_bounds(
-    bounds: tuple[float, float, float, float],
-) -> tuple[float, float, float, float]:
-    """Widen the shorter side of ``bounds`` symmetrically so the box is square.
-
-    Coordinates are rounded to whole metres (outwards).
-    """
-    minx, miny, maxx, maxy = bounds
-    width, height = maxx - minx, maxy - miny
-    if width < height:
-        pad = (height - width) / 2
-        minx, maxx = minx - pad, maxx + pad
-    elif height < width:
-        pad = (width - height) / 2
-        miny, maxy = miny - pad, maxy + pad
-    side = float(np.ceil(max(maxx - minx, maxy - miny)))
-    minx, miny = float(np.floor(minx)), float(np.floor(miny))
-    return minx, miny, minx + side, miny + side
-
-
 def default_grid() -> MapGrid:
-    """The M1 campaign grid: contract extent, squared, 4096 px."""
-    return MapGrid(squared_bounds(projected_bounds_of_extent()))
+    """The campaign grid (ADR 0115): explicit bounds, 7168 x 6144 px."""
+    return MapGrid(BOUNDS_PROJECTED, WIDTH_PX, HEIGHT_PX)
+
+
+def grid_from_metadata(metadata: dict, scale: float = 1.0) -> MapGrid:
+    """Grid of a ``map.json`` (``bounds_projected``, ``size_px`` [w, h]), scaled."""
+    width, height = metadata["size_px"]
+    return MapGrid(
+        tuple(metadata["bounds_projected"]),
+        int(round(width * scale)),
+        int(round(height * scale)),
+    )
