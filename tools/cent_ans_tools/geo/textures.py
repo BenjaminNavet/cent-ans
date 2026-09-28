@@ -172,7 +172,9 @@ def build_arrays(
     normal_sheet.save(normal_path, quality=ARRAY_JPEG_QUALITY, subsampling=0)
     water_path = texture_dir / "water_normal.png"
     water_size = int(spec["water"]["normal_size"])
-    Image.fromarray(water_normal(water_size), mode="RGB").save(water_path, optimize=True)
+    Image.fromarray(water_normal(water_size), mode="RGB").save(
+        water_path, optimize=True
+    )
     spec_path.write_text(format_spec(spec), encoding="utf-8")
     return [albedo_path, normal_path, water_path, spec_path]
 
