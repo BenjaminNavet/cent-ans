@@ -1,4 +1,4 @@
-# WIP orchestrateur — TW2 mécaniques Total War (28/09) — EN PAUSE
+# WIP orchestrateur — TW2 mécaniques Total War (28/09) — REPRIS le 28/09 après-midi
 
 Plan : `docs/design/2026-09-28-tw2-mecaniques-total-war.md`. Mandat : enchaîner les lots sans validation.
 Mis en pause par le joueur le 28/09 (« on reprendra dans une future session ») ; rien de TW2 n'est dans main.
@@ -14,9 +14,12 @@ Chaque lot a sa note `docs/wip/tw2-<lot>.md` dans sa branche `feat/tw2-<lot>`.
 | T2 reconstitution + réserves | feat/tw2-t2 (fd7e7275) | fini, dans integration/tw2 |
 | T3 mercenaires | feat/tw2-t3 (e4cdde5e) | agent stoppé ; ADR 0103 avec sonde, icônes faites, integration/tw2 déjà fusionnée ; voir `docs/wip/tw2-t3.md` de la branche |
 | T4 points de capture + rééquilibrage br3 (cible 4-7/10) | feat/tw2-t4 (597020f1) | agent stoppé pendant sa vérif finale ; capture, dernier carré, repli, UI, tests, ADR 0108 ; voir `docs/wip/tw2-t4.md` |
-| T5 traditions d'armée | feat/tw2-t5 | pas lancé |
+| T5 traditions d'armée | feat/tw2-t5 (worktree `../gp-tw2-t5`) | agent lancé (inclut dilution d'xp des renforts) |
 
-## integration/tw2 (worktree `../gp-tw2-merge`, 9c10e90e)
+## integration/tw2 (worktree `../gp-tw2-merge`, 54e3c4b2)
+
+Reprise : main refusionnée (doc seule), vérif complète relancée ; agents de reprise T3 et T4 relancés.
+
 
 = main (28/09 matin) + T1 + T2 + SB + correctif souris du test des barres + ADR SB renuméroté 0107.
 Vérifié avant la dernière fusion de main : fmt, clippy, cargo test, smoke (29 OK), 3 tests headless TW2,
