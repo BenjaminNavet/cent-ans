@@ -9,16 +9,17 @@ Chaque lot a sa note `docs/wip/tw2-<lot>.md` dans sa branche `feat/tw2-<lot>`.
 
 | Lot | Branche | État |
 |---|---|---|
-| SB barres de vie + rythme siège | feat/tw2-sb (6fcd5080) | fini, dans integration/tw2 ; br3 bascule 3/10→10/10 (rééquilibré par T4) |
-| T1 sort de la ville prise | feat/tw2-t1 (9851cd5d) | fini, dans integration/tw2 |
-| T2 reconstitution + réserves | feat/tw2-t2 (fd7e7275) | fini, dans integration/tw2 |
+| SB barres de vie + rythme siège | feat/tw2-sb (6fcd5080) | **dans main** (befaf258) ; br3 bascule 3/10→10/10 (rééquilibré par T4) |
+| T1 sort de la ville prise | feat/tw2-t1 (9851cd5d) | **dans main** (befaf258) |
+| T2 reconstitution + réserves | feat/tw2-t2 (fd7e7275) | **dans main** (befaf258) |
 | T3 mercenaires | feat/tw2-t3 (e4cdde5e) | agent stoppé ; ADR 0103 avec sonde, icônes faites, integration/tw2 déjà fusionnée ; voir `docs/wip/tw2-t3.md` de la branche |
 | T4 points de capture + rééquilibrage br3 (cible 4-7/10) | feat/tw2-t4 (597020f1) | agent stoppé pendant sa vérif finale ; capture, dernier carré, repli, UI, tests, ADR 0108 ; voir `docs/wip/tw2-t4.md` |
 | T5 traditions d'armée | feat/tw2-t5 (worktree `../gp-tw2-t5`) | agent lancé (inclut dilution d'xp des renforts) |
 
 ## integration/tw2 (worktree `../gp-tw2-merge`, 54e3c4b2)
 
-Reprise : main refusionnée (doc seule), vérif complète relancée ; agents de reprise T3 et T4 relancés.
+Fusionnée dans main le 28/09 (befaf258) : fmt, clippy, 1116 tests Rust, build, smoke + 3 tests TW2 headless, pytest 880 verts.
+NB : pas de `timeout` sur macOS, lancer godot directement.
 
 
 = main (28/09 matin) + T1 + T2 + SB + correctif souris du test des barres + ADR SB renuméroté 0107.
