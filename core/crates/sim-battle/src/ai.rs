@@ -2938,8 +2938,8 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
             }
             continue;
         }
-        if !openings.is_empty() {
-            let p = blocked[blockers];
+        if !blocked.is_empty() {
+            let p = blocked[blockers % blocked.len()];
             blockers += 1;
             let (x, z) = outer_point(works, p, -(band + 22.0));
             let (nx, nz) = works.pieces[p].outward();
