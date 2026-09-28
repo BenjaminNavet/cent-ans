@@ -207,7 +207,15 @@
    "Avenue Pierre Semard",
    "Rue Pierre Brossolette",
    "Avenue Gabriel Péri",
-   "Avenue du Général Leclerc"
+   "Avenue du Général Leclerc",
+   "Avenue Charles de Gaulle",
+   "Avenue Maréchal de Lattre de Tassigny",
+   "Avenue des Italiens",
+   "Avenue du 58e Régiment d'Infanterie",
+   "Avenue du 7e Génie",
+   "Boulevard du Quai Saint-Lazare",
+   "Boulevard du Quai de la Ligne",
+   "Impasse du Quai Saint-Lazare"
   ],
   "main": [
    "Rue de la Carreterie",
@@ -1572,398 +1580,6 @@
    ]
   },
   {
-   "id": "osm_76910892",
-   "name": "Avenue Charles de Gaulle",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [-261.0, 1698.7],
-    [-251.7, 1726.9],
-    [-248.3, 1750.9]
-   ]
-  },
-  {
-   "id": "osm_28196525",
-   "name": "Avenue Maréchal de Lattre de Tassigny",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [-216.5, -767.9],
-    [-175.7, -774.9]
-   ]
-  },
-  {
-   "id": "osm_896172783",
-   "name": "Avenue Maréchal de Lattre de Tassigny",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [-175.7, -774.9],
-    [-60.7, -786.5]
-   ]
-  },
-  {
-   "id": "osm_130636624",
-   "name": "Avenue des Italiens",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [945.3, 67.9],
-    [934.2, 56.2]
-   ]
-  },
-  {
-   "id": "osm_28207856",
-   "name": "Avenue du 58e Régiment d'Infanterie",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [717.1, -518.6],
-    [624.9, -681.8]
-   ]
-  },
-  {
-   "id": "osm_84918510",
-   "name": "Avenue du 58e Régiment d'Infanterie",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [542.9, -788.6],
-    [611.0, -703.6],
-    [624.9, -681.8]
-   ]
-  },
-  {
-   "id": "osm_28196532",
-   "name": "Avenue du 7e Génie",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [28.2, -888.3],
-    [-1.5, -891.4],
-    [-75.6, -891.2]
-   ]
-  },
-  {
-   "id": "osm_455314291",
-   "name": "Avenue du 7e Génie",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [-75.6, -891.2],
-    [-133.2, -879.9]
-   ]
-  },
-  {
-   "id": "osm_455314292",
-   "name": "Avenue du 7e Génie",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [101.2, -873.6],
-    [90.3, -874.1],
-    [28.2, -888.3]
-   ]
-  },
-  {
-   "id": "osm_623317051",
-   "name": "Avenue du 7e Génie",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [-229.1, -861.2],
-    [-133.2, -879.9]
-   ]
-  },
-  {
-   "id": "osm_10616970",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [657.5, 188.9],
-    [448.9, 276.0]
-   ]
-  },
-  {
-   "id": "osm_10618964",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [455.1, 265.5],
-    [531.9, 232.8]
-   ]
-  },
-  {
-   "id": "osm_130636625",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [616.1, 198.3],
-    [703.7, 157.9]
-   ]
-  },
-  {
-   "id": "osm_1419958811",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [717.5, 156.3],
-    [744.2, 143.1]
-   ]
-  },
-  {
-   "id": "osm_1419958812",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [744.2, 143.1],
-    [771.3, 130.0]
-   ]
-  },
-  {
-   "id": "osm_1419958813",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [531.9, 232.8],
-    [588.1, 209.8]
-   ]
-  },
-  {
-   "id": "osm_1419958814",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [588.1, 209.8],
-    [616.1, 198.3]
-   ]
-  },
-  {
-   "id": "osm_1517392954",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [729.3, 158.0],
-    [731.9, 152.0],
-    [744.2, 143.1]
-   ]
-  },
-  {
-   "id": "osm_1547340657",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [729.3, 158.0],
-    [657.5, 188.9]
-   ]
-  },
-  {
-   "id": "osm_161177063",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [952.9, 41.7],
-    [940.3, 51.8]
-   ]
-  },
-  {
-   "id": "osm_161177064",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [939.2, 46.7],
-    [950.9, 37.0]
-   ]
-  },
-  {
-   "id": "osm_25492191_0",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [925.6, 60.6],
-    [862.8, 89.8]
-   ]
-  },
-  {
-   "id": "osm_25492191_1",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [758.3, 142.5],
-    [729.3, 158.0]
-   ]
-  },
-  {
-   "id": "osm_456714131",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [674.5, 184.1],
-    [657.5, 188.9]
-   ]
-  },
-  {
-   "id": "osm_725128428_0",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [771.3, 130.0],
-    [787.4, 121.8]
-   ]
-  },
-  {
-   "id": "osm_725128428_1",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [842.3, 94.6],
-    [939.2, 46.7]
-   ]
-  },
-  {
-   "id": "osm_807758277",
-   "name": "Boulevard du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [616.1, 198.3],
-    [717.5, 156.3]
-   ]
-  },
-  {
-   "id": "osm_1175413592",
-   "name": "Boulevard du Quai de la Ligne",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [267.4, 285.3],
-    [418.9, 275.9],
-    [455.1, 265.5]
-   ]
-  },
-  {
-   "id": "osm_1547340660",
-   "name": "Boulevard du Quai de la Ligne",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [-39.3, 310.8],
-    [3.3, 318.9]
-   ]
-  },
-  {
-   "id": "osm_1548268674",
-   "name": "Boulevard du Quai de la Ligne",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [448.9, 276.0],
-    [426.5, 281.5]
-   ]
-  },
-  {
-   "id": "osm_1548268675",
-   "name": "Boulevard du Quai de la Ligne",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [426.5, 281.5],
-    [363.8, 288.5]
-   ]
-  },
-  {
-   "id": "osm_28197014_0",
-   "name": "Boulevard du Quai de la Ligne",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [3.3, 318.9],
-    [39.7, 321.1],
-    [80.7, 318.4]
-   ]
-  },
-  {
-   "id": "osm_28197014_1",
-   "name": "Boulevard du Quai de la Ligne",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [224.6, 287.5],
-    [267.4, 285.3]
-   ]
-  },
-  {
-   "id": "osm_28197016",
-   "name": "Boulevard du Quai de la Ligne",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [-115.1, 293.8],
-    [-39.3, 310.8]
-   ]
-  },
-  {
-   "id": "osm_28208972",
-   "name": "Boulevard du Quai de la Ligne",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [363.8, 288.5],
-    [298.4, 290.6]
-   ]
-  },
-  {
    "id": "osm_77517773",
    "name": "Chemin des Chartreux",
    "rank": "secondary",
@@ -2115,17 +1731,6 @@
     [298.2, -291.7],
     [305.6, -287.8],
     [306.4, -285.1]
-   ]
-  },
-  {
-   "id": "osm_79057780",
-   "name": "Impasse du Quai Saint-Lazare",
-   "rank": "secondary",
-   "width_m": 4.5,
-   "origin": "osm",
-   "points": [
-    [925.6, 60.6],
-    [933.2, 73.7]
    ]
   },
   {
@@ -6842,7 +6447,7 @@
     "width_m": 16,
     "height_m": 24,
     "ranges": [
-     [-20.3, -59.9, 62, 17, 32, -90]
+     [-25.0, -50.8, 56, 17, 32, -90]
     ]
    },
    "description": "Palais de Clément VI par Jean de Louvres, commencé le 17 juillet 1342, gros œuvre achevé le 21 octobre 1351 : aile des Grands Dignitaires sur la place (porte des Champeaux) et aile sud de la Grande Audience surmontée de la chapelle Clémentine (52 × 15 m, 20 m sous voûte). Emprises tirées du contour OSM (façade ouest, front sud) ; hauteurs restituées."
@@ -7021,7 +6626,7 @@
    "id": "cordeliers",
    "name": "Église des Cordeliers",
    "model": "church",
-   "at": [300, -600],
+   "at": [305, -615],
    "angle_deg": -23,
    "clear_m": 6,
    "certainty": "hypothetical",
