@@ -45,6 +45,7 @@
 pub mod abilities;
 pub mod ai;
 pub mod alerts;
+pub mod capture;
 pub mod command;
 pub mod crest;
 pub mod decision;
@@ -91,6 +92,7 @@ pub mod town;
 pub mod unit;
 
 pub use abilities::{AbilityView, ActiveAbility, EndedAbility, UnitAbilities};
+pub use capture::{CapturePoint, CapturePointKind, CaptureRules, PointStatus};
 pub use command::{Command, CommandError};
 pub use decision::{BattleEnd, DecisionRules};
 pub use decor::{

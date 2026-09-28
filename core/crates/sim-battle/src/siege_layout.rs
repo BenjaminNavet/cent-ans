@@ -562,6 +562,7 @@ impl SiegeWorks {
             square_radius: SQUARE_RADIUS,
             gate,
             hold_time: 0.0,
+            points: Vec::new(),
             houses: Vec::new(),
             props: Vec::new(),
             sortie: false,

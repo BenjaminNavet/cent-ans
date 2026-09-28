@@ -384,7 +384,12 @@ fn the_gate_gives_way_and_the_garrison_falls_back_to_the_square() {
                 && ((u.x - gx).powi(2) + (u.z - gz).powi(2)).sqrt() < 45.0
         })
         .count();
-    assert!(at_gate <= sim_battle::siege_fx::BLOCKERS_PER_OPENING);
+    assert!(
+        at_gate
+            <= sim_battle::CaptureRules::bundled()
+                .fall_back
+                .blockers_per_opening
+    );
 }
 
 #[test]

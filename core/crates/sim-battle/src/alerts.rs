@@ -39,6 +39,8 @@ pub enum AlertKind {
     AmmoOut,
     WallBreached,
     GateDestroyed,
+    /// T4 (ADR 0104): the attacker is taking the market square.
+    SquareThreatened,
 }
 
 impl AlertKind {
@@ -52,6 +54,7 @@ impl AlertKind {
             AlertKind::AmmoOut => "ammo_out",
             AlertKind::WallBreached => "wall_breached",
             AlertKind::GateDestroyed => "gate_destroyed",
+            AlertKind::SquareThreatened => "square_threatened",
         }
     }
 }
@@ -132,6 +135,7 @@ mod tests {
             AlertKind::AmmoOut,
             AlertKind::WallBreached,
             AlertKind::GateDestroyed,
+            AlertKind::SquareThreatened,
         ] {
             assert!(!kind.key().is_empty());
         }

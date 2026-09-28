@@ -1319,7 +1319,9 @@ impl BattleSim {
     /// towers[{x, z, radius, height}], houses[{x, z, radius, suburb, fire: {state:
     /// "intact"|"burning"|"burnt", intensity}, length, depth, yaw, rows, church}],
     /// props[{kind, x, z, yaw, length, depth, house}] (BR3), engines[{unit, kind:
-    /// "ram"|"tower", side, x, z, hp, max_hp}] (SB), gate_fire: {state, intensity},
+    /// "ram"|"tower", side, x, z, hp, max_hp}] (SB), points[{kind: "square"|"gate",
+    /// x, z, radius, progress, hold_s, share, status: "held"|"contested"|"capturing"|
+    /// "taken", attackers, defenders}] (T4, ADR 0104), gate_fire: {state, intensity},
     /// wind: Vector2 (direction × strength 0-1), houses_burning, houses_burnt,
     /// sortie, ram_period, oil_period}`. Pieces lose HP and houses burn during the battle (S2): call it
     /// again to show the damage.
@@ -1412,6 +1414,27 @@ impl BattleSim {
                 .to_variant()
             })
             .collect();
+        // T4 (ADR 0104): capture points (market square, gate) with their
+        // progress, for the flags and the capture bars.
+        let points: VarArray = works
+            .points
+            .iter()
+            .map(|p| {
+                vdict! {
+                    "kind" => p.kind.key(),
+                    "x" => p.x,
+                    "z" => p.z,
+                    "radius" => p.radius,
+                    "progress" => p.progress,
+                    "hold_s" => p.hold_s,
+                    "share" => p.share(),
+                    "status" => p.status.key(),
+                    "attackers" => p.attackers,
+                    "defenders" => p.defenders,
+                }
+                .to_variant()
+            })
+            .collect();
         vdict! {
             "fortification" => i64::from(works.fortification),
             "center" => v2(works.center),
@@ -1420,7 +1443,8 @@ impl BattleSim {
             "wall_height" => works.wall_height,
             "gate" => works.gate as i64,
             "hold_time" => works.hold_time,
-            "hold_to_win" => sim_battle::siege::HOLD_TO_WIN,
+            "hold_to_win" => sim_battle::CaptureRules::bundled().square.hold_s,
+            "points" => &points,
             "integrity" => works.integrity(),
             "pieces" => &pieces,
             "towers" => &towers,
