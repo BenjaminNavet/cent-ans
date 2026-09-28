@@ -211,7 +211,10 @@ func _clamp_body_height() -> void:
 	if area.y <= 0.0:
 		return
 	var budget := maxf(BODY_MIN_HEIGHT, area.y * BODY_MAX_RATIO)
-	_scroll.custom_minimum_size.y = minf(_scroll.get_combined_minimum_size().y, budget)
+	# Hauteur du contenu, pas du ScrollContainer : sa taille minimale propre est nulle en défilement
+	# vertical (Q6 : la fenêtre s'ouvrait avec un corps vide, choix inaccessibles).
+	var content := _scroll.get_child(0) as Control
+	_scroll.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, budget)
 
 
 func _center_on_screen() -> void:
