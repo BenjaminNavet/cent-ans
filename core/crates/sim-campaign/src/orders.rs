@@ -258,6 +258,11 @@ pub enum Order {
         offer: u32,
         accept: bool,
     },
+    /// FE (§ 4.3.5): the player's verdict on a private war offer.
+    ArbitratePrivateWar {
+        offer: u32,
+        verdict: crate::feudal::Arbitration,
+    },
     RequestPapalMediation {
         target: FactionId,
     },
@@ -792,6 +797,9 @@ impl CampaignState {
             }
             Order::AnswerOffer { offer, accept } => {
                 Ok(self.answer_offer(data, faction, offer, accept)?)
+            }
+            Order::ArbitratePrivateWar { offer, verdict } => {
+                Ok(self.arbitrate(data, faction, offer, verdict)?)
             }
             Order::RequestPapalMediation { target } => {
                 Ok(self.request_papal_mediation(data, faction, &target)?)
