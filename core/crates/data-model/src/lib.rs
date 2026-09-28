@@ -18,6 +18,7 @@ pub mod movement_graph;
 pub mod navgrid;
 pub mod settlement_load;
 pub mod title_check;
+pub mod trade_paths;
 
 pub use common::{
     Cost, Effect, EffectKind, EffectMode, HistoricalDate, LocalizedName, Percent, SocialClass,
@@ -127,3 +128,4 @@ pub use load::{upgrade_regressions, DataError, GameData, ReferenceError, Warning
 pub use map::{MapMeta, ProvinceGeometry};
 pub use movement_graph::{distance_km, terrain_cost, GraphEdge, MovementGraph};
 pub use navgrid::{MapRasters, NavGrid, ProvinceRaster, IMPASSABLE, PLAIN_COST};
+pub use trade_paths::{TradePath, TradePaths};

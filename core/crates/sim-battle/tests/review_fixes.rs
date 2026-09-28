@@ -292,3 +292,92 @@ fn siege_pathing_cache_follows_the_walls() {
     fresh.siege_mut().unwrap().pieces[breach].hp = 0.0;
     assert_eq!(opened, fresh.siege_route(side, from, to));
 }
+
+/// Review point left open after fix 2, rechecked after CB4 (RS-D), fixed by
+/// RS-J: crossbowmen behind their pavises, ordered to shoot a regiment
+/// hidden in a wood within bowshot, lower their pavises and close in like
+/// the archers of `archers_close_in_on_a_hidden_target`, then shoot.
+#[test]
+fn pavised_crossbowmen_close_in_on_a_hidden_target() {
+    let data = data();
+    let mut battle = setup(
+        vec![unit(&data, "unit_crossbowmen")],
+        vec![unit(&data, "unit_urban_militia")],
+        None,
+    );
+    battle.abilities = data.battle_abilities.values().cloned().collect();
+    let mut sim = BattleSim::new(battle, 7).unwrap();
+    lab(&mut sim);
+    sim.field_mut().forests.clear();
+    sim.field_mut().forest_parts.clear();
+    sim.field_mut().forests.push(sim_battle::Zone {
+        x: 600.0,
+        z: 520.0,
+        radius: 40.0,
+    });
+    place(&mut sim, 0, 600.0, 380.0, 0.0);
+    place(&mut sim, 1, 600.0, 520.0, std::f64::consts::PI);
+    sim.issue_command(Command::UseAbility {
+        units: vec![0],
+        ability: "ability_pavise".to_owned(),
+    })
+    .unwrap();
+    run(&mut sim, 6.0);
+    assert!(sim.units()[0].pavise.is_some(), "pavises up");
+    let before = sim.units()[1].hp;
+    sim.issue_command(Command::Attack {
+        units: vec![0],
+        target: 1,
+        run: false,
+        queue: false,
+    })
+    .unwrap();
+    run(&mut sim, 60.0);
+    assert!(sim.units()[0].z > 440.0, "z {}", sim.units()[0].z);
+    assert!(sim.units()[1].hp < before, "the hidden regiment is shot at");
+}
+
+/// RS-J non-regression: the same crossbowmen facing a regiment in the open
+/// within bowshot keep their pavises up, hold their ground and shoot.
+#[test]
+fn pavised_crossbowmen_hold_and_shoot_a_visible_target() {
+    let data = data();
+    let mut battle = setup(
+        vec![unit(&data, "unit_crossbowmen")],
+        vec![unit(&data, "unit_urban_militia")],
+        None,
+    );
+    battle.abilities = data.battle_abilities.values().cloned().collect();
+    let mut sim = BattleSim::new(battle, 7).unwrap();
+    lab(&mut sim);
+    sim.field_mut().forests.clear();
+    sim.field_mut().forest_parts.clear();
+    place(&mut sim, 0, 600.0, 380.0, 0.0);
+    place(&mut sim, 1, 600.0, 520.0, std::f64::consts::PI);
+    sim.issue_command(Command::UseAbility {
+        units: vec![0],
+        ability: "ability_pavise".to_owned(),
+    })
+    .unwrap();
+    run(&mut sim, 6.0);
+    assert!(sim.units()[0].pavise.is_some(), "pavises up");
+    let before = sim.units()[1].hp;
+    sim.issue_command(Command::Attack {
+        units: vec![0],
+        target: 1,
+        run: false,
+        queue: false,
+    })
+    .unwrap();
+    run(&mut sim, 30.0);
+    assert!(sim.units()[0].pavise.is_some(), "pavises still up");
+    assert!(
+        (sim.units()[0].z - 380.0).abs() < 1.0,
+        "z {}",
+        sim.units()[0].z
+    );
+    assert!(
+        sim.units()[1].hp < before,
+        "the visible regiment is shot at"
+    );
+}
