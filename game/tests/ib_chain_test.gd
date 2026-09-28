@@ -40,6 +40,7 @@ func _init() -> void:
 	if _check(_store != null and _bubbles != null, "CodexStore / CodexBubbles autoloads missing"):
 		_store.call("use_test_file")
 		await _run()
+		await _run_ib4()
 	print("ib_chain_test: %s" % ("OK" if _failures == 0 else "%d failure(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -166,6 +167,133 @@ func _run() -> void:
 	_bubbles.call("close_all")
 	holder.queue_free()
 	await process_frame
+
+
+## IB4 (spec IB § 3.3-3.4) : liens `ib:` émis par les specs ; lien d'entité → bulle riche avec
+## en-tête ; `ib:rule:` → bulle de règle ; fille à côté de sa parente à 1280 × 720 ; fil d'Ariane
+## au 3ᵉ niveau (clic : retour à ce niveau) ; réduction des ancêtres plutôt que fermeture.
+func _run_ib4() -> void:
+	_bubbles.call("close_all")
+	RichTooltip.reload_texts()
+	# Liens émis : libellés d'effets / stats en `ib:rule:`, noms d'entités en `ib:<kind>:`.
+	var unit_view := TooltipView.build(RichTooltip.unit_spec("unit_longbowmen"), true)
+	root.add_child(unit_view)
+	var stats_text := ""
+	for node in unit_view.find_children("Label", "RichTextLabel", true, false):
+		stats_text += (node as RichTextLabel).text
+	_check(stats_text.contains("[url=ib:rule:melee]"), "stat labels should link to ib:rule: (%s)" % stats_text.left(120))
+	var conditions := unit_view.find_child("Conditions", true, false) as RichTextLabel
+	_check(conditions != null and conditions.text.contains("[url=ib:"), "entity names in conditions should be ib: links")
+	unit_view.queue_free()
+	var building_id := _building_with_effects()
+	var building_view := TooltipView.build(RichTooltip.building_spec(building_id), true)
+	root.add_child(building_view)
+	var effects := building_view.find_child("Effects", true, false) as RichTextLabel
+	var headline_links := ""
+	for node in building_view.find_children("Caption", "RichTextLabel", true, false):
+		headline_links += (node as RichTextLabel).text
+	_check(effects == null and headline_links.contains("[url=ib:rule:") or effects != null and effects.text.contains("[url=ib:rule:"),
+		"%s: effect labels should link to ib:rule:" % building_id)
+	building_view.queue_free()
+	_check(CodexText.ib_link("rule", "army_morale", "Moral").contains("[url=ib:rule:army_morale]"), "CodexText.ib_link")
+
+	# Lien d'entité → bulle riche (en-tête), clé retenue ; règle → bulle `rule`.
+	_bubbles.set("area_override", Rect2(0, 0, 1280, 720))
+	var entity: PanelContainer = _bubbles.call("open", "ib:unit:unit_longbowmen", Vector2(8, 8))
+	await _settle()
+	_check(entity != null and entity.find_child("Header", true, false) != null, "ib:unit: should open a rich bubble with a header")
+	if entity != null:
+		_check(str(entity.get_meta("link_key", "")) == "ib:unit:unit_longbowmen", "the bubble should remember its link key")
+		var codex_id := str(_store.call("entry_for_entity", "unit_longbowmen"))
+		_check(str(entity.get_meta("codex_id", "")) == codex_id, "left click should lead to the linked Codex entry (%s)" % codex_id)
+	var rule: PanelContainer = _bubbles.call("open", "ib:rule:army_morale", -Vector2.ONE, 0)
+	await _settle()
+	_check(rule != null and _bubbles.call("parent_of", rule) == entity, "ib:rule: should open a child bubble")
+	if rule != null:
+		var title := rule.find_child("Title", true, false) as RichTextLabel
+		var detail := rule.find_child("Detail", true, false) as RichTextLabel
+		_check(title != null and title.text.contains(str(RichTooltip.EFFECT_LABELS["army_morale"])), "rule bubble title")
+		_check(detail != null and detail.text.length() > 20, "rule bubble text from tooltips.json")
+		# Fille à côté de sa parente, sans la chevaucher, dans l'écran 1280 × 720.
+		_check(not rule.get_rect().intersects(entity.get_rect()), "child should not overlap its parent: %s / %s" % [rule.get_rect(), entity.get_rect()])
+		_check(Rect2(0, 0, 1280, 720).encloses(rule.get_rect()), "child should stay on screen: %s" % rule.get_rect())
+		_check(rule.position.x >= entity.get_rect().end.x, "child should go right of its parent when room allows")
+	_check(_count() == 2 and _bubbles.call("_child_of", entity, "ib:rule:army_morale") == rule, "reopening the same link should reuse the bubble")
+
+	# Fil d'Ariane au 3ᵉ niveau, retiré des autres bulles ; un segment ramène à son niveau.
+	_bubbles.call("close_all")
+	await process_frame
+	var chain: Array = []
+	for key in ["ib:rule:army_morale", "ib:rule:morale", "ib:rule:unrest", "ib:rule:health"]:
+		var parent_index := chain.size() - 1
+		var bubble: PanelContainer = _bubbles.call("open", key, Vector2(8, 8), parent_index)
+		if not _check(bubble != null, "chain bubble %s" % key):
+			return
+		_force_size(bubble, Vector2(380, 380))
+		chain.append(bubble)
+		await _settle()
+		if chain.size() == 2:
+			_check(_bubbles.call("breadcrumb_of", chain[1]) == null, "no breadcrumb before the 3rd level")
+		if chain.size() == 3:
+			var crumb: RichTextLabel = _bubbles.call("breadcrumb_of", chain[2])
+			_check(crumb != null and crumb.text.contains(" › ") and crumb.text.contains("[url=crumb:0]"), "breadcrumb on the 3rd level")
+			_check(_bubbles.call("breadcrumb_of", chain[1]) == null, "only the most recent bubble has a breadcrumb")
+	# Place insuffisante pour le 4ᵉ niveau : les ancêtres anciennes se réduisent, rien ne se ferme.
+	_check(_count() == 4, "no bubble should close for lack of room (count %d)" % _count())
+	_check(bool(chain[0].get_meta("collapsed", false)), "the oldest ancestor should collapse to its header")
+	_check(chain[0].find_child("CollapsedHeader", true, false) != null, "collapsed bubble shows its header")
+	for index in range(1, chain.size()):
+		for ancestor_index in index:
+			_check(not chain[index].get_rect().intersects(chain[ancestor_index].get_rect()),
+				"bubble %d should not overlap ancestor %d: %s / %s" % [index, ancestor_index, chain[index].get_rect(), chain[ancestor_index].get_rect()])
+		_check(Rect2(0, 0, 1280, 720).encloses(chain[index].get_rect()), "bubble %d off screen: %s" % [index, chain[index].get_rect()])
+	var top_crumb: RichTextLabel = _bubbles.call("breadcrumb_of", chain[3])
+	if _check(top_crumb != null, "breadcrumb on the 4th level"):
+		top_crumb.meta_clicked.emit("crumb:1")
+		await _settle()
+		_check(_count() == 2 and not bool(chain[1].get_meta("collapsed", false)), "breadcrumb segment should close the descendants of its level (count %d)" % _count())
+	_bubbles.call("set_collapsed", chain[0], false)
+	_check(not bool(chain[0].get_meta("collapsed", false)) and chain[0].find_child("CollapsedHeader", true, false) == null, "a collapsed bubble reopens")
+
+	# Placement pur : droite, sinon gauche, sinon dessous ; jamais sur une ancêtre.
+	var script: Script = _bubbles.get_script()
+	var area := Rect2(0, 0, 1280, 720)
+	var parent_rect := Rect2(900, 100, 360, 300)
+	var left: Vector2 = script.call("place_beside", Vector2(360, 200), parent_rect, 150.0, area, [parent_rect])
+	_check(is_equal_approx(left.x, 900 - 6 - 360) and is_equal_approx(left.y, 150), "no room on the right → left, aligned on the keyword line: %s" % left)
+	var blocked: Vector2 = script.call("place_beside", Vector2(360, 200), Rect2(460, 100, 360, 300), 120.0, area, [Rect2(460, 100, 360, 300), Rect2(826, 0, 454, 720), Rect2(0, 0, 454, 720)])
+	_check(is_equal_approx(blocked.x, 460) and blocked.y >= 406, "sides taken → below the parent: %s" % blocked)
+	var none: Vector2 = script.call("place_beside", Vector2(360, 700), Rect2(460, 100, 360, 300), 120.0, area, [Rect2(0, 0, 1280, 720)])
+	_check(is_nan(none.x), "no room at all → NAN")
+
+	_bubbles.call("close_all")
+	_bubbles.set("area_override", Rect2())
+	await process_frame
+
+
+func _building_with_effects() -> String:
+	var buildings := GameCatalog.definitions("buildings")
+	var ids := buildings.keys()
+	ids.sort()
+	for id in ids:
+		if ((buildings[id] as Dictionary).get("effects", []) as Array).size() >= 2:
+			return str(id)
+	return "bld_castle"
+
+
+## Fixe la taille d'une bulle (contenu masqué par la réduction) pour un placement déterministe.
+func _force_size(bubble: PanelContainer, size: Vector2) -> void:
+	var spacer := Control.new()
+	spacer.name = "Spacer"
+	spacer.custom_minimum_size = size
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bubble.get_node("Box").add_child(spacer)
+	bubble.reset_size()
+
+
+func _settle() -> void:
+	for _frame in 3:
+		await process_frame
 
 
 func _count() -> int:
