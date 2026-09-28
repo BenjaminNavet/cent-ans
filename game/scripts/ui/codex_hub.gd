@@ -10,7 +10,9 @@ extends PanelContainer
 
 const TAB_HISTORY := 0
 const TAB_RULES := 1
-const SIZE := Vector2(1240, 720)
+## P2c : taille minimale sous `UiZones.Zone.MODAL` (centrée par `UiZones`, marge conservée à
+## 1280×720 — l'ancienne taille 1240×720 touchait les bords sans marge).
+const SIZE := Vector2(1180, 620)
 
 var tabs: TabBar
 var search: LineEdit
@@ -28,6 +30,7 @@ func _init() -> void:
 func _ready() -> void:
 	theme = load("res://scenes/ui/parchment_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	custom_minimum_size = SIZE
 	add_theme_stylebox_override("panel", HudStyle.panel_box(12))
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
@@ -37,7 +40,7 @@ func _ready() -> void:
 	box.add_child(header)
 	var title := Label.new()
 	title.text = "✠ Codex"
-	title.add_theme_font_size_override("font_size", 26)
+	UiType.apply(title, UiType.TITLE)
 	title.add_theme_color_override("font_color", HudStyle.RUBRIC)
 	header.add_child(title)
 	tabs = TabBar.new()
@@ -79,10 +82,19 @@ func _ready() -> void:
 	codex_window.visibility_changed.connect(_on_view_visibility.bind(codex_window))
 	visibility_changed.connect(_on_hub_visibility)
 	hide()
+	# P2c : fenêtre commune dans `UiZones.Zone.MODAL` (fond assombri, centrée sur sa taille
+	# propre). En différé : `_ready` tourne encore dans la pile de `map_ui.add_child(codex_hub)`,
+	# et un reparentage immédiat lèverait « parent busy setting up children ».
+	call_deferred("_join_modal_zone")
+
+
+func _join_modal_zone() -> void:
+	if is_inside_tree():
+		UiZones.put(UiZones.Zone.MODAL, self)
 
 
 ## Style parchemin d'une barre d'onglets (D5 : plus d'onglets gris foncé hors du thème).
-static func style_tabs(bar: TabBar, font_size: int = 17, padding: int = 14) -> void:
+static func style_tabs(bar: TabBar, variation: String = UiType.BODY, padding: int = 14) -> void:
 	bar.clip_tabs = false
 	var selected := HudStyle.card_box(HudStyle.PARCHMENT_LIGHT, HudStyle.RUBRIC, 2)
 	selected.set_content_margin_all(5)
@@ -101,7 +113,7 @@ static func style_tabs(bar: TabBar, font_size: int = 17, padding: int = 14) -> v
 	bar.add_theme_color_override("font_selected_color", HudStyle.RUBRIC)
 	bar.add_theme_color_override("font_unselected_color", HudStyle.INK_SOFT)
 	bar.add_theme_color_override("font_hovered_color", HudStyle.INK)
-	bar.add_theme_font_size_override("font_size", font_size)
+	UiType.apply(bar, variation)
 
 
 ## Accueille l'encyclopédie de la carte (créée par le tutoriel) dans l'onglet « Règles ».
@@ -159,7 +171,6 @@ func _on_view_visibility(view: Control) -> void:
 		tabs.current_tab = TAB_HISTORY if view == codex_window else TAB_RULES
 		if not visible:
 			show()
-			_center()
 		_apply_search_to(view)
 	elif not codex_window.visible and (encyclopedia == null or not encyclopedia.visible):
 		hide()
@@ -174,13 +185,6 @@ func _on_hub_visibility() -> void:
 	if encyclopedia != null and encyclopedia.visible:
 		encyclopedia.close_window()
 	_syncing = false
-
-
-func _center() -> void:
-	var view := get_viewport_rect().size
-	var wanted := SIZE.max(get_combined_minimum_size())
-	size = Vector2(minf(wanted.x, view.x - 16.0), minf(wanted.y, view.y - 70.0))
-	position = ((view - size) / 2.0).floor() + Vector2(0, 20)
 
 
 ## Recherche commune : filtre les deux listes ; le nombre de résultats s'affiche dans les onglets.
