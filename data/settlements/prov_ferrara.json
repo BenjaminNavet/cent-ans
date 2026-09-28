@@ -31,34 +31,6 @@
     ]
   },
   {
-    "id": "set_mantova",
-    "province": "prov_ferrara",
-    "kind": "town",
-    "name": {
-      "display": "Mantoue",
-      "local": "Mantoa",
-      "local_language": "lombard"
-    },
-    "lonlat": [
-      10.7936,
-      45.1564
-    ],
-    "weight": 25,
-    "owner": "fac_empire",
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_collegiate_church",
-      "bld_castle"
-    ],
-    "port": false,
-    "description": "Seigneurie des Gonzague, reconnus vicaires impériaux par Louis IV de Bavière en 1329.",
-    "sources": [
-      "Mantoue",
-      "Maison Gonzague"
-    ]
-  },
-  {
     "id": "set_modena",
     "province": "prov_ferrara",
     "kind": "castle",

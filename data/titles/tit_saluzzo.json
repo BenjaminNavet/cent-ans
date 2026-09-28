@@ -1,0 +1,46 @@
+{
+  "id": "tit_saluzzo",
+  "rank": "county",
+  "name": {
+    "display": "Marquisat de Saluces",
+    "local": "Marchesato di Saluzzo",
+    "local_language": "piémontais"
+  },
+  "heraldry": {
+    "blazon": "D'azur au chef d'argent.",
+    "description": "Armes des marquis de Saluces, branche cadette aléramique, en écho inversé de celles du Montferrat voisin.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_saluzzo"
+  ],
+  "holder_1337": {
+    "faction": "fac_saluzzo",
+    "sources": [
+      "Marquisat de Saluces",
+      "Thomas II de Saluces"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_saluzzo_hold",
+      "title": "Garder le marquisat",
+      "description": "La maison de Saluces doit conserver son marquisat alleutier.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_saluzzo"
+      }
+    },
+    {
+      "id": "obj_saluzzo_independence",
+      "title": "Résister à ses voisins",
+      "description": "Demeurer souverain face à la Savoie et au Montferrat.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ]
+}

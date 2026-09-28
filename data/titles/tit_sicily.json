@@ -1,0 +1,47 @@
+{
+  "id": "tit_sicily",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Trinacrie",
+    "local": "Regnum Trinacriae",
+    "local_language": "sicilien"
+  },
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4, d'or à quatre pals de gueules ; aux 2 et 3, d'argent à l'aigle de sable.",
+    "description": "Armes des rois aragonais de Sicile depuis la paix de Caltabellotta (1302) : écartelé d'Aragon (pals) et de Souabe (aigle des Hohenstaufen), rappelant l'origine du royaume normand puis souabe reconquis par la maison de Barcelone.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "de_jure_provinces": [
+    "prov_sicilia"
+  ],
+  "holder_1337": {
+    "faction": "fac_sicily",
+    "sources": [
+      "Royaume de Sicile (1282-1442)",
+      "Frédéric III de Sicile",
+      "Pierre II de Sicile"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_sicily_hold",
+      "title": "Garder la couronne",
+      "description": "La maison aragonaise de Sicile doit conserver la Trinacrie.",
+      "condition": {
+        "kind": "hold_crown",
+        "title": "tit_sicily"
+      }
+    },
+    {
+      "id": "obj_sicily_naples",
+      "title": "Réunir les deux Siciles",
+      "description": "Reprendre Naples aux Angevins et réunifier le royaume de Sicile d'avant 1282.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_naples"
+      }
+    }
+  ]
+}

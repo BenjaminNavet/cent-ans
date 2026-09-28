@@ -1,0 +1,45 @@
+{
+  "id": "tit_pisa",
+  "rank": "county",
+  "name": {
+    "display": "République de Pise",
+    "local": "Repubblica di Pisa",
+    "local_language": "toscan"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix d'argent.",
+    "description": "Croix blanche sur champ rouge de l'ancienne marine pisane, inverse des couleurs de la croix de Gênes.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_provinces": [
+    "prov_pisa"
+  ],
+  "holder_1337": {
+    "faction": "fac_pisa",
+    "sources": [
+      "République de Pise"
+    ]
+  },
+  "succession_law": "elective",
+  "objectives": [
+    {
+      "id": "obj_pisa_hold",
+      "title": "Garder la république",
+      "description": "Pise doit rester libre.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_pisa"
+      }
+    },
+    {
+      "id": "obj_pisa_revenge",
+      "title": "Revanche sur Gênes",
+      "description": "Effacer l'humiliation de la Meloria (1284) en soumettant Gênes.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_genoa"
+      }
+    }
+  ]
+}

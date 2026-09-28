@@ -1,0 +1,81 @@
+[
+  {
+    "id": "set_lucca",
+    "province": "prov_lucca",
+    "kind": "city",
+    "name": {
+      "display": "Lucques",
+      "local": "Lucca",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      10.5027,
+      43.843
+    ],
+    "weight": 32,
+    "owner": "fac_verona",
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_weaving_workshop",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Ville drapière toscane conquise en 1335 par Mastino II della Scala, seigneur de Vérone, qui la tient jusqu'en 1341.",
+    "sources": [
+      "Lucques",
+      "Mastino II della Scala"
+    ]
+  },
+  {
+    "id": "set_montecarlo",
+    "province": "prov_lucca",
+    "kind": "castle",
+    "name": {
+      "display": "Montecarlo",
+      "local": "Montecarlo",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      10.6825,
+      43.8608
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse lucquoise édifiée par Castruccio Castracani (rebaptisée en son honneur, « Mont Charles »).",
+    "sources": [
+      "Montecarlo (Italie)"
+    ]
+  },
+  {
+    "id": "set_camaiore",
+    "province": "prov_lucca",
+    "kind": "village",
+    "name": {
+      "display": "Camaiore",
+      "local": "Camaiore",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      10.3047,
+      43.9397
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Bourg de la Versilia, sur la route côtière entre Lucques et Pise.",
+    "sources": [
+      "Camaiore"
+    ]
+  }
+]

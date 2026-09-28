@@ -127,7 +127,20 @@
         "fac_trent",
         "fac_liege",
         "fac_utrecht",
-        "fac_namur"
+        "fac_namur",
+        "fac_mantua",
+        "fac_ferrara",
+        "fac_montferrat",
+        "fac_saluzzo",
+        "fac_pisa",
+        "fac_siena",
+        "fac_bologna",
+        "fac_perugia",
+        "fac_urbino",
+        "fac_rimini",
+        "fac_sicily",
+        "fac_taranto",
+        "fac_pavia"
       ],
       "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
     },

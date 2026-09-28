@@ -64,34 +64,6 @@
     ]
   },
   {
-    "id": "set_rimini",
-    "province": "prov_bologna",
-    "kind": "town",
-    "name": {
-      "display": "Rimini",
-      "local": "Arimino",
-      "local_language": "toscan"
-    },
-    "lonlat": [
-      12.5736,
-      44.0678
-    ],
-    "weight": 20,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_port",
-      "bld_stone_walls"
-    ],
-    "port": true,
-    "description": "Port adriatique de Romagne sous la seigneurie des Malatesta.",
-    "sources": [
-      "Rimini",
-      "Malatesta"
-    ]
-  },
-  {
     "id": "set_forli",
     "province": "prov_bologna",
     "kind": "castle",

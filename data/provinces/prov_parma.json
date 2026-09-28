@@ -1,0 +1,90 @@
+{
+  "id": "prov_parma",
+  "name": {
+    "display": "Parme",
+    "local": "Parma",
+    "local_language": "émilien"
+  },
+  "region": "italie_nord",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Parma"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Parme",
+      "local": "Parma",
+      "local_language": "émilien"
+    },
+    "lat": 44.8015,
+    "lon": 10.3279
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.3279,
+      44.8015
+    ],
+    "seed_lonlat": [
+      10.3,
+      44.72
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_verona",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 48000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6500,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 650,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Cité d'Émilie occupée ; population estimée par comparaison avec Plaisance et Vérone."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 3000,
+  "description": "Cité d'Émilie occupée par Mastino II della Scala de Vérone depuis 1335, au faîte de l'expansion scaligère ; elle sera perdue au profit des Correggio et Gonzague en 1341.",
+  "sources": [
+    "Parme",
+    "Mastino II della Scala"
+  ]
+}

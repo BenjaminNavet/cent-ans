@@ -13,8 +13,7 @@
     "secondary_color": "#B0182B"
   },
   "de_jure_provinces": [
-    "prov_aragon",
-    "prov_sicilia"
+    "prov_aragon"
   ],
   "holder_1337": {
     "faction": "fac_aragon",

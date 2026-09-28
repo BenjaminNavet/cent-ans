@@ -1283,6 +1283,169 @@
         "fac_luna",
         "fac_aragon"
       ]
+    },
+    {
+      "id": "gonzaga",
+      "name": "Gonzaga",
+      "arms_of": "fac_mantua",
+      "blazon": "D'argent à la croix pattée de gueules.",
+      "description": "Armes primitives des Gonzague, seigneurs de Mantoue.",
+      "source": "it.wikipedia : Gonzaga, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_mantua"
+      ],
+      "vassal_of": [
+        "fac_mantua"
+      ]
+    },
+    {
+      "id": "este",
+      "name": "Este",
+      "arms_of": "fac_ferrara",
+      "blazon": "D'azur à l'aigle d'argent, becquée et membrée d'or.",
+      "description": "Aigle blanche des Este, marquis de Ferrare, avant l'adjonction du lambel de France (1352).",
+      "source": "it.wikipedia : Casa d'Este, stemma",
+      "certainty": "attesté",
+      "factions": [
+        "fac_ferrara"
+      ],
+      "vassal_of": [
+        "fac_ferrara"
+      ]
+    },
+    {
+      "id": "paleologue_montferrat",
+      "name": "Paléologue",
+      "arms_of": "fac_montferrat",
+      "blazon": "D'argent au chef de gueules.",
+      "description": "Armes traditionnelles des marquis de Montferrat, reprises par les Paléologue à leur avènement (1306).",
+      "source": "it.wikipedia : Marchesato del Monferrato, stemma",
+      "certainty": "attesté",
+      "factions": [
+        "fac_montferrat"
+      ],
+      "vassal_of": [
+        "fac_montferrat"
+      ]
+    },
+    {
+      "id": "saluces",
+      "name": "Saluces",
+      "arms_of": "fac_saluzzo",
+      "blazon": "D'azur au chef d'argent.",
+      "description": "Armes des marquis de Saluces.",
+      "source": "it.wikipedia : Marchesato di Saluzzo, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_saluzzo"
+      ],
+      "vassal_of": [
+        "fac_saluzzo"
+      ]
+    },
+    {
+      "id": "malatesta",
+      "name": "Malatesta",
+      "arms_of": "fac_rimini",
+      "blazon": "Fuselé d'argent et de gueules.",
+      "description": "Losanges enchaînés attribués aux Malatesta, seigneurs de Rimini ; blason incertain avant le XVe siècle.",
+      "source": "it.wikipedia : Malatesta, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_rimini"
+      ],
+      "vassal_of": [
+        "fac_rimini"
+      ]
+    },
+    {
+      "id": "montefeltro",
+      "name": "Montefeltro",
+      "arms_of": "fac_urbino",
+      "blazon": "D'or à l'aigle de sable.",
+      "description": "Aigle noire sur or attribuée aux Montefeltro, comtes d'Urbin ; le blason ducal fixé au XVe siècle ne s'applique pas à cette période.",
+      "source": "it.wikipedia : Montefeltro, stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_urbino"
+      ],
+      "vassal_of": [
+        "fac_urbino"
+      ]
+    },
+    {
+      "id": "barcelone_sicile",
+      "name": "Barcelone-Sicile",
+      "arms_of": "fac_sicily",
+      "blazon": "Écartelé : aux 1 et 4, d'or à quatre pals de gueules ; aux 2 et 3, d'argent à l'aigle de sable.",
+      "description": "Armes aragono-souabes des rois de Sicile (Trinacrie) depuis la paix de Caltabellotta (1302).",
+      "source": "it.wikipedia : Regno di Sicilia (1282-1442), stemma",
+      "certainty": "attesté",
+      "factions": [
+        "fac_sicily"
+      ],
+      "vassal_of": [
+        "fac_sicily"
+      ]
+    },
+    {
+      "id": "anjou_tarente",
+      "name": "Anjou-Tarente",
+      "arms_of": "fac_taranto",
+      "blazon": "D'azur semé de fleurs de lis d'or, au lambel d'argent.",
+      "description": "Armes d'Anjou-Sicile brisées d'un lambel d'argent, à la manière des branches cadettes angevines.",
+      "source": "fr.wikipedia : Maison d'Anjou-Sicile, branches cadettes",
+      "certainty": "incertain",
+      "factions": [
+        "fac_taranto"
+      ],
+      "vassal_of": [
+        "fac_taranto"
+      ]
+    },
+    {
+      "id": "pepoli",
+      "name": "Pepoli",
+      "blazon": "De gueules à la croix pattée d'argent (armes communales de Bologne).",
+      "description": "Taddeo Pepoli, seigneur de fait de Bologne à partir du 28 août 1337, ne porte pas d'armes personnelles attestées avant sa reconnaissance comme vicaire pontifical (1340) : substitution par les armes communales.",
+      "source": "it.wikipedia : Pepoli, stemma",
+      "certainty": "substitution",
+      "factions": [
+        "fac_bologna"
+      ],
+      "vassal_of": [
+        "fac_bologna"
+      ]
+    },
+    {
+      "id": "valois_courtenay",
+      "name": "Valois-Courtenay",
+      "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+      "description": "Catherine de Valois-Courtenay, impératrice titulaire de Constantinople, fille de Charles de Valois : armes de Valois brisées comme les autres branches cadettes capétiennes.",
+      "source": "fr.wikipedia : Catherine II de Courtenay",
+      "certainty": "incertain",
+      "factions": [
+        "fac_taranto"
+      ],
+      "vassal_of": [
+        "fac_taranto"
+      ]
+    },
+    {
+      "id": "beccaria",
+      "name": "Beccaria",
+      "arms_of": "fac_pavia",
+      "blazon": "D'argent à la couleuvre d'azur couronnée d'or.",
+      "description": "Faction gibeline dominante à Pavie au XIVe siècle ; blason incertain, faute de sceau familial conservé pour cette période.",
+      "source": "it.wikipedia : Beccaria (famiglia), stemma",
+      "certainty": "incertain",
+      "factions": [
+        "fac_pavia"
+      ],
+      "vassal_of": [
+        "fac_pavia"
+      ]
     }
   ]
 }

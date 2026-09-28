@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_siena",
+    "province": "prov_siena",
+    "kind": "city",
+    "name": {
+      "display": "Sienne",
+      "local": "Siena",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      11.3306,
+      43.3188
+    ],
+    "weight": 38,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_collegiate_church",
+      "bld_stone_walls",
+      "bld_fair",
+      "bld_counting_house",
+      "bld_market",
+      "bld_cathedral"
+    ],
+    "port": false,
+    "description": "Commune bancaire rivale de Florence, gouvernée par le régime des Neuf, à l'apogée de sa prospérité.",
+    "sources": [
+      "Sienne",
+      "République de Sienne"
+    ]
+  },
+  {
+    "id": "set_montalcino",
+    "province": "prov_siena",
+    "kind": "castle",
+    "name": {
+      "display": "Montalcino",
+      "local": "Montalcino",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      11.4903,
+      43.0567
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Place forte guelfe des collines siennoises, vignoble déjà réputé.",
+    "sources": [
+      "Montalcino"
+    ]
+  },
+  {
+    "id": "set_san_galgano",
+    "province": "prov_siena",
+    "kind": "abbey",
+    "name": {
+      "display": "San Galgano",
+      "local": "San Galgano",
+      "local_language": "toscan"
+    },
+    "lonlat": [
+      11.1544,
+      43.1225
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne majeure du territoire siennois, fondée au début du XIIIe siècle.",
+    "sources": [
+      "Abbaye de San Galgano"
+    ]
+  }
+]

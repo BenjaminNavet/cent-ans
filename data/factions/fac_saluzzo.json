@@ -1,0 +1,57 @@
+{
+  "id": "fac_saluzzo",
+  "name": {
+    "display": "Marquisat de Saluces",
+    "local": "Marchesato di Saluzzo",
+    "local_language": "français"
+  },
+  "short_name": "Saluces",
+  "adjective": "saluçois",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_saluzzo",
+  "capital_city": "Saluces",
+  "religion": "rel_catholic",
+  "culture": "cul_lombard",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_saluzzo",
+  "heraldry": {
+    "blazon": "D'azur au chef d'argent.",
+    "description": "Armes des marquis de Saluces.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Marquis de Saluces"
+  ],
+  "treasury": 6000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_savoy",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 65,
+    "trade": 40,
+    "piety": 50
+  },
+  "description": "Marquisat alleutier des sources du Pô. Thomas II, marquis depuis 1296, compose vers ces années Le Chevalier errant, long poème allégorique.",
+  "sources": [
+    "Marquisat de Saluces",
+    "Thomas II de Saluces"
+  ],
+  "ruler": "chr_thomas_ii_de_saluces",
+  "suzerain": "fac_empire"
+}
