@@ -18,6 +18,15 @@ Cible cargo privée : `core/target-rs-b` (à supprimer en fin de lot).
 - [ ] 3. Révoltes 4-10 / partie (mesure avant/après, réglage dans les données, critères EQ6).
 - [ ] 4. fmt / clippy / test / pytest, `git merge main`, suppression de la cible.
 
+## Mesures (`balance_probe campaign 200`, normale, graines 1-16, binaires de release dans le scratchpad)
+| Variante | Révoltes / partie | Par graine | Guerre FR-EN | Banqueroutes | Impôt Haut | Mécontent. moyen |
+|---|---|---|---|---|---|---|
+| base (5c96ea30 = main + constantes) | 4,1 | 1 4 11 6 0 5 1 0 1 2 1 4 15 6 2 6 | 74 % | 0,08 | 33 % | 19,2 |
+| pondération (108709cc) | 2,8 | 1 0 3 1 11 0 3 0 9 1 2 0 5 5 1 3 | 69 % | 0,10 | 32 % | 20,5 |
+
+Bruit énorme entre graines (0 à 15). La pondération relève le mécontentement moyen (+1,3) mais pas
+le compte de révoltes de façon mesurable.
+
 ## Prochaine étape
 Point 3 : mesurer `balance_probe campaign 200` graines 1-16 avant (binaire `bp_base`, commit 5c96ea30)
 et après pondération, puis régler les révoltes dans les données.
