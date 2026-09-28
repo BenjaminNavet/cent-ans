@@ -83,6 +83,9 @@ var stats: Dictionary = {}
 ## fils de travail via les instantanés).
 var _pages: Dictionary = {}
 var _page_bytes: Dictionary = {}
+## RS-K : clés des pages chargées par étage (`_level_pages[étage]` : clé → vrai), pour
+## `finest_levels` sans parcourir toutes les pages.
+var _level_pages: Array[Dictionary] = []
 var _layer_keys: PackedInt64Array = PackedInt64Array()
 var _free_layers: Array[int] = []
 var _page_array: Texture2DArray
@@ -164,6 +167,7 @@ func setup(relief: ReliefPyramid, terrain_material: ShaderMaterial, data: MapDat
 	wait_jobs(false)
 	_pages.clear()
 	_page_bytes.clear()
+	_level_pages.clear()
 	for slot: MeshInstance3D in _slots.values():
 		slot.queue_free()
 	_slots.clear()
@@ -828,6 +832,7 @@ func _upload(key: int, job: PageJob) -> bool:
 	var t_upload := Time.get_ticks_msec() / 1000.0
 	_pages[key] = {"layer": layer, "last_used": _frame, "t_upload": t_upload}
 	_page_bytes[key] = job.bytes
+	_note_level_page(key, true)
 	var t_add := Time.get_ticks_usec()
 	if _native != null:
 		_native.call("add_page", key, layer, t_upload, _frame, job.bytes)
@@ -880,6 +885,7 @@ func _alloc_layer() -> int:
 	var layer: int = _pages[oldest]["layer"]
 	_pages.erase(oldest)
 	_page_bytes.erase(oldest)
+	_note_level_page(oldest, false)
 	if _native != null:
 		_native.call("remove_page", oldest)
 	_residency_version += 1
@@ -888,16 +894,15 @@ func _alloc_layer() -> int:
 	# (un parcours des 256 pages par éviction, deux évictions par image au pire, sinon).
 	var old_level := ReliefPyramid.level_of_key(oldest)
 	var touched := PackedInt32Array()
+	var touched_rects: Array[Rect2] = []
 	for index in _chunks_of(rect):
 		if _chunk_top[index] <= old_level:
 			touched.append(index)
-			_chunk_top[index] = -1
-	for key: int in (_pages if not touched.is_empty() else {}):
-		var level := ReliefPyramid.level_of_key(key)
-		var page_rect := _tile_rect(key)
-		for index in touched:
-			if level > _chunk_top[index] and page_rect.intersects(Rect2((index % 16) * 256.0, (index / 16) * 256.0, 256.0, 256.0)):
-				_chunk_top[index] = level
+			touched_rects.append(Rect2((index % 16) * 256.0, (index / 16) * 256.0, 256.0, 256.0))
+	# RS-K : étage le plus fin restant par morceau touché, sans parcourir toutes les pages.
+	var tops := finest_levels(touched_rects)
+	for k in touched.size():
+		_chunk_top[touched[k]] = tops[k]
 	surface_changed.emit(rect)
 	return layer
 
@@ -1058,16 +1063,71 @@ static func _bilinear(bytes: PackedByteArray, fx: float, fy: float, h_min: float
 ## (coordonnées locales à `origin`), repli sur la heightmap 4096 hors pages.
 ## ZG7a : étage de page le plus fin chargé qui touche chacun des rectangles (-1 : aucun), en
 ## un seul parcours des pages (sans copier leurs octets comme `surface_snapshot`).
+## RS-K : par rectangle, étages du plus fin au plus grossier avec arrêt à la première page qui le
+## touche ; à chaque étage, tuiles candidates ou pages de l'étage (le moins nombreux). Remplace le
+## parcours des ~256 pages (1-3 ms par page arrivée ou évincée, écouteurs de `surface_changed`).
+## Même résultat que `finest_levels_scan` (même test `Rect2.intersects`).
 func finest_levels(rects: Array[Rect2]) -> PackedInt32Array:
 	var out := PackedInt32Array()
 	out.resize(rects.size())
-	out.fill(-1)
+	for i in rects.size():
+		out[i] = _finest_level_in(rects[i])
+	return out
+
+
+func _finest_level_in(rect: Rect2) -> int:
+	for level in range(_level_pages.size() - 1, -1, -1):
+		var keys: Dictionary = _level_pages[level]
+		if keys.is_empty():
+			continue
+		# Plages de colonnes / rangées élargies d'une tuile (arrondis) ; test exact ensuite.
+		var t := ReliefPyramid.tile_units(level)
+		var c0 := floori((rect.position.x - ReliefPyramid.GRID_OFFSET) / t) - 1
+		var c1 := ceili((rect.end.x - ReliefPyramid.GRID_OFFSET) / t)
+		var r0 := floori((rect.position.y - ReliefPyramid.GRID_OFFSET) / t) - 1
+		var r1 := ceili((rect.end.y - ReliefPyramid.GRID_OFFSET) / t)
+		var last := ReliefPyramid.tiles_per_side(level) - 1
+		var candidates := (clampi(c1, 0, last) - clampi(c0, 0, last) + 1) * (clampi(r1, 0, last) - clampi(r0, 0, last) + 1)
+		if candidates <= keys.size():
+			for row in range(clampi(r0, 0, last), clampi(r1, 0, last) + 1):
+				for col in range(clampi(c0, 0, last), clampi(c1, 0, last) + 1):
+					var key := ReliefPyramid.key_of(level, col, row)
+					if keys.has(key) and _tile_rect(key).intersects(rect):
+						return level
+		else:
+			for key: int in keys:
+				var col := key & 0xfff
+				var row := (key >> 12) & 0xfff
+				if col >= c0 and col <= c1 and row >= r0 and row <= r1 and _tile_rect(key).intersects(rect):
+					return level
+	return -1
+
+
+func _note_level_page(key: int, loaded: bool) -> void:
+	var level := ReliefPyramid.level_of_key(key)
+	if loaded:
+		while _level_pages.size() <= level:
+			_level_pages.append({})
+		_level_pages[level][key] = true
+	elif level < _level_pages.size():
+		_level_pages[level].erase(key)
+
+
+func _finest_level_scan(rect: Rect2) -> int:
+	var best := -1
 	for key: int in _page_bytes:
 		var level := ReliefPyramid.level_of_key(key)
-		var page_rect := _tile_rect(key)
-		for i in rects.size():
-			if level > out[i] and page_rect.intersects(rects[i]):
-				out[i] = level
+		if level > best and _tile_rect(key).intersects(rect):
+			best = level
+	return best
+
+
+## Parcours complet des pages (référence des tests RS-K).
+func finest_levels_scan(rects: Array[Rect2]) -> PackedInt32Array:
+	var out := PackedInt32Array()
+	out.resize(rects.size())
+	for i in rects.size():
+		out[i] = _finest_level_scan(rects[i])
 	return out
 
 

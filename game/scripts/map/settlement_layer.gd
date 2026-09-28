@@ -864,7 +864,7 @@ func update_view(camera_distance: float) -> void:
 		_landmarks_root.visible = not site
 		# SZ6 : les hauteurs d'étiquettes ne dépendent des poids que par le palier près et les
 		# villes 1:1 : pas de recalcul des 570 étiquettes à chaque image d'un zoom.
-		var label_state := Vector2i(int(weights.x > 0.35), int(_towns_active()))
+		var label_state := Vector2i(int(weights.x > 0.35), 0)  # RS-K : indépendant des villes 1:1
 		if label_state != _label_state:
 			_update_label_heights()
 		_declutter_timer = 0.0
@@ -925,7 +925,7 @@ var _label_scale := -1.0
 ## Hauteur des étiquettes : au-dessus de la maquette (près) ou de l'icône (moyen).
 func _update_label_heights() -> void:
 	var near := _weights.x > 0.35
-	_label_state = Vector2i(int(near), int(_towns_active()))
+	_label_state = Vector2i(int(near), 0)
 	_label_scale = MapData.vertical_scale()
 	_label_chunks.clear()
 	for i in _labels.size():
@@ -1721,7 +1721,6 @@ func _compute_real_radii() -> void:
 func _update_towns(camera_distance: float) -> void:
 	if towns == null:
 		return
-	var was_active := towns.active
 	towns.update_view(camera_distance)
 	if towns.version == _towns_version:
 		return
@@ -1729,16 +1728,16 @@ func _update_towns(camera_distance: float) -> void:
 	var tp := Time.get_ticks_usec()
 	# RS-K : seules les colonies dont la ville 1:1 vient d'apparaître ou de disparaître (toutes
 	# les ~570 maquettes coûtaient jusqu'à 25 ms à chaque ville construite).
+	# La bascule d'activité ne touche que les colonies aux villes construites ; les hauteurs
+	# d'étiquettes ne dépendent pas des villes 1:1 (plus de recalcul des ~570 étiquettes ici).
 	var changes := towns.take_changes()
-	if bool(changes["all"]) or was_active != towns.active:
+	if bool(changes["all"]):
 		_update_model_visibility()
 	else:
 		for id: String in changes["ids"]:
 			var i := int(data.index_by_id.get(id, -1))
 			if i >= 0 and i < _models.size():
 				_apply_model_visibility(i)
-	if was_active != towns.active:
-		_update_label_heights()
 	PerfProbe.lap("town/models", tp)  # RS-K
 
 

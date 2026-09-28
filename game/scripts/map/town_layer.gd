@@ -30,8 +30,8 @@ var active := false
 var force_active := false
 ## Incrémenté à chaque ville affichée ou retirée (`SettlementLayer` recalcule alors les maquettes).
 var version := 0
-## RS-K : villes affichées ou retirées depuis le dernier `take_changes` (id → vrai) ; `_all_changed`
-## quand l'activité bascule (toutes les maquettes sont concernées).
+## RS-K : villes affichées ou retirées depuis le dernier `take_changes` (id → vrai), bascule
+## d'activité comprise (villes construites) ; `_all_changed` : tout revoir (premier appel).
 var _changed_ids: Dictionary = {}
 var _all_changed := true
 var stats: Dictionary = {}
@@ -178,7 +178,10 @@ func update_view(rig_distance: float) -> void:
 		active = now_active
 		visible = active
 		version += 1
-		_all_changed = true
+		# RS-K : seules les colonies dont la ville est construite changent d'affichage.
+		for id: String in _entries:
+			if (_entries[id] as Dictionary).get("builder") != null:
+				_changed_ids[id] = true
 		towns_changed.emit()
 	_last_distance = rig_distance
 	var tp := Time.get_ticks_usec()  # RS-K : sections `town/*` du banc `--bench-probe`
