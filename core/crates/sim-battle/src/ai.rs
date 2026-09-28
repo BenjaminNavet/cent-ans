@@ -2709,9 +2709,27 @@ fn plan_siege_attack(view: &mut View, works: &SiegeWorks) {
     let square = works.center;
     let mut ladder_slot = 0usize;
     let mut tower_slot = 0usize;
+    // T4 (ADR 0104): once foot of the side fights inside the walls, the
+    // shooters leave the duel with the wall walk and converge on the square
+    // too, shooting the garrison that holds it.
+    let foot_inside = storm
+        && own.iter().any(|&i| {
+            let u = &units[i];
+            u.able() && !is_shooter(u) && !u.on_wall && works.inside(u.x, u.z)
+        });
     for &i in &own {
         let unit = &units[i];
         if unit.category == UnitCategory::Siege || !view.free(i) || relief.contains(&i) {
+            continue;
+        }
+        if is_shooter(unit) && foot_inside {
+            let garrison = view.nearest_enemy(i, |e| {
+                !e.on_wall && e.state != UnitState::Routing && works.inside(e.x, e.z)
+            });
+            match garrison {
+                Some((j, d)) if d < 200.0 => view.attack(i, j, false),
+                _ => view.move_to(i, square.0, square.1, false, None),
+            }
             continue;
         }
         if is_shooter(unit) {
@@ -2813,6 +2831,17 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
         .collect();
     let mut blockers = 0usize;
     let gate_down = !works.pieces[works.gate].intact();
+    // T4 (ADR 0104): the garrison falls back on the square at the first
+    // breach (not only when the gate falls), leaving a few regiments in the
+    // openings; fallen back, it only charges attackers near the square.
+    let fall_back = &crate::capture::CaptureRules::bundled().fall_back;
+    let fallen_back = gate_down || (fall_back.on_breach && !openings.is_empty());
+    let max_blockers =
+        (openings.len() * fall_back.blockers_per_opening).min(fall_back.max_blockers);
+    let near_square = |j: usize| {
+        fall_back.on_breach
+            && dist_to(&units[j], works.center.0, works.center.1) < fall_back.engage_radius_m
+    };
     let mut square_slot = 0usize;
     for &i in &own {
         let unit = &units[i];
@@ -2842,9 +2871,9 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
                 .min_by(|a, b| a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
             if let Some((j, _)) = near_climber {
                 view.attack(i, j, false);
-            } else if gate_down {
-                // SG1: the gate is down, nobody climbs here: come down and
-                // regroup on the square.
+            } else if fallen_back {
+                // SG1: the gate is down (T4: or a breach open), nobody
+                // climbs here: come down and regroup on the square.
                 let k = square_slot;
                 square_slot += 1;
                 let (x, z) = square_point(works, k);
@@ -2855,18 +2884,21 @@ fn plan_siege_defence(view: &mut View, works: &SiegeWorks) {
             continue;
         }
         if let Some((j, d)) = near_inside {
-            if d < 250.0 || is_horse(unit) {
+            let engage = if fallen_back && fall_back.on_breach {
+                d < 40.0 || near_square(j)
+            } else {
+                d < 250.0
+            };
+            if engage || is_horse(unit) {
                 view.attack(i, j, true);
                 continue;
             }
         }
         // Block the openings from inside, one regiment per opening first;
-        // SG1: beyond `BLOCKERS_PER_OPENING` per opening, the foot regroups
-        // on the central square (and holds it) instead of crowding the gap.
-        if !openings.is_empty()
-            && blockers >= openings.len() * crate::siege_fx::BLOCKERS_PER_OPENING
-            && !is_horse(unit)
-        {
+        // SG1: beyond `blockers_per_opening` per opening (T4: and
+        // `max_blockers` in all), the foot regroups on the central square
+        // (and holds it) instead of crowding the gap.
+        if !openings.is_empty() && blockers >= max_blockers && !is_horse(unit) {
             if !works.in_square(unit.x, unit.z) {
                 let k = square_slot;
                 square_slot += 1;

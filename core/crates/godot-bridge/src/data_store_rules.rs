@@ -54,6 +54,7 @@ impl GameDataStore {
             sim_battle::alerts::AlertKind::AmmoOut,
             sim_battle::alerts::AlertKind::WallBreached,
             sim_battle::alerts::AlertKind::GateDestroyed,
+            sim_battle::alerts::AlertKind::SquareThreatened,
         ] {
             dict.set(
                 format!("cb5_alert_importance_{}", kind.key()),

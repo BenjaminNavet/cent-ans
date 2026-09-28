@@ -30,8 +30,6 @@ pub const RING_SIDES: usize = 8;
 pub const GATE_WIDTH: f64 = 14.0;
 /// Radius of the central square the attacker must hold.
 pub const SQUARE_RADIUS: f64 = 35.0;
-/// Seconds the attacker must hold the square to take the town.
-pub const HOLD_TO_WIN: f64 = 60.0;
 /// Seconds for a regiment to scale the wall with ladders.
 pub const LADDER_TIME: f64 = 45.0;
 /// Seconds to cross onto the wall from a docked siege tower.
@@ -656,8 +654,13 @@ pub struct SiegeWorks {
     pub square_radius: f64,
     /// Index of the gate in `pieces`.
     pub gate: usize,
-    /// Seconds the attacker has held the central square.
+    /// Seconds the attacker has held the central square (T4: mirror of the
+    /// square capture point's progress, see [`crate::capture`]).
     pub hold_time: f64,
+    /// T4 (ADR 0104): capture points (market square, gate), built at the
+    /// first step of the battle.
+    #[serde(default)]
+    pub points: Vec<crate::capture::CapturePoint>,
     /// House blocks inside the walls (F5a).
     #[serde(default)]
     pub houses: Vec<House>,
@@ -790,6 +793,7 @@ impl SiegeWorks {
             square_radius: SQUARE_RADIUS,
             gate,
             hold_time: 0.0,
+            points: Vec::new(),
             landmark: None,
         };
         works.lay_generic_town(TownRules::bundled());

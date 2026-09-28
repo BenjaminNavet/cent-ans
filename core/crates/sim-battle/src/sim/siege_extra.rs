@@ -47,7 +47,8 @@ impl BattleSim {
                         .iter()
                         .any(|e| (e.0 - tower.x).powi(2) + (e.1 - tower.z).powi(2) < 4.0)
             });
-            if !joined {
+            // T4: a gate taken by the attacker silences the towers around it.
+            if !joined || self.tower_silenced(tower.x, tower.z) {
                 continue;
             }
             let target = (0..self.units.len())

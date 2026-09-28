@@ -15,6 +15,7 @@ ALERT_KINDS = {
     "ammo_out",
     "wall_breached",
     "gate_destroyed",
+    "square_threatened",
 }
 
 

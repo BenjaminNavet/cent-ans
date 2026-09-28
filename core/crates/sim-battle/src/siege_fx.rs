@@ -32,9 +32,6 @@ pub const OIL_KILLS: f64 = 3.0;
 pub const OIL_MORALE: f64 = 4.0;
 /// Servants of the ram scalded by one pot (its hide roof sheds most of it).
 pub const OIL_RAM_KILLS: f64 = 0.5;
-/// Regiments per opening kept to block it once the gate falls; the rest of
-/// the garrison's foot regroups on the square.
-pub const BLOCKERS_PER_OPENING: usize = 2;
 
 /// Ladder foot distance from the outer face of the wall (metres).
 pub const LADDER_LEAN: f64 = 2.8;

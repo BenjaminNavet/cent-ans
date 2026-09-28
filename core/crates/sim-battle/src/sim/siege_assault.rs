@@ -531,6 +531,11 @@ impl BattleSim {
         let gate_fell = new
             .iter()
             .any(|k| matches!(k, SiegeFxKind::GateBroken { .. }));
+        // T4 (ADR 0104): the first breach too, when the rules say so.
+        let wall_fell = crate::capture::CaptureRules::bundled().fall_back.on_breach
+            && new
+                .iter()
+                .any(|k| matches!(k, SiegeFxKind::WallBreached { .. }));
         self.assault.intact = now_intact;
         self.assault.docked = now_docked;
         for kind in new {
@@ -539,13 +544,18 @@ impl BattleSim {
         for (kind, x, z) in breaches {
             self.alert(kind, x, z, None, None);
         }
-        if gate_fell && !self.assault.fell_back && self.ai_enabled[SideId::Defender.index()] {
+        if (gate_fell || wall_fell)
+            && !self.assault.fell_back
+            && self.ai_enabled[SideId::Defender.index()]
+        {
             self.assault.fell_back = true;
             self.push_fx(SiegeFxKind::DefendersFallBack);
-            self.log(
-                "La porte est tombée : la garnison se replie sur la place !".to_owned(),
-                Some(SideId::Defender),
-            );
+            let text = if gate_fell {
+                "La porte est tombée : la garnison se replie sur la place !"
+            } else {
+                "La muraille est rompue : la garnison se replie sur la place !"
+            };
+            self.log(text.to_owned(), Some(SideId::Defender));
         }
     }
 }

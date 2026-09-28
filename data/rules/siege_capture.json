@@ -18,11 +18,14 @@
   "threatened_share": 0.25,
   "last_stand": {
     "radius_m": 70.0,
-    "loss_morale_factor": 0.6,
-    "morale_per_s": 0.25,
-    "contagion_factor": 0.5
+    "loss_morale_factor": 0.8,
+    "morale_per_s": 0.1,
+    "contagion_factor": 0.75
   },
   "fall_back": {
-    "on_breach": true
+    "on_breach": true,
+    "blockers_per_opening": 1,
+    "max_blockers": 0,
+    "engage_radius_m": 45.0
   }
 }
