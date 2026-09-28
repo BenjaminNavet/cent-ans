@@ -83,8 +83,45 @@ Fichiers : `game/assets/textures/battle/build_textures.py`, `README.md`, tableau
        clore le lot ; ADR 0105 le signale. Commit.
 
 ### GA5 — Bâtiments (CC0, ≤ 1 $, agent `cent-ans-mech`, après GA2)
-- [ ] Textures bâtiments de bataille et `textures/buildings` en 2k Poly Haven ; variantes
-      torchis et colombages ; `SOURCE.md`/`README.md` ; tests mémoire ; ajout à l'ADR 0105.
+- [x] Textures bâtiments de bataille et `textures/buildings` en 2k Poly Haven (10 identifiants
+      existants bumpés : `medieval_wall_01`, `stone_wall`, `rustic_stone_wall`, `rough_wood`,
+      `weathered_brown_planks`, `clay_roof_tiles_03`, `roof_tiles_14`, `castle_wall_varriation`,
+      `roof_slates_02`, `thatch_roof_angled` — albédo 2k, normale/rugosité 1k, même convention
+      que GA2). Import corrigé au passage : ces textures étaient en `compress/mode=0` (« Lossless »,
+      sans mipmaps, oubli du lot BR1) — repassées en VRAM compressé + mipmaps, ce qui fait
+      **baisser** la mémoire malgré le doublement de résolution (cf. ADR 0105 §GA5).
+- [x] `BuildingMaterials.SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` déplacés dans les données
+      (`data/art/building_materials.json`, schéma `art_building_materials.schema.json`), lus au
+      premier appel comme `BattleTerrain.ground_layers()`. `kit_export.py` (Blender) garde sa
+      propre copie Python, inchangée (hors périmètre, synchronisation manuelle déjà assumée
+      avant GA5).
+- [x] Torchis/colombage (`TimberFrame`) : composite procédural (lattis de poteaux/sablières/
+      entretoises sur `lime_plaster` + `rough_wood` assombri, seed déterministe,
+      `build_textures.py::timber_frame()`), 0 $, pas d'IA (Poly Haven n'a pas de texture CC0
+      dédiée à ce motif). Ajoutée au catalogue avec `"wired": false`, absente de `atlas_layers` :
+      utilisable via `BuildingMaterials.material("TimberFrame")`, mais **non câblée** à une
+      surface du kit Blender — **point ouvert, décision à prendre par le joueur/lead**, pas
+      tranchée ici : (a) câbler demande un changement + réexport de `tools/blender_scripts/
+      building_kit.py`/`kit_export.py` (Blender dispo sur la machine, mais l'indice de couche de
+      l'atlas `Building` est baké dans la couleur de sommet des `.glb` déjà exportés — ajout en
+      milieu de tableau = modèles existants désalignés ; ajout en fin de tableau = tombe après
+      `first_plain`, traité comme matière unie par le shader sans changement supplémentaire) ;
+      (b) quelle proportion de bâtiments/quelles régions (la charpenterie apparente est plus
+      caractéristique de Normandie/Île-de-France/Angleterre que du Midi) recevraient cette
+      matière à la place de `Plaster`. Voir ADR 0105 §GA5 et `SOURCE.md`.
+- [x] `SOURCE.md` (nouveau, `game/assets/textures/buildings/`) et `README.md` (`battle/`,
+      tableau bâtiments mis à jour) : provenance Poly Haven (identifiants, CC0) + torchis.
+- [x] Tests mémoire : `game/tests/ga5_building_test.gd` — 12 matières texturées (11 + TimberFrame),
+      **≈ 47,3 Mo** au total (mesure conservatrice : compte double les matières qui partagent un
+      fichier source, ex. `Planks`/`Door`), format réel DXT1/BC1, sous le seuil (60 Mo, choisi
+      dans le test faute de plafond donné par la spec pour les bâtiments). `smoke.gd`, pytest
+      ciblé (`tools/tests/test_art_building_materials_schema.py`) et suite complète, `ruff` :
+      lancés, résultat noté au journal.
+- [x] Ajout à l'ADR 0105 (section « GA5 (bâtiments) »).
+
+**Point ouvert (non tranché par ce lot)** : câblage de `TimberFrame` dans le kit de bâtiments
+(quelles surfaces/bâtiments/régions, réexport Blender) — décision de conception pour le joueur/
+lead, cf. ci-dessus et ADR 0105 §GA5.
 
 ### GA4 — Campagne (CC0 + IA ponctuelle, ≤ 2 $, agent `cent-ans-dev`, après GA2)
 Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd`,
@@ -144,3 +181,18 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
   autorisé, sortie GLB ; modèle TRELLIS (Microsoft) sous licence MIT. Bloquant : aucune clé fal.ai
   dans l'environnement → compte + crédit à créer par le joueur (`FAL_KEY`). Blender présent.
 - 28/09 : `feat/ga` (GA1+GA2) : smoke, ga1_maps, ga2_ground, fg3_maps OK. **GA3 reporté** par le joueur (pas de clé fal.ai) : GA se clôt sans GA3 (GA6 après GA4/GA5), GA3 reste ouvert.
+- 28/09 : GA5 fait (worktree `../game_project-ga5`, branche `feat/ga5`, 0 $) : 10 matières de
+  bâtiments (dont 3 partagées avec `battle/`) bumpées en 2k Poly Haven (albédo 2k, normale/rugosité
+  1k). Import `compress/mode=0` (sans mipmaps, oubli BR1) corrigé en VRAM compressé — mémoire
+  mesurée en baisse malgré le bump (`ga5_building_test.gd` : ≈ 47,3 Mo pour les 12 matières
+  texturées, mesure conservatrice). `BuildingMaterials.SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS`
+  déplacés dans `data/art/building_materials.json` (schéma dédié, chargé comme
+  `BattleTerrain.ground_layers()`). Torchis/colombage (`TimberFrame`) : composite procédural
+  (lattis de poutres sur `lime_plaster`/`rough_wood`, 0 $, pas d'IA), ajouté au catalogue mais
+  **non câblé** au kit Blender (`wired: false`, absent de `atlas_layers`) — point ouvert non
+  tranché (câblage = changement + réexport Blender, indice de couche baké dans les `.glb` déjà
+  exportés ; proportion/région de bâtiments à choisir), signalé au joueur/lead. ADR 0105 §GA5.
+  `SOURCE.md` (nouveau) + `README.md` mis à jour. Tests : `ga5_building_test.gd` OK, `smoke.gd`
+  OK, 841 pytest passed/2 skipped, `ruff check --fix`/`format` sur le Python modifié. Pas de
+  capture d'écran (asset procédural vérifié par statistiques de pixels). Suite : fusion dans
+  `feat/ga` après GA4, puis planche GA6 et jugement du joueur.

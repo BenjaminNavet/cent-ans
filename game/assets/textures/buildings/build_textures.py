@@ -116,27 +116,43 @@ def _beam_mask(size: int) -> Image.Image:
 
 def timber_frame(size: int = 2048) -> None:
     """Half-timbered wall (torchis/colombage, lot GA5): beam lattice over plaster infill."""
-    plaster = Image.open("lime_plaster_diff.jpg").convert("RGB").resize((size, size), Image.LANCZOS)
-    wood = Image.open("rough_wood_diff.jpg").convert("RGB").resize((size, size), Image.LANCZOS)
+    plaster = (
+        Image.open("lime_plaster_diff.jpg")
+        .convert("RGB")
+        .resize((size, size), Image.LANCZOS)
+    )
+    wood = (
+        Image.open("rough_wood_diff.jpg")
+        .convert("RGB")
+        .resize((size, size), Image.LANCZOS)
+    )
     # Timber darkened and desaturated (aged oak, not fresh planking).
     wood = ImageEnhance.Brightness(ImageEnhance.Color(wood).enhance(0.6)).enhance(0.55)
     mask = np.asarray(_beam_mask(size)).astype(np.float32) / 255.0
-    diff = np.asarray(plaster).astype(np.float32) * (1 - mask[..., None]) + np.asarray(
-        wood
-    ).astype(np.float32) * mask[..., None]
+    diff = (
+        np.asarray(plaster).astype(np.float32) * (1 - mask[..., None])
+        + np.asarray(wood).astype(np.float32) * mask[..., None]
+    )
     Image.fromarray(diff.clip(0, 255).astype(np.uint8)).save(
         "timber_frame_diff.jpg", quality=88, optimize=True
     )
 
     nor_size = size // 2
     plaster_nor = (
-        Image.open("medieval_wall_01_nor.jpg").convert("RGB").resize((nor_size, nor_size), Image.LANCZOS)
+        Image.open("medieval_wall_01_nor.jpg")
+        .convert("RGB")
+        .resize((nor_size, nor_size), Image.LANCZOS)
     )
-    wood_nor = Image.open("rough_wood_nor.jpg").convert("RGB").resize((nor_size, nor_size), Image.LANCZOS)
+    wood_nor = (
+        Image.open("rough_wood_nor.jpg")
+        .convert("RGB")
+        .resize((nor_size, nor_size), Image.LANCZOS)
+    )
     nor_mask = np.asarray(_beam_mask(nor_size)).astype(np.float32) / 255.0
-    nor = np.asarray(plaster_nor).astype(np.float32) * (1 - nor_mask[..., None]) + np.asarray(
-        wood_nor
-    ).astype(np.float32) * nor_mask[..., None]
+    nor = (
+        np.asarray(plaster_nor).astype(np.float32) * (1 - nor_mask[..., None])
+        + np.asarray(wood_nor).astype(np.float32) * nor_mask[..., None]
+    )
     Image.fromarray(nor.clip(0, 255).astype(np.uint8)).save(
         "timber_frame_nor.jpg", quality=90, optimize=True
     )
@@ -146,10 +162,15 @@ def timber_frame(size: int = 2048) -> None:
         .convert("L")
         .resize((nor_size, nor_size), Image.LANCZOS)
     )
-    wood_rough = Image.open("rough_wood_rough.jpg").convert("L").resize((nor_size, nor_size), Image.LANCZOS)
-    rough = np.asarray(plaster_rough).astype(np.float32) * (1 - nor_mask) + np.asarray(
-        wood_rough
-    ).astype(np.float32) * nor_mask
+    wood_rough = (
+        Image.open("rough_wood_rough.jpg")
+        .convert("L")
+        .resize((nor_size, nor_size), Image.LANCZOS)
+    )
+    rough = (
+        np.asarray(plaster_rough).astype(np.float32) * (1 - nor_mask)
+        + np.asarray(wood_rough).astype(np.float32) * nor_mask
+    )
     Image.fromarray(rough.clip(0, 255).astype(np.uint8)).save(
         "timber_frame_rough.jpg", quality=90, optimize=True
     )
