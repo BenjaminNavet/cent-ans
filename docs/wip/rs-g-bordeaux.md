@@ -6,9 +6,12 @@ Branche `feat/rs-g-cities`. Fichiers : `data/landmarks_v2/bordeaux.json`,
 ## État
 - 28/09 : squelette valide (origine sur la cathédrale Saint-André, OSM ; fleuve fin « Garonne »,
   ≈ 500 m de large dans `hydro_fine`).
+- 28/09 : enceintes (troisième enceinte en deux polylignes ouvertes : front de terre avec fossé,
+  mur de Garonne sans fossé ; castrum et deuxième enceinte intérieurs), 13 monuments, 5 quartiers,
+  places, grève, Peugue et Devèze à la main. Script d'auteur hors dépôt (scratchpad).
 
 ## Manques de sources (à tenir à jour)
 - (à remplir)
 
 ## Prochaine étape
-Recherche (enceintes castrum / 1206-1255 / 1302-1327, portes), puis rues OSM par l'outil.
+Rues OSM par l'outil (`--refresh-osm`, emprise élargie), tests, relecture des manques.

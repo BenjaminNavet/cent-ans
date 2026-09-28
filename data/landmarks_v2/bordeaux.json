@@ -1,39 +1,1150 @@
 {
-  "format": 2,
-  "id": "bordeaux",
-  "name": "Bordeaux",
-  "settlement": "set_bordeaux",
-  "landmark": "bordeaux",
-  "period": "vers 1340 (squelette VH8, en cours)",
-  "year": 1340,
-  "seed": 1340033,
-  "crs": "EPSG:3035",
-  "origin_3035": [3486285, 2473262],
-  "extent_m": 1900,
-  "sources": [
-    {
-      "title": "OpenStreetMap",
-      "author": "Contributeurs d'OpenStreetMap",
-      "date": "2026-09-28",
-      "url": "https://www.openstreetmap.org/copyright",
-      "license": "ODbL 1.0 (© contributeurs d'OpenStreetMap)",
-      "extracted": true,
-      "use": "Tracés des rues actuelles héritées du plan médiéval ; positions des monuments."
-    }
-  ],
-  "osm_streets": {
-    "bbox_lonlat": [-0.588, 44.826, -0.562, 44.848],
-    "highways": ["primary", "secondary", "tertiary", "unclassified", "residential", "living_street", "pedestrian"],
-    "exclude": [],
-    "main": [],
-    "lanes": [],
-    "unnamed": false,
-    "simplify_m": 1.5
+ "format": 2,
+ "id": "bordeaux",
+ "name": "Bordeaux",
+ "settlement": "set_bordeaux",
+ "landmark": "bordeaux",
+ "period": "vers 1340 : capitale de la Guyenne anglaise, troisième enceinte achevée (1302-1327), avant la peste de 1348, la reconstruction de Saint-Pierre (1358) et de Saint-Michel, la tour Pey-Berland (1440) et les châteaux Trompette et du Hâ (1453-1456)",
+ "year": 1340,
+ "seed": 1340033,
+ "crs": "EPSG:3035",
+ "origin_3035": [3486285, 2473262],
+ "extent_m": 1700,
+ "sources": [
+  {
+   "title": "OpenStreetMap (voies, églises, portes, places, cours d'eau couverts)",
+   "author": "Contributeurs d'OpenStreetMap",
+   "date": "2026-09-28",
+   "url": "https://www.openstreetmap.org/copyright",
+   "license": "ODbL 1.0 (© contributeurs d'OpenStreetMap)",
+   "extracted": true,
+   "use": "Tracés des rues actuelles héritées du plan médiéval (extraction par `cent-ans geo landmarks`, percées et cours des XVIIIe-XIXe s. exclus) ; positions et orientations des églises, portes (Grosse Cloche, Cailhau, Dijeaux, Aquitaine, Bourgogne, Monnaie), tour Pey-Berland ; rues servant de repères au tracé des enceintes (rue des Remparts, rue Bouffard, rue Henri-IV, rue Bigot, rue des Douves, rue Ausone, etc.)."
   },
-  "fine_rivers": ["Garonne"],
-  "waters": [],
-  "walls": [],
-  "streets": [],
-  "monuments": [],
-  "districts": []
+  {
+   "title": "Bordeaux vers 1450 : description topographique (Archives municipales de Bordeaux, tome complémentaire)",
+   "author": "Léo Drouyn",
+   "date": "1874",
+   "url": "https://archive.org/details/bordeauxvers145000drou",
+   "license": "Domaine public",
+   "extracted": false,
+   "use": "Faits seulement (texte) : tracés du castrum, de la deuxième et de la troisième enceinte décrits par les rues de 1874 (p. 4-10, 38-43), tours, portes, fossés en eau, chemin de ronde. Le plan de l'ouvrage n'est pas utilisé."
+  },
+  {
+   "title": "Enceintes, tours, palais et castrum à Bordeaux du XIe siècle au milieu du XIIIe siècle, d'après les textes",
+   "author": "Frédéric Boutoulle, Revue archéologique de Bordeaux, t. XCIV",
+   "date": "2003",
+   "url": "https://www.societe-archeologique-bordeaux.fr/images/stories/PDF/Revue2003/RAB094_2003_059-075_Boutoulle.pdf",
+   "license": "Droits réservés (lecture des faits seulement)",
+   "extracted": false,
+   "use": "Chronologie de la deuxième enceinte (1205-1255), portes (Sous-le-Mur, Eyres, Cayffernan, Saint-Éloi, Bouqueyre, Rousselle), fouille de Mensignac (mur de 1,75 m, tours de 5,5 m, fossé de 20 m) ; castrum royal de l'Ombrière, tour de l'Arbalesteyre (17 × 14 m), grande salle (37 × 22 m) ; portes Bégueyre et des Paux."
+  },
+  {
+   "title": "Wikipédia (FR) : Remparts et portes de ville de Bordeaux ; Cathédrale Saint-André ; Tour Pey-Berland ; Palais de l'Ombrière ; Basilique Saint-Michel ; Abbaye Sainte-Croix ; Basilique Saint-Seurin ; Église Sainte-Eulalie ; Église Saint-Pierre ; Église Notre-Dame ; Esplanade des Quinconces",
+   "author": "Contributeurs de Wikipédia",
+   "date": "2026-09-28",
+   "url": "https://fr.wikipedia.org/wiki/Remparts_et_portes_de_ville_de_Bordeaux",
+   "license": "CC BY-SA 4.0 (faits seulement, rien d'extrait)",
+   "extracted": false,
+   "use": "Dates et dimensions des monuments (cathédrale 124 m dans œuvre, nef 18 m, voûtes 23/29 m ; Pey-Berland 1440-1500 ; Saint-Michel vers 1330-1430, 75 × 38 m ; Ombrière), liste des portes de la troisième enceinte, porte Dijeaux déplacée de 10-12 m vers l'ouest, portes du XVIIIe s., couvent des Dominicains sous les allées de Tourny."
+  },
+  {
+   "title": "Ancien rempart de Bordeaux et jardin (carte des patrimoines)",
+   "author": "Bordeaux Métropole, service architecture et patrimoine",
+   "date": "2026",
+   "url": "https://identificationpatrimoine.bordeaux-metropole.fr/lieux/ancien-rempart-de-bordeaux-et-jardin",
+   "license": "Droits réservés (faits seulement)",
+   "extracted": false,
+   "use": "Convention de 1302-1304 avec l'abbaye Sainte-Croix, travaux de 1304 aux années 1320 ; courtine sud concave entre les barbacanes de Saint-Julien et de Sainte-Eulalie."
+  }
+ ],
+ "plan": {
+  "frontage_m": [5.0, 8.0],
+  "depth_m": [18.0, 38.0],
+  "faubourg_frontage_m": [8.0, 16.0],
+  "faubourg_depth_m": [25.0, 50.0],
+  "street_width_m": {
+   "main": 8.0,
+   "secondary": 5.0,
+   "lane": 3.0,
+   "quay": 14.0
+  },
+  "house_kinds": {
+   "intra": {
+    "townhouse": 0.45,
+    "stonehouse": 0.35,
+    "timber": 0.2
+   },
+   "faubourg": {
+    "cottage": 0.4,
+    "timber": 0.3,
+    "longere": 0.15,
+    "barn": 0.15
+   }
+  },
+  "detail_cell_m": 250.0
+ },
+ "osm_streets": {
+  "bbox_lonlat": [-0.589, 44.8265, -0.5585, 44.8478],
+  "highways": [
+   "primary",
+   "secondary",
+   "tertiary",
+   "unclassified",
+   "residential",
+   "living_street",
+   "pedestrian"
+  ],
+  "exclude": [
+   "Cours de l'Intendance",
+   "Cours du Chapeau Rouge",
+   "Cours d'Alsace et Lorraine",
+   "Cours Victor Hugo",
+   "Cours Georges Clemenceau",
+   "Allées de Tourny",
+   "Place Gambetta",
+   "Cours d'Albret",
+   "Cours Aristide Briand",
+   "Place de la Victoire",
+   "Cours de la Marne",
+   "Cours Tournon",
+   "Cours de Verdun",
+   "Allées d'Orléans",
+   "Allées de Bristol",
+   "Allées de Chartres",
+   "Allées de Munich",
+   "Cours du XXX Juillet",
+   "Cours du Maréchal Foch",
+   "Place de la Comédie",
+   "Place de la Bourse",
+   "Place Tourny",
+   "Cours de Gourgue",
+   "Place des Quinconces",
+   "Esplanade des Quinconces",
+   "Quai Richelieu",
+   "Quai de la Douane",
+   "Quai du Maréchal Lyautey",
+   "Quai Louis XVIII",
+   "Quai des Salinières",
+   "Quai de la Grave",
+   "Quai de la Monnaie",
+   "Quai Sainte-Croix",
+   "Quai de Paludate",
+   "Quai des Chartrons",
+   "Quai des Queyries",
+   "Cours Pasteur",
+   "Rue Duffour-Dubergier",
+   "Rue duffour-dubergier",
+   "Rue Buhan",
+   "Rue Camille Sauvageau",
+   "Rue de Cursol",
+   "Rue Paul Louis Lande",
+   "Rue Esprit des Lois",
+   "Cours du Maréchal Juin",
+   "Place Pey Berland",
+   "Place Jean Moulin",
+   "Cours de la Libération",
+   "Cours Anatole France",
+   "Cours Barbey",
+   "Cours de l'Yser",
+   "Cours de la Somme",
+   "Cours de l'Argonne",
+   "Place des Capucins",
+   "Place André Meunier dit Mureine",
+   "Place Pierre Renaudel",
+   "Rue Élisée Reclus",
+   "Rue des Frères Bonie",
+   "Place de la République",
+   "Parvis des Droits de l'Homme",
+   "Pont de pierre"
+  ],
+  "main": [
+   "Rue Sainte-Catherine",
+   "Rue Porte Dijeaux",
+   "Rue Saint-Rémi",
+   "Rue du Loup",
+   "Rue des Ayres",
+   "Rue Saint-James",
+   "Rue du Mirail",
+   "Rue de la Rousselle",
+   "Rue Neuve",
+   "Rue des Argentiers",
+   "Rue Carpenteyre",
+   "Rue de la Fusterie",
+   "Rue Leyteire",
+   "Rue du Palais Gallien",
+   "Rue Judaïque",
+   "Rue Fondaudège",
+   "Rue de la Devise",
+   "Rue des Trois Conils",
+   "Rue du Hâ",
+   "Rue du Pas Saint-Georges",
+   "Rue Vital Carles",
+   "Rue Bouquière",
+   "Rue Porte de la Monnaie",
+   "Rue Sainte-Croix",
+   "Rue Saint-François",
+   "Rue des Faures",
+   "Rue Castéja"
+  ],
+  "lanes": [],
+  "unnamed": false,
+  "simplify_m": 1.5
+ },
+ "fine_rivers": [
+  "Garonne"
+ ],
+ "waters": [
+  {
+   "id": "garonne_0",
+   "name": "Garonne",
+   "kind": "river",
+   "origin": "rivers_fine",
+   "draw": false,
+   "points": [
+    [1833.4, -839.1, 491.2],
+    [1803.7, -812.3, 491.4],
+    [1774.1, -785.5, 491.7],
+    [1744.4, -758.7, 491.9],
+    [1714.7, -731.8, 492.1],
+    [1685.6, -704.5, 492.4],
+    [1656.9, -676.5, 492.6],
+    [1628.3, -648.6, 492.9],
+    [1599.6, -620.7, 493.1],
+    [1571.4, -592.4, 493.3],
+    [1543.6, -563.6, 493.6],
+    [1515.8, -534.9, 493.8],
+    [1488.0, -506.1, 494.0],
+    [1461.7, -475.9, 494.3],
+    [1435.5, -445.7, 494.5],
+    [1409.3, -415.5, 494.8],
+    [1383.0, -385.4, 495.0],
+    [1356.8, -355.2, 495.3],
+    [1332.9, -323.1, 495.5],
+    [1309.0, -291.0, 495.8],
+    [1285.1, -258.9, 496.0],
+    [1261.2, -226.8, 496.2],
+    [1240.9, -192.4, 496.5],
+    [1220.5, -158.0, 496.7],
+    [1200.2, -123.5, 497.0],
+    [1179.8, -89.1, 497.2],
+    [1159.5, -54.7, 497.5],
+    [1139.1, -20.2, 497.7],
+    [1118.8, 14.2, 498.0],
+    [1098.4, 48.7, 498.2],
+    [1078.1, 83.1, 498.5],
+    [1057.7, 117.5, 498.7],
+    [1037.4, 152.0, 499.0],
+    [1017.1, 186.4, 499.2],
+    [999.4, 222.3, 499.5],
+    [985.6, 259.9, 499.7],
+    [971.9, 297.4, 500.0],
+    [962.7, 336.4, 500.0],
+    [953.4, 375.3, 500.0],
+    [946.5, 414.6, 500.0],
+    [941.8, 454.3, 500.0],
+    [937.0, 494.0, 500.0],
+    [932.2, 533.7, 500.0],
+    [927.4, 573.5, 500.0],
+    [922.7, 613.2, 500.0],
+    [919.0, 653.0, 500.0],
+    [916.4, 692.9, 500.0],
+    [913.7, 732.8, 500.0],
+    [913.4, 772.8, 500.3],
+    [915.1, 812.7, 500.9],
+    [916.8, 852.7, 501.4],
+    [918.5, 892.7, 502.0],
+    [922.2, 932.4, 502.5],
+    [929.7, 971.7, 503.1],
+    [939.2, 1010.5, 503.6],
+    [950.5, 1048.9, 504.2],
+    [963.4, 1086.7, 504.7],
+    [982.3, 1121.9, 505.3],
+    [1001.8, 1156.9, 505.8],
+    [1022.6, 1191.0, 506.3],
+    [1044.5, 1224.5, 506.9],
+    [1069.3, 1255.7, 507.4],
+    [1096.6, 1285.0, 507.9],
+    [1125.2, 1312.9, 508.3],
+    [1153.9, 1340.8, 508.8],
+    [1182.6, 1368.7, 509.3],
+    [1212.6, 1395.1, 509.8],
+    [1242.6, 1421.5, 510.2],
+    [1272.7, 1447.9, 510.7],
+    [1302.8, 1474.2, 511.1],
+    [1335.1, 1497.7, 511.6],
+    [1367.5, 1521.2, 512.0],
+    [1399.9, 1544.7, 512.4],
+    [1432.2, 1568.2, 512.8],
+    [1464.7, 1591.5, 513.3],
+    [1481.0, 1600.1, 513.4]
+   ]
+  },
+  {
+   "id": "peugue",
+   "name": "Peugue",
+   "kind": "stream",
+   "origin": "hand",
+   "draw": true,
+   "points": [
+    [-160, -100, 6],
+    [-96, -82, 6],
+    [-70, -56, 6],
+    [128, -54, 6],
+    [315, -60, 6],
+    [474, -66, 6],
+    [627, -72, 6],
+    [713, -74, 7],
+    [765, -76, 8]
+   ]
+  },
+  {
+   "id": "deveze",
+   "name": "Devèze",
+   "kind": "stream",
+   "origin": "hand",
+   "draw": true,
+   "points": [
+    [321, 243, 5],
+    [386, 236, 5],
+    [458, 213, 5],
+    [513, 194, 5],
+    [554, 171, 5],
+    [590, 152, 6],
+    [640, 146, 7],
+    [690, 144, 8]
+   ]
+  }
+ ],
+ "walls": [
+  {
+   "id": "enceinte_front_terre",
+   "name": "Troisième enceinte (1302-1327), front de terre",
+   "points": [
+    [690, 812],
+    [400, 818],
+    [177, 822],
+    [100, 795],
+    [80, 757],
+    [47, 700],
+    [-10, 600],
+    [-45, 545],
+    [-80, 480],
+    [-100, 420],
+    [-108, 355],
+    [-114, 300],
+    [-98, 106],
+    [-86, 60],
+    [-86, 18],
+    [-91, -13],
+    [-95, -100],
+    [-96, -172],
+    [-95, -300],
+    [-90, -450],
+    [-88, -553],
+    [-30, -586],
+    [76, -642],
+    [126, -666],
+    [200, -705],
+    [245, -728],
+    [302, -770],
+    [362, -745],
+    [460, -745],
+    [522, -745],
+    [553, -745],
+    [643, -782],
+    [705, -800],
+    [718, -808],
+    [752, -890],
+    [944, -979],
+    [1039, -1024],
+    [1120, -1070],
+    [1210, -1000],
+    [1310, -880]
+   ],
+   "closed": false,
+   "height_m": 9.0,
+   "thickness_m": 2.0,
+   "tower_spacing_m": 75.0,
+   "tower_radius_m": 5.0,
+   "tower_height_m": 14.0,
+   "ditch_m": 18.0,
+   "gates": [
+    {
+     "name": "Porte Saint-Germain",
+     "at": [100, 795],
+     "kind": "gate",
+     "height_m": 17
+    },
+    {
+     "name": "Porte Dijeaux",
+     "at": [-108, 355],
+     "kind": "gate",
+     "height_m": 17
+    },
+    {
+     "name": "Porte du Far",
+     "at": [-96, -172],
+     "kind": "gate",
+     "height_m": 15
+    },
+    {
+     "name": "Porte Sainte-Eulalie",
+     "at": [-60, -570],
+     "kind": "gate",
+     "height_m": 15
+    },
+    {
+     "name": "Porte Saint-Julien",
+     "at": [302, -770],
+     "kind": "gate",
+     "height_m": 18
+    },
+    {
+     "name": "Porte du Mirail",
+     "at": [522, -745],
+     "kind": "gate",
+     "height_m": 15
+    },
+    {
+     "name": "Grand portail de Sainte-Croix",
+     "at": [1120, -1070],
+     "kind": "gate",
+     "height_m": 16
+    }
+   ],
+   "note": "Ordonnance de 1302 (Chronique bordelaise de Lurbe, citée par Drouyn 1874) : clore les faubourgs du nord et du sud et leurs couvents ; convention avec l'abbaye Sainte-Croix en 1302-1304, travaux jusqu'aux années 1320 (Bordeaux Métropole). Tracé de Drouyn (1874, p. 9-10 et 38-43) reporté sur les rues actuelles (OSM) : colonnes des Quinconces, cours de Tournon et rue Boudet, entre la rue Condillac et le cours Clemenceau, entre la place Gambetta et la rue de la Vieille-Tour, entre les rues Bouffard et des Remparts, milieu de la place Rohan, ouest de la rue Jean-Burguet, bord extérieur de la rue Henri-IV, saillant de la porte Saint-Julien, rue de Candale, rue Bigot, place des Capucins, rue des Douves, site du fort Louis (place André-Meunier), sud de l'abbaye Sainte-Croix. Front nord entre les allées d'Orléans et le milieu des Quinconces connu par les seuls textes (château Trompette) : tracé hypothétique ; de même la pointe sud-est (fort Louis - Garonne). Tours semi-circulaires de 9 à 12 m au nord-ouest (Drouyn) ; au sud, lignes droites et petits bastions (plans du XVIIIe s.). Fossés pleins d'eau courante (Vinet, cité par Drouyn), largeur restituée. Portes : Saint-Germain (place Tourny), Dijeaux (10-12 m à l'ouest de la porta Jovia, Wikipédia) et Saint-Julien (place de la Victoire) attestées ; porte du Far au débouché de la rue du Hâ (probable) ; porte Sainte-Eulalie (déplacée en 1603), porte du Mirail (au sud de la rue du Mirail) et grand portail Sainte-Croix (site des abattoirs) placées d'après une seule mention (hypothétique). Portes Saint-Symphorien, d'Audeyole, du Casse, du Redge, de Beyssac omises (position inconnue)."
+  },
+  {
+   "id": "enceinte_front_garonne",
+   "name": "Troisième enceinte (1302-1327), mur de Garonne",
+   "points": [
+    [1310, -880],
+    [1268, -795],
+    [1230, -750],
+    [1190, -690],
+    [1150, -640],
+    [1110, -590],
+    [1070, -535],
+    [1045, -500],
+    [1000, -440],
+    [950, -375],
+    [915, -330],
+    [895, -298],
+    [870, -262],
+    [840, -215],
+    [812, -160],
+    [772, -100],
+    [752, -78],
+    [742, -50],
+    [727, 12],
+    [712, 56],
+    [690, 126],
+    [683, 154],
+    [600, 425],
+    [652, 634],
+    [670, 720],
+    [690, 812]
+   ],
+   "closed": false,
+   "height_m": 8.0,
+   "thickness_m": 2.0,
+   "tower_spacing_m": 90.0,
+   "tower_radius_m": 4.5,
+   "tower_height_m": 12.0,
+   "ditch_m": 0.0,
+   "gates": [
+    {
+     "name": "Porte Sainte-Croix de la Rivière",
+     "at": [1268, -795],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte de la Grave",
+     "at": [1029, -472],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte Pey-Miqueu",
+     "at": [950, -375],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte des Salinières",
+     "at": [895, -298],
+     "kind": "gate",
+     "height_m": 14
+    },
+    {
+     "name": "Porte Saint-Jean",
+     "at": [760, -87],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte du Caillau",
+     "at": [727, 12],
+     "kind": "gate",
+     "height_m": 15
+    },
+    {
+     "name": "Porte Saint-Pey",
+     "at": [686, 142],
+     "kind": "water_gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte des Paux",
+     "at": [625, 343],
+     "kind": "gate",
+     "height_m": 13
+    }
+   ],
+   "note": "Pas de fossé du côté de la rivière (Drouyn). Mur de 8 à 10 m sur 2 m environ (trace au revers de la porte Cailhau, Wikipédia). La porte Cailhau actuelle (1493-1496) est bâtie plus près de la Garonne que la porte du Caillau du XIVe s. Portes des Salinières, du Caillau, Saint-Pey (embouchure de la Devèze) et des Paux (bout de la rue Saint-Rémi, Drouyn) placées d'après les textes ; Sainte-Croix de la Rivière, la Grave et Pey-Miqueu : ordre de la liste des portes (Wikipédia), positions hypothétiques ; porte Saint-Jean au bout de la rue de la Porte-Saint-Jean. Au nord du castrum, mur rectiligne sur 200 m jusqu'au bas des allées d'Orléans, puis tracé bouleversé par le château Trompette (1453 et XVIIe s.) : hypothétique jusqu'aux colonnes des Quinconces."
+  },
+  {
+   "id": "castrum",
+   "name": "Mur du castrum (fin IIIe s.), intérieur en 1340",
+   "points": [
+    [600, 400],
+    [385, 405],
+    [320, 410],
+    [250, 440],
+    [0, 450],
+    [-85, 432],
+    [-90, 354],
+    [-66, 105],
+    [-70, -38],
+    [128, -41],
+    [315, -46],
+    [474, -52],
+    [615, -58],
+    [605, 40],
+    [628, 150],
+    [625, 265]
+   ],
+   "closed": false,
+   "height_m": 9.0,
+   "thickness_m": 3.5,
+   "tower_spacing_m": 50.0,
+   "tower_radius_m": 4.0,
+   "tower_height_m": 12.0,
+   "ditch_m": 0.0,
+   "gates": [
+    {
+     "name": "Porte Médoque",
+     "at": [322, 410],
+     "kind": "gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte Dijeaux antique (porta Jovia)",
+     "at": [-90, 354],
+     "kind": "gate",
+     "height_m": 11
+    },
+    {
+     "name": "Porte Basse",
+     "at": [177, -42],
+     "kind": "gate",
+     "height_m": 11
+    },
+    {
+     "name": "Porte de la Cadène",
+     "at": [315, -46],
+     "kind": "gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte Bégueyre",
+     "at": [474, -52],
+     "kind": "gate",
+     "height_m": 11
+    }
+   ],
+   "note": "Castrum bâti entre 278 et 290 (725 × 450 m d'après Drouyn, 740 × 480 m d'après Wikipédia), murs de 2,8 à 4 m, quarante-six tours au moins (Drouyn) ; resté debout jusqu'au XVIIIe s. (porte de la Cadène 1728, porte Médoque vers 1775, porte Basse 1803). Tracé de Drouyn (1874, p. 4-5) : côté nord du cours d'Alsace-et-Lorraine, place du Palais, entre les rues des Bahutiers et des Argentiers, travers de Saint-Pierre, angle sud-ouest de la Bourse, côté sud des rues du Pont-de-la-Mousque et de la Maison-Daurade et du cours de l'Intendance, rue de la Vieille-Tour, côté est de la rue des Remparts, quelques mètres à l'ouest de Saint-André. Le côté est au nord de la Devèze se confond presque avec le mur de Garonne du XIVe s. et n'est pas doublé. Portes de 1340 d'après Drouyn et Boutoulle (Bégueyre : débouché de la rue du Pas-Saint-Georges) ; la porte des Paux et la porte Saint-Pey sont sur le mur de Garonne. Fossés en grande partie bâtis ou comblés (non restitués). Gabarit des tours restitué."
+  },
+  {
+   "id": "deuxieme_enceinte",
+   "name": "Deuxième enceinte (1205-1255), intérieure en 1340",
+   "points": [
+    [163, -42],
+    [158, -80],
+    [155, -165],
+    [162, -250],
+    [172, -318],
+    [240, -333],
+    [310, -340],
+    [400, -330],
+    [474, -318],
+    [560, -318],
+    [630, -300],
+    [735, -300],
+    [800, -290],
+    [858, -278]
+   ],
+   "closed": false,
+   "height_m": 8.0,
+   "thickness_m": 1.75,
+   "tower_spacing_m": 60.0,
+   "tower_radius_m": 2.75,
+   "tower_height_m": 11.0,
+   "ditch_m": 0.0,
+   "gates": [
+    {
+     "name": "Porte de Toscanan",
+     "at": [158, -80],
+     "kind": "gate",
+     "height_m": 11
+    },
+    {
+     "name": "Porte des Ayres",
+     "at": [155, -165],
+     "kind": "gate",
+     "height_m": 11
+    },
+    {
+     "name": "Porte de Cayffernan (des Carmes)",
+     "at": [310, -340],
+     "kind": "gate",
+     "height_m": 12
+    },
+    {
+     "name": "Porte Saint-Éloi (Saint-James)",
+     "at": [474, -318],
+     "kind": "gate",
+     "height_m": 22
+    },
+    {
+     "name": "Porte Bouquière",
+     "at": [630, -300],
+     "kind": "gate",
+     "height_m": 11
+    },
+    {
+     "name": "Porte de la Rousselle",
+     "at": [858, -278],
+     "kind": "gate",
+     "height_m": 12
+    }
+   ],
+   "note": "Clôture du bourg Saint-Éloi commencée après le siège castillan de 1205-1206, mur maçonné et doublé achevé vers 1255 (Boutoulle 2003 ; Wikipédia : 1227-1245) ; 660 × 270 m, deux murs à une dizaine de mètres l'un de l'autre, deux fossés (Drouyn) ; la fouille de Mensignac (1914, musée d'Aquitaine) n'a vu qu'un mur de 1,75 m à tours de 5,5 m et un fossé de 20 m (Boutoulle). Restitué en un seul mur, le long du côté intérieur du cours Victor-Hugo (fossés des Salinières, de l'Hôtel-de-Ville et des Carmes). Fossés comblés au cours du XIVe s. (Wikipédia, date non précisée) : non restitués. Porte Saint-Éloi : porte du XIIIe s. sous laquelle passaient les pèlerins ; le beffroi de la Grosse Cloche est du XVe s. Positions de Toscanan (près de la porte Basse) et Bouquière (rue Bouquière) : probables."
+  }
+ ],
+ "streets": [],
+ "quays": [
+  {
+   "id": "port_de_la_lune",
+   "name": "Grève du port de la Lune (Salinières, Caillau, Saint-Pierre)",
+   "kind": "strand",
+   "width_m": 18.0,
+   "points": [
+    [1060, -505],
+    [1015, -445],
+    [965, -380],
+    [930, -333],
+    [910, -300],
+    [885, -262],
+    [855, -215],
+    [827, -160],
+    [787, -100],
+    [767, -78],
+    [757, -50],
+    [742, 12],
+    [727, 56],
+    [705, 126],
+    [698, 154],
+    [640, 330]
+   ]
+  }
+ ],
+ "monuments": [
+  {
+   "id": "cathedrale",
+   "name": "Cathédrale Saint-André",
+   "model": "gothic_cathedral",
+   "at": [0, 0],
+   "angle_deg": 7,
+   "clear_m": 10,
+   "certainty": "attested",
+   "params": {
+    "length_m": 128,
+    "width_m": 24,
+    "nave_width_m": 18,
+    "vault_m": 23,
+    "ridge_m": 32,
+    "aisle_m": 14,
+    "transept_m": 55,
+    "transept_width_m": 14,
+    "transept_at": 0.55,
+    "apse": "round",
+    "chapels": true
+   },
+   "description": "Consacrée en 1096 ; nef unique (18 m de large, voûtes à 23 m) du XIIe s. remaniée au XIIIe s. ; déambulatoire commencé vers 1280 et raccordé à la nef vers 1330, chœur (29 m sous voûte) et chapelles rayonnantes du XIVe s. grâce à Clément V ; façades du transept du XIVe s., Porte royale vers 1250. Pas de portail ouest (rempart). Flèches du transept nord terminées au XVe s. (non restituées : pas de tours de transept dans le gabarit). Voûtes occidentales effondrées en 1427. Longueur 124 m dans œuvre (Wikipédia) ; emprise OSM ≈ 129 × 55 m."
+  },
+  {
+   "id": "pey_berland",
+   "name": "Tour Pey-Berland (clocher)",
+   "model": "belfry",
+   "at": [95, -16],
+   "angle_deg": 7,
+   "clear_m": 4,
+   "from_year": 1440,
+   "certainty": "attested",
+   "params": {
+    "size": 13,
+    "height": 47,
+    "top": "pyramid"
+   },
+   "description": "Clocher isolé à l'est du chevet, commencé en 1440 par l'archevêque Pey Berland, chantier jusqu'en 1500 (Wikipédia) : en 1440-1453 la tour est en construction ; hauteur et toit restitués."
+  },
+  {
+   "id": "ombriere",
+   "name": "Château de l'Ombrière (palais des ducs, siège du sénéchal)",
+   "model": "castle",
+   "at": [660, -18],
+   "angle_deg": 0,
+   "clear_m": 6,
+   "certainty": "probable",
+   "params": {
+    "ring": [
+     [-45, -38],
+     [42, -38],
+     [48, 30],
+     [-45, 38]
+    ],
+    "height_m": 11,
+    "thickness_m": 2.6,
+    "tower_radius_m": 5.0,
+    "tower_height_m": 17,
+    "keep": {
+     "at": [-5, -22],
+     "radius_m": 8.0,
+     "height_m": 26
+    },
+    "halls": [
+     [10, 12, 37, 22, 14, 0]
+    ]
+   },
+   "description": "Castrum royal de l'Ombrière, à l'angle sud-est de la cité (place du Palais), bâti de la fin du XIIe au milieu du XIIIe s. autour de la tour de l'Arbalesteyre (mentionnée en 1080 : 17-18 × 14 m, murs de 2,60 m, à 40 m en avant du rempart antique) ; grande salle à deux nefs (37 × 22 m) après 1254, tour du roi rebâtie après 1310, château agrandi et renforcé à la veille de la guerre de Cent Ans (Boutoulle 2003 ; Wikipédia). Siège du Parlement à partir de 1462, démoli en 1800. Site attesté ; enceinte et disposition restituées (aucun plan antérieur au XVIIIe s.)."
+  },
+  {
+   "id": "saint_seurin",
+   "name": "Collégiale Saint-Seurin (hors les murs)",
+   "model": "church",
+   "at": [-523, 707],
+   "angle_deg": 12,
+   "clear_m": 8,
+   "certainty": "attested",
+   "params": {
+    "length_m": 78,
+    "width_m": 26,
+    "height_m": 18,
+    "apse": "round"
+   },
+   "description": "Nef et chœur des XIe-XIIIe s., portail sud du XIIIe s. ; chapelles des XIVe-XVe s. (Notre-Dame de la Rose, autel consacré par Pey Berland en 1444) ; beffroi de 1538-1540 (hors période). Nécropole au sud. Emprise OSM ≈ 81 × 52 m ; hauteur restituée."
+  },
+  {
+   "id": "saint_michel_ancienne",
+   "name": "Église Saint-Michel (église ancienne)",
+   "model": "church",
+   "at": [956, -502],
+   "angle_deg": -13,
+   "clear_m": 6,
+   "until_year": 1429,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 45,
+    "width_m": 18,
+    "height_m": 14,
+    "apse": "flat"
+   },
+   "description": "Ancienne église paroissiale, hors les murs jusqu'à la troisième enceinte ; le chantier de la nouvelle église commence vers 1330 et n'avance guère avant le XVe s. (peste, guerre). Gabarit et emplacement exact de l'église ancienne inconnus : restitués sur le site de la basilique."
+  },
+  {
+   "id": "saint_michel",
+   "name": "Église Saint-Michel (église-halle)",
+   "model": "church",
+   "at": [956, -502],
+   "angle_deg": -13,
+   "clear_m": 6,
+   "from_year": 1430,
+   "certainty": "probable",
+   "params": {
+    "length_m": 75,
+    "width_m": 38,
+    "height_m": 23,
+    "apse": "flat"
+   },
+   "description": "L'église-halle « sort de terre » en 1430 ; nef exhaussée ensuite, clocher isolé de 1472-1492 (hors période). 75 m de long, 38 m au transept, nef de 23 m (Wikipédia)."
+  },
+  {
+   "id": "sainte_croix",
+   "name": "Abbaye Sainte-Croix",
+   "model": "abbey",
+   "at": [1221, -912],
+   "angle_deg": -12,
+   "clear_m": 8,
+   "certainty": "attested",
+   "params": {
+    "length_m": 62,
+    "width_m": 24,
+    "height_m": 17,
+    "apse": "round",
+    "tower": {
+     "at": "west",
+     "size": 8,
+     "height": 30
+    },
+    "cloister": {
+     "side": "south",
+     "size": 40
+    }
+   },
+   "description": "Abbaye bénédictine ; église de la fin du XIe - début du XIIe s., façade romane saintongeaise à un seul clocher (le second est d'Abadie, 1861-1865), voûtes gothiques des XIIe-XIIIe s. Englobée dans l'enceinte par la convention de 1302-1304. Église : emprise OSM ; cloître et hauteurs restitués."
+  },
+  {
+   "id": "sainte_eulalie",
+   "name": "Église Sainte-Eulalie",
+   "model": "church",
+   "at": [-46, -480],
+   "angle_deg": -6,
+   "clear_m": 6,
+   "certainty": "attested",
+   "params": {
+    "length_m": 58,
+    "width_m": 30,
+    "height_m": 15,
+    "apse": "flat",
+    "tower": {
+     "at": "west",
+     "size": 7,
+     "height": 28
+    }
+   },
+   "description": "Église du XIIe s. consacrée par l'archevêque Guillaume le Templier (1173-1187), deux bas-côtés au XIIIe s., chevet gothique au XIVe s. ; clocher détruit au XVIIIe s. Incluse dans la ville par la troisième enceinte. Emprise OSM ; élévations restituées."
+  },
+  {
+   "id": "saint_eloi",
+   "name": "Église Saint-Éloi",
+   "model": "church",
+   "at": [495, -300],
+   "angle_deg": 4,
+   "clear_m": 5,
+   "certainty": "attested",
+   "params": {
+    "length_m": 46,
+    "width_m": 20,
+    "height_m": 13
+   },
+   "description": "Église du XIIe s. (paroisse mentionnée en 1173), adossée à la porte Saint-Éloi (Grosse Cloche). Emprise OSM ; hauteur restituée."
+  },
+  {
+   "id": "saint_pierre",
+   "name": "Église Saint-Pierre",
+   "model": "church",
+   "at": [627, 155],
+   "angle_deg": -20,
+   "clear_m": 5,
+   "certainty": "probable",
+   "params": {
+    "length_m": 40,
+    "width_m": 18,
+    "height_m": 13
+   },
+   "description": "Église du port de la Devèze, mentionnée par Grégoire de Tours ; place et port Saint-Pierre cités en 1262 ; reconstruite à partir de 1358 jusqu'à la fin du XVe s. Le rempart antique la coupait en deux (Drouyn). Gabarit restitué."
+  },
+  {
+   "id": "saint_remi",
+   "name": "Église Saint-Rémi",
+   "model": "church",
+   "at": [537, 382],
+   "angle_deg": -6,
+   "clear_m": 5,
+   "certainty": "probable",
+   "params": {
+    "length_m": 40,
+    "width_m": 18,
+    "height_m": 13
+   },
+   "description": "Église à l'angle nord-est de la cité, sur des substructions romaines (Drouyn). Emprise OSM de l'édifice actuel ; gabarit de 1340 restitué."
+  },
+  {
+   "id": "saint_projet",
+   "name": "Église Saint-Projet",
+   "model": "church",
+   "at": [282, 38],
+   "angle_deg": 5,
+   "clear_m": 4,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 30,
+    "width_m": 12,
+    "height_m": 11
+   },
+   "description": "Église paroissiale de la cité (paroisse Saint-Projet, portes de Saint-Projet au XIe s., Boutoulle) ; il n'en reste qu'un fragment (OSM). Gabarit et orientation restitués."
+  },
+  {
+   "id": "jacobins",
+   "name": "Couvent des Dominicains (Jacobins)",
+   "model": "abbey",
+   "at": [235, 660],
+   "angle_deg": 0,
+   "clear_m": 6,
+   "certainty": "hypothetical",
+   "params": {
+    "length_m": 50,
+    "width_m": 14,
+    "height_m": 14,
+    "cloister": {
+     "side": "south",
+     "size": 35
+    }
+   },
+   "description": "Couvent et église des Dominicains érigés au XIIIe s. dans le faubourg Saint-Germain (actuelles allées de Tourny), rasés en 1678 pour le glacis du château Trompette (Wikipédia, église Notre-Dame). Position dans les allées et gabarit restitués."
+  }
+ ],
+ "districts": [
+  {
+   "id": "cite",
+   "name": "La cité (castrum) et le palais de l'Ombrière",
+   "zone": "intra",
+   "density": 0.92,
+   "polygon": [
+    [615, -58],
+    [128, -41],
+    [-70, -38],
+    [-66, 105],
+    [-90, 354],
+    [-85, 432],
+    [0, 450],
+    [250, 440],
+    [320, 410],
+    [385, 405],
+    [600, 400],
+    [600, 425],
+    [727, 12],
+    [742, -50]
+   ],
+   "houses": {
+    "townhouse": 0.45,
+    "stonehouse": 0.35,
+    "timber": 0.2
+   },
+   "roofs": {
+    "Tile": 0.8,
+    "TileOld": 0.2
+   }
+  },
+  {
+   "id": "bourg_saint_eloi",
+   "name": "Bourg Saint-Éloi (deuxième enceinte)",
+   "zone": "intra",
+   "density": 0.9,
+   "polygon": [
+    [163, -42],
+    [158, -80],
+    [155, -165],
+    [162, -250],
+    [172, -318],
+    [240, -333],
+    [310, -340],
+    [400, -330],
+    [474, -318],
+    [560, -318],
+    [630, -300],
+    [735, -300],
+    [858, -278],
+    [840, -215],
+    [812, -160],
+    [772, -100],
+    [752, -78],
+    [742, -50],
+    [615, -58],
+    [315, -46],
+    [128, -41]
+   ],
+   "houses": {
+    "townhouse": 0.45,
+    "stonehouse": 0.35,
+    "timber": 0.2
+   },
+   "roofs": {
+    "Tile": 0.8,
+    "TileOld": 0.2
+   }
+  },
+  {
+   "id": "accrue_nord",
+   "name": "Accrue du nord (Saint-Rémi, Tropeyte, faubourg Saint-Germain)",
+   "zone": "intra",
+   "density": 0.55,
+   "polygon": [
+    [-114, 300],
+    [-100, 420],
+    [-80, 480],
+    [100, 795],
+    [177, 822],
+    [690, 812],
+    [652, 634],
+    [600, 425],
+    [600, 400],
+    [385, 405],
+    [320, 410],
+    [250, 440],
+    [0, 450],
+    [-85, 432],
+    [-90, 354],
+    [-85, 300]
+   ],
+   "houses": {
+    "townhouse": 0.45,
+    "stonehouse": 0.35,
+    "timber": 0.2
+   },
+   "roofs": {
+    "Tile": 0.8,
+    "TileOld": 0.2
+   }
+  },
+  {
+   "id": "accrue_sud",
+   "name": "Accrue du sud (Sainte-Eulalie, Saint-Michel, Sainte-Croix)",
+   "zone": "intra",
+   "density": 0.6,
+   "polygon": [
+    [840, -215],
+    [915, -330],
+    [1110, -590],
+    [1190, -690],
+    [1230, -750],
+    [1268, -795],
+    [1210, -1000],
+    [1120, -1070],
+    [1039, -1024],
+    [752, -890],
+    [718, -808],
+    [705, -800],
+    [643, -782],
+    [553, -745],
+    [362, -745],
+    [302, -770],
+    [245, -728],
+    [76, -642],
+    [-88, -553],
+    [-96, -172],
+    [-95, -100],
+    [-91, -13],
+    [-86, 18],
+    [-86, 60],
+    [-98, 106],
+    [-114, 300],
+    [-85, 300],
+    [-66, 105],
+    [-70, -38],
+    [163, -42],
+    [158, -80],
+    [155, -165],
+    [162, -250],
+    [172, -318],
+    [240, -333],
+    [310, -340],
+    [400, -330],
+    [474, -318],
+    [560, -318],
+    [630, -300],
+    [735, -300],
+    [800, -290],
+    [858, -278]
+   ],
+   "houses": {
+    "townhouse": 0.35,
+    "stonehouse": 0.3,
+    "timber": 0.35
+   },
+   "roofs": {
+    "Tile": 0.8,
+    "TileOld": 0.2
+   }
+  },
+  {
+   "id": "saint_seurin",
+   "name": "Bourg Saint-Seurin (hors les murs)",
+   "zone": "faubourg",
+   "density": 0.3,
+   "polygon": [
+    [-150, 380],
+    [-160, 520],
+    [-250, 640],
+    [-380, 820],
+    [-560, 880],
+    [-700, 800],
+    [-720, 620],
+    [-560, 540],
+    [-380, 480],
+    [-250, 380]
+   ],
+   "houses": {
+    "cottage": 0.4,
+    "timber": 0.3,
+    "longere": 0.15,
+    "barn": 0.15
+   },
+   "roofs": {
+    "Tile": 0.8,
+    "TileOld": 0.2
+   }
+  }
+ ],
+ "open_spaces": [
+  {
+   "id": "cloitre_saint_andre",
+   "name": "Cloître de Saint-André (flanc sud, détruit en 1865)",
+   "kind": "cloister",
+   "polygon": [
+    [-40, -16],
+    [30, -8],
+    [28, -30],
+    [-40, -34]
+   ]
+  },
+  {
+   "id": "cimetiere_saint_seurin",
+   "name": "Cimetière et nécropole de Saint-Seurin",
+   "kind": "cemetery",
+   "polygon": [
+    [-575, 640],
+    [-470, 655],
+    [-465, 600],
+    [-570, 585]
+   ]
+  },
+  {
+   "id": "cimetiere_saint_michel",
+   "name": "Cimetière paroissial de Saint-Michel (place Meynard)",
+   "kind": "cemetery",
+   "polygon": [
+    [830, -520],
+    [905, -520],
+    [905, -470],
+    [840, -440]
+   ]
+  },
+  {
+   "id": "place_saint_pierre",
+   "name": "Place Saint-Pierre",
+   "kind": "square",
+   "polygon": [
+    [566, 120],
+    [600, 120],
+    [600, 175],
+    [566, 175]
+   ]
+  }
+ ],
+ "render": {
+  "fade_valley": [0.35, 0.65]
+ }
 }
