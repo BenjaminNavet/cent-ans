@@ -1,0 +1,54 @@
+{
+  "id": "fac_beloozero",
+  "name": {
+    "display": "Principauté de Beloozero",
+    "local": "Княжество Белозерское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Beloozero",
+  "adjective": "beloozerien",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_beloozero",
+  "capital_city": "Beloozero",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_moscow",
+  "primary_title": "tit_beloozero",
+  "heraldry": {
+    "blazon": "D'azur à deux fasces ondées d'argent.",
+    "description": "Les eaux du Lac Blanc ; blason de convention.",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Prince de Beloozero"
+  ],
+  "treasury": 2500,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_moscow",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 60,
+    "trade": 40,
+    "piety": 70
+  },
+  "description": "Principauté forestière du Lac Blanc, aux marges de Novgorod ; ses princes, de la maison de Rostov, sont dans la clientèle de Moscou ; le nom du prince de 1337 n'est pas retenu ici faute de source sûre.",
+  "sources": [
+    "Principauté de Beloozero",
+    "Belozersk"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "id": "tit_golden_horde",
+  "rank": "kingdom",
+  "name": {
+    "display": "Ulus de Djötchi (Horde d'Or)",
+    "local": "Ulugh Ulus",
+    "local_language": "kiptchak"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la lune d'or.",
+    "description": "Couleurs dynastiques des Djötchides (rouge et or) ; le croissant rappelle l'islam d'Özbeg. La tamga de la maison de Djötchi (trident) n'est pas rendue.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Les Mongols de la Horde n'ont pas d'héraldique ; blason de convention."
+  },
+  "de_jure_provinces": [
+    "prov_saray",
+    "prov_hadji_tarkhan",
+    "prov_bolgar",
+    "prov_steppe_don",
+    "prov_steppe_dnepr",
+    "prov_budjak",
+    "prov_saraichik",
+    "prov_kouban",
+    "prov_azaq",
+    "prov_crimee"
+  ],
+  "holder_1337": {
+    "faction": "fac_golden_horde",
+    "sources": [
+      "Horde d'Or",
+      "Özbeg",
+      "Saraï (Horde d'Or)"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_golden_horde_hold",
+      "title": "Le trône de Saraï",
+      "description": "Özbeg et ses successeurs conservent le trône de l'ulus de Djötchi.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_golden_horde"
+      }
+    },
+    {
+      "id": "obj_golden_horde_volga",
+      "title": "Cœur de l'empire",
+      "description": "Tenir Saraï, Bolgar, Hadji-Tarkhan et la Crimée.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_saray",
+          "prov_bolgar",
+          "prov_hadji_tarkhan",
+          "prov_crimee"
+        ]
+      }
+    },
+    {
+      "id": "obj_golden_horde_moscow",
+      "title": "Le prince fidèle",
+      "description": "Garder Moscou comme vassal direct de la Horde.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_moscow"
+      }
+    }
+  ],
+  "description": "Empire nomade et marchand des steppes, du Danube à l'Oural, converti à l'islam sunnite sous Özbeg (1313-1341) ; suzerain de tous les princes russes, dont il perçoit le tribut (« vyhod ») et confirme les yarlyks. Sa capitale, Saraï, est l'une des plus grandes villes du monde.",
+  "sources": [
+    "Horde d'Or",
+    "Özbeg",
+    "Saraï (Horde d'Or)"
+  ]
+}

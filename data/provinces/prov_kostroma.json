@@ -1,0 +1,90 @@
+{
+  "id": "prov_kostroma",
+  "name": {
+    "display": "Kostroma",
+    "local": "Кострома",
+    "local_language": "russe"
+  },
+  "region": "rus_centre",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Volga",
+    "Kostroma"
+  ],
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kostroma",
+      "local": "Кострома",
+      "local_language": "russe"
+    },
+    "lat": 57.77,
+    "lon": 40.93
+  },
+  "geo": {
+    "capital_lonlat": [
+      40.93,
+      57.77
+    ],
+    "seed_lonlat": [
+      41.3,
+      57.8
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_moscow",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 62300,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2100,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1400,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1400,
+  "description": "Kostroma et Galitch, domaine de la Volga rattaché à la grande-principauté de Vladimir ; monastère Ipatiev fondé vers 1330.",
+  "sources": [
+    "Kostroma",
+    "Galitch"
+  ]
+}

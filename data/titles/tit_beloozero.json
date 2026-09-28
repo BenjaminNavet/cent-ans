@@ -1,0 +1,52 @@
+{
+  "id": "tit_beloozero",
+  "rank": "county",
+  "name": {
+    "display": "Principauté de Beloozero",
+    "local": "Княжество Белозерское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "D'azur à deux fasces ondées d'argent.",
+    "description": "Les eaux du Lac Blanc ; blason de convention.",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_vladimir",
+  "de_jure_provinces": [
+    "prov_beloozero"
+  ],
+  "holder_1337": {
+    "faction": "fac_beloozero",
+    "sources": [
+      "Principauté de Beloozero",
+      "Belozersk"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_beloozero_hold",
+      "title": "Garder Beloozero",
+      "description": "Conserver la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_beloozero"
+      }
+    },
+    {
+      "id": "obj_beloozero_free",
+      "title": "Sans tuteur",
+      "description": "Devenir indépendant de Moscou.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Principauté forestière du Lac Blanc, aux marges de Novgorod ; ses princes, de la maison de Rostov, sont dans la clientèle de Moscou ; le nom du prince de 1337 n'est pas retenu ici faute de source sûre.",
+  "sources": [
+    "Principauté de Beloozero",
+    "Belozersk"
+  ]
+}

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_kozelsk",
+    "province": "prov_kozelsk",
+    "kind": "city",
+    "name": {
+      "display": "Kozelsk",
+      "local": "Козельск",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      35.78,
+      54.03
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville qui résista sept semaines aux Mongols (1238).",
+    "sources": [
+      "Kozelsk"
+    ]
+  },
+  {
+    "id": "set_belev",
+    "province": "prov_kozelsk",
+    "kind": "town",
+    "name": {
+      "display": "Belev",
+      "local": "Белёв",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      36.13,
+      53.81
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la principauté de Belev.",
+    "sources": [
+      "Belev"
+    ]
+  },
+  {
+    "id": "set_kalouga",
+    "province": "prov_kozelsk",
+    "kind": "town",
+    "name": {
+      "display": "Kalouga",
+      "local": "Калуга",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      36.27,
+      54.51
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg de l'Oka (première mention en 1371, existence antérieure incertaine).",
+    "sources": [
+      "Kalouga"
+    ]
+  }
+]

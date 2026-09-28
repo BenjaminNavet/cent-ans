@@ -1,0 +1,64 @@
+{
+  "id": "tit_rostov",
+  "rank": "county",
+  "name": {
+    "display": "Principauté de Rostov",
+    "local": "Княжество Ростовское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "D'azur au cerf d'argent.",
+    "description": "Cerf d'argent sur champ d'azur, emblème attribué à Rostov, attesté plus tard.",
+    "primary_color": "#2B5DF2",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_vladimir",
+  "de_jure_provinces": [
+    "prov_rostov"
+  ],
+  "holder_1337": {
+    "faction": "fac_rostov",
+    "sources": [
+      "Principauté de Rostov",
+      "Rostov"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_rostov_hold",
+      "title": "Garder Rostov",
+      "description": "Conserver la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_rostov"
+      }
+    },
+    {
+      "id": "obj_rostov_north",
+      "title": "Deux principautés",
+      "description": "Tenir Rostov et Iaroslavl.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_rostov",
+          "prov_yaroslavl"
+        ]
+      }
+    },
+    {
+      "id": "obj_rostov_free",
+      "title": "Sans tuteur",
+      "description": "Devenir indépendant de Moscou.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Le plus ancien centre de la Rus' du Nord-Est, siège d'un évêché, découpé en deux moitiés entre les branches de la maison ; le nom du prince de 1337 n'est pas retenu ici faute de source sûre.",
+  "sources": [
+    "Principauté de Rostov",
+    "Rostov"
+  ]
+}

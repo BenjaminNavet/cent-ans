@@ -1,0 +1,90 @@
+{
+  "id": "prov_smolensk",
+  "name": {
+    "display": "Smolensk",
+    "local": "Смоленск",
+    "local_language": "russe"
+  },
+  "region": "rus_ouest",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Dniepr"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Smolensk",
+      "local": "Смоленск",
+      "local_language": "russe"
+    },
+    "lat": 54.78,
+    "lon": 32.04
+  },
+  "geo": {
+    "capital_lonlat": [
+      32.04,
+      54.78
+    ],
+    "seed_lonlat": [
+      32.4,
+      54.8
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_smolensk",
+  "culture": "cul_russian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 115700,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 7800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2600,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2400,
+  "description": "Grande-principauté du Haut-Dniepr, tenue par Ivan Alexandrovitch ; pressée entre la Lituanie de Gediminas, Moscou et la Horde, elle sert de relais commercial vers Riga et Visby.",
+  "sources": [
+    "Principauté de Smolensk",
+    "Smolensk"
+  ]
+}

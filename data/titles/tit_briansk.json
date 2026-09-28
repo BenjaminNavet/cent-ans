@@ -1,0 +1,65 @@
+{
+  "id": "tit_briansk",
+  "rank": "county",
+  "name": {
+    "display": "Principauté de Briansk",
+    "local": "Княжество Брянское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "De sinople à la bande d'argent.",
+    "description": "Blason de convention pour Briansk.",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_briansk",
+    "prov_tchernigov"
+  ],
+  "holder_1337": {
+    "faction": "fac_briansk",
+    "sources": [
+      "Principauté de Briansk",
+      "Tchernigov"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_briansk_hold",
+      "title": "Garder Briansk",
+      "description": "Conserver la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_briansk"
+      }
+    },
+    {
+      "id": "obj_briansk_smolensk",
+      "title": "Le frère aîné",
+      "description": "Tenir Briansk et Smolensk.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_briansk",
+          "prov_smolensk"
+        ]
+      }
+    },
+    {
+      "id": "obj_briansk_free",
+      "title": "Sans maître",
+      "description": "Rester libre de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Principauté des forêts de la Desna, dont le prince Dmitri Alexandrovitch a fait assiéger son frère de Smolensk (1334) avec des auxiliaires tatars ; Tchernigov, jadis capitale des Olgovitchi, lui est rattachée (statut incertain).",
+  "sources": [
+    "Principauté de Briansk",
+    "Tchernigov"
+  ]
+}

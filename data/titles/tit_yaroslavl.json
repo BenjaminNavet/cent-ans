@@ -1,0 +1,52 @@
+{
+  "id": "tit_yaroslavl",
+  "rank": "county",
+  "name": {
+    "display": "Principauté de Iaroslavl",
+    "local": "Княжество Ярославское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "D'argent au chevron de sable.",
+    "description": "Blason de convention pour Iaroslavl (armes historiques : un ours à la hallebarde).",
+    "primary_color": "#111111",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_vladimir",
+  "de_jure_provinces": [
+    "prov_yaroslavl"
+  ],
+  "holder_1337": {
+    "faction": "fac_yaroslavl",
+    "sources": [
+      "Principauté de Iaroslavl",
+      "Vassili de Iaroslavl"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_yaroslavl_hold",
+      "title": "Garder Iaroslavl",
+      "description": "Conserver la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_yaroslavl"
+      }
+    },
+    {
+      "id": "obj_yaroslavl_free",
+      "title": "Sans tuteur",
+      "description": "Devenir indépendant de Moscou.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Principauté de la haute Volga tenue par Vassili Davidovitch (1321-1345), qui reste dans la clientèle des grands-princes de Vladimir.",
+  "sources": [
+    "Principauté de Iaroslavl",
+    "Vassili de Iaroslavl"
+  ]
+}

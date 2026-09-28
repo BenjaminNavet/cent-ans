@@ -1,0 +1,55 @@
+{
+  "id": "fac_yaroslavl",
+  "name": {
+    "display": "Principauté de Iaroslavl",
+    "local": "Княжество Ярославское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Iaroslavl",
+  "adjective": "iaroslavien",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_vassili_davidovitch",
+  "capital": "prov_yaroslavl",
+  "capital_city": "Iaroslavl",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_moscow",
+  "primary_title": "tit_yaroslavl",
+  "heraldry": {
+    "blazon": "D'argent au chevron de sable.",
+    "description": "Blason de convention pour Iaroslavl (armes historiques : un ours à la hallebarde).",
+    "primary_color": "#111111",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Prince de Iaroslavl"
+  ],
+  "treasury": 3500,
+  "prestige": 25,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_moscow",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 65,
+    "trade": 40,
+    "piety": 70
+  },
+  "description": "Principauté de la haute Volga tenue par Vassili Davidovitch (1321-1345), qui reste dans la clientèle des grands-princes de Vladimir.",
+  "sources": [
+    "Principauté de Iaroslavl",
+    "Vassili de Iaroslavl"
+  ]
+}

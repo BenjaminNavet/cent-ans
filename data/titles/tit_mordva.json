@@ -1,0 +1,52 @@
+{
+  "id": "tit_mordva",
+  "rank": "county",
+  "name": {
+    "display": "Terres des Mordves",
+    "local": "Мордовская земля",
+    "local_language": "russe"
+  },
+  "heraldry": {
+    "blazon": "De gueules à trois étoiles d'argent.",
+    "description": "Blason de convention pour les Mordves.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Pas d'héraldique attestée."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_mordves"
+  ],
+  "holder_1337": {
+    "faction": "fac_mordva",
+    "sources": [
+      "Mordves",
+      "Pourgaz"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_mordva_hold",
+      "title": "Garder les Mordves",
+      "description": "Conserver la terre mordve.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_mordva"
+      }
+    },
+    {
+      "id": "obj_mordva_free",
+      "title": "Sans maître",
+      "description": "Se libérer de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Peuples finno-ougriens (Moksha et Erzya) païens entre l'Oka et la Soura, soumis à la Horde ; leur ancien chef Pourgaz s'était opposé aux Russes au XIIIe siècle ; les chefs de 1337 ne sont pas connus.",
+  "sources": [
+    "Mordves",
+    "Pourgaz"
+  ]
+}

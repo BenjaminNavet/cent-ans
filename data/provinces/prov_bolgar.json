@@ -1,0 +1,90 @@
+{
+  "id": "prov_bolgar",
+  "name": {
+    "display": "Bolgar (Volga moyenne)",
+    "local": "Болгар",
+    "local_language": "tatar kiptchak"
+  },
+  "region": "horde",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Volga",
+    "Kama"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Bolgar",
+      "local": "Bolghar",
+      "local_language": "tatar kiptchak"
+    },
+    "lat": 54.97,
+    "lon": 49.05
+  },
+  "geo": {
+    "capital_lonlat": [
+      49.05,
+      54.97
+    ],
+    "seed_lonlat": [
+      49.6,
+      55.1
+    ],
+    "voronoi_weight": 1.4
+  },
+  "owner": "fac_golden_horde",
+  "culture": "cul_volga_bulgar",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 84550,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 5700,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2850,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1900,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1900,
+  "description": "Bolgar, ancien pays des Bulgares de la Volga, musulmans et négociants en fourrures et cires : province de la Horde qui bat monnaie ; le Kazan futur n'est encore qu'un bourg voisin.",
+  "sources": [
+    "Bolgar",
+    "Volga Bulgarie"
+  ]
+}

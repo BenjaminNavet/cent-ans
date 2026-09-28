@@ -1,0 +1,51 @@
+{
+  "id": "chr_ivan_alexandrovitch",
+  "name": {
+    "display": "Ivan Alexandrovitch de Smolensk",
+    "local": "Иван Александрович",
+    "local_language": "vieux russe"
+  },
+  "sex": "male",
+  "house": "Smolensk",
+  "faction": "fac_smolensk",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Naissance approximative."
+  },
+  "death": {
+    "value": "1359"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Smolensk",
+      "from": {
+        "value": "1313"
+      },
+      "note": "Fils d'Alexandre Glebovitch, prince jusqu'en 1359."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_diplomat"
+  ],
+  "piety": 60,
+  "family": {
+    "siblings": [
+      "chr_dmitri_alexandrovitch"
+    ]
+  },
+  "starting_location": "prov_smolensk",
+  "status": "at_court",
+  "description": "Prince de Smolensk depuis la mort de son père en 1313 ; il marie une fille au fils de Karijotas et s'est allié aux princes de Souzdal contre Moscou. Il meurt en 1359.",
+  "sources": [
+    "Ivan Alexandrovitch de Smolensk"
+  ]
+}

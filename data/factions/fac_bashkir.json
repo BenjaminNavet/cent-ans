@@ -1,0 +1,51 @@
+{
+  "id": "fac_bashkir",
+  "name": {
+    "display": "Tribus bachkires",
+    "local": "Башкорт",
+    "local_language": "bachkir"
+  },
+  "short_name": "Bachkirs",
+  "adjective": "bachkir",
+  "government": "lordship",
+  "playable": true,
+  "capital": "prov_bachkirie",
+  "capital_city": "Oufa (camp d'été)",
+  "religion": "rel_islam",
+  "culture": "cul_bashkir",
+  "succession_law": "elective",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_bashkir",
+  "heraldry": {
+    "blazon": "De sinople à la lune d'argent.",
+    "description": "Blason de convention (vert et argent) pour les Bachkirs.",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Pas d'héraldique attestée."
+  },
+  "titles": [
+    "Bek des tribus bachkires"
+  ],
+  "treasury": 2500,
+  "prestige": 15,
+  "starting_technologies": [
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 50,
+    "diplomacy": 45,
+    "trade": 30,
+    "piety": 55
+  },
+  "description": "Fédération de tribus nomades et éleveuses de l'Oural méridional, vassale de la Horde d'Or ; l'islamisation est en cours. Aucune ville ; les chefs de 1337 ne sont pas connus.",
+  "sources": [
+    "Bachkirs"
+  ]
+}

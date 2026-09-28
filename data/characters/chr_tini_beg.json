@@ -1,0 +1,48 @@
+{
+  "id": "chr_tini_beg",
+  "name": {
+    "display": "Tini Beg",
+    "local": "Тини бек",
+    "local_language": "kiptchak"
+  },
+  "sex": "male",
+  "house": "Djötchides",
+  "faction": "fac_golden_horde",
+  "role": "heir",
+  "birth": {
+    "value": "1315",
+    "uncertain": true,
+    "note": "Date de naissance approximative."
+  },
+  "death": {
+    "value": "1342"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Khan de la Horde d'Or",
+      "from": {
+        "value": "1341"
+      },
+      "note": "Succède à son père en 1341 ; assassiné par Djanibeg en 1342."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_impulsive"
+  ],
+  "piety": 50,
+  "family": {
+    "father": "chr_ozbeg"
+  },
+  "starting_location": "prov_saray",
+  "status": "at_court",
+  "description": "Fils aîné d'Özbeg et de Taïdoula ; il sera khan de 1341 à 1342, avant que son frère Djanibeg le fasse tuer.",
+  "sources": [
+    "Özbeg Khan"
+  ]
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_koporie",
+    "province": "prov_ingria",
+    "kind": "city",
+    "name": {
+      "display": "Koporié",
+      "local": "Копорье",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      29.083,
+      59.717
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse de pierre novgorodienne de la côte, bâtie au XIIIe siècle.",
+    "sources": [
+      "Koporié"
+    ]
+  },
+  {
+    "id": "set_orechek",
+    "province": "prov_ingria",
+    "kind": "castle",
+    "name": {
+      "display": "Orechek",
+      "local": "Орешек",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      31.03,
+      59.955
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse fondée en 1323 par le prince Iouri de Moscou sur l'île de la source de la Neva (traité d'Orekhovets, 1323).",
+    "sources": [
+      "Chlisselbourg"
+    ]
+  },
+  {
+    "id": "set_iam",
+    "province": "prov_ingria",
+    "kind": "village",
+    "name": {
+      "display": "Iam",
+      "local": "Ямь",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      28.61,
+      59.37
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg de la Louga, sur la route de Novgorod aux Livoniens (site du futur Iamgorod).",
+    "sources": [
+      "Kingissepp"
+    ]
+  }
+]
