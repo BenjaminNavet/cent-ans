@@ -15,7 +15,9 @@
   "de_jure_liege": "tit_empire",
   "de_jure_provinces": [
     "prov_bohemia",
-    "prov_luxembourg"
+    "prov_luxembourg",
+    "prov_moravia",
+    "prov_wroclaw"
   ],
   "holder_1337": {
     "faction": "fac_bohemia",

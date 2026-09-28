@@ -1,0 +1,46 @@
+{
+  "id": "chr_boleslas_iii_de_legnica",
+  "name": {
+    "display": "Boleslas III de Legnica",
+    "local": "Bolesław III Rozrzutny",
+    "local_language": "polonais"
+  },
+  "epithet": "le Prodigue",
+  "sex": "male",
+  "house": "Piast de Legnica",
+  "faction": "fac_legnica",
+  "role": "ruler",
+  "birth": {
+    "value": "1291-09-23"
+  },
+  "death": {
+    "value": "1352-04-21"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Legnica et de Brzeg",
+      "from": {
+        "value": "1296"
+      },
+      "note": "Vassal du roi de Bohême depuis le 9 mai 1329."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 3,
+    "court": 6
+  },
+  "traits": [
+    "trait_generous",
+    "trait_spendthrift",
+    "trait_cultured"
+  ],
+  "piety": 50,
+  "starting_location": "prov_legnica",
+  "status": "at_court",
+  "description": "Duc de Legnica et de Brzeg, épouse en secondes noces Katarzyna Šubić de Croatie ; grand seigneur de mœurs fastueuses, endetté.",
+  "sources": [
+    "Boleslas III le Prodigue"
+  ]
+}

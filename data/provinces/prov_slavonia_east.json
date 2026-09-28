@@ -1,0 +1,92 @@
+{
+  "id": "prov_slavonia_east",
+  "name": {
+    "display": "Slavonie orientale",
+    "local": "Slavonija",
+    "local_language": "croate"
+  },
+  "region": "croatie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Save",
+    "Drave",
+    "Danube"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Požega",
+      "local": "Pozsega",
+      "local_language": "hongrois"
+    },
+    "lat": 45.3403,
+    "lon": 17.6853
+  },
+  "geo": {
+    "capital_lonlat": [
+      17.6853,
+      45.3403
+    ],
+    "seed_lonlat": [
+      18.0,
+      45.5
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_slavonia",
+  "culture": "cul_croatian",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Plaine de Slavonie, comitats de Požega et de Valpó.",
+    "classes": {
+      "peasants": {
+        "count": 110000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3850,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2420,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3300,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "Slavonie orientale entre Drave et Save : Požega, chef-lieu de comitat, l'évêché bosniaque de Đakovo et les bourgs de la Drave.",
+  "sources": [
+    "Požega",
+    "Slavonie",
+    "Đakovo"
+  ]
+}

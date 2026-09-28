@@ -1,0 +1,55 @@
+{
+  "id": "chr_charles_i_robert_de_hongrie",
+  "name": {
+    "display": "Charles Ier Robert de Hongrie",
+    "local": "I. Károly",
+    "local_language": "hongrois"
+  },
+  "epithet": "Charles Robert",
+  "sex": "male",
+  "house": "Anjou-Hongrie",
+  "faction": "fac_hungary",
+  "role": "ruler",
+  "birth": {
+    "value": "1288-11-27"
+  },
+  "death": {
+    "value": "1342-07-16",
+    "place": "Visegrád"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Hongrie",
+      "from": {
+        "value": "1308-11-27"
+      },
+      "note": "Premier couronnement à Buda en 1308, troisième couronnement à Székesfehérvár en 1310."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 8,
+    "court": 7
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_resolute",
+    "trait_ambitious"
+  ],
+  "piety": 55,
+  "family": {
+    "spouses": [
+      "chr_elisabeth_de_pologne"
+    ],
+    "children": [
+      "chr_louis_ier_de_hongrie"
+    ]
+  },
+  "starting_location": "prov_hungary_central",
+  "status": "at_court",
+  "description": "Petit-fils de Charles II de Naples, roi depuis 1308 ; vainqueur des oligarques, réformateur de la monnaie (florin d'or de 1325) et de l'armée, vaincu à Posada par Basarab (1330) ; époux d'Élisabeth de Pologne, sœur de Casimir III.",
+  "sources": [
+    "Charles Ier de Hongrie"
+  ]
+}

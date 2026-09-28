@@ -1,0 +1,51 @@
+{
+  "id": "tit_swidnica",
+  "rank": "kingdom",
+  "name": {
+    "display": "Duché de Świdnica-Jawor",
+    "local": "Herzogtum Schweidnitz-Jauer",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "Parti : au 1 d'argent à la demi-aigle de gueules ; au 2 d'or à la demi-aigle de sable.",
+    "description": "Aigle silésienne partie de gueules et de sable.",
+    "primary_color": "#B22222",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Croissant d'argent omis."
+  },
+  "de_jure_provinces": [
+    "prov_swidnica"
+  ],
+  "holder_1337": {
+    "faction": "fac_swidnica",
+    "sources": [
+      "Bolko II de Świdnica",
+      "Duché de Świdnica"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_swidnica_hold",
+      "title": "Garder Świdnica",
+      "description": "Bolko II doit conserver l'héritage de ses pères.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_swidnica"
+      }
+    },
+    {
+      "id": "obj_swidnica_free",
+      "title": "Rester indépendant",
+      "description": "Ne jamais rendre hommage à la Bohême.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Duché piast de Świdnica-Jawor, indépendant de la Bohême jusqu'en 1368 ; rang « royaume » approximé pour marquer la souveraineté.",
+  "sources": [
+    "Bolko II de Świdnica",
+    "Duché de Świdnica"
+  ]
+}

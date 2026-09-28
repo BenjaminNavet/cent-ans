@@ -1,0 +1,54 @@
+{
+  "id": "chr_basarab_ier",
+  "name": {
+    "display": "Basarab Ier de Valachie",
+    "local": "Basarab I",
+    "local_language": "roumain"
+  },
+  "epithet": "le Fondateur",
+  "sex": "male",
+  "house": "Basarab",
+  "faction": "fac_wallachia",
+  "role": "ruler",
+  "birth": {
+    "value": "1270",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1352",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Voïvode de Valachie",
+      "from": {
+        "value": "1310",
+        "uncertain": true
+      },
+      "note": "Prince de Valachie (v. 1310-1352)."
+    }
+  ],
+  "skills": {
+    "command": 8,
+    "governance": 6,
+    "court": 4
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_veteran",
+    "trait_resolute"
+  ],
+  "piety": 50,
+  "family": {
+    "children": [
+      "chr_nicolae_alexandru"
+    ]
+  },
+  "starting_location": "prov_muntenia",
+  "status": "at_court",
+  "description": "Fondateur de la principauté de Valachie, vainqueur de Charles Robert à Posada en 1330 ; dates de naissance et de mort approximatives.",
+  "sources": [
+    "Basarab Ier de Valachie"
+  ]
+}

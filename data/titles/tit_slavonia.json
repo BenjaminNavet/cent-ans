@@ -1,0 +1,61 @@
+{
+  "id": "tit_slavonia",
+  "rank": "duchy",
+  "name": {
+    "display": "Banat de Slavonie et de Croatie",
+    "local": "Slavonska banovina",
+    "local_language": "croate"
+  },
+  "heraldry": {
+    "blazon": "D'azur à la fasce d'argent, accompagnée en chef d'une étoile d'or.",
+    "description": "Champ d'azur à la rivière (fasce) d'argent et à l'étoile d'or, armes de la Slavonie.",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Martre passante omise."
+  },
+  "de_jure_liege": "tit_hungary",
+  "de_jure_provinces": [
+    "prov_slavonia_west",
+    "prov_slavonia_east",
+    "prov_croatia"
+  ],
+  "holder_1337": {
+    "faction": "fac_slavonia",
+    "sources": [
+      "Mikcs Ban",
+      "Ban de Slavonie",
+      "Royaume de Croatie"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_slavonia_hold",
+      "title": "Tenir le banat",
+      "description": "Conserver la Slavonie.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_slavonia"
+      }
+    },
+    {
+      "id": "obj_slavonia_croatia",
+      "title": "Rétablir l'ordre en Croatie",
+      "description": "Tenir la Croatie intérieure.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_croatia",
+          "prov_slavonia_west",
+          "prov_slavonia_east"
+        ]
+      }
+    }
+  ],
+  "description": "Banat de Slavonie et de Croatie, grand office du royaume de Hongrie.",
+  "sources": [
+    "Mikcs Ban",
+    "Ban de Slavonie",
+    "Royaume de Croatie"
+  ]
+}

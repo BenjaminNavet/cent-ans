@@ -1,0 +1,94 @@
+{
+  "id": "prov_kyiv",
+  "name": {
+    "display": "Kiev",
+    "local": "Kyiv",
+    "local_language": "ruthène"
+  },
+  "region": "rus_sud",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Dniepr",
+    "Desna",
+    "Teteriv"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kiev",
+      "local": "Kyiv",
+      "local_language": "ruthène"
+    },
+    "lat": 50.4501,
+    "lon": 30.5234
+  },
+  "geo": {
+    "capital_lonlat": [
+      30.5234,
+      50.4501
+    ],
+    "seed_lonlat": [
+      30.0,
+      50.4
+    ],
+    "voronoi_weight": 1.6
+  },
+  "owner": "fac_kiev",
+  "culture": "cul_ruthenian",
+  "religion": "rel_orthodox",
+  "population": {
+    "uncertain": true,
+    "note": "Ancienne capitale de la Rus', très diminuée depuis le sac mongol de 1240.",
+    "classes": {
+      "peasants": {
+        "count": 110000,
+        "unrest": 15,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3300,
+        "unrest": 15,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2420,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2200,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_castle",
+    "bld_market",
+    "bld_cathedral",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "L'ancienne capitale de la Rus' de Kiev, ruinée par les Mongols en 1240 mais encore siège du métropolite ; le prince Fiodor, tributaire de la Horde d'Or, y règne sous l'influence lituanienne de Gediminas (incertain).",
+  "sources": [
+    "Kiev",
+    "Principauté de Kiev",
+    "Fiodor de Kiev"
+  ]
+}

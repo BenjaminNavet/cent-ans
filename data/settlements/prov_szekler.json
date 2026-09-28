@@ -1,0 +1,82 @@
+[
+  {
+    "id": "set_szekelyudvarhely",
+    "province": "prov_szekler",
+    "kind": "city",
+    "name": {
+      "display": "Székelyudvarhely",
+      "local": "Székelyudvarhely",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      25.2996,
+      46.3076
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Chef-lieu du siège sicule d'Udvarhely, place forte de la marche orientale.",
+    "sources": [
+      "Székelyudvarhely"
+    ]
+  },
+  {
+    "id": "set_brasso",
+    "province": "prov_szekler",
+    "kind": "town",
+    "name": {
+      "display": "Brassó",
+      "local": "Brassó",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      25.5887,
+      45.6427
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_fair"
+    ],
+    "port": false,
+    "description": "Ville saxonne du Burzenland au pied des cols de Valachie, principal comptoir du commerce avec le Bas-Danube.",
+    "sources": [
+      "Brassó"
+    ]
+  },
+  {
+    "id": "set_segesvar",
+    "province": "prov_szekler",
+    "kind": "town",
+    "name": {
+      "display": "Segesvár",
+      "local": "Segesvár",
+      "local_language": "hongrois"
+    },
+    "lonlat": [
+      24.7925,
+      46.2197
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville-forteresse saxonne sur la Târnava Mare.",
+    "sources": [
+      "Segesvár"
+    ]
+  }
+]

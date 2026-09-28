@@ -1,0 +1,50 @@
+{
+  "id": "chr_trojden_i_de_mazovie",
+  "name": {
+    "display": "Trojden Ier de Mazovie",
+    "local": "Trojden I",
+    "local_language": "polonais"
+  },
+  "sex": "male",
+  "house": "Piast de Mazovie",
+  "faction": "fac_warsaw",
+  "role": "ruler",
+  "birth": {
+    "value": "1284",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1341-03-13"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Czersk",
+      "from": {
+        "value": "1310"
+      },
+      "note": "Duc de Czersk, puis de Varsovie et de Liw."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_stubborn"
+  ],
+  "piety": 50,
+  "family": {
+    "children": [
+      "chr_boleslas_iouri_ii"
+    ]
+  },
+  "starting_location": "prov_warsaw",
+  "status": "at_court",
+  "description": "Duc de Czersk et de Varsovie, époux de Maria de Galicie ; père du roi de Ruthénie ; tuteur de son neveu Boleslas III de Płock.",
+  "sources": [
+    "Trojden Ier de Mazovie"
+  ]
+}

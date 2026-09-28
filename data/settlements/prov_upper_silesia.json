@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_opole",
+    "province": "prov_upper_silesia",
+    "kind": "city",
+    "name": {
+      "display": "Opole",
+      "local": "Opole",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      17.9213,
+      50.6751
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence des ducs d'Opole sur l'Oder, avec sa collégiale et son château.",
+    "sources": [
+      "Opole"
+    ]
+  },
+  {
+    "id": "set_raciborz",
+    "province": "prov_upper_silesia",
+    "kind": "town",
+    "name": {
+      "display": "Racibórz",
+      "local": "Ratibor",
+      "local_language": "moyen haut-allemand"
+    },
+    "lonlat": [
+      18.2194,
+      50.0914
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Résidence ducale de l'Oder haut, à la porte de la Moravie.",
+    "sources": [
+      "Racibórz"
+    ]
+  },
+  {
+    "id": "set_cieszyn",
+    "province": "prov_upper_silesia",
+    "kind": "town",
+    "name": {
+      "display": "Cieszyn",
+      "local": "Cieszyn",
+      "local_language": "polonais"
+    },
+    "lonlat": [
+      18.632,
+      49.746
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale du duché piast de Cieszyn (Casimir Ier), vassal de la Bohême depuis 1327.",
+    "sources": [
+      "Cieszyn"
+    ]
+  }
+]

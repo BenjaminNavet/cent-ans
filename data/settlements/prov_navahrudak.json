@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_navahrudak",
+    "province": "prov_navahrudak",
+    "kind": "city",
+    "name": {
+      "display": "Navahrudak",
+      "local": "Novogorodok",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      25.8333,
+      53.6
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_market",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de Mindaugas, sur une colline dominant la région ; sanctuaire orthodoxe.",
+    "sources": [
+      "Navahrudak"
+    ]
+  },
+  {
+    "id": "set_lida",
+    "province": "prov_navahrudak",
+    "kind": "castle",
+    "name": {
+      "display": "Lida",
+      "local": "Lida",
+      "local_language": "lituanien"
+    },
+    "lonlat": [
+      25.2997,
+      53.8833
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de brique fondé par Gediminas vers 1323 contre les croisés.",
+    "sources": [
+      "Lida"
+    ]
+  },
+  {
+    "id": "set_slonim",
+    "province": "prov_navahrudak",
+    "kind": "town",
+    "name": {
+      "display": "Slonim",
+      "local": "Slonim",
+      "local_language": "ruthène"
+    },
+    "lonlat": [
+      25.3167,
+      53.0833
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de l'Ouest de la Ruthénie noire, sur la Schara.",
+    "sources": [
+      "Slonim"
+    ]
+  }
+]

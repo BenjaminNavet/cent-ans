@@ -1,0 +1,40 @@
+{
+  "id": "chr_kestutis",
+  "name": {
+    "display": "Kęstutis",
+    "local": "Kęstutis",
+    "local_language": "lituanien"
+  },
+  "sex": "male",
+  "house": "Gediminides",
+  "faction": "fac_lithuania",
+  "role": "commander",
+  "birth": {
+    "value": "1297",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1382-08-15"
+  },
+  "historical": true,
+  "skills": {
+    "command": 8,
+    "governance": 5,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_resolute",
+    "trait_chivalrous"
+  ],
+  "piety": 35,
+  "family": {
+    "father": "chr_gediminas"
+  },
+  "starting_location": "prov_kaunas",
+  "status": "on_campaign",
+  "description": "Fils de Gediminas, tenu à Trakai et en Samogitie ; adversaire acharné de l'Ordre teutonique, honoré même par ses ennemis pour sa parole.",
+  "sources": [
+    "Kęstutis"
+  ]
+}

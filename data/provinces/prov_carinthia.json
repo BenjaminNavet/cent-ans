@@ -1,0 +1,92 @@
+{
+  "id": "prov_carinthia",
+  "name": {
+    "display": "Carinthie",
+    "local": "Kärnten",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_est",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Drave",
+    "Gurk",
+    "Gail"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Sankt Veit an der Glan",
+      "local": "Sankt Veit",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 46.7667,
+    "lon": 14.3611
+  },
+  "geo": {
+    "capital_lonlat": [
+      14.3611,
+      46.7667
+    ],
+    "seed_lonlat": [
+      14.1,
+      46.75
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_austria",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Carinthie donnée aux Habsbourg par Louis de Bavière en 1335.",
+    "classes": {
+      "peasants": {
+        "count": 85000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1870,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1700,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Duché de Carinthie, passé aux Habsbourg en 1335 quand l'empereur Louis IV l'a donné à Albert II et Otton après l'extinction des Goritz-Tyrol ; Sankt Veit est le siège ducal.",
+  "sources": [
+    "Duché de Carinthie",
+    "Sankt Veit an der Glan"
+  ]
+}
