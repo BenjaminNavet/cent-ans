@@ -113,11 +113,12 @@ func _check_reachable(button: Button, label: String) -> void:
 	while node != null:
 		if node is ScrollContainer:
 			(node as ScrollContainer).ensure_control_visible(button)
+			await _wait(2)  # défilement intérieur appliqué avant le suivant
 		node = node.get_parent()
 	await _wait(4)
 	var rect := button.get_global_rect()
 	var view := root.get_visible_rect()
-	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL).grow(0.5)
+	var side := UiZones.rect(UiZones.Zone.SIDE_PANEL).grow(1.0)  # défilement en pixels entiers
 	_check(view.grow(0.5).encloses(rect), "%s: « %s » %s outside the view %s" % [label, button.text, rect, view.size])
 	_check(side.encloses(rect), "%s: « %s » %s outside the side panel zone %s" % [label, button.text, rect, side])
 	var point := root.get_final_transform() * rect.get_center()
