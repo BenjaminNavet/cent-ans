@@ -75,8 +75,35 @@ tests, comme pour l'aîné Valois de F4a.
 
 ## État
 
-En cours d'écriture des fichiers JSON (titres, factions, provinces, personnages, colonies).
+Toutes les données écrites et validées par schéma : 11 provinces, 11 titres (dont
+`tit_ireland`, `tit_wales` sans faction), 9 factions, 12 personnages (+ mise à jour de
+`chr_henry_of_grosmont`), 11 fichiers de colonies (33 colonies neuves + 7 déplacées depuis les
+provinces mères). Doublons d'id trouvés et corrigés dans les données existantes (colonies
+`set_trim`, `set_galway`, `set_armagh`, `set_cork`, `set_kinsale`, `set_preston`,
+`set_clitheroe` dupliquaient des colonies déjà présentes dans les provinces mères — déplacées,
+pas dupliquées). `prov_lancashire` recentrée sur Cheshire seul (titre renommé `tit_chester`,
+ex-`tit_lancashire`, dont la note de titulaire 1337 était fausse — voir le bogue F0 corrigé
+plus haut) ; `prov_munster` recentrée sur son domaine royal restant (Waterford/Limerick),
+capitale déplacée de Cork (désormais dans `prov_desmond`) à Waterford.
+
+Héraldique : générateur de blasons (`tools/cent_ans_tools/heraldry.py`) étendu avec le sautoir
+(diagonal), qui manquait, pour les FitzGerald de Kildare et Desmond. Plusieurs blasons
+authentiques ne pouvaient pas être rendus distinctement par le générateur (main de l'Ulster,
+nef des Hébrides non rendue dans le rendu « champ seul » de `data/heraldry/houses.json`,
+léopards de Thomond identiques à ceux d'Angleterre) : couleurs ou substitutions documentées au
+cas par cas dans `data/heraldry/houses.json` (champ `description`), `blazon` du titre/de la
+faction conservé fidèle à la source quand c'est le rendu seul qui posait problème (Ó Néill).
+
+`data/ui/front_end.json` : 9 cartes de présentation. `data/portraits/archetypes.json` : Kildare/
+Ormond/Desmond/Lancastre ajoutés au bucket « england » ; nouveau bucket « ireland » (Tyrone,
+Thomond, Connacht, Leinster, Îles).
+
+Tests : `uv run --project tools pytest -q` — tous verts sauf `test_heraldry.py::
+test_shields_are_distinct_and_masked`, qui échoue sur une collision **préexistante**
+`fac_navarre`/`fac_papacy` (dernière modification de ces deux fichiers : commit `bdd997c1`
+« FE0 », hors de ma zone Ibérie/Papauté, non touché).
 
 ## Prochaine étape
 
-Écrire tous les fichiers, valider schémas, régénérer le pipeline géo, lancer les tests.
+Régénérer le pipeline géographique (`cent-ans geo provinces`, `settlements`, `hamlets`,
+`horizon`, `navgrid`), relancer `cargo test`, écrire le rapport final.
