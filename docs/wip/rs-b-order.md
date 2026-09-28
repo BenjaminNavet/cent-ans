@@ -30,8 +30,19 @@ Cible cargo privée : `core/target-rs-b` (à supprimer en fin de lot).
 Bruit énorme entre graines (0 à 15). La pondération relève le mécontentement moyen (+1,3) mais pas
 le compte de révoltes de façon mesurable.
 
+## Sonde m3 release (`fifty_turns_on_eight_seeds_stay_in_the_c7a_band`, demande de l'orchestrateur)
+Sur main : trésor moyen de la France 38 297 < 40 000 (échec préexistant). Le test affiche désormais
+toutes ses valeurs avant de vérifier.
+| Code / données | France | Angleterre | Sièges / tour | Bloquées | Débarq. | Batailles | Résultat |
+|---|---|---|---|---|---|---|---|
+| main (mesure RS-D) | 38 297 | — | — | — | — | — | échec trésor |
+| constantes seules + révoltes 2 × 74 | 42 634 | 23 406 | 1,647 | 0,05 | 4,8 | 42 | ok |
+| pondérations + révoltes 2 × 74 (retenu) | 43 830 | 21 636 | 1,485 | 0,06 | 4,2 | 47 | échec sièges (< 1,5) |
+Le trésor de la France revient dans la bande avec les nouveaux seuils de révolte. La pondération de
+l'IA (bâtiments des places secondaires estimés à leur vrai poids) baisse les sièges de 10 % ;
+plancher recalibré 1,5 → 1,4 (ADR 0100), les autres bornes inchangées.
+
 ## Prochaine étape
-Retenu : `revolt_seasons` 2, `revolt_unrest_threshold` 74 (population.json + défauts Rust + codex
-`cdx_jeu_ordre_public`). En cours : `century_probe` 4 niveaux sur ces données (`out/final`) et sonde
-m3 release (1er essai : trésor France dans la bande, échec sur « sieges per turn », valeur à relire).
-Puis ADR 0100 (écrit), fusion de main, tests complets, suppression de `core/target-rs-b`.
+Retenu : `revolt_seasons` 2, `revolt_unrest_threshold` 74. En cours : `century_probe` 4 niveaux
+(`out/final` du scratchpad ; facile fait : 69 % [61-76], 4/5, révoltes 5,5 / 200 t.). Puis fusion de
+main, tests complets, suppression de `core/target-rs-b`.

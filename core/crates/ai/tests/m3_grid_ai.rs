@@ -374,7 +374,9 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
         (5_000.0..=40_000.0).contains(&england),
         "England's treasury {england}"
     );
-    assert!((1.5..=8.0).contains(&sieges), "sieges per turn {sieges}");
+    // RS-B (ADR 0100): 1.5 until the AI weighed its places' buildings by
+    // `province_effect_percent`; sieges went 1.65 -> 1.49 per turn on these seeds.
+    assert!((1.4..=8.0).contains(&sieges), "sieges per turn {sieges}");
     assert!(stuck <= 1.0, "stuck armies per turn {stuck}");
     assert!(
         landings >= 1.0,
