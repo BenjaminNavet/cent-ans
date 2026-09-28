@@ -8,7 +8,7 @@ n'ont pas d'équivalent dans les énumérations actuelles.
 - Terrains `steppe` (plaine sèche : mouvement de plaine, ravitaillement réduit, avantage cavalerie)
   et `desert` (attrition, ravitaillement très réduit) ; climats `arid` et `steppe`. Les champs de
   bataille réutilisent le sol de plaine avec une teinte propre tant qu'aucun décor dédié n'existe.
-- Religions : `rel_orthodox` (Église orthodoxe, `church`), `rel_armenian` (Église apostolique,
+- Religions : `rel_orthodox` (Église orthodoxe, `other_faith` : dans le modèle `church` signifie catholique ; la proximité passe par le champ `kindred` → `rel_catholic`, relation « schismatiques »), `rel_armenian` (Église apostolique,
   `other_faith`), `rel_pagan` (Lituanie, Finnois de la Volga, `other_faith`) ; `rel_islam` désigne
   l'islam sunnite en général.
 - Zones maritimes ajoutées (identifiants libres) : ionienne, Égée, Levant, mer Noire, Caspienne
