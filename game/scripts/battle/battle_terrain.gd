@@ -65,6 +65,49 @@ const BIOMES := {
 	"marsh": {"relief": 0.2, "near_woods": 0.42, "far_woods": 0.38, "rocks": 0.2, "snow_line": 10000.0, "ridges": 0.0, "rolls": 1.0},
 }
 
+## GA2 : identité des couches du sol (Poly Haven, ordre d'empilement, taille de répétition),
+## jamais codée en dur ici (`data/fx/battle_ground_layers.json`, schéma
+## `fx_battle_ground_layers.schema.json`) ; même repli que `BattleGore.settings()`.
+const GROUND_LAYERS_FILE := "fx/battle_ground_layers.json"
+## Taille fixe du tableau `layer_tile_size` du shader (couches réelles ≤ cette taille).
+const MAX_GROUND_LAYERS := 16
+static var _ground_layers: Array = []
+static var _ground_layers_loaded: bool = false
+static var _ground_role_index: Dictionary = {}
+
+
+## GA2 : couches du sol depuis les données (dossier de données du jeu, puis `data/` du dépôt).
+static func ground_layers() -> Array:
+	if _ground_layers_loaded:
+		return _ground_layers
+	_ground_layers_loaded = true
+	var candidates: Array[String] = []
+	var tree := Engine.get_main_loop() as SceneTree
+	var paths: Node = tree.root.get_node_or_null("/root/MapPaths") if tree != null else null
+	if paths != null:
+		candidates.append(str(paths.get("data_dir")))
+	candidates.append(ProjectSettings.globalize_path("res://").path_join("../data").simplify_path())
+	for dir in candidates:
+		var path := dir.path_join(GROUND_LAYERS_FILE)
+		if FileAccess.file_exists(path):
+			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+			if parsed is Dictionary and (parsed as Dictionary).get("layers") is Array:
+				_ground_layers = (parsed as Dictionary)["layers"]
+				for i in _ground_layers.size():
+					var role := str((_ground_layers[i] as Dictionary).get("role", ""))
+					if role != "":
+						_ground_role_index[role] = i
+				return _ground_layers
+	push_warning("BattleTerrain: %s introuvable, sol replié sur les couches historiques" % GROUND_LAYERS_FILE)
+	return _ground_layers
+
+
+## GA2 : index (dans le `Texture2DArray`) de la couche portant ce rôle, -1 si absente des données.
+static func ground_role_index(role: String) -> int:
+	ground_layers()
+	return int(_ground_role_index.get(role, -1))
+
+
 const GROUND_SHADER := preload("res://shaders/battle_ground.gdshader")
 const WATER_SHADER := preload("res://shaders/battle_water.gdshader")
 const ALBEDO_ARRAY := preload("res://assets/textures/battle/ground_albedo_array.jpg")
@@ -128,6 +171,10 @@ var decor_render := true
 ## volume, feuillus ramifiés par essence avec imposteurs au loin, détail du sol de près.
 ## `--no-da6` rend l'ancienne végétation (banc A/B, captures « avant »).
 var da6 := true
+## GA2 : couches supplémentaires du sol (prairie fleurie, herbe piétinée, chaume, labour frais)
+## et macro-variation de teinte/luminance (50–200 m). `--no-ga2` coupe la macro-variation
+## (comparaisons A/B ; les couches restent en place, sans coût de rendu notable si non utilisées).
+var ga2 := true
 var tree_view: BattleTrees = null
 ## DA6 : banc A/B dans un seul processus (`--bench-ab=da6,no-da6`) : les deux végétations sont
 ## construites, `set_da6_view` bascule de l'une à l'autre.
@@ -207,6 +254,7 @@ func build(p_terrain: Dictionary, weather: String) -> void:
 	woodland = float(terrain.get("woodland", 0.5))
 	site_render = not OS.get_cmdline_user_args().has("--no-site")
 	da6 = not OS.get_cmdline_user_args().has("--no-da6")
+	ga2 = not OS.get_cmdline_user_args().has("--no-ga2")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--bench-ab=") and arg.contains("da6"):
 			da6_ab = true
@@ -1004,6 +1052,21 @@ func _build_material(weather: String) -> void:
 	ground_material.set_shader_parameter("near_detail_normal", NEAR_DETAIL_NORMAL)
 	ground_material.set_shader_parameter("near_detail_on", 1.0 if da6 else 0.0)
 	ground_material.set_shader_parameter("decor_saturation", decor_saturation())
+	# GA2 : identité des couches (nombre, taille de répétition) et index des rôles ajoutés
+	# (prairie fleurie, herbe piétinée, chaume, labour frais), lus depuis les données
+	# (`data/fx/battle_ground_layers.json`), jamais codés en dur dans le shader.
+	var ground_layer_list := ground_layers()
+	ground_material.set_shader_parameter("layer_count", ground_layer_list.size())
+	var tile_sizes := PackedFloat32Array()
+	tile_sizes.resize(MAX_GROUND_LAYERS)
+	for i in mini(ground_layer_list.size(), MAX_GROUND_LAYERS):
+		tile_sizes[i] = float((ground_layer_list[i] as Dictionary).get("tile_size_m", 6.0))
+	ground_material.set_shader_parameter("layer_tile_size", tile_sizes)
+	ground_material.set_shader_parameter("idx_flowering_meadow", ground_role_index("flowering_meadow"))
+	ground_material.set_shader_parameter("idx_trodden_grass", ground_role_index("trodden_grass"))
+	ground_material.set_shader_parameter("idx_stubble", ground_role_index("stubble"))
+	ground_material.set_shader_parameter("idx_fresh_plough", ground_role_index("fresh_plough"))
+	ground_material.set_shader_parameter("ga2_on", 1.0 if ga2 else 0.0)
 	if decor_on:
 		ground_material.set_shader_parameter("decor_fields", decor_fields)
 		ground_material.set_shader_parameter("decor_on", 1.0)

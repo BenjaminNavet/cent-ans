@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "fx_battle_ground_layers.schema.json",
   "title": "Couches du sol de bataille (lot GA2)",
-  "description": "Identité et paramètres des couches du `Texture2DArray` du sol de bataille (`battle_ground.gdshader`, `game/assets/textures/battle/ground_albedo_array.jpg` / `ground_normal_array.jpg`). L'ordre du tableau `layers` est l'ordre d'empilement des couches dans le tableau de textures (index = position). `role` identifie les couches que le shader traite spécifiquement (occupation du sol) ; absent pour une couche purement esthétique.",
+  "description": "Identité et paramètres des couches du `Texture2DArray` du sol de bataille (`battle_ground.gdshader`, `game/assets/textures/battle/ground_albedo_array.jpg` / `ground_normal_array.jpg`). L'ordre du tableau `layers` est l'ordre d'empilement des couches dans le tableau de textures (index = position). `role` identifie les couches que le shader traite spécifiquement (occupation du sol) ; absent pour une couche purement esthétique. `maxItems` = `MAX_GROUND_LAYERS` (taille fixe du tableau `layer_tile_size[]` du shader, `battle_ground.gdshader` et `BattleTerrain.MAX_GROUND_LAYERS`).",
   "type": "object",
   "required": ["layers"],
   "additionalProperties": false,
@@ -10,6 +10,7 @@
     "layers": {
       "type": "array",
       "minItems": 1,
+      "maxItems": 16,
       "items": {
         "type": "object",
         "required": ["id", "poly_haven_id", "tile_size_m"],
