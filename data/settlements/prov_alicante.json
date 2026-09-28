@@ -2,7 +2,7 @@
   {
     "id": "set_alicante",
     "province": "prov_alicante",
-    "kind": "town",
+    "kind": "city",
     "name": {
       "display": "Alicante",
       "local": "Alacant",

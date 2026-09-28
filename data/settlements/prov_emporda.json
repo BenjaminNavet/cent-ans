@@ -2,7 +2,7 @@
   {
     "id": "set_castello_dempuries",
     "province": "prov_emporda",
-    "kind": "castle",
+    "kind": "city",
     "name": {
       "display": "Castelló d'Empúries",
       "local": "Castelló d'Empúries",

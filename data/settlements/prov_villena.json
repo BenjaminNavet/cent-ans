@@ -2,7 +2,7 @@
   {
     "id": "set_villena",
     "province": "prov_villena",
-    "kind": "castle",
+    "kind": "city",
     "name": {
       "display": "Villena",
       "local": "Villena",

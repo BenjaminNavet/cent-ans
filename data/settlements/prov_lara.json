@@ -2,7 +2,7 @@
   {
     "id": "set_lara",
     "province": "prov_lara",
-    "kind": "castle",
+    "kind": "city",
     "name": {
       "display": "Lara de los Infantes",
       "local": "Lara de los Infantes",
