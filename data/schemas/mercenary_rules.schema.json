@@ -35,13 +35,13 @@
       "type": "object",
       "description": "L'IA engage quand elle est riche et qu'une de ses armées est menacée.",
       "properties": {
-        "rich_income_seasons": { "type": "integer", "minimum": 0 },
+        "rich_income_percent": { "type": "integer", "minimum": 0 },
         "rich_min_treasury": { "type": "integer", "minimum": 0 },
         "threat_ratio_percent": { "type": "integer", "minimum": 0, "maximum": 1000 },
         "target_ratio_percent": { "type": "integer", "minimum": 0, "maximum": 1000 },
-        "keep_income_seasons": { "type": "integer", "minimum": 0 }
+        "keep_income_percent": { "type": "integer", "minimum": 0 }
       },
-      "required": ["rich_income_seasons", "rich_min_treasury", "threat_ratio_percent", "target_ratio_percent", "keep_income_seasons"],
+      "required": ["rich_income_percent", "rich_min_treasury", "threat_ratio_percent", "target_ratio_percent", "keep_income_percent"],
       "additionalProperties": false
     },
     "region_names": {

@@ -11,11 +11,11 @@
     "pillage_devastation": 8
   },
   "ai": {
-    "rich_income_seasons": 3,
+    "rich_income_percent": 150,
     "rich_min_treasury": 4000,
     "threat_ratio_percent": 80,
     "target_ratio_percent": 120,
-    "keep_income_seasons": 2
+    "keep_income_percent": 75
   },
   "region_names": {
     "angleterre_centre": "Midlands",
