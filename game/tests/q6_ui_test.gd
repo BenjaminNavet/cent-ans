@@ -5,7 +5,9 @@ extends SceneTree
 ##     « Retour » et « Commencer » restent entièrement dans la vue, onglet des cartes comme onglet
 ##     de la carte des factions ;
 ##  2. fenêtre de décision (`ChronicleWindow`) : le corps défilant a la hauteur de son contenu
-##     (il s'ouvrait vide, choix inaccessibles) et les choix sont cliquables à l'écran.
+##     (il s'ouvrait vide, choix inaccessibles) et les choix sont cliquables à l'écran ;
+##  3. barre du haut de la carte, fenêtre 1280×720 en taille d'interface 1,25 (vue 1137×640) :
+##     elle tient dans l'écran (palier compact), et reprend ses libellés longs à 1920×1080.
 ## Usage : godot --headless --path game --script res://tests/q6_ui_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -29,10 +31,15 @@ func _check(condition: bool, message: String) -> bool:
 
 
 func _run() -> void:
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	settings.call("use_test_file")
+	settings.call("set_value", "tutorial/enabled", false, false)
+	settings.call("set_value", "game/autosave_interval", 0, false)
 	var facade: Node = root.get_node("/root/SimFacade")
 	facade.set_data_dir(MAP_PATHS.default_data_dir())
 	await _test_faction_select_fits()
 	await _test_chronicle_body_visible()
+	await _test_top_bar_fits()
 
 
 func _test_faction_select_fits() -> void:
@@ -78,4 +85,33 @@ func _test_chronicle_body_visible() -> void:
 			var rect := button.get_global_rect()
 			_check(view.encloses(rect) and scroll.get_global_rect().intersects(rect), "pass %d: « %s » %s not visible" % [pass_index, button.text, rect])
 	host.queue_free()
+	await process_frame
+
+
+func _test_top_bar_fits() -> void:
+	var settings: Node = root.get_node("/root/Settings")
+	root.size = Vector2i(1280, 720)
+	settings.call("set_value", "interface/ui_size", 1.25, false)
+	var facade: Node = root.get_node("/root/SimFacade")
+	facade.pending_faction = "fac_france"
+	facade.pending_seed = 1337
+	facade.pending_load_path = ""
+	var map: Node3D = (load("res://scenes/campaign_map.tscn") as PackedScene).instantiate()
+	root.add_child(map)
+	for _i in 10:
+		await process_frame
+	var top_bar := map.ui.get_node("TopBar") as Control
+	map.ui.fit_top_bar()
+	await process_frame
+	var view := root.get_visible_rect().size
+	var rect := top_bar.get_global_rect()
+	_check(rect.position.x >= -0.5 and rect.end.x <= view.x + 0.5, "top bar %s overflows the %s view" % [rect, view])
+	_check(not map.ui.treasury_label.text.begins_with("Trésor"), "narrow view: compact treasury label expected, got « %s »" % map.ui.treasury_label.text)
+	root.size = Vector2i(1920, 1080)
+	settings.call("set_value", "interface/ui_size", 1.0, false)
+	for _i in 4:
+		await process_frame
+	map.ui.fit_top_bar()
+	_check(map.ui.treasury_label.text.begins_with("Trésor"), "wide view: full treasury label expected, got « %s »" % map.ui.treasury_label.text)
+	map.queue_free()
 	await process_frame
