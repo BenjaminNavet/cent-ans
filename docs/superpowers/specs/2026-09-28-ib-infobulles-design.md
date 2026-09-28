@@ -129,7 +129,7 @@ Ctrl par les groupes. Verrouiller suffit à tout lire.
 
 ### 3.1 Touche
 
-Action **`tooltip_explore`**, par défaut **Alt** (Option sur macOS), remappable dans Réglages.
+Action **`tooltip_explore`**, **Alt** (Option sur macOS), listée dans la fiche des raccourcis (`shortcut_sheet.gd`).
 Alt seul est libre sur la carte et en bataille (seul usage : Alt+Maj+1…6 des formations, ignoré
 quand Maj est enfoncé). T garde son rôle actuel de bascule (compatibilité B1) ; l'aide en pied
 annonce Alt. Décision consignée dans l'ADR 0109.
@@ -204,8 +204,9 @@ IB1 et IB3 en parallèle (fichiers disjoints : `rich_tooltip.gd`/`tooltip_view.g
 Aucune règle de jeu nouvelle ; comparaison avec l'équipement (sans objet dans ce jeu) ;
 prise en charge de la manette ; refonte du contenu des fiches du Codex.
 
-## 7. Points à trancher par le joueur
+## 7. Décisions du joueur (28/09)
 
-1. Alt comme touche de chaîne (recommandé) ou T maintenu (l'arbre des techniques ne s'ouvrirait
-   alors qu'au relâchement d'un appui court) ?
-2. Détail complet réservé aux bulles verrouillées (recommandé) ou toujours affiché ?
+1. Touche de chaîne : **Alt**.
+2. Détail complet : **réservé aux bulles verrouillées**.
+
+Spec validée (« vas-y ») ; ADR 0109 écrit.

@@ -34,8 +34,8 @@ signal vertical_scale_changed(old_scale: float, new_scale: float)
 
 const CHUNKS := 16
 const TERRAIN_SHADER := preload("res://shaders/terrain.gdshader")
-## Couches de matériaux, dans l'ordre des Texture2DArray (voir game/assets/textures/terrain/README.md).
-const MATERIAL_LAYERS: Array[String] = ["grass", "farmland", "forest", "rock", "heath", "snow", "sand"]
+## Couches de matériaux, dans l'ordre des Texture2DArray : GA4, lues dans les données
+## (`CampaignTextures.layer_ids()`, `data/fx/campaign_terrain_textures.json`).
 const TEXTURE_DIR := "res://assets/textures/terrain/"
 
 ## Pas (en pixels) entre deux sommets pour le LOD proche / lointain.
@@ -124,8 +124,8 @@ var _border_texture: ImageTexture
 var _coast_texture: ImageTexture
 var _river_bed_texture: ImageTexture
 var _landuse_texture: ImageTexture
-var _albedo_array: Texture2DArray
-var _normal_array: Texture2DArray
+var _albedo_array: TextureLayered  # GA4 : CompressedTexture2DArray importé ou Texture2DArray (1k)
+var _normal_array: TextureLayered
 var _layer_means: PackedVector3Array = PackedVector3Array()
 ## Mipmap de niveau 2 de la heightmap R16 (blocs 4×4 moyennés) : hauteurs lissées du LOD
 ## lointain (pas de pics en dents de scie échantillonnés tous les `far_step` pixels).
@@ -1101,10 +1101,19 @@ static func _optional_texture(image: Image) -> ImageTexture:
 ## Moyenne linéaire de chaque albédo (dernier niveau de mipmap) : le shader s'en sert pour
 ## teinter les textures vers des couleurs réalistes réglables sans perdre leur détail.
 func _build_material_arrays() -> void:
+	# GA4 : tableaux 2k importés (compressés en VRAM), moyennes dans les données. `--no-ga4` ou
+	# tableaux absents : ancien chemin ci-dessous (JPEG 1k par couche, RGBA8 non compressé).
+	if CampaignTextures.enabled():
+		var ga4 := CampaignTextures.load_arrays()
+		if not ga4.is_empty():
+			_albedo_array = ga4["albedo"]
+			_normal_array = ga4["normal"]
+			_layer_means = ga4["means"]
+			return
 	var albedo_images: Array[Image] = []
 	var normal_images: Array[Image] = []
 	_layer_means = PackedVector3Array()
-	for layer in MATERIAL_LAYERS:
+	for layer in CampaignTextures.layer_ids():
 		var albedo := _load_layer_image(TEXTURE_DIR + layer + "_albedo.jpg")
 		var normal := _load_layer_image(TEXTURE_DIR + layer + "_normal_rough.jpg")
 		if albedo == null or normal == null:
@@ -1119,10 +1128,12 @@ func _build_material_arrays() -> void:
 		var data := albedo.get_data()
 		var mean := Color8(data[offset], data[offset + 1], data[offset + 2]).srgb_to_linear()
 		_layer_means.append(Vector3(mean.r, mean.g, mean.b))
-	_albedo_array = Texture2DArray.new()
-	_albedo_array.create_from_images(albedo_images)
-	_normal_array = Texture2DArray.new()
-	_normal_array.create_from_images(normal_images)
+	var albedo_array := Texture2DArray.new()
+	albedo_array.create_from_images(albedo_images)
+	_albedo_array = albedo_array
+	var normal_array := Texture2DArray.new()
+	normal_array.create_from_images(normal_images)
+	_normal_array = normal_array
 
 
 static func _load_layer_image(path: String) -> Image:
@@ -1204,6 +1215,7 @@ func _build_material() -> void:
 		material.set_shader_parameter("albedo_array", _albedo_array)
 		material.set_shader_parameter("normal_rough_array", _normal_array)
 		material.set_shader_parameter("layer_mean", _layer_means)
+	CampaignTextures.apply_terrain(material)  # GA4 : macro-variation, tuilage, mer peinte
 
 
 ## Maillage d'une tuile et grille de ses hauteurs : {"mesh": ArrayMesh, "grid": Dictionary}.

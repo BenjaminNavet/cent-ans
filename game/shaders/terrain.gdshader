@@ -104,6 +104,17 @@ uniform vec3 seabed_color = vec3(0.03, 0.07, 0.07);
 // Couleurs de water.gdshader (mer peinte là où le maillage dépasse le plan d'eau).
 uniform vec3 sea_shallow_color = vec3(0.045, 0.14, 0.14);
 uniform vec3 sea_deep_color = vec3(0.006, 0.028, 0.050);
+// GA4 (ADR 0105) : macro-variation à l'échelle de la carte (périodes en pixels carte) et mer
+// peinte à trois paliers de profondeur, réglées depuis `data/fx/campaign_terrain_textures.json`
+// (`CampaignTextures.apply_terrain`) ; `ga4_on` = 0 (`--no-ga4`) : rendu d'origine.
+uniform float ga4_on = 0.0;
+uniform vec4 ga4_macro_periods = vec4(9.0, 24.0, 60.0, 150.0);
+uniform vec4 ga4_macro_weights = vec4(0.4, 0.3, 0.2, 0.1);
+uniform float ga4_tint_amp = 1.0;
+uniform float ga4_lum_amp = 0.08;
+uniform vec3 sea_mid_color = vec3(0.018, 0.075, 0.095);
+uniform float sea_mid_depth_m = 25.0;
+uniform float sea_depth_falloff_m = 70.0;
 
 // Détail : taille d'une tuile de texture (pixels carte), part du détail, force des normales.
 uniform float tile_px = 3.0;
@@ -298,6 +309,7 @@ void field_at(vec2 p, int lay, out float cell_h, out float strip_h, out float du
 #include "res://shaders/relief_quadtree.gdshaderinc"  // ZG2 : relief streamé en quadtree
 #include "res://shaders/fine_parcels.gdshaderinc"  // ZG5b : parcellaire et détail de près
 #include "res://shaders/faction_borders.gdshaderinc"  // FR1 : frontières de faction (crochet fr1_borders)
+#include "res://shaders/ga_macro.gdshaderinc"  // GA4 : macro-variation, couleur de profondeur
 
 void vertex() {
 	VERTEX = qt_vertex(VERTEX);  // ZG2 : patch du quadtree déplacé (sans effet sur les morceaux E0)
@@ -514,6 +526,18 @@ void fragment() {
 		dn = vec3(0.0, 0.0, 0.85);
 	}
 	vec3 col = albedo * mix(1.0, tone, 1.0 - snow);
+	// GA4 : macro-variation de teinte (octaves fines d'abord) et de luminance (octaves larges
+	// d'abord), mêmes 4 échantillons de bruit ; visible aussi au dézoom (textures coupées).
+	if (ga4_on > 0.5) {
+		vec4 mo = vec4(value_noise(p / ga4_macro_periods.x + vec2(3.1, 7.7)),
+			value_noise(p / ga4_macro_periods.y + vec2(11.3, 1.9)),
+			value_noise(p / ga4_macro_periods.z + vec2(5.3, 17.2)),
+			value_noise(p / ga4_macro_periods.w + vec2(23.9, 13.4)));
+		float wsum4 = max(dot(ga4_macro_weights, vec4(1.0)), 1e-3);
+		float mh = dot(mo, ga4_macro_weights) / wsum4;
+		float ml = dot(mo, ga4_macro_weights.wzyx) / wsum4;
+		col *= ga_macro_variation(mh, ml, ga4_tint_amp, ga4_lum_amp);
+	}
 	// Canopée : ombrage de volume léger (les forêts paraissent plus sombres et granuleuses).
 	col *= 1.0 - 0.25 * w_forest / max(wsum, 1e-3) * (1.0 - value_noise(p * 1.7)) * detail_fade;
 	float open_w = (w_grass + w_farm) / max(wsum, 1e-3);
@@ -545,7 +569,7 @@ void fragment() {
 	vec3 water_col = lake_color;
 	if (hc <= 0.0) {
 		float depth = -hc;
-		vec3 wc = mix(sea_shallow_color, sea_deep_color, 1.0 - exp(-depth / 70.0));
+		vec3 wc = ga_depth_color(depth, sea_shallow_color, sea_mid_color, sea_deep_color, sea_mid_depth_m, sea_depth_falloff_m, ga4_on);  // GA4
 		water_col = mix(col, wc, mix(0.7, 0.97, smoothstep(0.0, 45.0, depth)));
 	}
 	if (lake_shore > 0.5) {
