@@ -1,6 +1,6 @@
 # 0100 — Ordre public pondéré et seuil de révolte (lot RS-B)
 
-Date : 2026-09-28. Statut : proposé.
+Date : 2026-09-28. Statut : accepté.
 Suivi : `docs/wip/rs-b-order.md`. Prolonge l'ADR 0082 (carte densifiée, `province_effect_percent`).
 
 ## Contexte
