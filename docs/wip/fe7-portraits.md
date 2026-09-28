@@ -23,20 +23,25 @@ Variantes âgées (convention DA2, ADR 0063) : pour chaque personnage dont l'âg
 `data/portraits/archetypes.json` (sinon le personnage bascule vers un archétype générique dès
 qu'il dépasse 49 ans en jeu — cf. `living_portrait.gd`). Les personnages déjà ≥ 50 ans en 1337
 gardent leur portrait fixe indéfiniment (bande max déjà atteinte), donc pas de variante âgée
-requise pour eux. Sur les 62 : 18 sont déjà ≥ 50 ans en 1337, donc **44 variantes âgées
-« old »** à générer, ≈ 2,00 $ supplémentaires. Total estimé ≈ 4,82 $, sous 14 $.
+requise pour eux. Sur les 62 : 13 sont déjà ≥ 50 ans en 1337 (mon estimation manuelle initiale
+de 18 était erronée), donc **49 variantes âgées « old »** générées, ≈ 2,23 $ supplémentaires.
 
 Aucune réduction de périmètre nécessaire (souverains, héritiers, consorts et variantes âgées
-tous inclus).
+tous inclus, bien sous le plafond de 15 $).
 
-## Étapes
-1. `cent-ans assets portraits --envelope <n>` par lots (idempotent) → 62 PNG.
-2. Ajouter 44 entrées `aged_variants` (band `old`) dans `data/portraits/archetypes.json` pour
-   les personnages < 50 ans en 1337, dans l'ordre : souverains (factions jouables) puis
-   héritiers/consorts.
-3. `cent-ans assets portrait-archetypes --no-archetypes --only <ids...>` par lots.
-4. `godot --headless --path game --import`, commit des `.png`/`.jpg` + `.import`.
-5. `uv run --project tools pytest -q`.
+## Étapes (toutes faites)
+1. `cent-ans assets portraits --envelope 3.5` → 62 PNG (2,86 $ réel).
+2. 49 entrées `aged_variants` (band `old`) ajoutées dans `data/portraits/archetypes.json`
+   (schéma validé).
+3. `cent-ans assets portrait-archetypes --no-archetypes --envelope 3.0` → 49 JPG aged (2,26 $
+   réel).
+4. `godot --headless --path game --import` : 161 fichiers `.import`/`.jpg` générés et commités.
+5. `uv run --project tools pytest -q` : 980 passés, 2 skipped (pré-existants).
+
+## État final
+Terminé. Cumul FE réel : 5,13 $ (voir `docs/budget.md`), très sous le plafond de 15 $.
+Commits : 56f9ef50 (dry-run/scope), c8825f44 (62 portraits de base), 8c679019 (49 variantes
+âgées + `.import`).
 
 ## Suivi budget
 Voir `docs/budget.md` section « Féodalité FE ». Chaque lot = une ligne (coût estimé, coût réel).
