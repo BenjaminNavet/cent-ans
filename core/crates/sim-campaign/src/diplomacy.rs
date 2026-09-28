@@ -114,6 +114,29 @@ pub enum Proposal {
     Treaty {
         articles: Vec<crate::negotiation::Article>,
     },
+    /// FE (§ 4.3): the proposer, a direct vassal of the recipient, is
+    /// attacked by `aggressor` and calls for protection. Accept: intervene;
+    /// refuse or let expire: shirk. Only sent to the player.
+    Protection {
+        aggressor: FactionId,
+    },
+    /// FE (§ 4.3.5): private war of `attacker` against `target`, both
+    /// direct vassals of the recipient. Accept: impose peace; refuse or let
+    /// expire: let be; `arbitrate` also takes a side. Only sent to the player.
+    Arbitration {
+        attacker: FactionId,
+        target: FactionId,
+    },
+}
+
+impl Proposal {
+    /// Feudal calls are created by the core, never proposed by a faction.
+    pub fn is_feudal_call(&self) -> bool {
+        matches!(
+            self,
+            Proposal::Protection { .. } | Proposal::Arbitration { .. }
+        )
+    }
 }
 
 /// A proposal waiting for the player's answer.
@@ -788,6 +811,9 @@ pub fn evaluate(
         Proposal::Obedience { .. } => {
             reasons.push(("Choix d'obédience".to_owned(), 0));
         }
+        Proposal::Protection { .. } | Proposal::Arbitration { .. } => {
+            reasons.push(("Devoir féodal".to_owned(), 0));
+        }
         Proposal::Treaty { articles } => {
             let verdict =
                 crate::negotiation::evaluate_treaty(state, data, proposer, recipient, articles);
@@ -946,6 +972,9 @@ impl CampaignState {
             .get_mut(attacker)
             .expect("checked")
             .last_war_declared = Some(self.turn);
+        // FE § 4.3: the target's suzerain is called (or the common lord
+        // arbitrates a private war) before the allies answer.
+        let feudal_liege = crate::feudal::liege_of(self, data, target);
         let text = format!(
             "{} déclare la guerre à {} ({motive}).",
             faction_name(data, attacker),
@@ -955,7 +984,8 @@ impl CampaignState {
         if excommunicate {
             religion::excommunicate(self, data, attacker);
         }
-        self.call_to_arms(data, target, attacker);
+        crate::feudal::escalate_war(self, data, attacker, target);
+        self.call_to_arms(data, target, attacker, feudal_liege.as_ref());
         self.rally_vassals(data, attacker, target);
         Ok(())
     }
@@ -1001,10 +1031,18 @@ impl CampaignState {
 
     /// The allies of `defender` decide whether to join its war against
     /// `aggressor` (spec § 2.3).
-    fn call_to_arms(&mut self, data: &GameData, defender: &FactionId, aggressor: &FactionId) {
+    /// `feudal_liege` (FE § 4.3) already answered as suzerain and is skipped.
+    fn call_to_arms(
+        &mut self,
+        data: &GameData,
+        defender: &FactionId,
+        aggressor: &FactionId,
+        feudal_liege: Option<&FactionId>,
+    ) {
         let allies: Vec<FactionId> = self.factions[defender].allies.iter().cloned().collect();
         for ally in allies {
-            if &ally == aggressor
+            if Some(&ally) == feudal_liege
+                || &ally == aggressor
                 || !self.factions.get(&ally).is_some_and(|f| f.alive)
                 || self.is_at_war(&ally, aggressor)
                 || is_rebels(&ally)
@@ -1138,7 +1176,7 @@ impl CampaignState {
     }
 
     /// Ends the war between `a` and `b` alone (see [`Self::make_peace`]).
-    fn make_peace_between(
+    pub(crate) fn make_peace_between(
         &mut self,
         data: &GameData,
         a: &FactionId,
@@ -1307,6 +1345,21 @@ impl CampaignState {
             Proposal::Treaty { articles } => {
                 crate::negotiation::apply_treaty(self, data, proposer, recipient, articles)?;
             }
+            Proposal::Protection { aggressor } => {
+                if self.is_at_war(proposer, aggressor) {
+                    crate::feudal::intervene(self, data, recipient, proposer, aggressor);
+                }
+            }
+            Proposal::Arbitration { attacker, target } => {
+                crate::feudal::apply_arbitration(
+                    self,
+                    data,
+                    recipient,
+                    attacker,
+                    target,
+                    &crate::feudal::Arbitration::ImposePeace,
+                );
+            }
         }
         Ok(())
     }
@@ -1351,6 +1404,11 @@ impl CampaignState {
             Proposal::Vassalage | Proposal::Marriage { .. } | Proposal::Obedience { .. } => {}
             Proposal::Treaty { articles } => {
                 crate::negotiation::check_treaty(self, data, proposer, recipient, articles)?;
+            }
+            Proposal::Protection { .. } | Proposal::Arbitration { .. } => {
+                return Err(DiplomacyError::Refused(
+                    "un appel féodal ne se propose pas".to_owned(),
+                ));
             }
         }
         Ok(())
@@ -1438,7 +1496,9 @@ impl CampaignState {
             .ok_or(DiplomacyError::UnknownOffer)?;
         let offer = self.factions[faction].offers[index].clone();
         if accept {
-            if !matches!(offer.proposal, Proposal::Obedience { .. }) {
+            if !matches!(offer.proposal, Proposal::Obedience { .. })
+                && !offer.proposal.is_feudal_call()
+            {
                 self.check_proposal(data, &offer.from, faction, &offer.proposal)?;
             }
             self.factions
@@ -1453,7 +1513,9 @@ impl CampaignState {
                 .expect("exists")
                 .offers
                 .remove(index);
-            if !matches!(offer.proposal, Proposal::Obedience { .. }) {
+            if offer.proposal.is_feudal_call() {
+                crate::feudal::refuse_feudal_call(self, data, faction, &offer);
+            } else if !matches!(offer.proposal, Proposal::Obedience { .. }) {
                 self.add_modifier(&offer.from, faction, -10, "Offre repoussée", 20);
             }
             Ok(())
@@ -1734,6 +1796,15 @@ fn offer_text(
                 .get(religion)
                 .map_or_else(|| religion.to_string(), |r| r.name.display.clone())
         ),
+        Proposal::Protection { aggressor } => format!(
+            "{name} est attaqué par {} et réclame votre protection.",
+            faction_name(data, aggressor)
+        ),
+        Proposal::Arbitration { attacker, target } => format!(
+            "Guerre privée : {} attaque {}, tous deux vos vassaux.",
+            faction_name(data, attacker),
+            faction_name(data, target)
+        ),
     }
 }
 
@@ -1772,6 +1843,10 @@ pub(crate) fn resolve_diplomacy(
     for offer in expired {
         if let Proposal::Obedience { .. } = offer.proposal {
             continue; // keeping the historical obedience is the default
+        }
+        if offer.proposal.is_feudal_call() {
+            crate::feudal::refuse_feudal_call(state, data, &player, &offer);
+            continue;
         }
         events.push(
             GameEvent::new(
