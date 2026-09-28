@@ -140,6 +140,40 @@ struct Fe8 {
     /// Bankruptcies of the 28 factions of before FE (`LEGACY`), the population
     /// the column measured up to RS-B.
     legacy_bankruptcies: u32,
+    /// Spec FE § 5 bands: France's direct vassals at the start, after 20
+    /// years and at the end; France first realm by population (itself and
+    /// its direct vassals) after 20 years and at the end; succession wars
+    /// (disputes taken up by a sponsor); most provinces held at the end by a
+    /// faction of at most 2 provinces in 1337, and which.
+    france_vassals: [usize; 3],
+    france_first: [bool; 2],
+    succession_wars: usize,
+    minor_max: (usize, String),
+}
+
+/// FE8: population of `faction`'s realm (its provinces and its direct vassals').
+fn realm_population(state: &CampaignState, data: &GameData, faction: &FactionId) -> u64 {
+    let mut members = sim_campaign::feudal::direct_vassals(state, data, faction);
+    members.push(faction.clone());
+    members
+        .iter()
+        .flat_map(|f| state.owned_provinces(f))
+        .filter_map(|p| state.provinces.get(&p))
+        .map(|p| p.population.total())
+        .sum()
+}
+
+/// FE8: whether France is the most populous sovereign realm.
+fn france_first(state: &CampaignState, data: &GameData) -> bool {
+    let france = id("fac_france");
+    let ours = realm_population(state, data, &france);
+    state
+        .factions
+        .iter()
+        .filter(|(f, s)| {
+            s.alive && s.suzerain.is_none() && **f != france && f.as_str() != "fac_rebels"
+        })
+        .all(|(f, _)| realm_population(state, data, f) <= ours)
 }
 
 /// FE8: the factions of before FE (ae5d94f1), rebels left out.
@@ -869,6 +903,8 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         .cloned()
         .collect();
     report.fe8.small_factions = small.len();
+    report.fe8.france_vassals[0] =
+        sim_campaign::feudal::direct_vassals(&state, data, &france).len();
     let names: Vec<String> = [&france, &england]
         .iter()
         .map(|f| data.factions[*f].short_or_display_name().to_owned())
@@ -1300,6 +1336,11 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
             }
         }
         track_fe8(&state, data, &events, &names, &mut report.fe8);
+        if state.turn == 80 {
+            report.fe8.france_vassals[1] =
+                sim_campaign::feudal::direct_vassals(&state, data, &france).len();
+            report.fe8.france_first[0] = france_first(&state, data);
+        }
         if at_war {
             report.fe8.first_war.get_or_insert(state.turn);
         }
@@ -1408,6 +1449,25 @@ fn run(data: &GameData, seed: u64, turns: u32, verbose: bool) -> Report {
         .map(|(id, _)| id.as_str().trim_start_matches("fac_").to_owned())
         .collect();
     report.idle_count = over_limit.values().filter(|n| **n > 4).count();
+    report.fe8.france_vassals[2] =
+        sim_campaign::feudal::direct_vassals(&state, data, &france).len();
+    report.fe8.france_first[1] = france_first(&state, data);
+    report.fe8.succession_wars = state
+        .feudal
+        .disputes
+        .iter()
+        .filter(|d| d.sponsor.is_some())
+        .count();
+    report.fe8.minor_max = small
+        .iter()
+        .map(|f| {
+            (
+                state.owned_provinces(f).len(),
+                f.as_str().trim_start_matches("fac_").to_owned(),
+            )
+        })
+        .max()
+        .unwrap_or_default();
     report.factions = state
         .factions
         .keys()
@@ -1656,6 +1716,25 @@ fn print_fe8(reports: &[Report]) {
             f.france_treasury_50,
             small_rate,
             legacy_rate,
+        );
+    }
+    println!(
+        "| graine | vassaux directs de la France (1337 / t80 / fin) | France 1er royaume par population (t80 / fin) | guerres de succession | mineure la plus grande à la fin (provinces) |"
+    );
+    println!("|---|---|---|---|---|");
+    for r in reports {
+        let f = &r.fe8;
+        println!(
+            "| {} | {} / {} / {} | {} / {} | {} | {} ({}) |",
+            r.seed,
+            f.france_vassals[0],
+            f.france_vassals[1],
+            f.france_vassals[2],
+            if f.france_first[0] { "oui" } else { "non" },
+            if f.france_first[1] { "oui" } else { "non" },
+            f.succession_wars,
+            f.minor_max.1,
+            f.minor_max.0,
         );
     }
     let n = reports.len();
