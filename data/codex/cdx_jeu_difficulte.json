@@ -1,0 +1,26 @@
+{
+  "id": "cdx_jeu_difficulte",
+  "title": "La difficulté de la campagne",
+  "category": "mecanique",
+  "aliases": [
+    "difficulté",
+    "niveau de difficulté",
+    "difficulté de la campagne",
+    "facile",
+    "difficile",
+    "très difficile"
+  ],
+  "era": { "from": "1337", "to": "1453" },
+  "summary": "Facile, Normale, Difficile ou Très difficile : choisi au lancement de la partie et figé pour toute la campagne, le niveau règle les revenus et l'entretien des IA, vos propres revenus et l'agitation de vos provinces, l'hostilité des IA envers vous et le moral de leurs armées quand elles vous affrontent.",
+  "body": "Le niveau de difficulté se choisit sous la fiche de faction, au lancement d'une nouvelle campagne, et ne peut plus changer ensuite : c'est un pari pris pour toute la partie, non un curseur qu'on ajuste tour après tour. « Normale » n'avantage ni ne pénalise personne : c'est le jeu tel qu'il a été équilibré, et chaque autre niveau s'en écarte dans un sens ou dans l'autre.\n\nFacile aide un joueur qui découvre la guerre de Cent Ans : les revenus des IA tombent à 80 % et les vôtres montent à 115 %, leurs armées gardent leur coût d'entretien et de recrutement habituel, mais elles vous voient d'un œil plus amical (attitude +10), hésitent davantage à vous déclarer la guerre (il leur faut un rapport de forces 120 % supérieur) et perdent 5 points de moral face à vous en bataille ; vos provinces, de leur côté, sont 5 points moins agitées.\n\nDifficile et Très difficile inversent la tendance. En Difficile, les IA lèvent 120 % de leurs revenus normaux et réduisent leur entretien à 90 %, vous regardent avec 10 points d'hostilité en plus, acceptent de vous attaquer avec un rapport de forces plus faible (90 %) et gagnent 5 points de moral contre vous ; vos provinces sont 3 points plus agitées. Très difficile pousse chaque levier plus loin : revenus des IA à 140 %, entretien à 80 %, coût de recrutement réduit à 85 %, vos propres revenus limités à 90 %, hostilité des IA +20, rapport de forces exigé abaissé à 80 % et moral de leurs armées +10 contre vous, vos provinces 6 points plus agitées.\n\nCes leviers ne rendent pas l'intelligence artificielle plus habile : elle planifie exactement de la même façon à tous les niveaux. Ils la rendent plus riche, plus hostile et plus tenace (ou, en Facile, plus conciliante et plus fragile), et pèsent en retour sur votre propre trésor et sur la patience de vos sujets. Les couronnes rivales ne sont pas avantagées les unes par rapport aux autres : revenus et entretien s'appliquent à toutes les IA de la même façon, seuls l'hostilité et le moral supplémentaire ne jouent que contre vous.",
+  "gameplay": "Quatre niveaux (`data/rules/difficulty.json`, défaut Normale) : Facile (revenus des IA ×0,8, vos revenus ×1,15, entretien des IA ×1,0, coût de recrutement des IA ×1,0, agitation de vos provinces −5, attitude des IA envers vous +10, rapport de forces exigé des IA pour vous attaquer ×1,2, moral des IA contre vous −5), Normale (tous les leviers à leur valeur neutre : ×1,0 ou décalage 0), Difficile (revenus des IA ×1,2, entretien des IA ×0,9, agitation de vos provinces +3, attitude des IA −10, rapport de forces exigé ×0,9, moral des IA +5), Très difficile (revenus des IA ×1,4, vos revenus ×0,9, entretien des IA ×0,8, coût de recrutement des IA ×0,85, agitation de vos provinces +6, attitude des IA −20, rapport de forces exigé ×0,8, moral des IA +10).\n\nLe bonus ou malus de moral ne s'applique qu'au camp d'une IA qui affronte une armée vous appartenant, aussi bien en bataille jouée qu'en auto-résolution et dans la prévision d'avant-bataille (qui affiche la ligne « Niveau de difficulté : moral de l'IA … »). L'agitation s'ajoute à la cible de mécontentement des provinces que vous contrôlez ; l'hostilité apparaît comme une raison distincte, « Niveau de difficulté », dans le panneau de diplomatie. Voir [[cdx_jeu_recrutement|recrutement]], [[cdx_jeu_impot|impôt]], [[cdx_jeu_ordre_public|ordre public]], [[cdx_jeu_entretien|entretien]] et [[cdx_jeu_moral|moral]] pour les mécaniques que ces leviers modulent.",
+  "see_also": [
+    "cdx_jeu_recrutement",
+    "cdx_jeu_impot",
+    "cdx_jeu_ordre_public",
+    "cdx_jeu_entretien",
+    "cdx_jeu_moral",
+    "cdx_jeu_resolution_auto"
+  ],
+  "sources": ["Guerre de Cent Ans", "Niveau de difficulté (jeu vidéo)"]
+}

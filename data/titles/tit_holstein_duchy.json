@@ -1,0 +1,21 @@
+{
+  "id": "tit_holstein_duchy",
+  "rank": "duchy",
+  "name": {
+    "display": "Holstein et Lübeck",
+    "local": "Holsten",
+    "local_language": "moyen bas-allemand"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_holstein"
+  ],
+  "holder_1337": {
+    "faction": "fac_holstein",
+    "sources": [
+      "Comté de Holstein",
+      "Gérard III de Holstein",
+      "Lübeck"
+    ]
+  }
+}
