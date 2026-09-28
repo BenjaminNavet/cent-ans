@@ -13,12 +13,16 @@ Branche `feat/fe2-escalade` (depuis `main` dfe88244). Spec § 4.3, plan F2.
   grâce) ; `declare_war` appelle `feudal::escalate_war` ; `call_to_arms` saute le suzerain féodal
   (déjà appelé). Refus ou expiration : dérobade / laisser faire.
 - `orders.rs` : `Order::ArbitratePrivateWar { offer, verdict }`.
-- Tests `feudal_escalation.rs` écrits (4).
+- Tests `feudal_escalation.rs` : 4 actifs et verts. fmt, clippy `-D warnings`, `cargo test --workspace`,
+  pytest (schémas) verts.
 
 ## Prochaine étape
-- Compiler, faire passer les tests, fmt/clippy/test workspace, commit final `FE2: …`.
+- Lot terminé ; fusion par l'orchestrateur avec F1/F3 (conflits attendus en fin de `feudal.rs`,
+  `FeudalRules`, schéma).
 
 ## Points ouverts
 - `summon_host` (titres) double `rally_vassals` (champ `suzerain`) : à unifier à la fusion avec F1.
 - Le vassal abandonné qui change d'allégeance (§ 4.3.2) : F3/F5.
+- Les tests alignent à la main le champ `suzerain` et les alliés de la Flandre sur les titres ;
+  après F1 (suzerain dérivé) ces lignes deviennent inutiles.
 - Pont Godot (offres, `ArbitratePrivateWar`, aperçu) : F6.
