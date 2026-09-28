@@ -43,8 +43,6 @@
     "voronoi_weight": 1.3
   },
   "owner": "fac_burgundy",
-  "overlord": "fac_france",
-  "holder": "chr_eudes_iv",
   "culture": "cul_french",
   "religion": "rel_catholic",
   "population": {

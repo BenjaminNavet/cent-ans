@@ -42,9 +42,10 @@ pub const WINTER_MOVEMENT_POINTS: u32 = 2;
 /// construction and recruitment move from provinces to settlements; armies
 /// stand on settlements). `6`: lot M2 free movement (`Army::position`,
 /// `movement_left`, `planned_path` replace `location`, `movement_points`,
-/// `path`; field battles carry a point).
+/// `path`; field battles carry a point). `7`: lot FE feudal titles
+/// (`feudal`: title holders, primary titles, felony cases).
 /// [`CampaignState::load_json`] refuses any other version.
-pub const STATE_VERSION: u32 = 6;
+pub const STATE_VERSION: u32 = 7;
 
 /// One of the four seasons; one campaign turn spans one season.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -928,6 +929,9 @@ pub struct CampaignState {
     /// ruins (absent from older saves; no change of [`STATE_VERSION`]).
     #[serde(default)]
     pub captures: crate::capture::CaptureState,
+    /// Lot FE: title holdings (feudal hierarchy, ADR 0098).
+    #[serde(default)]
+    pub feudal: crate::feudal::FeudalState,
     /// Lot M3: the AI faction whose turn is being played inside `end_turn`
     /// (its battles against the player are auto-resolved); never saved.
     #[serde(skip)]
@@ -980,6 +984,7 @@ impl CampaignState {
             difficulty: crate::difficulty::Difficulty::Normal,
             encounters: crate::encounter::EncounterState::default(),
             captures: crate::capture::CaptureState::default(),
+            feudal: crate::feudal::FeudalState::default(),
             ai_turn: None,
             ai_replay: crate::ai_replay::AiReplayLog::default(),
             last_battle_outcome: None,

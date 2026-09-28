@@ -32,6 +32,11 @@ pub enum CampaignError {
          version attendue : {expected}) : elle ne peut pas être chargée"
     )]
     PreFreeMovementSave { found: u32, expected: u32 },
+    #[error(
+        "sauvegarde d'une version antérieure à la féodalité (version {found}, \
+         version attendue : {expected}) : elle ne peut pas être chargée"
+    )]
+    PreFeudalSave { found: u32, expected: u32 },
 }
 
 /// First state version with settlements (lot C4); older saves are refused.
@@ -39,6 +44,9 @@ pub const SETTLEMENTS_STATE_VERSION: u32 = 5;
 /// First state version with free army movement (lot M2); older saves are
 /// refused.
 pub const FREE_MOVEMENT_STATE_VERSION: u32 = 6;
+/// First state version with feudal titles (lot FE); older saves are
+/// refused.
+pub const FEUDAL_STATE_VERSION: u32 = 7;
 
 impl CampaignState {
     /// Serialises the whole state (RNG included) as JSON.
@@ -63,6 +71,12 @@ impl CampaignState {
         }
         if header.state_version < FREE_MOVEMENT_STATE_VERSION {
             return Err(CampaignError::PreFreeMovementSave {
+                found: header.state_version,
+                expected: STATE_VERSION,
+            });
+        }
+        if header.state_version < FEUDAL_STATE_VERSION {
+            return Err(CampaignError::PreFeudalSave {
                 found: header.state_version,
                 expected: STATE_VERSION,
             });

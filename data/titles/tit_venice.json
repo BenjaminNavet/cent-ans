@@ -1,0 +1,25 @@
+{
+  "id": "tit_venice",
+  "rank": "kingdom",
+  "name": {
+    "display": "République de Venise",
+    "local": "Serenìsima Repùblica Vèneta",
+    "local_language": "vénitien"
+  },
+  "heraldry": {
+    "blazon": "De gueules au lion de saint Marc d'or.",
+    "description": "Lion ailé de l'évangéliste Marc, patron de la cité.",
+    "primary_color": "#9B1B1B",
+    "secondary_color": "#E8B923"
+  },
+  "de_jure_provinces": [
+    "prov_venezia"
+  ],
+  "holder_1337": {
+    "faction": "fac_venice",
+    "sources": [
+      "République de Venise",
+      "Francesco Dandolo"
+    ]
+  }
+}
