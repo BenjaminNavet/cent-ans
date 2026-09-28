@@ -68,6 +68,7 @@ pub mod passage;
 pub mod path_plan;
 pub mod population;
 pub mod posture;
+pub mod preview;
 pub mod ransom;
 pub mod reach;
 pub mod recruit_pool;
