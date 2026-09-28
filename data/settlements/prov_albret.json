@@ -1,0 +1,28 @@
+[
+  {
+    "id": "set_nerac",
+    "province": "prov_albret",
+    "kind": "city",
+    "name": {
+      "display": "Nérac",
+      "local": "Nerac",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      0.3333,
+      44.1333
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château sur la Baïse, berceau de la maison d'Albret, sénéchaux héréditaires de Gascogne.",
+    "sources": [
+      "Nérac",
+      "Maison d'Albret"
+    ]
+  }
+]

@@ -6,8 +6,8 @@
   "epithet": "la Boiteuse",
   "sex": "female",
   "house": "Dreux-Bretagne",
-  "faction": "fac_brittany",
-  "role": "heir",
+  "faction": "fac_penthievre",
+  "role": "ruler",
   "birth": {
     "value": "1319",
     "uncertain": true

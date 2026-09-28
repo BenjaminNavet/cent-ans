@@ -1,0 +1,28 @@
+[
+  {
+    "id": "set_foix",
+    "province": "prov_foix",
+    "kind": "city",
+    "name": {
+      "display": "Foix",
+      "local": "Foish",
+      "local_language": "occitan"
+    },
+    "lonlat": [
+      1.6052,
+      42.9656
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château comtal de Foix, tenu par Gaston II de Foix-Béarn en fief du roi de France.",
+    "sources": [
+      "Comté de Foix"
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "set_crepy_en_valois",
+    "province": "prov_valois",
+    "kind": "city",
+    "name": {
+      "display": "Crépy-en-Valois",
+      "local": "Crépy-en-Valois",
+      "local_language": "ancien français"
+    },
+    "lonlat": [
+      2.8874,
+      49.2333
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Capitale du comté de Valois, réuni au domaine royal en 1328.",
+    "sources": [
+      "Comté de Valois"
+    ]
+  }
+]

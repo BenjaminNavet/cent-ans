@@ -1,0 +1,58 @@
+{
+  "id": "fac_albret",
+  "name": {
+    "display": "Seigneurie d'Albret",
+    "local": "Lebret",
+    "local_language": "gascon"
+  },
+  "short_name": "Albret",
+  "adjective": "albretais",
+  "government": "lordship",
+  "playable": true,
+  "ruler": "chr_bernard_ezi_d_albret",
+  "capital": "prov_albret",
+  "capital_city": "Nérac",
+  "religion": "rel_catholic",
+  "culture": "cul_occitan",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_england",
+  "primary_title": "tit_albret",
+  "heraldry": {
+    "blazon": "De gueules à deux léopards d'or, armés et lampassés d'azur, l'un sur l'autre.",
+    "description": "Armes de la maison d'Albret ; blasonnement incertain pour 1337, reconstitué d'après les sceaux ultérieurs.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true
+  },
+  "titles": [
+    "Sire d'Albret",
+    "Sénéchal héréditaire de Gascogne"
+  ],
+  "treasury": 2200,
+  "prestige": 15,
+  "starting_technologies": [
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_england",
+      "status": "vassal",
+      "note": "Sénéchal héréditaire de Gascogne pour le duc d'Aquitaine, tenu par le roi d'Angleterre."
+    },
+    {
+      "faction": "fac_france",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 50,
+    "trade": 55,
+    "piety": 40
+  },
+  "description": "Petite seigneurie gasconne sur la Baïse, sénéchaux héréditaires de Gascogne pour le duc d'Aquitaine ; la maison d'Albret basculera plusieurs fois d'allégeance pendant la guerre.",
+  "sources": [
+    "Nérac",
+    "Maison d'Albret"
+  ]
+}

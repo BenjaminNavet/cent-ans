@@ -1,0 +1,25 @@
+{
+  "id": "tit_foix",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Foix",
+    "local": "Comtat de Foish",
+    "local_language": "occitan"
+  },
+  "de_jure_liege": "tit_france",
+  "de_jure_provinces": [
+    "prov_foix"
+  ],
+  "holder_1337": {
+    "faction": "fac_foix_bearn",
+    "sources": [
+      "Gaston II de Foix-Béarn",
+      "Comté de Foix"
+    ]
+  },
+  "description": "Comté pyrénéen tenu en fief du roi de France ; tenu conjointement avec la vicomté souveraine de Béarn (double allégeance).",
+  "sources": [
+    "Comté de Foix",
+    "Gaston II de Foix-Béarn"
+  ]
+}

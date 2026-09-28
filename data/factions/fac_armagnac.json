@@ -1,0 +1,60 @@
+{
+  "id": "fac_armagnac",
+  "name": {
+    "display": "Comté d'Armagnac",
+    "local": "Comtat d'Armanhac",
+    "local_language": "occitan"
+  },
+  "short_name": "Armagnac",
+  "adjective": "armagnacais",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_jean_i_d_armagnac",
+  "capital": "prov_armagnac",
+  "capital_city": "Lectoure",
+  "religion": "rel_catholic",
+  "culture": "cul_occitan",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_france",
+  "primary_title": "tit_armagnac",
+  "heraldry": {
+    "blazon": "D'argent au lion de gueules, armé, lampassé et couronné d'or.",
+    "description": "Blasonnement traditionnel de la maison d'Armagnac ; attesté surtout à partir du XIVe-XVe siècle.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B",
+    "uncertain": true
+  },
+  "titles": [
+    "Comte d'Armagnac",
+    "Comte de Rodez"
+  ],
+  "treasury": 4500,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "vassal",
+      "note": "Jean Ier est lieutenant royal en Languedoc contre les Anglais de Gascogne."
+    },
+    {
+      "faction": "fac_foix_bearn",
+      "status": "peace",
+      "note": "Rivalité acharnée pour la domination du Languedoc et de la Gascogne."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 40,
+    "trade": 35,
+    "piety": 45
+  },
+  "description": "Grand seigneur du Midi, fidèle de Philippe VI et rival acharné de Gaston II de Foix-Béarn pour la domination du Languedoc et de la Gascogne.",
+  "sources": [
+    "Jean Ier d'Armagnac",
+    "Comté d'Armagnac"
+  ]
+}

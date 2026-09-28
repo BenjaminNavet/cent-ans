@@ -1,95 +1,92 @@
 {
-  "id": "prov_bourbonnais",
+  "id": "prov_alencon",
   "name": {
-    "display": "Bourbonnais et Marche",
-    "local": "Borbonois",
+    "display": "Alençon (Perche)",
+    "local": "Alençon",
     "local_language": "ancien français"
   },
-  "region": "france_centre",
-  "terrain": "hills",
-  "climate": "continental",
+  "region": "france_ouest",
+  "terrain": "bocage",
+  "climate": "oceanic",
   "neighbors": [],
   "rivers": [
-    "Allier",
-    "Loire",
-    "Creuse"
+    "Sarthe",
+    "Huisne"
   ],
   "coastal": false,
   "resources": [
     "res_wheat",
     "res_wood",
-    "res_wool"
+    "res_cloth"
   ],
   "capital_city": {
     "name": {
-      "display": "Moulins",
-      "local": "Molins",
+      "display": "Alençon",
+      "local": "Alençon",
       "local_language": "ancien français"
     },
-    "lat": 46.5657,
-    "lon": 3.3336
+    "lat": 48.4322,
+    "lon": 0.0913
   },
   "geo": {
     "capital_lonlat": [
-      3.3336,
-      46.5657
+      0.0913,
+      48.4322
     ],
     "seed_lonlat": [
-      2.9,
-      46.35
+      0.15,
+      48.4
     ],
-    "voronoi_weight": 1.1
+    "voronoi_weight": 0.55
   },
-  "owner": "fac_bourbon",
+  "owner": "fac_alencon",
   "culture": "cul_french",
   "religion": "rel_catholic",
   "population": {
-    "uncertain": true,
-    "note": "Moulins compte environ 5 000 habitants.",
     "classes": {
       "peasants": {
-        "count": 203780,
+        "count": 85000,
         "unrest": 10,
         "health": 55,
         "wealth": 45,
         "goods_satisfaction": 60
       },
       "burghers": {
-        "count": 18400,
+        "count": 8500,
         "unrest": 10,
         "health": 50,
         "wealth": 60,
         "goods_satisfaction": 65
       },
       "clergy": {
-        "count": 5750,
+        "count": 2300,
         "unrest": 5,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       },
       "nobility": {
-        "count": 2070,
+        "count": 900,
         "unrest": 10,
         "health": 60,
         "wealth": 70,
         "goods_satisfaction": 75
       }
-    }
+    },
+    "uncertain": true,
+    "note": "Comté-apanage détaché du Maine ; population estimée par comparaison avec le Maine voisin."
   },
   "buildings": [
     "bld_market",
     "bld_parish_church",
-    "bld_water_mill",
     "bld_stone_walls",
     "bld_muster_field"
   ],
   "fortification_level": 2,
-  "base_supply": 4000,
-  "description": "Duché de Bourbon (érigé en 1327 pour Louis Ier, petit-fils de saint Louis) et comté de la Marche, tenus en fief du roi par la maison de Bourbon.",
+  "base_supply": 1700,
+  "description": "Comté d'Alençon et du Perche, érigé en apanage pour Charles II d'Alençon, frère cadet de Philippe VI, en 1325.",
   "sources": [
-    "Duché de Bourbon",
-    "Louis Ier de Bourbon",
-    "Comté de la Marche"
+    "Comté d'Alençon",
+    "Charles II d'Alençon"
   ]
 }

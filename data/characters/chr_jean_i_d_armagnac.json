@@ -7,8 +7,8 @@
   },
   "sex": "male",
   "house": "Armagnac",
-  "faction": "fac_france",
-  "role": "noble",
+  "faction": "fac_armagnac",
+  "role": "ruler",
   "birth": {
     "value": "1311",
     "uncertain": true
@@ -38,7 +38,7 @@
   "piety": 45,
   "starting_location": "prov_toulousain",
   "status": "at_court",
-  "description": "Grand seigneur du Midi, fidèle de [[cdx_philippe_vi|Philippe VI]] et rival acharné des comtes de Foix-Béarn ([[cdx_gaston_ii_de_foix_bearn|Gaston II]]) pour la domination du Languedoc et de la Gascogne. Lieutenant royal en Languedoc contre les Anglais de Gascogne. Faute d'une province distincte pour le comté d'Armagnac (limitrophe du Toulousain royal), il est placé ici par convention de jeu.",
+  "description": "Grand seigneur du Midi, fidèle de [[cdx_philippe_vi|Philippe VI]] et rival acharné des comtes de Foix-Béarn ([[cdx_gaston_ii_de_foix_bearn|Gaston II]]) pour la domination du Languedoc et de la Gascogne. Lieutenant royal en Languedoc contre les Anglais de Gascogne.",
   "sources": [
     "Jean Ier d'Armagnac",
     "Comté d'Armagnac"

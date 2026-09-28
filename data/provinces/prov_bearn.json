@@ -40,7 +40,7 @@
     ],
     "voronoi_weight": 1.0
   },
-  "owner": "fac_france",
+  "owner": "fac_foix_bearn",
   "culture": "cul_occitan",
   "religion": "rel_catholic",
   "population": {
@@ -86,7 +86,7 @@
   ],
   "fortification_level": 2,
   "base_supply": 3000,
-  "description": "Vicomté de Béarn (tenue en alleu selon Gaston II de Foix-Béarn) et comté de Foix, alliés du roi de France ; comté de Bigorre disputé, en garde royale. Vassalité contestée entre France et Angleterre.",
+  "description": "Vicomté souveraine de Béarn (tenue en alleu, sans hommage, selon Gaston II de Foix-Béarn ; distincte du comté de Foix, désormais province propre). Comté de Bigorre disputé, en garde royale, inclus par convention de carte.",
   "sources": [
     "Vicomté de Béarn",
     "Gaston II de Foix-Béarn",
