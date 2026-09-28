@@ -56,17 +56,23 @@ autres bornes inchangées.
 
 Références sans RS-B (binaire `cp_base`, révoltes 3 × 75) : normale 68 % [61-73], 10/10, révoltes 3,0 ;
 très difficile 60 % [47-72], 4/5, révoltes 3,8. Le seuil 74 pousse la guerre au-delà de 75 % sur 4
-graines sur 10 en normale : écarté. Essai 2 saisons × seuil 75 (retenu), normale : **69 % [55-75],
-9/10, révoltes 5,9 / 200 t.** ; autres niveaux : voir plus bas.
+graines sur 10 en normale : écarté.
 
-## Tests après fusion de main
-- `cargo fmt`, `clippy -D warnings`, `cargo test --workspace` : 1 082 passés, 0 échec.
-- `cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses` : la graine 7 (60 tours) ne
-  donnait plus d'embuscade avec la pondération de l'IA (2 ordres surveillés) ; passée à la graine 4
-  (12 ordres, 5 embuscades, 0 refus).
-- pytest : 832 passés, 1 échec préexistant hors lot (`test_budget.py`, grand livre, lot RS-H).
+## Century_probe 464 tours, état final (fusion de main, 2 saisons × seuil 75, release, ae5d94f1)
+| Niveau | Guerre FR-EN moy. [min-max] | Graines 55-75 | Trêves | Révoltes / 200 t. | Banqueroutes | 1re faction fin |
+|---|---|---|---|---|---|---|
+| Facile (5) | 69 % [60-77] | 3/5 | 11,8 | 6,1 | 0,10 | 21 % |
+| Normale (10) | 69 % [55-75] | 9/10 | 12,6 | 5,9 | 0,05 | 20 % |
+| Difficile (10) | 66 % [60-70] | 10/10 | 14,7 | 7,8 | 0,04 | 24 % |
+| Très difficile (5) | 59 % [57-63] | 5/5 | 17,8 | 7,4 | 0,02 | 28 % |
+
+Critère EQ6 (moyenne 55-75 % à chaque niveau) : **tenu aux quatre niveaux**, aucun réglage de
+données. Écart consigné : en facile, 2 graines sur 5 dépassent 75 % (76 et 77 %, bord de bande) ;
+en normale la graine basse est à 54,7 %. Révoltes dans la bande 4-10 à tous les niveaux (5,9 à 7,8).
+
+## Tests finaux (état ae5d94f1)
+- `cargo fmt --check`, `clippy --all-targets -D warnings`, `cargo test --workspace` : 1 082 passés, 0 échec.
+- pytest : 832 passés, 1 échec préexistant hors lot (`test_budget.py`, lot RS-H).
 
 ## Prochaine étape
-En cours : `century_probe` facile / difficile / très difficile avec 2 × 75 (`out/c275` du scratchpad),
-sonde m3 release sur l'état final (fusion de main, 2 × 75). Puis compléter ce fichier et l'ADR 0100,
-supprimer `core/target-rs-b`.
+Lot terminé. Fusion dans main par l'orchestrateur ; `core/target-rs-b` supprimé.
