@@ -104,6 +104,8 @@ pub struct TraditionView {
     pub pending: u8,
     /// Army name (kept one, else the current one).
     pub name: String,
+    /// `true` once the name is kept (no longer follows the general).
+    pub named: bool,
     pub banner_house: Option<String>,
     /// Every tradition, in data order, with its state.
     pub options: Vec<TraditionOption>,
@@ -214,6 +216,7 @@ impl CampaignState {
                 .copied(),
             pending: pending_choices(data, army),
             name: self.army_name(data, army_id),
+            named: army.traditions.name.is_some(),
             banner_house: army.traditions.banner_house.clone().or_else(|| {
                 army.general
                     .as_ref()

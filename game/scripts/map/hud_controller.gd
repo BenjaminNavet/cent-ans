@@ -92,6 +92,11 @@ func show_army(army_id: String, army: Dictionary, is_player: bool) -> void:
 	var faction_name := SimFacade.faction_short_name(faction)
 	var general_name := str(army.get("general_name", character.get("name", "")))
 	var title := "Ost de %s" % (general_name if general_name != "" else faction_name)
+	var traditions: Node = map.get("traditions")
+	if traditions != null:  # TW2-T5 : nom gardé par une armée aguerrie quand le chef change
+		var kept := str(traditions.call("kept_title", army_id))
+		if kept != "":
+			title = kept
 	if not is_player and general_name != "":
 		title += " (%s)" % faction_name
 	var garrison := garrison_availability(army, is_player)
@@ -103,6 +108,8 @@ func show_army(army_id: String, army: Dictionary, is_player: bool) -> void:
 		army["replenishment"] = sim.call("get_army_replenishment", army_id)
 	ui.show_army(army_id, army, character, faction, is_player, title, army_status(army, is_player),
 		is_player and split_supported(), bool(garrison["can_garrison"]), str(garrison["reason"]))
+	if traditions != null:  # TW2-T5 : bouton « Traditions » du bandeau
+		traditions.call("on_army_shown", army_id, is_player)
 
 
 ## Position et ordre en cours de l'armée (étiquette au-dessus du bandeau).

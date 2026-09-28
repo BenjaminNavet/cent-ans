@@ -11,7 +11,8 @@ use crate::campaign_sim::{order_result, CampaignSim};
 #[godot_api(secondary)]
 impl CampaignSim {
     /// Traditions of `army_id`: `{xp, rank, max_rank, next_threshold (-1 at
-    /// the last rank), pending, name (kept name, capitalised), banner_house,
+    /// the last rank), pending, name (capitalised), named (the name is kept
+    /// when the general changes), banner_house,
     /// effects_text, chosen: [names], options: [{id, branch, branch_name,
     /// tier, name, description, effects_text, chosen, allowed, reason}]}`.
     /// Empty for an unknown army.
@@ -55,6 +56,7 @@ impl CampaignSim {
             "next_threshold" => view.next_threshold.map_or(-1, i64::from),
             "pending" => i64::from(view.pending),
             "name" => sim_campaign::events::capitalize(&view.name).as_str(),
+            "named" => view.named,
             "banner_house" => view.banner_house.as_deref().unwrap_or(""),
             "effects_text" => view.effects.text_fr().as_str(),
             "chosen" => &chosen,
