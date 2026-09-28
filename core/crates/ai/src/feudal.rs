@@ -81,17 +81,17 @@ fn wars(state: &CampaignState, faction: &FactionId) -> usize {
     })
 }
 
-/// Power of `faction` and of its living allies, `except` left out.
+/// Power of `faction`, of its living allies and of its direct vassals
+/// (ADR 0114), `except` left out.
 fn coalition_power(state: &CampaignState, faction: &FactionId, except: &[&FactionId]) -> f64 {
     let own = state.faction_power(faction);
-    let allies: f64 = state.factions.get(faction).map_or(0.0, |f| {
-        f.allies
-            .iter()
-            .filter(|a| !except.contains(a) && alive(state, a))
-            .map(|a| state.faction_power(a))
-            .sum()
-    });
-    own + allies
+    let members: f64 = state
+        .coalition_members(faction)
+        .iter()
+        .filter(|a| !except.contains(a))
+        .map(|a| state.faction_power(a))
+        .sum();
+    own + members
 }
 
 fn label(data: &GameData, faction: &FactionId) -> String {
@@ -345,22 +345,37 @@ pub fn plan_commise(state: &CampaignState, data: &GameData, faction: &FactionId)
     }
     let factor = 1.0 + f64::from(aggression(data, faction) - 50) / 50.0 * w.aggression_shift;
     let needed = w.min_power_ratio / factor.max(0.1);
-    let mine = state.faction_power(faction);
     cases
         .into_iter()
         .filter(|v| {
             let other_wars = wars(state, faction) - usize::from(state.is_at_war(faction, v));
             other_wars <= w.max_wars
         })
-        .find(|v| {
-            let vassals: f64 = direct_vassals(state, data, v)
-                .iter()
-                .map(|x| state.faction_power(x))
-                .sum();
-            let felon = coalition_power(state, v, &[faction]) + vassals;
-            mine >= needed * felon.max(1.0)
-        })
+        .find(|v| commise_power_ratio(state, faction, v) >= needed)
         .map(|v| Order::DeclareCommise { vassal: v.clone() })
+}
+
+/// Balance of forces of a forfeiture (lot F8): the suzerain's coalition
+/// (itself, its allies and its direct vassals) against the felon's, each
+/// without the other. Before F8 the suzerain counted alone against the
+/// felon's whole coalition.
+pub fn commise_power_ratio(state: &CampaignState, liege: &FactionId, felon: &FactionId) -> f64 {
+    // A side: the faction, its allies and its direct vassals, not its own
+    // suzerain (who does not punish a rear vassal's felony for it).
+    let side = |faction: &FactionId, other: &FactionId| -> f64 {
+        let own_liege = state
+            .factions
+            .get(faction)
+            .and_then(|f| f.suzerain.as_ref());
+        let members: f64 = state
+            .coalition_members(faction)
+            .iter()
+            .filter(|m| *m != other && Some(*m) != own_liege)
+            .map(|m| state.faction_power(m))
+            .sum();
+        state.faction_power(faction) + members
+    };
+    side(liege, felon) / side(felon, liege).max(1.0)
 }
 
 fn roll(state: &CampaignState, faction: &FactionId, kind: u64) -> u64 {
