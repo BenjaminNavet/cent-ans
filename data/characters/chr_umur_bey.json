@@ -1,0 +1,47 @@
+{
+  "id": "chr_umur_bey",
+  "name": {
+    "display": "Umur Bey"
+  },
+  "sex": "male",
+  "house": "Aydınoğulları",
+  "faction": "fac_aydin",
+  "role": "ruler",
+  "birth": {
+    "value": "1309",
+    "uncertain": true,
+    "note": "Date approximative ou discutée.",
+    "place": "Birgi"
+  },
+  "death": {
+    "value": "1348-01-17",
+    "place": "Smyrne"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Gouverneur de Smyrne",
+      "from": {
+        "value": "1329"
+      },
+      "note": "Frère cadet du bey d'Aydın Hızır ; en 1337, chef de la flotte d'Aydın."
+    }
+  ],
+  "skills": {
+    "command": 8,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_admiral",
+    "trait_brave",
+    "trait_ambitious"
+  ],
+  "piety": 55,
+  "starting_location": "prov_izmir",
+  "status": "at_court",
+  "description": "Dit « Umur le Ghazi », il pille les côtes de l'Égée et s'allie à Jean Cantacuzène.",
+  "sources": [
+    "Umur Bey"
+  ]
+}

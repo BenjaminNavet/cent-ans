@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_gaza",
+    "province": "prov_gaza",
+    "kind": "city",
+    "name": {
+      "display": "Gaza",
+      "local": "غزة",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      34.47,
+      31.5
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Capitale du niyaba de Gaza, port des caravanes.",
+    "sources": [
+      "Gaza City"
+    ]
+  },
+  {
+    "id": "set_ramla",
+    "province": "prov_gaza",
+    "kind": "town",
+    "name": {
+      "display": "Ramla",
+      "local": "الرملة",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      34.87,
+      31.93
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la route Jaffa-Jérusalem.",
+    "sources": [
+      "Gaza City"
+    ]
+  },
+  {
+    "id": "set_rafah",
+    "province": "prov_gaza",
+    "kind": "village",
+    "name": {
+      "display": "Rafah",
+      "local": "رفح",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      34.25,
+      31.29
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Poste-frontière avec l'Égypte.",
+    "sources": [
+      "Gaza City"
+    ]
+  }
+]

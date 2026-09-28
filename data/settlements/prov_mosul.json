@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_mosul",
+    "province": "prov_mosul",
+    "kind": "city",
+    "name": {
+      "display": "Mossoul",
+      "local": "الموصل",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      43.13,
+      36.34
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Grand carrefour de la Djézireh ; musselines et tissus.",
+    "sources": [
+      "Jalayirids"
+    ]
+  },
+  {
+    "id": "set_nineveh",
+    "province": "prov_mosul",
+    "kind": "village",
+    "name": {
+      "display": "Ninive",
+      "local": "نينوى",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      43.15,
+      36.36
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Tertre de Kuyunjik, en ruines.",
+    "sources": [
+      "Jalayirids"
+    ]
+  },
+  {
+    "id": "set_sinjar",
+    "province": "prov_mosul",
+    "kind": "town",
+    "name": {
+      "display": "Sinjar",
+      "local": "سنجار",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      41.87,
+      36.32
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville des yézidis au pied du massif.",
+    "sources": [
+      "Jalayirids"
+    ]
+  }
+]

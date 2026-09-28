@@ -1,0 +1,95 @@
+{
+  "id": "prov_trebizond",
+  "name": {
+    "display": "Trébizonde",
+    "local": "Τραπεζοῦς",
+    "local_language": "grec pontique"
+  },
+  "region": "anatolie",
+  "terrain": "mountains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Trébizonde",
+    "Rhizaion"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Trébizonde",
+      "local": "Τραπεζοῦς",
+      "local_language": "grec pontique"
+    },
+    "lat": 41.0,
+    "lon": 39.72
+  },
+  "geo": {
+    "capital_lonlat": [
+      39.72,
+      41.0
+    ],
+    "seed_lonlat": [
+      39.9,
+      40.8
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_trebizond",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 46000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1400,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 550,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1100,
+  "description": "Capitale de l'empire de Trébizonde, port des routes de Perse, de Tabriz et de Caffa ; les Génois y tiennent le Léontokastron.",
+  "sources": [
+    "Empire of Trebizond",
+    "Trabzon"
+  ]
+}

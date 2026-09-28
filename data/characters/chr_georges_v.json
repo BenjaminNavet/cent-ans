@@ -1,0 +1,48 @@
+{
+  "id": "chr_georges_v",
+  "name": {
+    "display": "Georges V le Brillant",
+    "local": "გიორგი V ბრწყინვალე",
+    "local_language": "géorgien"
+  },
+  "epithet": "le Brillant",
+  "sex": "male",
+  "house": "Bagratides",
+  "faction": "fac_georgia",
+  "role": "ruler",
+  "birth": {
+    "value": "1286",
+    "place": "Tbilissi"
+  },
+  "death": {
+    "value": "1346",
+    "place": "Tbilissi"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi de Géorgie",
+      "from": {
+        "value": "1314"
+      },
+      "note": "Règne jusqu'en 1346."
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 8,
+    "court": 6
+  },
+  "traits": [
+    "trait_just",
+    "trait_cultured",
+    "trait_diplomat"
+  ],
+  "piety": 75,
+  "starting_location": "prov_kartli",
+  "status": "at_court",
+  "description": "Roi de Géorgie, restaurateur du royaume après l'Ilkhanat.",
+  "sources": [
+    "George V of Georgia"
+  ]
+}

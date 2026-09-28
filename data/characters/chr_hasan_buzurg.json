@@ -1,0 +1,47 @@
+{
+  "id": "chr_hasan_buzurg",
+  "name": {
+    "display": "Hasan Buzurg",
+    "local": "حسن بزرگ",
+    "local_language": "arabe"
+  },
+  "sex": "male",
+  "house": "Djalayirides",
+  "faction": "fac_jalayirids",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date approximative ou discutée."
+  },
+  "death": {
+    "value": "1356-10-02"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Sultan djalayiride",
+      "from": {
+        "value": "1336"
+      },
+      "note": "Prend Bagdad en 1336-1338 ; date exacte incertaine."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_ambitious"
+  ],
+  "piety": 45,
+  "starting_location": "prov_mosul",
+  "status": "at_court",
+  "description": "Chef djalayiride, gouverneur d'Ilkhanat, fondateur de la dynastie de Bagdad (naissance approximative).",
+  "sources": [
+    "Hasan Buzurg",
+    "Jalayirids"
+  ]
+}

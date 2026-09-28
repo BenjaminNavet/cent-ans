@@ -155,6 +155,50 @@
         "fac_isles"
       ],
       "prompt": "Gaelic Irish and Hebridean fashion: saffron-dyed linen leine (long tunic), brat wool cloak pinned with a brooch, léine sleeves, bare-legged or simple hose, no continental plate armour"
+    },
+    {
+      "id": "anatolie",
+      "label": "Beyliks turcs d'Anatolie",
+      "factions": [
+        "fac_ottoman",
+        "fac_karasi",
+        "fac_saruhan",
+        "fac_aydin",
+        "fac_mentese",
+        "fac_germiyan",
+        "fac_hamid",
+        "fac_teke",
+        "fac_esrefid",
+        "fac_karaman",
+        "fac_eretna",
+        "fac_candar",
+        "fac_dulkadir"
+      ],
+      "prompt": "Anatolian Turkish beylik fashion: long silk kaftan with embroidered collar, wrapped turban or felt cap (kalpak), wide sash belt, soft leather boots, moustache and short beard, no plate armour, decorated composite bow"
+    },
+    {
+      "id": "levant",
+      "label": "Mamelouks, Levant et Mésopotamie",
+      "factions": [
+        "fac_mamluks",
+        "fac_hama",
+        "fac_artuqids",
+        "fac_jalayirids"
+      ],
+      "prompt": "Mamluk and Levantine fashion: long silk robe (qaba) with tiraz armbands, tall conical turban or kalawta cap, sash belt, curved sabre, embroidered gold thread for emirs, sunburnt features, Arabic or Turco-Circassian appearance"
+    },
+    {
+      "id": "caucase",
+      "label": "Trébizonde, Cilicie, Géorgie et Caucase",
+      "factions": [
+        "fac_trebizond",
+        "fac_cilicia",
+        "fac_georgia",
+        "fac_samtskhe",
+        "fac_circassia",
+        "fac_alania"
+      ],
+      "prompt": "Eastern Christian and Caucasian fashion: long brocade tunic with jewelled collar, fur-trimmed cloak, tall hat or crown, tooled belt with dagger, Byzantine-Georgian embroidery, thick beard, Caucasian highlanders in felt cloaks and papakha hats"
     }
   ],
   "default_culture": "france",

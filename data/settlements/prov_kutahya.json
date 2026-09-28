@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_kutahya",
+    "province": "prov_kutahya",
+    "kind": "city",
+    "name": {
+      "display": "Kütahya (Cotyaeum)",
+      "local": "Kütahya",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      29.98,
+      39.42
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des Germiyan.",
+    "sources": [
+      "Germiyan"
+    ]
+  },
+  {
+    "id": "set_afyon",
+    "province": "prov_kutahya",
+    "kind": "town",
+    "name": {
+      "display": "Afyonkarahisar",
+      "local": "Karahisar",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      30.54,
+      38.75
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Forteresse sur son rocher, place des pavots.",
+    "sources": [
+      "Germiyan"
+    ]
+  },
+  {
+    "id": "set_usak",
+    "province": "prov_kutahya",
+    "kind": "village",
+    "name": {
+      "display": "Uşak"
+    },
+    "lonlat": [
+      29.4,
+      38.68
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg du haut Méandre.",
+    "sources": [
+      "Germiyan"
+    ]
+  }
+]

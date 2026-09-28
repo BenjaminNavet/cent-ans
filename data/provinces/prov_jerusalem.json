@@ -1,0 +1,91 @@
+{
+  "id": "prov_jerusalem",
+  "name": {
+    "display": "Jérusalem et Hébron",
+    "local": "القدس",
+    "local_language": "arabe"
+  },
+  "region": "levant",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Jourdain"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Jérusalem (al-Quds)",
+      "local": "القدس",
+      "local_language": "arabe"
+    },
+    "lat": 31.78,
+    "lon": 35.23
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.23,
+      31.78
+    ],
+    "seed_lonlat": [
+      35.2,
+      31.9
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_mamluks",
+  "culture": "cul_arabic",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 40000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4800,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1200,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 480,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 900,
+  "description": "Ville sainte des trois religions, sous les Mamelouks depuis 1244 ; Hébron et Naplouse dans les collines.",
+  "sources": [
+    "Jerusalem",
+    "Hebron",
+    "Nablus"
+  ]
+}

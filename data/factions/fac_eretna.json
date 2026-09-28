@@ -1,0 +1,61 @@
+{
+  "id": "fac_eretna",
+  "name": {
+    "display": "Beylik d'Eretna",
+    "local": "Eretna Beyliği",
+    "local_language": "turc ottoman"
+  },
+  "short_name": "Eretna",
+  "adjective": "d'Eretna",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_eretna",
+  "capital": "prov_sivas",
+  "capital_city": "Sivas (Sébaste)",
+  "religion": "rel_islam",
+  "culture": "cul_turkish",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_eretna",
+  "heraldry": {
+    "blazon": "D'argent au sautoir d'azur.",
+    "description": "Couleurs de convention d'Eretna.",
+    "primary_color": "#F3F0E4",
+    "secondary_color": "#2B4A9E",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Gouverneur ilkhanide d'Anatolie",
+    "Bey de Sivas"
+  ],
+  "treasury": 14000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_karaman",
+      "status": "peace",
+      "note": "Rival pour le plateau de Konya."
+    },
+    {
+      "faction": "fac_mamluks",
+      "status": "peace",
+      "note": "Voisin méridional."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 65,
+    "trade": 55,
+    "piety": 55
+  },
+  "description": "Ancien gouverneur ilkhanide de Roum, Eretna devient autonome après la mort d'Abu Saïd (1335) ; il ne prend le titre de sultan qu'en 1341-1343.",
+  "sources": [
+    "Eretna",
+    "Eretnids"
+  ]
+}

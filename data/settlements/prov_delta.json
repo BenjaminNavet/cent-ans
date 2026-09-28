@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_damietta",
+    "province": "prov_delta",
+    "kind": "city",
+    "name": {
+      "display": "Damiette (Dumyat)",
+      "local": "دمياط",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      31.82,
+      31.42
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port et forteresse de la bouche orientale du Nil.",
+    "sources": [
+      "Nile Delta"
+    ]
+  },
+  {
+    "id": "set_mansura",
+    "province": "prov_delta",
+    "kind": "town",
+    "name": {
+      "display": "Mansourah",
+      "local": "المنصورة",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      31.38,
+      31.04
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la victoire de 1250.",
+    "sources": [
+      "Nile Delta"
+    ]
+  },
+  {
+    "id": "set_tanta",
+    "province": "prov_delta",
+    "kind": "town",
+    "name": {
+      "display": "Tanta",
+      "local": "طنطا",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      31.0,
+      30.79
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Marché du Delta et pèlerinage de al-Badawi.",
+    "sources": [
+      "Nile Delta"
+    ]
+  }
+]

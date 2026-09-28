@@ -1,0 +1,52 @@
+{
+  "id": "chr_al_nasir_muhammad",
+  "name": {
+    "display": "Al-Nasir Muhammad",
+    "local": "الناصر محمد بن قلاوون",
+    "local_language": "arabe"
+  },
+  "sex": "male",
+  "house": "Qalawunides",
+  "faction": "fac_mamluks",
+  "role": "ruler",
+  "birth": {
+    "value": "1285-03-24",
+    "place": "Le Caire"
+  },
+  "death": {
+    "value": "1341-06-07",
+    "place": "Le Caire"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Sultan mamelouk",
+      "from": {
+        "value": "1310"
+      },
+      "note": "Troisième règne, jusqu'en 1341."
+    }
+  ],
+  "skills": {
+    "command": 7,
+    "governance": 9,
+    "court": 6
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_builder",
+    "trait_greedy"
+  ],
+  "piety": 65,
+  "family": {
+    "children": [
+      "chr_anuk"
+    ]
+  },
+  "starting_location": "prov_cairo",
+  "status": "at_court",
+  "description": "Fils de Qalawun, sultan dès 1293, chassé deux fois puis rétabli ; il bâtit la Citadelle, encourage le commerce et régnera jusqu'en 1341.",
+  "sources": [
+    "Al-Nasir Muhammad"
+  ]
+}

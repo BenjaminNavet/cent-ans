@@ -1,0 +1,56 @@
+{
+  "id": "tit_trebizond",
+  "rank": "kingdom",
+  "name": {
+    "display": "Empire de Trébizonde",
+    "local": "Βασιλεία τῆς Τραπεζοῦντος",
+    "local_language": "grec pontique"
+  },
+  "heraldry": {
+    "blazon": "D'or à l'aigle de sable.",
+    "description": "Aigle impérial des Grands Comnènes ; couleurs de convention.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#2A2A2A",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_provinces": [
+    "prov_kerasous",
+    "prov_trebizond"
+  ],
+  "holder_1337": {
+    "faction": "fac_trebizond",
+    "sources": [
+      "Empire of Trebizond",
+      "Basil of Trebizond"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_trebizond_hold",
+      "title": "Le dernier empire romain",
+      "description": "Conserver le trône de Trébizonde.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_trebizond"
+      }
+    },
+    {
+      "id": "obj_trebizond_coast",
+      "title": "La côte pontique",
+      "description": "Tenir Trébizonde et Kérasonte.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_trebizond",
+          "prov_kerasous"
+        ]
+      }
+    }
+  ],
+  "description": "État byzantin d'Anatolie pontique, dernier héritier de l'Empire des Comnènes ; Basile (1332-1340) règne sur une côte riche, mais son épouse Irène Paléologue va l'empoisonner en 1340.",
+  "sources": [
+    "Empire of Trebizond",
+    "Basil of Trebizond"
+  ]
+}

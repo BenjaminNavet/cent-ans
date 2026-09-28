@@ -1,0 +1,100 @@
+{
+  "id": "prov_mentese",
+  "name": {
+    "display": "Menteşe (Milas)",
+    "local": "Menteşe",
+    "local_language": "turc ottoman"
+  },
+  "region": "anatolie",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Dalaman"
+  ],
+  "ports": [
+    "Makri",
+    "Bodrum"
+  ],
+  "sea_zones": [
+    "sea_aegean",
+    "sea_levantine"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wood",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Milas (Mylasa)",
+      "local": "Milas",
+      "local_language": "turc ottoman"
+    },
+    "lat": 37.31,
+    "lon": 27.78
+  },
+  "geo": {
+    "capital_lonlat": [
+      27.78,
+      37.31
+    ],
+    "seed_lonlat": [
+      28.4,
+      37.1
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_mentese",
+  "culture": "cul_turkish",
+  "religion": "rel_islam",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 34000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4100,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1000,
+        "unrest": 5,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 70
+      },
+      "nobility": {
+        "count": 410,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation de jeu (aucun recensement du XIVe siècle)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field",
+    "bld_port"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1000,
+  "description": "Beylik côtier de Carie et de Lycie occidentale, marin et corsaire, face à Rhodes des Hospitaliers.",
+  "sources": [
+    "Menteşe",
+    "Milas",
+    "Muğla"
+  ]
+}

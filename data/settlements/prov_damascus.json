@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_damascus",
+    "province": "prov_damascus",
+    "kind": "city",
+    "name": {
+      "display": "Damas (Dimashq)",
+      "local": "دمشق",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      36.3,
+      33.5
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Grande cité du Levant, capitale du niyaba de Syrie.",
+    "sources": [
+      "Damascus"
+    ]
+  },
+  {
+    "id": "set_baalbek",
+    "province": "prov_damascus",
+    "kind": "town",
+    "name": {
+      "display": "Baalbek",
+      "local": "بعلبك",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      36.2,
+      34.0
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Cité des temples de Jupiter, forteresse mamelouke.",
+    "sources": [
+      "Damascus"
+    ]
+  },
+  {
+    "id": "set_beirut",
+    "province": "prov_damascus",
+    "kind": "town",
+    "name": {
+      "display": "Beyrouth",
+      "local": "بيروت",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.5,
+      33.89
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de Damas sur la côte du Levant.",
+    "sources": [
+      "Damascus"
+    ]
+  }
+]
