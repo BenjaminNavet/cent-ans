@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_nenagh",
+    "province": "prov_ormond",
+    "kind": "city",
+    "name": {
+      "display": "Nenagh",
+      "local": "An tAonach",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -8.198,
+      52.862
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Château de Nenagh, chef-lieu des Butler avant le déplacement du siège à Kilkenny.",
+    "sources": [
+      "Nenagh"
+    ]
+  },
+  {
+    "id": "set_gowran",
+    "province": "prov_ormond",
+    "kind": "castle",
+    "name": {
+      "display": "Gowran",
+      "local": "Gabhrán",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -7.077,
+      52.63
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Résidence où meurt James Butler, 1er comte d'Ormond, le 6 janvier 1338.",
+    "sources": [
+      "James Butler, 1er comte d'Ormond"
+    ]
+  },
+  {
+    "id": "set_holycross",
+    "province": "prov_ormond",
+    "kind": "abbey",
+    "name": {
+      "display": "Holy Cross",
+      "local": "Mainistir na Croise Naofa",
+      "local_language": "irlandais moyen"
+    },
+    "lonlat": [
+      -7.867,
+      52.649
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Abbaye cistercienne fondée v. 1180, célèbre lieu de pèlerinage (relique de la Vraie Croix).",
+    "sources": [
+      "Abbaye de Holy Cross"
+    ]
+  }
+]

@@ -1,8 +1,8 @@
 {
   "id": "prov_lancashire",
   "name": {
-    "display": "Lancastre et Cheshire",
-    "local": "Lancastreshire",
+    "display": "Cheshire",
+    "local": "Chestershire",
     "local_language": "moyen anglais"
   },
   "region": "angleterre_nord",
@@ -10,9 +10,7 @@
   "climate": "oceanic",
   "neighbors": [],
   "rivers": [
-    "Ribble",
     "Mersey",
-    "Lune",
     "Dee"
   ],
   "coastal": true,
@@ -30,23 +28,23 @@
   ],
   "capital_city": {
     "name": {
-      "display": "Lancastre",
-      "local": "Lancastre",
+      "display": "Chester",
+      "local": "Chester",
       "local_language": "moyen anglais"
     },
-    "lat": 54.0466,
-    "lon": -2.8007
+    "lat": 53.19,
+    "lon": -2.8914
   },
   "geo": {
     "capital_lonlat": [
-      -2.8007,
-      54.0466
+      -2.8914,
+      53.19
     ],
     "seed_lonlat": [
-      -2.6,
-      53.6
+      -2.7,
+      53.15
     ],
-    "voronoi_weight": 0.9
+    "voronoi_weight": 0.7
   },
   "owner": "fac_england",
   "culture": "cul_english",
@@ -96,10 +94,10 @@
   ],
   "fortification_level": 2,
   "base_supply": 3000,
-  "description": "Comté de Lancastre (Henri de Lancastre, père d'Henri de Grosmont ; palatinat en 1351) et comté palatin de Chester (domaine du prince). Sel de Cheshire, archers du Cheshire, Chester, port vers l'Irlande.",
+  "description": "Comté palatin de Chester, domaine propre du prince Édouard de Woodstock (comte de Chester depuis 1333) ; sel de Cheshire, archers du Cheshire réputés, port de Chester vers l'Irlande. Le comté de Lancastre voisin, tenu par Henri, 3e comte de Lancastre, forme désormais sa propre province (prov_lancaster, lot FE4c).",
   "sources": [
-    "Comté de Lancastre",
+    "Comté palatin de Chester",
     "Cheshire",
-    "Henri de Lancastre (1281-1345)"
+    "Édouard de Woodstock"
   ]
 }
