@@ -103,7 +103,7 @@ pub use battle_auto::{
     FieldConditions, Side, SideOutcome, UnitFamily, UnitProfile, Winner,
 };
 pub use battle_request::{BattleRequestError, PendingBattle, NO_QUARTER_PIETY};
-pub use buildings::{BuildOption, EffectTotals, EffectValue, ProvinceCity};
+pub use buildings::{BuildOption, DemolitionPreview, EffectTotals, EffectValue, ProvinceCity};
 pub use capture::{
     CaptureDecisionView, CaptureEffects, CaptureError, CaptureOptionView, CaptureOutcome,
     CaptureState, PendingCapture,
@@ -161,3 +161,5 @@ mod capture_tests;
 mod review_tests;
 #[cfg(test)]
 mod rs_c_tests;
+#[cfg(test)]
+mod rs_n_tests;

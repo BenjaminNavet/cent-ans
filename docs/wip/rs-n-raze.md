@@ -27,7 +27,9 @@ joueur / dépendance (`buildings::demolition_blocker`). Aucune UI n'existait.
 
 ## État
 - [x] Skeleton commité (ce fichier).
-- [ ] Cœur : `demolition_preview` + tests.
+- [x] Cœur : `buildings::demolition_preview`/`DemolitionPreview`, `demolish()`
+      réutilise le même calcul de remboursement. 4 tests `rs_n_tests.rs`
+      (autorisé, bloqué par dépendance, bloqué par siège, aperçu = réel).
 - [ ] Pont : `settlement_demolition_preview`.
 - [ ] Godot : bouton, dialogue, wiring, tests.
 - [ ] Codex.
