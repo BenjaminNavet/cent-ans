@@ -71,13 +71,26 @@ def test_vectorise_and_capital_snapping() -> None:
     assert moved and labels[int(snapped[1]), int(snapped[0])] == 2
 
 
-def test_assignable_land_drops_large_seedless_landmass() -> None:
-    """A big landmass without seed is excluded, a small island is kept."""
+def test_seedless_islands_join_only_small_ones_within_reach() -> None:
+    """A big landmass without seed is excluded, a small island near a seed is kept."""
     land = np.zeros((20, 20), dtype=bool)
     land[1:9, 1:9] = True  # seeded continent
     land[12:19, 1:19] = True  # large seedless landmass
     land[2:4, 15:17] = True  # small seedless island
+    land[18:20, 0:1] = False
     sources = np.array([[4, 4]])
-    kept = provinces.assignable_land(land, sources, max_seedless_px=20)
-    assert kept[4, 4] and kept[2, 15]
-    assert not kept[15, 10]
+    islands = provinces.seedless_islands(land, sources, 15.0, max_seedless_px=20)
+    assert islands[2, 15] and not islands[15, 10] and not islands[4, 4]
+    assert not provinces.seedless_islands(land, sources, 5.0, max_seedless_px=20)[2, 15]
+
+
+def test_land_within_reach_is_measured_over_land() -> None:
+    """Land farther than the limit over land stays out (ADR 0115), even if close by air."""
+    land = np.zeros((10, 30), dtype=bool)
+    land[1, :] = True  # long coastal strip
+    land[1:9, 0] = True
+    land[8, :] = True  # the far side, close by air to the start, far over land
+    sources = np.array([[1, 2]])
+    reach = provinces.land_within_reach(land, sources, 20.0)
+    assert reach[1, 20] and not reach[1, 25]
+    assert reach[8, 5] and not reach[8, 20]
