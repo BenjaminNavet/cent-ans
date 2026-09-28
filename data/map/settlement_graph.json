@@ -513,13 +513,6 @@
   },
   {
    "from": "set_abbiategrasso",
-   "to": "set_pavia",
-   "cost": 30.48,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_abbiategrasso",
    "to": "set_turin",
    "cost": 51.59,
    "road": true,
@@ -1129,8 +1122,8 @@
   },
   {
    "from": "set_aleria",
-   "to": "set_san_gimignano",
-   "cost": 294.59,
+   "to": "set_florence",
+   "cost": 349.81,
    "road": false,
    "sea": false
   },
@@ -1768,13 +1761,6 @@
    "from": "set_ancone",
    "to": "set_fonte_avellana",
    "cost": 63.73,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_ancone",
-   "to": "set_urbino",
-   "cost": 72.36,
    "road": false,
    "sea": false
   },
@@ -2473,37 +2459,30 @@
   },
   {
    "from": "set_assisi",
-   "to": "set_camerino",
-   "cost": 37.67,
+   "to": "set_fabriano",
+   "cost": 41.45,
    "road": false,
    "sea": false
   },
   {
    "from": "set_assisi",
-   "to": "set_capua",
-   "cost": 128.01,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_assisi",
-   "to": "set_fabriano",
-   "cost": 37.75,
+   "to": "set_florence",
+   "cost": 129.99,
    "road": false,
    "sea": false
   },
   {
    "from": "set_assisi",
    "to": "set_gubbio",
-   "cost": 31.2,
+   "cost": 23.42,
    "road": false,
    "sea": false
   },
   {
    "from": "set_assisi",
    "to": "set_perugia",
-   "cost": 19.04,
-   "road": false,
+   "cost": 6.73,
+   "road": true,
    "sea": false
   },
   {
@@ -4496,6 +4475,13 @@
   },
   {
    "from": "set_benevento",
+   "to": "set_grottaglie",
+   "cost": 116.66,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_benevento",
    "to": "set_montecassino",
    "cost": 45.25,
    "road": true,
@@ -4972,15 +4958,15 @@
   },
   {
    "from": "set_biguglia",
-   "to": "set_corte",
-   "cost": 84.59,
+   "to": "set_certaldo",
+   "cost": 249.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_biguglia",
-   "to": "set_lucca",
-   "cost": 241.06,
+   "to": "set_corte",
+   "cost": 84.59,
    "road": false,
    "sea": false
   },
@@ -5203,13 +5189,6 @@
   },
   {
    "from": "set_bologne",
-   "to": "set_chiaravalle",
-   "cost": 97.09,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_bologne",
    "to": "set_faenza",
    "cost": 24.49,
    "road": true,
@@ -5308,15 +5287,8 @@
   },
   {
    "from": "set_bondeno",
-   "to": "set_mantova",
-   "cost": 100.64,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_bondeno",
    "to": "set_modena",
-   "cost": 92.77,
+   "cost": 74.14,
    "road": false,
    "sea": false
   },
@@ -6546,6 +6518,20 @@
    "sea": false
   },
   {
+   "from": "set_camaiore",
+   "to": "set_lucca",
+   "cost": 14.9,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_camaiore",
+   "to": "set_montecarlo",
+   "cost": 23.9,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_camerino",
    "to": "set_fabriano",
    "cost": 25.73,
@@ -6554,9 +6540,16 @@
   },
   {
    "from": "set_camerino",
-   "to": "set_montecassino",
-   "cost": 96.09,
-   "road": true,
+   "to": "set_fonte_avellana",
+   "cost": 50.31,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_camerino",
+   "to": "set_orvieto",
+   "cost": 90.91,
+   "road": false,
    "sea": false
   },
   {
@@ -7219,15 +7212,15 @@
   },
   {
    "from": "set_certaldo",
-   "to": "set_lucca",
-   "cost": 54.4,
+   "to": "set_fontevivo",
+   "cost": 165.46,
    "road": false,
    "sea": false
   },
   {
    "from": "set_certaldo",
-   "to": "set_pisa",
-   "cost": 55.35,
+   "to": "set_levanto",
+   "cost": 201.55,
    "road": false,
    "sea": false
   },
@@ -7247,16 +7240,44 @@
   },
   {
    "from": "set_certaldo",
-   "to": "set_siena",
-   "cost": 34.59,
+   "to": "set_vallombrosa",
+   "cost": 44.99,
    "road": false,
    "sea": false
   },
   {
    "from": "set_certaldo",
-   "to": "set_vallombrosa",
-   "cost": 44.99,
+   "to": "set_vicopisano",
+   "cost": 40.41,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_certaldo",
+   "to": "set_viterbo",
+   "cost": 152.43,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_certosa_di_pavia",
+   "to": "set_chiaravalle",
+   "cost": 9.94,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_certosa_di_pavia",
+   "to": "set_pavia",
+   "cost": 3.27,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_certosa_di_pavia",
+   "to": "set_voghera",
+   "cost": 14.62,
+   "road": true,
    "sea": false
   },
   {
@@ -7968,6 +7989,13 @@
   },
   {
    "from": "set_chiaravalle",
+   "to": "set_fontanellato",
+   "cost": 46.62,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_chiaravalle",
    "to": "set_lodi",
    "cost": 11.38,
    "road": true,
@@ -7989,15 +8017,22 @@
   },
   {
    "from": "set_chiaravalle",
-   "to": "set_pavia",
-   "cost": 12.52,
+   "to": "set_san_benedetto_po",
+   "cost": 103.8,
    "road": true,
    "sea": false
   },
   {
    "from": "set_chiaravalle",
-   "to": "set_prato",
-   "cost": 224.29,
+   "to": "set_san_fruttuoso",
+   "cost": 177.95,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_chiaravalle",
+   "to": "set_vigevano",
+   "cost": 31.46,
    "road": false,
    "sea": false
   },
@@ -8116,7 +8151,7 @@
   {
    "from": "set_chioggia",
    "to": "set_este",
-   "cost": 99.48,
+   "cost": 99.73,
    "road": false,
    "sea": false
   },
@@ -8129,24 +8164,10 @@
   },
   {
    "from": "set_chioggia",
-   "to": "set_monselice",
-   "cost": 83.83,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_chioggia",
-   "to": "set_padova",
-   "cost": 80.37,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_chioggia",
    "to": "set_ravenna",
-   "cost": 185.51,
+   "cost": 128.26,
    "road": false,
-   "sea": true
+   "sea": false
   },
   {
    "from": "set_chioggia",
@@ -8627,7 +8648,7 @@
   {
    "from": "set_cologna_veneta",
    "to": "set_este",
-   "cost": 20.24,
+   "cost": 23.4,
    "road": true,
    "sea": false
   },
@@ -8643,6 +8664,20 @@
    "to": "set_lazise",
    "cost": 25.72,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cologna_veneta",
+   "to": "set_monselice",
+   "cost": 17.14,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_cologna_veneta",
+   "to": "set_san_benedetto_po",
+   "cost": 68.63,
+   "road": false,
    "sea": false
   },
   {
@@ -11231,22 +11266,43 @@
   {
    "from": "set_este",
    "to": "set_lendinara",
-   "cost": 16.85,
+   "cost": 8.75,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_este",
+   "to": "set_mestre",
+   "cost": 59.47,
    "road": true,
    "sea": false
   },
   {
    "from": "set_este",
    "to": "set_monselice",
-   "cost": 7.94,
+   "cost": 9.14,
    "road": true,
    "sea": false
   },
   {
    "from": "set_este",
-   "to": "set_praglia",
-   "cost": 24.7,
-   "road": false,
+   "to": "set_persiceto",
+   "cost": 51.0,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_este",
+   "to": "set_treviso",
+   "cost": 73.41,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_este",
+   "to": "set_venise",
+   "cost": 57.38,
+   "road": true,
    "sea": false
   },
   {
@@ -11496,6 +11552,13 @@
   },
   {
    "from": "set_fabriano",
+   "to": "set_florence",
+   "cost": 141.99,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fabriano",
    "to": "set_fonte_avellana",
    "cost": 24.59,
    "road": false,
@@ -11503,8 +11566,8 @@
   },
   {
    "from": "set_fabriano",
-   "to": "set_gubbio",
-   "cost": 26.83,
+   "to": "set_viterbo",
+   "cost": 121.17,
    "road": false,
    "sea": false
   },
@@ -11533,6 +11596,13 @@
    "from": "set_faenza",
    "to": "set_vallombrosa",
    "cost": 67.3,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_faenza",
+   "to": "set_verucchio",
+   "cost": 55.19,
    "road": false,
    "sea": false
   },
@@ -11628,6 +11698,34 @@
    "sea": false
   },
   {
+   "from": "set_fermignano",
+   "to": "set_florence",
+   "cost": 109.47,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fermignano",
+   "to": "set_fonte_avellana",
+   "cost": 22.32,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fermignano",
+   "to": "set_san_leo",
+   "cost": 16.09,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fermignano",
+   "to": "set_urbino",
+   "cost": 3.83,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_ferrare",
    "to": "set_lendinara",
    "cost": 27.42,
@@ -11637,22 +11735,22 @@
   {
    "from": "set_ferrare",
    "to": "set_modena",
-   "cost": 122.65,
-   "road": false,
+   "cost": 51.87,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_ferrare",
    "to": "set_pomposa",
-   "cost": 87.14,
+   "cost": 61.29,
    "road": false,
    "sea": false
   },
   {
    "from": "set_ferrare",
    "to": "set_rovigo",
-   "cost": 57.94,
-   "road": false,
+   "cost": 23.84,
+   "road": true,
    "sea": false
   },
   {
@@ -11825,8 +11923,8 @@
   },
   {
    "from": "set_florence",
-   "to": "set_gubbio",
-   "cost": 116.54,
+   "to": "set_fontanellato",
+   "cost": 150.64,
    "road": false,
    "sea": false
   },
@@ -11841,6 +11939,27 @@
    "from": "set_florence",
    "to": "set_prato",
    "cost": 8.81,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_florence",
+   "to": "set_san_benedetto_po",
+   "cost": 214.49,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_florence",
+   "to": "set_santarcangelo",
+   "cost": 101.17,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_florence",
+   "to": "set_sestri_levante",
+   "cost": 119.91,
    "road": true,
    "sea": false
   },
@@ -11901,6 +12020,34 @@
    "sea": false
   },
   {
+   "from": "set_fontanellato",
+   "to": "set_fontevivo",
+   "cost": 2.56,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fontanellato",
+   "to": "set_mantova",
+   "cost": 87.49,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fontanellato",
+   "to": "set_parma",
+   "cost": 7.68,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_fontanellato",
+   "to": "set_soave",
+   "cost": 99.5,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_fontdouce",
    "to": "set_pons",
    "cost": 10.8,
@@ -11924,14 +12071,21 @@
   {
    "from": "set_fonte_avellana",
    "to": "set_gubbio",
-   "cost": 23.31,
+   "cost": 35.43,
    "road": false,
    "sea": false
   },
   {
    "from": "set_fonte_avellana",
-   "to": "set_urbino",
-   "cost": 24.17,
+   "to": "set_vallombrosa",
+   "cost": 99.98,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fonte_avellana",
+   "to": "set_verucchio",
+   "cost": 56.43,
    "road": false,
    "sea": false
   },
@@ -11974,6 +12128,34 @@
    "from": "set_fontenay_le_comte",
    "to": "set_vouvant",
    "cost": 16.65,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fontevivo",
+   "to": "set_lazise",
+   "cost": 82.42,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fontevivo",
+   "to": "set_lodi",
+   "cost": 68.67,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_fontevivo",
+   "to": "set_parma",
+   "cost": 8.95,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_fontevivo",
+   "to": "set_san_benedetto_po",
+   "cost": 95.74,
    "road": false,
    "sea": false
   },
@@ -12028,8 +12210,8 @@
   },
   {
    "from": "set_forli",
-   "to": "set_rimini",
-   "cost": 23.01,
+   "to": "set_santarcangelo",
+   "cost": 18.55,
    "road": true,
    "sea": false
   },
@@ -12518,13 +12700,6 @@
   },
   {
    "from": "set_genes",
-   "to": "set_pavia",
-   "cost": 132.05,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_genes",
    "to": "set_san_fruttuoso",
    "cost": 20.48,
    "road": true,
@@ -12534,6 +12709,13 @@
    "from": "set_genes",
    "to": "set_savona",
    "cost": 39.61,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_genes",
+   "to": "set_vigevano",
+   "cost": 76.03,
    "road": true,
    "sea": false
   },
@@ -12836,6 +13018,55 @@
    "to": "set_vincennes",
    "cost": 7.98,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_gonzaga",
+   "to": "set_mantova",
+   "cost": 49.58,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gonzaga",
+   "to": "set_modena",
+   "cost": 38.89,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gonzaga",
+   "to": "set_monza",
+   "cost": 220.54,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gonzaga",
+   "to": "set_nonantola",
+   "cost": 47.78,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gonzaga",
+   "to": "set_parma",
+   "cost": 74.14,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gonzaga",
+   "to": "set_prato",
+   "cost": 179.74,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_gonzaga",
+   "to": "set_san_benedetto_po",
+   "cost": 19.14,
+   "road": false,
    "sea": false
   },
   {
@@ -13210,6 +13441,20 @@
    "sea": false
   },
   {
+   "from": "set_grottaglie",
+   "to": "set_massafra",
+   "cost": 27.26,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_grottaglie",
+   "to": "set_taranto",
+   "cost": 18.47,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_guadix",
    "to": "set_loja",
    "cost": 91.33,
@@ -13226,14 +13471,14 @@
   {
    "from": "set_gubbio",
    "to": "set_perugia",
-   "cost": 30.59,
+   "cost": 19.19,
    "road": false,
    "sea": false
   },
   {
    "from": "set_gubbio",
-   "to": "set_urbino",
-   "cost": 41.91,
+   "to": "set_vallombrosa",
+   "cost": 90.45,
    "road": false,
    "sea": false
   },
@@ -15494,7 +15739,7 @@
   {
    "from": "set_lendinara",
    "to": "set_rovigo",
-   "cost": 30.46,
+   "cost": 31.46,
    "road": false,
    "sea": false
   },
@@ -15614,13 +15859,6 @@
    "from": "set_lessay",
    "to": "set_villedieu_les_poeles",
    "cost": 48.65,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_levanto",
-   "to": "set_pisa",
-   "cost": 121.02,
    "road": false,
    "sea": false
   },
@@ -15969,15 +16207,8 @@
   },
   {
    "from": "set_lodi",
-   "to": "set_lucca",
-   "cost": 181.55,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_lodi",
    "to": "set_mantova",
-   "cost": 162.8,
+   "cost": 154.48,
    "road": false,
    "sea": false
   },
@@ -15990,22 +16221,15 @@
   },
   {
    "from": "set_lodi",
-   "to": "set_nonantola",
-   "cost": 70.21,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_lodi",
-   "to": "set_pavia",
-   "cost": 15.39,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_lodi",
    "to": "set_sterzing",
    "cost": 345.98,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_lodi",
+   "to": "set_vigevano",
+   "cost": 50.62,
    "road": false,
    "sea": false
   },
@@ -16151,22 +16375,15 @@
   },
   {
    "from": "set_lucca",
-   "to": "set_pisa",
-   "cost": 7.82,
+   "to": "set_montecarlo",
+   "cost": 6.1,
    "road": true,
    "sea": false
   },
   {
    "from": "set_lucca",
-   "to": "set_portovenere",
-   "cost": 109.34,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_lucca",
-   "to": "set_prato",
-   "cost": 23.97,
+   "to": "set_pisa",
+   "cost": 7.82,
    "road": true,
    "sea": false
   },
@@ -16543,22 +16760,22 @@
   },
   {
    "from": "set_mantova",
-   "to": "set_modena",
-   "cost": 73.35,
+   "to": "set_san_benedetto_po",
+   "cost": 33.48,
    "road": false,
    "sea": false
   },
   {
    "from": "set_mantova",
-   "to": "set_vangadizza",
-   "cost": 50.91,
+   "to": "set_vallombrosa",
+   "cost": 126.52,
    "road": true,
    "sea": false
   },
   {
    "from": "set_mantova",
    "to": "set_verone",
-   "cost": 59.09,
+   "cost": 52.43,
    "road": false,
    "sea": false
   },
@@ -16735,6 +16952,20 @@
    "to": "set_toulon",
    "cost": 48.49,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_massafra",
+   "to": "set_salerno",
+   "cost": 99.86,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_massafra",
+   "to": "set_taranto",
+   "cost": 8.39,
+   "road": true,
    "sea": false
   },
   {
@@ -16935,16 +17166,9 @@
   },
   {
    "from": "set_mestre",
-   "to": "set_padova",
-   "cost": 30.06,
+   "to": "set_schloss_tirol",
+   "cost": 158.33,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_mestre",
-   "to": "set_sterzing",
-   "cost": 336.22,
-   "road": false,
    "sea": false
   },
   {
@@ -17146,15 +17370,15 @@
   {
    "from": "set_modena",
    "to": "set_nonantola",
-   "cost": 26.86,
-   "road": false,
+   "cost": 9.45,
+   "road": true,
    "sea": false
   },
   {
    "from": "set_modena",
-   "to": "set_pavia",
-   "cost": 106.27,
-   "road": true,
+   "to": "set_vangadizza",
+   "cost": 108.72,
+   "road": false,
    "sea": false
   },
   {
@@ -17209,22 +17433,15 @@
   {
    "from": "set_monselice",
    "to": "set_padova",
-   "cost": 21.23,
+   "cost": 10.61,
    "road": true,
    "sea": false
   },
   {
    "from": "set_monselice",
    "to": "set_praglia",
-   "cost": 10.51,
+   "cost": 5.25,
    "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_monselice",
-   "to": "set_rovigo",
-   "cost": 37.19,
-   "road": false,
    "sea": false
   },
   {
@@ -17280,6 +17497,20 @@
    "from": "set_mont_saint_michel",
    "to": "set_villedieu_les_poeles",
    "cost": 31.18,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_montalcino",
+   "to": "set_san_galgano",
+   "cost": 19.53,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_montalcino",
+   "to": "set_siena",
+   "cost": 24.33,
    "road": false,
    "sea": false
   },
@@ -17368,6 +17599,20 @@
    "sea": false
   },
   {
+   "from": "set_montecarlo",
+   "to": "set_prato",
+   "cost": 17.9,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_montecarlo",
+   "to": "set_vicopisano",
+   "cost": 18.67,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_montecassino",
    "to": "set_naples",
    "cost": 40.12,
@@ -17385,6 +17630,13 @@
    "from": "set_montevergine",
    "to": "set_salerno",
    "cost": 13.89,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_montevergine",
+   "to": "set_taranto",
+   "cost": 109.34,
    "road": true,
    "sea": false
   },
@@ -18230,8 +18482,8 @@
   },
   {
    "from": "set_nonza",
-   "to": "set_pisa",
-   "cost": 201.84,
+   "to": "set_san_gimignano",
+   "cost": 236.53,
    "road": false,
    "sea": false
   },
@@ -18594,8 +18846,8 @@
   },
   {
    "from": "set_orvieto",
-   "to": "set_siena",
-   "cost": 92.22,
+   "to": "set_san_gimignano",
+   "cost": 120.42,
    "road": false,
    "sea": false
   },
@@ -18735,28 +18987,7 @@
   {
    "from": "set_padova",
    "to": "set_praglia",
-   "cost": 14.33,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_padova",
-   "to": "set_schloss_tirol",
-   "cost": 153.77,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_padova",
-   "to": "set_treviso",
-   "cost": 40.69,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_padova",
-   "to": "set_venise",
-   "cost": 29.12,
+   "cost": 7.16,
    "road": true,
    "sea": false
   },
@@ -18936,6 +19167,20 @@
    "sea": false
   },
   {
+   "from": "set_parma",
+   "to": "set_prato",
+   "cost": 119.4,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_parma",
+   "to": "set_verone",
+   "cost": 87.91,
+   "road": false,
+   "sea": false
+  },
+  {
    "from": "set_parthenay",
    "to": "set_poitiers",
    "cost": 45.66,
@@ -18965,30 +19210,16 @@
   },
   {
    "from": "set_pavia",
-   "to": "set_persiceto",
-   "cost": 85.92,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_pavia",
-   "to": "set_pisa",
-   "cost": 190.06,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_pavia",
-   "to": "set_savigliano",
-   "cost": 66.35,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_pavia",
    "to": "set_vigevano",
    "cost": 27.72,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_pavia",
+   "to": "set_voghera",
+   "cost": 12.16,
+   "road": true,
    "sea": false
   },
   {
@@ -19055,23 +19286,9 @@
    "sea": false
   },
   {
-   "from": "set_persiceto",
-   "to": "set_ravenna",
-   "cost": 84.28,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_perugia",
-   "to": "set_siena",
-   "cost": 89.23,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_perugia",
-   "to": "set_urbino",
-   "cost": 71.03,
+   "to": "set_san_gimignano",
+   "cost": 116.36,
    "road": false,
    "sea": false
   },
@@ -19154,16 +19371,23 @@
   },
   {
    "from": "set_pisa",
-   "to": "set_san_gimignano",
-   "cost": 59.12,
+   "to": "set_prato",
+   "cost": 58.62,
    "road": false,
    "sea": false
   },
   {
    "from": "set_pisa",
-   "to": "set_siena",
-   "cost": 87.56,
-   "road": false,
+   "to": "set_san_piero_a_grado",
+   "cost": 4.87,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_pisa",
+   "to": "set_vicopisano",
+   "cost": 7.65,
+   "road": true,
    "sea": false
   },
   {
@@ -19253,7 +19477,7 @@
   {
    "from": "set_pomposa",
    "to": "set_rovigo",
-   "cost": 80.13,
+   "cost": 57.09,
    "road": false,
    "sea": false
   },
@@ -19413,6 +19637,13 @@
   },
   {
    "from": "set_portovenere",
+   "to": "set_prato",
+   "cost": 173.89,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_portovenere",
    "to": "set_sestri_levante",
    "cost": 56.6,
    "road": false,
@@ -19462,15 +19693,8 @@
   },
   {
    "from": "set_praglia",
-   "to": "set_treviso",
-   "cost": 54.91,
-   "road": true,
-   "sea": false
-  },
-  {
-   "from": "set_praglia",
    "to": "set_vicenza",
-   "cost": 42.07,
+   "cost": 28.05,
    "road": false,
    "sea": false
   },
@@ -19589,9 +19813,9 @@
   {
    "from": "set_ravenna",
    "to": "set_rimini",
-   "cost": 24.41,
-   "road": true,
-   "sea": false
+   "cost": 148.81,
+   "road": false,
+   "sea": true
   },
   {
    "from": "set_ravensburg",
@@ -19657,6 +19881,20 @@
    "sea": false
   },
   {
+   "from": "set_revello",
+   "to": "set_saluzzo",
+   "cost": 2.74,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_revello",
+   "to": "set_verzuolo",
+   "cost": 2.76,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_revigny_sur_ornain",
    "to": "set_saint_mihiel",
    "cost": 20.6,
@@ -19707,8 +19945,15 @@
   },
   {
    "from": "set_rimini",
-   "to": "set_urbino",
-   "cost": 38.19,
+   "to": "set_santarcangelo",
+   "cost": 5.14,
+   "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_rimini",
+   "to": "set_verucchio",
+   "cost": 16.04,
    "road": false,
    "sea": false
   },
@@ -19933,13 +20178,6 @@
    "from": "set_rouillac",
    "to": "set_saint_jean_dangely",
    "cost": 39.99,
-   "road": false,
-   "sea": false
-  },
-  {
-   "from": "set_rovigo",
-   "to": "set_vangadizza",
-   "cost": 47.0,
    "road": false,
    "sea": false
   },
@@ -20210,6 +20448,20 @@
    "sea": false
   },
   {
+   "from": "set_saluzzo",
+   "to": "set_savigliano",
+   "cost": 13.29,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_saluzzo",
+   "to": "set_verzuolo",
+   "cost": 2.47,
+   "road": true,
+   "sea": false
+  },
+  {
    "from": "set_san_fruttuoso",
    "to": "set_savona",
    "cost": 115.04,
@@ -20224,9 +20476,9 @@
    "sea": false
   },
   {
-   "from": "set_san_fruttuoso",
-   "to": "set_vigevano",
-   "cost": 168.12,
+   "from": "set_san_galgano",
+   "to": "set_siena",
+   "cost": 22.89,
    "road": false,
    "sea": false
   },
@@ -20234,6 +20486,13 @@
    "from": "set_san_gimignano",
    "to": "set_siena",
    "cost": 28.56,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_san_gimignano",
+   "to": "set_vallombrosa",
+   "cost": 49.84,
    "road": false,
    "sea": false
   },
@@ -20249,6 +20508,27 @@
    "to": "set_zafra",
    "cost": 57.21,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_san_leo",
+   "to": "set_urbino",
+   "cost": 16.4,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_san_leo",
+   "to": "set_vallombrosa",
+   "cost": 73.86,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_san_leo",
+   "to": "set_verucchio",
+   "cost": 20.79,
+   "road": false,
    "sea": false
   },
   {
@@ -20270,6 +20550,13 @@
    "to": "set_vitoria",
    "cost": 166.25,
    "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_san_piero_a_grado",
+   "to": "set_vicopisano",
+   "cost": 11.67,
+   "road": true,
    "sea": false
   },
   {
@@ -20298,6 +20585,13 @@
    "to": "set_turin",
    "cost": 9.61,
    "road": true,
+   "sea": false
+  },
+  {
+   "from": "set_santarcangelo",
+   "to": "set_verucchio",
+   "cost": 9.72,
+   "road": false,
    "sea": false
   },
   {
@@ -20525,13 +20819,6 @@
    "sea": false
   },
   {
-   "from": "set_siena",
-   "to": "set_vallombrosa",
-   "cost": 48.91,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_sille_le_guillaume",
    "to": "set_solesmes",
    "cost": 37.88,
@@ -20752,6 +21039,13 @@
    "from": "set_stavoren",
    "to": "set_zutphen",
    "cost": 148.39,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_sterzing",
+   "to": "set_venise",
+   "cost": 342.31,
    "road": false,
    "sea": false
   },
@@ -21071,13 +21365,6 @@
    "sea": false
   },
   {
-   "from": "set_urbino",
-   "to": "set_vallombrosa",
-   "cost": 88.52,
-   "road": false,
-   "sea": false
-  },
-  {
    "from": "set_uxbridge",
    "to": "set_windsor",
    "cost": 5.71,
@@ -21102,6 +21389,13 @@
    "from": "set_valence_dauphine",
    "to": "set_vienne",
    "cost": 106.74,
+   "road": false,
+   "sea": false
+  },
+  {
+   "from": "set_vallombrosa",
+   "to": "set_verucchio",
+   "cost": 75.97,
    "road": false,
    "sea": false
   },
