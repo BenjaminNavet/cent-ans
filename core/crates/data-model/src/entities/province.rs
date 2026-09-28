@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::common::{LocalizedName, Percent, SocialClass, Sources};
 use crate::ids::{
-    BuildingId, CharacterId, CultureId, FactionId, ProvinceId, ReligionId, ResourceId, SeaZoneId,
+    BuildingId, CultureId, FactionId, ProvinceId, ReligionId, ResourceId, SeaZoneId,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -149,12 +149,6 @@ pub struct Province {
     pub capital_city: CapitalCity,
     /// Faction controlling the province in spring 1337.
     pub owner: FactionId,
-    /// Feudal overlord when the owner holds the province as a fief.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub overlord: Option<FactionId>,
-    /// Character holding the province as an appanage or fief.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub holder: Option<CharacterId>,
     pub culture: CultureId,
     pub religion: ReligionId,
     pub population: Population,

@@ -42,14 +42,6 @@ pub const MEDIATION_TRUCE_TURNS: u32 = 8;
 pub const OFFER_LIFETIME: u32 = 2;
 /// Minimum turns between two offers of the same AI faction to the player.
 pub const OFFER_COOLDOWN: u32 = 4;
-/// Share of a vassal's income paid to its suzerain each turn.
-pub const VASSAL_TRIBUTE_PERCENT: i64 = 10;
-/// Vassals below this loyalty may rebel.
-pub const REBELLION_LOYALTY: u8 = 20;
-/// Vassals below this loyalty ignore their suzerain's calls to arms.
-pub const CALL_TO_ARMS_LOYALTY: u8 = 30;
-/// Chance per turn (‰) that a disloyal vassal rebels.
-pub const REBELLION_PERMILLE: u32 = 250;
 /// Income lost by the target of each embargo.
 pub const EMBARGO_TARGET_PENALTY: f64 = 0.08;
 /// Income lost by the faction imposing each embargo.
@@ -58,8 +50,6 @@ pub const EMBARGO_IMPOSER_PENALTY: f64 = 0.03;
 pub const MEDIATION_COST: i64 = 1000;
 /// Papal favour needed to ask for a mediation.
 pub const MEDIATION_MIN_FAVOR: u8 = 30;
-/// Minimum power ratio to demand vassalage.
-pub const VASSALAGE_POWER_RATIO: f64 = 3.0;
 /// Modifier duration meaning "never expires".
 pub const FOREVER: u32 = u32::MAX;
 
@@ -762,13 +752,13 @@ pub fn evaluate(
                 hard_no = true;
             }
             let ratio = state.faction_power(proposer) / state.faction_power(recipient).max(1.0);
-            if ratio < VASSALAGE_POWER_RATIO {
+            if ratio < data.feudal_rules.vassalage_power_ratio {
                 reasons.push(("Pas assez puissant pour l'exiger".to_owned(), -100));
                 hard_no = true;
             } else {
                 reasons.push((
                     "Rapport de forces".to_owned(),
-                    (((ratio - VASSALAGE_POWER_RATIO) * 10.0) as i32).min(40),
+                    (((ratio - data.feudal_rules.vassalage_power_ratio) * 10.0) as i32).min(40),
                 ));
             }
             reasons.push(("Perte d'indépendance".to_owned(), -40));
@@ -1070,7 +1060,7 @@ impl CampaignState {
             if &vassal == target
                 || self.is_at_war(&vassal, target)
                 || self.is_allied(&vassal, target)
-                || self.factions[&vassal].loyalty < CALL_TO_ARMS_LOYALTY
+                || self.factions[&vassal].loyalty < data.feudal_rules.call_to_arms_loyalty
             {
                 continue;
             }
@@ -1803,16 +1793,16 @@ pub(crate) fn resolve_diplomacy(
             continue;
         }
         let tribute =
-            (state.factions[&vassal].income_last_turn * VASSAL_TRIBUTE_PERCENT / 100).max(0);
+            (state.factions[&vassal].income_last_turn * data.feudal_rules.vassal_tribute_percent / 100).max(0);
         state.factions.get_mut(&vassal).expect("exists").treasury -= tribute;
         state.factions.get_mut(&suzerain).expect("exists").treasury += tribute;
         let target = loyalty_target(state, data, &vassal, &suzerain);
         let v = state.factions.get_mut(&vassal).expect("exists");
         v.loyalty = move_towards(v.loyalty, target, 5);
         let loyalty = v.loyalty;
-        if loyalty < REBELLION_LOYALTY
+        if loyalty < data.feudal_rules.rebellion_loyalty
             && !state.is_at_war(&vassal, &suzerain)
-            && state.rng.chance_permille(REBELLION_PERMILLE)
+            && state.rng.chance_permille(data.feudal_rules.rebellion_permille)
         {
             state.cut_vassal_tie(&vassal, &suzerain);
             state.start_war(&vassal, &suzerain);
@@ -2125,7 +2115,7 @@ pub fn answers_call_to_arms(
         return false;
     };
     if ally_state.suzerain.as_ref() == Some(defender) {
-        return ally_state.loyalty >= CALL_TO_ARMS_LOYALTY;
+        return ally_state.loyalty >= data.feudal_rules.call_to_arms_loyalty;
     }
     if state
         .factions

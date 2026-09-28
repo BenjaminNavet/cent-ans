@@ -16,6 +16,7 @@
   "culture": "cul_savoyard",
   "succession_law": "male_preference_primogeniture",
   "suzerain": "fac_empire",
+  "primary_title": "tit_savoy",
   "heraldry": {
     "blazon": "De gueules à la croix d'argent.",
     "description": "Croix blanche sur champ rouge, en usage depuis Amédée V.",
