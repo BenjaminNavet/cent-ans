@@ -20,6 +20,11 @@ var _scene: Node = null
 
 func _init() -> void:
 	await process_frame
+	# Réglages par défaut : la taille d'interface du joueur changerait l'échelle de la fenêtre.
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.call("use_test_file")
+		settings.call("_apply_ui_scale")
 	_check_pure()
 	await _check_picker()
 	if _scene != null and is_instance_valid(_scene):
