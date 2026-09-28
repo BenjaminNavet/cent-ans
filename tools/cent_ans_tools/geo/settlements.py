@@ -584,8 +584,13 @@ def flag_roads(
         edge.road = float(road_distance_px[rows, cols].mean()) < limit
 
 
-def road_distance_raster(roads_path: Path, size_px: int) -> np.ndarray | None:
-    """Euclidean distance (px) to the nearest road pixel, or ``None`` without roads."""
+def road_distance_raster(
+    roads_path: Path, size_px: int | tuple[int, int]
+) -> np.ndarray | None:
+    """Euclidean distance (px) to the nearest road pixel, or ``None`` without roads.
+
+    ``size_px`` is the map shape ``(rows, cols)`` (an int for a square map).
+    """
     if not roads_path.exists():
         return None
     from rasterio.features import rasterize
@@ -596,7 +601,11 @@ def road_distance_raster(roads_path: Path, size_px: int) -> np.ndarray | None:
     if not shapes:
         return None
     raster = rasterize(
-        shapes, out_shape=(size_px, size_px), fill=0, dtype=np.uint8, all_touched=True
+        shapes,
+        out_shape=size_px if isinstance(size_px, tuple) else (size_px, size_px),
+        fill=0,
+        dtype=np.uint8,
+        all_touched=True,
     )
     return distance_transform_edt(raster == 0)
 
@@ -625,8 +634,12 @@ def render_preview(
     path: Path,
     size: int = PREVIEW_SIZE,
 ) -> None:
-    """Provinces in pastel tones, edges (roads in brown, sea dashed blue), settlements by kind."""
-    factor = labels.shape[0] / size
+    """Provinces in pastel tones, edges (roads in brown, sea dashed blue), settlements by kind.
+
+    ``size`` is the preview width; the height follows the map aspect.
+    """
+    factor = labels.shape[1] / size
+    height = int(round(labels.shape[0] / factor))
     step = max(1, int(round(factor)))
     small = labels[::step, ::step]
     rng = np.random.default_rng(1337)
@@ -638,8 +651,8 @@ def render_preview(
     border[:-1, :] |= small[:-1, :] != small[1:, :]
     rgb[border] = 0.35
     image = Image.fromarray((np.clip(rgb, 0, 1) * 255).astype(np.uint8), mode="RGB")
-    if image.size[0] != size:
-        image = image.resize((size, size), Image.Resampling.NEAREST)
+    if image.size != (size, height):
+        image = image.resize((size, height), Image.Resampling.NEAREST)
     draw = ImageDraw.Draw(image)
     position = {s.id: (s.px[0] / factor, s.px[1] / factor) for s in settlements}
     for edge in sorted(edges, key=lambda e: (e.road, e.sea)):
@@ -725,7 +738,7 @@ def build(
         map_dir, provinces_dir, settlements_dir, warnings
     )
     positions = {s.id: s.px for s in settlements}
-    distance = road_distance_raster(map_dir / ROADS_FILE, grid.size_px)
+    distance = road_distance_raster(map_dir / ROADS_FILE, grid.shape)
     if distance is not None:
         max_px = ROAD_MAX_MEAN_DISTANCE_KM * 1000.0 / grid.meters_per_px
         flag_roads(edges, positions, distance, max_px)

@@ -613,6 +613,7 @@ def build(
     log=print,  # noqa: ANN001
 ) -> AnchorsResult:
     """Write ``fine_anchors.json`` and the draped road tiles."""
+    pyramid.require_world_frame(map_dir, "geo anchors-fine")
     started = time.time()
     workers = workers or max(1, (os.cpu_count() or 2) - 1)
     frame = Frame(pyramid.map_bounds(map_dir))

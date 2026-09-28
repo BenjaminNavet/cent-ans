@@ -59,7 +59,12 @@ PYRAMID_DIR_NAME = "pyramid"
 WORK_DIR = download.RAW_DIR / "pyramid_work"
 TILE_PX = 512
 ROOT_TILE_UNITS = 256
-E0_SIZE_PX = relief.TILE_SIZE_PX
+#: Side of the baked pyramid frame: 16 root tiles of 256 units (the 4096² map
+#: before OM2). Since ADR 0115 the world is 28 x 24 root tiles; the frame sits
+#: at ``root_origin_tiles`` of ``relief_pyramid.json`` (tile (k, col, row) of the
+#: cache = world tile (col + dx·2^k, row + dy·2^k)). Every cooking step works in
+#: this frame so that a recook reproduces the published tiles.
+E0_SIZE_PX = 8192
 E0_TILES = E0_SIZE_PX // TILE_PX
 
 TIER1_LEVELS = (1, 2)
@@ -448,16 +453,78 @@ def refresh_manifest(
 # --------------------------------------------------------------------- shared inputs
 
 
+def root_origin_tiles(map_dir: Path = MAP_DIR) -> tuple[int, int]:
+    """``root_origin_tiles`` of ``relief_pyramid.json`` (``(0, 0)`` if absent)."""
+    path = map_dir / MANIFEST
+    if not path.exists():
+        return (0, 0)
+    dx, dy = json.loads(path.read_text(encoding="utf-8")).get(
+        "root_origin_tiles", [0, 0]
+    )
+    return int(dx), int(dy)
+
+
 def map_bounds(map_dir: Path = MAP_DIR) -> tuple[float, float, float, float]:
-    """``bounds_projected`` of ``map.json``."""
+    """EPSG:3035 bounds of the pyramid frame (see :data:`E0_SIZE_PX`).
+
+    The frame is ``E0_TILES`` root tiles square, placed at ``root_origin_tiles``
+    inside the ``map.json`` world. World units of the frame (CAFV points, tile
+    addresses) are the world units minus ``root_origin_tiles × 256``.
+    """
     metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
-    return tuple(metadata["bounds_projected"])
+    minx, _, _, maxy = metadata["bounds_projected"]
+    mpp = float(metadata["meters_per_px"])
+    dx, dy = root_origin_tiles(map_dir)
+    unit_m = ROOT_TILE_UNITS * mpp
+    x0 = float(minx) + dx * unit_m
+    y1 = float(maxy) - dy * unit_m
+    side = E0_TILES * unit_m
+    return (x0, y1 - side, x0 + side, y1)
+
+
+def require_world_frame(map_dir: Path, step: str) -> None:
+    """Refuse a step whose outputs mix world and pyramid-frame units (OM2).
+
+    ``fine_anchors.json``, ``towns_1340.json`` and the draped roads read world
+    positions (settlements, hamlets, roads) and write world units while sampling
+    the cache in its frame. Until the pyramid is recooked in the world frame
+    (``root_origin_tiles`` = ``[0, 0]``), those files are migrated (+1280 y,
+    ``tools/cent_ans_tools/geo/migrate_om2.py``) instead of regenerated.
+
+    Raises:
+        RuntimeError: ``root_origin_tiles`` is not ``(0, 0)``.
+    """
+    origin = root_origin_tiles(map_dir)
+    if origin != (0, 0):
+        raise RuntimeError(
+            f"{step} : la pyramide est cuite dans l'ancien cadre (root_origin_tiles "
+            f"{list(origin)}, ADR 0115) ; ses sorties en unités monde sont migrées, "
+            "pas régénérées, tant qu'elle n'est pas recuite dans le cadre monde."
+        )
+
+
+def frame_fine_grid(map_dir: Path = MAP_DIR) -> MapGrid:
+    """The E0 grid (8192²) over the pyramid frame."""
+    return MapGrid(map_bounds(map_dir), E0_SIZE_PX)
 
 
 def e0_heights(map_dir: Path = MAP_DIR) -> np.ndarray:
-    """The E0 tiles (8192², metres, ``float32``)."""
-    encoded = relief.read_tiles(map_dir / relief.TILE_DIR, E0_TILES)
-    return terrain.uint16_to_height(encoded).astype(np.float32)
+    """The E0 tiles of the pyramid frame (8192², metres, ``float32``)."""
+    dx, dy = root_origin_tiles(map_dir)
+    rows = [
+        np.hstack(
+            [
+                terrain.read_png16(
+                    map_dir
+                    / relief.TILE_DIR
+                    / relief.TILE_PATTERN.format(col=col + dx, row=row + dy)
+                )
+                for col in range(E0_TILES)
+            ]
+        )
+        for row in range(E0_TILES)
+    ]
+    return terrain.uint16_to_height(np.vstack(rows)).astype(np.float32)
 
 
 def boost_base(merged_m: np.ndarray, meters_per_px: float) -> np.ndarray:
@@ -487,7 +554,7 @@ def bbox_mask_e0(
     grid0: MapGrid, bbox: tuple[float, float, float, float], step: int = 8
 ) -> np.ndarray:
     """E0-grid mask of the pixels inside a lon/lat box (sampled every ``step`` px)."""
-    coarse = grid0.size_px // step
+    coarse = grid0.width_px // step
     centres = (np.arange(coarse) + 0.5) * step
     px, py = np.meshgrid(centres, centres)
     lon, lat = grid0.pixel_to_lonlat(px.ravel(), py.ravel())
@@ -528,16 +595,14 @@ def prepare_work(map_dir: Path = MAP_DIR, force: bool = False) -> dict[str, Path
         coast[sure_water] = 0
         np.save(paths["coast"], coast)
     if force or not paths["base"].exists():
-        grid0 = relief.fine_grid(map_dir)
+        grid0 = frame_fine_grid(map_dir)
         names = copernicus.tiles_in_bbox(copernicus.tile_list())
         cop = relief_shade.copernicus_on_grid(
-            grid0, names, cache=relief_shade.CACHE_DIR / f"cop_{grid0.size_px}.npy"
+            grid0, names, cache=relief_shade.cache_path(grid0)
         )
         etopo = relief.resample_heights(
             grid0,
-            download.etopo_tiles(
-                download.etopo_tiles_covering(*grid0.geographic_extent())
-            ),
+            download.etopo_tiles(download.etopo_tiles_for_grid(grid0)),
         )
         merged = copernicus.merge_with_etopo(cop, etopo)
         del cop, etopo
@@ -556,7 +621,7 @@ def candidate_tiles(
     Land inside one of the ``exclude`` boxes does not count.
     """
     e0 = np.load(WORK_DIR / "e0.npy", mmap_mode="r")
-    grid0 = relief.fine_grid(map_dir)
+    grid0 = frame_fine_grid(map_dir)
     mask = (np.asarray(e0) >= relief_shade.MIN_LAND_M * 0.5) & bbox_mask_e0(grid0, bbox)
     for box in exclude:
         mask &= ~bbox_mask_e0(grid0, box)

@@ -42,7 +42,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
 from scipy import ndimage
 
 from cent_ans_tools.geo import copernicus, download, relief, terrain
@@ -188,8 +187,12 @@ def block_mean(array: np.ndarray, factor: int) -> np.ndarray:
 
 def bilinear_upsample(array: np.ndarray, factor: int) -> np.ndarray:
     """What a GPU bilinear fetch of ``array`` returns at the centres of a ``factor``x finer grid."""
-    row_coords = (np.arange(array.shape[0] * factor, dtype=np.float32) + 0.5) / factor - 0.5
-    col_coords = (np.arange(array.shape[1] * factor, dtype=np.float32) + 0.5) / factor - 0.5
+    row_coords = (
+        np.arange(array.shape[0] * factor, dtype=np.float32) + 0.5
+    ) / factor - 0.5
+    col_coords = (
+        np.arange(array.shape[1] * factor, dtype=np.float32) + 0.5
+    ) / factor - 0.5
     rows, cols = np.meshgrid(row_coords, col_coords, indexing="ij")
     return ndimage.map_coordinates(array, [rows, cols], order=1, mode="nearest").astype(
         np.float32
@@ -277,7 +280,10 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> ReliefShadeResult:
     detail[~land] = 0.0
     occ[~land] = 0.0
     shade_paths = terrain.write_png_bands(
-        encode_shade(detail, occ), map_dir, RELIEF_SHADE_STEM, "LA",
+        encode_shade(detail, occ),
+        map_dir,
+        RELIEF_SHADE_STEM,
+        "LA",
         RELIEF_SHADE_BAND_ROWS,
     )
     (map_dir / RELIEF_SHADE).unlink(missing_ok=True)

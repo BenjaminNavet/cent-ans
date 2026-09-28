@@ -699,6 +699,7 @@ def build(
 
     from cent_ans_tools.geo import fine_anchors, fine_relief, hydro_fine, pyramid
 
+    pyramid.require_world_frame(map_dir, "geo towns")
     started = time.time()
     rules = load_rules(rules_path)
     frame = fine_anchors.Frame(pyramid.map_bounds(map_dir))

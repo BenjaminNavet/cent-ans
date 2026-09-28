@@ -557,7 +557,9 @@ def build(
     seeds = load_seeds(provinces_dir)
     land = load_land_mask(map_dir)
     work_shape = (grid.height_px // WORK_FACTOR, grid.width_px // WORK_FACTOR)
-    max_distance_work = MAX_SEED_DISTANCE_KM * 1000.0 / (grid.meters_per_px * WORK_FACTOR)
+    max_distance_work = (
+        MAX_SEED_DISTANCE_KM * 1000.0 / (grid.meters_per_px * WORK_FACTOR)
+    )
 
     def to_rows_cols(lonlat: list[tuple[float, float]]) -> np.ndarray:
         px, py = grid.lonlat_to_pixel(
@@ -594,8 +596,7 @@ def build(
         ndimage.binary_dilation(work_reach, structure=np.ones((3, 3))), WORK_FACTOR
     )
     land = land & (
-        reach
-        | seedless_islands(land, all_sources, max_distance_work * WORK_FACTOR)
+        reach | seedless_islands(land, all_sources, max_distance_work * WORK_FACTOR)
     )
     labels[~land] = 0
     labels = fill_unlabelled(labels, land)

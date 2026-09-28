@@ -170,8 +170,12 @@ def etopo_tiles_for_grid(grid: object, samples: int = 400) -> list[str]:
     minx, miny, maxx, maxy = grid.bounds
     xs = np.linspace(minx, maxx, samples)
     ys = np.linspace(miny, maxy, samples)
-    ring_x = np.concatenate([xs, np.full(samples, maxx), xs[::-1], np.full(samples, minx)])
-    ring_y = np.concatenate([np.full(samples, miny), ys, np.full(samples, maxy), ys[::-1]])
+    ring_x = np.concatenate(
+        [xs, np.full(samples, maxx), xs[::-1], np.full(samples, minx)]
+    )
+    ring_y = np.concatenate(
+        [np.full(samples, miny), ys, np.full(samples, maxy), ys[::-1]]
+    )
     lon, lat = _to_geo.transform(ring_x, ring_y)
     outline = Polygon(zip(lon, lat, strict=True)).buffer(0)
     step = ETOPO_TILE_DEG
