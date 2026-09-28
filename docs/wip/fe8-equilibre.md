@@ -58,7 +58,75 @@ Synthèse : guerre FR-EN 65 % [56-72], 10/10 dans 55-75 % ; trêves 12,2 / sièc
 [9,1-21,1] ; banqueroutes toutes factions 6,28 / fac. / déc. [5,98-6,62] ; 4 majeures en vie en
 1400 : 10/10 ; Empire allié à un vassal direct 464/464 tours (alliance d'état initial).
 
+## Après F8 (branche 40c360c3 ; 464 tours, graines 1-10, release)
+Changements : ADR 0114 (ost effectif à 200 km / indépendance de fait à 0,5 ; lien féodal au lieu
+d'alliance ; rapport de force de la commise entre coalitions ; félonie de 1337 ; `commise.min_power_ratio`
+2,0 → 1,2 ; réseau d'agents de l'IA dès 500 livres de revenu ; garnisons dans la garde de mutation
+monétaire) ; plancher c7a 15 000 → 20 000 (note à l'ADR 0113).
+
+| graine | commise Guyenne (tour) | commises / exécutées | félonies | ost impérial (c. France) | Italiens c. France t ≤ 50 | recettes France t ≤ 50 | banqueroutes petites fac. | banqueroutes 28 fac. d'avant FE |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 1 | 27 / 9 | 186 | 94 (25) | 25 | 1 631 571 | 3,42 | 0,02 |
+| 2 | 1 | 34 / 10 | 189 | 67 (0) | 0 | 1 769 966 | 3,89 | 0,24 |
+| 3 | 1 | 31 / 9 | 212 | 168 (15) | 37 | 1 609 564 | 3,95 | 0,12 |
+| 4 | 1 | 29 / 12 | 224 | 81 (13) | 13 | 1 665 118 | 3,35 | 0,07 |
+| 5 | 1 | 31 / 6 | 201 | 137 (17) | 51 | 1 696 219 | 3,45 | 0,10 |
+| 6 | 1 | 31 / 12 | 196 | 121 (17) | 45 | 1 746 358 | 3,84 | 0,13 |
+| 7 | 1 | 30 / 4 | 185 | 154 (15) | 29 | 1 741 778 | 3,85 | 0,09 |
+| 8 | 1 | 32 / 4 | 284 | 62 (15) | 38 | 1 686 708 | 4,15 | 0,19 |
+| 9 | 1 | 18 / 2 | 109 | 149 (30) | 22 | 1 779 149 | 3,43 | 0,14 |
+| 10 | 1 | 24 / 11 | 104 | 57 (16) | 37 | 1 798 705 | 4,01 | 0,10 |
+
+### Avant / après (moyennes, 10 graines)
+| mesure | avant (639b7e49) | après |
+|---|---|---|
+| commise de Guyenne | 0/10 | 10/10, au tour 1 (mai 1337), avant toute autre guerre FR-EN |
+| commises prononcées / exécutées (toutes) | 2,9 / 0,5 | 28,7 / 7,9 |
+| ost impérial contre la France (réponses, siècle) | 71 | 16 |
+| Italiens en guerre contre la France (tours × fac., t ≤ 50) | 80 | 30 |
+| Empire allié à un vassal direct (tours) | 464 | 0 |
+| recettes France t ≤ 50 | 1 599 054 | 1 712 514 (+7 %) |
+| banqueroutes / fac. / déc. (toutes) | 6,28 | 3,21 |
+| banqueroutes petites factions (≤ 2 prov.) | 7,3 | 3,7 |
+| banqueroutes 28 factions d'avant FE (réf. RS-B 0,05) | 0,10 | 0,12 |
+| guerre FR-EN (ADR 0085, 55-75 %) | 65 % [56-72], 10/10 | 66 % [51-76], 6/10 |
+| trêves FR-EN / siècle | 12,2 | 12,4 |
+| révoltes / 200 tours | 14,3 | 8,7 |
+| 4 majeures en vie en 1400 | 10/10 | 10/10 |
+| sonde c7a (France / Angleterre, 8 graines, 50 t.) | 24 336 / 20 316 (RS) | 32 603 / 13 251 |
+
+Les colonnes de banqueroute gardent leur définition ; la hausse venait de la population (91 factions,
+dont une trentaine d'un comté). Reste : des comtés de 50-80 livres de revenu (rois irlandais, Isles,
+Luna, Urbino) ne paient pas une seule unité de garnison ; donnée d'économie provinciale (FE4), hors F8.
+
+### Bandes de la spec § 5 (après ; pas de mesure « avant », colonnes ajoutées en F8)
+| graine | vassaux directs de la France (1337 / t80 / fin) | France 1er royaume par population (t80 / fin) | guerres de succession | mineure la plus grande à la fin (provinces) |
+|---|---|---|---|---|
+| 1 | 7 / 7 / 4 | oui / oui | 3 | Namur (13) |
+| 2 | 7 / 5 / 0 | oui / non | 3 | Namur (17) |
+| 3 | 7 / 7 / 1 | oui / non | 2 | Pavie (11) |
+| 4 | 7 / 7 / 0 | oui / oui | 3 | Gueldre (18) |
+| 5 | 7 / 7 / 1 | oui / oui | 2 | Flandre (13) |
+| 6 | 7 / 7 / 1 | oui / non | 4 | Gueldre (14) |
+| 7 | 7 / 7 / 2 | non / non | 5 | Savoie (12) |
+| 8 | 7 / 6 / 0 | oui / non | 2 | Trèves (25) |
+| 9 | 7 / 7 / 5 | oui / oui | 2 | Trèves (25) |
+| 10 | 7 / 6 / 0 | oui / oui | 2 | Flandre (29) |
+
+- France 1er royaume : 9/10 après 20 ans, 5/10 à la fin (l'Angleterre ou l'Empire la dépassent). Partiel.
+- Absorption des grands fiefs sans tout avaler en 20 ans : tenue (7 vassaux en 1337, 5-7 en 1357,
+  0-5 en 1453).
+- Guerres de succession : 2 à 5 par partie. Tenue.
+- Aucune mineure n'explose : non tenue (une ancienne petite faction finit à 11-29 provinces ; Trèves,
+  Flandre, Gueldre, Namur). Une cinquantaine de factions éliminées par partie, avant comme après.
+
+## Points ouverts
+- ADR 0085 : moyenne tenue (66 %), dispersion accrue (6/10 dans la bande ; un essai intermédiaire à
+  code presque identique donnait 9/10 : forte sensibilité des trajectoires). Angleterre éliminée après
+  1400 dans la graine 10.
+- Mineures qui explosent et France dépassée en population en fin de siècle : à traiter avec l'économie
+  des comtés et la doctrine « survie d'abord » (F8 bis ou lot dédié).
+- Comtés trop pauvres pour une garnison (voir plus haut).
+
 ## Prochaine étape
-Ost effectif + lien féodal sans alliance + félonie de 1337 codés (ADR 0114) ; mesure 50 tours :
-ost impérial c. France 13-15 (au lieu de 34-67), Italiens 27-43 (65-130), recettes France +5 %,
-mais commise de Guyenne toujours absente : calibrer `commise.min_power_ratio`.
+Lot terminé côté agent ; fusion et partie pilote par l'orchestrateur.
