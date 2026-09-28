@@ -22,7 +22,7 @@ Spec FE § 6 (et § 4) ; plan section F6 ; ADR 0098. `CARGO_TARGET_DIR=core/targ
   d'Ariane de la province. Pas de bouton dans la barre du haut : elle déborde en 1280 px (smoke).
 
 ## Prochaine étape
-Suite Rust complète (fmt, clippy, test), puis revue et fusion par l'orchestrateur.
+Suite Rust verte (fmt, clippy --all-targets, cargo test). Revue et fusion par l'orchestrateur.
 
 ## Points ouverts
 - Bretagne, Flandre, Navarre (départs recommandés de la spec) ne sont pas jouables dans les données
