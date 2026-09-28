@@ -12,9 +12,10 @@ use data_model::{
 };
 use godot::classes::RefCounted;
 use godot::prelude::*;
+use sim_campaign::buildings::demolition_preview;
 use sim_campaign::{
-    Army, ArmyId, BuildOption, CampaignState, CharacterView, Construction, EffectTotals,
-    EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
+    Army, ArmyId, BuildOption, CampaignState, CharacterView, Construction, DemolitionPreview,
+    EffectTotals, EffectValue, FactionEconomy, GameEvent, Order, ProvinceCity, TaxRate, Unit,
 };
 
 use crate::campaign_sim_preview::{before_after_dict, requirements_array};
@@ -873,6 +874,44 @@ pub(crate) fn buildings_array(data: &GameData, buildings: &[BuildingId]) -> VarA
     buildings
         .iter()
         .map(|id| building_summary_dict(data, id).to_variant())
+        .collect()
+}
+
+/// RS-N: `{building, name, can_demolish, reason, refund, upkeep_saved}` for
+/// one building of a settlement, for the « Raser » button.
+fn demolition_preview_dict(
+    data: &GameData,
+    building: &BuildingId,
+    preview: &DemolitionPreview,
+) -> VarDictionary {
+    let name = data
+        .buildings
+        .get(building)
+        .map_or_else(|| building.to_string(), |b| b.name.display.clone());
+    vdict! {
+        "building" => building.as_str(),
+        "name" => name.as_str(),
+        "can_demolish" => preview.can_demolish,
+        "reason" => preview.reason.as_deref().unwrap_or(""),
+        "refund" => preview.refund,
+        "upkeep_saved" => preview.upkeep_saved,
+    }
+}
+
+/// RS-N: demolition preview of every built building of `settlement`, in the
+/// order they stand in `buildings` (`state.demolition_preview`).
+pub(crate) fn demolition_preview_array(
+    state: &CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    buildings: &[BuildingId],
+) -> VarArray {
+    buildings
+        .iter()
+        .map(|id| {
+            let preview = demolition_preview(state, data, settlement, id);
+            demolition_preview_dict(data, id, &preview).to_variant()
+        })
         .collect()
 }
 

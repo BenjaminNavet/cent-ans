@@ -993,6 +993,46 @@ pub fn demolition_blocker(
     dependant.map(|b| format!("{} en dépend", b.name.display))
 }
 
+/// RS-N: read-only preview of razing `building` in `settlement`, for the UI's
+/// « Raser » button. `reason` (French) is `None` exactly when `can_demolish`
+/// is true. `refund` and `upkeep_saved` are given even when refused, so the
+/// button's tooltip can still show what raising it would recover once the
+/// blocker is lifted.
+pub struct DemolitionPreview {
+    pub can_demolish: bool,
+    pub reason: Option<String>,
+    pub refund: i64,
+    pub upkeep_saved: i64,
+}
+
+/// RS-N: computes the [`DemolitionPreview`] of `building` in `settlement`.
+pub fn demolition_preview(
+    state: &CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    building: &BuildingId,
+) -> DemolitionPreview {
+    let reason = demolition_blocker(state, data, settlement, building);
+    let (refund, upkeep_saved) = demolition_refund_and_upkeep(data, building);
+    DemolitionPreview {
+        can_demolish: reason.is_none(),
+        reason,
+        refund,
+        upkeep_saved,
+    }
+}
+
+/// RS-C/RS-N: the money refunded (`economy.json` `demolition_refund_percent`
+/// of the building's cost) and the upkeep no longer paid each season, were
+/// `building` to be razed.
+fn demolition_refund_and_upkeep(data: &GameData, building: &BuildingId) -> (i64, i64) {
+    data.buildings.get(building).map_or((0, 0), |b| {
+        let refund =
+            i64::from(b.cost.money) * i64::from(data.economy_rules.demolition_refund_percent) / 100;
+        (refund, i64::from(b.upkeep.unwrap_or(0)))
+    })
+}
+
 /// RS-C: razes `building` in `settlement` for `faction` (`Order::Demolish`),
 /// refunding `economy.json` `demolition_refund_percent` of its money cost.
 pub(crate) fn demolish(
@@ -1016,9 +1056,7 @@ pub(crate) fn demolish(
     if let Some(reason) = demolition_blocker(state, data, settlement, building) {
         return Err(OrderError::DemolitionRefused(reason));
     }
-    let refund = data.buildings.get(building).map_or(0, |b| {
-        i64::from(b.cost.money) * i64::from(data.economy_rules.demolition_refund_percent) / 100
-    });
+    let (refund, _) = demolition_refund_and_upkeep(data, building);
     state
         .settlements
         .get_mut(settlement)

@@ -11,6 +11,9 @@ signal recruit_requested(settlement_id: String, unit_type: String)
 signal create_army_requested(settlement_id: String, unit_indices: Array)
 signal build_requested(settlement_id: String, building_id: String)
 signal cancel_build_requested(settlement_id: String)
+## RS-N : `preview` vient de `settlement_demolition_preview` (cœur) : `{building, name,
+## can_demolish, reason, refund, upkeep_saved}`.
+signal raze_requested(settlement_id: String, building_id: String, preview: Dictionary)
 signal province_requested(province_id: String)
 signal closed
 
@@ -219,9 +222,10 @@ func _build_buildings_tab() -> void:
 
 
 ## `detail` : `CampaignSim.settlement_detail(id)`. `recruitable` : `get_recruitable(id)`,
-## `buildable` : `settlement_buildable(id)` (vides si la colonie n'est pas au joueur).
-## `label_of(faction_id) -> String` traduit un id de faction en nom court.
-func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Array = [], player_owner: bool = false, label_of: Callable = Callable()) -> void:
+## `buildable` : `settlement_buildable(id)`, `demolition` : `settlement_demolition_preview(id)`
+## (vides si la colonie n'est pas au joueur). `label_of(faction_id) -> String` traduit un id
+## de faction en nom court.
+func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Array = [], player_owner: bool = false, label_of: Callable = Callable(), demolition: Array = []) -> void:
 	if detail.is_empty():
 		hide()
 		return
@@ -273,7 +277,11 @@ func show_settlement(detail: Dictionary, recruitable: Array = [], buildable: Arr
 		func(unit_type: String) -> void: recruit_requested.emit(settlement_id, unit_type))
 	# Bâtiments et construction.
 	var buildings: Array = detail.get("buildings_info", [])
-	PanelWidgets.fill_buildings(buildings_list, buildings)
+	var demolition_by_id: Dictionary = {}
+	for row in demolition:
+		demolition_by_id[str(row.get("building", ""))] = row
+	PanelWidgets.fill_buildings(buildings_list, buildings, demolition_by_id, player_owner,
+		func(building_id: String, preview: Dictionary) -> void: raze_requested.emit(settlement_id, building_id, preview))
 	var construction: Dictionary = detail.get("construction", {}) if detail.get("construction") is Dictionary else {}
 	construction_box.visible = not construction.is_empty()
 	if not construction.is_empty():
