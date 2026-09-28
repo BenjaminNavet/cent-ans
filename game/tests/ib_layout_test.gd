@@ -165,7 +165,7 @@ func _check_live() -> void:
 	var unmet := false
 	var met := false
 	for row in rows:
-		_check((row as Dictionary).has("requirements") and row.has("before_after"), "buildable row should carry requirements and before_after: %s" % row.keys())
+		_check((row as Dictionary).has("requirements") and row.has("before_after"), "buildable row should carry requirements and before_after: %s" % [row.keys()])
 		var spec := RichTooltip.building_spec(str(row.get("building", "")), row)
 		var effects := "\n".join(_block(TooltipView.blocks_for(spec, false), "Effects"))
 		if str(row.get("reason", "")) != "déjà construit" and not (row.get("before_after", {}) as Dictionary).is_empty() and effects.contains(" → "):
