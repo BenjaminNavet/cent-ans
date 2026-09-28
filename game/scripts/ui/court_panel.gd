@@ -65,7 +65,7 @@ func _ready() -> void:
 		_filter_mode = filter_option.get_item_id(index)
 		_render())
 	close_button.pressed.connect(func() -> void:
-		hide()
+		UiMotion.fade_out(self)  # P2a (ADR 0097, bible DA § 12.4)
 		closed.emit())
 	_build_tree_tab()
 
@@ -87,7 +87,10 @@ func show_court(rows: Array[Dictionary], faction_label: String, faction_color: C
 	_render()
 	if _current_tab == TAB_TREE:
 		refresh_tree()
+	var was_visible := visible
 	show()
+	if not was_visible:
+		UiMotion.fade_in(self)  # P2a (ADR 0097, bible DA § 12.4)
 
 
 # --- C3 : arbre familial ----------------------------------------------------------------------
@@ -126,7 +129,7 @@ func _build_tree_tab() -> void:
 	toolbar.add_theme_constant_override("separation", 6)
 	_tree_hint = Label.new()
 	_tree_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_tree_hint.add_theme_font_size_override("font_size", 12)
+	UiType.apply(_tree_hint, UiType.CAPTION)
 	_tree_hint.add_theme_color_override("font_color", HudStyle.INK_SOFT)
 	toolbar.add_child(_tree_hint)
 	for spec in [["Recentrer sur le souverain", "⌂", func() -> void: recenter_tree("")],
@@ -250,7 +253,7 @@ func _make_row(row: Dictionary) -> Control:
 	initials.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	initials.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	initials.add_theme_color_override("font_color", Color(1, 1, 1))
-	initials.add_theme_font_size_override("font_size", 14)
+	UiType.apply(initials, UiType.CAPTION)
 	initials.set_anchors_preset(Control.PRESET_FULL_RECT)
 	swatch.add_child(initials)
 	# DA2 : portrait vivant encadré (âge, rang, marques) ; armes de la maison (DA1), de la
@@ -264,11 +267,11 @@ func _make_row(row: Dictionary) -> Control:
 	var name_label := Label.new()
 	var epithet: String = str(row.get("epithet", ""))
 	name_label.text = "%s%s" % [str(row.get("name", "?")), " « %s »" % epithet if epithet != "" else ""]
-	name_label.add_theme_font_size_override("font_size", 16)
+	UiType.apply(name_label, UiType.BODY)
 	name_box.add_child(name_label)
 	var sub_label := Label.new()
 	sub_label.text = "%s ans — %s — %s" % [int(row.get("age", 0)), str(row.get("title", "")), str(row.get("role", ""))]
-	sub_label.add_theme_font_size_override("font_size", 12)
+	UiType.apply(sub_label, UiType.CAPTION)
 	# C7 : une ligne trop longue n'élargit plus le panneau (la fiche se range à sa droite).
 	sub_label.clip_text = true
 	sub_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -293,7 +296,7 @@ func _make_row(row: Dictionary) -> Control:
 
 	var chevron := Label.new()
 	chevron.text = "›"
-	chevron.add_theme_font_size_override("font_size", 22)
+	UiType.apply(chevron, UiType.HEADING)
 	chevron.add_theme_color_override("font_color", HudStyle.INK_SOFT)
 	line.add_child(chevron)
 	for child in line.find_children("*", "Control", true, false):
