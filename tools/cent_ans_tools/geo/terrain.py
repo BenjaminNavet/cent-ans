@@ -78,7 +78,7 @@ def build_heightmap(grid: MapGrid, tile_paths: Iterable[Path]) -> np.ndarray:
     Pixels without data are set to sea level.
     """
     mosaic, src_transform = mosaic_dem(tile_paths, grid.geographic_extent())
-    destination = np.full((grid.size_px, grid.size_px), np.nan, dtype=np.float32)
+    destination = np.full(grid.shape, np.nan, dtype=np.float32)
     reproject(
         source=mosaic,
         destination=destination,
@@ -106,7 +106,7 @@ def build_land_mask(
     Returns:
         ``uint8`` array, 255 = land.
     """
-    shape = (grid.size_px, grid.size_px)
+    shape = grid.shape
     land_shapes = (
         (geom, 255) for geom in land.to_crs(CRS_MAP).geometry if not geom.is_empty
     )
@@ -146,3 +146,49 @@ def read_png16(path: Path) -> np.ndarray:
     """Read a 16-bit greyscale PNG back into a ``uint16`` array."""
     with Image.open(path) as image:
         return np.asarray(image, dtype=np.uint16)
+
+
+def write_png_bands(
+    array: np.ndarray, directory: Path, stem: str, mode: str, band_rows: int
+) -> list[Path]:
+    """Write an image as horizontal bands ``<stem>_<i>.png`` of ``band_rows`` rows.
+
+    Large rasters are split so that no versioned file exceeds GitHub's limits
+    (ADR 0115); a reader stacks the bands top to bottom. Stale bands with a
+    higher index are removed.
+
+    Args:
+        array: ``(rows, cols)`` or ``(rows, cols, channels)`` ``uint8`` array.
+        directory: Output directory.
+        stem: File name stem.
+        mode: PIL mode of each band (``"L"``, ``"LA"``, ``"RGB"``...).
+        band_rows: Rows per band (the last band may be shorter).
+
+    Returns:
+        The written paths, top to bottom.
+    """
+    paths = []
+    for index, row0 in enumerate(range(0, array.shape[0], band_rows)):
+        path = directory / f"{stem}_{index}.png"
+        Image.fromarray(
+            np.ascontiguousarray(array[row0 : row0 + band_rows]), mode=mode
+        ).save(path, compress_level=9)
+        paths.append(path)
+    index = len(paths)
+    while (directory / f"{stem}_{index}.png").exists():
+        (directory / f"{stem}_{index}.png").unlink()
+        index += 1
+    return paths
+
+
+def read_png_bands(directory: Path, stem: str) -> np.ndarray:
+    """Stack the bands written by :func:`write_png_bands` back into one array."""
+    bands = []
+    index = 0
+    while (directory / f"{stem}_{index}.png").exists():
+        with Image.open(directory / f"{stem}_{index}.png") as image:
+            bands.append(np.asarray(image))
+        index += 1
+    if not bands:
+        raise FileNotFoundError(directory / f"{stem}_0.png")
+    return np.concatenate(bands, axis=0)
