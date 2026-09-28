@@ -129,6 +129,9 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
 - [ ] Plaines et couches terrain en 2k ; macro-variation (réutiliser GA2).
 - [ ] Eau : normales CC0 animées + couleur de profondeur.
 - [ ] A/B banc carte PB1 (cache de relief relié, cf. PO6). Vignettes IA seulement sur décision.
+- État (worktree `../game_project-ga4`, branche `feat/ga4`) : squelette posé (données
+  `data/fx/campaign_terrain_textures.json` + schéma + pytest). Suite : script de construction
+  (tableaux 2k, moyennes, normale d'eau), câblage `TerrainBuilder`/`sea.gd`, shaders, test mémoire.
 
 ### GA3 — Décor 3D statique (image-vers-3D, ≤ 8 $)
 1. [ ] Recherche (session principale) : service hébergé TRELLIS payant à l'appel, conditions
