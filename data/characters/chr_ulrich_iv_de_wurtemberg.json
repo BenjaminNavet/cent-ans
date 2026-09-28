@@ -1,0 +1,44 @@
+{
+  "id": "chr_ulrich_iv_de_wurtemberg",
+  "name": {
+    "display": "Ulrich IV de Wurtemberg",
+    "local": "Ulrich IV. von Württemberg",
+    "local_language": "moyen haut-allemand"
+  },
+  "sex": "male",
+  "house": "Wurtemberg",
+  "faction": "fac_wurttemberg",
+  "role": "ruler",
+  "birth": {
+    "value": "1315",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1344-07-11"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Wurtemberg",
+      "from": {
+        "value": "1325"
+      }
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_energetic"
+  ],
+  "piety": 50,
+  "starting_location": "prov_wurttemberg",
+  "status": "at_court",
+  "description": "Comte de Wurtemberg depuis 1325, jeune encore en 1337 ; il agrandira le comté vers Heidenheim et Göppingen avant sa mort prématurée en 1344.",
+  "sources": [
+    "Ulrich IV de Wurtemberg"
+  ]
+}

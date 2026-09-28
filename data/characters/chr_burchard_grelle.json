@@ -1,0 +1,49 @@
+{
+  "id": "chr_burchard_grelle",
+  "name": {
+    "display": "Burchard Grelle",
+    "local": "Burchard Grelle",
+    "local_language": "moyen bas-allemand"
+  },
+  "sex": "male",
+  "house": "Grelle",
+  "faction": "fac_bremen",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true,
+    "note": "Date de naissance non retrouvée avec certitude."
+  },
+  "death": {
+    "value": "1344-11-19",
+    "uncertain": true,
+    "note": "Fin de règne 1327-1344 attestée par plusieurs listes épiscopales, mais à vérifier plus précisément (nom et dates signalés incertains dans le mandat de ce lot)."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Archevêque de Brême",
+      "from": {
+        "value": "1327",
+        "uncertain": true
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_pious",
+    "trait_stubborn"
+  ],
+  "piety": 75,
+  "starting_location": "prov_lower_saxony",
+  "status": "at_court",
+  "description": "Archevêque-prince de Brême, en conflit récurrent avec la bourgeoisie de sa propre cité, largement autonome de fait.",
+  "sources": [
+    "Burchard Grelle",
+    "Archevêché de Brême"
+  ]
+}

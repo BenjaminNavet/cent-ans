@@ -1,0 +1,47 @@
+{
+  "id": "chr_raoul_de_lorraine",
+  "name": {
+    "display": "Raoul de Lorraine",
+    "local": "Raoul de Loherraine",
+    "local_language": "ancien français"
+  },
+  "sex": "male",
+  "house": "Lorraine",
+  "faction": "fac_lorraine",
+  "role": "ruler",
+  "birth": {
+    "value": "1320",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1346-08-26",
+    "place": "Crécy",
+    "note": "Tué à la bataille de Crécy en combattant aux côtés du roi de France Philippe VI."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Lorraine",
+      "from": {
+        "value": "1329"
+      }
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_brave",
+    "trait_chivalrous"
+  ],
+  "piety": 50,
+  "family": {},
+  "starting_location": "prov_lorraine",
+  "status": "at_court",
+  "description": "Duc de Lorraine depuis 1329, fief d'Empire mais duché francophone tourné vers la France ; il mourra à Crécy en 1346, combattant dans les rangs français aux côtés de Philippe VI malgré son hommage à l'empereur.",
+  "sources": [
+    "Raoul de Lorraine"
+  ]
+}

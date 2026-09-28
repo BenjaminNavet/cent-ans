@@ -1,0 +1,65 @@
+{
+  "id": "fac_liege",
+  "name": {
+    "display": "Principauté épiscopale de Liège",
+    "local": "Principauté de Liège",
+    "local_language": "ancien français"
+  },
+  "short_name": "Liège",
+  "adjective": "liégeois",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_adolphe_de_la_marck",
+  "capital": "prov_liege",
+  "capital_city": "Liège",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "elective",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_liege",
+  "heraldry": {
+    "blazon": "De gueules à la colonne d'argent, couronnée d'or.",
+    "description": "Armes traditionnelles de la principauté épiscopale de Liège, colonne perronnelle rappelant le perron liégeois.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Prince-évêque de Liège",
+    "Comte de Looz (suzeraineté disputée)"
+  ],
+  "treasury": 9000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Principauté d'Église relevant nominalement de l'Empire ; Adolphe de la Marck tient aussi ses terres patrimoniales du roi de France."
+    },
+    {
+      "faction": "fac_france",
+      "status": "peace",
+      "note": "La maison de la Marck est proche de la couronne de France, alliée traditionnelle de Liège contre les comtes de Looz et de Flandre."
+    },
+    {
+      "faction": "fac_namur",
+      "status": "peace"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 60,
+    "trade": 65,
+    "piety": 75
+  },
+  "description": "Grande principauté épiscopale mosane, gouvernée depuis 1313 par Adolphe de la Marck, bâtisseur et fondateur du studium liégeois ; houillères, forges et dinanderie font sa richesse.",
+  "sources": [
+    "Adolphe de la Marck",
+    "Principauté de Liège"
+  ]
+}

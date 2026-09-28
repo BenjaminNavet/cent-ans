@@ -1,0 +1,95 @@
+{
+  "id": "prov_nuremberg",
+  "name": {
+    "display": "Nuremberg",
+    "local": "Nürnberg",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "empire_sud",
+  "terrain": "hills",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Pegnitz"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Nuremberg",
+      "local": "Nürnberg",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 49.4521,
+    "lon": 11.0767
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.0767,
+      49.4521
+    ],
+    "seed_lonlat": [
+      11.0,
+      49.45
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_nuremberg",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Nuremberg compte environ 20 000 habitants. Subdivisée de la Franconie (data FE4a), lot FE4b.",
+    "classes": {
+      "peasants": {
+        "count": 90000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 25000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_water_mill",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field",
+    "bld_stables",
+    "bld_forge"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2600,
+  "description": "Nuremberg : cité libre d'empire fidèle à Louis IV de Bavière, qui lui accorde des privilèges commerciaux, et forteresse du burgrave (Hohenzollern) qui coexiste avec la commune urbaine — deux pouvoirs distincts sur un même site, la ville échappant en pratique à l'autorité du burgrave. Métallurgie, commerce vers l'Italie.",
+  "sources": [
+    "Nuremberg",
+    "Burgraviat de Nuremberg",
+    "Jean II de Hohenzollern"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "tit_utrecht",
+  "rank": "county",
+  "name": {
+    "display": "Principauté épiscopale d'Utrecht",
+    "local": "Sticht Utrecht",
+    "local_language": "moyen néerlandais"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix d'argent, chargée en abîme d'un écusson de gueules à trois pals de vair.",
+    "description": "Croix d'argent du Sticht (attestée dès 1291 sur le sceau de l'évêque Jean de Sierck), brisée depuis Jean de Diest (1328) d'un écusson aux armes patrimoniales de la maison de Diest.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_utrecht"
+  ],
+  "holder_1337": {
+    "faction": "fac_utrecht",
+    "sources": [
+      "Jean de Diest",
+      "Principauté épiscopale d'Utrecht"
+    ]
+  },
+  "succession_law": "elective",
+  "objectives": [
+    {
+      "id": "obj_utrecht_hold",
+      "title": "Garder la principauté",
+      "description": "L'évêque d'Utrecht doit conserver son autorité temporelle sur le Nedersticht et l'Oversticht.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_utrecht"
+      }
+    }
+  ],
+  "description": "Principauté épiscopale d'Utrecht, État ecclésiastique du Saint-Empire couvrant le Nedersticht (autour d'Utrecht) et l'Oversticht (Deventer, Zwolle, Kampen), villes liées à la Hanse.",
+  "sources": [
+    "Jean de Diest",
+    "Principauté épiscopale d'Utrecht"
+  ]
+}

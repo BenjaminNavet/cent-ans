@@ -1,0 +1,32 @@
+{
+  "id": "tit_hesse",
+  "rank": "county",
+  "name": {
+    "display": "Landgraviat de Hesse",
+    "local": "Landgrafschaft Hessen",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "Burelé d'azur et d'or, au lion de gueules, armé et couronné d'or, brochant sur le tout.",
+    "description": "Le lion de Hesse, burelé d'azur et d'or, hérité des landgraves de Thuringe par Sophie de Brabant.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_hesse"
+  ],
+  "holder_1337": {
+    "faction": "fac_hesse",
+    "sources": [
+      "Landgraviat de Hesse",
+      "Henri II de Hesse"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "description": "Landgraviat de Hesse, détaché de la Thuringe en 1247 par Sophie de Brabant pour son fils Henri Ier ; tenu en 1337 par Henri II « le Fer ».",
+  "sources": [
+    "Landgraviat de Hesse",
+    "Henri II de Hesse"
+  ]
+}

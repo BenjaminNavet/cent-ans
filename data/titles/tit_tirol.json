@@ -1,0 +1,32 @@
+{
+  "id": "tit_tirol",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Tyrol",
+    "local": "Grafschaft Tirol",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à l'aigle de gueules, becquée et membrée d'or, couronnée d'or.",
+    "description": "Aigle du Tyrol, armes historiques du comté attestées depuis le XIIIe siècle.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#C8102E"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_tirol"
+  ],
+  "holder_1337": {
+    "faction": "fac_tirol",
+    "sources": [
+      "Jean-Henri de Luxembourg",
+      "Marguerite de Tyrol",
+      "Comté de Tyrol"
+    ]
+  },
+  "description": "Comté de Tyrol, échu par mariage (1330) à la maison de Luxembourg en la personne de Jean-Henri, frère cadet du futur empereur Charles IV.",
+  "sources": [
+    "Jean-Henri de Luxembourg",
+    "Comté de Tyrol"
+  ]
+}

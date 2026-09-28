@@ -1,0 +1,89 @@
+{
+  "id": "prov_trent",
+  "name": {
+    "display": "Évêché de Trente",
+    "local": "Tridentum",
+    "local_language": "latin"
+  },
+  "region": "empire_sud",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Adige"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Trente",
+      "local": "Trento",
+      "local_language": "italien"
+    },
+    "lat": 46.0667,
+    "lon": 11.1217
+  },
+  "geo": {
+    "capital_lonlat": [
+      11.1217,
+      46.0667
+    ],
+    "seed_lonlat": [
+      11.1,
+      46.05
+    ],
+    "voronoi_weight": 0.6
+  },
+  "owner": "fac_trent",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Trente compte environ 5 000 habitants. Subdivisée du Tyrol (data FE4a), lot FE4b. Population de culture germano-italienne mixte, simplifiée en cul_german comme le reste de la grappe C4.",
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 400,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "Principauté épiscopale de Trente, enclavée dans le comté de Tyrol mais politiquement distincte ; verrou de la route de l'Adige entre l'Empire et l'Italie. Population de culture mixte germano-italienne, simplifiée ici en culture allemande.",
+  "sources": [
+    "Principauté épiscopale de Trente",
+    "Trente"
+  ]
+}

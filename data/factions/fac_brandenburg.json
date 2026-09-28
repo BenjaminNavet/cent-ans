@@ -1,0 +1,54 @@
+{
+  "id": "fac_brandenburg",
+  "name": {
+    "display": "Marche de Brandebourg",
+    "local": "Mark Brandenburg",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Brandebourg",
+  "adjective": "brandebourgeois",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_louis_v_de_baviere",
+  "capital": "prov_brandenburg",
+  "capital_city": "Berlin",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_brandenburg",
+  "heraldry": {
+    "blazon": "D'argent à l'aigle de gueules, becquée et membrée d'or.",
+    "description": "Aigle rouge margraviale de Brandebourg, distincte de l'aigle noire impériale.",
+    "primary_color": "#C8102E",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Margrave de Brandebourg"
+  ],
+  "treasury": 9000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Union personnelle père-fils : Louis V, margrave de Brandebourg depuis 1323, est le fils aîné de l'empereur Louis IV. Deux factions jouables distinctes malgré la proche parenté, comme Alençon et la France (F4a)."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 50,
+    "piety": 40
+  },
+  "description": "Margraviat donné en 1323 par l'empereur Louis IV à son fils aîné Louis V, dit « le Brandebourgeois » ; gouvernement noté ici comme comté (rang réel de margraviat), le titre étant traité au rang de duché par convention politique parmi les grands électorats de l'Empire.",
+  "sources": [
+    "Louis V de Bavière",
+    "Marche de Brandebourg"
+  ]
+}

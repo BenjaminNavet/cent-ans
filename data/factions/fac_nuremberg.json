@@ -1,0 +1,54 @@
+{
+  "id": "fac_nuremberg",
+  "name": {
+    "display": "Burgraviat de Nuremberg",
+    "local": "Burggrafschaft Nürnberg",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Nuremberg",
+  "adjective": "nurembergeois",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_jean_ii_de_hohenzollern",
+  "capital": "prov_nuremberg",
+  "capital_city": "Nuremberg",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_nuremberg",
+  "heraldry": {
+    "blazon": "Parti : au 1 d'or au lion de sable, armé et lampassé de gueules (Zollern) ; au 2 d'argent au burg de sable (burgraviat).",
+    "description": "Armes composites des burgraves de Nuremberg, maison de Hohenzollern, ancêtres des Hohenzollern de Brandebourg puis de Prusse.",
+    "primary_color": "#1A1A1A",
+    "secondary_color": "#F5F1E6"
+  },
+  "titles": [
+    "Burgrave de Nuremberg"
+  ],
+  "treasury": 8000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 60,
+    "piety": 55
+  },
+  "description": "Burgraviat de Nuremberg, tenu par Jean II de Hohenzollern (1332-1357) depuis son château de Cadolzburg ; ancêtre lointain des Hohenzollern de Brandebourg puis de Prusse. La puissante cité impériale voisine échappe en pratique à son autorité directe.",
+  "sources": [
+    "Jean II de Hohenzollern",
+    "Burgraviat de Nuremberg"
+  ]
+}

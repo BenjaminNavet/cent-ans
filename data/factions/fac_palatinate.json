@@ -1,0 +1,58 @@
+{
+  "id": "fac_palatinate",
+  "name": {
+    "display": "Palatinat électoral du Rhin",
+    "local": "Kurpfalz",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Palatinat",
+  "adjective": "palatin",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_rudolf_ii_du_palatinat",
+  "capital": "prov_palatinate",
+  "capital_city": "Heidelberg",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_empire",
+  "primary_title": "tit_palatinate",
+  "heraldry": {
+    "blazon": "D'or au lion d'azur, armé et lampassé de gueules.",
+    "description": "Le lion palatin, couramment blasonné d'un lion noir (ou bleu-noir selon les sources) sur champ d'or ; ici rendu d'azur pour le distinguer des autres lions d'or déjà en usage.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93",
+    "uncertain": true,
+    "note": "Tincture du lion adaptée pour éviter un doublon avec d'autres blasons du jeu."
+  },
+  "titles": [
+    "Comte palatin du Rhin",
+    "Archi-sénéchal du Saint-Empire"
+  ],
+  "treasury": 8000,
+  "prestige": 42,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_empire",
+      "status": "vassal",
+      "note": "Prince-électeur, archi-sénéchal du Saint-Empire ; Rodolphe II est cousin rival de l'empereur Louis IV de Wittelsbach."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 40,
+    "diplomacy": 55,
+    "trade": 50,
+    "piety": 45
+  },
+  "description": "Comté palatin du Rhin, tenu par la branche rhénane des Wittelsbach, Rodolphe II « l'Aveugle » et son frère Robert Ier, restitués par le traité de Pavie (1329) face à leur cousin l'empereur. Heidelberg, Worms et Spire, cités impériales.",
+  "sources": [
+    "Palatinat du Rhin",
+    "Rodolphe II du Palatinat",
+    "Traité de Pavie (1329)"
+  ]
+}
