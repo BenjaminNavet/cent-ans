@@ -24,13 +24,32 @@ y + 1280.
   de la pyramide (`pyramid.map_bounds` = cadre, `FineRelief` décale E0).
 - [x] migration +1280 y : `geo/migrate_om2.py` (landmarks anchor.px, fine_anchors.json,
   towns_1340.json) ; littéraux des tests/scripts Godot.
-- [ ] génération complète (en cours) puis splat, landcover, relief-shade, navgrid, rivers-render,
-  horizon.
-- [ ] fichiers ≤ 50 Mo (vérifier), tests pytest, docs/geo.md, m1-campaign-map.md.
+- [x] génération complète sur feat/om fusionné (406 provinces : D1-D5), artefacts commités.
+- [x] fichiers ≤ 50 Mo, pytest, docs/geo.md (section « Emprise Oural–Méditerranée »),
+  m1-campaign-map.md.
+
+## Régénération complète (ordre, durées mesurées, 406 provinces)
+1. `uv run --project tools cent-ans geo build` — 5 min 08 (provinces 34 s)
+2. `uv run --project tools cent-ans geo splat` — 2 min 20 (appelle landcover)
+3. `uv run --project tools cent-ans geo relief-shade` — 1 min 04 (après build, qui écrase `height/`)
+4. `uv run --project tools cent-ans geo navgrid` — 6 s
+5. `uv run --project tools cent-ans geo rivers-render` — 14 s
+6. `uv run --project tools cent-ans geo horizon` — 26 s
+Total ≈ 9 min 20. Ne pas relancer `migrate_om2` ni `anchors-fine`/`towns`.
+Worktree : lier `tools/geo/raw/*` au dépôt principal sauf `kk10/` et `copernicus_cache/`
+(caches dépendant de la grille ; KK10 : `uv run --with h5py --with fsspec --with aiohttp
+python -c "from cent_ans_tools.geo import kk10; kk10.extract()"`, 16 s).
 
 ## Prochaine étape
-Finir la génération (`geo build` puis `splat`, `landcover`, `relief-shade`, `navgrid`,
-`rivers-render`, `horizon`), commit dédié des artefacts.
+Aucune dans ce lot : régénération finale par l'orchestrateur après D6.
+
+## Échecs pytest restants (données des lots D, pas OM2)
+- `test_settlements_schema` : 9 provinces à 2 colonies (3 attendues : beysehir, elbistan, lublin,
+  muntenia, muntenia_east, oltenia, polotsk, teke, vitebsk) ; `set_emba` (53,5° E, 48° N) hors
+  carte.
+- `test_heraldry::test_shields_are_distinct_and_masked` : 169 blasons distincts pour 171.
+- Avertissements navgrid : colonies sur des masses isolées sans port (set_bereket, set_emba,
+  set_itil, set_saraitchik : delta de la Volga / Oural ; set_bergen_rugen, set_poide, set_valaam).
 
 ## Points ouverts / coordination OM1
 - `relief_shade.png` est remplacé par des bandes `relief_shade_<i>.png` (3072 lignes,
