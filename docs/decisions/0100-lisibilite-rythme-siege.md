@@ -103,6 +103,7 @@ de campagne n'utilise pas ces PV (aucun effet).
 - La porte en feu (`siege_fire.json`, 4 PV/s × intensité) tombe aussi plus vite, dans la même
   proportion que sous le bélier (≈ 1 min au niveau 3 au lieu de ≈ 2 min 15) : laissé tel quel.
 - L'invariant de `sg3_assault_probe` « un pan tient au moins 3× plus que la porte » devient
-  « au moins 1,5× » (niveau 3 : 51 s contre 1 min 48).
+  « au moins 1,5× » (niveau 3 : 51 s contre 1 min 48). Le test `fire.rs` de la porte en feu
+  observe l'usure après 20 s au lieu de 60 s (la porte du niveau 2, 180 PV, tombe avant).
 - Les tours du rempart tirent toujours sur les engins et les béliers ; en vraie bataille les temps
   sont donc plus longs que ceux du tableau (équipage entamé, relève SG4).
