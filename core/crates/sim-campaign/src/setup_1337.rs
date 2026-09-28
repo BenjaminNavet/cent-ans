@@ -237,6 +237,7 @@ impl CampaignState {
                 goods: Default::default(),
                 army_upkeep_last_turn: 0,
                 building_upkeep_last_turn: 0,
+                deficit_seasons: 0,
                 projected_income: 0,
                 table_upkeep_last_turn: 0,
                 coinage: Default::default(),

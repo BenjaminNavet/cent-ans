@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/diplomacy_rules.schema.json",
+  "title": "Règles de diplomatie",
+  "description": "Fichier data/rules/diplomacy.json (lot RS-C) : plafond par motif des modificateurs d'opinion cumulés.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "opinion_caps": {
+      "type": "object",
+      "description": "Plafond (valeur absolue) du total des modificateurs d'opinion en cours d'un même motif qu'une faction garde envers une autre. marriage : « Mariage entre nos maisons » ; herald_embassy : « Ambassade d'un héraut » ; gift : « Présents diplomatiques » ; treaty : « Traité signé ».",
+      "propertyNames": {
+        "enum": ["marriage", "herald_embassy", "gift", "treaty"]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      }
+    }
+  },
+  "required": ["opinion_caps"],
+  "additionalProperties": false
+}
