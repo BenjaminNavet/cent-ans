@@ -7,12 +7,12 @@
     "local_language": "latin"
   },
   "heraldry": {
-    "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
-    "description": "Armes d'Anjou-Sicile brisées d'un lambel, comme les branches angevines de Durazzo et de Gravina.",
+    "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules et au lambel d'argent.",
+    "description": "Armes d'Anjou-Sicile brisées d'une bordure et d'un lambel, comme les branches angevines de Durazzo et de Gravina.",
     "primary_color": "#1F3A93",
     "secondary_color": "#B0182B",
     "uncertain": true,
-    "note": "Distinction incertaine entre les branches cadettes angevines."
+    "note": "Brisure de jeu : la distinction exacte entre les branches cadettes angevines est incertaine."
   },
   "de_jure_liege": "tit_naples",
   "de_jure_provinces": [

@@ -1450,8 +1450,8 @@
       ]
     },
     {
-      "id": "paleologue",
-      "name": "Paléologue",
+      "id": "paleologue_byzance",
+      "name": "Paléologue de Byzance",
       "arms_of": "fac_byzantium",
       "blazon": "De gueules à la croix d'or cantonnée de quatre fusées d'or.",
       "description": "Maison régnante de l'Empire depuis 1261 (Michel VIII).",
@@ -1481,7 +1481,7 @@
     },
     {
       "id": "nemanjic",
-      "name": "Némanjić",
+      "name": "Nemanjić",
       "arms_of": "fac_serbia",
       "blazon": "De gueules à l'aigle bicéphale d'argent.",
       "description": "Dynastie de Serbie depuis Étienne Nemanja (vers 1166).",
@@ -1558,7 +1558,7 @@
       "id": "anjou_durazzo",
       "name": "Anjou-Durazzo",
       "arms_of": "fac_durazzo",
-      "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+      "blazon": "D'azur semé de fleurs de lis d'or, à la bordure de gueules et au lambel d'argent.",
       "description": "Branche d'Anjou-Sicile issue de Jean de Gravina, ducs de Durazzo.",
       "source": "House of Anjou-Durazzo",
       "certainty": "incertain",
@@ -1603,7 +1603,7 @@
       "id": "villeneuve_hospitaliers",
       "name": "Villeneuve",
       "arms_of": "fac_hospitallers",
-      "blazon": "De gueules à la croix d'argent.",
+      "blazon": "De gueules à la croix d'argent, au chef d'azur.",
       "description": "Grand maître Hélion de Villeneuve : armes de l'Ordre par substitution.",
       "source": "Hélion de Villeneuve",
       "certainty": "substitution",
