@@ -1,0 +1,39 @@
+{
+  "id": "chr_johan_iii_de_holstein_kiel",
+  "name": {
+    "display": "Jean III de Holstein-Kiel",
+    "local": "Johann III. von Holstein-Kiel",
+    "local_language": "moyen bas-allemand"
+  },
+  "epithet": "le Doux",
+  "sex": "male",
+  "house": "Schauenbourg",
+  "faction": "fac_holstein_kiel",
+  "role": "ruler",
+  "birth": {
+    "value": "1297",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1359",
+    "uncertain": true
+  },
+  "historical": true,
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 6
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_diplomat"
+  ],
+  "piety": 55,
+  "starting_location": "prov_sjaelland",
+  "status": "at_court",
+  "description": "Comte de Holstein-Kiel et de Plön, médiateur de la paix de Kiel (1332) ; maître du Danemark à l'est du Grand Belt tant que le trône reste vide.",
+  "sources": [
+    "Jean III de Holstein-Kiel",
+    "Interrègne danois (1332-1340)"
+  ]
+}

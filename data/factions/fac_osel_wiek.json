@@ -1,0 +1,56 @@
+{
+  "id": "fac_osel_wiek",
+  "name": {
+    "display": "Évêché d'Ösel-Wiek",
+    "local": "Bistum Ösel-Wiek",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Ösel-Wiek",
+  "adjective": "oeselien",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_jakob_ii_d_osel_wiek",
+  "capital": "prov_osel_wiek",
+  "capital_city": "Hapsal",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "primary_title": "tit_osel_wiek",
+  "heraldry": {
+    "blazon": "D'azur à la croix d'argent.",
+    "description": "Croix blanche de l'évêché d'Ösel-Wiek (armes simplifiées).",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason non retrouvé pour 1337."
+  },
+  "titles": [
+    "Évêque d'Ösel-Wiek",
+    "Prince d'Empire"
+  ],
+  "treasury": 4000,
+  "prestige": 22,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_livonian_order",
+      "status": "peace",
+      "note": "L'Ordre tient une commanderie sur Ösel."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 55,
+    "trade": 55,
+    "piety": 80
+  },
+  "description": "Évêché de la côte occidentale de l'Estonie et des îles ; son évêque Jakob II vit ses derniers mois, et Hapsal reste un refuge fragile face à l'Ordre.",
+  "sources": [
+    "Évêché d'Ösel-Wiek",
+    "Haapsalu"
+  ]
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_vyborg",
+    "province": "prov_viborg",
+    "kind": "city",
+    "name": {
+      "display": "Viborg",
+      "local": "Viborg",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      28.7533,
+      60.7139
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Forteresse suédoise de 1293 et ville de commerce avec Novgorod.",
+    "sources": [
+      "Château de Viborg"
+    ]
+  },
+  {
+    "id": "set_lappee",
+    "province": "prov_viborg",
+    "kind": "village",
+    "name": {
+      "display": "Lappee",
+      "local": "Lappee",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      28.1867,
+      61.0583
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Paroisse de Savonie méridionale, sur le lac Saimaa.",
+    "sources": [
+      "Lappeenranta"
+    ]
+  },
+  {
+    "id": "set_vehkalahti",
+    "province": "prov_viborg",
+    "kind": "village",
+    "name": {
+      "display": "Vehkalahti",
+      "local": "Vehkalahti",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      26.7,
+      60.55
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": true,
+    "description": "Paroisse du golfe de Finlande orientale, sur la route côtière.",
+    "sources": [
+      "Vehkalahti"
+    ]
+  }
+]

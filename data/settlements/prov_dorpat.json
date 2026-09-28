@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_dorpat",
+    "province": "prov_dorpat",
+    "kind": "city",
+    "name": {
+      "display": "Dorpat",
+      "local": "Dorpat",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      26.729,
+      58.3776
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Tartu, siège de l'évêque et ville hanséatique de la route de Novgorod.",
+    "sources": [
+      "Tartu"
+    ]
+  },
+  {
+    "id": "set_odenpah",
+    "province": "prov_dorpat",
+    "kind": "castle",
+    "name": {
+      "display": "Odenpäh",
+      "local": "Odenpäh",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      26.4917,
+      58.0517
+    ],
+    "weight": 18,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'évêque sur la marche sud.",
+    "sources": [
+      "Otepää"
+    ]
+  },
+  {
+    "id": "set_lais",
+    "province": "prov_dorpat",
+    "kind": "castle",
+    "name": {
+      "display": "Lais",
+      "local": "Lais",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      26.4,
+      58.85
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'évêque de Dorpat (XIIIe siècle).",
+    "sources": [
+      "Laiuse"
+    ]
+  }
+]

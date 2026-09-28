@@ -1,0 +1,90 @@
+{
+  "id": "prov_tavastia",
+  "name": {
+    "display": "Tavastie",
+    "local": "Häme",
+    "local_language": "finnois"
+  },
+  "region": "finlande",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Vanajavesi"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Tavastehus",
+      "local": "Tavastehus",
+      "local_language": "finnois"
+    },
+    "lat": 60.9959,
+    "lon": 24.459
+  },
+  "geo": {
+    "capital_lonlat": [
+      24.459,
+      60.9959
+    ],
+    "seed_lonlat": [
+      24.6,
+      61.3
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_finnish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 35000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 700,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1050,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 420,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 800,
+  "description": "Le pays des Tavastiens, lacs et forêts de l'intérieur, tenu depuis le château de Tavastehus, bâti à la fin du XIIIe siècle par les Suédois.",
+  "sources": [
+    "Tavastie",
+    "Château de Häme"
+  ]
+}

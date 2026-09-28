@@ -1,0 +1,100 @@
+{
+  "id": "prov_skane",
+  "name": {
+    "display": "Scanie et Halland",
+    "local": "Skåne og Halland",
+    "local_language": "danois médiéval"
+  },
+  "region": "scandinavie",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Malmö",
+    "Helsingborg",
+    "Skanör",
+    "Halmstad"
+  ],
+  "sea_zones": [
+    "sea_baltic",
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_fish",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Lund",
+      "local": "Lund",
+      "local_language": "danois médiéval"
+    },
+    "lat": 55.7047,
+    "lon": 13.191
+  },
+  "geo": {
+    "capital_lonlat": [
+      13.191,
+      55.7047
+    ],
+    "seed_lonlat": [
+      13.4,
+      56.1
+    ],
+    "voronoi_weight": 0.95
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_danish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 230000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 16100,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 6900,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2760,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation ; Scanie et Halland parmi les régions les plus denses du Nord."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field",
+    "bld_cathedral"
+  ],
+  "fortification_level": 1,
+  "base_supply": 4600,
+  "description": "Scanie, Blékinge et Halland : provinces danoises mises en gage puis achetées par Magnus Eriksson en 1332 aux comtes de Holstein (Scanie, Blékinge) ; l'archevêque de Lund et la foire aux harengs de Skanör en font un des pays les plus riches du Nord.",
+  "sources": [
+    "Scanie",
+    "Traité de Kiel (1332)",
+    "Foires de Scanie",
+    "Magnus IV de Suède"
+  ]
+}

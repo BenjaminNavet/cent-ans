@@ -16,8 +16,7 @@
   "coastal": true,
   "ports": [
     "Rostock",
-    "Wismar",
-    "Stralsund"
+    "Wismar"
   ],
   "sea_zones": [
     "sea_baltic"

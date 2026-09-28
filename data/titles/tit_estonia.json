@@ -1,0 +1,50 @@
+{
+  "id": "tit_estonia",
+  "rank": "duchy",
+  "name": {
+    "display": "Duché d'Estonie",
+    "local": "Hertugdømmet Estland",
+    "local_language": "danois médiéval"
+  },
+  "heraldry": {
+    "blazon": "D'or à trois léopards d'azur passant.",
+    "description": "Armes de l'Estonie danoise : trois lions bleus sur or, dérivés des armes danoises.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "de_jure_liege": "tit_denmark",
+  "de_jure_provinces": [
+    "prov_harrien_wierland"
+  ],
+  "holder_1337": {
+    "faction": "fac_danish_estonia",
+    "sources": [
+      "Estonie danoise",
+      "Reval"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_estonia_hold",
+      "title": "Garder l'Estonie",
+      "description": "Conserver la province malgré l'absence de roi.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_estonia"
+      }
+    },
+    {
+      "id": "obj_estonia_indep",
+      "title": "Sans suzerain",
+      "description": "Se maintenir indépendant des Teutoniques et des Livoniens.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Duché d'Estonie : Harrie, Wierland et Jerwen, terre de la couronne danoise, gouvernée par un capitaine royal (Reval).",
+  "sources": [
+    "Estonie danoise",
+    "Reval"
+  ]
+}

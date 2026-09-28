@@ -1,0 +1,53 @@
+{
+  "id": "tit_riga",
+  "rank": "duchy",
+  "name": {
+    "display": "Archevêché de Riga",
+    "local": "Erzstift Riga",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'azur à deux clefs d'or en sautoir.",
+    "description": "Deux clefs de saint Pierre croisées, emblème de l'Église de Riga.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason simplifié : le sceau de l'archevêché n'a pas été retrouvé pour 1337."
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_riga_archbishopric"
+  ],
+  "holder_1337": {
+    "faction": "fac_riga_archbishopric",
+    "sources": [
+      "Archevêché de Riga"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_riga_arch_hold",
+      "title": "Garder l'Erzstift",
+      "description": "Tenir les terres de l'Église de Riga.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_riga"
+      }
+    },
+    {
+      "id": "obj_riga_arch_city",
+      "title": "La ville du siège",
+      "description": "Reprendre le contrôle effectif de Riga.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_riga"
+        ]
+      }
+    }
+  ],
+  "description": "Principauté séculière de l'archevêque de Riga, prince d'Empire depuis 1255.",
+  "sources": [
+    "Archevêché de Riga"
+  ]
+}

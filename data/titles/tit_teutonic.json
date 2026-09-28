@@ -1,0 +1,55 @@
+{
+  "id": "tit_teutonic",
+  "rank": "kingdom",
+  "name": {
+    "display": "État de l'ordre Teutonique",
+    "local": "Deutschordensstaat",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix de sable.",
+    "description": "La croix noire sur fond blanc de l'ordre Teutonique.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1A1A1A"
+  },
+  "de_jure_provinces": [
+    "prov_pomerelia",
+    "prov_kulm",
+    "prov_pomesania",
+    "prov_samland",
+    "prov_natangia",
+    "prov_galindia"
+  ],
+  "holder_1337": {
+    "faction": "fac_teutonic",
+    "sources": [
+      "Ordre Teutonique",
+      "Bulle d'or de Rimini"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_teutonic_hold",
+      "title": "Tenir l'État",
+      "description": "Garder l'État de l'Ordre en Prusse.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_teutonic"
+      }
+    },
+    {
+      "id": "obj_teutonic_livonia",
+      "title": "L'Ordre uni",
+      "description": "Garder la Livonie dans l'obédience du grand maître.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_livonian_order"
+      }
+    }
+  ],
+  "description": "État monastique souverain fondé par la bulle d'or de Rimini (1226), tenu en fief direct de l'Empereur et du pape ; capitale Marienbourg depuis 1309.",
+  "sources": [
+    "Ordre Teutonique",
+    "Bulle d'or de Rimini"
+  ]
+}

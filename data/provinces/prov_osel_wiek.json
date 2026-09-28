@@ -1,0 +1,97 @@
+{
+  "id": "prov_osel_wiek",
+  "name": {
+    "display": "Évêché d'Ösel-Wiek",
+    "local": "Bistum Ösel-Wiek",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "livonie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Hapsal",
+    "Pernau"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wood",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Hapsal",
+      "local": "Hapsal",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 58.9431,
+    "lon": 23.5414
+  },
+  "geo": {
+    "capital_lonlat": [
+      23.5414,
+      58.9431
+    ],
+    "seed_lonlat": [
+      23.3,
+      58.6
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_osel_wiek",
+  "culture": "cul_estonian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 60000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2400,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 720,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_cathedral",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1300,
+  "description": "L'évêché de la côte occidentale estonienne et des îles (Ösel, Moon, Dagö) : Hapsal (Haapsalu), Leal et Pernau, marché maritime sur le golfe de Riga.",
+  "sources": [
+    "Évêché d'Ösel-Wiek",
+    "Haapsalu",
+    "Saaremaa"
+  ]
+}

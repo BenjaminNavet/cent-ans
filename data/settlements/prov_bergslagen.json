@@ -1,0 +1,107 @@
+[
+  {
+    "id": "set_orebro",
+    "province": "prov_bergslagen",
+    "kind": "city",
+    "name": {
+      "display": "Örebro",
+      "local": "Örebro",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      15.2134,
+      59.2741
+    ],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château royal et marché de Närke, porte de Bergslagen.",
+    "sources": [
+      "Örebro"
+    ]
+  },
+  {
+    "id": "set_falun",
+    "province": "prov_bergslagen",
+    "kind": "town",
+    "name": {
+      "display": "Falun (Kopparberget)",
+      "local": "Kopparberget",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      15.626,
+      60.6065
+    ],
+    "weight": 22,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Mine de cuivre de Stora Kopparberget, société minière d'exploitation.",
+    "sources": [
+      "Falun"
+    ]
+  },
+  {
+    "id": "set_arboga",
+    "province": "prov_bergslagen",
+    "kind": "town",
+    "name": {
+      "display": "Arboga",
+      "local": "Arboga",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      15.8386,
+      59.3939
+    ],
+    "weight": 14,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_forge"
+    ],
+    "port": false,
+    "description": "Ville du fer où le Riksdag sera réuni en 1435.",
+    "sources": [
+      "Arboga"
+    ]
+  },
+  {
+    "id": "set_norberg",
+    "province": "prov_bergslagen",
+    "kind": "village",
+    "name": {
+      "display": "Norberg",
+      "local": "Norberg",
+      "local_language": "vieux suédois"
+    },
+    "lonlat": [
+      15.9333,
+      60.0667
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_forge",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Village minier du fer de Bergslagen.",
+    "sources": [
+      "Norberg"
+    ]
+  }
+]

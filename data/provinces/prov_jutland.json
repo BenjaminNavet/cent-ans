@@ -15,8 +15,7 @@
   "coastal": true,
   "ports": [
     "Ribe",
-    "Aarhus",
-    "Aalborg"
+    "Aarhus"
   ],
   "sea_zones": [
     "sea_north_sea",
@@ -45,7 +44,7 @@
       9.3,
       56.2
     ],
-    "voronoi_weight": 1.6
+    "voronoi_weight": 1.2
   },
   "owner": "fac_holstein",
   "culture": "cul_danish",

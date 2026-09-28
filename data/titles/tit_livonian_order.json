@@ -1,0 +1,63 @@
+{
+  "id": "tit_livonian_order",
+  "rank": "duchy",
+  "name": {
+    "display": "Ordre de Livonie",
+    "local": "Livländischer Orden",
+    "local_language": "moyen bas-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'argent à la croix de sable, à la bordure de gueules.",
+    "description": "Croix noire de l'Ordre, bordure rouge ajoutée en jeu pour distinguer la branche livonienne.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#1A1A1A",
+    "uncertain": true,
+    "note": "Brisure de jeu, non attestée."
+  },
+  "de_jure_liege": "tit_teutonic",
+  "de_jure_provinces": [
+    "prov_livonia",
+    "prov_courland"
+  ],
+  "holder_1337": {
+    "faction": "fac_livonian_order",
+    "sources": [
+      "Ordre Livonien"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_livonian_hold",
+      "title": "Garder la Livonie",
+      "description": "Tenir le domaine de l'Ordre.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_livonian_order"
+      }
+    },
+    {
+      "id": "obj_livonian_riga",
+      "title": "Riga sous la croix",
+      "description": "Prendre le contrôle direct de Riga.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_riga"
+        ]
+      }
+    },
+    {
+      "id": "obj_livonian_liege",
+      "title": "Un vassal fidèle",
+      "description": "Garder Riga dans la vassalité de l'Ordre.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_riga"
+      }
+    }
+  ],
+  "description": "Domaine de la branche livonienne de l'Ordre, en Livonie et Courlande.",
+  "sources": [
+    "Ordre Livonien"
+  ]
+}

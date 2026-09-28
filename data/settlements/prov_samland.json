@@ -1,0 +1,107 @@
+[
+  {
+    "id": "set_konigsberg",
+    "province": "prov_samland",
+    "kind": "city",
+    "name": {
+      "display": "Königsberg",
+      "local": "Königsberg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      20.4922,
+      54.7104
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port",
+      "bld_cathedral",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Château de l'Ordre et trois villes sur la Pregel ; cathédrale du Kneiphof en chantier.",
+    "sources": [
+      "Königsberg"
+    ]
+  },
+  {
+    "id": "set_fischhausen",
+    "province": "prov_samland",
+    "kind": "castle",
+    "name": {
+      "display": "Fischhausen",
+      "local": "Fischhausen",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      20.0,
+      54.6667
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Château de l'évêque de Sambie sur le Frisches Haff.",
+    "sources": [
+      "Primorsk (Fischhausen)"
+    ]
+  },
+  {
+    "id": "set_labiau",
+    "province": "prov_samland",
+    "kind": "castle",
+    "name": {
+      "display": "Labiau",
+      "local": "Labiau",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      21.1,
+      54.8
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'Ordre au nord du Kurisches Haff.",
+    "sources": [
+      "Polessk"
+    ]
+  },
+  {
+    "id": "set_tapiau",
+    "province": "prov_samland",
+    "kind": "castle",
+    "name": {
+      "display": "Tapiau",
+      "local": "Tapiau",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      21.0667,
+      54.5
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse de l'Ordre sur la Pregel, base des raids contre la Lituanie.",
+    "sources": [
+      "Gvardeïsk"
+    ]
+  }
+]

@@ -1,0 +1,95 @@
+{
+  "id": "prov_gotland",
+  "name": {
+    "display": "Gotland",
+    "local": "Gotland",
+    "local_language": "vieux suédois"
+  },
+  "region": "scandinavie",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Visby"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wool",
+    "res_stone",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Visby",
+      "local": "Visby",
+      "local_language": "vieux suédois"
+    },
+    "lat": 57.6348,
+    "lon": 18.2948
+  },
+  "geo": {
+    "capital_lonlat": [
+      18.2948,
+      57.6348
+    ],
+    "seed_lonlat": [
+      18.55,
+      57.5
+    ],
+    "voronoi_weight": 0.35
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_swedish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 25000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3750,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 750,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 300,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation ; la population de Visby est très supérieure à la moyenne."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 800,
+  "description": "Île marchande au centre de la Baltique, sous la suzeraineté du roi de Suède : Visby, entrepôt hanséatique enserré de sa muraille, et les paysans gotlandais gardent une large autonomie jusqu'à la conquête de Valdemar IV (1361).",
+  "sources": [
+    "Gotland",
+    "Visby",
+    "Hanse"
+  ]
+}

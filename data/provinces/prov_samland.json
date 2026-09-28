@@ -1,0 +1,99 @@
+{
+  "id": "prov_samland",
+  "name": {
+    "display": "Sambie (Samland)",
+    "local": "Sambien",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "prusse",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Pregel"
+  ],
+  "coastal": true,
+  "ports": [
+    "Königsberg",
+    "Fischhausen"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wheat",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Königsberg",
+      "local": "Königsberg",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 54.7104,
+    "lon": 20.4922
+  },
+  "geo": {
+    "capital_lonlat": [
+      20.4922,
+      54.7104
+    ],
+    "seed_lonlat": [
+      20.5,
+      54.75
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_teutonic",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 65000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 4550,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1950,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 780,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Presqu'île de la Sambie : Königsberg, fondée en 1255 sur la Pregel, avec la cathédrale du Kneiphof (dont les travaux ont commencé en 1333), et les côtes de l'ambre.",
+  "sources": [
+    "Sambie",
+    "Königsberg",
+    "Ambre de la Baltique"
+  ]
+}
