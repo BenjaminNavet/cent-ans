@@ -763,6 +763,8 @@ func _collect_jobs(block: bool = false) -> void:
 		if _finish_job(key, job):
 			uploads += 1
 	_main_queue.clear()
+	var t_jobs := Time.get_ticks_usec()
+	PerfProbe.add("qt/main_decode", t_jobs - t0)  # RS-K
 	for key: int in _jobs.keys():
 		var entry: Dictionary = _jobs[key]
 		if not block and (uploads >= max_uploads_per_frame or not WorkerThreadPool.is_task_completed(entry["task"])):
@@ -771,6 +773,7 @@ func _collect_jobs(block: bool = false) -> void:
 		_jobs.erase(key)
 		if _finish_job(key, entry["job"]):
 			uploads += 1
+	PerfProbe.add("qt/jobs", Time.get_ticks_usec() - t_jobs)  # RS-K
 	if block and not _jobs.is_empty():
 		_collect_jobs(true)  # ZG5b : pages parties au creusement pendant cette passe
 

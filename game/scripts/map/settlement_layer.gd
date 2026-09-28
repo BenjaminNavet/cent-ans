@@ -842,6 +842,7 @@ func update_view(camera_distance: float) -> void:
 	if data == null:
 		return
 	_camera_distance = camera_distance
+	var tp := Time.get_ticks_usec()  # RS-K : sections `settle/*` du banc `--bench-probe`
 	var weights := Vector3(tiers.near_weight(camera_distance), tiers.medium_weight(camera_distance), tiers.far_weight(camera_distance))
 	# ZG4 : au palier « site » (~1 km, jusqu'à 200 m), les maquettes à la loupe (colonies ×3-7,
 	# villes emblématiques ×3,5) dépasseraient les collines : masquées en attendant les villes à
@@ -883,12 +884,17 @@ func update_view(camera_distance: float) -> void:
 	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
+	tp = PerfProbe.lap("settle/labels", tp)
 	_update_settlement_scale(camera_distance)
+	tp = PerfProbe.lap("settle/scale", tp)
 	_update_towns(camera_distance)
+	tp = PerfProbe.lap("settle/towns", tp)
 	_update_landmark_cities(camera_distance)
+	tp = PerfProbe.lap("settle/landmarks", tp)
 	_update_hamlet_scale(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
+	tp = PerfProbe.lap("settle/hamlets", tp)
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
 	if _declutter_timer <= 0.0:
 		_declutter_timer = declutter_interval
@@ -896,6 +902,7 @@ func update_view(camera_distance: float) -> void:
 		if _declutter_force or _camera_moved():
 			declutter()
 	_update_declutter_fade()
+	PerfProbe.lap("settle/declutter", tp)
 
 
 func _on_chunk_surface_changed(index: int) -> void:
