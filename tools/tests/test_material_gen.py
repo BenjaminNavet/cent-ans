@@ -39,7 +39,9 @@ def _materials_file(tmp_path: Path) -> Path:
                 "model": "test/model",
                 "size": 256,
                 "tile_size": 64,
-                "materials": [{"id": "wool", "prompt": "x" * 30, "blend_width": 16}],
+                "materials": [
+                    {"id": "wool", "prompt": "x" * 30, "tile_m": 0.1, "blend_width": 16}
+                ],
             }
         ),
         encoding="utf-8",
@@ -171,3 +173,47 @@ def test_materials_yaml_matches_schema():
     ids = [entry["id"] for entry in document["materials"]]
     assert len(ids) == len(set(ids))
     assert document["size"] % document["tile_size"] == 0
+
+
+def test_centred_albedo_mean_and_saturation():
+    """Centred albedo has mean luminance ~0.5; saturation 0 gives grey texels."""
+    rng = np.random.default_rng(3)
+    albedo = rng.integers(20, 90, size=(64, 64, 3), dtype=np.uint8)
+    grey = material_gen.centred_albedo(albedo, 0.0).astype(np.float64) / 255.0
+    assert abs(float((grey @ np.array([0.2126, 0.7152, 0.0722])).mean()) - 0.5) < 0.02
+    assert np.abs(grey[..., 0] - grey[..., 1]).max() <= 1 / 255 + 1e-9
+
+
+def test_build_fine_arrays(tmp_path):
+    """Arrays stack one slice per material with the expected sizes and channels."""
+    materials = _materials_file(tmp_path)
+    raw = tmp_path / "tiles" / "wool_raw.png"
+    raw.parent.mkdir()
+    Image.fromarray(_hard_edged_image()).save(raw)
+    material_gen.process("wool", raw, raw.parent, materials_path=materials)
+    paths = material_gen.build_fine_arrays(
+        raw.parent, tmp_path / "out", materials_path=materials
+    )
+    detail = Image.open(paths["detail"])
+    albedo = Image.open(paths["albedo"])
+    assert detail.mode == "RGBA" and detail.size == (64, 64)
+    size = material_gen.ALBEDO_LAYER_SIZE
+    assert albedo.mode == "RGB" and albedo.size == (size, size)
+
+
+def test_shader_tile_sizes_match_materials():
+    """GA1_TILE_SIZE of the figure shader mirrors tile_m of materials.yaml (same order)."""
+    import re
+
+    shader = (ROOT / "game" / "shaders" / "battle_soldier_skinned.gdshader").read_text(
+        encoding="utf-8"
+    )
+    match = re.search(r"GA1_TILE_SIZE\[(\d+)\]\s*=\s*float\[\]\(([^)]*)\)", shader)
+    assert match, "GA1_TILE_SIZE absent du shader"
+    sizes = [float(value) for value in match.group(2).split(",")]
+    entries = material_gen.load_materials()["materials"]
+    assert int(match.group(1)) == len(entries)
+    assert sizes == [float(entry["tile_m"]) for entry in entries]
+    for index, entry in enumerate(entries):
+        constant = f"GA1_TILE_{entry['id'].upper()} = {index};"
+        assert constant in shader, constant

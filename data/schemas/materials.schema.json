@@ -2,26 +2,71 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "materials.schema.json",
   "title": "Matières générées tuilables (GA)",
-  "description": "Prompts et paramètres des matières générées par IA (`tools/cent_ans_tools/material_gen.py`) : image source `size`², tuile finale `tile_size`², puis cartes dérivées (hauteur, normale OpenGL, rugosité).",
+  "description": "Prompts et paramètres des matières générées par IA (`tools/cent_ans_tools/material_gen.py`) : image source `size`², tuile finale `tile_size`², puis cartes dérivées (hauteur, normale OpenGL, rugosité). L'ordre des matières est celui des couches des tableaux de détail des figurines (GA1).",
   "type": "object",
-  "required": ["model", "size", "tile_size", "materials"],
+  "required": [
+    "model",
+    "size",
+    "tile_size",
+    "materials"
+  ],
   "additionalProperties": false,
   "properties": {
-    "model": {"type": "string", "minLength": 1},
-    "size": {"type": "integer", "minimum": 256},
-    "tile_size": {"type": "integer", "minimum": 64},
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 256
+    },
+    "tile_size": {
+      "type": "integer",
+      "minimum": 64
+    },
     "materials": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "prompt"],
+        "required": [
+          "id",
+          "prompt",
+          "tile_m"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-          "prompt": {"type": "string", "minLength": 20},
-          "blend_width": {"type": "integer", "minimum": 1},
-          "height_strength": {"type": "number", "exclusiveMinimum": 0},
-          "roughness_bias": {"type": "number", "minimum": -1, "maximum": 1}
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 20
+          },
+          "blend_width": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "height_strength": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "roughness_bias": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "tile_m": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Côté de la tuile sur la figurine (m) ; doit égaler GA1_TILE_SIZE du shader des figurines (même ordre)."
+          },
+          "detail_saturation": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Part de la teinte gardée dans l'albédo de détail (0 : luminance seule, la couleur vient des données)."
+          }
         }
       }
     }

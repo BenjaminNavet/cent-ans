@@ -36,8 +36,9 @@ Fichiers : `material_gen.py`, `data/art/materials.yaml`,
        luminance passe-haut → normale OpenGL → rugosité), `contact_sheet`. Tests : écart des
        bords ≤ 4/255, dimensions, canaux. Commit. CLI : `uv run --project tools cent-ans assets
        materials --out <scratch> [--only id]… [--sheet planche.png]` (brute réutilisée si présente).
-2. [ ] Sonde : 2 matières (laine, mailles) → planche ; jugement en session principale (1 capture).
-       Sonde faite (0,08 $) : `docs/research/ga1_probe_sheet.png` ; **jugement en attente**.
+2. [x] Sonde : 2 matières (laine, mailles) → planche ; jugement en session principale (1 capture).
+       Sonde faite (0,08 $) : `docs/research/ga1_probe_sheet.png` ; validée (raccords invisibles) ; corrections : mailles moins rugueuses,
+       laine feutrée irrégulière (height_strength −30 %), police accentuée de la planche.
 3. [ ] Lot : 12 matières (laine, lin, futaine, gambison, mailles, cuir, plates, bois, peau,
        cheveux, robe claire, robe foncée), 512², budget consigné.
 4. [ ] Nouveau `fine_detail_albedo` (Texture2DArray, centré en luminance moyenne 0,5) multiplié
@@ -95,3 +96,7 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
   écart moyen des bords ≤ pas moyen intérieur (sans couture). Mailles sombres (lum. moy. 63/255),
   laine claire (174) : le centrage à 0,5 de l'étape 4 est nécessaire. Planche
   `docs/research/ga1_probe_sheet.png` (945 Ko) à juger en session principale.
+- 28/09 : GA1 étapes 3-5 en cours : 12 matières dans `materials.yaml` (`tile_m` = `GA1_TILE_SIZE`
+  du shader, testé), génération en cours vers le scratch ; shader (`ga1_detail`, `fine_detail_albedo`),
+  chargement (`--no-ga1`), test `ga1_maps_test.gd`. Suite : assembler les tableaux
+  (`material_gen.build_fine_arrays`), import Godot, tests, A/B, ADR 0104.
