@@ -65,6 +65,14 @@
     "heath": [
       "La lande est rase et le vent y souffle : que vos traits volent avec lui."
     ],
+    "steppe": [
+      "La steppe est sans fin et sans abri : tenez serrés, que leurs cavaliers ne trouvent aucun jour entre nous.",
+      "Pas un arbre, pas un fossé : gardez vos rangs, et que leurs flèches ne vous fassent pas rompre."
+    ],
+    "desert": [
+      "Le sable brûle et l'eau est loin : ménagez vos forces, et que personne ne rompe avant l'ordre.",
+      "Ici la soif tue autant que le fer : tenez ferme, la victoire sera à qui durera le plus longtemps."
+    ],
     "default": [
       "Connaissez ce terrain comme votre champ : il sera votre tombe ou le leur."
     ]
