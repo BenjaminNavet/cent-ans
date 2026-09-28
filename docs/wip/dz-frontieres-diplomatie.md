@@ -15,5 +15,7 @@ voir ses ennemis / neutres / alliés.
   choisie »).
 - Tests : smoke (pont), `game/tests/dz_diplo_borders_test.gd`.
 
-## Prochaine étape
-Build, tests, capture de contrôle, fusion ff-only dans main.
+## TERMINÉ
+Tests verts (dz_diplo_borders_test, smoke, fr1, mf1, cargo test/clippy du pont) ; captures
+`game/tests/dz_shot.gd` : vue France (enclave anglaise en rouge), vue Angleterre (France rouge).
+Reste : jugement du joueur en partie.
