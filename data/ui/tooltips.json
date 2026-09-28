@@ -582,6 +582,9 @@
     "naval_ship_card": {"title": "Navire"},
     "naval_ship_name": {"title": "Navire"},
     "naval_hull": {"title": "Coque"},
-    "codex_rules_tab": {"title": "Onglet Règles", "body": "La fiche de jeu.", "hint": "L"}
+    "codex_rules_tab": {"title": "Onglet Règles", "body": "La fiche de jeu.", "hint": "L"},
+    "feudal_title_crumb": {"title": "Titre"},
+    "feudal_tree_open": {"title": "Suzerains, vassaux, loyautés et actions féodales"},
+    "feudal_take_side": {"title": "Arbitrage féodal"}
   }
 }
