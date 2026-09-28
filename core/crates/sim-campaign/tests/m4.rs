@@ -495,7 +495,9 @@ fn salic_succession_from_philippe_to_jean() {
 #[test]
 fn a_minor_ruler_opens_a_regency() {
     let data = data();
-    let mut state = france(&data, 10);
+    // Seed 11: with FE's factions, seed 10 gives Jean a random elder son
+    // (born 1337), who rightly inherits before Charles V.
+    let mut state = france(&data, 11);
     // Let Charles V be born, then kill every adult Valois ahead of him.
     for _ in 0..8 {
         state.end_turn_with(&data, idle);
@@ -598,3 +600,4 @@ fn view_lists_ruler_first_and_family() {
         .any(|c| c.id == chr("chr_jean_de_normandie")));
     assert!(!view.traits.is_empty());
 }
+
