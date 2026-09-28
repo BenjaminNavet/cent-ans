@@ -37,7 +37,7 @@ fn start(data: &GameData, player: &str) -> CampaignState {
 /// 1337 has no count under a duke under a king: Flanders is given the
 /// county of Artois (below the duchy of Burgundy, below France) as its
 /// primary title, and its faction tie follows (what F1 derives).
-fn count_duke_king(state: &mut CampaignState) {
+fn count_duke_king(state: &mut CampaignState, data: &GameData) {
     let (flanders, burgundy, france) =
         (fac("fac_flanders"), fac("fac_burgundy"), fac("fac_france"));
     state
@@ -48,8 +48,9 @@ fn count_duke_king(state: &mut CampaignState) {
         .feudal
         .primary
         .insert(flanders.clone(), title("tit_artois"));
+    feudal::sync_suzerains(state, data);
+    assert_eq!(state.factions[&flanders].suzerain, Some(burgundy.clone()));
     let f = state.factions.get_mut(&flanders).unwrap();
-    f.suzerain = Some(burgundy.clone());
     f.allies.remove(&france);
     f.allies.insert(burgundy.clone());
     state
@@ -82,7 +83,7 @@ fn has_modifier(state: &CampaignState, holder: &str, with: &str, reason: &str) -
 fn count_duke_king_chain() {
     let data = data_with_duty(true);
     let mut state = start(&data, "fac_castile");
-    count_duke_king(&mut state);
+    count_duke_king(&mut state, &data);
     let (flanders, burgundy, france, brabant) = (
         fac("fac_flanders"),
         fac("fac_burgundy"),
@@ -134,7 +135,7 @@ fn count_duke_king_chain() {
 fn liege_shirks_protection() {
     let data = data_with_duty(false);
     let mut state = start(&data, "fac_castile");
-    count_duke_king(&mut state);
+    count_duke_king(&mut state, &data);
     let (flanders, burgundy, brabant) =
         (fac("fac_flanders"), fac("fac_burgundy"), fac("fac_brabant"));
     let preview = feudal::war_escalation_preview(&state, &data, &brabant, &flanders);
@@ -174,7 +175,7 @@ fn cascade_stops_at_a_shirking_liege() {
     // The duke shirks: the king is never called.
     let data = data_with_duty(false);
     let mut state = start(&data, "fac_france");
-    count_duke_king(&mut state);
+    count_duke_king(&mut state, &data);
     let prestige_before = prestige(&state, "fac_france");
     state.declare_war(&data, &brabant, &flanders).unwrap();
     assert!(!state.is_at_war(&france, &brabant));
@@ -184,7 +185,7 @@ fn cascade_stops_at_a_shirking_liege() {
     // The duke intervenes: the king (the player) is called by an offer.
     let data = data_with_duty(true);
     let mut state = start(&data, "fac_france");
-    count_duke_king(&mut state);
+    count_duke_king(&mut state, &data);
     state.declare_war(&data, &brabant, &flanders).unwrap();
     assert!(state.is_at_war(&burgundy, &brabant));
     assert!(!state.is_at_war(&france, &brabant), "waits for the player");

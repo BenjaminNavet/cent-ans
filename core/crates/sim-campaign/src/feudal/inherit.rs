@@ -107,6 +107,7 @@ pub(crate) fn contested_succession(
         )
         .faction(faction),
     );
+    super::record_rival_claimant(state, data, faction);
     let sponsor = state
         .factions
         .iter()

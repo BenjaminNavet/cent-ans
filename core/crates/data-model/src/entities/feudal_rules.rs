@@ -64,12 +64,22 @@ impl Default for FeudalRules {
 }
 
 /// Terms of a vassal's target loyalty towards its direct suzerain (§ 4.2).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct LoyaltyWeights {
     /// Starting point before any term.
     pub base: i32,
-    /// Suzerain more than twice as powerful as the vassal...
+    /// Power ratio (suzerain / vassal) above which the balance of forces
+    /// favours the suzerain.
+    pub power_ratio: f64,
+    /// Points per turn the loyalty moves towards its target.
+    pub drift_per_turn: u8,
+    /// Loyalty of a vassal right after it pays homage.
+    pub homage_start: u8,
+    /// Turns a remembered event (protection, forfeiture of a peer, defeat,
+    /// rival claimant, title granted) weighs on the loyalty.
+    pub memory_turns: u32,
+    /// Suzerain more than `power_ratio` times as powerful as the vassal...
     pub power_favourable: i32,
     /// ... or not.
     pub power_unfavourable: i32,
@@ -99,6 +109,10 @@ impl Default for LoyaltyWeights {
     fn default() -> Self {
         LoyaltyWeights {
             base: 55,
+            power_ratio: 2.0,
+            drift_per_turn: 5,
+            homage_start: 60,
+            memory_turns: 12,
             power_favourable: 10,
             power_unfavourable: -10,
             excommunicated_liege: -20,

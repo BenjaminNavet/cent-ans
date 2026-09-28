@@ -58,6 +58,9 @@ fn refresh_primary(state: &mut CampaignState, data: &GameData, faction: &Faction
             state.feudal.primary.remove(faction);
         }
     }
+    // Every holding change goes through here: keep the cached suzerains
+    // (`FactionState::suzerain`) in step with the titles.
+    super::sync_suzerains(state, data);
 }
 
 /// Keeps the capital of `faction` among the provinces it owns.
@@ -220,10 +223,8 @@ pub fn on_faction_destroyed(
 ) {
     let titles = titles_of(state, faction);
     for title in titles {
-        let liege = data
-            .titles
-            .get(&title)
-            .and_then(|t| t.de_jure_liege.as_ref())
+        // Effective liege: an homage or a release overrides the data.
+        let liege = super::effective_liege(state, data, &title)
             .and_then(|l| holder_of(state, l))
             .filter(|h| *h != faction && state.factions.get(*h).is_some_and(|f| f.alive))
             .cloned();
@@ -297,6 +298,7 @@ pub fn grant_title(
     };
     let mut events = Vec::new();
     transfer(state, data, title, &to, &mut events)?;
+    super::record_title_grant(state, data, grantor, &to);
     for event in events {
         state.push_order_event(event);
     }

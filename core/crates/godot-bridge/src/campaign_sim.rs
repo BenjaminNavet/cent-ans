@@ -130,7 +130,9 @@ impl CampaignSim {
             }
         };
         match CampaignState::new_1337(&data, player, seed as u64) {
-            Ok(state) => {
+            Ok(mut state) => {
+                // Lot FE: the suzerains are a view of the title holdings.
+                sim_campaign::feudal::sync_suzerains(&mut state, &data);
                 self.cancel_pending_turn();
                 self.data = Some(data);
                 self.state = Some(state);

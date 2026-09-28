@@ -189,6 +189,7 @@ pub(super) fn declare_commise(
         )
         .faction(liege),
     );
+    super::record_peer_forfeiture(state, data, liege, vassal);
     if !state.is_at_war(liege, vassal) {
         if let Err(error) = state.declare_war(data, liege, vassal) {
             state
