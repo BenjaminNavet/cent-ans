@@ -4,16 +4,21 @@ Method (see ``docs/geo.md``, section « Provinces »):
 
 1. Every province of ``data/provinces/`` provides a seed (``geo.seed_lonlat``)
    and a weight (``geo.voronoi_weight``). Seeds are projected to map pixels.
-2. A *weighted cost-distance Voronoi* is computed on a 1024² work grid (4 px
-   blocks of the 4096² map): the travel cost from each seed is propagated over
+2. A *weighted cost-distance Voronoi* is computed on a work grid of 4 px
+   blocks of the map (1792 x 1536 for the 7168 x 6144 map): the travel cost from each seed is propagated over
    land only (sea impassable, major rivers cost x4) with
    :class:`skimage.graph.MCP_Geometric`, divided by the seed weight, and each
    land pixel goes to the cheapest seed. Provinces therefore never jump across
    straits, and rivers act as soft borders.
-3. The label map is upsampled (nearest) to 4096², land pixels left without a
-   label (islands without seed, pixels lost by the downsampling) take the
-   nearest labelled pixel (Euclidean), and borders are smoothed with a 5x5
-   majority filter.
+   Land farther than :data:`MAX_SEED_DISTANCE_KM` (over land) from every
+   seed and capital stays outside any province (Sahara, Arabia, Kazakh
+   steppe, Siberia: ADR 0115); each propagation is cut at twice that distance
+   and solved on a window around its sources, so the cost grows with the
+   number of provinces, not with their product by the map area.
+3. The label map is upsampled (nearest) to the map grid, land pixels left
+   without a label (small islands without seed within reach, pixels lost by
+   the downsampling) take the nearest labelled pixel (Euclidean), and borders
+   are smoothed with a 5x5 majority filter.
 4. Regions are vectorised (``rasterio.features.shapes``), simplified (1.5 px)
    and cleaned of slivers; land neighbours come from adjacent pixel pairs and
    sea neighbours from the distance between coastal pixels.
@@ -38,7 +43,7 @@ from skimage.filters import rank
 from skimage.graph import MCP_Geometric
 from skimage.morphology import footprint_rectangle
 
-from cent_ans_tools.geo.project import MapGrid
+from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
 
 REPO_DIR = Path(__file__).resolve().parents[3]
 MAP_DIR = REPO_DIR / "data" / "map"
@@ -46,16 +51,20 @@ PROVINCES_DIR = REPO_DIR / "data" / "provinces"
 FACTIONS_DIR = REPO_DIR / "data" / "factions"
 PREVIEW_PATH = REPO_DIR / "docs" / "img" / "provinces-preview.png"
 
-WORK_FACTOR = 4  # cost distance is solved on a (SIZE_PX / WORK_FACTOR)² grid
+WORK_FACTOR = 4  # cost distance is solved on a grid of (map size / WORK_FACTOR)
 RIVER_COST = 4.0  # crossing a major river costs four land pixels
 RIVER_MAX_SCALERANK = 4
 SIMPLIFY_TOLERANCE_PX = 1.5
 MIN_PART_AREA_PX = 30.0
 MIN_SHARED_BORDER_PX = 3
-# A landmass without any seed larger than this (map pixels, ~33 000 km²) is
-# left unassigned (0): continental Africa. Smaller ones (islands) join the
-# nearest province.
-MAX_SEEDLESS_LANDMASS_PX = 64_000
+# Land farther than this from every seed and capital (distance over land, as
+# the crow flies within a landmass) stays unassigned (0): deserts, steppes and
+# forests beyond the playable provinces (ADR 0115).
+MAX_SEED_DISTANCE_KM = 400.0
+# A landmass without any seed (island) joins the nearest province only if it
+# is smaller than this (map pixels, ~33 000 km²) and within
+# MAX_SEED_DISTANCE_KM of a source as the crow flies.
+MAX_SEEDLESS_ISLAND_PX = 64_000
 SEA_NEIGHBOUR_RADIUS_PX = 60.0
 COAST_SAMPLE_STEP = 4
 MAJORITY_FOOTPRINT = 5
@@ -124,7 +133,7 @@ def load_faction_colours(factions_dir: Path = FACTIONS_DIR) -> dict[str, str]:
 def load_grid(map_dir: Path = MAP_DIR) -> MapGrid:
     """The grid described by ``map.json`` (bounds and size)."""
     metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
-    return MapGrid(tuple(metadata["bounds_projected"]), metadata["size_px"][0])
+    return grid_from_metadata(metadata)
 
 
 def load_land_mask(map_dir: Path = MAP_DIR) -> np.ndarray:
@@ -134,9 +143,16 @@ def load_land_mask(map_dir: Path = MAP_DIR) -> np.ndarray:
 
 
 def river_mask(
-    map_dir: Path, size: int, factor: int, max_scalerank: int = RIVER_MAX_SCALERANK
+    map_dir: Path,
+    size: int | tuple[int, int],
+    factor: int,
+    max_scalerank: int = RIVER_MAX_SCALERANK,
 ) -> np.ndarray:
-    """Rasterise major rivers (``scalerank <= max_scalerank``) on the work grid."""
+    """Rasterise major rivers (``scalerank <= max_scalerank``) on the work grid.
+
+    ``size`` is the work grid shape ``(rows, cols)`` (an int for a square grid).
+    """
+    shape = size if isinstance(size, tuple) else (size, size)
     rivers = json.loads((map_dir / "rivers.geojson").read_text(encoding="utf-8"))
     shapes = [
         (feature["geometry"], 1)
@@ -144,10 +160,10 @@ def river_mask(
         if (feature["properties"].get("scalerank") or 99) <= max_scalerank
     ]
     if not shapes:
-        return np.zeros((size, size), dtype=bool)
+        return np.zeros(shape, dtype=bool)
     raster = rasterio.features.rasterize(
         shapes,
-        out_shape=(size, size),
+        out_shape=shape,
         transform=Affine(factor, 0, 0, 0, factor, 0),
         fill=0,
         all_touched=True,
@@ -163,8 +179,12 @@ def river_mask(
 
 def downsample_mask(mask: np.ndarray, factor: int) -> np.ndarray:
     """Block-majority downsampling of a boolean mask."""
-    size = mask.shape[0] // factor
-    blocks = mask.reshape(size, factor, size, factor).mean(axis=(1, 3))
+    rows, cols = mask.shape[0] // factor, mask.shape[1] // factor
+    blocks = (
+        mask[: rows * factor, : cols * factor]
+        .reshape(rows, factor, cols, factor)
+        .mean(axis=(1, 3))
+    )
     return blocks >= 0.5
 
 
@@ -188,6 +208,7 @@ def weighted_cost_voronoi(
     sources_rc: list[np.ndarray],
     weights: np.ndarray,
     river_cost: float = RIVER_COST,
+    max_cost: float | None = None,
 ) -> np.ndarray:
     """Assign each land cell to the province with the lowest ``cost_distance / weight``.
 
@@ -198,6 +219,10 @@ def weighted_cost_voronoi(
             source cells (seed and capital), all on land.
         weights: ``(n,)`` positive weights (bigger = larger province).
         river_cost: Cost of a river cell relative to a plain land cell.
+        max_cost: Optional cut of each propagation (cost units, a plain land
+            cell costs 1): cells farther than that from a province are not
+            considered for it, and its propagation runs on a window of that
+            radius around its sources (performance on a large map).
 
     Returns:
         ``uint16`` label map, 1-based province index, 0 where unreachable or sea.
@@ -205,15 +230,29 @@ def weighted_cost_voronoi(
     costs = np.where(land, np.where(rivers, river_cost, 1.0), np.inf).astype(np.float64)
     best_cost = np.full(land.shape, np.inf, dtype=np.float64)
     labels = np.zeros(land.shape, dtype=np.uint16)
+    rows, cols = land.shape
     for index, (sources, weight) in enumerate(
         zip(sources_rc, weights, strict=True), start=1
     ):
-        mcp = MCP_Geometric(costs, fully_connected=True)
-        cost, _ = mcp.find_costs([(int(row), int(col)) for row, col in sources])
+        if max_cost is None:
+            r0, r1, c0, c1 = 0, rows, 0, cols
+        else:
+            reach = int(np.ceil(max_cost)) + 1
+            r0 = max(0, int(sources[:, 0].min()) - reach)
+            r1 = min(rows, int(sources[:, 0].max()) + reach + 1)
+            c0 = max(0, int(sources[:, 1].min()) - reach)
+            c1 = min(cols, int(sources[:, 1].max()) + reach + 1)
+        mcp = MCP_Geometric(costs[r0:r1, c0:c1], fully_connected=True)
+        cost, _ = mcp.find_costs(
+            [(int(row) - r0, int(col) - c0) for row, col in sources]
+        )
+        if max_cost is not None:
+            cost[cost > max_cost] = np.inf
         scaled = cost / weight
-        better = scaled < best_cost
-        best_cost[better] = scaled[better]
-        labels[better] = index
+        window_best = best_cost[r0:r1, c0:c1]
+        better = scaled < window_best
+        window_best[better] = scaled[better]
+        labels[r0:r1, c0:c1][better] = index
     labels[~land] = 0
     return labels
 
@@ -226,22 +265,72 @@ def fill_unlabelled(labels: np.ndarray, land: np.ndarray) -> np.ndarray:
     return filled
 
 
-def assignable_land(
-    land: np.ndarray, sources_rc: np.ndarray, max_seedless_px: int
-) -> np.ndarray:
-    """Land minus the seedless landmasses larger than ``max_seedless_px``.
+def _sources_inside(sources_rc: np.ndarray, shape: tuple[int, int]) -> np.ndarray:
+    """Source ``(row, col)`` pixels that fall on a grid of ``shape``."""
+    rows, cols = shape
+    inside = (
+        (sources_rc[:, 0] >= 0)
+        & (sources_rc[:, 0] < rows)
+        & (sources_rc[:, 1] >= 0)
+        & (sources_rc[:, 1] < cols)
+    )
+    return sources_rc[inside]
 
-    Connected components (8-connectivity) of ``land`` that contain no source
-    pixel and exceed the threshold (continental Africa) are excluded so they
-    are never filled by the nearest province.
+
+def land_within_reach(
+    land: np.ndarray, sources_rc: np.ndarray, max_distance_px: float
+) -> np.ndarray:
+    """Land whose distance *over land* to the nearest source is at most ``max_distance_px``.
+
+    Distances are 8-connected (diagonal = sqrt 2), sources off the land are
+    first moved to the nearest land cell.
+
+    Args:
+        land: Boolean land mask (work grid).
+        sources_rc: ``(n, 2)`` integer ``(row, col)`` sources (seeds, capitals).
+        max_distance_px: Distance limit in cells of ``land``.
     """
+    sources = _sources_inside(sources_rc, land.shape)
+    if len(sources) == 0:
+        return np.zeros_like(land)
+    snapped, _ = snap_to_mask(sources, land)
+    mcp = MCP_Geometric(np.where(land, 1.0, np.inf), fully_connected=True)
+    distance, _ = mcp.find_costs([(int(r), int(c)) for r, c in snapped])
+    return land & (distance <= max_distance_px)
+
+
+def seedless_islands(
+    land: np.ndarray,
+    sources_rc: np.ndarray,
+    max_distance_px: float,
+    max_seedless_px: int = MAX_SEEDLESS_ISLAND_PX,
+) -> np.ndarray:
+    """Small landmasses without any source, within ``max_distance_px`` as the crow flies.
+
+    Such islands (Man, Wight, minor Balearics...) join the nearest province;
+    larger seedless landmasses (Iceland, a continent without seeds) and
+    remote islets stay outside any province.
+
+    Args:
+        land: Boolean land mask (map grid).
+        sources_rc: ``(n, 2)`` integer ``(row, col)`` sources on the same grid.
+        max_distance_px: Crow-flies limit in pixels.
+        max_seedless_px: Largest seedless landmass that may be filled.
+    """
+    sources = _sources_inside(sources_rc, land.shape)
     components, count = ndimage.label(land, structure=np.ones((3, 3)))
     sizes = np.bincount(components.ravel(), minlength=count + 1)
     seeded = np.zeros(count + 1, dtype=bool)
-    seeded[components[sources_rc[:, 0], sources_rc[:, 1]]] = True
-    excluded = (~seeded) & (sizes > max_seedless_px)
-    excluded[0] = False
-    return land & ~excluded[components]
+    seeded[components[sources[:, 0], sources[:, 1]]] = True
+    small_seedless = (~seeded) & (sizes <= max_seedless_px)
+    small_seedless[0] = False
+    candidates = small_seedless[components]
+    if not candidates.any():
+        return candidates
+    source_mask = np.ones(land.shape, dtype=bool)
+    source_mask[sources[:, 0], sources[:, 1]] = False
+    crow = ndimage.distance_transform_edt(source_mask).astype(np.float32)
+    return candidates & (crow <= max_distance_px)
 
 
 def smooth_labels(labels: np.ndarray, land: np.ndarray, size: int) -> np.ndarray:
@@ -317,7 +406,11 @@ def sea_neighbours(
     radius_px: float = SEA_NEIGHBOUR_RADIUS_PX,
     step: int = COAST_SAMPLE_STEP,
 ) -> dict[int, set[int]]:
-    """Coastal provinces whose coasts lie within ``radius_px`` and are not land neighbours."""
+    """Coastal provinces whose coasts lie within ``radius_px`` and are not land neighbours.
+
+    A province with neither land nor sea neighbour (remote island) is linked to
+    the province whose coast is nearest.
+    """
     coast = coastal_pixels(labels)[::step]
     tree = cKDTree(coast[:, :2].astype(np.float64))
     pairs = tree.query_pairs(radius_px, output_type="ndarray")
@@ -332,6 +425,21 @@ def sea_neighbours(
             continue
         graph.setdefault(low, set()).add(high)
         graph.setdefault(high, set()).add(low)
+    # An island province beyond the radius (Gotland, 90 km off the coast) is
+    # linked to the nearest other province, so that the graph stays connected.
+    labels_on_coast = coast[:, 2]
+    for label in np.unique(labels_on_coast):
+        label = int(label)
+        if land_graph.get(label) or graph.get(label):
+            continue
+        own = coast[labels_on_coast == label, :2].astype(np.float64)
+        others = coast[labels_on_coast != label]
+        if len(others) == 0:
+            continue
+        distance, index = cKDTree(others[:, :2].astype(np.float64)).query(own)
+        nearest = int(others[index[int(np.argmin(distance))], 2])
+        graph.setdefault(label, set()).add(nearest)
+        graph.setdefault(nearest, set()).add(label)
     return graph
 
 
@@ -407,13 +515,15 @@ def render_preview(
     colours: dict[str, str],
     path: Path,
     map_dir: Path = MAP_DIR,
-    size: int = 1024,
+    size: int = 1792,
 ) -> None:
     """Owner-coloured provinces over a hillshade, black borders, capital dots."""
     from cent_ans_tools.geo import build, terrain
 
-    factor = labels.shape[0] // size
+    factor = max(1, labels.shape[1] // size)
     small = labels[::factor, ::factor]
+    small_rows, small_cols = labels.shape[0] // factor, labels.shape[1] // factor
+    small = small[:small_rows, :small_cols]
     palette = np.zeros((len(seeds) + 1, 3), dtype=np.float64)
     palette[0] = (0.45, 0.60, 0.78)
     for index, seed in enumerate(seeds, start=1):
@@ -422,7 +532,11 @@ def render_preview(
     heightmap = map_dir / "heightmap.png"
     if heightmap.exists():
         heights = terrain.uint16_to_height(terrain.read_png16(heightmap))
-        small_height = heights.reshape(size, factor, size, factor).mean(axis=(1, 3))
+        small_height = (
+            heights[: small_rows * factor, : small_cols * factor]
+            .reshape(small_rows, factor, small_cols, factor)
+            .mean(axis=(1, 3))
+        )
         shade = build.hillshade(small_height, load_grid(map_dir).meters_per_px * factor)
         rgb = rgb * (0.6 + 0.4 * shade[..., None])
     border = np.zeros(small.shape, dtype=bool)
@@ -458,8 +572,10 @@ def build(
     grid = load_grid(map_dir)
     seeds = load_seeds(provinces_dir)
     land = load_land_mask(map_dir)
-    size = grid.size_px
-    work_size = size // WORK_FACTOR
+    work_shape = (grid.height_px // WORK_FACTOR, grid.width_px // WORK_FACTOR)
+    max_distance_work = (
+        MAX_SEED_DISTANCE_KM * 1000.0 / (grid.meters_per_px * WORK_FACTOR)
+    )
 
     def to_rows_cols(lonlat: list[tuple[float, float]]) -> np.ndarray:
         px, py = grid.lonlat_to_pixel(
@@ -473,7 +589,7 @@ def build(
     weights = np.array([seed.weight for seed in seeds])
 
     work_land = downsample_mask(land, WORK_FACTOR)
-    rivers = river_mask(map_dir, work_size, WORK_FACTOR)
+    rivers = river_mask(map_dir, work_shape, WORK_FACTOR)
     work_seeds, moved = snap_to_mask(seeds_rc // WORK_FACTOR, work_land)
     snapped_seeds = [seeds[i].id for i in np.nonzero(moved)[0]]
     work_capitals, _ = snap_to_mask(capitals_rc // WORK_FACTOR, work_land)
@@ -482,10 +598,21 @@ def build(
         for seed, capital in zip(work_seeds, work_capitals, strict=True)
     ]
 
-    work_labels = weighted_cost_voronoi(work_land, rivers, sources, weights)
+    all_sources = np.concatenate([seeds_rc, capitals_rc])
+    work_reach = land_within_reach(
+        work_land, all_sources // WORK_FACTOR, max_distance_work
+    )
+    work_labels = weighted_cost_voronoi(
+        work_reach, rivers, sources, weights, max_cost=2.0 * max_distance_work
+    )
     labels = upsample_nearest(work_labels, WORK_FACTOR)
-    land = assignable_land(
-        land, np.clip(seeds_rc, 0, size - 1), MAX_SEEDLESS_LANDMASS_PX
+    # Coastal pixels of a reached block that the block majority counted as sea
+    # stay assignable (dilation by one work cell); seedless islets nearby too.
+    reach = upsample_nearest(
+        ndimage.binary_dilation(work_reach, structure=np.ones((3, 3))), WORK_FACTOR
+    )
+    land = land & (
+        reach | seedless_islands(land, all_sources, max_distance_work * WORK_FACTOR)
     )
     labels[~land] = 0
     labels = fill_unlabelled(labels, land)

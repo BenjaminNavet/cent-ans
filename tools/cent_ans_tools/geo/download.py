@@ -20,6 +20,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import httpx
+import numpy as np
 
 TOOLS_DIR = Path(__file__).resolve().parents[2]
 RAW_DIR = TOOLS_DIR / "geo" / "raw"
@@ -32,6 +33,9 @@ NATURAL_EARTH_LAYERS: dict[str, str] = {
     "rivers_europe": "ne_10m_rivers_europe",
     "lakes": "ne_10m_lakes",
     "lakes_europe": "ne_10m_lakes_europe",
+    # Named deserts (Sahara, Arabian, Syrian, Karakum...): land cover of the
+    # East and South (ADR 0115), where no finer land-cover source is used.
+    "geography_regions": "ne_10m_geography_regions_polys",
 }
 
 ETOPO_BASE = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/15s/15s_surface_elev_gtif"
@@ -143,3 +147,48 @@ def etopo_tiles(names: Iterable[str], force: bool = False) -> list[Path]:
         download_file(f"{ETOPO_BASE}/{name}", RAW_DIR / "etopo2022" / name, force)
         for name in names
     ]
+
+
+def etopo_tiles_for_grid(grid: object, samples: int = 400) -> list[str]:
+    """ETOPO tiles that actually intersect a map grid's projected rectangle.
+
+    The lon/lat bounding box of a large EPSG:3035 rectangle is much wider than
+    the rectangle itself (its edges are curved): tiles are kept only if they
+    intersect the rectangle's densified outline polygon.
+
+    Args:
+        grid: A :class:`~cent_ans_tools.geo.project.MapGrid`.
+        samples: Points sampled along each edge of the rectangle.
+
+    Returns:
+        Tile file names, north to south then west to east.
+    """
+    from shapely.geometry import Polygon, box
+
+    from cent_ans_tools.geo.project import _to_geo
+
+    minx, miny, maxx, maxy = grid.bounds
+    xs = np.linspace(minx, maxx, samples)
+    ys = np.linspace(miny, maxy, samples)
+    ring_x = np.concatenate(
+        [xs, np.full(samples, maxx), xs[::-1], np.full(samples, minx)]
+    )
+    ring_y = np.concatenate(
+        [np.full(samples, miny), ys, np.full(samples, maxy), ys[::-1]]
+    )
+    lon, lat = _to_geo.transform(ring_x, ring_y)
+    outline = Polygon(zip(lon, lat, strict=True)).buffer(0)
+    step = ETOPO_TILE_DEG
+    return [
+        name
+        for name in etopo_tiles_covering(*grid.geographic_extent())
+        if outline.intersects(box(*_tile_box(name, step)))
+    ]
+
+
+def _tile_box(name: str, step: int) -> tuple[float, float, float, float]:
+    """``(lon_min, lat_min, lon_max, lat_max)`` of an ETOPO tile name."""
+    code = name.split("_")[4]
+    lat = int(code[1:3]) * (1 if code[0] == "N" else -1)
+    lon = int(code[4:7]) * (1 if code[3] == "E" else -1)
+    return (lon, lat - step, lon + step, lat)

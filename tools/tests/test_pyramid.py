@@ -359,3 +359,33 @@ def test_tile_write_is_atomic(tmp_path: Path) -> None:
     np.testing.assert_allclose(decoded, heights, atol=0.05)
     assert pyramid.scan_level(map_dir, 3) == {(1, 2)}
     shutil.rmtree(map_dir)
+
+
+def test_pyramid_frame_sits_at_root_origin_tiles() -> None:
+    """OM2 (ADR 0115): the baked pyramid keeps the former 4096² frame at (0, 5) root tiles."""
+    manifest = json.loads((MAP_DIR / "relief_pyramid.json").read_text(encoding="utf-8"))
+    assert manifest["root_origin_tiles"] == [0, 5]
+    assert pyramid.root_origin_tiles(MAP_DIR) == (0, 5)
+    assert pyramid.map_bounds(MAP_DIR) == (2169486.0, 1327858.0, 5114414.0, 4272786.0)
+    with pytest.raises(RuntimeError):
+        pyramid.require_world_frame(MAP_DIR, "test")
+
+
+def test_e0_heights_read_the_frame_window(tmp_path: Path) -> None:
+    """E0 of the frame is read from the world tiles shifted by root_origin_tiles."""
+    (tmp_path / "relief_pyramid.json").write_text(
+        json.dumps({"root_origin_tiles": [1, 2]}), encoding="utf-8"
+    )
+    height_dir = tmp_path / "height"
+    height_dir.mkdir()
+    for row in range(2, 2 + pyramid.E0_TILES):
+        for col in range(1, 1 + pyramid.E0_TILES):
+            value = terrain.height_to_uint16(float(col * 100 + row))
+            terrain.write_png16(
+                np.full((pyramid.TILE_PX, pyramid.TILE_PX), value, dtype=np.uint16),
+                height_dir / f"h_{col}_{row}.png",
+            )
+    e0 = pyramid.e0_heights(tmp_path)
+    assert e0.shape == (8192, 8192)
+    assert abs(float(e0[0, 0]) - 102.0) < 0.1  # world tile (1, 2)
+    assert abs(float(e0[-1, -1]) - (16 * 100 + 17)) < 0.1  # world tile (16, 17)

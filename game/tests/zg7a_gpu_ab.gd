@@ -10,10 +10,10 @@ extends SceneTree
 
 ## Vues (x, y carte, distance) : Amiens palier vallée et site, Paris vallée, Grande Chartreuse.
 const VIEWS := {
-	"amiens_2": [Vector2(2224.0, 1763.6), 2.0],
-	"amiens_site": [Vector2(2224.0, 1763.6), 0.0],
-	"paris_5": [Vector2(2212.9, 1924.5), 5.0],
-	"chartreuse_3": [Vector2(2537.6, 2492.0), 3.0],
+	"amiens_2": [Vector2(2224.0, 3043.6), 2.0],
+	"amiens_site": [Vector2(2224.0, 3043.6), 0.0],
+	"paris_5": [Vector2(2212.9, 3204.5), 5.0],
+	"chartreuse_3": [Vector2(2537.6, 3772.0), 3.0],
 }
 const FRAMES := 60
 const SETTLE_TIMEOUT_MS := 20000

@@ -8,7 +8,7 @@ extends SceneTree
 ## Usage : godot --path game --script res://tests/pb1_bench.gd [-- --views=2600,1250,491,150,40]
 ## Sortie : une ligne `PB1_JSON {...}`.
 
-const PARIS := Vector2(2213, 1924)
+const PARIS := Vector2(2213, 3204)
 const DEFAULT_VIEWS: Array[float] = [2600.0, 1250.0, 491.0, 150.0, 40.0]
 const SAMPLES := 3
 const SAMPLE_FRAMES := 90

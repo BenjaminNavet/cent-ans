@@ -18,16 +18,16 @@ extends Node
 
 ## Étapes (x, y carte, distance) : Caen → Rouen → Paris → Chartres → Évreux, puis zoom sur Paris.
 const PAN_PATH: Array[Vector2] = [
-	Vector2(1880.0, 1845.0), Vector2(2097.0, 1819.0), Vector2(2213.0, 1924.0),
-	Vector2(2150.0, 2005.0), Vector2(2080.0, 1890.0),
+	Vector2(1880.0, 3125.0), Vector2(2097.0, 3099.0), Vector2(2213.0, 3204.0),
+	Vector2(2150.0, 3285.0), Vector2(2080.0, 3170.0),
 ]
 const WARMUP_FRAMES := 90
 ## ZG4 : lieux de la descente (x, y carte) : Rouen (zone E7), Grande Chartreuse (E4), Paris (E7).
-const DESCENT_SITES: Array[Vector2] = [Vector2(2096.5, 1819.7), Vector2(2537.6, 2492.0), Vector2(2212.9, 1924.5)]
+const DESCENT_SITES: Array[Vector2] = [Vector2(2096.5, 3099.7), Vector2(2537.6, 3772.0), Vector2(2212.9, 3204.5)]
 ## ZG6 : `--bench-towns` descend plutôt sur des villes ordinaires rendues à l'échelle 1:1
 ## (Amiens, Troyes, Poitiers, Gand ; Chartres et Lincoln ne sont pas dans les données), pause
 ## allongée pour laisser la construction progressive se faire sous la caméra.
-const TOWN_DESCENT_SITES: Array[Vector2] = [Vector2(2224.0, 1763.6), Vector2(2381.4, 2026.4), Vector2(1964.9, 2249.3), Vector2(2380.6, 1598.2)]
+const TOWN_DESCENT_SITES: Array[Vector2] = [Vector2(2224.0, 3043.6), Vector2(2381.4, 3306.4), Vector2(1964.9, 3529.3), Vector2(2380.6, 2878.2)]
 const TOWN_DESCENT_HOLD := 4.0
 const DESCENT_SECONDS := 6.0
 const DESCENT_HOLD := 1.5

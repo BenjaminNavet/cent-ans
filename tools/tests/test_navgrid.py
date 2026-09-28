@@ -258,17 +258,19 @@ def test_crossings_schema_requires_a_route_for_passes() -> None:
 
 
 def test_navgrid_file_and_map_json() -> None:
-    """``navgrid.png`` is a light 2048² 8-bit image declared in ``map.json``."""
+    """``navgrid.png`` is a light 8-bit image of W/2 x H/2 cells declared in ``map.json``."""
     path = MAP_DIR / navgrid.NAVGRID_FILE
-    assert path.stat().st_size < 1_500_000, "navgrid.png trop lourd"
+    assert path.stat().st_size < 3_000_000, "navgrid.png trop lourd"
+    metadata = json.loads((MAP_DIR / "map.json").read_text(encoding="utf-8"))
+    width, height = metadata["size_px"]
+    scale = navgrid.NAVGRID_SCALE
     with Image.open(path) as image:
         assert image.mode == "L"
-        assert image.size == (navgrid.NAVGRID_SIZE, navgrid.NAVGRID_SIZE)
-    metadata = json.loads((MAP_DIR / "map.json").read_text(encoding="utf-8"))
+        assert image.size == (width // scale, height // scale) == (3584, 3072)
     assert metadata["navgrid"] == {
-        "size_px": navgrid.NAVGRID_SIZE,
+        "size_px": [width // scale, height // scale],
         "file": navgrid.NAVGRID_FILE,
-        "scale": metadata["size_px"][0] // navgrid.NAVGRID_SIZE,
+        "scale": scale,
     }
 
 

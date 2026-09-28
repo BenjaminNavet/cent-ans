@@ -12,12 +12,12 @@ extends SceneTree
 
 ## [nom, point carte (px 4096)]
 const PLACES := [
-	["pyrenees", Vector2(1862.0, 2818.0)],
-	["alpes", Vector2(2652.0, 2404.0)],
-	["galles", Vector2(1694.0, 1188.0)],
-	["massif_central", Vector2(2233.0, 2405.0)],
-	["crecy", Vector2(2191.5, 1706.0)],
-	["falaises_normandes", Vector2(2018.0, 1772.0)],
+	["pyrenees", Vector2(1862.0, 4098.0)],
+	["alpes", Vector2(2652.0, 3684.0)],
+	["galles", Vector2(1694.0, 2468.0)],
+	["massif_central", Vector2(2233.0, 3685.0)],
+	["crecy", Vector2(2191.5, 2986.0)],
+	["falaises_normandes", Vector2(2018.0, 3052.0)],
 ]
 ## Distances des paliers (unités) ; « site » = distance minimale au point (+ 5 %).
 const TIERS := {"strat": 60.0, "vallee": 6.0, "site": -1.0}

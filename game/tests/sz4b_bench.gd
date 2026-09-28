@@ -6,11 +6,11 @@ extends SceneTree
 ## Une ligne `SZ4b bench <vue> fps=… frame_ms=… trees=… dense=… prims=…` par vue.
 
 const VIEWS := [
-	["foret_orleans_d6", Vector2(2180.0, 2053.0), 6.0],
-	["foret_orleans_d10", Vector2(2180.0, 2053.0), 10.0],
-	["foret_compiegne_d6", Vector2(2285.0, 1844.0), 6.0],
-	["crecy_d10", Vector2(2191.5, 1706.0), 10.0],
-	["amiens_d14", Vector2(2224.0, 1763.6), 14.0],
+	["foret_orleans_d6", Vector2(2180.0, 3333.0), 6.0],
+	["foret_orleans_d10", Vector2(2180.0, 3333.0), 10.0],
+	["foret_compiegne_d6", Vector2(2285.0, 3124.0), 6.0],
+	["crecy_d10", Vector2(2191.5, 2986.0), 10.0],
+	["amiens_d14", Vector2(2224.0, 3043.6), 14.0],
 ]
 const WARMUP_FRAMES := 30
 const MEASURE_FRAMES := 240

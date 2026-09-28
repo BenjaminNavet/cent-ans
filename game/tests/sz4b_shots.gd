@@ -9,11 +9,11 @@ extends SceneTree
 
 ## [nom, point carte (px 4096)]
 const PLACES := [
-	["crecy", Vector2(2191.5, 1706.0)],
-	["val_de_loire", Vector2(2052.0, 2127.3)],
-	["amiens", Vector2(2224.0, 1763.6)],
-	["foret_orleans", Vector2(2180.0, 2053.0)],
-	["foret_compiegne", Vector2(2285.0, 1844.0)],
+	["crecy", Vector2(2191.5, 2986.0)],
+	["val_de_loire", Vector2(2052.0, 3407.3)],
+	["amiens", Vector2(2224.0, 3043.6)],
+	["foret_orleans", Vector2(2180.0, 3333.0)],
+	["foret_compiegne", Vector2(2285.0, 3124.0)],
 ]
 const DEFAULT_TIERS := "d6:6,d10:10,d14:14,d20:20,d60:60"
 

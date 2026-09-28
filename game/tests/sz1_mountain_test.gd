@@ -16,15 +16,15 @@ const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
 
 ## [nom, point carte, écrasé ?]
 const PLACES := [
-	["pyrenees", Vector2(1862.0, 2818.0), true],
-	["alpes", Vector2(2652.0, 2404.0), true],
-	["galles", Vector2(1694.0, 1188.0), true],
-	["massif_central", Vector2(2233.0, 2405.0), false],
-	["crecy", Vector2(2191.5, 1706.0), false],
-	["falaises_normandes", Vector2(2018.0, 1772.0), false],
-	["paris", Vector2(2213.2, 1923.9), true],  # ville 1:1 (VH5) : relief à l'échelle vraie
-	["rouen_seine", Vector2(2097.0, 1819.4), true],  # ville 1:1 (VH4) : coteaux à l'échelle vraie
-	["val_de_loire", Vector2(2052.0, 2127.3), false],
+	["pyrenees", Vector2(1862.0, 4098.0), true],
+	["alpes", Vector2(2652.0, 3684.0), true],
+	["galles", Vector2(1694.0, 2468.0), true],
+	["massif_central", Vector2(2233.0, 3685.0), false],
+	["crecy", Vector2(2191.5, 2986.0), false],
+	["falaises_normandes", Vector2(2018.0, 3052.0), false],
+	["paris", Vector2(2213.2, 3203.9), true],  # ville 1:1 (VH5) : relief à l'échelle vraie
+	["rouen_seine", Vector2(2097.0, 3099.4), true],  # ville 1:1 (VH4) : coteaux à l'échelle vraie
+	["val_de_loire", Vector2(2052.0, 3407.3), false],
 ]
 
 var _failures := 0

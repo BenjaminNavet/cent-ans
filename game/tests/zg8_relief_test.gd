@@ -154,7 +154,7 @@ func _test_real_map() -> void:
 	_check(lowest >= 0.0, "floor must never be below sea level (%f)" % lowest)
 	# Plaine de Paris : relief local faible, hauteur affichée presque celle de ZG4.
 	var s := MapData.vertical_scale()
-	var paris := Vector2(2214.0, 1924.0)
+	var paris := Vector2(2214.0, 3204.0)
 	var h_paris := map_data.height_m_at(paris.x, paris.y)
 	var lift_paris := MapData.display_height(h_paris, paris.x, paris.y) / s - h_paris
 	print("zg8_relief_test: Paris h=%.0f m floor=%.0f m lift=%.1f m" % [h_paris, MapData.relief_floor_at(paris.x, paris.y), lift_paris])
@@ -189,7 +189,7 @@ func _test_grounding() -> void:
 	world.add_child(terrain)
 	terrain.build(map_data)
 	_check(MapData.has_relief_floor(), "terrain build publishes the valley floor")
-	var index := terrain.chunk_index_at(1855.0, 2826.0)
+	var index := terrain.chunk_index_at(1855.0, 4106.0)
 	var grid := terrain.surface_grid(index)
 	var heights: PackedFloat32Array = grid["heights"]
 	var side: int = grid["side"]
@@ -205,7 +205,7 @@ func _test_grounding() -> void:
 		_check(absf(terrain.surface_height_at(p.x, p.y) - maxf(y, 0.0)) < 1e-4, "object on a vertex = mesh height")
 	_check(worst < 1e-4, "baked E0 vertices round-trip through the display height (%f)" % worst)
 	# Maquette (LandmarkModel) : mètres = inverse de la surface, reposés par le shader à la même hauteur.
-	for p in [Vector2(2214.0, 1924.0), Vector2(1860.0, 2830.0), Vector2(2652.0, 2404.0)]:
+	for p in [Vector2(2214.0, 3204.0), Vector2(1860.0, 4110.0), Vector2(2652.0, 3684.0)]:
 		var ground := terrain.surface_height_at(p.x, p.y)
 		var meters := MapData.height_from_display(ground, p.x, p.y)
 		_check(absf(MapData.display_height(meters, p.x, p.y) - ground) < 1e-4, "landmark base at %s lands on the displayed ground" % p)

@@ -77,7 +77,7 @@
   "required": ["version", "settlements", "hamlets", "crossings", "roads"],
   "additionalProperties": false,
   "$defs": {
-    "px": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": -64, "maximum": 4160 } },
+    "px": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": -64, "maximum": 7232 } },
     "tile": {
       "type": "object",
       "properties": {

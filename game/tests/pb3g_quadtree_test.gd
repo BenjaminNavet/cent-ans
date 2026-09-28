@@ -53,10 +53,10 @@ func _run() -> void:
 	var camera := Camera3D.new()
 	world.add_child(camera)
 	camera.current = true
-	var paris := Vector2(2213.2, 1923.9)
-	var loire := Vector2(1850.0, 2330.0)
+	var paris := Vector2(2213.2, 3203.9)
+	var loire := Vector2(1850.0, 3610.0)
 	var views := [
-		["france", Vector2(2048.0, 2048.0), Vector3(0.0, 2600.0, 1400.0)],
+		["france", Vector2(2048.0, 3328.0), Vector3(0.0, 2600.0, 1400.0)],
 		["paris_150", paris, Vector3(0.0, 110.0, 100.0)],
 		["paris_40", paris, Vector3(0.0, 25.0, 30.0)],
 		["paris_ground", paris, Vector3(0.0, 1.5, 6.0)],

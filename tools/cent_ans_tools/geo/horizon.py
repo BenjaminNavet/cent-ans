@@ -38,7 +38,7 @@ from scipy import ndimage
 from shapely.geometry import shape
 
 from cent_ans_tools.geo import copernicus, relief, terrain
-from cent_ans_tools.geo.project import MapGrid
+from cent_ans_tools.geo.project import MapGrid, grid_from_metadata
 
 REPO_DIR = Path(__file__).resolve().parents[3]
 MAP_DIR = REPO_DIR / "data" / "map"
@@ -234,19 +234,24 @@ class Sources:
         """Load the fine relief, land mask, forest channel and province shapes."""
         metadata = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))
         self.bounds = tuple(metadata["bounds_projected"])
-        self.grid = MapGrid(self.bounds, 4096)
+        self.grid = grid_from_metadata(metadata)
         tiles = metadata["height_tiles"]
-        count = tiles["size_px"] // tiles["tile_px"]
+        size = tiles["size_px"]
+        width, height = size if isinstance(size, list) else (size, size)
         self.fine = terrain.uint16_to_height(
-            relief.read_tiles(map_dir / tiles["dir"], count)
+            relief.read_tiles(
+                map_dir / tiles["dir"],
+                width // tiles["tile_px"],
+                height // tiles["tile_px"],
+            )
         ).astype(np.float32)
-        self.fine_mpp = (self.bounds[2] - self.bounds[0]) / self.fine.shape[0]
+        self.fine_mpp = (self.bounds[2] - self.bounds[0]) / self.fine.shape[1]
         self.land = (
             np.asarray(Image.open(map_dir / "land_mask.png"), dtype=np.uint8) > 127
         )
         splat = np.asarray(Image.open(map_dir / "splat.png"), dtype=np.uint8)
         self.forest = splat[:, :, 2].astype(np.float32) / 255.0
-        self.forest_mpp = (self.bounds[2] - self.bounds[0]) / self.forest.shape[0]
+        self.forest_mpp = (self.bounds[2] - self.bounds[0]) / self.forest.shape[1]
         # Open sea: fine relief under the sea (ETOPO bathymetry where Copernicus shows the
         # sea surface), large connected bodies only (no estuaries, lagoons or lakes).
         sea = self.fine[::2, ::2] < -1.0

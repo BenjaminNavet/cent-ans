@@ -9,19 +9,19 @@ extends SceneTree
 
 ## [nom, point carte, distance (unités, < 0 : minimale × |d|), cap (degrés)]
 const SHOTS := [
-	["val_de_loire_site", Vector2(2052.0, 2127.3), 1.0, 0.0],
-	["rouen_site", Vector2(2096.64, 1819.78), 1.6, 0.0],
-	["rouen_pont", Vector2(2096.18, 1820.33), 0.55, -30.0],
-	["rouen_seine_sud", Vector2(2096.54, 1820.18), 1.2, 180.0],
-	["rouen_vallee", Vector2(2096.54, 1819.88), 4.0, 0.0],
-	["orleans_site", Vector2(2151.9, 2067.0), 1.0, 20.0],
-	["orleans_vallee", Vector2(2151.9, 2067.0), 5.0, 20.0],
-	["tours_site", Vector2(2017.0, 2128.2), 1.0, 20.0],
-	["tours_vallee", Vector2(2017.0, 2128.2), 5.0, 20.0],
-	["londres_site", Vector2(2021.9, 1487.2), 1.0, 0.0],
-	["londres_vallee", Vector2(2021.9, 1487.2), 5.0, 0.0],
-	["bordeaux_site", Vector2(1832.8, 2502.3), 1.0, 90.0],
-	["bordeaux_vallee", Vector2(1832.8, 2502.3), 5.0, 90.0],
+	["val_de_loire_site", Vector2(2052.0, 3407.3), 1.0, 0.0],
+	["rouen_site", Vector2(2096.64, 3099.78), 1.6, 0.0],
+	["rouen_pont", Vector2(2096.18, 3100.33), 0.55, -30.0],
+	["rouen_seine_sud", Vector2(2096.54, 3100.18), 1.2, 180.0],
+	["rouen_vallee", Vector2(2096.54, 3099.88), 4.0, 0.0],
+	["orleans_site", Vector2(2151.9, 3347.0), 1.0, 20.0],
+	["orleans_vallee", Vector2(2151.9, 3347.0), 5.0, 20.0],
+	["tours_site", Vector2(2017.0, 3408.2), 1.0, 20.0],
+	["tours_vallee", Vector2(2017.0, 3408.2), 5.0, 20.0],
+	["londres_site", Vector2(2021.9, 2767.2), 1.0, 0.0],
+	["londres_vallee", Vector2(2021.9, 2767.2), 5.0, 0.0],
+	["bordeaux_site", Vector2(1832.8, 3782.3), 1.0, 90.0],
+	["bordeaux_vallee", Vector2(1832.8, 3782.3), 5.0, 90.0],
 ]
 
 
