@@ -1,0 +1,25 @@
+{
+  "id": "tit_sweden",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Suède",
+    "local": "Svea rike",
+    "local_language": "vieux suédois"
+  },
+  "heraldry": {
+    "blazon": "D'azur à trois couronnes d'or.",
+    "description": "Les trois couronnes, sceau de Magnus Eriksson dès 1336.",
+    "primary_color": "#1F4E9B",
+    "secondary_color": "#E8B923"
+  },
+  "de_jure_provinces": [
+    "prov_gotaland"
+  ],
+  "holder_1337": {
+    "faction": "fac_sweden",
+    "sources": [
+      "Magnus IV de Suède",
+      "Royaume de Suède"
+    ]
+  }
+}

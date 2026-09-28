@@ -1,0 +1,27 @@
+{
+  "id": "tit_granada",
+  "rank": "kingdom",
+  "name": {
+    "display": "Émirat de Grenade",
+    "local": "Mamlakat Gharnāṭa",
+    "local_language": "arabe andalou"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la bande d'or engoulée de deux têtes de dragon, chargée de la devise nasride.",
+    "description": "Bande d'or des Nasrides portant « Wa-lā ghālib illā Allāh » (Nul vainqueur sinon Dieu).",
+    "primary_color": "#A31F24",
+    "secondary_color": "#E8B923"
+  },
+  "de_jure_provinces": [
+    "prov_granada",
+    "prov_malaga"
+  ],
+  "holder_1337": {
+    "faction": "fac_granada",
+    "sources": [
+      "Royaume de Grenade",
+      "Yusuf Ier de Grenade",
+      "Bataille du Salado"
+    ]
+  }
+}

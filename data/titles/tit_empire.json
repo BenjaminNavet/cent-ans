@@ -1,0 +1,44 @@
+{
+  "id": "tit_empire",
+  "rank": "kingdom",
+  "name": {
+    "display": "Saint-Empire romain",
+    "local": "Heiliges Römisches Reich",
+    "local_language": "moyen haut-allemand"
+  },
+  "heraldry": {
+    "blazon": "D'or à l'aigle de sable, becquée et membrée de gueules.",
+    "description": "Aigle impériale à une tête (l'aigle bicéphale ne devient l'emblème impérial qu'avec Sigismond au XVe siècle).",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "de_jure_provinces": [
+    "prov_alsace",
+    "prov_brandenburg",
+    "prov_cologne",
+    "prov_dauphine",
+    "prov_franconia",
+    "prov_frisia",
+    "prov_liege",
+    "prov_lorraine",
+    "prov_lower_saxony",
+    "prov_mainz",
+    "prov_meissen",
+    "prov_montferrat",
+    "prov_namur",
+    "prov_oberbayern",
+    "prov_palatinate",
+    "prov_swabia",
+    "prov_tirol",
+    "prov_trier",
+    "prov_utrecht",
+    "prov_westphalia"
+  ],
+  "holder_1337": {
+    "faction": "fac_empire",
+    "sources": [
+      "Louis IV du Saint-Empire",
+      "Saint-Empire romain germanique"
+    ]
+  }
+}
