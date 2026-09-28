@@ -520,6 +520,12 @@ fn plan_turn_in(
                 .map_or(0.0, |anchor| ctx.threat_at(anchor))
         },
     ));
+    // TW2-T5: ranks of the armies spent on traditions.
+    orders.extend(crate::traditions::plan_traditions(
+        ctx.state,
+        ctx.data,
+        ctx.faction,
+    ));
     plan_armies(&ctx, &mut orders);
     orders
 }
@@ -620,6 +626,8 @@ fn plan_economy(ctx: &Context, orders: &mut Vec<Order>) {
     if rate != me.tax_rate {
         orders.push(Order::SetTaxRate { rate });
     }
+    // RS-C: a realm whose buildings outgrew its income raze the least useful.
+    orders.extend(plan_demolitions(ctx));
 
     // Debt: dismiss the costliest unit until the surplus repays the debt
     // within `DEBT_REPAYMENT_TURNS`. F4: dismiss ahead of bankruptcy when the
@@ -990,6 +998,73 @@ fn building_value(
         };
     }
     value - f64::from(def.upkeep.unwrap_or(0)) * 1.5
+}
+
+/// RS-C: after `ai_demolition.deficit_seasons` seasons of deficit in a row,
+/// razes the buildings that do not pay for themselves, least value per livre
+/// of upkeep first, while their upkeep exceeds `max_upkeep_percent` of the
+/// gross income (at most `max_per_turn`). Buildings built before the
+/// construction cap (EQ5) otherwise sank the Swiss into bankruptcy.
+fn plan_demolitions(ctx: &Context) -> Vec<Order> {
+    let state = ctx.state;
+    let data = ctx.data;
+    let rules = &data.economy_rules.ai_demolition;
+    if state.factions[ctx.faction].deficit_seasons < rules.deficit_seasons {
+        return Vec::new();
+    }
+    // (value per livre of upkeep, upkeep, settlement, building)
+    let mut candidates: Vec<(f64, i64, SettlementId, data_model::BuildingId)> = Vec::new();
+    let mut burden = 0;
+    for (id, settlement) in state
+        .settlements
+        .iter()
+        .filter(|(id, s)| ctx.owns_settlement(id) && s.siege.is_none())
+    {
+        let Some(province) = state.provinces.get(&settlement.province) else {
+            continue;
+        };
+        let unrest = weighted_unrest(&province.population);
+        let health = f64::from(province.population.peasants.health);
+        let percent = sim_campaign::economy::building_upkeep_percent(data, settlement.kind);
+        for building in &settlement.buildings {
+            let upkeep = data
+                .buildings
+                .get(building)
+                .map_or(0, |b| i64::from(b.upkeep.unwrap_or(0)))
+                * percent
+                / 100;
+            if upkeep <= 0 || building_income(ctx, id, building) >= upkeep as f64 {
+                continue;
+            }
+            burden += upkeep;
+            if sim_campaign::buildings::demolition_blocker(state, data, id, building).is_some() {
+                continue;
+            }
+            let value = building_value(ctx, id, building, unrest, health);
+            candidates.push((value / upkeep as f64, upkeep, id.clone(), building.clone()));
+        }
+    }
+    let limit = ctx.gross_income.max(0) * rules.max_upkeep_percent / 100;
+    if burden <= limit {
+        return Vec::new();
+    }
+    candidates.sort_by(|a, b| {
+        a.0.total_cmp(&b.0)
+            .then_with(|| a.2.cmp(&b.2))
+            .then_with(|| a.3.cmp(&b.3))
+    });
+    let mut orders = Vec::new();
+    for (_, upkeep, settlement, building) in candidates {
+        if burden <= limit || orders.len() >= rules.max_per_turn {
+            break;
+        }
+        burden -= upkeep;
+        orders.push(Order::Demolish {
+            settlement: settlement.into(),
+            building,
+        });
+    }
+    orders
 }
 
 /// In debt, dismisses the costliest units until `savings` livres of upkeep
@@ -1499,6 +1574,20 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             _ => None,
         })
         .collect();
+    // Armies losing every unit this turn: gone before any later order.
+    let emptied: BTreeSet<&ArmyId> = disbanding
+        .iter()
+        .filter(|army| {
+            let dismissed = orders
+                .iter()
+                .filter(|o| matches!(o, Order::DisbandUnit { army: Some(a), .. } if a == *army))
+                .count();
+            state
+                .armies
+                .get(*army)
+                .is_some_and(|a| dismissed >= a.units.len())
+        })
+        .collect();
 
     // PB3f: the route tables the loop below asks for, computed ahead on
     // the planner's pool (a memo of the grid planner: same tables).
@@ -1513,7 +1602,10 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         .collect();
     ctx.grid.prefetch_tables(ctx.mode, &table_keys);
 
-    for (army_id, _) in armies.iter().filter(|(id, _)| !merged.contains(id)) {
+    for (army_id, _) in armies
+        .iter()
+        .filter(|(id, _)| !merged.contains(id) && !emptied.contains(id))
+    {
         let army = &state.armies[army_id];
         // EQ5: standing without right of passage in the lands of a realm at
         // peace (after a peace, or in a place of its own inside a foreign

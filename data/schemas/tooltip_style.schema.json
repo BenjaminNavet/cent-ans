@@ -4,7 +4,7 @@
   "title": "Style des infobulles (IB)",
   "description": "Présentation des infobulles en sections et de la chaîne de bulles (ADR 0109). Aucune règle de jeu.",
   "type": "object",
-  "required": ["width_px", "max_height_screen_share", "header_icon_px", "short_max_body_lines", "chain", "kind_colors", "headline"],
+  "required": ["equilibrium_effects", "width_px", "max_height_screen_share", "header_icon_px", "short_max_body_lines", "chain", "kind_colors", "headline"],
   "additionalProperties": false,
   "$defs": {
     "kind": {"enum": ["unit", "unit_recruit", "building", "technology", "resource", "gauge", "trait", "skill", "class", "rule", "plain"]},
@@ -28,6 +28,7 @@
         "breadcrumb_from_depth": {"description": "Profondeur à partir de laquelle le fil d'Ariane s'affiche.", "type": "integer", "minimum": 2, "maximum": 10}
       }
     },
+    "equilibrium_effects": {"description": "Effets dont l'avant → après (IB5) est le point d'équilibre vers lequel la jauge tend, pas sa valeur immédiate : la ligne le dit.", "type": "array", "items": {"type": "string"}, "uniqueItems": true},
     "kind_colors": {
       "type": "object",
       "propertyNames": {"$ref": "#/$defs/kind"},
@@ -38,6 +39,12 @@
       "type": "object",
       "propertyNames": {"$ref": "#/$defs/kind"},
       "additionalProperties": {"type": "array", "maxItems": 2, "items": {"type": "string"}}
+    },
+    "lower_is_better": {
+      "description": "Clés d'effet dont une hausse est défavorable (couleur rouge) : sens d'affichage seulement.",
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
     }
   }
 }

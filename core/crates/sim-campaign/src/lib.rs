@@ -68,6 +68,7 @@ pub mod passage;
 pub mod path_plan;
 pub mod population;
 pub mod posture;
+pub mod preview;
 pub mod ransom;
 pub mod reach;
 pub mod recruit_pool;
@@ -86,6 +87,7 @@ pub mod stance;
 pub mod state;
 pub mod table;
 pub mod trade;
+pub mod traditions;
 pub mod treaty_explain;
 pub mod turn;
 pub mod victory;
@@ -150,9 +152,12 @@ pub use state::{
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};
+pub use traditions::{ArmyTraditions, TraditionError, TraditionOption, TraditionView};
 pub use weather::{MapWeather, ProvinceWeather};
 
 #[cfg(test)]
 mod capture_tests;
 #[cfg(test)]
 mod review_tests;
+#[cfg(test)]
+mod rs_c_tests;

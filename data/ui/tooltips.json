@@ -1,8 +1,243 @@
 {
-  "description": "Chantier IB (ADR 0109) — textes des infobulles : libellés d'effets et de stats, textes des jauges et du HUD, infobulles simples (titre, corps, raccourci). Les {rule.…} sont résolus depuis les règles du core, comme dans RichTooltip. Rempli par le lot IB2 à partir des tables de game/scripts/ui/rich_tooltip.gd.",
-  "effects": {},
-  "stats": {},
-  "gauges": {},
+  "description": "Chantier IB (ADR 0109) — textes des infobulles : libellés d'effets et de stats, textes des jauges et du HUD, infobulles simples (titre, corps, raccourci). Les {rule.…} sont résolus depuis les règles du core, comme dans RichTooltip. Blocs effects, stats et gauges : textes des bulles de règle (liens ib:rule:<clé>, lot IB4) ; le reste est rempli par le lot IB2 à partir des tables de game/scripts/ui/rich_tooltip.gd.",
+  "effects": {
+    "unrest": {
+      "label": "Mécontentement",
+      "body": "Modifie le mécontentement vers lequel tend la province. Un mécontentement durablement élevé mène à la révolte."
+    },
+    "prestige": {
+      "label": "Prestige",
+      "body": "Modifie le prestige du souverain ou du personnage qui porte l'effet."
+    },
+    "army_morale": {
+      "label": "Moral des armées",
+      "body": "Modifie le moral des troupes, qui décide de leur tenue au combat avant la déroute."
+    },
+    "piety": {
+      "label": "Piété",
+      "body": "Modifie la piété du souverain ou du personnage qui porte l'effet."
+    },
+    "health": {
+      "label": "Santé",
+      "body": "Modifie la santé vers laquelle tend la province ; une santé basse fait décliner la population et expose à la peste."
+    },
+    "wealth": {
+      "label": "Richesse",
+      "body": "Modifie la richesse produite par la population d'une province chaque saison."
+    },
+    "trade_income": {
+      "label": "Revenus du commerce",
+      "body": "Modifie les revenus tirés du commerce bourgeois d'une province chaque saison."
+    },
+    "research_points": {
+      "label": "Points de recherche",
+      "body": "Ajoute des points de recherche à la faction chaque saison, quelle que soit la branche technologique."
+    },
+    "research_civil": {
+      "label": "Recherche civile",
+      "body": "Accélère la recherche des technologies civiles et médicales."
+    },
+    "research_military": {
+      "label": "Recherche militaire",
+      "body": "Accélère la recherche des technologies militaires."
+    },
+    "loyalty": {
+      "label": "Loyauté",
+      "body": "Abaisse d'autant le mécontentement vers lequel tend la province."
+    },
+    "army_ranged": {
+      "label": "Tir",
+      "body": "Ajoute un bonus de tir aux unités d'une catégorie donnée (technologies, bâtiments), appliqué en bataille."
+    },
+    "army_armor": {
+      "label": "Armure",
+      "body": "Ajoute un bonus d'armure aux unités d'une catégorie donnée (technologies, bâtiments), appliqué en bataille."
+    },
+    "army_melee": {
+      "label": "Mêlée",
+      "body": "Ajoute un bonus de mêlée aux unités d'une catégorie donnée (technologies, bâtiments), appliqué en bataille."
+    },
+    "tax_income": {
+      "label": "Impôts",
+      "body": "Modifie la base d'imposition d'une province chaque saison."
+    },
+    "production": {
+      "label": "Production",
+      "body": "Augmente la valeur du produit des paysans et des bourgeois (moulins, forges, ateliers), ce qui accroît les revenus fiscaux qui en découlent."
+    },
+    "intrigue": {
+      "label": "Intrigue",
+      "body": "Modifie l'intrigue du personnage qui porte l'effet."
+    },
+    "diplomacy": {
+      "label": "Diplomatie",
+      "body": "Modifie la diplomatie du personnage qui porte l'effet."
+    },
+    "battle_charge": {
+      "label": "Charge en bataille",
+      "body": "Ajoute un bonus de charge, en pourcentage, aux troupes commandées par le général qui porte l'effet."
+    },
+    "battle_ranged": {
+      "label": "Tir en bataille",
+      "body": "Ajoute un bonus de précision au tir, en pourcentage, aux troupes commandées par le général qui porte l'effet."
+    },
+    "battle_defense": {
+      "label": "Défense en bataille",
+      "body": "Ajoute un bonus d'armure, en pourcentage, aux troupes commandées par le général qui porte l'effet."
+    },
+    "siege_resistance": {
+      "label": "Résistance aux sièges",
+      "body": "Renforce la résistance d'une place assiégée face à l'attaquant."
+    },
+    "siege_speed": {
+      "label": "Vitesse de siège",
+      "body": "Accélère la progression d'un siège mené par le général qui porte l'effet, réduisant sa durée."
+    },
+    "army_experience": {
+      "label": "Expérience des troupes",
+      "body": "Expérience de départ (0 à 10) des régiments levés dans la province, pour toutes les troupes ou une seule catégorie."
+    },
+    "recruit_slots": {
+      "label": "Places de recrutement",
+      "body": "Ajoute des places de recrutement disponibles dans une garnison chaque saison."
+    },
+    "recruit_cost": {
+      "label": "Coût de recrutement",
+      "body": "Modifie le coût de recrutement des unités d'une province ou d'une catégorie d'unités."
+    },
+    "fortification_level": {
+      "label": "Fortifications",
+      "body": "Modifie le niveau de fortification d'une place, qui renforce sa garnison en défense et lors des sièges."
+    },
+    "growth": {
+      "label": "Croissance",
+      "body": "Modifie la croissance de la population d'une province chaque saison."
+    },
+    "movement": {
+      "label": "Mouvement",
+      "body": "Modifie la portée de déplacement d'une armée ou d'une catégorie d'unités sur la carte de campagne."
+    },
+    "goods_satisfaction": {
+      "label": "Satisfaction en biens",
+      "body": "Modifie la satisfaction de la population d'une province en biens de consommation chaque saison."
+    },
+    "garrison": {
+      "label": "Garnison",
+      "body": "Chaque point réduit la part de l'entretien de la garnison payée par le contrôleur et accélère la reconstitution de ses effectifs chaque saison, jusqu'à un plafond des règles."
+    },
+    "fertility": {
+      "label": "Fécondité",
+      "body": "Modifie la fécondité du personnage qui porte l'effet."
+    },
+    "construction_speed": {
+      "label": "Vitesse de construction",
+      "body": "Accélère la construction des bâtiments dans une province."
+    },
+    "attrition_resistance": {
+      "label": "Résistance à l'attrition",
+      "body": "Réduit les pertes subies par une armée par attrition (manque de ravitaillement, terrain hostile)."
+    },
+    "supply": {
+      "label": "Ravitaillement",
+      "body": "Améliore la récupération du ravitaillement d'une armée et atténue les pertes liées à son manque, y compris en bataille."
+    },
+    "army_upkeep": {
+      "label": "Entretien des armées",
+      "body": "Modifie le coût d'entretien des troupes d'une catégorie donnée ou d'une province."
+    },
+    "plague_resistance": {
+      "label": "Résistance à la peste",
+      "body": "Réduit la probabilité et la gravité des épidémies dans une province, dans la limite d'un plafond fixé par les règles."
+    },
+    "wound_recovery": {
+      "label": "Soin des blessés",
+      "body": "Augmente la part des pertes d'une bataille récupérée comme blessés par les troupes survivantes, dans la limite d'un plafond fixé par les règles."
+    },
+    "diet_health": {
+      "label": "Santé tirée des régimes",
+      "body": "Modifie en pourcentage les effets de santé apportés par le régime alimentaire d'une province."
+    }
+  },
+  "stats": {
+    "melee": {
+      "label": "Mêlée",
+      "body": "Puissance de l'unité au corps à corps en bataille."
+    },
+    "ranged": {
+      "label": "Tir",
+      "body": "Puissance de tir de l'unité ; nulle si l'unité n'a pas de portée."
+    },
+    "range": {
+      "label": "Portée",
+      "body": "Distance de tir de l'unité, en mètres ; 0 pour une unité de mêlée pure."
+    },
+    "armor": {
+      "label": "Armure",
+      "body": "Protection de l'unité, qui réduit les dégâts reçus en bataille."
+    },
+    "morale": {
+      "label": "Moral",
+      "body": "Résistance de l'unité au stress du combat avant de rompre ou de fuir."
+    },
+    "speed": {
+      "label": "Vitesse",
+      "body": "Vitesse de déplacement de l'unité sur le champ de bataille."
+    },
+    "ammo": {
+      "label": "Munitions",
+      "body": "Nombre de tirs disponibles avant qu'une unité à distance ne soit à court de munitions."
+    },
+    "charge": {
+      "label": "Charge",
+      "body": "Bonus de dégâts au moment de l'impact d'une charge, notamment pour la cavalerie."
+    },
+    "siege_attack": {
+      "label": "Attaque de siège",
+      "body": "Dégâts infligés aux fortifications par une unité de siège."
+    }
+  },
+  "gauges": {
+    "unrest": {
+      "title": "Mécontentement",
+      "body": "Tend vers le fardeau fiscal, la dévastation, le manque de biens et de santé, l'occupation étrangère, la religion différente et les troubles récents (prises, pillages, régence) ; la garnison et certains bâtiments l'apaisent. Au-delà de {rule.revolt_unrest_threshold} pendant {rule.revolt_seasons} saisons : révolte (le compte repart ensuite de zéro) ; au-delà de {rule.revolt_control_threshold} : la province passe aux rebelles."
+    },
+    "health": {
+      "title": "Santé",
+      "body": "Tend vers {rule.health_neutral} + bâtiments sanitaires + satisfaction en biens, moins la surpopulation. Sous {rule.health_neutral} la population décline ; sous {rule.plague_health_threshold}, risque de peste."
+    },
+    "wealth": {
+      "title": "Richesse",
+      "body": "Tend vers la base de la classe + bâtiments de commerce, moins le fardeau fiscal et la dévastation."
+    },
+    "goods_satisfaction": {
+      "title": "Biens",
+      "body": "Satisfaction en biens : {rule.goods_target_base} + {rule.goods_target_per_category} par catégorie de biens accessible à la faction (ressources des provinces contrôlées et alliées) + marchés et foires."
+    },
+    "devastation": {
+      "title": "Dévastation",
+      "body": "Pillages et combats : freine la croissance (nulle au-delà de {rule.growth_devastation_cap}), la richesse et nourrit le mécontentement."
+    },
+    "population": {
+      "title": "Population",
+      "body": "Habitants de la province, toutes classes confondues ; croît avec la santé."
+    },
+    "morale": {
+      "title": "Moral",
+      "body": "Au plus bas, l'unité rompt et fuit le combat."
+    },
+    "supply": {
+      "title": "Ravitaillement",
+      "body": "Vivres de l'armée : baisse hors du territoire ami (plus vite l'hiver), remonte en territoire ami ; un pays dévasté aggrave la perte et ralentit la reprise."
+    },
+    "movement": {
+      "title": "Mouvement",
+      "body": "Points de mouvement restants ce tour."
+    },
+    "strength": {
+      "title": "Effectif",
+      "body": "Hommes présents / effectif complet de l'unité."
+    }
+  },
   "hud": {},
   "plain": {}
 }

@@ -934,6 +934,103 @@ impl CampaignState {
     }
 }
 
+/// Adds a finished `building` to `settlement`, replacing the building it
+/// upgrades (IB5: shared with the tooltip previews).
+pub(crate) fn complete_building(
+    data: &GameData,
+    settlement: &mut SettlementState,
+    building: &BuildingId,
+) {
+    if let Some(from) = data
+        .buildings
+        .get(building)
+        .and_then(|b| b.upgrades_from.clone())
+    {
+        settlement.buildings.retain(|b| b != &from);
+    }
+    settlement.buildings.push(building.clone());
+}
+
+/// RS-C: why `building` cannot be razed in `settlement` (French), or `None`
+/// when it can: it must stand there, the place must not be besieged, and
+/// no other building of the place (nor its construction) may depend on it.
+pub fn demolition_blocker(
+    state: &CampaignState,
+    data: &GameData,
+    settlement: &SettlementId,
+    building: &BuildingId,
+) -> Option<String> {
+    let Some(place) = state.settlements.get(settlement) else {
+        return Some("colonie inconnue".to_owned());
+    };
+    if !place.buildings.contains(building) {
+        return Some("ce bâtiment ne se dresse pas ici".to_owned());
+    }
+    if place.siege.is_some() {
+        return Some("la colonie est assiégée".to_owned());
+    }
+    let others: Vec<BuildingId> = place
+        .buildings
+        .iter()
+        .filter(|b| *b != building)
+        .cloned()
+        .collect();
+    let needs_it = |required: &BuildingId| {
+        data.building_satisfies(building, required) && !data.has_building(&others, required)
+    };
+    let dependant = place
+        .buildings
+        .iter()
+        .filter(|b| *b != building)
+        .chain(place.construction.as_ref().map(|c| &c.building))
+        .filter_map(|b| data.buildings.get(b))
+        .find(|b| {
+            b.required_building.as_ref().is_some_and(needs_it)
+                || b.upgrades_from
+                    .as_ref()
+                    .is_some_and(|from| from == building)
+        });
+    dependant.map(|b| format!("{} en dépend", b.name.display))
+}
+
+/// RS-C: razes `building` in `settlement` for `faction` (`Order::Demolish`),
+/// refunding `economy.json` `demolition_refund_percent` of its money cost.
+pub(crate) fn demolish(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &data_model::FactionId,
+    settlement: &SettlementId,
+    building: &BuildingId,
+) -> Result<(), crate::orders::OrderError> {
+    use crate::orders::OrderError;
+    let place = state
+        .settlements
+        .get(settlement)
+        .ok_or_else(|| OrderError::UnknownSettlement(settlement.clone()))?;
+    if &place.controller != faction {
+        return Err(OrderError::NotYourSettlement(faction.clone()));
+    }
+    if place.siege.is_some() {
+        return Err(OrderError::SettlementBesieged);
+    }
+    if let Some(reason) = demolition_blocker(state, data, settlement, building) {
+        return Err(OrderError::DemolitionRefused(reason));
+    }
+    let refund = data.buildings.get(building).map_or(0, |b| {
+        i64::from(b.cost.money) * i64::from(data.economy_rules.demolition_refund_percent) / 100
+    });
+    state
+        .settlements
+        .get_mut(settlement)
+        .expect("checked above")
+        .buildings
+        .retain(|b| b != building);
+    if let Some(f) = state.factions.get_mut(faction) {
+        f.treasury += refund;
+    }
+    Ok(())
+}
+
 /// Phase: progresses (and completes) constructions in every settlement.
 pub(crate) fn resolve_construction(
     state: &mut CampaignState,
@@ -952,14 +1049,7 @@ pub(crate) fn resolve_construction(
             continue;
         }
         let Construction { building, .. } = settlement.construction.take().expect("checked above");
-        if let Some(from) = data
-            .buildings
-            .get(&building)
-            .and_then(|b| b.upgrades_from.clone())
-        {
-            settlement.buildings.retain(|b| b != &from);
-        }
-        settlement.buildings.push(building.clone());
+        complete_building(data, settlement, &building);
         let controller = settlement.controller.clone();
         let province = settlement.province.clone();
         if controller == player {
