@@ -1,0 +1,68 @@
+{
+  "id": "fac_bosnia",
+  "name": {
+    "display": "Banat de Bosnie",
+    "local": "Бансство Босна",
+    "local_language": "serbe"
+  },
+  "short_name": "Bosnie",
+  "adjective": "bosniaque",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_stjepan_ii_kotromanic",
+  "capital": "prov_bosnia",
+  "capital_city": "Visoko",
+  "religion": "rel_catholic",
+  "culture": "cul_bosnian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_bosnia",
+  "heraldry": {
+    "blazon": "D'azur à six fleurs de lis d'or posées trois, deux et une.",
+    "description": "Armes des Kotromanić : fleurs de lis d'or sur azur, d'inspiration angevine (attestées à partir du milieu du XIVe siècle).",
+    "primary_color": "#1F3E8F",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Attesté plus tard (Tvrtko Ier) ; ici étendu à Étienne II."
+  },
+  "titles": [
+    "Ban de Bosnie",
+    "Seigneur de Hum"
+  ],
+  "treasury": 6000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_serbia",
+      "status": "peace",
+      "note": "Le Hum a été enlevé aux Serbes en 1326 ; la rivalité reste vive."
+    },
+    {
+      "faction": "fac_venice",
+      "status": "peace",
+      "note": "Commerce vers Raguse et Cattaro."
+    }
+  ],
+  "claims": [
+    {
+      "kind": "province",
+      "province": "prov_ragusa",
+      "note": "Débouché maritime convoité."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 60,
+    "trade": 45,
+    "piety": 50
+  },
+  "description": "Banat de Bosnie d'Étienne II Kotromanić, un jeune ban qui a annexé le Hum en 1326 et se pose en arbitre entre la Hongrie, la Serbie et Venise.",
+  "sources": [
+    "Stephen II, Ban of Bosnia",
+    "Banat de Bosnie"
+  ]
+}

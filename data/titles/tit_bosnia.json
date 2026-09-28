@@ -1,0 +1,64 @@
+{
+  "id": "tit_bosnia",
+  "rank": "kingdom",
+  "name": {
+    "display": "Banat de Bosnie",
+    "local": "Bosna",
+    "local_language": "serbe"
+  },
+  "heraldry": {
+    "blazon": "D'azur à six fleurs de lis d'or posées trois, deux et une.",
+    "description": "Armes des Kotromanić : fleurs de lis d'or sur azur, d'inspiration angevine (attestées à partir du milieu du XIVe siècle).",
+    "primary_color": "#1F3E8F",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Attesté plus tard (Tvrtko Ier) ; ici étendu à Étienne II."
+  },
+  "de_jure_provinces": [
+    "prov_bosnia",
+    "prov_hum"
+  ],
+  "holder_1337": {
+    "faction": "fac_bosnia",
+    "sources": [
+      "Bosnie médiévale",
+      "Étienne II Kotromanić"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_bosnia_hold",
+      "title": "Garder le banat",
+      "description": "Étienne II doit conserver la Bosnie et le Hum.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_bosnia"
+      }
+    },
+    {
+      "id": "obj_bosnia_indep",
+      "title": "Un ban libre",
+      "description": "Refuser toute suzeraineté.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_bosnia_coast",
+      "title": "Vers la mer",
+      "description": "Obtenir Raguse et l'accès à l'Adriatique.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_ragusa"
+        ]
+      }
+    }
+  ],
+  "description": "Banat de Bosnie, de fait indépendant, nominalement vassal de la Hongrie ; rang « royaume » par approximation du schéma.",
+  "sources": [
+    "Bosnie médiévale",
+    "Étienne II Kotromanić"
+  ]
+}

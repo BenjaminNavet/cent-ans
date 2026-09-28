@@ -1,0 +1,48 @@
+{
+  "id": "chr_mihail_asen_iv",
+  "name": {
+    "display": "Michel Asen IV",
+    "local": "Михаил Асен IV",
+    "local_language": "bulgare"
+  },
+  "sex": "male",
+  "house": "Chichman",
+  "faction": "fac_bulgaria",
+  "role": "heir",
+  "birth": {
+    "value": "1322",
+    "uncertain": true,
+    "note": "Naissance vers 1322 ; couronné co-empereur en 1337."
+  },
+  "death": {
+    "value": "1355"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Cotsar",
+      "from": {
+        "value": "1337"
+      }
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_pious"
+  ],
+  "piety": 70,
+  "family": {
+    "father": "chr_ivan_alexander",
+    "mother": "chr_theodora_basarab"
+  },
+  "starting_location": "prov_tarnovo",
+  "status": "minor",
+  "description": "Fils aîné d'Ivan Alexandre, associé au trône en 1337 ; il mourra prématurément en 1355.",
+  "sources": [
+    "Michael Asen IV"
+  ]
+}

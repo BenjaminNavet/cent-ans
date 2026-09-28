@@ -1,0 +1,62 @@
+{
+  "id": "fac_archipelago",
+  "name": {
+    "display": "Duché de l'Archipel",
+    "local": "Ducato dell'Arcipelago",
+    "local_language": "vénitien"
+  },
+  "short_name": "Archipel",
+  "adjective": "archipélagique",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_nicolo_i_sanudo",
+  "capital": "prov_archipelago",
+  "capital_city": "Naxos",
+  "religion": "rel_catholic",
+  "culture": "cul_venetian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_archipelago",
+  "heraldry": {
+    "blazon": "Écartelé d'argent et de gueules.",
+    "description": "Armes des Sanudo, ducs de l'Archipel, écartelées d'argent et de gueules.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Armes des Sanudo non vérifiées."
+  },
+  "titles": [
+    "Duc de l'Archipel et de Naxos"
+  ],
+  "treasury": 7000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping",
+    "tech_letters_of_credit"
+  ],
+  "relations": [
+    {
+      "faction": "fac_venice",
+      "status": "peace",
+      "note": "Protecteur commercial et naval ; les Sanudo sont de souche vénitienne."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Traité de commerce ; îles convoitées par les Turcs."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 20,
+    "diplomacy": 70,
+    "trade": 75,
+    "piety": 55
+  },
+  "description": "Duché de Naxos et de l'Archipel, fondé par la famille Sanudo en 1207 ; État latin des Cyclades mais population grecque, tourné vers le commerce et menacé par la piraterie turque.",
+  "sources": [
+    "Duchy of the Archipelago",
+    "Nicholas I Sanudo"
+  ]
+}

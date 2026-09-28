@@ -1,0 +1,85 @@
+[
+  {
+    "id": "set_mistra",
+    "province": "prov_morea",
+    "kind": "city",
+    "name": {
+      "display": "Mistra",
+      "local": "Μυστράς",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.374,
+      37.074
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls",
+      "bld_scriptorium"
+    ],
+    "port": false,
+    "description": "Forteresse et ville de la vallée de l'Eurotas, capitale de la Morée byzantine.",
+    "sources": [
+      "Mistra"
+    ]
+  },
+  {
+    "id": "set_monemvasia",
+    "province": "prov_morea",
+    "kind": "town",
+    "name": {
+      "display": "Monemvasie",
+      "local": "Μονεμβασία",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      23.04,
+      36.687
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "sea_zone": "sea_aegean",
+    "description": "Rocher-forteresse et port, place la plus forte de Morée.",
+    "sources": [
+      "Monemvasia"
+    ]
+  },
+  {
+    "id": "set_maina",
+    "province": "prov_morea",
+    "kind": "castle",
+    "name": {
+      "display": "Maïna",
+      "local": "Μάνη",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.39,
+      36.79
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Marches farouches du Magne.",
+    "sources": [
+      "Mani (Péloponnèse)"
+    ]
+  }
+]

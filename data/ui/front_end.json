@@ -2338,6 +2338,198 @@
         "Vassal du Caire"
       ],
       "difficulty": 3
+    },
+    {
+      "id": "fac_byzantium",
+      "tagline": "Les derniers Romains",
+      "intro": "Andronic III règne sur ce qui reste de l'Empire : une Constantinople à demi vide, la Thrace, la Macédoine, la Thessalie reprise en 1333 et la Morée. La Serbie de Dušan et les émirats turcs guettent. Reprenez l'Épire, contenez les Slaves et sauvez, ou relevez, l'Empire des Romains.",
+      "strengths": [
+        "Prestige impérial et la plus grande capitale du monde chrétien",
+        "Cantacuzène, un grand capitaine et diplomate",
+        "Ports et flotte commerciale sur trois mers"
+      ],
+      "weaknesses": [
+        "Trésor épuisé, armée de mercenaires",
+        "Voisins ambitieux : Serbie, Bulgarie, Turcs",
+        "Guerres civiles latentes autour du trône"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_epirus",
+      "tagline": "Un despotat orphelin",
+      "intro": "Nicéphore II, un enfant, règne sur Arta et Janina sous la régence d'Anne Paléologine, pendant que l'empereur Andronic III approche. Trouvez des alliés en Albanie et en Morée latine, ou négociez au mieux votre soumission.",
+      "strengths": [
+        "Terres de montagne faciles à défendre",
+        "Régente rusée et bien informée",
+        "Voisins latins et albanais à courtiser"
+      ],
+      "weaknesses": [
+        "Enfant sur le trône, régente contestée",
+        "Byzance à vos portes",
+        "Trésor et armée minuscules"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_serbia",
+      "tagline": "Le roi conquérant",
+      "intro": "Étienne Dušan est roi depuis 1331, vainqueur des Byzantins en Macédoine. La Serbie est au sommet de sa force : mines d'argent, armée de chevaliers et de mercenaires, alliance bulgare. Prenez Serrès, Thessalonique, Constantinople, et coiffez la couronne impériale.",
+      "strengths": [
+        "Armée nombreuse et mines d'argent de Novo Brdo",
+        "Alliance avec la Bulgarie",
+        "Roi guerrier au prestige montant"
+      ],
+      "weaknesses": [
+        "Noblesse serbe turbulente",
+        "Peu de ports, pas de flotte",
+        "Hongrie et Bosnie sur les flancs"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_bulgaria",
+      "tagline": "L'empire de Tarnovo",
+      "intro": "Ivan Alexandre a rétabli la paix après Velbazhd et Rusokastro. La Bulgarie est riche de ses terres à blé et de sa culture hésychaste, mais Serbes et Byzantins la guettent. Faites de Tarnovo le foyer d'un empire balkanique, et tenez Vidin en laisse.",
+      "strengths": [
+        "Blé, vin et mines des Balkans",
+        "Alliance de famille avec la Serbie",
+        "Capitale fortifiée de Tarnovo"
+      ],
+      "weaknesses": [
+        "Vidin quasi indépendant",
+        "Défaites récentes contre Byzance",
+        "Peu de flotte"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_vidin",
+      "tagline": "Le despote du Danube",
+      "intro": "Belaur tient Vidin et ses forteresses du Danube en vassal du tsar. À vous de servir ou de trahir : jouez entre Tarnovo, la Hongrie et la Serbie, ou hissez Vidin au rang de royaume.",
+      "strengths": [
+        "Forteresse de Baba Vida",
+        "Commerce danubien",
+        "Voisins divisés"
+      ],
+      "weaknesses": [
+        "Une seule province",
+        "Tarnovo veut vous soumettre",
+        "Hongrie catholique au nord"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_bosnia",
+      "tagline": "Un ban entre les grandes puissances",
+      "intro": "Étienne II Kotromanić, ban depuis 1322, a pris le Hum en 1326. Entre Hongrie, Serbie et Venise, il veut faire de la Bosnie un royaume et atteindre la mer par Raguse.",
+      "strengths": [
+        "Mines de fer et d'argent",
+        "Terres de montagne défendables",
+        "Rival de la Serbie, allié possible de la Hongrie"
+      ],
+      "weaknesses": [
+        "Pays pauvre et divisé par les hérésies",
+        "Aucun port sûr",
+        "Voisins puissants"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_ragusa",
+      "tagline": "La cité marchande de l'Adriatique",
+      "intro": "Raguse est une cité patricienne sous suzeraineté vénitienne. Le sel de Ston, les marchands des Balkans et une flotte agile vous font riche : jouez la diplomatie, achetez la liberté et étendez votre contado.",
+      "strengths": [
+        "Trésor et commerce florissants",
+        "Position clé entre Balkans et Adriatique",
+        "Diplomatie à l'italienne"
+      ],
+      "weaknesses": [
+        "Une seule province minuscule",
+        "Suzeraineté de Venise",
+        "Armée réduite à la milice et aux mercenaires"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_durazzo",
+      "tagline": "L'Albanie angevine",
+      "intro": "Le jeune duc Charles de Durazzo règne sous la régence d'Agnès de Périgord sur les restes du royaume d'Albanie. Défendez Durazzo contre Byzance, la Serbie et les clans albanais, ou cherchez l'appui de Naples.",
+      "strengths": [
+        "Port et via Egnatia",
+        "Appui de la maison d'Anjou",
+        "Prestige du titre royal"
+      ],
+      "weaknesses": [
+        "Enfant sur le trône",
+        "Voisins dévorants",
+        "Seigneuries albanaises remuantes"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_athens",
+      "tagline": "Le duché catalan",
+      "intro": "Guillaume II tient sur le papier Athènes et Néopatras, héritage de la Compagnie catalane ; le vicaire Nicolas Lanza gouverne. Défendez la frontière de Thessalie, ménagez Venise et cherchez l'appui de la Sicile et de l'Aragon.",
+      "strengths": [
+        "Chevalerie catalane redoutée",
+        "Lien avec la Sicile et l'Aragon",
+        "Acropole d'Athènes et forteresses"
+      ],
+      "weaknesses": [
+        "Isolé loin de la Sicile",
+        "Population grecque hostile",
+        "Byzance et Venise à la frontière"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_archipelago",
+      "tagline": "Les îles de Sanudo",
+      "intro": "Nicolas Sanudo gouverne Naxos et les Cyclades : commerce, corsaires turcs, protection de Venise. Défendez vos îles, commerçez avec tous et jouez des rivalités.",
+      "strengths": [
+        "Commerce actif",
+        "Flotte de galères",
+        "Sanudo, diplomate expérimenté"
+      ],
+      "weaknesses": [
+        "Îles dispersées sans profondeur",
+        "Piraterie turque",
+        "Peu d'hommes d'armes"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_hospitallers",
+      "tagline": "L'Ordre à Rhodes",
+      "intro": "Hélion de Villeneuve gouverne Rhodes, couvent-forteresse et base navale. Vos galères menacent les Turcs d'Aydın, votre armée de chevaliers-moines est d'élite. Pas de terres, mais un statut unique.",
+      "strengths": [
+        "Chevaliers-moines redoutables",
+        "Flotte et forteresses maritimes",
+        "Trésor et prestige spirituel"
+      ],
+      "weaknesses": [
+        "Une seule île",
+        "Aucun héritier : Grand Maître élu",
+        "Dépend de l'Occident pour ses recrues"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_cyprus",
+      "tagline": "Le royaume des Lusignan",
+      "intro": "Hugues IV règne sur Chypre, riche de Famagouste et du commerce du Levant. Le royaume latin le plus oriental doit tenir face aux Turcs, aux Mamelouks et aux Génois, et attirer les croisés.",
+      "strengths": [
+        "Trésor et commerce du Levant",
+        "Île forteresse",
+        "Alliances latines"
+      ],
+      "weaknesses": [
+        "Peuple grec orthodoxe",
+        "Armée modeste",
+        "Dépend de la flotte vénitienne"
+      ],
+      "difficulty": 1
     }
   ],
   "difficulty_labels": [

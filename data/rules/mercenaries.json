@@ -69,7 +69,11 @@
     "caucase": "Caucase",
     "levant": "Levant",
     "egypte": "Égypte",
-    "mesopotamie": "Haute-Mésopotamie"
+    "mesopotamie": "Haute-Mésopotamie",
+    "balkans": "Balkans",
+    "grece": "Grèce",
+    "egee": "Îles de l'Égée",
+    "chypre": "Chypre"
   },
   "bands": [
     {

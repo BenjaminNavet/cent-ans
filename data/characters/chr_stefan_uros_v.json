@@ -1,0 +1,46 @@
+{
+  "id": "chr_stefan_uros_v",
+  "name": {
+    "display": "Étienne Uroš V",
+    "local": "Стефан Урош V",
+    "local_language": "serbe"
+  },
+  "epithet": "le Faible",
+  "sex": "male",
+  "house": "Nemanjić",
+  "faction": "fac_serbia",
+  "role": "heir",
+  "birth": {
+    "value": "1336",
+    "uncertain": true,
+    "note": "Naissance en 1336 ou 1337."
+  },
+  "death": {
+    "value": "1371-12-04"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Héritier de Serbie"
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_peaceful"
+  ],
+  "piety": 65,
+  "family": {
+    "father": "chr_stefan_dusan",
+    "mother": "chr_helena_of_bulgaria"
+  },
+  "starting_location": "prov_kosovo",
+  "status": "minor",
+  "description": "Fils de Dušan, nourrisson en 1337 ; dernier des Nemanjić, il verra l'empire serbe s'effondrer.",
+  "sources": [
+    "Stefan Uroš V"
+  ]
+}

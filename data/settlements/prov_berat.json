@@ -1,0 +1,84 @@
+[
+  {
+    "id": "set_berat",
+    "province": "prov_berat",
+    "kind": "city",
+    "name": {
+      "display": "Bérat",
+      "local": "Βελεγράδα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      19.9522,
+      40.7058
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité forteresse sur l'Osum, capitale des marches byzantines d'Albanie.",
+    "sources": [
+      "Berat"
+    ]
+  },
+  {
+    "id": "set_avlona",
+    "province": "prov_berat",
+    "kind": "town",
+    "name": {
+      "display": "Avlona",
+      "local": "Αυλών",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      19.489,
+      40.466
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls"
+    ],
+    "port": true,
+    "sea_zone": "sea_adriatic",
+    "description": "Port de l'Adriatique méridionale (Vlorë).",
+    "sources": [
+      "Vlorë"
+    ]
+  },
+  {
+    "id": "set_kanina",
+    "province": "prov_berat",
+    "kind": "castle",
+    "name": {
+      "display": "Canina",
+      "local": "Κανίνα",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      19.49,
+      40.41
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse dominant Avlona.",
+    "sources": [
+      "Kanina"
+    ]
+  }
+]

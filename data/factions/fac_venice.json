@@ -65,6 +65,32 @@
       "faction": "fac_aydin",
       "status": "war",
       "note": "Umur Bey razzie l'Égée ; ligue chrétienne et prise de Smyrne en 1344."
+    },
+    {
+      "faction": "fac_ragusa",
+      "status": "overlord",
+      "note": "Suzeraineté sur Raguse depuis 1205."
+    },
+    {
+      "faction": "fac_byzantium",
+      "status": "peace",
+      "note": "Traité de commerce avec Andronic III ; Venise convoite les îles de l'Égée."
+    },
+    {
+      "faction": "fac_hospitallers",
+      "status": "alliance",
+      "note": "Ligue anti-turque de 1334 avec Rhodes et Chypre.",
+      "since": {
+        "value": "1334"
+      }
+    },
+    {
+      "faction": "fac_cyprus",
+      "status": "alliance",
+      "note": "Ligue anti-turque de 1334.",
+      "since": {
+        "value": "1334"
+      }
     }
   ],
   "ai_personality": {

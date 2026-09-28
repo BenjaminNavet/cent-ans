@@ -167,7 +167,19 @@
         "fac_galicia_volhynia",
         "fac_lithuania",
         "fac_kiev",
-        "fac_wallachia"
+        "fac_wallachia",
+        "fac_byzantium",
+        "fac_epirus",
+        "fac_serbia",
+        "fac_bulgaria",
+        "fac_vidin",
+        "fac_bosnia",
+        "fac_ragusa",
+        "fac_durazzo",
+        "fac_athens",
+        "fac_archipelago",
+        "fac_hospitallers",
+        "fac_cyprus"
       ],
       "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
     },

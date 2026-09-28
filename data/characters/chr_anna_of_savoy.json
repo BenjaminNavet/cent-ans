@@ -1,0 +1,53 @@
+{
+  "id": "chr_anna_of_savoy",
+  "name": {
+    "display": "Anne de Savoie",
+    "local": "Ἄννα τῆς Σαβοΐας",
+    "local_language": "grec"
+  },
+  "sex": "female",
+  "house": "Paléologue de Byzance",
+  "faction": "fac_byzantium",
+  "role": "consort",
+  "birth": {
+    "value": "1306",
+    "uncertain": true,
+    "note": "Naissance entre 1306 et 1308 selon les sources."
+  },
+  "death": {
+    "value": "1365-12-16"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Impératrice des Romains",
+      "from": {
+        "value": "1326"
+      }
+    }
+  ],
+  "skills": {
+    "command": 2,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_ambitious"
+  ],
+  "piety": 60,
+  "family": {
+    "spouses": [
+      "chr_andronikos_iii"
+    ],
+    "children": [
+      "chr_ioannes_v"
+    ]
+  },
+  "starting_location": "prov_constantinople",
+  "status": "at_court",
+  "description": "Impératrice, fille d'Amédée V de Savoie, mère du futur Jean V ; elle jouera un rôle central dans la guerre civile.",
+  "sources": [
+    "Anne de Savoie (impératrice)"
+  ]
+}

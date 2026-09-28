@@ -1,0 +1,50 @@
+{
+  "id": "chr_alix_d_ibelin",
+  "name": {
+    "display": "Alix d'Ibelin"
+  },
+  "sex": "female",
+  "house": "Lusignan-Chypre",
+  "faction": "fac_cyprus",
+  "role": "consort",
+  "birth": {
+    "value": "1304",
+    "uncertain": true,
+    "note": "Naissance vers 1304."
+  },
+  "death": {
+    "value": "1386"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Reine de Chypre",
+      "from": {
+        "value": "1324"
+      }
+    }
+  ],
+  "skills": {
+    "command": 1,
+    "governance": 4,
+    "court": 6
+  },
+  "traits": [
+    "trait_cultured"
+  ],
+  "piety": 65,
+  "family": {
+    "spouses": [
+      "chr_hugues_iv_de_chypre"
+    ],
+    "children": [
+      "chr_pierre_i_de_chypre"
+    ]
+  },
+  "starting_location": "prov_cyprus",
+  "status": "at_court",
+  "description": "Épouse d'Hugues IV, mariée en 1318, mère du futur Pierre Ier.",
+  "sources": [
+    "Alix d'Ibelin"
+  ]
+}
