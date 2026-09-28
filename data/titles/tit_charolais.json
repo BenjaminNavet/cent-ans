@@ -1,0 +1,24 @@
+{
+  "id": "tit_charolais",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Charolais",
+    "local": "Charolais",
+    "local_language": "ancien français"
+  },
+  "de_jure_liege": "tit_burgundy",
+  "de_jure_provinces": [
+    "prov_charolais"
+  ],
+  "holder_1337": {
+    "faction": "fac_burgundy",
+    "sources": [
+      "Comté de Charolais",
+      "Eudes IV de Bourgogne"
+    ]
+  },
+  "description": "Comté acquis par Hugues IV puis Robert II de Bourgogne en 1237, tenu en propre par la maison ducale depuis lors ; distinct du duché mais jamais concédé à un autre vassal.",
+  "sources": [
+    "Comté de Charolais"
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "id": "tit_angoumois",
-  "rank": "duchy",
+  "rank": "county",
   "name": {
-    "display": "Angoumois",
+    "display": "Comté d'Angoulême",
     "local": "Engolesme",
     "local_language": "ancien français"
   },

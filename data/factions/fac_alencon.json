@@ -1,0 +1,56 @@
+{
+  "id": "fac_alencon",
+  "name": {
+    "display": "Comté d'Alençon",
+    "local": "Alençon",
+    "local_language": "ancien français"
+  },
+  "short_name": "Alençon",
+  "adjective": "alençonnais",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_charles_d_alencon",
+  "capital": "prov_alencon",
+  "capital_city": "Alençon",
+  "religion": "rel_catholic",
+  "culture": "cul_french",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_france",
+  "primary_title": "tit_alencon",
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, au lambel de gueules.",
+    "description": "Armes de France ancien brisées d'un lambel de gueules, marque des cadets de Valois.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Comte d'Alençon",
+    "Comte du Perche",
+    "Comte de Chartres"
+  ],
+  "treasury": 4000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "vassal",
+      "note": "Charles II est le frère cadet de Philippe VI."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 45,
+    "trade": 35,
+    "piety": 55
+  },
+  "description": "Comté-apanage érigé en 1325 pour Charles II d'Alençon, frère cadet de Philippe VI ; il mènera la charge de la chevalerie française à Crécy en 1346.",
+  "sources": [
+    "Charles II d'Alençon",
+    "Comté d'Alençon"
+  ]
+}

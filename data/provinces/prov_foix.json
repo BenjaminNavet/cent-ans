@@ -1,0 +1,89 @@
+{
+  "id": "prov_foix",
+  "name": {
+    "display": "Foix",
+    "local": "Foish",
+    "local_language": "occitan"
+  },
+  "region": "languedoc",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "rivers": [
+    "Ariège"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_iron",
+    "res_wool",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Foix",
+      "local": "Foish",
+      "local_language": "occitan"
+    },
+    "lat": 42.9656,
+    "lon": 1.6052
+  },
+  "geo": {
+    "capital_lonlat": [
+      1.6052,
+      42.9656
+    ],
+    "seed_lonlat": [
+      1.62,
+      42.85
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_foix_bearn",
+  "culture": "cul_occitan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 52000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 5600,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1400,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 620,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Comté pyrénéen détaché du Toulousain, distinct de la vicomté souveraine de Béarn."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1050,
+  "description": "Comté de Foix, tenu en fief du roi de France par Gaston II de Foix-Béarn, qui tient par ailleurs le Béarn en alleu souverain.",
+  "sources": [
+    "Comté de Foix",
+    "Gaston II de Foix-Béarn"
+  ]
+}
