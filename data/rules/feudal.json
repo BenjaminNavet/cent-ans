@@ -1,0 +1,26 @@
+{
+  "vassal_tribute_percent": 10,
+  "rebellion_loyalty": 20,
+  "call_to_arms_loyalty": 30,
+  "rebellion_permille": 250,
+  "vassalage_power_ratio": 3.0,
+  "disloyal_threshold": 30,
+  "felony_window_turns": 8,
+  "independence_turns": 20,
+  "ascension_turns": 20,
+  "loyalty": {
+    "base": 55,
+    "power_favourable": 10,
+    "power_unfavourable": -10,
+    "excommunicated_liege": -20,
+    "embargo_squeeze": -25,
+    "protection_granted": 15,
+    "protection_refused": -20,
+    "family_tie": 10,
+    "shared_culture": 5,
+    "title_granted": 10,
+    "peer_forfeiture": -10,
+    "liege_defeat": -5,
+    "rival_claimant": -15
+  }
+}

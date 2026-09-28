@@ -42,8 +42,6 @@
     "voronoi_weight": 1.2
   },
   "owner": "fac_burgundy",
-  "overlord": "fac_empire",
-  "holder": "chr_jeanne_iii_de_bourgogne",
   "culture": "cul_french",
   "religion": "rel_catholic",
   "population": {

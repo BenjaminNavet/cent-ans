@@ -1,0 +1,22 @@
+{
+  "id": "tit_franche_comte",
+  "rank": "duchy",
+  "name": {
+    "display": "Comté de Bourgogne",
+    "local": "Contey de Bourgoigne",
+    "local_language": "ancien français"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_franche_comte"
+  ],
+  "holder_1337": {
+    "faction": "fac_burgundy",
+    "sources": [
+      "Comté de Bourgogne",
+      "Salins-les-Bains",
+      "Besançon"
+    ]
+  },
+  "description": "Tenu en 1337 par chr_jeanne_iii_de_bourgogne (apanage ou fief)."
+}
