@@ -1746,7 +1746,3 @@ func _update_towns(camera_distance: float) -> void:
 func _update_model_visibility() -> void:
 	for i in _models.size():
 		_apply_model_visibility(i)
-
-
-func _towns_active() -> bool:
-	return towns != null and towns.active
