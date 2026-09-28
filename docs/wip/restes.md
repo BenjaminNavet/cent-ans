@@ -30,6 +30,12 @@ vers `main`. ADR réservés : **0100** (lot B ; 0098 pris par FE), **0099** (lot
   `sz4*_test` exigent `data/map/pyramid` (ignoré par git) : liens symboliques dans les worktrees.
 - En cours : **M** (`feat/rs-m-c7a`, sonde c7a rouge sur main : France 34 286 < 40 000 depuis TW2/FE),
   **K2** (`feat/rs-k2-perf`, `settle/*` et `life/*` au zoom). En attente : P2d (TW2 T4), P2f (après IB).
+- **K2 fusionné** (c18158c9 : images > 50 ms 50 → 1, pire 123 → 52 ms), **M fusionné** (2fda948b, ADR
+  **0113** : pas de bogue, plancher du trésor France de la sonde c7a 40 000 → 15 000 ; causes : rançons du roi
+  plus fréquentes avec TW2, ost d'Empire FE avec vassaux italiens ; banqueroutes century 1,09 vs 0,05 —
+  signalé à FE pour F8).
+- Reste : P2d (attend TW2 T4), P2f (attend IB). Suites facultatives : bouton « Raser » (UI), pics
+  `settle/labels`/`declutter` ~8 ms.
 - Vague 3 lancée : **P2g** (`feat/p2g-layout`, Tech/Diplo/Cour/Fiche/SaveLoadDialog dans `UiLayout`),
   **K perf** (`feat/rs-k-perf`, `TownLayer` ~10 ms, `qt/collect`). `alerts.gd` (champ de siège au pont)
   attend TW2 SB (même zone) ; C après B ; P2d après TW2 SB ; P2f en dernier.
