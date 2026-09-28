@@ -2,10 +2,18 @@
 
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
+uid="uid://cyjndu7f30gfq"
+path.bptc="res://.godot/imported/fine_detail_albedo.png-11e84a5173a0773e01efbcb55476425e.bptc.ctexarray"
+path.astc="res://.godot/imported/fine_detail_albedo.png-11e84a5173a0773e01efbcb55476425e.astc.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/models/battle_fine/textures/fine_detail_albedo.png"
+dest_files=["res://.godot/imported/fine_detail_albedo.png-11e84a5173a0773e01efbcb55476425e.bptc.ctexarray", "res://.godot/imported/fine_detail_albedo.png-11e84a5173a0773e01efbcb55476425e.astc.ctexarray"]
 
 [params]
 

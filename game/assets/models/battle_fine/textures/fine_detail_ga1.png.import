@@ -2,10 +2,18 @@
 
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
+uid="uid://dwvgw4hdd35pi"
+path.bptc="res://.godot/imported/fine_detail_ga1.png-5a6bc09659198219e5435aefa4c71d7b.bptc.ctexarray"
+path.astc="res://.godot/imported/fine_detail_ga1.png-5a6bc09659198219e5435aefa4c71d7b.astc.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
 
 [deps]
 
 source_file="res://assets/models/battle_fine/textures/fine_detail_ga1.png"
+dest_files=["res://.godot/imported/fine_detail_ga1.png-5a6bc09659198219e5435aefa4c71d7b.bptc.ctexarray", "res://.godot/imported/fine_detail_ga1.png-5a6bc09659198219e5435aefa4c71d7b.astc.ctexarray"]
 
 [params]
 
