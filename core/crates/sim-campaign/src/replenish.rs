@@ -300,11 +300,10 @@ impl CampaignState {
             let price = |men: u64| (men * money * cost_percent).div_ceil(soldiers * 100);
             if price(men) > left {
                 // What the treasury still pays for.
-                men = if money * cost_percent == 0 {
-                    men
-                } else {
-                    left * soldiers * 100 / (money * cost_percent)
-                };
+                men = (left * soldiers * 100)
+                    .checked_div(money * cost_percent)
+                    .unwrap_or(men)
+                    .min(men);
             }
             let cost = price(men);
             left -= cost.min(left);

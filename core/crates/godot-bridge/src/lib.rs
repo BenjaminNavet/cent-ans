@@ -34,6 +34,7 @@ mod campaign_sim_holdings;
 mod campaign_sim_map_lens;
 mod campaign_sim_movement;
 mod campaign_sim_provinces;
+mod campaign_sim_replenish;
 mod campaign_sim_retinue;
 mod campaign_sim_settlements;
 mod campaign_sim_siege;
