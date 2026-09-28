@@ -1,7 +1,7 @@
 # RS-C — plafond d'opinion par motif et démolition (cœur, IA)
 
 Branche `feat/rs-c-diplo` (worktree d'agent, partie de main 48f1a5f8). Orchestration : `docs/wip/restes.md`.
-Cible cargo privée : `core/target-rs-c` (à supprimer en fin de lot). ADR : 0108 (0104-0106 réservés GA, 0107 pris).
+Cible cargo privée : `core/target-rs-c` (à supprimer en fin de lot). ADR : 0111 (0104-0106 réservés GA, 0107 pris).
 
 ## Points traités
 1. Opinion « Mariage entre nos maisons » empilée sans plafond (+150), ambassades de héraut
@@ -30,7 +30,7 @@ Cible cargo privée : `core/target-rs-c` (à supprimer en fin de lot). ADR : 010
 - [x] IA : `plan_demolitions` dans `ai::campaign::plan_economy`.
 - [x] Tests : `sim-campaign/src/rs_c_tests.rs` (10 : plafonds, renouvellement, négatif, sans
   plafond, démolition, refus, JSON du pont, `deficit_seasons`), `ai/tests/rs_c_demolition.rs` (3).
-- [x] ADR 0108 ; codex `cdx_jeu_diplomatie`, `cdx_jeu_construction` (une phrase chacun).
+- [x] ADR 0111 ; codex `cdx_jeu_diplomatie`, `cdx_jeu_construction` (une phrase chacun).
 - [x] Mesures (binaires release dans le scratchpad ; base = main 48f1a5f8).
 - [x] fmt, clippy `--workspace --all-targets -D warnings`, `cargo test --workspace` (0 échec),
   pytest 890 passés / 2 ignorés.
