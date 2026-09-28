@@ -19,6 +19,7 @@ Branche `feat/tw2-t5` (worktree `../gp-tw2-t5`, base `integration/tw2`). Spec :
 
 - [x] Test headless `game/tests/tw2_t5_traditions_test.gd` (OK).
 
-## Prochaine étape
+- [x] ADR 0109 ; fmt, clippy -D warnings, build.sh, import, smoke, test headless, pytest (884) verts.
 
-- ADR 0109, vérifs finales (fmt, clippy, workspace, smoke, pytest).
+## Prochaine étape
+Attendre `cargo test --workspace` puis rapport ; fusion dans `integration/tw2` par l'orchestrateur.
