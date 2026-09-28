@@ -711,8 +711,11 @@ fn reinforce_garrison(settlement: &mut SettlementState, effects: &EffectTotals) 
     }
     let percent = (points * GARRISON_REINFORCE_PERCENT_PER_POINT).min(50);
     for unit in &mut settlement.garrison {
-        let gain = (unit.max_strength * percent).div_ceil(100);
-        unit.strength = (unit.strength + gain).min(unit.max_strength.max(unit.strength));
+        let gain = (unit.max_strength * percent)
+            .div_ceil(100)
+            .min(unit.max_strength.saturating_sub(unit.strength));
+        // TW2-T5: local levies dilute the garrison's experience pro rata.
+        crate::traditions::add_recruits(unit, gain, 0);
     }
 }
 

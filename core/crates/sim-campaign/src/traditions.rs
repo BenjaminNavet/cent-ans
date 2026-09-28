@@ -135,6 +135,11 @@ pub fn army_tradition_effects(data: &GameData, army: &Army) -> TraditionEffects 
     total
 }
 
+/// Siege duration cut (percent) of the assault traditions of `army`.
+pub fn siege_speed_percent(data: &GameData, army: &Army) -> f64 {
+    f64::from(army_tradition_effects(data, army).siege_speed_percent)
+}
+
 /// Choices `army` may still make.
 pub fn pending_choices(data: &GameData, army: &Army) -> u8 {
     rank_for_xp(data, army.traditions.xp).saturating_sub(army.traditions.chosen.len() as u8)
@@ -312,6 +317,14 @@ pub(crate) struct BattleSide<'a> {
     pub multiplier: f64,
 }
 
+/// Men of each of `armies` now (before a battle).
+pub(crate) fn strengths(state: &CampaignState, armies: &[ArmyId]) -> BTreeMap<ArmyId, u32> {
+    armies
+        .iter()
+        .filter_map(|id| Some((id.clone(), state.armies.get(id)?.total_strength())))
+        .collect()
+}
+
 /// After a battle (field, assault, sortie; auto-resolved or fought in 3D):
 /// every surviving army of the side gains its experience, unless the enemy
 /// was a mere band (under `min_enemy_percent` of the side).
@@ -347,8 +360,8 @@ pub fn add_recruits(unit: &mut Unit, men: u32, recruit_experience: u8) {
     let veterans = u64::from(unit.strength);
     let total = veterans + u64::from(men);
     let old = u64::from(unit.experience) * 1000 + u64::from(unit.experience_residue.min(999));
-    let mixed = (old * veterans + u64::from(recruit_experience.min(10)) * 1000 * u64::from(men))
-        / total;
+    let mixed =
+        (old * veterans + u64::from(recruit_experience.min(10)) * 1000 * u64::from(men)) / total;
     unit.experience = (mixed / 1000).min(10) as u8;
     unit.experience_residue = if unit.experience >= 10 {
         0

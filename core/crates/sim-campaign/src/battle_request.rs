@@ -288,7 +288,13 @@ pub(crate) fn side_setup(
                 // the levying province's buildings (armoury, butts).
                 let tech =
                     research::tech_unit_bonus(state, data, &army.faction, unit_type.category);
-                setup.morale = research::boosted(setup.morale, tech.morale, 100);
+                // TW2-T5: discipline and shooting traditions of the army.
+                let traditions = crate::traditions::army_tradition_effects(data, army);
+                setup.morale = research::boosted(
+                    setup.morale,
+                    tech.morale + f64::from(traditions.morale),
+                    100,
+                );
                 setup.stats.melee = research::boosted(setup.stats.melee, tech.melee, 255);
                 setup.stats.armor = research::boosted(
                     setup.stats.armor,
@@ -298,7 +304,7 @@ pub(crate) fn side_setup(
                 if setup.stats.ranged > 0 {
                     setup.stats.ranged = research::boosted(
                         setup.stats.ranged,
-                        tech.ranged + f64::from(unit.levy_ranged),
+                        tech.ranged + f64::from(unit.levy_ranged) + f64::from(traditions.ranged),
                         255,
                     );
                 }
