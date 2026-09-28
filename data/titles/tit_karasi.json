@@ -31,6 +31,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_karasi_lesbos",
+      "title": "Lesbos",
+      "description": "Tenir l'île qui fait face à Edremit.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_lesbos"
+        ]
+      }
     }
   ],
   "description": "Beylik de Mysie, fondé vers 1296 par Karasi Bey, dont les gazis ont déjà traversé l'Hellespont ; le bey en exercice en 1337 n'est pas identifié avec certitude, faute de source sûre.",

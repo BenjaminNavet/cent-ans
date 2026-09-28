@@ -45,6 +45,17 @@
           "prov_ayas"
         ]
       }
+    },
+    {
+      "id": "obj_cilicia_seleucia",
+      "title": "Séleucie et Korykos",
+      "description": "Recouvrer la côte de Séleucie, perdue au profit des Karamanides.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_karaman"
+        ]
+      }
     }
   ],
   "description": "Dernier royaume arménien, en Cilicie, pris en étau entre Mamelouks et Turkmènes ; Léon IV (1320-1341) attend en vain l'aide de l'Occident. Ayas tombera dans le courant de 1337.",

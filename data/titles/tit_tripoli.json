@@ -47,6 +47,17 @@
           "prov_nafusa"
         ]
       }
+    },
+    {
+      "id": "obj_tripoli_sirte",
+      "title": "La côte de Syrte",
+      "description": "Étendre Tripoli vers l'est, jusqu'à Syrte.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_syrte"
+        ]
+      }
     }
   ],
   "description": "Cité de Tripoli gouvernée par les Banu Thabit au nom des Hafsides, dans une quasi-indépendance.",

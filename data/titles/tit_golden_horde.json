@@ -66,6 +66,17 @@
         "kind": "be_liege_of",
         "faction": "fac_moscow"
       }
+    },
+    {
+      "id": "obj_golden_horde_caffa",
+      "title": "Caffa",
+      "description": "Chasser les Génois de Caffa (sièges de 1343-1346).",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_caffa"
+        ]
+      }
     }
   ],
   "description": "Empire nomade et marchand des steppes, du Danube à l'Oural, converti à l'islam sunnite sous Özbeg (1313-1341) ; suzerain de tous les princes russes, dont il perçoit le tribut (« vyhod ») et confirme les yarlyks. Sa capitale, Saraï, est l'une des plus grandes villes du monde.",

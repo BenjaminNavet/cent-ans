@@ -36,6 +36,17 @@
           "prov_sinope"
         ]
       }
+    },
+    {
+      "id": "obj_candar_amasya",
+      "title": "La vallée de l'Iris",
+      "description": "Arracher Amasya aux Eretnides.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_amasya"
+        ]
+      }
     }
   ],
   "description": "Beylik du Pont occidental (Süleyman Paşa, 1309-1339) qui tient Kastamonu et le grand port de Sinope depuis 1322 ; fer, cuivre et bois.",

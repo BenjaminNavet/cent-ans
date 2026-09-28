@@ -41,6 +41,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_kiev_chernihiv",
+      "title": "La rive gauche",
+      "description": "Rattacher Tchernigov à Kiev.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_tchernigov"
+        ]
+      }
     }
   ],
   "description": "Principauté de Kiev, rang « royaume » approximé pour un prince souverain mais tributaire de la Horde d'Or.",

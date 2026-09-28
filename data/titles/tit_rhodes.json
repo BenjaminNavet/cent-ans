@@ -42,6 +42,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_rhodes_smyrna",
+      "title": "Smyrne",
+      "description": "Prendre le port de Smyrne (croisade de 1344).",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_izmir"
+        ]
+      }
     }
   ],
   "description": "État souverain de l'Ordre de l'Hôpital à Rhodes ; rang « comté » du schéma.",

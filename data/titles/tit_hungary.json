@@ -59,6 +59,17 @@
         "kind": "hold_crown",
         "title": "tit_hungary"
       }
+    },
+    {
+      "id": "obj_hungary_halych",
+      "title": "La Ruthénie rouge",
+      "description": "Faire valoir les droits hongrois sur Halych.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_halych"
+        ]
+      }
     }
   ],
   "description": "Royaume de Hongrie sous Charles Ier Robert d'Anjou, avec la Transylvanie et la Slavonie comme grands offices.",

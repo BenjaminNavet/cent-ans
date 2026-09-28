@@ -32,6 +32,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_saruhan_smyrna",
+      "title": "Smyrne",
+      "description": "Disputer Smyrne à l'émirat d'Aydın.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_izmir"
+        ]
+      }
     }
   ],
   "description": "Beylik fondé vers 1300 par Saruhan Bey, riche plaine du Gediz ; allié des Aydın, tributaire de la piraterie de l'Égée.",

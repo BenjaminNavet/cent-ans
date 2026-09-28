@@ -50,6 +50,17 @@
           "prov_odishi"
         ]
       }
+    },
+    {
+      "id": "obj_georgia_samtskhe",
+      "title": "Le Samtskhé",
+      "description": "Soumettre directement les atabegs Jaqeli.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_samtskhe"
+        ]
+      }
     }
   ],
   "description": "Royaume de Géorgie sous Georges V le Brillant (1314-1346), qui a réuni le pays et secoué la tutelle ilkhanide après 1335 ; le Caucase, la mer Noire et Tbilissi sont à lui.",

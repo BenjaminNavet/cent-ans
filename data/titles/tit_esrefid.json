@@ -31,6 +31,17 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_esrefid_hamid",
+      "title": "Venger Süleyman",
+      "description": "Reprendre l'avantage sur les Hamidides.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_hamid"
+        ]
+      }
     }
   ],
   "description": "Petite principauté du lac de Beyşehir ; les sources divergent sur sa survie jusqu'en 1326 ou 1355 (incertain).",

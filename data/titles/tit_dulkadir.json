@@ -36,6 +36,17 @@
           "prov_elbistan"
         ]
       }
+    },
+    {
+      "id": "obj_dulkadir_kayseri",
+      "title": "Césarée",
+      "description": "Étendre l'émirat jusqu'à Kayseri.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_kayseri"
+        ]
+      }
     }
   ],
   "description": "Principauté turkmène du Taurus oriental, fondée par Zeyneddin Karaca Bey (date discutée : 1337 ou 1348) et tenue sous suzeraineté mamelouke.",

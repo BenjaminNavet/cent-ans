@@ -35,6 +35,17 @@
         "kind": "hold_title",
         "title": "tit_hama"
       }
+    },
+    {
+      "id": "obj_hama_aleppo",
+      "title": "L'héritage ayyoubide",
+      "description": "Rendre Alep à la maison d'Abu l-Fida.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_aleppo"
+        ]
+      }
     }
   ],
   "description": "Dernière lignée ayyoubide, vassale du Caire ; Abu l'Fida est mort en 1331 et a laissé Hama à son fils al-Afdal Muhammad.",

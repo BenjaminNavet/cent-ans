@@ -45,6 +45,17 @@
         "kind": "be_liege_of",
         "faction": "fac_livonian_order"
       }
+    },
+    {
+      "id": "obj_teutonic_samogitia",
+      "title": "La Samogitie",
+      "description": "Conquérir la Samogitie qui sépare la Prusse de la Livonie.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_samogitia"
+        ]
+      }
     }
   ],
   "description": "État monastique souverain fondé par la bulle d'or de Rimini (1226), tenu en fief direct de l'Empereur et du pape ; capitale Marienbourg depuis 1309.",
