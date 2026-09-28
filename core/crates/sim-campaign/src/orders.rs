@@ -361,6 +361,12 @@ pub enum Order {
         site: u32,
         option: usize,
     },
+    // ----- TW2-T1: fate of a captured place (`capture.rs`) -------------------
+    /// Decides the fate of the place of pending capture `decision`.
+    ChooseCaptureOutcome {
+        decision: u32,
+        outcome: crate::capture::CaptureOutcome,
+    },
 }
 
 impl Order {
@@ -510,6 +516,10 @@ pub enum OrderError {
     Agent(#[from] crate::agents::AgentError),
     #[error(transparent)]
     Encounter(#[from] crate::encounter::EncounterError),
+    #[error(transparent)]
+    Capture(#[from] crate::capture::CaptureError),
+    #[error("la place est en ruine : ni recrutement ni chantier")]
+    SettlementRuined,
 }
 
 /// G1: recruitments every settlement can queue per turn before buildings.
@@ -652,6 +662,9 @@ impl CampaignState {
                 unit_type,
             } => {
                 let settlement = self.resolve_place(&settlement)?;
+                if crate::capture::is_ruined(self, &settlement) {
+                    return Err(OrderError::SettlementRuined);
+                }
                 self.order_recruit(data, faction, &settlement, &unit_type)
             }
             Order::CreateArmy {
@@ -693,6 +706,9 @@ impl CampaignState {
                 building,
             } => {
                 let settlement = self.resolve_place(&settlement)?;
+                if crate::capture::is_ruined(self, &settlement) {
+                    return Err(OrderError::SettlementRuined);
+                }
                 self.order_build(data, faction, &settlement, &building)
             }
             Order::CancelBuild { settlement } => {
@@ -807,6 +823,9 @@ impl CampaignState {
             }
             Order::ChooseEventOption { decision, option } => {
                 Ok(self.choose_event_option(data, faction, decision, option)?)
+            }
+            Order::ChooseCaptureOutcome { decision, outcome } => {
+                Ok(self.choose_capture_outcome(data, faction, decision, outcome)?)
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;

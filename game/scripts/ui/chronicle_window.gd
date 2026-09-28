@@ -114,6 +114,8 @@ func _ready() -> void:
 func show_decision(decision: Dictionary, queue_size: int) -> void:
 	_decision_id = int(decision.get("id", -1))
 	_kind_label.text = "✠ Chronique du temps" if decision.get("historical", false) else "✠ Nouvelles du royaume"
+	if decision.has("kind_label"):  # TW2-T1 : sort de la place prise, même fenêtre
+		_kind_label.text = str(decision["kind_label"])
 	_title_label.text = str(decision.get("title", ""))
 	_art.texture = PortraitLoader.load_texture(EVENT_ART_DIR + str(decision.get("event", "")) + ".jpg")
 	if _art.texture == null:  # AR1 : décision sans miniature propre, vignette de son genre
@@ -155,6 +157,12 @@ func _option_row(option: Dictionary) -> Control:
 	button.tooltip_text = effects if effects != "" else "Sans effet notable."
 	var index := int(option.get("index", 0))
 	button.pressed.connect(func() -> void: option_chosen.emit(_decision_id, index))
+	# TW2-T1 : choix refusé par le cœur (raser une cité) — grisé, la raison en clair.
+	var reason := str(option.get("reason", ""))
+	if not option.get("allowed", true):
+		button.disabled = true
+		button.tooltip_text = "Impossible : %s." % reason if reason != "" else "Impossible."
+		effects = "Impossible : %s" % reason if reason != "" else effects
 	row.add_child(button)
 	if effects != "":
 		var summary := Label.new()
