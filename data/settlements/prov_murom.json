@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_mourom",
+    "province": "prov_murom",
+    "kind": "city",
+    "name": {
+      "display": "Mourom",
+      "local": "Муром",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      42.04,
+      55.58
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Vieille ville de l'Oka, patrie d'Ilia Mouromets.",
+    "sources": [
+      "Mourom"
+    ]
+  },
+  {
+    "id": "set_gorodets_mechtcherski",
+    "province": "prov_murom",
+    "kind": "town",
+    "name": {
+      "display": "Gorodets-Mechtcherski",
+      "local": "Городец Мещерский",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      41.39,
+      54.94
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville des Mechtchères, futur Kassimov.",
+    "sources": [
+      "Kassimov"
+    ]
+  },
+  {
+    "id": "set_mechtchera",
+    "province": "prov_murom",
+    "kind": "village",
+    "name": {
+      "display": "Bourgs de la Mechtchéra",
+      "local": "Мещёра",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      41.9,
+      55.2
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Villages forestiers de la Mechtchéra (nom et emplacement génériques, incertain).",
+    "sources": [
+      "Mechtchéra"
+    ]
+  }
+]

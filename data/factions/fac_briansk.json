@@ -1,0 +1,61 @@
+{
+  "id": "fac_briansk",
+  "name": {
+    "display": "Principauté de Briansk",
+    "local": "Княжество Брянское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Briansk",
+  "adjective": "brianskien",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_dmitri_alexandrovitch",
+  "capital": "prov_briansk",
+  "capital_city": "Briansk",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_briansk",
+  "heraldry": {
+    "blazon": "De sinople à la bande d'argent.",
+    "description": "Blason de convention pour Briansk.",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Prince de Briansk",
+    "Prince de Tchernigov (de fait)"
+  ],
+  "treasury": 4500,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_smolensk",
+      "status": "peace",
+      "note": "Frère de Dmitri, Ivan de Smolensk ; querelle de 1334."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 45,
+    "trade": 40,
+    "piety": 55
+  },
+  "description": "Principauté des forêts de la Desna, dont le prince Dmitri Alexandrovitch a fait assiéger son frère de Smolensk (1334) avec des auxiliaires tatars ; Tchernigov, jadis capitale des Olgovitchi, lui est rattachée (statut incertain).",
+  "sources": [
+    "Principauté de Briansk",
+    "Tchernigov"
+  ]
+}

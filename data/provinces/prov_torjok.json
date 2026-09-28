@@ -1,0 +1,88 @@
+{
+  "id": "prov_torjok",
+  "name": {
+    "display": "Torjok",
+    "local": "Торжок",
+    "local_language": "russe"
+  },
+  "region": "rus_nord",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Tvertsa"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Torjok",
+      "local": "Торжок",
+      "local_language": "russe"
+    },
+    "lat": 57.043,
+    "lon": 34.958
+  },
+  "geo": {
+    "capital_lonlat": [
+      34.958,
+      57.043
+    ],
+    "seed_lonlat": [
+      35.0,
+      57.4
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_novgorod",
+  "culture": "cul_novgorodian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 80100,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 5400,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2700,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1800,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1800,
+  "description": "Torjok (Novyi Torg), grenier de Novgorod à la frontière de Tver : les blés de la Volga passent par sa douane ; Novgorod y a mainte fois coupé le grain contre les princes.",
+  "sources": [
+    "Torjok"
+  ]
+}

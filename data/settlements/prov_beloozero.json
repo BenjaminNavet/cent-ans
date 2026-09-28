@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_beloozero",
+    "province": "prov_beloozero",
+    "kind": "city",
+    "name": {
+      "display": "Beloozero",
+      "local": "Белоозеро",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      37.79,
+      60.03
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville du Lac Blanc, la « Belozersk » actuelle.",
+    "sources": [
+      "Belozersk"
+    ]
+  },
+  {
+    "id": "set_vologda",
+    "province": "prov_beloozero",
+    "kind": "town",
+    "name": {
+      "display": "Vologda",
+      "local": "Вологда",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      39.89,
+      59.22
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Vologda, ville de la Vologda et de la route vers la Dvina (Novgorod la revendique ; statut en 1337 incertain).",
+    "sources": [
+      "Vologda"
+    ]
+  },
+  {
+    "id": "set_spaso_kamenny",
+    "province": "prov_beloozero",
+    "kind": "abbey",
+    "name": {
+      "display": "Monastère Spaso-Kamenny",
+      "local": "Спасо-Каменный монастырь",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      39.3,
+      59.5
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_abbey"
+    ],
+    "port": false,
+    "description": "Monastère du lac Koubenskoïe.",
+    "sources": [
+      "Monastère Spaso-Kamenny"
+    ]
+  }
+]

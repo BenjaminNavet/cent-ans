@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_vladimir",
+    "province": "prov_vladimir",
+    "kind": "city",
+    "name": {
+      "display": "Vladimir",
+      "local": "Владимир",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      40.407,
+      56.129
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville du grand-prince, avec la cathédrale de la Dormition (1158-1160).",
+    "sources": [
+      "Vladimir"
+    ]
+  },
+  {
+    "id": "set_bogolioubovo",
+    "province": "prov_vladimir",
+    "kind": "village",
+    "name": {
+      "display": "Bogolioubovo",
+      "local": "Боголюбово",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      40.53,
+      56.2
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Résidence d'André Bogolioubski, bourg palatial près de Vladimir.",
+    "sources": [
+      "Bogolioubovo"
+    ]
+  },
+  {
+    "id": "set_gorokhovets",
+    "province": "prov_vladimir",
+    "kind": "town",
+    "name": {
+      "display": "Gorokhovets",
+      "local": "Гороховец",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      42.65,
+      56.2
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Kliazma inférieure, aux marges de la terre de Nijni.",
+    "sources": [
+      "Gorokhovets"
+    ]
+  }
+]

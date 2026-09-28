@@ -1,0 +1,96 @@
+{
+  "id": "prov_caffa",
+  "name": {
+    "display": "Caffa (Gazarie génoise)",
+    "local": "Caffa",
+    "local_language": "ligure"
+  },
+  "region": "crimee",
+  "terrain": "hills",
+  "climate": "steppe",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [],
+  "ports": [
+    "Caffa",
+    "Cerco (Kertch)"
+  ],
+  "sea_zones": [
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wine",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Caffa",
+      "local": "Caffa",
+      "local_language": "ligure"
+    },
+    "lat": 45.03,
+    "lon": 35.38
+  },
+  "geo": {
+    "capital_lonlat": [
+      35.38,
+      45.03
+    ],
+    "seed_lonlat": [
+      35.75,
+      45.0
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_genoa",
+  "culture": "cul_ligurian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 42000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 13200,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1800,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port",
+    "bld_counting_house"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1200,
+  "description": "Caffa (Théodosie), principale colonie génoise de la mer Noire, sous la suzeraineté de la Horde d'Or ; siège d'un consul, marché aux esclaves et aux soies et débouché de la route de la Volga.",
+  "sources": [
+    "Caffa",
+    "Gazarie"
+  ]
+}

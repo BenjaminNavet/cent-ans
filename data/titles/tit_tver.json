@@ -1,0 +1,63 @@
+{
+  "id": "tit_tver",
+  "rank": "duchy",
+  "name": {
+    "display": "Grande-principauté de Tver",
+    "local": "Великое княжество Тверское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "De gueules au chevron d'or.",
+    "description": "Armes de convention pour Tver (le trône couronné apparaît plus tard).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_tver"
+  ],
+  "holder_1337": {
+    "faction": "fac_tver",
+    "sources": [
+      "Principauté de Tver",
+      "Konstantin de Tver",
+      "Alexandre de Tver"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_tver_hold",
+      "title": "Tenir Tver",
+      "description": "Conserver la principauté de Tver.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_tver"
+      }
+    },
+    {
+      "id": "obj_tver_yarlyk",
+      "title": "Le yarlyk perdu",
+      "description": "Redevenir grand-prince de Vladimir.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_vladimir"
+      }
+    },
+    {
+      "id": "obj_tver_free",
+      "title": "Sans maître",
+      "description": "Rester libre de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Grande-principauté de la haute Volga, longtemps la plus forte de Rus' ; le prince Alexandre a fait massacrer l'armée de Chevkal (1327) et fui à Pskov puis en Lituanie ; son frère Konstantin, régnant en 1337, ménage la Horde ; Alexandre sera gracié en 1338, exécuté à Saraï en 1339.",
+  "sources": [
+    "Principauté de Tver",
+    "Konstantin de Tver",
+    "Alexandre de Tver"
+  ]
+}

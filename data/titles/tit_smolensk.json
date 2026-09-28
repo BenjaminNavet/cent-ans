@@ -1,0 +1,66 @@
+{
+  "id": "tit_smolensk",
+  "rank": "duchy",
+  "name": {
+    "display": "Principauté de Smolensk",
+    "local": "Княжество Смоленское",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la guivre d'or.",
+    "description": "Blason de convention pour Smolensk (armes historiques : un oiseau Gamayoun sur un canon, d'époque moderne).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "de_jure_liege": "tit_golden_horde",
+  "de_jure_provinces": [
+    "prov_smolensk",
+    "prov_viazma"
+  ],
+  "holder_1337": {
+    "faction": "fac_smolensk",
+    "sources": [
+      "Principauté de Smolensk",
+      "Ivan Alexandrovitch de Smolensk"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_smolensk_hold",
+      "title": "Garder Smolensk",
+      "description": "Conserver la principauté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_smolensk"
+      }
+    },
+    {
+      "id": "obj_smolensk_west",
+      "title": "La marche occidentale",
+      "description": "Tenir Smolensk, Viazma et Briansk.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_smolensk",
+          "prov_viazma",
+          "prov_briansk"
+        ]
+      }
+    },
+    {
+      "id": "obj_smolensk_free",
+      "title": "Sans maître",
+      "description": "Rester libre de la Horde.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Grande principauté du haut Dniepr, tenue depuis 1313 par Ivan Alexandrovitch, prise entre Lituanie, Moscou et Horde ; en 1339, il envoie des troupes à Ivan Kalita mais préfère les liens avec Gediminas.",
+  "sources": [
+    "Principauté de Smolensk",
+    "Ivan Alexandrovitch de Smolensk"
+  ]
+}

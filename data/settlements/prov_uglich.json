@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_ouglitch",
+    "province": "prov_uglich",
+    "kind": "city",
+    "name": {
+      "display": "Ouglitch",
+      "local": "Углич",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      38.33,
+      57.53
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Volga, apanage acquis par Moscou.",
+    "sources": [
+      "Ouglitch"
+    ]
+  },
+  {
+    "id": "set_mologa",
+    "province": "prov_uglich",
+    "kind": "town",
+    "name": {
+      "display": "Mologa",
+      "local": "Молога",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      38.03,
+      58.11
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la confluence Mologa–Volga (principauté de Mologa, rattachée à Iaroslavl ou Moscou, statut incertain).",
+    "sources": [
+      "Mologa"
+    ]
+  },
+  {
+    "id": "set_kaliazine",
+    "province": "prov_uglich",
+    "kind": "town",
+    "name": {
+      "display": "Kaliazine",
+      "local": "Калязин",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      37.86,
+      57.24
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bourg de la haute Volga (première mention en 1254).",
+    "sources": [
+      "Kaliazine"
+    ]
+  }
+]

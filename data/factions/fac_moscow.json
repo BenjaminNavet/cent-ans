@@ -1,0 +1,82 @@
+{
+  "id": "fac_moscow",
+  "name": {
+    "display": "Grande-principauté de Moscou et de Vladimir",
+    "local": "Великое княжество Владимирское и Московское",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Moscou",
+  "adjective": "moscovite",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_ivan_kalita",
+  "heir": "chr_simeon_ivanovitch",
+  "capital": "prov_moscow",
+  "capital_city": "Moscou",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_vladimir",
+  "heraldry": {
+    "blazon": "De gueules à la bande d'or.",
+    "description": "Armes de convention de Moscou (le cavalier terrassant le dragon n'est fixé que plus tard).",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Grand-prince de Vladimir",
+    "Prince de Moscou",
+    "Prince de Novgorod (jusqu'en 1337)"
+  ],
+  "treasury": 14000,
+  "prestige": 55,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_royal_taxation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal"
+    },
+    {
+      "faction": "fac_novgorod",
+      "status": "peace",
+      "note": "Ivan Kalita a été prince de Novgorod (1328-1337) ; il exige un tribut lourd et convoite la ville."
+    },
+    {
+      "faction": "fac_tver",
+      "status": "peace",
+      "note": "Rivalité mortelle : Moscou a écrasé Tver en 1327-1328 avec l'aide de la Horde."
+    },
+    {
+      "faction": "fac_rostov",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_yaroslavl",
+      "status": "overlord"
+    },
+    {
+      "faction": "fac_beloozero",
+      "status": "overlord"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 75,
+    "trade": 65,
+    "piety": 75
+  },
+  "description": "Principauté cadette des Riourikides qui, grâce à l'habileté d'Ivan Kalita (« la Bourse »), a reçu du khan le yarlyk de grand-prince de Vladimir (1331) ; il collecte le tribut de toute la Rus', gagne en richesse et attire le métropolite (1325).",
+  "sources": [
+    "Ivan Ier de Moscou",
+    "Grande-principauté de Moscou",
+    "Grande-principauté de Vladimir"
+  ]
+}

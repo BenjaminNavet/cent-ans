@@ -1,0 +1,51 @@
+{
+  "id": "chr_konstantin_mikhailovitch",
+  "name": {
+    "display": "Constantin Mikhaïlovitch de Tver",
+    "local": "Константин Михайлович",
+    "local_language": "vieux russe"
+  },
+  "sex": "male",
+  "house": "Tver",
+  "faction": "fac_tver",
+  "role": "ruler",
+  "birth": {
+    "value": "1306",
+    "uncertain": true,
+    "place": "Tver"
+  },
+  "death": {
+    "value": "1346"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Tver",
+      "from": {
+        "value": "1328"
+      },
+      "note": "Nommé par Özbeg après la fuite de son frère Alexandre ; règne 1328-1338, puis 1339-1346."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 6,
+    "court": 5
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_loyal"
+  ],
+  "piety": 60,
+  "family": {
+    "siblings": [
+      "chr_alexandre_mikhailovitch"
+    ]
+  },
+  "starting_location": "prov_tver",
+  "status": "at_court",
+  "description": "Prince de Tver depuis 1328 après la révolte de 1327 ; il cède le trône à son frère Alexandre pardonné (1338) puis le reprend après son exécution (1339).",
+  "sources": [
+    "Konstantin de Tver"
+  ]
+}

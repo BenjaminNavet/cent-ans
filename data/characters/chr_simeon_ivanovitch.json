@@ -1,0 +1,50 @@
+{
+  "id": "chr_simeon_ivanovitch",
+  "name": {
+    "display": "Siméon Ivanovitch",
+    "local": "Семён Иванович",
+    "local_language": "vieux russe"
+  },
+  "epithet": "le Superbe",
+  "sex": "male",
+  "house": "Moscou",
+  "faction": "fac_moscow",
+  "role": "heir",
+  "birth": {
+    "value": "1316-09-07",
+    "place": "Moscou"
+  },
+  "death": {
+    "value": "1353-04-27",
+    "place": "Moscou"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Grand-prince de Vladimir",
+      "from": {
+        "value": "1340"
+      },
+      "note": "Succède à son père en 1340."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 7,
+    "court": 5
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_stern"
+  ],
+  "piety": 65,
+  "family": {
+    "father": "chr_ivan_kalita"
+  },
+  "starting_location": "prov_moscow",
+  "status": "at_court",
+  "description": "Fils aîné d'Ivan Kalita (né en 1316 selon Wikipedia), époux d'Aïgousta, fille de Gediminas. Il deviendra grand-prince en 1340 et mourra de la peste en 1353.",
+  "sources": [
+    "Siméon de Moscou"
+  ]
+}
