@@ -50,9 +50,16 @@ Fichiers : `material_gen.py`, `data/art/materials.yaml`,
 Fichiers : `game/assets/textures/battle/build_textures.py`, `README.md`, tableaux du sol,
 `game/scripts/battle/battle_terrain.gd`, shader du sol de bataille, données des couches
 (`data/fx/` ou `battle_layers`), ADR `0105-textures-2k-et-macro-variation.md`.
-1. [ ] Mesure mémoire : 13 couches 2k BC7 (si > 120 Mo : normales en 1k). Noter ici.
-2. [ ] Poly Haven 2k pour les 9 couches + 3–4 nouvelles (prairie fleurie, herbe piétinée,
-       chaume/éteules, labour) ; identifiants choisis consignés dans `README.md`.
+1. [x] Mesure mémoire : 13 couches 2k BC7. Albédo 2k (13 × 2048² × 1 o/texel × 4/3 mipmaps)
+       ≈ 69,3 Mo ; normales 2k ≈ 69,3 Mo → total 2k/2k ≈ 138,6 Mo > 120 Mo. Normales en 1k
+       (13 × 1024² × 1 o/texel × 4/3) ≈ 17,3 Mo → total albédo 2k + normale 1k ≈ 86,6 Mo (sous
+       le plafond). Décision : albédo 2k, normale 1k pour les 13 couches.
+2. [x] Poly Haven 2k (9 couches existantes + 4 nouvelles) : identifiants dans `data/fx/
+       battle_ground_layers.json` (schéma `fx_battle_ground_layers.schema.json`) et `README.md`.
+       Nouvelles : `leafy_grass` (prairie fleurie — pas de texture « prairie fleurie » dédiée en
+       CC0 chez Poly Haven ; substitut le plus proche, à revoir si une meilleure source apparaît),
+       `grassy_cobblestone` (herbe piétinée), `withered_grass` (chaume/éteules), `farm_furrows`
+       (labour frais, distinct de `farm_soil` déjà utilisé pour le labour ambiant/procédural).
 3. [ ] Câbler les nouvelles couches dans l'occupation du sol de bataille (données).
 4. [ ] Macro-variation procédurale (octaves 50–200 m, teinte + luminance). `--no-ga2`.
 5. [ ] Tests mémoire + smoke ; A/B ≤ +5 %. ADR 0105. Commit.
