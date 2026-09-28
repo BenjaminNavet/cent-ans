@@ -76,9 +76,13 @@ var _memo_depth := 0
 ## `FrameBudget.begin_frame` (tout d'un coup hors image : tests, outils). Réécriture des panaches
 ## après un pas d'échelle : `SMOKE_SLICE` points par image et par famille, reprise au curseur
 ## (un nouveau pas relance un tour complet sans revenir au début). Recalage des sols : tuiles
-## en attente traitées par tranches d'au moins `REGROUND_SLICE` points, hauteurs lues en un appel.
+## en attente traitées par tranches (jusqu'à `REGROUND_SLICE` points), hauteurs lues en un appel.
+## Moulins : `MILL_SLICE` par image, avec leur curseur.
 const SMOKE_SLICE := 1600
-const REGROUND_SLICE := 700
+const REGROUND_SLICE := 400
+const MILL_SLICE := 500
+var _mill_left := 0  # moulins restant à réécrire (tour en cours)
+var _mill_cursor := 0
 var _smoke_left: Dictionary = {}  # MultiMeshInstance3D → points restant à réécrire
 var _smoke_cursor: Dictionary = {}  # MultiMeshInstance3D → prochain point
 var _reground_pending: Dictionary = {}  # index de tuile → vrai (ordre d'arrivée)
@@ -209,6 +213,8 @@ func _rebuild_key(province_states: Dictionary) -> String:
 ## Moulins à vent sur la couronne de champs des colonies ; ailes arrêtées en pays dévasté.
 func _build_windmills(province_states: Dictionary) -> void:
 	_points_version += 1
+	_mill_left = 0  # RS-K2 : positions neuves
+	_mill_cursor = 0
 	_windmill_points.clear()
 	var data := _layer.data
 	for i in data.settlements.size():
@@ -700,23 +706,40 @@ func _apply_prop_scale(camera_distance: float) -> void:
 	tp = PerfProbe.lap("life/smoke_rewrite", tp)
 	if _mills_dirty and _windmill_bodies.visible:
 		_mills_dirty = false
+		_mill_left = _windmill_points.size()  # RS-K2 : tour de réécriture étalé
+	if _mill_left > 0:
 		_rewrite_windmills()
 	_end_pass()
 	PerfProbe.lap("life/mill_rewrite", tp)
 
 
+## RS-K2 : tranche du tour de réécriture des moulins (`MILL_SLICE` par image dans une image
+## ouverte, reprise au curseur ; tous sinon).
 func _rewrite_windmills() -> void:
-	if _windmill_bodies.multimesh == null or _windmill_sails.multimesh == null:
+	var count := _windmill_points.size()
+	if _windmill_bodies.multimesh == null or _windmill_sails.multimesh == null or count == 0:
+		_mill_left = 0
 		return
-	if _windmill_bodies.multimesh.instance_count != _windmill_points.size():
+	if _windmill_bodies.multimesh.instance_count != count:
+		_mill_left = 0
 		return
-	for n in _windmill_points.size():
+	var todo := mini(_mill_left, MILL_SLICE) if FrameBudget.in_frame() else _mill_left
+	var n := _mill_cursor % count
+	var indices: Array = []
+	for _step in todo:
 		var point: Array = _windmill_points[n]
 		var pose := _mill_pose(point)
 		_settlement_pose(pose)
 		point[0] = pose[0]
 		point[4] = _pose_y(pose)
-	_write_windmills(range(_windmill_points.size()))
+		indices.append(n)
+		n += 1
+		if n == count:
+			n = 0
+	_mill_cursor = n
+	_mill_left -= todo
+	indices.sort()
+	_write_windmills(indices)
 
 
 ## SZ4b : origines des panaches des colonies à l'échelle courante de leur maquette (tampon complet
