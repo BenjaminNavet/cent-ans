@@ -7,12 +7,12 @@ Fichiers : `game/scripts/codex/codex_bubbles.gd`, `game/tests/ib_chain_test.gd`,
 ## État
 
 - [x] Branche, dylib copiée, wip
-- [ ] `codex_bubbles.gd` : réglages `chain` lus dans `tooltip_style.json`, état Alt, conversion,
+- [x] `codex_bubbles.gd` : réglages `chain` lus dans `tooltip_style.json`, état Alt, conversion,
   filles verrouillées à 0,12 s, remplacement de branche, surlignage de la source, grâce au relâché
-- [ ] `ib_chain_test.gd` activé
-- [ ] ligne Alt dans `shortcut_sheet.gd`
+- [x] `ib_chain_test.gd` activé (OK)
+- [x] ligne Alt dans `shortcut_sheet.gd`
 - [ ] fusion de `main`, smoke / ib_chain / p2c
 
 ## Prochaine étape
 
-Implémenter dans `codex_bubbles.gd`.
+Vérifier smoke (section codex_bubbles), p2c, puis fusion de `main`.
