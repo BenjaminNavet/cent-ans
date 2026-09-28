@@ -1377,14 +1377,17 @@ def assets_materials(
 
     from cent_ans_tools import material_gen
 
-    ids = only or [entry["id"] for entry in material_gen.load_materials()["materials"]]
+    entries = {
+        entry["id"]: entry for entry in material_gen.load_materials()["materials"]
+    }
+    ids = only or list(entries)
     tiles = {}
     for material_id in ids:
         albedo = material_gen.generate(material_id, out_dir, lot=lot)
         tiles[material_id] = np.asarray(Image.open(albedo).convert("RGB"))
         console.print(f"[green]OK[/green] : {material_id} -> {albedo}")
     if sheet is not None:
-        path = material_gen.contact_sheet(tiles, sheet)
+        path = material_gen.contact_sheet(tiles, sheet, params=entries)
         console.print(f"Planche : {path} ({path.stat().st_size // 1024} Ko)")
     console.print(f"Cumul GA : {budget.total()} $")
 

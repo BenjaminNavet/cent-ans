@@ -1,4 +1,6 @@
-# GA: AI-generated tileable materials (ADR 0104). Filled in GA1.
+# GA1: AI-generated tileable materials of the fine battle figures (ADR 0104).
+# Order = layer of fine_detail_ga1.png / fine_detail_albedo.png (GA1_TILE_* in
+# battle_soldier_skinned.gdshader); tile_m must equal GA1_TILE_SIZE there.
 # Prompts: flat texture seen straight on, even diffuse light, no cast shadow or
 # perspective, filling the frame (the pipeline makes it tileable afterwards).
 model: openai/gpt-5-image-mini
@@ -7,15 +9,57 @@ tile_size: 512
 materials:
   - id: wool
     prompt: >-
-      Seamless flat texture swatch of coarse medieval hand-woven wool cloth, undyed
-      natural oatmeal colour, visible irregular plain weave with thick uneven yarns,
-      slight fuzz and small slubs. Photographed straight on, orthographic top-down
-      view, perfectly even diffuse lighting, no cast shadows, no highlights, no
-      perspective, no folds, no vignette, the weave fills the entire frame edge to
-      edge. No text, no border, no objects.
+      Seamless flat texture swatch of medieval hand-woven felted wool cloth, undyed
+      natural oatmeal colour, irregular hand-spun yarns of uneven thickness, the weave
+      softened and partly hidden by fulling, slightly fuzzy with loose fibres and
+      small pills, about forty threads across the frame. Photographed straight on,
+      orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
+      no highlights, no perspective, no folds, no vignette, the cloth fills the entire
+      frame edge to edge. No text, no border, no objects.
+    tile_m: 0.1
     blend_width: 128
-    height_strength: 0.8
+    height_strength: 0.55
     roughness_bias: 0.1
+    detail_saturation: 0.2
+  - id: linen
+    prompt: >-
+      Seamless flat texture swatch of medieval hand-woven linen cloth, pale undyed
+      flax colour, fine plain weave with slightly irregular thin threads and a few
+      slubs, about sixty threads across the frame. Photographed straight on,
+      orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
+      no highlights, no perspective, no folds, no vignette, the cloth fills the entire
+      frame edge to edge. No text, no border, no objects.
+    tile_m: 0.05
+    blend_width: 128
+    height_strength: 0.5
+    roughness_bias: 0.05
+    detail_saturation: 0.2
+  - id: fustian
+    prompt: >-
+      Seamless flat texture swatch of medieval fustian cloth, a dense twill of linen
+      and cotton with fine diagonal ribs and a slightly brushed nap, plain light
+      beige colour, about fifty ribs across the frame. Photographed straight on,
+      orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
+      no highlights, no perspective, no folds, no vignette, the cloth fills the entire
+      frame edge to edge. No text, no border, no objects.
+    tile_m: 0.06
+    blend_width: 128
+    height_strength: 0.5
+    roughness_bias: 0.05
+    detail_saturation: 0.15
+  - id: gambeson
+    prompt: >-
+      Seamless flat texture swatch of a medieval padded gambeson, off-white linen
+      quilted in parallel vertical channels about four centimetres wide, stitched seams
+      between padded ridges, slightly worn and soiled cloth, four channels across the
+      frame. Photographed straight on, orthographic top-down view, perfectly even
+      diffuse lighting, no cast shadows, no perspective, no vignette, the quilting fills
+      the entire frame edge to edge. No text, no border, no objects.
+    tile_m: 0.16
+    blend_width: 96
+    height_strength: 1.0
+    roughness_bias: 0.1
+    detail_saturation: 0.2
   - id: mail
     prompt: >-
       Seamless flat texture swatch of medieval riveted chain mail, European
@@ -24,6 +68,94 @@ materials:
       orthographic top-down view, perfectly even diffuse lighting, no cast shadows,
       no perspective, no folds, no vignette, uniform ring size, the rings fill the
       entire frame edge to edge. No text, no border, no background showing.
+    tile_m: 0.1
     blend_width: 96
     height_strength: 1.2
-    roughness_bias: -0.3
+    roughness_bias: -0.35
+    detail_saturation: 0.0
+  - id: leather
+    prompt: >-
+      Seamless flat texture swatch of medieval vegetable-tanned cowhide leather,
+      natural brown, visible grain pores, fine creases, scuffs and slightly uneven
+      waxed patina. Photographed straight on, orthographic top-down view, perfectly
+      even diffuse lighting, no cast shadows, no highlights, no perspective, no folds,
+      no vignette, the leather fills the entire frame edge to edge. No text, no border,
+      no stitching, no objects.
+    tile_m: 0.12
+    blend_width: 128
+    height_strength: 0.7
+    roughness_bias: -0.05
+    detail_saturation: 0.25
+  - id: plate
+    prompt: >-
+      Seamless flat texture swatch of a hand-forged medieval steel armour plate
+      surface, shallow irregular hammer dents, faint file marks and light polishing
+      scratches, even grey steel, no rust. Photographed straight on, orthographic
+      top-down view, perfectly even diffuse lighting, no reflections of the
+      surroundings, no cast shadows, no perspective, no vignette, the metal fills the
+      entire frame edge to edge. No text, no border, no rivets, no objects.
+    tile_m: 0.16
+    blend_width: 128
+    height_strength: 0.35
+    roughness_bias: -0.4
+    detail_saturation: 0.0
+  - id: wood
+    prompt: >-
+      Seamless flat texture swatch of weathered medieval ash wood, straight grain
+      running vertically, a few small knots, split-and-shaved surface, natural pale
+      brown. Photographed straight on, orthographic top-down view, perfectly even
+      diffuse lighting, no cast shadows, no perspective, no vignette, the wood fills
+      the entire frame edge to edge. No text, no border, no planks seams, no objects.
+    tile_m: 0.3
+    blend_width: 128
+    height_strength: 0.6
+    roughness_bias: 0.0
+    detail_saturation: 0.3
+  - id: skin
+    prompt: >-
+      Seamless flat texture swatch of human skin seen very close, light European
+      complexion, fine pores, faint fine wrinkles and subtle uneven redness, no hair,
+      no moles. Photographed straight on, orthographic view, perfectly even diffuse
+      lighting, no cast shadows, no highlights, no perspective, no vignette, the skin
+      fills the entire frame edge to edge. No text, no border, no objects.
+    tile_m: 0.06
+    blend_width: 128
+    height_strength: 0.35
+    roughness_bias: -0.15
+    detail_saturation: 0.1
+  - id: hair
+    prompt: >-
+      Seamless flat texture swatch of straight human hair strands running vertically,
+      medium brown, many fine strands with slight waves and lighter and darker locks,
+      no scalp showing. Photographed straight on, orthographic view, perfectly even
+      diffuse lighting, no cast shadows, no perspective, no vignette, the hair fills
+      the entire frame edge to edge. No text, no border, no face, no objects.
+    tile_m: 0.05
+    blend_width: 96
+    height_strength: 0.8
+    roughness_bias: -0.1
+    detail_saturation: 0.0
+  - id: coat_light
+    prompt: >-
+      Seamless flat texture swatch of the short glossy coat of a light grey horse,
+      fine hairs lying in one direction running vertically, subtle dapples, even
+      colour. Photographed straight on, orthographic view, perfectly even diffuse
+      lighting, no cast shadows, no highlights, no perspective, no vignette, the coat
+      fills the entire frame edge to edge. No text, no border, no objects.
+    tile_m: 0.1
+    blend_width: 128
+    height_strength: 0.4
+    roughness_bias: -0.1
+    detail_saturation: 0.1
+  - id: coat_dark
+    prompt: >-
+      Seamless flat texture swatch of the short glossy coat of a dark bay horse,
+      fine hairs lying in one direction running vertically, deep reddish brown, even
+      colour. Photographed straight on, orthographic view, perfectly even diffuse
+      lighting, no cast shadows, no highlights, no perspective, no vignette, the coat
+      fills the entire frame edge to edge. No text, no border, no objects.
+    tile_m: 0.1
+    blend_width: 128
+    height_strength: 0.4
+    roughness_bias: -0.1
+    detail_saturation: 0.1

@@ -211,11 +211,7 @@ def process(
     mosaic = Image.fromarray(np.tile(tileable, (3, 3, 1)))
     mosaic = mosaic.resize((tile_size * 3, tile_size * 3), Image.Resampling.LANCZOS)
     albedo = np.asarray(mosaic)[tile_size : 2 * tile_size, tile_size : 2 * tile_size]
-    maps = derive_maps(
-        albedo,
-        height_strength=float(entry.get("height_strength", 1.0)),
-        roughness_bias=float(entry.get("roughness_bias", 0.0)),
-    )
+    maps = derive_maps(albedo, **_map_params(entry))
     out_dir.mkdir(parents=True, exist_ok=True)
     paths = {"albedo": out_dir / f"{material_id}_albedo.png"}
     Image.fromarray(albedo).save(paths["albedo"])
@@ -263,11 +259,31 @@ def generate(
 # --- review sheet ----------------------------------------------------------------
 
 
+# Latin font with accents (Pillow's built-in default font has none).
+SHEET_FONT = (
+    ROOT
+    / "game"
+    / "assets"
+    / "third_party"
+    / "fonts"
+    / "eb_garamond"
+    / "EBGaramond-VariableFont_wght.ttf"
+)
+
+
 def _font(size: int) -> ImageFont.ImageFont | ImageFont.FreeTypeFont:
     try:
+        return ImageFont.truetype(str(SHEET_FONT), size)
+    except OSError:
         return ImageFont.load_default(size=size)
-    except TypeError:  # Pillow without FreeType
-        return ImageFont.load_default()
+
+
+def _map_params(entry: dict[str, Any]) -> dict[str, float]:
+    """``derive_maps`` keyword arguments of a ``materials.yaml`` entry."""
+    return {
+        "height_strength": float(entry.get("height_strength", 1.0)),
+        "roughness_bias": float(entry.get("roughness_bias", 0.0)),
+    }
 
 
 def contact_sheet(
@@ -276,11 +292,14 @@ def contact_sheet(
     *,
     panel: int = 320,
     max_bytes: int = SHEET_MAX_BYTES,
+    params: dict[str, dict[str, Any]] | None = None,
 ) -> Path:
     """Write a labelled review sheet of ``tiles`` and return its path.
 
     ``tiles`` maps a material id to its albedo tile (H x W x 3 uint8). One row per
     material: albedo repeated 2x2 (seams visible if any), derived normal, roughness.
+    ``params`` maps an id to its ``materials.yaml`` entry, so the derived maps use
+    the material's own ``height_strength``/``roughness_bias`` (defaults otherwise).
     Falls back to a 256-colour palette PNG if the sheet exceeds ``max_bytes``.
     """
     label_width, header, gap = 150, 30, 8
@@ -300,7 +319,7 @@ def contact_sheet(
     for row, (material_id, albedo) in enumerate(tiles.items()):
         top = header + row * (panel + gap)
         draw.text((8, top + 8), material_id, fill=(230, 220, 200), font=font)
-        maps = derive_maps(albedo)
+        maps = derive_maps(albedo, **_map_params((params or {}).get(material_id, {})))
         panels = [
             Image.fromarray(np.tile(albedo[..., :3], (2, 2, 1))),
             Image.fromarray(maps["normal"]),
@@ -317,3 +336,79 @@ def contact_sheet(
             out_path, optimize=True
         )
     return out_path
+
+
+# --- fine figure arrays (GA1) ----------------------------------------------------
+
+FINE_TEXTURES_DIR = ROOT / "game" / "assets" / "models" / "battle_fine" / "textures"
+DETAIL_ARRAY = "fine_detail_ga1.png"
+ALBEDO_ARRAY = "fine_detail_albedo.png"
+# Detail albedo layers are smaller than the RG/B/A tiles (memory: GA1 adds <= 4 MB).
+ALBEDO_LAYER_SIZE = 256
+
+
+def centred_albedo(albedo: np.ndarray, saturation: float) -> np.ndarray:
+    """Albedo factor tile: hue kept at ``saturation``, mean luminance 0.5 (x2 in the shader).
+
+    The shader multiplies the vertex colour by ``2 * texel``: a mean of 0.5 keeps the
+    data-driven colour (livery, heraldry) on average and only adds the material's detail.
+    """
+    rgb = albedo[..., :3].astype(np.float64) / 255.0
+    luminance = rgb @ _LUMA
+    mixed = luminance[..., np.newaxis] + saturation * (rgb - luminance[..., np.newaxis])
+    mean = float(luminance.mean()) or 1.0
+    centred = np.clip(mixed * (0.5 / mean), 0.0, 1.0)
+    return np.clip(np.rint(centred * 255.0), 0, 255).astype(np.uint8)
+
+
+def build_fine_arrays(
+    tile_dir: Path,
+    out_dir: Path = FINE_TEXTURES_DIR,
+    *,
+    materials_path: Path = MATERIALS_PATH,
+) -> dict[str, Path]:
+    """Assemble the GA1 texture arrays of the fine figures from processed tiles.
+
+    Reads ``<id>_albedo.png`` / ``_normal.png`` / ``_height.png`` / ``_roughness.png``
+    of every material (``materials.yaml`` order = layer) and writes two vertical strips
+    imported by Godot as ``Texture2DArray`` (one slice per material):
+
+    - ``fine_detail_ga1.png``: ``tile_size``² RGBA, RG normal (OpenGL), B relief
+      (height), A roughness -- same packing as the FG3 tiles of ADR 0088;
+    - ``fine_detail_albedo.png``: ``ALBEDO_LAYER_SIZE``² RGB, centred albedo factor.
+    """
+    entries = load_materials(materials_path)["materials"]
+    detail_layers = []
+    albedo_layers = []
+    for entry in entries:
+        material_id = entry["id"]
+
+        def read(name: str, material_id: str = material_id) -> np.ndarray:
+            return np.asarray(Image.open(Path(tile_dir) / f"{material_id}_{name}.png"))
+
+        normal, height, roughness = read("normal"), read("height"), read("roughness")
+        detail_layers.append(
+            np.dstack([normal[..., 0], normal[..., 1], height, roughness])
+        )
+        albedo = centred_albedo(
+            read("albedo"), float(entry.get("detail_saturation", 0.0))
+        )
+        small = Image.fromarray(np.tile(albedo, (3, 3, 1))).resize(
+            (ALBEDO_LAYER_SIZE * 3, ALBEDO_LAYER_SIZE * 3), Image.Resampling.LANCZOS
+        )
+        albedo_layers.append(
+            np.asarray(small)[
+                ALBEDO_LAYER_SIZE : 2 * ALBEDO_LAYER_SIZE,
+                ALBEDO_LAYER_SIZE : 2 * ALBEDO_LAYER_SIZE,
+            ]
+        )
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    paths = {"detail": out_dir / DETAIL_ARRAY, "albedo": out_dir / ALBEDO_ARRAY}
+    Image.fromarray(np.concatenate(detail_layers), "RGBA").save(
+        paths["detail"], optimize=True
+    )
+    Image.fromarray(np.concatenate(albedo_layers), "RGB").save(
+        paths["albedo"], optimize=True
+    )
+    return paths
