@@ -34,15 +34,6 @@
   },
   "objectives": [
     {
-      "id": "obj_hungary_hold",
-      "title": "Garder la couronne de saint Étienne",
-      "description": "Charles Robert doit conserver le royaume.",
-      "condition": {
-        "kind": "hold_title",
-        "title": "tit_hungary"
-      }
-    },
-    {
       "id": "obj_hungary_vassals",
       "title": "Tenir la Transylvanie et la Slavonie",
       "description": "Garder les deux ducs (voïvode et ban) sous tutelle.",

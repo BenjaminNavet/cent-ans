@@ -50,14 +50,6 @@
       }
     },
     {
-      "id": "obj_galicia_free",
-      "title": "Rester indépendant",
-      "description": "Ne devenir le vassal de personne.",
-      "condition": {
-        "kind": "be_independent"
-      }
-    },
-    {
       "id": "obj_galicia_volhynia_berestia",
       "title": "Berestia",
       "description": "Recouvrer la terre de Brest, passée aux Lituaniens.",
