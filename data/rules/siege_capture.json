@@ -17,15 +17,16 @@
   "superiority": 1.0,
   "threatened_share": 0.25,
   "last_stand": {
-    "radius_m": 45.0,
+    "radius_m": 35.0,
     "loss_morale_factor": 0.85,
     "morale_per_s": 0.08,
     "contagion_factor": 0.8
   },
   "fall_back": {
     "on_breach": true,
-    "blockers_per_opening": 1,
-    "max_blockers": 0,
+    "gate_blockers": 2,
+    "breach_blockers": 0,
+    "max_blockers": 2,
     "engage_radius_m": 30.0
   },
   "assault": {

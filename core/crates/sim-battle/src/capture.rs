@@ -58,8 +58,10 @@ pub struct FallBackRules {
     /// Fall back to the square at the first breach, not only when the gate
     /// falls.
     pub on_breach: bool,
-    /// Regiments kept to block each opening; the rest regroups on the square.
-    pub blockers_per_opening: usize,
+    /// Regiments kept to block the broken gate; the rest regroups on the square.
+    pub gate_blockers: usize,
+    /// Regiments kept to block each wall breach.
+    pub breach_blockers: usize,
     /// Cap on the regiments blocking the openings.
     pub max_blockers: usize,
     /// Fallen back, the garrison only charges attackers this close to the

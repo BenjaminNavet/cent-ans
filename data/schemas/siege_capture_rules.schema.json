@@ -50,11 +50,12 @@
       "type": "object",
       "properties": {
         "on_breach": { "type": "boolean", "description": "La garnison IA se replie sur la place dès la première brèche (et non plus seulement à la chute de la porte)." },
-        "blockers_per_opening": { "type": "integer", "minimum": 0, "maximum": 6, "description": "Régiments laissés pour tenir chaque ouverture (brèche, porte), le reste se replie sur la place." },
+        "gate_blockers": { "type": "integer", "minimum": 0, "maximum": 6, "description": "Régiments laissés pour tenir la porte enfoncée tant qu'elle est la seule entrée (le corps de porte se défend) ; dès qu'une muraille est rompue, elle est traitée comme une brèche." },
+        "breach_blockers": { "type": "integer", "minimum": 0, "maximum": 6, "description": "Régiments laissés pour tenir chaque brèche de muraille (éboulis)." },
         "max_blockers": { "type": "integer", "minimum": 0, "maximum": 12, "description": "Plafond total des régiments tenant les ouvertures." },
         "engage_radius_m": { "type": "number", "minimum": 0, "maximum": 400, "description": "Repliés sur la place, les défenseurs ne chargent que les assaillants à moins de cette distance du centre de la place." }
       },
-      "required": ["on_breach", "blockers_per_opening", "max_blockers", "engage_radius_m"],
+      "required": ["on_breach", "gate_blockers", "breach_blockers", "max_blockers", "engage_radius_m"],
       "additionalProperties": false
     },
     "assault": {
