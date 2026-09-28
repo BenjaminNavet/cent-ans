@@ -37,6 +37,7 @@ Fichiers : `material_gen.py`, `data/art/materials.yaml`,
        bords ≤ 4/255, dimensions, canaux. Commit. CLI : `uv run --project tools cent-ans assets
        materials --out <scratch> [--only id]… [--sheet planche.png]` (brute réutilisée si présente).
 2. [ ] Sonde : 2 matières (laine, mailles) → planche ; jugement en session principale (1 capture).
+       Sonde faite (0,08 $) : `docs/research/ga1_probe_sheet.png` ; **jugement en attente**.
 3. [ ] Lot : 12 matières (laine, lin, futaine, gambison, mailles, cuir, plates, bois, peau,
        cheveux, robe claire, robe foncée), 512², budget consigné.
 4. [ ] Nouveau `fine_detail_albedo` (Texture2DArray, centré en luminance moyenne 0,5) multiplié
@@ -89,3 +90,8 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
 - 28/09 : GA0 fait (squelette, section budget GA). Suite : vague 1 (GA1 ∥ GA2).
 - 28/09 : GA1 étape 1 faite (worktree `../game_project-ga1`, branche `feat/ga1`) : chaîne
   tuilable + cartes dérivées + planche + CLI `assets materials`. Suite : sonde laine/mailles.
+- 28/09 : GA1 sonde laine + mailles (gpt-5-image-mini, 2 × 0,04 $ = 0,08 $, estimation 0,02 $/image :
+  prévoir ≈ 0,50 $ pour les 12). Brutes 1024² hors dépôt (scratch de l'agent). Tuiles 512² :
+  écart moyen des bords ≤ pas moyen intérieur (sans couture). Mailles sombres (lum. moy. 63/255),
+  laine claire (174) : le centrage à 0,5 de l'étape 4 est nécessaire. Planche
+  `docs/research/ga1_probe_sheet.png` (945 Ko) à juger en session principale.
