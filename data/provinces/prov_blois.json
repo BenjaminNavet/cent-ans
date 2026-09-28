@@ -1,0 +1,91 @@
+{
+  "id": "prov_blois",
+  "name": {
+    "display": "Blois",
+    "local": "Bloys",
+    "local_language": "ancien français"
+  },
+  "region": "france_centre",
+  "terrain": "plains",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Loire",
+    "Cisse"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wine",
+    "res_wheat",
+    "res_stone"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Blois",
+      "local": "Bloys",
+      "local_language": "ancien français"
+    },
+    "lat": 47.5861,
+    "lon": 1.3359
+  },
+  "geo": {
+    "capital_lonlat": [
+      1.3359,
+      47.5861
+    ],
+    "seed_lonlat": [
+      1.35,
+      47.62
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_blois",
+  "culture": "cul_french",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 92000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 10500,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2500,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Comté détaché de l'Orléanais, tenu par la maison de Châtillon-Blois."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_parish_church",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1850,
+  "description": "Comté de Blois, tenu par Guy Ier de Châtillon, père de Charles de Blois, en fief direct du roi.",
+  "sources": [
+    "Comté de Blois",
+    "Guy Ier de Châtillon"
+  ]
+}

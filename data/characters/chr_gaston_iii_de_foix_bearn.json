@@ -1,0 +1,46 @@
+{
+  "id": "chr_gaston_iii_de_foix_bearn",
+  "name": {
+    "display": "Gaston III de Foix-Béarn",
+    "local": "Gaston III de Foix-Bearn",
+    "local_language": "gascon"
+  },
+  "epithet": "Fébus",
+  "sex": "male",
+  "house": "Foix",
+  "faction": "fac_foix_bearn",
+  "role": "heir",
+  "birth": {
+    "value": "1331"
+  },
+  "death": {
+    "value": "1391-08-01"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Comte de Foix (futur)"
+    },
+    {
+      "title": "Vicomte de Béarn (futur)"
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 2,
+    "court": 3
+  },
+  "traits": [
+    "trait_ambitious"
+  ],
+  "piety": 30,
+  "family": {
+    "father": "chr_gaston_ii_de_foix_bearn"
+  },
+  "starting_location": "prov_bearn",
+  "status": "minor",
+  "description": "Fils de [[cdx_gaston_ii_de_foix_bearn|Gaston II]], âgé de six ans en 1337 ; futur Gaston Fébus, l'un des grands princes du Midi de la seconde moitié du siècle.",
+  "sources": [
+    "Gaston III de Foix-Béarn dit Fébus"
+  ]
+}

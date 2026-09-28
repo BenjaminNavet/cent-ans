@@ -151,6 +151,7 @@ fn init_settlements(state: &mut CampaignState, data: &GameData) -> Result<(), Ca
                 construction: None,
                 recruit_queue: Vec::new(),
                 fortification_level: settlement.fortification_level,
+                recruit_pool: Default::default(),
             },
         );
     }
@@ -250,7 +251,8 @@ impl CampaignState {
                 ledger: Default::default(),
                 regency: false,
                 embargoes: BTreeSet::new(),
-                suzerain: faction.suzerain.clone(),
+                // Lot FE: a view of the title holdings (ADR 0098).
+                suzerain: crate::feudal::liege_of(&state, data, id),
                 loyalty: 100,
                 claims: faction
                     .claims
@@ -280,8 +282,8 @@ impl CampaignState {
                 research_points_last_turn: 0,
                 research_banked: Default::default(),
             };
-            if let Some(suzerain) = &faction.suzerain {
-                faction_state.allies.insert(suzerain.clone());
+            if let Some(suzerain) = faction_state.suzerain.clone() {
+                faction_state.allies.insert(suzerain);
             }
             state.factions.insert(id.clone(), faction_state);
         }

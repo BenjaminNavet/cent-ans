@@ -1,0 +1,59 @@
+{
+  "id": "fac_foix_bearn",
+  "name": {
+    "display": "Foix-Béarn",
+    "local": "Foish-Bearn",
+    "local_language": "gascon"
+  },
+  "short_name": "Foix-Béarn",
+  "adjective": "béarnais",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_gaston_ii_de_foix_bearn",
+  "heir": "chr_gaston_iii_de_foix_bearn",
+  "capital": "prov_bearn",
+  "capital_city": "Orthez",
+  "religion": "rel_catholic",
+  "culture": "cul_occitan",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_bearn",
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4, d'or à trois pals de gueules (Foix) ; aux 2 et 3, d'or à deux vaches de gueules, accornées, colletées et clarinées d'azur (Béarn).",
+    "description": "Écu écartelé Foix-Béarn adopté par Gaston Ier puis ses successeurs.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Comte de Foix",
+    "Vicomte souverain de Béarn"
+  ],
+  "treasury": 5500,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation"
+  ],
+  "relations": [
+    {
+      "faction": "fac_france",
+      "status": "peace",
+      "note": "Hommage rendu pour le seul comté de Foix ; le Béarn est tenu en alleu, sans hommage."
+    },
+    {
+      "faction": "fac_armagnac",
+      "status": "peace",
+      "note": "Rivalité pour la prééminence en Gascogne et en Languedoc, sans guerre ouverte en 1337."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 60,
+    "diplomacy": 45,
+    "trade": 35,
+    "piety": 55
+  },
+  "description": "Gaston II tient le comté de Foix en fief du roi de France et la vicomté de Béarn en alleu souverain (double allégeance) ; rival de la maison d'Armagnac, il meurt en 1343 au retour de la croisade du Salado, laissant le Béarn à son fils Gaston III, le futur Gaston Fébus.",
+  "sources": [
+    "Gaston II de Foix-Béarn",
+    "Vicomté de Béarn"
+  ]
+}
