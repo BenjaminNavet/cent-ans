@@ -1,0 +1,20 @@
+{
+  "id": "tit_pavia",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Pavie",
+    "local": "Signoria di Pavia",
+    "local_language": "lombard"
+  },
+  "de_jure_liege": "tit_empire",
+  "de_jure_provinces": [
+    "prov_pavia"
+  ],
+  "holder_1337": {
+    "faction": "fac_milan",
+    "sources": [
+      "Pavie",
+      "Matteo Ier Visconti"
+    ]
+  }
+}

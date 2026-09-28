@@ -1,0 +1,91 @@
+{
+  "id": "prov_perugia",
+  "name": {
+    "display": "Pérouse",
+    "local": "Perugia",
+    "local_language": "ombrien"
+  },
+  "region": "italie_centre",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Tibre"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wine",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Pérouse",
+      "local": "Perugia",
+      "local_language": "ombrien"
+    },
+    "lat": 43.1122,
+    "lon": 12.3888
+  },
+  "geo": {
+    "capital_lonlat": [
+      12.3888,
+      43.1122
+    ],
+    "seed_lonlat": [
+      12.35,
+      43.05
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_perugia",
+  "culture": "cul_tuscan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 42000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6500,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1600,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Commune ombrienne fortement fortifiée ; population estimée par comparaison avec Sienne."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 3400,
+  "description": "Commune guelfe de premier plan en Ombrie, alliée constante de Florence, jalouse d'une indépendance de fait malgré la suzeraineté pontificale théorique sur l'État de l'Église.",
+  "sources": [
+    "Pérouse",
+    "République de Pérouse"
+  ]
+}

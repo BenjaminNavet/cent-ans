@@ -1,0 +1,46 @@
+{
+  "id": "tit_taranto",
+  "rank": "county",
+  "name": {
+    "display": "Principauté de Tarente",
+    "local": "Principato di Taranto",
+    "local_language": "napolitain"
+  },
+  "heraldry": {
+    "blazon": "D'azur semé de fleurs de lis d'or, au lambel d'argent.",
+    "description": "Armes d'Anjou-Sicile brisées d'un lambel d'argent (au lieu du gueules du rameau royal de Naples), à la manière des branches cadettes angevines.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_liege": "tit_naples",
+  "de_jure_provinces": [
+    "prov_taranto"
+  ],
+  "holder_1337": {
+    "faction": "fac_taranto",
+    "sources": [
+      "Principauté de Tarente",
+      "Catherine de Valois-Courtenay"
+    ]
+  },
+  "succession_law": "male_preference_primogeniture",
+  "objectives": [
+    {
+      "id": "obj_taranto_hold",
+      "title": "Garder la principauté",
+      "description": "La maison d'Anjou-Tarente doit conserver Tarente.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_taranto"
+      }
+    },
+    {
+      "id": "obj_taranto_achaea",
+      "title": "Le trône d'Achaïe",
+      "description": "Faire valoir les droits de Catherine de Valois-Courtenay sur la principauté d'Achaïe.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ]
+}

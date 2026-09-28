@@ -1,0 +1,59 @@
+{
+  "id": "fac_urbino",
+  "name": {
+    "display": "Comté d'Urbin",
+    "local": "Contea di Urbino",
+    "local_language": "marchigian"
+  },
+  "short_name": "Urbin",
+  "adjective": "urbinate",
+  "government": "lordship",
+  "playable": true,
+  "capital": "prov_urbino",
+  "capital_city": "Urbin",
+  "religion": "rel_catholic",
+  "culture": "cul_tuscan",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_urbino",
+  "heraldry": {
+    "blazon": "D'or à l'aigle de sable.",
+    "description": "Armes attribuées aux Montefeltro au XIVe siècle, incertaines.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Comte d'Urbin"
+  ],
+  "treasury": 4000,
+  "prestige": 30,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_papacy",
+      "status": "peace",
+      "note": "Vicariat pontifical incertain à cette date pour les Montefeltro."
+    },
+    {
+      "faction": "fac_rimini",
+      "status": "peace",
+      "note": "Rivalité récurrente entre Montefeltro gibelins et Malatesta guelfes pour la Romagne méridionale."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 40,
+    "trade": 35,
+    "piety": 40
+  },
+  "description": "Petite seigneurie montagnarde des Marches, tenue par la maison gibeline des Montefeltro, en délicatesse récurrente avec la légation pontificale et les guelfes Malatesta de Rimini.",
+  "sources": [
+    "Urbin",
+    "Maison de Montefeltro"
+  ],
+  "ruler": "chr_nolfo_da_montefeltro",
+  "suzerain": "fac_papacy"
+}

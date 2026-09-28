@@ -1,0 +1,53 @@
+{
+  "id": "fac_siena",
+  "name": {
+    "display": "République de Sienne",
+    "local": "Repubblica di Siena",
+    "local_language": "toscan"
+  },
+  "short_name": "Sienne",
+  "adjective": "siennois",
+  "government": "republic",
+  "playable": true,
+  "capital": "prov_siena",
+  "capital_city": "Sienne",
+  "religion": "rel_catholic",
+  "culture": "cul_tuscan",
+  "succession_law": "elective",
+  "primary_title": "tit_siena",
+  "heraldry": {
+    "blazon": "Parti d'argent et de sable (la balzana).",
+    "description": "La balzana, emblème communal de Sienne.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#111111"
+  },
+  "titles": [
+    "Governo dei Nove"
+  ],
+  "treasury": 16000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_bookkeeping"
+  ],
+  "relations": [
+    {
+      "faction": "fac_florence",
+      "status": "peace",
+      "note": "Rivalité commerciale et politique séculaire, sans guerre ouverte en 1337."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 25,
+    "diplomacy": 60,
+    "trade": 65,
+    "piety": 50
+  },
+  "description": "République guelfe gouvernée par le Governo dei Nove depuis 1287 ; achève au tournant de la décennie la Torre del Mangia et le agrandissement inabouti du Duomo.",
+  "sources": [
+    "République de Sienne",
+    "Governo dei Nove"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "prov_pavia",
+  "name": {
+    "display": "Pavie",
+    "local": "Pavia",
+    "local_language": "lombard"
+  },
+  "region": "italie_nord",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Tessin"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_iron",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Pavie",
+      "local": "Pavia",
+      "local_language": "lombard"
+    },
+    "lat": 45.1847,
+    "lon": 9.1582
+  },
+  "geo": {
+    "capital_lonlat": [
+      9.1582,
+      45.1847
+    ],
+    "seed_lonlat": [
+      9.1,
+      45.1
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_milan",
+  "culture": "cul_lombard",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 55000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7500,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 800,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ancienne capitale du royaume lombard, conquise par les Visconti en 1315 ; population estimée par comparaison avec Milan."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 3800,
+  "description": "Ancienne capitale du royaume lombard, prise par Matteo Ier Visconti en 1315 et intégrée à la seigneurie de Milan ; université fondée dans le sillage des écoles épiscopales médiévales.",
+  "sources": [
+    "Pavie",
+    "Matteo Ier Visconti"
+  ]
+}

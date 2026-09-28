@@ -1,0 +1,92 @@
+{
+  "id": "prov_pisa",
+  "name": {
+    "display": "Pise",
+    "local": "Pisa",
+    "local_language": "toscan"
+  },
+  "region": "italie_centre",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Arno"
+  ],
+  "coastal": true,
+  "resources": [
+    "res_fish",
+    "res_salt",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Pise",
+      "local": "Pisa",
+      "local_language": "toscan"
+    },
+    "lat": 43.7228,
+    "lon": 10.4017
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.4017,
+      43.7228
+    ],
+    "seed_lonlat": [
+      10.35,
+      43.68
+    ],
+    "voronoi_weight": 0.55
+  },
+  "owner": "fac_pisa",
+  "culture": "cul_tuscan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 60000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 10000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2000,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "République maritime affaiblie depuis la mort de Castruccio Castracani (1328) ; population en net recul par rapport à son apogée du XIIIe siècle."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 4800,
+  "description": "République gibeline sur l'Arno, ancienne rivale maritime de Gênes (défaite à la Meloria, 1284) ; sans seigneur fort depuis la mort de Castruccio Castracani en 1328, gouvernée par ses Anciens.",
+  "sources": [
+    "République de Pise",
+    "Castruccio Castracani"
+  ]
+}

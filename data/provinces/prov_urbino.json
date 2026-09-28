@@ -1,0 +1,90 @@
+{
+  "id": "prov_urbino",
+  "name": {
+    "display": "Urbin",
+    "local": "Urbino",
+    "local_language": "marchigian"
+  },
+  "region": "italie_centre",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "rivers": [
+    "Metauro"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Urbin",
+      "local": "Urbino",
+      "local_language": "marchigian"
+    },
+    "lat": 43.7267,
+    "lon": 12.6361
+  },
+  "geo": {
+    "capital_lonlat": [
+      12.6361,
+      43.7267
+    ],
+    "seed_lonlat": [
+      12.6,
+      43.65
+    ],
+    "voronoi_weight": 0.3
+  },
+  "owner": "fac_urbino",
+  "culture": "cul_tuscan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 24000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 3200,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 400,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Petite seigneurie montagnarde des Marches ; population estimée par comparaison avec Rimini."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2000,
+  "description": "Seigneurie gibeline des Montefeltro, comtes d'Urbin, alliés traditionnels de l'Empire dans les Marches, en délicatesse récurrente avec la légation pontificale de Romagne.",
+  "sources": [
+    "Urbin",
+    "Maison de Montefeltro"
+  ]
+}

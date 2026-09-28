@@ -1,0 +1,48 @@
+{
+  "id": "tit_perugia",
+  "rank": "county",
+  "name": {
+    "display": "Commune de Pérouse",
+    "local": "Comune di Perugia",
+    "local_language": "ombrien"
+  },
+  "heraldry": {
+    "blazon": "D'or au griffon de sable.",
+    "description": "Griffon noir sur champ d'or, emblème communal de Pérouse.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#111111"
+  },
+  "de_jure_provinces": [
+    "prov_perugia"
+  ],
+  "holder_1337": {
+    "faction": "fac_perugia",
+    "sources": [
+      "Pérouse"
+    ]
+  },
+  "succession_law": "elective",
+  "objectives": [
+    {
+      "id": "obj_perugia_hold",
+      "title": "Garder la commune",
+      "description": "Pérouse doit rester libre.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_perugia"
+      }
+    },
+    {
+      "id": "obj_perugia_umbria",
+      "title": "Dominer l'Ombrie",
+      "description": "Étendre l'influence de Pérouse sur les communes voisines d'Ombrie.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_perugia",
+          "prov_urbino"
+        ]
+      }
+    }
+  ]
+}

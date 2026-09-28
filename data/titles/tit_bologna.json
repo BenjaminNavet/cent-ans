@@ -1,0 +1,46 @@
+{
+  "id": "tit_bologna",
+  "rank": "county",
+  "name": {
+    "display": "Commune de Bologne",
+    "local": "Comune di Bologna",
+    "local_language": "émilien"
+  },
+  "heraldry": {
+    "blazon": "De gueules à la croix pattée d'argent.",
+    "description": "Armes communales de Bologne (« libertas »), reprises par la seigneurie de fait de Taddeo Pepoli en 1337.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_provinces": [
+    "prov_bologna"
+  ],
+  "holder_1337": {
+    "faction": "fac_bologna",
+    "sources": [
+      "Bologne",
+      "Taddeo Pepoli"
+    ]
+  },
+  "succession_law": "elective",
+  "objectives": [
+    {
+      "id": "obj_bologna_hold",
+      "title": "Garder la commune",
+      "description": "Bologne doit rester libre.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_bologna"
+      }
+    },
+    {
+      "id": "obj_bologna_emilia",
+      "title": "Dominer l'Émilie",
+      "description": "Étendre l'influence de Bologne sur Ferrare et l'Émilie.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_ferrara"
+      }
+    }
+  ]
+}

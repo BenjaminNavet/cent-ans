@@ -1,0 +1,45 @@
+{
+  "id": "tit_siena",
+  "rank": "county",
+  "name": {
+    "display": "République de Sienne",
+    "local": "Repubblica di Siena",
+    "local_language": "toscan"
+  },
+  "heraldry": {
+    "blazon": "Parti d'argent et de sable (la balzana).",
+    "description": "La balzana, blanc et noir, emblème communal de Sienne depuis le XIIIe siècle.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#111111"
+  },
+  "de_jure_provinces": [
+    "prov_siena"
+  ],
+  "holder_1337": {
+    "faction": "fac_siena",
+    "sources": [
+      "République de Sienne"
+    ]
+  },
+  "succession_law": "elective",
+  "objectives": [
+    {
+      "id": "obj_siena_hold",
+      "title": "Garder la république",
+      "description": "Sienne doit rester libre.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_siena"
+      }
+    },
+    {
+      "id": "obj_siena_florence",
+      "title": "Primauté toscane",
+      "description": "Supplanter Florence comme première puissance de Toscane.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_florence"
+      }
+    }
+  ]
+}
