@@ -25,21 +25,19 @@ scènes vers `UiLayout`, `UiType`, `UiMotion` (ADR 0097, bible DA § 12). Branch
     la taille de base correspondante (mêmes valeurs que `province_panel.tscn`, précédent PO1) :
     titre 22→`Heading`/20, statut de recherche 16→`Body`/17, légende 13→`Caption`/14.
   - Résultat : **0** `add_theme_font_size_override` restant dans les 4 fichiers `.gd` du lot.
-- [x] `UiLayout` : les deux fenêtres centrales plein écran (`TechPanel`, `DiplomacyPanel`)
-  rejoignent la zone `MODAL` (fond assombri, entrées bloquées), au lieu de rester des fenêtres
-  `PanelStack.Kind.CENTRAL` sans voile. **Choix de conception fait ici, à signaler** (voir
-  « Point ouvert » ci-dessous) : `SIDE_PANEL` (30 % de largeur) est trop étroit pour ces deux
-  écrans multi-colonnes ; `MODAL` est la zone la plus proche des occupants déjà prévus par la
-  bible (rencontre, déclaration de guerre — mêmes fenêtres centrées bloquantes). L'appel
-  `UiZones.put(UiZones.Zone.MODAL, self)` est posé **dans le script du panneau lui-même**
-  (`_ready()` pour `TechPanel`, fin de `_ready()` pour `DiplomacyPanel`) et non depuis
-  `map_ui.gd`/`diplomacy_controller.gd`/`campaign_map.gd` (hors lot, non touchés).
-  - `TechPanel` : taille fixe préservée à l'identique (`custom_minimum_size = Vector2(1300, 600)`
-    remplace l'ancien positionnement par ancres à décalages fixes ±650/±300 — même rectangle final
-    une fois centré par `UiZones.claim`).
-  - `DiplomacyPanel` : `_fit_to_viewport()` (plein écran, inchangée) continue de poser la taille
-    et la position exactes après le `claim` — le centrage `MINSIZE` de la zone `MODAL` est
-    immédiatement recouvert par cet appel, donc le rectangle visible ne change pas.
+- [x] **`UiLayout` : essayé puis abandonné, voir « Point ouvert ».** Premier essai : les deux
+  fenêtres centrales plein écran (`TechPanel`, `DiplomacyPanel`) rejoignaient la zone `MODAL`
+  (`UiZones.put(UiZones.Zone.MODAL, self)`, posé dans le script du panneau lui-même, différé par
+  `call_deferred` pour éviter « Parent node is busy… »). `smoke.gd` a montré une régression
+  réelle : `claim()` reparente le panneau hors de `map_ui` (dans la couche de zones de
+  `UiLayout`), ce qui casse l'égalité `panel.get_parent() == self` que `map_ui.gd::_keep_on_screen`
+  (hors lot) utilise pour replacer les panneaux centraux hors de la minicarte — 12 échecs
+  (« minicarte par-dessus le panneau », « la province ne revient pas », « Échap ne désélectionne
+  plus »› aux 4 résolutions testées). **Revenu en arrière** : ni `TechPanel` ni `DiplomacyPanel`
+  ne rejoignent de zone `UiLayout` ; ils gardent leur positionnement d'origine (`TechPanel` :
+  ancres fixes ±650/±300 restaurées dans `tech_panel.tscn` ; `DiplomacyPanel` :
+  `_fit_to_viewport()` inchangée). Seules les tailles (`UiType`) et les animations
+  d'ouverture/fermeture (`UiMotion`) restent migrées.
 - [x] `UiMotion` sur les ouvertures/fermetures atteignables depuis les 4 fichiers du lot :
   - `TechPanel.show_tree()` : fondu d'entrée seulement si le panneau était fermé (les
     rafraîchissements pendant qu'il reste ouvert ne rejouent pas l'animation) ; bouton « × »
@@ -68,12 +66,28 @@ scènes vers `UiLayout`, `UiType`, `UiMotion` (ADR 0097, bible DA § 12). Branch
 
 ## Point ouvert à signaler à l'orchestrateur
 
-Le brief demandait « side_panel ou modal » sans préciser lequel pour `TechPanel`/`DiplomacyPanel`
-(des fenêtres centrales plein écran ou quasi, pas des panneaux ancrés). J'ai choisi `MODAL` (fond
-assombri cohérent avec la fenêtre de rencontre migrée par PO1, taille finale inchangée). C'est une
-lecture raisonnable mais c'est un choix, pas une évidence : si l'orchestrateur ou le joueur préfère
-qu'aucun voile n'assombre la carte derrière ces deux écrans (comportement d'avant), il faut revenir
-dessus (`UiZones.put` → à retirer ou remplacer par `anchor_to`, qui ne pose pas de voile).
+Le brief demandait que chaque panneau passe par `UiLayout` (`side_panel` ou `modal`). Pour
+`TechPanel`/`DiplomacyPanel` (fenêtres centrales plein écran ou quasi, gérées par
+`PanelStack.Kind.CENTRAL`), aucune des deux zones ne convient sans toucher à des fichiers hors
+lot :
+- `SIDE_PANEL` (30 % de largeur) est trop étroit pour ces deux écrans multi-colonnes — les y
+  forcer changerait leur mise en page, pas seulement leur position (nouvelle règle de style
+  déguisée, hors du mandat « migration mécanique »).
+- `MODAL` (`UiZones.claim`) reparente le panneau hors de `map_ui`, ce qui casse
+  `map_ui.gd::_keep_on_screen` (repositionnement anti-recouvrement de la minicarte) et la
+  fermeture par Échap/`PanelStack.close_top` — régressions mesurées sur `smoke.gd` (voir ci-dessus).
+  `anchor_to()` (sans reparentage) évite ce problème mais force alors le panneau dans le
+  rectangle `MODAL` (60 % × 76 % de l'écran), ce qui *change* la taille effective de
+  `DiplomacyPanel` (plein écran avant) et de `TechPanel` (1300×600 fixe) — encore un changement de
+  comportement visible, pas une migration mécanique.
+
+Je n'ai donc PAS mis ces deux écrans dans une zone `UiLayout` : ils gardent leur mécanisme de
+positionnement d'origine (`PanelStack.Kind.CENTRAL`, inchangé). Seules les tailles de police
+(`UiType`) et les animations d'ouverture/fermeture (`UiMotion`, là où le lot le permet) sont
+migrées. Si l'objectif du joueur/de l'orchestrateur est vraiment de leur donner le voile assombri
+de `MODAL`, il faut soit accepter le changement de taille d'`anchor_to()`, soit faire évoluer
+`map_ui.gd::_keep_on_screen` et `PanelStack` pour qu'ils sachent traiter un panneau central
+reparenté dans une zone `UiLayout` — les deux sont hors du périmètre de fichiers de ce lot.
 
 ## Reprendre
 
