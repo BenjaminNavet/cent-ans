@@ -14,7 +14,9 @@ Branche `feat/ib5-live` (worktree agent). Spec : `docs/superpowers/specs/2026-09
   (`campaign_sim_preview.rs`)
 - [x] 4. `rich_tooltip.gd` : `_requirement_met(live, id, repli)`, clé d'effet ciblée dans `effect_item`,
   l'effet vedette d'un bâtiment garde sa ligne quand il a un avant → après
-- [ ] 5. `ib_layout_test.gd` étendu (`_check_live`) ; tests de fin
+- [x] 5. `ib_layout_test.gd` étendu (`_check_live`) ; `main` fusionné (conflit `buildings.rs` avec
+  RS-C résolu : les deux fonctions gardées) ; `cargo test` sim-campaign + godot-bridge, smoke,
+  `ib_layout_test`, `ib_chain_test`, `po_ui_test`, `p2c_ui_test` verts
 
 ## Choix
 
@@ -36,4 +38,7 @@ Branche `feat/ib5-live` (worktree agent). Spec : `docs/superpowers/specs/2026-09
 
 ## Prochaine étape
 
-Dylib (`CARGO_TARGET_DIR=core/target-ib5 core/build.sh`), import Godot, `ib_layout_test.gd`.
+Lot terminé. Reste à l'orchestrateur : fusion dans `integration/ib` (dylib à reconstruire), jugement
+visuel. Pistes non faites : avant → après des unités (aucun effet d'unité dans la spec), effets de
+bataille et d'armée des techniques (pas de valeur unique hors d'une armée précise), cible
+`core/target-ib5` supprimée.
