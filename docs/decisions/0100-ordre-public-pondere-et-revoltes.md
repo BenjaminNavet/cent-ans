@@ -24,9 +24,12 @@ Suivi : `docs/wip/rs-b-order.md`. Prolonge l'ADR 0082 (carte densifiée, `provin
    - résistance à la peste : `province_building_effects` au lieu des bâtiments bruts ;
    - IA : revenu estimé d'une province avec les effets pondérés, et évaluation d'un bâtiment
      (apaisement, santé, croissance au poids de province de la place, recherche à `research_percent`).
-3. **Révolte** (`data/rules/population.json`) : après **2 saisons** (3 avant) au-delà de **74** de
-   mécontentement moyen (75 avant). Le seuil de passage aux rebelles (90) ne change pas. L'IA,
-   qui lit ce seuil pour sa marge de prudence fiscale, suit.
+3. **Révolte** (`data/rules/population.json`) : après **2 saisons** (3 avant) au-delà de 75 de
+   mécontentement moyen. Les seuils (75, et 90 pour le passage aux rebelles) ne changent pas.
+4. Sondes recalibrées : `m3_grid_ai::fifty_turns_on_eight_seeds_stay_in_the_c7a_band`, plancher des
+   sièges par tour 1,5 → 1,4 (la pondération de l'IA les baisse de 10 %) ;
+   `cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses`, graine 7 → 4 (la graine 7
+   ne tendait plus d'embuscade).
 
 ## Mesures (`balance_probe campaign 200`, normale, graines 1-16)
 | Variante | Révoltes / partie | Guerre FR-EN | Banqueroutes / fac. / déc. | Impôt Haut |
@@ -35,12 +38,21 @@ Suivi : `docs/wip/rs-b-order.md`. Prolonge l'ADR 0082 (carte densifiée, `provin
 | + pondérations | 2,8 | 69 % | 0,10 | 32 % |
 | + 2 saisons | 4,8 | 69 % | 0,10 | 33 % |
 | + 2 saisons, seuil 72 | 11,1 | 69 % | 0,08 | 30 % |
-| **+ 2 saisons, seuil 74 (retenu)** | **7,8** | 69 % | 0,13 | 31 % |
+| + 2 saisons, seuil 74 | 7,8 | 69 % | 0,13 | 31 % |
+| **+ 2 saisons, seuil 75 (retenu)** | **4,8** | 69 % | 0,10 | 33 % |
 
-`century_probe` 464 tours par niveau : voir `docs/wip/rs-b-order.md`.
+`century_probe` 464 tours, normale, graines 1-10 (critère EQ6 : guerre FR-EN 55-75 %) :
+| Variante | Guerre FR-EN moy. [min-max] | Graines dans 55-75 | Révoltes / 200 t. |
+|---|---|---|---|
+| sans RS-B | 68 % [61-73] | 10/10 | 3,0 |
+| RS-B, 2 saisons, seuil 74 | 73 % [67-78] | 6/10 | 7,3 |
+| **RS-B, 2 saisons, seuil 75 (retenu)** | **69 % [55-75]** | **9/10** | **5,9** |
+Les autres niveaux sont dans `docs/wip/rs-b-order.md`.
 
 ## Conséquences
-- Les révoltes reviennent au milieu de la bande 4-10 ; le seuil est très sensible (72 donne 11).
+- Les révoltes reviennent dans la bande 4-10 (4,8 sur 200 tours en normale, 5,9 sur le siècle), en
+  bas de bande : le seuil est très sensible (74 donne 7,8, 72 donne 11) mais 74 pousse la guerre
+  FR-EN au-delà de 75 % sur 4 graines sur 10 (plus de révoltes affaiblissent le royaume attaqué).
 - Une révolte est plus rapide à déclencher : le joueur a deux saisons pour réagir au lieu de trois
   (codex `cdx_jeu_ordre_public` mis à jour ; l'UI lit les valeurs dans les données).
 - Les garnisons des châteaux et villes apaisent moins la province qu'avant : tenir l'ordre passe par
