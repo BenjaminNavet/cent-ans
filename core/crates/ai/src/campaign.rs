@@ -509,6 +509,12 @@ fn plan_turn_in(
                 .map_or(0.0, |anchor| ctx.threat_at(anchor))
         },
     ));
+    // TW2-T5: ranks of the armies spent on traditions.
+    orders.extend(crate::traditions::plan_traditions(
+        ctx.state,
+        ctx.data,
+        ctx.faction,
+    ));
     plan_armies(&ctx, &mut orders);
     orders
 }
@@ -1478,6 +1484,20 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
             _ => None,
         })
         .collect();
+    // Armies losing every unit this turn: gone before any later order.
+    let emptied: BTreeSet<&ArmyId> = disbanding
+        .iter()
+        .filter(|army| {
+            let dismissed = orders
+                .iter()
+                .filter(|o| matches!(o, Order::DisbandUnit { army: Some(a), .. } if a == *army))
+                .count();
+            state
+                .armies
+                .get(*army)
+                .is_some_and(|a| dismissed >= a.units.len())
+        })
+        .collect();
 
     // PB3f: the route tables the loop below asks for, computed ahead on
     // the planner's pool (a memo of the grid planner: same tables).
@@ -1492,7 +1512,10 @@ fn plan_armies(ctx: &Context, orders: &mut Vec<Order>) {
         .collect();
     ctx.grid.prefetch_tables(ctx.mode, &table_keys);
 
-    for (army_id, _) in armies.iter().filter(|(id, _)| !merged.contains(id)) {
+    for (army_id, _) in armies
+        .iter()
+        .filter(|(id, _)| !merged.contains(id) && !emptied.contains(id))
+    {
         let army = &state.armies[army_id];
         // EQ5: standing without right of passage in the lands of a realm at
         // peace (after a peace, or in a place of its own inside a foreign

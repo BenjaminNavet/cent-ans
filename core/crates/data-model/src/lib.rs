@@ -39,6 +39,10 @@ pub use entities::ai_doctrine::{AiDoctrines, Doctrine};
 pub use entities::ai_grid::{
     AiAmbush, AiEncounters, AiEntrenched, AiForcedMarch, AiGrid, AiPostures,
 };
+pub use entities::army_traditions::{
+    ArmyExperienceRules, ArmyTradition, ArmyTraditionRules, BranchWeights, TraditionAiWeights,
+    TraditionBranch, TraditionBranchDef, TraditionEffects,
+};
 pub use entities::auto_resolve::{
     AutoResolveRules, AutoResolveWeather, TerrainEffects, WeatherChances,
 };
