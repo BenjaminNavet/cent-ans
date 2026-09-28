@@ -140,7 +140,7 @@ impl CampaignState {
     }
 
     /// Men of [`CampaignState::province_garrison_strength`], each place weighing
-    /// its kind's `province_effect_percent` (lot RS-B, ADR 0098: the garrison
+    /// its kind's `province_effect_percent` (lot RS-B, ADR 0100: the garrison
     /// that keeps a province in order is the city's; the dense map's castles and
     /// towns count like their buildings, for half).
     pub fn weighted_garrison_strength(&self, data: &GameData, province: &ProvinceId) -> u32 {

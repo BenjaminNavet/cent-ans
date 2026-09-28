@@ -1,4 +1,4 @@
-//! Lot RS-B (ADR 0098): the economy constants come from `data/rules/economy.json`,
+//! Lot RS-B (ADR 0100): the economy constants come from `data/rules/economy.json`,
 //! and the garrison that keeps a province in order and its plague resistance weigh
 //! each place's kind `province_effect_percent`, like the province-wide building
 //! effects of lot DC3.

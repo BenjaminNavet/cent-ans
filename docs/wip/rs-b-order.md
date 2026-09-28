@@ -1,6 +1,6 @@
 # RS-B — économie et ordre public (cœur)
 
-Branche `feat/rs-b-order` (worktree d'agent). Orchestration : `docs/wip/restes.md`. ADR réservé : 0098.
+Branche `feat/rs-b-order` (worktree d'agent). Orchestration : `docs/wip/restes.md`. ADR : 0100 (0098 pris par FE).
 Cible cargo privée : `core/target-rs-b` (à supprimer en fin de lot).
 
 ## État
@@ -34,4 +34,4 @@ le compte de révoltes de façon mesurable.
 Retenu : `revolt_seasons` 2, `revolt_unrest_threshold` 74 (population.json + défauts Rust + codex
 `cdx_jeu_ordre_public`). En cours : `century_probe` 4 niveaux sur ces données (`out/final`) et sonde
 m3 release (1er essai : trésor France dans la bande, échec sur « sieges per turn », valeur à relire).
-Puis ADR 0098, fusion de main, tests complets, suppression de `core/target-rs-b`.
+Puis ADR 0100 (écrit), fusion de main, tests complets, suppression de `core/target-rs-b`.

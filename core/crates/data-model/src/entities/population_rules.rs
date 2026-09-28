@@ -84,12 +84,12 @@ fn default_disorder_max() -> f64 {
     20.0
 }
 
-/// RS-B (ADR 0098): 75 before.
+/// RS-B (ADR 0100): 75 before.
 fn default_revolt_threshold() -> f64 {
     74.0
 }
 
-/// RS-B (ADR 0098): 3 before.
+/// RS-B (ADR 0100): 3 before.
 fn default_revolt_seasons() -> u32 {
     2
 }
