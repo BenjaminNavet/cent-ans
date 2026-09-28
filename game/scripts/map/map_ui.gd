@@ -992,6 +992,10 @@ func _setup_zones() -> void:
 	UiZones.put(UiZones.Zone.MODAL, save_load_dialog)
 
 
+## P2g : méta des panneaux réclamés par `claim_modal_panel` (placés par la carte).
+const _SCREEN_ANCHORED := &"map_ui_screen_anchored"
+
+
 ## P2g : `panel` rejoint la zone `MODAL` de `UiLayout` **sans changer de place ni de taille** :
 ## ses ancres, pensées pour un parent plein écran, sont converties au repère de la zone
 ## (`a' = (a - zone.x) / zone.largeur`, décalages en pixels inchangés), ce qui donne le même
@@ -1013,14 +1017,14 @@ func claim_modal_panel(panel: Control) -> void:
 		panel.set_offset(sides[i], float(offsets[i]))
 	panel.grow_horizontal = grow[0]
 	panel.grow_vertical = grow[1]
+	panel.set_meta(_SCREEN_ANCHORED, true)
 
 
-## P2g : panneau placé par la carte (enfant direct, ou réclamé dans la zone `MODAL`) ; les
-## occupants des autres zones (chronique, registre dans `SIDE_PANEL`) sont placés par leur zone.
+## P2g : panneau placé par la carte (enfant direct, ou réclamé par `claim_modal_panel`) ; les
+## autres occupants de zone (chronique et registre dans `SIDE_PANEL`, Codex centré dans `MODAL`)
+## sont placés par leur zone.
 func _placed_by_map(panel: Control) -> bool:
-	if panel.get_parent() == self:
-		return true
-	return panel.has_meta(UiZones.ZONE_META) and int(panel.get_meta(UiZones.ZONE_META)) == UiZones.Zone.MODAL
+	return panel.get_parent() == self or panel.has_meta(_SCREEN_ANCHORED)
 
 
 # --- Pile des panneaux (audit A3, lot U1) ------------------------------------------------
