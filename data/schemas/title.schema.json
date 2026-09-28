@@ -50,7 +50,14 @@
               "faction": { "$ref": "common.schema.json#/$defs/faction_id" }
             },
             "required": ["kind"],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "oneOf": [
+              { "properties": { "kind": { "const": "hold_title" } }, "required": ["title"], "not": { "anyOf": [{ "required": ["provinces"] }, { "required": ["faction"] }] } },
+              { "properties": { "kind": { "const": "hold_provinces" } }, "required": ["provinces"], "not": { "anyOf": [{ "required": ["title"] }, { "required": ["faction"] }] } },
+              { "properties": { "kind": { "const": "be_independent" } }, "not": { "anyOf": [{ "required": ["title"] }, { "required": ["provinces"] }, { "required": ["faction"] }] } },
+              { "properties": { "kind": { "const": "be_liege_of" } }, "required": ["faction"], "not": { "anyOf": [{ "required": ["title"] }, { "required": ["provinces"] }] } },
+              { "properties": { "kind": { "const": "hold_crown" } }, "required": ["title"], "not": { "anyOf": [{ "required": ["provinces"] }, { "required": ["faction"] }] } }
+            ]
           }
         },
         "required": ["id", "title", "description", "condition"],
