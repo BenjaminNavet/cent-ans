@@ -130,8 +130,15 @@ attesté surtout à partir de 1338).
     ne s'affaiblit pas). Cause probable : l'ajout de provinces/factions déplace en aval le flux
     RNG déterministe (positions d'armées IA, génération de personnages), sans rapport avec une
     règle de jeu que j'aurais modifiée. À trancher par F5 (IA féodale) / l'intégration finale.
-- Re-run de `cargo test --no-fail-fast` après corrections : en cours (voir rapport final).
+- Correction supplémentaire trouvée au deuxième passage : `state.armies().len()` figé à 35
+  (même test `new_1337_matches_game_data`, deuxième assertion) → 60 (une armée principale par
+  faction jouable, `fac_rebels` virtuelle exclue). Corrigée.
+- `cargo fmt --all` et `cargo clippy --all-targets -- -D warnings` : verts.
+- Deuxième `cargo test --no-fail-fast` complet (arrière-plan) : exit 101, exactement les mêmes
+  3 binaires en échec que le premier passage (`cv3_ai_stances`, `campaign`, `m4`) — mais un
+  rerun ciblé `-p sim-campaign --test campaign` APRÈS le fix `armies().len()` est vert (20/20,
+  exit 0) : le run complet avait démarré avant ce dernier commit. État final réel : seuls les
+  deux échecs de trajectoire attendus subsistent (`cv3_ai_stances::the_ai_never_gives_a_stance_order_the_core_refuses`,
+  `m4::a_minor_ruler_opens_a_regency`), non corrigés, signalés comme demandé.
 
-## Prochaine étape
-Rapport final une fois le deuxième `cargo test` confirmé (seuls les deux échecs de trajectoire
-attendus doivent rester).
+## État : TERMINÉ (rapport final envoyé)
