@@ -129,6 +129,30 @@ func _run() -> void:
 	_check((store._tiles[1] as Dictionary).size() <= 2, "LRU bounded: %d" % (store._tiles[1] as Dictionary).size())
 	_check(store.load_sync(1, 40, 40) == null, "missing tile")
 
+	# 2b. Cache dans le cadre de la pyramide (ADR 0115, `root_origin_tiles` [0, 5]) : index et points
+	# en coordonnées monde (+5 × 256 = +1280 en y, +20 tuiles E2), fichiers en coordonnées de cache.
+	var shifted_dir := ProjectSettings.globalize_path(TEST_DIR + "_origin")
+	DirAccess.make_dir_recursive_absolute(shifted_dir.path_join("pyramid/hydro_fine/E2"))
+	_write(shifted_dir.path_join("pyramid/hydro_fine/E2/32_29.bin"), river_bytes)
+	_write_json(shifted_dir.path_join("rivers_fine.json"), {"format": "CAFV", "dir": "pyramid/hydro_fine", "pattern": "E2/{col}_{row}.bin", "tiles": [{"col": 32, "row": 29}]})
+	_write_json(shifted_dir.path_join("relief_pyramid.json"), {"root_origin_tiles": [0, 5]})
+	var shifted := FineGeoStore.new()
+	_check(shifted.load_from(shifted_dir), "shifted store not available")
+	_check(shifted.origin_tiles == Vector2i(0, 20), "E2 origin %s" % shifted.origin_tiles)
+	_check(shifted.has_tile(1, 32, 49) and not shifted.has_tile(1, 32, 29), "shifted index in world tiles")
+	_check(shifted.tile_path(1, 32, 49).ends_with("E2/32_29.bin"), "shifted path in cache tiles: %s" % shifted.tile_path(1, 32, 49))
+	var moved := shifted.load_sync(1, 32, 49)
+	if _check(moved != null, "shifted tile not loaded"):
+		_check(moved.row == 49 and moved.col == 32, "shifted header %d, %d" % [moved.col, moved.row])
+		_check(is_equal_approx(moved.x[0], 2050.0) and is_equal_approx(moved.y[0], 1890.0 + 1280.0), "shifted points %s, %s" % [moved.x[0], moved.y[0]])
+		_check(moved.line_bounds[0].is_equal_approx(Vector4(2050, 3170, 2110, 3170)), "shifted bounds %s" % moved.line_bounds[0])
+		_check(FineGeoStore.tile_rect(32, 49).has_point(Vector2(moved.x[1], moved.y[1])), "shifted points inside their world tile")
+	(shifted._tiles[1] as Dictionary).clear()
+	shifted.request(1, 32, 49)
+	shifted.poll(true)
+	var threaded := shifted.get_tile(1, 32, 49)
+	_check(threaded != null and is_equal_approx(threaded.y[0], 3170.0), "threaded shifted load")
+
 	# 3. Lit creusé : page E4 plate à 50 m contenant le fleuve (tuile E4 (131, 118) :
 	# x ∈ [2096, 2112), y ∈ [1888, 1904) depuis SZ2b, ADR 0086).
 	store.max_cached_tiles = 64
@@ -297,8 +321,8 @@ func _test_real_cache() -> void:
 	if not store.load_from(map_dir) or not store.available(1):
 		print("zg5b_fine_geo_test: no ZG5a cache, real-data checks skipped")
 		return
-	# Rouen ≈ (2097, 1819) : tuile E2 (32, 28).
-	var tile := store.load_sync(1, 32, 28)
+	# Rouen ≈ (2097, 3099) en unités monde (1819 + 1280 dans le cadre du cache) : tuile E2 (32, 48).
+	var tile := store.load_sync(1, 32, 28 + store.origin_tiles.y)
 	if not _check(tile != null and tile.lines() > 0, "Rouen tile missing"):
 		return
 	var seine := 0
