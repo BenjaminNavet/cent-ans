@@ -39,7 +39,7 @@
    "url": "https://fr.wikipedia.org/wiki/Remparts_d'Avignon",
    "license": "CC BY-SA 4.0 (faits seulement)",
    "extracted": false,
-   "use": "Enceinte de 1234-1237 (achevée en 1248) et son tracé par les rues des Trois-Colombes, Campane, Philonarde, Lices, Henri-Fabre, Joseph-Vernet, Grande-Fusterie ; remparts de 1355-1370/1377, 4 330 m, 8 m, fossé de 4 m alimenté par la Sorgue et la Durançole."
+   "use": "Enceinte de 1234-1237 (achevée en 1248) et son tracé par les rues des Trois-Colombes, Campane, Philonarde, Lices, Henri-Fabre, Joseph-Vernet, Grande-Fusterie ; remparts de 1357-1373 (Serdon 2021), 4 330 m, 8 m, fossé de 4 m alimenté par la Sorgue et la Durançole ; noms anciens des portes ; porte de la Ligne déplacée en 1757 ; porte Saint-Lazare rebâtie vers 1364."
   },
   {
    "title": "Portes et poternes, des liens symboliques entre intramuros et extramuros ; Les remparts dans l'histoire urbaine d'Avignon",
@@ -101,7 +101,7 @@
    "url": "https://pop.culture.gouv.fr/notice/merimee/IA30001059",
    "license": "Licence Ouverte (faits seulement)",
    "extracted": false,
-   "use": "Chapelle d'Arnaud de Via consacrée en 1333, collégiale en 1336, cloître 1350, clocher 1362."
+   "use": "Chapelle d'Arnaud de Via consacrée le 1er juin 1333, porche est autorisé en 1334, cloître et réorientation de l'église dès 1336, « deuxième clocher » non daté."
   },
   {
    "title": "Fort Saint-André (Villeneuve-lès-Avignon)",
@@ -129,6 +129,57 @@
    "license": "CC BY-SA 4.0 / droits réservés (faits seulement)",
    "extracted": false,
    "use": "Percées du XIXe s. exclues des rues : rue de la République (1856-1867), rue Thiers, cours Jean-Jaurès, place Pie, boulevards."
+  },
+  {
+   "title": "Le palais des papes d'Avignon : structures défensives et références symboliques, dans P. Boucheron et J. Chiffoleau (dir.), Les Palais dans la ville",
+   "author": "Jean-Michel Poisson (Presses universitaires de Lyon, OpenEdition Books)",
+   "date": "2004",
+   "url": "https://books.openedition.org/pul/19345",
+   "license": "OpenEdition (droits réservés ; faits seulement)",
+   "extracted": false,
+   "use": "Tours du palais : Anges (1335, 17,50 m de côté, 46 m, murs de 3 m, front est vers le sud), Trouillas (1341-1345, 52 m, extrémité nord), Campane (1339, angle nord-ouest du palais Vieux), Saint-Laurent (1353, angle sud), Saint-Jean (1338)."
+  },
+  {
+   "title": "Avignon, palais des Papes : plancher de la tour de la Campane",
+   "author": "Archeodunum",
+   "url": "https://www.archeodunum.com/Notice_site/avignon-387/",
+   "license": "Droits réservés (faits seulement)",
+   "extracted": false,
+   "use": "Tour de la Campane : angle nord-ouest du palais, à côté de la cathédrale ; 45 m, murs de 3 m, plan de 14,94 × 12,80 m, cinq niveaux."
+  },
+  {
+   "title": "Pont Saint-Bénezet, ses chapelles Saint-Bénezet et Saint-Nicolas et ses tours d'entrée dites Châtelet et tour Philippe-le-Bel (IA84000918)",
+   "author": "Inventaire général Provence-Alpes-Côte d'Azur (S. Delétoille, I. Havard, B. Decrock)",
+   "date": "2012-2016",
+   "url": "https://dossiersinventaire.maregionsud.fr/dossier/IA84000918",
+   "license": "Droits réservés (faits seulement)",
+   "extracted": false,
+   "use": "Pont de 1177-1185, 920 m, 4 m, 23 arches ; chapelle de 1184 dans la troisième pile ; travées de 32,5 m, piles de 7,5-8,1 m ; Châtelet à partir de 1414 ; tour Philippe-le-Bel 1293-1307, 27 m, tour de guet 7 m plus haute."
+  },
+  {
+   "title": "Chapelle des Templiers d'Avignon ; Collégiale Notre-Dame de Villeneuve-lès-Avignon ; Petit Palais (Avignon) ; Cathédrale Notre-Dame-des-Doms",
+   "author": "Wikipédia (FR)",
+   "date": "2026",
+   "url": "https://fr.wikipedia.org/wiki/Chapelle_des_Templiers_d%27Avignon",
+   "license": "CC BY-SA 4.0 (faits seulement)",
+   "extracted": false,
+   "use": "Chapelle 1273-1281, 23,80 × 8 m, Hospitaliers vers 1330 ; tour-beffroi de la collégiale en 1362 à l'est ; livrée de Frédol (1317), achetée par Arnaud de Via (1323) puis Benoît XII (5 juin 1336) ; clocher de Notre-Dame-des-Doms écroulé le 27 janvier 1405."
+  },
+  {
+   "title": "Rue Victor Hugo (couvent des Dominicains)",
+   "author": "Avignon cité millénaire",
+   "url": "https://www.avignoncitemillenaire.com/rue-victor-hugo",
+   "license": "Droits réservés (faits seulement)",
+   "extracted": false,
+   "use": "Couvent des Dominicains le long de la rue Victor-Hugo et de la rue Saint-André ; église 1312-1336, neuf travées, dix-huit chapelles ; démolition jusqu'en 1852."
+  },
+  {
+   "title": "Fort Saint-André, fiche de visite",
+   "author": "Centre des monuments nationaux",
+   "url": "https://www.fort-saint-andre.fr/",
+   "license": "Droits réservés (faits seulement)",
+   "extracted": false,
+   "use": "Fort décidé et bâti dans les années 1360 sous Jean le Bon ; acte de 1362."
   }
  ],
  "plan": {
@@ -547,7 +598,7 @@
      "height_m": 14
     }
    ],
-   "note": "Rebâtie à partir de 1234 (achevée en 1248) 30-40 m en avant du mur rasé après le siège de 1226. Tracé le long des rues qui le conservent (OSM) : Grande-Fusterie, Joseph-Vernet, Henri-Fabre, Lices, Philonarde, Campane, Trois-Colombes (Wikipédia) ; le raccord Philonarde-Campane suit la rue Paul-Saïn (probable, non cité). Polyligne ouverte : le front nord (rocher des Doms, rive du Rhône entre la Grande-Fusterie et le rocher) n'est pas tracé faute de source. Portails placés au débouché des rues qui portent leur nom (Matheron, Magnanen, Boquier, Bienson, porte Évêque) ; Portail Peint au carrefour Philonarde-Bonneterie-Lices-Teinturiers. Onze portails d'après les sources : les autres (dont ceux du Rhône) ne sont ni nommés ni placés. Hauteur, épaisseur, tours (tours à deux tours dites « bisturri » aux portails) et fossé (béal de la Sorgue, Rolland 1989) restitués. Les portails subsistent jusqu'au XVIIIe s. : pas de date de fin."
+   "note": "Rebâtie de 1234 à 1237 (achevée en 1248 ; Maynègre 1991, cité par Wikipédia) 30-40 m en avant du mur rasé après le siège de 1226. Tracé le long des rues qui le conservent (OSM) : Grande-Fusterie, Joseph-Vernet, Henri-Fabre, Lices, Philonarde, Campane, Trois-Colombes (Wikipédia) ; le raccord Philonarde-Campane suit la rue Paul-Saïn (probable, non cité). Polyligne ouverte : le front nord (rocher des Doms, rive du Rhône entre la Grande-Fusterie et le rocher) n'est pas tracé faute de source. Portails placés au débouché des rues qui portent leur nom (Matheron, Magnanen, Boquier, Bienson, porte Évêque) ; Portail Peint au carrefour Philonarde-Bonneterie-Lices-Teinturiers. Onze portails d'après les sources : les autres (dont ceux du Rhône) ne sont ni nommés ni placés. Hauteur, épaisseur, tours (tours à deux tours dites « bisturri » aux portails) et fossé (béal de la Sorgue, Rolland 1989) restitués. Les portails subsistent jusqu'au XVIIIe s. : pas de date de fin. Le Portail Magnanen est celui du mur du XIIIe s. (rue du Portail-Magnanen) : la « porte Magnanen » des remparts est une percée de 1902."
   },
   {
    "id": "remparts",
@@ -604,7 +655,7 @@
      "height_m": 16
     },
     {
-     "name": "Porte de la Ligne",
+     "name": "Porte Aurose (de la Ligne)",
      "at": [364, 271],
      "kind": "gate",
      "height_m": 15
@@ -634,14 +685,14 @@
      "height_m": 15
     },
     {
-     "name": "Porte de l'Oulle",
+     "name": "Porte Saint-Jacques (de l'Oulle)",
      "at": [-403, -26],
      "kind": "gate",
      "height_m": 16
     }
    ],
    "from_year": 1357,
-   "note": "Remparts actuels (4 330 m, 8 m, 35-39 tours carrées ouvertes à la gorge, fossé de 4 m de profondeur alimenté par la Sorgue et la Durançole) : travaux engagés par Clément VI (1349) et Innocent VI (1355), gros œuvre de 1357 à 1370-1377 (Urbain V, Grégoire XI). Date retenue : 1357. Anneau tiré de la relation OSM « Remparts d'Avignon » (segments et tours conservés), le tronçon du rocher des Doms et celui de la porte du Rhône joints en ligne droite. Sept portes de la fin du XIVe s. (Ville d'Avignon) aux positions OSM ; la porte Saint-Roch actuelle date de 1865, la médiévale est placée au même endroit (hypothèse). Largeur du fossé restituée."
+   "note": "Remparts actuels (4 330 m, 8 m, tours carrées ouvertes à la gorge, fossé de 4 m de profondeur alimenté par la Sorgue et la Durançole) : travaux engagés par Clément VI (1349) et Innocent VI (1355), élevés de 1357 à 1373 (V. Serdon, Moyen Âge 125, 2021, cité par Wikipédia). Date retenue : 1357. La porte Saint-Lazare, emportée par la crue de la Durance de 1358, est rebâtie vers 1364 sous Urbain V avec le front qui va jusqu'au rocher des Doms (Viollet-le-Duc). Nombre de portes et de tours discordant : 12 portes et 36 tours (Serdon) ou 7 portes, 35 grandes tours et 50 petites (Maynègre) ; sept portes figurées (Ville d'Avignon), noms du XIVe s. quand ils sont datés (porte Saint-Jacques = de l'Oulle, porte Aurose = de la Ligne). Anneau tiré de la relation OSM « Remparts d'Avignon », le tronçon du rocher des Doms et celui de la porte du Rhône joints en ligne droite. Portes aux positions OSM : la porte de la Ligne a été déplacée d'une centaine de mètres en 1757 (position médiévale inconnue) ; la porte Saint-Roch actuelle date de 1865, la médiévale (portail des Miracles, porte de Champfleury) est placée au même endroit (hypothèse). Espacement des tours et largeur du fossé restitués."
   }
  ],
  "streets": [
@@ -6349,7 +6400,7 @@
    "arches": 8,
    "chapel_at": 0.22,
    "certainty": "probable",
-   "note": "Pont bâti de 1177 à 1185 (22 arches, ≈ 920 m, tablier de 4 m), refait en 1234-1237. Première travée : axe des quatre arches conservées (OSM), prolongé jusqu'à l'île ; chapelle Saint-Bénézet sur la troisième pile, sous la chapelle Saint-Nicolas. Point de coude et partage des arches (8 + 14) restitués. Pas de châtelet côté Avignon figuré en 1340 (le châtelet actuel relève des remparts)."
+   "note": "Pont bâti par les Frères pontifes de 1177 à 1185 environ, ≈ 920 m, tablier de 4 m, détruit en 1226 et rebâti en pierre (1234-1237 selon Wikipédia) ; chapelle aménagée en 1184 dans la troisième pile en venant d'Avignon, chapelle Saint-Nicolas au-dessus ; arches d'environ 32,5 m, piles de 7,5 à 8,1 m (Inventaire PACA, IA84000918). 22 arches (Wikipédia) ou 23 (Inventaire) : 22 gardées. Première travée : axe des quatre arches conservées (OSM), prolongé jusqu'à l'île. Point de coude et partage des arches (8 + 14) restitués. Pas de châtelet côté Avignon en 1340 (élevé à partir de 1414, Inventaire)."
   },
   {
    "id": "pont_saint_benezet_ouest",
@@ -6395,27 +6446,27 @@
    "from_year": 1335,
    "certainty": "probable",
    "params": {
-    "size": 18,
+    "size": 17.5,
     "height": 46,
     "top": "turrets"
    },
-   "description": "Tour-donjon de Benoît XII (1335-1337), 46 m, logis du pape, sur le front est. Section et position restituées (saillie du contour OSM sur le front est)."
+   "description": "Tour-donjon de Benoît XII (1335-1337), chambre du pape et trésor, sur le front est, « très en avant vers le sud » : carré de 17,50 m, 46 m de haut, murs de 3 m (J.-M. Poisson, 2004). Position restituée sur la saillie du contour OSM du front est."
   },
   {
    "id": "tour_campane",
    "name": "Tour de la Campane",
    "model": "belfry",
-   "at": [70, 21],
+   "at": [-4, 52],
    "angle_deg": 72,
    "clear_m": 3,
    "from_year": 1340,
-   "certainty": "hypothetical",
+   "certainty": "probable",
    "params": {
-    "size": 12,
-    "height": 40,
+    "size": 14,
+    "height": 45,
     "top": "turrets"
    },
-   "description": "Tour de la cloche du palais Vieux, commencée en août 1339, achevée en juin 1340 (Wikipédia). Position, section et hauteur restituées."
+   "description": "Tour de la cloche du palais Vieux, commencée en août 1339 (Wikipédia ; J.-M. Poisson, 2004 : 1339), achevée en 1340 (date retenue, à recouper). Angle nord-ouest du palais, à côté de la cathédrale : 45 m, murs de 3 m, plan de 14,94 × 12,80 m, cinq niveaux (Archeodunum, étude du plancher). Placée dans l'angle nord-ouest du contour OSM ; section carrée de 14 m (gabarit)."
   },
   {
    "id": "tour_trouillas",
@@ -6431,7 +6482,7 @@
     "height": 52,
     "top": "turrets"
    },
-   "description": "Tour de 52 m à l'angle nord-est du palais Vieux, achevée en mars 1346, incendiée en 1354. Section restituée ; placée à l'angle nord-est du contour OSM."
+   "description": "Tour de 52 m (murs de 4,50 m) à l'extrémité nord du palais, vers le rocher des Doms (J.-M. Poisson, 2004) : commencée en août 1341, achevée en mars 1346, incendiée en 1354. Section restituée ; placée à l'angle nord-est du contour OSM."
   },
   {
    "id": "palais_neuf",
@@ -6482,7 +6533,7 @@
     "height": 38,
     "top": "turrets"
    },
-   "description": "Tour bâtie sous Innocent VI (1352-1356 selon Wikipédia) ; date retenue : fin du pontificat cité. Placée sur la saillie sud du contour OSM, section et hauteur restituées."
+   "description": "Tour de l'angle sud du palais, bâtie sous Innocent VI de 1353 à 1356 (Wikipédia ; J.-M. Poisson, 2004 : 1353) ; date retenue : achèvement. Placée sur la saillie sud du contour OSM, section et hauteur restituées."
   },
   {
    "id": "notre_dame_des_doms",
@@ -6690,23 +6741,23 @@
     "height_m": 20,
     "apse": "flat"
    },
-   "description": "Couvent fondé en 1224-1226 au bord du Rhône (ancienne île de l'Estel) ; église achevée en 1312-1336, la plus vaste de la ville (trois nefs, quatorze chapelles), canonisation de Thomas d'Aquin en 1323 ; sacristie 1345, clocher 1356 ; démoli au XIXe s. (rue Victor-Hugo). Emprise, axe et hauteur restitués le long de la rue d'Annanelle."
+   "description": "Frères prêcheurs arrivés en 1224 ; église achevée de 1312 à 1336 (cardinal Guillaume de Peyre de Godin), la plus vaste de la ville (trois nefs, neuf travées, dix-huit chapelles) ; canonisation de Thomas d'Aquin en 1323 ; sacristie refaite en 1345, cloître achevé vers 1348, clocher 1356 ; démoli de 1840 à 1852 (Avignon cité millénaire, rue Victor-Hugo ; Liste des églises d'Avignon). Le couvent bordait l'actuelle rue Victor-Hugo (ancienne rue Saint-Dominique) et la rue Saint-André ; emprise, axe et hauteur de l'église restitués."
   },
   {
    "id": "templiers",
-   "name": "Chapelle des Templiers (Saint-Jean-le-Vieux des Hospitaliers après 1312)",
+   "name": "Chapelle des Templiers (Notre-Dame-de-Bethléem, aux Hospitaliers vers 1330)",
    "model": "church",
    "at": [-270, -236],
    "angle_deg": 0,
    "clear_m": 6,
    "certainty": "probable",
    "params": {
-    "length_m": 30,
-    "width_m": 12,
+    "length_m": 24,
+    "width_m": 8,
     "height_m": 12,
     "apse": "flat"
    },
-   "description": "Chapelle de la commanderie du Temple (fondée en 1256, bâtie vers 1305), rue Saint-Agricol ; aux Hospitaliers après la suppression du Temple. Position OSM ; axe et gabarit restitués."
+   "description": "Templiers attestés à Avignon dès 1174 ; chapelle bâtie de 1273 à 1281 (citée sous le nom de Notre-Dame-de-Bethléem en 1281) ; passée aux Hospitaliers vers 1330, confirmé par Clément VI en 1342. Nef rectangulaire de 23,80 × 8 m, quatre travées, chevet plat (Wikipédia, Chapelle des Templiers d'Avignon). Position OSM, rue Saint-Agricol ; hauteur restituée."
   },
   {
    "id": "saint_laurent",
@@ -6772,7 +6823,7 @@
     "height": 20,
     "top": "turrets"
    },
-   "description": "Tour royale à la tête du pont côté Villeneuve, après le traité de 1292 ; premier étage achevé en 1303 par Randolphe de Mornel. Emprise OSM (17 × 16 m) ; hauteur de cet état restituée."
+   "description": "Tour royale à la tête du pont côté Villeneuve, décidée par le paréage de 1292, construite de 1293 à 1307 (Inventaire PACA, IA84000918) ; premier étage achevé en 1303 par Randolphe de Mornel (Wikipédia). Emprise OSM (17 × 16 m) ; hauteur de cet état restituée."
   },
   {
    "id": "tour_philippe_le_bel_1360",
@@ -6785,10 +6836,10 @@
    "certainty": "probable",
    "params": {
     "size": 16,
-    "height": 30,
+    "height": 27,
     "top": "turrets"
    },
-   "description": "Tour rehaussée d'un étage gothique vers 1360 contre les routiers. Hauteur restituée."
+   "description": "Tour rehaussée d'un étage gothique vers 1360 contre les routiers (Wikipédia) : 27 m aujourd'hui, flanquée au nord d'une tour de guet qui la dépasse de 7 m, non figurée (Inventaire PACA, IA84000918)."
   },
   {
    "id": "fort_saint_andre",
@@ -6817,7 +6868,7 @@
     "tower_radius_m": 5.0,
     "tower_height_m": 14
    },
-   "description": "Enceinte royale du mont Andaon (≈ 750 m), entreprise sous Jean le Bon vers 1362 et achevée par Jean de Louvres sur ordre de Charles V ; porte à tours jumelles, tour des Masques. Contour OSM simplifié ; hauteurs restituées ; la porte jumelle n'est pas figurée à part."
+   "description": "Enceinte royale du mont Andaon (≈ 750 m) : un acte de 1362 prescrit de clore et fortifier le lieu ; travaux des années 1360 sous Jean le Bon, achevés sous Charles V, Jean de Loubières (Jean de Louvres) dernier maître d'œuvre (Wikipédia ; Centre des monuments nationaux) ; porte à tours jumelles, tour des Masques. Contour OSM simplifié ; hauteurs restituées ; la porte jumelle n'est pas figurée à part."
   },
   {
    "id": "abbaye_saint_andre",
@@ -6852,7 +6903,7 @@
     "height_m": 16,
     "apse": "flat"
    },
-   "description": "Chapelle de la livrée du cardinal Arnaud de Via consacrée le 1er juin 1333 par Jean XXII, collégiale en 1336, agrandie ; cloître en 1350. Emprise OSM ; hauteur restituée.",
+   "description": "Chapelle de la livrée du cardinal Arnaud de Via consacrée le 1er juin 1333 par Jean XXII, collégiale fondée le 7 août 1333 ; porche d'entrée à l'est autorisé le 1er avril 1334 ; dès 1336, cloître entre l'église et le logis, église réorientée (chœur à l'est) (POP IA30001059). Emprise OSM ; hauteur restituée.",
    "until_year": 1361
   },
   {
@@ -6862,7 +6913,7 @@
    "at": [-777, 1442],
    "angle_deg": 5,
    "clear_m": 6,
-   "certainty": "probable",
+   "certainty": "hypothetical",
    "params": {
     "length_m": 50,
     "width_m": 18,
@@ -6875,7 +6926,7 @@
      "spire_m": 4
     }
    },
-   "description": "Clocher ajouté en 1362 (POP IA30001059 ; Wikipédia). Place du clocher (ouest) et hauteur restituées.",
+   "description": "Grande tour-beffroi de 1362 à l'extrémité est (Wikipédia, d'après Petit Patrimoine ; la notice POP IA30001059 mentionne un « deuxième clocher » sans date). Le gabarit `church` ne sait placer la tour qu'à l'ouest ou à la croisée : tour figurée à l'ouest (écart connu) ; date et hauteur à recouper.",
    "from_year": 1362
   },
   {

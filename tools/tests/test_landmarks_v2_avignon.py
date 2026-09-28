@@ -38,12 +38,12 @@ def test_walls_1340(city: dict) -> None:
     } <= {g["name"] for g in old["gates"]}
     assert {g["name"] for g in new["gates"]} == {
         "Porte du Rhône",
-        "Porte de l'Oulle",
+        "Porte Saint-Jacques (de l'Oulle)",  # XIVth-c. name (historian review)
         "Porte Saint-Roch",
         "Porte Saint-Michel",
         "Porte Limbert",
         "Porte Saint-Lazare",
-        "Porte de la Ligne",
+        "Porte Aurose (de la Ligne)",  # XIVth-c. name (historian review)
     }
     ramparts_m = landmarks_v2.wall_length({"walls": [new]})
     assert 4000.0 < ramparts_m < 5000.0, ramparts_m  # 4 330 m (Wikipédia)
@@ -59,6 +59,11 @@ def test_palace_phases(city: dict) -> None:
     assert monuments["tour_trouillas"]["from_year"] == 1346
     assert monuments["tour_trouillas"]["params"]["height"] == 52
     assert monuments["tour_des_anges"]["params"]["height"] == 46
+    # Campane: 45 m, north-west corner of the palace next to the cathedral (Archeodunum).
+    campane = monuments["tour_campane"]
+    assert campane["params"]["height"] == 45
+    assert campane["at"][0] < monuments["tour_des_anges"]["at"][0] - 40
+    assert campane["at"][1] > monuments["tour_des_anges"]["at"][1] + 40
     alive = {i for i, m in monuments.items() if _alive(m, 1340)}
     assert {"palais_vieux", "tour_des_anges", "tour_campane"} <= alive
     assert not alive & {
