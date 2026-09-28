@@ -39,6 +39,11 @@
     {
       "faction": "fac_novgorod",
       "status": "vassal"
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "alliance",
+      "note": "Pskov sous protection lituanienne (Alexandre de Tver, prince de Pskov)."
     }
   ],
   "ai_personality": {

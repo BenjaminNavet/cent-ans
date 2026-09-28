@@ -58,6 +58,16 @@
     {
       "faction": "fac_viatka",
       "status": "overlord"
+    },
+    {
+      "faction": "fac_livonian_order",
+      "status": "peace",
+      "note": "Paix commerciale fragile, conflits de frontière en Ingrie et à Pskov."
+    },
+    {
+      "faction": "fac_sweden",
+      "status": "peace",
+      "note": "Traité de Nöteborg (1323) ; guerre de Magnus Eriksson en 1348."
     }
   ],
   "ai_personality": {

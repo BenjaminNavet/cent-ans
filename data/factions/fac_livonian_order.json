@@ -45,6 +45,16 @@
       "faction": "fac_riga_archbishopric",
       "status": "peace",
       "note": "Rivalité ancienne avec l'archevêque pour la suprématie."
+    },
+    {
+      "faction": "fac_lithuania",
+      "status": "war",
+      "note": "Guerre de frontière permanente entre la Livonie et la Lituanie."
+    },
+    {
+      "faction": "fac_novgorod",
+      "status": "peace",
+      "note": "Paix commerciale fragile, conflits de frontière en Ingrie et à Pskov."
     }
   ],
   "ai_personality": {

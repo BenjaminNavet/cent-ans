@@ -55,6 +55,11 @@
       "faction": "fac_galicia_volhynia",
       "status": "peace",
       "note": "Bolesław-Iouri II est le cousin de Casimir ; la Ruthénie rouge attire Cracovie."
+    },
+    {
+      "faction": "fac_teutonic",
+      "status": "truce",
+      "note": "Trêve depuis 1332 ; l'Ordre occupe la Kuyavie et Dobrzyń ; arbitrage de Visegrád (1335), paix de Kalisz en 1343."
     }
   ],
   "claims": [
