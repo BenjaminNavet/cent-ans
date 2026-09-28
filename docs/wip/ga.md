@@ -136,3 +136,10 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
   dédiée, ADR 0105, tests mémoire/smoke/pytest verts. A/B non concluant (machine chargée) : à
   refaire avant fusion dans `feat/ga`. Point ouvert : substitut « prairie fleurie » (`leafy_grass`,
   pas de texture CC0 dédiée chez Poly Haven).
+- 28/09 : GA1 + GA2 fusionnés dans `feat/ga` (1e5f26c6). Planche GA1 des 12 jugée bonne (défauts
+  mineurs : clous du bois et bandes horizontales des plates, à revoir si visibles en jeu). Brutes GA1
+  copiées hors dépôt dans `~/dev/game_raw_assets/ga1/`. A/B GA2 non concluant (charge ≈ 120) : à
+  refaire machine calme. Vague 2 lancée : GA5 (`../game_project-ga5`) ∥ GA4 (`../game_project-ga4`).
+- 28/09 : recherche GA3 : fal.ai `fal-ai/trellis`, 0,02 $/génération, usage commercial des sorties
+  autorisé, sortie GLB ; modèle TRELLIS (Microsoft) sous licence MIT. Bloquant : aucune clé fal.ai
+  dans l'environnement → compte + crédit à créer par le joueur (`FAL_KEY`). Blender présent.
