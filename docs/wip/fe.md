@@ -3,25 +3,25 @@
 Spec : `docs/superpowers/specs/2026-09-28-feodalite-design.md`. Plan : `docs/superpowers/plans/2026-09-28-feodalite.md`.
 ADR : 0098. Worktree orchestrateur : `../game_project-fe` sur `feat/fe`.
 
-## État (pause du 2026-09-28, à la demande du joueur)
-- F0 dans `main` (1dcd6821) : titres, migration (45 titres), `feudal.rs` avec déductions, sauvegarde v7.
-- Vague 1 terminée par les agents, branches : F1 `feat/fe1-deductions` (2fb75fde), F2 `feat/fe2-escalade`
-  (5f2abba4), F3 `feat/fe3-titres` (a86b9152), F4a `feat/fe4a-france` (cddb3c5d). Rapports dans leurs `docs/wip/fe<N>-*.md`.
-- Intégration **en cours** dans `../game_project-fe` (`feat/fe`, pas encore dans `main`) :
-  - fusionnés et commités : F3, F2 (0433b2b2), F4a (52d3a711), schéma d'objectifs resserré, budget à 6 colonnes,
-    8 tests rouges après F4a corrigés (591cef00 ; détail dans `docs/wip/fe-integration-v1.md`).
-  - **fusion de F1 interrompue** : conflits non résolus dans `core/crates/sim-campaign/src/feudal.rs` et
-    `characters.rs` (le reste de F1 est indexé). Reprendre là (ou `git merge --abort` puis refaire).
+## État (2026-09-28, reprise)
+- F0 dans `main` (1dcd6821). Vague 1 entièrement fusionnée dans `feat/fe` (`../game_project-fe`) :
+  F3, F2, F4a, puis F1 (cdad6965) avec réconciliation :
+  - une seule convocation d'ost : `feudal::summon_host` (l'attaquant et le suzerain protecteur convoquent
+    leurs vassaux directs) ; refus → `on_host_refused` envers le suzerain qui convoque ;
+  - `sync_suzerains` appelé à chaque changement de détention (`transfer::refresh_primary`) ; la déshérence
+    suit le suzerain effectif (`effective_liege`, donc les hommages) ; titre supérieur vacant → indépendant ;
+  - mémoire de loyauté F1 alimentée par concession (F3), commise (pairs du félon), succession contestée
+    (prétendant rival) et paix perdue (côté qui cède terres ou tribut). La protection reste un modificateur
+    d'opinion F2 (visible dans l'UI) : les variantes `Protection*` de F1 ont été retirées (double compte) ;
+  - tests F2 : `suzerain` dérivé par `sync_suzerains`, plus d'alignement manuel.
+- `main` (TW2, RS) fusionné dans `feat/fe` (3d634500) : fmt, clippy, 152 binaires de test verts, smoke OK.
+- En cours : agent `feat/fe4a-assets` (`../game_project-fe4a-assets`) pour les 16 échecs pytest dus aux
+  données F4a (colonies, horizon, navgrid, héraldique, front-end, portraits).
 
 ## Reprise
-1. Finir la fusion F1 et réconcilier (voir `docs/wip/fe-integration-v1.md` et le brief ci-dessous) :
-   - une seule convocation d'ost (F1 `rally_vassals` + F2 `summon_host`), refus → `feudal::on_host_refused` (F3) ;
-   - `sync_suzerains` après chaque transfert/concession/vacance/destruction (F3) ; `liege_overrides` (F1)
-     compatibles avec « titre supérieur vacant → indépendant » (F3) ;
-   - mémoire de loyauté F1 alimentée par F2 (protection, défaites) et F3 (concession, commise, prétendant) ;
-   - tests F2 : retirer l'alignement manuel de `suzerain`.
-2. pytest : 16 échecs dus aux données F4a (colonies, horizon, navgrid, héraldique, front-end, portraits), à corriger.
-3. Vérifications complètes (fmt, clippy, cargo test, pytest, build, smoke), ff `main`, puis vague 2 (F4b-F4e, F5).
+1. Fusionner `feat/fe4a-assets` dans `feat/fe`, pytest vert, ff `main`.
+2. Vague 2 (F4b-F4e, F5) depuis `main`. Les artefacts globaux régénérés (navgrid, horizon) se régénèrent
+   à l'intégration, pas dans chaque lot.
 
 ## Points ouverts (à trancher en F5/F8)
 - `ai/tests/g4.rs` (Brabant allié de l'Angleterre) en `#[ignore]` : un vassal peut-il s'allier hors de son suzerain ? (F5)
