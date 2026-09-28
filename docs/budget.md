@@ -79,6 +79,7 @@ Rapprochement (2026-09-24, session 5) : compteur OpenRouter de la nouvelle clé,
 | 2026-09-26 | OpenRouter | DA7c : icônes de trait à l'encre (59 × openai/gpt-5-image-mini) | 2,69 $ | 2,68 $ | 20,56 $ |
 | 2026-09-28 | OpenRouter | CB : icônes des contrôles de bataille à l'encre, sonde (2 × openai/gpt-5-image-mini) | 0,10 $ | 0,09 $ | 20,65 $ |
 | 2026-09-28 | OpenRouter | CB : icônes des contrôles de bataille à l'encre (14 × openai/gpt-5-image-mini) | 0,64 $ | 0,64 $ | 21,29 $ |
+| 2026-09-28 | OpenRouter | RS : icône « Raser » à l'encre (1 × openai/gpt-5-image-mini) | 0,05 $ | 0,05 $ | 21,34 $ |
 
 ## Polish PO (27/09) — 0 $ prévu, enveloppe ≤ 3 $ (ADR 0097)
 
