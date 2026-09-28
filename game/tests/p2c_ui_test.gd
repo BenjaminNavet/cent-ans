@@ -29,6 +29,13 @@ var _sizes: Dictionary = {}
 
 func _init() -> void:
 	await process_frame
+	# Fichier de test et échelle d'interface neutre avant le premier écran (sinon un
+	# `interface/ui_size` du joueur dans `user://settings.cfg` fausse les tailles mesurées —
+	# cause d'échecs vus ailleurs, ex. cb6/po_ui_test).
+	var settings: Node = root.get_node_or_null("/root/Settings")
+	if settings != null:
+		settings.call("use_test_file")
+		settings.call("_apply_ui_scale")
 	_helper = load("res://tests/po_ui_test.gd").new()
 	_helper.set("_tool_patterns", _tool_patterns())
 	await _check_bubbles_and_tooltip()
@@ -175,7 +182,6 @@ func _check_modal_occupant(layout: Node, control: Control, label: String) -> voi
 		if root.size != resolution:
 			print("p2c_ui_test: window cannot be resized here (%s)" % root.size)
 			continue
-		print("DEBUG host=", layout.host(), " zone_rect=", layout.zone_rect(layout.Zone.MODAL), " zone_node_rect=", layout.zone_node(layout.Zone.MODAL).get_global_rect(), " control_parent=", control.get_parent())
 		var view: Vector2 = root.get_visible_rect().size
 		var rect := control.get_global_rect()
 		_check(rect.position.x >= -0.5 and rect.position.y >= -0.5 and rect.end.x <= view.x + 0.5 and rect.end.y <= view.y + 0.5,

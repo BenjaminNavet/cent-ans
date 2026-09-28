@@ -42,18 +42,19 @@ Déjà traité avant ce lot : `codex_window.gd` a ses libellés courts (3e élé
 - [ ] `codex_hub.gd` : titre + `style_tabs` → `UiType` ; fenêtre → `UiZones.Zone.MODAL` (déféré).
 - [ ] `encyclopedia.gd` : tailles → `UiType` (contrôles et BBCode `[font_size=…]`).
 - [ ] `rich_tooltip.gd` : tailles → `UiType.CAPTION`.
-- [~] `game/tests/p2c_ui_test.gd` (C1-C3 sur mes écrans, aides de `po_ui_test.gd` réutilisées sans
+- [x] `game/tests/p2c_ui_test.gd` (C1-C3 sur mes écrans, aides de `po_ui_test.gd` réutilisées sans
       le modifier — instance de son script chargé pour les fonctions `_collect_font_sizes` /
-      `_collect_tool_texts`). C1 et C3 verts (30 textes lus, tailles [14, 17, 26]). C2 en cours :
-      la fenêtre `CodexWindow` autonome déborde de l'écran à 1280×720 et 1920×1080 quand elle est
-      ouverte juste après avoir libéré une carte de campagne dans le même test — position figée à
-      (540, 187) quelle que soit la résolution suivante, alors qu'une fenêtre isolée (sans carte
-      créée avant) se centre bien. Un ajout de 6 `await process_frame` après `map.queue_free()`
-      n'a pas changé le résultat (mêmes chiffres) : sonde de débogage en cours (impression de
-      `UiLayout.host()` / `zone_rect(MODAL)` / parent du contrôle) pour trouver la vraie cause
-      avant de conclure si c'est un artefact de mon test ou un vrai défaut de `UiZones` (hors de
-      mes fichiers si c'est le cas).
-- [ ] `game/tests/p2c_shot.gd` (captures 1280×720 dans `docs/img/po/p2c/`).
+      `_collect_tool_texts`). Vert : C1 OK (30 textes lus), C2 OK, C3 OK (tailles [14, 17, 26]).
+      Cause du débordement C2 trouvée et corrigée : `codex_window.gd::open()` gardait un centrage
+      manuel oublié (`position = ((area - SIZE) / 2.0).floor()` sur tout le viewport), qui
+      écrasait le centrage par ancres posé par `UiZones.put(MODAL, …)` (offsets asymétriques
+      observés en débogage : -171/+809 au lieu de ±490). Retiré ; `UiZones` centre seul désormais.
+      Sécurité ajoutée en tête de `_init()` du test : `Settings.use_test_file()` +
+      `_apply_ui_scale()` avant le premier écran (un `interface/ui_size` laissé dans
+      `user://settings.cfg` fausse sinon les tailles mesurées, cause vue ailleurs sur cb6/po_ui_test).
+- [x] `game/tests/p2c_shot.gd` (captures 1280×720 dans `docs/img/po/p2c/`, réutilise les stages
+      existants `--stage=codex/encyclopedia/tooltips` de `campaign_map.gd`, sur le modèle de
+      `po4_shot.gd`).
 - [ ] `smoke.gd`, tests existants des bulles et du Codex (`tools/tests/test_codex*.py`,
       `game/tests/codex_screenshot.gd`, `encyclopedia_screenshot.gd`).
 - [ ] Merge `main` (déjà à jour, branché dessus), réimport, rapport final.
