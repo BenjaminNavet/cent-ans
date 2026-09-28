@@ -17,10 +17,10 @@
   "suzerain": "fac_golden_horde",
   "primary_title": "tit_mordva",
   "heraldry": {
-    "blazon": "De gueules à trois étoiles d'argent.",
+    "blazon": "De sinople à la roue d'or.",
     "description": "Blason de convention pour les Mordves.",
-    "primary_color": "#B0182B",
-    "secondary_color": "#F5F1E6",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F2C230",
     "uncertain": true,
     "note": "Pas d'héraldique attestée."
   },
