@@ -15,17 +15,23 @@ use serde::{Deserialize, Serialize};
 
 use crate::state::CampaignState;
 
+mod acts;
 mod felony;
 mod inherit;
 mod objectives;
+mod policy;
 mod transfer;
 
+pub use acts::{revolt, switch_allegiance};
 pub use felony::{
     has_forfeiture, on_host_refused, on_revolt, open_felony_towards, settle_forfeitures,
 };
 pub(crate) use inherit::{contested_succession, heir_comes_home, inherit_titles_on_extinction};
 pub(crate) use objectives::resolve_feudal;
 pub use objectives::{generic_victory, objective_status, GenericVictory};
+pub use policy::{
+    install_policy, policy, ArbitrationFn, FeudalPolicy, HostFn, ProtectionFn, PROVISIONAL,
+};
 pub use transfer::{
     conquer_title, grant_title, on_faction_destroyed, vacate_title, Grantee, TitleDemandOutcome,
 };
@@ -531,12 +537,13 @@ pub fn protection_score(
     (score, reason)
 }
 
-/// Likelihood shown for a protection score.
+/// Likelihood shown for a protection score relative to the decision
+/// threshold of the installed [`FeudalPolicy`] (`>= 0`: intervenes).
 pub fn likelihood_of(data: &GameData, score: i32) -> Likelihood {
-    let rules = &data.feudal_rules.escalation.score;
-    if score >= rules.intervene_at + rules.certainty_margin {
+    let margin = (policy().certainty_margin)(data);
+    if score >= margin {
         Likelihood::Likely
-    } else if score < rules.intervene_at - rules.certainty_margin {
+    } else if score < -margin {
         Likelihood::Unlikely
     } else {
         Likelihood::Uncertain
@@ -605,7 +612,7 @@ pub fn war_escalation_preview(
     target: &FactionId,
 ) -> Vec<EscalationStep> {
     if let Some(lord) = common_liege(state, data, attacker, target) {
-        let (verdict, why) = ai_arbitration(state, data, &lord, attacker, target);
+        let (verdict, why) = (policy().arbitration)(state, data, &lord, attacker, target);
         let (likelihood, what) = match &verdict {
             Arbitration::ImposePeace => (Likelihood::Likely, "imposera la paix".to_owned()),
             Arbitration::TakeSide { side } if side == target => (
@@ -641,7 +648,7 @@ pub fn war_escalation_preview(
             });
             break;
         }
-        let (score, why) = protection_score(state, data, &liege, &vassal, attacker);
+        let (score, why) = (policy().protection)(state, data, &liege, &vassal, attacker);
         steps.push(EscalationStep {
             faction: liege.clone(),
             likelihood: likelihood_of(data, score),
@@ -681,7 +688,7 @@ pub(crate) fn escalate_war(
         };
         push_feudal_offer(state, data, target, proposal, text);
     } else {
-        let (verdict, _) = ai_arbitration(state, data, &lord, attacker, target);
+        let (verdict, _) = (policy().arbitration)(state, data, &lord, attacker, target);
         apply_arbitration(state, data, &lord, attacker, target, &verdict);
     }
 }
@@ -716,8 +723,8 @@ pub(crate) fn call_liege(
         push_feudal_offer(state, data, vassal, proposal, text);
         return;
     }
-    let (score, _) = protection_score(state, data, &liege, vassal, aggressor);
-    if score >= data.feudal_rules.escalation.score.intervene_at {
+    let (score, _) = (policy().protection)(state, data, &liege, vassal, aggressor);
+    if score >= 0 {
         intervene(state, data, &liege, vassal, aggressor);
     } else {
         shirk(state, data, &liege, vassal, aggressor);
@@ -818,8 +825,8 @@ pub(crate) fn shirk(
 }
 
 /// `liege` summons the host of its direct vassals against `enemy` (never
-/// its rear vassals). A vassal below `call_to_arms_loyalty` refuses, which
-/// opens a felony case (§ 4.4).
+/// its rear vassals). Whether a vassal answers is [`answers_host`]; a
+/// refusal opens a felony case (§ 4.4).
 pub fn summon_host(
     state: &mut CampaignState,
     data: &GameData,
@@ -831,7 +838,7 @@ pub fn summon_host(
         if &vassal == enemy || state.is_at_war(&vassal, enemy) || state.is_allied(&vassal, enemy) {
             continue;
         }
-        if state.factions[&vassal].loyalty >= data.feudal_rules.call_to_arms_loyalty {
+        if answers_host(state, data, &vassal, liege, enemy) {
             state.start_war(&vassal, enemy);
             let text = format!(
                 "{} répond à l'ost de son suzerain {} contre {}.",
@@ -850,6 +857,22 @@ pub fn summon_host(
             felony::on_host_refused(state, data, &vassal, liege);
         }
     }
+}
+
+/// Does `vassal` answer the host of `liege` against `enemy`? The player's
+/// vassal ties follow `feudal.json:call_to_arms_loyalty`; an AI vassal asks
+/// the installed [`FeudalPolicy`].
+pub fn answers_host(
+    state: &CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+    liege: &FactionId,
+    enemy: &FactionId,
+) -> bool {
+    if vassal == &state.player_faction {
+        return (PROVISIONAL.answers_host)(state, data, vassal, liege, enemy);
+    }
+    (policy().answers_host)(state, data, vassal, liege, enemy)
 }
 
 /// Applies the verdict of `lord` on the private war of `attacker` against

@@ -270,6 +270,22 @@ pub enum Order {
         offer: u32,
         verdict: crate::feudal::Arbitration,
     },
+    /// FE5 (§ 4.4): the liege declares forfeiture against `vassal`, which
+    /// must be under an open felony case.
+    DeclareCommise {
+        vassal: FactionId,
+    },
+    /// FE5 (§ 4.4): grants `title` (not the primary one) to `grantee`.
+    GrantTitle {
+        title: data_model::TitleId,
+        grantee: FactionId,
+    },
+    /// FE5 (§ 4.2): the vassal revolts against its direct suzerain.
+    Revolt,
+    /// FE5 (§ 4.2): pays homage to `lord`, leaving the current suzerain.
+    SwitchAllegiance {
+        lord: FactionId,
+    },
     RequestPapalMediation {
         target: FactionId,
     },
@@ -518,6 +534,8 @@ pub enum OrderError {
     Marriage(#[from] MarriageError),
     #[error(transparent)]
     Diplomacy(#[from] crate::diplomacy::DiplomacyError),
+    #[error(transparent)]
+    Feudal(#[from] crate::feudal::FeudalError),
     #[error(transparent)]
     Research(#[from] ResearchError),
     #[error(transparent)]
@@ -846,6 +864,26 @@ impl CampaignState {
             Order::ArbitratePrivateWar { offer, verdict } => {
                 Ok(self.arbitrate(data, faction, offer, verdict)?)
             }
+            Order::DeclareCommise { vassal } => Ok(crate::feudal::declare_commise(
+                self, data, faction, &vassal,
+            )?),
+            Order::GrantTitle { title, grantee } => {
+                crate::feudal::grant_title(
+                    self,
+                    data,
+                    faction,
+                    &title,
+                    crate::feudal::Grantee::Faction(grantee),
+                )?;
+                Ok(())
+            }
+            Order::Revolt => {
+                crate::feudal::revolt(self, data, faction)?;
+                Ok(())
+            }
+            Order::SwitchAllegiance { lord } => Ok(crate::feudal::switch_allegiance(
+                self, data, faction, &lord,
+            )?),
             Order::RequestPapalMediation { target } => {
                 Ok(self.request_papal_mediation(data, faction, &target)?)
             }
