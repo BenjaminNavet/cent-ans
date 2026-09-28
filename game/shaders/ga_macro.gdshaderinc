@@ -4,24 +4,24 @@
 // en bataille, bruit de valeur procédural sur la carte), les échelles restent propres à chacun.
 
 // Macro-variation de teinte et de luminance, faible amplitude, multipliée à l'albédo.
-// `h` : bruit macro (0..1) de la teinte ; `lum_h` : bruit (0..1) de la luminance.
-// `tint_amp` = 1 et `lum_amp` = 0 : réglage d'origine de GA2 (teinte seule, ±3 %).
-vec3 ga_macro_variation(float h, float lum_h, float tint_amp, float lum_amp) {
-	vec3 tint = vec3(
-		1.0 + (h - 0.5) * 0.06 * tint_amp,
-		1.0 + (h - 0.5) * 0.04 * tint_amp,
-		1.0 - (h - 0.5) * 0.05 * tint_amp
+// `ga_h` : bruit macro (0..1) de la teinte ; `ga_lum_h` : bruit (0..1) de la luminance.
+// `ga_tint_amp` = 1 et `ga_lum_amp` = 0 : réglage d'origine de GA2 (teinte seule, ±3 %).
+vec3 ga_macro_variation(float ga_h, float ga_lum_h, float ga_tint_amp, float ga_lum_amp) {
+	vec3 ga_tint = vec3(
+		1.0 + (ga_h - 0.5) * 0.06 * ga_tint_amp,
+		1.0 + (ga_h - 0.5) * 0.04 * ga_tint_amp,
+		1.0 - (ga_h - 0.5) * 0.05 * ga_tint_amp
 	);
-	return tint * (1.0 + (lum_h - 0.5) * 2.0 * lum_amp);
+	return ga_tint * (1.0 + (ga_lum_h - 0.5) * 2.0 * ga_lum_amp);
 }
 
-// Couleur de l'eau selon la profondeur (m) : haut-fond → palier intermédiaire (`mid_depth_m`)
-// → grand fond (décroissance exponentielle `falloff_m`). `mid_amount` = 0 : deux paliers
+// Couleur de l'eau selon la profondeur (m) : haut-fond → palier intermédiaire (`ga_mid_depth`)
+// → grand fond (décroissance exponentielle `ga_falloff`). `ga_mid_amount` = 0 : deux paliers
 // (réglage d'origine du lot V2).
-vec3 ga_depth_color(float depth, vec3 shallow, vec3 mid, vec3 deep, float mid_depth_m,
-		float falloff_m, float mid_amount) {
-	vec3 two = mix(shallow, deep, 1.0 - exp(-depth / falloff_m));
-	vec3 near = mix(shallow, mid, smoothstep(0.0, mid_depth_m, depth));
-	vec3 three = mix(near, deep, smoothstep(mid_depth_m * 0.5, mid_depth_m + falloff_m * 2.0, depth));
-	return mix(two, three, mid_amount);
+vec3 ga_depth_color(float ga_d, vec3 ga_shallow, vec3 ga_mid, vec3 ga_deep, float ga_mid_depth,
+		float ga_falloff, float ga_mid_amount) {
+	vec3 ga_two = mix(ga_shallow, ga_deep, 1.0 - exp(-ga_d / ga_falloff));
+	vec3 ga_near = mix(ga_shallow, ga_mid, smoothstep(0.0, ga_mid_depth, ga_d));
+	vec3 ga_three = mix(ga_near, ga_deep, smoothstep(ga_mid_depth * 0.5, ga_mid_depth + ga_falloff * 2.0, ga_d));
+	return mix(ga_two, ga_three, ga_mid_amount);
 }
