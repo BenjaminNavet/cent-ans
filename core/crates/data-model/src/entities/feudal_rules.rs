@@ -30,6 +30,14 @@ pub struct FeudalRules {
     /// Turns as the realm's first vassal for the generic victory (§ 4.8).
     pub ascension_turns: u32,
     pub loyalty: LoyaltyWeights,
+    /// Liege's war score against the felon, at the peace, needed to seize
+    /// the forfeited titles (§ 4.4, lot F3).
+    pub forfeiture_win_war_score: i32,
+    /// Treaty value (negotiation points) of a title demanded in a peace,
+    /// on top of its provinces (§ 4.6, lot F3).
+    pub title_loss_penalty: i32,
+    /// How a suzerain arbitrates a contested succession (§ 4.5, lot F3).
+    pub arbitration: ArbitrationWeights,
 }
 
 impl Default for FeudalRules {
@@ -45,6 +53,9 @@ impl Default for FeudalRules {
             independence_turns: 20,
             ascension_turns: 20,
             loyalty: LoyaltyWeights::default(),
+            forfeiture_win_war_score: 10,
+            title_loss_penalty: 30,
+            arbitration: ArbitrationWeights::default(),
         }
     }
 }
@@ -97,6 +108,30 @@ impl Default for LoyaltyWeights {
             peer_forfeiture: -10,
             liege_defeat: -5,
             rival_claimant: -15,
+        }
+    }
+}
+
+/// Scores of each claimant when a suzerain arbitrates a contested
+/// succession (spec § 4.5); the best score wins, the designated heir on a tie.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct ArbitrationWeights {
+    /// The claimant (or the claimant's spouse) is kin of the arbiter's
+    /// ruler or belongs to the arbiter's court.
+    pub family_tie: i32,
+    /// The claimant is the heir by the succession law.
+    pub law_heir: i32,
+    /// The claimant is the heir designated by the late ruler.
+    pub designated_heir: i32,
+}
+
+impl Default for ArbitrationWeights {
+    fn default() -> Self {
+        ArbitrationWeights {
+            family_tie: 20,
+            law_heir: 10,
+            designated_heir: 5,
         }
     }
 }
