@@ -50,17 +50,46 @@ Branche `feat/p2e-menus` (depuis `main`), worktree
 - [x] `battle_demos_menu.gd` migré (MODAL, UiType, UiMotion).
 - [x] `historical_battles_menu.gd` migré.
 - [x] `replays_menu.gd` migré.
-- [ ] `credits_screen.gd`
-- [ ] `settings_menu.gd`
-- [ ] `pause_menu.gd`
-- [ ] `save_load_dialog.gd` (+ `.tscn`)
-- [ ] `battle_loading_card.gd`
-- [ ] `game/tests/p2e_ui_test.gd`
-- [ ] `game/tests/p2e_shot.gd` + captures `docs/img/po/p2e/`
-- [ ] `smoke.gd` + tests existants relancés
-- [ ] merge `main`, réimport, tests finaux
+- [x] `credits_screen.gd` migré (`_panel` en `MODAL`, `self` garde le fond `MenuBackground` hors
+      zone ; tailles bbcode incrustées converties via `UiType.size(...)`).
+- [x] `settings_menu.gd` migré (un seul point de rattachement pour ses deux appelants).
+- [x] `pause_menu.gd` migré : `_menu_panel`/`_confirm_panel`/`save_dialog` rejoignent `MODAL`
+      individuellement ; `self` reste un coordinateur invisible. Ajout de
+      `_free_modal_children()` sur `tree_exiting` car `flow_controller.gd` (hors lot) ne fait
+      que `pause_menu.queue_free()`, qui ne libérerait plus ces enfants déplacés.
+- [x] `save_load_dialog.gd` + `.tscn` : tailles → `UiType`, `UiMotion` sur `open_save`/`open_load`/
+      `close`. Rattachement (zone/parent) **non touché** : voir « Points ouverts ».
+- [x] `save_slots.gd` : aucune UI, aucun changement.
+- [x] `battle_loading_card.gd` : tailles brutes → `UiType.size(...)`, structure `CanvasLayer`
+      inchangée (hors zones `UiLayout`, comme `loading_screen.gd`).
+- [x] `game/tests/p2e_ui_test.gd` écrit (C1/C2 adapté/C3) — **aides dupliquées, pas réutilisées**
+      depuis `po_ui_test.gd` : voir « Points ouverts ».
+- [x] `game/tests/p2e_shot.gd` écrit (7 vues, `docs/img/po/p2e/`).
+- [ ] dylib copiée, import fait ; smoke test relancé — en cours (machine très chargée, plusieurs
+      builds Rust d'autres lots tournent en parallèle).
+- [ ] lancer `p2e_ui_test.gd`, `p2e_shot.gd` (une fois, pas de relecture d'image)
+- [ ] merge `main`, réimport, tests finaux, rapport
+
+## Points ouverts (à trancher par le joueur/orchestrateur si besoin)
+
+1. **`SaveLoadDialog` non rattaché à une zone `UiLayout` par lui-même.** Il est instancié dans
+   trois fichiers : `pause_menu.gd` (mon lot — rejoint `MODAL` explicitement), `start_menu.gd` et
+   `map_ui.gd` (hors lot, l'un avec `panels.register(save_load_dialog, PanelStack.Kind.MODAL)`,
+   l'ancien système d'étages). Faire rejoindre `MODAL` depuis le `_ready()` de `save_load_dialog.gd`
+   lui-même aurait déplacé ces deux instances partagées hors de mon lot, sans pouvoir vérifier les
+   effets de bord (ordre d'affichage `PanelStack`, éventuels appels `move_child` dans ces fichiers).
+   Je n'ai donc migré que ses tailles de police, pas son rattachement, en dehors de l'instance de
+   `pause_menu.gd`.
+2. **`p2e_ui_test.gd` ne réutilise pas littéralement les aides de `po_ui_test.gd`** comme demandé.
+   `po_ui_test.gd` `extends SceneTree` et son `_init()` lance tout seul l'ensemble de ses tests puis
+   appelle `quit()` : instancier ce script (`preload(...).new()`) aurait exécuté *et terminé*
+   `po_ui_test.gd` avant même mon premier test. J'ai donc reproduit ses aides
+   (`_collect_font_sizes`, `_collect_tool_texts`, motifs C1, `MIN_SIZE`/`MAX_DISTINCT_SIZES`)
+   plutôt que de les appeler sur une instance. Signalé pour arbitrage si une vraie factorisation
+   (par ex. extraire ces aides dans une classe `RefCounted` séparée, touchant `po_ui_test.gd`) est
+   préférée — je ne l'ai pas fait puisque la consigne était de ne pas modifier ce fichier.
 
 ## Prochaine étape
 
-Migrer `credits_screen.gd` (même patron MODAL que les trois menus déjà faits, plus les tailles
-bbcode incrustées dans `markdown_to_bbcode`), puis `settings_menu.gd` et `pause_menu.gd`.
+Une fois la machine moins chargée : relancer `smoke.gd`, puis `p2e_ui_test.gd` et `p2e_shot.gd`,
+fusionner `main`, réimporter, relancer tous les tests, puis répondre à l'orchestrateur.
