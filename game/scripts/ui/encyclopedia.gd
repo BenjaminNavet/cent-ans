@@ -713,7 +713,7 @@ static func _tech_unlocking(kind: String, entry_id: String) -> Array:
 
 static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	var category := str(definition.get("category", ""))
-	var subtitle := str(RichTooltip.UNIT_CATEGORY_LABELS.get(category, category))
+	var subtitle := RichTooltip.unit_category_label(category)
 	if definition.has("soldiers"):
 		subtitle += ", %d hommes" % int(definition["soldiers"])
 	var name_block: Variant = definition.get("name", {})
@@ -730,7 +730,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	var stat_lines := PackedStringArray()
 	for stat in ["melee", "ranged", "range", "armor", "morale", "speed", "charge", "siege_attack", "ammo"]:
 		if stats.has(stat):
-			stat_lines.append("%s %s" % [RichTooltip.STAT_LABELS[stat], RichTooltip._number(float(stats[stat]))])
+			stat_lines.append("%s %s" % [RichTooltip.stat_label(stat), RichTooltip._number(float(stats[stat]))])
 	var sw := RichTooltip.strengths_weaknesses(definition)
 	var traits := PackedStringArray()
 	if not (sw[0] as PackedStringArray).is_empty():
@@ -739,7 +739,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 		traits.append("[color=%s]Faiblesses : %s[/color]" % [RichTooltip.RED, ", ".join(sw[1])])
 	var abilities := PackedStringArray()
 	for ability in definition.get("abilities", []):
-		abilities.append(str(RichTooltip.ABILITY_LABELS.get(ability, ability)))
+		abilities.append(RichTooltip.ability_label(ability))
 	if not abilities.is_empty():
 		traits.append("Capacités : " + ", ".join(abilities))
 	var requires := PackedStringArray()
@@ -756,7 +756,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 	if not unlocking.is_empty() and str(definition.get("required_technology", "")) == "":
 		requires.append("Débloquée par : " + _links(unlocking))
 	if str(definition.get("source_class", "")) != "":
-		requires.append("Recrutés parmi : %s" % str(RichTooltip.CLASS_LABELS.get(definition["source_class"], definition["source_class"])).to_lower())
+		requires.append("Recrutés parmi : %s" % RichTooltip.class_label(str(definition["source_class"])).to_lower())
 	var cultures: Array = definition.get("required_culture", [])
 	if not cultures.is_empty():
 		var names := PackedStringArray()
@@ -784,7 +784,7 @@ static func _unit_fiche(entry_id: String, definition: Dictionary) -> String:
 
 static func _building_fiche(entry_id: String, definition: Dictionary) -> String:
 	var category := str(definition.get("category", ""))
-	var subtitle := str(RichTooltip.BUILDING_CATEGORY_LABELS.get(category, category))
+	var subtitle := RichTooltip.building_category_label(category)
 	if definition.has("tier"):
 		subtitle += ", rang %d" % int(definition["tier"])
 	var costs := PackedStringArray()
@@ -857,7 +857,7 @@ static func _resource_fiche(entry_id: String, definition: Dictionary) -> String:
 		lines.append("Prix de base : %s %s" % [RichTooltip._number(float(definition["base_price"])), RichTooltip.POUND])
 	var classes := PackedStringArray()
 	for class_id in definition.get("satisfies_classes", []):
-		classes.append("%s %s" % [icon_bbcode("class_" + str(class_id), 16), str(RichTooltip.CLASS_LABELS.get(class_id, class_id))])
+		classes.append("%s %s" % [icon_bbcode("class_" + str(class_id), 16), RichTooltip.class_label(str(class_id))])
 	if not classes.is_empty():
 		lines.append("Satisfait : " + ", ".join(classes))
 	elif definition.has("satisfies_classes"):
@@ -869,7 +869,7 @@ static func _resource_fiche(entry_id: String, definition: Dictionary) -> String:
 			used_by.append(str(id))
 	used_by.sort()
 	return _join([
-		_heading(entry_id, name_of(entry_id), str(RichTooltip.RESOURCE_CATEGORY_LABELS.get(category, category)), "resource"),
+		_heading(entry_id, name_of(entry_id), RichTooltip.resource_category_label(category), "resource"),
 		_description(definition), "\n".join(lines),
 		_section("Utilisée par les bâtiments", _links(used_by)), _sources(definition),
 	])
@@ -880,7 +880,7 @@ static func _trait_fiche(entry_id: String, definition: Dictionary) -> String:
 	var opposites: Array = definition.get("opposites", [])
 	return _join([
 		# DA7c : icône propre au trait, repli catégorie générique (`IconLibrary.resolve`).
-		_heading(entry_id, name_of(entry_id), "Trait " + str(RichTooltip.TRAIT_CATEGORY_LABELS.get(category, category)), "trait"),
+		_heading(entry_id, name_of(entry_id), "Trait " + RichTooltip.trait_category_label(category), "trait"),
 		_description(definition), _section("Effets", _effects(definition.get("effects", []))),
 		_section("Incompatible avec", _links(opposites)),
 	])
@@ -888,14 +888,14 @@ static func _trait_fiche(entry_id: String, definition: Dictionary) -> String:
 
 static func _skill_fiche(entry_id: String, definition: Dictionary) -> String:
 	var branch := str(definition.get("branch", ""))
-	var subtitle := "%s, rang %d — %s de compétence" % [RichTooltip.BRANCH_LABELS.get(branch, branch), int(definition.get("tier", 1)), FrText.count(int(definition.get("cost", 1)), "point")]
+	var subtitle := "%s, rang %d — %s de compétence" % [RichTooltip.branch_label(branch), int(definition.get("tier", 1)), FrText.count(int(definition.get("cost", 1)), "point")]
 	var prerequisites: Array = definition.get("prerequisites", [])
 	return _join([
 		_heading("branch_" + branch, name_of(entry_id), subtitle, "branch"), _description(definition),
 		_section("Effets", _effects(definition.get("effects", []))),
 		_section("Prérequis", _links(prerequisites) if not prerequisites.is_empty() else "Aucun"),
 		_section("Ouvre", _links(_referencing("skills", "prerequisites", entry_id))),
-		str(RichTooltip.BRANCH_TEXTS.get(branch, "")),
+		RichTooltip.branch_text(branch),
 	])
 
 
@@ -1035,7 +1035,7 @@ static func _mechanic_extra(kind: String) -> String:
 				for res_id in resources:
 					if class_id in resources[res_id].get("satisfies_classes", []):
 						goods.append(link(str(res_id)))
-				parts.append("• %s %s : %s" % [icon_bbcode("class_" + class_id, 16), RichTooltip.CLASS_LABELS[class_id], ", ".join(goods)])
+				parts.append("• %s %s : %s" % [icon_bbcode("class_" + class_id, 16), RichTooltip.class_label(class_id), ", ".join(goods)])
 			return _section("Biens recherchés par classe", "\n".join(parts))
 		"relations":
 			var parts := PackedStringArray()

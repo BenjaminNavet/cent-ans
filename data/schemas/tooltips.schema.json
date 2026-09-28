@@ -4,7 +4,7 @@
   "title": "Textes des infobulles (IB)",
   "description": "Libellés et textes des infobulles (ADR 0109). Une entrée de type règle peut ouvrir sa propre bulle (lien ib:rule:<clé>).",
   "type": "object",
-  "required": ["effects", "stats", "gauges", "hud", "plain"],
+  "required": ["effects", "stats", "gauges", "hud", "categories", "abilities", "classes", "branches", "plain"],
   "additionalProperties": false,
   "$defs": {
     "key": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
@@ -38,6 +38,10 @@
     "stats": {"type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/rule_entry"}},
     "gauges": {"type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/entry"}},
     "hud": {"type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/entry"}},
-    "plain": {"type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/entry"}}
+    "categories": {"description": "Catégories d'unités, de bâtiments, de ressources et de traits (IB2, pas de collision de clé entre elles).", "type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/entry"}},
+    "abilities": {"description": "Capacités d'unités (IB2).", "type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/entry"}},
+    "classes": {"description": "Classes de population (IB2).", "type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/entry"}},
+    "branches": {"description": "Branches de compétences de personnage (IB2).", "type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/entry"}},
+    "plain": {"description": "Infobulles brutes (titre, corps, raccourci en pied) migrées des ~120 tooltip_text littéraux (IB2).", "type": "object", "propertyNames": {"$ref": "#/$defs/key"}, "additionalProperties": {"$ref": "#/$defs/entry"}}
   }
 }

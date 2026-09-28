@@ -221,7 +221,7 @@ func _run_ib4() -> void:
 	if rule != null:
 		var title := rule.find_child("Title", true, false) as RichTextLabel
 		var detail := rule.find_child("Detail", true, false) as RichTextLabel
-		_check(title != null and title.text.contains(str(RichTooltip.EFFECT_LABELS["army_morale"])), "rule bubble title")
+		_check(title != null and title.text.contains(RichTooltip.effect_label("army_morale")), "rule bubble title")
 		_check(detail != null and detail.text.length() > 20, "rule bubble text from tooltips.json")
 		# Fille à côté de sa parente, sans la chevaucher, dans l'écran 1280 × 720.
 		_check(not rule.get_rect().intersects(entity.get_rect()), "child should not overlap its parent: %s / %s" % [rule.get_rect(), entity.get_rect()])
