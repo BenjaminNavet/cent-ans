@@ -112,6 +112,8 @@ fn forfeiture_is_declared_on_felony_when_the_odds_allow() {
     let data = data();
     let mut state = start(&data);
     let (france, blois) = (fac("fac_france"), fac("fac_blois"));
+    // F8: the case of 1337 against England is left aside.
+    state.feudal.felonies.clear();
     assert_eq!(ai::feudal::plan_commise(&state, &data, &france), None);
     feudal::open_felony(&mut state, &data, &blois, FelonyReason::RefusedHost).expect("case");
     let order = ai::feudal::plan_commise(&state, &data, &france);

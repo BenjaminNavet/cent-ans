@@ -65,6 +65,11 @@ fn guyenne_forfeiture() {
     let (france, england) = (fac("fac_france"), fac("fac_england"));
     // England is no direct vassal of France, but holds Guyenne of it.
     assert_eq!(feudal::liege_of(&s, &data, &england), None);
+    // F8: the case of 1337 (Robert of Artois harboured) is open at the start.
+    assert!(s.feudal.felonies.iter().any(|c| c.vassal == england
+        && c.liege == france
+        && c.reason == FelonyReason::HarbouredFelon));
+    s.feudal.felonies.clear();
     assert_eq!(
         feudal::declare_commise(&mut s, &data, &france, &england),
         Err(FeudalError::NoFelonyCase(england.clone()))
