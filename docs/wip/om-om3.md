@@ -15,7 +15,12 @@
 - [x] Religions : champ `kindred` (orthodoxie ↔ catholicisme = `FaithRelation::Kindred`, opinion −25,
   pas de « guerre de religion ») ; couleurs du filtre religion ; fiche codex.
 - [x] Tests : sim-campaign/tests/om3_terrains.rs, sim-battle/tests/om3_terrains.rs.
-- [ ] Vérif Godot (import + smoke + tests touchés).
+- [x] Vérif Godot : import, smoke.gd, ga2_ground, mf1_map_modes, ib_plain, c5_settlements_ui, p2c_ui, om3_terrain_test (nouveau) : OK.
+
+## Points ouverts
+- ADR 0116 dit `rel_orthodox` de type `church` ; gardé `other_faith` : dans le modèle, `church`/`obedience` = catholique (is_catholic, excommunication, Schisme). La proximité passe par `kindred`.
+- Le climat n'est affiché nulle part côté UI (pas de libellé à ajouter).
+- Valeurs d'équilibre (fourrage, charge) à revoir à la sonde de la vague 3.
 
 ## Prochaine étape
-cargo test complet vert, puis dylib (profil om3) → game/bin, import Godot, smoke.gd.
+Lot terminé ; à fusionner dans feat/om. La régénération géo de l'intégration appliquera le coût désert de la grille.
