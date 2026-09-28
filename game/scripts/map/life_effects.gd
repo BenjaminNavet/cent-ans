@@ -66,6 +66,10 @@ var _camera_distance := 1000.0
 var _cpu_buffers: Dictionary = {}  # MultiMeshInstance3D → PackedFloat32Array
 ## RS-K : échelles de maquette (courante, réelle) par colonie, mémorisées le temps d'une passe de
 ## réécriture (plusieurs panaches et moulins par colonie : 3 appels `model_scale_at` par point).
+## RS-K : réécritures dues à l'échelle reportées tant que le nœud est masqué (panaches par
+## `MultiMeshInstance3D`, moulins) : faites à l'image où il redevient visible, avant son rendu.
+var _smoke_dirty: Dictionary = {}  # MultiMeshInstance3D → vrai
+var _mills_dirty := false
 var _scale_memo: Dictionary = {}  # colonie → Vector2(échelle courante, échelle réelle)
 var _memo_depth := 0
 
@@ -600,14 +604,21 @@ func _apply_prop_scale(camera_distance: float) -> void:
 	var reference := _reference_scale()
 	var moved := props.needs_rewrite(_settlement_ref, reference)
 	var tp := Time.get_ticks_usec()  # RS-K : sous-sections du banc `--bench-probe`
-	_begin_pass()
 	if moved:
 		# SZ4b : moulins et panaches suivent l'échelle de la maquette de leur colonie.
 		_settlement_ref = reference
+		_smoke_dirty[_chimneys] = true
+		_smoke_dirty[_fires] = true
+		_mills_dirty = true
+	if props.needs_rewrite(_windmill_scale, mill):
+		_windmill_scale = mill
+		_mills_dirty = true
+	_begin_pass()
+	if not _smoke_dirty.is_empty():
 		_rewrite_smoke_positions()
 	tp = PerfProbe.lap("life/smoke_rewrite", tp)
-	if moved or props.needs_rewrite(_windmill_scale, mill):
-		_windmill_scale = mill
+	if _mills_dirty and _windmill_bodies.visible:
+		_mills_dirty = false
 		_rewrite_windmills()
 	_end_pass()
 	PerfProbe.lap("life/mill_rewrite", tp)
@@ -633,6 +644,9 @@ func _rewrite_smoke_positions() -> void:
 	for pair in [[_chimneys, _chimney_points], [_fires, _fire_points]]:
 		var mmi: MultiMeshInstance3D = pair[0]
 		var points: Array = pair[1]
+		if not _smoke_dirty.has(mmi) or not mmi.visible:
+			continue  # RS-K : reportée (masqué) ou déjà à jour
+		_smoke_dirty.erase(mmi)
 		if mmi.multimesh == null or mmi.multimesh.instance_count != points.size():
 			continue
 		var buffer: PackedFloat32Array = _cpu_buffers.get(mmi, PackedFloat32Array())
@@ -662,9 +676,6 @@ func _rewrite_smoke_positions() -> void:
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	near_weight = tiers.near_weight(camera_distance) if tiers != null else 1.0
 	var medium := tiers.medium_weight(camera_distance) if tiers != null else 0.0
-	# SZ4 : fumées, feux et moulins à leur taille réelle sous le palier comté (ZG4 les masquait au
-	# palier site, à leur taille de carte : des colonnes de plusieurs kilomètres).
-	_apply_prop_scale(camera_distance)
 	var chimney_alpha := near_weight * _season_boost * 0.85 * MapPropScale.shared().chimney_alpha(camera_distance)
 	_chimneys.visible = chimney_alpha > 0.02
 	_chimney_material.set_shader_parameter("fade", chimney_alpha)
@@ -674,6 +685,10 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	var show_models := near_weight > 0.35
 	_windmill_bodies.visible = show_models
 	_windmill_sails.visible = show_models
+	# SZ4 : fumées, feux et moulins à leur taille réelle sous le palier comté (ZG4 les masquait au
+	# palier site, à leur taille de carte : des colonnes de plusieurs kilomètres). RS-K : après la
+	# visibilité (réécritures des nœuds masqués reportées).
+	_apply_prop_scale(camera_distance)
 	if (_snow > 0.01) != _overlay_snowy:
 		_update_overlays()
 	if _reground_timer >= 0.0:
