@@ -1,0 +1,52 @@
+{
+  "id": "fac_perm",
+  "name": {
+    "display": "Grand Perm",
+    "local": "Пермь Великая",
+    "local_language": "komi"
+  },
+  "short_name": "Perm",
+  "adjective": "permien",
+  "government": "lordship",
+  "playable": true,
+  "capital": "prov_perm",
+  "capital_city": "Tcherdyn",
+  "religion": "rel_pagan",
+  "culture": "cul_permian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_novgorod",
+  "primary_title": "tit_perm",
+  "heraldry": {
+    "blazon": "De sable à l'étoile d'or.",
+    "description": "Blason de convention pour les Permiens païens de la Kama et de la Vytchegda.",
+    "primary_color": "#111111",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Pas d'héraldique attestée."
+  },
+  "titles": [
+    "Chef des Permiens"
+  ],
+  "treasury": 2500,
+  "prestige": 15,
+  "starting_technologies": [
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_novgorod",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 30,
+    "diplomacy": 50,
+    "trade": 40,
+    "piety": 60
+  },
+  "description": "Pays des Komis (Permiens) de la Kama et de la Vytchegda, païens, riches en fourrures et en sel ; Novgorod y lève un tribut et n'y a que des comptoirs. Les chefs locaux ne sont pas connus par des sources sûres.",
+  "sources": [
+    "Grand Perm",
+    "Komis"
+  ]
+}

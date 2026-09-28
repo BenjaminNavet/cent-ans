@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_pereslavl_riazanski",
+    "province": "prov_ryazan",
+    "kind": "city",
+    "name": {
+      "display": "Pereslavl-Riazanski",
+      "local": "Переяславль-Рязанский",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      39.74,
+      54.63
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Capitale des princes de Riazan depuis la ruine de la vieille Riazan (1237).",
+    "sources": [
+      "Riazan"
+    ]
+  },
+  {
+    "id": "set_staraia_riazan",
+    "province": "prov_ryazan",
+    "kind": "village",
+    "name": {
+      "display": "Vieille Riazan",
+      "local": "Старая Рязань",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      40.05,
+      54.42
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Site de l'ancienne capitale, rasée par les Mongols en 1237, bourg de faible importance.",
+    "sources": [
+      "Vieille Riazan"
+    ]
+  },
+  {
+    "id": "set_zaraisk",
+    "province": "prov_ryazan",
+    "kind": "town",
+    "name": {
+      "display": "Zaraïsk",
+      "local": "Зарайск",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      38.87,
+      54.76
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la frontière avec Kolomna (fondation traditionnelle en 1146, incertaine).",
+    "sources": [
+      "Zaraïsk"
+    ]
+  }
+]

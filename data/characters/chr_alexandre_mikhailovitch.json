@@ -1,0 +1,59 @@
+{
+  "id": "chr_alexandre_mikhailovitch",
+  "name": {
+    "display": "Alexandre Mikhaïlovitch de Tver",
+    "local": "Александр Михайлович",
+    "local_language": "vieux russe"
+  },
+  "sex": "male",
+  "house": "Tver",
+  "faction": "fac_pskov",
+  "role": "ruler",
+  "birth": {
+    "value": "1301-10-07",
+    "place": "Tver",
+    "note": "Position exacte en 1337 incertaine."
+  },
+  "death": {
+    "value": "1339-10-28",
+    "place": "Saraï"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Tver",
+      "from": {
+        "value": "1326"
+      },
+      "note": "Chassé après l'insurrection de 1327 ; de retour à Tver à l'automne 1338."
+    },
+    {
+      "title": "Prince de Pskov",
+      "from": {
+        "value": "1327"
+      },
+      "note": "Élu par les Pskoviens ; règne jusqu'en 1337, avec un exil en Lituanie en 1329-1331."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_brave",
+    "trait_stubborn"
+  ],
+  "piety": 65,
+  "family": {
+    "siblings": [
+      "chr_konstantin_mikhailovitch"
+    ]
+  },
+  "starting_location": "prov_pskov",
+  "status": "at_court",
+  "description": "Prince de Tver qui a fait massacrer l'escorte du baskak Chevkal (1327) ; réfugié à Pskov, il y est prince jusqu'en 1337, part alors à la Horde, est gracié, retourne à Tver (automne 1338) et est exécuté à Saraï avec son fils Fiodor le 28 octobre 1339 (29 selon d'autres sources). Sa présence à Pskov au printemps 1337 est probable mais incertaine.",
+  "sources": [
+    "Alexandre de Tver"
+  ]
+}

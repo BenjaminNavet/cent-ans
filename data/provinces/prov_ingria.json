@@ -1,0 +1,97 @@
+{
+  "id": "prov_ingria",
+  "name": {
+    "display": "Ingrie",
+    "local": "Водская пятина",
+    "local_language": "russe"
+  },
+  "region": "rus_nord",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Neva",
+    "Louga"
+  ],
+  "ports": [
+    "Koporié"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Koporié",
+      "local": "Копорье",
+      "local_language": "russe"
+    },
+    "lat": 59.717,
+    "lon": 29.083
+  },
+  "geo": {
+    "capital_lonlat": [
+      29.083,
+      59.717
+    ],
+    "seed_lonlat": [
+      29.9,
+      59.6
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_novgorod",
+  "culture": "cul_novgorodian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 40050,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 2700,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1350,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 900,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1000,
+  "description": "Vodskaïa piatina, rive sud du golfe de Finlande : Koporié et Orechek (fondée en 1323 à la source de la Neva), verrous de Novgorod contre la Suède.",
+  "sources": [
+    "Koporié",
+    "Orechek"
+  ]
+}

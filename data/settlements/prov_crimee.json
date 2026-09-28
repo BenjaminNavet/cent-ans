@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_solkhat",
+    "province": "prov_crimee",
+    "kind": "city",
+    "name": {
+      "display": "Solkhat (Qirim)",
+      "local": "Solḫāt",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      35.09,
+      45.03
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Chef-lieu de la Crimée mongole, ville cosmopolite avec mosquée d'Özbeg (1314).",
+    "sources": [
+      "Staryï Krym"
+    ]
+  },
+  {
+    "id": "set_kirk_yer",
+    "province": "prov_crimee",
+    "kind": "castle",
+    "name": {
+      "display": "Kirk-Yer (Tchoufout-Kalé)",
+      "local": "Qırq Yer",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      33.93,
+      44.74
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse alane puis résidence de princes de la Horde.",
+    "sources": [
+      "Tchoufout-Kalé"
+    ]
+  },
+  {
+    "id": "set_soldaia",
+    "province": "prov_crimee",
+    "kind": "town",
+    "name": {
+      "display": "Soldaïa (Soudak)",
+      "local": "Sudaq",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      34.97,
+      44.85
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port de la côte sud, escale vénitienne et grecque (contrôlé par la Horde ; génois seulement en 1365).",
+    "sources": [
+      "Soudak"
+    ]
+  }
+]

@@ -1,0 +1,96 @@
+{
+  "id": "prov_zavolotchie",
+  "name": {
+    "display": "Zavolotchié (Dvina)",
+    "local": "Заволочье",
+    "local_language": "russe"
+  },
+  "region": "rus_nord",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Dvina septentrionale",
+    "Vaga"
+  ],
+  "ports": [
+    "Kholmogory"
+  ],
+  "sea_zones": [
+    "sea_white_sea"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Kholmogory",
+      "local": "Холмогоры",
+      "local_language": "russe"
+    },
+    "lat": 64.22,
+    "lon": 41.15
+  },
+  "geo": {
+    "capital_lonlat": [
+      41.15,
+      64.22
+    ],
+    "seed_lonlat": [
+      43.5,
+      63.0
+    ],
+    "voronoi_weight": 2.3
+  },
+  "owner": "fac_novgorod",
+  "culture": "cul_novgorodian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 31150,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 2100,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1050,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 700,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_palisade"
+  ],
+  "fortification_level": 1,
+  "base_supply": 700,
+  "description": "Terre de la Dvina, au-delà des portages : colonies novgorodiennes, pêcheries, salines et fourrures ; Novgorod y lève le tribut sur les Samoyèdes et les Zyrianes.",
+  "sources": [
+    "Zavolotchié",
+    "Dvina septentrionale"
+  ]
+}

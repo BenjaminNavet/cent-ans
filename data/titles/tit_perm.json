@@ -1,0 +1,52 @@
+{
+  "id": "tit_perm",
+  "rank": "county",
+  "name": {
+    "display": "Grand Perm",
+    "local": "Пермь Великая",
+    "local_language": "vieux russe"
+  },
+  "heraldry": {
+    "blazon": "De sable à l'étoile d'or.",
+    "description": "Blason de convention pour les Permiens païens de la Kama et de la Vytchegda.",
+    "primary_color": "#111111",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Pas d'héraldique attestée."
+  },
+  "de_jure_liege": "tit_novgorod",
+  "de_jure_provinces": [
+    "prov_perm"
+  ],
+  "holder_1337": {
+    "faction": "fac_perm",
+    "sources": [
+      "Grand Perm",
+      "Komis"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_perm_hold",
+      "title": "Garder la Perm",
+      "description": "Conserver le Grand Perm.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_perm"
+      }
+    },
+    {
+      "id": "obj_perm_free",
+      "title": "Sans tribut",
+      "description": "Ne plus payer le tribut à Novgorod.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Pays des Komis (Permiens) de la Kama et de la Vytchegda, païens, riches en fourrures et en sel ; Novgorod y lève un tribut et n'y a que des comptoirs. Les chefs locaux ne sont pas connus par des sources sûres.",
+  "sources": [
+    "Grand Perm",
+    "Komis"
+  ]
+}

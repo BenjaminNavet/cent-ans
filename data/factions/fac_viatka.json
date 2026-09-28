@@ -1,0 +1,51 @@
+{
+  "id": "fac_viatka",
+  "name": {
+    "display": "Terre de Viatka",
+    "local": "Вятская земля",
+    "local_language": "vieux russe"
+  },
+  "short_name": "Viatka",
+  "adjective": "viatchien",
+  "government": "republic",
+  "playable": true,
+  "capital": "prov_viatka",
+  "capital_city": "Khlynov",
+  "religion": "rel_orthodox",
+  "culture": "cul_russian",
+  "succession_law": "elective",
+  "suzerain": "fac_novgorod",
+  "primary_title": "tit_viatka",
+  "heraldry": {
+    "blazon": "D'argent à la croix de sinople.",
+    "description": "Blason de convention pour la terre libre de Viatka.",
+    "primary_color": "#2E7D32",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason de convention : les princes russes de 1337 n'ont pas d'armoiries héraldiques fixées ; couleurs et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Vétché de Viatka"
+  ],
+  "treasury": 2500,
+  "prestige": 15,
+  "starting_technologies": [
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_novgorod",
+      "status": "vassal"
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 40,
+    "trade": 35,
+    "piety": 55
+  },
+  "description": "Communauté de colons et d'ouchkouïniks issus de Novgorod, sur la Viatka, avec un vétché de type novgorodien ; les chefs de l'époque sont mal connus.",
+  "sources": [
+    "Terre de Viatka"
+  ]
+}

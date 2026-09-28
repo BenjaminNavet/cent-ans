@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_bolgar",
+    "province": "prov_bolgar",
+    "kind": "city",
+    "name": {
+      "display": "Bolgar",
+      "local": "Bolghar",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      49.05,
+      54.97
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ancienne capitale bulgare, hôtel de la monnaie et grand marché de la Horde sur la Volga.",
+    "sources": [
+      "Bolgar"
+    ]
+  },
+  {
+    "id": "set_bilyar",
+    "province": "prov_bolgar",
+    "kind": "town",
+    "name": {
+      "display": "Bilyar",
+      "local": "Biler",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      50.55,
+      54.98
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Grande ville bulgare ruinée en 1236, en partie occupée (emplacement approximatif).",
+    "sources": [
+      "Bilyar"
+    ]
+  },
+  {
+    "id": "set_joukotine",
+    "province": "prov_bolgar",
+    "kind": "town",
+    "name": {
+      "display": "Joukotine (Djouketaou)",
+      "local": "Cüketaw",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      49.83,
+      55.77
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du Nord de la Volga bulgare, dans la région du futur Kazan (emplacement approximatif, incertain).",
+    "sources": [
+      "Kazan"
+    ]
+  }
+]

@@ -1,0 +1,48 @@
+{
+  "id": "chr_dmitri_alexandrovitch",
+  "name": {
+    "display": "Dmitri Alexandrovitch de Briansk",
+    "local": "Дмитрий Александрович",
+    "local_language": "vieux russe"
+  },
+  "sex": "male",
+  "house": "Smolensk",
+  "faction": "fac_briansk",
+  "role": "ruler",
+  "birth": {
+    "value": "1305",
+    "uncertain": true,
+    "note": "Dates approximatives."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Briansk",
+      "from": {
+        "value": "1330"
+      },
+      "note": "Dates approximatives."
+    }
+  ],
+  "skills": {
+    "command": 6,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_mercenary"
+  ],
+  "piety": 45,
+  "family": {
+    "siblings": [
+      "chr_ivan_alexandrovitch"
+    ]
+  },
+  "starting_location": "prov_briansk",
+  "status": "at_court",
+  "description": "Frère du prince de Smolensk, prince de Briansk ; il assiège Smolensk en 1334 avec des Tatars puis se réconcilie avec son frère.",
+  "sources": [
+    "Ivan Alexandrovitch de Smolensk"
+  ]
+}

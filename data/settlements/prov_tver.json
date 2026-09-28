@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_tver",
+    "province": "prov_tver",
+    "kind": "city",
+    "name": {
+      "display": "Tver",
+      "local": "Тверь",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      35.9,
+      56.86
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville de la Volga, capitale de Mikhaïl Iaroslavitch et de ses fils.",
+    "sources": [
+      "Tver"
+    ]
+  },
+  {
+    "id": "set_bejetsk",
+    "province": "prov_tver",
+    "kind": "town",
+    "name": {
+      "display": "Bejetsk",
+      "local": "Бежецк",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      36.7,
+      57.78
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Bejetski Verkh, ville de l'apanage tverien.",
+    "sources": [
+      "Bejetsk"
+    ]
+  },
+  {
+    "id": "set_staritsa",
+    "province": "prov_tver",
+    "kind": "town",
+    "name": {
+      "display": "Staritsa",
+      "local": "Старица",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      34.93,
+      56.51
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville de la Volga supérieure, apanage de Tver.",
+    "sources": [
+      "Staritsa (Tver)"
+    ]
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_akkerman",
+    "province": "prov_budjak",
+    "kind": "city",
+    "name": {
+      "display": "Akkerman (Maurocastro)",
+      "local": "Aqkerman",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      30.34,
+      46.19
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ville-port à l'embouchure du Dniestr, comptoir génois de Maurocastro sous suzeraineté de la Horde.",
+    "sources": [
+      "Cetatea Albă"
+    ]
+  },
+  {
+    "id": "set_kilia",
+    "province": "prov_budjak",
+    "kind": "town",
+    "name": {
+      "display": "Kilia (Licostomo)",
+      "local": "Kilia",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      29.27,
+      45.46
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Port du Danube, comptoir génois de Licostomo.",
+    "sources": [
+      "Kilia"
+    ]
+  },
+  {
+    "id": "set_isaccea",
+    "province": "prov_budjak",
+    "kind": "town",
+    "name": {
+      "display": "Isaccea",
+      "local": "Isakçı",
+      "local_language": "tatar kiptchak"
+    },
+    "lonlat": [
+      28.46,
+      45.27
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du bas Danube, siège d'un hôtel de la monnaie de la Horde.",
+    "sources": [
+      "Isaccea"
+    ]
+  }
+]

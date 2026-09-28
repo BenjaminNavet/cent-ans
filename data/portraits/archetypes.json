@@ -155,6 +155,38 @@
         "fac_isles"
       ],
       "prompt": "Gaelic Irish and Hebridean fashion: saffron-dyed linen leine (long tunic), brat wool cloak pinned with a brooch, léine sleeves, bare-legged or simple hose, no continental plate armour"
+    },
+    {
+      "id": "rus",
+      "label": "Rus' (Novgorod, Moscou, Tver, Smolensk)",
+      "factions": [
+        "fac_novgorod",
+        "fac_pskov",
+        "fac_perm",
+        "fac_viatka",
+        "fac_moscow",
+        "fac_tver",
+        "fac_ryazan",
+        "fac_suzdal",
+        "fac_rostov",
+        "fac_yaroslavl",
+        "fac_beloozero",
+        "fac_smolensk",
+        "fac_briansk",
+        "fac_haute_oka",
+        "fac_mordva",
+        "fac_theodoro"
+      ],
+      "prompt": "Rus' princely and boyar fashion: long kaftan or ankle-length tunic with embroidered collar, fur-trimmed caftan and tall fur hat (gorlatnaya shapka), wide belt, soft leather boots, thick beard, Orthodox cross pendant"
+    },
+    {
+      "id": "horde",
+      "label": "Horde d'Or, Bachkirs, Crimée",
+      "factions": [
+        "fac_golden_horde",
+        "fac_bashkir"
+      ],
+      "prompt": "Golden Horde steppe fashion: silk kaftan (del) with wrap closure, felt or fur-trimmed pointed hat, sash belt, composite bow quiver, moustache and thin beard, Turkic-Mongol features, gold jewellery for nobles"
     }
   ],
   "default_culture": "france",

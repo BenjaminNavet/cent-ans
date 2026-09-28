@@ -1293,6 +1293,289 @@
         "Isolée diplomatiquement"
       ],
       "difficulty": 3
+    },
+    {
+      "id": "fac_golden_horde",
+      "tagline": "Le khan d'or au sommet de sa puissance",
+      "intro": "Özbeg règne depuis vingt-quatre ans sur un empire qui va du Danube à l'Oural et tient en laisse tous les princes russes. À Saraï, marchands génois, vénitiens et arabes se croisent ; en Rus', un prince de Moscou levé par tes soins collecte pour toi. Mais les fils du khan guettent la succession.",
+      "strengths": [
+        "Suzeraineté sur tous les princes russes",
+        "Cavalerie nomade innombrable",
+        "Route de la soie et de la Volga",
+        "Trésor parmi les plus riches"
+      ],
+      "weaknesses": [
+        "Succession disputée entre les fils du khan",
+        "Territoire immense et disparate",
+        "Dépendance des tributs vassaux"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_novgorod",
+      "tagline": "La Grande Novgorod, seigneur et maître de ses princes",
+      "intro": "Novgorod invite ses princes et les congédie quand il lui plaît. Ses boyards contrôlent les fourrures, la cire et le grain, ses navires vont à Visby et Lübeck. Mais Moscou avance, le tribut pèse et le froid ne pardonne pas les mauvaises récoltes.",
+      "strengths": [
+        "Richesse par les fourrures et la Hanse",
+        "Immenses territoires forestiers",
+        "Vétché : prince choisi et révocable"
+      ],
+      "weaknesses": [
+        "Armée levée à la demande, peu disciplinée",
+        "Rivalité avec Moscou et la Lituanie",
+        "Territoires éclatés, difficiles à tenir"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_pskov",
+      "tagline": "Le rempart de l'Occident russe",
+      "intro": "Pskov garde la frontière de la Livonie, et ses murs ont arrêté plus d'un chevalier teutonique. Ses citoyens ont refusé de livrer le prince Alexandre à Özbeg. Petite, pauvre mais fière, elle veut l'indépendance vis-à-vis de Novgorod.",
+      "strengths": [
+        "Murailles de pierre",
+        "Population belliqueuse et fière",
+        "Prince de valeur : Alexandre Mikhaïlovitch"
+      ],
+      "weaknesses": [
+        "Territoire minuscule",
+        "Menace de l'Ordre livonien",
+        "Doit ménager Novgorod et la Horde"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_perm",
+      "tagline": "Le pays des fourrures et des idoles",
+      "intro": "Au-delà des portages de la Dvina, les Permiens vivent de la chasse et de l'argent qu'ils reçoivent des marchands de l'Orient. Novgorod exige le tribut ; Moscou envoie déjà ses missionnaires.",
+      "strengths": [
+        "Fourrures et argent oriental",
+        "Forêts impénétrables",
+        "Culture païenne unie"
+      ],
+      "weaknesses": [
+        "Peu peuplé",
+        "Peu de villes",
+        "Écrasé par Novgorod"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_viatka",
+      "tagline": "La république des forêts de la Viatka",
+      "intro": "Ici, ni prince ni baskak : des paysans-guerriers et des pillards de fleuve qui descendent jusqu'à Bolgar. L'éloignement les protège, pas pour longtemps.",
+      "strengths": [
+        "Éloignement protecteur",
+        "Guerriers sur bateaux (ouchkouïniks)",
+        "Sol libre"
+      ],
+      "weaknesses": [
+        "Très peu peuplée",
+        "Aucune place forte solide",
+        "Convoitée par tous ses voisins"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_moscow",
+      "tagline": "Le collecteur qui rassemble les terres russes",
+      "intro": "Ivan Kalita a compris que la fidélité à la Horde était la voie du pouvoir : il ramasse le tribut, achète des terres, y attire le métropolite. Sa prudente politique ouvre la voie du « rassemblement des terres russes » — tant que Saraï lui sourit.",
+      "strengths": [
+        "Yarlyk de grand-prince de Vladimir",
+        "Trésor bien rempli",
+        "Métropolite de toute la Russie installé à Moscou",
+        "Faveur du khan"
+      ],
+      "weaknesses": [
+        "Dépendance envers la Horde",
+        "Rivalité avec Tver, Souzdal et Riazan",
+        "Territoire encore de taille moyenne"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_tver",
+      "tagline": "La grande rivale de Moscou, blessée mais fière",
+      "intro": "Tver a tout perdu en 1327 : Alexandre en fuite, la ville dévastée, le yarlyk repris. Sous Konstantin, la principauté cherche la paix — et l'occasion de sa revanche, avec l'appui de la Lituanie de Gediminas.",
+      "strengths": [
+        "Ancien prestige de grande-principauté",
+        "Alliance possible avec la Lituanie",
+        "Sol fertile de la Volga"
+      ],
+      "weaknesses": [
+        "Fraîchement ruinée par 1327",
+        "Surveillée par la Horde",
+        "Frère aîné en exil"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_ryazan",
+      "tagline": "La marche de la steppe",
+      "intro": "Riazan reçoit chaque année les premiers coups des raids tatars. Ses princes ont appris à se battre sans compter, et à ruser avec la Horde. Moscou a pris Kolomna : elle ne l'oublie pas.",
+      "strengths": [
+        "Cavalerie aguerrie",
+        "Terres fertiles",
+        "Position de marche"
+      ],
+      "weaknesses": [
+        "Frontière exposée aux razzias",
+        "Divisions avec Pronsk",
+        "Moscou sur sa flanc nord"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_suzdal",
+      "tagline": "La lignée aînée, avide de son rang",
+      "intro": "Descendants d'Andreï Iaroslavitch, les princes de Souzdal jugent le yarlyk leur dû. Nijni Novgorod contrôle la Volga et l'Oka, mais la Horde est là et Moscou plus habile.",
+      "strengths": [
+        "Lignée aînée",
+        "Contrôle de la Volga et de l'Oka",
+        "Ports fluviaux"
+      ],
+      "weaknesses": [
+        "Voisin de Moscou et de la Horde",
+        "Terres frontalières exposées à Bolgar et aux Mordves",
+        "Moyens limités"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_rostov",
+      "tagline": "La vieille cité épiscopale",
+      "intro": "Rostov a vu naître la Rus' du Nord-Est. Divisée entre cousins, épuisée par les querelles, elle compte sur son évêque et sur Moscou pour survivre.",
+      "strengths": [
+        "Prestige religieux",
+        "Centre marchand du lac Nero"
+      ],
+      "weaknesses": [
+        "Territoire divisé",
+        "Faible armée",
+        "Dans l'ombre de Moscou"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_yaroslavl",
+      "tagline": "La petite principauté de la Volga",
+      "intro": "Iaroslavl n'a pas les armées de ses voisines, mais des marchands de Volga, des monastères et un prince prudent. Sa survie dépend de son habileté.",
+      "strengths": [
+        "Position sur la Volga",
+        "Marchands de la Volga"
+      ],
+      "weaknesses": [
+        "Minuscule",
+        "Voisins ambitieux",
+        "Faible armée"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_beloozero",
+      "tagline": "Le pays des lacs et du fer",
+      "intro": "Sur le Lac Blanc, les princes de Beloozero commandent des forêts giboyeuses et des forgerons. Entre Novgorod et Moscou, chaque choix est un risque.",
+      "strengths": [
+        "Forêts et fer",
+        "Éloignement"
+      ],
+      "weaknesses": [
+        "Peu peuplée",
+        "Prise en tenaille entre Novgorod et Moscou"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_smolensk",
+      "tagline": "Entre Vilnius, Moscou et Saraï",
+      "intro": "Smolensk contrôle la route du Dniepr et reste orthodoxe entre les païens de Lituanie et le catholicisme de Riga. Chaque alliance est un pari ; le prince Ivan les a tous joués.",
+      "strengths": [
+        "Route commerciale du Dniepr",
+        "Ville fortifiée",
+        "Prince aguerri"
+      ],
+      "weaknesses": [
+        "Voisinage de la Lituanie ambitieuse",
+        "Rivalité avec Briansk",
+        "Peu de ressources"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_briansk",
+      "tagline": "Les forêts de la Desna, marche du sud",
+      "intro": "Briansk est cernée : Smolensk au nord, la Lituanie à l'ouest, la steppe au sud. Le prince Dmitri a appris à louer des Tatars.",
+      "strengths": [
+        "Forêts défensives",
+        "Prince ambitieux",
+        "Alliés tatars possibles"
+      ],
+      "weaknesses": [
+        "Peu peuplé",
+        "Guerre de famille avec Smolensk",
+        "Menace lituanienne"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_haute_oka",
+      "tagline": "Les petits princes des confins",
+      "intro": "Kozelsk, Belev, Novossil, Odoïev : des noms de forteresses, des princes mineurs et un grand danger — la steppe tatare au sud, Moscou et Vilnius au nord.",
+      "strengths": [
+        "Forteresses forestières",
+        "Habitude des razzias"
+      ],
+      "weaknesses": [
+        "Territoires morcelés",
+        "Aucune alliance sûre",
+        "Très faible trésor"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_mordva",
+      "tagline": "Les chefs des forêts entre Oka et Soura",
+      "intro": "Chasseurs, apiculteurs et guerriers, les Mordves défendent leurs bois païens contre les colons russes et les collecteurs tatars. Ils savent se cacher.",
+      "strengths": [
+        "Forêts épaisses",
+        "Tradition de résistance"
+      ],
+      "weaknesses": [
+        "Sans villes",
+        "Écrasés entre Nijni et la Horde"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_bashkir",
+      "tagline": "Les cavaliers de l'Oural du Sud",
+      "intro": "Les tribus bachkires paissent leurs troupeaux du Iaïk à la Belaïa, sous la suzeraineté lointaine de Saraï. Tous savent tirer à l'arc à cheval.",
+      "strengths": [
+        "Archers montés",
+        "Vastes pâturages",
+        "Éloignement"
+      ],
+      "weaknesses": [
+        "Aucune ville",
+        "Peu d'or",
+        "Dépendance envers Saraï"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_theodoro",
+      "tagline": "Le dernier bastion goth de Crimée",
+      "intro": "Perchée sur son plateau imprenable de Mangoup, Théodoro règne sur des montagnards grecs et goths, entre les Génois de Caffa et les Tatars de Solkhat. Un jour, elle sera le dernier morceau de l'empire byzantin — mais encore fallait-il durer.",
+      "strengths": [
+        "Forteresse de Mangoup",
+        "Terrain montagneux défensif",
+        "Commerce de la côte"
+      ],
+      "weaknesses": [
+        "Minuscule",
+        "Voisins puissants (Horde, Gênes)",
+        "Dépendante de la Horde"
+      ],
+      "difficulty": 3
     }
   ],
   "difficulty_labels": [

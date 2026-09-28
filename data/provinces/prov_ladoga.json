@@ -1,0 +1,91 @@
+{
+  "id": "prov_ladoga",
+  "name": {
+    "display": "Ladoga et Carélie",
+    "local": "Ладога и Корела",
+    "local_language": "russe"
+  },
+  "region": "rus_nord",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Volkhov",
+    "Svir"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Staraïa Ladoga",
+      "local": "Ладога",
+      "local_language": "russe"
+    },
+    "lat": 60.002,
+    "lon": 32.298
+  },
+  "geo": {
+    "capital_lonlat": [
+      32.298,
+      60.002
+    ],
+    "seed_lonlat": [
+      30.6,
+      60.9
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_novgorod",
+  "culture": "cul_karelian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 62300,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 40,
+        "goods_satisfaction": 55
+      },
+      "burghers": {
+        "count": 4200,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2100,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 65,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1400,
+        "unrest": 10,
+        "health": 65,
+        "wealth": 75,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Ordre de grandeur estimé (démographie de la Rus' et de la steppe au XIVe siècle mal connue)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1400,
+  "description": "Rives du lac Ladoga et Carélie de Novgorod : Ladoga, Korela (Kexholm) et l'île de Valaam ; marches contre la Suède et les Finnois.",
+  "sources": [
+    "Staraïa Ladoga",
+    "Carélie"
+  ]
+}

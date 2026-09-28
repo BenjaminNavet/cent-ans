@@ -1446,6 +1446,129 @@
       "vassal_of": [
         "fac_pavia"
       ]
+    },
+    {
+      "id": "djotchides",
+      "name": "Djötchides",
+      "arms_of": "fac_golden_horde",
+      "blazon": "De gueules à la lune d'or.",
+      "description": "Descendants de Djötchi, fils aîné de Gengis Khan : maison régnante de la Horde d'Or. Pas d'héraldique attestée ; couleurs de convention.",
+      "source": "fr.wikipedia : Horde d'or",
+      "certainty": "substitution",
+      "factions": [
+        "fac_golden_horde"
+      ],
+      "vassal_of": [
+        "fac_golden_horde"
+      ]
+    },
+    {
+      "id": "moscou",
+      "name": "Moscou",
+      "arms_of": "fac_moscow",
+      "blazon": "De gueules à la bande d'or.",
+      "description": "Daniilovitchi, branche cadette des Riourikides, princes de Moscou. Pas d'armoiries fixées en 1337 ; substitution.",
+      "source": "fr.wikipedia : Ivan Ier de Moscou",
+      "certainty": "substitution",
+      "factions": [
+        "fac_moscow"
+      ],
+      "vassal_of": [
+        "fac_moscow"
+      ]
+    },
+    {
+      "id": "tver",
+      "name": "Tver",
+      "arms_of": "fac_tver",
+      "blazon": "De gueules à la couronne d'or.",
+      "description": "Maison princière de Tver (Iaroslavitchi), armes de convention.",
+      "source": "fr.wikipedia : Principauté de Tver",
+      "certainty": "substitution",
+      "factions": [
+        "fac_tver",
+        "fac_pskov"
+      ],
+      "vassal_of": [
+        "fac_tver"
+      ]
+    },
+    {
+      "id": "riazan",
+      "name": "Riazan",
+      "arms_of": "fac_ryazan",
+      "blazon": "D'azur au pal d'or.",
+      "description": "Maison des princes de Riazan, armes de convention.",
+      "source": "fr.wikipedia : Principauté de Riazan",
+      "certainty": "substitution",
+      "factions": [
+        "fac_ryazan"
+      ],
+      "vassal_of": [
+        "fac_ryazan"
+      ]
+    },
+    {
+      "id": "souzdal",
+      "name": "Souzdal",
+      "arms_of": "fac_suzdal",
+      "blazon": "D'azur à l'aigle d'argent.",
+      "description": "Maison des princes de Souzdal-Nijni Novgorod, armes de convention.",
+      "source": "fr.wikipedia : Principauté de Souzdal",
+      "certainty": "substitution",
+      "factions": [
+        "fac_suzdal"
+      ],
+      "vassal_of": [
+        "fac_suzdal"
+      ]
+    },
+    {
+      "id": "iaroslavl",
+      "name": "Iaroslavl",
+      "arms_of": "fac_yaroslavl",
+      "blazon": "D'argent au chevron de sable.",
+      "description": "Maison des princes de Iaroslavl, armes de convention.",
+      "source": "fr.wikipedia : Principauté de Iaroslavl",
+      "certainty": "substitution",
+      "factions": [
+        "fac_yaroslavl"
+      ],
+      "vassal_of": [
+        "fac_yaroslavl"
+      ]
+    },
+    {
+      "id": "smolensk",
+      "name": "Smolensk",
+      "arms_of": "fac_smolensk",
+      "blazon": "De gueules au dragon d'or.",
+      "description": "Maison des princes de Smolensk (Rostislavitchi), armes de convention ; la branche de Briansk en descend.",
+      "source": "fr.wikipedia : Principauté de Smolensk",
+      "certainty": "substitution",
+      "factions": [
+        "fac_smolensk",
+        "fac_briansk"
+      ],
+      "vassal_of": [
+        "fac_smolensk",
+        "fac_briansk"
+      ]
+    },
+    {
+      "id": "novgorod",
+      "name": "Novgorod",
+      "arms_of": "fac_novgorod",
+      "blazon": "D'argent au sautoir de gueules.",
+      "description": "Notables (boyards) de la république de Novgorod, armes de convention.",
+      "source": "fr.wikipedia : République de Novgorod",
+      "certainty": "substitution",
+      "factions": [
+        "fac_novgorod"
+      ],
+      "vassal_of": [
+        "fac_novgorod"
+      ]
     }
   ]
 }

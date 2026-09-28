@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_smolensk",
+    "province": "prov_smolensk",
+    "kind": "city",
+    "name": {
+      "display": "Smolensk",
+      "local": "Смоленск",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      32.04,
+      54.78
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Cité du Dniepr, clef de la route « des Varègues aux Grecs ».",
+    "sources": [
+      "Smolensk"
+    ]
+  },
+  {
+    "id": "set_roslavl",
+    "province": "prov_smolensk",
+    "kind": "town",
+    "name": {
+      "display": "Roslavl",
+      "local": "Рославль",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      32.86,
+      53.95
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville du sud de la principauté (mention en 1137).",
+    "sources": [
+      "Roslavl"
+    ]
+  },
+  {
+    "id": "set_krasny",
+    "province": "prov_smolensk",
+    "kind": "village",
+    "name": {
+      "display": "Krasnoïe",
+      "local": "Красный",
+      "local_language": "russe"
+    },
+    "lonlat": [
+      31.4,
+      54.57
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg à l'ouest de Smolensk, sur la route de Vitebsk (emplacement approximatif).",
+    "sources": [
+      "Smolensk"
+    ]
+  }
+]

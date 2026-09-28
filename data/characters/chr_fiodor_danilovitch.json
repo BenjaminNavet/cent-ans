@@ -1,0 +1,43 @@
+{
+  "id": "chr_fiodor_danilovitch",
+  "name": {
+    "display": "Fiodor Danilovitch",
+    "local": "Фёдор Данилович",
+    "local_language": "vieux russe"
+  },
+  "sex": "male",
+  "house": "Novgorod",
+  "faction": "fac_novgorod",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true,
+    "note": "Dates et durée de charge incertaines."
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Posadnik de Novgorod",
+      "from": {
+        "value": "1331"
+      },
+      "note": "Dates approximatives ; il est encore posadnik en 1342."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 7,
+    "court": 6
+  },
+  "traits": [
+    "trait_cunning",
+    "trait_greedy"
+  ],
+  "piety": 55,
+  "starting_location": "prov_novgorod",
+  "status": "at_court",
+  "description": "Posadnik (maire) de Novgorod, chef de fait de la république avec l'archevêque Vassili Kalika ; il sera brièvement détenu à Koporié en 1342.",
+  "sources": [
+    "République de Novgorod"
+  ]
+}
