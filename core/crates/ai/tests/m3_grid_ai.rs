@@ -358,6 +358,14 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
     }
     let france = mean(&|g| g.treasury[0] as f64);
     let england = mean(&|g| g.treasury[1] as f64);
+    let sieges = mean(&|g| f64::from(g.siege_turns) / 50.0);
+    let stuck = mean(&|g| f64::from(g.stuck_turns) / 50.0);
+    let landings = mean(&|g| f64::from(g.english_landings));
+    // RS-B: the band is printed before it is checked, so that a failure shows every figure.
+    println!(
+        "France {france:.0}, England {england:.0}, sieges/turn {sieges:.3}, stuck/turn {stuck:.2}, English landings {landings:.1}, battles {:.1}",
+        mean(&|g| f64::from(g.battles))
+    );
     assert!(
         (40_000.0..=160_000.0).contains(&france),
         "France's treasury {france}"
@@ -366,18 +374,11 @@ fn fifty_turns_on_eight_seeds_stay_in_the_c7a_band() {
         (5_000.0..=40_000.0).contains(&england),
         "England's treasury {england}"
     );
-    let sieges = mean(&|g| f64::from(g.siege_turns) / 50.0);
     assert!((1.5..=8.0).contains(&sieges), "sieges per turn {sieges}");
-    let stuck = mean(&|g| f64::from(g.stuck_turns) / 50.0);
     assert!(stuck <= 1.0, "stuck armies per turn {stuck}");
-    let landings = mean(&|g| f64::from(g.english_landings));
     assert!(
         landings >= 1.0,
         "England lands on the continent ({landings} per game)"
-    );
-    println!(
-        "France {france:.0}, England {england:.0}, sieges/turn {sieges:.1}, stuck/turn {stuck:.2}, English landings {landings:.1}, battles {:.1}",
-        mean(&|g| f64::from(g.battles))
     );
 }
 
