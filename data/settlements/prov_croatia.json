@@ -1,0 +1,80 @@
+[
+  {
+    "id": "set_knin",
+    "province": "prov_croatia",
+    "kind": "city",
+    "name": {
+      "display": "Knin",
+      "local": "Knin",
+      "local_language": "croate"
+    },
+    "lonlat": [
+      16.1975,
+      44.04
+    ],
+    "weight": 35,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Ancienne capitale des rois croates, forteresse de la Krka.",
+    "sources": [
+      "Knin"
+    ]
+  },
+  {
+    "id": "set_bihac",
+    "province": "prov_croatia",
+    "kind": "town",
+    "name": {
+      "display": "Bihać",
+      "local": "Bihać",
+      "local_language": "croate"
+    },
+    "lonlat": [
+      15.8697,
+      44.8169
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Ville royale libre de l'Una depuis 1262, marche de Croatie.",
+    "sources": [
+      "Bihać"
+    ]
+  },
+  {
+    "id": "set_modrus",
+    "province": "prov_croatia",
+    "kind": "castle",
+    "name": {
+      "display": "Modruš",
+      "local": "Modruš",
+      "local_language": "croate"
+    },
+    "lonlat": [
+      15.0333,
+      45.2333
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse des Frankopans, siège d'un comté et d'un évêché de Croatie.",
+    "sources": [
+      "Modruš"
+    ]
+  }
+]

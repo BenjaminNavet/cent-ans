@@ -1,0 +1,96 @@
+{
+  "id": "prov_wroclaw",
+  "name": {
+    "display": "Wrocław (Basse-Silésie)",
+    "local": "Breslau",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "silesie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Oder",
+    "Ślęza",
+    "Oława"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_cloth",
+    "res_wood"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Wrocław",
+      "local": "Breslau",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 51.1079,
+    "lon": 17.0385
+  },
+  "geo": {
+    "capital_lonlat": [
+      17.0385,
+      51.1079
+    ],
+    "seed_lonlat": [
+      17.15,
+      51.1
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_bohemia",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Breslau compte environ 20 000 habitants, ville majoritairement germanophone ; campagne slavophone.",
+    "classes": {
+      "peasants": {
+        "count": 170000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 17000,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3740,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 3400,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_stone_walls",
+    "bld_weaving_workshop",
+    "bld_fair"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2500,
+  "description": "Duché de Wrocław, dernier morceau de la Silésie que Jean de Bohême a fait passer à la couronne de Bohême (1335, après le décès sans héritier d'Henri VI) ; grande ville marchande de l'Oder, Breslau dépend de Prague et regarde vers l'Allemagne.",
+  "sources": [
+    "Wrocław",
+    "Duché de Wrocław",
+    "Traité de Trentschin"
+  ]
+}

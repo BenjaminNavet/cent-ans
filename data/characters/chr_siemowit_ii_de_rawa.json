@@ -1,0 +1,46 @@
+{
+  "id": "chr_siemowit_ii_de_rawa",
+  "name": {
+    "display": "Siemowit II de Rawa",
+    "local": "Siemowit II rawski",
+    "local_language": "polonais"
+  },
+  "sex": "male",
+  "house": "Piast de Mazovie",
+  "faction": "fac_rawa",
+  "role": "ruler",
+  "birth": {
+    "value": "1283",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1345",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc de Rawa",
+      "from": {
+        "value": "1313"
+      },
+      "note": "Duc de Rawa et de Sochaczew."
+    }
+  ],
+  "skills": {
+    "command": 4,
+    "governance": 4,
+    "court": 3
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_peaceful"
+  ],
+  "piety": 50,
+  "starting_location": "prov_rawa",
+  "status": "at_court",
+  "description": "Duc de Rawa et de Sochaczew, l'un des trois frères qui se sont partagé la Mazovie en 1313 ; tuteur de son neveu de Płock.",
+  "sources": [
+    "Siemowit II de Rawa"
+  ]
+}

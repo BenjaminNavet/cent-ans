@@ -1485,6 +1485,246 @@
         "Stralsund frondeuse"
       ],
       "difficulty": 2
+    },
+    {
+      "id": "fac_poland",
+      "tagline": "Reconstruire le royaume des Piast",
+      "intro": "À 27 ans, Casimir III hérite d'un royaume à peine rassemblé : la Silésie est perdue, Kuyavie et Dobrzyń tenues par les chevaliers teutoniques, la Bohême voisine convoite la Mazovie. Mais Cracovie est riche du sel de Wieliczka et deux beaux-frères puissants, le roi de Hongrie et le grand-duc de Lituanie, soutiennent la couronne.",
+      "strengths": [
+        "Alliés puissants : Hongrie et Lituanie",
+        "Sel de Wieliczka et fortune de Cracovie",
+        "Grande noblesse fidèle et nombreuse"
+      ],
+      "weaknesses": [
+        "Kuyavie et Dobrzyń occupées par l'Ordre",
+        "Silésie perdue et Mazovie sous influence bohémienne",
+        "Trésor et armée à reconstruire"
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "fac_plock",
+      "tagline": "Un jeune duc entre trois puissances",
+      "intro": "À la mort de Wenceslas (mai 1336), la Mazovie occidentale est aux mains d'un enfant, épaulé par ses oncles. Płock, ville épiscopale, est prise entre le roi de Bohême, suzerain, le roi de Pologne, qui espère le duché, et l'Ordre teutonique au nord.",
+      "strengths": [
+        "Siège de l'évêché de Płock",
+        "Mère lituanienne, alliée de Gediminas",
+        "Terres agricoles bien peuplées"
+      ],
+      "weaknesses": [
+        "Duc mineur sous tutelle jusqu'en 1340",
+        "Vassal de la Bohême, convoité par la Pologne",
+        "Aucune armée de métier"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_warsaw",
+      "tagline": "Une cour ducale entre Vistule et Ruthénie",
+      "intro": "Trojden Ier est à la fois duc de Czersk et père d'un roi de Ruthénie. Varsovie n'est encore qu'une petite ville ducale, mais l'alliance galicienne lui ouvre des ambitions bien au-delà de la Mazovie.",
+      "strengths": [
+        "Fils sur le trône de Galicie-Volhynie",
+        "Tuteur du duc de Płock",
+        "Vistule riche en blé et en bois"
+      ],
+      "weaknesses": [
+        "Terres exiguës",
+        "Convoité par Cracovie et Prague",
+        "Peu de ville fortifiée"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_rawa",
+      "tagline": "Le plus petit des ducs de Mazovie",
+      "intro": "Siemowit II ne tient qu'un duché exigu, entre les terres de Łęczyca et le cours de la Bzura. Il lui faut ruser entre Cracovie, Prague et ses frères pour survivre.",
+      "strengths": [
+        "Terres au centre de la Pologne",
+        "Tuteur du duc de Płock",
+        "Villages riches de blé"
+      ],
+      "weaknesses": [
+        "Le plus petit territoire du jeu",
+        "Armée minuscule",
+        "Vassal de Bohême, cible de Cracovie"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_legnica",
+      "tagline": "Le dernier grand duc piast de Basse-Silésie",
+      "intro": "Boleslas III règne sur deux villes prospères, Legnica et Brzeg, mais ses fêtes ont vidé les caisses. Vassal de Prague, il rêve pourtant de la gloire des Piast d'antan.",
+      "strengths": [
+        "Villes riches de droit allemand",
+        "Position centrale en Silésie",
+        "Prestige de la lignée piast"
+      ],
+      "weaknesses": [
+        "Duc endetté",
+        "Vassal de la Bohême",
+        "Peu de soldats"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_glogow",
+      "tagline": "Aux marches du Brandebourg",
+      "intro": "Henri IV le Fidèle tient la Basse-Silésie occidentale, face au margrave de Brandebourg et à la Grande-Pologne. Son fils, le futur Henri le Fer, s'apprête à faire de ce duché un acteur redouté.",
+      "strengths": [
+        "Passage de l'Oder sécurisé",
+        "Fils ambitieux, Henri V",
+        "Terres relativement calmes"
+      ],
+      "weaknesses": [
+        "Duché partagé entre héritiers",
+        "Menace du Brandebourg",
+        "Vassalité bohémienne fragile"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_opole",
+      "tagline": "Le carrefour de la Haute-Silésie",
+      "intro": "Boleslas II d'Opole règne sur la Haute-Silésie, entre la Bohême, la Moravie et la Petite-Pologne. Les riches mines de fer et de plomb de Bytom font l'envie de ses voisins.",
+      "strengths": [
+        "Mines de fer et de plomb",
+        "Région bien fortifiée",
+        "Nombreuses places-fortes"
+      ],
+      "weaknesses": [
+        "Vassal de la Bohême",
+        "Pas d'accès à la mer",
+        "Duchés partagés entre parents"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_swidnica",
+      "tagline": "Le dernier duc silésien libre",
+      "intro": "Bolko II refuse de plier devant Jean de Luxembourg. Ses monts et ses forteresses, dont Bolków, lui donnent une position défensive redoutable ; ses mariages doivent lui apporter la sécurité.",
+      "strengths": [
+        "Indépendant de la Bohême",
+        "Forteresses des Sudètes",
+        "Villes marchandes prospères"
+      ],
+      "weaknesses": [
+        "Entouré de vassaux de Prague",
+        "Peu de soldats",
+        "Dépendant des alliances"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_hungary",
+      "tagline": "Le royaume angevin, riche d'or et de sel",
+      "intro": "Charles Robert a rétabli l'ordre après la guerre civile contre les oligarques. Sa monnaie d'or de Kremnica est l'une des plus solides d'Europe, mais le royaume s'étend sur une mosaïque de peuples qu'il faut tenir.",
+      "strengths": [
+        "Or de Kremnica, sel de Transylvanie",
+        "Alliance avec Pologne et Bohême",
+        "Grandes armées banderiales"
+      ],
+      "weaknesses": [
+        "Mosaïque de peuples et de religions",
+        "Nobles oligarques toujours turbulents",
+        "Défaite de Posada face à la Valachie"
+      ],
+      "difficulty": 0
+    },
+    {
+      "id": "fac_transylvania",
+      "tagline": "Le gardien des Carpates",
+      "intro": "Thomas Szécsényi gouverne la Transylvanie au nom de Charles Robert. Entre nobles hongrois, Sicules libres, Saxons riches et Valaques orthodoxes, il doit tenir la marche du royaume face à Basarab et à la Horde.",
+      "strengths": [
+        "Sel et mines d'or",
+        "Sicules et Saxons armés",
+        "Soutien royal"
+      ],
+      "weaknesses": [
+        "Voïvodie sous tutelle royale",
+        "Peuples divisés",
+        "Voisin valaque dangereux"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_slavonia",
+      "tagline": "Le ban des marches du sud",
+      "intro": "Mikcs gouverne Slavonie et Croatie au nom du roi. Les Šubić sont tombés en 1322, mais les Frankopans et les Nelipić restent turbulents et la Bosnie voisine grandit.",
+      "strengths": [
+        "Confiance du roi",
+        "Villes royales libres",
+        "Terres agricoles de la Save"
+      ],
+      "weaknesses": [
+        "Croatie difficile à tenir",
+        "Seigneurs indociles",
+        "Peu de ressources propres"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_galicia_volhynia",
+      "tagline": "Le dernier roi de Ruthénie",
+      "intro": "Iouri II, fils d'un duc de Mazovie, est monté sur le trône de Daniel de Galicie en 1323. Il doit tenir les boyards orthodoxes, les colons catholiques, la Pologne, la Hongrie et la Lituanie qui guettent son héritage.",
+      "strengths": [
+        "Sel des Carpates",
+        "Vaste royaume fertile",
+        "Villes marchandes prospères"
+      ],
+      "weaknesses": [
+        "Boyards hostiles",
+        "Aucun héritier",
+        "Voisins avides"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_lithuania",
+      "tagline": "Le dernier prince païen d'Europe",
+      "intro": "Gediminas règne sur des forêts, des marais et de vastes terres ruthènes. Ses fils, Algirdas et Kęstutis, mènent ses armées. Les croisés de l'Ordre l'attaquent chaque été ; il traite avec le pape et les marchands de la Hanse pour gagner du temps.",
+      "strengths": [
+        "Armées mobiles et redoutées",
+        "Fils talentueux (Algirdas, Kęstutis)",
+        "Immenses forêts et vastes terres ruthènes"
+      ],
+      "weaknesses": [
+        "Croisades de l'Ordre teutonique et de Livonie",
+        "Sujets ruthènes orthodoxes distincts de la noblesse païenne",
+        "Peu de villes et d'artisans"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_kiev",
+      "tagline": "L'ombre de la Rus' de Kiev",
+      "intro": "Kiev n'est plus que l'ombre de son passé : quelques milliers d'habitants entre les ruines et les églises, un tribut à la Horde d'Or, un protecteur lituanien. Fiodor peut encore redonner un peu d'éclat à la ville sainte de la Rus'.",
+      "strengths": [
+        "Prestige de l'ancienne capitale",
+        "Métropolite orthodoxe",
+        "Terres fertiles"
+      ],
+      "weaknesses": [
+        "Tributaire de la Horde",
+        "Population très faible",
+        "Voisins puissants"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_wallachia",
+      "tagline": "Le vainqueur de Posada",
+      "intro": "Basarab a écrasé l'armée royale hongroise dans les défilés de Posada, en 1330. Sa principauté, jeune et orthodoxe, reste pourtant coincée entre la Hongrie, la Horde d'Or et la Bulgarie.",
+      "strengths": [
+        "Victoire de Posada",
+        "Défilés carpatiques faciles à défendre",
+        "Prince d'expérience"
+      ],
+      "weaknesses": [
+        "Population clairsemée",
+        "Voisin hongrois vindicatif",
+        "Peu de villes"
+      ],
+      "difficulty": 2
     }
   ],
   "difficulty_labels": [

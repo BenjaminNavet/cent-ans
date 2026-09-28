@@ -1,0 +1,91 @@
+{
+  "id": "prov_legnica",
+  "name": {
+    "display": "Duché de Legnica-Brzeg",
+    "local": "Liegnitz",
+    "local_language": "moyen haut-allemand"
+  },
+  "region": "silesie",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Oder",
+    "Kaczawa"
+  ],
+  "coastal": false,
+  "resources": [
+    "res_wheat",
+    "res_wood",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Legnica",
+      "local": "Liegnitz",
+      "local_language": "moyen haut-allemand"
+    },
+    "lat": 51.207,
+    "lon": 16.155
+  },
+  "geo": {
+    "capital_lonlat": [
+      16.155,
+      51.207
+    ],
+    "seed_lonlat": [
+      16.3,
+      51.3
+    ],
+    "voronoi_weight": 0.9
+  },
+  "owner": "fac_legnica",
+  "culture": "cul_german",
+  "religion": "rel_catholic",
+  "population": {
+    "uncertain": true,
+    "note": "Duché aux villes germanisées.",
+    "classes": {
+      "peasants": {
+        "count": 130000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 9100,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2860,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2600,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    }
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_stone_walls"
+  ],
+  "fortification_level": 2,
+  "base_supply": 2000,
+  "description": "Duché de Boleslas III le Prodigue, dernier grand duché piast de Basse-Silésie ; vassal du roi de Bohême depuis le 9 mai 1329, endetté par ses dépenses, il domine Legnica, Brzeg et Lubin.",
+  "sources": [
+    "Duché de Legnica",
+    "Boleslas III le Prodigue"
+  ]
+}

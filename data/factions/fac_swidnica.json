@@ -1,0 +1,67 @@
+{
+  "id": "fac_swidnica",
+  "name": {
+    "display": "Duché de Świdnica-Jawor",
+    "local": "Herzogtum Schweidnitz-Jauer",
+    "local_language": "moyen haut-allemand"
+  },
+  "short_name": "Świdnica",
+  "adjective": "de Świdnica",
+  "government": "duchy",
+  "playable": true,
+  "ruler": "chr_bolko_ii_de_swidnica",
+  "capital": "prov_swidnica",
+  "capital_city": "Świdnica",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_swidnica",
+  "heraldry": {
+    "blazon": "Parti : au 1 d'argent à la demi-aigle de gueules ; au 2 d'or à la demi-aigle de sable.",
+    "description": "Aigle silésienne partie de gueules et de sable.",
+    "primary_color": "#B22222",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Croissant d'argent omis."
+  },
+  "titles": [
+    "Duc de Świdnica",
+    "Seigneur de Jawor (avec son oncle Henri Ier)"
+  ],
+  "treasury": 6500,
+  "prestige": 28,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry",
+    "tech_crossbow_windlass"
+  ],
+  "relations": [
+    {
+      "faction": "fac_bohemia",
+      "status": "peace",
+      "note": "Bolko refuse l'hommage à Jean de Luxembourg."
+    },
+    {
+      "faction": "fac_hungary",
+      "status": "alliance",
+      "note": "Rapprochement avec Charles Robert contre la Bohême (incertain)."
+    },
+    {
+      "faction": "fac_austria",
+      "status": "peace",
+      "note": "Bolko épousera Agnès de Habsbourg en 1338."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 65,
+    "trade": 60,
+    "piety": 55
+  },
+  "description": "Duché silésien resté indépendant de la Bohême ; Bolko II de Świdnica gouverne un pays riche de villes et de mines, rusant entre Prague, Cracovie et Vienne pour éviter l'hommage.",
+  "sources": [
+    "Bolko II de Świdnica",
+    "Duché de Świdnica"
+  ]
+}

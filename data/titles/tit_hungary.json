@@ -1,0 +1,70 @@
+{
+  "id": "tit_hungary",
+  "rank": "kingdom",
+  "name": {
+    "display": "Royaume de Hongrie",
+    "local": "Magyar Királyság",
+    "local_language": "hongrois"
+  },
+  "heraldry": {
+    "blazon": "Écartelé : aux 1 et 4 burelé d'argent et de gueules de huit pièces ; aux 2 et 3 d'azur semé de fleurs de lis d'or.",
+    "description": "Armes d'Anjou-Hongrie : bandes des Árpád et fleurs de lis d'Anjou.",
+    "primary_color": "#B01E2E",
+    "secondary_color": "#F5F1E6"
+  },
+  "de_jure_provinces": [
+    "prov_hungary_central",
+    "prov_transdanubia_west",
+    "prov_transdanubia_mid",
+    "prov_pecs",
+    "prov_great_plain_west",
+    "prov_great_plain_east",
+    "prov_slovakia_west",
+    "prov_slovakia_east",
+    "prov_banat",
+    "prov_syrmia"
+  ],
+  "holder_1337": {
+    "faction": "fac_hungary",
+    "sources": [
+      "Charles Ier de Hongrie",
+      "Royaume de Hongrie",
+      "Bataille de Posada"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_hungary_hold",
+      "title": "Garder la couronne de saint Étienne",
+      "description": "Charles Robert doit conserver le royaume.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_hungary"
+      }
+    },
+    {
+      "id": "obj_hungary_vassals",
+      "title": "Tenir la Transylvanie et la Slavonie",
+      "description": "Garder les deux ducs (voïvode et ban) sous tutelle.",
+      "condition": {
+        "kind": "be_liege_of",
+        "faction": "fac_transylvania"
+      }
+    },
+    {
+      "id": "obj_hungary_crown",
+      "title": "Assurer la succession",
+      "description": "Le trône doit passer à Louis.",
+      "condition": {
+        "kind": "hold_crown",
+        "title": "tit_hungary"
+      }
+    }
+  ],
+  "description": "Royaume de Hongrie sous Charles Ier Robert d'Anjou, avec la Transylvanie et la Slavonie comme grands offices.",
+  "sources": [
+    "Charles Ier de Hongrie",
+    "Royaume de Hongrie",
+    "Bataille de Posada"
+  ]
+}

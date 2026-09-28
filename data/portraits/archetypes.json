@@ -152,7 +152,22 @@
         "fac_osel_wiek",
         "fac_courland",
         "fac_pomerania_stettin",
-        "fac_pomerania_wolgast"
+        "fac_pomerania_wolgast",
+        "fac_poland",
+        "fac_plock",
+        "fac_warsaw",
+        "fac_rawa",
+        "fac_legnica",
+        "fac_glogow",
+        "fac_opole",
+        "fac_swidnica",
+        "fac_hungary",
+        "fac_transylvania",
+        "fac_slavonia",
+        "fac_galicia_volhynia",
+        "fac_lithuania",
+        "fac_kiev",
+        "fac_wallachia"
       ],
       "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
     },

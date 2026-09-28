@@ -1,0 +1,56 @@
+{
+  "id": "tit_transylvania",
+  "rank": "duchy",
+  "name": {
+    "display": "Voïvodie de Transylvanie",
+    "local": "Erdélyi vajdaság",
+    "local_language": "hongrois"
+  },
+  "heraldry": {
+    "blazon": "D'azur à l'aigle de sable, becquée et membrée d'or.",
+    "description": "Aigle sombre sur azur, armes de substitution pour la voïvodie.",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Armes de la voïvodie attestées seulement plus tard."
+  },
+  "de_jure_liege": "tit_hungary",
+  "de_jure_provinces": [
+    "prov_transylvania",
+    "prov_szekler"
+  ],
+  "holder_1337": {
+    "faction": "fac_transylvania",
+    "sources": [
+      "Thomas Szécsényi",
+      "Voïvodie de Transylvanie"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_transylvania_hold",
+      "title": "Garder les Carpates",
+      "description": "Le voïvode doit conserver la Transylvanie.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_transylvania"
+      }
+    },
+    {
+      "id": "obj_transylvania_wallachia",
+      "title": "Soumettre la Valachie",
+      "description": "Tenir Oltenia.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_oltenia"
+        ]
+      }
+    }
+  ],
+  "description": "Voïvodie de Transylvanie, office royal héréditaire de fait.",
+  "sources": [
+    "Thomas Szécsényi",
+    "Voïvodie de Transylvanie"
+  ]
+}

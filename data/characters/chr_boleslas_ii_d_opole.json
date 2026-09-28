@@ -1,0 +1,46 @@
+{
+  "id": "chr_boleslas_ii_d_opole",
+  "name": {
+    "display": "Boleslas II d'Opole",
+    "local": "Bolko II opolski",
+    "local_language": "polonais"
+  },
+  "sex": "male",
+  "house": "Piast d'Opole",
+  "faction": "fac_opole",
+  "role": "ruler",
+  "birth": {
+    "value": "1300",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1356",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Duc d'Opole",
+      "from": {
+        "value": "1313"
+      },
+      "note": "Duc d'Opole, vassal du roi de Bohême."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 5
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_diplomat"
+  ],
+  "piety": 50,
+  "starting_location": "prov_upper_silesia",
+  "status": "at_court",
+  "description": "Duc d'Opole depuis 1313, vassal de Jean de Bohême ; dates de vie approximatives.",
+  "sources": [
+    "Boleslas II d'Opole"
+  ]
+}

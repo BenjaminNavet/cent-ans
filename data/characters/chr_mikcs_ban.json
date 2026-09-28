@@ -1,0 +1,46 @@
+{
+  "id": "chr_mikcs_ban",
+  "name": {
+    "display": "Mikcs Ban",
+    "local": "Mikcs bán",
+    "local_language": "hongrois"
+  },
+  "sex": "male",
+  "house": "Ákos",
+  "faction": "fac_slavonia",
+  "role": "ruler",
+  "birth": {
+    "value": "1290",
+    "uncertain": true
+  },
+  "death": {
+    "value": "1343",
+    "uncertain": true
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Ban de Slavonie",
+      "from": {
+        "value": "1325"
+      },
+      "note": "Ban de Slavonie de 1325 à 1343 (dates à vérifier)."
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 3
+  },
+  "traits": [
+    "trait_loyal",
+    "trait_cautious"
+  ],
+  "piety": 50,
+  "starting_location": "prov_slavonia_west",
+  "status": "at_court",
+  "description": "Ban de Slavonie et de Croatie pour Charles Robert, issu du lignage des Ákos ; naissance et date de mort incertaines.",
+  "sources": [
+    "Mikcs Ban"
+  ]
+}

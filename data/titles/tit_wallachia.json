@@ -1,0 +1,66 @@
+{
+  "id": "tit_wallachia",
+  "rank": "kingdom",
+  "name": {
+    "display": "Principauté de Valachie",
+    "local": "Țara Românească",
+    "local_language": "roumain"
+  },
+  "heraldry": {
+    "blazon": "D'azur à l'aigle d'or, à la bordure de gueules.",
+    "description": "Aigle d'or sur azur, symbole des princes de Valachie, attesté plus tard ; bordure de gueules ajoutée pour la distinction en jeu.",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Armes attestées à partir du XVe siècle ; bordure : brisure de jeu."
+  },
+  "de_jure_provinces": [
+    "prov_oltenia",
+    "prov_muntenia",
+    "prov_muntenia_east"
+  ],
+  "holder_1337": {
+    "faction": "fac_wallachia",
+    "sources": [
+      "Basarab Ier de Valachie",
+      "Principauté de Valachie",
+      "Bataille de Posada"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_wallachia_hold",
+      "title": "Garder la Valachie",
+      "description": "Basarab doit conserver la principauté indépendante.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_wallachia"
+      }
+    },
+    {
+      "id": "obj_wallachia_free",
+      "title": "Rester indépendant",
+      "description": "Ne pas retomber sous la suzeraineté hongroise.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    },
+    {
+      "id": "obj_wallachia_banat",
+      "title": "Prendre Severin",
+      "description": "Prendre le Banat.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_banat"
+        ]
+      }
+    }
+  ],
+  "description": "Principauté indépendante de Valachie ; rang « royaume » approximé.",
+  "sources": [
+    "Basarab Ier de Valachie",
+    "Principauté de Valachie",
+    "Bataille de Posada"
+  ]
+}

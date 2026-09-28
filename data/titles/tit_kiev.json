@@ -1,0 +1,51 @@
+{
+  "id": "tit_kiev",
+  "rank": "kingdom",
+  "name": {
+    "display": "Principauté de Kiev",
+    "local": "Київське князівство",
+    "local_language": "ruthène"
+  },
+  "heraldry": {
+    "blazon": "D'azur à la croix d'or.",
+    "description": "Croix d'or sur azur, substitution pour la principauté (le trident rurikide n'est pas dessinable ici).",
+    "primary_color": "#1F3F8F",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Trident des Rurikides omis."
+  },
+  "de_jure_provinces": [
+    "prov_kyiv"
+  ],
+  "holder_1337": {
+    "faction": "fac_kiev",
+    "sources": [
+      "Fiodor de Kiev",
+      "Principauté de Kiev"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_kiev_hold",
+      "title": "Sauver Kiev",
+      "description": "Le prince doit garder la ville sainte.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_kiev"
+      }
+    },
+    {
+      "id": "obj_kiev_free",
+      "title": "Se libérer de tout tribut",
+      "description": "Rester indépendant.",
+      "condition": {
+        "kind": "be_independent"
+      }
+    }
+  ],
+  "description": "Principauté de Kiev, rang « royaume » approximé pour un prince souverain mais tributaire de la Horde d'Or.",
+  "sources": [
+    "Fiodor de Kiev",
+    "Principauté de Kiev"
+  ]
+}
