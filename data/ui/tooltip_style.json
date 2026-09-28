@@ -1,0 +1,39 @@
+{
+  "description": "Chantier IB (ADR 0109) — présentation des infobulles et des bulles : couleurs de catégorie, chiffres vedettes par type, dimensions, délais de la chaîne à Alt maintenu. Rendu seulement, aucune règle de jeu. Lu par game/scripts/ui/tooltip_view.gd et game/scripts/codex/codex_bubbles.gd.",
+  "width_px": 360,
+  "max_height_screen_share": 0.7,
+  "header_icon_px": 48,
+  "short_max_body_lines": 8,
+  "chain": {
+    "hover_delay_s": 0.12,
+    "idle_hover_delay_s": 0.35,
+    "close_grace_s": 0.4,
+    "max_bubbles": 10,
+    "breadcrumb_from_depth": 3
+  },
+  "kind_colors": {
+    "unit": "#7a2e1e",
+    "building": "#5a4a2a",
+    "technology": "#2e4a6a",
+    "resource": "#4a5a2a",
+    "gauge": "#5a3a5a",
+    "trait": "#6a4a1e",
+    "skill": "#2e5a4a",
+    "class": "#4a3a2a",
+    "rule": "#3a3a3a",
+    "plain": "#3a2a1a"
+  },
+  "headline": {
+    "unit": ["strength", "morale"],
+    "unit_recruit": ["cost", "melee_or_ranged"],
+    "building": ["main_effect"],
+    "technology": ["research_cost"],
+    "gauge": ["value"],
+    "resource": [],
+    "trait": [],
+    "skill": [],
+    "class": ["population"],
+    "rule": [],
+    "plain": []
+  }
+}

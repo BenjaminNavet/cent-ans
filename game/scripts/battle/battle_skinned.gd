@@ -78,6 +78,12 @@ const FINE_MAPS := {
 	"detail": "fine_detail.png",
 	"horse": "fine_horse.png",
 }
+## Lot GA1 (ADR 0104) : matières générées. `detail` prend `fine_detail_ga1.png` (12 couches,
+## `data/art/materials.yaml`) et `detail_albedo` s'ajoute (albédo de détail centré, multiplié à
+## la couleur de sommet). `--no-ga1` après `--` : tuiles FG3 d'origine (mesures A/B) ; l'ancien
+## tableau n'est alors chargé qu'à la place du nouveau (pas de double mémoire).
+const GA1_DETAIL := "fine_detail_ga1.png"
+const GA1_ALBEDO := "fine_detail_albedo.png"
 static var _fine_maps: Dictionary = {}
 static var _fine_maps_loaded := false
 
@@ -88,11 +94,22 @@ static func fine_maps() -> Dictionary:
 		# `--no-fg3` : figurines fines sans cartes cuites (mesures A/B).
 		if OS.get_cmdline_user_args().has("--no-fg3"):
 			return _fine_maps
+		var ga1 := (
+			not OS.get_cmdline_user_args().has("--no-ga1")
+			and ResourceLoader.exists(FINE_TEX_DIR + GA1_DETAIL)
+			and ResourceLoader.exists(FINE_TEX_DIR + GA1_ALBEDO)
+		)
 		for key in FINE_MAPS:
-			var path: String = FINE_TEX_DIR + str(FINE_MAPS[key])
+			var file := GA1_DETAIL if ga1 and key == "detail" else str(FINE_MAPS[key])
+			var path: String = FINE_TEX_DIR + file
 			if ResourceLoader.exists(path):
 				_fine_maps[key] = load(path)
-		if _fine_maps.size() < FINE_MAPS.size():
+		if ga1:
+			_fine_maps["detail_albedo"] = load(FINE_TEX_DIR + GA1_ALBEDO)
+		var complete := true
+		for key in FINE_MAPS:
+			complete = complete and _fine_maps.has(key)
+		if not complete:
 			if fine_enabled():
 				push_warning("BattleSkinned: cartes FG3 incomplètes dans %s" % FINE_TEX_DIR)
 			_fine_maps = {}
@@ -101,6 +118,11 @@ static func fine_maps() -> Dictionary:
 
 static func fine_maps_ready() -> bool:
 	return not fine_maps().is_empty()
+
+
+## GA1 : albédo de détail généré actif (absent avec `--no-ga1` ou sans les tableaux).
+static func ga1_enabled() -> bool:
+	return fine_maps().has("detail_albedo")
 
 
 ## FG3 : bascule le matériau d'une figurine fine cuite sur la variante `FG3_BAKED` et pose
@@ -119,6 +141,9 @@ static func _setup_fine_maps(mat: ShaderMaterial, kind: String, variant: int) ->
 	mat.set_shader_parameter("fine_atlas0", maps["lod0"])
 	mat.set_shader_parameter("fine_atlas1", maps["lod1"])
 	mat.set_shader_parameter("fine_detail", maps["detail"])
+	mat.set_shader_parameter("ga1_detail", maps.has("detail_albedo"))
+	if maps.has("detail_albedo"):
+		mat.set_shader_parameter("fine_detail_albedo", maps["detail_albedo"])
 	mat.set_shader_parameter("fine_horse", maps["horse"])
 	mat.set_shader_parameter("fine_layer", int(fig["atlas_layer"]))
 
