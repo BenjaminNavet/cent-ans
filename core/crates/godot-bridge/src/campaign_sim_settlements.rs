@@ -4,7 +4,8 @@ use data_model::{ProvinceId, SettlementId};
 use godot::prelude::*;
 
 use crate::campaign_sim::{
-    buildable_array, buildings_array, construction_dict, ids, units_array, CampaignSim,
+    buildable_array, buildings_array, construction_dict, demolition_preview_array, ids,
+    units_array, CampaignSim,
 };
 
 #[godot_api(secondary)]
@@ -149,6 +150,25 @@ impl CampaignSim {
             return VarArray::new();
         };
         buildable_array(data, &state.buildable(data, &id), Some((state, &id)))
+    }
+
+    /// RS-N: demolition preview of every built building of a settlement, for
+    /// the « Raser » button (`Order::Demolish`): `[{building, name,
+    /// can_demolish, reason, refund, upkeep_saved}]`, in the order of
+    /// `settlement_detail`'s `buildings`. `reason` is French, empty when
+    /// `can_demolish` is true. Empty for an unknown id.
+    #[func]
+    fn settlement_demolition_preview(&self, id: GString) -> VarArray {
+        let (Some(state), Some(data)) = (&self.state, &self.data) else {
+            return VarArray::new();
+        };
+        let Ok(id) = SettlementId::new(id.to_string()) else {
+            return VarArray::new();
+        };
+        let Some(live) = state.settlement_state(&id) else {
+            return VarArray::new();
+        };
+        demolition_preview_array(state, data, &id, &live.buildings)
     }
 
     /// Settlement ids of a province, the city first then by id (lot C4).

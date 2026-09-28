@@ -5,7 +5,8 @@ extends Node
 ## toute règle vient de `CampaignSim` :
 ## - panneau de colonie (`SettlementPanel`) ouvert par `SettlementLayer.settlement_selected`
 ##   ou par l'onglet « Colonies » du panneau de province (qui centre aussi la caméra) ;
-##   ordres `recruit` / `create_army` / `build` / `cancel_build` adressés à la colonie ;
+##   ordres `recruit` / `create_army` / `build` / `cancel_build` / `demolish` (RS-N, bouton
+##   « Raser », confirmé par `RazeConfirmationDialog`) adressés à la colonie ;
 ## - clic droit sur une colonie avec une armée sélectionnée : ordre `move_army` le long de
 ##   `find_path(armée, colonie)` ;
 ## - colonies atteignables ce tour (`get_reachable_settlements`) : anneaux au sol ;
@@ -24,6 +25,10 @@ var hovered_settlement: String = ""
 var _opening := false
 var _mouse_dirty := false
 var _last_distance := -1.0
+## RS-N : confirmation avant l'ordre `demolish` ; ordre en attente de sa réponse
+## ({settlement, building}).
+var raze_dialog: RazeConfirmationDialog = null
+var _pending_raze: Dictionary = {}
 
 
 func setup(campaign_map: Node) -> void:
@@ -39,7 +44,12 @@ func setup(campaign_map: Node) -> void:
 	panel.create_army_requested.connect(_on_create_army)
 	panel.build_requested.connect(_on_build)
 	panel.cancel_build_requested.connect(_on_cancel_build)
+	panel.raze_requested.connect(_on_raze_requested)
 	panel.province_requested.connect(_on_province_requested)
+	raze_dialog = RazeConfirmationDialog.new()
+	raze_dialog.confirmed.connect(_on_raze_confirmed)
+	raze_dialog.cancelled.connect(func() -> void: _pending_raze = {})
+	UiZones.put(UiZones.Zone.MODAL, raze_dialog)
 	panel.closed.connect(func() -> void:
 		if map.settlement_layer != null:
 			map.settlement_layer.select(""))
@@ -110,7 +120,8 @@ func _show(detail: Dictionary) -> void:
 	var player_owner := str(detail.get("owner", "")) == player and str(detail.get("controller", "")) == player
 	var recruitable: Array = map.sim.call("get_recruitable", id) if player_owner else []
 	var buildable: Array = map.sim.call("settlement_buildable", id) if player_owner and map.sim.has_method("settlement_buildable") else []
-	panel.show_settlement(detail, recruitable, buildable, player_owner, SimFacade.faction_short_name)
+	var demolition: Array = map.sim.call("settlement_demolition_preview", id) if player_owner and map.sim.has_method("settlement_demolition_preview") else []
+	panel.show_settlement(detail, recruitable, buildable, player_owner, SimFacade.faction_short_name, demolition)
 
 
 ## Rafraîchit le panneau ouvert après un changement d'état (appelé par `refresh_all`).
@@ -162,6 +173,22 @@ func _on_build(settlement_id: String, building_id: String) -> void:
 
 func _on_cancel_build(settlement_id: String) -> void:
 	map._submit({"type": "cancel_build", "settlement": settlement_id}, "Construction annulée (moitié du coût remboursée).")
+
+
+## RS-N : ouvre la confirmation avant l'ordre `demolish`.
+func _on_raze_requested(settlement_id: String, building_id: String, preview: Dictionary) -> void:
+	if not bool(preview.get("can_demolish", false)):
+		return
+	_pending_raze = {"settlement": settlement_id, "building": building_id}
+	raze_dialog.ask(str(preview.get("name", building_id)), preview)
+
+
+func _on_raze_confirmed() -> void:
+	if _pending_raze.is_empty():
+		return
+	var order := {"type": "demolish", "settlement": _pending_raze.get("settlement", ""), "building": _pending_raze.get("building", "")}
+	_pending_raze = {}
+	map._submit(order, "Bâtiment rasé, remboursement versé.")
 
 
 # --- Ordres d'armée ---------------------------------------------------------------------
