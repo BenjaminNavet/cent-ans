@@ -54,6 +54,11 @@
     {
       "faction": "fac_navarre",
       "status": "peace"
+    },
+    {
+      "faction": "fac_sicily",
+      "status": "alliance",
+      "note": "Branche cadette de la maison de Barcelone, tenant la Sicile depuis la paix de Caltabellotta (1302) ; alliance dynastique constante, sans union des couronnes."
     }
   ],
   "ai_personality": {
