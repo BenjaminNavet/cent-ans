@@ -1,0 +1,95 @@
+{
+  "id": "prov_viborg",
+  "name": {
+    "display": "Viborg et Savonie",
+    "local": "Viipuri",
+    "local_language": "finnois"
+  },
+  "region": "finlande",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Viborg"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Viborg",
+      "local": "Viborg",
+      "local_language": "finnois"
+    },
+    "lat": 60.7139,
+    "lon": 28.7533
+  },
+  "geo": {
+    "capital_lonlat": [
+      28.7533,
+      60.7139
+    ],
+    "seed_lonlat": [
+      28.3,
+      61.0
+    ],
+    "voronoi_weight": 1.5
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_finnish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 30000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 900,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 900,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 360,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 800,
+  "description": "Marche orientale de la Suède face à Novgorod : le château de Viborg (1293), acquis par la paix de Nöteborg (1323), la Carélie occidentale et le Savo.",
+  "sources": [
+    "Château de Viborg",
+    "Traité de Nöteborg (1323)",
+    "Carélie occidentale"
+  ]
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_riga",
+    "province": "prov_riga",
+    "kind": "city",
+    "name": {
+      "display": "Riga",
+      "local": "Riga",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      24.1052,
+      56.9496
+    ],
+    "weight": 60,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_guild_hall",
+      "bld_cathedral",
+      "bld_muster_field"
+    ],
+    "port": true,
+    "description": "Ville hanséatique au conseil puissant, cathédrale Sainte-Marie et château de l'Ordre.",
+    "sources": [
+      "Riga"
+    ]
+  },
+  {
+    "id": "set_dunamunde",
+    "province": "prov_riga",
+    "kind": "abbey",
+    "name": {
+      "display": "Dünamünde",
+      "local": "Dünamünde",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      24.03,
+      57.0567
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_abbey",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Abbaye cistercienne fortifiée à l'embouchure de la Dvina.",
+    "sources": [
+      "Daugavgrīva"
+    ]
+  },
+  {
+    "id": "set_uexkull",
+    "province": "prov_riga",
+    "kind": "village",
+    "name": {
+      "display": "Uexküll",
+      "local": "Üxküll",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      24.4886,
+      56.8333
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Première église de pierre de Livonie (vers 1186), bourg de la Dvina.",
+    "sources": [
+      "Ikšķile"
+    ]
+  }
+]

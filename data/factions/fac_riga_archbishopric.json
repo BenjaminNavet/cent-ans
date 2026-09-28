@@ -1,0 +1,61 @@
+{
+  "id": "fac_riga_archbishopric",
+  "name": {
+    "display": "Archevêché de Riga",
+    "local": "Erzbistum Riga",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Riga (archevêché)",
+  "adjective": "rigois",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_friedrich_von_pernstein",
+  "capital": "prov_riga_archbishopric",
+  "capital_city": "Kokenhusen",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "primary_title": "tit_riga",
+  "heraldry": {
+    "blazon": "D'azur à deux clefs d'or en sautoir.",
+    "description": "Deux clefs de saint Pierre croisées, emblème de l'Église de Riga.",
+    "primary_color": "#1F3A93",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason simplifié : le sceau de l'archevêché n'a pas été retrouvé pour 1337."
+  },
+  "titles": [
+    "Archevêque de Riga",
+    "Prince d'Empire"
+  ],
+  "treasury": 7000,
+  "prestige": 38,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_livonian_order",
+      "status": "peace",
+      "note": "Conflit chronique de suprématie avec l'Ordre."
+    },
+    {
+      "faction": "fac_riga",
+      "status": "peace",
+      "note": "La ville de Riga, siège de l'archevêque, échappe à son autorité effective."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 80
+  },
+  "description": "Métropolite de toute la Livonie et prince d'Empire, l'archevêque Friedrich de Pernstein tient des seigneuries dispersées et une autorité contestée par l'Ordre et par sa propre ville.",
+  "sources": [
+    "Archevêché de Riga",
+    "Friedrich von Pernstein"
+  ]
+}

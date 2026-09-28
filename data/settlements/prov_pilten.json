@@ -1,0 +1,79 @@
+[
+  {
+    "id": "set_pilten",
+    "province": "prov_pilten",
+    "kind": "city",
+    "name": {
+      "display": "Pilten",
+      "local": "Pilten",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      21.6836,
+      57.2231
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Château et chapitre de l'évêque de Courlande.",
+    "sources": [
+      "Piltene"
+    ]
+  },
+  {
+    "id": "set_hasenpoth",
+    "province": "prov_pilten",
+    "kind": "castle",
+    "name": {
+      "display": "Hasenpoth",
+      "local": "Hasenpoth",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      21.6,
+      56.7
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'évêque sur la marche de Courlande.",
+    "sources": [
+      "Aizpute"
+    ]
+  },
+  {
+    "id": "set_dondangen",
+    "province": "prov_pilten",
+    "kind": "castle",
+    "name": {
+      "display": "Dondangen",
+      "local": "Dondangen",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      22.3,
+      57.5
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'évêque au nord du cap Kolka.",
+    "sources": [
+      "Dundaga"
+    ]
+  }
+]

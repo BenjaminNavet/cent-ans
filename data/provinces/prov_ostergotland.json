@@ -1,0 +1,100 @@
+{
+  "id": "prov_ostergotland",
+  "name": {
+    "display": "Östergötland et Småland",
+    "local": "Östergötland",
+    "local_language": "vieux suédois"
+  },
+  "region": "scandinavie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Motala ström"
+  ],
+  "coastal": true,
+  "ports": [
+    "Söderköping",
+    "Kalmar"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_iron",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Linköping",
+      "local": "Linköping",
+      "local_language": "vieux suédois"
+    },
+    "lat": 58.4109,
+    "lon": 15.6245
+  },
+  "geo": {
+    "capital_lonlat": [
+      15.6245,
+      58.4109
+    ],
+    "seed_lonlat": [
+      15.3,
+      57.75
+    ],
+    "voronoi_weight": 1.2
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_swedish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 190000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 13300,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 5700,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 2280,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field",
+    "bld_cathedral"
+  ],
+  "fortification_level": 1,
+  "base_supply": 3600,
+  "description": "Plaine céréalière de l'Östergötland, siège de la cathédrale de Linköping, et forêts du Småland jusqu'à Kalmar, verrou de la frontière danoise.",
+  "sources": [
+    "Östergötland",
+    "Linköping",
+    "Kalmar",
+    "Småland"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "tit_sjaelland",
+  "rank": "county",
+  "name": {
+    "display": "Gage de Sjælland et des îles",
+    "local": "Sjælland med øerne",
+    "local_language": "danois médiéval"
+  },
+  "de_jure_liege": "tit_denmark",
+  "de_jure_provinces": [
+    "prov_sjaelland"
+  ],
+  "holder_1337": {
+    "faction": "fac_holstein_kiel",
+    "sources": [
+      "Jean III de Holstein-Kiel",
+      "Interrègne danois (1332-1340)"
+    ]
+  },
+  "objectives": [
+    {
+      "id": "obj_sjaelland_hold",
+      "title": "Garder le gage",
+      "description": "Conserver Sjælland et les îles engagés.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_sjaelland"
+      }
+    },
+    {
+      "id": "obj_sjaelland_crown",
+      "title": "Maître du royaume",
+      "description": "Tenir la couronne du Danemark à la place de Gérard.",
+      "condition": {
+        "kind": "hold_crown",
+        "title": "tit_denmark"
+      }
+    }
+  ],
+  "description": "Sjælland, Lolland, Falster et Møn, engagés au comte Jean III de Holstein-Kiel après la paix de 1332.",
+  "sources": [
+    "Jean III de Holstein-Kiel",
+    "Interrègne danois (1332-1340)"
+  ]
+}

@@ -1,0 +1,105 @@
+[
+  {
+    "id": "set_wenden",
+    "province": "prov_livonia",
+    "kind": "city",
+    "name": {
+      "display": "Wenden",
+      "local": "Wenden",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      25.2733,
+      57.3117
+    ],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_armoury",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Résidence du maître de Livonie et forteresse de l'Ordre.",
+    "sources": [
+      "Cēsis"
+    ]
+  },
+  {
+    "id": "set_fellin",
+    "province": "prov_livonia",
+    "kind": "castle",
+    "name": {
+      "display": "Fellin",
+      "local": "Fellin",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      25.59,
+      58.3639
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Commanderie de l'Ordre en Estonie méridionale.",
+    "sources": [
+      "Viljandi"
+    ]
+  },
+  {
+    "id": "set_segewold",
+    "province": "prov_livonia",
+    "kind": "castle",
+    "name": {
+      "display": "Segewold",
+      "local": "Segewold",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      24.8534,
+      57.1531
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château de l'Ordre sur l'Aa, héritage des Porte-Glaive.",
+    "sources": [
+      "Sigulda"
+    ]
+  },
+  {
+    "id": "set_wolmar",
+    "province": "prov_livonia",
+    "kind": "town",
+    "name": {
+      "display": "Wolmar",
+      "local": "Wolmar",
+      "local_language": "moyen bas-allemand"
+    },
+    "lonlat": [
+      25.4256,
+      57.5378
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Petite ville de l'Ordre, base des armées contre Pskov.",
+    "sources": [
+      "Valmiera"
+    ]
+  }
+]

@@ -1,0 +1,94 @@
+{
+  "id": "prov_norrland",
+  "name": {
+    "display": "Norrland",
+    "local": "Norrland",
+    "local_language": "vieux suédois"
+  },
+  "region": "scandinavie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Selånger"
+  ],
+  "sea_zones": [
+    "sea_gulf_of_bothnia"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_iron"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Selånger",
+      "local": "Selånger",
+      "local_language": "vieux suédois"
+    },
+    "lat": 62.3958,
+    "lon": 17.2843
+  },
+  "geo": {
+    "capital_lonlat": [
+      17.2843,
+      62.3958
+    ],
+    "seed_lonlat": [
+      17.4,
+      62.6
+    ],
+    "voronoi_weight": 2.3
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_swedish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 1350,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1350,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 540,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 900,
+  "description": "Côte du Norrland (Hälsingland, Medelpad, Ångermanland) : paysans-pêcheurs libres, fer et fourrures, Selånger étant le principal marché médiéval du littoral.",
+  "sources": [
+    "Norrland",
+    "Selånger",
+    "Hälsingland"
+  ]
+}

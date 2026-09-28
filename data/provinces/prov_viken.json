@@ -1,0 +1,100 @@
+{
+  "id": "prov_viken",
+  "name": {
+    "display": "Viken et Østlandet",
+    "local": "Viken",
+    "local_language": "vieux norrois"
+  },
+  "region": "norvege",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Glomma",
+    "Drammenselva"
+  ],
+  "coastal": true,
+  "ports": [
+    "Oslo",
+    "Tønsberg"
+  ],
+  "sea_zones": [
+    "sea_north_sea"
+  ],
+  "resources": [
+    "res_wood",
+    "res_iron",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Oslo",
+      "local": "Oslo",
+      "local_language": "vieux norrois"
+    },
+    "lat": 59.9139,
+    "lon": 10.7522
+  },
+  "geo": {
+    "capital_lonlat": [
+      10.7522,
+      59.9139
+    ],
+    "seed_lonlat": [
+      10.7,
+      59.85
+    ],
+    "voronoi_weight": 1.3
+  },
+  "owner": "fac_sweden",
+  "culture": "cul_norwegian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 90000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6300,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 2700,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1080,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1900,
+  "description": "Le sud-est du royaume de Norvège : Oslo, capitale du roi depuis Håkon V, le fjord d'Oslo, Tønsberg et les vallées intérieures jusqu'à Hamar.",
+  "sources": [
+    "Oslo",
+    "Viken",
+    "Håkon V de Norvège"
+  ]
+}

@@ -1,0 +1,107 @@
+[
+  {
+    "id": "set_oslo",
+    "province": "prov_viken",
+    "kind": "city",
+    "name": {
+      "display": "Oslo",
+      "local": "Oslo",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      10.7522,
+      59.9139
+    ],
+    "weight": 32,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_castle"
+    ],
+    "port": true,
+    "description": "Capitale de Håkon V, forteresse d'Akershus.",
+    "sources": [
+      "Oslo"
+    ]
+  },
+  {
+    "id": "set_tonsberg",
+    "province": "prov_viken",
+    "kind": "castle",
+    "name": {
+      "display": "Tønsberg",
+      "local": "Tunsberg",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      10.407,
+      59.2674
+    ],
+    "weight": 15,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne ville royale et forteresse de Vestfold.",
+    "sources": [
+      "Tønsberg"
+    ]
+  },
+  {
+    "id": "set_hamar",
+    "province": "prov_viken",
+    "kind": "town",
+    "name": {
+      "display": "Hamar",
+      "local": "Hamar",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      11.068,
+      60.7945
+    ],
+    "weight": 12,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Siège épiscopal de l'intérieur, sur le lac Mjøsa.",
+    "sources": [
+      "Hamar"
+    ]
+  },
+  {
+    "id": "set_sarpsborg",
+    "province": "prov_viken",
+    "kind": "town",
+    "name": {
+      "display": "Sarpsborg",
+      "local": "Borg",
+      "local_language": "vieux norrois"
+    },
+    "lonlat": [
+      11.1094,
+      59.2839
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_water_mill"
+    ],
+    "port": false,
+    "description": "Ville de la Glomma frontalière de la Suède.",
+    "sources": [
+      "Sarpsborg"
+    ]
+  }
+]

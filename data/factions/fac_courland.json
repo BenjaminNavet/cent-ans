@@ -1,0 +1,54 @@
+{
+  "id": "fac_courland",
+  "name": {
+    "display": "Évêché de Courlande",
+    "local": "Bistum Kurland",
+    "local_language": "moyen bas-allemand"
+  },
+  "short_name": "Courlande (évêché)",
+  "adjective": "courlandais épiscopal",
+  "government": "theocracy",
+  "playable": true,
+  "ruler": "chr_johann_ii_de_courlande",
+  "capital": "prov_pilten",
+  "capital_city": "Pilten",
+  "religion": "rel_catholic",
+  "culture": "cul_german",
+  "succession_law": "elective",
+  "primary_title": "tit_courland",
+  "heraldry": {
+    "blazon": "De sinople à la croix d'argent.",
+    "description": "Croix blanche de l'évêché de Courlande (armes simplifiées).",
+    "primary_color": "#1E783C",
+    "secondary_color": "#F5F1E6",
+    "uncertain": true,
+    "note": "Blason non retrouvé pour 1337."
+  },
+  "titles": [
+    "Évêque de Courlande"
+  ],
+  "treasury": 3000,
+  "prestige": 20,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_livonian_order",
+      "status": "peace",
+      "note": "Enclavé dans les terres de l'Ordre, son chapitre est composé de chevaliers-frères."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 20,
+    "diplomacy": 60,
+    "trade": 50,
+    "piety": 80
+  },
+  "description": "Le plus petit des évêchés livoniens : Pilten, Hasenpoth et Dondangen, coincés dans les terres de l'Ordre, dont l'évêque est le chapelain-confrère.",
+  "sources": [
+    "Évêché de Courlande"
+  ]
+}

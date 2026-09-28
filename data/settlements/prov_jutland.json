@@ -58,32 +58,6 @@
     ]
   },
   {
-    "id": "set_aalborg",
-    "province": "prov_jutland",
-    "kind": "town",
-    "name": {
-      "display": "Aalborg",
-      "local": "Alaborg",
-      "local_language": "vieux danois"
-    },
-    "lonlat": [
-      9.9217,
-      57.0488
-    ],
-    "weight": 15,
-    "owner": null,
-    "fortification_level": 1,
-    "buildings": [
-      "bld_market",
-      "bld_port"
-    ],
-    "port": true,
-    "description": "Ville marchande sur le Limfjord, plaque tournante du commerce du hareng.",
-    "sources": [
-      "Aalborg"
-    ]
-  },
-  {
     "id": "set_viborg",
     "province": "prov_jutland",
     "kind": "town",
@@ -133,32 +107,6 @@
     "description": "Forteresse royale construite v. 1268 par Christophe Ier pour garder la frontière méridionale du Jutland face au Sleswig.",
     "sources": [
       "Koldinghus"
-    ]
-  },
-  {
-    "id": "set_logumkloster",
-    "province": "prov_jutland",
-    "kind": "abbey",
-    "name": {
-      "display": "Løgumkloster",
-      "local": "Løgum",
-      "local_language": "vieux danois"
-    },
-    "lonlat": [
-      8.9736,
-      54.9911
-    ],
-    "weight": 6,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_abbey",
-      "bld_scriptorium"
-    ],
-    "port": false,
-    "description": "Abbaye cistercienne fondée en 1173 dans le sud du Jutland, connue en latin sous le nom de Locus Dei.",
-    "sources": [
-      "Løgumkloster"
     ]
   }
 ]

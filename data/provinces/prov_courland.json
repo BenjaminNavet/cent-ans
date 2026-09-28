@@ -1,0 +1,100 @@
+{
+  "id": "prov_courland",
+  "name": {
+    "display": "Courlande et Sémigalle",
+    "local": "Kurland",
+    "local_language": "moyen bas-allemand"
+  },
+  "region": "livonie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "rivers": [
+    "Venta",
+    "Lielupe"
+  ],
+  "coastal": true,
+  "ports": [
+    "Windau"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_wheat",
+    "res_fish"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Goldingen",
+      "local": "Goldingen",
+      "local_language": "moyen bas-allemand"
+    },
+    "lat": 56.9686,
+    "lon": 21.9736
+  },
+  "geo": {
+    "capital_lonlat": [
+      21.9736,
+      56.9686
+    ],
+    "seed_lonlat": [
+      22.6,
+      56.65
+    ],
+    "voronoi_weight": 1.1
+  },
+  "owner": "fac_livonian_order",
+  "culture": "cul_latvian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 60000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2400,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 720,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1300,
+  "description": "Terres de l'Ordre en Courlande et en Sémigalle : Goldingen (Kuldīga), Windau et Mitau (Jelgava), face aux raids lituaniens de Gediminas.",
+  "sources": [
+    "Courlande",
+    "Kuldīga",
+    "Jelgava",
+    "Semigalle"
+  ]
+}

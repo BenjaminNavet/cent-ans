@@ -1,0 +1,99 @@
+{
+  "id": "prov_north_jutland",
+  "name": {
+    "display": "Jutland du Nord",
+    "local": "Nørrejylland",
+    "local_language": "danois médiéval"
+  },
+  "region": "scandinavie",
+  "terrain": "heath",
+  "climate": "oceanic",
+  "neighbors": [],
+  "rivers": [
+    "Limfjord"
+  ],
+  "coastal": true,
+  "ports": [
+    "Aalborg",
+    "Skagen"
+  ],
+  "sea_zones": [
+    "sea_north_sea",
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wool",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Aalborg",
+      "local": "Aalborg",
+      "local_language": "danois médiéval"
+    },
+    "lat": 57.0488,
+    "lon": 9.9217
+  },
+  "geo": {
+    "capital_lonlat": [
+      9.9217,
+      57.0488
+    ],
+    "seed_lonlat": [
+      9.9,
+      57.0
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_holstein",
+  "culture": "cul_danish",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 105000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 7350,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 3150,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 1260,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation à partir du peuplement du Jutland du XIVe siècle ; incertaine."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 2200,
+  "description": "Vendsyssel, Thy et rives du Limfjord : la marche septentrionale du Jutland, engagée avec le reste de la Nørrejylland au comte Gérard III de Holstein depuis l'interrègne de 1332.",
+  "sources": [
+    "Jutland du Nord",
+    "Aalborg",
+    "Interrègne danois (1332-1340)"
+  ]
+}

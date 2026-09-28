@@ -1,0 +1,96 @@
+{
+  "id": "prov_harrien_wierland",
+  "name": {
+    "display": "Estonie danoise",
+    "local": "Hertugdømmet Estland",
+    "local_language": "danois médiéval"
+  },
+  "region": "livonie",
+  "terrain": "forest",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Reval",
+    "Narva"
+  ],
+  "sea_zones": [
+    "sea_baltic"
+  ],
+  "resources": [
+    "res_wood",
+    "res_fish",
+    "res_wheat"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Reval",
+      "local": "Reval",
+      "local_language": "danois médiéval"
+    },
+    "lat": 59.437,
+    "lon": 24.7454
+  },
+  "geo": {
+    "capital_lonlat": [
+      24.7454,
+      59.437
+    ],
+    "seed_lonlat": [
+      25.8,
+      59.1
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_danish_estonia",
+  "culture": "cul_estonian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 55000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2750,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 1650,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 660,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation démographique approximative (aucun recensement en 1337)."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_muster_field",
+    "bld_castle"
+  ],
+  "fortification_level": 2,
+  "base_supply": 1500,
+  "description": "Harrie, Wierland et Jerwen : le duché d'Estonie, possession de la couronne danoise depuis 1219 ; sans roi au Danemark depuis 1332, la province est déchirée entre le parti danois de l'évêque de Reval et le parti allemand des vassaux.",
+  "sources": [
+    "Estonie danoise",
+    "Reval",
+    "Révolte de la Saint-Georges (1343)"
+  ]
+}
