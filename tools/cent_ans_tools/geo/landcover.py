@@ -270,9 +270,7 @@ def river_distance(
         shapes.extend((LineString(part), 1) for part in parts if len(part) >= 2)
     if not shapes:
         return np.full(shape, 1e4, dtype=np.float32)
-    lines = rasterize(
-        shapes, out_shape=shape, fill=0, dtype=np.uint8, all_touched=True
-    )
+    lines = rasterize(shapes, out_shape=shape, fill=0, dtype=np.uint8, all_touched=True)
     return ndimage.distance_transform_edt(lines == 0).astype(np.float32)
 
 

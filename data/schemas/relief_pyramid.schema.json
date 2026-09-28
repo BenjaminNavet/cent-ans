@@ -9,6 +9,10 @@
     "version": { "type": "integer", "minimum": 1 },
     "tile_px": { "const": 512 },
     "root_tile_units": { "const": 256 },
+    "root_origin_tiles": {
+      "type": "array", "items": { "type": "integer", "minimum": 0 }, "minItems": 2, "maxItems": 2,
+      "description": "OM2 (ADR 0115) : décalage (dx, dy) en tuiles racines de la pyramide cuite dans le monde. Tuile existante (k, col, row) = tuile monde (col + dx·2^k, row + dy·2^k) ; ses positions monde sont décalées de (dx, dy) × root_tile_units. Absent = (0, 0)."
+    },
     "height_min_m": { "type": "number" },
     "height_range_m": { "type": "number", "exclusiveMinimum": 0 },
     "dir": { "type": "string", "description": "Dossier des tuiles E1+, relatif à data/map/." },

@@ -179,8 +179,7 @@ def build(force: bool = False, map_dir: Path = MAP_DIR) -> HamletResult:
     )
     places = {key: value[inside] for key, value in places.items()}
     xs, ys = grid.lonlat_to_pixel(places["lon"], places["lat"])
-    size = grid.size_px
-    on_map = (xs >= 0) & (xs < size) & (ys >= 0) & (ys < size)
+    on_map = (xs >= 0) & (xs < grid.width_px) & (ys >= 0) & (ys < grid.height_px)
     label = np.zeros(len(xs), dtype=np.int64)
     label[on_map] = labels[ys[on_map].astype(int), xs[on_map].astype(int)]
 

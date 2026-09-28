@@ -233,9 +233,13 @@ def segment_distance(
     return np.hypot(dx, dy), t
 
 
-def compute_bed(rivers: list[dict], size: int) -> np.ndarray:
-    """Signed distance (map px) to the nearest bank; negative inside a river bed."""
-    bed = np.full((size, size), BED_RANGE_PX, dtype=np.float32)
+def compute_bed(rivers: list[dict], size: int | tuple[int, int]) -> np.ndarray:
+    """Signed distance (map px) to the nearest bank; negative inside a river bed.
+
+    ``size`` is the map shape ``(rows, cols)`` (an int for a square map).
+    """
+    rows, cols = size if isinstance(size, tuple) else (size, size)
+    bed = np.full((rows, cols), BED_RANGE_PX, dtype=np.float32)
     reach = BED_RANGE_PX + 1.0
     for river in rivers:
         points: np.ndarray = river["points"]
@@ -244,9 +248,9 @@ def compute_bed(rivers: list[dict], size: int) -> np.ndarray:
             a = points[i]
             b = points[i + 1]
             x0 = max(int(math.floor(min(a[0], b[0]) - reach)), 0)
-            x1 = min(int(math.ceil(max(a[0], b[0]) + reach)), size)
+            x1 = min(int(math.ceil(max(a[0], b[0]) + reach)), cols)
             y0 = max(int(math.floor(min(a[1], b[1]) - reach)), 0)
-            y1 = min(int(math.ceil(max(a[1], b[1]) + reach)), size)
+            y1 = min(int(math.ceil(max(a[1], b[1]) + reach)), rows)
             if x0 >= x1 or y0 >= y1:
                 continue
             ys, xs = np.mgrid[y0:y1, x0:x1]
@@ -548,7 +552,7 @@ def build(map_dir: Path = MAP_DIR) -> RiverRenderResult:
     )
 
     bed_path = map_dir / BED_FILE
-    Image.fromarray(encode_bed(compute_bed(rivers, height_m.shape[0])), mode="L").save(
+    Image.fromarray(encode_bed(compute_bed(rivers, height_m.shape)), mode="L").save(
         bed_path, optimize=True
     )
 
