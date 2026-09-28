@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_veroia",
+    "province": "prov_veroia",
+    "kind": "city",
+    "name": {
+      "display": "Bérée",
+      "local": "Βέροια",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.203,
+      40.523
+    ],
+    "weight": 40,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Ville de Macédoine, siège d'une métropole.",
+    "sources": [
+      "Veria"
+    ]
+  },
+  {
+    "id": "set_vodena",
+    "province": "prov_veroia",
+    "kind": "town",
+    "name": {
+      "display": "Vodéna",
+      "local": "Βοδενά",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      22.05,
+      40.8
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Cité fortifiée sur la falaise des cascades (Édesse).",
+    "sources": [
+      "Édesse (Grèce)"
+    ]
+  },
+  {
+    "id": "set_kastoria",
+    "province": "prov_veroia",
+    "kind": "town",
+    "name": {
+      "display": "Castoria",
+      "local": "Καστοριά",
+      "local_language": "grec"
+    },
+    "lonlat": [
+      21.2687,
+      40.5192
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market",
+      "bld_stone_walls",
+      "bld_parish_church"
+    ],
+    "port": false,
+    "description": "Cité lacustre, siège d'un évêché ; rare place byzantine à l'ouest.",
+    "sources": [
+      "Kastoria"
+    ]
+  }
+]

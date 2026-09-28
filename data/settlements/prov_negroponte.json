@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_negroponte",
+    "province": "prov_negroponte",
+    "kind": "city",
+    "name": {
+      "display": "Négrepont",
+      "local": "Chalcis",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      23.6,
+      38.46
+    ],
+    "weight": 50,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_cathedral",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_counting_house"
+    ],
+    "port": true,
+    "description": "Chalcis, capitale du bailliage vénitien.",
+    "sources": [
+      "Chalcis"
+    ]
+  },
+  {
+    "id": "set_karystos",
+    "province": "prov_negroponte",
+    "kind": "castle",
+    "name": {
+      "display": "Castel Rosso (Karystos)",
+      "local": "Κάρυστος",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      24.42,
+      38.01
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Forteresse du sud de l'Eubée.",
+    "sources": [
+      "Karystos"
+    ]
+  },
+  {
+    "id": "set_oreos",
+    "province": "prov_negroponte",
+    "kind": "castle",
+    "name": {
+      "display": "Oréos",
+      "local": "Ὠρεοί",
+      "local_language": "vénitien"
+    },
+    "lonlat": [
+      23.1,
+      38.95
+    ],
+    "weight": 20,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Fortin du nord de l'Eubée.",
+    "sources": [
+      "Oreoi"
+    ]
+  }
+]

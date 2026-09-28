@@ -1,0 +1,91 @@
+{
+  "id": "prov_ohrid",
+  "name": {
+    "display": "Ohrid",
+    "local": "Охрид",
+    "local_language": "bulgare"
+  },
+  "region": "balkans",
+  "terrain": "mountains",
+  "climate": "mountain",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Drin Noir"
+  ],
+  "resources": [
+    "res_fish",
+    "res_wood",
+    "res_wool"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Ohrid",
+      "local": "Охрид",
+      "local_language": "bulgare"
+    },
+    "lat": 41.117,
+    "lon": 20.801
+  },
+  "geo": {
+    "capital_lonlat": [
+      20.801,
+      41.117
+    ],
+    "seed_lonlat": [
+      20.75,
+      41.2
+    ],
+    "voronoi_weight": 0.8
+  },
+  "owner": "fac_serbia",
+  "culture": "cul_bulgarian",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 84000,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 6300,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 3000,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 750,
+        "unrest": 8,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_castle",
+    "bld_scriptorium"
+  ],
+  "fortification_level": 3,
+  "base_supply": 2800,
+  "description": "Lac et archevêché autocéphale d'Ohrid, cédés à la Serbie par Byzance en 1334 ; centre culturel des Slaves du Sud (saint Clément, saint Naum).",
+  "sources": [
+    "Ohrid",
+    "Archevêché d'Ohrid"
+  ]
+}

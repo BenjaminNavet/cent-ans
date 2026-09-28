@@ -1,0 +1,98 @@
+{
+  "id": "prov_zara",
+  "name": {
+    "display": "Zara",
+    "local": "Zadar",
+    "local_language": "vénitien"
+  },
+  "region": "balkans",
+  "terrain": "plains",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "ports": [
+    "Zara",
+    "Nin",
+    "Biograd"
+  ],
+  "sea_zones": [
+    "sea_adriatic"
+  ],
+  "resources": [
+    "res_salt",
+    "res_fish",
+    "res_wine"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Zara",
+      "local": "Iadera",
+      "local_language": "vénitien"
+    },
+    "lat": 44.117,
+    "lon": 15.227
+  },
+  "geo": {
+    "capital_lonlat": [
+      15.227,
+      44.117
+    ],
+    "seed_lonlat": [
+      15.4,
+      44.15
+    ],
+    "voronoi_weight": 1.0
+  },
+  "owner": "fac_venice",
+  "culture": "cul_dalmatian",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 45000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 40,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 10000,
+        "unrest": 18,
+        "health": 52,
+        "wealth": 55,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 1800,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 600,
+        "unrest": 13,
+        "health": 52,
+        "wealth": 70,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_port",
+    "bld_cathedral",
+    "bld_stone_walls",
+    "bld_counting_house"
+  ],
+  "fortification_level": 3,
+  "base_supply": 1500,
+  "description": "Zara, vénitienne depuis la reprise de 1311 après sa révolte ; Nin et Biograd ; la Croatie de l'intérieur l'entoure.",
+  "sources": [
+    "Zadar",
+    "Nin",
+    "Biograd na Moru"
+  ]
+}

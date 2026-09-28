@@ -1,0 +1,83 @@
+[
+  {
+    "id": "set_varna",
+    "province": "prov_varna",
+    "kind": "city",
+    "name": {
+      "display": "Varna",
+      "local": "Варна",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      27.911,
+      43.214
+    ],
+    "weight": 45,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_port",
+      "bld_stone_walls",
+      "bld_cathedral"
+    ],
+    "port": true,
+    "description": "Principal port bulgare.",
+    "sources": [
+      "Varna"
+    ]
+  },
+  {
+    "id": "set_ovech",
+    "province": "prov_varna",
+    "kind": "castle",
+    "name": {
+      "display": "Ovech (Provadia)",
+      "local": "Овеч",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      27.44,
+      43.18
+    ],
+    "weight": 30,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_castle",
+      "bld_muster_field"
+    ],
+    "port": false,
+    "description": "Forteresse de Provadia.",
+    "sources": [
+      "Provadia"
+    ]
+  },
+  {
+    "id": "set_shumen",
+    "province": "prov_varna",
+    "kind": "town",
+    "name": {
+      "display": "Chumen",
+      "local": "Шумен",
+      "local_language": "bulgare"
+    },
+    "lonlat": [
+      26.93,
+      43.27
+    ],
+    "weight": 25,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle",
+      "bld_stone_walls"
+    ],
+    "port": false,
+    "description": "Forteresse médiévale sur le plateau.",
+    "sources": [
+      "Shumen"
+    ]
+  }
+]

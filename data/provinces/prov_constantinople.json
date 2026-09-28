@@ -1,0 +1,103 @@
+{
+  "id": "prov_constantinople",
+  "name": {
+    "display": "Constantinople",
+    "local": "Κωνσταντινούπολις",
+    "local_language": "grec"
+  },
+  "region": "byzance",
+  "terrain": "hills",
+  "climate": "mediterranean",
+  "neighbors": [],
+  "coastal": true,
+  "rivers": [
+    "Corne d'Or"
+  ],
+  "ports": [
+    "Constantinople",
+    "Galata (Péra)"
+  ],
+  "sea_zones": [
+    "sea_aegean",
+    "sea_black_sea"
+  ],
+  "resources": [
+    "res_fish",
+    "res_salt",
+    "res_cloth"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Constantinople",
+      "local": "Κωνσταντινούπολις",
+      "local_language": "grec"
+    },
+    "lat": 41.0082,
+    "lon": 28.9784
+  },
+  "geo": {
+    "capital_lonlat": [
+      28.9784,
+      41.0082
+    ],
+    "seed_lonlat": [
+      28.9,
+      41.12
+    ],
+    "voronoi_weight": 0.5
+  },
+  "owner": "fac_byzantium",
+  "culture": "cul_greek",
+  "religion": "rel_orthodox",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 25000,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 35,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 55000,
+        "unrest": 12,
+        "health": 52,
+        "wealth": 50,
+        "goods_satisfaction": 60
+      },
+      "clergy": {
+        "count": 5000,
+        "unrest": 7,
+        "health": 52,
+        "wealth": 60,
+        "goods_satisfaction": 60
+      },
+      "nobility": {
+        "count": 1500,
+        "unrest": 7,
+        "health": 52,
+        "wealth": 65,
+        "goods_satisfaction": 60
+      }
+    },
+    "uncertain": true,
+    "note": "Estimation d'après la densité régionale ; aucune source chiffrée pour 1337."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_cathedral",
+    "bld_port",
+    "bld_stone_walls",
+    "bld_scriptorium",
+    "bld_guild_hall",
+    "bld_counting_house"
+  ],
+  "fortification_level": 4,
+  "base_supply": 800,
+  "description": "La Ville gardée de Dieu : capitale de l'Empire, immense et à demi vide dans ses murailles théodosiennes, ruinée depuis le sac latin de 1204 et la guerre civile de 1321-1328. Galata (Péra), sur l'autre rive, est une colonie génoise.",
+  "sources": [
+    "Constantinople",
+    "Andronic III Paléologue",
+    "Galata"
+  ]
+}
