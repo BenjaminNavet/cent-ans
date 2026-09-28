@@ -166,18 +166,21 @@ pub(crate) fn contested_succession(
     Some(winner)
 }
 
-/// Orders heirs by `law` (spec § 2 laws, applied to kin abroad).
+/// Orders heirs by `law` (spec § 2 laws, applied to kin abroad). The Salic
+/// law (and the default) only knows agnates: men of `house` itself, never
+/// the sons of its daughters (1328).
 fn best_by_law(
     state: &CampaignState,
     law: Option<SuccessionLaw>,
+    house: &str,
     mut candidates: Vec<CharacterId>,
 ) -> Option<CharacterId> {
     let get = |id: &CharacterId| state.characters.get(id).expect("listed");
     candidates.sort_by_key(|id| (get(id).birth_year, id.clone()));
     match law {
-        Some(SuccessionLaw::Salic) | None => {
-            candidates.into_iter().find(|id| get(id).sex == Sex::Male)
-        }
+        Some(SuccessionLaw::Salic) | None => candidates
+            .into_iter()
+            .find(|id| get(id).sex == Sex::Male && get(id).house == house),
         Some(SuccessionLaw::MalePreferencePrimogeniture) => candidates
             .iter()
             .find(|id| get(id).sex == Sex::Male)
@@ -242,7 +245,7 @@ pub(crate) fn inherit_titles_on_extinction(
             .get(&title)
             .and_then(|t| t.succession_law)
             .or(faction_law);
-        let heir = best_by_law(state, law, kin_abroad(state, faction, &house));
+        let heir = best_by_law(state, law, &house, kin_abroad(state, faction, &house));
         if let Some(heir) = heir {
             let to = state.characters[&heir].faction.clone();
             events.push(
@@ -284,4 +287,91 @@ pub(crate) fn inherit_titles_on_extinction(
         }
     }
     !state.factions.get(faction).is_some_and(|f| f.alive)
+}
+
+/// The successor `heir` of `faction` lives in another faction (spec § 4.5,
+/// personal union). From a lesser realm, the heir comes home: the realm he
+/// rules is united to `faction` (Charles d'Alençon king of France brings
+/// Alençon back to the crown), or he simply leaves the court he served.
+/// From an equal or greater realm, `faction`'s titles pass to the heir's
+/// realm. Returns `true` when `faction` has thereby vanished.
+pub(crate) fn heir_comes_home(
+    state: &mut CampaignState,
+    data: &GameData,
+    faction: &FactionId,
+    heir: &CharacterId,
+    events: &mut Vec<GameEvent>,
+) -> bool {
+    let Some(home) = state.characters.get(heir).map(|c| c.faction.clone()) else {
+        return false;
+    };
+    if &home == faction || !state.factions.get(&home).is_some_and(|f| f.alive) {
+        return false;
+    }
+    let own_rank = super::primary_rank(state, data, faction);
+    let home_rank = super::primary_rank(state, data, &home);
+    if home_rank.is_some() && home_rank >= own_rank && own_rank.is_some() {
+        let mut titles = titles_of(state, faction);
+        if !titles.is_empty() {
+            titles.rotate_left(1);
+        }
+        events.push(
+            GameEvent::new(
+                EventKind::Succession,
+                format!(
+                    "{} hérite de {}, uni aux possessions de {}.",
+                    state.character_name(data, heir),
+                    faction_name(data, faction),
+                    faction_name(data, &home)
+                ),
+            )
+            .faction(&home),
+        );
+        for title in titles {
+            let _ = super::transfer::transfer(state, data, &title, &home, events);
+        }
+        return !state.factions.get(faction).is_some_and(|f| f.alive);
+    }
+    let rules_home = state.factions[&home].ruler.as_ref() == Some(heir);
+    if rules_home {
+        events.push(
+            GameEvent::new(
+                EventKind::Succession,
+                format!(
+                    "{} hérite de {} : {} y est réuni.",
+                    state.character_name(data, heir),
+                    faction_name(data, faction),
+                    faction_name(data, &home)
+                ),
+            )
+            .faction(faction),
+        );
+        let mut titles = titles_of(state, &home);
+        if !titles.is_empty() {
+            titles.rotate_left(1);
+        }
+        for title in titles {
+            let _ = super::transfer::transfer(state, data, &title, faction, events);
+        }
+    }
+    if state.characters.get(heir).map(|c| &c.faction) != Some(faction) {
+        state.detach_general(heir);
+        if let Some(c) = state.characters.get_mut(heir) {
+            c.faction = faction.clone();
+            c.governor_of = None;
+        }
+        // The realm he left keeps a ruler and needs a new heir.
+        if state.factions.get(&home).is_some_and(|f| f.alive) {
+            if rules_home {
+                crate::characters::succeed(state, data, &home, events);
+            } else if state.factions[&home].heir.as_ref() == Some(heir) {
+                let next = state.factions[&home]
+                    .ruler
+                    .clone()
+                    .and_then(|r| crate::dynasty::pick_heir_by_law(state, data, &home, &r));
+                state.factions.get_mut(&home).expect("alive").heir = next;
+            }
+        }
+    }
+    false
 }

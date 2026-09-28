@@ -48,7 +48,8 @@
     "spouses": [
       "chr_jeanne_de_penthievre"
     ],
-    "father": "chr_guy_i_de_chatillon"
+    "father": "chr_guy_i_de_chatillon",
+    "mother": "chr_marguerite_de_valois"
   },
   "starting_location": "prov_ile_de_france",
   "status": "at_court",
