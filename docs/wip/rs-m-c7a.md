@@ -62,5 +62,12 @@ Guerre et révoltes dans leurs bandes en moyenne (graines hors bande : 1 à 52 %
 signaler : banqueroutes / faction / décennie 1,09 contre 0,05 à RS-B (ae5d94f1) — les petites
 factions FE ; à juger en F8, hors lot.
 
+## Tests finaux (branche `feat/rs-m-c7a`)
+- Sonde c7a release : France 24 336, Angleterre 20 316, sièges 2,435, bloquées 0,11, débarq. 5,0,
+  batailles 80 : **ok**.
+- `cargo fmt --check`, `clippy --all-targets -D warnings`, `cargo test --workspace` : 1 189 passés, 0 échec.
+- pytest : 931 passés, 2 ignorés.
+
 ## Prochaine étape
-Sonde verte sur la branche, tests complets.
+Lot terminé. Fusion par l'orchestrateur ; cibles `core/target-rs-m*` supprimées. Suite : FE F8 (ost
+d'Empire, banqueroutes des petites factions), puis remonter le plancher d'après la mesure.
