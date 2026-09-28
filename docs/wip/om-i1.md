@@ -11,7 +11,10 @@ Branche `feat/om-om2`, worktree `../gp-om-om2`. Profil cargo `i1`.
 
 ## État
 - [x] 1 (premier passage) : voir « Corrections de données ».
-- [ ] 2 régénération complète relancée après correctifs (build → horizon, journal scratchpad).
+- [x] 2 régénération complète (build 5 min 22, splat 2 min 18, relief-shade 1 min 02, navgrid 6 s,
+  rivers-render 14 s, horizon 25 s ; ≈ 9 min 30) : 443 provinces, 1 composante connexe, plus
+  aucune île sans port ; commit `data: OM I1 regenerated geo artifacts`. Aucun fichier > 50 Mo.
+  `geo settlements` + `navgrid` relancés après Pantelleria (port).
 - [x] 3 : `FineGeoStore` lit `root_origin_tiles` de `relief_pyramid.json` ; index et points CAFV
   en coordonnées monde (+20 tuiles E2, +1280 unités en y), chemin de fichier en coordonnées de
   cache (`CafvTile.parse(bytes, offset_tiles)`). Test : `zg5b_fine_geo_test.gd` § 2b ; test réel
@@ -44,6 +47,19 @@ chotts, le Jourdain étaient de la mer. `terrain.lift_inland_depressions` (appel
 `geo build`) remonte à 0,5-1 m la terre ≤ 0 m non reliée à l'océan (graine : golfe de Gascogne) ;
 les basses terres reliées à la mer (Pays-Bas) gardent le comportement d'avant. Test
 `tools/tests/test_inland_depressions.py`.
+
+## Tests Rust corrigés (données D, pas les règles)
+- eq2_balance : 57 bâtiments de colonies D hors des règles (cathédrale en bourg → collégiale,
+  comptoir sans foire → foire à la place du marché, université sans collégiale → collégiale
+  ajoutée, marché/port retirés des villages et châteaux).
+- dp2_explain : `neutral()` = première faction en paix **de la foi de la France** (la première
+  par id était l'Alanie, dont les objections de foi masquaient le point bloquant).
+- feudal_titles::no_objective_victory_at_start : 31 titres D avaient tous leurs objectifs déjà
+  remplis ; un objectif historique non atteint ajouté à chacun (Chios, Smyrne, Samogitie, Caffa,
+  Halych…), au plus 3 objectifs (schéma).
+- m10_events::black_death : la vague part du sud, qui est maintenant l'Égypte : Le Caire au
+  premier pas (touché à l'automne 1347), plus Malaga.
+- f7_events passe (seed inchangée).
 
 ## Prochaine étape
 Fin de `geo build`, contrôles (colonies hors province, provinces sans pixel, îles sans port),
