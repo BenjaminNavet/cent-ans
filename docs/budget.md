@@ -121,3 +121,12 @@ Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`).
 | 2026-09-28 | — | F0 (titres, migration) | 0,00 $ | 0,00 $ | 0,00 $ |
 | 2026-09-28 | OpenRouter | F7 : portraits des souverains et héritiers FE (62 × openai/gpt-5-image-mini) | 2,83 $ | 2,86 $ | 2,86 $ |
 | 2026-09-28 | OpenRouter | F7 : variantes âgées des personnages FE (49 × openai/gpt-5-image-mini) | 2,23 $ | 2,27 $ | 5,13 $ |
+
+## Carte Oural–Méditerranée OM (28/09) — plafond propre de 10 $ (portraits)
+
+Format du grand livre (6 colonnes, lu par `tools/cent_ans_tools/budget.py`). Lot P1 : plafond 5 $ (portraits des nouvelles factions D1-D3 et variantes âgées).
+
+| Date | Service | Objet | Coût estimé | Coût réel | Cumul OM |
+|---|---|---|---|---|---|
+| 2026-09-28 | — | P1 : écus et bannières (génération locale) | 0,00 $ | 0,00 $ | 0,00 $ |
+| 2026-09-29 | OpenRouter | Portraits M10 (46 × openai/gpt-5-image-mini) | 2,10 $ | 2,16 $ | 2,16 $ |
