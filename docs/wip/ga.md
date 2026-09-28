@@ -154,7 +154,7 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
        de bataille (données `battle_decor`). ADR `0106-pipeline-image-vers-3d.md`.
 
 ### GA6 — Clôture
-- [ ] Planche avant/après globale (réutiliser `po_shot.gd`, vues 04, 08, 09 + gros plan).
+- [x] Planche avant/après globale (réutiliser `po_shot.gd`, vues 04, 08, 09 + gros plan).
 - [ ] Jugement du joueur, puis `feat/ga` → `main` (`--ff-only`), suppression des worktrees.
 
 ## Vagues
@@ -215,3 +215,10 @@ Fichiers : `game/assets/textures/terrain/`, `game/scripts/map/terrain_builder.gd
   `ga_macro.gdshaderinc`, mer à normale procédurale animée + 3 paliers de profondeur, `--no-ga4`,
   ADR 0105 § GA4 ; `ga4_terrain_test.gd`, smoke (avec et sans `--no-ga4`), pytest ciblé verts.
   A/B PB1 carte à faire (commande ci-dessus). 0 $.
+- 28/09 : GA4 + GA5 fusionnés dans `feat/ga` ; tests Godot (smoke, ga1, ga2, ga4, ga5, fg3) et
+  pytest (846 passés) verts. GA6 : `po_shot.gd` gagne `--extra=` et la vue 11 `gros-plan` ;
+  planche `docs/img/ga/avant/` (drapeaux `--no-ga1,--no-ga2,--no-ga4` ; GA5 sans drapeau) vs
+  `apres/`, montage `docs/img/ga/avant-apres.jpg`. Écart moyen mesuré 0,6 à 4/255 : gain subtil à
+  ces cadrages (sol plus varié, teinte carte) ; le détail GA1 des figurines ne se lit pas à la
+  distance de la vue « gros-plan ». Reste : A/B perf machine calme, jugement du joueur, fusion.
+  Points ouverts : câblage `TimberFrame` (réexport Blender + choix régions), GA3 reporté.
