@@ -64,6 +64,10 @@ var _camera_distance := 1000.0
 ## de moulin : 12 ; ailes : 12 + 4). Lire `MultiMesh.buffer` relit le tampon du GPU de façon
 ## synchrone (jusqu'à 80 ms par réécriture pendant un zoom) : on écrit depuis ces copies.
 var _cpu_buffers: Dictionary = {}  # MultiMeshInstance3D → PackedFloat32Array
+## RS-K : échelles de maquette (courante, réelle) par colonie, mémorisées le temps d'une passe de
+## réécriture (plusieurs panaches et moulins par colonie : 3 appels `model_scale_at` par point).
+var _scale_memo: Dictionary = {}  # colonie → Vector2(échelle courante, échelle réelle)
+var _memo_depth := 0
 
 
 func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
@@ -115,6 +119,7 @@ func rebuild(province_states: Dictionary) -> void:
 	if key == _last_rebuild_key:
 		return
 	_last_rebuild_key = key
+	_begin_pass()
 	_chimney_points.clear()
 	_fire_points.clear()
 	var data := _layer.data
@@ -151,6 +156,7 @@ func rebuild(province_states: Dictionary) -> void:
 	_fill(_fires, _fire_points, FIRE_SIZE, 1.0)
 	_build_windmills(province_states)
 	_apply_ruins(province_states)
+	_end_pass()
 	stats = {"chimneys": _chimney_points.size(), "fires": _fire_points.size(), "windmills": _windmill_points.size(), "ruins": _ruin.size()}
 
 
@@ -284,7 +290,7 @@ func _surface_y(px: Vector2) -> float:
 ## ancrée, mis à l'échelle de la maquette ; sol gardé aux deux poses extrêmes.
 func _settlement_point(i: int, offset: Vector2, lift: float, seed_value: float) -> Array:
 	var center := _layer.model_px(i)
-	var ratio := _layer.model_scale_at(i, 0.0)
+	var ratio := _scale_pair(i).y
 	var point := [center, lift, seed_value, i, offset, _surface_y(center + offset), _surface_y(center + offset * ratio)]
 	_settlement_pose(point)
 	return point
@@ -301,7 +307,7 @@ func _settlement_pose(point: Array) -> void:
 	var i: int = point[3]
 	if i < 0:
 		return
-	var s := _layer.model_scale_at(i, _camera_distance)
+	var s := _scale_pair(i).x
 	point[0] = _layer.model_px(i) + (point[4] as Vector2) * s
 
 
@@ -310,10 +316,33 @@ func _pose_y(point: Array) -> float:
 	var i: int = point[3]
 	if i < 0:
 		return point[5]
-	var s := _layer.model_scale_at(i, _camera_distance)
-	var ratio := _layer.model_scale_at(i, 0.0)
+	var pair := _scale_pair(i)
+	var s := pair.x
+	var ratio := pair.y
 	var along := clampf((s - ratio) / maxf(1.0 - ratio, 1e-4), 0.0, 1.0)
 	return lerpf(float(point[6]), float(point[5]), along)
+
+
+## RS-K : (échelle courante, échelle réelle) de la maquette `i`, mémorisées pendant une passe.
+func _scale_pair(i: int) -> Vector2:
+	if _memo_depth > 0 and _scale_memo.has(i):
+		return _scale_memo[i]
+	var pair := Vector2(_layer.model_scale_at(i, _camera_distance), _layer.model_scale_at(i, 0.0))
+	if _memo_depth > 0:
+		_scale_memo[i] = pair
+	return pair
+
+
+func _begin_pass() -> void:
+	if _memo_depth == 0:
+		_scale_memo.clear()
+	_memo_depth += 1
+
+
+func _end_pass() -> void:
+	_memo_depth -= 1
+	if _memo_depth == 0:
+		_scale_memo.clear()
 
 
 ## SZ4b : exagération commune à la distance courante (réécriture des positions par pas).
@@ -442,13 +471,19 @@ func _reground_point(point: Array) -> void:
 	var center := _layer.model_px(i)
 	var offset: Vector2 = point[4]
 	point[5] = _surface_y(center + offset)
-	point[6] = _surface_y(center + offset * _layer.model_scale_at(i, 0.0))
+	point[6] = _surface_y(center + offset * _scale_pair(i).y)
 
 
 ## PB1 : seuls les points des tuiles dont la surface a changé (`_reground_chunks`) sont recalés :
 ## la hauteur d'un point ne dépend que de sa tuile. SZ6 : points indexés par tuile (plus de
 ## parcours de tous les points à chaque recalage), tampon lu et écrit seulement si un point bouge.
 func _reground() -> void:
+	_begin_pass()
+	_reground_pass()
+	_end_pass()
+
+
+func _reground_pass() -> void:
 	var changed := _reground_chunks
 	_reground_chunks = {}
 	if _windmill_bodies.multimesh != null and _windmill_sails.multimesh != null:
@@ -565,6 +600,7 @@ func _apply_prop_scale(camera_distance: float) -> void:
 	var reference := _reference_scale()
 	var moved := props.needs_rewrite(_settlement_ref, reference)
 	var tp := Time.get_ticks_usec()  # RS-K : sous-sections du banc `--bench-probe`
+	_begin_pass()
 	if moved:
 		# SZ4b : moulins et panaches suivent l'échelle de la maquette de leur colonie.
 		_settlement_ref = reference
@@ -573,6 +609,7 @@ func _apply_prop_scale(camera_distance: float) -> void:
 	if moved or props.needs_rewrite(_windmill_scale, mill):
 		_windmill_scale = mill
 		_rewrite_windmills()
+	_end_pass()
 	PerfProbe.lap("life/mill_rewrite", tp)
 
 
