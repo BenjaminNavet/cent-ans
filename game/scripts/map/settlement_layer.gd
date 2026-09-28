@@ -169,6 +169,11 @@ var _settlement_scale_ref := -1.0
 var _scale_memo: PackedFloat64Array = PackedFloat64Array()
 var _ratio_memo: PackedFloat64Array = PackedFloat64Array()
 var _scale_memo_distance := -1.0
+## RS-K2 : tour de réécriture des maquettes (pas d'échelle) : maquettes par image, curseur et
+## entrées restant à voir.
+const PLACE_SLICE := 300
+var _place_cursor := 0
+var _place_left := 0
 var _exaggeration_distance := -1.0
 var _exaggeration_value := 1.0
 ## RS-K2 : hameaux écartés (ville emblématique, maquette) mémorisés : les tuiles de hameaux sont
@@ -637,21 +642,46 @@ func _place_model(i: int) -> void:
 
 
 ## SZ4b : échelle des maquettes réécrite par pas de `rewrite_step` (≈ 0,3 ms pour 560 maquettes).
+## RS-K2 (ADR 0051) : un pas lance un tour de réécriture étalé (`PLACE_SLICE` maquettes par image
+## dans une image ouverte, reprise au curseur ; un nouveau pas relance un tour complet) ; masquage
+## recalculé à chaque tranche.
 func _update_settlement_scale(camera_distance: float) -> void:
 	var props := MapPropScale.shared()
 	var wanted := props.exaggeration(camera_distance)  # exagération commune
-	if not props.needs_rewrite(_settlement_scale_ref, wanted):
+	if props.needs_rewrite(_settlement_scale_ref, wanted):
+		_settlement_scale_ref = wanted
+		_place_left = _models.size()
+	if _place_left > 0:
+		_place_slice(FrameBudget.in_frame())
+
+
+## RS-K2 : tranche du tour de réécriture des maquettes et de leurs étiquettes (toutes si `sliced`
+## est faux). Seules les étiquettes posées sur une maquette ordinaire dépendent de son échelle
+## (villes emblématiques et palier moyen : non ; changements de palier et d'échelle verticale
+## traités dans `update_view`).
+func _place_slice(sliced: bool) -> void:
+	var count := _models.size()
+	if count == 0:
+		_place_left = 0
 		return
-	_settlement_scale_ref = wanted
 	var tp := Time.get_ticks_usec()  # RS-K2 : sous-sections du banc `--bench-probe`
-	for i in _models.size():
-		_place_model(i)
+	var near := _weights.x > 0.35
+	var placed := 0
+	var i := _place_cursor % count
+	while _place_left > 0 and (not sliced or placed < PLACE_SLICE):
+		if _models[i] != null and not _landmarks.has(i):
+			_place_model(i)
+			if near:
+				_update_label_height(i, near)
+			placed += 1
+		_place_left -= 1
+		i += 1
+		if i == count:
+			i = 0
+	_place_cursor = i
 	tp = PerfProbe.lap("settle/scale/place", tp)
-	_update_absorption()  # DC6c : masquage aux rayons affichés
-	tp = PerfProbe.lap("settle/scale/absorb", tp)
-	# Hauteurs des étiquettes : toutes, par pas d'échelle seulement (pas à chaque image, SZ6).
-	_update_label_heights()
-	PerfProbe.lap("settle/scale/label_h", tp)
+	_update_absorption()  # DC6c : masquage aux rayons affichés (< 0,5 ms, à chaque tranche)
+	PerfProbe.lap("settle/scale/absorb", tp)
 
 
 func _build_label(i: int, entry: Dictionary) -> void:
@@ -1429,6 +1459,8 @@ func flush() -> void:
 	if landmark_cities != null:  # VH4 : villes emblématiques 1:1
 		landmark_cities.flush()
 		_update_landmark_cities(_camera_distance)
+	if _place_left > 0:  # RS-K2 : tour de réécriture des maquettes terminé
+		_place_slice(false)
 	_labels_dirty = false
 	_update_label_heights()
 
