@@ -136,7 +136,6 @@ pub use orders::{
 pub use path_plan::PathPlan;
 pub use ransom::{CaptiveRank, RansomDebt, RansomError, RansomTerms};
 pub use recruit_pool::PoolView;
-pub use traditions::{ArmyTraditions, TraditionError, TraditionOption, TraditionView};
 pub use replenish::{FactorKind, ReplenishFactor, ReplenishPreview, Territory};
 pub use research::{ResearchError, ResearchInfo, TechStatus, UnitTechBonus};
 pub use rng::CampaignRng;
@@ -150,6 +149,7 @@ pub use state::{
 };
 pub use table::{DietChoice, DietError, DietOption, DEFAULT_DIET};
 pub use trade::{faction_trade_income, trade_routes, TradeMode, TradeRouteView};
+pub use traditions::{ArmyTraditions, TraditionError, TraditionOption, TraditionView};
 pub use weather::{MapWeather, ProvinceWeather};
 
 #[cfg(test)]

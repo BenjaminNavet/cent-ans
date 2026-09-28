@@ -548,7 +548,9 @@ impl GameData {
         if replenishment_path.is_file() {
             data.replenishment_rules = read_json(&replenishment_path)?;
         }
-        let traditions_path = root.join(folders::RULES).join(folders::ARMY_TRADITION_RULES);
+        let traditions_path = root
+            .join(folders::RULES)
+            .join(folders::ARMY_TRADITION_RULES);
         if traditions_path.is_file() {
             data.army_tradition_rules = read_json(&traditions_path)?;
         }
