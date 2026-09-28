@@ -3,9 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::common::{LocalizedName, Percent, SocialClass, Sources};
-use crate::ids::{
-    BuildingId, CultureId, FactionId, ProvinceId, ReligionId, ResourceId, SeaZoneId,
-};
+use crate::ids::{BuildingId, CultureId, FactionId, ProvinceId, ReligionId, ResourceId, SeaZoneId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

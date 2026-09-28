@@ -414,9 +414,8 @@ impl GameData {
         };
         let titles_dir = root.join(folders::TITLES);
         if titles_dir.is_dir() {
-            data.titles = load_entities(&titles_dir, |t: &crate::entities::title::FeudalTitle| {
-                &t.id
-            })?;
+            data.titles =
+                load_entities(&titles_dir, |t: &crate::entities::title::FeudalTitle| &t.id)?;
         }
         let feudal_path = root.join(folders::RULES).join(folders::FEUDAL_RULES);
         if feudal_path.is_file() {

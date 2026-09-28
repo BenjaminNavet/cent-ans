@@ -1792,8 +1792,10 @@ pub(crate) fn resolve_diplomacy(
             v.allies.remove(&suzerain);
             continue;
         }
-        let tribute =
-            (state.factions[&vassal].income_last_turn * data.feudal_rules.vassal_tribute_percent / 100).max(0);
+        let tribute = (state.factions[&vassal].income_last_turn
+            * data.feudal_rules.vassal_tribute_percent
+            / 100)
+            .max(0);
         state.factions.get_mut(&vassal).expect("exists").treasury -= tribute;
         state.factions.get_mut(&suzerain).expect("exists").treasury += tribute;
         let target = loyalty_target(state, data, &vassal, &suzerain);
@@ -1802,7 +1804,9 @@ pub(crate) fn resolve_diplomacy(
         let loyalty = v.loyalty;
         if loyalty < data.feudal_rules.rebellion_loyalty
             && !state.is_at_war(&vassal, &suzerain)
-            && state.rng.chance_permille(data.feudal_rules.rebellion_permille)
+            && state
+                .rng
+                .chance_permille(data.feudal_rules.rebellion_permille)
         {
             state.cut_vassal_tie(&vassal, &suzerain);
             state.start_war(&vassal, &suzerain);
