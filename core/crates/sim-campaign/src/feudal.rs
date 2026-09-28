@@ -339,17 +339,6 @@ pub fn feudal_tree(state: &CampaignState, data: &GameData, faction: &FactionId) 
     build(state, data, faction, 0)
 }
 
-/// Suzerains called, link by link, if `attacker` attacks `target` (§ 4.3).
-/// Filled by F2.
-pub fn war_escalation_preview(
-    _state: &CampaignState,
-    _data: &GameData,
-    _attacker: &FactionId,
-    _target: &FactionId,
-) -> Vec<EscalationStep> {
-    Vec::new()
-}
-
 /// Opens a felony case of `vassal` against its direct suzerain (§ 4.4):
 /// refused host, alliance with the suzerain's enemy or revolt. The case
 /// stays open `feudal_rules.felony_window_turns` turns; `None` when the
@@ -401,4 +390,563 @@ pub fn transfer_title(
 /// some (§ 4.8), evaluated against the current state.
 pub fn evaluate_objectives(state: &CampaignState, data: &GameData) -> Vec<ObjectiveProgress> {
     objectives::evaluate_objectives(state, data)
+}
+
+// =========================================================================
+// War escalation and private war (§ 4.3, lot F2)
+// =========================================================================
+
+/// Opinion modifier of an attacked vassal whose suzerain came to its help
+/// (worth `feudal.loyalty.protection_granted`, feeds the loyalty target).
+pub const PROTECTION_GRANTED_REASON: &str = "Protection accordée par le suzerain";
+/// Opinion modifier of an attacked vassal whose suzerain shirked
+/// (worth `feudal.loyalty.protection_refused`).
+pub const PROTECTION_REFUSED_REASON: &str = "Protection refusée par le suzerain";
+
+/// Verdict of a lord on a private war between two of its direct vassals
+/// (§ 4.3.5).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum Arbitration {
+    /// White peace and truce between the two vassals.
+    ImposePeace,
+    /// The lord goes to war against the other party.
+    TakeSide { side: FactionId },
+    /// The lord lets them settle their quarrel.
+    LetBe,
+}
+
+/// Changes the loyalty of `vassal` towards its suzerain by `delta`, clamped
+/// to 0-100 (a one-off shock; the loyalty then drifts back to its target).
+pub fn adjust_loyalty(state: &mut CampaignState, vassal: &FactionId, delta: i32) {
+    if let Some(f) = state.factions.get_mut(vassal) {
+        f.loyalty = (i32::from(f.loyalty) + delta).clamp(0, 100) as u8;
+    }
+}
+
+/// Lord of both `a` and `b` when they are direct vassals of the same
+/// suzerain: their war is a private war (§ 4.3.5).
+pub fn common_liege(
+    state: &CampaignState,
+    data: &GameData,
+    a: &FactionId,
+    b: &FactionId,
+) -> Option<FactionId> {
+    let lord = liege_of(state, data, a)?;
+    (liege_of(state, data, b).as_ref() == Some(&lord)).then_some(lord)
+}
+
+/// Provisional AI score of `liege` called to protect `vassal` against
+/// `aggressor` (§ 4.3.4: power, relation, treasury, ongoing wars), with
+/// its main reason in French. Kept apart so that F5 replaces it.
+pub fn protection_score(
+    state: &CampaignState,
+    data: &GameData,
+    liege: &FactionId,
+    vassal: &FactionId,
+    aggressor: &FactionId,
+) -> (i32, String) {
+    let rules = &data.feudal_rules.escalation.score;
+    let mut terms: Vec<(i32, String)> = vec![(
+        rules.base,
+        format!(
+            "devoir de protection envers {}",
+            faction_label(data, vassal)
+        ),
+    )];
+    let ratio = state.faction_power(liege) / state.faction_power(aggressor).max(1.0);
+    if ratio >= rules.power_ratio {
+        terms.push((
+            rules.power_favourable,
+            "plus fort que l'agresseur".to_owned(),
+        ));
+    } else {
+        terms.push((
+            rules.power_unfavourable,
+            "plus faible que l'agresseur".to_owned(),
+        ));
+    }
+    let attitude = state.attitude(data, liege, vassal).0 / rules.attitude_divisor.max(1);
+    let label = if attitude >= 0 {
+        "bonne entente avec le vassal"
+    } else {
+        "mauvaise entente avec le vassal"
+    };
+    terms.push((attitude, label.to_owned()));
+    if state.factions.get(liege).is_some_and(|f| f.treasury < 0) {
+        terms.push((rules.empty_treasury, "trésor vide".to_owned()));
+    }
+    let wars = state.factions.get(liege).map_or(0, |f| {
+        f.at_war_with
+            .iter()
+            .filter(|e| !crate::diplomacy::is_rebels(e))
+            .count()
+    });
+    if wars > 0 {
+        terms.push((
+            rules.per_ongoing_war * wars as i32,
+            format!("déjà engagé dans {wars} guerre(s)"),
+        ));
+    }
+    if state.is_allied(liege, aggressor) {
+        terms.push((
+            rules.allied_with_aggressor,
+            "allié de l'agresseur".to_owned(),
+        ));
+    }
+    let score: i32 = terms.iter().map(|(v, _)| v).sum();
+    let main = if score >= rules.intervene_at {
+        terms.iter().max_by_key(|(v, _)| *v)
+    } else {
+        terms.iter().min_by_key(|(v, _)| *v)
+    };
+    let reason = main.map_or_else(String::new, |(_, r)| r.clone());
+    (score, reason)
+}
+
+/// Likelihood shown for a protection score.
+pub fn likelihood_of(data: &GameData, score: i32) -> Likelihood {
+    let rules = &data.feudal_rules.escalation.score;
+    if score >= rules.intervene_at + rules.certainty_margin {
+        Likelihood::Likely
+    } else if score < rules.intervene_at - rules.certainty_margin {
+        Likelihood::Unlikely
+    } else {
+        Likelihood::Uncertain
+    }
+}
+
+/// Provisional AI verdict of `lord` on the private war of `attacker`
+/// against `target` (replaced in F5), with its reason in French.
+pub fn ai_arbitration(
+    state: &CampaignState,
+    data: &GameData,
+    lord: &FactionId,
+    attacker: &FactionId,
+    target: &FactionId,
+) -> (Arbitration, String) {
+    let rules = &data.feudal_rules.escalation.arbitration;
+    let towards_attacker = state.attitude(data, lord, attacker).0;
+    let towards_target = state.attitude(data, lord, target).0;
+    for (favoured, other) in [
+        (target, towards_target - towards_attacker),
+        (attacker, towards_attacker - towards_target),
+    ] {
+        if other >= rules.take_side_attitude_gap {
+            return (
+                Arbitration::TakeSide {
+                    side: favoured.clone(),
+                },
+                format!("préfère {}", faction_label(data, favoured)),
+            );
+        }
+    }
+    let ratio = state.faction_power(lord) / state.faction_power(attacker).max(1.0);
+    if ratio >= rules.impose_peace_power_ratio {
+        (
+            Arbitration::ImposePeace,
+            "assez fort pour imposer la paix".to_owned(),
+        )
+    } else {
+        (
+            Arbitration::LetBe,
+            "trop faible pour imposer la paix".to_owned(),
+        )
+    }
+}
+
+fn faction_label(data: &GameData, id: &FactionId) -> String {
+    crate::diplomacy::faction_name(data, id)
+}
+
+fn capitalized(text: &str) -> String {
+    let mut chars = text.chars();
+    chars.next().map_or_else(String::new, |first| {
+        first.to_uppercase().chain(chars).collect()
+    })
+}
+
+/// Suzerains called, link by link, if `attacker` attacks `target` (§ 4.3):
+/// each step assumes the previous suzerains intervened (the cascade stops
+/// in fact at the first one who shirks). A private war gives a single step,
+/// the arbitrating lord: `likely` when it would impose peace or side with
+/// the target.
+pub fn war_escalation_preview(
+    state: &CampaignState,
+    data: &GameData,
+    attacker: &FactionId,
+    target: &FactionId,
+) -> Vec<EscalationStep> {
+    if let Some(lord) = common_liege(state, data, attacker, target) {
+        let (verdict, why) = ai_arbitration(state, data, &lord, attacker, target);
+        let (likelihood, what) = match &verdict {
+            Arbitration::ImposePeace => (Likelihood::Likely, "imposera la paix".to_owned()),
+            Arbitration::TakeSide { side } if side == target => (
+                Likelihood::Likely,
+                format!("prendra le parti de {}", faction_label(data, target)),
+            ),
+            Arbitration::TakeSide { .. } => (
+                Likelihood::Unlikely,
+                format!("prendra le parti de {}", faction_label(data, attacker)),
+            ),
+            Arbitration::LetBe => (Likelihood::Unlikely, "laissera faire".to_owned()),
+        };
+        return vec![EscalationStep {
+            faction: lord,
+            likelihood,
+            reason: format!("Guerre privée, l'arbitre {what} ({why})"),
+        }];
+    }
+    let mut steps = Vec::new();
+    let mut vassal = target.clone();
+    for _ in 0..MAX_DEPTH {
+        let Some(liege) = liege_of(state, data, &vassal) else {
+            break;
+        };
+        if &liege == attacker {
+            break;
+        }
+        if state.is_at_war(&liege, attacker) {
+            steps.push(EscalationStep {
+                faction: liege,
+                likelihood: Likelihood::Likely,
+                reason: "Déjà en guerre contre l'agresseur".to_owned(),
+            });
+            break;
+        }
+        let (score, why) = protection_score(state, data, &liege, &vassal, attacker);
+        steps.push(EscalationStep {
+            faction: liege.clone(),
+            likelihood: likelihood_of(data, score),
+            reason: capitalized(&why),
+        });
+        vassal = liege;
+    }
+    steps
+}
+
+/// Entry point from `declare_war`: a private war is arbitrated by the
+/// common lord, any other attack calls the target's suzerain (§ 4.3).
+pub(crate) fn escalate_war(
+    state: &mut CampaignState,
+    data: &GameData,
+    attacker: &FactionId,
+    target: &FactionId,
+) {
+    use crate::diplomacy::is_rebels;
+    if is_rebels(attacker) || is_rebels(target) {
+        return;
+    }
+    let Some(lord) = common_liege(state, data, attacker, target) else {
+        call_liege(state, data, target, attacker);
+        return;
+    };
+    if lord == state.player_faction {
+        let text = format!(
+            "Guerre privée : {} attaque {}, tous deux vos vassaux. Accepter : imposer la paix ; \
+             refuser : laisser faire ; ou prendre parti.",
+            faction_label(data, attacker),
+            faction_label(data, target)
+        );
+        let proposal = crate::diplomacy::Proposal::Arbitration {
+            attacker: attacker.clone(),
+            target: target.clone(),
+        };
+        push_feudal_offer(state, data, target, proposal, text);
+    } else {
+        let (verdict, _) = ai_arbitration(state, data, &lord, attacker, target);
+        apply_arbitration(state, data, &lord, attacker, target, &verdict);
+    }
+}
+
+/// The direct suzerain of `vassal` is called to protect it against
+/// `aggressor`: the player gets an offer, the AI answers at once.
+pub(crate) fn call_liege(
+    state: &mut CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+    aggressor: &FactionId,
+) {
+    let Some(liege) = liege_of(state, data, vassal) else {
+        return;
+    };
+    if &liege == aggressor
+        || !state.factions.get(&liege).is_some_and(|f| f.alive)
+        || state.is_at_war(&liege, aggressor)
+    {
+        return;
+    }
+    if liege == state.player_faction {
+        let text = format!(
+            "{} est attaqué par {} et réclame votre protection. Accepter : entrer en guerre et \
+             convoquer l'ost de vos vassaux ; refuser : vous dérober (prestige, loyauté).",
+            faction_label(data, vassal),
+            faction_label(data, aggressor)
+        );
+        let proposal = crate::diplomacy::Proposal::Protection {
+            aggressor: aggressor.clone(),
+        };
+        push_feudal_offer(state, data, vassal, proposal, text);
+        return;
+    }
+    let (score, _) = protection_score(state, data, &liege, vassal, aggressor);
+    if score >= data.feudal_rules.escalation.score.intervene_at {
+        intervene(state, data, &liege, vassal, aggressor);
+    } else {
+        shirk(state, data, &liege, vassal, aggressor);
+    }
+}
+
+/// Offer to the player, outside the diplomatic cooldown (a feudal call
+/// cannot be missed).
+fn push_feudal_offer(
+    state: &mut CampaignState,
+    data: &GameData,
+    from: &FactionId,
+    proposal: crate::diplomacy::Proposal,
+    text: String,
+) {
+    use crate::events::{EventKind, GameEvent};
+    let player = state.player_faction.clone();
+    let id = state.next_offer_id;
+    state.next_offer_id += 1;
+    let expires_turn = state.turn + data.feudal_rules.escalation.answer_turns + 1;
+    if let Some(f) = state.factions.get_mut(&player) {
+        f.offers.push(crate::diplomacy::Offer {
+            id,
+            from: from.clone(),
+            proposal,
+            expires_turn,
+            text_fr: text.clone(),
+        });
+    }
+    state.push_order_event(GameEvent::new(EventKind::DiplomaticOffer, text).faction(from));
+}
+
+/// `liege` protects `vassal`: it enters the war against `aggressor`,
+/// summons the host of its own direct vassals, then its own suzerain is
+/// called in turn (cascade).
+pub(crate) fn intervene(
+    state: &mut CampaignState,
+    data: &GameData,
+    liege: &FactionId,
+    vassal: &FactionId,
+    aggressor: &FactionId,
+) {
+    use crate::events::{EventKind, GameEvent};
+    let alive = |s: &CampaignState, f: &FactionId| s.factions.get(f).is_some_and(|f| f.alive);
+    if !alive(state, aggressor) || !alive(state, liege) || state.is_at_war(liege, aggressor) {
+        return;
+    }
+    let rules = &data.feudal_rules.escalation;
+    state.start_war(liege, aggressor);
+    state.change_ruler_prestige(liege, rules.intervene_prestige);
+    state.add_modifier(
+        vassal,
+        liege,
+        data.feudal_rules.loyalty.protection_granted,
+        PROTECTION_GRANTED_REASON,
+        rules.protection_memory_turns,
+    );
+    let text = format!(
+        "{} accourt au secours de son vassal {} contre {}.",
+        faction_label(data, liege),
+        faction_label(data, vassal),
+        faction_label(data, aggressor)
+    );
+    state.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(liege));
+    summon_host(state, data, liege, aggressor);
+    call_liege(state, data, liege, aggressor);
+}
+
+/// `liege` shirks the protection of `vassal`: its ruler loses prestige,
+/// every direct vassal loses loyalty, the attacked vassal remembers it.
+pub(crate) fn shirk(
+    state: &mut CampaignState,
+    data: &GameData,
+    liege: &FactionId,
+    vassal: &FactionId,
+    aggressor: &FactionId,
+) {
+    use crate::events::{EventKind, GameEvent};
+    let rules = &data.feudal_rules.escalation;
+    state.change_ruler_prestige(liege, rules.shirk_prestige);
+    for v in direct_vassals(state, data, liege) {
+        adjust_loyalty(state, &v, -i32::from(rules.shirk_loyalty_drop));
+    }
+    state.add_modifier(
+        vassal,
+        liege,
+        data.feudal_rules.loyalty.protection_refused,
+        PROTECTION_REFUSED_REASON,
+        rules.protection_memory_turns,
+    );
+    let text = format!(
+        "{} se dérobe et laisse son vassal {} seul face à {}.",
+        faction_label(data, liege),
+        faction_label(data, vassal),
+        faction_label(data, aggressor)
+    );
+    state.push_order_event(GameEvent::new(EventKind::AllianceBroken, text).faction(liege));
+}
+
+/// `liege` summons the host of its direct vassals against `enemy` (never
+/// its rear vassals). A vassal below `call_to_arms_loyalty` refuses, which
+/// opens a felony case (§ 4.4).
+pub fn summon_host(
+    state: &mut CampaignState,
+    data: &GameData,
+    liege: &FactionId,
+    enemy: &FactionId,
+) {
+    use crate::events::{EventKind, GameEvent};
+    for vassal in direct_vassals(state, data, liege) {
+        if &vassal == enemy || state.is_at_war(&vassal, enemy) || state.is_allied(&vassal, enemy) {
+            continue;
+        }
+        if state.factions[&vassal].loyalty >= data.feudal_rules.call_to_arms_loyalty {
+            state.start_war(&vassal, enemy);
+            let text = format!(
+                "{} répond à l'ost de son suzerain {} contre {}.",
+                faction_label(data, &vassal),
+                faction_label(data, liege),
+                faction_label(data, enemy)
+            );
+            state.push_order_event(GameEvent::new(EventKind::WarDeclared, text).faction(&vassal));
+        } else {
+            let text = format!(
+                "{} refuse l'ost de son suzerain {}.",
+                faction_label(data, &vassal),
+                faction_label(data, liege)
+            );
+            state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(&vassal));
+            open_felony(state, data, &vassal, FelonyReason::RefusedHost);
+        }
+    }
+}
+
+/// Applies the verdict of `lord` on the private war of `attacker` against
+/// `target`.
+pub(crate) fn apply_arbitration(
+    state: &mut CampaignState,
+    data: &GameData,
+    lord: &FactionId,
+    attacker: &FactionId,
+    target: &FactionId,
+    verdict: &Arbitration,
+) {
+    use crate::events::{EventKind, GameEvent};
+    let rules = &data.feudal_rules.escalation.arbitration;
+    if !state.is_at_war(attacker, target) {
+        return; // settled meanwhile
+    }
+    let (kind, text) = match verdict {
+        Arbitration::ImposePeace => {
+            state.make_peace_between(data, attacker, target, &[], 0, rules.truce_turns);
+            adjust_loyalty(
+                state,
+                attacker,
+                -i32::from(rules.imposed_peace_loyalty_drop),
+            );
+            (
+                EventKind::PeaceSigned,
+                format!(
+                    "{} impose la paix à ses vassaux {} et {}.",
+                    faction_label(data, lord),
+                    faction_label(data, attacker),
+                    faction_label(data, target)
+                ),
+            )
+        }
+        Arbitration::TakeSide { side } => {
+            let other = if side == attacker { target } else { attacker };
+            if !state.is_at_war(lord, other) {
+                state.start_war(lord, other);
+            }
+            adjust_loyalty(state, other, -i32::from(rules.opposed_loyalty_drop));
+            (
+                EventKind::WarDeclared,
+                format!(
+                    "{} prend le parti de {} contre {}.",
+                    faction_label(data, lord),
+                    faction_label(data, side),
+                    faction_label(data, other)
+                ),
+            )
+        }
+        Arbitration::LetBe => (
+            EventKind::Diplomacy,
+            format!(
+                "{} laisse {} et {} vider leur querelle.",
+                faction_label(data, lord),
+                faction_label(data, attacker),
+                faction_label(data, target)
+            ),
+        ),
+    };
+    state.push_order_event(GameEvent::new(kind, text).faction(lord));
+}
+
+/// The player refused (or let expire) a feudal call: a call for protection
+/// is shirked, an arbitration is left alone.
+pub(crate) fn refuse_feudal_call(
+    state: &mut CampaignState,
+    data: &GameData,
+    player: &FactionId,
+    offer: &crate::diplomacy::Offer,
+) {
+    use crate::diplomacy::Proposal;
+    match &offer.proposal {
+        Proposal::Protection { aggressor } => {
+            if state.is_at_war(&offer.from, aggressor) {
+                shirk(state, data, player, &offer.from, aggressor);
+            }
+        }
+        Proposal::Arbitration { attacker, target } => {
+            apply_arbitration(state, data, player, attacker, target, &Arbitration::LetBe);
+        }
+        _ => {}
+    }
+}
+
+impl CampaignState {
+    /// The player, lord of both parties of a private war, answers the
+    /// arbitration offer `offer_id` with `verdict` (§ 4.3.5).
+    pub fn arbitrate(
+        &mut self,
+        data: &GameData,
+        faction: &FactionId,
+        offer_id: u32,
+        verdict: Arbitration,
+    ) -> Result<(), crate::diplomacy::DiplomacyError> {
+        use crate::diplomacy::{DiplomacyError, Proposal};
+        let offers = &self
+            .factions
+            .get(faction)
+            .ok_or(DiplomacyError::UnknownOffer)?
+            .offers;
+        let index = offers
+            .iter()
+            .position(|o| o.id == offer_id)
+            .ok_or(DiplomacyError::UnknownOffer)?;
+        let Proposal::Arbitration { attacker, target } = offers[index].proposal.clone() else {
+            return Err(DiplomacyError::Refused(
+                "cette offre n'est pas un arbitrage".to_owned(),
+            ));
+        };
+        if let Arbitration::TakeSide { side } = &verdict {
+            if side != &attacker && side != &target {
+                return Err(DiplomacyError::Refused(
+                    "on ne prend parti que pour l'une des deux parties".to_owned(),
+                ));
+            }
+        }
+        self.factions
+            .get_mut(faction)
+            .expect("checked")
+            .offers
+            .remove(index);
+        apply_arbitration(self, data, faction, &attacker, &target, &verdict);
+        Ok(())
+    }
 }
