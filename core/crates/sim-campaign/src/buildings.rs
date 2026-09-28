@@ -934,6 +934,23 @@ impl CampaignState {
     }
 }
 
+/// Adds a finished `building` to `settlement`, replacing the building it
+/// upgrades (IB5: shared with the tooltip previews).
+pub(crate) fn complete_building(
+    data: &GameData,
+    settlement: &mut SettlementState,
+    building: &BuildingId,
+) {
+    if let Some(from) = data
+        .buildings
+        .get(building)
+        .and_then(|b| b.upgrades_from.clone())
+    {
+        settlement.buildings.retain(|b| b != &from);
+    }
+    settlement.buildings.push(building.clone());
+}
+
 /// Phase: progresses (and completes) constructions in every settlement.
 pub(crate) fn resolve_construction(
     state: &mut CampaignState,
@@ -952,14 +969,7 @@ pub(crate) fn resolve_construction(
             continue;
         }
         let Construction { building, .. } = settlement.construction.take().expect("checked above");
-        if let Some(from) = data
-            .buildings
-            .get(&building)
-            .and_then(|b| b.upgrades_from.clone())
-        {
-            settlement.buildings.retain(|b| b != &from);
-        }
-        settlement.buildings.push(building.clone());
+        complete_building(data, settlement, &building);
         let controller = settlement.controller.clone();
         let province = settlement.province.clone();
         if controller == player {
