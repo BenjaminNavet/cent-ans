@@ -44,7 +44,14 @@ func _init() -> void:
 		var w := arr.get_width()
 		var h := arr.get_height()
 		var count := arr.get_layers()
-		var per_texel := 1.0 if fmt == Image.FORMAT_BPTC_RGBA or fmt == Image.FORMAT_ASTC_4x4 else 4.0
+		# Octets par texel selon le format VRAM réel (`compress/channel_pack=0` de l'import choisit
+		# DXT1/BC1 pour ces couches sans alpha, 0,5 o/texel — pas BC7/BPTC comme la spec l'anticipait ;
+		# mesuré ici plutôt que supposé, cf. note ADR 0105).
+		var per_texel := 4.0
+		if fmt == Image.FORMAT_BPTC_RGBA or fmt == Image.FORMAT_ASTC_4x4 or fmt == Image.FORMAT_DXT3 or fmt == Image.FORMAT_DXT5 or fmt == Image.FORMAT_RGTC_RG:
+			per_texel = 1.0
+		elif fmt == Image.FORMAT_DXT1 or fmt == Image.FORMAT_RGTC_R:
+			per_texel = 0.5
 		var bytes := int(w * h * count * per_texel * 4.0 / 3.0)
 		total += bytes
 		print("GA2 map %s: %dx%d x%d, format %d, %.2f Mo (mipmaps compris)" % [key, w, h, count, fmt, bytes / 1048576.0])
