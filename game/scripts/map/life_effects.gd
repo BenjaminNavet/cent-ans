@@ -504,13 +504,16 @@ func _apply_prop_scale(camera_distance: float) -> void:
 	var mill := props.windmill_scale(camera_distance)
 	var reference := _reference_scale()
 	var moved := props.needs_rewrite(_settlement_ref, reference)
+	var tp := Time.get_ticks_usec()  # RS-K : sous-sections du banc `--bench-probe`
 	if moved:
 		# SZ4b : moulins et panaches suivent l'échelle de la maquette de leur colonie.
 		_settlement_ref = reference
 		_rewrite_smoke_positions()
+	tp = PerfProbe.lap("life/smoke_rewrite", tp)
 	if moved or props.needs_rewrite(_windmill_scale, mill):
 		_windmill_scale = mill
 		_rewrite_windmills()
+	PerfProbe.lap("life/mill_rewrite", tp)
 
 
 func _rewrite_windmills() -> void:
@@ -580,4 +583,6 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 	if _reground_timer >= 0.0:
 		_reground_timer -= get_process_delta_time()
 		if _reground_timer < 0.0:
+			var tp := Time.get_ticks_usec()
 			_reground()
+			PerfProbe.lap("life/reground", tp)  # RS-K
