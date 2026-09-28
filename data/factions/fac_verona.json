@@ -15,6 +15,7 @@
   "religion": "rel_catholic",
   "culture": "cul_lombard",
   "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_verona",
   "heraldry": {
     "blazon": "De gueules à l'échelle d'argent posée en pal.",
     "description": "L'échelle (scala) des della Scala.",
