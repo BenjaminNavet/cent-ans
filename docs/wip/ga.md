@@ -60,9 +60,17 @@ Fichiers : `game/assets/textures/battle/build_textures.py`, `README.md`, tableau
        CC0 chez Poly Haven ; substitut le plus proche, à revoir si une meilleure source apparaît),
        `grassy_cobblestone` (herbe piétinée), `withered_grass` (chaume/éteules), `farm_furrows`
        (labour frais, distinct de `farm_soil` déjà utilisé pour le labour ambiant/procédural).
-3. [ ] Câbler les nouvelles couches dans l'occupation du sol de bataille (données).
-4. [ ] Macro-variation procédurale (octaves 50–200 m, teinte + luminance). `--no-ga2`.
-5. [ ] Tests mémoire + smoke ; A/B ≤ +5 %. ADR 0105. Commit.
+3. [x] Câblage (données) : `BattleTerrain.ground_layers()`/`ground_role_index()` lisent
+       `data/fx/battle_ground_layers.json` ; uniformes `layer_count`, `layer_tile_size[]`,
+       `idx_flowering_meadow/trodden_grass/stubble/fresh_plough` posés dans `_build_material`.
+       Occupation : labour frais = parcelles décor EP6 `decor_kind==1` (le labour ambiant garde
+       `farm_soil`) ; chaume = `decor_kind==6` ; herbe piétinée = halo `splat_b.g` des chemins/
+       routes déjà cuit ; prairie fleurie = part des taches de prairie grasse (`patch`/`patch2`
+       du lot V4b). `layer_size()` du shader lit `layer_tile_size[]` (plus de constantes en dur).
+4. [x] Macro-variation dédiée (4 octaves 50/90/140/200 m, teinte + luminance, faible amplitude),
+       appliquée à l'albédo final, sous `ga2_on`. `--no-ga2` la coupe (compromis : ne restaure pas
+       d'anciennes textures 1k, cf. ADR 0105 « conséquences »).
+5. [ ] Tests mémoire + smoke ; A/B ≤ +5 %. ADR 0105 écrit (à confirmer avec les mesures). Commit.
 
 ### GA5 — Bâtiments (CC0, ≤ 1 $, agent `cent-ans-mech`, après GA2)
 - [ ] Textures bâtiments de bataille et `textures/buildings` en 2k Poly Haven ; variantes
