@@ -72,6 +72,16 @@ var _smoke_dirty: Dictionary = {}  # MultiMeshInstance3D → vrai
 var _mills_dirty := false
 var _scale_memo: Dictionary = {}  # colonie → Vector2(échelle courante, échelle réelle)
 var _memo_depth := 0
+## RS-K2 (ADR 0051) : travaux étalés sur plusieurs images dans une image ouverte par
+## `FrameBudget.begin_frame` (tout d'un coup hors image : tests, outils). Réécriture des panaches
+## après un pas d'échelle : `SMOKE_SLICE` points par image et par famille, reprise au curseur
+## (un nouveau pas relance un tour complet sans revenir au début). Recalage des sols : tuiles
+## en attente traitées par tranches d'au moins `REGROUND_SLICE` points, hauteurs lues en un appel.
+const SMOKE_SLICE := 1600
+const REGROUND_SLICE := 700
+var _smoke_left: Dictionary = {}  # MultiMeshInstance3D → points restant à réécrire
+var _smoke_cursor: Dictionary = {}  # MultiMeshInstance3D → prochain point
+var _reground_pending: Dictionary = {}  # index de tuile → vrai (ordre d'arrivée)
 
 
 func setup(layer: SettlementLayer, terrain: TerrainBuilder) -> void:
@@ -456,6 +466,8 @@ func _fill(mmi: MultiMeshInstance3D, points: Array, size: Vector2, darkness: flo
 	multimesh.buffer = buffer
 	mmi.multimesh = multimesh
 	_cpu_buffers[mmi] = buffer
+	_smoke_left.erase(mmi)  # RS-K2 : positions neuves, tour de réécriture en cours caduc
+	_smoke_cursor.erase(mmi)
 
 
 ## Pied d'un panache (au sol ; la levée `point[1]` est portée par la base d'instance, SZ4) ;
@@ -481,19 +493,85 @@ func _reground_point(point: Array) -> void:
 ## PB1 : seuls les points des tuiles dont la surface a changé (`_reground_chunks`) sont recalés :
 ## la hauteur d'un point ne dépend que de sa tuile. SZ6 : points indexés par tuile (plus de
 ## parcours de tous les points à chaque recalage), tampon lu et écrit seulement si un point bouge.
+## RS-K2 : les tuiles recalées rejoignent la file ; une tranche traitée par image (ADR 0051).
 func _reground() -> void:
+	for index: int in _reground_chunks:
+		_reground_pending[index] = true
+	_reground_chunks = {}
+	_reground_step()
+
+
+## RS-K2 : tuiles en attente prises dans l'ordre jusqu'à `REGROUND_SLICE` points (toutes hors
+## image ouverte), puis recalées.
+func _reground_step() -> void:
+	if _reground_pending.is_empty():
+		return
+	var changed: Dictionary = {}
+	if not FrameBudget.in_frame():
+		changed = _reground_pending
+		_reground_pending = {}
+	else:
+		var taken := 0
+		for index: int in _reground_pending.keys():
+			changed[index] = true
+			_reground_pending.erase(index)
+			taken += _chunk_point_count(index)
+			if taken >= REGROUND_SLICE:
+				break
 	_begin_pass()
-	_reground_pass()
+	_reground_pass(changed)
 	_end_pass()
 
 
-func _reground_pass() -> void:
-	var changed := _reground_chunks
-	_reground_chunks = {}
+## RS-K2 : nombre de points (moulins, panaches, feux) rattachés à la tuile `index`.
+func _chunk_point_count(index: int) -> int:
+	var total := 0
+	for list_name in ["windmills", "chimneys", "fires"]:
+		var cached: Dictionary = _points_by_chunk.get(list_name, {})
+		total += (cached.get("by_chunk", {}) as Dictionary).get(index, []).size()
+	return maxi(total, 1)
+
+
+## RS-K2 : sols des deux poses de `points` relus en un seul appel groupé
+## (`TerrainBuilder.surface_heights_at`, même résultat que `_reground_point` point par point).
+func _reground_points(points: Array) -> void:
+	if _terrain == null:
+		for point: Array in points:
+			_reground_point(point)
+		return
+	var positions := PackedVector2Array()
+	positions.resize(points.size() * 2)
+	for n in points.size():
+		var point: Array = points[n]
+		var i: int = point[3]
+		if i < 0:
+			positions[n * 2] = point[0]
+			positions[n * 2 + 1] = point[0]
+		else:
+			var center := _layer.model_px(i)
+			var offset: Vector2 = point[4]
+			positions[n * 2] = center + offset
+			positions[n * 2 + 1] = center + offset * _scale_pair(i).y
+	var heights := _terrain.surface_heights_at(positions)
+	for n in points.size():
+		var point: Array = points[n]
+		point[5] = heights[n * 2]
+		point[6] = heights[n * 2] if int(point[3]) < 0 else heights[n * 2 + 1]
+
+
+func _reground_pass(changed: Dictionary) -> void:
 	if _windmill_bodies.multimesh != null and _windmill_sails.multimesh != null:
 		var mills := _changed_points("windmills", _windmill_points, changed)
+		var poses: Array = []
 		for n: int in mills:
-			_reground_windmill(_windmill_points[n])
+			poses.append(_mill_pose(_windmill_points[n]))
+		_reground_points(poses)
+		for k in mills.size():
+			var point: Array = _windmill_points[mills[k]]
+			var pose: Array = poses[k]
+			point[7] = pose[5]
+			point[8] = pose[6]
+			point[4] = _pose_y(pose)
 		if not mills.is_empty():
 			_write_windmills(mills)
 	for triple in [[_chimneys, _chimney_points, "chimneys"], [_fires, _fire_points, "fires"]]:
@@ -517,8 +595,11 @@ func _reground_pass() -> void:
 				xform.origin = _origin(points[n])
 				mmi.multimesh.set_instance_transform(n, xform)
 			continue
+		var todo_points: Array = []
 		for n: int in todo:
-			_reground_point(points[n])
+			todo_points.append(points[n])
+		_reground_points(todo_points)
+		for n: int in todo:
 			buffer[n * stride + 7] = _pose_y(points[n])
 		mmi.multimesh.buffer = buffer
 		_cpu_buffers[mmi] = buffer
@@ -614,7 +695,7 @@ func _apply_prop_scale(camera_distance: float) -> void:
 		_windmill_scale = mill
 		_mills_dirty = true
 	_begin_pass()
-	if not _smoke_dirty.is_empty():
+	if not _smoke_dirty.is_empty() or not _smoke_left.is_empty():
 		_rewrite_smoke_positions()
 	tp = PerfProbe.lap("life/smoke_rewrite", tp)
 	if _mills_dirty and _windmill_bodies.visible:
@@ -640,37 +721,71 @@ func _rewrite_windmills() -> void:
 
 ## SZ4b : origines des panaches des colonies à l'échelle courante de leur maquette (tampon complet
 ## écrit une fois depuis sa copie processeur, RS-K ; repli point par point sans copie).
+## RS-K2 : un pas d'échelle lance un tour de réécriture, fait par tranches (`_rewrite_smoke_slice`).
 func _rewrite_smoke_positions() -> void:
 	for pair in [[_chimneys, _chimney_points], [_fires, _fire_points]]:
 		var mmi: MultiMeshInstance3D = pair[0]
 		var points: Array = pair[1]
-		if not _smoke_dirty.has(mmi) or not mmi.visible:
-			continue  # RS-K : reportée (masqué) ou déjà à jour
-		_smoke_dirty.erase(mmi)
-		if mmi.multimesh == null or mmi.multimesh.instance_count != points.size():
-			continue
-		var buffer: PackedFloat32Array = _cpu_buffers.get(mmi, PackedFloat32Array())
-		var stride := 16
-		var readable := buffer.size() == points.size() * stride
-		var touched := false
-		for n in points.size():
-			var point: Array = points[n]
-			if int(point[3]) < 0:
-				continue
-			_settlement_pose(point)
-			var origin := _origin(point)
+		if _smoke_dirty.has(mmi) and mmi.visible:
+			_smoke_dirty.erase(mmi)
+			if mmi.multimesh != null and mmi.multimesh.instance_count == points.size() and not points.is_empty():
+				_smoke_left[mmi] = points.size()
+		if _smoke_left.has(mmi):
+			_rewrite_smoke_slice(mmi, points)
+
+
+## RS-K2 : réécrit une tranche de panaches depuis le curseur (tous hors image ouverte) ; échelle,
+## centre et pose de la colonie calculés une fois pour ses points consécutifs.
+func _rewrite_smoke_slice(mmi: MultiMeshInstance3D, points: Array) -> void:
+	var count := points.size()
+	var left: int = _smoke_left[mmi]
+	if mmi.multimesh == null or mmi.multimesh.instance_count != count or count == 0:
+		_smoke_left.erase(mmi)
+		return
+	var buffer: PackedFloat32Array = _cpu_buffers.get(mmi, PackedFloat32Array())
+	var stride := 16
+	var readable := buffer.size() == count * stride
+	var todo := mini(left, SMOKE_SLICE) if readable and FrameBudget.in_frame() else left
+	var n: int = int(_smoke_cursor.get(mmi, 0)) % count
+	var last := -1
+	var center := Vector2.ZERO
+	var s := 1.0
+	var along := 0.0
+	var touched := false
+	for _step in todo:
+		var point: Array = points[n]
+		var i: int = point[3]
+		if i >= 0:
+			if i != last:
+				last = i
+				center = _layer.model_px(i)
+				var scales := _scale_pair(i)
+				s = scales.x
+				along = clampf((s - scales.y) / maxf(1.0 - scales.y, 1e-4), 0.0, 1.0)
+			var px: Vector2 = center + (point[4] as Vector2) * s
+			point[0] = px
+			var y := lerpf(float(point[6]), float(point[5]), along)
 			if readable:
-				buffer[n * stride + 3] = origin.x
-				buffer[n * stride + 7] = origin.y
-				buffer[n * stride + 11] = origin.z
+				var o := n * stride
+				buffer[o + 3] = px.x
+				buffer[o + 7] = y
+				buffer[o + 11] = px.y
 				touched = true
 			else:
 				var xform := mmi.multimesh.get_instance_transform(n)
-				xform.origin = origin
+				xform.origin = Vector3(px.x, y, px.y)
 				mmi.multimesh.set_instance_transform(n, xform)
-		if touched:
-			mmi.multimesh.buffer = buffer
-			_cpu_buffers[mmi] = buffer
+		n += 1
+		if n == count:
+			n = 0
+	_smoke_cursor[mmi] = n
+	if left - todo <= 0:
+		_smoke_left.erase(mmi)
+	else:
+		_smoke_left[mmi] = left - todo
+	if touched:
+		mmi.multimesh.buffer = buffer
+		_cpu_buffers[mmi] = buffer
 
 
 func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
@@ -697,3 +812,7 @@ func update_view(camera_distance: float, tiers: ZoomTiers) -> void:
 			var tp := Time.get_ticks_usec()
 			_reground()
 			PerfProbe.lap("life/reground", tp)  # RS-K
+	elif not _reground_pending.is_empty():
+		var tp := Time.get_ticks_usec()
+		_reground_step()  # RS-K2 : tranches suivantes
+		PerfProbe.lap("life/reground", tp)
