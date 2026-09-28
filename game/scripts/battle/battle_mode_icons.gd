@@ -2,9 +2,8 @@ class_name BattleModeIcons
 extends RefCounted
 
 ## CB2 : pictogrammes des modes d'unité (course, garde, escarmouche, mêlée, battre en brèche) et
-## des nouveaux états (hésite, sous le feu), dessinés en code (pas de glyphe de police). Glyphes
-## provisoires : la session principale générera les icônes DA5 après CB4 ; `HudStyle.icon`
-## prendra alors le relais (clé `battle_mode_<mode>`), comme pour les boutons d'ordres.
+## des nouveaux états (hésite, sous le feu) : icônes à l'encre DA5 (lot CB, clés `battle_mode_<mode>`
+## et `battle_state_<état>` via `HudStyle.icon`), glyphes dessinés en code en repli si le PNG manque.
 ## Aucune règle : les modes et états viennent de `BattleSim.get_units()`.
 
 ## Modes dans l'ordre des boutons (clé de `set_mode`, champ de `get_units`, libellé, infobulle).
@@ -17,6 +16,8 @@ const MODES := [
 ]
 
 const INK := Color(0.22, 0.14, 0.07)
+## Côté (px) d'une icône DA5 dans une pastille d'état de 13 px.
+const BADGE_ICON_SIDE := 10.0
 
 
 ## Champ de `get_units` qui dit si `mode` est actif.
@@ -52,8 +53,23 @@ static func active_modes(unit: Dictionary) -> Array[String]:
 	return out
 
 
-## Pictogramme du mode `mode` centré en `c`, dans un carré d'environ 16 px × `k`.
+## Icône à l'encre DA5 (lot CB) de la clé `key` (`battle_mode_run`, `battle_state_rout`…) posée
+## dans un carré de côté `side` centré en `c`, l'encre changée en `ink` ; faux si l'icône manque
+## (le glyphe dessiné en code sert alors de repli : le jeu tourne sans les PNG).
+static func draw_ink_icon(canvas: CanvasItem, key: String, c: Vector2, side: float, ink: Color = INK) -> bool:
+	var texture := HudStyle.icon(key)
+	if texture == null:
+		return false
+	var modulate := Color(ink.r / INK.r, ink.g / INK.g, ink.b / INK.b, ink.a)
+	canvas.draw_texture_rect(texture, Rect2(c - Vector2(side, side) * 0.5, Vector2(side, side)), false, modulate)
+	return true
+
+
+## Pictogramme du mode `mode` centré en `c`, dans un carré d'environ 16 px × `k` : icône DA5
+## `battle_mode_<mode>` si elle existe, sinon glyphe dessiné.
 static func draw_mode(canvas: CanvasItem, mode: String, c: Vector2, k: float, ink: Color = INK) -> void:
+	if draw_ink_icon(canvas, "battle_mode_" + mode, c, 16.0 * k, ink):
+		return
 	match mode:
 		"run":  # flèche en avant et traits de vitesse
 			canvas.draw_line(c + Vector2(-2, 0) * k, c + Vector2(6, 0) * k, ink, 1.8 * k)
@@ -88,6 +104,8 @@ static func draw_mode(canvas: CanvasItem, mode: String, c: Vector2, k: float, in
 
 ## Pictogramme d'un état (pastille) : `wavering` (hésite) ou `under_fire` (sous le feu).
 static func draw_state(canvas: CanvasItem, kind: String, c: Vector2, ink: Color) -> void:
+	if draw_ink_icon(canvas, "battle_state_" + kind, c, BADGE_ICON_SIDE, ink):
+		return
 	match kind:
 		"wavering":  # point d'exclamation
 			canvas.draw_rect(Rect2(c + Vector2(-1, -4.5), Vector2(2, 6)), ink)

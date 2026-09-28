@@ -210,11 +210,13 @@ func _row(entry: Dictionary) -> Control:
 	return row
 
 
-## Glyphe à l'encre par type d'alerte (vectoriel, pas d'icône DA5), même esprit que
-## `BattleHud._draw_command_icon`.
+## Icône à l'encre DA5 par type d'alerte (lot CB, clé `battle_alert_<kind>`) ; glyphe vectoriel
+## en repli si le PNG manque, même esprit que `BattleHud._draw_command_icon`.
 func _draw_glyph(glyph: Control) -> void:
 	var kind := str(glyph.get_meta("kind", ""))
 	var c := glyph.size * 0.5
+	if BattleModeIcons.draw_ink_icon(glyph, "battle_alert_" + kind, c, minf(glyph.size.x, glyph.size.y) - 2.0, INK):
+		return
 	match kind:
 		"rout":  # flèche fuyante
 			glyph.draw_line(c + Vector2(-8, 0), c + Vector2(6, 0), INK, 2.0)

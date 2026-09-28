@@ -6,7 +6,8 @@ extends RefCounted
 ## `none`) ; ce script ne fait que choisir l'image et la poser par `Input.set_custom_mouse_cursor`
 ## (32 px, point chaud au centre). `none` rend la flèche du système.
 ##
-## Images : `res://assets/ui/cursors/<contexte>.png` (pipeline DA5, à produire) si elles existent ;
+## Images : `res://assets/ui/cursors/<contexte>.png` (lot CB, dérivées des icônes DA5 par
+## `cent-ans assets ink-icons`, section `cursors` de `data/ui/icons_ink.json`) si elles existent ;
 ## sinon un substitut construit en code à partir des icônes game-icons déjà livrées (encre cernée,
 ## comme `AttackCursor` de la campagne), ou une forme simple (cercle barré de `forbidden`).
 
