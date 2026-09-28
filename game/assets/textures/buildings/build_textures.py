@@ -59,7 +59,7 @@ def main() -> None:
             if layer.startswith("battle/")
             else Path(f"{layer}_diff.jpg")
         )
-        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.LANCZOS)
+        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.Resampling.LANCZOS)
         sheet.paste(image, (0, index * SLICE))
     sheet.save("building_albedo_array.jpg", quality=88, optimize=True)
     normals = Image.new("RGB", (SLICE, SLICE * len(LAYERS)), (128, 128, 255))
@@ -72,7 +72,7 @@ def main() -> None:
             if name.startswith("battle/")
             else Path(f"{name}_nor.jpg")
         )
-        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.LANCZOS)
+        image = Image.open(path).convert("RGB").resize((SLICE, SLICE), Image.Resampling.LANCZOS)
         normals.paste(image, (0, index * SLICE))
     normals.save("building_normal_array.jpg", quality=90, optimize=True)
 
@@ -119,12 +119,12 @@ def timber_frame(size: int = 2048) -> None:
     plaster = (
         Image.open("lime_plaster_diff.jpg")
         .convert("RGB")
-        .resize((size, size), Image.LANCZOS)
+        .resize((size, size), Image.Resampling.LANCZOS)
     )
     wood = (
         Image.open("rough_wood_diff.jpg")
         .convert("RGB")
-        .resize((size, size), Image.LANCZOS)
+        .resize((size, size), Image.Resampling.LANCZOS)
     )
     # Timber darkened and desaturated (aged oak, not fresh planking).
     wood = ImageEnhance.Brightness(ImageEnhance.Color(wood).enhance(0.6)).enhance(0.55)
@@ -141,12 +141,12 @@ def timber_frame(size: int = 2048) -> None:
     plaster_nor = (
         Image.open("medieval_wall_01_nor.jpg")
         .convert("RGB")
-        .resize((nor_size, nor_size), Image.LANCZOS)
+        .resize((nor_size, nor_size), Image.Resampling.LANCZOS)
     )
     wood_nor = (
         Image.open("rough_wood_nor.jpg")
         .convert("RGB")
-        .resize((nor_size, nor_size), Image.LANCZOS)
+        .resize((nor_size, nor_size), Image.Resampling.LANCZOS)
     )
     nor_mask = np.asarray(_beam_mask(nor_size)).astype(np.float32) / 255.0
     nor = (
@@ -160,12 +160,12 @@ def timber_frame(size: int = 2048) -> None:
     plaster_rough = (
         Image.open("medieval_wall_01_rough.jpg")
         .convert("L")
-        .resize((nor_size, nor_size), Image.LANCZOS)
+        .resize((nor_size, nor_size), Image.Resampling.LANCZOS)
     )
     wood_rough = (
         Image.open("rough_wood_rough.jpg")
         .convert("L")
-        .resize((nor_size, nor_size), Image.LANCZOS)
+        .resize((nor_size, nor_size), Image.Resampling.LANCZOS)
     )
     rough = (
         np.asarray(plaster_rough).astype(np.float32) * (1 - nor_mask)
