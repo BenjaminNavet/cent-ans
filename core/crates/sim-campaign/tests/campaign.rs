@@ -58,7 +58,11 @@ fn new_1337_matches_game_data() {
     let state = france(&data, 1);
     // FE registry lots keep adding factions and provinces: every one in the
     // data enters the campaign (fac_rebels included), and the map is not shrunk.
-    assert_eq!(state.factions.len(), data.factions.len(), "including the virtual fac_rebels");
+    assert_eq!(
+        state.factions.len(),
+        data.factions.len(),
+        "including the virtual fac_rebels"
+    );
     assert_eq!(state.provinces.len(), data.provinces.len());
     assert!(state.factions.len() >= 61 && state.provinces.len() >= 153);
     assert_eq!(state.date_label(), "Printemps 1337");
