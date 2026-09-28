@@ -87,6 +87,9 @@ func _check_picker() -> void:
 	_check(picker.collapsed and not picker.body.visible, "the header collapses the picker")
 	_check(picker.header.text.begins_with("▸"), "collapsed arrow (%s)" % picker.header.text)
 	_check(picker.get_combined_minimum_size().y < tall * 0.6, "collapsed picker is short (%.0f < %.0f)" % [picker.get_combined_minimum_size().y, tall])
+	var rect := picker.get_global_rect()
+	_check(rect.end.x <= 1440.0 and rect.end.y <= 900.0 - BattleHud.BAND_HEIGHT, "collapsed picker stays in its corner (%s)" % rect)
+	_check(rect.size.y < 60.0, "collapsed picker shrinks to its header (%s)" % rect)
 	# Replié, le raccourci garde son effet et l'en-tête rappelle le préréglage.
 	_scene.get_viewport().push_input(_key(KEY_2, true, true))
 	_check(picker.active_id != "" and picker.header.text.contains(picker.name_of(picker.active_id)), "active preset shown in the header (%s)" % picker.header.text)
@@ -98,6 +101,9 @@ func _check_picker() -> void:
 	picker.header.pressed.emit()
 	await process_frame
 	_check(not picker.collapsed and picker.body.visible and picker.header.text.begins_with("▾"), "the header expands it again")
+	await process_frame
+	rect = picker.get_global_rect()
+	_check(rect.end.x <= 1440.0 and rect.end.y <= 900.0 - BattleHud.BAND_HEIGHT and rect.size.y >= tall - 1.0, "expanded picker back in its corner (%s)" % rect)
 
 
 # ----- incendier (siège) --------------------------------------------------------------------

@@ -137,8 +137,10 @@ func set_collapsed(value: bool) -> void:
 	if body != null:
 		body.visible = not collapsed
 	_update_header()
-	# Le conteneur reprend la taille de son contenu (ancré en bas à droite, il grandit vers le haut).
-	reset_size()
+	# Le conteneur reprend la taille de son contenu : rectangle nul au coin d'ancrage (bas droite),
+	# la taille minimale le fait grandir vers la gauche et le haut (`GROW_DIRECTION_BEGIN`).
+	offset_left = offset_right
+	offset_top = offset_bottom
 
 
 func toggle_collapsed() -> void:
