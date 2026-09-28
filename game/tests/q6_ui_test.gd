@@ -7,7 +7,9 @@ extends SceneTree
 ##  2. fenêtre de décision (`ChronicleWindow`) : le corps défilant a la hauteur de son contenu
 ##     (il s'ouvrait vide, choix inaccessibles) et les choix sont cliquables à l'écran ;
 ##  3. barre du haut de la carte, fenêtre 1280×720 en taille d'interface 1,25 (vue 1137×640) :
-##     elle tient dans l'écran (palier compact), et reprend ses libellés longs à 1920×1080.
+##     elle tient dans l'écran (palier compact), et reprend ses libellés longs à 1920×1080 ;
+##  4. fin de tour : la diplomatie ne s'ouvre seule que pour une offre nouvelle de poids (pas pour
+##     un accord commercial, pas quand une décision de chronique attend).
 ## Usage : godot --headless --path game --script res://tests/q6_ui_test.gd
 
 const MAP_PATHS := preload("res://scripts/map/map_paths.gd")
@@ -40,6 +42,7 @@ func _run() -> void:
 	await _test_faction_select_fits()
 	await _test_chronicle_body_visible()
 	await _test_top_bar_fits()
+	_test_diplomacy_auto_open()
 
 
 func _test_faction_select_fits() -> void:
@@ -115,3 +118,60 @@ func _test_top_bar_fits() -> void:
 	_check(map.ui.treasury_label.text.begins_with("Trésor"), "wide view: full treasury label expected, got « %s »" % map.ui.treasury_label.text)
 	map.queue_free()
 	await process_frame
+
+
+class DiplomacyProbe extends "res://scripts/map/diplomacy_controller.gd":
+	var opened := 0
+
+	func open_panel(_faction_id: String = "") -> void:
+		opened += 1
+
+
+class SimStub extends RefCounted:
+	var offers: Array = []
+	var decisions: Array = []
+
+	func get_diplomacy() -> Dictionary:
+		return {}
+
+	func get_offers() -> Array:
+		return offers
+
+	func get_pending_decisions() -> Array:
+		return decisions
+
+
+class UiStub extends Node:
+	func show_toast(_text: String, _warning: bool = false) -> void:
+		pass
+
+
+class MapStub extends Node:
+	var sim: Object = null
+	var ui: Node = null
+	var chronicle: Node = null
+
+
+func _test_diplomacy_auto_open() -> void:
+	var map := MapStub.new()
+	var sim := SimStub.new()
+	map.sim = sim
+	map.ui = UiStub.new()
+	var ctl := DiplomacyProbe.new()
+	ctl.map = map
+	sim.offers = [{"id": 1, "kind": "treaty"}, {"id": 2, "kind": "treaty"}]
+	ctl.after_end_turn()
+	_check(ctl.opened == 0, "diplomacy opened for routine trade offers")
+	sim.offers.append({"id": 3, "kind": "peace"})
+	sim.decisions = [{"id": 9}]
+	ctl.after_end_turn()
+	_check(ctl.opened == 0, "diplomacy opened over a pending chronicle decision")
+	sim.offers.append({"id": 4, "kind": "alliance"})
+	sim.decisions = []
+	ctl.after_end_turn()
+	_check(ctl.opened == 1, "diplomacy should open for a fresh alliance offer (opened %d)" % ctl.opened)
+	ctl.after_end_turn()
+	_check(ctl.opened == 1, "diplomacy reopened without a fresh offer")
+	map.ui.free()
+	map.free()
+	ctl.free()
