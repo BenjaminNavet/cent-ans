@@ -237,6 +237,29 @@ touche un monument ou une muraille), minutage par étape (`stats.marks_usec`). P
 ≈ 2-5 s dans le fil de travail selon la charge (Rouen : ≈ 2-3 s), ≈ 8 800 maisons, 110 monuments.
 Captures : `godot --path game --script res://tests/vh4_shots.gd -- --city=paris --out=<dossier>`.
 
+## Bordeaux, Avignon, Calais, Bruges (VH8, lot RS-G)
+
+Mêmes règles que Rouen ; chaque fichier liste ses sources, et les manques sont écrits dans les
+`note` et `description` (éléments `hypothetical`). Suivis : `docs/wip/rs-g-<ville>.md` ; relectures
+historiennes : `docs/histoire/relecture-vh-<ville>.md`. Tests : `tools/tests/test_landmarks_v2_<ville>.py`
+et `_test_vh8` dans `res://tests/vh4_landmarks_test.gd` (plan, portes, eau, monuments fusionnés).
+
+- **Bordeaux** : troisième enceinte (1302-1327) en deux polylignes ouvertes (front de terre avec
+  fossé, mur de Garonne sans fossé), castrum et deuxième enceinte intérieurs ; Garonne fine,
+  Peugue et Devèze à la main ; Pey-Berland à partir de 1440, Saint-Michel ancienne jusqu'en 1429.
+- **Avignon** : enceinte du XIIIe s. ouverte, remparts d'Innocent VI et d'Urbain V à partir de 1357,
+  pont Saint-Bénézet en deux entrées `bridges` (pont coudé), palais Vieux 1335 / Neuf 1342, fort
+  Saint-André 1362 ; bras de Villeneuve (OSM) et Sorgue dessinée.
+- **Calais** : enceinte de Hurepel (1228), havre en polygone `hand` (trait de côte de 1340 non
+  sourcé : restitution minimale), Notre-Dame en trois phases, Rysbank ; trame OSM de la
+  reconstruction, peu sûre.
+- **Bruges** : levée de 1297 démantelée en 1328 (portes basses en 1340, portes de pierre datées
+  1361-1401), beffroi en trois états, Waterhalle, reien d'après OSM dessinées (`fine_rivers: []`).
+
+Manques de format relevés (contournés) : pas de `certainty` ni de `note` sur les portes, pas de
+levée de terre linéaire, pas de pont coudé, eaux non datées, polygones d'eau non dessinés par le
+moteur (l'eau affichée reste celle de la carte fine).
+
 ## Limites connues (VH4)
 
 - Parcellaire généré le long des rues OSM nommées (pas de cadastre réel) ; ≈ 4 800 parcelles et
