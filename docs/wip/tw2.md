@@ -1,0 +1,17 @@
+# WIP orchestrateur — TW2 mécaniques Total War (28/09)
+
+Plan : `docs/design/2026-09-28-tw2-mecaniques-total-war.md`. Mandat : enchaîner les lots sans validation.
+Chaque lot a sa note `docs/wip/tw2-<lot>.md` dans sa branche `feat/tw2-<lot>`.
+Fusion : worktree `../gp-tw2-merge` (branche `integration/tw2`), `git merge main`, merge du lot, clippy +
+tests + `core/build.sh` + `--import` + smoke, puis `git merge --ff-only` dans main.
+Session RS parallèle (`docs/wip/restes.md`) : ADR 0098/0099 à elle ; conflits probables avec RS B
+(économie) et RS F (bataille).
+
+| Lot | Branche | État |
+|---|---|---|
+| SB barres de vie + rythme siège | feat/tw2-sb | lancé (vague 1) |
+| T1 sort de la ville prise | feat/tw2-t1 | lancé (vague 1) |
+| T2 reconstitution + réserves | feat/tw2-t2 | lancé (vague 1) |
+| T3 mercenaires | feat/tw2-t3 | vague 2 |
+| T4 points de capture | feat/tw2-t4 | vague 2 (après SB) |
+| T5 traditions d'armée | feat/tw2-t5 | vague 2 (après T2) |

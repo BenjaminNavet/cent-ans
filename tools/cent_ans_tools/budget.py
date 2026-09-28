@@ -27,6 +27,7 @@ DEFAULT_BUDGET_PATH = Path(__file__).resolve().parents[2] / "docs" / "budget.md"
 _CENTS = Decimal("0.01")
 _AMOUNT_RE = re.compile(r"-?\d+(?:[.,]\d+)?")
 _PLACEHOLDER_SERVICE = "—"
+_PLACEHOLDER_SUBJECT = "Aucune dépense pour l'instant"
 _DEFAULT_CUMUL_LABEL = "Cumul"
 
 
@@ -47,8 +48,16 @@ class BudgetEntry:
 
     @property
     def is_placeholder(self) -> bool:
-        """Whether the row is the initial "no spending yet" placeholder."""
-        return self.service == _PLACEHOLDER_SERVICE
+        """Whether the row is the initial "no spending yet" placeholder.
+
+        Checks both the service (``—``) and the exact placeholder subject: several real,
+        free-of-charge rows also use ``—`` as their service (open data, a no-cost step...),
+        and must not be mistaken for the placeholder and dropped by `add_entry()`.
+        """
+        return (
+            self.service == _PLACEHOLDER_SERVICE
+            and self.subject == _PLACEHOLDER_SUBJECT
+        )
 
 
 @dataclass
@@ -211,6 +220,31 @@ class BudgetLedger:
         """The last table in the file: where new spending is recorded and the cap is checked."""
         return self.sessions[-1]
 
+    def find_session(self, title: str) -> BudgetSession:
+        """Return the session whose heading is, or starts with, ``title``.
+
+        Several tool pipelines (DA5 ink icons, portraits, event art...) share one envelope
+        that is not always the *last* table in the file — a later, unrelated section (e.g. a
+        following polish pass) can be appended after it. Callers that know their envelope's
+        heading use this instead of :attr:`current_session` to avoid writing into whichever
+        table happens to be last. Raises ``ValueError`` if no session matches, or more than
+        one does (an ambiguous, too-short ``title``).
+        """
+        matches = [
+            session
+            for session in self.sessions
+            if session.title is not None and session.title.startswith(title)
+        ]
+        if not matches:
+            raise ValueError(
+                f"Aucune section de budget nommée {title!r} dans {self.path}"
+            )
+        if len(matches) > 1:
+            raise ValueError(
+                f"Plusieurs sections de budget correspondent à {title!r} dans {self.path}"
+            )
+        return matches[0]
+
     def session_totals(self) -> dict[str, Decimal]:
         """Cumulative real spend of each session, keyed by its heading.
 
@@ -239,12 +273,17 @@ class BudgetLedger:
         subject: str,
         estimated: Decimal | float | int | str,
         actual: Decimal | float | int | str,
+        session: str | None = None,
     ) -> BudgetEntry:
-        """Append a row to the current session.
+        """Append a row to a session.
 
-        Drops its placeholder if present, recomputes that session's cumul, and saves.
+        ``session`` names the target heading (see :meth:`find_session`); left out, the row
+        goes to :attr:`current_session` (the last table), as before. Drops the target
+        session's placeholder if present, recomputes its cumul, and saves.
         """
-        session = self.current_session
+        session_obj = (
+            self.find_session(session) if session is not None else self.current_session
+        )
         entry = BudgetEntry(
             date=date,
             service=service,
@@ -252,11 +291,11 @@ class BudgetLedger:
             estimated=to_money(estimated),
             actual=to_money(actual),
         )
-        session.entries = [
-            existing for existing in session.entries if not existing.is_placeholder
+        session_obj.entries = [
+            existing for existing in session_obj.entries if not existing.is_placeholder
         ]
-        session.entries.append(entry)
-        self._recompute(session)
+        session_obj.entries.append(entry)
+        self._recompute(session_obj)
         self.save()
         return entry
 
@@ -327,6 +366,9 @@ def add_entry(
     estimated: Decimal | float | int | str,
     actual: Decimal | float | int | str,
     path: Path | str = DEFAULT_BUDGET_PATH,
+    session: str | None = None,
 ) -> BudgetEntry:
-    """Module-level shortcut: append a row to the current session in ``path``."""
-    return BudgetLedger(path).add_entry(date, service, subject, estimated, actual)
+    """Module-level shortcut: append a row to a session (see `BudgetLedger.add_entry`) in ``path``."""
+    return BudgetLedger(path).add_entry(
+        date, service, subject, estimated, actual, session=session
+    )

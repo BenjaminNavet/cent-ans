@@ -11,7 +11,9 @@ Suites possibles (non faites) :
 - Pont get_siege_state / get_soldier_buffers groupés : repris par PB3c.
 - [x] trade.rs : précalculer les chemins des routes au chargement de data.trade — fait (RS-D, `feat/rs-d-trade`, voir 18c).
 - sim-battle : `disengaging` retombe au 1er pas hors contact (décrochage en bord de mêlée) ; pavois attend une cible cachée — revérifié après CB4 (RS-D) : toujours ouvert (`start_attack` ne teste que la portée, les pavois restent levés et le régiment attend) ; test ignoré `review_fixes::pavised_crossbowmen_close_in_on_a_hidden_target` (comportement attendu, échoue aujourd'hui), correction de règle laissée à un lot bataille.
-- Mock : événements "movement", "appointment", "skill_learned" absents d'EventKind.
+- Mock : événements "appointment", "skill_learned" absents d'EventKind (mais traités par `map_ui.gd`,
+  laissés). RS-H (28/09) : "movement" (armée qui campe, pas de rôle de jeu, aucun script n'en
+  dépendait) retiré du mock ; ce sont désormais les deux seuls types restants à écarter du core.
 - [x] Tests manquants : campagne n° 4, 13, 14, 15 — faits (RS-D, `review_tests.rs` : `an_army_emptied_by_its_fallback_is_dispersed`, `the_winner_demands_its_unheld_war_goals_first`, `a_crown_beaten_at_minus_fifty_sues_for_peace`, `a_poor_herald_does_not_wait_for_a_ransom`, `hired_cogs_lost_at_sea_are_not_the_fleets`) ; chacun échoue quand on retire le correctif.
 - [x] Relancer la sonde release ai `fifty_turns_on_eight_seeds_stay_in_the_c7a_band` — relancée (RS-D, 28/09, `main` c0be4da7 + RS-D) : ÉCHEC sur la seule borne de trésor moyen de la France, 38 297 < 40 000 (bande 40 000-160 000) ; toutes les assertions par graine passent (survie, aucune banqueroute, Δ provinces ≤ 5, batailles). Résultat identique au livre près avec l'ancienne recherche de chemins (cache désactivé) : dérive préexistante, sans lien avec RS-D. À recaler (borne ou économie) avec RS-B (ordre public / `economy.json`), qui touche ces valeurs.
 - Leçon outillage : un CARGO_TARGET_DIR partagé entre worktrees mélange les artefacts des crates du workspace ;

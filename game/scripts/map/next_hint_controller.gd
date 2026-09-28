@@ -8,9 +8,13 @@ extends Node
 ## tutoriel, sous les panneaux et fenêtres, et quand le réglage `interface/next_hint` est
 ## décoché ; la croix masque le conseil courant jusqu'à la saison suivante.
 ## Créé par `campaign_map.gd` (`setup`, `stage_screenshot`). Aucune règle de jeu.
+## RS-E : `refresh()` est appelé par `campaign_map.gd` sur les événements qui changent son état
+## (fin de tour et tout ordre via `refresh_all`, sélection et désélection d'armée ou de province) ;
+## `_process` ne sert plus que de minuterie de secours, lente, pour les cas non couverts.
 
 const SETTING := "interface/next_hint"
-const REFRESH_SECONDS := 1.0
+## Minuterie de secours (les vrais changements passent par `refresh()`, appelé par `campaign_map.gd`).
+const FALLBACK_SECONDS := 5.0
 ## Chantiers recomptés au plus toutes les tant de secondes (parcours des provinces).
 const CONSTRUCTION_SECONDS := 4.0
 
@@ -51,7 +55,7 @@ func _process(delta: float) -> void:
 	_construction_timer -= delta
 	if _timer > 0.0:
 		return
-	_timer = REFRESH_SECONDS
+	_timer = FALLBACK_SECONDS
 	refresh()
 
 
