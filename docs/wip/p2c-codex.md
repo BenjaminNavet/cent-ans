@@ -42,9 +42,17 @@ Déjà traité avant ce lot : `codex_window.gd` a ses libellés courts (3e élé
 - [ ] `codex_hub.gd` : titre + `style_tabs` → `UiType` ; fenêtre → `UiZones.Zone.MODAL` (déféré).
 - [ ] `encyclopedia.gd` : tailles → `UiType` (contrôles et BBCode `[font_size=…]`).
 - [ ] `rich_tooltip.gd` : tailles → `UiType.CAPTION`.
-- [ ] `game/tests/p2c_ui_test.gd` (C1-C3 sur mes écrans, aides de `po_ui_test.gd` réutilisées sans
+- [~] `game/tests/p2c_ui_test.gd` (C1-C3 sur mes écrans, aides de `po_ui_test.gd` réutilisées sans
       le modifier — instance de son script chargé pour les fonctions `_collect_font_sizes` /
-      `_collect_tool_texts`).
+      `_collect_tool_texts`). C1 et C3 verts (30 textes lus, tailles [14, 17, 26]). C2 en cours :
+      la fenêtre `CodexWindow` autonome déborde de l'écran à 1280×720 et 1920×1080 quand elle est
+      ouverte juste après avoir libéré une carte de campagne dans le même test — position figée à
+      (540, 187) quelle que soit la résolution suivante, alors qu'une fenêtre isolée (sans carte
+      créée avant) se centre bien. Un ajout de 6 `await process_frame` après `map.queue_free()`
+      n'a pas changé le résultat (mêmes chiffres) : sonde de débogage en cours (impression de
+      `UiLayout.host()` / `zone_rect(MODAL)` / parent du contrôle) pour trouver la vraie cause
+      avant de conclure si c'est un artefact de mon test ou un vrai défaut de `UiZones` (hors de
+      mes fichiers si c'est le cas).
 - [ ] `game/tests/p2c_shot.gd` (captures 1280×720 dans `docs/img/po/p2c/`).
 - [ ] `smoke.gd`, tests existants des bulles et du Codex (`tools/tests/test_codex*.py`,
       `game/tests/codex_screenshot.gd`, `encyclopedia_screenshot.gd`).
