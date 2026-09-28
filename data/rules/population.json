@@ -1,5 +1,5 @@
 {
-  "description": "Ordre public (lots E2, EQ1) : termes de la cible de mécontentement de chaque classe hors effets de bâtiments et d'événements, et seuils de révolte. L'impôt « Haut » coûte du mécontentement ; la garnison et l'abondance des biens n'effacent plus tout ; les troubles récents de la province (prises, pillages, régence) s'y ajoutent ; une révolte exige plusieurs saisons de mécontentement élevé et le compte repart de zéro après chacune. EQ2 : la jauge de troubles perd 2 points plus 10 % de sa valeur par saison. RS-B (ADR 0100) : la garnison qui apaise est pondérée comme les bâtiments (celle des places secondaires pour moitié, province_effect_percent) ; révolte après 2 saisons (3 avant) au-delà de 74 (75 avant) : sur la carte densifiée les révoltes étaient tombées à 2,8-4,1 par partie de 200 tours, sous la cible 4-10.",
+  "description": "Ordre public (lots E2, EQ1) : termes de la cible de mécontentement de chaque classe hors effets de bâtiments et d'événements, et seuils de révolte. L'impôt « Haut » coûte du mécontentement ; la garnison et l'abondance des biens n'effacent plus tout ; les troubles récents de la province (prises, pillages, régence) s'y ajoutent ; une révolte exige plusieurs saisons de mécontentement élevé et le compte repart de zéro après chacune. EQ2 : la jauge de troubles perd 2 points plus 10 % de sa valeur par saison. RS-B (ADR 0100) : la garnison qui apaise est pondérée comme les bâtiments (celle des places secondaires pour moitié, province_effect_percent) ; révolte après 2 saisons au-delà de 75 (3 avant) : sur la carte densifiée les révoltes étaient tombées à 2,8-4,1 par partie de 200 tours, sous la cible 4-10 (un seuil de 74 en donnait 7,8 mais poussait la guerre FR-EN au-delà de 75 % sur 4 graines sur 10).",
   "tax_unrest_weight": 130.0,
   "garrison_relief_per_100_men": 1.0,
   "garrison_relief_max": 10.0,
@@ -8,7 +8,7 @@
   "foreign_religion_unrest": 10.0,
   "disorder_unrest_weight": 0.5,
   "disorder_unrest_max": 20.0,
-  "revolt_unrest_threshold": 74.0,
+  "revolt_unrest_threshold": 75.0,
   "revolt_seasons": 2,
   "revolt_control_threshold": 90.0,
   "disorder_decay_flat": 2,
