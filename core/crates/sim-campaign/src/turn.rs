@@ -121,6 +121,8 @@ impl CampaignState {
 
         // 6-8. Economy, attrition, recovery.
         economy::resolve_economy(self, data, events);
+        // TW2-T3: companies' premium upkeep, arrears, mercenary reserves.
+        crate::mercenaries::resolve_mercenaries(self, data, events);
         // C5: trade routes and agreements, after the treasury's tax income.
         crate::trade::resolve_trade(self, data, events);
         // H5: prices follow the coinage.

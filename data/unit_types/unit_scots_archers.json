@@ -1,0 +1,38 @@
+{
+  "id": "unit_scots_archers",
+  "name": {
+    "display": "Archers écossais",
+    "local": "Scottis archearis",
+    "local_language": "moyen écossais"
+  },
+  "category": "ranged",
+  "source_class": "peasants",
+  "mercenary": true,
+  "soldiers": 100,
+  "cost": {
+    "money": 620
+  },
+  "upkeep": 55,
+  "recruit_time_turns": 1,
+  "stats": {
+    "melee": 42,
+    "ranged": 60,
+    "range": 200,
+    "armor": 30,
+    "morale": 62,
+    "speed": 50,
+    "ammo": 40
+  },
+  "abilities": [
+    "volley",
+    "rain_penalty"
+  ],
+  "figure": "archer_3",
+  "missile": "arrow",
+  "equipment": "Arc d'if, jaque rembourrée, bassinet ou chapel, épée et bouclier rond (targe) ; croix de Saint-André cousue sur la jaque.",
+  "description": "Archers et gens d'armes d'[[cdx_ecosse|Écosse]] qui louent leur service : l'Armée d'Écosse du comte de Buchan et d'Archibald Douglas sert le dauphin Charles (Baugé 1421, Verneuil 1424) ; ses survivants forment la Garde écossaise des rois de France.",
+  "sources": [
+    "B. Chevalier, « Les Écossais dans les armées de Charles VII », dans Jeanne d'Arc, une époque, un rayonnement, CNRS, 1982",
+    "B. Ditcham, The Employment of Foreign Mercenary Troops in the French Royal Armies 1415-1470, thèse, Université d'Édimbourg, 1979"
+  ]
+}

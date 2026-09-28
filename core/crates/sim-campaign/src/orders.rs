@@ -372,6 +372,14 @@ pub enum Order {
         decision: u32,
         outcome: crate::capture::CaptureOutcome,
     },
+    // ----- TW2-T3: mercenary companies (`mercenaries.rs`) --------------------
+    /// `army` hires a company of `unit` from the reserve of the region it
+    /// stands in; the company joins at once.
+    HireMercenary {
+        army: ArmyId,
+        #[serde(alias = "unit_type")]
+        unit: UnitTypeId,
+    },
 }
 
 impl Order {
@@ -525,6 +533,8 @@ pub enum OrderError {
     Capture(#[from] crate::capture::CaptureError),
     #[error("la place est en ruine : ni recrutement ni chantier")]
     SettlementRuined,
+    #[error("engagement impossible : {0}")]
+    MercenaryUnavailable(String),
 }
 
 /// G1: recruitments every settlement can queue per turn before buildings.
@@ -837,6 +847,9 @@ impl CampaignState {
             }
             Order::ChooseCaptureOutcome { decision, outcome } => {
                 Ok(self.choose_capture_outcome(data, faction, decision, outcome)?)
+            }
+            Order::HireMercenary { army, unit } => {
+                self.order_hire_mercenary(data, faction, &army, &unit)
             }
             Order::SetDiet { province, diet } => {
                 crate::table::set_diet(self, data, faction, &province, &diet)?;
@@ -1184,6 +1197,11 @@ impl CampaignState {
         }
         if settlement.siege.is_some() {
             return Some("la colonie est assiégée".to_owned());
+        }
+        // TW2-T3 (ADR 0103): companies are hired by an army from its region's
+        // reserve (`HireMercenary`), never levied in a town.
+        if unit_type.mercenary {
+            return Some("compagnie de mercenaires : à engager depuis une armée".to_owned());
         }
         let slots = self.recruit_slots(data, settlement_id);
         if self.recruits_ordered_this_turn(settlement) >= slots {

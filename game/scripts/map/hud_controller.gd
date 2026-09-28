@@ -12,6 +12,8 @@ var map: Node = null  # CampaignMap
 var ui: MapUI = null
 ## Événements du dernier tour (alertes « construction achevée »).
 var last_events: Array = []
+## TW2-T3 : panneau « Mercenaires » (créé à la première ouverture).
+var mercenary_panel: MercenaryPanel = null
 
 
 func setup(campaign_map: Node) -> void:
@@ -22,6 +24,7 @@ func setup(campaign_map: Node) -> void:
 	ui.army_general_clicked.connect(_on_general_clicked)
 	ui.army_split_requested.connect(_on_split_requested)
 	ui.army_garrison_requested.connect(_on_garrison_requested)
+	ui.army_mercenaries_requested.connect(show_mercenaries)
 	ui.load_requested.connect(func(_path: String) -> void:
 		last_events = []
 		update_interest()
@@ -250,3 +253,31 @@ func _on_split_requested(army_id: String, unit_indices: Array) -> void:
 ## garnison remplie par un autre ordre) revient dans le toast d'erreur de `_submit`.
 func _on_garrison_requested(army_id: String, unit_indices: Array) -> void:
 	map.call("_submit", {"type": "garrison_units", "army": army_id, "unit_indices": unit_indices}, "Régiment laissé en garnison." if unit_indices.size() <= 1 else "Régiments laissés en garnison.")
+
+
+## TW2-T3 : ouvre (ou rafraîchit) le panneau « Mercenaires » de l'armée `army_id` : compagnies
+## de sa région, prix, solde, réserves et refus, tels que le cœur les donne (`get_mercenaries`).
+func show_mercenaries(army_id: String) -> void:
+	var sim := _sim()
+	if sim == null or not sim.has_method("get_mercenaries"):
+		ui.show_toast("Mercenaires indisponibles avec cette simulation.", true)
+		return
+	var info: Dictionary = sim.call("get_mercenaries", army_id)
+	if info.is_empty():
+		return
+	if mercenary_panel == null:
+		mercenary_panel = MercenaryPanel.new()
+		mercenary_panel.theme = ui.event_log.theme
+		UiZones.put(UiZones.Zone.SIDE_PANEL, mercenary_panel)
+		ui.register_panel(mercenary_panel, PanelStack.Kind.CENTRAL)
+		mercenary_panel.hire_requested.connect(_on_hire_requested)
+	mercenary_panel.show_market(army_id, info)
+	mercenary_panel.show()
+
+
+## Un clic sur une compagnie : ordre `hire_mercenary` (refus du cœur dans le toast d'erreur de
+## `_submit`), puis le panneau se met à jour (réserve, engagements restants, trésor).
+func _on_hire_requested(army_id: String, unit_type: String) -> void:
+	map.call("_submit", {"type": "hire_mercenary", "army": army_id, "unit": unit_type}, "Compagnie engagée : elle rejoint l'ost.")
+	if mercenary_panel != null and mercenary_panel.visible:
+		show_mercenaries(army_id)

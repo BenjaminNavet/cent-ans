@@ -44,7 +44,9 @@
     "unit_jinetes": "sword",
     "unit_breton_knights": "two_hand",
     "unit_gascon_crossbowmen": "sword",
-    "unit_culveriners": "sword"
+    "unit_culveriners": "sword",
+    "unit_brabancons": "polearm",
+    "unit_scots_archers": "sword"
   },
   "critical_chance": {
     "axe": 0.14,
