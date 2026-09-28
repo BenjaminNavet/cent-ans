@@ -12,7 +12,7 @@ extends SceneTree
 ## Usage : godot --headless --path game --script res://tests/dc6c_fit_scale_test.gd
 
 const MIN_FIT := 0.4
-const LILLE := Vector2(2310.3, 1657.9)
+const LILLE := Vector2(2310.3, 2937.9)
 
 var _failures := 0
 

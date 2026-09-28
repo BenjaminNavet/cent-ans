@@ -16,7 +16,7 @@ extends Node
 ## (vsync coupée, i/s non plafonnées : temps d'image réels).
 
 const CAMPAIGN_SCENE := "res://scenes/campaign_map.tscn"
-const PARIS := Vector2(2213.0, 1924.0)
+const PARIS := Vector2(2213.0, 3204.0)
 const ZOOMS := [1500.0, 1250.0, 491.0, 150.0]
 const TIMEOUT_S := 240.0
 

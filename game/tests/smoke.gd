@@ -1103,7 +1103,7 @@ func _run_diplomacy() -> void:
 		for army_id in army_ids:
 			var army: Dictionary = sim.call("get_army", army_id)
 			if str(army.get("faction", "")) == FACTION_ID:
-				var passage: Dictionary = sim.call("find_path_trespass", army_id, 2000.0, 2000.0)
+				var passage: Dictionary = sim.call("find_path_trespass", army_id, 2000.0, 3280.0)
 				_check(passage.is_empty() or passage.has("ok"), "find_path_trespass should answer")
 				break
 

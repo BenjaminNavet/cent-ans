@@ -212,7 +212,8 @@ def test_roads_geojson() -> None:
         assert feature["geometry"]["type"] == "LineString"
         assert feature["properties"]["source"] in {"itiner-e", "computed"}
         coords = np.asarray(feature["geometry"]["coordinates"])
-        assert coords.min() >= 0 and coords.max() <= 4096
+        assert coords.min() >= 0
+        assert coords[:, 0].max() <= 7168 and coords[:, 1].max() <= 6144
 
 
 def test_hamlets() -> None:
@@ -237,16 +238,17 @@ def test_hamlets() -> None:
 
 
 def test_relief_tiles() -> None:
-    """``map.json`` declares 16 x 16 tiles of 512² 16-bit PNGs, all present."""
+    """``map.json`` declares 28 x 24 tiles of 512² 16-bit PNGs, all present."""
     metadata = json.loads((MAP_DIR / "map.json").read_text(encoding="utf-8"))
     tiles = metadata.get("height_tiles")
     if tiles is None:
         pytest.skip("height_tiles absent (cent-ans geo relief)")
-    assert tiles == relief.HEIGHT_TILES
-    count = tiles["size_px"] // tiles["tile_px"]
+    assert tiles == relief.height_tiles_meta(relief.fine_grid(MAP_DIR))
+    assert tiles["size_px"] == [14336, 12288]
+    cols, rows = (side // tiles["tile_px"] for side in tiles["size_px"])
     directory = MAP_DIR / tiles["dir"]
-    for row in range(count):
-        for col in range(count):
+    for row in range(rows):
+        for col in range(cols):
             assert (directory / tiles["pattern"].format(col=col, row=row)).exists()
     with Image.open(directory / tiles["pattern"].format(col=5, row=7)) as image:
         assert image.size == (512, 512)

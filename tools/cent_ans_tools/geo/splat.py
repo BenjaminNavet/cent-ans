@@ -3,7 +3,7 @@
 Three files are written next to the heightmap in ``data/map/``:
 
 ``splat.png``
-    RGBA8, 2048², material weights normalised to 255 on land (0 at sea):
+    RGBA8, half the map grid (one texel = 2 x 2 map pixels), material weights normalised to 255 on land (0 at sea):
     R = grassland, G = farmland, B = forest, A = rock / heath. Built from the
     dominant terrain of each province (``data/provinces/*.json``), altitude,
     slope, distance to the coast and fractal noise.
@@ -35,7 +35,7 @@ REPO_DIR = download.TOOLS_DIR.parent
 MAP_DIR = REPO_DIR / "data" / "map"
 PROVINCES_DIR = REPO_DIR / "data" / "provinces"
 
-SPLAT_SIZE = 2048
+SPLAT_FACTOR = 2  # map pixels per splat texel (per side)
 BORDER_DIST_SCALE = 6.0  # 1 px = 6 levels, signed range ±21 px
 BORDER_RANGE_PX = 127.0 / BORDER_DIST_SCALE
 BORDER_CHANNELS = 3
@@ -348,7 +348,7 @@ def build(map_dir: Path = MAP_DIR, provinces_dir: Path = PROVINCES_DIR) -> Splat
         encode_border_dist(compute_border_dist(ids_full, land_full)), mode="RGB"
     ).save(border_path, compress_level=9)
 
-    factor = max(1, height.shape[0] // SPLAT_SIZE)
+    factor = SPLAT_FACTOR
     height_small = downsample_mean(height, factor)
     land_small = downsample_mean(~water, factor) > 0.5
     ids_small = ids_full[::factor, ::factor]

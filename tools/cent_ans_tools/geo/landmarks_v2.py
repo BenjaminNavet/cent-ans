@@ -241,9 +241,9 @@ def fine_river_lines(
         for i, f in enumerate(features)
         if hydro_fine.normalise_name(f["name"]) in targets
     }
-    bounds = json.loads((map_dir / "map.json").read_text(encoding="utf-8"))[
-        "bounds_projected"
-    ]
+    from cent_ans_tools.geo import pyramid  # noqa: PLC0415 - heavy, import cycle
+
+    bounds = pyramid.map_bounds(map_dir)  # frame of the fine tiles (OM2)
     mpp = (bounds[2] - bounds[0]) / 4096.0
     origin = city["origin_3035"]
     reach = float(city["extent_m"]) + 400.0

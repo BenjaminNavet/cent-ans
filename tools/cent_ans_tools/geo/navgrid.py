@@ -1,9 +1,12 @@
 """Navigation grid for free army movement (lot M1, spec 2026-09-24-mouvement-libre § 2).
 
-Output: ``data/map/navgrid.png``, 8-bit greyscale, :data:`NAVGRID_SIZE`² cells,
-one cell = 2 × 2 map pixels (about 1.44 km). The value of a cell is the cost
+Output: ``data/map/navgrid.png``, 8-bit greyscale, half the map grid in each
+direction (3584 x 3072 cells for the 7168 x 6144 map, ADR 0115), one cell =
+:data:`NAVGRID_SCALE` x :data:`NAVGRID_SCALE` map pixels (about 1.44 km). The value of a cell is the cost
 of entering it (10 = one plain cell), :data:`IMPASSABLE` (255) = cannot be
-entered. ``map.json`` gains ``"navgrid": {"size_px", "file", "scale"}``.
+entered. ``map.json`` gains ``"navgrid": {"size_px": [w, h], "file", "scale"}``.
+Land outside every province (``province_ids.png`` = 0: deserts, steppes beyond
+the playable provinces) is impassable.
 
 Layers, in order (costs from ``data/movement/rules.json``):
 
@@ -62,7 +65,7 @@ RULES_PATH = REPO_DIR / "data" / "movement" / "rules.json"
 PREVIEW_PATH = REPO_DIR / "docs" / "img" / "navgrid-preview.png"
 NAVGRID_FILE = "navgrid.png"
 CROSSINGS_FILE = "crossings.json"
-NAVGRID_SIZE = 2048
+NAVGRID_SCALE = 2  # map pixels per navigation cell (per side)
 IMPASSABLE = 255
 MAX_COST = 254
 
@@ -128,7 +131,7 @@ ROAD_SOURCE = "itiner-e"
 PASS_WINDOW_CELLS = 30
 PASS_SLOPE_PENALTY = 3.0  # cost multiplier of too-steep cells for the pass search
 
-PREVIEW_SIZE = 2048
+PREVIEW_WIDTH = 1792
 EIGHT = np.ones((3, 3), dtype=bool)
 
 
@@ -159,6 +162,8 @@ class NavgridLayers:
     settlement_cells: dict[str, tuple[int, int]]
     ports: set[str]
     road_crossings_dropped: int = 0
+    #: Land outside every province (impassable, ADR 0115); ``None`` = none.
+    outside: np.ndarray | None = None
 
 
 @dataclass
@@ -199,20 +204,29 @@ def load_crossings(path: Path) -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8"))["crossings"]
 
 
-def to_cell(px: float, py: float, scale: int, size: int) -> tuple[int, int]:
-    """Map pixel -> ``(row, col)`` grid cell, clamped."""
+def _shape(size: int | tuple[int, int]) -> tuple[int, int]:
+    """Grid shape ``(rows, cols)`` from a shape or a square side."""
+    return size if isinstance(size, tuple) else (size, size)
+
+
+def to_cell(
+    px: float, py: float, scale: int, size: int | tuple[int, int]
+) -> tuple[int, int]:
+    """Map pixel -> ``(row, col)`` grid cell, clamped (``size``: grid shape)."""
+    rows, cols = _shape(size)
     return (
-        int(np.clip(py // scale, 0, size - 1)),
-        int(np.clip(px // scale, 0, size - 1)),
+        int(np.clip(py // scale, 0, rows - 1)),
+        int(np.clip(px // scale, 0, cols - 1)),
     )
 
 
 def rasterize_lines(
-    lines: list, size: int, scale: int, all_touched: bool
+    lines: list, size: int | tuple[int, int], scale: int, all_touched: bool
 ) -> np.ndarray:
     """Boolean raster of map-pixel ``lines`` (shapely geometries) on the grid."""
+    size = _shape(size)
     if not lines:
-        return np.zeros((size, size), dtype=bool)
+        return np.zeros(size, dtype=bool)
     factor = 1.0 / scale
     shapes = [
         (shapely.affinity.scale(line, factor, factor, origin=(0, 0)), 1)
@@ -221,7 +235,7 @@ def rasterize_lines(
     return (
         rasterize(
             shapes,
-            out_shape=(size, size),
+            out_shape=size,
             fill=0,
             dtype=np.uint8,
             all_touched=all_touched,
@@ -393,11 +407,10 @@ def carve_pass(
     """
     rows = [r for r, _ in route]
     cols = [c for _, c in route]
-    size = cost.shape[0]
     top = max(0, min(rows) - PASS_WINDOW_CELLS)
     left = max(0, min(cols) - PASS_WINDOW_CELLS)
-    bottom = min(size, max(rows) + PASS_WINDOW_CELLS + 1)
-    right = min(size, max(cols) + PASS_WINDOW_CELLS + 1)
+    bottom = min(cost.shape[0], max(rows) + PASS_WINDOW_CELLS + 1)
+    right = min(cost.shape[1], max(cols) + PASS_WINDOW_CELLS + 1)
     window = cost[top:bottom, left:right].astype(np.float64)
     window = np.where(
         steep[top:bottom, left:right], window * PASS_SLOPE_PENALTY, window
@@ -459,16 +472,18 @@ def _terrain_provinces(map_dir: Path, ids: np.ndarray, terrain: str) -> np.ndarr
     return mask[ids]
 
 
-def _block_mean(array: np.ndarray, size: int) -> np.ndarray:
-    """Block average of a ``(rows, cols[, channels])`` raster down to ``size``² cells.
+def _block_mean(array: np.ndarray, size: int | tuple[int, int]) -> np.ndarray:
+    """Block average of a ``(rows, cols[, channels])`` raster down to the grid ``size``.
 
     A raster already at (or below) the grid size is sampled by nearest cell.
     """
-    rows = array.shape[0]
-    if rows <= size:
-        index = (np.arange(size) * rows) // size
-        return array[index][:, index]
-    factor = rows // size
+    grid_rows, grid_cols = _shape(size)
+    rows, cols = array.shape[:2]
+    if rows <= grid_rows:
+        row_index = (np.arange(grid_rows) * rows) // grid_rows
+        col_index = (np.arange(grid_cols) * cols) // grid_cols
+        return array[row_index][:, col_index]
+    factor = rows // grid_rows
     if array.ndim == 2:
         return splat.downsample_mean(array, factor)
     return np.stack(
@@ -480,23 +495,23 @@ def _block_mean(array: np.ndarray, size: int) -> np.ndarray:
     )
 
 
-def _splat_weights(map_dir: Path, size: int) -> np.ndarray:
-    """Splat weights ``(size, size, 4)`` in ``[0, 1]``, block-averaged from ``splat.png``.
+def _splat_weights(map_dir: Path, size: int | tuple[int, int]) -> np.ndarray:
+    """Splat weights ``(rows, cols, 4)`` in ``[0, 1]``, block-averaged from ``splat.png``.
 
     Lot R3 (ADR 0045): the historical forests of lot R1 are what the rules
-    read. ``splat.png`` is 4096² (2 × 2 map pixels per cell): the forest
+    read. ``splat.png`` is on the map grid (2 × 2 map pixels per cell): the forest
     weight of a cell is the share of its pixels under forest, so a cell is a
     forest (``FOREST_MIN_WEIGHT``) when at least half of it is wooded.
     """
     path = map_dir / "splat.png"
     if not path.exists():
-        return np.zeros((size, size, 4), dtype=np.float32)
+        return np.zeros((*_shape(size), 4), dtype=np.float32)
     with Image.open(path) as image:
         array = np.asarray(image.convert("RGBA"), dtype=np.float32) / 255.0
     return _block_mean(array, size)
 
 
-def _wetland_marsh(map_dir: Path, size: int) -> np.ndarray:
+def _wetland_marsh(map_dir: Path, size: int | tuple[int, int]) -> np.ndarray:
     """Cells slowed like a marsh by ``wetlands.png`` (lot R1): reed beds, dense ponds.
 
     R (marsh) is a share of reed beds and open water, G (ponds) the density of
@@ -505,7 +520,7 @@ def _wetland_marsh(map_dir: Path, size: int) -> np.ndarray:
     """
     path = map_dir / WETLANDS_FILE
     if not path.exists():
-        return np.zeros((size, size), dtype=bool)
+        return np.zeros(_shape(size), dtype=bool)
     with Image.open(path) as image:
         array = np.asarray(image.convert("RGB"), dtype=np.float32) / 255.0
     wet = _block_mean(array, size)
@@ -520,11 +535,11 @@ def compute(
     """Compute the grid and its diagnostic layers from ``data/map``."""
     rules = rules if rules is not None else load_rules()
     crossings_path = crossings_path or map_dir / CROSSINGS_FILE
-    size = NAVGRID_SIZE
+    scale = NAVGRID_SCALE
     height_full = terrain.uint16_to_height(
         terrain.read_png16(map_dir / "heightmap.png")
     )
-    scale = height_full.shape[0] // size
+    size = (height_full.shape[0] // scale, height_full.shape[1] // scale)
     with Image.open(map_dir / "land_mask.png") as image:
         land_full = np.asarray(image.convert("L")) > 127
     height = splat.downsample_mean(height_full, scale)
@@ -549,7 +564,7 @@ def compute(
     steep = slope > rules["slope_impassable_threshold"]
 
     # Rivers.
-    major = np.zeros((size, size), dtype=np.int16)
+    major = np.zeros(size, dtype=np.int16)
     keys = list(MAJOR_RIVERS)
     minor_lines = []
     major_lines: dict[str, list] = {key: [] for key in keys}
@@ -668,6 +683,9 @@ def compute(
                 cost[cell] = mountains
 
     cost[water] = IMPASSABLE
+    # Land outside every province (ADR 0115): impassable.
+    outside = (labels == 0) & ~water
+    cost[outside] = IMPASSABLE
     plains = float(rules["terrain_costs"]["plains"])
     for cell in settlement_cells.values():
         cost[cell] = plains
@@ -683,6 +701,7 @@ def compute(
         settlement_cells=settlement_cells,
         ports=_ports(),
         road_crossings_dropped=road_dropped,
+        outside=outside,
     )
 
 
@@ -702,8 +721,14 @@ def _lonlat_to_pixel(grid: MapGrid, lon: float, lat: float) -> tuple[float, floa
 
 
 def land_masses(layers: NavgridLayers) -> np.ndarray:
-    """8-connected land components (settlement cells count as land)."""
+    """8-connected land components (settlement cells count as land).
+
+    Land outside every province does not count: Scandinavia and the continent
+    are one landmass on the map, but not through the provinces (ADR 0115).
+    """
     land = ~layers.water
+    if layers.outside is not None:
+        land &= ~layers.outside
     for cell in layers.settlement_cells.values():
         land[cell] = True
     labels, _ = ndimage.label(land, structure=EIGHT)
@@ -778,18 +803,22 @@ def render_preview(layers: NavgridLayers, rules: dict, path: Path) -> None:
             draw.ellipse((c - 3, r - 3, c + 3, r + 3), outline=(255, 40, 40))
     for r, c in layers.settlement_cells.values():
         draw.rectangle((c - 1, r - 1, c + 1, r + 1), fill=(255, 255, 255))
-    if image.size[0] != PREVIEW_SIZE:
-        image = image.resize((PREVIEW_SIZE, PREVIEW_SIZE), Image.Resampling.NEAREST)
+    if image.size[0] != PREVIEW_WIDTH:
+        preview_height = round(image.size[1] * PREVIEW_WIDTH / image.size[0])
+        image = image.resize((PREVIEW_WIDTH, preview_height), Image.Resampling.NEAREST)
     path.parent.mkdir(parents=True, exist_ok=True)
     image.save(path, optimize=True)
 
 
-def update_map_json(map_dir: Path, scale: int) -> None:
-    """Add (or refresh) ``navgrid`` in ``map.json``, keeping every other key."""
+def update_map_json(map_dir: Path, scale: int, shape: tuple[int, int]) -> None:
+    """Add (or refresh) ``navgrid`` in ``map.json``, keeping every other key.
+
+    ``shape`` is the grid ``(rows, cols)``; ``size_px`` is written ``[w, h]``.
+    """
     path = map_dir / "map.json"
     metadata = json.loads(path.read_text(encoding="utf-8"))
     metadata["navgrid"] = {
-        "size_px": NAVGRID_SIZE,
+        "size_px": [shape[1], shape[0]],
         "file": NAVGRID_FILE,
         "scale": scale,
     }
@@ -828,8 +857,7 @@ def build(
     warnings = errors + warnings
     path = map_dir / NAVGRID_FILE
     terrain.write_png8(layers.cost, path)
-    scale = settlements.provinces_step.load_grid(map_dir).size_px // NAVGRID_SIZE
-    update_map_json(map_dir, scale)
+    update_map_json(map_dir, NAVGRID_SCALE, layers.cost.shape)
     land = ~layers.water
     return NavgridResult(
         path=path,

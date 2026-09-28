@@ -36,7 +36,7 @@ from cent_ans_tools.geo.project import (
 REPO_DIR = download.TOOLS_DIR.parent
 MAP_DIR = REPO_DIR / "data" / "map"
 PREVIEW_PATH = REPO_DIR / "docs" / "img" / "map-preview.png"
-PREVIEW_SIZE = 1024
+PREVIEW_SIZE = 1792  # preview width (1792 x 1536, 4 map pixels each)
 
 
 @dataclass(frozen=True)
@@ -62,12 +62,12 @@ def map_metadata(grid: MapGrid, etopo_tiles: list[str]) -> dict:
     return {
         "crs": CRS_MAP,
         "bounds_projected": list(grid.bounds),
-        "size_px": [grid.size_px, grid.size_px],
+        "size_px": [grid.width_px, grid.height_px],
         "meters_per_px": grid.meters_per_px,
         "height_min_m": terrain.HEIGHT_MIN_M,
         "height_max_m": terrain.HEIGHT_MAX_M,
         "extent_lonlat": [LON_MIN, LAT_MIN, LON_MAX, LAT_MAX],
-        "height_tiles": dict(relief.HEIGHT_TILES),
+        "height_tiles": relief.height_tiles_meta(grid.scaled(relief.FINE_SCALE)),
         "sources": {
             "dem": {"name": "ETOPO 2022 v1 15s surface", "tiles": etopo_tiles},
             "vectors": {
@@ -107,9 +107,19 @@ def render_preview(
     size: int = PREVIEW_SIZE,
 ) -> None:
     """Render a downscaled hypsometric + hillshade preview with vectors."""
-    factor = grid.size_px // size
-    small_height = height_m.reshape(size, factor, size, factor).mean(axis=(1, 3))
-    small_land = land_mask.reshape(size, factor, size, factor).max(axis=(1, 3)) > 0
+    factor = max(1, grid.width_px // size)
+    rows, cols = grid.height_px // factor, grid.width_px // factor
+    small_height = (
+        height_m[: rows * factor, : cols * factor]
+        .reshape(rows, factor, cols, factor)
+        .mean(axis=(1, 3))
+    )
+    small_land = (
+        land_mask[: rows * factor, : cols * factor]
+        .reshape(rows, factor, cols, factor)
+        .max(axis=(1, 3))
+        > 0
+    )
     shade = hillshade(small_height, grid.meters_per_px * factor)
     relief = np.clip(small_height, 0.0, 2500.0) / 2500.0
     land_rgb = np.stack(
@@ -154,7 +164,7 @@ def build(
     grid = default_grid()
     map_dir.mkdir(parents=True, exist_ok=True)
 
-    tile_names = download.etopo_tiles_covering(*grid.geographic_extent())
+    tile_names = download.etopo_tiles_for_grid(grid)
     tile_paths = download.etopo_tiles(tile_names, force)
     shapefiles = {
         layer: download.natural_earth_shapefile(layer, force)

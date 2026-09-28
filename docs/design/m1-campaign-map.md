@@ -5,25 +5,28 @@ en provinces historiques de 1337, navigable à la caméra, avec villes placées 
 
 ## 1. Emprise et projection
 
-- Emprise géographique : longitude -11° à 16°, latitude 35° à 60° (Portugal → Rhénanie/Suisse/Italie du Nord, Andalousie → Écosse).
+- Emprise (ADR 0115, depuis OM2) : rectangle projeté fixe x 2 169 486 → 7 323 110 m,
+  y 775 684 → 5 193 076 m, soit 7168 × 6144 unités de 718,9765625 m (28 × 24 tuiles racines de
+  256) : Maroc atlantique → Oural, mer Blanche → delta du Nil, Caspienne occidentale.
+  Avant OM2 : lon −11 → 16°, lat 35 → 60° en 4096² ; un ancien pixel (x, y) vaut (x, y + 1280).
 - Projection : Lambert azimutale équivalente Europe (EPSG:3035). Toutes les coordonnées de jeu
   sont en **coordonnées carte** : origine au coin nord-ouest de l'emprise projetée, axe X vers l'est,
   axe Y vers le sud, unité = pixel de la heightmap.
-- Heightmap : 4096 × 4096 pixels, PNG 16 bits en niveaux de gris, valeur 0 = -200 m, 65535 = 4800 m
-  (linéaire). Résolution ≈ 800 m/pixel. Mer = altitude ≤ 0 → masque terre/mer séparé.
+- Heightmap : 7168 × 6144 pixels, PNG 16 bits en niveaux de gris, valeur 0 = -200 m, 65535 = 4800 m
+  (linéaire, sommets du Caucase écrêtés à 4800 m). Résolution ≈ 719 m/pixel. Mer = altitude ≤ 0 → masque terre/mer séparé.
 - Dans Godot : 1 pixel = 1 unité monde (X = x carte, Z = y carte, Y = altitude × exagération 0,02).
 
 ## 2. Contrat de données (`data/map/`)
 
 | Fichier | Contenu |
 |---|---|
-| `map.json` | `{ "crs": "EPSG:3035", "bounds_projected": [minx, miny, maxx, maxy], "size_px": [4096, 4096], "meters_per_px": ..., "height_min_m": -200, "height_max_m": 4800 }` |
+| `map.json` | `{ "crs": "EPSG:3035", "bounds_projected": [minx, miny, maxx, maxy], "size_px": [7168, 6144], "meters_per_px": ..., "height_min_m": -200, "height_max_m": 4800 }` |
 | `heightmap.png` | PNG 16 bits |
 | `land_mask.png` | PNG 8 bits, 255 = terre |
 | `rivers.geojson` | LineStrings en coordonnées carte, propriété `name`, `strahler` ou `scalerank` |
 | `coastline.geojson` | LineStrings côte (pour rendu) |
 | `provinces.geojson` | Polygones (MultiPolygon possible) en coordonnées carte ; propriétés : `id` (= id de `data/provinces/`), `centroid` [x, y], `neighbors` [ids], `capital_px` [x, y] |
-| `province_ids.png` | PNG RGB 4096², couleur = index de province (R = idx & 255, G = idx >> 8), 0 = mer/aucune ; sert au picking |
+| `province_ids.png` | PNG RGB 7168 × 6144, couleur = index de province (R = idx & 255, G = idx >> 8), 0 = mer/aucune (terres à plus de ~400 km d'une graine : hors provinces, infranchissables) ; sert au picking |
 
 Les données de gameplay des provinces restent dans `data/provinces/*.json` (schéma existant).
 Chaque province y reçoit des champs `geo: { capital_lonlat: [lon, lat], seed_lonlat: [lon, lat] }`.

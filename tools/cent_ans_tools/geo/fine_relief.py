@@ -10,6 +10,7 @@ relief the player sees: rivers and roads must sit on it.
 
 from __future__ import annotations
 
+import json
 import warnings
 from collections import OrderedDict
 from pathlib import Path
@@ -46,6 +47,8 @@ class FineRelief:
     ) -> None:
         """Scan the cache for the tiles present at each level."""
         self.map_dir = Path(map_dir)
+        # E0 lives in the world grid (height/), the pyramid in its frame (OM2).
+        self.origin = _root_origin_tiles(self.map_dir)
         self.bounds = tuple(float(v) for v in bounds)
         self.width_m = self.bounds[2] - self.bounds[0]
         self.max_level = max_level
@@ -65,7 +68,8 @@ class FineRelief:
 
     def _tile_path(self, level: int, col: int, row: int) -> Path:
         if level == 0:
-            return self.map_dir / E0_DIR / f"h_{col}_{row}.png"
+            dx, dy = self.origin
+            return self.map_dir / E0_DIR / f"h_{col + dx}_{row + dy}.png"
         return self.map_dir / PYRAMID_DIR / f"E{level}" / f"{col}_{row}.png"
 
     def _scan(self, level: int) -> list[tuple[int, int]]:
@@ -78,7 +82,10 @@ class FineRelief:
             for path in directory.glob(f"{prefix}*.png"):
                 parts = path.stem.removeprefix(prefix).split("_")
                 if len(parts) == 2 and all(p.isdigit() for p in parts):
-                    tiles.append((int(parts[0]), int(parts[1])))
+                    col, row = int(parts[0]), int(parts[1])
+                    if level == 0:
+                        col, row = col - self.origin[0], row - self.origin[1]
+                    tiles.append((col, row))
         return tiles
 
     def tile(self, level: int, col: int, row: int) -> np.ndarray:
@@ -183,3 +190,14 @@ class FineRelief:
             mask = levels == level
             out[mask] = self.sample_level(x[mask], y[mask], int(level))
         return out.reshape(shape)
+
+
+def _root_origin_tiles(map_dir: Path) -> tuple[int, int]:
+    """``root_origin_tiles`` of ``relief_pyramid.json`` (``(0, 0)`` if absent, OM2)."""
+    path = Path(map_dir) / "relief_pyramid.json"
+    if not path.exists():
+        return (0, 0)
+    dx, dy = json.loads(path.read_text(encoding="utf-8")).get(
+        "root_origin_tiles", [0, 0]
+    )
+    return int(dx), int(dy)

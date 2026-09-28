@@ -202,8 +202,8 @@ fn a_faction_sees_its_provinces_but_not_everything() {
     );
     let share = vision.mask.seen_share();
     assert!(share > 0.0 && share < 0.5, "seen share {share}");
-    assert_eq!(vision.mask.width, 512);
-    assert_eq!(vision.mask.height, 512);
+    assert_eq!(vision.mask.width, 896); // 7168 / 8 (ADR 0115)
+    assert_eq!(vision.mask.height, 768);
 }
 
 #[test]
