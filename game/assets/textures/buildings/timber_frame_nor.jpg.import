@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rrs7fdgy7f2v"
-path.s3tc="res://.godot/imported/rough_wood_nor.jpg-a980e0de22cb5dc73bac03e7ed40ec69.s3tc.ctex"
-path.etc2="res://.godot/imported/rough_wood_nor.jpg-a980e0de22cb5dc73bac03e7ed40ec69.etc2.ctex"
+uid="uid://c1iohdo1qu4dn"
+path.s3tc="res://.godot/imported/timber_frame_nor.jpg-ad3e970193634baade9af133a0ce2fad.s3tc.ctex"
+path.etc2="res://.godot/imported/timber_frame_nor.jpg-ad3e970193634baade9af133a0ce2fad.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/textures/buildings/rough_wood_nor.jpg"
-dest_files=["res://.godot/imported/rough_wood_nor.jpg-a980e0de22cb5dc73bac03e7ed40ec69.s3tc.ctex", "res://.godot/imported/rough_wood_nor.jpg-a980e0de22cb5dc73bac03e7ed40ec69.etc2.ctex"]
+source_file="res://assets/textures/buildings/timber_frame_nor.jpg"
+dest_files=["res://.godot/imported/timber_frame_nor.jpg-ad3e970193634baade9af133a0ce2fad.s3tc.ctex", "res://.godot/imported/timber_frame_nor.jpg-ad3e970193634baade9af133a0ce2fad.etc2.ctex"]
 
 [params]
 

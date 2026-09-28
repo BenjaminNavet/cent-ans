@@ -78,3 +78,54 @@ ici (voir « point ouvert » dans le rapport du lot).
   qui ne peut pas venir du coût réel de la macro-variation (4 échantillons de bruit en plus par
   pixel de sol, seule différence entre les deux). À refaire sur machine calme avant de considérer
   le budget de performance (+5 %) validé.
+
+## Section GA5 (bâtiments)
+
+Date : 2026-09-28. Suite du lot GA5 (`docs/wip/ga.md`), même principe qu'en §GA2 (2k Poly Haven,
+« GA5 suit le même schéma pour les bâtiments » anticipé plus haut) mais avec des différences
+propres aux bâtiments, détaillées ici.
+
+1. **Import non compressé découvert et corrigé.** Contrairement au sol (déjà en `compress/mode=2`,
+   VRAM compressé, avant même GA2), les textures individuelles de `game/assets/textures/buildings/`
+   (matières `BuildingMaterials.SPECS`) étaient importées en **`compress/mode=0`** (« Lossless »,
+   `vram_texture: false`, **sans mipmaps**) depuis le lot BR1 — un oubli de réglage, pas un choix.
+   GA5 corrige ce réglage (`compress/mode=2`, `mipmaps/generate=true`, régénéré par
+   `godot --headless --path game --import`) en même temps que le bump 2k. Conséquence chiffrée
+   (mesure `game/tests/ga5_building_test.gd`, format réel DXT1/BC1 pour les diffuses et la plupart
+   des normales sans alpha, comme en §GA2) : les **12 matières texturées** (11 historiques +
+   `TimberFrame`, albédo 2k, normale et rugosité 1k quand elles existent) pèsent **≈ 47,3 Mo** au
+   total (mesure conservatrice : chaque matière est comptée séparément même quand deux partagent
+   le même fichier source, ex. `Planks`/`Door`) — **moins** que l'ancien 1k non compressé et sans
+   mipmaps (`1024² × 4 octets/texel` par diffuse ≈ 4,2 Mo **par matière**, sans le facteur 4/3 des
+   mipmaps puisqu'il n'y en avait pas) : corriger l'import pèse plus lourd sur la mémoire que le
+   bump de résolution, malgré le doublement.
+2. **`SPECS`/`PLAIN`/`ROOFS`/`ATLAS_LAYERS` déplacés dans les données.** `game/scripts/visual/
+   building_materials.gd` lisait ces tables en dur (lot BR1). GA5 les déplace dans
+   `data/art/building_materials.json` (schéma `art_building_materials.schema.json`), lu au premier
+   appel de `BuildingMaterials.material()`/`atlas_layers()` — même repli que
+   `BattleTerrain.ground_layers()` (dossier de données du jeu, puis `data/` du dépôt). `kit_export.py`
+   (Blender) garde sa propre copie Python de ces valeurs (`MATERIALS`/`ATLAS_LAYERS`, déjà commentée
+   « mêmes valeurs que `building_materials.gd` » avant GA5) : synchronisation manuelle assumée,
+   inchangée par ce lot (script Blender, hors périmètre GA5, pas de réexport du kit ici).
+3. **Torchis/colombage (`TimberFrame`) : matière prête, non câblée.** La spec GA5 demande des
+   variantes torchis/colombage « si les bâtiments ont une place pour les utiliser ». Poly Haven
+   n'a pas de texture CC0 dédiée pour ce motif (mur à pans de bois, torchis = remplissage,
+   colombage = ossature) ; `TimberFrame` est donc un **composite procédural** (`build_textures.py::
+   timber_frame()`/`_beam_mask()`, seed déterministe) : lattis de poteaux/sablières/entretoises
+   mélangé entre `lime_plaster` (remplissage) et `rough_wood` assombri (poutres), toutes deux déjà
+   CC0 Poly Haven — 0 $, pas d'IA. La matière est complète et chargée (`data/art/
+   building_materials.json`, `"wired": false`, absente de `atlas_layers`), utilisable dès
+   aujourd'hui via `BuildingMaterials.material("TimberFrame")`, **mais aucune surface du kit
+   Blender ne porte ce nom** : l'affecter à des bâtiments réels demande soit un changement +
+   réexport de `tools/blender_scripts/building_kit.py`/`kit_export.py` (Blender est disponible sur
+   la machine de dev, mais le kit est versionné en `.glb` déjà exportés dans `game/assets/models/
+   buildings/`, et l'indice de couche de l'atlas `Building` est **baké dans la couleur de sommet**
+   de ces `.glb` à l'export — l'ajouter en milieu de tableau désaligne les modèles existants, et
+   l'ajouter en fin de tableau (après `Canvas`, indice 14) tombe après `first_plain` = 11 et serait
+   traité comme une matière unie, sans texture, par `building_atlas.gdshader`, sauf à aussi changer
+   le shader), soit une réécriture plus large du système d'atlas. C'est aussi un **choix de
+   conception non tranché ici** : quelle proportion de bâtiments (quel type, quelle région —
+   la charpenterie apparente est historiquement plus caractéristique de Normandie/Île-de-France/
+   Angleterre que du Midi) recevrait `TimberFrame` à la place de `Plaster`. Décision laissée au
+   joueur/lead (voir rapport du lot et `docs/wip/ga.md`, section GA5) ; ni le rendu en jeu ni les
+   `.glb` existants ne sont affectés par cette matière tant qu'elle n'est pas câblée.
