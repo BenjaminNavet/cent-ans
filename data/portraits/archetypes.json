@@ -5,34 +5,118 @@
   "archetype_dir": "portraits/archetypes",
   "aged_dir": "portraits/aged",
   "age_bands": [
-    {"id": "child", "label": "Enfant", "max_age": 15, "prompt": "a child of about 8 years old"},
-    {"id": "young", "label": "Jeune", "max_age": 29, "prompt": "a young adult of about 22"},
-    {"id": "adult", "label": "Adulte", "max_age": 49, "prompt": "a mature adult of about 40"},
-    {"id": "old", "label": "Âgé", "prompt": "an elderly person of about 62, greying or white hair, lined face"}
+    {
+      "id": "child",
+      "label": "Enfant",
+      "max_age": 15,
+      "prompt": "a child of about 8 years old"
+    },
+    {
+      "id": "young",
+      "label": "Jeune",
+      "max_age": 29,
+      "prompt": "a young adult of about 22"
+    },
+    {
+      "id": "adult",
+      "label": "Adulte",
+      "max_age": 49,
+      "prompt": "a mature adult of about 40"
+    },
+    {
+      "id": "old",
+      "label": "Âgé",
+      "prompt": "an elderly person of about 62, greying or white hair, lined face"
+    }
   ],
   "cultures": [
     {
       "id": "france",
       "label": "France, Bourgogne et Pays-Bas",
-      "factions": ["fac_france", "fac_burgundy", "fac_brittany", "fac_flanders", "fac_brabant", "fac_hainaut", "fac_guelders", "fac_savoy", "fac_papacy", "fac_rebels", "fac_albret", "fac_alencon", "fac_armagnac", "fac_blois", "fac_bourbon", "fac_foix_bearn", "fac_penthievre"],
+      "factions": [
+        "fac_france",
+        "fac_burgundy",
+        "fac_brittany",
+        "fac_flanders",
+        "fac_brabant",
+        "fac_hainaut",
+        "fac_guelders",
+        "fac_savoy",
+        "fac_papacy",
+        "fac_rebels",
+        "fac_albret",
+        "fac_alencon",
+        "fac_armagnac",
+        "fac_blois",
+        "fac_bourbon",
+        "fac_foix_bearn",
+        "fac_penthievre",
+        "fac_lorraine"
+      ],
       "prompt": "French and Burgundian court fashion: fitted cotehardie, hood (chaperon) with long liripipe, fur-lined mantle, rich wool and silk in muted earth tones"
     },
     {
       "id": "england",
       "label": "Angleterre et Écosse",
-      "factions": ["fac_england", "fac_scotland"],
+      "factions": [
+        "fac_england",
+        "fac_scotland"
+      ],
       "prompt": "English and Scottish fashion: cotehardie with low hip belt, hood with liripipe, heavy wool mantle with fur trim, sober colours"
     },
     {
       "id": "iberia",
       "label": "Ibérie",
-      "factions": ["fac_castile", "fac_aragon", "fac_portugal", "fac_navarre", "fac_granada"],
+      "factions": [
+        "fac_castile",
+        "fac_aragon",
+        "fac_portugal",
+        "fac_navarre",
+        "fac_granada"
+      ],
       "prompt": "Iberian (Castilian and Aragonese) fashion: long saya tunic, pellote over-gown with wide armholes, mantle with Mudejar geometric silk borders"
     },
     {
       "id": "italy_empire",
       "label": "Italie et Empire",
-      "factions": ["fac_empire", "fac_austria", "fac_bohemia", "fac_holstein", "fac_sweden", "fac_swiss", "fac_milan", "fac_verona", "fac_venice", "fac_genoa", "fac_florence", "fac_naples"],
+      "factions": [
+        "fac_empire",
+        "fac_austria",
+        "fac_bohemia",
+        "fac_holstein",
+        "fac_sweden",
+        "fac_swiss",
+        "fac_milan",
+        "fac_verona",
+        "fac_venice",
+        "fac_genoa",
+        "fac_florence",
+        "fac_naples",
+        "fac_mainz",
+        "fac_hesse",
+        "fac_palatinate",
+        "fac_trier",
+        "fac_cologne",
+        "fac_julich",
+        "fac_berg",
+        "fac_cleve",
+        "fac_mark",
+        "fac_brandenburg",
+        "fac_mecklenburg",
+        "fac_meissen",
+        "fac_brunswick",
+        "fac_bremen",
+        "fac_wurttemberg",
+        "fac_baden",
+        "fac_wurzburg",
+        "fac_nuremberg",
+        "fac_bamberg",
+        "fac_tirol",
+        "fac_trent",
+        "fac_liege",
+        "fac_utrecht",
+        "fac_namur"
+      ],
       "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
     }
   ],
@@ -112,19 +196,175 @@
     ]
   },
   "cells": [
-    {"rank": "child", "sexes": ["male", "female"], "bands": ["child"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 3},
-    {"rank": "sovereign", "sexes": ["male", "female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
-    {"rank": "noble", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 4},
-    {"rank": "noble", "sexes": ["female"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 3},
-    {"rank": "knight", "sexes": ["male"], "bands": ["young", "adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 4},
-    {"rank": "prelate", "sexes": ["male"], "bands": ["adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
-    {"rank": "prelate", "sexes": ["female"], "bands": ["adult", "old"], "cultures": ["any"], "faces": 1},
-    {"rank": "burgher", "sexes": ["male"], "bands": ["adult", "old"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1},
-    {"rank": "burgher", "sexes": ["female"], "bands": ["adult"], "cultures": ["france", "england", "iberia", "italy_empire"], "faces": 1}
+    {
+      "rank": "child",
+      "sexes": [
+        "male",
+        "female"
+      ],
+      "bands": [
+        "child"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 3
+    },
+    {
+      "rank": "sovereign",
+      "sexes": [
+        "male",
+        "female"
+      ],
+      "bands": [
+        "young",
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 1
+    },
+    {
+      "rank": "noble",
+      "sexes": [
+        "male"
+      ],
+      "bands": [
+        "young",
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 4
+    },
+    {
+      "rank": "noble",
+      "sexes": [
+        "female"
+      ],
+      "bands": [
+        "young",
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 3
+    },
+    {
+      "rank": "knight",
+      "sexes": [
+        "male"
+      ],
+      "bands": [
+        "young",
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 4
+    },
+    {
+      "rank": "prelate",
+      "sexes": [
+        "male"
+      ],
+      "bands": [
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 1
+    },
+    {
+      "rank": "prelate",
+      "sexes": [
+        "female"
+      ],
+      "bands": [
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "any"
+      ],
+      "faces": 1
+    },
+    {
+      "rank": "burgher",
+      "sexes": [
+        "male"
+      ],
+      "bands": [
+        "adult",
+        "old"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 1
+    },
+    {
+      "rank": "burgher",
+      "sexes": [
+        "female"
+      ],
+      "bands": [
+        "adult"
+      ],
+      "cultures": [
+        "france",
+        "england",
+        "iberia",
+        "italy_empire"
+      ],
+      "faces": 1
+    }
   ],
   "fallbacks": {
-    "rank": {"sovereign": "noble", "knight": "noble", "prelate": "noble", "burgher": "noble", "noble": "knight"},
-    "band": {"child": "young", "young": "adult", "adult": "old", "old": "adult"}
+    "rank": {
+      "sovereign": "noble",
+      "knight": "noble",
+      "prelate": "noble",
+      "burgher": "noble",
+      "noble": "knight"
+    },
+    "band": {
+      "child": "young",
+      "young": "adult",
+      "adult": "old",
+      "old": "adult"
+    }
   },
   "rank_rules": {
     "data_roles": {
@@ -141,44 +381,159 @@
       "burgher": "burgher"
     },
     "title_keywords": [
-      {"rank": "prelate", "words": ["évêque", "archevêque", "abbé", "abbesse", "cardinal", "pape", "prieur", "prieure", "chanoine"]},
-      {"rank": "burgher", "words": ["bourgeois", "marchand", "prévôt des marchands", "échevin", "doge", "capitaine du peuple"]},
-      {"rank": "sovereign", "words": ["roi ", "reine ", "empereur", "impératrice"]}
+      {
+        "rank": "prelate",
+        "words": [
+          "évêque",
+          "archevêque",
+          "abbé",
+          "abbesse",
+          "cardinal",
+          "pape",
+          "prieur",
+          "prieure",
+          "chanoine"
+        ]
+      },
+      {
+        "rank": "burgher",
+        "words": [
+          "bourgeois",
+          "marchand",
+          "prévôt des marchands",
+          "échevin",
+          "doge",
+          "capitaine du peuple"
+        ]
+      },
+      {
+        "rank": "sovereign",
+        "words": [
+          "roi ",
+          "reine ",
+          "empereur",
+          "impératrice"
+        ]
+      }
     ],
     "ruler_house_rank": "noble",
     "army_rank": "knight",
-    "default_rank": {"male": "knight", "female": "noble"}
+    "default_rank": {
+      "male": "knight",
+      "female": "noble"
+    }
   },
   "aged_variants": [
-    {"character": "chr_edward_iii", "band": "adult"},
-    {"character": "chr_edward_iii", "band": "old"},
-    {"character": "chr_philippe_vi", "band": "old"},
-    {"character": "chr_jean_de_normandie", "band": "adult"},
-    {"character": "chr_charles_v", "band": "adult"},
-    {"character": "chr_edward_of_woodstock", "band": "adult"},
-    {"character": "chr_philippe_le_hardi", "band": "adult"},
-    {"character": "chr_philippe_le_hardi", "band": "old"},
-    {"character": "chr_jean_de_berry", "band": "adult"},
-    {"character": "chr_jean_de_berry", "band": "old"},
-    {"character": "chr_jean_de_gand", "band": "adult"},
-    {"character": "chr_jean_de_gand", "band": "old"},
-    {"character": "chr_charles_vi", "band": "adult"},
-    {"character": "chr_louis_d_anjou", "band": "adult"},
-    {"character": "chr_philippa_of_hainault", "band": "adult"},
-    {"character": "chr_charles_ii_de_navarre", "band": "adult"},
-    {"character": "chr_pedro_iv", "band": "adult"},
-    {"character": "chr_charles_de_luxembourg", "band": "adult"},
-    {"character": "chr_david_ii", "band": "adult"},
-    {"character": "chr_robert_stewart", "band": "old"},
-    {"character": "chr_gautier_de_mauny", "band": "adult"},
-    {"character": "chr_henry_of_grosmont", "band": "adult"},
-    {"character": "chr_louis_de_male", "band": "adult"},
-    {"character": "chr_jeanne_de_penthievre", "band": "adult"},
-    {"character": "chr_petrarque", "band": "old"}
+    {
+      "character": "chr_edward_iii",
+      "band": "adult"
+    },
+    {
+      "character": "chr_edward_iii",
+      "band": "old"
+    },
+    {
+      "character": "chr_philippe_vi",
+      "band": "old"
+    },
+    {
+      "character": "chr_jean_de_normandie",
+      "band": "adult"
+    },
+    {
+      "character": "chr_charles_v",
+      "band": "adult"
+    },
+    {
+      "character": "chr_edward_of_woodstock",
+      "band": "adult"
+    },
+    {
+      "character": "chr_philippe_le_hardi",
+      "band": "adult"
+    },
+    {
+      "character": "chr_philippe_le_hardi",
+      "band": "old"
+    },
+    {
+      "character": "chr_jean_de_berry",
+      "band": "adult"
+    },
+    {
+      "character": "chr_jean_de_berry",
+      "band": "old"
+    },
+    {
+      "character": "chr_jean_de_gand",
+      "band": "adult"
+    },
+    {
+      "character": "chr_jean_de_gand",
+      "band": "old"
+    },
+    {
+      "character": "chr_charles_vi",
+      "band": "adult"
+    },
+    {
+      "character": "chr_louis_d_anjou",
+      "band": "adult"
+    },
+    {
+      "character": "chr_philippa_of_hainault",
+      "band": "adult"
+    },
+    {
+      "character": "chr_charles_ii_de_navarre",
+      "band": "adult"
+    },
+    {
+      "character": "chr_pedro_iv",
+      "band": "adult"
+    },
+    {
+      "character": "chr_charles_de_luxembourg",
+      "band": "adult"
+    },
+    {
+      "character": "chr_david_ii",
+      "band": "adult"
+    },
+    {
+      "character": "chr_robert_stewart",
+      "band": "old"
+    },
+    {
+      "character": "chr_gautier_de_mauny",
+      "band": "adult"
+    },
+    {
+      "character": "chr_henry_of_grosmont",
+      "band": "adult"
+    },
+    {
+      "character": "chr_louis_de_male",
+      "band": "adult"
+    },
+    {
+      "character": "chr_jeanne_de_penthievre",
+      "band": "adult"
+    },
+    {
+      "character": "chr_petrarque",
+      "band": "old"
+    }
   ],
   "marks": {
-    "sick_traits": ["trait_sickly"],
-    "wound_traits": ["trait_wounded", "trait_maimed", "trait_one_eyed"],
+    "sick_traits": [
+      "trait_sickly"
+    ],
+    "wound_traits": [
+      "trait_wounded",
+      "trait_maimed",
+      "trait_one_eyed"
+    ],
     "mourning_years": 1
   }
 }
