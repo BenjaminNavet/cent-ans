@@ -48,9 +48,19 @@ Suivi : `docs/wip/rs-b-order.md`. Prolonge l'ADR 0082 (carte densifiée, `provin
 | sans RS-B | 68 % [61-73] | 10/10 | 3,0 |
 | RS-B, 2 saisons, seuil 74 | 73 % [67-78] | 6/10 | 7,3 |
 | **RS-B, 2 saisons, seuil 75 (retenu)** | **69 % [55-75]** | **9/10** | **5,9** |
-Les autres niveaux sont dans `docs/wip/rs-b-order.md`.
+
+Retenu, les quatre niveaux (état final après fusion de main) :
+| Niveau (graines) | Guerre FR-EN moy. [min-max] | Graines dans 55-75 | Révoltes / 200 t. | Banqueroutes |
+|---|---|---|---|---|
+| Facile (5) | 69 % [60-77] | 3/5 | 6,1 | 0,10 |
+| Normale (10) | 69 % [55-75] | 9/10 | 5,9 | 0,05 |
+| Difficile (10) | 66 % [60-70] | 10/10 | 7,8 | 0,04 |
+| Très difficile (5) | 59 % [57-63] | 5/5 | 7,4 | 0,02 |
 
 ## Conséquences
+- Critère EQ6 tenu : guerre FR-EN moyenne entre 55 et 75 % aux quatre niveaux, sans réglage
+  supplémentaire. Écart accepté : en facile, 2 graines sur 5 dépassent légèrement 75 % (76, 77 %).
+- Révoltes dans la bande 4-10 à tous les niveaux sur le siècle (5,9 en normale, 7,8 en difficile).
 - Les révoltes reviennent dans la bande 4-10 (4,8 sur 200 tours en normale, 5,9 sur le siècle), en
   bas de bande : le seuil est très sensible (74 donne 7,8, 72 donne 11) mais 74 pousse la guerre
   FR-EN au-delà de 75 % sur 4 graines sur 10 (plus de révoltes affaiblissent le royaume attaqué).
