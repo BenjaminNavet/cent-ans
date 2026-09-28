@@ -842,6 +842,7 @@ func update_view(camera_distance: float) -> void:
 	if data == null:
 		return
 	_camera_distance = camera_distance
+	var tp := Time.get_ticks_usec()  # RS-K : sections `settle/*` du banc `--bench-probe`
 	var weights := Vector3(tiers.near_weight(camera_distance), tiers.medium_weight(camera_distance), tiers.far_weight(camera_distance))
 	# ZG4 : au palier « site » (~1 km, jusqu'à 200 m), les maquettes à la loupe (colonies ×3-7,
 	# villes emblématiques ×3,5) dépasseraient les collines : masquées en attendant les villes à
@@ -863,7 +864,7 @@ func update_view(camera_distance: float) -> void:
 		_landmarks_root.visible = not site
 		# SZ6 : les hauteurs d'étiquettes ne dépendent des poids que par le palier près et les
 		# villes 1:1 : pas de recalcul des 570 étiquettes à chaque image d'un zoom.
-		var label_state := Vector2i(int(weights.x > 0.35), int(_towns_active()))
+		var label_state := Vector2i(int(weights.x > 0.35), 0)  # RS-K : indépendant des villes 1:1
 		if label_state != _label_state:
 			_update_label_heights()
 		_declutter_timer = 0.0
@@ -883,12 +884,17 @@ func update_view(camera_distance: float) -> void:
 	if not is_equal_approx(camera_distance, _icon_distance) and _icon_material != null:
 		_icon_distance = camera_distance
 		_icon_material.set_shader_parameter("camera_distance", camera_distance)
+	tp = PerfProbe.lap("settle/labels", tp)
 	_update_settlement_scale(camera_distance)
+	tp = PerfProbe.lap("settle/scale", tp)
 	_update_towns(camera_distance)
+	tp = PerfProbe.lap("settle/towns", tp)
 	_update_landmark_cities(camera_distance)
+	tp = PerfProbe.lap("settle/landmarks", tp)
 	_update_hamlet_scale(camera_distance)
 	_update_hamlets()
 	_update_selection_ring()
+	tp = PerfProbe.lap("settle/hamlets", tp)
 	_declutter_timer -= get_process_delta_time() if is_inside_tree() else 0.0
 	if _declutter_timer <= 0.0:
 		_declutter_timer = declutter_interval
@@ -896,6 +902,7 @@ func update_view(camera_distance: float) -> void:
 		if _declutter_force or _camera_moved():
 			declutter()
 	_update_declutter_fade()
+	PerfProbe.lap("settle/declutter", tp)
 
 
 func _on_chunk_surface_changed(index: int) -> void:
@@ -918,7 +925,7 @@ var _label_scale := -1.0
 ## Hauteur des étiquettes : au-dessus de la maquette (près) ou de l'icône (moyen).
 func _update_label_heights() -> void:
 	var near := _weights.x > 0.35
-	_label_state = Vector2i(int(near), int(_towns_active()))
+	_label_state = Vector2i(int(near), 0)
 	_label_scale = MapData.vertical_scale()
 	_label_chunks.clear()
 	for i in _labels.size():
@@ -1714,14 +1721,24 @@ func _compute_real_radii() -> void:
 func _update_towns(camera_distance: float) -> void:
 	if towns == null:
 		return
-	var was_active := towns.active
 	towns.update_view(camera_distance)
 	if towns.version == _towns_version:
 		return
 	_towns_version = towns.version
-	_update_model_visibility()
-	if was_active != towns.active:
-		_update_label_heights()
+	var tp := Time.get_ticks_usec()
+	# RS-K : seules les colonies dont la ville 1:1 vient d'apparaître ou de disparaître (toutes
+	# les ~570 maquettes coûtaient jusqu'à 25 ms à chaque ville construite).
+	# La bascule d'activité ne touche que les colonies aux villes construites ; les hauteurs
+	# d'étiquettes ne dépendent pas des villes 1:1 (plus de recalcul des ~570 étiquettes ici).
+	var changes := towns.take_changes()
+	if bool(changes["all"]):
+		_update_model_visibility()
+	else:
+		for id: String in changes["ids"]:
+			var i := int(data.index_by_id.get(id, -1))
+			if i >= 0 and i < _models.size():
+				_apply_model_visibility(i)
+	PerfProbe.lap("town/models", tp)  # RS-K
 
 
 ## SZ4b : maquette masquée seulement quand la ville 1:1 de sa colonie est affichée (ZG6) ; ailleurs
@@ -1729,7 +1746,3 @@ func _update_towns(camera_distance: float) -> void:
 func _update_model_visibility() -> void:
 	for i in _models.size():
 		_apply_model_visibility(i)
-
-
-func _towns_active() -> bool:
-	return towns != null and towns.active
