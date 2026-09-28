@@ -156,7 +156,7 @@ func _build_banner() -> void:
 	banner.add_child(box)
 	var label := Label.new()
 	label.text = "Déploiement — placez vos troupes"
-	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	label.add_theme_color_override("font_color", Color(0.22, 0.14, 0.07))
 	box.add_child(label)
 	var button := Button.new()

@@ -79,12 +79,12 @@ func _ready() -> void:
 	header.add_theme_constant_override("separation", 8)
 	box.add_child(header)
 	title_label = Label.new()
-	title_label.add_theme_font_size_override("font_size", 21)
+	title_label.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	header.add_child(title_label)
 	progress_label = Label.new()
-	progress_label.add_theme_font_size_override("font_size", 14)
+	progress_label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	progress_label.add_theme_color_override("font_color", Color(0.42, 0.35, 0.25))
 	progress_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	header.add_child(progress_label)
@@ -93,7 +93,7 @@ func _ready() -> void:
 	toc_button.text = "☰ Étapes"
 	toc_button.toggle_mode = true
 	toc_button.focus_mode = Control.FOCUS_NONE
-	toc_button.add_theme_font_size_override("font_size", 13)
+	toc_button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	toc_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	toc_button.tooltip_text = "Sommaire du tutoriel : cliquez sur une étape pour y aller."
 	toc_button.toggled.connect(func(on: bool) -> void: set_toc_open(on))
@@ -141,7 +141,7 @@ func _ready() -> void:
 	continue_button.pressed.connect(func() -> void: continue_pressed.emit())
 	buttons.add_child(continue_button)
 	for button: Button in [skip_all_button, later_button, skip_step_button]:
-		button.add_theme_font_size_override("font_size", 14)
+		button.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 
 
 func _rich(font_size: int) -> RichTextLabel:
@@ -235,7 +235,7 @@ func _rebuild_toc() -> void:
 		row.flat = true
 		row.focus_mode = Control.FOCUS_NONE
 		row.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		row.add_theme_font_size_override("font_size", 14)
+		row.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 		for state in ["normal", "pressed", "focus", "disabled"]:
 			row.add_theme_stylebox_override(state, plain)
 		row.add_theme_stylebox_override("hover", hover)

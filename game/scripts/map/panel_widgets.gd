@@ -163,7 +163,7 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 static func import_cost_label(import_cost: int) -> Label:
 	var label := Label.new()
 	label.text = "Dont import : %s" % Money.amount(import_cost)
-	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	label.add_theme_color_override("font_color", Color(RichTooltip.RED))
 	return label
 
@@ -171,7 +171,7 @@ static func import_cost_label(import_cost: int) -> Label:
 static func reason_label(text: String) -> Label:
 	var reason := Label.new()
 	reason.text = text
-	reason.add_theme_font_size_override("font_size", 13)
+	reason.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	reason.add_theme_color_override("font_color", REASON_COLOR)
 	return reason
 

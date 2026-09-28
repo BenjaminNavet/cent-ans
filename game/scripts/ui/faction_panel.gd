@@ -232,10 +232,10 @@ func _arrange_budget() -> void:
 	var grid := income_value.get_parent()
 	var net_key := Label.new()
 	net_key.text = "Solde prévu de la saison"
-	net_key.add_theme_font_size_override("font_size", 17)
+	net_key.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	net_value = RichLabel.new()
 	net_value.text = "—"
-	net_value.add_theme_font_size_override("font_size", 17)
+	net_value.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	net_value.mouse_filter = Control.MOUSE_FILTER_PASS
 	net_value.tooltip_text = "Recettes moins toutes les charges : le « Solde » de la barre du haut, ajouté au trésor en fin de tour."
 	grid.add_child(net_key)
@@ -267,8 +267,8 @@ func _build_budget_view() -> void:
 		if child != treasury_value and child != grid.get_child(treasury_value.get_index() - 1):
 			(child as Control).hide()
 	var treasury_key: Label = grid.get_child(treasury_value.get_index() - 1)
-	treasury_key.add_theme_font_size_override("font_size", 19)
-	treasury_value.add_theme_font_size_override("font_size", 19)
+	treasury_key.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
+	treasury_value.add_theme_font_size_override("font_size", UiType.size(UiType.HEADING))
 	var anchor: Control = grid
 	var budget_title := _section_title("Budget de la saison")
 	anchor.add_sibling(budget_title)
@@ -289,7 +289,7 @@ const PANEL_WIDTH := 500.0
 func _section_title(text: String) -> Label:
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", 17)
+	label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	label.add_theme_color_override("font_color", Color(0.40, 0.22, 0.10))
 	return label
 

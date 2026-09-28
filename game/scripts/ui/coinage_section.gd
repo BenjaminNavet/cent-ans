@@ -43,7 +43,7 @@ func _init() -> void:
 	add_child(head)
 	header_label = Label.new()
 	header_label.text = "Monnaie"
-	header_label.add_theme_font_size_override("font_size", 16)
+	header_label.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(header_label)
 	current_label = _small_label(14, false)
@@ -95,7 +95,7 @@ func _init() -> void:
 	explanation_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	explanation_label.add_theme_color_override("default_color", RichTooltip.INK)
 	for key in ["normal_font_size", "bold_font_size", "italics_font_size"]:
-		explanation_label.add_theme_font_size_override(key, 12)
+		explanation_label.add_theme_font_size_override(key, UiType.size(UiType.CAPTION))
 	add_child(explanation_label)
 
 

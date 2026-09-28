@@ -70,7 +70,7 @@ func setup(checked: ReliefCacheStatus) -> void:
 	box.add_child(head)
 	var title := Label.new()
 	title.text = status.notice_title()
-	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_font_size_override("font_size", UiType.size(UiType.BODY))
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
 	close_button = Button.new()
@@ -107,7 +107,7 @@ func setup(checked: ReliefCacheStatus) -> void:
 	row.add_child(copy)
 	var fallback := Label.new()
 	fallback.text = "Sans hébergement disponible : %s" % ReliefCacheStatus.REGEN_COMMAND
-	fallback.add_theme_font_size_override("font_size", 12)
+	fallback.add_theme_font_size_override("font_size", UiType.size(UiType.CAPTION))
 	fallback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	fallback.custom_minimum_size = Vector2(WIDTH - 32.0, 0.0)
 	box.add_child(fallback)
