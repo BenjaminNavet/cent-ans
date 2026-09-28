@@ -34,6 +34,15 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_pavia_milan",
+      "title": "Abattre les Visconti",
+      "description": "Prendre Milan aux Visconti, maîtres convoités de Pavie.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_milan"
+      }
     }
   ]
 }

@@ -39,6 +39,15 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_bearn_armagnac",
+      "title": "Vaincre l'Armagnac",
+      "description": "Soumettre le comté d'Armagnac, rival de la maison de Foix (Launac, 1362).",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_armagnac"
+      }
     }
   ],
   "description": "Vicomté tenue en alleu, sans hommage, selon la prétention de la maison de Foix-Béarn (rang de comté par convention de schéma ; titre souverain, sans suzerain de jure).",

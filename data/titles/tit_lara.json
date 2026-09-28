@@ -35,6 +35,15 @@
           "prov_biscay"
         ]
       }
+    },
+    {
+      "id": "obj_lara_cerda",
+      "title": "Le droit des La Cerda",
+      "description": "Faire valoir la prétention des La Cerda, dont les Lara sont héritiers, à la couronne de Castille.",
+      "condition": {
+        "kind": "hold_crown",
+        "title": "tit_castile"
+      }
     }
   ],
   "description": "Berceau de l'une des plus anciennes maisons de la haute noblesse castillane, réconciliée avec Alphonse XI en 1337 après le siège de Lerma (1336).",

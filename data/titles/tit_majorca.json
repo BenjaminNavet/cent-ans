@@ -43,6 +43,15 @@
       "condition": {
         "kind": "be_independent"
       }
+    },
+    {
+      "id": "obj_majorca_montpellier",
+      "title": "La seigneurie de Montpellier",
+      "description": "Recouvrer Montpellier, tenue par les rois de Majorque.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_montpellier"
+      }
     }
   ],
   "description": "Royaume issu du testament de Jacques Ier le Conquérant (1276) pour son fils Jacques II ; vassal nominal d'Aragon depuis le traité de Perpignan (1279) mais de fait indépendant. Pierre IV d'Aragon l'annexera par la force en 1343-1344 (bataille de Llucmajor, 1349).",

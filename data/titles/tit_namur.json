@@ -34,6 +34,15 @@
         "kind": "hold_title",
         "title": "tit_namur"
       }
+    },
+    {
+      "id": "obj_namur_liege",
+      "title": "Revanche sur Liège",
+      "description": "Soumettre la principauté de Liège, vieil adversaire du comté.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_liege"
+      }
     }
   ],
   "description": "Comté de Namur, élevé au rang honorifique de marquisat par l'empereur Louis IV en 1336 ; tenu par la branche cadette de Dampierre, issue des comtes de Flandre.",

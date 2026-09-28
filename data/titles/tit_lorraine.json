@@ -35,6 +35,17 @@
         "kind": "hold_title",
         "title": "tit_lorraine"
       }
+    },
+    {
+      "id": "obj_lorraine_bar",
+      "title": "Lorraine et Bar",
+      "description": "Réunir le duché de Bar à la Lorraine.",
+      "condition": {
+        "kind": "hold_provinces",
+        "provinces": [
+          "prov_bar"
+        ]
+      }
     }
   ],
   "description": "Duché de Lorraine, fief du Saint-Empire mais de langue et de culture françaises ; Metz, Toul et Verdun, cités épiscopales impériales enclavées dans le duché, restent indépendantes du duc.",

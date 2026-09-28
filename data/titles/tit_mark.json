@@ -32,6 +32,15 @@
         "kind": "hold_title",
         "title": "tit_mark"
       }
+    },
+    {
+      "id": "obj_mark_cleve",
+      "title": "L'héritage de Clèves",
+      "description": "Obtenir le comté de Clèves (Adolphe de La Marck, 1368).",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_cleve"
+      }
     }
   ],
   "description": "Comté de la Marck, en Westphalie, tenu par Adolphe II (1328-1347) ; sa maison a déjà donné plusieurs archevêques de Cologne.",

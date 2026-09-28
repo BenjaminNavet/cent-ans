@@ -421,3 +421,20 @@ fn objectives_are_evaluated() {
         Some(feudal::GenericVictory::Objectives)
     );
 }
+
+/// No faction may win on its title objectives at the 1337 start: at least
+/// one objective of every primary title must still be to achieve.
+#[test]
+fn no_objective_victory_at_start() {
+    let data = data();
+    let s = start(&data);
+    let mut already_won: Vec<String> = s
+        .feudal
+        .primary
+        .keys()
+        .filter(|f| feudal::generic_victory(&s, &data, f).is_some())
+        .map(|f| f.to_string())
+        .collect();
+    already_won.sort();
+    assert!(already_won.is_empty(), "won at start: {already_won:?}");
+}

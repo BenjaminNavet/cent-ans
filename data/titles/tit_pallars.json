@@ -34,6 +34,15 @@
         "kind": "hold_title",
         "title": "tit_pallars"
       }
+    },
+    {
+      "id": "obj_pallars_ribagorca",
+      "title": "Pallars et Ribagorce",
+      "description": "Étendre le Pallars au comté voisin de Ribagorce.",
+      "condition": {
+        "kind": "hold_title",
+        "title": "tit_ribagorca"
+      }
     }
   ],
   "description": "Comté pyrénéen dont les comtes durent défendre les terres face aux prétentions de Comminges et de Foix, avec l'appui du roi d'Aragon ; Arnau Roger II mourra sans descendance en 1343.",
