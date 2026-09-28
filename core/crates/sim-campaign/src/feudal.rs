@@ -61,6 +61,19 @@ pub struct FeudalState {
     /// Historical objectives already announced as met (id per faction).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub objectives_met: BTreeMap<FactionId, BTreeSet<String>>,
+    /// Effective `de_jure_liege` of the titles whose allegiance changed in
+    /// play (homage, release, revolt): `None` makes the title sovereign.
+    /// The data stay untouched (F1).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub liege_overrides: BTreeMap<TitleId, Option<TitleId>>,
+    /// Remembered events weighing on vassal loyalty (§ 4.2), fed by F2/F3.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub loyalty_events: Vec<LoyaltyEvent>,
+    /// `FactionState::suzerain` is derived from the titles. `false` in the
+    /// version 7 saves written before F1: [`sync_suzerains`] then adopts
+    /// their stored suzerains as liege overrides once.
+    #[serde(default)]
+    pub derived: bool,
 }
 
 impl FeudalState {
@@ -91,6 +104,9 @@ impl FeudalState {
             start_crowns,
             streaks: BTreeMap::new(),
             objectives_met: BTreeMap::new(),
+            liege_overrides: BTreeMap::new(),
+            loyalty_events: Vec::new(),
+            derived: true,
         }
     }
 }
@@ -248,7 +264,7 @@ pub fn titles_of(state: &CampaignState, faction: &FactionId) -> Vec<TitleId> {
 pub fn liege_of(state: &CampaignState, data: &GameData, faction: &FactionId) -> Option<FactionId> {
     let mut title = state.feudal.primary.get(faction)?;
     for _ in 0..MAX_DEPTH {
-        title = data.titles.get(title)?.de_jure_liege.as_ref()?;
+        title = effective_liege(state, data, title)?;
         match holder_of(state, title) {
             Some(holder) if holder != faction => return Some(holder.clone()),
             Some(_) => {}
@@ -283,7 +299,7 @@ pub fn province_lieges(
                 chain.push(holder.clone());
             }
         }
-        title = data.titles.get(id).and_then(|t| t.de_jure_liege.as_ref());
+        title = effective_liege(state, data, id);
     }
     chain
 }
@@ -318,10 +334,7 @@ pub fn title_vassals(
         .iter()
         .filter(|(_, holder)| *holder != faction)
         .filter(|(title, _)| {
-            data.titles
-                .get(*title)
-                .and_then(|t| t.de_jure_liege.as_ref())
-                .and_then(|liege| holder_of(state, liege))
+            effective_liege(state, data, title).and_then(|liege| holder_of(state, liege))
                 == Some(faction)
         })
         .map(|(_, holder)| holder.clone())
@@ -834,7 +847,7 @@ pub fn summon_host(
                 faction_label(data, liege)
             );
             state.push_order_event(GameEvent::new(EventKind::Diplomacy, text).faction(&vassal));
-            open_felony(state, data, &vassal, FelonyReason::RefusedHost);
+            felony::on_host_refused(state, data, &vassal, liege);
         }
     }
 }
@@ -963,4 +976,269 @@ impl CampaignState {
         apply_arbitration(self, data, faction, &attacker, &target, &verdict);
         Ok(())
     }
+}
+
+// ----- F1: effective allegiance, homage, suzerain view, loyalty memory ----
+
+/// Title that `title` currently depends on: the in-play override when
+/// there is one, else its `de_jure_liege` in the data.
+pub fn effective_liege<'a>(
+    state: &'a CampaignState,
+    data: &'a GameData,
+    title: &TitleId,
+) -> Option<&'a TitleId> {
+    match state.feudal.liege_overrides.get(title) {
+        Some(liege) => liege.as_ref(),
+        None => data.titles.get(title)?.de_jure_liege.as_ref(),
+    }
+}
+
+/// Sets the effective liege of `title`, dropping the override when it
+/// matches the data again.
+fn set_effective_liege(
+    state: &mut CampaignState,
+    data: &GameData,
+    title: &TitleId,
+    liege: Option<TitleId>,
+) {
+    let de_jure = data.titles.get(title).and_then(|t| t.de_jure_liege.clone());
+    if de_jure == liege {
+        state.feudal.liege_overrides.remove(title);
+    } else {
+        state.feudal.liege_overrides.insert(title.clone(), liege);
+    }
+}
+
+/// Suzerains of `faction`, direct first, up to the sovereign.
+pub fn liege_chain(state: &CampaignState, data: &GameData, faction: &FactionId) -> Vec<FactionId> {
+    let mut chain: Vec<FactionId> = Vec::new();
+    let mut current = faction.clone();
+    for _ in 0..MAX_DEPTH {
+        match liege_of(state, data, &current) {
+            Some(liege) if &liege != faction && !chain.contains(&liege) => {
+                chain.push(liege.clone());
+                current = liege;
+            }
+            _ => break,
+        }
+    }
+    chain
+}
+
+/// Refreshes `FactionState::suzerain`, the cached view of [`liege_of`]
+/// (single source: the title holdings). A dead faction has no suzerain.
+/// Saves from before F1 first have their stored suzerains adopted as
+/// liege overrides, so that they load unchanged.
+pub fn sync_suzerains(state: &mut CampaignState, data: &GameData) {
+    if !state.feudal.derived {
+        adopt_stored_suzerains(state, data);
+        state.feudal.derived = true;
+    }
+    let lieges: Vec<(FactionId, Option<FactionId>)> = state
+        .factions
+        .iter()
+        .map(|(id, f)| {
+            let liege = if f.alive {
+                liege_of(state, data, id)
+            } else {
+                None
+            };
+            (id.clone(), liege)
+        })
+        .collect();
+    for (id, liege) in lieges {
+        if let Some(f) = state.factions.get_mut(&id) {
+            f.suzerain = liege;
+        }
+    }
+}
+
+/// Turns the `suzerain` fields of a pre-F1 save into liege overrides of the
+/// primary titles.
+fn adopt_stored_suzerains(state: &mut CampaignState, data: &GameData) {
+    let stored: Vec<(FactionId, Option<FactionId>)> = state
+        .factions
+        .iter()
+        .filter(|(_, f)| f.alive)
+        .map(|(id, f)| (id.clone(), f.suzerain.clone()))
+        .collect();
+    for (faction, suzerain) in stored {
+        if liege_of(state, data, &faction) == suzerain {
+            continue;
+        }
+        let Some(own) = state.feudal.primary.get(&faction).cloned() else {
+            continue;
+        };
+        let liege = suzerain.and_then(|s| state.feudal.primary.get(&s).cloned());
+        set_effective_liege(state, data, &own, liege);
+    }
+}
+
+/// `vassal` pays homage to `liege` (`Proposal::Vassalage`, spec § 4.2):
+/// the effective liege of its primary title becomes `liege`'s primary
+/// title. A `liege` that stood below `vassal` is first freed, so that the
+/// hierarchy keeps no cycle. `false` when either has no primary title.
+pub fn pay_homage(
+    state: &mut CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+    liege: &FactionId,
+) -> bool {
+    let (Some(own), Some(above)) = (
+        state.feudal.primary.get(vassal).cloned(),
+        state.feudal.primary.get(liege).cloned(),
+    ) else {
+        return false;
+    };
+    if liege_chain(state, data, liege).contains(vassal) {
+        set_effective_liege(state, data, &above, None);
+    }
+    set_effective_liege(state, data, &own, Some(above));
+    sync_suzerains(state, data);
+    true
+}
+
+/// `vassal` leaves its suzerain (release, revolt, refused call, vanished
+/// suzerain): its primary title becomes sovereign. Needs no game data, so
+/// that the callers without it stay in sync.
+pub fn release_from_liege(state: &mut CampaignState, vassal: &FactionId) {
+    if let Some(own) = state.feudal.primary.get(vassal).cloned() {
+        state.feudal.liege_overrides.insert(own, None);
+    }
+    if let Some(f) = state.factions.get_mut(vassal) {
+        f.suzerain = None;
+    }
+}
+
+/// Kind of a remembered event weighing on a vassal's loyalty (§ 4.2).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LoyaltyEventKind {
+    TitleGranted,
+    PeerForfeiture,
+    LiegeDefeat,
+    RivalClaimant,
+}
+
+/// A remembered event: counts towards the loyalty of `vassal` for `liege`
+/// until `expires_turn`, as long as `liege` stays its direct suzerain.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LoyaltyEvent {
+    pub vassal: FactionId,
+    pub liege: FactionId,
+    pub kind: LoyaltyEventKind,
+    pub expires_turn: u32,
+}
+
+fn remember(
+    state: &mut CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+    liege: &FactionId,
+    kind: LoyaltyEventKind,
+) {
+    let expires_turn = state.turn + data.feudal_rules.loyalty.memory_turns;
+    state.feudal.loyalty_events.push(LoyaltyEvent {
+        vassal: vassal.clone(),
+        liege: liege.clone(),
+        kind,
+        expires_turn,
+    });
+}
+
+/// `liege` granted a title to `vassal` (§ 4.4, 4.6, fed by F3).
+pub fn record_title_grant(
+    state: &mut CampaignState,
+    data: &GameData,
+    liege: &FactionId,
+    vassal: &FactionId,
+) {
+    remember(state, data, vassal, liege, LoyaltyEventKind::TitleGranted);
+}
+
+/// Remembers `kind` for every direct vassal of `liege` but `except`.
+fn remember_for_vassals(
+    state: &mut CampaignState,
+    data: &GameData,
+    liege: &FactionId,
+    except: Option<&FactionId>,
+    kind: LoyaltyEventKind,
+) {
+    for vassal in direct_vassals(state, data, liege) {
+        if Some(&vassal) != except {
+            remember(state, data, &vassal, liege, kind);
+        }
+    }
+}
+
+/// `liege` struck its vassal `felon` with forfeiture: its other direct
+/// vassals fear for their fiefs (§ 4.4, fed by F3).
+pub fn record_peer_forfeiture(
+    state: &mut CampaignState,
+    data: &GameData,
+    liege: &FactionId,
+    felon: &FactionId,
+) {
+    remember_for_vassals(
+        state,
+        data,
+        liege,
+        Some(felon),
+        LoyaltyEventKind::PeerForfeiture,
+    );
+}
+
+/// `liege` lost a battle or a war: its direct vassals doubt it (fed by F2).
+pub fn record_liege_defeat(state: &mut CampaignState, data: &GameData, liege: &FactionId) {
+    remember_for_vassals(state, data, liege, None, LoyaltyEventKind::LiegeDefeat);
+}
+
+/// A rival claimant to `liege`'s primary title stands up (fed by F3).
+pub fn record_rival_claimant(state: &mut CampaignState, data: &GameData, liege: &FactionId) {
+    remember_for_vassals(state, data, liege, None, LoyaltyEventKind::RivalClaimant);
+}
+
+/// Forgets the expired loyalty events (each turn).
+pub fn forget_expired(state: &mut CampaignState) {
+    let turn = state.turn;
+    state
+        .feudal
+        .loyalty_events
+        .retain(|e| e.expires_turn > turn);
+}
+
+/// Loyalty points of `vassal` towards `liege` owed to the remembered
+/// events (§ 4.2), weighted by `feudal.json:loyalty`.
+pub fn remembered_loyalty(
+    state: &CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+    liege: &FactionId,
+) -> i32 {
+    let w = &data.feudal_rules.loyalty;
+    state
+        .feudal
+        .loyalty_events
+        .iter()
+        .filter(|e| &e.vassal == vassal && &e.liege == liege && e.expires_turn > state.turn)
+        .map(|e| match e.kind {
+            LoyaltyEventKind::TitleGranted => w.title_granted,
+            LoyaltyEventKind::PeerForfeiture => w.peer_forfeiture,
+            LoyaltyEventKind::LiegeDefeat => w.liege_defeat,
+            LoyaltyEventKind::RivalClaimant => w.rival_claimant,
+        })
+        .sum()
+}
+
+/// Tribute `vassal` owes this turn, and to whom: its direct suzerain only,
+/// never the suzerain's own lieges (spec § 4.1, `feudal.json:vassal_tribute_percent`).
+pub fn tribute_due(
+    state: &CampaignState,
+    data: &GameData,
+    vassal: &FactionId,
+) -> Option<(FactionId, i64)> {
+    let liege = liege_of(state, data, vassal)?;
+    let income = state.factions.get(vassal)?.income_last_turn;
+    let amount = (income * data.feudal_rules.vassal_tribute_percent / 100).max(0);
+    Some((liege, amount))
 }
