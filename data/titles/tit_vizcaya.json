@@ -1,0 +1,31 @@
+{
+  "id": "tit_vizcaya",
+  "rank": "county",
+  "name": {
+    "display": "Seigneurie de Vizcaya",
+    "local": "Señorío de Bizkaia",
+    "local_language": "basque"
+  },
+  "heraldry": {
+    "blazon": "D'argent à deux chaudières échiquetées d'or et de gueules, engoulées de serpents de sinople.",
+    "description": "Mêmes armes que Lara : les deux seigneuries sont réunies par le mariage de Juan Núñez III avec María de Haro.",
+    "primary_color": "#F5F1E6",
+    "secondary_color": "#B0182B"
+  },
+  "de_jure_liege": "tit_castile",
+  "de_jure_provinces": [
+    "prov_biscay"
+  ],
+  "holder_1337": {
+    "faction": "fac_lara",
+    "sources": [
+      "Juan Núñez III de Lara",
+      "María de Haro"
+    ]
+  },
+  "description": "Seigneurie basque aux fueros jalousement gardés ; acquise par Juan Núñez III de Lara par son mariage (1330) avec María de Haro, fille de Juan el Tuerto.",
+  "sources": [
+    "Señorío de Vizcaya",
+    "Juan Núñez III de Lara"
+  ]
+}

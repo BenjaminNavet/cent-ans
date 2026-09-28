@@ -1189,6 +1189,100 @@
       "vassal_of": [
         "fac_utrecht"
       ]
+    },
+    {
+      "id": "majorque",
+      "name": "Majorque",
+      "arms_of": "fac_majorca",
+      "blazon": "D'or à quatre pals de gueules.",
+      "description": "Branche cadette de la maison de Barcelone régnant sur le royaume de Majorque.",
+      "source": "Kingdom of Majorca",
+      "certainty": "attesté",
+      "factions": [
+        "fac_majorca"
+      ],
+      "vassal_of": [
+        "fac_majorca"
+      ]
+    },
+    {
+      "id": "manuel",
+      "name": "Manuel",
+      "arms_of": "fac_villena",
+      "blazon": "Écartelé de Castille et de León, à la bordure d'argent.",
+      "description": "Branche cadette de la maison de Castille issue de l'infant Manuel, fils de Ferdinand III ; blason personnel de Juan Manuel non localisé avec certitude, approximé d'après sa filiation royale.",
+      "source": "Juan Manuel, Prince of Villena",
+      "certainty": "incertain",
+      "factions": [
+        "fac_villena"
+      ],
+      "vassal_of": [
+        "fac_villena"
+      ]
+    },
+    {
+      "id": "lara",
+      "name": "Lara",
+      "arms_of": "fac_lara",
+      "blazon": "D'argent à deux chaudières échiquetées d'or et de gueules, engoulées de serpents de sinople.",
+      "description": "Chaudières (calderas) des grands majordomes royaux, emblème classique de la maison de Lara.",
+      "source": "Maison de Lara, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_lara"
+      ],
+      "vassal_of": [
+        "fac_lara",
+        "fac_castile"
+      ]
+    },
+    {
+      "id": "aragon_urgell",
+      "name": "Aragon-Urgell",
+      "arms_of": "fac_urgell",
+      "blazon": "D'or au bœuf de gueules.",
+      "description": "Armes traditionnelles des comtes d'Urgell, branche cadette de la maison d'Aragon issue d'Alphonse IV.",
+      "source": "County of Urgell",
+      "certainty": "attesté",
+      "factions": [
+        "fac_urgell"
+      ],
+      "vassal_of": [
+        "fac_urgell",
+        "fac_aragon"
+      ]
+    },
+    {
+      "id": "pallars_mataplana",
+      "name": "Pallars-Mataplana",
+      "arms_of": "fac_pallars",
+      "blazon": "D'or à quatre pals de gueules, au lambel d'azur.",
+      "description": "Approximation faute de blason personnel des comtes de Pallars Sobirà du XIVe siècle retrouvé avec certitude.",
+      "source": "Comtat de Pallars Sobirà",
+      "certainty": "incertain",
+      "factions": [
+        "fac_pallars"
+      ],
+      "vassal_of": [
+        "fac_pallars",
+        "fac_aragon"
+      ]
+    },
+    {
+      "id": "luna",
+      "name": "Luna",
+      "arms_of": "fac_luna",
+      "blazon": "D'azur à la lune décroissante d'argent.",
+      "description": "Armes parlantes (« luna », la lune) de la maison de Luna.",
+      "source": "Maison de Luna, armoiries",
+      "certainty": "attesté",
+      "factions": [
+        "fac_luna"
+      ],
+      "vassal_of": [
+        "fac_luna",
+        "fac_aragon"
+      ]
     }
   ]
 }

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_balaguer",
+    "province": "prov_urgell",
+    "kind": "city",
+    "name": {
+      "display": "Balaguer",
+      "local": "Balaguer",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      0.8069,
+      41.7903
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle",
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Château-résidence des comtes d'Urgell, sur le Sègre.",
+    "sources": [
+      "Balaguer",
+      "Comté d'Urgell"
+    ]
+  },
+  {
+    "id": "set_la_seu_durgell",
+    "province": "prov_urgell",
+    "kind": "town",
+    "name": {
+      "display": "La Seu d'Urgell",
+      "local": "La Seu d'Urgell",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.4593,
+      42.3585
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_collegiate_church"
+    ],
+    "port": false,
+    "description": "Cité épiscopale pyrénéenne, siège du diocèse d'Urgell depuis le haut Moyen Âge.",
+    "sources": [
+      "La Seu d'Urgell"
+    ]
+  },
+  {
+    "id": "set_agramunt",
+    "province": "prov_urgell",
+    "kind": "village",
+    "name": {
+      "display": "Agramunt",
+      "local": "Agramunt",
+      "local_language": "catalan"
+    },
+    "lonlat": [
+      1.0968,
+      41.7853
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg fortifié du comté d'Urgell, sur les rives du Sió.",
+    "sources": [
+      "Agramunt"
+    ]
+  }
+]

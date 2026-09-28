@@ -1,0 +1,30 @@
+{
+  "id": "tit_ribagorca",
+  "rank": "county",
+  "name": {
+    "display": "Comté de Ribagorce",
+    "local": "Comtat de Ribagorça",
+    "local_language": "catalan"
+  },
+  "heraldry": {
+    "blazon": "D'or à quatre pals de gueules, à la bordure d'azur.",
+    "description": "Armes de la maison d'Aragon brisées d'une bordure d'azur, marque de l'infant Pierre, fils cadet de Jacques II.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#1F3A93"
+  },
+  "de_jure_liege": "tit_aragon",
+  "de_jure_provinces": [
+    "prov_ribagorca"
+  ],
+  "holder_1337": {
+    "faction": "fac_ribagorca",
+    "sources": [
+      "Peter, Count of Ribagorza"
+    ]
+  },
+  "description": "Comté pyrénéen tenu depuis 1322 par l'infant Pierre d'Aragon, oncle de Pierre IV, diplomate et homme de lettres.",
+  "sources": [
+    "Peter, Count of Ribagorza",
+    "Comtat de Ribagorça"
+  ]
+}

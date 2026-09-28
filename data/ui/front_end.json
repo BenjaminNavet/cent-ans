@@ -952,6 +952,131 @@
         "Peu de ressources propres face à ses voisins"
       ],
       "difficulty": 1
+    },
+    {
+      "id": "fac_majorca",
+      "tagline": "Le royaume insulaire cerné par ses cousins",
+      "intro": "Jacques III règne sur Majorque, Minorque, Ibiza, le Roussillon et la Cerdagne : un royaume vassal d'Aragon mais de fait souverain, que son cousin Pierre IV rêve d'annexer.",
+      "strengths": [
+        "Flotte et commerce méditerranéen actifs",
+        "Places fortes pyrénéennes (Roussillon, Cerdagne)",
+        "Revenus des foires de Perpignan"
+      ],
+      "weaknesses": [
+        "Territoire dispersé entre îles et continent",
+        "Suzeraineté aragonaise contestée en permanence",
+        "Isolé sans grand allié continental"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_villena",
+      "tagline": "Un royaume dans le royaume",
+      "intro": "Don Juan Manuel, petit-fils de Ferdinand III et auteur du Conde Lucanor, gouverne depuis Villena un domaine à l'autonomie quasi souveraine, frappant sa propre monnaie.",
+      "strengths": [
+        "Chevalerie personnelle nombreuse (plus de mille lances)",
+        "Autonomie de fait vis-à-vis de la couronne",
+        "Position charnière entre Castille, Aragon et Murcie"
+      ],
+      "weaknesses": [
+        "Sans allié fixe, isolé entre trois couronnes",
+        "Terres arides et peu peuplées",
+        "Rivalités renouvelées avec Alphonse XI possibles"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_lara",
+      "tagline": "Les seigneurs du chaudron",
+      "intro": "Juan Núñez III de Lara, alférez mayor du roi, réunit par mariage les terres ancestrales de Lara et la seigneurie basque de Vizcaya.",
+      "strengths": [
+        "Charge d'alférez mayor : influence à la cour",
+        "Fueros basques de Vizcaya, terres fidèles",
+        "Cavalerie castillane réputée"
+      ],
+      "weaknesses": [
+        "Domaine coupé en deux, Lara et Vizcaya non contiguës",
+        "Réconciliation récente (1337) avec la couronne, fragile",
+        "Peu de places fortes majeures"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_urgell",
+      "tagline": "Le jeune comte des Pyrénées",
+      "intro": "Jacques Ier, cousin germain de Pierre IV d'Aragon, tient depuis l'âge de huit ans le comté d'Urgell, l'un des plus anciens de Catalogne.",
+      "strengths": [
+        "Comté ancien et prestigieux",
+        "Lien de sang direct avec la couronne d'Aragon",
+        "Position centrale sur le Sègre"
+      ],
+      "weaknesses": [
+        "Comte jeune, entouré de tuteurs et de conseillers",
+        "Comté modeste, vite mobilisé dans les guerres du roi",
+        "Peu de ressources propres"
+      ],
+      "difficulty": 2
+    },
+    {
+      "id": "fac_pallars",
+      "tagline": "Le petit comté des cimes",
+      "intro": "Arnau Roger II gouverne depuis Sort un comté pyrénéen isolé, disputé entre Comminges, Foix et la couronne d'Aragon.",
+      "strengths": [
+        "Terrain montagneux, difficile à envahir",
+        "Population combative habituée aux raids frontaliers"
+      ],
+      "weaknesses": [
+        "Comté pauvre et peu peuplé",
+        "Comte sans héritier direct : succession incertaine",
+        "Frontière disputée en permanence"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_ribagorca",
+      "tagline": "Le comte-diplomate",
+      "intro": "L'infant Pierre, oncle de Pierre IV, homme de lettres et diplomate, tient les comtés pyrénéens de Ribagorce et côtier d'Empúries.",
+      "strengths": [
+        "Diplomatie et prestige de sang royal",
+        "Deux comtés complémentaires (montagne et littoral)",
+        "Port de Roses ouvert sur la Méditerranée"
+      ],
+      "weaknesses": [
+        "Territoire scindé en deux zones non contiguës",
+        "Ambitions limitées par la fidélité à son neveu le roi"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_luna",
+      "tagline": "Le conseiller du roi",
+      "intro": "Lope de Luna, sire de Luna, futur premier comte de Luna, est l'un des conseillers les plus écoutés de Pierre IV d'Aragon.",
+      "strengths": [
+        "Influence croissante à la cour d'Aragon",
+        "Terres fertiles de l'Èbre"
+      ],
+      "weaknesses": [
+        "Domaine modeste, encore une simple seigneurie en 1337",
+        "Peu de places fortes",
+        "Dépendant du crédit royal pour grandir"
+      ],
+      "difficulty": 3
+    },
+    {
+      "id": "fac_calatrava",
+      "tagline": "Les moines-soldats de la frontière",
+      "intro": "L'ordre militaire du Calatrava tient depuis 1158 la marche de La Manche face à Grenade, gouverné par un chapitre électif de chevaliers-moines.",
+      "strengths": [
+        "Ordre militaire discipliné, forteresses solides",
+        "Revenus propres, indépendants de la couronne",
+        "Vocation guerrière contre Grenade"
+      ],
+      "weaknesses": [
+        "Succession élective, pas de dynastie",
+        "Domaine étroit, coincé entre Tolède et Cordoue",
+        "Obligations religieuses limitant certains choix diplomatiques"
+      ],
+      "difficulty": 3
     }
   ],
   "difficulty_labels": [

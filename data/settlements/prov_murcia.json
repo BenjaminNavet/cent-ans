@@ -159,30 +159,5 @@
     "sources": [
       "Caravaca de la Cruz"
     ]
-  },
-  {
-    "id": "set_yecla",
-    "province": "prov_murcia",
-    "kind": "village",
-    "name": {
-      "display": "Yecla",
-      "local": "Yecla",
-      "local_language": "castillan"
-    },
-    "lonlat": [
-      -1.1156,
-      38.6158
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": false,
-    "description": "Bourg du nord du royaume de Murcie, au pied de son château.",
-    "sources": [
-      "Yecla"
-    ]
   }
 ]

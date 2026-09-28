@@ -1,0 +1,44 @@
+{
+  "id": "chr_juan_manuel_de_villena",
+  "name": {
+    "display": "Juan Manuel",
+    "local": "Don Juan Manuel",
+    "local_language": "castillan"
+  },
+  "sex": "male",
+  "house": "Manuel",
+  "faction": "fac_villena",
+  "role": "ruler",
+  "birth": {
+    "value": "1282-05-05"
+  },
+  "death": {
+    "value": "1348-06-13"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Prince de Villena"
+    },
+    {
+      "title": "Adelantado mayor de Murcie"
+    }
+  ],
+  "skills": {
+    "command": 5,
+    "governance": 5,
+    "court": 6
+  },
+  "traits": [
+    "trait_cultured",
+    "trait_ambitious",
+    "trait_cunning"
+  ],
+  "piety": 50,
+  "starting_location": "prov_villena",
+  "status": "at_court",
+  "description": "Petit-fils de Ferdinand III par son père l'infant Manuel de Castille ; écrivain (Conde Lucanor), il a bâti sur les marches de Murcie une seigneurie à l'autonomie quasi souveraine après plusieurs révoltes contre la couronne.",
+  "sources": [
+    "Juan Manuel, Prince of Villena"
+  ]
+}

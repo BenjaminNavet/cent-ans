@@ -1,0 +1,76 @@
+[
+  {
+    "id": "set_luna",
+    "province": "prov_luna",
+    "kind": "city",
+    "name": {
+      "display": "Luna",
+      "local": "Luna",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -0.8667,
+      42.0333
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Château-siège de la maison de Luna, dans l'Aragon septentrional.",
+    "sources": [
+      "Luna (Aragon)",
+      "Maison de Luna"
+    ]
+  },
+  {
+    "id": "set_illueca",
+    "province": "prov_luna",
+    "kind": "town",
+    "name": {
+      "display": "Illueca",
+      "local": "Illueca",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.6864,
+      41.5981
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Bourg fortifié des terres de la maison de Luna.",
+    "sources": [
+      "Illueca"
+    ]
+  },
+  {
+    "id": "set_ejea_de_los_caballeros",
+    "province": "prov_luna",
+    "kind": "village",
+    "name": {
+      "display": "Ejea de los Caballeros",
+      "local": "Ejea de los Caballeros",
+      "local_language": "castillan"
+    },
+    "lonlat": [
+      -1.1333,
+      42.1333
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg fortifié de la frontière aragonaise.",
+    "sources": [
+      "Ejea de los Caballeros"
+    ]
+  }
+]

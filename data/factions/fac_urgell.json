@@ -1,0 +1,55 @@
+{
+  "id": "fac_urgell",
+  "name": {
+    "display": "Comté d'Urgell",
+    "local": "Comtat d'Urgell",
+    "local_language": "catalan"
+  },
+  "short_name": "Urgell",
+  "adjective": "urgellais",
+  "government": "county",
+  "playable": true,
+  "ruler": "chr_jaume_i_durgell",
+  "capital": "prov_urgell",
+  "capital_city": "Balaguer",
+  "religion": "rel_catholic",
+  "culture": "cul_catalan",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_aragon",
+  "primary_title": "tit_urgell",
+  "heraldry": {
+    "blazon": "D'or au bœuf de gueules.",
+    "description": "Armes traditionnelles des comtes d'Urgell.",
+    "primary_color": "#F2C230",
+    "secondary_color": "#B0182B"
+  },
+  "titles": [
+    "Comte d'Urgell",
+    "Vicomte d'Àger",
+    "Baron d'Antillón et d'Entença"
+  ],
+  "treasury": 6000,
+  "prestige": 35,
+  "starting_technologies": [
+    "tech_water_mills",
+    "tech_three_field_rotation",
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_aragon",
+      "status": "vassal",
+      "note": "Jacques Ier, fils cadet d'Alphonse IV, cousin germain de Pierre IV."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 45,
+    "diplomacy": 55,
+    "trade": 40,
+    "piety": 55
+  },
+  "description": "L'un des plus anciens comtés catalans, hérité à huit ans par Jacques Ier en 1328 ; branche cadette de la maison royale d'Aragon.",
+  "sources": [
+    "James I, Count of Urgell"
+  ]
+}

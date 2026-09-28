@@ -1,0 +1,90 @@
+{
+  "id": "prov_luna",
+  "name": {
+    "display": "Luna",
+    "local": "Luna",
+    "local_language": "castillan"
+  },
+  "region": "aragon",
+  "terrain": "plains",
+  "climate": "continental",
+  "neighbors": [],
+  "coastal": false,
+  "rivers": [
+    "Arba"
+  ],
+  "resources": [
+    "res_wheat",
+    "res_wool",
+    "res_salt"
+  ],
+  "capital_city": {
+    "name": {
+      "display": "Luna",
+      "local": "Luna",
+      "local_language": "castillan"
+    },
+    "lat": 42.0333,
+    "lon": -0.8667
+  },
+  "geo": {
+    "capital_lonlat": [
+      -0.8667,
+      42.0333
+    ],
+    "seed_lonlat": [
+      -1.0,
+      41.95
+    ],
+    "voronoi_weight": 0.4
+  },
+  "owner": "fac_luna",
+  "culture": "cul_catalan",
+  "religion": "rel_catholic",
+  "population": {
+    "classes": {
+      "peasants": {
+        "count": 22000,
+        "unrest": 10,
+        "health": 55,
+        "wealth": 45,
+        "goods_satisfaction": 60
+      },
+      "burghers": {
+        "count": 2400,
+        "unrest": 10,
+        "health": 50,
+        "wealth": 60,
+        "goods_satisfaction": 65
+      },
+      "clergy": {
+        "count": 800,
+        "unrest": 5,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      },
+      "nobility": {
+        "count": 350,
+        "unrest": 10,
+        "health": 60,
+        "wealth": 70,
+        "goods_satisfaction": 75
+      }
+    },
+    "uncertain": true,
+    "note": "Terres de la maison de Luna dans l'Aragon septentrional."
+  },
+  "buildings": [
+    "bld_market",
+    "bld_castle",
+    "bld_muster_field"
+  ],
+  "fortification_level": 1,
+  "base_supply": 800,
+  "description": "Seigneurie de Luna, tenue en 1337 par Lope de Luna, sire de Luna, futur premier comte de Luna en 1348 et principal conseiller de Pierre IV d'Aragon.",
+  "sources": [
+    "Maison de Luna",
+    "Lope de Luna"
+  ]
+}
