@@ -1,0 +1,15 @@
+{
+  "id": "rel_armenian",
+  "name": {
+    "display": "Église apostolique arménienne",
+    "local": "Հայ Առաքելական Եկեղեցի",
+    "local_language": "arménien"
+  },
+  "kind": "other_faith",
+  "seat": "Sis",
+  "description": "Église du royaume arménien de Cilicie, dont le catholicos siège à Sis ; unions intermittentes avec Rome sous la pression mamelouke.",
+  "sources": [
+    "Église apostolique arménienne",
+    "Royaume arménien de Cilicie"
+  ]
+}

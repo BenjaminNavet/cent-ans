@@ -1,0 +1,21 @@
+{
+  "id": "rel_orthodox",
+  "name": {
+    "display": "Orthodoxie",
+    "local": "Ὀρθοδοξία",
+    "local_language": "grec"
+  },
+  "kind": "other_faith",
+  "seat": "Constantinople",
+  "effects": [
+    {
+      "effect": "piety",
+      "value": 5
+    }
+  ],
+  "description": "Église de Constantinople et de ses Églises sœurs : Byzance, Serbie, Bulgarie, Valachie, principautés russes, Géorgie. Le patriarche siège à Constantinople, le métropolite de Kiev et de toute la Russie à Moscou depuis 1325.",
+  "sources": [
+    "Église orthodoxe",
+    "Pierre de Moscou"
+  ]
+}
