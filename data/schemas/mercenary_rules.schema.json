@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cent-ans.game/schemas/mercenary_rules.schema.json",
+  "title": "Règles des compagnies de mercenaires",
+  "description": "Fichier data/rules/mercenaries.json (lot TW2-T3, ADR 0103). Voir docs/design/2026-09-28-tw2-mecaniques-total-war.md § T3.",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string" },
+    "hire_cost_percent": {
+      "type": "integer", "minimum": 100, "maximum": 400,
+      "description": "Prix d'engagement, en pourcentage du coût (`cost.money`) de l'unité."
+    },
+    "upkeep_percent": {
+      "type": "integer", "minimum": 100, "maximum": 300,
+      "description": "Solde d'une compagnie, en pourcentage de l'entretien (`upkeep`) de son type ; la part au-delà de 100 % est prélevée par le module des mercenaires."
+    },
+    "hires_per_army_per_turn": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "hires_per_faction_per_turn": { "type": "integer", "minimum": 1, "maximum": 20 },
+    "hostile_territory_allowed": {
+      "type": "boolean",
+      "description": "Faux : aucun engagement sur les terres d'une faction en guerre avec l'armée."
+    },
+    "arrears": {
+      "type": "object",
+      "description": "Compagnies impayées (trésor négatif après l'entretien de la saison) : désertion, sinon pillage de la province.",
+      "properties": {
+        "desert_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "pillage_unrest": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "pillage_devastation": { "type": "integer", "minimum": 0, "maximum": 100 }
+      },
+      "required": ["desert_percent", "pillage_unrest", "pillage_devastation"],
+      "additionalProperties": false
+    },
+    "ai": {
+      "type": "object",
+      "description": "L'IA engage quand elle est riche et qu'une de ses armées est menacée.",
+      "properties": {
+        "rich_income_seasons": { "type": "integer", "minimum": 0 },
+        "rich_min_treasury": { "type": "integer", "minimum": 0 },
+        "threat_ratio_percent": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "target_ratio_percent": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "keep_income_seasons": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["rich_income_seasons", "rich_min_treasury", "threat_ratio_percent", "target_ratio_percent", "keep_income_seasons"],
+      "additionalProperties": false
+    },
+    "region_names": {
+      "type": "object",
+      "description": "Nom français de chaque région (`region` des provinces).",
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "bands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "unit": { "type": "string", "pattern": "^unit_[a-z0-9_]+$" },
+          "regions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+          "from": { "type": "integer", "minimum": 1300, "maximum": 1500 },
+          "until": { "type": "integer", "minimum": 1300, "maximum": 1500 },
+          "cap": { "type": "integer", "minimum": 1, "maximum": 10 },
+          "refill_milli": { "type": "integer", "minimum": 0, "maximum": 10000 },
+          "experience": { "type": "integer", "minimum": 0, "maximum": 10 },
+          "note": { "type": "string" }
+        },
+        "required": ["id", "name", "unit", "regions", "from", "until", "cap", "refill_milli"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["hire_cost_percent", "upkeep_percent", "hires_per_army_per_turn", "hires_per_faction_per_turn", "hostile_territory_allowed", "arrears", "ai", "region_names", "bands"],
+  "additionalProperties": false
+}

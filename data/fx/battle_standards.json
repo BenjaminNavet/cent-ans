@@ -67,7 +67,9 @@
     "unit_francs_archers": "pennon",
     "unit_culveriners": "pennon",
     "unit_welsh_spearmen": "pennon",
-    "unit_coutiliers": "pennon"
+    "unit_coutiliers": "pennon",
+    "unit_brabancons": "pennon",
+    "unit_scots_archers": "pennon"
   },
   "default_kind": "pennon",
   "second_bearer_kind": "pennon",
