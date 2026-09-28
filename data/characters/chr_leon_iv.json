@@ -1,0 +1,48 @@
+{
+  "id": "chr_leon_iv",
+  "name": {
+    "display": "Léon IV d'Arménie",
+    "local": "Լևոն Դ",
+    "local_language": "arménien"
+  },
+  "sex": "male",
+  "house": "Héthoumides",
+  "faction": "fac_cilicia",
+  "role": "ruler",
+  "birth": {
+    "value": "1309",
+    "uncertain": true,
+    "note": "Date approximative ou discutée.",
+    "place": "Sis"
+  },
+  "death": {
+    "value": "1341-08-28",
+    "place": "Sis"
+  },
+  "historical": true,
+  "titles": [
+    {
+      "title": "Roi d'Arménie",
+      "from": {
+        "value": "1320"
+      },
+      "note": "Règne jusqu'en 1341, assassiné par ses barons."
+    }
+  ],
+  "skills": {
+    "command": 3,
+    "governance": 4,
+    "court": 4
+  },
+  "traits": [
+    "trait_cautious",
+    "trait_pious"
+  ],
+  "piety": 65,
+  "starting_location": "prov_sis",
+  "status": "at_court",
+  "description": "Fils d'Oshin, roi à onze ans, épousé à Constance de Sicile en 1331 ; roi vaincu par le Caire en 1337.",
+  "sources": [
+    "Leo IV, King of Armenia"
+  ]
+}

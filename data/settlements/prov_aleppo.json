@@ -1,0 +1,78 @@
+[
+  {
+    "id": "set_aleppo",
+    "province": "prov_aleppo",
+    "kind": "city",
+    "name": {
+      "display": "Alep (Halab)",
+      "local": "حلب",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      37.16,
+      36.2
+    ],
+    "weight": 10,
+    "owner": null,
+    "fortification_level": 4,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Citadelle imprenable, second marché du sultanat.",
+    "sources": [
+      "Aleppo"
+    ]
+  },
+  {
+    "id": "set_antioch",
+    "province": "prov_aleppo",
+    "kind": "town",
+    "name": {
+      "display": "Antioche (Antakya)",
+      "local": "أنطاكية",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      36.16,
+      36.2
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne capitale de la principauté franque.",
+    "sources": [
+      "Aleppo"
+    ]
+  },
+  {
+    "id": "set_aintab",
+    "province": "prov_aleppo",
+    "kind": "town",
+    "name": {
+      "display": "Aïntab (Gaziantep)",
+      "local": "عينتاب",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      37.38,
+      37.06
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ville-frontière du nord.",
+    "sources": [
+      "Aleppo"
+    ]
+  }
+]

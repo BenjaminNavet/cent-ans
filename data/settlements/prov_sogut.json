@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set_sogut",
+    "province": "prov_sogut",
+    "kind": "city",
+    "name": {
+      "display": "Söğüt"
+    },
+    "lonlat": [
+      30.18,
+      40.02
+    ],
+    "weight": 8,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Premier fief d'Ertuğrul et d'Osman ; y repose Ertuğrul.",
+    "sources": [
+      "Söğüt"
+    ]
+  },
+  {
+    "id": "set_bilecik",
+    "province": "prov_sogut",
+    "kind": "town",
+    "name": {
+      "display": "Bilecik"
+    },
+    "lonlat": [
+      29.98,
+      40.15
+    ],
+    "weight": 7,
+    "owner": null,
+    "fortification_level": 2,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Forteresse prise par Osman vers 1299.",
+    "sources": [
+      "Söğüt"
+    ]
+  },
+  {
+    "id": "set_eskisehir",
+    "province": "prov_sogut",
+    "kind": "town",
+    "name": {
+      "display": "Eskişehir (Dorylée)",
+      "local": "Eskişehir",
+      "local_language": "turc ottoman"
+    },
+    "lonlat": [
+      30.52,
+      39.77
+    ],
+    "weight": 6,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market"
+    ],
+    "port": false,
+    "description": "Ancienne Dorylée, carrefour des routes d'Anatolie centrale.",
+    "sources": [
+      "Söğüt"
+    ]
+  }
+]

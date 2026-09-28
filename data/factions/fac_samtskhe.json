@@ -1,0 +1,55 @@
+{
+  "id": "fac_samtskhe",
+  "name": {
+    "display": "Principauté de Samtskhé",
+    "local": "სამცხე-საათაბაგო",
+    "local_language": "géorgien"
+  },
+  "short_name": "Samtskhé",
+  "adjective": "samtskhien",
+  "government": "principality",
+  "playable": true,
+  "ruler": "chr_beka_i",
+  "capital": "prov_samtskhe",
+  "capital_city": "Akhaltsikhé",
+  "religion": "rel_orthodox",
+  "culture": "cul_georgian",
+  "succession_law": "male_preference_primogeniture",
+  "suzerain": "fac_georgia",
+  "primary_title": "tit_samtskhe",
+  "heraldry": {
+    "blazon": "D'azur à la croix d'or.",
+    "description": "Croix des Djakéli ; couleurs de convention.",
+    "primary_color": "#2B4A9E",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Atabeg de Samtskhé"
+  ],
+  "treasury": 8000,
+  "prestige": 40,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_water_mills"
+  ],
+  "relations": [
+    {
+      "faction": "fac_georgia",
+      "status": "vassal",
+      "note": "Atabeg vassal de la couronne, mais autonome."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 55,
+    "trade": 45,
+    "piety": 75
+  },
+  "description": "Principauté des Djakéli (Jaqeli), atabegs de Samtskhé, au sud-ouest du royaume ; Beka Ier (Beka Mandaturtukhutsesi) règne depuis 1334.",
+  "sources": [
+    "Samtskhe-Saatabago",
+    "Beka I Jaqeli"
+  ]
+}

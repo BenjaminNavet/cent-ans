@@ -1,0 +1,53 @@
+{
+  "id": "fac_alania",
+  "name": {
+    "display": "Alanie (Ossètes)",
+    "local": "Ир",
+    "local_language": "alan (ossète)"
+  },
+  "short_name": "Alanie",
+  "adjective": "alan",
+  "government": "principality",
+  "playable": true,
+  "capital": "prov_alania",
+  "capital_city": "Alagir",
+  "religion": "rel_orthodox",
+  "culture": "cul_alan",
+  "succession_law": "elective",
+  "suzerain": "fac_golden_horde",
+  "primary_title": "tit_alania",
+  "heraldry": {
+    "blazon": "De gueules à la fasce d'argent.",
+    "description": "Couleurs de convention des Alains.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F3F0E4",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Roi des Alains"
+  ],
+  "treasury": 4000,
+  "prestige": 28,
+  "starting_technologies": [
+    "tech_masonry"
+  ],
+  "relations": [
+    {
+      "faction": "fac_golden_horde",
+      "status": "vassal",
+      "note": "Tributaires de la Horde depuis la conquête mongole."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 55,
+    "diplomacy": 45,
+    "trade": 30,
+    "piety": 65
+  },
+  "description": "Descendants des Alains, réfugiés dans les montagnes du Caucase central après la conquête mongole ; aucun souverain n'est nommé en 1337.",
+  "sources": [
+    "Alania",
+    "Ossetians"
+  ]
+}

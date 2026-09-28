@@ -64,7 +64,12 @@
     "crimee": "Crimée",
     "horde": "Horde d'Or et steppes",
     "rus_centre": "Rus' du Nord-Est",
-    "rus_nord": "Rus' du Nord"
+    "rus_nord": "Rus' du Nord",
+    "anatolie": "Anatolie",
+    "caucase": "Caucase",
+    "levant": "Levant",
+    "egypte": "Égypte",
+    "mesopotamie": "Haute-Mésopotamie"
   },
   "bands": [
     {

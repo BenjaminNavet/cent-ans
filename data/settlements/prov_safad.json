@@ -1,0 +1,77 @@
+[
+  {
+    "id": "set_safad",
+    "province": "prov_safad",
+    "kind": "city",
+    "name": {
+      "display": "Safad (Safed)",
+      "local": "صفد",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.5,
+      32.96
+    ],
+    "weight": 9,
+    "owner": null,
+    "fortification_level": 3,
+    "buildings": [
+      "bld_market",
+      "bld_castle"
+    ],
+    "port": false,
+    "description": "Forteresse templière sur sa colline, capitale du niyaba.",
+    "sources": [
+      "Safed"
+    ]
+  },
+  {
+    "id": "set_acre",
+    "province": "prov_safad",
+    "kind": "town",
+    "name": {
+      "display": "Acre (Akka)",
+      "local": "عكا",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.07,
+      32.92
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 1,
+    "buildings": [
+      "bld_market",
+      "bld_port"
+    ],
+    "port": true,
+    "description": "Ancienne capitale franque, ruinée en 1291.",
+    "sources": [
+      "Safed"
+    ]
+  },
+  {
+    "id": "set_tiberias",
+    "province": "prov_safad",
+    "kind": "village",
+    "name": {
+      "display": "Tibériade",
+      "local": "طبريا",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      35.53,
+      32.79
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Ville du lac.",
+    "sources": [
+      "Safed"
+    ]
+  }
+]

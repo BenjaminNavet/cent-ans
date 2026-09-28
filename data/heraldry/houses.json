@@ -1879,6 +1879,351 @@
       "vassal_of": [
         "fac_novgorod"
       ]
+    },
+    {
+      "id": "osmanogullar",
+      "name": "Osmanoğulları",
+      "arms_of": "fac_ottoman",
+      "blazon": "De gueules au chef d'argent.",
+      "description": "Maison régnante (Ottomans) ; Couleurs rouge et blanc portées par les Ottomans ; le croissant et l'étoile ne sont pas encore fixés, blason de jeu.",
+      "source": "Orhan (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_ottoman"
+      ],
+      "vassal_of": [
+        "fac_ottoman"
+      ]
+    },
+    {
+      "id": "karesiogullar",
+      "name": "Karesioğulları",
+      "arms_of": "fac_karasi",
+      "blazon": "D'azur à l'étoile d'or.",
+      "description": "Maison régnante (Karasi) ; Couleurs de convention des Karasi.",
+      "source": "Karasids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_karasi"
+      ],
+      "vassal_of": [
+        "fac_karasi"
+      ]
+    },
+    {
+      "id": "saruhanogullar",
+      "name": "Saruhanoğulları",
+      "arms_of": "fac_saruhan",
+      "blazon": "De sinople au chevron d'argent.",
+      "description": "Maison régnante (Saruhan) ; Couleurs de convention des Saruhan.",
+      "source": "Saruhanids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_saruhan"
+      ],
+      "vassal_of": [
+        "fac_saruhan"
+      ]
+    },
+    {
+      "id": "aydnogullar",
+      "name": "Aydınoğulları",
+      "arms_of": "fac_aydin",
+      "blazon": "D'argent à la nef de sinople.",
+      "description": "Maison régnante (Aydın) ; Nef en hommage à la flotte des Aydın ; couleurs de convention.",
+      "source": "Aydınids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_aydin"
+      ],
+      "vassal_of": [
+        "fac_aydin"
+      ]
+    },
+    {
+      "id": "menteseogullar",
+      "name": "Menteşeoğulları",
+      "arms_of": "fac_mentese",
+      "blazon": "De sable à la bande d'argent.",
+      "description": "Maison régnante (Menteşe) ; Couleurs de convention de Menteşe.",
+      "source": "Menteşe (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_mentese"
+      ],
+      "vassal_of": [
+        "fac_mentese"
+      ]
+    },
+    {
+      "id": "germiyanogullar",
+      "name": "Germiyanoğulları",
+      "arms_of": "fac_germiyan",
+      "blazon": "D'or à la bande de sinople.",
+      "description": "Maison régnante (Germiyan) ; Couleurs de convention des Germiyan.",
+      "source": "Germiyan (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_germiyan"
+      ],
+      "vassal_of": [
+        "fac_germiyan"
+      ]
+    },
+    {
+      "id": "hamidogullar",
+      "name": "Hamidoğulları",
+      "arms_of": "fac_hamid",
+      "blazon": "D'azur à la bande d'argent.",
+      "description": "Maison régnante (Hamid) ; Couleurs de convention des Hamid.",
+      "source": "Hamidids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_hamid"
+      ],
+      "vassal_of": [
+        "fac_hamid"
+      ]
+    },
+    {
+      "id": "tekeogullar",
+      "name": "Tekeoğulları",
+      "arms_of": "fac_teke",
+      "blazon": "D'or à la nef de sinople.",
+      "description": "Maison régnante (Teke) ; Nef d'Antalya ; couleurs de convention.",
+      "source": "Teke (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_teke"
+      ],
+      "vassal_of": [
+        "fac_teke"
+      ]
+    },
+    {
+      "id": "esrefogullar",
+      "name": "Eşrefoğulları",
+      "arms_of": "fac_esrefid",
+      "blazon": "De sinople au chevron d'or.",
+      "description": "Maison régnante (Eşrefoğulları) ; Couleurs de convention des Eşrefoğulları.",
+      "source": "Eshrefids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_esrefid"
+      ],
+      "vassal_of": [
+        "fac_esrefid"
+      ]
+    },
+    {
+      "id": "karamanogullar",
+      "name": "Karamanoğulları",
+      "arms_of": "fac_karaman",
+      "blazon": "De sable au chevron d'or.",
+      "description": "Maison régnante (Karaman) ; Couleurs de convention des Karamanoğulları.",
+      "source": "Karamanids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_karaman"
+      ],
+      "vassal_of": [
+        "fac_karaman"
+      ]
+    },
+    {
+      "id": "eretnides",
+      "name": "Eretnides",
+      "arms_of": "fac_eretna",
+      "blazon": "D'argent au sautoir d'azur.",
+      "description": "Maison régnante (Eretna) ; Couleurs de convention d'Eretna.",
+      "source": "Eretna (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_eretna"
+      ],
+      "vassal_of": [
+        "fac_eretna"
+      ]
+    },
+    {
+      "id": "candarogullar",
+      "name": "Candaroğulları",
+      "arms_of": "fac_candar",
+      "blazon": "De gueules au sautoir d'argent.",
+      "description": "Maison régnante (Candar) ; Couleurs de convention des Candar.",
+      "source": "Candar dynasty (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_candar"
+      ],
+      "vassal_of": [
+        "fac_candar"
+      ]
+    },
+    {
+      "id": "grands_comnenes",
+      "name": "Grands Comnènes",
+      "arms_of": "fac_trebizond",
+      "blazon": "D'or à l'aigle de sable.",
+      "description": "Maison régnante (Trébizonde) ; Aigle impérial des Grands Comnènes ; couleurs de convention.",
+      "source": "Empire of Trebizond (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_trebizond"
+      ],
+      "vassal_of": [
+        "fac_trebizond"
+      ]
+    },
+    {
+      "id": "hethoumides",
+      "name": "Héthoumides",
+      "arms_of": "fac_cilicia",
+      "blazon": "De gueules au lion d'or couronné d'argent.",
+      "description": "Maison régnante (Cilicie) ; Lion des Roupénides et des Héthoumides ; couleurs et couronne de convention.",
+      "source": "Kingdom of Armenia (Cilicia) (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_cilicia"
+      ],
+      "vassal_of": [
+        "fac_cilicia"
+      ]
+    },
+    {
+      "id": "dulkadirogullar",
+      "name": "Dulkadiroğulları",
+      "arms_of": "fac_dulkadir",
+      "blazon": "De sinople à la bande d'argent.",
+      "description": "Maison régnante (Dulkadir) ; Couleurs de convention des Dulkadir.",
+      "source": "Dulkadir (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_dulkadir"
+      ],
+      "vassal_of": [
+        "fac_dulkadir"
+      ]
+    },
+    {
+      "id": "bagratides",
+      "name": "Bagratides",
+      "arms_of": "fac_georgia",
+      "blazon": "D'argent à la croix de gueules, au chef d'or.",
+      "description": "Maison régnante (Géorgie) ; Croix de Géorgie ; chef d'or de convention.",
+      "source": "Kingdom of Georgia (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_georgia"
+      ],
+      "vassal_of": [
+        "fac_georgia"
+      ]
+    },
+    {
+      "id": "djakeli",
+      "name": "Djakéli",
+      "arms_of": "fac_samtskhe",
+      "blazon": "D'azur à la croix d'or.",
+      "description": "Maison régnante (Samtskhé) ; Croix des Djakéli ; couleurs de convention.",
+      "source": "Samtskhe-Saatabago (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_samtskhe"
+      ],
+      "vassal_of": [
+        "fac_samtskhe"
+      ]
+    },
+    {
+      "id": "adyghes",
+      "name": "Adyghés",
+      "arms_of": "fac_circassia",
+      "blazon": "De sinople à trois étoiles d'or.",
+      "description": "Maison régnante (Circassie) ; Étoiles du drapeau circassien ; couleurs de convention.",
+      "source": "Circassia (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_circassia"
+      ],
+      "vassal_of": [
+        "fac_circassia"
+      ]
+    },
+    {
+      "id": "alains",
+      "name": "Alains",
+      "arms_of": "fac_alania",
+      "blazon": "De gueules à la fasce d'argent.",
+      "description": "Maison régnante (Alanie) ; Couleurs de convention des Alains.",
+      "source": "Alania (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_alania"
+      ],
+      "vassal_of": [
+        "fac_alania"
+      ]
+    },
+    {
+      "id": "djalayirides",
+      "name": "Djalayirides",
+      "arms_of": "fac_jalayirids",
+      "blazon": "De gueules à la bordure d'or.",
+      "description": "Maison régnante (Djalayirides) ; Couleurs de convention des Djalayirides.",
+      "source": "Jalayirids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_jalayirids"
+      ],
+      "vassal_of": [
+        "fac_jalayirids"
+      ]
+    },
+    {
+      "id": "artuqides",
+      "name": "Artuqides",
+      "arms_of": "fac_artuqids",
+      "blazon": "D'or à la bande de sable.",
+      "description": "Maison régnante (Artuqides) ; Couleurs de convention des Artuqides.",
+      "source": "Artuqids (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_artuqids"
+      ],
+      "vassal_of": [
+        "fac_artuqids"
+      ]
+    },
+    {
+      "id": "qalawunides",
+      "name": "Qalawunides",
+      "arms_of": "fac_mamluks",
+      "blazon": "D'or à la fasce de sable.",
+      "description": "Maison régnante (Mamelouks) ; Couleurs jaune et noir de l'étendard mamelouk ; blason de jeu.",
+      "source": "Mamluk Sultanate (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_mamluks"
+      ],
+      "vassal_of": [
+        "fac_mamluks"
+      ]
+    },
+    {
+      "id": "ayyoubides",
+      "name": "Ayyoubides",
+      "arms_of": "fac_hama",
+      "blazon": "D'or à la fasce d'azur.",
+      "description": "Maison régnante (Hama) ; Couleurs ayyoubides ; blason de jeu.",
+      "source": "Hama (Wikipédia)",
+      "certainty": "substitution",
+      "factions": [
+        "fac_hama"
+      ],
+      "vassal_of": [
+        "fac_hama"
+      ]
     }
   ]
 }

@@ -1,0 +1,38 @@
+{
+  "id": "chr_anuk",
+  "name": {
+    "display": "Anuk",
+    "local": "أنوك",
+    "local_language": "arabe"
+  },
+  "sex": "male",
+  "house": "Qalawunides",
+  "faction": "fac_mamluks",
+  "role": "heir",
+  "birth": {
+    "value": "1323-04-08",
+    "place": "Le Caire"
+  },
+  "death": {
+    "value": "1340"
+  },
+  "historical": true,
+  "skills": {
+    "command": 3,
+    "governance": 3,
+    "court": 4
+  },
+  "traits": [
+    "trait_spendthrift"
+  ],
+  "piety": 45,
+  "family": {
+    "father": "chr_al_nasir_muhammad"
+  },
+  "starting_location": "prov_cairo",
+  "status": "minor",
+  "description": "Fils favori d'al-Nasir Muhammad et de Toghay ; mort en 1340, avant son père. Désignation comme héritier en 1337 incertaine.",
+  "sources": [
+    "Al-Nasir Muhammad"
+  ]
+}

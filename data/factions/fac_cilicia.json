@@ -1,0 +1,56 @@
+{
+  "id": "fac_cilicia",
+  "name": {
+    "display": "Royaume arménien de Cilicie",
+    "local": "Կիլիկիայի հայկական թագավորություն",
+    "local_language": "arménien"
+  },
+  "short_name": "Cilicie",
+  "adjective": "arménien",
+  "government": "kingdom",
+  "playable": true,
+  "ruler": "chr_leon_iv",
+  "capital": "prov_sis",
+  "capital_city": "Sis (Kozan)",
+  "religion": "rel_armenian",
+  "culture": "cul_armenian",
+  "succession_law": "male_preference_primogeniture",
+  "primary_title": "tit_cilicia",
+  "heraldry": {
+    "blazon": "De gueules au lion d'or couronné d'argent.",
+    "description": "Lion des Roupénides et des Héthoumides ; couleurs et couronne de convention.",
+    "primary_color": "#B0182B",
+    "secondary_color": "#F2C230",
+    "uncertain": true,
+    "note": "Blason de convention : pas d'héraldique fixée dans ce monde ; couleurs dynastiques et meuble choisis pour la distinction en jeu."
+  },
+  "titles": [
+    "Roi des Arméniens",
+    "Seigneur de Cilicie"
+  ],
+  "treasury": 10000,
+  "prestige": 45,
+  "starting_technologies": [
+    "tech_masonry",
+    "tech_letters_of_credit",
+    "tech_siege_engineering"
+  ],
+  "relations": [
+    {
+      "faction": "fac_mamluks",
+      "status": "war",
+      "note": "Al-Nasir Muhammad prend Ayas en 1337 et impose une trêve humiliante à Léon IV."
+    }
+  ],
+  "ai_personality": {
+    "aggression": 35,
+    "diplomacy": 65,
+    "trade": 60,
+    "piety": 75
+  },
+  "description": "Dernier royaume arménien, en Cilicie, pris en étau entre Mamelouks et Turkmènes ; Léon IV (1320-1341) attend en vain l'aide de l'Occident. Ayas tombera dans le courant de 1337.",
+  "sources": [
+    "Kingdom of Armenia (Cilicia)",
+    "Leo IV, King of Armenia"
+  ]
+}
