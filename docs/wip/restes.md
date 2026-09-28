@@ -11,6 +11,14 @@ Lire ce fichier, `git worktree list`, `git branch --list 'feat/rs-*'`. Chaque lo
 `docs/wip/rs-<lot>.md`. Fusion : worktree `../gp-rs-merge` (branche `integration/rs`), puis ff-only
 vers `main`. ADR réservés : **0100** (lot B ; 0098 pris par FE), **0099** (lot F). GA réserve 0104-0106.
 
+## Reprise (28/09 ~15 h)
+
+- P2c **fusionné** (67171a61) : smoke, `p2c_ui_test`, `po_ui_test` verts.
+- B : agent de reprise dans son worktree (century_probe 4 niveaux, 2 × 75), puis intégration.
+- Vague 3 lancée : **P2g** (`feat/p2g-layout`, Tech/Diplo/Cour/Fiche/SaveLoadDialog dans `UiLayout`),
+  **K perf** (`feat/rs-k-perf`, `TownLayer` ~10 ms, `qt/collect`). `alerts.gd` (champ de siège au pont)
+  attend TW2 SB (même zone) ; C après B ; P2d après TW2 SB ; P2f en dernier.
+
 ## PAUSE (28/09 ~09 h 15, demande du joueur) — comment reprendre
 
 `main` = fec99a04 + ce commit : lots A, D, E, F, G, H, J, P2a, P2b, P2e fusionnés. Deux lots arrêtés, tout commité :
@@ -47,7 +55,7 @@ Note E : `alerts.gd` garde une lecture par province (détail du siège absent de
 |---|---|---|---|
 | P2a | cour, fiche perso, arbre familial | `feat/p2a-court` | **fusionné** (9b1ee0bb) ; cour et fiche restent hors `UiLayout` (même cause que P2b) |
 | P2b | techniques, diplomatie | `feat/p2b-tech-diplo` | **fusionné** (9b1ee0bb) — fini (9ceabff1) ; Tech/Diplo restent hors `UiLayout` (reparentage casse `map_ui._keep_on_screen`) |
-| P2c | codex, encyclopédie, infobulles | `feat/p2c-codex` | en cours (codex en `MODAL`) |
+| P2c | codex, encyclopédie, infobulles | `feat/p2c-codex` | **fusionné** (67171a61), codex en `MODAL` |
 | P2e | menus secondaires | `feat/p2e-menus` | **fusionné** (9b1ee0bb) — fini (816c775b) ; `SaveLoadDialog` de `start_menu`/`map_ui` pas en zone |
 | G | Bordeaux, Avignon, Calais, Bruges ; rives | `feat/rs-g-cities` | **fusionné** (9b1ee0bb) ; recuisson par le joueur |
 | J | pavois face à une cible cachée (test ignoré de D) | `feat/rs-j-pavise` | **fusionné** (9b1ee0bb), sondes ep7/ep9b/eq7 identiques |
