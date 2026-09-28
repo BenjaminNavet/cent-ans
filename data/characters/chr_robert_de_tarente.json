@@ -1,0 +1,43 @@
+{
+  "id": "chr_robert_de_tarente",
+  "name": {
+    "display": "Robert de Tarente",
+    "local": "Roberto d'Angiò-Taranto",
+    "local_language": "napolitain"
+  },
+  "sex": "male",
+  "house": "Anjou-Tarente",
+  "faction": "fac_taranto",
+  "role": "ruler",
+  "birth": {
+    "value": "1326"
+  },
+  "historical": true,
+  "skills": {
+    "command": 1,
+    "governance": 1,
+    "court": 2
+  },
+  "traits": [
+    "trait_ambitious"
+  ],
+  "piety": 45,
+  "starting_location": "prov_taranto",
+  "status": "minor",
+  "description": "Fils cadet de Philippe Ier de Tarente et de Catherine de Valois-Courtenay, il porte depuis 1332 le titre de prince de Tarente à la mort de son père, sous la régence de sa mère.",
+  "sources": [
+    "Principauté de Tarente",
+    "Philippe Ier de Tarente"
+  ],
+  "titles": [
+    {
+      "title": "Prince de Tarente",
+      "from": {
+        "value": "1332"
+      }
+    }
+  ],
+  "family": {
+    "mother": "chr_catherine_de_valois_courtenay"
+  }
+}

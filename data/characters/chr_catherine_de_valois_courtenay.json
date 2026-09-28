@@ -1,0 +1,45 @@
+{
+  "id": "chr_catherine_de_valois_courtenay",
+  "name": {
+    "display": "Catherine de Valois-Courtenay",
+    "local": "Catherine de Valois-Courtenay",
+    "local_language": "français"
+  },
+  "sex": "female",
+  "house": "Valois-Courtenay",
+  "faction": "fac_taranto",
+  "role": "regent",
+  "birth": {
+    "value": "1303"
+  },
+  "historical": true,
+  "skills": {
+    "command": 1,
+    "governance": 6,
+    "court": 7
+  },
+  "traits": [
+    "trait_ambitious",
+    "trait_cunning"
+  ],
+  "piety": 45,
+  "starting_location": "prov_taranto",
+  "status": "at_court",
+  "description": "Impératrice titulaire de Constantinople (dynastie latine), épouse de Philippe Ier de Tarente puis, veuve depuis 1331, régente de la principauté de Tarente pour son fils Robert ; fait valoir les droits de la maison d'Anjou-Tarente sur l'Achaïe et l'Épire.",
+  "sources": [
+    "Catherine de Valois-Courtenay"
+  ],
+  "titles": [
+    {
+      "title": "Impératrice titulaire de Constantinople",
+      "from": {
+        "value": "1313"
+      }
+    }
+  ],
+  "family": {
+    "children": [
+      "chr_robert_de_tarente"
+    ]
+  }
+}
