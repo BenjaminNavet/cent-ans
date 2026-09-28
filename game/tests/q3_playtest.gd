@@ -755,6 +755,13 @@ func phase_naval() -> void:
 		log_q("naval: no pre-battle dialog")
 		return
 	await wait(60)
+	if not dialog.fight_button.visible:
+		# Bataille navale 3D retirée (PLAYABLE_3D = false) : résolution automatique, comme un joueur.
+		await click(dialog.auto_button)
+		await wait(30)
+		log_q("naval: auto-resolved, dialog visible %s" % dialog.visible)
+		await dismiss_dialogs()
+		return
 	var t := Time.get_ticks_msec()
 	await click(dialog.fight_button)
 	if dialog.visible:
