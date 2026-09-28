@@ -19,8 +19,23 @@ Branche `feat/tw2-t3` (depuis `integration/tw2`, SB fusionné). Spec :
 - [x] Test headless `game/tests/tw2_t3_mercenaries_test.gd` (OK), smoke.
 
 ## Prochaine étape
-Lot terminé une fois la vérification complète verte (fmt, clippy, cargo test, build, test headless,
-smoke, pytest) ; reste la fusion dans `integration/tw2` par l'orchestrateur.
+Lot terminé : `integration/tw2` (SB + doc/uids) fusionné sans conflit, vérification complète verte
+(fmt, clippy, cargo test workspace, build, import, smoke, les 3 tests headless TW2, pytest). Reste la
+fusion dans `integration/tw2` par l'orchestrateur.
+
+## Vérification finale (2026-09-28)
+- `git merge integration/tw2` : pas de conflit (3 `.uid` non suivis identiques au contenu fusionné,
+  supprimés avant merge) ; commit `96ca4112`.
+- `cargo fmt --all --check` : OK.
+- `cargo clippy --workspace --all-targets -- -D warnings` : OK.
+- `cargo test --workspace` : 154 suites, 0 échec.
+- `core/build.sh` : OK, dylib copiée.
+- `godot --headless --path game --import` : OK.
+- `godot --headless --path game --script res://tests/smoke.gd` : `smoke OK`.
+- `tw2_t3_mercenaries_test.gd`, `tw2_t1_capture_test.gd`, `tw2_t2_replenish_test.gd` : `OK` (exit 0
+  chacun).
+- `uv run --project tools pytest -q` : 885 passed, 2 skipped.
+- Aucune correction de code nécessaire.
 
 ## Points ouverts
 - La surprime n'apparaît pas dans le budget de l'interface (`economy.rs`, lot RS) : panneau et journal.
