@@ -40,11 +40,13 @@ static func fill_garrison(list: Container, garrison: Array, selectable: bool) ->
 			check.set_script(RichButton)
 			check.theme_type_variation = &"CheckBox"
 			IconLibrary.decorate_button(check, unit_type, int(ROW_ICON), "unit")
-			check.tooltip_text = RichTooltip.unit(unit_type, unit)
+			RichTooltip.set_tooltip(check, "unit", unit_type, unit)  # IB1 : infobulle en sections
 			list.add_child(check)
 			checks.append(check)
 		else:
-			list.add_child(IconChip.create(unit_type, text, RichTooltip.unit(unit_type, unit), ROW_ICON, 14, "unit"))
+			var chip := IconChip.create(unit_type, text, "", ROW_ICON, 14, "unit")
+			RichTooltip.set_tooltip(chip, "unit", unit_type, unit)  # IB1
+			list.add_child(chip)
 	return checks
 
 
@@ -64,7 +66,7 @@ static func fill_recruitable(list: Container, recruitable: Array, on_recruit: Ca
 		button.disabled = not available
 		var unit_type: String = str(row.get("unit_type", ""))
 		IconLibrary.decorate_button(button, unit_type, int(ROW_ICON), "unit")
-		button.tooltip_text = RichTooltip.unit(unit_type, row)
+		RichTooltip.set_tooltip(button, "unit", unit_type, row)  # IB1 : infobulle en sections
 		button.pressed.connect(func() -> void: on_recruit.call(unit_type))
 		line.add_child(button)
 		var reason := str(row.get("reason", "Indisponible"))
@@ -96,7 +98,9 @@ static func fill_buildings(list: Container, buildings: Array) -> void:
 	for entry in buildings:
 		var building_id: String = str(entry.get("id", ""))
 		var text := "%s (entretien %s)" % [str(entry.get("name", building_id)), Money.amount(int(entry.get("upkeep", 0)))]
-		list.add_child(IconChip.create(building_id, text, RichTooltip.building(building_id, entry), ROW_ICON, 14, "building"))
+		var chip := IconChip.create(building_id, text, "", ROW_ICON, 14, "building")
+		RichTooltip.set_tooltip(chip, "building", building_id, entry)  # IB1
+		list.add_child(chip)
 
 
 ## Constructions possibles (`buildable`), sans celles déjà construites (`built_ids`) ;
@@ -151,7 +155,7 @@ static func fill_buildable(list: Container, buildable: Array, is_player_owner: b
 		var import_cost := int(row.get("import_cost", 0))
 		if import_cost > 0:
 			line.add_child(import_cost_label(import_cost))
-		button.tooltip_text = RichTooltip.building(building_id, row)
+		RichTooltip.set_tooltip(button, "building", building_id, row)  # IB1 : infobulle en sections
 		list.add_child(line)
 
 
