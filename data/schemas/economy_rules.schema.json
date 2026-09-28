@@ -262,6 +262,20 @@
       "maximum": 100,
       "description": "Part (en %) du coût en argent d'un bâtiment rendue quand on le rase (lot RS-C)."
     },
+    "terrain_supply": {
+      "type": "object",
+      "description": "Lot OM3 (ADR 0116) : fourrage selon le terrain de la province. En territoire ami, la reprise de saison est multipliée par recovery_percent % ; hors du territoire ami, la perte par loss_percent % ; chaque été, summer_loss points de plus sont perdus partout (chaleur, puits à sec). Un terrain absent nourrit normalement.",
+      "propertyNames": { "enum": ["plains", "hills", "mountains", "forest", "marsh", "heath", "bocage", "steppe", "desert"] },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "recovery_percent": { "type": "number", "minimum": 0 },
+          "loss_percent": { "type": "number", "minimum": 0 },
+          "summer_loss": { "type": "integer", "minimum": 0, "maximum": 100 }
+        },
+        "additionalProperties": false
+      }
+    },
     "ai_demolition": {
       "type": "object",
       "description": "Quand l'IA rase ses bâtiments (lot RS-C).",
