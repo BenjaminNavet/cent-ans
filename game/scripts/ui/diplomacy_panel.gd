@@ -548,7 +548,7 @@ func _render_offers() -> void:
 				var side_id := str(call.get(side[0], ""))
 				var take := Button.new()
 				take.text = "Soutenir %s" % str(call.get(side[1], side_id))
-				take.tooltip_text = "Prendre le parti de %s : guerre contre l'autre vassal." % str(call.get(side[1], side_id))
+				RichTooltip.attach_plain(take, "feudal_take_side", {"title": "Prendre le parti de %s" % str(call.get(side[1], side_id)), "body": "Guerre contre l'autre vassal."})
 				take.pressed.connect(func() -> void: arbitration_requested.emit(offer_id, "take_side", side_id))
 				row.add_child(take)
 		var no := Button.new()
