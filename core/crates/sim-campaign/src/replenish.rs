@@ -14,6 +14,9 @@
 //!   replenishes what it can pay for.
 //!
 //! Units wiped out are removed after their battle and never come back.
+//! The men regained are raw recruits: they dilute the unit's experience pro
+//! rata (TW2-T5, `traditions::add_recruits`); the army's stewardship
+//! traditions raise the rate.
 //! Garrisons keep their own reinforcement (`economy`, `garrison` effect).
 
 use data_model::{FactionId, GameData};
@@ -257,6 +260,16 @@ impl CampaignState {
                 bonus += buildings;
             }
         }
+        // TW2-T5: stewardship traditions of the army.
+        let traditions = crate::traditions::army_tradition_effects(data, army).replenish_percent;
+        if traditions != 0 {
+            preview.factors.push(ReplenishFactor {
+                kind: FactorKind::Bonus,
+                label: "Traditions de l'armée".to_owned(),
+                percent: traditions,
+            });
+            bonus += traditions;
+        }
         let bonus = bonus.max(-90);
         // Final rate in hundredths of a percent.
         let rate_bp = u64::from(base) * multiplier * (100 + bonus) as u64 / 100;
@@ -408,7 +421,9 @@ fn apply_plan(
 ) {
     if let Some(army) = state.armies.get_mut(army_id) {
         for (unit, men) in army.units.iter_mut().zip(&plan.per_unit) {
-            unit.strength = (unit.strength + men).min(unit.max_strength.max(unit.strength));
+            // TW2-T5: raw recruits dilute the unit's experience pro rata.
+            let men = (*men).min(unit.max_strength.saturating_sub(unit.strength));
+            crate::traditions::add_recruits(unit, men, 0);
         }
     }
     if let Some(faction) = state.factions.get_mut(faction) {
