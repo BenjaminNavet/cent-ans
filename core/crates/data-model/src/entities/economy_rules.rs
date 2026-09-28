@@ -1,7 +1,80 @@
-//! Economy tuning (lots EQ1, B7a, SV4), mirroring
+//! Economy tuning (lots EQ1, B7a, SV4, RS-B), mirroring
 //! `data/schemas/economy_rules.schema.json` (`data/rules/economy.json`).
 
 use serde::{Deserialize, Serialize};
+
+use crate::SocialClass;
+
+/// RS-B: livres per head and per season, by social class (ex-`tax_per_head`).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TaxPerHead {
+    pub peasants: f64,
+    pub burghers: f64,
+    pub clergy: f64,
+    pub nobility: f64,
+}
+
+impl TaxPerHead {
+    /// Livres per head and per season of `class`.
+    pub fn of(&self, class: SocialClass) -> f64 {
+        match class {
+            SocialClass::Peasants => self.peasants,
+            SocialClass::Burghers => self.burghers,
+            SocialClass::Clergy => self.clergy,
+            SocialClass::Nobility => self.nobility,
+        }
+    }
+}
+
+impl Default for TaxPerHead {
+    fn default() -> Self {
+        TaxPerHead {
+            peasants: 0.02,
+            burghers: 0.08,
+            clergy: 0.01,
+            nobility: 0.03,
+        }
+    }
+}
+
+/// RS-B: one tax bracket (spec § 1.4).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TaxBracket {
+    /// Multiplier of the tax base, also the unrest multiplier of § 1.1.
+    pub multiplier: f64,
+    /// Share of the population's wealth taken by the crown (0-1).
+    pub burden: f64,
+}
+
+/// RS-B: the three tax brackets a faction can pick.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TaxBrackets {
+    pub low: TaxBracket,
+    pub normal: TaxBracket,
+    pub high: TaxBracket,
+}
+
+impl Default for TaxBrackets {
+    fn default() -> Self {
+        TaxBrackets {
+            low: TaxBracket {
+                multiplier: 0.7,
+                burden: 0.2,
+            },
+            normal: TaxBracket {
+                multiplier: 1.0,
+                burden: 0.35,
+            },
+            high: TaxBracket {
+                multiplier: 1.4,
+                burden: 0.5,
+            },
+        }
+    }
+}
 
 /// Contents of `data/rules/economy.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -61,6 +134,38 @@ pub struct EconomyRules {
     /// SV4: devastation healed per season in every province.
     #[serde(default = "default_devastation_decay")]
     pub devastation_decay: u8,
+    /// RS-B: share of the theoretical tax base the crown actually collects.
+    #[serde(default = "default_tax_efficiency")]
+    pub tax_efficiency: f64,
+    /// RS-B: livres per head and per season, by social class.
+    #[serde(default)]
+    pub tax_per_head: TaxPerHead,
+    /// RS-B: the tax brackets (multiplier and burden).
+    #[serde(default)]
+    pub tax_rates: TaxBrackets,
+    /// RS-B (F1): share of a `Production` bonus that reaches the tax base (0-1).
+    #[serde(default = "default_production_tax_share")]
+    pub production_tax_share: f64,
+    /// RS-B: months of unit upkeep (monthly in `data/unit_types`) billed per season.
+    #[serde(default = "default_upkeep_months_per_season")]
+    pub upkeep_months_per_season: i64,
+    /// RS-B: share (percent) of field upkeep a garrison costs when
+    /// `settlements/rules.json` gives none for the settlement kind.
+    #[serde(default = "default_garrison_upkeep_percent")]
+    pub garrison_upkeep_percent: i64,
+    /// RS-B (F1): garrison upkeep relief (percent) per point of `Garrison` effect...
+    #[serde(default = "default_garrison_relief_percent_per_point")]
+    pub garrison_relief_percent_per_point: i64,
+    /// ... up to this ceiling (percent).
+    #[serde(default = "default_garrison_relief_max_percent")]
+    pub garrison_relief_max_percent: i64,
+    /// RS-B (F1): strength (percent of `max_strength`) a garrison regains each
+    /// season per point of `Garrison` effect...
+    #[serde(default = "default_garrison_reinforce_percent_per_point")]
+    pub garrison_reinforce_percent_per_point: u32,
+    /// ... up to this ceiling (percent).
+    #[serde(default = "default_garrison_reinforce_max_percent")]
+    pub garrison_reinforce_max_percent: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
@@ -121,6 +226,16 @@ impl Default for EconomyRules {
             supply_recovery: default_supply_recovery(),
             starvation_loss_percent: default_starvation_loss_percent(),
             devastation_decay: default_devastation_decay(),
+            tax_efficiency: default_tax_efficiency(),
+            tax_per_head: TaxPerHead::default(),
+            tax_rates: TaxBrackets::default(),
+            production_tax_share: default_production_tax_share(),
+            upkeep_months_per_season: default_upkeep_months_per_season(),
+            garrison_upkeep_percent: default_garrison_upkeep_percent(),
+            garrison_relief_percent_per_point: default_garrison_relief_percent_per_point(),
+            garrison_relief_max_percent: default_garrison_relief_max_percent(),
+            garrison_reinforce_percent_per_point: default_garrison_reinforce_percent_per_point(),
+            garrison_reinforce_max_percent: default_garrison_reinforce_max_percent(),
             description: None,
         }
     }
@@ -143,4 +258,31 @@ fn default_starvation_loss_percent() -> u32 {
 }
 fn default_devastation_decay() -> u8 {
     5
+}
+/// Lot C4: 0.09 / 1.1 — in 1337 almost every province is held whole, so the
+/// full-province bonus (+10 %, `settlements/rules.json`) would otherwise
+/// inflate every treasury; the base is lowered to keep the v1 economy.
+fn default_tax_efficiency() -> f64 {
+    0.082
+}
+fn default_production_tax_share() -> f64 {
+    0.5
+}
+fn default_upkeep_months_per_season() -> i64 {
+    4
+}
+fn default_garrison_upkeep_percent() -> i64 {
+    50
+}
+fn default_garrison_relief_percent_per_point() -> i64 {
+    10
+}
+fn default_garrison_relief_max_percent() -> i64 {
+    50
+}
+fn default_garrison_reinforce_percent_per_point() -> u32 {
+    5
+}
+fn default_garrison_reinforce_max_percent() -> u32 {
+    50
 }

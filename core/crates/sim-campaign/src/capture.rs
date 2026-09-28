@@ -288,7 +288,7 @@ pub fn preview(
     let share = place_share(rules, place.kind);
     let (income, heads) = state.provinces.get(&place.province).map_or((0.0, 0), |p| {
         (
-            province_income(p),
+            province_income(&data.economy_rules, p),
             p.population.iter().map(|(_, c)| c.count).sum::<u64>(),
         )
     });
