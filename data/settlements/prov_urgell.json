@@ -67,9 +67,7 @@
     "weight": 4,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Bourg fortifié du comté d'Urgell, sur les rives du Sió.",
     "sources": [

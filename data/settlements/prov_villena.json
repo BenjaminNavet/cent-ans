@@ -52,7 +52,7 @@
   {
     "id": "set_almansa",
     "province": "prov_villena",
-    "kind": "village",
+    "kind": "castle",
     "name": {
       "display": "Almansa",
       "local": "Almansa",
@@ -64,7 +64,7 @@
     ],
     "weight": 4,
     "owner": null,
-    "fortification_level": 1,
+    "fortification_level": 2,
     "buildings": [
       "bld_castle"
     ],

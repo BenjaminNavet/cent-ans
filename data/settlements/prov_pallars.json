@@ -65,9 +65,7 @@
     "weight": 4,
     "owner": null,
     "fortification_level": 1,
-    "buildings": [
-      "bld_stone_walls"
-    ],
+    "buildings": [],
     "port": false,
     "description": "Village fortifié du Pallars Jussà, sur la Noguera Pallaresa.",
     "sources": [
