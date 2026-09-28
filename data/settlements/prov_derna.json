@@ -1,5 +1,28 @@
 [
   {
+    "id": "set_bardia",
+    "province": "prov_derna",
+    "kind": "village",
+    "name": {
+      "display": "Bardia",
+      "local": "Bardiyya",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      25.0917,
+      31.7594
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Port de pêcheurs et de caravanes sur la côte, dernière étape avant l'Égypte.",
+    "sources": [
+      "Bardia"
+    ]
+  },
+  {
     "id": "set_derna",
     "province": "prov_derna",
     "kind": "city",

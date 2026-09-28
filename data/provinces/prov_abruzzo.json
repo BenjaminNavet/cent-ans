@@ -91,5 +91,7 @@
   "sea_zones": [
     "sea_adriatic"
   ],
-  "ports": []
+  "ports": [
+    "Oristano"
+  ]
 }

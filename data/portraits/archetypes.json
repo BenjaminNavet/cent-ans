@@ -84,7 +84,12 @@
         "fac_pallars",
         "fac_ribagorca",
         "fac_luna",
-        "fac_calatrava"
+        "fac_calatrava",
+        "fac_marinids",
+        "fac_hafsids",
+        "fac_makki",
+        "fac_tripoli",
+        "fac_barqa"
       ],
       "prompt": "Iberian (Castilian and Aragonese) fashion: long saya tunic, pellote over-gown with wide armholes, mantle with Mudejar geometric silk borders"
     },
@@ -140,7 +145,8 @@
         "fac_rimini",
         "fac_sicily",
         "fac_taranto",
-        "fac_pavia"
+        "fac_pavia",
+        "fac_arborea"
       ],
       "prompt": "Italian and Imperial fashion: Italian gown (cioppa) or German fur-trimmed tunic, soft cap or beretta, brocade borders"
     },

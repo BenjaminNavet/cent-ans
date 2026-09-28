@@ -7,12 +7,12 @@
     "local_language": "arabe maghrébin"
   },
   "heraldry": {
-    "blazon": "D'argent plain.",
-    "description": "Bannière blanche des Mérinides (Banu Marin) ; l'étendard blanc est attesté par les chroniqueurs, sans meuble héraldique. Simple champ d'argent pour le jeu.",
+    "blazon": "D'argent à la bordure de sable.",
+    "description": "Bannière blanche des Mérinides (Banu Marin) ; l'étendard blanc est attesté par les chroniqueurs, sans meuble héraldique. Bordure de sable ajoutée pour la distinction visuelle en jeu.",
     "primary_color": "#F2EFE6",
     "secondary_color": "#2F6B3A",
     "uncertain": true,
-    "note": "Champ blanc d'après les drapeaux de l'Atlas catalan et des chroniques ; sans charge."
+    "note": "Champ blanc attesté ; bordure de sable : brisure de jeu, non attestée."
   },
   "de_jure_provinces": [
     "prov_fes",

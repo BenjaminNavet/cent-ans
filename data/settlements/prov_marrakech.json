@@ -50,5 +50,28 @@
     "sources": [
       "Aghmat"
     ]
+  },
+  {
+    "id": "set_tinmel",
+    "province": "prov_marrakech",
+    "kind": "village",
+    "name": {
+      "display": "Tinmel",
+      "local": "Tīnmal",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -8.3667,
+      30.9833
+    ],
+    "weight": 5,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Village du Haut Atlas où Ibn Tumart fonda la puissance almohade ; mosquée en ruine.",
+    "sources": [
+      "Tinmel"
+    ]
   }
 ]

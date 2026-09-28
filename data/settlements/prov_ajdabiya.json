@@ -1,5 +1,28 @@
 [
   {
+    "id": "set_marada",
+    "province": "prov_ajdabiya",
+    "kind": "village",
+    "name": {
+      "display": "Maradah",
+      "local": "Mārāda",
+      "local_language": "arabe"
+    },
+    "lonlat": [
+      19.1167,
+      29.2
+    ],
+    "weight": 3,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Oasis de la piste du Fezzan à Ajdabiya.",
+    "sources": [
+      "Marada"
+    ]
+  },
+  {
     "id": "set_ajdabiya",
     "province": "prov_ajdabiya",
     "kind": "city",

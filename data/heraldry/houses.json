@@ -1450,8 +1450,8 @@
     {
       "id": "marinides",
       "name": "Mérinides",
-      "blazon": "D'argent plain.",
-      "description": "Champ blanc, étendard des Banu Marin ; sans charge héraldique.",
+      "blazon": "D'argent à la bordure de sable.",
+      "description": "Champ blanc, étendard des Banu Marin ; bordure de sable ajoutée pour la distinction en jeu.",
       "source": "fr.wikipedia : Mérinides, drapeau",
       "certainty": "incertain",
       "factions": [
@@ -1464,7 +1464,7 @@
     {
       "id": "hafsides",
       "name": "Hafsides",
-      "blazon": "Coupé d'argent et de gueules.",
+      "blazon": "Coupé de gueules et d'argent.",
       "description": "Bicolore blanc et rouge d'après les portulans.",
       "source": "fr.wikipedia : Hafsides ; Atlas catalan (1375)",
       "certainty": "incertain",

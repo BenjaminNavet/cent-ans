@@ -85,5 +85,7 @@
   "sea_zones": [
     "sea_ionian"
   ],
-  "ports": []
+  "ports": [
+    "Oristano"
+  ]
 }

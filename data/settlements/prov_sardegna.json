@@ -86,33 +86,6 @@
     ]
   },
   {
-    "id": "set_oristano",
-    "province": "prov_sardegna",
-    "kind": "town",
-    "name": {
-      "display": "Oristano",
-      "local": "Aristanis",
-      "local_language": "sarde"
-    },
-    "lonlat": [
-      8.5911,
-      39.9036
-    ],
-    "weight": 12,
-    "owner": null,
-    "fortification_level": 2,
-    "buildings": [
-      "bld_market",
-      "bld_stone_walls"
-    ],
-    "port": false,
-    "description": "Capitale du judicat d'Arborée, dernier État sarde indépendant, en résistance ouverte à la conquête aragonaise.",
-    "sources": [
-      "Judicat d'Arborea",
-      "Oristano"
-    ]
-  },
-  {
     "id": "set_iglesias",
     "province": "prov_sardegna",
     "kind": "town",
@@ -163,31 +136,6 @@
     "sources": [
       "Castelsardo",
       "Famille Doria"
-    ]
-  },
-  {
-    "id": "set_bosa",
-    "province": "prov_sardegna",
-    "kind": "village",
-    "name": {
-      "display": "Bosa",
-      "local": "Bosa",
-      "local_language": "sarde"
-    },
-    "lonlat": [
-      8.4989,
-      40.2986
-    ],
-    "weight": 4,
-    "owner": null,
-    "fortification_level": 0,
-    "buildings": [
-      "bld_parish_church"
-    ],
-    "port": true,
-    "description": "Bourg côtier au pied du château Malaspina, sur la côte occidentale de l'île.",
-    "sources": [
-      "Bosa (Italie)"
     ]
   }
 ]

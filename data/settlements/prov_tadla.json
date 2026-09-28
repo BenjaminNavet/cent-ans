@@ -53,5 +53,28 @@
     "sources": [
       "Béni Mellal"
     ]
+  },
+  {
+    "id": "set_ouaouizeght",
+    "province": "prov_tadla",
+    "kind": "village",
+    "name": {
+      "display": "Ouaouizeght",
+      "local": "Wāwīzaght",
+      "local_language": "berbère"
+    },
+    "lonlat": [
+      -6.3,
+      32.15
+    ],
+    "weight": 4,
+    "owner": null,
+    "fortification_level": 0,
+    "buildings": [],
+    "port": false,
+    "description": "Bourg berbère au pied de l'Atlas, sur la route de Marrakech (à préciser).",
+    "sources": [
+      "Ouaouizeght"
+    ]
   }
 ]
