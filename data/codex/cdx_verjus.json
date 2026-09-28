@@ -1,0 +1,11 @@
+{
+  "id": "cdx_verjus",
+  "title": "Le verjus",
+  "category": "ingredient",
+  "aliases": ["verjus", "verjuice", "vert jus"],
+  "era": { "from": "1200", "to": "1600" },
+  "summary": "Jus de raisin cueilli vert, avant la véraison, le verjus donne aux sauces médiévales leur pointe acide : un citron du Nord, moins coûteux que les agrumes venus du Midi, pressé dans toutes les régions de vigne.",
+  "body": "Le verjus (« vert jus ») se presse à partir de grappes cueillies encore vertes, bien avant les vendanges, sur des ceps parfois laissés exprès moins mûrs que ceux du vin. On l'obtient aussi, en Angleterre notamment, à partir de pommes sauvages ou acides (crab-apples). Sa saveur, vive et acidulée sans l'âcreté du vinaigre, en fait l'assaisonnement de choix des sauces froides que servent les cuisiniers de cour.\n\nLa [[cdx_cameline|cameline]], l'aillée et bien d'autres sauces du [[cdx_viandier|Viandier]] et du [[cdx_menagier_de_paris|Ménagier de Paris]] l'emploient concurremment au vinaigre et au vin, selon ce qu'on a sous la main ; on l'utilise aussi pour déglacer une poêle, attendrir une viande, ou calmer un plat trop gras. Avant que le citron et l'orange, fruits méridionaux et coûteux, ne se répandent, le verjus est le grand acide de la cuisine du nord de la France et de l'Angleterre.\n\nLes régions de grande vigne, Bourgogne, Orléanais, Anjou, en font une petite production à part : certains ceps, comme le cépage aujourd'hui encore nommé « verjus » autour de Beaune, ne sont cultivés que pour cet usage. Selon la théorie des [[cdx_humeurs|humeurs]], comme le [[cdx_vinaigre|vinaigre]], il est classé froid, utile à tempérer les plats et les tempéraments trop chauds.\n\nAu XXIe siècle, quelques vignerons de Bourgogne et de Touraine ont relancé sa production : les grands chefs le redécouvrent comme une alternative plus douce au vinaigre ou au citron pour déglacer une sauce ou assaisonner un poisson.",
+  "see_also": ["cdx_cameline", "cdx_vinaigre", "cdx_viandier", "cdx_menagier_de_paris", "cdx_humeurs"],
+  "sources": ["Verjus", "Cuisine médiévale"]
+}
