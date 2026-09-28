@@ -182,3 +182,23 @@ def test_river_reach_orders_points() -> None:
     assert reach is not None
     line = np.array(reach["line"])
     assert np.all(np.diff(line @ np.array(reach["tangent"])) > 0)
+
+
+def test_major_river_beats_nearby_brook() -> None:
+    """RS-G: a brook near the centre gives way to a much wider river in reach (Tours, Loire)."""
+    assert towns.pick_river_feature({}) is None
+    # Brook 50 m away, 15 m wide; Loire 450 m away, 400 m wide: the Loire.
+    assert towns.pick_river_feature({3: (50.0, 15.0), 7: (450.0, 400.0)}) == 7
+    # Two comparable rivers: the nearest one.
+    assert towns.pick_river_feature({3: (50.0, 60.0), 7: (450.0, 120.0)}) == 3
+
+
+def test_tours_river_corridor() -> None:
+    """RS-G: Tours and Orléans keep the Loire (not a brook) as their river corridor."""
+    data = json.loads((DATA / "map" / "towns_1340.json").read_text(encoding="utf-8"))
+    for sid, width in (("set_tours", 300.0), ("set_orleans", 300.0)):
+        river = data["towns"][sid]["river"]
+        assert river is not None and river["width_m"] >= width, (
+            sid,
+            river and river["width_m"],
+        )

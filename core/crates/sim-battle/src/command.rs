@@ -186,6 +186,12 @@ pub enum CommandError {
     NothingToBurn,
     /// `burn`: no regiment of the order stands close enough.
     TooFarToBurn(u32),
+    /// RS-F (`BattleSim::burn_choice`): every house and the gate already
+    /// burn or are ruins.
+    NothingLeftToBurn,
+    /// RS-F (`BattleSim::burn_choice`): no house nor the gate within torch
+    /// reach of the regiments.
+    NothingInReach,
     /// CB-M3: regiment `unit` already has `max` orders waiting.
     QueueFull {
         unit: u32,
@@ -251,6 +257,18 @@ impl std::fmt::Display for CommandError {
             }
             CommandError::TooFarToBurn(id) => {
                 write!(f, "l'unité {id} est trop loin pour y mettre le feu")
+            }
+            CommandError::NothingLeftToBurn => {
+                write!(
+                    f,
+                    "toutes les maisons et la porte brûlent déjà ou sont en ruine"
+                )
+            }
+            CommandError::NothingInReach => {
+                write!(
+                    f,
+                    "aucune maison ni la porte à portée de torche : approchez un régiment"
+                )
             }
             CommandError::QueueFull { unit, max } => {
                 write!(

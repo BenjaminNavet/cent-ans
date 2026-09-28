@@ -355,6 +355,9 @@ pub struct GameData {
     /// `data/economy/trade.json` (lot C5), absent until written: no trade
     /// route exists.
     pub trade: Option<TradeCatalog>,
+    /// Paths of the trade routes, precomputed by
+    /// [`GameData::build_trade_paths`] (review point 18c).
+    pub trade_paths: crate::trade_paths::TradePaths,
     /// `data/movement/rules.json` (lot M2, free movement), absent until
     /// written: [`FreeMovementRules::default`] then applies.
     pub free_movement: Option<crate::entities::movement::FreeMovementRules>,
@@ -426,6 +429,7 @@ impl GameData {
             cover: Default::default(),
             movement_graph: Default::default(),
             trade: None,
+            trade_paths: Default::default(),
             free_movement: None,
             settlement_px: BTreeMap::new(),
             rasters: Default::default(),
