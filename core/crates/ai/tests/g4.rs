@@ -261,6 +261,11 @@ fn england_pensions_then_allies_brabant_beside_its_low_countries_allies() {
         .iter()
         // FE5 (ADR 0110): the Low Countries princes are vassals of the Empire.
         .filter(|(id, f)| **id != brabant && f.alive && id.as_str() != "fac_rebels")
+        // The Low Countries only: FE4b's Rhenish princes (Cologne, Trier) sort
+        // first and would draw England's pension to the Rhine instead.
+        .filter(|(id, _)| {
+            ["fac_hainaut", "fac_guelders", "fac_flanders", "fac_julich"].contains(&id.as_str())
+        })
         .map(|(id, _)| id.clone())
         .find(|id| {
             state.are_neighbors(&data, &brabant, id)
