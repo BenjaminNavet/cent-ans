@@ -16,10 +16,12 @@
   "succession_law": "elective",
   "primary_title": "tit_pavia",
   "heraldry": {
-    "blazon": "D'or au lion d'azur.",
+    "blazon": "D'or au lion d'azur, à la bordure de gueules.",
     "description": "Simplification (le moteur de rendu ne trace pas la couleuvre) ; blason incertain, faction gibeline dominante à Pavie plutôt qu'armes familiales attestées.",
     "primary_color": "#F5F1E6",
-    "secondary_color": "#1F3A93"
+    "secondary_color": "#1F3A93",
+    "uncertain": true,
+    "note": "Bordure de jeu ajoutée pour distinguer l'écu de celui du Palatinat (même simplification du lion)."
   },
   "titles": [
     "Commune de Pavie"
